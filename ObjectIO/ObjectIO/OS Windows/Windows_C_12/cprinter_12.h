@@ -1,7 +1,7 @@
 #ifndef _CPRINTER
 #define _CPRINTER
 
-#include <Clean.h>
+#include "Clean.h"
 
 char * strtokMW(char **str, const char ch1, const char ch2);
 int startPage(int hdc);
