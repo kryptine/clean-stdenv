@@ -4,7 +4,7 @@ import StdEnv
 import htmlDataDef, htmlHandler
 import StdArrow
 
-startCircuit :: (GecCircuit a b) a HSt -> ((b,[Body]),HSt) 
+startCircuit :: (GecCircuit a b) a *HSt -> ((b,[Body]),*HSt) 
 startCircuit (HGC circuit) initval hst 
 # ((val,body),bool,hst) = circuit ((initval,[]),False,hst)
 = ((val,reverse (removedup body [])),hst)
@@ -18,8 +18,10 @@ where
 // Bool is used for feedback loop
 // True for second round (take argument, not current (updated) value stored in global state)
 
+//:: GecCircuit a b = GecCircuit !.(A. .ps: (GecSet b ps) *(PSt ps) -> *(GecSet a ps, *PSt ps))
+
 :: GecCircuit a b 	
-	= HGC (((a,[(String,Body)]),Bool,HSt ) -> ((b,[(String,Body)]),Bool,HSt))
+	= HGC !(*((a, [(String,Body)]), Bool, *HSt )  -> *((b,[(String,Body)]),Bool,*HSt))
 
 instance Arrow GecCircuit
 where
@@ -41,6 +43,7 @@ where
 edit :: String -> GecCircuit a a |  gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 edit title = HGC mkApplyEdit`
 where
+	mkApplyEdit` :: ((a,[(String,Body)]),Bool,*HSt ) -> ((a,[(String,Body)]),Bool,*HSt) |  gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 	mkApplyEdit` ((initval,prevbody),False,hst) 
 	# ((a,bodya),hst) = mkApplyEditHGEC title initval initval hst
 	= ((a,[(title,bodya):prevbody]),False,hst)
@@ -73,7 +76,7 @@ where
 	# (res,bool,hst) = gec_ab (res,True,hst)
 	= (res,False,hst)							// indicates that we loop from here 
 
-lift :: String HMode (String HMode a HSt -> ((b,Body),HSt)) -> (GecCircuit a b)
+lift :: String HMode (String HMode a *HSt -> ((b,Body),*HSt)) -> (GecCircuit a b)
 lift name mode fun = HGC fun`
 where
 	fun` ((a,body),bool,hst)

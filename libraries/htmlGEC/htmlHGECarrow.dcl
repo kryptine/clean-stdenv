@@ -15,7 +15,7 @@ instance Arrow GecCircuit
 
 // all "real" editors in the circuit will add a piece of html code in [Body]
 
-startCircuit 	:: (GecCircuit a b) a HSt -> ((b,[Body]),HSt) 
+startCircuit 	:: (GecCircuit a b) a *HSt -> ((b,[Body]),*HSt) 
 
 // an editor shows the value which can be modified by the application user using a browser
 // a display just shows the value
@@ -31,4 +31,4 @@ self 			:: (a -> a) (GecCircuit a a) -> GecCircuit a a
 
 // to lift library functions to the circuit domain
 
-lift :: String HMode (String HMode a HSt -> ((b,Body),HSt)) -> (GecCircuit a b)
+lift :: String HMode (String HMode a *HSt -> ((b,Body),*HSt)) -> (GecCircuit a b)

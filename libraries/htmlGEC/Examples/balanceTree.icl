@@ -16,6 +16,7 @@ MyPage hst
 	, Br, Br
 	, Body treeform
 	, Br
+	, traceHtmlInput
 	], hst)
 where
 	mycircuit = feedback (edit "tree") (arr  balanceTree)

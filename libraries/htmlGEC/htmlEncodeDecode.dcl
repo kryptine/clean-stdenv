@@ -23,7 +23,8 @@ addScript 		:: GlobalState -> Body			// the corresponding script, stores global 
 
 // decoding of information
 
-CheckUpdateId 	:: String
-CheckUpdate 	:: (Maybe a, Maybe b) | gParse{|*|} a & gParse{|*|} b 
-CheckGlobalState :: String
-ShiftState 		:: String -> (Maybe (String,a),String) | gParse{|*|} a 
+CheckUpdateId 	:: String						// id of updated form
+CheckUpdate 	:: (Maybe a, Maybe b) | gParse{|*|} a & gParse{|*|} b // updated form, updated value
+CheckGlobalState :: String						// the whole state
+ShiftState 		:: String -> (Maybe (String,a),String) | gParse{|*|} a // to check whether a form has a state 
+AnyInput 		:: String						// any input is accepted if a string is required
