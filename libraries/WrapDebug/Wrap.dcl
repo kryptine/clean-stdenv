@@ -50,3 +50,37 @@ instance toString WrappedDescriptorId
     |   WrappedOther !WrappedDescriptor !{WrappedNode}
 
 wrapNode :: !.a -> WrappedNode
+shallowWrapNode :: !.a -> ShallowlyWrappedNode
+:: ExtNode
+	=	E.a: {node :: !a}
+
+::  ShallowlyWrappedNode
+	//	basic types
+    =   ShallowlyWrappedInt !Int
+    |   ShallowlyWrappedChar !Char
+    |   ShallowlyWrappedBool !Bool
+    |   ShallowlyWrappedReal !Real
+    |   ShallowlyWrappedFile !File
+
+	// unboxed arrays of basic types
+    |   ShallowlyWrappedString !{#Char}
+    |   ShallowlyWrappedIntArray !{#Int}
+    |   ShallowlyWrappedBoolArray !{#Bool}
+    |   ShallowlyWrappedRealArray !{#Real}
+    |   ShallowlyWrappedFileArray !{#File}
+
+	// other arrays
+    |   ShallowlyWrappedArray !{ExtNode}
+
+	// records
+    |   ShallowlyWrappedRecord !WrappedDescriptor !{ExtNode}
+
+	// unboxed lists
+    |   ShallowlyWrappedUnboxedList !WrappedDescriptor !{ExtNode}
+
+	// unboxed lists of records
+    |   ShallowlyWrappedUnboxedRecordList !WrappedDescriptor !{ExtNode}
+
+	// other nodes
+    |   ShallowlyWrappedOther !WrappedDescriptor !{ExtNode}
+
