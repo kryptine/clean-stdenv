@@ -57,6 +57,7 @@ where
 		,	("take", dynamic take :: A.a: Int [a] -> [a])
 		,	("map", dynamic map :: A.a b: (a -> b) [a] -> [b])
 		,	("(!!)", dynamic (!!) :: A.a: [a] Int -> a)
+		,	("drop", dynamic drop :: A.a: Int [a] -> [a])
 		]
 	where
 		eqList eq [x:xs] [y:ys] = eq x y && eqList eq xs ys

@@ -183,8 +183,8 @@ prettyDynamic :: !Dynamic -> (![String], !String)
 prettyDynamic d = (v, t)
 where
 	v = case d of 
-//		(x :: a -> b) -> ["<function>"]
-		(x :: a -> b) -> debugShowWithOptions [DebugTerminator "", DebugMaxDepth 3, DebugMaxBreadth 2, DebugClosures False] x
+		(x :: a -> b) -> ["<function>"]
+//		(x :: a -> b) -> debugShowWithOptions [DebugTerminator "", DebugMaxDepth 3, DebugMaxBreadth 2, DebugClosures False] x
 		(x :: a) -> (debugShowWithOptions [DebugTerminator ""] x)
 
 	t = removeForAll (typeCodeOfDynamic d)
