@@ -20,18 +20,20 @@ import	ostoolbox
 		,	p6		:: !Int
 		}
 
+call_back_clean_object_io :: !Int !Int !Int !Int !Int !Int !Int !*OSToolbox -> *(!Int,!Int,!Int,!Int,!Int,!Int,!Int,!*OSToolbox);
+
 //	Crosscall with state parameter:
 errorCallback :: !String !CrossCallInfo !.s !*OSToolbox -> (!CrossCallInfo,!.s,!*OSToolbox)
-issueCleanRequest :: !(CrossCallInfo -> .(.s -> .(*OSToolbox -> *(.CrossCallInfo,.s,*OSToolbox))))
-					 !.CrossCallInfo
+issueCleanRequest :: !(CrossCallInfo -> .(.s -> .(*OSToolbox -> *(CrossCallInfo,.s,*OSToolbox))))
+					 !CrossCallInfo
 					 !.s
 					 !*OSToolbox
 				  -> (!CrossCallInfo,!.s,!*OSToolbox)
 
 //	Crosscall without state parameter:
 errorCallback2 :: !String !CrossCallInfo !*OSToolbox -> (!CrossCallInfo,!*OSToolbox)
-issueCleanRequest2 :: !(CrossCallInfo -> .(*OSToolbox -> *(.CrossCallInfo,*OSToolbox)))
-					 !.CrossCallInfo
+issueCleanRequest2 :: !(CrossCallInfo -> .(*OSToolbox -> *(CrossCallInfo,*OSToolbox)))
+					 !CrossCallInfo
 					 !*OSToolbox
 				  -> (!CrossCallInfo,!*OSToolbox)
 
@@ -59,9 +61,8 @@ return6Cci   :: !Int !Int !Int !Int !Int !Int -> CrossCallInfo
   //---------------------------------------------------------------------//
  //  Synchronisation operations between the Clean thread and OS thread  //
 //---------------------------------------------------------------------//
-winKickOsThread			:: !CrossCallInfo !*OSToolbox -> (!CrossCallInfo,!*OSToolbox)
-winKillOsThread			:: !*OSToolbox -> *OSToolbox
-winStartOsThread		:: !*OSToolbox -> *OSToolbox
+winEndOs			:: !*OSToolbox -> *OSToolbox
+winBeginOs			:: !*OSToolbox -> *OSToolbox
 
 winCloseOs				:: !*OSToolbox -> Bool
 winInitOs				:: (!Bool,!*OSToolbox)
