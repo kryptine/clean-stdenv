@@ -40,7 +40,7 @@ Global
 		Path:	{Project}
 		Path:	{Project}:English
 		Path:	{Project}:Macintosh
-		Path:	{Application}:Examples:ObjectIO Examples 1.2.4:gui utilities
+		Path:	{Application}:Examples:ObjectIO Examples:gui utilities
 	Precompile:	
 	Postlink:	
 MainModule
