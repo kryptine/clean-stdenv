@@ -36,6 +36,8 @@ instance toString WrappedDescriptor where
 		=	"(,..,)"
 	toString (WrappedDescriptorOther descriptorId)
 		=	toString descriptorId
+	toString WrappedDescriptorUnknown
+		=	"<?>"
 
 instance wrap WrappedArg where
 	wrap x
