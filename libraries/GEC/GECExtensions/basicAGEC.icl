@@ -183,3 +183,14 @@ where
 	mktable list	  _ = vertlistGEC [(horlistGEC xs) \\ xs <- list]
 	mklist  []			= []	
 	mklist  [hor:hors]	= [^^ hor: mklist hors]	
+
+tableGEC2 :: [[a]] -> AGEC [[a]] | gGEC {|*|} a  
+tableGEC2  list		= mkAGEC	{	toGEC	= \newlist -> mktable newlist
+								,	fromGEC = \table   -> mklist (^^ table)
+								,	value 	= list
+								,	updGEC	= id
+								} "tableGEC"
+where
+	mktable list	  _ = horlistGEC [(vertlistGEC xs) \\ xs <- list]
+	mklist  []			= []	
+	mklist  [hor:hors]	= [^^ hor: mklist hors]	
