@@ -22,13 +22,13 @@ Start world
 
 // options of design editor
 
-:: Type 	=	F_I_I  	Int (AGEC (Int -> Int))						// define function :: Int -> Int 
-			|	F_R_R  	Int (AGEC (Real -> Real)) 					// define function :: Real -> Real
-			|	F_LI_I 	(AGEC [ListIndex]) (AGEC ([Int] -> Int))  	// define function :: [Int] -> Int
-			|	F_LR_R 	(AGEC [ListIndex]) (AGEC ([Real] -> Real))  // define function :: [Real] -> Real
-			|	String_ String										// define initial string 								
-			|	Real_ 	Real										// define initial real value 
-			|	Int_ 	Int											// define initial int value (default)
+:: Type 	= F_I_I  Int (AGEC (Int -> Int))						// define function :: Int -> Int 
+			| F_R_R  Int (AGEC (Real -> Real)) 						// define function :: Real -> Real
+			| F_LI_I (AGEC [ListIndex]) (AGEC ([Int] -> Int))  		// define function :: [Int] -> Int
+			| F_LR_R (AGEC [ListIndex]) (AGEC ([Real] -> Real))  	// define function :: [Real] -> Real
+			| String_ String										// define initial string 								
+			| Real_   Real											// define initial real value 
+			| Int_ 	  Int											// define initial int value (default)
 			
 :: Editors 	= Calculator											// ad calculator
 			| Expression											// allow expressions /function definitions
@@ -94,7 +94,7 @@ where
 // type of application editor element
 
 :: ApplicationElem											
-			= AF_I_I 	(AGEC String)( AGEC (Int->Int,	 ListIndex ))
+			= AF_I_I 	(AGEC String) (AGEC (Int->Int,	 ListIndex ))
 			| AF_R_R 	(AGEC String) (AGEC (Real->Real, ListIndex ))
 			| AF_LI_I 	(AGEC String) (AGEC ([Int]->Int, [ListIndex]))
 			| AF_LR_R 	(AGEC String) (AGEC ([Real]->Real,[ListIndex]))
