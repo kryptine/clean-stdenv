@@ -17,3 +17,5 @@ createDummyGEC :: OutputOnly a (Update a (PSt .ps)) *(PSt .ps) -> *((GECVALUE a 
 createMouseGEC :: String OutputOnly (Update MouseState (PSt .ps)) *(PSt .ps) -> *((GECVALUE MouseState *(PSt .ps)),*(PSt .ps)) 
 
 searchWindowIdWithTitle :: String (IOSt .ps) -> (Maybe Id,IOSt .ps)
+
+createDGEC :: String OutputOnly Bool a  *(PSt .ps) -> (a,*(PSt .ps)) | gGEC{|*|} a & bimap{|*|} ps
