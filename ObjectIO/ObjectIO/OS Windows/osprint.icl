@@ -1,6 +1,6 @@
 implementation module osprint
 
-//	Clean Standard Object I/O library, version 1.1
+//	Clean Standard Object I/O library, version 1.2
 
 // MW11 was import StdEnv,intrface,clCrossCall_12, iostate, scheduler
 import StdEnv,clCCall_12,clCrossCall_12, iostate, scheduler

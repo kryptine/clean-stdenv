@@ -1,6 +1,6 @@
 definition module osprint
 
-//	Clean Standard Object I/O library, version 1.1
+//	Clean Standard Object I/O library, version 1.2
 
 import StdFile, StdPicture, iostate
 
