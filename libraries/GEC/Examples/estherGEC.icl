@@ -15,7 +15,7 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	test7
+ 	test4
  	world  
 
 //testX = CGEC (gecEdit "test")  (dynamicGEC 23)
