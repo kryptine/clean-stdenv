@@ -33,7 +33,7 @@ instance wrap (WrappedNode a) | wrap a where
 	wrap x
 		=	mapWrapNode wrapArg (shallowWrap x)
 		where
-			wrapArg :: UnwrappedArg -> a | wrap a
+			wrapArg :: !UnwrappedArg -> a | wrap a
 			wrapArg x
 				=	wrap x.node
 
@@ -69,7 +69,7 @@ mapWrapNode _ (WrappedRealArray ra)
 mapWrapNode _ (WrappedFileArray fa)
 	=	WrappedFileArray fa
 
-mapArgs :: (a -> b) {a} -> {b}
+mapArgs :: (a -> b) {!a} -> {!b}
 mapArgs f a
 	=	{f e \\ e <-: a}
 
@@ -171,7 +171,8 @@ shallowWrap node
 					| B: <i> <n>
 		| wrap arg
 		push_a	1
-		build e_Wrap_tUnwrappedArg 1 e_Wrap_cUnwrappedArg
+		build_r e_Wrap_rUnwrappedArg 1 0 0 0
+		updatepop_a	0 1
 		update_a	0 2
 		pop_a	1
 
@@ -463,7 +464,8 @@ shallowWrap node
 					| A: <_{fields}> <field> <afield_ .. afield_m>
 		| wrap field
 		push_a	1
-		build e_Wrap_tUnwrappedArg 1 e_Wrap_cUnwrappedArg
+		build_r e_Wrap_rUnwrappedArg 1 0 0 0
+		updatepop_a	0 1
 		update_a	0 2
 		pop_a	1
 
@@ -640,7 +642,8 @@ shallowWrap node
 		push_a	1
 		select	_ 1 0
 
-		build e_Wrap_tUnwrappedArg 1 e_Wrap_cUnwrappedArg
+		build_r e_Wrap_rUnwrappedArg 1 0 0 0
+		updatepop_a	0 1
 					| A: <element> <_wrapped_array> <_array> <result>
 					| B: <n> <i>
 		| update i-th element of _wrapped_array with wrapped element

@@ -143,7 +143,7 @@ instance prune (WrappedNode a) | prune a where
 	prune _ _ _ a
 		=	a
 
-pruneArray :: !Int !Int !Int !{a} -> {a} | prune a
+pruneArray :: !Int !Int !Int !{!a} -> {!a} | prune a
 pruneArray depth maxDepth maxBreadth a
 	| size a > maxBreadth
 		=	{{prune (depth+1) maxDepth maxBreadth e \\ e <-: a & i <- [0 .. maxBreadth]}
