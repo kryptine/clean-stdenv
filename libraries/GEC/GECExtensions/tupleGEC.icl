@@ -30,3 +30,21 @@ where
 			# (id1,pSt)	= openId pSt
 			# (id2,pSt)	= openId pSt
 			= customGECGUIFun Nothing [(id1,Just (Left,zero),Just (Right,zero)),(id2,Nothing,Just (Right,zero))] undef NilLS (const id) outputOnly pSt
+
+gGEC{|(,,)|} gGECa gGECb gGECc gecArgs=:{gec_value=tuple3,update=tuple3update} pSt
+	= convert (gGEC{|*->*->*|} gGECa (gGEC{|*->*->*|}gGECb gGECc) {gecArgs & gec_value=tuple2,update=tuple2update} pSt)
+where
+	tuple2 = case tuple3 of
+				Just (a,b,c) = Just (a,(b,c))
+				Nothing	   = Nothing
+
+	convert (tuple2handle,pst) = ({tuple2handle & gecSetValue = tuple3SetValue tuple2handle.gecSetValue
+	                                        , gecGetValue = tuple3GetValue tuple2handle.gecGetValue
+	                            },pst)
+	
+	tuple2update reason (a,(b,c)) pst = tuple3update reason (a,b,c) pst
+
+	tuple3SetValue tuple2SetValue upd (a,b,c)  = tuple2SetValue upd (a,(b,c))
+	tuple3GetValue tuple2GetValue pst
+		# ((a,(b,c)),pst) = tuple2GetValue pst
+		= ((a,b,c),pst)
