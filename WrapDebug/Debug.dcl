@@ -5,7 +5,7 @@
 	Ronny Wichers Schreur
 	ronny@cs.kun.nl
 */
-definition module ShowDebug
+definition module Debug
 
 :: DebugShowFunction a :== a -> [{#Char}]
 
@@ -17,7 +17,7 @@ debugAfter :: .a !(DebugShowFunction .a) !.b -> .b
 debugValue :: !(DebugShowFunction .a) !.a -> .a
 
 // generic show function
-debugShow :: [DebugShowOption] .a -> [{#Char}]
+debugShowWithOptions :: [DebugShowOption] .a -> [{#Char}]
 
 :: DebugShowOption 
 	=	DebugMaxDepth !Int			// default no limit

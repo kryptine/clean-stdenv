@@ -2,7 +2,7 @@ implementation module RWSDebug
 
 import Debug
 
-show x
+show
 	=	debugShowWithOptions [DebugMaxChars 80, DebugMaxDepth 5]
 
 (->>) :: !.a !.b -> .a
