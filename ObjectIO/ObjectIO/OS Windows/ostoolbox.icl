@@ -4,7 +4,7 @@ implementation module ostoolbox
 
 import	StdBool, StdClass, StdInt, StdMisc, StdTuple
 import	clCrossCall_12
-import	code from "cCrossCallFont_121.obj", "cCrossCallTCP_121.obj"
+import	code from "cCrossCallFont_121.obj", "cCrossCallTCP_121.obj", "cTCP_121.obj"
 
 
 ::	OSToolbox
