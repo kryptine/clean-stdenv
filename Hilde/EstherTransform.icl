@@ -2,7 +2,7 @@ implementation module EstherTransform
 
 import EstherBackend
 import CleanTricks, StdList, StdString, StdBool, StdMisc, StdFunc
-import EstherPostParser, DynamicFileSystem
+import EstherPostParser, DynamicFileSystem, EstherScript
 
 (@) infixl 9
 (@) e1 e2 :== CoreApply e1 e2
@@ -44,9 +44,12 @@ where
 transform{|NTstatements|} (Statement s) = transform{|*|} s
 
 transform{|NTstatement|} (Expression e) = transform{|*|} e
-transform{|NTstatement|} (Write e _ (NTnameDef n p)) = write @ transform{|*|} (NTdynamic Tdynamic e)
+transform{|NTstatement|} (Write e _ (NTnameDef n p)) = CoreCode (dynamic write :: Dynamic *World -> *(Bool, *World)) @ transform{|*|} (NTdynamic Tdynamic e)
 where
-	write = CoreCode (dynamic dynamicWrite [f p] :: Dynamic *World -> *(Bool, *World))
+	write d env 
+		# (ok, dyn, env) = dynamicRead ENV_CWD env
+		  cwd = if ok (case dyn of (p :: DynamicPath) -> p; _ -> []) []
+		= dynamicWrite (cwd ++ [f p]) d env
 
 //	writeFile n p d env
 //		# (maybe, world) = resolveFilename n env
