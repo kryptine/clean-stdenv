@@ -7,7 +7,7 @@
 */
 definition module ShowWrapped
 
-from Wrap import ::DeeplyWrappedNode, ::WrappedNode, ::WrappedArg
+from Wrap import ::DeeplyWrappedNode, ::WrappedNode, ::WrappedArg, class wrap
 
 :: ShowWrappedOptions
 	=	Don`tShowParentheses | ShowParentheses
@@ -22,3 +22,9 @@ instance showWrapped WrappedArg
 showWrappedNode :: a -> [{#Char}] | showWrapped a
 showApplication :: ShowWrappedOptions {#Char} {!arg} -> [{#Char}]
 															| showWrapped arg
+class prune a | wrap a where
+	prune :: !Int !Int !Int a -> a
+
+instance prune (WrappedNode a) | prune a
+instance prune WrappedArg
+chop :: !Int [{#Char}] -> [{#Char}]
