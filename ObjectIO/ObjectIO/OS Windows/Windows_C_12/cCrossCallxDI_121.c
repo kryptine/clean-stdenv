@@ -912,6 +912,15 @@ void EvalCcRqDESTROYWINDOW (CrossCallInfo *pcci) /* hwnd; no result. */
 	MakeReturn0Cci (pcci);
 }
 
+void EvalCcRqGETWINDOWPOS (CrossCallInfo *pcci)	/* hwnd;   width, heigth result */
+{
+	RECT rect;
+
+	GetWindowRect ((HWND) pcci->p1, &rect);
+
+	MakeReturn2Cci (pcci, rect.left, rect.top);
+}
+
 void EvalCcRqGETCLIENTSIZE (CrossCallInfo *pcci) /* hwnd;		width, height result.  */
 {
 	RECT rect;
@@ -1065,6 +1074,7 @@ extern int InstallCrossCallxDI (int ios)
 	AddCrossCallEntry (newTable, CcRqCREATESDIFRAMEWINDOW,   EvalCcRqCREATESDIFRAMEWINDOW);
 	AddCrossCallEntry (newTable, CcRqCREATEMDIFRAMEWINDOW,   EvalCcRqCREATEMDIFRAMEWINDOW);
 	AddCrossCallEntry (newTable, CcRqDESTROYWINDOW,          EvalCcRqDESTROYWINDOW);
+	AddCrossCallEntry (newTable, CcRqGETWINDOWPOS,           EvalCcRqGETWINDOWPOS);
 	AddCrossCallEntry (newTable, CcRqGETCLIENTSIZE,          EvalCcRqGETCLIENTSIZE);
 	AddCrossCallEntry (newTable, CcRqCREATEMDITOOLBAR,       EvalCcRqCREATEMDITOOLBAR);
 	AddCrossCallEntry (newTable, CcRqCREATESDITOOLBAR,       EvalCcRqCREATESDITOOLBAR);

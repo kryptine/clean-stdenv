@@ -2541,15 +2541,6 @@ void EvalCcRqSETSELECTWINDOW (CrossCallInfo *pcci)	/* hwnd, hasHScroll, hasVScro
 	MakeReturn0Cci (pcci);
 }
 
-void EvalCcRqGETWINDOWPOS (CrossCallInfo *pcci)	/* hwnd;   width, heigth result */
-{
-	RECT rect;
-
-	GetWindowRect ((HWND) pcci->p1, &rect);
-
-	MakeReturn2Cci (pcci, rect.left, rect.top);
-}
-
 /*	Set the position of windows/controls. */
 void EvalCcRqSETWINDOWPOS (CrossCallInfo *pcci)	/* hwnd, x,y, update, include scrollbars ; no result. */
 {
@@ -3611,7 +3602,6 @@ int InstallCrossCallWindows (int ios)
 	AddCrossCallEntry (newTable, CcRqUPDATEWINDOWRECT,       EvalCcRqUPDATEWINDOWRECT);
 	AddCrossCallEntry (newTable, CcRqSETCLIENTSIZE,          EvalCcRqSETCLIENTSIZE);
 	AddCrossCallEntry (newTable, CcRqSETSELECTWINDOW,        EvalCcRqSETSELECTWINDOW);
-	AddCrossCallEntry (newTable, CcRqGETWINDOWPOS,           EvalCcRqGETWINDOWPOS);
 	AddCrossCallEntry (newTable, CcRqSETWINDOWPOS,           EvalCcRqSETWINDOWPOS);
 	AddCrossCallEntry (newTable, CcRqGETWINDOWSIZE,          EvalCcRqGETWINDOWSIZE);
 	AddCrossCallEntry (newTable, CcRqSETWINDOWSIZE,          EvalCcRqSETWINDOWSIZE);
