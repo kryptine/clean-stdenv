@@ -135,7 +135,7 @@ where
 		| trace_n a False = undef
 		= seta a env
 
-self :: (GecCircuit a a) (GecCircuit a a) -> GecCircuit a a
+self :: (GecCircuit a b) (GecCircuit b a) -> GecCircuit a b
 self g f = GecCircuit k
 where 
 	k seta env 
