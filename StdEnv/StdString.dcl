@@ -13,6 +13,7 @@ instance <  		{#Char}
 instance fromString	{#Char}
 
 instance toString	Int
+
 instance toString	Char
 
 instance toString	Real
