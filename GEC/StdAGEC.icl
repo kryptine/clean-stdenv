@@ -144,7 +144,7 @@ where
 
 
 AGECtoCGEC :: String	(AGEC a) 		-> (GecCircuit a a) 	| gGEC{|*|}, generate{|*|} a
-AGECtoCGEC sa agec =  (\a -> agec ^= a) @>> edit sa >>@ (\agec -> (^^ agec))
+AGECtoCGEC sa agec =  arr (\a -> agec ^= a) >>> edit sa >>> arr (\agec -> (^^ agec))
 
 generate{|AGEC|} ga trace stream 
 	# (a, trace, _, stream) = ga trace stream
@@ -152,7 +152,7 @@ generate{|AGEC|} ga trace stream
 
 CGECtoAGEC :: 			(GecCircuit a a ) a 	-> (AGEC a) 	| gGEC{|*|} a		// Use CGEC as AGEC 
 CGECtoAGEC cgec a 
-= mkAGEC { toGEC   = \a _ -> {inout = (Hide a,Hide a), gec = (\(Hide a) -> a) @>> cgec >>@ (\a -> Hide a)}
+= mkAGEC { toGEC   = \a _ -> {inout = (Hide a,Hide a), gec = arr (\(Hide a) -> a) >>> cgec >>> arr (\a -> Hide a)}
 		 , fromGEC = \{inout = (a,Hide b)} = b
 		 , updGEC  = id
 		 , value   = a

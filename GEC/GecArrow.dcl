@@ -2,12 +2,6 @@ definition module GecArrow
 
 import StdArrow, StdGECExt
 
-(@>>) infixr 8 //:: (a -> b) (arr b c) -> arr a c
-(@>>) f g :== arr f >>> g
- 
-(>>@) infixr 8 //:: (arr a b) (b -> c) -> arr a c
-(>>@) g f :== g >>> arr f
-
 :: GecCircuit a b
 
 // Initialize GecCircuit circuit
@@ -31,9 +25,9 @@ instance ArrowCircuit GecCircuit
 
 probe :: String -> GecCircuit a a | toString a
 
+self :: (GecCircuit a a) (GecCircuit a a) -> GecCircuit a a
 feedback :: (GecCircuit a a) -> GecCircuit a a
 
-//initial :: a -> GecCircuit a a
 sink :: GecCircuit a Void
 source :: (GecCircuit a b) -> GecCircuit Void b
 flowControl :: (IncludeUpdate -> a -> Maybe (IncludeUpdate, b)) -> GecCircuit a b
