@@ -75,7 +75,7 @@ showApplication options symbol args
 		=	application
 	where
 		application
-			=	flatten (separate [" "]
+			=	flatten (intersperse [" "]
 					[[symbol] : [showWrapped ShowParentheses arg \\ arg <-: args]])
 
 instance showWrapped WrappedArg where
@@ -136,12 +136,12 @@ showNode _ (WrappedRealArray a)
 showNode _ (WrappedFileArray a)
 	=	showBasicArray a
 showNode options (WrappedArray a)
-	=	["{" : flatten (separate [", "] [showWrapped options el \\ el <-: a])] ++ ["}"]
+	=	["{" : flatten (intersperse [", "] [showWrapped options el \\ el <-: a])] ++ ["}"]
 showNode options (WrappedRecord descriptor args)
-	=	["{" : flatten (separate [" "] [[showDescriptor descriptor]
+	=	["{" : flatten (intersperse [" "] [[showDescriptor descriptor]
 			: [showWrapped ShowParentheses arg \\ arg <-: args]])] ++ ["}"]
 showNode _ (WrappedOther WrappedDescriptorTuple args)
-	=	["(" : flatten (separate [", "] [showWrapped Don`tShowParentheses arg \\ arg <-: args])] ++ [")"]
+	=	["(" : flatten (intersperse [", "] [showWrapped Don`tShowParentheses arg \\ arg <-: args])] ++ [")"]
 showNode options (WrappedOther descriptor args)
 	= showApplication options (showDescriptor descriptor) args
 
@@ -157,17 +157,17 @@ showDescriptor WrappedDescriptorTuple
 
 showBasicArray :: {#a} -> [{#Char}] | toString a & Array {#} a
 showBasicArray a
-	=	["{" : separate ", " [toString el \\ el <-: a]] ++ ["}"]
+	=	["{" : intersperse ", " [toString el \\ el <-: a]] ++ ["}"]
 
 showWrappedArray :: {WrappedNode a} -> [{#Char}] | showWrapped a
 showWrappedArray a
-	=	["{" : flatten (separate [", "]
+	=	["{" : flatten (intersperse [", "]
 			[showWrapped Don`tShowParentheses el \\ el <-: a])] ++ ["}"]
 
-separate :: a [a] -> [a]
-separate separator [a : t=:[b : _]]
-	=	[a, separator : separate separator t]
-separate _ l
+intersperse :: a [a] -> [a]
+intersperse separator [a : t=:[b : _]]
+	=	[a, separator : intersperse separator t]
+intersperse _ l
 	=	l
 
 instance toString File
