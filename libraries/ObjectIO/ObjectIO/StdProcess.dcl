@@ -18,7 +18,6 @@ from	iostate	import PSt, IOSt
 class Processes pdef where
 	startProcesses	:: !pdef !*World   -> *World
 	openProcesses	:: !pdef !(PSt .l) -> PSt .l
-
 /*	(start/open)Processes creates an interactive process topology specified by
 		the pdef argument. 
 		All interactive processes can communicate with each other by means of the 
@@ -32,9 +31,6 @@ class Processes pdef where
 instance Processes [pdef]	| Processes pdef
 instance Processes Process
 
-
-//	Convenience process creation functions:
-
 startIO :: !DocumentInterface !.l !(ProcessInit (PSt .l))
 							 ![ProcessAttribute (PSt .l)]
 			!*World -> *World
@@ -44,7 +40,7 @@ startIO :: !DocumentInterface !.l !(ProcessInit (PSt .l))
 
 //	Process access operations:
 
-closeProcess	:: !(PSt .l) -> PSt .l
+closeProcess		:: !(PSt .l) -> PSt .l
 /*	closeProcess removes all abstract devices that are held in the interactive 
 	process.
 	If the interactive process has processes that share its GUI then these will also
@@ -53,8 +49,8 @@ closeProcess	:: !(PSt .l) -> PSt .l
 */
 
 
-hideProcess		:: !(PSt .l) -> PSt .l
-showProcess		:: !(PSt .l) -> PSt .l
+hideProcess			:: !(PSt .l) -> PSt .l
+showProcess			:: !(PSt .l) -> PSt .l
 /*	If the interactive process is active, hideProcess hides the interactive process, 
 	and showProcess makes it visible. Note that hiding an interactive process does 
 	NOT disable the process but simply makes it invisible.
@@ -63,7 +59,6 @@ showProcess		:: !(PSt .l) -> PSt .l
 getProcessWindowPos	:: !(IOSt .l) -> (!Point2,!IOSt .l)
 /*	getProcessWindowPos returns the current position of the ProcessWindow.
 */
-
 
 getProcessWindowSize:: !(IOSt .l) -> (!Size,!IOSt .l)
 /*	getProcessWindowSize returns the current size of the ProcessWindow.
