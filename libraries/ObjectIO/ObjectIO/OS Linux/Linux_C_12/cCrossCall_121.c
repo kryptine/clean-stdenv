@@ -28,15 +28,15 @@
 #include <gdk/gdkkeysyms.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <stdlib.h>
-#include <strings.h>
-/*
-extern char** global_argv;
-extern int global_argc;
-*/
+
 char** global_argv;
 int global_argc = 0;
+
+#define _MAX_PATH 255
+
 /**********************************************************************************************
 	External global data section.
 **********************************************************************************************/
@@ -53,9 +53,9 @@ static pthread_mutex_t gOSMutex;
 static pthread_t gOSThread;
 static gboolean gOSThreadIsRunning = FALSE;
 static gboolean gEventsInited = FALSE; /* What is this? */
-/*
+
 static CrossCallInfo *MakeQuitCci (CrossCallInfo * pcci);
-*/
+
 
 /*	GetModifiers returns the modifiers that are currently pressed.
 */
@@ -64,16 +64,19 @@ int GetModifiers (void)
 	int mods = 0;
 	GdkModifierType state;
 
-    printf("GetModifiers\n");
+    /*printf("GetModifiers\n");*/
 
 	gdk_event_get_state(gtk_get_current_event(), &state);
 
-	if (state & GDK_SHIFT_MASK)
+	if (state & GDK_SHIFT_MASK) {
 		mods |= SHIFTBIT;
-	if (state & GDK_CONTROL_MASK)
+    }
+	if (state & GDK_CONTROL_MASK) {
 		mods |= CTRLBIT;
-	if (state & GDK_MOD1_MASK)
+    }
+	if (state & GDK_MOD1_MASK) {
 		mods |= ALTBIT;
+    }
 
 	return mods;
 }
@@ -86,7 +89,7 @@ int GetModifiers (void)
 int CheckVirtualKeyCode (int keycode)
 {
 	int c = 0;
-    printf("CheckVirtualKeyCode\n");
+    /* printf("CheckVirtualKeyCode\n");*/
 	switch (keycode)
 	{
 		case GDK_Up:
@@ -173,21 +176,21 @@ int CheckVirtualKeyCode (int keycode)
 
 static gboolean TimerCallback (gpointer data)
 {
-    printf("TimerCallback\n");
+    /*printf("TimerCallback\n");*/
 	SendMessage0ToClean (CcWmIDLETIMER);
     return TRUE;
 }
 
 void HandleCleanRequest (CrossCallInfo * pcci)
 {
-    printf("HandleCleanRequest: Message = %d\n", pcci->mess);
+    /*printf("HandleCleanRequest: Message = %d\n", pcci->mess);*/
 	switch (pcci->mess)
 	{
 		case CcRqDOMESSAGE: 	/* idleTimerOn, sleeptime; no result. */
 			{
 				gboolean gIdleTimerOn = (gboolean) pcci->p1;
 				gint interval = (gint) pcci->p2;
-                printf("CcRqDOMESSAGE\n");
+                /*printf("CcRqDOMESSAGE\n");*/
 
 				if (gIdleTimerOn)
 				{
@@ -212,18 +215,17 @@ void HandleCleanRequest (CrossCallInfo * pcci)
 				CrossCallProcedure action;
 
 				action = FindCrossCallEntry (gCrossCallProcedureTable, pcci->mess);
-                printf("Handle Request for action logged for: %d\n", pcci->mess);
+                /*printf("Handle Request for action logged for: %d\n", pcci->mess);*/
 
 				if (action == NULL)
 				{	/* Cross call request code not installed. */
-					printf("\'HandleCleanRequest\' got uninstalled CcRq request code from Haskell: %d\n", pcci->mess);
+					/*printf("\'HandleCleanRequest\' got uninstalled CcRq request code from Haskell: %d\n", pcci->mess);*/
 					exit(1);
 				}
 				else
 				{	/* Cross call request code found. Apply it to pcci. */
-                    printf("Action Requested: %d\n", pcci->mess);
+                    /*printf("Action Requested: %d\n", pcci->mess);*/
 					action (pcci);
-                    printf("Action done.\n");
 				}
 			}
 	}
@@ -234,14 +236,12 @@ void InitGTK()
 {
 	static gboolean gInitiated = FALSE;
 
-    printf("InitGTK\n");
+    /*printf("InitGTK\n"); */
 	if (!gInitiated)
 	{
-        printf("Must initialize GTK\n");
 		gtk_set_locale();
 		gtk_init(&global_argc,&global_argv);
 	    gInitiated = TRUE;
-        printf("Initialized GTK\n");
 	};
 }	/* InitGTK */
 
@@ -250,33 +250,32 @@ static gpointer OsThreadFunction (gpointer param);
 OS WinStartOsThread(OS os)
 {
 	pthread_attr_t attr;
-    rprintf ("WinStartOSThread\n");
+    /* rprintf ("WinStartOSThread\n"); */
 
 	InitGTK();
-    rprintf ("Init'd GTK\n");
 
 	/*	The cross call procedure table is set to the empty table. */
 	gCrossCallProcedureTable = EmptyCrossCallProcedureTable ();
-    rprintf ("Created CC Table\n");
+    /* rprintf ("Created CC Table\n"); */
 
 	pthread_mutex_init(&gCleanMutex,NULL);
 	pthread_mutex_lock(&gCleanMutex);
 	pthread_mutex_init(&gOSMutex,NULL);
 	pthread_mutex_lock(&gOSMutex);
 	gOSThreadIsRunning = TRUE;
-    rprintf ("OS is running.\n");
+    /* rprintf ("OS is running.\n"); */
 
 	pthread_attr_init(&attr);
 	pthread_create(&gOSThread,&attr,OsThreadFunction,NULL);
 	pthread_attr_destroy(&attr);
-    rprintf ("Exiting initializer.\n");
+    /* rprintf ("Exiting initializer.\n"); */
 
     return os;
 }	/* WinStartOsThread */
 
 OS WinKillOsThread (OS os)
 {
-    printf("WinKillOsThread\n");
+    /* printf("WinKillOsThread\n"); */
 	if (gOSThread != FALSE)
 	{
 		gOSThreadIsRunning = FALSE;
@@ -302,9 +301,11 @@ void WinKickOsThread (int imess,
                       OS *oos
 					 )
 {
+#ifdef PRINTCROSSCALLS
         rprintf("WinKickOsThread (");
         printCCI (&gCci);
         rprintf(")\n");
+#endif
 	gCci.mess = imess;
 	gCci.p1 = ip1;
 	gCci.p2 = ip2;
@@ -335,6 +336,9 @@ void WinKickOsThread (int imess,
 		*op5 = gCci.p5;
 		*op6 = gCci.p6;
         *oos = ios;
+        /* printf("Data: %d, %d, %d, %d, %d, %d, %d",
+                        gCci.p1, gCci.p2, gCci.p3, gCci.p4,
+                        gCci.p5, gCci.p6, ios); */
 	}
 	else
 	{
@@ -359,7 +363,7 @@ static int clsp = -1;
 
 void KickCleanThread (CrossCallInfo * pcci)
 {
-    rprintf("KickCleanThread\n");
+    /* rprintf("KickCleanThread\n"); */
 #ifdef PRINTCROSSCALLS
 	if (ossp == -1)
 	{
@@ -383,7 +387,9 @@ void KickCleanThread (CrossCallInfo * pcci)
 #endif
 
 	if (pcci != &gCci)
+    {
 		gCci = *pcci;
+    }
 
 #ifdef PRINTCROSSCALLS
 	rprintf ("KCT: started\n");
@@ -442,7 +448,7 @@ void KickCleanThread (CrossCallInfo * pcci)
 
 void SendMessageToClean (int mess, int p1, int p2, int p3, int p4, int p5, int p6)
 {
-    printf("SendMessageToClean -- Message: %d\n", mess); 
+    /* printf("SendMessageToClean -- Message: %d\n", mess);  */
 	gCci.mess = mess;
 	gCci.p1 = p1;
 	gCci.p2 = p2;
@@ -523,20 +529,18 @@ CrossCallInfo *MakeReturn6Cci (CrossCallInfo * pcci, int v1, int v2, int v3, int
 
 gboolean IsReturnCci (CrossCallInfo * pcci)
 {
-    printf("Checking message %d: ", pcci->mess);
+    /* printf("Checking message %d: ", pcci->mess);*/
 	if (pcci->mess >= CcRETURNmin && pcci->mess <= CcRETURNmax)
     {
-        printf("True.\n");
 		return TRUE;
     }
-    printf("False.\n");
 	return FALSE;
 }
 
 
 static gpointer OsThreadFunction (gpointer param)
 {
-    printf("OsThreadFunction\n");
+    /* printf("OsThreadFunction\n"); */
 	gTooltip = gtk_tooltips_new();
 
 	pthread_mutex_lock(&gCleanMutex);
@@ -556,7 +560,7 @@ static gpointer OsThreadFunction (gpointer param)
 
 void WinInitOs (Bool* ok, OS* os)
 {
-    printf("WinInitOs\n");
+    /* printf("WinInitOs\n"); */
     if (gEventsInited)
     {
        *ok = FALSE;                                                                    
@@ -597,8 +601,59 @@ void WinCallProcess (char* commandline, char* env, char* dir, char* in,
 void WinLaunchApp2 (CLEAN_STRING commandline, CLEAN_STRING pathname,
                 BOOL console, OS ios, Bool *success, OS *oos)
 {
-    printf("WinLaunchApp2 --> Not implemented\n");
+    pid_t pi;
+    BOOL fsuccess;
+    char path[_MAX_PATH];
+    char *cl, *exname, *thepath;
+    int i;
+    int error;
+
+    rprintf ("WLA: starting...\n");
+
+    *success = FALSE;
     *oos = ios;
+
+    rprintf ("WLA: step 2.\n");
+
+    exname = cstring(pathname);
+    cl = cstring (commandline);
+    strcpy (path, cl);
+    for (i = strlen (path); path[i] != '\\' && i >= 0; i--)
+    {
+        path[i] = 0;
+    }
+
+    if (i == 0)
+    {
+            thepath = NULL;
+    }
+    else
+    {       /* path[i] = '\"'; */
+            thepath = path + 1;
+    }
+
+    rprintf ("WLA: step 2a: directory = <%s>\n", thepath);
+
+    rprintf ("WLA: step 3: calling process \"%s\".\n", cl);
+    pi = fork();
+    if (pi == 0)
+    {
+	    /* I'm a child -- launch the desired program. */
+	    execlp(exname, cl);
+    } else if (pi == -1) {
+	    /* Error condition */
+    	    error = errno;
+            rprintf ("WLA: failure %d\n", error);
+	    fsuccess = FALSE;
+    } else {
+            rprintf ("WLA: success\n");
+	    fsuccess = TRUE;
+    }
+
+    rprintf ("WLA: step 5: returning\n");
+    *success = fsuccess;
+    *oos = ios;
+    rprintf ("WLA: done...\n");
 }
 
 void WinLaunchApp (CLEAN_STRING commandline, BOOL console, OS ios,
@@ -615,7 +670,7 @@ char* WinGetAppPath (void)
     char *search = rmalloc(261);
     pid_t pid = getpid();
 
-    printf("WinGetAppPath\n");
+    /* printf("WinGetAppPath\n"); */
 
     /*
      * NOTE:  LINUX Only
@@ -628,25 +683,17 @@ char* WinGetAppPath (void)
      */
      sprintf(search, "/proc/%d/exe", pid);
      length = readlink(search, path, 261);
-     rfree(search);
-     if (length < 0)
-     {
-     	path[0] = NULL;
-     	return path;
-     }
      path[length] = 0x00;
 
      for (idx = length - 1;
-         idx >= 0 &&
-         path[idx] != '/' &&
-         path[idx] != '\\' &&
+         path[idx] != '/' &&                                                             path[idx] != '\\' &&
          path[idx] != ':';
          idx--)
         ;
 
     path[idx + 1] = 0;
 
-    printf("App Path: %s\n", path);
+    /* printf("App Path: %s\n", path); */
 
     return path;
     /* relying on the calling clean function to de-allocate path. */
@@ -654,7 +701,7 @@ char* WinGetAppPath (void)
 
 CLEAN_STRING WinGetModulePath (void)
 {
-/*    char path[255 + 1]; */
+    char path[255 + 1];
 
     printf("WinGetModulePath -- Not Implemented.\n");
 
