@@ -38,8 +38,10 @@ ModelessDialogType	:== 4;		// The window type of a fixed size dialog	= 4 (noGrow
 ModalDialogType    	:== 5;		// The window type of a modal dialog 		= 5 (movableDBoxProc)
 
 //-- Debugging Tools
+//import nodebug
 //import dodebug
 trace_n` _ f :== f
+DebugStr` _ f :== f
 //trace_n m f :== trace_n` m f
 trace_n _ f :== f
 
@@ -895,7 +897,7 @@ osCompoundControlHasOrigin	:== False
 //-- RadioControl
 
 RadioButProc	:==	370	//2		// radio button
-RadBoxWid	:== 32
+RadBoxWid		:== 32
 RadBoxHight
 //	:== 18
 	=: GetRadioButtonHeight
@@ -928,7 +930,7 @@ osCreateRadioControl :: !OSWindowPtr !(!Int,!Int) !String !Bool !Bool !(!Int,!In
 																						   -> (!OSWindowPtr,!*OSToolbox)
 osCreateRadioControl parentWindow parentPos title show able (x,y) (w,h) selected isfirst tb
 	# (radioH,tb)		= NewControl parentWindow (OSRect2Rect itemRect) (validateControlTitle title) True value 0 1 RadioButProc 0 tb
-	#! tb = trace_n ("osCreateRadioControl"+++toString (radioH,parentWindow,parentPos)) tb
+	#! tb = trace_n` ("osCreateRadioControl"+++toString (radioH,parentWindow,parentPos)) tb
 	# tb = case able of
 			True	-> tb
 			False	-> appGrafport parentWindow (HiliteControl radioH 255) tb
@@ -944,32 +946,32 @@ where
 
 osDestroyRadioControl :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osDestroyRadioControl cPtr tb
-	# tb = trace_n ("osDestroyRadioControl") tb
+	# tb = trace_n` ("osDestroyRadioControl") tb
 	= DisposeControl cPtr tb
 
 osUpdateRadioControl :: !OSRect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
 osUpdateRadioControl area _ parentWindow theControl tb
-	#! tb = trace_n ("osUpdateRadioControl: "+++toString (theControl,area)) tb
+	#! tb = trace_n` ("osUpdateRadioControl",theControl,area) tb
 	#! tb = assertPort` parentWindow tb
 	= osUpdateCommonControl area theControl tb
 
 osSetRadioControl :: !OSWindowPtr !OSWindowPtr !OSWindowPtr !OSRect !*OSToolbox -> *OSToolbox
 osSetRadioControl wPtr current new cliprect tb
-	# tb = trace_n ("osSetRadioControl",current,new) tb
+	# tb = trace_n` ("osSetRadioControl",current,new) tb
 	# tb = setClippedControlValue wPtr cliprect current 0 tb
 	# tb = setClippedControlValue wPtr cliprect new 1 tb
 	= tb
 
 osSetRadioControlSelect :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetRadioControlSelect wPtr cPtr _ select tb
-	#! tb = trace_n ("osSetRadioControlSelect",cPtr,select) tb
+	#! tb = trace_n` ("osSetRadioControlSelect",cPtr,select) tb
 	#! tb = assertPort` wPtr tb
 	# tb = HiliteControl cPtr (if select 0 255) tb
 	= tb
 
 osSetRadioControlShow :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetRadioControlShow wPtr cPtr clipRect show tb
-	#! tb = trace_n ("osSetRadioControlShow",cPtr,show) tb
+	#! tb = trace_n` ("osSetRadioControlShow",cPtr,show) tb
 	| show
 		= appClipport wPtr clipRect (showC cPtr) tb
 	= appClipport wPtr clipRect (showC cPtr) tb
@@ -980,7 +982,7 @@ where
 		
 osSetRadioControlPos :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetRadioControlPos wPtr (parent_x,parent_y) radioPtr (x,y) _ update tb
-	#! tb = trace_n ("osSetRadioControlPos",radioPtr,(x,y)) tb
+	#! tb = trace_n` ("osSetRadioControlPos",radioPtr,(x,y),(h,v)) tb
 	#! tb = assertPort` wPtr tb
 	# tb = MoveControl radioPtr h v tb
 	= tb
@@ -990,14 +992,14 @@ where
 
 osSetRadioControlSize :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetRadioControlSize wPtr _ radioPtr _ size=:(w,h) update tb
-	#! tb = trace_n ("osSetRadioControlSize",radioPtr,size) tb
+	#! tb = trace_n` ("osSetRadioControlSize",radioPtr,size) tb
 	#! tb = assertPort` wPtr tb
 	# tb = SizeControl radioPtr w h tb
 	= tb
 
 osClipRadioControl :: !OSWindowPtr !(!Int,!Int) !OSRect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 osClipRadioControl _ parentPos area itemPos itemSize tb
-	# tb = trace_n ("osClipRadioControl") tb
+	# tb = trace_n` ("osClipRadioControl") tb
 	= oscliprectrgn parentPos area itemPos itemSize tb
 
 
