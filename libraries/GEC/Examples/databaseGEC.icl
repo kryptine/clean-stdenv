@@ -4,7 +4,7 @@ import StdEnv
 import StdIO
 import genericgecs
 import StdGEC, StdGECExt, StdAGEC
-import StdGecComb, basicAGEC
+import GecArrow, basicAGEC
 
 // TO TEST JUST REPLACE THE EXAMPLE NAME IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
 // ALL EXAMPLES HAVE TO BE OF FORM pst -> pst
@@ -18,8 +18,8 @@ Start world
  	example_db3
  	world  
 
-example_db1	=	CGEC (mkGEC "My Database") [MyRecord] 					
-example_db2	=	CGEC (predGEC "My Database" checkrecord) [MyRecord]					
+example_db1	=	startCircuit (edit "My Database") [MyRecord] 					
+example_db2	=	startCircuit (predGEC "My Database" checkrecord) [MyRecord]					
 where
 	checkrecord rs = and (map check rs)
 	where
@@ -30,7 +30,13 @@ where
 											&& isDigit zipcode.[3]
 											&& isAlpha zipcode.[4]
 											&& isAlpha zipcode.[5] //|| zipcode==""
-example_db3	= CGEC (mkGEC "ListDisplay") (listAGEC True initrecords) 
+
+predGEC 		:: String (a -> Bool) 		-> GecCircuit a a 		| gGEC{|*|} a
+predGEC s p  =  	(\a -> (a,Hide a)) 
+				@>> edit s 
+				>>@	(\(a,Hide oa) -> if (p a) a oa)
+
+example_db3	= startCircuit (edit "ListDisplay") (listAGEC True initrecords) 
 where
 	initrecords 	= [MyRecord]
 

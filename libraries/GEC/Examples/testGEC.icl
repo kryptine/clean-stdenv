@@ -4,7 +4,7 @@ import StdEnv
 import StdIO
 import genericgecs
 import StdGEC, StdGECExt, StdAGEC
-import StdGecComb, basicAGEC
+import GecArrow, basicAGEC
 
 // TO TEST JUST REPLACE THE EXAMPLE NAME IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
 // ALL EXAMPLES HAVE TO BE OF FORM pst -> pst
@@ -15,7 +15,7 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	testX`
+ 	test5
  	world  
 
 :: T = C1 (AGEC Int)
@@ -23,7 +23,7 @@ Start world
 	 
 derive gGEC T
 
-testX = CGEC (selfGEC "self" test) (C1 (counterAGEC 0))
+testX = startCircuit (feedback (edit "self" >>@ test)) (C1 (counterAGEC 0))
 where
 	 test (C1 igec) = C1 (counterAGEC ((^^ igec) + 5))
 //	 test (C1 igec) = C2 (counterAGEC (toReal (^^ igec)))
@@ -34,19 +34,19 @@ where
 	 
 derive gGEC T`
 
-testX` = CGEC (selfGEC "self" test) (C1` 0)
+testX` = startCircuit (feedback (edit "self" >>@ test)) (C1` 0)
 where
 //	 test (C1` i) = C1` (i + 5)
 	 test (C1` i) = C2` (toReal i)
 	 test (C2` r) = C1` (toInt r)
 
-testbetsy = CGEC (selfGEC "self" mytestje) (mydata 5)
+testbetsy = startCircuit (feedback (edit "self" >>@ mytestje)) (mydata 5)
 where
 	mydata i = i <|> horlistAGEC (repeatn i i)
 	mytestje (i <|> _) = mydata i
 
 
-test12 = CGEC (gecEdit "Editor") (hidAGEC 1)
+test12 = startCircuit (edit "Editor") (hidAGEC 1)
 
 // paper stuf
 
@@ -76,7 +76,7 @@ updRecord rec = { rec
 			 	& MyRecord2.sum  = rec.value1 +  rec.value2
 			 	}
 
-test23 = CGEC (selfGEC "self" updRecord) (initRecord2 0 0)
+test23 = startCircuit (feedback (edit "self" >>@ updRecord)) (initRecord2 0 0)
 
 // basic example with counters
 
@@ -98,7 +98,7 @@ fromMyEditRecord rec = 	{ value1	= fromCounter (updateCounter rec.MyEditRecord.e
 						, sum		= fromDisplay rec.MyEditRecord.edsum
 						}
 
-test24 = CGEC (selfGEC "self" (toMyEditRecord o updRecord o fromMyEditRecord)) (toMyEditRecord (initRecord2 0 0))
+test24 = startCircuit (feedback (edit "self" >>@ toMyEditRecord o updRecord o fromMyEditRecord)) (toMyEditRecord (initRecord2 0 0))
 
 
 toDisplay :: a -> Mode a
@@ -135,7 +135,7 @@ fromMyEditRecord2 rec = 	{ value1	= ^^ rec.MyEditRecord2.edvalue1
 							, sum		= ^^ rec.MyEditRecord2.edsum
 							}
 
-test25 = CGEC (selfGEC "self" (toMyEditRecord2 o updRecord o fromMyEditRecord2)) 
+test25 = startCircuit (feedback (edit "self" >>@ toMyEditRecord2 o updRecord o fromMyEditRecord2)) 
 												(toMyEditRecord2 (initRecord2 22 23))
 
 
@@ -163,27 +163,28 @@ toMyEditRecord21 edrec = 	{ MyEditRecord2 |
 
 //test5 = CGEC (gecEdit "test") { inout2 = In 1 , gec2 = gecDisplay "circuit"}
 
-test0 = CGEC (gecEdit "test") mylist
+test0 = startCircuit (edit "test") mylist
 where
 	mylist :: AGEC [[Int]]
 	mylist = table_vh_AGEC [list\\j <- list] where list = []
-test1 = CGEC mycgec 23
-test2 = CGEC (AGECtoCGEC "test" (CGECtoAGEC mycgec 27)) 23
-test3 = CGEC (gecEdit "test") (CGECtoAGEC (selfGEC "self" inc) 22)
-test4 = CGEC (gecEdit "test") { inout = (Edit 1,Display 1) , gec = gecDisplay "circuit"}
+test1 = startCircuit mycgec 23
+test2 = startCircuit (AGECtoCGEC "test" (CGECtoAGEC mycgec 27)) 23
+test3 = startCircuit (edit "test") (CGECtoAGEC (feedback (edit "self" >>@ inc)) 22)
+test4 = startCircuit (edit "test") { inout = (Edit 1,Display 1) , gec = display "circuit"}
 
 mycgec = (AGECtoCGEC "test" (counterAGEC 0))
 
 
 				
-test6 = CGEC (selfGEC "self" incsum) 	{ field1	= counterAGEC 0
-							  			, field2	= counterAGEC 0
-							  			, sum 		= idAGEC 0}
+test6 = startCircuit (feedback (edit "self" >>@ incsum))
+								 	{ field1	= counterAGEC 0
+							  		, field2	= counterAGEC 0
+							  		, sum 		= idAGEC 0}
 where
 	incsum rec = {rec & MyRecord.sum = rec.MyRecord.sum ^= (^^ rec.field1 + ^^ rec.field2)}
 
 			
-test5 = CGEC (%| (test @| gecEdit "test" |@ (^^)) ) 23
+test5 = startCircuit (feedback (test @>> edit "test" >>@ (^^)) ) 23
 where
 	test n = if (isEven n) (counterAGEC n) (idAGEC n)
 
@@ -191,7 +192,7 @@ where
 				 , field2:: AGEC a
 				 , sum:: AGEC a }
 
-counterCGEC n = CGECtoAGEC (%| ((\n -> (n,Neutral)) @| gecEdit "test" |@ updateCounter)) n
+counterCGEC n = CGECtoAGEC (feedback ((\n -> (n,Neutral)) @>> edit "test" >>@ updateCounter)) n
 where
 	updateCounter (n,UpPressed) 	= n+1
 	updateCounter (n,DownPressed) 	= n-1

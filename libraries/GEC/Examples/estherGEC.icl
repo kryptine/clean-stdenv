@@ -2,7 +2,7 @@ module estherGEC
 
 import StdEnv
 import StdGEC, StdGECExt, StdAGEC, dynamicAGEC
-import StdGecComb
+import GecArrow
 import StdDynamic
 import EstherInterFace, basicAGEC
 
@@ -89,7 +89,7 @@ where
 derive gMap MyRecord3
 derive gGEC MyRecord3
 
-test4 = CGEC (selfGEC "self" convert) (mapTo init)	
+test4 = startCircuit (feedback (edit "self" >>@ convert)) (mapTo init)	
 where
 	init = 	{ val1	= 0.0
 			, val2	= 0.0
@@ -105,7 +105,7 @@ where
 
 :: Counter a = Counter (AGEC a)
 
-test5 = CGEC (selfGEC "self" id) (mkAGECs (counterAGEC) (dynamicAGEC) init)	
+test5 = startCircuit (feedback (edit "self")) (mkAGECs (counterAGEC) (dynamicAGEC) init)	
 where
 	init :: (T Int Real)
 	init = 	C 19
@@ -132,7 +132,7 @@ where
 derive gGEC X
 
 //test7 = CGEC (selfGEC "self" convert2) (mapto2 init) //(mapTo init)	
-test7 = CGEC (selfGEC "self" mapto2) init //(mapTo init)	
+test7 = startCircuit (edit "self" >>@ mapto2) init //(mapTo init)	
 where
 	init = 	X (3,(idAGEC [1..3]))
 

@@ -4,7 +4,7 @@ import StdEnv
 import StdIO
 import genericgecs
 import StdGEC, StdGECExt, StdAGEC, calcAGEC
-import StdGecComb, basicAGEC//, StdDynamicGEC, StdDynamic//, StdGeneric
+import GecArrow, basicAGEC//, StdDynamicGEC, StdDynamic//, StdGeneric
 
 goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
@@ -12,10 +12,10 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	spreadsheet1
+ 	spreadsheet2
  	world  
 
-spreadsheet1	=	CGEC (selfGEC 	"spreadsheet"			updsheet)	    (mksheet inittable) 
+spreadsheet1	=	startCircuit (feedback (edit "spreadsheet" >>@ updsheet)) (mksheet inittable) 
 where
 		updsheet (table <-> _ <|>
 		          _ <-> _ )			= mksheet (^^ table)
@@ -29,7 +29,7 @@ where
 									  ]
 		inittable	  				= [map ((+) i) [1..10] \\ i <- [0,5..25]]	
 
-spreadsheet2	=	CGEC (selfGEC 	"spreadsheet"			updsheet)	    (mksheet inittable) 
+spreadsheet2	=	startCircuit (feedback (edit "spreadsheet" >>@ updsheet))	    (mksheet inittable) 
 where
 		updsheet (table <-> _ <|>
 		          _ <-> _ )			= mksheet (^^ table)
@@ -43,7 +43,7 @@ where
 									  ]
 		inittable	  				= [map ((+) i) [1..5] \\ i <- [0,5..25]]	
 
-spreadsheet3	=	CGEC (selfGEC "spreadsheet" updsheet) (mksheet initcosts initvat) 
+spreadsheet3	=	startCircuit (feedback (edit "spreadsheet" >>@ updsheet)) (mksheet initcosts initvat) 
 where
 		updsheet (_ <-> _ <-> _ <-> _ <|>
 				  costs <-> _ <-> _ <-> vat <|>

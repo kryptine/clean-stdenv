@@ -4,7 +4,7 @@ import StdEnv
 import StdIO
 import genericgecs
 import StdGEC, StdGECExt, StdAGEC
-import StdGecComb, basicAGEC, buttonAGEC, calcAGEC
+import GecArrow, basicAGEC, buttonAGEC, calcAGEC
 
 goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
@@ -15,7 +15,7 @@ Start world
  	example_calc
  	world  
 
-example_calc	= CGEC (selfGEC "Calculator" update_calc) calculator
+example_calc	= startCircuit (feedback (edit "Calculator" >>@ update_calc)) calculator
 where
 	calculator	= 	zero  	   <|> 
 					calc zero  <|> 
