@@ -33,7 +33,6 @@ extern void SendMouseStillDownToClean (HWND hwndParent, HWND hwndChild, int x, i
 extern void SendMouseStillUpToClean   (HWND hwndParent, HWND hwndChild, int x, int y);
 extern void SendMouseDownToClean      (HWND hwndParent, HWND hwndChild, int x, int y);
 
-
 //	InstallCrossCallxDI adds the proper cross call procedures to the
 //	cross call procedures managed by cCrossCall_121.c.
 extern int InstallCrossCallxDI (int ios);

@@ -11,8 +11,8 @@
 #include "util_121.h"
 #include "intrface_121.h"
 #include "cGameLib_121.h"
-#include "cOSGameLib_121.h"  /* OS specific functions */
-#include "cCrossCall_121.h"	/* Cross call infrastructure */
+#include "cOSGameLib_121.h"  /* OS specific functions */		// PA: this include is actually already in cGameLib_121.h
+#include "cCrossCall_121.h"	 /* Cross call infrastructure */
 
 // #define SMART_DRAW
 
@@ -112,7 +112,7 @@ extern BOOL FullScreen;
 extern int XShiftScreen;
 extern int YShiftScreen;
 
-int iFrameCounter;
+static int iFrameCounter;		// PA: changed to static
 
 static GAMELAYERMAPINFO *glmipGameLayerMapInfo = NULL;
 static SPRITEANIMATION *saSprites = NULL;
@@ -196,8 +196,8 @@ static USER_EVENT_INFO *ueiUserEventInfo = NULL;
 
 #define EV_PLAY_SOUND  (-1)
 
-
-void ClearUserEvents ()
+//	PA: made static
+static void ClearUserEvents (void)
 {
     struct USER_EVENT_INFO *ueiNext;
 
@@ -210,11 +210,11 @@ void ClearUserEvents ()
 }
 
 
-int NextFrame (int);
+static int NextFrame (int);
 
 
 /* use one integer to save info for both pages */
-int setflipint (int x, int value)
+static int setflipint (int x, int value)
 {
     if ((iFrameCounter % 2) == 0)
         return ((x & 0xFFFF0000) + (value & 0xFFFF));
@@ -222,7 +222,7 @@ int setflipint (int x, int value)
         return ((x & 0xFFFF) + (value << 16));
 }
 
-int getflipint (int value)
+static int getflipint (int value)
 {
     if ((iFrameCounter % 2) == 0)
         return (value & 0xFFFF);
@@ -230,7 +230,7 @@ int getflipint (int value)
         return (value >> 16);
 }
 
-BOOL cmpflipint (int x, int value)
+static BOOL cmpflipint (int x, int value)
 {
     if ((iFrameCounter % 2) == 0)
         return ((x & 0xFFFF0000) == (value << 16));
@@ -250,24 +250,24 @@ BOOL cmpflipint (int x, int value)
     -3 / 2 = -1
 */
 
-int intdiv (int x, int y)
+static int intdiv (int x, int y)
 {
     return (x < 0)? (x - y + 1) / y : x / y;
 }
 
-int Min (int x, int y)
+static int Min (int x, int y)
 {
     return (x < y)? x : y;
 }
 
-int Max (int x, int y)
+static int Max (int x, int y)
 {
     return (x > y)? x : y;
 }
 
 
 /* get a pointer to the SPRITEANIMATION structure with id ID */
-SPRITEANIMATION *GetSpriteAnimation (int ID)
+static SPRITEANIMATION *GetSpriteAnimation (int ID)
 {
     SPRITEANIMATION *sa = saSprites;
     BOOL bFound = FALSE;
@@ -283,10 +283,10 @@ SPRITEANIMATION *GetSpriteAnimation (int ID)
         return sa;
     else
         return NULL;
-}
+}	/* GetSpriteAnimation */
 
 /* free the SPRITEANIMATION list */
-void FreeSpriteAnimationList ()
+static void FreeSpriteAnimationList (void)
 {
     SPRITEANIMATION *sa;
 
@@ -301,10 +301,10 @@ void FreeSpriteAnimationList ()
         rfree (saSprites);
         saSprites = sa;
     }
-}
+}	/* FreeSpriteAnimationList */
 
 /* get a pointer to the GAMELAYERMAPINFO structure with id MID */
-GAMELAYERMAPINFO *GetGameLayerMapInfo (int MapID)
+static GAMELAYERMAPINFO *GetGameLayerMapInfo (int MapID)
 {
     GAMELAYERMAPINFO *glmip = glmipGameLayerMapInfo;
     BOOL bFound = FALSE;
@@ -317,10 +317,10 @@ GAMELAYERMAPINFO *GetGameLayerMapInfo (int MapID)
             glmip = glmip->glmipNext;
     }
     return glmip;
-}
+}	/* GetGameLayerMapInfo */
 
 /* free the GAMELAYERMAPINFO list and all the map strings */
-void FreeGameLayerMapInfoList ()
+static void FreeGameLayerMapInfoList (void)
 {
     GAMELAYERMAPINFO *glmip;
 
@@ -335,11 +335,11 @@ void FreeGameLayerMapInfoList ()
         rfree (glmipGameLayerMapInfo);
         glmipGameLayerMapInfo = glmip;
     }
-}
+}	/* FreeGameLayerMapInfoList */
 
 
 /* get a pointer to the OBJECTREC structure with id ID */
-OBJECTREC *GetObjectRec (int ID)
+static OBJECTREC *GetObjectRec (int ID)
 {
     OBJECTREC *obj = objObjects;
     BOOL bFound = FALSE;
@@ -352,11 +352,11 @@ OBJECTREC *GetObjectRec (int ID)
             obj = obj->objNext;
     }
     return obj;
-}
+}	/* GetObjectRec */
 
 
 /* update last position if pos has been changed during an event */
-void UpdatePosition (OBJECTREC *obj)
+static void UpdatePosition (OBJECTREC *obj)
 {
     obj->iLastXPos = obj->iXPos;
     obj->iLastYPos = obj->iYPos;
@@ -369,7 +369,7 @@ void UpdatePosition (OBJECTREC *obj)
 
 
 /* initialize a new game object */
-void InitGameObject (int mapx, int mapy)
+static void InitGameObject (int mapx, int mapy)
 {
     OBJECTREC *objNew;
     OBJECTREC *obj1;
@@ -451,10 +451,10 @@ void InitGameObject (int mapx, int mapy)
     iCCObjectID = 0;
 
     UpdatePosition (objNew);
-}
+}	/* InitGameObject */
 
 /* remove game object with id ID and all objects that are not active (id==0) */
-void GameObjectDone (int id)
+static void GameObjectDone (int id)
 {
     OBJECTREC *objCur = objObjects;
     OBJECTREC *objNext = NULL;
@@ -524,10 +524,10 @@ void GameObjectDone (int id)
         }
         objCur = objNext;
     }
-}
+}	/* GameObjectDone */
 
 
-void InitGameGlobals ()
+void InitGameGlobals (void)
 {
     ghGameWindow = NULL;
     bGameActive = FALSE;
@@ -537,7 +537,7 @@ void InitGameGlobals ()
 
 
 /* GameTranslateKey translates WM_KEYDOWN wPara fields to GameKey values */
-int GameTranslateKey (WPARAM wPara)
+static int GameTranslateKey (WPARAM wPara)
 {
     switch (wPara)
     {
@@ -574,7 +574,7 @@ int GameTranslateKey (WPARAM wPara)
              break;
         }
     }
-}
+}	/* GameTranslateKey */
 
 
 
@@ -587,7 +587,7 @@ static BOOL gk_state[GK_MAX_KEY + 1] =
 
 
 /* GameWindowProcedure is the Windows callback routine for a game window. */
-LRESULT CALLBACK GameWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara, LPARAM lPara)
+static LRESULT CALLBACK GameWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara, LPARAM lPara)
 {
     printMessage ("Game Window", hWin, uMess, wPara, lPara);
     switch (uMess)
@@ -715,11 +715,11 @@ LRESULT CALLBACK GameWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara, LPARA
             break;
     }
     return 0;
-}
+}	/* GameWindowProcedure */
 
 
 /* move XView and YView towards iActualXView and iActualYView */
-void CorrectView ()
+static void CorrectView (void)
 {
     if (iActualXView > XView)
         XView = Min (XView + iMaxXScrollSpeed, iActualXView);
@@ -755,10 +755,10 @@ void CorrectView ()
         iActualYView = YView;
         YScrollSpeed = 0;
     }
-}
+}	/* CorrectView */
 
 
-void RunGame ()
+void RunGame (void)
 {
     MSG msg;
     int i, j, x, y, w, h;
@@ -855,11 +855,11 @@ void RunGame ()
     iFollowID = 0;
 
     //  MessageBeep (MB_ICONASTERISK);
-}
+}	/* RunGame */
 
 
 /* create a new event */
-void ScheduleEvent (int event, int par1, int par2, int par3, int par4, int target, int subtarget, int time)
+static void ScheduleEvent (int event, int par1, int par2, int par3, int par4, int target, int subtarget, int time)
 {
     struct USER_EVENT_INFO *uei;
 
@@ -874,14 +874,14 @@ void ScheduleEvent (int event, int par1, int par2, int par3, int par4, int targe
     uei->iTimeCounter = time;
     uei->ueiNext = ueiUserEventInfo;
     ueiUserEventInfo = uei;
-}
+}	/* ScheduleEvent */
 
 
 /* play (actually schedule) a sound sample */
 void PlaySoundSample (int id, int vol, int pan, int freq, int delay)
 {
     ScheduleEvent (EV_PLAY_SOUND, id, vol, pan, freq, 0, -1, delay);
-}
+}	/* PlaySoundSample */
 
 /* schedule any user event */
 void ScheduleUserGameEvent (int event, int par1, int par2,
@@ -909,7 +909,7 @@ void ScheduleUserGameEvent (int event, int par1, int par2,
         uei->ueiNext = ueiUserEventInfo;
         ueiUserEventInfo = uei;
     }
-}
+}	/* ScheduleUserGameEvent */
 
 
 /* create the game window */
@@ -966,15 +966,16 @@ int CreateGameWindow (int w, int h, int bpp, BOOL fs)
     iFrameCounter = 0;
 
     return ((int) ghGameWindow);
-}
+}	/* CreateGameWindow */
 
 
 /* register game window class */
-void RegisterGameWindowClass ()
+void RegisterGameWindowClass (void)
 {
-    WNDCLASS wclass;
+    WNDCLASSEX wclass;
 
-    wclass.style = CS_HREDRAW | CS_VREDRAW;
+    wclass.cbSize = sizeof (WNDCLASSEX);
+	wclass.style = CS_HREDRAW | CS_VREDRAW;
     wclass.lpfnWndProc = (WNDPROC) GameWindowProcedure;
     wclass.cbClsExtra = 0;
     wclass.cbWndExtra = 0;
@@ -984,9 +985,11 @@ void RegisterGameWindowClass ()
     wclass.hbrBackground = NULL;
     wclass.lpszMenuName = NULL;
     wclass.lpszClassName = FullScreenGameWindowClassName;
-    RegisterClass (&wclass);
+	wclass.hIconSm = NULL;
+    RegisterClassEx (&wclass);
 
-    wclass.style = CS_HREDRAW | CS_VREDRAW;
+    wclass.cbSize = sizeof (WNDCLASSEX);
+	wclass.style = CS_HREDRAW | CS_VREDRAW;
     wclass.lpfnWndProc = (WNDPROC) GameWindowProcedure;
     wclass.cbClsExtra = 0;
     wclass.cbWndExtra = 0;
@@ -996,8 +999,9 @@ void RegisterGameWindowClass ()
     wclass.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
     wclass.lpszMenuName = NULL;
     wclass.lpszClassName = GameWindowClassName;
-    RegisterClass (&wclass);
-}
+	wclass.hIconSm = NULL;
+    RegisterClassEx (&wclass);
+}	/* RegisterGameWindowClass */
 
 
 /* convert an integer to a 4-byte string */
@@ -1013,7 +1017,7 @@ CLEAN_STRING WinBinaryIntStr (int x)
     rsncopy (result->characters, (const char *) &x, sizeof (x));
 
     return result;
-}
+}	/* WinBinaryIntStr */
 
 /* convert a boolean value to a Clean string */
 CLEAN_STRING WinBinaryBoolStr (BOOL b)
@@ -1028,7 +1032,7 @@ CLEAN_STRING WinBinaryBoolStr (BOOL b)
     rsncopy (result->characters, (const char *) &b, sizeof (b));
 
     return result;
-}
+}	/* WinBinaryBoolStr */
 
 /* read a new bitmap into (offscreen) memory (id==0: create new id: result) */
 void WinInitGameBitmap (int id, CLEAN_STRING name,
@@ -1043,7 +1047,7 @@ void WinInitGameBitmap (int id, CLEAN_STRING name,
 
     *result = resultcode;
     *oos = ios;
-}
+}	/* WinInitGameBitmap */
 
 /* remove all bitmaps from memory, including all sprites */
 void WinClearAllGameBitmaps (OS ios, int *result, OS* oos)
@@ -1053,21 +1057,21 @@ void WinClearAllGameBitmaps (OS ios, int *result, OS* oos)
 
     *result = GR_OK;
     *oos = ios;
-}
+}	/* WinClearAllGameBitmaps */
 
 /* remove bitmap from memory */
 void WinGameBitmapDone (int id, OS ios, int *result, OS* oos)
 {
     *result = OSFreeGameBitmap (id);
     *oos = ios;
-}
+}	/* WinGameBitmapDone */
 
 /* set the transparent color for a bitmap: (x,y) is a transparent pixel */
 void WinSetTransparentColor (int id, int x, int y, OS ios, int *result, OS* oos)
 {
     *result = OSSetTransparentColor (id, x, y);
     *oos = ios;
-}
+}	/* WinSetTransparentColor */
 
 /* initialize a block animation sequence (list of repeating blocks) */
 void WinInitBlockSequence (int bitmapid, int seqid, CLEAN_STRING seq, OS ios, int *result, OS *oos)
@@ -1075,7 +1079,7 @@ void WinInitBlockSequence (int bitmapid, int seqid, CLEAN_STRING seq, OS ios, in
     *result = OSInitBlockSequence (bitmapid, seqid,
                                      cstring (seq), seq->length);
     *oos = ios;
-}
+}	/* WinInitBlockSequence */
 
 /* initialize the bound map */
 void WinSetGameBoundMap (int blockwidth, int blockheight, CLEAN_STRING map,
@@ -1118,7 +1122,7 @@ void WinSetGameBoundMap (int blockwidth, int blockheight, CLEAN_STRING map,
 
     *result = resultcode;
     *oos = ios;
-}
+}	/* WinSetGameBoundMap */
 
 
 /* set the level's initial position */
@@ -1133,7 +1137,7 @@ void WinMoveScreenTo (int x, int y, OS ios, int *result ,OS *oos)
 
     *result = GR_OK;
     *oos = ios;
-}
+}	/* WinMoveScreenTo */
 
 
 /* initialize a new layer map */
@@ -1191,7 +1195,7 @@ void WinInitGameLayerMap (int mapid, int bitmapid, CLEAN_STRING map,
 
     *result = resultcode;
     *oos = ios;
-}
+}	/* WinInitGameLayerMap */
 
 /* remove layer map from memory */
 void WinGameLayerMapDone (int mapid, OS ios, int *result, OS* oos)
@@ -1232,7 +1236,7 @@ void WinGameLayerMapDone (int mapid, OS ios, int *result, OS* oos)
     }
 
     *oos = ios;
-}
+}	/* WinGameLayerMapDone */
 
 
 /* initialize an animation sequence (if succes, result = id) */
@@ -1317,11 +1321,11 @@ void WinInitSpriteAnimation (int bitmapid, CLEAN_STRING seq, BOOL loop, OS ios, 
     else
         *result = resultcode;
     *oos = ios;
-}
+}	/* WinInitSpriteAnimation */
 
 
 /* get value of boundmap[x,y] */
-int ReadBoundMapValue (int x, int y, int options, int bounds, int mccode)
+static int ReadBoundMapValue (int x, int y, int options, int bounds, int mccode)
 {
     int mappos;
     int result;
@@ -1359,10 +1363,10 @@ int ReadBoundMapValue (int x, int y, int options, int bounds, int mccode)
 ///
 
     return result;
-}
+}	/* ReadBoundMapValue */
 
 
-void Bounce (OBJECTREC *obj, int bound)
+static void Bounce (OBJECTREC *obj, int bound)
 {
     int xb = obj->iXBounce;
     int yb = obj->iYBounce;
@@ -1396,11 +1400,11 @@ void Bounce (OBJECTREC *obj, int bound)
         obj->iFixedXPos = obj->iLastFixedXPos;
         obj->iXSpeed = xb;
     }
-}
+}	/* Bounce */
 
 
 /* move objects around */
-void MoveObjects ()
+static void MoveObjects (void)
 {
     OBJECTREC *obj;
     int x, y, w, h, i, j, k, xbnd, ybnd, code, bound, Bound;
@@ -2280,33 +2284,33 @@ void MoveObjects ()
     GameObjectDone (0);
 
     CorrectView ();
-}
+}	/* MoveObjects */
 
 #ifdef SMART_DRAW
 /* avoid drawing the same tile if it is already there */
-void SaveSmart (int x, int y, int tilenr)
+static void SaveSmart (int x, int y, int tilenr)
 {
     int pos = (y * iLastTileW + x) * sizeof (int);
 
     (*(int *) &sLastTile[pos]) =
         setflipint ((*(int *) &sLastTile[pos]), tilenr);
-}
+}	/* SaveSmart */
 
-int GetSmart (int x, int y)
+static int GetSmart (int x, int y)
 {
     int pos = (y * iLastTileW + x) * sizeof (int);
 
     return (*(int *) &sLastTile[pos]);
-}
+}	/* GetSmart */
 
-void EraseSmart (int x, int y)
+static void EraseSmart (int x, int y)
 {
     if ((x >= 0) && (x <= iLastTileW))
         if ((y >= 0) && (y <= iLastTileH))
             SaveSmart (x, y, 0);
-}
+}	/* EraseSmart */
 
-void EraseSmartArea (int x1, int y1, int x2, int y2)
+static void EraseSmartArea (int x1, int y1, int x2, int y2)
 {
     int x, y;
     int i, j;
@@ -2329,11 +2333,11 @@ void EraseSmartArea (int x1, int y1, int x2, int y2)
     for (j = y1; j <= (y2 + 1); j++)
         for (i = x1; i <= (x2 + 1); i++)
             EraseSmart (i, j);
-}
+}	/* EraseSmartArea */
 #endif
 
 /* draw objects */
-void DrawObjects (int FromLayer, int ToLayer)
+static void DrawObjects (int FromLayer, int ToLayer)
 {
     OBJECTREC *obj = objObjects;
     int x, y, w, h, sw, sh, dw, dh;
@@ -2504,7 +2508,7 @@ void DrawObjects (int FromLayer, int ToLayer)
         }
         obj = obj->objNext;
     }
-}
+}	/* DrawObjects */
 
 
 /* calculate layer offset and draw layer */
@@ -2658,11 +2662,11 @@ int DrawLayer (int mapid)
         }
     }
     return resultcode;
-}
+}	/* DrawLayer */
 
 
 /* run sequences, draw layers and flip pages */
-int NextFrame (int fade)
+static int NextFrame (int fade)
 {
     int resultcode;
 	//    DDBLTFX ddbltfx;     PA: applications of ddbltfx have been commented out
@@ -2831,7 +2835,7 @@ int NextFrame (int fade)
     }
 
     return resultcode;
-}
+}	/* NextFrame */
 
 
 /* make the screen follow an object */
@@ -2863,12 +2867,12 @@ void WinSetObjectFocus (int x1, int y1, int x2, int y2, int maxxv, int maxyv, OS
 
     *result = resultcode;
     *oos = ios;
-}
+}	/* WinSetObjectFocus */
 
 
 /* create a new game object during the game */
 void CreateGameObject (int mapval, int above, int x, int y,
-                  int *result)
+                       int *result)
 {
     OBJECTREC *objNew;
     OBJECTREC *obj1;
@@ -2909,7 +2913,7 @@ void CreateGameObject (int mapval, int above, int x, int y,
     // object remains inactive until moveobject() is run
 
     *result = GR_OK;
-}
+}	/* CreateGameObject */
 
 
 void WinSetObjectRec (int id, int objtype, int subtype, BOOL active,
@@ -2971,7 +2975,7 @@ void WinSetObjectRec (int id, int objtype, int subtype, BOOL active,
 
     *result = resultcode;
     *oos = ios;
-}
+}	/* WinSetObjectRec */
 
 
 void WinGetObjectRec (int id, OS ios, int *objtype, int *subtype, BOOL *active,
@@ -3025,7 +3029,7 @@ void WinGetObjectRec (int id, OS ios, int *objtype, int *subtype, BOOL *active,
     }
     *result = resultcode;
     *oos = ios;
-}
+}	/* WinGetObjectRec */
 
 
 void WinShowStatistic (int x, int y, CLEAN_STRING format, int value,
@@ -3111,7 +3115,7 @@ void WinShowStatistic (int x, int y, CLEAN_STRING format, int value,
 
     *result = GR_OK;
     *oos = ios;
-}
+}	/* WinShowStatistic */
 
 void WinPlayMusic (CLEAN_STRING midifile, BOOL restart, OS ios, int *result, OS *oos)
 {
@@ -3122,13 +3126,13 @@ void WinPlayMusic (CLEAN_STRING midifile, BOOL restart, OS ios, int *result, OS 
 
     *result = resultcode;
     *oos = ios;
-}
+}	/* WinPlayMusic */
 
 void WinStopMusic (OS ios, int *result, OS *oos)
 {
     *result = OSStopMusic ();
     *oos = ios;
-}
+}	/* WinStopMusic */
 
 /* set extra level options */
 void WinGameLevelOptions (int r, int g, int b,
@@ -3149,7 +3153,7 @@ void WinGameLevelOptions (int r, int g, int b,
     bFadeOut = fadeout;
     *result = GR_OK;
     *oos = ios;
-}
+}	/* WinGameLevelOptions */
 
 /* init a sound sample or clear all samples if id = -1 */
 void WinInitSoundSample (int id, CLEAN_STRING name, int buffers, OS ios, int *result, OS *oos)
@@ -3165,7 +3169,7 @@ void WinInitSoundSample (int id, CLEAN_STRING name, int buffers, OS ios, int *re
             *result = GR_OS_ERROR;
     }
     *oos = ios;
-}
+}	/* WinGameLevelOptions */
 
 
 void WinGetBoundMap (int x, int y, OS ios, int *mapvalue, int *result, OS *oos)
@@ -3186,7 +3190,7 @@ void WinGetBoundMap (int x, int y, OS ios, int *mapvalue, int *result, OS *oos)
 
     mappos = (y * BoundMapWidth + x) * sizeof (int);
     *mapvalue = (*(int *) &sBoundMap[mappos]);
-}
+}	/* WinGetBoundMap */
 
 void WinSetBoundMap (int x, int y, int newvalue, OS ios, int *result, OS *oos)
 {
@@ -3204,7 +3208,7 @@ void WinSetBoundMap (int x, int y, int newvalue, OS ios, int *result, OS *oos)
 
     mappos = (y * BoundMapWidth + x) * sizeof (int);
     (*(int *) &sBoundMap[mappos]) = newvalue;
-}
+}	/* WinSetBoundMap */
 
 /*
 void WinPlaySoundSample (int id, int volume, int pan, int freq, int delay, OS ios, int *result, OS *oos)
@@ -3239,5 +3243,3 @@ void WinPlaySoundSample (int id, int volume, int pan, int freq, int delay, OS io
     *oos = ios;
 }
 */
-
-

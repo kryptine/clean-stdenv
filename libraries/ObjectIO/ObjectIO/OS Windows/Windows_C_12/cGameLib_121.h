@@ -115,14 +115,13 @@ extern void WinSetBoundMap (int,int,int,OS,int*,OS*);
 #define GK_MAX_KEY  255
 
 
-/* functions called from cCrossCall_121 */
-void InitGameGlobals ();
-void RunGame ();
-void PlaySoundSample (int, int, int, int, int);
-void CreateGameObject (int, int, int, int, int *);
-void ScheduleUserGameEvent (int, int, int, int, int, int);
-int CreateGameWindow (int, int, int, BOOL);
-void RegisterGameWindowClass ();
+/* Functions called from cCrossCallGame_121 */
+extern void InitGameGlobals (void);
+extern void RunGame (void);
+extern void PlaySoundSample (int, int, int, int, int);
+extern void CreateGameObject (int, int, int, int, int *);
+extern void ScheduleUserGameEvent (int, int, int, int, int, int);
+extern int  CreateGameWindow (int, int, int, BOOL);
+extern void RegisterGameWindowClass (void);
 
 #endif
-

@@ -12,22 +12,22 @@
 #include "cCrossCall_121.h"
 
 
-int CALLBACK EnumFontNameProc (ENUMLOGFONT FAR * lpelf,		/* pointer to logical-font  data */
-							   NEWTEXTMETRIC FAR * lpntm,	/* pointer to physical-font data */
-							   int fontType,				/* type of font */
-							   LPARAM lParam				/* address of application-defined data	*/
-							  )
+static int CALLBACK EnumFontNameProc (ENUMLOGFONT FAR * lpelf,		/* pointer to logical-font  data */
+									  NEWTEXTMETRIC FAR * lpntm,	/* pointer to physical-font data */
+									  int fontType,					/* type of font */
+									  LPARAM lParam					/* address of application-defined data	*/
+									 )
 {
 	SendMessage1ToClean (CcCbFONTNAME, lpelf->elfLogFont.lfFaceName);
 
 	return 1;
 }
 
-int CALLBACK EnumFontSizeProc (ENUMLOGFONT FAR * lpelf,		/* pointer to logical-font data  */
-							   NEWTEXTMETRIC FAR * lpntm,	/* pointer to physical-font data  */
-							   int fontType,				/* type of font  */
-							   LPARAM lParam				/* address of application-defined data	*/
-							  )
+static int CALLBACK EnumFontSizeProc (ENUMLOGFONT FAR * lpelf,		/* pointer to logical-font data  */
+									  NEWTEXTMETRIC FAR * lpntm,	/* pointer to physical-font data  */
+									  int fontType,				/* type of font  */
+									  LPARAM lParam				/* address of application-defined data	*/
+									 )
 {
 	SendMessage2ToClean (CcCbFONTSIZE,lpntm->tmHeight - lpntm->tmInternalLeading, fontType == TRUETYPE_FONTTYPE);
 

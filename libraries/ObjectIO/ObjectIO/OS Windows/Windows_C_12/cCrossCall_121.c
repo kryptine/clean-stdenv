@@ -87,95 +87,6 @@ UINT NextMenuItemID (void)
 }
 
 
-void InitGlobals (void)
-{
-	LOGFONT lf;
-	
-	//	Globally, we create a logical font that is used in all controls. 
-	SetLogFontData (&lf, "MS Sans Serif", 0, 8);
-	gControlFont = CreateFontIndirect (&lf);
-
-	//	The cross call procedure table is set to the empty table.
-	gCrossCallProcedureTable = EmptyCrossCallProcedureTable ();
-}
-
-/*	Registered Windows main window class name.
-*/
-static char MainWindowClassName[] = "__CleanMainWindow";	/* Class for main window (ghMainWindow). */
-
-
-void GetAppFileName (void)
-{
-	char path[MAX_PATH + 1];
-	int length, index;
-	int start, end;
-	BOOL newword;
-
-	length = GetModuleFileName (NULL, path, MAX_PATH);
-
-	for (index = length - 1; path[index] != '.'; index--)
-		;
-	end = index - 1;
-
-	for (index = end;
-		 path[index] != '/' &&
-		 path[index] != '\\' &&
-		 path[index] != ':';
-		 index--)
-		;
-
-	start = index + 1;
-
-	if (end - start > 31)
-		end = start + 31;
-
-	if (end - start >= 0)
-	{
-		gAppName = rmalloc (end - start + 2);
-		for (index = 0; index <= end - start; index++)
-			gAppName[index] = path[start + index];
-		gAppName[index] = '\0';
-	}
-	else
-	{
-		gAppName = "Clean Application";
-	}
-
-	newword = TRUE;
-	for (index = 0; gAppName[index] != '\0'; index++)
-	{
-		if (gAppName[index] >= 'A' && gAppName[index] <= 'Z' && !newword)
-			gAppName[index] = gAppName[index] - ('A' - 'a');
-
-		if (gAppName[index] == ' ')
-			newword = TRUE;
-		else
-			newword = FALSE;
-	}
-}
-
-PSTR WinGetAppPath (void)
-{
-	char *path;
-	int idx, length;
-
-	path = rmalloc (261);
-
-	length = GetModuleFileName (NULL, path, 260);
-
-	for (idx = length - 1;
-		 path[idx] != '/' &&
-		 path[idx] != '\\' &&
-		 path[idx] != ':';
-		 idx--)
-		;
-
-	path[idx + 1] = 0;
-
-	return path;	/* relying on the calling clean function to de-allocate path. */
-}
-
-
 /*	GetModifiers returns the modifiers that are currently pressed.
 */
 int GetModifiers (void)
@@ -286,225 +197,6 @@ int CheckVirtualKeyCode (int keycode)
 }
 
 
-/*	The callback routine for the main window.
-	PA: The WM_CREATE  message registers the main window as a clipboard viewer. 
-		The WM_DESTROY message unregisters the main window. 
-*/
-LRESULT CALLBACK MainWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara, LPARAM lPara)
-{
-	printMessage ("Main Window", hWin, uMess, wPara, lPara);
-	switch (uMess)
-	{
-		case WM_NCPAINT:
-			break;
-		case WM_ACTIVATEAPP:
-			{
-				if (wPara)
-				{
-					gAppRunning = TRUE;
-				}
-				else
-				{
-					gAppRunning = FALSE;
-				}
-			}
-			break;
-		/*	WM_ENTERIDLE message is used to let Clean evaluate the initialisation action
-			of a modal dialog by sending the CcWmIDLEDIALOG message.
-		*/
-		case WM_ENTERIDLE:
-			{
-				HWND hwndModalDialog;
-				
-				hwndModalDialog = (HWND)lPara;
-
-				if (wPara == MSGF_DIALOGBOX && hwndModalDialog != ghwndLastModalDialog)
-				{
-					SendMessage1ToClean (CcWmIDLEDIALOG,(int)hwndModalDialog);
-					ghwndLastModalDialog = hwndModalDialog;
-				}
-				else
-				{
-					SendMessage0ToClean (CcWmIDLETIMER);
-				}
-				return 0;
-			}
-			break;
-		case WM_TIMER:
-			{
-				SendMessage2ToClean (CcWmTIMER, wPara, GetMessageTime ());
-			}
-			break;
-		case WM_ENABLE:
-			{
-				HWND hwin;
-				char title[64];
-
-				hwin = GetWindow (ghMainWindow, GW_HWNDFIRST);
-				while (hwin != NULL)
-				{
-					GetWindowText (hwin, title, 63);
-
-					if (GetWindow (hwin, GW_OWNER) == ghMainWindow)
-					{
-						RECT r;
-						GetWindowRect (hwin, &r);
-						if (r.top != -1 || r.left != -1 || r.right != 0 || r.bottom != 0)
-						{
-							EnableWindow (hwin, (BOOL) wPara);
-						}
-					}
-					hwin = GetWindow (hwin, GW_HWNDNEXT);
-				}
-			}
-			break;
-		/* PA: The WM_CREATE message registers the ghMainWindow (hWin) as a clipboard viewer.
-		*/
-		case WM_CREATE:
-			{
-				gNextClipboardViewer = SetClipboardViewer (hWin);
-			}
-			break;
-		/* PA: The WM_DESTROY message unregisters the ghMainWindow (hWin) as a clipboard viewer.
-		*/
-		case WM_DESTROY:
-			{
-				ChangeClipboardChain (hWin, gNextClipboardViewer);
-			}
-			break;
-		/* PA: other clipboard chain management messages:
-		*/
-		case WM_DRAWCLIPBOARD:
-			{
-				gClipboardCount += 1;
-				if (gNextClipboardViewer != NULL)
-					SendMessage (gNextClipboardViewer, uMess, wPara, lPara);
-
-				return 0;
-			}
-			break;
-		case WM_CHANGECBCHAIN:
-			{
-				if ((HWND)wPara == gNextClipboardViewer)	/* gNextClipboardViewer is no longer a clipboard viewer. */
-					gNextClipboardViewer = (HWND)lPara;		/*	then store the new viewer. */
-				else if (gNextClipboardViewer != NULL)
-					SendMessage (gNextClipboardViewer, uMess, wPara, lPara);
-
-				return 0;
-			}
-			break;
-		/* PA: PM_SOCKET_EVENT and PM_DNS_EVENT are intercepted by MainWindowProcedure.
-				If ghTCPWindow != NULL, then these messages are passed on to ghTCPWindow.
-		*/
-		case PM_SOCKET_EVENT:
-		case PM_DNS_EVENT:
-			{
-				if (ghTCPWindow != NULL)
-					SendMessage (ghTCPWindow, uMess, wPara, lPara);
-
-				return 0;
-			}
-			break;
-		case WM_DDE_INITIATE:
-			{
-				static char apptext[256], topictext[256];
-				ATOM aApp, aTopic;
-/* RWS ... */
-				BOOL handleTopic;
-/* ... RWS */
-				GlobalGetAtomName (HIWORD (lPara), topictext, 256);
-
-				if (lstrcmp (topictext, "CLEANOPEN") == 0)
-/* RWS: compare application name */
-				{
-					GlobalGetAtomName (LOWORD (lPara), apptext, 256);
-					handleTopic	= CompareStringA (LOCALE_USER_DEFAULT, NORM_IGNORECASE,
-									apptext, lstrlen (apptext), gAppName, lstrlen (gAppName)) == 2;	/* 2 means they are equal */
-				}
-				else
-					handleTopic	= FALSE;
-
-				if (handleTopic)
-				{
-/* ... RWS */
-					aApp = GlobalAddAtom (apptext);
-					aTopic = GlobalAddAtom (topictext);
-					SendMessage ((HWND) wPara, WM_DDE_ACK, (WPARAM) hWin, MAKELONG (aApp, aTopic));
-					GlobalDeleteAtom (aApp);
-					GlobalDeleteAtom (aTopic);
-				}
-				else
-				{
-					return DefWindowProc (hWin, uMess, wPara, lPara);
-				}
-			}
-			break;
-		case WM_DDE_EXECUTE:
-			{
-				char *commandstring;
-				char *pcommand;
-				int len;
-				union
-				{
-					DDEACK ddeack;
-					WORD w;
-				}	da;
-
-				pcommand = GlobalLock ((HANDLE) lPara);
-				len = lstrlen (pcommand) + 1;
-				commandstring = rmalloc (len);	/* this pointer is passed to and freed in the Clean code. */
-				lstrcpyn (commandstring, pcommand, len);
-				GlobalUnlock ((HANDLE) lPara);
-
-				SendMessage1ToClean (CcWmDDEEXECUTE, commandstring);
-
-				da.ddeack.bAppReturnCode = 0;
-				da.ddeack.fBusy = 0;
-				da.ddeack.fAck = 1;
-				PostMessage ((HWND) wPara, WM_DDE_ACK, (WPARAM) hWin, PackDDElParam (WM_DDE_ACK, (UINT) da.w, lPara));
-				return 0;
-			}
-			break;
-		case WM_DDE_TERMINATE:
-			{
-				PostMessage ((HWND) wPara, WM_DDE_TERMINATE, (WPARAM) hWin, 0);
-			} return 0;
-		default:
-			return DefWindowProc (hWin, uMess, wPara, lPara);
-			break;
-	}
-	return 0;
-}	/*	MainWindowProcedure */
-
-
-BOOL TranslateKeyboardMessage (MSG * pmsg)
-{
-	int c;
-	UINT msg;
-
-	c   = 0;
-	msg = pmsg->message;
-	if (msg==WM_SYSKEYDOWN || msg==WM_KEYDOWN)
-	{
-		c = CheckVirtualKeyCode ((int) pmsg->wParam);
-	}
-	if (c)
-	{
-		gStoredMess = *pmsg;
-		gStoredMess.wParam = (WPARAM) c;
-
-		if (pmsg->message == WM_SYSKEYDOWN)
-			gStoredMess.message = WM_SYSCHAR;
-		else
-			gStoredMess.message = WM_CHAR;
-
-		gMessStored = TRUE;
-		return TRUE;
-	}
-	else
-		return TranslateMessage (pmsg);
-}
-
 /*	EndSuspendTimerProc is the parameter of the SetTimer procedure used 
 	in GetMessageQuickly to set a positive timer interval.
 	The WaitMessage routine suspends the OS thread until an interesting
@@ -512,13 +204,13 @@ BOOL TranslateKeyboardMessage (MSG * pmsg)
 	EndSuspendTimerProc is called, which kills the timer and informs
 	Clean about the timer event. 
 */
-VOID CALLBACK EndSuspendTimerProc (HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime )
+static VOID CALLBACK EndSuspendTimerProc (HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime )
 {
 	KillTimer (ghMainWindow, (UINT) -2);
 	SendMessage0ToClean (CcWmIDLETIMER);
 };
 
-int GetMessageQuickly (BOOL gIdleTimerOn, int gSleeptime, MSG * pmsg)
+static int GetMessageQuickly (BOOL gIdleTimerOn, int gSleeptime, MSG * pmsg)
 {
 	if (gMessStored)
 	{
@@ -577,8 +269,38 @@ int GetMessageQuickly (BOOL gIdleTimerOn, int gSleeptime, MSG * pmsg)
 			return TRUE;
 		}
 	}
-}
+}	/* GetMessageQuickly */
 
+
+
+//	TranslateKeyboardMessage is used by HandleCleanRequest only. 
+static BOOL TranslateKeyboardMessage (MSG * pmsg)
+{
+	int c;
+	UINT msg;
+
+	c   = 0;
+	msg = pmsg->message;
+	if (msg==WM_SYSKEYDOWN || msg==WM_KEYDOWN)
+	{
+		c = CheckVirtualKeyCode ((int) pmsg->wParam);
+	}
+	if (c)
+	{
+		gStoredMess = *pmsg;
+		gStoredMess.wParam = (WPARAM) c;
+
+		if (pmsg->message == WM_SYSKEYDOWN)
+			gStoredMess.message = WM_SYSCHAR;
+		else
+			gStoredMess.message = WM_CHAR;
+
+		gMessStored = TRUE;
+		return TRUE;
+	}
+	else
+		return TranslateMessage (pmsg);
+}	/* TranslateKeyboardMessage */
 
 void HandleCleanRequest (CrossCallInfo * pcci)
 {
@@ -640,7 +362,7 @@ void HandleCleanRequest (CrossCallInfo * pcci)
 			}
 	}
 	KickCleanThread (pcci);
-}
+}	/* HandleCleanRequest */
 
 
 BOOL CleanThreadRunning (void)
@@ -668,7 +390,7 @@ void WinInitOs (Bool * ok, OS * os)
 	}
 
 	*os = 54321;
-}
+}	/* WinInitOs */
 
 Bool WinCloseOs (OS os)
 {
@@ -683,7 +405,20 @@ Bool WinCloseOs (OS os)
 		rprintf ("WCO: return FALSE\n");
 		return FALSE;
 	}
-}
+}	/* WinCloseOs */
+
+/*	InitGlobals is used by WinStartOSThread only. */
+static void InitGlobals (void)
+{
+	LOGFONT lf;
+	
+	//	Globally, we create a logical font that is used in all controls. 
+	SetLogFontData (&lf, "MS Sans Serif", 0, 8);
+	gControlFont = CreateFontIndirect (&lf);
+
+	//	The cross call procedure table is set to the empty table.
+	gCrossCallProcedureTable = EmptyCrossCallProcedureTable ();
+}	/* InitGlobals */
 
 OS WinStartOsThread (OS os)
 {
@@ -717,7 +452,7 @@ OS WinStartOsThread (OS os)
 	rprintf ("WSOT: wait done\n");
 
 	return os;
-}
+}	/* WinStartOSThread */
 
 OS WinKillOsThread (OS os)
 {
@@ -757,7 +492,7 @@ OS WinKillOsThread (OS os)
 // ... MW
 
 	return os;
-}
+}	/* WinKillOsThread*/
 
 void WinKickOsThread (int imess,
 					  int ip1, int ip2, int ip3,
@@ -769,7 +504,6 @@ void WinKickOsThread (int imess,
 					  OS * oos
 					 )
 {
-
 /*	rprintf("KOT: filling in Cci\n"); */
 	rprintf ("WinKickOsThread (");
 	printCCI (&gCci);
@@ -817,7 +551,7 @@ void WinKickOsThread (int imess,
 		*oos = ios;
 	}
 	rprintf ("KOT: done.\n");
-}
+}	/* WinKickOsThread */
 
 #define PRINTCROSSCALLS
 
@@ -905,7 +639,7 @@ void KickCleanThread (CrossCallInfo * pcci)
 		rprintf (">\n");
 	}
 #endif
-}
+}	/* KickCleanThread */
 
 void SendMessageToClean (int mess, int p1, int p2, int p3, int p4, int p5, int p6)
 {
@@ -924,92 +658,16 @@ void SendMessageToClean (int mess, int p1, int p2, int p3, int p4, int p5, int p
 	}
 }
 
-extern double c_div_real (double n, double d);
-extern int c_ftoi (double d);
-
-DWORD OsThreadFunction (DWORD param)
-{
-	WNDCLASS wclass;
-	int width, height;
-	HMENU mainSystemMenu;
-
-	/* register main window class */
-	wclass.style         = CS_NOCLOSE;
-	wclass.lpfnWndProc   = (WNDPROC) MainWindowProcedure;
-	wclass.cbClsExtra    = 0;
-	wclass.cbWndExtra    = 0;
-	wclass.hInstance     = ghInst;
-	wclass.hIcon         = LoadIcon (ghInst, IDI_APPLICATION);
-	wclass.hCursor       = LoadCursor (ghInst, IDC_ARROW);
-	wclass.hbrBackground = NULL;
-	wclass.lpszMenuName  = NULL;
-	wclass.lpszClassName = MainWindowClassName;
-	RegisterClass (&wclass);
-
-	GetAppFileName ();
-
-	width  =     GetSystemMetrics (SM_CXMAXIMIZED) - 2 * GetSystemMetrics (SM_CXSIZEFRAME);
-	height = 2 * GetSystemMetrics (SM_CYSIZEFRAME) + GetSystemMetrics (SM_CYCAPTION) + GetSystemMetrics (SM_CYMENU);
-
-	ghMainWindow
-		= CreateWindow (MainWindowClassName,	/* Class name					 */
-						(LPCTSTR) gAppName, 	/* Window title 				 */
-						WS_OVERLAPPEDWINDOW,	/* style flags					 */
-						0, -5 - height,			/* x, y 						 */
-						width, height,			/* width, height 				 */
-						NULL,					/* Parent window				 */
-						NULL,					/* menu handle					 */
-						(HANDLE) ghInst,		/* Instance that owns the window */
-						0);
-	/*	Don't show the main window. This will result in one button less in the taskbar.
-	ShowWindow (ghMainWindow, SW_SHOWNORMAL);
-	*/
-	/*	Before creating Clean controls, the tooltip control is created as the topmost child of this window. */
-	ghwndTT = CreateWindowEx (	WS_EX_TOPMOST,					// Apply the topmost style for this window
-								TOOLTIPS_CLASS,					// Class name
-								NULL,							// Title (NULL)
-								WS_POPUP | TTS_ALWAYSTIP,		// Style *must* be WS_POPUP
-								CW_USEDEFAULT,					// Default position (x,y)
-								CW_USEDEFAULT,
-								CW_USEDEFAULT,					// Default size (w,h)
-								CW_USEDEFAULT,
-								ghMainWindow,					// Parent is the ghMainWindow
-								(HMENU) NULL,					// No menu
-								(HANDLE) ghInst,				// The instance
-								NULL							// No window creation data
-							 );
-	
-	mainSystemMenu = GetSystemMenu (ghMainWindow,FALSE);
-	RemoveMenu (mainSystemMenu, SC_RESTORE,  MF_BYCOMMAND);
-	RemoveMenu (mainSystemMenu, SC_MOVE,     MF_BYCOMMAND);
-	RemoveMenu (mainSystemMenu, SC_SIZE,     MF_BYCOMMAND);
-	RemoveMenu (mainSystemMenu, SC_MINIMIZE, MF_BYCOMMAND);
-	RemoveMenu (mainSystemMenu, SC_MAXIMIZE, MF_BYCOMMAND);
-	DrawMenuBar (ghMainWindow);
-
-	KickCleanThread (MakeReturn0Cci (&gCci));
-
-	while (1)
-	{
-		HandleCleanRequest (&gCci);
-	}
-
-	MakeReturn0Cci (&gCci);
-	SetEvent (gOS_DONE);
-
-	return 0;
-}
-
 CrossCallInfo *MakeReturn0Cci (CrossCallInfo * pcci)
 {
 	pcci->mess = CcRETURN0;
 	return pcci;
 }
 
-CrossCallInfo *MakeReturn1Cci (CrossCallInfo * pcci, int v)
+CrossCallInfo *MakeReturn1Cci (CrossCallInfo * pcci, int v1)
 {
 	pcci->mess = CcRETURN1;
-	pcci->p1 = v;
+	pcci->p1 = v1;
 	return pcci;
 }
 
@@ -1072,52 +730,351 @@ BOOL IsReturnCci (CrossCallInfo * pcci)
 }
 
 
-CLEAN_STRING WinGetModulePath (void)
+extern double c_div_real (double n, double d);
+extern int c_ftoi (double d);
+
+//	GetAppFileName used by OsThreadFunction only. 
+static void GetAppFileName (void)
 {
 	char path[MAX_PATH + 1];
+	int length, index;
+	int start, end;
+	BOOL newword;
 
-	GetModuleFileName (NULL, path, MAX_PATH);
+	length = GetModuleFileName (NULL, path, MAX_PATH);
 
-	return cleanstring (path);
-}
+	for (index = length - 1; path[index] != '.'; index--)
+		;
+	end = index - 1;
 
-void WinFileModifiedDate (CLEAN_STRING name, Bool *exists, int *yy, int *mm, int *dd, int *h, int *m, int *s)
-{
-	char *file_name;
-	HANDLE handle;
-	WIN32_FIND_DATA find_data;
+	for (index = end;
+		 path[index] != '/' &&
+		 path[index] != '\\' &&
+		 path[index] != ':';
+		 index--)
+		;
 
-	file_name = cstring (name);
+	start = index + 1;
 
-	handle = FindFirstFile (file_name, &find_data);
+	if (end - start > 31)
+		end = start + 31;
 
-	if (handle != INVALID_HANDLE_VALUE)
+	if (end - start >= 0)
 	{
-		SYSTEMTIME system_time;
-
-		FindClose (handle);
-
-		if (FileTimeToSystemTime (&find_data.ftLastWriteTime, &system_time))
-		{
-			*exists = TRUE;
-			*yy = system_time.wYear;
-			*mm = system_time.wMonth;
-			*dd = system_time.wDay;
-			*h = system_time.wHour;
-			*m = system_time.wMinute;
-			*s = system_time.wSecond;
-			return;
-		}
+		gAppName = rmalloc (end - start + 2);
+		for (index = 0; index <= end - start; index++)
+			gAppName[index] = path[start + index];
+		gAppName[index] = '\0';
+	}
+	else
+	{
+		gAppName = "Clean Application";
 	}
 
-	*exists = FALSE;
-	*yy = 0;
-	*mm = 0;
-	*dd = 0;
-	*h = 0;
-	*m = 0;
-	*s = 0;
+	newword = TRUE;
+	for (index = 0; gAppName[index] != '\0'; index++)
+	{
+		if (gAppName[index] >= 'A' && gAppName[index] <= 'Z' && !newword)
+			gAppName[index] = gAppName[index] - ('A' - 'a');
+
+		if (gAppName[index] == ' ')
+			newword = TRUE;
+		else
+			newword = FALSE;
+	}
 }
+
+/*	Registered Windows main window class name.
+*/
+static char MainWindowClassName[] = "__CleanMainWindow";	/* Class for main window (ghMainWindow). */
+
+
+/*	The callback routine for the main window.
+	PA: The WM_CREATE  message registers the main window as a clipboard viewer. 
+		The WM_DESTROY message unregisters the main window. 
+*/
+static LRESULT CALLBACK MainWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara, LPARAM lPara)
+{
+	printMessage ("Main Window", hWin, uMess, wPara, lPara);
+	switch (uMess)
+	{
+		case WM_NCPAINT:
+			break;
+		case WM_ACTIVATEAPP:
+			{
+				if (wPara)
+				{
+					gAppRunning = TRUE;
+				}
+				else
+				{
+					gAppRunning = FALSE;
+				}
+			}
+			break;
+		/*	WM_ENTERIDLE message is used to let Clean evaluate the initialisation action
+			of a modal dialog by sending the CcWmIDLEDIALOG message.
+		*/
+		case WM_ENTERIDLE:
+			{
+				HWND hwndModalDialog;
+				
+				hwndModalDialog = (HWND)lPara;
+
+				if (wPara == MSGF_DIALOGBOX && hwndModalDialog != ghwndLastModalDialog)
+				{
+					SendMessage1ToClean (CcWmIDLEDIALOG,(int)hwndModalDialog);
+					ghwndLastModalDialog = hwndModalDialog;
+				}
+				else
+				{
+					SendMessage0ToClean (CcWmIDLETIMER);
+				}
+				return 0;
+			}
+			break;
+		case WM_TIMER:
+			{
+				SendMessage2ToClean (CcWmTIMER, wPara, GetMessageTime ());
+			}
+			break;
+		case WM_ENABLE:
+			{
+				HWND hwin;
+				char title[64];
+
+				hwin = GetWindow (ghMainWindow, GW_HWNDFIRST);
+				while (hwin != NULL)
+				{
+					GetWindowText (hwin, title, 63);
+
+					if (GetWindow (hwin, GW_OWNER) == ghMainWindow)
+					{
+						RECT r;
+						GetWindowRect (hwin, &r);
+						if (r.top != -1 || r.left != -1 || r.right != 0 || r.bottom != 0)
+						{
+							EnableWindow (hwin, (BOOL) wPara);
+						}
+					}
+					hwin = GetWindow (hwin, GW_HWNDNEXT);
+				}
+			}
+			break;
+		/* The WM_CREATE message registers the ghMainWindow (hWin) as a clipboard viewer.
+		*/
+		case WM_CREATE:
+			{
+				gNextClipboardViewer = SetClipboardViewer (hWin);
+			}
+			break;
+		/* The WM_DESTROY message unregisters the ghMainWindow (hWin) as a clipboard viewer.
+		*/
+		case WM_DESTROY:
+			{
+				ChangeClipboardChain (hWin, gNextClipboardViewer);
+			}
+			break;
+		/* Other clipboard chain management messages:
+		*/
+		case WM_DRAWCLIPBOARD:
+			{
+				gClipboardCount += 1;
+				if (gNextClipboardViewer != NULL)
+					SendMessage (gNextClipboardViewer, uMess, wPara, lPara);
+
+				return 0;
+			}
+			break;
+		case WM_CHANGECBCHAIN:
+			{
+				if ((HWND)wPara == gNextClipboardViewer)	/* gNextClipboardViewer is no longer a clipboard viewer. */
+					gNextClipboardViewer = (HWND)lPara;		/*	then store the new viewer. */
+				else if (gNextClipboardViewer != NULL)
+					SendMessage (gNextClipboardViewer, uMess, wPara, lPara);
+
+				return 0;
+			}
+			break;
+		/*	PM_SOCKET_EVENT and PM_DNS_EVENT are intercepted by MainWindowProcedure.
+			If ghTCPWindow != NULL, then these messages are passed on to ghTCPWindow.
+		*/
+		case PM_SOCKET_EVENT:
+		case PM_DNS_EVENT:
+			{
+				if (ghTCPWindow != NULL)
+					SendMessage (ghTCPWindow, uMess, wPara, lPara);
+
+				return 0;
+			}
+			break;
+		case WM_DDE_INITIATE:
+			{
+				static char apptext[256], topictext[256];
+				ATOM aApp, aTopic;
+/* RWS ... */
+				BOOL handleTopic;
+/* ... RWS */
+				GlobalGetAtomName (HIWORD (lPara), topictext, 256);
+
+				if (lstrcmp (topictext, "CLEANOPEN") == 0)
+/* RWS: compare application name */
+				{
+					GlobalGetAtomName (LOWORD (lPara), apptext, 256);
+					handleTopic	= CompareStringA (LOCALE_USER_DEFAULT, NORM_IGNORECASE,
+									apptext, lstrlen (apptext), gAppName, lstrlen (gAppName)) == 2;	/* 2 means they are equal */
+				}
+				else
+					handleTopic	= FALSE;
+
+				if (handleTopic)
+				{
+/* ... RWS */
+					aApp = GlobalAddAtom (apptext);
+					aTopic = GlobalAddAtom (topictext);
+					SendMessage ((HWND) wPara, WM_DDE_ACK, (WPARAM) hWin, MAKELONG (aApp, aTopic));
+					GlobalDeleteAtom (aApp);
+					GlobalDeleteAtom (aTopic);
+				}
+				else
+				{
+					return DefWindowProc (hWin, uMess, wPara, lPara);
+				}
+			}
+			break;
+		case WM_DDE_EXECUTE:
+			{
+				char *commandstring;
+				char *pcommand;
+				int len;
+				union
+				{
+					DDEACK ddeack;
+					WORD w;
+				}	da;
+
+				pcommand = GlobalLock ((HANDLE) lPara);
+				len = lstrlen (pcommand) + 1;
+				commandstring = rmalloc (len);	/* this pointer is passed to and freed in the Clean code. */
+				lstrcpyn (commandstring, pcommand, len);
+				GlobalUnlock ((HANDLE) lPara);
+
+				SendMessage1ToClean (CcWmDDEEXECUTE, commandstring);
+
+				da.ddeack.bAppReturnCode = 0;
+				da.ddeack.fBusy = 0;
+				da.ddeack.fAck = 1;
+				PostMessage ((HWND) wPara, WM_DDE_ACK, (WPARAM) hWin, PackDDElParam (WM_DDE_ACK, (UINT) da.w, lPara));
+				return 0;
+			}
+			break;
+		case WM_DDE_TERMINATE:
+			{
+				PostMessage ((HWND) wPara, WM_DDE_TERMINATE, (WPARAM) hWin, 0);
+			} return 0;
+		default:
+			return DefWindowProc (hWin, uMess, wPara, lPara);
+			break;
+	}
+	return 0;
+}	/*	MainWindowProcedure */
+
+DWORD OsThreadFunction (DWORD param)
+{
+	WNDCLASSEX wclass;
+	int width, height;
+	HMENU mainSystemMenu;
+
+	/* register main window class */
+	wclass.cbSize        = sizeof (WNDCLASSEX);
+	wclass.style         = CS_NOCLOSE;
+	wclass.lpfnWndProc   = (WNDPROC) MainWindowProcedure;
+	wclass.cbClsExtra    = 0;
+	wclass.cbWndExtra    = 0;
+	wclass.hInstance     = ghInst;
+	wclass.hIcon         = LoadIcon (ghInst, IDI_APPLICATION);
+	wclass.hCursor       = LoadCursor (ghInst, IDC_ARROW);
+	wclass.hbrBackground = NULL;
+	wclass.lpszMenuName  = NULL;
+	wclass.lpszClassName = MainWindowClassName;
+	wclass.hIconSm       = NULL;
+	RegisterClassEx (&wclass);
+
+	GetAppFileName ();
+
+	width  =     GetSystemMetrics (SM_CXMAXIMIZED) - 2 * GetSystemMetrics (SM_CXSIZEFRAME);
+	height = 2 * GetSystemMetrics (SM_CYSIZEFRAME) + GetSystemMetrics (SM_CYCAPTION) + GetSystemMetrics (SM_CYMENU);
+
+	ghMainWindow
+		= CreateWindow (MainWindowClassName,	/* Class name					 */
+						(LPCTSTR) gAppName, 	/* Window title 				 */
+						WS_OVERLAPPEDWINDOW,	/* style flags					 */
+						0, -5 - height,			/* x, y 						 */
+						width, height,			/* width, height 				 */
+						NULL,					/* Parent window				 */
+						NULL,					/* menu handle					 */
+						(HANDLE) ghInst,		/* Instance that owns the window */
+						0);
+	/*	Don't show the main window. This will result in one button less in the taskbar.
+	ShowWindow (ghMainWindow, SW_SHOWNORMAL);
+	*/
+	/*	Before creating Clean controls, the tooltip control is created as the topmost child of this window. */
+	ghwndTT = CreateWindowEx (	WS_EX_TOPMOST,					// Apply the topmost style for this window
+								TOOLTIPS_CLASS,					// Class name
+								NULL,							// Title (NULL)
+								WS_POPUP | TTS_ALWAYSTIP,		// Style *must* be WS_POPUP
+								CW_USEDEFAULT,					// Default position (x,y)
+								CW_USEDEFAULT,
+								CW_USEDEFAULT,					// Default size (w,h)
+								CW_USEDEFAULT,
+								ghMainWindow,					// Parent is the ghMainWindow
+								(HMENU) NULL,					// No menu
+								(HANDLE) ghInst,				// The instance
+								NULL							// No window creation data
+							 );
+	
+	mainSystemMenu = GetSystemMenu (ghMainWindow,FALSE);
+	RemoveMenu (mainSystemMenu, SC_RESTORE,  MF_BYCOMMAND);
+	RemoveMenu (mainSystemMenu, SC_MOVE,     MF_BYCOMMAND);
+	RemoveMenu (mainSystemMenu, SC_SIZE,     MF_BYCOMMAND);
+	RemoveMenu (mainSystemMenu, SC_MINIMIZE, MF_BYCOMMAND);
+	RemoveMenu (mainSystemMenu, SC_MAXIMIZE, MF_BYCOMMAND);
+	DrawMenuBar (ghMainWindow);
+
+	KickCleanThread (MakeReturn0Cci (&gCci));
+
+	while (1)
+	{
+		HandleCleanRequest (&gCci);
+	}
+
+	MakeReturn0Cci (&gCci);
+	SetEvent (gOS_DONE);
+
+	return 0;
+}	/* OsThreadFunction */
+
+
+PSTR WinGetAppPath (void)
+{
+	char *path;
+	int idx, length;
+
+	path = rmalloc (261);
+
+	length = GetModuleFileName (NULL, path, 260);
+
+	for (idx = length - 1;
+		 path[idx] != '/' &&
+		 path[idx] != '\\' &&
+		 path[idx] != ':';
+		 idx--)
+		;
+
+	path[idx + 1] = 0;
+
+	return path;	/* relying on the calling clean function to de-allocate path. */
+}	/* WinGetAppPath */
 
 Bool WinFileExists (CLEAN_STRING name)
 {
@@ -1137,7 +1094,7 @@ Bool WinFileExists (CLEAN_STRING name)
 	}
 	else
 		return FALSE;
-}
+}	/* WinFileExists */
 
 void WinCallProcess (PSTR commandline,
 					 PSTR env,
@@ -1388,7 +1345,7 @@ void WinCallProcess (PSTR commandline,
 
 	rprintf ("WCP: returning\n");
 	/* *oos = ios; */
-}
+}	/* WinCallProcess */
 
 void WinLaunchApp (CLEAN_STRING commandline, BOOL console, OS ios, Bool * success, OS * oos)
 {
@@ -1461,7 +1418,7 @@ void WinLaunchApp (CLEAN_STRING commandline, BOOL console, OS ios, Bool * succes
 	*success = fsuccess;
 	*oos = ios;
 	rprintf ("WLA: done...\n");
-}
+}	/* WinLaunchApp */
 
 /*	New version of WinLaunchApp. In addition to the commandline, it gets a directory argument.
 */
@@ -1524,5 +1481,52 @@ void WinLaunchApp2 (CLEAN_STRING commandline, CLEAN_STRING pathname, BOOL consol
 	*success = fsuccess;
 	*oos = ios;
 	rprintf ("WLA2: done...\n");
-}
-/*	End of addition. */
+}	/* WinLaunchApp2 */
+
+
+CLEAN_STRING WinGetModulePath (void)
+{
+	char path[MAX_PATH + 1];
+
+	GetModuleFileName (NULL, path, MAX_PATH);
+
+	return cleanstring (path);
+}	/* WinGetModulePath */
+
+void WinFileModifiedDate (CLEAN_STRING name, Bool *exists, int *yy, int *mm, int *dd, int *h, int *m, int *s)
+{
+	char *file_name;
+	HANDLE handle;
+	WIN32_FIND_DATA find_data;
+
+	file_name = cstring (name);
+
+	handle = FindFirstFile (file_name, &find_data);
+
+	if (handle != INVALID_HANDLE_VALUE)
+	{
+		SYSTEMTIME system_time;
+
+		FindClose (handle);
+
+		if (FileTimeToSystemTime (&find_data.ftLastWriteTime, &system_time))
+		{
+			*exists = TRUE;
+			*yy = system_time.wYear;
+			*mm = system_time.wMonth;
+			*dd = system_time.wDay;
+			*h = system_time.wHour;
+			*m = system_time.wMinute;
+			*s = system_time.wSecond;
+			return;
+		}
+	}
+
+	*exists = FALSE;
+	*yy = 0;
+	*mm = 0;
+	*dd = 0;
+	*h = 0;
+	*m = 0;
+	*s = 0;
+}	/* WinFileModifiedDate */

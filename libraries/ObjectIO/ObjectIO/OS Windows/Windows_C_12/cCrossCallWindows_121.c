@@ -39,7 +39,7 @@ struct LocalWindowData
 
 typedef struct LocalWindowData *LocalWindowData;
 
-LocalWindowData AllocateLocalWindowData ()
+static LocalWindowData AllocateLocalWindowData (void)
 {
 	LocalWindowData lwd_wdata;
 
@@ -52,15 +52,15 @@ LocalWindowData AllocateLocalWindowData ()
 
 /*	DestroyLocalWindowData (wdata) frees the memory used by the wdata. 
 */
-void DestroyLocalWindowData (LocalWindowData wdata)
+static void DestroyLocalWindowData (LocalWindowData wdata)
 {
 	rfree (wdata);
 }
 
-
-/*	IsSDIDocumentWindow (hwnd)
-	returns TRUE if the class name of hwnd is SDIWindowClassName.
-*/
+/* PA: The following two procedures do not seem to be used anymore.
+//	IsSDIDocumentWindow (hwnd)
+//	returns TRUE if the class name of hwnd is SDIWindowClassName.
+//
 BOOL IsSDIDocumentWindow (HWND hwnd)
 {
 	char *classname;
@@ -78,9 +78,9 @@ BOOL IsSDIDocumentWindow (HWND hwnd)
 	return isSDI;
 }
 
-/*	IsMDIDocumentWindow (hwnd)
-	returns TRUE if the class name of hwnd is MDIWindowClassName.
-*/
+//	IsMDIDocumentWindow (hwnd)
+//	returns TRUE if the class name of hwnd is MDIWindowClassName.
+//
 BOOL IsMDIDocumentWindow (HWND hwnd)
 {
 	char *classname;
@@ -97,12 +97,13 @@ BOOL IsMDIDocumentWindow (HWND hwnd)
 
 	return isMDI;
 }
+*/
 
 
 /*	Find the first non CompoundControl parent window of the argument
 	hwnd. This procedure assumes that hwnd is the handle of a control. 
 */
-HWND GetControlParent (HWND hwndControl)
+static HWND GetControlParent (HWND hwndControl)
 {
 	HWND parent;
 	char *parentclassname;
@@ -113,7 +114,7 @@ HWND GetControlParent (HWND hwndControl)
 	parentclassname = rmalloc (classnamelength);
 	GetClassName (parent, parentclassname, classnamelength);
 
-	while (nstrequal (classnamelength, parentclassname, CompoundControlClassName))
+	while (nstrequal (classnamelength-1, parentclassname, CompoundControlClassName))
 	{
 		parent = GetParent (parent);
 		GetClassName (parent,parentclassname,classnamelength);
@@ -127,7 +128,7 @@ HWND GetControlParent (HWND hwndControl)
 	a Dialog then NULL is returned. 
 	This procedure assumes that hwnd is the handle of a control.
 */
-HWND GetControlParentDialog (HWND hwndControl)
+static HWND GetControlParentDialog (HWND hwndControl)
 {
 	HWND parent;
 	char *parentclassname;
@@ -153,9 +154,9 @@ HWND GetControlParentDialog (HWND hwndControl)
 }
 
 
-BOOL CALLBACK SetControlFontProc (HWND hchild,		/* handle to child window */
-								  LPARAM lParam		/* application-defined value */
-								 )
+static BOOL CALLBACK SetControlFontProc (HWND hchild,		/* handle to child window */
+										 LPARAM lParam		/* application-defined value */
+										)
 {
 	HFONT hfont;
 
@@ -174,7 +175,7 @@ BOOL CALLBACK SetControlFontProc (HWND hchild,		/* handle to child window */
 /*********************************************************************************************
 	The callback routine for a modal/modeless dialog box.
 *********************************************************************************************/
-BOOL CALLBACK DialogProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+static BOOL CALLBACK DialogProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	printMessage ("Dialog procedure", hwnd, message, wParam, lParam);
 
@@ -493,7 +494,7 @@ BOOL CALLBACK DialogProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
 /*********************************************************************************************
 	The callback routine for a custom control.
 *********************************************************************************************/
-LRESULT CALLBACK CustomControlProcedure (HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
+static LRESULT CALLBACK CustomControlProcedure (HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 {
 	printMessage ("CustomControlProcedure", hwnd, uMess, wParam, lParam);
 	switch (uMess)
@@ -678,7 +679,7 @@ LRESULT CALLBACK CustomControlProcedure (HWND hwnd, UINT uMess, WPARAM wParam, L
 /*********************************************************************************************
 	The callback routine for a compound control.
 *********************************************************************************************/
-LRESULT CALLBACK CompoundControlProcedure (HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
+static LRESULT CALLBACK CompoundControlProcedure (HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 {
 	printMessage ("CompoundControlProcedure", hwnd, uMess, wParam, lParam);
 	switch (uMess)
@@ -742,14 +743,13 @@ LRESULT CALLBACK CompoundControlProcedure (HWND hwnd, UINT uMess, WPARAM wParam,
 				HDC hdc;
 				PAINTSTRUCT ps;
 
-			//	if (GetUpdateRect(hwnd,NULL,FALSE))	// determine if there is really an update area. 
-			//	{
-				parentwindow = GetControlParent (hwnd);
-				
-				hdc = BeginPaint (hwnd, &ps);
-				SendMessage3ToClean (CcWmDRAWCONTROL, parentwindow, hwnd, hdc);
-				EndPaint (hwnd, &ps);
-			//	}
+				if (GetUpdateRect(hwnd,NULL,FALSE))	// determine if there is really an update area. 
+				{
+					parentwindow = GetControlParent (hwnd);
+					hdc = BeginPaint (hwnd, &ps);
+					SendMessage3ToClean (CcWmDRAWCONTROL, parentwindow, hwnd, hdc);
+					EndPaint (hwnd, &ps);
+				}
 				
 				return 0;
 			} break;
@@ -1080,7 +1080,7 @@ LRESULT CALLBACK CompoundControlProcedure (HWND hwnd, UINT uMess, WPARAM wParam,
 	SetFocus/KillFocus events are passed to Clean as Activate and Deactivate events. 
 	All other events are handled as a standard windows edit control. 
 *********************************************************************************************/
-LRESULT CALLBACK EditControlProcedure (HWND hwnd,UINT uMess,WPARAM wParam,LPARAM lParam)
+static LRESULT CALLBACK EditControlProcedure (HWND hwnd,UINT uMess,WPARAM wParam,LPARAM lParam)
 {
 	LRESULT stdresult;
 
@@ -1245,7 +1245,7 @@ LRESULT CALLBACK EditControlProcedure (HWND hwnd,UINT uMess,WPARAM wParam,LPARAM
 	SetFocus/KillFocus events are passed to Clean as Activate and Deactivate events. 
 	All other events are handled as a standard windows edit control. 
 *********************************************************************************************/
-LRESULT CALLBACK SimpleEditControlProcedure (HWND hwnd,UINT uMess,WPARAM wParam,LPARAM lParam)
+static LRESULT CALLBACK SimpleEditControlProcedure (HWND hwnd,UINT uMess,WPARAM wParam,LPARAM lParam)
 {
 	LRESULT stdresult;
 
@@ -1321,7 +1321,7 @@ LRESULT CALLBACK SimpleEditControlProcedure (HWND hwnd,UINT uMess,WPARAM wParam,
 	would, but in addition it also sends each keyboard input to Clean.
 	All other events are handled as a standard windows pop up control. 
 *********************************************************************************************/
-LRESULT CALLBACK PopUpControlProcedure (HWND hwnd,UINT uMess,WPARAM wParam,LPARAM lParam)
+static LRESULT CALLBACK PopUpControlProcedure (HWND hwnd,UINT uMess,WPARAM wParam,LPARAM lParam)
 {
 	LRESULT stdresult;
 
@@ -1443,7 +1443,7 @@ LRESULT CALLBACK PopUpControlProcedure (HWND hwnd,UINT uMess,WPARAM wParam,LPARA
 	The callback routine handles all events for the client window of a SDI window.
 	The accelerator table is now managed by its parent SDI frame window callback routine.
 *********************************************************************************************/
-LRESULT CALLBACK SDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lPara)
+static LRESULT CALLBACK SDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lPara)
 {
 	printMessage ("Clean SDI Window", hWin, uMess, wPara, lPara);
 	switch (uMess)
@@ -1829,15 +1829,13 @@ LRESULT CALLBACK SDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lP
 						} break;
 					case ODT_BUTTON:
 						{
-							{
-								SendMessage3ToClean (CcWmDRAWCONTROL, hWin, lpdis->hwndItem, lpdis->hDC);
-								 
-								if (lpdis->itemState & ODS_SELECTED)
-									InvertRect (lpdis->hDC, &lpdis->rcItem);
-								
-								if (lpdis->itemState & ODS_FOCUS)
-									DrawFocusRect (lpdis->hDC, &lpdis->rcItem);
-							};
+							SendMessage3ToClean (CcWmDRAWCONTROL, hWin, lpdis->hwndItem, lpdis->hDC);
+							 
+							if (lpdis->itemState & ODS_SELECTED)
+								InvertRect (lpdis->hDC, &lpdis->rcItem);
+							
+							if (lpdis->itemState & ODS_FOCUS)
+								DrawFocusRect (lpdis->hDC, &lpdis->rcItem);
 							return TRUE;
 						} break;
 				}
@@ -1856,7 +1854,7 @@ LRESULT CALLBACK SDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lP
 		these do not work well when dialogs are involved. Instead WM_NCACTIVATE messages are 
 		checked.
 *********************************************************************************************/
-LRESULT CALLBACK MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lPara)
+static LRESULT CALLBACK MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lPara)
 {
 	printMessage ("Clean MDI Doc Window",hWin,uMess,wPara,lPara);
 	switch (uMess)
@@ -2272,15 +2270,13 @@ LRESULT CALLBACK MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lP
 						} break;
 					case ODT_BUTTON:
 						{
-							{
-								SendMessage3ToClean (CcWmDRAWCONTROL, hWin, lpdis->hwndItem, lpdis->hDC);
-								 
-								if (lpdis->itemState & ODS_SELECTED)
-									InvertRect (lpdis->hDC, &lpdis->rcItem);
-								
-								if (lpdis->itemState & ODS_FOCUS)
-									DrawFocusRect (lpdis->hDC, &lpdis->rcItem);
-							};
+							SendMessage3ToClean (CcWmDRAWCONTROL, hWin, lpdis->hwndItem, lpdis->hDC);
+							 
+							if (lpdis->itemState & ODS_SELECTED)
+								InvertRect (lpdis->hDC, &lpdis->rcItem);
+							
+							if (lpdis->itemState & ODS_FOCUS)
+								DrawFocusRect (lpdis->hDC, &lpdis->rcItem);
 							return TRUE;
 						} break;
 				}
@@ -3520,11 +3516,12 @@ void EvalCcRqDELCONTROLTIP (CrossCallInfo *pcci) /* parentPtr, controlPtr; no re
 
 /*	Initialisation:
 */
-void InitialiseCrossCallWindows ()
+void InitialiseCrossCallWindows (void)
 {
-	WNDCLASS wclass;
+	WNDCLASSEX wclass;
 	
 	/* register custom control class */
+	wclass.cbSize        = sizeof (WNDCLASSEX);
 	wclass.style         = CS_NOCLOSE | CS_PARENTDC;
 	wclass.lpfnWndProc   = (WNDPROC) CustomControlProcedure;
 	wclass.cbClsExtra    = 0;
@@ -3535,9 +3532,11 @@ void InitialiseCrossCallWindows ()
 	wclass.hbrBackground = (HBRUSH) (COLOR_BTNFACE + 1);
 	wclass.lpszMenuName  = NULL;
 	wclass.lpszClassName = CustomControlClassName;
-	RegisterClass (&wclass);
+	wclass.hIconSm       = NULL;
+	RegisterClassEx (&wclass);
 
 	/* register clean compound control class */
+	wclass.cbSize        = sizeof (WNDCLASSEX);
 	wclass.style         = CS_PARENTDC;
 	wclass.lpfnWndProc   = (WNDPROC) CompoundControlProcedure;
 	wclass.cbClsExtra    = 0;
@@ -3548,9 +3547,11 @@ void InitialiseCrossCallWindows ()
 	wclass.hbrBackground = (HBRUSH) (COLOR_BTNFACE + 1);//(NULL_BRUSH);
 	wclass.lpszMenuName  = NULL;
 	wclass.lpszClassName = CompoundControlClassName;
-	RegisterClass (&wclass);
+	wclass.hIconSm       = NULL;
+	RegisterClassEx (&wclass);
 
 	/* register clean SDI window class */
+	wclass.cbSize        = sizeof (WNDCLASSEX);
 	wclass.style         = 0;
 	wclass.lpfnWndProc   = (WNDPROC) SDIWindowProcedure;
 	wclass.cbClsExtra    = 0;
@@ -3561,9 +3562,11 @@ void InitialiseCrossCallWindows ()
 	wclass.hbrBackground = (HBRUSH) GetStockObject (WHITE_BRUSH);
 	wclass.lpszMenuName  = NULL;
 	wclass.lpszClassName = SDIWindowClassName;
-	RegisterClass (&wclass);
+	wclass.hIconSm       = NULL;
+	RegisterClassEx (&wclass);
 
 	/* register clean MDI window class */
+	wclass.cbSize        = sizeof (WNDCLASSEX);
 	wclass.style         = 0;
 	wclass.lpfnWndProc   = (WNDPROC) MDIWindowProcedure;
 	wclass.cbClsExtra    = 0;
@@ -3574,7 +3577,8 @@ void InitialiseCrossCallWindows ()
 	wclass.hbrBackground = (HBRUSH) GetStockObject (WHITE_BRUSH);
 	wclass.lpszMenuName  = NULL;
 	wclass.lpszClassName = MDIWindowClassName;
-	RegisterClass (&wclass);
+	wclass.hIconSm       = NULL;
+	RegisterClassEx (&wclass);
 
 	/* initialise the common control library. */
 	InitCommonControls ();

@@ -18,7 +18,7 @@ extern CrossCallEntry NewCrossCallEntry (int cce_code, CrossCallProcedure cce_pr
 extern void FreeCrossCallEntry (CrossCallEntry cce);
 
 //	EmptyCrossCallProcedureTable creates an empty table.
-extern CrossCallProcedureTable EmptyCrossCallProcedureTable ();
+extern CrossCallProcedureTable EmptyCrossCallProcedureTable (void);
 
 //	GetCrossCallProcedureTableSize returns the current number of installed cross call procedures.
 extern int GetCrossCallProcedureTableSize (CrossCallProcedureTable ccpt);

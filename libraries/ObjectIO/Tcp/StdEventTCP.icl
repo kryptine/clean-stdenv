@@ -66,6 +66,7 @@ openSendNotifier ls (SendNotifier sChan f rAttributes) pSt
 	  					= getEndpointDataC chan.bEndpointRef pSt
 	|	hasSendableNotifier
 		=	(ErrorNotifierOpen, sChan, pSt)
+	#	pSt				= appPIO (appIOToolbox OSinstallTCP) pSt		// PA: added
 	#	(errReport,pSt)	= openReceiverGeneral
 							(	newInetStateHandle ls (handleSendableEvent chan.bId f) 0
 									(close_tcpschan_receiver chan.bEndpointRef)
@@ -387,6 +388,7 @@ newInetStateHandle ls rFun maxSize closeFun id select connectedIds endpointRef i
 lookupIPAddress_async	::	!String !(InetLookupFunction (PSt .l)) !(PSt .l)
 						->	(PSt .l)
 lookupIPAddress_async inetAddr lookupFunction pSt
+	# pSt							= appPIO (appIOToolbox OSinstallTCP) pSt		// PA: added
 	# ((errCode,endpointRef),pSt)	= lookupHost_asyncC (inetAddr+++"\0") pSt
 	| errCode<>0
 		= lookupFunction Nothing pSt
@@ -411,6 +413,7 @@ handleDNREvent f (IE_IPADDRESSNOTFOUND,_,_) (recId,ps=:{io})
 connectTCP_async		::	!(!IPAddress,!Port) !(InetConnectFunction (PSt .l)) !(PSt .l)
 						->	(PSt .l)
 connectTCP_async (inetHost,inetPort) callback pSt
+	# pSt								= appPIO (appIOToolbox OSinstallTCP) pSt		// PA: added
 	# destination						= (unpack_ipaddr inetHost, inetPort)
 	  ((errCode,_,endpointRef), pSt)	= os_connectTCP PST False (False,0) destination pSt
 	| errCode<>0

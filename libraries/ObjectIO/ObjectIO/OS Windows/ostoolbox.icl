@@ -4,7 +4,7 @@ implementation module ostoolbox
 
 import	StdBool, StdClass, StdInt, StdMisc, StdTuple
 import	clCrossCall_12
-import	code from "cCrossCallFont_121.obj", "cCrossCallTCP_121.obj", "cTCP_121.obj"
+import	code from "cCrossCallFont_121.obj"// PA: moved to ostcp, "cCrossCallTCP_121.obj", "cTCP_121.obj"
 
 
 ::	OSToolbox
@@ -25,7 +25,7 @@ OSInitToolbox toolbox
 	| otherwise
 		# toolbox	= WinStartOsThread toolbox	// PA: WinStartOsThread added
 		# toolbox	= OSinstallFont toolbox		// Install font info cross call handling
-		# toolbox	= OSinstallTCP  toolbox		// Install tcp cross call handling
+	//	# toolbox	= OSinstallTCP  toolbox		// Install tcp cross call handling	(PA: moved to StdEventTCP)
 		= toolbox
 
 OSinstallFont :: !*OSToolbox -> *OSToolbox
@@ -36,7 +36,7 @@ OSinstallFont _
 			ccall InstallCrossCallFont "I-I"
 		.end
 	}
-
+/*	PA: moved to ostcp
 OSinstallTCP :: !*OSToolbox -> *OSToolbox
 OSinstallTCP tb
 	= snd (IssueCleanRequest2 (\_ tb->(Return0Cci,tb)) (Rq0Cci CcRqCREATETCPWINDOW) (osInstallTCP tb))
@@ -49,6 +49,7 @@ osInstallTCP _
 			ccall InstallCrossCallTCP "I-I"
 		.end
 	}
+*/
 
 // RWS ??? ugly
 // OSDummyToolbox :: *OSToolbox

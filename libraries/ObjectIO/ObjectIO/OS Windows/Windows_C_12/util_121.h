@@ -40,33 +40,33 @@ extern void SetLogFontData (LOGFONT*, char*, int, int);
 /*  since we don't use the C runtime library, here are some simple
     routines that would normally come from the C runtime lib.
 */
+// PA: extern added
+extern void rfree( HGLOBAL ptr );
+extern HGLOBAL rmalloc( DWORD bytes );
 
-void rfree( HGLOBAL ptr );
-HGLOBAL rmalloc( DWORD bytes );
-
-
-int rstrlen(char *s);
-void rsncopy(char *d, const char *s, int n);
-void rscopy(char *d, const char *s);
-BOOL strequal( char *s1, char *s2 );
-BOOL nstrequal( int length, char *s1, char *s2 );
-int rabs(int i);
-
+extern int rstrlen(char *s);
+extern void rsncopy(char *d, const char *s, int n);
+extern void rscopy(char *d, const char *s);
+extern BOOL strequal( char *s1, char *s2 );
+extern BOOL nstrequal( int length, char *s1, char *s2 );
+extern int rabs(int i);
 
 /*  clean_strings don't have to end with 0, so we have to make
     copy the clean string and end it with a 0.
     global variables used for conversion from c strings to clean strings
 */
 
-char *cstring (CLEAN_STRING s);
-CLEAN_STRING cleanstring (char *s);
+extern char *cstring (CLEAN_STRING s);
+extern CLEAN_STRING cleanstring (char *s);
+// PA: up to here
 
 extern OS WinReleaseCString (PSTR,OS);
 extern void WinGetCString (PSTR,OS,CLEAN_STRING*,OS*);
 extern void WinGetCStringAndFree (PSTR,OS,CLEAN_STRING*,OS*);
 extern void WinMakeCString (CLEAN_STRING,OS,PSTR*,OS*);
 
-int nCopyAnsiToWideChar (LPWORD, LPSTR);
+//	PA: extern added to the end
+extern int nCopyAnsiToWideChar (LPWORD, LPSTR);
 
 /*  The following routines are used to write to the console, or convey runtime errors
     with message boxes. 
@@ -76,22 +76,22 @@ int nCopyAnsiToWideChar (LPWORD, LPSTR);
 #define _RPRINTBUFSIZE 512
 #endif
 
-void rMessageBox(HWND owner, UINT style, char *title, char *format, ... );
-void CheckF(BOOL theCheck, char *checkText, char *checkMess, char *filename, int linenum);
-void ErrorExit(char *format, ...);
-char *BOOLstring( BOOL b );
+extern void rMessageBox(HWND owner, UINT style, char *title, char *format, ... );
+extern void CheckF(BOOL theCheck, char *checkText, char *checkMess, char *filename, int linenum);
+extern void ErrorExit(char *format, ...);
+extern char *BOOLstring( BOOL b );
 
 #define Check(check,mess) CheckF((check),(#check),(mess),__FILE__,__LINE__)
 
-void DumpMem( int *ptr, int lines);
+extern void DumpMem( int *ptr, int lines);
 
 /* #define LOGFILE "debuglog.txt" */
 # undef LOGFILE
 
 #ifdef LOGFILE
-void rprintf(char *format, ... );
-void printCCI( CrossCallInfo *pcci );
-void printMessage( char* fname, HWND hWin, UINT uMess, WPARAM wPara, LPARAM lPara);
+extern void rprintf(char *format, ... );
+extern void printCCI( CrossCallInfo *pcci );
+extern void printMessage( char* fname, HWND hWin, UINT uMess, WPARAM wPara, LPARAM lPara);
 #else
 # define rprintf /* RWS() */
 # define printCCI(a1)

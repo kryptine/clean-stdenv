@@ -1,10 +1,28 @@
 implementation module ostcp
 
-import	StdInt
+import	StdInt, StdTuple
 import	StdTCPDef
 import	StdChannels
 import	tcp, ostick
 import	code from "cTCP_121.obj", library "wsock_library"
+import	clCrossCall_12
+import	code from "cCrossCallTCP_121.obj"	// PA: moved from ostoolbox
+
+
+// PA: moved from ostoolbox:
+OSinstallTCP :: !*OSToolbox -> *OSToolbox
+OSinstallTCP tb
+	= snd (IssueCleanRequest2 (\_ tb->(Return0Cci,tb)) (Rq0Cci CcRqCREATETCPWINDOW) (osInstallTCP tb))
+
+osInstallTCP :: !*OSToolbox -> *OSToolbox
+osInstallTCP _
+	= code
+	{
+		.inline InstallCrossCallTCP
+			ccall InstallCrossCallTCP "I-I"
+		.end
+	}
+// ...PA
 
 os_eom					::	!EndpointRef !*env
 						->	(!Bool, !*env)

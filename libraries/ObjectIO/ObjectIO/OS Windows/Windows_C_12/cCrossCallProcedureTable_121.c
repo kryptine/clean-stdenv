@@ -47,7 +47,7 @@ void FreeCrossCallEntry (CrossCallEntry cce)
 }
 
 //	EmptyCrossCallProcedureTable creates an empty table.
-CrossCallProcedureTable EmptyCrossCallProcedureTable ()
+CrossCallProcedureTable EmptyCrossCallProcedureTable (void)
 {
 	CrossCallProcedureTable ccpt = rmalloc (sizeof (struct _crosscallproceduretable));
 
@@ -76,7 +76,7 @@ void FreeCrossCallProcedureTable (CrossCallProcedureTable ccpt)
 		is the entry after which a new entry with nr should be added, or
 		NULL in case nr should be placed before entry.
 */
-CrossCallEntry SearchCrossCallEntry (int nr,CrossCallEntry entry)
+static CrossCallEntry SearchCrossCallEntry (int nr,CrossCallEntry entry)
 {
 	if (nr == entry->cce_code)
 		return entry;				// entry found

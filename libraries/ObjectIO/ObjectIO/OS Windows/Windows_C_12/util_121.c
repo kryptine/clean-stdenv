@@ -31,14 +31,14 @@ void SetLogFontData (LOGFONT * plf, char *fname, int style, int size)
 	plf->lfClipPrecision  = CLIP_DEFAULT_PRECIS;
 	plf->lfQuality        = DEFAULT_QUALITY;
 	plf->lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
-}
+}	/* SetLogFontData */
+
 
 /*	since we don't use the C runtime library, here are some simple
 	routines that would normally come from the C runtime lib.
 */
 
-int numallocated = 0;
-
+static int numallocated = 0;	// PA: turned into static
 
 HGLOBAL rmalloc (DWORD bytes)
 {
@@ -64,7 +64,7 @@ HGLOBAL rmalloc (DWORD bytes)
 	}
 
 	return ptr;
-}
+}	/* rmalloc */
 
 void rfree (HGLOBAL ptr)
 {
@@ -86,7 +86,7 @@ void rfree (HGLOBAL ptr)
 		MessageBeep (0xFFFFFFFF);
 		ExitProcess (255);
 	}
-}
+}	/* rfree */
 
 int rstrlen (char *s)
 {
@@ -95,7 +95,7 @@ int rstrlen (char *s)
 	for (l = 0; s[l] != 0; l++)
 		;
 	return l;
-}
+}	/* rstrlen */
 
 void rsncopy (char *d, const char *s, int n)
 {
@@ -104,7 +104,7 @@ void rsncopy (char *d, const char *s, int n)
 	{
 		d[i] = s[i];
 	}
-}
+}	/* rsncopy */
 
 void rscopy (char *d, const char *s)
 {
@@ -114,7 +114,7 @@ void rscopy (char *d, const char *s)
 		d[i] = s[i];
 	}
 	d[i] = s[i];
-}
+}	/* rscopy */
 
 BOOL strequal (char *s1, char *s2)
 {
@@ -126,7 +126,7 @@ BOOL strequal (char *s1, char *s2)
 		i++;
 	}
 	return FALSE;
-}
+}	/* strequal */
 
 BOOL nstrequal (int length, char *s1, char *s2)
 {
@@ -138,7 +138,7 @@ BOOL nstrequal (int length, char *s1, char *s2)
 		i++;
 	}
 	return FALSE;
-}
+}	/* nstrequal */
 
 int rabs (int i)
 {
@@ -146,15 +146,13 @@ int rabs (int i)
 		return -i;
 	else
 		return i;
-}
+}	/* rabs */
 
 
 /*	clean_strings don't have to end with 0, so we have to make
 	copy the clean string and end it with a 0.
 	global variables used for conversion from c strings to clean strings
 */
-
-
 
 char * cstring (CLEAN_STRING s)
 {
@@ -171,8 +169,7 @@ char * cstring (CLEAN_STRING s)
 	cstr[s->length] = 0;
 /* rprintf("}\n"); */
 	return cstr;
-}
-
+}	/* cstring */
 
 
 CLEAN_STRING cleanstring (char *s)
@@ -187,7 +184,7 @@ CLEAN_STRING cleanstring (char *s)
 	rsncopy (result_clean_string->characters, s, rstrlen (s) + 1);
 /* rprintf("]\n"); */
 	return result_clean_string;
-}
+}	/* cleanstring */
 
 OS WinReleaseCString (PSTR cs, OS ios)
 {
@@ -199,7 +196,7 @@ OS WinReleaseCString (PSTR cs, OS ios)
 /*		rprintf(")\n"); */
 
 	return ios;
-}
+}	/* WinReleaseCString */
 
 void WinGetCString (PSTR cs, OS ios, CLEAN_STRING * cls, OS * oos)
 {
@@ -208,7 +205,7 @@ void WinGetCString (PSTR cs, OS ios, CLEAN_STRING * cls, OS * oos)
 	*cls = cleanstring (cs);
 	*oos = ios;
 /*	rprintf(">\n"); */
-}
+}	/* WinGetCString */
 
 void WinGetCStringAndFree (PSTR cs, OS ios, CLEAN_STRING * cls, OS * oos)
 {
@@ -217,7 +214,7 @@ void WinGetCStringAndFree (PSTR cs, OS ios, CLEAN_STRING * cls, OS * oos)
 	*oos = ios;
 	rfree (cs);
 /*	rprintf("}\n"); */
-}
+}	/* WinGetCStringAndFree */
 
 
 void WinMakeCString (CLEAN_STRING s, OS ios, PSTR * cs, OS * oos)
@@ -230,7 +227,7 @@ void WinMakeCString (CLEAN_STRING s, OS ios, PSTR * cs, OS * oos)
 
 	*oos = ios;
 /*	  rprintf("\"%s)\n",*cs); */
-}
+}	/* WinMakeCString */
 
 
 int nCopyAnsiToWideChar (LPWORD lpWCStr, LPSTR lpAnsiIn)
@@ -244,7 +241,7 @@ int nCopyAnsiToWideChar (LPWORD lpWCStr, LPSTR lpAnsiIn)
 	} while (*lpAnsiIn++);
 
 	return nChar;
-}
+}	/* nCopyAnsiToWideChar */
 
 
 /*	The following routines are used to write to the console, or convey runtime errors
@@ -292,7 +289,7 @@ void rprintf (char *format,...)
 		MessageBox (NULL, "Cannot write to stdout --write error.", NULL, MB_OK | MB_ICONSTOP);
 		return;
 	};
-};
+}	/* rprintf */
 
 #endif
 
@@ -305,8 +302,7 @@ void rMessageBox (HWND owner, UINT style, char *title, char *format,...)
 	va_end (arglist);
 
 	MessageBox (owner, mbuff, title, style);
-
-}
+}	/* rMessageBox */
 
 void CheckF (BOOL theCheck, char *checkText, char *checkMess,
 		char *filename, int linenum)
@@ -318,7 +314,7 @@ void CheckF (BOOL theCheck, char *checkText, char *checkMess,
 					 checkMess, checkText, filename, linenum);
 		ExitProcess (1);
 	}
-}
+}	/* CheckF */
 
 void ErrorExit (char *format,...)
 {
@@ -330,7 +326,7 @@ void ErrorExit (char *format,...)
 
 	MessageBox (NULL, mbuff, NULL, MB_OK | MB_ICONSTOP);
 	ExitProcess (1);
-}
+}	/* ErrorExit */
 
 void DumpMem (int *ptr, int lines)
 {
@@ -364,7 +360,7 @@ void DumpMem (int *ptr, int lines)
 		};
 		rprintf ("\n");
 	}
-}
+}	/* DumpMem */
 
  /*-----------------------------------/*
 /*	support for printing messages	 /*
@@ -376,7 +372,7 @@ char * BOOLstring (BOOL b)
 		return "TRUE";
 	else
 		return "FALSE";
-}
+}	/* BOOLstring */
 
 #ifdef LOGFILE
 void printCCI (CrossCallInfo * pcci)
@@ -498,12 +494,6 @@ void printCCI (CrossCallInfo * pcci)
 			{
 				rprintf ("CcWmLOSEMODELESSDLOG");
 			} break;
-		/* PA---: has become obsolete:
-		case CcRqCREATEWINDOW:
-			{
-				rprintf ("CcRqCREATEWINDOW");
-			} break;
-		---PA */
 		case CcRqBEEP:	/* no params; no result. */
 			{
 				rprintf ("CcRqBEEP");
@@ -512,12 +502,6 @@ void printCCI (CrossCallInfo * pcci)
 			{
 				rprintf ("CcRqDOMESSAGE");
 			} break;
-		/* PA---: has become obsolete:
-		case CcRqAPPENDMENUITEM:		// on/off,hmenu,textptr, marked; HITEM result.
-			{
-				rprintf ("CcRqAPPENDMENUITEM");
-			} break;
-		*/
 		case CcRqINSERTMENUITEM:		/* on/off, hmenu, textptr, marked,
 										   pos; HITEM result. */
 			{
@@ -540,12 +524,6 @@ void printCCI (CrossCallInfo * pcci)
 			{
 				rprintf ("CcRqITEMENABLE");
 			} break;
-		/* PA---: has become obsolete:
-		case CcRqAPPENDMENU:	// on/off, hmenu, textptr, hsubmenu; no result. 
-			{
-				rprintf ("CcRqAPPENDMENU");
-			} break;
-		*/
 		case CcRqMODIFYMENU:	/* on/off, hmenu, textptr, hsubmenu, pos; no
 								   result. */
 			{
@@ -555,50 +533,18 @@ void printCCI (CrossCallInfo * pcci)
 			{
 				rprintf ("CcRqMENUENABLE");
 			} break;
-		/* PA---: has become obsolete:
-		case CcRqAPPENDSEPARATOR:		// hmenu; no result. 
-			{
-				rprintf ("CcRqAPPENDSEPARATOR");
-			} break;
-		*/
 		case CcRqINSERTSEPARATOR:		/* hmenu, pos; no result. */
 			{
 				rprintf ("CcRqINSERTSEPARATOR");
 			} break;
-		/* PA---: has become obsolete:
-		case CcRqCREATEMBAR:	// no params; HMENU result. 
-			{
-				rprintf ("CcRqCREATEMBAR");
-			} break;
-		*/
 		case CcRqCREATEPOPMENU: /* no params; HMENU result. */
 			{
 				rprintf ("CcRqCREATEPOPMENU");
 			} break;
-		/* PA---: has become obsolete:
-		case CcRqCREATEMENUWINDOW:		// hmenu, titleptr; HWND result. 
-			{
-				rprintf ("CcRqCREATEMENUWINDOW");
-			} break;
-		*/
 		case CcRqDRAWMBAR:		/* no params; no result. */
 			{
 				rprintf ("CcRqDRAWMBAR");
 			} break;
-		/* PA---: have become obsolete:
-		case CcRqMSGBOX:		// textptr; no result. 
-			{
-				rprintf ("CcRqMSGBOX");
-			} break;
-		case CcRqCREATEFIXEDWINDOW: 	// textptr, l,t,w,h; HWND result. 
-			{
-				rprintf ("CcRqCREATEFIXEDWINDOW");
-			} break;
-		case CcRqCREATESCROLLWINDOW:	// textptr, l,t,w,h; HWND result. 
-			{
-				rprintf ("CcRqCREATESCROLLWINDOW");
-			} break;
-		*/
 		case CcRqDESTROYWINDOW: /* hwnd; no result. */
 			{
 				rprintf ("CcRqDESTROYWINDOW");
@@ -623,16 +569,6 @@ void printCCI (CrossCallInfo * pcci)
 			{
 				rprintf ("CcRqINVALIDATEWINDOW");
 			} break;
-		/* PA---: has become obsolete:
-		case CcRqGETFOREGROUNDWINDOW:	// no params; HWND result. 
-			{
-				rprintf ("CcRqGETFOREGROUNDWINDOW");
-			} break;
-		case CcRqSETFOREGROUNDWINDOW:	// hwnd; no result. 
-			{
-				rprintf ("CcRqSETFOREGROUNDWINDOW");
-			} break;
-		*/
 		case CcRqSETWINDOWTITLE:		/* hwnd, textptr; no result. */
 			{
 				rprintf ("CcRqSETWINDOWTITLE");
@@ -641,20 +577,6 @@ void printCCI (CrossCallInfo * pcci)
 			{
 				rprintf ("CcRqGETWINDOWTEXT");
 			} break;
-		/* PA---: have become obsolete:
-		case CcRqSETHSCROLLINFO:		// hwnd, min, max, thumb, winsize; no result.	
-			{
-				rprintf ("CcRqSETHSCROLLINFO");
-			} break;
-		case CcRqSETVSCROLLINFO:		// hwnd, min, max, thumb, winsize; no result.
-			{
-				rprintf ("CcRqSETVSCROLLINFO");
-			} break;
-		case CcRqSCROLLWINDOW:	// hwnd, dx, dy; no result. 
-			{
-				rprintf ("CcRqSCROLLWINDOW");
-			} break;
-		*/
 		case CcRqGETCLIENTSIZE: /* hwnd; width, height result. */
 			{
 				rprintf ("CcRqGETCLIENTSIZE");
@@ -663,24 +585,6 @@ void printCCI (CrossCallInfo * pcci)
 			{
 				rprintf ("CcRqGETWINDOWPOS");
 			} break;
-		/* PA---: have become obsolete:
-		case CcRqGETSCROLLFRAME:		// hwnd; width, height result.
-			{
-				rprintf ("CcRqGETSCROLLFRAME");
-			} break;
-		case CcRqRESIZESCROLL:	// hwnd, width, height, maxwidth, maxheight; adjusted width,height result; 
-			{
-				rprintf ("CcRqRESIZESCROLL");
-			} break;
-		case CcRqRESIZEFIXED:	// hwnd, width, heigth; no result. 
-			{
-				rprintf ("CcRqRESIZEFIXED");
-			} break;
-		case CcRqFIXEDTOSCROLL: // hwnd, width, height; new hwnd, width, height result; 
-			{
-				rprintf ("CcRqFIXEDTOSCROLL");
-			} break;
-		*/
 		case CcRqCHANGEWINDOWCURSOR:	/* hwnd, cursor code; no result. */
 			{
 				rprintf ("CcRqCHANGEWINDOWCURSOR");
@@ -713,16 +617,6 @@ void printCCI (CrossCallInfo * pcci)
 			{
 				rprintf ("CcCbFONTSIZE");
 			} break;
-		/* PA---: has become obsolete:
-		case CcRqCREATETIMER:	// milliseconds; HITEM result. 
-			{
-				rprintf ("CcRqCREATETIMER");
-			} break;
-		case CcRqKILLTIMER: 	// HITEM; no result. 
-			{
-				rprintf ("CcRqKILLTIMER");
-			} break;
-		*/
 		case CcRqGETCURTIME:	/* no params; hours, minutes, seconds. */
 			{
 				rprintf ("CcRqGETCURTIME");
@@ -743,20 +637,6 @@ void printCCI (CrossCallInfo * pcci)
 			{
 				rprintf ("CcRqCREATEDIALOG");
 			} break;
-		/* PA---: has become obsolete:
-		case CcRqMODALDIALOG:	// textptr; no result. 
-			{
-				rprintf ("CcRqMODALDIALOG");
-			} break;
-		case CcRqENDMODALDLOG:	// hwnd; no result. 
-			{
-				rprintf ("CcRqENDMODALDLOG");
-			} break;
-		case CcRqGETACTIVEDIALOG:		// no params; HWND result.	
-			{
-				rprintf ("CcRqGETACTIVEDIALOG");
-			} break;
-		*/
 		case CcRqCREATEBUTTON:	/* hwnd, x,y,w,h, isdefbut; HWND result. */
 			{
 				rprintf ("CcRqCREATEBUTTON");
@@ -839,7 +719,7 @@ void printCCI (CrossCallInfo * pcci)
 				rprintf ("Unknown CCI: %d", pcci->mess);
 			} break;
 	}
-}
+}	/* printCCI */
 
 void printMessage (char *fname, HWND hWin, UINT uMess, WPARAM wPara, LPARAM lPara)
 {
@@ -1686,6 +1566,6 @@ void printMessage (char *fname, HWND hWin, UINT uMess, WPARAM wPara, LPARAM lPar
 				rprintf ("== %s got UNKOWN MESSAGE %d, hwin = %d\n", fname, uMess, hWin);
 			} break;
 	}
-};
+}	/* printMessage */
 
 #endif
