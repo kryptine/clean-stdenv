@@ -62,6 +62,26 @@ where
 				codex -> raise (ApplyTypeError codef codex)
 		= solveOverloading d env
 
+applyDynamics :: !Dynamic !Dynamic -> Maybe Dynamic
+applyDynamics codef codex 
+	# codefx = case codex of
+		(x :: A.a: a) -> case codef of
+			(f :: A.b: b) -> Just (dynamic f x :: A.c: c)
+			(f .|. c_f :: Overloaded d_f (d -> e) o_f) -> Just (dynamic C f x .|. c_f :: Overloaded d_f e o_f)
+			(f :: f -> g) -> Just (dynamic f x :: g)
+			_ -> Nothing
+		(x .|. c_x :: Overloaded d_x h o_x) -> case codef of
+			(f :: A.i: i) -> Just (dynamic B f x .|. c_x :: A.j: Overloaded d_x j o_x)
+			(f .|. c_f :: Overloaded d_f (h -> k) o_f) -> Just (dynamic P f x .|. c_f .&. c_x :: Overloaded (Contexts d_f d_x) k (Contexts o_f o_x))
+			(f :: h -> l) -> Just (dynamic B f x .|. c_x :: Overloaded d_x l o_x)
+			_ -> Nothing
+		(x :: m) -> case codef of
+			(f :: A.n: n) -> Just (dynamic f x :: A.o: o)
+			(f .|. c_f :: Overloaded d_f (m -> p) o_f) -> Just (dynamic C f x .|. c_f :: Overloaded d_f p o_f)
+			(f :: m -> q) -> Just (dynamic f x :: q)
+			_ -> Nothing
+	= codefx
+
 solveOverloading :: !Dynamic !*env -> (!Dynamic, !*env) | resolveInstance env
 solveOverloading d=:(_ :: A.a: a) env = (d, env)
 solveOverloading d=:(_ :: Overloaded a b c) env
@@ -136,41 +156,39 @@ P f g (x .&. y) = f x (g y)
 L f x y = f (x .&. y)
 R f y x = f (x .&. y)
 
-toStringDynamic :: !Dynamic -> (String, !String)
+toStringDynamic :: !Dynamic -> (![String], !String)
 toStringDynamic d=:(_ :: A.a: a) = prettyDynamic d
-toStringDynamic (e .|. c :: Overloaded d t o) = (value, type +++ " | " +++ cr)
+toStringDynamic (e .|. c :: Overloaded d t o) = (value, type +++ " | " +++ contexts)
 where
 	(value, _) = prettyDynamic (dynamic e :: d -> t)
 	(_, type) = prettyDynamic (dynamic Omega :: t)
-	cr = prettyCR [(n, v) \\ n <- listNames d & v <- listVariables tc]
+	contexts = prettyContexts [(n, v) \\ n <- listNames d & v <- listVariables (typeCodeOfDynamic d)]
 	where
 		d = dynamic c :: o
-		tc = typeCodeOfDynamic d
-
-	prettyCR [(n, v)] = n +++ " " +++ v
-	prettyCR [c:cs] = prettyCR [c] +++ " & " +++ prettyCR cs
-
-	Omega = raise "Omega"
+		
+		prettyContexts [(n, v)] = n +++ " " +++ v
+		prettyContexts [c:cs] = prettyContexts [c] +++ " & " +++ prettyContexts cs
 	
-	listNames (Class name :: Context a) = [name]
-	listNames (x .&. y :: Contexts a b) = listNames (dynamic x :: a) ++ listNames (dynamic y :: b)
-	
-	listVariables (TypeApp _ (TypeVar i)) = [if (i < 26) {'a' + toChar i} ("tv" +++ toString i)]
-	listVariables (TypeApp _ (TypeCons c)) = [toString c]
-	listVariables (TypeScheme _ t) = listVariables t
-	listVariables (TypeApp t1 t2) = listVariables t1 ++ listVariables t2
-	listVariables _ = []
+		listNames (Class name :: Context a) = [name]
+		listNames (x .&. y :: Contexts a b) = listNames (dynamic x :: a) ++ listNames (dynamic y :: b)
+		
+		listVariables (TypeApp _ (TypeVar i)) = [if (i < 26) {'a' + toChar i} ("tv" +++ toString i)]
+		listVariables (TypeApp _ (TypeCons c)) = [toString c]
+		listVariables (TypeScheme _ t) = listVariables t
+		listVariables (TypeApp t1 t2) = listVariables t1 ++ listVariables t2
+		listVariables _ = []
 toStringDynamic d = prettyDynamic d
 
-prettyDynamic :: !Dynamic -> (String, !String)
-prettyDynamic d = (v, toString` (typeCodeOfDynamic d))
+prettyDynamic :: !Dynamic -> (![String], !String)
+prettyDynamic d = (v, removeForAll (typeCodeOfDynamic d))
 where
 	v = case d of 
-		(x :: a -> b) -> "<function>"//foldl (+++) "" (debugShowWithOptions [DebugTerminator "", DebugClosures False] x)
-		(x :: a) -> foldl (+++) "" (debugShowWithOptions [DebugTerminator ""] x)
+//		(x :: a -> b) -> ["<function>"]
+//		(x :: a -> b) -> debugShowWithOptions [DebugTerminator "", DebugClosures False] x
+		(x :: a) -> /*drop 35300*/ (debugShowWithOptions [DebugTerminator ""] x)
 
-	toString` (TypeScheme _ t) = toString t
-	toString` t = toString t
+	removeForAll (TypeScheme _ t) = toString t
+	removeForAll t = toString t
 
 (<<-) infixl 0 :: .a !.b -> .a
 (<<-) value debugValue = debugBefore debugValue show value
