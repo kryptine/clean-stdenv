@@ -15,7 +15,7 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	example_lists1
+ 	example_lists3
  	world  
 
 example_lists1	= CGEC (mkGEC "InfiniteListDisplay") (listGEC False allprimes) 
@@ -35,3 +35,8 @@ where
 	| n rem 2 == 0 	= [n2 : calcnum n2 ]	with n2 = n / 2
 	| otherwise 	= [n31: calcnum n31]	with n31 = (3 * n) + 1	
 
+example_lists3 = CGEC (selfGEC "Try ou demo" update) 
+					(listGEC True (
+							[vertlistGEC (repeatn 5 i) \\ i <- [0..2]]))
+where
+	update = id

@@ -24,3 +24,5 @@ derive gGEC AGEC
 mkAGEC  	:: !(BimapGEC a b) !String -> AGEC a |  gGEC{|*|} b
 ^^			:: (AGEC a) -> a
 (^=) infixl	:: (AGEC a) a -> (AGEC a)
+
+mkAGEC`  	:: !(BimapGEC a (g b)) !String -> AGEC a | gGEC{|*->*|} g // variant used to make dummy AGEC's

@@ -17,7 +17,7 @@ dynamicGEC2 v = mkAGEC { toGEC   = toExpr
 					  , fromGEC = fromExpr
 					  , updGEC  = updExpr
 					  , value   = v
-					  } "dynamicGEC"
+					  } ("dynamicGEC" +++ (snd(prettyDynamic (dynamic v))))
 where
 	toExpr v Undefined 		= display v (prettyVal  v)
 	toExpr v (Defined b)	= b 				
@@ -36,7 +36,7 @@ dynamicGEC v = mkAGEC { toGEC   = toExpr
 					  , fromGEC = fromExpr
 					  , updGEC  = updExpr
 					  , value   = v
-					  } "dynamicGEC"
+					  } ("dynamicGEC" +++ (snd(prettyDynamic (dynamic v))))
 where
 	toExpr v Undefined 		= display v (prettyVal  v)
 	toExpr v (Defined b)	= b 				

@@ -63,7 +63,6 @@ myinit 		= (zeroElem, Choose)
 zeroElem 	= (Int_ 0, Identity)
 
 // Update of design editor
-// DesignEditor :== ([((Type,Editors),Commands)],Element)
 
 updateDesign :: DesignEditor -> DesignEditor
 updateDesign (elems,s) =  (keepone (update (paste elems s)),(copy elems s))
@@ -87,8 +86,9 @@ where
 	update [((F_LI_I ix f,e),Choose):xs] = [((F_LI_I (dynamicGEC2 []) (dynamicGEC2 (const 0))  ,e),Apply): xs]
 	update [((F_LR_R ix f,e),Choose):xs] = [((F_LR_R (dynamicGEC2 []) (dynamicGEC2 (const 0.0)),e),Apply): xs]
 	
-	update [(x,Apply): xs] = [(x,Apply):update xs]
-	update [(x,_): xs]     = [(x,Choose):update xs]
+	update [(x,Choose): xs] = [(x,Choose):update xs]
+//	update [(x,Copy): xs]  = [(x,Apply):update xs]
+	update [(x,_): xs]     = [(x,Apply):update xs]
 	update []      = []
 
 // type of application editor element
@@ -154,15 +154,15 @@ where
 
 	calcfli :: ([Int] -> Int) [ListIndex] -> (Bool,Bool,Int)
 	calcfli f indexlist
-	# res				= map CheckBoundsIntVal indexlist
+	# res				= map tryGetIntArgs indexlist
 	= (or (map fst3 res),or (map snd3 res),f (map thd3 res)) 
 	
 	calcflr :: ([Real] -> Real) [ListIndex] -> (Bool,Bool,Real)
 	calcflr f indexlist
-	# res				= map CheckBoundsRealVal indexlist
+	# res				= map tryGetRealArgs indexlist
 	= (or (map fst3 res),or (map snd3 res),f (map thd3 res)) 
 
-	CheckBoundsIntVal i 
+	tryGetIntArgs i 
 	| checkBounds i = (True,False,0)
 	= fetchIntVal (list!!i)
 	where
@@ -171,7 +171,7 @@ where
 			fetchIntVal (AF_LI_I _ fi) 	= applyflii fi
 			fetchIntVal _ 				= (False,True,0)
 				 
-	CheckBoundsRealVal i 
+	tryGetRealArgs i 
 	| checkBounds i = (True,False,0.0)
 	= fetchRealVal (list!!i)
 	where
