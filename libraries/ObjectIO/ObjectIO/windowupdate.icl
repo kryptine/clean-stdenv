@@ -1,0 +1,666 @@
+implementation module windowupdate
+
+
+//	Clean Object I/O library, version 1.2
+
+
+import	StdBool, StdFunc, StdList, StdMisc
+import	ospicture, osrgn, oswindow
+import	commondef, deviceevents, windowhandle, wstate
+from	controllayout	import getCompoundContentRect, getWindowContentRect, getCompoundHScrollRect, getCompoundVScrollRect
+from	windowaccess	import getWItemCompoundInfo, getWItemCustomButtonInfo, getWItemCustomInfo, getWindowInfoWindowData
+from	windowclipstate	import validateWindowClipState
+from	wstateaccess	import getWItemCompoundInfo`
+
+
+windowupdateFatalError :: String String -> .x
+windowupdateFatalError rule error = FatalError rule "windowupdate" error
+
+
+/*	updatewindow updates the window, using the UpdateInfo argument.
+*/
+updatewindow :: !OSWindowMetrics !UpdateInfo !(WindowHandle .ls .pst) !*OSToolbox
+										  -> (!WindowHandle .ls .pst, !*OSToolbox)
+updatewindow wMetrics info=:{updWIDS={wPtr},updGContext} wH tb
+	# (wH,tb)			= validateWindowClipState wMetrics False wPtr wH tb
+	# (osPict,tb)		= getUpdateContext wPtr updGContext tb
+	# (wH,osPict,tb)	= updatewindowbackground wMetrics False Nothing info wH osPict tb
+	# (wH,osPict,tb)	= updatecontrols         wMetrics               info wH osPict tb
+	# tb				= setUpdateContext wPtr updGContext osPict tb
+	= (wH,tb)
+where
+	getUpdateContext :: OSWindowPtr !(Maybe OSPictContext) !*OSToolbox -> (!OSPictContext,!*OSToolbox)
+	getUpdateContext _ (Just osPict) tb	= (osPict,tb)
+	getUpdateContext wPtr _ tb			= OSgrabWindowPictContext wPtr tb
+	
+	setUpdateContext :: !OSWindowPtr !(Maybe OSPictContext) !OSPictContext !*OSToolbox -> *OSToolbox
+	setUpdateContext wPtr updContext osPict tb
+		| isJust updContext	= tb
+		| otherwise			= OSreleaseWindowPictContext wPtr osPict tb
+
+
+/*	updatewindowbackgrounds(`) redraws the (window/compound) backgrounds that are inside the OSRgnHandle argument.
+	After redrawing the OSRgnHandle argument is disposed!
+*/
+updatewindowbackgrounds :: !OSWindowMetrics !OSRgnHandle !WIDS !(WindowHandle .ls .pst) !*OSToolbox
+															-> (!WindowHandle .ls .pst, !*OSToolbox)
+updatewindowbackgrounds wMetrics backgrRgn wids=:{wPtr} wH=:{whItems,whSelect,whSize,whWindowInfo} tb
+	# (_,backgrRect,tb)						= osgetrgnbox backgrRgn tb
+	| IsEmptyRect backgrRect
+		= (wH,osdisposergn backgrRgn tb)
+	| otherwise
+		# updInfo							= {	updWIDS			= wids
+											  ,	updWindowArea	= backgrRect
+											  ,	updControls		= []
+											  ,	updGContext		= Nothing
+											  }
+		# (osPict,tb)						= OSgrabWindowPictContext wPtr tb
+		# picture							= packPicture zero (copyPen pen) True osPict tb		// Make sure picture is initialised with the proper pen, but origin zero
+		# (origin,pen,toScreen,osPict,tb)	= peekPicture picture
+		# (wH,osPict,tb)					= updatewindowbackground wMetrics True (Just backgrRgn) updInfo wH osPict tb
+		# (backgrRgn,wH,osPict,tb)			= updatecontrolbackgrounds wMetrics backgrRgn wH osPict tb
+		# picture							= unpeekPicture origin pen toScreen osPict tb
+		# (_,_,_,osPict,tb)					= unpackPicture picture								// Make sure picture is cleared
+		# tb								= OSreleaseWindowPictContext wPtr osPict tb
+		= (wH,osdisposergn backgrRgn tb)
+where
+	pen	= case whWindowInfo of
+			WindowInfo info	-> info.windowLook.lookPen
+			other			-> defaultPen
+	
+	updatecontrolbackgrounds :: !OSWindowMetrics !OSRgnHandle !(WindowHandle .ls .pst) !OSPictContext !*OSToolbox
+											 -> (!OSRgnHandle, !WindowHandle .ls .pst, !OSPictContext,!*OSToolbox)
+	updatecontrolbackgrounds wMetrics backgrRgn wH=:{whItems,whSelect,whSize} osPict tb
+		# (backgrRgn,itemHs,osPict,tb)	= updatebackgrounds wMetrics (SizeToRect whSize) whSelect backgrRgn whItems osPict tb
+		= (backgrRgn,{wH & whItems=itemHs},osPict,tb)
+	where
+		updatebackgrounds :: !OSWindowMetrics !Rect !Bool !OSRgnHandle ![WElementHandle .ls .pst] !OSPictContext !*OSToolbox
+													  -> (!OSRgnHandle,![WElementHandle .ls .pst],!OSPictContext,!*OSToolbox)
+		updatebackgrounds wMetrics wFrame ableContext backgrRgn itemHs osPict tb
+			# (empty,tb)						= osisemptyrgn backgrRgn tb
+			| empty || isEmpty itemHs
+				= (backgrRgn,itemHs,osPict,tb)
+			| otherwise
+				# (itemH,itemHs)				= HdTl itemHs
+				# (backgrRgn,itemH, osPict,tb)	= updatebackground  wMetrics wFrame ableContext backgrRgn itemH  osPict tb
+				# (backgrRgn,itemHs,osPict,tb)	= updatebackgrounds wMetrics wFrame ableContext backgrRgn itemHs osPict tb
+				= (backgrRgn,[itemH:itemHs],osPict,tb)
+		where
+			updatebackground :: !OSWindowMetrics !Rect !Bool !OSRgnHandle !(WElementHandle .ls .pst) !OSPictContext !*OSToolbox
+														 -> (!OSRgnHandle, !WElementHandle .ls .pst, !OSPictContext,!*OSToolbox)
+			updatebackground wMetrics wFrame ableContext backgrRgn (WItemHandle itemH=:{wItemShow,wItemVirtual,wItemKind,wItemPos,wItemSize}) osPict tb
+				| not wItemShow || wItemVirtual || wItemKind<>IsCompoundControl
+					= (backgrRgn,WItemHandle itemH,osPict,tb)
+				# (_,backgrRect,tb)					= osgetrgnbox backgrRgn tb
+				# compoundRect						= PosSizeToRect wItemPos wItemSize
+				| DisjointRects backgrRect compoundRect
+					= (backgrRgn,WItemHandle itemH,osPict,tb)
+				| otherwise
+					# (backgrRgn,itemH,osPict,tb)	= updatecompoundbackground wMetrics wFrame compoundRect ableContext backgrRgn itemH osPict tb
+					= (backgrRgn,WItemHandle itemH,osPict,tb)
+			where
+				updatecompoundbackground :: !OSWindowMetrics !Rect !Rect !Bool !OSRgnHandle !(WItemHandle .ls .pst) !OSPictContext !*OSToolbox
+														 				   -> (!OSRgnHandle, !WItemHandle .ls .pst, !OSPictContext,!*OSToolbox)
+				updatecompoundbackground wMetrics wFrame compoundRect ableContext backgrRgn itemH=:{wItems} osPict tb
+					| isTransparant
+						# (backgrRgn,itemHs,osPict,tb)
+											= updatebackgrounds wMetrics cFrame cAble backgrRgn wItems osPict tb
+						= (backgrRgn,{itemH & wItems=itemHs},osPict,tb)
+					# (updRgn,tb)			= ossectrgn backgrRgn clipInfo.clipRgn tb
+					# (empty,tb)			= osisemptyrgn updRgn tb
+					| empty
+						# (backgrRgn,itemHs,osPict,tb)
+											= updatebackgrounds wMetrics cFrame cAble backgrRgn wItems osPict tb
+						# (rectRgn,tb)		= osnewrectrgn cFrame tb
+						# (diffRgn,tb)		= osdiffrgn backgrRgn rectRgn tb
+						# tb				= StateMap2 osdisposergn [rectRgn,backgrRgn,updRgn] tb
+						= (diffRgn,{itemH & wItems=itemHs},osPict,tb)
+					| otherwise
+						# picture			= unpeekPicture zero defaultPen True osPict tb
+						# picture			= setpictorigin (origin-itemPos) picture
+						# picture			= setpictpen lookPen picture
+						# picture			= clipospicture updRgn contentRect (lookFun (if cAble Able Unable) updState) picture
+						# picture			= setpictpen defaultPen picture
+						# picture			= setpictorigin zero picture
+						# (_,_,_,osPict,tb)	= peekPicture picture
+						# (backgrRgn,itemHs,osPict,tb)
+											= updatebackgrounds wMetrics cFrame cAble backgrRgn wItems osPict tb
+						# (rectRgn,tb)		= osnewrectrgn cFrame tb
+						# (diffRgn,tb)		= osdiffrgn backgrRgn rectRgn tb
+						# tb				= StateMap2 osdisposergn [rectRgn,backgrRgn,updRgn] tb
+						= (diffRgn,{itemH & wItems=itemHs},osPict,tb)
+				where
+					itemPos					= itemH.wItemPos
+					itemSize				= itemH.wItemSize
+					info					= getWItemCompoundInfo itemH.wItemInfo
+					isTransparant			= isNothing info.compoundLookInfo
+					compLookInfo			= fromJust info.compoundLookInfo
+					{lookFun,lookPen}		= compLookInfo.compoundLook
+					clipInfo				= compLookInfo.compoundClip
+					origin					= info.compoundOrigin
+					domainRect				= info.compoundDomain
+					hasScrolls				= (isJust info.compoundHScroll,isJust info.compoundVScroll)
+					visScrolls				= OSscrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
+					contentRect				= getCompoundContentRect wMetrics visScrolls compoundRect
+					cFrame					= IntersectRects wFrame contentRect
+					cAble					= ableContext && itemH.wItemSelect
+					updFrame				= RectToRectangle cFrame
+					updState				= {oldFrame=updFrame,newFrame=updFrame,updArea=[updFrame]}
+					
+					clipospicture :: !OSRgnHandle !Rect !(IdFun *Picture) !*Picture -> *Picture
+					clipospicture newClipRgn rect drawf picture
+						#! (rectRgn,picture)	= accpicttoolbox (osnewrectrgn rect) picture
+						#! (curClipRgn,picture)	= pictgetcliprgn picture
+						#! picture				= (if (curClipRgn==0) (pictsetcliprgn rectRgn) (pictandcliprgn rectRgn)) picture
+						#! picture				= pictandcliprgn newClipRgn picture
+						#! picture				= drawf picture
+						#! picture				= pictsetcliprgn curClipRgn picture
+						#  picture				= apppicttoolbox (osdisposergn rectRgn o (if (curClipRgn==0) id (osdisposergn curClipRgn))) picture
+						= picture
+			
+			updatebackground wMetrics wFrame ableContext backgrRgn (WListLSHandle itemHs) osPict tb
+				# (backgrRgn,itemHs,osPict,tb)	= updatebackgrounds wMetrics wFrame ableContext backgrRgn itemHs osPict tb
+				= (backgrRgn,WListLSHandle itemHs,osPict,tb)
+			
+			updatebackground wMetrics wFrame ableContext backgrRgn (WExtendLSHandle wExH=:{wExtendItems=itemHs}) osPict tb
+				# (backgrRgn,itemHs,osPict,tb)	= updatebackgrounds wMetrics wFrame ableContext backgrRgn itemHs osPict tb
+				= (backgrRgn,WExtendLSHandle {wExH & wExtendItems=itemHs},osPict,tb)
+			
+			updatebackground wMetrics wFrame ableContext backgrRgn (WChangeLSHandle wChH=:{wChangeItems=itemHs}) osPict tb
+				# (backgrRgn,itemHs,osPict,tb)	= updatebackgrounds wMetrics wFrame ableContext backgrRgn itemHs osPict tb
+				= (backgrRgn,WChangeLSHandle {wChH & wChangeItems=itemHs},osPict,tb)
+
+
+updatewindowbackgrounds` :: !OSWindowMetrics !OSRgnHandle !WIDS !WindowHandle` !*OSToolbox
+															-> (!WindowHandle`,!*OSToolbox)
+updatewindowbackgrounds` wMetrics backgrRgn wids=:{wPtr} wH=:{whItems`,whSelect`,whSize`,whWindowInfo`} tb
+	# (_,backgrRect,tb)						= osgetrgnbox backgrRgn tb
+	| IsEmptyRect backgrRect
+		= (wH,osdisposergn backgrRgn tb)
+	| otherwise
+		# updInfo							= {	updWIDS			= wids
+											  ,	updWindowArea	= backgrRect
+											  ,	updControls		= []
+											  ,	updGContext		= Nothing
+											  }
+		# (osPict,tb)						= OSgrabWindowPictContext wPtr tb
+		# picture							= packPicture zero (copyPen pen) True osPict tb	// Make sure picture is initialised with the proper pen, but origin zero
+		# (origin,pen,toScreen,osPict,tb)	= peekPicture picture
+		# (wH,osPict,tb)					= updatewindowbackground` wMetrics True (Just backgrRgn) updInfo wH osPict tb
+		# (backgrRgn,wH,osPict,tb)			= updatecontrolbackgrounds wMetrics backgrRgn wH osPict tb
+		# picture							= unpeekPicture origin pen toScreen osPict tb
+		# (_,_,_,osPict,tb)					= unpackPicture picture						// Make sure picture is cleared
+		# tb								= OSreleaseWindowPictContext wPtr osPict tb
+		= (wH,osdisposergn backgrRgn tb)
+where
+	pen	= case whWindowInfo` of
+			WindowInfo info	-> info.windowLook.lookPen
+			other			-> defaultPen
+	
+	updatecontrolbackgrounds :: !OSWindowMetrics !OSRgnHandle !WindowHandle` !OSPictContext !*OSToolbox
+											 -> (!OSRgnHandle,!WindowHandle`,!OSPictContext,!*OSToolbox)
+	updatecontrolbackgrounds wMetrics backgrRgn wH=:{whItems`,whSelect`,whSize`} osPict tb
+		# (backgrRgn,itemHs,osPict,tb)	= updatebackgrounds wMetrics (SizeToRect whSize`) whSelect` backgrRgn whItems` osPict tb
+		= (backgrRgn,{wH & whItems`=itemHs},osPict,tb)
+	where
+		updatebackgrounds :: !OSWindowMetrics !Rect !Bool !OSRgnHandle ![WElementHandle`] !OSPictContext !*OSToolbox
+													  -> (!OSRgnHandle,![WElementHandle`],!OSPictContext,!*OSToolbox)
+		updatebackgrounds wMetrics wFrame ableContext backgrRgn itemHs osPict tb
+			# (empty,tb)						= osisemptyrgn backgrRgn tb
+			| empty || isEmpty itemHs
+				= (backgrRgn,itemHs,osPict,tb)
+			| otherwise
+				# (itemH,itemHs)				= HdTl itemHs
+				# (backgrRgn,itemH, osPict,tb)	= updatebackground  wMetrics wFrame ableContext backgrRgn itemH  osPict tb
+				# (backgrRgn,itemHs,osPict,tb)	= updatebackgrounds wMetrics wFrame ableContext backgrRgn itemHs osPict tb
+				= (backgrRgn,[itemH:itemHs],osPict,tb)
+		where
+			updatebackground :: !OSWindowMetrics !Rect !Bool !OSRgnHandle !WElementHandle` !OSPictContext !*OSToolbox
+														 -> (!OSRgnHandle,!WElementHandle`,!OSPictContext,!*OSToolbox)
+			updatebackground wMetrics wFrame ableContext backgrRgn (WItemHandle` itemH=:{wItemShow`,wItemVirtual`,wItemKind`,wItemPos`,wItemSize`}) osPict tb
+				| not wItemShow` || wItemVirtual` || wItemKind`<>IsCompoundControl
+					= (backgrRgn,WItemHandle` itemH,osPict,tb)
+				# (_,backgrRect,tb)					= osgetrgnbox backgrRgn tb
+				  compoundRect						= PosSizeToRect wItemPos` wItemSize`
+				| DisjointRects backgrRect compoundRect
+					= (backgrRgn,WItemHandle` itemH,osPict,tb)
+				| otherwise
+					# (backgrRgn,itemH,osPict,tb)	= updatecompoundbackground wMetrics wFrame compoundRect ableContext backgrRgn itemH osPict tb
+					= (backgrRgn,WItemHandle` itemH,osPict,tb)
+			where
+				updatecompoundbackground :: !OSWindowMetrics !Rect !Rect !Bool !OSRgnHandle !WItemHandle` !OSPictContext !*OSToolbox
+														 				   -> (!OSRgnHandle,!WItemHandle`,!OSPictContext,!*OSToolbox)
+				updatecompoundbackground wMetrics wFrame compoundRect ableContext backgrRgn itemH=:{wItems`} osPict tb
+					| isTransparant
+						# (backgrRgn,itemHs,osPict,tb)
+											= updatebackgrounds wMetrics cFrame cAble backgrRgn wItems` osPict tb
+						= (backgrRgn,{itemH & wItems`=itemHs},osPict,tb)
+					# (updRgn,tb)			= ossectrgn backgrRgn clipInfo.clipRgn tb
+					# (empty,tb)			= osisemptyrgn updRgn tb
+					| empty
+						# (backgrRgn,itemHs,osPict,tb)
+											= updatebackgrounds wMetrics cFrame cAble backgrRgn wItems` osPict tb
+						# (rectRgn,tb)		= osnewrectrgn cFrame tb
+						# (diffRgn,tb)		= osdiffrgn backgrRgn rectRgn tb
+						# tb				= StateMap2 osdisposergn [rectRgn,backgrRgn,updRgn] tb
+						= (diffRgn,{itemH & wItems`=itemHs},osPict,tb)
+					| otherwise
+						# picture			= unpeekPicture zero defaultPen True osPict tb
+						# picture			= setpictorigin (origin-itemPos) picture
+						# picture			= setpictpen lookPen picture
+						# picture			= clipospicture updRgn contentRect (lookFun (if cAble Able Unable) updState) picture
+						# picture			= setpictpen defaultPen picture
+						# picture			= setpictorigin zero picture
+						# (_,_,_,osPict,tb)	= peekPicture picture
+						# (backgrRgn,itemHs,osPict,tb)
+											= updatebackgrounds wMetrics cFrame cAble backgrRgn wItems` osPict tb
+						# (rectRgn,tb)		= osnewrectrgn cFrame tb
+						# (diffRgn,tb)		= osdiffrgn backgrRgn rectRgn tb
+						# tb				= StateMap2 osdisposergn [rectRgn,backgrRgn,updRgn] tb
+						= (diffRgn,{itemH & wItems`=itemHs},osPict,tb)
+				where
+					itemPos					= itemH.wItemPos`
+					itemSize				= itemH.wItemSize`
+					info					= getWItemCompoundInfo` itemH.wItemInfo`
+					isTransparant			= isNothing info.compoundLookInfo
+					compLookInfo			= fromJust info.compoundLookInfo
+					{lookFun,lookPen}		= compLookInfo.compoundLook
+					clipInfo				= compLookInfo.compoundClip
+					origin					= info.compoundOrigin
+					domainRect				= info.compoundDomain
+					hasScrolls				= (isJust info.compoundHScroll,isJust info.compoundVScroll)
+					visScrolls				= OSscrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
+					contentRect				= getCompoundContentRect wMetrics visScrolls compoundRect
+					cFrame					= IntersectRects wFrame contentRect
+					cAble					= ableContext && itemH.wItemSelect`
+					updFrame				= RectToRectangle cFrame
+					updState				= {oldFrame=updFrame,newFrame=updFrame,updArea=[updFrame]}
+					
+					clipospicture :: !OSRgnHandle !Rect !(IdFun *Picture) !*Picture -> *Picture
+					clipospicture newClipRgn rect drawf picture
+						#! (rectRgn,picture)	= accpicttoolbox (osnewrectrgn rect) picture
+						#! (curClipRgn,picture)	= pictgetcliprgn picture
+						#! picture				= (if (curClipRgn==0) (pictsetcliprgn rectRgn) (pictandcliprgn rectRgn)) picture
+						#! picture				= pictandcliprgn newClipRgn picture
+						#! picture				= drawf picture
+						#! picture				= pictsetcliprgn curClipRgn picture
+						#  picture				= apppicttoolbox (osdisposergn rectRgn o (if (curClipRgn==0) id (osdisposergn curClipRgn))) picture
+						= picture
+			
+			updatebackground wMetrics wFrame ableContext backgrRgn (WRecursiveHandle` itemHs wKind) osPict tb
+				# (backgrRgn,itemHs,osPict,tb)	= updatebackgrounds wMetrics wFrame ableContext backgrRgn itemHs osPict tb
+				= (backgrRgn,WRecursiveHandle` itemHs wKind,osPict,tb)
+
+
+/*	updaterectcontrols updates the controls that fit in the Rect argument of the indicated window or compound control. 
+	The Rect is in window/compound coordinates. 
+*/
+updaterectcontrols :: !OSWindowMetrics !Rect !OSWindowPtr !(WindowHandle .ls .pst) !*OSToolbox
+													   -> (!WindowHandle .ls .pst, !*OSToolbox)
+updaterectcontrols wMetrics area wPtr wH=:{whItems,whSelect} tb
+	| IsEmptyRect area
+		= (wH,tb)
+	| otherwise
+		# (itemHs,tb)	= updatecontrolsinrect wMetrics wPtr whSelect area whItems tb
+		= ({wH & whItems=itemHs},tb)
+where
+	updatecontrolsinrect :: !OSWindowMetrics !OSWindowPtr !Bool !Rect ![WElementHandle .ls .pst] !*OSToolbox
+																  -> (![WElementHandle .ls .pst],!*OSToolbox)
+	updatecontrolsinrect wMetrics parentPtr ableContext area itemHs tb
+		| IsEmptyRect area || isEmpty itemHs
+			= (itemHs,tb)
+		| otherwise
+			# (itemH,itemHs)	= HdTl itemHs
+			# (itemH, tb)		= updatecontrolinrect  wMetrics parentPtr ableContext area itemH  tb
+			# (itemHs,tb)		= updatecontrolsinrect wMetrics parentPtr ableContext area itemHs tb
+			= ([itemH:itemHs],tb)
+	where
+		updatecontrolinrect :: !OSWindowMetrics !OSWindowPtr !Bool !Rect !(WElementHandle .ls .pst) !*OSToolbox
+																	  -> (!WElementHandle .ls .pst, !*OSToolbox)
+		updatecontrolinrect wMetrics parentPtr ableContext area 
+							wItemH=:(WItemHandle itemH=:{wItemKind,wItemPtr,wItemPos,wItemSize,wItemShow,wItemVirtual}) tb
+			| not itemH.wItemShow || wItemVirtual || IsEmptyRect intersectRect || ignorecontrol
+				= (wItemH,tb)
+			| iscustomcontrol
+				# (itemH,tb)	= updatecustomcontrol wMetrics parentPtr ableContext intersectRect itemH tb
+				= (WItemHandle itemH,tb)
+			| isoscontrol
+				# tb			= updateoscontrol (subVector (toVector wItemPos) intersectRect) parentPtr wItemPtr tb
+				= (wItemH,tb)
+			| otherwise			// This alternative should never be reached
+				= windowupdateFatalError "updatecontrolinrect" "unexpected ControlKind"
+		where
+			controlRect			= PosSizeToRect wItemPos wItemSize
+			intersectRect		= IntersectRects area controlRect
+			iscustomcontrol		= case wItemKind of
+									IsCustomButtonControl	-> True
+									IsCustomControl			-> True
+									IsCompoundControl		-> True
+									_						-> False
+			ignorecontrol		= case wItemKind of
+									IsOtherControl _		-> True
+									_						-> False
+			(isoscontrol,updateoscontrol)
+								= case wItemKind of
+									IsRadioControl			-> (True,OSupdateRadioControl)
+									IsCheckControl			-> (True,OSupdateCheckControl)
+									IsPopUpControl			-> (True,OSupdatePopUpControl)
+									IsSliderControl			-> (True,OSupdateSliderControl)
+									IsTextControl			-> (True,OSupdateTextControl)
+									IsEditControl			-> (True,OSupdateEditControl)
+									IsButtonControl			-> (True,OSupdateButtonControl)
+									_						-> (False,undef)
+			
+	//		updatecustomcontrol updates a ((Custom)Button/Compound)Control.
+			updatecustomcontrol :: !OSWindowMetrics !OSWindowPtr !Bool !Rect !(WItemHandle .ls .pst) !*OSToolbox
+																		  -> (!WItemHandle .ls .pst, !*OSToolbox)
+			updatecustomcontrol _ parentPtr contextAble area itemH=:{wItemKind=IsCustomButtonControl} tb
+				#! (osPict,tb)			= OSgrabControlPictContext parentPtr itemPtr tb
+				#! picture				= packPicture zero (copyPen lookInfo.lookPen) True osPict tb
+				#! picture				= appClipPicture (toRegion updArea) (lookInfo.lookFun selectState updState) picture
+				#! (_,pen,_,osPict,tb)	= unpackPicture picture
+				   info					= {info & cButtonInfoLook={lookInfo & lookPen=pen}}
+				#! tb					= OSreleaseControlPictContext itemPtr osPict tb
+				#! tb					= OSvalidateWindowRect itemPtr areaLocal tb
+				= ({itemH & wItemInfo=CustomButtonInfo info},tb)
+			where
+				itemPtr					= itemH.wItemPtr
+				selectState				= if (contextAble && itemH.wItemSelect) Able Unable
+				info					= getWItemCustomButtonInfo itemH.wItemInfo
+				lookInfo				= info.cButtonInfoLook
+				areaLocal				= subVector (toVector itemH.wItemPos) area
+				cFrame					= SizeToRectangle itemH.wItemSize
+				updArea					= RectToRectangle areaLocal
+				updState				= {oldFrame=cFrame,newFrame=cFrame,updArea=[updArea]}
+			
+			updatecustomcontrol _ parentPtr contextAble area itemH=:{wItemKind=IsCustomControl} tb
+				#! (osPict,tb)			= OSgrabControlPictContext parentPtr itemPtr tb
+				#! picture				= packPicture zero (copyPen lookInfo.lookPen) True osPict tb
+				#! picture				= appClipPicture (toRegion updArea) (lookInfo.lookFun selectState updState) picture
+				#! (_,pen,_,osPict,tb)	= unpackPicture picture
+				   info					= {info & customInfoLook={lookInfo & lookPen=pen}}
+				#! tb					= OSreleaseControlPictContext itemPtr osPict tb
+				#! tb					= OSvalidateWindowRect itemPtr areaLocal tb
+				= ({itemH & wItemInfo=CustomInfo info},tb)
+			where
+				itemPtr					= itemH.wItemPtr
+				selectState				= if (contextAble && itemH.wItemSelect) Able Unable
+				info					= getWItemCustomInfo itemH.wItemInfo
+				lookInfo				= info.customInfoLook
+				areaLocal				= subVector (toVector itemH.wItemPos) area
+				cFrame					= SizeToRectangle itemH.wItemSize
+				updArea					= RectToRectangle areaLocal
+				updState				= {oldFrame=cFrame,newFrame=cFrame,updArea=[updArea]}
+			
+			updatecustomcontrol wMetrics parentPtr contextAble area itemH=:{wItemKind=IsCompoundControl,wItems} tb
+				| isNothing info.compoundLookInfo
+					# (itemHs,tb)		= updatecontrolsinrect wMetrics parentPtr compoundAble area wItems tb
+					= ({itemH & wItems=itemHs},tb)
+				| otherwise
+					#! (osPict,tb)			= OSgrabControlPictContext parentPtr itemPtr tb
+					#! picture				= packPicture origin (copyPen lookInfo.lookPen) True osPict tb
+					#! picture				= appClipPicture (toRegion updArea) (lookInfo.lookFun selectState updState) picture
+					#! (_,pen,_,osPict,tb)	= unpackPicture picture
+					   info					= {info & compoundLookInfo=Just {compLookInfo & compoundLook={lookInfo & lookPen=pen}}}
+					#! tb					= OSreleaseControlPictContext itemPtr osPict tb
+					#! tb					= updatescrollareas tb
+					#! (itemHs,tb)			= updatecontrolsinrect wMetrics parentPtr compoundAble area wItems tb
+					#! tb					= OSvalidateWindowRect itemPtr areaLocal tb
+					= ({itemH & wItemInfo=CompoundInfo info,wItems=itemHs},tb)
+			where
+				itemPtr						= itemH.wItemPtr
+				itemPos						= itemH.wItemPos		// PA+++
+				itemSize					= itemH.wItemSize
+				compoundAble				= contextAble && itemH.wItemSelect
+				selectState					= if compoundAble Able Unable
+				info						= getWItemCompoundInfo itemH.wItemInfo
+				compLookInfo				= fromJust info.compoundLookInfo
+				lookInfo					= compLookInfo.compoundLook
+				(origin,domainRect,hasScrolls)
+											= (info.compoundOrigin,info.compoundDomain,(isJust info.compoundHScroll,isJust info.compoundVScroll))
+				visScrolls					= OSscrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
+				contentRect					= getCompoundContentRect wMetrics visScrolls (PosSizeToRect origin itemSize)
+				areaLocal					= subVector (toVector itemH.wItemPos) area
+				cFrame						= RectToRectangle contentRect
+				updArea						= RectToRectangle (IntersectRects contentRect (subVector (toVector (itemH.wItemPos-origin)) area))
+				updState					= {oldFrame=cFrame,newFrame=cFrame,updArea=[updArea]}
+				
+				updatescrollareas			= if (emptyH && emptyV) id
+											 (if emptyH				(OSupdateCompoundControl updVRect parentPtr itemPtr)
+											 (if emptyV				(OSupdateCompoundControl updHRect parentPtr itemPtr)
+											 						(OSupdateCompoundControl updHRect parentPtr itemPtr o
+											 						 OSupdateCompoundControl {updVRect & rbottom=updHRect.rbottom} parentPtr itemPtr)))
+				itemRect					= PosSizeToRect itemPos itemSize
+				hRect						= getCompoundHScrollRect wMetrics hasScrolls itemRect
+				vRect						= getCompoundVScrollRect wMetrics hasScrolls itemRect
+				updHRect					= IntersectRects hRect area
+				updVRect					= IntersectRects vRect area
+				emptyH						= IsEmptyRect updHRect
+				emptyV						= IsEmptyRect updVRect
+			
+			updatecustomcontrol _ _ _ _ {wItemKind} _
+				= windowupdateFatalError "updatecustomcontrol" ("unexpected ControlKind: "+++toString wItemKind)
+		
+		updatecontrolinrect wMetrics parentPtr ableContext area (WListLSHandle itemHs) tb
+			# (itemHs,tb)		= updatecontrolsinrect wMetrics parentPtr ableContext area itemHs tb
+			= (WListLSHandle itemHs,tb)
+		
+		updatecontrolinrect wMetrics parentPtr ableContext area (WExtendLSHandle wExH=:{wExtendItems=itemHs}) tb
+			# (itemHs,tb)		= updatecontrolsinrect wMetrics parentPtr ableContext area itemHs tb
+			= (WExtendLSHandle {wExH & wExtendItems=itemHs},tb)
+		
+		updatecontrolinrect wMetrics parentPtr ableContext area (WChangeLSHandle wChH=:{wChangeItems=itemHs}) tb
+			# (itemHs,tb)		= updatecontrolsinrect wMetrics parentPtr ableContext area itemHs tb
+			= (WChangeLSHandle {wChH & wChangeItems=itemHs},tb)
+			
+
+/*	updatebackground(`) updates the background of the window.
+*/
+updatewindowbackground :: !OSWindowMetrics !Bool !(Maybe OSRgnHandle) !UpdateInfo !(WindowHandle .ls .pst) !OSPictContext !*OSToolbox
+																			   -> (!WindowHandle .ls .pst, !OSPictContext,!*OSToolbox)
+updatewindowbackground wMetrics pictureInitialised alsoClipRgn info=:{updWIDS={wPtr}} wH=:{whKind,whWindowInfo,whSize} osPict tb
+	| IsEmptyRect updRect || whKind<>IsWindow			// Nothing to update at all
+		= (wH,osPict,tb)
+	| IsEmptyRect updAreaRect							// Nothing to update inside viewframe
+		= (wH,osPict,tb)
+	| otherwise
+		#! picture					= toPicture zero (copyPen initPen) True osPict tb
+		#! (curClipRgn,picture)		= pictgetcliprgn picture
+		   (clipAction,dispose)		= if (curClipRgn==0) (pictsetcliprgn,\_ p->p) (pictandcliprgn,osdisposergn)
+		#! picture					= clipAction clipState.clipRgn picture
+		   clipAlsoAction			= case alsoClipRgn of
+		   								Just clip	-> pictandcliprgn clip
+		   								_			-> id
+		#! picture					= clipAlsoAction picture
+		#! picture					= setpictorigin origin picture
+		#! picture					= appClipPicture (toRegion updArea) (lookInfo.lookFun selectState updState) picture
+		#! picture					= pictsetcliprgn curClipRgn picture
+		#! (_,pen,_,osPict,tb)		= fromPicture picture
+		#! tb						= dispose curClipRgn tb
+		   wH						= {wH & whWindowInfo=WindowInfo {windowInfo & windowLook={lookInfo & lookPen=pen}}}
+		= (wH,osPict,tb)
+where
+	(toPicture,fromPicture)			= if pictureInitialised (unpeekPicture,peekPicture) (packPicture,unpackPicture)
+	updRect							= info.updWindowArea
+	windowInfo						= getWindowInfoWindowData whWindowInfo
+	(origin,domainRect,hasScrolls)	= (windowInfo.windowOrigin,windowInfo.windowDomain,(isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll))
+	visScrolls						= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
+//	{right=w,bottom=h}				= getWindowContentRect wMetrics visScrolls (SizeToRect whSize)
+//	wFrameRect						= PosSizeToRect origin {w=w,h=h}
+	wFrameRect						= PosSizeToRect origin (RectSize (getWindowContentRect wMetrics visScrolls (SizeToRect whSize)))
+	wFrame							= RectToRectangle wFrameRect
+	updAreaRect						= IntersectRects wFrameRect (addVector (toVector origin) updRect)
+	updArea							= RectToRectangle updAreaRect
+	updState						= {oldFrame=wFrame,newFrame=wFrame,updArea=[updArea]}
+	lookInfo						= windowInfo.windowLook
+	clipState						= windowInfo.windowClip
+	selectState						= if wH.whSelect Able Unable
+	initPen							= lookInfo.lookPen
+
+updatewindowbackground` :: !OSWindowMetrics !Bool !(Maybe OSRgnHandle) !UpdateInfo !WindowHandle` !OSPictContext !*OSToolbox
+																			   -> (!WindowHandle`,!OSPictContext,!*OSToolbox)
+updatewindowbackground` wMetrics pictureInitialised alsoClipRgn info=:{updWIDS={wPtr}} wH=:{whKind`,whWindowInfo`,whSize`} osPict tb
+	| IsEmptyRect updRect || whKind`<>IsWindow			// Nothing to update at all
+		= (wH,osPict,tb)
+	| IsEmptyRect updAreaRect							// Nothing to update inside viewframe
+		= (wH,osPict,tb)
+	| otherwise
+		#! picture					= toPicture zero (copyPen initPen) True osPict tb
+		#! (curClipRgn,picture)		= pictgetcliprgn picture
+		   (clipAction,dispose)		= if (curClipRgn==0) (pictsetcliprgn,\_ p->p) (pictandcliprgn,osdisposergn)
+		#! picture					= clipAction clipState.clipRgn picture
+		   clipAlsoAction			= case alsoClipRgn of
+		   								Just clip	-> pictandcliprgn clip
+		   								_			-> id
+		#! picture					= clipAlsoAction picture
+		#! picture					= setpictorigin origin picture
+		#! picture					= appClipPicture (toRegion updArea) (lookInfo.lookFun selectState updState) picture
+		#! picture					= pictsetcliprgn curClipRgn picture
+		#! (_,pen,_,osPict,tb)		= fromPicture picture
+		#! tb						= dispose curClipRgn tb
+		   wH						= {wH & whWindowInfo`=WindowInfo {windowInfo & windowLook={lookInfo & lookPen=pen}}}
+		= (wH,osPict,tb)
+where
+	(toPicture,fromPicture)			= if pictureInitialised (unpeekPicture,peekPicture) (packPicture,unpackPicture)
+	updRect							= info.updWindowArea
+	windowInfo						= getWindowInfoWindowData whWindowInfo`
+	(origin,domainRect,hasScrolls)	= (windowInfo.windowOrigin,windowInfo.windowDomain,(isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll))
+	visScrolls						= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize`) hasScrolls
+	wFrameRect						= PosSizeToRect origin (RectSize (getWindowContentRect wMetrics visScrolls (SizeToRect whSize`)))
+	wFrame							= RectToRectangle wFrameRect
+	updAreaRect						= IntersectRects wFrameRect (addVector (toVector origin) updRect)
+	updArea							= RectToRectangle updAreaRect
+	updState						= {oldFrame=wFrame,newFrame=wFrame,updArea=[updArea]}
+	lookInfo						= windowInfo.windowLook
+	clipState						= windowInfo.windowClip
+	selectState						= if wH.whSelect` Able Unable
+	initPen							= lookInfo.lookPen
+
+
+/*	updatecontrols updates the controls that are registered for update in UpdateInfo.
+*/
+updatecontrols :: !OSWindowMetrics !UpdateInfo !(WindowHandle .ls .pst) !OSPictContext !*OSToolbox
+											-> (!WindowHandle .ls .pst, !OSPictContext,!*OSToolbox)
+updatecontrols wMetrics info=:{updWIDS,updControls} wH=:{whSelect,whItems} osPict tb
+	# (_,itemHs,osPict,tb)	= updateControls wMetrics updWIDS whSelect updControls whItems osPict tb
+	= ({wH & whItems=itemHs},osPict,tb)
+where
+	updateControls :: !OSWindowMetrics !WIDS !Bool ![ControlUpdateInfo] ![WElementHandle .ls .pst] !OSPictContext !*OSToolbox
+											   -> (![ControlUpdateInfo],![WElementHandle .ls .pst],!OSPictContext,!*OSToolbox)
+	updateControls wMetrics wids contextAble updControls itemHs osPict tb
+		| isEmpty updControls || isEmpty itemHs
+			= (updControls,itemHs,osPict,tb)
+		| otherwise
+			# (itemH,itemHs)				= HdTl itemHs
+			# (updControls,itemH, osPict,tb)= updateControl  wMetrics wids contextAble updControls itemH  osPict tb
+			# (updControls,itemHs,osPict,tb)= updateControls wMetrics wids contextAble updControls itemHs osPict tb
+			= (updControls,[itemH:itemHs],osPict,tb)
+	where
+		updateControl :: !OSWindowMetrics !WIDS !Bool ![ControlUpdateInfo] !(WElementHandle .ls .pst) !OSPictContext !*OSToolbox
+												  -> (![ControlUpdateInfo], !WElementHandle .ls .pst, !OSPictContext,!*OSToolbox)
+		updateControl wMetrics wids contextAble updControls (WItemHandle itemH) osPict tb
+			# (updControls,itemH,osPict,tb)		= updateControl` wMetrics wids contextAble updControls itemH osPict tb
+			= (updControls,WItemHandle itemH,osPict,tb)
+		where
+			updateControl` :: !OSWindowMetrics !WIDS !Bool ![ControlUpdateInfo] !(WItemHandle .ls .pst) !OSPictContext !*OSToolbox
+													   -> (![ControlUpdateInfo], !WItemHandle .ls .pst, !OSPictContext,!*OSToolbox)
+			updateControl` wMetrics wids contextAble updControls itemH=:{wItemNr} osPict tb
+				# (found,updInfo,updControls)	= Remove (\{cuItemNr}->cuItemNr==wItemNr) undef updControls
+				# (updControls,itemHs,osPict,tb)= updateControls wMetrics wids (contextAble && itemH.wItemSelect) updControls itemH.wItems osPict tb
+				  itemH							= {itemH & wItems=itemHs}
+				| not found
+					= (updControls,itemH,osPict,tb)
+				| otherwise
+					# (itemH,osPict,tb)			= updateControl`` wMetrics wids contextAble updInfo.cuArea itemH osPict tb
+					= (updControls,itemH,osPict,tb)
+			where
+				updateControl`` :: !OSWindowMetrics !WIDS !Bool !Rect !(WItemHandle .ls .pst) !OSPictContext !*OSToolbox
+																   -> (!WItemHandle .ls .pst, !OSPictContext,!*OSToolbox)
+				
+				updateControl`` wMetrics wids contextAble area itemH=:{wItemKind=IsCustomButtonControl} osPict tb
+					#! picture				= packPicture zero (copyPen lookInfo.lookPen) True osPict tb
+					#! picture				= appClipPicture (toRegion cFrame) (lookInfo.lookFun selectState updState) picture
+					#! (_,pen,_,osPict,tb)	= unpackPicture picture
+					   info					= {info & cButtonInfoLook={lookInfo & lookPen=pen}}
+					= ({itemH & wItemInfo=CustomButtonInfo info},osPict,tb)
+				where
+					selectState				= if (contextAble && itemH.wItemSelect) Able Unable
+					info					= getWItemCustomButtonInfo itemH.wItemInfo
+					lookInfo				= info.cButtonInfoLook
+					cFrame					= SizeToRectangle itemH.wItemSize
+					updArea					= RectToRectangle (subVector (toVector itemH.wItemPos) area)
+					updState				= {oldFrame=cFrame,newFrame=cFrame,updArea=[updArea]}
+				
+				updateControl`` wMetrics wids contextAble area itemH=:{wItemKind=IsCustomControl} osPict tb
+					#! picture				= packPicture zero (copyPen lookInfo.lookPen) True osPict tb
+					#! picture				= appClipPicture (toRegion cFrame) (lookInfo.lookFun selectState updState) picture
+					#! (_,pen,_,osPict,tb)	= unpackPicture picture
+					   info					= {info & customInfoLook={lookInfo & lookPen=pen}}
+					= ({itemH & wItemInfo=CustomInfo info},osPict,tb)
+				where
+					selectState				= if (contextAble && itemH.wItemSelect) Able Unable
+					info					= getWItemCustomInfo itemH.wItemInfo
+					lookInfo				= info.customInfoLook
+					cFrame					= SizeToRectangle itemH.wItemSize
+					updArea					= RectToRectangle (subVector (toVector itemH.wItemPos) area)
+					updState				= {oldFrame=cFrame,newFrame=cFrame,updArea=[updArea]}
+				
+				updateControl`` wMetrics wids contextAble area itemH=:{wItemKind=IsCompoundControl} osPict tb
+					| isNothing info.compoundLookInfo
+						= (itemH,osPict,tb)
+					| otherwise
+						#! picture				= packPicture origin (copyPen lookInfo.lookPen) True osPict tb
+						#! picture				= appClipPicture (toRegion cFrame) (lookInfo.lookFun selectState updState) picture
+						#! (_,pen,_,osPict,tb)	= unpackPicture picture
+						   info					= {info & compoundLookInfo=Just {compLookInfo & compoundLook={lookInfo & lookPen=pen}}}
+						= ({itemH & wItemInfo=CompoundInfo info},osPict,tb)
+				where
+					selectState				= if (contextAble && itemH.wItemSelect) Able Unable
+					itemSize				= itemH.wItemSize
+					itemPos					= itemH.wItemPos
+					info					= getWItemCompoundInfo itemH.wItemInfo
+					domainRect				= info.compoundDomain
+					hasScrolls				= (isJust info.compoundHScroll,isJust info.compoundVScroll)
+					visScrolls				= OSscrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
+					compLookInfo			= fromJust info.compoundLookInfo
+					lookInfo				= compLookInfo.compoundLook
+					origin					= info.compoundOrigin
+					cFrame					= PosSizeToRectangle origin (RectSize (getCompoundContentRect wMetrics visScrolls (SizeToRect itemSize)))
+					updArea					= RectToRectangle (IntersectRects (RectangleToRect cFrame) (addVector (toVector (origin-itemPos)) area))
+					updState				= {oldFrame=cFrame,newFrame=cFrame,updArea=[updArea]}
+				
+				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsRadioControl} osPict tb
+					= (itemH,osPict,OSupdateRadioControl area wids.wPtr itemH.wItemPtr tb)
+				
+				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsCheckControl} osPict tb
+					= (itemH,osPict,OSupdateCheckControl area wids.wPtr itemH.wItemPtr tb)
+				
+				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsPopUpControl} osPict tb
+					= (itemH,osPict,OSupdatePopUpControl area wids.wPtr itemH.wItemPtr tb)
+				
+				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsSliderControl} osPict tb
+					= (itemH,osPict,OSupdateSliderControl area wids.wPtr itemH.wItemPtr tb)
+				
+				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsTextControl} osPict tb
+					= (itemH,osPict,OSupdateTextControl area wids.wPtr itemH.wItemPtr tb)
+				
+				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsEditControl} osPict tb
+					= (itemH,osPict,OSupdateEditControl area wids.wPtr itemH.wItemPtr tb)
+				
+				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsButtonControl} osPict tb
+					= (itemH,osPict,OSupdateButtonControl area wids.wPtr itemH.wItemPtr tb)
+				
+				updateControl`` _ _ _ _ itemH=:{wItemKind=IsOtherControl _} osPict tb
+					= (itemH,osPict,tb)
+		
+		updateControl wMetrics wids contextAble updControls (WListLSHandle itemHs) osPict tb
+			# (updControls,itemHs,osPict,tb)	= updateControls wMetrics wids contextAble updControls itemHs osPict tb
+			= (updControls,WListLSHandle itemHs,osPict,tb)
+		
+		updateControl wMetrics wids contextAble updControls (WExtendLSHandle wExH=:{wExtendItems=itemHs}) osPict tb
+			# (updControls,itemHs,osPict,tb)	= updateControls wMetrics wids contextAble updControls itemHs osPict tb
+			= (updControls,WExtendLSHandle {wExH & wExtendItems=itemHs},osPict,tb)
+		
+		updateControl wMetrics wids contextAble updControls (WChangeLSHandle wChH=:{wChangeItems=itemHs}) osPict tb
+			# (updControls,itemHs,osPict,tb)	= updateControls wMetrics wids contextAble updControls itemHs osPict tb
+			= (updControls,WChangeLSHandle {wChH & wChangeItems=itemHs},osPict,tb)
