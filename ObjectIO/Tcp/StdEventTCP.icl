@@ -29,24 +29,24 @@ instance ChannelEnv (IOSt .l)
 	mb_close_inet_receiver_without_id False _ ioState
 		= ioState
 	mb_close_inet_receiver_without_id True id_pair ioState
-		#! (closed,ioState)			= IOStClosed ioState
+		#! (closed,ioState)			= ioStClosed ioState
 		| closed
 			= ioState
-		# (found,receivers,ioState)	= IOStGetDevice ReceiverDevice ioState
+		# (found,receivers,ioState)	= ioStGetDevice ReceiverDevice ioState
 		| not found			// PA: guard added
 			= ioState
-		# rsHs						= (ReceiverSystemStateGetReceiverHandles receivers).rReceivers
-		  (found,rsH,rsHs)			= URemove (inetReceiverStateIdentified1 id_pair) undef rsHs
-		# ioState					= IOStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
+		# rsHs						= (receiverSystemStateGetReceiverHandles receivers).rReceivers
+		  (found,rsH,rsHs)			= uremove (inetReceiverStateIdentified1 id_pair) undef rsHs
+		# ioState					= ioStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
 		| not found
 			= ioState
 		| otherwise
 			# {rId=id,rConnected=connectedIds,rInetInfo=inetInfo}
 									= rsH.rHandle
-			# (idtable,ioState)		= IOStGetIdTable ioState
-			# ioState				= IOStSetIdTable (snd (removeIdFromIdTable id idtable)) ioState
+			# (idtable,ioState)		= ioStGetIdTable ioState
+			# ioState				= ioStSetIdTable (snd (removeIdFromIdTable id idtable)) ioState
 			# ioState				= unbindRId id ioState
-			# ioState				= IOStSetRcvDisabled True ioState // MW11++
+			# ioState				= ioStSetRcvDisabled True ioState // MW11++
 			# ioState				= seq (map closeReceiver connectedIds) ioState
 			  (_,_,_,closeFun)		= fromJust inetInfo
 			# ioState				= appIOToolbox closeFun ioState
@@ -254,10 +254,10 @@ applyCharCBF state=:{dummyPending, strings, index, mbMaxIterations, callback, ch
 		nrCharsToApply	= case mbMaxIterations of
 							(Just maxIterations)	-> min nrCharsInString maxIterations
 							_						-> nrCharsInString
-	#!	pSt				= appPIO (IOStSetRcvDisabled False) pSt
+	#!	pSt				= appPIO (ioStSetRcvDisabled False) pSt
 						// set a flag  in the ioState to False
 		(newIndex, (c_ls, pSt))
-						= loop (RIdtoId charRcvRId) callback nrCharsToApply index string (state.c_ls, pSt)
+						= loop (rIdtoId charRcvRId) callback nrCharsToApply index string (state.c_ls, pSt)
 						// apply the callback function nrCharsToApply characters, this can possibly not succeed,
 						// because the callback function closed/disabled this receiver 
 		nrCharsApplied	= newIndex-index
@@ -282,13 +282,13 @@ applyCharCBF state=:{dummyPending, strings, index, mbMaxIterations, callback, ch
 		// applies string.[index] .. string.[index+nrCharsToApply-1] to the callback function
 		|	nrCharsToApply==0
 			= (index, ls_pSt)
-		#!	(receiverPossiblyDisabled, io)	= IOStGetRcvDisabled io
+		#!	(receiverPossiblyDisabled, io)	= ioStGetRcvDisabled io
 		//	this flag is set, when an arbitrary receiver is closed or disabled or when closeProcess happend
 		|	not receiverPossiblyDisabled
 			= loop	charRcvId callback (dec nrCharsToApply) (inc index) string 
 					(callback (Received string.[index]) (ls, { pSt & io=io }))
 		// it is possible, that the receiver was disabled/closed. Check this
-		#!	io	= IOStSetRcvDisabled False io
+		#!	io	= ioStSetRcvDisabled False io
 			(mbSelectState, io)	= getReceiverSelectState charRcvId io
 		|	isJust mbSelectState && (fromJust mbSelectState)==Able
 			= loop	charRcvId callback (dec nrCharsToApply) (inc index) string 
@@ -300,7 +300,7 @@ applyCharCBF state=:{dummyPending, strings, index, mbMaxIterations, callback, ch
 		|	not eomHappened
 			= (state, pSt)
 		#!	(c_ls, pSt)	= callback EOM (state.c_ls, pSt)
-		= ({ state & c_ls=c_ls }, appPIO (closeReceiver (RIdtoId charRcvRId)) pSt)
+		= ({ state & c_ls=c_ls }, appPIO (closeReceiver (rIdtoId charRcvRId)) pSt)
 
 
 open_RChan_or_Listener closeFun ls id rAttributes endpointRef maxSize callbackFun receiverType pSt
@@ -354,18 +354,18 @@ openReceiverGeneral ::	.(Id -> .(SelectState -> .([Id] -> .(.a -> .(.b -> Receiv
 						!.Id [.ReceiverAttribute .e] .a .b !*(PSt .c)
 					->	*(.ErrorReport,!*PSt .c);
 openReceiverGeneral createStateHandleFunc id rAttributes endpointRef isReceiver pState
-	# (pState=:{io=ioState})	= ReceiverFunctions.dOpen pState // MW11++
-	# (rt,ioState)				= IOStGetReceiverTable ioState
+	# (pState=:{io=ioState})	= receiverFunctions.dOpen pState // MW11++
+	# (rt,ioState)				= ioStGetReceiverTable ioState
 	  (maybe_parent,rt)			= getReceiverTableEntry id rt
-	# ioState					= IOStSetReceiverTable rt ioState	// PA++
+	# ioState					= ioStSetReceiverTable rt ioState	// PA++
 	| isJust maybe_parent
 	= (ErrorIdsInUse, { pState & io=ioState })
-	# (found,receivers,ioState)	= IOStGetDevice ReceiverDevice ioState
+	# (found,receivers,ioState)	= ioStGetDevice ReceiverDevice ioState
 	| not found					// PA: condition should never occur as ReceiverDevice has just been 'installed'
-	= FatalError "openReceiverGeneral" "StdEventTCP" "could not retrieve ReceiverSystemState from IOSt"
-	# rsHs						= (ReceiverSystemStateGetReceiverHandles receivers).rReceivers
+	= fatalError "openReceiverGeneral" "StdEventTCP" "could not retrieve ReceiverSystemState from IOSt"
+	# rsHs						= (receiverSystemStateGetReceiverHandles receivers).rReceivers
 	  rsH						= createStateHandleFunc id select closeAlso endpointRef isReceiver 
-	  ioState					= IOStSetDevice (ReceiverSystemState {rReceivers=[rsH:rsHs]}) ioState
+	  ioState					= ioStSetDevice (ReceiverSystemState {rReceivers=[rsH:rsHs]}) ioState
 	  ioState					= bindRId id select id ReceiverDevice ioState
 	= (NoError, { pState & io=ioState })
 where
@@ -475,10 +475,10 @@ closeInetReceiver id category ioState
 	#!	(closed, ioState)	= IOStClosed ioState
 	|	closed
 		= (Nothing, ioState)
-	# (receivers,ioState)	= IOStGetDevice ReceiverDevice ioState
-	  rsHs					= (ReceiverSystemStateGetReceiverHandles receivers).rReceivers
+	# (receivers,ioState)	= ioStGetDevice ReceiverDevice ioState
+	  rsHs					= (receiverSystemStateGetReceiverHandles receivers).rReceivers
 	  (found,rsH,rsHs)		= Remove (inetReceiverStateIdentified2 (id,category)) undef rsHs
-	# ioState				= IOStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
+	# ioState				= ioStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
 	| not found
 		= (Nothing, ioState)
 	# ioState				= unbindRId rsH.rHandle.rId ioState

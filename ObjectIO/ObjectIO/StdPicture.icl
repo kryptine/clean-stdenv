@@ -15,7 +15,7 @@ import	commondef, StdPictureDef
 
 setPenAttributes :: ![PenAttribute] !*Picture -> *Picture
 setPenAttributes atts picture
-	= StateMap2 setattribute atts picture
+	= stateMap2 setattribute atts picture
 where
 	setattribute :: !PenAttribute !*Picture -> *Picture
 	setattribute (PenSize size) picture = setPenSize size picture
@@ -125,62 +125,62 @@ setDefaultPenFont picture
 openFont :: !FontDef !*Picture -> (!(!Bool,!Font),!*Picture)
 openFont {fName,fStyles,fSize} picture
 	# (origin,pen,toScreen,context,tb)	= peekPicture picture
-	# (found,font,tb)					= OSselectfont (fName,fStyles,fSize) tb
+	# (found,font,tb)					= osSelectfont (fName,fStyles,fSize) tb
 	# picture							= unpeekPicture origin pen toScreen context tb
 	= ((found,font),picture)
 
 openDefaultFont :: !*Picture -> (!Font,!*Picture)
 openDefaultFont picture
-	= accpicttoolbox OSdefaultfont picture
+	= accpicttoolbox osDefaultfont picture
 
 openDialogFont :: !*Picture -> (!Font,!*Picture)
 openDialogFont picture
-	= accpicttoolbox OSdialogfont picture
+	= accpicttoolbox osDialogfont picture
 
 getFontNames :: !*Picture -> (![FontName],!*Picture)
 getFontNames picture
-	= accpicttoolbox OSfontnames picture
+	= accpicttoolbox osFontnames picture
 
 getFontStyles :: !FontName	!*Picture -> (![FontStyle],!*Picture)
 getFontStyles fName picture
-	= accpicttoolbox (OSfontstyles fName) picture
+	= accpicttoolbox (osFontstyles fName) picture
 
 getFontSizes :: !Int !Int !FontName	!*Picture -> (![FontSize],!*Picture)
 getFontSizes sizeBound1 sizeBound2 fName picture
-	= accpicttoolbox (OSfontsizes sizeBound1 sizeBound2 fName) picture
+	= accpicttoolbox (osFontsizes sizeBound1 sizeBound2 fName) picture
 
 getFontDef :: !Font -> FontDef
 getFontDef font
 	= {fName=name,fStyles=styles,fSize=size}
 where
-	(name,styles,size)	= OSfontgetdef font
+	(name,styles,size)	= osFontgetdef font
 
 getFontCharWidth :: !Font !Char !*Picture -> (!Int,!*Picture)
 getFontCharWidth font char picture
 	# (osPictContext,picture)	= peekOSPictContext picture
-	# (widths,picture)			= accpicttoolbox (OSgetfontcharwidths True osPictContext [char] font) picture
+	# (widths,picture)			= accpicttoolbox (osGetfontcharwidths True osPictContext [char] font) picture
 	= (hd widths,picture)
 
 getFontCharWidths :: !Font ![Char] !*Picture -> (![Int],!*Picture)
 getFontCharWidths font chars picture
 	# (osPictContext,picture)	= peekOSPictContext picture
-	= accpicttoolbox (OSgetfontcharwidths True osPictContext chars font) picture
+	= accpicttoolbox (osGetfontcharwidths True osPictContext chars font) picture
 
 getFontStringWidth :: !Font !String !*Picture -> (!Int,!*Picture)
 getFontStringWidth font string picture
 	# (osPictContext,picture)	= peekOSPictContext picture
-	# (widths,picture)			= accpicttoolbox (OSgetfontstringwidths True osPictContext [string] font) picture
+	# (widths,picture)			= accpicttoolbox (osGetfontstringwidths True osPictContext [string] font) picture
 	= (hd widths,picture)
 
 getFontStringWidths :: !Font ![String] !*Picture -> (![Int],!*Picture)
 getFontStringWidths font strings picture
 	# (osPictContext,picture)	= peekOSPictContext picture
-	= accpicttoolbox (OSgetfontstringwidths True osPictContext strings font) picture
+	= accpicttoolbox (osGetfontstringwidths True osPictContext strings font) picture
 
 getFontMetrics :: !Font !*Picture -> (!FontMetrics,!*Picture)
 getFontMetrics font picture
 	# (osPictContext,picture)						= peekOSPictContext picture
-	# ((ascent,descent,leading,maxwidth),picture)	= accpicttoolbox (OSgetfontmetrics True osPictContext font) picture
+	# ((ascent,descent,leading,maxwidth),picture)	= accpicttoolbox (osGetfontmetrics True osPictContext font) picture
 	= ({fAscent=ascent,fDescent=descent,fLeading=leading,fMaxWidth=maxwidth},picture)
 
 getPenFontCharWidth :: !Char !*Picture -> (!Int,!*Picture)
@@ -274,7 +274,7 @@ isEmptyRegion {region_shape=[]}	= True
 isEmptyRegion _					= False
 
 getRegionBound :: !Region -> Rectangle
-getRegionBound {region_bound} = RectToRectangle region_bound
+getRegionBound {region_bound} = rectToRectangle region_bound
 
 class toRegion area :: !area -> Region
 
@@ -286,15 +286,15 @@ class toRegion area :: !area -> Region
 instance toRegion Rectangle where
 	toRegion :: !Rectangle -> Region
 	toRegion rectangle
-		| IsEmptyRect rect	= zero
+		| isEmptyRect rect	= zero
 		| otherwise			= {region_shape=[RegionRect rect],region_bound=rect}
 	where
-		rect				= RectangleToRect rectangle
+		rect				= rectangleToRect rectangle
 
 instance toRegion PolygonAt where
 	toRegion :: !PolygonAt -> Region
 	toRegion {polygon_pos=p=:{x,y},polygon={polygon_shape}}
-		| IsEmptyRect bound	= zero
+		| isEmptyRect bound	= zero
 		| otherwise			= {region_shape=[RegionPolygon p shape],region_bound=bound}
 	where
 		shape				= closeShape zero polygon_shape
@@ -333,9 +333,9 @@ instance zero Region where
 instance + Region where
 	(+) :: !Region !Region -> Region
 	(+) r1 r2
-	| IsEmptyRect r1.region_bound
+	| isEmptyRect r1.region_bound
 		= r2
-	| IsEmptyRect r2.region_bound
+	| isEmptyRect r2.region_bound
 		= r1
 	| otherwise
 		= {region_shape=r1.region_shape++r2.region_shape,region_bound=sumbound r1.region_bound r2.region_bound}
@@ -431,14 +431,14 @@ instance Hilites Rectangle where
 	hilite :: !Rectangle !*Picture -> *Picture
 	hilite rectangle picture
 		# picture	= setpicthilitemode picture
-		# picture	= pictfillrect (RectangleToRect rectangle) picture
+		# picture	= pictfillrect (rectangleToRect rectangle) picture
 		# picture	= setpictnormalmode picture
 		= picture
 	
 	hiliteAt :: !Point2 !Rectangle !*Picture -> *Picture
 	hiliteAt _ rectangle picture
 		# picture	= setpicthilitemode picture
-		# picture	= pictfillrect (RectangleToRect rectangle) picture
+		# picture	= pictfillrect (rectangleToRect rectangle) picture
 		# picture	= setpictnormalmode picture
 		= picture
 
@@ -715,36 +715,36 @@ where
 instance Drawables Rectangle where
 	draw :: !Rectangle !*Picture -> *Picture
 	draw rectangle picture
-		= pictdrawrect (RectangleToRect rectangle) picture
+		= pictdrawrect (rectangleToRect rectangle) picture
 	
 	drawAt :: !Point2 !Rectangle !*Picture -> *Picture
 	drawAt _ rectangle picture
-		= pictdrawrect (RectangleToRect rectangle) picture
+		= pictdrawrect (rectangleToRect rectangle) picture
 
 	undraw :: !Rectangle !*Picture -> *Picture
 	undraw rectangle picture
-		= pictundrawrect (RectangleToRect rectangle) picture
+		= pictundrawrect (rectangleToRect rectangle) picture
 	
 	undrawAt :: !Point2 !Rectangle !*Picture -> *Picture
 	undrawAt _ rectangle picture
-		= pictundrawrect (RectangleToRect rectangle) picture
+		= pictundrawrect (rectangleToRect rectangle) picture
 
 instance Fillables Rectangle where
 	fill :: !Rectangle !*Picture -> *Picture
 	fill rectangle picture
-		= pictfillrect (RectangleToRect rectangle) picture
+		= pictfillrect (rectangleToRect rectangle) picture
 	
 	fillAt :: !Point2 !Rectangle !*Picture -> *Picture
 	fillAt _ rectangle picture
-		= pictfillrect (RectangleToRect rectangle) picture
+		= pictfillrect (rectangleToRect rectangle) picture
 
 	unfill :: !Rectangle !*Picture -> *Picture
 	unfill rectangle picture
-		= pictunfillrect (RectangleToRect rectangle) picture
+		= pictunfillrect (rectangleToRect rectangle) picture
 	
 	unfillAt :: !Point2 !Rectangle !*Picture -> *Picture
 	unfillAt _ rectangle picture
-		= pictunfillrect (RectangleToRect rectangle) picture
+		= pictunfillrect (rectangleToRect rectangle) picture
 
 
 /*	Polygon drawing operations:

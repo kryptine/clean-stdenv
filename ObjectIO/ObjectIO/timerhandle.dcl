@@ -55,5 +55,5 @@ import	StdTimerDef, receiverhandle, receivertable
 
 //	Conversion functions from TimerElementState to TimerElementHandle, and vice versa:
 
-TimerElementHandleToTimerElementState :: !*(TimerElementHandle .ls .pst) -> *TimerElementState  .ls .pst
-TimerElementStateToTimerElementHandle :: !*(TimerElementState  .ls .pst) -> *TimerElementHandle .ls .pst
+timerElementHandleToTimerElementState :: !*(TimerElementHandle .ls .pst) -> *TimerElementState  .ls .pst
+timerElementStateToTimerElementHandle :: !*(TimerElementState  .ls .pst) -> *TimerElementHandle .ls .pst

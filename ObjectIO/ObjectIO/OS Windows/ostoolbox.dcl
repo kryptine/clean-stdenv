@@ -9,12 +9,12 @@ definition module ostoolbox
 OSNewToolbox :== 0
 
 // RWS ??? add success bool
-OSInitToolbox :: *OSToolbox -> *OSToolbox
+osInitToolbox :: *OSToolbox -> *OSToolbox
 
 // RWS ??? ugly
 // OSDummyToolbox :: *OSToolbox
 OSDummyToolbox :== 0
 
 // PA: moved from world to ostoolbox
-WorldGetToolbox :: !*World -> (!*OSToolbox,!*World)
-WorldSetToolbox :: !*OSToolbox !*World -> *World
+worldGetToolbox :: !*World -> (!*OSToolbox,!*World)
+worldSetToolbox :: !*OSToolbox !*World -> *World

@@ -5,7 +5,7 @@ definition module receiverhandle
 
 
 import	id, receivermessage
-from	ostoolbox	import OSToolbox // MW11++
+from	ostoolbox	import OSToolbox
 
 
 ::	*ReceiverHandles pst

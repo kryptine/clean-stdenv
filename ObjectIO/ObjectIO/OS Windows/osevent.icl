@@ -4,14 +4,14 @@ implementation module osevent
 
 import	StdBool, StdList, StdMisc, StdTuple
 import	clCrossCall_12, ostime, ostoolbox, ostypes
-from	commondef	import HdTl, FatalError
+from	commondef	import hdtl, fatalError
 from	StdMaybe	import Maybe, Just, Nothing
 //import	StdDebug, tracetypes
 
 
 oseventFatalError :: String String -> .x
 oseventFatalError function error
-	= FatalError function "osevent" error
+	= fatalError function "osevent" error
 
 
 /*	The OSEvents environment keeps track of delayed events. 
@@ -20,32 +20,32 @@ oseventFatalError function error
 	:== [OSEvent]
 
 
-OSappendEvents :: !*[OSEvent] !OSEvents -> OSEvents
-OSappendEvents newEvents osEvents
+osAppendEvents :: !*[OSEvent] !OSEvents -> OSEvents
+osAppendEvents newEvents osEvents
 	= osEvents ++ newEvents
 
-OSisEmptyEvents :: !OSEvents -> (!Bool,!OSEvents)
-OSisEmptyEvents []
+osIsEmptyEvents :: !OSEvents -> (!Bool,!OSEvents)
+osIsEmptyEvents []
 	= (True,  [])
-OSisEmptyEvents osEvents
+osIsEmptyEvents osEvents
 	= (False, osEvents)
 
-OSremoveEvent :: !OSEvents -> (!OSEvent,!OSEvents)
-OSremoveEvent [osEvent:osEvents]
+osRemoveEvent :: !OSEvents -> (!OSEvent,!OSEvents)
+osRemoveEvent [osEvent:osEvents]
 	= (osEvent,osEvents)
-OSremoveEvent []
-	= oseventFatalError "OSremoveEvent" "OSEvents argument is empty"
+osRemoveEvent []
+	= oseventFatalError "osRemoveEvent" "OSEvents argument is empty"
 
-OScopyEvents :: !OSEvents -> (!OSEvents,!OSEvents)
-OScopyEvents []
+osCopyEvents :: !OSEvents -> (!OSEvents,!OSEvents)
+osCopyEvents []
 	= ([],[])
-OScopyEvents [e:es]
+osCopyEvents [e:es]
 	= ([e:es1],[e:es2])
 where
-	(es1,es2)	= OScopyEvents es
+	(es1,es2)	= osCopyEvents es
 
-OSnewEvents :: OSEvents
-OSnewEvents = []
+osNewEvents :: OSEvents
+osNewEvents = []
 
 
 ::	OSEvent
@@ -53,8 +53,8 @@ OSnewEvents = []
 ::	OSSleepTime		// The max time the process allows multi-tasking
 	:== Int
 
-OSNullEvent :: OSEvent
-OSNullEvent
+osNullEvent :: OSEvent
+osNullEvent
 	=	{	ccMsg	= CcWmIDLETIMER
 		,	p1		= 0
 		,	p2		= 0
@@ -69,20 +69,20 @@ OSLongSleep	:== 2^15-1
 // OSNoSleep :: OSSleepTime
 OSNoSleep	:== 0
 
-OShandleEvents :: !(.s -> (Bool,.s)) !(.s -> (OSEvents,.s)) !((OSEvents,.s) -> .s) !(.s -> (Int,.s)) !(OSEvent -> .s -> ([Int],.s)) !(!.s,!*OSToolbox) -> (!.s,!*OSToolbox)
+osHandleEvents :: !(.s -> (Bool,.s)) !(.s -> (OSEvents,.s)) !((OSEvents,.s) -> .s) !(.s -> (Int,.s)) !(OSEvent -> .s -> ([Int],.s)) !(!.s,!*OSToolbox) -> (!.s,!*OSToolbox)
 
-OShandleEvents isFinalState getOSEvents setOSEvents getSleepTime handleOSEvent (state,tb)
+osHandleEvents isFinalState getOSEvents setOSEvents getSleepTime handleOSEvent (state,tb)
 	# (terminate,state)			= isFinalState state
 	| terminate
 		= (state,tb)
 	# (osEvents,state)			= getOSEvents state
-	# (noDelayEvents,osEvents)	= OSisEmptyEvents osEvents
+	# (noDelayEvents,osEvents)	= osIsEmptyEvents osEvents
 	| noDelayEvents
 		# state					= setOSEvents (osEvents,state)
 		# (sleep,state)			= getSleepTime state
 		  getEventCci			= {ccMsg=CcRqDOMESSAGE,p1=toInt (sleep<>OSLongSleep),p2=sleep,p3=0,p4=0,p5=0,p6=0}
-		# (_,state,tb)			= IssueCleanRequest (rccitoevent handleOSEvent) getEventCci state tb
-		= OShandleEvents isFinalState getOSEvents setOSEvents getSleepTime handleOSEvent (state,tb)
+		# (_,state,tb)			= issueCleanRequest (rccitoevent handleOSEvent) getEventCci state tb
+		= osHandleEvents isFinalState getOSEvents setOSEvents getSleepTime handleOSEvent (state,tb)
 		with
 			rccitoevent :: !(OSEvent -> .s -> ([Int],.s)) !OSEvent !.s !*OSToolbox -> (!OSEvent,!.s,!*OSToolbox)
 			rccitoevent handleOSEvent osEvent=:{ccMsg} state tb
@@ -90,31 +90,31 @@ OShandleEvents isFinalState getOSEvents setOSEvents getSleepTime handleOSEvent (
 				# (reply,state)	= handleOSEvent osEvent state
 				= (setReplyInOSEvent reply,state,tb)
 	| otherwise
-		# (osEvent,osEvents)	= OSremoveEvent osEvents
+		# (osEvent,osEvents)	= osRemoveEvent osEvents
 		# state					= setOSEvents (osEvents,state)
 //		# (_,state)				= handleOSEvent (trace_n ("DelayedEvent-->"+++toCleanCrossCallInfoString osEvent) osEvent) state
 		# (_,state)				= handleOSEvent osEvent state
-		= OShandleEvents isFinalState getOSEvents setOSEvents getSleepTime handleOSEvent (state,tb)
+		= osHandleEvents isFinalState getOSEvents setOSEvents getSleepTime handleOSEvent (state,tb)
 
 setReplyInOSEvent :: ![Int] -> CrossCallInfo
 setReplyInOSEvent reply
-	| isEmpty reply	= Return0Cci
-	# (e1,reply)	= HdTl reply
-	| isEmpty reply	= Return1Cci e1
-	# (e2,reply)	= HdTl reply
-	| isEmpty reply	= Return2Cci e1 e2
-	# (e3,reply)	= HdTl reply
-	| isEmpty reply	= Return3Cci e1 e2 e3
-	# (e4,reply)	= HdTl reply
-	| isEmpty reply	= Return4Cci e1 e2 e3 e4
-	# (e5,reply)	= HdTl reply
-	| isEmpty reply	= Return5Cci e1 e2 e3 e4 e5
-	# (e6,_)		= HdTl reply
-	| isEmpty reply	= Return6Cci e1 e2 e3 e4 e5 e6
+	| isEmpty reply	= return0Cci
+	# (e1,reply)	= hdtl reply
+	| isEmpty reply	= return1Cci e1
+	# (e2,reply)	= hdtl reply
+	| isEmpty reply	= return2Cci e1 e2
+	# (e3,reply)	= hdtl reply
+	| isEmpty reply	= return3Cci e1 e2 e3
+	# (e4,reply)	= hdtl reply
+	| isEmpty reply	= return4Cci e1 e2 e3 e4
+	# (e5,reply)	= hdtl reply
+	| isEmpty reply	= return5Cci e1 e2 e3 e4 e5
+	# (e6,_)		= hdtl reply
+	| isEmpty reply	= return6Cci e1 e2 e3 e4 e5 e6
 	| otherwise		= oseventFatalError "setReplyInOSEvent" "number of reply codes > 6"
 
-OSEventIsUrgent :: !OSEvent -> Bool
-OSEventIsUrgent {ccMsg}
+osEventIsUrgent :: !OSEvent -> Bool
+osEventIsUrgent {ccMsg}
 	= case ccMsg of
 		CcWmDRAWCLIPBOARD	-> False	// PA: in a future version, use this event to evaluate a clipboard callback function.
 		CcWmIDLETIMER		-> False

@@ -12,27 +12,27 @@ import clipboardCrossCall_12
 OSClipboardText
 	:==	1	// CF_TEXT
 
-OSinitialiseClipboard :: !*OSToolbox -> *OSToolbox
-OSinitialiseClipboard tb
-	= WinInitialiseClipboard tb
+osInitialiseClipboard :: !*OSToolbox -> *OSToolbox
+osInitialiseClipboard tb
+	= winInitialiseClipboard tb
 
-OShasClipboardText :: !*OSToolbox -> (!Bool,!*OSToolbox)
-OShasClipboardText tb
-	= WinHasClipboardText tb
+osHasClipboardText :: !*OSToolbox -> (!Bool,!*OSToolbox)
+osHasClipboardText tb
+	= winHasClipboardText tb
 
-OSsetClipboardText :: !{#Char} !*OSToolbox -> *OSToolbox
-OSsetClipboardText text tb
-	= WinSetClipboardText text tb
+osSetClipboardText :: !{#Char} !*OSToolbox -> *OSToolbox
+osSetClipboardText text tb
+	= winSetClipboardText text tb
 
-OSgetClipboardText :: !*OSToolbox -> (!{#Char},!*OSToolbox)
-OSgetClipboardText tb
-	= WinGetClipboardText tb
+osGetClipboardText :: !*OSToolbox -> (!{#Char},!*OSToolbox)
+osGetClipboardText tb
+	= winGetClipboardText tb
 
-OSgetClipboardContent :: !*OSToolbox -> (![OSClipboardItemType],!*OSToolbox)
-OSgetClipboardContent tb
-	# (hasText,tb)	= WinHasClipboardText tb
+osGetClipboardContent :: !*OSToolbox -> (![OSClipboardItemType],!*OSToolbox)
+osGetClipboardContent tb
+	# (hasText,tb)	= winHasClipboardText tb
 	= (if hasText [OSClipboardText] [],tb)
 
-OSgetClipboardVersion :: !Int !*OSToolbox -> (!Int,!*OSToolbox)
-OSgetClipboardVersion nr tb
-	= WinGetClipboardCount tb
+osGetClipboardVersion :: !Int !*OSToolbox -> (!Int,!*OSToolbox)
+osGetClipboardVersion nr tb
+	= winGetClipboardCount tb

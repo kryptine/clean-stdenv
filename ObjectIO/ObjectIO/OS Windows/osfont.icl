@@ -6,9 +6,9 @@ implementation module osfont
 
 import	StdBool, StdClass, StdEnum, StdReal
 import	clCrossCall_12, pictCCall_12
-from	clCCall_12		import WinMakeCString, WinGetCString, CSTR, WinGetVertResolution
+from	clCCall_12		import winMakeCString, winGetCString, CSTR, winGetVertResolution
 from	StdPictureDef	import FontName, FontSize, FontStyle, BoldStyle, ItalicsStyle, UnderlinedStyle
-from	commondef		import Error, IsBetween, minmax, StateMap
+from	commondef		import fatalError, isBetween, minmax, stateMap
 
 
 ::	Font
@@ -31,42 +31,42 @@ instance == OSFont where
 	(==) f1 f2 = f1.osfontsize==f2.osfontsize && f1.osfontstyles==f2.osfontstyles && f1.osfontname==f2.osfontname
 
 
-OSselectfont :: !OSFontDef !*OSToolbox -> (!Bool,!Font,!*OSToolbox)
-OSselectfont fdef=:(fName,fStyles,fSize) tb
+osSelectfont :: !OSFontDef !*OSToolbox -> (!Bool,!Font,!*OSToolbox)
+osSelectfont fdef=:(fName,fStyles,fSize) tb
 	= (True,{fontdef=fdef,fontimp=fimp},tb)
 where
-	fimp	= {osfontname=fName,osfontstyles=SStyle2IStyle fStyles,osfontsize=fSize}
+	fimp	= {osfontname=fName,osfontstyles=sStyle2IStyle fStyles,osfontsize=fSize}
 
-OSdefaultfont :: !*OSToolbox -> (!Font,!*OSToolbox)
-OSdefaultfont tb
+osDefaultfont :: !*OSToolbox -> (!Font,!*OSToolbox)
+osDefaultfont tb
 	= ({fontdef=def,fontimp=imp},tb)
 where
 	def		= (name,styles,size)
-	imp		= {osfontname=name,osfontstyles=SStyle2IStyle styles,osfontsize=size}
+	imp		= {osfontname=name,osfontstyles=sStyle2IStyle styles,osfontsize=size}
 	name	= "Times"
 	styles	= []
 	size	= 10
 
-OSdialogfont :: !*OSToolbox -> (!Font,!*OSToolbox)
-OSdialogfont tb
+osDialogfont :: !*OSToolbox -> (!Font,!*OSToolbox)
+osDialogfont tb
 	= ({fontdef=def,fontimp=imp},tb)
 where
 	def		= (name,styles,size)
-	imp		= {osfontname=name,osfontstyles=SStyle2IStyle styles,osfontsize=size}
+	imp		= {osfontname=name,osfontstyles=sStyle2IStyle styles,osfontsize=size}
 	name	= "MS Sans Serif"
 	styles	= []
 	size	= 8
 
-OSfontgetdef :: !Font -> OSFontDef
-OSfontgetdef {fontdef}
+osFontgetdef :: !Font -> OSFontDef
+osFontgetdef {fontdef}
 	= fontdef
 
-OSfontgetimp :: !Font -> OSFont
-OSfontgetimp {fontimp}
+osFontgetimp :: !Font -> OSFont
+osFontgetimp {fontimp}
 	= fontimp
 
-SStyle2IStyle :: ![FontStyle] -> Int
-SStyle2IStyle styles
+sStyle2IStyle :: ![FontStyle] -> Int
+sStyle2IStyle styles
 	= s2i styles 0
 where
 	s2i []                         i = i
@@ -75,8 +75,8 @@ where
 	s2i [ UnderlinedStyle : rest ] i = s2i rest (i bitor iUnderline)
  	s2i [ _               : rest ] i = s2i rest i
 
-IStyle2SStyle :: !Int -> [FontStyle]
-IStyle2SStyle istyle
+iStyle2SStyle :: !Int -> [FontStyle]
+iStyle2SStyle istyle
 	= idtofontstyles` istyle [iBold,iItalic,iUnderline,iStrikeOut]
 where
 	idtofontstyles` :: !Int ![Int] -> [String]
@@ -91,90 +91,90 @@ where
 		style			= if (styleflag==iBold)      BoldStyle
 						 (if (styleflag==iItalic)    ItalicsStyle
 						 (if (styleflag==iUnderline) UnderlinedStyle
-						                             (Error "IStyle2SStyle" "osfont"
-															"Fatal error: unmatched styleflag value ("+++toString styleflag+++")"
+						                             (fatalError "iStyle2SStyle" "osfont"
+																 "unmatched styleflag value ("+++toString styleflag+++")"
 													 )))
 	idtofontstyles` _ _
 		= []
 
 
-OSfontnames :: !*OSToolbox -> (![String], !*OSToolbox)
-OSfontnames tb
+osFontnames :: !*OSToolbox -> (![String], !*OSToolbox)
+osFontnames tb
 	# getFontNamesCci		= {ccMsg=CcRqGETFONTNAMES,p1=0,p2=0,p3=0,p4=0,p5=0,p6=0}
-	# (_,unsortednames,tb)	= IssueCleanRequest FontnamesCallback getFontNamesCci [] tb
-	= (SortAndRemoveDuplicates unsortednames,tb)
+	# (_,unsortednames,tb)	= issueCleanRequest fontnamesCallback getFontNamesCci [] tb
+	= (sortAndRemoveDuplicates unsortednames,tb)
 where
-	FontnamesCallback :: !CrossCallInfo ![FontName] !*OSToolbox -> (!CrossCallInfo,![String],!*OSToolbox)
-	FontnamesCallback cci names os
-		# (newname,os) = WinGetCString cci.p1 os
-		= (Return0Cci,[newname:names],os)
+	fontnamesCallback :: !CrossCallInfo ![FontName] !*OSToolbox -> (!CrossCallInfo,![String],!*OSToolbox)
+	fontnamesCallback cci names os
+		# (newname,os) = winGetCString cci.p1 os
+		= (return0Cci,[newname:names],os)
 
-SortAndRemoveDuplicates :: !u:[a] -> u:[a] | Ord a
-SortAndRemoveDuplicates [e:es]
-	= insert e (SortAndRemoveDuplicates es)
+sortAndRemoveDuplicates :: !u:[a] -> u:[a] | Ord a
+sortAndRemoveDuplicates [e:es]
+	= insert e (sortAndRemoveDuplicates es)
 where
-	insert:: a !u:[a] -> u:[a] | Ord a
+	insert :: a !u:[a] -> u:[a] | Ord a
 	insert a list=:[b:x]
 		| a<b		= [a:list]
 		| a>b		= [b:insert a x]
 		| otherwise	= list
 	insert a _
 		= [a]
-SortAndRemoveDuplicates _
+sortAndRemoveDuplicates _
 	= []
 
 
-OSfontstyles :: !String !*OSToolbox -> (![String],!*OSToolbox)
-OSfontstyles fname tb
+osFontstyles :: !String !*OSToolbox -> (![String],!*OSToolbox)
+osFontstyles fname tb
 	= ([BoldStyle,ItalicsStyle,UnderlinedStyle],tb)
 
-OSfontsizes :: !Int !Int !String !*OSToolbox -> (![Int],!*OSToolbox)
-OSfontsizes between1 between2 fname tb
-	# (textptr,tb)			= WinMakeCString fname tb
+osFontsizes :: !Int !Int !String !*OSToolbox -> (![Int],!*OSToolbox)
+osFontsizes between1 between2 fname tb
+	# (textptr,tb)			= winMakeCString fname tb
 	  getFontSizesCci		= {ccMsg=CcRqGETFONTSIZES,p1=textptr,p2=0,p3=0,p4=0,p5=0,p6=0}
-	# (_,unsortedsizes,tb)	= IssueCleanRequest FontSizesCallback getFontSizesCci [] tb
-	= (SortAndRemoveDuplicates unsortedsizes,tb)
+	# (_,unsortedsizes,tb)	= issueCleanRequest fontSizesCallback getFontSizesCci [] tb
+	= (sortAndRemoveDuplicates unsortedsizes,tb)
 where
 	(low,high)	= minmax between1 between2
 	
-	FontSizesCallback :: !CrossCallInfo ![FontSize] !*OSToolbox -> (!CrossCallInfo,![FontSize],!*OSToolbox)
-	FontSizesCallback cci=:{p1=size,p2=0} sizes tb
-		= (Return0Cci,newsizes,tb)
+	fontSizesCallback :: !CrossCallInfo ![FontSize] !*OSToolbox -> (!CrossCallInfo,![FontSize],!*OSToolbox)
+	fontSizesCallback cci=:{p1=size,p2=0} sizes tb
+		= (return0Cci,newsizes,tb)
 	where
-		pts		= Height2Points size
-		newsizes= if (IsBetween pts low high)
+		pts		= height2Points size
+		newsizes= if (isBetween pts low high)
 					 [pts:sizes]
 					 sizes
-	FontSizesCallback _ _ tb
-		= (Return0Cci,[low..high],tb)
+	fontSizesCallback _ _ tb
+		= (return0Cci,[low..high],tb)
 
-Height2Points :: !Int -> Int
-Height2Points h
+height2Points :: !Int -> Int
+height2Points h
 	= toInt points
 where
-	dpi		= toReal WinGetVertResolution
+	dpi		= toReal winGetVertResolution
 	phfactor= dpi / 72.0
 	points	= toReal h / phfactor
 
 /* XXX MW: probably not called anywhere
-Points2Height :: !Int -> Int
-Points2Height p
+points2Height :: !Int -> Int
+points2Height p
 	= toInt height
 where
-	dpi		= toReal WinGetVertResolution
+	dpi		= toReal winGetVertResolution
 	phfactor= dpi / 72.0
 	height	= toReal p * phfactor
 */
 
-OSgetfontcharwidths :: !Bool !Int ![Char] !Font !*OSToolbox -> (![Int], !*OSToolbox)
-OSgetfontcharwidths hdcPassed maybeHdc chars {fontimp={osfontname,osfontstyles,osfontsize}} tb
-	= StateMap (\c tb->WinGetCharWidth c (osfontname,osfontstyles,osfontsize) (toInt hdcPassed) maybeHdc tb) chars tb
+osGetfontcharwidths :: !Bool !Int ![Char] !Font !*OSToolbox -> (![Int], !*OSToolbox)
+osGetfontcharwidths hdcPassed maybeHdc chars {fontimp={osfontname,osfontstyles,osfontsize}} tb
+	= stateMap (\c tb->winGetCharWidth c (osfontname,osfontstyles,osfontsize) (toInt hdcPassed) maybeHdc tb) chars tb
 
-OSgetfontstringwidths :: !Bool !Int ![String] !Font !*OSToolbox -> (![Int], !*OSToolbox)
-OSgetfontstringwidths hdcPassed maybeHdc strings {fontimp={osfontname,osfontstyles,osfontsize}} tb
-	= StateMap (\s tb->WinGetStringWidth s (osfontname,osfontstyles,osfontsize) (toInt hdcPassed) maybeHdc tb) strings tb
+osGetfontstringwidths :: !Bool !Int ![String] !Font !*OSToolbox -> (![Int], !*OSToolbox)
+osGetfontstringwidths hdcPassed maybeHdc strings {fontimp={osfontname,osfontstyles,osfontsize}} tb
+	= stateMap (\s tb->winGetStringWidth s (osfontname,osfontstyles,osfontsize) (toInt hdcPassed) maybeHdc tb) strings tb
 
-OSgetfontmetrics :: !Bool !Int !Font !*OSToolbox -> (!(!Int,!Int,!Int,!Int),!*OSToolbox)
-OSgetfontmetrics hdcPassed maybeHdc {fontimp={osfontname,osfontstyles,osfontsize}} tb
-	# (ascent,descent,maxwidth,leading,tb) = WinGetFontInfo (osfontname,osfontstyles,osfontsize) (toInt hdcPassed) maybeHdc tb
+osGetfontmetrics :: !Bool !Int !Font !*OSToolbox -> (!(!Int,!Int,!Int,!Int),!*OSToolbox)
+osGetfontmetrics hdcPassed maybeHdc {fontimp={osfontname,osfontstyles,osfontsize}} tb
+	# (ascent,descent,maxwidth,leading,tb) = winGetFontInfo (osfontname,osfontstyles,osfontsize) (toInt hdcPassed) maybeHdc tb
 	= ((ascent,descent,leading,maxwidth),tb)

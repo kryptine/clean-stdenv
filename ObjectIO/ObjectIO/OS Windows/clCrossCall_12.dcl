@@ -11,7 +11,7 @@ import	ostoolbox
 
 //	CrossCallInfo is the basic record that is passed between the Clean thread and the OS thread:
 ::	CrossCallInfo
-	=	{	ccMsg	:: !Int		// The message nr: Clean->OS use CcRq...; OS->Clean use CcWm...
+	=	{	ccMsg	:: !Int		// The message nr: Clean->OS use ccRq...; OS->Clean use ccWm...
 		,	p1		:: !Int
 		,	p2		:: !Int
 		,	p3		:: !Int
@@ -21,23 +21,23 @@ import	ostoolbox
 		}
 
 //	Crosscall with state parameter:
-ErrorCallback :: !String !CrossCallInfo !.s !*OSToolbox -> (!CrossCallInfo,!.s,!*OSToolbox)
-IssueCleanRequest :: !(CrossCallInfo -> .(.s -> .(*OSToolbox -> *(.CrossCallInfo,.s,*OSToolbox))))
+errorCallback :: !String !CrossCallInfo !.s !*OSToolbox -> (!CrossCallInfo,!.s,!*OSToolbox)
+issueCleanRequest :: !(CrossCallInfo -> .(.s -> .(*OSToolbox -> *(.CrossCallInfo,.s,*OSToolbox))))
 					 !.CrossCallInfo
 					 !.s
 					 !*OSToolbox
 				  -> (!CrossCallInfo,!.s,!*OSToolbox)
 
 //	Crosscall without state parameter:
-ErrorCallback2 :: !String !CrossCallInfo !*OSToolbox -> (!CrossCallInfo,!*OSToolbox)
-IssueCleanRequest2 :: !(CrossCallInfo -> .(*OSToolbox -> *(.CrossCallInfo,*OSToolbox)))
+errorCallback2 :: !String !CrossCallInfo !*OSToolbox -> (!CrossCallInfo,!*OSToolbox)
+issueCleanRequest2 :: !(CrossCallInfo -> .(*OSToolbox -> *(.CrossCallInfo,*OSToolbox)))
 					 !.CrossCallInfo
 					 !*OSToolbox
 				  -> (!CrossCallInfo,!*OSToolbox)
 
-ConsolePrint	:: !{#Char} !*OSToolbox ->  *OSToolbox
-Iprint			:: !String !.a -> .a
-Iprint`			:: !String !.a -> .a
+consolePrint	:: !{#Char} !*OSToolbox ->  *OSToolbox
+iprint			:: !String !.a -> .a
+iprint`			:: !String !.a -> .a
 
 Rq0Cci msg :== {ccMsg=msg,p1=0,p2=0,p3=0,p4=0,p5=0,p6=0}
 Rq1Cci msg v1 :== {ccMsg=msg,p1=v1,p2=0,p3=0,p4=0,p5=0,p6=0}
@@ -47,24 +47,24 @@ Rq4Cci msg v1 v2 v3 v4 :== {ccMsg=msg,p1=v1,p2=v2,p3=v3,p4=v4,p5=0,p6=0}
 Rq5Cci msg v1 v2 v3 v4 v5 :== {ccMsg=msg,p1=v1,p2=v2,p3=v3,p4=v4,p5=v5,p6=0}
 Rq6Cci msg v1 v2 v3 v4 v5 v6 :== {ccMsg=msg,p1=v1,p2=v2,p3=v3,p4=v4,p5=v5,p6=v6}
 
-Return0Cci   ::				                     CrossCallInfo
-Return1Cci   :: !Int			              -> CrossCallInfo
-Return2Cci   :: !Int !Int		              -> CrossCallInfo
-Return3Cci   :: !Int !Int !Int                -> CrossCallInfo
-Return4Cci   :: !Int !Int !Int !Int           -> CrossCallInfo
-Return5Cci   :: !Int !Int !Int !Int !Int      -> CrossCallInfo
-Return6Cci   :: !Int !Int !Int !Int !Int !Int -> CrossCallInfo
+return0Cci   ::				                     CrossCallInfo
+return1Cci   :: !Int			              -> CrossCallInfo
+return2Cci   :: !Int !Int		              -> CrossCallInfo
+return3Cci   :: !Int !Int !Int                -> CrossCallInfo
+return4Cci   :: !Int !Int !Int !Int           -> CrossCallInfo
+return5Cci   :: !Int !Int !Int !Int !Int      -> CrossCallInfo
+return6Cci   :: !Int !Int !Int !Int !Int !Int -> CrossCallInfo
 
 
   //---------------------------------------------------------------------//
  //  Synchronisation operations between the Clean thread and OS thread  //
 //---------------------------------------------------------------------//
-WinKickOsThread			:: !CrossCallInfo !*OSToolbox -> (!CrossCallInfo,!*OSToolbox)
-WinKillOsThread			:: !*OSToolbox -> *OSToolbox
-WinStartOsThread		:: !*OSToolbox -> *OSToolbox
+winKickOsThread			:: !CrossCallInfo !*OSToolbox -> (!CrossCallInfo,!*OSToolbox)
+winKillOsThread			:: !*OSToolbox -> *OSToolbox
+winStartOsThread		:: !*OSToolbox -> *OSToolbox
 
-WinCloseOs				:: !*OSToolbox -> Bool
-WinInitOs				:: (!Bool,!*OSToolbox)
+winCloseOs				:: !*OSToolbox -> Bool
+winInitOs				:: (!Bool,!*OSToolbox)
 
 
   //------------------------------------------------------------------------//
@@ -201,7 +201,7 @@ CcRqINSERTMENUITEM			:== 1205
 CcRqDOMESSAGE				:== 1100
 
   //------------------------------------------------------------------------//
- //  The message numbers for communication from OS to Clean (ccMsg field)  //
+ //  The message numbers for communication from OS to Clean (CcMsg field)  //
 //------------------------------------------------------------------------//
 CcWINMESSmax				:== 999
 

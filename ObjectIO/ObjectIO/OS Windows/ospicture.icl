@@ -10,7 +10,7 @@ import	pictCCall_12, osfont
 from	osrgn		import OSRgnHandle
 from	ostoolbox	import OSNewToolbox
 import	StdPictureDef
-from	commondef	import toTuple, subVector, SetBetween
+from	commondef	import toTuple, subVector, setBetween
 
 ::	Picture
 	=	{	pictContext		:: !OSPictContext	// The context for drawing operations
@@ -36,8 +36,8 @@ from	commondef	import toTuple, subVector, SetBetween
 /*
 initialisePicture :: !Origin !Pen !OSPictContext !*OSToolbox -> (!OSPictContext,!*OSToolbox)
 initialisePicture origin pen=:{penSize,penForeColour,penBackColour,penPos,penFont} hdc tb
-	# {osfontname,osfontstyles,osfontsize}	= OSfontgetimp penFont
-	# (hdc,tb)								= WinInitPicture
+	# {osfontname,osfontstyles,osfontsize}	= osFontgetimp penFont
+	# (hdc,tb)								= winInitPicture
 												penSize
 												iModeCopy
 												initforecolour
@@ -46,7 +46,7 @@ initialisePicture origin pen=:{penSize,penForeColour,penBackColour,penPos,penFon
 												(osfontname,osfontstyles,osfontsize)
 												(0,0)
 												(hdc,tb)
-	# (_,_,_,_,_,_,(hdc,tb))	= WinDonePicture (hdc,tb)
+	# (_,_,_,_,_,_,(hdc,tb))	= winDonePicture (hdc,tb)
 	= (hdc,tb)
 where
 	initforecolour	= toRGBtriple penForeColour
@@ -55,8 +55,8 @@ where
 */
 packPicture :: !Origin !*Pen !Bool !OSPictContext !*OSToolbox -> *Picture
 packPicture origin pen=:{penSize,penForeColour,penBackColour,penPos,penFont} isScreenOutput hdc tb
-	#! {osfontname,osfontstyles,osfontsize}= OSfontgetimp penFont
-	#! (hdc,tb)		= WinInitPicture
+	#! {osfontname,osfontstyles,osfontsize}= osFontgetimp penFont
+	#! (hdc,tb)		= winInitPicture
 						penSize
 						iModeCopy
 						initforecolour
@@ -78,8 +78,8 @@ where
 
 unpackPicture :: !*Picture -> (!Origin,!*Pen,!Bool,!OSPictContext,!*OSToolbox)
 unpackPicture {pictOrigin,pictPen,pictToScreen,pictContext,pictToolbox}
-// PA: intend to use simplified version of WinDonePicture; crashes for some reason.
-	# (_,_,_,_,_,_,(hdc,tb))	= WinDonePicture (pictContext,pictToolbox)
+// PA: intend to use simplified version of winDonePicture; crashes for some reason.
+	# (_,_,_,_,_,_,(hdc,tb))	= winDonePicture (pictContext,pictToolbox)
 //	# (hdc,tb)	= WinDonePicture (pictContext,pictToolbox)
 	= (pictOrigin,pictPen,pictToScreen,hdc,tb)
 
@@ -114,11 +114,11 @@ copyPen {penSize,penForeColour,penBackColour,penPos={x,y},penFont}
 
 peekScreen :: !.(St *Picture .x) !*OSToolbox -> (!.x,!*OSToolbox)
 peekScreen f tb
-	# (hdc,tb)		= WinCreateScreenHDC tb
+	# (hdc,tb)		= winCreateScreenHDC tb
 	# picture		= packPicture zero defaultPen True hdc tb
 	# (x,picture)	= f picture
 	# (_,_,_,hdc,tb)= unpackPicture picture
-	# tb			= WinDestroyScreenHDC (hdc,tb)
+	# tb			= winDestroyScreenHDC (hdc,tb)
 	= (x,tb)
 
 
@@ -131,7 +131,7 @@ defaultPen
 	  ,	penFont			= defaultFont
 	  }
 where
-	(defaultFont,_)		= OSdefaultfont OSNewToolbox
+	(defaultFont,_)		= osDefaultfont OSNewToolbox
 
 dialogPen :: *Pen
 dialogPen
@@ -142,7 +142,7 @@ dialogPen
 	  ,	penFont			= dialogFont
 	  }
 where
-	(dialogFont,_)		= OSdialogfont OSNewToolbox
+	(dialogFont,_)		= osDialogfont OSNewToolbox
 
 setPenAttribute :: !PenAttribute !u:Pen -> u:Pen
 setPenAttribute (PenSize   size)   pen = {pen & penSize      =max 1 size}
@@ -196,7 +196,7 @@ setpictpenpos newpos=:{x=x`,y=y`} picture=:{pictToolbox,pictOrigin,pictPen=pen=:
 	| x==x` && y==y`
 		= picture
 	| otherwise
-		# (context,tb)	= WinMovePenTo (toTuple (newpos-pictOrigin)) (pictContext,pictToolbox)
+		# (context,tb)	= winMovePenTo (toTuple (newpos-pictOrigin)) (pictContext,pictToolbox)
 		  pen			= {pen & penPos={x=x`,y=y`}}
 		= {picture & pictToolbox=tb,pictContext=context,pictPen=pen}
 
@@ -206,7 +206,7 @@ getpictpenpos picture=:{pictPen={penPos={x,y}}}
 
 movepictpenpos :: !Vector2 !*Picture -> *Picture
 movepictpenpos v=:{vx,vy} picture=:{pictToolbox,pictPen=pen=:{penPos={x,y}},pictContext}
-	# (context,tb)	= WinMovePen (toTuple v) (pictContext,pictToolbox)
+	# (context,tb)	= winMovePen (toTuple v) (pictContext,pictToolbox)
 	  pen			= {pen & penPos={x=x+vx,y=y+vy}}
 	= {picture & pictToolbox=tb,pictContext=context,pictPen=pen}
 
@@ -216,7 +216,7 @@ setpictpensize w picture=:{pictToolbox,pictContext,pictPen}
 	| w`==pictPen.penSize
 		= picture
 	| otherwise
-		# (context,tb)	= WinSetPenSize w` (pictContext,pictToolbox)
+		# (context,tb)	= winSetPenSize w` (pictContext,pictToolbox)
 		  pen			= {pictPen & penSize=w`}
 		= {picture & pictToolbox=tb,pictContext=context,pictPen=pen}
 where
@@ -233,7 +233,7 @@ setpictpencolour colour picture=:{pictToolbox,pictPen,pictContext}
 	| reqRGB==curRGB
 		= picture
 	| otherwise
-		# (context,tb)	= WinSetPenColor reqRGB (pictContext,pictToolbox)
+		# (context,tb)	= winSetPenColor reqRGB (pictContext,pictToolbox)
 		  pen			= {pictPen & penForeColour=colour}
 		= {picture & pictPen=pen,pictToolbox=tb,pictContext=context}
 where
@@ -245,7 +245,7 @@ setpictbackcolour colour picture=:{pictToolbox,pictPen,pictContext}
 	| reqRGB==curRGB
 		= picture
 	| otherwise
-		# (context,tb)	= WinSetBackColor (toRGBtriple colour) (pictContext,pictToolbox)
+		# (context,tb)	= winSetBackColor (toRGBtriple colour) (pictContext,pictToolbox)
 		  pen			= {pictPen & penBackColour=colour}
 		= {picture & pictPen=pen,pictToolbox=tb,pictContext=context}
 where
@@ -253,7 +253,7 @@ where
 	curRGB				= toRGBtriple pictPen.penBackColour
 
 toRGBtriple :: !Colour -> (!Int,!Int,!Int)
-toRGBtriple (RGB {r,g,b})	= (SetBetween r MinRGB MaxRGB,SetBetween g MinRGB MaxRGB,SetBetween b MinRGB MaxRGB)
+toRGBtriple (RGB {r,g,b})	= (setBetween r MinRGB MaxRGB,setBetween g MinRGB MaxRGB,setBetween b MinRGB MaxRGB)
 toRGBtriple Black			= (MinRGB,MinRGB,MinRGB)
 toRGBtriple DarkGrey		= ( MaxRGB>>2,    MaxRGB>>2,    MaxRGB>>2)
 toRGBtriple Grey			= ( MaxRGB>>1,    MaxRGB>>1,    MaxRGB>>1)
@@ -278,14 +278,14 @@ getpictbackcolour picture=:{pictPen={penBackColour}}
 //	Change the font attributes:
 setpictpenfont :: !Font !*Picture -> *Picture
 setpictpenfont font picture=:{pictToolbox,pictContext,pictPen=pen}
-	| imp==OSfontgetimp pen.penFont
+	| imp==osFontgetimp pen.penFont
 		= picture
 	| otherwise
-		# (context,tb)	= WinSetFont (osfontname,osfontstyles,osfontsize) (pictContext,pictToolbox)
+		# (context,tb)	= winSetFont (osfontname,osfontstyles,osfontsize) (pictContext,pictToolbox)
 		  pen			= {pen & penFont=font}
 		= {picture & pictToolbox=tb,pictContext=context,pictPen=pen}
 where
-	imp										= OSfontgetimp font
+	imp										= osFontgetimp font
 	{osfontname,osfontstyles,osfontsize}	= imp
 
 getpictpenfont :: !*Picture -> (!Font,!*Picture)
@@ -294,10 +294,10 @@ getpictpenfont picture=:{pictPen={penFont}}
 
 setpictpendefaultfont :: !*Picture -> *Picture
 setpictpendefaultfont picture=:{pictToolbox,pictContext,pictPen}
-	# (font,tb)		= OSdefaultfont pictToolbox
+	# (font,tb)		= osDefaultfont pictToolbox
 	  {osfontname,osfontstyles,osfontsize}
-	  				= OSfontgetimp font
-	# (context,tb)	= WinSetFont (osfontname,osfontstyles,osfontsize) (pictContext,tb)
+	  				= osFontgetimp font
+	# (context,tb)	= winSetFont (osfontname,osfontstyles,osfontsize) (pictContext,tb)
 	  pen			= {pictPen & penFont=font}
 	= {picture & pictToolbox=tb,pictContext=context,pictPen=pen}
 
@@ -306,17 +306,17 @@ setpictpendefaultfont picture=:{pictToolbox,pictContext,pictPen}
 */
 setpictxormode :: !*Picture -> *Picture
 setpictxormode picture=:{pictToolbox,pictContext}
-	# (context,tb)	= WinSetMode iModeXor (pictContext,pictToolbox)
+	# (context,tb)	= winSetMode iModeXor (pictContext,pictToolbox)
 	= {picture & pictToolbox=tb,pictContext=context}
 
 setpicthilitemode :: !*Picture -> *Picture
 setpicthilitemode picture=:{pictToolbox,pictContext}
-	# (context,tb)	= WinSetMode iModeXor (pictContext,pictToolbox)
+	# (context,tb)	= winSetMode iModeXor (pictContext,pictToolbox)
 	= {picture & pictToolbox=tb,pictContext=context}
 
 setpictnormalmode :: !*Picture -> *Picture
 setpictnormalmode picture=:{pictToolbox,pictContext}
-	# (context,tb)	= WinSetMode iModeCopy (pictContext,pictToolbox)
+	# (context,tb)	= winSetMode iModeCopy (pictContext,pictToolbox)
 	= {picture & pictToolbox=tb,pictContext=context}
 
 
@@ -327,10 +327,10 @@ setpictnormalmode picture=:{pictToolbox,pictContext}
 pictdrawpoint :: !Point2 !*Picture -> *Picture
 pictdrawpoint pos=:{x,y} picture=:{pictPen={penSize},pictOrigin={x=ox,y=oy},pictToolbox,pictContext}
 	| penSize==1
-		# (context,tb)	= WinDrawPoint (x`,y`) (pictContext,pictToolbox)
+		# (context,tb)	= winDrawPoint (x`,y`) (pictContext,pictToolbox)
 		= {picture & pictToolbox=tb,pictContext=context}
 	| otherwise
-		# (context,tb)	= WinFillRectangle {rleft=x`,rtop=y`,rright=x`+penSize,rbottom=y`+penSize} (pictContext,pictToolbox)
+		# (context,tb)	= winFillRectangle {rleft=x`,rtop=y`,rright=x`+penSize,rbottom=y`+penSize} (pictContext,pictToolbox)
 		= {picture & pictToolbox=tb,pictContext=context}
 where
 	(x`,y`)	= (x-ox,y-oy)
@@ -346,27 +346,27 @@ where
 */
 pictdrawlineto :: !Point2 !*Picture -> *Picture
 pictdrawlineto pos=:{x,y} picture=:{pictOrigin,pictToolbox,pictContext,pictPen}
-	# (context,tb)	= WinLinePenTo (toTuple (pos-pictOrigin)) (pictContext,pictToolbox)
+	# (context,tb)	= winLinePenTo (toTuple (pos-pictOrigin)) (pictContext,pictToolbox)
 	  pen			= {pictPen & penPos={x=x,y=y}}
 	= {picture & pictToolbox=tb,pictContext=context,pictPen=pen}
 
 pictundrawlineto :: !Point2 !*Picture -> *Picture
 pictundrawlineto pos=:{x,y} picture=:{pictOrigin,pictToolbox,pictContext,pictPen=pen=:{penForeColour,penBackColour}}
-	# (context,tb)	= WinSetPenColor (toRGBtriple penBackColour) (pictContext,pictToolbox)
-	# (context,tb)	= WinLinePenTo (toTuple (pos-pictOrigin)) (context,tb)
-	# (context,tb)	= WinSetPenColor (toRGBtriple penForeColour) (context,tb)
+	# (context,tb)	= winSetPenColor (toRGBtriple penBackColour) (pictContext,pictToolbox)
+	# (context,tb)	= winLinePenTo (toTuple (pos-pictOrigin)) (context,tb)
+	# (context,tb)	= winSetPenColor (toRGBtriple penForeColour) (context,tb)
 	= {picture & pictToolbox=tb,pictContext=context,pictPen={pen & penPos={x=x,y=y}}}
 
 pictdrawline :: !Point2 !Point2 !*Picture -> *Picture
 pictdrawline a b picture=:{pictOrigin,pictToolbox,pictContext}
-	# (context,tb)	= WinDrawLine (toTuple (a-pictOrigin)) (toTuple (b-pictOrigin)) (pictContext,pictToolbox)
+	# (context,tb)	= winDrawLine (toTuple (a-pictOrigin)) (toTuple (b-pictOrigin)) (pictContext,pictToolbox)
 	= {picture & pictToolbox=tb,pictContext=context}
 
 pictundrawline :: !Point2 !Point2 !*Picture -> *Picture
 pictundrawline a b picture=:{pictOrigin,pictToolbox,pictContext,pictPen={penForeColour,penBackColour}}
-	# (context,tb)	= WinSetPenColor (toRGBtriple penBackColour) (pictContext,pictToolbox)
-	# (context,tb)	= WinDrawLine (toTuple (a-pictOrigin)) (toTuple (b-pictOrigin)) (context,tb)
-	# (context,tb)	= WinSetPenColor (toRGBtriple penForeColour) (context,tb)
+	# (context,tb)	= winSetPenColor (toRGBtriple penBackColour) (pictContext,pictToolbox)
+	# (context,tb)	= winDrawLine (toTuple (a-pictOrigin)) (toTuple (b-pictOrigin)) (context,tb)
+	# (context,tb)	= winSetPenColor (toRGBtriple penForeColour) (context,tb)
 	= {picture & pictToolbox=tb,pictContext=context}
 
 
@@ -376,33 +376,33 @@ pictundrawline a b picture=:{pictOrigin,pictToolbox,pictContext,pictPen={penFore
 */
 pictdrawchar :: !Char !*Picture -> *Picture
 pictdrawchar char picture=:{pictContext,pictToolbox,pictPen,pictOrigin}
-	# (context,tb)		= WinDrawChar (toInt char) (pictContext,pictToolbox)
-	# (x`,y`,context,tb)= WinGetPenPos (context,tb)
+	# (context,tb)		= winDrawChar (toInt char) (pictContext,pictToolbox)
+	# (x`,y`,context,tb)= winGetPenPos (context,tb)
 	#! {x,y}			= pictOrigin
 	#! pen				= {pictPen & penPos={x=x+x`,y=y+y`}}
 	= {picture & pictContext=context,pictToolbox=tb,pictPen=pen}
 
 pictundrawchar :: !Char !*Picture -> *Picture
 pictundrawchar char picture=:{pictContext,pictToolbox,pictPen=pen=:{penForeColour,penBackColour},pictOrigin={x=ox,y=oy}}
-	# (context,tb)		= WinSetPenColor (toRGBtriple penBackColour) (pictContext,pictToolbox)
-	# (context,tb)		= WinDrawChar (toInt char) (context,tb)
-	# (context,tb)		= WinSetPenColor (toRGBtriple penForeColour) (context,tb)
-	# (x,y,context,tb)	= WinGetPenPos (context,tb)
+	# (context,tb)		= winSetPenColor (toRGBtriple penBackColour) (pictContext,pictToolbox)
+	# (context,tb)		= winDrawChar (toInt char) (context,tb)
+	# (context,tb)		= winSetPenColor (toRGBtriple penForeColour) (context,tb)
+	# (x,y,context,tb)	= winGetPenPos (context,tb)
 	= {picture & pictContext=context,pictToolbox=tb,pictPen={pen & penPos={x=x+ox,y=y+oy}}}
 
 pictdrawstring :: !String !*Picture -> *Picture
-pictdrawstring string picture=:{pictContext,pictToolbox,pictPen,pictOrigin={x=ox,y=oy}}	// PA:
-	# (context,tb)		= WinDrawString string (pictContext,pictToolbox)
-	# (x,y,context,tb)	= WinGetPenPos (context,tb)
+pictdrawstring string picture=:{pictContext,pictToolbox,pictPen,pictOrigin={x=ox,y=oy}}
+	# (context,tb)		= winDrawString string (pictContext,pictToolbox)
+	# (x,y,context,tb)	= winGetPenPos (context,tb)
 	  pen				= {pictPen & penPos={x=x+ox,y=y+oy}}
 	= {picture & pictContext=context,pictToolbox=tb,pictPen=pen}
 
 pictundrawstring :: !String !*Picture -> *Picture
 pictundrawstring string picture=:{pictContext,pictToolbox,pictPen=pen=:{penForeColour,penBackColour},pictOrigin={x=ox,y=oy}}
-	# (context,tb)		= WinSetPenColor (toRGBtriple penBackColour) (pictContext,pictToolbox)
-	# (context,tb)		= WinDrawString string (context,tb)
-	# (context,tb)		= WinSetPenColor (toRGBtriple penForeColour) (context,tb)
-	# (x,y,context,tb)	= WinGetPenPos (context,tb)
+	# (context,tb)		= winSetPenColor (toRGBtriple penBackColour) (pictContext,pictToolbox)
+	# (context,tb)		= winDrawString string (context,tb)
+	# (context,tb)		= winSetPenColor (toRGBtriple penForeColour) (context,tb)
+	# (x,y,context,tb)	= winGetPenPos (context,tb)
 	= {picture & pictContext=context,pictToolbox=tb,pictPen={pen & penPos={x=x+ox,y=y+oy}}}
 
 
@@ -413,30 +413,30 @@ pictundrawstring string picture=:{pictContext,pictToolbox,pictPen=pen=:{penForeC
 */
 pictdrawoval :: !Point2 !Oval !*Picture -> *Picture
 pictdrawoval center oval picture=:{pictContext,pictToolbox,pictOrigin}
-	# (context,tb)	= WinDrawOval rect (pictContext,pictToolbox)
+	# (context,tb)	= winDrawOval rect (pictContext,pictToolbox)
 	= {picture & pictContext=context,pictToolbox=tb}
 where
 	rect	= ovalToRect (center-pictOrigin) oval
 
 pictundrawoval :: !Point2 !Oval !*Picture -> *Picture
 pictundrawoval center oval picture=:{pictContext,pictToolbox,pictOrigin,pictPen={penBackColour,penForeColour}}
-	# (context,tb)	= WinSetPenColor (toRGBtriple penBackColour) (pictContext,pictToolbox)
-	# (context,tb)	= WinDrawOval rect (context,tb)
-	# (context,tb)	= WinSetPenColor (toRGBtriple penForeColour) (context,tb)
+	# (context,tb)	= winSetPenColor (toRGBtriple penBackColour) (pictContext,pictToolbox)
+	# (context,tb)	= winDrawOval rect (context,tb)
+	# (context,tb)	= winSetPenColor (toRGBtriple penForeColour) (context,tb)
 	= {picture & pictContext=context,pictToolbox=tb}
 where
 	rect	= ovalToRect (center-pictOrigin) oval
 
 pictfilloval :: !Point2 !Oval !*Picture -> *Picture
 pictfilloval center oval picture=:{pictContext,pictToolbox,pictOrigin}
-	# (context,tb)	= WinFillOval rect (pictContext,pictToolbox)
+	# (context,tb)	= winFillOval rect (pictContext,pictToolbox)
 	= {picture & pictContext=context,pictToolbox=tb}
 where
 	rect	= ovalToRect (center-pictOrigin) oval
 
 pictunfilloval :: !Point2 !Oval !*Picture -> *Picture
 pictunfilloval center oval picture=:{pictContext,pictToolbox,pictOrigin,pictPen}
-	# (context,tb)	= WinEraseOval rect (pictContext,pictToolbox)
+	# (context,tb)	= winEraseOval rect (pictContext,pictToolbox)
 	= {picture & pictContext=context,pictToolbox=tb}
 where
 	rect	= ovalToRect (center-pictOrigin) oval
@@ -457,7 +457,7 @@ where
 */
 pictdrawcurve :: !Bool !Point2 !Curve !*Picture -> *Picture
 pictdrawcurve movePen start=:{x,y} curve picture=:{pictContext,pictToolbox,pictOrigin}
-	# (context,tb)		= WinDrawCurve wrect (toTuple wstart) (toTuple wend) (pictContext,pictToolbox)
+	# (context,tb)		= winDrawCurve wrect (toTuple wstart) (toTuple wend) (pictContext,pictToolbox)
 	# picture			= {picture & pictContext=context,pictToolbox=tb}
 	| not movePen		= picture
 	| otherwise			= setpictpenpos end picture
@@ -468,9 +468,9 @@ where
 
 pictundrawcurve :: !Bool !Point2 !Curve !*Picture -> *Picture
 pictundrawcurve movePen start=:{x,y} curve picture=:{pictContext,pictToolbox,pictOrigin,pictPen={penForeColour,penBackColour}}
-	# (context,tb)		= WinSetPenColor (toRGBtriple penBackColour) (pictContext,pictToolbox)
-	# (context,tb)		= WinDrawCurve wrect (toTuple wstart) (toTuple wend) (context,tb)
-	# (context,tb)		= WinSetPenColor (toRGBtriple penForeColour) (context,tb)
+	# (context,tb)		= winSetPenColor (toRGBtriple penBackColour) (pictContext,pictToolbox)
+	# (context,tb)		= winDrawCurve wrect (toTuple wstart) (toTuple wend) (context,tb)
+	# (context,tb)		= winSetPenColor (toRGBtriple penForeColour) (context,tb)
 	# picture			= {picture & pictContext=context,pictToolbox=tb}
 	| not movePen		= picture
 	| otherwise			= setpictpenpos end picture
@@ -481,7 +481,7 @@ where
 
 pictfillcurve :: !Bool !Point2 !Curve !*Picture -> *Picture
 pictfillcurve movePen start curve picture=:{pictContext,pictToolbox,pictOrigin}
-	# (context,tb)		= WinFillWedge wrect (toTuple wstart) (toTuple wend) (pictContext,pictToolbox)
+	# (context,tb)		= winFillWedge wrect (toTuple wstart) (toTuple wend) (pictContext,pictToolbox)
 	# picture			= {picture & pictContext=context,pictToolbox=tb}
 	| not movePen		= picture
 	| otherwise			= setpictpenpos end picture
@@ -492,9 +492,9 @@ where
 
 pictunfillcurve :: !Bool !Point2 !Curve !*Picture -> *Picture
 pictunfillcurve movePen start curve picture=:{pictContext,pictToolbox,pictOrigin,pictPen={penForeColour,penBackColour}}
-	# (context,tb)		= WinSetPenColor (toRGBtriple penBackColour) (pictContext,pictToolbox)
-	# (context,tb)		= WinFillWedge wrect (toTuple wstart) (toTuple wend) (context,tb)
-	# (context,tb)		= WinSetPenColor (toRGBtriple penForeColour) (context,tb)
+	# (context,tb)		= winSetPenColor (toRGBtriple penBackColour) (pictContext,pictToolbox)
+	# (context,tb)		= winFillWedge wrect (toTuple wstart) (toTuple wend) (context,tb)
+	# (context,tb)		= winSetPenColor (toRGBtriple penForeColour) (context,tb)
 	# picture			= {picture & pictContext=context,pictToolbox=tb}
 	| not movePen		= picture
 	| otherwise			= setpictpenpos end picture
@@ -524,24 +524,24 @@ where
 */
 pictdrawrect :: !Rect !*Picture -> *Picture
 pictdrawrect r picture=:{pictContext,pictToolbox,pictOrigin}
-	# (context,tb)	= WinDrawRectangle (subVector (toVector pictOrigin) r) (pictContext,pictToolbox)
+	# (context,tb)	= winDrawRectangle (subVector (toVector pictOrigin) r) (pictContext,pictToolbox)
 	= {picture & pictContext=context,pictToolbox=tb}
 
 pictundrawrect :: !Rect !*Picture -> *Picture
 pictundrawrect r picture=:{pictContext,pictToolbox,pictOrigin,pictPen={penForeColour,penBackColour}}
-	# (context,tb)	= WinSetPenColor (toRGBtriple penBackColour) (pictContext,pictToolbox)
-	# (context,tb)	= WinDrawRectangle (subVector (toVector pictOrigin) r) (context,tb)
-	# (context,tb)	= WinSetPenColor (toRGBtriple penForeColour) (context,tb)
+	# (context,tb)	= winSetPenColor (toRGBtriple penBackColour) (pictContext,pictToolbox)
+	# (context,tb)	= winDrawRectangle (subVector (toVector pictOrigin) r) (context,tb)
+	# (context,tb)	= winSetPenColor (toRGBtriple penForeColour) (context,tb)
 	= {picture & pictContext=context,pictToolbox=tb}
 
 pictfillrect :: !Rect !*Picture -> *Picture
 pictfillrect r picture=:{pictContext,pictToolbox,pictOrigin}
-	# (context,tb)	= WinFillRectangle (subVector (toVector pictOrigin) r) (pictContext,pictToolbox)
+	# (context,tb)	= winFillRectangle (subVector (toVector pictOrigin) r) (pictContext,pictToolbox)
 	= {picture & pictContext=context,pictToolbox=tb}
 
 pictunfillrect :: !Rect !*Picture -> *Picture
 pictunfillrect r picture=:{pictContext,pictToolbox,pictOrigin}
-	# (context,tb)	= WinEraseRectangle (subVector (toVector pictOrigin) r) (pictContext,pictToolbox)
+	# (context,tb)	= winEraseRectangle (subVector (toVector pictOrigin) r) (pictContext,pictToolbox)
 	= {picture & pictContext=context,pictToolbox=tb}
 
 
@@ -549,7 +549,7 @@ pictunfillrect r picture=:{pictContext,pictToolbox,pictOrigin}
 */
 pictscroll :: !Rect !Vector2 !*Picture -> (!Rect,!*Picture)
 pictscroll r v picture=:{pictContext,pictToolbox,pictOrigin}
-	# (updRect,(context,tb))	= WinScrollRectangle (subVector (toVector pictOrigin) r) (toTuple v) (pictContext,pictToolbox)
+	# (updRect,(context,tb))	= winScrollRectangle (subVector (toVector pictOrigin) r) (toTuple v) (pictContext,pictToolbox)
 	= (updRect,{picture & pictContext=context,pictToolbox=tb})
 
 /*	Polygon drawing operations.
@@ -559,45 +559,45 @@ pictscroll r v picture=:{pictContext,pictToolbox,pictOrigin}
 pictdrawpolygon :: !Point2 !Polygon !*Picture -> *Picture
 pictdrawpolygon start {polygon_shape} picture=:{pictContext,pictToolbox,pictOrigin}
 	# tb			= transferPolygon (start-pictOrigin) polygon_shape pictToolbox
-	# (context,tb)	= WinDrawPolygon (pictContext,tb)
-	# tb			= WinEndPolygon tb
+	# (context,tb)	= winDrawPolygon (pictContext,tb)
+	# tb			= winEndPolygon tb
 	= {picture & pictContext=context,pictToolbox=tb}
 
 pictundrawpolygon :: !Point2 !Polygon !*Picture -> *Picture
 pictundrawpolygon start {polygon_shape} picture=:{pictContext,pictToolbox,pictOrigin,pictPen={penForeColour,penBackColour}}
 	# tb			= transferPolygon (start-pictOrigin) polygon_shape pictToolbox
-	# (context,tb)	= WinSetPenColor (toRGBtriple penBackColour) (pictContext,tb)
-	# (context,tb)	= WinDrawPolygon (context,tb)
-	# tb			= WinEndPolygon tb
-	# (context,tb)	= WinSetPenColor (toRGBtriple penForeColour) (context,tb)
+	# (context,tb)	= winSetPenColor (toRGBtriple penBackColour) (pictContext,tb)
+	# (context,tb)	= winDrawPolygon (context,tb)
+	# tb			= winEndPolygon tb
+	# (context,tb)	= winSetPenColor (toRGBtriple penForeColour) (context,tb)
 	= {picture & pictContext=context,pictToolbox=tb}
 
 pictfillpolygon :: !Point2 !Polygon !*Picture -> *Picture
 pictfillpolygon start {polygon_shape} picture=:{pictPen={penSize},pictContext,pictToolbox,pictOrigin}
 	# tb			= transferPolygon (start-pictOrigin) polygon_shape pictToolbox
-	# (context,tb)	= WinSetPenSize 1 (pictContext,tb)
-	# (context,tb)	= WinFillPolygon (context,tb)
-	# (context,tb)	= WinDrawPolygon (context,tb)
-	# (context,tb)	= WinSetPenSize penSize (context,tb)
-	# tb			= WinEndPolygon tb
+	# (context,tb)	= winSetPenSize 1 (pictContext,tb)
+	# (context,tb)	= winFillPolygon (context,tb)
+	# (context,tb)	= winDrawPolygon (context,tb)
+	# (context,tb)	= winSetPenSize penSize (context,tb)
+	# tb			= winEndPolygon tb
 	= {picture & pictContext=context,pictToolbox=tb}
 
 pictunfillpolygon :: !Point2 !Polygon !*Picture -> *Picture
 pictunfillpolygon start {polygon_shape} picture=:{pictPen={penSize,penForeColour,penBackColour},pictContext,pictToolbox,pictOrigin}
 	# tb			= transferPolygon (start-pictOrigin) polygon_shape pictToolbox
-	# (context,tb)	= WinSetPenColor (toRGBtriple penBackColour) (pictContext,tb)
-	# (context,tb)	= WinSetPenSize 1 (context,tb)
-	# (context,tb)	= WinFillPolygon  (context,tb)
-	# (context,tb)	= WinDrawPolygon  (context,tb)
-	# (context,tb)	= WinSetPenSize penSize (context,tb)
-	# tb			= WinEndPolygon tb
-	# (context,tb)	= WinSetPenColor (toRGBtriple penForeColour) (context,tb)
+	# (context,tb)	= winSetPenColor (toRGBtriple penBackColour) (pictContext,tb)
+	# (context,tb)	= winSetPenSize 1 (context,tb)
+	# (context,tb)	= winFillPolygon  (context,tb)
+	# (context,tb)	= winDrawPolygon  (context,tb)
+	# (context,tb)	= winSetPenSize penSize (context,tb)
+	# tb			= winEndPolygon tb
+	# (context,tb)	= winSetPenColor (toRGBtriple penForeColour) (context,tb)
 	= {picture & pictContext=context,pictToolbox=tb}
 
 transferPolygon :: !Point2 ![Vector2] !*OSToolbox -> *OSToolbox
 transferPolygon start vs tb
-	# tb	= WinStartPolygon (1 + length vs) tb
-	# tb	= WinAddPolygonPoint wstart tb
+	# tb	= winStartPolygon (1 + length vs) tb
+	# tb	= winAddPolygonPoint wstart tb
 	# tb	= transferShape wstart vs tb
 	= tb
 where
@@ -605,7 +605,7 @@ where
 	
 	transferShape :: !(!Int,!Int) ![Vector2] !*OSToolbox -> *OSToolbox
 	transferShape (x,y) [{vx,vy}:vs] tb
-   		= transferShape newpos vs (WinAddPolygonPoint newpos tb)
+   		= transferShape newpos vs (winAddPolygonPoint newpos tb)
 	where
 		newpos = (x+vx,y+vy)
 	transferShape _ _ tb
@@ -618,17 +618,17 @@ where
 */
 pictgetcliprgn :: !*Picture -> (!OSRgnHandle,!*Picture)
 pictgetcliprgn picture=:{pictContext,pictToolbox}
-	# (cliprgn,(context,tb)) = WinGetClipRgnPicture (pictContext,pictToolbox)
+	# (cliprgn,(context,tb)) = winGetClipRgnPicture (pictContext,pictToolbox)
 	= (cliprgn,{picture & pictContext=context,pictToolbox=tb})
 
 pictsetcliprgn :: !OSRgnHandle !*Picture -> *Picture
 pictsetcliprgn cliprgn picture=:{pictContext,pictToolbox}
-	# (context,tb)	= WinSetClipRgnPicture cliprgn (pictContext,pictToolbox)
+	# (context,tb)	= winSetClipRgnPicture cliprgn (pictContext,pictToolbox)
 	= {picture & pictContext=context,pictToolbox=tb}
 
 pictandcliprgn :: !OSRgnHandle !*Picture -> *Picture
 pictandcliprgn cliprgn picture=:{pictContext,pictToolbox}
-	# (context,tb)	= WinClipRgnPicture cliprgn (pictContext,pictToolbox)
+	# (context,tb)	= winClipRgnPicture cliprgn (pictContext,pictToolbox)
 	= {picture & pictContext=context,pictToolbox=tb}
 
 /*	Resolution access function (added by MW):

@@ -60,8 +60,8 @@ BUTTONDOWN			:== 1
 BUTTONSTILLUP		:== 0		/* PA: new constant for passing mouse move events. */
 
 
-WinLaunchApp ::  !{#Char} !Bool !*OSToolbox -> ( !Bool, !*OSToolbox)
-WinLaunchApp _ _ _
+winLaunchApp ::  !{#Char} !Bool !*OSToolbox -> ( !Bool, !*OSToolbox)
+winLaunchApp _ _ _
 	= code
 	{
 		.inline WinLaunchApp
@@ -69,8 +69,8 @@ WinLaunchApp _ _ _
 		.end
 	}
 
-WinLaunchApp2 :: !{#Char} !{#Char} !Bool !*OSToolbox -> ( !Bool, !*OSToolbox)
-WinLaunchApp2 _ _ _ _
+winLaunchApp2 :: !{#Char} !{#Char} !Bool !*OSToolbox -> ( !Bool, !*OSToolbox)
+winLaunchApp2 _ _ _ _
 	= code
 	{
 		.inline WinLaunchApp2
@@ -78,8 +78,8 @@ WinLaunchApp2 _ _ _ _
 		.end
 	}
 
-WinCallProcess ::  !CSTR !CSTR !CSTR !CSTR !CSTR !CSTR !*OSToolbox -> ( !Bool, !Int, !*OSToolbox)
-WinCallProcess _ _ _ _ _ _ _
+winCallProcess ::  !CSTR !CSTR !CSTR !CSTR !CSTR !CSTR !*OSToolbox -> ( !Bool, !Int, !*OSToolbox)
+winCallProcess _ _ _ _ _ _ _
 	= code
 	{
 		.inline WinCallProcess
@@ -87,8 +87,8 @@ WinCallProcess _ _ _ _ _ _ _
 		.end
 	}
 
-WinGetModulePath ::  {#Char}
-WinGetModulePath
+winGetModulePath ::  {#Char}
+winGetModulePath
 	= code
 	{
 		.inline WinGetModulePath
@@ -96,8 +96,8 @@ WinGetModulePath
 		.end
 	}
 
-WinFileModifiedDate ::  !{#Char} -> ( !Bool, !Int, !Int, !Int, !Int, !Int, !Int)
-WinFileModifiedDate _
+winFileModifiedDate ::  !{#Char} -> ( !Bool, !Int, !Int, !Int, !Int, !Int, !Int)
+winFileModifiedDate _
 	= code
 	{
 		.inline WinFileModifiedDate
@@ -105,8 +105,8 @@ WinFileModifiedDate _
 		.end
 	}
 
-WinFileExists ::  !{#Char} ->  Bool
-WinFileExists _
+winFileExists ::  !{#Char} ->  Bool
+winFileExists _
 	= code
 	{
 		.inline WinFileExists
@@ -114,8 +114,8 @@ WinFileExists _
 		.end
 	}
 
-WinBeep :: !*OSToolbox -> *OSToolbox
-WinBeep tb
+winBeep :: !*OSToolbox -> *OSToolbox
+winBeep tb
 	= code
 	{
 		.inline WinBeep
@@ -123,8 +123,8 @@ WinBeep tb
 		.end
 	}
 
-Rand ::  Int
-Rand
+rand ::  Int
+rand
 	= code
 	{
 		.inline Rand
@@ -132,8 +132,8 @@ Rand
 		.end
 	}
 
-WinReleaseCString ::  !CSTR !*OSToolbox ->  *OSToolbox
-WinReleaseCString _ _
+winReleaseCString ::  !CSTR !*OSToolbox ->  *OSToolbox
+winReleaseCString _ _
 	= code
 	{
 		.inline WinReleaseCString
@@ -141,8 +141,8 @@ WinReleaseCString _ _
 		.end
 	}
 
-WinGetCStringAndFree ::  !CSTR !*OSToolbox -> ( !{#Char}, !*OSToolbox)
-WinGetCStringAndFree _ _
+winGetCStringAndFree ::  !CSTR !*OSToolbox -> ( !{#Char}, !*OSToolbox)
+winGetCStringAndFree _ _
 	= code
 	{
 		.inline WinGetCStringAndFree
@@ -150,8 +150,8 @@ WinGetCStringAndFree _ _
 		.end
 	}
 
-WinGetCString ::  !CSTR !*OSToolbox -> ( !{#Char}, !*OSToolbox)
-WinGetCString _ _
+winGetCString ::  !CSTR !*OSToolbox -> ( !{#Char}, !*OSToolbox)
+winGetCString _ _
 	= code
 	{
 		.inline WinGetCString
@@ -159,8 +159,8 @@ WinGetCString _ _
 		.end
 	}
 
-WinMakeCString ::  !{#Char} !*OSToolbox -> ( !CSTR, !*OSToolbox)
-WinMakeCString _ _
+winMakeCString ::  !{#Char} !*OSToolbox -> ( !CSTR, !*OSToolbox)
+winMakeCString _ _
 	= code
 	{
 		.inline WinMakeCString
@@ -168,8 +168,8 @@ WinMakeCString _ _
 		.end
 	}
 
-WinGetAppPath ::  CSTR
-WinGetAppPath
+winGetAppPath ::  CSTR
+winGetAppPath
 	= code
 	{
 		.inline WinGetAppPath
@@ -177,8 +177,8 @@ WinGetAppPath
 		.end
 	}
 
-WinSetDoubleDownDist ::  !Int !*OSToolbox ->  *OSToolbox
-WinSetDoubleDownDist _ _
+winSetDoubleDownDist ::  !Int !*OSToolbox ->  *OSToolbox
+winSetDoubleDownDist _ _
 	= code
 	{
 		.inline WinSetDoubleDownDist
@@ -186,8 +186,8 @@ WinSetDoubleDownDist _ _
 		.end
 	}
 
-WinGetHorzResolution ::  Int
-WinGetHorzResolution
+winGetHorzResolution ::  Int
+winGetHorzResolution
 	= code
 	{
 		.inline WinGetHorzResolution
@@ -195,8 +195,8 @@ WinGetHorzResolution
 		.end
 	}
 
-WinGetVertResolution ::  Int
-WinGetVertResolution
+winGetVertResolution ::  Int
+winGetVertResolution
 	= code
 	{
 		.inline WinGetVertResolution
@@ -204,8 +204,8 @@ WinGetVertResolution
 		.end
 	}
 
-WinMaxFixedWindowSize :: ( !Int, !Int)
-WinMaxFixedWindowSize
+winMaxFixedWindowSize :: ( !Int, !Int)
+winMaxFixedWindowSize
 	= code
 	{
 		.inline WinMaxFixedWindowSize
@@ -213,8 +213,8 @@ WinMaxFixedWindowSize
 		.end
 	}
 
-WinMaxScrollWindowSize :: ( !Int, !Int)
-WinMaxScrollWindowSize
+winMaxScrollWindowSize :: ( !Int, !Int)
+winMaxScrollWindowSize
 	= code
 	{
 		.inline WinMaxScrollWindowSize
@@ -223,8 +223,8 @@ WinMaxScrollWindowSize
 	}
 
 //	PA: interface added for determining screen width and height.
-WinScreenYSize :: !*OSToolbox -> (!Int,!*OSToolbox)
-WinScreenYSize _
+winScreenYSize :: !*OSToolbox -> (!Int,!*OSToolbox)
+winScreenYSize _
 	= code
 	{	
 		.inline WinScreenYSize
@@ -232,8 +232,8 @@ WinScreenYSize _
 		.end
 	}
 
-WinScreenXSize :: !*OSToolbox -> (!Int,!*OSToolbox)
-WinScreenXSize _
+winScreenXSize :: !*OSToolbox -> (!Int,!*OSToolbox)
+winScreenXSize _
 	= code
 	{	
 		.inline WinScreenXSize
@@ -241,8 +241,8 @@ WinScreenXSize _
 		.end
 	}
 
-WinMinimumWinSize :: ( !Int, !Int)
-WinMinimumWinSize
+winMinimumWinSize :: ( !Int, !Int)
+winMinimumWinSize
 	= code
 	{
 		.inline WinMinimumWinSize
@@ -251,8 +251,8 @@ WinMinimumWinSize
 	}
 
 //	PA: function added to get system metrics for width and height of scrollbars.
-WinScrollbarSize :: !*OSToolbox -> ( !Int, !Int, !*OSToolbox )
-WinScrollbarSize _
+winScrollbarSize :: !*OSToolbox -> ( !Int, !Int, !*OSToolbox )
+winScrollbarSize _
 	= code
 	{	
 		.inline WinScrollbarSize
@@ -260,12 +260,12 @@ WinScrollbarSize _
 		.end
 	}
 
-/*	PA: two new routines (Win(M/S)DIClientToOuterSizeDims added to convert between the
+/*	PA: two new routines (win(M/S)DIClientToOuterSizeDims added to convert between the
 		client and outer size of (M/S)DI windows. The Int argument contains the style flags 
 		of the window.
 */
-WinMDIClientToOuterSizeDims :: !Int !*OSToolbox -> (!Int,!Int,!*OSToolbox)
-WinMDIClientToOuterSizeDims _ _
+winMDIClientToOuterSizeDims :: !Int !*OSToolbox -> (!Int,!Int,!*OSToolbox)
+winMDIClientToOuterSizeDims _ _
 	= code
 	{
 		.inline WinMDIClientToOuterSizeDims
@@ -273,8 +273,8 @@ WinMDIClientToOuterSizeDims _ _
 		.end
 	}
 
-WinSDIClientToOuterSizeDims :: !Int !*OSToolbox -> (!Int,!Int,!*OSToolbox)
-WinSDIClientToOuterSizeDims _ _
+winSDIClientToOuterSizeDims :: !Int !*OSToolbox -> (!Int,!Int,!*OSToolbox)
+winSDIClientToOuterSizeDims _ _
 	= code
 	{
 		.inline WinSDIClientToOuterSizeDims
@@ -283,8 +283,8 @@ WinSDIClientToOuterSizeDims _ _
 	}
 
 
-WinPlaySound :: !{#Char} !*OSToolbox -> (!Bool,!*OSToolbox)
-WinPlaySound _ _
+winPlaySound :: !{#Char} !*OSToolbox -> (!Bool,!*OSToolbox)
+winPlaySound _ _
 	= code
 	{
 		.inline WinPlaySound

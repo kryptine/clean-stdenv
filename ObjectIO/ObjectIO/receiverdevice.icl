@@ -7,16 +7,16 @@ implementation module receiverdevice
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	StdReceiver
 import	devicefunctions, iostate, receiveraccess, receiverevent, receiverid
-from	commondef	import FatalError, URemove, UCond, StrictSeq, StrictSeqList, AccessList
+from	commondef	import fatalError, uremove, UCond, strictSeq, strictSeqList, accessList
 from	StdPSt		import appPIO, accPIO
 
 
 receiverdeviceFatalError :: String String -> .x
 receiverdeviceFatalError rule error
-	= FatalError rule "receiverdevice" error
+	= fatalError rule "receiverdevice" error
 
-ReceiverFunctions :: DeviceFunctions (PSt .l)
-ReceiverFunctions
+receiverFunctions :: DeviceFunctions (PSt .l)
+receiverFunctions
 	= {	dDevice	= ReceiverDevice
 	  ,	dShow	= id
 	  ,	dHide	= id
@@ -28,46 +28,46 @@ ReceiverFunctions
 
 receiverOpen :: !(PSt .l) -> PSt .l
 receiverOpen pState=:{io=ioState}
-	# (hasReceiver,ioState)	= IOStHasDevice ReceiverDevice ioState
+	# (hasReceiver,ioState)	= ioStHasDevice ReceiverDevice ioState
 	| hasReceiver
 		= {pState & io=ioState}
 	| otherwise
-		# ioState			= IOStSetDevice (ReceiverSystemState {rReceivers=[]}) ioState
-		# ioState			= IOStSetDeviceFunctions ReceiverFunctions ioState
+		# ioState			= ioStSetDevice (ReceiverSystemState {rReceivers=[]}) ioState
+		# ioState			= ioStSetDeviceFunctions receiverFunctions ioState
 		= {pState & io=ioState}
 
 receiverClose :: !(PSt .l) -> PSt .l
 receiverClose pState=:{io=ioState}
 	# ioState					= callReceiverCloseFunctions ioState
-	# ioState					= IOStSetRcvDisabled True ioState
-	# (found,rDevice,ioState)	= IOStGetDevice ReceiverDevice ioState
+	# ioState					= ioStSetRcvDisabled True ioState
+	# (found,rDevice,ioState)	= ioStGetDevice ReceiverDevice ioState
 	| not found
 		= {pState & io=ioState}
 	| otherwise
-		# rHs					= (ReceiverSystemStateGetReceiverHandles rDevice).rReceivers
+		# rHs					= (receiverSystemStateGetReceiverHandles rDevice).rReceivers
 		  rIds					= map (\{rHandle={rId}}->rId) rHs
-		# (idtable,ioState)		= IOStGetIdTable ioState
-		# ioState				= IOStSetIdTable (snd (removeIdsFromIdTable rIds idtable)) ioState
+		# (idtable,ioState)		= ioStGetIdTable ioState
+		# ioState				= ioStSetIdTable (snd (removeIdsFromIdTable rIds idtable)) ioState
 		# ioState				= unbindRIds rIds ioState
-		# ioState				= IOStRemoveDeviceFunctions ReceiverDevice ioState
+		# ioState				= ioStRemoveDeviceFunctions ReceiverDevice ioState
 		= {pState & io=ioState}
 where
 	callReceiverCloseFunctions :: !(IOSt .l) -> (IOSt .l)
 	callReceiverCloseFunctions ioState
-		# (found,rDevice,ioState)	= IOStGetDevice ReceiverDevice ioState
+		# (found,rDevice,ioState)	= ioStGetDevice ReceiverDevice ioState
 		| not found
 			= ioState
 		| otherwise
-			# rHs					= (ReceiverSystemStateGetReceiverHandles rDevice).rReceivers
-			# (funcs,rHs)			= AccessList getCloseFunc rHs
-			# ioState				= IOStSetDevice (ReceiverSystemState {rReceivers=rHs}) ioState
-			= StrictSeq funcs ioState
+			# rHs					= (receiverSystemStateGetReceiverHandles rDevice).rReceivers
+			# (funcs,rHs)			= accessList getCloseFunc rHs
+			# ioState				= ioStSetDevice (ReceiverSystemState {rReceivers=rHs}) ioState
+			= strictSeq funcs ioState
 	where
 		getCloseFunc :: !(ReceiverStateHandle (PSt .l)) -> (!IdFun (IOSt .l),!ReceiverStateHandle (PSt .l))
 		getCloseFunc rsH=:{rHandle={rInetInfo=Nothing, rConnected}}
-			= (StrictSeq (map closeReceiver rConnected),rsH)
+			= (strictSeq (map closeReceiver rConnected),rsH)
 		getCloseFunc rsH=:{rHandle={rInetInfo=Just (_,_,_,closeFun),rConnected}}
-			= (appIOToolbox closeFun o StrictSeq (map closeReceiver rConnected),rsH)
+			= (appIOToolbox closeFun o strictSeq (map closeReceiver rConnected),rsH)
 
 /*	The receiver handles three cases of message events (for the time being timers are not included in receivers):
 	- QASyncMessage:
@@ -83,11 +83,11 @@ where
 */
 receiverIO :: !DeviceEvent !(PSt .l) -> (!DeviceEvent,!PSt .l)
 receiverIO deviceEvent pState=:{io=ioState}
-	# (found,rDevice,ioState)	= IOStGetDevice ReceiverDevice ioState
+	# (found,rDevice,ioState)	= ioStGetDevice ReceiverDevice ioState
 	| not found					// This condition should not occur: dDoIO function should be applied only iff dEvent filters message
 		= receiverdeviceFatalError "receiverIO" "could not retrieve ReceiverSystemState from IOSt"
 	| otherwise
-		# receivers				= ReceiverSystemStateGetReceiverHandles rDevice
+		# receivers				= receiverSystemStateGetReceiverHandles rDevice
 		= receiverIO deviceEvent receivers.rReceivers {pState & io=ioState}
 where
 	receiverIO :: !DeviceEvent !*[ReceiverStateHandle (PSt .l)] !(PSt .l) -> (!DeviceEvent,!PSt .l)
@@ -97,7 +97,7 @@ where
 		receiverASyncIO :: !QASyncMessage !*[ReceiverStateHandle (PSt .l)] !(PSt .l) -> PSt .l
 		receiverASyncIO event=:{qasmRecLoc={rlReceiverId},qasmMsg} rsHs pState=:{io=ioState}
 			#! rsHs			= qMessage rlReceiverId qasmMsg rsHs
-			#  ioState		= IOStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
+			#  ioState		= ioStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
 			#  pState		= {pState & io=ioState}
 			=  pState
 		where
@@ -122,8 +122,8 @@ where
 			= pState2
 		where
 			dummy			= receiverdeviceFatalError "receiverIO (ReceiverEvent (ASyncMessage _))" "receiver could not be found"
-			(_,rsH1,rsHs1)	= URemove (identifyReceiverStateHandle rlParentId) dummy rsHs
-			pState1			= appPIO (IOStSetDevice receivers) pState
+			(_,rsH1,rsHs1)	= uremove (identifyReceiverStateHandle rlParentId) dummy rsHs
+			pState1			= appPIO (ioStSetDevice receivers) pState
 			(rsH2,pState2)	= letReceiverDoIO rsH1 pState1
 			receivers		= ReceiverSystemState {rReceivers=rsHs1++[rsH2]}
 			
@@ -135,7 +135,7 @@ where
 				= receiverdeviceFatalError "letReceiverDoIO" "message queue of target receiver is empty"
 	
 	receiverIO (ReceiverEvent (SyncMessage event)) rsHs pState
-		# (lastProcess,pState)	= accPIO IOStLastInteraction pState
+		# (lastProcess,pState)	= accPIO ioStLastInteraction pState
 		# (event,pState)		= receiverSyncIO lastProcess event rsHs pState
 		= (ReceiverEvent (SyncMessage event),pState)
 	where
@@ -150,7 +150,7 @@ where
 			| otherwise
 				= ({event & smError=error},pState2)
 		where
-			pState1		= {pState & io=IOStSetDevice (ReceiverSystemState {rReceivers=rsHs1}) pState.io}
+			pState1		= {pState & io=ioStSetDevice (ReceiverSystemState {rReceivers=rsHs1}) pState.io}
 			(found,error,resp,rsHs1,pState2)
 						= applyReceiverFunction event rsHs pState1
 			
@@ -182,7 +182,7 @@ letOneReceiverDoInetEvent (eventCode,endpointRef,inetReceiverCategory,misc) rsHs
 	| nothing
 /* PA: receiver device must be restored, because it is removed from the IOSt
 		= pState		// No IOSetReceiverDevice needed, because nothing has been changed
-*/		= appPIO (IOStSetDevice (ReceiverSystemState {rReceivers=rsHs})) pState
+*/		= appPIO (ioStSetDevice (ReceiverSystemState {rReceivers=rsHs})) pState
 	# eventInfo			= (eventCode,endpointRef,misc)
 	# rsH				= fromJust opt_rsH
 	# (rSelect,emptyASMQ,inetRId,rsH)
@@ -191,7 +191,7 @@ letOneReceiverDoInetEvent (eventCode,endpointRef,inetReceiverCategory,misc) rsHs
 		 = applyInetEvent eventInfo rsH rsHs pState	// apply the event immediately
 	// receiver is unable, so queue the event via asyncSend to handle it later
 	# receivers			= ReceiverSystemState {rReceivers=[rsH:rsHs]} // left at the beginning
-	  pState			= appPIO (IOStSetDevice receivers) pState
+	  pState			= appPIO (ioStSetDevice receivers) pState
 	# (sR,pState)		= asyncSend inetRId eventInfo pState
 	| sR<>SendOk
 		= abort "receiverdevice: I have a bug (78)"	
@@ -217,7 +217,7 @@ applyInetEvent :: !InetReceiverASMQType !*(ReceiverStateHandle *(PSt .l)) *[Rece
 applyInetEvent eventInfo rsH=:{rState,rHandle} rsHs pState
 	= pState2
 where
-	pState1				= appPIO (IOStSetDevice receivers) pState
+	pState1				= appPIO (ioStSetDevice receivers) pState
 	(rState2,pState2)	= receiverApplyInetEvent eventInfo rHandle (rState,pState1)
 	receivers			= ReceiverSystemState {rReceivers=[{rsH & rState=rState2}:rsHs]} // left at the beginning
 // ..MW11

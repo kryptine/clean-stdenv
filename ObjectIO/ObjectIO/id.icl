@@ -10,7 +10,7 @@ import commondef, device, systemid
 
 idFatalError :: String String -> .x
 idFatalError rule error
-	= FatalError rule "id" error
+	= fatalError rule "id" error
 
  
 ::	Id										// The Id data type:
@@ -54,12 +54,12 @@ specialIdName SpecialWindowMenuTileVId		= "SpecialWindowMenuTileVId"
 specialIdName SpecialWindowMenuSeparatorId	= "WindowMenuSeparatorId"
 specialIdName _								= idFatalError "toString (Id)" "undefined special Id."
 
-WindowMenuId			:: Id;		WindowMenuId			= SpecialId SpecialWindowMenuId;
-WindowMenuRadioId		:: Id;		WindowMenuRadioId		= SpecialId SpecialWindowMenuRadioId;
-WindowMenuCascadeId		:: Id;		WindowMenuCascadeId		= SpecialId SpecialWindowMenuCascadeId;
-WindowMenuTileHId		:: Id;		WindowMenuTileHId		= SpecialId SpecialWindowMenuTileHId;
-WindowMenuTileVId		:: Id;		WindowMenuTileVId		= SpecialId SpecialWindowMenuTileVId;
-WindowMenuSeparatorId	:: Id;		WindowMenuSeparatorId	= SpecialId SpecialWindowMenuSeparatorId;
+windowMenuId			:: Id;		windowMenuId			= SpecialId SpecialWindowMenuId;
+windowMenuRadioId		:: Id;		windowMenuRadioId		= SpecialId SpecialWindowMenuRadioId;
+windowMenuCascadeId		:: Id;		windowMenuCascadeId		= SpecialId SpecialWindowMenuCascadeId;
+windowMenuTileHId		:: Id;		windowMenuTileHId		= SpecialId SpecialWindowMenuTileHId;
+windowMenuTileVId		:: Id;		windowMenuTileVId		= SpecialId SpecialWindowMenuTileVId;
+windowMenuSeparatorId	:: Id;		windowMenuSeparatorId	= SpecialId SpecialWindowMenuSeparatorId;
 
 
 toId :: !Int -> Id
@@ -102,7 +102,6 @@ isSpecialId (SpecialId _)	= True
 isSpecialId _				= False
 
 instance == Id where
-	(==) :: !Id !Id -> Bool
 	(==) (CustomId	 id1)	id	= case id of
 									(CustomId	id2)	-> id1==id2
 									(CustomRId	id2)	-> id1==id2 // MW11++
@@ -127,21 +126,18 @@ instance == Id where
 	(==) _					_	= False
 
 instance == (RId mess) where
-	(==) :: !(RId mess) !(RId mess) -> Bool
 	(==) (RId i) (RId j) = i==j
 
 instance == (R2Id mess resp) where
-	(==) :: !(R2Id mess resp) !(R2Id mess resp) -> Bool
 	(==) (R2Id i) (R2Id j) = i==j
 
-RIdtoId :: (RId mess) -> Id
-RIdtoId (RId i) = CustomRId i
+rIdtoId :: (RId mess) -> Id
+rIdtoId (RId i) = CustomRId i
 
-R2IdtoId :: (R2Id mess resp) -> Id
-R2IdtoId (R2Id i) = CustomR2Id i
+r2IdtoId :: (R2Id mess resp) -> Id
+r2IdtoId (R2Id i) = CustomR2Id i
 
 instance toString Id where
-	toString :: !Id -> {#Char}
 	toString (CustomId id)	= "toId "+++toString id
 	toString (CustomRId _)	= "RId"
 	toString (CustomR2Id _)	= "R2Id"
@@ -232,7 +228,7 @@ addtosortlist x px _
 addIdsToIdTable :: ![(Id,IdParent)] !*IdTable -> *(!Bool,!*IdTable)
 addIdsToIdTable idparents idTable
 //	# (oks,idTable)	= seqList (map (\(id,parent)->addIdToIdTable id parent) idparents) idTable
-	# (oks,idTable)	= StrictSeqList (map add idparents) idTable
+	# (oks,idTable)	= strictSeqList (map add idparents) idTable
 	= (and oks,idTable)
 where
 	add :: !(!Id,!IdParent) !*IdTable -> *(!Bool,!*IdTable)

@@ -14,11 +14,11 @@ from	StdPSt				import accPIO
 
 menudeviceFatalError :: String String -> .x
 menudeviceFatalError rule error
-	= FatalError rule "menudevice" error
+	= fatalError rule "menudevice" error
 
 
-MenuFunctions :: DeviceFunctions (PSt .l)
-MenuFunctions
+menuFunctions :: DeviceFunctions (PSt .l)
+menuFunctions
 	= {	dDevice	= MenuDevice
 	  ,	dShow	= menuShow
 	  ,	dHide	= menuHide
@@ -31,99 +31,99 @@ MenuFunctions
 menuShow :: !(PSt .l) -> PSt .l
 /* PA: mOSMenuBar information is stored in IOSt:OSDInfo.
 menuShow pState=:{io=ioState}
-	# (activeIO,ioState)	= IOStIsActive ioState
+	# (activeIO,ioState)	= ioStIsActive ioState
 	| not activeIO
 		= {pState & io=ioState}
 	| otherwise
 		# (tb,ioState)		= getIOToolbox ioState
-		# (menus,ioState)	= IOStGetDevice MenuDevice ioState
-		  mHs				= MenuSystemStateGetMenuHandles menus
-		# (menuBar, tb)		= OSMenuBarSet mHs.mOSMenuBar tb
+		# (menus,ioState)	= ioStGetDevice MenuDevice ioState
+		  mHs				= menuSystemStateGetMenuHandles menus
+		# (menuBar, tb)		= osMenuBarSet mHs.mOSMenuBar tb
 		  mHs				= {mHs & mOSMenuBar = menuBar}
 		# ioState			= setIOToolbox tb ioState
-		# ioState			= IOStSetDevice (MenuSystemState mHs) ioState
+		# ioState			= ioStSetDevice (MenuSystemState mHs) ioState
 		= {pState & io=ioState}
 */
 menuShow pState=:{io=ioState}
-	# (activeIO,ioState)		= IOStIsActive ioState
+	# (activeIO,ioState)		= ioStIsActive ioState
 	| not activeIO
 		= {pState & io=ioState}
-	# (osdinfo,ioState)			= IOStGetOSDInfo ioState
+	# (osdinfo,ioState)			= ioStGetOSDInfo ioState
 	  maybeMenuBar				= getOSDInfoOSMenuBar osdinfo
 	| isNothing maybeMenuBar
 		= menudeviceFatalError "MenuFunctions.dShow" "OSMenuBar could not be retrieved from OSDInfo"
 	| otherwise
 		# osMenuBar				= fromJust maybeMenuBar
-		# (osMenuBar,ioState)	= accIOToolbox (OSMenuBarSet osMenuBar) ioState
+		# (osMenuBar,ioState)	= accIOToolbox (osMenuBarSet osMenuBar) ioState
 		  osdinfo				= setOSDInfoOSMenuBar osMenuBar osdinfo
-		# ioState				= IOStSetOSDInfo osdinfo ioState
+		# ioState				= ioStSetOSDInfo osdinfo ioState
 		= {pState & io=ioState}
 
 menuClose :: !(PSt .l) -> PSt .l
 menuClose pState=:{io=ioState}
-	# (osdinfo,ioState)				= IOStGetOSDInfo ioState
+	# (osdinfo,ioState)				= ioStGetOSDInfo ioState
 	  maybeOSMenuBar				= getOSDInfoOSMenuBar osdinfo
 	| isNothing maybeOSMenuBar
 		= menudeviceFatalError "MenuFunctions.dClose" "OSMenuBar could not be retrieved from OSDInfo"
-	# (found,mDevice,ioState)		= IOStGetDevice MenuDevice ioState
+	# (found,mDevice,ioState)		= ioStGetDevice MenuDevice ioState
 	| not found
 		= menudeviceFatalError "MenuFunctions.dClose" "could not retrieve MenuSystemState from IOSt"
 	| otherwise
 		# osMenuBar					= fromJust maybeOSMenuBar
-		# (opt_guishare,ioState)	= IOStGetGUIShare ioState
-		  menus						= MenuSystemStateGetMenuHandles mDevice
+		# (opt_guishare,ioState)	= ioStGetGUIShare ioState
+		  menus						= menuSystemStateGetMenuHandles mDevice
 		# (tb,ioState)				= getIOToolbox ioState
 		# (menus,(osMenuBar,tb))	= disposeMenuHandles (isJust opt_guishare) menus (osMenuBar,tb)
 		# ioState					= setIOToolbox tb ioState
 		  osdinfo					= setOSDInfoOSMenuBar osMenuBar osdinfo
-		# ioState					= IOStSetOSDInfo osdinfo ioState
-		# (ioid,ioState)			= IOStGetIOId ioState
-		# (rt,ioState)				= IOStGetReceiverTable ioState
-		# (it,ioState)				= IOStGetIdTable ioState
+		# ioState					= ioStSetOSDInfo osdinfo ioState
+		# (ioid,ioState)			= ioStGetIOId ioState
+		# (rt,ioState)				= ioStGetReceiverTable ioState
+		# (it,ioState)				= ioStGetIdTable ioState
 		# (mHs,_)					= menuHandlesGetMenus menus
-		  (_,(rt,it))				= StateMap (disposeIds ioid) mHs (rt,it)
-		# ioState					= IOStSetIdTable it ioState
-		# ioState					= IOStSetReceiverTable rt ioState
-		# ioState					= IOStRemoveDeviceFunctions MenuDevice ioState
+		  (_,(rt,it))				= stateMap (disposeIds ioid) mHs (rt,it)
+		# ioState					= ioStSetIdTable it ioState
+		# ioState					= ioStSetReceiverTable rt ioState
+		# ioState					= ioStRemoveDeviceFunctions MenuDevice ioState
 		= {pState & io=ioState}
 where
 	disposeIds :: !SystemId !(MenuStateHandle .pst) !*(!*ReceiverTable,!*IdTable)
 						 -> (!MenuStateHandle .pst, !*(!*ReceiverTable,!*IdTable))
 	disposeIds ioid (MenuLSHandle menuH=:{mlsHandle=mH=:{mItems}}) ts
-		# (itemHs,ts)	= StateMap (disposeMenuIds ioid) mItems ts
+		# (itemHs,ts)	= stateMap (disposeMenuIds ioid) mItems ts
 		= (MenuLSHandle {menuH & mlsHandle={mH & mItems=itemHs}},ts)
 
 menuHide :: !(PSt .l) -> PSt .l
 menuHide pState=:{io=ioState}
-	# (activeIO,ioState)	= IOStIsActive ioState
+	# (activeIO,ioState)	= ioStIsActive ioState
 	| not activeIO
 		= {pState & io=ioState}
-	# (found,menus,ioState)	= IOStGetDevice MenuDevice ioState
+	# (found,menus,ioState)	= ioStGetDevice MenuDevice ioState
 	| not found
 		= {pState & io=ioState}
 	| otherwise
-		# mHs				= MenuSystemStateGetMenuHandles menus
+		# mHs				= menuSystemStateGetMenuHandles menus
 		# (tb,ioState)		= getIOToolbox ioState
-		# tb				= OSMenuBarClear tb
+		# tb				= osMenuBarClear tb
 		# ioState			= setIOToolbox tb ioState
-		# ioState			= IOStSetDevice (MenuSystemState mHs) ioState
+		# ioState			= ioStSetDevice (MenuSystemState mHs) ioState
 		= {pState & io=ioState}
 
 
 /*	Opening menus:
 	Note:	all interactive processes have atleast the AppleMenu to identify the 
 			process, and is used for checking whether the process is active
-			(see IOStIsActive further down this module).
+			(see ioStIsActive further down this module).
 			If the process is a subprocess, then the ioguishare of its IOSt
 			contains the list to the Mac toolbox menu system.
 */
 menuOpen :: !(PSt .l) -> PSt .l
 menuOpen pState=:{io=ioState}
-	# (hasMenu,ioState)		= IOStHasDevice MenuDevice ioState
+	# (hasMenu,ioState)		= ioStHasDevice MenuDevice ioState
 	| hasMenu
 		= {pState & io=ioState}
 	| otherwise
-		# (di,     ioState)	= IOStGetDocumentInterface ioState
+		# (di,     ioState)	= ioStGetDocumentInterface ioState
 		# (popUpId,ioState)	= getPopUpId di ioState
 		  bound				= case di of
 								NDI -> Finite 0
@@ -131,14 +131,14 @@ menuOpen pState=:{io=ioState}
 								MDI -> Infinite
 		  mHs				= {	mMenus		= []
 							  ,	mKeys		= []
-			//PA---			  ,	mOSMenuBar	= OSMenuBarNew OSNoWindowPtr OSNoWindowPtr (-1) // PA: menubar will be initialised by the (M/S)DI window creation
+			//PA---			  ,	mOSMenuBar	= osMenuBarNew OSNoWindowPtr OSNoWindowPtr (-1) // PA: menubar will be initialised by the (M/S)DI window creation
 							  ,	mEnabled	= SystemAble
 							  ,	mNrMenuBound= bound
 							  ,	mPopUpId	= popUpId
 							  }
-		# ioState			= IOStSetDevice (MenuSystemState mHs) ioState
-		# ioState			= IOStSetDeviceFunctions MenuFunctions ioState
-		# ioState			= appIOToolbox OSinitialiseMenus ioState
+		# ioState			= ioStSetDevice (MenuSystemState mHs) ioState
+		# ioState			= ioStSetDeviceFunctions menuFunctions ioState
+		# ioState			= appIOToolbox osInitialiseMenus ioState
 		= {pState & io=ioState}
 where
 	getPopUpId :: !DocumentInterface !(IOSt .l) -> (!Maybe Id,!IOSt .l)
@@ -151,7 +151,7 @@ where
 
 menuIO :: !DeviceEvent !(PSt .l) -> (!DeviceEvent,!PSt .l)
 menuIO deviceEvent pState
-	# (ok,pState)	= accPIO (IOStHasDevice MenuDevice) pState
+	# (ok,pState)	= accPIO (ioStHasDevice MenuDevice) pState
 	| not ok		// This condition should never occur
 		= menudeviceFatalError "MenuFunctions.dDoIO" "could not retrieve MenuSystemState from IOSt"
 	| otherwise
@@ -162,9 +162,9 @@ where
 	menuIO receiverEvent=:(ReceiverEvent msgEvent) pState
 		= (ReceiverEvent msgEvent1,pState2)
 	where
-		(_,mDevice,ioState)			= IOStGetDevice MenuDevice pState.io
-		menus						= MenuSystemStateGetMenuHandles mDevice
-		ioState1					= IOStSetDevice (MenuSystemState menus1) ioState
+		(_,mDevice,ioState)			= ioStGetDevice MenuDevice pState.io
+		menus						= menuSystemStateGetMenuHandles mDevice
+		ioState1					= ioStSetDevice (MenuSystemState menus1) ioState
 		pState1						= {pState & io=ioState1}
 		(msgEvent1,menus1,pState2)	= menuMsgIO msgEvent menus pState1
 		
@@ -176,10 +176,10 @@ where
 			menusMsgIO :: !Id !MsgEvent ![MenuStateHandle (PSt .l)] (PSt .l)
 						  -> (!MsgEvent,![MenuStateHandle (PSt .l)], PSt .l)
 			menusMsgIO menuId msgEvent msHs pState
-				# (empty,msHs)				= u_isEmpty msHs
+				# (empty,msHs)				= uisEmpty msHs
 				| empty
 					= menudeviceFatalError "menuIO (ReceiverEvent _) _" "menu could not be found"
-				# (msH,msHs)				= HdTl msHs
+				# (msH,msHs)				= hdtl msHs
 				  (id,msH)					= menuStateHandleGetMenuId msH
 				| id==menuId
 					# (msgEvent,msH,pState)	= menuStateMsgIO msgEvent msH pState
@@ -191,9 +191,9 @@ where
 	menuIO deviceEvent=:(MenuTraceEvent info) pState
 		= (deviceEvent,pState2)
 	where
-		(_,mDevice,ioState)	= IOStGetDevice MenuDevice pState.io
-		menus				= MenuSystemStateGetMenuHandles mDevice
-		ioState1			= IOStSetDevice (MenuSystemState menus1) ioState
+		(_,mDevice,ioState)	= ioStGetDevice MenuDevice pState.io
+		menus				= menuSystemStateGetMenuHandles mDevice
+		ioState1			= ioStSetDevice (MenuSystemState menus1) ioState
 		pState1				= {pState & io=ioState1}
 		(menus1,pState2)	= menuTraceIO info menus pState1
 		
@@ -204,10 +204,10 @@ where
 		where
 			menusTraceIO :: !Id !MenuTraceInfo ![MenuStateHandle (PSt .l)] (PSt .l) -> (![MenuStateHandle (PSt .l)],PSt .l)
 			menusTraceIO menuId info msHs pState
-				# (empty,msHs)		= u_isEmpty msHs
+				# (empty,msHs)		= uisEmpty msHs
 				| empty
 					= menudeviceFatalError "menuIO (MenuTraceEvent _) _" "menu could not be found"
-				# (msH,msHs)		= HdTl msHs
+				# (msH,msHs)		= hdtl msHs
 				  (id, msH)			= menuStateHandleGetMenuId msH
 				| id==menuId
 					# (msH,pState)	= menuStateTraceIO info msH pState
@@ -217,8 +217,8 @@ where
 					= ([msH:msHs],pState)
 	
 	menuIO deviceEvent=:(ToolbarSelection {tbsItemNr}) pState
-		# (atts,pState)			= accPIO IOStGetProcessAttributes pState
-		  (hasToolbarAtt,att)	= Select isProcessToolbar undef atts
+		# (atts,pState)			= accPIO ioStGetProcessAttributes pState
+		  (hasToolbarAtt,att)	= cselect isProcessToolbar undef atts
 		| not hasToolbarAtt
 			= (deviceEvent,pState)
 		| otherwise
@@ -277,7 +277,7 @@ where
 					# (itemHs,(ls,pst))= subMenusTraceIO info parentsIndex mSubItems (ls,pst)
 					= (zIndex+1,SubMenuHandle {subH & mSubItems=itemHs},(ls,pst))
 			subMenuTraceIO` parentIndex info parentsIndex zIndex (RadioMenuHandle itemH=:{mRadioItems}) (ls,pst)
-				# (nrRadios,itemHs)	= Ulength mRadioItems
+				# (nrRadios,itemHs)	= ulength mRadioItems
 				= (zIndex+nrRadios,RadioMenuHandle {itemH & mRadioItems=itemHs},(ls,pst))
 			subMenuTraceIO` parentIndex info parentsIndex zIndex itemH=:(MenuItemHandle _) (ls,pst)
 				= (zIndex+1,itemH,(ls,pst))
@@ -312,12 +312,12 @@ where
 			| itemIndex<>zIndex || not hasFun	= (zIndex+1,MenuItemHandle itemH,  (ls,ps))
 			| otherwise							= (zIndex+1,MenuItemHandle itemH,f (ls,ps))
 		where
-			(hasFun,fAtt)	= Select isEitherFun undef mItemAtts
+			(hasFun,fAtt)	= cselect isEitherFun undef mItemAtts
 			f				= if (isMenuFunction fAtt)	(getMenuFun fAtt)
 														(getMenuModsFun fAtt info.mtModifiers)
 			isEitherFun f	= isMenuFunction f || isMenuModsFunction f
 		menuElementTraceIO itemIndex info zIndex (RadioMenuHandle radioH=:{mRadioIndex,mRadioItems}) (ls,pst)
-			# (nrRadios,itemHs)		= Ulength mRadioItems
+			# (nrRadios,itemHs)		= ulength mRadioItems
 			| itemIndex>zIndex+nrRadios
 				// Selected item is not one of these radio items
 				= (zIndex+nrRadios,RadioMenuHandle {radioH & mRadioItems=itemHs},(ls,pst))
@@ -493,31 +493,31 @@ where
 			with mac menu ID AppleMenuId. This is taken care of by the creation
 			of the interactive process (see menuOpen above).
 */
-IOStIsActive :: !(IOSt .l) -> (!Bool, !IOSt .l)
-IOStIsActive ioState
+ioStIsActive :: !(IOSt .l) -> (!Bool, !IOSt .l)
+ioStIsActive ioState
 /* RWS +++
 	# (globalHandle,ioState)= accIOToolbox (GetMHandle AppleMenuId) ioState
-	  (menus,ioState)		= IOStGetDevice MenuDevice ioState
-	  (mHs,menuHs)			= MenuHandlesGetMenuStateHandles (MenuSystemStateGetMenuHandles menus)
-	  (appleH,others)		= HdTl mHs
+	  (menus,ioState)		= ioStGetDevice MenuDevice ioState
+	  (mHs,menuHs)			= MenuHandlesGetMenuStateHandles (menuSystemStateGetMenuHandles menus)
+	  (appleH,others)		= hdtl mHs
 	  (apple,appleH1)		= menuStateHandleGetHandle appleH
-	  ioState				= IOStSetDevice (MenuSystemState {menuHs & mMenus=[appleH1:others]}) ioState
+	  ioState				= ioStSetDevice (MenuSystemState {menuHs & mMenus=[appleH1:others]}) ioState
 	= (apple==globalHandle,ioState)
 */	= (True,ioState)
 
 
-/*	Activate the interactive process:
+/*	activate the interactive process:
 */
-ActivateMenuSystem :: !(IOSt .l) -> IOSt .l
-ActivateMenuSystem ioState
-	# ioState					= SelectIOSt ioState
-	# (osdinfo,ioState)			= IOStGetOSDInfo ioState
+activateMenuSystem :: !(IOSt .l) -> IOSt .l
+activateMenuSystem ioState
+	# ioState					= selectIOSt ioState
+	# (osdinfo,ioState)			= ioStGetOSDInfo ioState
 	  maybeOSMenuBar			= getOSDInfoOSMenuBar osdinfo
 	| isNothing maybeOSMenuBar
 		= ioState
 	| otherwise
 		# osMenuBar				= fromJust maybeOSMenuBar
-		# (osMenuBar,ioState)	= accIOToolbox (OSMenuBarSet osMenuBar) ioState
+		# (osMenuBar,ioState)	= accIOToolbox (osMenuBarSet osMenuBar) ioState
 		  osdinfo				= setOSDInfoOSMenuBar osMenuBar osdinfo
-		# ioState				= IOStSetOSDInfo osdinfo ioState
+		# ioState				= ioStSetOSDInfo osdinfo ioState
 		= ioState

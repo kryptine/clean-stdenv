@@ -19,7 +19,7 @@ import	osdocumentinterface, oswindow
 
 windowcontrolsFatalError :: String String -> .x
 windowcontrolsFatalError function error
-	= FatalError function "windowcontrols" error
+	= fatalError function "windowcontrols" error
 
 
 /*	opencontrols adds the given controls to the window. 
@@ -29,18 +29,18 @@ opencontrols :: !OSWindowMetrics .ls ![WElementHandle .ls .pst] !(WindowStateHan
 opencontrols wMetrics ls newItems 
 			 wsH=:{wshIds,wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems=curItems,whSize,whAtts,whDefaultId,whCancelId,whSelect,whItemNrs,whKind,whWindowInfo}}} 
 			 tb
-	# (nrCurItems,curItems)		= Ulength curItems
+	# (nrCurItems,curItems)		= ulength curItems
 	  (itemNrs,newItems)		= genWElementItemNrs whItemNrs newItems
 	  newItems					= [WChangeLSHandle {wChangeLS=ls,wChangeItems=newItems}]
 	  allItems					= curItems++newItems
-	  visScrolls				= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
-	  {rright=curw,rbottom=curh}= getWindowContentRect wMetrics visScrolls (SizeToRect whSize)
+	  visScrolls				= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
+	  {rright=curw,rbottom=curh}= getWindowContentRect wMetrics visScrolls (sizeToRect whSize)
 	  hMargins					= getWindowHMargins   whKind wMetrics whAtts
 	  vMargins					= getWindowVMargins   whKind wMetrics whAtts
 	  spaces					= getWindowItemSpaces whKind wMetrics whAtts
 	  reqSize					= {w=curw-fst hMargins-snd hMargins,h=curh-fst vMargins-snd vMargins}
 	# (_,allItems,tb)			= layoutControls wMetrics hMargins vMargins spaces reqSize zero [(domain,origin)] allItems tb
-	  (curItems,newItems)		= Split nrCurItems allItems
+	  (curItems,newItems)		= split nrCurItems allItems
 	# (newItems,tb)				= createControls wMetrics whDefaultId whCancelId whSelect wPtr newItems tb
 	  allItems					= curItems++newItems
 	  wH						= {wH & whItemNrs=itemNrs,whItems=allItems}
@@ -52,8 +52,8 @@ where
 	(origin,hasHScroll,hasVScroll,domainRect)
 								= case whWindowInfo of
 									WindowInfo info	-> (info.windowOrigin,isJust info.windowHScroll,isJust info.windowVScroll,info.windowDomain)
-									other			-> (zero,             False,                    False,                    SizeToRect whSize)
-	domain						= RectToRectangle domainRect
+									other			-> (zero,             False,                    False,                    sizeToRect whSize)
+	domain						= rectToRectangle domainRect
 opencontrols _ _ _ _ _
 	= windowcontrolsFatalError "opencontrols" "unexpected window placeholder argument"
 
@@ -73,7 +73,7 @@ opencompoundcontrols osdInfo wMetrics compoundId ls newItems
 	| otherwise
 		# (curw,curh)				= (whSize.w-(if visVScroll wMetrics.osmVSliderWidth 0),whSize.h-(if visHScroll wMetrics.osmHSliderHeight 0))
 		  curSize					= {w=curw,h=curh}
-		  wFrame					= SizeToRect curSize
+		  wFrame					= sizeToRect curSize
 		  hMargins					= getWindowHMargins   whKind wMetrics whAtts
 		  vMargins					= getWindowVMargins   whKind wMetrics whAtts
 		  spaces					= getWindowItemSpaces whKind wMetrics whAtts
@@ -89,12 +89,12 @@ opencompoundcontrols osdInfo wMetrics compoundId ls newItems
 		= (True,{wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
 where
 	wPtr							= wshIds.wPtr
-	domain							= RectToRectangle domainRect
+	domain							= rectToRectangle domainRect
 	(origin,domainRect,hasHScroll,hasVScroll)
 									= case whWindowInfo of
 										WindowInfo info	-> (info.windowOrigin,info.windowDomain,isJust info.windowHScroll,isJust info.windowVScroll)
-										other			-> (zero,             SizeToRect whSize,False,False)
-	(visHScroll,visVScroll)			= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
+										other			-> (zero,             sizeToRect whSize,False,False)
+	(visHScroll,visVScroll)			= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
 	
 	addControlsToCompound :: !Id .ls` ![WElementHandle .ls` .pst] [Int] ![WElementHandle .ls .pst]
 				  -> (!Bool,!Int,.ls`,![WElementHandle .ls` .pst],[Int],![WElementHandle .ls .pst])
@@ -130,7 +130,7 @@ where
 					// otherwise
 						= (found,nrSkip,ls,newItems,itemNrs,{itemH & wItems=itemHs})
 				| otherwise
-					# (nrSkip,curItems)	= Ulength itemH.wItems
+					# (nrSkip,curItems)	= ulength itemH.wItems
 					  (itemNrs,newItems)= genWElementItemNrs itemNrs newItems
 					  newItems			= [WChangeLSHandle {wChangeLS=ls,wChangeItems=newItems}]
 					  itemH				= {itemH & wItems=curItems++newItems}
@@ -169,7 +169,7 @@ closecontrols wMetrics closeIds relayout
 		= (freeRIds,freeIds,disposeFun,{wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
 	| otherwise
 		# (curw,curh)				= (whSize.w-(if visVScroll wMetrics.osmVSliderWidth 0),whSize.h-(if visHScroll wMetrics.osmHSliderHeight 0))
-		  wFrame					= SizeToRect {w=curw,h=curh}
+		  wFrame					= sizeToRect {w=curw,h=curh}
 		  hMargins					= getWindowHMargins   whKind wMetrics whAtts
 		  vMargins					= getWindowVMargins   whKind wMetrics whAtts
 		  spaces					= getWindowItemSpaces whKind wMetrics whAtts
@@ -182,12 +182,12 @@ closecontrols wMetrics closeIds relayout
 		# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wshIds {wH & whItems=newItemHs} tb
 		= (freeRIds,freeIds,disposeFun,{wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
 where
-	domain							= RectToRectangle domainRect
+	domain							= rectToRectangle domainRect
 	(origin,domainRect,hasHScroll,hasVScroll)
 									= case whWindowInfo of
 										WindowInfo info	-> (info.windowOrigin,info.windowDomain,isJust info.windowHScroll,isJust info.windowVScroll)
-										other			-> (zero,             SizeToRect whSize,False,False)
-	(visHScroll,visVScroll)			= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
+										other			-> (zero,             sizeToRect whSize,False,False)
+	(visHScroll,visVScroll)			= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
 	
 	closeWElementHandles :: !OSWindowPtr ![Id]  [Int] ![WElementHandle .ls .pst] !*OSToolbox
 	   -> (![Id],![Id],!IdFun *OSToolbox,![Id],![Int],![WElementHandle .ls .pst],!*OSToolbox)
@@ -217,7 +217,7 @@ where
 			
 			closeWItemHandle parentPtr ids itemNrs itemH=:{wItemKind,wItemId,wItemPos,wItemSize,wItemNr,wItems} tb
 				# (close,ids)										= case wItemId of
-																		(Just id)	-> RemoveCheck id ids
+																		(Just id)	-> removeCheck id ids
 																		_			-> (False,ids)
 				| isRecursiveControl wItemKind
 					# (freeRIds,freeIds,f1,ids,itemNrs,itemHs,tb)	= closeWElementHandles parentPtr ids itemNrs wItems tb
@@ -229,28 +229,28 @@ where
 							= (close,freeRIds,freeIds,f1,ids,itemNrs,itemH,tb)
 					// otherwise
 						# (freeRIds1,freeIds1,f2,itemH,tb)			= disposeWItemHandle parentPtr itemH tb
-						# tb										= OSinvalidateWindowRect parentPtr (PosSizeToRect wItemPos wItemSize) tb
+						# tb										= osInvalidateWindowRect parentPtr (posSizeToRect wItemPos wItemSize) tb
 						= (close,freeRIds1++freeRIds,freeIds1++freeIds,f2 o f1,ids,itemNrs,itemH,tb)
 				| not close
 					= (close,[],[],id,ids,itemNrs,itemH,tb)
 				| otherwise
 					# (freeRIds,freeIds,f,itemH,tb)					= disposeWItemHandle parentPtr itemH tb
-					# tb											= OSinvalidateWindowRect parentPtr (PosSizeToRect wItemPos wItemSize) tb
+					# tb											= osInvalidateWindowRect parentPtr (posSizeToRect wItemPos wItemSize) tb
 					= (close,freeRIds,freeIds,f,ids,[wItemNr:itemNrs],itemH,tb)
 		
 		closeWElementHandle parentPtr ids itemNrs (WListLSHandle itemHs) tb
 			# (freeRIds,freeIds,f,ids,itemNrs,itemHs,tb)	= closeWElementHandles parentPtr ids itemNrs itemHs tb
-			# (empty,itemHs)								= u_isEmpty itemHs
+			# (empty,itemHs)								= uisEmpty itemHs
 			= (empty,freeRIds,freeIds,f,ids,itemNrs,WListLSHandle itemHs,tb)
 		
 		closeWElementHandle parentPtr ids itemNrs (WExtendLSHandle wExH=:{wExtendItems=itemHs}) tb
 			# (freeRIds,freeIds,f,ids,itemNrs,itemHs,tb)	= closeWElementHandles parentPtr ids itemNrs itemHs tb
-			# (empty,itemHs)								= u_isEmpty itemHs
+			# (empty,itemHs)								= uisEmpty itemHs
 			= (empty,freeRIds,freeIds,f,ids,itemNrs,WExtendLSHandle {wExH & wExtendItems=itemHs},tb)
 		
 		closeWElementHandle parentPtr ids itemNrs (WChangeLSHandle wChH=:{wChangeItems=itemHs}) tb
 			# (freeRIds,freeIds,f,ids,itemNrs,itemHs,tb)	= closeWElementHandles parentPtr ids itemNrs itemHs tb
-			# (empty,itemHs)								= u_isEmpty itemHs
+			# (empty,itemHs)								= uisEmpty itemHs
 			= (empty,freeRIds,freeIds,f,ids,itemNrs,WChangeLSHandle {wChH & wChangeItems=itemHs},tb)
 closecontrols _ _ _ _ _
 	= windowcontrolsFatalError "closecontrols" "unexpected window placeholder argument"
@@ -284,11 +284,11 @@ where
 				| isRecursiveControl wItemKind
 					# (freeRIds1,freeIds1,f1,itemNrs,tb)= closeWElementHandles parentPtr wItems itemNrs tb
 					# (freeRIds2,freeIds2,f2,_,tb)		= disposeWItemHandle parentPtr {itemH & wItems=[]} tb		// PA: itemH --> {itemH & wItems=[]}
-					# tb								= OSinvalidateWindowRect parentPtr (PosSizeToRect wItemPos wItemSize) tb
+					# tb								= osInvalidateWindowRect parentPtr (posSizeToRect wItemPos wItemSize) tb
 					= (freeRIds2++freeRIds1,freeIds2++freeIds1,f2 o f1,itemNrs,tb)
 				| otherwise
 					# (freeRIds,freeIds,f,_,tb)			= disposeWItemHandle parentPtr itemH tb
-					# tb								= OSinvalidateWindowRect parentPtr (PosSizeToRect wItemPos wItemSize) tb
+					# tb								= osInvalidateWindowRect parentPtr (posSizeToRect wItemPos wItemSize) tb
 					= (freeRIds,freeIds,f,[wItemNr:itemNrs],tb)
 		
 		closeWElementHandle parentPtr (WListLSHandle itemHs) itemNrs tb
@@ -315,7 +315,7 @@ setcontrolpositions wMetrics newPoss
 		= (False,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=oldItems}}},tb)
 	| otherwise
 		# (curw,curh)				= (whSize.w-(if visVScroll wMetrics.osmVSliderWidth 0),whSize.h-(if visHScroll wMetrics.osmHSliderHeight 0))
-		  wFrame					= SizeToRect {w=curw,h=curh}
+		  wFrame					= sizeToRect {w=curw,h=curh}
 		  hMargins					= getWindowHMargins   whKind wMetrics whAtts
 		  vMargins					= getWindowVMargins   whKind wMetrics whAtts
 		  spaces					= getWindowItemSpaces whKind wMetrics whAtts
@@ -325,23 +325,23 @@ setcontrolpositions wMetrics newPoss
 		# (_,newItems,tb)			= layoutControls wMetrics hMargins vMargins spaces reqSize zero [(domain,origin)] newItems tb
 		  wH						= {wH & whItems=newItems}
 		# (wH,tb)					= forceValidWindowClipState wMetrics True wPtr wH tb
-		  viewFrame					= PosSizeToRectangle origin {w=curw,h=curh}
-		  updState					= RectangleToUpdateState viewFrame
+		  viewFrame					= posSizeToRectangle origin {w=curw,h=curh}
+		  updState					= rectangleToUpdateState viewFrame
 		  drawbackground			= if (whKind==IsDialog) (\x y->(x,y)) (drawwindowlook wMetrics wPtr id updState)
 		# (wH,tb)					= drawbackground wH tb
 		# (updRgn,newItems,tb)		= relayoutControls wMetrics whSelect whShow wFrame wFrame zero zero wPtr whDefaultId oldItems` wH.whItems tb
 		# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wshIds {wH & whItems=newItems} tb
-		# tb						= OSvalidateWindowRect wPtr (SizeToRect whSize) tb
+		# tb						= osValidateWindowRect wPtr (sizeToRect whSize) tb
 		  wsH						= {wsH & wshHandle=Just {wlsH & wlsHandle=wH}}
 		= (True,wsH,tb)
 where
 	wPtr							= wshIds.wPtr
-	domain							= RectToRectangle domainRect
+	domain							= rectToRectangle domainRect
 	(origin,domainRect,hasHScroll,hasVScroll)
 									= case whWindowInfo of
 										WindowInfo info	-> (info.windowOrigin,info.windowDomain,isJust info.windowHScroll,isJust info.windowVScroll)
-										other			-> (zero,             SizeToRect whSize,False,False)
-	(visHScroll,visVScroll)			= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
+										other			-> (zero,             sizeToRect whSize,False,False)
+	(visHScroll,visVScroll)			= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
 
 	validateNewItemPoss :: ![(Id,ItemPos)] ![WElementHandle .ls .pst] -> (!Bool,![WElementHandle .ls .pst])
 	validateNewItemPoss idPoss itemHs
@@ -411,8 +411,8 @@ where
 						= (idPoss,{itemH & wItems=itemHs})
 					// otherwise
 						= (idPoss,itemH)
-				# (found,idPos,idPoss)	= Remove ((==) itemId o fst) undef idPoss
-				  atts					= if found (snd (Replace isControlPos (ControlPos (snd idPos)) wItemAtts)) wItemAtts
+				# (found,idPos,idPoss)	= remove ((==) itemId o fst) undef idPoss
+				  atts					= if found (snd (creplace isControlPos (ControlPos (snd idPos)) wItemAtts)) wItemAtts
 				| isRecursiveControl wItemKind
 					# (idPoss,itemHs)	= setNewItemPoss idPoss wItems
 					| found && wItemKind==IsCompoundControl

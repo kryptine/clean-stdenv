@@ -6,7 +6,7 @@ implementation module osdocumentinterface
 
 import	StdMaybe, StdOverloaded, StdString, StdTuple
 import	clCrossCall_12, ostoolbar, ossystem, ostypes, windowCrossCall_12
-from	commondef	import FatalError
+from	commondef	import fatalError
 from	StdIOCommon	import DocumentInterface, MDI, SDI, NDI
 import	code from "cCrossCallxDI_121.obj"
 
@@ -37,10 +37,10 @@ import	code from "cCrossCallxDI_121.obj"
 
 osdocumentinterfaceFatalError :: String String -> .x
 osdocumentinterfaceFatalError function error
-	= FatalError function "osdocumentinterface" error
+	= fatalError function "osdocumentinterface" error
 
-OSinitialiseDI :: !*OSToolbox -> *OSToolbox
-OSinitialiseDI _
+osInitialiseDI :: !*OSToolbox -> *OSToolbox
+osInitialiseDI _
 	= code
 	{
 		.inline InstallCrossCallxDI
@@ -104,14 +104,14 @@ setOSDInfoOSInfo osinfo (OSSDInfo oss) = OSSDInfo {oss & ossdOSInfo=osinfo}
 setOSDInfoOSInfo _       osnoinfo      = osnoinfo
 
 
-/*	OSopenMDI creates the infrastructure of an MDI process.
+/*	osOpenMDI creates the infrastructure of an MDI process.
 		If the first Bool argument is True, then the frame window is shown, otherwise it is hidden.
 		The second Bool indicates whether the process accepts file open events.
 */
-OSopenMDI :: !Bool !Bool !*OSToolbox -> (!OSDInfo,!*OSToolbox)
-OSopenMDI show acceptFileOpen tb
+osOpenMDI :: !Bool !Bool !*OSToolbox -> (!OSDInfo,!*OSToolbox)
+osOpenMDI show acceptFileOpen tb
 	# createCci			= Rq2Cci CcRqCREATEMDIFRAMEWINDOW (toInt show) (toInt acceptFileOpen)
-	# (returncci,tb)	= IssueCleanRequest2 osCreateMDIWindowCallback createCci tb
+	# (returncci,tb)	= issueCleanRequest2 osCreateMDIWindowCallback createCci tb
 	  (framePtr,clientPtr,menuBar,windowMenu)
 		  				= case returncci.ccMsg of
 			  				CcRETURN4	-> (returncci.p1,returncci.p2,returncci.p3,returncci.p4)
@@ -128,18 +128,18 @@ OSopenMDI show acceptFileOpen tb
 where
 	osCreateMDIWindowCallback :: !CrossCallInfo !*OSToolbox -> (!CrossCallInfo,!*OSToolbox)
 	osCreateMDIWindowCallback {ccMsg=CcWmDEACTIVATE} tb
-		= (Return0Cci,tb)
+		= (return0Cci,tb)
 	osCreateMDIWindowCallback {ccMsg=CcWmACTIVATE} tb
-		= (Return0Cci,tb)
+		= (return0Cci,tb)
 	osCreateMDIWindowCallback {ccMsg=CcWmKILLFOCUS} tb		/* PA: added. Shouldn't ControlDeactivate be delayed? */
-		= (Return0Cci,tb)
+		= (return0Cci,tb)
 	osCreateMDIWindowCallback {ccMsg} tb
 		= osdocumentinterfaceFatalError "osCreateMDIWindowCallback" ("received message nr:"+++toString ccMsg)
 
-OSopenSDI :: !Bool !*OSToolbox -> (!OSDInfo,!*OSToolbox)
-OSopenSDI acceptFileOpen tb
+osOpenSDI :: !Bool !*OSToolbox -> (!OSDInfo,!*OSToolbox)
+osOpenSDI acceptFileOpen tb
 	# createCci			= Rq1Cci CcRqCREATESDIFRAMEWINDOW (toInt acceptFileOpen)
-	# (returncci,tb)	= IssueCleanRequest2 osCreateSDIWindowCallback createCci tb
+	# (returncci,tb)	= issueCleanRequest2 osCreateSDIWindowCallback createCci tb
 	  (framePtr,menuBar)= case returncci.ccMsg of
 	  						CcRETURN2	-> (returncci.p1,returncci.p2)
 	  						CcWASQUIT	-> (OSNoWindowPtr,OSNoWindowPtr)
@@ -149,31 +149,31 @@ OSopenSDI acceptFileOpen tb
 where
 	osCreateSDIWindowCallback :: !CrossCallInfo !*OSToolbox -> (!CrossCallInfo,!*OSToolbox)
 	osCreateSDIWindowCallback {ccMsg=CcWmDEACTIVATE} tb
-		= (Return0Cci,tb)
+		= (return0Cci,tb)
 	osCreateSDIWindowCallback {ccMsg=CcWmACTIVATE} tb
-		= (Return0Cci,tb)
+		= (return0Cci,tb)
 	osCreateSDIWindowCallback {ccMsg=CcWmKILLFOCUS} tb		/* PA: added. Shouldn't ControlDeactivate be delayed? */
-		= (Return0Cci,tb)
+		= (return0Cci,tb)
 	osCreateSDIWindowCallback {ccMsg} tb
 		= osdocumentinterfaceFatalError "osCreateSDIWindowCallback" ("received message nr:"+++toString ccMsg)
 
-OScloseOSDInfo :: !OSDInfo !*OSToolbox -> *OSToolbox
-OScloseOSDInfo (OSMDInfo {osmdOSInfo={osFrame}}) tb
-	= snd (IssueCleanRequest2 (osDestroyProcessWindowCallback "OScloseMDI") (Rq1Cci CcRqDESTROYWINDOW osFrame) tb)
-OScloseOSDInfo (OSSDInfo {ossdOSInfo={osFrame}}) tb
-	= snd (IssueCleanRequest2 (osDestroyProcessWindowCallback "OScloseSDI") (Rq1Cci CcRqDESTROYWINDOW osFrame) tb)
-OScloseOSDInfo _ tb
+osCloseOSDInfo :: !OSDInfo !*OSToolbox -> *OSToolbox
+osCloseOSDInfo (OSMDInfo {osmdOSInfo={osFrame}}) tb
+	= snd (issueCleanRequest2 (osDestroyProcessWindowCallback "osCloseMDI") (Rq1Cci CcRqDESTROYWINDOW osFrame) tb)
+osCloseOSDInfo (OSSDInfo {ossdOSInfo={osFrame}}) tb
+	= snd (issueCleanRequest2 (osDestroyProcessWindowCallback "osCloseSDI") (Rq1Cci CcRqDESTROYWINDOW osFrame) tb)
+osCloseOSDInfo _ tb
 	= tb
 
 osDestroyProcessWindowCallback :: String !CrossCallInfo !*OSToolbox -> (!CrossCallInfo,!*OSToolbox)
 osDestroyProcessWindowCallback _ {ccMsg=CcWmDEACTIVATE} tb
-	= (Return0Cci,tb)
+	= (return0Cci,tb)
 osDestroyProcessWindowCallback _ {ccMsg=CcWmACTIVATE} tb
-	= (Return0Cci,tb)
+	= (return0Cci,tb)
 osDestroyProcessWindowCallback _ {ccMsg=CcWmKEYBOARD} tb
-	= (Return0Cci,tb)
+	= (return0Cci,tb)
 osDestroyProcessWindowCallback _ {ccMsg=CcWmPAINT,p1=hwnd} tb
-	= (Return0Cci,WinFakePaint hwnd tb)
+	= (return0Cci,winFakePaint hwnd tb)
 osDestroyProcessWindowCallback function {ccMsg} tb
 	= osdocumentinterfaceFatalError function ("received message nr:"+++toString ccMsg)
 

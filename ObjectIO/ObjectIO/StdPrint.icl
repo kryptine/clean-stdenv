@@ -113,7 +113,7 @@ printUpdateFunction doDialog updateFunc rectangles printSetup printEnv
 			clipsOfOneRectangle rectangle
 				= clipRectangles
 				where
-					{rleft=x1,rtop=y1,rright=x2,rbottom=y2} = RectangleToRect rectangle
+					{rleft=x1,rtop=y1,rright=x2,rbottom=y2} = rectangleToRect rectangle
 					wR = x2-x1+1
 					hR = y2-y1+1
 					columns = [0..(ceilOfRatio wR wP)-1]
@@ -130,7 +130,7 @@ printUpdateFunction doDialog updateFunc rectangles printSetup printEnv
 						| x>y = y
 						=x
 	pageTrans ((printSetup, [clipRect:rest]), picture)
-		# drawFunction = updateFunc (RectangleToUpdateState clipRect)
+		# drawFunction = updateFunc (rectangleToUpdateState clipRect)
 		= ( (isEmpty rest,if (isEmpty rest) zero (hd rest).corner1),
 		 	((printSetup,rest), appClipPicture (toRegion clipRect) drawFunction picture)
 		  )

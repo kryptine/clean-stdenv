@@ -5,34 +5,34 @@ definition module osevent
 from	StdInt			import ^,-
 from	clCrossCall_12	import CrossCallInfo
 from	ostoolbox		import OSToolbox
-from	ostime			import OSTime				// PA: new
+from	ostime			import OSTime
 from	ostypes			import OSWindowPtr
 from	StdMaybe		import Maybe, Just, Nothing
 
 
 ::	*OSEvents
 
-OSnewEvents		:: OSEvents
-OScopyEvents	:: !OSEvents -> (!OSEvents,!OSEvents)
-OSappendEvents	:: !*[OSEvent] !OSEvents -> OSEvents		// OSappendEvents adds events at the end of the queue
-OSisEmptyEvents	:: !OSEvents -> (!Bool,!OSEvents)
-OSremoveEvent	:: !OSEvents -> (!OSEvent,!OSEvents)
+osNewEvents		:: OSEvents
+osCopyEvents	:: !OSEvents -> (!OSEvents,!OSEvents)
+osAppendEvents	:: !*[OSEvent] !OSEvents -> OSEvents		// osAppendEvents adds events at the end of the queue
+osIsEmptyEvents	:: !OSEvents -> (!Bool,!OSEvents)
+osRemoveEvent	:: !OSEvents -> (!OSEvent,!OSEvents)
 
 
 ::	OSEvent
 	:==	CrossCallInfo
 ::	OSSleepTime			// The max time the process allows multi-tasking
 	:==	Int
-OSNullEvent :: OSEvent	// OSNullEvent returns a valid non-informative event
+osNullEvent :: OSEvent	// osNullEvent returns a valid non-informative event
 
 // OSLongSleep :: OSSleepTime
 OSLongSleep	:== 2^15-1
 // OSNoSleep :: OSSleepTime
 OSNoSleep	:== 0
 
-//OShandleEvents		:: !(.s -> (Bool,.s)) !(.s -> (Int,.s)) !(OSEvent -> .s -> ([Int],.s)) !(!.s,!*OSToolbox) -> (!.s,!*OSToolbox)
-OShandleEvents			:: !(.s -> (Bool,.s)) !(.s -> (OSEvents,.s)) !((OSEvents,.s) -> .s) !(.s -> (Int,.s)) !(OSEvent -> .s -> ([Int],.s)) !(!.s,!*OSToolbox) -> (!.s,!*OSToolbox)
-OSEventIsUrgent			:: !OSEvent -> Bool
+//osHandleEvents		:: !(.s -> (Bool,.s)) !(.s -> (Int,.s)) !(OSEvent -> .s -> ([Int],.s)) !(!.s,!*OSToolbox) -> (!.s,!*OSToolbox)
+osHandleEvents			:: !(.s -> (Bool,.s)) !(.s -> (OSEvents,.s)) !((OSEvents,.s) -> .s) !(.s -> (Int,.s)) !(OSEvent -> .s -> ([Int],.s)) !(!.s,!*OSToolbox) -> (!.s,!*OSToolbox)
+osEventIsUrgent			:: !OSEvent -> Bool
 setReplyInOSEvent		:: ![Int] -> CrossCallInfo
 
 /*	createOS(Dea/A)ctivateWindowEvent creates the event the platform would generate for a genuine (de)activate event. */

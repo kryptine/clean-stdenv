@@ -10,18 +10,18 @@ import	StdBool, StdList, StdFunc, StdTuple, StdMisc
 from	StdSystem		import maxScrollWindowSize
 import	osdocumentinterface, ostypes, oswindow
 from	ospicture		import defaultPen, setPenAttribute
-from	ossystem		import OSscreenrect, OSstripOuterSize
+from	ossystem		import osScreenrect, osStripOuterSize
 import	commondef, controllayout, keyfocus, StdControlAttribute, StdId, StdWindowAttribute, windowaccess
-from	iostate			import IOSt, IOStGetIdTable, IOStSetIdTable
+from	iostate			import IOSt, ioStGetIdTable, ioStSetIdTable
 
 
 windowvalidateError :: String String -> .x
-windowvalidateError function error
-	= Error function "windowvalidate" error
+windowvalidateError function message
+	= error function "windowvalidate" message
 
 windowvalidateFatalError :: String String -> .x
-windowvalidateFatalError function error
-	= FatalError function "windowvalidate" error
+windowvalidateFatalError function message
+	= fatalError function "windowvalidate" message
 
 
 /*	validateWindowId checks whether the Id of the window/dialogue has already been bound.
@@ -33,9 +33,9 @@ validateWindowId Nothing ioState
 	# (wId,ioState)				= openId ioState
 	= (Just wId,ioState)
 validateWindowId (Just id) ioState
-	# (idtable,ioState)			= IOStGetIdTable ioState
-	| memberIdTable id idtable	= (Nothing,IOStSetIdTable idtable ioState)
-	| otherwise					= (Just id,IOStSetIdTable idtable ioState)
+	# (idtable,ioState)			= ioStGetIdTable ioState
+	| memberIdTable id idtable	= (Nothing,ioStSetIdTable idtable ioState)
+	| otherwise					= (Just id,ioStSetIdTable idtable ioState)
 
 
 /*	Validate the given window.
@@ -54,14 +54,14 @@ validateWindow wMetrics _ wH=:{whMode=mode,whKind=IsDialog,whItemNrs,whItems,whA
 	  (canid,whItems)			= getCancelId							atts whItems
 	  (atts, whItems)			= validateWindowInitActive				atts whItems
 	  reqSize					= determineRequestedSize zero sizeAtt
-	  (minWidth,minHeight)		= OSMinWindowSize
+	  (minWidth,minHeight)		= osMinWindowSize
 	  minSize					= {w=minWidth,h=minHeight}
-	  domain					= SizeToRectangle reqSize
+	  domain					= sizeToRectangle reqSize
 	# (derSize,items,tb)		= layoutControls wMetrics hMargins vMargins spaces reqSize minSize [(domain,zero)] whItems tb
 	  (itemNrs,items)			= genWElementItemNrs whItemNrs items
 	  (focusItems,items)		= getWElementKeyFocusIds True items
 	  derSize					= determineRequestedSize derSize sizeAtt
-	  domain					= SizeToRectangle derSize
+	  domain					= sizeToRectangle derSize
 	# okSize					= exactWindowSize wMetrics domain derSize False False IsDialog
 	# (okPos,windows,tb)		= exactWindowPos wMetrics okSize pos IsDialog mode windows tb
 	= (	index
@@ -98,7 +98,7 @@ validateWindow wMetrics osdInfo wH=:{whKind=IsWindow,whItemNrs,whItems,whAtts} w
 	  (defid,whItems)			= getOkId								atts whItems
 	  (canid,whItems)			= getCancelId							atts whItems
 	  (atts, whItems)			= validateWindowInitActive				atts whItems
-	  pen						= StateMap2 setPenAttribute (reverse penAtts) defaultPen
+	  pen						= stateMap2 setPenAttribute (reverse penAtts) defaultPen
 	# (derSize,items,tb)		= layoutControls wMetrics hMargins vMargins spaces reqSize minSize [(domain,domain.corner1)] whItems tb
 	  (itemNrs,items)			= genWElementItemNrs whItemNrs items
 	  (focusItems,items)		= getWElementKeyFocusIds True items
@@ -113,7 +113,7 @@ validateWindow wMetrics osdInfo wH=:{whKind=IsWindow,whItemNrs,whItems,whAtts} w
 	  ,	{	wH	&	whItemNrs	= itemNrs
 				,	whKeyFocus	= newFocusItems focusItems
 				,	whWindowInfo= WindowInfo
-									{	windowDomain	= RectangleToRect domain
+									{	windowDomain	= rectangleToRect domain
 									,	windowOrigin	= domain.corner1
 									,	windowHScroll	= hScroll
 									,	windowVScroll	= vScroll
@@ -131,14 +131,14 @@ validateWindow wMetrics osdInfo wH=:{whKind=IsWindow,whItemNrs,whItems,whAtts} w
 	  ,	tb
 	  )
 where
-	minSize			= fromTuple OSMinWindowSize
+	minSize			= fromTuple osMinWindowSize
 	isMDI			= getOSDInfoDocumentInterface osdInfo == MDI
 	
 	validScrollInfos :: OSWindowMetrics !Size !(Maybe ScrollFunction) !(Maybe ScrollFunction) -> (!Maybe ScrollInfo,!Maybe ScrollInfo)
 	validScrollInfos wMetrics wSize maybe_hScroll maybe_vScroll
 		= (mapMaybe (scrollInfo hScrollRect) maybe_hScroll,mapMaybe (scrollInfo vScrollRect) maybe_vScroll)
 	where
-		windowRect	= SizeToRect wSize
+		windowRect	= sizeToRect wSize
 		hasScrolls	= (isJust maybe_hScroll,isJust maybe_vScroll)
 		hScrollRect	= getWindowHScrollRect wMetrics hasScrolls windowRect
 		vScrollRect	= getWindowVScrollRect wMetrics hasScrolls windowRect
@@ -147,7 +147,7 @@ where
 		scrollInfo r=:{rleft,rtop} scrollFun
 			= {	scrollFunction	= scrollFun
 			  ,	scrollItemPos	= {x=rleft,y=rtop}
-  			  ,	scrollItemSize	= RectSize r
+  			  ,	scrollItemSize	= rectSize r
 			  ,	scrollItemPtr	= OSNoWindowPtr
 			  }
 
@@ -171,14 +171,14 @@ validateWindowIndex :: !WindowMode ![WindowAttribute *(.ls,.pst)] !(WindowHandle
 validateWindowIndex mode atts windows=:{whsWindows}
 	= (okIndex,atts`,{windows & whsWindows=modal`++modeless`})
 where
-	(_,indexAtt,atts`)		= Remove isWindowIndex (WindowIndex 0) atts
+	(_,indexAtt,atts`)		= remove isWindowIndex (WindowIndex 0) atts
 	index					= getWindowIndexAtt indexAtt
-	(modal,modeless)		= Uspan isModalWindow whsWindows
-	(nrModals,modal`)		= Ulength modal
-	(nrModeless,modeless`)	= Ulength modeless
+	(modal,modeless)		= uspan isModalWindow whsWindows
+	(nrModals,modal`)		= ulength modal
+	(nrModeless,modeless`)	= ulength modeless
 	okIndex					= if (mode==Modal)
 	  							 0													// Open modal windows frontmost
-	  							 (SetBetween index nrModals (nrModals+nrModeless))	// Open modeless windows behind the modal windows
+	  							 (setBetween index nrModals (nrModals+nrModeless))	// Open modeless windows behind the modal windows
 	
 	isModalWindow :: !(WindowStateHandle .pst) -> *(!Bool,!WindowStateHandle .pst)
 	isModalWindow wsH
@@ -203,7 +203,7 @@ validateWindowPos mode atts windows
 		# (found,windows)	= hasWindowHandlesWindow (toWID relativeTo) windows
 		= (if found (Just itemPos) Nothing,atts`,windows)
 where
-	(hasPosAtt,posAtt,atts`)= Remove isWindowPos undef atts
+	(hasPosAtt,posAtt,atts`)= remove isWindowPos undef atts
 	itemPos					= getWindowPosAtt posAtt
 	(isRelative,relativeTo)	= isRelativeItemPos itemPos
 
@@ -216,21 +216,21 @@ where
 */
 validateWindowDomain :: ![WindowAttribute .st] -> (!ViewDomain,![WindowAttribute .st])
 validateWindowDomain atts
-	# (hasDomain,domainAtt,atts)= Remove isWindowViewDomain undef atts
+	# (hasDomain,domainAtt,atts)= remove isWindowViewDomain undef atts
 	| not hasDomain
 		= ({viewDomainRange & corner1=zero},atts)
 	# domain					= getWindowViewDomainAtt domainAtt
-	| IsEmptyRectangle domain
+	| isEmptyRectangle domain
 		= windowvalidateError "validateWindowDomain" "Window has illegal ViewDomain argument"
 	| otherwise
 		= (validateViewDomain domain,atts)
 
 validateViewDomain :: !ViewDomain -> ViewDomain
 validateViewDomain domain
-	= {corner1={x=SetBetween dl rl rr,y=SetBetween dt rt rb},corner2={x=SetBetween dr rl rr,y=SetBetween db rt rb}}
+	= {corner1={x=setBetween dl rl rr,y=setBetween dt rt rb},corner2={x=setBetween dr rl rr,y=setBetween db rt rb}}
 where
-	{rleft=dl,rtop=dt,rright=dr,rbottom=db}	= RectangleToRect domain
-	{rleft=rl,rtop=rt,rright=rr,rbottom=rb}	= RectangleToRect viewDomainRange
+	{rleft=dl,rtop=dt,rright=dr,rbottom=db}	= rectangleToRect domain
+	{rleft=rl,rtop=rt,rright=rr,rbottom=rb}	= rectangleToRect viewDomainRange
 
 
 /*	validateWindowSize wMetrics viewDomain isMDI isResizable (hasHScroll,hasVScroll) atts
@@ -250,23 +250,23 @@ validateWindowSize wMetrics domain isMDI isResizable hasScrolls atts tb
 		domainSize		= rectangleSize domain
 		pictSize		= {w=min domainSize.w maxSize.w,h=min domainSize.h maxSize.h}
 	| isWindowViewSize sizeAtt
-		= (size1,snd (Replace isWindowViewSize (WindowViewSize size1) atts),tb)
+		= (size1,snd (creplace isWindowViewSize (WindowViewSize size1) atts),tb)
 	with
 		size			= getWindowViewSizeAtt sizeAtt
-		size1			= {w=SetBetween size.w (fst minSize) maxSize.w,h=SetBetween size.h (snd minSize) maxSize.h}
+		size1			= {w=setBetween size.w (fst minSize) maxSize.w,h=setBetween size.h (snd minSize) maxSize.h}
 	| otherwise
-		# ((dw,dh),tb)	= OSstripOuterSize isMDI isResizable tb
+		# ((dw,dh),tb)	= osStripOuterSize isMDI isResizable tb
 		  (w,h)			= (outerSize.w-dw,outerSize.h-dh)
-		  visScrolls	= OSscrollbarsAreVisible wMetrics (RectangleToRect domain) (w,h) hasScrolls
-		  viewSize		= RectSize (getWindowContentRect wMetrics visScrolls (SizeToRect {w=w,h=h}))
-		# (_,_,atts)	= Remove isWindowOuterSize undef atts
-		# (_,_,atts)	= Remove isWindowViewSize  undef atts
+		  visScrolls	= osScrollbarsAreVisible wMetrics (rectangleToRect domain) (w,h) hasScrolls
+		  viewSize		= rectSize (getWindowContentRect wMetrics visScrolls (sizeToRect {w=w,h=h}))
+		# (_,_,atts)	= remove isWindowOuterSize undef atts
+		# (_,_,atts)	= remove isWindowViewSize  undef atts
 		= (viewSize,[WindowViewSize viewSize:atts],tb)
 	with
 		outerSize		= getWindowOuterSizeAtt sizeAtt
 where
-	(hasSize,sizeAtt)	= Select (\att->isWindowViewSize att || isWindowOuterSize att) undef atts
-	minSize				= OSMinWindowSize
+	(hasSize,sizeAtt)	= cselect (\att->isWindowViewSize att || isWindowOuterSize att) undef atts
+	minSize				= osMinWindowSize
 	maxSize				= maxScrollWindowSize
 
 
@@ -276,22 +276,22 @@ where
 */
 validateOrigin :: !Size !ViewDomain ![WindowAttribute .st] -> (!Point2,![WindowAttribute .st])
 validateOrigin {w,h} domain=:{corner1={x=l,y=t},corner2={x=r,y=b}} atts
-	# (_,domainAtt,atts)	= Remove isWindowOrigin (WindowOrigin domain.corner1) atts
+	# (_,domainAtt,atts)	= remove isWindowOrigin (WindowOrigin domain.corner1) atts
 	  origin				= getWindowOriginAtt domainAtt
-	= ({x=SetBetween origin.x l (max l (r-w)),y=SetBetween origin.y t (max t (b-h))},atts)
+	= ({x=setBetween origin.x l (max l (r-w)),y=setBetween origin.y t (max t (b-h))},atts)
 
 
 /*	validateWindow(H/V)Scroll removes the Window(H/V)Scroll attribute from the attribute list. 
 */
 validateWindowHScroll :: ![WindowAttribute .st] -> (!Maybe ScrollFunction,![WindowAttribute .st])
 validateWindowHScroll atts
-	# (found,scrollAtt,atts)	= Remove isWindowHScroll undef atts
+	# (found,scrollAtt,atts)	= remove isWindowHScroll undef atts
 	| found						= (Just (getWindowHScrollFun scrollAtt),atts)
 	| otherwise					= (Nothing,atts)
 
 validateWindowVScroll :: ![WindowAttribute .st] -> (!Maybe ScrollFunction,![WindowAttribute .st])
 validateWindowVScroll atts
-	# (found,scrollAtt,atts)	= Remove isWindowVScroll undef atts
+	# (found,scrollAtt,atts)	= remove isWindowVScroll undef atts
 	| found						= (Just (getWindowVScrollFun scrollAtt),atts)
 	| otherwise					= (Nothing,atts)
 
@@ -302,12 +302,12 @@ validateWindowVScroll atts
 */
 validateWindowLook :: ![WindowAttribute .st] -> (!Bool,!Look,![WindowAttribute .st])
 validateWindowLook atts
-	# (_,lookAtt,atts)	= Remove isWindowLook (WindowLook True defaultlook) atts
+	# (_,lookAtt,atts)	= remove isWindowLook (WindowLook True defaultlook) atts
 	  (sysLook,lookFun)	= getWindowLookAtt lookAtt
 	= (sysLook,lookFun,atts)
 where
 	defaultlook :: SelectState !UpdateState !*Picture -> *Picture
-	defaultlook _ {updArea} picture = StrictSeq (map unfill updArea) picture
+	defaultlook _ {updArea} picture = strictSeq (map unfill updArea) picture
 
 
 //	Retrieve (View/Outer)Size, Margins, ItemSpaces, SelectState, and PenAttributes from the attribute list.
@@ -318,7 +318,7 @@ attrSize atts
 	| isWindowViewSize att	= Just (getWindowViewSizeAtt  att)
 	| otherwise				= Just (getWindowOuterSizeAtt att)
 where
-	(hasSize,att)			= Select (\att->isWindowViewSize att || isWindowOuterSize att) undef atts
+	(hasSize,att)			= cselect (\att->isWindowViewSize att || isWindowOuterSize att) undef atts
 
 attrMargins :: !WindowKind !OSWindowMetrics ![WindowAttribute .st] -> (!(!Int,!Int),!(!Int,!Int))
 attrMargins wKind wMetrics atts
@@ -326,11 +326,11 @@ attrMargins wKind wMetrics atts
 
 attrSelectState :: ![WindowAttribute .st] -> Bool
 attrSelectState atts
-	= enabled (getWindowSelectStateAtt (snd (Select isWindowSelectState (WindowSelectState Able) atts)))
+	= enabled (getWindowSelectStateAtt (snd (cselect isWindowSelectState (WindowSelectState Able) atts)))
 
 attrPen :: ![WindowAttribute .st] -> (![PenAttribute],![WindowAttribute .st])
 attrPen atts
-	# (_,penAtt,atts)	= Remove isWindowPen (WindowPen []) atts
+	# (_,penAtt,atts)	= remove isWindowPen (WindowPen []) atts
 	= (getWindowPenAtt penAtt,atts)
 
 
@@ -347,7 +347,7 @@ getOkId atts itemHs
 	| otherwise
 		= (Nothing,itemHs)
 where
-	(hasid,idAtt)		= Select isWindowOk undef atts
+	(hasid,idAtt)		= cselect isWindowOk undef atts
 	id					= getWindowOkAtt idAtt
 
 getCancelId :: ![WindowAttribute *(.ls,.pst)] ![WElementHandle .ls .pst] -> (!Maybe Id,![WElementHandle .ls .pst])
@@ -360,7 +360,7 @@ getCancelId atts itemHs
 	| otherwise
 		= (Nothing,itemHs)
 where
-	(hasid,idAtt)		= Select isWindowCancel undef atts
+	(hasid,idAtt)		= cselect isWindowCancel undef atts
 	id					= getWindowCancelAtt idAtt
 
 isOkOrCancelControlId :: !Id ![WElementHandle .ls .pst] -> (!Bool,![WElementHandle .ls .pst])
@@ -387,7 +387,7 @@ validateWindowInitActive atts itemHs
 	| otherwise
 		= (atts,itemHs)
 where
-	(hasAtt,att,atts1)	= Remove isWindowInitActive undef atts
+	(hasAtt,att,atts1)	= remove isWindowInitActive undef atts
 
 /*	getControlKind id itemHs
 		returns (Just ControlKind) of the control in the item list. 
@@ -433,8 +433,8 @@ exactWindowSize wMetrics domain wSize=:{w,h} hasHScroll hasVScroll wKind
 	| visVScroll				= {wSize & w=w`}
 	| otherwise					= wSize
 where
-	visHScroll					= hasHScroll && OSscrollbarIsVisible (minmax domain.corner1.x domain.corner2.x) w
-	visVScroll					= hasVScroll && OSscrollbarIsVisible (minmax domain.corner1.y domain.corner2.y) h
+	visHScroll					= hasHScroll && osScrollbarIsVisible (minmax domain.corner1.x domain.corner2.x) w
+	visVScroll					= hasVScroll && osScrollbarIsVisible (minmax domain.corner1.y domain.corner2.y) h
 	w`							= w+wMetrics.osmVSliderWidth
 	h`							= h+wMetrics.osmHSliderHeight
 
@@ -449,11 +449,11 @@ exactWindowPos wMetrics exactSize maybePos wKind wMode windows tb
 	| wKind==IsDialog && wMode==Modal
 		= (pos,windows,tb1)
 	with
-		(screenRect,tb1)	= OSscreenrect tb
-		screenSize			= RectSize screenRect
+		(screenRect,tb1)	= osScreenrect tb
+		screenSize			= rectSize screenRect
 		l					= screenRect.rleft + (screenSize.w-exactSize.w)/2
 		t					= screenRect.rtop  + (screenSize.h-exactSize.h)/3
-		pos					= {x=SetBetween l screenRect.rleft screenRect.rright,y=SetBetween t screenRect.rtop screenRect.rbottom}
+		pos					= {x=setBetween l screenRect.rleft screenRect.rright,y=setBetween t screenRect.rtop screenRect.rbottom}
 	| isNothing maybePos
 		= (zero,windows,tb)
 	| otherwise
@@ -469,16 +469,16 @@ where
 											   -> (!Point2,!WindowHandles .pst, !*OSToolbox)
 	getItemPosPosition wMetrics size itemPos windows=:{whsWindows=wsHs} tb
 		| isRelative
-			# (rect,tb)					= OSscreenrect tb
-			  screenDomain				= RectToRectangle rect
+			# (rect,tb)					= osScreenrect tb
+			  screenDomain				= rectToRectangle rect
 			  screenOrigin				= {x=rect.rleft,y=rect.rtop}
-			# (before,after)			= Uspan (unidentifyWindow (toWID relativeTo)) wsHs
+			# (before,after)			= uspan (unidentifyWindow (toWID relativeTo)) wsHs
 			  (wPtr,wsH,after)			= case after of
 		  									[]                           -> windowvalidateFatalError "getItemPosPosition" "target window could not be found"
 		  									[wsH=:{wshIds={wPtr}}:after] -> (wPtr,wsH,after)
 			  (relativeSize,wsH)		= getWindowStateHandleSize wsH
 			  windows					= {windows & whsWindows=before++[wsH:after]}
-			# ((relativeX,relativeY),tb)= OSgetWindowPos wPtr tb
+			# ((relativeX,relativeY),tb)= osGetWindowPos wPtr tb
 			/* PA: do not use OSgetWindowViewFrameSize. 
 			# ((relativeW,relativeH),tb)= OSgetWindowViewFrameSize wPtr tb
 			*/
@@ -501,16 +501,16 @@ where
 			= (not (identifyWIDS wid ids),wsH)
 	getItemPosPosition _ size itemPos windows tb
 		| isAbsolute
-			# (rect,tb)					= OSscreenrect tb
-			  screenDomain				= RectToRectangle rect
+			# (rect,tb)					= osScreenrect tb
+			  screenDomain				= rectToRectangle rect
 			  screenOrigin				= {x=rect.rleft,y=rect.rtop}
 			= (movePoint (itemPosOffset offset screenDomain screenOrigin) zero,windows,tb)
 	where
 		(isAbsolute,offset)			= isAbsoluteItemPos itemPos
 	getItemPosPosition _ size itemPos windows tb
 		| isCornerItemPos itemPos
-			# (rect,tb)					= OSscreenrect tb
-			  screenDomain				= RectToRectangle rect
+			# (rect,tb)					= osScreenrect tb
+			  screenDomain				= rectToRectangle rect
 			  screenOrigin				= {x=rect.rleft,y=rect.rtop}
 			  (exactW,exactH)			= toTuple size
 			  {vx,vy}					= itemPosOffset (snd itemPos) screenDomain screenOrigin
@@ -527,9 +527,9 @@ where
 */
 	setWindowInsideScreen :: !Point2 !Size !*OSToolbox -> (!Point2,!*OSToolbox)
 	setWindowInsideScreen pos=:{x,y} size=:{w,h} tb
-		# (screenRect,tb)		= OSscreenrect tb
-		  {w=screenW,h=screenH}	= RectSize screenRect
-		  (x`,y`)				= (SetBetween x screenRect.rleft (screenRect.rright-w),SetBetween y screenRect.rtop (screenRect.rbottom-h))
+		# (screenRect,tb)		= osScreenrect tb
+		  {w=screenW,h=screenH}	= rectSize screenRect
+		  (x`,y`)				= (setBetween x screenRect.rleft (screenRect.rright-w),setBetween y screenRect.rtop (screenRect.rbottom-h))
 		  pos					= if (w<=screenW && h<=screenH)	{x=x`,y=y`}			// window fits entirely on screen
 		  						 (if (w<=screenW)				{x=x`,y=0 }			// window is to high
 			  					 (if (h<=screenH)				{x=0, y=y`}			// window is to wide

@@ -10,7 +10,7 @@ import	cast, commondef, id
 
 semidynamicFatalError :: String String -> .x
 semidynamicFatalError function error
-	= FatalError function "semidynamic" error
+	= fatalError function "semidynamic" error
 
 ::	SemiDynamic					// A SemiDynamic:
 	=	E. x:
@@ -29,14 +29,14 @@ matchDynamic did {id} = did==id
 readDynamic :: !(DId m) !SemiDynamic -> Maybe m
 readDynamic did {value,id}
 	| did==id
-		= Just (Cast value)
+		= Just (cast value)
 	| otherwise
 		= Nothing
 
 getDynamic :: !Id !SemiDynamic -> Maybe m
 getDynamic did {value,id}
 	| did==id
-		= Just (Cast value)
+		= Just (cast value)
 	| otherwise
 		= Nothing
 
@@ -47,14 +47,14 @@ setDynamic did x sd=:{id}
 	| otherwise
 		= semidynamicFatalError "setDynamic" "SemiDynamic did not match argument Id"
 
-RIdtoDId :: !(RId m) -> DId m
-RIdtoDId rid = RIdtoId rid
+rIdtoDId :: !(RId m) -> DId m
+rIdtoDId rid = rIdtoId rid
 
-R2IdtoDId :: !(R2Id m r) -> DId m
-R2IdtoDId r2id = R2IdtoId r2id
+r2IdtoDId :: !(R2Id m r) -> DId m
+r2IdtoDId r2id = r2IdtoId r2id
 
-R2IdtoDId` :: !(R2Id m r) -> DId r
-R2IdtoDId` r2id = R2IdtoId r2id
+r2IdtoDId` :: !(R2Id m r) -> DId r
+r2IdtoDId` r2id = r2IdtoId r2id
 
-DIdtoId :: !(DId m) -> Id
-DIdtoId did = did
+dIdtoId :: !(DId m) -> Id
+dIdtoId did = did

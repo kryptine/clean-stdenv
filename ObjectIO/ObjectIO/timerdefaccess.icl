@@ -27,7 +27,7 @@ where
 		| otherwise	= [att:atts]
 	where
 		att			= TimerSelectState select
-		(done,atts1)= Replace isTimerSelectState att atts
+		(done,atts1)= creplace isTimerSelectState att atts
 
 timerDefSetInterval	:: !TimerInterval !(Timer t .ls .pst) -> Timer t .ls .pst
 timerDefSetInterval interval (Timer _ items atts)
@@ -43,4 +43,4 @@ where
 		| otherwise	= [att:atts]
 	where
 		att			= TimerFunction f
-		(done,atts1)= Replace isTimerFunction att atts
+		(done,atts1)= creplace isTimerFunction att atts

@@ -25,7 +25,7 @@ addMenusItems :: !(!Id,Maybe Id) !Int .ls` (m .ls` (PSt .l)) !SystemId !*Receive
 												   |  MenuElements m
 addMenusItems loc pos ls new pid rt it menus=:{mMenus,mKeys} osMenuBar pState
 	# (newItemHs,pState)				= menuElementToHandles new pState
-	  newItemHs							= map MenuElementStateToMenuElementHandle newItemHs
+	  newItemHs							= map menuElementStateToMenuElementHandle newItemHs
 	  (ok,newItemHs,rt,it)				= menuIdsAreConsistent pid (fst loc) newItemHs rt it
 	| not ok
 		= ((ErrorIdsInUse,rt,it),menus,osMenuBar,pState)
@@ -87,7 +87,7 @@ where
 					  subH											= {subH & mSubItems=itemHs}
 					= (True,error,ls,new,rt,it,SubMenuHandle subH,keys,iNr+1,tb)
 			addSubMenuItems _ _ _ _ _ ls new rt it (RadioMenuHandle itemH=:{mRadioItems=itemHs}) keys iNr tb
-				# (nrRadioItemHs,itemHs)							= Ulength itemHs
+				# (nrRadioItemHs,itemHs)							= ulength itemHs
 				# radioH											= RadioMenuHandle {itemH & mRadioItems=itemHs}
 				= (False,NoError,ls,new,rt,it,radioH,keys,iNr+nrRadioItemHs,tb)
 			addSubMenuItems menuId itemId pos menu pid ls new rt it (MenuListLSHandle mListItems) keys iNr tb
@@ -120,7 +120,7 @@ where
 				# (opened,error,ls,new,rt,it,itemHs,keys,pos,iNr,tb)	= extendMenu` menuId menu pid ls new rt it itemHs keys (pos-1) (iNr+1) tb
 				= (opened,error,ls,new,rt,it,[itemH:itemHs],keys,pos,iNr,tb)
 			extendMenu` menuId menu pid ls new rt it [(RadioMenuHandle itemH=:{mRadioItems=radioItemHs}):itemHs] keys pos iNr tb
-				# (nrRadioItems,radioItemHs)							= Ulength radioItemHs
+				# (nrRadioItems,radioItemHs)							= ulength radioItemHs
 				# (opened,error,ls,new,rt,it,itemHs,keys,pos,iNr,tb)	= extendMenu` menuId menu pid ls new rt it itemHs keys (pos-1) (iNr+nrRadioItems) tb
 				# radioH												= RadioMenuHandle {itemH & mRadioItems=radioItemHs}
 				= (opened,error,ls,new,rt,it,[radioH:itemHs],keys,pos,iNr,tb)
@@ -208,13 +208,13 @@ where
 				# (opened,error,itemHs,keys,_,tb)	= addSubMenuItems` itemId pos mSubHandle new mSubItems keys 1 tb
 				= (opened,error,SubMenuHandle {subH & mSubItems=itemHs},keys,iNr+1,tb)
 			addSubMenuItems itemId pos menu new itemH=:(RadioMenuHandle radioH=:{mRadioId,mRadioIndex,mRadioItems}) keys iNr tb
-				# (nrItems,mRadioItems)		= Ulength mRadioItems
+				# (nrItems,mRadioItems)		= ulength mRadioItems
 				| isNothing mRadioId || itemId<>fromJust mRadioId
 					# itemH					= RadioMenuHandle {radioH & mRadioItems=mRadioItems}
 					= (False,NoError,itemH,keys,iNr+nrItems,tb)
-				# newItemHs					= map (\(a,b,c,f)->RadioMenuItemToMenuElementHandle (a,b,c,noLS f)) new
-				# (nrNewItems,newItemHs)	= Ulength newItemHs
-				  pos						= SetBetween pos 0 nrItems
+				# newItemHs					= map (\(a,b,c,f)->radioMenuItemToMenuElementHandle (a,b,c,noLS f)) new
+				# (nrNewItems,newItemHs)	= ulength newItemHs
+				  pos						= setBetween pos 0 nrItems
 				  index						= if (pos<mRadioIndex) (mRadioIndex+nrNewItems) (max 1 mRadioIndex)
 				# (itemHs,keys,tb)			= extendMenu` iNr pos menu newItemHs mRadioItems keys tb
 				| nrItems<>0
@@ -223,7 +223,7 @@ where
 					# (before,[itemH:after])= splitAt (index-1) itemHs
 					# (itemHandle,itemH)	= (\(MenuItemHandle itemH=:{mOSMenuItem})->(mOSMenuItem,MenuItemHandle itemH)) itemH
 					# itemHs				= before ++ [itemH:after]
-					# tb					= OSMenuItemCheck True menu itemHandle tb
+					# tb					= osMenuItemCheck True menu itemHandle tb
 					= (True,NoError,RadioMenuHandle {radioH & mRadioIndex=1,    mRadioItems=itemHs},keys,iNr+nrItems+nrNewItems,tb)
 			addSubMenuItems itemId pos menu new (MenuListLSHandle mListItems) keys iNr tb
 				# (opened,error,mListItems,keys,iNr,tb)	= addSubMenuItems` itemId pos menu new mListItems keys iNr tb
@@ -300,7 +300,7 @@ where
 			removeFromMenu :: !OSWindowPtr !OSMenu !SystemId !Int !*ReceiverTable !*IdTable ![Id] !*(MenuElementHandle .ls .ps) ![Char] !*OSToolbox
 												   -> (!Bool,!Int,!*ReceiverTable,!*IdTable,![Id], !*MenuElementHandle .ls .ps, ![Char],!*OSToolbox)
 			removeFromMenu framePtr menu pid iNr rt it ids (MenuItemHandle itemH=:{mItemId,mItemKey,mOSMenuItem}) keys tb
-				# (containsItem,ids)			= if (isNothing mItemId) (False,ids) (RemoveCheck (fromJust mItemId) ids)
+				# (containsItem,ids)			= if (isNothing mItemId) (False,ids) (removeCheck (fromJust mItemId) ids)
 				| not containsItem
 					= (containsItem,iNr+1,rt,it,ids,MenuItemHandle itemH,keys,tb)
 				| otherwise
@@ -308,44 +308,44 @@ where
 					= (containsItem,iNr,rt,it,ids,MenuItemHandle itemH,keys,tb)
 			
 			removeFromMenu framePtr menu pid iNr rt it ids itemH=:(SubMenuHandle subH=:{mSubHandle,mSubMenuId,mSubOSMenuNr,mSubItems}) keys tb
-				# (containsItem,ids)			= if (isNothing mSubMenuId) (False,ids) (RemoveCheck (fromJust mSubMenuId) ids)
+				# (containsItem,ids)			= if (isNothing mSubMenuId) (False,ids) (removeCheck (fromJust mSubMenuId) ids)
 				# (_,rt,it,ids,itemHs,keys,tb)	= removeFromMenu` framePtr mSubHandle pid 1 rt it ids mSubItems keys tb
 				| not containsItem
 					= (containsItem,iNr+1,rt,it,ids,SubMenuHandle {subH & mSubItems=itemHs},keys,tb)
 				| otherwise
-					# (itemHs,(rt,it))			= StateMap (disposeMenuIds pid) itemHs (rt,it)
-					# (itemHs,(keys,tb))		= StateMap (disposeShortcutkeys framePtr) itemHs (keys,tb)
-					# (itemHs,tb)				= StateMap disposeSubMenuHandles itemHs tb
-					# (_,tb)					= OSSubMenuRemove mSubHandle menu tb
+					# (itemHs,(rt,it))			= stateMap (disposeMenuIds pid) itemHs (rt,it)
+					# (itemHs,(keys,tb))		= stateMap (disposeShortcutkeys framePtr) itemHs (keys,tb)
+					# (itemHs,tb)				= stateMap disposeSubMenuHandles itemHs tb
+					# (_,tb)					= osSubMenuRemove mSubHandle menu tb
 					= (containsItem,iNr,rt,it,ids,SubMenuHandle {subH & mSubItems=itemHs},keys,tb)
 			
 			removeFromMenu framePtr menu pid iNr rt it ids (RadioMenuHandle radioH=:{mRadioId,mRadioIndex,mRadioItems}) keys tb
 				# (containsItem,ids)			= if (isNothing mRadioId)
 													(False,ids)
-													(RemoveCheck (fromJust mRadioId) ids)
+													(removeCheck (fromJust mRadioId) ids)
 				  items							= confirmRadioMenuIndex mRadioIndex mRadioItems
 				# (_,rt,it,ids,items,keys,tb)	= removeFromMenu` framePtr menu pid iNr rt it ids items keys tb
 				| containsItem
-					# (_,(keys,it,tb))			= StateMap (\(MenuItemHandle itemH)->disposeMenuItemHandle menu iNr itemH) items (keys,it,tb)
+					# (_,(keys,it,tb))			= stateMap (\(MenuItemHandle itemH)->disposeMenuItemHandle menu iNr itemH) items (keys,it,tb)
 					# h							= RadioMenuHandle {radioH & mRadioItems=[]}
 					= (containsItem,iNr,rt,it,ids,h,keys,tb)
 				| otherwise
 					# (index,items,tb)			= checkNewRadioMenuIndex menu iNr items tb
-					  (nrNewItems,items)		= Ulength items
+					  (nrNewItems,items)		= ulength items
 					  h							= RadioMenuHandle {radioH & mRadioItems=items,mRadioIndex=index}
 				= (containsItem,iNr+nrNewItems,rt,it,ids,h,keys,tb)
 			
 			removeFromMenu framePtr menu pid iNr rt it ids h=:(MenuSeparatorHandle {mSepId,mOSMenuSeparator}) keys tb
-				# (containsItem,ids)			= if (isNothing mSepId) (False,ids) (RemoveCheck (fromJust mSepId) ids)
+				# (containsItem,ids)			= if (isNothing mSepId) (False,ids) (removeCheck (fromJust mSepId) ids)
 				| not containsItem
 					= (containsItem,iNr+1,rt,it,ids,h,keys,tb)
-				# (_,tb)						= OSMenuRemoveItem mOSMenuSeparator menu tb
+				# (_,tb)						= osMenuRemoveItem mOSMenuSeparator menu tb
 				| otherwise
 					# (_,it)					= removeIdFromIdTable (fromJust mSepId) it
 					= (containsItem,iNr,rt,it,ids,h,keys,tb)
 			
 			removeFromMenu framePtr menu pid iNr rt it ids h=:(MenuReceiverHandle {mReceiverHandle=rH=:{rId}}) keys tb
-				# (containsItem,ids)			= RemoveCheck rId ids
+				# (containsItem,ids)			= removeCheck rId ids
 				| not containsItem
 					= (containsItem,iNr,rt,it,ids,h,keys,tb)
 				| otherwise
@@ -477,21 +477,21 @@ where
 		removeItems :: !OSWindowPtr !Bool !OSMenu !SystemId !Int ![Int] !*ReceiverTable !*IdTable !(MenuElementHandle .ls .ps) ![Char] !*OSToolbox
 												  -> (!Bool,!Int,![Int],!*ReceiverTable,!*IdTable, !MenuElementHandle .ls .ps, ![Char],!*OSToolbox)
 		removeItems framePtr alsoSpecials menu pid iNr indices rt it itemH=:(SubMenuHandle subH=:{mSubHandle,mSubMenuId,mSubOSMenuNr,mSubItems}) keys tb
-			# (containsItem,indices)= RemoveCheck iNr indices
+			# (containsItem,indices)= removeCheck iNr indices
 			| not containsItem || (specialId && not alsoSpecials)
 				= (False,iNr+1,indices,rt,it,itemH,keys,tb)
 			| otherwise
-				# (itemHs,(rt,it))	= StateMap (disposeMenuIds pid) mSubItems (rt,it)
-				# (itemHs,(keys,tb))= StateMap (disposeShortcutkeys framePtr) itemHs (keys,tb)
-				# (itemHs,tb)		= StateMap	disposeSubMenuHandles itemHs tb
-				# (_,tb)			= OSSubMenuRemove mSubHandle menu tb
+				# (itemHs,(rt,it))	= stateMap (disposeMenuIds pid) mSubItems (rt,it)
+				# (itemHs,(keys,tb))= stateMap (disposeShortcutkeys framePtr) itemHs (keys,tb)
+				# (itemHs,tb)		= stateMap	disposeSubMenuHandles itemHs tb
+				# (_,tb)			= osSubMenuRemove mSubHandle menu tb
 				# indices			= map dec indices
 				= (containsItem,iNr,indices,rt,it,SubMenuHandle {subH & mSubItems=itemHs},keys,tb)
 		where
 			specialId				= isJust mSubMenuId && isSpecialId (fromJust mSubMenuId)
 		
 		removeItems framePtr alsoSpecials menu pid iNr indices rt it (MenuItemHandle mH=:{mItemId,mItemKey,mOSMenuItem}) keys tb
-			# (containsItem,indices)= RemoveCheck iNr indices
+			# (containsItem,indices)= removeCheck iNr indices
 			| not containsItem || (specialId && not alsoSpecials)
 				= (False,iNr+1,indices,rt,it,MenuItemHandle mH,keys,tb)
 			| otherwise
@@ -502,14 +502,14 @@ where
 			specialId				= isJust mItemId && isSpecialId (fromJust mItemId)
 		
 		removeItems framePtr alsoSpecials menu pid iNr indices rt it (RadioMenuHandle radioH=:{mRadioId,mRadioItems}) keys tb
-			# (containsItem,indices)= RemoveCheck iNr indices
+			# (containsItem,indices)= removeCheck iNr indices
 			| not containsItem || (specialId && not alsoSpecials)
-				# (nrItems,items)	= Ulength mRadioItems
+				# (nrItems,items)	= ulength mRadioItems
 				  itemH				= RadioMenuHandle {radioH & mRadioItems=items}
 				  indices			= map ((+) (nrItems-1)) indices
 				= (False,iNr+nrItems,indices,rt,it,itemH,keys,tb)
 			| otherwise
-				# (_,(keys,it,tb))	= StateMap (\(MenuItemHandle itemH)->disposeMenuItemHandle menu iNr itemH) mRadioItems (keys,it,tb)
+				# (_,(keys,it,tb))	= stateMap (\(MenuItemHandle itemH)->disposeMenuItemHandle menu iNr itemH) mRadioItems (keys,it,tb)
 				  itemH				= RadioMenuHandle {radioH & mRadioItems=[]}
 				  indices			= map dec indices
 				= (containsItem,iNr,indices,rt,it,itemH,keys,tb)
@@ -517,11 +517,11 @@ where
 			specialId				= isJust mRadioId && isSpecialId (fromJust mRadioId)
 		
 		removeItems framePtr alsoSpecials menu pid iNr indices rt it h=:(MenuSeparatorHandle {mSepId,mOSMenuSeparator}) keys tb
-			# (containsItem,indices)= RemoveCheck iNr indices
+			# (containsItem,indices)= removeCheck iNr indices
 			| not containsItem || (specialId && not alsoSpecials)
 				= (False,iNr+1,indices,rt,it,h,keys,tb)
 			| otherwise
-				# (_,tb)			= OSMenuRemoveItem mOSMenuSeparator menu tb
+				# (_,tb)			= osMenuRemoveItem mOSMenuSeparator menu tb
 				  (_,it)			= removeIdFromIdTable (fromJust mSepId) it
 				  indices			= map dec indices
 				= (containsItem,iNr,indices,rt,it,h,keys,tb)
@@ -529,7 +529,7 @@ where
 			specialId				= isJust mSepId && isSpecialId (fromJust mSepId)
 		
 		removeItems framePtr alsoSpecials menu pid iNr indices rt it itemH=:(MenuReceiverHandle recH=:{mReceiverHandle={rId}}) keys tb
-			# (containsItem,indices)= RemoveCheck iNr indices
+			# (containsItem,indices)= removeCheck iNr indices
 			| not containsItem
 				= (False,iNr,indices,rt,it,itemH,keys,tb)
 			| otherwise
@@ -566,7 +566,7 @@ confirmRadioMenuIndex _ []
 */
 checkNewRadioMenuIndex :: !OSMenu !Int !*[MenuElementHandle .ls .ps] !*OSToolbox -> (!Int,!*[MenuElementHandle .ls .ps],!*OSToolbox)
 checkNewRadioMenuIndex menu iNr itemHs tb
-	# (empty,itemHs)		= u_isEmpty itemHs
+	# (empty,itemHs)		= uisEmpty itemHs
 	| empty
 		= (0,itemHs,tb)
 	# (found,index,itemHs)	= getNewRadioMenuIndex 1 itemHs
@@ -588,6 +588,6 @@ where
 	
 	checkFirstRadioItem :: !OSMenu !Int !*[MenuElementHandle .ls .ps] !*OSToolbox -> (!*[MenuElementHandle .ls .ps],!*OSToolbox)
 	checkFirstRadioItem menu iNr [MenuItemHandle itemH=:{mOSMenuItem}:itemHs] tb
-		= ([MenuItemHandle {itemH & mItemMark=True}:itemHs],OSMenuItemCheck True menu mOSMenuItem tb)
+		= ([MenuItemHandle {itemH & mItemMark=True}:itemHs],osMenuItemCheck True menu mOSMenuItem tb)
 	checkFirstRadioItem _ _ [] tb
 		= ([],tb)

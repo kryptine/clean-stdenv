@@ -14,5 +14,5 @@ from	iostate	import PSt, IOSt
 
 menuEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
 
-MenuHandlesGetMenuStateHandles :: !(MenuHandles .pst) -> (![MenuStateHandle .pst], !MenuHandles .pst)
+menuHandlesGetMenuStateHandles :: !(MenuHandles .pst) -> (![MenuStateHandle .pst], !MenuHandles .pst)
 // PA: moved from menudevice

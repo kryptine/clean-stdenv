@@ -10,11 +10,11 @@ import StdOverloaded
 ::	SystemId
 
 
-WorldSystemId	:: !Int			->	SystemId
-WorldChildId	:: !Int			->	SystemId
-InitSystemId	::	SystemId
-NullSystemId	::  SystemId
-IncrSystemId	:: !SystemId	->	(!SystemId,!SystemId)
+worldSystemId	:: !Int			->	SystemId
+worldChildId	:: !Int			->	SystemId
+initSystemId	::	SystemId
+nullSystemId	::  SystemId
+incrSystemId	:: !SystemId	->	(!SystemId,!SystemId)
 
 instance == SystemId
 instance <  SystemId

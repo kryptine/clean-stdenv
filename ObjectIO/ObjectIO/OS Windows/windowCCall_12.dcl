@@ -7,11 +7,11 @@ from	rgnCCall_12		import HRGN
 from	pictCCall_12	import HDC
 
 
-WinInitialiseWindows:: !*OSToolbox -> *OSToolbox
-WinInvalidateWindow	:: !HWND !*OSToolbox -> *OSToolbox
-WinInvalidateRect	:: !HWND !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
-WinValidateRect		:: !HWND !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
-WinValidateRgn		:: !HWND !HRGN !*OSToolbox -> *OSToolbox
+winInitialiseWindows:: !*OSToolbox -> *OSToolbox
+winInvalidateWindow	:: !HWND !*OSToolbox -> *OSToolbox
+winInvalidateRect	:: !HWND !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
+winValidateRect		:: !HWND !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
+winValidateRgn		:: !HWND !HRGN !*OSToolbox -> *OSToolbox
 
-WinGetDC			:: !HWND !*OSToolbox -> (!HDC,!*OSToolbox)
-WinReleaseDC		:: !HWND !(!HDC,!*OSToolbox) -> *OSToolbox
+winGetDC			:: !HWND !*OSToolbox -> (!HDC,!*OSToolbox)
+winReleaseDC		:: !HWND !(!HDC,!*OSToolbox) -> *OSToolbox

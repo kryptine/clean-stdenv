@@ -229,10 +229,8 @@ import	commondef, keyfocus, receiverhandle
 //	Equalities on simple types:
 
 instance == WIDS where
-	(==) :: !WIDS !WIDS -> Bool
 	(==) wids wids` = wids.wPtr==wids`.wPtr && wids.wId==wids`.wId
 instance == WindowMode where
-	(==) :: !WindowMode !WindowMode -> Bool
 	(==) Modal		mode = case mode of
 								Modal		-> True
 								_			-> False
@@ -240,20 +238,16 @@ instance == WindowMode where
 								Modeless	-> True
 								_			-> False
 instance == WindowKind where
-	(==) :: !WindowKind !WindowKind -> Bool
 	(==) IsWindow		kind = case kind of
 								IsWindow		-> True
 								_				-> False
 	(==) IsDialog		kind = case kind of
 								IsDialog		-> True
 								_				-> False
-// Mike //
 	(==) IsGameWindow	kind = case kind of
 								IsGameWindow	-> True
 								_				-> False
-//
 instance == LayoutInfo where
-	(==) :: !LayoutInfo !LayoutInfo -> Bool
 	(==) LayoutFix       info = case info of
 								LayoutFix		-> True
 								_				-> False
@@ -264,7 +258,6 @@ instance == LayoutInfo where
 								LayoutFrame		-> True
 								_				-> False
 instance == ControlKind where
-	(==) :: !ControlKind !ControlKind -> Bool
 	(==) IsButtonControl		kind = case kind of
 											IsButtonControl			-> True
 											_						-> False
@@ -302,7 +295,6 @@ instance == ControlKind where
 											IsOtherControl type2	-> type1==type2
 											_						-> False
 instance toString ControlKind where
-	toString :: !ControlKind -> {#Char}
 	toString IsButtonControl			= "IsButtonControl"
 	toString IsCheckControl				= "IsCheckControl"
 	toString IsCompoundControl			= "IsCompoundControl"
@@ -333,8 +325,8 @@ isRecursiveControl _					= False
 
 //	Conversion functions from ControlState to WElementHandle, and vice versa:
 
-WElementHandleToControlState :: !*(WElementHandle .ls .pst) -> *ControlState .ls .pst
-WElementHandleToControlState wH = wH
+wElementHandleToControlState :: !*(WElementHandle .ls .pst) -> *ControlState .ls .pst
+wElementHandleToControlState wH = wH
 
-ControlStateToWElementHandle :: !*(ControlState .ls .pst) -> *WElementHandle .ls .pst
-ControlStateToWElementHandle wH = wH
+controlStateToWElementHandle :: !*(ControlState .ls .pst) -> *WElementHandle .ls .pst
+controlStateToWElementHandle wH = wH

@@ -8,4 +8,4 @@ import	devicefunctions
 from	iostate	import PSt, IOSt
 
 
-TimerFunctions :: DeviceFunctions (PSt .l)
+timerFunctions :: DeviceFunctions (PSt .l)

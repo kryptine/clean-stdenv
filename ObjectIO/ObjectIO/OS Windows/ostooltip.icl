@@ -12,20 +12,20 @@ implementation module ostooltip
 
 import	StdTuple
 import	clCrossCall_12
-from	clCCall_12	import WinMakeCString, WinReleaseCString, CSTR
+from	clCCall_12	import winMakeCString, winReleaseCString, CSTR
 from	oswindow	import OSWindowPtr
 
 osIgnoreCallback :: !CrossCallInfo !*OSToolbox -> (!CrossCallInfo,!*OSToolbox)
 osIgnoreCallback _ tb 
-	= (Return0Cci,tb)
+	= (return0Cci,tb)
 
-OSaddControlToolTip :: !OSWindowPtr !OSWindowPtr !String !*OSToolbox -> *OSToolbox
-OSaddControlToolTip parentPtr controlPtr tip tb
-	# (textptr,tb)	= WinMakeCString tip tb
+osAddControlToolTip :: !OSWindowPtr !OSWindowPtr !String !*OSToolbox -> *OSToolbox
+osAddControlToolTip parentPtr controlPtr tip tb
+	# (textptr,tb)	= winMakeCString tip tb
 	# cci			= Rq3Cci CcRqADDCONTROLTIP parentPtr controlPtr textptr
-	# tb			= snd (IssueCleanRequest2 osIgnoreCallback cci tb)
-	= WinReleaseCString textptr tb
+	# tb			= snd (issueCleanRequest2 osIgnoreCallback cci tb)
+	= winReleaseCString textptr tb
 
-OSremoveControlToolTip :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
-OSremoveControlToolTip parentPtr controlPtr tb
-	= snd (IssueCleanRequest2 osIgnoreCallback (Rq2Cci CcRqDELCONTROLTIP parentPtr controlPtr) tb)
+osRemoveControlToolTip :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+osRemoveControlToolTip parentPtr controlPtr tb
+	= snd (issueCleanRequest2 osIgnoreCallback (Rq2Cci CcRqDELCONTROLTIP parentPtr controlPtr) tb)

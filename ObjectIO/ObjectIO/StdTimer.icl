@@ -10,9 +10,9 @@ import	StdId, StdTimerAttribute, StdTimerElementClass
 from	StdPSt	import appPIO, accPIO
 
 
-StdTimerFatalError :: String String -> .x
-StdTimerFatalError function error
-	= FatalError function "StdTimer" error
+stdTimerFatalError :: String String -> .x
+stdTimerFatalError function error
+	= fatalError function "StdTimer" error
 
 
 //	Open timer:
@@ -24,25 +24,25 @@ class Timers tdef where
 instance Timers (Timer t) | TimerElements t where
 	openTimer :: .ls !(Timer t .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | TimerElements t
 	openTimer ls tDef=:(Timer period items atts) pState
-		# pState				= TimerFunctions.dOpen pState
+		# pState				= timerFunctions.dOpen pState
 		# (maybe_okId,pState)	= accPIO (validateTimerId maybeId) pState
 		| isNothing maybe_okId
 			= (ErrorIdsInUse,pState)
-		# (ok,timers,ioState)	= IOStGetTimerHandles pState.io
+		# (ok,timers,ioState)	= ioStGetTimerHandles pState.io
 		| not ok				// This condition should never hold: TimerDevice has just been 'installed'
-			= StdTimerFatalError "openTimer (Timer)" "could not retrieve TimerSystemState from IOSt"
-		# (pid,ioState)			= IOStGetIOId ioState
+			= stdTimerFatalError "openTimer (Timer)" "could not retrieve TimerSystemState from IOSt"
+		# (pid,ioState)			= ioStGetIOId ioState
 		# pState				= {pState & io=ioState}
 		  id					= fromJust maybe_okId
 		# (ts,pState)			= timerElementToHandles items pState
-		  itemHs				= map TimerElementStateToTimerElementHandle ts
-		# (it,ioState)			= IOStGetIdTable pState.io
-		# (rt,ioState)			= IOStGetReceiverTable ioState
+		  itemHs				= map timerElementStateToTimerElementHandle ts
+		# (it,ioState)			= ioStGetIdTable pState.io
+		# (rt,ioState)			= ioStGetReceiverTable ioState
 		  (ok,itemHs,rt,it)		= bindTimerElementIds pid id itemHs rt it
 		| not ok
-			# ioState			= IOStSetDevice (TimerSystemState timers) ioState
-			# ioState			= IOStSetIdTable it ioState
-			# ioState			= IOStSetReceiverTable rt ioState
+			# ioState			= ioStSetDevice (TimerSystemState timers) ioState
+			# ioState			= ioStSetIdTable it ioState
+			# ioState			= ioStSetReceiverTable rt ioState
 			= (ErrorIdsInUse,{pState & io=ioState})
 		| otherwise
 			= (NoError,pState2)
@@ -61,32 +61,32 @@ instance Timers (Timer t) | TimerElements t where
 								  }
 			it1					= snd (addIdToIdTable id {idpIOId=pid,idpDevice=TimerDevice,idpId=id} it)
 			ioState1			= addAbleTimerToTimerTable ableTimer tLoc period ioState
-			ioState2			= IOStSetReceiverTable rt ioState1
-			ioState3			= IOStSetIdTable it1 ioState2
-			ioState4			= IOStSetDevice (TimerSystemState {timers & tTimers=[tsH:timers.tTimers]}) ioState3
+			ioState2			= ioStSetReceiverTable rt ioState1
+			ioState3			= ioStSetIdTable it1 ioState2
+			ioState4			= ioStSetDevice (TimerSystemState {timers & tTimers=[tsH:timers.tTimers]}) ioState3
 			pState1				= {pState & io=ioState4}
 			(ls1,pState2)		= timerInit (ls,pState1)
 	where
-		(hasIdAtt,idAtt)		= Select isTimerId undef atts
+		(hasIdAtt,idAtt)		= cselect isTimerId undef atts
 		maybeId					= if hasIdAtt (Just (getTimerIdAtt idAtt)) Nothing
-		ableTimer				= enabled (getTimerSelectStateAtt (snd (Select isTimerSelectState (TimerSelectState Able) atts)))
-		f						= getTimerFun (snd (Select isTimerFunction (TimerFunction (\_ st->st)) atts))
-		timerInit				= getTimerInitFun (snd (Select isTimerInit (TimerInit id) atts))
+		ableTimer				= enabled (getTimerSelectStateAtt (snd (cselect isTimerSelectState (TimerSelectState Able) atts)))
+		f						= getTimerFun (snd (cselect isTimerFunction (TimerFunction (\_ st->st)) atts))
+		timerInit				= getTimerInitFun (snd (cselect isTimerInit (TimerInit id) atts))
 		
 		validateTimerId :: !(Maybe Id) !(IOSt .l) -> (!Maybe Id,!IOSt .l)
 		validateTimerId Nothing ioState
 			# (tId,ioState)			= openId ioState
 			= (Just tId,ioState)
 		validateTimerId (Just id) ioState
-			# (it,ioState)			= IOStGetIdTable ioState
-			| memberIdTable id it	= (Nothing,IOStSetIdTable it ioState)
-			| otherwise				= (Just id,IOStSetIdTable it ioState)
+			# (it,ioState)			= ioStGetIdTable ioState
+			| memberIdTable id it	= (Nothing,ioStSetIdTable it ioState)
+			| otherwise				= (Just id,ioStSetIdTable it ioState)
 		
 		addAbleTimerToTimerTable :: !Bool !TimerLoc !TimerInterval !(IOSt .l) -> IOSt .l
 		addAbleTimerToTimerTable True tLoc period ioState
-			# (tt,ioState)			= IOStGetTimerTable ioState
+			# (tt,ioState)			= ioStGetTimerTable ioState
 			# (_,tt)				= addTimerToTimerTable tLoc period tt
-			= IOStSetTimerTable tt ioState
+			= ioStSetTimerTable tt ioState
 		addAbleTimerToTimerTable _ _ _ ioState
 			= ioState
 	
@@ -103,20 +103,20 @@ eqTimerStateHandleId id tsH=:(TimerLSHandle {tHandle={tId}})
 
 closeTimer :: !Id !(IOSt .l) -> IOSt .l
 closeTimer id ioState
-	# (ok,tHs,ioState)		= IOStGetTimerHandles ioState
+	# (ok,tHs,ioState)		= ioStGetTimerHandles ioState
 	| not ok
 		= ioState
 	| otherwise
-		# (pid,ioState)		= IOStGetIOId ioState
-		# (rt,ioState)		= IOStGetReceiverTable ioState
-		# (tt,ioState)		= IOStGetTimerTable ioState
-		# (it,ioState)		= IOStGetIdTable ioState
+		# (pid,ioState)		= ioStGetIOId ioState
+		# (rt,ioState)		= ioStGetReceiverTable ioState
+		# (tt,ioState)		= ioStGetTimerTable ioState
+		# (it,ioState)		= ioStGetIdTable ioState
 		  (rt,tt,it,tsHs)	= closetimer id pid rt tt it tHs.tTimers
-		# ioState			= IOStSetIdTable it ioState
-		# ioState			= IOStSetReceiverTable rt ioState
-		# ioState			= IOStSetTimerTable tt ioState
+		# ioState			= ioStSetIdTable it ioState
+		# ioState			= ioStSetReceiverTable rt ioState
+		# ioState			= ioStSetTimerTable tt ioState
 		  tHs				= {tHs & tTimers=tsHs}
-		# ioState			= IOStSetDevice (TimerSystemState tHs) ioState
+		# ioState			= ioStSetDevice (TimerSystemState tHs) ioState
 		= ioState
 where
 	closetimer :: !Id !SystemId !*ReceiverTable !*TimerTable !*IdTable ![TimerStateHandle .pst]
@@ -145,13 +145,13 @@ where
 
 getTimers :: !(IOSt .l) -> (![(Id,TimerType)],!IOSt .l)
 getTimers ioState
-	# (ok,tHs,ioState)		= IOStGetTimerHandles ioState
+	# (ok,tHs,ioState)		= ioStGetTimerHandles ioState
 	| not ok
 		= ([],ioState)
 	| otherwise
 		# (idtypes,timers)	= getidtypes tHs.tTimers
 		  tHs				= {tHs & tTimers=timers}
-		# ioState			= IOStSetDevice (TimerSystemState tHs) ioState
+		# ioState			= ioStSetDevice (TimerSystemState tHs) ioState
 		= (idtypes,ioState)
 where
 	getidtypes :: ![TimerStateHandle .pst] -> (![(Id,TimerType)],![TimerStateHandle .pst])
@@ -198,13 +198,13 @@ where
 
 getTimerSelectState :: !Id !(IOSt .l) -> (!Maybe SelectState,!IOSt .l)
 getTimerSelectState id ioState
-	# (ok,tHs,ioState)			= IOStGetTimerHandles ioState
+	# (ok,tHs,ioState)			= ioStGetTimerHandles ioState
 	| not ok
 		= (Nothing,ioState)
 	| otherwise
 		# (maybe_select,timers)	= gettimerselect id tHs.tTimers
 		  tHs					= {tHs & tTimers=timers}
-		# ioState				= IOStSetDevice (TimerSystemState tHs) ioState
+		# ioState				= ioStSetDevice (TimerSystemState tHs) ioState
 		= (maybe_select,ioState)
 where
 	gettimerselect :: !Id ![TimerStateHandle .pst] -> (!Maybe SelectState, ![TimerStateHandle .pst])
@@ -241,12 +241,12 @@ where
 
 getTimerInterval :: !Id !(IOSt .l) -> (!Maybe TimerInterval,!IOSt .l)
 getTimerInterval id ioState
-	# (ok,tHs,ioState)		= IOStGetTimerHandles ioState
+	# (ok,tHs,ioState)		= ioStGetTimerHandles ioState
 	| not ok
 		= (Nothing,ioState)
 	# (optinterval,timers)	= gettimerinterval id tHs.tTimers
 	  tHs					= {tHs & tTimers=timers}
-	# ioState				= IOStSetDevice (TimerSystemState tHs) ioState
+	# ioState				= ioStSetDevice (TimerSystemState tHs) ioState
 	= (optinterval,ioState)
 where
 	gettimerinterval :: !Id ![TimerStateHandle .pst] -> (!Maybe TimerInterval, ![TimerStateHandle .pst])
@@ -260,13 +260,13 @@ where
 		= (Nothing,[])
 
 
-IOStGetTimerHandles :: !(IOSt .l) -> (!Bool,TimerHandles (PSt .l), !IOSt .l)
-IOStGetTimerHandles ioState
-	# (found,tDevice,ioState) = IOStGetDevice TimerDevice ioState
+ioStGetTimerHandles :: !(IOSt .l) -> (!Bool,TimerHandles (PSt .l), !IOSt .l)
+ioStGetTimerHandles ioState
+	# (found,tDevice,ioState) = ioStGetDevice TimerDevice ioState
 	| not found
 		= (False,undef,ioState)
 	| otherwise
-		= (True,TimerSystemStateGetTimerHandles tDevice,ioState)
+		= (True,timerSystemStateGetTimerHandles tDevice,ioState)
 
 
 //	General TimerHandle changing function:
@@ -276,15 +276,15 @@ IOStGetTimerHandles ioState
 
 changeTimer :: !Id !(DeltaTimerStateHandle (PSt .l)) !(IOSt .l) -> IOSt .l
 changeTimer id f ioState
-	# (ok,tHs,ioState)	= IOStGetTimerHandles ioState
+	# (ok,tHs,ioState)	= ioStGetTimerHandles ioState
 	| not ok
 		= ioState
 	| otherwise
-		# (tt,  ioState)= IOStGetTimerTable   ioState
-		# (ioid,ioState)= IOStGetIOId         ioState
+		# (tt,  ioState)= ioStGetTimerTable   ioState
+		# (ioid,ioState)= ioStGetIOId         ioState
 		  (tt,tHs)		= changetimerdevice ioid id f tt tHs
-		# ioState		= IOStSetDevice (TimerSystemState tHs) ioState
-		# ioState		= IOStSetTimerTable tt ioState
+		# ioState		= ioStSetDevice (TimerSystemState tHs) ioState
+		# ioState		= ioStSetTimerTable tt ioState
 		= ioState
 where
 	changetimerdevice :: SystemId !Id (DeltaTimerStateHandle .pst) !*TimerTable !(TimerHandles .pst)

@@ -24,27 +24,27 @@ from	ostypes				import Rect, HWND
 
 OSdirseparator			:== '\\'
 
-OShomepath				:: !String -> String
-OSapplicationpath		:: !String -> String
+osHomepath				:: !String -> String
+osApplicationpath		:: !String -> String
 OSnewlineChars			:== "\xD\xA" // MW11++
 
 OStickspersecond		:== 1000
 
-OSmmToHPixels			:: !Real -> Int
-OSmmToVPixels			:: !Real -> Int
-OSmaxScrollWindowSize	:: (!Int,!Int)
-OSmaxFixedWindowSize	:: (!Int,!Int)
-OSscreenrect			:: !*OSToolbox -> (!Rect,!*OSToolbox)
+osMMtoHPixels			:: !Real -> Int
+osMMtoVPixels			:: !Real -> Int
+osMaxScrollWindowSize	:: (!Int,!Int)
+osMaxFixedWindowSize	:: (!Int,!Int)
+osScreenrect			:: !*OSToolbox -> (!Rect,!*OSToolbox)
 
-OSprintSetupTypical		:: Bool // MW11++
+osPrintSetupTypical		:: Bool // MW11++
 
-// OSGetProcessWindowDimensions returns Rect of process window in terms of screen coordinates
-OSGetProcessWindowDimensions :: !OSDInfo !*OSToolbox -> (!Rect,!*OSToolbox)
+// osGetProcessWindowDimensions returns Rect of process window in terms of screen coordinates
+osGetProcessWindowDimensions :: !OSDInfo !*OSToolbox -> (!Rect,!*OSToolbox)
 
 
-OSDefaultWindowMetrics	:: !*OSToolbox -> (!OSWindowMetrics,!*OSToolbox)
+osDefaultWindowMetrics	:: !*OSToolbox -> (!OSWindowMetrics,!*OSToolbox)
 
-/*	OSstripOuterSize isMDI isResizable
+/*	osStripOuterSize isMDI isResizable
 		returns (dw,dh) required to add/subtract to view/outer size in order to obtain outer/view size.
 */
-OSstripOuterSize		:: !Bool !Bool !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
+osStripOuterSize		:: !Bool !Bool !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)

@@ -3,7 +3,7 @@ implementation module menuCrossCall_12
 
 import	StdInt, StdMisc, StdTuple
 import	clCrossCall_12
-from	clCCall_12	import WinMakeCString, WinReleaseCString, CSTR
+from	clCCall_12	import winMakeCString, winReleaseCString, CSTR
 from	ostypes		import HWND
 
 
@@ -11,90 +11,90 @@ from	ostypes		import HWND
 ::	HMENU	:==  Int
 
 
-WinCreatePopupMenuHandle :: !*OSToolbox -> (!HMENU,!*OSToolbox)		// PA: check if this can be a C call
-WinCreatePopupMenuHandle tb
-	# (rcci,tb)	= IssueCleanRequest2 (ErrorCallback2 "CreatePopupMenuHandle ") (Rq0Cci CcRqCREATEPOPMENU) tb
-	  hmenu		= case rcci.ccMsg of
+winCreatePopupMenuHandle :: !*OSToolbox -> (!HMENU,!*OSToolbox)		// PA: check if this can be a C call
+winCreatePopupMenuHandle tb
+	# (rcci,tb)	= issueCleanRequest2 (errorCallback2 "CreatePopupMenuHandle ") (Rq0Cci CcRqCREATEPOPMENU) tb
+	  menu		= case rcci.ccMsg of
 					CcRETURN1	-> rcci.p1
 					CcWASQUIT	-> 0
-					other		-> abort "[CreatePopupMenuHandle] expected CcRETURN1 value."
-	= (hmenu,tb)
+					otherwise	-> abort "[winCreatePopupMenuHandle] expected CcRETURN1 value."
+	= (menu,tb)
 
-WinTrackPopupMenu :: !HMENU !HWND !*OSToolbox -> (!Bool,!*OSToolbox)
-WinTrackPopupMenu menu framePtr tb
-	# (rcci,tb)	= IssueCleanRequest2 (ErrorCallback2 "TrackPopupMenu") (Rq2Cci CcRqTRACKPOPMENU menu framePtr) tb
+winTrackPopupMenu :: !HMENU !HWND !*OSToolbox -> (!Bool,!*OSToolbox)
+winTrackPopupMenu menu framePtr tb
+	# (rcci,tb)	= issueCleanRequest2 (errorCallback2 "TrackPopupMenu") (Rq2Cci CcRqTRACKPOPMENU menu framePtr) tb
 	  ok		= case rcci.ccMsg of
-	  				CcRETURN1	-> rcci.p1<>0
-	  				CcWASQUIT	-> False
-	  				other		-> abort "[TrackPopupMenu] expected CcRETURN1 value."
+					CcRETURN1	-> rcci.p1<>0
+					CcWASQUIT	-> False
+					otherwise	-> abort "[winTrackPopupMenu] expected CcRETURN1 value."
 	= (ok,tb)
 
-WinInsertMenu :: !String !Bool !HMENU !HMENU !Int !*OSToolbox -> *OSToolbox
-WinInsertMenu text state submenu menu pos tb
-	# (textptr,tb)	= WinMakeCString text tb
-	# (_,tb)		= IssueCleanRequest2 (ErrorCallback2 "AppendMenu") (Rq5Cci CcRqINSERTMENU (toInt state) menu textptr submenu pos) tb
-	= WinReleaseCString textptr tb
+winInsertMenu :: !String !Bool !HMENU !HMENU !Int !*OSToolbox -> *OSToolbox
+winInsertMenu text state submenu menu pos tb
+	# (textptr,tb)	= winMakeCString text tb
+	# (_,tb)		= issueCleanRequest2 (errorCallback2 "AppendMenu") (Rq5Cci CcRqINSERTMENU (toInt state) menu textptr submenu pos) tb
+	= winReleaseCString textptr tb
 
-WinInsertMenuItem :: !String !Bool !Bool !HMENU !Int !*OSToolbox -> (!HITEM,!*OSToolbox)
-WinInsertMenuItem text ablestate markstate menu pos tb
-	# (textptr,tb)	= WinMakeCString text tb
+winInsertMenuItem :: !String !Bool !Bool !HMENU !Int !*OSToolbox -> (!HITEM,!*OSToolbox)
+winInsertMenuItem text ablestate markstate menu pos tb
+	# (textptr,tb)	= winMakeCString text tb
 	  insertCci		= Rq5Cci CcRqINSERTMENUITEM (toInt ablestate) menu textptr (toInt markstate) pos
-	# (rcci,tb)		= IssueCleanRequest2 (ErrorCallback2 "InsertMenuItem") insertCci tb
+	# (rcci,tb)		= issueCleanRequest2 (errorCallback2 "InsertMenuItem") insertCci tb
 	  hitem			= case rcci.ccMsg of
 						CcRETURN1	-> rcci.p1
 						CcWASQUIT	-> 0
-						other		-> abort "[WinInsertMenuItem] expected CcRETURN1 value."
-	# tb			= WinReleaseCString textptr tb
+						other		-> abort "[winInsertMenuItem] expected CcRETURN1 value."
+	# tb			= winReleaseCString textptr tb
 	= (hitem,tb)
 
-WinInsertSeparator :: !HMENU !Int !*OSToolbox -> *OSToolbox
-WinInsertSeparator menu pos tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "InsertSeparator") (Rq2Cci CcRqINSERTSEPARATOR menu pos) tb)
+winInsertSeparator :: !HMENU !Int !*OSToolbox -> *OSToolbox
+winInsertSeparator menu pos tb
+	= snd (issueCleanRequest2 (errorCallback2 "InsertSeparator") (Rq2Cci CcRqINSERTSEPARATOR menu pos) tb)
 
-WinChangeMenuItemCheck :: !HMENU !HITEM !Bool !*OSToolbox -> *OSToolbox
-WinChangeMenuItemCheck menu hitem state tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "CheckMenuItem") (Rq3Cci CcRqCHECKMENUITEM menu hitem (toInt state)) tb)
+winChangeMenuItemCheck :: !HMENU !HITEM !Bool !*OSToolbox -> *OSToolbox
+winChangeMenuItemCheck menu hitem state tb
+	= snd (issueCleanRequest2 (errorCallback2 "CheckMenuItem") (Rq3Cci CcRqCHECKMENUITEM menu hitem (toInt state)) tb)
 
-WinModifyMenu :: !String !HMENU !HMENU !*OSToolbox -> *OSToolbox
-WinModifyMenu text submenu menu tb
-	# (textptr,tb)	= WinMakeCString text tb
-	# (_,tb)		= IssueCleanRequest2 (ErrorCallback2 "ModifyMenu") (Rq3Cci CcRqMODIFYMENU submenu menu textptr) tb
-	= WinReleaseCString textptr tb
+winModifyMenu :: !String !HMENU !HMENU !*OSToolbox -> *OSToolbox
+winModifyMenu text submenu menu tb
+	# (textptr,tb)	= winMakeCString text tb
+	# (_,tb)		= issueCleanRequest2 (errorCallback2 "ModifyMenu") (Rq3Cci CcRqMODIFYMENU submenu menu textptr) tb
+	= winReleaseCString textptr tb
 
-WinModifyMenuItem :: !String !HITEM !HMENU !*OSToolbox -> *OSToolbox
-WinModifyMenuItem text hitem menu tb
-	# (textptr,tb)	= WinMakeCString text tb
-	# (_,tb)		= IssueCleanRequest2 (ErrorCallback2 "ModifyMenuItem") (Rq3Cci CcRqMODIFYMENUITEM hitem menu textptr) tb
-	= WinReleaseCString textptr tb
+winModifyMenuItem :: !String !HITEM !HMENU !*OSToolbox -> *OSToolbox
+winModifyMenuItem text hitem menu tb
+	# (textptr,tb)	= winMakeCString text tb
+	# (_,tb)		= issueCleanRequest2 (errorCallback2 "ModifyMenuItem") (Rq3Cci CcRqMODIFYMENUITEM hitem menu textptr) tb
+	= winReleaseCString textptr tb
 
-WinDestroyMenu :: !HMENU !*OSToolbox -> *OSToolbox
-WinDestroyMenu menu tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "DestroyMenu") (Rq1Cci CcRqDESTROYMENU menu) tb)
+winDestroyMenu :: !HMENU !*OSToolbox -> *OSToolbox
+winDestroyMenu menu tb
+	= snd (issueCleanRequest2 (errorCallback2 "DestroyMenu") (Rq1Cci CcRqDESTROYMENU menu) tb)
 
-WinDeleteMenu :: !HMENU !HITEM !*OSToolbox -> *OSToolbox
-WinDeleteMenu menu hitem tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "DeleteMenu") (Rq2Cci CcRqDELETEMENU menu hitem) tb)
+winDeleteMenu :: !HMENU !HITEM !*OSToolbox -> *OSToolbox
+winDeleteMenu menu hitem tb
+	= snd (issueCleanRequest2 (errorCallback2 "DeleteMenu") (Rq2Cci CcRqDELETEMENU menu hitem) tb)
 
-WinRemoveMenuItem :: !HMENU !HITEM !*OSToolbox -> *OSToolbox
-WinRemoveMenuItem menu hitem tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "RemoveMenuItem") (Rq2Cci CcRqREMOVEMENUITEM menu hitem) tb)
+winRemoveMenuItem :: !HMENU !HITEM !*OSToolbox -> *OSToolbox
+winRemoveMenuItem menu hitem tb
+	= snd (issueCleanRequest2 (errorCallback2 "RemoveMenuItem") (Rq2Cci CcRqREMOVEMENUITEM menu hitem) tb)
 
-WinChangeItemAbility :: !HMENU !HITEM !Bool !*OSToolbox -> *OSToolbox
-WinChangeItemAbility parent hitem onoff tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "ChangeItemAbility") (Rq3Cci CcRqITEMENABLE parent hitem (toInt onoff)) tb)
+winChangeItemAbility :: !HMENU !HITEM !Bool !*OSToolbox -> *OSToolbox
+winChangeItemAbility parent hitem onoff tb
+	= snd (issueCleanRequest2 (errorCallback2 "ChangeItemAbility") (Rq3Cci CcRqITEMENABLE parent hitem (toInt onoff)) tb)
 
-WinChangeMenuAbility :: !HMENU !Int !Bool !*OSToolbox -> *OSToolbox
-WinChangeMenuAbility parent zIndex onoff tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "ChangeMenuAbility") (Rq3Cci CcRqMENUENABLE parent zIndex (toInt onoff)) tb)
+winChangeMenuAbility :: !HMENU !Int !Bool !*OSToolbox -> *OSToolbox
+winChangeMenuAbility parent zIndex onoff tb
+	= snd (issueCleanRequest2 (errorCallback2 "ChangeMenuAbility") (Rq3Cci CcRqMENUENABLE parent zIndex (toInt onoff)) tb)
 
-WinDrawMenuBar :: !HWND !HWND !*OSToolbox -> *OSToolbox
-WinDrawMenuBar framePtr clientPtr tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "DrawMenuBar") (Rq2Cci CcRqDRAWMBAR framePtr clientPtr) tb)
+winDrawMenuBar :: !HWND !HWND !*OSToolbox -> *OSToolbox
+winDrawMenuBar framePtr clientPtr tb
+	= snd (issueCleanRequest2 (errorCallback2 "DrawMenuBar") (Rq2Cci CcRqDRAWMBAR framePtr clientPtr) tb)
 
-WinAddMenuShortKey :: !HWND !Int !Char !*OSToolbox -> *OSToolbox
-WinAddMenuShortKey framePtr cmd key tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "AddMenuShortKey") (Rq3Cci CcRqADDMENUSHORTKEY framePtr cmd (toInt key)) tb)
+winAddMenuShortKey :: !HWND !Int !Char !*OSToolbox -> *OSToolbox
+winAddMenuShortKey framePtr cmd key tb
+	= snd (issueCleanRequest2 (errorCallback2 "AddMenuShortKey") (Rq3Cci CcRqADDMENUSHORTKEY framePtr cmd (toInt key)) tb)
 
-WinRemoveMenuShortKey :: !HWND !Int !*OSToolbox -> *OSToolbox
-WinRemoveMenuShortKey framePtr cmd tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "RemoveMenuShortKey") (Rq2Cci CcRqREMOVEMENUSHORTKEY framePtr cmd) tb)
+winRemoveMenuShortKey :: !HWND !Int !*OSToolbox -> *OSToolbox
+winRemoveMenuShortKey framePtr cmd tb
+	= snd (issueCleanRequest2 (errorCallback2 "RemoveMenuShortKey") (Rq2Cci CcRqREMOVEMENUSHORTKEY framePtr cmd) tb)

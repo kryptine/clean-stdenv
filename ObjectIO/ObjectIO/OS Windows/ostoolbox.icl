@@ -14,22 +14,22 @@ import	code from "cCrossCallFont_121.obj"// PA: moved to ostcp, "cCrossCallTCP_1
 OSNewToolbox :== 0
 
 // RWS ??? add success bool
-OSInitToolbox :: *OSToolbox -> *OSToolbox
-OSInitToolbox toolbox
+osInitToolbox :: *OSToolbox -> *OSToolbox
+osInitToolbox toolbox
 	| toolbox<>0
-		= abort "OSInitToolbox reinitialised\n"
-	# (ok,toolbox)	= WinInitOs
+		= abort "osInitToolbox reinitialised\n"
+	# (ok,toolbox)	= winInitOs
 	| not ok
 		= toolbox // PA: don't abort, otherwise you can't do startIO twice. 
-	//	= abort "OSInitToolbox failed\n"
+	//	= abort "osInitToolbox failed\n"
 	| otherwise
-		# toolbox	= WinStartOsThread toolbox	// PA: WinStartOsThread added
-		# toolbox	= OSinstallFont toolbox		// Install font info cross call handling
-	//	# toolbox	= OSinstallTCP  toolbox		// Install tcp cross call handling	(PA: moved to StdEventTCP)
+		# toolbox	= winStartOsThread toolbox	// PA: WinStartOsThread added
+		# toolbox	= osInstallFont toolbox		// Install font info cross call handling
+	//	# toolbox	= osInstallTCP  toolbox		// Install tcp cross call handling	(PA: moved to StdEventTCP)
 		= toolbox
 
-OSinstallFont :: !*OSToolbox -> *OSToolbox
-OSinstallFont _
+osInstallFont :: !*OSToolbox -> *OSToolbox
+osInstallFont _
 	= code
 	{
 		.inline InstallCrossCallFont
@@ -37,8 +37,8 @@ OSinstallFont _
 		.end
 	}
 /*	PA: moved to ostcp
-OSinstallTCP :: !*OSToolbox -> *OSToolbox
-OSinstallTCP tb
+osInstallTCP :: !*OSToolbox -> *OSToolbox
+osInstallTCP tb
 	= snd (IssueCleanRequest2 (\_ tb->(Return0Cci,tb)) (Rq0Cci CcRqCREATETCPWINDOW) (osInstallTCP tb))
 
 osInstallTCP :: !*OSToolbox -> *OSToolbox
@@ -56,10 +56,10 @@ osInstallTCP _
 OSDummyToolbox :== 0
 
 // PA: moved from world to ostoolbox
-WorldGetToolbox :: !*World -> (!*OSToolbox,!*World)
-WorldGetToolbox world
+worldGetToolbox :: !*World -> (!*OSToolbox,!*World)
+worldGetToolbox world
 	= (OSNewToolbox,world)
 
-WorldSetToolbox :: !*OSToolbox !*World -> *World
-WorldSetToolbox _ world
+worldSetToolbox :: !*OSToolbox !*World -> *World
+worldSetToolbox _ world
 	= world

@@ -15,7 +15,7 @@ setWElements f itemHs (args,s)
 	| isEmpty args || isEmpty itemHs
 		= (itemHs,(args,s))
 	| otherwise
-		# (itemH,itemHs)	= HdTl itemHs
+		# (itemH,itemHs)	= hdtl itemHs
 		# (itemH, args_s)	= setWElements` f itemH  (args,s)
 		# (itemHs,args_s)	= setWElements  f itemHs args_s
 		= ([itemH:itemHs],args_s)
@@ -50,7 +50,7 @@ setWElement :: (Id WItemHandle` .s -> *(Bool,WItemHandle`,.s)) !Id ![WElementHan
 setWElement f id itemHs s
 	| isEmpty itemHs
 		= (False,itemHs,s)
-	# (itemH,itemHs)		= HdTl itemHs
+	# (itemH,itemHs)		= hdtl itemHs
 	# (done,itemH,s)		= setWElement` f id itemH  s
 	| done
 		= (done,[itemH:itemHs],s)
@@ -70,7 +70,7 @@ setWItemHandle :: (WItemHandle` .s -> *(Bool,WItemHandle`,.s)) ![WElementHandle`
 setWItemHandle f itemHs s
 	| isEmpty itemHs
 		= (False,itemHs,s)
-	# (itemH,itemHs)		= HdTl itemHs
+	# (itemH,itemHs)		= hdtl itemHs
 	# (done,itemH,s)		= setWItemHandle` f itemH  s
 	| done
 		= (done,[itemH:itemHs],s)
@@ -100,7 +100,7 @@ where
 		| otherwise					= getWElementKeyFocusIds` (shownContext && wItemShow`) wItems`
 	where
 		focus						= [{focusNr=wItemNr`,focusShow=shownContext}]
-		hasKeyAtt					= Contains iscontrolkeyboard` wItemAtts`
+		hasKeyAtt					= contains iscontrolkeyboard` wItemAtts`
 		keySensitive				= wItemKind`==IsCustomControl
 	getWElementKeyFocusIds`` shownContext (WRecursiveHandle` itemHs _)
 		= getWElementKeyFocusIds` shownContext itemHs
@@ -109,7 +109,6 @@ getWElementKeyFocusIds` _ _
 
 
 instance == WRecursiveKind where
-	(==) :: !WRecursiveKind !WRecursiveKind -> Bool
 	(==) IsWListLSHandle	wRecKind	= case wRecKind of
 											IsWListLSHandle		-> True
 											_					-> False

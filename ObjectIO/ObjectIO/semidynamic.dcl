@@ -31,7 +31,7 @@ readDynamic	:: !(DId m) !SemiDynamic -> Maybe m
 getDynamic	:: !Id      !SemiDynamic -> Maybe m
 setDynamic	:: !Id m    !SemiDynamic -> SemiDynamic
 
-RIdtoDId	:: !(RId  m  ) -> DId m
-R2IdtoDId	:: !(R2Id m r) -> DId m
-R2IdtoDId`	:: !(R2Id m r) -> DId r
-DIdtoId		:: !(DId  m  ) -> Id
+rIdtoDId	:: !(RId  m  ) -> DId m
+r2IdtoDId	:: !(R2Id m r) -> DId m
+r2IdtoDId`	:: !(R2Id m r) -> DId r
+dIdtoId		:: !(DId  m  ) -> Id

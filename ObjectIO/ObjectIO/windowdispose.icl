@@ -14,7 +14,7 @@ from	windowcreate		import bufferDelayedEvents
 
 windowdisposeFatalError :: String String -> .x
 windowdisposeFatalError function error
-	= FatalError function "windowdispose" error
+	= fatalError function "windowdispose" error
 
 
 /*	disposeWindow disposes all system resources associated with the indicated window if it exists.
@@ -26,24 +26,24 @@ windowdisposeFatalError function error
 */
 disposeWindow :: !WID !(PSt .l) -> PSt .l
 disposeWindow wid pState=:{io=ioState}
-	# (found,wDevice,ioState)		= IOStGetDevice WindowDevice ioState
+	# (found,wDevice,ioState)		= ioStGetDevice WindowDevice ioState
 	| not found
 		= {pState & io=ioState}
-	# windows						= WindowSystemStateGetWindowHandles wDevice
+	# windows						= windowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)			= getWindowHandlesWindow wid windows
 	// The window could not be found
 	| not found
-		= {pState & io=IOStSetDevice (WindowSystemState windows) ioState}
+		= {pState & io=ioStSetDevice (WindowSystemState windows) ioState}
 	# (alreadyClosing,wsH)			= getWindowStateHandleClosing wsH
 	// The window is already in the act of being closed
 	| alreadyClosing
-		= {pState & io=IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState}
-	# (documentInterface,ioState)	= IOStGetDocumentInterface ioState
+		= {pState & io=ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState}
+	# (documentInterface,ioState)	= ioStGetDocumentInterface ioState
 	  (wKind,wsH)					= getWindowStateHandleWindowKind wsH
 	  (wids, wsH)					= getWindowStateHandleWIDS wsH
 	// Of a SDI process, the SDI client should be closed, not the SDI frame (which is closed by closeProcess)
 	| documentInterface==SDI && wKind==IsWindow
-	//	= {pState & io=IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState}
+	//	= {pState & io=ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState}
 		# windows					= incWindowBound windows
 		= dispose wids wsH windows {pState & io=ioState}
 	with
@@ -61,7 +61,7 @@ disposeWindow wid pState=:{io=ioState}
 	# activeId						= fromJust activeWIDS
 	// Do not dispose inactive modal windows
 	| wids.wId<>activeId.wId
-		= {pState & io=IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState}
+		= {pState & io=ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState}
 	// Dispose only the active modal window
 	| otherwise
 		= dispose wids wsH windows {pState & io=ioState}
@@ -70,21 +70,21 @@ where
 	dispose wids=:{wId} wsH windows pState=:{io=ioState}
 		# (_,_,windows)			= removeWindowHandlesWindow (toWID wId) windows	// Remove window placeholder
 		# (windows,ioState)		= enableProperWindows windows ioState			// PA: before disposing last modal window, the window and menu system should be enabled
-		# ioState				= IOStSetDevice (WindowSystemState windows) ioState
-		# (disposeFun,ioState)	= IOStGetInitIO ioState
+		# ioState				= ioStSetDevice (WindowSystemState windows) ioState
+		# (disposeFun,ioState)	= ioStGetInitIO ioState
 		# pState				= disposeFun {pState & io=ioState}
-		# (osdinfo,ioState)		= IOStGetOSDInfo pState.io
-		# (inputTrack,ioState)	= IOStGetInputTrack ioState
+		# (osdinfo,ioState)		= ioStGetOSDInfo pState.io
+		# (inputTrack,ioState)	= ioStGetInputTrack ioState
 		# (tb,ioState)			= getIOToolbox ioState
 		# pState				= {pState & io=ioState}
 		# ((rids,ids,delayinfo,finalLS,inputTrack),(_,pState),tb)
 								= disposeWindowStateHandle osdinfo inputTrack handleOSEvent (wsH,pState) tb
 		# ioState				= setIOToolbox tb pState.io
-		# ioState				= IOStSetInputTrack inputTrack ioState
+		# ioState				= ioStSetInputTrack inputTrack ioState
 		# ioState				= unbindRIds rids ioState						// When timers are part of windows, also unbind timers
-		# (idtable,ioState)		= IOStGetIdTable ioState
+		# (idtable,ioState)		= ioStGetIdTable ioState
 		  (_,idtable)			= removeIdsFromIdTable (rids++ids) idtable
-		# ioState				= IOStSetIdTable idtable ioState
+		# ioState				= ioStSetIdTable idtable ioState
 		# ioState				= addFinalLS finalLS ioState
 		# ioState				= bufferDelayedEvents delayinfo ioState
 		= {pState & io=ioState}
@@ -96,17 +96,17 @@ where
 	enableProperWindows windows ioState
 		# (modalWIDS,windows)	= getWindowHandlesActiveModalDialog windows
 		| isJust modalWIDS		= (windows,ioState)
-		| otherwise				= (windows,IOStSetIOIsModal Nothing ioState)
+		| otherwise				= (windows,ioStSetIOIsModal Nothing ioState)
 	
 	addFinalLS :: ![FinalModalLS] !(IOSt .l) -> IOSt .l
 	addFinalLS finalLS ioState
-		# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+		# (found,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
 		| not found
 			= windowdisposeFatalError "disposeWindow" "could not restore final local window state"
 		| otherwise
-			# windows				= WindowSystemStateGetWindowHandles wDevice
+			# windows				= windowSystemStateGetWindowHandles wDevice
 			# windows				= {windows & whsFinalModalLS=finalLS++windows.whsFinalModalLS}
-			= IOStSetDevice (WindowSystemState windows) ioState
+			= ioStSetDevice (WindowSystemState windows) ioState
 
 
 /*	disposeCursorInfo disposes all system resources associated with the given CursorInfo.
@@ -132,11 +132,11 @@ disposeWindowStateHandle osdinfo inputTrack handleOSEvent
 	  (isWindowInfo,info)		= case whWindowInfo of
 									WindowInfo info	-> (True, info)
 									_				-> (False,windowdisposeFatalError "disposeWindowStateHandle" "info unexpectedly evaluated")
-//	# (ids_dispose,tb)			= StateMap (disposeWElementHandle wPtr) wH.whItems tb
+//	# (ids_dispose,tb)			= stateMap (disposeWElementHandle wPtr) wH.whItems tb
 //	  (rIdss,idss,disposeFuns)	= unzip3 ids_dispose
 	# (rids,ids,fs,itemHs,tb)	= disposeWElementHandles wPtr whItems tb
 	# tb						= fs tb//StrictSeq disposeFuns tb
-	# (delayinfo,state,tb)		= OSdestroyWindow osdinfo (whMode==Modal) (whKind==IsWindow) wPtr handleOSEvent state tb
+	# (delayinfo,state,tb)		= osDestroyWindow osdinfo (whMode==Modal) (whKind==IsWindow) wPtr handleOSEvent state tb
 //	  rids						= flatten rIdss
 	  ids						= [wId:ids]//flatten idss]
 	  finalModalLS				= if isModalDialog [{fmWIDS=wids,fmLS=wlsState}] []
@@ -195,17 +195,17 @@ disposeWItemHandle :: !OSWindowPtr !(WItemHandle .ls .pst) !*OSToolbox
 disposeWItemHandle wPtr itemH=:{wItemKind=IsCheckControl,wItemInfo,wItemId} tb
 	# checkInfo			= getWItemCheckInfo wItemInfo
 	  items				= checkInfo.checkItems
-	# tb				= StateMap2 (\{checkItemPtr,checkItemPos,checkItemSize}
-										->OSsetCheckControlShow wPtr checkItemPtr (PosSizeToRect checkItemPos checkItemSize) False
+	# tb				= stateMap2 (\{checkItemPtr,checkItemPos,checkItemSize}
+										->osSetCheckControlShow wPtr checkItemPtr (posSizeToRect checkItemPos checkItemSize) False
 									) items tb
-	= ([],maybeToList wItemId,StateMap2 (\{checkItemPtr}->OSdestroyCheckControl checkItemPtr) items,itemH,tb)
+	= ([],maybeToList wItemId,stateMap2 (\{checkItemPtr}->osDestroyCheckControl checkItemPtr) items,itemH,tb)
 
 disposeWItemHandle wPtr itemH=:{wItemKind=IsCompoundControl,wItemInfo,wItems,wItemId,wItemPos,wItemSize,wItemPtr} tb
 	# (rids,ids,fs,itemHs,tb)	= disposeWElementHandles wPtr wItems tb
-	  f							= OSdestroyCompoundControl wItemPtr
+	  f							= osDestroyCompoundControl wItemPtr
 	  ids						= maybeToList wItemId ++ ids
 	  info						= getWItemCompoundInfo wItemInfo
-	# tb						= OSsetCompoundShow wPtr wItemPtr (PosSizeToRect wItemPos wItemSize) False tb
+	# tb						= osSetCompoundShow wPtr wItemPtr (posSizeToRect wItemPos wItemSize) False tb
 	  itemH						= {itemH & wItems=itemHs}
 	= (rids,ids,f o disposeClipState info.compoundLookInfo.compoundClip o fs,itemH,tb)
 
@@ -228,23 +228,23 @@ disposeWItemHandle wPtr itemH=:{wItemKind=IsOtherControl controltype,wItemId} tb
 disposeWItemHandle wPtr itemH=:{wItemKind=IsRadioControl,wItemId,wItemInfo} tb
 	# radioInfo			= getWItemRadioInfo wItemInfo
 	  items				= radioInfo.radioItems
-	# tb				= StateMap2 (\{radioItemPtr,radioItemPos,radioItemSize}
-										->OSsetRadioControlShow wPtr radioItemPtr (PosSizeToRect radioItemPos radioItemSize) False
+	# tb				= stateMap2 (\{radioItemPtr,radioItemPos,radioItemSize}
+										->osSetRadioControlShow wPtr radioItemPtr (posSizeToRect radioItemPos radioItemSize) False
 									) items tb
-	= ([],maybeToList wItemId,StateMap2 (\{radioItemPtr}->OSdestroyRadioControl radioItemPtr) items,itemH,tb)
+	= ([],maybeToList wItemId,stateMap2 (\{radioItemPtr}->osDestroyRadioControl radioItemPtr) items,itemH,tb)
 
 disposeWItemHandle wPtr itemH=:{wItemKind,wItemId,wItemPtr,wItemPos,wItemSize} tb
-	# tb				= hide wPtr wItemPtr (PosSizeToRect wItemPos wItemSize) False tb
+	# tb				= hide wPtr wItemPtr (posSizeToRect wItemPos wItemSize) False tb
 	= ([],maybeToList wItemId,dispose wItemPtr,itemH,tb)
 where
 	(hide,dispose)		= case wItemKind of
-							IsPopUpControl			-> (OSsetPopUpControlShow,			OSdestroyPopUpControl)
-							IsSliderControl			-> (OSsetSliderControlShow,			OSdestroySliderControl)
-							IsTextControl			-> (OSsetTextControlShow,			OSdestroyTextControl)
-							IsEditControl			-> (OSsetEditControlShow,			OSdestroyEditControl)
-							IsButtonControl			-> (OSsetButtonControlShow,			OSdestroyButtonControl)
-							IsCustomButtonControl	-> (OSsetCustomButtonControlShow,	OSdestroyCustomButtonControl)
-							IsCustomControl			-> (OSsetCustomControlShow,			OSdestroyCustomControl)
+							IsPopUpControl			-> (osSetPopUpControlShow,			osDestroyPopUpControl)
+							IsSliderControl			-> (osSetSliderControlShow,			osDestroySliderControl)
+							IsTextControl			-> (osSetTextControlShow,			osDestroyTextControl)
+							IsEditControl			-> (osSetEditControlShow,			osDestroyEditControl)
+							IsButtonControl			-> (osSetButtonControlShow,			osDestroyButtonControl)
+							IsCustomButtonControl	-> (osSetCustomButtonControlShow,	osDestroyCustomButtonControl)
+							IsCustomControl			-> (osSetCustomControlShow,			osDestroyCustomControl)
 							_						-> windowdisposeFatalError "disposeWItemHandle" ("unmatched ControlKind: "+++toString wItemKind)
 
 maybeToList :: !(Maybe .x) -> [.x]

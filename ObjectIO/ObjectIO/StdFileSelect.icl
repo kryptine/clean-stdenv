@@ -15,22 +15,22 @@ instance FileSelectEnv World where
 	selectInputFile :: !*World -> (!Maybe String,!*World)
 	selectInputFile world
 		# (initContext,tb)			= initContext` world
-		# tb						= OSinitialiseFileSelectors tb
-		# (ok,name,doneContext,tb)	= OSselectinputfile handleOSEvent initContext tb
+		# tb						= osInitialiseFileSelectors tb
+		# (ok,name,doneContext,tb)	= osSelectinputfile handleOSEvent initContext tb
 		= (if ok (Just name) Nothing,closeContext doneContext tb)
 	
 	selectOutputFile :: !String !String !*World -> (!Maybe String,!*World)
 	selectOutputFile prompt filename world
 		# (initContext,tb)			= initContext` world
-		# tb						= OSinitialiseFileSelectors tb
-		# (ok,name,doneContext,tb)	= OSselectoutputfile handleOSEvent initContext prompt filename tb
+		# tb						= osInitialiseFileSelectors tb
+		# (ok,name,doneContext,tb)	= osSelectoutputfile handleOSEvent initContext prompt filename tb
 		= (if ok (Just name) Nothing,closeContext doneContext tb)
 	
 	selectDirectory :: !*World -> (!Maybe String,!*World)
 	selectDirectory world
 		# (initContext,tb)			= initContext` world
-		# tb						= OSinitialiseFileSelectors tb
-		# (ok,name,doneContext,tb)	= OSselectdirectory handleOSEvent initContext tb
+		# tb						= osInitialiseFileSelectors tb
+		# (ok,name,doneContext,tb)	= osSelectdirectory handleOSEvent initContext tb
 		= (if ok (Just name) Nothing,closeContext doneContext tb)
 
 handleOSEvent :: !OSEvent !Context -> Context

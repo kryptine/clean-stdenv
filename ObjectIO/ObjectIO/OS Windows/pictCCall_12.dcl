@@ -54,116 +54,116 @@ WINDING				:== 2
 //	PA: end of addition.
 
 
-/*	Win(Create/Destroy)ScreenHDC added to temporarily create a HDC of a screen.
+/*	win(Create/Destroy)ScreenHDC added to temporarily create a HDC of a screen.
 	Never use these values for a window or control.
 */
-WinCreateScreenHDC		:: !*OSToolbox -> PIC
-WinDestroyScreenHDC		:: !PIC -> *OSToolbox
+winCreateScreenHDC		:: !*OSToolbox -> PIC
+winDestroyScreenHDC		:: !PIC -> *OSToolbox
 
-WinGetPicStringWidth	:: !{#Char} !PIC -> ( !Int, !PIC)
-WinGetPicCharWidth		:: !Char !PIC -> ( !Int, !PIC)
-WinGetStringWidth		:: !{#Char} !Fnt !Int !HDC !*OSToolbox -> ( !Int, !*OSToolbox)
-WinGetCharWidth			:: !Char !Fnt !Int !HDC !*OSToolbox -> ( !Int, !*OSToolbox)
+winGetPicStringWidth	:: !{#Char} !PIC -> ( !Int, !PIC)
+winGetPicCharWidth		:: !Char !PIC -> ( !Int, !PIC)
+winGetStringWidth		:: !{#Char} !Fnt !Int !HDC !*OSToolbox -> ( !Int, !*OSToolbox)
+winGetCharWidth			:: !Char !Fnt !Int !HDC !*OSToolbox -> ( !Int, !*OSToolbox)
 
-WinGetPicFontInfo		:: !PIC -> ( !Int, !Int, !Int, !Int, !PIC)
-WinGetFontInfo			:: !Fnt !Int !HDC !*OSToolbox -> ( !Int, !Int, !Int, !Int, !*OSToolbox)
-WinSetFontStyle			:: !Int !PIC ->  PIC
-WinSetFontSize			:: !Int !PIC ->  PIC
-WinSetFontName			:: !{#Char} !PIC ->  PIC
-WinSetFont				:: !Fnt !PIC ->  PIC
+winGetPicFontInfo		:: !PIC -> ( !Int, !Int, !Int, !Int, !PIC)
+winGetFontInfo			:: !Fnt !Int !HDC !*OSToolbox -> ( !Int, !Int, !Int, !Int, !*OSToolbox)
+winSetFontStyle			:: !Int !PIC ->  PIC
+winSetFontSize			:: !Int !PIC ->  PIC
+winSetFontName			:: !{#Char} !PIC ->  PIC
+winSetFont				:: !Fnt !PIC ->  PIC
 
-/*	Routines to PRINT bitmaps (WinPrint(Resized)Bitmap).
-	Routines to DRAW  bitmaps (WinDraw(Resized)Bitmap).
-	Create a bitmap (WinCreateBitmap).
+/*	Routines to PRINT bitmaps (winPrint(Resized)Bitmap).
+	Routines to DRAW  bitmaps (winDraw(Resized)Bitmap).
+	Create a bitmap (winCreateBitmap).
 */
-// MW11 WinPrintBitmap			:: !(!Int,!Int) !(!Int,!Int) !{#Char} !PIC -> PIC
-WinPrintResizedBitmap	:: !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) !{#Char} !PIC -> PIC
-WinDrawBitmap			:: !(!Int,!Int) !(!Int,!Int) !Int !PIC -> PIC
-WinDrawResizedBitmap	:: !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) !Int !PIC -> PIC
-WinCreateBitmap			:: !Int !{#Char} !HDC !*OSToolbox -> (!Int,!*OSToolbox)
+// MW11 winPrintBitmap			:: !(!Int,!Int) !(!Int,!Int) !{#Char} !PIC -> PIC
+winPrintResizedBitmap	:: !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) !{#Char} !PIC -> PIC
+winDrawBitmap			:: !(!Int,!Int) !(!Int,!Int) !Int !PIC -> PIC
+winDrawResizedBitmap	:: !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) !Int !PIC -> PIC
+winCreateBitmap			:: !Int !{#Char} !HDC !*OSToolbox -> (!Int,!*OSToolbox)
 
 
-WinInvertPolygon		:: !PIC ->  PIC
-WinErasePolygon			:: !PIC ->  PIC
-WinFillPolygon			:: !PIC ->  PIC
-WinDrawPolygon			:: !PIC ->  PIC
-WinAddPolygonPoint		:: !Pt !*OSToolbox ->  *OSToolbox
-WinStartPolygon			:: !Int !*OSToolbox ->  *OSToolbox
-WinEndPolygon			:: !*OSToolbox -> *OSToolbox
+winInvertPolygon		:: !PIC ->  PIC
+winErasePolygon			:: !PIC ->  PIC
+winFillPolygon			:: !PIC ->  PIC
+winDrawPolygon			:: !PIC ->  PIC
+winAddPolygonPoint		:: !Pt !*OSToolbox ->  *OSToolbox
+winStartPolygon			:: !Int !*OSToolbox ->  *OSToolbox
+winEndPolygon			:: !*OSToolbox -> *OSToolbox
 
-WinAllocPolyShape		:: !Int !*OSToolbox -> (!Int,!*OSToolbox)
-WinSetPolyPoint			:: !Int !Int !Int !Int !*OSToolbox -> *OSToolbox
-WinFreePolyShape		:: !Int !*OSToolbox -> *OSToolbox
-
-
-WinInvertWedge			:: !Rect !Pt !Pt !PIC ->  PIC
-WinEraseWedge			:: !Rect !Pt !Pt !PIC ->  PIC
-WinFillWedge			:: !Rect !Pt !Pt !PIC ->  PIC
-WinDrawWedge			:: !Rect !Pt !Pt !PIC ->  PIC
+winAllocPolyShape		:: !Int !*OSToolbox -> (!Int,!*OSToolbox)
+winSetPolyPoint			:: !Int !Int !Int !Int !*OSToolbox -> *OSToolbox
+winFreePolyShape		:: !Int !*OSToolbox -> *OSToolbox
 
 
-WinInvertCircle			:: !Pt !Int !PIC ->  PIC
-WinEraseCircle			:: !Pt !Int !PIC ->  PIC
-WinFillCircle			:: !Pt !Int !PIC ->  PIC
-WinDrawCircle			:: !Pt !Int !PIC ->  PIC
+winInvertWedge			:: !Rect !Pt !Pt !PIC ->  PIC
+winEraseWedge			:: !Rect !Pt !Pt !PIC ->  PIC
+winFillWedge			:: !Rect !Pt !Pt !PIC ->  PIC
+winDrawWedge			:: !Rect !Pt !Pt !PIC ->  PIC
 
 
-WinInvertOval			:: !Rect !PIC ->  PIC
-WinEraseOval			:: !Rect !PIC ->  PIC
-WinFillOval				:: !Rect !PIC ->  PIC
-WinDrawOval				:: !Rect !PIC ->  PIC
+winInvertCircle			:: !Pt !Int !PIC ->  PIC
+winEraseCircle			:: !Pt !Int !PIC ->  PIC
+winFillCircle			:: !Pt !Int !PIC ->  PIC
+winDrawCircle			:: !Pt !Int !PIC ->  PIC
 
 
-WinInvertRoundRectangle	:: !Rect !Int !Int !PIC ->  PIC
-WinEraseRoundRectangle	:: !Rect !Int !Int !PIC ->  PIC
-WinFillRoundRectangle	:: !Rect !Int !Int !PIC ->  PIC
-WinDrawRoundRectangle	:: !Rect !Int !Int !PIC ->  PIC
+winInvertOval			:: !Rect !PIC ->  PIC
+winEraseOval			:: !Rect !PIC ->  PIC
+winFillOval				:: !Rect !PIC ->  PIC
+winDrawOval				:: !Rect !PIC ->  PIC
 
 
-WinScrollRectangle		:: !Rect !Pt !PIC -> (!Rect,!PIC)
-WinCopyRectangle		:: !Rect !Pt !PIC ->  PIC
-WinCopyRectangleTo		:: !Rect !Pt !PIC ->  PIC
-WinMoveRectangle		:: !Rect !Pt !PIC ->  PIC
-WinMoveRectangleTo		:: !Rect !Pt !PIC ->  PIC
+winInvertRoundRectangle	:: !Rect !Int !Int !PIC ->  PIC
+winEraseRoundRectangle	:: !Rect !Int !Int !PIC ->  PIC
+winFillRoundRectangle	:: !Rect !Int !Int !PIC ->  PIC
+winDrawRoundRectangle	:: !Rect !Int !Int !PIC ->  PIC
 
 
-WinInvertRectangle		:: !Rect !PIC ->  PIC
-WinEraseRectangle		:: !Rect !PIC ->  PIC
-WinFillRectangle		:: !Rect !PIC ->  PIC
-WinDrawRectangle		:: !Rect !PIC ->  PIC
+winScrollRectangle		:: !Rect !Pt !PIC -> (!Rect,!PIC)
+winCopyRectangle		:: !Rect !Pt !PIC ->  PIC
+winCopyRectangleTo		:: !Rect !Pt !PIC ->  PIC
+winMoveRectangle		:: !Rect !Pt !PIC ->  PIC
+winMoveRectangleTo		:: !Rect !Pt !PIC ->  PIC
 
 
-WinDrawChar				:: !Int !PIC ->  PIC
-WinDrawString			:: !{#Char} !PIC ->  PIC
+winInvertRectangle		:: !Rect !PIC ->  PIC
+winEraseRectangle		:: !Rect !PIC ->  PIC
+winFillRectangle		:: !Rect !PIC ->  PIC
+winDrawRectangle		:: !Rect !PIC ->  PIC
 
 
-WinDrawCCurve			:: !Rect !Pt !Pt !RGBcolor !PIC ->  PIC
-WinDrawCLine			:: !Pt !Pt !RGBcolor !PIC ->  PIC
-WinDrawCPoint			:: !Pt !RGBcolor !PIC ->  PIC
-WinDrawCurve			:: !Rect !Pt !Pt !PIC ->  PIC
-WinDrawLine				:: !Pt !Pt !PIC ->  PIC
-WinDrawPoint			:: !Pt !PIC ->  PIC
+winDrawChar				:: !Int !PIC ->  PIC
+winDrawString			:: !{#Char} !PIC ->  PIC
 
 
-WinLinePen				:: !Pt !PIC ->  PIC
-WinLinePenTo			:: !Pt !PIC ->  PIC
+winDrawCCurve			:: !Rect !Pt !Pt !RGBcolor !PIC ->  PIC
+winDrawCLine			:: !Pt !Pt !RGBcolor !PIC ->  PIC
+winDrawCPoint			:: !Pt !RGBcolor !PIC ->  PIC
+winDrawCurve			:: !Rect !Pt !Pt !PIC ->  PIC
+winDrawLine				:: !Pt !Pt !PIC ->  PIC
+winDrawPoint			:: !Pt !PIC ->  PIC
 
-WinMovePen				:: !Pt !PIC ->  PIC
-WinMovePenTo			:: !Pt !PIC ->  PIC
-WinGetPenPos			:: !PIC -> (!Int,!Int,!HDC,!*OSToolbox)
 
-WinSetPenSize			:: !Int !PIC ->  PIC
-WinSetPattern			:: !Int !PIC ->  PIC
-WinSetMode				:: !Int !PIC ->  PIC
-WinSetBackColor			:: !RGBcolor !PIC ->  PIC
-WinSetPenColor			:: !RGBcolor !PIC ->  PIC
+winLinePen				:: !Pt !PIC ->  PIC
+winLinePenTo			:: !Pt !PIC ->  PIC
 
-WinClipPicture			:: !Rect !PIC ->  PIC
-WinClipRgnPicture		:: !HRGN !PIC -> PIC			//	Operation to set the clipping region
-WinSetClipRgnPicture	:: !HRGN !PIC -> PIC			//	Operation to completely set the clipping region
-WinGetClipRgnPicture	::       !PIC -> (!HRGN,!PIC)	//  Operation to retrieve the current clipping region
+winMovePen				:: !Pt !PIC ->  PIC
+winMovePenTo			:: !Pt !PIC ->  PIC
+winGetPenPos			:: !PIC -> (!Int,!Int,!HDC,!*OSToolbox)
 
-WinDeleteObject			:: !Int !*OSToolbox -> *OSToolbox
+winSetPenSize			:: !Int !PIC ->  PIC
+winSetPattern			:: !Int !PIC ->  PIC
+winSetMode				:: !Int !PIC ->  PIC
+winSetBackColor			:: !RGBcolor !PIC ->  PIC
+winSetPenColor			:: !RGBcolor !PIC ->  PIC
 
-WinDonePicture			:: !PIC -> ( !Int, !Int, !RGBcolor, !RGBcolor, !Pt, !Fnt, !PIC)
-WinInitPicture			:: !Int !Int !RGBcolor !RGBcolor !Pt !Fnt !Pt !PIC ->  PIC
+winClipPicture			:: !Rect !PIC ->  PIC
+winClipRgnPicture		:: !HRGN !PIC -> PIC			//	Operation to set the clipping region
+winSetClipRgnPicture	:: !HRGN !PIC -> PIC			//	Operation to completely set the clipping region
+winGetClipRgnPicture	::       !PIC -> (!HRGN,!PIC)	//  Operation to retrieve the current clipping region
+
+winDeleteObject			:: !Int !*OSToolbox -> *OSToolbox
+
+winDonePicture			:: !PIC -> ( !Int, !Int, !RGBcolor, !RGBcolor, !Pt, !Fnt, !PIC)
+winInitPicture			:: !Int !Int !RGBcolor !RGBcolor !Pt !Fnt !Pt !PIC ->  PIC

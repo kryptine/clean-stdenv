@@ -40,52 +40,54 @@ import code from library "advapi32_library",
 		}
 
 
-//	PA: restructured IssueCleanRequest for readability.
+//	PA: restructured issueCleanRequest for readability.
 //	2 versions: first without Iprint statements, second with Iprint statements.
 //	In both cases the Bool result has also been eliminated as it is never used.
-IssueCleanRequest :: !(CrossCallInfo -> .(.s -> .(*OSToolbox -> *(.CrossCallInfo,.s,*OSToolbox))))
+issueCleanRequest :: !(CrossCallInfo -> .(.s -> .(*OSToolbox -> *(.CrossCallInfo,.s,*OSToolbox))))
                      !.CrossCallInfo !.s !*OSToolbox -> (!CrossCallInfo,!.s,!*OSToolbox)
-IssueCleanRequest callback cci s tb
-//	# tb			= trace_n ("IssueCleanRequest :"+++toOSCrossCallInfoString cci) tb
-	# (reply,tb)	= WinKickOsThread cci tb
-	= HandleCallBacks callback reply s tb
+issueCleanRequest callback cci s tb
+//	# tb			= trace_n ("issueCleanRequest :"+++toOSCrossCallInfoString cci) tb
+	# (reply,tb)	= winKickOsThread cci tb
+	= handleCallBacks callback reply s tb
 where
-	HandleCallBacks :: !(CrossCallInfo -> .(.s -> .(*OSToolbox -> *(.CrossCallInfo,.s,*OSToolbox))))
+	handleCallBacks :: !(CrossCallInfo -> .(.s -> .(*OSToolbox -> *(.CrossCallInfo,.s,*OSToolbox))))
 					   !CrossCallInfo !.s !*OSToolbox -> (!CrossCallInfo,!.s,!*OSToolbox)
-	HandleCallBacks callback cci=:{ccMsg} s tb
+	handleCallBacks callback cci=:{ccMsg} s tb
 		| ccMsg>2000
-			= abort ("HandleCallBacks "+++toString ccMsg)
-//		# tb					= trace_n ("IssueCleanRequest <-- "+++toCleanCrossCallInfoString cci) tb
-		| IsReturnOrQuitCci ccMsg
+			= abort ("handleCallBacks "+++toString ccMsg)
+//		# tb					= trace_n ("issueCleanRequest <-- "+++toCleanCrossCallInfoString cci) tb
+		| isReturnOrQuitCci ccMsg
+//			# tb				= trace_n "issueCleanRequest." tb
 			= (cci,s,tb)
 		| otherwise
 			# (returnCci,s,tb)	= callback cci s tb
-//			# tb				= trace_n ("IssueCleanRequest --> "+++toOSCrossCallInfoString returnCci) tb
-			# (replyCci,tb)		= WinKickOsThread returnCci tb
-			= HandleCallBacks callback replyCci s tb
+//			# tb				= trace_n ("issueCleanRequest --> "+++toOSCrossCallInfoString returnCci) tb
+			# (replyCci,tb)		= winKickOsThread returnCci tb
+			= handleCallBacks callback replyCci s tb
 
-/*	PA: version of IssueCleanRequest that has no state parameter.
+/*	PA: version of issueCleanRequest that has no state parameter.
 */
-IssueCleanRequest2 :: !(CrossCallInfo -> .(*OSToolbox -> *(.CrossCallInfo,*OSToolbox))) !.CrossCallInfo !*OSToolbox
+issueCleanRequest2 :: !(CrossCallInfo -> .(*OSToolbox -> *(.CrossCallInfo,*OSToolbox))) !.CrossCallInfo !*OSToolbox
 																					 -> (!CrossCallInfo,!*OSToolbox)
-IssueCleanRequest2 callback cci tb
-//	# tb			= trace_n ("IssueCleanRequest2 :"+++toOSCrossCallInfoString cci) tb
-	# (reply,tb)	= WinKickOsThread cci tb
-	= HandleCallBacks callback reply tb
+issueCleanRequest2 callback cci tb
+//	# tb			= trace_n ("issueCleanRequest2 :"+++toOSCrossCallInfoString cci) tb
+	# (reply,tb)	= winKickOsThread cci tb
+	= handleCallBacks callback reply tb
 where
-	HandleCallBacks :: !(CrossCallInfo -> .(*OSToolbox -> *(.CrossCallInfo,*OSToolbox))) !CrossCallInfo !*OSToolbox
+	handleCallBacks :: !(CrossCallInfo -> .(*OSToolbox -> *(.CrossCallInfo,*OSToolbox))) !CrossCallInfo !*OSToolbox
 																					 -> (!CrossCallInfo,!*OSToolbox)
-	HandleCallBacks callback cci=:{ccMsg} tb
+	handleCallBacks callback cci=:{ccMsg} tb
 		| ccMsg>2000
 			= abort ("HandleCallBacks "+++toString ccMsg)
-//		# tb					= trace_n ("IssueCleanRequest2 <-- "+++toCleanCrossCallInfoString cci) tb
-		| IsReturnOrQuitCci ccMsg
+//		# tb					= trace_n ("issueCleanRequest2 <-- "+++toCleanCrossCallInfoString cci) tb
+		| isReturnOrQuitCci ccMsg
+//			# tb				= trace_n "issueCleanRequest2." tb
 			= (cci,tb)
 		| otherwise
 			# (returnCci,tb) 	= callback cci tb
-//			# tb				= trace_n ("IssueCleanRequest2 --> "+++toOSCrossCallInfoString returnCci) tb
-			# (replyCci, tb) 	= WinKickOsThread returnCci tb
-			= HandleCallBacks callback replyCci tb
+//			# tb				= trace_n ("issueCleanRequest2 --> "+++toOSCrossCallInfoString returnCci) tb
+			# (replyCci, tb) 	= winKickOsThread returnCci tb
+			= handleCallBacks callback replyCci tb
 
 //	PA: macros for returning proper number of arguments within a CrossCallInfo.
 Rq0Cci msg :== {ccMsg=msg,p1=0,p2=0,p3=0,p4=0,p5=0,p6=0}
@@ -96,29 +98,29 @@ Rq4Cci msg v1 v2 v3 v4 :== {ccMsg=msg,p1=v1,p2=v2,p3=v3,p4=v4,p5=0,p6=0}
 Rq5Cci msg v1 v2 v3 v4 v5 :== {ccMsg=msg,p1=v1,p2=v2,p3=v3,p4=v4,p5=v5,p6=0}
 Rq6Cci msg v1 v2 v3 v4 v5 v6 :== {ccMsg=msg,p1=v1,p2=v2,p3=v3,p4=v4,p5=v5,p6=v6}
 
-Return0Cci :: CrossCallInfo
-Return0Cci = Rq0Cci CcRETURN0
+return0Cci :: CrossCallInfo
+return0Cci = Rq0Cci CcRETURN0
 
-Return1Cci :: !Int -> CrossCallInfo
-Return1Cci v = Rq1Cci CcRETURN1 v
+return1Cci :: !Int -> CrossCallInfo
+return1Cci v = Rq1Cci CcRETURN1 v
 
-Return2Cci :: !Int !Int -> CrossCallInfo
-Return2Cci v1 v2 = Rq2Cci CcRETURN2 v1 v2
+return2Cci :: !Int !Int -> CrossCallInfo
+return2Cci v1 v2 = Rq2Cci CcRETURN2 v1 v2
 
-Return3Cci :: !Int !Int !Int -> CrossCallInfo
-Return3Cci v1 v2 v3 = Rq3Cci CcRETURN3 v1 v2 v3
+return3Cci :: !Int !Int !Int -> CrossCallInfo
+return3Cci v1 v2 v3 = Rq3Cci CcRETURN3 v1 v2 v3
 
-Return4Cci :: !Int !Int !Int !Int -> CrossCallInfo
-Return4Cci v1 v2 v3 v4 = Rq4Cci CcRETURN4 v1 v2 v3 v4
+return4Cci :: !Int !Int !Int !Int -> CrossCallInfo
+return4Cci v1 v2 v3 v4 = Rq4Cci CcRETURN4 v1 v2 v3 v4
 
-Return5Cci :: !Int !Int !Int !Int !Int -> CrossCallInfo
-Return5Cci v1 v2 v3 v4 v5 = Rq5Cci CcRETURN5 v1 v2 v3 v4 v5
+return5Cci :: !Int !Int !Int !Int !Int -> CrossCallInfo
+return5Cci v1 v2 v3 v4 v5 = Rq5Cci CcRETURN5 v1 v2 v3 v4 v5
 
-Return6Cci :: !Int !Int !Int !Int !Int !Int -> CrossCallInfo
-Return6Cci v1 v2 v3 v4 v5 v6 = Rq6Cci CcRETURN6 v1 v2 v3 v4 v5 v6
+return6Cci :: !Int !Int !Int !Int !Int !Int -> CrossCallInfo
+return6Cci v1 v2 v3 v4 v5 v6 = Rq6Cci CcRETURN6 v1 v2 v3 v4 v5 v6
 
-IsReturnOrQuitCci :: !Int -> Bool
-IsReturnOrQuitCci mess
+isReturnOrQuitCci :: !Int -> Bool
+isReturnOrQuitCci mess
 	= mess==CcWASQUIT || (mess<=CcRETURNmax && mess>=CcRETURNmin)
 
 instance toInt Bool where
@@ -126,35 +128,35 @@ instance toInt Bool where
 	toInt True = -1
 	toInt _    = 0
 
-ErrorCallback :: !String !CrossCallInfo !.s !*OSToolbox -> (!CrossCallInfo, !.s, !*OSToolbox)
-ErrorCallback source cci s tb
-	= (Return0Cci, s, Iprint msgtext tb)
+errorCallback :: !String !CrossCallInfo !.s !*OSToolbox -> (!CrossCallInfo, !.s, !*OSToolbox)
+errorCallback source cci s tb
+	= (return0Cci, s, iprint msgtext tb)
 where
 	msgtext	= " *** [" +++ source +++ "] did not expect a callback: " +++ toString cci.ccMsg
 
-//	PA: version of ErrorCallback without state parameter (use with IssueCleanRequest2).
-ErrorCallback2 :: !String !CrossCallInfo !*OSToolbox -> (!CrossCallInfo,!*OSToolbox)
-ErrorCallback2 source cci tb
-	= (Return0Cci,Iprint msgtext tb)
+//	PA: version of errorCallback without state parameter (use with IssueCleanRequest2).
+errorCallback2 :: !String !CrossCallInfo !*OSToolbox -> (!CrossCallInfo,!*OSToolbox)
+errorCallback2 source cci tb
+	= (return0Cci,iprint msgtext tb)
 where
 	msgtext	= " *** [" +++ source +++ "] did not expect a callback: " +++ toString cci.ccMsg
 
-Iprint :: !String !.a -> .a
-Iprint s a 
+iprint :: !String !.a -> .a
+iprint s a 
 	| not (printresult == 0)  = a
 							  = abort ("Print failed: " +++ s)
 where
-	printresult   = ConsolePrint ("## " +++ s +++ "\n") 999
+	printresult   = consolePrint ("## " +++ s +++ "\n") 999
 
-Iprint` :: !String !.a -> .a
-Iprint` s a 
+iprint` :: !String !.a -> .a
+iprint` s a 
 	| not (printresult == 0)  = a
 							  = abort ("Print failed: " +++ s)
 where
-	printresult   = ConsolePrint s 999
+	printresult   = consolePrint s 999
 
-ConsolePrint ::  !{#Char} !*OSToolbox ->  *OSToolbox
-ConsolePrint _ _
+consolePrint ::  !{#Char} !*OSToolbox ->  *OSToolbox
+consolePrint _ _
 	= code
 	{
 		.inline ConsolePrint
@@ -167,8 +169,8 @@ ConsolePrint _ _
  //  Synchronisation operations between the Clean thread and OS thread  //
 //---------------------------------------------------------------------//
 
-WinKickOsThread ::  !CrossCallInfo !*OSToolbox -> ( !CrossCallInfo, !*OSToolbox)
-WinKickOsThread _ _
+winKickOsThread ::  !CrossCallInfo !*OSToolbox -> ( !CrossCallInfo, !*OSToolbox)
+winKickOsThread _ _
 	= code
 	{
 		.inline WinKickOsThread
@@ -176,8 +178,8 @@ WinKickOsThread _ _
 		.end
 	}
 
-WinKillOsThread ::  !*OSToolbox ->  *OSToolbox
-WinKillOsThread _
+winKillOsThread ::  !*OSToolbox ->  *OSToolbox
+winKillOsThread _
 	= code
 	{
 		.inline WinKillOsThread
@@ -185,8 +187,8 @@ WinKillOsThread _
 		.end
 	}
 
-WinStartOsThread ::  !*OSToolbox ->  *OSToolbox
-WinStartOsThread _
+winStartOsThread ::  !*OSToolbox ->  *OSToolbox
+winStartOsThread _
 	= code
 	{
 		.inline WinStartOsThread
@@ -194,8 +196,8 @@ WinStartOsThread _
 		.end
 	}
 
-WinCloseOs ::  !*OSToolbox ->  Bool
-WinCloseOs _
+winCloseOs ::  !*OSToolbox ->  Bool
+winCloseOs _
 	= code
 	{
 		.inline WinCloseOs
@@ -203,8 +205,8 @@ WinCloseOs _
 		.end
 	}
 
-WinInitOs :: ( !Bool, !*OSToolbox)
-WinInitOs
+winInitOs :: ( !Bool, !*OSToolbox)
+winInitOs
 	= code
 	{
 		.inline WinInitOs
@@ -347,7 +349,7 @@ CcRqINSERTMENUITEM			:== 1205
 CcRqDOMESSAGE				:== 1100
 
   //------------------------------------------------------------------------//
- //  The message numbers for communication from OS to Clean (ccMsg field)  //
+ //  The message numbers for communication from OS to Clean (CcMsg field)  //
 //------------------------------------------------------------------------//
 CcWINMESSmax				:== 999
 

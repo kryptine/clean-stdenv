@@ -32,9 +32,9 @@ from	ostypes				import HWND
 		,	menuClient		:: !HWND
 		}
 
-/*	Before using OSopenMDI, OSopenSDI, or OScloseOSDInfo evaluate OSinitialiseDI.
+/*	Before using osOpenMDI, osOpenSDI, or osCloseOSDInfo evaluate osInitialiseDI.
 */
-OSinitialiseDI :: !*OSToolbox -> *OSToolbox
+osInitialiseDI :: !*OSToolbox -> *OSToolbox
 
 /*	emptyOSDInfo creates a OSDInfo with dummy values for the argument document interface.
 */
@@ -56,16 +56,16 @@ setOSDInfoOSMenuBar :: !OSMenuBar !OSDInfo -> OSDInfo
 getOSDInfoOSInfo ::         !OSDInfo -> Maybe OSInfo
 setOSDInfoOSInfo :: !OSInfo !OSDInfo -> OSDInfo
 
-/*	OSopenMDI  creates  the infrastructure of a MDI process.
+/*	osOpenMDI  creates  the infrastructure of a MDI process.
 		If the first Bool argument is True, then the frame window is shown, otherwise it is hidden.
 		The second Bool indicates whether the process accepts file open events.
-	OSopenSDI  creates the infrastructure of a SDI process.
+	osOpenSDI  creates the infrastructure of a SDI process.
 		The Bool argument indicates whether the process accepts file open events.
-	OScloseOSDInfo destroys the infrastructure.
+	osCloseOSDInfo destroys the infrastructure.
 */
-OSopenMDI     :: !Bool !Bool !*OSToolbox -> (!OSDInfo,!*OSToolbox)
-OSopenSDI     ::       !Bool !*OSToolbox -> (!OSDInfo,!*OSToolbox)
-OScloseOSDInfo:: !OSDInfo    !*OSToolbox -> *OSToolbox
+osOpenMDI     :: !Bool !Bool !*OSToolbox -> (!OSDInfo,!*OSToolbox)
+osOpenSDI     ::       !Bool !*OSToolbox -> (!OSDInfo,!*OSToolbox)
+osCloseOSDInfo:: !OSDInfo    !*OSToolbox -> *OSToolbox
 
 /*	getOSDInfoOSToolbar retrieves the OSToolbar, if any.
 */

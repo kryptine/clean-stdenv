@@ -53,35 +53,35 @@ instance Ids World where
 instance Ids (IOSt .l) where
 	openId :: !*(IOSt .l) -> (!Id, !*IOSt .l)
 	openId ioState
-		# (idseed,ioState)	= IOStGetIdSeed ioState
-		= (toId idseed,IOStSetIdSeed (idseed-1) ioState)
+		# (idseed,ioState)	= ioStGetIdSeed ioState
+		= (toId idseed,ioStSetIdSeed (idseed-1) ioState)
 	
 	openIds :: !Int !*(IOSt .l) -> (![Id], !*IOSt .l)
 	openIds n ioState
-		# (idseed,ioState)	= IOStGetIdSeed ioState
-		= ([toId nr \\ nr<-[idseed-n+1..idseed]],IOStSetIdSeed (idseed-n) ioState)
+		# (idseed,ioState)	= ioStGetIdSeed ioState
+		= ([toId nr \\ nr<-[idseed-n+1..idseed]],ioStSetIdSeed (idseed-n) ioState)
 	
 	
 	openRId :: !*(IOSt .l) -> (!RId m, !*IOSt .l)
 	openRId ioState
-		# (idseed,ioState)	= IOStGetIdSeed ioState
-		= (toRId idseed,IOStSetIdSeed (idseed-1) ioState)
+		# (idseed,ioState)	= ioStGetIdSeed ioState
+		= (toRId idseed,ioStSetIdSeed (idseed-1) ioState)
 	
 	openRIds :: !Int !*(IOSt .l) -> (![RId m], !*IOSt .l)
 	openRIds n ioState
-		# (idseed,ioState)	= IOStGetIdSeed ioState
-		= ([toRId nr \\ nr<-[idseed-n+1..idseed]],IOStSetIdSeed (idseed-n) ioState)
+		# (idseed,ioState)	= ioStGetIdSeed ioState
+		= ([toRId nr \\ nr<-[idseed-n+1..idseed]],ioStSetIdSeed (idseed-n) ioState)
 	
 	
 	openR2Id :: !*(IOSt .l) -> (!R2Id m r, !*IOSt .l)
 	openR2Id ioState
-		# (idseed,ioState)	= IOStGetIdSeed ioState
-		= (toR2Id idseed,IOStSetIdSeed (idseed-1) ioState)
+		# (idseed,ioState)	= ioStGetIdSeed ioState
+		= (toR2Id idseed,ioStSetIdSeed (idseed-1) ioState)
 	
 	openR2Ids :: !Int !*(IOSt .l) -> (![R2Id m r], !*IOSt .l)
 	openR2Ids n ioState
-		# (idseed,ioState)	= IOStGetIdSeed ioState
-		= ([toR2Id nr \\ nr<-[idseed-n+1..idseed]],IOStSetIdSeed (idseed-n) ioState)
+		# (idseed,ioState)	= ioStGetIdSeed ioState
+		= ([toR2Id nr \\ nr<-[idseed-n+1..idseed]],ioStSetIdSeed (idseed-n) ioState)
 
 instance Ids (PSt .l) where
 	openId      pSt			= accPIO  openId       pSt
@@ -94,9 +94,9 @@ instance Ids (PSt .l) where
 
 getParentId :: !Id !(IOSt .l) -> (!Maybe Id,!IOSt .l)
 getParentId id ioState
-	# (idTable,ioState)		= IOStGetIdTable ioState
+	# (idTable,ioState)		= ioStGetIdTable ioState
 	  (maybeParent,idTable)	= getIdParent id idTable
-	# ioState				= IOStSetIdTable idTable ioState
+	# ioState				= ioStSetIdTable idTable ioState
 	| isNothing maybeParent
 		= (Nothing,ioState)
 	| otherwise

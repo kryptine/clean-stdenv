@@ -2,7 +2,7 @@ implementation module ostime
 
 //	Clean Object I/O library, version 1.2
 
-import	StdClass, StdInt, StdOverloaded
+import	StdBool, StdClass, StdInt, StdOverloaded
 import	ostoolbox
 
 ::	OSTime
@@ -10,44 +10,42 @@ import	ostoolbox
 
 OSMaxTickCount	:==	2^31-1
 
-OSMaxTime :: OSTime
-OSMaxTime = OSTime OSMaxTickCount
+osMaxTime :: OSTime
+osMaxTime = OSTime OSMaxTickCount
 
-OSGetTime :: !*OSToolbox -> (!OSTime,!*OSToolbox)
-OSGetTime tb
-	# (tickcount,tb)	= GetMessageTime tb
+osGetTime :: !*OSToolbox -> (!OSTime,!*OSToolbox)
+osGetTime tb
+	# (tickcount,tb)	= getMessageTime tb
 	= (OSTime tickcount,tb)
 where
-	GetMessageTime :: !*OSToolbox -> (!Int,!*OSToolbox)
-	GetMessageTime tb = WinGetTickCount tb
+	getMessageTime :: !*OSToolbox -> (!Int,!*OSToolbox)
+	getMessageTime tb = winGetTickCount tb
 
-OSWait :: !Int .x !*OSToolbox -> (.x,!*OSToolbox)
-OSWait delay x tb
-	= (x,WinWait delay tb)
+osWait :: !Int .x !*OSToolbox -> (.x,!*OSToolbox)
+osWait delay x tb
+	= (x,winWait delay tb)
 
-OSGetBlinkInterval :: !*OSToolbox -> (!Int,!*OSToolbox)
-OSGetBlinkInterval tb
-	= WinGetBlinkTime tb
+osGetBlinkInterval :: !*OSToolbox -> (!Int,!*OSToolbox)
+osGetBlinkInterval tb
+	= winGetBlinkTime tb
 
-OSGetCurrentTime :: !*OSToolbox -> (!(!Int,!Int,!Int),!*OSToolbox)
-OSGetCurrentTime tb
-	= WinGetTime tb
+osGetCurrentTime :: !*OSToolbox -> (!(!Int,!Int,!Int),!*OSToolbox)
+osGetCurrentTime tb
+	= winGetTime tb
 
-OSGetCurrentDate :: !*OSToolbox -> (!(!Int,!Int,!Int,!Int),!*OSToolbox)
-OSGetCurrentDate tb
-	= WinGetDate tb
+osGetCurrentDate :: !*OSToolbox -> (!(!Int,!Int,!Int,!Int),!*OSToolbox)
+osGetCurrentDate tb
+	= winGetDate tb
 
 instance - OSTime where
 	(-) :: !OSTime !OSTime -> OSTime
 	(-) (OSTime new) (OSTime old)
-		| old<=new
-			= OSTime (new-old)
-			= OSTime (OSMaxTickCount-old+new)
+		| old<=new	= OSTime (new-old)
+		| otherwise	= OSTime (OSMaxTickCount-old+new)
 
 instance < OSTime where
 	(<) :: !OSTime !OSTime -> Bool
-	(<) (OSTime t1) (OSTime t2)
-		= t1<t2
+	(<) (OSTime t1) (OSTime t2) = t1<t2
 
 instance toInt OSTime where
 	toInt :: !OSTime -> Int
@@ -58,8 +56,8 @@ instance fromInt OSTime where
 	fromInt t = OSTime (max 0 t)
 
 
-WinGetTime :: !*OSToolbox -> (!(!Int,!Int,!Int),!*OSToolbox)
-WinGetTime tb
+winGetTime :: !*OSToolbox -> (!(!Int,!Int,!Int),!*OSToolbox)
+winGetTime tb
 	= code
 	{
 		.inline WinGetTime
@@ -67,8 +65,8 @@ WinGetTime tb
 		.end
 	}
 
-WinGetDate :: !*OSToolbox -> (!(!Int,!Int,!Int,!Int),!*OSToolbox)
-WinGetDate tb
+winGetDate :: !*OSToolbox -> (!(!Int,!Int,!Int,!Int),!*OSToolbox)
+winGetDate tb
 	= code
 	{
 		.inline WinGetDate
@@ -76,8 +74,8 @@ WinGetDate tb
 		.end
 	}
 
-WinWait :: !Int !*OSToolbox -> *OSToolbox
-WinWait i tb
+winWait :: !Int !*OSToolbox -> *OSToolbox
+winWait i tb
 	= code
 	{
 		.inline WinWait
@@ -85,8 +83,8 @@ WinWait i tb
 		.end
 	}
 
-WinGetBlinkTime :: !*OSToolbox -> (!Int,!*OSToolbox)
-WinGetBlinkTime tb
+winGetBlinkTime :: !*OSToolbox -> (!Int,!*OSToolbox)
+winGetBlinkTime tb
 	= code
 	{
 		.inline WinGetBlinkTime
@@ -94,8 +92,8 @@ WinGetBlinkTime tb
 		.end
 	}
 
-WinGetTickCount ::  !*OSToolbox -> (!Int, !*OSToolbox)
-WinGetTickCount _
+winGetTickCount ::  !*OSToolbox -> (!Int, !*OSToolbox)
+winGetTickCount _
 	= code
 	{
 		.inline WinGetTickCount

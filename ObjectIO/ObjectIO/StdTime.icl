@@ -4,7 +4,7 @@ implementation module StdTime
 
 //	Time related operations
 
-import	StdClass, StdFunc, StdInt, StdReal
+import	StdBool, StdClass, StdFunc, StdInt, StdReal
 import	ostime, ossystem, /*MW11++*/ ostick
 
 ::	Time
@@ -24,22 +24,10 @@ import	ostime, ossystem, /*MW11++*/ ostick
 wait :: !Int .x -> .x
 wait nrTicks x
 	| nrTicks<=0
-	= x
-	#! (x,_)	= OSWait nrTicks x OSNewToolbox
-	= x
-/* Macintosh version of OSWait:
-OSWait :: !Int .x !*OSToolbox -> (.x,!*OSToolbox)
-OSWait delay x tb
-	# (now,tb)	= TickCount tb
-	= waitticks now delay tb x
-where
-	waitticks :: !Int !Int .x !*OSToolbox -> (.x,!*OSToolbox)
-	waitticks then delay x tb
-		# (now,tb) = TickCount tb
-		| now-then>=delay
-		= (x,tb)
-		= waitticks then delay x tb
-*/
+		= x
+	| otherwise
+		#! (x,_)	= osWait nrTicks x OSNewToolbox
+		= x
 
 // MW11..
 instance < Tick
@@ -67,7 +55,7 @@ class TimeEnv env where
 instance TimeEnv World where
 	getBlinkInterval :: !*World -> (!Int,!*World)
 	getBlinkInterval world
-		# (msec,_)	= OSGetBlinkInterval OSNewToolbox
+		# (msec,_)	= osGetBlinkInterval OSNewToolbox
 		| OStickspersecond==1000
 		= (msec,world)
 		# tsec		= (toInt ((toReal msec)/1000.0))*OStickspersecond
@@ -75,11 +63,11 @@ instance TimeEnv World where
 	
 	getCurrentTime :: !*World -> (!Time,!*World)
 	getCurrentTime world
-		# ((hours,minutes,seconds),_)	= OSGetCurrentTime OSNewToolbox
+		# ((hours,minutes,seconds),_)	= osGetCurrentTime OSNewToolbox
 		= ({hours=hours,minutes=minutes,seconds=seconds},world)
 	/*	Macintosh version:
-	OSGetCurrentTime :: !*OSToolbox -> (!(!Int,!Int,!Int),!*OSToolbox)
-	OSGetCurrentTime tb
+	osGetCurrentTime :: !*OSToolbox -> (!(!Int,!Int,!Int),!*OSToolbox)
+	osGetCurrentTime tb
 		# (time,tb)					= LoadLong TimeLoc tb
 		# (hours,minutes,seconds,tb)= Secs2Time time tb
 		= ((hours,minutes,seconds),tb)
@@ -87,11 +75,11 @@ instance TimeEnv World where
 	
 	getCurrentDate :: !*World -> (!Date,!*World)
 	getCurrentDate world
-		# ((year,month,day,dayOfWeek),_)	= OSGetCurrentDate OSNewToolbox
+		# ((year,month,day,dayOfWeek),_)	= osGetCurrentDate OSNewToolbox
 		= ({year=year,month=month,day=day,dayNr=dayOfWeek},world)
 	/*	Macintosh version:
-	OSGetCurrentDate :: !*OSToolbox -> (!(!Int,!Int,!Int,!Int),!*OSToolbox)
-	OSGetCurrentDate tb
+	osGetCurrentDate :: !*OSToolbox -> (!(!Int,!Int,!Int,!Int),!*OSToolbox)
+	osGetCurrentDate tb
 		# (time,tb)					= LoadLong TimeLoc tb
 		# (year,month,day,dayNr,tb)	= Secs2Date time tb
 		= ((year,month,day,dayNr),tb)

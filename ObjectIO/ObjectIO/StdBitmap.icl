@@ -16,7 +16,7 @@ openBitmap name env
 	# (ok,file,env)		= fopen name FReadData env
 	| not ok
 		= (Nothing,env)
-	# (ok,osBitmap,file)= OSreadBitmap file
+	# (ok,osBitmap,file)= osReadBitmap file
     # (_,env)			= fclose file env
     | not ok
     	= (Nothing,env)
@@ -25,21 +25,21 @@ openBitmap name env
 
 getBitmapSize :: !Bitmap -> Size
 getBitmapSize bitmap
-	= fromTuple (OSgetBitmapSize (fromBitmap bitmap))
+	= fromTuple (osGetBitmapSize (fromBitmap bitmap))
 
 resizeBitmap :: !Size !Bitmap -> Bitmap
 resizeBitmap size=:{w,h} bitmap
 	| w<0 || h<0
-		= Error "resizeBitmap" "StdBitmap" "a Size record with negative components was passed"
+		= error "resizeBitmap" "StdBitmap" "a Size record with negative components was passed"
 	| otherwise
-		= toBitmap (OSresizeBitmap (w,h) (fromBitmap bitmap))
+		= toBitmap (osResizeBitmap (w,h) (fromBitmap bitmap))
 
 instance Drawables Bitmap where
 	draw :: !Bitmap !*Picture -> *Picture
 	draw bitmap picture
 		# (origin,pen,toScreen,pictContext,tb)	= peekPicture picture
 		  (penPos,pen)							= getPenPenPos pen
-		# (pictContext,tb)						= OSdrawBitmap (fromBitmap bitmap) (toTuple penPos) (toTuple origin) toScreen pictContext tb
+		# (pictContext,tb)						= osDrawBitmap (fromBitmap bitmap) (toTuple penPos) (toTuple origin) toScreen pictContext tb
 		= unpeekPicture origin pen toScreen pictContext tb
 	where
 		getPenPenPos :: !*Pen -> (!Point2,!*Pen)
@@ -48,17 +48,17 @@ instance Drawables Bitmap where
 	drawAt :: !Point2 !Bitmap !*Picture -> *Picture
 	drawAt pos bitmap picture
 		# (origin,pen,toScreen,pictContext,tb)	= peekPicture picture
-		# (pictContext,tb)						= OSdrawBitmap (fromBitmap bitmap) (toTuple pos) (toTuple origin) toScreen pictContext tb
+		# (pictContext,tb)						= osDrawBitmap (fromBitmap bitmap) (toTuple pos) (toTuple origin) toScreen pictContext tb
 		= unpeekPicture origin pen toScreen pictContext tb
 	
 	undraw :: !Bitmap !*Picture -> *Picture
 	undraw bitmap picture
 		= unfill {box_w=w,box_h=h} picture
 	where
-		(w,h)	= OSgetBitmapSize (fromBitmap bitmap)
+		(w,h)	= osGetBitmapSize (fromBitmap bitmap)
 	
 	undrawAt :: !Point2 !Bitmap !*Picture -> *Picture
 	undrawAt pos bitmap picture
 		= unfillAt pos {box_w=w,box_h=h} picture
 	where
-		(w,h)	= OSgetBitmapSize (fromBitmap bitmap)
+		(w,h)	= osGetBitmapSize (fromBitmap bitmap)

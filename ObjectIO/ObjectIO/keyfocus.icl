@@ -26,7 +26,7 @@ eqFocusItemNr nr {focusNr} = nr==focusNr
 
 newFocusItems :: !*[FocusItem] -> *KeyFocus
 newFocusItems items
-	# (found,item,items) = USelect isShownFocusItem undef items
+	# (found,item,items) = ucselect isShownFocusItem undef items
 	= {	kfItem = if found (Just item.focusNr) Nothing
 	  ,	kfItems= items
 	  }
@@ -69,7 +69,7 @@ where
 	closeFocusItems` [] _
 		= []
 	closeFocusItems` nrs [item:items]
-		# (found,nrs)	= RemoveCheck item.focusNr nrs
+		# (found,nrs)	= removeCheck item.focusNr nrs
 		| found
 			= closeFocusItems` nrs items
 		| otherwise
@@ -85,7 +85,7 @@ setShowFocusItems show [] _
 setShowFocusItems show _ []
 	= []
 setShowFocusItems show nrs [item:items]
-	# (found,nrs)	= RemoveCheck item.focusNr nrs
+	# (found,nrs)	= removeCheck item.focusNr nrs
 	| found
 		= [{item & focusShow=show}:setShowFocusItems show nrs items]
 	| otherwise
@@ -111,20 +111,20 @@ setNewFocusItem new kf
 setNextFocusItem :: !(Maybe Int) !*KeyFocus -> (!Maybe Int,!*KeyFocus)
 setNextFocusItem (Just behind) kf=:{kfItems}
 	# (before,item_after)		= span (not o (eqFocusItemNr behind)) kfItems
-	# (no_after,item_after)		= u_isEmpty item_after
+	# (no_after,item_after)		= uisEmpty item_after
 	| no_after
 		= (Nothing,{kf & kfItems=before})
-	# (a,tl_item_after)			= HdTl item_after
-	# (found,item,tl_item_after)= USelect isShownFocusItem undef tl_item_after
+	# (a,tl_item_after)			= hdtl item_after
+	# (found,item,tl_item_after)= ucselect isShownFocusItem undef tl_item_after
 	| found
 		= (Just item.focusNr,{kf & kfItem=Just item.focusNr,kfItems=before++[a:tl_item_after]})
-	# (found,item,before)		= USelect isShownFocusItem undef before
+	# (found,item,before)		= ucselect isShownFocusItem undef before
 	| found
 		= (Just item.focusNr,{kf & kfItem=Just item.focusNr,kfItems=before++[a:tl_item_after]})
 	| otherwise
 		= (Nothing,{kf & kfItems=before++[a:tl_item_after]})
 setNextFocusItem _ kf=:{kfItems}
-	# (found,item,items)		= USelect isShownFocusItem undef kfItems
+	# (found,item,items)		= ucselect isShownFocusItem undef kfItems
 	| not found
 		= (Nothing,{kf & kfItem=Nothing,kfItems=items})
 	| otherwise

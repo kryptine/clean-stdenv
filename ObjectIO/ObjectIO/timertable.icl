@@ -35,7 +35,6 @@ identifyTimerTableEntry :: !TimerLoc !TimerTableEntry -> Bool
 identifyTimerTableEntry loc tte=:{tteLoc} = loc==tteLoc
 
 instance == TimerLoc where
-	(==) :: !TimerLoc !TimerLoc -> Bool
 	(==) tt1 tt2 = tt1.tlIOId == tt2.tlIOId
 					&&
 				   tt1.tlDevice == tt2.tlDevice
@@ -69,7 +68,7 @@ removeTimerFromTimerTable :: !TimerLoc !*TimerTable -> (!Bool,!*TimerTable)
 removeTimerFromTimerTable loc timers
 	= (found,timers`)
 where
-	(found,_,timers`) = Remove (identifyTimerTableEntry loc) undef timers
+	(found,_,timers`) = remove (identifyTimerTableEntry loc) undef timers
 
 /*	setIntervalInTimerTable changes the timerinterval of the given timer in the TimerTable.
 	If the timer was not present in the table, then nothing happens (the Boolean result is False).

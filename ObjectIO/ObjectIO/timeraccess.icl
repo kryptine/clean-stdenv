@@ -6,11 +6,12 @@ implementation module timeraccess
 
 import	StdBool, StdTuple
 import	devicesystemstate, timerhandle, timertable
-from	commondef	import FatalError, StateMap2
+from	commondef	import fatalError, stateMap2
 
 
 timeraccessFatalError :: String String -> .x
-timeraccessFatalError function error = FatalError function "timeraccess" error
+timeraccessFatalError function error
+	= fatalError function "timeraccess" error
 
 
 /*	bindTimerElementIds binds all unbound R(2)Ids and Ids that can be located in the list of TimerElementStates.
@@ -67,7 +68,7 @@ bindTimerElementIds _ _ [] rt it
 unbindTimerElementIds :: !SystemId !*[*TimerElementHandle .ls .pst] !(!*TimerTable,!*ReceiverTable,!*IdTable)
 																  -> (!*TimerTable,!*ReceiverTable,!*IdTable)
 unbindTimerElementIds pid itemHs tables
-	= StateMap2 unbindTimerElementIds` itemHs tables
+	= stateMap2 unbindTimerElementIds` itemHs tables
 where
 	unbindTimerElementIds` :: !*(TimerElementHandle .ls .pst) !(!*TimerTable,!*ReceiverTable,!*IdTable)
 															-> (!*TimerTable,!*ReceiverTable,!*IdTable)
@@ -76,15 +77,15 @@ where
 	where
 		teLoc	= {tlIOId=pid,tlDevice=TimerDevice,tlParentId=rId,tlTimerId=rId}
 	unbindTimerElementIds` (TimerListLSHandle tListItems) tables
-		= StateMap2 unbindTimerElementIds` tListItems tables
+		= stateMap2 unbindTimerElementIds` tListItems tables
 	unbindTimerElementIds` (TimerElimLSHandle tElimItems) tables
-		= StateMap2 unbindTimerElementIds` tElimItems tables
+		= stateMap2 unbindTimerElementIds` tElimItems tables
 	unbindTimerElementIds` (TimerIntroLSHandle {tIntroItems}) tables
-		= StateMap2 unbindTimerElementIds` tIntroItems tables
+		= stateMap2 unbindTimerElementIds` tIntroItems tables
 	unbindTimerElementIds` (TimerExtendLSHandle {tExtendItems}) tables
-		= StateMap2 unbindTimerElementIds` tExtendItems tables
+		= stateMap2 unbindTimerElementIds` tExtendItems tables
 	unbindTimerElementIds` (TimerChangeLSHandle {tChangeItems}) tables
-		= StateMap2 unbindTimerElementIds` tChangeItems tables
+		= stateMap2 unbindTimerElementIds` tChangeItems tables
 
 identifyTimerStateHandle :: !Id !*(TimerStateHandle .pst) -> *(!Bool,!*TimerStateHandle .pst)
 identifyTimerStateHandle id tlsH=:(TimerLSHandle {tHandle={tId}})

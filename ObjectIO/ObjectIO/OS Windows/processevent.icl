@@ -10,16 +10,16 @@ implementation module processevent
 
 import	StdArray, StdBool, StdList
 from	clCrossCall_12	import CcWmDDEEXECUTE, CcWmPROCESSCLOSE, CcWmPROCESSDROPFILES
-from	clCCall_12		import WinGetCStringAndFree, CSTR
+from	clCCall_12		import winGetCStringAndFree, CSTR
 from	ostypes			import OSNoWindowPtr, OSWindowPtr
 import	deviceevents, iostate
-from	commondef		import FatalError
+from	commondef		import fatalError
 from	processstack	import topShowProcessShowState
 
 
 processeventFatalError :: String String -> .x
 processeventFatalError function error
-	= FatalError function "processevent" error
+	= fatalError function "processevent" error
 
 
 /*	processEvent filters the scheduler events that can be handled by this process device.
@@ -29,10 +29,10 @@ processEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!Schedule
 
 processEvent schedulerEvent=:(ScheduleOSEvent osEvent=:{ccMsg} _) pState=:{io=ioState}
 	| isProcessOSEvent ccMsg
-		# (processStack,ioState)		= IOStGetProcessStack ioState
+		# (processStack,ioState)		= ioStGetProcessStack ioState
 		  (found,systemId)				= topShowProcessShowState processStack
-		# (ioId,ioState)				= IOStGetIOId ioState
-		# (osdInfo,ioState)				= IOStGetOSDInfo ioState
+		# (ioId,ioState)				= ioStGetIOId ioState
+		# (osdInfo,ioState)				= ioStGetOSDInfo ioState
 		# (tb,ioState)					= getIOToolbox ioState
 		# (myEvent,replyToOS,deviceEvent,tb)
 		  								= filterOSEvent osEvent (found && systemId==ioId) osdInfo tb
@@ -62,7 +62,7 @@ filterOSEvent {ccMsg=CcWmDDEEXECUTE,p1=cString} isActive _ tb
 	| not isActive
 		= (False,Nothing,Nothing,tb)
 	| otherwise
-		# (fName,tb)	= WinGetCStringAndFree cString tb
+		# (fName,tb)	= winGetCStringAndFree cString tb
 		= (True,Nothing,Just (ProcessRequestOpenFiles [fName]),tb)
 
 filterOSEvent {ccMsg=CcWmPROCESSCLOSE,p1=framePtr} _ osdInfo tb
@@ -75,7 +75,7 @@ filterOSEvent {ccMsg=CcWmPROCESSDROPFILES,p1=framePtr,p2=cString} _ osdInfo tb
 	| framePtr<>getOSDInfoFramePtr osdInfo
 		= (False,Nothing,Nothing,tb)
 	| otherwise
-		# (allNames,tb)	= WinGetCStringAndFree cString tb
+		# (allNames,tb)	= winGetCStringAndFree cString tb
 		  allNames		= if (allNames.[size allNames-1]=='\n') allNames (allNames+++"\n")
 		= (True,Nothing,Just (ProcessRequestOpenFiles (filter ((<>) "") (getFileNames 0 0 (size allNames) allNames []))),tb)
 where

@@ -5,12 +5,12 @@ implementation module roundrobin
 
 
 import	StdList, StdString
-from	commondef	import FatalError
+from	commondef	import fatalError
 
 
 roundrobinFatalError :: String String -> .x
 roundrobinFatalError rule error
-	= FatalError rule "roundrobin" error
+	= fatalError rule "roundrobin" error
 
 ::	RR x
 	=	{	done:: !.[x]		// The elements that are done (in reverse order)
@@ -39,8 +39,12 @@ notodoRR rr=:{todo=[]}			= (True, rr)
 notodoRR rr						= (False,rr)
 
 resetRR :: !u:(RR .x) -> u:RR .x
-resetRR {done=[x:xs],todo}		= resetRR {done=xs,todo=[x:todo]}
-resetRR rr						= rr
+resetRR {done,todo}
+	= {done=[],todo=resetRR` done todo}
+where
+	resetRR` :: !u:[v:x] !u:[v:x] -> u:[v:x], [u<=v]
+	resetRR` [x:xs] todo = resetRR` xs [x:todo]
+	resetRR` []     todo = todo
 
 adddoneRR :: .x !u:(RR .x) -> u:RR .x
 adddoneRR x rr=:{done}			= {rr & done=[x:done]}

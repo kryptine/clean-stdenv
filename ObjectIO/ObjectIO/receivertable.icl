@@ -57,7 +57,7 @@ removeReceiverFromReceiverTable :: !Id !*ReceiverTable -> (!Bool,!*ReceiverTable
 removeReceiverFromReceiverTable rid receivers
 	= (found,receivers`)
 where
-	(found,_,receivers`) = Remove (\{rteLoc}->eqReceiverId rid rteLoc) undef receivers
+	(found,_,receivers`) = remove (\{rteLoc}->eqReceiverId rid rteLoc) undef receivers
 
 
 /*	getReceiverTableEntry returns the receiver identified by Id from the ReceiverTable.

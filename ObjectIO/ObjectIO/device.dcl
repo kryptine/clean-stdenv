@@ -16,10 +16,4 @@ instance ==			Device
 instance toString	Device
 
 priorityDevice :: !Device -> Int
-Devices							// The device list in order of descending priority
-	:== [	ReceiverDevice
-		,	TimerDevice
-		,	MenuDevice
-		,	WindowDevice
-		,	ProcessDevice
-		]
+devices :: [Device]				// The device list in order of descending priority

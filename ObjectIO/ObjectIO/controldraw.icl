@@ -8,7 +8,7 @@ implementation module controldraw
 from	ospicture		import packPicture, unpackPicture, pictsetcliprgn, copyPen
 from	osrgn			import osnewrectrgn, osdisposergn, ossectrgn
 from	ossystem		import OSWindowMetrics
-from	oswindow		import OSgrabWindowPictContext, OSreleaseWindowPictContext, OSscrollbarsAreVisible
+from	oswindow		import osGrabWindowPictContext, osReleaseWindowPictContext, osScrollbarsAreVisible
 import	commondef, wstate
 from	windowaccess	import getWItemCompoundInfo,  getWItemCustomButtonInfo,  getWItemCustomInfo, getCompoundContentRect
 from	wstateaccess	import getWItemCompoundInfo`, getWItemCustomButtonInfo`, getWItemCustomInfo`
@@ -28,13 +28,13 @@ drawCompoundLook :: !OSWindowMetrics !Bool !OSWindowPtr !Rect !(WItemHandle .ls 
 drawCompoundLook wMetrics able wPtr contextClip itemH=:{wItemInfo} tb
 	#! (contextRgn,tb)				= osnewrectrgn contextClip tb
 	#! (clipRgn,tb)					= ossectrgn contextRgn itemClip.clipRgn tb
-	#! (osPict,tb)					= OSgrabWindowPictContext wPtr tb
+	#! (osPict,tb)					= osGrabWindowPictContext wPtr tb
 	#! picture						= packPicture (origin-itemPos) (copyPen itemLook.lookPen) True osPict tb
 	#! picture						= pictsetcliprgn clipRgn picture
 	#! picture						= itemLook.lookFun selectState updState picture
 	#! (_,pen,_,osPict,tb)			= unpackPicture picture
-	#! tb							= OSreleaseWindowPictContext wPtr osPict tb
-	#! tb							= StateMap2 osdisposergn [contextRgn,clipRgn] tb
+	#! tb							= osReleaseWindowPictContext wPtr osPict tb
+	#! tb							= stateMap2 osdisposergn [contextRgn,clipRgn] tb
 	   info							= {info & compoundLookInfo={compoundLookInfo & compoundLook={itemLook & lookPen=pen}}}
 	= ({itemH & wItemInfo=CompoundInfo info},tb)
 where
@@ -42,10 +42,10 @@ where
 	itemSize						= itemH.wItemSize
 	info							= getWItemCompoundInfo wItemInfo
 	(origin,domainRect,hasScrolls)	= (info.compoundOrigin,info.compoundDomain,(isJust info.compoundHScroll,isJust info.compoundVScroll))
-	visScrolls						= OSscrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
-	contentRect						= getCompoundContentRect wMetrics visScrolls (PosSizeToRect origin itemSize)
-	clipRectangle					= RectToRectangle (addVector (toVector (origin-itemPos)) (IntersectRects (addVector (toVector (itemPos-origin)) contentRect) contextClip))
-	viewFrame						= RectToRectangle contentRect
+	visScrolls						= osScrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
+	contentRect						= getCompoundContentRect wMetrics visScrolls (posSizeToRect origin itemSize)
+	clipRectangle					= rectToRectangle (addVector (toVector (origin-itemPos)) (intersectRects (addVector (toVector (itemPos-origin)) contentRect) contextClip))
+	viewFrame						= rectToRectangle contentRect
 	updState						= {oldFrame=viewFrame,newFrame=viewFrame,updArea=[clipRectangle]}
 	compoundLookInfo				= info.compoundLookInfo
 	itemLook						= compoundLookInfo.compoundLook
@@ -56,13 +56,13 @@ drawCompoundLook` :: !OSWindowMetrics !Bool !OSWindowPtr !Rect !WItemHandle` !*O
 drawCompoundLook` wMetrics able wPtr contextClip itemH=:{wItemInfo`} tb
 	#! (contextRgn,tb)				= osnewrectrgn contextClip tb
 	#! (clipRgn,tb)					= ossectrgn contextRgn itemClip.clipRgn tb
-	#! (osPict,tb)					= OSgrabWindowPictContext wPtr tb
+	#! (osPict,tb)					= osGrabWindowPictContext wPtr tb
 	#! picture						= packPicture (origin-itemPos) (copyPen itemLook.lookPen) True osPict tb
 	#! picture						= pictsetcliprgn clipRgn picture
 	#! picture						= itemLook.lookFun selectState updState picture
 	#! (_,pen,_,osPict,tb)			= unpackPicture picture
-	#! tb							= OSreleaseWindowPictContext wPtr osPict tb
-	#! tb							= StateMap2 osdisposergn [contextRgn,clipRgn] tb
+	#! tb							= osReleaseWindowPictContext wPtr osPict tb
+	#! tb							= stateMap2 osdisposergn [contextRgn,clipRgn] tb
 	   info							= {info & compoundLookInfo={compoundLookInfo & compoundLook={itemLook & lookPen=pen}}}
 	= ({itemH & wItemInfo`=CompoundInfo` info},tb)
 where
@@ -70,10 +70,10 @@ where
 	itemSize						= itemH.wItemSize`
 	info							= getWItemCompoundInfo` wItemInfo`
 	(origin,domainRect,hasScrolls)	= (info.compoundOrigin,info.compoundDomain,(isJust info.compoundHScroll,isJust info.compoundVScroll))
-	visScrolls						= OSscrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
-	contentRect						= getCompoundContentRect wMetrics visScrolls (PosSizeToRect origin itemSize)
-	clipRectangle					= RectToRectangle (addVector (toVector (origin-itemPos)) (IntersectRects (addVector (toVector (itemPos-origin)) contentRect) contextClip))
-	viewFrame						= RectToRectangle contentRect
+	visScrolls						= osScrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
+	contentRect						= getCompoundContentRect wMetrics visScrolls (posSizeToRect origin itemSize)
+	clipRectangle					= rectToRectangle (addVector (toVector (origin-itemPos)) (intersectRects (addVector (toVector (itemPos-origin)) contentRect) contextClip))
+	viewFrame						= rectToRectangle contentRect
 	updState						= {oldFrame=viewFrame,newFrame=viewFrame,updArea=[clipRectangle]}
 	compoundLookInfo				= info.compoundLookInfo
 	itemLook						= compoundLookInfo.compoundLook
@@ -88,41 +88,41 @@ where
 drawCustomButtonLook :: !Bool !OSWindowPtr !Rect !(WItemHandle .ls .pst) !*OSToolbox -> (!WItemHandle .ls .pst,!*OSToolbox)
 drawCustomButtonLook able wPtr contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wItemSize} tb
 	#! (clipRgn,tb)			= osnewrectrgn contextClip tb
-	#! (osPict,tb)			= OSgrabWindowPictContext wPtr tb		// PA: use window HDC instead of control HDC because of clipstate
+	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb		// PA: use window HDC instead of control HDC because of clipstate
 	#! picture				= packPicture (zero-wItemPos) (copyPen itemLook.lookPen) True osPict tb
 	#! picture				= pictsetcliprgn clipRgn picture
 	#! picture				= appClipPicture (toRegion clipRectangle) (itemLook.lookFun selectState updState) picture
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
-	#! tb					= OSreleaseWindowPictContext wPtr osPict tb
+	#! tb					= osReleaseWindowPictContext wPtr osPict tb
 	#! tb					= osdisposergn clipRgn tb
 	   info					= CustomButtonInfo {info & cButtonInfoLook={itemLook & lookPen=pen}}
 	= ({itemH & wItemInfo=info},tb)
 where
 	info					= getWItemCustomButtonInfo wItemInfo
 	itemLook				= info.cButtonInfoLook
-	viewFrame				= SizeToRectangle wItemSize
+	viewFrame				= sizeToRectangle wItemSize
 	selectState				= if able Able Unable
-	clipRectangle			= RectToRectangle (IntersectRects (subVector (toVector wItemPos) contextClip) (SizeToRect wItemSize))
+	clipRectangle			= rectToRectangle (intersectRects (subVector (toVector wItemPos) contextClip) (sizeToRect wItemSize))
 	updState				= {oldFrame=viewFrame,newFrame=viewFrame,updArea=[clipRectangle]}
 
 drawCustomButtonLook` :: !Bool !OSWindowPtr !Rect !WItemHandle` !*OSToolbox -> (!WItemHandle`,!*OSToolbox)
 drawCustomButtonLook` able wPtr contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,wItemSize`} tb
 	#! (clipRgn,tb)			= osnewrectrgn contextClip tb
-	#! (osPict,tb)			= OSgrabWindowPictContext wPtr tb		// PA: use window HDC instead of control HDC because of clipstate
+	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb		// PA: use window HDC instead of control HDC because of clipstate
 	#! picture				= packPicture (zero-wItemPos`) (copyPen itemLook.lookPen) True osPict tb
 	#! picture				= pictsetcliprgn clipRgn picture
 	#! picture				= appClipPicture (toRegion clipRectangle) (itemLook.lookFun selectState updState) picture
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
-	#! tb					= OSreleaseWindowPictContext wPtr osPict tb
+	#! tb					= osReleaseWindowPictContext wPtr osPict tb
 	#! tb					= osdisposergn clipRgn tb
 	   info					= CustomButtonInfo` {info & cButtonInfoLook={itemLook & lookPen=pen}}
 	= ({itemH & wItemInfo`=info},tb)
 where
 	info					= getWItemCustomButtonInfo` wItemInfo`
 	itemLook				= info.cButtonInfoLook
-	viewFrame				= SizeToRectangle wItemSize`
+	viewFrame				= sizeToRectangle wItemSize`
 	selectState				= if able Able Unable
-	clipRectangle			= RectToRectangle (IntersectRects (subVector (toVector wItemPos`) contextClip) (SizeToRect wItemSize`))
+	clipRectangle			= rectToRectangle (intersectRects (subVector (toVector wItemPos`) contextClip) (sizeToRect wItemSize`))
 	updState				= {oldFrame=viewFrame,newFrame=viewFrame,updArea=[clipRectangle]}
 
 /*	drawCustomLook(`) able parentWindow itemH
@@ -133,41 +133,41 @@ where
 drawCustomLook :: !Bool !OSWindowPtr !Rect !(WItemHandle .ls .pst) !*OSToolbox -> (!WItemHandle .ls .pst,!*OSToolbox)
 drawCustomLook able wPtr contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wItemSize} tb
 	#! (clipRgn,tb)			= osnewrectrgn contextClip tb
-	#! (osPict,tb)			= OSgrabWindowPictContext wPtr tb		// PA: use window HDC instead of control HDC because of clipstate
+	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb		// PA: use window HDC instead of control HDC because of clipstate
 	#! picture				= packPicture (zero-wItemPos) (copyPen itemLook.lookPen) True osPict tb
 	#! picture				= pictsetcliprgn clipRgn picture
 	#! picture				= appClipPicture (toRegion clipRectangle) (itemLook.lookFun selectState updState) picture
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
-	#! tb					= OSreleaseWindowPictContext wPtr osPict tb
+	#! tb					= osReleaseWindowPictContext wPtr osPict tb
 	#! tb					= osdisposergn clipRgn tb
 	   info					= CustomInfo {info & customInfoLook={itemLook & lookPen=pen}}
 	= ({itemH & wItemInfo=info},tb)
 where
 	info					= getWItemCustomInfo wItemInfo
 	itemLook				= info.customInfoLook
-	viewFrame				= SizeToRectangle wItemSize
+	viewFrame				= sizeToRectangle wItemSize
 	selectState				= if able Able Unable
-	clipRectangle			= RectToRectangle (IntersectRects (subVector (toVector wItemPos) contextClip) (SizeToRect wItemSize))
+	clipRectangle			= rectToRectangle (intersectRects (subVector (toVector wItemPos) contextClip) (sizeToRect wItemSize))
 	updState				= {oldFrame=viewFrame,newFrame=viewFrame,updArea=[clipRectangle]}
 
 drawCustomLook` :: !Bool !OSWindowPtr !Rect !WItemHandle` !*OSToolbox -> (!WItemHandle`,!*OSToolbox)
 drawCustomLook` able wPtr contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,wItemSize`} tb
 	#! (clipRgn,tb)			= osnewrectrgn contextClip tb
-	#! (osPict,tb)			= OSgrabWindowPictContext wPtr tb		// PA: use window HDC instead of control HDC because of clipstate
+	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb		// PA: use window HDC instead of control HDC because of clipstate
 	#! picture				= packPicture (zero-wItemPos`) (copyPen itemLook.lookPen) True osPict tb
 	#! picture				= pictsetcliprgn clipRgn picture
 	#! picture				= appClipPicture (toRegion clipRectangle) (itemLook.lookFun selectState updState) picture
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
-	#! tb					= OSreleaseWindowPictContext wPtr osPict tb
+	#! tb					= osReleaseWindowPictContext wPtr osPict tb
 	#! tb					= osdisposergn clipRgn tb
 	   info					= CustomInfo` {info & customInfoLook={itemLook & lookPen=pen}}
 	= ({itemH & wItemInfo`=info},tb)
 where
 	info					= getWItemCustomInfo` wItemInfo`
 	itemLook				= info.customInfoLook
-	viewFrame				= SizeToRectangle wItemSize`
+	viewFrame				= sizeToRectangle wItemSize`
 	selectState				= if able Able Unable
-	clipRectangle			= RectToRectangle (IntersectRects (subVector (toVector wItemPos`) contextClip) (SizeToRect wItemSize`))
+	clipRectangle			= rectToRectangle (intersectRects (subVector (toVector wItemPos`) contextClip) (sizeToRect wItemSize`))
 	updState				= {oldFrame=viewFrame,newFrame=viewFrame,updArea=[clipRectangle]}
 
 
@@ -181,13 +181,13 @@ drawInCompound :: !OSWindowPtr !.(St *Picture .x) !Rect !(WItemHandle .ls .pst) 
 drawInCompound wPtr drawfun contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wItemSize} tb
 	#! (contextRgn,tb)			= osnewrectrgn contextClip tb
 	#! (clipRgn,tb)				= ossectrgn contextRgn compoundClip.clipRgn tb
-	#! (osPict,tb)				= OSgrabWindowPictContext wPtr tb		// PA: use window HDC instead of control HDC because of clipstate
+	#! (osPict,tb)				= osGrabWindowPictContext wPtr tb		// PA: use window HDC instead of control HDC because of clipstate
 	#! picture					= packPicture (origin-wItemPos) (copyPen compoundLook.lookPen) True osPict tb
 	#! picture					= pictsetcliprgn clipRgn picture
 	#! (x,picture)				= drawfun picture
 	#! (_,pen,_,osPict,tb)		= unpackPicture picture
-	#! tb						= OSreleaseWindowPictContext wPtr osPict tb
-	#! tb						= StateMap2 osdisposergn [contextRgn,clipRgn] tb
+	#! tb						= osReleaseWindowPictContext wPtr osPict tb
+	#! tb						= stateMap2 osdisposergn [contextRgn,clipRgn] tb
 	   info						= {info & compoundLookInfo={compoundLookInfo & compoundLook={compoundLook & lookPen=pen}}}
 	   itemH					= {itemH & wItemInfo=CompoundInfo info}
 	= (x,itemH,tb)
@@ -201,13 +201,13 @@ drawInCompound` :: !OSWindowPtr !.(St *Picture .x) !Rect !WItemHandle` !*OSToolb
 drawInCompound` wPtr drawfun contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,wItemSize`} tb
 	#! (contextRgn,tb)			= osnewrectrgn contextClip tb
 	#! (clipRgn,tb)				= ossectrgn contextRgn compoundClip.clipRgn tb
-	#! (osPict,tb)				= OSgrabWindowPictContext wPtr tb		// PA: use window HDC instead of control HDC because of clipstate
+	#! (osPict,tb)				= osGrabWindowPictContext wPtr tb		// PA: use window HDC instead of control HDC because of clipstate
 	#! picture					= packPicture (origin-wItemPos`) (copyPen compoundLook.lookPen) True osPict tb
 	#! picture					= pictsetcliprgn clipRgn picture
 	#! (x,picture)				= drawfun picture
 	#! (_,pen,_,osPict,tb)		= unpackPicture picture
-	#! tb						= OSreleaseWindowPictContext wPtr osPict tb
-	#! tb						= StateMap2 osdisposergn [contextRgn,clipRgn] tb
+	#! tb						= osReleaseWindowPictContext wPtr osPict tb
+	#! tb						= stateMap2 osdisposergn [contextRgn,clipRgn] tb
 	   info						= {info & compoundLookInfo={compoundLookInfo & compoundLook={compoundLook & lookPen=pen}}}
 	   itemH					= {itemH & wItemInfo`=CompoundInfo` info}
 	= (x,itemH,tb)
@@ -220,12 +220,12 @@ where
 drawInCustomButton :: !OSWindowPtr !.(St *Picture .x) !Rect !(WItemHandle .ls .ps) !*OSToolbox -> (.x,!WItemHandle .ls .ps,!*OSToolbox)
 drawInCustomButton wPtr drawfun contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wItemSize} tb
 	#! (clipRgn,tb)			= osnewrectrgn contextClip tb						// PA+++: clip also inside contextClip
-	#! (osPict,tb)			= OSgrabWindowPictContext wPtr tb
+	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb
 	#! picture				= packPicture (zero-wItemPos) (copyPen itemLook.lookPen) True osPict tb
 	#! picture				= pictsetcliprgn clipRgn picture					// PA+++: set new clipping region
-	#! (x,picture)			= accClipPicture (toRegion (SizeToRectangle wItemSize)) drawfun picture
+	#! (x,picture)			= accClipPicture (toRegion (sizeToRectangle wItemSize)) drawfun picture
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
-	#! tb					= OSreleaseWindowPictContext wPtr osPict tb
+	#! tb					= osReleaseWindowPictContext wPtr osPict tb
 	#! tb					= osdisposergn clipRgn tb							// PA+++: dispose clipping region
 	   info					= {info & cButtonInfoLook={itemLook & lookPen=pen}}
 	   itemH				= {itemH & wItemInfo=CustomButtonInfo info}
@@ -237,12 +237,12 @@ where
 drawInCustomButton` :: !OSWindowPtr !.(St *Picture .x) !Rect !WItemHandle` !*OSToolbox -> (.x,!WItemHandle`,!*OSToolbox)
 drawInCustomButton` wPtr drawfun contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,wItemSize`} tb
 	#! (clipRgn,tb)			= osnewrectrgn contextClip tb						// PA+++: clip also inside contextClip
-	#! (osPict,tb)			= OSgrabWindowPictContext wPtr tb
+	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb
 	#! picture				= packPicture (zero-wItemPos`) (copyPen itemLook.lookPen) True osPict tb
 	#! picture				= pictsetcliprgn clipRgn picture					// PA+++: set new clipping region
-	#! (x,picture)			= accClipPicture (toRegion (SizeToRectangle wItemSize`)) drawfun picture
+	#! (x,picture)			= accClipPicture (toRegion (sizeToRectangle wItemSize`)) drawfun picture
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
-	#! tb					= OSreleaseWindowPictContext wPtr osPict tb
+	#! tb					= osReleaseWindowPictContext wPtr osPict tb
 	#! tb					= osdisposergn clipRgn tb							// PA+++: dispose clipping region
 	   info					= {info & cButtonInfoLook={itemLook & lookPen=pen}}
 	   itemH				= {itemH & wItemInfo`=CustomButtonInfo` info}
@@ -254,12 +254,12 @@ where
 drawInCustom :: !OSWindowPtr !.(St *Picture .x) !Rect !(WItemHandle .ls .ps) !*OSToolbox -> (.x,!WItemHandle .ls .ps,!*OSToolbox)
 drawInCustom wPtr drawfun contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wItemSize} tb
 	#! (clipRgn,tb)			= osnewrectrgn contextClip tb						// PA+++: clip also inside contextClip
-	#! (osPict,tb)			= OSgrabWindowPictContext wPtr tb
+	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb
 	#! picture				= packPicture (zero-wItemPos) (copyPen itemLook.lookPen) True osPict tb
 	#! picture				= pictsetcliprgn clipRgn picture					// PA+++: set new clipping region
-	#! (x,picture)			= accClipPicture (toRegion (SizeToRectangle wItemSize)) drawfun picture
+	#! (x,picture)			= accClipPicture (toRegion (sizeToRectangle wItemSize)) drawfun picture
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
-	#! tb					= OSreleaseWindowPictContext wPtr osPict tb
+	#! tb					= osReleaseWindowPictContext wPtr osPict tb
 	#! tb					= osdisposergn clipRgn tb							// PA+++: dispose clipping region
 	   info					= {info & customInfoLook={itemLook & lookPen=pen}}
 	   itemH				= {itemH & wItemInfo=CustomInfo info}
@@ -271,12 +271,12 @@ where
 drawInCustom` :: !OSWindowPtr !.(St *Picture .x) !Rect !WItemHandle` !*OSToolbox -> (.x,!WItemHandle`,!*OSToolbox)
 drawInCustom` wPtr drawfun contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,wItemSize`} tb
 	#! (clipRgn,tb)			= osnewrectrgn contextClip tb						// PA+++: clip also inside contextClip
-	#! (osPict,tb)			= OSgrabWindowPictContext wPtr tb
+	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb
 	#! picture				= packPicture (zero-wItemPos`) (copyPen itemLook.lookPen) True osPict tb
 	#! picture				= pictsetcliprgn clipRgn picture					// PA+++: set new clipping region
-	#! (x,picture)			= accClipPicture (toRegion (SizeToRectangle wItemSize`)) drawfun picture
+	#! (x,picture)			= accClipPicture (toRegion (sizeToRectangle wItemSize`)) drawfun picture
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
-	#! tb					= OSreleaseWindowPictContext wPtr osPict tb
+	#! tb					= osReleaseWindowPictContext wPtr osPict tb
 	#! tb					= osdisposergn clipRgn tb							// PA+++: dispose clipping region
 	   info					= {info & customInfoLook={itemLook & lookPen=pen}}
 	   itemH				= {itemH & wItemInfo`=CustomInfo` info}

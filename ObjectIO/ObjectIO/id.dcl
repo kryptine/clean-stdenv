@@ -20,12 +20,12 @@ from	systemid	import SystemId
 		,	idpId		:: !Id				// Id of parent GUI object
 		}
 
-WindowMenuId			:: Id				// The Id of the WindowMenu
-WindowMenuRadioId		:: Id				// The Id of the WindowMenu Window list item
-WindowMenuCascadeId		:: Id				// The Id of the WindowMenu Cascade item
-WindowMenuTileHId		:: Id				// The Id of the WindowMenu Tile Horizontally item
-WindowMenuTileVId		:: Id				// The Id of the WindowMenu Tile Vertically   item
-WindowMenuSeparatorId	:: Id
+windowMenuId			:: Id				// The Id of the WindowMenu
+windowMenuRadioId		:: Id				// The Id of the WindowMenu Window list item
+windowMenuCascadeId		:: Id				// The Id of the WindowMenu Cascade item
+windowMenuTileHId		:: Id				// The Id of the WindowMenu Tile Horizontally item
+windowMenuTileVId		:: Id				// The Id of the WindowMenu Tile Vertically   item
+windowMenuSeparatorId	:: Id
 
 toId					:: !Int				-> Id
 toRId					:: !Int				-> RId  mess
@@ -43,8 +43,8 @@ instance ==	Id
 instance ==	(RId  mess)
 instance == (R2Id mess resp)
 
-RIdtoId					:: (RId  mess)		-> Id
-R2IdtoId				:: (R2Id mess resp)	-> Id
+rIdtoId					:: (RId  mess)		-> Id
+r2IdtoId				:: (R2Id mess resp)	-> Id
 
 instance toString	Id
 

@@ -10,7 +10,7 @@ from	iostate		import PSt, IOSt
 import	devicefunctions, windowhandle
 
 
-WindowFunctions			:: DeviceFunctions (PSt .l)
+windowFunctions			:: DeviceFunctions (PSt .l)
 
 windowStateSizeAction	:: !OSWindowMetrics !Bool !WindowSizeActionInfo !(WindowStateHandle .pst) !*OSToolbox
 																	 -> (!WindowStateHandle .pst, !*OSToolbox)

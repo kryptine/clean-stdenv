@@ -18,8 +18,8 @@ RGN_COPY			:== 5
 
 /*	PA: operations to create, modify and destroy regions.
 */
-WinCreateRectRgn :: !Int !Int !Int !Int !*OSToolbox -> (!HRGN,!*OSToolbox)
-WinCreateRectRgn _ _ _ _ _
+winCreateRectRgn :: !Int !Int !Int !Int !*OSToolbox -> (!HRGN,!*OSToolbox)
+winCreateRectRgn _ _ _ _ _
 	= code
 	{	
 		.inline WinCreateRectRgn
@@ -27,8 +27,8 @@ WinCreateRectRgn _ _ _ _ _
 		.end
 	}
 
-WinCreatePolygonRgn :: !Int !Int !Int !*OSToolbox -> (!HRGN,!*OSToolbox)
-WinCreatePolygonRgn _ _ _ _
+winCreatePolygonRgn :: !Int !Int !Int !*OSToolbox -> (!HRGN,!*OSToolbox)
+winCreatePolygonRgn _ _ _ _
 	= code
 	{	
 		.inline WinCreatePolygonRgn
@@ -36,8 +36,8 @@ WinCreatePolygonRgn _ _ _ _
 		.end
 	}
 
-WinSetRgnToRect :: !Int !Int !Int !Int !HRGN !*OSToolbox -> (!HRGN,!*OSToolbox)
-WinSetRgnToRect _ _ _ _ _ _
+winSetRgnToRect :: !Int !Int !Int !Int !HRGN !*OSToolbox -> (!HRGN,!*OSToolbox)
+winSetRgnToRect _ _ _ _ _ _
 	= code
 	{	
 		.inline WinSetRgnToRect
@@ -45,8 +45,8 @@ WinSetRgnToRect _ _ _ _ _ _
 		.end
 	}
 
-WinCombineRgn :: !HRGN !HRGN !HRGN !Int !*OSToolbox -> (!HRGN,!*OSToolbox)
-WinCombineRgn _ _ _ _ _
+winCombineRgn :: !HRGN !HRGN !HRGN !Int !*OSToolbox -> (!HRGN,!*OSToolbox)
+winCombineRgn _ _ _ _ _
 	= code
 	{	
 		.inline WinCombineRgn
@@ -54,8 +54,8 @@ WinCombineRgn _ _ _ _ _
 		.end
 	}
 
-WinGetRgnBox :: !HRGN !*OSToolbox -> (!Int,!Int,!Int,!Int,!Bool,!Bool,!*OSToolbox)
-WinGetRgnBox _ _
+winGetRgnBox :: !HRGN !*OSToolbox -> (!Int,!Int,!Int,!Int,!Bool,!Bool,!*OSToolbox)
+winGetRgnBox _ _
 	= code
 	{	
 		.inline WinGetRgnBox

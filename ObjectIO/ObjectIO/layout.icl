@@ -10,12 +10,12 @@ from	windowhandle	import LayoutInfo, LayoutFix, LayoutFun, LayoutFrame, Origin
 
 
 layoutError :: String String -> .x
-layoutError rule error
-	= Error rule "layout" error
+layoutError rule message
+	= error rule "layout" message
 
 layoutFatalError :: String String -> .x
-layoutFatalError rule error
-	= FatalError rule "layout" error
+layoutFatalError rule message
+	= fatalError rule "layout" message
 
 
 //	The data types used for calculating the layout:
@@ -55,7 +55,7 @@ removeRoot :: !Id ![Root] -> (!Bool,Root,![Root])
 removeRoot id [item:items]
 	| identifyRoot id item
 		= (True,item,items)
-	| Contains (identifyRelative id) item.rootTree
+	| contains (identifyRelative id) item.rootTree
 		= (True,item,items)
 	| otherwise
 		# (found,root,items)	= removeRoot id items
@@ -72,7 +72,7 @@ getLayoutItemPosSize :: !Id !Root -> (!Bool,!Vector2,!Size)
 getLayoutItemPosSize id item
 	| identifyRoot id item
 		= (True,item.rootPos,item.rootItem.liItemSize)
-	# (found,relative)	= Select (identifyRelative id) undef item.rootTree
+	# (found,relative)	= cselect (identifyRelative id) undef item.rootTree
 	| not found
 		= (False,zero,zero)
 	| otherwise
@@ -95,11 +95,11 @@ shiftRoot offset item=:{rootPos,rootTree}
 */
 getRootBoundingBox :: !Root -> Rect
 getRootBoundingBox item=:{rootPos={vx,vy},rootItem={liItemSize},rootTree}
-	= getRelativeBoundingBox rootTree (PosSizeToRect {x=vx,y=vy} liItemSize)
+	= getRelativeBoundingBox rootTree (posSizeToRect {x=vx,y=vy} liItemSize)
 where
 	getRelativeBoundingBox :: ![Relative] !Rect -> Rect
 	getRelativeBoundingBox [item:items] boundBox
-		= getRelativeBoundingBox items (mergeBoundingBox boundBox (PosSizeToRect {x=vx,y=vy} item.relativeItem.liItemSize))
+		= getRelativeBoundingBox items (mergeBoundingBox boundBox (posSizeToRect {x=vx,y=vy} item.relativeItem.liItemSize))
 	where
 		{vx,vy}	= item.relativePos
 		
@@ -163,9 +163,9 @@ layoutItems :: !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) !Size !Size ![(ViewDomain,
 layoutItems hMargins=:(lMargin,rMargin) vMargins=:(tMargin,bMargin) itemSpaces reqSize minSize orientations layoutItems
 	# reqSize		= if (reqSize<>zero) {w=reqSize.w-lMargin-rMargin,h=reqSize.h-tMargin-bMargin} reqSize
 	# layoutItems	= sortLayoutItems layoutItems
-	# (_,roots)		= StateMap2 (calcRootPosition itemSpaces orientations) layoutItems (0,[])
+	# (_,roots)		= stateMap2 (calcRootPosition itemSpaces orientations) layoutItems (0,[])
 	  size			= calcAreaSize orientations roots reqSize minSize
-	# roots			= StateMap2 (calcFramePosition hMargins vMargins orientations size) roots []
+	# roots			= stateMap2 (calcFramePosition hMargins vMargins orientations size) roots []
 	  finalSize		= {w=lMargin+size.w+rMargin,h=tMargin+size.h+bMargin}
 	= (finalSize,roots)
 
@@ -188,7 +188,7 @@ where
 	sortLayoutItems` done todo
 		| isEmpty todo
 			= reverse done
-		# (item1,todo)		= HdTl todo
+		# (item1,todo)		= hdtl todo
 		  pos1				= item1.liItemPos
 		  (isRelative,id2)	= IsRelative pos1
 		| not isRelative
@@ -199,13 +199,13 @@ where
 	where
 		getItemPosChain :: !Id ![LayoutItem] ![LayoutItem] ![LayoutItem] -> (![LayoutItem],![LayoutItem],![LayoutItem])
 		getItemPosChain nextId done chain todo
-			# in_chain				= Contains (identifyLayoutItem nextId) chain
+			# in_chain				= contains (identifyLayoutItem nextId) chain
 			| in_chain
 				= layoutError "calculating layout" "cyclic dependency between Ids"
-			# in_done				= Contains (identifyLayoutItem nextId) done
+			# in_done				= contains (identifyLayoutItem nextId) done
 			| in_done
 				= (done,chain,todo)
-			# (in_todo,next,todo)	= Remove (identifyLayoutItem nextId) undef todo
+			# (in_todo,next,todo)	= remove (identifyLayoutItem nextId) undef todo
 			| not in_todo
 				= layoutError "calculating layout" "reference to unknown Id"
 			# nextPos				= next.liItemPos
@@ -337,7 +337,7 @@ calcAreaSize orientations roots reqSize minimumSize
 	| reqSize<>zero
 		= stretchSize minimumSize reqSize
 	| otherwise
-		= StateMap2 (fitRootInArea origin orientations) roots minimumSize
+		= stateMap2 (fitRootInArea origin orientations) roots minimumSize
 where
 	origin	= snd (hd orientations)
 	
@@ -449,7 +449,7 @@ itemPosOffset NoOffset _
 itemPosOffset (OffsetVector v) _
 	= v
 itemPosOffset (OffsetFun i f) orientations
-	| IsBetween i 1 (length orientations)
+	| isBetween i 1 (length orientations)
 		= f (orientations!!(i-1))
 	| otherwise
 		= layoutError "calculating OffsetFun" ("illegal ParentIndex value: "+++toString i)

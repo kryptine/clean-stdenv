@@ -7,12 +7,12 @@ implementation module scheduler
 import	StdBool, StdList, StdTuple
 import	osevent, ostime
 from	ossystem			import OStickspersecond
-from	ostoolbox			import OSNewToolbox, OSInitToolbox
+from	ostoolbox			import OSNewToolbox, osInitToolbox
 import	commondef, devicefunctions, iostate, processstack, roundrobin, timertable, world
 from	StdProcessDef		import ProcessInit
 from	StdPSt				import accPIO, appPIO
 from	StdProcessAttribute	import isProcessKindAttribute
-//import StdDebug,tracetypes
+
 
 ::	*Environs
 	=	{	envsEvents		:: !*OSEvents
@@ -33,24 +33,24 @@ from	StdProcessAttribute	import isProcessKindAttribute
 		}
 
 schedulerFatalError :: String String -> .x
-schedulerFatalError rule error
-	= Error rule "scheduler" error
+schedulerFatalError rule message
+	= error rule "scheduler" message
 
 
 /*	Retrieval operations:			*/
 
 //	On Context:
 
-ContextGetProcessStack :: !Context -> (!ProcessStack,!Context)
-ContextGetProcessStack context=:{cProcessStack}
+contextGetProcessStack :: !Context -> (!ProcessStack,!Context)
+contextGetProcessStack context=:{cProcessStack}
 	= (cProcessStack,context)
 
-ContextGetProcesses :: !Context -> (!CProcesses,!Context)
-ContextGetProcesses context=:{cProcesses}
+contextGetProcesses :: !Context -> (!CProcesses,!Context)
+contextGetProcesses context=:{cProcesses}
 	= (cProcesses,{context & cProcesses=emptyRR})
 
-ContextGetSleepTime :: !Context -> (!Int,!Context)
-ContextGetSleepTime context=:{cTimerTable=tt,cReceiverTable}
+contextGetSleepTime :: !Context -> (!Int,!Context)
+contextGetSleepTime context=:{cTimerTable=tt,cReceiverTable}
 	# (maybe_sleep,tt)		= getTimeIntervalFromTimerTable tt
 	# (maybe_receiver,rt)	= getActiveReceiverTableEntry cReceiverTable
 	  sleep					= if (isJust maybe_receiver) 0								// a receiver with a non-empty message queue exists
@@ -58,13 +58,13 @@ ContextGetSleepTime context=:{cTimerTable=tt,cReceiverTable}
 			  				 							OSLongSleep)					// neither a receiver nor timer
 	= (sleep,{context & cTimerTable=tt,cReceiverTable=rt})
 
-ContextGetOSEvents :: !Context -> (!OSEvents,!Context)
-ContextGetOSEvents context=:{cEnvs=envs=:{envsEvents=es}}
-	# (es1,es2)		= OScopyEvents es
+contextGetOSEvents :: !Context -> (!OSEvents,!Context)
+contextGetOSEvents context=:{cEnvs=envs=:{envsEvents=es}}
+	# (es1,es2)		= osCopyEvents es
 	= (es1,{context & cEnvs={envs & envsEvents=es2}})
 
-ContextSetOSEvents :: !(!OSEvents,!Context) -> Context
-ContextSetOSEvents (osEvents,context=:{cEnvs=envs})
+contextSetOSEvents :: !(!OSEvents,!Context) -> Context
+contextSetOSEvents (osEvents,context=:{cEnvs=envs})
 	= {context & cEnvs={envs & envsEvents=osEvents}}
 
 
@@ -72,7 +72,7 @@ ContextSetOSEvents (osEvents,context=:{cEnvs=envs})
 
 rsIsBlocked :: !RuntimeState -> (!Bool,SystemId)
 rsIsBlocked (Blocked ioid)	= (True, ioid)
-rsIsBlocked _				= (False,NullSystemId)
+rsIsBlocked _				= (False,nullSystemId)
 
 rsIsClosed :: !RuntimeState -> Bool
 rsIsClosed Closed			= True
@@ -85,12 +85,12 @@ initContext :: !(ProcessInit (PSt .l)) !String !.l !DocumentInterface !ProcessKi
 initContext ioDefInit ioDefAbout local documentInterface ioKind world
 	# w						= loadWorld world
 	# world					= storeWorld w world
-	# initEnvs				= {envsEvents=OSnewEvents,envsWorld=world}
-	# tb					= OSInitToolbox OSNewToolbox
-	# (ostime,tb)			= OSGetTime tb
+	# initEnvs				= {envsEvents=osNewEvents,envsWorld=world}
+	# tb					= osInitToolbox OSNewToolbox
+	# (ostime,tb)			= osGetTime tb
 	= (	{	cEnvs			= initEnvs
 		,	cProcessStack	= ioStack
-		,	cMaxIONr		= InitSystemId
+		,	cMaxIONr		= initSystemId
 		,	cProcesses		= toRR [] [openLocalIO ioState local]
 		,	cModalProcess	= initModalId
 		,	cReceiverTable	= initialReceiverTable
@@ -105,19 +105,19 @@ initContext ioDefInit ioDefAbout local documentInterface ioKind world
 where
 	initModalId				= Nothing
 	show					= ioKind==InteractiveProcess
-	ioStack					= [{psId=InitSystemId,psShow=show,psKind=ioKind}]
-	ioState					= createNewIOSt [] ioDefInit ioDefAbout InitSystemId Nothing Nothing ShareGUI documentInterface ioKind
+	ioStack					= [{psId=initSystemId,psShow=show,psKind=ioKind}]
+	ioState					= createNewIOSt [] ioDefInit ioDefAbout initSystemId Nothing Nothing ShareGUI documentInterface ioKind
 
 initContext` :: !*World -> (!Context,!*OSToolbox)
 initContext` world
 	# w						= loadWorld world
 	# world					= storeWorld w world
-	# initEnvs				= {envsEvents=OSnewEvents,envsWorld=world}
-	# tb					= OSInitToolbox OSNewToolbox
-	# (ostime,tb)			= OSGetTime tb
+	# initEnvs				= {envsEvents=osNewEvents,envsWorld=world}
+	# tb					= osInitToolbox OSNewToolbox
+	# (ostime,tb)			= osGetTime tb
 	= (	{	cEnvs			= initEnvs
 		,	cProcessStack	= ioStack
-		,	cMaxIONr		= InitSystemId
+		,	cMaxIONr		= initSystemId
 		,	cProcesses		= toRR [] []
 		,	cModalProcess	= initModalId
 		,	cReceiverTable	= initialReceiverTable
@@ -144,8 +144,8 @@ createNewIOSt pAtts ioDefInit ioDefAbout nr parentId guishare isSubProcess docum
 
 handleEvents :: !Context !*OSToolbox -> (!Context,!*OSToolbox)
 handleEvents context tb
-	# (_,context)	= handleContextOSEvent OSNullEvent context
-	= OShandleEvents terminate ContextGetOSEvents ContextSetOSEvents ContextGetSleepTime handleContextOSEvent (context,tb)
+	# (_,context)	= handleContextOSEvent osNullEvent context
+	= osHandleEvents terminate contextGetOSEvents contextSetOSEvents contextGetSleepTime handleContextOSEvent (context,tb)
 where
 	terminate :: !Context -> (!Bool,!Context)
 	terminate context=:{cProcessStack}
@@ -162,9 +162,9 @@ closeContext {cProcessStack,cEnvs={envsWorld}} tb
 
 //	Handling events while condition holds.
 
-CondHandleEvents :: !(St Context Bool) !*OSToolbox !Context -> (!*OSToolbox,!Context)
-CondHandleEvents cond tb context
-	# (context,tb)	= OShandleEvents terminate ContextGetOSEvents ContextSetOSEvents ContextGetSleepTime handleContextOSEvent (context,tb)
+chandleEvents :: !(St Context Bool) !*OSToolbox !Context -> (!*OSToolbox,!Context)
+chandleEvents cond tb context
+	# (context,tb)	= osHandleEvents terminate contextGetOSEvents contextSetOSEvents contextGetSleepTime handleContextOSEvent (context,tb)
 	= (tb,context)
 where
 	terminate :: !Context -> (!Bool,!Context)
@@ -175,7 +175,7 @@ where
 handleContextOSEvent :: !OSEvent !Context -> (![Int],!Context)
 handleContextOSEvent osEvent context=:{cEnvs=envs=:{envsEvents=osEvents},cProcessStack,cProcesses,cReceiverTable,cTimerTable,cOSTime,cOSToolbox}
 //	PA: shift the time in the timertable.
-	# (ostime,tb)				= OSGetTime cOSToolbox
+	# (ostime,tb)				= osGetTime cOSToolbox
 	  timeshift					= toInt (ostime-cOSTime)
 	  timertable				= shiftTimeInTimerTable timeshift cTimerTable
 //	PA: determine whether a TimerEvent or ASyncMessage can be generated
@@ -194,12 +194,12 @@ handleContextOSEvent osEvent context=:{cEnvs=envs=:{envsEvents=osEvents},cProces
 	  replyToOS					= case schedulerEvent of
 	  								(ScheduleOSEvent _ reply)	-> reply
 	  								_							-> []
-	# (newStack,context)		= ContextGetProcessStack context
+	# (newStack,context)		= contextGetProcessStack context
 	  (newTopIOVis,newTopIO)	= topShowProcessShowState newStack
 	| oldTopIO==newTopIO || not newTopIOVis
 		= (replyToOS,context)
 	| otherwise
-		# (processes,context)	= ContextGetProcesses context
+		# (processes,context)	= contextGetProcesses context
 		# (newStack,processes)	= activateTopOfGroups newTopIO newStack (resetRR processes)
 		= (replyToOS,{context & cProcessStack=newStack,cProcesses=processes})
 
@@ -225,8 +225,7 @@ toSchedulerEvent osevent receivertable timertable osTime osEvents
 		= (schedulerEvent,receivertable,timertable,osEvents)
 	# (timerEvent,timertable`)		= toTimerEvent timertable
 	  (asyncEvent,receivertable`)	= toASyncEvent (fromJust maybe_receiver) receivertable
-//	# osEvents`						= checkOSZeroTimerEvent zerotimer osTime osevent osEvents
-	# osEvents`						= checkOSZeroTimerEvent maybe_timer osTime osevent osEvents
+	# osEvents`						= checkOSZeroTimerEvent zerotimer osTime osevent osEvents
 	| sure_timer && sure_receiver
 		| isEven (toInt osTime)
 			= (timerEvent,receivertable,timertable`,osEvents`)
@@ -237,28 +236,24 @@ toSchedulerEvent osevent receivertable timertable osTime osEvents
 	| otherwise
 		= (asyncEvent,receivertable`,timertable,osEvents)
 where
-	eventIsUrgent					= OSEventIsUrgent osevent
+	eventIsUrgent					= osEventIsUrgent osevent
 	schedulerEvent					= ScheduleOSEvent osevent []
 
 //	In case the original event is a virtual zero timer event:
 //		check if another should be inserted in the OSEvents to circumvent the event system call. 
 //	In case the original event is a non urgent event:
 //		check if an initial virtual zero timer event must be inserted to start circumventing event system calls.
-//	checkOSZeroTimerEvent :: !Bool !OSTime !OSEvent !*OSEvents -> *OSEvents
-	checkOSZeroTimerEvent :: !(Maybe (Bool,Int)) !OSTime !OSEvent !*OSEvents -> *OSEvents
-//	checkOSZeroTimerEvent zerotimer osTime osevent osEvents
-	checkOSZeroTimerEvent maybe_timer osTime osevent osEvents
-		| isJust maybe_zerotimer_start && zerotimer
-			| osTime-zerotimer_start<=zerotimelimit
-				= OSappendEvents [osevent] osEvents
-			// otherwise
-				= osEvents
-		| isNothing maybe_zerotimer_start && zerotimer
-			= OSappendEvents [createOSZeroTimerEvent osTime] osEvents
+	checkOSZeroTimerEvent :: !Bool !OSTime !OSEvent !*OSEvents -> *OSEvents
+	checkOSZeroTimerEvent zerotimer osTime osevent osEvents
+		| not zerotimer
+			= osEvents
+		| isNothing maybe_zerotimer_start
+			= osAppendEvents [createOSZeroTimerEvent osTime] osEvents
+		| osTime-zerotimer_start<=zerotimelimit
+			= osAppendEvents [osevent] osEvents
 		| otherwise
 			= osEvents
 	where
-		(zerotimer,_)			= fromJust maybe_timer
 		maybe_zerotimer_start	= getOSZeroTimerStartTime osevent
 		zerotimer_start			= fromJust maybe_zerotimer_start
 	
@@ -299,35 +294,35 @@ handleEventForContext eventDone schedulerEvent context=:{cProcesses=processes}
 where
 	processQuitted :: !CProcess -> (!Bool,!CProcess)
 	processQuitted localIO=:{localIOSt}
-		# (closed,ioState) = IOStClosed localIOSt
+		# (closed,ioState) = ioStClosed localIOSt
 		= (closed,{localIO & localIOSt=ioState})
 	
 	processModal :: !CProcess -> (!Bool,!CProcess)
 	processModal localIO=:{localIOSt}
-		# (optModal,ioState)= IOStGetIOIsModal localIOSt
-		# (myId,ioState)	= IOStGetIOId ioState
+		# (optModal,ioState)= ioStGetIOIsModal localIOSt
+		# (myId,ioState)	= ioStGetIOId ioState
 		= (isJust optModal && myId==fromJust optModal,{localIO & localIOSt=ioState})
 
 handleEventForLocalIO :: !Bool !SchedulerEvent !CProcess !Context
 					 -> (!Bool,!SchedulerEvent,!CProcess,!Context)
 handleEventForLocalIO eventDone schedulerEvent {localState=opt_local,localIOSt=ioState} context
-	# (runtime,ioState)						= IOStGetRuntimeState ioState
+	# (runtime,ioState)						= ioStGetRuntimeState ioState
 	| fst (rsIsBlocked runtime)
 		= (eventDone,schedulerEvent,{localState=opt_local, localIOSt=ioState},context)
-	# (initIO,ioState)						= IOStGetInitIO ioState
+	# (initIO,ioState)						= ioStGetInitIO ioState
 	# (dummies,pState)						= cSwitchIn (fromJust opt_local) context ioState
 	# pState								= initIO pState
-	# (ioKind,pState)						= accPIO IOStGetProcessKind pState
+	# (ioKind,pState)						= accPIO ioStGetProcessKind pState
 	| ioKind==VirtualProcess
 		# pState							= closeVirtualProcess pState
 		# (local,context,ioState)			= cSwitchOut dummies pState
 		= (eventDone,schedulerEvent,{localState=Just local,localIOSt=ioState},context)
-	# (closed,pState)						= accPIO IOStClosed pState
+	# (closed,pState)						= accPIO ioStClosed pState
 	| closed
 		# (local,context,ioState)			= cSwitchOut dummies pState
 		= (eventDone,schedulerEvent,{localState=Just local,localIOSt=ioState},context)
 	| otherwise
-		# (deviceFunctions,pState)			= accPIO IOStGetDeviceFunctions pState
+		# (deviceFunctions,pState)			= accPIO ioStGetDeviceFunctions pState
 		  ioFunctions						= [(df.dEvent,df.dDoIO) \\ df<-deviceFunctions]
 		# (eventDone,schedulerEvent,pState)	= handleEventForDevices ioFunctions eventDone schedulerEvent pState
 		# (local,context,ioState)			= cSwitchOut dummies pState
@@ -335,46 +330,46 @@ handleEventForLocalIO eventDone schedulerEvent {localState=opt_local,localIOSt=i
 where
 	closeVirtualProcess :: !(PSt .l) -> PSt .l
 	closeVirtualProcess pState=:{io}
-		# (subids,ioState)		= IOStGetSubProcessIds io
+		# (subids,ioState)		= ioStGetSubProcessIds io
 		| not (isEmpty subids)
 			= {pState & io=ioState}
 		| otherwise
-			# (ioStack,ioState)	= IOStGetProcessStack ioState
-			# (nr,ioState)		= IOStGetIOId ioState
+			# (ioStack,ioState)	= ioStGetProcessStack ioState
+			# (nr,ioState)		= ioStGetIOId ioState
 			  (_, ioStack)		= removeProcessShowState nr ioStack
-			# ioState			= IOStSetProcessStack ioStack ioState
+			# ioState			= ioStSetProcessStack ioStack ioState
 			# ioState			= removeIOIdFromParentProcess nr ioState
-			# ioState			= IOStSetRuntimeState Closed ioState
+			# ioState			= ioStSetRuntimeState Closed ioState
 			= {pState & io=ioState}
 
 cSwitchIn :: !.l !Context !(IOSt .l) -> (!(![*World],!CProcesses),!PSt .l)
 cSwitchIn local {cEnvs={envsEvents,envsWorld},cProcessStack,cMaxIONr,cProcesses,cModalProcess,cReceiverTable,cTimerTable,cIdTable,cOSTime,cIdSeed} ioState
-	# ioState				= IOStSetProcessStack cProcessStack ioState
-	# ioState				= IOStSetEvents envsEvents ioState
-	# ioState				= IOStSetMaxIONr cMaxIONr ioState
-	# (ioContext,ioState)	= IOStSwapIO ([envsWorld],cProcesses) ioState
-	# ioState				= IOStSetIOIsModal cModalProcess ioState
-	# ioState				= IOStSetIdTable cIdTable ioState
-	# ioState				= IOStSetReceiverTable cReceiverTable ioState
-	# ioState				= IOStSetTimerTable cTimerTable ioState
-	# ioState				= IOStSetOSTime cOSTime ioState
-	# ioState				= IOStSetIdSeed cIdSeed ioState
+	# ioState				= ioStSetProcessStack cProcessStack ioState
+	# ioState				= ioStSetEvents envsEvents ioState
+	# ioState				= ioStSetMaxIONr cMaxIONr ioState
+	# (ioContext,ioState)	= ioStSwapIO ([envsWorld],cProcesses) ioState
+	# ioState				= ioStSetIOIsModal cModalProcess ioState
+	# ioState				= ioStSetIdTable cIdTable ioState
+	# ioState				= ioStSetReceiverTable cReceiverTable ioState
+	# ioState				= ioStSetTimerTable cTimerTable ioState
+	# ioState				= ioStSetOSTime cOSTime ioState
+	# ioState				= ioStSetIdSeed cIdSeed ioState
 	# pState				= {ls=local,io=ioState}
 	= (ioContext,pState)
 
 cSwitchOut :: !(![*World],!CProcesses) !(PSt .l) -> (!.l,!Context,!IOSt .l)
 cSwitchOut ioContext {ls,io}
-	# (ostime,   ioState)		= IOStGetOSTime			io
-	# (tt,       ioState)		= IOStGetTimerTable		ioState
-	# (idseed,   ioState)		= IOStGetIdSeed			ioState
-	# (ridlocs,  ioState)		= IOStGetReceiverTable	ioState
-	# (idtable,  ioState)		= IOStGetIdTable		ioState
-	# (modalId,  ioState)		= IOStGetIOIsModal		ioState
-	# (ioContext,ioState)		= IOStSwapIO ioContext	ioState
+	# (ostime,   ioState)		= ioStGetOSTime			io
+	# (tt,       ioState)		= ioStGetTimerTable		ioState
+	# (idseed,   ioState)		= ioStGetIdSeed			ioState
+	# (ridlocs,  ioState)		= ioStGetReceiverTable	ioState
+	# (idtable,  ioState)		= ioStGetIdTable		ioState
+	# (modalId,  ioState)		= ioStGetIOIsModal		ioState
+	# (ioContext,ioState)		= ioStSwapIO ioContext	ioState
 	# (worlds,processes)		= ioContext
-	# (maxIONr,  ioState)		= IOStGetMaxIONr		ioState
-	# (ioStack,  ioState)		= IOStGetProcessStack	ioState
-	# (es,	     ioState)		= IOStGetEvents			ioState
+	# (maxIONr,  ioState)		= ioStGetMaxIONr		ioState
+	# (ioStack,  ioState)		= ioStGetProcessStack	ioState
+	# (es,	     ioState)		= ioStGetEvents			ioState
 	# envs						= {envsEvents=es,envsWorld=hd worlds}
 	# context					= {	cEnvs			= envs
 								  ,	cProcessStack	= ioStack
@@ -391,7 +386,7 @@ cSwitchOut ioContext {ls,io}
 	= (ls,context,ioState)
 
 /*	handleEventForDevices in sequence lets the devices handle the scheduler event until it is handled
-	or the process is terminated (IOStClosed returns True).
+	or the process is terminated (ioStClosed returns True).
 	Before handing over the event to the device DoIOFunction, the device first maps the event to a
 	device event if possible using its EventFunction. 
 */	
@@ -400,7 +395,7 @@ handleEventForDevices :: ![!(!EventFunction (PSt .l),!DoIOFunction (PSt .l))] !B
 handleEventForDevices [(mapDeviceEvent,doDeviceIO):doIOs] eventDone schedulerEvent pState
 	| eventDone
 		= (eventDone,schedulerEvent,pState)
-	# (closed,pState)				= accPIO IOStClosed pState
+	# (closed,pState)				= accPIO ioStClosed pState
 	| closed
 		= (True,schedulerEvent,pState)
 	# (forThisDevice,okDeviceEvent,schedulerEvent,pState)
@@ -422,9 +417,8 @@ handleEventForDevices _ eventDone schedulerEvent pState
 
 handleOneEventForDevices :: !SchedulerEvent !(PSt .l) -> (!Bool,!SchedulerEvent,!PSt .l)
 handleOneEventForDevices schedulerEvent pState
-	# (deviceFunctions,pState)	= accPIO IOStGetDeviceFunctions pState
+	# (deviceFunctions,pState)	= accPIO ioStGetDeviceFunctions pState
 	  ioFunctions				= [(df.dEvent,df.dDoIO) \\ df<-deviceFunctions]
-//	# pState					= trace_n ("handleOneEventForDevices (handling device functions): "+++listToString deviceFunctions) pState
 	= handleEventForDevices ioFunctions False schedulerEvent pState
 
 
@@ -447,17 +441,17 @@ NotShareGUI			:==	False
 
 addVirtualProcess :: !(ProcessInit (PSt .l)) String .l !(PSt .l`) -> PSt .l`
 addVirtualProcess ioDefInit ioDefAbout local pState
-	# (nr,ioState)			= IOStNewMaxIONr pState.io
-	# (parentId,ioState)	= IOStGetIOId					ioState
+	# (nr,ioState)			= ioStNewMaxIONr pState.io
+	# (parentId,ioState)	= ioStGetIOId					ioState
 	# (guishare,ioState)	= getGUIShare     ShareGUI		ioState
 	# ioState				= addSubProcessId ShareGUI nr	ioState
-	# (ioStack, ioState)	= IOStGetProcessStack			ioState
+	# (ioStack, ioState)	= ioStGetProcessStack			ioState
 	  ioStack				= pushProcessShowState {psId=nr,psShow=False,psKind=VirtualProcess} ioStack
-	# ioState				= IOStSetProcessStack ioStack	ioState
-	# (processes,ioState)	= IOStGetCProcesses				ioState
+	# ioState				= ioStSetProcessStack ioStack	ioState
+	# (processes,ioState)	= ioStGetCProcesses				ioState
 	# newIOSt				= createNewIOSt [] ioDefInit ioDefAbout nr (Just parentId) guishare ShareGUI NDI VirtualProcess
 	# process				= openLocalIO newIOSt local
-	# ioState				= IOStSetCProcesses (inserttodoRR process processes) ioState
+	# ioState				= ioStSetCProcesses (inserttodoRR process processes) ioState
 	= {pState & io=ioState}
 
 
@@ -465,19 +459,19 @@ addVirtualProcess ioDefInit ioDefAbout local pState
 
 addInteractiveProcess :: ![ProcessAttribute (PSt .l)] !(ProcessInit (PSt .l)) String .l !Bool !DocumentInterface !(PSt .l`) -> PSt .l`
 addInteractiveProcess pAtts ioDefInit ioDefAbout local isSubProcess documentInterface pState
-	# (nr,ioState)			= IOStNewMaxIONr pState.io
-	# (parentId,ioState)	= IOStGetIOId						ioState
+	# (nr,ioState)			= ioStNewMaxIONr pState.io
+	# (parentId,ioState)	= ioStGetIOId						ioState
 	# (guishare,ioState)	= getGUIShare     isSubProcess		ioState
 	# ioState				= addSubProcessId isSubProcess nr	ioState
-	# (ioStack, ioState)	= IOStGetProcessStack				ioState
+	# (ioStack, ioState)	= ioStGetProcessStack				ioState
 	  ioStack				= pushProcessShowState {psId=nr,psShow=True,psKind=InteractiveProcess} ioStack
-	# ioState				= IOStSetProcessStack ioStack		ioState
-	# (processes,ioState)	= IOStGetCProcesses					ioState
+	# ioState				= ioStSetProcessStack ioStack		ioState
+	# (processes,ioState)	= ioStGetCProcesses					ioState
 	  parent				= if isSubProcess (Just parentId) Nothing
 	  pAtts					= filter (isProcessKindAttribute documentInterface) pAtts
 	# newIOSt				= createNewIOSt pAtts ioDefInit ioDefAbout nr parent guishare isSubProcess documentInterface InteractiveProcess
 	# process				= openLocalIO newIOSt local
-	# ioState				= IOStSetCProcesses (inserttodoRR process processes) ioState
+	# ioState				= ioStSetCProcesses (inserttodoRR process processes) ioState
 	= {pState & io=ioState}
 
 openLocalIO :: !(IOSt .l) !.l -> CProcess
@@ -490,10 +484,10 @@ getGUIShare :: !Bool !(IOSt .l) -> (!Maybe GUIShare,!IOSt .l)
 getGUIShare isSubProcess ioState
 	| not isSubProcess
 		= (Nothing,ioState)
-	# (guishare,ioState)	= IOStGetGUIShare ioState
+	# (guishare,ioState)	= ioStGetGUIShare ioState
 	| isJust guishare
 		= (guishare,ioState)
-	# (ioKind,ioState)		= IOStGetProcessKind ioState
+	# (ioKind,ioState)		= ioStGetProcessKind ioState
 	| ioKind==VirtualProcess
 		= (guishare,ioState)
 	| otherwise
@@ -504,8 +498,8 @@ addSubProcessId isSubProcess nr ioState
 	| not isSubProcess
 		= ioState
 	| otherwise
-		# (subids,ioState)	= IOStGetSubProcessIds ioState
-		  ioState			= IOStSetSubProcessIds [nr:subids] ioState
+		# (subids,ioState)	= ioStGetSubProcessIds ioState
+		  ioState			= ioStSetSubProcessIds [nr:subids] ioState
 		= ioState
 
 
@@ -526,12 +520,12 @@ activateTopOfGroups topIONr ioStack processes
 where
 	activateTopProcess :: !SystemId !ProcessStack !CProcess -> (!Bool,!ProcessStack,!CProcess)
 	activateTopProcess topIONr ioStack process=:{localIOSt=ioState}
-		# (nr,ioState)			= IOStGetIOId ioState
+		# (nr,ioState)			= ioStGetIOId ioState
 		| nr<>topIONr
 			= (False,ioStack ,{process & localIOSt=ioState})
 		| otherwise
-			# ioState			= IOStSetProcessStack ioStack ioState
-			# (ioStack,ioState)	= IOStGetProcessStack ioState
+			# ioState			= ioStSetProcessStack ioStack ioState
+			# (ioStack,ioState)	= ioStGetProcessStack ioState
 			= (True,ioStack,{process & localIOSt=ioState})
 
 
@@ -546,24 +540,24 @@ where
 */
 quitProcess :: !(PSt .l) -> PSt .l
 quitProcess pState
-	# (rs,pState)					= accPIO IOStGetRuntimeState pState
+	# (rs,pState)					= accPIO ioStGetRuntimeState pState
 	| fst (rsIsBlocked rs)
 		= schedulerFatalError "quitProcess" "closeProcess applied to blocked process"
 	| rsIsClosed rs
 		= pState
 	| otherwise
-		# (deviceFunctions,pState)	= accPIO IOStGetDeviceFunctions pState
-		# pState					= StrictSeq [df.dClose \\ df<-deviceFunctions] pState
-		# ioState					= IOStSetRuntimeState Closed     pState.io
-		# (nr,ioState)				= IOStGetIOId                    ioState
-		# (subids,ioState)			= IOStGetSubProcessIds           ioState
+		# (deviceFunctions,pState)	= accPIO ioStGetDeviceFunctions pState
+		# pState					= strictSeq [df.dClose \\ df<-deviceFunctions] pState
+		# ioState					= ioStSetRuntimeState Closed     pState.io
+		# (nr,ioState)				= ioStGetIOId                    ioState
+		# (subids,ioState)			= ioStGetSubProcessIds           ioState
 		# ioState					= quitSubProcesses subids        ioState
 		# ioState					= removeIOIdFromParentProcess nr ioState
-		# (ioStack,ioState)			= IOStGetProcessStack            ioState
+		# (ioStack,ioState)			= ioStGetProcessStack            ioState
 		  (_,ioStack)				= removeProcessShowState nr      ioStack
-		# ioState					= IOStSetProcessStack ioStack    ioState
-		# (osdinfo,ioState)			= IOStGetOSDInfo                 ioState
-		# ioState					= appIOToolbox (OScloseOSDInfo osdinfo) ioState
+		# ioState					= ioStSetProcessStack ioStack    ioState
+		# (osdinfo,ioState)			= ioStGetOSDInfo                 ioState
+		# ioState					= appIOToolbox (osCloseOSDInfo osdinfo) ioState
 		= {pState & io=ioState}
 
 
@@ -574,9 +568,9 @@ quitProcess pState
 */
 quitSubProcesses :: ![SystemId] !(IOSt .l) -> IOSt .l
 quitSubProcesses ids ioState
-	# (processes,ioState)	= IOStGetCProcesses ioState
+	# (processes,ioState)	= ioStGetCProcesses ioState
 	  (_,processes)			= quitLocalSubProcesses ids processes
-	# ioState				= IOStSetCProcesses processes ioState
+	# ioState				= ioStSetCProcesses processes ioState
 	= ioState
 where
 	quitLocalSubProcesses :: ![SystemId] !CProcesses -> (![SystemId],!CProcesses)
@@ -595,11 +589,11 @@ where
 		quitLocalSubProcesses` ids []
 			= (ids,[])
 		quitLocalSubProcesses` ids [process=:{localState,localIOSt=ioState}:processes]
-			# (ioid,ioState)		= IOStGetIOId ioState
-			  (hadId,_,ids)			= Remove ((==) ioid) NullSystemId ids
+			# (ioid,ioState)		= ioStGetIOId ioState
+			  (hadId,_,ids)			= remove ((==) ioid) nullSystemId ids
 			| hadId
-				# (subids,ioState)	= IOStGetSubProcessIds ioState
-				# ioState			= IOStSetInitIO quitProcess ioState
+				# (subids,ioState)	= ioStGetSubProcessIds ioState
+				# ioState			= ioStSetInitIO quitProcess ioState
 				# process			= {localState=localState,localIOSt=ioState}
 				# (ids,processes)	= quitLocalSubProcesses` (ids++subids) processes
 				= (ids,[process:processes])
@@ -615,13 +609,13 @@ where
 */
 removeIOIdFromParentProcess :: !SystemId !(IOSt .l) -> IOSt .l
 removeIOIdFromParentProcess me ioState
-	# (opt_parent,ioState)	= IOStGetParentId ioState
+	# (opt_parent,ioState)	= ioStGetParentId ioState
 	| isNothing opt_parent
 		= ioState
 	# parent				= fromJust opt_parent
-	# (locals,ioState)		= IOStGetCProcesses ioState
+	# (locals,ioState)		= ioStGetCProcesses ioState
 	# (done,locals)			= removeIOIdFromLocals me parent locals
-	# ioState				= IOStSetCProcesses locals ioState
+	# ioState				= ioStSetCProcesses locals ioState
 	| done
 		= ioState
 	| otherwise
@@ -639,11 +633,11 @@ where
 	where
 		removeIOIdFromLocals` :: !SystemId !SystemId !*[CProcess] -> (!Bool,!*[CProcess])
 		removeIOIdFromLocals` me parent [process=:{localState,localIOSt=ioState}:processes]
-			# (ioid,ioState)			= IOStGetIOId ioState
+			# (ioid,ioState)			= ioStGetIOId ioState
 			| parent==ioid
-				# (subids,ioState)		= IOStGetSubProcessIds ioState
-				  (_,_,subids)			= Remove ((==) me) (dummy "removeIOIdFromLocals") subids
-				# ioState				= IOStSetSubProcessIds subids ioState
+				# (subids,ioState)		= ioStGetSubProcessIds ioState
+				  (_,_,subids)			= remove ((==) me) (dummy "removeIOIdFromLocals") subids
+				# ioState				= ioStSetSubProcessIds subids ioState
 				# process				= {localState=localState,localIOSt=ioState}
 				= (True,[process:processes])
 			| otherwise
@@ -694,16 +688,16 @@ cswitchProcess processId message pState
 		= (checkSyncMessageError message1,getSyncMessageResponse message1,pState2)
 	with
 		context2						= {context1 & cProcesses=groups3}
-		(_,context3)					= CondHandleEvents (processIsBlocked processId) OSNewToolbox context2
-		(groups4,context4)				= ContextGetProcesses context3
+		(_,context3)					= chandleEvents (processIsBlocked processId) OSNewToolbox context2
+		(groups4,context4)				= contextGetProcesses context3
 		context5						= {context4 & cProcesses=resetRR groups4}
 		(message1,context6)				= handleEventForContext False message context5
 		pState2							= switchToPSt typeIOSt returnId context6 local
 where
-	(returnId,pState1)					= accPIO IOStGetIOId pState
+	(returnId,pState1)					= accPIO ioStGetIOId pState
 	(local,context,ioState)= switchFromPSt pState1
-	(groups,context1)					= ContextGetProcesses context
-	ioState1							= IOStSetRuntimeState (Blocked processId) ioState
+	(groups,context1)					= contextGetProcesses context
+	ioState1							= ioStSetRuntimeState (Blocked processId) ioState
 	(typeIOSt, ioState3)				= typeIsIOSt  ioState1
 	blockedLocalIO						= {localState=Nothing,localIOSt=ioState3}
 	groups1								= adddoneRR blockedLocalIO groups
@@ -718,14 +712,14 @@ where
 		  {localIOSt=blockedIO}			= group
 		  blockedIO						= castType typeIOSt blockedIO
 		  context						= {context & cProcesses=toRR gDone gToDo}
-		  (_,pState)					= cSwitchIn local context (IOStSetRuntimeState Running blockedIO)
+		  (_,pState)					= cSwitchIn local context (ioStSetRuntimeState Running blockedIO)
 		= pState
 	
 	checkSyncMessageError :: !SchedulerEvent -> Maybe SwitchError
 	checkSyncMessageError (ScheduleMsgEvent (SyncMessage {smError}))
 		| isEmpty smError
 			= Nothing
-		| not (IsSingleton smError)
+		| not (isSingleton smError)
 			= schedulerFatalError "checkSyncMessageError" "more than one MessageError returned"
 		| otherwise
 			= case (hd smError) of
@@ -749,16 +743,16 @@ typeIsLocal ioState = (Unguard,ioState)
 
 accContext :: !.(St Context .x) !(PSt .l) -> (!.x, !PSt .l)
 accContext fun pState
-	# (returnId,pState)			= accPIO IOStGetIOId pState
+	# (returnId,pState)			= accPIO ioStGetIOId pState
 	# (local,context,ioState)	= switchFromPSt pState
-	# (groups,context)			= ContextGetProcesses context
+	# (groups,context)			= contextGetProcesses context
 	# (typeIOSt, ioState)		= typeIsIOSt  ioState
 	# (typeLocal,ioState)		= typeIsLocal ioState
 	# localIO					= {localState=Just local,localIOSt=ioState}
 	# groups					= adddoneRR localIO groups
 	# context					= {context & cProcesses=groups}
 	# (x, context)				= fun context
-	# (groups,context)			= ContextGetProcesses context
+	# (groups,context)			= contextGetProcesses context
 	# context					= {context & cProcesses=resetRR groups}
 	# pState					= switchToPSt typeIOSt typeLocal returnId context
 	= (x, pState)
@@ -771,14 +765,14 @@ where
 	where
 		(found,groups)			= turnRRToProcessInGroups returnId cProcesses
 		(gDone,gToDo)			= fromRR groups
-		(group,gToDo1)			= HdTl gToDo
+		(group,gToDo1)			= hdtl gToDo
 		{localState=local,localIOSt=ioState}
 								= group
 		ioState1				= castType typeIOSt ioState
 		local1					= castType typeLocal   local
 		groups1					= toRR gDone gToDo1
 		context1				= {context & cProcesses=groups1}
-		(closed,ioState2)		= IOStClosed ioState1
+		(closed,ioState2)		= ioStClosed ioState1
 
 switchFromPSt :: !(PSt .l) -> (!.l,!Context,!IOSt .l)
 switchFromPSt pState
@@ -802,7 +796,7 @@ where
 	where
 		turnRRToProcess` :: !SystemId !*CProcess -> (!Bool,!*CProcess)
 		turnRRToProcess` id l=:{localIOSt=ioState}
-			# (ioid,ioState)	= IOStGetIOId ioState
+			# (ioid,ioState)	= ioStGetIOId ioState
 			= (id==ioid,{l & localIOSt=ioState})
 
 
@@ -821,7 +815,7 @@ where
 			= (False,gs)
 		# nextproc						= fromJust opt_id
 		  blockedprocs					= [nextproc:blockedprocs]
-		  occurs						= Contains ((==) nextproc) blockedprocs
+		  occurs						= contains ((==) nextproc) blockedprocs
 		| occurs
 			= (True, gs)
 		| otherwise
@@ -843,10 +837,10 @@ where
 	where
 		checkProcess :: !SystemId !(IOSt .l) -> (!Result SystemId,!IOSt .l)
 		checkProcess ioid ioState
-			# (ioid`,ioState)		= IOStGetIOId ioState
+			# (ioid`,ioState)		= ioStGetIOId ioState
 			| ioid<>ioid`
 				= ((False,Nothing),ioState)
-			# (runtime,ioState)		= IOStGetRuntimeState ioState
+			# (runtime,ioState)		= ioStGetRuntimeState ioState
 			  (isBlocked,blockedFor)= rsIsBlocked runtime
 			| isBlocked
 				= ((True,Just blockedFor),ioState)

@@ -11,21 +11,21 @@ import	ostoolbox
 OSClipboardText
 	:==	1	// CF_TEXT
 
-//	OSinitialiseClipboard should be evaluated before any of the functions below.
-OSinitialiseClipboard :: !*OSToolbox -> *OSToolbox
+osInitialiseClipboard :: !*OSToolbox -> *OSToolbox
+//	osInitialiseClipboard should be evaluated before any of the functions below.
 
-OShasClipboardText :: !*OSToolbox -> (!Bool,!*OSToolbox)
-//	OShasClipboardText checks whether the clipboard currently contains a text item.
+osHasClipboardText :: !*OSToolbox -> (!Bool,!*OSToolbox)
+//	osHasClipboardText checks whether the clipboard currently contains a text item.
 
-OSsetClipboardText :: !{#Char} !*OSToolbox -> *OSToolbox
-//	OSsetClipboardText empties the clipboard and sets the text to the clipboard.
+osSetClipboardText :: !{#Char} !*OSToolbox -> *OSToolbox
+//	osSetClipboardText empties the clipboard and sets the text to the clipboard.
 //	The return Int is the new version number.
 
-OSgetClipboardText :: !*OSToolbox -> (!{#Char},!*OSToolbox)
-//	OSgetClipboardText retrieves the current clipboard text item, which is empty if not present.
+osGetClipboardText :: !*OSToolbox -> (!{#Char},!*OSToolbox)
+//	osGetClipboardText retrieves the current clipboard text item, which is empty if not present.
 
-OSgetClipboardContent :: !*OSToolbox -> (![OSClipboardItemType],!*OSToolbox)
-//	OSgetClipboardContent retrieves the current item types that are stored in the clipboard.
+osGetClipboardContent :: !*OSToolbox -> (![OSClipboardItemType],!*OSToolbox)
+//	osGetClipboardContent retrieves the current item types that are stored in the clipboard.
 
-OSgetClipboardVersion :: !Int !*OSToolbox -> (!Int,!*OSToolbox)
-//	OSgetClipboardVersion given the previous version number returns the new, current version number.
+osGetClipboardVersion :: !Int !*OSToolbox -> (!Int,!*OSToolbox)
+//	osGetClipboardVersion given the previous version number returns the new, current version number.

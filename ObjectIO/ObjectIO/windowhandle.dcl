@@ -239,5 +239,5 @@ isRecursiveControl	:: !ControlKind -> Bool
 
 
 //	Conversion functions from ControlState to WElementHandle, and vice versa:
-WElementHandleToControlState:: !*(WElementHandle .ls .pst) -> *ControlState   .ls .pst
-ControlStateToWElementHandle:: !*(ControlState   .ls .pst) -> *WElementHandle .ls .pst
+wElementHandleToControlState:: !*(WElementHandle .ls .pst) -> *ControlState   .ls .pst
+controlStateToWElementHandle:: !*(ControlState   .ls .pst) -> *WElementHandle .ls .pst

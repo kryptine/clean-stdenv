@@ -13,30 +13,30 @@ from	ospicture		import pictscroll
 from	osrgn			import osgetrgnbox
 from	ostypes			import Rect
 from	ostoolbox		import OSToolbox
-from	oswindow		import OSWindowMetrics, OSscrollbarsAreVisible, OSsetWindowSliderThumb, toOSscrollbarRange, OSMinWindowSize
+from	oswindow		import OSWindowMetrics, osScrollbarsAreVisible, osSetWindowSliderThumb, toOSscrollbarRange, osMinWindowSize
 
 
 controlposFatalError :: String String -> .x
 controlposFatalError function error
-	= FatalError function "controlpos" error
+	= fatalError function "controlpos" error
 
 /*	movewindowviewframe moves the current view frame of the WindowHandle by the given Vector2. 
 	movewindowviewframe assumes that the argument WindowHandle is a Window.
 */
 movewindowviewframe :: !OSWindowMetrics !Vector2 !WIDS !(WindowHandle .ls .pst) !*OSToolbox -> (!WindowHandle .ls .pst,!*OSToolbox)
 movewindowviewframe wMetrics v wids=:{wPtr} wH=:{whWindowInfo,whItems=oldItems,whSize,whAtts,whSelect,whShow} tb
-	| newOrigin==oldOrigin		// origin has not changed
+	| newOrigin==oldOrigin			// origin has not changed
 		= (wH,tb)
-	# tb						= setsliderthumb (hasHScroll && newOrigin.x<>oldOrigin.x) wMetrics wPtr True  (minx,newOrigin.x,maxx) vieww (toTuple whSize) tb
-	# tb						= setsliderthumb (hasVScroll && newOrigin.y<>oldOrigin.y) wMetrics wPtr False (miny,newOrigin.y,maxy) viewh (toTuple whSize) tb
-	# (noControls,oldItems)		= u_isEmpty oldItems
-	| noControls				// there are no controls: do only visual updates
-		# windowInfo			= {windowInfo & windowOrigin=newOrigin}
-		  wH					= {wH & whWindowInfo=WindowInfo windowInfo,whItems=oldItems}
-		  (updArea,updAction)	= if (not lookInfo.lookSysUpdate || toMuch)
-		  							([newFrame],return []) (calcScrollUpdateArea oldOrigin newOrigin contentRect)
-		  updState				= {oldFrame=PosSizeToRectangle oldOrigin contentSize,newFrame=newFrame,updArea=updArea}
-		# (wH,tb)				= drawwindowlook` wMetrics wPtr updAction updState wH tb
+	# tb							= setsliderthumb (hasHScroll && newOrigin.x<>oldOrigin.x) wMetrics wPtr True  (minx,newOrigin.x,maxx) vieww (toTuple whSize) tb
+	# tb							= setsliderthumb (hasVScroll && newOrigin.y<>oldOrigin.y) wMetrics wPtr False (miny,newOrigin.y,maxy) viewh (toTuple whSize) tb
+	# (noControls,oldItems)			= uisEmpty oldItems
+	| noControls					// there are no controls: do only visual updates
+		# windowInfo				= {windowInfo & windowOrigin=newOrigin}
+		  wH						= {wH & whWindowInfo=WindowInfo windowInfo,whItems=oldItems}
+		  (updArea,updAction)		= if (not lookInfo.lookSysUpdate || toMuch)
+		  								([newFrame],return []) (calcScrollUpdateArea oldOrigin newOrigin contentRect)
+		  updState					= {oldFrame=posSizeToRectangle oldOrigin contentSize,newFrame=newFrame,updArea=updArea}
+		# (wH,tb)					= drawwindowlook` wMetrics wPtr updAction updState wH tb
 		= (wH,tb)
 	| otherwise						// there are controls: recalculate layout and do visual updates
 		# reqSize					= {w=contentSize.w-fst hMargins-snd hMargins,h=contentSize.h-fst vMargins-snd vMargins}
@@ -53,26 +53,26 @@ movewindowviewframe wMetrics v wids=:{wPtr} wH=:{whWindowInfo,whItems=oldItems,w
 		# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wids {wH & whItems=newItems} tb
 		  (updArea,updAction)		= if (not lookInfo.lookSysUpdate || toMuch || not isRect)
 		  								([newFrame],return []) (calcScrollUpdateArea oldOrigin newOrigin areaRect)
-		  updState					= {oldFrame=PosSizeToRectangle oldOrigin contentSize,newFrame=newFrame,updArea=updArea}
+		  updState					= {oldFrame=posSizeToRectangle oldOrigin contentSize,newFrame=newFrame,updArea=updArea}
 		# (wH,tb)					= drawwindowlook` wMetrics wPtr updAction updState wH tb
 		= (wH,tb)
 where
 	windowInfo					= getWindowInfoWindowData whWindowInfo
 	(oldOrigin,domainRect,hasHScroll,hasVScroll,lookInfo)
 								= (windowInfo.windowOrigin,windowInfo.windowDomain,isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll,windowInfo.windowLook)
-	domain						= RectToRectangle domainRect
-	visScrolls					= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
-	contentRect					= getWindowContentRect wMetrics visScrolls (SizeToRect whSize)
-	contentSize					= RectSize contentRect
+	domain						= rectToRectangle domainRect
+	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
+	contentRect					= getWindowContentRect wMetrics visScrolls (sizeToRect whSize)
+	contentSize					= rectSize contentRect
 	{w=w`,h=h`}					= contentSize
 	(minx,maxx,vieww)			= (domainRect.rleft,domainRect.rright, contentSize.w)
 	(miny,maxy,viewh)			= (domainRect.rtop, domainRect.rbottom,contentSize.h)
-	newOrigin					= {	x = SetBetween (oldOrigin.x+v.vx) minx (max minx (maxx-vieww))
-								  ,	y = SetBetween (oldOrigin.y+v.vy) miny (max miny (maxy-viewh))
+	newOrigin					= {	x = setBetween (oldOrigin.x+v.vx) minx (max minx (maxx-vieww))
+								  ,	y = setBetween (oldOrigin.y+v.vy) miny (max miny (maxy-viewh))
 								  }
-	newFrame					= PosSizeToRectangle newOrigin contentSize
+	newFrame					= posSizeToRectangle newOrigin contentSize
 	toMuch						= (abs (newOrigin.x-oldOrigin.x)>=w`) || (abs (newOrigin.y-oldOrigin.y)>=h`)
-	(defMinW,defMinH)			= OSMinWindowSize
+	(defMinW,defMinH)			= osMinWindowSize
 	minSize						= {w=defMinW,h=defMinH}
 	hMargins					= getWindowHMargins   IsWindow wMetrics whAtts
 	vMargins					= getWindowVMargins   IsWindow wMetrics whAtts
@@ -80,7 +80,7 @@ where
 	
 	setsliderthumb :: !Bool !OSWindowMetrics !OSWindowPtr !Bool !(!Int,!Int,!Int) !Int !(!Int,!Int) !*OSToolbox -> *OSToolbox
 	setsliderthumb hasScroll wMetrics wPtr isHScroll scrollValues viewSize maxcoords tb
-		| hasScroll				= OSsetWindowSliderThumb wMetrics wPtr isHScroll osThumb maxcoords True tb
+		| hasScroll				= osSetWindowSliderThumb wMetrics wPtr isHScroll osThumb maxcoords True tb
 		| otherwise				= tb
 	where
 		(_,osThumb,_,_)			= toOSscrollbarRange scrollValues viewSize
@@ -92,7 +92,7 @@ where
 */
 	calcScrollUpdateArea :: !Point2 !Point2 !Rect -> (![Rectangle],!St *Picture [Rect])
 	calcScrollUpdateArea oldOrigin newOrigin areaRect
-		= (map RectToRectangle updArea,scroll {newOriginAreaRect & rright=rright+1,rbottom=rbottom+1} restArea v)
+		= (map rectToRectangle updArea,scroll {newOriginAreaRect & rright=rright+1,rbottom=rbottom+1} restArea v)
 	where
 		newOriginAreaRect			= addVector (toVector newOrigin) areaRect
 		{rleft,rtop,rright,rbottom}	= newOriginAreaRect

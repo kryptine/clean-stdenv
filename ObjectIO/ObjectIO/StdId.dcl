@@ -9,7 +9,7 @@ definition module StdId
 
 
 from	StdMaybe	import Maybe, Just, Nothing
-from	id			import Id, RId, R2Id, RIdtoId, R2IdtoId, toString, ==
+from	id			import Id, RId, R2Id, rIdtoId, r2IdtoId, toString, ==
 from	iostate		import PSt, IOSt
 
 class Ids env where

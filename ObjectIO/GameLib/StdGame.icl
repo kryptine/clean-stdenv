@@ -22,7 +22,7 @@ SK_FOREVER         :== -1
 
 
 StdGameFatalError :: String String -> .x
-StdGameFatalError function error = FatalError function "StdGame" error
+StdGameFatalError function error = fatalError function "StdGame" error
 
 
 startGame :: .(Game a) a [.GameAttribute a] !*World -> .World
@@ -60,18 +60,18 @@ where
     // always full screen, game in a window not implemented yet
 	OpenGameWindow :: !Id !Size !Int !Bool !(PSt .l) -> (!ErrorReport, !PSt .l)
 	OpenGameWindow id gamewindowsize bitsperpixel fullscreen pState
-		# pState					= WindowFunctions.dOpen pState	// Install the window device
+		# pState					= windowFunctions.dOpen pState	// Install the window device
 		# maybe_id					= Just id
 		# (maybe_okId,ioState)		= validateWindowId maybe_id pState.io
 		| isNothing maybe_okId
 			= (ErrorIdsInUse,{pState & io=ioState})
-		# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+		# (found,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
 		| not found					// This condition should never occur: WindowDevice must have been 'installed'
 			= StdGameFatalError "openGame" "could not retrieve WindowSystemState from IOSt"
-		# windows					= WindowSystemStateGetWindowHandles wDevice
+		# windows					= windowSystemStateGetWindowHandles wDevice
 		# (isZero,windows)			= checkZeroWindowHandlesBound windows
 		| isZero
-			# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+			# ioState				= ioStSetDevice (WindowSystemState windows) ioState
 			= (ErrorViolateDI,{pState & io=ioState})
 		| otherwise
 			# info					= {	gamewindowDDPtr      = OSNoWindowPtr
@@ -91,7 +91,7 @@ where
 			  wsH					= {wshIds=wIds,wshHandle=Just wlsH}
 			  windows				= addWindowHandlesWindow 0 wsH windows
 			  windows				= decreaseWindowHandlesBound windows
-			# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+			# ioState				= ioStSetDevice (WindowSystemState windows) ioState
 			# ioState				= bufferDelayedEvents delayinfo ioState
 			= (NoError,{pState & io=ioState})
 

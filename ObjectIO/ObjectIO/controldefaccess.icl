@@ -10,11 +10,11 @@ import	commondef, StdControlAttribute
 
 //	Access rules to ControlAttributes:
 
-ControlAttributesHaveThisId :: !Id ![ControlAttribute .st] -> Bool
-ControlAttributesHaveThisId id atts
+controlAttributesHaveThisId :: !Id ![ControlAttribute .st] -> Bool
+controlAttributesHaveThisId id atts
 	= hasId && id==getControlIdAtt idAtt
 where
-	(hasId,idAtt)	= Select isControlId undef atts
+	(hasId,idAtt)	= cselect isControlId undef atts
 
 
 sameControlAttribute :: !(ControlAttribute .st) !(ControlAttribute .st) -> Bool

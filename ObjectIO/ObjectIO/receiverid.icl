@@ -9,29 +9,29 @@ import	iostate
 
 bindRId :: !Id !SelectState !Id !Device !(IOSt .l) -> IOSt .l
 bindRId rid select deviceid device ioState
-	# (pid,ioState)		= IOStGetIOId ioState
-	# (rt,ioState)		= IOStGetReceiverTable ioState
+	# (pid,ioState)		= ioStGetIOId ioState
+	# (rt,ioState)		= ioStGetReceiverTable ioState
 	  rl				= {	rlIOId		= pid
 	  					  ,	rlDevice	= device
 	  					  ,	rlParentId	= deviceid
 	  					  ,	rlReceiverId= rid
 	  					  }
 	  (_,rt)			= addReceiverToReceiverTable {rteLoc=rl,rteSelectState=select,rteASMCount=0} rt
-	# ioState			= IOStSetReceiverTable rt ioState
+	# ioState			= ioStSetReceiverTable rt ioState
 	= ioState
 
 unbindRId :: !Id !(IOSt .l) -> IOSt .l
 unbindRId rid ioState
-	# (rt,ioState)		= IOStGetReceiverTable ioState
+	# (rt,ioState)		= ioStGetReceiverTable ioState
 	  (_,rt)			= removeReceiverFromReceiverTable rid rt
-	# ioState			= IOStSetReceiverTable rt ioState
+	# ioState			= ioStSetReceiverTable rt ioState
 	= ioState
 
 unbindRIds :: ![Id] !(IOSt .l) -> IOSt .l
 unbindRIds ids ioState
-	# (rt,ioState)		= IOStGetReceiverTable ioState
+	# (rt,ioState)		= ioStGetReceiverTable ioState
 	  rt				= unbindRIds` ids rt
-	# ioState			= IOStSetReceiverTable rt ioState
+	# ioState			= ioStSetReceiverTable rt ioState
 	= ioState
 where
 	unbindRIds` :: ![Id] !*ReceiverTable -> *ReceiverTable

@@ -8,18 +8,18 @@ import	StdBool, StdFunc, StdList, StdMisc
 import	commondef, devicefunctions, devicesystemstate, processstack, receivertable, timertable
 import	osdocumentinterface, ostime
 from	osactivaterequests	import OSActivateRequest
-from	osevent				import OSEvents, OScopyEvents, OSnewEvents
+from	osevent				import OSEvents, osCopyEvents, osNewEvents
 from	osguishare			import OSGUIShare
-from	osmouse				import OSGetDoubleClickTime
-from	ossystem			import OSWindowMetrics, OSDefaultWindowMetrics
+from	osmouse				import osGetDoubleClickTime
+from	ossystem			import OSWindowMetrics, osDefaultWindowMetrics
 from	ostoolbox			import OSNewToolbox, OSDummyToolbox
 from	ostypes				import OSWindowPtr, OSNoWindowPtr
 from	roundrobin			import RR, emptyRR, notodoRR
-import StdDebug
+
 
 iostateFatalError :: String String -> .x
 iostateFatalError function error
-	= FatalError function "iostate" error
+	= fatalError function "iostate" error
 
 
 ::	*PSt l
@@ -31,8 +31,8 @@ iostateFatalError function error
 	:==	RR *CProcess											//	is a round-robin
 ::	*CProcess													// The context-free process
 	=	E. .l:
-		{	localState	:: !Maybe l								//	its local state
-		,	localIOSt	:: !*IOSt l								//	its context-free IOSt
+		{	localState		:: !Maybe l							//	its local state
+		,	localIOSt		:: !*IOSt l							//	its context-free IOSt
 		}
 ::	*IOSt l
 	=	{	iounique		:: !*IOUnique l
@@ -114,7 +114,7 @@ emptyIOSt ioId parentId guishare documentInterface processKind processAtts initI
 	# (wMetrics,iounique)			= emptyIOUnique initIO
 	= {	iounique= iounique
 	  ,	ioshare	= {	ioid			= ioId
-  				  ,	ionr			= NullSystemId
+  				  ,	ionr			= nullSystemId
   				  ,	ioparent		= parentId
   				  ,	ioguishare		= guishare
   				  ,	iosubids		= []
@@ -140,9 +140,9 @@ emptyIOSt ioId parentId guishare documentInterface processKind processAtts initI
 emptyIOUnique :: !(IdFun (PSt .l)) -> (!OSWindowMetrics,!*IOUnique .l)
 emptyIOUnique initIO
 	# tb					= OSNewToolbox
-	# (wMetrics,tb)			= OSDefaultWindowMetrics tb
+	# (wMetrics,tb)			= osDefaultWindowMetrics tb
 	= (	wMetrics
-	  ,	{	ioevents		= OSnewEvents
+	  ,	{	ioevents		= osNewEvents
 		,	ioworld			= []
 		,	ioprocesses		= emptyRR
 		,	iodevices		= []
@@ -163,16 +163,16 @@ InitButtonFreqState	:==	{	bfstime		= 0
 						,	bfswindow	= OSNoWindowPtr
 						}
 
-IOStButtonFreq :: !Int !Point2 !OSWindowPtr !(IOSt .l) -> (!Int,!IOSt .l)
-IOStButtonFreq now pos curWindow ioState
+ioStButtonFreq :: !Int !Point2 !OSWindowPtr !(IOSt .l) -> (!Int,!IOSt .l)
+ioStButtonFreq now pos curWindow ioState
 	# (bfs,ioState)		= getButtonFreq ioState
 	  newbfs			= {bfs & bfstime=now, bfspos=pos, bfswindow=curWindow}
 	| curWindow<>bfs.bfswindow
 		= (1,setButtonFreq {newbfs & bfsfreq=1} ioState)
-	# (double,ioState)	= accIOToolbox OSGetDoubleClickTime ioState
+	# (double,ioState)	= accIOToolbox osGetDoubleClickTime ioState
 	  oldpos			= bfs.bfspos
 	  oldfreq			= bfs.bfsfreq
-	  ddDist`			= Dist oldpos.x pos.x + Dist oldpos.y pos.y
+	  ddDist`			= dist oldpos.x pos.x + dist oldpos.y pos.y
 	  dTime				= now-bfs.bfstime
 	| dTime>double || ddDist`>bfs.bfsdddist
 		= (1,setButtonFreq {newbfs & bfsfreq=1} ioState)
@@ -186,8 +186,8 @@ where
 	setButtonFreq :: !ButtonFreqState !(IOSt .l) -> IOSt .l
 	setButtonFreq bfs ioState=:{ioshare} = {ioState & ioshare={ioshare & iobutton=bfs}}
 
-IOStSetDoubleDownDist :: !DoubleDownDist !(IOSt .l) -> IOSt .l
-IOStSetDoubleDownDist ddDist ioState=:{ioshare}
+ioStSetDoubleDownDist :: !DoubleDownDist !(IOSt .l) -> IOSt .l
+ioStSetDoubleDownDist ddDist ioState=:{ioshare}
 	| ddDist==ioshare.iobutton.bfsdddist
 		= ioState
 	| otherwise
@@ -196,230 +196,224 @@ IOStSetDoubleDownDist ddDist ioState=:{ioshare}
 
 //	Access rules to InputTrack:
 
-IOStGetInputTrack :: !(IOSt .l) -> (!Maybe InputTrack,!IOSt .l)
-IOStGetInputTrack ioState=:{ioshare} = (ioshare.ioinputtrack, ioState)
+ioStGetInputTrack :: !(IOSt .l) -> (!Maybe InputTrack,!IOSt .l)
+ioStGetInputTrack ioState=:{ioshare} = (ioshare.ioinputtrack, ioState)
 
-IOStSetInputTrack :: !(Maybe InputTrack) !(IOSt .l) -> IOSt .l
-IOStSetInputTrack inputtrack ioState=:{ioshare} = {ioState & ioshare={ioshare & ioinputtrack=inputtrack}}
+ioStSetInputTrack :: !(Maybe InputTrack) !(IOSt .l) -> IOSt .l
+ioStSetInputTrack inputtrack ioState=:{ioshare} = {ioState & ioshare={ioshare & ioinputtrack=inputtrack}}
 
 
 //	Access rules to IOAttributes:
 
-IOStGetProcessAttributes :: !(IOSt .l) -> (![ProcessAttribute (PSt .l)], !IOSt .l)
-IOStGetProcessAttributes ioState=:{ioshare} = (ioshare.ioatts, ioState)
+ioStGetProcessAttributes :: !(IOSt .l) -> (![ProcessAttribute (PSt .l)], !IOSt .l)
+ioStGetProcessAttributes ioState=:{ioshare} = (ioshare.ioatts, ioState)
 
-IOStSetProcessAttributes :: ![ProcessAttribute (PSt .l)] !(IOSt .l) -> IOSt .l
-IOStSetProcessAttributes atts ioState=:{ioshare} = {ioState & ioshare={ioshare & ioatts=atts}}
+ioStSetProcessAttributes :: ![ProcessAttribute (PSt .l)] !(IOSt .l) -> IOSt .l
+ioStSetProcessAttributes atts ioState=:{ioshare} = {ioState & ioshare={ioshare & ioatts=atts}}
 
 
 //	Access rules to the initial actions:
 
-IOStGetInitIO :: !(IOSt .l) -> (!IdFun (PSt .l), !IOSt .l)
-IOStGetInitIO ioState=:{iounique=unique=:{ioinit}} = (ioinit,{ioState & iounique={unique & ioinit=id}})
+ioStGetInitIO :: !(IOSt .l) -> (!IdFun (PSt .l), !IOSt .l)
+ioStGetInitIO ioState=:{iounique=unique=:{ioinit}} = (ioinit,{ioState & iounique={unique & ioinit=id}})
 
-IOStSetInitIO :: !(IdFun (PSt .l)) !(IOSt .l) -> IOSt .l
-IOStSetInitIO initIO ioState = {ioState & iounique={ioState.iounique & ioinit=initIO}}
+ioStSetInitIO :: !(IdFun (PSt .l)) !(IOSt .l) -> IOSt .l
+ioStSetInitIO initIO ioState = {ioState & iounique={ioState.iounique & ioinit=initIO}}
 
 
 //	Access rules to RuntimeState:
 
-IOStClosed :: !(IOSt .l) -> (!Bool,!IOSt .l)
-IOStClosed ioState=:{ioshare={ioruntime=Closed}}= (True,ioState)
-IOStClosed ioState								= (False,ioState)
+ioStClosed :: !(IOSt .l) -> (!Bool,!IOSt .l)
+ioStClosed ioState=:{ioshare={ioruntime=Closed}}= (True,ioState)
+ioStClosed ioState								= (False,ioState)
 
-IOStGetRuntimeState :: !(IOSt .l) -> (!RuntimeState, !IOSt .l)
-IOStGetRuntimeState ioState=:{ioshare} = (ioshare.ioruntime, ioState)
+ioStGetRuntimeState :: !(IOSt .l) -> (!RuntimeState, !IOSt .l)
+ioStGetRuntimeState ioState=:{ioshare} = (ioshare.ioruntime, ioState)
 
-IOStSetRuntimeState :: !RuntimeState !(IOSt .l) -> IOSt .l
-IOStSetRuntimeState runtime ioState=:{ioshare} = {ioState & ioshare={ioshare & ioruntime=runtime}}
+ioStSetRuntimeState :: !RuntimeState !(IOSt .l) -> IOSt .l
+ioStSetRuntimeState runtime ioState=:{ioshare} = {ioState & ioshare={ioshare & ioruntime=runtime}}
 
 
 //	Access rules to IOIsModal:
 
-IOStGetIOIsModal :: !(IOSt .l) -> (!Maybe SystemId, !IOSt .l)
-IOStGetIOIsModal ioState=:{ioshare} = (ioshare.ioismodal, ioState)
+ioStGetIOIsModal :: !(IOSt .l) -> (!Maybe SystemId, !IOSt .l)
+ioStGetIOIsModal ioState=:{ioshare} = (ioshare.ioismodal, ioState)
 
-IOStSetIOIsModal :: !(Maybe SystemId) !(IOSt .l) -> IOSt .l
-IOStSetIOIsModal optId ioState=:{ioshare} = {ioState & ioshare={ioshare & ioismodal=optId}}
+ioStSetIOIsModal :: !(Maybe SystemId) !(IOSt .l) -> IOSt .l
+ioStSetIOIsModal optId ioState=:{ioshare} = {ioState & ioshare={ioshare & ioismodal=optId}}
 
 
 //	Access rules to IdTable:
 
-IOStGetIdTable :: !(IOSt .l) -> (!*IdTable,!IOSt .l)
-IOStGetIdTable ioState=:{iounique=iounique=:{ioidtable=idTable}}
+ioStGetIdTable :: !(IOSt .l) -> (!*IdTable,!IOSt .l)
+ioStGetIdTable ioState=:{iounique=iounique=:{ioidtable=idTable}}
 	= (idTable, {ioState & iounique={iounique & ioidtable=initialIdTable}})
 
-IOStSetIdTable :: !*IdTable !(IOSt .l) -> IOSt .l
-IOStSetIdTable idTable ioState=:{iounique}
+ioStSetIdTable :: !*IdTable !(IOSt .l) -> IOSt .l
+ioStSetIdTable idTable ioState=:{iounique}
 	= {ioState & iounique={iounique & ioidtable=idTable}}
 
 
 //	Access rules to ReceiverTable:
 
-IOStGetReceiverTable :: !(IOSt .l) -> (!*ReceiverTable,!IOSt .l)
-IOStGetReceiverTable ioState=:{iounique=iounique=:{ioreceivertable=receiverTable}}
+ioStGetReceiverTable :: !(IOSt .l) -> (!*ReceiverTable,!IOSt .l)
+ioStGetReceiverTable ioState=:{iounique=iounique=:{ioreceivertable=receiverTable}}
 	= (receiverTable, {ioState & iounique={iounique & ioreceivertable=initialReceiverTable}})
 
-IOStSetReceiverTable :: !*ReceiverTable !(IOSt .l) -> IOSt .l
-IOStSetReceiverTable ioreceivertable ioState=:{iounique}
+ioStSetReceiverTable :: !*ReceiverTable !(IOSt .l) -> IOSt .l
+ioStSetReceiverTable ioreceivertable ioState=:{iounique}
 	= {ioState & iounique={iounique & ioreceivertable=ioreceivertable}}
 
 
 //	Access rules to TimerTable:
 
-IOStGetTimerTable :: !(IOSt .l) -> (!*TimerTable,!IOSt .l)
-IOStGetTimerTable ioState=:{iounique=iounique=:{iotimertable=tt}}
+ioStGetTimerTable :: !(IOSt .l) -> (!*TimerTable,!IOSt .l)
+ioStGetTimerTable ioState=:{iounique=iounique=:{iotimertable=tt}}
 	= (tt, {ioState & iounique={iounique & iotimertable=initialTimerTable}})
 
-IOStSetTimerTable :: !*TimerTable !(IOSt .l) -> IOSt .l
-IOStSetTimerTable tt ioState=:{iounique}
+ioStSetTimerTable :: !*TimerTable !(IOSt .l) -> IOSt .l
+ioStSetTimerTable tt ioState=:{iounique}
 	= {ioState & iounique={iounique & iotimertable=tt}}
 
 
 //	Access rules to OSTime:
 
-IOStGetOSTime :: !(IOSt .l) -> (!OSTime,!IOSt .l)
-IOStGetOSTime ioState=:{ioshare} = (ioshare.ioostime,ioState)
+ioStGetOSTime :: !(IOSt .l) -> (!OSTime,!IOSt .l)
+ioStGetOSTime ioState=:{ioshare} = (ioshare.ioostime,ioState)
 
-IOStSetOSTime :: !OSTime !(IOSt .l) -> IOSt .l
-IOStSetOSTime ostime ioState=:{ioshare} = {ioState & ioshare={ioshare & ioostime=ostime}}
+ioStSetOSTime :: !OSTime !(IOSt .l) -> IOSt .l
+ioStSetOSTime ostime ioState=:{ioshare} = {ioState & ioshare={ioshare & ioostime=ostime}}
 
 
 //	Access rules to ActivateRequests:
 
-IOStGetActivateRequests :: !(IOSt .l) -> (!ActivateRequests, !IOSt .l)
-IOStGetActivateRequests ioState=:{ioshare} = (ioshare.ioactrequest, ioState)
+ioStGetActivateRequests :: !(IOSt .l) -> (!ActivateRequests, !IOSt .l)
+ioStGetActivateRequests ioState=:{ioshare} = (ioshare.ioactrequest, ioState)
 
-IOStSetActivateRequests :: !ActivateRequests !(IOSt .l) -> IOSt .l
-IOStSetActivateRequests ioReqs ioState=:{ioshare} = {ioState & ioshare={ioshare & ioactrequest=ioReqs}}
+ioStSetActivateRequests :: !ActivateRequests !(IOSt .l) -> IOSt .l
+ioStSetActivateRequests ioReqs ioState=:{ioshare} = {ioState & ioshare={ioshare & ioactrequest=ioReqs}}
 
 
 //	Access rules to the OSEvents environment:
 
-IOStGetEvents :: !(IOSt .l) -> (!*OSEvents, !IOSt .l)
-//IOStGetEvents ioState=:{iounique=unique=:{ioevents}} = (ioevents,{ioState & iounique={unique & ioevents=OSnewEvents}})
-IOStGetEvents ioState=:{iounique=unique=:{ioevents=es}}
-	# (es1,es2)	= OScopyEvents es
+ioStGetEvents :: !(IOSt .l) -> (!*OSEvents, !IOSt .l)
+//ioStGetEvents ioState=:{iounique=unique=:{ioevents}} = (ioevents,{ioState & iounique={unique & ioevents=OSnewEvents}})
+ioStGetEvents ioState=:{iounique=unique=:{ioevents=es}}
+	# (es1,es2)	= osCopyEvents es
 	= (es1,{ioState & iounique={unique & ioevents=es2}})
 
-IOStSetEvents :: !*OSEvents !(IOSt .l) -> IOSt .l
-IOStSetEvents es ioState = {ioState & iounique={ioState.iounique & ioevents=es}}
+ioStSetEvents :: !*OSEvents !(IOSt .l) -> IOSt .l
+ioStSetEvents es ioState = {ioState & iounique={ioState.iounique & ioevents=es}}
 
 
 //	Access rules to the World environment:
 
-IOStGetWorld :: !(IOSt .l) -> (!*World, !IOSt .l)
-IOStGetWorld ioState=:{iounique=unique=:{ioworld=[w:ws]}} = (w,{ioState & iounique={unique & ioworld=ws}})
+ioStGetWorld :: !(IOSt .l) -> (!*World, !IOSt .l)
+ioStGetWorld ioState=:{iounique=unique=:{ioworld=[w:ws]}} = (w,{ioState & iounique={unique & ioworld=ws}})
 
-IOStSetWorld :: !*World !(IOSt .l) -> IOSt .l
-IOStSetWorld w ioState=:{iounique=unique=:{ioworld=ws}} = {ioState & iounique={unique & ioworld=[w:ws]}}
+ioStSetWorld :: !*World !(IOSt .l) -> IOSt .l
+ioStSetWorld w ioState=:{iounique=unique=:{ioworld=ws}} = {ioState & iounique={unique & ioworld=[w:ws]}}
 
 
 //	Access rules to CProcesses:
 
-IOStGetCProcesses :: !(IOSt .l) -> (!CProcesses, !IOSt .l)
-IOStGetCProcesses ioState=:{iounique=unique=:{ioprocesses}} = (ioprocesses,{ioState & iounique={unique & ioprocesses=emptyRR}})
+ioStGetCProcesses :: !(IOSt .l) -> (!CProcesses, !IOSt .l)
+ioStGetCProcesses ioState=:{iounique=unique=:{ioprocesses}} = (ioprocesses,{ioState & iounique={unique & ioprocesses=emptyRR}})
 
-IOStSetCProcesses :: !CProcesses !(IOSt .l) -> IOSt .l
-IOStSetCProcesses processes ioState = {ioState & iounique={ioState.iounique & ioprocesses=processes}}
+ioStSetCProcesses :: !CProcesses !(IOSt .l) -> IOSt .l
+ioStSetCProcesses processes ioState = {ioState & iounique={ioState.iounique & ioprocesses=processes}}
 
 
 //	Access to the ProcessStack of the IOSt:
 
-IOStGetProcessStack :: !(IOSt .l) -> (!ProcessStack, !IOSt .l)
-IOStGetProcessStack ioState=:{ioshare} = (ioshare.iostack,ioState) /*
-IOStGetProcessStack ioState=:{ioshare={iostack}}
-	= (iostack, ioState) */
+ioStGetProcessStack :: !(IOSt .l) -> (!ProcessStack, !IOSt .l)
+ioStGetProcessStack ioState=:{ioshare} = (ioshare.iostack,ioState)
 
-IOStSetProcessStack :: !ProcessStack !(IOSt .l) -> IOSt .l
-IOStSetProcessStack ioStack ioState=:{ioshare} = {ioState & ioshare={ioshare & iostack=ioStack}} /*
-IOStSetProcessStack ioStack ioState=:{ioshare}
-	= {ioState & ioshare={ioshare & iostack=ioStack}} */
+ioStSetProcessStack :: !ProcessStack !(IOSt .l) -> IOSt .l
+ioStSetProcessStack ioStack ioState=:{ioshare} = {ioState & ioshare={ioshare & iostack=ioStack}}
 
-SelectIOSt :: !(IOSt .l) -> IOSt .l
-SelectIOSt ioState=:{ioshare} = {ioState & ioshare={ioshare & iostack=selectProcessShowState ioshare.ioid ioshare.iostack}} /*
-SelectIOSt ioState=:{ioshare=ioshare=:{ioid,iostack}}
-	= {ioState & ioshare={ioshare & iostack=selectProcessShowState ioid iostack}} */
+selectIOSt :: !(IOSt .l) -> IOSt .l
+selectIOSt ioState=:{ioshare} = {ioState & ioshare={ioshare & iostack=selectProcessShowState ioshare.ioid ioshare.iostack}}
 
 
 //	Access rules to DocumentInterface:
 
-IOStGetDocumentInterface :: !(IOSt .l) -> (!DocumentInterface, !IOSt .l)
-IOStGetDocumentInterface ioState=:{ioshare} = (getOSDInfoDocumentInterface ioshare.ioosdinfo, ioState)
+ioStGetDocumentInterface :: !(IOSt .l) -> (!DocumentInterface, !IOSt .l)
+ioStGetDocumentInterface ioState=:{ioshare} = (getOSDInfoDocumentInterface ioshare.ioosdinfo, ioState)
 
 
 //	Access rules to OSDInfo:
 
-IOStGetOSDInfo :: !(IOSt .l) -> (!OSDInfo,!IOSt .l)
-IOStGetOSDInfo ioState=:{ioshare} = (ioshare.ioosdinfo, ioState)
+ioStGetOSDInfo :: !(IOSt .l) -> (!OSDInfo,!IOSt .l)
+ioStGetOSDInfo ioState=:{ioshare} = (ioshare.ioosdinfo, ioState)
 
-IOStSetOSDInfo :: !OSDInfo !(IOSt .l) -> IOSt .l
-IOStSetOSDInfo osdInfo ioState=:{ioshare} = {ioState & ioshare={ioshare & ioosdinfo=osdInfo}}
+ioStSetOSDInfo :: !OSDInfo !(IOSt .l) -> IOSt .l
+ioStSetOSDInfo osdInfo ioState=:{ioshare} = {ioState & ioshare={ioshare & ioosdinfo=osdInfo}}
 
 
 //	Access rules to ProcessKind:
 
-IOStGetProcessKind :: !(IOSt .l) -> (!ProcessKind, !IOSt .l)
-IOStGetProcessKind ioState=:{ioshare} = (ioshare.iokind, ioState)
+ioStGetProcessKind :: !(IOSt .l) -> (!ProcessKind, !IOSt .l)
+ioStGetProcessKind ioState=:{ioshare} = (ioshare.iokind, ioState)
 
 
 //	Swapping of IOSt environments:
 
-IOStSwapIO :: !(![*World],!CProcesses) !(IOSt .l) -> (!(![*World],!CProcesses),!IOSt .l)
-IOStSwapIO (world`,cprocesses`) ioState=:{iounique=unique=:{ioworld,ioprocesses}}
+ioStSwapIO :: !(![*World],!CProcesses) !(IOSt .l) -> (!(![*World],!CProcesses),!IOSt .l)
+ioStSwapIO (world`,cprocesses`) ioState=:{iounique=unique=:{ioworld,ioprocesses}}
 	= ((ioworld,ioprocesses),{ioState & iounique={unique & ioworld=world`,ioprocesses=cprocesses`}})
 
 
 //	Access to the SystemId of the IOSt:
 
-IOStGetIOId :: !(IOSt .l) -> (!SystemId,!IOSt .l)
-IOStGetIOId ioState=:{ioshare} = (ioshare.ioid,ioState)
+ioStGetIOId :: !(IOSt .l) -> (!SystemId,!IOSt .l)
+ioStGetIOId ioState=:{ioshare} = (ioshare.ioid,ioState)
 
 
 //	Access to the max SystemId of the IOSt:
 
-IOStGetMaxIONr :: !(IOSt .l) -> (!SystemId,!IOSt .l)
-IOStGetMaxIONr ioState=:{ioshare} = (ioshare.ionr,ioState)
+ioStGetMaxIONr :: !(IOSt .l) -> (!SystemId,!IOSt .l)
+ioStGetMaxIONr ioState=:{ioshare} = (ioshare.ionr,ioState)
 
-IOStSetMaxIONr :: !SystemId !(IOSt .l) -> IOSt .l
-IOStSetMaxIONr maxId ioState=:{ioshare} = {ioState & ioshare={ioshare & ionr=maxId}}
+ioStSetMaxIONr :: !SystemId !(IOSt .l) -> IOSt .l
+ioStSetMaxIONr maxId ioState=:{ioshare} = {ioState & ioshare={ioshare & ionr=maxId}}
 
-IOStNewMaxIONr :: !(IOSt .l) -> (!SystemId,!IOSt .l)
-IOStNewMaxIONr ioState=:{ioshare}
+ioStNewMaxIONr :: !(IOSt .l) -> (!SystemId,!IOSt .l)
+ioStNewMaxIONr ioState=:{ioshare}
 	= (newMaxId, {ioState & ioshare={ioshare & ionr=maxId1}})
 where
-	(maxId1,newMaxId) = IncrSystemId ioshare.ionr
+	(maxId1,newMaxId) = incrSystemId ioshare.ionr
 
 
 //	Access to the parent Id of the IOSt:
 
-IOStGetParentId :: !(IOSt .l) -> (!Maybe SystemId,!IOSt .l)
-IOStGetParentId ioState=:{ioshare} = (ioshare.ioparent,ioState)
+ioStGetParentId :: !(IOSt .l) -> (!Maybe SystemId,!IOSt .l)
+ioStGetParentId ioState=:{ioshare} = (ioshare.ioparent,ioState)
 
 
 //	Access to the subprocess flag of the IOSt:
 
-IOStGetGUIShare :: !(IOSt .l) -> (!Maybe GUIShare,!IOSt .l)
-IOStGetGUIShare ioState=:{ioshare} = (ioshare.ioguishare,ioState)
+ioStGetGUIShare :: !(IOSt .l) -> (!Maybe GUIShare,!IOSt .l)
+ioStGetGUIShare ioState=:{ioshare} = (ioshare.ioguishare,ioState)
 
 
 //	Access to the SystemIds of the subprocess of the IOSt:
 
-IOStGetSubProcessIds :: !(IOSt .l) -> (![SystemId],!IOSt .l)
-IOStGetSubProcessIds ioState=:{ioshare} = (ioshare.iosubids,ioState)
+ioStGetSubProcessIds :: !(IOSt .l) -> (![SystemId],!IOSt .l)
+ioStGetSubProcessIds ioState=:{ioshare} = (ioshare.iosubids,ioState)
 
-IOStSetSubProcessIds :: ![SystemId] !(IOSt .l) -> IOSt .l
-IOStSetSubProcessIds ids ioState=:{ioshare} = {ioState & ioshare={ioshare & iosubids=ids}}
+ioStSetSubProcessIds :: ![SystemId] !(IOSt .l) -> IOSt .l
+ioStSetSubProcessIds ids ioState=:{ioshare} = {ioState & ioshare={ioshare & iosubids=ids}}
 
 
 //	Access to the global seed integer to generate all Ids (see StdId):
 
-IOStGetIdSeed :: !(IOSt .l) -> (!Int,!IOSt .l)
-IOStGetIdSeed ioState=:{ioshare}
+ioStGetIdSeed :: !(IOSt .l) -> (!Int,!IOSt .l)
+ioStGetIdSeed ioState=:{ioshare}
 	= (ioshare.ioidseed,ioState)
 
-IOStSetIdSeed :: !Int !(IOSt .l) -> IOSt .l
-IOStSetIdSeed seed ioState=:{ioshare}
+ioStSetIdSeed :: !Int !(IOSt .l) -> IOSt .l
+ioStSetIdSeed seed ioState=:{ioshare}
 	= {ioState & ioshare={ioshare & ioidseed=seed}}
 
 
@@ -427,26 +421,26 @@ IOStSetIdSeed seed ioState=:{ioshare}
 
 InitClipboardState	:==	{cbsCount=0}
 
-IOStGetClipboardState :: !(IOSt .l) -> (!ClipboardState, !IOSt .l)
-IOStGetClipboardState ioState=:{ioshare} = (ioshare.ioclipboard,ioState)
+ioStGetClipboardState :: !(IOSt .l) -> (!ClipboardState, !IOSt .l)
+ioStGetClipboardState ioState=:{ioshare} = (ioshare.ioclipboard,ioState)
 
-IOStSetClipboardState :: !ClipboardState !(IOSt .l) -> IOSt .l
-IOStSetClipboardState clipboard ioState=:{ioshare} = {ioState & ioshare={ioshare & ioclipboard=clipboard}}
+ioStSetClipboardState :: !ClipboardState !(IOSt .l) -> IOSt .l
+ioStSetClipboardState clipboard ioState=:{ioshare} = {ioState & ioshare={ioshare & ioclipboard=clipboard}}
 
 
 //	Access to the OSWindowMetrics of the IOSt:
 
-IOStGetOSWindowMetrics :: !(IOSt .l) -> (!OSWindowMetrics,!IOSt .l)
-IOStGetOSWindowMetrics ioState=:{ioshare} = (ioshare.iooswmetrics,ioState)
+ioStGetOSWindowMetrics :: !(IOSt .l) -> (!OSWindowMetrics,!IOSt .l)
+ioStGetOSWindowMetrics ioState=:{ioshare} = (ioshare.iooswmetrics,ioState)
 
 
 //	Access to the DeviceFunctions:
 
-IOStGetDeviceFunctions :: !(IOSt .l) -> (![DeviceFunctions (PSt .l)],!IOSt .l)
-IOStGetDeviceFunctions ioState=:{ioshare} = (ioshare.iodevicefuncs,ioState)
+ioStGetDeviceFunctions :: !(IOSt .l) -> (![DeviceFunctions (PSt .l)],!IOSt .l)
+ioStGetDeviceFunctions ioState=:{ioshare} = (ioshare.iodevicefuncs,ioState)
 
-IOStSetDeviceFunctions :: !(DeviceFunctions (PSt .l)) !(IOSt .l) -> IOSt .l
-IOStSetDeviceFunctions funcs=:{dDevice} ioState=:{ioshare=ioshare=:{iodevicefuncs}}
+ioStSetDeviceFunctions :: !(DeviceFunctions (PSt .l)) !(IOSt .l) -> IOSt .l
+ioStSetDeviceFunctions funcs=:{dDevice} ioState=:{ioshare=ioshare=:{iodevicefuncs}}
 	= {ioState & ioshare={ioshare & iodevicefuncs=setdevicefunctions (priorityDevice dDevice) dDevice funcs iodevicefuncs}}
 where
 	setdevicefunctions :: !Int !Device !(DeviceFunctions .pst) ![DeviceFunctions .pst] -> [DeviceFunctions .pst]
@@ -461,8 +455,8 @@ where
 	setdevicefunctions _ _ funcs _
 		= [funcs]
 
-IOStRemoveDeviceFunctions :: !Device !(IOSt .l) -> IOSt .l
-IOStRemoveDeviceFunctions device ioState=:{ioshare=ioshare=:{iodevicefuncs}}
+ioStRemoveDeviceFunctions :: !Device !(IOSt .l) -> IOSt .l
+ioStRemoveDeviceFunctions device ioState=:{ioshare=ioshare=:{iodevicefuncs}}
 	= {ioState & ioshare={ioshare & iodevicefuncs=removedevicefunctions device iodevicefuncs}}
 where
 	removedevicefunctions :: !Device ![DeviceFunctions .pst] -> [DeviceFunctions .pst]
@@ -477,15 +471,15 @@ where
 
 //	Access to the DeviceSystemStates:
 
-IOStLastInteraction :: !(IOSt .l) -> (!Bool,!IOSt .l)
-IOStLastInteraction ioState
-	# (processes,ioState)	= IOStGetCProcesses ioState
+ioStLastInteraction :: !(IOSt .l) -> (!Bool,!IOSt .l)
+ioStLastInteraction ioState
+	# (processes,ioState)	= ioStGetCProcesses ioState
 	  (empty,processes)		= notodoRR processes
-	# ioState				= IOStSetCProcesses processes ioState
+	# ioState				= ioStSetCProcesses processes ioState
 	= (empty,ioState)
 
-IOStHasDevice :: !Device !(IOSt .l) -> (!Bool,!IOSt .l)
-IOStHasDevice d ioState=:{iounique=iounique=:{iodevices=ds}}
+ioStHasDevice :: !Device !(IOSt .l) -> (!Bool,!IOSt .l)
+ioStHasDevice d ioState=:{iounique=iounique=:{iodevices=ds}}
 	# (ok,ds)	= devicesHaveDevice d ds
 	= (ok, {ioState & iounique={iounique & iodevices=ds}})
 where
@@ -500,13 +494,13 @@ where
 	devicesHaveDevice _ []
 		= (False,[])
 
-IOStGetDevices :: !(IOSt .l) -> (![Device],!IOSt .l)
-IOStGetDevices ioState=:{iounique=iounique=:{iodevices=ds}}
-	# (devices,ds)	= AccessList toDevice ds
+ioStGetDevices :: !(IOSt .l) -> (![Device],!IOSt .l)
+ioStGetDevices ioState=:{iounique=iounique=:{iodevices=ds}}
+	# (devices,ds)	= accessList toDevice ds
 	= (devices,{ioState & iounique={iounique & iodevices=ds}})
 
-IOStGetDevice :: !Device !(IOSt .l) -> (!Bool,DeviceSystemState (PSt .l),!IOSt .l)
-IOStGetDevice d ioState=:{iounique=iounique=:{iodevices=ds}}
+ioStGetDevice :: !Device !(IOSt .l) -> (!Bool,DeviceSystemState (PSt .l),!IOSt .l)
+ioStGetDevice d ioState=:{iounique=iounique=:{iodevices=ds}}
 	# (found,device,ds)	= devicesGetDevice d ds
 	= (found,device,{ioState & iounique={iounique & iodevices=ds}})
 where
@@ -521,8 +515,8 @@ where
 	devicesGetDevice d []
 		= (False,undef,[])
 
-IOStSetDevice :: !(DeviceSystemState (PSt .l)) !(IOSt .l) -> IOSt .l
-IOStSetDevice d ioState=:{iounique=iounique=:{iodevices=ds}}
+ioStSetDevice :: !(DeviceSystemState (PSt .l)) !(IOSt .l) -> IOSt .l
+ioStSetDevice d ioState=:{iounique=iounique=:{iodevices=ds}}
 	#! (device,d)	= toDevice d
 	#! ds	 		= devicesSetDevice (priorityDevice device) device d ds
 	#! iounique		= {iounique & iodevices=ds}
@@ -532,7 +526,7 @@ where
 	devicesSetDevice p device dState2 [dState1:dStates]
 		# (device1,dState1)	= toDevice dState1
 		| device1==device
-			= iostateFatalError "IOStSetDevice" (toString device+++" already present") //[dState2:dStates]
+			= iostateFatalError "ioStSetDevice" (toString device+++" already present") //[dState2:dStates]
 		| p>priorityDevice device1
 			= [dState2,dState1:dStates]
 		| otherwise
@@ -542,12 +536,12 @@ where
 		= [dState]
 
 // MW11..
-IOStGetRcvDisabled	:: !(IOSt .l) -> (!Bool, !IOSt .l)
-IOStGetRcvDisabled io=:{ioshare={iorcvdisabled}}
+ioStGetRcvDisabled	:: !(IOSt .l) -> (!Bool, !IOSt .l)
+ioStGetRcvDisabled io=:{ioshare={iorcvdisabled}}
 	= (iorcvdisabled, io)
 
-IOStSetRcvDisabled	:: !Bool !(IOSt .l) -> IOSt .l
-IOStSetRcvDisabled iorcvdisabled io=:{ioshare}
+ioStSetRcvDisabled	:: !Bool !(IOSt .l) -> IOSt .l
+ioStSetRcvDisabled iorcvdisabled io=:{ioshare}
 	= { io & ioshare={ ioshare & iorcvdisabled=iorcvdisabled }}
 // ..MW11
 

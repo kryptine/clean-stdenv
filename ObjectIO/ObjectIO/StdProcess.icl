@@ -7,12 +7,12 @@ implementation module StdProcess
 import	StdFunc, StdList
 import	StdProcessDef
 import	devicefunctions, iostate, processdevice, scheduler
-from	commondef			import StateMap2, Contains, Cond, RectSize, StrictSeq
+from	commondef			import stateMap2, Cond, rectSize, strictSeq
 from	processstack		import setProcessShowState
 from	StdProcessAttribute	import isProcessOpenFiles, isProcessToolbar
 import	osdocumentinterface
 from	ostypes				import Rect
-from	ossystem			import OSGetProcessWindowDimensions
+from	ossystem			import osGetProcessWindowDimensions
 
 
 //	General process topology creation functions:
@@ -24,13 +24,13 @@ class Processes pdef where
 instance Processes [pdef]	| Processes pdef where
 	startProcesses :: ![pdef] !*World -> *World | Processes pdef
 	startProcesses pDefs world
-		# (initContext, tb)	= initContext (StateMap2 openProcesses (reverse pDefs)) "" 0 NDI VirtualProcess world
+		# (initContext, tb)	= initContext (stateMap2 openProcesses (reverse pDefs)) "" 0 NDI VirtualProcess world
 		# (finalContext,tb)	= handleEvents initContext tb
 		= closeContext finalContext tb
 	
 	openProcesses :: ![pdef] !(PSt .l) -> PSt .l | Processes pdef
 	openProcesses pDefs pState
-		= addVirtualProcess (StateMap2 openProcesses (reverse pDefs)) "" (0,0) pState
+		= addVirtualProcess (stateMap2 openProcesses (reverse pDefs)) "" (0,0) pState
 
 instance Processes Process  where
 	startProcesses :: !Process !*World -> *World
@@ -41,7 +41,7 @@ instance Processes Process  where
 	
 	openProcesses :: !Process !(PSt .l) -> PSt .l
 	openProcesses (Process xDI local init atts) pState
-		= addInteractiveProcess atts (init o ProcessFunctions.dOpen) "" local NotShareGUI xDI pState
+		= addInteractiveProcess atts (init o processFunctions.dOpen) "" local NotShareGUI xDI pState
 
 
 //	Specialised process creation functions:
@@ -73,13 +73,13 @@ showProcess pState
 
 hide_show :: !Bool !(PSt .l) -> PSt .l
 hide_show shouldHide pState=:{io}
-	# (nr,ioState)				= IOStGetIOId io
-	# (ioStack,ioState)			= IOStGetProcessStack ioState
+	# (nr,ioState)				= ioStGetIOId io
+	# (ioStack,ioState)			= ioStGetProcessStack ioState
 	# ioStack					= setProcessShowState nr (not shouldHide) ioStack
-	# ioState					= IOStSetProcessStack ioStack ioState
-	# (deviceFunctions,ioState)	= IOStGetDeviceFunctions ioState
+	# ioState					= ioStSetProcessStack ioStack ioState
+	# (deviceFunctions,ioState)	= ioStGetDeviceFunctions ioState
 	  hideOrShow				= if shouldHide [df.dHide \\ df<-deviceFunctions] [df.dShow \\ df<-deviceFunctions]
-	= StrictSeq hideOrShow {pState & io=ioState}
+	= strictSeq hideOrShow {pState & io=ioState}
 
 
 /* RWS ..
@@ -104,8 +104,8 @@ getProcessWindowSize ioState
 getProcessWindowPos :: !(IOSt .l) -> (!Point2,!IOSt .l)
 getProcessWindowPos ioState
 	# (tb,ioState)		= getIOToolbox ioState
-	# (osdinfo,ioState)	= IOStGetOSDInfo ioState					// PA+++
-	# (rect,tb)			= OSGetProcessWindowDimensions osdinfo tb	// PA: OSDInfo argument added
+	# (osdinfo,ioState)	= ioStGetOSDInfo ioState					// PA+++
+	# (rect,tb)			= osGetProcessWindowDimensions osdinfo tb	// PA: OSDInfo argument added
 	# ioState			= setIOToolbox tb ioState
 	= ({x=rect.rleft,y=rect.rtop},ioState)
 
@@ -114,8 +114,8 @@ getProcessWindowPos ioState
 getProcessWindowSize :: !(IOSt .l) -> (!Size,!IOSt .l)
 getProcessWindowSize ioState
 	# (tb,ioState)		= getIOToolbox ioState
-	# (osdinfo,ioState)	= IOStGetOSDInfo ioState					// PA+++
-	# (rect,tb)			= OSGetProcessWindowDimensions osdinfo tb	// PA: OSDInfo argument added
+	# (osdinfo,ioState)	= ioStGetOSDInfo ioState					// PA+++
+	# (rect,tb)			= osGetProcessWindowDimensions osdinfo tb	// PA: OSDInfo argument added
 	# ioState			= setIOToolbox tb ioState
-	= (RectSize rect,ioState)
+	= (rectSize rect,ioState)
 /* ... RWS */

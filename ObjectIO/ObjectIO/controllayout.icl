@@ -12,12 +12,12 @@ import	commondef, layout, StdControlAttribute, windowaccess, wstateaccess
 
 
 controllayoutError :: String String -> .x
-controllayoutError rule error
-	= Error rule "controllayout" error
+controllayoutError rule message
+	= error rule "controllayout" message
 
 controllayoutFatalError :: String String -> .x
-controllayoutFatalError rule error
-	= FatalError rule "controllayout" error
+controllayoutFatalError rule message
+	= fatalError rule "controllayout" message
 
 
 //	Calculate the precise position (in pixels) of each Control.
@@ -88,7 +88,7 @@ where
 			  							_			-> False
 			= (is_line_item,fix_corner_item_found,WItemHandle itemH)
 	where
-		(hasPos,posAtt)		= Select isControlPos (ControlPos (Left,NoOffset)) wItemAtts
+		(hasPos,posAtt)		= cselect isControlPos (ControlPos (Left,NoOffset)) wItemAtts
 		pos					= fst (getControlPosAtt posAtt)
 	
 	validateFirstWElementPos fix_corner_item_found (WListLSHandle itemHs)
@@ -108,7 +108,7 @@ validateFirstWElementsPos` :: !Bool ![WElementHandle`] -> (!Bool,!Bool,![WElemen
 validateFirstWElementsPos` fix_corner_item_found itemHs
 	| isEmpty itemHs
 		= (False,fix_corner_item_found,itemHs)
-	# (itemH,itemHs)							= HdTl itemHs
+	# (itemH,itemHs)							= hdtl itemHs
 	  (done,fix_corner_item_found,itemH)		= validateFirstWElementPos` fix_corner_item_found itemH
 	| done
 		= (done,fix_corner_item_found,[itemH:itemHs])
@@ -140,7 +140,7 @@ where
 			  							_			-> False
 			= (is_line_item,fix_corner_item_found,WItemHandle` itemH)
 	where
-		(hasPos,posAtt)		= Select iscontrolpos` (ControlPos` (Left,NoOffset)) wItemAtts`
+		(hasPos,posAtt)		= cselect iscontrolpos` (ControlPos` (Left,NoOffset)) wItemAtts`
 		pos					= fst (getcontrolpos` posAtt)
 	
 	validateFirstWElementPos` fix_corner_item_found (WRecursiveHandle` itemHs kind)
@@ -235,7 +235,7 @@ where
 		where
 			pos						= getLayoutItemPos prevId wItemAtts
 			(id,cId1,prevIds1)		= getLayoutItemId cId itemH.wItemId prevIds
-			itemHeight				= OSgetRadioControlItemHeight wMetrics
+			itemHeight				= osGetRadioControlItemHeight wMetrics
 			info					= getWItemRadioInfo wItemInfo
 			items					= info.radioItems
 			layout					= info.radioLayout
@@ -257,7 +257,7 @@ where
 		where
 			pos						= getLayoutItemPos prevId wItemAtts
 			(id,cId1,prevIds1)		= getLayoutItemId cId itemH.wItemId prevIds
-			itemHeight				= OSgetCheckControlItemHeight wMetrics
+			itemHeight				= osGetCheckControlItemHeight wMetrics
 			info					= getWItemCheckInfo wItemInfo
 			items					= info.checkItems
 			layout					= info.checkLayout
@@ -304,14 +304,14 @@ where
 				hasHScroll				= isJust info.compoundHScroll
 				hasVScroll				= isJust info.compoundVScroll
 				(minSize,atts1)			= validateMinSize atts
-				(hadSize,reqSize,atts2)	= validateCompoundSize wMetrics (RectToRectangle domainRect) (hasHScroll,hasVScroll) atts1
-				(_,hMarginAtt)			= Select isControlHMargin (ControlHMargin lMargin rMargin) atts2
+				(hadSize,reqSize,atts2)	= validateCompoundSize wMetrics (rectToRectangle domainRect) (hasHScroll,hasVScroll) atts1
+				(_,hMarginAtt)			= cselect isControlHMargin (ControlHMargin lMargin rMargin) atts2
 				newHMargins				= validateControlMargin (getControlHMarginAtt hMarginAtt)
-				(_,vMarginAtt)			= Select isControlVMargin (ControlVMargin tMargin bMargin) atts2
+				(_,vMarginAtt)			= cselect isControlVMargin (ControlVMargin tMargin bMargin) atts2
 				newVMargins				= validateControlMargin (getControlVMarginAtt vMarginAtt)
-				(_,spaceAtt)			= Select isControlItemSpace (ControlItemSpace (fst spaces) (snd spaces)) atts2
+				(_,spaceAtt)			= cselect isControlItemSpace (ControlItemSpace (fst spaces) (snd spaces)) atts2
 				newItemSpaces			= validateControlItemSpace (getControlItemSpaceAtt spaceAtt)
-				domain					= RectToRectangle domainRect
+				domain					= rectToRectangle domainRect
 				newOrientations			= [(domain,origin):orientations]
 				(derSize,itemHs1,tb1)	= layoutControls wMetrics newHMargins newVMargins newItemSpaces reqSize minSize newOrientations itemHs tb
 				okDerivedSize			= validateDerivedCompoundSize wMetrics domainRect (hasHScroll,hasVScroll) derSize reqSize
@@ -321,8 +321,8 @@ where
 				validateMinSize atts
 					= (okMinSize,if hadMinSize [ControlMinimumSize okMinSize:atts1] atts1)
 				where
-					(defMinW,defMinH)			= OSMinCompoundSize
-					(hadMinSize,minAtt,atts1)	= Remove isControlMinimumSize (ControlMinimumSize {w=defMinW,h=defMinH}) atts
+					(defMinW,defMinH)			= osMinCompoundSize
+					(hadMinSize,minAtt,atts1)	= remove isControlMinimumSize (ControlMinimumSize {w=defMinW,h=defMinH}) atts
 					minSize						= getControlMinimumSizeAtt minAtt
 					okMinSize					= {w=max defMinW minSize.w,h=max defMinH minSize.h}
 
@@ -339,22 +339,22 @@ where
 					| not hasSize
 						= (False,zero,atts)
 					| isControlViewSize sizeAtt
-						= (True,size1,snd (Replace isControlViewSize (ControlViewSize size1) atts))
+						= (True,size1,snd (creplace isControlViewSize (ControlViewSize size1) atts))
 					with
 						size			= getControlViewSizeAtt sizeAtt
 						size1			= {w=max size.w (fst minSize),h=max size.h (snd minSize)}
 					| otherwise
 						# (w,h)			= toTuple outerSize
-						  visScrolls	= OSscrollbarsAreVisible wMetrics (RectangleToRect domain) (w,h) hasScrolls
-						  viewSize		= RectSize (getCompoundContentRect wMetrics visScrolls (SizeToRect {w=w,h=h}))
-						# (_,_,atts)	= Remove isControlOuterSize undef atts
-						# (_,_,atts)	= Remove isControlViewSize  undef atts
+						  visScrolls	= osScrollbarsAreVisible wMetrics (rectangleToRect domain) (w,h) hasScrolls
+						  viewSize		= rectSize (getCompoundContentRect wMetrics visScrolls (sizeToRect {w=w,h=h}))
+						# (_,_,atts)	= remove isControlOuterSize undef atts
+						# (_,_,atts)	= remove isControlViewSize  undef atts
 						= (True,viewSize,[ControlViewSize viewSize:atts])
 					with
 						outerSize		= getControlOuterSizeAtt sizeAtt
 				where
-					(hasSize,sizeAtt)	= Select (\att->isControlViewSize att || isControlOuterSize att) undef atts
-					minSize				= OSMinCompoundSize
+					(hasSize,sizeAtt)	= cselect (\att->isControlViewSize att || isControlOuterSize att) undef atts
+					minSize				= osMinCompoundSize
 				
 				validateDerivedCompoundSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) Size !Size -> Size
 				validateDerivedCompoundSize wMetrics domain hasScrolls derSize reqSize
@@ -369,9 +369,9 @@ where
 						| visVScroll				= {size & w=w`}
 						| otherwise					= size
 					where
-						domainSize					= RectSize domainRect
-						visHScroll					= hasHScroll && OSscrollbarIsVisible (domainRect.rleft,domainRect.rright)  w
-						visVScroll					= hasVScroll && OSscrollbarIsVisible (domainRect.rtop, domainRect.rbottom) h
+						domainSize					= rectSize domainRect
+						visHScroll					= hasHScroll && osScrollbarIsVisible (domainRect.rleft,domainRect.rright)  w
+						visVScroll					= hasVScroll && osScrollbarIsVisible (domainRect.rtop, domainRect.rbottom) h
 						(w`,h`)						= (w+wMetrics.osmVSliderWidth,h+wMetrics.osmHSliderHeight)
 		
 		getLayoutWItem wMetrics hMargins vMargins spaces orientations prevIds prevId cId itemH=:{wItemKind=IsLayoutControl,wItemAtts,wItems} tb
@@ -390,11 +390,11 @@ where
 			where
 				(minSize,atts1)			= validateMinSize atts
 				(hadSize,reqSize,atts2)	= validateLayoutSize wMetrics atts1
-				(_,hMarginAtt)			= Select isControlHMargin (ControlHMargin lMargin rMargin) atts2
+				(_,hMarginAtt)			= cselect isControlHMargin (ControlHMargin lMargin rMargin) atts2
 				newHMargins				= validateControlMargin (getControlHMarginAtt hMarginAtt)
-				(_,vMarginAtt)			= Select isControlVMargin (ControlVMargin tMargin bMargin) atts2
+				(_,vMarginAtt)			= cselect isControlVMargin (ControlVMargin tMargin bMargin) atts2
 				newVMargins				= validateControlMargin (getControlVMarginAtt vMarginAtt)
-				(_,spaceAtt)			= Select isControlItemSpace (ControlItemSpace (fst spaces) (snd spaces)) atts2
+				(_,spaceAtt)			= cselect isControlItemSpace (ControlItemSpace (fst spaces) (snd spaces)) atts2
 				newItemSpaces			= validateControlItemSpace (getControlItemSpaceAtt spaceAtt)
 				(derSize,itemHs1,tb1)	= layoutControls wMetrics newHMargins newVMargins newItemSpaces reqSize minSize orientations itemHs tb
 				okDerivedSize			= validateDerivedLayoutSize wMetrics derSize reqSize
@@ -403,7 +403,7 @@ where
 				validateMinSize atts
 					= (okMinSize,if hadMinSize [ControlMinimumSize okMinSize:atts1] atts1)
 				where
-					(hadMinSize,minAtt,atts1)	= Remove isControlMinimumSize (ControlMinimumSize zero) atts
+					(hadMinSize,minAtt,atts1)	= remove isControlMinimumSize (ControlMinimumSize zero) atts
 					minSize						= getControlMinimumSizeAtt minAtt
 					okMinSize					= {w=max 0 minSize.w,h=max 0 minSize.h}
 
@@ -418,11 +418,11 @@ where
 						= (False,zero,atts)
 					| otherwise
 						# size1			= {w=max size.w 0,h=max size.h 0}
-						# (_,_,atts)	= Remove isControlOuterSize undef atts
-						# (_,_,atts)	= Remove isControlViewSize  undef atts
+						# (_,_,atts)	= remove isControlOuterSize undef atts
+						# (_,_,atts)	= remove isControlViewSize  undef atts
 						= (True,size1,[ControlViewSize size1:atts])
 				where
-					(hasSize,sizeAtt)	= Select (\att->isControlViewSize att || isControlOuterSize att) undef atts
+					(hasSize,sizeAtt)	= cselect (\att->isControlViewSize att || isControlOuterSize att) undef atts
 					size				= if (isControlViewSize sizeAtt) (getControlViewSizeAtt sizeAtt) (getControlOuterSizeAtt sizeAtt)
 
 		getLayoutWItem _ _ _ _ _ _ _ _ _ _
@@ -432,7 +432,7 @@ where
 		getLayoutItemPos prevId atts
 			= (itemLoc1,offset)
 		where
-			(itemLoc,offset)	= getControlPosAtt (snd (Select isControlPos (ControlPos (RightTo prevId,NoOffset)) atts))
+			(itemLoc,offset)	= getControlPosAtt (snd (cselect isControlPos (ControlPos (RightTo prevId,NoOffset)) atts))
 			itemLoc1			= if (isRelativeToPrev itemLoc) (setRelativeTo prevId itemLoc) itemLoc
 	
 	getLayoutItem wMetrics hMargins vMargins spaces orientations prevIds prevId cId (WListLSHandle itemHs) tb
@@ -525,7 +525,7 @@ where
 		where
 			pos						= getLayoutItemPos prevId wItemAtts`
 			(id,cId1,prevIds1)		= getLayoutItemId cId itemH.wItemId` prevIds
-			itemHeight				= OSgetRadioControlItemHeight wMetrics
+			itemHeight				= osGetRadioControlItemHeight wMetrics
 			info					= getWItemRadioInfo` wItemInfo`
 			items					= info.radioItems`
 			layout					= info.radioLayout`
@@ -547,7 +547,7 @@ where
 		where
 			pos						= getLayoutItemPos prevId wItemAtts`
 			(id,cId1,prevIds1)		= getLayoutItemId cId itemH.wItemId` prevIds
-			itemHeight				= OSgetCheckControlItemHeight wMetrics
+			itemHeight				= osGetCheckControlItemHeight wMetrics
 			info					= getWItemCheckInfo` wItemInfo`
 			items					= info.checkItems`
 			layout					= info.checkLayout`
@@ -594,14 +594,14 @@ where
 				hasHScroll				= isJust info.compoundHScroll
 				hasVScroll				= isJust info.compoundVScroll
 				(minSize,atts1)			= validateMinSize atts
-				(hadSize,reqSize,atts2)	= validateCompoundSize wMetrics (RectToRectangle domainRect) (hasHScroll,hasVScroll) atts1
-				(_,hMarginAtt)			= Select iscontrolhmargin` (ControlHMargin` lMargin rMargin) atts2
+				(hadSize,reqSize,atts2)	= validateCompoundSize wMetrics (rectToRectangle domainRect) (hasHScroll,hasVScroll) atts1
+				(_,hMarginAtt)			= cselect iscontrolhmargin` (ControlHMargin` lMargin rMargin) atts2
 				newHMargins				= validateControlMargin (getcontrolhmargin` hMarginAtt)
-				(_,vMarginAtt)			= Select iscontrolvmargin` (ControlVMargin` tMargin bMargin) atts2
+				(_,vMarginAtt)			= cselect iscontrolvmargin` (ControlVMargin` tMargin bMargin) atts2
 				newVMargins				= validateControlMargin (getcontrolvmargin` vMarginAtt)
-				(_,spaceAtt)			= Select iscontrolitemspace` (ControlItemSpace` (fst spaces) (snd spaces)) atts2
+				(_,spaceAtt)			= cselect iscontrolitemspace` (ControlItemSpace` (fst spaces) (snd spaces)) atts2
 				newItemSpaces			= validateControlItemSpace (getcontrolitemspace` spaceAtt)
-				domain					= RectToRectangle domainRect
+				domain					= rectToRectangle domainRect
 				newOrientations			= [(domain,origin):orientations]
 				(derSize,itemHs1,tb1)	= layoutControls` wMetrics newHMargins newVMargins newItemSpaces reqSize minSize newOrientations itemHs tb
 				okDerivedSize			= validateDerivedCompoundSize` wMetrics domainRect (hasHScroll,hasVScroll) derSize reqSize
@@ -611,8 +611,8 @@ where
 				validateMinSize atts
 					= (okMinSize,if hadMinSize [ControlMinimumSize` okMinSize:atts1] atts1)
 				where
-					(defMinW,defMinH)			= OSMinCompoundSize
-					(hadMinSize,minAtt,atts1)	= Remove iscontrolminimumsize` (ControlMinimumSize` {w=defMinW,h=defMinH}) atts
+					(defMinW,defMinH)			= osMinCompoundSize
+					(hadMinSize,minAtt,atts1)	= remove iscontrolminimumsize` (ControlMinimumSize` {w=defMinW,h=defMinH}) atts
 					minSize						= getcontrolminimumsize` minAtt
 					okMinSize					= {w=max defMinW minSize.w,h=max defMinH minSize.h}
 
@@ -629,22 +629,22 @@ where
 					| not hasSize
 						= (False,zero,atts)
 					| iscontrolviewsize` sizeAtt
-						= (True,size1,snd (Replace iscontrolviewsize` (ControlViewSize` size1) atts))
+						= (True,size1,snd (creplace iscontrolviewsize` (ControlViewSize` size1) atts))
 					with
 						size			= getcontrolviewsize` sizeAtt
 						size1			= {w=max size.w (fst minSize),h=max size.h (snd minSize)}
 					| otherwise
 						# (w,h)			= toTuple outerSize
-						  visScrolls	= OSscrollbarsAreVisible wMetrics (RectangleToRect domain) (w,h) hasScrolls
-						  viewSize		= RectSize (getCompoundContentRect wMetrics visScrolls (SizeToRect {w=w,h=h}))
-						# (_,_,atts)	= Remove iscontroloutersize` undef atts
-						# (_,_,atts)	= Remove iscontrolviewsize` undef atts
+						  visScrolls	= osScrollbarsAreVisible wMetrics (rectangleToRect domain) (w,h) hasScrolls
+						  viewSize		= rectSize (getCompoundContentRect wMetrics visScrolls (sizeToRect {w=w,h=h}))
+						# (_,_,atts)	= remove iscontroloutersize` undef atts
+						# (_,_,atts)	= remove iscontrolviewsize` undef atts
 						= (True,viewSize,[ControlViewSize` viewSize:atts])
 					with
 						outerSize		= getcontroloutersize` sizeAtt
 				where
-					(hasSize,sizeAtt)	= Select (\att->iscontrolviewsize` att || iscontroloutersize` att) undef atts
-					minSize				= OSMinCompoundSize
+					(hasSize,sizeAtt)	= cselect (\att->iscontrolviewsize` att || iscontroloutersize` att) undef atts
+					minSize				= osMinCompoundSize
 				
 				validateDerivedCompoundSize` :: !OSWindowMetrics !Rect !(!Bool,!Bool) Size !Size -> Size
 				validateDerivedCompoundSize` wMetrics domain hasScrolls derSize reqSize
@@ -659,8 +659,8 @@ where
 						| visVScroll				= {size & w=w`}
 						| otherwise					= size
 					where
-						domainSize					= RectSize domainRect
-						(visHScroll,visVScroll)		= OSscrollbarsAreVisible wMetrics domainRect (w,h) (hasHScroll,hasVScroll)
+						domainSize					= rectSize domainRect
+						(visHScroll,visVScroll)		= osScrollbarsAreVisible wMetrics domainRect (w,h) (hasHScroll,hasVScroll)
 						w`							= w+wMetrics.osmVSliderWidth
 						h`							= h+wMetrics.osmHSliderHeight
 		
@@ -680,11 +680,11 @@ where
 			where
 				(minSize,atts1)			= validateMinSize atts
 				(hadSize,reqSize,atts2)	= validateLayoutSize wMetrics atts1
-				(_,hMarginAtt)			= Select iscontrolhmargin` (ControlHMargin` lMargin rMargin) atts2
+				(_,hMarginAtt)			= cselect iscontrolhmargin` (ControlHMargin` lMargin rMargin) atts2
 				newHMargins				= validateControlMargin (getcontrolhmargin` hMarginAtt)
-				(_,vMarginAtt)			= Select iscontrolvmargin` (ControlVMargin` tMargin bMargin) atts2
+				(_,vMarginAtt)			= cselect iscontrolvmargin` (ControlVMargin` tMargin bMargin) atts2
 				newVMargins				= validateControlMargin (getcontrolvmargin` vMarginAtt)
-				(_,spaceAtt)			= Select iscontrolitemspace` (ControlItemSpace` (fst spaces) (snd spaces)) atts2
+				(_,spaceAtt)			= cselect iscontrolitemspace` (ControlItemSpace` (fst spaces) (snd spaces)) atts2
 				newItemSpaces			= validateControlItemSpace (getcontrolitemspace` spaceAtt)
 				(derSize,itemHs1,tb1)	= layoutControls` wMetrics newHMargins newVMargins newItemSpaces reqSize minSize orientations itemHs tb
 				okDerivedSize			= validateDerivedLayoutSize wMetrics derSize reqSize
@@ -693,7 +693,7 @@ where
 				validateMinSize atts
 					= (okMinSize,if hadMinSize [ControlMinimumSize` okMinSize:atts1] atts1)
 				where
-					(hadMinSize,minAtt,atts1)	= Remove iscontrolminimumsize` (ControlMinimumSize` zero) atts
+					(hadMinSize,minAtt,atts1)	= remove iscontrolminimumsize` (ControlMinimumSize` zero) atts
 					minSize						= getcontrolminimumsize` minAtt
 					okMinSize					= {w=max 0 minSize.w,h=max 0 minSize.h}
 
@@ -708,11 +708,11 @@ where
 						= (False,zero,atts)
 					| otherwise
 						# size1			= {w=max size.w 0,h=max size.h 0}
-						# (_,_,atts)	= Remove iscontroloutersize` undef atts
-						# (_,_,atts)	= Remove iscontrolviewsize`  undef atts
+						# (_,_,atts)	= remove iscontroloutersize` undef atts
+						# (_,_,atts)	= remove iscontrolviewsize`  undef atts
 						= (True,size1,[ControlViewSize` size1:atts])
 				where
-					(hasSize,sizeAtt)	= Select (\att->iscontrolviewsize` att || iscontroloutersize` att) undef atts
+					(hasSize,sizeAtt)	= cselect (\att->iscontrolviewsize` att || iscontroloutersize` att) undef atts
 					size				= if (iscontrolviewsize` sizeAtt) (getcontrolviewsize` sizeAtt) (getcontroloutersize` sizeAtt)
 
 		getLayoutWItem` _ _ _ _ _ _ _ _ _ _
@@ -722,7 +722,7 @@ where
 		getLayoutItemPos prevId atts
 			= (itemLoc1,offset)
 		where
-			(itemLoc,offset)	= getcontrolpos` (snd (Select iscontrolpos` (ControlPos` (RightTo prevId,NoOffset)) atts))
+			(itemLoc,offset)	= getcontrolpos` (snd (cselect iscontrolpos` (ControlPos` (RightTo prevId,NoOffset)) atts))
 			itemLoc1			= if (isRelativeToPrev itemLoc) (setRelativeTo prevId itemLoc) itemLoc
 	
 	getLayoutItem` wMetrics hMargins vMargins spaces orientations prevIds prevId cId (WRecursiveHandle` itemHs kind) tb
@@ -753,13 +753,13 @@ layoutScrollbars wMetrics size info=:{compoundHScroll,compoundVScroll}
 	  }
 where
 	hasScrolls	= (isJust compoundHScroll,isJust compoundVScroll)	// PA: this should actually become: (visHScroll,visVScroll)!!
-	rect		= SizeToRect size
+	rect		= sizeToRect size
 	hRect		= getCompoundHScrollRect wMetrics hasScrolls rect
 	vRect		= getCompoundVScrollRect wMetrics hasScrolls rect
 	
 	layoutScrollbar :: Rect !ScrollInfo -> ScrollInfo
 	layoutScrollbar r=:{rleft,rtop} scrollInfo
-		= {scrollInfo & scrollItemPos={x=rleft,y=rtop},scrollItemSize=RectSize r}
+		= {scrollInfo & scrollItemPos={x=rleft,y=rtop},scrollItemSize=rectSize r}
 
 position_items :: !(Point2 -> .x -> .x) !Int !Int ![Int] ![[.x]] -> [[.x]]
 position_items setPosition itemHeight left [maxwidth:maxwidths] [col:cols]
@@ -785,20 +785,20 @@ where
 	
 	repeat_splitting :: !Int ![x] -> [[x]]
 	repeat_splitting n items
-		# (before,after)= Split n items
+		# (before,after)= split n items
 		| isEmpty after	= [before]
 		| otherwise		= [before:repeat_splitting n after]
 toColumns (Rows n) items
 	= repeat_spreading nrColumns items cols
 where
 	nrItems		= length items
-	n`			= SetBetween n 1 nrItems
+	n`			= setBetween n 1 nrItems
 	nrColumns	= if (nrItems rem n`==0) (nrItems/n`) (nrItems/n`+1)
 	cols		= repeatn nrColumns []
 	
 	repeat_spreading :: !Int ![x] ![[x]] -> [[x]]
 	repeat_spreading n items cols
-		# (before,after)= Split n items
+		# (before,after)= split n items
 		| isEmpty after	= spread before cols
 		| otherwise		= spread before (repeat_spreading n after cols)
 	where

@@ -9,13 +9,14 @@ import	commondef, iostate, windowaccess, windowupdate
 
 
 sdisizeFatalError :: String String -> .x
-sdisizeFatalError rule error = FatalError rule "sdisize" error
+sdisizeFatalError rule error
+	= fatalError rule "sdisize" error
 
 
 //	getSDIWindowSize retrieves the current size of the WindowViewFrame if this is a SDI process
 getSDIWindowSize :: !(IOSt .l) -> (!Size,!OSWindowPtr,!IOSt .l)
 getSDIWindowSize ioState
-	# (osdInfo,ioState)		= IOStGetOSDInfo ioState
+	# (osdInfo,ioState)		= ioStGetOSDInfo ioState
 	  isSDI					= getOSDInfoDocumentInterface osdInfo==SDI
 	  wPtr					= case (getOSDInfoOSInfo osdInfo) of
 		  						Just info -> info.osFrame
@@ -23,8 +24,8 @@ getSDIWindowSize ioState
 	| not isSDI
 		= (zero,wPtr,ioState)
 	| otherwise
-		// PA: here we have to use OSgetWindowViewFrameSize, because it is the only reliable way to determine proper viewframe size. 
-		# ((w,h),ioState)	= accIOToolbox (OSgetWindowViewFrameSize wPtr) ioState
+		// PA: here we have to use osGetWindowViewFrameSize, because it is the only reliable way to determine proper viewframe size. 
+		# ((w,h),ioState)	= accIOToolbox (osGetWindowViewFrameSize wPtr) ioState
 		= ({w=w,h=h},wPtr,ioState)
 
 /*	resizeSDIWindow wPtr oldviewframesize newviewframesize
@@ -36,7 +37,7 @@ getSDIWindowSize ioState
 */
 resizeSDIWindow :: !OSWindowPtr !Size !Size !(IOSt .l) -> IOSt .l
 resizeSDIWindow wPtr {h=oldHeight} newFrameSize=:{h=newHeight} ioState
-	# (osdInfo,ioState)			= IOStGetOSDInfo ioState
+	# (osdInfo,ioState)			= ioStGetOSDInfo ioState
 	  isSDI						= getOSDInfoDocumentInterface osdInfo==SDI
 	| not isSDI
 		= sdisizeFatalError "resizeSDIWindow" "not an SDI process"
@@ -46,22 +47,22 @@ resizeSDIWindow wPtr {h=oldHeight} newFrameSize=:{h=newHeight} ioState
 	| wPtr<>framePtr
 		= sdisizeFatalError "resizeSDIWindow" "SDIWindow frame could not be located"
 	# (tb,ioState)				= getIOToolbox ioState
-	# ((oldw,oldh),tb)			= OSgetWindowSize framePtr tb
-	# tb						= OSsetWindowSize framePtr (oldw,oldh+oldHeight-newHeight) True tb
+	# ((oldw,oldh),tb)			= osGetWindowSize framePtr tb
+	# tb						= osSetWindowSize framePtr (oldw,oldh+oldHeight-newHeight) True tb
 	| newHeight>oldHeight	// menus take up less space
 		= setIOToolbox tb ioState
-	# (ok,wDevice,ioState)		= IOStGetDevice WindowDevice ioState
+	# (ok,wDevice,ioState)		= ioStGetDevice WindowDevice ioState
 	| not ok
 		= ioState
-	# windows					= WindowSystemStateGetWindowHandles wDevice
+	# windows					= windowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)		= getWindowHandlesWindow (toWID clientPtr) windows
 	| not found
-		= IOStSetDevice (WindowSystemState windows) ioState
+		= ioStSetDevice (WindowSystemState windows) ioState
 	| otherwise
-		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# (wMetrics,ioState)	= ioStGetOSWindowMetrics ioState
 		# (wsH,tb)				= updateSDIWindow wMetrics oldHeight newFrameSize wsH tb
 		  windows				= setWindowHandlesWindow wsH windows
-		# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+		# ioState				= ioStSetDevice (WindowSystemState windows) ioState
 		= setIOToolbox tb ioState
 where
 	// Note that oldH>newSize.h

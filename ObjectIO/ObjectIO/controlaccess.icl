@@ -5,7 +5,7 @@ implementation module controlaccess
 
 
 import	StdBool, StdFunc, StdInt, StdList, StdMisc, StdTuple
-from	oswindow	import OSscrollbarsAreVisible
+from	oswindow	import osScrollbarsAreVisible
 import	commondef, id, windowaccess, wstateaccess
 
 
@@ -21,7 +21,7 @@ mapWElementHandles` f itemHs
 	| isEmpty itemHs
 		= []
 	| otherwise
-		# (itemH,itemHs)	= HdTl itemHs
+		# (itemH,itemHs)	= hdtl itemHs
 		= mapWElementHandle` f itemH ++ mapWElementHandles` f itemHs
 where
 	mapWElementHandle` :: (WItemHandle`->v:[u:x]) !WElementHandle` -> v:[u:x], [v<=u]
@@ -34,7 +34,7 @@ seekmapWElementHandle` :: (WItemHandle`->(Bool,x)) x ![WElementHandle`] -> (!Boo
 seekmapWElementHandle` f x itemHs
 	| isEmpty itemHs
 		= (False,x)
-	# (itemH,itemHs)	= HdTl itemHs
+	# (itemH,itemHs)	= hdtl itemHs
 	  (found,x)			= seekmapWItemHandle` f x itemH
 	| found
 		= (found,x)
@@ -52,7 +52,7 @@ statemapWElementHandles` cond f s itemHs
 	| cond s			= s
 	| isEmpty itemHs	= s
 	| otherwise
-		# (itemH,itemHs)= HdTl itemHs
+		# (itemH,itemHs)= hdtl itemHs
 		# s				= statemapWElementHandle`  cond f s itemH
 		# s				= statemapWElementHandles` cond f s itemHs
 		= s
@@ -116,12 +116,12 @@ where
 		| otherwise			= getcontrolslayouts wItems` (ids1,layouts1)
 		with
 			itemPos			= if hasAtt (Just (getcontrolpos` posAtt)) Nothing
-			(hasAtt,posAtt)	= Select iscontrolpos` (ControlPos` (Left,NoOffset)) wItemAtts`
+			(hasAtt,posAtt)	= cselect iscontrolpos` (ControlPos` (Left,NoOffset)) wItemAtts`
 			layout			= (itemId,True,(itemPos,toVector wItemPos`))
-			(_,layouts1)	= Replace (eqfst3id itemId) layout layouts
+			(_,layouts1)	= creplace (eqfst3id itemId) layout layouts
 	where
 		itemId				= fromJust wItemId`
-		(hadId,ids1)		= RemoveCheck itemId ids
+		(hadId,ids1)		= removeCheck itemId ids
 
 getcontrolsviewsizes :: !OSWindowMetrics ![WElementHandle`] !(![Id],![(Id,Bool,Size)]) -> (![Id],![(Id,Bool,Size)])
 getcontrolsviewsizes wMetrics itemHs ids_sizes
@@ -137,14 +137,14 @@ where
 			info			= getWItemCompoundInfo` itemH.wItemInfo`
 			(domainRect,hasScrolls)
 							= (info.compoundDomain,(isJust info.compoundHScroll,isJust info.compoundVScroll))
-			visScrolls		= OSscrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
+			visScrolls		= osScrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
 			size			= if (wItemKind`<>IsCompoundControl)
  								 itemSize
-								 (RectSize (getCompoundContentRect wMetrics visScrolls (SizeToRect itemSize)))
-			(_,sizes1)		= Replace (eqfst3id itemId) (itemId,True,size) sizes
+								 (rectSize (getCompoundContentRect wMetrics visScrolls (sizeToRect itemSize)))
+			(_,sizes1)		= creplace (eqfst3id itemId) (itemId,True,size) sizes
 	where
 		itemId				= fromJust wItemId`
-		(hadId,ids1)		= RemoveCheck itemId ids
+		(hadId,ids1)		= removeCheck itemId ids
 
 getcontrolsoutersizes :: !OSWindowMetrics ![WElementHandle`] !(![Id],![(Id,Bool,Size)]) -> (![Id],![(Id,Bool,Size)])
 getcontrolsoutersizes wMetrics itemHs ids_sizes
@@ -157,10 +157,10 @@ where
 		| otherwise			= getcontrolsoutersizes wMetrics wItems` (ids1,sizes1)
 		with
 			size			= itemH.wItemSize`
-			(_,sizes1)		= Replace (eqfst3id itemId) (itemId,True,size) sizes
+			(_,sizes1)		= creplace (eqfst3id itemId) (itemId,True,size) sizes
 	where
 		itemId				= fromJust wItemId`
-		(hadId,ids1)		= RemoveCheck itemId ids
+		(hadId,ids1)		= removeCheck itemId ids
 
 getcontrolsselects :: ![WElementHandle`] !(![Id],![(Id,Bool,SelectState)]) -> (![Id],![(Id,Bool,SelectState)])
 getcontrolsselects itemHs ids_selects
@@ -174,10 +174,10 @@ where
 								with
 									selectstate	= if wItemSelect` Able Unable
 									select		= (itemId,True,selectstate)
-									(_,selects1)= Replace (eqfst3id itemId) select selects
+									(_,selects1)= creplace (eqfst3id itemId) select selects
 	where
 		itemId					= fromJust wItemId`
-		(hadId,ids1)			= RemoveCheck itemId ids
+		(hadId,ids1)			= removeCheck itemId ids
 
 getcontrolsshowstates :: ![WElementHandle`] !(![Id],![(Id,Bool,Bool)]) -> (![Id],![(Id,Bool,Bool)])
 getcontrolsshowstates itemHs ids_shows
@@ -190,10 +190,10 @@ where
 		| otherwise				= getcontrolsshowstates wItems` (ids1,shows1)
 								with
 									show		= (itemId,True,wItemShow`)
-									(_,shows1)	= Replace (eqfst3id itemId) show shows
+									(_,shows1)	= creplace (eqfst3id itemId) show shows
 	where
 		itemId					= fromJust wItemId`
-		(hadId,ids1)			= RemoveCheck itemId ids
+		(hadId,ids1)			= removeCheck itemId ids
 
 getcontrolstexts :: ![WElementHandle`] !(![Id],![(Id,Bool,Maybe String)]) -> (![Id],![(Id,Bool,Maybe String)])
 getcontrolstexts itemHs ids_texts
@@ -206,10 +206,10 @@ where
 		| not hastext			= getcontrolstexts wItems` (ids1,texts )
 		| otherwise				= getcontrolstexts wItems` (ids1,texts1)
 								with
-									(_,texts1)	= Replace (eqfst3id itemId) (itemId,True,Just textline) texts
+									(_,texts1)	= creplace (eqfst3id itemId) (itemId,True,Just textline) texts
 	where
 		itemId					= fromJust wItemId`
-		(hadId,ids1)			= RemoveCheck itemId ids
+		(hadId,ids1)			= removeCheck itemId ids
 		(hastext,textline)		= case wItemKind` of
 									IsPopUpControl	-> (True,getPopUpText (getWItemPopUpInfo`  wItemInfo`))
 									IsTextControl	-> (True,(getWItemTextInfo`   wItemInfo`).textInfoText)
@@ -240,10 +240,10 @@ where
 									with
 										info		= getWItemEditInfo` itemH.wItemInfo`
 										nrline		= (itemId,True,Just info.editInfoNrLines)
-										(_,nrlines1)= Replace (eqfst3id itemId) nrline nrlines
+										(_,nrlines1)= creplace (eqfst3id itemId) nrline nrlines
 	where
 		itemId						= fromJust wItemId`
-		(hadId,ids1)				= RemoveCheck itemId ids
+		(hadId,ids1)				= removeCheck itemId ids
 
 getcontrolslooks :: ![WElementHandle`] !(![Id],![(Id,Bool,Maybe (Bool,Look))]) -> (![Id],![(Id,Bool,Maybe (Bool,Look))])
 getcontrolslooks itemHs ids_looks
@@ -256,10 +256,10 @@ where
 		| not haslook		= getcontrolslooks wItems` (ids1,looks )
 		| otherwise			= getcontrolslooks wItems` (ids1,looks1)
 							with
-								(_,looks1)	= Replace (eqfst3id itemId) (itemId,True,look) looks
+								(_,looks1)	= creplace (eqfst3id itemId) (itemId,True,look) looks
 	where
 		itemId				= fromJust wItemId`
-		(hadId,ids1)		= RemoveCheck itemId ids
+		(hadId,ids1)		= removeCheck itemId ids
 		(haslook,look)		= getlook wItemKind` wItemInfo`
 		
 		getlook :: !ControlKind !WItemInfo` -> (!Bool,Maybe (Bool,Look))
@@ -288,12 +288,12 @@ where
 		| not hadId				= getcontrolsminsizes wItems` ids_sizes
 		| otherwise				= getcontrolsminsizes wItems` (ids1,sizes1)
 								with
-									(has_minsize,minatt)= Select iscontrolminimumsize` (dummy "getcontrolsminsizes") wItemAtts`
+									(has_minsize,minatt)= cselect iscontrolminimumsize` (dummy "getcontrolsminsizes") wItemAtts`
 									size				= (itemId,True,if has_minsize (Just (getcontrolminimumsize` minatt)) Nothing)
-									(_,sizes1)			= Replace (eqfst3id itemId) size sizes
+									(_,sizes1)			= creplace (eqfst3id itemId) size sizes
 	where
 		itemId					= fromJust wItemId`
-		(hadId,ids1)			= RemoveCheck itemId ids
+		(hadId,ids1)			= removeCheck itemId ids
 
 getcontrolsresizes :: ![WElementHandle`] !(![Id],![(Id,Bool,Maybe ControlResizeFunction)])
 									   -> (![Id],![(Id,Bool,Maybe ControlResizeFunction)])
@@ -309,11 +309,11 @@ where
 		| otherwise				= getcontrolsresizes wItems` (ids1,resizes1)
 								with
 									resize		= (itemId,True,Just (getcontrolresize` resizeAtt))
-									(_,resizes1)= Replace (eqfst3id itemId) resize resizes1
+									(_,resizes1)= creplace (eqfst3id itemId) resize resizes1
 	where
 		itemId					= fromJust wItemId`
-		(hadId,ids1)			= RemoveCheck itemId ids
-		(hasResize,resizeAtt)	= Select iscontrolresize` (dummy "getresizes") wItemAtts`
+		(hadId,ids1)			= removeCheck itemId ids
+		(hasResize,resizeAtt)	= cselect iscontrolresize` (dummy "getresizes") wItemAtts`
 
 getpopupitems :: ![WElementHandle`] !(![Id],![(Id,Bool,Maybe [String])]) -> (![Id],![(Id,Bool,Maybe [String])])
 getpopupitems itemHs ids_titles
@@ -328,10 +328,10 @@ where
 										with
 											info		= getWItemPopUpInfo` wItemInfo`
 											title		= (itemId,True,Just info.popUpInfoItems`)
-											(_,titles1)	= Replace (eqfst3id itemId) title titles
+											(_,titles1)	= creplace (eqfst3id itemId) title titles
 	where
 		itemId			= fromJust wItemId`
-		(hadId,ids1)	= RemoveCheck itemId ids
+		(hadId,ids1)	= removeCheck itemId ids
 
 getselectedpopupitems :: ![WElementHandle`] !(![Id],![(Id,Bool,Maybe Index)]) -> (![Id],![(Id,Bool,Maybe Index)])
 getselectedpopupitems itemHs ids_indices
@@ -346,10 +346,10 @@ where
 										with
 											info		= getWItemPopUpInfo` wItemInfo`
 											index		= (itemId,True,Just info.popUpInfoIndex`)
-											(_,indices1)= Replace (eqfst3id itemId) index indices
+											(_,indices1)= creplace (eqfst3id itemId) index indices
 	where
 		itemId			= fromJust wItemId`
-		(hadId,ids1)	= RemoveCheck itemId ids
+		(hadId,ids1)	= removeCheck itemId ids
 
 getradioitems :: ![WElementHandle`] !(![Id],![(Id,Bool,Maybe [String])]) -> (![Id],![(Id,Bool,Maybe [String])])
 getradioitems itemHs ids_titles
@@ -364,10 +364,10 @@ where
 										with
 											info		= getWItemRadioInfo` wItemInfo`
 											title		= (itemId,True,Just [fst item.radioItem` \\ item<-info.radioItems`])
-											(_,titles1)	= Replace (eqfst3id itemId) title titles
+											(_,titles1)	= creplace (eqfst3id itemId) title titles
 	where
 		itemId			= fromJust wItemId`
-		(hadId,ids1)	= RemoveCheck itemId ids
+		(hadId,ids1)	= removeCheck itemId ids
 
 getradiocontrolsmarks :: ![WElementHandle`] !(![Id],![(Id,Bool,Maybe Index)]) -> (![Id],![(Id,Bool,Maybe Index)])
 getradiocontrolsmarks itemHs ids_marks
@@ -382,10 +382,10 @@ where
 										with
 											info		= getWItemRadioInfo` wItemInfo`
 											mark		= (itemId,True,Just info.radioIndex`)
-											(_,marks1)	= Replace (eqfst3id itemId) mark marks
+											(_,marks1)	= creplace (eqfst3id itemId) mark marks
 	where
 		itemId			= fromJust wItemId`
-		(hadId,ids1)	= RemoveCheck itemId ids
+		(hadId,ids1)	= removeCheck itemId ids
 
 getcheckitems :: ![WElementHandle`] !(![Id],![(Id,Bool,Maybe [String])]) -> (![Id],![(Id,Bool,Maybe [String])])
 getcheckitems itemHs ids_titles
@@ -400,10 +400,10 @@ where
 										with
 											info		= getWItemCheckInfo` wItemInfo`
 											title		= (itemId,True,Just [fst3 item.checkItem` \\ item<-info.checkItems`])
-											(_,titles1)	= Replace (eqfst3id itemId) title titles
+											(_,titles1)	= creplace (eqfst3id itemId) title titles
 	where
 		itemId			= fromJust wItemId`
-		(hadId,ids1)	= RemoveCheck itemId ids
+		(hadId,ids1)	= removeCheck itemId ids
 
 getcheckcontrolsmarks :: ![WElementHandle`] !(![Id],![(Id,Bool,Maybe [Index])]) -> (![Id],![(Id,Bool,Maybe [Index])])
 getcheckcontrolsmarks itemHs ids_marks
@@ -419,7 +419,7 @@ where
 											info		= getWItemCheckInfo` wItemInfo`
 											indices		= getMarkIndices 1 info.checkItems`
 											mark		= (itemId,True,Just indices)
-											(_,marks1)	= Replace (eqfst3id itemId) mark marks
+											(_,marks1)	= creplace (eqfst3id itemId) mark marks
 											
 											getMarkIndices :: !Index ![CheckItemInfo`] -> [Index]
 											getMarkIndices index [{checkItem`=(_,_,mark)}:items]
@@ -430,7 +430,7 @@ where
 												= []
 	where
 		itemId			= fromJust wItemId`
-		(hadId,ids1)	= RemoveCheck itemId ids
+		(hadId,ids1)	= removeCheck itemId ids
 
 getslidersdirections :: ![WElementHandle`] !(![Id],![(Id,Bool,Maybe Direction)]) -> (![Id],![(Id,Bool,Maybe Direction)])
 getslidersdirections itemHs ids_sliders
@@ -445,10 +445,10 @@ where
 										with
 											info		= getWItemSliderInfo` wItemInfo`
 											slider		= (itemId,True,Just info.sliderInfoDir`)
-											(_,sliders1)= Replace (eqfst3id itemId) slider sliders
+											(_,sliders1)= creplace (eqfst3id itemId) slider sliders
 	where
 		itemId			= fromJust wItemId`
-		(hadId,ids1)	= RemoveCheck itemId ids
+		(hadId,ids1)	= removeCheck itemId ids
 
 getslidersstates :: ![WElementHandle`] !(![Id],![(Id,Bool,Maybe SliderState)]) -> (![Id],![(Id,Bool,Maybe SliderState)])
 getslidersstates itemHs ids_states
@@ -463,10 +463,10 @@ where
 										with
 											info		= getWItemSliderInfo` wItemInfo`
 											state		= (itemId,True,Just info.sliderInfoState`)
-											(_,states1)	= Replace (eqfst3id itemId) state states
+											(_,states1)	= creplace (eqfst3id itemId) state states
 	where
 		itemId			= fromJust wItemId`
-		(hadId,ids1)	= RemoveCheck itemId ids
+		(hadId,ids1)	= removeCheck itemId ids
 
 getcontrolsframes :: !OSWindowMetrics ![WElementHandle`] !(![Id],![(Id,Bool,Maybe ViewFrame)]) -> (![Id],![(Id,Bool,Maybe ViewFrame)])
 getcontrolsframes wMetrics itemHs ids_frames
@@ -482,13 +482,13 @@ where
 											info		= getWItemCompoundInfo` wItemInfo`
 											(origin,domainRect,hasScrolls)
 														= (info.compoundOrigin,info.compoundDomain,(isJust info.compoundHScroll,isJust info.compoundVScroll))
-											visScrolls	= OSscrollbarsAreVisible wMetrics domainRect (toTuple wItemSize`) hasScrolls
-											itemRect	= getCompoundContentRect wMetrics visScrolls (PosSizeToRect origin wItemSize`)
-											frame		= (itemId,True,Just (RectToRectangle itemRect))
-											(_,frames1)	= Replace (eqfst3id itemId) frame frames
+											visScrolls	= osScrollbarsAreVisible wMetrics domainRect (toTuple wItemSize`) hasScrolls
+											itemRect	= getCompoundContentRect wMetrics visScrolls (posSizeToRect origin wItemSize`)
+											frame		= (itemId,True,Just (rectToRectangle itemRect))
+											(_,frames1)	= creplace (eqfst3id itemId) frame frames
 	where
 		itemId			= fromJust wItemId`
-		(hadId,ids1)	= RemoveCheck itemId ids
+		(hadId,ids1)	= removeCheck itemId ids
 
 getcontrolsdomains :: ![WElementHandle`] !(![Id],![(Id,Bool,Maybe ViewDomain)]) -> (![Id],![(Id,Bool,Maybe ViewDomain)])
 getcontrolsdomains itemHs ids_domains
@@ -502,11 +502,11 @@ where
 		| otherwise						= getcontrolsdomains wItems` (ids1,domains1)
 										with
 											info		= getWItemCompoundInfo` wItemInfo`
-											domain		= (itemId,True,Just (RectToRectangle info.compoundDomain))
-											(_,domains1)= Replace (eqfst3id itemId) domain domains
+											domain		= (itemId,True,Just (rectToRectangle info.compoundDomain))
+											(_,domains1)= creplace (eqfst3id itemId) domain domains
 	where
 		itemId			= fromJust wItemId`
-		(hadId,ids1)	= RemoveCheck itemId ids
+		(hadId,ids1)	= removeCheck itemId ids
 
 getscrollfunctions :: ![WElementHandle`] !(![Id],![(Id,Bool,Maybe ((Direction,Maybe ScrollFunction),(Direction,Maybe ScrollFunction)))])
 									   -> (![Id],![(Id,Bool,Maybe ((Direction,Maybe ScrollFunction),(Direction,Maybe ScrollFunction)))])
@@ -527,10 +527,10 @@ where
 											func		= (itemId,True,Just ((Horizontal,mapMaybe getscrollfunction hScroll)
 																			,(Vertical,  mapMaybe getscrollfunction vScroll)
 																			))
-											(_,funcs1)	= Replace (eqfst3id itemId) func funcs
+											(_,funcs1)	= creplace (eqfst3id itemId) func funcs
 	where
 		itemId			= fromJust wItemId`
-		(hadId,ids1)	= RemoveCheck itemId ids
+		(hadId,ids1)	= removeCheck itemId ids
 		
 		getscrollfunction :: !ScrollInfo -> ScrollFunction
 		getscrollfunction {scrollFunction} = scrollFunction
@@ -548,11 +548,11 @@ where
 		| otherwise				= getcontrolsspaces newspaces itemH.wItems` (ids1,spaces1)
 								with
 									space		= (itemId,True,Just newspaces)
-									(_,spaces1)	= Replace (eqfst3id itemId) space spaces
+									(_,spaces1)	= creplace (eqfst3id itemId) space spaces
 	where
 		itemId					= fromJust wItemId`
-		(hadId,ids1)			= RemoveCheck itemId ids
-		newspaces				= getcontrolitemspace` (snd (Select iscontrolitemspace` (ControlItemSpace` (fst curspaces) (snd curspaces)) wItemAtts`))
+		(hadId,ids1)			= removeCheck itemId ids
+		newspaces				= getcontrolitemspace` (snd (cselect iscontrolitemspace` (ControlItemSpace` (fst curspaces) (snd curspaces)) wItemAtts`))
 
 getcontrolsmargins :: ((Int,Int),(Int,Int)) ![WElementHandle`] !(![Id],![(Id,Bool,Maybe ((Int,Int),(Int,Int)))])
 															 -> (![Id],![(Id,Bool,Maybe ((Int,Int),(Int,Int)))])
@@ -569,11 +569,11 @@ where
 		| otherwise					= getcontrolsmargins newmargins itemH.wItems` (ids1,margins1)
 									with
 										margin		= (itemId,True,Just newmargins)
-										(_,margins1)= Replace (eqfst3id itemId) margin margins
+										(_,margins1)= creplace (eqfst3id itemId) margin margins
 	where
 		itemId						= fromJust wItemId`
-		(hadId,ids1)				= RemoveCheck itemId ids
+		(hadId,ids1)				= removeCheck itemId ids
 		((left,right),(top,bottom))	= curmargins
-		newHMargins					= getcontrolhmargin` (snd (Select iscontrolhmargin` (ControlHMargin` left right) wItemAtts`))
-		newVMargins					= getcontrolvmargin` (snd (Select iscontrolvmargin` (ControlVMargin` top bottom) wItemAtts`))
+		newHMargins					= getcontrolhmargin` (snd (cselect iscontrolhmargin` (ControlHMargin` left right) wItemAtts`))
+		newVMargins					= getcontrolvmargin` (snd (cselect iscontrolvmargin` (ControlVMargin` top bottom) wItemAtts`))
 		newmargins					= (newHMargins,newVMargins)

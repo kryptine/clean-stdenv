@@ -85,35 +85,30 @@ ISCANCELBUTTON		:==	2			/* The button is the CANCEL button. */
 //	PA: end of addition
 
 
-WinSetWindowCursor		:: !HWND !Int						!*OSToolbox -> *OSToolbox
-WinObscureCursor		::									!*OSToolbox -> *OSToolbox
-WinSetWindowTitle		:: !HWND !String					!*OSToolbox -> *OSToolbox
-WinGetWindowText		:: !HWND							!*OSToolbox -> (!String, !*OSToolbox)
-//	PA: new function to update part of a window.
-WinUpdateWindowRect		:: !HWND !(!Int,!Int,!Int,!Int)		!*OSToolbox -> *OSToolbox
-//	PA: new function to (en/dis)able windows.
-WinSetSelectStateWindow :: !HWND !(!Bool,!Bool) !Bool !Bool	!*OSToolbox -> *OSToolbox
-WinBeginPaint			:: !HWND							!*OSToolbox -> (!HDC, !*OSToolbox) 
-WinEndPaint				:: !HWND					!(!HDC, !*OSToolbox) -> *OSToolbox
-//	PA: new function to fake an update. Added for efficiency reasons.
-WinFakePaint			:: !HWND							!*OSToolbox -> *OSToolbox
-WinGetClientSize		:: !HWND							!*OSToolbox -> (!(!Int,!Int), !*OSToolbox)
-WinGetWindowSize		:: !HWND							!*OSToolbox -> (!(!Int,!Int), !*OSToolbox)	// PA: added; returns bounding size of window
-WinSetClientSize		:: !HWND !(!Int,!Int)				!*OSToolbox -> *OSToolbox					// PA: added
-WinSetWindowSize		:: !HWND !(!Int,!Int) !Bool			!*OSToolbox -> *OSToolbox					// PA: added
-WinGetWindowPos			:: !HWND							!*OSToolbox -> (!(!Int,!Int), !*OSToolbox)
-WinSetWindowPos			:: !HWND !(!Int,!Int) !Bool !Bool	!*OSToolbox -> *OSToolbox
-/*	PA: three new functions to handle scrollbars.
-*/
-WinSetScrollRange		:: !HWND !Int !Int !Int !Bool		!*OSToolbox -> *OSToolbox
-WinSetScrollPos			:: !HWND !Int !Int !Int !Int !Int	!*OSToolbox -> *OSToolbox
-WinSetScrollThumbSize	:: !HWND !Int !Int !Int !Int !Int	!*OSToolbox -> *OSToolbox
-/*	PA: new functions to handle edit controls.
-*/
-WinSetEditSelection		:: !HWND !Int !Int					!*OSToolbox -> *OSToolbox		// Note: @2<=@3, @1 must point to an edit control.
+winSetWindowCursor		:: !HWND !Int						!*OSToolbox -> *OSToolbox
+winObscureCursor		::									!*OSToolbox -> *OSToolbox
+winSetWindowTitle		:: !HWND !String					!*OSToolbox -> *OSToolbox
+winGetWindowText		:: !HWND							!*OSToolbox -> (!String, !*OSToolbox)
+winUpdateWindowRect		:: !HWND !(!Int,!Int,!Int,!Int)		!*OSToolbox -> *OSToolbox
+winSetSelectStateWindow :: !HWND !(!Bool,!Bool) !Bool !Bool	!*OSToolbox -> *OSToolbox
+winBeginPaint			:: !HWND							!*OSToolbox -> (!HDC, !*OSToolbox) 
+winEndPaint				:: !HWND					!(!HDC, !*OSToolbox) -> *OSToolbox
+winFakePaint			:: !HWND							!*OSToolbox -> *OSToolbox
+winGetClientSize		:: !HWND							!*OSToolbox -> (!(!Int,!Int), !*OSToolbox)
+winGetWindowSize		:: !HWND							!*OSToolbox -> (!(!Int,!Int), !*OSToolbox)	// Returns bounding size of window
+winSetClientSize		:: !HWND !(!Int,!Int)				!*OSToolbox -> *OSToolbox
+winSetWindowSize		:: !HWND !(!Int,!Int) !Bool			!*OSToolbox -> *OSToolbox
+winGetWindowPos			:: !HWND							!*OSToolbox -> (!(!Int,!Int), !*OSToolbox)
+winSetWindowPos			:: !HWND !(!Int,!Int) !Bool !Bool	!*OSToolbox -> *OSToolbox
 
-WinShowControl			:: !HWND !Bool						!*OSToolbox -> *OSToolbox	// PA: new routine to hide (False) & show (True) controls.
-WinEnableControl		:: !HWND !Bool						!*OSToolbox -> *OSToolbox
-WinEnablePopupItem		:: !HWND !Int !Bool					!*OSToolbox -> *OSToolbox	// PA: this function is currently not used, but might be
-WinCheckControl			:: !HWND !Bool						!*OSToolbox -> *OSToolbox
-WinSelectPopupItem		:: !HWND !Int						!*OSToolbox -> *OSToolbox
+winSetScrollRange		:: !HWND !Int !Int !Int !Bool		!*OSToolbox -> *OSToolbox
+winSetScrollPos			:: !HWND !Int !Int !Int !Int !Int	!*OSToolbox -> *OSToolbox
+winSetScrollThumbSize	:: !HWND !Int !Int !Int !Int !Int	!*OSToolbox -> *OSToolbox
+
+winSetEditSelection		:: !HWND !Int !Int					!*OSToolbox -> *OSToolbox					// Note: @2<=@3, @1 must point to an edit control.
+
+winShowControl			:: !HWND !Bool						!*OSToolbox -> *OSToolbox
+winEnableControl		:: !HWND !Bool						!*OSToolbox -> *OSToolbox
+winEnablePopupItem		:: !HWND !Int !Bool					!*OSToolbox -> *OSToolbox					// PA: this function is currently not used, but might be
+winCheckControl			:: !HWND !Bool						!*OSToolbox -> *OSToolbox
+winSelectPopupItem		:: !HWND !Int						!*OSToolbox -> *OSToolbox

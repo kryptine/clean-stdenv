@@ -30,7 +30,7 @@ getSelectState :: ![ReceiverAttribute .pst] -> SelectState
 getSelectState atts
 	= getReceiverSelectStateAtt selectAtt
 where
-	(_,selectAtt)	= Select isReceiverSelectState defSelect atts
+	(_,selectAtt)	= cselect isReceiverSelectState defSelect atts
 	defSelect		= ReceiverSelectState Able
 
 receiverDefFunction :: !(Receiver m .ls .pst) -> ReceiverFunction m *(.ls,.pst)
@@ -49,7 +49,7 @@ receiver2DefSetAbility ability (Receiver2 r2id f atts)
 
 setSelectState :: !SelectState ![ReceiverAttribute .pst] -> [ReceiverAttribute .pst]
 setSelectState ability atts
-	= snd (Replace isReceiverSelectState att atts)
+	= snd (creplace isReceiverSelectState att atts)
 where
 	att	= ReceiverSelectState ability
 
