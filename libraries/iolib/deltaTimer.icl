@@ -130,19 +130,19 @@ GetTimerBlinkInterval io =  (0,io);
 /* Get current time and current date.
 */
 GetCurrentTime :: !(IOState s) -> (!CurrentTime, !IOState s);
-GetCurrentTime io =  (XGetCurrentTime 0, io);
+GetCurrentTime io =  (get_current_time 0, io);
 
 GetCurrentDate :: !(IOState s) -> (!CurrentDate, !IOState s);
-GetCurrentDate io =  (XGetCurrentDate 0, io);
+GetCurrentDate io =  (get_current_date 0, io);
 
 
 /* Wait a specified interval of time.
 */
 Wait :: !TimerInterval x -> x;
-Wait interval x =  Evaluate_2 x (WaitmSeconds interval); 
+Wait interval x =  Evaluate_2 x (wait_mseconds interval); 
 
 UWait :: !TimerInterval * x -> * x;
-UWait interval x =  UEvaluate_2 x (WaitmSeconds interval);
+UWait interval x =  UEvaluate_2 x (wait_mseconds interval);
 
 // Get the timer handles from the IOState
 

@@ -40,7 +40,7 @@ ShowMenu io_state
 OpenMenu :: !(DeviceSystem s (IOState s)) !(IOState s) -> IOState s;
 OpenMenu (MenuSystem menus) io_state
    #!
-      menu_bar   = AddMenuBar 0;
+      menu_bar   = add_menu_bar 0;
       handles    = CreateXHandles [] menus menu_bar;
    #!
       menu_system= MenuSystemState menu_bar handles; 
@@ -272,40 +272,40 @@ AddXMenu bar s able
    | Enabled able #!
 		menu=menu;
 		=
-		 (EnableMenuWidgetX  menu, bar);
+		 (enable_menu_widget  menu, bar);
    #!
 		menu=menu;
 		=
-		(DisableMenuWidgetX menu, bar);
+		(disable_menu_widget menu, bar);
       where {
-      menu=: AddMenu bar s;
+      menu=: add_menu bar s;
       };
 
 AddXMenuSeparator :: !Widget -> (!Widget, !Widget);
-AddXMenuSeparator menu =  (AddMenuSeparator menu, menu);
+AddXMenuSeparator menu =  (add_menu_separator menu, menu);
 
 AddXMenuItem :: !Widget !String !KeyShortcut !SelectState -> (!Widget, !Widget);
 AddXMenuItem menu s ks able 
-   #!   item = AddMenuItem menu s;
+   #!   item = add_menu_item menu s;
      	item`= InstallKeyShortcut item ks;
    | Enabled able
 		=
-		 (EnableMenuWidgetX  item`, menu);
+		 (enable_menu_widget  item`, menu);
 		=
-		(DisableMenuWidgetX item`, menu);
+		(disable_menu_widget item`, menu);
 
 AddXSubMenuItem :: !Widget !String !SelectState -> (!Widget, !Widget);
 AddXSubMenuItem menu s able 
    | Enabled able #!
 		sub=sub;
 		=
-		 (EnableMenuWidgetX  sub, menu);
+		 (enable_menu_widget  sub, menu);
    #!
 		sub=sub;
 		=
-		(DisableMenuWidgetX sub, menu);
+		(disable_menu_widget sub, menu);
       where {
-      sub=: AddSubMenu menu s;
+      sub=: add_sub_menu menu s;
       };
 
 AddXCheckMenuItem :: !Widget !String !KeyShortcut !MarkState !SelectState
@@ -316,14 +316,14 @@ AddXCheckMenuItem menu s ks ms able
 	  item`= InstallKeyShortcut item ks;
    | Enabled able
    		=
-		(EnableMenuWidgetX  item`, menu);
+		(enable_menu_widget  item`, menu);
 		=
-		(DisableMenuWidgetX item`, menu);
+		(disable_menu_widget item`, menu);
 
 AddXCheckMenuItem` :: !Widget !String !MarkState -> Widget;
 AddXCheckMenuItem` menu s ms
-   | MarkEqual Mark ms =  AddCheckItem menu s XMark;
-   =  AddCheckItem menu s XNoMark;
+   | MarkEqual Mark ms =  add_check_item menu s XMark;
+   =  add_check_item menu s XNoMark;
 
 /* Handling group items
 */
@@ -625,7 +625,7 @@ ReconstructMenuElements :: ![MenuItemHandle s (IOState s)] ![KeyShortcut]
    -> (![KeyShortcut], ![MenuElement s (IOState s)]);
 ReconstructMenuElements [ItemHandle (id,w) f : items] keys 
    #
-      info            = GetItemInfo w;
+      info            = get_item_info w;
       (keys` , item  )= ConvertItemHandle info id f keys;
    #!
 		strict2=ReconstructMenuElements items keys`;
@@ -647,7 +647,7 @@ ReconstructMenuElements [SubMenuHandle (id,w) handles : items] keys
     #  (keys` , subitems)= strict3;
 	#!	strict2=ReconstructMenuElements items keys`;
    #   (keys``, items`  )= strict2;
-      (title, ability)  = GetSubmenuInfo w;
+      (title, ability)  = get_submenu_info w;
       ability`          = if (ability == 0) Unable Able;
    #!   strict1=DestroyOld (SubMenuItem id title ability` subitems) w;
 		=
@@ -681,7 +681,7 @@ ReconstructRadioElements :: !Int ![RadioMenuItemHandle s (IOState s)]
    -> (!Int, ![KeyShortcut], ![RadioElement s (IOState s)]);
 ReconstructRadioElements did [RadioItemHandle (id,w) f : items] keys
    #!
-      info                  = GetItemInfo w;
+      info                  = get_item_info w;
 		strict3=ConvertRadioItemHandle info id f keys;
     #  (id` , keys` , item  )= strict3;
 	#!	strict2=ReconstructRadioElements id` items keys`;
@@ -692,7 +692,7 @@ ReconstructRadioElements did [RadioItemHandle (id,w) f : items] keys
 ReconstructRadioElements did items keys =  (did, keys, []);
 
 DestroyOld :: !x !Widget -> x;
-DestroyOld x w =  Evaluate_2 x (DestroyItemWidget w);
+DestroyOld x w =  Evaluate_2 x (destroy_item_widget w);
 
 ConvertItemHandle :: !(!Int, !Int, !String, !String) !Int
       !(MenuFunction s (IOState s)) ![KeyShortcut]
@@ -730,12 +730,12 @@ ConvertRadioItemHandle (ability,state,title,key) id f keys
 /* Controlling the appearance of menus and items.
 */
 CheckXWidget :: !Widget !MarkState -> Widget;
-CheckXWidget w Mark =  CheckWidget w XMark ;
-CheckXWidget w NoMark =  CheckWidget w XNoMark;
+CheckXWidget w Mark =  check_widget w XMark ;
+CheckXWidget w NoMark =  check_widget w XNoMark;
 
 SetWidgetAbility :: !Widget !SelectState -> Widget;
-SetWidgetAbility w Able =  EnableMenuWidgetX w ;
-SetWidgetAbility w Unable =  DisableMenuWidgetX w;
+SetWidgetAbility w Able =  enable_menu_widget w ;
+SetWidgetAbility w Unable =  disable_menu_widget w;
 
 SetMenuAbility :: !Widget !SelectState -> Widget;
 SetMenuAbility w state =  SetWidgetAbility w state;
@@ -745,21 +745,21 @@ SetMenuAbility w state =  SetWidgetAbility w state;
 */
 DisposeMenuSystemState :: !(DeviceSystemState s) -> DeviceSystemState s;
 DisposeMenuSystemState (MenuSystemState w handles)
-   =  Evaluate_2 (MenuSystemState 0 ([],[],True)) (DestroyMenu w);
+   =  Evaluate_2 (MenuSystemState 0 ([],[],True)) (destroy_menu w);
 
 /* (Un)drawing a MenuSystem (menubar),i.e. (un)managing widgets.
 */
 ClearMenuSystem :: !(DeviceSystemState s) -> DeviceSystemState s;
-ClearMenuSystem h=:(MenuSystemState w handles) =  Evaluate_2 h (HideMenuX w);
+ClearMenuSystem h=:(MenuSystemState w handles) =  Evaluate_2 h (hide_menu w);
 
 DrawMenuSystem :: !(DeviceSystemState s) -> DeviceSystemState s;
-DrawMenuSystem h=:(MenuSystemState w handles) =  Evaluate_2 h (ShowMenuX w);
+DrawMenuSystem h=:(MenuSystemState w handles) =  Evaluate_2 h (show_menu w);
 
 
 /* Installing key shortcuts.
 */
 InstallKeyShortcut :: !Widget !KeyShortcut -> Widget;
-InstallKeyShortcut w (Key c) =  InstallShortcut w (toString c);
+InstallKeyShortcut w (Key c) =  install_shortcut w (toString c);
 InstallKeyShortcut w key =  w;
 
 AddKey :: !KeyShortcut ![KeyShortcut] -> [KeyShortcut];

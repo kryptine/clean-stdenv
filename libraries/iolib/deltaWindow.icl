@@ -98,8 +98,8 @@ ActivateWindow :: !WindowId !(IOState s) -> IOState s;
 ActivateWindow id io_state
   | not exists
 	=  io_state`;
-// =  SetActiveWindowHandle (XActivateWindow widget) io_state`;
-	# r =  XActivateWindow widget;
+// =  SetActiveWindowHandle (activate_window widget) io_state`;
+	# r =  activate_window widget;
 	| r==r
    		= io_state`;
   where {
@@ -187,7 +187,7 @@ ChangeWindowTitle`` id title [window=:(w_def,win) : windows]
    | id == id`   #!
       w_def`      = WindowDef_SetTitle w_def title;
    #  (w_ptr, pic)= win;
-   #!	strict2=XSetWindowTitle w_ptr title;
+   #!	strict2=set_window_title w_ptr title;
    #  win`        = (strict2, pic);
 		=
 		 [(w_def`, win`) : windows];
@@ -264,20 +264,20 @@ Change_thumbs s (ScrollWindow i p t h =: (ScrollBar (Thumb old_h) s_h=:(Scroll h
 	#! h`  = ScrollBar (Thumb new_h) s_h;
 	   v`  = ScrollBar (Thumb new_v) s_v;
 	# (s1,win1)= ScrUpd s up pic 
-                        (XSetScrollBar win h_min v_min new_h (-1) new_v (-1));
+                        (set_scrollbars win h_min v_min new_h (-1) new_v (-1));
 	#! win1=win1;
 		=
 		(s1,(ScrollWindow i p t h` v` pd ms is up att, (win1,pic)));
    | HThumbChange change
 	#! h`     = ScrollBar (Thumb new_h) s_h;
 	#  (s2,win2)= ScrUpd s up pic
-                        (XSetScrollBar win h_min v_min new_h (-1) (-1) (-1));
+                        (set_scrollbars win h_min v_min new_h (-1) (-1) (-1));
 	#!	win2=win2;
 		=
 		(s2,(ScrollWindow i p t h` v pd ms is up att, (win2,pic)));
 	#! v`     = ScrollBar (Thumb new_v) s_v;
 	#  (s3,win3)= ScrUpd s up pic
-                        (XSetScrollBar win h_min v_min (-1) (-1) new_v (-1));
+                        (set_scrollbars win h_min v_min (-1) (-1) new_v (-1));
 	#! win3=win3;
 		=
 		(s3,(ScrollWindow i p t h v` pd ms is up att, (win3,pic)));
@@ -287,7 +287,7 @@ Change_thumbs s (ScrollWindow i p t h =: (ScrollBar (Thumb old_h) s_h=:(Scroll h
       mh_val =: Align_thumb h_val h_min h_max` h_scroll;
       mv_val =: Align_thumb v_val v_min v_max` v_scroll;
       (h_val,v_val)=: ChangeValues change;
-      (w,he)  =: XGetCurrentWindowSize win;
+      (w,he)  =: get_window_size win;
       h_max`=:(h_max - w);
                 v_max`=:(v_max - he);
 		};
@@ -303,21 +303,21 @@ ScrUpd s upd p (w,n)
    # 
       (w`, p` )= strict1;
 		=
-		(s`, EndXUpdate w`);
+		(s`, end_update w`);
 
 Change_scrolls :: !*s !(WindowHandle *s) !ScrollBarChange
    -> (!*s, !WindowHandle *s);
 Change_scrolls s (ScrollWindow i p t h =: (ScrollBar t_h=:(Thumb old_h) s_h=:(Scroll h_scroll)) v =: (ScrollBar t_v=:(Thumb old_v) s_v=:(Scroll v_scroll)) pd=: (((h_min,v_min),(h_max,v_max))) ms is up att,(win,pic)) change| ScrollsChange change #!
       h`     = Evaluate_2 (ScrollBar t_h (Scroll new_h_s))
-                          (XSetScrollBar win h_min v_min (-1) new_h_s (-1) (-1));
+                          (set_scrollbars win h_min v_min (-1) new_h_s (-1) (-1));
       v`     = Evaluate_2 (ScrollBar t_v (Scroll new_v_s))
-                          (XSetScrollBar win h_min v_min (-1) (-1) (-1) new_v_s);
+                          (set_scrollbars win h_min v_min (-1) (-1) (-1) new_v_s);
 		=
 		Change_thumbs s (ScrollWindow i p t h` v` pd ms is up att,(win,pic))
                     (ChangeThumbs new_h_t new_v_t);
    | HScrollChange change #!
       h`     = Evaluate_2 (ScrollBar t_h (Scroll new_h_s))
-                          (XSetScrollBar win h_min v_min (-1) new_h_s (-1) (-1));
+                          (set_scrollbars win h_min v_min (-1) new_h_s (-1) (-1));
 		v=v;
 		=
 		Change_thumbs s (ScrollWindow i p t h` v pd ms is up att, (win,pic))
@@ -325,7 +325,7 @@ Change_scrolls s (ScrollWindow i p t h =: (ScrollBar t_h=:(Thumb old_h) s_h=:(Sc
    #!
 		h=h;
       v`     = Evaluate_2 (ScrollBar t_v (Scroll new_v_s))
-                          (XSetScrollBar win h_min v_min (-1) (-1) (-1) new_v_s);
+                          (set_scrollbars win h_min v_min (-1) (-1) (-1) new_v_s);
 		=
 		Change_thumbs s (ScrollWindow i p t h v` pd ms is up att, (win,pic))
                     (ChangeVThumb new_v_t);
@@ -337,7 +337,7 @@ Change_scrolls s (ScrollWindow i p t h =: (ScrollBar t_h=:(Thumb old_h) s_h=:(Sc
       mod_h_t=: Align_thumb old_h h_min h_max` h_s;
       mod_v_t=: Align_thumb old_v v_min v_max` v_s;
       (h_s,v_s)=: ChangeValues change;
-      (w,he)  =: XGetCurrentWindowSize win;
+      (w,he)  =: get_window_size win;
       h_max`=:(h_max - w);
                 v_max`=:(v_max - he);
 		};
@@ -440,7 +440,7 @@ ChangePictureDomain``` act pd state (olddef, (win,pic))
    | changed #!
       strict1=(WindowDef_Update def``);
    #  (state``, win``)= ScrUpd state strict1 
-                               newpic (GetFirstUpdateX newwin);
+                               newpic (get_first_update newwin);
 		=
 	 (state``, (def``, (win``, newpic)));
 		=
@@ -456,8 +456,8 @@ ChangePictureDomain``` act pd state (olddef, (win,pic))
 GetCurrentWindowdef :: !WindowPtr !(WindowDef s (IOState s))
    -> WindowDef s (IOState s);
 GetCurrentWindowdef window olddef   =: (ScrollWindow i p t ohscrollb=: (ScrollBar (Thumb ohthumb) (Scroll hscroll)) ovscrollb=: (ScrollBar (Thumb ovthumb) (Scroll vscroll)) oldpd msize is u oa)#!
-      newsize  = XGetCurrentWindowSize window;
-      strict1=XGetCurrentWindowThumbs window;
+      newsize  = get_window_size window;
+      strict1=get_current_thumbs window;
     # (hthumb,vthumb)= strict1;
       nhscrollb= ScrollBar (Thumb hthumb) (Scroll hscroll);
       nvscrollb= ScrollBar (Thumb vthumb) (Scroll hscroll);
@@ -472,15 +472,15 @@ CorrectUpdates state window pic olddef   =: (ScrollWindow i p t ohscrollb=: (Scr
                               newpd    =: (((x0,y0),(x1,y1))) nms      =: ((min_width, min_height)) newsize  =: ((new_width, new_height)) upd na)| old_width <> new_width
                                                  || old_height <> new_height   #!
 		changed_window=changed_window;
-		= (s`,    DiscardXUpdates window`       );
+		= (s`,    discard_updates window`       );
    | ohthumb <> nhthumb
                                                  || ovthumb <> nvthumb   #!
 		changed_window=changed_window;
-		= (s``,   DiscardXUpdates window``      );
+		= (s``,   discard_updates window``      );
    #!
 		changed_window=changed_window;
 		=
-		(state, DiscardXUpdates changed_window);
+		(state, discard_updates changed_window);
       where {
       (s`, upds)    =: upd [((nhthumb,nvthumb), 
                            (nhthumb + new_width, nvthumb + new_height))] state;
@@ -490,12 +490,12 @@ CorrectUpdates state window pic olddef   =: (ScrollWindow i p t ohscrollb=: (Scr
         pic``)      =: Draw_in_window (changed_window,pic) (nhthumb,nvthumb) upds`;
       thumb_areas   =: ThumbUpdateAreas ohthumb nhthumb ovthumb nvthumb
                                        new_width new_height;
-      changed_window=: ChangeXWindow Scrollable window nhthumb nhscroll
+      changed_window=: change_window Scrollable window nhthumb nhscroll
                          nvthumb nvscroll new_width new_height
                          min_width min_height x0 y0 x1 y1;
        };
 CorrectUpdates state window pic olddef   =: (FixedWindow i p t oldpd    =: (((oldx0,oldy0),(oldx1,oldy1))) u oa) newdef   =: (FixedWindow ni np nt newpd    =: (((x0,y0),(x1,y1))) upd na)| old_width <> new_width
-                                     || old_height <> new_height =  (s`, DiscardXUpdates window`);
+                                     || old_height <> new_height =  (s`, discard_updates window`);
    #!
 		strict1=strict1;
 		=
@@ -503,7 +503,7 @@ CorrectUpdates state window pic olddef   =: (FixedWindow i p t oldpd    =: (((ol
       where {
       (s`, upds)     =: upd [newpd] state;
       (window`, pic`)=: Draw_in_window strict1 (x0,y0) upds;
-      changed_window =: ChangeXWindow FixedSize window x0 0 y0 0
+      changed_window =: change_window FixedSize window x0 0 y0 0
                                      new_width new_height 0 0 x0 y0 x1 y1;
       old_width      =: oldx1 - oldx0;    old_height=: oldy1 - oldy0;
       new_width      =: x1 - x0;          new_height=: y1 - y0;
@@ -589,8 +589,8 @@ WindowGetFrame id io_state
 		=
 		(((x0, y0),(strict3, strict4)), io_state`);
       where {
-      (x0, y0)           =: XGetCurrentWindowThumbs widget;
-      (w, h)             =: XGetCurrentWindowSize widget;
+      (x0, y0)           =: get_current_thumbs widget;
+      (w, h)             =: get_window_size widget;
       (widget, pic)      =: window;
       (exists, window)   =: GetWindowHandleFromId id device;
       (device, io_state`)=: IOStateGetDevice io_state WindowDevice;
@@ -605,7 +605,7 @@ WindowGetPos id io_state
 	| not exists
 		= ((0,0),io_state);
 		# (widget,pic) = window;
-		# (x,y) = XGetWindowPosition widget;
+		# (x,y) = get_window_position widget;
 		= ((x,y),io_state);
 
 ActiveWindowGetFrame :: !(IOState s) -> (!PictureDomain, !IOState s);

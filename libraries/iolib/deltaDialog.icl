@@ -85,10 +85,10 @@ CloseActiveDialog` ds=:(DialogSystemState []) =  ds;
 
 OpenNotice :: !NoticeDef !*s !(IOState *s) -> (!NoticeButtonId, !*s, !IOState *s);
 OpenNotice (Notice text defbutton buttons) program_state io_state
-   =  (XHandleNotice notice, program_state, io_state);
+   =  (handle_notice notice, program_state, io_state);
       where {
       notice =: AddNoticeButtons notice` [defbutton : buttons];
-      notice`=: XCreateNotice (CreateNoticeText text);
+      notice`=: create_notice (CreateNoticeText text);
       };
 
 CreateNoticeText :: ![String] -> String;
@@ -97,11 +97,11 @@ CreateNoticeText s =  "";
 
 AddNoticeButtons :: !Widget ![NoticeButtonDef] -> Widget;
 AddNoticeButtons w [NoticeButton id label :buttons]
-   =  AddNoticeButtons (XCreateNoticeButton w label id) buttons;
+   =  AddNoticeButtons (add_n_button w label id) buttons;
 AddNoticeButtons w buttons =  w;
 
 Beep :: !(IOState s) -> IOState s;
-Beep io =  UEvaluate_2 io (XBeep 0);
+Beep io =  UEvaluate_2 io (beep 0);
 
 GetDialogInfo :: !DialogId !(IOState s) -> (!Bool, !DialogInfo, !IOState s);
 GetDialogInfo id io_state =  (found, DDef2DInfo def, io_state``);
@@ -401,7 +401,7 @@ CAbilityDialogItem state (id,w) (DialogIconButton i l p look s f)
    #
       dfs= Concat (PictureNormal p) (look state);
    #!
-      strict2=NewXPicture (DialogItem2Object w);
+      strict2=NewXPicture (dialog_item_to_object w);
       w` = Evaluate_2 w (Draw_in_window (1, strict2) (0,0) dfs);
 		=
 		((id, w`), DialogIconButton i l p look state f);
@@ -409,7 +409,7 @@ CAbilityDialogItem state (id,w) (Control i l p s cs look feel f)
    #
       dfs= Concat (PictureNormal p) (look state cs);
    #!
-      strict2=NewXPicture (DialogItem2Object w);
+      strict2=NewXPicture (dialog_item_to_object w);
       w` = Evaluate_2 w (Draw_in_window (1, strict2) (0,0) dfs);
 		=
 		((id, w`), Control i l p state cs look feel f);
@@ -473,8 +473,8 @@ CMarkDialogItem mark (id,w) item=:(CheckBoxes i l roc checks)
 CMarkDialogItem mark handle item =  (handle,item);
 
 CheckDialogItem :: !Widget !MarkState -> Widget;
-CheckDialogItem w Mark =  CheckDialogItemX w XMark;
-CheckDialogItem w mark =  CheckDialogItemX w XNoMark;
+CheckDialogItem w Mark =  check_dialog_item w XMark;
+CheckDialogItem w mark =  check_dialog_item w XNoMark;
 
 SelectDialogRadioItem :: !DialogItemId !(DialogState s (IOState s))
    -> DialogState s (IOState s);
@@ -489,7 +489,7 @@ SelectDialogRadioItem` (id,w) (RadioButtons id` l roc did radios)
 		=
 		((id, strict1), RadioButtons id` l roc id radios);
 	where {
-	strict1=XPressRadioWidget w "";
+	strict1=press_radio_widget w "";
 		
 	};
 SelectDialogRadioItem` (id,w) (DialogPopUp id` l a did radios)
@@ -499,7 +499,7 @@ SelectDialogRadioItem` (id,w) (DialogPopUp id` l a did radios)
 		((id, strict1), DialogPopUp id` l a id radios);
       where {
       title=: GetDefaultRadioTitle id radios;
-      strict1=XPressRadioWidget w title;
+      strict1=press_radio_widget w title;
 		};
 SelectDialogRadioItem` handle item =  (handle,item);
 
@@ -522,7 +522,7 @@ ChangeEditText` text (id,w) (EditText id` l wi nl text`)
 		=
 		((id, strict1), EditText id` l wi nl text);
 	where {
-	strict1=XSetEditText w text;
+	strict1=set_edit_text w text;
 		
 	}; 
 ChangeEditText` text handle item =  (handle,item);
@@ -540,7 +540,7 @@ ChangeDynamicText` text (id,w) (DynamicText id` l wi text`)
 		=
 		((id, strict1), DynamicText id` l wi text);
 	where {
-	strict1=XSetStaticText w text;
+	strict1=set_static_text w text;
 		
 	};
 ChangeDynamicText` text handle item =  (handle,item);
@@ -556,7 +556,7 @@ ChangeIconLook` look (id,w) (DialogIconButton id` l p look` s f)
    #
       dfs= Concat (PictureNormal p) (look s);
    #!
-      strict2=NewXPicture (DialogItem2Object w);
+      strict2=NewXPicture (dialog_item_to_object w);
       w` = Evaluate_2 w (Draw_in_window (1, strict2) (0,0) dfs);
 		=
 		((id, w`), DialogIconButton id` l p look s f);
@@ -573,7 +573,7 @@ ChangeControlState` cs (id,w) (Control id` l p s cs` look feel f)
    #
       dfs= Concat (PictureNormal p) (look s cs);
    #!
-      strict2=NewXPicture (DialogItem2Object w);
+      strict2=NewXPicture (dialog_item_to_object w);
       w` = Evaluate_2 w (Draw_in_window (1, strict2) (0,0) dfs);
 		=
 		((id, w`), Control id` l p s cs look feel f);
@@ -590,7 +590,7 @@ ChangeControlLook` look (id,w) (Control id` l p s cs look` feel f)
    #
       dfs= Concat (PictureNormal p) (look s cs);
    #!
-      strict2=NewXPicture (DialogItem2Object w);
+      strict2=NewXPicture (dialog_item_to_object w);
       w` = Evaluate_2 w (Draw_in_window (1, strict2) (0,0) dfs);
 		=
 		((id, w`), Control id` l p s cs look feel f);
