@@ -23,7 +23,7 @@ instance Controls ColourTextControl where
 				[ControlOuterSize s : _] = (s,pSt)
 				[ControlViewSize  s : _] = (s,pSt)
 				nothing                  = controlSize (PopUpControl [] 1 atts) True Nothing Nothing Nothing pSt
-		impl size=:{w,h} metrics font
+		impl size metrics font
 							= { addLS = txt
 							  , addDef=		CustomControl size (look  txt)
 												[ ControlPen         [PenFont font,PenBack colour]
@@ -34,10 +34,18 @@ instance Controls ColourTextControl where
 										:+: Receiver2 r2Id receiverFun []
 							  }
 		where
-			look txt _ _ picture
-				# picture	= unfill {zero & corner2={x=w,y=h}} picture
+			look txt _ {newFrame} picture
+				# picture	= unfill newFrame picture
+				# picture	= setPenColour Black picture
+				# picture	= draw newFrame picture
+				# picture	= setPenColour White picture
+				# picture	= drawAt {x=0,y=h-1} {vx=w,vy=0} picture
+				# picture	= drawAt {x=w-1,y=h-1} {vx=0,vy= ~h} picture
+				# picture	= setPenColour Black picture
 				# picture	= drawAt {x=metrics.fMaxWidth/2,y=h-(h-(fontLineHeight metrics))/2-metrics.fDescent} txt picture
 				= picture
+			where
+				{w,h}		= rectangleSize newFrame
 			
 			receiverFun :: !MsgIn !((String,.ls),PSt .ps) -> (!MsgOut,!((String,.ls),PSt .ps))
 			receiverFun GetTextIn ((txt,lSt),pSt)
