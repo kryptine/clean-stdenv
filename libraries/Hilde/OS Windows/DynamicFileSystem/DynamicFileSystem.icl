@@ -46,7 +46,7 @@ where
 					= valid ds
 				valid _ = []
 
-	dynamicWrite path (_ :: DynamicDirectory) world = CreateDirectory (toDirectory path) world
+	dynamicWrite path (directory :: DynamicDirectory) world = CreateDirectory (toDirectory path) world
 	dynamicWrite path d world = writeDynamic (toDirectory path +++ FILENAME_DYNAMIC_EXTENSION) d world
 
 	dynamicRemove path world

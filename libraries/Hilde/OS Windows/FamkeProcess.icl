@@ -128,21 +128,24 @@ where
 			FreePort p -> freePort` p reply st
 
 	clientWorkRequest self osId reply st=:{working, waiting, famke}
-		# (Just w=:{workingWork, workingJoin, workingState}, working) = uExtractK self working
-		  famke = Foldr (joinClient self) famke workingJoin
-		= case workingState of
-			Disconnect -> processServer {st & working = working, famke = endWaitingClient 0 {waitingReply = reply, waitingWorking=w} famke}
-			_
-				# (maybe, workingWork) = uDeCons workingWork
-				  w = {w & workingWork = workingWork, workingJoin = Empty, workingState = Connected osId}
-				-> case maybe of
-					Just process
-						# famke = reply (ClientDoMoreWork process) famke
-						  working = uInsertK self w working
-						-> TRACE ("Process client " +++ toString self +++ " put to work") (processServer {st & working = working, famke = famke})
+		# (maybe, working) = uExtractK self working
+		= case maybe of
+			Just w=:{workingWork, workingJoin, workingState}
+				# famke = Foldr (joinClient self) famke workingJoin
+				-> case workingState of
+					Disconnect -> processServer {st & working = working, famke = endWaitingClient 0 {waitingReply = reply, waitingWorking=w} famke}
 					_
-				  		# waiting = uSnoc waiting {waitingReply = reply, waitingWorking = w}
-				  		-> TRACE ("Process client " +++ toString self +++ " idle") (processServer {st & working = working, waiting = waiting, famke = famke})
+						# (maybe, workingWork) = uDeCons workingWork
+						  w = {w & workingWork = workingWork, workingJoin = Empty, workingState = Connected osId}
+						-> case maybe of
+							Just process
+								# famke = reply (ClientDoMoreWork process) famke
+								  working = uInsertK self w working
+								-> TRACE ("Process client " +++ toString self +++ " put to work") (processServer {st & working = working, famke = famke})
+							_
+						  		# waiting = uSnoc waiting {waitingReply = reply, waitingWorking = w}
+						  		-> TRACE ("Process client " +++ toString self +++ " idle") (processServer {st & working = working, waiting = waiting, famke = famke})
+	  		_ -> TRACE ("Process client " +++ toString self +++ " does not exist") (processServer {st & working = working, famke = famke})
 		
 	newProcess` process reply st=:{working, waiting, nextid} 
 		# (maybe, waiting) = uDeCons waiting
@@ -186,8 +189,10 @@ where
 				  famke = if (id <> self) (reply ProcessKilled famke) famke
 				-> processServer {st & famke = famke}
 			_
-				# (Just client, waiting) = extractWaiting id waiting
-				  famke = endWaitingClient self client famke
+				# (maybe, waiting) = extractWaiting id waiting
+				  famke = case maybe of
+							Just client -> endWaitingClient self client famke
+							_ -> famke
 				  famke = reply ProcessKilled famke
 				-> processServer {st & waiting = waiting, famke = famke}
 	

@@ -3,8 +3,8 @@ implementation module EstherScript
 import EstherPostParser, EstherTransform, DynamicFileSystem
 import StdBool, StdList, StdMisc, StdParsComb, StdFunc
 
-compose :: !String !*(Esther *env) -> (!Dynamic, !*Esther *env) | DynamicFileSystem, ExceptionEnv, bimap{|*|} env
-compose input env = (compile input catchAllIO handler) env
+compose :: !String !*(Esther *env) -> (!Dynamic, !*Esther *env) | DynamicFileSystem, bimap{|*|} env
+compose input env = compile input env
 where
 	compile input env
 		# syntax = parseStatement input
@@ -12,10 +12,6 @@ where
 		  syntax = fixInfix{|*|} syntax
 		  core = transform{|*|} syntax
 		= generateCode core env`
-
-	handler d env = (dynamic EstherError (foldr (+++) "" v) :: EstherError, env)
-	where
-		(v, t) = toStringDynamic d
 
 evaluate :: !Bool a !Dynamic !*(Esther *env) -> (!a, !*Esther *env) | TC a & TC, DynamicFileSystem, ExceptionEnv, bimap{|*|} env
 evaluate unsafe def input esther 
@@ -34,26 +30,17 @@ where
 	where
 		(v, t) = toStringDynamic d
 
-transform{|NTstatement|} (Expression e) = transform{|*|} e
-
 instance resolveFilename (Esther *env) | DynamicFileSystem env
 where
-	resolveFilename name state = searchCache True name (searchBuildin name (raise ("Cannot find file: " +++ name))) state 
+	resolveFilename name state=:{searchPath, builtin, env}
+		# (ok, dyn, prio) = findFile name builtin
+		| ok = (dyn, prio, {state & env = env})
+		# (cache, env) = cacheSearchPath searchPath env
+		  (ok, path, prio) = findFile name cache
+		  (ok, dyn, env) = if ok (dynamicRead path env) (False, undef, env)
+		| ok = (dyn, prio, {state & env = env})
+		= raise ("Cannot find file: " +++ name)
 	where
-		searchCache retry name else state=:{searchPath, searchCache=cache, env}
-			# (ok, path, prio) = findFile name cache
-			  (ok, dyn, env) = if ok (dynamicRead path env) (False, undef, env)
-			| not ok
-				| not retry = else {state & env = env}
-				# (cache, env) = cacheSearchPath searchPath env
-				= searchCache False name else {state & searchCache = cache, env = env}
-			= (dyn, prio, {state & env = env})
-		
-		searchBuildin name else state=:{buildin} 
-			# (ok, dyn, prio) = findFile name buildin
-			| not ok = else state
-			= (dyn, prio, state)
-	
 		findFile n [] = (False, undef, undef)
 		findFile n [(x, d):xs] = case begin (sp (parse (fromString n)) <& sp eof) (fromString x) of
 			[([], p)] -> (True, d, p)
@@ -72,7 +59,6 @@ instance resolveInstance (Esther *env) | DynamicFileSystem env
 where
 	resolveInstance n t env = (i, env`)
 	where
-//		(i, _, env`) = resolveType (toString (typeCodeOfDynamic t)) env 
 		(i, _, env`) = resolveType (outermostType t) env
 		
 		resolveType s env = resolveFilename ("instance " +++ n +++ " " +++ s) env
