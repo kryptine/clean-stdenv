@@ -773,14 +773,14 @@ int os_printsetupvalid(CleanString inSetup)
 		//PMBegin();
 		err = PMCreateSession(&gPrintSession);
 	if (err != noErr)
-		return false;
+		return 0;
 
 	allocPrintRecord(gPrintSession,inSetup,&pageFormat,&err);
 	if (err)
 		{
 		if (!prGrafPortOK)
 			PMRelease(gPrintSession);
-		return false;
+		return 0;
 		};
 /*
 	if (!prGrafPortOK)
@@ -797,7 +797,7 @@ int os_printsetupvalid(CleanString inSetup)
 	if (!prGrafPortOK)
 //		PMEnd();
 		PMRelease(gPrintSession);
-	return !changed;
+	return (changed ? 0 : -1);	//!changed;
 }
 /*
 OSStatus printSetupToString(PMPageFormat pageFormat, CleanString *pCleanString)
