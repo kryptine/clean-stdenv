@@ -246,16 +246,16 @@ OSStatus setMaxResolution(PMPageFormat *pageFormat)
 //		DebugStr("\pError in setMaxResolution:PMSetResolution");
 		return err;
 		};
-	err	= PMValidatePageFormat(*pageFormat, &changed);
+	err	= PMSessionValidatePageFormat(gPrintSession,*pageFormat, &changed);
 	if (err != noErr)
 		{
-//		DebugStr("\pError in setMaxResolution:PMValidatePageFormat");
+//		DebugStr("\pError in setMaxResolution:PMSessionValidatePageFormat");
 		return err;
 		};
 	return err;
 }
 
-void allocPrintRecord(CleanString printSetup,PMPageFormat *pageFormat,int *pErr)
+void allocPrintRecord(PMPrintSession printSession,CleanString printSetup,PMPageFormat *pageFormat,int *pErr)
 // error code: 0 no error; 1=out of memory
 {
 	int				length,i;
@@ -287,7 +287,7 @@ void allocPrintRecord(CleanString printSetup,PMPageFormat *pageFormat,int *pErr)
 //			DebugStr("\pUnflatten failed");
 			return;
 		};
-	err = PMValidatePageFormat(*pageFormat, &changed);
+	err = PMSessionValidatePageFormat(printSession,*pageFormat, &changed);
 	if (err != noErr)
 		{	*pErr = 1;
 //			DebugStr("\pValidate failed");
@@ -325,7 +325,7 @@ void getPageDimensionsC(	CleanString printSetup, int emulateScreen,
 			};
 		};
 	
-	allocPrintRecord(printSetup,&sPageFormat,pErr);
+	allocPrintRecord(gPrintSession,printSetup,&sPageFormat,pErr);
 	if (*pErr)
 		{
 		if (!prGrafPortOK)
@@ -424,11 +424,12 @@ void getPageDimensionsMore( int *pErr,
 
     if (sPageFormat != kPMNoPageFormat)
     	{
-		    err				= PMDisposePageFormat(sPageFormat);
+//		    err				= PMDisposePageFormat(sPageFormat);
+		    err				= PMRelease(sPageFormat);
 		};
 	if (err != noErr)
 		{
-//			DebugStr("\pPMDisposePageFormat failed");
+//			DebugStr("\pPMRelease failed");
 			*pErr = err;
 			if (!prGrafPortOK)
 				{
@@ -494,18 +495,18 @@ void printSetupDialogC(CleanString inSetup, int *pErr, CleanString *pOutSetup)
 //		DebugStr("\pprintSetupDialog:PMCreateSession failed");
 		return;
 		}
-	allocPrintRecord(inSetup,&pageFormat,pErr);
+	allocPrintRecord(printSession,inSetup,&pageFormat,pErr);
 	if (*pErr) {
 		*pOutSetup	= inSetup;
 //		DebugStr("\pprintSetupDialog:allocPrintRecord failed");
 		return;
 		}
 
-	err = PMValidatePageFormat(pageFormat, &changed);
+	err = PMSessionValidatePageFormat(printSession,pageFormat, &changed);
 	if (err != noErr) {
 		*pErr = err;
 		*pOutSetup	= inSetup;
-//		DebugStr("\pprintSetupDialog:PMValidatePageFormat failed");
+//		DebugStr("\pprintSetupDialog:PMSessionValidatePageFormat failed");
 		return;
 		}
 
@@ -584,12 +585,6 @@ void getPrintInfoC( int doDialog, int emulateScreen, CleanString inSetup, int un
 		};
 	DisposePtr(pTemp);
 
-	PMBegin();
-	allocPrintRecord(inSetup,&pageFormat,pErr);
-	PMEnd();
-	if (*pErr)
-		return;
-
 	*pRecHandleP = (int) pageFormat;
 
 	err = PMCreateSession(&gPrintSession);
@@ -599,6 +594,10 @@ void getPrintInfoC( int doDialog, int emulateScreen, CleanString inSetup, int un
 		return;
 		};
 	
+	allocPrintRecord(gPrintSession,inSetup,&pageFormat,pErr);
+	if (*pErr)
+		return;
+
 	if (!emulateScreen)
 		{
 		err	= setMaxResolution(&pageFormat);
@@ -719,6 +718,20 @@ int prClose(int os)
 	return os;
 }
 
+int	isPrinting()
+// if the current grafport is the printer grafport, then strech the size accordingly
+// This function is called in quickdraw.icl
+{
+	GrafPtr		curGrafPort;
+
+    if (!prGrafPortOK)
+		return 0;
+	  else		
+		{ GetPort(&curGrafPort);
+	 	  return (int) curGrafPort == (int) prGrafPort;
+	 	};
+}
+
 int	adjustToPrinterRes(int scrnSize)
 // if the current grafport is the printer grafport, then stretch the size accordingly
 // This function is called in quickdraw.icl
@@ -733,20 +746,6 @@ int	adjustToPrinterRes(int scrnSize)
 		return scrnSize;
 
 	
-}
-
-int	isPrinting()
-// if the current grafport is the printer grafport, then strech the size accordingly
-// This function is called in quickdraw.icl
-{
-	GrafPtr		curGrafPort;
-
-    if (!prGrafPortOK)
-		return 0;
-	  else		
-		{ GetPort(&curGrafPort);
-	 	  return (int) curGrafPort == (int) prGrafPort;
-	 	};
 }
 
 void getResolutionC(int *xResP, int *yResP)
@@ -767,14 +766,23 @@ int os_printsetupvalid(CleanString inSetup)
 {
 	PMPageFormat	pageFormat = kPMNoPageFormat;
 	Boolean			changed;
-	OSStatus		status;
+	OSStatus		status = noErr;
 	int			err, handleChanged;
 	
-	if (!prGrafPortOK) PMBegin();
-
-	allocPrintRecord(inSetup,&pageFormat,&err);
-	if (err)
+	if (!prGrafPortOK)
+		//PMBegin();
+		err = PMCreateSession(&gPrintSession);
+	if (err != noErr)
 		return false;
+
+	allocPrintRecord(gPrintSession,inSetup,&pageFormat,&err);
+	if (err)
+		{
+		if (!prGrafPortOK)
+			PMRelease(gPrintSession);
+		return false;
+		};
+/*
 	if (!prGrafPortOK)
 		{
 		status = PMValidatePageFormat(pageFormat, &changed);
@@ -783,8 +791,12 @@ int os_printsetupvalid(CleanString inSetup)
 		{
 		status = PMSessionValidatePageFormat(gPrintSession,pageFormat,&changed);
 		}
+*/
+	status = PMSessionValidatePageFormat(gPrintSession,pageFormat,&changed);
 	PMRelease(pageFormat);
-	if (!prGrafPortOK) PMEnd();
+	if (!prGrafPortOK)
+//		PMEnd();
+		PMRelease(gPrintSession);
 	return !changed;
 }
 /*
