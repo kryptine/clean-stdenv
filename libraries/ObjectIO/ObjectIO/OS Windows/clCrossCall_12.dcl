@@ -97,6 +97,7 @@ CcRqCREATESDIFRAMEWINDOW	:== 1813		// PA: added to create SDI frame window
 CcRqCLIPBOARDHASTEXT		:== 1812
 CcRqGETCLIPBOARDTEXT		:== 1811
 CcRqSETCLIPBOARDTEXT		:== 1810
+CcRqGETCLIPBOARDCOUNT		:== 1809		/* PA: added to retrieve clipboard count. */
 
 CcRqDIRECTORYDIALOG			:==	1802		/* PA: added to create directory selector dialog. */
 CcRqFILESAVEDIALOG			:== 1801

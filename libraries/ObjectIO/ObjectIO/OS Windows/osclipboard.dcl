@@ -16,6 +16,7 @@ OShasClipboardText :: !*OSToolbox -> (!Bool,!*OSToolbox)
 
 OSsetClipboardText :: !{#Char} !*OSToolbox -> *OSToolbox
 //	OSsetClipboardText empties the clipboard and sets the text to the clipboard.
+//	The return Int is the new version number.
 
 OSgetClipboardText :: !*OSToolbox -> (!{#Char},!*OSToolbox)
 //	OSgetClipboardText retrieves the current clipboard text item, which is empty if not present.
