@@ -65,6 +65,7 @@ WinStartOsThread		:: !*OSToolbox -> *OSToolbox
 
 WinCloseOs				:: !*OSToolbox -> Bool
 WinInitOs				:: (!Bool,!*OSToolbox)
+WinRefreshDesktop		:: !*OSToolbox -> *OSToolbox
 
 
   //------------------------------------------------------------------------//
@@ -81,6 +82,7 @@ CcRqCREATEGAMEWINDOW		:== 1900
 // MW...
 CcRqDO_PRINT_SETUP			:== 1828 // MW11++
 CcRqDO_HTML_HELP			:==	1827
+
 CcRqGET_PRINTER_DC			:== 1824
 CcRqDISPATCH_MESSAGES_WHILE_PRINTING
 							:== 1823
@@ -92,7 +94,6 @@ CcRqCREATESDIDOCWINDOW		:==	1816		// PA: added to create SDI document window
 CcRqCREATEMDIDOCWINDOW		:== 1815		// PA: added to create MDI document window
 CcRqCREATEMDIFRAMEWINDOW	:== 1814		// PA: added to create MDI frame window
 CcRqCREATESDIFRAMEWINDOW	:== 1813		// PA: added to create SDI frame window
-
 CcRqCLIPBOARDHASTEXT		:== 1812
 CcRqGETCLIPBOARDTEXT		:== 1811
 CcRqSETCLIPBOARDTEXT		:== 1810
@@ -100,6 +101,8 @@ CcRqSETCLIPBOARDTEXT		:== 1810
 CcRqDIRECTORYDIALOG			:==	1802		/* PA: added to create directory selector dialog. */
 CcRqFILESAVEDIALOG			:== 1801
 CcRqFILEOPENDIALOG			:== 1800
+
+CcRqUPDATEDESKTOP			:== 1790		/* PA: added to force refresh of desktop. */
 
 CcRqSHOWCONTROL				:== 1755		/* PA: added */
 CcRqSELECTPOPUPITEM			:== 1754

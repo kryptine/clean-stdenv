@@ -21,3 +21,5 @@ OSmaxFixedWindowSize	:: (!Int,!Int)
 OSscreenrect			:: !*OSToolbox -> (!Rect,!*OSToolbox)
 
 OSprintSetupTypical		:: Bool // MW11++
+
+OSrefreshDesktop		:: !*OSToolbox -> *OSToolbox
