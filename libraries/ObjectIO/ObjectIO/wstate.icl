@@ -5,7 +5,6 @@ import	StdInt, StdList, StdTuple, StdFunc
 import	oswindow
 import	commondef, keyfocus, windowhandle
 
-
 wstateFatalError :: String String -> .x
 wstateFatalError rule error
 	= fatalError rule "wstate" error
@@ -612,6 +611,270 @@ where
 		= info
 	setWItemInfo` _ _
 		= wstateFatalError "setWindowHandle`" "incompatible WItemInfo"
+
+retrieveWindowHandle2 :: !*(WindowStateHandle .pst) !*OSToolbox -> (!WindowHandle2,!*WindowStateHandle .pst,!*OSToolbox)
+retrieveWindowHandle2 wsH=:{wshIds={wPtr},wshHandle=Just wlsH=:{wlsHandle=wH}} tb
+	# (wH`,wH,tb)	= getWindowHandle2 wPtr wH tb
+	= (wH`,{wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
+retrieveWindowHandle2 _ _
+	= wstateFatalError "retrieveWindowHandle2" "unexpected window placeholder argument"
+
+getWindowHandle2 :: !OSWindowPtr !*(WindowHandle .ls .pst) !*OSToolbox -> (!WindowHandle2,!*WindowHandle .ls .pst,!*OSToolbox)
+getWindowHandle2 wPtr wH=:{	whWindowInfo
+						  ,	whItems=items
+						  ,	whSize
+						  } tb
+	#! (items`,items,tb)	= getWElementHandles2 wPtr items tb
+	= (	{	whWindowInfo2	= whWindowInfo
+		,	whItems2		= items`
+		,	whSize2			= whSize
+		}
+	  ,	{wH & whItems=items}
+	  ,	tb
+	  )
+where	
+	getWElementHandles2 :: !OSWindowPtr !*[WElementHandle .ls .pst] !*OSToolbox -> (![WElementHandle2],!*[WElementHandle .ls .pst],!*OSToolbox)
+	getWElementHandles2 wPtr [itemH:itemHs] tb
+		#! (itemH`, itemH, tb)	= getWElementHandle2  wPtr itemH  tb
+		#! (itemHs`,itemHs,tb)	= getWElementHandles2 wPtr itemHs tb
+		= ([itemH`:itemHs`],[itemH:itemHs],tb)
+	where
+		getWElementHandle2 :: !OSWindowPtr !*(WElementHandle .ls .pst) !*OSToolbox -> (!WElementHandle2,!*WElementHandle .ls .pst,!*OSToolbox)
+		getWElementHandle2 wPtr (WItemHandle itemH) tb
+			#! (itemH`,itemH,tb)	= getWItemHandle2 wPtr itemH tb
+			= (WItemHandle2 itemH`,WItemHandle itemH,tb)
+		getWElementHandle2 wPtr (WListLSHandle itemHs) tb
+			#! (itemHs`,itemHs,tb)	= getWElementHandles2 wPtr itemHs tb
+			= (WRecursiveHandle2 itemHs` IsWListLSHandle,WListLSHandle itemHs,tb)
+		getWElementHandle2 wPtr (WExtendLSHandle exH=:{wExtendItems=itemHs}) tb
+			#! (itemHs`,itemHs,tb)	= getWElementHandles2 wPtr itemHs tb
+			= (WRecursiveHandle2 itemHs` IsWExtendLSHandle,WExtendLSHandle {exH & wExtendItems=itemHs},tb)
+		getWElementHandle2 wPtr (WChangeLSHandle chH=:{wChangeItems=itemHs}) tb
+			#! (itemHs`,itemHs,tb)	= getWElementHandles2 wPtr itemHs tb
+			= (WRecursiveHandle2 itemHs` IsWChangeLSHandle,WChangeLSHandle {chH & wChangeItems=itemHs},tb)
+	getWElementHandles2 _ _ tb
+		= ([],[],tb)
+	
+	getWItemHandle2 :: !OSWindowPtr !*(WItemHandle .ls .pst) !*OSToolbox -> (!WItemHandle2,!*WItemHandle .ls .pst,!*OSToolbox)
+	getWItemHandle2 wPtr itemH=:{	wItemId
+								,	wItemKind
+								,	wItemShow
+								,	wItemInfo
+								,	wItems
+								,	wItemPos
+								,	wItemSize
+								,	wItemPtr
+								} tb
+		#! (itemHs`,itemHs,tb)	= getWElementHandles2 wPtr wItems tb
+		#! (info`,info,tb)		= getWItemInfo` wPtr wItemPtr wItemInfo tb
+		= (	{	wItemId2		= wItemId
+			,	wItemKind2		= wItemKind
+			,	wItemShow2		= wItemShow
+			,	wItemInfo2		= info`
+			,	wItems2			= itemHs`
+			,	wItemPos2		= wItemPos
+			,	wItemSize2		= wItemSize
+			,	wItemPtr2		= wItemPtr
+			}
+		  ,	{itemH & wItems=itemHs,wItemInfo=info}
+		  ,	tb
+		  )
+	where	
+		getWItemInfo` :: !OSWindowPtr !OSWindowPtr !(WItemInfo .ls .pst) !*OSToolbox -> (!WItemInfo`,!WItemInfo .ls .pst,!*OSToolbox)
+		getWItemInfo` wPtr itemPtr info=:(RadioInfo {radioItems,radioLayout,radioIndex}) tb
+			= (	RadioInfo` { radioItems`  = map getRadioInfo` radioItems
+						   , radioLayout` = radioLayout
+						   , radioIndex`  = radioIndex
+						   }
+			  ,	info
+			  ,	tb
+			  )
+		where
+			getRadioInfo` :: !(RadioItemInfo .st) -> RadioItemInfo`
+			getRadioInfo` {radioItem=(text,width,_),radioItemPos,radioItemSize,radioItemPtr}
+				= {	radioItem`     = (text,width)
+				  ,	radioItemPos`  = radioItemPos
+				  ,	radioItemSize` = radioItemSize
+				  ,	radioItemPtr`  = radioItemPtr
+				  }
+		getWItemInfo` wPtr itemPtr info=:(CheckInfo {checkItems,checkLayout}) tb
+			= (	CheckInfo` { checkItems`  = map getCheckInfo` checkItems
+						   , checkLayout` = checkLayout
+						   }
+			  ,	info
+			  ,	tb
+			  )
+		where
+			getCheckInfo` :: !(CheckItemInfo .st) -> CheckItemInfo`
+			getCheckInfo` {checkItem=(text,width,mark,_),checkItemPos,checkItemSize,checkItemPtr}
+				= {	checkItem`     = (text,width,mark)
+				  ,	checkItemPos`  = checkItemPos
+				  ,	checkItemSize` = checkItemSize
+				  ,	checkItemPtr`  = checkItemPtr
+				  }
+		getWItemInfo` wPtr itemPtr info=:(PopUpInfo {popUpInfoItems,popUpInfoIndex,popUpInfoEdit}) tb
+			# (infoEdit,tb)	= getPopUpInfoEdit` popUpInfoEdit tb
+			= (	PopUpInfo` { popUpInfoItems` = map fst popUpInfoItems
+						   , popUpInfoIndex` = popUpInfoIndex
+						   , popUpInfoEdit`  = infoEdit
+						   }
+			  ,	info
+			  ,	tb
+			  )
+		where
+			getPopUpInfoEdit` :: !(Maybe PopUpEditInfo) !*OSToolbox -> (!Maybe PopUpEditInfo,!*OSToolbox)
+			getPopUpInfoEdit` Nothing tb
+				= (Nothing,tb)
+			getPopUpInfoEdit` (Just info=:{popUpEditPtr}) tb
+				# (content,tb)	= osGetPopUpControlText wPtr popUpEditPtr tb
+				= (Just {info & popUpEditText=content},tb)
+		getWItemInfo` wPtr itemPtr info=:(SliderInfo {sliderInfoDir,sliderInfoLength,sliderInfoState}) tb
+			= (	SliderInfo` { sliderInfoDir`    = sliderInfoDir
+							, sliderInfoLength` = sliderInfoLength
+							, sliderInfoState`  = sliderInfoState
+							}
+			  ,	info
+			  ,	tb
+			  )
+		getWItemInfo` wPtr itemPtr info=:(TextInfo textInfo) tb
+			= (TextInfo` textInfo,info,tb)
+		getWItemInfo` wPtr itemPtr info=:(EditInfo editInfo) tb
+//			# (content,tb)	= osGetEditControlText wPtr itemPtr tb
+//			#! editInfo		= {editInfo & editInfoText=content}
+			= (EditInfo` editInfo,info,tb)
+		getWItemInfo` wPtr itemPtr info=:(ButtonInfo buttonInfo) tb
+			= (ButtonInfo` buttonInfo,info,tb)
+		getWItemInfo` wPtr itemPtr info=:(CustomButtonInfo customButtonInfo) tb
+			= (CustomButtonInfo` customButtonInfo,info,tb)
+		getWItemInfo` wPtr itemPtr info=:(CustomInfo customInfo) tb
+			= (CustomInfo` customInfo,info,tb)
+		getWItemInfo` wPtr itemPtr info=:(CompoundInfo compoundInfo) tb
+			= (CompoundInfo` compoundInfo,info,tb)
+		getWItemInfo` wPtr itemPtr info=:(ReceiverInfo _) tb
+			= (NoWItemInfo`,info,tb)
+		getWItemInfo` wPtr itemPtr info=:NoWItemInfo tb
+			= (NoWItemInfo`,info,tb)
+
+insertWindowHandle2 :: !WindowHandle2 !*(WindowStateHandle .pst) -> *WindowStateHandle .pst
+insertWindowHandle2 wH` wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH}}
+	#! wH	= setWindowHandle2 wH` wH
+	= {wsH & wshHandle=Just {wlsH & wlsHandle=wH}}
+insertWindowHandle2 _ _
+	= wstateFatalError "insertWindowHandle2" "unexpected window placeholder argument"
+
+setWindowHandle2 :: !WindowHandle2 !*(WindowHandle .ls .pst) -> *WindowHandle .ls .pst
+setWindowHandle2 wH`=:{whWindowInfo2,whItems2,whSize2}
+				 wH =:{whItems,whAtts}
+	#! itemHs	= setWElementHandles2 whItems2 whItems
+	= {	wH	& whItems		= itemHs
+			, whWindowInfo	= whWindowInfo2
+			, whSize		= whSize2
+	  }
+where
+	setWElementHandles2 :: ![WElementHandle2] !*[WElementHandle .ls .pst] -> *[WElementHandle .ls .pst]
+	setWElementHandles2 [itemH`:itemHs`] [itemH:itemHs]
+		#! itemH	= setWElement2  itemH`  itemH
+		#! itemHs	= setWElementHandles2 itemHs` itemHs
+		= [itemH:itemHs]
+	where
+		setWElement2 :: !WElementHandle2 !*(WElementHandle .ls .pst) -> *WElementHandle .ls .pst
+		setWElement2 (WItemHandle2 itemH`) (WItemHandle itemH)
+			#! itemH	= setWItemHandle2 itemH` itemH
+			=  WItemHandle itemH
+		setWElement2 (WRecursiveHandle2 itemHs` IsWListLSHandle) (WListLSHandle itemHs)
+			#! itemHs	= setWElementHandles2 itemHs` itemHs
+			=  WListLSHandle itemHs
+		setWElement2 (WRecursiveHandle2 itemHs` IsWExtendLSHandle) (WExtendLSHandle exH=:{wExtendItems=itemHs})
+			#! itemHs	= setWElementHandles2 itemHs` itemHs
+			=  WExtendLSHandle {exH & wExtendItems=itemHs}
+		setWElement2 (WRecursiveHandle2 itemHs` IsWChangeLSHandle) (WChangeLSHandle chH=:{wChangeItems=itemHs})
+			#! itemHs	= setWElementHandles2 itemHs` itemHs
+			=  WChangeLSHandle {chH & wChangeItems=itemHs}
+		setWElement2 _ _
+			= wstateFatalError "setWElementHandles2" "WElementHandles do not match pairwise"
+	setWElementHandles2 [] []
+		= []
+	setWElementHandles2 _ _
+		= wstateFatalError "setWElementHandles2" "incompatible number of WElementHandles"
+	
+	setWItemHandle2 :: !WItemHandle2 !*(WItemHandle .ls .pst) -> *WItemHandle .ls .pst
+	setWItemHandle2 itemH`=:{	wItemShow2
+							,	wItemInfo2
+							,	wItems2		= itemHs`
+							,	wItemPos2
+							,	wItemSize2
+							,	wItemKind2
+							}
+					itemH =:{	wItemInfo	= info
+							,	wItemAtts	= atts
+							,	wItems		= itemHs
+							}
+		#! info1	= setWItemInfo` wItemInfo2 info
+		   itemHs1	= setWElementHandles2 itemHs` itemHs
+		= {	itemH	& wItemShow			= wItemShow2
+					, wItemInfo			= info1
+					, wItems			= itemHs1
+					, wItemPos			= wItemPos2
+					, wItemSize			= wItemSize2
+		  }
+	where	
+		setWItemInfo` :: !WItemInfo` !(WItemInfo .ls .pst) -> WItemInfo .ls .pst
+		setWItemInfo` (RadioInfo` {radioItems`,radioIndex`}) (RadioInfo radio=:{radioItems,radioIndex})
+			= RadioInfo {radio & radioItems=setRadioInfos radioItems` radioItems,radioIndex=radioIndex`}
+		where
+			setRadioInfos :: ![RadioItemInfo`] ![RadioItemInfo .st] -> [RadioItemInfo .st]
+			setRadioInfos [info`:infos`] [info:infos]
+				= [setRadioInfo info` info:setRadioInfos infos` infos]
+			where
+				setRadioInfo :: !RadioItemInfo` !(RadioItemInfo .st) -> RadioItemInfo .st
+				setRadioInfo {radioItem`=(item`,s`),radioItemPos`,radioItemSize`} info=:{radioItem=(_,_,f)}
+					= {info & radioItem=(item`,s`,f),radioItemPos=radioItemPos`,radioItemSize=radioItemSize`}
+			setRadioInfos [] []
+				= []
+			setRadioInfos _ _
+				= wstateFatalError "setWindowHandle2" "incompatible RadioInfo"
+		setWItemInfo` (CheckInfo` {checkItems`}) (CheckInfo check=:{checkItems})
+			= CheckInfo {check & checkItems=setCheckInfos checkItems` checkItems}
+		where
+			setCheckInfos :: ![CheckItemInfo`] ![CheckItemInfo .st] -> [CheckItemInfo .st]
+			setCheckInfos [info`:infos`] [info:infos]
+				= [setCheckInfo info` info:setCheckInfos infos` infos]
+			where
+				setCheckInfo :: !CheckItemInfo` !(CheckItemInfo .st) -> CheckItemInfo .st
+				setCheckInfo {checkItem`=(text`,s`,mark`),checkItemPos`,checkItemSize`} info=:{checkItem=(_,_,_,f)}
+					= {info & checkItem=(text`,s`,mark`,f),checkItemPos=checkItemPos`,checkItemSize=checkItemSize`}
+			setCheckInfos [] []
+				= []
+			setCheckInfos _ _
+				= wstateFatalError "setWindowHandle2" "incompatible CheckInfo"
+		setWItemInfo` (PopUpInfo` {popUpInfoItems`=texts`,popUpInfoIndex`=i,popUpInfoEdit`}) (PopUpInfo popup=:{popUpInfoItems=items})
+			= PopUpInfo {popup & popUpInfoItems=setpopuptexts texts` items,popUpInfoIndex=i,popUpInfoEdit=popUpInfoEdit`}
+		where
+			setpopuptexts :: ![String] ![PopUpControlItem .st] -> [PopUpControlItem .st]
+			setpopuptexts [text:texts] [(_,f):items]
+				= [(text,f):setpopuptexts texts items]
+			setpopuptexts [] []
+				= []
+			setpopuptexts _ _
+				= wstateFatalError "setWindowHandle2" "incompatible PopUpInfo"
+		setWItemInfo` (SliderInfo` {sliderInfoDir`=dir,sliderInfoLength`=length,sliderInfoState`=state}) (SliderInfo slider)
+			= SliderInfo {slider & sliderInfoDir=dir,sliderInfoLength=length,sliderInfoState=state}
+		setWItemInfo` (TextInfo` info) (TextInfo _)
+			= TextInfo info
+		setWItemInfo` (EditInfo` info) (EditInfo _)
+			= EditInfo info
+		setWItemInfo` (ButtonInfo` info) (ButtonInfo _)
+			= ButtonInfo info
+		setWItemInfo` (CustomButtonInfo` info) (CustomButtonInfo _)
+			= CustomButtonInfo info
+		setWItemInfo` (CustomInfo` info) (CustomInfo _)
+			= CustomInfo info
+		setWItemInfo` (CompoundInfo` info) (CompoundInfo _)
+			= CompoundInfo info
+		setWItemInfo` NoWItemInfo` info
+			= info
+		setWItemInfo` _ _
+			= wstateFatalError "setWindowHandle2" "incompatible WItemInfo"
 
 instance toString ControlAttribute` where
 	toString  ControlActivate`         = "ControlActivate`"

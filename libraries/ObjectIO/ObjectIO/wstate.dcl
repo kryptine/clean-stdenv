@@ -151,12 +151,36 @@ import	ostoolbox
 
 
 //	Retrieving the projection type from several arguments.
-retrieveWindowHandle`		::              !*(WindowStateHandle  .pst)	!*OSToolbox -> (!WindowHandle`,	   !*WindowStateHandle   .pst, !*OSToolbox)
+retrieveWindowHandle`		::				!*(WindowStateHandle  .pst) !*OSToolbox -> (!WindowHandle`,    !*WindowStateHandle   .pst, !*OSToolbox)
+retrieveWindowHandle2		::				!*(WindowStateHandle  .pst) !*OSToolbox -> (!WindowHandle2,    !*WindowStateHandle   .pst, !*OSToolbox)
 getWindowHandle`			:: !OSWindowPtr !*(WindowHandle   .ls .pst)	!*OSToolbox -> (!WindowHandle`,	   !*WindowHandle    .ls .pst, !*OSToolbox)
 getWElementHandles`			:: !OSWindowPtr !*[WElementHandle .ls .pst]	!*OSToolbox -> (![WElementHandle`],!*[WElementHandle .ls .pst],!*OSToolbox)
 getWItemHandle`				:: !OSWindowPtr !*(WItemHandle    .ls .pst)	!*OSToolbox -> (! WItemHandle`,    ! *WItemHandle    .ls .pst, !*OSToolbox)
 
 //	Replacing the projection type to several arguments.
 insertWindowHandle`			:: !WindowHandle`		!*(WindowStateHandle  .pst) -> *WindowStateHandle   .pst
+insertWindowHandle2			:: !WindowHandle2 		!*(WindowStateHandle  .pst) -> *WindowStateHandle   .pst
 setWindowHandle`			:: !WindowHandle`		!*(WindowHandle   .ls .pst) -> *WindowHandle    .ls .pst
 setWElementHandles`			:: ![WElementHandle`]	!*[WElementHandle .ls .pst] -> *[WElementHandle .ls .pst]
+
+::	WindowHandle2
+	=	{	whWindowInfo2		:: WindowInfo					// Additional information about the Window (Nothing for Dialogs)
+		,	whItems2			:: [WElementHandle2]			// The window controls
+		,	whSize2				:: Size							// The exact size of the window
+		}
+
+::	WElementHandle2
+	=	WItemHandle2			WItemHandle2
+	|	WRecursiveHandle2		[WElementHandle2] WRecursiveKind
+
+::	WItemHandle2
+	=	{	wItemId2			:: Maybe Id						// If the control has a (ControlId id) attribute, then Just id; Nothing
+		,	wItemKind2			:: ControlKind					// The sort of control
+		,	wItemShow2			:: Bool							// The visibility of the control (True iff visible)
+		,	wItemInfo2			:: WItemInfo`					// Additional information of the control
+		,	wItems2				:: [WElementHandle2]			// In case of	CompoundControl	: its control elements
+																//				Otherwise		: []
+		,	wItemPos2			:: !Vector2						// The position of the item, relative to its parent (window/dialog/compound/layout)
+		,	wItemSize2			:: Size							// The exact size of the item
+		,	wItemPtr2			:: OSWindowPtr					// The ptr to the item (OSNoWindowPtr if no handle)
+		}
