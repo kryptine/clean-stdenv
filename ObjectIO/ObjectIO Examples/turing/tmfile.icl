@@ -176,7 +176,6 @@ where
 					| otherwise			= i
 				
 				IsLayoutChar :: !Int !String -> Bool
-			//	IsLayoutChar i s = isMember s.[i] [' ', '(', ')', '-', '>', ',', '.', '[', ']', '{', '}', ':']
 				IsLayoutChar i s = isMember s.[i] [' ()->,.[]{}:']
 
 
