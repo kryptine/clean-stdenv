@@ -5,7 +5,7 @@ import StdAGEC, modeGEC, buttonGEC, layoutGEC
 // Identity 
 
 nopred n 	= (DontTest,n)
-noupdate b  = (False,b)
+noupdate b ps = (False,b,ps)
 
 idxAGEC :: (TgGEC a *(PSt .ps)) a -> AGEC a 
 idxAGEC gGEC j 	= mkxAGEC gGEC (idBimapGEC j) "idGEC"
@@ -48,7 +48,7 @@ applyAGEC :: (b -> a) (AGEC b) -> AGEC a | gGEC {|*|} a & gGEC {|*|} b
 applyAGEC fba gecb	= mkAGEC 	{	toGEC	= initgec
 								,	fromGEC = \(gecb <|> Display olda) -> fba (^^ gecb)
 								,	value	= inita
-								,	updGEC	= \(gecb <|> Display olda) -> (True,(gecb <|> Display (fba (^^ gecb))))
+								,	updGEC	= \(gecb <|> Display olda) ps -> (True,(gecb <|> Display (fba (^^ gecb))),ps)
 								,	pred	= nopred
 								} "applyAGEC"
 where
@@ -82,7 +82,7 @@ counterAGEC :: a -> AGEC a | gGEC {|*|} a & IncDec a
 counterAGEC j = mkAGEC 	{	toGEC	= \i _ ->(i,Neutral)
 						,	fromGEC = fst
 						,	value	= j
-						,	updGEC	= \j -> (True, updateCounter j)
+						,	updGEC	= \j ps -> (True, updateCounter j,ps)
 						,	pred	= nopred
 						} "counterGEC"
 where
@@ -135,30 +135,31 @@ hor2listAGEC defaultval list
 	= 	mkAGEC	{	toGEC	= mkdisplay
 				,	fromGEC = fetchlist
 				,	value 	= list
-				,	updGEC	= \list -> (False,adjustdisplay list)
+				,	updGEC	= \list ps -> (False,adjustdisplay list,ps)
 				,	pred	= nopred
 				} "list2AGEC"
 where
 	mkdisplay list Undefined 	= display list
 	mkdisplay list (Defined _) 	= display list
 
-	display list =  mlbuttons <|> horlistAGEC list
+	display list =  mlbuttons <|*|> horlistAGEC list
 	where
 		mlbuttons 	= (Button width "-", Button width "+")
 		width 		= defCellWidth / 10
 
-	adjustdisplay ((_,Pressed) <|> alist) = display (^^ alist ++ [defaultval])
-	adjustdisplay ((Pressed,_) <|> alist) = display (init (^^ alist))
-	adjustdisplay (       _    <|> alist) = display (^^ alist)
+	adjustdisplay ((_,Pressed) <|*|> alist) = display (^^ alist ++ [defaultval])
+	adjustdisplay ((Pressed,_) <|*|> alist) = display (init (^^ alist))
+	adjustdisplay (       _    <|*|> alist) = display (^^ alist)
 
-	fetchlist (_ <|> alist ) = ^^ alist
+	fetchlist (_ <|*|> alist ) = ^^ alist
+
 
 vert2listAGEC :: a [a] -> AGEC [a] | gGEC {|*|} a  
 vert2listAGEC defaultval list  
 	= 	mkAGEC	{	toGEC	= mkdisplay
 				,	fromGEC = fetchlist
 				,	value 	= list
-				,	updGEC	= (\list -> (False,adjustdisplay list))
+				,	updGEC	= (\list ps -> (False,adjustdisplay list,ps))
 				,	pred	= nopred
 				} "list2AGEC"
 where
@@ -198,7 +199,7 @@ listAGEC finite list
 	= 	mkAGEC	{	toGEC	= mkdisplay
 				,	fromGEC = \(_,Hide (_,(list,_))) -> list
 				,	value 	= list
-				,	updGEC	= \b -> (True,edit (parseListEditor b))
+				,	updGEC	= \b ps -> (True,edit (parseListEditor b),ps)
 				,	pred	= nopred
 				} "listGEC"
 where
@@ -280,7 +281,7 @@ calcAGEC a butfun
 	= mkAGEC { toGEC   = \a _ -> a <|> table_hv_AGEC buts
 	         , fromGEC = \(na <|> _) -> na
 	         , value   = a
-	         , updGEC  = \c -> (True,calcnewa c)
+	         , updGEC  = \c ps -> (True,calcnewa c,ps)
 			 , pred	   = nopred
 	         } "calcGEC"
 where
@@ -335,3 +336,12 @@ where
 											     (v+(toReal i/(base*10.0)),Hide(cond,(base*10.0)))
 				)
 		
+textAGEC :: a -> AGEC a | gGEC {|*|} a & toString a
+textAGEC v 	= mkAGEC (textBimapGEC v) "textGEC"
+
+textBimapGEC v =	{ toGEC		= \v _ -> Text (toString v)
+				, fromGEC 	= \_ -> v
+				, value		= v
+				, updGEC	= \v pst -> (True,v,pst)
+				, pred		= nopred
+				} 

@@ -34,7 +34,7 @@ where
 dynamicAGEC :: d -> AGEC d | TC d
 dynamicAGEC dv = mkAGEC { toGEC   = toExpr
 						 , fromGEC = fromExpr dv
-						 , updGEC  = \vv -> (True,updExpr dv vv)
+						 , updGEC  = \vv ps -> (True,updExpr dv vv,ps)
 						 , value   = dv
 						 , pred	   = \t -> (DontTest,t)
 //						 } ("dynamicGEC2")

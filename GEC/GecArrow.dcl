@@ -12,7 +12,7 @@ startGEC 	 :: ((PSt Void) -> (PSt Void)) *World -> *World
 
 startCircuit :: !(GecCircuit a b) a !*(PSt .ps) -> *PSt .ps
 
-:: CircuitCB a ps :== a -> *(PSt ps) -> *PSt ps
+:: CircuitCB  a ps :== a -> *(PSt ps) -> *PSt ps
 :: CircuitGet a ps :== *(PSt ps) -> *(a, *PSt ps)
 :: CircuitSet a ps :== a -> *(PSt ps) -> *PSt ps
 
@@ -26,20 +26,20 @@ gecMouse	:: String -> GecCircuit a MouseState					// Assign a mouse to a fresh w
 
 // Arrow instance for GecCircuit
 
-instance Arrow GecCircuit
-instance ArrowChoice GecCircuit
-instance ArrowLoop GecCircuit
-instance ArrowCircuit GecCircuit
+instance Arrow 			GecCircuit
+instance ArrowChoice 	GecCircuit
+instance ArrowLoop 		GecCircuit
+instance ArrowCircuit 	GecCircuit
 
 // Other GecCircuit combinators
 
-probe :: String -> GecCircuit a a | toString a
+probe 		:: String -> GecCircuit a a | toString a
 
-self :: (GecCircuit a b) (GecCircuit b a) -> GecCircuit a b
-feedback :: (GecCircuit a a) -> GecCircuit a a
+self 		:: (GecCircuit a b) (GecCircuit b a) -> GecCircuit a b
+feedback 	:: (GecCircuit a a) -> GecCircuit a a
 
-sink :: GecCircuit a Void
-source :: (GecCircuit a b) -> GecCircuit Void b
+sink 		:: GecCircuit a Void
+source 		:: (GecCircuit a b) -> GecCircuit Void b
 flowControl :: (a -> Maybe b) -> GecCircuit a b
 
-gecIO :: (A. .ps: a *(PSt .ps) -> *(b, *PSt .ps)) -> GecCircuit a b
+gecIO 		:: (A. .ps: a *(PSt .ps) -> *(b, *PSt .ps)) -> GecCircuit a b

@@ -13,14 +13,16 @@ derive gGEC Status
 Start:: *World -> *World
 Start world = startGEC myeditor world
 
-myeditor = startCircuit mycircuit defaultv
+myeditor = startCircuit (feedback mycircuit) defaultv
 where
 	mycircuit =  edit "Family Tree Editor" 
+
+//	defaultv = (1 <-> 2 ) <^|^> 3
 
 	defaultv :: Family
 	defaultv =  defval`
 
-:: Family	=	Family  Person Status (Maybe Partner)
+:: Family	=	Family  Person Status (Maybe (Person,Kids))
 :: Status	=	Married			
 			|	Divorced		
 			|	Single 
@@ -40,14 +42,18 @@ familieAGEC f = mkAGEC (to_BimapGEC bimapFamily f) "Family"
 where
 	bimapFamily = {map_to = map_to, map_from = map_from}
 
-	map_to (Family p1 Single _) 				=  (p1 <|> Single)       <-> Nothing
-	map_to (Family p1=:(Woman v) any  Nothing) 	=  (p1 <|> any)          <-> mandef 
-	map_to (Family p1    	     any  Nothing) 	=  (p1 <|> any )         <-> vrouwdef
-	map_to (Family p1            any  partners) =  (p1 <|> any )         <-> partners
-	map_from ((p1 <|> bs) <-> partners) 			=   Family p1 bs partners
+	map_to (Family p1 Single _) 						=  p1 <-> notmaried   <|> Single  <|*|> Nothing
+	map_to (Family p1=:(Woman v) any  Nothing) 			=  p1 <-> mary man    <|> any     <|*|> Just NoKids 
+	map_to (Family p1    	     any  Nothing) 			=  p1 <-> mary woman  <|> any     <|*|> Just NoKids
+	map_to (Family p1            any  (Just (p2,kids)))	=  p1 <-> mary p2 	  <|> any     <|*|> Just kids
 
-	mandef 		= Just (Partner (Man "")    NoKids) 
-	vrouwdef 	= Just (Partner (Woman "")  NoKids) 
+	map_from (p1 <-> Nothing <|> bs <|*|> _	)		   =   Family p1 bs Nothing
+	map_from (p1 <-> Just p2 <|> bs <|*|> (Just kids)) =   Family p1 bs (Just (p2,kids))
+
+	mary p 	= Just p
+	man 	= Man ""     
+	woman 	= Woman ""   
+	notmaried = Nothing
 
 gGEC{|Kids|} gecArgs pSt 
 = Specialize NoKids KidsAGEC gecArgs pSt
@@ -57,29 +63,20 @@ KidsAGEC p = mkAGEC (to_BimapGEC bimapKids p) "Kids"
 where
 	bimapKids = {map_to = map_to, map_from = map_from}
 	where
-		map_to (NoKids) 	  = (displaykids 0 <|> hor2listAGEC defaultfam [])
-		map_to (Kids familie) = (displaykids (length familie) <|> hor2listAGEC defaultfam familie)
-		map_from (_ <|>alist)  = case (^^ alist) of
+		map_to (NoKids) 	  = (displaykids 0 <|*|> hor2listAGEC defaultfam [])
+		map_to (Kids familie) = (displaykids (length familie) <|*|> hor2listAGEC defaultfam (number familie))
+		map_from (_ <|*|> alist)  = case (^^ alist) of
 								[] -> NoKids
-								list -> Kids list
+								list -> Kids (unnumber list)
 
-		defaultfam = (Family (Man "") Single (Nothing))
+		defaultfam = (Text "  1:" <-> (Family (Man "") Single (Nothing)))
 
 		displaykids 0 = Display "No Children "
 		displaykids 1 = Display "1 Child "
 		displaykids n = Display (toString n +++ " Children ")
 
-
-gGEC{|Partner|} gecArgs pSt 
-= Specialize (Partner (Man "") NoKids) PartnerAGEC gecArgs pSt
-where
-	PartnerAGEC :: Partner -> AGEC(Partner)
-	PartnerAGEC p = mkAGEC (to_BimapGEC bimapPartner p) "Partner" 
-	where
-		bimapPartner = {map_to = map_to, map_from = map_from}
-		where
-			map_to (Partner p kids) = p <|> kids
-			map_from (p  <|> kids)   = (Partner p kids)
+		number kids = [(Text (toString i +++ ":") <-> kid) \\ i <- [1 ..] & kid <- kids]
+		unnumber kids = [kid \\ (_ <-> kid) <- kids]
 
 gGEC{|Person|} gecArgs pSt 
 = Specialize (Man "") PersonAGEC gecArgs pSt
@@ -89,12 +86,12 @@ where
 	where
 		bimapPerson = {map_to = map_to, map_from = map_from}
 		where
-			map_to (Man m) = m <|> MAN
-			map_to (Woman v) = v <|> WOMAN
-			map_from (m <|> MAN)   = (Man m)
-			map_from (v <|> WOMAN)   = (Woman v)
+			map_to (Man m) = m <|> Male
+			map_to (Woman v) = v <|> Female
+			map_from (m <|> Male)   = (Man m)
+			map_from (v <|> Female)   = (Woman v)
 
-:: Gender = MAN | WOMAN
+:: Gender = Male | Female
 derive gGEC Gender
 
 // additional hacking conversions funcions just to hide constructors on one level
@@ -131,16 +128,20 @@ defval{|AGEC|}   da 	    = undef
 
 defval` = defval {|*|}
 
-// try out
 
-getdict :: (t a) -> ((t a),(TgGEC a (PSt .ps))) | gGEC{|*|} a & bimap{|*|} ps
-getdict ar = (ar,dict)
+
+/*
+gGEC{|Partner|} gecArgs pSt 
+= Specialize (Partner (Man "") NoKids) PartnerAGEC gecArgs pSt
 where
-	dict = gGEC {|*|}
-
-
-
-
+	PartnerAGEC :: Partner -> AGEC(Partner)
+	PartnerAGEC p = mkAGEC (to_BimapGEC bimapPartner p) "Partner" 
+	where
+		bimapPartner = {map_to = map_to, map_from = map_from}
+		where
+			map_to (Partner p kids) = p <|> kids
+			map_from (p  <|> kids)   = (Partner p kids)
+*/
 
 /*
 
