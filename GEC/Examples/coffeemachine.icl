@@ -105,7 +105,7 @@ where
 		  Display "money " <-> Display (toString money +++ " ") <-> Button 80 "Insert coin" <|>
 		  Display "beans " <-> Display (toString beans +++ " ") <-> Button 80 "Add beans"   <|>
 		  Display "trash " <-> Display (toString trash +++ " ") <-> Button 80 "Empty trash" <|>
-		  Button 60 "Coffee"  <-> Button 60 "Capuccino" <-> Button 60 "Espresso" <|>
+		  Button (2*defCellWidth/3) "Coffee"  <-> Button (2*defCellWidth/3) "Capuccino" <-> Button (2*defCellWidth/3) "Espresso" <|>
 		  Display (toString out +++ ". ")
 	
 //	fromViewModel transform the view model to the data model of the Client-Coffee Machine:
