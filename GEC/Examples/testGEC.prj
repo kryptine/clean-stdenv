@@ -1,7 +1,7 @@
 Version: 1.4
 Global
 	Built:	True
-	Target:	Really Everything
+	Target:	StdEnv
 	Exec:	{Project}\testGEC.exe
 	CodeGen
 		CheckStacks:	False

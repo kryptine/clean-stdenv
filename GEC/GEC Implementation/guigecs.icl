@@ -71,7 +71,8 @@ where
 		# (cId,pSt)	= openColourTextControlId pSt
 		# basicGUI	= ColourTextControl cId "" defTextBackColour
 						[ ControlTip   (tipTypeText typeName)
-						, ControlWidth (PixelWidth  defTextWidths)
+		//				, ControlWidth (PixelWidth  defTextWidths)
+						, ControlViewSize {w=defCellWidth,h=defCellHeight}
 						]
 		= customGECGUIFun Nothing [] undef basicGUI (update cId) outputOnly pSt
 	where
@@ -173,8 +174,9 @@ where
 		# ((fontDef,width),pSt)
 						= accPIO (accScreenPicture accFontInfo) pSt
 		# fieldGUI		= ColourTextControl multiId gfd_name defTextBackColour 
-							[ ControlWidth (PixelWidth width)
-							, ControlTip   (tipTypeText gtd_name)
+							[ ControlTip   (tipTypeText gtd_name)
+						//	, ControlWidth (PixelWidth width)
+							, ControlViewSize {w=width,h=defCellHeight}
 							]
 		= customGECGUIFun Nothing [(consId,Nothing/*Just (RightTo multiId,zero)*/,Nothing)] undef fieldGUI (const id) outputOnly pSt
 	where

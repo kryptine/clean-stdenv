@@ -36,7 +36,7 @@ where
 	conses		= gtd.gtd_conses
 	consNames	= [gtd_cons.gcd_name \\ gtd_cons <- conses]
 	impl		=     ColourTextControl colId "" defTextBackColour
-						[ ControlWidth (PixelWidth defTextWidths)
+						[ ControlViewSize {w=defCellWidth,h=defCellHeight}//ControlWidth (PixelWidth defTextWidths)
 						: atts
 						]
 				  :+: Receiver recId handleMsg []

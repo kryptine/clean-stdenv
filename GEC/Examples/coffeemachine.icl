@@ -91,8 +91,8 @@ instance toString Output where
 	toString (Prod Espresso)  = "Espresso"
 
 isPressed :: Button -> Bool
-isPressed (Button s) = False
-isPressed Pressed    = True
+isPressed (Button _ _) = False
+isPressed Pressed      = True
 
 coffeemachine
 	= startCircuit (feedback (edit "Coffee" >>@ updCoffee)) (toViewModel (Idle,initCoffee))
@@ -102,10 +102,10 @@ where
 //	toViewModel transform the data model to the view model of the Client-Coffee Machine:
 	toViewModel (_, m=:{money,beans,trash,out})
 		= hidAGEC m <|>
-		  Display "money " <-> Display (toString money +++ " ") <-> Button "Insert coin" <|>
-		  Display "beans " <-> Display (toString beans +++ " ") <-> Button "Add beans"   <|>
-		  Display "trash " <-> Display (toString trash +++ " ") <-> Button "Empty trash" <|>
-		  Button "Coffee"  <-> Button "Capuccino" <-> Button "Espresso" <|>
+		  Display "money " <-> Display (toString money +++ " ") <-> Button 80 "Insert coin" <|>
+		  Display "beans " <-> Display (toString beans +++ " ") <-> Button 80 "Add beans"   <|>
+		  Display "trash " <-> Display (toString trash +++ " ") <-> Button 80 "Empty trash" <|>
+		  Button 60 "Coffee"  <-> Button 60 "Capuccino" <-> Button 60 "Espresso" <|>
 		  Display (toString out +++ ". ")
 	
 //	fromViewModel transform the view model to the data model of the Client-Coffee Machine:

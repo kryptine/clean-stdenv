@@ -6,7 +6,7 @@ import genericgecs
 import StdGEC, StdGECExt, StdAGEC
 import basicAGEC, calcAGEC, dynamicAGEC
 import GecArrow
-from StdGecComb import selfGEC, :: CGEC
+//from StdGecComb import selfGEC, :: CGEC
 
 // TO TEST JUST REPLACE THE EXAMPLE NAME IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
 // ALL EXAMPLES HAVE TO BE OF FORM pst -> pst
@@ -17,7 +17,7 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	example5
+ 	example1
  	world  
 
 :: BalancedTree a  	
@@ -29,7 +29,7 @@ Start world
 				, smaller:: .BalancedTree a
 				} 
 
-derive gGEC   	BalancedTree, BalancedNode, OperatorTest
+derive gGEC   	BalancedTree, BalancedNode//, OperatorTest
 
 BalanceTree :: (BalancedTree a) -> (BalancedTree a) | Ord a
 BalanceTree tree = toBalTree (BalTreetoList tree)
@@ -50,9 +50,10 @@ where
 
 example1 = startCircuit mycircuit2 [1..5]  // connecting two editors 
 where
-	mycircuit  = edit "list" <<@ toBalTree >>> edit "balanced tree"
+//	mycircuit  = edit "list" <<@ toBalTree >>> edit "balanced tree"
 	mycircuit2 = edit "list" >>> arr toBalTree >>> edit "balanced tree" // alternative definition
 
+/*
 example2 = startCircuit mycircuit3 (toBalTree [1..5]) // self balancing tree
 where
 	mycircuit  = feedback (edit "self balancing tree" >>> arr BalanceTree)
@@ -204,4 +205,5 @@ gecDisplay "scounter" )
 updateCounter (Tuple2 n GoUp) 	= Tuple2 (n+1) Neutraal
 updateCounter (Tuple2 n GoDown) = Tuple2 (n-1) Neutraal
 updateCounter any 		 = any
+*/
 */

@@ -1,7 +1,7 @@
 Version: 1.4
 Global
 	Built:	True
-	Target:	Really Everything
+	Target:	Everything + Develop Object IO
 	Exec:	{Project}\editeditorGEC.exe
 	CodeGen
 		CheckStacks:	False
@@ -37,6 +37,15 @@ Global
 		ExportedNames:	
 	Paths
 		Path:	{Project}
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\ObjectIOExtensions
+		Path:	{Application}\Libraries\Hilde
+		Path:	{Application}\Libraries\Hilde\OS Windows\NoDynamicFileSystem
+		Path:	{Application}\Libraries\Hilde\Parser combinators 2002
+		Path:	{Application}\Libraries\Hilde\WrapDebugClosures
+		Path:	{Application}\Libraries\Hilde\OS Windows\Foreign
+		Path:	{Application}\Libraries\Hilde\OS Windows
 	Precompile:	
 	Postlink:	
 MainModule
@@ -62,15 +71,15 @@ MainModule
 	Icl
 		WindowPosition
 			X:	0
-			Y:	101
-			SizeX:	885
-			SizeY:	518
+			Y:	45
+			SizeX:	955
+			SizeY:	831
 	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
 	Module
 		Name:	GecArrow
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -630,7 +639,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdIO
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -658,7 +667,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdId
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -714,7 +723,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	id
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -742,7 +751,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	device
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -770,7 +779,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	systemid
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -798,7 +807,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	commondef
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -826,7 +835,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdIOCommon
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -854,7 +863,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdBitmap
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -882,7 +891,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osbitmap
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -910,7 +919,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ospicture
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -938,7 +947,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osrgn
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -966,7 +975,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ostoolbox
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -996,7 +1005,7 @@ OtherModules
 			ObjectFile:	cCrossCallFont_121.obj
 	Module
 		Name:	clCrossCall_12
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1043,7 +1052,7 @@ OtherModules
 			Library:	advapi32_library
 	Module
 		Name:	ostypes
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1071,7 +1080,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	pictCCall_12
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1099,7 +1108,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	rgnCCall_12
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1127,7 +1136,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osfont
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1155,7 +1164,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	clCCall_12
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1191,7 +1200,7 @@ OtherModules
 			ObjectFile:	cCCallSystem_121.obj
 	Module
 		Name:	StdPictureDef
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1219,7 +1228,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdIOBasic
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1247,7 +1256,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdPicture
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1275,7 +1284,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdKey
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1303,7 +1312,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	oskey
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1331,7 +1340,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	iostate
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1359,7 +1368,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osactivaterequests
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1387,7 +1396,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osdocumentinterface
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1417,7 +1426,7 @@ OtherModules
 			ObjectFile:	cCrossCallxDI_121.obj
 	Module
 		Name:	menuCrossCall_12
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1445,7 +1454,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ostoolbar
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1473,7 +1482,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	windowCCall_12
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1504,7 +1513,7 @@ OtherModules
 			ObjectFile:	cCCallWindows_121.obj
 	Module
 		Name:	ossystem
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1532,7 +1541,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	windowCrossCall_12
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1560,7 +1569,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osevent
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1588,7 +1597,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ostime
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1616,7 +1625,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osguishare
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1644,7 +1653,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	devicefunctions
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1672,7 +1681,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	deviceevents
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1700,7 +1709,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	receivermessage
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1728,7 +1737,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	receivertable
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1756,7 +1765,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	semidynamic
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1784,7 +1793,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	cast
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1812,7 +1821,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	timertable
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1840,7 +1849,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdTimerDef
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1868,7 +1877,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	windowhandle
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1896,7 +1905,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdControlDef
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1924,7 +1933,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdWindowDef
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1952,7 +1961,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	receiverhandle
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1980,7 +1989,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	keyfocus
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2008,7 +2017,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	devicesystemstate
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2036,7 +2045,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	menuhandle
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2064,7 +2073,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdMenuDef
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2092,7 +2101,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osmenu
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2120,7 +2129,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	menuCCall_12
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2150,7 +2159,7 @@ OtherModules
 			ObjectFile:	cCrossCallMenus_121.obj
 	Module
 		Name:	processhandle
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2178,7 +2187,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	timerhandle
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2206,7 +2215,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	processstack
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2234,7 +2243,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	roundrobin
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2262,7 +2271,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osmouse
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2290,7 +2299,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdPSt
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2318,7 +2327,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdProcessAttribute
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2346,7 +2355,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdProcessDef
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2374,7 +2383,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osbeep
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2402,7 +2411,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	world
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2430,7 +2439,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdPStClass
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2458,7 +2467,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdFileSelect
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2486,7 +2495,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osfileselect
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2516,7 +2525,7 @@ OtherModules
 			ObjectFile:	cCrossCallFileSelectors_121.obj
 	Module
 		Name:	scheduler
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2544,7 +2553,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdTime
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2572,7 +2581,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ostick
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2628,7 +2637,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdSystem
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2656,7 +2665,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdProcess
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2684,7 +2693,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	processdevice
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2712,7 +2721,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	menudevice
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2740,7 +2749,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	menuevent
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2768,7 +2777,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	menuaccess
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2796,7 +2805,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	menucreate
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2824,7 +2833,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdMenuElementClass
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2852,7 +2861,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	menudefaccess
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2880,7 +2889,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdMenuAttribute
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2908,7 +2917,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	sdisize
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2936,7 +2945,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	oswindow
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2964,7 +2973,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	windowaccess
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2992,7 +3001,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdControlAttribute
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3020,7 +3029,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdWindowAttribute
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3048,7 +3057,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	windowupdate
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3076,7 +3085,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	wstate
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3104,7 +3113,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	windowclipstate
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3132,7 +3141,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	wstateaccess
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3160,7 +3169,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	receiveraccess
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3188,7 +3197,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdReceiverDef
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3216,7 +3225,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	receiverdefaccess
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3244,7 +3253,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdReceiverAttribute
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3272,7 +3281,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	menuwindowmenu
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3300,7 +3309,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	processevent
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3328,7 +3337,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	toolbar
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3356,7 +3365,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdClipboard
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3384,7 +3393,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osclipboard
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3412,7 +3421,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	clipboardCrossCall_12
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3442,7 +3451,7 @@ OtherModules
 			ObjectFile:	cCrossCallClipboard_121.obj
 	Module
 		Name:	StdPrint
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3470,7 +3479,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osprint
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3501,7 +3510,7 @@ OtherModules
 			ObjectFile:	cCrossCallPrinter_121.obj
 	Module
 		Name:	StdWindow
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3529,7 +3538,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdControlClass
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3557,7 +3566,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	controlvalidate
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3585,7 +3594,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	windowvalidate
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3613,7 +3622,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	controllayout
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3641,7 +3650,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	layout
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3669,7 +3678,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	controlpos
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3697,7 +3706,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	controlrelayout
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3725,7 +3734,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	relayout
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3753,7 +3762,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	windowdraw
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3781,7 +3790,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	windowcreate
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3809,7 +3818,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdMenu
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3837,7 +3846,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	menuinternal
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3865,7 +3874,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	menuitems
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3893,7 +3902,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	controlcreate
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3921,7 +3930,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ostooltip
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3949,7 +3958,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	windowdevice
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3977,7 +3986,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	controldraw
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4005,7 +4014,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	controlresize
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4033,7 +4042,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	receiverid
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4061,7 +4070,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	windowdispose
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4089,7 +4098,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	windowevent
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4117,7 +4126,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	controlinternal
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4145,7 +4154,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdPrintText
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4173,7 +4182,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdControlReceiver
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4201,7 +4210,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdControl
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4229,7 +4238,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	controlaccess
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4257,7 +4266,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	windowcontrols
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4285,7 +4294,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdMenuReceiver
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4313,7 +4322,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdMenuElement
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4341,7 +4350,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	mstate
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4369,7 +4378,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdReceiver
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4397,7 +4406,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	receiverdevice
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4425,7 +4434,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	receiverevent
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4453,7 +4462,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdTimerAttribute
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4481,7 +4490,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdTimerElementClass
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4509,7 +4518,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdTimerReceiver
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4537,7 +4546,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdTimer
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4565,7 +4574,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	timeraccess
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4593,7 +4602,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	timerdefaccess
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4621,7 +4630,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	timerdevice
-		Dir:	{Application}\Libraries\ObjectIO
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4649,7 +4658,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	timerevent
-		Dir:	{Application}\Libraries\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4677,7 +4686,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	genericgecs
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4705,7 +4714,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	gec
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4733,7 +4742,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	guiloc
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4761,7 +4770,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	objectloc
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4873,7 +4882,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	guigecs
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4897,7 +4906,7 @@ OtherModules
 				Y:	0
 				SizeX:	500
 				SizeY:	300
-		IclOpen:	False
+		IclOpen:	True
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	GenParse
@@ -4929,7 +4938,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	Debug
-		Dir:	{Application}\Libraries\WrapDebug
+		Dir:	{Application}\Libraries\Hilde\WrapDebugClosures
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4957,7 +4966,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	Wrap
-		Dir:	{Application}\Libraries\WrapDebug
+		Dir:	{Application}\Libraries\Hilde\WrapDebugClosures
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4985,7 +4994,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ShowWrapped
-		Dir:	{Application}\Libraries\WrapDebug
+		Dir:	{Application}\Libraries\Hilde\WrapDebugClosures
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5041,7 +5050,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	parseprint
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5069,7 +5078,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdObjectIOExt
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5097,7 +5106,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ColourTextControl
-		Dir:	{Application}\Libraries\ObjectIOExtensions
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC\ObjectIOExtensions
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5125,7 +5134,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdBimap
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5153,7 +5162,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	infragecs
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5293,7 +5302,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	GenDefault
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5321,7 +5330,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	TRACE
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5349,7 +5358,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5377,7 +5386,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdGECExt
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5405,7 +5414,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdAGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5433,7 +5442,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	basicAGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5461,7 +5470,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	store
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5489,7 +5498,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	calcAGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5517,7 +5526,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	EstherInterFace
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6225,7 +6234,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	updownAGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6253,7 +6262,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	dynamicAGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6281,7 +6290,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	modeAGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6309,7 +6318,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	buttonAGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6337,7 +6346,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	tupleAGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	C:\Peter\Projecten\Visual Editor\libraries\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6536,458 +6545,458 @@ OtherModules
 Static
 	Mods
 		Path:	{Project}\editeditorGEC.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GecArrow.icl
-		Path:	{Application}\Libraries\StdEnv\StdEnv.icl
-		Path:	{Application}\Libraries\StdEnv\StdBool.icl
-		Path:	{Application}\Libraries\StdEnv\StdOverloaded.icl
-		Path:	{Application}\Libraries\StdEnv\StdInt.icl
-		Path:	{Application}\Libraries\StdEnv\StdMisc.icl
-		Path:	{Application}\Libraries\StdEnv\StdChar.icl
-		Path:	{Application}\Libraries\StdEnv\StdClass.icl
-		Path:	{Application}\Libraries\StdEnv\StdArray.icl
-		Path:	{Application}\Libraries\StdEnv\_SystemArray.icl
-		Path:	{Application}\Libraries\StdEnv\StdReal.icl
-		Path:	{Application}\Libraries\StdEnv\StdString.icl
-		Path:	{Application}\Libraries\StdEnv\StdFile.icl
-		Path:	{Application}\Libraries\StdEnv\StdList.icl
-		Path:	{Application}\Libraries\StdEnv\StdEnum.icl
-		Path:	{Application}\Libraries\StdEnv\_SystemEnum.icl
-		Path:	{Application}\Libraries\StdEnv\StdOrdList.icl
-		Path:	{Application}\Libraries\StdEnv\StdTuple.icl
-		Path:	{Application}\Libraries\StdEnv\StdCharList.icl
-		Path:	{Application}\Libraries\StdEnv\StdFunc.icl
-		Path:	{Application}\Libraries\ObjectIO\StdIO.icl
-		Path:	{Application}\Libraries\ObjectIO\StdId.icl
-		Path:	{Application}\Libraries\StdLib\StdMaybe.icl
-		Path:	{Application}\Libraries\ObjectIO\id.icl
-		Path:	{Application}\Libraries\ObjectIO\device.icl
-		Path:	{Application}\Libraries\ObjectIO\systemid.icl
-		Path:	{Application}\Libraries\ObjectIO\commondef.icl
-		Path:	{Application}\Libraries\ObjectIO\StdIOCommon.icl
-		Path:	{Application}\Libraries\ObjectIO\StdBitmap.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osbitmap.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\ospicture.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osrgn.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\ostoolbox.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\clCrossCall_12.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\ostypes.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\pictCCall_12.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\rgnCCall_12.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osfont.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\clCCall_12.icl
-		Path:	{Application}\Libraries\ObjectIO\StdPictureDef.icl
-		Path:	{Application}\Libraries\ObjectIO\StdIOBasic.icl
-		Path:	{Application}\Libraries\ObjectIO\StdPicture.icl
-		Path:	{Application}\Libraries\ObjectIO\StdKey.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\oskey.icl
-		Path:	{Application}\Libraries\ObjectIO\iostate.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osactivaterequests.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osdocumentinterface.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\menuCrossCall_12.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\ostoolbar.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\windowCCall_12.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\ossystem.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\windowCrossCall_12.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osevent.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\ostime.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osguishare.icl
-		Path:	{Application}\Libraries\ObjectIO\devicefunctions.icl
-		Path:	{Application}\Libraries\ObjectIO\deviceevents.icl
-		Path:	{Application}\Libraries\ObjectIO\receivermessage.icl
-		Path:	{Application}\Libraries\ObjectIO\receivertable.icl
-		Path:	{Application}\Libraries\ObjectIO\semidynamic.icl
-		Path:	{Application}\Libraries\ObjectIO\cast.icl
-		Path:	{Application}\Libraries\ObjectIO\timertable.icl
-		Path:	{Application}\Libraries\ObjectIO\StdTimerDef.icl
-		Path:	{Application}\Libraries\ObjectIO\windowhandle.icl
-		Path:	{Application}\Libraries\ObjectIO\StdControlDef.icl
-		Path:	{Application}\Libraries\ObjectIO\StdWindowDef.icl
-		Path:	{Application}\Libraries\ObjectIO\receiverhandle.icl
-		Path:	{Application}\Libraries\ObjectIO\keyfocus.icl
-		Path:	{Application}\Libraries\ObjectIO\devicesystemstate.icl
-		Path:	{Application}\Libraries\ObjectIO\menuhandle.icl
-		Path:	{Application}\Libraries\ObjectIO\StdMenuDef.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osmenu.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\menuCCall_12.icl
-		Path:	{Application}\Libraries\ObjectIO\processhandle.icl
-		Path:	{Application}\Libraries\ObjectIO\timerhandle.icl
-		Path:	{Application}\Libraries\ObjectIO\processstack.icl
-		Path:	{Application}\Libraries\ObjectIO\roundrobin.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osmouse.icl
-		Path:	{Application}\Libraries\ObjectIO\StdPSt.icl
-		Path:	{Application}\Libraries\ObjectIO\StdProcessAttribute.icl
-		Path:	{Application}\Libraries\ObjectIO\StdProcessDef.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osbeep.icl
-		Path:	{Application}\Libraries\ObjectIO\world.icl
-		Path:	{Application}\Libraries\ObjectIO\StdPStClass.icl
-		Path:	{Application}\Libraries\ObjectIO\StdFileSelect.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osfileselect.icl
-		Path:	{Application}\Libraries\ObjectIO\scheduler.icl
-		Path:	{Application}\Libraries\ObjectIO\StdTime.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\ostick.icl
-		Path:	{Application}\Libraries\StdLib\StdLibMisc.icl
-		Path:	{Application}\Libraries\ObjectIO\StdSystem.icl
-		Path:	{Application}\Libraries\ObjectIO\StdProcess.icl
-		Path:	{Application}\Libraries\ObjectIO\processdevice.icl
-		Path:	{Application}\Libraries\ObjectIO\menudevice.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\menuevent.icl
-		Path:	{Application}\Libraries\ObjectIO\menuaccess.icl
-		Path:	{Application}\Libraries\ObjectIO\menucreate.icl
-		Path:	{Application}\Libraries\ObjectIO\StdMenuElementClass.icl
-		Path:	{Application}\Libraries\ObjectIO\menudefaccess.icl
-		Path:	{Application}\Libraries\ObjectIO\StdMenuAttribute.icl
-		Path:	{Application}\Libraries\ObjectIO\sdisize.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\oswindow.icl
-		Path:	{Application}\Libraries\ObjectIO\windowaccess.icl
-		Path:	{Application}\Libraries\ObjectIO\StdControlAttribute.icl
-		Path:	{Application}\Libraries\ObjectIO\StdWindowAttribute.icl
-		Path:	{Application}\Libraries\ObjectIO\windowupdate.icl
-		Path:	{Application}\Libraries\ObjectIO\wstate.icl
-		Path:	{Application}\Libraries\ObjectIO\windowclipstate.icl
-		Path:	{Application}\Libraries\ObjectIO\wstateaccess.icl
-		Path:	{Application}\Libraries\ObjectIO\receiveraccess.icl
-		Path:	{Application}\Libraries\ObjectIO\StdReceiverDef.icl
-		Path:	{Application}\Libraries\ObjectIO\receiverdefaccess.icl
-		Path:	{Application}\Libraries\ObjectIO\StdReceiverAttribute.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\menuwindowmenu.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\processevent.icl
-		Path:	{Application}\Libraries\ObjectIO\toolbar.icl
-		Path:	{Application}\Libraries\ObjectIO\StdClipboard.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osclipboard.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\clipboardCrossCall_12.icl
-		Path:	{Application}\Libraries\ObjectIO\StdPrint.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osprint.icl
-		Path:	{Application}\Libraries\ObjectIO\StdWindow.icl
-		Path:	{Application}\Libraries\ObjectIO\StdControlClass.icl
-		Path:	{Application}\Libraries\ObjectIO\controlvalidate.icl
-		Path:	{Application}\Libraries\ObjectIO\windowvalidate.icl
-		Path:	{Application}\Libraries\ObjectIO\controllayout.icl
-		Path:	{Application}\Libraries\ObjectIO\layout.icl
-		Path:	{Application}\Libraries\ObjectIO\controlpos.icl
-		Path:	{Application}\Libraries\ObjectIO\controlrelayout.icl
-		Path:	{Application}\Libraries\ObjectIO\relayout.icl
-		Path:	{Application}\Libraries\ObjectIO\windowdraw.icl
-		Path:	{Application}\Libraries\ObjectIO\windowcreate.icl
-		Path:	{Application}\Libraries\ObjectIO\StdMenu.icl
-		Path:	{Application}\Libraries\ObjectIO\menuinternal.icl
-		Path:	{Application}\Libraries\ObjectIO\menuitems.icl
-		Path:	{Application}\Libraries\ObjectIO\controlcreate.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\ostooltip.icl
-		Path:	{Application}\Libraries\ObjectIO\windowdevice.icl
-		Path:	{Application}\Libraries\ObjectIO\controldraw.icl
-		Path:	{Application}\Libraries\ObjectIO\controlresize.icl
-		Path:	{Application}\Libraries\ObjectIO\receiverid.icl
-		Path:	{Application}\Libraries\ObjectIO\windowdispose.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\windowevent.icl
-		Path:	{Application}\Libraries\ObjectIO\controlinternal.icl
-		Path:	{Application}\Libraries\ObjectIO\StdPrintText.icl
-		Path:	{Application}\Libraries\ObjectIO\StdControlReceiver.icl
-		Path:	{Application}\Libraries\ObjectIO\StdControl.icl
-		Path:	{Application}\Libraries\ObjectIO\controlaccess.icl
-		Path:	{Application}\Libraries\ObjectIO\windowcontrols.icl
-		Path:	{Application}\Libraries\ObjectIO\StdMenuReceiver.icl
-		Path:	{Application}\Libraries\ObjectIO\StdMenuElement.icl
-		Path:	{Application}\Libraries\ObjectIO\mstate.icl
-		Path:	{Application}\Libraries\ObjectIO\StdReceiver.icl
-		Path:	{Application}\Libraries\ObjectIO\receiverdevice.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\receiverevent.icl
-		Path:	{Application}\Libraries\ObjectIO\StdTimerAttribute.icl
-		Path:	{Application}\Libraries\ObjectIO\StdTimerElementClass.icl
-		Path:	{Application}\Libraries\ObjectIO\StdTimerReceiver.icl
-		Path:	{Application}\Libraries\ObjectIO\StdTimer.icl
-		Path:	{Application}\Libraries\ObjectIO\timeraccess.icl
-		Path:	{Application}\Libraries\ObjectIO\timerdefaccess.icl
-		Path:	{Application}\Libraries\ObjectIO\timerdevice.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\timerevent.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\genericgecs.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\gec.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\guiloc.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\objectloc.icl
-		Path:	{Application}\Libraries\Generics\GenEq.icl
-		Path:	{Application}\Libraries\StdEnv\StdGeneric.icl
-		Path:	{Application}\Libraries\Generics\GenPrint.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\guigecs.icl
-		Path:	{Application}\Libraries\Generics\GenParse.icl
-		Path:	{Application}\Libraries\WrapDebug\Debug.icl
-		Path:	{Application}\Libraries\WrapDebug\Wrap.icl
-		Path:	{Application}\Libraries\WrapDebug\ShowWrapped.icl
-		Path:	{Application}\Libraries\StdEnv\StdDebug.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\parseprint.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\StdObjectIOExt.icl
-		Path:	{Application}\Libraries\ObjectIOExtensions\ColourTextControl.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\StdBimap.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\infragecs.icl
-		Path:	{Application}\Libraries\Gast\testable.icl
-		Path:	{Application}\Libraries\Gast\genLibTest.icl
-		Path:	{Application}\Libraries\Gast\stdProperty.icl
-		Path:	{Application}\Libraries\MersenneTwister\MersenneTwister.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\GenDefault.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\TRACE.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\StdGEC.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\StdGECExt.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\StdAGEC.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\basicAGEC.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\store.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\calcAGEC.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\EstherInterFace.icl
-		Path:	{Application}\Libraries\Hilde\EstherPostParser.icl
-		Path:	{Application}\Libraries\Hilde\EstherParser.icl
-		Path:	{Application}\Libraries\ExceptionsWindows\StdException.icl
-		Path:	{Application}\Libraries\Dynamics\extension\StdDynamic.icl
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\_SystemDynamic.icl
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\DynamicGraphConversion.icl
-		Path:	{Application}\Libraries\Dynamics\implementation\StdDynamicTypes.icl
-		Path:	{Application}\Libraries\Dynamics\general\DefaultElem.icl
-		Path:	{Application}\Libraries\Dynamics\general\EnDecode.icl
-		Path:	{Application}\Libraries\Dynamics\implementation\DynamicUtilities.icl
-		Path:	{Application}\Libraries\Dynamics\implementation\StdDynamicLowLevelInterface.icl
-		Path:	{Application}\Libraries\Dynamics\general\BitSet.icl
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\DynamicLinkerInterface.icl
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\shared_buffer.icl
-		Path:	{Application}\Libraries\Dynamics\implementation\StdDynamicVersion.icl
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\memory_mapped_files.icl
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\memory.icl
-		Path:	{Application}\Libraries\Dynamics\implementation\DynID.icl
-		Path:	{Application}\Libraries\Dynamics\general\md5.icl
-		Path:	{Application}\Libraries\StdLib\StdArrayExtensions.icl
-		Path:	{Application}\Libraries\Hilde\Parser combinators 2002\StdParsComb.icl
-		Path:	{Application}\Libraries\Hilde\EstherTransform.icl
-		Path:	{Application}\Libraries\Hilde\EstherBackend.icl
-		Path:	{Application}\Libraries\Hilde\CleanTricks.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\updownAGEC.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\dynamicAGEC.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\modeAGEC.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\buttonAGEC.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\tupleAGEC.icl
-		Path:	{Application}\Libraries\Dynamics\extension\StdCleanTypes.icl
-		Path:	{Application}\Libraries\Hilde\EstherScript.icl
-		Path:	{Application}\Libraries\Hilde\DynamicFileSystem.icl
-		Path:	{Application}\Libraries\Hilde\OS Windows\Windows.icl
-		Path:	{Application}\Libraries\Hilde\Marshall.icl
 		Path:	{Application}\Libraries\Hilde\EstherStdEnv.icl
+		Path:	{Application}\Libraries\Hilde\Marshall.icl
+		Path:	{Application}\Libraries\Hilde\OS Windows\Windows.icl
+		Path:	{Application}\Libraries\Hilde\DynamicFileSystem.icl
+		Path:	{Application}\Libraries\Hilde\EstherScript.icl
+		Path:	{Application}\Libraries\Dynamics\extension\StdCleanTypes.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\tupleAGEC.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\buttonAGEC.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\modeAGEC.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\dynamicAGEC.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\updownAGEC.icl
+		Path:	{Application}\Libraries\Hilde\CleanTricks.icl
+		Path:	{Application}\Libraries\Hilde\EstherBackend.icl
+		Path:	{Application}\Libraries\Hilde\EstherTransform.icl
+		Path:	{Application}\Libraries\Hilde\Parser combinators 2002\StdParsComb.icl
+		Path:	{Application}\Libraries\StdLib\StdArrayExtensions.icl
+		Path:	{Application}\Libraries\Dynamics\general\md5.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\DynID.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\memory.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\memory_mapped_files.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\StdDynamicVersion.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\shared_buffer.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\DynamicLinkerInterface.icl
+		Path:	{Application}\Libraries\Dynamics\general\BitSet.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\StdDynamicLowLevelInterface.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\DynamicUtilities.icl
+		Path:	{Application}\Libraries\Dynamics\general\EnDecode.icl
+		Path:	{Application}\Libraries\Dynamics\general\DefaultElem.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\StdDynamicTypes.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\DynamicGraphConversion.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\_SystemDynamic.icl
+		Path:	{Application}\Libraries\Dynamics\extension\StdDynamic.icl
+		Path:	{Application}\Libraries\ExceptionsWindows\StdException.icl
+		Path:	{Application}\Libraries\Hilde\EstherParser.icl
+		Path:	{Application}\Libraries\Hilde\EstherPostParser.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\EstherInterFace.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\calcAGEC.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\store.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\basicAGEC.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\StdAGEC.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\StdGECExt.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\StdGEC.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\TRACE.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\GenDefault.icl
+		Path:	{Application}\Libraries\MersenneTwister\MersenneTwister.icl
+		Path:	{Application}\Libraries\Gast\stdProperty.icl
+		Path:	{Application}\Libraries\Gast\genLibTest.icl
+		Path:	{Application}\Libraries\Gast\testable.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\infragecs.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\StdBimap.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\ObjectIOExtensions\ColourTextControl.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\StdObjectIOExt.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\parseprint.icl
+		Path:	{Application}\Libraries\StdEnv\StdDebug.icl
+		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\ShowWrapped.icl
+		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Wrap.icl
+		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Debug.icl
+		Path:	{Application}\Libraries\Generics\GenParse.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\guigecs.icl
+		Path:	{Application}\Libraries\Generics\GenPrint.icl
+		Path:	{Application}\Libraries\StdEnv\StdGeneric.icl
+		Path:	{Application}\Libraries\Generics\GenEq.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\objectloc.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\guiloc.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\gec.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\genericgecs.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\timerevent.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\timerdevice.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\timerdefaccess.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\timeraccess.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdTimer.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdTimerReceiver.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdTimerElementClass.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdTimerAttribute.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\receiverevent.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\receiverdevice.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdReceiver.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\mstate.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdMenuElement.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdMenuReceiver.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\windowcontrols.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\controlaccess.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdControl.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdControlReceiver.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdPrintText.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\controlinternal.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\windowevent.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\windowdispose.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\receiverid.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\controlresize.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\controldraw.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\windowdevice.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\ostooltip.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\controlcreate.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\menuitems.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\menuinternal.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdMenu.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\windowcreate.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\windowdraw.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\relayout.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\controlrelayout.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\controlpos.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\layout.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\controllayout.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\windowvalidate.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\controlvalidate.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdControlClass.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdWindow.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\osprint.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdPrint.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\clipboardCrossCall_12.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\osclipboard.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdClipboard.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\toolbar.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\processevent.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\menuwindowmenu.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdReceiverAttribute.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\receiverdefaccess.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdReceiverDef.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\receiveraccess.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\wstateaccess.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\windowclipstate.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\wstate.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\windowupdate.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdWindowAttribute.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdControlAttribute.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\windowaccess.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\oswindow.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\sdisize.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdMenuAttribute.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\menudefaccess.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdMenuElementClass.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\menucreate.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\menuaccess.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\menuevent.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\menudevice.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\processdevice.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdProcess.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdSystem.icl
+		Path:	{Application}\Libraries\StdLib\StdLibMisc.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\ostick.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdTime.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\scheduler.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\osfileselect.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdFileSelect.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdPStClass.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\world.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\osbeep.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdProcessDef.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdProcessAttribute.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdPSt.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\osmouse.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\roundrobin.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\processstack.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\timerhandle.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\processhandle.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\menuCCall_12.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\osmenu.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdMenuDef.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\menuhandle.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\devicesystemstate.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\keyfocus.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\receiverhandle.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdWindowDef.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdControlDef.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\windowhandle.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdTimerDef.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\timertable.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\cast.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\semidynamic.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\receivertable.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\receivermessage.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\deviceevents.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\devicefunctions.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\osguishare.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\ostime.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\osevent.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\windowCrossCall_12.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\ossystem.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\windowCCall_12.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\ostoolbar.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\menuCrossCall_12.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\osdocumentinterface.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\osactivaterequests.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\iostate.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\oskey.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdKey.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdPicture.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdIOBasic.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdPictureDef.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\clCCall_12.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\osfont.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\rgnCCall_12.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\pictCCall_12.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\ostypes.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\clCrossCall_12.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\ostoolbox.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\osrgn.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\ospicture.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\osbitmap.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdBitmap.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdIOCommon.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\commondef.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\systemid.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\device.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\id.icl
+		Path:	{Application}\Libraries\StdLib\StdMaybe.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdId.icl
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\StdIO.icl
+		Path:	{Application}\Libraries\StdEnv\StdFunc.icl
+		Path:	{Application}\Libraries\StdEnv\StdCharList.icl
+		Path:	{Application}\Libraries\StdEnv\StdTuple.icl
+		Path:	{Application}\Libraries\StdEnv\StdOrdList.icl
+		Path:	{Application}\Libraries\StdEnv\_SystemEnum.icl
+		Path:	{Application}\Libraries\StdEnv\StdEnum.icl
+		Path:	{Application}\Libraries\StdEnv\StdList.icl
+		Path:	{Application}\Libraries\StdEnv\StdFile.icl
+		Path:	{Application}\Libraries\StdEnv\StdString.icl
+		Path:	{Application}\Libraries\StdEnv\StdReal.icl
+		Path:	{Application}\Libraries\StdEnv\_SystemArray.icl
+		Path:	{Application}\Libraries\StdEnv\StdArray.icl
+		Path:	{Application}\Libraries\StdEnv\StdClass.icl
+		Path:	{Application}\Libraries\StdEnv\StdChar.icl
+		Path:	{Application}\Libraries\StdEnv\StdMisc.icl
+		Path:	{Application}\Libraries\StdEnv\StdInt.icl
+		Path:	{Application}\Libraries\StdEnv\StdOverloaded.icl
+		Path:	{Application}\Libraries\StdEnv\StdBool.icl
+		Path:	{Application}\Libraries\StdEnv\StdEnv.icl
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GecArrow.icl
 	Objs
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup0.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup1Trace.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup2.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_system.o
 		Path:	{Project}\Clean System Files\editeditorGEC.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\Clean System Files\dynamicAGEC.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\Clean System Files\calcAGEC.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\md5.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynID.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory_mapped_files.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicVersion.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\shared_buffer.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicLinkerInterface.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\BitSet.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicLowLevelInterface.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynamicUtilities.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\EnDecode.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\DefaultElem.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicTypes.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicGraphConversion.o
+		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\Clean System Files\store.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\Clean System Files\updownAGEC.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\Clean System Files\buttonAGEC.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\Clean System Files\modeAGEC.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\Clean System Files\basicAGEC.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\Clean System Files\GecArrow.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\Clean System Files\StdAGEC.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\Clean System Files\StdGEC.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\Clean System Files\StdGECExt.o
+		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Clean System Files\ShowWrapped.o
+		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Clean System Files\Wrap.o
+		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Clean System Files\Debug.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdString.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdClass.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnv.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdBool.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdInt.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdMisc.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdChar.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdClass.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdArray.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemArray.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFile.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnv.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdReal.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdString.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFile.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdList.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnum.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnum.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOrdList.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdTuple.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdCharList.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\tupleAGEC.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\genericgecs.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\Clean System Files\tupleAGEC.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdIO.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdId.o
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osdocumentinterface.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\id.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\device.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\systemid.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdIOCommon.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdBitmap.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osbitmap.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ospicture.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osrgn.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostoolbox.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\clCrossCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostypes.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\pictCCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\rgnCCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osfont.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPictureDef.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdIOBasic.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPicture.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdKey.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\oskey.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\commondef.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\clCCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\menuCrossCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostoolbar.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\windowCCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ossystem.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\windowCrossCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osevent.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostime.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\deviceevents.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receivermessage.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receivertable.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\semidynamic.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\cast.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\timertable.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdId.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\iostate.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osactivaterequests.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osguishare.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\devicefunctions.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTimerDef.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowhandle.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControlDef.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdWindowDef.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverhandle.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\keyfocus.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\devicesystemstate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuhandle.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuDef.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osmenu.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\menuCCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\processhandle.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\timerhandle.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\processstack.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\roundrobin.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osmouse.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPSt.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdProcessDef.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdProcessAttribute.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osbeep.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\world.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\wstate.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\oswindow.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControlReceiver.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiverDef.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControlClass.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControlAttribute.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlvalidate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdWindowAttribute.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowvalidate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdSystem.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controllayout.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\wstateaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\layout.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiverAttribute.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiveraccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverdefaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControl.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlinternal.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostooltip.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlresize.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowupdate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowclipstate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlrelayout.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\relayout.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowdraw.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controldraw.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowcontrols.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlcreate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowdispose.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuElementClass.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuAttribute.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menudefaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenu.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menudevice.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\menuevent.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menucreate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\sdisize.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuinternal.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuitems.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\scheduler.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowcreate.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\menuwindowmenu.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlpos.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowdevice.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverid.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\windowevent.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiver.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverdevice.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\receiverevent.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\gec.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPrintText.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPrint.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osprint.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdWindow.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuReceiver.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuElement.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\mstate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTimerAttribute.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTimerElementClass.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTimerReceiver.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTimer.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\timeraccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\timerdefaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\timerdevice.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\timerevent.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\guiloc.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\objectloc.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\id.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\device.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\systemid.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdIOCommon.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdBitmap.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\osbitmap.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\ospicture.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\osrgn.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\ostoolbox.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\clCrossCall_12.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\ostypes.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\pictCCall_12.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\rgnCCall_12.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\osfont.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdPictureDef.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdIOBasic.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdPicture.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdKey.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\oskey.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\commondef.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\clCCall_12.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\iostate.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\osactivaterequests.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\osdocumentinterface.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\menuCrossCall_12.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\ostoolbar.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\windowCCall_12.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\ossystem.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\windowCrossCall_12.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\osevent.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\ostime.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\osguishare.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\devicefunctions.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\deviceevents.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\receivermessage.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\receivertable.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\semidynamic.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\cast.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\timertable.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdTimerDef.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\windowhandle.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdControlDef.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdWindowDef.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\receiverhandle.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\keyfocus.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\devicesystemstate.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\menuhandle.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdMenuDef.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\osmenu.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\menuCCall_12.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\processhandle.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\timerhandle.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\processstack.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\roundrobin.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\osmouse.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdPSt.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdProcessDef.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdProcessAttribute.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\osbeep.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\world.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdPStClass.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdFileSelect.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\scheduler.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\osfileselect.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdTime.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\ostick.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdSystem.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdProcess.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\processdevice.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\menudevice.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdReceiverDef.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdMenuAttribute.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdMenuElementClass.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\menuaccess.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\menudefaccess.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\menuevent.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\menucreate.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\sdisize.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\wstate.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\oswindow.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\windowaccess.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdControlAttribute.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdWindowAttribute.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\windowupdate.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\windowclipstate.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\wstateaccess.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\receiveraccess.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdReceiverAttribute.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\receiverdefaccess.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\menuwindowmenu.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\processevent.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\toolbar.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdClipboard.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\osclipboard.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\clipboardCrossCall_12.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdPrint.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\osprint.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdControlClass.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\controlvalidate.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\windowvalidate.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\controllayout.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\layout.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdWindow.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\controlpos.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\controlrelayout.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\relayout.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\windowdraw.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\windowcreate.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdMenu.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\menuinternal.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\menuitems.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\windowdevice.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\windowdispose.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\receiverid.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\controldraw.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\controlresize.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\windowevent.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\controlcreate.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\ostooltip.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\controlinternal.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdPrintText.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdControlReceiver.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdControl.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\controlaccess.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\windowcontrols.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdMenuReceiver.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdMenuElement.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\mstate.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdReceiver.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\receiverdevice.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\receiverevent.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdTimerAttribute.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdTimerElementClass.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdTimerReceiver.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\StdTimer.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\timeraccess.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\timerdefaccess.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\Clean System Files\timerdevice.o
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\timerevent.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\Clean System Files\genericgecs.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\Clean System Files\gec.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\Clean System Files\guiloc.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\Clean System Files\objectloc.o
 		Path:	{Application}\Libraries\Generics\Clean System Files\GenEq.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
 		Path:	{Application}\Libraries\Generics\Clean System Files\GenPrint.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\parseprint.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\Clean System Files\parseprint.o
 		Path:	{Application}\Libraries\Generics\Clean System Files\GenParse.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\guigecs.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTime.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostick.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\StdObjectIOExt.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdIO.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPStClass.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdFileSelect.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osfileselect.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdProcess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\processdevice.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\processevent.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\toolbar.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdClipboard.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osclipboard.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\clipboardCrossCall_12.o
-		Path:	{Application}\Libraries\ObjectIOExtensions\Clean System Files\ColourTextControl.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\StdBimap.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\infragecs.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\Clean System Files\guigecs.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\ObjectIOExtensions\Clean System Files\ColourTextControl.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\Clean System Files\StdObjectIOExt.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\Clean System Files\StdBimap.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\Clean System Files\infragecs.o
 		Path:	{Application}\Libraries\Gast\Clean System Files\testable.o
 		Path:	{Application}\Libraries\Gast\Clean System Files\genLibTest.o
 		Path:	{Application}\Libraries\Gast\Clean System Files\stdProperty.o
 		Path:	{Application}\Libraries\MersenneTwister\Clean System Files\MersenneTwister.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\GenDefault.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\TRACE.o
-		Path:	{Application}\Libraries\WrapDebug\Clean System Files\Debug.o
-		Path:	{Application}\Libraries\WrapDebug\Clean System Files\Wrap.o
-		Path:	{Application}\Libraries\WrapDebug\Clean System Files\ShowWrapped.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\StdGECExt.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\StdGEC.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\StdAGEC.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\GecArrow.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\basicAGEC.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\modeAGEC.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\buttonAGEC.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\updownAGEC.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\store.o
-		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicGraphConversion.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicTypes.o
-		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\DefaultElem.o
-		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\EnDecode.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynamicUtilities.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicLowLevelInterface.o
-		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\BitSet.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicLinkerInterface.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\shared_buffer.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicVersion.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory_mapped_files.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynID.o
-		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\md5.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\calcAGEC.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\dynamicAGEC.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\EstherInterFace.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\Clean System Files\GenDefault.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\Clean System Files\TRACE.o
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation\Clean System Files\EstherInterFace.o
 		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherBackend.o
 		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherParser.o
 		Path:	{Application}\Libraries\ExceptionsWindows\Clean System Files\StdException.o
@@ -7000,55 +7009,64 @@ Static
 		Path:	{Application}\Libraries\Hilde\OS Windows\Clean System Files\Windows.o
 		Path:	{Application}\Libraries\Hilde\Clean System Files\Marshall.o
 		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherStdEnv.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallClipboard_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFileSelectors_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFont_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallMenus_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallWindows_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallProcedureTable_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallCursor_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCall_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallSystem_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cAcceleratorTable_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallxDI_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cpicture_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cprinter_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallPrinter_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cCrossCallClipboard_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cCrossCallFileSelectors_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cCrossCallFont_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cCrossCallMenus_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cCrossCallWindows_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cCrossCallProcedureTable_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cCrossCallCursor_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cCrossCall_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cCCallSystem_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cAcceleratorTable_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cCrossCallxDI_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cpicture_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cprinter_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cCrossCallPrinter_121.obj
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\low.obj
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\mem.obj
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\read_function.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\util_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cpicture_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cdebug_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCall_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallWindows_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallSystem_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\util_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cpicture_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cdebug_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cCrossCall_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cCrossCallWindows_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.obj
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\cCCallSystem_121.obj
 	Dlib
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\kernel_library
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\user_library
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\gdi_library
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\comdlg_library
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\StdDynamic_kernel32_library
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\userExt_library
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\gdiExt_library
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\kernelExt_library
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\userExt_library
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\gdiExt_library
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\kernelExt_library
 		Path:	{Application}\Libraries\Hilde\OS Windows\Clean System Files\windowsKERNEL32_library
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\winspool_library
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\winmm_library
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\shell32_library
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ole32_library
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\kernel32_library
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\comctl32_library
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\advapi32_library
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\winmm_library
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\shell32_library
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\ole32_library
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\kernel32_library
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\comctl32_library
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows\Clean System Files\advapi32_library
 	Pths
 		Path:	{Project}
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\ObjectIOExtensions
+		Path:	{Application}\Libraries\Hilde
+		Path:	{Application}\Libraries\Hilde\OS Windows\NoDynamicFileSystem
+		Path:	{Application}\Libraries\Hilde\Parser combinators 2002
+		Path:	{Application}\Libraries\Hilde\WrapDebugClosures
+		Path:	{Application}\Libraries\Hilde\OS Windows\Foreign
+		Path:	{Application}\Libraries\Hilde\OS Windows
 		Path:	{Application}\Libraries\StdEnv
 		Path:	{Application}\Libraries\StdLib
-		Path:	{Application}\Libraries\ObjectIO
-		Path:	{Application}\Libraries\ObjectIO\OS Windows
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO
+		Path:	C:\Develop Object IO\libraries\ObjectIO\ObjectIO\OS Windows
 		Path:	{Application}\Libraries\Directory
 		Path:	{Application}\Libraries\Dynamics\extension
 		Path:	{Application}\Libraries\Dynamics\general
@@ -7064,14 +7082,14 @@ Static
 		Path:	{Application}\Libraries\WrapDebug
 		Path:	{Application}\Libraries\ExtendedArith\ExtendedArith
 		Path:	{Application}\Libraries\GameLib
-		Path:	{Application}\Libraries\ObjectIOExtensions
 		Path:	{Application}\Libraries\Hilde
+		Path:	{Application}\Libraries\Hilde\Loes 0.2
 		Path:	{Application}\Libraries\Hilde\OS Windows
+		Path:	{Application}\Libraries\Hilde\OS Windows\NoDynamicFileSystem
 		Path:	{Application}\Libraries\Hilde\Parser combinators 2002
 		Path:	{Application}\Libraries\Hilde\WrapDebugClosures
-		Path:	{Application}\Libraries\Hilde\Loes 0.2
-		Path:	{Application}\Libraries\Hilde\OS Windows\NoDynamicFileSystem
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC
-	AppP:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.0
-	PrjP:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Examples
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
+		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\ObjectIOExtensions
+	AppP:	C:\Clean 2.1.1 alpha 3
+	PrjP:	C:\Peter\Projecten\Visual Editor\libraries\GEC\Examples

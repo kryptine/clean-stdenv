@@ -1,7 +1,7 @@
 implementation module ColourTextControl
 
-import StdInt, StdList, StdMisc
-import StdControl, StdControlReceiver, StdId, StdPicture, StdReceiver, StdPSt
+import StdBool, StdInt, StdList, StdMisc
+import StdControl, StdControlAttribute, StdControlReceiver, StdId, StdPicture, StdReceiver, StdPSt
 
 ::	ColourTextControlId
 	=	{	r2Id :: !R2Id MsgIn MsgOut
@@ -12,11 +12,17 @@ import StdControl, StdControlReceiver, StdId, StdPicture, StdReceiver, StdPSt
 
 instance Controls ColourTextControl where
 	controlToHandles (ColourTextControl {r2Id,cId} txt colour atts) pSt
-		# (size,       pSt)	= controlSize (PopUpControl [] 1 atts) True Nothing Nothing Nothing pSt
+	//	# (size,pSt)		= controlSize (PopUpControl [] 1 atts) True Nothing Nothing Nothing pSt
+		# (size,pSt)		= getSize atts pSt
 		# ((font,metrics),pSt)
 							= accPIO (accScreenPicture getFontInfo) pSt
 		= controlToHandles (impl size metrics font) pSt
 	where
+		getSize atts pSt
+			= case filter (\att -> isControlOuterSize att || isControlViewSize att) atts of
+				[ControlOuterSize s : _] = (s,pSt)
+				[ControlViewSize  s : _] = (s,pSt)
+				nothing                  = controlSize (PopUpControl [] 1 atts) True Nothing Nothing Nothing pSt
 		impl size=:{w,h} metrics font
 							= { addLS = txt
 							  , addDef=		CustomControl size (look  txt)

@@ -29,10 +29,9 @@ where
 
 	calc		= realcalcAGEC			// to obtain a real calculator
 //	calc		= intcalcAGEC 			// to obtain an int calculator
-	buttons		= [Button "+", Button "-", Button "*"]
+	buttons		= [Button buttonWidth "+", Button buttonWidth "-", Button buttonWidth "*"]
 	operators 	= [(+),(-),(*)]
 	whichopper buttons operators = [x \\ (Pressed,x) <- (zip2 buttons operators)]
-
 */
 :: ButtonEditor 	:== [(String,AGEC (Int Int -> Int))]
 :: MyButtonFuns 	:== ([Button],[Int Int -> Int])
@@ -64,7 +63,7 @@ where
 	convert editbuttons =  initCalculator 0 0 mybuttons
 	where
 		mybuttons :: MyButtonFuns
-		mybuttons = unzip [(Button string,^^ fun)\\ (string,fun) <- editbuttons]
+		mybuttons = unzip [(Button buttonWidth string,^^ fun)\\ (string,fun) <- editbuttons]
 
 :: MyCalculatorType :== ((<|> Int (<|> (AGEC Int) (AGEC [Button]))),AGEC MyButtonFuns)
 
@@ -93,8 +92,7 @@ example_calc3	= startCircuit (feedback (edit "Calculator" >>@ updateCalculator))
 where
 	mybuttons = initCalculator 0 0 (buttons,operators)
 
-	buttons		= [Button "+", Button "-", Button "*"]
+	buttons		= [Button buttonWidth "+", Button buttonWidth "-", Button buttonWidth "*"]
 	operators 	= [(+),(-),(*)]
 
-
-
+buttonWidth	:== defCellWidth / 3	// Place three buttons in a single cell

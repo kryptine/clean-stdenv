@@ -147,7 +147,7 @@ where
 							 mkaction ni  
 	where
 		mkaction nr			= {	element_nr 	= counterAGEC nr
-							  , goto		= (Button "0",Button (toString next))
+							  , goto		= (Button (defCellWidth/2) "0",Button (defCellWidth/2) (toString next))
 							  , actions 	= Choose 
 							  }
 		ni					
