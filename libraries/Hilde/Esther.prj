@@ -23,7 +23,7 @@ Global
 			Time:	True
 			Stack:	True
 		Output
-			Output:	ShowConstructors
+			Output:	NoReturnType
 			Font:	Courier
 			FontSize:	9
 			WriteStdErr:	False
@@ -555,7 +555,7 @@ OtherModules
 				Y:	0
 				SizeX:	805
 				SizeY:	551
-		IclOpen:	True
+		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdLibMisc
@@ -695,11 +695,11 @@ OtherModules
 		DclOpen:	False
 		Icl
 			WindowPosition
-				X:	10
-				Y:	10
-				SizeX:	786
-				SizeY:	496
-		IclOpen:	False
+				X:	61
+				Y:	70
+				SizeX:	712
+				SizeY:	393
+		IclOpen:	True
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	Marshall
@@ -1476,8 +1476,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	585
+				SizeY:	296
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -1969,7 +1969,7 @@ OtherModules
 				Y:	2
 				SizeX:	810
 				SizeY:	506
-		IclOpen:	False
+		IclOpen:	True
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	EstherParser
@@ -1997,7 +1997,7 @@ OtherModules
 				Y:	1
 				SizeX:	813
 				SizeY:	498
-		IclOpen:	False
+		IclOpen:	True
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdException
@@ -2126,17 +2126,17 @@ OtherModules
 			ReuseUniqueNodes:	True
 		Dcl
 			WindowPosition
-				X:	45
-				Y:	11
+				X:	5
+				Y:	2
 				SizeX:	786
 				SizeY:	484
-		DclOpen:	True
+		DclOpen:	False
 		Icl
 			WindowPosition
-				X:	11
-				Y:	10
-				SizeX:	765
-				SizeY:	491
+				X:	30
+				Y:	18
+				SizeX:	785
+				SizeY:	481
 		IclOpen:	True
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2279,28 +2279,28 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup2.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_system.o
 		Path:	{Project}\Clean System Files\Esther.o
-		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnv.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdBool.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdInt.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdMisc.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdChar.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdClass.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdArray.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemArray.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdReal.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdString.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFile.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdList.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnum.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnum.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOrdList.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdTuple.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdCharList.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
 		Path:	{Project}\Clean System Files\EstherScript.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdCharList.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdTuple.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOrdList.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnum.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnum.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdList.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFile.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdString.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdReal.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemArray.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdArray.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdClass.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdChar.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdMisc.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdInt.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdBool.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnv.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
+		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
 		Path:	{Project}\Clean System Files\EstherPostParser.o
 		Path:	{Project}\Clean System Files\EstherParser.o
 		Path:	{Application}\Libraries\ExceptionsWindows\Clean System Files\StdException.o
@@ -2323,19 +2323,19 @@ Static
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
 		Path:	{Project}\Parser combinators 2002\Clean System Files\StdParsComb.o
+		Path:	{Project}\Clean System Files\EstherTransform.o
 		Path:	{Project}\Clean System Files\EstherBackend.o
 		Path:	{Project}\WrapDebugClosures\Clean System Files\Debug.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
 		Path:	{Project}\WrapDebugClosures\Clean System Files\Wrap.o
 		Path:	{Project}\WrapDebugClosures\Clean System Files\ShowWrapped.o
-		Path:	{Project}\Clean System Files\EstherTransform.o
-		Path:	{Project}\Clean System Files\CleanTricks.o
 		Path:	{Project}\Clean System Files\DynamicFileSystem.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamicFileIO.o
 		Path:	{Application}\Libraries\Directory\Clean System Files\Directory.o
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
 		Path:	{Project}\OS Windows\Clean System Files\Windows.o
 		Path:	{Project}\Clean System Files\Marshall.o
+		Path:	{Project}\Clean System Files\CleanTricks.o
 		Path:	{Project}\Clean System Files\EstherStdEnv.o
 		Path:	{Project}\Clean System Files\EstherFamkeEnv.o
 		Path:	{Project}\Clean System Files\FamkeProcess.o

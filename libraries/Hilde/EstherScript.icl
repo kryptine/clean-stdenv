@@ -1,17 +1,35 @@
 implementation module EstherScript
 
 import EstherPostParser, EstherTransform, DynamicFileSystem
-import StdBool, StdList, StdMisc, StdParsComb, StdFunc
+import StdBool, StdList, StdMisc, StdParsComb, StdFunc, StdTuple
 
-compose :: !String !*(Esther *env) -> (!Dynamic, !*Esther *env) | DynamicFileSystem, bimap{|*|} env
-compose input env = compile input env
+compose :: !String !*(Esther *env) -> (!Dynamic, !*Esther *env) | DynamicFileSystem, bimap{|*|}, ExceptionEnv env
+compose input env = (compile input catchAllIO (\d env -> (raise (EstherError (handler d)), env))) env 
 where
+	compile :: !String !*(Esther *env) -> (!Dynamic, !*Esther *env) | DynamicFileSystem, bimap{|*|} env
 	compile input env
 		# syntax = parseStatement input
 		  (syntax, fv, env`) = resolveNames{|*|} syntax [] env
 		  syntax = fixInfix{|*|} syntax
 		  core = transform{|*|} syntax
 		= generateCode core env`
+
+	handler :: !Dynamic -> String
+	handler ((ApplyTypeError df dx) :: ComposeException) = "cannot apply `" +++ tf +++ "' to `" +++ tx +++ "'"
+	where
+		(vf, tf) = toStringDynamic df
+		(vx, tx) = toStringDynamic dx
+	handler (UnboundVariable v :: ComposeException) = "unbound variable (internal error) `" +++ v +++ "'"
+	handler (InstanceNotFound c dt :: ComposeException) = "`instance " +++ c +++ " " +++ snd (toStringDynamic dt) +++ "' not found"
+	handler (InvalidInstance c dt :: ComposeException) = "`instance " +++ c +++ " " +++ snd (toStringDynamic dt) +++ "' is invalid (type not an instance of the class type)"
+	handler (UnsolvableOverloading :: ComposeException) = "unsolvable overloading"
+	handler (InfixRightArgumentMissing :: PostParseException) = "right argument of infix operator is missing"
+	handler (InfixLeftArgumentMissing :: PostParseException) = "left argument of infix operator is missing"
+	handler (UnsolvableInfixOrder :: PostParseException) = "conflicting priorities of infix operators"
+	handler (NameNotFound n :: PostParseException) = "file `" +++ n +++ "' not found"
+	handler (CaseBadConstructorArity :: TransformException) = "constructor in pattern has too many or too little arguments"
+	handler (NotSupported s :: TransformException) = "feature not (yet) supported: `" +++ s +++ "'"
+	handler d = raise d
 
 evaluate :: !Bool a !Dynamic !*(Esther *env) -> (!a, !*Esther *env) | TC a & TC, DynamicFileSystem, ExceptionEnv, bimap{|*|} env
 evaluate unsafe def input esther 
@@ -34,12 +52,12 @@ instance resolveFilename (Esther *env) | DynamicFileSystem env
 where
 	resolveFilename name state=:{searchPath, builtin, env}
 		# (ok, dyn, prio) = findFile name builtin
-		| ok = (dyn, prio, {state & env = env})
+		| ok = (Just (dyn, prio), {state & env = env})
 		# (cache, env) = cacheSearchPath searchPath env
 		  (ok, path, prio) = findFile name cache
 		  (ok, dyn, env) = if ok (dynamicRead path env) (False, undef, env)
-		| ok = (dyn, prio, {state & env = env})
-		= raise ("Cannot find file: " +++ name)
+		| ok = (Just (dyn, prio), {state & env = env})
+		= (Nothing, {state & env = env})
 	where
 		findFile n [] = (False, undef, undef)
 		findFile n [(x, d):xs] = case begin (sp (parse (fromString n)) <& sp eof) (fromString x) of
@@ -57,16 +75,14 @@ where
 
 instance resolveInstance (Esther *env) | DynamicFileSystem env
 where
-	resolveInstance n t env = (i, env`)
+	resolveInstance n t env = case resolveFilename ("instance " +++ n +++ " " +++ (outermostType t)) env of
+		(Just (inst, _), env) -> (Just inst, env)
+		(_, env) -> (Nothing, env)
 	where
-		(i, _, env`) = resolveType (outermostType t) env
-		
-		resolveType s env = resolveFilename ("instance " +++ n +++ " " +++ s) env
-
-		outermostType :: !Dynamic -> String
+/*		outermostType :: !Dynamic -> String
 		outermostType d
 			# (ok, n, type) = f (typeCodeOfDynamic d)
-			| not ok = raise "No outermost type constructor"
+			| not ok = raise ("No outermost type constructor: " +++ snd (toStringDynamic d))
 			= toString type
 		where
 			f (TypeScheme _ type) = f type
@@ -74,8 +90,19 @@ where
 			f (TypeApp x y)
 				# (ok, n, x) = f x
 				= (ok, n + 1, TypeApp x (TypeVar n))
-			f type = (False, 0, type)
+			f type = (False, 0, type)*/
 	
+		outermostType :: !Dynamic -> String
+		outermostType d = toString (snd (f (typeCodeOfDynamic d)))
+		where
+			f (TypeScheme _ type) = f type
+			f (TypeUnique type) = f type
+			f type=:(TypeCons cons) = (0, type)
+			f (TypeApp t1 t2)
+				# (n, t1) = f t1
+				= (n + 1, TypeApp t1 (TypeVar n))
+			f type = (0, type)
+
 cacheSearchPath :: ![DynamicPath] !*env -> (![(String, DynamicPath)], !*env) | DynamicFileSystem env
 cacheSearchPath [p:ps] env 
 	# (ok, d, env) = dynamicRead p env

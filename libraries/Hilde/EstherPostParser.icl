@@ -1,7 +1,7 @@
 implementation module EstherPostParser
 
 import EstherParser
-import StdMisc, StdList, StdString, EstherBackend
+import StdMisc, StdList, StdString, EstherTransform
 
 generic resolveNames e :: !e ![String] !*env -> (!e, ![String], !*env) | resolveFilename env
 
@@ -49,9 +49,9 @@ resolveNames{|NTnameOrValue|} (NTvalue (x :: a) prio) vs st
 	= (NTvalue (dynamic x :: a) prio, vs, st)
 resolveNames{|NTnameOrValue|} (NTname n) vs st 
 	| isMember n vs = (NTname n, vs, st)
-	= (NTvalue dyn prio, vs, st`)
-where
-	(dyn, prio, st`) = resolveFilename n st
+	= case resolveFilename n st of
+		(Just (dyn, prio), st) -> (NTvalue dyn prio, vs, st)
+		(_, st) -> (raise (NameNotFound n), vs, st)
 
 resolveNames{|Scope|} ge (Scope e) vs st = (Scope e`, vs, st`)
 where
@@ -80,7 +80,7 @@ where
 	desugarList (ListComprehension c) = desugarListComprehension c
 	
 	desugarListComprehension (DotDot f t _ e) = desugarDotDot f t e
-	desugarListComprehension (ZF e _ qs) = raise "ZF not implemented"
+	desugarListComprehension (ZF e _ qs) = raise (NotSupported "ZF expressions")
 
 	desugarDotDot f Nothing Nothing = Apply (Term (Plain (NameOrValue (NTvalue dynamicFrom GenConsNoPrio)))) (Plain (Nested (|-| f)))
 	desugarDotDot f Nothing (Just e) = Apply (Apply (Term (Plain (NameOrValue (NTvalue dynamicFromTo GenConsNoPrio)))) (Plain (Nested (|-| f)))) (Plain (Nested (|-| e)))
@@ -136,35 +136,6 @@ derive fixInfix NTstatement, NTterm, NTsugar, NTlist, NTlistComprehension, NTlam
 derive fixInfix +-, |-|, [], Maybe, (,), Scope
 
 derive bimap (,), (,,)
-
-dynamicTuple :: !Int -> Dynamic
-dynamicTuple 2 = dynamicTuple2
-dynamicTuple 3 = dynamicTuple3
-dynamicTuple 4 = dynamicTuple4
-dynamicTuple 5 = dynamicTuple5
-dynamicTuple 6 = dynamicTuple6
-dynamicTuple 7 = dynamicTuple7
-dynamicTuple 8 = dynamicTuple8
-dynamicTuple 9 = dynamicTuple9
-dynamicTuple 10 = dynamicTuple10
-dynamicTuple 11 = dynamicTuple11
-dynamicTuple 12 = dynamicTuple12
-dynamicTuple n = raise "dynamicTuple<1||>12"
-
-dynamicTuple2 =: dynamic \a b -> (a, b) :: A.a b: a b -> (a, b)
-dynamicTuple3 =: dynamic \a b c -> (a, b, c) :: A.a b c: a b c -> (a, b, c)
-dynamicTuple4 =: dynamic \a b c d -> (a, b, c, d) :: A.a b c d: a b c d -> (a, b, c, d)
-dynamicTuple5 =: dynamic \a b c d e -> (a, b, c, d, e) :: A.a b c d e: a b c d e -> (a, b, c, d, e)
-dynamicTuple6 =: dynamic \a b c d e f -> (a, b, c, d, e, f) :: A.a b c d e f: a b c d e f -> (a, b, c, d, e, f)
-dynamicTuple7 =: dynamic \a b c d e f g -> (a, b, c, d, e, f, g) :: A.a b c d e f g: a b c d e f g -> (a, b, c, d, e, f, g)
-dynamicTuple8 =: dynamic \a b c d e f g h -> (a, b, c, d, e, f, g, h) :: A.a b c d e f g h: a b c d e f g h -> (a, b, c, d, e, f, g, h)
-dynamicTuple9 =: dynamic \a b c d e f g h i -> (a, b, c, d, e, f, g, h, i) :: A.a b c d e f g h i: a b c d e f g h i -> (a, b, c, d, e, f, g, h, i)
-dynamicTuple10 =: dynamic \a b c d e f g h i j -> (a, b, c, d, e, f, g, h, i, j) :: A.a b c d e f g h i j: a b c d e f g h i j -> (a, b, c, d, e, f, g, h, i, j)
-dynamicTuple11 =: dynamic \a b c d e f g h i j k -> (a, b, c, d, e, f, g, h, i, j, k) :: A.a b c d e f g h i j k: a b c d e f g h i j k -> (a, b, c, d, e, f, g, h, i, j, k)
-dynamicTuple12 =: dynamic \a b c d e f g h i j k l -> (a, b, c, d, e, f, g, h, i, j, k, l) :: A.a b c d e f g h i j k l: a b c d e f g h i j k l -> (a, b, c, d, e, f, g, h, i, j, k, l)
-
-dynamicCons =: dynamic \x xs -> [x:xs] :: A.a: a [a] -> [a]
-dynamicNil =: dynamic [] :: A.a: [a]
 
 dynamicFrom =: overloaded2 "+" "one" (dynamic (undef, undef, From) :: A.a: (a, a, (a a -> a) a a -> [a]))
 where

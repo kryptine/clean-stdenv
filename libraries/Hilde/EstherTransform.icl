@@ -43,10 +43,7 @@ transform{|NTexpression|} (Apply f x) = CoreApply (transform{|*|} f) (transform{
 transform{|NTterm|} (Plain e) = transform{|*|} e
 transform{|NTterm|} (Sugar e) = transform{|*|} (desugar e)
 
-transform{|NTdynamic|} (NTdynamic _ e) = CoreApply toDynamic (transform{|*|} e)
-where
-//	toDynamic = CoreCode (overloaded "TC" (dynamic (undef, id) :: A.a: (a, (a -> Dynamic) a -> Dynamic)))
-	toDynamic = CoreVariable "_dynamic_"
+transform{|NTdynamic|} (NTdynamic _ e) = CoreApply CoreDynamic (transform{|*|} e)
 
 transform{|NTfunction|} (NTfunction n vs _ e) = transform{|*|} (Write d Twrite n)
 where
@@ -108,7 +105,7 @@ match (x :: Char) 1 = ifEqual x
 match (x :: String) 1 = ifEqual x
 match (x :: Bool) 1 = ifEqual x
 match constr n = case constructorNode constr of
-	(arity, x :: a) -> if (n <> arity) (ifMatch x) (raise "Constructor arity <> number of patterns")
+	(arity, x :: a) -> if (n <> arity) (ifMatch x) (raise CaseBadConstructorArity)
 where
 	ifMatch :: !a -> Core | TC a
 	ifMatch x = CoreCode (dynamic IfConstr :: A.b: (a^ -> b) b a^ -> b)
@@ -127,7 +124,7 @@ where
 	IfEq th el y = if (x == y) (th y) el
 
 codeApply :: !Dynamic -> Core
-codeApply (_ :: a b c d e f g h i -> j) = raise "codeApply error>8"
+codeApply (_ :: a b c d e f g h i -> j) = raise (NotSupported "constructors with arity above eight")
 codeApply (_ :: a b c d e f g h -> i) = CoreCode (dynamic \f n -> f (unsafeSelect1of8 n) (unsafeSelect2of8 n) (unsafeSelect3of8 n) (unsafeSelect4of8 n) (unsafeSelect5of8 n) (unsafeSelect6of8 n) (unsafeSelect7of8 n) (unsafeSelect8of8 n) :: A.j: (a b c d e f g h -> j) i -> j)
 codeApply (_ :: a b c d e f g -> h) = CoreCode (dynamic \f n -> f (unsafeSelect1of7 n) (unsafeSelect2of7 n) (unsafeSelect3of7 n) (unsafeSelect4of7 n) (unsafeSelect5of7 n) (unsafeSelect6of7 n) (unsafeSelect7of7 n) :: A.i: (a b c d e f g -> i) h -> i)
 codeApply (_ :: a b c d e f -> g) = CoreCode (dynamic \f n -> f (unsafeSelect1of6 n) (unsafeSelect2of6 n) (unsafeSelect3of6 n) (unsafeSelect4of6 n) (unsafeSelect5of6 n) (unsafeSelect6of6 n) :: A.h: (a b c d e f -> h) g -> h)
@@ -150,7 +147,7 @@ dynamicTuple 9 = dynamicTuple9
 dynamicTuple 10 = dynamicTuple10
 dynamicTuple 11 = dynamicTuple11
 dynamicTuple 12 = dynamicTuple12
-dynamicTuple n = raise "dynamicTuple<1||>12"
+dynamicTuple n = raise (NotSupported "tuples with arity less than one of more than twelve")
 
 dynamicTuple2 =: dynamic \a b -> (a, b) :: A.a b: a b -> (a, b)
 dynamicTuple3 =: dynamic \a b c -> (a, b, c) :: A.a b c: a b c -> (a, b, c)
@@ -164,11 +161,18 @@ dynamicTuple10 =: dynamic \a b c d e f g h i j -> (a, b, c, d, e, f, g, h, i, j)
 dynamicTuple11 =: dynamic \a b c d e f g h i j k -> (a, b, c, d, e, f, g, h, i, j, k) :: A.a b c d e f g h i j k: a b c d e f g h i j k -> (a, b, c, d, e, f, g, h, i, j, k)
 dynamicTuple12 =: dynamic \a b c d e f g h i j k l -> (a, b, c, d, e, f, g, h, i, j, k, l) :: A.a b c d e f g h i j k l: a b c d e f g h i j k l -> (a, b, c, d, e, f, g, h, i, j, k, l)
 
+dynamicCons :: Dynamic
 dynamicCons =: dynamic \x xs -> [x:xs] :: A.a: a [a] -> [a]
+
+dynamicNil :: Dynamic
 dynamicNil =: dynamic [] :: A.a: [a]
 
 codeMismatch :: Core
-codeMismatch = CoreCode (dynamic mismatch :: A.a: a) where mismatch = raise "Pattern mismatch" 
+codeMismatch = CoreCode (dynamic mismatch :: A.a: a) 
+where 
+	mismatch = raise "pattern mismatch"
 
 codeY :: Core
-codeY =: CoreCode (dynamic Y :: A.a: (a -> a) -> a) where Y f = let x = f x in x 
+codeY =: CoreCode (dynamic Y :: A.a: (a -> a) -> a) 
+where 
+	Y f = let x = f x in x 
