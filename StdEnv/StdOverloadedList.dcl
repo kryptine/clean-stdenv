@@ -594,7 +594,7 @@ Avg :: !.(l e) -> e | List l e & / e & IncDec e
 		l=[#],e=Int ; l=[#],e=Real
 		l=[#!],e=Int; l=[#!],e=Real
 
-AvgM l :== avg_
+AvgM l :== avg_ l
 	where
 	avg_ [|] = abort "avg called with empty list"
 	avg_ x  = accavg zero zero x
