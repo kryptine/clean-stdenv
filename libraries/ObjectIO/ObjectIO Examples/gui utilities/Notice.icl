@@ -8,12 +8,8 @@ implementation module Notice
 //	
 //	**************************************************************************************************
 
-import StdEnv, StdIO
-
-/*  A simple state type.
-*/
-::  NoState
-    =   NoState
+import StdMisc, StdTuple
+import StdId, StdPSt, StdWindow
 
 /*  The data type that defines a notice.
 */

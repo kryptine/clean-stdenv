@@ -11,9 +11,6 @@ import	board, graphics, state, language, systemsettings
 import	Help, ListBox
 
 
-::	NoState			// NoState is a singleton type constructor
-	=	NoState
-
 /***************************************************************************************************************
 	The Start rule creates the GUI of the scrabble game and the initial program state.
 ***************************************************************************************************************/

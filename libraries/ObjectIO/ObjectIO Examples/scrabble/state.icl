@@ -2,7 +2,7 @@ implementation module state
 
 
 import	StdBool, StdList
-import	StdPSt
+import	StdPStClass
 import	graphics, board, language
 import	Random
 

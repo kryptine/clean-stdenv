@@ -11,20 +11,17 @@ module clipboardview
 import StdEnv												// Import all standard library modules
 import StdIO												// Import all standard gui library modules
 
-::	NoState													// NoState is a singleton type constructor
-	=	NoState
-
 Start :: *World -> *World									// The main rule
 Start world
 	# (ids,world)	= openIds 3 world						// Create 3 Id values
 	= startIO NDI											// Evaluate an interactive process with:
-			  NoState										//    no local  process state
+			  Void											//    no local  process state
 			  (initialise ids)								//    the initialisation action
 			  []											//    only default attributes
 			  world
 
 initialise ids pst
-	# (error,pst)	= openDialog NoState clipview pst		// Open the clipview dialog
+	# (error,pst)	= openDialog Void clipview pst			// Open the clipview dialog
 	| error<>NoError										// In case of an error:
 		= closeProcess pst									//    terminate the interactive process
 	| otherwise												// Otherwise:

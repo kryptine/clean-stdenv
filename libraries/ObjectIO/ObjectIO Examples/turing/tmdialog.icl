@@ -2,7 +2,7 @@ implementation module tmdialog
 
 
 import	StdBool, StdChar, StdFunc, StdList, StdMisc, StdTuple
-import	StdControl, StdId, StdMenuElement, StdPSt, StdSystem, StdWindow
+import	StdControl, StdId, StdMenuElement, StdPSt, StdPStClass, StdSystem, StdWindow
 import	showtm, tmfile, Notice
 
 
@@ -251,4 +251,4 @@ where
 	SvBfClSave :: (PSt Tm) -> PSt Tm
 	SvBfClSave pst=:{ls=tm=:{tmstate={turing},name,tmids={saveItemId}},io}
 		# pst	= {pst & ls={tm & saved=True}, io=disableMenuElements [saveItemId] io}
-		= snd (accFiles (WriteTuringToFile turing name) pst)
+		= snd (WriteTuringToFile turing name pst)

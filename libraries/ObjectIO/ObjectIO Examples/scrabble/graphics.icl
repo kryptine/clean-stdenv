@@ -205,8 +205,8 @@ drawplayer2letters letters2Id letters iostate
 	= setControlLook letters2Id True (True,playerletterslook letters) iostate
 
 playerletterslook :: ![Char] SelectState UpdateState !*Picture -> *Picture
-playerletterslook ws _ _ picture
-	= seq [	drawletter c (i,0) \\ c<-ws & i<-[0..] ] picture
+playerletterslook ws _ {newFrame} picture
+	= seq [	drawletter c (i,0) \\ c<-ws & i<-[0..] ] (unfill newFrame picture)
 
 drawplayer1score :: !Id !Int !(IOSt .l) -> IOSt .l
 drawplayer1score player1scoreId s iostate
