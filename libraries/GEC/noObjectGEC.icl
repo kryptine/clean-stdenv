@@ -33,7 +33,7 @@ noObjectAGEC :: a -> AGEC a	| gGEC{|*|} a	// identity, no OBJ pulldown menu cons
 noObjectAGEC j = mkAGEC {	toGEC	= \i _ -> NoObject i
 						,	fromGEC = \(NoObject i) -> i
 						,	value	= j
-						,	updGEC	= \j -> (False,j)
+						,	updGEC	= \j ps -> (False,j,ps)
 						,	pred	= okpred
 						} "noObjectAGEC"
 
@@ -66,6 +66,6 @@ yesObjectAGEC :: a -> AGEC a	| gGEC{|*|} a	// identity, OBJ pulldown menu constr
 yesObjectAGEC j = mkAGEC {	toGEC	= \i _ -> YesObject i
 						,	fromGEC = \(YesObject i) -> i
 						,	value	= j
-						,	updGEC	= \j -> (False,j)
+						,	updGEC	= \j ps -> (False,j,ps)
 						,	pred	= okpred
 						} "yesObjectAGEC"

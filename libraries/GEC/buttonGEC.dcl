@@ -6,7 +6,7 @@ import genericgecs
 
 derive gGEC Button, Checkbox, Text, UpDown
 
-:: Button 	= Button Int String | Pressed
+:: Button 	= Pressed | Button Int String
 :: UpDown 	= UpPressed | DownPressed | Neutral
 :: Checkbox = Checked | NotChecked 
 :: Text 	= Text String

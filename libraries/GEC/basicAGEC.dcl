@@ -18,6 +18,8 @@ calcAGEC 	 	:: a [[(Button,a->a)]] 	-> AGEC a | gGEC {|*|} a // apply pressed fu
 intcalcAGEC  	:: Int 					-> AGEC Int
 realcalcAGEC 	:: Real 				-> AGEC Real
 
+textAGEC 		:: a 					-> AGEC a | gGEC {|*|} a & toString a
+
 horlistAGEC 	:: [a] 					-> AGEC [a]		| gGEC {|*|} a 				// all elements of a list displayed in a row
 hor2listAGEC 	:: a    [a] 			-> AGEC [a] 	| gGEC {|*|} a  			// row list, one can add a default val and delete elements at the tail
 vertlistAGEC 	:: [a] 					-> AGEC [a] 	| gGEC {|*|} a 				// all elements of a list displayed in a column

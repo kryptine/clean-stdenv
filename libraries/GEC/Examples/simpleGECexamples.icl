@@ -9,7 +9,7 @@ import basicEditors
 // ALL EXAMPLES HAVE TO BE OF TYPE ((PSt Void) -> (PSt Void))
 
 Start :: *World -> *World
-Start world = startGEC myEditor1 world
+Start world = startGEC myEditor2 world
 
 // List Editor
                                                
@@ -20,7 +20,7 @@ myEditor0 = mkGEC "List" [1]
 import tree
 derive gGEC Tree
 
-myEditor1 = mkGEC "Tree" (Node Leaf 1 Leaf)
+myEditor1 = mkGEC "Tree" (Node Leaf 1.5 Leaf)
                                                
 // Record Editor
 

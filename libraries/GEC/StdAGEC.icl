@@ -12,7 +12,7 @@ import StdGECExt, basicAGEC
 		
 // BimapGEC:: a b to use a b-editor for constructing an a-value
 
-mkBimapGEC  :: (a (Current b) -> b) (b -> (Bool,b)) (b -> a) (a -> (UpdateA,a)) a -> (BimapGEC a b)
+//mkBimapGEC  :: (a (Current b) -> b) (b *(PSt .ps) -> *(Bool,b,*(PSt .ps))) (b -> a) (a -> (UpdateA,a)) a -> (BimapGEC a b)
 mkBimapGEC toGEC updGEC fromGEC pred value 
 =	{ toGEC   = toGEC
 	, fromGEC = fromGEC
@@ -23,7 +23,7 @@ mkBimapGEC toGEC updGEC fromGEC pred value
 
 to_BimapGEC :: (Bimap a b) a -> (BimapGEC a b)
 to_BimapGEC {map_to,map_from} a 
-= {toGEC = \a _ -> map_to a, fromGEC = map_from, updGEC = \b -> (False,b), value = a, pred = \t -> (TestStoreUpd,t)}
+= {toGEC = \a _ -> map_to a, fromGEC = map_from, updGEC = \b ps -> (False,b,ps), value = a, pred = \t -> (TestStoreUpd,t)}
 
 Bimap_BimapGEC :: (Bimap a b) (BimapGEC a va) -> (BimapGEC b va)
 Bimap_BimapGEC bimapab bimapGava = {toGEC=toGEC,fromGEC=fromGEC,updGEC=updGEC,value=value,pred=pred}
@@ -56,15 +56,15 @@ where
 		initb = bimapG.toGEC initbimapG.value Undefined
 	
 		updateb bimapupdate bhandle reason b pst	// new value made with b editor
-		# (storeb,nb)	= bimapG.updGEC  b			// calculate new b value
-		# na			= bimapG.fromGEC nb			// convert to a 
+		# (storeb,nb,pst)	= bimapG.updGEC  b pst			// calculate new b value
+		# na				= bimapG.fromGEC nb			// convert to a 
 		= case  (bimapG.pred na) of
 			// test if predicate should be applied, store new b value if required, and raise update 
 			(DontTest,_) 		# pst = if storeb (bhandle.gecSetValue NoUpdate nb pst) pst
-								= bimapupdate reason {initbimapG & value = na} pst 
+								= bimapupdate reason (initbimapG ^^= na) pst 
 			// result of predicate is passed, store new value and raise update
 			(TestStoreUpd,tna) 	# pst	= bhandle.gecSetValue NoUpdate (bimapG.toGEC tna (Defined  nb)) pst
-								= bimapupdate reason {initbimapG & value = tna} pst 
+								= bimapupdate reason (initbimapG ^^= tna) pst 
 			// result of predicate is not passed, store new value and but no update is raisen
 			(TestStore,tna) 	= bhandle.gecSetValue NoUpdate (bimapG.toGEC tna (Defined  b)) pst 
 	
@@ -74,7 +74,7 @@ where
 	
 		bimapGetValue bGetValue pst							// request for most recent bimapGEC
 		# (b,pst) = bhandle.gecGetValue pst					// fetch latest b value from b editor				
-		= ({bimapG & value = initbimapG.fromGEC b},pst)		// and update initial (!) bimapGEC with latest value
+		= (bimapG ^^= initbimapG.fromGEC b,pst)		// and update initial (!) bimapGEC with latest value
 
 // AGEC:: Abstract version of BimapGEC
 
@@ -95,9 +95,10 @@ where
 ^^ {bimapGEC} = bimapGEC.value
 
 (^=) infixl  :: (AGEC a) a -> (AGEC a)
-(^=) {bimapGEC,bGEC,descr} nvalue = {bimapGEC=nbimapGEC,bGEC,descr}
-where
-	nbimapGEC = {bimapGEC & value = nvalue}
+(^=) {bimapGEC,bGEC,descr} nvalue = {bimapGEC= bimapGEC ^^= nvalue,bGEC,descr}
+
+(^^=) infixl :: (BimapGEC a b) a -> (BimapGEC a b)
+(^^=) {toGEC,fromGEC,updGEC,pred,value} nvalue = {value = nvalue,toGEC,fromGEC,updGEC,pred}
 
 Specialize :: a (a -> AGEC a) (GECArgs a (PSt .ps)) !(PSt .ps) -> *(!GECVALUE a (PSt .ps),!(PSt .ps))
 Specialize a toAGEC gecArgs=:{gec_value=Nothing} pSt 
@@ -160,7 +161,8 @@ mkStaticAgec gecx gecArgs=:{gec_value=Just agec=:{bimapGEC,bGEC,descr}} pSt
 = a_GEC_as_b_GEC {bimapto = bimapto, bimapfrom = bimapfrom, gGEC = mkBimapGECeditor bimapGEC bGEC} gecArgs pSt
 where
 	bimapto nbimapG 				= agec ^= nbimapG.value //{agec & bimapGEC.value = nbimapG.value} 
-	bimapfrom {bimapGEC=nbimapGEC} 	= {bimapGEC & value = nbimapGEC.value}
+	bimapfrom {bimapGEC=nbimapGEC} 	= bimapGEC ^^= nbimapGEC.value
+//	bimapfrom {bimapGEC=nbimapGEC} 	= {bimapGEC & value = nbimapGEC.value}
 mkStaticAgec gecx gecArgs=:{gec_value=Nothing} pSt
 # (geca,pSt)	= gecx {gecArgs & gec_value=Nothing, update = \v r env -> env} pSt
 # (a,   pSt)	= geca.gecGetValue pSt
@@ -197,7 +199,8 @@ where
 	fun bupdate (InSetValue includeUpdate newAGECa=:{bimapGEC = nval,bGEC = ngGECb, descr = ndescr}) (lSt=:{agecBimapGEC=abbaGEC,agecAGEC={descr = odescr}},pSt)
 	| odescr == ndescr	// The same AGEC is used for the new value
 		# (bimap,pSt)	= abbaGEC.gecGetValue pSt
-		# pSt			= abbaGEC.gecSetValue includeUpdate {bimap & value=nval.value} pSt		// send new value down the current infrastructure
+		# pSt			= abbaGEC.gecSetValue includeUpdate (bimap ^^= nval.value) pSt		// send new value down the current infrastructure
+//		# pSt			= abbaGEC.gecSetValue includeUpdate {bimap & value=nval.value} pSt		// send new value down the current infrastructure
 		= (OutDone,(lSt,pSt))
 	| otherwise			// A different AGEC, of unknown type, is used for the new value
 		# pSt			= abbaGEC.gecClose pSt													// close old infrastructure
@@ -350,7 +353,7 @@ CGECtoAGEC :: 			(GecCircuit a a ) a 	-> (AGEC a) 	| gGEC{|*|} a		// Use CGEC as
 CGECtoAGEC cgec a 
 = mkAGEC { toGEC   = \a _ -> {inout = (Hide a,Hide a), gec = arr (\(Hide a) -> a) >>> cgec >>> arr (\a -> Hide a)}
 		 , fromGEC = \{inout = (a,Hide b)} = b
-		 , updGEC  = \b -> (False,b)
+		 , updGEC  = \b ps -> (False,b,ps)
 		 , value   = a
 		 , pred	   = \na -> (DontTest,na)
 		 } "CGECtoAGEC"
