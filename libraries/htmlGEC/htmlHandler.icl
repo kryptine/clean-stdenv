@@ -11,37 +11,34 @@ derive gParse (,), (,,), UpdValue
 derive gHpr   (,), (,,)
 derive gUpd		   (,,)
  
-:: HSt 			:== (InputId,[FormState],String)	// all form sates are collected here ... 	
-:: FormState 	:== (FormID,FormValue)				// state of a form to remember
-:: FormId	 	:== String							// unique id identifying the form
-:: FormValue 	:== String							// current Clean value to remember encoded in a String
-:: InputId	 	:== Int								// unique id for every constructor and basic value appearing in the state
+:: HSt 			:== (InputId,[FormState])	// all form sates are collected here ... 	
+:: FormState 	:== (FormID,FormValue)		// state of a form to remember
+:: FormId	 	:== String					// unique id identifying the form
+:: FormValue 	:== String					// current Clean value to remember encoded in a String
+:: InputId	 	:== Int						// unique id for every constructor and basic value appearing in the state
 
 :: FormUpdate	:== (InputId,UpdValue)		// info obtained when form is updated
 
-:: UpdValue 	= UpdI Int							// new integer value
-				| UpdR Real							// new real value
-				| UpdC String						// choose indicated constructor 
-				| UpdS String						// new piece of text
+:: UpdValue 	= UpdI Int					// new integer value
+				| UpdR Real					// new real value
+				| UpdC String				// choose indicated constructor 
+				| UpdS String				// new piece of text
 
 
-mkHSt :: String -> HSt
-mkHSt gbst = (0,[],gbst)
+mkHSt ::  HSt
+mkHSt = (0,[])
 
 incHSt :: HSt -> HSt
-incHSt (inidx,lhst,ghst) = (inidx+1,lhst,ghst)
-
-
+incHSt (inidx,lhst) = (inidx+1,lhst)
 
 // top level function given to end user
 // it collects the html page to display, and returns the contents of all Clean GEC's / Forms created
 
 doHtml :: (HSt -> (Html,HSt)) *World -> *World
 doHtml pagehandler world 
-= print_to_stdout html world
+= print_to_stdout (Head head [addScript lhst:body]) world
 where
-	(html,(_,lhst,_))  // the collection of local states is saved in the global state: easy thanks to lazy evaluation !
-		= pagehandler (mkHSt (urlEncodeState (reverse lhst))) 
+	(Head head body,(_,lhst)) = pagehandler mkHSt
 
 // simple editor for either editing or showing a simple value
 
@@ -88,8 +85,8 @@ where
 // swiss army nife editor that makes coffee too ...
 
 mkViewHGEC :: FormID HMode (HBimap d v) d HSt -> (d,(Body,HSt)) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
-mkViewHGEC uniqueid mode {toHGEC, updHGEC, fromHGEC, resetHGEC} data (inidx,lhsts,ghst) 
-= (newdata,gHGEC{|*|} mode nextview (0,[(uniqueid,viewtostore):lhsts],ghst))
+mkViewHGEC uniqueid mode {toHGEC, updHGEC, fromHGEC, resetHGEC} data (inidx,lhsts) 
+= (newdata,gHGEC{|*|} mode nextview (0,[(uniqueid,viewtostore):lhsts]))
 where
 	initview 			= toHGEC data						// convert init data to view domain
 	(isupdated,newview) = updateFormInfo uniqueid initview	// has to form been updated or is it in the global storage ?	 
@@ -160,15 +157,15 @@ gHGEC{|EITHER|} gHa gHb mode (LEFT a)   hst = gHa mode a hst
 gHGEC{|EITHER|} gHa gHb mode (RIGHT b)  hst = gHb mode b hst
 gHGEC{|OBJECT|} gHo     mode (OBJECT o) hst = gHo mode o hst
 
-gHGEC{|CONS of t|} gHc mode (CONS c) hst=:(inidx,lhst,ghst)
-| not (isEmpty t.gcd_fields) 		 = gHc mode c (inidx+1,lhst,ghst) // don't display record constructor 
-| t.gcd_type_def.gtd_num_conses == 1 = gHc mode c (inidx+1,lhst,ghst) // don't display constructors that have no alternative
+gHGEC{|CONS of t|} gHc mode (CONS c) hst=:(inidx,lhst)
+| not (isEmpty t.gcd_fields) 		 = gHc mode c (inidx+1,lhst) // don't display record constructor 
+| t.gcd_type_def.gtd_num_conses == 1 = gHc mode c (inidx+1,lhst) // don't display constructors that have no alternative
 # (selector,hst)= mkConsSelector t hst
 # (body,hst)	= gHc mode c hst
 = (Table [Tbl_CellPadding 0, Tbl_CellSpacing 0] [[selector,body]],hst)
 where
-	mkConsSelector thiscons (inidx,lhst=:[(formid,mystate):states],ghst) 
-						= (mkConsSel inidx allnames myindex formid ghst, (inidx+1,lhst,ghst))
+	mkConsSelector thiscons (inidx,lhst=:[(formid,mystate):states]) 
+						= (mkConsSel inidx allnames myindex formid, (inidx+1,lhst))
 	where
 		myname   = thiscons.gcd_name
 		allnames = map (\n -> n.gcd_name) thiscons.gcd_type_def.gtd_conses
@@ -180,72 +177,46 @@ where
 			| otherwise = find x ys (idx+1)
 			find x [] idx = abort ("cannot find index " +++ x )
 
-	mkConsSel:: Int [String] Int String String -> Body
-	mkConsSel inidx list nr formid ghst
-		= (Form	[ Frm_Action MyPhP
-				, Frm_Name formid
-				, Frm_Method Post
-				, Frm_Style "margin:0"] 
-				[ 	Select 	[ Sel_Name ("ConsSelector")
-							, setstyle
-							, changeable
-							]
-							[Option elem 
-								[	Opt_Value (encodeUpdate (formid,inidx,UpdC elem)): if (j == nr) [Opt_Selected Selected:optionstyle] optionstyle ]
-								\\ elem <- list & j <- [0..]
-							]
- 				,	storeglobal 
-				] )
+	mkConsSel:: Int [String] Int String -> Body
+	mkConsSel inidx list nr formid
+		= Select 	[ Sel_Name ("CS")
+					, setstyle
+					, changeable
+					]
+					[Option elem 
+						[	Opt_Value (encodeInfo (formid,inidx,UpdC elem)): if (j == nr) [Opt_Selected Selected:optionstyle] optionstyle ]
+						\\ elem <- list & j <- [0..]
+					]
 		where
-				changescript = "\"javascript: form.submit()\""  
-				changeable = case mode of
-								HEdit 		-> `Sel_ElemEvnts (OnChange changescript)
-								HDisplay 	-> Sel_Disabled Disabled
-				storeglobal = case mode of
-								HEdit 		-> storeHidden ghst
-								HDisplay 	-> EmptyBody
-				setstyle	= case mode of
-								HEdit 		-> Sel_Style "width:72px"
-								HDisplay 	-> Sel_Style "width:72px; background-color:#6699CC"
-				optionstyle	= case mode of
-								HEdit 		-> []
-								HDisplay 	-> [Opt_Style "background-color:#6699CC"]
-
+			changeable = case mode of
+							HEdit 		-> `Sel_ElemEvnts (OnChange callClean)
+							HDisplay 	-> Sel_Disabled Disabled
+			setstyle	= case mode of
+							HEdit 		-> Sel_Style "width:72px"
+							HDisplay 	-> Sel_Style "width:72px; background-color:#6699CC"
+			optionstyle	= case mode of
+							HEdit 		-> []
+							HDisplay 	-> [Opt_Style "background-color:#6699CC"]
 
 mkInput :: HMode Value UpdValue HSt -> (Body,HSt) 
-mkInput HEdit val updval (inidx,lhsts=:[(uniqueid,lst):lsts],ghst) 
-	= (Form 	[Frm_Action MyPhP, Frm_Name formname, Frm_Method Post, Frm_Style "margin:0"] 
-				 [	Input 	[	Inp_Type Text
-							, 	Inp_Value val
-							,	Inp_Name (encodeUpdate (uniqueid,inidx,updval))
-							,	Inp_Size defsize
-							]
-				 ,	storeHidden ghst
-				 ]
-				,(inidx+1,lhsts,ghst))
-	where
-		formname = fst (hd lhsts)
-mkInput HDisplay val _ (inidx,lhsts=:[(uniqueid,lst):lsts],ghst) 
-	= (Form 	[Frm_Action MyPhP, Frm_Name formname, Frm_Method Post, Frm_Style "margin:0"] 
-				 [	Input 	[	Inp_Type Text
-							, 	Inp_Value val
-							,	Inp_ReadOnly ReadOnly
-							, 	Inp_Style "background-color:#6699CC"
-							,	Inp_Size defsize
-							]
-				 ]
-				,(inidx+1,lhsts,ghst))
-	where
-		formname = fst (hd lhsts)
-
-storeHidden ::  String -> Body
-storeHidden ghst
-	 =	Input	[	Inp_Type Hidden
-				,	Inp_Value (SV  ghst) // store global lhst
-				,	Inp_Name "hidden"									
+mkInput HEdit val updval (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+	= ( Input [	Inp_Type Text
+				, 	Inp_Value val
+				,	Inp_Name (encodeInfo (uniqueid,inidx,updval))
+				,	Inp_Size defsize
+				,	`Inp_ElemEvnts	(OnChange callClean)
 				]
+		,(inidx+1,lhsts))
+mkInput HDisplay val _ (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+	= ( Input [	Inp_Type Text
+				, 	Inp_Value val
+				,	Inp_ReadOnly ReadOnly
+				, 	Inp_Style "background-color:#6699CC"
+				,	Inp_Size defsize
+				]
+		,(inidx+1,lhsts))
 
-//gHGEC{|FIELD of d |} gHx mode (FIELD x) hst = gHx mode x hst // to be done !!!
+
 gHGEC{|FIELD of d |} gHx mode (FIELD x) hst 
 # (bx,mode) = gHx mode x hst
 = (Table [Tbl_CellPadding 0, Tbl_CellSpacing 0] [[fieldname,bx]],hst)
@@ -343,21 +314,21 @@ derive gUpd (,)
 
 // tuples are placed next to each other, pairs below each other ...
 
-gHGEC{|(,)|} gHa gHb mode  (a,b) (inidx,lhsts,ghst)
-# (ba,hst) = gHa mode a (inidx+1,lhsts,ghst)   // one more for the now invisable (,) constructor 
+gHGEC{|(,)|} gHa gHb mode  (a,b) (inidx,lhsts)
+# (ba,hst) = gHa mode a (inidx+1,lhsts)   // one more for the now invisable (,) constructor 
 # (bb,hst) = gHb mode b hst
 = (Table [Tbl_CellPadding 0, Tbl_CellSpacing 0] [[ba, bb]],hst)
 
-gHGEC{|(,,)|} gHa gHb gHc mode (a,b,c) (inidx,lhsts,ghst)
-# (ba,hst) = gHa mode a (inidx+1,lhsts,ghst)   // one more for the now invisable (,,) constructor 
+gHGEC{|(,,)|} gHa gHb gHc mode (a,b,c) (inidx,lhsts)
+# (ba,hst) = gHa mode a (inidx+1,lhsts)   // one more for the now invisable (,,) constructor 
 # (bb,hst) = gHb mode b hst
 # (bc,hst) = gHc mode c hst
 = (Table [Tbl_CellPadding 0, Tbl_CellSpacing 0] [[ba, bb, bc]],hst)
 
 // <-> works exactly the same as (,) and places its arguments next to each other, for compatibility with GEC's
 
-gHGEC{|(<->)|} gHa gHb mode  (a <-> b) (inidx,lhsts,ghst)
-# (ba,hst) = gHa mode a (inidx+1,lhsts,ghst)   // one more for the now invisable <-> constructor 
+gHGEC{|(<->)|} gHa gHb mode  (a <-> b) (inidx,lhsts)
+# (ba,hst) = gHa mode a (inidx+1,lhsts)   // one more for the now invisable <-> constructor 
 # (bb,hst) = gHb mode b hst
 = (Table [Tbl_CellPadding 0, Tbl_CellSpacing 0] [[ba, bb]],hst)
 derive gUpd   <->
@@ -366,8 +337,8 @@ derive gPrint <->
 
 // <|> works exactly the same as PAIR and places its arguments below each other, for compatibility with GEC's
 
-gHGEC{|(<|>)|} gHa gHb mode (a <|> b) (inidx,lhsts,ghst) 
-# (ba,hst) = gHa mode a (inidx+1,lhsts,ghst) // one more for the now invisable <|> constructor
+gHGEC{|(<|>)|} gHa gHb mode (a <|> b) (inidx,lhsts) 
+# (ba,hst) = gHa mode a (inidx+1,lhsts) // one more for the now invisable <|> constructor
 # (bb,hst) = gHb mode b hst
 = (Table [Tbl_CellPadding 0, Tbl_CellSpacing 0] [[ba],[bb]],hst)
 derive gUpd   <|>
@@ -388,31 +359,14 @@ derive gPrint CHHidden
 
 // Button to press
 
-gHGEC{|CHButton|} mode (CHButton size bname) (inidx,lhsts=:[(uniqueid,lst):lsts],ghst) 
-= (Form [Frm_Action MyPhP, Frm_Name "thisbutton", Frm_Method Post, Frm_Style "margin:0"] 
-						 [	Input 	[	Inp_Type Button
-									, 	Inp_Value (SV bname)
-									,	Inp_Name (encodeUpdate (uniqueid,inidx,UpdS bname))
-									,	Inp_Size size  
-									, 	`Inp_MouseEvnts (OnClick submitscript)
-									]
-						 ,	storeHidden2 
-						 ]
-						, (inidx+1,lhsts,ghst))
-where
-	submitscript = "\"javascript: form.submit()\""    // works fine for global lhst 
-
-	storeHidden2
-		=	Input	[	Inp_Type Hidden
-			 			,	Inp_Value (SV ("; =;i;" +++ //encodeInfo uniqueid +++
-			 								ghst ))
-		 			,	Inp_Name (encodeUpdate (uniqueid,inidx, UpdS  bname) 
-		 										+++
-		 										";i;" 	+++ ghst 
-		 						 )
-		 							
-					]
-
+gHGEC{|CHButton|} mode (CHButton size bname) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+= ( Input [	Inp_Type Button
+			, 	Inp_Value (SV bname)
+			,	Inp_Name (encodeInfo (uniqueid,inidx,UpdS bname))
+			,	Inp_Size size  
+			, 	`Inp_MouseEvnts (OnClick callClean)
+			]
+	, (inidx+1,lhsts))
 gHGEC{|CHButton|} mode CHPressed hst = gHGEC {|*|} mode (CHButton defsize "??") hst // end user should reset button
 
 gUpd{|CHButton|} (UpdSearch (UpdS name) 0) 	_ = (UpdDone,CHPressed)					// update integer value
