@@ -1808,6 +1808,16 @@ osCreatePopUpControlItems parentPopUp editPtr able items selectedNr tb
 				# (n,tb)		= GetCtlMax parentPopUp tb
 				# (n,tb)		= appendItems mPtr n items tb
 				# tb			= SetCtlMax parentPopUp n tb
+
+				# hTE			= fromJust editPtr
+				# title			= if (selectedNr > 0 && length items >= selectedNr) (items!!(dec selectedNr)) ""
+				# title`		= osValidateMenuItemTitle Nothing title
+				# (err,tb)		= SetControlData hTE 0 "text" title tb
+				# start			= 0
+				# end			= 0
+				# data			= {toChar (start >> 8 bitor 0xFF),toChar (start bitor 0xFF),toChar (end >> 8 bitor 0xFF),toChar (end bitor 0xFF)}
+				# (err,tb)		= SetControlData hTE 0 "sele" data tb
+				# tb			= SetItem mPtr 1 title tb
 				-> tb
 		False
 				# (mPtr,tb)		= GetControlPopupMenuHandle parentPopUp tb
@@ -1835,11 +1845,13 @@ where
 	appendItems mPtr n [] tb	= (n,tb)
 	appendItems mPtr n [title:items] tb
 		# n				= n + 1
+		# title`		= osValidateMenuItemTitle Nothing title
 		# tb			= AppendMenu mPtr title tb
-		# tb			= SetItem mPtr n (osValidateMenuItemTitle Nothing title) tb
+		
+//		# tb			= SetItem mPtr n title tb
 		| n == selectedNr && editable
 			# ePtr		= fromJust editPtr
-			# (err,tb)	= SetControlData ePtr 0 "text" (osValidateMenuItemTitle Nothing title) tb
+			# (err,tb)	= SetControlData ePtr 0 "text" title tb
 			# start		= 0
 			# end		= 0
 			# data		= {toChar (start >> 8 bitor 0xFF),toChar (start bitor 0xFF),toChar (end >> 8 bitor 0xFF),toChar (end bitor 0xFF)}
@@ -1860,8 +1872,11 @@ where
 		title = " "
 		check = "!"+++toString (toChar 18)
 */
+
 osCreatePopUpControlItem :: !OSWindowPtr !(Maybe OSWindowPtr) !Int !Bool !String !Bool !Int !*OSToolbox -> (!Int,!*OSToolbox)
 osCreatePopUpControlItem parentPopUp editPtr pos able title selected itemNr tb
+	= undef
+/*
 	# tb = trace_n ("osCreatePopUpControlItem",parentPopUp,editPtr) tb
 	# tb = case editable of
 		True
@@ -1899,6 +1914,7 @@ where
 		| isJust editPtr
 			= itemNr + 2
 			= itemNr
+*/
 /*
 	selectText
 		| selected	= title+++check
@@ -1944,8 +1960,18 @@ where
 	// huidige text ophalen
 	= case editPtr of
 			(Just ePtr)
+				# (title,tb)		= osGetPopUpControlText wPtr ePtr tb
 				# (menuPtr,tb)		= GetControlPopupMenuHandle itemPtr tb
-				# tb				= SetItem menuPtr 1 title` tb
+				# (getIndex,tb)		= GetCtlValue itemPtr tb
+				# (text,tb)			= GetItem menuPtr getIndex String256 tb
+				# tb = trace_n` ("Title",title,text,getIndex) tb
+
+				# tb				= case title==text of
+										True
+											-> tb
+										False
+											# tb	= SetCtlValue itemPtr 1 tb
+											-> SetItem menuPtr 1 title tb
 
 //				# (global,tb)		= LocalToGlobal wItemPos tb
 				# (newIndex,tb)		= TrackControl itemPtr (wItemPos.x + wItemSize.w - 20) wItemPos.y 0 tb
@@ -1954,10 +1980,17 @@ where
 				# tb = trace_n ("Index",newIndex,getIndex) tb
 
 				# (text,tb)			= GetItem menuPtr getIndex String256 tb
-				# tb				= setPopUpEditText (fromJust editPtr) text tb
+				# tb				= setPopUpEditText ePtr text tb
 
 				# tb				= assertPort` wPtr tb
-				# tb				= redrawPopUpEditText (fromJust editPtr) (toTuple wItemPos) (toTuple wItemSize) text tb
+				# tb				= redrawPopUpEditText ePtr (toTuple wItemPos) (toTuple wItemSize) text tb
+
+
+				# (title,tb)		= osGetPopUpControlText wPtr ePtr tb
+				# (menuPtr,tb)		= GetControlPopupMenuHandle itemPtr tb
+				# (getIndex,tb)		= GetCtlValue itemPtr tb
+				# (text,tb)			= GetItem menuPtr getIndex String256 tb
+				# tb = trace_n` ("Title`",title,text,getIndex) tb
 
 				# getIndex			= getIndex - 2
 				-> (getIndex,tb)
@@ -1968,10 +2001,6 @@ where
 				# tb				= Draw1Control itemPtr tb	// shouldn't be necessary?
 				# tb = trace_n ("Index",newIndex,getIndex) tb
 				-> (getIndex,tb)
-	where
-		title` = case title of
-					"" -> " "
-					ok -> ok
 
 String256 :: String
 String256 = createArray 256 '@'

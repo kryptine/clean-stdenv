@@ -435,13 +435,13 @@ where
 				# ps = trace_n ("mouseevent",puIndex,newIndex) ps
 				| newIndex  == 0 || newIndex == puIndex
 					= (True,Nothing,wsH,ps)
-				# newText			= if (newIndex < 0)
-										(editTxt)
-										(puTexts!!(newIndex-1))
-				# ps				= appPIO (appIOToolbox(
-										osSetPopUpControl wPtr itemPtr editPtr clipRect
-											(posSizeToRect wItemPos wItemSize) puIndex newIndex newText True
-										)) ps 
+//				# newText			= if (newIndex < 0)
+//										(editTxt)
+//										(puTexts!!(newIndex-1))
+//				# ps				= appPIO (appIOToolbox(
+//										osSetPopUpControl wPtr itemPtr editPtr clipRect
+//											(posSizeToRect wItemPos wItemSize) puIndex newIndex newText True
+//										)) ps 
 				# (wids,wsH)		= getWindowStateHandleWIDS wsH
 				# controlInfo		= Just (ControlSelection
 										{csWIDS=wids,csItemNr=itemNr,csItemPtr=itemPtr
