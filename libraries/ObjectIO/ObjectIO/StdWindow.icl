@@ -210,7 +210,12 @@ setActiveWindow wId pState
 		  activatePtr			= if (isSDI && modelessWIDS.wPtr==clientPtr) framePtr modelessWIDS.wPtr	// Do not activate SDI client, but SDI frame
 		  showAction			= if shown id (snd o OSshowWindow activatePtr True)
 		# ioState				= IOStSetDevice (WindowSystemState {windows & whsWindows=befModals++[lastModal,wsH:others]}) ioState
-		# ioState				= appIOToolbox (showAction o OSstackWindow activatePtr modalWIDS.wPtr) ioState
+//		# ioState				= appIOToolbox (showAction o OSstackWindow activatePtr modalWIDS.wPtr) ioState
+		# (tb,ioState)			= getIOToolbox ioState
+		# pState				= {pState & io=ioState}
+		# (delayinfo,pState,tb)	= OSstackWindow activatePtr modalWIDS.wPtr handleOSEvent pState (showAction tb)
+		# ioState				= setIOToolbox tb pState.io
+		# ioState				= bufferDelayedEvents delayinfo ioState
 		= {pState & io=ioState}
 where
 	wid							= toWID wId
@@ -219,11 +224,6 @@ where
 	ismodalwindow wsH
 		# (mode,wsH)			= getWindowStateHandleWindowMode wsH
 		= (mode==Modal,wsH)
-
-//	handleOSEvent turns handleOneEventForDevices into the form required by OSactivateWindow.
-	handleOSEvent :: !OSEvent !(!PSt .l,!*OSToolbox) -> (!PSt .l,!*OSToolbox)
-	handleOSEvent osEvent (pState,tb)
-		= (thd3 (handleOneEventForDevices (ScheduleOSEvent osEvent []) pState),tb)
 
 
 /*	getActiveWindow returns the Id of the currently active window.
@@ -374,24 +374,27 @@ where
 
 
 /*	stackWindow changes the stacking order of the current windows.
-*/
-stackWindow :: !Id !Id !(IOSt .l) -> IOSt .l
-stackWindow windowId behindId ioState
+PA: previous implementation.
+stackWindow :: !Id !Id !(PSt .l) -> PSt .l
+stackWindow windowId behindId pState=:{io=ioState}
 	| windowId==behindId	// Don't stack a window behind itself
-		= ioState
+		= pState
 	# (found,wDevice,ioState)		= IOStGetDevice WindowDevice ioState
 	| not found
-		= ioState
+		= {pState & io=ioState}
 	# windows						= WindowSystemStateGetWindowHandles wDevice
 	# (hasBehind,windows)			= hasWindowHandlesWindow (toWID behindId) windows
 	| not hasBehind			// Behind window does not exist
-		= IOStSetDevice (WindowSystemState windows) ioState
+		# ioState					= IOStSetDevice (WindowSystemState windows) ioState
+		= {pState & io=ioState}
 	# (hasWindow,wsH,windows)		= getWindowHandlesWindow (toWID windowId) windows
 	| not hasWindow			// Stack window does not exist
-		= IOStSetDevice (WindowSystemState windows) ioState
+		# ioState					= IOStSetDevice (WindowSystemState windows) ioState
+		= {pState & io=ioState}
 	# (mode,wsH)					= getWindowStateHandleWindowMode wsH
 	| mode==Modal			// Stack window is modal, skip
-		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
+		# ioState					= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
+		= {pState & io=ioState}
 	| otherwise
 		# (_,_,windows)				= removeWindowHandlesWindow (toWID windowId) windows		// remove placeholder window
 		# (wids,wsH)				= getWindowStateHandleWIDS wsH
@@ -404,7 +407,8 @@ stackWindow windowId behindId ioState
 		# (tb,ioState)				= getIOToolbox ioState
 		# (windows,tb)				= stackwindows wsH wPtr behindId windows tb
 		# ioState					= setIOToolbox tb ioState
-		= IOStSetDevice (WindowSystemState windows) ioState
+		# ioState					= IOStSetDevice (WindowSystemState windows) ioState
+		= {pState & io=ioState}
 where
 /*	stackwindows stackwindow stackptr behindId
 		places stackwindow behind the window identified by behindId.
@@ -443,6 +447,50 @@ where
 				= ([wsH`,wsH:wsHs],OSstackWindow wPtr wids`.wPtr tb)
 		stackBehind _ _ _ _ _
 			= StdWindowFatalError "stackBehind" "this alternative should not be reached"
+*/
+/*	PA: new implementation of stackWindow. Uses new windowaccess function, improved OSstackWindow.
+*/
+stackWindow :: !Id !Id !(PSt .l) -> PSt .l
+stackWindow windowId behindId pState=:{io=ioState}
+	| windowId==behindId	// Don't stack a window behind itself
+		= pState
+	# (found,wDevice,ioState)		= IOStGetDevice WindowDevice ioState
+	| not found
+		= {pState & io=ioState}
+	# windows						= WindowSystemStateGetWindowHandles wDevice
+	# (hasBehind,windows)			= hasWindowHandlesWindow behindWID windows
+	| not hasBehind			// Behind window does not exist
+		# ioState					= IOStSetDevice (WindowSystemState windows) ioState
+		= {pState & io=ioState}
+	# (hasWindow,wsH,windows)		= getWindowHandlesWindow windowWID windows
+	| not hasWindow			// Stack window does not exist
+		# ioState					= IOStSetDevice (WindowSystemState windows) ioState
+		= {pState & io=ioState}
+	# (mode,wsH)					= getWindowStateHandleWindowMode wsH
+	| mode==Modal			// Stack window is modal, skip
+		# ioState					= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
+		= {pState & io=ioState}
+	| otherwise
+		# (_,_,windows)				= removeWindowHandlesWindow windowWID windows		// remove placeholder window
+		# (wids,wsH)				= getWindowStateHandleWIDS wsH
+		# (behindWIDS,windows)		= addBehindWindowHandlesWindow behindWID wsH windows
+		# ioState					= IOStSetDevice (WindowSystemState windows) ioState
+		# (tb,ioState)				= getIOToolbox ioState
+		# pState					= {pState & io=ioState}
+		# (delayinfo,pState,tb)		= OSstackWindow wids.wPtr behindWIDS.wPtr handleOSEvent pState tb
+		# ioState					= setIOToolbox tb pState.io
+		# ioState					= bufferDelayedEvents delayinfo ioState
+		= {pState & io=ioState}
+where
+	windowWID						= toWID windowId
+	behindWID						= toWID behindId
+
+/*	handleOSEvent turns handleOneEventForDevices into the form required by OSactivateWindow and OSstackWindow.
+	(Used by stackWindow, setActiveWindow.)
+*/
+handleOSEvent :: !OSEvent !(!PSt .l,!*OSToolbox) -> (!PSt .l,!*OSToolbox)
+handleOSEvent osEvent (pState,tb)
+	= (thd3 (handleOneEventForDevices (ScheduleOSEvent osEvent []) pState),tb)
 
 getWindowStack :: !(IOSt .l) -> (![(Id,WindowType)],!IOSt .l)
 getWindowStack ioState
@@ -1315,48 +1363,70 @@ setWindowViewDomain wId newDomain ioState
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 where
 	setwindowviewdomain :: !OSWindowMetrics !ViewDomain !(WindowStateHandle .pst) !*OSToolbox -> (!WindowStateHandle .pst,!*OSToolbox)
-	setwindowviewdomain wMetrics domain wsH=:{wshIds,wshHandle=Just wlsH=:{wlsHandle=wH}} tb
-		# domain				= validateViewDomain domain
-		  domainSize			= rectangleSize domain
-		  domainRect			= RectangleToRect domain
-		  newOrigin				= {	x = if (w>=domainSize.w) domain.corner1.x (SetBetween oldOrigin.x domain.corner1.x (domain.corner2.x-w))
-		  						  ,	y = if (h>=domainSize.h) domain.corner1.y (SetBetween oldOrigin.y domain.corner1.y (domain.corner2.y-h))
+	setwindowviewdomain wMetrics newDomain wsH=:{wshIds,wshHandle=Just wlsH=:{wlsHandle=wH}} tb
+		# newDomain				= validateViewDomain newDomain
+		  newDomainSize			= rectangleSize newDomain
+		  newDomainRect			= RectangleToRect newDomain
+		  newOrigin				= {	x = if (w>=newDomainSize.w) newDomainRect.rleft (SetBetween oldOrigin.x newDomainRect.rleft (newDomainRect.rright -w))
+		  						  ,	y = if (h>=newDomainSize.h) newDomainRect.rtop  (SetBetween oldOrigin.y newDomainRect.rtop  (newDomainRect.rbottom-h))
 		  						  }
-		  visScrolls			= OSscrollbarsAreVisible wMetrics domainRect (toTuple wSize) (hasHScroll,hasVScroll)
-		  wFrame				= getWindowContentRect wMetrics visScrolls (SizeToRect wSize)
-		  {rright=w`,rbottom=h`}= wFrame
-		  osHState				= toOSscrollbarRange (domain.corner1.x,newOrigin.x,domain.corner2.x) w`
-		  osVState				= toOSscrollbarRange (domain.corner1.y,newOrigin.y,domain.corner2.y) h`
-		# tb					= setwindowslider hasHScroll wMetrics wPtr True  osHState (toTuple wSize) tb
-		# tb					= setwindowslider hasVScroll wMetrics wPtr False osVState (toTuple wSize) tb
-		  windowInfo			= WindowInfo {windowInfo & windowDomain=domainRect,windowOrigin=newOrigin}
-		  hMargins				= getWindowHMargins   IsWindow wMetrics atts
-		  vMargins				= getWindowVMargins   IsWindow wMetrics atts
-		  spaces				= getWindowItemSpaces IsWindow wMetrics atts
-		  reqSize				= {w=w`-fst hMargins-snd hMargins,h=h`-fst vMargins-snd vMargins}
-		# (_,newItems,tb)		= layoutControls wMetrics hMargins vMargins spaces reqSize minSize [(domain,newOrigin)] oldItems tb
-		  wH					= {wH & whWindowInfo=windowInfo,whItems=newItems}
-		# (wH,tb)				= forceValidWindowClipState wMetrics True wPtr wH tb
-		# (updRgn,tb)			= relayoutControls wMetrics whSelect whShow wFrame wFrame zero zero wPtr whDefaultId oldItems wH.whItems tb
-		  viewFrame				= PosSizeToRectangle newOrigin {w=w`,h=h`}
-		  updState				= RectangleToUpdateState viewFrame
-		# (wH,tb)				= drawwindowlook wMetrics wPtr id updState wH tb
-		# (wH,tb)				= updatewindowbackgrounds wMetrics updRgn wshIds wH tb
-		# tb					= OSvalidateWindowRect wPtr (SizeToRect wSize) tb
-		= ({wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
+		  newVisScrolls			= OSscrollbarsAreVisible wMetrics newDomainRect wSize` hasScrolls
+		  newContentRect		= getWindowContentRect wMetrics newVisScrolls (SizeToRect wSize)
+		  {rright=w`,rbottom=h`}= newContentRect
+		  osHState				= toOSscrollbarRange (newDomainRect.rleft,newOrigin.x,newDomainRect.rright)  w`
+		  osVState				= toOSscrollbarRange (newDomainRect.rtop, newOrigin.y,newDomainRect.rbottom) h`
+		# tb					= setwindowslider hasHScroll wMetrics wPtr True  osHState wSize` tb
+		# tb					= setwindowslider hasVScroll wMetrics wPtr False osVState wSize` tb
+		  windowInfo			= WindowInfo {windowInfo & windowDomain=newDomainRect,windowOrigin=newOrigin}
+		  newViewFrameRect		= PosSizeToRect newOrigin {w=w`,h=h`}
+		  newViewFrame			= RectToRectangle newViewFrameRect
+		  oldViewFrame			= RectToRectangle oldViewFrameRect
+		  oldDomainViewMax		= getdomainviewmax oldDomainRect oldViewFrameRect
+		  newDomainViewMax		= getdomainviewmax newDomainRect newViewFrameRect
+		  updArea				= if (sysLook && oldOrigin==newOrigin && oldDomainViewMax==newDomainViewMax)
+		  							[]
+		  							[newViewFrame]
+		  updState				= {oldFrame=oldViewFrame,newFrame=newViewFrame,updArea=updArea}
+		| isEmpty oldItems		// window has no controls
+			# wH				= {wH & whWindowInfo=windowInfo}
+		//	# tb				= OSvalidateWindowRect wPtr (SizeToRect wSize) tb
+			| isEmpty updArea	// nothing has to updated
+				= ({wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
+			// otherwise
+				# (wH,tb)		= drawwindowlook wMetrics wPtr id updState wH tb
+				= ({wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
+		| otherwise				// window has controls
+			# hMargins			= getWindowHMargins   IsWindow wMetrics atts
+			  vMargins			= getWindowVMargins   IsWindow wMetrics atts
+			  spaces			= getWindowItemSpaces IsWindow wMetrics atts
+			  reqSize			= {w=w`-fst hMargins-snd hMargins,h=h`-fst vMargins-snd vMargins}
+			# (_,newItems,tb)	= layoutControls wMetrics hMargins vMargins spaces reqSize minSize [(newDomain,newOrigin)] oldItems tb
+			  wH				= {wH & whWindowInfo=windowInfo,whItems=newItems}
+			# (wH,tb)			= forceValidWindowClipState wMetrics True wPtr wH tb
+			# (updRgn,tb)		= relayoutControls wMetrics whSelect whShow newContentRect newContentRect zero zero wPtr whDefaultId oldItems wH.whItems tb
+			# (wH,tb)			= drawwindowlook wMetrics wPtr id updState wH tb
+			# (wH,tb)			= updatewindowbackgrounds wMetrics updRgn wshIds wH tb
+		//	# tb				= OSvalidateWindowRect wPtr (SizeToRect wSize) tb
+			= ({wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
 	where
 		wPtr					= wshIds.wPtr
 		atts					= wH.whAtts
 		wSize					= wH.whSize
-		(w,h)					= toTuple wSize
+		wSize`					= toTuple wSize
+		(w,h)					= wSize`
 		whSelect				= wH.whSelect
 		whShow					= wH.whShow
 		whDefaultId				= wH.whDefaultId
-	//	windowInfo				= fromJust wH.whWindowInfo	Mike: fromJust changed to getWindowInfoWindowData
 		windowInfo				= getWindowInfoWindowData wH.whWindowInfo
+		oldDomainRect			= windowInfo.windowDomain
 		oldOrigin				= windowInfo.windowOrigin
+		sysLook					= windowInfo.windowLook.lookSysUpdate
 		oldItems				= wH.whItems
-		(hasHScroll,hasVScroll)	= (isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll)
+		hasScrolls				= (isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll)
+		(hasHScroll,hasVScroll)	= hasScrolls
+		oldVisScrolls			= OSscrollbarsAreVisible wMetrics oldDomainRect wSize` hasScrolls
+		oldContentRect			= getWindowContentRect wMetrics oldVisScrolls (SizeToRect wSize)
+		oldViewFrameRect		= PosSizeToRect oldOrigin (RectSize oldContentRect)
 		(defMinW,defMinH)		= OSMinWindowSize
 		minSize					= {w=defMinW,h=defMinH}
 		
@@ -1364,6 +1434,10 @@ where
 		setwindowslider hasScroll wMetrics wPtr isHorizontal state maxcoords tb
 			| hasScroll			= OSsetWindowSlider wMetrics wPtr isHorizontal state maxcoords tb
 			| otherwise			= tb
+		
+		getdomainviewmax :: !Rect !Rect -> Point2
+		getdomainviewmax domainRect viewframeRect
+			= {x=min domainRect.rright viewframeRect.rright,y=min domainRect.rbottom viewframeRect.rbottom}
 	setwindowviewdomain _ _ _ _
 		= StdWindowFatalError "setWindowViewDomain" "unexpected window placeholder argument"
 

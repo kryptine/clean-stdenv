@@ -87,8 +87,7 @@ where
 			| otherwise			= relayout wPtr wMetrics newArea k1 old new rgnHs picture
 		where
 			/*	relayout assumes that the two RelayoutItem arguments 
-				have the same ControlKind (fifth argument) and differ only in size or position or both.
-				In addition, it can be assumed safely that the element is visible. 
+				have the same ControlKind (fourth argument) and differ only in size or position or both.
 			*/
 			relayout :: !OSWindowPtr !OSWindowMetrics ![Rect] !ControlKind !(!Rect,!Point2,!RelayoutItem) !(!Rect,!Point2,!RelayoutItem)
 						!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle) !*Picture
@@ -103,10 +102,13 @@ where
 										= relayoutItems` wPtr wMetrics newArea1 (oldFrame1,oldPos,old.rliItems)
 																				(newFrame1,newPos,new.rliItems)
 																				(clipRgn,validRgn,invalidRgn) picture
-				#! ((validRgn,invalidRgn),picture)
+				| new.rliItemShow
+					#! ((validRgn,invalidRgn),picture)
 										= accpicttoolbox (checkUpdateRegions oldFrame1 newFrame1 (validRgn,invalidRgn)) picture
-				#! (clipRgn,picture)	= accpicttoolbox (subtractRectFromRgn (IntersectRects newFrame newCompoundRect) clipRgn) picture
-				=  ((clipRgn,validRgn,invalidRgn),picture)
+					#! (clipRgn,picture)= accpicttoolbox (subtractRectFromRgn (IntersectRects newFrame newCompoundRect) clipRgn) picture
+					=  ((clipRgn,validRgn,invalidRgn),picture)
+				| otherwise
+					= ((clipRgn,validRgn,invalidRgn),picture)
 			where
 				sameSize		= oldSize==newSize
 				samePos			= OSCompoundMovesControls && oldPos-oldParentPos==newPos-newParentPos || oldPos==newPos
@@ -148,7 +150,7 @@ where
 					| otherwise		= OSsetCompoundSliderThumb wMetrics compoundPtr isHorizontal new (rright,rbottom) True tb
 			
 			relayout wPtr wMetrics newArea IsLayoutControl (oldFrame,oldParentPos,old) (newFrame,newParentPos,new) rgnHs picture
-				= relayoutItems` wPtr wMetrics newArea (oldFrame1,oldPos,old.rliItems) (newFrame1,newPos,new.rliItems) rgnHs picture
+				= relayoutItems` wPtr wMetrics newArea (oldFrame1,oldParentPos,old.rliItems) (newFrame1,newParentPos,new.rliItems) rgnHs picture
 			where
 				newSize					= new.rliItemSize;								oldSize			= old.rliItemSize;
 				newPos					= new.rliItemPos;								oldPos			= old.rliItemPos;
@@ -160,10 +162,13 @@ where
 													   (clipRgn,validRgn,invalidRgn) picture
 				#! picture				= apppicttoolbox (moveF o sizeF) picture
 				#! picture				= updF picture
-				#! ((validRgn,invalidRgn),picture)
+				| new.rliItemShow
+					#! ((validRgn,invalidRgn),picture)
 										= accpicttoolbox (checkUpdateRegions oldFrame1 newFrame1 (validRgn,invalidRgn)) picture
-				#! (clipRgn,picture)	= accpicttoolbox (subtractRectFromRgn newFrame1 clipRgn) picture
-				= ((clipRgn,validRgn,invalidRgn),picture)
+					#! (clipRgn,picture)= accpicttoolbox (subtractRectFromRgn newFrame1 clipRgn) picture
+					= ((clipRgn,validRgn,invalidRgn),picture)
+				| otherwise
+					= ((clipRgn,validRgn,invalidRgn),picture)
 			where
 				sameSize				= oldSize==newSize
 				samePos					= OSCompoundMovesControls && oldPos-oldParentPos==newPos-newParentPos || oldPos==newPos

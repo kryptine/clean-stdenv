@@ -9,12 +9,13 @@ import	deviceevents
 
 
 ::	DeviceFunctions pst								// The major device callback functions:
-	=	{	dShow	:: ShowFunction  pst			// Show the device and its instances
-		,	dHide	:: HideFunction  pst			// Hide the device and its instances
-		,	dEvent	:: EventFunction pst			// Map an OSEvent to a DeviceEvent
-		,	dDoIO	:: DoIOFunction  pst			// Handle a DeviceEvent for this device
-		,	dOpen	:: OpenFunction  pst			// Open the initial device
-		,	dClose	:: CloseFunction pst			// Close the device and its instances
+	=	{	dDevice	:: Device						//	The device kind
+		,	dShow	:: ShowFunction  pst			//	Show the device and its instances
+		,	dHide	:: HideFunction  pst			//	Hide the device and its instances
+		,	dEvent	:: EventFunction pst			//	Map an OSEvent to a DeviceEvent
+		,	dDoIO	:: DoIOFunction  pst			//	Handle a DeviceEvent for this device
+		,	dOpen	:: OpenFunction  pst			//	Open the initial device
+		,	dClose	:: CloseFunction pst			//	Close the device and its instances
 		}
 ::	ShowFunction  pst	:==	pst -> pst
 ::	HideFunction  pst	:==	pst -> pst
@@ -26,13 +27,3 @@ import	deviceevents
 ::	DoIOFunction  pst	:==	DeviceEvent
 						 -> pst
 						 -> (DeviceEvent, pst)
-
-dummyDeviceFunctions :: DeviceFunctions .pst
-dummyDeviceFunctions
-	= {	dShow	= id
-	  ,	dHide	= id
-	  ,	dEvent	= \osevent pst -> (False,Nothing,osevent,pst)
-	  ,	dDoIO	= \ioevent pst -> (ioevent,pst)
-	  ,	dOpen	= id
-	  ,	dClose	= id
-	  }

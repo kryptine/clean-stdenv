@@ -17,7 +17,8 @@ receiverdeviceFatalError rule error
 
 ReceiverFunctions :: DeviceFunctions (PSt .l)
 ReceiverFunctions
-	= {	dShow	= id
+	= {	dDevice	= ReceiverDevice
+	  ,	dShow	= id
 	  ,	dHide	= id
 	  ,	dEvent	= receiverEvent
 	  ,	dDoIO	= receiverIO
@@ -32,9 +33,7 @@ receiverOpen pState=:{io=ioState}
 		= {pState & io=ioState}
 	| otherwise
 		# ioState			= IOStSetDevice (ReceiverSystemState {rReceivers=[]}) ioState
-		# (deviceFunctions,ioState)
-							= IOStGetDeviceFunctions ioState
-		# ioState			= IOStSetDeviceFunctions [ReceiverFunctions:deviceFunctions] ioState
+		# ioState			= IOStSetDeviceFunctions ReceiverFunctions ioState
 		= {pState & io=ioState}
 
 receiverClose :: !(PSt .l) -> PSt .l
@@ -52,6 +51,7 @@ receiverClose pState=:{io=ioState}
 	# ioState					= IOStSetIdTable (snd (removeIdsFromIdTable rIds idtable)) ioState
 	# ioState					= unbindRIds rIds ioState
 	# ioState					= IOStRemoveDevice ReceiverDevice ioState
+	# ioState					= IOStRemoveDeviceFunctions ReceiverDevice ioState
 	= {pState & io=ioState}
 // MW11..
   where

@@ -94,7 +94,7 @@ getActiveControl::			!(IOSt .l) -> (!(!Bool,!Maybe Id),!IOSt .l)
 */
 
 
-stackWindow		:: !Id !Id	!(IOSt .l) -> IOSt .l
+stackWindow		:: !Id !Id	!(PSt .l) -> PSt .l
 /*	stackWindow id1 id2 places the window with id1 behind the window with id2. 
 	If id1 or id2 is unknown, or id1 indicates a modal window, stackWindow does 
 	nothing.

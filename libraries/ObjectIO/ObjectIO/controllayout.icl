@@ -20,7 +20,6 @@ controllayoutFatalError rule error
 	= FatalError rule "controllayout" error
 
 
-
 //	Calculate the precise position (in pixels) of each Control.
 
 layoutControls :: !OSWindowMetrics !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) !Size !Size ![(ViewDomain,Point2)] ![WElementHandle .ls .pst] !*OSToolbox
@@ -40,6 +39,14 @@ layoutControls` wMetrics hMargins vMargins spaces reqSize minSize orientations i
 	  (size,roots)				= layoutItems hMargins vMargins spaces reqSize minSize orientations layouts
 	  (_,itemHs)				= setLayoutItems` roots itemHs
 	= (size,itemHs,tb)
+
+calcControlsSize :: !OSWindowMetrics !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) !Size !Size ![(ViewDomain,Point2)] ![WElementHandle .ls .pst] !*OSToolbox
+																																-> (!Size,!*OSToolbox)
+calcControlsSize wMetrics hMargins vMargins spaces reqSize minSize orientations itemHs tb
+	# (_,_,itemHs)				= validateFirstWElementsPos False itemHs
+	# (layouts,_,_,_,_,tb)		= getLayoutItems wMetrics hMargins vMargins spaces orientations [] (sysId (-1)) (-2) itemHs tb
+	  (size,_)					= layoutItems hMargins vMargins spaces reqSize minSize orientations layouts
+	= (size,tb)
 
 
 /*	validateFirstWElementsPos(`) verifies that the first non line layout, not virtual, WElementHandle either: 
@@ -222,7 +229,7 @@ where
 				  width				= sum colmaxwidths
 				  height			= itemHeight*(length (hd colwidths))
 				  itPos				= newLayoutItem id pos {w=width,h=height}
-				  collaynoutitems	= position_items itemHeight 0 colmaxwidths colitemsizes
+				  collaynoutitems	= position_items (\pos item->{item & radioItemPos=pos}) itemHeight 0 colmaxwidths colitemsizes
 				  laynoutitems		= fromColumns layout collaynoutitems
 				  info				= RadioInfo {info & radioItems=laynoutitems}
 				= (itPos,prevIds1,id,cId1,{itemH & wItemAtts=[ControlId id:wItemAtts],wItemInfo=info},tb)
@@ -233,20 +240,6 @@ where
 			info					= getWItemRadioInfo wItemInfo
 			items					= info.radioItems
 			layout					= info.radioLayout
-			
-			position_items :: !Int !Int ![Int] ![[RadioItemInfo .st]] -> [[RadioItemInfo .st]]
-			position_items itemHeight left [maxwidth:maxwidths] [col:cols]
-				# col	= position_items` itemHeight {x=left,y=0} col
-				  cols	= position_items  itemHeight (left+maxwidth) maxwidths cols
-				= [col:cols]
-			where
-				position_items` :: !Int !Point2 ![RadioItemInfo .st] -> [RadioItemInfo .st]
-				position_items` itemHeight pos [item:items]
-					= [{item & radioItemPos=pos}:position_items` itemHeight {pos & y=pos.y+itemHeight} items]
-				position_items` _ _ _
-					= []
-			position_items _ _ _ _
-				= []
 		
 		getLayoutWItem wMetrics hMargins vMargins spaces _ prevIds prevId cId itemH=:{wItemKind=IsCheckControl,wItemInfo,wItemAtts} tb
 			| isEmpty items
@@ -258,7 +251,7 @@ where
 				  width				= sum colmaxwidths
 				  height			= itemHeight*(length (hd colwidths))
 				  itPos				= newLayoutItem id pos {w=width,h=height}
-				  collaynoutitems	= position_items itemHeight 0 colmaxwidths colitemsizes
+				  collaynoutitems	= position_items (\pos item->{item & checkItemPos=pos}) itemHeight 0 colmaxwidths colitemsizes
 				  laynoutitems		= fromColumns layout collaynoutitems
 				  info				= CheckInfo {info & checkItems=laynoutitems}
 				= (itPos,prevIds1,id,cId1,{itemH & wItemAtts=[ControlId id:wItemAtts],wItemInfo=info},tb)
@@ -269,20 +262,6 @@ where
 			info					= getWItemCheckInfo wItemInfo
 			items					= info.checkItems
 			layout					= info.checkLayout
-			
-			position_items :: !Int !Int ![Int] ![[CheckItemInfo .st]] -> [[CheckItemInfo .st]]
-			position_items itemHeight left [maxwidth:maxwidths] [col:cols]
-				# col	= position_items` itemHeight {x=left,y=0} col
-				  cols	= position_items  itemHeight (left+maxwidth) maxwidths cols
-				= [col:cols]
-			where
-				position_items` :: !Int !Point2 ![CheckItemInfo .st] -> [CheckItemInfo .st]
-				position_items` itemHeight pos [item:items]
-					= [{item & checkItemPos=pos}:position_items` itemHeight {pos & y=pos.y+itemHeight} items]
-				position_items` _ _ _
-					= []
-			position_items _ _ _ _
-				= []
 		
 		getLayoutWItem wMetrics hMargins vMargins spaces _ prevIds prevId cId itemH=:{wItemKind=IsCustomControl,wItemAtts,wItemSize} tb
 			= (itPos,prevIds1,id,cId1,{itemH & wItemAtts=[ControlId id:wItemAtts]},tb)
@@ -336,7 +315,7 @@ where
 				domain					= RectToRectangle domainRect
 				newOrientations			= [(domain,origin):orientations]
 				(derSize,itemHs1,tb1)	= layoutControls wMetrics newHMargins newVMargins newItemSpaces reqSize minSize newOrientations itemHs tb
-				okDerivedSize			= validateDerivedSize wMetrics domainRect (hasHScroll,hasVScroll) derSize reqSize
+				okDerivedSize			= validateDerivedCompoundSize wMetrics domainRect (hasHScroll,hasVScroll) derSize reqSize
 				info1					= layoutScrollbars wMetrics okDerivedSize info
 
 				validateMinSize :: ![ControlAttribute .st] -> (!Size,![ControlAttribute .st])
@@ -377,41 +356,6 @@ where
 				where
 					(hasSize,sizeAtt)	= Select (\att->isControlViewSize att || isControlOuterSize att) undef atts
 					minSize				= OSMinCompoundSize
-				
-				validateDerivedSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) Size !Size -> Size
-				validateDerivedSize wMetrics domain hasScrolls derSize reqSize
-					| reqSize==zero		= validateScrollbarSize wMetrics domain hasScrolls derSize
-					| otherwise			= validateScrollbarSize wMetrics domain hasScrolls reqSize
-				where
-					validateScrollbarSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) !Size -> Size
-					validateScrollbarSize wMetrics domainRect (hasHScroll,hasVScroll) size=:{w,h}
-						| domainSize==zero			= size
-						| visHScroll && visVScroll	= {w=w`,h=h`}
-						| visHScroll				= {size & h=h`}
-						| visVScroll				= {size & w=w`}
-						| otherwise					= size
-					where
-						domainSize					= RectSize domainRect
-						visHScroll					= hasHScroll && OSscrollbarIsVisible (domainRect.rleft,domainRect.rright)  w
-						visVScroll					= hasVScroll && OSscrollbarIsVisible (domainRect.rtop, domainRect.rbottom) h
-						(w`,h`)						= (w+wMetrics.osmVSliderWidth,h+wMetrics.osmHSliderHeight)
-				
-				layoutScrollbars :: !OSWindowMetrics !Size !CompoundInfo -> CompoundInfo
-				layoutScrollbars wMetrics size info=:{compoundHScroll,compoundVScroll}
-					= {	info & compoundHScroll=layoutScrollbar hRect compoundHScroll
-							 , compoundVScroll=layoutScrollbar vRect compoundVScroll
-					  }
-				where
-					hasScrolls	= (isJust compoundHScroll,isJust compoundVScroll)	// PA: this should actually become: (visHScroll,visVScroll)!!
-					rect		= SizeToRect size
-					hRect		= getCompoundHScrollRect wMetrics hasScrolls rect
-					vRect		= getCompoundVScrollRect wMetrics hasScrolls rect
-					
-					layoutScrollbar :: Rect !(Maybe ScrollInfo) -> Maybe ScrollInfo
-					layoutScrollbar _ Nothing
-						= Nothing
-					layoutScrollbar r=:{rleft,rtop} (Just scrollInfo)
-						= Just {scrollInfo & scrollItemPos={x=rleft,y=rtop},scrollItemSize=RectSize r}
 		
 		getLayoutWItem wMetrics hMargins vMargins spaces orientations prevIds prevId cId itemH=:{wItemKind=IsLayoutControl,wItemAtts,wItems} tb
 			= (itPos,prevIds1,id,cId1,{itemH & wItemAtts=[ControlId id:atts1],wItems=items},tb1)
@@ -436,7 +380,7 @@ where
 				(_,spaceAtt)			= Select isControlItemSpace (ControlItemSpace (fst spaces) (snd spaces)) atts2
 				newItemSpaces			= validateControlItemSpace (getControlItemSpaceAtt spaceAtt)
 				(derSize,itemHs1,tb1)	= layoutControls wMetrics newHMargins newVMargins newItemSpaces reqSize minSize orientations itemHs tb
-				okDerivedSize			= validateDerivedSize wMetrics derSize reqSize
+				okDerivedSize			= validateDerivedLayoutSize wMetrics derSize reqSize
 
 				validateMinSize :: ![ControlAttribute .st] -> (!Size,![ControlAttribute .st])
 				validateMinSize atts
@@ -463,11 +407,6 @@ where
 				where
 					(hasSize,sizeAtt)	= Select (\att->isControlViewSize att || isControlOuterSize att) undef atts
 					size				= if (isControlViewSize sizeAtt) (getControlViewSizeAtt sizeAtt) (getControlOuterSizeAtt sizeAtt)
-				
-				validateDerivedSize :: !OSWindowMetrics Size !Size -> Size
-				validateDerivedSize wMetrics derSize reqSize
-					| reqSize==zero		= derSize
-					| otherwise			= reqSize
 
 		getLayoutWItem _ _ _ _ _ _ _ _ _ _
 			= controllayoutFatalError "getLayoutWItem" "unmatched control implementation alternative"
@@ -562,7 +501,7 @@ where
 				  width				= sum colmaxwidths
 				  height			= itemHeight*(length (hd colwidths))
 				  itPos				= newLayoutItem id pos {w=width,h=height}
-				  collaynoutitems	= position_items itemHeight 0 colmaxwidths colitemsizes
+				  collaynoutitems	= position_items (\pos item->{item & radioItemPos`=pos}) itemHeight 0 colmaxwidths colitemsizes
 				  laynoutitems		= fromColumns layout collaynoutitems
 				  info				= RadioInfo` {info & radioItems`=laynoutitems}
 				= (itPos,prevIds1,id,cId1,{itemH & wItemAtts`=[ControlId` id:wItemAtts`],wItemInfo`=info},tb)
@@ -573,20 +512,6 @@ where
 			info					= getWItemRadioInfo` wItemInfo`
 			items					= info.radioItems`
 			layout					= info.radioLayout`
-			
-			position_items :: !Int !Int ![Int] ![[RadioItemInfo`]] -> [[RadioItemInfo`]]
-			position_items itemHeight left [maxwidth:maxwidths] [col:cols]
-				# col	= position_items` itemHeight {x=left,y=0} col
-				  cols	= position_items  itemHeight (left+maxwidth) maxwidths cols
-				= [col:cols]
-			where
-				position_items` :: !Int !Point2 ![RadioItemInfo`] -> [RadioItemInfo`]
-				position_items` itemHeight pos [item:items]
-					= [{item & radioItemPos`=pos}:position_items` itemHeight {pos & y=pos.y+itemHeight} items]
-				position_items` _ _ _
-					= []
-			position_items _ _ _ _
-				= []
 		
 		getLayoutWItem` wMetrics hMargins vMargins spaces _ prevIds prevId cId itemH=:{wItemKind`=IsCheckControl,wItemInfo`,wItemAtts`} tb
 			| isEmpty items
@@ -598,7 +523,7 @@ where
 				  width				= sum colmaxwidths
 				  height			= itemHeight*(length (hd colwidths))
 				  itPos				= newLayoutItem id pos {w=width,h=height}
-				  collaynoutitems	= position_items itemHeight 0 colmaxwidths colitemsizes
+				  collaynoutitems	= position_items (\pos item->{item & checkItemPos`=pos}) itemHeight 0 colmaxwidths colitemsizes
 				  laynoutitems		= fromColumns layout collaynoutitems
 				  info				= CheckInfo` {info & checkItems`=laynoutitems}
 				= (itPos,prevIds1,id,cId1,{itemH & wItemAtts`=[ControlId` id:wItemAtts`],wItemInfo`=info},tb)
@@ -609,20 +534,6 @@ where
 			info					= getWItemCheckInfo` wItemInfo`
 			items					= info.checkItems`
 			layout					= info.checkLayout`
-			
-			position_items :: !Int !Int ![Int] ![[CheckItemInfo`]] -> [[CheckItemInfo`]]
-			position_items itemHeight left [maxwidth:maxwidths] [col:cols]
-				# col	= position_items` itemHeight {x=left,y=0} col
-				  cols	= position_items  itemHeight (left+maxwidth) maxwidths cols
-				= [col:cols]
-			where
-				position_items` :: !Int !Point2 ![CheckItemInfo`] -> [CheckItemInfo`]
-				position_items` itemHeight pos [item:items]
-					= [{item & checkItemPos`=pos}:position_items` itemHeight {pos & y=pos.y+itemHeight} items]
-				position_items` _ _ _
-					= []
-			position_items _ _ _ _
-				= []
 		
 		getLayoutWItem` wMetrics hMargins vMargins spaces _ prevIds prevId cId itemH=:{wItemKind`=IsCustomControl,wItemAtts`,wItemSize`} tb
 			= (itPos,prevIds1,id,cId1,{itemH & wItemAtts`=[ControlId` id:wItemAtts`]},tb)
@@ -676,7 +587,7 @@ where
 				domain					= RectToRectangle domainRect
 				newOrientations			= [(domain,origin):orientations]
 				(derSize,itemHs1,tb1)	= layoutControls` wMetrics newHMargins newVMargins newItemSpaces reqSize minSize newOrientations itemHs tb
-				okDerivedSize			= validateDerivedSize wMetrics domainRect (hasHScroll,hasVScroll) derSize reqSize
+				okDerivedSize			= validateDerivedCompoundSize wMetrics domainRect (hasHScroll,hasVScroll) derSize reqSize
 				info1					= layoutScrollbars wMetrics okDerivedSize info
 
 				validateMinSize :: ![ControlAttribute`] -> (!Size,![ControlAttribute`])
@@ -717,41 +628,6 @@ where
 				where
 					(hasSize,sizeAtt)	= Select (\att->iscontrolviewsize` att || iscontroloutersize` att) undef atts
 					minSize				= OSMinCompoundSize
-				
-				validateDerivedSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) Size !Size -> Size
-				validateDerivedSize wMetrics domain hasScrolls derSize reqSize
-					| reqSize==zero		= validateScrollbarSize wMetrics domain hasScrolls derSize
-					| otherwise			= validateScrollbarSize wMetrics domain hasScrolls reqSize
-				where
-					validateScrollbarSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) !Size -> Size
-					validateScrollbarSize wMetrics domainRect (hasHScroll,hasVScroll) size=:{w,h}
-						| domainSize==zero			= size
-						| visHScroll && visVScroll	= {w=w`,h=h`}
-						| visHScroll				= {size & h=h`}
-						| visVScroll				= {size & w=w`}
-						| otherwise					= size
-					where
-						domainSize					= RectSize domainRect
-						(visHScroll,visVScroll)		= OSscrollbarsAreVisible wMetrics domainRect (w,h) (hasHScroll,hasVScroll)
-						w`							= w+wMetrics.osmVSliderWidth
-						h`							= h+wMetrics.osmHSliderHeight
-				
-				layoutScrollbars :: !OSWindowMetrics !Size !CompoundInfo -> CompoundInfo
-				layoutScrollbars wMetrics size info=:{compoundHScroll,compoundVScroll}
-					= {	info & compoundHScroll=layoutScrollbar hRect compoundHScroll
-							 , compoundVScroll=layoutScrollbar vRect compoundVScroll
-					  }
-				where
-					hasScrolls	= (isJust compoundHScroll,isJust compoundVScroll)	// PA: this should actually become: (visHScroll,visVScroll)!!
-					rect		= SizeToRect size
-					hRect		= getCompoundHScrollRect wMetrics hasScrolls rect
-					vRect		= getCompoundVScrollRect wMetrics hasScrolls rect
-					
-					layoutScrollbar :: Rect !(Maybe ScrollInfo) -> Maybe ScrollInfo
-					layoutScrollbar _ Nothing
-						= Nothing
-					layoutScrollbar r=:{rleft,rtop} (Just scrollInfo)
-						= Just {scrollInfo & scrollItemPos={x=rleft,y=rtop},scrollItemSize=RectSize r}
 		
 		getLayoutWItem` wMetrics hMargins vMargins spaces orientations prevIds prevId cId itemH=:{wItemKind`=IsLayoutControl,wItemAtts`,wItems`} tb
 			= (itPos,prevIds1,id,cId1,{itemH & wItemAtts`=[ControlId` id:atts1],wItems`=items},tb1)
@@ -776,7 +652,7 @@ where
 				(_,spaceAtt)			= Select iscontrolitemspace` (ControlItemSpace` (fst spaces) (snd spaces)) atts2
 				newItemSpaces			= validateControlItemSpace (getcontrolitemspace` spaceAtt)
 				(derSize,itemHs1,tb1)	= layoutControls` wMetrics newHMargins newVMargins newItemSpaces reqSize minSize orientations itemHs tb
-				okDerivedSize			= validateDerivedSize wMetrics derSize reqSize
+				okDerivedSize			= validateDerivedLayoutSize wMetrics derSize reqSize
 
 				validateMinSize :: ![ControlAttribute`] -> (!Size,![ControlAttribute`])
 				validateMinSize atts
@@ -803,11 +679,6 @@ where
 				where
 					(hasSize,sizeAtt)	= Select (\att->iscontrolviewsize` att || iscontroloutersize` att) undef atts
 					size				= if (iscontrolviewsize` sizeAtt) (getcontrolviewsize` sizeAtt) (getcontroloutersize` sizeAtt)
-				
-				validateDerivedSize :: !OSWindowMetrics Size !Size -> Size
-				validateDerivedSize wMetrics derSize reqSize
-					| reqSize==zero		= derSize
-					| otherwise			= reqSize
 
 		getLayoutWItem` _ _ _ _ _ _ _ _ _ _
 			= controllayoutFatalError "getLayoutWItem`" "unmatched control implementation alternative"
@@ -826,11 +697,87 @@ where
 getLayoutItems` _ _ _ _ _ prevIds prevId cId [] tb
 	= ([],prevIds,prevId,cId,[],tb)
 
+
+/*	Functions shared above.
+*/
 validateControlMargin :: !(!Int,!Int) -> (!Int,!Int)
 validateControlMargin (a,b) = (max 0 a,max 0 b)
 
 validateControlItemSpace :: !(!Int,!Int) -> (!Int,!Int)
 validateControlItemSpace (hspace,vspace) = (max 0 hspace,max 0 vspace)
+
+validateDerivedLayoutSize :: !OSWindowMetrics Size !Size -> Size
+validateDerivedLayoutSize wMetrics derSize reqSize
+	| reqSize==zero		= derSize
+	| otherwise			= reqSize
+
+/*	PA: this version was used for WElementHandles (IsCompoundControl)
+validateDerivedCompoundSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) Size !Size -> Size
+validateDerivedCompoundSize wMetrics domain hasScrolls derSize reqSize
+	| reqSize==zero		= validateScrollbarSize wMetrics domain hasScrolls derSize
+	| otherwise			= validateScrollbarSize wMetrics domain hasScrolls reqSize
+where
+	validateScrollbarSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) !Size -> Size
+	validateScrollbarSize wMetrics domainRect (hasHScroll,hasVScroll) size=:{w,h}
+		| domainSize==zero			= size
+		| visHScroll && visVScroll	= {w=w`,h=h`}
+		| visHScroll				= {size & h=h`}
+		| visVScroll				= {size & w=w`}
+		| otherwise					= size
+	where
+		domainSize					= RectSize domainRect
+		visHScroll					= hasHScroll && OSscrollbarIsVisible (domainRect.rleft,domainRect.rright)  w
+		visVScroll					= hasVScroll && OSscrollbarIsVisible (domainRect.rtop, domainRect.rbottom) h
+		(w`,h`)						= (w+wMetrics.osmVSliderWidth,h+wMetrics.osmHSliderHeight)
+
+And this version was used for WElementHandle`s (IsCompoundControl). This one is ok, since it uses OSscrollbarsAreVisible.
+*/
+validateDerivedCompoundSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) Size !Size -> Size
+validateDerivedCompoundSize wMetrics domain hasScrolls derSize reqSize
+	| reqSize==zero		= validateScrollbarSize wMetrics domain hasScrolls derSize
+	| otherwise			= validateScrollbarSize wMetrics domain hasScrolls reqSize
+where
+	validateScrollbarSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) !Size -> Size
+	validateScrollbarSize wMetrics domainRect (hasHScroll,hasVScroll) size=:{w,h}
+		| domainSize==zero			= size
+		| visHScroll && visVScroll	= {w=w`,h=h`}
+		| visHScroll				= {size & h=h`}
+		| visVScroll				= {size & w=w`}
+		| otherwise					= size
+	where
+		domainSize					= RectSize domainRect
+		(visHScroll,visVScroll)		= OSscrollbarsAreVisible wMetrics domainRect (w,h) (hasHScroll,hasVScroll)
+		w`							= w+wMetrics.osmVSliderWidth
+		h`							= h+wMetrics.osmHSliderHeight
+
+layoutScrollbars :: !OSWindowMetrics !Size !CompoundInfo -> CompoundInfo
+layoutScrollbars wMetrics size info=:{compoundHScroll,compoundVScroll}
+	= {	info & compoundHScroll=mapMaybe (layoutScrollbar hRect) compoundHScroll
+			 , compoundVScroll=mapMaybe (layoutScrollbar vRect) compoundVScroll
+	  }
+where
+	hasScrolls	= (isJust compoundHScroll,isJust compoundVScroll)	// PA: this should actually become: (visHScroll,visVScroll)!!
+	rect		= SizeToRect size
+	hRect		= getCompoundHScrollRect wMetrics hasScrolls rect
+	vRect		= getCompoundVScrollRect wMetrics hasScrolls rect
+	
+	layoutScrollbar :: Rect !ScrollInfo -> ScrollInfo
+	layoutScrollbar r=:{rleft,rtop} scrollInfo
+		= {scrollInfo & scrollItemPos={x=rleft,y=rtop},scrollItemSize=RectSize r}
+
+position_items :: !(Point2 -> .x -> .x) !Int !Int ![Int] ![[.x]] -> [[.x]]
+position_items setPosition itemHeight left [maxwidth:maxwidths] [col:cols]
+	# col	= position_items` setPosition itemHeight {x=left,y=0} col
+	  cols	= position_items  setPosition itemHeight (left+maxwidth) maxwidths cols
+	= [col:cols]
+where
+	position_items` :: !(Point2 -> .x -> .x) !Int !Point2 ![.x] -> [.x]
+	position_items` setPosition itemHeight pos [item:items]
+		= [setPosition pos item:position_items` setPosition itemHeight {pos & y=pos.y+itemHeight} items]
+	position_items` _ _ _ _
+		= []
+position_items _ _ _ _ _
+	= []
 
 toColumns :: !RowsOrColumns ![x] -> [[x]]
 toColumns (Columns n) items
@@ -987,15 +934,13 @@ where
 				shiftRadioItem item=:{radioItemPos}
 					= {item & radioItemPos=movePoint offset radioItemPos}
 			shiftWItemInfo offset (CompoundInfo info=:{compoundHScroll,compoundVScroll})
-				= CompoundInfo {info & compoundHScroll=shiftScrollbar compoundHScroll
-									 , compoundVScroll=shiftScrollbar compoundVScroll
+				= CompoundInfo {info & compoundHScroll=mapMaybe shiftScrollbar compoundHScroll
+									 , compoundVScroll=mapMaybe shiftScrollbar compoundVScroll
 							   }
 			where
-				shiftScrollbar :: !(Maybe ScrollInfo) -> Maybe ScrollInfo
-				shiftScrollbar Nothing
-					= Nothing
-				shiftScrollbar (Just info=:{scrollItemPos})
-					= Just {info & scrollItemPos=movePoint offset scrollItemPos}
+				shiftScrollbar :: !ScrollInfo -> ScrollInfo
+				shiftScrollbar info=:{scrollItemPos}
+					= {info & scrollItemPos=movePoint offset scrollItemPos}
 			shiftWItemInfo _ info
 				= info
 		setLayoutWItem _ _
@@ -1014,7 +959,7 @@ setLayoutItems roots itemHs
 
 setLayoutItems` :: ![Root] ![WElementHandle`] -> (![Root],![WElementHandle`])
 setLayoutItems` roots [itemH:itemHs]
-	# (roots,itemH)	= setLayoutItem`  roots itemH
+	# (roots,itemH)		= setLayoutItem`  roots itemH
 	# (roots,itemHs)	= setLayoutItems` roots itemHs
 	= (roots,[itemH:itemHs])
 where
@@ -1070,15 +1015,13 @@ where
 				shiftRadioItem item=:{radioItemPos`}
 					= {item & radioItemPos`=movePoint offset radioItemPos`}
 			shiftWItemInfo offset (CompoundInfo` info=:{compoundHScroll,compoundVScroll})
-				= CompoundInfo` {info & compoundHScroll=shiftScrollbar compoundHScroll
-									  , compoundVScroll=shiftScrollbar compoundVScroll
+				= CompoundInfo` {info & compoundHScroll=mapMaybe shiftScrollbar compoundHScroll
+									  , compoundVScroll=mapMaybe shiftScrollbar compoundVScroll
 							    }
 			where
-				shiftScrollbar :: !(Maybe ScrollInfo) -> Maybe ScrollInfo
-				shiftScrollbar Nothing
-					= Nothing
-				shiftScrollbar (Just info=:{scrollItemPos})
-					= Just {info & scrollItemPos=movePoint offset scrollItemPos}
+				shiftScrollbar :: !ScrollInfo -> ScrollInfo
+				shiftScrollbar info=:{scrollItemPos}
+					= {info & scrollItemPos=movePoint offset scrollItemPos}
 			shiftWItemInfo _ info
 				= info
 		setLayoutWItem` _ _

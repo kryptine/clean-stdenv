@@ -20,7 +20,8 @@ menudeviceFatalError rule error
 
 MenuFunctions :: DeviceFunctions (PSt .l)
 MenuFunctions
-	= {	dShow	= menuShow
+	= {	dDevice	= MenuDevice
+	  ,	dShow	= menuShow
 	  ,	dHide	= menuHide
 	  ,	dEvent	= menuEvent
 	  ,	dDoIO	= menuIO
@@ -82,9 +83,10 @@ menuClose pState=:{io=ioState}
 		# ioState				= IOStSetIdTable it ioState
 		# ioState				= IOStSetReceiverTable rt ioState
 		# ioState				= IOStRemoveDevice MenuDevice ioState
+		# ioState				= IOStRemoveDeviceFunctions MenuDevice ioState
 		= {pState & io=ioState}
 where
-	disposeIds :: !SystemId !(MenuStateHandle .ps) !(!ReceiverTable,!IdTable) -> (!ReceiverTable,!IdTable)
+	disposeIds :: !SystemId !(MenuStateHandle .pst) !(!ReceiverTable,!IdTable) -> (!ReceiverTable,!IdTable)
 	disposeIds ioid (MenuLSHandle {mlsHandle={mItems}}) ts
 		= StateMap2 (disposeMenuIds ioid) mItems ts
 
@@ -132,9 +134,7 @@ menuOpen pState=:{io=ioState}
 							  ,	mPopUpId	= popUpId
 							  }
 		# ioState			= IOStSetDevice (MenuSystemState mHs) ioState
-		# (deviceFunctions,ioState)
-							= IOStGetDeviceFunctions ioState
-		# ioState			= IOStSetDeviceFunctions [MenuFunctions:deviceFunctions] ioState
+		# ioState			= IOStSetDeviceFunctions MenuFunctions ioState
 		= {pState & io=ioState}
 where
 	getPopUpId :: !DocumentInterface !(IOSt .l) -> (!Maybe Id,!IOSt .l)
@@ -243,8 +243,8 @@ menuStateTraceIO info=:{mtParents} (MenuLSHandle {mlsState=ls,mlsHandle=mH=:{mIt
 	= (MenuLSHandle {mlsState=ls,mlsHandle={mH & mItems=mItems}},pState)
 where
 //	subMenusTraceIO finds the final submenu that contains the selected menu item and then applies its Menu(Mods)Function.
-	subMenusTraceIO :: !MenuTraceInfo ![Int] ![MenuElementHandle .ls .ps] !(.ls,.ps)
-										 -> (![MenuElementHandle .ls .ps], (.ls,.ps))
+	subMenusTraceIO :: !MenuTraceInfo ![Int] ![MenuElementHandle .ls .pst] !(.ls,.pst)
+										 -> (![MenuElementHandle .ls .pst], (.ls,.pst))
 	subMenusTraceIO info [] itemHs ls_ps
 		# (_,itemHs,ls_ps)	= menuElementsTraceIO info.mtItemNr info 0 itemHs ls_ps
 		= (itemHs,ls_ps)
@@ -252,8 +252,8 @@ where
 		# (_,itemHs,ls_ps)	= subMenuTraceIO subIndex info subIndices 0 itemHs ls_ps
 		= (itemHs,ls_ps)
 	where
-		subMenuTraceIO :: !Int !MenuTraceInfo ![Int] !Int ![MenuElementHandle .ls .ps] !(.ls,.ps)
-												 -> (!Int,![MenuElementHandle .ls .ps], (.ls,.ps))
+		subMenuTraceIO :: !Int !MenuTraceInfo ![Int] !Int ![MenuElementHandle .ls .pst] !(.ls,.pst)
+												 -> (!Int,![MenuElementHandle .ls .pst], (.ls,.pst))
 		subMenuTraceIO parentIndex info parentsIndex zIndex [itemH:itemHs] ls_ps
 			# (zIndex,itemH,ls_ps)	= subMenuTraceIO` parentIndex info parentsIndex zIndex itemH ls_ps
 			| parentIndex<zIndex
@@ -262,8 +262,8 @@ where
 				# (zIndex,itemHs,ls_ps)	= subMenuTraceIO parentIndex info parentsIndex zIndex itemHs ls_ps
 				= (zIndex,[itemH:itemHs],ls_ps)
 		where
-			subMenuTraceIO` :: !Int !MenuTraceInfo ![Int] !Int !(MenuElementHandle .ls .ps) !(.ls,.ps)
-													  -> (!Int, !MenuElementHandle .ls .ps,  (.ls,.ps))
+			subMenuTraceIO` :: !Int !MenuTraceInfo ![Int] !Int !(MenuElementHandle .ls .pst) !(.ls,.pst)
+													  -> (!Int, !MenuElementHandle .ls .pst,  (.ls,.pst))
 			subMenuTraceIO` parentIndex info parentsIndex zIndex itemH=:(SubMenuHandle subH=:{mSubItems}) ls_ps
 				| parentIndex<>zIndex
 					= (zIndex+1,itemH,ls_ps)
@@ -290,8 +290,8 @@ where
 			= (zIndex,itemHs,ls_ps)
 	
 //	menuElementsTraceIO applies the Menu(Mods)Function of the menu item at index itemIndex to the context state.
-	menuElementsTraceIO :: !Int !MenuTraceInfo !Int ![MenuElementHandle .ls .ps] !(.ls,.ps)
-										   -> (!Int,![MenuElementHandle .ls .ps], (.ls,.ps))
+	menuElementsTraceIO :: !Int !MenuTraceInfo !Int ![MenuElementHandle .ls .pst] !(.ls,.pst)
+										   -> (!Int,![MenuElementHandle .ls .pst], (.ls,.pst))
 	menuElementsTraceIO itemIndex info zIndex [itemH:itemHs] ls_ps
 		# (zIndex,itemH,ls_ps)		= menuElementTraceIO itemIndex info zIndex itemH ls_ps
 		| itemIndex<zIndex
@@ -300,8 +300,8 @@ where
 			# (zIndex,itemHs,ls_ps)	= menuElementsTraceIO itemIndex info zIndex itemHs ls_ps
 			= (zIndex,[itemH:itemHs],ls_ps)
 	where
-		menuElementTraceIO :: !Int !MenuTraceInfo !Int !(MenuElementHandle .ls .ps) !(.ls,.ps)
-											  -> (!Int, !MenuElementHandle .ls .ps,  (.ls,.ps))
+		menuElementTraceIO :: !Int !MenuTraceInfo !Int !(MenuElementHandle .ls .pst) !(.ls,.pst)
+											  -> (!Int, !MenuElementHandle .ls .pst,  (.ls,.pst))
 		menuElementTraceIO itemIndex info zIndex itemH=:(MenuItemHandle {mItemAtts}) (ls,ps)
 			| itemIndex<>zIndex || not hasFun	= (zIndex+1,itemH,  (ls,ps))
 			| otherwise							= (zIndex+1,itemH,f (ls,ps))

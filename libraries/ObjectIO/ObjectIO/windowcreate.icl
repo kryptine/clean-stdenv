@@ -148,13 +148,13 @@ createAnyWindow wMetrics behindPtr wId {x,y} {w,h} originv osdinfo wH=:{whMode,w
 									= OScreateWindow wMetrics isResizable hInfo vInfo minSize (toTuple maxSize)
 													 isClosable whTitle pos size getInitActiveControl (createWindowControls wMetrics)
 													 (updateWindowControl wMetrics wId size)
-													 osdinfo wH tb
+													 osdinfo behindPtr wH tb
 		  windowInfo				= {	windowInfo	& windowHScroll	= setScrollInfoPtr hScroll hPtr
 				  									, windowVScroll	= setScrollInfoPtr vScroll vPtr
 						  			  }
 		  wH						= {wH & whWindowInfo=WindowInfo windowInfo}
 		# (wH,tb)					= movewindowviewframe wMetrics originv {wPtr=wPtr,wId=wId,wActive=False} wH tb	// PA: check WIDS value
-		# tb						= stackWindow wPtr behindPtr tb
+	//	# tb						= stackWindow wPtr behindPtr tb		PA: moved to OScreateWindow
 		# (delay_info`,tb)			= OSshowWindow wPtr False tb
 		# tb						= OSsetWindowCursor wPtr (toCursorCode (getWindowCursorAtt cursorAtt)) tb
 		= (delay_info++delay_info`,wPtr,osdinfo,wH,tb)
@@ -255,10 +255,11 @@ getStackBehindWindow index wsHs=:{whsWindows}
 	# (before,[wlsH=:{wshIds={wPtr}}:wlsHs])	= splitAt (index-1) whsWindows
 	= (wPtr,{wsHs & whsWindows=before++[wlsH:wlsHs]})
 
+/*	PA: not used anymore.
 stackWindow :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
 stackWindow wPtr OSNoWindowPtr tb = tb
 stackWindow wPtr behindPtr     tb = OSstackWindow wPtr behindPtr tb
-
+*/
 
 /*	bufferDelayedEvents buffers the events in the OSEvents environment.
 */

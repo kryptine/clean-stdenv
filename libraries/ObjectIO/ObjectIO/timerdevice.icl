@@ -15,7 +15,8 @@ timerdeviceFatalError function error
 
 TimerFunctions :: DeviceFunctions (PSt .l)
 TimerFunctions
-	= {	dShow	= id
+	= {	dDevice	= TimerDevice
+	  ,	dShow	= id
 	  ,	dHide	= id
 	  ,	dEvent	= timerEvent
 	  ,	dDoIO	= timerIO
@@ -30,9 +31,7 @@ timerOpen pState=:{io=ioState}
 		= {pState & io=ioState}
 	| otherwise
 		# ioState			= IOStSetDevice (TimerSystemState {tTimers=[]}) ioState
-		# (deviceFunctions,ioState)
-							= IOStGetDeviceFunctions ioState
-		# ioState			= IOStSetDeviceFunctions [TimerFunctions:deviceFunctions] ioState
+		# ioState			= IOStSetDeviceFunctions TimerFunctions ioState
 		= {pState & io=ioState}
 
 timerClose :: !(PSt .l) -> PSt .l
@@ -51,6 +50,7 @@ timerClose pState=:{io=ioState}
 		# ioState			= IOStSetTimerTable tt ioState
 		# ioState			= IOStSetIdTable idtable ioState
 		# ioState			= IOStRemoveDevice TimerDevice ioState
+		# ioState			= IOStRemoveDeviceFunctions TimerDevice ioState
 		= {pState & io=ioState}
 where
 	closeTimerIds :: !SystemId !(TimerStateHandle .ps) !(!TimerTable,!ReceiverTable,!IdTable) -> (!TimerTable,!ReceiverTable,!IdTable)
