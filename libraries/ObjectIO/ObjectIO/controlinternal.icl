@@ -789,9 +789,8 @@ where
 			  (_,f)			= id_f
 			  newState		= validateSliderState (f oldState)
 			  itemH			= {itemH & wItemInfo`=SliderInfo` {info & sliderInfoState`=newState}}
-			  (tbMin,tbThumb,tbMax,_)
-			  				= toOSscrollbarRange (newState.sliderMin,newState.sliderThumb,newState.sliderMax) 0
-			# tb			= osSetSliderControlThumb wPtr wItemPtr` clipRect (not (isEmptyRect clipRect)) (tbMin,tbThumb,tbMax) tb
+			  thumbState	= toOSscrollbarRange (newState.sliderMin,newState.sliderThumb,newState.sliderMax) 0
+			# tb			= osSetSliderControlThumb wPtr wItemPtr` clipRect (not (isEmptyRect clipRect)) thumbState tb
 			= (itemH,(id_fs,tb))
 	
 	setSliderState wMetrics wPtr clipRect itemH=:{wItemKind`=IsCompoundControl} (id_fs,tb)

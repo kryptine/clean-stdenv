@@ -76,8 +76,9 @@ openmodalwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
 	# (osDelayEvents,ioState)	= accIOToolbox (strictSeqList (delayMouse++delayKey)) pState.io
 	# (osEvents,ioState)		= ioStGetEvents ioState
 	# ioState					= ioStSetEvents (osAppendEvents osDelayEvents osEvents) ioState
-	# (finalLS,ioState)			= getFinalModalDialogLS noError (toWID wId) ioState
+	# (finalLS,moreLS,ioState)	= getFinalModalDialogLS noError (toWID wId) ioState
 	| isJust modalWIDS			// there still are modal dialogs
+		|| moreLS				// DvA: or unretrieved final states...
 		= (errorReport,finalLS,{pState & io=ioState})
 	# (closed,ioState)			= ioStClosed ioState
 	| closed					// process has been requested to close; remove WindowDevice, so process can removed (scheduler)
@@ -176,27 +177,28 @@ where
 /*	getFinalModalDialogLS retrieves the final local state of the modal dialog. This value has been stored in the window handles.
 	This MUST have been done by disposeWindow (windowdispose). 
 */
-	getFinalModalDialogLS :: !Bool !WID !(IOSt .l) -> (!Maybe .ls,!IOSt .l)
+	getFinalModalDialogLS :: !Bool !WID !(IOSt .l) -> (!Maybe .ls,!Bool,!IOSt .l)
 	getFinalModalDialogLS noError wid ioState
-		| not noError
-			= (Nothing,ioState)
 		# (found,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
 		| not found
 			= windowcreateFatalError "getFinalModalDialogLS" "could not retrieve WindowSystemState from IOSt"
+		# windows					= windowSystemStateGetWindowHandles wDevice
+		  (final,more,windows)		= getFinalLS wid windows
+		# ioState					= ioStSetDevice (WindowSystemState windows) ioState
+		| not noError
+			= (Nothing,more,ioState)
 		| otherwise
-			# windows				= windowSystemStateGetWindowHandles wDevice
-			  (final,windows)		= getFinalLS wid windows
-			# ioState				= ioStSetDevice (WindowSystemState windows) ioState
 			= case final of
 				Nothing    -> windowcreateFatalError "getFinalModalDialogLS" "final local modal dialog state not found"
-				Just final -> (getFinalModalLS wid final,ioState)
+				Just final -> (getFinalModalLS wid final,more,ioState)
 	where
-		getFinalLS :: !WID !(WindowHandles .pst) -> (!Maybe FinalModalLS,!WindowHandles .pst)
+		getFinalLS :: !WID !(WindowHandles .pst) -> (!Maybe FinalModalLS,!Bool,!WindowHandles .pst)
 		getFinalLS wid windows=:{whsFinalModalLS}
 			# (removed,finalLS,finalLSs)	= uremove (\fmLS=:{fmWIDS}->(identifyWIDS wid fmWIDS,fmLS)) undef whsFinalModalLS
 			  windows						= {windows & whsFinalModalLS=finalLSs}
-			| not removed					= (Nothing,windows)
-			| otherwise						= (Just finalLS,windows)
+			  more							= not (isEmpty finalLSs)
+			| not removed					= (Nothing,more,windows)
+			| otherwise						= (Just finalLS,more,windows)
 
 
 /*	createModalDialogControls wPtr ioState

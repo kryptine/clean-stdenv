@@ -1245,17 +1245,12 @@ osCompoundControlHasOrigin :== True
 
 //	On slider controls:
 
-osSetSliderControlThumb :: !OSWindowPtr !OSWindowPtr !Rect !Bool !(!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
-osSetSliderControlThumb _ cPtr _ redraw (min,thumb,max) tb
-	= winSetScrollPos cPtr SB_CTL thumb 0 0 0 tb//redraw tb
-/*	PA: Diederik proposed the following to solve Maarten's bug:
 osSetSliderControlThumb :: !OSWindowPtr !OSWindowPtr !Rect !Bool !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
 osSetSliderControlThumb _ cPtr _ redraw (min,thumb,max,thumbsize) tb
 	# tb	= winSetScrollRange cPtr SB_CTL min max False tb
-//	# tb	= winSetScrollPos   sliderPtr SB_CTL thumb (x+w) (y+h) (if horizontal h w) tb
 	# tb	= winSetScrollThumbSize cPtr SB_CTL thumbsize 0 0 0 tb
-	= winSetScrollPos cPtr SB_CTL thumb 0 0 0 tb//redraw tb
-*/
+	= winSetScrollPos cPtr SB_CTL thumb 0 0 0 tb
+
 osSetSliderControlSelect :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
 osSetSliderControlSelect _ cPtr _ select tb
 	= winEnableControl cPtr select tb

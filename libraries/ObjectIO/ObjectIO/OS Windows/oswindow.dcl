@@ -493,7 +493,7 @@ osCompoundControlHasOrigin		:== True
 	osSetSliderControlSize parentWindow parentPos sliderPtr pos size update
 		sets the new size of the slider control and updates the control if update holds.
 */
-osSetSliderControlThumb			:: !OSWindowPtr !OSWindowPtr !Rect !Bool !(!Int,!Int,!Int)					!*OSToolbox -> *OSToolbox
+osSetSliderControlThumb			:: !OSWindowPtr !OSWindowPtr !Rect !Bool !(!Int,!Int,!Int,!Int)				!*OSToolbox -> *OSToolbox
 osSetSliderControlSelect		:: !OSWindowPtr !OSWindowPtr !Rect !Bool									!*OSToolbox -> *OSToolbox
 osSetSliderControlShow			:: !OSWindowPtr !OSWindowPtr !Rect !Bool									!*OSToolbox -> *OSToolbox
 osSetSliderControlPos			:: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool	!*OSToolbox -> *OSToolbox

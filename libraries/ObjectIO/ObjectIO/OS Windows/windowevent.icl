@@ -473,8 +473,9 @@ filterOSEvent _ {ccMsg=CcWmACTIVATE,p1=wPtr} windows ioState
 	| otherwise
 		# (wids,wsH)			= getWindowStateHandleWIDS wsH
 		  windows				= setWindowHandlesWindow wsH windows
-		  (activeModal,windows)	= getWindowHandlesActiveModalDialog windows
-		= (True,Nothing,if (isJust activeModal) (Just (WindowInitialise wids)) (Just (WindowActivation wids)),windows,ioState)	// PA: WindowInitialise? Why? Doesn't smell well
+//		  (activeModal,windows)	= getWindowHandlesActiveModalDialog windows
+//		= (True,Nothing,if (isJust activeModal) (Just (WindowInitialise wids)) (Just (WindowActivation wids)),windows,ioState)	// PA: WindowInitialise? Why? Doesn't smell well
+		= (True,Nothing,Just (WindowActivation wids),windows,ioState)	// DvA: always activate/deactivate windows
 
 filterOSEvent _ {ccMsg=CcWmCLOSE,p1=wPtr} windows ioState
 	# (found,wsH,windows)		= getWindowHandlesWindow (toWID wPtr) windows
@@ -497,8 +498,9 @@ filterOSEvent _ {ccMsg=CcWmDEACTIVATE,p1=wPtr} windows ioState
 	| otherwise
 		# (wids,wsH)			= getWindowStateHandleWIDS wsH
 		  windows				= setWindowHandlesWindow wsH windows
-		  (activeModal,windows)	= getWindowHandlesActiveModalDialog windows
-		= (True,Nothing,if (isJust activeModal) Nothing (Just (WindowDeactivation wids)),windows,ioState)
+//		  (activeModal,windows)	= getWindowHandlesActiveModalDialog windows
+//		= (True,Nothing,if (isJust activeModal) Nothing (Just (WindowDeactivation wids)),windows,ioState)
+		= (True,Nothing,Just (WindowDeactivation wids),windows,ioState)	// DvA: always activate/deactivate windows
 
 filterOSEvent _ {ccMsg=CcWmKEYBOARD,p1=wPtr,p2=cPtr,p3=keycode,p4=state,p5=mods} windows ioState
 	# (found,wsH,windows)			= getWindowHandlesWindow (toWID wPtr) windows
