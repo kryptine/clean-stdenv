@@ -1160,21 +1160,27 @@ where
 			= (done,{itemH & wItems`=itemHs},updRgn_tb)
 		| newOrigin==oldOrigin
 			= (True,itemH,updRgn_tb)
+		# (updRgn,tb)			= updRgn_tb
+		# tb					= setsliderthumb hasHScroll miOSMetrics itemPtr True  (minx,newOrigin.x,maxx) viewx (toTuple itemSize) tb
+		# tb					= setsliderthumb hasVScroll miOSMetrics itemPtr False (miny,newOrigin.y,maxy) viewy (toTuple itemSize) tb
+		  info					= {info & compoundOrigin=newOrigin}
+		  clipRect1				= IntersectRects contentRect clipRect
+		| isEmpty itemH.wItems`
+			# itemH				= {itemH & wItemInfo`=CompoundInfo` info}
+			# (itemH,tb)		= drawCompoundLook` miOSMetrics ableContext1 wPtr clipRect1 itemH tb
+			= (True,itemH,(updRgn,tb))
 		| otherwise
-			# (updRgn,tb)		= updRgn_tb
-			# tb				= setsliderthumb hasHScroll miOSMetrics itemPtr True  (minx,newOrigin.x,maxx) viewx (toTuple itemSize) tb
-			# tb				= setsliderthumb hasVScroll miOSMetrics itemPtr False (miny,newOrigin.y,maxy) viewy (toTuple itemSize) tb
-			  oldItems`			= itemH.wItems`
+			# oldItems`			= itemH.wItems`
 			  orientation`		= [(domain,newOrigin):miOrientation]
 			# (_,newItems`,tb)	= layoutControls` miOSMetrics hMargins` vMargins` spaces` itemSize itemSize orientation` oldItems` tb
 			  newItems`			= shiftControls` (toVector itemPos) newItems`
-			  info				= {info & compoundOrigin=newOrigin}
 			  itemH				= {itemH & wItems`=newItems`,wItemInfo`=CompoundInfo` info}
 			# tb				= case updRgn of
 									Just rgn -> osdisposergn rgn tb
 									nothing  -> tb
 			# (itemH, tb)		= forceValidCompoundClipState` miOSMetrics True wPtr defaultId shownContext itemH tb
 			# (updRgn,tb)		= relayoutControls` miOSMetrics ableContext1 shownContext1 contentRect contentRect itemPos itemPos itemPtr defaultId oldItems` itemH.wItems` tb
+			# (itemH, tb)		= drawCompoundLook` miOSMetrics ableContext1 wPtr clipRect1 itemH tb
 			= (True,itemH,(Just updRgn,tb))
 	where
 		info					= getWItemCompoundInfo` itemH.wItemInfo`
@@ -1257,26 +1263,28 @@ where
 			= (done,{itemH & wItems`=itemHs},updRgn_tb)
 		| newDomain==oldDomain
 			= (True,itemH,updRgn_tb)
+		# (updRgn,tb)		= updRgn_tb
+		# (minx,maxx,viewx)	= (newDomainRect.rleft,newDomainRect.rright, newContentSize.w)
+		  (miny,maxy,viewy)	= (newDomainRect.rtop, newDomainRect.rbottom,newContentSize.h)
+		  newOrigin			= {x=SetBetween oldOrigin.x minx (max minx (maxx-viewx)),y=SetBetween oldOrigin.y miny (max miny (maxy-viewy))}
+		# tb				= setsliderthumb hasHScroll miOSMetrics itemPtr True  (minx,newOrigin.x,maxx) viewx itemSize` tb
+		# tb				= setsliderthumb hasVScroll miOSMetrics itemPtr False (miny,newOrigin.y,maxy) viewy itemSize` tb
+		  oldItems`			= itemH.wItems`
+		  orientation`		= [(newDomain,newOrigin):miOrientation]
+		# (_,newItems`,tb)	= layoutControls` miOSMetrics hMargins` vMargins` spaces` itemSize itemSize orientation` oldItems` tb
+		  newItems`			= shiftControls` (toVector itemPos) newItems`
+		  info				= {info & compoundOrigin=newOrigin,compoundDomain=newDomainRect}
+		  itemH				= {itemH & wItems`=newItems`,wItemInfo`=CompoundInfo` info}
+		# tb				= case updRgn of
+								Just rgn -> osdisposergn rgn tb
+								nothing  -> tb
+		# (itemH, tb)		= forceValidCompoundClipState` miOSMetrics True wPtr defaultId shownContext itemH tb
+		# (updRgn,tb)		= relayoutControls` miOSMetrics ableContext1 shownContext1 newContentRect newContentRect itemPos itemPos itemPtr defaultId
+								oldItems` itemH.wItems` tb
+		| shownContext1
+			# (itemH,tb)	= drawCompoundLook` miOSMetrics ableContext1 wPtr (IntersectRects newContentRect clipRect) itemH tb
+			= (True,itemH,(Just updRgn,tb))
 		| otherwise
-			# (updRgn,tb)		= updRgn_tb
-			# (minx,maxx,viewx)	= (newDomainRect.rleft,newDomainRect.rright, newContentSize.w)
-			  (miny,maxy,viewy)	= (newDomainRect.rtop, newDomainRect.rbottom,newContentSize.h)
-			  newOrigin			= {x=SetBetween oldOrigin.x minx (max minx (maxx-viewx)),y=SetBetween oldOrigin.y miny (max miny (maxy-viewy))}
-			# tb				= setsliderthumb hasHScroll miOSMetrics itemPtr True  (minx,newOrigin.x,maxx) viewx itemSize` tb
-			# tb				= setsliderthumb hasVScroll miOSMetrics itemPtr False (miny,newOrigin.y,maxy) viewy itemSize` tb
-			  oldItems`			= itemH.wItems`
-			  orientation`		= [(newDomain,newOrigin):miOrientation]
-			# (_,newItems`,tb)	= layoutControls` miOSMetrics hMargins` vMargins` spaces` itemSize itemSize orientation` oldItems` tb
-			  newItems`			= shiftControls` (toVector itemPos) newItems`
-			  info				= {info & compoundOrigin=newOrigin,compoundDomain=newDomainRect}
-			  itemH				= {itemH & wItems`=newItems`,wItemInfo`=CompoundInfo` info}
-			# tb				= case updRgn of
-									Just rgn -> osdisposergn rgn tb
-									nothing  -> tb
-			# (itemH, tb)		= forceValidCompoundClipState` miOSMetrics True wPtr defaultId shownContext itemH tb
-			# (updRgn,tb)		= relayoutControls` miOSMetrics ableContext1 shownContext1 newContentRect newContentRect itemPos itemPos itemPtr defaultId
-									oldItems` itemH.wItems` tb
-			# (itemH,tb)		= drawCompoundLook` miOSMetrics ableContext1 wPtr (IntersectRects newContentRect clipRect) itemH tb
 			= (True,itemH,(Just updRgn,tb))
 	where
 		info					= getWItemCompoundInfo` itemH.wItemInfo`

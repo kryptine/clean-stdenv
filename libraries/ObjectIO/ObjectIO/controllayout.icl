@@ -396,12 +396,6 @@ where
 						visVScroll					= hasVScroll && OSscrollbarIsVisible (domainRect.rtop, domainRect.rbottom) h
 						(w`,h`)						= (w+wMetrics.osmVSliderWidth,h+wMetrics.osmHSliderHeight)
 				
-				validateControlMargin :: !(!Int,!Int) -> (!Int,!Int)
-				validateControlMargin (a,b) = (max 0 a,max 0 b)
-				
-				validateControlItemSpace :: !(!Int,!Int) -> (!Int,!Int)
-				validateControlItemSpace (hspace,vspace) = (max 0 hspace,max 0 vspace)
-				
 				layoutScrollbars :: !OSWindowMetrics !Size !CompoundInfo -> CompoundInfo
 				layoutScrollbars wMetrics size info=:{compoundHScroll,compoundVScroll}
 					= {	info & compoundHScroll=layoutScrollbar hRect compoundHScroll
@@ -474,12 +468,6 @@ where
 				validateDerivedSize wMetrics derSize reqSize
 					| reqSize==zero		= derSize
 					| otherwise			= reqSize
-				
-				validateControlMargin :: !(!Int,!Int) -> (!Int,!Int)
-				validateControlMargin (a,b) = (max 0 a,max 0 b)
-				
-				validateControlItemSpace :: !(!Int,!Int) -> (!Int,!Int)
-				validateControlItemSpace (hspace,vspace) = (max 0 hspace,max 0 vspace)
 
 		getLayoutWItem _ _ _ _ _ _ _ _ _ _
 			= controllayoutFatalError "getLayoutWItem" "unmatched control implementation alternative"
@@ -517,7 +505,7 @@ getLayoutItems` wMetrics hMargins vMargins spaces orientations prevIds prevId cI
 where
 	getLayoutItem` :: !OSWindowMetrics !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) ![(ViewDomain,Origin)]
 									   [Id] Id !Int !WElementHandle` !*OSToolbox
-						  -> (![LayoutItem],[Id],Id,!Int,!WElementHandle`,!*OSToolbox)
+					 -> (![LayoutItem],[Id],Id,!Int,!WElementHandle`,!*OSToolbox)
 	getLayoutItem` wMetrics hMargins vMargins spaces orientations prevIds prevId cId (WItemHandle` itemH=:{wItemVirtual`}) tb
 		| wItemVirtual`
 			= ([],prevIds,prevId,cId,WItemHandle` itemH,tb)
@@ -748,12 +736,6 @@ where
 						w`							= w+wMetrics.osmVSliderWidth
 						h`							= h+wMetrics.osmHSliderHeight
 				
-				validateControlMargin :: !(!Int,!Int) -> (!Int,!Int)
-				validateControlMargin (a,b) = (max 0 a,max 0 b)
-				
-				validateControlItemSpace :: !(!Int,!Int) -> (!Int,!Int)
-				validateControlItemSpace (hspace,vspace) = (max 0 hspace,max 0 vspace)
-				
 				layoutScrollbars :: !OSWindowMetrics !Size !CompoundInfo -> CompoundInfo
 				layoutScrollbars wMetrics size info=:{compoundHScroll,compoundVScroll}
 					= {	info & compoundHScroll=layoutScrollbar hRect compoundHScroll
@@ -826,12 +808,6 @@ where
 				validateDerivedSize wMetrics derSize reqSize
 					| reqSize==zero		= derSize
 					| otherwise			= reqSize
-				
-				validateControlMargin :: !(!Int,!Int) -> (!Int,!Int)
-				validateControlMargin (a,b) = (max 0 a,max 0 b)
-				
-				validateControlItemSpace :: !(!Int,!Int) -> (!Int,!Int)
-				validateControlItemSpace (hspace,vspace) = (max 0 hspace,max 0 vspace)
 
 		getLayoutWItem` _ _ _ _ _ _ _ _ _ _
 			= controllayoutFatalError "getLayoutWItem`" "unmatched control implementation alternative"
@@ -849,7 +825,13 @@ where
 
 getLayoutItems` _ _ _ _ _ prevIds prevId cId [] tb
 	= ([],prevIds,prevId,cId,[],tb)
-	
+
+validateControlMargin :: !(!Int,!Int) -> (!Int,!Int)
+validateControlMargin (a,b) = (max 0 a,max 0 b)
+
+validateControlItemSpace :: !(!Int,!Int) -> (!Int,!Int)
+validateControlItemSpace (hspace,vspace) = (max 0 hspace,max 0 vspace)
+
 toColumns :: !RowsOrColumns ![x] -> [[x]]
 toColumns (Columns n) items
 	= repeat_splitting perColumn items

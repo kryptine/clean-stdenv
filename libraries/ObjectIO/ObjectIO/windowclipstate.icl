@@ -14,7 +14,7 @@ from	wstateaccess	import getWItemRadioInfo`, getWItemCheckInfo`, getWItemCompoun
 
 /*	createClipState wMetrics allClipStates validate wPtr clipRect defId isVisible items
 		calculates the ClipState that corresponds with items.
-		If the Boolean argument is True, also the invalid ClipStates are recalculated of non transparant CompoundControls
+		If the Boolean argument is True, also the invalid ClipStates are recalculated of CompoundControls
 			that are inside the window frame. 
 */
 createClipState :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !Rect !(Maybe Id) !Bool ![WElementHandle .ls .pst] !*OSToolbox

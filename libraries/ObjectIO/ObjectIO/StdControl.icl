@@ -566,7 +566,7 @@ where
 	moveControlViewFrame` :: !Id Vector2 !*WState -> *WState
 	moveControlViewFrame` id v wState=:{wIds,wRep,wTb,wMetrics}
 		# (wH,tb)	= movecontrolviewframe id v wMetrics wIds wRep wTb
-		  wH		= invalidateWindowClipState` wH
+	//	  wH		= invalidateWindowClipState` wH		PA: seems to me that this is a bit exagerated
 		= {wState & wRep=wH,wTb=tb}
 
 
