@@ -46,7 +46,7 @@ MainModule
 		NeverMemoryProfile:	False
 		NeverTimeProfile:	False
 		StrictnessAnalysis:	True
-		ListTypes:	StrictExportTypes
+		ListTypes:	NoTypes
 		ListAttributes:	True
 		Warnings:	True
 		Verbose:	True
@@ -92,8 +92,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	821
+				SizeY:	570
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -307,8 +307,8 @@ OtherModules
 			ReuseUniqueNodes:	True
 		Dcl
 			WindowPosition
-				X:	0
-				Y:	0
+				X:	24
+				Y:	1
 				SizeX:	887
 				SizeY:	455
 		DclOpen:	False
@@ -335,15 +335,15 @@ OtherModules
 			ReuseUniqueNodes:	True
 		Dcl
 			WindowPosition
-				X:	12
-				Y:	88
+				X:	17
+				Y:	37
 				SizeX:	883
 				SizeY:	584
-		DclOpen:	True
+		DclOpen:	False
 		Icl
 			WindowPosition
-				X:	0
-				Y:	0
+				X:	-1
+				Y:	60
 				SizeX:	882
 				SizeY:	538
 		IclOpen:	False
@@ -643,10 +643,10 @@ OtherModules
 			ReuseUniqueNodes:	True
 		Dcl
 			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	821
-				SizeY:	574
+				X:	31
+				Y:	67
+				SizeX:	863
+				SizeY:	486
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -5739,34 +5739,6 @@ OtherModules
 				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	tree
-		Dir:	{Project}
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 Static
 	Mods
 		Path:	{Project}\specialize.icl
@@ -5971,21 +5943,16 @@ Static
 		Path:	{Application}\Libraries\StdEnv\StdOverloaded.icl
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\_SystemDynamic.icl
 		Path:	{Application}\Libraries\Dynamics\extension\StdCleanTypes.icl
-		Path:	{Project}\tree.icl
 	Objs
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup0.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup1Trace.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup2.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_system.o
 		Path:	{Project}\Clean System Files\specialize.o
-		Path:	{Application}\Libraries\StdGEC\Clean System Files\noObjectAGEC.o
 		Path:	{Project}\Clean System Files\basicArrowEditors.o
 		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\store.o
-		Path:	{Application}\Libraries\StdGEC\Clean System Files\updownAGEC.o
 		Path:	{Application}\Libraries\StdGEC\Clean System Files\tupleAGEC.o
-		Path:	{Application}\Libraries\StdGEC\Clean System Files\buttonAGEC.o
 		Path:	{Application}\Libraries\StdGEC\Clean System Files\modeAGEC.o
-		Path:	{Application}\Libraries\StdGEC\Clean System Files\StdAGEC.o
 		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\StdGEC.o
 		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Clean System Files\ShowWrapped.o
 		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Clean System Files\Wrap.o
@@ -6010,7 +5977,8 @@ Static
 		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\objectloc.o
 		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\guiloc.o
 		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\gec.o
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\genericgecs.o
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\StdGECExt.o
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\StdArrow.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
@@ -6176,10 +6144,12 @@ Static
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\timerdevice.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\timerevent.o
 		Path:	{Application}\Libraries\StdGEC\Clean System Files\GecArrow.o
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\StdArrow.o
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\StdGECExt.o
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\genericgecs.o
+		Path:	{Application}\Libraries\StdGEC\Clean System Files\StdAGEC.o
 		Path:	{Application}\Libraries\StdGEC\Clean System Files\basicAGEC.o
-		Path:	{Project}\Clean System Files\tree.o
+		Path:	{Application}\Libraries\StdGEC\Clean System Files\buttonAGEC.o
+		Path:	{Application}\Libraries\StdGEC\Clean System Files\updownAGEC.o
+		Path:	{Application}\Libraries\StdGEC\Clean System Files\noObjectAGEC.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallClipboard_121.obj
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFileSelectors_121.obj
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFont_121.obj
