@@ -14,7 +14,6 @@ import StdPSt
 import testable, parseprint
 from   infragecs import basicGEC, :: InfraGEC
 
-
 // (,) is used to place editors next to each other
 
 gGEC{|(,)|} gGECa gGECb gecArgs=:{gec_value=mtuple,update=tupdate} pSt
