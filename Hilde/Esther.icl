@@ -15,7 +15,7 @@ Start world = StartProcess Esther world
 
 Esther :: !*World -> *World
 Esther env
-	# st = {searchPath = [], builtin = [("Esther", dynamic Esther :: *World -> *World)] ++ stdEnv ++ famkeEnv, env = env}
+	# st = {searchPath = [[]], builtin = [("Esther", dynamic Esther :: *World -> *World)] ++ stdEnv ++ famkeEnv, env = env}
 	  st=:{env} = shell st
 	= env
 where
@@ -46,10 +46,10 @@ where
 		= (v ++ [" :: ", t], {st & env = env})
 	where
 		eval :: !Dynamic !*env -> (!Dynamic, !*env) | TC env
-		eval (f :: *env^ -> *env^) env = trace "<*World -> *World>" (dynamic UNIT, f env)
+		eval (f :: *env^ -> *env^) env = trace_n "<*World -> *World>" (dynamic UNIT, f env)
 		eval (f :: *env^ -> *(a, *env^)) env 
 			# (x, env) = f env
-			= trace "<*World -> *(a, *World)>" (dynamic x :: a, env)
+			= trace_n "<*World -> *(a, *World)>" (dynamic x :: a, env)
 		eval d env = (d, env)
 
 	handler ((ApplyTypeError df dx) :: ComposeException) env = (["*** Error: cannot apply ", tf, " to ", tx, " ***"], env)

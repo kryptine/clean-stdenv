@@ -125,8 +125,10 @@ parser{|Tzf|} b = keyword "\\\\" &> yield Tzf
 parser{|TbackArrow|} b = keyword "<-" &> yield TbackArrow
 parser{|Tguard|} b = keyword "|" &> yield Tguard
 parser{|Tand|} b = keyword "&" &> yield Tand
+parser{|Twrite|} b = keyword ">>>" &> yield Twrite
+parser{|Tdynamic|} b = keyword "dynamic" &> yield Tdynamic
 
-derive parser NTstatement, NTplain, NTterm, NTsugar, NTlist, NTlistComprehension, NTqualifier, NTgenerator
+derive parser NTstatement, NTplain, NTterm, NTsugar, NTlist, NTlistComprehension, NTqualifier, NTgenerator, NTdynamic
 derive parser NTlambda, NTpattern, NTlet, NTletDef, NTcase, NTcaseAlt
 derive parser Scope, (,)
 
@@ -173,7 +175,7 @@ lowercaseIdentifier = satisfy (\c -> isMember c lowerchars) <:&> <*> (satisfy (\
 uppercaseIdentifier = satisfy (\c -> isMember c upperchars) <:&> <*> (satisfy (\c -> isMember c alphachars)) <@ toString
 funnyIdentifier = <+> (satisfy (\c -> isMember c funnychars)) <@ toString
 
-keywords =: ["=", "->", "let", "in", "case", "of", "\\", "_", ":", "..", "\\\\", "<-", "|", "&"]
+keywords =: ["=", "->", "let", "in", "case", "of", "\\", "_", ":", "..", "\\\\", "<-", "|", "&", ">>>", "dynamic"]
 symbolchars =: ['\',();[]{}"']
 spacechars =: ['\t\n\r\v ']
 funnychars =: ['\\?.=:$!@#%^&*+-<>/|~']

@@ -2,7 +2,8 @@ implementation module EstherTransform
 
 import EstherBackend
 import CleanTricks, StdList, StdString, StdBool, StdMisc, StdFunc
-import EstherPostParser
+import EstherPostParser, DynamicFileSystem
+//import EstherScript
 
 generic transform e :: !e -> Core
 
@@ -32,12 +33,28 @@ where
 		>>= f g env 
 			# (x, env) = f env
 			= g x env
+transform{|NTstatement|} (Write e _ n) = CoreApply (CoreApply write (CoreCode (dynamic n :: String))) (transform{|*|} (NTdynamic Tdynamic e))
+where
+	write = CoreCode (dynamic >>> :: String Dynamic *World -> *(Bool, *World))
+	where
+		>>> n d env = dynamicWrite [n] d env
+/*transform{|NTstatement|} (Write e _ n) = write
+where
+	write = CoreCode (dynamic >>> :: *World -> *(Bool, *World))
+	where
+		>>> env 
+			# (d, env) = generateCode (transform{|*|} e) env
+			= dynamicWrite [n] d env*/
 
 transform{|NTexpression|} (Term e) = transform{|*|} e
 transform{|NTexpression|} (Apply f x) = CoreApply (transform{|*|} f) (transform{|*|} x)
 
 transform{|NTterm|} (Plain e) = transform{|*|} e
 transform{|NTterm|} (Sugar e) = transform{|*|} (desugar e)
+
+transform{|NTdynamic|} (NTdynamic _ e) = CoreApply toDynamic (transform{|*|} e)
+where
+	toDynamic = CoreCode (overloaded "TC" (dynamic (undef, id) :: A.a: (a, (a -> Dynamic) a -> Dynamic)))
 
 transform{|NTnameOrValue|} (NTvalue d _) = CoreCode d
 transform{|NTnameOrValue|} (NTname y) = CoreVariable y
