@@ -39,7 +39,6 @@ Start world
 	#!	console 					= fwrites (server+++" responded on port "+++toString port+++"\n")
 											  console
 		{ sChannel=sc, rChannel=rc }= fromJust mbDuplexChan
-//	**************************************************************************************************
 
   // send http command
 

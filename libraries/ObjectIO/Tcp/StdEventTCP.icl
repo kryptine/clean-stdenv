@@ -3,7 +3,7 @@ implementation module StdEventTCP
 //	Clean Standard Object I/O library, version 1.2
 
 import StdEnv
-import /*StdChannelEnv,*/ StdChannels, StdTCPDef, StdTCPChannels
+import StdChannels, StdTCPDef, StdTCPChannels
 import StdReceiver
 import StdPSt, StdPStClass
 import tcp, ostcp, tcp_bytestreams
@@ -515,9 +515,6 @@ Cast a
 		}
 
 // MW11..
-u_isNothing x=:(Just _) = (False, x)
-u_isNothing x=:Nothing = (True, x)
-
 getConnectedIds rAtts
 	# l = [ids \\ (ReceiverConnectedReceivers ids)<-rAtts]
 	| isEmpty l

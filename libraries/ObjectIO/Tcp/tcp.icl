@@ -1,7 +1,21 @@
 implementation module tcp
 
 import	StdEnv
-from	id				import Id
+import	StdFile
+import	id
+import	StdTime
+from	StdId import Ids
+
+class ChannelEnv env	| Ids env & TimeEnv env & FileEnv env
+where
+	channelEnvKind	::	!*env	-> (!Int, !*env)
+	mb_close_inet_receiver_without_id :: !Bool !(!Int, !Int) !*env -> *env
+	
+//channelEnvKind can return the following values:
+// (some C functions rely on these values)
+WORLD	:==	0
+IOST	:==	1
+PST		:==	2
 
 IE_CONNECTREQUEST		:== 0x0001
 IE_RECEIVED				:== 0x0004
@@ -80,13 +94,13 @@ unpack_ipaddr i = i
 
 close_listener	:: !EndpointRef !*env	->	*env
 close_listener endpointRef env
-	#!	env	= setEndpointDataC endpointRef 0 False False True env
+	#	env	= setEndpointDataC endpointRef 0 False False True env
 		env	= garbageCollectEndpointC endpointRef env
 	= env
 
 close_tcprchan	:: !EndpointRef !*env	->	*env
 close_tcprchan endpointRef env
-	#!	((referenceCount,_,hs,aborted),env)
+	#	((referenceCount,_,hs,aborted),env)
 						= getEndpointDataC endpointRef env
 		env = setEndpointDataC endpointRef (dec referenceCount) False hs aborted env
 		env	= case (referenceCount, aborted) of

@@ -8,7 +8,7 @@ definition module StdChannels
 
 from	StdMaybe		import	Maybe
 from	StdOverloaded	import	==, toString
-from	channelenv		import	ChannelEnv
+from	tcp				import	ChannelEnv
 
 instance ChannelEnv World
 
