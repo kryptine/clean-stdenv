@@ -11,26 +11,12 @@ idGEC j 	= mkAGEC 	{	toGEC	= \i _ ->i
 						,	updGEC	= id
 						} "idGEC"
 
-
-// Hidden Identity
-
-hidGEC :: a -> AGEC a | gGEC {|*|} a 
-hidGEC j 	= mkAGEC 	{	toGEC	= \i _ -> Hide i
+hidGEC :: a -> AGEC a  // Just a store, does not require any GEC !
+hidGEC j 	= mkAGEC` 	{	toGEC	= \i _ -> Hide i
 						,	fromGEC = \(Hide i) -> i
 						,	value	= j
 						,	updGEC	= id
 						} "hidGEC"
-
-
-// Hidden and constant, cannot be changed
-
-constGEC :: a -> AGEC a
-constGEC j 	= mkAGEC 	{	toGEC	= \i _ -> Hide 0
-						,	fromGEC = \(Hide 0) -> j
-						,	value	= j
-						,	updGEC	= id
-						} "constGEC"
-
 
 // apply GEC
 
@@ -86,13 +72,15 @@ horlistGEC  list	= mkAGEC	{	toGEC	= tohorlist
 								,	fromGEC = fromhorlist
 								,	value 	= list
 								,	updGEC	= id
-								}  ("horlistGEC" +++ toString (length list))
+								}  ("horlistGEC" +++ len)
 where
 	tohorlist []	 _ = EmptyMode <-> hidGEC []
 	tohorlist [x:xs] _ = Edit x    <-> horlistGEC xs
 
 	fromhorlist (EmptyMode <-> xs) = []  
 	fromhorlist (Edit x <-> xs)    = [x: ^^ xs]  
+
+	len = (toString (length list))
 
 
 // All elements of a list shown in a column

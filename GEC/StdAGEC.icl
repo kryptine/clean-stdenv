@@ -52,6 +52,12 @@ where
 mkAGEC  :: !(BimapGEC a b) !String -> AGEC a | gGEC{|*|} b
 mkAGEC bimapGEC descriptor =  Hidden bimapGEC (gGEC{|*->*->*|} undef gGEC{|*|}) descriptor
 
+mkAGEC`  :: !(BimapGEC a (g b)) !String -> AGEC a | gGEC{|*->*|} g
+mkAGEC` bimapGEC descriptor =  Hidden bimapGEC (gGEC{|*->*->*|} undef1 (gGEC{|*->*|} undef2)) descriptor
+where
+	undef1 = abort "mkAGEC` evaluated undefined GEC editor/1"
+	undef2 = abort "mkAGEC` evaluated undefined GEC editor/2"
+	
 ^^    :: (AGEC a) -> a
 ^^ (Hidden bimap ggec string) = bimap.value
 
@@ -133,7 +139,7 @@ where
 		# (aGEC,pSt)	= gGECa {gecArgs & gec_value=Nothing, update = \v r env -> env} pSt
 		# (a,   pSt)	= aGEC.gecGetValue pSt
 		# pSt			= aGEC.gecClose    pSt
-		= gGEC_AGEC gGECa {gecArgs & gec_value=Just (constGEC a)} pSt
+		= gGEC_AGEC gGECa {gecArgs & gec_value=Just (hidGEC a)} pSt
 
 
 /******************************************************************************************************
