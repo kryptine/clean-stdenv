@@ -1,18 +1,18 @@
 implementation module xpath;
 
-GetHomePath :: !Int -> {#Char};
-GetHomePath _
-	= code {
-		.inline GetHomePath
-			ccall get_home_path "I-S"
-		.end
-	};
+//1.3
+from StdString import String;
+//3.1
 
-GetApplicationPath :: !Int -> {#Char};
-GetApplicationPath _
-	= code {
-		.inline GetApplicationPath
-			ccall get_appl_path "I-S"
-		.end
-	};
 
+get_home_path :: !Int -> {#Char};
+get_home_path a0 = code {
+	ccall get_home_path "I:S"
+}
+// CleanString get_home_path (int);
+
+get_appl_path :: !Int -> {#Char};
+get_appl_path a0 = code {
+	ccall get_appl_path "I:S"
+}
+// CleanString get_appl_path (int);

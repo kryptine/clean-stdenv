@@ -1,3 +1,8 @@
-system module xcursor;
+definition module xcursor;
 
-XSetWidgetCursor :: !Int !Int -> Int;
+//1.3
+from StdString import String;
+//3.1
+
+set_window_cursor :: !Int !Int -> Int;
+// int set_window_cursor (int,int);
