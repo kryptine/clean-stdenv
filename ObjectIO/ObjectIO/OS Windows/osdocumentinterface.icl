@@ -5,7 +5,7 @@ implementation module osdocumentinterface
 
 
 import	StdMaybe, StdTuple
-import	clCrossCall_12, ostoolbar, oswindow
+import	clCrossCall_12, ostoolbar, ossystem, ostypes
 from	commondef	import FatalError,String
 from	StdIOCommon	import DocumentInterface, MDI, SDI, NDI
 

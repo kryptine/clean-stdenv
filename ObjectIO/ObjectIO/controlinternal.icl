@@ -13,10 +13,10 @@ import	commondef, wstateaccess
 from	StdControlAttribute	import isControlTip, getControlTipAtt, isControlKeyboard
 from	controldraw			import drawCustomButtonLook`, drawCustomLook`, drawCompoundLook`,
 									drawInCustomButton`,  drawInCustom`,   drawInCompound`
-from	controllayout		import getCompoundContentRect, getWindowContentRect, layoutControls`
+from	controllayout		import layoutControls`
 from	controlrelayout		import relayoutControls`
 from	controlvalidate		import validateControlTitle, validateSliderState
-from	windowaccess		import identifyMaybeId, getWItemPopUpInfo, getWindowInfoWindowData
+from	windowaccess		import identifyMaybeId, getWItemPopUpInfo, getWindowInfoWindowData, getCompoundContentRect, getWindowContentRect
 from	windowclipstate		import validateCompoundClipState`, forceValidCompoundClipState`
 from	windowupdate		import updatewindowbackgrounds`
 from	windowvalidate		import validateViewDomain

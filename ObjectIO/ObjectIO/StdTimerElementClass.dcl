@@ -9,7 +9,7 @@ definition module StdTimerElementClass
 
 
 import	StdIOCommon, StdTimerDef
-from	StdPSt		import PSt, IOSt
+from	iostate		import PSt, IOSt
 from	timerhandle	import TimerElementState
 
 

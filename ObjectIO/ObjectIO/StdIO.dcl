@@ -13,6 +13,7 @@ import
 	StdKey,					// Function and type definitions on keyboard
 	StdMaybe,				// The Maybe data type
 	StdPSt,					// Operations on PSt that are not device related
+	StdPStClass,			// PSt/IOSt instances of common classes
 	StdSystem,				// System dependent operations
 	
 	StdFileSelect,			// File selector dialogues

@@ -7,8 +7,8 @@ implementation module windowupdate
 import	StdBool, StdFunc, StdList, StdMisc
 import	ospicture, osrgn, oswindow
 import	commondef, deviceevents, windowhandle, wstate
-from	controllayout	import getCompoundContentRect, getWindowContentRect, getCompoundHScrollRect, getCompoundVScrollRect
-from	windowaccess	import getWItemCompoundInfo, getWItemCustomButtonInfo, getWItemCustomInfo, getWindowInfoWindowData
+from	windowaccess	import getWItemCompoundInfo, getWItemCustomButtonInfo, getWItemCustomInfo, getWindowInfoWindowData,
+								getCompoundContentRect, getWindowContentRect, getCompoundHScrollRect, getCompoundVScrollRect
 from	windowclipstate	import validateWindowClipState
 from	wstateaccess	import getWItemCompoundInfo`
 
@@ -170,7 +170,6 @@ where
 				# (backgrRgn,itemHs,osPict,tb)	= updatebackgrounds wMetrics wFrame ableContext backgrRgn itemHs osPict tb
 				= (backgrRgn,WChangeLSHandle {wChH & wChangeItems=itemHs},osPict,tb)
 
-
 updatewindowbackgrounds` :: !OSWindowMetrics !OSRgnHandle !WIDS !WindowHandle` !*OSToolbox
 															-> (!WindowHandle`,!*OSToolbox)
 updatewindowbackgrounds` wMetrics backgrRgn wids=:{wPtr} wH=:{whItems`,whSelect`,whSize`,whWindowInfo`} tb
@@ -290,7 +289,6 @@ where
 			updatebackground wMetrics wFrame ableContext backgrRgn (WRecursiveHandle` itemHs wKind) osPict tb
 				# (backgrRgn,itemHs,osPict,tb)	= updatebackgrounds wMetrics wFrame ableContext backgrRgn itemHs osPict tb
 				= (backgrRgn,WRecursiveHandle` itemHs wKind,osPict,tb)
-
 
 /*	updaterectcontrols updates the controls that fit in the Rect argument of the indicated window or compound control. 
 	The Rect is in window/compound coordinates. 

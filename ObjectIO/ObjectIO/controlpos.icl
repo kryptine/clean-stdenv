@@ -5,7 +5,7 @@ implementation module controlpos
 
 import	StdBool, StdFunc, StdInt, StdList, StdMisc, StdTuple
 import	commondef, windowaccess
-from	controllayout	import layoutControls, getWindowContentRect
+from	controllayout	import layoutControls
 from	controlrelayout	import relayoutControls
 from	windowclipstate	import forceValidWindowClipState
 from	windowdefaccess	import isWindowItemSpace,    getWindowItemSpaceAtt,

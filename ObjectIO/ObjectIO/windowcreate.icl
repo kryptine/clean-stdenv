@@ -7,14 +7,13 @@ implementation module windowcreate
 
 
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
-import	osevent, oswindow
+import	osevent, ostypes, oswindow
 from	ostoolbox			import OSNewToolbox
 from	StdMenu				import enableMenuSystem, disableMenuSystem
 from	StdPSt				import accPIO
 from	StdWindowAttribute	import isWindowInit, getWindowInitFun, isWindowClose, isWindowCursor, getWindowCursorAtt
 import	commondef, controlpos, iostate, scheduler, windowaccess
 from	controlcreate		import createControls
-from	controllayout		import getWindowContentRect
 from	windowclipstate		import validateWindowClipState
 from	windowupdate		import updatewindow
 from	windowvalidate		import validateWindow

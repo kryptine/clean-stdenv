@@ -11,9 +11,8 @@ from	commondef			import StateMap2, Contains, Cond, RectSize, StrictSeq
 from	processstack		import setProcessShowState
 from	StdProcessAttribute	import isProcessOpenFiles, isProcessToolbar
 import	osdocumentinterface
-from	toolbar				import openToolbar
 from	ostypes				import Rect
-from	oswindow			import OSGetProcessWindowDimensions
+from	ossystem			import OSGetProcessWindowDimensions
 
 
 //	General process topology creation functions:

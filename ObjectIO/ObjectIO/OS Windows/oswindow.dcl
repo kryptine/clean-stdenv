@@ -4,23 +4,17 @@ definition module oswindow
 //	Clean Object I/O library, version 1.2
 
 
-from StdMaybe				import Maybe, Just, Nothing
 from StdString				import String
 from StdOverloaded			import ==
-from menuCrossCall_12		import HMENU
+from StdMaybe				import Maybe, Just, Nothing
+from osdocumentinterface	import OSDInfo, OSMDInfo, OSSDInfo, OSInfo, OSToolbar, OSToolbarHandle, HMENU, HWND
 from osevent				import OSEvent, CrossCallInfo
 from osfont					import Font
 from osrgn					import OSRgnHandle
+from ossystem				import OSWindowMetrics
 from ostoolbox				import OSToolbox
-from ostypes				import Rect, OSWindowPtr, HWND
+from ostypes				import Rect, OSWindowPtr
 from ospicture				import OSPictContext
-from osdocumentinterface	import OSDInfo, OSMDInfo, OSSDInfo, OSInfo, OSToolbar, OSToolbarHandle
-
-
-OSNoWindowPtr	:== -1
-
-// OSGetProcessWindowDimensions returns Rect of process window in terms of screen coordinates
-OSGetProcessWindowDimensions :: !OSDInfo !*OSToolbox -> (!Rect,!*OSToolbox)
 
 
 /*	System dependent constants:
@@ -30,26 +24,8 @@ OSControlTitleSpecialChars :== []					// Special prefix characters that should b
 
 /*	System dependent metrics:
 */
-::	OSWindowMetrics
-	=	{	osmFont				:: Font				// The internal Font used in Windows for controls
-		,	osmFontMetrics		:: (Int,Int,Int)	// The ascent, descent, leading of osmFont
-		,	osmHeight			:: Int				// The height of the internal Font
-		,	osmHorMargin		:: Int				// The default horizontal margin
-		,	osmVerMargin		:: Int				// The default vertical   margin
-		,	osmHorItemSpace		:: Int				// The default horizontal item space
-		,	osmVerItemSpace		:: Int				// The default vertical   item space
-		,	osmHSliderHeight	:: Int				// The default height of a horizontal slider control
-		,	osmVSliderWidth		:: Int				// The default width  of a vertical   slider control
-		}
-
-OSDefaultWindowMetrics			:: !*OSToolbox -> (!OSWindowMetrics,!*OSToolbox)
 OSMinWindowSize					:: (!Int,!Int)
 OSMinCompoundSize				:: (!Int,!Int)
-
-/*	OSstripOuterSize isMDI isResizable
-		returns (dw,dh) required to add/subtract to view/outer size in order to obtain outer/view size.
-*/
-OSstripOuterSize				:: !Bool !Bool !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
 
 
 /*	Determine the size of controls:

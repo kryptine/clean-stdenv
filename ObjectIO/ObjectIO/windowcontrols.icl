@@ -10,9 +10,9 @@ from	StdControlAttribute	import isControlPos
 from	StdWindowAttribute	import isWindowHMargin,    getWindowHMarginAtt, 
 									isWindowVMargin,   getWindowVMarginAtt, 
 									isWindowItemSpace, getWindowItemSpaceAtt
-from	controllayout		import layoutControls, getWindowContentRect
+from	controllayout		import layoutControls
 from	controlrelayout		import relayoutControls
-from	windowaccess		import identifyMaybeId, genWElementItemNrs
+from	windowaccess		import identifyMaybeId, genWElementItemNrs, getWindowContentRect
 from	windowdispose		import disposeWItemHandle
 from	windowdraw			import drawwindowlook
 from	windowupdate		import updatewindowbackgrounds

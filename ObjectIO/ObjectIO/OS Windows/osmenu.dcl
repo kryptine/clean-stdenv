@@ -7,8 +7,7 @@ definition module osmenu
 from	menuCrossCall_12	import HMENU, HITEM
 from	osdocumentinterface	import OSMenuBar
 from	ostoolbox			import OSToolbox
-from	ostypes				import HWND
-from	oswindow			import OSWindowPtr
+from	ostypes				import HWND, OSWindowPtr
 
 
 //	Types for menus and menu elements:

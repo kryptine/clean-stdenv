@@ -8,33 +8,10 @@ definition module StdPSt
 //	********************************************************************************
 
 
-import	StdFile, StdFileSelect, StdSound, StdTime
 from	StdFunc		import St
-from	StdIOBasic	import IdFun
-from	StdIOCommon	import DocumentInterface, MDI, SDI, NDI
+from	StdIOCommon	import IdFun, DocumentInterface, MDI, SDI, NDI
 from	StdPicture	import Picture
 from	iostate		import PSt, IOSt
-from	channelenv	import  ChannelEnv // MW11++
-
-
-/*	PSt is an environment instance of the following classes:
-	- FileSystem	(see StdFile)
-	- FileEnv		(see StdFile)
-	- FileSelectEnv	(see StdFileSelect)
-	- TimeEnv		(see StdTime)
-	- playSoundFile (see StdSound)
-	- ChannelEnv	(see StdChannels) // MW11++
-	- Ids			(see StdId) // MW11++
-	
-	IOSt is also an environment instance of the classes FileEnv, TimeEnv & ChannelEnv
-*/
-instance FileSystem		(PSt .l)
-instance FileEnv		(PSt .l), (IOSt .l) // MW11 added IOSt
-instance FileSelectEnv	(PSt .l)
-instance TimeEnv		(PSt .l), (IOSt .l) // MW11 added IOSt
-instance playSoundFile	(PSt .l)
-instance ChannelEnv 	(PSt .l), (IOSt .l) // MW11 added IOSt
-instance Ids		 	(PSt .l)
 
 
 /*	accScreenPicture provides access to an initial Picture as it would be created in

@@ -5,7 +5,7 @@ definition module sdisize
 
 from StdIOBasic	import Size
 from iostate	import IOSt
-from oswindow	import OSWindowPtr
+from ostypes	import OSWindowPtr
 
 
 /*	getSDIWindowSize retrieves the OSWindowPtr and current Size of the WindowViewFrame of the SDI window

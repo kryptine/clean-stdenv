@@ -7,7 +7,7 @@ implementation module menuinternal
 import	StdBool, StdList, StdMisc
 import	osmenu
 from	menuevent	import MenuSystemStateGetMenuHandles, MenuHandlesGetMenuStateHandles
-from	oswindow	import OSNoWindowPtr
+from	ostypes		import OSNoWindowPtr
 import	iostate, menuaccess, menuitems, sdisize
 from	commondef	import FatalError, StateMap2, RemoveCheck, URemove, UCond, HdTl
 from	menucreate	import disposeMenuIds, disposeShortcutkeys, disposeSubMenuHandles

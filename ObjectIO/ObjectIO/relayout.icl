@@ -10,7 +10,7 @@ from	ospicture		import packPicture, unpackPicture, defaultPen,apppicttoolbox, ac
 								getpictorigin, setpictorigin, getpictpen, setpictpen,
 								pictgetcliprgn, pictsetcliprgn, pictandcliprgn
 import	commondef, windowhandle
-from	controllayout	import getCompoundContentRect, getCompoundHScrollRect, getCompoundVScrollRect
+from	windowaccess	import getCompoundContentRect, getCompoundHScrollRect, getCompoundVScrollRect
 
 
 ::	RelayoutItem

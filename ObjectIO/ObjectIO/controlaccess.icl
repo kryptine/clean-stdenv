@@ -6,7 +6,7 @@ implementation module controlaccess
 
 import	StdBool, StdFunc, StdInt, StdList, StdMisc, StdTuple
 from	oswindow	import OSscrollbarsAreVisible
-import	commondef, id, controldefaccess, controllayout, wstateaccess
+import	commondef, id, controldefaccess, windowaccess, wstateaccess
 
 
 eqfst3id :: !Id !(!Id,.x,.y) -> Bool

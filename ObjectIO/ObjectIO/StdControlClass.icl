@@ -8,7 +8,7 @@ implementation module StdControlClass
 
 import	StdBool, StdFunc, StdInt, StdList, StdMisc, StdTuple
 import	commondef, controldefaccess, controlvalidate, id, iostate, StdControlDef, StdPSt, windowhandle, windowvalidate
-import	ospicture, ossystem, oswindow
+import	ospicture, ossystem, ostypes, oswindow
 
 
 class Controls cdef where

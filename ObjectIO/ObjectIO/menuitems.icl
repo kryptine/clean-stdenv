@@ -7,8 +7,8 @@ implementation module menuitems
 import	StdBool, StdList, StdMisc, StdTuple
 import	commondef, menucreate, menuhandle, receivertable
 import	osdocumentinterface, osmenu
-from	oswindow	import OSNoWindowPtr
-from	iostate		import getIOToolbox, setIOToolbox
+from	ostypes	import OSNoWindowPtr
+from	iostate	import getIOToolbox, setIOToolbox
 
 
 /*	Adding menu elements to (Sub)Menus:

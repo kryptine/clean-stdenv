@@ -5,7 +5,7 @@ definition module timerdefaccess
 
 //	Access function to timerDefinitions.
 
-import	StdTimerAttribute, StdMaybe
+import	StdTimerDef
 
 
 timerDefGetAttributes	:: !(Timer t .ls .pst) -> [TimerAttribute *(.ls,.pst)]

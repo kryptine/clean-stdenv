@@ -9,9 +9,9 @@ definition module StdWindow
 
 
 from	StdFunc			import St
-import	StdMaybe, StdWindowDef
+import	StdControlDef, StdMaybe, StdWindowDef
 from	StdPSt			import PSt, IOSt
-from	StdControlClass	import Controls, ControlState
+from	StdControlClass	import Controls, ControlState, ControlType
 
 
 //	Functions applied to non-existent windows or unknown ids have no effect.

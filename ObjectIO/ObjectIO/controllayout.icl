@@ -20,59 +20,6 @@ controllayoutFatalError rule error
 	= FatalError rule "controllayout" error
 
 
-getCompoundContentRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
-getCompoundContentRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom}
-	| visHScroll && visVScroll	= {itemRect & rright=r`,rbottom=b`}
-	| visHScroll				= {itemRect &           rbottom=b`}
-	| visVScroll				= {itemRect & rright=r`           }
-	| otherwise					= itemRect
-where
-	r`							= rright -osmVSliderWidth
-	b`							= rbottom-osmHSliderHeight
-
-getCompoundHScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
-getCompoundHScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom}
-	| not visHScroll	= zero
-	| otherwise			= {itemRect & rtop=b`,rright=if visVScroll r` rright}
-where
-	r`					= rright -osmVSliderWidth
-	b`					= rbottom-osmHSliderHeight
-
-getCompoundVScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
-getCompoundVScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom}
-	| not visVScroll	= zero
-	| otherwise			= {itemRect & rleft=r`,rbottom=if visHScroll b` rbottom}
-where
-	r`					= rright -osmVSliderWidth
-	b`					= rbottom-osmHSliderHeight
-
-
-getWindowContentRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
-getWindowContentRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom}
-	| visHScroll && visVScroll	= {itemRect & rright=r`,rbottom=b`}
-	| visHScroll				= {itemRect &           rbottom=b`}
-	| visVScroll				= {itemRect & rright=r`           }
-	| otherwise					= itemRect
-where
-	r`							= rright -osmVSliderWidth //+1
-	b`							= rbottom-osmHSliderHeight//+1
-
-getWindowHScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
-getWindowHScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) {rleft,rtop,rright,rbottom}
-	| not visHScroll	= zero
-	| otherwise			= {rleft=rleft-1,rtop=b`,rright=if visVScroll (r`+1) (rright+1),rbottom=rbottom+1}
-where
-	r`					= rright -osmVSliderWidth +1
-	b`					= rbottom-osmHSliderHeight+1
-
-getWindowVScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
-getWindowVScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) {rleft,rtop,rright,rbottom}
-	| not visVScroll	= zero
-	| otherwise			= {rleft=r`,rtop=rtop-1,rright=rright+1,rbottom=if visHScroll (b`+1) (rbottom+1)}
-where
-	r`					= rright -osmVSliderWidth +1
-	b`					= rbottom-osmHSliderHeight+1
-
 
 //	Calculate the precise position (in pixels) of each Control.
 

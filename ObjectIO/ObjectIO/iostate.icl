@@ -11,9 +11,10 @@ from	osactivaterequests	import OSActivateRequest
 from	osevent				import OSEvents, OSnewEvents
 from	osguishare			import OSGUIShare
 from	osmouse				import OSGetDoubleClickTime
+from	ossystem			import OSWindowMetrics, OSDefaultWindowMetrics
 from	ostime				import OSTime
 from	ostoolbox			import OSNewToolbox, OSDummyToolbox
-from	oswindow			import OSWindowPtr, OSNoWindowPtr, OSWindowMetrics, OSDefaultWindowMetrics
+from	ostypes				import OSWindowPtr, OSNoWindowPtr
 from	roundrobin			import RR, emptyRR, notodoRR
 
 
