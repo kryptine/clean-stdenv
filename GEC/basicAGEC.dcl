@@ -8,7 +8,7 @@ import modeAGEC, buttonAGEC, tupleAGEC, updownAGEC
 
 idAGEC 			:: a   					-> AGEC a 		| gGEC {|*|} a				// identity editor  
 hidAGEC 		:: a 					-> AGEC a 		 							// identity, no editor created
-predAGEC 		:: (a -> (Bool,a)) a 		-> AGEC a 		| gGEC {|*|} a 				// id editor only accepts values satifying the given predicate
+predAGEC 		:: (a -> (Bool,a)) a 	-> AGEC a 		| gGEC {|*|} a 				// id editor only accepts values satifying the given predicate
 modeAGEC 		:: (Mode a) 			-> AGEC a 		| gGEC {|*|} a				// convert Mode to AGEC
 applyAGEC 		:: (b -> a) (AGEC b) 	-> AGEC a 		| gGEC {|*|} a & gGEC {|*|} b // apply fba; show both b and a
 counterAGEC		:: a					-> AGEC a		| gGEC {|*|} a & IncDec a 

@@ -62,7 +62,6 @@ where
 	initgec _ Undefined = gecb <|> Display inita
 	initgec _ (Defined b) = b
 
-
 // convert mode to agec
 
 modeAGEC :: (Mode a) -> AGEC a | gGEC {|*|} a
