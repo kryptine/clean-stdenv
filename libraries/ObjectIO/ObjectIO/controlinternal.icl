@@ -604,6 +604,44 @@ where
 		= (False,itemH,tb)
 
 
+//	Set the text selection of an EditControl, and handle proper feedback.
+
+seteditcontrolselection :: !Id !Int !Int !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
+seteditcontrolselection id begin end wMetrics wPtr wH`=:{whItems`,whSize`,whWindowInfo`} tb
+	# (_,itemHs,tb)			= setWElement (setEditSelection wMetrics wPtr True clipRect begin end) id whItems` tb
+	= ({wH` & whItems`=itemHs},tb)
+where
+	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
+	
+	setEditSelection :: !OSWindowMetrics !OSWindowPtr !Bool !OSRect !Int !Int !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
+	
+	setEditSelection wMetrics wPtr shownContext clipRect begin end id itemH=:{wItemKind`=IsEditControl} tb
+		| not (identifyMaybeId id itemH.wItemId`)
+			= (False,itemH,tb)
+		| otherwise
+			# itemRect		= posSizeToRect itemH.wItemPos` itemH.wItemSize`
+			# tb			= osSetEditControlSelection wPtr itemH.wItemPtr` clipRect itemRect begin end tb
+			= (True,itemH,tb)
+	
+	setEditSelection wMetrics wPtr shownContext clipRect begin end id itemH=:{wItemKind`=IsCompoundControl} tb
+		# (found,itemHs,tb)	= setWElement (setEditSelection wMetrics wPtr shownContext1 clipRect1 begin end) id itemH.wItems` tb
+		= (found,{itemH & wItems`=itemHs},tb)
+	where
+		info				= getWItemCompoundInfo` itemH.wItemInfo`
+		clipRect1			= intersectRectContent wMetrics clipRect info itemH.wItemPos` itemH.wItemSize`
+		shownContext1		= shownContext && itemH.wItemShow`
+	
+	setEditSelection wMetrics wPtr shownContext clipRect begin end id itemH=:{wItemKind`=IsLayoutControl} tb
+		# (found,itemHs,tb)	= setWElement (setEditSelection wMetrics wPtr shownContext1 clipRect1 begin end) id itemH.wItems` tb
+		= (found,{itemH & wItems`=itemHs},tb)
+	where
+		clipRect1			= intersectRects clipRect (posSizeToRect itemH.wItemPos` itemH.wItemSize`)
+		shownContext1		= shownContext && itemH.wItemShow`
+	
+	setEditSelection _ _ _ _ _ _ _ itemH tb
+		= (False,itemH,tb)
+
+
 //	Set the look of a control, and handle proper feedback.
 
 setcontrolslook :: ![(Id,Bool,(Bool,Look))] !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)

@@ -1350,6 +1350,10 @@ osSetEditControlCursor :: !OSWindowPtr !OSWindowPtr !OSRect !OSRect !Int !*OSToo
 osSetEditControlCursor _ ePtr _ _ pos tb
 	= winSetEditSelection ePtr pos (pos+1) tb
 
+osSetEditControlSelection :: !OSWindowPtr !OSWindowPtr !OSRect !OSRect !Int !Int !*OSToolbox -> *OSToolbox
+osSetEditControlSelection _ ePtr _ _ start end tb
+	= winSetEditSelection ePtr start end tb
+
 osSetEditControlSelect :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetEditControlSelect _ ePtr _ select tb
 	= winEnableControl ePtr select tb

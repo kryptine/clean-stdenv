@@ -560,6 +560,8 @@ osSetPopUpControlSize			:: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !
 		returns the current content of the edit control.
 	osSetEditControlCursor parentWindow editPtr clipRect itemRect pos
 		sets the cursor position at pos of the edit control while clipping.
+	osSetEditControlSelection parentWindow editPtr clipRect itemRect start end
+		sets the selection of the text in the edit control while clipping.
 	osSetEditControlSelect parentWindow editPtr clipRect toAble
 		enables the edit control (if toAble), or disables the edit control (if (not toAble)), while clipping.
 	osSetEditControlShow parentWindow editPtr clipRect show
@@ -572,6 +574,7 @@ osSetPopUpControlSize			:: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !
 osSetEditControlText			:: !OSWindowPtr !OSWindowPtr !OSRect !OSRect !Bool !String					!*OSToolbox -> *OSToolbox
 osGetEditControlText			:: !OSWindowPtr !OSWindowPtr												!*OSToolbox -> (!String,!*OSToolbox) 
 osSetEditControlCursor			:: !OSWindowPtr !OSWindowPtr !OSRect !OSRect !Int							!*OSToolbox -> *OSToolbox
+osSetEditControlSelection		:: !OSWindowPtr !OSWindowPtr !OSRect !OSRect !Int !Int						!*OSToolbox -> *OSToolbox
 osSetEditControlSelect			:: !OSWindowPtr !OSWindowPtr !OSRect !Bool									!*OSToolbox -> *OSToolbox
 osSetEditControlShow			:: !OSWindowPtr !OSWindowPtr !OSRect !Bool									!*OSToolbox -> *OSToolbox
 osSetEditControlPos				:: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool	!*OSToolbox -> *OSToolbox

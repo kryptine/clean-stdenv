@@ -277,7 +277,7 @@ where
 		| not found
 			= stdWindowFatalError "setActiveControl" "indicated control could not be located"
 		| otherwise
-		//	# keyfocus					= setNewFocusItem itemNr whKeyFocus
+		//	# keyfocus					= setNewFocusItem itemNr whKeyFocus		This should be done via (de)activate-event
 			# (delayinfo,tb)			= osActivateControl wshIds.wPtr itemPtr tb
 			= (delayinfo,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & /*whKeyFocus=keyfocus,*/whItems=itemHs}}},tb)
 	where
