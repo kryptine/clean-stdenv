@@ -92,14 +92,14 @@ void getDevmodeSizeC(int *size, HANDLE *phPrinter,
 	szDevice = strtokMW(&szPrinter,',',',');
 	szDriver = strtokMW(&szPrinter,',',' ');
 	szOutput = strtokMW(&szPrinter,',',' ');
+	*device	= PassCleanString(&passObj1,szDevice,CStringLength(szDevice)+1); // add 1 so '\0' will be passed too
+	*driver	= PassCleanString(&passObj2,szDriver,CStringLength(szDriver)+1);
+	*output	= PassCleanString(&passObj3,szOutput,CStringLength(szOutput)+1);
 	if (*szDevice=='\0' || szDriver=='\0' || *szOutput=='\0')
 		{
 		*size	= 0;
 		return;
 		};
-	*device	= PassCleanString(&passObj1,szDevice,CStringLength(szDevice)+1); // add 1 so '\0' will be passed too
-	*driver	= PassCleanString(&passObj2,szDriver,CStringLength(szDriver)+1);
-	*output	= PassCleanString(&passObj3,szOutput,CStringLength(szOutput)+1);
 	OpenPrinter(szDevice,phPrinter,NULL);
 	*size = DocumentProperties(NULL,*phPrinter,szDevice,NULL,NULL,0);
 }
@@ -126,6 +126,8 @@ static HDC myCreateIC(LPCTSTR driver, LPCTSTR device, DEVMODE *devmode)
 	return icPrint;
 }
 
+#define GetDeviceCapsWithDefault(icPrint, index, defaullt) (icPrint ? GetDeviceCaps(icPrint, index) : defaullt)
+
 void os_getpagedimensionsC(	CleanString devmode,
 							CleanString device, CleanString driver,
 							int emulateScreenRes,
@@ -144,8 +146,8 @@ void os_getpagedimensionsC(	CleanString devmode,
 	icPrint	= myCreateIC(	CleanStringCharacters(driver),CleanStringCharacters(device),
 							(DEVMODE*) CleanStringCharacters(devmode));
 	
-	xResolution = GetDeviceCaps(icPrint, LOGPIXELSX);
-	yResolution = GetDeviceCaps(icPrint, LOGPIXELSY);
+	xResolution = GetDeviceCapsWithDefault(icPrint, LOGPIXELSX, 300);
+	yResolution = GetDeviceCapsWithDefault(icPrint, LOGPIXELSY, 300);
 	if (emulateScreenRes)						// for emulation of the screen resolution
 		{	scNX = WinGetHorzResolution();		// all the deviceCaps will be scaled
 			scNY = WinGetVertResolution();
@@ -155,14 +157,14 @@ void os_getpagedimensionsC(	CleanString devmode,
 	  else
 		{	scNX = 1; scNY = 1; scDX = 1; scDY = 1;	};
 	
-	horPaperPixels	= (GetDeviceCaps(icPrint, PHYSICALWIDTH)*scNX)/scDX;
-	verPaperPixels	= (GetDeviceCaps(icPrint, PHYSICALHEIGHT)*scNY)/scDY;
+	horPaperPixels	= (GetDeviceCapsWithDefault(icPrint, PHYSICALWIDTH, 2246)*scNX)/scDX;
+	verPaperPixels	= (GetDeviceCapsWithDefault(icPrint, PHYSICALHEIGHT, 3250)*scNY)/scDY;
 
-	*maxX			= (GetDeviceCaps(icPrint, HORZRES)*scNX)/scDX;
-	*maxY			= (GetDeviceCaps(icPrint, VERTRES)*scNY)/scDY;
+	*maxX			= (GetDeviceCapsWithDefault(icPrint, HORZRES, 2241)*scNX)/scDX;
+	*maxY			= (GetDeviceCapsWithDefault(icPrint, VERTRES, 3254)*scNY)/scDY;
 
-    *leftPaper		= (-GetDeviceCaps(icPrint, PHYSICALOFFSETX)*scNX)/scDX;
-	*topPaper		= (-GetDeviceCaps(icPrint, PHYSICALOFFSETY)*scNY)/scDY;
+    *leftPaper		= (-GetDeviceCapsWithDefault(icPrint, PHYSICALOFFSETX, 116)*scNX)/scDX;
+	*topPaper		= (-GetDeviceCapsWithDefault(icPrint, PHYSICALOFFSETY, 129)*scNY)/scDY;
 	*rightPaper		= horPaperPixels - *leftPaper;
 	*bottomPaper	= verPaperPixels - *topPaper;
 	
