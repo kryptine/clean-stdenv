@@ -1,6 +1,6 @@
 Version: 1.4
 Global
-	Built:	True
+	Built:	False
 	Target:	develop
 	Exec:	{Project}\DebugExamples.exe
 	CodeGen
@@ -680,8 +680,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	840
-				SizeY:	406
+				SizeX:	777
+				SizeY:	633
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -714,7 +714,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ShowWrapped
-		Dir:	{Project}
+		Dir:	C:\Documents and Settings\ronny\Desktop\WrapDebug
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -729,15 +729,15 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	690
+				SizeY:	466
 		DclOpen:	False
 		Icl
 			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+				X:	142
+				Y:	48
+				SizeX:	820
+				SizeY:	643
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -889,7 +889,10 @@ Static
 		Path:	{Application}\develop\Libraries\StdEnv\Clean System Files\_startup2.o
 		Path:	{Application}\develop\Libraries\StdEnv\Clean System Files\_system.o
 		Path:	{Project}\Clean System Files\DebugExamples.o
-		Path:	{Project}\Clean System Files\ShowWrapped.o
+		Path:	{Application}\develop\Libraries\StdEnv\Clean System Files\_SystemEnumStrict.o
+		Path:	{Application}\develop\Libraries\StdEnv\Clean System Files\_SystemStrictLists.o
+		Path:	{Application}\develop\Libraries\StdEnv\Clean System Files\StdStrictLists.o
+		Path:	{Application}\develop\Libraries\StdEnv\Clean System Files\StdDebug.o
 		Path:	{Application}\develop\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
 		Path:	{Application}\develop\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
 		Path:	{Application}\develop\Libraries\StdEnv\Clean System Files\StdOverloaded.o
@@ -913,10 +916,7 @@ Static
 		Path:	{Application}\develop\Libraries\StdEnv\Clean System Files\StdFunc.o
 		Path:	{Project}\Clean System Files\Debug.o
 		Path:	{Project}\Clean System Files\Wrap.o
-		Path:	{Application}\develop\Libraries\StdEnv\Clean System Files\StdDebug.o
-		Path:	{Application}\develop\Libraries\StdEnv\Clean System Files\StdStrictLists.o
-		Path:	{Application}\develop\Libraries\StdEnv\Clean System Files\_SystemStrictLists.o
-		Path:	{Application}\develop\Libraries\StdEnv\Clean System Files\_SystemEnumStrict.o
+		Path:	{Project}\Clean System Files\ShowWrapped.o
 	Dlib
 		Path:	{Application}\develop\Libraries\StdEnv\Clean System Files\kernel_library
 		Path:	{Application}\develop\Libraries\StdEnv\Clean System Files\user_library

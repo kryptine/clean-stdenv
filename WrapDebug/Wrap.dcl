@@ -18,6 +18,7 @@ instance toString WrappedDescriptorId
     |   WrappedDescriptorNil
     |   WrappedDescriptorTuple
     |   WrappedDescriptorOther !WrappedDescriptorId
+    |   WrappedDescriptorUnknown
 
 instance toString WrappedDescriptor
 
