@@ -58,12 +58,12 @@ where
 	demode (Display a) = a
 	demode (Edit a) =  a
 	demode (Hide a) =  a
+	demode EmptyMode =  undef
 
 	mkmode (Display om) nm Undefined = Display nm
 	mkmode (Edit om)    nm Undefined = Edit nm
 	mkmode (Hide om)    nm Undefined = Hide nm
 	mkmode mode nm         (Defined om) = mkmode mode nm Undefined
-
 
 // Integer with up down counter
 
