@@ -1,7 +1,7 @@
 definition module YlseServer
 
 import StdMaybe
-from FamkeRpc import :: Famke(..), :: RpcId(..), :: FamkePort(..), :: FamkeId(..)
+from FamkeRpc import :: RpcId(..), :: FamkePort(..), :: FamkeId(..)
 
 :: Path` :== [String]
 
@@ -11,24 +11,24 @@ from FamkeRpc import :: Famke(..), :: RpcId(..), :: FamkePort(..), :: FamkeId(..
 
 :: YlseOut
 
-existFileAt :: !YlseId !Path` !*Famke -> (!Bool, !*Famke)
-readFileAt :: !YlseId !Path` !*Famke -> (!Maybe Dynamic, !*Famke)
-writeFileAt :: !YlseId !Path` Dynamic !*Famke -> (!Bool, !*Famke)
-removeFileAt :: !YlseId !Path` !*Famke -> (!Bool, !*Famke)
-makePathAt :: !YlseId !Path` !*Famke -> (!Bool, !*Famke)
-listFolderAt :: !YlseId !Path` !*Famke -> (!Maybe [String], !*Famke)
-removePathAt :: !YlseId !Path` !*Famke -> (!Bool, !*Famke)
+existFileAt :: !YlseId !Path` !*World -> (!Bool, !*World)
+readFileAt :: !YlseId !Path` !*World -> (!Maybe Dynamic, !*World)
+writeFileAt :: !YlseId !Path` Dynamic !*World -> (!Bool, !*World)
+removeFileAt :: !YlseId !Path` !*World -> (!Bool, !*World)
+makePathAt :: !YlseId !Path` !*World -> (!Bool, !*World)
+listFolderAt :: !YlseId !Path` !*World -> (!Maybe [String], !*World)
+removePathAt :: !YlseId !Path` !*World -> (!Bool, !*World)
 
 class YlseServer env
 where
-	ylseExistFile :: !Path` !*env !*Famke -> (!Bool, !*env, !*Famke)
-	ylseReadFile :: !Path` !*env !*Famke -> (!Maybe Dynamic, !*env, !*Famke)
-	ylseWriteFile :: !Path` Dynamic !*env !*Famke -> *(!Bool, !*env, !*Famke)
-	ylseRemoveFile :: !Path` !*env !*Famke -> (!Bool, !*env, !*Famke)
-	ylseMakeFolder :: !Path` !*env !*Famke -> (!Bool, !*env, !*Famke)
-	ylseListFolder :: !Path` !*env !*Famke -> (!Maybe [String], !*env, !*Famke)
-	ylseRemoveFolder :: !Path` !*env !*Famke -> (!Bool, !*env, !*Famke)
-	ylseMount :: !Path` !YlseId !*env !*Famke -> (!Bool, !*env, !*Famke)
-	ylseUnmount :: !Path` !*env !*Famke -> (!Bool, !*env, !*Famke)
+	ylseExistFile :: !Path` !*env !*World -> (!Bool, !*env, !*World)
+	ylseReadFile :: !Path` !*env !*World -> (!Maybe Dynamic, !*env, !*World)
+	ylseWriteFile :: !Path` Dynamic !*env !*World -> *(!Bool, !*env, !*World)
+	ylseRemoveFile :: !Path` !*env !*World -> (!Bool, !*env, !*World)
+	ylseMakeFolder :: !Path` !*env !*World -> (!Bool, !*env, !*World)
+	ylseListFolder :: !Path` !*env !*World -> (!Maybe [String], !*env, !*World)
+	ylseRemoveFolder :: !Path` !*env !*World -> (!Bool, !*env, !*World)
+	ylseMount :: !Path` !YlseId !*env !*World -> (!Bool, !*env, !*World)
+	ylseUnmount :: !Path` !*env !*World -> (!Bool, !*env, !*World)
 
-StartYlseServer :: !YlseId !*env !*Famke -> *Famke | YlseServer env
+StartYlseServer :: !YlseId !*env !*World -> *World | YlseServer env

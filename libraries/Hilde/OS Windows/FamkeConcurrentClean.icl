@@ -7,7 +7,7 @@ from CleanTricks import unsafeTypeCast, unsafeTypeAttrCast
 :: ProcId 
 	:== ProcessId
 
-``P`` :: !(*Famke -> *(a, *Famke)) !*Famke -> (a, !*Famke) | SendGraph{|*|}, ReceiveGraph{|*|}, TC a
+``P`` :: !(*World -> *(a, *World)) !*World -> (a, !*World) | SendGraph{|*|}, ReceiveGraph{|*|}, TC a
 ``P`` f famke
 	# (port, famke) = reservePort famke
 	  (_, famke) = newProcess (sendNfPieceWise port f) famke
@@ -19,7 +19,7 @@ where
 		push_a	0
 	}
 
-	sendNfPieceWise :: !(FamkePort String String)  !(*Famke -> *(a, *Famke)) !*Famke -> *Famke | SendGraph{|*|} a
+	sendNfPieceWise :: !(FamkePort String String)  !(*World -> *(a, *World)) !*World -> *World | SendGraph{|*|} a
 	sendNfPieceWise port f famke
 		# (channel, famke) = tryToBeServer port famke
 		  (x, famke) = f famke
@@ -28,7 +28,7 @@ where
 		  famke = famkeDisconnect channel famke
 		= famke
 
-	wait :: !(FamkePort String String) !*Famke -> a | ReceiveGraph{|*|} a
+	wait :: !(FamkePort String String) !*World -> a | ReceiveGraph{|*|} a
 	wait port famke
 		# (channel, famke) = tryToBeServer port famke
 		  (x, channel, famke) = ReceiveGraph{|*|} channel famke
@@ -50,7 +50,7 @@ where
 		| not ok = beClient port famke
 		= (channel, famke)
 		
-generic SendGraph a :: !a !*(FamkeChannel String String) !*Famke -> *(!*FamkeChannel String String, !*Famke)
+generic SendGraph a :: !a !*(FamkeChannel String String) !*World -> *(!*FamkeChannel String String, !*World)
 SendGraph{|UNIT|} _ channel famke = (channel, famke)
 SendGraph{|PAIR|} gl gr (PAIR l r) channel famke
 	# (channel, famke) = freeze gl l channel famke
@@ -89,7 +89,7 @@ sendGraph s channel famke
 	| not ok = abort "SendGraph failed"
 	= (channel, famke)
 
-generic ReceiveGraph b :: !*(FamkeChannel String String) !*Famke -> *(!b, *FamkeChannel String String, *Famke)
+generic ReceiveGraph b :: !*(FamkeChannel String String) !*World -> *(!b, *FamkeChannel String String, *World)
 ReceiveGraph{|UNIT|} channel famke = (UNIT, channel, famke)
 ReceiveGraph{|PAIR|} gl gr channel famke 
 	# (l, channel, famke) = defrost gl channel famke
@@ -138,7 +138,7 @@ receiveGraph channel famke
 	| not ok = abort "ReceiveGraph failed"
 	= (s, channel, famke)
 
-freeze :: .(a -> .(*(FamkeChannel String .b) -> .(*Famke -> *(*FamkeChannel String .b, *Famke)))) a !*(FamkeChannel String .b) !*Famke -> (!*FamkeChannel String .b, !*Famke)
+freeze :: .(a -> .(*(FamkeChannel String .b) -> .(*World -> *(*FamkeChannel String .b, *World)))) a !*(FamkeChannel String .b) !*World -> (!*FamkeChannel String .b, !*World)
 freeze g x channel famke
 	# (rnf, x, famke) = (True, x, famke) //unsafeIsInRNF x famke
 	| rnf
@@ -151,7 +151,7 @@ freeze g x channel famke
 	| not ok = abort "SendGraph failed"
 	= (channel, famke)
 
-defrost :: .(*(FamkeChannel .a String) -> .(*Famke -> *(b, *FamkeChannel .a String, *Famke))) !*(FamkeChannel .a String) !*Famke -> (b, *FamkeChannel .a String, *Famke)
+defrost :: .(*(FamkeChannel .a String) -> .(*World -> *(b, *FamkeChannel .a String, *World))) !*(FamkeChannel .a String) !*World -> (b, *FamkeChannel .a String, *World)
 defrost g channel famke
 	# (ok, s, channel, famke) = famkeReceive True channel famke
 	| not ok = abort "ReceiveGraph failed"
@@ -161,7 +161,7 @@ defrost g channel famke
 		| not ok = abort "ReceiveGraph failed"
 		= (case d of (x :: A.c: c) -> x, channel, famke)
 
-unsafeIsInRNF :: .a !*Famke -> (!Bool, .a, !*Famke)
+unsafeIsInRNF :: .a !*World -> (!Bool, .a, !*World)
 unsafeIsInRNF x famke = code {	|A| x | famke
 		pushD_a		0			|B| x-desc
 		pushI		2			|B| 2 | x-desc
