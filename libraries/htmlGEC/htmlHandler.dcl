@@ -16,7 +16,7 @@ doHtml :: (*HSt -> (Html,!*HSt)) *World -> *World
 
 // mkHGEC converts any Clean type into a Html GEC
 
-:: FormID	 	:== String				// unique id identifying the form
+:: FormId	 	:== String				// unique id identifying the form
 
 // the editors below are just versiosn of "mkViewHGEC".
 // make shure that all editors have a unique identifier !
@@ -32,15 +32,15 @@ doHtml :: (*HSt -> (Html,!*HSt)) *World -> *World
 :: HMode		= HEdit					// indicates an editor
 				| HDisplay				// indicates that one just wants to display something
 
-mkEditHGEC 		:: !FormID 	!HMode				d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSetHGEC 		:: !FormID 	!HMode				d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSelfHGEC 		:: !FormID 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkApplyHGEC 	:: !FormID 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkStoreHGEC 	:: !FormID 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkApplyEditHGEC	:: !FormID 	!d					d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSpecialEditor :: !FormID 	!HMode !(Bimap d v) d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
+mkEditHGEC 		:: !FormId 	!HMode				d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSetHGEC 		:: !FormId 	!HMode				d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSelfHGEC 		:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyHGEC 	:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkStoreHGEC 	:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyEditHGEC	:: !FormId 	!d					d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSpecialEditor :: !FormId 	!HMode !(Bimap d v) d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
 
-mkEditHGEC2:: !FormID !HMode d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkEditHGEC2:: !FormId !HMode d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 
 
 // mkViewHGEC is the swiss army nife function creating an editor with a view v of data d
@@ -51,7 +51,7 @@ mkEditHGEC2:: !FormID !HMode d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|
 				, resetHGEC :: Maybe (v -> v)		// can be used to reset view (eg for buttons)
 				}
 
-mkViewHGEC 		:: !FormID 	!HMode !(HBimap d v) 	d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
+mkViewHGEC 		:: !FormId 	!HMode !(HBimap d v) 	d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
 
 // generic functions that do the real work,
 // end user just has to derive them for mkHGEC ...
@@ -72,8 +72,9 @@ derive gUpd  Int, Real, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (,)
 
 :: <-> a b		= (<->) infixl 5 a b				// place b to the left of a
 :: <|> a b		= (<|>) infixl 4 a b				// place b below a
-:: CHButton 	= CHPressed | CHButton Int String	// button with text
-:: CHHidden a 	= CHHidden a 						// hidden state
+:: CHButton 	= CHPressed 
+				| CHButton Int String				// button, size in pixels, text of button
+				| ChButtonPict (Int,Int) String		// button, (height,width), reference to picture
 
 :: Mode a 		= Display a
 				| Hide a
@@ -81,10 +82,10 @@ derive gUpd  Int, Real, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (,)
 				| EmptyMode
 
 
-derive gHGEC 		 (,,), (<->), <|>, CHButton, CHHidden, Mode  
-derive gUpd  		 (,,), (<->), <|>, CHButton, CHHidden, Mode
-derive gPrint 	(,), (,,), (<->), <|>, CHButton, CHHidden, Mode
-derive gParse 	(,), (,,), (<->), <|>, CHButton, CHHidden, Mode
+derive gHGEC 		 (,,), (<->), <|>, CHButton, Mode  
+derive gUpd  		 (,,), (<->), <|>, CHButton, Mode
+derive gPrint 	(,), (,,), (<->), <|>, CHButton, Mode
+derive gParse 	(,), (,,), (<->), <|>, CHButton, Mode
 
 // Some default constants used for the length of input boxes
 
@@ -92,5 +93,5 @@ defsize  :== 10										// size of inputfield
 defpixel :== 83										// size in pixels for buttons, pull-down buttons
 backcolor :== "#6699CC"								// background color of non-editable fields
 
-specialize :: (FormID HMode a *HSt -> ((a,BodyTag),*HSt)) FormID HMode a *HSt -> ((a,BodyTag),*HSt) | gUpd {|*|} a
+specialize :: (FormId HMode a *HSt -> ((a,BodyTag),*HSt)) FormId HMode a *HSt -> ((a,BodyTag),*HSt) | gUpd {|*|} a
 

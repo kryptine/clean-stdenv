@@ -119,7 +119,7 @@ None			:== [NoAttr]
 			| Big  			[Std_Attr] String			// big text <big></big>
 			| Blockquote  	[Block_Attr] String			// start of a long quotation <blockquote></blockquote>
 			| Br  										// single line break <br>
-			| Btn	 		[Button_Attr] String		// push button <button></button>		
+			| Button 		[Button_Attr] String		// push button <button></button>		
 			| Caption		[Caption_Attr] String		// Table caption <caption></caption>			
 			| Center		[Std_Attr] String			// centered text <center></center>			
 			| Cite			[Std_Attr] String 			// citation <cite></cite>			
@@ -668,9 +668,11 @@ None			:== [NoAttr]
 			| `Ula_Events	[ElementEvents]
 
 :: Value	= SV String
+			| NQV String
 			| IV Int
 			| RV Real
 			| BV Bool
+
 
 import htmlPrintUtil
 

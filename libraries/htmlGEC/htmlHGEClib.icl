@@ -19,6 +19,14 @@ import StdHtml
 (<||>) infixl 4	:: BodyTag BodyTag -> BodyTag	// Place a above b
 (<||>) b1 b2 =  STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[b1],[b2]]
 
+mkCTable :: [[BodyTag]] -> BodyTag
+mkCTable table
+= Table []	(mktable table)
+where
+	mktable table 	= [Tr [] (mkrow rows) \\ rows <- table]	
+	mkrow rows 		= [Td [Td_VAlign Alo_Top, Td_Width (Pixels defpixel)] [row] \\ row <- rows] 
+
+
 // HGEC collection:
 
 counterHGEC 	:: !String !HMode a !*HSt -> ((a,!BodyTag),!*HSt) | +, -, one,  gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
@@ -94,16 +102,37 @@ where
 	# ((fun,oneb)   ,hst)	= assignFuncBut s mode x hst
 	= ((fun o rowfun,oneb <=> rowb),hst)
 
-	assignFuncBut :: !String !HMode !(CHButton, a -> a) !*HSt -> ((a -> a,!BodyTag),!*HSt)
-	assignFuncBut s mode (button=:CHButton size name ,cbf) hst = mkViewHGEC (s +++ name) mode bimap id hst
-	where
-		bimap =	{ toHGEC 	= \_ _	-> button
-				, updHGEC	= \_ v -> v
-				, fromHGEC	= \_ but -> case but of 
-										CHPressed -> cbf
-										_		  -> id
-				, resetHGEC	= Just (\_ 	-> button)
-				}
-	assignFuncBut s mode (CHPressed,cbf) hst = assignFuncBut s mode (CHButton 10 "??",cbf) hst
+assignFuncBut :: !String !HMode !(CHButton, a -> a) !*HSt -> ((a -> a,!BodyTag),!*HSt)
+assignFuncBut s mode (button=:CHButton _ name ,cbf) hst = mkViewHGEC (s +++ name) mode bimap id hst
+where
+	bimap =	{ toHGEC 	= \_ _	-> button
+			, updHGEC	= \_ v -> v
+			, fromHGEC	= \_ but -> case but of 
+									CHPressed -> cbf
+									_		  -> id
+			, resetHGEC	= Just (\_ 	-> button)
+			}
+assignFuncBut s mode (button=:ChButtonPict _ ref ,cbf) hst = mkViewHGEC (s +++ ref) mode bimap id hst
+where
+	bimap =	{ toHGEC 	= \_ _	-> button
+			, updHGEC	= \_ v -> v
+			, fromHGEC	= \_ but -> case but of 
+									CHPressed -> cbf
+									_		  -> id
+			, resetHGEC	= Just (\_ 	-> button)
+			}
+assignFuncBut s mode (CHPressed,cbf) hst = assignFuncBut s mode (CHButton 10 "??",cbf) hst
 
+assignListFuncBut :: !String !HMode [(CHButton, a -> a)] !*HSt -> ((a -> a,![BodyTag]),!*HSt)
+assignListFuncBut s mode [] hst = ((id,[]),hst)
+assignListFuncBut s mode [x:xs] hst 
+# ((rowfun,rowb),hst) 	= assignListFuncBut s mode xs hst
+# ((fun,oneb)   ,hst)	= assignFuncBut s mode x hst
+= ((fun o rowfun,[oneb:rowb]),hst)
 
+listHGEC 	:: !String !HMode ![a] 	!*HSt -> (([a],![BodyTag]),!*HSt) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+listHGEC s mode [] hst  = (([],[]),hst)
+listHGEC s mode [x:xs] hst
+# ((xs,xsbody),hst) = listHGEC s mode xs hst
+# ((x, xbody), hst) = mkEditHGEC (s +++ toString (length xs)) mode x hst
+= (([x:xs],[xbody:xsbody]),hst)
