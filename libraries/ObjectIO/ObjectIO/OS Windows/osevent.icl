@@ -24,10 +24,6 @@ OSappendEvents :: !*[OSEvent] !OSEvents -> OSEvents
 OSappendEvents newEvents osEvents
 	= osEvents ++ newEvents
 
-OSinsertEvents :: !*[OSEvent] !OSEvents -> OSEvents
-OSinsertEvents newEvents osEvents
-	= newEvents ++ osEvents
-
 OSisEmptyEvents :: !OSEvents -> (!Bool,!OSEvents)
 OSisEmptyEvents []
 	= (True,  [])

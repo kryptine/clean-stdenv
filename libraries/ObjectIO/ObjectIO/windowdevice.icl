@@ -204,7 +204,7 @@ where
 		| otherwise														// handle control deactivate function AFTER lost input events
 			# (osDelayEvents,ioState)= accIOToolbox (StrictSeqList (lostInputEvents ++ [createOSDeactivateControlEvent wids.wPtr info.ckfItemPtr])) ioState
 			# (osEvents,ioState)	= IOStGetEvents ioState
-			# ioState				= IOStSetEvents (OSinsertEvents osDelayEvents osEvents) ioState
+			# ioState				= IOStSetEvents (OSappendEvents osDelayEvents osEvents) ioState
 			# pState				= {pState & io=ioState}
 			= (deviceEvent,pState)
 	
@@ -297,7 +297,7 @@ where
 			# (osDelayEvents,ioState)
 								= accIOToolbox (StrictSeqList (lostInputEvents ++ [createOSDeactivateWindowEvent wids.wPtr])) ioState
 			# (osEvents,ioState)= IOStGetEvents ioState
-			# ioState			= IOStSetEvents (OSinsertEvents osDelayEvents osEvents) ioState
+			# ioState			= IOStSetEvents (OSappendEvents osDelayEvents osEvents) ioState
 			# pState			= {pState & io=ioState}
 			= (deviceEvent,pState)
 	
