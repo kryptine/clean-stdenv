@@ -12,7 +12,7 @@ import GenParse
 
 :: HSt 	// unique state to pass around
 
-doHtml :: (*HSt -> (Html,*HSt)) *World -> *World 
+doHtml :: (*HSt -> (Html,!*HSt)) *World -> *World 
 
 // mkHGEC converts any Clean type into a Html GEC
 
@@ -32,15 +32,15 @@ doHtml :: (*HSt -> (Html,*HSt)) *World -> *World
 :: HMode		= HEdit					// indicates an editor
 				| HDisplay				// indicates that one just wants to display something
 
-mkEditHGEC 		:: FormID 	HMode				d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSetHGEC 		:: FormID 	HMode				d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSelfHGEC 		:: FormID 	(d -> d)			d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkApplyHGEC 	:: FormID 	(d -> d)			d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkStoreHGEC 	:: FormID 	(d -> d)			d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkApplyEditHGEC	:: FormID 	d					d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSpecialEditor :: FormID 	HMode (Bimap d v) 	d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
+mkEditHGEC 		:: !FormID 	!HMode				d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSetHGEC 		:: !FormID 	!HMode				d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSelfHGEC 		:: !FormID 	!(d -> d)			d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyHGEC 	:: !FormID 	!(d -> d)			d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkStoreHGEC 	:: !FormID 	!(d -> d)			d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyEditHGEC	:: !FormID 	!d					d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSpecialEditor :: !FormID 	!HMode !(Bimap d v) d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
 
-mkEditHGEC2:: FormID HMode d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkEditHGEC2:: !FormID !HMode d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 
 
 // mkViewHGEC is the swiss army nife function creating an editor with a view v of data d
@@ -51,7 +51,7 @@ mkEditHGEC2:: FormID HMode d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gP
 				, resetHGEC :: Maybe (v -> v)	// appearance of the view for the next time
 				}
 
-mkViewHGEC 		:: FormID 	HMode (HBimap d v) 	d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
+mkViewHGEC 		:: !FormID 	!HMode !(HBimap d v) 	d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
 
 // generic functions that do the real work,
 // end user just has to derive them for mkHGEC ...
