@@ -122,6 +122,8 @@ where
 		= (Return0Cci,tb)
 	osCreateMDIWindowCallback {ccMsg=CcWmACTIVATE} tb
 		= (Return0Cci,tb)
+	osCreateMDIWindowCallback {ccMsg=CcWmKILLFOCUS} tb		/* PA: added. Shouldn't ControlDeactivate be delayed? */
+		= (Return0Cci,tb)
 	osCreateMDIWindowCallback {ccMsg} tb
 		= osdocumentinterfaceFatalError "osCreateMDIWindowCallback" ("received message nr:"+++toString ccMsg)
 
@@ -140,6 +142,8 @@ where
 	osCreateSDIWindowCallback {ccMsg=CcWmDEACTIVATE} tb
 		= (Return0Cci,tb)
 	osCreateSDIWindowCallback {ccMsg=CcWmACTIVATE} tb
+		= (Return0Cci,tb)
+	osCreateSDIWindowCallback {ccMsg=CcWmKILLFOCUS} tb		/* PA: added. Shouldn't ControlDeactivate be delayed? */
 		= (Return0Cci,tb)
 	osCreateSDIWindowCallback {ccMsg} tb
 		= osdocumentinterfaceFatalError "osCreateSDIWindowCallback" ("received message nr:"+++toString ccMsg)
