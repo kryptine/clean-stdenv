@@ -48,7 +48,7 @@ import	ostoolbox
 		,	wItems`				:: [WElementHandle`]			// In case of	CompoundControl	: its control elements
 																//				Otherwise		: []
 		,	wItemVirtual`		:: Bool							// The control is virtual (True) and should not be layn out
-		,	wItemPos`			:: !Point2						// The exact position of the item
+		,	wItemPos`			:: !Vector2						// The position of the item, relative to its parent (window/dialog/compound/layout)
 		,	wItemSize`			:: Size							// The exact size of the item
 		,	wItemPtr`			:: OSWindowPtr					// The ptr to the item (OSNoWindowPtr if no handle)
 		,	wItemLayoutInfo`	:: LayoutInfo					// Additional information on layout
@@ -72,7 +72,7 @@ import	ostoolbox
 		}
 ::	RadioItemInfo`
 	=	{	radioItem`			:: (String,Int)					// The text of the item
-		,	radioItemPos`		:: !Point2						// The exact position of the item
+		,	radioItemPos`		:: !Vector2						// The exact position of the item
 		,	radioItemSize`		:: Size							// The exact size of the item
 		,	radioItemPtr`		:: OSWindowPtr					// The OSWindowPtr of the item
 		}
@@ -82,7 +82,7 @@ import	ostoolbox
 		}
 ::	CheckItemInfo`
 	=	{	checkItem`			:: (String,Int,MarkState)		// The text and mark of the item
-		,	checkItemPos`		:: !Point2						// The exact position of the item
+		,	checkItemPos`		:: !Vector2						// The exact position of the item
 		,	checkItemSize`		:: Size							// The exact size of the item
 		,	checkItemPtr`		:: OSWindowPtr					// The OSWindowPtr of the item
 		}

@@ -52,6 +52,8 @@ getContentRect _ NoWindowInfo size
 	= sizeToRect size
 
 /*	Calculate the intersection of the given OSRect with the content of a CompoundControl.
+	The Point2 argument must be the absolute position of the compound control.
+	The Size   argument must be the exact size of the compound control.
 */
 intersectRectContent :: !OSWindowMetrics !OSRect !CompoundInfo !Point2 !Size -> OSRect
 intersectRectContent wMetrics clipRect info itemPos itemSize
@@ -73,15 +75,15 @@ where
 */
 enablecontrols :: ![Id] !Bool !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
 enablecontrols ids overrule wMetrics wPtr wH=:{whItems`,whShow`,whSelect`,whSize`,whDefaultId`} tb
-	# (itemHs,(_,tb))	= setAllWElements (enableWItemHandle` wMetrics wPtr whDefaultId` overrule whSelect` whShow` clipRect) whItems` (ids,tb)
+	# (itemHs,(_,tb))	= setAllWElements (enableWItemHandle` wMetrics wPtr whDefaultId` overrule whSelect` whShow` clipRect zero) whItems` (ids,tb)
 	= ({wH & whItems`=itemHs},tb)
 where
 	clipRect			= getContentRect wMetrics wH.whWindowInfo` whSize`
 	
-	enableWItemHandle` :: !OSWindowMetrics !OSWindowPtr !(Maybe Id) !Bool !Bool !Bool !OSRect !WItemHandle` !(![Id],!*OSToolbox)
-																						  -> (!WItemHandle`,!(![Id],!*OSToolbox))
+	enableWItemHandle` :: !OSWindowMetrics !OSWindowPtr !(Maybe Id) !Bool !Bool !Bool !OSRect !Point2 !WItemHandle` !(![Id],!*OSToolbox)
+	                                                                                              -> (!WItemHandle`,!(![Id],!*OSToolbox))
 	
-	enableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect itemH=:{wItemKind`} (ids,tb)
+	enableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect _ itemH=:{wItemKind`} (ids,tb)
 		| systemControl
 			# (found,ids)	= maybeRemoveCheck itemH.wItemId` ids
 			| found
@@ -106,17 +108,17 @@ where
   						IsButtonControl	-> (True,osSetButtonControlSelect wPtr itemPtr clipRect)
   						_				-> (False,undef)
 	
-	enableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect itemH=:{wItemKind`} (ids,tb)
+	enableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect parentPos itemH=:{wItemKind`} (ids,tb)
 		| customControl
 			# (found,ids)	= maybeRemoveCheck itemH.wItemId` ids
 			| found
 				# itemH		= {itemH & wItemSelect`=True}
 				# tb		= customOSAction contextSelect tb
-				# (itemH,tb)= customDraw contextSelect wPtr clipRect itemH tb
+				# (itemH,tb)= customDraw contextSelect wPtr parentPos clipRect itemH tb
 				= (itemH,(ids,tb))
 			| overrule
 				# select	= contextSelect && itemSelect
-				# (itemH,tb)= customDraw select wPtr clipRect itemH tb
+				# (itemH,tb)= customDraw select wPtr parentPos clipRect itemH tb
 				= (itemH,(ids,customOSAction select tb))
 			// otherwise
 				= (itemH,(ids,tb))
@@ -129,27 +131,28 @@ where
 		  						IsCustomControl			-> (True,drawCustomLook`,      osSetCustomControlSelect       wPtr itemPtr clipRect)
 		  						_						-> (False,undef,undef)
 	
-	enableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect itemH=:{wItemKind`=IsCompoundControl} (ids,tb)
+	enableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect parentPos itemH=:{wItemKind`=IsCompoundControl} (ids,tb)
 		# (found,ids)			= maybeRemoveCheck itemH.wItemId` ids
 		| found
-			# (itemH,tb)		= validateCompoundClipState` wMetrics False wPtr defId contextShow itemH tb
-			# (itemH,tb)		= drawCompoundLook` wMetrics contextSelect wPtr clipRect1 itemH tb
-			# (itemHs,(ids,tb))	= setAllWElements (enableWItemHandle` wMetrics wPtr defId True contextSelect contextShow1 clipRect1) itemH.wItems` (ids,tb)
+			# (itemH,tb)		= validateCompoundClipState` wMetrics False wPtr parentPos defId contextShow itemH tb
+			# (itemH,tb)		= drawCompoundLook` wMetrics contextSelect wPtr parentPos clipRect1 itemH tb
+			# (itemHs,(ids,tb))	= setAllWElements (enableWItemHandle` wMetrics wPtr defId True contextSelect contextShow1 clipRect1 absolutePos) itemH.wItems` (ids,tb)
 			# tb				= osSetCompoundSelect wPtr itemPtr clipRect scrollInfo scrollPtrs contextSelect tb
 			  itemH				= {itemH & wItemSelect`=True,wItems`=itemHs}
 			= (itemH,(ids,tb))
 		| overrule
-			# (itemH,tb)		= validateCompoundClipState` wMetrics False wPtr defId contextShow itemH tb
-			# (itemH,tb)		= drawCompoundLook` wMetrics contextSelect1 wPtr clipRect1 itemH tb
-			# (itemHs,(ids,tb))	= setAllWElements (enableWItemHandle` wMetrics wPtr defId overrule contextSelect1 contextShow1 clipRect1) itemH.wItems` (ids,tb)
+			# (itemH,tb)		= validateCompoundClipState` wMetrics False wPtr parentPos defId contextShow itemH tb
+			# (itemH,tb)		= drawCompoundLook` wMetrics contextSelect1 wPtr parentPos clipRect1 itemH tb
+			# (itemHs,(ids,tb))	= setAllWElements (enableWItemHandle` wMetrics wPtr defId overrule contextSelect1 contextShow1 clipRect1 absolutePos) itemH.wItems` (ids,tb)
 			# tb				= osSetCompoundSelect wPtr itemPtr clipRect scrollInfo scrollPtrs contextSelect1 tb
 			  itemH				= {itemH & wItems`=itemHs}
 			= (itemH,(ids,tb))
 		| otherwise
-			# (itemHs,(ids,tb))	= setAllWElements (enableWItemHandle` wMetrics wPtr defId overrule contextSelect1 contextShow1 clipRect1) itemH.wItems` (ids,tb)
+			# (itemHs,(ids,tb))	= setAllWElements (enableWItemHandle` wMetrics wPtr defId overrule contextSelect1 contextShow1 clipRect1 absolutePos) itemH.wItems` (ids,tb)
 			  itemH				= {itemH & wItems`=itemHs}
 			= (itemH,(ids,tb))
 	where
+		absolutePos				= movePoint itemH.wItemPos` parentPos
 		itemPtr					= itemH.wItemPtr`
 		itemSelect				= itemH.wItemSelect`
 		info					= getWItemCompoundInfo` itemH.wItemInfo`
@@ -162,20 +165,21 @@ where
 		itemSize				= itemH.wItemSize`
 		contextSelect1			= contextSelect && itemSelect
 		contextShow1			= contextShow && itemH.wItemShow`
-		clipRect1				= intersectRectContent wMetrics clipRect info itemH.wItemPos` itemSize
+		clipRect1				= intersectRectContent wMetrics clipRect info absolutePos itemSize
 	
-	enableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect itemH=:{wItemKind`=IsLayoutControl} (ids,tb)
+	enableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect parentPos itemH=:{wItemKind`=IsLayoutControl} (ids,tb)
 		# (found,ids)			= maybeRemoveCheck itemH.wItemId` ids
 		  contextSelect1		= if found contextSelect (contextSelect && itemSelect)
-		  (itemHs,(ids,tb))		= setAllWElements (enableWItemHandle` wMetrics wPtr defId (overrule || found) contextSelect1 contextShow1 clipRect1) itemH.wItems` (ids,tb)
+		  (itemHs,(ids,tb))		= setAllWElements (enableWItemHandle` wMetrics wPtr defId (overrule || found) contextSelect1 contextShow1 clipRect1 absolutePos) itemH.wItems` (ids,tb)
 		  itemH					= {itemH & wItemSelect`=found || itemSelect,wItems`=itemHs}
 		= (itemH,(ids,tb))
 	where
+		absolutePos				= movePoint itemH.wItemPos` parentPos
 		itemSelect				= itemH.wItemSelect`
 		contextShow1			= contextShow && itemH.wItemShow`
-		clipRect1				= intersectRects clipRect (posSizeToRect itemH.wItemPos` itemH.wItemSize`)
+		clipRect1				= intersectRects clipRect (posSizeToRect absolutePos itemH.wItemSize`)
 	
-	enableWItemHandle` _ _ _ _ _ _ _ itemH=:{wItemKind`=IsOtherControl _} (ids,tb)
+	enableWItemHandle` _ _ _ _ _ _ _ _ itemH=:{wItemKind`=IsOtherControl _} (ids,tb)
 		# (found,ids)			= maybeRemoveCheck itemH.wItemId` ids
 		| found					= ({itemH & wItemSelect`=True},(ids,tb))
 		| otherwise				= (itemH,(ids,tb))
@@ -190,15 +194,15 @@ where
 */
 disablecontrols :: ![Id] !Bool !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
 disablecontrols ids overrule wMetrics wPtr wH=:{whItems`,whShow`,whSelect`,whSize`,whDefaultId`} tb
-	# (itemHs,(_,tb))	= setAllWElements (disableWItemHandle` wMetrics wPtr whDefaultId` overrule whSelect` whShow` clipRect) whItems` (ids,tb)
+	# (itemHs,(_,tb))	= setAllWElements (disableWItemHandle` wMetrics wPtr whDefaultId` overrule whSelect` whShow` clipRect zero) whItems` (ids,tb)
 	= ({wH & whItems`=itemHs},tb)
 where
 	clipRect			= getContentRect wMetrics wH.whWindowInfo` whSize`
 	
-	disableWItemHandle` :: !OSWindowMetrics !OSWindowPtr !(Maybe Id) !Bool !Bool !Bool !OSRect !WItemHandle` !(![Id],!*OSToolbox)
-																						   -> (!WItemHandle`,!(![Id],!*OSToolbox))
+	disableWItemHandle` :: !OSWindowMetrics !OSWindowPtr !(Maybe Id) !Bool !Bool !Bool !OSRect !Point2 !WItemHandle` !(![Id],!*OSToolbox)
+	                                                                                               -> (!WItemHandle`,!(![Id],!*OSToolbox))
 	
-	disableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect itemH=:{wItemKind`} (ids,tb)
+	disableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect _ itemH=:{wItemKind`} (ids,tb)
 		| systemControl
 			# (found,ids)	= maybeRemoveCheck itemH.wItemId` ids
 			| found
@@ -223,17 +227,17 @@ where
 						IsButtonControl	-> (True,osSetButtonControlSelect wPtr itemPtr clipRect)
 						_				-> (False,undef)
 	
-	disableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect itemH=:{wItemKind`} (ids,tb)
+	disableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect parentPos itemH=:{wItemKind`} (ids,tb)
 		| customControl
 			# (found,ids)	= maybeRemoveCheck itemH.wItemId` ids
 			| found
 				# itemH		= {itemH & wItemSelect`=False}
 				# tb		= customOSAction False tb
-				# (itemH,tb)= customDraw False wPtr clipRect itemH tb
+				# (itemH,tb)= customDraw False wPtr parentPos clipRect itemH tb
 				= (itemH,(ids,tb))
 			| overrule
 				# select	= contextSelect && itemSelect
-				# (itemH,tb)= customDraw select wPtr clipRect itemH tb
+				# (itemH,tb)= customDraw select wPtr parentPos clipRect itemH tb
 				= (itemH,(ids,customOSAction select tb))
 			// otherwise
 				= (itemH,(ids,tb))
@@ -246,28 +250,29 @@ where
 								IsCustomControl			-> (True,drawCustomLook`,      osSetCustomControlSelect       wPtr itemPtr clipRect)
 								_						-> (False,undef,undef)
 	
-	disableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect itemH=:{wItemKind`=IsCompoundControl} (ids,tb)
+	disableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect parentPos itemH=:{wItemKind`=IsCompoundControl} (ids,tb)
 		# (found,ids)			= maybeRemoveCheck itemH.wItemId` ids
 		| found
 			# itemH				= {itemH & wItemSelect`=False}
-			# (itemH,tb)		= validateCompoundClipState` wMetrics False wPtr defId contextShow itemH tb
-			# (itemH,tb)		= drawCompoundLook` wMetrics False wPtr clipRect1 itemH tb
-			# (itemHs,(ids,tb))	= setAllWElements (disableWItemHandle` wMetrics wPtr defId True False contextShow1 clipRect1) itemH.wItems` (ids,tb)
+			# (itemH,tb)		= validateCompoundClipState` wMetrics False wPtr parentPos defId contextShow itemH tb
+			# (itemH,tb)		= drawCompoundLook` wMetrics False wPtr parentPos clipRect1 itemH tb
+			# (itemHs,(ids,tb))	= setAllWElements (disableWItemHandle` wMetrics wPtr defId True False contextShow1 clipRect1 absolutePos) itemH.wItems` (ids,tb)
 			# tb				= osSetCompoundSelect wPtr itemPtr clipRect scrollInfo scrollPtrs False tb
 			  itemH				= {itemH & wItems`=itemHs}
 			= (itemH,(ids,tb))
 		| overrule
-			# (itemH,tb)		= validateCompoundClipState` wMetrics False wPtr defId contextShow itemH tb
-			# (itemH,tb)		= drawCompoundLook` wMetrics contextSelect1 wPtr clipRect1 itemH tb
-			# (itemHs,(ids,tb))	= setAllWElements (disableWItemHandle` wMetrics wPtr defId overrule contextSelect1 contextShow1 clipRect1) itemH.wItems` (ids,tb)
+			# (itemH,tb)		= validateCompoundClipState` wMetrics False wPtr parentPos defId contextShow itemH tb
+			# (itemH,tb)		= drawCompoundLook` wMetrics contextSelect1 wPtr parentPos clipRect1 itemH tb
+			# (itemHs,(ids,tb))	= setAllWElements (disableWItemHandle` wMetrics wPtr defId overrule contextSelect1 contextShow1 clipRect1 absolutePos) itemH.wItems` (ids,tb)
 			# tb				= osSetCompoundSelect wPtr itemPtr clipRect scrollInfo scrollPtrs contextSelect1 tb
 			  itemH				= {itemH & wItems`=itemHs}
 			= (itemH,(ids,tb))
 		| otherwise
-			# (itemHs,(ids,tb))	= setAllWElements (disableWItemHandle` wMetrics wPtr defId overrule contextSelect1 contextShow1 clipRect1) itemH.wItems` (ids,tb)
+			# (itemHs,(ids,tb))	= setAllWElements (disableWItemHandle` wMetrics wPtr defId overrule contextSelect1 contextShow1 clipRect1 absolutePos) itemH.wItems` (ids,tb)
 			  itemH				= {itemH & wItems`=itemHs}
 			= (itemH,(ids,tb))
 	where
+		absolutePos				= movePoint itemH.wItemPos` parentPos
 		itemPtr					= itemH.wItemPtr`
 		itemSelect				= itemH.wItemSelect`
 		itemSize				= itemH.wItemSize`
@@ -280,20 +285,21 @@ where
 		vPtr	| snd scrollInfo= (fromJust info.compoundVScroll).scrollItemPtr
 								= OSNoWindowPtr
 		scrollPtrs				= (hPtr,vPtr)
-		clipRect1				= intersectRectContent wMetrics clipRect info itemH.wItemPos` itemSize
+		clipRect1				= intersectRectContent wMetrics clipRect info absolutePos itemSize
 	
-	disableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect itemH=:{wItemKind`=IsLayoutControl} (ids,tb)
+	disableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect parentPos itemH=:{wItemKind`=IsLayoutControl} (ids,tb)
 		# (found,ids)			= maybeRemoveCheck itemH.wItemId` ids
 		  contextSelect1		= if found False (contextSelect && itemSelect)
-		# (itemHs,(ids,tb))		= setAllWElements (disableWItemHandle` wMetrics wPtr defId (found || overrule) contextSelect1 contextShow1 clipRect1) itemH.wItems` (ids,tb)
+		# (itemHs,(ids,tb))		= setAllWElements (disableWItemHandle` wMetrics wPtr defId (found || overrule) contextSelect1 contextShow1 clipRect1 absolutePos) itemH.wItems` (ids,tb)
 		  itemH					= {itemH & wItemSelect`=if found False itemSelect,wItems`=itemHs}
 		= (itemH,(ids,tb))
 	where
+		absolutePos				= movePoint itemH.wItemPos` parentPos
 		itemSelect				= itemH.wItemSelect`
 		contextShow1			= contextShow && itemH.wItemShow`
-		clipRect1				= intersectRects clipRect (posSizeToRect itemH.wItemPos` itemH.wItemSize`)
+		clipRect1				= intersectRects clipRect (posSizeToRect absolutePos itemH.wItemSize`)
 	
-	disableWItemHandle` _ _ _ _ _ _ _ itemH=:{wItemKind`=IsOtherControl _} (ids,tb)
+	disableWItemHandle` _ _ _ _ _ _ _ _ itemH=:{wItemKind`=IsOtherControl _} (ids,tb)
 		# (found,ids)			= maybeRemoveCheck itemH.wItemId` ids
 		| found					= ({itemH & wItemSelect`=False},(ids,tb))
 		| otherwise				= (itemH,(ids,tb))
@@ -303,7 +309,7 @@ where
 */
 setcontrolsshowstate :: ![Id] !Bool !OSWindowMetrics !WIDS !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
 setcontrolsshowstate ids itemsShow wMetrics wids=:{wPtr} wH=:{whItems`,whSelect`,whSize`,whWindowInfo`} tb
-	# (itemHs,(_,tb))	= setWElements (setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect) whItems` (ids,tb)
+	# (itemHs,(_,tb))	= setWElements (setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect zero) whItems` (ids,tb)
 	= ({wH & whItems`=itemHs},tb)
 where
 	clipRect			= getContentRect wMetrics whWindowInfo` whSize`
@@ -311,10 +317,10 @@ where
 	contextShow			= True	// DvA: moet dit niet itemsShow zijn? PA: nee, want itemsShow bepaalt de nieuwe show-state van elementen; contextShow bepaalt show-state window
 	contextSelect		= if whSelect` Able Unable
 	
-	setWItemShowStates :: !OSWindowMetrics !OSWindowPtr !Bool !Bool !Bool !SelectState !OSRect !WItemHandle` !(![Id],!*OSToolbox)
-																						   -> (!WItemHandle`,!(![Id],!*OSToolbox))
+	setWItemShowStates :: !OSWindowMetrics !OSWindowPtr !Bool !Bool !Bool !SelectState !OSRect !Point2 !WItemHandle` !(![Id],!*OSToolbox)
+	                                                                                               -> (!WItemHandle`,!(![Id],!*OSToolbox))
 	
-	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect itemH=:{wItemKind`=IsRadioControl} (ids,tb)
+	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect _ itemH=:{wItemKind`=IsRadioControl} (ids,tb)
 		# (found,ids)			= maybeRemoveCheck itemH.wItemId` ids
 		| not found && not overrule
 			= (itemH,(ids,tb))
@@ -326,10 +332,10 @@ where
 			= (itemH,(ids,tb))
 	where
 		setradio :: !Bool !OSRect !RadioItemInfo` !*OSToolbox -> *OSToolbox
-		setradio osShow clipRect {radioItemPtr`,radioItemPos`,radioItemSize`} tb
+		setradio osShow clipRect {radioItemPtr`,radioItemSize`} tb
 			= osSetRadioControlShow wPtr radioItemPtr` clipRect osShow tb
 	
-	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect itemH=:{wItemKind`=IsCheckControl} (ids,tb)
+	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect _ itemH=:{wItemKind`=IsCheckControl} (ids,tb)
 		# (found,ids)			= maybeRemoveCheck itemH.wItemId` ids
 		| not found && not overrule
 			= (itemH,(ids,tb))
@@ -341,10 +347,10 @@ where
 			= (itemH,(ids,tb))
 	where
 		setcheck :: !Bool !OSRect !CheckItemInfo` !*OSToolbox -> *OSToolbox
-		setcheck osShow clipRect {checkItemPtr`,checkItemPos`,checkItemSize`} tb
+		setcheck osShow clipRect {checkItemPtr`,checkItemSize`} tb
 			= osSetCheckControlShow wPtr checkItemPtr` clipRect osShow tb
 	
-	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect itemH=:{wItemKind`=IsTextControl} (ids,tb)
+	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect parentPos itemH=:{wItemKind`=IsTextControl} (ids,tb)
 		# (found,ids)			= maybeRemoveCheck itemH.wItemId` ids
 		| not found && not overrule
 			= (itemH,(ids,tb))
@@ -353,11 +359,13 @@ where
 			  itemH				= if found {itemH & wItemShow`=itemsShow} itemH
 			  info				= getWItemTextInfo` itemH.wItemInfo`
 			  text				= info.textInfoText
-			  itemRect			= posSizeToRect itemH.wItemPos` itemH.wItemSize`
+			  itemRect			= posSizeToRect absolutePos itemH.wItemSize`
 			# tb				= osSetTextControlShow wPtr itemH.wItemPtr` clipRect itemRect osShow text tb
 			= (itemH,(ids,tb))
+	where
+		absolutePos				= movePoint itemH.wItemPos` parentPos
 
-	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect itemH=:{wItemKind`} (ids,tb)
+	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect _ itemH=:{wItemKind`} (ids,tb)
 		| osControl
 			# (found,ids)		= maybeRemoveCheck itemH.wItemId` ids
 			| not found && not overrule
@@ -375,7 +383,7 @@ where
 									IsButtonControl -> (True,osSetButtonControlShow)
 									_               -> (False,undef)
 	
-	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect itemH=:{wItemKind`} (ids,tb)
+	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect parentPos itemH=:{wItemKind`} (ids,tb)
 		| isCustom
 			# (found,ids)		= maybeRemoveCheck itemH.wItemId` ids
 			| not found && not overrule
@@ -383,68 +391,58 @@ where
 			// otherwise
 				# osShow		= if overrule contextShow (contextShow && itemsShow)
 				  itemH			= if found {itemH & wItemShow`=itemsShow} itemH
-				  customDraw	= if osShow customDraw (\_ _ _ itemH tb -> (itemH,tb))
-				  itemRect		= posSizeToRect itemH.wItemPos` itemH.wItemSize`
+				  customDraw	= if osShow customDraw (\_ _ _ _ itemH tb -> (itemH,tb))
+				  itemRect		= posSizeToRect absolutePos itemH.wItemSize`
 				# tb			= osAction wPtr itemH.wItemPtr` itemRect clipRect osShow tb
-				# (itemH,tb)	= customDraw itemH.wItemSelect` wPtr clipRect itemH tb
+				# (itemH,tb)	= customDraw itemH.wItemSelect` wPtr parentPos clipRect itemH tb
 				= (itemH,(ids,tb))
 	where
-	  (isCustom,customDraw,osAction)
+		absolutePos				= movePoint itemH.wItemPos` parentPos
+		(isCustom,customDraw,osAction)
 				  				= case wItemKind` of
 				  					IsCustomButtonControl	-> (True,drawCustomButtonLook`,osSetCustomButtonControlShow)
 				  					IsCustomControl			-> (True,drawCustomLook`,      osSetCustomControlShow)
 				  					_						-> (False,undef,undef)
 	
-	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect itemH=:{wItemKind`=IsCompoundControl} (ids,tb)
+	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect parentPos itemH=:{wItemKind`=IsCompoundControl} (ids,tb)
 		# (found,ids)			= maybeRemoveCheck itemH.wItemId` ids
 		  contextShow1			= contextShow && (if found itemsShow itemShow)
 		  overrule1				= overrule || found && itemShow<>itemsShow
-		# (itemHs,(ids,tb))		= setAllWElements (setWItemShowStates wMetrics wPtr overrule1 itemsShow contextShow1 contextSelect1 clipRect1) itemH.wItems` (ids,tb)
+		# (itemHs,(ids,tb))		= setAllWElements (setWItemShowStates wMetrics wPtr overrule1 itemsShow contextShow1 contextSelect1 clipRect1 absolutePos) itemH.wItems` (ids,tb)
 		  itemH					= {itemH & wItems`=itemHs}
 		| not found && not overrule
-//			= cont found (itemH,(ids,tb))
-			= (itemH,(ids,tb))	// PA: is dubbelop, al gedaan in rgl.408
+			= (itemH,(ids,tb))
 		| otherwise
 			# itemH				= if found {itemH & wItemShow`=itemsShow} itemH
-			# itemRect			= posSizeToRect itemH.wItemPos` itemH.wItemSize`
-//			# tb				= osSetCompoundShow wPtr itemH.wItemPtr` itemRect clipRect itemsShow tb
-//			# itemH				= invalidateCompoundClipState` itemH		// PA: added
+			# itemRect			= posSizeToRect absolutePos itemSize
 			# osShow			= if overrule contextShow (contextShow && itemsShow)
-			  customDraw		= if osShow customDraw (\_ _ _ itemH tb -> (itemH,tb))
-			# itemRect			= posSizeToRect itemH.wItemPos` itemH.wItemSize`
+			  customDraw		= if osShow customDraw (\_ _ _ _ itemH tb -> (itemH,tb))
 			# tb				= osSetCompoundShow wPtr itemH.wItemPtr` itemRect clipRect osShow tb
-			# (itemH,tb)		= customDraw itemH.wItemSelect` wPtr clipRect itemH tb					// alleen bij show? PA: is ok, want rgl.418 zet customDraw op dummy
-//			= cont found (itemH,(ids,tb))
-			= (itemH,(ids,tb))	// PA: is dubbelop, al gedaan in rgl.408
+			# (itemH,tb)		= customDraw itemH.wItemSelect` wPtr parentPos clipRect itemH tb
+			= (itemH,(ids,tb))
 	where
+		absolutePos				= movePoint itemH.wItemPos` parentPos
 		itemShow				= itemH.wItemShow`
 		customDraw				= drawCompoundLook` wMetrics
 		contextSelect1			= if (enabled contextSelect) (if itemH.wItemSelect` Able Unable) contextSelect
 		info					= getWItemCompoundInfo` itemH.wItemInfo`
 		itemSize				= itemH.wItemSize`
-		clipRect1				= intersectRectContent wMetrics clipRect info itemH.wItemPos` itemSize
-/*	PA: overbodig, want dubbelop.
-		cont found (itemH,(ids,tb))
-			# contextShow1			= contextShow && (if found itemsShow itemH.wItemShow`)
-			  overrule1				= overrule || found && itemH.wItemShow`<>itemsShow
-			# (itemHs,(ids,tb))		= setAllWElements (setWItemShowStates wMetrics wPtr overrule1 itemsShow contextShow1 contextSelect1 clipRect1) itemH.wItems` (ids,tb)
-							// PA: setAllWElements was setWElements
-			  itemH					= {itemH & wItems`=itemHs}
-			= (itemH,(ids,tb)) */
-	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect itemH=:{wItemKind`=IsLayoutControl} (ids,tb)
+		clipRect1				= intersectRectContent wMetrics clipRect info absolutePos itemSize
+	
+	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect parentPos itemH=:{wItemKind`=IsLayoutControl} (ids,tb)
 		# (found,ids)			= maybeRemoveCheck itemH.wItemId` ids
 		  contextShow1			= contextShow && (if found itemsShow itemShow)
 		  overrule1				= overrule || found && itemShow<>itemsShow
-		# (itemHs,(ids,tb))		= setAllWElements (setWItemShowStates wMetrics wPtr overrule1 itemsShow contextShow1 contextSelect1 clipRect1) itemH.wItems` (ids,tb)
-						// PA: setAllWElements was setWElements
+		# (itemHs,(ids,tb))		= setAllWElements (setWItemShowStates wMetrics wPtr overrule1 itemsShow contextShow1 contextSelect1 clipRect1 absolutePos) itemH.wItems` (ids,tb)
 		  itemH					= {itemH & wItemShow`=if found itemsShow itemShow,wItems`=itemHs}
 		= (itemH,(ids,tb))
 	where
+		absolutePos				= movePoint itemH.wItemPos` parentPos
 		itemShow				= itemH.wItemShow`
 		contextSelect1			= if (enabled contextSelect) (if itemH.wItemSelect` Able Unable) contextSelect
 		clipRect1				= clipRect//intersectRects clipRect (posSizeToRect itemH.wItemPos` itemH.wItemSize`)
 	
-	setWItemShowStates _ _ _ _ _ _ _ itemH=:{wItemKind`=IsOtherControl _} (ids,tb)
+	setWItemShowStates _ _ _ _ _ _ _ _ itemH=:{wItemKind`=IsOtherControl _} (ids,tb)
 		# (_,ids)				= maybeRemoveCheck itemH.wItemId` ids
 		= (itemH,(ids,tb))
 
@@ -453,14 +451,14 @@ where
 
 setcontrolsmarkstate :: !Id !MarkState ![Index] !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
 setcontrolsmarkstate id mark indexs wMetrics wPtr wH=:{whItems`,whSize`,whWindowInfo`} tb
-	# (_,itemHs,tb)					= setWElement (setWItemMarks wMetrics wPtr mark clipRect indexs) id whItems` tb
+	# (_,itemHs,tb)					= setWElement (setWItemMarks wMetrics wPtr mark zero clipRect indexs) id whItems` tb
 	= ({wH & whItems`=itemHs},tb)
 where
 	clipRect						= getContentRect wMetrics whWindowInfo` whSize`
 	
-	setWItemMarks :: !OSWindowMetrics !OSWindowPtr !MarkState !OSRect ![Index] !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
+	setWItemMarks :: !OSWindowMetrics !OSWindowPtr !MarkState !Point2 !OSRect ![Index] !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
 	
-	setWItemMarks wMetrics wPtr mark clipRect indexs id itemH=:{wItemKind`=IsCheckControl} tb
+	setWItemMarks wMetrics wPtr mark _ clipRect indexs id itemH=:{wItemKind`=IsCheckControl} tb
 		| identifyMaybeId id itemH.wItemId`
 			# info					= getWItemCheckInfo` itemH.wItemInfo`
 			  checkItems			= info.checkItems`
@@ -482,35 +480,38 @@ where
 			  checkItems			= before++[{item & checkItem`=(title,width,mark)}:after]
 			= (checkItems,osSetCheckControl wPtr item.checkItemPtr` clipRect (marked mark) tb)
 	
-	setWItemMarks wMetrics wPtr mark clipRect indexs id itemH=:{wItemKind`} tb
+	setWItemMarks wMetrics wPtr mark parentPos clipRect indexs id itemH=:{wItemKind`} tb
 		| wItemKind`==IsCompoundControl
-			# (found,itemHs,tb)		= setWElement (setWItemMarks wMetrics wPtr mark clipRect1 indexs) id itemH.wItems` tb
+			# (found,itemHs,tb)		= setWElement (setWItemMarks wMetrics wPtr mark absolutePos clipRect1 indexs) id itemH.wItems` tb
 			= (found,{itemH & wItems`=itemHs},tb)
 		with
 			info					= getWItemCompoundInfo` itemH.wItemInfo`
-			clipRect1				= intersectRectContent wMetrics clipRect info itemH.wItemPos` itemH.wItemSize`
+			clipRect1				= intersectRectContent wMetrics clipRect info absolutePos itemSize
 		| wItemKind`==IsLayoutControl
-			# (found,itemHs,tb)		= setWElement (setWItemMarks wMetrics wPtr mark clipRect1 indexs) id itemH.wItems` tb
+			# (found,itemHs,tb)		= setWElement (setWItemMarks wMetrics wPtr mark absolutePos clipRect1 indexs) id itemH.wItems` tb
 			= (found,{itemH & wItems`=itemHs},tb)
 		with
-			clipRect1				= intersectRects clipRect (posSizeToRect itemH.wItemPos` itemH.wItemSize`)
+			clipRect1				= intersectRects clipRect (posSizeToRect absolutePos itemSize)
 		| otherwise
 			= (False,itemH,tb)
+	where
+		absolutePos					= movePoint itemH.wItemPos` parentPos
+		itemSize					= itemH.wItemSize`
 
 
 //	Set the text of the controls and provide proper feedback.
 
 setcontroltexts :: ![(Id,String)] !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
 setcontroltexts id_texts wMetrics wPtr wH`=:{whItems`,whSize`,whWindowInfo`} tb
-	# (itemHs,(_,tb))	= setWElements (setControlText wMetrics wPtr True clipRect) whItems` (id_texts,tb)
+	# (itemHs,(_,tb))	= setWElements (setControlText wMetrics wPtr True clipRect zero) whItems` (id_texts,tb)
 	= ({wH` & whItems`=itemHs},tb)
 where
 	clipRect		= getContentRect wMetrics whWindowInfo` whSize`
 	
-	setControlText :: !OSWindowMetrics !OSWindowPtr !Bool !OSRect !WItemHandle` !(![(Id,String)],!*OSToolbox)
-															  -> (!WItemHandle`,!(![(Id,String)],!*OSToolbox))
+	setControlText :: !OSWindowMetrics !OSWindowPtr !Bool !OSRect !Point2 !WItemHandle` !(![(Id,String)],!*OSToolbox)
+	                                                                  -> (!WItemHandle`,!(![(Id,String)],!*OSToolbox))
 	
-	setControlText wMetrics wPtr shownContext clipRect itemH=:{wItemKind`=IsEditControl} (id_texts,tb)
+	setControlText wMetrics wPtr shownContext clipRect parentPos itemH=:{wItemKind`=IsEditControl} (id_texts,tb)
 		# (found,id_text,id_texts)	= removeOnIdOfPair itemH.wItemId` id_texts
 		| not found
 			= (itemH,(id_texts,tb))
@@ -519,11 +520,13 @@ where
 			  (_,text)				= id_text
 			  editInfo				= getWItemEditInfo` itemH.wItemInfo`
 			  itemH					= {itemH & wItemInfo`=EditInfo` {editInfo & editInfoText=text}}
-			  itemRect				= posSizeToRect itemH.wItemPos` itemH.wItemSize`
+			  itemRect				= posSizeToRect absolutePos itemH.wItemSize`
 			# tb					= osSetEditControlText wPtr itemH.wItemPtr` clipRect itemRect shownContext1 text tb
 			= (itemH,(id_texts,tb))
+	where
+		absolutePos					= movePoint itemH.wItemPos` parentPos
 	
-	setControlText wMetrics wPtr shownContext clipRect itemH=:{wItemKind`=IsTextControl} (id_texts,tb)
+	setControlText wMetrics wPtr shownContext clipRect parentPos itemH=:{wItemKind`=IsTextControl} (id_texts,tb)
 		# (found,id_text,id_texts)	= removeOnIdOfPair itemH.wItemId` id_texts
 		| not found
 			= (itemH,(id_texts,tb))
@@ -532,11 +535,13 @@ where
 			  shownContext1			= shownContext && itemH.wItemShow`
 			  textInfo				= getWItemTextInfo` itemH.wItemInfo`
 			  itemH					= {itemH & wItemInfo`=TextInfo` {textInfo & textInfoText=text}}
-			  itemRect				= posSizeToRect itemH.wItemPos` itemH.wItemSize`
+			  itemRect				= posSizeToRect absolutePos itemH.wItemSize`
 			# tb					= osSetTextControlText wPtr itemH.wItemPtr` clipRect itemRect shownContext1 text tb
 			= (itemH,(id_texts,tb))
+	where
+		absolutePos					= movePoint itemH.wItemPos` parentPos
 	
-	setControlText wMetrics wPtr _ clipRect itemH=:{wItemKind`=IsButtonControl} (id_texts,tb)
+	setControlText wMetrics wPtr _ clipRect _ itemH=:{wItemKind`=IsButtonControl} (id_texts,tb)
 		# (found,id_text,id_texts)	= removeOnIdOfPair itemH.wItemId` id_texts
 		| not found
 			= (itemH,(id_texts,tb))
@@ -547,22 +552,24 @@ where
 			# tb					= osSetButtonControlText wPtr itemH.wItemPtr` clipRect (validateControlTitle text) tb
 			= (itemH,(id_texts,tb))
 	
-	setControlText wMetrics wPtr shownContext clipRect itemH=:{wItemKind`=IsCompoundControl} s
-		# (itemHs,s)				= setWElements (setControlText wMetrics wPtr shownContext1 clipRect1) itemH.wItems` s
+	setControlText wMetrics wPtr shownContext clipRect parentPos itemH=:{wItemKind`=IsCompoundControl} s
+		# (itemHs,s)				= setWElements (setControlText wMetrics wPtr shownContext1 clipRect1 absolutePos) itemH.wItems` s
 		= ({itemH & wItems`=itemHs},s)
 	where
+		absolutePos					= movePoint itemH.wItemPos` parentPos
 		info						= getWItemCompoundInfo` itemH.wItemInfo`
-		clipRect1					= intersectRectContent wMetrics clipRect info itemH.wItemPos` itemH.wItemSize`
+		clipRect1					= intersectRectContent wMetrics clipRect info absolutePos itemH.wItemSize`
 		shownContext1				= shownContext && itemH.wItemShow`
 	
-	setControlText wMetrics wPtr shownContext clipRect itemH=:{wItemKind`=IsLayoutControl} s
-		# (itemHs,s)	= setWElements (setControlText wMetrics wPtr shownContext1 clipRect1) itemH.wItems` s
+	setControlText wMetrics wPtr shownContext clipRect parentPos itemH=:{wItemKind`=IsLayoutControl} s
+		# (itemHs,s)	= setWElements (setControlText wMetrics wPtr shownContext1 clipRect1 absolutePos) itemH.wItems` s
 		= ({itemH & wItems`=itemHs},s)
 	where
-		clipRect1					= intersectRects clipRect (posSizeToRect itemH.wItemPos` itemH.wItemSize`)
+		absolutePos					= movePoint itemH.wItemPos` parentPos
+		clipRect1					= intersectRects clipRect (posSizeToRect absolutePos itemH.wItemSize`)
 		shownContext1				= shownContext && itemH.wItemShow`
 	
-	setControlText _ _ _ _ itemH s
+	setControlText _ _ _ _ _ itemH s
 		= (itemH,s)
 
 
@@ -570,37 +577,41 @@ where
 
 seteditcontrolcursor :: !Id !Int !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
 seteditcontrolcursor id pos wMetrics wPtr wH`=:{whItems`,whSize`,whWindowInfo`} tb
-	# (_,itemHs,tb)			= setWElement (setEditCursor wMetrics wPtr True clipRect pos) id whItems` tb
+	# (_,itemHs,tb)			= setWElement (setEditCursor wMetrics wPtr True clipRect zero pos) id whItems` tb
 	= ({wH` & whItems`=itemHs},tb)
 where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	
-	setEditCursor :: !OSWindowMetrics !OSWindowPtr !Bool !OSRect !Int !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
+	setEditCursor :: !OSWindowMetrics !OSWindowPtr !Bool !OSRect !Point2 !Int !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
 	
-	setEditCursor wMetrics wPtr shownContext clipRect pos id itemH=:{wItemKind`=IsEditControl} tb
+	setEditCursor wMetrics wPtr shownContext clipRect parentPos pos id itemH=:{wItemKind`=IsEditControl} tb
 		| not (identifyMaybeId id itemH.wItemId`)
 			= (False,itemH,tb)
 		| otherwise
-			# itemRect		= posSizeToRect itemH.wItemPos` itemH.wItemSize`
+			# itemRect		= posSizeToRect absolutePos itemH.wItemSize`
 			# tb			= osSetEditControlCursor wPtr itemH.wItemPtr` clipRect itemRect pos tb
 			= (True,itemH,tb)
+	where
+		absolutePos			= movePoint itemH.wItemPos` parentPos
 	
-	setEditCursor wMetrics wPtr shownContext clipRect pos id itemH=:{wItemKind`=IsCompoundControl} tb
-		# (found,itemHs,tb)	= setWElement (setEditCursor wMetrics wPtr shownContext1 clipRect1 pos) id itemH.wItems` tb
+	setEditCursor wMetrics wPtr shownContext clipRect parentPos pos id itemH=:{wItemKind`=IsCompoundControl} tb
+		# (found,itemHs,tb)	= setWElement (setEditCursor wMetrics wPtr shownContext1 clipRect1 absolutePos pos) id itemH.wItems` tb
 		= (found,{itemH & wItems`=itemHs},tb)
 	where
+		absolutePos			= movePoint itemH.wItemPos` parentPos
 		info				= getWItemCompoundInfo` itemH.wItemInfo`
-		clipRect1			= intersectRectContent wMetrics clipRect info itemH.wItemPos` itemH.wItemSize`
+		clipRect1			= intersectRectContent wMetrics clipRect info absolutePos itemH.wItemSize`
 		shownContext1		= shownContext && itemH.wItemShow`
 	
-	setEditCursor wMetrics wPtr shownContext clipRect pos id itemH=:{wItemKind`=IsLayoutControl} tb
-		# (found,itemHs,tb)	= setWElement (setEditCursor wMetrics wPtr shownContext1 clipRect1 pos) id itemH.wItems` tb
+	setEditCursor wMetrics wPtr shownContext clipRect parentPos pos id itemH=:{wItemKind`=IsLayoutControl} tb
+		# (found,itemHs,tb)	= setWElement (setEditCursor wMetrics wPtr shownContext1 clipRect1 absolutePos pos) id itemH.wItems` tb
 		= (found,{itemH & wItems`=itemHs},tb)
 	where
-		clipRect1			= intersectRects clipRect (posSizeToRect itemH.wItemPos` itemH.wItemSize`)
+		absolutePos			= movePoint itemH.wItemPos` parentPos
+		clipRect1			= intersectRects clipRect (posSizeToRect absolutePos itemH.wItemSize`)
 		shownContext1		= shownContext && itemH.wItemShow`
 	
-	setEditCursor _ _ _ _ _ _ itemH tb
+	setEditCursor _ _ _ _ _ _ _ itemH tb
 		= (False,itemH,tb)
 
 
@@ -608,37 +619,41 @@ where
 
 seteditcontrolselection :: !Id !Int !Int !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
 seteditcontrolselection id begin end wMetrics wPtr wH`=:{whItems`,whSize`,whWindowInfo`} tb
-	# (_,itemHs,tb)			= setWElement (setEditSelection wMetrics wPtr True clipRect begin end) id whItems` tb
+	# (_,itemHs,tb)			= setWElement (setEditSelection wMetrics wPtr True clipRect zero begin end) id whItems` tb
 	= ({wH` & whItems`=itemHs},tb)
 where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	
-	setEditSelection :: !OSWindowMetrics !OSWindowPtr !Bool !OSRect !Int !Int !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
+	setEditSelection :: !OSWindowMetrics !OSWindowPtr !Bool !OSRect !Point2 !Int !Int !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
 	
-	setEditSelection wMetrics wPtr shownContext clipRect begin end id itemH=:{wItemKind`=IsEditControl} tb
+	setEditSelection wMetrics wPtr shownContext clipRect parentPos begin end id itemH=:{wItemKind`=IsEditControl} tb
 		| not (identifyMaybeId id itemH.wItemId`)
 			= (False,itemH,tb)
 		| otherwise
-			# itemRect		= posSizeToRect itemH.wItemPos` itemH.wItemSize`
+			# itemRect		= posSizeToRect absolutePos itemH.wItemSize`
 			# tb			= osSetEditControlSelection wPtr itemH.wItemPtr` clipRect itemRect begin end tb
 			= (True,itemH,tb)
+	where
+		absolutePos			= movePoint itemH.wItemPos` parentPos
 	
-	setEditSelection wMetrics wPtr shownContext clipRect begin end id itemH=:{wItemKind`=IsCompoundControl} tb
-		# (found,itemHs,tb)	= setWElement (setEditSelection wMetrics wPtr shownContext1 clipRect1 begin end) id itemH.wItems` tb
+	setEditSelection wMetrics wPtr shownContext clipRect parentPos begin end id itemH=:{wItemKind`=IsCompoundControl} tb
+		# (found,itemHs,tb)	= setWElement (setEditSelection wMetrics wPtr shownContext1 clipRect1 absolutePos begin end) id itemH.wItems` tb
 		= (found,{itemH & wItems`=itemHs},tb)
 	where
+		absolutePos			= movePoint itemH.wItemPos` parentPos
 		info				= getWItemCompoundInfo` itemH.wItemInfo`
-		clipRect1			= intersectRectContent wMetrics clipRect info itemH.wItemPos` itemH.wItemSize`
+		clipRect1			= intersectRectContent wMetrics clipRect info absolutePos itemH.wItemSize`
 		shownContext1		= shownContext && itemH.wItemShow`
 	
-	setEditSelection wMetrics wPtr shownContext clipRect begin end id itemH=:{wItemKind`=IsLayoutControl} tb
-		# (found,itemHs,tb)	= setWElement (setEditSelection wMetrics wPtr shownContext1 clipRect1 begin end) id itemH.wItems` tb
+	setEditSelection wMetrics wPtr shownContext clipRect parentPos begin end id itemH=:{wItemKind`=IsLayoutControl} tb
+		# (found,itemHs,tb)	= setWElement (setEditSelection wMetrics wPtr shownContext1 clipRect1 absolutePos begin end) id itemH.wItems` tb
 		= (found,{itemH & wItems`=itemHs},tb)
 	where
-		clipRect1			= intersectRects clipRect (posSizeToRect itemH.wItemPos` itemH.wItemSize`)
+		absolutePos			= movePoint itemH.wItemPos` parentPos
+		clipRect1			= intersectRects clipRect (posSizeToRect absolutePos itemH.wItemSize`)
 		shownContext1		= shownContext && itemH.wItemShow`
 	
-	setEditSelection _ _ _ _ _ _ _ itemH tb
+	setEditSelection _ _ _ _ _ _ _ _ itemH tb
 		= (False,itemH,tb)
 
 
@@ -646,18 +661,18 @@ where
 
 setcontrolslook :: ![(Id,Bool,(Bool,Look))] !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
 setcontrolslook looks wMetrics wPtr wH=:{whItems`,whSelect`,whDefaultId`,whSize`,whWindowInfo`} tb
-	# (itemHs,(_,tb))	= setWElements (setWItemLook wMetrics wPtr whSelect` True resizeable whDefaultId` clipRect) whItems` (looks,tb)
+	# (itemHs,(_,tb))	= setWElements (setWItemLook wMetrics wPtr whSelect` True resizeable whDefaultId` clipRect zero) whItems` (looks,tb)
 	= ({wH & whItems`=itemHs},tb)
 where
 	clipRect			= getContentRect wMetrics whWindowInfo` whSize`
 	resizeable			= True
 	
-	setWItemLook :: !OSWindowMetrics !OSWindowPtr !Bool !Bool !Bool (Maybe Id) !OSRect !WItemHandle` !(![(Id,Bool,(Bool,Look))],!*OSToolbox)
-																				   -> (!WItemHandle`,!(![(Id,Bool,(Bool,Look))],!*OSToolbox))
+	setWItemLook :: !OSWindowMetrics !OSWindowPtr !Bool !Bool !Bool (Maybe Id) !OSRect !Point2 !WItemHandle` !(![(Id,Bool,(Bool,Look))],!*OSToolbox)
+	                                                                                       -> (!WItemHandle`,!(![(Id,Bool,(Bool,Look))],!*OSToolbox))
 	
-	setWItemLook wMetrics wPtr ableContext shownContext resizeable defId clipRect itemH=:{wItemId`,wItemKind`=IsCompoundControl,wItemSize`} (looks,tb)
+	setWItemLook wMetrics wPtr ableContext shownContext resizeable defId clipRect parentPos itemH=:{wItemId`,wItemKind`=IsCompoundControl,wItemSize`} (looks,tb)
 		# (found,look,looks)		= removeOnIdOfTriple wItemId` looks
-		# (itemHs,looks_tb)			= setWElements (setWItemLook wMetrics wPtr ableContext1 shownContext1 resizeable defId clipRect1) itemH.wItems` (looks,tb)
+		# (itemHs,looks_tb)			= setWElements (setWItemLook wMetrics wPtr ableContext1 shownContext1 resizeable defId clipRect1 absolutePos) itemH.wItems` (looks,tb)
 		  itemH						= {itemH & wItems`=itemHs}
 		| not found
 			= (itemH,looks_tb)
@@ -671,23 +686,24 @@ where
 			= (itemH,looks_tb)
 		| otherwise
 			# (looks,tb)			= looks_tb
-			# (itemH,tb)			= validateCompoundClipState` wMetrics False wPtr defId shownContext itemH tb
-			# (itemH,tb)			= drawCompoundLook` wMetrics ableContext1 wPtr clipRect1 itemH tb
+			# (itemH,tb)			= validateCompoundClipState` wMetrics False wPtr parentPos defId shownContext itemH tb
+			# (itemH,tb)			= drawCompoundLook` wMetrics ableContext1 wPtr parentPos clipRect1 itemH tb
 			= (itemH,(looks,tb))
 	where
+		absolutePos					= movePoint itemH.wItemPos` parentPos
 		info						= getWItemCompoundInfo` itemH.wItemInfo`
 		hasScrolls					= (isJust info.compoundHScroll,isJust info.compoundVScroll)
 		compoundLookInfo			= info.compoundLookInfo
 		lookInfo					= compoundLookInfo
 		pen							= compoundLookInfo.compoundLook.lookPen
 		visScrolls					= osScrollbarsAreVisible wMetrics info.compoundDomain (toTuple wItemSize`) hasScrolls
-		itemRect					= posSizeToRect itemH.wItemPos` wItemSize`
+		itemRect					= posSizeToRect absolutePos wItemSize`
 		contentRect					= osGetCompoundContentRect wMetrics visScrolls itemRect
 		clipRect1					= intersectRects clipRect contentRect
 		ableContext1				= ableContext  && itemH.wItemSelect`
 		shownContext1				= shownContext && itemH.wItemShow`
 	
-	setWItemLook wMetrics wPtr ableContext shownContext resizeable defId clipRect itemH=:{wItemId`,wItemKind`=IsCustomButtonControl} (looks,tb)
+	setWItemLook wMetrics wPtr ableContext shownContext resizeable defId clipRect parentPos itemH=:{wItemId`,wItemKind`=IsCustomButtonControl} (looks,tb)
 		# (found,look,looks)		= removeOnIdOfTriple wItemId` looks
 		| not found
 			= (itemH,(looks,tb))
@@ -697,7 +713,7 @@ where
 		| not redraw || not shownContext1
 			= (itemH,(looks,tb))
 		| otherwise
-			# (itemH,tb)			= drawCustomButtonLook` ableContext1 wPtr clipRect itemH tb
+			# (itemH,tb)			= drawCustomButtonLook` ableContext1 wPtr parentPos clipRect itemH tb
 			= (itemH,(looks,tb))
 	where
 		info						= getWItemCustomButtonInfo` itemH.wItemInfo`
@@ -705,7 +721,7 @@ where
 		ableContext1				= ableContext  && itemH.wItemSelect`
 		shownContext1				= shownContext && itemH.wItemShow`
 	
-	setWItemLook wMetrics wPtr ableContext shownContext resizeable defId clipRect itemH=:{wItemId`,wItemKind`=IsCustomControl} (looks,tb)
+	setWItemLook wMetrics wPtr ableContext shownContext resizeable defId clipRect parentPos itemH=:{wItemId`,wItemKind`=IsCustomControl} (looks,tb)
 		# (found,look,looks)		= removeOnIdOfTriple wItemId` looks
 		| not found
 			= (itemH,(looks,tb))
@@ -715,7 +731,7 @@ where
 		| not redraw || not shownContext1
 			= (itemH,(looks,tb))
 		| otherwise
-			# (itemH,tb)			= drawCustomLook` ableContext1 wPtr clipRect itemH tb
+			# (itemH,tb)			= drawCustomLook` ableContext1 wPtr parentPos clipRect itemH tb
 			= (itemH,(looks,tb))
 	where
 		info						= getWItemCustomInfo` itemH.wItemInfo`
@@ -723,17 +739,18 @@ where
 		ableContext1				= ableContext  && itemH.wItemSelect`
 		shownContext1				= shownContext && itemH.wItemShow`
 	
-	setWItemLook wMetrics wPtr ableContext shownContext resizeable defId clipRect itemH=:{wItemId`,wItemKind`=IsLayoutControl} (looks,tb)
+	setWItemLook wMetrics wPtr ableContext shownContext resizeable defId clipRect parentPos itemH=:{wItemId`,wItemKind`=IsLayoutControl} (looks,tb)
 		# (_,_,looks)				= removeOnIdOfTriple wItemId` looks
-		# (itemHs,looks_tb)			= setWElements (setWItemLook wMetrics wPtr ableContext1 shownContext1 resizeable defId clipRect1) itemH.wItems` (looks,tb)
+		# (itemHs,looks_tb)			= setWElements (setWItemLook wMetrics wPtr ableContext1 shownContext1 resizeable defId clipRect1 absolutePos) itemH.wItems` (looks,tb)
 		  itemH						= {itemH & wItems`=itemHs}
 		= (itemH,looks_tb)
 	where
-		clipRect1					= intersectRects clipRect (posSizeToRect itemH.wItemPos` itemH.wItemSize`)
+		absolutePos					= movePoint itemH.wItemPos` parentPos
+		clipRect1					= intersectRects clipRect (posSizeToRect absolutePos itemH.wItemSize`)
 		ableContext1				= ableContext  && itemH.wItemSelect`
 		shownContext1				= shownContext && itemH.wItemShow`
 	
-	setWItemLook _ _ _ _ _ _ _ itemH=:{wItemId`} (looks,tb)
+	setWItemLook _ _ _ _ _ _ _ _ itemH=:{wItemId`} (looks,tb)
 		# (_,_,looks)				= removeOnIdOfTriple wItemId` looks
 		= (itemH,(looks,tb))
 
@@ -742,63 +759,65 @@ where
 
 drawincontrol :: !Id !.(St *Picture .x) !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> *(!Maybe .x,!WindowHandle`,!*OSToolbox)
 drawincontrol controlId drawfun wMetrics wPtr wH=:{whItems`,whDefaultId`,whShow`,whSize`,whWindowInfo`} tb
-	# (_,itemHs,(x,_,tb))	= setWElement (drawInWItem wMetrics wPtr resizeable whDefaultId` whShow` clipRect) controlId whItems` (Nothing,drawfun,tb)
+	# (_,itemHs,(x,_,tb))	= setWElement (drawInWItem wMetrics wPtr resizeable whDefaultId` whShow` clipRect zero) controlId whItems` (Nothing,drawfun,tb)
 	= (x,{wH & whItems`=itemHs},tb)
 where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	resizeable				= True
 	
-	drawInWItem :: !OSWindowMetrics !OSWindowPtr Bool (Maybe Id) !Bool !OSRect !Id !WItemHandle` !*(!v:(Maybe u:x),w:(St *Picture u:x),!*OSToolbox)
-																	     -> (!Bool,!WItemHandle`,!*(!v:(Maybe u:x),w:(St *Picture u:x),!*OSToolbox)), [v<=u]
+	drawInWItem :: !OSWindowMetrics !OSWindowPtr Bool (Maybe Id) !Bool !OSRect !Point2 !Id !WItemHandle` !*(!v:(Maybe u:x),w:(St *Picture u:x),!*OSToolbox)
+	                                                                             -> (!Bool,!WItemHandle`,!*(!v:(Maybe u:x),w:(St *Picture u:x),!*OSToolbox)), [v<=u]
 	
-	drawInWItem wMetrics wPtr resizeable defId contextShow clipRect id itemH=:{wItemId`,wItemPtr`,wItemKind`=IsCompoundControl} x_tb
+	drawInWItem wMetrics wPtr resizeable defId contextShow clipRect parentPos id itemH=:{wItemId`,wItemPtr`,wItemKind`=IsCompoundControl} x_tb
 		| not (identifyMaybeId id wItemId`)
-			# (found,itemHs,x_tb)	= setWElement (drawInWItem wMetrics wPtr resizeable defId itemShow clipRect1) id itemH.wItems` x_tb
+			# (found,itemHs,x_tb)	= setWElement (drawInWItem wMetrics wPtr resizeable defId itemShow clipRect1 absolutePos) id itemH.wItems` x_tb
 			= (found,{itemH & wItems`=itemHs},x_tb)
 		| otherwise
 			# (_,drawfun,tb)		= x_tb
-			# (itemH,tb)			= validateCompoundClipState` wMetrics False wPtr defId contextShow itemH tb
-			# (x,itemH,tb)			= drawInCompound` wPtr drawfun clipRect1 itemH tb
+			# (itemH,tb)			= validateCompoundClipState` wMetrics False wPtr parentPos defId contextShow itemH tb
+			# (x,itemH,tb)			= drawInCompound` drawfun wPtr parentPos clipRect1 itemH tb
 			= (True,itemH,(Just x,undef,tb))
 	where
 		itemShow					= contextShow && itemH.wItemShow`
 		info						= getWItemCompoundInfo` itemH.wItemInfo`
 		domainRect					= info.compoundDomain
 		hasScrolls					= (isJust info.compoundHScroll,isJust info.compoundVScroll)
+		absolutePos					= movePoint itemPos parentPos
 		itemPos						= itemH.wItemPos`
 		itemSize					= itemH.wItemSize`
-		itemRect					= posSizeToRect itemPos itemSize
+		itemRect					= posSizeToRect absolutePos itemSize
 		visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
 		contentRect					= osGetCompoundContentRect wMetrics visScrolls itemRect
 		clipRect1					= intersectRects clipRect contentRect
 	
-	drawInWItem _ wPtr _ _ _ clipRect id itemH=:{wItemId`,wItemKind`=IsCustomButtonControl} x_tb
+	drawInWItem _ wPtr _ _ _ clipRect parentPos id itemH=:{wItemId`,wItemKind`=IsCustomButtonControl} x_tb
 		| not (identifyMaybeId id wItemId`)
 			= (False,itemH,x_tb)
 		| otherwise
 			# (_,drawfun,tb)		= x_tb
-			# (x,itemH,tb)			= drawInCustomButton` wPtr drawfun clipRect itemH tb
+			# (x,itemH,tb)			= drawInCustomButton` drawfun wPtr parentPos clipRect itemH tb
 			= (True,itemH,(Just x,undef,tb))
 	
-	drawInWItem _ wPtr _ _ _ clipRect id itemH=:{wItemId`,wItemKind`=IsCustomControl} x_tb
+	drawInWItem _ wPtr _ _ _ clipRect parentPos id itemH=:{wItemId`,wItemKind`=IsCustomControl} x_tb
 		| not (identifyMaybeId id wItemId`)
 			= (False,itemH,x_tb)
 		| otherwise
 			# (_,drawfun,tb)		= x_tb
-			# (x,itemH,tb)			= drawInCustom` wPtr drawfun clipRect itemH tb
+			# (x,itemH,tb)			= drawInCustom` drawfun wPtr parentPos clipRect itemH tb
 			= (True,itemH,(Just x,undef,tb))
 	
-	drawInWItem wMetrics wPtr resizeable defId contextShow clipRect id itemH=:{wItemId`,wItemKind`=IsLayoutControl} x_tb
+	drawInWItem wMetrics wPtr resizeable defId contextShow clipRect parentPos id itemH=:{wItemId`,wItemKind`=IsLayoutControl} x_tb
 		| identifyMaybeId id wItemId`
 			= (True,itemH,x_tb)
 		| otherwise
-			# (found,itemHs,x_tb)	= setWElement (drawInWItem wMetrics wPtr resizeable defId itemShow clipRect1) id itemH.wItems` x_tb
+			# (found,itemHs,x_tb)	= setWElement (drawInWItem wMetrics wPtr resizeable defId itemShow clipRect1 absolutePos) id itemH.wItems` x_tb
 			= (found,{itemH & wItems`=itemHs},x_tb)
 	where
+		absolutePos					= movePoint itemH.wItemPos` parentPos
 		itemShow					= contextShow && itemH.wItemShow`
-		clipRect1					= intersectRects clipRect (posSizeToRect itemH.wItemPos` itemH.wItemSize`)
+		clipRect1					= intersectRects clipRect (posSizeToRect absolutePos itemH.wItemSize`)
 	
-	drawInWItem _ _ _ _ _ _ id itemH=:{wItemId`} x_tb
+	drawInWItem _ _ _ _ _ _ _ id itemH=:{wItemId`} x_tb
 		= (identifyMaybeId id wItemId`,itemH,x_tb)
 
 
@@ -806,15 +825,15 @@ where
 
 setslidercontrolstates :: ![(Id,IdFun SliderState)] !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
 setslidercontrolstates id_fs wMetrics wPtr wH`=:{whItems`,whSize`,whWindowInfo`} tb
-	# (itemHs,(_,tb))		= setWElements (setSliderState wMetrics wPtr clipRect) whItems` (id_fs,tb)
+	# (itemHs,(_,tb))		= setWElements (setSliderState wMetrics wPtr clipRect zero) whItems` (id_fs,tb)
 	= ({wH` & whItems`=itemHs},tb)
 where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	
-	setSliderState :: !OSWindowMetrics !OSWindowPtr !OSRect !WItemHandle` !(![(Id,IdFun SliderState)],!*OSToolbox)
-													    -> (!WItemHandle`,!(![(Id,IdFun SliderState)],!*OSToolbox))
+	setSliderState :: !OSWindowMetrics !OSWindowPtr !OSRect !Point2 !WItemHandle` !(![(Id,IdFun SliderState)],!*OSToolbox)
+	                                                            -> (!WItemHandle`,!(![(Id,IdFun SliderState)],!*OSToolbox))
 	
-	setSliderState wMetrics wPtr clipRect itemH=:{wItemId`,wItemKind`=IsSliderControl,wItemPtr`} (id_fs,tb)
+	setSliderState wMetrics wPtr clipRect _ itemH=:{wItemId`,wItemKind`=IsSliderControl,wItemPtr`} (id_fs,tb)
 		# (found,id_f,id_fs)= removeOnIdOfPair wItemId` id_fs
 		| not found
 			= (itemH,(id_fs,tb))
@@ -828,22 +847,24 @@ where
 			# tb			= osSetSliderControlThumb wPtr wItemPtr` clipRect (not (isEmptyRect clipRect)) thumbState tb
 			= (itemH,(id_fs,tb))
 	
-	setSliderState wMetrics wPtr clipRect itemH=:{wItemKind`=IsCompoundControl} (id_fs,tb)
+	setSliderState wMetrics wPtr clipRect parentPos itemH=:{wItemKind`=IsCompoundControl} (id_fs,tb)
 		# (_,_,id_fs)		= removeOnIdOfPair itemH.wItemId` id_fs
-		# (itemHs,id_fs_tb)	= setWElements (setSliderState wMetrics wPtr clipRect1) itemH.wItems` (id_fs,tb)
+		# (itemHs,id_fs_tb)	= setWElements (setSliderState wMetrics wPtr clipRect1 absolutePos) itemH.wItems` (id_fs,tb)
 		= ({itemH & wItems`=itemHs},id_fs_tb)
 	where
+		absolutePos			= movePoint itemH.wItemPos` parentPos
 		info				= getWItemCompoundInfo` itemH.wItemInfo`
-		clipRect1			= intersectRectContent wMetrics clipRect info itemH.wItemPos` itemH.wItemSize`
+		clipRect1			= intersectRectContent wMetrics clipRect info absolutePos itemH.wItemSize`
 	
-	setSliderState wMetrics wPtr clipRect itemH=:{wItemKind`=IsLayoutControl} (id_fs,tb)
+	setSliderState wMetrics wPtr clipRect parentPos itemH=:{wItemKind`=IsLayoutControl} (id_fs,tb)
 		# (_,_,id_fs)		= removeOnIdOfPair itemH.wItemId` id_fs
-		# (itemHs,id_fs_tb)	= setWElements (setSliderState wMetrics wPtr clipRect1) itemH.wItems` (id_fs,tb)
+		# (itemHs,id_fs_tb)	= setWElements (setSliderState wMetrics wPtr clipRect1 absolutePos) itemH.wItems` (id_fs,tb)
 		= ({itemH & wItems`=itemHs},id_fs_tb)
 	where
-		clipRect1			= intersectRects clipRect (posSizeToRect itemH.wItemPos` itemH.wItemSize`)
+		absolutePos			= movePoint itemH.wItemPos` parentPos
+		clipRect1			= intersectRects clipRect (posSizeToRect absolutePos itemH.wItemSize`)
 	
-	setSliderState _ _ _ itemH (id_fs,tb)
+	setSliderState _ _ _ _ itemH (id_fs,tb)
 		# (_,_,id_fs)		= removeOnIdOfPair itemH.wItemId` id_fs
 		= (itemH,(id_fs,tb))
 
@@ -852,49 +873,51 @@ where
 
 selectradiocontrol :: !Id !Index !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
 selectradiocontrol id index wMetrics wPtr wH=:{whItems`,whSize`,whWindowInfo`} tb
-	# (_,itemHs,tb)			= setWElement (selectWItemRadioControl wMetrics wPtr clipRect index) id whItems` tb
+	# (_,itemHs,tb)			= setWElement (selectWItemRadioControl wMetrics wPtr clipRect zero index) id whItems` tb
 	= ({wH & whItems`=itemHs},tb)
 where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	
-	selectWItemRadioControl :: !OSWindowMetrics !OSWindowPtr !OSRect !Index !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
+	selectWItemRadioControl :: !OSWindowMetrics !OSWindowPtr !OSRect !Point2 !Index !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
 	
-	selectWItemRadioControl wMetrics wPtr clipRect index id itemH=:{wItemId`,wItemKind`=IsRadioControl} tb
+	selectWItemRadioControl wMetrics wPtr clipRect _ index id itemH=:{wItemId`,wItemKind`=IsRadioControl} tb
 		| not (identifyMaybeId id wItemId`)
 			= (False,itemH,tb)
-		# info				= getWItemRadioInfo` itemH.wItemInfo`
-		  cur				= info.radioIndex`
-		  items				= info.radioItems`
-		  nrItems			= length items
-		  index				= setBetween index 1 nrItems
-		  info				= {info & radioIndex`=index}
-		  itemH				= {itemH & wItemInfo`=RadioInfo` info}
+		# info					= getWItemRadioInfo` itemH.wItemInfo`
+		  cur					= info.radioIndex`
+		  items					= info.radioItems`
+		  nrItems				= length items
+		  index					= setBetween index 1 nrItems
+		  info					= {info & radioIndex`=index}
+		  itemH					= {itemH & wItemInfo`=RadioInfo` info}
 		| index==cur
 			= (True,itemH,tb)
 		| otherwise
-			# tb			= osSetRadioControl wPtr (items!!(cur-1)).radioItemPtr` (items!!(index-1)).radioItemPtr` clipRect tb
+			# tb				= osSetRadioControl wPtr (items!!(cur-1)).radioItemPtr` (items!!(index-1)).radioItemPtr` clipRect tb
 			= (True,itemH,tb)
 	
-	selectWItemRadioControl wMetrics wPtr clipRect index id itemH=:{wItemKind`=IsCompoundControl} tb
+	selectWItemRadioControl wMetrics wPtr clipRect parentPos index id itemH=:{wItemKind`=IsCompoundControl} tb
 		| identifyMaybeId id itemH.wItemId`
 			= (True,itemH,tb)
 		| otherwise
-			# (done,itemHs,tb)	= setWElement (selectWItemRadioControl wMetrics wPtr clipRect1 index) id itemH.wItems` tb
+			# (done,itemHs,tb)	= setWElement (selectWItemRadioControl wMetrics wPtr clipRect1 absolutePos index) id itemH.wItems` tb
 			= (done,{itemH & wItems`=itemHs},tb)
 	where
+		absolutePos				= movePoint itemH.wItemPos` parentPos
 		info					= getWItemCompoundInfo` itemH.wItemInfo`
-		clipRect1				= intersectRectContent wMetrics clipRect info itemH.wItemPos` itemH.wItemSize`
+		clipRect1				= intersectRectContent wMetrics clipRect info absolutePos itemH.wItemSize`
 	
-	selectWItemRadioControl wMetrics wPtr clipRect index id itemH=:{wItemKind`=IsLayoutControl} tb
+	selectWItemRadioControl wMetrics wPtr clipRect parentPos index id itemH=:{wItemKind`=IsLayoutControl} tb
 		| identifyMaybeId id itemH.wItemId`
 			= (True,itemH,tb)
 		| otherwise
-			# (done,itemHs,tb)	= setWElement (selectWItemRadioControl wMetrics wPtr clipRect1 index) id itemH.wItems` tb
+			# (done,itemHs,tb)	= setWElement (selectWItemRadioControl wMetrics wPtr clipRect1 absolutePos index) id itemH.wItems` tb
 			= (done,{itemH & wItems`=itemHs},tb)
 	where
-		clipRect1				= intersectRects clipRect (posSizeToRect itemH.wItemPos` itemH.wItemSize`)
+		absolutePos				= movePoint itemH.wItemPos` parentPos
+		clipRect1				= intersectRects clipRect (posSizeToRect absolutePos itemH.wItemSize`)
 	
-	selectWItemRadioControl _ _ _ _ id itemH tb
+	selectWItemRadioControl _ _ _ _ _ id itemH tb
 		= (identifyMaybeId id itemH.wItemId`,itemH,tb)
 
 
@@ -902,55 +925,59 @@ where
 	
 selectpopupitem :: !Id !Index !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
 selectpopupitem id index wMetrics wPtr wH=:{whItems`,whSize`,whWindowInfo`} tb
-	# (_,itemHs,tb)			= setWElement (selectWItemPopUp wMetrics wPtr True index clipRect) id whItems` tb
+	# (_,itemHs,tb)			= setWElement (selectWItemPopUp wMetrics wPtr True index clipRect zero) id whItems` tb
 	= ({wH & whItems`=itemHs},tb)
 where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	
-	selectWItemPopUp :: !OSWindowMetrics !OSWindowPtr !Bool !Index !OSRect !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
+	selectWItemPopUp :: !OSWindowMetrics !OSWindowPtr !Bool !Index !OSRect !Point2 !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
 	
-	selectWItemPopUp wMetrics wPtr shownContext index clipRect id itemH=:{wItemId`,wItemKind`=IsPopUpControl} tb
+	selectWItemPopUp wMetrics wPtr shownContext index clipRect parentPos id itemH=:{wItemId`,wItemKind`=IsPopUpControl} tb
 		| not (identifyMaybeId id wItemId`)
 			= (False,itemH,tb)
-		# info				= getWItemPopUpInfo` itemH.wItemInfo`
-		  popUps			= info.popUpInfoItems`
-		  curindex			= info.popUpInfoIndex`
-		  editinfo			= info.popUpInfoEdit`
-		  nrPopUps			= length popUps
-		  index				= setBetween index 1 nrPopUps
+		# info					= getWItemPopUpInfo` itemH.wItemInfo`
+		  popUps				= info.popUpInfoItems`
+		  curindex				= info.popUpInfoIndex`
+		  editinfo				= info.popUpInfoEdit`
+		  nrPopUps				= length popUps
+		  index					= setBetween index 1 nrPopUps
 		| curindex==index
 			= (True,itemH,tb)
 		| otherwise
-			# shownContext1	= shownContext && itemH.wItemShow`
-			  info			= {info & popUpInfoIndex`=index}
-			  itemH			= {itemH & wItemInfo`=PopUpInfo` info}
-			  itemRect		= posSizeToRect itemH.wItemPos` itemH.wItemSize`
-			  editPtr		= mapMaybe (\{popUpEditPtr}->popUpEditPtr) editinfo
-			# tb			= osSetPopUpControl wPtr itemH.wItemPtr` editPtr clipRect itemRect curindex index (popUps!!(index-1)) shownContext1 tb
+			# shownContext1		= shownContext && itemH.wItemShow`
+			  info				= {info & popUpInfoIndex`=index}
+			  itemH				= {itemH & wItemInfo`=PopUpInfo` info}
+			  itemRect			= posSizeToRect absolutePos itemH.wItemSize`
+			  editPtr			= mapMaybe (\{popUpEditPtr}->popUpEditPtr) editinfo
+			# tb				= osSetPopUpControl wPtr itemH.wItemPtr` editPtr clipRect itemRect curindex index (popUps!!(index-1)) shownContext1 tb
 			= (True,itemH,tb)
+	where
+		absolutePos				= movePoint itemH.wItemPos` parentPos
 	
-	selectWItemPopUp wMetrics wPtr shownContext index clipRect id itemH=:{wItemKind`=IsCompoundControl} tb
+	selectWItemPopUp wMetrics wPtr shownContext index clipRect parentPos id itemH=:{wItemKind`=IsCompoundControl} tb
 		| identifyMaybeId id itemH.wItemId`
 			= (True,itemH,tb)
 		| otherwise
-			# (found,itemHs,tb)	= setWElement (selectWItemPopUp wMetrics wPtr shownContext1 index clipRect1) id itemH.wItems` tb
+			# (found,itemHs,tb)	= setWElement (selectWItemPopUp wMetrics wPtr shownContext1 index clipRect1 absolutePos) id itemH.wItems` tb
 			= (found,{itemH & wItems`=itemHs},tb)
 	where
+		absolutePos				= movePoint itemH.wItemPos` parentPos
 		info					= getWItemCompoundInfo` itemH.wItemInfo`
-		clipRect1				= intersectRectContent wMetrics clipRect info itemH.wItemPos` itemH.wItemSize`
+		clipRect1				= intersectRectContent wMetrics clipRect info absolutePos itemH.wItemSize`
 		shownContext1			= shownContext && itemH.wItemShow`
 	
-	selectWItemPopUp wMetrics wPtr shownContext index clipRect id itemH=:{wItemKind`=IsLayoutControl} tb
+	selectWItemPopUp wMetrics wPtr shownContext index clipRect parentPos id itemH=:{wItemKind`=IsLayoutControl} tb
 		| identifyMaybeId id itemH.wItemId`
 			= (True,itemH,tb)
 		| otherwise
-			# (found,itemHs,tb)	= setWElement (selectWItemPopUp wMetrics wPtr shownContext1 index clipRect1) id itemH.wItems` tb
+			# (found,itemHs,tb)	= setWElement (selectWItemPopUp wMetrics wPtr shownContext1 index clipRect1 absolutePos) id itemH.wItems` tb
 			= (found,{itemH & wItems`=itemHs},tb)
 	where
-		clipRect1				= intersectRects clipRect (posSizeToRect itemH.wItemPos` itemH.wItemSize`)
+		absolutePos				= movePoint itemH.wItemPos` parentPos
+		clipRect1				= intersectRects clipRect (posSizeToRect absolutePos itemH.wItemSize`)
 		shownContext1			= shownContext && itemH.wItemShow`
 	
-	selectWItemPopUp _ _ _ _ _ id itemH tb
+	selectWItemPopUp _ _ _ _ _ _ id itemH tb
 		= (identifyMaybeId id itemH.wItemId`,itemH,tb)
 
 
@@ -1129,16 +1156,11 @@ where
 		}
 
 shiftControls` :: !Vector2 ![WElementHandle`] -> [WElementHandle`]
-shiftControls` v itemHs
-	| isEmpty itemHs
-		= itemHs
-	| otherwise
-		# (itemH,itemHs)= hdtl itemHs
-		= [shiftControl` v itemH:shiftControls` v itemHs]
+shiftControls` v itemHs = map (shiftControl` v) itemHs
 where
 	shiftControl` :: !Vector2 !WElementHandle` -> WElementHandle`
 	shiftControl` v (WItemHandle` itemH=:{wItemPos`,wItems`})
-		= WItemHandle` {itemH & wItemPos`=movePoint v wItemPos`, wItems`=shiftControls` v wItems`}
+		= WItemHandle` {itemH & wItemPos`=v+wItemPos`}	// PA: do not descend recursively!, wItems`=shiftControls` v wItems`}
 	shiftControl` v (WRecursiveHandle` itemHs kind)
 		= WRecursiveHandle` (shiftControls` v itemHs) kind
 
@@ -1177,7 +1199,7 @@ movecontrolviewframe id v wMetrics wids=:{wPtr} wH=:{whKind`,whItems`,whSize`,wh
 	| whKind`==IsGameWindow
 		= (wH,tb)
 	# metricsInfo			= {miOSMetrics=wMetrics,miHMargins=hMargins,miVMargins=vMargins,miItemSpaces=spaces,miOrientation=orientation}
-	# (_,itemHs,(updRgn,tb))= setWElement (moveWItemFrame metricsInfo wPtr whDefaultId` True whSelect` clipRect v)
+	# (_,itemHs,(updRgn,tb))= setWElement (moveWItemFrame metricsInfo wPtr whDefaultId` True whSelect` clipRect zero zero v)
 								id whItems` (Nothing,tb)
 	  wH					= {wH & whItems`=itemHs}
 	| isNothing updRgn
@@ -1201,11 +1223,11 @@ where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	orientation				= [(rectToRectangle domainRect,origin)]
 	
-	moveWItemFrame :: !MetricsInfo !OSWindowPtr !(Maybe Id) !Bool !Bool !OSRect !Vector2 !Id
+	moveWItemFrame :: !MetricsInfo !OSWindowPtr !(Maybe Id) !Bool !Bool !OSRect !Point2 !Vector2 !Vector2 !Id
 							!WItemHandle` !(!Maybe OSRgnHandle,!*OSToolbox)
 				  -> (!Bool,!WItemHandle`,!(!Maybe OSRgnHandle,!*OSToolbox))
 	
-	moveWItemFrame metricsInfo=:{miOSMetrics,miHMargins,miVMargins,miItemSpaces,miOrientation} wPtr defaultId shownContext ableContext clipRect v id
+	moveWItemFrame metricsInfo=:{miOSMetrics,miHMargins,miVMargins,miItemSpaces,miOrientation} wPtr defaultId shownContext ableContext clipRect parentPos compoundPos v id
 				   itemH=:{wItemId`,wItemKind`} updRgn_tb
 		| not (isRecursiveControl wItemKind`)
 			= (identifyMaybeId id wItemId`,itemH,updRgn_tb)
@@ -1214,16 +1236,16 @@ where
 				= (True,itemH,updRgn_tb)
 			// otherwise
 				# metricsInfo`	= {metricsInfo & miHMargins=hMargins`,miVMargins=vMargins`,miItemSpaces=spaces`}
-				  clipRect1		= intersectRects clipRect (posSizeToRect itemPos itemSize)
+				  clipRect1		= intersectRects clipRect (posSizeToRect absolutePos itemSize)
 				# (done,itemHs,updRgn_tb)
-								= setWElement (moveWItemFrame metricsInfo` wPtr defaultId shownContext1 ableContext1 clipRect1 v) id itemH.wItems` updRgn_tb
+								= setWElement (moveWItemFrame metricsInfo` wPtr defaultId shownContext1 ableContext1 clipRect1 absolutePos compoundPos v) id itemH.wItems` updRgn_tb
 				= (done,{itemH & wItems`=itemHs},updRgn_tb)
 		| not (identifyMaybeId id itemH.wItemId`)
 			# orientation`		= [(domain,oldOrigin):miOrientation]
 			  clipRect1			= intersectRects contentRect clipRect
 			  metricsInfo`		= {metricsInfo & miHMargins=hMargins`,miVMargins=vMargins`,miItemSpaces=spaces`,miOrientation=orientation`}
 			# (done,itemHs,updRgn_tb)
-								= setWElement (moveWItemFrame metricsInfo` wPtr defaultId shownContext1 ableContext1 clipRect1 v) id itemH.wItems` updRgn_tb
+								= setWElement (moveWItemFrame metricsInfo` wPtr defaultId shownContext1 ableContext1 clipRect1 absolutePos compoundPos1 v) id itemH.wItems` updRgn_tb
 			= (done,{itemH & wItems`=itemHs},updRgn_tb)
 		| newOrigin==oldOrigin
 			= (True,itemH,updRgn_tb)
@@ -1236,20 +1258,21 @@ where
 		  clipRect1				= intersectRects contentRect clipRect
 		| isEmpty itemH.wItems`
 			# itemH				= {itemH & wItemInfo`=CompoundInfo` info}
-			# (itemH,tb)		= drawCompoundLook` miOSMetrics ableContext1 wPtr clipRect1 itemH tb
+			# (itemH,tb)		= drawCompoundLook` miOSMetrics ableContext1 wPtr parentPos clipRect1 itemH tb
 			= (True,itemH,(updRgn,tb))
 		| otherwise
 			# oldItems`			= itemH.wItems`
 			  orientation`		= [(domain,newOrigin):miOrientation]
 			# (_,newItems`,tb)	= layoutControls` miOSMetrics hMargins` vMargins` spaces` itemSize itemSize orientation` oldItems` tb
-			  newItems`			= shiftControls` (toVector itemPos) newItems`
+			  newItems`			= shiftControls` itemPos newItems`
 			  itemH				= {itemH & wItems`=newItems`,wItemInfo`=CompoundInfo` info}
 			# tb				= case updRgn of
 									Just rgn -> osdisposergn rgn tb
 									nothing  -> tb
-			# (itemH, tb)		= forceValidCompoundClipState` miOSMetrics True wPtr defaultId shownContext itemH tb
-			# (updRgn,tb)		= relayoutControls` miOSMetrics ableContext1 shownContext1 contentRect contentRect itemPos itemPos itemPtr defaultId oldItems` itemH.wItems` tb
-			# (itemH, tb)		= drawCompoundLook` miOSMetrics ableContext1 wPtr clipRect1 itemH tb
+			# (itemH, tb)		= forceValidCompoundClipState` miOSMetrics True wPtr parentPos defaultId shownContext itemH tb
+			# (updRgn,tb)		= relayoutControls` miOSMetrics itemPtr defaultId ableContext1 shownContext1 (contentRect,absolutePos,compoundPos,oldItems`) 
+								                                                                             (contentRect,absolutePos,compoundPos,itemH.wItems`) tb
+			# (itemH, tb)		= drawCompoundLook` miOSMetrics ableContext1 wPtr parentPos clipRect1 itemH tb
 			= (True,itemH,(Just updRgn,tb))
 	where
 		info					= getWItemCompoundInfo` itemH.wItemInfo`
@@ -1260,16 +1283,17 @@ where
 		itemPos					= itemH.wItemPos`
 		itemSize				= itemH.wItemSize`
 		itemAtts				= itemH.wItemAtts`
+		absolutePos				= movePoint itemPos parentPos
+		compoundPos1			= compoundPos + itemPos
 		(hasHScroll,hasVScroll)	= (isJust info.compoundHScroll,isJust info.compoundVScroll)
 		hPtr	| hasHScroll	= (fromJust info.compoundHScroll).scrollItemPtr
 								= OSNoWindowPtr
 		vPtr	| hasVScroll	= (fromJust info.compoundVScroll).scrollItemPtr
 								= OSNoWindowPtr
 		visScrolls				= osScrollbarsAreVisible miOSMetrics domainRect (toTuple itemSize) (hasHScroll,hasVScroll)
-//		contentRect				= osGetCompoundContentRect miOSMetrics visScrolls (posSizeToRect (windowInfo.windowOrigin - itemPos) itemSize)
-		contentRect				= osGetCompoundContentRect miOSMetrics visScrolls (posSizeToRect itemPos itemSize)
-		hRect					= osGetCompoundHScrollRect miOSMetrics visScrolls (posSizeToRect itemPos itemSize)
-		vRect					= osGetCompoundVScrollRect miOSMetrics visScrolls (posSizeToRect itemPos itemSize)
+		contentRect				= osGetCompoundContentRect miOSMetrics visScrolls (posSizeToRect absolutePos itemSize)
+		hRect					= osGetCompoundHScrollRect miOSMetrics visScrolls (posSizeToRect absolutePos itemSize)
+		vRect					= osGetCompoundVScrollRect miOSMetrics visScrolls (posSizeToRect absolutePos itemSize)
 		contentSize				= rectSize contentRect
 		shownContext1			= if shownContext itemH.wItemShow` shownContext
 		ableContext1			= ableContext && itemH.wItemSelect`
@@ -1288,7 +1312,7 @@ setcontrolviewdomain id newDomain wMetrics wids=:{wPtr} wH=:{whKind`,whItems`,wh
 	| whKind`==IsGameWindow
 		= (wH,tb)
 	# metricsInfo			= {miOSMetrics=wMetrics,miHMargins=hMargins,miVMargins=vMargins,miItemSpaces=spaces,miOrientation=orientation}
-	# (_,itemHs,(updRgn,tb))= setWElement (setWItemDomain metricsInfo wPtr whDefaultId` True whSelect` clipRect (validateViewDomain newDomain))
+	# (_,itemHs,(updRgn,tb))= setWElement (setWItemDomain metricsInfo wPtr whDefaultId` True whSelect` clipRect zero zero (validateViewDomain newDomain))
 								id whItems` (Nothing,tb)
 	  wH					= {wH & whItems`=itemHs}
 	| isNothing updRgn
@@ -1312,10 +1336,11 @@ where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	orientation				= [(rectToRectangle domainRect,origin)]
 	
-	setWItemDomain :: !MetricsInfo !OSWindowPtr !(Maybe Id) !Bool !Bool !OSRect !ViewDomain !Id !WItemHandle` !(!Maybe OSRgnHandle,!*OSToolbox)
-																					  -> (!Bool,!WItemHandle`,!(!Maybe OSRgnHandle,!*OSToolbox))
+	setWItemDomain :: !MetricsInfo !OSWindowPtr !(Maybe Id) !Bool !Bool !OSRect !Point2 !Vector2 !ViewDomain !Id !WItemHandle` !(!Maybe OSRgnHandle,!*OSToolbox)
+	                                                                                                   -> (!Bool,!WItemHandle`,!(!Maybe OSRgnHandle,!*OSToolbox))
 	
-	setWItemDomain metricsInfo=:{miOSMetrics,miHMargins,miVMargins,miItemSpaces,miOrientation} wPtr defaultId shownContext ableContext clipRect newDomain id
+	setWItemDomain metricsInfo=:{miOSMetrics,miHMargins,miVMargins,miItemSpaces,miOrientation} 
+	               wPtr defaultId shownContext ableContext clipRect parentPos compoundPos newDomain id
 				   itemH=:{wItemId`,wItemKind`} updRgn_tb=:(updRgn,tb)
 		| not (isRecursiveControl wItemKind`)
 			= (identifyMaybeId id wItemId`,itemH,updRgn_tb)
@@ -1324,9 +1349,9 @@ where
 				= (True,itemH,updRgn_tb)
 			// otherwise
 				# metricsInfo`	= {metricsInfo & miHMargins=hMargins`,miVMargins=vMargins`,miItemSpaces=spaces`}
-				  clipRect1		= intersectRects clipRect (posSizeToRect itemPos itemSize)
+				  clipRect1		= intersectRects clipRect (posSizeToRect absolutePos itemSize)
 				# (done,itemHs,updRgn_tb)
-								= setWElement (setWItemDomain metricsInfo` wPtr defaultId shownContext1 ableContext1 clipRect1 newDomain)
+								= setWElement (setWItemDomain metricsInfo` wPtr defaultId shownContext1 ableContext1 clipRect1 absolutePos compoundPos newDomain)
 										id itemH.wItems` updRgn_tb
 				= (done,{itemH & wItems`=itemHs},updRgn_tb)
 		| not (identifyMaybeId id itemH.wItemId`)
@@ -1334,7 +1359,7 @@ where
 			  clipRect1			= intersectRects oldContentRect clipRect
 			  metricsInfo`		= {metricsInfo & miHMargins=hMargins`,miVMargins=vMargins`,miItemSpaces=spaces`,miOrientation=orientation`}
 			# (done,itemHs,updRgn_tb)
-								= setWElement (setWItemDomain metricsInfo` wPtr defaultId shownContext1 ableContext1 clipRect1 newDomain)
+								= setWElement (setWItemDomain metricsInfo` wPtr defaultId shownContext1 ableContext1 clipRect1 absolutePos compoundPos1 newDomain)
 									id itemH.wItems` updRgn_tb
 			= (done,{itemH & wItems`=itemHs},updRgn_tb)
 		| newDomain==oldDomain
@@ -1350,24 +1375,24 @@ where
 		| isEmpty oldItems`		// CompoundControl has no controls
 			# itemH				= {itemH & wItemInfo`=CompoundInfo` info}
 			| shownContext1
-				# (itemH,tb)	= drawCompoundLook` miOSMetrics ableContext1 wPtr (intersectRects newContentRect clipRect) itemH tb
+				# (itemH,tb)	= drawCompoundLook` miOSMetrics ableContext1 wPtr parentPos (intersectRects newContentRect clipRect) itemH tb
 				= (True,itemH,(updRgn,tb))
 			// otherwise
 				= (True,itemH,(updRgn,tb))
 		// CompoundControl has controls
 		# orientation`			= [(newDomain,newOrigin):miOrientation]
 		# (_,newItems`,tb)		= layoutControls` miOSMetrics hMargins` vMargins` spaces` itemSize itemSize orientation` oldItems` tb
-		  newItems`				= shiftControls` (toVector itemPos) newItems`
+		  newItems`				= shiftControls` itemPos newItems`
 		  itemH					= {itemH & wItems`=newItems`,wItemInfo`=CompoundInfo` info}
 		# tb					= case updRgn of
 									Just rgn -> osdisposergn rgn tb
 									nothing  -> tb
-		# (itemH, tb)			= forceValidCompoundClipState` miOSMetrics True wPtr defaultId shownContext itemH tb
+		# (itemH, tb)			= forceValidCompoundClipState` miOSMetrics True wPtr parentPos defaultId shownContext itemH tb
 		# itemH					= {itemH & wItemAtts` = replaceControlSizeAtt newContentSize itemH.wItemAtts`}		// PA: update required because controllayout.icl relies on info
-		# (updRgn,tb)			= relayoutControls` miOSMetrics ableContext1 shownContext1 newContentRect newContentRect itemPos itemPos itemPtr defaultId
-									oldItems` itemH.wItems` tb
+		# (updRgn,tb)			= relayoutControls` miOSMetrics itemPtr defaultId ableContext1 shownContext1 (newContentRect,absolutePos,compoundPos,oldItems`) 
+								                                                                             (newContentRect,absolutePos,compoundPos,itemH.wItems`) tb
 		| shownContext1
-			# (itemH,tb)		= drawCompoundLook` miOSMetrics ableContext1 wPtr (intersectRects newContentRect clipRect) itemH tb
+			# (itemH,tb)		= drawCompoundLook` miOSMetrics ableContext1 wPtr parentPos (intersectRects newContentRect clipRect) itemH tb
 			= (True,itemH,(Just updRgn,tb))
 		| otherwise
 			= (True,itemH,(Just updRgn,tb))
@@ -1377,12 +1402,14 @@ where
 		oldDomainRect			= info.compoundDomain
 		oldDomain				= rectToRectangle oldDomainRect
 		newDomainRect			= rectangleToRect newDomain
+		absolutePos				= movePoint itemPos parentPos
+		compoundPos1			= compoundPos + itemPos
 		itemPtr					= itemH.wItemPtr`
 		itemPos					= itemH.wItemPos`
 		itemSize				= itemH.wItemSize`
 		itemSize`				= toTuple itemSize
 		itemAtts				= itemH.wItemAtts`
-		itemRect				= posSizeToRect itemPos itemSize
+		itemRect				= posSizeToRect absolutePos itemSize
 		(hasHScroll,hasVScroll)	= (isJust info.compoundHScroll,isJust info.compoundVScroll)
 		hPtr	| hasHScroll	= (fromJust info.compoundHScroll).scrollItemPtr
 								= OSNoWindowPtr

@@ -100,23 +100,24 @@ where
 			| id<>fromJust wItemId`			= getcompoundstypes` id wItems`
 			| otherwise						= (True,getcontrolstypes wItems`)
 
-getcontrolslayouts :: ![WElementHandle`] !(![Id],![(Id,Bool,(Maybe ItemPos,Vector2))])
-									   -> (![Id],![(Id,Bool,(Maybe ItemPos,Vector2))])
-getcontrolslayouts itemHs ids_layouts
-	= statemapWElementHandles` (isEmpty o fst) getlayouts ids_layouts itemHs
+getcontrolslayouts :: !Point2 ![WElementHandle`] !(![Id],![(Id,Bool,(Maybe ItemPos,Vector2))])
+                                               -> (![Id],![(Id,Bool,(Maybe ItemPos,Vector2))])
+getcontrolslayouts parentPos itemHs ids_layouts
+	= statemapWElementHandles` (isEmpty o fst) (getlayouts parentPos) ids_layouts itemHs
 where
-	getlayouts :: !WItemHandle` !(![Id],![(Id,Bool,(Maybe ItemPos,Vector2))])
-							  -> (![Id],![(Id,Bool,(Maybe ItemPos,Vector2))])
-	getlayouts itemH=:{wItemId`,wItemAtts`,wItems`,wItemPos`} ids_layouts=:(ids,layouts)
-		| isNothing wItemId`= getcontrolslayouts wItems` ids_layouts
-		| not hadId			= getcontrolslayouts wItems` ids_layouts
-		| otherwise			= getcontrolslayouts wItems` (ids1,layouts1)
+	getlayouts :: !Point2 !WItemHandle` !(![Id],![(Id,Bool,(Maybe ItemPos,Vector2))])
+	                                  -> (![Id],![(Id,Bool,(Maybe ItemPos,Vector2))])
+	getlayouts parentPos itemH=:{wItemId`,wItemAtts`,wItems`,wItemPos`} ids_layouts=:(ids,layouts)
+		| isNothing wItemId`= getcontrolslayouts absolutePos wItems` ids_layouts
+		| not hadId			= getcontrolslayouts absolutePos wItems` ids_layouts
+		| otherwise			= getcontrolslayouts absolutePos wItems` (ids1,layouts1)
 		with
 			itemPos			= if hasAtt (Just (getcontrolpos` posAtt)) Nothing
 			(hasAtt,posAtt)	= cselect iscontrolpos` (ControlPos` (Left,NoOffset)) wItemAtts`
-			layout			= (itemId,True,(itemPos,toVector wItemPos`))
+			layout			= (itemId,True,(itemPos,toVector absolutePos))
 			(_,layouts1)	= creplace (eqfst3id itemId) layout layouts
 	where
+		absolutePos			= movePoint wItemPos` parentPos
 		itemId				= fromJust wItemId`
 		(hadId,ids1)		= removeCheck itemId ids
 

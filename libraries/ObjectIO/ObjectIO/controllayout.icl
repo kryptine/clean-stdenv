@@ -757,15 +757,15 @@ where
 	layoutScrollbar r=:{rleft,rtop} scrollInfo
 		= {scrollInfo & scrollItemPos={x=rleft,y=rtop},scrollItemSize=rectSize r}
 
-position_items :: !(Point2 -> .x -> .x) !Int !Int ![Int] ![[.x]] -> [[.x]]
+position_items :: !(Vector2 -> .x -> .x) !Int !Int ![Int] ![[.x]] -> [[.x]]
 position_items setPosition itemHeight left [maxwidth:maxwidths] [col:cols]
-	# col	= position_items` setPosition itemHeight {x=left,y=0} col
+	# col	= position_items` setPosition itemHeight {vx=left,vy=0} col
 	  cols	= position_items  setPosition itemHeight (left+maxwidth) maxwidths cols
 	= [col:cols]
 where
-	position_items` :: !(Point2 -> .x -> .x) !Int !Point2 ![.x] -> [.x]
+	position_items` :: !(Vector2 -> .x -> .x) !Int !Vector2 ![.x] -> [.x]
 	position_items` setPosition itemHeight pos [item:items]
-		= [setPosition pos item:position_items` setPosition itemHeight {pos & y=pos.y+itemHeight} items]
+		= [setPosition pos item:position_items` setPosition itemHeight {pos & vy=pos.vy+itemHeight} items]
 	position_items` _ _ _ _
 		= []
 position_items _ _ _ _ _
@@ -878,18 +878,18 @@ where
 		setLayoutWItem :: ![Root] !(WItemHandle .ls .pst) -> (![Root],!WItemHandle .ls .pst)
 		setLayoutWItem roots itemH=:{wItemKind,wItemInfo,wItems,wItemAtts=[ControlId id:atts]}
 			#! (layoutInfo,corner,size,roots)	= getLayoutItem id roots
-			#! itemHs							= map (shiftCompounds layoutInfo corner) wItems
-			#! info								= shiftWItemInfo corner wItemInfo
+		//	#! itemHs							= map (shiftCompounds layoutInfo corner) wItems		PA: not needed anymore, because positions are relative
+		//	#! info								= shiftWItemInfo corner wItemInfo					PA: same
 			= (	roots
 			  ,	{	itemH	& wItemAtts			= atts
-							, wItemInfo			= info
-							, wItems			= itemHs
-							, wItemPos			= {x=corner.vx,y=corner.vy}
+		//					, wItemInfo			= info
+		//					, wItems			= itemHs
+							, wItemPos			= corner//{x=corner.vx,y=corner.vy}
 							, wItemSize			= size
 							, wItemLayoutInfo	= layoutInfo
 				}
 			  )
-		where
+/*		where
 			shiftCompounds :: !LayoutInfo !Vector2 !(WElementHandle .ls .pst) -> WElementHandle .ls .pst
 			shiftCompounds layoutInfo offset (WItemHandle itemH)
 				#! itemH	= shiftCompound layoutInfo offset itemH
@@ -934,7 +934,7 @@ where
 				shiftScrollbar info=:{scrollItemPos}
 					= {info & scrollItemPos=movePoint offset scrollItemPos}
 			shiftWItemInfo _ info
-				= info
+				= info */
 		setLayoutWItem _ _
 			= controllayoutFatalError "setLayoutWItem" "WElementHandle has no ControlId"
 	setLayoutItem roots (WListLSHandle itemHs)
@@ -966,18 +966,18 @@ where
 		setLayoutWItem` :: ![Root] !WItemHandle` -> (![Root],!WItemHandle`)
 		setLayoutWItem` roots itemH=:{wItemKind`,wItemInfo`,wItems`,wItemAtts`=[ControlId` id:atts]}
 			# (layoutInfo,corner,size,roots)	= getLayoutItem id roots
-			  itemHs							= if (isRecursiveControl wItemKind`) (map (shiftCompounds layoutInfo corner) wItems`) wItems`
-			  info								= shiftWItemInfo corner wItemInfo`
+		//	  itemHs							= if (isRecursiveControl wItemKind`) (map (shiftCompounds layoutInfo corner) wItems`) wItems`	PA: see above
+		//	  info								= shiftWItemInfo corner wItemInfo`																PA: see above
 			= (	roots
 			  ,	{	itemH	& wItemAtts`		= atts
-							, wItemInfo`		= info
-							, wItems`			= itemHs
-							, wItemPos`			= {x=corner.vx,y=corner.vy}
+		//					, wItemInfo`		= info
+		//					, wItems`			= itemHs
+							, wItemPos`			= corner//{x=corner.vx,y=corner.vy}
 							, wItemSize`		= size
 							, wItemLayoutInfo`	= layoutInfo
 				}
 			  )
-		where
+/*		where
 			shiftCompounds :: !LayoutInfo !Vector2 !WElementHandle` -> WElementHandle`
 			shiftCompounds layoutInfo offset (WItemHandle` itemH)
 				= WItemHandle` (shiftCompound layoutInfo offset itemH)
@@ -1015,7 +1015,7 @@ where
 				shiftScrollbar info=:{scrollItemPos}
 					= {info & scrollItemPos=movePoint offset scrollItemPos}
 			shiftWItemInfo _ info
-				= info
+				= info */
 		setLayoutWItem` _ _
 			= controllayoutFatalError "setLayoutWItem`" "WElementHandle` has no ControlId`"
 	

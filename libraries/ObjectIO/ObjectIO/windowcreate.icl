@@ -349,7 +349,7 @@ where
 	updateWindowControl :: !OSWindowMetrics !Id !(!Int,!Int) !OSWindowPtr !OSWindowPtr !OSPictContext !(WindowHandle .ls (PSt .l)) !*OSToolbox
 																								   -> (!WindowHandle .ls (PSt .l), !*OSToolbox)
 	updateWindowControl wMetrics wId (w,h) wPtr cPtr osPict wH=:{whItems=itemHs} tb
-		#! (_,controls,itemHs)	= getUpdateControls cPtr (sizeToRect {w=w,h=h}) itemHs
+		#! (_,controls,itemHs)	= getUpdateControls cPtr zero (sizeToRect {w=w,h=h}) itemHs
 		#! wH					= {wH & whItems=itemHs}
 		# updateInfo			= {	updWIDS			= {wPtr=wPtr,wId=wId,wActive=False}	// PA: check WIDS value
 								  ,	updWindowArea	= zero
@@ -358,34 +358,35 @@ where
 								  }
 		= updatewindow wMetrics updateInfo wH tb
 	where
-		getUpdateControls :: !OSWindowPtr !OSRect ![WElementHandle .ls .pst] -> (!Bool,![ControlUpdateInfo],![WElementHandle .ls .pst])
-		getUpdateControls cPtr clipRect [itemH:itemHs]
-			# (found,controls,itemH)		= getUpdateControl cPtr clipRect itemH
+		getUpdateControls :: !OSWindowPtr !Point2 !OSRect ![WElementHandle .ls .pst] -> (!Bool,![ControlUpdateInfo],![WElementHandle .ls .pst])
+		getUpdateControls cPtr parentPos clipRect [itemH:itemHs]
+			# (found,controls,itemH)		= getUpdateControl cPtr parentPos clipRect itemH
 			| found
 				= (found,controls,[itemH:itemHs])
 			| otherwise
-				# (found,controls,itemHs)	= getUpdateControls cPtr clipRect itemHs
+				# (found,controls,itemHs)	= getUpdateControls cPtr parentPos clipRect itemHs
 				= (found,controls,[itemH:itemHs])
 		where
-			getUpdateControl :: !OSWindowPtr !OSRect !(WElementHandle .ls .pst) -> (!Bool,![ControlUpdateInfo],!WElementHandle .ls .pst)
-			getUpdateControl cPtr clipRect (WItemHandle itemH=:{wItemPtr,wItemNr,wItemPos,wItemSize,wItems})
+			getUpdateControl :: !OSWindowPtr !Point2 !OSRect !(WElementHandle .ls .pst) -> (!Bool,![ControlUpdateInfo],!WElementHandle .ls .pst)
+			getUpdateControl cPtr parentPos clipRect (WItemHandle itemH=:{wItemPtr,wItemNr,wItemPos,wItemSize,wItems})
 				| cPtr==wItemPtr
 					= (True, [{cuItemNr=wItemNr,cuItemPtr=wItemPtr,cuArea=clipRect1}],WItemHandle itemH)
 				| otherwise
-					# (found,controls,itemHs)	= getUpdateControls cPtr clipRect1 wItems
+					# (found,controls,itemHs)	= getUpdateControls cPtr absolutePos clipRect1 wItems
 					= (found,controls,WItemHandle {itemH & wItems=itemHs})
 			where
-				clipRect1						= intersectRects clipRect (posSizeToRect wItemPos wItemSize)
-			getUpdateControl cPtr clipRect (WListLSHandle itemHs)
-				# (found,controls,itemHs)		= getUpdateControls cPtr clipRect itemHs
+				absolutePos						= movePoint wItemPos parentPos
+				clipRect1						= intersectRects clipRect (posSizeToRect absolutePos wItemSize)
+			getUpdateControl cPtr parentPos clipRect (WListLSHandle itemHs)
+				# (found,controls,itemHs)		= getUpdateControls cPtr parentPos clipRect itemHs
 				= (found,controls,WListLSHandle itemHs)
-			getUpdateControl cPtr clipRect (WExtendLSHandle wExH=:{wExtendItems=itemHs})
-				# (found,controls,itemHs)		= getUpdateControls cPtr clipRect itemHs
+			getUpdateControl cPtr parentPos clipRect (WExtendLSHandle wExH=:{wExtendItems=itemHs})
+				# (found,controls,itemHs)		= getUpdateControls cPtr parentPos clipRect itemHs
 				= (found,controls,WExtendLSHandle {wExH & wExtendItems=itemHs})
-			getUpdateControl cPtr clipRect (WChangeLSHandle wChH=:{wChangeItems=itemHs})
-				# (found,controls,itemHs)		= getUpdateControls cPtr clipRect itemHs
+			getUpdateControl cPtr parentPos clipRect (WChangeLSHandle wChH=:{wChangeItems=itemHs})
+				# (found,controls,itemHs)		= getUpdateControls cPtr parentPos clipRect itemHs
 				= (found,controls,WChangeLSHandle {wChH & wChangeItems=itemHs})
-		getUpdateControls _ _ []
+		getUpdateControls _ _ _ []
 			= (False,[],[])
 
 getStackBehindWindow :: !Index !(WindowHandles .pst) -> (!OSWindowPtr,!WindowHandles .pst)

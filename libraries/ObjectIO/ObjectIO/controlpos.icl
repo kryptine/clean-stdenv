@@ -44,7 +44,8 @@ movewindowviewframe wMetrics v wids=:{wPtr} wH=:{whWindowInfo,whItems=oldItems,w
 		# (isRect,areaRect,tb)		= case whWindowInfo of
 		  								WindowInfo {windowClip={clipRgn}} -> osgetrgnbox clipRgn tb
 		  								_                                 -> controlposFatalError "movewindowviewframe" "unexpected whWindowInfo field"
-		# (updRgn,newItems,tb)		= relayoutControls wMetrics whSelect whShow contentRect contentRect zero zero wPtr wH.whDefaultId oldItems` wH.whItems tb
+		# (updRgn,newItems,tb)		= relayoutControls wMetrics wPtr wH.whDefaultId whSelect whShow (contentRect,zero,zero,oldItems`) 
+									                                                                (contentRect,zero,zero,wH.whItems) tb
 		# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wids {wH & whItems=newItems} tb
 		  (updArea,updAction)		= if (not lookInfo.lookSysUpdate || toMuch || not isRect || hasUpdate)
 		  								([newFrame],return []) (calcScrollUpdateArea oldOrigin newOrigin areaRect)
@@ -52,37 +53,37 @@ movewindowviewframe wMetrics v wids=:{wPtr} wH=:{whWindowInfo,whItems=oldItems,w
 		# (wH,tb)					= drawwindowlook` wMetrics wPtr updAction updState wH tb
 		= (wH,tb)
 where
-	windowInfo					= getWindowInfoWindowData whWindowInfo
+	windowInfo						= getWindowInfoWindowData whWindowInfo
 	(oldOrigin,domainRect,hasHScroll,hasVScroll,lookInfo)
-								= (windowInfo.windowOrigin,windowInfo.windowDomain,isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll,windowInfo.windowLook)
-	hScroll						= if hasHScroll (Just (fromJust windowInfo.windowHScroll).scrollItemPtr) Nothing
-	vScroll						= if hasVScroll (Just (fromJust windowInfo.windowVScroll).scrollItemPtr) Nothing
-	domain						= rectToRectangle domainRect
-	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
-	contentRect					= osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize)
-	hRect						= osGetWindowHScrollRect wMetrics visScrolls (sizeToRect whSize)
-	vRect						= osGetWindowVScrollRect wMetrics visScrolls (sizeToRect whSize)
-	contentSize					= rectSize contentRect
-	{w=w`,h=h`}					= contentSize
-	(minx,maxx,vieww)			= (domainRect.rleft,domainRect.rright, contentSize.w)
-	(miny,maxy,viewh)			= (domainRect.rtop, domainRect.rbottom,contentSize.h)
-	newOrigin					= {	x = setBetween (oldOrigin.x+v.vx) minx (max minx (maxx-vieww))
-								  ,	y = setBetween (oldOrigin.y+v.vy) miny (max miny (maxy-viewh))
-								  }
-	newFrame					= posSizeToRectangle newOrigin contentSize
-	toMuch						= (abs (newOrigin.x-oldOrigin.x)>=w`) || (abs (newOrigin.y-oldOrigin.y)>=h`)
-	(defMinW,defMinH)			= osMinWindowSize
-	minSize						= {w=defMinW,h=defMinH}
-	hMargins					= getWindowHMargins   IsWindow wMetrics whAtts
-	vMargins					= getWindowVMargins   IsWindow wMetrics whAtts
-	spaces						= getWindowItemSpaces IsWindow wMetrics whAtts
+									= (windowInfo.windowOrigin,windowInfo.windowDomain,isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll,windowInfo.windowLook)
+	hScroll							= if hasHScroll (Just (fromJust windowInfo.windowHScroll).scrollItemPtr) Nothing
+	vScroll							= if hasVScroll (Just (fromJust windowInfo.windowVScroll).scrollItemPtr) Nothing
+	domain							= rectToRectangle domainRect
+	visScrolls						= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
+	contentRect						= osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize)
+	hRect							= osGetWindowHScrollRect wMetrics visScrolls (sizeToRect whSize)
+	vRect							= osGetWindowVScrollRect wMetrics visScrolls (sizeToRect whSize)
+	contentSize						= rectSize contentRect
+	{w=w`,h=h`}						= contentSize
+	(minx,maxx,vieww)				= (domainRect.rleft,domainRect.rright, contentSize.w)
+	(miny,maxy,viewh)				= (domainRect.rtop, domainRect.rbottom,contentSize.h)
+	newOrigin						= {	x = setBetween (oldOrigin.x+v.vx) minx (max minx (maxx-vieww))
+									  ,	y = setBetween (oldOrigin.y+v.vy) miny (max miny (maxy-viewh))
+									  }
+	newFrame						= posSizeToRectangle newOrigin contentSize
+	toMuch							= (abs (newOrigin.x-oldOrigin.x)>=w`) || (abs (newOrigin.y-oldOrigin.y)>=h`)
+	(defMinW,defMinH)				= osMinWindowSize
+	minSize							= {w=defMinW,h=defMinH}
+	hMargins						= getWindowHMargins   IsWindow wMetrics whAtts
+	vMargins						= getWindowVMargins   IsWindow wMetrics whAtts
+	spaces							= getWindowItemSpaces IsWindow wMetrics whAtts
 	
 	setsliderthumb :: !Bool !OSWindowMetrics !OSWindowPtr !Bool !(!Int,!Int,!Int) !Int !(!Int,!Int) !*OSToolbox -> *OSToolbox
 	setsliderthumb hasScroll wMetrics wPtr isHScroll scrollValues viewSize maxcoords tb
-		| hasScroll				= osSetWindowSliderThumb wMetrics wPtr isHScroll osThumb hScroll vScroll hRect vRect maxcoords True tb
-		| otherwise				= tb
+		| hasScroll					= osSetWindowSliderThumb wMetrics wPtr isHScroll osThumb hScroll vScroll hRect vRect maxcoords True tb
+		| otherwise					= tb
 	where
-		(_,osThumb,_,_)			= toOSscrollbarRange scrollValues viewSize
+		(_,osThumb,_,_)				= toOSscrollbarRange scrollValues viewSize
 	
 /*	calcScrollUpdateArea p1 p2 area calculates the new update area that has to be updated. 
 	Assumptions: p1 is the origin before scrolling,
