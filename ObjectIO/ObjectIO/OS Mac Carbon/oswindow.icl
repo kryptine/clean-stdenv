@@ -170,7 +170,13 @@ createProperWindow :: !OSRect  !String !Int !OSWindowPtr !Bool !*OSToolbox -> (!
 createProperWindow rect title type behind goAway tb
 	# (windowPtr,tb)	= NewCWindow 0 (OSRect2Rect rect) title False type behind goAway 0 tb
 	# (err,root,tb)		= CreateRootControl windowPtr tb
+	# (err,tb)			= SetWindowModified windowPtr 0 tb
 	= (windowPtr,tb)
+
+SetWindowModified :: !OSWindowPtr !Int !*OSToolbox -> (!OSStatus,!*OSToolbox)
+SetWindowModified wPtr mod ioState = code {
+	ccall SetWindowModified "PII:I:I"
+	}
 
 osCreateDialog :: !Bool !Bool !String !(!Int,!Int) !(!Int,!Int) !OSWindowPtr
 				  !(u:s->*(OSWindowPtr,u:s))
@@ -1406,7 +1412,7 @@ osSetTextControlSize _ _ textPtr _ size update tb
 
 //-- EditControl
 
-kControlEditTextProc	:== 272//if onOSX 912 272
+kControlEditTextProc	:== if onOSX 912 272
 
 osCreateEditControl :: !OSWindowPtr !(!Int,!Int) !String !Bool !Bool !Bool !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSWindowPtr,!*OSToolbox)
 osCreateEditControl parentWindow parentPos text show able isKeySensitive (x,y) (w,h) tb
