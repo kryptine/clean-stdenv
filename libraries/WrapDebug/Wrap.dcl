@@ -1,18 +1,13 @@
 /*
 	Wrap Clean nodes (for debugging purposes).
 
-	Version 1.0.3
+	Version 1.0.4
 	Ronny Wichers Schreur
 	ronny@cs.kun.nl
 */
 definition module Wrap
 
-//1.3
-from StdOverloaded import toString 
-//3.1
-/*2.0
-from StdOverloaded import class toString(..);
-0.2*/
+from StdOverloaded import class toString (..)
 
 ::	WrappedDescriptorId
 

@@ -1,7 +1,7 @@
 /*
 	Show Wrapped Node
 
-	Version 1.0.3
+	Version 1.0.4
 	Ronny Wichers Schreur
 	ronny@cs.kun.nl
 */
@@ -44,10 +44,42 @@ show _ (WrappedArray a)
 	=	["{" : flatten (separate [", "] [show Don`tShowParentheses el \\ el <-: a])] ++ ["}"]
 show _ (WrappedRecord descriptor args)
 	=	["{" : flatten (separate [" "] [[showDescriptor descriptor] : [show ShowParentheses arg \\ arg <-: args]])] ++ ["}"]
-show _ (WrappedUnboxedList descriptor args)
-	=	["(" : flatten (separate [", "] [show Don`tShowParentheses arg \\ arg <-: args])] ++ [")"]
+show _ (WrappedUnboxedList _ args)
+	| size args == 2
+		=	["[#" : flatten [show Don`tShowParentheses args.[0] : showTail args.[1]]] ++ ["]"]
+	where
+		showTail :: WrappedNode -> [[{#Char}]]
+		showTail (WrappedUnboxedList _ args)
+			| size args == 2
+				=	[[", "], show Don`tShowParentheses args.[0] : showTail args.[1]]
+		showTail (WrappedOther WrappedDescriptorNil args)
+			| size args == 0
+				=	[]
+		showTail node // abnormal list
+			=	[[" : " : show Don`tShowParentheses node]]
 show _ (WrappedUnboxedRecordList descriptor args)
-	=	["(" : flatten (separate [", "] [show Don`tShowParentheses arg \\ arg <-: args])] ++ [")"]
+	=	["[#" : flatten (showHeadTail descriptor args)] ++ ["]"]
+	where
+		showHeadTail :: WrappedDescriptor {WrappedNode} -> [[{#Char}]]
+		showHeadTail descriptor args
+			=	[show Don`tShowParentheses (WrappedRecord descriptor head) : showTail tail]
+			where
+				n
+					=	size args
+				head
+					=	{arg \\ arg <-: args & _ <- [0..n-2]}
+				tail
+					=	args.[n-1]
+			
+		showTail :: WrappedNode -> [[{#Char}]]
+		showTail (WrappedUnboxedRecordList descripctor args)
+			| size args == 2
+				=	[[", "] : showHeadTail descriptor args]
+		showTail (WrappedOther WrappedDescriptorNil args)
+			| size args == 0
+				=	[]
+		showTail node // abnormal list
+			=	[[" : " : show Don`tShowParentheses node]]
 show _ (WrappedOther WrappedDescriptorCons args)
 	| size args == 2
 		=	["[" : flatten [show Don`tShowParentheses args.[0] : showTail args.[1]]] ++ ["]"]
@@ -82,12 +114,7 @@ showDescriptor WrappedDescriptorCons
 showDescriptor WrappedDescriptorTuple
 	=	"(..)"
 
-//1.3
-showBasicArray :: {#a} -> [{#Char}] | toString, ArrayElem a
-//3.1
-/*2.0
 showBasicArray :: {#a} -> [{#Char}] | toString a & Array {#} a
-0.2*/
 showBasicArray a
 	=	["{" : separate ", " [toString el \\ el <-: a]] ++ ["}"]
 

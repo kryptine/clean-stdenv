@@ -1,6 +1,6 @@
 WrapDebug
 
-Version  1.0.3
+Version  1.0.4
 Ronny Wichers Schreur
 ronny@cs.kun.nl
 
@@ -20,7 +20,5 @@ FILES
         Wrap Clean nodes
     ShowWrapped.dcl, ShowWrapped.icl
         Convert a wrapped node to a list of strings
-    RWSDebug.dcl, RWSDebug.icl
-        Syntax and options I use for debugging (uses Debug)
     Examples.icl
         Some examples with explanations
