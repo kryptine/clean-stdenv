@@ -47,23 +47,23 @@ where
 
 examplea = StartCircuit mycircuit [1..5]  // connecting two editors 
 where
-	mycircuit = gecEdit "list" >>> arr toBalTree >>> gecDisplay "balancedtree"
+	mycircuit = edit "list" >>> arr toBalTree >>> display "balancedtree"
 
 exampleb = StartCircuit mycircuit2 (toBalTree [1..5]) // self balancing tree
 where
-	mycircuit  = gecFix (gecEdit "self balancing tree" >>> arr BalanceTree)
-	mycircuit2 = gecFix (arr BalanceTree >>> gecEdit "self balancing tree")
+	mycircuit  = fix (edit "self balancing tree" >>> arr BalanceTree)
+	mycircuit2 = fix (arr BalanceTree >>> edit "self balancing tree")
 
 exampleb` = StartCircuit mycircuit ([1..5])
 where
-	mycircuit = gecEdit "list" >>> arr toBalTree >>> gecFixViaLoop`ViaGecLoopViaLoop` (gecEdit "self balancing tree" >>> arr BalanceTree)
+	mycircuit = edit "list" >>> arr toBalTree >>> fix (edit "self balancing tree" >>> arr BalanceTree) >>> display "result"
 
 examplec = StartCircuit mycircuit [1..5]
 where
 	mycircuit     = evenCircuit &&& oddCircuit >>> balancedtree
-	evenCircuit   = takeEven  @>> gecEdit "part1"
-	oddCircuit    = takeOdd   @>> gecEdit "part2"
-	balancedtree  = convert   @>> gecEdit "balanced tree"
+	evenCircuit   = takeEven  @>> edit "part1"
+	oddCircuit    = takeOdd   @>> edit "part2"
+	balancedtree  = convert   @>> edit "balanced tree"
 
 	takeEven list = [e \\ e <- list | isEven e]
 	takeOdd list  = [e \\ e <- list | isOdd e]
