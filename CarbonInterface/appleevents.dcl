@@ -3,6 +3,7 @@ definition module appleevents;
 from mac_types import ::Toolbox;
 
 TypeApplSignature	:== 0x7369676E;	// 'sign'
+TypeProcessSerialNumber:==0x70736E20; // 'psn '
 KCoreEventClass		:==	0x61657674;	// 'aevt'
 KAEMiscStandards	:== 0x6D697363;	// 'misc'
 KAEQuitApplication	:==	0x71756974;	// 'quit'
