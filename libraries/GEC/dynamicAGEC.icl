@@ -8,6 +8,7 @@ import EstherInterFace
 from EstherBackend import toStringDynamic
 import StdDynamic, StdPSt, iostate
 
+/* OLD VERSION was to restrictive in a (gGEC{|*|} a)
 dynamicAGEC2 :: a -> AGEC a | TC a & gGEC {|*|} a	 					
 dynamicAGEC2 v = mkAGEC { toGEC   = toExpr
 					  , fromGEC = fromExpr
@@ -19,14 +20,41 @@ where
 	toExpr v Undefined 		= display v (prettyVal  v)
 	toExpr v (Defined b)	= b 				
 
-	display v s 		= DynStr (dynamic v) s <-> hidAGEC (v,s)
+	display v s 			= DynStr (dynamic v) s <-> hidAGEC (v,s)
 
 	fromExpr (_ <-> hvs )	= fst (^^ hvs)
+	fromExpr _ = undef
 	
 	updExpr (DynStr nd=:(d::a^) s <-> _)	= display d s
 	updExpr (_ <-> hvs) 					= display (fst (^^ hvs)) (snd (^^ hvs))
 
 	prettyVal  v  	= fst (toStringDynamic (dynamic v))
+*/
+
+dynamicAGEC2 :: d -> AGEC d | TC d
+dynamicAGEC2 dv = mkAGEC { toGEC   = toExpr
+						 , fromGEC = fromExpr dv
+						 , updGEC  = updExpr  dv
+						 , value   = dv
+//						 } ("dynamicGEC2")
+						 } ("dynamicGEC2" +++ ShowValueDynamic (dynamic dv))
+where
+	toExpr dv Undefined 	= display dv (prettyVal dv)
+	toExpr dv (Defined vv)	= vv
+
+//	display dv ds 			= (DynStr (dynamic dv) ds,hidAGEC (DynStr (dynamic dv) ds))
+	display dv ds = let dx = DynStr (dynamic dv) ds in (dx,hidAGEC dx)
+
+	fromExpr :: d (DynString, AGEC DynString) -> d | TC d
+	fromExpr _ (_,oldd)		= case (^^oldd) of
+								DynStr (dv::d^) _ -> dv
+	
+	updExpr :: d (DynString, AGEC DynString) -> (DynString, AGEC DynString) | TC d
+	updExpr _ (newd=:(DynStr (dv::d^) s),_)
+							= (newd, hidAGEC newd)
+	updExpr _ (_, oldd)		= (^^oldd, oldd)
+
+	prettyVal x				= fst (toStringDynamic (dynamic x))
 
 dynamicAGEC :: a -> AGEC a | TC a & gGEC {|*|} a	 					
 dynamicAGEC v = mkAGEC { toGEC   = toExpr
