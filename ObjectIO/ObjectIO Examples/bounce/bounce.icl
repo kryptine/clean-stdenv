@@ -84,7 +84,7 @@ where
 					:+:	MenuItem "Quit"				[MenuFunction (noLS quit),MenuShortKey 'q']
 					)	[]
 		
-	//	timer defines the timer that will calculate the movements of the current balls as often as possible.
+	//	timer defines the timer that calculates the movements of the current balls.
 		timer	= Timer 0 NilLS 
 					[	TimerId			tId
 					,	TimerFunction	(noLS1 (bounceBalls splitWalls))
@@ -150,28 +150,22 @@ where
 //	bounceHelp opens a dialog that tells something about this application.
 	bounceHelp :: Bounce -> Bounce
 	bounceHelp bounce
-		# (okId, bounce)	= accPIO openId bounce
-		# ((error,_),bounce)= openModalDialog undef (dDef okId) bounce
-		| error<>NoError	= abort "bounce could not open About bounce dialog."
-		| otherwise			= bounce
-	where
-		dDef okId			= Dialog "About bounce"
+		# (okId,bounce)		= accPIO openId bounce
+		# (dId, bounce)		= accPIO openId bounce
+		# dDef				= Dialog "About bounce"
 								(	TextControl   "This is a Clean program"
-														[ControlPos center]
+														[ControlPos (Center,NoOffset)]
 								:+:	ButtonControl "Ok"	[ControlId okId
-														,ControlPos center
-														,ControlFunction (noLS close)
+														,ControlPos (Center,NoOffset)
+														,ControlFunction (noLS (closeWindow dId))
 														]
 								)
 								[	WindowOk okId
+								,	WindowId dId
 								]
-		center	= (Center,NoOffset)
-		
-		close :: Bounce -> Bounce
-		close bounce
-			# (Just id,bounce)	= accPIO getActiveWindow  bounce
-			# bounce			= closeWindow id bounce
-			= bounce
+		# ((error,_),bounce)= openModalDialog undef dDef bounce
+		| error<>NoError	= abort "bounce could not open About bounce dialog."
+		| otherwise			= bounce
 
 
 //	Determine which balls are inside and which are outside the barrel:
