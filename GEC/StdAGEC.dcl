@@ -21,6 +21,6 @@ derive gGEC AGEC
 
 :: AGEC a		// abstract GEC for an a-value maintained with a b-editor
 
-mkAGEC  	:: (BimapGEC a b) String -> AGEC a |  gGEC{|*|} b
+mkAGEC  	:: !(BimapGEC a b) !String -> AGEC a |  gGEC{|*|} b
 ^^			:: (AGEC a) -> a
 (^=) infixl	:: (AGEC a) a -> (AGEC a)

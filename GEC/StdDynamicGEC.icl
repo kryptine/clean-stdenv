@@ -12,6 +12,25 @@ import StdDynamic, StdPSt, iostate
 // TO TEST JUST REPLACE THE EXAMPLE NAME IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
 // ALL EXAMPLES HAVE TO BE OF FORM pst -> pst
 
+dynamicGEC2 :: a -> AGEC a | TC a & gGEC {|*|} a	 					
+dynamicGEC2 v = mkAGEC { toGEC   = toExpr
+					  , fromGEC = fromExpr
+					  , updGEC  = updExpr
+					  , value   = v
+					  } "dynamicGEC"
+where
+	toExpr v Undefined 		= display v (prettyVal  v)
+	toExpr v (Defined b)	= b 				
+
+	display v s 		= DynStr (dynamic v) s <-> hidGEC (v,s)
+
+	fromExpr (_ <-> hvs )	= fst (^^ hvs)
+	
+	updExpr (DynStr nd=:(d::a^) s <-> _)	= display d s
+	updExpr (_ <-> hvs) 					= display (fst (^^ hvs)) (snd (^^ hvs))
+
+	prettyVal  v  	= fst (prettyDynamic (dynamic v))
+
 dynamicGEC :: a -> AGEC a | TC a & gGEC {|*|} a	 					
 dynamicGEC v = mkAGEC { toGEC   = toExpr
 					  , fromGEC = fromExpr
@@ -22,12 +41,12 @@ where
 	toExpr v Undefined 		= display v (prettyVal  v)
 	toExpr v (Defined b)	= b 				
 
-	display v s 		= (hidGEC (v,s)) <-> (prettyValD v s) <->(prettyType v) <-> DynStr (dynamic v) s 
+	display v s 		= prettyValD v s <-> prettyType v <-> DynStr (dynamic v) s <-> hidGEC (v,s) 
 
-	fromExpr (hvs <-> _ <-> _ <-> _ )	= fst (^^ hvs)
+	fromExpr (_ <-> _ <-> _ <-> hvs)	= fst (^^ hvs)
 	
-	updExpr (_   <-> _ <-> _ <-> DynStr nd=:(d::a^) s)	= display d s
-	updExpr (hvs <-> _ <-> _ <-> _) 					= display (fst (^^ hvs)) (snd (^^ hvs))
+	updExpr ( _ <-> _ <-> DynStr nd=:(d::a^) s <-> hvs)	= display d s
+	updExpr ( _ <-> _ <-> _ <-> hvs) 					= display (fst (^^ hvs)) (snd (^^ hvs))
 
 	prettyVal  v  	= fst (prettyDynamic (dynamic v))
 	prettyValD v s	= case (dynamic v) of

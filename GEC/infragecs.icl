@@ -738,7 +738,7 @@ GEC2 pGEC name gecguiFun fun outputOnly lSt pSt
 	# tDef			= GECReceiver pGEC (fun gecGUI pGEC)	// (2)
 	# (_,pSt)		= openReceiver lSt tDef pSt				// (2)
 	# pSt			= openGEC pGEC pSt						// (3)
-	= (newGEC pGEC,pSt)										// (4)
+	= (newGEC pGEC,pSt)										// (4)  mjp
 where
 	newGEC :: !(GECId t) -> .GECVALUE t (PSt .ps)
 	newGEC tGEC
