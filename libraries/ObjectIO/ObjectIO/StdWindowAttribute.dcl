@@ -2,13 +2,11 @@ definition module StdWindowAttribute
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.2
+//	Clean Standard Object I/O library.
 //	
 //	StdWindowAttribute specifies which WindowAttributes are valid for Windows
 //	and Dialogs.
 //	Basic comparison operations and retrieval functions are also included.
-//	Author: Peter Achten
-//	Modified: 7 September 2001 for Clean 2.0
 //	********************************************************************************
 
 

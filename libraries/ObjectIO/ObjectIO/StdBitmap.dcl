@@ -2,11 +2,9 @@ definition module StdBitmap
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.2
+//	Clean Standard Object I/O library.
 //	
 //	StdBitmap contains functions for reading bitmap files and drawing bitmaps.
-//	Author: Peter Achten
-//	Modified: 7 September 2001 for Clean 2.0
 //	********************************************************************************
 
 

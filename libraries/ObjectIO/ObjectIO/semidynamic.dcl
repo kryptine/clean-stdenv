@@ -2,12 +2,10 @@ definition module semidynamic
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.2
+//	Clean Standard Object I/O library.
 //	
 //	This module implements a heavily degraded kind of dynamics. In a version of Clean
 //	with proper dynamics, this module will disappear.
-//	Author: Peter Achten
-//	Modified: 7 September 2001 for Clean 2.0
 //	********************************************************************************
 
 

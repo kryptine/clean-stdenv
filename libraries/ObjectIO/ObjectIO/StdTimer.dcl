@@ -2,11 +2,9 @@ definition module StdTimer
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.2
+//	Clean Standard Object I/O library.
 //	
 //	StdTimer specifies all timer operations.
-//	Author: Peter Achten
-//	Modified: 15 October 2001 for Clean 2.0
 //	********************************************************************************
 
 

@@ -2,11 +2,9 @@ definition module StdProcess
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.2
+//	Clean Standard Object I/O library.
 //	
 //	StdProcess contains the process creation and manipulation functions.
-//	Author: Peter Achten
-//	Modified: 8 October 2001 for Clean 2.0
 //	********************************************************************************
 
 

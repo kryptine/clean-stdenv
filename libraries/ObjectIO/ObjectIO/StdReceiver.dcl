@@ -1,11 +1,9 @@
 definition module StdReceiver
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.2
+//	Clean Standard Object I/O library.
 //	
 //	StdReceiver specifies all receiver operations.
-//	Author: Peter Achten
-//	Modified: 15 October 2001 for Clean 2.0
 //	********************************************************************************
 
 import	StdReceiverDef, StdMaybe

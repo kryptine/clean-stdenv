@@ -2,11 +2,9 @@ definition module StdControl
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.2
+//	Clean Standard Object I/O library.
 //	
 //	StdControl specifies all control operations.
-//	Author: Peter Achten
-//	Modified: 20 November 2001 (setEditControlSelection added).
 //	********************************************************************************
 
 

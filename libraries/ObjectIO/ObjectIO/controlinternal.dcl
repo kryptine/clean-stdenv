@@ -2,10 +2,7 @@ definition module controlinternal
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.2
-//	
-//	Author: Peter Achten
-//	Modified: 20 November 2001 (seteditcontrolselection added).
+//	Clean Standard Object I/O library.
 //	********************************************************************************
 
 
