@@ -134,26 +134,49 @@ where
 		| trace_n a False = undef
 		= seta u a env
 
-feedback :: (GecCircuit a a) -> GecCircuit a a
-feedback g = GecCircuit k
+self :: (GecCircuit a a) (GecCircuit a a) -> GecCircuit a a
+self g f = GecCircuit k
 where 
-	k seta env = (feedback_seta` id_u seta`, env``)
+	k seta env = (self_seta id_u gseta, env````)
 	where
 		(id_u, env`) = openStoreId env
-		(seta`, env``) = runCircuit g (feedback_seta id_u seta seta`) env`
+		(_, env``) = openStore id_u (Just YesUpdate) env`
+		(fseta, env```) = runCircuit f gseta env``
+		(gseta, env````) = runCircuit g (self_setrec id_u seta fseta) env```
 
-	feedback_seta id_u seta seta` NoUpdate a env 
-		# (ok, env) = valueStored id_u env
-		  (u, env) = if ok (readStore id_u env) (YesUpdate, env) 
-		  env = closeStore id_u env
+	self_setrec id_u setout setrec NoUpdate a env 
+		# (u, env) = readStore id_u env
+		= setout u a env
+	self_setrec id_u setout setrec YesUpdate a env = setrec NoUpdate a env
+
+	self_seta id_u seta u a env 
+		# env = writeStore id_u u env
 		= seta u a env
-	feedback_seta id_u seta seta` YesUpdate a env 
-		# env = closeStore id_u env
-		= seta` NoUpdate a env
 
-	feedback_seta` id_u seta` u a env 
-		# (_, env) = openStore id_u (Just u) env
-		= seta` u a env
+	/* = arr addLEFT >>> feedback (first g >>> arr selectX >>> f >>> arr addRIGHT) >>> arr fst
+	where
+		addLEFT x = (x, LEFT x)
+		selectX (x, LEFT _) = x
+		selectX (_, RIGHT x) = x
+		addRIGHT x = (x, RIGHT x)*/
+
+feedback :: (GecCircuit a a) -> GecCircuit a a
+feedback g = GecCircuit k	// = self g (arr id)
+where 
+	k seta env = (feedback_seta id_u gseta, env```)
+	where
+		(id_u, env`) = openStoreId env
+		(_, env``) = openStore id_u (Just YesUpdate) env`
+		(gseta, env```) = runCircuit g (feedback_setrec id_u seta gseta) env``
+
+	feedback_setrec id_u  setout setrec NoUpdate a env 
+		# (u, env) = readStore id_u env
+		= setout u a env
+	feedback_setrec id_u  setout setrec YesUpdate a env = setrec NoUpdate a env
+
+	feedback_seta id_u seta u a env 
+		# env = writeStore id_u u env
+		= seta u a env
 
 sink :: GecCircuit a Void
 sink = GecCircuit k

@@ -5,10 +5,27 @@ import StdGEC, StdGECExt, StdAGEC
 import GecArrow, StdDebug
 
 Start :: !*World -> *World
-Start world = goGui feedbackTest6 world  
+Start world = goGui selfTest1 world  
 where
 	goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 
+:: T` = C1` (P Int  Bool)
+	  | C2` (P Real Bool)
+:: P a b = P a b
+derive gGEC T`, P
+
+selfTest1 = startCircuit (self (edit "self") (arr test)) (C1` (P 0 False))
+where
+	 test (C1` (P i b)) = C2` (P (toReal i) b)
+	 test (C2` (P r b)) = C1` (P (toInt  r) b)
+/*
+testXX` pst = let (cGEC,pst`) = createNGEC "self" Interactive True (C1` (P 0 False)) (\_ t -> cGEC.gecSetValue NoUpdate (test t)) pst
+             in  pst`
+//testX` = CGEC (selfGEC "self" test) (C1` 0)
+where
+	 test (C1` (P i b)) = C2` (P (toReal i) b)
+	 test (C2` (P r b)) = C1` (P (toInt  r) b)
+*/
 loopTest1 = startCircuit (edit "edit" >>> loop (arr \(x, y) -> (x + 1, y + 1)) >>> display "display") 42
 
 loopTest2 = startCircuit (edit "edit" >>> loop (first (edit "loop")) >>> display "display") 42
@@ -56,7 +73,7 @@ feedbackTest4 = startCircuit (edit "input" >>> feedback (first (arr ((+) 1))) >>
 //feedbackTest5 = startCircuit (feedback ((edit "+1" >>> arr ((+) 1)) *** (edit "+100" >>> arr ((+) 100)) >>> probe "result")) (0, 0)
 feedbackTest5 = startCircuit (feedback (second (edit "+1" >>> arr ((+) 1)) >>> first (edit "+100" >>> arr ((+) 100)) >>> probe "result")) (0, 0)
 
-feedbackTest6 = startCircuit (feedback (feedback (edit "edit") >>> display "inner") >>> display "outer") 0
+feedbackTest6 = startCircuit (feedback (feedback (edit "edit") >>> arr ((+) 1) >>> display "inner") >>> arr ((+) 100) >>> display "outer") 0
 
 sinkTest1 = startCircuit (edit "input" >>> sink >>> arr (\_ -> -1) >>> display "output") 0
 /*
