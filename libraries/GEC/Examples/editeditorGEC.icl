@@ -9,10 +9,49 @@ import genericgecs
 import StdGEC, StdGECExt, GecArrow, StdDynamic 
 import basicAGEC, StdAGEC, calcAGEC, dynamicAGEC
 
+/* first example paper
+:: MyRecord = { function :: DynString
+              , argument :: DynString
+              , result   :: DynString
+              }
+
+derive gGEC MyRecord
+
+testje = startCircuit (feedback (dotest @>> edit "test")) (initval ((+) 1) 3)
+where
+	initval f v = { function = DynStr (dynamic f) "f"
+                  , argument = DynStr (dynamic v) (toString v)
+                  , result   = DynStr (dynamic (f v)) (ShowValueDynamic (dynamic (f v)))
+                  }
+	dotest all=:{ function = DynStr (f::a -> b) fstr
+		   		, argument = DynStr (v::a) vstr
+		   		} = {all & result = DynStr (dynamic (f v)) (ShowValueDynamic (dynamic (f v)))}
+	dotest all = all
+*/
+:: MyRecord = { function :: AGEC (Int -> Int)
+              , argument :: AGEC Int
+              , result   :: AGEC Int
+              }
+
+derive gGEC MyRecord
+
+testje = startCircuit (feedback (dotest @>> edit "test")) (initval ((+) 1) 3)
+where
+	initval f v = { function = dynamicAGEC2 f
+                  , argument = dynamicAGEC2 v
+                  , result   = showAGEC (f v)
+                  }
+	dotest all=:{ function = af
+		   		, argument = av
+		   		} = {all & result = showAGEC ((^^ af) (^^ av))}
+	dotest all = all
+	
 
 Start :: *World -> *World
+//Start world = goGui testje world  
 //Start world = goGui editoreditor world  
-Start world = goGui testDynamic world  
+//Start world = goGui testDynamic world  
+Start world = goGui testDynamic2 world  
 /*
 Start world = goGui mytest world
 where
@@ -27,6 +66,23 @@ where
 */	
 
 derive gGEC Maybe 
+
+testDynamic2 = startCircuit  (feedback (dotest @>> edit "test" ))  initval  
+where	
+	initval  = vertlistAGEC [show "expression " (toDynStr (dynamic 0))] 
+	 
+	dotest x = dotest` (^^ x)
+	
+	dotest` [x:xs] = vertlistAGEC ([x] ++ (check (fromDynStr x) xs))
+	where
+		check (f::a -> b) [(_,dyn=:DynStr (x::a) s):xs] = [show "argument " dyn: check (dynamic f x) xs]
+		check dyn=:(f::a -> b) else 				= [show "argument " (toDynStr (dynamic "??"))]
+		check dyn  else 							= [show "result " (toDynStr dyn)]
+
+	show s v = (showAGEC s,v)
+
+	toDynStr v 					  = DynStr v (ShowValueDynamic v)
+	fromDynStr (_,(DynStr d str)) = d
 
 testDynamic = startCircuit  (feedback (dotest @>> edit "test" ))  initval  
 where	
