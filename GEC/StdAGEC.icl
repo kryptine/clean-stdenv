@@ -135,7 +135,7 @@ where
 		      , gecOpened   = accPIO (isGECIdBound tGEC)
 		      }
 
-	gGEC_AGEC gGECa gecArgs pSt		// No AGEC argument, use constGEC as default implementation
+	gGEC_AGEC gGECa gecArgs pSt	
 		# (aGEC,pSt)	= gGECa {gecArgs & gec_value=Nothing, update = \v r env -> env} pSt
 		# (a,   pSt)	= aGEC.gecGetValue pSt
 		# pSt			= aGEC.gecClose    pSt
