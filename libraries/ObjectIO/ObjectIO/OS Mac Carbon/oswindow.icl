@@ -1406,7 +1406,7 @@ osSetTextControlSize _ _ textPtr _ size update tb
 
 //-- EditControl
 
-kControlEditTextProc	:== if onOSX 912 272
+kControlEditTextProc	:== 272//if onOSX 912 272
 
 osCreateEditControl :: !OSWindowPtr !(!Int,!Int) !String !Bool !Bool !Bool !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSWindowPtr,!*OSToolbox)
 osCreateEditControl parentWindow parentPos text show able isKeySensitive (x,y) (w,h) tb
@@ -2649,9 +2649,10 @@ GetControlData :: !OSControlPtr !OSControlPart !String !*OSToolbox -> (!String,!
 GetControlData cPtr cPart tag tb
 	# iTag	= ((toInt tag.[0]) << 24) bitor ((toInt tag.[1]) << 16) bitor ((toInt tag.[2]) << 8) bitor ((toInt tag.[3]) << 0)
 	# (err,iSize,tb)	= GetControlDataSize cPtr cPart iTag tb
+	| err <> 0 = ("",tb)
 	# iBuffer			= createArray iSize '@'
 	# (err,oSize,tb)	= GetControlData cPtr cPart iTag iSize iBuffer tb
-	# tb = trace_n ("GetControlData",cPtr,iSize,oSize,iBuffer) tb
+	| err <> 0 = ("",tb)
 	= (iBuffer,tb)
 where
 	GetControlData :: !OSControlPtr !OSControlPart !Int !Int !String !*OSToolbox -> (!Int,!Int,!*OSToolbox)
