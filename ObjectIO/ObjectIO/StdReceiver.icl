@@ -7,7 +7,7 @@ implementation module StdReceiver
 import	StdInt, StdBool, StdList, StdTuple, StdOverloaded, StdFunc
 import	commondef, id, receiveraccess, receiverdefaccess, receiverdevice, receiverid, scheduler
 from	StdPSt	import	accPIO, appPIO, St
-//import tracetypes, StdDebug
+
 
 stdReceiverFatalError :: String String -> .x
 stdReceiverFatalError rule error
@@ -136,19 +136,20 @@ closeReceiver id ioState
 	# ioState					= ioStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
 	| not found
 		= ioState
-	# (idtable,ioState)		= ioStGetIdTable ioState
-	# ioState				= ioStSetIdTable (snd (removeIdFromIdTable id idtable)) ioState
-	# ioState				= unbindRId id ioState
+//	| otherwise
+	# (idtable,ioState)			= ioStGetIdTable ioState
+	  ioState					= ioStSetIdTable (snd (removeIdFromIdTable id idtable)) ioState
+	  ioState					= unbindRId id ioState
 // MW11..
-	# ioState				= ioStSetRcvDisabled True ioState
-	  connectedIds			= rsH.rHandle.rConnected
-	# ioState				= seq (map closeReceiver connectedIds) ioState
-	  inetInfo				= rsH.rHandle.rInetInfo
+	  ioState					= ioStSetRcvDisabled True ioState
+	  connectedIds				= rsH.rHandle.rConnected
+	  ioState					= seq (map closeReceiver connectedIds) ioState
+	  inetInfo					= rsH.rHandle.rInetInfo
 	| isNothing inetInfo
 		= ioState
 	| otherwise
-		# (_,_,_,closeFun)	= fromJust inetInfo
-		# ioState			= appIOToolbox closeFun ioState
+		# (_,_,_,closeFun)		= fromJust inetInfo
+		  ioState				= appIOToolbox closeFun ioState
 // ..MW11
 		= ioState
 where
@@ -466,13 +467,15 @@ syncSend2 r2id msg pState=:{io=ioState}
 where
 	pstHandleSync2Message :: !(DId resp) !SyncMessage !(PSt .l) -> (!(!SendReport,!Maybe resp), !PSt .l)
 	pstHandleSync2Message did sm pState
-		# (_,schedulerEvent,pState)
+		# (handled,schedulerEvent,pState)
 								= handleOneEventForDevices (ScheduleMsgEvent (SyncMessage sm)) pState
 		  sm					= case schedulerEvent of
 		  							(ScheduleMsgEvent (SyncMessage sm))	-> sm
 		  							_									-> stdReceiverFatalError "syncSend2" "unexpected scheduler event"
 		  errors				= sm.smError
 		  resps					= sm.smResp
+		| not handled
+			= stdReceiverFatalError "syncSend2" "receiver event not handled"
 		| not (isEmpty errors)
 			# sendReport		= case (hd errors) of
 									ReceiverUnable	-> SendUnableReceiver

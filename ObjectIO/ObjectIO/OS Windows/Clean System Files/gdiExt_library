@@ -10,4 +10,5 @@ CreateCompatibleDC@4
 DPtoLP@12
 GetTextExtentPointA@16
 CreateFontA@56
-
+CreateEllipticRgn@16
+PaintRgn@8

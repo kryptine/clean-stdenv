@@ -10,6 +10,8 @@ import	StdBool, StdFunc, StdInt, StdList, StdMisc, StdReal, StdTuple
 import	ospicture, osfont, osrgn, ostoolbox
 import	commondef, StdPictureDef
 
+//import StdDebug,dodebug
+trace_rgn _ r :== r
 
 //	Pen attribute functions:
 
@@ -26,14 +28,8 @@ where
 
 getPenAttributes :: !*Picture -> (![PenAttribute],!*Picture)
 getPenAttributes picture
-	# (pen,picture)	= getpictpen picture
-	= (getattribute pen,picture)
-where
-	getattribute :: !Pen -> [PenAttribute]
-	getattribute {penSize,penForeColour,penBackColour,penPos,penFont}
-		= [PenSize penSize,PenPos penPos,PenColour penForeColour,PenBack penBackColour,PenFont penFont]
-
-
+	= getpictpenattributes picture
+	
 //	Pen position attributes:
 setPenPos :: !Point2 !*Picture -> *Picture
 setPenPos pos picture
@@ -351,14 +347,20 @@ appClipPicture region drawf picture
 accClipPicture :: !Region !.(St *Picture .x) !*Picture -> (.x,!*Picture)
 accClipPicture region drawf picture
 	#! (curClipRgn,picture)				= pictgetcliprgn picture
+//	#! curClipRgn = trace_rgn "accClipPicture: cur" curClipRgn
 	#! (origin,pen,toScreen,context,tb)	= peekPicture picture
 	#! (newClipRgn,tb)					= osnewrgn tb
 	#! (hFac,vFac,context,tb)			= getPictureScalingFactors context tb
 	#! (newClipRgn,tb)					= setrgnshapes hFac vFac origin region.region_shape newClipRgn tb
+//	#! newClipRgn = trace_rgn "accClipPicture: new" newClipRgn
+	   isEmpty							= if (curClipRgn==0) (\_ tb->(True,tb)) osisemptyrgn	// PA: you must test for 0, because that's what windows generates if there is no clipping region!
+	#! (emptyCur,tb)					= isEmpty curClipRgn tb
 	#! picture							= unpeekPicture origin pen toScreen context tb
-	   (set,dispose)					= if (curClipRgn==0) (pictsetcliprgn,\_ x->x) (pictandcliprgn,osdisposergn)
+//	   (set,dispose)					= if (curClipRgn==0) (pictsetcliprgn,\_ x->x) (pictandcliprgn,osdisposergn)
+	   (set,dispose)					= if emptyCur (pictsetcliprgn,\_ x->x) (pictandcliprgn,osdisposergn)
 	#! picture							= set newClipRgn picture
 	#! (x,picture)						= drawf picture
+//	#! (curClipRgn,picture) = (trace_rgn "accClipPicture: cur" curClipRgn,picture)
 	#! picture							= pictsetcliprgn curClipRgn picture
 	#! picture							= apppicttoolbox (dispose curClipRgn o osdisposergn newClipRgn) picture
 	=  (x,picture)

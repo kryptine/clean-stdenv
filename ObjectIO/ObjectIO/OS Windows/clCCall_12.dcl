@@ -2,7 +2,8 @@ definition module clCCall_12
 
 //	Clean Object I/O library, version 1.2
 
-from ostoolbox import OSToolbox
+from StdIOCommon	import Modifiers
+from ostoolbox		import OSToolbox
 
 
 ::	CSTR	:==  Int
@@ -52,6 +53,9 @@ BUTTONDOUBLEDOWN	:== 2
 BUTTONDOWN			:== 1
 BUTTONSTILLUP		:== 0		/* PA: new constant for passing mouse move events. */
 
+
+//	PA: moved from windowevent.icl because also used by menuCrossCall_12
+toModifiers				:: !Int -> Modifiers
 
 winLaunchApp			:: !{#Char} !Bool !*OSToolbox -> (!Bool,!*OSToolbox)
 winLaunchApp2			:: !{#Char} !{#Char} !Bool !*OSToolbox -> (!Bool,!*OSToolbox)

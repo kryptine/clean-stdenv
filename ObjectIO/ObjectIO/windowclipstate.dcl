@@ -5,7 +5,7 @@ definition module windowclipstate
 
 
 import	wstate
-from	oswindow	import OSWindowMetrics
+import	ossystem
 
 
 disposeClipState:: !ClipState !*OSToolbox -> *OSToolbox

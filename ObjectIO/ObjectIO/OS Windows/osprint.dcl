@@ -30,31 +30,22 @@ import StdFile, StdPicture, iostate
 	=	Cancelled x
 	|	StartedPrinting y
 
-os_getpagedimensions	::	!PrintSetup	!Bool 
-						->	!(!(!Int,!Int),
-							  !(!(!Int,!Int),!(!Int,!Int)),
-							  !(!Int,!Int))
-os_defaultprintsetup	::	!*env
-						->	(!PrintSetup, !*env)
-os_printsetupvalid		::	!PrintSetup !*env
-						->	(!Bool, !*env)
+os_getpagedimensions	:: !PrintSetup !Bool -> (!(!Int,!Int),!(!(!Int,!Int),!(!Int,!Int)),!(!Int,!Int))
+os_defaultprintsetup	::             !*env -> (!PrintSetup, !*env)
+os_printsetupvalid		:: !PrintSetup !*env -> (!Bool,       !*env)
 						
-class PrintEnvironments printEnv
-  where
-	os_printpageperpage
-		::	!.Bool !Bool 
-			!.x
-			.(.x -> .(PrintInfo -> .(*Picture -> ((.Bool,Point2),(.state,*Picture)))))
-			((.state,*Picture) -> ((.Bool,Point2),(.state,*Picture)))
-			!PrintSetup !*printEnv
-		-> 	(Alternative .x .state,!*printEnv)
-	os_printsetupdialog
-		:: !PrintSetup !*printEnv
-		-> (!PrintSetup, !*printEnv)
+class PrintEnvironments printEnv where
+	os_printpageperpage	:: !.Bool !Bool 
+						   !.x
+						   .(.x -> .(PrintInfo -> .(*Picture -> ((.Bool,Point2),(.state,*Picture)))))
+						   ((.state,*Picture) -> ((.Bool,Point2),(.state,*Picture)))
+						   !PrintSetup !*printEnv
+						-> (Alternative .x .state,!*printEnv)
+	os_printsetupdialog	:: !PrintSetup  !*printEnv
+						-> (!PrintSetup,!*printEnv)
 		
 instance PrintEnvironments Files
-instance PrintEnvironments (PSt .l)
+instance PrintEnvironments (PSt .ps)
 
-
-os_printsetuptostring	::	!PrintSetup -> String
-os_stringtoprintsetup	::	!String -> PrintSetup
+os_printsetuptostring	:: !PrintSetup -> String
+os_stringtoprintsetup	:: !String     -> PrintSetup

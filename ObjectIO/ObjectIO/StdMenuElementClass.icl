@@ -273,7 +273,30 @@ instance PopUpMenuElements ((:+:) m1 m2) | PopUpMenuElements m1 & PopUpMenuEleme
 	getPopUpMenuElementType _
 		= ""
 
-instance PopUpMenuElements (SubMenu m) | PopUpMenuElements m where
+instance PopUpMenuElements RadioMenu where
+	popUpMenuElementToHandles :: !(RadioMenu .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
+	popUpMenuElementToHandles  radioMenu pState
+		= menuElementToHandles radioMenu pState
+	getPopUpMenuElementType    radioMenu
+		= getMenuElementType   radioMenu
+
+instance PopUpMenuElements MenuItem where
+	popUpMenuElementToHandles :: !(MenuItem .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
+	popUpMenuElementToHandles  menuItem pState
+		= menuElementToHandles menuItem pState
+	getPopUpMenuElementType    menuItem
+		= getMenuElementType   menuItem
+
+instance PopUpMenuElements MenuSeparator where
+	popUpMenuElementToHandles :: !(MenuSeparator .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
+	popUpMenuElementToHandles  menuSeparator pState
+		= menuElementToHandles menuSeparator pState
+	getPopUpMenuElementType    menuSeparator
+		= getMenuElementType   menuSeparator
+
+//-- DvA --
+
+instance PopUpMenuElements (SubMenu	m) | PopUpMenuElements m where
 	popUpMenuElementToHandles :: !(SubMenu m .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l) | PopUpMenuElements m
 	popUpMenuElementToHandles (SubMenu title items atts) pState
 		# (ms,pState)		= popUpMenuElementToHandles items pState
@@ -295,23 +318,3 @@ instance PopUpMenuElements (SubMenu m) | PopUpMenuElements m where
 	getPopUpMenuElementType _
 		= "SubMenu"
 
-instance PopUpMenuElements RadioMenu where
-	popUpMenuElementToHandles :: !(RadioMenu .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
-	popUpMenuElementToHandles  radioMenu pState
-		= menuElementToHandles radioMenu pState
-	getPopUpMenuElementType    radioMenu
-		= getMenuElementType   radioMenu
-
-instance PopUpMenuElements MenuItem where
-	popUpMenuElementToHandles :: !(MenuItem .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
-	popUpMenuElementToHandles  menuItem pState
-		= menuElementToHandles menuItem pState
-	getPopUpMenuElementType    menuItem
-		= getMenuElementType   menuItem
-
-instance PopUpMenuElements MenuSeparator where
-	popUpMenuElementToHandles :: !(MenuSeparator .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
-	popUpMenuElementToHandles  menuSeparator pState
-		= menuElementToHandles menuSeparator pState
-	getPopUpMenuElementType    menuSeparator
-		= getMenuElementType   menuSeparator

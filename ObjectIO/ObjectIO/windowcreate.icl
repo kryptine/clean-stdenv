@@ -7,16 +7,17 @@ implementation module windowcreate
 
 
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
-import	osevent, ostypes, oswindow
-from	ostoolbox			import OSNewToolbox
+import	osevent, ostoolbox, ostypes, oswindow
 from	StdMenu				import enableMenuSystem, disableMenuSystem
 from	StdPSt				import accPIO, appPIO
 from	StdWindowAttribute	import isWindowInit, getWindowInitFun, isWindowClose, isWindowCursor, getWindowCursorAtt
 import	commondef, controlpos, iostate, scheduler, windowaccess
 from	controlcreate		import createControls
 from	windowclipstate		import validateWindowClipState
+from	windowdevice		import windowFunctions
 from	windowupdate		import updatewindow
 from	windowvalidate		import validateWindow
+import	menuwindowmenu
 
 
 windowcreateFatalError :: String String -> .x
@@ -35,7 +36,7 @@ openmodalwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
 	# tb						= osInitialiseWindows tb					// initialise windows toolbox
 	# (osdinfo,ioState)			= ioStGetOSDInfo ioState
 	# (wMetrics,ioState)		= ioStGetOSWindowMetrics ioState
-	# (_,_,_,_,wlsHandle,windows,tb)
+	# (_,_,size,_,wlsHandle,windows,tb)
 								= validateWindow wMetrics osdinfo wlsHandle windows tb
 	  (title,closable,wlsHandle)= (\wlsH=:{whTitle,whAtts}->(whTitle,contains isWindowClose whAtts,wlsH)) wlsHandle
 	# ioState					= ioStSetOSDInfo osdinfo ioState
@@ -44,6 +45,9 @@ openmodalwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
 	  wsH						= {wshIds=wIds,wshHandle=Just wlsH}
 	  (modalWIDS,windows)		= getWindowHandlesActiveModalDialog windows
 	  windows					= addWindowHandlesActiveWindow wsH windows	// frontmost position is assumed by system
+	  (disableMenus,enableMenus)= if (osModalDialogHandlesMenuSelectState || isJust modalWIDS)
+								     (id,id)
+								     (appPIO disableMenuSystem,appPIO enableMenuSystem)
 	# (ioId,ioState)			= ioStGetIOId ioState
 	# ioState					= ioStSetIOIsModal (Just ioId) ioState
 	# ioState					= setIOToolbox tb ioState
@@ -51,8 +55,17 @@ openmodalwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
 	# (inputTrack,ioState)		= ioStGetInputTrack ioState
 	# ioState					= ioStSetInputTrack Nothing ioState			// clear input track information
 	# pState					= {pState & io=ioState}
-	# (noError,pState,_)		= osCreateModalDialog closable title osdinfo (mapMaybe (\{wPtr}->wPtr) modalWIDS)
-									getOSEvent setOSEvent handleOSEvent pState OSNewToolbox
+	# pState					= disableMenus pState
+	# (noError,pState)			= osCreateModalDialog wMetrics closable title osdinfo (mapMaybe (\{wPtr}->wPtr) modalWIDS) (toTuple size)
+									(modalDialogControls wMetrics)			// ignored iff osModalDialogHandlesControlCreation
+									(modalInitIO wId)						// ignored iff osModalDialogHandlesWindowInit
+									(if osModalDialogHandlesEvents
+										(OSModalEventCallback getOSEvent setOSEvent handleOSEvent)
+										(OSModalEventLoop (modalEventLoop wId))
+									)
+									(accPIO getIOToolbox,\tb -> appPIO (setIOToolbox tb))
+									pState
+	# pState					= enableMenus pState
 	  errorReport				= if noError NoError (OtherError "could not create modal dialog")
 	  (delayMouse,delayKey)		= case inputTrack of						// after handling modal dialog, generate proper (Mouse/Key)Lost events
 	  								Nothing	-> ([],[])
@@ -82,6 +95,84 @@ where
 	setOSEvent :: !(!OSEvents,!PSt .l) -> PSt .l
 	setOSEvent (osEvents,pState) = appPIO (ioStSetEvents osEvents) pState
 	
+/*	modalDialogControls creates the controls of the given modal dialog.
+	PA: Note that the initially active control is not set.
+*/	modalDialogControls :: !OSWindowMetrics !OSWindowPtr !(PSt .l) -> PSt .l
+	modalDialogControls wMetrics wPtr pState=:{io=ioState}
+		# (tb,ioState)				= getIOToolbox ioState
+		# (found,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
+		| not found					// This condition should never occur: WindowDevice must have been 'installed'
+			= windowcreateFatalError "openmodalwindow" "could not retrieve WindowSystemState from IOSt"
+		| otherwise
+			# windows				= windowSystemStateGetWindowHandles wDevice
+			# (itemPtr,windows,tb)	= createModalDialogControls wMetrics wPtr windows tb
+			# ioState				= setIOToolbox tb ioState
+			# ioState				= ioStSetDevice (WindowSystemState windows) ioState
+			= {pState & io=ioState}
+
+/*	modalInitIO takes care that the WindowInit attribute is evaluated before the event loop is entered.
+*/	modalInitIO :: !Id !OSWindowPtr !(PSt .l) -> PSt .l
+	modalInitIO modalWindowId wPtr pState
+		= snd (doIO (WindowInitialise wids) pState)
+	where
+		wids	= { wId=modalWindowId, wPtr=wPtr, wActive=True }
+		doIO	= windowFunctions.dDoIO
+
+/*	modalEventLoop handles events for the modal dialog (only in case osCreateModalDialog does not do this).
+*/	modalEventLoop :: !Id !(PSt .l) -> PSt .l
+	modalEventLoop modalWindowId pState
+		= appContext (fst o (flip (chandleEvents modalDialogExists) OSNewToolbox)) pState
+	where
+	/*	modalDialogExists context
+			returns True iff the modal dialog exists (and therefore also its parent process).
+	*/
+		modalDialogExists :: !Context -> (!Bool,!Context)
+		modalDialogExists context=:{cProcesses,cModalProcess=Just myId}
+			| not found				= (False,          context1)
+			| otherwise				= (fromJust closed,context1)
+		where
+			((found,closed),groups1)= gLocals modalWindowId myId cProcesses
+			context1				= {context & cProcesses=groups1}
+			
+			gLocals :: !Id !SystemId !*CProcesses -> (!Result Bool,!*CProcesses)
+			gLocals modalWindowId id locals
+				= accessLocals (checkIOStQuitted` modalWindowId id) locals
+			where
+				checkIOStQuitted` modalWindowId id localIO
+					= (r,{localIO & localIOSt=ioState})
+				where
+					(r,ioState)	= checkIOStQuitted modalWindowId id localIO.localIOSt
+					
+					checkIOStQuitted :: !Id !SystemId !(IOSt .l) -> (!Result Bool,!IOSt .l)
+					checkIOStQuitted modalWindowId ioid ioState
+						# (ioid`,ioState)		= ioStGetIOId ioState
+						| not (ioid == ioid`)//(eqSystemId ioid ioid`)
+							= ((False,Nothing),ioState)
+						# (closed,ioState)	= ioStClosed ioState
+						| closed
+							= ((True, Just False),ioState)
+	//						= ((True, Just closed),ioState)
+			//			# (found,dsH,ioState)	= IOStGetDialog (toWID modalWindowId) ioState
+			//			# (found,wsH,windows)	= getWindowHandlesWindow (toWID wPtr) windows
+			//			| not found
+			//				= ((True, Just False),ioState)
+			//			# (isModal,_,dsH)		= IsModalDialog dsH
+			//			# ioState				= IOStReplaceDialog dsH ioState
+			//			= ((True, Just isModal),ioState)
+						= ((True, Just True),ioState)
+	/* PA: not used:		
+			gGroups :: !Id !SystemId !*CProcesses -> (!Result Bool,!*CProcesses)
+			gGroups modalWindowId id groups
+				= accessGroups (f` modalWindowId id) groups
+			where
+				f` modalWindowId id {groupState=p,groupIO=locals}
+					= (r,{groupState=p,groupIO=locals`})
+				where
+					(r,locals`) = gLocals modalWindowId id locals
+	*/
+		modalDialogExists context
+			= (False,context)
+	
 /*	getFinalModalDialogLS retrieves the final local state of the modal dialog. This value has been stored in the window handles.
 	This MUST have been done by disposeWindow (windowdispose). 
 */
@@ -106,6 +197,42 @@ where
 			  windows						= {windows & whsFinalModalLS=finalLSs}
 			| not removed					= (Nothing,windows)
 			| otherwise						= (Just finalLS,windows)
+
+
+/*	createModalDialogControls wPtr ioState
+		Replaces the OSWindowPtr of the modal dialog that is identified by a zero OSWindowPtr from the IOSt.
+		If such a modal dialog could not be found, then a runtime error is generated.
+		Then it takes care that the controls of the indicated modal dialog are created.
+	NOTE: this function is also used in windowevent.icl
+*/
+createModalDialogControls :: !OSWindowMetrics !OSWindowPtr !*(WindowHandles .pst) !*OSToolbox
+										  -> (!OSWindowPtr, !*WindowHandles .pst, !*OSToolbox)
+createModalDialogControls wMetrics wPtr windows tb
+	# (maybeWIDS,windows)		= getWindowHandlesActiveWindow windows
+	| isNothing maybeWIDS
+		= windowcreateFatalError "createModalDialogControls" "could not retrieve active window from IOSt"
+	# wids						= fromJust maybeWIDS
+	| wids.wPtr<>0
+		= windowcreateFatalError "createModalDialogControls" "could not retrieve modal dialog from IOSt"
+	| otherwise
+		# (_,wsH,windows)		= removeWindowHandlesWindow (toWID 0) windows
+		  wids					= {wids & wPtr=wPtr}
+		  wsH					= (\wsH->{wsH & wshIds=wids}) wsH
+		# (itemPtr,wsH,tb)		= createDialogControls wMetrics wsH tb
+		= (itemPtr,addWindowHandlesActiveWindow wsH windows,tb)
+where
+	createDialogControls :: !OSWindowMetrics !(WindowStateHandle .pst) !*OSToolbox
+							-> (!OSWindowPtr, !WindowStateHandle .pst, !*OSToolbox)
+	createDialogControls wMetrics wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems=itemHs}}} tb
+		# (itemHs,tb)			= createControls wMetrics whDefaultId whCancelId True wPtr itemHs tb
+		# (itemPtr,wH)			= getInitActiveControl {wH & whItems=itemHs}
+		= (itemPtr,{wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
+	where
+		whDefaultId				= wH.whDefaultId
+		whCancelId				= wH.whCancelId
+	createDialogControls _ _ _
+		= windowcreateFatalError "createDialogControls" "placeholder not expected"
+
 
 /*	Open a modeless window/dialogue.
 */
@@ -149,6 +276,8 @@ openwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
 			# (index,pos,size,originv,wH,windows,tb)
 									= validateWindow wMetrics osdinfo wH windows tb
 			  (behindPtr,windows)	= getStackBehindWindow index windows
+			# isMDI					= getOSDInfoDocumentInterface osdinfo == MDI
+			# wH					= {wH & whAtts = validateWindowActivateForWindowMenu` wId isMDI wH.whAtts}
 			# (delayinfo,wPtr,osdinfo,wH,tb)
 									= createAnyWindow wMetrics behindPtr wId pos size originv osdinfo wH tb
 			# (wH,tb)				= validateWindowClipState wMetrics True wPtr wH tb
@@ -170,9 +299,10 @@ createAnyWindow wMetrics behindPtr wId {x,y} {w,h} originv osdinfo wH=:{whMode,w
 						  			  }
 		  wH						= {wH & whWindowInfo=WindowInfo windowInfo}
 		# (wH,tb)					= movewindowviewframe wMetrics originv {wPtr=wPtr,wId=wId,wActive=False} wH tb	// PA: check WIDS value
-	//	# tb						= stackWindow wPtr behindPtr tb		PA: moved to osCreateWindow
+	//	# tb						= stackWindow wPtr behindPtr tb		PA: moved to OScreateWindow
 		# (delay_info`,tb)			= osShowWindow wPtr False tb
-		# tb						= osSetWindowCursor wPtr (toCursorCode (getWindowCursorAtt cursorAtt)) tb
+//		# tb						= OSsetWindowCursor wPtr (toCursorCode (getWindowCursorAtt cursorAtt)) tb
+		# tb						= osSetWindowCursor wPtr (getWindowCursorAtt cursorAtt) tb
 		= (delay_info++delay_info`,wPtr,osdinfo,wH,tb)
 		with
 			isResizable				= True
@@ -182,7 +312,7 @@ createAnyWindow wMetrics behindPtr wId {x,y} {w,h} originv osdinfo wH=:{whMode,w
 			hScroll					= windowInfo.windowHScroll
 			vScroll					= windowInfo.windowVScroll
 			visScrolls				= osScrollbarsAreVisible wMetrics viewDomain (w,h) (isJust hScroll,isJust vScroll)
-			{rright=w`,rbottom=h`}	= getWindowContentRect wMetrics visScrolls (sizeToRect {w=w,h=h})
+			{rright=w`,rbottom=h`}	= osGetWindowContentRect wMetrics visScrolls (sizeToRect {w=w,h=h})
 			hInfo					= toScrollbarInfo hScroll (viewDomain.rleft,viewOrigin.x,viewDomain.rright, w`)
 			vInfo					= toScrollbarInfo vScroll (viewDomain.rtop, viewOrigin.y,viewDomain.rbottom,h`)
 			minSize					= osMinWindowSize

@@ -8,7 +8,6 @@ implementation module windowaccess
 
 import	StdBool, StdEnum, StdInt, StdList, StdMisc, StdTuple
 import	ossystem, ostypes, oswindow
-from	windowCrossCall_12	import CURSARROW, CURSBUSY, CURSCROSS, CURSFATCROSS, CURSHIDDEN, CURSIBEAM
 import	commondef, keyfocus, windowhandle
 from	StdControlAttribute	import isControlKeyboard
 from	StdWindowAttribute	import isWindowInitActive, getWindowInitActiveAtt,
@@ -17,6 +16,8 @@ from	StdWindowAttribute	import isWindowInitActive, getWindowInitActiveAtt,
 									isWindowItemSpace, getWindowItemSpaceAtt
 import	cast
 
+//import StdDebug,dodebug
+trace_n _ s :== s
 
 windowaccessFatalError :: String String -> .x
 windowaccessFatalError function error
@@ -48,7 +49,6 @@ getWindowInfoWindowData (WindowInfo wData) = wData
 
 getWindowInfoGameWindowData :: !WindowInfo -> GameWindowData
 getWindowInfoGameWindowData (GameWindowInfo gwData) = gwData
-
 
 //	Access to the additional WItemInfo field of a WItemHandle (partial functions!).
 
@@ -128,7 +128,8 @@ identifyMaybeId id (Just id`) = id==id`
 identifyMaybeId _ _ = False
 
 
-//	Transforming CursorShape to OS cursor codes:
+//	Transforming CursorShape to OS cursor codes (moved to oswindow):
+/*
 toCursorCode :: !CursorShape -> Int
 toCursorCode StandardCursor	= CURSARROW
 toCursorCode BusyCursor		= CURSBUSY
@@ -137,10 +138,10 @@ toCursorCode CrossCursor	= CURSCROSS
 toCursorCode FatCrossCursor	= CURSFATCROSS
 toCursorCode ArrowCursor	= CURSARROW
 toCursorCode HiddenCursor	= CURSHIDDEN
-
+*/
 
 //	Calculating the view frame of window/compound with visibility of scrollbars.
-
+/*	PA: moved to oswindow because of dependency on Mac and Windows.
 getCompoundContentRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
 getCompoundContentRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom}
 	| visHScroll && visVScroll	= {itemRect & rright=r`,rbottom=b`}
@@ -154,18 +155,18 @@ where
 getCompoundHScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
 getCompoundHScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom}
 	| not visHScroll	= zero
-	| otherwise			= {itemRect & rtop=b`,rright=if visVScroll r` rright}
+	| otherwise			= {itemRect & rleft = itemRect.rleft - 1, rbottom = rbottom+1, rtop=b`, rright=r`+1}
 where
-	r`					= rright -osmVSliderWidth
-	b`					= rbottom-osmHSliderHeight
+	r`					= rright -osmVSliderWidth + 1
+	b`					= rbottom-osmHSliderHeight + 1
 
 getCompoundVScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
 getCompoundVScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom}
 	| not visVScroll	= zero
-	| otherwise			= {itemRect & rleft=r`,rbottom=if visHScroll b` rbottom}
+	| otherwise			= {itemRect & rtop = itemRect.rtop, rright = rright + 1, rleft=r`,rbottom= b` + 1}//if visHScroll b` rbottom}
 where
-	r`					= rright -osmVSliderWidth
-	b`					= rbottom-osmHSliderHeight
+	r`					= rright -osmVSliderWidth + 1
+	b`					= rbottom-osmHSliderHeight + 1
 
 
 getWindowContentRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
@@ -181,7 +182,7 @@ where
 getWindowHScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
 getWindowHScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) {rleft,rtop,rright,rbottom}
 	| not visHScroll	= zero
-	| otherwise			= {rleft=rleft-1,rtop=b`,rright=if visVScroll (r`+1) (rright+1),rbottom=rbottom+1}
+	| otherwise			= {rleft=rleft-1,rtop=b`,rright= /*if visVScroll*/ (r`+1) /*(rright+1)*/,rbottom=rbottom+1}
 where
 	r`					= rright -osmVSliderWidth  + 1
 	b`					= rbottom-osmHSliderHeight + 1
@@ -189,11 +190,11 @@ where
 getWindowVScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
 getWindowVScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) {rleft,rtop,rright,rbottom}
 	| not visVScroll	= zero
-	| otherwise			= {rleft=r`,rtop=rtop-1,rright=rright+1,rbottom=if visHScroll (b`+1) (rbottom+1)}
+	| otherwise			= {rleft=r`,rtop=rtop-1,rright=rright+1,rbottom= /*if visHScroll*/ (b`+1) /*(rbottom+1)*/}
 where
 	r`					= rright -osmVSliderWidth  + 1
 	b`					= rbottom-osmHSliderHeight + 1
-
+*/
 
 //	Access operations on WindowStateHandles:
 
@@ -575,6 +576,15 @@ decreaseWindowHandlesBound wHs=:{whsNrWindowBound}
 	= {wHs & whsNrWindowBound=decBound whsNrWindowBound}
 
 
+// DvA
+
+getWindowHandlesCursorInfo :: !(WindowHandles .pst) -> *(!CursorInfo,!WindowHandles .pst)
+getWindowHandlesCursorInfo wHs=:{whsCursorInfo} = (whsCursorInfo,wHs)
+
+setWindowHandlesCursorInfo :: !CursorInfo !(WindowHandles .pst) -> WindowHandles .pst
+setWindowHandlesCursorInfo ci wHs = {wHs & whsCursorInfo = ci}
+
+
 /*	getInitActiveControl retrieves the OSWindowPtr of the control that has the initial input focus.
 	It is assumed that the control identified by the WindowInitActive attribute exists.
 */
@@ -601,6 +611,7 @@ where
 				= (True,wItemPtr,WItemHandle itemH)
 			| wItemKind==IsEditControl && isNothing initActiveId
 				= (True,wItemPtr,WItemHandle itemH)
+			// add editable popup checking...
 			| otherwise
 				# (found,itemPtr,itemHs)	= getFocusWElementHandles initActiveId wItems
 				= (found,itemPtr,WItemHandle {itemH & wItems=itemHs})
@@ -631,19 +642,25 @@ where
 		= (ids,WItemHandle itemH)
 	where
 		getWItemKeyFocusIds :: !(WItemHandle .ls .pst) -> (!*[FocusItem],!WItemHandle .ls .pst)
-		getWItemKeyFocusIds itemH=:{wItemNr,wItemKind,wItemShow,wItemAtts,wItems}
+		getWItemKeyFocusIds itemH=:{wItemNr,wItemKind,wItemShow,wItemAtts,wItems,wItemInfo}
+			#! focus = trace_n ("getWIKFIB",wItemNr,wItemKind) focus
 			| wItemKind==IsEditControl
+				= (focus,itemH)
+			| isPopup && hasKeyAtt	//isEditable
 				= (focus,itemH)
 			| keySensitive && hasKeyAtt
 				= (focus,itemH)
 			| otherwise
-				# (focus,itemHs)= getWElementKeyFocusIds (shownContext && wItemShow) wItems
+				#! wItems = trace_n ("getWIKFIA",wItemNr,wItemKind) wItems
+				# (focus,itemHs)= getWElementKeyFocusIds (shownContext/* && wItemShow*/) wItems
 				  itemH			= {itemH & wItems=itemHs}
 				= (focus,itemH)
 		where
 			focus				= [{focusNr=wItemNr,focusShow=shownContext}]
 			hasKeyAtt			= contains isControlKeyboard wItemAtts
-			keySensitive		= wItemKind==IsCustomControl
+			keySensitive		= wItemKind == IsCustomControl || wItemKind == IsCompoundControl
+			isPopup				= wItemKind == IsPopUpControl
+//			isEditable			= isJust (getWItemPopUpInfo wItemInfo).popUpInfoEdit
 	
 	getWElementKeyFocusIds` shownContext (WListLSHandle itemHs)
 		# (ids,itemHs)	= getWElementKeyFocusIds shownContext itemHs

@@ -6,8 +6,7 @@ implementation module menuitems
 
 import	StdBool, StdList, StdMisc, StdTuple
 import	commondef, menuaccess, menucreate, receivertable
-import	osdocumentinterface, osmenu
-from	ostypes	import OSNoWindowPtr
+import	osdocumentinterface, osmenu, ostypes
 from	iostate	import getIOToolbox, setIOToolbox
 
 
@@ -223,7 +222,7 @@ where
 					# (before,[itemH:after])= splitAt (index-1) itemHs
 					# (itemHandle,itemH)	= (\(MenuItemHandle itemH=:{mOSMenuItem})->(mOSMenuItem,MenuItemHandle itemH)) itemH
 					# itemHs				= before ++ [itemH:after]
-					# tb					= osMenuItemCheck True menu itemHandle tb
+					# tb					= osMenuItemCheck True menu itemHandle index iNr tb
 					= (True,NoError,RadioMenuHandle {radioH & mRadioIndex=1,    mRadioItems=itemHs},keys,iNr+nrItems+nrNewItems,tb)
 			addSubMenuItems itemId pos menu new (MenuListLSHandle mListItems) keys iNr tb
 				# (opened,error,mListItems,keys,iNr,tb)	= addSubMenuItems` itemId pos menu new mListItems keys iNr tb
@@ -315,8 +314,9 @@ where
 				| otherwise
 					# (itemHs,(rt,it))			= stateMap (disposeMenuIds pid) itemHs (rt,it)
 					# (itemHs,(keys,tb))		= stateMap (disposeShortcutkeys framePtr) itemHs (keys,tb)
-					# (itemHs,tb)				= stateMap disposeSubMenuHandles itemHs tb
-					# (_,tb)					= osSubMenuRemove mSubHandle menu tb
+					# (itemHs,(_,tb))			= stateMap disposeSubMenuHandles itemHs (menu,tb)
+//					# (_,tb)					= osSubMenuRemove mSubHandle menu tb
+					# (_,tb)					= osSubMenuRemove mSubHandle menu mSubOSMenuNr iNr tb
 					= (containsItem,iNr,rt,it,ids,SubMenuHandle {subH & mSubItems=itemHs},keys,tb)
 			
 			removeFromMenu framePtr menu pid iNr rt it ids (RadioMenuHandle radioH=:{mRadioId,mRadioIndex,mRadioItems}) keys tb
@@ -339,7 +339,7 @@ where
 				# (containsItem,ids)			= if (isNothing mSepId) (False,ids) (removeCheck (fromJust mSepId) ids)
 				| not containsItem
 					= (containsItem,iNr+1,rt,it,ids,h,keys,tb)
-				# (_,tb)						= osMenuRemoveItem mOSMenuSeparator menu tb
+				# (_,tb)						= osMenuRemoveItem mOSMenuSeparator iNr menu tb
 				| otherwise
 					# (_,it)					= removeIdFromIdTable (fromJust mSepId) it
 					= (containsItem,iNr,rt,it,ids,h,keys,tb)
@@ -483,8 +483,9 @@ where
 			| otherwise
 				# (itemHs,(rt,it))	= stateMap (disposeMenuIds pid) mSubItems (rt,it)
 				# (itemHs,(keys,tb))= stateMap (disposeShortcutkeys framePtr) itemHs (keys,tb)
-				# (itemHs,tb)		= stateMap	disposeSubMenuHandles itemHs tb
-				# (_,tb)			= osSubMenuRemove mSubHandle menu tb
+				# (itemHs,(_,tb))	= stateMap	disposeSubMenuHandles itemHs (menu,tb)
+//				# (_,tb)			= osSubMenuRemove mSubHandle menu tb
+				# (_,tb)			= osSubMenuRemove mSubHandle menu mSubOSMenuNr iNr tb
 				# indices			= map dec indices
 				= (containsItem,iNr,indices,rt,it,SubMenuHandle {subH & mSubItems=itemHs},keys,tb)
 		where
@@ -521,7 +522,7 @@ where
 			| not containsItem || (specialId && not alsoSpecials)
 				= (False,iNr+1,indices,rt,it,h,keys,tb)
 			| otherwise
-				# (_,tb)			= osMenuRemoveItem mOSMenuSeparator menu tb
+				# (_,tb)			= osMenuRemoveItem mOSMenuSeparator iNr menu tb
 				  (_,it)			= removeIdFromIdTable (fromJust mSepId) it
 				  indices			= map dec indices
 				= (containsItem,iNr,indices,rt,it,h,keys,tb)
@@ -588,6 +589,6 @@ where
 	
 	checkFirstRadioItem :: !OSMenu !Int !*[MenuElementHandle .ls .ps] !*OSToolbox -> (!*[MenuElementHandle .ls .ps],!*OSToolbox)
 	checkFirstRadioItem menu iNr [MenuItemHandle itemH=:{mOSMenuItem}:itemHs] tb
-		= ([MenuItemHandle {itemH & mItemMark=True}:itemHs],osMenuItemCheck True menu mOSMenuItem tb)
+		= ([MenuItemHandle {itemH & mItemMark=True}:itemHs],osMenuItemCheck True menu mOSMenuItem iNr iNr tb)
 	checkFirstRadioItem _ _ [] tb
 		= ([],tb)

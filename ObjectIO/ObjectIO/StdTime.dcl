@@ -7,9 +7,20 @@ definition module StdTime
 //	StdTime contains time related operations.
 //	********************************************************************************
 
-from	StdOverloaded import <
-from	ostick import Tick
-from	StdLibMisc import Time, Date
+from	StdOverloaded	import <
+from	ostick			import Tick
+
+::	Time
+	=	{	hours	:: !Int		// hours		(0-23)
+		,	minutes	:: !Int		// minutes		(0-59)
+		,	seconds	:: !Int		// seconds		(0-59)
+		}
+::	Date
+	=	{	year	:: !Int		// year
+		,	month	:: !Int		// month		(1-12)
+		,	day		:: !Int		// day			(1-31)
+		,	dayNr	:: !Int		// day of week	(1-7, Sunday=1, Saturday=7)
+		}
 
 wait				:: !Int .x -> .x
 
@@ -21,8 +32,7 @@ instance < Tick
 
 intPlusTick			::	!Int  !Tick	-> Tick
 tickDifference		::	!Tick !Tick	-> Int
-	// tickDifference arg1 arg2>0 iff arg1 is "later" than arg2
-	
+
 class TimeEnv env where
 	getBlinkInterval:: !*env -> (!Int,	!*env)
 	getCurrentTime	:: !*env -> (!Time,	!*env)

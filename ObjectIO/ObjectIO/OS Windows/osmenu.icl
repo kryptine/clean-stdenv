@@ -5,6 +5,8 @@ implementation module osmenu
 
 
 import	StdBool, StdChar, StdClass, StdInt, StdString
+import	StdMaybe
+from	StdIOCommon			import Modifiers
 import	menuCCall_12, menuCrossCall_12
 from	osdocumentinterface	import OSMenuBar
 from	ostypes				import OSWindowPtr, OSNoWindowPtr
@@ -39,13 +41,22 @@ osEnableMenu :: !Int !OSMenuBar !*OSToolbox -> *OSToolbox
 osEnableMenu zIndex osMenuBar=:{menuBar} tb
 	= winChangeMenuAbility menuBar zIndex True tb
 
-osEnableMenuItem :: !OSMenu !OSMenuItem !*OSToolbox -> *OSToolbox
-osEnableMenuItem menuHandle item tb
+osDisableMenuItem :: !OSMenu !OSMenuItem !Int !*OSToolbox -> *OSToolbox
+osDisableMenuItem menuHandle item _ tb
+	= winChangeItemAbility menuHandle item False tb
+
+osEnableMenuItem :: !OSMenu !OSMenuItem !Int !*OSToolbox -> *OSToolbox
+osEnableMenuItem menuHandle item _ tb
 	= winChangeItemAbility menuHandle item True tb
 
-osDisableMenuItem :: !OSMenu !OSMenuItem !*OSToolbox -> *OSToolbox
-osDisableMenuItem menuHandle item tb
+osDisableSubMenu :: !OSMenu !OSMenuItem !Int !*OSToolbox -> *OSToolbox
+osDisableSubMenu menuHandle item _ tb
 	= winChangeItemAbility menuHandle item False tb
+
+osEnableSubMenu	:: !OSMenu !OSMenuItem !Int !*OSToolbox -> *OSToolbox
+osEnableSubMenu menuHandle item _ tb
+	= winChangeItemAbility menuHandle item True tb
+
 
 
 //	Changing and updating the menu bar:
@@ -78,19 +89,35 @@ osMenuRemove menu menuBar=:{menuBar=hmenu} tb
 	# tb	= winDestroyMenu menu tb
 	= (menuBar,tb)
 
-osSubMenuRemove :: !OSMenu !OSMenu !*OSToolbox -> (!OSMenu,!*OSToolbox)
-osSubMenuRemove submenu hmenu tb
+osSubMenuRemove :: !OSMenu !OSMenu !Int !Int !*OSToolbox -> (!OSMenu,!*OSToolbox)
+osSubMenuRemove submenu hmenu _ _ tb
 	# tb	= winDeleteMenu hmenu submenu tb
 	# tb	= winDestroyMenu submenu tb
 	= (hmenu,tb)
+
+osRemoveMenuShortKey :: !OSWindowPtr !OSMenuItem !*OSToolbox -> *OSToolbox
+osRemoveMenuShortKey framePtr item tb
+	= winRemoveMenuShortKey framePtr item tb
 
 osCreatePopUpMenu :: !*OSToolbox -> (!OSMenu,!*OSToolbox)
 osCreatePopUpMenu tb
 	= winCreatePopupMenuHandle tb
 
-osTrackPopUpMenu :: !OSMenu !OSWindowPtr !*OSToolbox -> (!Bool,!*OSToolbox)
+::	OSTrackPopUpMenu									// The result of tracking an item in a PopUpMenu:
+	=	{	ospupItem		:: !OSTrackPopUpMenuResult	//	the item that has been selected
+		,	ospupModifiers	:: !Modifiers				//	the modifiers that have been pressed at selection
+		}
+::	OSTrackPopUpMenuResult								// The item of a pop up menu that has been selected is indicated by:
+	=	PopUpTrackedByIndex	 !Int !Int					//	the parent menu id and the item's index position (used on Mac)
+	|	PopUpTrackedByItemId !Int						//	its identification                               (used on Windows)
+
+osTrackPopUpMenu :: !OSMenu !OSWindowPtr !*OSToolbox -> (!Maybe OSTrackPopUpMenu,!*OSToolbox)
 osTrackPopUpMenu menu framePtr tb
-	= winTrackPopupMenu menu framePtr tb
+	# (menuItemID,modifiers,tb)	= winTrackPopupMenu menu framePtr tb
+	| menuItemID==0
+		= (Nothing,tb)
+	| otherwise
+		= (Just {ospupItem=PopUpTrackedByItemId menuItemID,ospupModifiers=modifiers},tb)
 
 
 //	Changing (sub)menus:
@@ -114,23 +141,26 @@ osChangeMenuTitle :: !OSMenuBar !OSMenu !{#Char} !*OSToolbox -> *OSToolbox
 osChangeMenuTitle {menuBar} menu title tb
 	= winModifyMenu title menu menuBar tb
 
-osChangeMenuItemTitle :: !OSMenu !OSMenuItem !{#Char} !*OSToolbox -> *OSToolbox
-osChangeMenuItemTitle menu item title tb
+osChangeMenuItemTitle :: !OSMenu !OSMenuItem !Int !{#Char} !*OSToolbox -> *OSToolbox
+osChangeMenuItemTitle menu item _ title tb
 	= winModifyMenuItem title item menu tb
 
-osMenuItemCheck :: !Bool !OSMenu !OSMenuItem !*OSToolbox -> *OSToolbox
-osMenuItemCheck check menu item tb
+osMenuItemCheck :: !Bool !OSMenu !OSMenuItem !Int !Int !*OSToolbox -> *OSToolbox
+osMenuItemCheck check menu item _ _ tb
 	= winChangeMenuItemCheck menu item check tb
 
-osMenuRemoveItem :: !OSMenuItem !OSMenu !*OSToolbox -> (!OSMenu,!*OSToolbox)
-osMenuRemoveItem item menu tb
+osMenuRemoveItem :: !OSMenuItem !Int !OSMenu !*OSToolbox -> (!OSMenu,!*OSToolbox)
+osMenuRemoveItem item _ menu tb
 	= (menu,winRemoveMenuItem menu item tb)
 
 
 //	Validation of (sub)menu (element) attributes:
 
-osValidateMenuItemTitle :: !{#Char} -> {#Char}
-osValidateMenuItemTitle title = title
+osValidateMenuItemTitle :: !(Maybe Char) !{#Char} -> {#Char}	// PA: function now includes short key.
+osValidateMenuItemTitle Nothing title
+	= title
+osValidateMenuItemTitle (Just key) title
+	= title +++ "\tCtrl+" +++ toString (toUpper key)
 
 
 /*	Two functions that generate free OS ids for menus and sub menus.

@@ -6,10 +6,10 @@ implementation module StdMenu
 
 import	StdBool, StdList, StdTuple
 import	osmenu
-import	commondef, iostate, menuaccess, menucreate, menudevice, menuinternal, menuitems, StdId
+import	commondef, iostate, menuaccess, menucreate, menudevice, menuevent, menuinternal, menuitems, StdId
 from	devicesystemstate	import windowSystemStateGetWindowHandles
 from	menudefaccess		import menuDefGetMenuId
-from	menuevent			import menuSystemStateGetMenuHandles
+from	devicesystemstate	import menuSystemStateGetMenuHandles
 from	StdPSt				import accPIO
 from	windowaccess		import getWindowHandlesActiveModalDialog
 
@@ -134,13 +134,13 @@ instance Menus (Menu m)	| MenuElements m where
 
 validateMenuId :: !(Maybe Id) !(IOSt .l) -> (!Maybe Id,!IOSt .l)
 validateMenuId Nothing ioState
-	# (mId,ioState)		= openId ioState
+	# (mId,ioState)				= openId ioState
 	= (Just mId,ioState)
 validateMenuId (Just id) ioState
-	# (idtable,ioState)	= ioStGetIdTable ioState
-	# (member,idtable)	= memberIdTable id idtable
-	| member			= (Nothing,ioStSetIdTable idtable ioState)
-	| otherwise			= (Just id,ioStSetIdTable idtable ioState)
+	# (idtable,ioState)			= ioStGetIdTable ioState
+	# (member,idtable)			= memberIdTable id idtable
+	| member					= (Nothing,ioStSetIdTable idtable ioState)
+	| otherwise					= (Just id,ioStSetIdTable idtable ioState)
 
 instance Menus (PopUpMenu m) | PopUpMenuElements m where
 	openMenu :: .ls !(PopUpMenu m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | PopUpMenuElements m
@@ -170,12 +170,12 @@ instance Menus (PopUpMenu m) | PopUpMenuElements m where
 		# ioState					= ioStSetDevice (MenuSystemState mHs) ioState
 		# pState					= {pState & io=ioState}
 		| ok
-			= handlePopUpMenu pState
+			= (NoError,handlePopUpMenu pState)
 		| otherwise
 			= (ErrorIdsInUse,pState)
 	where
 	//	handlePopUpMenu opens the pop up menu.
-		handlePopUpMenu :: !(PSt .l) -> (!ErrorReport,!PSt .l)
+/*		handlePopUpMenu :: !(PSt .l) -> (!ErrorReport,!PSt .l)
 		handlePopUpMenu pState
 			# (osdInfo,ioState)			= ioStGetOSDInfo pState.io
 			  framePtr					= case (getOSDInfoOSInfo osdInfo) of
@@ -189,7 +189,11 @@ instance Menus (PopUpMenu m) | PopUpMenuElements m where
 			  (popUpMenu,menus)			= hdtl menus
 			  (popUpId,popUpMenu)		= menuStateHandleGetMenuId popUpMenu
 			  (mPtr,popUpMenu)			= menuStateHandleGetHandle popUpMenu
-			# (ok,ioState)				= accIOToolbox (osTrackPopUpMenu mPtr framePtr) ioState
+//			# ((ok,event,popUpMenu),ioState)	= accIOToolbox (osTrackPopUpMenu mPtr framePtr popUpMenu) ioState
+			# ((itemNr,menuMods),ioState)		= accIOToolbox (osTrackPopUpMenu mPtr framePtr) ioState
+			# ((ok,event,popUpMenu),ioState)	= case itemNr of
+													0 -> ((True,Nothing,popUpMenu),ioState)
+													_ -> accIOToolbox (getSelectedMenuStateHandleItem itemNr menuMods popUpMenu) ioState
 			| not ok
 				# ioState				= ioStSetDevice (MenuSystemState {mHs & mMenus=menus,mPopUpId=Just popUpId}) ioState
 				# pState				= {pState & io=ioState}
@@ -198,10 +202,139 @@ instance Menus (PopUpMenu m) | PopUpMenuElements m where
 				# ioState				= ioStSetDevice (MenuSystemState {mHs & mMenus=[popUpMenu:menus]}) ioState
 				# pState				= {pState & io=ioState}
 				= (NoError,pState)
+*/		handlePopUpMenu :: !(PSt .ps) -> PSt .ps
+		handlePopUpMenu pState
+			# (osdInfo,ioState)				= ioStGetOSDInfo pState.io
+			  framePtr						= case (getOSDInfoOSInfo osdInfo) of
+				  								Just info -> info.osFrame
+				  								nothing   -> stdMenuFatalError "openMenu (PopUpMenu)" "incorrect OSDInfo retrieved"
+			# (found,mDevice,ioState)		= ioStGetDevice MenuDevice ioState
+			| not found						// This condition should never occur
+				= stdMenuFatalError "openMenu (PopUpMenu)" "could not retrieve MenuSystemState from IOSt"
+			# (tb,ioState)					= getIOToolbox ioState
+			  mHs							= menuSystemStateGetMenuHandles mDevice
+			  (menus,mHs)					= menuHandlesGetMenus mHs
+			  (popUpMenu,menus)				= hdtl menus
+	//		  (popUpId,popUpMenu)			= menuStateHandleGetMenuId popUpMenu		PA: not needed anymore
+			  (mPtr,popUpMenu)				= menuStateHandleGetHandle popUpMenu
+			# (maybePopUpItem,tb)			= osTrackPopUpMenu mPtr framePtr tb
+			| isNothing maybePopUpItem		// No item has been selected
+				# ioState					= setIOToolbox tb ioState
+				# ioState					= ioStSetDevice (MenuSystemState {mHs & mMenus=[popUpMenu:menus]}) ioState
+				# pState					= {pState & io=ioState}
+				= pState
+			# (maybePopUpEvent,popUpMenu,tb)= popUpMenuEvent (fromJust maybePopUpItem) popUpMenu tb
+			# ioState						= setIOToolbox tb ioState
+			# ioState						= ioStSetDevice (MenuSystemState {mHs & mMenus=[popUpMenu:menus]}) ioState
+			# pState						= {pState & io=ioState}
+			| isNothing maybePopUpEvent		// No abstract event is associated with the item
+				= pState
+			| otherwise						// Evaluate the abstract event
+				= snd (menuFunctions.dDoIO (fromJust maybePopUpEvent) pState)
 	
 	getMenuType :: (PopUpMenu m .ls .pst) -> MenuType | PopUpMenuElements m
 	getMenuType _ = "PopUpMenu"
 
+
+/*	PA: no need to copy/adapt code. Better to reuse menuevent and menudevice. 
+//	where (copied from ?menuevent)
+
+getSelectedMenuStateHandleItem :: !Int !Modifiers !(MenuStateHandle .pst) !*OSToolbox
+				-> ((!Bool,!Maybe DeviceEvent,!MenuStateHandle .pst), !*OSToolbox)
+getSelectedMenuStateHandleItem itemNr mods msH=:(MenuLSHandle mlsH=:{mlsHandle=mH=:{mSelect,mHandle,mMenuId,mItems,mOSMenuNr}}) tb
+	| not mSelect
+		= ((False,Nothing,msH),tb)
+	| otherwise
+		# (found,menuEvent,_,_,itemHs,tb)	= getSelectedMenuElementHandlesItem itemNr mHandle mMenuId mOSMenuNr mods [] 1 mItems tb
+		= ((found,menuEvent,MenuLSHandle {mlsH & mlsHandle={mH & mItems=itemHs}}),tb)
+where
+	getSelectedMenuElementHandlesItem :: !Int !OSMenu !Id !OSMenuNr !Modifiers ![Int] !Int ![MenuElementHandle .ls .pst] !*OSToolbox
+								  -> (!Bool,!Maybe DeviceEvent,![Int],!Int,![MenuElementHandle .ls .pst],!*OSToolbox)
+	getSelectedMenuElementHandlesItem itemNr mH mMenuId mOSMenuNr mods parents zIndex itemHs tb
+		# (isEmpty,itemHs)	= uisEmpty itemHs
+		| isEmpty
+			= (False,Nothing,parents,zIndex,itemHs,tb)
+		# (itemH,itemHs)							= hdtl itemHs
+		# (found,menuEvent,parents,zIndex,itemH,tb)	= getSelectedMenuElementHandle itemNr mH mMenuId mOSMenuNr mods parents zIndex itemH tb
+		| found
+			= (found,menuEvent,parents,zIndex,[itemH:itemHs],tb)
+		| otherwise
+			# (found,menuEvent,parents,zIndex,itemHs,tb)= getSelectedMenuElementHandlesItem itemNr mH mMenuId mOSMenuNr mods parents zIndex itemHs tb
+			= (found,menuEvent,parents,zIndex,[itemH:itemHs],tb)
+	where
+		getSelectedMenuElementHandle :: !Int !OSMenu !Id !OSMenuNr !Modifiers ![Int] !Int !(MenuElementHandle .ls .pst) !*OSToolbox
+								 -> (!Bool,!Maybe DeviceEvent,![Int],!Int, !MenuElementHandle .ls .pst, !*OSToolbox)
+		
+		getSelectedMenuElementHandle itemNr mH mMenuId mOSMenuNr mods parents zIndex itemH=:(MenuItemHandle {mOSMenuItem,mItemId}) tb
+//			# tb = trace_n ("?: z"+++toString zIndex+++" mOSM: "+++toString mOSMenuNr) tb
+			| itemNr==zIndex
+//				#! tb = trace_n (zIndex,pretty parents) tb
+				= (True,Just (MenuTraceEvent {mtId=mMenuId,mtParents=parents,mtItemNr=itemNr-1,mtModifiers= mods}),parents,zIndex+1,itemH,tb)
+			| otherwise
+				= (False,Nothing,parents,zIndex+1,itemH,tb)
+/*				
+		getSelectedMenuElenebtHandle itemNr mH mMenuId mOSMenuNr mods parents zIndex itemH=:(MenuSeparatorHandle) tb
+			| itemNr == zIndex
+				= ()
+			| otherwise
+				= (False,Nothing,parents,zIndex+1,itemH,tb)
+*/					
+		getSelectedMenuElementHandle itemNr mH mMenuId mOSMenuNr mods parents zIndex itemH=:(SubMenuHandle submenuH=:{mSubOSMenuNr,mSubSelect,mSubHandle,mSubItems}) tb
+//			#! tb = trace_n ("mSubOSMenuNr",mSubOSMenuNr,zIndex) tb
+			| not mSubSelect
+				= (False,Nothing,parents,zIndex+1,itemH,tb)
+			| otherwise
+				#! parents1	= parents++[zIndex-1]
+//				#! tb = trace_n ("parents1 before ",pretty parents1) tb
+				# (found,menuEvent,parents1,_,itemHs,tb)
+							= getSelectedMenuElementHandlesItem itemNr mSubHandle mMenuId mSubOSMenuNr mods parents1 1 mSubItems tb
+//				#! tb = trace_n ("parents1 after",pretty parents1,found) tb
+				# itemH		= SubMenuHandle {submenuH & mSubItems=itemHs}
+				  parents	= if found parents1 parents
+				= (found,menuEvent,parents,zIndex+1,itemH,tb)
+		
+		getSelectedMenuElementHandle itemNr mH mMenuId mOSMenuNr mods parents zIndex (RadioMenuHandle rH=:{mRadioSelect,mRadioItems=itemHs,mRadioIndex}) tb
+			# (nrRadios,itemHs)	= ulength itemHs
+			| not mRadioSelect
+				= (False,Nothing,parents,zIndex+nrRadios,RadioMenuHandle {rH & mRadioItems=itemHs},tb)
+//					# (found,menuEvent,parents,zIndex1,itemHs,tb)	= getSelectedMenuElementHandlesItem itemNr mH mMenuId mods parents zIndex itemHs tb// itemNr mH mMenuId mmods parents zIndex itemHs tb
+			# (found,menuEvent,parents,zIndex1,itemHs,tb)	= getSelectedMenuElementHandlesItem itemNr mH mMenuId mOSMenuNr mods parents zIndex itemHs tb
+			| not found
+				= (found,menuEvent,parents,zIndex1,RadioMenuHandle {rH & mRadioItems=itemHs},tb)
+			# curIndex	= mRadioIndex
+			  newIndex	= zIndex1-zIndex
+			| curIndex==newIndex
+				= (found,menuEvent,parents,zIndex1,RadioMenuHandle {rH & mRadioItems=itemHs},tb)
+			| otherwise
+				# (before,[itemH:after])= splitAt (curIndex-1) itemHs
+				# (curH,itemH)			= getMenuItemOSMenuItem itemH
+				# (before,[itemH:after])= splitAt (newIndex-1) (before ++ [itemH:after])
+				# (newH,itemH)			= getMenuItemOSMenuItem itemH
+				# tb					= osMenuItemCheck False mH curH curIndex (curIndex+zIndex-1) tb
+				# tb					= osMenuItemCheck True  mH newH newIndex (zIndex1-1) tb
+				= (found,menuEvent,parents,zIndex1,RadioMenuHandle {rH & mRadioItems=before ++ [itemH:after],mRadioIndex=newIndex},tb)
+		where
+			getMenuItemOSMenuItem :: !*(MenuElementHandle .ls .pst) -> (!OSMenuItem,!MenuElementHandle .ls .pst)
+			getMenuItemOSMenuItem itemH=:(MenuItemHandle {mOSMenuItem}) = (mOSMenuItem,itemH)
+		
+		getSelectedMenuElementHandle itemNr mH mMenuId mOSMenuNr mods parents zIndex (MenuListLSHandle itemHs) tb
+			# (found,menuEvent,parents,zIndex,itemHs,tb)	= getSelectedMenuElementHandlesItem itemNr mH mMenuId mOSMenuNr mods parents zIndex itemHs tb
+			= (found,menuEvent,parents,zIndex,MenuListLSHandle itemHs,tb)
+		
+		getSelectedMenuElementHandle itemNr mH mMenuId mOSMenuNr mods parents zIndex (MenuExtendLSHandle mExH=:{mExtendItems=itemHs}) tb
+			# (found,menuEvent,parents,zIndex,itemHs,tb)	= getSelectedMenuElementHandlesItem itemNr mH mMenuId mOSMenuNr mods parents zIndex itemHs tb
+			= (found,menuEvent,parents,zIndex,MenuExtendLSHandle {mExH & mExtendItems=itemHs},tb)
+		
+		getSelectedMenuElementHandle itemNr mH mMenuId mOSMenuNr mods parents zIndex (MenuChangeLSHandle mChH=:{mChangeItems=itemHs}) tb
+			# (found,menuEvent,parents,zIndex,itemHs,tb)	= getSelectedMenuElementHandlesItem itemNr mH mMenuId mOSMenuNr mods parents zIndex itemHs tb
+			= (found,menuEvent,parents,zIndex,MenuChangeLSHandle {mChH & mChangeItems=itemHs},tb)
+		
+		getSelectedMenuElementHandle _ _ _ _ _ parents zIndex itemH=:(MenuReceiverHandle _) tb
+			= (False,Nothing,parents,zIndex,itemH,tb)
+
+		getSelectedMenuElementHandle _ _ _ _ _ parents zIndex itemH tb
+			= (False,Nothing,parents,zIndex+1,itemH,tb)
+*/
 
 //	Closing a menu.
 
@@ -254,6 +387,7 @@ where
 			| i<0			= tb
 			| otherwise		= enablemenus (i-1) osMenuBar (osEnableMenu i osMenuBar tb)
 
+
 disableMenuSystem :: !(IOSt .l) -> IOSt .l
 disableMenuSystem ioState
 	# (di,ioState)	= ioStGetDocumentInterface ioState
@@ -267,6 +401,7 @@ where
 		| otherwise
 			# (nrMenus,msHs)= ulength mMenus
 			# tb			= disablemenus (if (di==MDI) (nrMenus+1) (nrMenus-1)) osMenuBar tb
+		//	# tb			= osDrawMenuBar {mbHandle=0,amHandle=0,mbInfo=[]} tb	PA: not necessary, as this is taken care of by (changeMenuSystemState True)
 			= ({menus & mMenus=msHs,mEnabled=SystemUnable},tb)
 	where
 		disablemenus :: !Int !OSMenuBar !*OSToolbox -> *OSToolbox
@@ -482,7 +617,7 @@ getMenus ioState
 		# mHs					= menuSystemStateGetMenuHandles mDevice
 		  (idtypes,msHs)		= accessList getIdType mHs.mMenus
 		# ioState				= ioStSetDevice (MenuSystemState {mHs & mMenus=msHs}) ioState
-		= (tl idtypes,ioState)
+		= (/*tl*/ idtypes,ioState)		// PA: there is no special first menu
 where
 	getIdType :: !(MenuStateHandle .pst) -> *((Id,MenuType),!MenuStateHandle .pst)
 	getIdType msH

@@ -232,7 +232,8 @@ printText3 doDialog wrapMode fontDef spacesPerTab textRangeFunc eachPageDrawFunc
 
 ///////////////  initState //////////////////////////////////////////////////////////////////////
 
-
+//import StdDebug,dodebug
+//import print
 
 initState ::	!*(	.Int,
 					FontDef,
@@ -254,7 +255,12 @@ initState (wrapMode, fontDef, spacePerTab, textRangeFunc, eachPageDrawFunc, file
 	((_,font),picture) = openFont fontDef picture
     ({fAscent, fDescent, fMaxWidth, fLeading}, picture)
     	= getFontMetrics font picture
-    lineHeight 
+/*	PA: I guess Diederik added this for debugging purposes. 
+  # (res,_) = os_getresolution 42
+//  # res = trace_n ("PrintRes",res) res
+  | fst res == 42 = abort "aaaarggh"
+*/
+  # lineHeight 
     	= fAscent + fDescent + fLeading
   
   // Check top and bot

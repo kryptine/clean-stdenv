@@ -5,12 +5,9 @@ definition module windowupdate
 //	Update actions on windows/dialogues and controls.
 
 
-from	deviceevents	import UpdateInfo, ControlUpdateInfo
-from	ospicture		import OSPictContext
-from	ostoolbox		import OSToolbox
-from	ostypes			import Rect
-from	oswindow		import OSWindowMetrics
+import	ospicture, ossystem, ostoolbox, ostypes
 import	windowhandle, wstate
+from	deviceevents	import UpdateInfo, ControlUpdateInfo
 
 
 /*	updatewindow redraws the controls indicated by the UpdateInfo.

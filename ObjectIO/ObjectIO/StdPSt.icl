@@ -8,9 +8,7 @@ import	StdBool, StdFunc
 import	commondef, iostate
 from	StdIOCommon			import IdFun
 from	StdProcessAttribute	import isProcessActivate, isProcessDeactivate
-from	osbeep				import osBeep
-from	ospicture			import peekScreen
-from	ostoolbox			import OSToolbox, worldGetToolbox, worldSetToolbox
+import	osbeep, ospicture, ostoolbox
 
 
 

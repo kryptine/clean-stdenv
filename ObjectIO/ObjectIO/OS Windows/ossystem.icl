@@ -10,15 +10,15 @@ from	ostypes	import Rect
 
 
 ::	OSWindowMetrics
-	=	{	osmFont				:: Font				// The internal Font used in Windows for controls
-		,	osmFontMetrics		:: (Int,Int,Int)	// The ascent, descent, leading of osmFont
-		,	osmHeight			:: Int				// The height of the internal Font
-		,	osmHorMargin		:: Int				// The default horizontal margin
-		,	osmVerMargin		:: Int				// The default vertical   margin
-		,	osmHorItemSpace		:: Int				// The default horizontal item space
-		,	osmVerItemSpace		:: Int				// The default vertical   item space
-		,	osmHSliderHeight	:: Int				// The default height of a horizontal slider control
-		,	osmVSliderWidth		:: Int				// The default width  of a vertical   slider control
+	=	{	osmFont				:: !Font				// The internal Font used in Windows for controls
+		,	osmFontMetrics		:: !(!Int,!Int,!Int)	// The ascent, descent, leading of osmFont
+		,	osmHeight			:: !Int					// The height of the internal Font
+		,	osmHorMargin		:: !Int					// The default horizontal margin
+		,	osmVerMargin		:: !Int					// The default vertical   margin
+		,	osmHorItemSpace		:: !Int					// The default horizontal item space
+		,	osmVerItemSpace		:: !Int					// The default vertical   item space
+		,	osmHSliderHeight	:: !Int					// The default height of a horizontal slider control
+		,	osmVSliderWidth		:: !Int					// The default width  of a vertical   slider control
 		}
 
 OSdirseparator	:==	'\\'				// OS separator between folder- and filenames in a pathname

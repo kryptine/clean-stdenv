@@ -3,15 +3,13 @@ definition module pictCCall_12
 
 from	rgnCCall_12	import HRGN
 from	ostoolbox	import OSToolbox
-from	ostypes		import Rect
+from	ostypes		import Rect, HDC
 
 
 ::	*PIC
 	:== (	!HDC
 		,	!*OSToolbox
 		)
-::	HDC
-	:== Int
 ::	Pt
 	:== (	!Int
 		,	!Int

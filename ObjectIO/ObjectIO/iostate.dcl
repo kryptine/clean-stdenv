@@ -4,13 +4,7 @@ definition module iostate
 //	Clean Object I/O library, version 1.2
 
 
-import	osdocumentinterface
-from	osevent				import OSEvents
-from	osguishare			import OSGUIShare
-from	osactivaterequests	import OSActivateRequest
-from	ossystem			import OSWindowMetrics
-from	ostypes				import OSWindowPtr
-from	ostime				import OSTime
+import	osactivaterequests, osdocumentinterface, osevent, osguishare, ossystem, ostime, ostypes
 import	devicefunctions, devicesystemstate
 from	processstack		import ProcessStack, ProcessShowState, ShowFlag, ProcessKind
 from	receivertable		import ReceiverTable
@@ -20,38 +14,47 @@ from	timertable			import TimerTable
 
 ::	*IOSt l
 ::	*PSt  l
-	=	{	ls			:: !l					// The local (and private) data of the process
-		,	io			:: !*IOSt l				// The IOSt environment of the process
+	=	{	ls			:: !l						// The local (and private) data of the process
+		,	io			:: !*IOSt l					// The IOSt environment of the process
 		}
 
-::	*CProcesses									// The 'context-free' processes administration
-	:==	RR *CProcess							//	is a round-robin
-::	*CProcess									// The context-free process
+::	*CProcesses										// The 'context-free' processes administration
+	:==	RR *CProcess								//	is a round-robin
+::	*CProcess										// The context-free process
 	=	E. .l:
-		{	localState	:: !Maybe l				//	its local state
-		,	localIOSt	:: !*IOSt l				//	its context-free IOSt
+		{	localState	:: !Maybe l					//	its local state
+		,	localIOSt	:: !*IOSt l					//	its context-free IOSt
 		}
 
 ::	RuntimeState
-	=	Running									// The process is running
-	|	Blocked !SystemId						// The process is blocked for the process with given id
-	|	Closed									// The process is closed
+	=	Running										// The process is running
+	|	Blocked !SystemId							// The process is blocked for the process with given id
+	|	Closed										// The process is closed
 ::	GUIShare
 	:==	OSGUIShare
 
 ::	ActivateRequests	:== [OSActivateRequest]
 ::	DoubleDownDist		:== Int
-::	InputTrack									// Input being tracked:
-	=	{	itWindow	:: !OSWindowPtr			// the parent window
-		,	itControl	:: !Int					// zero if parent window, otherwise item nr of control (>0)
-		,	itKind		:: !InputTrackKind		// the input kinds being tracked
+::	InputTrack										// Input being tracked:
+	=	{	itWindow	:: !OSWindowPtr				// the parent window
+		,	itControl	:: !Int						// zero if parent window, otherwise item nr of control (>0)
+		,	itKind		:: !InputTrackKind			// the input kinds being tracked
 		}
-::	InputTrackKind								// Input source kinds:
-	=	{	itkMouse	:: !Bool				// mouse
-		,	itkKeyboard	:: !Bool				// keyboard
+::	InputTrackKind									// Input source kinds:
+	=	{	itkMouse	:: !Bool					// mouse
+		,	itkKeyboard	:: !Bool					// keyboard
+		,	itkChar		:: !Int						// DvA: key that is being tracked
+		,	itkSlider	:: !Maybe !SliderTrackInfo	// DvA: slider tracking
+		}
+::	SliderTrackInfo									// PA: please add comments to meaning of record and fields
+	=	{	stiControl	:: !OSWindowPtr
+		,	stiPart		:: !Int
+		,	stiHilite	:: !Bool
+		,	stiDirection:: !Direction
+		,	stiIsControl:: !Bool
 		}
 ::	ClipboardState
-	=	{	cbsCount	:: !Int					// ScrapCount of last access
+	=	{	cbsCount	:: !Int						// ScrapCount of last access
 		}
 
 
@@ -119,9 +122,9 @@ ioStSetRcvDisabled			:: !Bool							!(IOSt .l) -> IOSt .l /* MW11++*/
 
 ioStSwapIO					:: !(![*World],!CProcesses)	!(IOSt .l) -> (!(![*World],!CProcesses),!IOSt .l)
 
-ioStLastInteraction			::									!(IOSt .l) -> (!Bool,    !IOSt .l)
-ioStHasDevice				:: !Device							!(IOSt .l) -> (!Bool,    !IOSt .l)
-ioStHasDevices				::									!(IOSt .l) -> (!Bool,    !IOSt .l)
+ioStLastInteraction			::									!(IOSt .l) -> (!Bool,	 !IOSt .l)
+ioStHasDevice				:: !Device							!(IOSt .l) -> (!Bool,	 !IOSt .l)
+ioStHasDevices				::									!(IOSt .l) -> (!Bool,	 !IOSt .l)
 ioStGetDevices				::									!(IOSt .l) -> (![Device],!IOSt .l)
 
 ioStGetDevice				:: !Device							!(IOSt .l) -> (!Bool,DeviceSystemState (PSt .l),!IOSt .l)

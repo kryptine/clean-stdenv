@@ -4,12 +4,10 @@ implementation module StdPStClass
 //	Clean Object I/O library, version 1.2.1
 
 import	StdFile, StdTuple
-import	iostate, StdFileSelect, StdSound, StdTime
+import	iostate, StdFileSelect, StdTime
 from	scheduler			import handleOneEventForDevices
 from	StdPSt				import accPIO, appPIO
-from	clCCall_12			import winPlaySound
-import	osfileselect
-from	ostoolbox			import OSNewToolbox
+import	osfileselect, ostoolbox
 
 
 /*	PSt is an environment instance of the class FileEnv (see StdFile).
@@ -178,9 +176,3 @@ instance TimeEnv (IOSt .l) where
 		  (tick,world)		= getCurrentTick world
 		= (tick, ioStSetWorld world io)
 // ..MW11
-
-instance playSoundFile (PSt .l) where
-	playSoundFile :: !String !(PSt .l) -> (!Bool,!PSt .l)
-	playSoundFile soundFileName pState=:{io}
-		# (ok,io)	= accIOToolbox (winPlaySound soundFileName) io
-		= (ok,{pState & io=io})

@@ -59,7 +59,6 @@ where
 	where
 		teLoc			= {tlIOId=pid,tlDevice=TimerDevice,tlParentId=tId,tlTimerId=tId}
 
-
 timerIO	:: !DeviceEvent !(PSt .l) -> (!DeviceEvent,!PSt .l)
 timerIO deviceEvent pState
 	# (hasDevice,pState)= accPIO (ioStHasDevice TimerDevice) pState
@@ -84,6 +83,7 @@ where
 			pState1			= appPIO (ioStSetDevice timers1) pState
 			(tH1,pState2)	= letTimerDoIO nrOfIntervals tH pState1
 			timers1			= TimerSystemState {timers & tTimers=tHs1++[tH1]}
+			
 /*			Compiling with 'Reuse Unique Nodes' causes a space-leak in this function definition.
 			Therefore it is replaced temporarily with the function below.
 			letTimerDoIO :: !NrOfIntervals !(TimerStateHandle .ps) !.ps -> (!TimerStateHandle .ps, .ps)

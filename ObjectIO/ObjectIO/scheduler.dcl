@@ -7,6 +7,7 @@ definition module scheduler
 
 import	StdString
 import	deviceevents, StdMaybe
+import	osevent, ostime, ostoolbox
 from	id				import Id
 from	iostate			import PSt, IOSt, RR, CProcesses, CProcess
 from	receivertable	import ReceiverTable, ReceiverTableEntry, RecLoc
@@ -22,9 +23,6 @@ from	StdIOCommon		import SelectState, Able, Unable, IdFun,
 								ProcessWindowSize, ProcessWindowResize, ProcessWindowResizeFunction,
 								ProcessActivate, ProcessDeactivate, ProcessClose, ProcessNoWindowMenu,
 								Vector2, Point2, Size
-from	osevent			import OSEvents, OSEvent, CrossCallInfo
-from	ostoolbox		import OSToolbox
-from	ostime			import OSTime
 from	StdProcessDef	import ProcessInit, DocumentInterface, NDI, SDI, MDI
 
 
@@ -56,7 +54,7 @@ handleEvents	:: !Context !*OSToolbox -> (!Context,!*OSToolbox)
 /*	Consecutively handle events until termination of all interactive processes.
 */
 
-chandleEvents :: !(St Context Bool) !*OSToolbox !Context -> (!*OSToolbox,!Context)
+chandleEvents :: !(St Context Bool) !Context !*OSToolbox -> (!Context,!*OSToolbox)
 /*	chandleEvents consecutively handles events while condition holds.
 */
 
@@ -128,8 +126,9 @@ cswitchProcess :: !SystemId !SchedulerEvent !(PSt .l) -> (!Maybe SwitchError, ![
 	Observe that in case Nothing is returned, the ps PSt component may have changed value.
 */
 
+appContext :: !.(IdFun Context) !(PSt .l) -> PSt .l
 accContext :: !.(St Context .x) !(PSt .l) -> (!.x, !PSt .l)
-/*	accContext applies the Context access function to the switched out process state (which creates a
+/*	(app/acc)Context applies the Context access function to the switched out process state (which creates a
 	Context value), and switches back to the process state. The Context access function must not
 	remove the argument process, otherwise a run-time error will occur!
 */

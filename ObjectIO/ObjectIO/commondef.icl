@@ -7,7 +7,6 @@ implementation module commondef
 
 
 import	StdArray, StdBool, StdChar, StdClass, StdEnum, StdFunc, StdInt, StdList, StdMisc, StdReal, StdString
-from	ostypes		import Rect	// PA: Rect type is defined in the ostypes module.
 import	osrgn
 import	StdIOCommon
 
@@ -191,6 +190,12 @@ instance fromTuple4 Rectangle where
 	fromTuple4 (l,t,r,b) = {corner1={x=l,y=t},corner2={x=r,y=b}}
 
 
+/*	Tuple functions:
+*/
+swap :: !(.a,.b) -> (.b,.a)
+swap (a,b) = (b,a)
+
+
 /*	Error generation rule:
 */
 error :: !String !String !String -> .x
@@ -333,6 +338,14 @@ strictSeqList [f:fs] s
 	= ([x:xs],s)
 strictSeqList _ s
 	= ([],s)
+
+allList :: !(.x .s -> .(Bool,.s)) ![.x] !.s -> (!Bool,!.s)
+allList cond [x:xs] s
+	# (ok,s)	= cond x s
+	| ok		= allList cond xs s
+	| otherwise	= (False,s)
+allList _ _ s
+	= (True,s)
 
 contains :: !(Cond x) ![x] -> Bool
 contains c [x:xs]	= c x || contains c xs

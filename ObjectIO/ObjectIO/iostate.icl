@@ -6,15 +6,8 @@ implementation module iostate
 
 import	StdBool, StdFunc, StdList, StdMisc
 import	commondef, devicefunctions, devicesystemstate, processstack, receivertable, timertable
-import	osdocumentinterface, ostime
-from	osactivaterequests	import OSActivateRequest
-from	osevent				import OSEvents, osNewEvents
-from	osguishare			import OSGUIShare
-from	osmouse				import osGetDoubleClickTime
-from	ossystem			import OSWindowMetrics, osDefaultWindowMetrics
-from	ostoolbox			import OSNewToolbox, OSDummyToolbox
-from	ostypes				import OSWindowPtr, OSNoWindowPtr
-from	roundrobin			import RR, emptyRR, notodoRR
+import	osactivaterequests, osdocumentinterface, osevent, osguishare, osmouse, ossystem, ostime, ostoolbox, ostypes
+from	roundrobin	import RR, emptyRR, notodoRR
 
 
 iostateFatalError :: String String -> .x
@@ -92,6 +85,15 @@ iostateFatalError function error
 ::	InputTrackKind												// Input source kinds:
 	=	{	itkMouse	:: !Bool								// mouse
 		,	itkKeyboard	:: !Bool								// keyboard
+		,	itkChar		:: !Int									// DvA: key that is being tracked
+		,	itkSlider	:: !Maybe !SliderTrackInfo				// DvA: slider tracking
+		}
+::	SliderTrackInfo												// PA: please add comments to meaning of record and fields
+	=	{	stiControl	:: !OSWindowPtr
+		,	stiPart		:: !Int
+		,	stiHilite	:: !Bool
+		,	stiDirection:: !Direction
+		,	stiIsControl:: !Bool
 		}
 ::	ClipboardState
 	=	{	cbsCount	:: !Int									// ScrapCount of last access

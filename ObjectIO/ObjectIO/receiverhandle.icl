@@ -5,7 +5,7 @@ implementation module receiverhandle
 
 
 import	receivermessage
-from	ostoolbox import OSToolbox
+import	ostoolbox
 
 
 ::	*ReceiverHandles pst

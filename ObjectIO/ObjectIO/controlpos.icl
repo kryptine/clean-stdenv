@@ -9,12 +9,9 @@ from	controllayout	import layoutControls
 from	windowclipstate	import forceValidWindowClipState
 from	windowdraw		import drawwindowlook`
 from	windowupdate	import updatewindowbackgrounds
-from	ospicture		import pictscroll
-from	osrgn			import osgetrgnbox
-from	ostypes			import Rect
-from	ostoolbox		import OSToolbox
-from	oswindow		import OSWindowMetrics, osScrollbarsAreVisible, osSetWindowSliderThumb, toOSscrollbarRange, osMinWindowSize
+import	ospicture, osrgn, ostoolbox, ostypes, oswindow
 
+//import dodebug
 
 controlposFatalError :: String String -> .x
 controlposFatalError function error
@@ -29,7 +26,7 @@ movewindowviewframe wMetrics v wids=:{wPtr} wH=:{whWindowInfo,whItems=oldItems,w
 		= (wH,tb)
 	# tb							= setsliderthumb (hasHScroll && newOrigin.x<>oldOrigin.x) wMetrics wPtr True  (minx,newOrigin.x,maxx) vieww (toTuple whSize) tb
 	# tb							= setsliderthumb (hasVScroll && newOrigin.y<>oldOrigin.y) wMetrics wPtr False (miny,newOrigin.y,maxy) viewh (toTuple whSize) tb
-	# (noControls,oldItems)			= uisEmpty oldItems
+	# (noControls,oldItems)			= uisEmpty oldItems	// geeft nu foute resultaat?! PA: wat bedoel je hier mee?
 	| noControls					// there are no controls: do only visual updates
 		# windowInfo				= {windowInfo & windowOrigin=newOrigin}
 		  wH						= {wH & whWindowInfo=WindowInfo windowInfo,whItems=oldItems}
@@ -60,9 +57,13 @@ where
 	windowInfo					= getWindowInfoWindowData whWindowInfo
 	(oldOrigin,domainRect,hasHScroll,hasVScroll,lookInfo)
 								= (windowInfo.windowOrigin,windowInfo.windowDomain,isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll,windowInfo.windowLook)
+	hScroll						= if hasHScroll (Just (fromJust windowInfo.windowHScroll).scrollItemPtr) Nothing
+	vScroll						= if hasVScroll (Just (fromJust windowInfo.windowVScroll).scrollItemPtr) Nothing
 	domain						= rectToRectangle domainRect
 	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
-	contentRect					= getWindowContentRect wMetrics visScrolls (sizeToRect whSize)
+	contentRect					= osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize)
+	hRect						= osGetWindowHScrollRect wMetrics visScrolls (sizeToRect whSize)
+	vRect						= osGetWindowVScrollRect wMetrics visScrolls (sizeToRect whSize)
 	contentSize					= rectSize contentRect
 	{w=w`,h=h`}					= contentSize
 	(minx,maxx,vieww)			= (domainRect.rleft,domainRect.rright, contentSize.w)
@@ -80,7 +81,7 @@ where
 	
 	setsliderthumb :: !Bool !OSWindowMetrics !OSWindowPtr !Bool !(!Int,!Int,!Int) !Int !(!Int,!Int) !*OSToolbox -> *OSToolbox
 	setsliderthumb hasScroll wMetrics wPtr isHScroll scrollValues viewSize maxcoords tb
-		| hasScroll				= osSetWindowSliderThumb wMetrics wPtr isHScroll osThumb maxcoords True tb
+		| hasScroll				= osSetWindowSliderThumb wMetrics wPtr isHScroll osThumb hScroll vScroll hRect vRect maxcoords True tb
 		| otherwise				= tb
 	where
 		(_,osThumb,_,_)			= toOSscrollbarRange scrollValues viewSize
@@ -98,22 +99,44 @@ where
 		{rleft,rtop,rright,rbottom}	= newOriginAreaRect
 		v							= toVector (oldOrigin-newOrigin)
 		{vx,vy}						= v
-		(updArea,restArea)			= if (vx<=0 && vy<=0)
-										(	[{newOriginAreaRect & rleft=rright+vx,rbottom=rbottom+vy},{newOriginAreaRect & rtop=rbottom+vy}]
+		(updArea,restArea)			= if (vx<0 && vy<0)		// PA: waarom zijn deze verschillend van CVS versie?
+										(	[{newOriginAreaRect & rleft=rright+vx,rbottom=rbottom+vy}
+											,{newOriginAreaRect & rtop=rbottom+vy}
+											]
 										,	 {newOriginAreaRect & rright=rright+vx,rbottom=rbottom+vy}
 										)
-									 (if (vx<=0 && vy>=0)
-									 	(	[{newOriginAreaRect & rbottom=rtop+vy},{newOriginAreaRect & rleft=rright+vx,rtop=rtop+vy}]
+									 (if (vx<0 && vy>0)
+									 	(	[{newOriginAreaRect & rleft=rright+vx,rtop=rtop+vy}
+									 		,{newOriginAreaRect & rbottom=rtop+vy}
+									 		]
 									 	,	 {newOriginAreaRect & rtop=rtop+vy,rright=rright+vx}
 									 	)
-									 (if (vx>=0 && vy<=0)
-									 	(	[{newOriginAreaRect & rright=rleft+vx,rbottom=rbottom+vy},{newOriginAreaRect & rtop=rbottom+vy}]
+									 (if (vx<0)	//@@@@
+									 	(	[{newOriginAreaRect & rleft=rright+vx}]
+									 	,	 {newOriginAreaRect & rright=rright+vx}
+									 	)
+									 (if (vx>0 && vy<0)
+									 	(	[{newOriginAreaRect & rleft=rright-vx}
+									 		,{newOriginAreaRect & rright=rright-vx,rbottom=rtop-vy}
+									 		]
 									 	,	 {newOriginAreaRect & rleft=rleft+vx,rbottom=rbottom+vy}
 									 	)
-								//	  if (vx>=0 && vy>=0)
-									 	(	[{newOriginAreaRect & rbottom=rtop+vy},{newOriginAreaRect & rtop=rtop+vy,rright=rleft+vx}]
+									 (if (vx>0 && vy>0)
+									 	(	[{newOriginAreaRect & rright=rright-vx,rtop=rbottom-vy}
+									 		,{newOriginAreaRect & rleft=rright-vx}
+									 		]
 									 	,	 {newOriginAreaRect & rleft=rleft+vx,rtop=rtop+vy}
-									 	)))
+									 	)
+									 (if (vx>0)	//@@@@
+									 	(	[{newOriginAreaRect & rright=rleft+vx}]
+									 	,	 {newOriginAreaRect & rleft=rleft+vx}
+									 	)
+									 (if (vy<0)	//@@@@
+									 	(	[{newOriginAreaRect & rtop=rbottom+vy}],{newOriginAreaRect & rbottom = rbottom+vy})
+									 (if (vy>0)	//@@@@
+									 	(	[{newOriginAreaRect & rbottom=rtop+vy}],{newOriginAreaRect & rtop = rtop+vy})
+									 	(	[zero],newOriginAreaRect)
+									 )))))))
 		
 		scroll :: !Rect !Rect !Vector2 !*Picture -> (![Rect],!*Picture)
 		scroll scrollRect restRect v picture

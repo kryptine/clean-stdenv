@@ -2864,7 +2864,8 @@ void EvalCcRqCREATEMODALDIALOG (CrossCallInfo *pcci)	/* textptr,parentptr; error
 	pdlgtemplate = p = (PWORD) rmalloc (1000);
 
 	/* start to fill in the dlgtemplate information. Addressing by WORDs */
-	lStyle = WS_CAPTION | DS_SETFONT | DS_MODALFRAME | WS_SYSMENU | DS_SYSMODAL | WS_VISIBLE;
+//	lStyle = WS_CAPTION | DS_SETFONT | DS_MODALFRAME | WS_SYSMENU | DS_SYSMODAL | WS_VISIBLE;	PA: DS_SYSMODAL has become obsolete
+	lStyle = WS_CAPTION | DS_SETFONT | DS_MODALFRAME | WS_SYSMENU | WS_VISIBLE;
 
 	*p++ = LOWORD (lStyle);
 	*p++ = HIWORD (lStyle);

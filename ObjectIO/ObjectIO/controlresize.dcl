@@ -4,8 +4,8 @@ definition module controlresize
 //	Clean Object I/O library, version 1.2
 
 
+import	ossystem
 import	wstate
-from	oswindow	import OSWindowMetrics
 
 
 resizeControls :: !OSWindowMetrics !Bool !Bool !WIDS !Origin !Size !Size !(WindowHandle .ls .pst) !*OSToolbox

@@ -11,6 +11,11 @@ import	StdControlAttribute, StdWindowAttribute, windowaccess, windowclipstate, w
 from	keyfocus		import setNoFocusItem, setNewFocusItem
 from	StdPSt			import accPIO
 
+//import controls,quickdraw
+//import osutil
+
+//import StdDebug,dodebug
+//trace_n _ c :== c
 
 windowdeviceFatalError :: String String -> .x
 windowdeviceFatalError function error
@@ -38,15 +43,18 @@ windowOpen pState=:{io=ioState}
 		= {pState & io=ioState}
 	| otherwise
 		# (ioInterface,ioState)		= ioStGetDocumentInterface ioState
+		  (rgnH,ioState)			= accIOToolbox osnewrgn ioState
 		  windows					= {	whsWindows		= []
-	/*								  ,	whsCursorInfo	= {	cInfoChanged	= True
+//	/*
+									  ,	whsCursorInfo	= {	cInfoChanged	= True
 														  ,	cLocalRgn		= rgnH
 														  ,	cMouseWasInRgn	= False
 														  ,	cLocalShape		= StandardCursor
 														  ,	cGlobalSet		= False
 														  ,	cGlobalShape	= StandardCursor
 														  }
-	*/								  ,	whsNrWindowBound= case ioInterface of
+//	*/
+									  ,	whsNrWindowBound= case ioInterface of
 								  							NDI	-> Finite 0
 								  							SDI	-> Finite 1
 									  						MDI	-> Infinite
@@ -76,9 +84,10 @@ windowClose pState=:{io=ioState}
 		# (tb,ioState)			= getIOToolbox ioState
 		  (wsHs,windows)		= (\windows=:{whsWindows}->(whsWindows,{windows & whsWindows=[]})) windows
 		# pState				= {pState & io=ioStSetDevice (WindowSystemState windows) ioState}
-		# (disposeInfo,(inputTrack,pState,tb))
-								= stateMap (disposeWindowStateHandle` osdinfo) wsHs (inputTrack,pState,tb)
+		# (disposeInfo,(osdinfo,inputTrack,pState,tb))
+								= stateMap disposeWindowStateHandle` wsHs (osdinfo,inputTrack,pState,tb)
 		# ioState				= setIOToolbox tb pState.io
+		# ioState				= ioStSetOSDInfo osdinfo ioState
 		# ioState				= ioStSetInputTrack inputTrack ioState
 		  (freeRIdss,freeIdss,_,finalLSs)
 		  						= unzip4 disposeInfo
@@ -89,16 +98,18 @@ windowClose pState=:{io=ioState}
 		# (idtable,ioState)		= ioStGetIdTable ioState
 		  (_,idtable)			= removeIdsFromIdTable (freeRIds++freeIds) idtable
 		# ioState				= ioStSetIdTable idtable ioState
-	//	# ioState				= ioStRemoveDeviceFunctions WindowDevice ioState		// PA: it is not clear whether this should be done
+//		  windows				= (\windows=:{whsFinalModalLS=finalLS}->{windows & whsFinalModalLS=finalLS++finalLSs}) windows
+//		# ioState				= ioStSetDevice (WindowSystemState windows) ioState
+	//	# ioState				= ioStRemoveDeviceFunction WindowDevice ioState		PA: it is not clear whether this should be done
 		# ioState				= setFinalLS finalLSs ioState
 		# pState				= {pState & io=ioState}
 		= pState
 where
-	disposeWindowStateHandle` :: !OSDInfo !*(WindowStateHandle (PSt .l)) !*(!Maybe InputTrack,PSt .l,!*OSToolbox)
-			   -> (!(![Id],![Id],![DelayActivationInfo],![FinalModalLS]),!*(!Maybe InputTrack,PSt .l,!*OSToolbox))
-	disposeWindowStateHandle` osdinfo wsH (inputTrack,state,tb)
-		# ((freeRIds,freeIds,delayInfo,finalLS,inputTrack),(_,state),tb) = disposeWindowStateHandle osdinfo inputTrack handleOSEvent (wsH,state) tb
-		= ((freeRIds,freeIds,delayInfo,finalLS),(inputTrack,state,tb))
+	disposeWindowStateHandle` :: !*(WindowStateHandle (PSt .l)) !*(!OSDInfo,!Maybe InputTrack,PSt .l,!*OSToolbox)
+			   -> (!(![Id],![Id],![DelayActivationInfo],![FinalModalLS]),!*(!OSDInfo,!Maybe InputTrack,PSt .l,!*OSToolbox))
+	disposeWindowStateHandle` wsH (osdinfo,inputTrack,state,tb)
+		# ((freeRIds,freeIds,delayInfo,finalLS,osdinfo,inputTrack),(_,state),tb) = disposeWindowStateHandle osdinfo inputTrack handleOSEvent (wsH,state) tb
+		= ((freeRIds,freeIds,delayInfo,finalLS),(osdinfo,inputTrack,state,tb))
 	
 	handleOSEvent :: !OSEvent !(PSt .l) -> (![Int],!PSt .l)
 	handleOSEvent osEvent pState = accContext (handleContextOSEvent osEvent) pState
@@ -193,15 +204,15 @@ where
 			= windowdeviceFatalError "windowIO (ControlLooseKeyFocus _) _" "window could not be found"
 		# (oldInputTrack,ioState)		= ioStGetInputTrack ioState
 		  (newInputTrack,lostMouse,lostKey)
-			  							= case oldInputTrack of
-			  								Just it=:{itWindow,itControl,itKind}
-			  										-> if (itWindow==wids.wPtr && itControl==info.ckfItemNr)
-			  												(	Nothing
-			  												,	if itKind.itkMouse    [createOSLooseMouseEvent itWindow itControl] []
-			  												,	if itKind.itkKeyboard [createOSLooseKeyEvent   itWindow itControl] []
-			  												)
-			  												(oldInputTrack,[],[])
-			  								nothing	-> (nothing,[],[])
+		  								= case oldInputTrack of
+		  									Just it=:{itWindow,itControl,itKind}
+		  											-> if (itWindow==wids.wPtr && itControl==info.ckfItemNr)
+		  													(	Nothing
+		  													,	if itKind.itkMouse    [createOSLooseMouseEvent itWindow itControl] []
+		  													,	if itKind.itkKeyboard [createOSLooseKeyEvent   itWindow itControl] []
+		  													)
+		  													(oldInputTrack,[],[])
+		  									nothing	-> (nothing,[],[])
 		# ioState						= ioStSetInputTrack newInputTrack ioState
 		  lostInputEvents				= lostMouse ++ lostKey
 		| isEmpty lostInputEvents		// no input was being tracked: simply evaluate control deactivate function
@@ -211,9 +222,10 @@ where
 			ioState1					= ioStSetDevice (WindowSystemState windows1) ioState
 			pState1						= {pState & io=ioState1}
 			(wsH1,pState2)				= windowStateControlKeyFocusActionIO False info wsH pState1
-		| otherwise						// handle control deactivate function AFTER lost input events, but BEFORE other delayed events
+		| otherwise						// handle control deactivate function AFTER lost input events
 			# (osDelayEvents,ioState)	= accIOToolbox (strictSeqList (lostInputEvents ++ [createOSDeactivateControlEvent wids.wPtr info.ckfItemPtr])) ioState
 			# (osEvents,ioState)		= ioStGetEvents ioState
+//			# ioState					= ioStSetEvents (osAppendEvents osDelayEvents osEvents) ioState
 			# ioState					= ioStSetEvents (osInsertEvents osDelayEvents osEvents) ioState
 			# windows					= setWindowHandlesWindow wsH windows
 			# ioState					= ioStSetDevice (WindowSystemState windows) ioState
@@ -289,7 +301,7 @@ where
 		  (found,wsH,windows)	= getWindowHandlesWindow (toWID wids.wId) windows
 		| not found
 			= windowdeviceFatalError "windowIO (WindowDeactivation _)" "window could not be found"
-		# wsH					= {wsH & wshIds={wids & wActive=False}}	// PA: clear isActive flag
+//		# wsH					= {wsH & wshIds={wids & wActive=False}}	// PA: clear isActive flag
 		# (inputTrack,ioState)	= ioStGetInputTrack ioState
 		# ioState				= ioStSetInputTrack Nothing ioState		// clear input track information
 		  (lostMouse,lostKey)	= case inputTrack of					// check for (Mouse/Key)Lost events
@@ -300,6 +312,7 @@ where
 	  										   )
 		# lostInputEvents		= lostMouse ++ lostKey
 		| isEmpty lostInputEvents										// no input was being tracked: simply evaluate deactivate function
+			# wsH					= {wsH & wshIds={wids & wActive=False}}	// DvA: moved here!
 			= (deviceEvent,pState2)
 		with
 			windows1			= setWindowHandlesWindow wsH1 windows
@@ -672,7 +685,7 @@ where
 									(zero,sizeToRect whSize,False,False)
 	domain						= rectToRectangle domainRect
 	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
-	wFrame						= getWindowContentRect wMetrics visScrolls (sizeToRect whSize)
+	wFrame						= osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize)
 	contentSize					= rectSize wFrame
 	(defMinW,defMinH)			= osMinWindowSize
 	minSize						= {w=defMinW,h=defMinH}
@@ -713,7 +726,7 @@ where
 					= windowdeviceFatalError "drawWElementLook (windowStateCompoundScrollActionIO)" "argument control is not a CompoundControl"
 				| otherwise
 					# (itemH,tb)			= drawCompoundLook wMetrics isAble wPtr clipRect1 itemH tb
-				//	# tb					= OSvalidateWindowRect itemH.wItemPtr clipRect1 tb//(sizeToRect wItemSize) tb	// PA: validation of (sizeToRect wItemSize) is to much
+				//	# tb					= OSvalidateWindowRect itemH.wItemPtr clipRect1 tb//(sizeToRect wItemSize) tb	// PA: validation of (SizeToRect wItemSize) is to much
 					= (True,WItemHandle itemH,tb)
 			where
 				isAble						= ableContext && wItemSelect
@@ -722,7 +735,7 @@ where
 				hasScrolls					= (isJust itemInfo.compoundHScroll,isJust itemInfo.compoundVScroll)
 				visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple wItemSize) hasScrolls
 				itemRect					= posSizeToRect wItemPos wItemSize
-				contentRect					= getCompoundContentRect wMetrics visScrolls itemRect 
+				contentRect					= osGetCompoundContentRect wMetrics visScrolls itemRect 
 				clipRect1					= intersectRects clipRect contentRect
 			
 			drawWElementLook wMetrics ableContext clipRect itemNr wPtr (WListLSHandle itemHs) tb
@@ -752,7 +765,7 @@ where
 	where
 		calcNewWElementOrigin :: !OSWindowMetrics !CompoundScrollActionInfo !(WElementHandle .ls .pst) !*OSToolbox
 															 -> (!Bool,!Bool,!WElementHandle .ls .pst, !*OSToolbox)
-		calcNewWElementOrigin wMetrics info (WItemHandle itemH=:{wItemNr,wItemKind,wItemAtts,wItems,wItemSize=compoundSize,wItemInfo}) tb
+		calcNewWElementOrigin wMetrics info (WItemHandle itemH=:{wItemNr,wItemKind,wItemAtts,wItems,wItemPos,wItemSize=compoundSize,wItemInfo}) tb
 			| info.csaItemNr<>wItemNr
 				| not (isRecursiveControl wItemKind)
 					= (False,False,WItemHandle itemH,tb)
@@ -765,7 +778,8 @@ where
 			| newThumb==oldThumb
 				= (True,False,WItemHandle itemH,tb)
 			| otherwise
-				# tb							= osSetCompoundSliderThumb wMetrics itemPtr isHorizontal newOSThumb (toTuple compoundSize) True tb
+//				# tb							= OSsetCompoundSliderThumb wMetrics itemPtr isHorizontal newOSThumb (toTuple compoundSize) True tb
+				# tb							= osSetCompoundSliderThumb wMetrics wPtr itemPtr itemPtr scrollRect isHorizontal newOSThumb (toTuple compoundSize) True tb
 				# itemH							= {itemH & wItemInfo=CompoundInfo {compoundInfo & compoundOrigin=newOrigin}
 														 , wItemAtts=replaceOrAppend isControlViewSize (ControlViewSize {w=w,h=h}) wItemAtts
 												  }
@@ -774,8 +788,17 @@ where
 			itemPtr								= info.csaItemPtr
 			compoundInfo						= getWItemCompoundInfo wItemInfo
 			(domainRect,origin,hScroll,vScroll)	= (compoundInfo.compoundDomain,compoundInfo.compoundOrigin,compoundInfo.compoundHScroll,compoundInfo.compoundVScroll)
+			(hScrollPtr,vScrollPtr) = (mscrollptr compoundInfo.compoundHScroll,mscrollptr compoundInfo.compoundVScroll)
+			mscrollptr = mapMaybe (\{scrollItemPtr}->scrollItemPtr)
 			visScrolls							= osScrollbarsAreVisible wMetrics domainRect (toTuple compoundSize) (isJust hScroll,isJust vScroll)
-			{w,h}								= rectSize (getCompoundContentRect wMetrics visScrolls (sizeToRect compoundSize))
+			{w,h}								= rectSize (osGetCompoundContentRect wMetrics visScrolls (sizeToRect compoundSize))
+//			hScrollRect = osGetCompoundHScrollRect wMetrics visScrolls (sizeToRect compoundSize)
+//			vScrollRect = osGetCompoundVScrollRect wMetrics visScrolls (sizeToRect compoundSize)
+			hScrollRect = osGetCompoundHScrollRect wMetrics visScrolls (posSizeToRect wItemPos compoundSize)
+			vScrollRect = osGetCompoundVScrollRect wMetrics visScrolls (posSizeToRect wItemPos compoundSize)
+			scrollRect
+				| isHorizontal = hScrollRect
+				= vScrollRect
 			isHorizontal						= info.csaDirection==Horizontal
 			scrollInfo							= fromJust (if isHorizontal hScroll vScroll)
 			scrollFun							= scrollInfo.scrollFunction
@@ -1402,7 +1425,7 @@ where
 		| otherwise
 			# (_,newOSThumb,_,_)		= toOSscrollbarRange (min`,newThumb,max`) viewSize
 			  newOrigin					= if isHorizontal {oldOrigin & x=newThumb} {oldOrigin & y=newThumb}
-			# tb						= osSetWindowSliderThumb wMetrics wPtr isHorizontal newOSThumb (toTuple whSize) True tb
+			# tb						= osSetWindowSliderThumb wMetrics wPtr isHorizontal newOSThumb hScroll vScroll hRect vRect (toTuple whSize) True tb
 			# (oldItems`,oldItems,tb)	= getWElementHandles` wPtr oldItems tb
 			# (_,newItems,tb)			= layoutControls wMetrics hMargins vMargins spaces contentSize minSize [(domain,newOrigin)] oldItems tb
 			  wH						= {	wH & whWindowInfo	= WindowInfo {windowInfo & windowOrigin=newOrigin}
@@ -1416,28 +1439,38 @@ where
 			# (updRgn,newItems,tb)		= relayoutControls wMetrics whSelect whShow contentRect contentRect zero zero wPtr whDefaultId oldItems` wH.whItems tb
 			# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn info.wsaWIDS {wH & whItems=newItems} tb
 			  newFrame					= posSizeToRectangle newOrigin contentSize
-			  toMuch					= if isHorizontal (abs (newOrigin.x-oldOrigin.x)>=w`) (abs (newOrigin.y-oldOrigin.y)>=h`)
+			  toMuch					= if isHorizontal
+			  								(abs (newOrigin.x-oldOrigin.x)>=w`)
+			  								(abs (newOrigin.y-oldOrigin.y)>=h`)
 			  (updArea,updAction)		= if (not lookInfo.lookSysUpdate || toMuch || not isRect)
-			  								(newFrame,return []) (calcScrollUpdateArea oldOrigin newOrigin areaRect)
+			  								(newFrame,return [])
+			  								(calcScrollUpdateArea oldOrigin newOrigin areaRect)
 			  updState					= {oldFrame=oldFrame,newFrame=newFrame,updArea=[updArea]}
 			# (wH,tb)					= drawwindowlook` wMetrics wPtr updAction updState wH tb
-		//	# tb						= OSvalidateWindowRect wPtr (sizeToRect whSize) tb
+			# tb						= osValidateWindowRect wPtr (sizeToRect whSize) tb
 			= (wH,tb)
 	where
 		windowInfo						= getWindowInfoWindowData whWindowInfo
 		(oldOrigin,domainRect,hasHScroll,hasVScroll,lookInfo)
 										= (windowInfo.windowOrigin,windowInfo.windowDomain,isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll,windowInfo.windowLook)
+		hScroll							= if hasHScroll (Just (fromJust windowInfo.windowHScroll).scrollItemPtr) Nothing
+		vScroll							= if hasVScroll (Just (fromJust windowInfo.windowVScroll).scrollItemPtr) Nothing
 		isHorizontal					= info.wsaDirection==Horizontal
 		domain							= rectToRectangle domainRect
 		visScrolls						= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
-		contentRect						= getWindowContentRect wMetrics visScrolls (sizeToRect whSize)
+		contentRect						= osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize)
+		hRect						= osGetWindowHScrollRect wMetrics visScrolls (sizeToRect whSize)
+		vRect						= osGetWindowVScrollRect wMetrics visScrolls (sizeToRect whSize)
 		contentSize						= rectSize contentRect
 		{w=w`,h=h`}						= contentSize
 		oldFrame						= posSizeToRectangle oldOrigin contentSize
+
 		(min`,oldThumb,max`,viewSize)	= if isHorizontal
 											(domain.corner1.x,oldOrigin.x,domain.corner2.x,w`)
 											(domain.corner1.y,oldOrigin.y,domain.corner2.y,h`)
+
 		sliderState						= {sliderMin=min`,sliderThumb=oldThumb,sliderMax=max`-viewSize}
+
 		scrollInfo						= fromJust (if isHorizontal windowInfo.windowHScroll windowInfo.windowVScroll)
 		scrollFun						= scrollInfo.scrollFunction
 		newThumb`						= scrollFun oldFrame sliderState info.wsaSliderMove
@@ -1486,33 +1519,58 @@ windowStateScrollActionIO _ _ _ _
 windowStateSizeAction :: !OSWindowMetrics !Bool !WindowSizeActionInfo !(WindowStateHandle .pst) !*OSToolbox
 																   -> (!WindowStateHandle .pst, !*OSToolbox)
 windowStateSizeAction wMetrics isActive info=:{wsWIDS={wPtr},wsSize,wsUpdateAll} wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH}} tb
+// DvA: vergelijk met setWIndowViewDomain in StdWindow...
 	#  visScrolls		= osScrollbarsAreVisible wMetrics domainRect oldSize` (hasHScroll,hasVScroll)
-	   oldContent		= getWindowContentRect wMetrics visScrolls (sizeToRect oldSize)
+	   oldContent		= osGetWindowContentRect wMetrics visScrolls (sizeToRect oldSize)
 	   oldContentSize	= rectSize oldContent
+
+	   oldHRect			= osGetWindowHScrollRect wMetrics visScrolls (sizeToRect oldSize)
+	   oldVRect			= osGetWindowVScrollRect wMetrics visScrolls (sizeToRect oldSize)
+	
 	   visScrolls		= osScrollbarsAreVisible wMetrics domainRect newSize` (hasHScroll,hasVScroll)
-	   newContent		= getWindowContentRect wMetrics visScrolls (sizeToRect wsSize)
+	   newContent		= osGetWindowContentRect wMetrics visScrolls (sizeToRect wsSize)
 	   newContentSize	= rectSize newContent
+//	   visScrollsH = let (h,v)=visScrolls in (h,h||v)
+//	   visScrollsV = let (h,v)=visScrolls in (h||v,v)
+	   visScrollsH		= visScrolls
+	   visScrollsV		= visScrolls
 	   newOrigin		= newOrigin oldOrigin domainRect newContentSize
-	#! winfo			= {windowInfo & windowOrigin=newOrigin}
+	   newHRect			= osGetWindowHScrollRect wMetrics visScrollsH (sizeToRect wsSize)
+	   newHScroll		= newScroll oldHScroll newHRect
+	   newVRect			= osGetWindowVScrollRect wMetrics visScrollsV (sizeToRect wsSize)
+	   newVScroll		= newScroll oldVScroll newVRect
+	#! winfo			= {windowInfo & windowOrigin=newOrigin
+							, windowHScroll = newHScroll
+							, windowVScroll = newVScroll
+							}
 	   newWindowInfo	= WindowInfo winfo
 	   resizedAtt		= WindowViewSize newContentSize
 	   (replaced,atts)	= creplace isWindowViewSize resizedAtt wH.whAtts
 	   resizedAtts		= if replaced atts [resizedAtt:atts]
 	#! wH				= {wH & whSize=wsSize,whWindowInfo=newWindowInfo,whAtts=resizedAtts}
-	#  tb				= setWindowScrollThumbValues hasHScroll wMetrics wPtr True  (newContentSize.w+1) oldOrigin.x newOrigin.x newSize` tb
-	#  tb				= setWindowScrollThumbValues hasVScroll wMetrics wPtr False (newContentSize.h+1) oldOrigin.y newOrigin.y newSize` tb
+	#  tb				= setWindowScrollThumbValues newHScroll newHRect newVRect hasHScroll wMetrics wPtr True  (newContentSize.w+1) oldOrigin.x newOrigin.x newSize` tb
+	#  tb				= setWindowScrollThumbValues newVScroll newHRect newVRect hasVScroll wMetrics wPtr False (newContentSize.h+1) oldOrigin.y newOrigin.y newSize` tb
 	#  (wH,tb)			= resizeControls wMetrics isActive wsUpdateAll info.wsWIDS oldOrigin oldContentSize newContentSize wH tb
 	#! wlsH				= {wlsH & wlsHandle=wH}
 	   wsH				= {wsH & wshHandle=Just wlsH}
 	=  (wsH,tb)
 where
+	able				= wH.whSelect
 	oldSize				= wH.whSize
 	oldSize`			= toTuple oldSize
 	newSize`			= toTuple wsSize
 	windowInfo			= getWindowInfoWindowData wH.whWindowInfo
 	(oldOrigin,domainRect,hasHScroll,hasVScroll)
 						= (windowInfo.windowOrigin,windowInfo.windowDomain,isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll)
+	hScroll				= if hasHScroll (Just (fromJust windowInfo.windowHScroll).scrollItemPtr) Nothing
+	vScroll				= if hasVScroll (Just (fromJust windowInfo.windowVScroll).scrollItemPtr) Nothing
+	(oldHScroll,oldVScroll)
+						= ( windowInfo.windowHScroll, windowInfo.windowVScroll)
 	
+	newScroll Nothing _ = Nothing
+	newScroll (Just scroll_inf=:{scrollItemPtr}) {rleft,rtop,rright,rbottom}
+		= Just {scroll_inf & scrollItemPos = {x=rleft,y=rtop},scrollItemSize = {w = rright - rleft, h = rbottom - rtop}}
+
 	newOrigin :: !Point2 !Rect !Size -> Point2
 	newOrigin {x,y} {rleft,rtop,rright,rbottom} {w,h}
 		= {x=x`,y=y`}
@@ -1520,12 +1578,22 @@ where
 		x`	= if (x+w>rright)  (max (rright -w) rleft) x
 		y`	= if (y+h>rbottom) (max (rbottom-h) rtop ) y
 	
-	setWindowScrollThumbValues :: !Bool !OSWindowMetrics !OSWindowPtr !Bool !Int !Int !Int !(!Int,!Int) !*OSToolbox -> *OSToolbox
-	setWindowScrollThumbValues hasScroll wMetrics wPtr isHorizontal size old new maxcoords tb
+	setWindowScrollThumbValues :: !(Maybe ScrollInfo) !Rect !Rect !Bool !OSWindowMetrics !OSWindowPtr !Bool !Int !Int !Int !(!Int,!Int) !*OSToolbox -> *OSToolbox
+	setWindowScrollThumbValues newScroll hRect vRect hasScroll wMetrics wPtr isHorizontal size old new maxcoords tb
 		| not hasScroll	= tb
-		# tb			= osSetWindowSliderThumbSize wMetrics wPtr isHorizontal size maxcoords (old==new) tb
+		# tb = osUpdateWindowScroll wPtr scrollInfo.scrollItemPtr (toTuple scrollInfo.scrollItemPos) (toTuple scrollInfo.scrollItemSize) newRect tb	// PA: updateWindowScroll --> osUpdateWindowScroll and moved from osutil --> oswindow
+//		# tb			= OSsetWindowSliderThumbSize wMetrics wPtr isHorizontal size maxcoords (old==new) tb
+		# tb			= osSetWindowSliderThumbSize wMetrics wPtr sPtr isHorizontal min max size maxcoords newRect able (old==new)tb
 		| old==new		= tb
-		| otherwise		= osSetWindowSliderThumb wMetrics wPtr isHorizontal new maxcoords True tb
+		| otherwise	
+			= osSetWindowSliderThumb wMetrics wPtr isHorizontal new hScroll vScroll hRect vRect maxcoords True tb
+	where
+		newRect			= if isHorizontal hRect vRect
+		sPtr			= (fromJust newScroll).scrollItemPtr
+		min				= if isHorizontal domainRect.rleft domainRect.rtop
+		max				= if isHorizontal (domainRect.rright - size) (domainRect.rbottom - size)
+		scrollInfo		= fromJust newScroll
+	
 windowStateSizeAction _ _ _ _ _
 	= windowdeviceFatalError "windowIO _ (WindowSizeAction _) _" "unexpected placeholder argument"
 
@@ -1543,3 +1611,4 @@ where
 		| otherwise	= selected cond dummy xs (i+1)
 	selected _ dummy _ i
 		= (False,i,dummy)
+

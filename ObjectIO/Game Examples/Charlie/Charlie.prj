@@ -1,18 +1,18 @@
 Version: 1.4
 Global
 	Built:	True
-	Target:	Game Library
+	Target:	Uniform Object IO 1.2
 	Exec:	{Project}\Charlie.exe
 	CodeGen
 		CheckStacks:	False
 		CheckIndexes:	False
 		TargetProcessor:	CurrentProcessor
 	Application
-		HeapSize:	2097152
-		StackSize:	409600
+		HeapSize:	409600
+		StackSize:	102400
 		ExtraMemory:	81920
-		IntialHeapSize:	819200
-		HeapSizeMultiplier:	640
+		IntialHeapSize:	204800
+		HeapSizeMultiplier:	4096
 		ShowExecutionTime:	False
 		ShowGC:	False
 		ShowStackSize:	False
@@ -32,6 +32,8 @@ Global
 		LinkMethod:	Static
 		GenerateRelocations:	False
 		GenerateLinkMap:	False
+		LinkResources:	False
+		ResourceSource:	
 	Paths
 		Path:	{Project}
 MainModule
@@ -51,7 +53,7 @@ MainModule
 		Editor
 			TabSize:	4
 			Font:	Courier New
-			FontSize:	10
+			FontSize:	9
 			AutoIndent:	True
 			ShowTabs:	False
 			ShowLins:	True
@@ -65,21 +67,21 @@ MainModule
 		Editor
 			TabSize:	4
 			Font:	Courier New
-			FontSize:	10
+			FontSize:	9
 			AutoIndent:	True
 			ShowTabs:	False
 			ShowLins:	True
 		WindowPosition
-			X:	0
-			Y:	0
-			SizeX:	500
-			SizeY:	300
+			X:	10
+			Y:	10
+			SizeX:	800
+			SizeY:	601
 	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
 	Module
 		Name:	sdisize
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -94,7 +96,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -108,91 +110,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	layout
-		Dir:	{Application}\ObjectIO\ObjectIO
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	wstateaccess
-		Dir:	{Application}\ObjectIO\ObjectIO
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -205,7 +123,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	controlvalidate
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -220,7 +138,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -234,7 +152,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -247,7 +165,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ostooltip
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -262,7 +180,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -276,49 +194,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	menuevent
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -331,7 +207,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdMenuAttribute
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -346,7 +222,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -360,7 +236,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -373,7 +249,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	menudefaccess
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -388,7 +264,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -402,49 +278,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	menuaccess
-		Dir:	{Application}\ObjectIO\ObjectIO
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -457,7 +291,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	menuitems
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -472,7 +306,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -486,7 +320,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -499,7 +333,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	menuinternal
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -514,7 +348,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -528,7 +362,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -541,7 +375,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	menudevice
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -556,7 +390,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -570,7 +404,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -583,7 +417,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	menucreate
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -598,7 +432,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -612,7 +446,259 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	menuaccess
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	menuevent
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdReceiverAttribute
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	receiverdefaccess
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	layout
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	wstateaccess
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -625,7 +711,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	toolbar
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -640,7 +726,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -654,7 +740,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -667,7 +753,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	processevent
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -682,7 +768,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -696,7 +782,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -709,7 +795,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdSystem
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -724,7 +810,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -738,7 +824,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -750,8 +836,8 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
-		Name:	windowevent
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Name:	menuwindowmenu
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -766,7 +852,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -780,511 +866,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	windowdraw
-		Dir:	{Application}\ObjectIO\ObjectIO
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	windowdispose
-		Dir:	{Application}\ObjectIO\ObjectIO
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdControlAttribute
-		Dir:	{Application}\ObjectIO\ObjectIO
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	receiverid
-		Dir:	{Application}\ObjectIO\ObjectIO
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	controlresize
-		Dir:	{Application}\ObjectIO\ObjectIO
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	relayout
-		Dir:	{Application}\ObjectIO\ObjectIO
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	controlrelayout
-		Dir:	{Application}\ObjectIO\ObjectIO
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	controllayout
-		Dir:	{Application}\ObjectIO\ObjectIO
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	controldraw
-		Dir:	{Application}\ObjectIO\ObjectIO
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	windowupdate
-		Dir:	{Application}\ObjectIO\ObjectIO
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	wstate
-		Dir:	{Application}\ObjectIO\ObjectIO
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	windowclipstate
-		Dir:	{Application}\ObjectIO\ObjectIO
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1297,7 +879,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	controlcreate
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1312,7 +894,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1326,7 +908,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1339,7 +921,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	controlpos
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1354,7 +936,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1368,49 +950,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdWindowAttribute
-		Dir:	{Application}\ObjectIO\ObjectIO
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1423,7 +963,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdMenuElementClass
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1438,7 +978,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1452,7 +992,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1465,7 +1005,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdMenu
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1480,7 +1020,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1494,7 +1034,679 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowupdate
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowevent
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowdraw
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowdispose
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowclipstate
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdWindowAttribute
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdControlAttribute
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	receiverid
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdReceiverDef
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	receiveraccess
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	controlresize
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	relayout
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	controlrelayout
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	controllayout
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	wstate
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	controldraw
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1507,7 +1719,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	world
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1522,7 +1734,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1536,7 +1748,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1549,7 +1761,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	scheduler
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1564,7 +1776,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1578,7 +1790,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1591,7 +1803,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	processdevice
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1606,7 +1818,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1620,7 +1832,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1633,7 +1845,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	gameCrossCall_12
-		Dir:	{Application}\ObjectIO\GameLib
+		Dir:	C:\Develop Object IO\UniformObjectIO\2DGame
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1648,7 +1860,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1662,7 +1874,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1673,9 +1885,60 @@ OtherModules
 				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cOSGameLib_121.obj
+			ObjectFile:	cGameLib_121.obj
+			ObjectFile:	cCrossCallGame_121.obj
+		NeededLibraries
+			Library:	dsound_library
+			Library:	ddraw_library
+	Module
+		Name:	menuCCall_12
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cCrossCallMenus_121.obj
 	Module
 		Name:	cast
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1690,7 +1953,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1704,49 +1967,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	windowCrossCall_12
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1759,7 +1980,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	windowCCall_12
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1774,7 +1995,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1788,7 +2009,52 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cpicture_121.obj
+			ObjectFile:	cCCallWindows_121.obj
+	Module
+		Name:	windowCrossCall_12
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1801,7 +2067,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osmouse
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1816,7 +2082,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1830,7 +2096,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1843,7 +2109,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osbeep
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1858,7 +2124,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1872,7 +2138,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1885,7 +2151,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdProcessAttribute
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1900,7 +2166,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1914,7 +2180,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1927,7 +2193,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	windowvalidate
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1942,7 +2208,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -1956,91 +2222,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	windowaccess
-		Dir:	{Application}\ObjectIO\ObjectIO
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	windowdevice
-		Dir:	{Application}\ObjectIO\ObjectIO
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2053,7 +2235,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	oswindow
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2068,7 +2250,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2082,7 +2264,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2095,7 +2277,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	windowcreate
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2110,7 +2292,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2124,7 +2306,91 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowaccess
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowdevice
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2137,7 +2403,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	gameobjectutils
-		Dir:	{Application}\ObjectIO\GameLib
+		Dir:	C:\Develop Object IO\UniformObjectIO\2DGame
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2152,7 +2418,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2166,7 +2432,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2179,7 +2445,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	gameutils
-		Dir:	{Application}\ObjectIO\GameLib
+		Dir:	C:\Develop Object IO\UniformObjectIO\2DGame
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2194,7 +2460,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2208,7 +2474,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2221,7 +2487,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	fixed
-		Dir:	{Application}\ObjectIO\GameLib
+		Dir:	C:\Develop Object IO\UniformObjectIO\2DGame
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2236,7 +2502,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2250,7 +2516,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2263,7 +2529,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdId
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2278,7 +2544,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2292,7 +2558,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2305,7 +2571,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	clCCall_12
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2320,7 +2586,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2334,7 +2600,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2345,6 +2611,14 @@ OtherModules
 				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	util_121.obj
+			ObjectFile:	cpicture_121.obj
+			ObjectFile:	cdebug_121.obj
+			ObjectFile:	cCrossCall_121.obj
+			ObjectFile:	cCrossCallWindows_121.obj
+			ObjectFile:	cCCallWindows_121.obj
+			ObjectFile:	cCCallSystem_121.obj
 	Module
 		Name:	_SystemEnum
 		Dir:	{Application}\StdEnv
@@ -2352,7 +2626,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	AllTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -2362,7 +2636,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2376,7 +2650,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2404,7 +2678,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2418,7 +2692,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2436,7 +2710,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	AllTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -2446,7 +2720,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2460,7 +2734,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2488,7 +2762,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2502,7 +2776,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2530,7 +2804,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2544,7 +2818,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2572,7 +2846,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2586,7 +2860,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2614,7 +2888,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2628,7 +2902,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2646,7 +2920,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	AllTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -2656,7 +2930,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2670,7 +2944,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2698,7 +2972,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2712,7 +2986,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2730,7 +3004,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	AllTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -2740,7 +3014,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2754,7 +3028,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2772,7 +3046,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	AllTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -2782,7 +3056,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2796,7 +3070,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2824,7 +3098,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2838,7 +3112,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2866,7 +3140,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2880,20 +3154,20 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	736
-				SizeY:	538
+				SizeX:	500
+				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	notes
-		Dir:	{Application}\ObjectIO\GameLib
+		Dir:	C:\Develop Object IO\UniformObjectIO\2DGame
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2908,7 +3182,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2922,7 +3196,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2935,7 +3209,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ostick
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2950,7 +3224,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2964,7 +3238,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -2977,7 +3251,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdTime
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2992,7 +3266,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3006,7 +3280,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3019,7 +3293,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	Random
-		Dir:	{Application}\ObjectIO\GameLib
+		Dir:	C:\Develop Object IO\UniformObjectIO\2DGame
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3034,7 +3308,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3048,7 +3322,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3061,7 +3335,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdProcessDef
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3076,7 +3350,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3090,7 +3364,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3103,7 +3377,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdProcess
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3118,7 +3392,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3132,7 +3406,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3145,7 +3419,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	GameFunctions
-		Dir:	{Application}\ObjectIO\GameLib
+		Dir:	C:\Develop Object IO\UniformObjectIO\2DGame
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3160,7 +3434,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3174,7 +3448,91 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	rgnCCall_12
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	pictCCall_12
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3187,7 +3545,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	gameintrface_12
-		Dir:	{Application}\ObjectIO\GameLib
+		Dir:	C:\Develop Object IO\UniformObjectIO\2DGame
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3202,7 +3560,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3216,7 +3574,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3229,7 +3587,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	gamehandle
-		Dir:	{Application}\ObjectIO\GameLib
+		Dir:	C:\Develop Object IO\UniformObjectIO\2DGame
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3244,7 +3602,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3258,7 +3616,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3271,7 +3629,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osgame
-		Dir:	{Application}\ObjectIO\GameLib
+		Dir:	C:\Develop Object IO\UniformObjectIO\2DGame
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3286,7 +3644,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3300,7 +3658,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3313,7 +3671,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	roundrobin
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3328,7 +3686,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3342,7 +3700,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3355,7 +3713,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	processstack
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3370,7 +3728,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3384,7 +3742,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3397,7 +3755,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	timerhandle
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3412,7 +3770,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3426,7 +3784,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3439,7 +3797,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	processhandle
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3454,7 +3812,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3468,7 +3826,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3481,7 +3839,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osmenu
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3496,7 +3854,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3510,7 +3868,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3523,7 +3881,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdMenuDef
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3538,7 +3896,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3552,7 +3910,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3565,7 +3923,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	menuhandle
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3580,7 +3938,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3594,7 +3952,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3607,7 +3965,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	devicesystemstate
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3622,7 +3980,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3636,7 +3994,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3649,7 +4007,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	keyfocus
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3664,7 +4022,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3678,7 +4036,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3696,7 +4054,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	AllTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -3706,7 +4064,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3720,7 +4078,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3748,7 +4106,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3762,7 +4120,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3775,7 +4133,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	commondef
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3790,7 +4148,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3804,7 +4162,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3817,7 +4175,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	receiverhandle
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3832,7 +4190,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3846,7 +4204,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3859,7 +4217,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdWindowDef
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3874,7 +4232,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3888,7 +4246,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3901,7 +4259,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdControlDef
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3916,7 +4274,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3930,7 +4288,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3943,7 +4301,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	windowhandle
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -3958,7 +4316,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3972,7 +4330,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -3985,7 +4343,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdTimerDef
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4000,7 +4358,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4014,7 +4372,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4027,7 +4385,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	timertable
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4042,7 +4400,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4056,7 +4414,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4069,7 +4427,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	semidynamic
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4084,7 +4442,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4098,7 +4456,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4111,7 +4469,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	receivertable
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4126,7 +4484,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4140,7 +4498,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4153,7 +4511,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	receivermessage
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4168,7 +4526,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4182,7 +4540,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4195,7 +4553,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	deviceevents
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4210,7 +4568,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4224,7 +4582,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4237,7 +4595,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	devicefunctions
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4252,7 +4610,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4266,49 +4624,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	ostime
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4321,7 +4637,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ossystem
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4336,7 +4652,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4350,49 +4666,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	osactivaterequests
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4405,7 +4679,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osguishare
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4420,7 +4694,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4434,7 +4708,49 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	ostime
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4447,7 +4763,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	clCrossCall_12
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4462,7 +4778,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4476,7 +4792,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4488,23 +4804,17 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	Dsutil.obj
-			ObjectFile:	ddutil.obj
-			ObjectFile:	cOSGameLib_12.obj
-			ObjectFile:	cGameLib_12.obj
-			ObjectFile:	cTCP.obj
-			ObjectFile:	cprinter_12.obj
-			ObjectFile:	util_12.obj
-			ObjectFile:	cpicture_12.obj
-			ObjectFile:	cdebug_12.obj
-			ObjectFile:	cCrossCall_12.obj
+			ObjectFile:	cCrossCallWindows_121.obj
+			ObjectFile:	cCrossCallProcedureTable_121.obj
+			ObjectFile:	cCrossCallCursor_121.obj
+			ObjectFile:	cCrossCall_121.obj
+			ObjectFile:	cCCallSystem_121.obj
+			ObjectFile:	cCCallWindows_121.obj
+			ObjectFile:	cAcceleratorTable_121.obj
 		NeededLibraries
-			Library:	dsound_library
-			Library:	ddraw_library
 			Library:	userExt_library
 			Library:	gdiExt_library
 			Library:	kernelExt_library
-			Library:	wsock_library
 			Library:	winspool_library
 			Library:	winmm_library
 			Library:	shell32_library
@@ -4514,7 +4824,7 @@ OtherModules
 			Library:	advapi32_library
 	Module
 		Name:	osevent
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4529,7 +4839,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4543,7 +4853,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4556,7 +4866,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ostoolbar
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4571,7 +4881,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4585,7 +4895,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4598,7 +4908,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	menuCrossCall_12
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4613,7 +4923,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4627,7 +4937,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4640,7 +4950,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osdocumentinterface
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4655,7 +4965,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4669,7 +4979,51 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cCrossCallxDI_121.obj
+	Module
+		Name:	osactivaterequests
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4682,7 +5036,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	iostate
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4697,7 +5051,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4711,7 +5065,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4724,7 +5078,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdPSt
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4739,7 +5093,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4753,7 +5107,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4766,7 +5120,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	systemid
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4781,7 +5135,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4795,7 +5149,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4808,7 +5162,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	device
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4823,7 +5177,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4837,7 +5191,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4850,7 +5204,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	id
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4865,7 +5219,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4879,7 +5233,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4892,7 +5246,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	key
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4907,7 +5261,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4921,7 +5275,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4934,7 +5288,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdKey
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4949,7 +5303,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4963,7 +5317,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -4976,7 +5330,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdPicture
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4991,7 +5345,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5005,7 +5359,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5018,7 +5372,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osrgn
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5033,7 +5387,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5047,133 +5401,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	ostypes
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	rgnCCall_12
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	pictCCall_12
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5186,7 +5414,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ospicture
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5201,7 +5429,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5215,7 +5443,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5228,7 +5456,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	osbitmap
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5243,7 +5471,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5257,7 +5485,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5275,7 +5503,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	AllTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -5285,7 +5513,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5299,7 +5527,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5312,7 +5540,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdBitmap
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5327,7 +5555,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5341,7 +5569,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5354,7 +5582,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdIOCommon
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5369,7 +5597,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5383,7 +5611,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5401,7 +5629,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	AllTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -5411,7 +5639,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5425,7 +5653,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5438,7 +5666,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdGame
-		Dir:	{Application}\ObjectIO\GameLib
+		Dir:	C:\Develop Object IO\UniformObjectIO\2DGame
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5453,7 +5681,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5467,7 +5695,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5480,7 +5708,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	gst
-		Dir:	{Application}\ObjectIO\GameLib
+		Dir:	C:\Develop Object IO\UniformObjectIO\2DGame
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5495,7 +5723,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5509,7 +5737,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5522,7 +5750,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdGSt
-		Dir:	{Application}\ObjectIO\GameLib
+		Dir:	C:\Develop Object IO\UniformObjectIO\2DGame
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5537,7 +5765,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5551,7 +5779,49 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	ostypes
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5564,7 +5834,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ostoolbox
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5579,7 +5849,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5593,7 +5863,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5604,9 +5874,11 @@ OtherModules
 				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cCrossCallFont_121.obj
 	Module
 		Name:	osfont
-		Dir:	{Application}\ObjectIO\ObjectIO\OS Windows
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5621,7 +5893,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5635,7 +5907,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5648,7 +5920,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdPictureDef
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5663,7 +5935,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5677,7 +5949,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5690,7 +5962,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdMaybe
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\StdLib 1.0
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5705,7 +5977,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5719,7 +5991,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5732,7 +6004,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdIOBasic
-		Dir:	{Application}\ObjectIO\ObjectIO
+		Dir:	C:\Develop Object IO\UniformObjectIO\Object IO
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5747,7 +6019,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5761,91 +6033,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdString
-		Dir:	{Application}\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdOverloaded
-		Dir:	{Application}\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	AllTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
-				AutoIndent:	True
-				ShowTabs:	False
-				ShowLins:	True
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			Editor
-				TabSize:	4
-				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5873,7 +6061,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5887,7 +6075,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5899,8 +6087,8 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
-		Name:	StdGameDef
-		Dir:	{Application}\ObjectIO\GameLib
+		Name:	StdOverloaded
+		Dir:	{Application}\StdEnv
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5915,7 +6103,7 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5929,7 +6117,91 @@ OtherModules
 			Editor
 				TabSize:	4
 				Font:	Courier New
-				FontSize:	10
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdString
+		Dir:	{Application}\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdGameDef
+		Dir:	C:\Develop Object IO\UniformObjectIO\2DGame
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	AllTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
+				AutoIndent:	True
+				ShowTabs:	False
+				ShowLins:	True
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			Editor
+				TabSize:	4
+				Font:	Courier New
+				FontSize:	9
 				AutoIndent:	True
 				ShowTabs:	False
 				ShowLins:	True
@@ -5943,60 +6215,66 @@ OtherModules
 Static
 	Mods
 		Path:	{Project}\Charlie.icl
-		Path:	{Application}\ObjectIO\ObjectIO\sdisize.icl
-		Path:	{Application}\ObjectIO\ObjectIO\layout.icl
-		Path:	{Application}\ObjectIO\ObjectIO\wstateaccess.icl
-		Path:	{Application}\ObjectIO\ObjectIO\controlvalidate.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\ostooltip.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\menuevent.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdMenuAttribute.icl
-		Path:	{Application}\ObjectIO\ObjectIO\menudefaccess.icl
-		Path:	{Application}\ObjectIO\ObjectIO\menuaccess.icl
-		Path:	{Application}\ObjectIO\ObjectIO\menuitems.icl
-		Path:	{Application}\ObjectIO\ObjectIO\menuinternal.icl
-		Path:	{Application}\ObjectIO\ObjectIO\menudevice.icl
-		Path:	{Application}\ObjectIO\ObjectIO\menucreate.icl
-		Path:	{Application}\ObjectIO\ObjectIO\toolbar.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\processevent.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdSystem.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\windowevent.icl
-		Path:	{Application}\ObjectIO\ObjectIO\windowdraw.icl
-		Path:	{Application}\ObjectIO\ObjectIO\windowdispose.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdControlAttribute.icl
-		Path:	{Application}\ObjectIO\ObjectIO\receiverid.icl
-		Path:	{Application}\ObjectIO\ObjectIO\controlresize.icl
-		Path:	{Application}\ObjectIO\ObjectIO\relayout.icl
-		Path:	{Application}\ObjectIO\ObjectIO\controlrelayout.icl
-		Path:	{Application}\ObjectIO\ObjectIO\controllayout.icl
-		Path:	{Application}\ObjectIO\ObjectIO\controldraw.icl
-		Path:	{Application}\ObjectIO\ObjectIO\windowupdate.icl
-		Path:	{Application}\ObjectIO\ObjectIO\wstate.icl
-		Path:	{Application}\ObjectIO\ObjectIO\windowclipstate.icl
-		Path:	{Application}\ObjectIO\ObjectIO\controlcreate.icl
-		Path:	{Application}\ObjectIO\ObjectIO\controlpos.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdWindowAttribute.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdMenuElementClass.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdMenu.icl
-		Path:	{Application}\ObjectIO\ObjectIO\world.icl
-		Path:	{Application}\ObjectIO\ObjectIO\scheduler.icl
-		Path:	{Application}\ObjectIO\ObjectIO\processdevice.icl
-		Path:	{Application}\ObjectIO\GameLib\gameCrossCall_12.icl
-		Path:	{Application}\ObjectIO\ObjectIO\cast.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\windowCrossCall_12.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\windowCCall_12.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\osmouse.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\osbeep.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdProcessAttribute.icl
-		Path:	{Application}\ObjectIO\ObjectIO\windowvalidate.icl
-		Path:	{Application}\ObjectIO\ObjectIO\windowaccess.icl
-		Path:	{Application}\ObjectIO\ObjectIO\windowdevice.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\oswindow.icl
-		Path:	{Application}\ObjectIO\ObjectIO\windowcreate.icl
-		Path:	{Application}\ObjectIO\GameLib\gameobjectutils.icl
-		Path:	{Application}\ObjectIO\GameLib\gameutils.icl
-		Path:	{Application}\ObjectIO\GameLib\fixed.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdId.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\clCCall_12.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\sdisize.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\controlvalidate.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\ostooltip.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdMenuAttribute.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\menudefaccess.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\menuitems.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\menuinternal.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\menudevice.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\menucreate.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\menuaccess.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\menuevent.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdReceiverAttribute.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\receiverdefaccess.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\layout.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\wstateaccess.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\toolbar.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\processevent.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdSystem.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\menuwindowmenu.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\controlcreate.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\controlpos.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdMenuElementClass.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdMenu.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\windowupdate.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\windowevent.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\windowdraw.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\windowdispose.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\windowclipstate.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdWindowAttribute.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdControlAttribute.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\receiverid.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdReceiverDef.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\receiveraccess.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\controlresize.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\relayout.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\controlrelayout.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\controllayout.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\wstate.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\controldraw.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\world.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\scheduler.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\processdevice.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\gameCrossCall_12.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\menuCCall_12.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\cast.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\windowCCall_12.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\windowCrossCall_12.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\osmouse.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\osbeep.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdProcessAttribute.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\windowvalidate.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\oswindow.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\windowcreate.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\windowaccess.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\windowdevice.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\gameobjectutils.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\gameutils.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\fixed.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdId.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\clCCall_12.icl
 		Path:	{Application}\StdEnv\_SystemEnum.icl
 		Path:	{Application}\StdEnv\StdEnum.icl
 		Path:	{Application}\StdEnv\StdMisc.icl
@@ -6010,256 +6288,275 @@ Static
 		Path:	{Application}\StdEnv\StdReal.icl
 		Path:	{Application}\StdEnv\StdEnv.icl
 		Path:	{Project}\CharlieGfx.icl
-		Path:	{Application}\ObjectIO\GameLib\notes.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\ostick.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdTime.icl
-		Path:	{Application}\ObjectIO\GameLib\Random.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdProcessDef.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdProcess.icl
-		Path:	{Application}\ObjectIO\GameLib\GameFunctions.icl
-		Path:	{Application}\ObjectIO\GameLib\gameintrface_12.icl
-		Path:	{Application}\ObjectIO\GameLib\gamehandle.icl
-		Path:	{Application}\ObjectIO\GameLib\osgame.icl
-		Path:	{Application}\ObjectIO\ObjectIO\roundrobin.icl
-		Path:	{Application}\ObjectIO\ObjectIO\processstack.icl
-		Path:	{Application}\ObjectIO\ObjectIO\timerhandle.icl
-		Path:	{Application}\ObjectIO\ObjectIO\processhandle.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\osmenu.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdMenuDef.icl
-		Path:	{Application}\ObjectIO\ObjectIO\menuhandle.icl
-		Path:	{Application}\ObjectIO\ObjectIO\devicesystemstate.icl
-		Path:	{Application}\ObjectIO\ObjectIO\keyfocus.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\notes.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\ostick.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdTime.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\Random.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdProcessDef.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdProcess.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\GameFunctions.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\rgnCCall_12.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\pictCCall_12.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\gameintrface_12.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\gamehandle.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\osgame.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\roundrobin.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\processstack.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\timerhandle.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\processhandle.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\osmenu.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdMenuDef.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\menuhandle.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\devicesystemstate.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\keyfocus.icl
 		Path:	{Application}\StdEnv\StdBool.icl
 		Path:	{Application}\StdEnv\StdClass.icl
-		Path:	{Application}\ObjectIO\ObjectIO\commondef.icl
-		Path:	{Application}\ObjectIO\ObjectIO\receiverhandle.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdWindowDef.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdControlDef.icl
-		Path:	{Application}\ObjectIO\ObjectIO\windowhandle.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdTimerDef.icl
-		Path:	{Application}\ObjectIO\ObjectIO\timertable.icl
-		Path:	{Application}\ObjectIO\ObjectIO\semidynamic.icl
-		Path:	{Application}\ObjectIO\ObjectIO\receivertable.icl
-		Path:	{Application}\ObjectIO\ObjectIO\receivermessage.icl
-		Path:	{Application}\ObjectIO\ObjectIO\deviceevents.icl
-		Path:	{Application}\ObjectIO\ObjectIO\devicefunctions.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\ostime.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\ossystem.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\osactivaterequests.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\osguishare.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\clCrossCall_12.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\osevent.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\ostoolbar.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\menuCrossCall_12.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\osdocumentinterface.icl
-		Path:	{Application}\ObjectIO\ObjectIO\iostate.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdPSt.icl
-		Path:	{Application}\ObjectIO\ObjectIO\systemid.icl
-		Path:	{Application}\ObjectIO\ObjectIO\device.icl
-		Path:	{Application}\ObjectIO\ObjectIO\id.icl
-		Path:	{Application}\ObjectIO\ObjectIO\key.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdKey.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdPicture.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\osrgn.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\ostypes.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\rgnCCall_12.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\pictCCall_12.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\ospicture.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\osbitmap.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\commondef.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\receiverhandle.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdWindowDef.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdControlDef.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\windowhandle.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdTimerDef.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\timertable.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\semidynamic.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\receivertable.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\receivermessage.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\deviceevents.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\devicefunctions.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\ossystem.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\osguishare.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\ostime.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\clCrossCall_12.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\osevent.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\ostoolbar.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\menuCrossCall_12.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\osdocumentinterface.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\osactivaterequests.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\iostate.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdPSt.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\systemid.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\device.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\id.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\key.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdKey.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdPicture.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\osrgn.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\ospicture.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\osbitmap.icl
 		Path:	{Application}\StdEnv\StdFile.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdBitmap.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdIOCommon.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdBitmap.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdIOCommon.icl
 		Path:	{Application}\StdEnv\StdInt.icl
-		Path:	{Application}\ObjectIO\GameLib\StdGame.icl
-		Path:	{Application}\ObjectIO\GameLib\gst.icl
-		Path:	{Application}\ObjectIO\GameLib\StdGSt.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\ostoolbox.icl
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\osfont.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdPictureDef.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdMaybe.icl
-		Path:	{Application}\ObjectIO\ObjectIO\StdIOBasic.icl
-		Path:	{Application}\StdEnv\StdString.icl
-		Path:	{Application}\StdEnv\StdOverloaded.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\StdGame.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\gst.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\StdGSt.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\ostypes.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\ostoolbox.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\osfont.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdPictureDef.icl
+		Path:	C:\Develop Object IO\StdLib 1.0\StdMaybe.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\StdIOBasic.icl
 		Path:	{Application}\StdEnv\StdFunc.icl
-		Path:	{Application}\ObjectIO\GameLib\StdGameDef.icl
+		Path:	{Application}\StdEnv\StdOverloaded.icl
+		Path:	{Application}\StdEnv\StdString.icl
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\StdGameDef.icl
 	Objs
 		Path:	{Application}\StdEnv\Clean System Files\_startup0.o
 		Path:	{Application}\StdEnv\Clean System Files\_startup1.o
 		Path:	{Application}\StdEnv\Clean System Files\_startup2.o
 		Path:	{Application}\StdEnv\Clean System Files\_system.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\sdisize.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\layout.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\wstateaccess.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\controlvalidate.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\ostooltip.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\menuevent.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdMenuAttribute.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\menudefaccess.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\menuaccess.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\menuitems.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\menuinternal.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\menudevice.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\menucreate.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\toolbar.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\processevent.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdSystem.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\windowevent.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\windowdraw.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\windowdispose.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdControlAttribute.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\receiverid.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\controlresize.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\relayout.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\controlrelayout.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\controllayout.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\controldraw.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\windowupdate.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\wstate.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\windowclipstate.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\controlcreate.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\controlpos.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdWindowAttribute.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdMenuElementClass.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdMenu.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\world.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\scheduler.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\processdevice.o
-		Path:	{Application}\ObjectIO\GameLib\Clean System Files\gameCrossCall_12.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\cast.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\windowCCall_12.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\windowCrossCall_12.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\osmouse.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\osbeep.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdProcessAttribute.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\windowvalidate.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\windowaccess.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\windowdevice.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\oswindow.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\windowcreate.o
-		Path:	{Application}\ObjectIO\GameLib\Clean System Files\gameobjectutils.o
-		Path:	{Application}\ObjectIO\GameLib\Clean System Files\gameutils.o
-		Path:	{Application}\ObjectIO\GameLib\Clean System Files\fixed.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdId.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\clCCall_12.o
-		Path:	{Application}\StdEnv\Clean System Files\_SystemEnum.o
-		Path:	{Application}\StdEnv\Clean System Files\StdEnum.o
-		Path:	{Application}\StdEnv\Clean System Files\StdMisc.o
-		Path:	{Application}\StdEnv\Clean System Files\StdCharList.o
-		Path:	{Application}\StdEnv\Clean System Files\StdTuple.o
-		Path:	{Application}\StdEnv\Clean System Files\StdOrdList.o
-		Path:	{Application}\StdEnv\Clean System Files\StdList.o
-		Path:	{Application}\StdEnv\Clean System Files\_SystemArray.o
-		Path:	{Application}\StdEnv\Clean System Files\StdArray.o
-		Path:	{Application}\StdEnv\Clean System Files\StdChar.o
-		Path:	{Application}\StdEnv\Clean System Files\StdReal.o
-		Path:	{Application}\StdEnv\Clean System Files\StdEnv.o
 		Path:	{Project}\Clean System Files\CharlieGfx.o
-		Path:	{Application}\ObjectIO\GameLib\Clean System Files\notes.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\ostick.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdTime.o
-		Path:	{Application}\ObjectIO\GameLib\Clean System Files\Random.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdProcessDef.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdProcess.o
-		Path:	{Application}\ObjectIO\GameLib\Clean System Files\GameFunctions.o
-		Path:	{Application}\ObjectIO\GameLib\Clean System Files\gameintrface_12.o
-		Path:	{Application}\ObjectIO\GameLib\Clean System Files\gamehandle.o
-		Path:	{Application}\ObjectIO\GameLib\Clean System Files\osgame.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\roundrobin.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\processstack.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\timerhandle.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\processhandle.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\osmenu.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdMenuDef.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\menuhandle.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\devicesystemstate.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\keyfocus.o
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\Clean System Files\notes.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\ostick.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdTime.o
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\Clean System Files\Random.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdProcessDef.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdProcess.o
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\Clean System Files\GameFunctions.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\rgnCCall_12.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\pictCCall_12.o
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\Clean System Files\gameintrface_12.o
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\Clean System Files\gamehandle.o
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\Clean System Files\osgame.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\roundrobin.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\processstack.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\timerhandle.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\processhandle.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\osmenu.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdMenuDef.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\menuhandle.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\devicesystemstate.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\keyfocus.o
 		Path:	{Application}\StdEnv\Clean System Files\StdBool.o
 		Path:	{Application}\StdEnv\Clean System Files\StdClass.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\commondef.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\receiverhandle.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdWindowDef.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdControlDef.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\windowhandle.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdTimerDef.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\timertable.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\semidynamic.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\receivertable.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\receivermessage.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\deviceevents.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\devicefunctions.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\ossystem.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\osactivaterequests.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\osguishare.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\ostime.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\clCrossCall_12.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\osevent.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\ostoolbar.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\menuCrossCall_12.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\osdocumentinterface.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\iostate.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdPSt.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\systemid.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\device.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\id.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\key.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdKey.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdPicture.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\osrgn.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\ostypes.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\rgnCCall_12.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\pictCCall_12.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\ospicture.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\osbitmap.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\commondef.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\receiverhandle.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdWindowDef.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdControlDef.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\windowhandle.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdTimerDef.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\timertable.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\semidynamic.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\receivertable.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\receivermessage.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\deviceevents.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\devicefunctions.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\ossystem.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\osguishare.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\ostime.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\clCrossCall_12.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\osevent.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\ostoolbar.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\menuCrossCall_12.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\osdocumentinterface.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\osactivaterequests.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\iostate.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdPSt.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\systemid.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\device.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\id.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\key.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdKey.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdPicture.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\osrgn.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\ospicture.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\osbitmap.o
 		Path:	{Application}\StdEnv\Clean System Files\StdFile.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdBitmap.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdIOCommon.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdBitmap.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdIOCommon.o
 		Path:	{Application}\StdEnv\Clean System Files\StdInt.o
-		Path:	{Application}\ObjectIO\GameLib\Clean System Files\StdGame.o
-		Path:	{Application}\ObjectIO\GameLib\Clean System Files\gst.o
-		Path:	{Application}\ObjectIO\GameLib\Clean System Files\StdGSt.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\ostoolbox.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\osfont.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdPictureDef.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdMaybe.o
-		Path:	{Application}\ObjectIO\ObjectIO\Clean System Files\StdIOBasic.o
-		Path:	{Application}\StdEnv\Clean System Files\StdString.o
-		Path:	{Application}\StdEnv\Clean System Files\StdOverloaded.o
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\Clean System Files\StdGame.o
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\Clean System Files\gst.o
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\Clean System Files\StdGSt.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\ostypes.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\ostoolbox.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\osfont.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdPictureDef.o
+		Path:	C:\Develop Object IO\StdLib 1.0\Clean System Files\StdMaybe.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdIOBasic.o
 		Path:	{Application}\StdEnv\Clean System Files\StdFunc.o
-		Path:	{Application}\ObjectIO\GameLib\Clean System Files\StdGameDef.o
+		Path:	{Application}\StdEnv\Clean System Files\StdOverloaded.o
+		Path:	{Application}\StdEnv\Clean System Files\StdString.o
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\Clean System Files\StdGameDef.o
 		Path:	{Project}\Clean System Files\Charlie.o
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\Dsutil.obj
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\ddutil.obj
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\cOSGameLib_12.obj
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\cGameLib_12.obj
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\cTCP.obj
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\cprinter_12.obj
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\util_12.obj
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\cpicture_12.obj
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\cdebug_12.obj
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\cCrossCall_12.obj
+		Path:	{Application}\StdEnv\Clean System Files\StdEnv.o
+		Path:	{Application}\StdEnv\Clean System Files\StdReal.o
+		Path:	{Application}\StdEnv\Clean System Files\StdChar.o
+		Path:	{Application}\StdEnv\Clean System Files\StdArray.o
+		Path:	{Application}\StdEnv\Clean System Files\_SystemArray.o
+		Path:	{Application}\StdEnv\Clean System Files\StdList.o
+		Path:	{Application}\StdEnv\Clean System Files\StdOrdList.o
+		Path:	{Application}\StdEnv\Clean System Files\StdTuple.o
+		Path:	{Application}\StdEnv\Clean System Files\StdCharList.o
+		Path:	{Application}\StdEnv\Clean System Files\StdMisc.o
+		Path:	{Application}\StdEnv\Clean System Files\StdEnum.o
+		Path:	{Application}\StdEnv\Clean System Files\_SystemEnum.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\clCCall_12.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdId.o
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\Clean System Files\fixed.o
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\Clean System Files\gameutils.o
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\Clean System Files\gameobjectutils.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\windowdevice.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\windowaccess.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\windowcreate.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\oswindow.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\windowvalidate.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdProcessAttribute.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\osbeep.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\osmouse.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\windowCrossCall_12.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\windowCCall_12.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\cast.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\menuCCall_12.o
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame\Clean System Files\gameCrossCall_12.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\processdevice.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\scheduler.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\world.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\controldraw.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\wstate.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\controllayout.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\controlrelayout.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\relayout.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\controlresize.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\receiveraccess.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdReceiverDef.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\receiverid.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdControlAttribute.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdWindowAttribute.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\windowclipstate.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\windowdispose.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\windowdraw.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\windowevent.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\windowupdate.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdMenu.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdMenuElementClass.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\controlpos.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\controlcreate.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\menuwindowmenu.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdSystem.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\processevent.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\toolbar.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\wstateaccess.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\layout.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\receiverdefaccess.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdReceiverAttribute.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\menuevent.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\menuaccess.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\menucreate.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\menudevice.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\menuinternal.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\menuitems.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\menudefaccess.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\StdMenuAttribute.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\ostooltip.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\controlvalidate.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\Clean System Files\sdisize.o
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cCrossCallFont_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cCrossCallMenus_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cCrossCallWindows_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cCrossCallProcedureTable_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cCrossCallCursor_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cCrossCall_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cCCallSystem_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cCCallWindows_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cAcceleratorTable_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cCrossCallxDI_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cOSGameLib_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cGameLib_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cCrossCallGame_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cpicture_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cCCallWindows_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\util_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cpicture_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cdebug_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cCrossCall_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cCrossCallWindows_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cCCallWindows_121.obj
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\cCCallSystem_121.obj
 	Dlib
 		Path:	{Application}\StdEnv\Clean System Files\kernel_library
 		Path:	{Application}\StdEnv\Clean System Files\comdlg_library
 		Path:	{Application}\StdEnv\Clean System Files\gdi_library
 		Path:	{Application}\StdEnv\Clean System Files\user_library
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\dsound_library
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\ddraw_library
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\userExt_library
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\gdiExt_library
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\kernelExt_library
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\wsock_library
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\dsound_library
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\ddraw_library
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\userExt_library
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\gdiExt_library
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\kernelExt_library
 		Path:	{Application}\StdEnv\Clean System Files\winspool_library
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\winmm_library
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\shell32_library
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\ole32_library
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\kernel32_library
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\comctl32_library
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows\Clean System Files\advapi32_library
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\winmm_library
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\shell32_library
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\ole32_library
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\kernel32_library
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\comctl32_library
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows\Clean System Files\advapi32_library
 	Pths
 		Path:	{Project}
 		Path:	{Application}\StdEnv
-		Path:	{Application}\ObjectIO\ObjectIO
-		Path:	{Application}\ObjectIO\ObjectIO\OS Windows
-		Path:	{Application}\ObjectIO\GameLib
-	AppP:	C:\Clean
-	PrjP:	C:\Charlie
+		Path:	C:\Develop Object IO\StdLib 1.0
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO\OS Windows
+		Path:	C:\Develop Object IO\UniformObjectIO\Object IO
+		Path:	C:\Develop Object IO\UniformObjectIO\Tcp
+		Path:	C:\Develop Object IO\UniformObjectIO\2DGame
+	AppP:	C:\Clean 1.3.3
+	PrjP:	C:\Develop Object IO\UniformObjectIO\2DGame Examples\Charlie

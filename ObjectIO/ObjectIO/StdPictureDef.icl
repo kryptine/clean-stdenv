@@ -9,7 +9,7 @@ implementation module StdPictureDef
 
 
 import	StdIOBasic
-from	osfont		import	Font
+import	osfont
 
 
 ::	Line2									// A line connects two points
@@ -72,11 +72,11 @@ MinRGB					:== 0
 MaxRGB					:== 255
 
 //	Font constants:
-SerifFontDef			:==	{fName="Times New Roman",fStyles=[],fSize=10}
-SansSerifFontDef		:==	{fName="Arial",          fStyles=[],fSize=10}
-SmallFontDef			:==	{fName="Small Fonts",    fStyles=[],fSize=7 }
-NonProportionalFontDef	:==	{fName="Courier New",    fStyles=[],fSize=10}
-SymbolFontDef			:==	{fName="Symbol",         fStyles=[],fSize=10}
+SerifFontDef			:: FontDef; SerifFontDef           = let (name,style,size) = osSerifFontDef           in {fName=name,fStyles=style,fSize=size}
+SansSerifFontDef		:: FontDef; SansSerifFontDef       = let (name,style,size) = osSansSerifFontDef       in {fName=name,fStyles=style,fSize=size}
+SmallFontDef			:: FontDef; SmallFontDef           = let (name,style,size) = osSmallFontDef           in {fName=name,fStyles=style,fSize=size}
+NonProportionalFontDef	:: FontDef; NonProportionalFontDef = let (name,style,size) = osNonProportionalFontDef in {fName=name,fStyles=style,fSize=size}
+SymbolFontDef			:: FontDef; SymbolFontDef          = let (name,style,size) = osSymbolFontDef          in {fName=name,fStyles=style,fSize=size}
 
 //	Font style constants:
 ItalicsStyle			:== "Italic"

@@ -36,7 +36,7 @@ menuSystemStateGetMenuHandles :: !(DeviceSystemState .pst) -> *MenuHandles .pst
 menuSystemStateGetMenuHandles (MenuSystemState msHs)
 	= msHs
 menuSystemStateGetMenuHandles _
-	= devicesystemstateFatalError "nenuSystemStateGetMenuHandles" "argument is no MenuSystemState"
+	= devicesystemstateFatalError "menuSystemStateGetMenuHandles" "argument is no MenuSystemState"
 
 processSystemStateGetProcessHandles :: !(DeviceSystemState .pst) -> *ProcessHandles .pst
 processSystemStateGetProcessHandles (ProcessSystemState psHs)

@@ -333,6 +333,18 @@ void WinCreateRectRgn (int nLeftRect, int nTopRect, int nRightRect, int nBottomR
 	*oos = ios;
 }	/* WinCreateRectRgn */
 
+void WinCreateEllipseRgn (int nLeftRect, int nTopRect, int nRightRect, int nBottomRect, OS ios, HRGN * rgn, OS * oos)
+{
+	HRGN theRegion;
+
+	theRegion = CreateEllipticRgn (nLeftRect, nTopRect, nRightRect, nBottomRect);
+	if (theRegion==NULL)
+		ErrorExit ("Fatal error in WinCreateEllipseRgn: CreateEllipticRgn returned NULL.");
+
+	*rgn = theRegion;
+	*oos = ios;
+}	/* WinCreateEllipseRgn */
+
 void WinCreatePolygonRgn (POINT * lppt, int cPoints, int fnPolyFillMode, OS ios, HRGN * rgn, OS * oos)
 {
 	HRGN theRegion;
@@ -1242,6 +1254,14 @@ void WinInvertPolygon (HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 	*ohdc = ihdc;
 	*oos = ios;
 }	/* WinInvertPolygon */
+
+
+OS WinPaintRgn (HDC hdc, HRGN hrgn, OS os)
+{
+	StartFilling (hdc);
+	PaintRgn(hdc, hrgn);
+	return (os);
+}	/* WinPaintRgn */
 
 
 /*	PA: two new routines that temporarily create and destroy a DISPLAY HDC.

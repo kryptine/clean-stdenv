@@ -10,7 +10,7 @@ import ospicture
 toBitmap	:: !OSBitmap -> Bitmap
 fromBitmap	:: !Bitmap -> OSBitmap
 
-//	osReadBitmap reads a bitmap from a file. See page 176 of Programming Windows 95 (Charles Petzold)
+//	osReadBitmap reads a bitmap from a file.
 osReadBitmap :: !*File -> (!Bool,!OSBitmap,!*File)
 
 //	osGetBitmapSize returns the size of the bitmap

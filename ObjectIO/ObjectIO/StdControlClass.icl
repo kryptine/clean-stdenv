@@ -11,8 +11,7 @@ import	commondef, iostate, StdControlAttribute, windowhandle
 from	controlvalidate	import validateSliderState
 from	StdPSt			import accScreenPicture
 from	windowvalidate	import validateViewDomain
-import	ospicture, oswindow
-from	ostypes			import OSNoWindowPtr
+import	ospicture, ostypes, oswindow
 
 
 class Controls cdef where

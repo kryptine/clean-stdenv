@@ -34,10 +34,12 @@ extern OS   WinFreePolyShape (POINT*,OS);
 /*	Operations to create, modify and destroy regions.
 */
 extern void WinCreateRectRgn (int,int,int,int,OS,HRGN*,OS*);
+extern void WinCreateEllipseRgn (int,int,int,int,OS,HRGN*,OS*);
 extern void WinCreatePolygonRgn (POINT*,int,int,OS,HRGN*,OS*);
 extern void WinSetRgnToRect (int,int,int,int,HRGN,OS,HRGN*,OS*);
 extern void WinCombineRgn (HRGN,HRGN,HRGN,int,OS,HRGN*,OS*);
 extern void WinGetRgnBox (HRGN,OS,int*,int*,int*,int*,BOOL*,BOOL*,OS*);
+extern OS WinPaintRgn (HDC,HRGN,OS);
 extern OS WinDeleteObject (HGDIOBJ,OS);
 
 extern void WinSetPenSize (int,HDC,OS,HDC*,OS*);

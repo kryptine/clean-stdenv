@@ -3,7 +3,7 @@ definition module controlaccess
 
 //	Clean Object I/O library, version 1.2
 
-from	ossystem import OSWindowMetrics
+import	ossystem
 import	wstate
 
 

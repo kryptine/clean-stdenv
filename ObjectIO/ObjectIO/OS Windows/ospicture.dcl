@@ -6,21 +6,20 @@ definition module ospicture
 /*	Drawing functions and other operations on Pictures. 
 */
 
-
+import	osrgn, ostypes
 from	StdFunc			import St
-from	pictCCall_12	import HDC
 from	osfont			import Font
 from	ostoolbox		import OSToolbox
-from	ostypes			import Rect
-from	osrgn			import OSRgnHandle
 import	StdPictureDef
 
 
 ::	Picture
 ::	Origin
 	:==	Point2
+/*	PA: moved to ostypes
 ::	OSPictContext
 	:==	HDC
+*/
 ::  Pen
 	=	{	penSize			:: !Int				// The width and height of the pen
   		,	penForeColour	:: !Colour			// The drawing colour of the pen
@@ -36,18 +35,19 @@ import	StdPictureDef
 	To open/close an existing picture:
 		peekPicture   gives you the components of a Picture
 		unpeekPicture restores the components to a Picture
+	To obtain the graphics context of an existing picture:
+		peekOSPictContext
 	To obtain a read-only picture:
 		sharePicture  creates a copy of the Picture. This copy does not occupy OS resources.
 	To obtain temporary access to the screen:
 		peekScreen    creates a window picture, applies the argument function to it, and releases the OS resources. 
 */
 packPicture				:: !Origin !*Pen !Bool !OSPictContext !*OSToolbox -> *Picture
+unpeekPicture			:: !Origin !*Pen !Bool !OSPictContext !*OSToolbox -> *Picture
 unpackPicture			:: !*Picture -> (!Origin,!*Pen,!Bool,!OSPictContext,!*OSToolbox)
 peekPicture				:: !*Picture -> (!Origin,!*Pen,!Bool,!OSPictContext,!*OSToolbox)
-unpeekPicture			:: !Origin !*Pen !Bool !OSPictContext !*OSToolbox -> *Picture
 peekOSPictContext		:: !*Picture -> (!OSPictContext,!*Picture)
-sharePicture			:: !*Picture -> (!Picture,!*Picture)
-
+sharePicture			:: !*Picture -> (!Picture,      !*Picture)
 peekScreen				:: !.(St *Picture .x) !*OSToolbox -> (!.x,!*OSToolbox)
 
 defaultPen				:: *Pen		// The Pen for customised drawing operations
@@ -74,7 +74,7 @@ getpictorigin			::							!*Picture -> (!Origin,!*Picture)
 setpictpenpos			:: !Point2					!*Picture -> *Picture
 getpictpenpos			::							!*Picture -> (!Point2,!*Picture)
 movepictpenpos			:: !Vector2					!*Picture -> *Picture
-// Move the pen position over the given vector
+//	Move the pen position over the given vector
 
 //	PenSize attributes:
 setpictpensize			:: !Int						!*Picture -> *Picture 	
@@ -184,6 +184,7 @@ pictunfillrect			:: !Rect	!*Picture -> *Picture
 */
 pictscroll				:: !Rect !Vector2 !*Picture -> (!Rect,!*Picture)
 
+
 /*	Polygon drawing operations.
 	pict(draw/fill)polygon point polygon
 		draws/fills a polygon starting at point. The pen position is not changed.
@@ -211,4 +212,7 @@ pictandcliprgn			:: !OSRgnHandle				!*Picture -> *Picture
 getResolutionC :: !OSPictContext !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
 
 // MW: scaling of screen coordinates to printer coordinates.
-getPictureScalingFactors :: !OSPictContext !*OSToolbox -> (!(!Int,!Int),!(!Int,!Int),!OSPictContext,!*OSToolbox)
+getPictureScalingFactors:: !OSPictContext !*OSToolbox -> (!(!Int,!Int),!(!Int,!Int),!OSPictContext,!*OSToolbox)
+
+getpictpenattributes	:: !*Picture	-> (![PenAttribute],!*Picture)
+getPenPenPos			:: !*Pen		-> (!Point2,!*Pen)

@@ -43,7 +43,7 @@ priorityDevice MenuDevice		= 3
 priorityDevice WindowDevice		= 2
 priorityDevice ProcessDevice	= 0
 
-devices :: [Device]
+devices	:: [Device]
 devices							// The device list in order of descending priority
 	= [	ReceiverDevice
 	  ,	TimerDevice

@@ -46,7 +46,8 @@ instance PopUpMenuElements (ListLS	m)		| PopUpMenuElements m
 instance PopUpMenuElements NilLS
 instance PopUpMenuElements ((:+:) m1 m2)	| PopUpMenuElements m1
 											& PopUpMenuElements m2
-instance PopUpMenuElements (SubMenu	m)		| PopUpMenuElements m
 instance PopUpMenuElements RadioMenu
 instance PopUpMenuElements MenuItem
 instance PopUpMenuElements MenuSeparator
+
+instance PopUpMenuElements (SubMenu	m)		| PopUpMenuElements m

@@ -20,6 +20,7 @@ from	StdPSt				import	accPIO
 from	StdWindowAttribute	import	isWindowKeyboard,  getWindowKeyboardAtt,
 									isWindowMouse,     getWindowMouseAtt,
 									isWindowCursor,    getWindowCursorAtt
+from	windowcreate		import	createModalDialogControls
 
 
 windoweventFatalError :: String String -> .x
@@ -76,7 +77,7 @@ where
 		isWindowOSEvent _					= False
 	
 	windowEvent schedulerEvent=:(ScheduleMsgEvent msgEvent) pState=:{io=ioState}
-		# (ioId,ioState)			= ioStGetIOId ioState
+		# (ioId,ioState)		= ioStGetIOId ioState
 		| ioId<>recLoc.rlIOId || recLoc.rlDevice<>WindowDevice
 			= (False,Nothing,schedulerEvent,{pState & io=ioState})
 		| otherwise
@@ -298,11 +299,13 @@ filterOSEvent _ {ccMsg=CcWmIDLEDIALOG,p1=wPtr} windows ioState
 	| otherwise
 		= (True,Nothing,Just (WindowInitialise (fromJust maybeWIDS)),windows,ioState)
 
-/*	PA:	CcWmINITDIALOG is generated for modal dialogs. It should create all the controls of the
+/*	PA:	CcWmINITDIALOG is generated for modal and modeless dialogs. It should create all the controls of the
 		dialog, and return the desired position, size, and focus control of the dialog.
+	PA: THE FOLLOWING STATEMENT IS NOT TRUE; FUNCTIONALITY MOVED TO CcWmIDLEDIALOG.
 		In addition, the return DeviceEvent should be WindowInitialise to have the initialisation
 		function evaluated.
 */
+/*	PA: previous version. Now code is shared in windowcreate and windowevent.
 filterOSEvent wMetrics {ccMsg=CcWmINITDIALOG,p1=wPtr} windows ioState
 	# (maybeWIDS,windows)		= getWindowHandlesActiveWindow windows
 	| isNothing maybeWIDS
@@ -332,6 +335,24 @@ where
 		whCancelId				= wH.whCancelId
 	createDialogControls _ _ _
 		= windoweventFatalError "createDialogControls" "placeholder not expected"
+*/
+filterOSEvent wMetrics {ccMsg=CcWmINITDIALOG,p1=wPtr} windows ioState
+	# (maybeWIDS,windows)	= getWindowHandlesActiveWindow windows
+	| isNothing maybeWIDS
+		= (False,Nothing,Nothing,windows,ioState)
+	# wids					= fromJust maybeWIDS
+	| wids.wPtr<>0
+		= (False,Nothing,Nothing,windows,ioState)
+	# (tb,ioState)			= getIOToolbox ioState
+	# (itemPtr,windows,tb)	= createModalDialogControls wMetrics wPtr windows tb
+	# ioState				= setIOToolbox tb ioState
+	# (found,wsH,windows)	= getWindowHandlesWindow (toWID wPtr) windows
+	| not found				// This alternative can't be reached, because createModalDialogControls has added this handle
+		= windoweventFatalError "filterOSEvent (CcWmINITDIALOG)" "could not retrieve window"
+	| otherwise
+		# ({w,h},wsH)		= getWindowStateHandleSize wsH
+		  windows			= setWindowHandlesWindow wsH windows
+		= (True,Just [-1,-1,w,h,if (itemPtr==OSNoWindowPtr) 0 itemPtr],Nothing,windows,ioState)
 
 filterOSEvent _ {ccMsg=CcWmSCROLLBARACTION,p1=wPtr,p2=cPtr,p3=iBar,p4=action,p5=osThumb} windows ioState
 	# (found,wsH,windows)	= getWindowHandlesWindow (toWID wPtr) windows
@@ -453,7 +474,7 @@ filterOSEvent _ {ccMsg=CcWmACTIVATE,p1=wPtr} windows ioState
 		# (wids,wsH)			= getWindowStateHandleWIDS wsH
 		  windows				= setWindowHandlesWindow wsH windows
 		  (activeModal,windows)	= getWindowHandlesActiveModalDialog windows
-		= (True,Nothing,if (isJust activeModal) (Just (WindowInitialise wids)) (Just (WindowActivation wids)),windows,ioState)
+		= (True,Nothing,if (isJust activeModal) (Just (WindowInitialise wids)) (Just (WindowActivation wids)),windows,ioState)	// PA: WindowInitialise? Why? Doesn't smell well
 
 filterOSEvent _ {ccMsg=CcWmCLOSE,p1=wPtr} windows ioState
 	# (found,wsH,windows)		= getWindowHandlesWindow (toWID wPtr) windows
@@ -468,6 +489,11 @@ filterOSEvent _ {ccMsg=CcWmDEACTIVATE,p1=wPtr} windows ioState
 	# (found,wsH,windows)		= getWindowHandlesWindow (toWID wPtr) windows
 	| not found
 		= (False,Nothing,Nothing,windows,ioState)
+//	PA: in my version this test was not present.
+	# (active,wsH)				= getWindowStateHandleActive wsH
+	| not active				// The window is already inactive, skip
+		= (True,Nothing,Nothing,setWindowHandlesWindow wsH windows,ioState)
+//  ...PA
 	| otherwise
 		# (wids,wsH)			= getWindowStateHandleWIDS wsH
 		  windows				= setWindowHandlesWindow wsH windows
@@ -817,7 +843,7 @@ filterOSEvent _ {ccMsg=CcWmMOUSE,p1=wPtr,p2=cPtr,p3=action,p4=x,p5=y,p6=mods} wi
 		= (True,Nothing,deviceEvent,setWindowHandlesWindow wsH windows,ioState)
 	with
 		okWindowMouseState :: !Int !Point2 !(WindowStateHandle .pst) !(Maybe InputTrack)
-					   -> (!Bool,MouseState,!WindowStateHandle .pst, ! Maybe InputTrack)
+					  -> (!Bool,MouseState,!WindowStateHandle .pst, ! Maybe InputTrack)
 		okWindowMouseState action eventPos wsH=:{wshHandle=Just {wlsHandle={whKind,whWindowInfo,whAtts}}} inputTrack
 			| whKind==IsDialog
 				= (False,undef,wsH,inputTrack)
@@ -857,7 +883,7 @@ filterOSEvent _ {ccMsg=CcWmMOUSE,p1=wPtr,p2=cPtr,p3=action,p4=x,p5=y,p6=mods} wi
 		= (True,Nothing,deviceEvent,setWindowHandlesWindow wsH windows,ioState)
 	with
 		okControlItemsNrMouseState :: !OSWindowPtr !OSWindowPtr !Int !Point2 !(WindowStateHandle .pst) !(Maybe InputTrack)
-												   -> (!Bool,!Int,MouseState, !WindowStateHandle .pst, ! Maybe InputTrack)
+												   -> (!Bool,!Int,MouseState,!WindowStateHandle .pst, ! Maybe InputTrack)
 		okControlItemsNrMouseState wPtr itemPtr action eventPos wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems}}} inputTrack
 			# (_,ok,itemNr,itemPos,itemHs,inputTrack)
 									= okControlsItemNrMouseState True wPtr itemPtr action eventPos whItems inputTrack
@@ -1012,6 +1038,7 @@ filterOSEvent _ _ _ _
 	= windoweventFatalError "filterOSEvent" "unmatched OSEvent"
 
 
+/*	PA: moved to clCCall_12:
 toModifiers :: !Int -> Modifiers
 toModifiers i
 	=	{	shiftDown	= shifton
@@ -1024,6 +1051,7 @@ where
 	shifton	= i bitand SHIFTBIT <> 0
 	alton	= i bitand ALTBIT   <> 0
 	ctrlon	= i bitand CTRLBIT  <> 0
+*/
 
 getControlKeyFocusItemNr :: !Bool !OSWindowPtr !(WindowStateHandle .pst) -> (!Bool,!Int,!WindowStateHandle .pst)
 getControlKeyFocusItemNr activated cPtr wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH}}
@@ -1034,7 +1062,7 @@ where
 	getControlsKeyFocusItemNr` activated cPtr []
 		= (False,0,[])
 	getControlsKeyFocusItemNr` activated cPtr [itemH:itemHs]
-		# (found,itemNr,itemH)		= getControlKeyFocusItemNr` activated cPtr itemH
+		# (found,itemNr,itemH)	= getControlKeyFocusItemNr` activated cPtr itemH
 		| found
 			= (found,itemNr,[itemH:itemHs])
 		| otherwise
@@ -1046,6 +1074,14 @@ where
 			| cPtr==wItemPtr
 				| not (isMember wItemKind [IsCompoundControl,IsCustomControl,IsEditControl,IsPopUpControl])
 					= (True,0,WItemHandle itemH)
+			/*	PA: deze tests zijn verwijderd
+				| not wItemSelect
+					= (0,WItemHandle itemH)
+				| contains reqAttribute wItemAtts
+					= (wItemNr,WItemHandle itemH)
+				// otherwise
+					= (0,WItemHandle itemH)
+			*/
 				// otherwise
 					= (True,wItemNr,WItemHandle itemH)
 			| not (isRecursiveControl wItemKind)
@@ -1053,7 +1089,9 @@ where
 			| otherwise
 				# (found,itemNr,itemHs)	= getControlsKeyFocusItemNr` activated cPtr wItems
 				= (found,itemNr,WItemHandle {itemH & wItems=itemHs})
-		
+	/*	where
+			reqAttribute	= if activated isControlActivate isControlDeactivate	// PA: wordt niet meer gebruikt
+	*/	
 		getControlKeyFocusItemNr` activated cPtr (WListLSHandle itemHs)
 			# (found,itemNr,itemHs)	= getControlsKeyFocusItemNr` activated cPtr itemHs
 			= (found,itemNr,WListLSHandle itemHs)
@@ -1090,7 +1128,15 @@ trackMouse wPtr cPtr (Just it=:{itWindow,itControl,itKind=itk})
 	| otherwise
 		= Just {it & itKind={itk & itkMouse=True}}
 trackMouse wPtr cPtr nothing
-	= Just {itWindow=wPtr,itControl=cPtr,itKind={itkMouse=True,itkKeyboard=False}}
+//	= Just {itWindow=wPtr,itControl=cPtr,itKind={itkMouse=True,itkKeyboard=False}}
+	= Just { itWindow  = wPtr
+	       , itControl = cPtr
+	       , itKind    = { itkMouse    = True
+	                     , itkKeyboard = False
+	                     , itkChar     = 0			// PA: assuming the fields itkChar and itkSlider are not used on Windows platform
+	                     , itkSlider   = Nothing	// dito
+	                     }
+	       }
 
 untrackMouse :: !(Maybe InputTrack) -> Maybe InputTrack
 untrackMouse (Just it=:{itKind=itk})
@@ -1117,4 +1163,12 @@ trackKeyboard wPtr cPtr (Just it=:{itWindow,itControl,itKind=itk})
 	| otherwise
 		= Just {it & itKind={itk & itkKeyboard=True}}
 trackKeyboard wPtr cPtr nothing
-	= Just {itWindow=wPtr,itControl=cPtr,itKind={itkMouse=False,itkKeyboard=True}}
+//	= Just {itWindow=wPtr,itControl=cPtr,itKind={itkMouse=False,itkKeyboard=True}}
+	= Just { itWindow  = wPtr
+	       , itControl = cPtr
+	       , itKind    = { itkMouse    = False
+	                     , itkKeyboard = True
+	                     , itkChar     = 0			// PA: assuming the fields itkChar and itkSlider are not used on Windows platform
+	                     , itkSlider   = Nothing	// dito
+	                     }
+	       }

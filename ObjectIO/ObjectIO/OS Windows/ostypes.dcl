@@ -4,11 +4,15 @@ definition module ostypes
 
 //	Standard types for the OS
 
-::	Rect						// A Rect is supposed to be an ordered rectangle with
-	=	{	rleft	:: !Int		// rleft<=rright && rtop<=rbottom
-		,	rtop	:: !Int
-		,	rright	:: !Int
-		,	rbottom	:: !Int
+::	OSPictContext					// PA: moved from ospicture by DvA
+	:== HDC
+::	HDC								// PA: moved from pictCCall_12
+	:== Int
+::	Rect							// A Rect is supposed to be an ordered rectangle with
+	=	{	rleft		:: !Int		// rleft<=rright && rtop<=rbottom
+		,	rtop		:: !Int
+		,	rright		:: !Int
+		,	rbottom		:: !Int
 		}
 ::	OSWindowPtr
 	:== HWND

@@ -3,9 +3,7 @@ definition module relayout
 //	Clean Object I/O library, version 1.2
 
 import	windowhandle
-from	ostoolbox	import OSToolbox
-from	ostypes		import Rect
-from	oswindow	import OSWindowMetrics, Font
+import	osfont, ossystem, ostoolbox, ostypes
 
 
 ::	RelayoutItem

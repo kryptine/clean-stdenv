@@ -5,9 +5,7 @@ implementation module controlinternal
 
 
 import	StdBool, StdEnum, StdList, StdMisc, StdTuple
-import	osrgn, oswindow
-from	ospicture			import defaultPen
-from	ostooltip			import osAddControlToolTip
+import	ospicture, osrgn, ostooltip, oswindow
 import	commondef, wstateaccess
 from	StdControlAttribute	import isControlTip, getControlTipAtt, isControlKeyboard
 from	controldraw			import drawCustomButtonLook`, drawCustomLook`, drawCompoundLook`,
@@ -15,7 +13,7 @@ from	controldraw			import drawCustomButtonLook`, drawCustomLook`, drawCompoundLo
 from	controllayout		import layoutControls`
 from	controlrelayout		import relayoutControls`
 from	controlvalidate		import validateControlTitle, validateSliderState
-from	windowaccess		import identifyMaybeId, getWItemPopUpInfo, getWindowInfoWindowData, getCompoundContentRect, getWindowContentRect
+from	windowaccess		import identifyMaybeId, getWItemPopUpInfo, getWindowInfoWindowData
 from	windowclipstate		import validateCompoundClipState`, forceValidCompoundClipState`, invalidateCompoundClipState`
 from	windowupdate		import updatewindowbackgrounds`
 from	windowvalidate		import validateViewDomain
@@ -46,7 +44,7 @@ removeOnIdOfTriple nothing id_args
 */
 getContentRect :: !OSWindowMetrics !WindowInfo !Size -> Rect
 getContentRect wMetrics (WindowInfo wInfo) size
-	= getWindowContentRect wMetrics visScrolls (sizeToRect size)
+	= osGetWindowContentRect wMetrics visScrolls (sizeToRect size)
 where
 	domainRect	= wInfo.windowDomain
 	hasScrolls	= (isJust wInfo.windowHScroll,isJust wInfo.windowVScroll)
@@ -66,7 +64,7 @@ where
 	domainRect	= info.compoundDomain
 	itemRect	= posSizeToRect itemPos itemSize
 	visScrolls	= osScrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
-	contentRect	= getCompoundContentRect wMetrics visScrolls itemRect
+	contentRect	= osGetCompoundContentRect wMetrics visScrolls itemRect
 
 
 /*	Enable the controls and provide proper feedback.
@@ -140,14 +138,14 @@ where
 			# (itemH,tb)		= validateCompoundClipState` wMetrics False wPtr defId contextShow itemH tb
 			# (itemH,tb)		= drawCompoundLook` wMetrics contextSelect wPtr clipRect1 itemH tb
 			# (itemHs,(ids,tb))	= setAllWElements (enableWItemHandle` wMetrics wPtr defId True contextSelect contextShow1 clipRect1) itemH.wItems` (ids,tb)
-			# tb				= osSetCompoundSelect wPtr itemPtr clipRect scrollInfo contextSelect tb
+			# tb				= osSetCompoundSelect wPtr itemPtr clipRect scrollInfo scrollPtrs contextSelect tb
 			  itemH				= {itemH & wItemSelect`=True,wItems`=itemHs}
 			= (itemH,(ids,tb))
 		| overrule
 			# (itemH,tb)		= validateCompoundClipState` wMetrics False wPtr defId contextShow itemH tb
 			# (itemH,tb)		= drawCompoundLook` wMetrics contextSelect1 wPtr clipRect1 itemH tb
 			# (itemHs,(ids,tb))	= setAllWElements (enableWItemHandle` wMetrics wPtr defId overrule contextSelect1 contextShow1 clipRect1) itemH.wItems` (ids,tb)
-			# tb				= osSetCompoundSelect wPtr itemPtr clipRect scrollInfo contextSelect1 tb
+			# tb				= osSetCompoundSelect wPtr itemPtr clipRect scrollInfo scrollPtrs contextSelect1 tb
 			  itemH				= {itemH & wItems`=itemHs}
 			= (itemH,(ids,tb))
 		| otherwise
@@ -159,6 +157,11 @@ where
 		itemSelect				= itemH.wItemSelect`
 		info					= getWItemCompoundInfo` itemH.wItemInfo`
 		scrollInfo				= (isJust info.compoundHScroll,isJust info.compoundVScroll)
+		hPtr | fst scrollInfo	= (fromJust info.compoundHScroll).scrollItemPtr
+								= OSNoWindowPtr
+		vPtr | snd scrollInfo	= (fromJust info.compoundVScroll).scrollItemPtr
+								= OSNoWindowPtr
+		scrollPtrs				= (hPtr,vPtr)
 		itemSize				= itemH.wItemSize`
 		contextSelect1			= contextSelect && itemSelect
 		contextShow1			= contextShow && itemH.wItemShow`
@@ -253,14 +256,14 @@ where
 			# (itemH,tb)		= validateCompoundClipState` wMetrics False wPtr defId contextShow itemH tb
 			# (itemH,tb)		= drawCompoundLook` wMetrics False wPtr clipRect1 itemH tb
 			# (itemHs,(ids,tb))	= setAllWElements (disableWItemHandle` wMetrics wPtr defId True False contextShow1 clipRect1) itemH.wItems` (ids,tb)
-			# tb				= osSetCompoundSelect wPtr itemPtr clipRect scrollInfo False tb
+			# tb				= osSetCompoundSelect wPtr itemPtr clipRect scrollInfo scrollPtrs False tb
 			  itemH				= {itemH & wItems`=itemHs}
 			= (itemH,(ids,tb))
 		| overrule
 			# (itemH,tb)		= validateCompoundClipState` wMetrics False wPtr defId contextShow itemH tb
 			# (itemH,tb)		= drawCompoundLook` wMetrics contextSelect1 wPtr clipRect1 itemH tb
 			# (itemHs,(ids,tb))	= setAllWElements (disableWItemHandle` wMetrics wPtr defId overrule contextSelect1 contextShow1 clipRect1) itemH.wItems` (ids,tb)
-			# tb				= osSetCompoundSelect wPtr itemPtr clipRect scrollInfo contextSelect1 tb
+			# tb				= osSetCompoundSelect wPtr itemPtr clipRect scrollInfo scrollPtrs contextSelect1 tb
 			  itemH				= {itemH & wItems`=itemHs}
 			= (itemH,(ids,tb))
 		| otherwise
@@ -275,6 +278,11 @@ where
 		contextShow1			= contextShow && itemH.wItemShow`
 		info					= getWItemCompoundInfo` itemH.wItemInfo`
 		scrollInfo				= (isJust info.compoundHScroll,isJust info.compoundVScroll)
+		hPtr	| fst scrollInfo= (fromJust info.compoundHScroll).scrollItemPtr
+								= OSNoWindowPtr
+		vPtr	| snd scrollInfo= (fromJust info.compoundVScroll).scrollItemPtr
+								= OSNoWindowPtr
+		scrollPtrs				= (hPtr,vPtr)
 		clipRect1				= intersectRectContent wMetrics clipRect info itemH.wItemPos` itemSize
 	
 	disableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect itemH=:{wItemKind`=IsLayoutControl} (ids,tb)
@@ -303,7 +311,7 @@ setcontrolsshowstate ids itemsShow wMetrics wids=:{wPtr} wH=:{whItems`,whSelect`
 where
 	clipRect			= getContentRect wMetrics whWindowInfo` whSize`
 	overrule			= False
-	contextShow			= True
+	contextShow			= True	// DvA: moet dit niet itemsShow zijn? PA: nee, want itemsShow bepaalt de nieuwe show-state van elementen; contextShow bepaalt show-state window
 	contextSelect		= if whSelect` Able Unable
 	
 	setWItemShowStates :: !OSWindowMetrics !OSWindowPtr !Bool !Bool !Bool !SelectState !Rect !WItemHandle` !(![Id],!*OSToolbox)
@@ -337,8 +345,21 @@ where
 	where
 		setcheck :: !Bool !Rect !CheckItemInfo` !*OSToolbox -> *OSToolbox
 		setcheck osShow clipRect {checkItemPtr`,checkItemPos`,checkItemSize`} tb
-			= osSetRadioControlShow wPtr checkItemPtr` clipRect osShow tb
+			= osSetCheckControlShow wPtr checkItemPtr` clipRect osShow tb
 	
+	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect itemH=:{wItemKind`=IsTextControl} (ids,tb)
+		# (found,ids)			= maybeRemoveCheck itemH.wItemId` ids
+		| not found && not overrule
+			= (itemH,(ids,tb))
+		| otherwise
+			# osShow			= if overrule contextShow (contextShow && itemsShow)
+			  itemH				= if found {itemH & wItemShow`=itemsShow} itemH
+			  info				= getWItemTextInfo` itemH.wItemInfo`
+			  text				= info.textInfoText
+			  itemRect			= posSizeToRect itemH.wItemPos` itemH.wItemSize`
+			# tb				= osSetTextControlShow wPtr itemH.wItemPtr` clipRect itemRect osShow text tb
+			= (itemH,(ids,tb))
+
 	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect itemH=:{wItemKind`} (ids,tb)
 		| osControl
 			# (found,ids)		= maybeRemoveCheck itemH.wItemId` ids
@@ -351,12 +372,11 @@ where
 				= (itemH,(ids,tb))
 	where
 		(osControl,osAction)	= case wItemKind` of
-					  				IsPopUpControl			-> (True,osSetPopUpControlShow)
-					  				IsSliderControl			-> (True,osSetSliderControlShow)
-					  				IsTextControl			-> (True,osSetTextControlShow)
-					  				IsEditControl			-> (True,osSetEditControlShow)
-					  				IsButtonControl			-> (True,osSetButtonControlShow)
-					  				_						-> (False,undef)
+									IsPopUpControl  -> (True,osSetPopUpControlShow)
+									IsSliderControl -> (True,osSetSliderControlShow)
+									IsEditControl   -> (True,osSetEditControlShow)
+									IsButtonControl -> (True,osSetButtonControlShow)
+									_               -> (False,undef)
 	
 	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect itemH=:{wItemKind`} (ids,tb)
 		| isCustom
@@ -367,7 +387,8 @@ where
 				# osShow		= if overrule contextShow (contextShow && itemsShow)
 				  itemH			= if found {itemH & wItemShow`=itemsShow} itemH
 				  customDraw	= if osShow customDraw (\_ _ _ itemH tb -> (itemH,tb))
-				# tb			= osAction wPtr itemH.wItemPtr` clipRect osShow tb
+				  itemRect		= posSizeToRect itemH.wItemPos` itemH.wItemSize`
+				# tb			= osAction wPtr itemH.wItemPtr` itemRect clipRect osShow tb
 				# (itemH,tb)	= customDraw itemH.wItemSelect` wPtr clipRect itemH tb
 				= (itemH,(ids,tb))
 	where
@@ -379,24 +400,40 @@ where
 	
 	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect itemH=:{wItemKind`=IsCompoundControl} (ids,tb)
 		# (found,ids)			= maybeRemoveCheck itemH.wItemId` ids
-		  contextShow1			= contextShow && (if found itemsShow itemH.wItemShow`)
-		  overrule1				= overrule || found && itemH.wItemShow`<>itemsShow
+		  contextShow1			= contextShow && (if found itemsShow itemShow)
+		  overrule1				= overrule || found && itemShow<>itemsShow
 		# (itemHs,(ids,tb))		= setAllWElements (setWItemShowStates wMetrics wPtr overrule1 itemsShow contextShow1 contextSelect1 clipRect1) itemH.wItems` (ids,tb)
-						// PA: setAllWElements was setWElements
 		  itemH					= {itemH & wItems`=itemHs}
 		| not found && not overrule
-			= (itemH,(ids,tb))
+//			= cont found (itemH,(ids,tb))
+			= (itemH,(ids,tb))	// PA: is dubbelop, al gedaan in rgl.408
 		| otherwise
 			# itemH				= if found {itemH & wItemShow`=itemsShow} itemH
-			# tb				= osSetCompoundShow wPtr itemH.wItemPtr` clipRect itemsShow tb
-			# itemH				= invalidateCompoundClipState` itemH		// PA: added
-			= (itemH,(ids,tb))
+			# itemRect			= posSizeToRect itemH.wItemPos` itemH.wItemSize`
+//			# tb				= osSetCompoundShow wPtr itemH.wItemPtr` itemRect clipRect itemsShow tb
+//			# itemH				= invalidateCompoundClipState` itemH		// PA: added
+			# osShow			= if overrule contextShow (contextShow && itemsShow)
+			  customDraw		= if osShow customDraw (\_ _ _ itemH tb -> (itemH,tb))
+			# itemRect			= posSizeToRect itemH.wItemPos` itemH.wItemSize`
+			# tb				= osSetCompoundShow wPtr itemH.wItemPtr` itemRect clipRect osShow tb
+			# (itemH,tb)		= customDraw itemH.wItemSelect` wPtr clipRect itemH tb					// alleen bij show? PA: is ok, want rgl.418 zet customDraw op dummy
+//			= cont found (itemH,(ids,tb))
+			= (itemH,(ids,tb))	// PA: is dubbelop, al gedaan in rgl.408
 	where
+		itemShow				= itemH.wItemShow`
+		customDraw				= drawCompoundLook` wMetrics
 		contextSelect1			= if (enabled contextSelect) (if itemH.wItemSelect` Able Unable) contextSelect
 		info					= getWItemCompoundInfo` itemH.wItemInfo`
 		itemSize				= itemH.wItemSize`
 		clipRect1				= intersectRectContent wMetrics clipRect info itemH.wItemPos` itemSize
-	
+/*	PA: overbodig, want dubbelop.
+		cont found (itemH,(ids,tb))
+			# contextShow1			= contextShow && (if found itemsShow itemH.wItemShow`)
+			  overrule1				= overrule || found && itemH.wItemShow`<>itemsShow
+			# (itemHs,(ids,tb))		= setAllWElements (setWItemShowStates wMetrics wPtr overrule1 itemsShow contextShow1 contextSelect1 clipRect1) itemH.wItems` (ids,tb)
+							// PA: setAllWElements was setWElements
+			  itemH					= {itemH & wItems`=itemHs}
+			= (itemH,(ids,tb)) */
 	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect itemH=:{wItemKind`=IsLayoutControl} (ids,tb)
 		# (found,ids)			= maybeRemoveCheck itemH.wItemId` ids
 		  contextShow1			= contextShow && (if found itemsShow itemShow)
@@ -610,7 +647,7 @@ where
 		pen							= compoundLookInfo.compoundLook.lookPen
 		visScrolls					= osScrollbarsAreVisible wMetrics info.compoundDomain (toTuple wItemSize`) hasScrolls
 		itemRect					= posSizeToRect itemH.wItemPos` wItemSize`
-		contentRect					= getCompoundContentRect wMetrics visScrolls itemRect
+		contentRect					= osGetCompoundContentRect wMetrics visScrolls itemRect
 		clipRect1					= intersectRects clipRect contentRect
 		ableContext1				= ableContext  && itemH.wItemSelect`
 		shownContext1				= shownContext && itemH.wItemShow`
@@ -697,7 +734,7 @@ where
 		itemSize					= itemH.wItemSize`
 		itemRect					= posSizeToRect itemPos itemSize
 		visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
-		contentRect					= getCompoundContentRect wMetrics visScrolls itemRect
+		contentRect					= osGetCompoundContentRect wMetrics visScrolls itemRect
 		clipRect1					= intersectRects clipRect contentRect
 	
 	drawInWItem _ wPtr _ _ _ clipRect id itemH=:{wItemId`,wItemKind`=IsCustomButtonControl} x_tb
@@ -732,8 +769,8 @@ where
 
 //	Change the state of the slider and handle proper feedback.
 
-setsliderstates :: ![(Id,IdFun SliderState)] !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
-setsliderstates id_fs wMetrics wPtr wH`=:{whItems`,whSize`,whWindowInfo`} tb
+setslidercontrolstates :: ![(Id,IdFun SliderState)] !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
+setslidercontrolstates id_fs wMetrics wPtr wH`=:{whItems`,whSize`,whWindowInfo`} tb
 	# (itemHs,(_,tb))		= setWElements (setSliderState wMetrics wPtr clipRect) whItems` (id_fs,tb)
 	= ({wH` & whItems`=itemHs},tb)
 where
@@ -754,7 +791,7 @@ where
 			  itemH			= {itemH & wItemInfo`=SliderInfo` {info & sliderInfoState`=newState}}
 			  (tbMin,tbThumb,tbMax,_)
 			  				= toOSscrollbarRange (newState.sliderMin,newState.sliderThumb,newState.sliderMax) 0
-			# tb			= osSetSliderThumb wPtr wItemPtr` clipRect (not (isEmptyRect clipRect)) (tbMin,tbThumb,tbMax) tb
+			# tb			= osSetSliderControlThumb wPtr wItemPtr` clipRect (not (isEmptyRect clipRect)) (tbMin,tbThumb,tbMax) tb
 			= (itemH,(id_fs,tb))
 	
 	setSliderState wMetrics wPtr clipRect itemH=:{wItemKind`=IsCompoundControl} (id_fs,tb)
@@ -844,6 +881,7 @@ where
 		# info				= getWItemPopUpInfo` itemH.wItemInfo`
 		  popUps			= info.popUpInfoItems`
 		  curindex			= info.popUpInfoIndex`
+		  editinfo			= info.popUpInfoEdit`
 		  nrPopUps			= length popUps
 		  index				= setBetween index 1 nrPopUps
 		| curindex==index
@@ -853,7 +891,8 @@ where
 			  info			= {info & popUpInfoIndex`=index}
 			  itemH			= {itemH & wItemInfo`=PopUpInfo` info}
 			  itemRect		= posSizeToRect itemH.wItemPos` itemH.wItemSize`
-			# tb			= osSetPopUpControl wPtr itemH.wItemPtr` clipRect itemRect curindex index (popUps!!(index-1)) shownContext1 tb
+			  editPtr		= mapMaybe (\{popUpEditPtr}->popUpEditPtr) editinfo
+			# tb			= osSetPopUpControl wPtr itemH.wItemPtr` editPtr clipRect itemRect curindex index (popUps!!(index-1)) shownContext1 tb
 			= (True,itemH,tb)
 	
 	selectWItemPopUp wMetrics wPtr shownContext index clipRect id itemH=:{wItemKind`=IsCompoundControl} tb
@@ -913,12 +952,14 @@ where
 				| not (identifyMaybeId id itemH.wItemId)
 					= (False,itemH,tb)
 				# (newPopUpPtr,editPtr,tb)
-									= osCreateEmptyPopUpControl wPtr (0,0) itemH.wItemShow ableContext 
+									= osCreateEmptyPopUpControl wPtr /*popUpPtr*/ (0,0) itemH.wItemShow ableContext 
 																(toTuple popUpPos) (toTuple popUpSize) (length newItems) isEditable tb
-				# (_,tb)			= stateMap2 (appendPopUp newPopUpPtr newIndex) newItems (1,tb)
+				# maybeEditPtr		= if isEditable (Just editPtr) (Nothing)
+				# (_,tb)			= stateMap2 (appendPopUp newPopUpPtr maybeEditPtr newIndex) newItems (1,tb)
 			//	# tb				= osStackWindow newPopUpPtr popUpPtr tb
-				# (_,_,tb)			= osStackWindow newPopUpPtr popUpPtr k` 0 tb	// PA: for control delayinfo can be ignored
-				# tb				= osDestroyPopUpControl popUpPtr tb
+// DvA:???opMac???				# (_,_,tb)			= osStackWindow newPopUpPtr popUpPtr k` 0 tb	// PA: for control delayinfo can be ignored
+// PA: klopt, ik heb osCreateEmptyPopUpControl een extra argument meegegeven dat zelf osStackWindow aanroept.
+				# tb				= osDestroyPopUpControl popUpPtr popUpEdit tb
 				  newPopUpInfo		= {	popUpInfoItems = newItems
 									  ,	popUpInfoIndex = newIndex
 									  ,	popUpInfoEdit  = if isEditable (Just {curEditInfo & popUpEditPtr=editPtr}) Nothing
@@ -936,6 +977,7 @@ where
 				popUpSize		= itemH.wItemSize
 				popUpPos		= itemH.wItemPos
 				popUpInfo		= getWItemPopUpInfo itemH.wItemInfo
+				popUpEdit		= mapMaybe (\{popUpEditPtr}->popUpEditPtr) popUpInfo.popUpInfoEdit
 				curEditInfo		= fromJust popUpInfo.popUpInfoEdit
 				curIndex		= popUpInfo.popUpInfoIndex
 				curItems		= popUpInfo.popUpInfoItems
@@ -943,9 +985,9 @@ where
 				newIndex		= if (curIndex<=index) curIndex (curIndex+index)
 				(before,after)	= split index curItems
 				
-				appendPopUp :: !OSWindowPtr !Index !(PopUpControlItem .pst) !(!Int,!*OSToolbox) -> (!Int,!*OSToolbox)
-				appendPopUp popUpPtr index (title,_) (itemNr,tb)
-					# (_,tb)			= osCreatePopUpControlItem popUpPtr (-1) ableContext title (index==itemNr) tb
+				appendPopUp :: !OSWindowPtr !(Maybe !OSWindowPtr) !Index !(PopUpControlItem .pst) !(!Int,!*OSToolbox) -> (!Int,!*OSToolbox)
+				appendPopUp popUpPtr editPtr index (title,_) (itemNr,tb)
+					# (_,tb)			= osCreatePopUpControlItem popUpPtr editPtr (-1) ableContext title (index==itemNr) itemNr tb
 					= (itemNr+1,tb)
 			
 			openWItemPopUpItems wPtr index newItems id itemH=:{wItemId,wItems} tb
@@ -1000,12 +1042,14 @@ where
 				| not (identifyMaybeId id itemH.wItemId)
 					= (False,itemH,tb)
 				# (newPopUpPtr,editPtr,tb)
-									= osCreateEmptyPopUpControl wPtr (0,0) itemH.wItemShow ableContext 
+									= osCreateEmptyPopUpControl wPtr /*popUpPtr*/ (0,0) itemH.wItemShow ableContext 
 																(toTuple popUpPos) (toTuple popUpSize) (length newItems) isEditable tb
-				# (_,tb)			= stateMap2 (appendPopUp newPopUpPtr newIndex) newItems (1,tb)
+				# maybeEditPtr		= if isEditable (Just editPtr) Nothing
+				# (_,tb)			= stateMap2 (appendPopUp newPopUpPtr maybeEditPtr newIndex) newItems (1,tb)
 			//	# tb				= osStackWindow newPopUpPtr popUpPtr tb
-				# (_,_,tb)			= osStackWindow newPopUpPtr popUpPtr k` 0 tb	// PA: for control delayinfo can be ignored
-				# tb				= osDestroyPopUpControl popUpPtr tb
+// DvA:???opMac???				# (_,_,tb)			= osStackWindow newPopUpPtr popUpPtr k` 0 tb	// PA: for control delayinfo can be ignored
+// PA: klopt, ik heb osCreateEmptyPopUpControl een extra argument meegegeven dat zelf osStackWindow aanroept.
+				# tb				= osDestroyPopUpControl popUpPtr maybeEditPtr tb
 				  newPopUpInfo		= {	popUpInfoItems = newItems
 									  ,	popUpInfoIndex = newIndex
 									  ,	popUpInfoEdit  = if isEditable (Just {curEditInfo & popUpEditPtr=editPtr}) Nothing
@@ -1030,9 +1074,9 @@ where
 				nrNewItems			= length newItems
 				newIndex			= if (isMember curIndex indexs) 1 (min nrNewItems curIndex)
 				
-				appendPopUp :: !OSWindowPtr !Index !(PopUpControlItem .ps) !(!Int,!*OSToolbox) -> (!Int,!*OSToolbox)
-				appendPopUp popUpPtr index (title,_) (itemNr,tb)
-					# (_,tb)		= osCreatePopUpControlItem popUpPtr (-1) ableContext title (index==itemNr) tb
+				appendPopUp :: !OSWindowPtr !(Maybe !OSWindowPtr) !Index !(PopUpControlItem .ps) !(!Int,!*OSToolbox) -> (!Int,!*OSToolbox)
+				appendPopUp popUpPtr editPtr index (title,_) (itemNr,tb)
+					# (_,tb)		= osCreatePopUpControlItem popUpPtr editPtr (-1) ableContext title (index==itemNr) itemNr tb
 					= (itemNr+1,tb)
 			
 			closeWItemPopUpItems wPtr indexs id itemH=:{wItemId,wItems} tb
@@ -1055,7 +1099,7 @@ where
 			= (done,WChangeLSHandle {wChH & wChangeItems=itemHs},tb)
 
 
-/*	The record MetricsInfo and the functions shiftControls` and setsliderthumb are used by
+/*	The record MetricsInfo and the functions shiftControls` and setcompoundsliderthumb are used by
 	movecontrolviewframe and setcontrolviewdomain.
 */
 ::	MetricsInfo
@@ -1080,10 +1124,32 @@ where
 	shiftControl` v (WRecursiveHandle` itemHs kind)
 		= WRecursiveHandle` (shiftControls` v itemHs) kind
 
+/*
 setsliderthumb :: !Bool OSWindowMetrics OSWindowPtr Bool (Int,Int,Int) Int (Int,Int) !*OSToolbox -> *OSToolbox
 setsliderthumb hasScroll wMetrics itemPtr isHScroll scrollValues viewSize maxcoords tb
 	| not hasScroll	= tb
-	| otherwise		= osSetCompoundSlider wMetrics itemPtr isHScroll (toOSscrollbarRange scrollValues viewSize) maxcoords tb
+	| otherwise		= OSsetCompoundSlider wMetrics itemPtr isHScroll (toOSscrollbarRange scrollValues viewSize) maxcoords tb
+
+//	# tb			= osSetCompoundSliderThumbSize wMetrics compoundPtr isHorizontal size (rright,rbottom) (old==new) tb
+	# tb			= osSetCompoundSliderThumbSize compoundPtr scrollPtr scrollMin scrollMax scrollSize scrollRect able (old==new) tb
+*/
+
+setcompoundsliderthumb :: !Bool Bool OSWindowMetrics OSWindowPtr OSWindowPtr Bool (Int,Int,Int) Int (Int,Int) !(Rect,Rect) !*OSToolbox -> *OSToolbox
+setcompoundsliderthumb hasScroll able wMetrics windPtr itemPtr isHScroll scrollValues viewSize maxcoords (hRect,vRect) tb
+	| not hasScroll
+		= tb
+//	| otherwise			= osSetCompoundSlider wMetrics itemPtr isHScroll (toOSscrollbarRange scrollValues viewSize) maxcoords tb
+	| otherwise	
+		# tb			= osSetCompoundSliderThumbSize wMetrics windPtr itemPtr min max wid scrollRect isHScroll able False tb
+	//	# tb			= appGrafport windPtr (updateCompoundScroll windPtr itemPtr scrollRect) tb		PA: line turned into function of oswindow, osUpdateCompoundScroll
+		# tb			= osUpdateCompoundScroll windPtr itemPtr scrollRect tb
+		# tb			= osSetCompoundSliderThumb wMetrics windPtr itemPtr itemPtr scrollRect isHScroll pos /*(42,42)*/maxcoords True tb
+		= tb
+where
+	(min,pos,max,wid)	= toOSscrollbarRange scrollValues viewSize
+	scrollRect
+		| isHScroll		= hRect
+		| otherwise		= vRect
 
 
 /*	Move the ViewFrame of a CompoundControl. (In future version also customised controls.)
@@ -1144,10 +1210,10 @@ where
 		| newOrigin==oldOrigin
 			= (True,itemH,updRgn_tb)
 		# (updRgn,tb)			= updRgn_tb
-		# tb					= setsliderthumb (hasHScroll && newOrigin.x<>oldOrigin.x) miOSMetrics itemPtr True
-												 (minx,newOrigin.x,maxx) viewx (toTuple itemSize) tb
-		# tb					= setsliderthumb (hasVScroll && newOrigin.y<>oldOrigin.y) miOSMetrics itemPtr False
-												 (miny,newOrigin.y,maxy) viewy (toTuple itemSize) tb
+		# tb					= setcompoundsliderthumb (hasHScroll && newOrigin.x<>oldOrigin.x) ableContext1 miOSMetrics wPtr hPtr True
+												 (minx,newOrigin.x,maxx) viewx (toTuple itemSize) (hRect,vRect) tb
+		# tb					= setcompoundsliderthumb (hasVScroll && newOrigin.y<>oldOrigin.y) ableContext1 miOSMetrics wPtr vPtr False
+												 (miny,newOrigin.y,maxy) viewy (toTuple itemSize) (hRect,vRect) tb
 		  info					= {info & compoundOrigin=newOrigin}
 		  clipRect1				= intersectRects contentRect clipRect
 		| isEmpty itemH.wItems`
@@ -1177,8 +1243,15 @@ where
 		itemSize				= itemH.wItemSize`
 		itemAtts				= itemH.wItemAtts`
 		(hasHScroll,hasVScroll)	= (isJust info.compoundHScroll,isJust info.compoundVScroll)
+		hPtr	| hasHScroll	= (fromJust info.compoundHScroll).scrollItemPtr
+								= OSNoWindowPtr
+		vPtr	| hasVScroll	= (fromJust info.compoundVScroll).scrollItemPtr
+								= OSNoWindowPtr
 		visScrolls				= osScrollbarsAreVisible miOSMetrics domainRect (toTuple itemSize) (hasHScroll,hasVScroll)
-		contentRect				= getCompoundContentRect miOSMetrics visScrolls (posSizeToRect itemPos itemSize)
+//		contentRect				= osGetCompoundContentRect miOSMetrics visScrolls (posSizeToRect (windowInfo.windowOrigin - itemPos) itemSize)
+		contentRect				= osGetCompoundContentRect miOSMetrics visScrolls (posSizeToRect itemPos itemSize)
+		hRect					= osGetCompoundHScrollRect miOSMetrics visScrolls (posSizeToRect itemPos itemSize)
+		vRect					= osGetCompoundVScrollRect miOSMetrics visScrolls (posSizeToRect itemPos itemSize)
 		contentSize				= rectSize contentRect
 		shownContext1			= if shownContext itemH.wItemShow` shownContext
 		ableContext1			= ableContext && itemH.wItemSelect`
@@ -1253,8 +1326,8 @@ where
 		  (miny,maxy,viewy)		= (newDomainRect.rtop, newDomainRect.rbottom,newContentSize.h)
 		  newOrigin				= {x=setBetween oldOrigin.x minx (max minx (maxx-viewx)),y=setBetween oldOrigin.y miny (max miny (maxy-viewy))}
 		  info					= {info & compoundOrigin=newOrigin,compoundDomain=newDomainRect}
-		# tb					= setsliderthumb hasHScroll miOSMetrics itemPtr True  (minx,newOrigin.x,maxx) viewx itemSize` tb
-		# tb					= setsliderthumb hasVScroll miOSMetrics itemPtr False (miny,newOrigin.y,maxy) viewy itemSize` tb
+		# tb					= setcompoundsliderthumb hasHScroll ableContext1 miOSMetrics wPtr hPtr True  (minx,newOrigin.x,maxx) viewx itemSize` (hRect,vRect) tb
+		# tb					= setcompoundsliderthumb hasVScroll ableContext1 miOSMetrics wPtr vPtr False (miny,newOrigin.y,maxy) viewy itemSize` (hRect,vRect) tb
 		  oldItems`				= itemH.wItems`
 		| isEmpty oldItems`		// CompoundControl has no controls
 			# itemH				= {itemH & wItemInfo`=CompoundInfo` info}
@@ -1292,10 +1365,16 @@ where
 		itemAtts				= itemH.wItemAtts`
 		itemRect				= posSizeToRect itemPos itemSize
 		(hasHScroll,hasVScroll)	= (isJust info.compoundHScroll,isJust info.compoundVScroll)
+		hPtr	| hasHScroll	= (fromJust info.compoundHScroll).scrollItemPtr
+								= OSNoWindowPtr
+		vPtr	| hasVScroll	= (fromJust info.compoundVScroll).scrollItemPtr
+								= OSNoWindowPtr
 		oldVisScrolls			= osScrollbarsAreVisible miOSMetrics oldDomainRect itemSize` (hasHScroll,hasVScroll)
 		newVisScrolls			= osScrollbarsAreVisible miOSMetrics newDomainRect itemSize` (hasHScroll,hasVScroll)
-		oldContentRect			= getCompoundContentRect miOSMetrics oldVisScrolls itemRect
-		newContentRect			= getCompoundContentRect miOSMetrics newVisScrolls itemRect
+		oldContentRect			= osGetCompoundContentRect miOSMetrics oldVisScrolls itemRect
+		newContentRect			= osGetCompoundContentRect miOSMetrics newVisScrolls itemRect
+		hRect					= osGetCompoundHScrollRect miOSMetrics newVisScrolls itemRect
+		vRect					= osGetCompoundVScrollRect miOSMetrics newVisScrolls itemRect
 		newContentSize			= rectSize newContentRect
 		shownContext1			= if shownContext itemH.wItemShow` shownContext
 		ableContext1			= ableContext && itemH.wItemSelect`

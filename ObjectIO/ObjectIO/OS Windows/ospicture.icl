@@ -6,7 +6,7 @@ implementation module ospicture
 */
 
 import	StdBool, StdFunc, StdInt, StdList, StdReal, StdTuple
-import	pictCCall_12, osfont
+import	pictCCall_12, osfont, ostypes
 from	osrgn		import OSRgnHandle
 from	ostoolbox	import OSNewToolbox
 import	StdPictureDef
@@ -21,8 +21,10 @@ from	commondef	import toTuple, subVector, setBetween
 		}
 ::	Origin
 	:==	Point2
+/*	PA: moved to ostypes
 ::	OSPictContext
 	:==	HDC
+*/
 ::  Pen
 	=	{	penSize			:: !Int				// The width and height of the pen
   		,	penForeColour	:: !Colour			// The drawing colour of the pen
@@ -391,7 +393,7 @@ pictundrawchar char picture=:{pictContext,pictToolbox,pictPen=pen=:{penForeColou
 	= {picture & pictContext=context,pictToolbox=tb,pictPen={pen & penPos={x=x+ox,y=y+oy}}}
 
 pictdrawstring :: !String !*Picture -> *Picture
-pictdrawstring string picture=:{pictContext,pictToolbox,pictPen,pictOrigin={x=ox,y=oy}}
+pictdrawstring string picture=:{pictContext,pictToolbox,pictPen,pictOrigin={x=ox,y=oy}}	// PA:
 	# (context,tb)		= winDrawString string (pictContext,pictToolbox)
 	# (x,y,context,tb)	= winGetPenPos (context,tb)
 	  pen				= {pictPen & penPos={x=x+ox,y=y+oy}}
@@ -646,3 +648,15 @@ getPictureScalingFactors _ _
 	{
 		ccall WinGetPictureScaleFactor "II-IIIIII"
 	}
+
+getpictpenattributes :: !*Picture -> (![PenAttribute],!*Picture)
+getpictpenattributes picture
+	# (pen,picture)	= getpictpen picture
+	= (getpenattribute pen,picture)
+where
+	getpenattribute :: !Pen -> [PenAttribute]
+	getpenattribute {penSize,penForeColour,penBackColour,penPos,penFont}
+		= [PenSize penSize,PenPos penPos,PenColour penForeColour,PenBack penBackColour,PenFont penFont]
+
+getPenPenPos :: !*Pen -> (!Point2,!*Pen)
+getPenPenPos pen=:{penPos={x,y}} = ({x=x,y=y},pen)

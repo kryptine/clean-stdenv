@@ -9,6 +9,7 @@ import	StdBool, StdFunc, StdInt, StdList
 import	ospicture, osrgn, oswindow
 import	commondef, controllayout, StdPicture, windowaccess
 
+//import StdDebug,dodebug,memory
 
 /*	drawwindowlook wPtr includeBackground window
 		applies the Look function of window.
@@ -40,7 +41,7 @@ where
 	clipRgn					= clip.clipRgn
 	hasScrolls				= (isJust info.windowHScroll,isJust info.windowVScroll)
 	visScrolls				= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
-	{w,h}					= rectSize (getWindowContentRect wMetrics visScrolls (sizeToRect whSize))
+	{w,h}					= rectSize (osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize))
 	wFrame					= {corner1=origin,corner2={x=origin.x+w,y=origin.y+h}}
 
 drawwindowlook` :: !OSWindowMetrics !OSWindowPtr !(St *Picture [Rect]) !UpdateState !(WindowHandle .ls .pst) !*OSToolbox
@@ -56,6 +57,7 @@ drawwindowlook` wMetrics wPtr drawFirst updState wH=:{whSelect,whSize,whWindowIn
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
 	#! tb					= osReleaseWindowPictContext wPtr osPict tb
 	#! tb					= osValidateWindowRgn wPtr clipRgn tb		// PA: added to eliminate update of window (in drawing part)
+// DvA: removed for now to avoid disagreement with movewindowviewframe && pictscroll...
 	#! look					= {look & lookPen=pen}
 	#! info					= {info & windowLook=look}
 	= ({wH & whWindowInfo=WindowInfo info},tb)
@@ -69,7 +71,7 @@ where
 	clipRgn					= clip.clipRgn
 	hasScrolls				= (isJust info.windowHScroll,isJust info.windowVScroll)
 	visScrolls				= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
-	{w,h}					= rectSize (getWindowContentRect wMetrics visScrolls (sizeToRect whSize))
+	{w,h}					= rectSize (osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize))
 	wFrame					= {corner1=origin,corner2={x=origin.x+w,y=origin.y+h}}
 
 
@@ -81,6 +83,8 @@ where
 drawinwindow :: !OSWindowMetrics !OSWindowPtr !.(St *Picture .x) !(WindowHandle .ls .pst) !*OSToolbox
 														 -> (.x, ! WindowHandle .ls .pst, !*OSToolbox)
 drawinwindow wMetrics wPtr drawfun wH=:{whSize,whWindowInfo} tb
+//	#! (size,grow,tb)		= MaxMem tb
+//	#! tb = trace_n ("drawinwindow",size,grow) tb
 	#! (domainRgn,tb)		= osnewrectrgn contentRect tb
 	#! (clip,tb)			= ossectrgn domainRgn clipRgn tb
 	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb
@@ -101,4 +105,4 @@ where
 	clipRgn					= windowClip.clipRgn
 	hasScrolls				= (isJust info.windowHScroll,isJust info.windowVScroll)
 	visScrolls				= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
-	contentRect				= getWindowContentRect wMetrics visScrolls (sizeToRect whSize)
+	contentRect				= osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize)

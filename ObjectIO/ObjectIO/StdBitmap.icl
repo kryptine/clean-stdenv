@@ -38,12 +38,9 @@ instance Drawables Bitmap where
 	draw :: !Bitmap !*Picture -> *Picture
 	draw bitmap picture
 		# (origin,pen,toScreen,pictContext,tb)	= peekPicture picture
-		  (penPos,pen)							= getPenPenPos pen
+		  (penPos,pen)							= getPenPenPos pen	// kan ook met getpictpenpos...
 		# (pictContext,tb)						= osDrawBitmap (fromBitmap bitmap) (toTuple penPos) (toTuple origin) toScreen pictContext tb
 		= unpeekPicture origin pen toScreen pictContext tb
-	where
-		getPenPenPos :: !*Pen -> (!Point2,!*Pen)
-		getPenPenPos pen=:{penPos={x,y}} = ({x=x,y=y},pen)
 	
 	drawAt :: !Point2 !Bitmap !*Picture -> *Picture
 	drawAt pos bitmap picture

@@ -5,8 +5,8 @@ implementation module controlaccess
 
 
 import	StdBool, StdFunc, StdInt, StdList, StdMisc, StdTuple
-from	oswindow	import osScrollbarsAreVisible
 import	commondef, id, windowaccess, wstateaccess
+import	oswindow
 
 
 eqfst3id :: !Id !(!Id,.x,.y) -> Bool
@@ -140,7 +140,7 @@ where
 			visScrolls		= osScrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
 			size			= if (wItemKind`<>IsCompoundControl)
  								 itemSize
-								 (rectSize (getCompoundContentRect wMetrics visScrolls (sizeToRect itemSize)))
+								 (rectSize (osGetCompoundContentRect wMetrics visScrolls (sizeToRect itemSize)))
 			(_,sizes1)		= creplace (eqfst3id itemId) (itemId,True,size) sizes
 	where
 		itemId				= fromJust wItemId`
@@ -483,7 +483,7 @@ where
 											(origin,domainRect,hasScrolls)
 														= (info.compoundOrigin,info.compoundDomain,(isJust info.compoundHScroll,isJust info.compoundVScroll))
 											visScrolls	= osScrollbarsAreVisible wMetrics domainRect (toTuple wItemSize`) hasScrolls
-											itemRect	= getCompoundContentRect wMetrics visScrolls (posSizeToRect origin wItemSize`)
+											itemRect	= osGetCompoundContentRect wMetrics visScrolls (posSizeToRect origin wItemSize`)
 											frame		= (itemId,True,Just (rectToRectangle itemRect))
 											(_,frames1)	= creplace (eqfst3id itemId) frame frames
 	where

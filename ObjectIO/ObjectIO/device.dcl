@@ -15,5 +15,5 @@ import StdOverloaded, StdString
 instance ==			Device
 instance toString	Device
 
-priorityDevice :: !Device -> Int
-devices :: [Device]				// The device list in order of descending priority
+priorityDevice	:: !Device -> Int
+devices			:: [Device]		// The device list in order of descending priority

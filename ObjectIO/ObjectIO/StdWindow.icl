@@ -10,7 +10,8 @@ import	StdControlClass
 from	StdId				import getParentId
 from	StdPSt				import appPIO, accPIO
 from	StdSystem			import maxScrollWindowSize
-import	commondef, controlpos, iostate, scheduler, windowaccess, windowcreate, windowdevice, windowhandle, windowupdate, wstate
+import	commondef, controlpos, iostate, scheduler, windowaccess, windowcreate
+import	windowdevice, windowhandle, windowupdate, wstate
 from	controlinternal		import enablecontrols, disablecontrols
 from	controllayout		import layoutControls
 from	controlrelayout		import relayoutControls
@@ -27,7 +28,7 @@ from	windowclipstate	import validateWindowClipState, forceValidWindowClipState
 from	windowdispose	import disposeWindow
 from	windowdraw		import drawinwindow, drawwindowlook
 from	windowvalidate	import validateWindowId, validateViewDomain, exactWindowPos, exactWindowSize
-
+import	menuwindowmenu
 
 //	General functions:
 
@@ -76,6 +77,7 @@ instance Windows (Window c) | Controls c where
 			# wH				= initWindowHandle title Modeless IsWindow NoWindowInfo itemHs atts
 			# pState			= openwindow okId {wlsState=ls,wlsHandle=wH} pState
 			# pState			= appPIO decreaseWindowBound pState
+			# pState			= addWindowToWindowMenu okId title pState
 			= (NoError,pState)
 	
 	getWindowType :: (Window c .ls .pst) -> WindowType | Controls c
@@ -155,6 +157,7 @@ getWindowIdAttribute atts
 */
 closeWindow :: !Id !(PSt .l) -> PSt .l
 closeWindow id pState
+	# pState = appPIO (removeWindowFromWindowMenu id) pState
 	= disposeWindow (toWID id) pState
 
 closeActiveWindow :: !(PSt .l) -> PSt .l
@@ -917,13 +920,14 @@ where
 		| isEmptyRect updArea
 			= (wsH,tb)
 		| otherwise
+			# tb						= osInvalidateWindowRect wshIds.wPtr updArea tb		// PA: check if necessary on Windows
 			# (wH,tb)					= updatewindow wMetrics updInfo wH tb
 			= ({wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
 	where
 		info							= getWindowInfoWindowData whWindowInfo
 		(origin,domainRect,hasScrolls)	= (info.windowOrigin,info.windowDomain,(isJust info.windowHScroll,isJust info.windowVScroll))
 		visScrolls						= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
-		contentRect						= getWindowContentRect wMetrics visScrolls (sizeToRect whSize)
+		contentRect						= osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize)
 		updArea							= case maybeViewFrame of
 											Nothing		-> contentRect
 											Just rect	-> intersectRects (rectangleToRect (subVector (toVector origin) rect)) contentRect
@@ -972,7 +976,7 @@ where
 		origin					= windowInfo.windowOrigin
 		hasScrolls				= (isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll)
 		visScrolls				= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
-		contentRect				= getWindowContentRect wMetrics visScrolls (sizeToRect whSize)
+		contentRect				= osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize)
 		wFrame					= posSizeToRectangle origin (rectSize contentRect)
 		updState				= rectangleToUpdateState wFrame
 	setwindowlook _ _ _ _ _
@@ -1155,7 +1159,7 @@ where
 					WindowInfo info	-> (info.windowOrigin,info.windowDomain,isJust info.windowHScroll,isJust info.windowVScroll)
 					other			-> stdWindowFatalError "getWindowViewFrame" "Window has no WindowInfo"
 	visScrolls	= osScrollbarsAreVisible wMetrics domainRect (toTuple wSize) (hasHScroll,hasVScroll)
-	contentRect	= getWindowContentRect wMetrics visScrolls (posSizeToRect origin wSize)
+	contentRect	= osGetWindowContentRect wMetrics visScrolls (posSizeToRect origin wSize)
 getwindowviewframe _ _
 	= stdWindowFatalError "getWindowViewFrame" "unexpected window placeholder argument"
 
@@ -1298,12 +1302,14 @@ where
 		  								  ,	y = if (h>=newDomainSize.h) newDomainRect.rtop  (setBetween oldOrigin.y newDomainRect.rtop  (newDomainRect.rbottom-h))
 		  								  }
 		  newVisScrolls					= osScrollbarsAreVisible wMetrics newDomainRect wSize` hasScrolls
-		  newContentRect				= getWindowContentRect wMetrics newVisScrolls (sizeToRect whSize)
+		  newContentRect				= osGetWindowContentRect wMetrics newVisScrolls (sizeToRect whSize)
+		  newHRect						= osGetWindowHScrollRect wMetrics newVisScrolls (sizeToRect whSize)
+		  newVRect						= osGetWindowVScrollRect wMetrics newVisScrolls (sizeToRect whSize)
 		  {rright=w`,rbottom=h`}		= newContentRect
 		  osHState						= toOSscrollbarRange (newDomainRect.rleft,newOrigin.x,newDomainRect.rright)  w`
 		  osVState						= toOSscrollbarRange (newDomainRect.rtop, newOrigin.y,newDomainRect.rbottom) h`
-		# tb							= setwindowslider hasHScroll wMetrics wPtr True  osHState wSize` tb
-		# tb							= setwindowslider hasVScroll wMetrics wPtr False osVState wSize` tb
+		# tb							= setwindowslider hasHScroll wMetrics wPtr True  osHState newHRect newVRect wSize` tb
+		# tb							= setwindowslider hasVScroll wMetrics wPtr False osVState newHRect newVRect wSize` tb
 		  windowInfo					= WindowInfo {windowInfo & windowDomain=newDomainRect,windowOrigin=newOrigin}
 		  newViewFrameRect				= posSizeToRect newOrigin {w=w`,h=h`}
 		  newViewFrame					= rectToRectangle newViewFrameRect
@@ -1347,17 +1353,38 @@ where
 		sysLook					= windowInfo.windowLook.lookSysUpdate
 		hasScrolls				= (isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll)
 		(hasHScroll,hasVScroll)	= hasScrolls
+		hScroll					= if hasHScroll (Just (fromJust windowInfo.windowHScroll).scrollItemPtr) Nothing
+		vScroll					= if hasVScroll (Just (fromJust windowInfo.windowVScroll).scrollItemPtr) Nothing
 		oldVisScrolls			= osScrollbarsAreVisible wMetrics oldDomainRect wSize` hasScrolls
-		oldContentRect			= getWindowContentRect wMetrics oldVisScrolls (sizeToRect whSize)
+		oldContentRect			= osGetWindowContentRect wMetrics oldVisScrolls (sizeToRect whSize)
 		oldViewFrameRect		= posSizeToRect oldOrigin (rectSize oldContentRect)
 		(defMinW,defMinH)		= osMinWindowSize
 		minSize					= {w=defMinW,h=defMinH}
 		
-		setwindowslider :: !Bool OSWindowMetrics OSWindowPtr Bool (Int,Int,Int,Int) (Int,Int) !*OSToolbox -> *OSToolbox
-		setwindowslider hasScroll wMetrics wPtr isHorizontal state maxcoords tb
-			| hasScroll			= osSetWindowSlider wMetrics wPtr isHorizontal state maxcoords tb
+		setwindowslider :: !Bool OSWindowMetrics OSWindowPtr Bool (Int,Int,Int,Int) Rect Rect (Int,Int) !*OSToolbox -> *OSToolbox
+		setwindowslider hasScroll wMetrics wPtr isHorizontal state=:(osMin,osThumb,osMax,osSize) hrect vrect maxcoords=:(min,max) tb
+//			| hasScroll			= OSsetWindowSlider wMetrics wPtr isHorizontal state maxcoords tb
+// vgl met gebruik in bv controlpos, verschil is waarschijnlijk dat setWindoweSLider ook thumbsize zet...
+//			| hasScroll				= osSetWindowSliderThumb wMetrics wPtr isHorizontal osThumb hScroll vScroll hrect vrect maxcoords True tb
+			| hasScroll
+				# tb			= osSetWindowSliderThumbSize wMetrics wPtr sPtr isHorizontal osMin osMax osSize (osMin,osMax) (if isHorizontal hrect vrect) whSelect True tb
+//				# tb			= osSetWindowSliderThumbSize wPtr sPtr min max (if isHorizontal hrect vrect) whSelect True tb
+//				= osSetWindowSliderThumb wMetrics wPtr isHorizontal osThumb hScroll vScroll hrect vrect (osMin,osMax) True tb
+				= osSetWindowSliderThumb wMetrics wPtr isHorizontal osThumb hScroll vScroll hrect vrect maxcoords True tb
 			| otherwise			= tb
-		
+		where
+			sPtr = case isHorizontal of
+					True	-> fromJust hScroll
+					_		-> fromJust vScroll
+
+/*		
+		setsliderthumb :: !Bool !OSWindowMetrics !OSWindowPtr !Bool !(!Int,!Int,!Int) !Int !(!Int,!Int) !*OSToolbox -> *OSToolbox
+		setsliderthumb hasScroll wMetrics wPtr isHScroll scrollValues viewSize maxcoords tb
+			| hasScroll				= OSsetWindowSliderThumb wMetrics wPtr isHScroll osThumb hScroll vScroll maxcoords True tb
+			| otherwise				= tb
+		where
+			(_,osThumb,_,_)			= toOSscrollbarRange scrollValues viewSize
+*/		
 		getdomainviewmax :: !Rect !Rect -> Point2
 		getdomainviewmax domainRect viewframeRect
 			= {x=min domainRect.rright viewframeRect.rright,y=min domainRect.rbottom viewframeRect.rbottom}
@@ -1480,6 +1507,7 @@ setWindowTitle id title ioState
 		  wsH					= setWindowStateHandleWindowTitle title wsH
 	//	# ioState				= appIOToolbox (osSetWindowTitle (if (isSDI && wids.wPtr==clientPtr) framePtr wids.wPtr) title) ioState
 		# ioState				= appIOToolbox (osSetWindowTitle (if isSDI framePtr wids.wPtr) title) ioState
+		# ioState				= changeWindowInWindowMenu id title ioState
 		= ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 
 setWindowOk :: !Id Id !(IOSt .l) -> IOSt .l
@@ -1535,7 +1563,7 @@ setWindowCursor id shape ioState
 where
 	setwindowcursor :: !CursorShape !(WindowStateHandle .pst) !*OSToolbox -> (!WindowStateHandle .pst,!*OSToolbox)
 	setwindowcursor shape wsH=:{wshIds={wPtr},wshHandle=Just wlsH=:{wlsHandle=wH}} tb
-		# tb				= osSetWindowCursor wPtr (toCursorCode shape) tb
+		# tb				= osSetWindowCursor wPtr shape tb
 		  cursorAtt			= WindowCursor shape
 		  (replaced,atts)	= creplace isWindowCursor cursorAtt wH.whAtts
 		  atts				= if replaced atts [cursorAtt:atts]

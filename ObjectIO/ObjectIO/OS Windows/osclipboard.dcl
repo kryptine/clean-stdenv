@@ -5,11 +5,13 @@ definition module osclipboard
 //	Clipboard operations.
 
 import	ostoolbox
+from	clipboardCrossCall_12	import CF_TEXT
+
 
 ::	OSClipboardItemType
 	:==	Int
 OSClipboardText
-	:==	1	// CF_TEXT
+	:==	CF_TEXT
 
 osInitialiseClipboard :: !*OSToolbox -> *OSToolbox
 //	osInitialiseClipboard should be evaluated before any of the functions below.

@@ -7,13 +7,12 @@ implementation module windowvalidate
 
 
 import	StdBool, StdList, StdFunc, StdTuple, StdMisc
-from	StdSystem		import maxScrollWindowSize
-import	osdocumentinterface, ostypes, oswindow
-from	ospicture		import defaultPen, setPenAttribute
-from	ossystem		import osScreenrect, osStripOuterSize
+import	osdocumentinterface, ospicture, ossystem, ostypes, oswindow
 import	commondef, controllayout, keyfocus, StdControlAttribute, StdId, StdWindowAttribute, windowaccess
-from	iostate			import IOSt, ioStGetIdTable, ioStSetIdTable
+from	StdSystem	import maxScrollWindowSize
+from	iostate		import IOSt, ioStGetIdTable, ioStSetIdTable
 
+//import dodebug
 
 windowvalidateError :: String String -> .x
 windowvalidateError function message
@@ -141,8 +140,8 @@ where
 	where
 		windowRect	= sizeToRect wSize
 		hasScrolls	= (isJust maybe_hScroll,isJust maybe_vScroll)
-		hScrollRect	= getWindowHScrollRect wMetrics hasScrolls windowRect
-		vScrollRect	= getWindowVScrollRect wMetrics hasScrolls windowRect
+		hScrollRect	= osGetWindowHScrollRect wMetrics hasScrolls windowRect
+		vScrollRect	= osGetWindowVScrollRect wMetrics hasScrolls windowRect
 		
 		scrollInfo :: Rect !ScrollFunction -> ScrollInfo
 		scrollInfo r=:{rleft,rtop} scrollFun
@@ -259,7 +258,7 @@ validateWindowSize wMetrics domain isMDI isResizable hasScrolls atts tb
 		# ((dw,dh),tb)	= osStripOuterSize isMDI isResizable tb
 		  (w,h)			= (outerSize.w-dw,outerSize.h-dh)
 		  visScrolls	= osScrollbarsAreVisible wMetrics (rectangleToRect domain) (w,h) hasScrolls
-		  viewSize		= rectSize (getWindowContentRect wMetrics visScrolls (sizeToRect {w=w,h=h}))
+		  viewSize		= rectSize (osGetWindowContentRect wMetrics visScrolls (sizeToRect {w=w,h=h}))
 		# (_,_,atts)	= remove isWindowOuterSize undef atts
 		# (_,_,atts)	= remove isWindowViewSize  undef atts
 		= (viewSize,[WindowViewSize viewSize:atts],tb)
@@ -438,6 +437,7 @@ where
 	visVScroll					= hasVScroll && osScrollbarIsVisible (minmax domain.corner1.y domain.corner2.y) h
 	w`							= w+wMetrics.osmVSliderWidth
 	h`							= h+wMetrics.osmHSliderHeight
+// DvA: hmmm, gelijk aan oswindow:osGetWindowContentRect?
 
 
 /*	exactWindowPos determines the exact position of a window.
@@ -446,7 +446,8 @@ where
 */
 exactWindowPos :: !OSWindowMetrics !Size !(Maybe ItemPos) !WindowKind !WindowMode !(WindowHandles .pst) !*OSToolbox
 																	   -> (!Point2,!WindowHandles .pst, !*OSToolbox)
-exactWindowPos wMetrics exactSize maybePos wKind wMode windows tb
+exactWindowPos wMetrics exactSize=:{w,h} maybePos wKind wMode windows tb
+	# exactSize = {w = w + osWindowFrameWidth + osWindowFrameWidth, h = h + osWindowFrameWidth + osWindowFrameWidth + osWindowTitleBarHeight - 1}
 	| wKind==IsDialog && wMode==Modal
 		= (pos,windows,tb1)
 	with
@@ -470,33 +471,31 @@ where
 											   -> (!Point2,!WindowHandles .pst, !*OSToolbox)
 	getItemPosPosition wMetrics size itemPos windows=:{whsWindows=wsHs} tb
 		| isRelative
-			#  (rect,tb)					= osScreenrect tb
-			   screenDomain				= rectToRectangle rect
-			   screenOrigin				= {x=rect.rleft,y=rect.rtop}
+			# (rect,tb)					= osScreenrect tb
+			  screenDomain				= rectToRectangle rect
+			  screenOrigin				= {x=rect.rleft,y=rect.rtop}
 			#! (before,after)			= uspan (unidentifyWindow (toWID relativeTo)) wsHs
 			   (wPtr,wsH,after)			= case after of
-		  									[]
-		  										-> windowvalidateFatalError "getItemPosPosition" "target window could not be found"
+		  									[]	-> windowvalidateFatalError "getItemPosPosition" "target window could not be found"
 		  									[wsH:after]
 		  										#  (wPtr,wsH) = wsH!wshIds.wPtr
 		  										-> (wPtr,wsH,after)
 			   (relativeSize,wsH)		= getWindowStateHandleSize wsH
-			   wsHs						= before ++ [wsH:after]
-			   windows					= {windows & whsWindows=wsHs}
-			#  ((relativeX,relativeY),tb)= osGetWindowPos wPtr tb
-			/*	PA: do not use OSgetWindowViewFrameSize. 
-			#  ((relativeW,relativeH),tb)= OSgetWindowViewFrameSize wPtr tb
+			   windows					= {windows & whsWindows=before++[wsH:after]}
+			# ((relativeX,relativeY),tb)= osGetWindowPos wPtr tb
+			/* PA: do not use OSgetWindowViewFrameSize. 
+			# ((relativeW,relativeH),tb)= OSgetWindowViewFrameSize wPtr tb
 			*/
-			   (relativeW,relativeH)		= toTuple relativeSize
-			   (exactW,exactH)			= (size.w,size.h)
-			   {vx,vy}					= itemPosOffset (snd itemPos) screenDomain screenOrigin
-			   pos						= case (fst itemPos) of
+			  (relativeW,relativeH)		= toTuple relativeSize
+			  (exactW,exactH)			= (size.w,size.h)
+			  {vx,vy}					= itemPosOffset (snd itemPos) screenDomain screenOrigin
+			  pos						= case (fst itemPos) of
 						  					(LeftOf  _)	-> {x=relativeX+vx-exactW,   y=relativeY+vy}
 						  					(RightTo _)	-> {x=relativeX+vx+relativeW,y=relativeY+vy}
 				  							(Above   _)	-> {x=relativeX+vx,          y=relativeY+vy-exactH}
 			  								(Below   _)	-> {x=relativeX+vx,          y=relativeY+vy+relativeH}
 			  								other       -> windowvalidateFatalError "getItemPosPosition" "unexpected ItemLoc alternative"
-			=  (pos,windows,tb)
+			= (pos,windows,tb)
 	where
 		(isRelative,relativeTo)		= isRelativeItemPos itemPos
 		
@@ -504,6 +503,7 @@ where
 		unidentifyWindow wid wsH
 			# (ids,wsH)				= getWindowStateHandleWIDS wsH
 			= (not (identifyWIDS wid ids),wsH)
+
 	getItemPosPosition _ size itemPos windows tb
 		| isAbsolute
 			# (rect,tb)					= osScreenrect tb
@@ -525,9 +525,10 @@ where
 					  						LeftBottom	-> {x=rect.rleft +vx,       y=rect.rbottom+vy-exactH}
 					  						RightBottom	-> {x=rect.rright+vx-exactW,y=rect.rbottom+vy-exactH}
 			= (pos,windows,tb)
+
 	getItemPosPosition _ _ _ windows tb
 		= (zero,windows,tb)
-	
+
 /*	setWindowInsideScreen makes sure that a window at the given position and given size will be on screen.
 */
 	setWindowInsideScreen :: !Point2 !Size !*OSToolbox -> (!Point2,!*OSToolbox)

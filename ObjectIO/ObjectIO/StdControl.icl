@@ -8,6 +8,7 @@ implementation module StdControl
 
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	commondef, controlaccess, controlinternal, controlvalidate, id, iostate, StdControlClass, windowaccess, windowcontrols, wstate
+import	ostoolbox, oswindow
 from	controllayout	import calcControlsSize
 from	receiverid		import unbindRIds
 from	StdPSt			import appPIO
@@ -16,8 +17,6 @@ from	windowupdate	import updatewindow
 from	wstateaccess	import iswindowitemspace`, getwindowitemspace`,
 								iswindowhmargin`,  getwindowhmargin`,
 								iswindowvmargin`,  getwindowvmargin`
-from	ostoolbox		import OSNewToolbox
-from	oswindow		import osScrollbarsAreVisible
 
 
 StdControlFatalError :: String String -> .x
@@ -211,11 +210,15 @@ openControls wId ls newControls pState
 		= (ErrorIdsInUse,pState)
 	| otherwise
 		# (wMetrics,ioState)	= ioStGetOSWindowMetrics ioState
-		# (wsH,ioState)			= accIOToolbox (opencontrols wMetrics ls newItemHs wsH) ioState
+// DvA...		
+		# (wids,wsH)			= getWindowStateHandleWIDS wsH
+		# wPtr					= wids.wPtr
+		# (wsH,ioState)			= accIOToolbox (accGrafport wPtr (opencontrols wMetrics ls newItemHs wsH)) ioState
+// ...DvA
+//		# (wsH,ioState)			= accIOToolbox (opencontrols wMetrics ls newItemHs wsH) ioState
 		# ioState				= ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
 		# pState				= {pState & io=ioState}
 		= (NoError,pState)
-
 
 /*	getWindowStateHandleIds returns all Ids of the controls in this window.
 	This function is used by open(Compound)Controls.
@@ -708,7 +711,7 @@ where
 	
 	setSliderStates` :: ![(Id,IdFun SliderState)] !*WState -> *WState
 	setSliderStates` id_fs wState=:{wIds={wPtr},wRep,wTb,wMetrics}
-		# (wH,tb)	= setsliderstates id_fs wMetrics wPtr wRep wTb
+		# (wH,tb)	= setslidercontrolstates id_fs wMetrics wPtr wRep wTb
 		= {wState & wRep=wH,wTb=tb}
 
 setSliderState :: !Id (IdFun SliderState) !(IOSt .l) -> IOSt .l
@@ -789,7 +792,7 @@ where
 											IsWindow -> (info.windowDomain,(isJust info.windowHScroll,isJust info.windowVScroll))
 											_        -> (sizeToRect whSize,(False,False))
 		visScrolls						= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
-		contentRect						= getWindowContentRect wMetrics visScrolls (sizeToRect whSize)
+		contentRect						= osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize)
 		
 		getWElementHandlesUpdateInfo :: !OSWindowMetrics !Id !Rect ![WElementHandle .ls .pst] -> (!Bool,UpdateInfo,![WElementHandle .ls .pst])
 		getWElementHandlesUpdateInfo _ _ _ []
@@ -824,7 +827,7 @@ where
 				hasScrolls				= (isJust compoundInfo.compoundHScroll,isJust compoundInfo.compoundVScroll)
 				visScrolls				= osScrollbarsAreVisible wMetrics domain (toTuple wItemSize) hasScrolls
 				contentRect				= if (wItemKind==IsCompoundControl)
-											(getCompoundContentRect wMetrics visScrolls itemRect)
+											(osGetCompoundContentRect wMetrics visScrolls itemRect)
 											itemRect
 				visRect					= intersectRects contentRect clipRect
 				updArea							= case maybeViewFrame of

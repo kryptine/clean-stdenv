@@ -5,11 +5,12 @@ implementation module windowdispose
 
 
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
-import	menuevent, osmenu, oswindow
+import	menuevent, osmenu, ostypes, oswindow
 import	commondef, iostate, receiverid, scheduler, StdPSt, windowaccess, windowclipstate
 from	StdMenu				import enableMenuSystem
 from	StdWindowAttribute	import isWindowDeactivate
 from	windowcreate		import bufferDelayedEvents
+//import menuwindowmenu
 
 
 windowdisposeFatalError :: String String -> .x
@@ -77,9 +78,10 @@ where
 		# (inputTrack,ioState)	= ioStGetInputTrack ioState
 		# (tb,ioState)			= getIOToolbox ioState
 		# pState				= {pState & io=ioState}
-		# ((rids,ids,delayinfo,finalLS,inputTrack),(_,pState),tb)
+		# ((rids,ids,delayinfo,finalLS,osdinfo,inputTrack),(_,pState),tb)
 								= disposeWindowStateHandle osdinfo inputTrack handleOSEvent (wsH,pState) tb
 		# ioState				= setIOToolbox tb pState.io
+		# ioState				= ioStSetOSDInfo osdinfo ioState
 		# ioState				= ioStSetInputTrack inputTrack ioState
 		# ioState				= unbindRIds rids ioState						// When timers are part of windows, also unbind timers
 		# (idtable,ioState)		= ioStGetIdTable ioState
@@ -124,7 +126,7 @@ disposeCursorInfo :: !CursorInfo !(IOSt .l) -> IOSt .l
 	When timers are part of windows, also timer ids should be returned.
 */
 disposeWindowStateHandle :: !OSDInfo !(Maybe InputTrack) !(OSEvent -> .s -> ([Int],.s)) !*(!*WindowStateHandle .pst,.s) !*OSToolbox
-			-> (!(![Id],![Id],![DelayActivationInfo],![FinalModalLS],!Maybe InputTrack),!*(!*WindowStateHandle .pst,.s),!*OSToolbox)
+   -> (!(![Id],![Id],![DelayActivationInfo],![FinalModalLS],!OSDInfo,!Maybe InputTrack),!*(!*WindowStateHandle .pst,.s),!*OSToolbox)
 disposeWindowStateHandle osdinfo inputTrack handleOSEvent 
 						 (wsH=:{wshIds=wids=:{wPtr,wId},wshHandle=Just wlsH=:{wlsState,wlsHandle=wH=:{whWindowInfo,whItems,whKind,whMode}}},state)
 						 tb
@@ -136,7 +138,8 @@ disposeWindowStateHandle osdinfo inputTrack handleOSEvent
 //	  (rIdss,idss,disposeFuns)	= unzip3 ids_dispose
 	# (rids,ids,fs,itemHs,tb)	= disposeWElementHandles wPtr whItems tb
 	# tb						= fs tb//StrictSeq disposeFuns tb
-	# (delayinfo,state,tb)		= osDestroyWindow osdinfo (whMode==Modal) (whKind==IsWindow) wPtr handleOSEvent state tb
+	# (delayinfo,osdinfo,state,tb)
+								= osDestroyWindow (whMode==Modal) (whKind==IsWindow) wPtr handleOSEvent osdinfo state tb
 //	  rids						= flatten rIdss
 	  ids						= [wId:ids]//flatten idss]
 	  finalModalLS				= if isModalDialog [{fmWIDS=wids,fmLS=wlsState}] []
@@ -144,7 +147,7 @@ disposeWindowStateHandle osdinfo inputTrack handleOSEvent
 	  								Just {itWindow}
 	  										-> if (itWindow==wPtr) Nothing inputTrack
 	  								nothing -> nothing
-	  result					= (rids,ids,delayinfo,finalModalLS,inputTrack)
+	  result					= (rids,ids,delayinfo,finalModalLS,osdinfo,inputTrack)
 	  wsH						= {wsH & wshHandle=Just {wlsH & wlsState=undef,wlsHandle={wH & whItems=itemHs}}}
 	| isWindowInfo				= (result,(wsH,state),disposeClipState info.windowClip tb)
 	| otherwise					= (result,(wsH,state),tb)
@@ -202,10 +205,17 @@ disposeWItemHandle wPtr itemH=:{wItemKind=IsCheckControl,wItemInfo,wItemId} tb
 
 disposeWItemHandle wPtr itemH=:{wItemKind=IsCompoundControl,wItemInfo,wItems,wItemId,wItemPos,wItemSize,wItemPtr} tb
 	# (rids,ids,fs,itemHs,tb)	= disposeWElementHandles wPtr wItems tb
-	  f							= osDestroyCompoundControl wItemPtr
+	# compoundInfo				= getWItemCompoundInfo wItemInfo
+	  hPtr						= case compoundInfo.compoundHScroll of
+	  								(Just {scrollItemPtr})	-> scrollItemPtr
+	  								_						-> OSNoWindowPtr
+	  vPtr						= case compoundInfo.compoundVScroll of
+	  								(Just {scrollItemPtr})	-> scrollItemPtr
+	  								_						-> OSNoWindowPtr
+	  f							= osDestroyCompoundControl wItemPtr hPtr vPtr
 	  ids						= maybeToList wItemId ++ ids
 	  info						= getWItemCompoundInfo wItemInfo
-	# tb						= osSetCompoundShow wPtr wItemPtr (posSizeToRect wItemPos wItemSize) False tb
+	# tb						= osSetCompoundShow wPtr wItemPtr (posSizeToRect wItemPos wItemSize) (posSizeToRect wItemPos wItemSize) False tb
 	  itemH						= {itemH & wItems=itemHs}
 	= (rids,ids,f o disposeClipState info.compoundLookInfo.compoundClip o fs,itemH,tb)
 
@@ -233,17 +243,47 @@ disposeWItemHandle wPtr itemH=:{wItemKind=IsRadioControl,wItemId,wItemInfo} tb
 									) items tb
 	= ([],maybeToList wItemId,stateMap2 (\{radioItemPtr}->osDestroyRadioControl radioItemPtr) items,itemH,tb)
 
+disposeWItemHandle wPtr itemH=:{wItemKind=IsTextControl,wItemId,wItemPtr,wItemPos,wItemSize,wItemInfo} tb
+	# textInfo			= getWItemTextInfo wItemInfo
+	# itemRect			= posSizeToRect wItemPos wItemSize
+	# tb				= osSetTextControlShow wPtr wItemPtr itemRect itemRect False (textInfo.textInfoText) tb
+	= ([],maybeToList wItemId,osDestroyTextControl wItemPtr,itemH,tb)
+
+disposeWItemHandle wPtr itemH=:{wItemKind=IsPopUpControl,wItemId,wItemPtr,wItemPos,wItemSize,wItemInfo} tb
+	# popupInfo			= getWItemPopUpInfo wItemInfo
+	# editPtr			= mapMaybe (\{popUpEditPtr}->popUpEditPtr) popupInfo.popUpInfoEdit
+	# itemRect			= posSizeToRect wItemPos wItemSize
+	# tb				= osSetPopUpControlShow wPtr wItemPtr itemRect False tb
+	= ([],maybeToList wItemId,osDestroyPopUpControl wItemPtr editPtr,itemH,tb)
+
 disposeWItemHandle wPtr itemH=:{wItemKind,wItemId,wItemPtr,wItemPos,wItemSize} tb
-	# tb				= hide wPtr wItemPtr (posSizeToRect wItemPos wItemSize) False tb
+	# tb				= case custom of
+							False	-> hide wPtr wItemPtr (posSizeToRect wItemPos wItemSize) False tb
+							True	-> hide` wPtr wItemPtr (posSizeToRect wItemPos wItemSize) (posSizeToRect wItemPos wItemSize) False tb
 	= ([],maybeToList wItemId,dispose wItemPtr,itemH,tb)
 where
-	(hide,dispose)		= case wItemKind of
-							IsPopUpControl			-> (osSetPopUpControlShow,			osDestroyPopUpControl)
-							IsSliderControl			-> (osSetSliderControlShow,			osDestroySliderControl)
-							IsTextControl			-> (osSetTextControlShow,			osDestroyTextControl)
-							IsEditControl			-> (osSetEditControlShow,			osDestroyEditControl)
-							IsButtonControl			-> (osSetButtonControlShow,			osDestroyButtonControl)
-							IsCustomButtonControl	-> (osSetCustomButtonControlShow,	osDestroyCustomButtonControl)
-							IsCustomControl			-> (osSetCustomControlShow,			osDestroyCustomControl)
+	(custom,dispose)= case wItemKind of
+//							IsPopUpControl			-> (osSetPopUpControlShow,			osDestroyPopUpControl)
+							IsSliderControl			-> (False,	osDestroySliderControl)
+//							IsTextControl			-> (osSetTextControlShow,			osDestroyTextControl)
+							IsEditControl			-> (False,	osDestroyEditControl)
+							IsButtonControl			-> (False,	osDestroyButtonControl)
+							IsCustomButtonControl	-> (True,	osDestroyCustomButtonControl)
+							IsCustomControl			-> (True,	osDestroyCustomControl)
 							_						-> windowdisposeFatalError "disposeWItemHandle" ("unmatched ControlKind: "+++toString wItemKind)
-
+	hide = case wItemKind of
+//							IsPopUpControl			-> osSetPopUpControlShow
+							IsSliderControl			-> osSetSliderControlShow
+//							IsTextControl			-> osSetTextControlShow
+							IsEditControl			-> osSetEditControlShow
+							IsButtonControl			-> osSetButtonControlShow
+							_						-> windowdisposeFatalError "disposeWItemHandle" ("unmatched ControlKind: "+++toString wItemKind)
+	hide` = case wItemKind of
+							IsCustomButtonControl	-> osSetCustomButtonControlShow
+							IsCustomControl			-> osSetCustomControlShow
+							_						-> windowdisposeFatalError "disposeWItemHandle" ("unmatched ControlKind: "+++toString wItemKind)
+/*	PA: now in StdLibExt:StdMaybe
+maybeToList :: !(Maybe .x) -> [.x]
+maybeToList (Just x)	= [x]
+maybeToList _			= []
+*/

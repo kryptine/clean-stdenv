@@ -6,17 +6,25 @@ implementation module windowhandle
 
 import	StdBool, StdInt
 import	StdControlDef, StdMaybe, StdWindowDef
-from	ospicture	import Pen
-from	ostypes		import OSWindowPtr
 import	commondef, keyfocus, receiverhandle
+import	ospicture, ostypes
 
+//import windowcursor
+::	CursorInfo
+	=	{	cInfoChanged	:: !Bool							// True if cLocalRgn or cMouseWasInRgn has changed
+		,	cLocalRgn		:: !OSRgnHandle					// Background region of active window
+		,	cMouseWasInRgn	:: !Bool							// Previous mouse was in background region
+		,	cLocalShape		:: !CursorShape					// Cursor shape of active window
+		,	cGlobalSet		:: !Bool							// Global cursor is set
+		,	cGlobalShape	:: !CursorShape					// Global cursor shape
+		}
 
 ::	*ControlState ls pst										// The internal implementation of a control
 	:==	WElementHandle ls pst									// is a WElementHandle
 
 ::	*WindowHandles pst											// Windows currently are only dialogs
 	=	{	whsWindows		:: *[*WindowStateHandle pst]		// The windows and their controls of a process
-//		,	whsCursorInfo	:: CursorInfo						// The global cursor information
+		,	whsCursorInfo	:: !CursorInfo						// The global cursor information
 		,	whsNrWindowBound:: !Bound							// The maximum number of windows that are allowed to be opened
 		,	whsModal		:: !Bool							// Flag: the window system is modal (used in combination with modal dialogues)
 		,	whsFinalModalLS	:: ![FinalModalLS]					// The final local states of terminated modal dialogs
@@ -330,3 +338,4 @@ wElementHandleToControlState wH = wH
 
 controlStateToWElementHandle :: !*(ControlState .ls .pst) -> *WElementHandle .ls .pst
 controlStateToWElementHandle wH = wH
+

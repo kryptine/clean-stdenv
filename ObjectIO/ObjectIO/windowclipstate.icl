@@ -7,8 +7,7 @@ implementation module windowclipstate
 import	StdBool, StdList, StdMisc
 import	osrgn, oswindow
 import	commondef, wstate
-from	windowaccess	import getWItemRadioInfo,  getWItemCheckInfo,  getWItemCompoundInfo, getWindowInfoWindowData,
-								getCompoundContentRect, getCompoundHScrollRect, getCompoundVScrollRect, getWindowContentRect
+from	windowaccess	import getWItemRadioInfo,  getWItemCheckInfo,  getWItemCompoundInfo, getWindowInfoWindowData
 from	wstateaccess	import getWItemRadioInfo`, getWItemCheckInfo`, getWItemCompoundInfo`
 
 
@@ -350,7 +349,7 @@ where
 	domainRect					= windowInfo.windowDomain
 	hasScrolls					= (isJust windowInfo.windowHScroll, isJust windowInfo.windowVScroll)
 	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
-	contentRect					= getWindowContentRect wMetrics visScrolls (sizeToRect whSize)
+	contentRect					= osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize)
 
 validateWindowClipState` :: !OSWindowMetrics !Bool !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
 validateWindowClipState` wMetrics allClipStates wPtr wH=:{whKind`,whWindowInfo`,whItems`,whSize`,whDefaultId`,whShow`} tb
@@ -379,7 +378,7 @@ where
 	domainRect					= windowInfo.windowDomain
 	hasScrolls					= (isJust windowInfo.windowHScroll, isJust windowInfo.windowVScroll)
 	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize`) hasScrolls
-	contentRect					= getWindowContentRect wMetrics visScrolls (sizeToRect whSize`)
+	contentRect					= osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize`)
 
 forceValidWindowClipState :: !OSWindowMetrics !Bool !OSWindowPtr !(WindowHandle .ls .pst) !*OSToolbox -> (!WindowHandle .ls .pst,!*OSToolbox)
 forceValidWindowClipState wMetrics allClipStates wPtr wH=:{whKind,whWindowInfo,whItems,whSize,whDefaultId,whShow} tb
@@ -402,7 +401,7 @@ where
 	domainRect					= windowInfo.windowDomain
 	hasScrolls					= (isJust windowInfo.windowHScroll, isJust windowInfo.windowVScroll)
 	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
-	contentRect					= getWindowContentRect wMetrics visScrolls (sizeToRect whSize)
+	contentRect					= osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize)
 
 forceValidWindowClipState` :: !OSWindowMetrics !Bool !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
 forceValidWindowClipState` wMetrics allClipStates wPtr wH=:{whKind`,whWindowInfo`,whItems`,whSize`,whDefaultId`,whShow`} tb
@@ -425,7 +424,7 @@ where
 	domainRect					= windowInfo.windowDomain
 	hasScrolls					= (isJust windowInfo.windowHScroll, isJust windowInfo.windowVScroll)
 	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize`) hasScrolls
-	contentRect					= getWindowContentRect wMetrics visScrolls (sizeToRect whSize`)
+	contentRect					= osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize`)
 
 
 invalidateWindowClipState :: !(WindowHandle .ls .pst) -> WindowHandle .ls .pst
@@ -468,7 +467,7 @@ where
 	domainRect					= compoundInfo.compoundDomain
 	hasScrolls					= (isJust compoundInfo.compoundHScroll, isJust compoundInfo.compoundVScroll)
 	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple wItemSize) hasScrolls
-	contentRect					= getCompoundContentRect wMetrics visScrolls (posSizeToRect wItemPos wItemSize)
+	contentRect					= osGetCompoundContentRect wMetrics visScrolls (posSizeToRect wItemPos wItemSize)
 
 validateCompoundClipState` :: !OSWindowMetrics !Bool !OSWindowPtr !(Maybe Id) !Bool !WItemHandle` !*OSToolbox -> (!WItemHandle`,!*OSToolbox)
 validateCompoundClipState` wMetrics allClipStates wPtr defId isVisible itemH=:{wItemShow`, wItemPos`,wItemSize`,wItemInfo`,wItems`} tb
@@ -491,7 +490,7 @@ where
 	domainRect					= compoundInfo.compoundDomain
 	hasScrolls					= (isJust compoundInfo.compoundHScroll, isJust compoundInfo.compoundVScroll)
 	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple wItemSize`) hasScrolls
-	contentRect					= getCompoundContentRect wMetrics visScrolls (posSizeToRect wItemPos` wItemSize`)
+	contentRect					= osGetCompoundContentRect wMetrics visScrolls (posSizeToRect wItemPos` wItemSize`)
 
 forceValidCompoundClipState :: !OSWindowMetrics !Bool !OSWindowPtr !(Maybe Id) !Bool !(WItemHandle .ls .pst) !*OSToolbox -> (!WItemHandle .ls .pst,!*OSToolbox)
 forceValidCompoundClipState wMetrics allClipStates wPtr defId isVisible itemH=:{wItemShow,wItemPos,wItemSize,wItemInfo,wItems} tb
@@ -507,7 +506,7 @@ where
 	domainRect					= compoundInfo.compoundDomain
 	hasScrolls					= (isJust compoundInfo.compoundHScroll, isJust compoundInfo.compoundVScroll)
 	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple wItemSize) hasScrolls
-	contentRect					= getCompoundContentRect wMetrics visScrolls (posSizeToRect wItemPos wItemSize)
+	contentRect					= osGetCompoundContentRect wMetrics visScrolls (posSizeToRect wItemPos wItemSize)
 
 forceValidCompoundClipState` :: !OSWindowMetrics !Bool !OSWindowPtr !(Maybe Id) !Bool !WItemHandle` !*OSToolbox -> (!WItemHandle`,!*OSToolbox)
 forceValidCompoundClipState` wMetrics allClipStates wPtr defId isVisible itemH=:{wItemShow`,wItemPos`,wItemSize`,wItemInfo`,wItems`} tb
@@ -523,18 +522,20 @@ where
 	domainRect					= compoundInfo.compoundDomain
 	hasScrolls					= (isJust compoundInfo.compoundHScroll, isJust compoundInfo.compoundVScroll)
 	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple wItemSize`) hasScrolls
-	contentRect					= getCompoundContentRect wMetrics visScrolls (posSizeToRect wItemPos` wItemSize`)
+	contentRect					= osGetCompoundContentRect wMetrics visScrolls (posSizeToRect wItemPos` wItemSize`)
 
 invalidateCompoundClipState :: !(WItemHandle .ls .pst) -> WItemHandle .ls .pst
 invalidateCompoundClipState itemH=:{wItemInfo}
 	# compoundInfo	= getWItemCompoundInfo wItemInfo
 	  compoundLook	= compoundInfo.compoundLookInfo
 	  clipState		= compoundLook.compoundClip
-	= {itemH & wItemInfo=CompoundInfo {compoundInfo & compoundLookInfo={compoundLook & compoundClip={clipState & clipOk=False}}}}
+//	= {itemH & wItemInfo=CompoundInfo {compoundInfo & compoundLookInfo={compoundLook & compoundClip={clipState & clipOk=False}}}}
+	= {itemH & wItemInfo=CompoundInfo {compoundInfo & compoundLookInfo.compoundClip.clipOk=False}}
 
 invalidateCompoundClipState` :: !WItemHandle` -> WItemHandle`
 invalidateCompoundClipState` itemH=:{wItemInfo`}
 	# compoundInfo	= getWItemCompoundInfo` wItemInfo`
 	  compoundLook	= compoundInfo.compoundLookInfo
 	  clipState		= compoundLook.compoundClip
-	= {itemH & wItemInfo`=CompoundInfo` {compoundInfo & compoundLookInfo={compoundLook & compoundClip={clipState & clipOk=False}}}}
+//	= {itemH & wItemInfo`=CompoundInfo` {compoundInfo & compoundLookInfo={compoundLook & compoundClip={clipState & clipOk=False}}}}
+	= {itemH & wItemInfo`=CompoundInfo` {compoundInfo & compoundLookInfo.compoundClip.clipOk=False}}

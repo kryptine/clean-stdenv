@@ -2,12 +2,9 @@ definition module osdocumentinterface
 
 //	Clean object I/O library, version 1.2
 
-import	StdMaybe, StdOverloaded
 import	StdIOCommon
 from	menuCrossCall_12	import HMENU
-from	ostoolbox			import OSToolbox
-from	ostoolbar			import OSToolbar, OSToolbarHandle
-from	ostypes				import HWND
+import ostoolbar, ostoolbox, ostypes
 
 ::	OSDInfo
 	=	OSMDInfo !OSMDInfo
@@ -70,3 +67,8 @@ osCloseOSDInfo:: !OSDInfo    !*OSToolbox -> *OSToolbox
 /*	getOSDInfoOSToolbar retrieves the OSToolbar, if any.
 */
 getOSDInfoOSToolbar :: !OSDInfo -> Maybe OSToolbar
+
+/*	osOSDInfoIsActive tests if the given OSDInfo represents the interactive process with the
+	active menu system. (Always True on Windows; use menu bar on Mac.)
+*/
+osOSDInfoIsActive :: !OSDInfo !*OSToolbox -> (!Bool, !*OSToolbox)
