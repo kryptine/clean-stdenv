@@ -4,7 +4,7 @@ import StdEnv
 import StdIO
 import genericgecs
 import StdGEC, StdGECExt, StdAGEC
-import basicAGEC, examplesAGEC
+import basicAGEC, calcAGEC
 import StdGecComb
 
 // TO TEST JUST REPLACE THE EXAMPLE NAME IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
@@ -16,7 +16,7 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	testX`//example_cnt6
+ 	example_t3//example_cnt6
  	world  
 
 :: T = C1 (P Int (AGEC Int))
