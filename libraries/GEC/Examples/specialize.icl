@@ -11,21 +11,17 @@ derive gGEC BurgelijkeStaat, Bimap
 // one simply defines a bimap from the original type to an AGEC of that type
 
 Start:: *World -> *World
-Start world = startGEC myeditor2 world
+Start world = startGEC myeditor world
 
-import tree
-derive gGEC Tree
-derive defval Tree
-
-myeditor2 = startCircuit mycircuit defaultv
+myeditor = startCircuit mycircuit defaultv
 where
 	mycircuit =  edit "Family Tree Editor"
 
-	defaultv :: Tree Family
+	defaultv :: Family
 	defaultv =  defval`
 
 // data domain
-:: Family	 	 	=	Family    		Persoon BurgelijkeStaat (Viewbe Partner)
+:: Family	 	 	=	Family    		Persoon BurgelijkeStaat (Maybe Partner)
 :: BurgelijkeStaat	=	Married			
 					|	Divorced		
 					|	Single 
@@ -35,11 +31,9 @@ where
 					| 	Woman 			String
 
 derive gGEC Persoon
-derive gGEC Maybe
 
-//derive gGEC Family
-//derive gGEC Kids
-//derive gGEC Partner
+derive gGEC Maybe
+//derive gGEC Family, Kids, Partner
 
 
 gGEC{|Family|} gecArgs pSt 
@@ -50,11 +44,11 @@ familieAGEC f = mkAGEC (to_BimapGEC bimapFamily f) "Family"
 where
 	bimapFamily = {map_to = map_to, map_from = map_from}
 
-	map_to (Family p1 Single _) 					      =  (p1 <|> Single       <|> toViewbe Nothing)
-	map_to (Family p1=:(Woman v) any  (NoObject Nothing)) =  (p1 <|> any          <|> toViewbe mandef ) 
-	map_to (Family p1    	     any  (NoObject Nothing)) =  (p1 <|> any          <|> toViewbe vrouwdef) 
-	map_to (Family p1            any   partners)		  =  (p1 <|> any          <|> partners)
-	map_from (p1 <|> bs <|> partners) 					  =   Family p1 bs partners
+	map_to (Family p1 Single _) 				=  (p1 <|> Single       <|> Nothing)
+	map_to (Family p1=:(Woman v) any  Nothing) 	=  (p1 <|> any          <|> mandef ) 
+	map_to (Family p1    	     any  Nothing) 	=  (p1 <|> any          <|> vrouwdef) 
+	map_to (Family p1            any   partners)=  (p1 <|> any          <|> partners)
+	map_from (p1 <|> bs <|> partners) 			=   Family p1 bs partners
 
 	mandef 		= Just (Partner (Man "")   NoKids) 
 	vrouwdef 	= Just (Partner (Woman "") NoKids) 
@@ -73,7 +67,7 @@ where
 							[] -> NoKids
 							list -> Kids list
 
-		defaultfam = (Family (Man "") Single (NoObject Nothing))
+		defaultfam = (Family (Man "") Single (Nothing))
 
 gGEC{|Partner|} gecArgs pSt 
 = Specialize defval PartnerAGEC gecArgs pSt
@@ -90,17 +84,26 @@ where
 
 // additional hacking conversions funcions just to hide constructors on one level
 
-:: Viewbe a			:== NoObject (Maybe (YesObject a))
+/*
 
-toViewbe :: (Maybe a) -> (Viewbe a)
-toViewbe (Just v) =  NoObject (Just (YesObject v)) 
-toViewbe Nothing  =  NoObject Nothing 
+gGEC{|Maybe|} geca gecArgs pSt 
+= Specialize Nothing MaybeAGEC gecArgs pSt
+where
+	MaybeAGEC n = mkxAGEC (editor geca) (to_BimapGEC bimapMaybe Nothing) "Maybe"
 
-fromViewbe :: (Viewbe a) -> (Maybe a)
-fromViewbe (NoObject (Just (YesObject v))) = Just v 
-fromViewbe (NoObject Nothing) = Nothing
+	bimapMaybe = {map_to = map_to, map_from = map_from}
+	where
+		map_to (Nothing) = undef
+		map_to (Just a)  = a
 
-//
+		map_from a = Just a
+
+//(A.u:a:TgGEC b *(PSt .a)) -> TgGEC b *(PSt .c) conflicts with derived type 
+//(A.u:a:TgGEC b *(PSt .a)) -> TgGEC b *(PSt .c)
+
+*/			
+//	editor :: (A. .ps : TgGEC a *(PSt .ps)) -> (TgGEC a *(PSt .ps)) //| bimap {|*|} ps
+	editor geca = geca
 
 gGEC{|(->)|} gGECa gGECb args=:{gec_value = Just (id), update = modeupdate} pSt
 = createDummyGEC OutputOnly (id) modeupdate pSt
@@ -127,7 +130,7 @@ defval` = defval {|*|}
 
 // try out
 
-getdict :: (t a) -> ((t a),(InfraGEC a (PSt .ps))) | gGEC{|*|} a & bimap{|*|} ps
+getdict :: (t a) -> ((t a),(TgGEC a (PSt .ps))) | gGEC{|*|} a & bimap{|*|} ps
 getdict ar = (ar,dict)
 where
 	dict = gGEC {|*|}
@@ -176,6 +179,11 @@ where
 	convert (Just (partner <|> afamily)) = Just (partner,map fromView (^^ afamily))
 
 
+			map_to (Nothing) = NoObject Nothing 
+			map_to (Just a)  = NoObject (Just (YesObject a)) 
+
+			map_from (NoObject Nothing) = Nothing
+			map_from (NoObject (Just (YesObject a))) = Just a
 */
 
 
