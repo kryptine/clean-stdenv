@@ -6,68 +6,93 @@ import StdGeneric
 import htmlEncodeDecode
 import GenParse, GenPrint
 
-derive gPrint (,), UpdValue
-derive gParse (,), UpdValue
-derive gHpr (,)
+derive gPrint (,), (,,), UpdValue
+derive gParse (,), (,,), UpdValue
+derive gHpr   (,), (,,)
+derive gUpd		   (,,)
+ 
+:: HSt 			:== (InputId,[FormState],String)	// all form sates are collected here ... 	
+:: FormState 	:== (FormID,FormValue)				// state of a form to remember
+:: FormId	 	:== String							// unique id identifying the form
+:: FormValue 	:== String							// current Clean value to remember encoded in a String
+:: InputId	 	:== Int								// unique id for every constructor and basic value appearing in the state
 
-:: HSt 			:== ([FormState],InputId)	// all form sates are collected here ... 	
-:: FormState 	:== (FormID,FormValue)		// state of a form to remember
-:: FormID	 	:== String					// unique id identifying the form
-:: FormValue 	:== String					// current Clean value to remember encoded in a String
-:: InputId	 	:== Int						// unique id for every constructor and basic value appearing in the state
+:: FormUpdate	:== (InputId,UpdValue)		// info obtained when form is updated
+
+:: UpdValue 	= UpdI Int							// new integer value
+				| UpdR Real							// new real value
+				| UpdC String						// choose indicated constructor 
+				| UpdS String						// new piece of text
 
 
-mkHSt :: HSt
-mkHSt = ([],0)
+mkHSt :: String -> HSt
+//mkHSt gbst :: HSt
+mkHSt gbst = (0,[],gbst)
 
 // top level function given to end user
 // it collects the html page to display, and returns the contents of all Clean GEC's / Forms created
 
 doHtml :: (HSt -> (Html,HSt)) *World -> *World
 doHtml pagehandler world 
-# (html,hst) = pagehandler mkHSt
-// find out how store the global hst in the page somehow ...
 = print_to_stdout html world
-
-//= print_to_stdout [(id,urlDecodeS state) \\ (id,state) <- fst hst ] world   // just testing state collected
-
-mkHGEC :: FormID (a -> a) a HSt -> (a,(Body,HSt)) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
-mkHGEC uniqueid update v (states,inidx) 
-= (nv,gHGEC{|*|} nv ([(uniqueid,state):states],0))
 where
-	state 	= encodeInfo nv
-	
-	nv = updClean uniqueid update v	 
+	(html,(_,lhst,_))  // the collection of local states is saved in the global state: easy thanks to lazy evaluation !
+		= pagehandler (mkHSt (urlEncodeState (reverse lhst))) 
 
-	updClean :: FormID (a -> a) a -> a | gUpd{|*|} a & gParse{|*|} a
-	updClean uniqueid update v 
-		= case decodeInput1 of
-			// update of this form detected
-			(Just (pos,updval), Just formid, Just state) 	
-				-> if (formid == uniqueid)
-						(update (snd (gUpd{|*|} (UpdSearch updval pos) state)))
-						v //state
-			// no update, but I can find the state
-			(_, Just formid, Just state) 		
-					-> if (formid == uniqueid)
-							state
-							v 
-			else	-> v	
+mkHGEC :: FormID (HMode a)  a HSt -> (a,(Body,HSt)) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
+mkHGEC uniqueid mode v (inidx,lhsts,ghst) 
+= (nv,gHGEC{|*|} nv (0,[(uniqueid,lhst):lhsts],ghst))
+where
+	lhst 	= encodeInfo  nv
+	
+	nv = updClean uniqueid mode v	 
+
+	updClean :: FormID (HMode a) a -> a | gUpd{|*|} a & gParse{|*|} a
+	updClean uniqueid mode v 
+		= case (decodeInput1 uniqueid,mode) of
+			// an update is for this form is detected
+			((Just (pos,updval), Just oldstate),Edit update) -> (update (snd (gUpd{|*|} (UpdSearch updval pos) oldstate)))
+			// no update, look for it previous state
+			((Nothing, Just oldstate),Edit update)			-> oldstate
+			// no update, look for it previous state
+			((Nothing, Just oldstate),Set)					-> v
+			// no update, no previous state, so take the initial value as state
+			else											-> v	
 	where
-		decodeInput1 :: (Maybe (Int,UpdValue), Maybe String, Maybe a) | gParse{|*|} a
-		decodeInput1
-		= case CheckUpdateInfo of
-			(Just (n,UpdC s),	Just "" ,formid,state) = (Just (n,UpdC s),formid,state)
-			else = case CheckUpdateInfo of
-					(Just (n,UpdI i),	Just ni,formid,state) = (Just (n,UpdI ni),formid,state) 
-					else = case CheckUpdateInfo of
-							(Just (n,UpdR r),	Just nr,formid,state) = (Just (n,UpdR nr),formid,state) 
-							else = case CheckUpdateInfo of
-								(Just (n,UpdS s),	Just ns,formid,state)	= (Just (n,UpdS ns),formid,state) 
-								(upd,new,formid,state) = (upd,formid,state)
+		decodeInput1 :: String -> (Maybe FormUpdate, Maybe a) | gParse{|*|} a
+		decodeInput1 uniqueid
+		| CheckUpdateId == uniqueid// this state is updated
+		= case CheckUpdate of
+			(Just (sid,pos,UpdC s), Just "") 						= (Just (pos,UpdC s)  ,find sid CheckGlobalState)
+			(Just (sid,pos,UpdC s), _) 								= (Just (pos,UpdC s)  ,find sid CheckGlobalState)
+			else = case CheckUpdate of
+					(Just (sid,pos,UpdI i), Just ni) 				= (Just (pos,UpdI ni) ,find sid CheckGlobalState) 
+					else = case CheckUpdate of
+							(Just (sid,pos,UpdR r), Just nr) 		= (Just (pos,UpdR nr) ,find sid CheckGlobalState) 
+							else = case CheckUpdate of
+								(Just (sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns) ,find sid CheckGlobalState) 
+								(Just (sid,pos,UpdS s),	_)			= (Just (pos,UpdS s)  ,find sid CheckGlobalState) 
+								(upd,new) 							= abort "cannot find global state" //(Nothing,Nothing)
+		| otherwise = (Nothing, find uniqueid CheckGlobalState)
+
+		find :: FormId  String -> (Maybe a) | gParse{|*|} a
+		find formid   ""	= Nothing
+		find formid   input
+		# (result,input) = ShiftState input
+		= case (result,input) of
+			(Just (thisid,a),input) -> if (thisid == formid) (Just a) (find formid input)
+			(Nothing, input)		-> find formid input
+
+
+	
+//			find formid  [(stateid,state):states]
+//			| True	= abort "id gevonden" //parseString state
+//			| formid == stateid	= abort "id gevonden" //parseString state
+//			| otherwise			= abort "formstate gevonden" //find formid (Just states)
+//			find formid  else = Nothing
 
 // automatic tranformation of any Clean type to html body
-// the state on the head of the hst is the state for the form we create here
+// the lhst on the head of the hst is the lhst for the form we create here
 
 generic gHGEC a :: a HSt -> (Body,HSt)		
 gHGEC{|Int|}    i hst 	= toBody i hst
@@ -89,8 +114,9 @@ gHGEC{|CONS of t|} gHc (CONS c) hst
 # (body,hst)	= gHc c hst
 = (Table [Tbl_CellPadding 0, Tbl_CellSpacing 0] [[selector,body]],hst)
 where
-	mkConsSelector thiscons (states,inidx) 
-						= (mkConsSel inidx allnames myindex (hd states), (states,inidx+1))
+	mkConsSelector thiscons (inidx,lhst=:[(formid,mystate):states],ghst) 
+//						= (mkConsSel inidx allnames myindex (hd lhsts), (inidx+1,lhsts))
+						= (mkConsSel inidx allnames myindex formid ghst, (inidx+1,lhst,ghst))
 	where
 		myname   = thiscons.gcd_name
 		allnames = map (\n -> n.gcd_name) thiscons.gcd_type_def.gtd_conses
@@ -102,8 +128,8 @@ where
 			| otherwise = find x ys (idx+1)
 			find x [] idx = abort ("cannot find index " +++ x )
 
-	mkConsSel:: Int [String] Int FormState -> Body
-	mkConsSel id list nr formstate=:(formid,state)
+	mkConsSel:: Int [String] Int String String -> Body
+	mkConsSel inidx list nr formid ghst
 		= (Form	[ Frm_Action MyPhP
 				, Frm_Name formid
 				, Frm_Method Post
@@ -111,10 +137,10 @@ where
 				[ 	Select 	[ Sel_Name ("ConsSelector")
 							, `Sel_ElemEvnts (OnChange changescript)
 							]
-							[Option elem [	Opt_Value (encodeUpdate (id,UpdC elem)): if (j == nr) [Opt_Selected Selected] [] ]
+							[Option elem [	Opt_Value (encodeUpdate (formid,inidx,UpdC elem)): if (j == nr) [Opt_Selected Selected] [] ]
 							\\ elem <- list & j <- [0..]
 							]
- 				,	storeHidden formstate 
+ 				,	storeHidden ghst 
 				] )
 		where
 				changescript = "\"javascript: form.submit()\""  
@@ -124,94 +150,86 @@ class toBody a :: a HSt -> (Body,HSt)
 
 instance toBody Int
 where
-	toBody i (states,inidx) 
+	toBody i (inidx,lhsts=:[(uniqueid,lst):lsts],ghst) 
 			= (Form 	[Frm_Action MyPhP, Frm_Name formname, Frm_Method Post, Frm_Style "margin:0"] 
 						 [	Input 	[	Inp_Type Text
 									, 	Inp_Value (IV i)
-									,	Inp_Name (encodeUpdate (inidx,UpdI i))
+									,	Inp_Name (encodeUpdate (uniqueid,inidx,UpdI i))
 									,	Inp_Size defsize
 									]
-						 ,	storeHidden (hd states) 
+						 ,	storeHidden ghst // !! (hd lhsts) 
 						 ]
-						,(states,inidx+1))
+						,(inidx+1,lhsts,ghst))
 	where
-		formname = fst (hd states)
+		formname = fst (hd lhsts)
 
 instance toBody Real
 where
-	toBody r (states,inidx) 
+	toBody r (inidx,lhsts=:[(uniqueid,lst):lsts],ghst) 
 		= (Form 	[Frm_Action MyPhP, Frm_Name formname, Frm_Method Post, Frm_Style "margin:0"] 
 						 [	Input 	[	Inp_Type Text
 									, 	Inp_Value (RV r)
-									,	Inp_Name (encodeUpdate (inidx,UpdR r))
+									,	Inp_Name (encodeUpdate (uniqueid,inidx,UpdR r))
 									,	Inp_Size defsize
 									]
-						 ,	storeHidden (hd states) 
+						 ,	storeHidden ghst //(hd lhsts) 
 						 ]
-						,(states,inidx+1))
+						,(inidx+1,lhsts,ghst))
 	where
-		formname = fst (hd states)
+		formname = fst (hd lhsts)
 
 instance toBody String
 where
-	toBody s (states,inidx)
+	toBody s (inidx,lhsts=:[(uniqueid,lst):lsts],ghst)
 			 = (Form 	[Frm_Action MyPhP, Frm_Name formname, Frm_Method Post, Frm_Style "margin:0"] 
 						 [	Input 	[	Inp_Type Text
 									, 	Inp_Value (SV s)
-									,	Inp_Name (encodeUpdate (inidx,UpdS s))
+									,	Inp_Name (encodeUpdate (uniqueid,inidx,UpdS s))
 									,	Inp_Size defsize
 									]
-						 ,	storeHidden (hd states) 
+						 ,	storeHidden ghst // (hd lhsts) 
 						 ]
-						,(states,inidx + 1))
+						,(inidx+1,lhsts,ghst))
 	where
-		formname = fst (hd states)
+		formname = fst (hd lhsts)
 
-storeHidden ::  FormState -> Body
-storeHidden (idform,state)
+storeHidden ::  String -> Body
+storeHidden ghst
 	 =	Input	[	Inp_Type Hidden
-				,	Inp_Value (SV (encodeHidden (idform,state)))
-				,	Inp_Name idform
+				,	Inp_Value (SV  ghst) // global lhst
+//				,	Inp_Value (SV (encodeHidden (idform,lhst))) // global lhst
+				,	Inp_Name "hidden"									
 				]
 
 // special representations, buutons and the like
 
 :: CHButton = CHPressed | CHButton Int String
 
-gHGEC{|CHButton|} (CHButton size bname) (states,inidx) 
+gHGEC{|CHButton|} (CHButton size bname) (inidx,lhsts=:[(uniqueid,lst):lsts],ghst) 
 = (Form [Frm_Action MyPhP, Frm_Name "thisbutton", Frm_Method Post, Frm_Style "margin:0"] 
 						 [	Input 	[	Inp_Type Button
 									, 	Inp_Value (SV bname)
-									,	Inp_Name (encodeUpdate (inidx,UpdS bname))
+									,	Inp_Name (encodeUpdate (uniqueid,inidx,UpdS bname))
 									,	Inp_Size size
 									, 	`Inp_MouseEvnts (OnClick submitscript)
 									]
-						 ,	storeHidden2 ((inidx,UpdS bname),hd states) 
+						 ,	storeHidden2 
 						 ]
-						, (states,inidx+1))
+						, (inidx+1,lhsts,ghst))
 where
-	submitscript = "\"javascript: var y = document.forms.thisbutton + document.forms.globalform; y.submit()\""  
-//	submitscript = "\"javascript: form.submit() ; document.forms.globalform.submit()\""  
-//	submitscript = "\"javascript: form.submit()\""    // works fine for global state 
-//	submitscript = "\"javascript: form.submit(document.Global.State.value)\""  
+	submitscript = "\"javascript: form.submit()\""    // works fine for global lhst 
 
-	storeHidden2 (upd,fstate=:(id,state)) 
+	storeHidden2
 		=	Input	[	Inp_Type Hidden
-		 			,	Inp_Value (SV ("; " +++ 
-		 								"=;i;" +++ encodeInfo id +++
-		 								";s;" +++ state )) //id
-//		 			,	Inp_Value (SV ("; " +++ encodeInfo fstate +++ ";=")) //id
-		 			,	Inp_Name (encodeUpdate upd +++ 
-		 							";i;" +++ id +++
-		 							";s;" +++ state +++
-		 								encodeHidden fstate ) //state //name
+			 			,	Inp_Value (SV ("; =;i;" +++ //encodeInfo uniqueid +++
+			 								ghst ))
+		 			,	Inp_Name (encodeUpdate (uniqueid,inidx, UpdS  bname) 
+		 										+++
+		 										";i;" 	+++ ghst 
+		 						 )
+		 							
 					]
 
-/*	storeHidden2 (id,state,upd) =	Input	[	Inp_Type Hidden
-							 			,	Inp_Value (SV ("; " +++ encodeInfo state +++ ";=")) //id
-							 			,	Inp_Name (encodeUpdate upd +++ ";"
-
-*/
 gHGEC{|CHButton|} CHPressed hst = gHGEC {|*|} CHPressed hst
 
 gUpd{|CHButton|} (UpdSearch (UpdS name) 0) 	_ = (UpdDone,CHPressed)					// update integer value
@@ -226,13 +244,13 @@ derive gParse CHButton
 
 // tuples are placed next to each other, pairs below each other ...
 
-gHGEC{|(,)|} gHa gHb (a,b) (states,inidx)
-# (ba,hst) = gHa a (states,inidx+1)   // one more for the now invisable (,) constructor 
+gHGEC{|(,)|} gHa gHb (a,b) (inidx,lhsts,ghst)
+# (ba,hst) = gHa a (inidx+1,lhsts,ghst)   // one more for the now invisable (,) constructor 
 # (bb,hst) = gHb b hst
 = (Table [Tbl_CellPadding 0, Tbl_CellSpacing 0] [[ba, bb]],hst)
 
-gHGEC{|(,,)|} gHa gHb gHc (a,b,c) (states,inidx)
-# (ba,hst) = gHa a (states,inidx+1)   // one more for the now invisable (,,) constructor 
+gHGEC{|(,,)|} gHa gHb gHc (a,b,c) (inidx,lhsts,ghst)
+# (ba,hst) = gHa a (inidx+1,lhsts,ghst)   // one more for the now invisable (,,) constructor 
 # (bb,hst) = gHb b hst
 # (bc,hst) = gHc c hst
 = (Table [Tbl_CellPadding 0, Tbl_CellSpacing 0] [[ba, bb, bc]],hst)
@@ -251,10 +269,6 @@ gHGEC{|(,,)|} gHa gHb gHc (a,b,c) (states,inidx)
 			| UpdCreate [ConsPos]
 			| UpdDone
 
-:: UpdValue = UpdI Int			// new integer value
-			| UpdR Real			// new real value
-			| UpdC String		// choose indicated constructor 
-			| UpdS String		// new piece of text
 
 generic gUpd t :: UpdMode t -> (UpdMode,t)
 
@@ -328,27 +342,23 @@ gUpd{|CONS|} gUpdo mode (CONS c) 			// other cases
 derive gUpd (,)
 
 
-// garbage ???
+/* garbage: 
 
-/*
+//# (Head headattr body,hst) = pagehandler mkHSt
+//= print_to_stdout (Head headattr (body ++ [globalstore hst body])) world
+//= print_to_stdout [(id,urlDecodeS state) \\ (id,state) <- fst hst ] world   // just testing state collected
+//where
+	// storing the global state in the hidden field of form "globalform" 
 
-decodeInput :: (Maybe (Int,UpdValue),Maybe a) | gParse{|*|} a
-decodeInput
-=	case UpdateInfo of
-	  (update, "", state, id) 		= (parseString update, parseString state)
-	  (update, newvalue, state, id) 
-	  			= case (parseString update) of
-	  					Just (id,UpdI i) = (Just (id, UpdateI (UpdI i) (parseString newvalue)), parseString state) 
-	  					else = (Nothing,Nothing)	
-
-UpdateI :: UpdValue (Maybe Int) -> UpdValue
-UpdateI (UpdI i) (Just ni) = UpdI ni
-UpdateI val else = val
-
-UpdateR :: UpdValue (Maybe Real) -> UpdValue
-UpdateR (UpdR r) (Just nr) = UpdR nr
-UpdateR val else = val
-
-//			changescript = "\"javascript: window.document.location.href = this.options[this.selectedIndex].value\""
+	// we still have to find out how to submit this info with every input action !!!
+	
+//		globalstore globalstate body
+//			=  Form	[Frm_Action MyPhP, Frm_Name "globalform", Frm_Method Post, Frm_Style "margin:0"] 
+//					[	Input	[	Inp_Type Hidden
+//								,	Inp_Value (SV (decode (fst globalstate)))
+//								,	Inp_Name "GlobalName"
+//								]
+//				 	]
+//	decode globalstate = urlEncodeState (reverse globalstate)
 
 */

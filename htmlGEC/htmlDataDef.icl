@@ -74,10 +74,15 @@ derive gHpr Script_Attr
 derive gHpr Scr_Text
 derive gHpr CharSet
 derive gHpr Defer
-derive gHpr Language
+//derive gHpr Language
 derive gHpr FormElementEvents
 derive gHpr KeyboardEvents
 derive gHpr MouseEvents
+
+gHpr{|Language|} prev JavaScript 	= prev <+ "\"text/javascript\""
+gHpr{|Language|} prev LiveScript 	= prev <+ "\"text/livescript\""
+gHpr{|Language|} prev VbScript 		= prev <+ "\"text/vbscript\""
+gHpr{|Language|} prev Other     	= prev <+ "\"text/other\""
 
 
 gHpr{|Script|} prev (Script scriptattr script)= prev <+> htmlAttrCmnd  "script" scriptattr script

@@ -9,10 +9,10 @@ import StdHtml
 Start world  = doHtml spreadsheet world
 
 spreadsheet hst
-# (table, (tableB,hst)) = table_hv_HGEC "table" inittable    	hst
-# (_,    (rowsumB,hst)) = vertlistHGEC  "vsum"  (rowsum table)  hst
-# (_,    (colsumB,hst)) = horlistHGEC   "hsum"  (colsum table)  hst
-# (_,    (tsumB,  hst)) = mkHGEC        "tsum"  id (sum (rowsum table)) hst
+# (table, (tableB,hst)) = table_hv_HGEC "table" (Edit id) inittable    	hst
+# (_,    (rowsumB,hst)) = vertlistHGEC  "vsum"  Set (rowsum table)  hst
+# (_,    (colsumB,hst)) = horlistHGEC   "hsum"  Set (colsum table)  hst
+# (_,    (tsumB,  hst)) = mkHGEC        "tsum"  Set (sum (rowsum table)) hst
 = (Head 
 		[ Hd_Title "Spreadsheet"
 		] 
@@ -20,6 +20,7 @@ spreadsheet hst
 		, Br
 		, (tableB  <-> rowsumB)
 		, (colsumB <-> tsumB)
+		, T "so the result of the spreadsheet is :", tsumB
 		],hst)
 where
 	rowsum table	= map sum table

@@ -21,26 +21,51 @@ import StdHtml
 
 // HGEC collection:
 
-horlistHGEC :: String [a] HSt -> ([a],(Body,HSt)) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
-horlistHGEC s [] hst  = ([],(EmptyBody,hst))
-horlistHGEC s [x:xs] hst
-# (xs,(xsbody,hst)) 	= horlistHGEC s xs hst
-# (x, (xbody,   hst))  	= mkHGEC (s +++ toString (length xs)) id x hst
-= ([x:xs],(xbody <-> xsbody,hst))
-	
-vertlistHGEC :: String [a] HSt -> ([a],(Body,HSt)) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
-vertlistHGEC s [] hst  = ([],(EmptyBody,hst))
-vertlistHGEC s [x:xs] hst
-# (xs,(xsbody,hst)) 	= vertlistHGEC s xs hst
-# (x, (xbody,   hst))  	= mkHGEC (s +++ toString (length xs)) id x hst
-= ([x:xs],(xbody <|> xsbody,hst))
+counterHGEC 	:: String (HMode a) a 	HSt -> (a,(Body,HSt)) 		| +, -, one,  gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+counterHGEC name mode i hst 
+# (nc, result) = mkHGEC name (Edit updCounter) (toCounter i) hst
+= (fromCounter nc, result)
+where
+	toCounter n = (n,down,up)
 
-table_hv_HGEC :: String [[a]] HSt -> ([[a]],(Body,HSt)) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
-table_hv_HGEC s [] hst = ([],(EmptyBody,hst))
-table_hv_HGEC s [x:xs] hst
-# (xs,(xsbody,hst)) 	= table_hv_HGEC s xs hst
-# (x, (xbody,  hst))  	= horlistHGEC (s +++ toString (length xs)) x hst
+	fromCounter (n,_,_) = n
+
+	updCounter (n,CHPressed,_)  = (n - one,down,up)
+	updCounter (n,_,CHPressed) 	= (n + one,down,up)
+	updCounter else 			= else
+
+	up 		= CHButton defsize "+"
+	down	= CHButton defsize "-"
+
+horlistHGEC :: String (HMode a) [a] HSt -> ([a],(Body,HSt)) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
+horlistHGEC s mode [] hst  = ([],(EmptyBody,hst))
+horlistHGEC s mode [x:xs] hst
+# (xs,(xsbody,hst)) 	= horlistHGEC s mode xs hst
+# (x, (xbody,   hst))  	= mkHGEC (s +++ toString (length xs)) (setelem mode) x hst
+= ([x:xs],(xbody <-> xsbody,hst))
+where
+	setelem Set = Set
+	setelem _   = Edit id
+	
+vertlistHGEC :: String (HMode a) [a] HSt -> ([a],(Body,HSt)) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
+vertlistHGEC s mode [] hst  = ([],(EmptyBody,hst))
+vertlistHGEC s mode [x:xs] hst
+# (xs,(xsbody,hst)) 	= vertlistHGEC s mode xs hst
+# (x, (xbody,   hst))  	= mkHGEC (s +++ toString (length xs)) (setelem mode) x hst
 = ([x:xs],(xbody <|> xsbody,hst))
+where
+	setelem Set = Set
+	setelem _   = Edit id
+
+table_hv_HGEC :: String (HMode a) [[a]] HSt -> ([[a]],(Body,HSt)) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
+table_hv_HGEC s mode [] hst = ([],(EmptyBody,hst))
+table_hv_HGEC s mode [x:xs] hst
+# (xs,(xsbody,hst)) 	= table_hv_HGEC s mode xs hst
+# (x, (xbody,  hst))  	= horlistHGEC (s +++ toString (length xs)) (setelem mode) x hst
+= ([x:xs],(xbody <|> xsbody,hst))
+where
+	setelem Set = Set
+	setelem _   = Edit id
 
 
 
