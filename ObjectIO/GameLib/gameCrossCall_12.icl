@@ -8,11 +8,11 @@ import	clCrossCall_12, gameintrface_12
 import	ostypes
 import code from "cCrossCallGame_121.obj",
 				 "cGameLib_121.obj",
-				 "cOSGameLib_121.obj",
-				 "ddutil.obj",
-				 "Dsutil.obj"
-import code from library "ddraw_library"
-import code from library "dsound_library"
+				 "cOSGameLib_121.obj"
+//				 "ddutil.obj"          
+//				 "dsutil.obj"
+//import code from library "ddraw_library"
+//import code from library "dsound_library"
 
 
 gameCrossCall_12FatalError :: String String -> .x
