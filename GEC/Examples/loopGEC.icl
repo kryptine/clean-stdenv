@@ -5,7 +5,7 @@ import StdGEC, StdGECExt, StdAGEC
 import GecArrow, StdDebug
 
 Start :: !*World -> *World
-Start world = goGui choiceTest1 world  
+Start world = goGui feedbackTest5 world  
 where
 	goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 
@@ -57,11 +57,12 @@ feedbackTest4 = startCircuit (edit "input" >>> feedback (first (arr ((+) 1))) >>
 feedbackTest5 = startCircuit (feedback (second (edit "+1" >>> arr ((+) 1)) >>> first (edit "+100" >>> arr ((+) 100)) >>> probe "result")) (0, 0)
 
 sinkTest1 = startCircuit (edit "input" >>> sink >>> arr (\_ -> -1) >>> display "output") 0
-
+/*
 choiceTest1 = startCircuit (edit "input" >>> g >>> display "output") (RIght False)
 where
 	g :: GecCircuit (EIther Int Bool) (EIther Int Bool)
 	g = left (arr ((+) 1))
+*/
 /*
 choiceTest2 = startCircuit (edit "input" >>> g >>> display "output") (RIght False)
 where
