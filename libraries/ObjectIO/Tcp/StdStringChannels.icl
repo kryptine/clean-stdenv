@@ -3,7 +3,7 @@ implementation module StdStringChannels
 //	Clean Standard Object I/O library, version 1.2
 
 import	StdEnv
-import	StdPSt
+import	StdPSt, StdPStClass
 import	StdChannels, StdTCPDef, StdTCPChannels, StdReceiver, StdEventTCP
 import	receiverdefaccess
 

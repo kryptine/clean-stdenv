@@ -1,6 +1,7 @@
 definition module StdTCP
 
-import	StdChannels,
+import	StdChannelEnv,
+		StdChannels,
 		StdTCPChannels,
 		StdEventTCP,
 		StdStringChannels,
