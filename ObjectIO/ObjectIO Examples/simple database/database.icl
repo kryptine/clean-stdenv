@@ -41,13 +41,6 @@ import StdEnv, StdIO, Notice
 instance zero Entry where
 	zero = {maxwidth=0,fields=[""]}
 
-// fopen for use with accFiles
-fopen2 fileName mode files
-	:==	((ok, file), files2)
-	where
-		(ok, file, files2)
-			=	fopen fileName mode files
-
 CharsInInputBox :== 20						// Input width (number of characters)
 
 Replace			:== True					// Replace current selection when adding new record
@@ -124,7 +117,7 @@ where
 		|	isNothing maybe_dbname
 			=	appPIO beep database
 		#	dbname					= fromJust maybe_dbname
-		#	((open,dbfile),database)= accFiles (fopen2 dbname FReadText) database
+		#	(open,dbfile,database)	= fopen dbname FReadText database
 		|	not open
 			=	appPIO beep database
 		#	(descr,dbfile)			= FReadDescr dbfile
@@ -198,12 +191,12 @@ where
 		editDialog ids
 			=	Dialog "Edit Record" 
 					(	TextControl "" [ControlId editinfoid,ControlWidth (PixelWidth inputboxwidth)]
-					:+:	CompoundControl
+					:+:	LayoutControl
 					(	ListLS
 					[	TextControl field [ControlPos (Left,NoOffset)]
 					\\	field <- descr.fields
 					])	[ControlPos (Left,NoOffset)]
-					:+:	CompoundControl
+					:+:	LayoutControl
 					(	ListLS
 					[	EditControl "" (PixelWidth inputboxwidth) 1 [ControlId (ids!!i),ControlPos (Left,NoOffset)]
 					\\	i <- [1..nr_descrs]
@@ -266,7 +259,7 @@ where
 			=	Dialog "Change Set Up" 
 					(	TextControl "Select Field..." []
 					:+:	RadioControl (radioitems d.fields) (Columns 1) 1 [ControlId selectId]
-					:+:	CompoundControl
+					:+:	LayoutControl
 					(	ButtonControl "&Delete"  [	left,buttonwidth
 												 ,	ControlFunction (noLS (DeleteField fieldDialogId getselectedfield))
 												 ,	ControlTip		"Delete selected field."
@@ -276,7 +269,7 @@ where
 												 ,	ControlTip		"Rename selected field."
 												 ]
 					)	[left]
-					:+:	CompoundControl
+					:+:	LayoutControl
 					(	ButtonControl "&Move"    [	left,buttonwidth
 												 ,	ControlFunction (noLS (MoveField fieldDialogId getselectedfield))
 												 ,	ControlTip		"Move selected field to other position."
@@ -306,7 +299,7 @@ where
 		|	isNothing maybe_dbname
 			=	database
 		#	dbname					= fromJust maybe_dbname
-		#	((open,dbfile),database)= accFiles (fopen2 dbname FWriteText) database
+		#	(open,dbfile,database)	= fopen dbname FWriteText database
 		|	not open
 			=	appPIO beep database
 		#	(close,database)		= accFiles (fclose (seq (writedescriptor++writerecords) dbfile)) database
