@@ -1,7 +1,7 @@
 implementation module EstherScript
 
 import EstherPostParser, EstherTransform, DynamicFileSystem
-import StdBool, StdList, StdMisc, StdParsComb
+import StdBool, StdList, StdMisc, StdParsComb, StdFunc
 
 compose :: !String !*(Esther *env) -> (!Dynamic, !*Esther *env) | DynamicFileSystem, ExceptionEnv, bimap{|*|} env
 compose input env = (compile input catchAllIO handler) env
@@ -13,7 +13,24 @@ where
 		  core = transform{|*|} syntax
 		= generateCode core env`
 
-	handler d env = (dynamic EstherError v :: EstherError, env)
+	handler d env = (dynamic EstherError (foldr (+++) "" v) :: EstherError, env)
+	where
+		(v, t) = toStringDynamic d
+
+evaluate :: !Bool a !Dynamic !*(Esther *env) -> (!a, !*Esther *env) | TC a & TC, DynamicFileSystem, ExceptionEnv, bimap{|*|} env
+evaluate unsafe def input esther 
+	# forceType = dynamic id :: a^ -> a^
+	  core = CoreApply (CoreCode forceType) (CoreCode input)
+	  (output, esther) = (generateCode core catchAllIO handler) esther
+	= case output of
+		(x :: a^) -> (x, esther)
+		(f :: *env^ -> *(a^, *env^)) | unsafe
+			# esther=:{env} = esther
+			  (x, env) = f env
+			-> (x, {esther & env = env})
+		_ -> (def, esther)
+where
+	handler d env = (dynamic EstherError (foldr (+++) "" v) :: EstherError, env)
 	where
 		(v, t) = toStringDynamic d
 

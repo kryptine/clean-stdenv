@@ -12,6 +12,7 @@ import EstherPostParser, EstherTransform, DynamicFileSystem
 :: EstherError = EstherError !String
 
 compose :: !String !*(Esther *env) -> (!Dynamic, !*Esther *env) | DynamicFileSystem, ExceptionEnv, bimap{|*|} env
+evaluate :: !Bool a !Dynamic !*(Esther *env) -> (!a, !*Esther *env) | TC a & TC, DynamicFileSystem, ExceptionEnv, bimap{|*|} env
 
 derive transform NTstatement
 

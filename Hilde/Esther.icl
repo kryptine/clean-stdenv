@@ -2,19 +2,25 @@ module Esther
 
 import StdEnv, EstherScript, EstherStdEnv, DynamicFileSystem
 
-class f a :: a b b
-
-instance f Bimap
-where
-	f = undef
-
-Start :: !*World -> String
+Start :: !*World -> *World
 Start world
-	# st = {searchPath = [], searchCache = [], buildin = stdEnv, env = world}
+	# (console, world) = stdio world
+	  st = {searchPath = [], searchCache = [], buildin = stdEnv, env = world}
+	  (console, st=:{env=world}) = shell console st
+	  (_, world) = fclose console world
+	= world
+	 
+shell console st
+	# console = fwrites "Esther>" console
+	  (input, console) = freadline console
+	| input == "" || input == "\n" = (console, st)
+	# input = input % (0, size input - 1)
 	  (d, st) = compose input st
 	  (v, t) = toStringDynamic d
-	= "\n" +++ input +++ "\n==>\n" +++ v +++ " :: " +++ t +++ "\n"
-where
+	  console = foldl (\f x -> fwrites x f) console v
+	  console = fwrites (" :: " +++ t +++ "\n") console
+	= shell console st
+/*where
 //	input = "[1,3 .. 10]"
 //	input = "(+) one"
 //	input = "(\\((1, 4), (2, 3)) -> True) ((1, 4), (2, 3))"
@@ -40,7 +46,7 @@ where
 //	input = "(\\x -> max (inc x) x) 1"
 //	input = "f\\ x y = 42"
 //	input = "[ x \\\\ x <- [ 1 .. 100 ] ]"
-	input = "2 * 3 * 4"
+	input = "2 * 3 * 4"*/
 
 /*	eval :: !Int !(a -> b) !a -> b
 	eval 1 f x = f x
