@@ -11,8 +11,8 @@ derive gParse (,), (,,), UpdValue
 derive gHpr   (,), (,,)
 derive gUpd		   (,,)
  
-:: HSt 			:== .(InputId,[FormState])	// all form states are collected here ... 	
-:: FormState 	:== (FormID,FormValue)		// state of a form to remember
+:: HSt 			:== (InputId,[FormState])	// all form states are collected here ... 	
+:: FormState 	:== (FormId,FormValue)		// state of a form to remember
 :: FormId	 	:== String					// unique id identifying the form
 :: FormValue 	:== String					// current Clean value to remember encoded in a String
 :: InputId	 	:== Int						// unique id for every constructor and basic value appearing in the state
@@ -43,13 +43,13 @@ where
 
 // experimental function:
 
-mkEditHGEC2:: !FormID !HMode d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkEditHGEC2:: !FormId !HMode d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkEditHGEC2 uniqueid  mode data (inidx,lhst)
 =	case findInLocalStore uniqueid lhst 0 lhst of
 		(Just id, Just state,lhst)	-> mkSetHGEC uniqueid mode state (inidx,lhst)
 		(_,_,				 lhst)	-> mkSetHGEC uniqueid mode data (inidx,lhst)
 where
-	findInLocalStore :: String [(FormID,FormValue)] Int [(FormID,FormValue)] -> (Maybe Int, Maybe d,[(FormID,FormValue)]) | gParse{|*|} d
+	findInLocalStore :: String [(FormId,FormValue)] Int [(FormId,FormValue)] -> (Maybe Int, Maybe d,[(FormId,FormValue)]) | gParse{|*|} d
 	findInLocalStore s [] 			 _ lhst	 = (Nothing,Nothing,lhst)
 	findInLocalStore s [(id,st):lst] n lhst
 	| uniqueid == id = (Just n, parseString st, removeAt n lhst) 
@@ -57,21 +57,21 @@ where
 
 // simple editor for either editing or showing a simple value
 
-mkEditHGEC:: !FormID !HMode d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkEditHGEC:: !FormId !HMode d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkEditHGEC uniqueid  HEdit data hst
 = mkViewHGEC uniqueid HEdit 
 	{toHGEC = toHGECid , updHGEC = \_ v -> v , fromHGEC = \_ v -> v , resetHGEC = Nothing} data hst
 mkEditHGEC uniqueid  mode data hst
 = mkSetHGEC uniqueid mode data hst
 
-mkSetHGEC:: !FormID !HMode d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSetHGEC:: !FormId !HMode d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkSetHGEC uniqueid  mode data hst
 = mkViewHGEC uniqueid mode 
 	{toHGEC = toHGECid , updHGEC = \_ _ -> data , fromHGEC = \_ v -> v , resetHGEC = Nothing} data hst
 
 // editor with feedback to its self
 
-mkSelfHGEC  :: !FormID 	!(d -> d) d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSelfHGEC  :: !FormId 	!(d -> d) d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkSelfHGEC uniqueid cbf initdata hst
 = mkViewHGEC uniqueid HEdit 
 	{toHGEC = toHGECid , updHGEC = update , fromHGEC = \_ v -> v , resetHGEC = Nothing} initdata hst
@@ -81,19 +81,19 @@ where
 	
 // editor which applies the function to its argument
 
-mkApplyHGEC :: !FormID !(d -> d) d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyHGEC :: !FormId !(d -> d) d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkApplyHGEC uniqueid cbf data hst
 = mkViewHGEC uniqueid HDisplay 
 	{toHGEC = toHGECid , updHGEC = \_ v = cbf data , fromHGEC = \_ v -> v, resetHGEC = Nothing} data hst
 
 // editor which applies the function to its argument
 
-mkStoreHGEC :: !FormID 	!(d -> d) d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkStoreHGEC :: !FormId 	!(d -> d) d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkStoreHGEC uniqueid cbf data hst
 = mkViewHGEC uniqueid HDisplay 
 	{toHGEC = toHGECid , updHGEC = \_ v = cbf v , fromHGEC = \_ v -> v, resetHGEC = Nothing} data hst
 
-mkApplyEditHGEC	:: !FormID !d d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyEditHGEC	:: !FormId !d d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkApplyEditHGEC uniqueid inputval initval hst
 = mkViewHGEC uniqueid HEdit 
 	{toHGEC =  toHGECid , updHGEC = update , fromHGEC = \_ v -> v, resetHGEC = Nothing} initval hst
@@ -101,7 +101,7 @@ where
 	update True  newval = newval
 	update False val    = inputval
 
-mkSpecialEditor :: !FormID !HMode !(Bimap d v) d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
+mkSpecialEditor :: !FormId !HMode !(Bimap d v) d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
 mkSpecialEditor fid mode {map_to,map_from} d hst
 = mkViewHGEC fid mode 	{ toHGEC = \d _ -> map_to d
 						, updHGEC = \b v -> map_to (map_from v)
@@ -115,7 +115,7 @@ toHGECid d (Just v) = v
 
 // swiss army nife editor that makes coffee too ...
 
-mkViewHGEC :: !FormID !HMode !(HBimap d v) d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
+mkViewHGEC :: !FormId !HMode !(HBimap d v) d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
 mkViewHGEC uniqueid mode {toHGEC, updHGEC, fromHGEC, resetHGEC} initdata (inidx,lhsts) 
 # ((updview,body),(nr,[(uniqueid,mystore):lhsts])) = gHGEC{|*|} mode nextview (0,[(uniqueid,viewtostore):lhsts])
 = ((fromHGEC2 updview,body),(0,[(uniqueid,encodeInfo2 updview):lhsts]))
@@ -143,7 +143,7 @@ where
 							Nothing -> encodeInfo updview
 							(Just reset)	-> viewtostore
 
-	updateFormInfo :: FormID -> (Bool,Maybe a) | gUpd{|*|} a & gParse{|*|} a
+	updateFormInfo :: FormId -> (Bool,Maybe a) | gUpd{|*|} a & gParse{|*|} a
 	updateFormInfo uniqueid
 		= case (decodeInput1 uniqueid) of
 
@@ -434,14 +434,6 @@ derive gPrint <|>
 
 // to hide a state ::
 
-gHGEC{|CHHidden|} gHa mode (CHHidden a) hst = ((CHHidden a,EmptyBody),hst)
-
-gUpd{|CHHidden|} gHa (UpdSearch any cnt) val	= ((UpdSearch any cnt),val)	// skip hidden stuf, never updated
-gUpd{|CHHidden|} gHa (UpdCreate l)		  _ 	= (UpdCreate l,abort "creation of new hidden values not implemeneted")					// create default value
-gUpd{|CHHidden|} gHa umode 			     any	= (umode,any)				// don't change
-
-derive gParse CHHidden
-derive gPrint CHHidden
 
 gHGEC{|Mode|} gHa mode (Hide a) (inidx,lhsts) 	
 # ((na,nba),hst) = gHa HDisplay a (inidx+1,lhsts)
@@ -471,6 +463,17 @@ gHGEC{|CHButton|} mode (CHButton size bname) (inidx,lhsts=:[(uniqueid,lst):lsts]
 					, 	`Inp_Events [OnClick callClean]
 					] "")
 	, (inidx+1,lhsts))
+gHGEC{|CHButton|} mode v=:(ChButtonPict (height,width) ref) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+= ((v
+			, Input	[ Inp_Type Inp_Image
+					, Inp_Value (SV ref)
+					, Inp_Src ref
+//					, Inp_Value (NQV ref)
+					, Inp_Name (encodeInfo (uniqueid,inidx,UpdS ref))
+					, `Inp_Std [Std_Style ("width:" +++ toString width +++ " height:" +++ toString height)]
+					, `Inp_Events [OnClick callClean]
+					] "")
+	, (incrIndex inidx v,lhsts))
 gHGEC{|CHButton|} mode CHPressed hst = gHGEC {|*|} mode (CHButton defsize "??") hst // end user should reset button
 
 gUpd{|CHButton|} (UpdSearch (UpdS name) 0) 	_ = (UpdDone,CHPressed)					// update integer value
@@ -482,12 +485,17 @@ derive gPrint CHButton
 
 // specialize attempt ...
 
-specialize :: (FormID HMode a *HSt -> ((a,BodyTag),*HSt)) FormID HMode a *HSt -> ((a,BodyTag),*HSt) | gUpd {|*|} a
+specialize :: (FormId HMode a *HSt -> ((a,BodyTag),*HSt)) FormId HMode a *HSt -> ((a,BodyTag),*HSt) | gUpd {|*|} a
 specialize editor name mode v hst=:(inidx,[(myid,mylst):lsts])
-# (UpdSearch _ cnt,v) = gUpd {|*|} (UpdSearch (UpdI 0) -1) v
-# nextidx = inidx + (-1 - cnt)
+//# (UpdSearch _ cnt,v) = gUpd {|*|} (UpdSearch (UpdI 0) -1) v
+//# nextidx = inidx + (-1 - cnt)
+# nextidx = incrIndex inidx v
 # ((v,body),(_,lsts)) = editor codedname mode v (0,lsts)
 = ((v,body),(nextidx,[(myid,mylst):lsts]))
 where
 	codedname = myid +++ "_" +++ toString inidx
 
+incrIndex :: Int v -> Int | gUpd {|*|} v
+incrIndex i v
+# (UpdSearch _ cnt,v) = gUpd {|*|} (UpdSearch (UpdI 0) -1) v
+= i + (-1 - cnt)

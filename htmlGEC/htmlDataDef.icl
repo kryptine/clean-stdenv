@@ -39,7 +39,7 @@ gHpr{|BodyTag|} prev (Bdo attr text)			= prev <+> htmlAttrCmnd "bdo" 		attr		tex
 gHpr{|BodyTag|} prev (Big attr text)			= prev <+> htmlAttrCmnd "big" 		attr		text
 gHpr{|BodyTag|} prev (Blockquote attr text)		= prev <+> htmlAttrCmnd "blockquote"	attr		text
 gHpr{|BodyTag|} prev Br							= prev <+ "<br>"
-gHpr{|BodyTag|} prev (Btn attr text)			= prev <+> htmlAttrCmnd "button" 	attr		text
+gHpr{|BodyTag|} prev (Button attr text)			= prev <+> htmlAttrCmnd "button" 	attr		text
 gHpr{|BodyTag|} prev (Caption attr text)		= prev <+> htmlAttrCmnd "caption" 	attr		text
 gHpr{|BodyTag|} prev (Center attr text)			= prev <+> htmlAttrCmnd "center" 	attr		text
 gHpr{|BodyTag|} prev (Cite attr text)  			= prev <+> htmlAttrCmnd "cite" 		attr		text
@@ -200,6 +200,7 @@ gHpr{|Value|} prev (SV string)	= prev <+ "\"" <+ string <+ "\""
 gHpr{|Value|} prev (IV int)  	= prev <+ toString int  		
 gHpr{|Value|} prev (RV real) 	= prev <+ toString real		
 gHpr{|Value|} prev (BV bool) 	= prev <+ toString bool		
+gHpr{|Value|} prev (NQV string)	= prev <+ string 			
 
 gHpr{|ScriptType|} prev (TypeEcmascript) 	= prev <+ "\"text/Emacscript\""		
 gHpr{|ScriptType|} prev (TypeJavascript) 	= prev <+ "\"text/Javascript\""		
