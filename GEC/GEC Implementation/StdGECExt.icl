@@ -134,3 +134,38 @@ where
 				= pSt
 			(Nothing, pSt)
 				= abort "Could not access WState from window."
+
+createDGEC :: String OutputOnly Bool a  *(PSt .ps) -> (a,*(PSt .ps)) | gGEC{|*|} a & bimap{|*|} ps
+createDGEC title outputOnly hasOBJECT initval pSt
+	# (objId,pSt)	= openOBJECTControlId pSt
+	# (id,pSt)	= openId pSt
+	# (rid,pSt)	= openRId pSt
+	# ((_,Just lst),pSt)	= openModalDialog initval 
+					(Dialog title  (Receiver rid receiverfun [])
+							[	WindowId id
+							, 	WindowViewSize {w=600,h=350}
+							, 	WindowLook     True stdUnfillNewFrameLook
+							, 	WindowPen      [PenBack defWindowBackColour]
+							,	WindowHScroll  (stdScrollFunction Horizontal 20)
+							,	WindowVScroll  (stdScrollFunction Horizontal 20)
+							,	WindowViewDomain {zero & corner2={x=600,y=350}}
+							,	WindowInit		(createEditor rid id objId)
+							,	WindowClose	   (\(ls,ps) -> (ls,closeWindow id ps))
+							]) pSt
+	= (lst,pSt)
+where
+	createEditor rid id objId (ls,pSt)
+	#	guiLoc			= {guiId=id,guiItemPos=(Left,OffsetVector {vy=vOffset, vx=hOffset})}
+	# 	(handlA,pSt)	= openGECVALUE (guiLoc,objId) outputOnly hasOBJECT (Just initval) (myupdate rid) pSt
+	# 	pSt 			= handlA.gecOpenGUI (guiLoc,objId) pSt
+	= handlA.gecGetValue pSt
+
+	myupdate rid r a pst 
+	# (_,pst) =	asyncSend rid a pst
+	=pst
+
+	hOffset		= 10		// The horizontal margin 
+	vOffset		= 10		// The vertical distance between the GUIs of two subsequent GECs
+	
+receiverfun:: a (a,*(PSt .ps)) -> (a,*(PSt .ps))
+receiverfun na (a,pst) = (na,pst)
