@@ -9,7 +9,7 @@ implementation module deltaIOState;
 
 import deltaEventIO;
 from misc    import UEvaluate_2;
-from xwindow import XSetDoubleDownDistance;
+from xwindow import set_dd_distance;
 import ioState;
  
 // RWS ...
@@ -40,4 +40,4 @@ ObscureCursor :: !(IOState s) -> IOState s;
 ObscureCursor io           =  io;
 
 SetDoubleDownDistance :: !Int !(IOState s) -> IOState s;
-SetDoubleDownDistance dist io           =  UEvaluate_2 io (XSetDoubleDownDistance dist);
+SetDoubleDownDistance dist io           =  UEvaluate_2 io (set_dd_distance dist);

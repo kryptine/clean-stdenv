@@ -16,11 +16,11 @@ TimerFunctions = (ShowTimer,TimerOpen,TimerIO,TimerClose,HideTimer);
 
 TimerOpen	:: !(DeviceSystem s (IOState s)) !(IOState s) -> IOState s;
 TimerOpen (TimerSystem timers) io
-	| able =  UEvaluate_2 io` (EnableTheTimer  install);
-	=  UEvaluate_2 io` (DisableTheTimer install);
+	| able =  UEvaluate_2 io` (enable_timer  install);
+	=  UEvaluate_2 io` (disable_timer install);
 		where {
 		io`               =: IOStateSetDevice io (TimerSystemState (int,handles));
-		install           =: InstallXTimer int;
+		install           =: install_timer int;
 	   (able,int,handles)=: CalculateInterval (-1) timers;
 		};
 
@@ -39,11 +39,11 @@ CalculateInterval interval []
 
 ReOpenTimers	:: ![TimerHandle s] !(IOState s) -> IOState s;
 ReOpenTimers timers io
-	| able =  UEvaluate_2 io` (EnableTheTimer  install);
-	=  UEvaluate_2 io` (DisableTheTimer install);
+	| able =  UEvaluate_2 io` (enable_timer  install);
+	=  UEvaluate_2 io` (disable_timer install);
 		where {
 		io`       =: IOStateSetDevice io (TimerSystemState (int,timers));
-		install   =: InstallXTimer int;
+		install   =: install_timer int;
 	   (able,int)=: ReCalcInterval False (-1) timers;
 		};
 
@@ -76,7 +76,7 @@ TimerIO (w,XTimerDevice,e) state io
 	   (timers`,funs)=: TimersIO (int * tstate) timers;
 		(int,timers)  =: TimerSystemState_TimerHandles timerdev;
 		(timerdev,io`)=: IOStateGetDevice io TimerDevice;
-		tstate        =: GetTimerInfo e;
+		tstate        =: get_timer_count e;
 	   };
 TimerIO no_timer_event state io =  (False, state, io);
 
@@ -120,16 +120,16 @@ TimerClose io =  IOStateRemoveDevice (HideTimer io) TimerDevice;
 /*	Hide the Timers before entering a nested interaction */
 
 HideTimer	:: !(IOState s) -> IOState s;
-HideTimer io =  UEvaluate_2 io (DisableTheTimer (InstallXTimer 0));
+HideTimer io =  UEvaluate_2 io (disable_timer (install_timer 0));
 
 /* Show the Timers after quitting a nested interaction */
 
 ShowTimer :: !(IOState s)  -> IOState s;
 ShowTimer io
-	| TimerEnabled timers =  UEvaluate_2 io` (EnableTheTimer  install);
-	=  UEvaluate_2 io` (DisableTheTimer install);
+	| TimerEnabled timers =  UEvaluate_2 io` (enable_timer  install);
+	=  UEvaluate_2 io` (disable_timer install);
 	   where {
-	   install           =: InstallXTimer interval;
+	   install           =: install_timer interval;
 	   (interval,timers) =: TimerSystemState_TimerHandles timer_device;
 	   (timer_device,io`)=: IOStateGetDevice io TimerDevice;
 	   };

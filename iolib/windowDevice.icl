@@ -3,7 +3,7 @@ implementation module windowDevice;
 import StdClass,StdChar,StdInt,StdBool,StdMisc,StdString;
 import commonDef,deltaIOSystem,misc;
 import xkernel,xwindow,xevent,xtypes;
-from xdialog import XPopupModeless;
+from xdialog import popup_modelessdialog;
 import ioState,picture,cursorInternal;
 from deltaWindow import CloseWindows;
 
@@ -40,7 +40,7 @@ Open_windows` w_def=: (ScrollWindow id pos title hsbar vsbar domain
 	    #
 	      (win, pic)= Open_window pos title hsbar vsbar domain msize isize;
 	    #!
-	      window`   = XActivateWindow (SetWindowAttributes win atts);
+	      window`   = activate_window (SetWindowAttributes win atts);
 		=
 			[(w_def`, (window`,pic)) : windows];
    =  windows;
@@ -52,7 +52,7 @@ Open_windows` w_def=: (FixedWindow id pos title domain upd atts) windows| Window
 	#
       (win, pic)= Open_fs_window pos title domain;
 	#!
-      window`   = XActivateWindow (SetWindowAttributes win atts);
+      window`   = activate_window (SetWindowAttributes win atts);
 	=
 		[(w_def`, (window`,pic)) : windows];
    =  windows;
@@ -82,13 +82,13 @@ ReOpen_window active oldwindow w_def=: (ScrollWindow id pos title hsbar vsbar do
       window`   = SetWindowAttributes win atts;
     | active == oldwindow
     #!
-		strict1=XActivateWindow window`;
+		strict1=activate_window window`;
 	=
 		(w_def, (strict1,pic));
 	=
 		(w_def, (window`,pic));
       where {
-      pos`      =: Evaluate_2 pos (DestroyWidget oldwindow);
+      pos`      =: Evaluate_2 pos (destroy_widget oldwindow);
 		};
 
 Open_window :: !WindowPos !WindowTitle !ScrollBarDef !ScrollBarDef !PictureDomain
@@ -96,7 +96,7 @@ Open_window :: !WindowPos !WindowTitle !ScrollBarDef !ScrollBarDef !PictureDomai
    -> Window;
 Open_window (xw,yw) title hsbar=: (ScrollBar (Thumb hthumb) (Scroll hscroll)) vsbar=: (ScrollBar (Thumb vthumb) (Scroll vscroll)) ((x0,y0),(x1,y1)) (wm,hm) (wi,hi)
 	#!
-      strict1=XCreateWindow Scrollable xw yw x0 y0 title hthumb hscroll
+      strict1=create_window Scrollable xw yw x0 y0 title hthumb hscroll
                                  vthumb vscroll w h wm hm wi hi;
     #  (pic, win)= strict1;
 	=
@@ -109,7 +109,7 @@ Open_window (xw,yw) title hsbar=: (ScrollBar (Thumb hthumb) (Scroll hscroll)) vs
 Open_fs_window :: !WindowPos !WindowTitle !PictureDomain -> Window;
 Open_fs_window (xw,yw) title ((x0,y0),(x1,y1))
    #!
-      strict1=XCreateWindow FixedSize xw yw x0 y0 title x0 0 y0 0 w h 0 0 w h;
+      strict1=create_window FixedSize xw yw x0 y0 title x0 0 y0 0 w h 0 0 w h;
    #   (pic, win)= strict1;  // Halbe: was: ...title 0 0 0 0 w h...
 	=
 		(win, NewXPicture pic);
@@ -120,7 +120,7 @@ Open_fs_window (xw,yw) title ((x0,y0),(x1,y1))
 
 WindowIdNotUsed :: !Int !(WindowHandles s) -> Bool;
 WindowIdNotUsed id [(w_def,(w,p)) : windows]
-   | id ==  WindowDef_WindowId w_def  =  Evaluate_2 False (XActivateWindow w);
+   | id ==  WindowDef_WindowId w_def  =  Evaluate_2 False (activate_window w);
    =  WindowIdNotUsed id windows;
 WindowIdNotUsed id windows =  True;
 
@@ -141,7 +141,7 @@ Close_windows` [(w_def, window) : windows]
 Close_windows` windows =  windows;
 
 Close_window :: !Window -> Window;
-Close_window (win,pic) =  (DestroyWidget win,pic);
+Close_window (win,pic) =  (destroy_widget win,pic);
 
 WindowDeviceNotEmpty :: !(DeviceSystemState s) -> Bool;
 WindowDeviceNotEmpty (WindowSystemState []) =  False;
@@ -154,7 +154,7 @@ WindowDeviceNotEmpty device =  True;
 WindowIO :: !Event !*s !(IOState *s) -> (!Bool, !*s, !IOState *s);
 WindowIO (w, XWindowDevice, e) s io_state
    #!
-      strict1=GetXWindowEvent e;
+      strict1=get_window_event e;
    #
       (s`, io`)= WindowIO` (w, strict1, e) s io_state;
 	=
@@ -198,13 +198,13 @@ WindowAttIO (w, XWindowKeyboard, e) [Keyboard a f : atts] s io
    | SelectStateEqual a Able =  f key_info s io;
    =  (s, io);
       where {
-      key_info=: EventToKeyboard (GetKeyboardInfo e);
+      key_info=: EventToKeyboard (get_key_state e);
       };
 WindowAttIO (w, XWindowMouse, e) [Mouse a f : atts] s io
    | SelectStateEqual a Able =  f mouse_info s io;
    =  (s, io);
       where {
-      mouse_info=: EventToMouse (GetMouseInfo e);
+      mouse_info=: EventToMouse (get_mouse_state e);
       };
 WindowAttIO (w, XWindowClosed,     e) [GoAway     f : atts] s io =  f s io;
 WindowAttIO (w, XWindowActivate,   e) [Activate   f : atts] s io =  f s io;
@@ -267,7 +267,7 @@ HideWindow`` [(w_def,(win,pic)) : windows]
 	=
 		[(w_def,(strict1,pic)) : strict2];
 	where {
-	strict1=XPopDown win;
+	strict1=popdown win;
 		strict2=HideWindow`` windows;
 		
 	};
@@ -301,7 +301,7 @@ ShowWindow`` [(w_def, (win,pic)) : windows]
 	=
 		[(w_def, (strict1,pic)) : strict2];
 	where {
-	strict1=XPopup win;
+	strict1=popup win;
 		strict2=ShowWindow`` windows;
 		
 	};
@@ -464,7 +464,7 @@ Align_thumb thumb min max scroll
 
 CollectUpdateArea :: !Widget -> UpdateArea;
 CollectUpdateArea w 
-	# (x,y,xx,yy,more) = GetXExposeArea w;
+	# (x,y,xx,yy,more) = get_expose_area w;
 	| more==0
 		= [];
     # rect = ((x,y),(xx,yy));
@@ -474,10 +474,10 @@ CollectUpdateArea w
 		= [rect : t];
 
 StartUpdate :: !UpdateArea !Widget -> UpdateArea;
-StartUpdate u w =  Evaluate_2 u (StartXUpdate w);
+StartUpdate u w =  Evaluate_2 u (start_update w);
 
 EndUpdate :: !(!*s, !IOState *s) !Widget -> (!*s, !IOState *s);
-EndUpdate s w =  UEvaluate_2 s (EndXUpdate w); 
+EndUpdate s w =  UEvaluate_2 s (end_update w); 
 
 Draw_in_window :: !Window !(!Int,!Int) ![DrawFunction] -> Window;
 Draw_in_window window=:(0,pic) offset fs =  window;
@@ -517,7 +517,7 @@ ValidateWindow (ScrollWindow id pos =: ((left,top)) t hbar=: (ScrollBar (Thumb h
       v_scroll` =: Maximum 1 (Minimum v_scroll d_v);
       s_h       =: s_r - 50;
       s_v       =: s_b - 50;
-      (s_r, s_b)=: XScreenSize 0;
+      (s_r, s_b)=: get_screen_size 0;
      min_w``=: Maximum min_w` 70;
                 min_h``=: Maximum min_h` 70;
                 init_w`=: Minimum init_w d_h`;
@@ -540,7 +540,7 @@ ValidateWindow (FixedWindow id pos=: ((left,top)) title pic=: (((h_min,v_min),(h
       s_h       =: s_r - 50; s_v=: s_b - 50;
       width     =: h_max - h_min; height=: v_max - v_min;
       maxwidth  =: s_r - 100; maxheight=: s_b - 100;
-      (s_r, s_b)=: XScreenSize 0;
+      (s_r, s_b)=: get_screen_size 0;
       };
 
 WindowDef_WindowId :: !(WindowDef s io) -> WindowId;

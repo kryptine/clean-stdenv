@@ -76,10 +76,10 @@ NewXPicture :: !Int -> XPicture;
 NewXPicture p =  p;
 
 StartDrawing :: !XPicture -> XPicture;
-StartDrawing p =  StartXDrawing p;
+StartDrawing p =  start_drawing p;
 
 EndDrawing :: !XPicture -> XPicture;
-EndDrawing p =  EndXDrawing p;
+EndDrawing p =  end_drawing p;
 
 
 /* Rules setting the attributes of a Picture
@@ -90,7 +90,7 @@ SetPenSize (width,height) (b,p) #!
 		=
 		(b, strict1);
 	where {
-	strict1=PenSizeX width /* RWS */ height p;
+	strict1=pen_size width /* RWS */ height p;
 		
 	};
 
@@ -102,15 +102,15 @@ SetPenMode mode (b,p)
 		(b, strict1);
 
 SetPenMode` :: !PenMode !XPicture -> XPicture;  
-SetPenMode` CopyMode     p =  PenModeX 3 p;
-SetPenMode` OrMode       p =  PenModeX 7 p;
-SetPenMode` XorMode      p =  PenModeX 6 p;
-SetPenMode` ClearMode    p =  PenModeX 4 p;
-SetPenMode` NotCopyMode  p =  PenModeX 12 p;
-SetPenMode` NotOrMode    p =  PenModeX 13 p;
-SetPenMode` NotXorMode   p =  PenModeX 9 p;
-SetPenMode` NotClearMode p =  PenModeX 1 p;
-SetPenMode` HiliteMode   p =  PenModeX 6 p;
+SetPenMode` CopyMode     p =  pen_mode 3 p;
+SetPenMode` OrMode       p =  pen_mode 7 p;
+SetPenMode` XorMode      p =  pen_mode 6 p;
+SetPenMode` ClearMode    p =  pen_mode 4 p;
+SetPenMode` NotCopyMode  p =  pen_mode 12 p;
+SetPenMode` NotOrMode    p =  pen_mode 13 p;
+SetPenMode` NotXorMode   p =  pen_mode 9 p;
+SetPenMode` NotClearMode p =  pen_mode 1 p;
+SetPenMode` HiliteMode   p =  pen_mode 6 p;
 
 SetPenPattern :: !PenPattern !Picture -> Picture;
 SetPenPattern pattern (b,p) #!
@@ -123,61 +123,42 @@ SetPenPattern pattern (b,p) #!
 	};
 
 SetPenPattern` :: !PenPattern !XPicture -> XPicture;
-SetPenPattern` BlackPattern  p =  PenPatternX 100 p;
-SetPenPattern` DkGreyPattern p =  PenPatternX 75 p;
-SetPenPattern` GreyPattern   p =  PenPatternX 50 p;
-SetPenPattern` LtGreyPattern p =  PenPatternX 25 p;
-SetPenPattern` WhitePattern  p =  PenPatternX 0 p;
+SetPenPattern` BlackPattern  p =  pen_pattern 100 p;
+SetPenPattern` DkGreyPattern p =  pen_pattern 75 p;
+SetPenPattern` GreyPattern   p =  pen_pattern 50 p;
+SetPenPattern` LtGreyPattern p =  pen_pattern 25 p;
+SetPenPattern` WhitePattern  p =  pen_pattern 0 p;
 
 SetPenNormal :: !Picture -> Picture;
 SetPenNormal p
    =  SetPenSize (1,1) (SetPenMode CopyMode (SetPenPattern BlackPattern p));
 
 SetPenColour :: !Colour !Picture -> Picture;
-SetPenColour (RGB r g b) (bo,p) #!
-		strict1=strict1;
-		=
-		(bo, strict1);
-	where {
-	strict1=RGBForegroundColorX r g b p;
-		
-	};
-SetPenColour c (b,p) #!
-		strict1=strict1;
-		=
-		(b, strict1);
-	where {
-	strict1=ForegroundColorX (ConvertColour c) p;
-		
-	};
+SetPenColour (RGB r g b) (bo,p)
+	#! strict1=rgb_fg_color r g b p;
+	= (bo, strict1);
+
+SetPenColour c (b,p)
+	#! strict1=foreground_color (ConvertColour c) p;
+	= (b, strict1);
 
 SetBackColour :: !Colour !Picture -> Picture;
-SetBackColour (RGB r g b) (bo,p) #!
-		strict1=strict1;
-		=
-		(bo, strict1);
-	where {
-	strict1=RGBBackgroundColorX r g b p;
-		
-	};
-SetBackColour c (b,p) #!
-		strict1=strict1;
-		=
-		(b, strict1);
-	where {
-	strict1=BackgroundColorX (ConvertColour c) p;
-		
-	};
+SetBackColour (RGB r g b) (bo,p)
+	#! strict1=rgb_bg_color r g b p;
+	= (bo, strict1);
+SetBackColour c (b,p)
+	#! strict1=background_color (ConvertColour c) p;
+	= (b, strict1);
 
 ConvertColour :: !Colour -> Int;
-ConvertColour BlackColour   =  GetColorX 1;
-ConvertColour WhiteColour   =  GetColorX 2;
-ConvertColour RedColour     =  GetColorX 3;
-ConvertColour GreenColour   =  GetColorX 4;
-ConvertColour BlueColour    =  GetColorX 5;
-ConvertColour CyanColour    =  GetColorX 6;
-ConvertColour MagentaColour =  GetColorX 7;
-ConvertColour YellowColour  =  GetColorX 8;
+ConvertColour BlackColour   =  get_color 1;
+ConvertColour WhiteColour   =  get_color 2;
+ConvertColour RedColour     =  get_color 3;
+ConvertColour GreenColour   =  get_color 4;
+ConvertColour BlueColour    =  get_color 5;
+ConvertColour CyanColour    =  get_color 6;
+ConvertColour MagentaColour =  get_color 7;
+ConvertColour YellowColour  =  get_color 8;
 
 SetFont :: !Font !Picture -> Picture;
 SetFont (info,name,style,size) (b,p) #!
@@ -185,7 +166,7 @@ SetFont (info,name,style,size) (b,p) #!
 		=
 		(b,strict1);
 	where {
-	strict1=SetFontX p info name style size;
+	strict1=set_font p info name style size;
 		
 	};
 
@@ -195,7 +176,7 @@ SetFontName name (b,p) #!
 		=
 		(b,strict1);
 	where {
-	strict1=SetFontNameX p (MakeLowerCase name);
+	strict1=set_font_name p (MakeLowerCase name);
 		
 	};
 
@@ -206,7 +187,7 @@ SetFontStyle style (b,p)
 		=
 		(b, strict1);
 	where {
-	strict1=SetStyleX p (ConvertFontStyles (MakeLowerCases style) 
+	strict1=set_font_style p (ConvertFontStyles (MakeLowerCases style) 
                                           (False,False,False,False,False));
 		
 	};
@@ -217,7 +198,7 @@ SetFontSize size (b,p) #!
 		=
 		(b, strict1);
 	where {
-	strict1=SetSizeX p ( toString (10 * size)  +++ "*");
+	strict1=set_font_size p ( toString (10 * size)  +++ "*");
 		
 	};
 
@@ -225,7 +206,7 @@ PictureCharWidth :: !Char !Picture -> (!Int, !Picture);
 PictureCharWidth c (b,p)
    =  (w,(b,p`));
       where {
-      (w,p`)=: GetStringWidthX p (toString c);
+      (w,p`)=: get_string_width p (toString c);
       };
 
 PictureStringWidth :: !String !Picture -> (!Int, !Picture);
@@ -235,7 +216,7 @@ PictureStringWidth s (b,p)
 		=
 		(w,(b,p`));
       where {
-      (w,p`)=: GetStringWidthX p s;
+      (w,p`)=: get_string_width p s;
       };
 
 PictureFontMetrics :: !Picture -> (!FontInfo, !Picture);
@@ -245,7 +226,7 @@ PictureFontMetrics (bo,p)
 		=
 		((a,b,c,d),(bo, p`));
       where {
-      (a,b,c,d,p`)=: GetFontInfoX p;
+      (a,b,c,d,p`)=: get_font_info p;
       };
 
 MovePenTo :: !Point !Picture -> Picture;
@@ -254,7 +235,7 @@ MovePenTo (h,v) (b, p) #!
 		=
 		(b, strict1);
 	where {
-	strict1=MoveToX h v p;
+	strict1=move_to h v p;
 		
 	};
 
@@ -264,7 +245,7 @@ MovePen (dh,dv) (b,p) #!
 		=
 		(b, strict1);
 	where {
-	strict1=MoveRelativeX dh dv p;
+	strict1=move_relative dh dv p;
 		
 	};
 
@@ -274,7 +255,7 @@ LinePenTo (h,v) (b,p) #!
 		=
 		(b, strict1);
 	where {
-	strict1=LineToX h v p;
+	strict1=line_to h v p;
 		
 	};
 
@@ -284,7 +265,7 @@ LinePen (dh,dv) (b,p) #!
 		=
 		(b, strict1);
 	where {
-	strict1=LineRelativeX dh dv p;
+	strict1=line_relative dh dv p;
 		
 	};
 
@@ -294,7 +275,7 @@ DrawChar c (b,p) #!
 		=
 		(b, strict1);
 	where {
-	strict1=DrawStringX (toString c) p;
+	strict1=draw_string (toString c) p;
 		
 	};
 
@@ -304,7 +285,7 @@ DrawString s (b,p) #!
 		=
 		(b, strict1);
 	where {
-	strict1=DrawStringX s p;
+	strict1=draw_string s p;
 		
 	};
 
@@ -314,7 +295,7 @@ DrawPoint (x,y) (b,p) #!
 		=
 		(b, strict1);
 	where {
-	strict1=DrawPointX x y p;
+	strict1=draw_point x y p;
 		
 	};
 
@@ -327,7 +308,7 @@ DrawLine ((x1,y1),(x2,y2)) (b,p) #!
 		=
 		(b, strict1);
 	where {
-	strict1=DrawLineX x1 y1 x2 y2 p;
+	strict1=draw_line x1 y1 x2 y2 p;
 		
 	};
 
@@ -340,7 +321,7 @@ DrawCurve (rectangle, start,arc) (b,p)
    #
       (x1,y1,x2,y2)= strict2;
    #!
-      strict1=FrameArcX x1 y1 x2 y2 start (arc - start) p;
+      strict1=frame_arc x1 y1 x2 y2 start (arc - start) p;
 		=
 		(b, strict1);
 
@@ -353,7 +334,7 @@ DrawRectangle rectangle (b,p)
 		strict2=RectangleToRect rectangle;
    #   (x1,y1,x2,y2)= strict2;
    #!
-      strict1=FrameRectangleX x1 y1 x2 y2 p;
+      strict1=frame_rectangle x1 y1 x2 y2 p;
 		=
 		(b, strict1);
 
@@ -364,7 +345,7 @@ FillRectangle rectangle (b,p)
    #
       (x1,y1,x2,y2)= strict2;
    #!
-      strict1=PaintRectangleX x1 y1 x2 y2 p;
+      strict1=paint_rectangle x1 y1 x2 y2 p;
 		=
 		(b, strict1);
 
@@ -375,7 +356,7 @@ EraseRectangle rectangle (b,p)
    #
       (x1,y1,x2,y2)= strict2;
    #!
-      strict1=EraseRectangleX x1 y1 x2 y2 p;
+      strict1=erase_rectangle x1 y1 x2 y2 p;
 		=
 		(b, strict1);
 
@@ -386,7 +367,7 @@ InvertRectangle rectangle (b,p)
    #
       (x1,y1,x2,y2)= strict2;
    #!
-      strict1=InvertRectangleX x1 y1 x2 y2 p;
+      strict1=invert_rectangle x1 y1 x2 y2 p;
 		=
 		(b, strict1);
 
@@ -397,7 +378,7 @@ MoveRectangleTo rectangle (x`,y`) (b,p)
    #
       (x1,y1,x2,y2)= strict2;
    #!
-      strict1=MoveRectangleX x1 y1 x2 y2 x` y` p;
+      strict1=move_rectangle x1 y1 x2 y2 x` y` p;
 		=
 		(b, strict1);
 
@@ -408,7 +389,7 @@ MoveRectangle rectangle (xv,yv) (b,p)
     #
       (x1,y1,x2,y2)= strict2;
     #!
-      strict1=MoveRectangleX x1 y1 x2 y2 (x1 + xv) (y1 + yv) p;
+      strict1=move_rectangle x1 y1 x2 y2 (x1 + xv) (y1 + yv) p;
 		=
 		(b, strict1);
 
@@ -419,7 +400,7 @@ CopyRectangleTo rectangle (x`,y`) (b,p)
    #
       (x1,y1,x2,y2)= strict2;
    #!
-      strict1=CopyRectangleX x1 y1 x2 y2 x` y` p;
+      strict1=copy_rectangle x1 y1 x2 y2 x` y` p;
 		=
 		(b, strict1);
 
@@ -430,7 +411,7 @@ CopyRectangle rectangle (xv,yv) (b,p)
     #
       (x1,y1,x2,y2)= strict2;
     #!
-      strict1=CopyRectangleX x1 y1 x2 y2 (x1 + xv) (y1 + yv) p;
+      strict1=copy_rectangle x1 y1 x2 y2 (x1 + xv) (y1 + yv) p;
 		=
 		(b, strict1);
       where {
@@ -455,7 +436,7 @@ DrawRoundRectangle (((x1,y1),(x2,y2)),width,height) (b,p)
 		=
 		(b, strict1);
 	where {
-	strict1=FrameRoundRectangleX x1 y1 x2 y2 width height p;
+	strict1=frame_round_rectangle x1 y1 x2 y2 width height p;
 		
 	}; 
 
@@ -466,7 +447,7 @@ FillRoundRectangle (((x1,y1),(x2,y2)),width,height) (b,p)
 		=
 		(b, strict1);
 	where {
-	strict1=PaintRoundRectangleX x1 y1 x2 y2 width height p;
+	strict1=paint_round_rectangle x1 y1 x2 y2 width height p;
 		
 	};
 
@@ -477,7 +458,7 @@ EraseRoundRectangle (((x1,y1),(x2,y2)),width,height) (b,p)
 		=
 		(b, strict1);
 	where {
-	strict1=EraseRoundRectangleX x1 y1 x2 y2 width height p;
+	strict1=erase_round_rectangle x1 y1 x2 y2 width height p;
 		
 	};
 
@@ -488,7 +469,7 @@ InvertRoundRectangle (((x1,y1),(x2,y2)),width,height) (b,p)
 		=
 		(b, strict1);
 	where {
-	strict1=InvertRoundRectangleX x1 y1 x2 y2 width height p;
+	strict1=invert_round_rectangle x1 y1 x2 y2 width height p;
 		
 	};
 
@@ -499,7 +480,7 @@ DrawOval oval (b,p)
    #
       (x1,y1,x2,y2)= strict2;
    #!
-      strict1=FrameOvalX x1 y1 x2 y2 p;
+      strict1=frame_oval x1 y1 x2 y2 p;
 		=
 		(b, strict1);
 
@@ -510,7 +491,7 @@ FillOval oval (b,p)
    #
       (x1,y1,x2,y2)= strict2;
    #!
-      strict1=PaintOvalX x1 y1 x2 y2 p;
+      strict1=paint_oval x1 y1 x2 y2 p;
 		=
 		(b, strict1);
 
@@ -521,7 +502,7 @@ EraseOval oval (b,p)
    #
       (x1,y1,x2,y2)= strict2;
    #!
-      strict1=EraseOvalX x1 y1 x2 y2 p;
+      strict1=erase_oval x1 y1 x2 y2 p;
 		=
 		(b, strict1);
 
@@ -532,7 +513,7 @@ InvertOval oval (b,p)
    #
       (x1,y1,x2,y2)= strict2;
    #!
-      strict1=InvertOvalX x1 y1 x2 y2 p;
+      strict1=invert_oval x1 y1 x2 y2 p;
 		=
 		(b, strict1);
 
@@ -543,7 +524,7 @@ DrawCircle circle (b,p)
    #
       (x1,y1,x2,y2)= strict2;
    #!
-      strict1=FrameOvalX x1 y1 x2 y2 p;
+      strict1=frame_oval x1 y1 x2 y2 p;
 		=
 		(b, strict1);
 
@@ -554,7 +535,7 @@ FillCircle circle (b,p)
    #
       (x1,y1,x2,y2)= strict2;
    #!
-      strict1=PaintOvalX x1 y1 x2 y2 p;
+      strict1=paint_oval x1 y1 x2 y2 p;
 		=
 		(b, strict1);
 
@@ -565,7 +546,7 @@ EraseCircle circle (b,p)
    #
       (x1,y1,x2,y2)= strict2;
    #!
-      strict1=EraseOvalX x1 y1 x2 y2 p;
+      strict1=erase_oval x1 y1 x2 y2 p;
 		=
 		(b, strict1);
 
@@ -576,7 +557,7 @@ InvertCircle circle (b,p)
    #
       (x1,y1,x2,y2)= strict2;
    #!
-      strict1=InvertOvalX x1 y1 x2 y2 p;
+      strict1=invert_oval x1 y1 x2 y2 p;
 		=
 		(b, strict1);
 
@@ -596,9 +577,9 @@ DrawWedge (rectangle, start, arc) (b,p)
 
 DrawWedge` :: !Int !Int !Int !Int !Int !Int !XPicture -> XPicture;
 DrawWedge` px py qx qy s t p
-   =  DrawLineX px` py` st`_x st`_y (
-         DrawLineX sr`_x sr`_y px` py` (
-         FrameArcX px py qx qy s (t - s) p));
+   =  draw_line px` py` st`_x st`_y (
+         draw_line sr`_x sr`_y px` py` (
+         frame_arc px py qx qy s (t - s) p));
       where {
       px`    =: px +  toInt rx ;               py`    =: py +  toInt ry ;
       sr`    =:  toReal s  / 180.0;            st`    =:  toReal t  / 180.0;
@@ -619,7 +600,7 @@ FillWedge (rectangle, start, arc) (b,p)
    #
       (x1,y1,x2,y2)= strict2;
    #!
-      strict1=PaintArcX x1 y1 x2 y2 start (arc - start) p;
+      strict1=paint_arc x1 y1 x2 y2 start (arc - start) p;
 		=
 		(b, strict1);
 
@@ -630,7 +611,7 @@ EraseWedge (rectangle, start, arc) (b,p)
    #
       (x1,y1,x2,y2)= strict2;
    #!
-      strict1=EraseArcX x1 y1 x2 y2 start (arc - start) p;
+      strict1=erase_arc x1 y1 x2 y2 start (arc - start) p;
 		=
 		(b, strict1);
 
@@ -641,7 +622,7 @@ InvertWedge (rectangle, start, arc) (b,p)
    #
       (x1,y1,x2,y2)= strict2;
    #!
-      strict1=InvertArcX x1 y1 x2 y2 start (arc - start) p;
+      strict1=invert_arc x1 y1 x2 y2 start (arc - start) p;
 		=
 		(b, strict1);
 
@@ -696,7 +677,7 @@ DrawPolygon ((x,y),poly) (b,p)
    #
       (poly`, n)= CreatePolygon poly;
    #!
-      strict1=FreePolygonX poly` (FramePolygonX poly` n x y p);
+      strict1=free_polygon poly` (frame_polygon poly` n x y p);
 		=
 		(b, strict1);
 
@@ -705,7 +686,7 @@ FillPolygon ((x,y),poly) (b,p)
    #
       (poly`,n)= CreatePolygon poly;
    #!
-      strict1=FreePolygonX poly` (PaintPolygonX poly` n x y p);
+      strict1=free_polygon poly` (paint_polygon poly` n x y p);
 		=
 		(b, strict1);
 
@@ -714,7 +695,7 @@ ErasePolygon ((x,y),poly) (b,p)
    #
       (poly`,n)= CreatePolygon poly;
    #!
-      strict1=FreePolygonX poly` (ErasePolygonX poly` n x y p);
+      strict1=free_polygon poly` (erase_polygon poly` n x y p);
 		=
 		(b, strict1);
 
@@ -723,21 +704,21 @@ InvertPolygon ((x,y),poly) (b,p)
    #
       (poly`,n)= CreatePolygon poly;
    #!
-      strict1=FreePolygonX poly` (InvertPolygonX poly` n x y p);
+      strict1=free_polygon poly` (invert_polygon poly` n x y p);
 		=
 		(b, strict1);
 
 CreatePolygon :: ![Vector] -> (!Int,!Int);
 CreatePolygon poly
-   =  (CreatePolygon` (AllocatePolygonX n) poly 1 (0,0), n);
+   =  (CreatePolygon` (alloc_polygon n) poly 1 (0,0), n);
       where {
       n=: 2 +  ListLength poly ;
       };
 
 CreatePolygon` :: !Int ![Vector] !Int !(!Int,!Int) -> Int;
 CreatePolygon` p [(x,y) : vectors] i (x`,y`)
-   =  CreatePolygon` (SetPolygonPointX p i x y) vectors (inc i) (x` + x,y + y`);
-CreatePolygon` p vectors i (x,y) =  SetPolygonPointX p i (0 - x) (0 - y);
+   =  CreatePolygon` (set_polygon_point p i x y) vectors (inc i) (x` + x,y + y`);
+CreatePolygon` p vectors i (x,y) =  set_polygon_point p i (0 - x) (0 - y);
 
 ListLength :: ![x] -> Int;
 ListLength [a : rest] =  inc (ListLength rest);
@@ -753,7 +734,7 @@ SelectFont name styles size
 		=  (False, BestFontMatch name` fstyles size);
 		=  (True,  (select, fname, fstyles, fsize));
     where {
-      select =: SelectFontX (fname +++  fstyles +++ fsize );
+      select =: select_font (fname +++  fstyles +++ fsize );
       fname  =: "*" +++ name`;
       name`  =: MakeLowerCase name;
       fstyles=:  ConvertFontStyles (MakeLowerCases styles) 
@@ -771,10 +752,10 @@ BestFontMatch name style size
 		=  (select1,fname,style,size`);
     where {
       fname  =: "*" +++ name;
-      def    =: SelectDefaultFontX 0;
-      select1=: SelectFontX (fname +++  style +++ size` );
+      def    =: select_default_font 0;
+      select1=: select_font (fname +++  style +++ size` );
       size`  =:  toString (FitBestFontSize (FontSizes name) size)  +++ "-*-*-*-*-*-*";
-      select2=: SelectFontX (fname +++  style` +++ size` );
+      select2=: select_font (fname +++  style` +++ size` );
       style` =: "-medium-r-normal-*-*-";
     };
 
@@ -865,7 +846,7 @@ DefaultFont ::    (!FontName, ![FontStyle], !FontSize);
 DefaultFont = ("courier",[],12);
 
 FontNames ::    [FontName];
-FontNames = FontNames` (GetNumberOfFontsX 0) [];
+FontNames = FontNames` (get_number_fonts 0) [];
 
 FontNames` :: !Int ![FontName] -> [FontName];
 FontNames` index fonts
@@ -873,12 +854,12 @@ FontNames` index fonts
    #
       index`= dec index;
    #!
-      strict1=GetFontNameX index`;
+      strict1=get_font_name index`;
 		=
 		FontNames` index` [strict1 : fonts];
 
 FontStyles :: !FontName -> [FontStyle];
-FontStyles name =  FontStyles` (GetFontStylesX ("*" +++ name)) [];
+FontStyles name =  FontStyles` (get_font_styles ("*" +++ name)) [];
 
 FontStyles` :: !(!Int,!Int,!Int,!Int,!Int) ![FontStyle] -> [FontStyle];
 FontStyles` (1,b,c,d,e) styles =  FontStyles` (0,b,c,d,e) ["normal"  :styles];
@@ -889,7 +870,7 @@ FontStyles` (0,0,0,0,1) styles =  ["condensed":styles];
 FontStyles` (0,0,0,0,0) styles =  styles;
 
 FontSizes :: !FontName -> [FontSize];
-FontSizes name =  FontSizes` 0 (GetFontSizesX ("*" +++ name));
+FontSizes name =  FontSizes` 0 (get_font_sizes ("*" +++ name));
 
 FontSizes` :: !Int !Int -> [FontSize];
 FontSizes` i n
@@ -900,13 +881,13 @@ FontSizes` i n
 		[strict1 : strict2];
    =  [];
 	where {
-	strict1= GetOneFontSizeX i  / 10;
+	strict1= get_one_font_size i  / 10;
 		strict2=FontSizes` (inc i) n;
 		
 	};
 
 FontCharWidth :: !Char !Font -> Int;
-FontCharWidth c (font,name,styles,size) =  GetFontStringWidthX font (toString c);
+FontCharWidth c (font,name,styles,size) =  get_font_string_width font (toString c);
 
 FontCharWidths :: ![Char] !Font -> [Int];
 FontCharWidths [c:r] font #!
@@ -922,7 +903,7 @@ FontCharWidths [c:r] font #!
 FontCharWidths r font =  [];
 
 FontStringWidth :: !String !Font -> Int;
-FontStringWidth s (font,name,styles,size) =  GetFontStringWidthX font s;
+FontStringWidth s (font,name,styles,size) =  get_font_string_width font s;
 
 FontStringWidths :: ![String] !Font -> [Int];
 FontStringWidths [s:r] font
@@ -939,5 +920,5 @@ FontStringWidths [s:r] font
 FontStringWidths r font =  [];
 
 FontMetrics :: !Font -> FontInfo;
-FontMetrics (font,name,styles,size) =  GetFontFontInfoX font;
+FontMetrics (font,name,styles,size) =  get_font_font_info font;
 

@@ -36,36 +36,36 @@ OptionOnly  :== (False,True,False,False);
 CommandOnly :== (False,False,True,True);
 ControlOnly :== (False,False,True,True);
 
-from xpath   import GetHomePath, GetApplicationPath;
-from xwindow import XScreenSize;
-from xdialog import XMMToPixelHor,XMMToPixelVer;
+from xpath   import get_home_path, get_appl_path;
+from xwindow import get_screen_size;
+from xdialog import mm_to_pixel_hor,mm_to_pixel_ver;
 from StdInt  import class - (-), instance - (Int);
 from StdReal  import class * (*), instance * (Real);
 from StdString  import class +++ (+++), instance +++({#Char});
 
 HomePath :: !String -> String;
-HomePath fname   =   GetHomePath 0  +++  "/." +++ fname ;
+HomePath fname   =   get_home_path 0  +++  "/." +++ fname ;
 
 ApplicationPath :: !String -> String;
-ApplicationPath fname   =   GetApplicationPath 0  +++  "/" +++ fname ;
+ApplicationPath fname   =   get_appl_path 0  +++  "/" +++ fname ;
 
 MaxFixedWindowSize ::    (!Int,!Int);
 MaxFixedWindowSize =: (width - 100, height - 100);
     where {
-      (width, height)=: XScreenSize 0;
+      (width, height)=: get_screen_size 0;
     };
 
 MaxScrollWindowSize ::    (!Int, !Int);
 MaxScrollWindowSize =: MaxFixedWindowSize;
 
 MMToHorPixels :: !Real -> Int;
-MMToHorPixels n     =  XMMToPixelHor n;
+MMToHorPixels n     =  mm_to_pixel_hor n;
 
 MMToVerPixels :: !Real -> Int;
-MMToVerPixels n     =  XMMToPixelVer n;
+MMToVerPixels n     =  mm_to_pixel_ver n;
 
 InchToHorPixels :: !Real -> Int;
-InchToHorPixels n     =  XMMToPixelHor (n * 25.4);
+InchToHorPixels n     =  mm_to_pixel_hor (n * 25.4);
 
 InchToVerPixels :: !Real -> Int;
-InchToVerPixels n     =  XMMToPixelVer (n * 25.4);
+InchToVerPixels n     =  mm_to_pixel_ver (n * 25.4);

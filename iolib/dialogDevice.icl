@@ -5,8 +5,8 @@ import StdBool, StdChar, StdInt, StdString, StdReal;
 import xkernel,xtypes, deltaIOSystem, xdialog;
 import ioState, dialogDef;
 
-from xwindow import GetMouseInfo;
-from xwindow import XPopDown;
+from xwindow import get_mouse_state;
+from xwindow import popdown;
 from windowDevice import EventToMouse,Draw_in_window;
 from picture import NewXPicture;
 import misc, commonDef;
@@ -70,7 +70,7 @@ Close_dialogs`  [dialog : dialogs]
 Close_dialogs` dialogs =  dialogs;
 
 Close_dialog :: !(DialogHandle s io) -> Widget;
-Close_dialog (DialHandle m (id, w) handle def) =  DestroyDialogX w;
+Close_dialog (DialHandle m (id, w) handle def) =  destroy_dialog w;
 
 
 HideDialog :: !(IOState s) -> IOState s;
@@ -100,7 +100,7 @@ HideDialog`` [DialHandle m (id,w) items def : dialogs]
 		=
 		[DialHandle m (id,strict1) items def : strict2];
 	where {
-	strict1=XPopDownDialog w;
+	strict1=popdown_dialog w;
 		strict2=HideDialog`` dialogs;
 		
 	};
@@ -189,7 +189,7 @@ Open_dialogs [dialog=:PropertyDialog id t a f1 f2 items : dialogs]
 	};
 Open_dialogs [dialog=:AboutDialog appname pic=:((x0,y0),(x1,y1)) dfs help : dialogs]
 	| x0==x1 && y0==y1
-		#! r=SetToplevelNameX appname;
+		#! r=set_toplevelname appname;
 		= Open_dialogs (Evaluate_2 (RemoveAbouts dialogs) r);
 		#!
 			strict1=Open_about dialog;
@@ -219,9 +219,9 @@ Open_about def=:(AboutDialog appname ((x0,y0),(x1,y1)) dfs NoHelp)
 		about=about;
 		=
 		Evaluate_2 (DialHandle Modal (-1, about) [] def)
-                 (SetToplevelNameX appname);
+                 (set_toplevelname appname);
       where {
-      about=: XCreateAboutDialog x0 y0 x1 y1 0 "";
+      about=: create_about_dialog x0 y0 x1 y1 0 "";
       };
 Open_about def=:(AboutDialog appname ((x0,y0),(x1,y1)) dfs
                   (AboutHelp title f))
@@ -229,9 +229,9 @@ Open_about def=:(AboutDialog appname ((x0,y0),(x1,y1)) dfs
 		about=about;
 		=
 		Evaluate_2 (DialHandle Modal (-1, about) [] def)
-                 (SetToplevelNameX appname);
+                 (set_toplevelname appname);
       where {
-      about=: XCreateAboutDialog x0 y0 x1 y1 1 title;
+      about=: create_about_dialog x0 y0 x1 y1 1 title;
       };
 
 Open_dialog :: !DialogMode !(DialogDef s (IOState s)) -> DialogHandle s (IOState s);
@@ -270,7 +270,7 @@ PopupModalDialog (DialHandle m (id,w) items def)
 		=
 		DialHandle Modal (id, strict1) items def;
 	where {
-	strict1=XPopupModal w;
+	strict1=popup_modaldialog w;
 		
 	};
 
@@ -282,7 +282,7 @@ PopupModelessDialog (DialHandle m (id,w) items def)
 		=
 		DialHandle Modeless (id, strict1) items def;
 	where {
-	strict1=XPopupModeless w;
+	strict1=popup_modelessdialog w;
 		
 	};
 
@@ -291,19 +291,19 @@ OpenNormalDialog mode def=:(CommandDialog id title att ditem items)
    #!
 		strict3=GetDialogSize att;
    #  (width,height)= strict3;
-   #!  command= XCreateCommandDialog title width height (GetDialogMode mode);
+   #!  command= create_commanddial title width height (GetDialogMode mode);
 		strict2=(AddDialogItems command items);
 
       items` = PositionItems command att items strict2;
       defitem= GetCommandDefaultItem ditem items`;
-      strict1=XSetCommandDefault command defitem;
+      strict1=set_command_default command defitem;
 		=
 		DialHandle mode (id, strict1) items` def;
 OpenNormalDialog mode def=:(PropertyDialog id title att f1 f2 items)
    #!
 		strict2=GetDialogSize att;
    #  (width,height)= strict2;
-   #! property= XCreatePropertyDialog title width height;
+   #! property= create_propertydial title width height;
       strict1=(AddDialogItems property items);
       items`  = PositionItems property att items strict1;
 		=
@@ -320,19 +320,19 @@ GetDialogSize atts =  (0,0);
 
 ConvertMeasureX :: Measure -> Int;
 ConvertMeasureX (Pixel n) =  n;
-ConvertMeasureX (MM    n) =  XMMToPixelHor n;
-ConvertMeasureX (Inch  n) =  XMMToPixelHor (n * 25.4);
+ConvertMeasureX (MM    n) =  mm_to_pixel_hor n;
+ConvertMeasureX (Inch  n) =  mm_to_pixel_hor (n * 25.4);
   
 ConvertMeasureY :: Measure -> Int;
 ConvertMeasureY (Pixel n) =  n;
-ConvertMeasureY (MM    n) =  XMMToPixelVer n;
-ConvertMeasureY (Inch  n) =  XMMToPixelVer(n * 25.4);
+ConvertMeasureY (MM    n) =  mm_to_pixel_ver n;
+ConvertMeasureY (Inch  n) =  mm_to_pixel_ver(n * 25.4);
 
 
 AddDialogItems :: !Widget ![DialogItem s io] -> [XDItemHandle];
 AddDialogItems dialog [DialogButton id layout title state f : items]
    #!
-      item= XCreateDialButton dialog 0 0 0 0 title;
+      item= add_dialog_button dialog 0 0 0 0 title;
       strict1=SetDialogItemAbility item state;
 		strict2=AddDialogItems dialog items;
 		=
@@ -344,7 +344,7 @@ AddDialogItems dialog [StaticText id layout text : items]
 		=
 		[(id, strict1) : strict2];
 	where {
-	strict1=XCreateStaticText dialog 0 0 0 0 text;
+	strict1=add_static_text dialog 0 0 0 0 text;
 		strict2=AddDialogItems dialog items;
 		
 	};
@@ -355,7 +355,7 @@ AddDialogItems dialog [DynamicText id itempos width text : items]
 		=
 		[(id, strict1) : strict2];
 	where {
-	strict1=XCreateStaticText dialog 0 0 (ConvertMeasureX width) 0 text;
+	strict1=add_static_text dialog 0 0 (ConvertMeasureX width) 0 text;
 		strict2=AddDialogItems dialog items;
 		
 	};
@@ -366,16 +366,16 @@ AddDialogItems dialog [EditText id layout width lines text : items]
 		=
 		[(id, strict1) : strict2];
 	where {
-		strict1=XCreateEditText dialog 0 0 (ConvertMeasureX width) 0 lines text;
+		strict1=add_edit_text dialog 0 0 (ConvertMeasureX width) 0 lines text;
 		strict2=AddDialogItems dialog items;
 		
 	};
 AddDialogItems dialog [DialogPopUp id layout state rid radios : items]
    #  rid`    = CheckDefaultRadioId rid radios; 
    #!
-      popup   = XCreateDialogPopup dialog 0 0 0 0;
+      popup   = add_dialog_popup dialog 0 0 0 0;
       popup`=SetDialogItemAbility popup state;
-      radios` = AddDialogRadioItems (XGetPopupEx popup`) dialog rid` radios;
+      radios` = AddDialogRadioItems (get_popup_ex popup`) dialog rid` radios;
       radios``= CorrectPopupSize radios` popup`;
 		strict2=(AddDialogItems dialog items);
 		strict1=Concat radios`` strict2;
@@ -387,7 +387,7 @@ AddDialogItems dialog [RadioButtons id layout roc rid radios : items]
    #!	strict3=ConvertROC roc;
    #
       (roc`, n)= strict3;
-   #! group    = XCreateRadioGroup dialog 0 0 0 0 roc` n;
+   #! group    = add_dialog_exclusives dialog 0 0 0 0 roc` n;
    #! radios`  = AddDialogRadioItems group dialog rid` radios;
       strict2=(AddDialogItems dialog items);
 		strict1=Concat radios` strict2;
@@ -397,7 +397,7 @@ AddDialogItems dialog [CheckBoxes id layout roc checks : items]
    #!	strict3=ConvertROC roc;
    #  (roc`, n)= strict3;
    #!
-      group    = XCreateCheckGroup dialog 0 0 0 0 roc` n;
+      group    = add_dialog_nonexclusives dialog 0 0 0 0 roc` n;
       checks`  = AddDialogCheckItems group dialog checks;
       strict2=(AddDialogItems dialog items);
 		strict1=Concat checks` strict2;
@@ -411,7 +411,7 @@ AddDialogItems dialog [Control id layout ((x0,y0),(x1,y1)) state cstate
 		=
 		[(id, control) : strict1];
       where {
-      control=: XCreateDialogControl dialog 0 0 width height x0 y0 XCControl;
+      control=: add_dialog_control dialog 0 0 width height x0 y0 XCControl;
       width  =: x1 - x0;
       height =: y1 - y0;
       strict1=AddDialogItems dialog items;
@@ -424,7 +424,7 @@ AddDialogItems dialog [DialogIconButton id pos ((x0,y0),(x1,y1)) look state f
 		=
 		[(id, control) : strict1];
       where {
-      control=: XCreateDialogControl dialog 0 0 width height x0 y0 XCIcon;
+      control=: add_dialog_control dialog 0 0 width height x0 y0 XCIcon;
       width  =: x1 - x0;
       height =: y1 - y0;
       strict1=AddDialogItems dialog items;
@@ -440,12 +440,12 @@ ConvertMark Mark   =  XMarkOn;
 ConvertMark NoMark =  XMarkOff;
 
 SetDialogItemAbility :: !Widget !SelectState -> Widget;
-SetDialogItemAbility w Able =  XEnableDialogItem w;
-SetDialogItemAbility w Unable =  XDisableDialogItem w;
+SetDialogItemAbility w Able =  enable_dialog_item w;
+SetDialogItemAbility w Unable =  disable_dialog_item w;
 
 CorrectPopupSize :: ![XDItemHandle] !Widget -> [XDItemHandle];
 CorrectPopupSize radios popup 
-   =  Evaluate_2 radios (XCorrectPopupSize popup);
+   =  Evaluate_2 radios (correct_popup_size popup);
 
 CheckDefaultRadioId :: !Id ![RadioItemDef s io] -> Id;
 CheckDefaultRadioId rid radios=:[RadioItem id t s f : rest`]
@@ -462,13 +462,13 @@ AddDialogRadioItems :: !Widget !Widget !Id ![RadioItemDef s io]
    -> [XDItemHandle];
 AddDialogRadioItems group dialog rid [RadioItem id title state f : radios]
    | id == rid #!
-      radio1=  XCreateDialogRadioItem group dialog title XMarkOn;
+      radio1=  add_dialog_radiob group dialog title XMarkOn;
 		strict1=SetDialogItemAbility radio1 state;
 	#!	radios`=radios`;
 		=
 		[(id, strict1) : radios`];
    #!
-      radio2=  XCreateDialogRadioItem group dialog title XMarkOff;
+      radio2=  add_dialog_radiob group dialog title XMarkOff;
       strict3=SetDialogItemAbility radio2 state;
 	#!	radios`=radios`;
 		=
@@ -488,7 +488,7 @@ AddDialogCheckItems group dialog [CheckBox id title state mark f : radios]
 		=
 		[(id, strict1) : checks];
       where {
-      check=:  XCreateDialogCheckItem group dialog title (ConvertMark mark);
+      check=:  add_dialog_checkb group dialog title (ConvertMark mark);
       checks=: AddDialogCheckItems group dialog radios;
       strict1=SetDialogItemAbility check state;
 		};
@@ -500,7 +500,7 @@ DoModalDialog s io
 	| not the_one =  DoModalDialog s  io`;
 	=  DoModalDialog s` io``;
 		where {
-		(s`,io``)                  =: DialogIO` [dialog] (GetXDialogEvent e) s io`;
+		(s`,io``)                  =: DialogIO` [dialog] (get_dialog_event e) s io`;
 		(active,the_one,dialog,io`)=: GetActiveModalDialogHandle w io;
 		(w,dev,e)                  =: GetNextEvent;
 		};
@@ -530,7 +530,7 @@ GetActiveModalDialog modal widget [] =  (modal, False, DummyDialHandle);
 DialogIO :: !Event !*s !(IOState *s) -> (!Bool, !*s, !IOState *s);
 DialogIO (w, XDialogDevice, e) s io_state
    #!
-      strict2=GetXDialogEvent e;
+      strict2=get_dialog_event e;
       strict3=GetDialogHandle io_state w;
    #  (dialog,io``)= strict3;
    #! strict1=DialogIO` dialog (strict2) s io``;
@@ -556,7 +556,7 @@ DialogIO`` (DialHandle m (id,w) items def) (XDialogClosed, item) s io
    #!
 		strict1=strict1;
 		=
-		UEvaluate_2 (s,strict1) (DestroyDialogX w);
+		UEvaluate_2 (s,strict1) (destroy_dialog w);
 	where {
 	strict1=RemoveDialogHandle w io;
 		
@@ -604,7 +604,7 @@ DialogIO`` handle=:(DialHandle m (id,w) items def) (XDialogMouse, item) s io
    | able
 		#!	cs=cs;
 	      cid= GetDialogItemId item items;
-	      mouse=EventToMouse (GetMouseInfo item);
+	      mouse=EventToMouse (get_mouse_state item);
 		#  (cs`, drawfs)= f mouse cs;
 		#! drawfs=drawfs;
 		   cs`=cs`;
@@ -623,7 +623,7 @@ DialogIO`` handle=:(DialHandle m (id,w) items def) (XDialogMouse, item) s io
 DialogIO`` handle=:(DialHandle m (id,w) items def) (XDialogIMouse, item) s io
    =  HandleIconSelection items def item mouse s io;
       where {
-      mouse=: EventToMouse (GetMouseInfo item);
+      mouse=: EventToMouse (get_mouse_state item);
       };
 DialogIO`` (DialHandle m (id,w) items def) (XDialogApply, item) s io
    =  f (DDef2DInfo def) s io;
@@ -683,7 +683,7 @@ DrawInControl control dfs io
 		=
 		UEvaluate_2 io (Draw_in_window (1,strict1) (0,0) dfs);
 	where {
-	strict1=NewXPicture (DialogItem2Object control);
+	strict1=NewXPicture (dialog_item_to_object control);
 		
 	};
 
@@ -908,7 +908,7 @@ ReconstructDialog` [EditText id l w nl text : items] handles
 		=
 		[EditText id l w nl text` : strict1];
       where {
-      text`=: XGetEditText (GetDialogWidget id handles);
+      text`=: get_edit_text (GetDialogWidget id handles);
       strict1=ReconstructDialog` items handles;
 		};
 ReconstructDialog` [RadioButtons id l roc did radios : items] handles
@@ -953,7 +953,7 @@ ReconstructDialog` items handles =  items;
 ReconstructRadioButtons :: ![RadioItemDef s (IOState s)] ![XDItemHandle]
    -> (!Id, ![RadioItemDef s (IOState s)]);
 ReconstructRadioButtons [radio=:RadioItem id t state f : radios] handles
-   | IsMark (XGetMark (GetDialogWidget id handles)) =  (id, [radio : radios]);
+   | IsMark (get_mark (GetDialogWidget id handles)) =  (id, [radio : radios]);
    #!
       strict2=ReconstructRadioButtons radios handles;
    #  (id`, radios`)= strict2;
@@ -968,7 +968,7 @@ ReconstructCheckBoxes :: ![CheckBoxDef s (IOState s)] ![XDItemHandle]
    -> [CheckBoxDef s (IOState s)];
 ReconstructCheckBoxes [CheckBox id t state mark f : checks] handles
    #!
-      xmark= XGetMark (GetDialogWidget id handles);
+      xmark= get_mark (GetDialogWidget id handles);
    | IsMark xmark #!
 		checks`=checks`;
 		=
@@ -1098,7 +1098,7 @@ DialogNotOpen (PropertyDialog id t a f1 f2 items) dialogs
 DialogNotOpen` :: ![DialogHandle s (IOState s)] -> Bool;
 DialogNotOpen` [] =  True;
 DialogNotOpen` [DialHandle m (id,w) items def : rest]
-   =  Evaluate_2 False (ActivateDialogX w);
+   =  Evaluate_2 False (activate_dialog w);
 
 MakeActiveDialog :: !(DialogHandle s (IOState s)) !(IOState s) -> IOState s;
 MakeActiveDialog dialog io_state
@@ -1243,7 +1243,7 @@ MakeItemLayouts [DialogButton id pos t s f : items] handles
    #!
 		strict1=strict1;
 		=
-		[(handle, XGetCurrentRect w, pos, []) : strict1];
+		[(handle, get_current_rect w, pos, []) : strict1];
       where {
       (handle, handles`)=: GetXDItemHandle id handles;
       (id`,w)=: handle;
@@ -1253,7 +1253,7 @@ MakeItemLayouts [DialogIconButton id pos p l s f : items] handles
    #!
 		strict1=strict1;
 		=
-		[(handle, XGetCurrentRect w, pos, []) : strict1];
+		[(handle, get_current_rect w, pos, []) : strict1];
       where {
       (handle, handles`)=: GetXDItemHandle id handles;
       (id`,w)=: handle;
@@ -1263,7 +1263,7 @@ MakeItemLayouts [StaticText id pos s : items] handles
    #!
 		strict1=strict1;
 		=
-		[(handle, XGetCurrentRect w, pos, []) : strict1];
+		[(handle, get_current_rect w, pos, []) : strict1];
       where {
       (handle, handles`)=: GetXDItemHandle id handles;
       (id`,w)=: handle;
@@ -1273,7 +1273,7 @@ MakeItemLayouts [DynamicText id pos width s : items] handles
    #!
 		strict1=strict1;
 		=
-		[(handle, XGetCurrentRect w, pos, []) : strict1];
+		[(handle, get_current_rect w, pos, []) : strict1];
       where {
       (handle, handles`)=: GetXDItemHandle id handles;
       (id`,w)=: handle;
@@ -1283,7 +1283,7 @@ MakeItemLayouts [EditText id pos wi n s : items] handles
    #!
 		strict1=strict1;
 		=
-		[(handle, XGetCurrentRect w, pos, []) : strict1]
+		[(handle, get_current_rect w, pos, []) : strict1]
       where {
       (handle, handles`)=: GetXDItemHandle id handles;
       (id`,w)=: handle;
@@ -1293,7 +1293,7 @@ MakeItemLayouts [DialogPopUp id pos able did radios : items] handles
    #!
 		strict1=strict1;
 		=
-		[(handle, XGetCurrentRect w, pos, []) :
+		[(handle, get_current_rect w, pos, []) :
        strict1];
       where {
       (handle, handles`)=: GetXDItemHandle id handles;
@@ -1304,7 +1304,7 @@ MakeItemLayouts [RadioButtons id pos roc did radios : items] handles
    #!
 		strict1=strict1;
 		=
-		[(handle, XGetCurrentRect w, pos, []) : strict1];
+		[(handle, get_current_rect w, pos, []) : strict1];
       where {
       (handle, handles`)=: GetXDItemHandle id handles;
       (id`,w)=: handle;
@@ -1314,7 +1314,7 @@ MakeItemLayouts [CheckBoxes id pos roc checks : items] handles
    #!
 		strict1=strict1;
 		=
-		[(handle, XGetCurrentRect w, pos, []) : strict1];
+		[(handle, get_current_rect w, pos, []) : strict1];
       where {
       (handle, handles`)=: GetXDItemHandle id handles;
       (id`,w)=: handle;
@@ -1324,7 +1324,7 @@ MakeItemLayouts [Control id pos p s cs lo fe f : items] handles
    #!
 		strict1=strict1;
 		=
-		[(handle, XGetCurrentRect w, pos, []) : strict1];
+		[(handle, get_current_rect w, pos, []) : strict1];
       where {
       (handle, handles`)=: GetXDItemHandle id handles;
       (id`,w)=: handle;
@@ -1352,7 +1352,7 @@ RepositionItems [item=:((id,widget),(x,y,w,h),pos,l) : items]
 		=
 		[strict1  : strict2];
       where {
-      change=: RepositionCList l (XRepositionWidget widget x y w h);
+      change=: RepositionCList l (repos_widget widget x y w h);
       strict1=Evaluate_2 item change;
 		strict2=RepositionItems items;
 		};
@@ -1360,7 +1360,7 @@ RepositionItems items =  items;
 
 RepositionCList :: ![(XDItemHandle,Rect)] !Int -> Int;
 RepositionCList [((id,widget),(x,y,w,h)) : rest] c
-   =  RepositionCList rest (XRepositionWidget widget x y w h);
+   =  RepositionCList rest (repos_widget widget x y w h);
 RepositionCList [] c =  c;
 
 LayoutPass2 :: !(!Int,!Int) !(!Int,!Int) !Int ![ItemLayout] ![ItemLayout]
@@ -1534,14 +1534,14 @@ RepositionCItems dialog m=:(mx,my) [(handle,rect,Right,l) : items]
              (RepositionCItems dialog m items);
 RepositionCItems dialog m [item : items] =  RepositionCItems dialog m items;
 RepositionCItems dialog (mx,my) []
-   =  Evaluate_2 [] (XSetDialogMargins dialog mx my);
+   =  Evaluate_2 [] (set_dialog_margins dialog mx my);
 
 CenterItems :: !Int ![(!XDItemHandle, !Rect)] -> [Widget];
 CenterItems mx l=:[item=: ((id,w),rect) : items]
    =  CenterItems` base l;
       where {
       base=: ( dialogwidth - groupwidth  - (mx + mx)) / 2;
-      dialogwidth=: XGetFatherWidth w;
+      dialogwidth=: get_father_width w;
       groupwidth=: GetTotalWidth mx l;
       };
 
@@ -1550,7 +1550,7 @@ RightItems mx l=:[item=: ((id,w),rect) : items]
    =  CenterItems` base l;
       where {
       base=:  dialogwidth - groupwidth  - (mx + mx);
-      dialogwidth=: XGetFatherWidth w;
+      dialogwidth=: get_father_width w;
       groupwidth=: GetTotalWidth mx l;
       };
 
@@ -1571,7 +1571,7 @@ CenterItems` base [((id,widget),(x,y,w,h)) : items]
 		=
 		[strict1 : strict2];
 	where {
-	strict1=XRepositionWidget widget (x + base) y w h;
+	strict1=repos_widget widget (x + base) y w h;
 		strict2=CenterItems` base items;
 		
 	};

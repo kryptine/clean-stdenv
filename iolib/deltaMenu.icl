@@ -302,7 +302,7 @@ ChangeItemTitles attributes (id,w)
 		=
 		(id, strict1);
 	where {
-	strict1=SetWidgetTitle w (GetTitle attributes id);
+	strict1=set_widget_title w (GetTitle attributes id);
 		
 	};
 

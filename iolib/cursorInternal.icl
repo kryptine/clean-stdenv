@@ -5,12 +5,12 @@ import ioState,windowDevice;
 
     
 SetWidgetCursor :: !Widget !CursorShape -> Widget; 
-SetWidgetCursor w StandardCursor	=  XSetWidgetCursor XStandardCursor w;
-SetWidgetCursor w BusyCursor 		=  XSetWidgetCursor XBusyCursor w;
-SetWidgetCursor w IBeamCursor 	=  XSetWidgetCursor XIBeamCursor w;
-SetWidgetCursor w CrossCursor 	=  XSetWidgetCursor XCrossCursor w;
-SetWidgetCursor w FatCrossCursor	=  XSetWidgetCursor XFatCrossCursor w;
-SetWidgetCursor w ArrowCursor 	=  XSetWidgetCursor XArrowCursor w;
+SetWidgetCursor w StandardCursor	=  set_window_cursor XStandardCursor w;
+SetWidgetCursor w BusyCursor 		=  set_window_cursor XBusyCursor w;
+SetWidgetCursor w IBeamCursor 	=  set_window_cursor XIBeamCursor w;
+SetWidgetCursor w CrossCursor 	=  set_window_cursor XCrossCursor w;
+SetWidgetCursor w FatCrossCursor	=  set_window_cursor XFatCrossCursor w;
+SetWidgetCursor w ArrowCursor 	=  set_window_cursor XArrowCursor w;
 SetWidgetCursor w othercursor		=  w;
 
 SetGlobalCursor :: !CursorShape !(IOState s) -> IOState s;

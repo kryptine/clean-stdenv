@@ -61,11 +61,11 @@ DoInitialIO [f : fs] s io
 DoInitialIO f s io =  (s, io);
 
 ShowToplevel :: !(IOState s) -> IOState s;
-ShowToplevel io_state =  UEvaluate_2 io_state (ShowToplevelX 0);
+ShowToplevel io_state =  UEvaluate_2 io_state (show_toplevelx 0);
 
 
 HideIO :: !(IOState s) -> IOState s;
-HideIO io_state =  HideIO` (UEvaluate_2 io_state (HideToplevelX 0)) Devices;
+HideIO io_state =  HideIO` (UEvaluate_2 io_state (hide_toplevelx 0)) Devices;
     
 HideIO` :: !(IOState s) ![Device] -> IOState s;
 HideIO` io_state [d : ds]
@@ -127,7 +127,7 @@ LetDevicesDoIO do_io event state io_state =  (state, io_state);
 /*  Quit the interaction in which this function is applied:
 */
 QuitIO :: !(IOState s) -> IOState s;
-QuitIO io =  QuitIO` (UEvaluate_2 io (HideToplevelX 0));
+QuitIO io =  QuitIO` (UEvaluate_2 io (hide_toplevelx 0));
 
 QuitIO` :: !(IOState s) -> IOState s;
 QuitIO` io_state

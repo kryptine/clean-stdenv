@@ -74,11 +74,11 @@ DummyEvents :== 0;
     
 OpenEvents   :: !* World -> (!EVENTS, !* World);
 OpenEvents world
-   =  UEvaluate_2 (OpenEvents1 world) (OpenToplevelX (InitToplevelX 0));
+   =  UEvaluate_2 (OpenEvents1 world) (open_toplevelx (init_toplevelx 0));
 
 CloseEvents   :: !EVENTS !* World -> * World;
 CloseEvents events world
-   =  UEvaluate_2 (CloseEvents1 events world) (CloseToplevelX 0);
+   =  UEvaluate_2 (CloseEvents1 events world) (close_toplevelx 0);
 
 
 OpenEvents1   :: !* World -> (!EVENTS, !* World);
