@@ -173,10 +173,13 @@ setActiveWindow wId pState
 	| not exists				// Indicated window does not exist
 		= {pState & io=ioStSetDevice (WindowSystemState windows) ioState}
 	# (activeWIDS,windows)		= getWindowHandlesActiveWindow windows
+/* DvA...
 	| isNothing activeWIDS		// There are no windows, so skip it
 		= {pState & io=ioStSetDevice (WindowSystemState windows) ioState}
 	# wids						= fromJust activeWIDS
 	| exists && wids.wId==wId	// If already active, then skip
+...DvA*/
+	| isJust activeWIDS  && (fromJust activeWIDS).wId==wId	// If already active, then skip
 		= {pState & io=ioStSetDevice (WindowSystemState windows) ioState}
 	# (wHs,windows)				= getWindowHandlesWindows windows
 	  (modal,modeless)			= uspan ismodalwindow wHs
