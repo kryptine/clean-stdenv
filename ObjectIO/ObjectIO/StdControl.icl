@@ -662,6 +662,26 @@ where
 		= {wState & wRep=wH,wTb=tb}
 
 
+//	Set the selection of an EditControl.
+
+setEditControlSelection :: !Id !Int !Int !(IOSt .l) -> IOSt .l
+setEditControlSelection cId begin end ioState
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (maybeParent,ioState)	= ioStGetIdParent cId ioState
+	| not (fst (isOkControlId ioId (cId,maybeParent)))
+		= ioState
+	| otherwise
+		= setWindow (fromJust maybeParent).idpId (setEditControlSelection` cId begin` end`) ioState
+where
+	(begin`,end`)	= if (begin<=end) (begin,end) (0,-1)
+	
+	setEditControlSelection` :: !Id !Int !Int !*WState -> *WState
+	setEditControlSelection` id begin end wState=:{wIds={wPtr},wRep,wTb,wMetrics}
+		# (wH,tb)	= seteditcontrolselection id begin end wMetrics wPtr wRep wTb
+		= {wState & wRep=wH,wTb=tb}
+
+
+
 /*	Change the Look of the corresponding (Custom(Button)/Compound)Controls and redraw
 	only if the first Boolean is True.
 */

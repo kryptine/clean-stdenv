@@ -6,7 +6,7 @@ definition module StdControl
 //	
 //	StdControl specifies all control operations.
 //	Author: Peter Achten
-//	Modified: 15 October 2001 for Clean 2.0
+//	Modified: 20 November 2001 (setEditControlSelection added).
 //	********************************************************************************
 
 
@@ -158,6 +158,16 @@ setEditControlCursor	:: !Id !Int						!(IOSt .l) -> IOSt .l
 	In case @2<0, then the cursor is set at the start of the current content.
 	In case @2>size content, then the cursor is set at the end of the current 
 	content.
+*/
+
+setEditControlSelection	:: !Id !Int !Int				!(IOSt .l) -> IOSt .l
+/*	setEditControlSelection sets the new selection starting at position @2 until
+	@3 in the current content of the indicated EditControl. 
+	In case @2<=@3, then the selection starts at @2 and ends at @3, with @2
+		taken to be atleast 0, and @3 taken to be at most (size content). 
+	In case @2> @3, then the whole text is selected.
+	The indicated control must be the active EditControl (use setActiveControl in
+	StdWindow), otherwise this function has no effect.
 */
 
 setControlLooks			:: ![(Id, Bool,(Bool,Look))]	!(IOSt .l) -> IOSt .l

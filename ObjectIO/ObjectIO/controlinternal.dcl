@@ -5,7 +5,7 @@ definition module controlinternal
 //	Clean Standard Object I/O library, version 1.2.2
 //	
 //	Author: Peter Achten
-//	Modified: 7 September 2001 for Clean 2.0
+//	Modified: 20 November 2001 (seteditcontrolselection added).
 //	********************************************************************************
 
 
@@ -19,6 +19,7 @@ setcontrolsshowstate	:: ![Id] !Bool               !OSWindowMetrics !WIDS        
 setcontrolsmarkstate	:: !Id !MarkState ![Index]   !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox -> (!WindowHandle`,           !*OSToolbox)
 setcontroltexts			:: ![(Id,String)]            !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox -> (!WindowHandle`,           !*OSToolbox)
 seteditcontrolcursor	:: !Id !Int                  !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox -> (!WindowHandle`,           !*OSToolbox)
+seteditcontrolselection	:: !Id !Int !Int             !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox -> (!WindowHandle`,           !*OSToolbox)
 setcontrolslook			:: ![(Id,Bool,(Bool,Look))]  !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox -> (!WindowHandle`,           !*OSToolbox)
 drawincontrol			:: !Id !.(St *Picture .x)    !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox -> *(!Maybe .x,!WindowHandle`,!*OSToolbox)
 setslidercontrolstates	:: ![(Id,IdFun SliderState)] !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox -> (!WindowHandle`,           !*OSToolbox)

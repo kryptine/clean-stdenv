@@ -266,9 +266,14 @@ where
 //	The user request the placement of a word:
 	placeword :: (PSt *State) -> PSt *State
 	placeword pst
-		# (maybeScrabble,pst)		= accPIO (getWindow scrabbleId) pst
-		| isNothing maybeScrabble	= abort "placeword could not retrieve WState from Scrabble window."
-		| otherwise					= placeword` (fromJust maybeScrabble) pst
+		# (maybeScrabble,pst)	= accPIO (getWindow scrabbleId) pst
+		| isNothing maybeScrabble
+			= abort "placeword could not retrieve WState from Scrabble window."
+		| otherwise
+			# pst				= placeword` (fromJust maybeScrabble) pst
+			# pst				= setActiveControl editId pst
+			# pst				= appPIO (setEditControlSelection editId 1 0) pst
+			= pst
 	
 	placeword` :: WState (PSt *State) -> PSt *State
 	placeword` info pst=:{ls=t=:{	board
