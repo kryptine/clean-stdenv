@@ -351,8 +351,10 @@ accClipPicture region drawf picture
 	   isEmpty							= if (curClipRgn==0) (\_ tb->(True,tb)) osisemptyrgn	// PA: you must test for 0, because that's what windows generates if there is no clipping region!
 	#! (emptyCur,tb)					= isEmpty curClipRgn tb
 	#! picture							= unpeekPicture origin pen toScreen context tb
-//	   (set,dispose)					= if (curClipRgn==0) (pictsetcliprgn,\_ x->x) (pictandcliprgn,osdisposergn)
-	   (set,dispose)					= if emptyCur (pictsetcliprgn,\_ x->x) (pictandcliprgn,osdisposergn)
+	   // DvA: Set back to this variant under Windows to avoid window resize bug if window look completely hidden by controls
+	   // cf. Search window in CleanIde.
+	   (set,dispose)					= if (curClipRgn==0) (pictsetcliprgn,\_ x->x) (pictandcliprgn,osdisposergn)
+//	   (set,dispose)					= if emptyCur (pictsetcliprgn,\_ x->x) (pictandcliprgn,osdisposergn)
 	#! picture							= set newClipRgn picture
 	#! (x,picture)						= drawf picture
 //	#! (curClipRgn,picture) = (trace_rgn "accClipPicture: cur" curClipRgn,picture)
