@@ -3,8 +3,6 @@ implementation module EstherScript
 import EstherPostParser, EstherTransform
 import StdBool, StdList, StdMisc, StdFunc, StdTuple, StdParsComb, DynamicFileSystem
 
-ENV_PATH :== ["path"]
-
 compose :: !String !*env -> (!MaybeException Dynamic, !*env) | resolveFilename, ExceptionEnv, bimap{|*|} env
 compose input env 
 	# (maybe, env) = getExceptionIO (compile input) env
@@ -45,8 +43,10 @@ where
 instance resolveFilename World
 where
 	resolveFilename name env
-		# (ok, dyn, env) = dynamicRead ENV_PATH env
-		  path = if ok (case dyn of (p :: [DynamicPath]) -> p) [[]]
+		# (ok, dyn, env) = dynamicRead ENV_CWD env
+		  cwd = if ok (case dyn of (p :: DynamicPath) -> p; _ -> []) []
+		  (ok, dyn, env) = dynamicRead ENV_PATH env
+		  path = [cwd:if ok (case dyn of (p :: [DynamicPath]) -> p; _ -> [[]]) [[]]]
 		  (cache, env) = cacheSearchPath path env
 		  (ok, file, prio) = findFile name cache
 		| not ok = (Nothing, env)

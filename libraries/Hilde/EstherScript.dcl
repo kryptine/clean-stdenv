@@ -2,6 +2,9 @@ definition module EstherScript
 
 import EstherPostParser, EstherTransform
 
+ENV_PATH :== ["path"]
+ENV_CWD :== ["cwd"]
+
 :: EstherBuiltin env = {builtin :: ![(String, Dynamic)], env :: !env}
 
 :: EstherError = EstherError !String

@@ -6,6 +6,7 @@ import StdInt, StdList, StdMisc, StdFunc, StdTuple, StdBool, StdString, StdReal
 stdEnv :: [(String, Dynamic)]
 stdEnv = 
 	[	("if", dynamic IF :: A.a: Bool a a -> a)
+	,	("raise", overloaded "TC" (dynamic (undef, \tc x -> raiseDynamic (tc x)) :: A.a b: (a, (a -> Dynamic) a -> b)))
 //	,	("(>>>>) infix 0", overloaded "TC" (dynamic (undef, >>>>) :: A.a: (a, (a -> Dynamic) a String -> *World -> *(Bool, *World))))
 	]	
 	++ stdOverloaded ++ stdClass ++ stdInt ++ stdReal ++ stdList 
