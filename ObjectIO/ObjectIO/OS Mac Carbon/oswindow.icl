@@ -2237,7 +2237,8 @@ ButtonWidth
 
 osGetButtonControlSize :: !OSWindowMetrics !String !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
 osGetButtonControlSize wMetrics=:{osmFont,osmHeight} text tb
-	# (width,tb)	= osGetfontstringwidth False 0 (validateControlTitle text) osmFont tb
+//	# (width,tb)	= osGetfontstringwidth False 0 (validateControlTitle text) osmFont tb
+	# ((width,h),tb)= osGetThemeTextDimensions (validateControlTitle text) tb
 //	# width			= max MinButWid (ButtonWidth+width)
 	# width			= ButtonWidth + width
 	# tb = trace_n ("osGetButtonControlSize :: width: "+++toString width+++" height: "+++toString ButtonHeight) tb
@@ -2833,3 +2834,58 @@ addReturnFilter editc tb = code {
 	}
 */
 //import code from "keyfilter.xo"
+
+:: ThemeFontID	:== Int
+
+kThemePushButtonFont          :== 105
+
+:: ThemeDrawState	:== Int
+:: CFStringRef		:== Int
+:: Boolean			:== Int
+:: PointRef			:== Int
+:: SInt16Ref		:== Int
+:: OSStatus			:== Int
+
+osGetThemeTextDimensions :: !String !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
+osGetThemeTextDimensions s tb
+	# (sref,tb)				= CFStringCreateWithCString 0 (s+++"\0") 0 tb
+	# tb = DebugStr` ("CFStringCreateWithCString",sref) tb
+	# (boundsref,err,tb)	= NewPtr 4 tb
+	# tb = DebugStr` ("NewPtr4",err,boundsref) tb
+	# (baseref,err,tb)		= NewPtr 2 tb
+	# tb = DebugStr` ("NewPtr2",err,baseref) tb
+	# (err,tb)				= GetThemeTextDimensions sref kThemePushButtonFont 0 0 boundsref baseref tb
+	# tb = DebugStr` ("GetThemeTextDimensions",err) tb
+	# (v,tb)				= LoadWord boundsref tb
+	# (h,tb)				= LoadWord (boundsref+2) tb
+	# tb					= DisposePtr boundsref tb
+	# tb					= DisposePtr baseref tb
+	# tb					= CFRelease sref tb
+	# tb = DebugStr` ("osGetThemeTextDimensions",s,h,v) tb
+	= ((h,v),tb)
+	
+GetThemeTextDimensions :: !CFStringRef !ThemeFontID !ThemeDrawState !Boolean !PointRef !SInt16Ref !*OSToolbox-> (!OSStatus,!*OSToolbox)
+GetThemeTextDimensions _ _ _ _ _ _ _ = code {
+	ccall GetThemeTextDimensions "IIIIII:I:I"
+	}
+
+//CFStringRef CFStringCreateWithCString(CFAllocatorRef alloc, const char *cStr, CFStringEncoding encoding);
+CFStringCreateWithCString :: !Int !String !Int !*OSToolbox -> (!CFStringRef,!*OSToolbox)
+CFStringCreateWithCString _ _ _ _ = code {
+	ccall CFStringCreateWithCString "IsI:I:I"
+	}
+
+CFRelease :: !Int !*OSToolbox -> *OSToolbox
+CFRelease _ _ = code {
+	ccall CFRelease "I:V:I"
+	}
+/*
+extern OSStatus 
+GetThemeTextDimensions(
+  CFStringRef      inString,
+  ThemeFontID      inFontID,
+  ThemeDrawState   inState,
+  Boolean          inWrapToWidth,
+  Point *          ioBounds,
+  SInt16 *         outBaseline)                               AVAILABLE_MAC_OS_X_VERSION_10_0_AND_LATER;
+*/
