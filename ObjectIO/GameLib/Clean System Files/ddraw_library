@@ -1,0 +1,5 @@
+ddraw.dll
+LoadImageA@24
+GetModuleHandleA@4
+DirectDrawCreate@12
+DirectDrawEnumerateA@8
