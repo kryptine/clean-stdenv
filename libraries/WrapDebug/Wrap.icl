@@ -11,29 +11,6 @@ import	StdOverloaded, StdMisc
 
 ::	WrappedDescriptorId = {descriptorId :: !Int}
 
-::  WrappedDescriptor
-    =   WrappedDescriptorCons
-    |   WrappedDescriptorNil
-    |   WrappedDescriptorTuple
-    |   WrappedDescriptorOther !WrappedDescriptorId
-
-::  WrappedNode
-    =   WrappedInt !Int
-    |   WrappedChar !Char
-    |   WrappedBool !Bool
-    |   WrappedReal !Real
-    |   WrappedFile !File
-    |   WrappedString !{#Char}
-    |   WrappedIntArray !{#Int}
-    |   WrappedBoolArray !{#Bool}
-    |   WrappedRealArray !{#Real}
-    |   WrappedFileArray !{#File}
-    |   WrappedArray !{WrappedNode}
-    |   WrappedRecord !WrappedDescriptor !{WrappedNode}
-    |   WrappedUnboxedList !WrappedDescriptor !{WrappedNode}
-    |   WrappedUnboxedRecordList !WrappedDescriptor !{WrappedNode}
-    |   WrappedOther !WrappedDescriptor !{WrappedNode}
-
 instance toString WrappedDescriptorId where
 	toString :: WrappedDescriptorId -> {#Char}
 	toString {descriptorId}
