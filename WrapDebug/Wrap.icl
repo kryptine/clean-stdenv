@@ -7,7 +7,7 @@
 */
 implementation module Wrap
 
-import	StdOverloaded, StdMisc
+import	StdOverloaded, StdMisc, StdArray, StdClass, StdInt
 
 ::	WrappedDescriptorId = {descriptorId :: !Int}
 
@@ -27,6 +27,46 @@ instance toString WrappedDescriptorId where
 
 wrapNode :: !.a -> WrappedNode
 wrapNode node
+	=	wrapShallowNode (shallowWrapNode node)
+
+wrapShallowNode :: !ShallowlyWrappedNode -> WrappedNode
+wrapShallowNode (ShallowlyWrappedInt i)
+	=	WrappedInt i
+wrapShallowNode (ShallowlyWrappedChar c)
+	=	WrappedChar c
+wrapShallowNode (ShallowlyWrappedBool b)
+	=	WrappedBool b
+wrapShallowNode (ShallowlyWrappedReal r)
+	=	WrappedReal r
+wrapShallowNode (ShallowlyWrappedFile f)
+	=	WrappedFile f
+wrapShallowNode (ShallowlyWrappedString s)
+	=	WrappedString s
+wrapShallowNode (ShallowlyWrappedIntArray ia)
+	=	WrappedIntArray ia
+wrapShallowNode (ShallowlyWrappedBoolArray ba)
+	=	WrappedBoolArray ba
+wrapShallowNode (ShallowlyWrappedRealArray ra)
+	=	WrappedRealArray ra
+wrapShallowNode (ShallowlyWrappedFileArray fa)
+	=	WrappedFileArray fa
+wrapShallowNode (ShallowlyWrappedArray a)
+	=	WrappedArray (wrapExtArray a)
+wrapShallowNode (ShallowlyWrappedRecord desc fields)
+	=	WrappedRecord desc (wrapExtArray fields)
+wrapShallowNode (ShallowlyWrappedUnboxedList desc fields)
+	=	WrappedUnboxedList desc (wrapExtArray fields)
+wrapShallowNode (ShallowlyWrappedUnboxedRecordList desc fields)
+	=	WrappedUnboxedRecordList desc (wrapExtArray fields)
+wrapShallowNode (ShallowlyWrappedOther desc args)
+	=	WrappedOther desc (wrapExtArray args)
+
+wrapExtArray :: {ExtNode} -> {WrappedNode}
+wrapExtArray a
+	=	{wrapNode e.node \\ e <-: a}
+
+shallowWrapNode :: !.a -> ShallowlyWrappedNode
+shallowWrapNode node
 	=	code
 	{
 					| A: <node> <result>
@@ -35,7 +75,7 @@ wrapNode node
 		jmp_false	not_a_bool
 		pushB_a	0
 		pop_a	1
-		fill_r	e_Wrap_kWrappedBool 0 1 0 0 0
+		fill_r	e_Wrap_kShallowlyWrappedBool 0 1 0 0 0
 		pop_b	1
 	.d 1 0
 		rtn
@@ -46,7 +86,7 @@ wrapNode node
 
 		pushI_a	0
 		pop_a	1
-		fill_r	e_Wrap_kWrappedInt 0 1 0 0 0
+		fill_r	e_Wrap_kShallowlyWrappedInt 0 1 0 0 0
 		pop_b	1
 	.d 1 0
 		rtn
@@ -57,7 +97,7 @@ wrapNode node
 
 		pushC_a	0
 		pop_a	1
-		fill_r	e_Wrap_kWrappedChar 0 1 0 0 0
+		fill_r	e_Wrap_kShallowlyWrappedChar 0 1 0 0 0
 		pop_b	1
 	.d 1 0
 		rtn
@@ -68,7 +108,7 @@ wrapNode node
 
 		pushR_a	0
 		pop_a	1
-		fill_r	e_Wrap_kWrappedReal 0 2 0 0 0
+		fill_r	e_Wrap_kShallowlyWrappedReal 0 2 0 0 0
 		pop_b	2
 	.d 1 0
 		rtn
@@ -119,7 +159,7 @@ wrapNode node
 					| B: <i> <n>
 		| wrap arg
 		push_a	1
-		build	e_Wrap_swrapNode 1 e_Wrap_nwrapNode
+		build e_Wrap_tExtNode 1 e_Wrap_cExtNode
 		update_a	0 2
 		pop_a	1
 
@@ -187,7 +227,7 @@ wrapNode node
 		update_a	0 1
 		pop_a	1
 					| A: <descriptor> <_{args}> <result>
-		fill_r	e_Wrap_kWrappedOther 2 0 2 0 0
+		fill_r	e_Wrap_kShallowlyWrappedOther 2 0 2 0 0
 		pop_a	2
 					| A: <result>
 	.d 1 0
@@ -411,7 +451,7 @@ wrapNode node
 					| A: <_{fields}> <field> <afield_ .. afield_m>
 		| wrap field
 		push_a	1
-		build	e_Wrap_swrapNode 1 e_Wrap_nwrapNode
+		build e_Wrap_tExtNode 1 e_Wrap_cExtNode
 		update_a	0 2
 		pop_a	1
 
@@ -469,7 +509,7 @@ wrapNode node
 	:fill_record_result
 		pop_b	1
 		| fill result node for record
-		fill_r	e_Wrap_kWrappedRecord 2 0 2 0 0
+		fill_r	e_Wrap_kShallowlyWrappedRecord 2 0 2 0 0
 		pop_a	2
 		jmp	wrapped_record_return_to_caller
 
@@ -477,7 +517,7 @@ wrapNode node
 		pop_b	1
 		| fill result node for constructor
 
-		fill_r	e_Wrap_kWrappedOther 2 0 2 0 0
+		fill_r	e_Wrap_kShallowlyWrappedOther 2 0 2 0 0
 		pop_a	2
 		jmp	wrapped_record_return_to_caller
 
@@ -485,7 +525,7 @@ wrapNode node
 		pop_b	1
 		| fill result node for constructor
 
-		fill_r	e_Wrap_kWrappedUnboxedList 2 0 2 0 0
+		fill_r	e_Wrap_kShallowlyWrappedUnboxedList 2 0 2 0 0
 		pop_a	2
 		jmp	wrapped_record_return_to_caller
 
@@ -493,7 +533,7 @@ wrapNode node
 		pop_b	1
 		| fill result node for constructor
 
-		fill_r	e_Wrap_kWrappedUnboxedRecordList 2 0 2 0 0
+		fill_r	e_Wrap_kShallowlyWrappedUnboxedRecordList 2 0 2 0 0
 		pop_a	2
 		jmp	wrapped_record_return_to_caller
 
@@ -531,7 +571,7 @@ wrapNode node
 
 	:wrap__string
 		| fill result node
-		fill_r	e_Wrap_kWrappedString 1 0 1 0 0
+		fill_r	e_Wrap_kShallowlyWrappedString 1 0 1 0 0
 		pop_a	1
 	.d 1 0
 					| A: <result>
@@ -587,7 +627,8 @@ wrapNode node
 		push_b	1
 		push_a	1
 		select	_ 1 0
-		build	e_Wrap_swrapNode 1 e_Wrap_nwrapNode
+
+		build e_Wrap_tExtNode 1 e_Wrap_cExtNode
 					| A: <element> <_wrapped_array> <_array> <result>
 					| B: <n> <i>
 		| update i-th element of _wrapped_array with wrapped element
@@ -620,7 +661,7 @@ wrapNode node
 					| A: <_wrapped_array> <result>
 					| B:
 		| fill result node
-		fill_r	e_Wrap_kWrappedArray 1 0 1 0 0
+		fill_r	e_Wrap_kShallowlyWrappedArray 1 0 1 0 0
 		pop_a	1
 	.d 1 0
 					| A: <result>
@@ -634,7 +675,7 @@ wrapNode node
 		pop_b	1
 
 		| fill result node
-		fill_r	e_Wrap_kWrappedBoolArray 1 0 1 0 0
+		fill_r	e_Wrap_kShallowlyWrappedBoolArray 1 0 1 0 0
 		pop_a	1
     .d 1 0
                     | A: <result>
@@ -647,7 +688,7 @@ wrapNode node
 		pop_b	1
 
 		| fill result node
-		fill_r	e_Wrap_kWrappedIntArray 1 0 1 0 0
+		fill_r	e_Wrap_kShallowlyWrappedIntArray 1 0 1 0 0
 		pop_a	1
 	.d 1 0
 					| A: <result>
@@ -660,7 +701,7 @@ wrapNode node
 		pop_b	1
 
 		| fill result node
-		fill_r	e_Wrap_kWrappedRealArray 1 0 1 0 0
+		fill_r	e_Wrap_kShallowlyWrappedRealArray 1 0 1 0 0
 		pop_a	1
 	.d 1 0
 					| A: <result>
@@ -673,7 +714,7 @@ wrapNode node
 		pop_b	1
 
 		| fill result node
-		fill_r	e_Wrap_kWrappedFileArray 1 0 1 0 0
+		fill_r	e_Wrap_kShallowlyWrappedFileArray 1 0 1 0 0
 		pop_a	1
 	.d 1 0
 					| A: <result>
@@ -743,7 +784,7 @@ wrapNode node
 		pop_a	1
 					| A: <_wrapped_array> <result>
 		| fill result node
-		fill_r	e_Wrap_kWrappedArray 1 0 1 0 0
+		fill_r	e_Wrap_kShallowlyWrappedArray 1 0 1 0 0
 		pop_a	1
 	.d 1 0
 					| A: <result>
