@@ -36,8 +36,6 @@ feedback :: (GecCircuit a a) -> GecCircuit a a
 
 sink :: GecCircuit a Void
 source :: (GecCircuit a b) -> GecCircuit Void b
-flowControl :: (IncludeUpdate -> a -> Maybe (IncludeUpdate, b)) -> GecCircuit a b
+flowControl :: (a -> Maybe b) -> GecCircuit a b
 
 gecIO :: (A. .ps: a *(PSt .ps) -> *(b, *PSt .ps)) -> GecCircuit a b
-
-derive generate GecCircuit

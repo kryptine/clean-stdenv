@@ -5,7 +5,7 @@ import store, GenDefault, StdDebug
 
 :: GecCircuit a b = GecCircuit !.(A. .ps: (GecSet b ps) *(PSt ps) -> *(GecSet a ps, *PSt ps))
 
-:: GecSet a ps :== IncludeUpdate a *(PSt ps) -> *PSt ps
+:: GecSet a ps :== a *(PSt ps) -> *PSt ps
 
 runCircuit (GecCircuit k) = k
 
@@ -15,14 +15,12 @@ startCircuit g a env = thd3 (evalCircuit (const id) g a env)
 evalCircuit :: (CircuitCB b .ps) !(GecCircuit a b) a !*(PSt .ps) -> (CircuitGet b .ps, CircuitSet a .ps, *PSt .ps)
 evalCircuit cb g a env
 	# (id_b, env) = openStore` Nothing env
-	  (seta, env) = runCircuit g (startCircuit_setb cb id_b) env
-	= (readStore id_b, seta YesUpdate, seta YesUpdate a env)
+	  (seta, env) = runCircuit g (evalCircuit_setb cb id_b) env
+	= (readStore id_b, seta, seta a env)
 where
-	startCircuit_setb cb id_b u b env 
+	evalCircuit_setb cb id_b b env 
 		# env = writeStore id_b b env
-		= case u of
-			YesUpdate -> cb b env
-			_ -> env
+		= cb b env
 
 edit :: String -> GecCircuit a a | gGEC{|*|} a 
 edit title = gecEdit True title
@@ -30,35 +28,30 @@ edit title = gecEdit True title
 display :: String -> GecCircuit a a | gGEC{|*|} a 
 display title = gecEdit False title
 
+gecEdit :: Bool String -> GecCircuit a a | gGEC{|*|} a 
 gecEdit edit title = GecCircuit k
 where
 	k seta env 
 		# (id_rec, env) = openStore` Nothing env
 		= (gecEdit_seta seta id_rec, env)
 		
-	gecEdit_seta seta id_rec u a env
+	gecEdit_seta seta id_rec a env
 		# (ok, env) = valueStored id_rec env
-		  (rec, env) = case ok of
+		  ({gecSetValue}, env) = case ok of
 					  	True -> readStore id_rec env
 					  	_
 							# (rec, env) = createNGEC title (if edit Interactive OutputOnly) 
-											True a (\r -> seta (includeUpdate r)) env
+											True a (\_ -> seta) env
 							  env = writeStore id_rec rec env
 							-> (rec, env)
-		= gecEdit_seta` rec seta u a env
-	
-	gecEdit_seta` {gecSetValue, gecGetValue} seta NoUpdate a env
-		# env = gecSetValue NoUpdate a env
-		  (a`, env) = gecGetValue env
-		= seta NoUpdate a` env
-	gecEdit_seta` {gecSetValue} _ u a env = gecSetValue u a env
+		= gecSetValue YesUpdate a env
 
 gecMouse :: String -> GecCircuit a MouseState
 gecMouse title = GecCircuit k
 where
 	k seta env
-		# (_, env) = createMouseGEC title Interactive (\r -> seta (includeUpdate r)) env
-		= (\_ _ env -> env, env)
+		# (_, env) = createMouseGEC title Interactive (\r -> seta) env
+		= (\_ env -> env, env)
 
 instance Arrow GecCircuit
 where
@@ -66,7 +59,7 @@ where
 	where
 		k setb env = (arr_seta setb f, env)
 
-		arr_seta setb f u a env = setb u (f a) env
+		arr_seta setb f a env = setb (f a) env
 	
 	(>>>) l r = GecCircuit k
 	where 
@@ -81,13 +74,13 @@ where
 			  (seta, env) = runCircuit g (first_setb id_c setbc) env
 			= (first_setac id_c seta, env)
 		
-		first_setac id_c seta u ac env
+		first_setac id_c seta ac env
 			# env = writeStore id_c (snd ac) env
-			= seta u (fst ac) env
+			= seta (fst ac) env
 
-		first_setb id_c setbc u b env 
+		first_setb id_c setbc b env 
 			# (c, env) = readStore id_c env
-			= setbc u (b, c) env
+			= setbc (b, c) env
 
 instance ArrowChoice GecCircuit
 where
@@ -97,10 +90,10 @@ where
 			# (seta, env) = runCircuit g (left_setb setbc) env
 			= (left_setac seta setbc, env)
 
-		left_setac seta setbc u (LEft a) env = seta u a env
-		left_setac seta setbc u (RIght c) env = setbc u (RIght c) env
+		left_setac seta setbc (LEft a) env = seta a env
+		left_setac seta setbc (RIght c) env = setbc (RIght c) env
 
-		left_setb setbc u b env = setbc u (LEft b) env
+		left_setb setbc b env = setbc (LEft b) env
 
 instance ArrowLoop GecCircuit
 where
@@ -111,13 +104,13 @@ where
 			  (setab, env) = runCircuit g (loop_setcb setc id_b) env
 			= (loop_seta setab id_b, env)
 
-		loop_setcb setc id_b u cb env
-			# env = setc u (fst cb) env
+		loop_setcb setc id_b cb env
+			# env = setc (fst cb) env
 			= writeStore id_b (snd cb) env
 		
-		loop_seta setab id_b u a env = env`
+		loop_seta setab id_b a env = env`
 		where
-			(b, env`) = readStore id_b (setab u (a, b) env)
+			(b, env`) = readStore id_b (setab (a, b) env)
 
 instance ArrowCircuit GecCircuit
 where
@@ -127,9 +120,9 @@ where
 			# (id_a, env) = openStore` (Just a) env
 			= (delay_seta seta id_a, env)
 
-		delay_seta seta id_a u a` env
+		delay_seta seta id_a a` env
 			# (a, env) = readStore id_a env
-			  env = seta u a env
+			  env = seta a env
 			= writeStore id_a a` env
 
 probe :: String -> GecCircuit a a | toString a
@@ -137,10 +130,10 @@ probe s = GecCircuit k
 where
 	k seta env = (probe_seta seta, env)
 	
-	probe_seta seta u a env
+	probe_seta seta a env
 		| trace (s +++ ": ") False = undef
 		| trace_n a False = undef
-		= seta u a env
+		= seta a env
 
 self :: (GecCircuit a a) (GecCircuit a a) -> GecCircuit a a
 self g f = GecCircuit k
@@ -152,14 +145,14 @@ where
 		(fseta, env```) = runCircuit f gseta env``
 		(gseta, env````) = runCircuit g (self_setrec id_B seta fseta) env```
 
-	self_setrec id_B setout setrec u a env 
+	self_setrec id_B setout setrec a env 
 		# (exit, env) = readStore id_B env
 		  env = writeStore id_B (not exit) env
-		= (if exit setout setrec) u a env
+		= (if exit setout setrec) a env
 
-	self_seta id_B seta u a env 
+	self_seta id_B seta a env 
 		# env = writeStore id_B False env
-		= seta u a env
+		= seta a env
 
 	/* = arr addLEFT >>> feedback (first g >>> arr selectX >>> f >>> arr addRIGHT) >>> arr fst
 	where
@@ -174,22 +167,22 @@ feedback g = self g (arr id)
 sink :: GecCircuit a Void
 sink = GecCircuit k
 where
-	k _ env = (\_ _ env -> env, env)
+	k _ env = (\_ env -> env, env)
 
 source :: (GecCircuit a b) -> GecCircuit Void b
 source g = GecCircuit k
 where
 	k setb env 
 		# (_, env) = runCircuit g setb env
-		= (\_ _ env -> env, env)
+		= (\_ env -> env, env)
 
-flowControl :: (IncludeUpdate -> a -> Maybe (IncludeUpdate, b)) -> GecCircuit a b
+flowControl :: (a -> Maybe b) -> GecCircuit a b
 flowControl f = GecCircuit k
 where
     k setb env = (seta, env)
     where
-        seta u a env = case f u a of
-            Just (u`, b) -> setb u` b env
+        seta a env = case f a of
+            Just b -> setb b env
             _ -> env
 
 gecIO :: (A. .ps: a *(PSt .ps) -> *(b, *PSt .ps)) -> GecCircuit a b
@@ -197,21 +190,11 @@ gecIO f = GecCircuit k
 where
 	k setb env = (seta, env)
 	where
-		seta u a env 
+		seta a env 
 			# (b, env) = f a env
-			= setb u b env
-
-includeUpdate :: !UpdateReason -> *IncludeUpdate
-includeUpdate Changed = YesUpdate
-includeUpdate _ = NoUpdate
-
+			= setb b env
+			
 openStore` :: !(Maybe a) !(PSt .ps) -> (!(StoreId a), !PSt .ps)
 openStore` maybe env
 	# (id, env) = openStoreId env
-	  (_, env) = openStore id maybe env
-	= (id, env)
-
-generate{|GecCircuit|} ga gb trace stream
-	# (b, trace, f, stream) = gb trace stream
-	= (arr (const b), trace, \_ -> 0, stream)
-
+	= (id, openStore id maybe env)
