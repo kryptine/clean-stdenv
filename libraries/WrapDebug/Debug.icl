@@ -1,7 +1,7 @@
 /*
 	Debug functions.
 
-	Version 1.0
+	Version 1.0.2
 	Ronny Wichers Schreur
 	ronny@cs.kun.nl
 */
@@ -9,11 +9,23 @@ implementation module Debug
 
 import StdEnv
 import Wrap, ShowWrapped
+import StdDebug
+
+// abort and undef from StdMisc are recognised be the strictness analyser
+// because we rely on the evaluation order in this module, we use our own abort
+
+non_strict_abort :: !{#Char} -> .a;
+non_strict_abort a = code  {
+	.d 1 0
+		jsr print_string_
+	.o 0 0
+		halt
+	}
 
 print :: ![{#Char}] .b -> .b
 print debugStrings value
 	| fst (ferror (stderr <<< debugStrings))
-		=	abort "Debug, print: couldn't write to stderr"
+		=	non_strict_abort "Debug, print: couldn't write to stderr"
 	// otherwise
 		=	value
 
@@ -84,8 +96,7 @@ debugShowWithOptions debugOptions debugValue
 					=	{options & terminator=terminator}
 
 :: Indicators
-// MW 2.0 was:	=	...
-	=	@...
+	=	...
 	|	.+.
 
 MaxCharsString
@@ -93,8 +104,7 @@ MaxCharsString
 MaxBreadthString
 	:== "..."
 MaxBreadthIndicator
-// MW 2.0 was:	:== wrapNode ...
-	:== wrapNode @...
+	:== wrapNode ...
 MaxDepthIndicator
 	:==	wrapNode .+.
 
@@ -140,7 +150,6 @@ pruneWrappedNode maxDepth maxBreadth value
 			// otherwise
 				=	{prune (depth+1) e \\ e <-: a}
 
-// MW:
 //1.3
 		pruneBasicArray :: !Int !(a b) -> WrappedNode | Array .a & ArrayElem b
 //3.1
@@ -153,7 +162,7 @@ pruneWrappedNode maxDepth maxBreadth value
 			// otherwise
 				=	WrappedArray {wrapNode e \\ e <-: a}
 
-/* +++ handle newlines in strings correctly */
+/* FIXME handle newlines in strings correctly */
 chop :: !Int [{#Char}] -> [{#Char}]
 chop _ []
 	=	[]

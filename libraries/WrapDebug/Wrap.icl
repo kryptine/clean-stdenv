@@ -7,7 +7,7 @@
 */
 implementation module Wrap
 
-import	StdOverloaded, StdMisc
+import	StdOverloaded
 
 ::	WrappedDescriptorId = {descriptorId :: !Int}
 

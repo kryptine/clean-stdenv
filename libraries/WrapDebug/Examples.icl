@@ -1,3 +1,10 @@
+/*
+	Examples of Debug behaviour
+
+	Version 1.0.2
+	Ronny Wichers Schreur
+	ronny@cs.kun.nl
+*/
 module Examples
 
 import StdEnv
@@ -64,13 +71,17 @@ example6
 	debugging with arrays 
 */
 example7
-	=	"example7" <<- {1, 2, 3, 4, 5}
+	=	"example7" <<- array
+	where
+		array :: {Int}
+		array
+			=	{1, 2, 3, 4, 5}
 
 /*
 	debugging with closures 
 */
 example8
-	=	"example8" <<- (take, take 5, take 5 ['Brubek'])
+	=	"example8" <<- (take, take 5, take 5 ['Brubeck'])
 
 /*
 	debugging may evaluate values that wouldn't otherwise

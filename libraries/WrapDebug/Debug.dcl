@@ -1,7 +1,7 @@
 /*
 	Debug functions.
 
-	Version 1.0
+	Version 1.0.2
 	Ronny Wichers Schreur
 	ronny@cs.kun.nl
 */
