@@ -22,7 +22,7 @@ disposeWindow				:: !WID !(PSt .l) -> PSt .l
 */
 
 disposeWindowStateHandle	:: !OSDInfo !(Maybe InputTrack) !(OSEvent -> .s -> ([Int],.s)) !*(!*WindowStateHandle .pst,.s) !*OSToolbox
-			   -> (!(![Id],![Id],![DelayActivationInfo],![FinalModalLS],!OSDInfo,!Maybe InputTrack),!*(!*WindowStateHandle .pst,.s),!*OSToolbox)
+      -> (!(![Id],![Id],![DelayActivationInfo],![FinalModalLS],!OSDInfo,!Maybe InputTrack),!*(!*WindowStateHandle .pst,.s),!*OSToolbox)
 //disposeWindowStateHandle :: !OSDInfo !(Maybe InputTrack) !(OSEvent -> .s -> ([Int],.s)) !*(!OSDInfo,!*WindowStateHandle .pst,.s) !*OSToolbox
 //			-> (!(![Id],![Id],![DelayActivationInfo],![FinalModalLS],!Maybe InputTrack),!*(!OSDInfo,!*WindowStateHandle .pst,.s),!*OSToolbox)
 /*	disposeWindowStateHandle disposes all system resources associated with the given WindowStateHandle.
@@ -30,9 +30,11 @@ disposeWindowStateHandle	:: !OSDInfo !(Maybe InputTrack) !(OSEvent -> .s -> ([In
 	(When timers are also part of windows, timer ids will also be returned.)
 */
 
-disposeWItemHandle			::  !OSWindowPtr !(WItemHandle .ls .pst) !*OSToolbox
-			-> (![Id],![Id],!IdFun *OSToolbox,!WItemHandle .ls .pst, !*OSToolbox)
+disposeWItemHandle			::  !OSWindowPtr !Point2 !(WItemHandle .ls .pst) !*OSToolbox
+                    -> (![Id],![Id],!IdFun *OSToolbox,!WItemHandle .ls .pst, !*OSToolbox)
 /*	disposeWItemHandle returns all freed receiver ids and a function that (recursively) disposes all system 
 	resources associated with the given WItemHandle. 
 	(When timers are also part of windows, timer ids will also be returned.)
+	The OSWindowPtr argument must identify the parent window.
+	The Point2 argument must be the exact position of the parent GUI element of this WItemHandle.
 */

@@ -876,7 +876,7 @@ where
 	updateControlBackground :: !OSWindowMetrics !WindowKind !Id !(Maybe ViewFrame) !(WindowStateHandle .pst) !*OSToolbox
 																				-> (!WindowStateHandle .pst, !*OSToolbox)
 	updateControlBackground wMetrics wKind cId maybeViewFrame wsH=:{wshIds,wshHandle=Just wlsH=:{wlsHandle=wH=:{whSize=whSize,whItems=itemHs}}} tb
-		# (_,updInfo,itemHs)			= getWElementHandlesUpdateInfo wMetrics cId contentRect itemHs
+		# (_,updInfo,itemHs)			= getWElementHandlesUpdateInfo wMetrics cId contentRect zero itemHs
 		  wH							= {wH & whItems=itemHs}
 		# tb							= strictSeq [osInvalidateWindowRect updInfo.updWIDS.wPtr cuArea \\ {cuArea} <- updInfo.updControls] tb // DvA
 		# (wH,tb)						= updatewindow wMetrics updInfo wH tb
@@ -889,31 +889,32 @@ where
 		visScrolls						= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
 		contentRect						= osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize)
 		
-		getWElementHandlesUpdateInfo :: !OSWindowMetrics !Id !OSRect ![WElementHandle .ls .pst] -> (!Bool,UpdateInfo,![WElementHandle .ls .pst])
-		getWElementHandlesUpdateInfo _ _ _ []
+		getWElementHandlesUpdateInfo :: !OSWindowMetrics !Id !OSRect !Point2 ![WElementHandle .ls .pst] -> (!Bool,UpdateInfo,![WElementHandle .ls .pst])
+		getWElementHandlesUpdateInfo _ _ _ _ []
 			= (False,undef,[])
-		getWElementHandlesUpdateInfo wMetrics cId clipRect [itemH:itemHs]
-			# (found,updInfo,itemH)		= getWElementHandleUpdateInfo wMetrics cId clipRect itemH
+		getWElementHandlesUpdateInfo wMetrics cId clipRect parentPos [itemH:itemHs]
+			# (found,updInfo,itemH)		= getWElementHandleUpdateInfo wMetrics cId clipRect parentPos itemH
 			| found
 				= (found,updInfo,[itemH:itemHs])
 			| otherwise
-				# (found,updInfo,itemHs)= getWElementHandlesUpdateInfo wMetrics cId clipRect itemHs
+				# (found,updInfo,itemHs)= getWElementHandlesUpdateInfo wMetrics cId clipRect parentPos itemHs
 				= (found,updInfo,[itemH:itemHs])
 		where
-			getWElementHandleUpdateInfo :: !OSWindowMetrics !Id !OSRect !(WElementHandle .ls .pst) -> (!Bool,UpdateInfo,!WElementHandle .ls .pst)
-			getWElementHandleUpdateInfo wMetrics cId clipRect (WItemHandle itemH=:{wItemId,wItemNr,wItemPtr,wItemKind,wItemPos,wItemSize,wItems,wItemInfo})
+			getWElementHandleUpdateInfo :: !OSWindowMetrics !Id !OSRect !Point2 !(WElementHandle .ls .pst) -> (!Bool,UpdateInfo,!WElementHandle .ls .pst)
+			getWElementHandleUpdateInfo wMetrics cId clipRect parentPos (WItemHandle itemH=:{wItemId,wItemNr,wItemPtr,wItemKind,wItemPos,wItemSize,wItems,wItemInfo})
 				| isNothing wItemId || cId<>fromJust wItemId
 					| not (isRecursiveControl wItemKind)
 						= (False,undef,WItemHandle itemH)
 					// otherwise
-						# (found,updInfo,itemHs)	= getWElementHandlesUpdateInfo wMetrics cId visRect wItems
+						# (found,updInfo,itemHs)	= getWElementHandlesUpdateInfo wMetrics cId visRect absolutePos wItems
 						= (found,updInfo,WItemHandle {itemH & wItems=itemHs})
 				| isMember wItemKind [IsCompoundControl,IsCustomControl,IsCustomButtonControl]
 					= (True,updInfo,WItemHandle itemH)
 				| otherwise
 					= (False,undef,WItemHandle itemH)
 			where
-				itemRect				= posSizeToRect wItemPos wItemSize
+				absolutePos				= movePoint wItemPos parentPos
+				itemRect				= posSizeToRect absolutePos wItemSize
 				compoundInfo			= getWItemCompoundInfo wItemInfo
 				origin					= if (wItemKind==IsCompoundControl)
 											compoundInfo.compoundOrigin
@@ -927,7 +928,7 @@ where
 				visRect					= intersectRects contentRect clipRect
 				updArea							= case maybeViewFrame of
 													Nothing		-> visRect
-													Just rect	-> intersectRects (rectangleToRect (addVector (toVector wItemPos)
+													Just rect	-> intersectRects (rectangleToRect (addVector (toVector absolutePos)
 																								   (subVector (toVector origin) rect)
 																								   )
 																				  ) visRect
@@ -939,14 +940,14 @@ where
 																		}]
 												  ,	updGContext		= Nothing
 												  }
-			getWElementHandleUpdateInfo wMetrics cId clipRect (WListLSHandle itemHs)
-				# (found,updInfo,itemHs)= getWElementHandlesUpdateInfo wMetrics cId clipRect itemHs
+			getWElementHandleUpdateInfo wMetrics cId clipRect parentPos (WListLSHandle itemHs)
+				# (found,updInfo,itemHs)= getWElementHandlesUpdateInfo wMetrics cId clipRect parentPos itemHs
 				= (found,updInfo,WListLSHandle itemHs)
-			getWElementHandleUpdateInfo wMetrics cId clipRect (WExtendLSHandle wExH=:{wExtendItems=itemHs})
-				# (found,updInfo,itemHs)= getWElementHandlesUpdateInfo wMetrics cId clipRect itemHs
+			getWElementHandleUpdateInfo wMetrics cId clipRect parentPos (WExtendLSHandle wExH=:{wExtendItems=itemHs})
+				# (found,updInfo,itemHs)= getWElementHandlesUpdateInfo wMetrics cId clipRect parentPos itemHs
 				= (found,updInfo,WExtendLSHandle {wExH & wExtendItems=itemHs})
-			getWElementHandleUpdateInfo wMetrics cId clipRect (WChangeLSHandle wChH=:{wChangeItems=itemHs})
-				# (found,updInfo,itemHs)= getWElementHandlesUpdateInfo wMetrics cId clipRect itemHs
+			getWElementHandleUpdateInfo wMetrics cId clipRect parentPos (WChangeLSHandle wChH=:{wChangeItems=itemHs})
+				# (found,updInfo,itemHs)= getWElementHandlesUpdateInfo wMetrics cId clipRect parentPos itemHs
 				= (found,updInfo,WChangeLSHandle {wChH & wChangeItems=itemHs})
 	updateControlBackground _ _ _ _ _ _
 		= StdControlFatalError "updateControl" "unexpected window placeholder argument"
@@ -972,7 +973,7 @@ snd3thd3 tuple :== (t2,t3) where (_,t2,t3) = tuple
 
 getControlLayouts :: ![Id] !WState -> [(Bool,(Maybe ItemPos,Vector2))]
 getControlLayouts ids wstate
-	= map snd3thd3 (snd (getcontrolslayouts (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
+	= map snd3thd3 (snd (getcontrolslayouts zero (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= (Nothing,zero)

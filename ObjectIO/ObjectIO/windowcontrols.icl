@@ -80,7 +80,7 @@ opencompoundcontrols osdInfo wMetrics compoundId ls newItems
 		# (newItemHs,tb)			= createCompoundControls wMetrics compoundId nrSkip whDefaultId whCancelId whSelect wPtr newItemHs tb
 		  wH						= {wH & whItemNrs=itemNrs,whItems=newItemHs}
 		# (wH,tb)					= forceValidWindowClipState wMetrics True wPtr wH tb
-		# (updRgn,newItemHs,tb)		= relayoutControls wMetrics whSelect whShow wFrame wFrame zero zero wPtr whDefaultId oldItemHs` wH.whItems tb
+		# (updRgn,newItemHs,tb)		= relayoutControls wMetrics wPtr whDefaultId whSelect whShow (wFrame,zero,zero,oldItemHs`) (wFrame,zero,zero,wH.whItems) tb
 		# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wshIds {wH & whItems=newItemHs} tb
 		= (True,{wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
 where
@@ -174,7 +174,7 @@ openrecursivecontrols osdInfo wMetrics controlId ls newItems
 		# (newItemHs,tb)			= createRecursiveControls wMetrics controlId nrSkip whDefaultId whCancelId whSelect wPtr newItemHs tb
 		  wH						= {wH & whItemNrs=itemNrs,whItems=newItemHs}
 		# (wH,tb)					= forceValidWindowClipState wMetrics True wPtr wH tb
-		# (updRgn,newItemHs,tb)		= relayoutControls wMetrics whSelect whShow wFrame wFrame zero zero wPtr whDefaultId oldItemHs` wH.whItems tb
+		# (updRgn,newItemHs,tb)		= relayoutControls wMetrics wPtr whDefaultId whSelect whShow (wFrame,zero,zero,oldItemHs`) (wFrame,zero,zero,wH.whItems) tb
 		# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wshIds {wH & whItems=newItemHs} tb
 		= (True,{wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
 where
@@ -251,7 +251,7 @@ closecontrols wMetrics closeIds relayout
 			  wsH=:{wshIds=wshIds=:{wPtr},wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems=curItems,whItemNrs,whAtts,whKind,whSize,whSelect,whShow,whDefaultId,whWindowInfo}}} 
 			  tb
 	# (freeRIds,freeIds,disposeFun,_,itemNrs,oldItemHs,tb)
-									= closeWElementHandles wPtr closeIds whItemNrs curItems tb
+									= closeWElementHandles wPtr zero closeIds whItemNrs curItems tb
 	| not relayout
 		# wH						= {wH & whItemNrs=itemNrs,whItems=oldItemHs}
 		  wH						= invalidateWindowClipState wH
@@ -267,7 +267,7 @@ closecontrols wMetrics closeIds relayout
 		# (_,newItemHs,tb)			= layoutControls wMetrics hMargins vMargins spaces reqSize zero [(domain,origin)] oldItemHs tb
 		  wH						= {wH & whItemNrs=itemNrs, whItems=newItemHs}
 		# (wH,tb)					= forceValidWindowClipState wMetrics True wPtr wH tb
-		# (updRgn,newItemHs,tb)		= relayoutControls wMetrics whSelect whShow wFrame wFrame zero zero wPtr whDefaultId oldItemHs` wH.whItems tb
+		# (updRgn,newItemHs,tb)		= relayoutControls wMetrics wPtr whDefaultId whSelect whShow (wFrame,zero,zero,oldItemHs`) (wFrame,zero,zero,wH.whItems) tb
 		# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wshIds {wH & whItems=newItemHs} tb
 		= (freeRIds,freeIds,disposeFun,{wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
 where
@@ -278,15 +278,15 @@ where
 										other			-> (zero,             sizeToRect whSize,False,False)
 	(visHScroll,visVScroll)			= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
 	
-	closeWElementHandles :: !OSWindowPtr ![Id]  [Int] ![WElementHandle .ls .pst] !*OSToolbox
-	   -> (![Id],![Id],!IdFun *OSToolbox,![Id],![Int],![WElementHandle .ls .pst],!*OSToolbox)
-	closeWElementHandles _ ids itemNrs [] tb
+	closeWElementHandles :: !OSWindowPtr !Point2 ![Id]  [Int] ![WElementHandle .ls .pst] !*OSToolbox
+	           -> (![Id],![Id],!IdFun *OSToolbox,![Id],![Int],![WElementHandle .ls .pst],!*OSToolbox)
+	closeWElementHandles _ _ ids itemNrs [] tb
 		= ([],[],id,ids,itemNrs,[],tb)
-	closeWElementHandles parentPtr ids itemNrs [itemH:itemHs] tb
+	closeWElementHandles parentPtr parentPos ids itemNrs [itemH:itemHs] tb
 		| isEmpty ids
 			= ([],[],id,ids,itemNrs,[itemH:itemHs],tb)
-		# (close,freeRIds1,freeIds1,f1,ids,itemNrs,itemH, tb)	= closeWElementHandle  parentPtr ids itemNrs itemH  tb
-		# (      freeRIds2,freeIds2,f2,ids,itemNrs,itemHs,tb)	= closeWElementHandles parentPtr ids itemNrs itemHs tb
+		# (close,freeRIds1,freeIds1,f1,ids,itemNrs,itemH, tb)	= closeWElementHandle  parentPtr parentPos ids itemNrs itemH  tb
+		# (      freeRIds2,freeIds2,f2,ids,itemNrs,itemHs,tb)	= closeWElementHandles parentPtr parentPos ids itemNrs itemHs tb
 		  freeRIds												= freeRIds1++freeRIds2
 		  freeIds												= freeIds1 ++freeIds2
 		  f														= f2 o f1
@@ -295,21 +295,21 @@ where
 		| otherwise
 			= (freeRIds,freeIds,f,ids,itemNrs,[itemH:itemHs],tb)
 	where
-		closeWElementHandle :: !OSWindowPtr ![Id] [Int] !(WElementHandle .ls .pst) !*OSToolbox
-		  -> (!Bool,![Id],![Id],!IdFun *OSToolbox,![Id],![Int],!WElementHandle .ls .pst,!*OSToolbox)
-		closeWElementHandle parentPtr ids itemNrs (WItemHandle itemH) tb
-			# (keep,freeRIds,freeIds,f,ids,itemNrs,itemH,tb)= closeWItemHandle parentPtr ids itemNrs itemH tb
+		closeWElementHandle :: !OSWindowPtr !Point2 ![Id]  [Int] !(WElementHandle .ls .pst) !*OSToolbox
+		    -> (!Bool,![Id],![Id],!IdFun *OSToolbox,![Id],![Int], !WElementHandle .ls .pst, !*OSToolbox)
+		closeWElementHandle parentPtr parentPos ids itemNrs (WItemHandle itemH) tb
+			# (keep,freeRIds,freeIds,f,ids,itemNrs,itemH,tb)= closeWItemHandle parentPtr parentPos ids itemNrs itemH tb
 			= (keep,freeRIds,freeIds,f,ids,itemNrs,WItemHandle itemH,tb)
 		where
-			closeWItemHandle :: !OSWindowPtr ![Id] [Int] !(WItemHandle .ls .pst) !*OSToolbox
-				-> (!Bool,![Id],![Id],!IdFun *OSToolbox,![Id],![Int], !WItemHandle .ls .pst, !*OSToolbox)
+			closeWItemHandle :: !OSWindowPtr !Point2 ![Id]  [Int] !(WItemHandle .ls .pst) !*OSToolbox
+			 -> (!Bool,![Id],![Id],!IdFun *OSToolbox,![Id],![Int], !WItemHandle .ls .pst, !*OSToolbox)
 			
-			closeWItemHandle parentPtr ids itemNrs itemH=:{wItemKind,wItemId,wItemPos,wItemSize,wItemNr,wItems} tb
+			closeWItemHandle parentPtr parentPos ids itemNrs itemH=:{wItemKind,wItemId,wItemPos,wItemSize,wItemNr,wItems} tb
 				# (close,ids)										= case wItemId of
 																		(Just id)	-> removeCheck id ids
 																		_			-> (False,ids)
 				| isRecursiveControl wItemKind
-					# (freeRIds,freeIds,f1,ids,itemNrs,itemHs,tb)	= closeWElementHandles parentPtr ids itemNrs wItems tb
+					# (freeRIds,freeIds,f1,ids,itemNrs,itemHs,tb)	= closeWElementHandles parentPtr absolutePos ids itemNrs wItems tb
 					  itemH											= {itemH & wItems=itemHs}
 					| not close
 						| wItemKind==IsCompoundControl
@@ -317,28 +317,31 @@ where
 						// otherwise
 							= (close,freeRIds,freeIds,f1,ids,itemNrs,itemH,tb)
 					// otherwise
-						# (freeRIds1,freeIds1,f2,itemH,tb)			= disposeWItemHandle parentPtr itemH tb
-						# tb										= osInvalidateWindowRect parentPtr (posSizeToRect wItemPos wItemSize) tb
+						# (freeRIds1,freeIds1,f2,itemH,tb)			= disposeWItemHandle parentPtr parentPos itemH tb
+						# tb										= osInvalidateWindowRect parentPtr itemRect tb
 						= (close,freeRIds1++freeRIds,freeIds1++freeIds,f2 o f1,ids,itemNrs,itemH,tb)
 				| not close
 					= (close,[],[],id,ids,itemNrs,itemH,tb)
 				| otherwise
-					# (freeRIds,freeIds,f,itemH,tb)					= disposeWItemHandle parentPtr itemH tb
-					# tb											= osInvalidateWindowRect parentPtr (posSizeToRect wItemPos wItemSize) tb
+					# (freeRIds,freeIds,f,itemH,tb)					= disposeWItemHandle parentPtr parentPos itemH tb
+					# tb											= osInvalidateWindowRect parentPtr itemRect tb
 					= (close,freeRIds,freeIds,f,ids,[wItemNr:itemNrs],itemH,tb)
+			where
+				absolutePos											= movePoint wItemPos parentPos
+				itemRect											= posSizeToRect absolutePos wItemSize
 		
-		closeWElementHandle parentPtr ids itemNrs (WListLSHandle itemHs) tb
-			# (freeRIds,freeIds,f,ids,itemNrs,itemHs,tb)	= closeWElementHandles parentPtr ids itemNrs itemHs tb
+		closeWElementHandle parentPtr parentPos ids itemNrs (WListLSHandle itemHs) tb
+			# (freeRIds,freeIds,f,ids,itemNrs,itemHs,tb)	= closeWElementHandles parentPtr parentPos ids itemNrs itemHs tb
 			# (empty,itemHs)								= uisEmpty itemHs
 			= (empty,freeRIds,freeIds,f,ids,itemNrs,WListLSHandle itemHs,tb)
 		
-		closeWElementHandle parentPtr ids itemNrs (WExtendLSHandle wExH=:{wExtendItems=itemHs}) tb
-			# (freeRIds,freeIds,f,ids,itemNrs,itemHs,tb)	= closeWElementHandles parentPtr ids itemNrs itemHs tb
+		closeWElementHandle parentPtr parentPos ids itemNrs (WExtendLSHandle wExH=:{wExtendItems=itemHs}) tb
+			# (freeRIds,freeIds,f,ids,itemNrs,itemHs,tb)	= closeWElementHandles parentPtr parentPos ids itemNrs itemHs tb
 			# (empty,itemHs)								= uisEmpty itemHs
 			= (empty,freeRIds,freeIds,f,ids,itemNrs,WExtendLSHandle {wExH & wExtendItems=itemHs},tb)
 		
-		closeWElementHandle parentPtr ids itemNrs (WChangeLSHandle wChH=:{wChangeItems=itemHs}) tb
-			# (freeRIds,freeIds,f,ids,itemNrs,itemHs,tb)	= closeWElementHandles parentPtr ids itemNrs itemHs tb
+		closeWElementHandle parentPtr parentPos ids itemNrs (WChangeLSHandle wChH=:{wChangeItems=itemHs}) tb
+			# (freeRIds,freeIds,f,ids,itemNrs,itemHs,tb)	= closeWElementHandles parentPtr parentPos ids itemNrs itemHs tb
 			# (empty,itemHs)								= uisEmpty itemHs
 			= (empty,freeRIds,freeIds,f,ids,itemNrs,WChangeLSHandle {wChH & wChangeItems=itemHs},tb)
 closecontrols _ _ _ _ _
@@ -351,43 +354,46 @@ closecontrols _ _ _ _ _
 */
 closeallcontrols :: !(WindowStateHandle .pst) !*OSToolbox -> (![Id],![Id],!IdFun *OSToolbox,!WindowStateHandle .pst,!*OSToolbox)
 closeallcontrols wsH=:{wshIds={wPtr},wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems=curItems,whItemNrs}}} tb
-	# (freeRIds,freeIds,disposeFun,itemNrs,tb)	= closeWElementHandles wPtr curItems whItemNrs tb
+	# (freeRIds,freeIds,disposeFun,itemNrs,tb)	= closeWElementHandles wPtr zero curItems whItemNrs tb
 	  wH										= {wH & whItemNrs=itemNrs,whItems=[]}
 	  wH										= invalidateWindowClipState wH
 	= (freeRIds,freeIds,disposeFun,{wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
 where
-	closeWElementHandles :: !OSWindowPtr ![WElementHandle .ls .pst] ![Int] !*OSToolbox -> (![Id],![Id],!IdFun *OSToolbox,![Int],!*OSToolbox)
-	closeWElementHandles _ [] itemNrs tb
+	closeWElementHandles :: !OSWindowPtr !Point2 ![WElementHandle .ls .pst] ![Int] !*OSToolbox -> (![Id],![Id],!IdFun *OSToolbox,![Int],!*OSToolbox)
+	closeWElementHandles _ _ [] itemNrs tb
 		= ([],[],id,itemNrs,tb)
-	closeWElementHandles parentPtr [itemH:itemHs] itemNrs tb
-		# (freeRIds1,freeIds1,f1,itemNrs,tb)= closeWElementHandle  parentPtr itemH  itemNrs tb
-		# (freeRIds2,freeIds2,f2,itemNrs,tb)= closeWElementHandles parentPtr itemHs itemNrs tb
+	closeWElementHandles parentPtr parentPos [itemH:itemHs] itemNrs tb
+		# (freeRIds1,freeIds1,f1,itemNrs,tb)= closeWElementHandle  parentPtr parentPos itemH  itemNrs tb
+		# (freeRIds2,freeIds2,f2,itemNrs,tb)= closeWElementHandles parentPtr parentPos itemHs itemNrs tb
 		= (freeRIds1++freeRIds2,freeIds1++freeIds2,f2 o f1,itemNrs,tb)
 	where
-		closeWElementHandle :: !OSWindowPtr !(WElementHandle .ls .pst) ![Int] !*OSToolbox -> (![Id],![Id],!IdFun *OSToolbox,![Int],!*OSToolbox)
-		closeWElementHandle parentPtr (WItemHandle itemH) itemNrs tb
-			= closeWItemHandle parentPtr itemH itemNrs tb
+		closeWElementHandle :: !OSWindowPtr !Point2 !(WElementHandle .ls .pst) ![Int] !*OSToolbox -> (![Id],![Id],!IdFun *OSToolbox,![Int],!*OSToolbox)
+		closeWElementHandle parentPtr parentPos (WItemHandle itemH) itemNrs tb
+			= closeWItemHandle parentPtr parentPos itemH itemNrs tb
 		where
-			closeWItemHandle :: !OSWindowPtr !(WItemHandle .ls .pst) ![Int] !*OSToolbox -> (![Id],![Id],!IdFun *OSToolbox,![Int],!*OSToolbox)
-			closeWItemHandle parentPtr itemH=:{wItemKind,wItemNr,wItems,wItemPos,wItemSize} itemNrs tb
+			closeWItemHandle :: !OSWindowPtr !Point2 !(WItemHandle .ls .pst) ![Int] !*OSToolbox -> (![Id],![Id],!IdFun *OSToolbox,![Int],!*OSToolbox)
+			closeWItemHandle parentPtr parentPos itemH=:{wItemKind,wItemNr,wItems,wItemPos,wItemSize} itemNrs tb
 				| isRecursiveControl wItemKind
-					# (freeRIds1,freeIds1,f1,itemNrs,tb)= closeWElementHandles parentPtr wItems itemNrs tb
-					# (freeRIds2,freeIds2,f2,_,tb)		= disposeWItemHandle parentPtr {itemH & wItems=[]} tb		// PA: itemH --> {itemH & wItems=[]}
-					# tb								= osInvalidateWindowRect parentPtr (posSizeToRect wItemPos wItemSize) tb
+					# (freeRIds1,freeIds1,f1,itemNrs,tb)= closeWElementHandles parentPtr absolutePos wItems itemNrs tb
+					# (freeRIds2,freeIds2,f2,_,tb)		= disposeWItemHandle parentPtr parentPos {itemH & wItems=[]} tb		// PA: itemH --> {itemH & wItems=[]}
+					# tb								= osInvalidateWindowRect parentPtr itemRect tb
 					= (freeRIds2++freeRIds1,freeIds2++freeIds1,f2 o f1,itemNrs,tb)
 				| otherwise
-					# (freeRIds,freeIds,f,_,tb)			= disposeWItemHandle parentPtr itemH tb
-					# tb								= osInvalidateWindowRect parentPtr (posSizeToRect wItemPos wItemSize) tb
+					# (freeRIds,freeIds,f,_,tb)			= disposeWItemHandle parentPtr parentPos itemH tb
+					# tb								= osInvalidateWindowRect parentPtr itemRect tb
 					= (freeRIds,freeIds,f,[wItemNr:itemNrs],tb)
+			where
+				absolutePos								= movePoint wItemPos parentPos
+				itemRect								= posSizeToRect absolutePos wItemSize
 		
-		closeWElementHandle parentPtr (WListLSHandle itemHs) itemNrs tb
-			= closeWElementHandles parentPtr itemHs itemNrs tb
+		closeWElementHandle parentPtr parentPos (WListLSHandle itemHs) itemNrs tb
+			= closeWElementHandles parentPtr parentPos itemHs itemNrs tb
 		
-		closeWElementHandle parentPtr (WExtendLSHandle {wExtendItems=itemHs}) itemNrs tb
-			= closeWElementHandles parentPtr itemHs itemNrs tb
+		closeWElementHandle parentPtr parentPos (WExtendLSHandle {wExtendItems=itemHs}) itemNrs tb
+			= closeWElementHandles parentPtr parentPos itemHs itemNrs tb
 		
-		closeWElementHandle parentPtr (WChangeLSHandle {wChangeItems=itemHs}) itemNrs tb
-			= closeWElementHandles parentPtr itemHs itemNrs tb
+		closeWElementHandle parentPtr parentPos (WChangeLSHandle {wChangeItems=itemHs}) itemNrs tb
+			= closeWElementHandles parentPtr parentPos itemHs itemNrs tb
 closeallcontrols _ _
 	= windowcontrolsFatalError "closeallcontrols" "unexpected window placeholder argument"
 
@@ -418,7 +424,7 @@ setcontrolpositions wMetrics newPoss
 		  updState					= rectangleToUpdateState viewFrame
 		  drawbackground			= if (whKind==IsDialog) (\x y->(x,y)) (drawwindowlook wMetrics wPtr id updState)
 		# (wH,tb)					= drawbackground wH tb	// DvA: was switched off because of clipping concerns
-		# (updRgn,newItems,tb)		= relayoutControls wMetrics whSelect whShow wFrame wFrame zero zero wPtr whDefaultId oldItems` wH.whItems tb
+		# (updRgn,newItems,tb)		= relayoutControls wMetrics wPtr whDefaultId whSelect whShow (wFrame,zero,zero,oldItems`) (wFrame,zero,zero,wH.whItems) tb
 		# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wshIds {wH & whItems=newItems} tb
 		# tb						= osValidateWindowRect wPtr (sizeToRect whSize) tb
 		  wsH						= {wsH & wshHandle=Just {wlsH & wlsHandle=wH}}

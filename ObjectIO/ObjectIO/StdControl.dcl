@@ -241,7 +241,12 @@ updateControl			:: !Id !(Maybe ViewFrame)		!(IOSt .l) -> IOSt .l
 */
 
 ::	WState
-
+	=	{	wIds	:: !WIDS
+		,	wRep	:: !WindowHandle`
+		,	wTb		:: !.OSToolbox
+		,	wMetrics:: !OSWindowMetrics
+		}
+import wstate, ossystem
 getWindow				:: !Id !(IOSt .l) -> (!Maybe WState, !IOSt .l)
 getParentWindow			:: !Id !(IOSt .l) -> (!Maybe WState, !IOSt .l)
 /*	getWindow returns a read-only WState for the indicated window.

@@ -10,7 +10,7 @@ import	wstate
 
 getcontrolstypes		::		![WElementHandle`] -> [(ControlType,Maybe Id)]
 getcompoundstypes		:: !Id	![WElementHandle`] -> [(ControlType,Maybe Id)]
-getcontrolslayouts		::							![WElementHandle`] !(![Id],![(Id,Bool,(Maybe ItemPos,Vector2))])
+getcontrolslayouts		:: !Point2					![WElementHandle`] !(![Id],![(Id,Bool,(Maybe ItemPos,Vector2))])
 																	 -> (![Id],![(Id,Bool,(Maybe ItemPos,Vector2))])
 getcontrolsviewsizes	:: !OSWindowMetrics			![WElementHandle`] !(![Id],![(Id,Bool,Size)])
 																	 -> (![Id],![(Id,Bool,Size)])

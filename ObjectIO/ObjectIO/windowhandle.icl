@@ -130,7 +130,7 @@ import	ospicture, ostypes
 		,	wItems			:: *[WElementHandle ls pst]			// In case of	CompoundControl	: its control elements
 																//				Otherwise		: []
 		,	wItemVirtual	:: Bool								// The control is virtual (True) and should not be layn out
-		,	wItemPos		:: Point2							// The exact position of the item
+		,	wItemPos		:: Vector2							// The position of the item, relative to its parent (window/dialog/compound/layout)
 		,	wItemSize		:: Size								// The exact size of the item
 		,	wItemPtr		:: OSWindowPtr						// The ptr to the item (OSNoWindowPtr if no handle)
 		,	wItemLayoutInfo	:: LayoutInfo						// Additional information on layout
@@ -159,7 +159,7 @@ import	ospicture, ostypes
 		}
 ::	RadioItemInfo	st
 	=	{	radioItem		:: (String,Int,IdFun st)			// The RadioItem of the definition
-		,	radioItemPos	:: !Point2							// The exact position of the item
+		,	radioItemPos	:: !Vector2							// The exact position of the item
 		,	radioItemSize	:: Size								// The exact size of the item
 		,	radioItemPtr	:: OSWindowPtr						// The OSWindowPtr of the item
 		}
@@ -169,7 +169,7 @@ import	ospicture, ostypes
 		}
 ::	CheckItemInfo	st
 	=	{	checkItem		:: (String,Int,MarkState,IdFun st)	// The CheckItem of the definition
-		,	checkItemPos	:: !Point2							// The exact position of the item
+		,	checkItemPos	:: !Vector2							// The exact position of the item
 		,	checkItemSize	:: Size								// The exact size of the item
 		,	checkItemPtr	:: OSWindowPtr						// The OSWindowPtr of the item
 		}

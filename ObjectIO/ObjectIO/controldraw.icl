@@ -10,19 +10,19 @@ from	wstateaccess	import getWItemCompoundInfo`, getWItemCustomButtonInfo`, getWI
 /*	The following functions apply the current Look function of the given control.
 */
 
-/*	drawCompoundLook(`) able parentWindow contextClip itemH
+/*	drawCompoundLook(`) metrics able parentWindow parentPos contextClip itemH
 		applies the Look function of the compound control given the current selectstate (True iff Able).
 		Drawing is clipped inside contextClip (in window coordinates) and the content rectangle of the compound control. 
 		The function assumes that itemH refers to a CompoundControl(`) which ClipState is valid.
 	Note that drawCompoundLook(`) draws in the graphics context of the parent window (OS(grab/release)WindowPictContext).
 		This is done because the ClipState of the CompoundControl is given relative to the left-top of the window.
 */
-drawCompoundLook :: !OSWindowMetrics !Bool !OSWindowPtr !OSRect !(WItemHandle .ls .pst) !*OSToolbox -> (!WItemHandle .ls .pst,!*OSToolbox)
-drawCompoundLook wMetrics able wPtr contextClip itemH=:{wItemInfo} tb
+drawCompoundLook :: !OSWindowMetrics !Bool !OSWindowPtr !Point2 !OSRect !(WItemHandle .ls .pst) !*OSToolbox -> (!WItemHandle .ls .pst,!*OSToolbox)
+drawCompoundLook wMetrics able wPtr parentPos contextClip itemH=:{wItemInfo} tb
 	#! (contextRgn,tb)				= osnewrectrgn contextClip tb
 	#! (clipRgn,tb)					= ossectrgn contextRgn itemClip.clipRgn tb
 	#! (osPict,tb)					= osGrabWindowPictContext wPtr tb
-	#! picture						= packPicture (origin-itemPos) (copyPen itemLook.lookPen) True osPict tb
+	#! picture						= packPicture (origin-absolutePos) (copyPen itemLook.lookPen) True osPict tb
 	#! picture						= pictsetcliprgn clipRgn picture
 	#! picture						= itemLook.lookFun selectState updState picture
 	#! (_,pen,_,osPict,tb)			= unpackPicture picture
@@ -33,11 +33,12 @@ drawCompoundLook wMetrics able wPtr contextClip itemH=:{wItemInfo} tb
 where
 	itemPos							= itemH.wItemPos
 	itemSize						= itemH.wItemSize
+	absolutePos						= movePoint itemPos parentPos
 	info							= getWItemCompoundInfo wItemInfo
 	(origin,domainRect,hasScrolls)	= (info.compoundOrigin,info.compoundDomain,(isJust info.compoundHScroll,isJust info.compoundVScroll))
 	visScrolls						= osScrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
 	contentRect						= osGetCompoundContentRect wMetrics visScrolls (posSizeToRect origin itemSize)
-	clipRectangle					= rectToRectangle (addVector (toVector (origin-itemPos)) (intersectRects (addVector (toVector (itemPos-origin)) contentRect) contextClip))
+	clipRectangle					= rectToRectangle (addVector (toVector (origin-absolutePos)) (intersectRects (addVector (toVector (absolutePos-origin)) contentRect) contextClip))
 	viewFrame						= rectToRectangle contentRect
 	updState						= {oldFrame=viewFrame,newFrame=viewFrame,updArea=[clipRectangle]}
 	compoundLookInfo				= info.compoundLookInfo
@@ -45,12 +46,12 @@ where
 	itemClip						= compoundLookInfo.compoundClip
 	selectState						= if able Able Unable
 
-drawCompoundLook` :: !OSWindowMetrics !Bool !OSWindowPtr !OSRect !WItemHandle` !*OSToolbox -> (!WItemHandle`,!*OSToolbox)
-drawCompoundLook` wMetrics able wPtr contextClip itemH=:{wItemInfo`} tb
+drawCompoundLook` :: !OSWindowMetrics !Bool !OSWindowPtr !Point2 !OSRect !WItemHandle` !*OSToolbox -> (!WItemHandle`,!*OSToolbox)
+drawCompoundLook` wMetrics able wPtr parentPos contextClip itemH=:{wItemInfo`} tb
 	#! (contextRgn,tb)				= osnewrectrgn contextClip tb
 	#! (clipRgn,tb)					= ossectrgn contextRgn itemClip.clipRgn tb
 	#! (osPict,tb)					= osGrabWindowPictContext wPtr tb
-	#! picture						= packPicture (origin-itemPos) (copyPen itemLook.lookPen) True osPict tb
+	#! picture						= packPicture (origin-absolutePos) (copyPen itemLook.lookPen) True osPict tb
 	#! picture						= pictsetcliprgn clipRgn picture
 	#! picture						= itemLook.lookFun selectState updState picture
 	#! (_,pen,_,osPict,tb)			= unpackPicture picture
@@ -61,11 +62,12 @@ drawCompoundLook` wMetrics able wPtr contextClip itemH=:{wItemInfo`} tb
 where
 	itemPos							= itemH.wItemPos`
 	itemSize						= itemH.wItemSize`
+	absolutePos						= movePoint itemPos parentPos
 	info							= getWItemCompoundInfo` wItemInfo`
 	(origin,domainRect,hasScrolls)	= (info.compoundOrigin,info.compoundDomain,(isJust info.compoundHScroll,isJust info.compoundVScroll))
 	visScrolls						= osScrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
 	contentRect						= osGetCompoundContentRect wMetrics visScrolls (posSizeToRect origin itemSize)
-	clipRectangle					= rectToRectangle (addVector (toVector (origin-itemPos)) (intersectRects (addVector (toVector (itemPos-origin)) contentRect) contextClip))
+	clipRectangle					= rectToRectangle (addVector (toVector (origin-absolutePos)) (intersectRects (addVector (toVector (absolutePos-origin)) contentRect) contextClip))
 	viewFrame						= rectToRectangle contentRect
 	updState						= {oldFrame=viewFrame,newFrame=viewFrame,updArea=[clipRectangle]}
 	compoundLookInfo				= info.compoundLookInfo
@@ -78,11 +80,11 @@ where
 		Drawing is clipped inside contextClip and the content rectangle of the custom button control. 
 		The function assumes that itemH refers to a custom button control.
 */
-drawCustomButtonLook :: !Bool !OSWindowPtr !OSRect !(WItemHandle .ls .pst) !*OSToolbox -> (!WItemHandle .ls .pst,!*OSToolbox)
-drawCustomButtonLook able wPtr contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wItemSize} tb
+drawCustomButtonLook :: !Bool !OSWindowPtr !Point2 !OSRect !(WItemHandle .ls .pst) !*OSToolbox -> (!WItemHandle .ls .pst,!*OSToolbox)
+drawCustomButtonLook able wPtr parentPos contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wItemSize} tb
 	#! (clipRgn,tb)			= osnewrectrgn contextClip tb
 	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb		// PA: use window HDC instead of control HDC because of clipstate
-	#! picture				= packPicture (zero-wItemPos) (copyPen itemLook.lookPen) True osPict tb
+	#! picture				= packPicture (zero-absolutePos) (copyPen itemLook.lookPen) True osPict tb
 	#! picture				= pictsetcliprgn clipRgn picture
 	#! picture				= appClipPicture (toRegion clipRectangle) (itemLook.lookFun selectState updState) picture
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
@@ -91,18 +93,19 @@ drawCustomButtonLook able wPtr contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,w
 	   info					= CustomButtonInfo {info & cButtonInfoLook={itemLook & lookPen=pen}}
 	= ({itemH & wItemInfo=info},tb)
 where
+	absolutePos				= movePoint wItemPos parentPos
 	info					= getWItemCustomButtonInfo wItemInfo
 	itemLook				= info.cButtonInfoLook
 	viewFrame				= sizeToRectangle wItemSize
 	selectState				= if able Able Unable
-	clipRectangle			= rectToRectangle (intersectRects (subVector (toVector wItemPos) contextClip) (sizeToRect wItemSize))
+	clipRectangle			= rectToRectangle (intersectRects (subVector (toVector absolutePos) contextClip) (sizeToRect wItemSize))
 	updState				= {oldFrame=viewFrame,newFrame=viewFrame,updArea=[clipRectangle]}
 
-drawCustomButtonLook` :: !Bool !OSWindowPtr !OSRect !WItemHandle` !*OSToolbox -> (!WItemHandle`,!*OSToolbox)
-drawCustomButtonLook` able wPtr contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,wItemSize`} tb
+drawCustomButtonLook` :: !Bool !OSWindowPtr !Point2 !OSRect !WItemHandle` !*OSToolbox -> (!WItemHandle`,!*OSToolbox)
+drawCustomButtonLook` able wPtr parentPos contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,wItemSize`} tb
 	#! (clipRgn,tb)			= osnewrectrgn contextClip tb
 	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb		// PA: use window HDC instead of control HDC because of clipstate
-	#! picture				= packPicture (zero-wItemPos`) (copyPen itemLook.lookPen) True osPict tb
+	#! picture				= packPicture (zero-absolutePos) (copyPen itemLook.lookPen) True osPict tb
 	#! picture				= pictsetcliprgn clipRgn picture
 	#! picture				= appClipPicture (toRegion clipRectangle) (itemLook.lookFun selectState updState) picture
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
@@ -111,11 +114,12 @@ drawCustomButtonLook` able wPtr contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPo
 	   info					= CustomButtonInfo` {info & cButtonInfoLook={itemLook & lookPen=pen}}
 	= ({itemH & wItemInfo`=info},tb)
 where
+	absolutePos				= movePoint wItemPos` parentPos
 	info					= getWItemCustomButtonInfo` wItemInfo`
 	itemLook				= info.cButtonInfoLook
 	viewFrame				= sizeToRectangle wItemSize`
 	selectState				= if able Able Unable
-	clipRectangle			= rectToRectangle (intersectRects (subVector (toVector wItemPos`) contextClip) (sizeToRect wItemSize`))
+	clipRectangle			= rectToRectangle (intersectRects (subVector (toVector absolutePos) contextClip) (sizeToRect wItemSize`))
 	updState				= {oldFrame=viewFrame,newFrame=viewFrame,updArea=[clipRectangle]}
 
 /*	drawCustomLook(`) able parentWindow itemH
@@ -123,11 +127,11 @@ where
 		Drawing is clipped inside contextClip and the content rectangle of the custom button control. 
 		The function assumes that itemH refers to a custom control.
 */
-drawCustomLook :: !Bool !OSWindowPtr !OSRect !(WItemHandle .ls .pst) !*OSToolbox -> (!WItemHandle .ls .pst,!*OSToolbox)
-drawCustomLook able wPtr contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wItemSize} tb
+drawCustomLook :: !Bool !OSWindowPtr !Point2 !OSRect !(WItemHandle .ls .pst) !*OSToolbox -> (!WItemHandle .ls .pst,!*OSToolbox)
+drawCustomLook able wPtr parentPos contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wItemSize} tb
 	#! (clipRgn,tb)			= osnewrectrgn contextClip tb
 	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb		// PA: use window HDC instead of control HDC because of clipstate
-	#! picture				= packPicture (zero-wItemPos) (copyPen itemLook.lookPen) True osPict tb
+	#! picture				= packPicture (zero-absolutePos) (copyPen itemLook.lookPen) True osPict tb
 	#! picture				= pictsetcliprgn clipRgn picture
 	#! picture				= appClipPicture (toRegion clipRectangle) (itemLook.lookFun selectState updState) picture
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
@@ -136,18 +140,19 @@ drawCustomLook able wPtr contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wItemSi
 	   info					= CustomInfo {info & customInfoLook={itemLook & lookPen=pen}}
 	= ({itemH & wItemInfo=info},tb)
 where
+	absolutePos				= movePoint wItemPos parentPos
 	info					= getWItemCustomInfo wItemInfo
 	itemLook				= info.customInfoLook
 	viewFrame				= sizeToRectangle wItemSize
 	selectState				= if able Able Unable
-	clipRectangle			= rectToRectangle (intersectRects (subVector (toVector wItemPos) contextClip) (sizeToRect wItemSize))
+	clipRectangle			= rectToRectangle (intersectRects (subVector (toVector absolutePos) contextClip) (sizeToRect wItemSize))
 	updState				= {oldFrame=viewFrame,newFrame=viewFrame,updArea=[clipRectangle]}
 
-drawCustomLook` :: !Bool !OSWindowPtr !OSRect !WItemHandle` !*OSToolbox -> (!WItemHandle`,!*OSToolbox)
-drawCustomLook` able wPtr contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,wItemSize`} tb
+drawCustomLook` :: !Bool !OSWindowPtr !Point2 !OSRect !WItemHandle` !*OSToolbox -> (!WItemHandle`,!*OSToolbox)
+drawCustomLook` able wPtr parentPos contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,wItemSize`} tb
 	#! (clipRgn,tb)			= osnewrectrgn contextClip tb
 	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb		// PA: use window HDC instead of control HDC because of clipstate
-	#! picture				= packPicture (zero-wItemPos`) (copyPen itemLook.lookPen) True osPict tb
+	#! picture				= packPicture (zero-absolutePos) (copyPen itemLook.lookPen) True osPict tb
 	#! picture				= pictsetcliprgn clipRgn picture
 	#! picture				= appClipPicture (toRegion clipRectangle) (itemLook.lookFun selectState updState) picture
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
@@ -156,11 +161,12 @@ drawCustomLook` able wPtr contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,wIt
 	   info					= CustomInfo` {info & customInfoLook={itemLook & lookPen=pen}}
 	= ({itemH & wItemInfo`=info},tb)
 where
+	absolutePos				= movePoint wItemPos` parentPos
 	info					= getWItemCustomInfo` wItemInfo`
 	itemLook				= info.customInfoLook
 	viewFrame				= sizeToRectangle wItemSize`
 	selectState				= if able Able Unable
-	clipRectangle			= rectToRectangle (intersectRects (subVector (toVector wItemPos`) contextClip) (sizeToRect wItemSize`))
+	clipRectangle			= rectToRectangle (intersectRects (subVector (toVector absolutePos) contextClip) (sizeToRect wItemSize`))
 	updState				= {oldFrame=viewFrame,newFrame=viewFrame,updArea=[clipRectangle]}
 
 
@@ -170,12 +176,12 @@ where
 /*	drawInCompound(`) assumes that the WItemHandle(`) argument refers to a non transparent compound control 
 	with a valid ClipState.
 */
-drawInCompound :: !OSWindowPtr !.(St *Picture .x) !OSRect !(WItemHandle .ls .pst) !*OSToolbox -> (.x,!WItemHandle .ls .pst,!*OSToolbox)
-drawInCompound wPtr drawfun contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wItemSize} tb
+drawInCompound :: !.(St *Picture .x) !OSWindowPtr !Point2 !OSRect !(WItemHandle .ls .pst) !*OSToolbox -> (.x,!WItemHandle .ls .pst,!*OSToolbox)
+drawInCompound drawfun wPtr parentPos contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wItemSize} tb
 	#! (contextRgn,tb)			= osnewrectrgn contextClip tb
 	#! (clipRgn,tb)				= ossectrgn contextRgn compoundClip.clipRgn tb
 	#! (osPict,tb)				= osGrabWindowPictContext wPtr tb		// PA: use window HDC instead of control HDC because of clipstate
-	#! picture					= packPicture (origin-wItemPos) (copyPen compoundLook.lookPen) True osPict tb
+	#! picture					= packPicture (origin-absolutePos) (copyPen compoundLook.lookPen) True osPict tb
 	#! picture					= pictsetcliprgn clipRgn picture
 	#! (x,picture)				= drawfun picture
 	#! (_,pen,_,osPict,tb)		= unpackPicture picture
@@ -185,17 +191,18 @@ drawInCompound wPtr drawfun contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wIte
 	   itemH					= {itemH & wItemInfo=CompoundInfo info}
 	= (x,itemH,tb)
 where
+	absolutePos					= movePoint wItemPos parentPos
 	info						= getWItemCompoundInfo wItemInfo
 	origin						= info.compoundOrigin
 	compoundLookInfo			= info.compoundLookInfo
 	{compoundLook,compoundClip}	= compoundLookInfo
 
-drawInCompound` :: !OSWindowPtr !.(St *Picture .x) !OSRect !WItemHandle` !*OSToolbox -> (.x,!WItemHandle`,!*OSToolbox)
-drawInCompound` wPtr drawfun contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,wItemSize`} tb
+drawInCompound` :: !.(St *Picture .x) !OSWindowPtr !Point2 !OSRect !WItemHandle` !*OSToolbox -> (.x,!WItemHandle`,!*OSToolbox)
+drawInCompound` drawfun wPtr parentPos contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,wItemSize`} tb
 	#! (contextRgn,tb)			= osnewrectrgn contextClip tb
 	#! (clipRgn,tb)				= ossectrgn contextRgn compoundClip.clipRgn tb
 	#! (osPict,tb)				= osGrabWindowPictContext wPtr tb		// PA: use window HDC instead of control HDC because of clipstate
-	#! picture					= packPicture (origin-wItemPos`) (copyPen compoundLook.lookPen) True osPict tb
+	#! picture					= packPicture (origin-absolutePos) (copyPen compoundLook.lookPen) True osPict tb
 	#! picture					= pictsetcliprgn clipRgn picture
 	#! (x,picture)				= drawfun picture
 	#! (_,pen,_,osPict,tb)		= unpackPicture picture
@@ -205,16 +212,17 @@ drawInCompound` wPtr drawfun contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,
 	   itemH					= {itemH & wItemInfo`=CompoundInfo` info}
 	= (x,itemH,tb)
 where
+	absolutePos					= movePoint wItemPos` parentPos
 	info						= getWItemCompoundInfo` wItemInfo`
 	origin						= info.compoundOrigin
 	compoundLookInfo			= info.compoundLookInfo
 	{compoundLook,compoundClip}	= compoundLookInfo
 
-drawInCustomButton :: !OSWindowPtr !.(St *Picture .x) !OSRect !(WItemHandle .ls .ps) !*OSToolbox -> (.x,!WItemHandle .ls .ps,!*OSToolbox)
-drawInCustomButton wPtr drawfun contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wItemSize} tb
+drawInCustomButton :: !.(St *Picture .x) !OSWindowPtr !Point2 !OSRect !(WItemHandle .ls .ps) !*OSToolbox -> (.x,!WItemHandle .ls .ps,!*OSToolbox)
+drawInCustomButton drawfun wPtr parentPos contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wItemSize} tb
 	#! (clipRgn,tb)			= osnewrectrgn contextClip tb						// PA+++: clip also inside contextClip
 	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb
-	#! picture				= packPicture (zero-wItemPos) (copyPen itemLook.lookPen) True osPict tb
+	#! picture				= packPicture (zero-absolutePos) (copyPen itemLook.lookPen) True osPict tb
 	#! picture				= pictsetcliprgn clipRgn picture					// PA+++: set new clipping region
 	#! (x,picture)			= accClipPicture (toRegion (sizeToRectangle wItemSize)) drawfun picture
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
@@ -224,14 +232,15 @@ drawInCustomButton wPtr drawfun contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,
 	   itemH				= {itemH & wItemInfo=CustomButtonInfo info}
 	= (x,itemH,tb)
 where
+	absolutePos				= movePoint wItemPos parentPos
 	info					= getWItemCustomButtonInfo wItemInfo
 	itemLook				= info.cButtonInfoLook
 
-drawInCustomButton` :: !OSWindowPtr !.(St *Picture .x) !OSRect !WItemHandle` !*OSToolbox -> (.x,!WItemHandle`,!*OSToolbox)
-drawInCustomButton` wPtr drawfun contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,wItemSize`} tb
+drawInCustomButton` :: !.(St *Picture .x) !OSWindowPtr !Point2 !OSRect !WItemHandle` !*OSToolbox -> (.x,!WItemHandle`,!*OSToolbox)
+drawInCustomButton` drawfun wPtr parentPos contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,wItemSize`} tb
 	#! (clipRgn,tb)			= osnewrectrgn contextClip tb						// PA+++: clip also inside contextClip
 	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb
-	#! picture				= packPicture (zero-wItemPos`) (copyPen itemLook.lookPen) True osPict tb
+	#! picture				= packPicture (zero-absolutePos) (copyPen itemLook.lookPen) True osPict tb
 	#! picture				= pictsetcliprgn clipRgn picture					// PA+++: set new clipping region
 	#! (x,picture)			= accClipPicture (toRegion (sizeToRectangle wItemSize`)) drawfun picture
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
@@ -241,14 +250,15 @@ drawInCustomButton` wPtr drawfun contextClip itemH=:{wItemPtr`,wItemInfo`,wItemP
 	   itemH				= {itemH & wItemInfo`=CustomButtonInfo` info}
 	= (x,itemH,tb)
 where
+	absolutePos				= movePoint wItemPos` parentPos
 	info					= getWItemCustomButtonInfo` wItemInfo`
 	itemLook				= info.cButtonInfoLook
 
-drawInCustom :: !OSWindowPtr !.(St *Picture .x) !OSRect !(WItemHandle .ls .ps) !*OSToolbox -> (.x,!WItemHandle .ls .ps,!*OSToolbox)
-drawInCustom wPtr drawfun contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wItemSize} tb
+drawInCustom :: !.(St *Picture .x) !OSWindowPtr !Point2 !OSRect !(WItemHandle .ls .ps) !*OSToolbox -> (.x,!WItemHandle .ls .ps,!*OSToolbox)
+drawInCustom drawfun wPtr parentPos contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wItemSize} tb
 	#! (clipRgn,tb)			= osnewrectrgn contextClip tb						// PA+++: clip also inside contextClip
 	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb
-	#! picture				= packPicture (zero-wItemPos) (copyPen itemLook.lookPen) True osPict tb
+	#! picture				= packPicture (zero-absolutePos) (copyPen itemLook.lookPen) True osPict tb
 	#! picture				= pictsetcliprgn clipRgn picture					// PA+++: set new clipping region
 	#! (x,picture)			= accClipPicture (toRegion (sizeToRectangle wItemSize)) drawfun picture
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
@@ -258,14 +268,15 @@ drawInCustom wPtr drawfun contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wItemS
 	   itemH				= {itemH & wItemInfo=CustomInfo info}
 	= (x,itemH,tb)
 where
+	absolutePos				= movePoint wItemPos parentPos
 	info					= getWItemCustomInfo wItemInfo
 	itemLook				= info.customInfoLook
 
-drawInCustom` :: !OSWindowPtr !.(St *Picture .x) !OSRect !WItemHandle` !*OSToolbox -> (.x,!WItemHandle`,!*OSToolbox)
-drawInCustom` wPtr drawfun contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,wItemSize`} tb
+drawInCustom` :: !.(St *Picture .x) !OSWindowPtr !Point2 !OSRect !WItemHandle` !*OSToolbox -> (.x,!WItemHandle`,!*OSToolbox)
+drawInCustom` drawfun wPtr parentPos contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,wItemSize`} tb
 	#! (clipRgn,tb)			= osnewrectrgn contextClip tb						// PA+++: clip also inside contextClip
 	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb
-	#! picture				= packPicture (zero-wItemPos`) (copyPen itemLook.lookPen) True osPict tb
+	#! picture				= packPicture (zero-absolutePos) (copyPen itemLook.lookPen) True osPict tb
 	#! picture				= pictsetcliprgn clipRgn picture					// PA+++: set new clipping region
 	#! (x,picture)			= accClipPicture (toRegion (sizeToRectangle wItemSize`)) drawfun picture
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
@@ -275,5 +286,6 @@ drawInCustom` wPtr drawfun contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,wI
 	   itemH				= {itemH & wItemInfo`=CustomInfo` info}
 	= (x,itemH,tb)
 where
+	absolutePos				= movePoint wItemPos` parentPos
 	info					= getWItemCustomInfo` wItemInfo`
 	itemLook				= info.customInfoLook

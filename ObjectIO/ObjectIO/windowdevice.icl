@@ -655,7 +655,7 @@ windowStateCompoundScrollActionIO wMetrics info=:{csaWIDS={wPtr}}
 								  tb
 	# (whItems`,whItems,tb)		= getWElementHandles` wPtr whItems tb
 	# (done,originChanged,itemHs,tb)
-								= calcNewCompoundOrigin wMetrics info whItems tb
+								= calcNewCompoundOrigin wMetrics info zero whItems tb
 	| not done
 		= windowdeviceFatalError "windowStateCompoundScrollActionIO" "could not locate CompoundControl"
 	| not originChanged
@@ -664,7 +664,7 @@ windowStateCompoundScrollActionIO wMetrics info=:{csaWIDS={wPtr}}
 		# (_,newItems,tb)		= layoutControls wMetrics hMargins vMargins spaces contentSize minSize [(domain,origin)] itemHs tb
 		  wH					= {wH & whItems=newItems}
 		# (wH,tb)				= forceValidWindowClipState wMetrics True wPtr wH tb
-		# (updRgn,newItems,tb)	= relayoutControls wMetrics whSelect whShow wFrame wFrame zero zero wPtr whDefaultId whItems` wH.whItems tb
+		# (updRgn,newItems,tb)	= relayoutControls wMetrics wPtr whDefaultId whSelect whShow (wFrame,zero,zero,whItems`) (wFrame,zero,zero,wH.whItems) tb
 		# (wH,tb)				= updatewindowbackgrounds wMetrics updRgn info.csaWIDS {wH & whItems=newItems} tb
 		# (wH,tb)				= drawcompoundlook wMetrics whSelect wFrame info.csaItemNr wPtr wH tb	// PA: this might be redundant now because of updatewindowbackgrounds
 //		# tb					= OSvalidateWindowRect wPtr (sizeToRect whSize) tb
@@ -687,82 +687,83 @@ where
 	
 	drawcompoundlook :: !OSWindowMetrics !Bool !OSRect !Int !OSWindowPtr !(WindowHandle .ls .pst) !*OSToolbox -> (!WindowHandle .ls .pst,!*OSToolbox)
 	drawcompoundlook wMetrics ableContext clipRect itemNr wPtr wH=:{whItems} tb
-		# (_,itemHs,tb)	= drawcompoundlook` wMetrics ableContext clipRect itemNr wPtr whItems tb
+		# (_,itemHs,tb)	= drawcompoundlook` wMetrics ableContext zero clipRect itemNr wPtr whItems tb
 		= ({wH & whItems=itemHs},tb)
 	where
-		drawcompoundlook` :: !OSWindowMetrics !Bool !OSRect !Int !OSWindowPtr ![WElementHandle .ls .pst] !*OSToolbox
-																  -> (!Bool,![WElementHandle .ls .pst],!*OSToolbox)
-		drawcompoundlook` wMetrics ableContext clipRect itemNr wPtr [itemH:itemHs] tb
-			# (done,itemH,tb)		= drawWElementLook wMetrics ableContext clipRect itemNr wPtr itemH tb
+		drawcompoundlook` :: !OSWindowMetrics !Bool !Point2 !OSRect !Int !OSWindowPtr ![WElementHandle .ls .pst] !*OSToolbox
+		                                                                    -> (!Bool,![WElementHandle .ls .pst],!*OSToolbox)
+		drawcompoundlook` wMetrics ableContext parentPos clipRect itemNr wPtr [itemH:itemHs] tb
+			# (done,itemH,tb)		= drawWElementLook wMetrics ableContext parentPos clipRect itemNr wPtr itemH tb
 			| done
 				= (done,[itemH:itemHs],tb)
 			| otherwise
-				# (done,itemHs,tb)	= drawcompoundlook` wMetrics ableContext clipRect itemNr wPtr itemHs tb
+				# (done,itemHs,tb)	= drawcompoundlook` wMetrics ableContext parentPos clipRect itemNr wPtr itemHs tb
 				= (done,[itemH:itemHs],tb)
 		where
-			drawWElementLook :: !OSWindowMetrics !Bool !OSRect !Int !OSWindowPtr !(WElementHandle .ls .pst) !*OSToolbox
-																	  -> (!Bool,!WElementHandle .ls .pst, !*OSToolbox)
-			drawWElementLook wMetrics ableContext clipRect itemNr wPtr (WItemHandle itemH=:{wItemKind,wItemSelect,wItemNr,wItemInfo,wItemPos,wItemSize,wItems}) tb
+			drawWElementLook :: !OSWindowMetrics !Bool !Point2 !OSRect !Int !OSWindowPtr !(WElementHandle .ls .pst) !*OSToolbox
+			                                                                    -> (!Bool,!WElementHandle .ls .pst, !*OSToolbox)
+			drawWElementLook wMetrics ableContext parentPos clipRect itemNr wPtr (WItemHandle itemH=:{wItemKind,wItemSelect,wItemNr,wItemInfo,wItemPos,wItemSize,wItems}) tb
 				| info.csaItemNr<>wItemNr
 					| not (isRecursiveControl wItemKind)
 						= (False,WItemHandle itemH,tb)
 					| wItemKind==IsLayoutControl
-						# (done,itemHs,tb)	= drawcompoundlook` wMetrics isAble (intersectRects clipRect itemRect) itemNr wPtr wItems tb
+						# (done,itemHs,tb)	= drawcompoundlook` wMetrics isAble absolutePos (intersectRects clipRect itemRect) itemNr wPtr wItems tb
 						  itemH				= {itemH & wItems=itemHs}
 						= (done,WItemHandle itemH,tb)
 					// otherwise
-						# (done,itemHs,tb)	= drawcompoundlook` wMetrics isAble clipRect1 itemNr wPtr wItems tb
+						# (done,itemHs,tb)	= drawcompoundlook` wMetrics isAble absolutePos clipRect1 itemNr wPtr wItems tb
 						  itemH				= {itemH & wItems=itemHs}
 						= (done,WItemHandle itemH,tb)
 				| wItemKind<>IsCompoundControl
 					= windowdeviceFatalError "drawWElementLook (windowStateCompoundScrollActionIO)" "argument control is not a CompoundControl"
 				| otherwise
-					# (itemH,tb)			= drawCompoundLook wMetrics isAble wPtr clipRect1 itemH tb
+					# (itemH,tb)			= drawCompoundLook wMetrics isAble wPtr parentPos clipRect1 itemH tb
 				//	# tb					= OSvalidateWindowRect itemH.wItemPtr clipRect1 tb//(sizeToRect wItemSize) tb	// PA: validation of (SizeToRect wItemSize) is to much
 					= (True,WItemHandle itemH,tb)
 			where
+				absolutePos					= movePoint wItemPos parentPos
 				isAble						= ableContext && wItemSelect
 				itemInfo					= getWItemCompoundInfo wItemInfo
 				domainRect					= itemInfo.compoundDomain
 				hasScrolls					= (isJust itemInfo.compoundHScroll,isJust itemInfo.compoundVScroll)
 				visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple wItemSize) hasScrolls
-				itemRect					= posSizeToRect wItemPos wItemSize
+				itemRect					= posSizeToRect absolutePos wItemSize
 				contentRect					= osGetCompoundContentRect wMetrics visScrolls itemRect 
 				clipRect1					= intersectRects clipRect contentRect
 			
-			drawWElementLook wMetrics ableContext clipRect itemNr wPtr (WListLSHandle itemHs) tb
-				# (done,itemHs,tb)	= drawcompoundlook` wMetrics ableContext clipRect itemNr wPtr itemHs tb
+			drawWElementLook wMetrics ableContext parentPos clipRect itemNr wPtr (WListLSHandle itemHs) tb
+				# (done,itemHs,tb)	= drawcompoundlook` wMetrics ableContext parentPos clipRect itemNr wPtr itemHs tb
 				= (done,WListLSHandle itemHs,tb)
 			
-			drawWElementLook wMetrics ableContext clipRect itemNr wPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs}) tb
-				# (done,itemHs,tb)	= drawcompoundlook` wMetrics ableContext clipRect itemNr wPtr itemHs tb
+			drawWElementLook wMetrics ableContext parentPos clipRect itemNr wPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs}) tb
+				# (done,itemHs,tb)	= drawcompoundlook` wMetrics ableContext parentPos clipRect itemNr wPtr itemHs tb
 				= (done,WExtendLSHandle {wExH & wExtendItems=itemHs},tb)
 			
-			drawWElementLook wMetrics ableContext clipRect itemNr wPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs}) tb
-				# (done,itemHs,tb)	= drawcompoundlook` wMetrics ableContext clipRect itemNr wPtr itemHs tb
+			drawWElementLook wMetrics ableContext parentPos clipRect itemNr wPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs}) tb
+				# (done,itemHs,tb)	= drawcompoundlook` wMetrics ableContext parentPos clipRect itemNr wPtr itemHs tb
 				= (done,WChangeLSHandle {wChH & wChangeItems=itemHs},tb)
 		
-		drawcompoundlook` _ _ _ _ _ [] tb
+		drawcompoundlook` _ _ _ _ _ _ [] tb
 			= (False,[],tb)
 	
-	calcNewCompoundOrigin :: !OSWindowMetrics !CompoundScrollActionInfo ![WElementHandle .ls .pst] !*OSToolbox
-														-> (!Bool,!Bool,![WElementHandle .ls .pst],!*OSToolbox)
-	calcNewCompoundOrigin wMetrics info [itemH:itemHs] tb
-		# (done,changed,itemH,tb)		= calcNewWElementOrigin wMetrics info itemH tb
+	calcNewCompoundOrigin :: !OSWindowMetrics !CompoundScrollActionInfo !Point2 ![WElementHandle .ls .pst] !*OSToolbox
+	                                                            -> (!Bool,!Bool,![WElementHandle .ls .pst],!*OSToolbox)
+	calcNewCompoundOrigin wMetrics info parentPos [itemH:itemHs] tb
+		# (done,changed,itemH,tb)		= calcNewWElementOrigin wMetrics info parentPos itemH tb
 		| done
 			= (done,changed,[itemH:itemHs],tb)
 		| otherwise
-			# (done,changed,itemHs,tb)	= calcNewCompoundOrigin wMetrics info itemHs tb
+			# (done,changed,itemHs,tb)	= calcNewCompoundOrigin wMetrics info parentPos itemHs tb
 			= (done,changed,[itemH:itemHs],tb)
 	where
-		calcNewWElementOrigin :: !OSWindowMetrics !CompoundScrollActionInfo !(WElementHandle .ls .pst) !*OSToolbox
-															 -> (!Bool,!Bool,!WElementHandle .ls .pst, !*OSToolbox)
-		calcNewWElementOrigin wMetrics info (WItemHandle itemH=:{wItemPtr,wItemNr,wItemKind,wItemAtts,wItems,wItemPos,wItemSize=compoundSize,wItemInfo}) tb
+		calcNewWElementOrigin :: !OSWindowMetrics !CompoundScrollActionInfo !Point2 !(WElementHandle .ls .pst) !*OSToolbox
+		                                                             -> (!Bool,!Bool,!WElementHandle .ls .pst, !*OSToolbox)
+		calcNewWElementOrigin wMetrics info parentPos (WItemHandle itemH=:{wItemPtr,wItemNr,wItemKind,wItemAtts,wItems,wItemPos,wItemSize=compoundSize,wItemInfo}) tb
 			| info.csaItemNr<>wItemNr
 				| not (isRecursiveControl wItemKind)
 					= (False,False,WItemHandle itemH,tb)
 				// otherwise
-					# (done,changed,itemHs,tb)	= calcNewCompoundOrigin wMetrics info wItems tb
+					# (done,changed,itemHs,tb)	= calcNewCompoundOrigin wMetrics info absolutePos wItems tb
 					  itemH						= {itemH & wItems=itemHs}
 					= (done,changed,WItemHandle itemH,tb)
 			| wItemKind<>IsCompoundControl		// This alternative should never occur
@@ -776,18 +777,17 @@ where
 												  }
 				= (True,True,WItemHandle itemH,tb)
 		where
+			absolutePos							= movePoint wItemPos parentPos
 			itemPtr								= info.csaItemPtr
 			compoundInfo						= getWItemCompoundInfo wItemInfo
 			(domainRect,origin,hScroll,vScroll)	= (compoundInfo.compoundDomain,compoundInfo.compoundOrigin,compoundInfo.compoundHScroll,compoundInfo.compoundVScroll)
-			(hScrollPtr,vScrollPtr) = (mscrollptr compoundInfo.compoundHScroll,mscrollptr compoundInfo.compoundVScroll)
-			mscrollptr = mapMaybe (\{scrollItemPtr}->scrollItemPtr)
+			(hScrollPtr,vScrollPtr)				= (mscrollptr compoundInfo.compoundHScroll,mscrollptr compoundInfo.compoundVScroll)
+			mscrollptr							= mapMaybe (\{scrollItemPtr}->scrollItemPtr)
 			visScrolls							= osScrollbarsAreVisible wMetrics domainRect (toTuple compoundSize) (isJust hScroll,isJust vScroll)
 			{w,h}								= rectSize (osGetCompoundContentRect wMetrics visScrolls (sizeToRect compoundSize))
-			hScrollRect = osGetCompoundHScrollRect wMetrics visScrolls (posSizeToRect wItemPos compoundSize)
-			vScrollRect = osGetCompoundVScrollRect wMetrics visScrolls (posSizeToRect wItemPos compoundSize)
-			scrollRect
-				| isHorizontal = hScrollRect
-				= vScrollRect
+			hScrollRect							= osGetCompoundHScrollRect wMetrics visScrolls (posSizeToRect absolutePos compoundSize)
+			vScrollRect							= osGetCompoundVScrollRect wMetrics visScrolls (posSizeToRect absolutePos compoundSize)
+			scrollRect							= if isHorizontal hScrollRect vScrollRect
 			isHorizontal						= info.csaDirection==Horizontal
 			scrollInfo							= fromJust (if isHorizontal hScroll vScroll)
 			scrollFun							= scrollInfo.scrollFunction
@@ -801,19 +801,19 @@ where
 			(_,newOSThumb,_,_)					= toOSscrollbarRange (min`,newThumb,max`) viewSize
 			newOrigin							= if isHorizontal {origin & x=newThumb} {origin & y=newThumb}
 		
-		calcNewWElementOrigin wMetrics info (WListLSHandle itemHs) tb
-			# (done,changed,itemHs,tb)	= calcNewCompoundOrigin wMetrics info itemHs tb
+		calcNewWElementOrigin wMetrics info parentPos (WListLSHandle itemHs) tb
+			# (done,changed,itemHs,tb)	= calcNewCompoundOrigin wMetrics info parentPos itemHs tb
 			= (done,changed,WListLSHandle itemHs,tb)
 		
-		calcNewWElementOrigin wMetrics info (WExtendLSHandle wExH=:{wExtendItems=itemHs}) tb
-			# (done,changed,itemHs,tb)	= calcNewCompoundOrigin wMetrics info itemHs tb
+		calcNewWElementOrigin wMetrics info parentPos (WExtendLSHandle wExH=:{wExtendItems=itemHs}) tb
+			# (done,changed,itemHs,tb)	= calcNewCompoundOrigin wMetrics info parentPos itemHs tb
 			= (done,changed,WExtendLSHandle {wExH & wExtendItems=itemHs},tb)
 		
-		calcNewWElementOrigin wMetrics info (WChangeLSHandle wChH=:{wChangeItems=itemHs}) tb
-			# (done,changed,itemHs,tb)	= calcNewCompoundOrigin wMetrics info itemHs tb
+		calcNewWElementOrigin wMetrics info parentPos (WChangeLSHandle wChH=:{wChangeItems=itemHs}) tb
+			# (done,changed,itemHs,tb)	= calcNewCompoundOrigin wMetrics info parentPos itemHs tb
 			= (done,changed,WChangeLSHandle {wChH & wChangeItems=itemHs},tb)
 	
-	calcNewCompoundOrigin _ _ _ tb
+	calcNewCompoundOrigin _ _ _ _ tb
 		= (False,False,[],tb)
 windowStateCompoundScrollActionIO _ _ _ _
 	= windowdeviceFatalError "windowStateCompoundScrollActionIO" "unexpected window placeholder"
@@ -1427,7 +1427,7 @@ where
 			# (isRect,areaRect,tb)		= case whWindowInfo of
 			  								WindowInfo {windowClip={clipRgn}} -> osgetrgnbox clipRgn tb
 			  								_                                 -> windowdeviceFatalError "windowScrollActionIO" "unexpected whWindowInfo field"
-			# (updRgn,newItems,tb)		= relayoutControls wMetrics whSelect whShow contentRect contentRect zero zero wPtr whDefaultId oldItems` wH.whItems tb
+			# (updRgn,newItems,tb)		= relayoutControls wMetrics wPtr whDefaultId whSelect whShow (contentRect,zero,zero,oldItems`) (contentRect,zero,zero,wH.whItems) tb
 			# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn info.wsaWIDS {wH & whItems=newItems} tb
 			  newFrame					= posSizeToRectangle newOrigin contentSize
 			  toMuch					= if isHorizontal
@@ -1450,8 +1450,8 @@ where
 		domain							= rectToRectangle domainRect
 		visScrolls						= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
 		contentRect						= osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize)
-		hRect						= osGetWindowHScrollRect wMetrics visScrolls (sizeToRect whSize)
-		vRect						= osGetWindowVScrollRect wMetrics visScrolls (sizeToRect whSize)
+		hRect							= osGetWindowHScrollRect wMetrics visScrolls (sizeToRect whSize)
+		vRect							= osGetWindowVScrollRect wMetrics visScrolls (sizeToRect whSize)
 		contentSize						= rectSize contentRect
 		{w=w`,h=h`}						= contentSize
 		oldFrame						= posSizeToRectangle oldOrigin contentSize

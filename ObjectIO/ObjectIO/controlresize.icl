@@ -39,7 +39,8 @@ resizeControls wMetrics isActive updateAll wids=:{wPtr} oldOrigin oldWSize newWS
 		# (_,newItems,tb)		= layoutControls wMetrics hMargins vMargins spaces newWSize minSize [(domain,newOrigin)] newItems tb
 		  wH					= {wH & whItems=newItems}
 		# (wH,tb)				= forceValidWindowClipState wMetrics True wPtr wH tb
-		# (updRgn,newItems,tb)	= relayoutControls wMetrics whSelect whShow (sizeToRect oldWSize) (sizeToRect newWSize) zero zero wPtr whDefaultId oldItems` wH.whItems tb
+		# (updRgn,newItems,tb)	= relayoutControls wMetrics wPtr whDefaultId whSelect whShow (sizeToRect oldWSize,zero,zero,oldItems`) 
+								                                                             (sizeToRect newWSize,zero,zero,wH.whItems) tb
 		# (wH,tb)				= updatewindowbackgrounds wMetrics updRgn wids {wH & whItems=newItems} tb
 		  {x,y}					= oldOrigin
 		  (oldw,oldh)			= toTuple oldWSize
@@ -244,7 +245,7 @@ resizeControl wMetrics updateAll wids=:{wPtr} controlId newCSize wH=:{whWindowIn
 		# (_,newItems`,tb)		= layoutControls` wMetrics hMargins vMargins spaces wSize minSize [(domain,origin)] newItems` tb
 		  wH					= {wH & whItems`=newItems`}
 		# (wH,tb)				= forceValidWindowClipState` wMetrics True wPtr wH tb
-		# (updRgn,tb)			= relayoutControls` wMetrics whSelect` whShow` (sizeToRect wSize) (sizeToRect wSize) zero zero wPtr whDefaultId` oldItems` wH.whItems` tb
+		# (updRgn,tb)			= relayoutControls` wMetrics wPtr whDefaultId` whSelect` whShow` (sizeToRect wSize,zero,zero,oldItems`) (sizeToRect wSize,zero,zero,wH.whItems`) tb
 		# (wH,tb)				= updatewindowbackgrounds` wMetrics updRgn wids wH tb
 		  {x,y}					= origin
 		  (oldw,oldh)			= wSize`

@@ -11,7 +11,7 @@ import	commondef, controllayout, controlvalidate, StdControlAttribute, windowacc
 createControls :: !OSWindowMetrics !(Maybe Id) !(Maybe Id) !Bool !OSWindowPtr ![WElementHandle .ls .pst] !*OSToolbox
 																		  -> (![WElementHandle .ls .pst],!*OSToolbox)
 createControls wMetrics okId cancelId ableContext wPtr itemHs tb
-	= stateMap (createWElementHandle wMetrics okId cancelId True ableContext zero wPtr) itemHs tb
+	= stateMap (createWElementHandle wMetrics okId cancelId True ableContext zero zero wPtr) itemHs tb
 
 /*	createCompoundControls generates the proper system resources for those controls that are part of the 
 	CompoundControl with the given Id, skipping its first nr of controls given by the Int argument.
@@ -20,24 +20,24 @@ createControls wMetrics okId cancelId ableContext wPtr itemHs tb
 createCompoundControls :: !OSWindowMetrics !Id !Int !(Maybe Id) !(Maybe Id) !Bool !OSWindowPtr ![WElementHandle .ls .pst] !*OSToolbox
 																						   -> (![WElementHandle .ls .pst],!*OSToolbox)
 createCompoundControls wMetrics compoundId nrSkip okId cancelId ableContext wPtr itemHs tb
-	= stateMap (createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId True ableContext zero wPtr) itemHs tb
+	= stateMap (createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId True ableContext zero zero wPtr) itemHs tb
 where
-	createCompoundWElementHandle :: !OSWindowMetrics !Id !Int !(Maybe Id) !(Maybe Id) !Bool !Bool !Point2 !OSWindowPtr
+	createCompoundWElementHandle :: !OSWindowMetrics !Id !Int !(Maybe Id) !(Maybe Id) !Bool !Bool !Point2 !Vector2 !OSWindowPtr
 									!(WElementHandle .ls .pst) !*OSToolbox
 								 -> (!WElementHandle .ls .pst, !*OSToolbox)
-	createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext ableContext parentPos wPtr (WItemHandle itemH=:{wItemKind,wItemId}) tb
+	createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext ableContext parentPos compoundPos wPtr (WItemHandle itemH=:{wItemKind,wItemId}) tb
 		| wItemKind<>IsCompoundControl
 			| isRecursiveControl wItemKind
-				# (itemHs,tb)		= stateMap (createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext1 ableContext parentPos wPtr) itemH.wItems tb
+				# (itemHs,tb)		= stateMap (createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext1 ableContext absolutePos compoundPos wPtr) itemH.wItems tb
 				= (WItemHandle {itemH & wItems=itemHs},tb)
 			// otherwise
 				= (WItemHandle itemH,tb)
 		| not (identifyMaybeId compoundId wItemId)
-			# (itemHs,tb)			= stateMap (createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext1 ableContext1 itemPos itemPtr) itemH.wItems tb
+			# (itemHs,tb)			= stateMap (createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext1 ableContext1 absolutePos compoundPos1 itemPtr) itemH.wItems tb
 			= (WItemHandle {itemH & wItems=itemHs},tb)
 		| otherwise
 			# (oldItems,newItems)	= split nrSkip itemH.wItems
-			# (newItems,tb)			= stateMap (createWElementHandle wMetrics okId cancelId showContext1 ableContext1 itemPos itemPtr) newItems tb
+			# (newItems,tb)			= stateMap (createWElementHandle wMetrics okId cancelId showContext1 ableContext1 absolutePos compoundPos1 itemPtr) newItems tb
 			# tb					= osInvalidateCompound itemPtr tb		// PA: added
 			= (WItemHandle {itemH & wItems=oldItems++newItems},tb)
 	where
@@ -45,17 +45,19 @@ where
 		ableContext1				= ableContext && itemH.wItemSelect
 		itemPos						= itemH.wItemPos
 		itemPtr						= itemH.wItemPtr
+		absolutePos					= movePoint itemPos parentPos
+		compoundPos1				= compoundPos + itemPos
 	
-	createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext ableContext parentPos wPtr (WListLSHandle itemHs) tb
-		# (itemHs,tb)	= stateMap (createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext ableContext parentPos wPtr) itemHs tb
+	createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext ableContext parentPos compoundPos wPtr (WListLSHandle itemHs) tb
+		# (itemHs,tb)	= stateMap (createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext ableContext parentPos compoundPos wPtr) itemHs tb
 		= (WListLSHandle itemHs,tb)
 	
-	createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext ableContext parentPos wPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs}) tb
-		# (itemHs,tb)	= stateMap (createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext ableContext parentPos wPtr) itemHs tb
+	createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext ableContext parentPos compoundPos wPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs}) tb
+		# (itemHs,tb)	= stateMap (createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext ableContext parentPos compoundPos wPtr) itemHs tb
 		= (WExtendLSHandle {wExH & wExtendItems=itemHs},tb)
 	
-	createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext ableContext parentPos wPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs}) tb
-		# (itemHs,tb)	= stateMap (createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext ableContext parentPos wPtr) itemHs tb
+	createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext ableContext parentPos compoundPos wPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs}) tb
+		# (itemHs,tb)	= stateMap (createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext ableContext parentPos compoundPos wPtr) itemHs tb
 		= (WChangeLSHandle {wChH & wChangeItems=itemHs},tb)
 
 /*	createRecursiveControls generates the proper system resources for those controls that are part of the 
@@ -63,17 +65,17 @@ where
 	The WElementHandles must be the complete list of controls of the window.
 */
 createRecursiveControls :: !OSWindowMetrics !Id !Int !(Maybe Id) !(Maybe Id) !Bool !OSWindowPtr ![WElementHandle .ls .pst] !*OSToolbox
-																										 -> (![WElementHandle .ls .pst],!*OSToolbox)
+                                                                                            -> (![WElementHandle .ls .pst],!*OSToolbox)
 createRecursiveControls wMetrics controlId nrSkip okId cancelId ableContext wPtr itemHs tb
-	= stateMap (createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId True ableContext zero wPtr) itemHs tb
+	= stateMap (createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId True ableContext zero zero wPtr) itemHs tb
 where
-	createRecursiveWElementHandle :: !OSWindowMetrics !Id !Int !(Maybe Id) !(Maybe Id) !Bool !Bool !Point2 !OSWindowPtr
+	createRecursiveWElementHandle :: !OSWindowMetrics !Id !Int !(Maybe Id) !(Maybe Id) !Bool !Bool !Point2 !Vector2 !OSWindowPtr
 									!(WElementHandle .ls .pst) !*OSToolbox
 								 -> (!WElementHandle .ls .pst, !*OSToolbox)
-	createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos wPtr (WItemHandle itemH=:{wItemKind,wItemId}) tb
+	createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos compoundPos wPtr (WItemHandle itemH=:{wItemKind,wItemId}) tb
 		| not (identifyMaybeId controlId wItemId)
 			| isRecursiveControl wItemKind
-				# (itemHs,tb)		= stateMap (createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext1 ableContext1 itemPos1 itemPtr1) itemH.wItems tb
+				# (itemHs,tb)		= stateMap (createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext1 ableContext1 absolutePos compoundPos1 itemPtr1) itemH.wItems tb
 				= (WItemHandle {itemH & wItems=itemHs},tb)
 			| otherwise
 				= (WItemHandle itemH,tb)
@@ -81,7 +83,7 @@ where
 			= (WItemHandle itemH,tb)
 		| otherwise
 			# (oldItems,newItems)	= split nrSkip itemH.wItems
-			# (newItems,tb)			= stateMap (createWElementHandle wMetrics okId cancelId showContext1 ableContext1 itemPos1 itemPtr1) newItems tb
+			# (newItems,tb)			= stateMap (createWElementHandle wMetrics okId cancelId showContext1 ableContext1 absolutePos compoundPos1 itemPtr1) newItems tb
 			# itemH					= {itemH & wItems=oldItems++newItems}
 			| wItemKind==IsCompoundControl
 				= (WItemHandle itemH,osInvalidateCompound itemPtr1 tb)
@@ -90,19 +92,20 @@ where
 	where
 		showContext1				= showContext && itemH.wItemShow
 		ableContext1				= ableContext && itemH.wItemSelect
-		(itemPos1,itemPtr1)			= if (wItemKind==IsCompoundControl) (itemH.wItemPos,itemH.wItemPtr)
-									                                    (itemH.wItemPos,wPtr          )
+		itemPos						= itemH.wItemPos
+		(itemPtr1,compoundPos1)		= if (wItemKind==IsCompoundControl) (itemH.wItemPtr,compoundPos+itemPos) (wPtr,compoundPos)
+		absolutePos					= movePoint itemPos parentPos
 	
-	createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos wPtr (WListLSHandle itemHs) tb
-		# (itemHs,tb)	= stateMap (createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos wPtr) itemHs tb
+	createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos compoundPos wPtr (WListLSHandle itemHs) tb
+		# (itemHs,tb)	= stateMap (createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos compoundPos wPtr) itemHs tb
 		= (WListLSHandle itemHs,tb)
 	
-	createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos wPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs}) tb
-		# (itemHs,tb)	= stateMap (createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos wPtr) itemHs tb
+	createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos compoundPos wPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs}) tb
+		# (itemHs,tb)	= stateMap (createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos compoundPos wPtr) itemHs tb
 		= (WExtendLSHandle {wExH & wExtendItems=itemHs},tb)
 	
-	createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos wPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs}) tb
-		# (itemHs,tb)	= stateMap (createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos wPtr) itemHs tb
+	createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos compoundPos wPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs}) tb
+		# (itemHs,tb)	= stateMap (createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos compoundPos wPtr) itemHs tb
 		= (WChangeLSHandle {wChH & wChangeItems=itemHs},tb)
 
 
@@ -120,59 +123,65 @@ toOKorCANCEL okId cancelId maybeControlId
 
 /*	createWElementHandle generates the proper system resources.
 */
-createWElementHandle :: !OSWindowMetrics !(Maybe Id) !(Maybe Id) !Bool !Bool !Point2 !OSWindowPtr !(WElementHandle .ls .pst) !*OSToolbox
-																							   -> (!WElementHandle .ls .pst, !*OSToolbox)
-createWElementHandle wMetrics okId cancelId showContext ableContext parentPos wPtr (WItemHandle itemH) tb
-	# (itemH,tb)	= createWItemHandle wMetrics okId cancelId showContext ableContext parentPos wPtr itemH tb
+createWElementHandle :: !OSWindowMetrics !(Maybe Id) !(Maybe Id) !Bool !Bool !Point2 !Vector2 !OSWindowPtr !(WElementHandle .ls .pst) !*OSToolbox
+																							            -> (!WElementHandle .ls .pst, !*OSToolbox)
+createWElementHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr (WItemHandle itemH) tb
+	# (itemH,tb)	= createWItemHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr itemH tb
 	= (WItemHandle itemH,tb)
 where
-	createWItemHandle :: !OSWindowMetrics !(Maybe Id) !(Maybe Id) !Bool !Bool !Point2 !OSWindowPtr !(WItemHandle .ls .pst) !*OSToolbox
-																							    -> (!WItemHandle .ls .pst, !*OSToolbox)
+	createWItemHandle :: !OSWindowMetrics !(Maybe Id) !(Maybe Id) !Bool !Bool !Point2 !Vector2 !OSWindowPtr !(WItemHandle .ls .pst) !*OSToolbox
+																							             -> (!WItemHandle .ls .pst, !*OSToolbox)
 	
-	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos wPtr itemH=:{wItemKind=IsRadioControl} tb
+	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr itemH=:{wItemKind=IsRadioControl} tb
 		# radioInfo				= getWItemRadioInfo itemH.wItemInfo
 		  show					= showContext && itemH.wItemShow
 		  able					= ableContext && itemH.wItemSelect
-		# (radioItems,(_,tb))	= stateMap (createRadioItem show able (toTuple parentPos) wPtr radioInfo.radioIndex) radioInfo.radioItems (1,tb)
+		# (radioItems,(_,tb))	= stateMap (createRadioItem show able absolutePos compoundPos wPtr radioInfo.radioIndex) radioInfo.radioItems (1,tb)
 		  radioInfo				= {radioInfo & radioItems=radioItems}
 		= ({itemH & wItemInfo=RadioInfo radioInfo},tb)
 	where
 		(hasTip,tipAtt)			= cselect isControlTip undef itemH.wItemAtts
 		tip						= getControlTipAtt tipAtt
+		absolutePos				= movePoint itemH.wItemPos parentPos
 		
-		createRadioItem :: !Bool !Bool !(!Int,!Int) !OSWindowPtr !Index !(RadioItemInfo .pst) !(!Index,!*OSToolbox)
-																 	 -> (!RadioItemInfo .pst, !(!Index,!*OSToolbox))
-		createRadioItem show able parentPos wPtr index item=:{radioItem=(title,_,_),radioItemPos,radioItemSize} (itemNr,tb)
-			# (radioPtr,tb)		= osCreateRadioControl wPtr parentPos title show able (toTuple radioItemPos) (toTuple radioItemSize) (index==itemNr) (itemNr==1) tb
+		createRadioItem :: !Bool !Bool !Point2 !Vector2 !OSWindowPtr !Index !(RadioItemInfo .pst) !(!Index,!*OSToolbox)
+		                                                                 -> (!RadioItemInfo .pst, !(!Index,!*OSToolbox))
+		createRadioItem show able parentPos compoundPos wPtr index item=:{radioItem=(title,_,_),radioItemPos,radioItemSize} (itemNr,tb)
+			# (radioPtr,tb)		= osCreateRadioControl wPtr (toTuple compoundPos) title show able (toTuple absolutePos) (toTuple radioItemSize) (index==itemNr) (itemNr==1) tb
 			  itemH				= {item & radioItemPtr=radioPtr}
 			| not hasTip
 				= (itemH,(itemNr+1,tb))
 			| otherwise
 				= (itemH,(itemNr+1,osAddControlToolTip wPtr radioPtr tip tb))
+		where
+			absolutePos			= movePoint radioItemPos parentPos
 	
-	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos wPtr itemH=:{wItemKind=IsCheckControl} tb
+	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr itemH=:{wItemKind=IsCheckControl} tb
 		# checkInfo				= getWItemCheckInfo itemH.wItemInfo
 		  show					= showContext && itemH.wItemShow
 		  able					= ableContext && itemH.wItemSelect
-		# (checkItems,(_,tb))	= stateMap (createCheckItem show able (toTuple parentPos) wPtr) checkInfo.checkItems (1,tb)
+		# (checkItems,(_,tb))	= stateMap (createCheckItem show able absolutePos compoundPos wPtr) checkInfo.checkItems (1,tb)
 		  checkInfo				= {checkInfo & checkItems=checkItems}
 		= ({itemH & wItemInfo=CheckInfo checkInfo},tb)
 	where
 		(hasTip,tipAtt)			= cselect isControlTip undef itemH.wItemAtts
 		tip						= getControlTipAtt tipAtt
+		absolutePos				= movePoint itemH.wItemPos parentPos
 		
-		createCheckItem :: !Bool !Bool !(!Int,!Int) !OSWindowPtr !(CheckItemInfo .pst) !(!Index,!*OSToolbox)
-															  -> (!CheckItemInfo .pst, !(!Index,!*OSToolbox))
-		createCheckItem show able parentPos wPtr item=:{checkItem=(title,_,mark,_),checkItemPos,checkItemSize} (itemNr,tb)
-			# (checkPtr,tb)		= osCreateCheckControl wPtr parentPos title show able (toTuple checkItemPos) (toTuple checkItemSize) (marked mark) (itemNr==1) tb
+		createCheckItem :: !Bool !Bool !Point2 !Vector2 !OSWindowPtr !(CheckItemInfo .pst) !(!Index,!*OSToolbox)
+		                                                          -> (!CheckItemInfo .pst, !(!Index,!*OSToolbox))
+		createCheckItem show able parentPos compoundPos wPtr item=:{checkItem=(title,_,mark,_),checkItemPos,checkItemSize} (itemNr,tb)
+			# (checkPtr,tb)		= osCreateCheckControl wPtr (toTuple compoundPos) title show able (toTuple absolutePos) (toTuple checkItemSize) (marked mark) (itemNr==1) tb
 			  itemH				= {item & checkItemPtr=checkPtr}
 			| not hasTip
 				= (itemH,(itemNr+1,tb))
 			| otherwise
 				= (itemH,(itemNr+1,osAddControlToolTip wPtr checkPtr tip tb))
+		where
+			absolutePos			= movePoint checkItemPos parentPos
 	
-	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos wPtr itemH=:{wItemKind=IsPopUpControl} tb
-		# (popUpPtr,editPtr,tb)	= osCreateEmptyPopUpControl wPtr (toTuple parentPos) show able (toTuple pos) (toTuple size) (length items) isEditable tb
+	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr itemH=:{wItemKind=IsPopUpControl} tb
+		# (popUpPtr,editPtr,tb)	= osCreateEmptyPopUpControl wPtr (toTuple compoundPos) show able (toTuple absolutePos) (toTuple size) (length items) isEditable tb
 		# maybeEditPtr			= if isEditable (Just editPtr) Nothing
 		# tb					= osCreatePopUpControlItems popUpPtr maybeEditPtr ableContext (map fst items) info.popUpInfoIndex tb
 		  info					= if isEditable {info & popUpInfoEdit=Just {popUpEditText="",popUpEditPtr=editPtr}} info
@@ -184,6 +193,7 @@ where
 	where
 		pos						= itemH.wItemPos
 		size					= itemH.wItemSize
+		absolutePos				= movePoint pos parentPos
 		show					= showContext && itemH.wItemShow
 		able					= ableContext && itemH.wItemSelect
 		info					= getWItemPopUpInfo itemH.wItemInfo
@@ -191,8 +201,8 @@ where
 		(hasTip,tipAtt)			= cselect isControlTip undef itemH.wItemAtts
 		isEditable				= contains isControlKeyboard itemH.wItemAtts
 	
-	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos wPtr itemH=:{wItemKind=IsSliderControl} tb
-		# (sliderPtr,tb)		= osCreateSliderControl wPtr (toTuple parentPos) show able (direction==Horizontal) (toTuple pos) (toTuple size) (osMin,osThumb,osMax,osThumbSize) tb
+	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr itemH=:{wItemKind=IsSliderControl} tb
+		# (sliderPtr,tb)		= osCreateSliderControl wPtr (toTuple compoundPos) show able (direction==Horizontal) (toTuple absolutePos) (toTuple size) (osMin,osThumb,osMax,osThumbSize) tb
 		  itemH					= {itemH & wItemPtr=sliderPtr}
 		| not hasTip
 			= (itemH,tb)
@@ -210,10 +220,11 @@ where
 								= toOSscrollbarRange (min,sliderState.sliderThumb,max) 0
 		pos						= itemH.wItemPos
 		size					= itemH.wItemSize
+		absolutePos				= movePoint pos parentPos
 		(hasTip,tipAtt)			= cselect isControlTip undef itemH.wItemAtts
 
-	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos wPtr itemH=:{wItemKind=IsTextControl} tb
-		# (textPtr,tb)			= osCreateTextControl wPtr (toTuple parentPos) title show (toTuple pos) (toTuple size) tb
+	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr itemH=:{wItemKind=IsTextControl} tb
+		# (textPtr,tb)			= osCreateTextControl wPtr (toTuple compoundPos) title show (toTuple absolutePos) (toTuple size) tb
 		  itemH					= {itemH & wItemPtr=textPtr}
 		| not hasTip
 			= (itemH,tb)
@@ -223,11 +234,12 @@ where
 		show					= showContext && itemH.wItemShow
 		pos						= itemH.wItemPos
 		size					= itemH.wItemSize
+		absolutePos				= movePoint pos parentPos
 		title					= (getWItemTextInfo itemH.wItemInfo).textInfoText
 		(hasTip,tipAtt)			= cselect isControlTip undef itemH.wItemAtts
 	
-	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos wPtr itemH=:{wItemKind=IsEditControl} tb
-		# (editPtr,tb)			= osCreateEditControl wPtr (toTuple parentPos) text show able keySensitive (toTuple pos) (toTuple size) tb
+	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr itemH=:{wItemKind=IsEditControl} tb
+		# (editPtr,tb)			= osCreateEditControl wPtr (toTuple compoundPos) text show able keySensitive (toTuple absolutePos) (toTuple size) tb
 		  itemH					= {itemH & wItemPtr=editPtr}
 		| not hasTip
 			= (itemH,tb)
@@ -240,11 +252,12 @@ where
 		keySensitive			= contains isControlKeyboard atts
 		pos						= itemH.wItemPos
 		size					= itemH.wItemSize
+		absolutePos				= movePoint pos parentPos
 		text					= (getWItemEditInfo itemH.wItemInfo).editInfoText
 		(hasTip,tipAtt)			= cselect isControlTip undef atts
 	
-	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos wPtr itemH=:{wItemKind=IsButtonControl} tb
-		# (buttonPtr,tb)		= osCreateButtonControl wPtr (toTuple parentPos) title show able (toTuple pos) (toTuple size) okOrCancel tb
+	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr itemH=:{wItemKind=IsButtonControl} tb
+		# (buttonPtr,tb)		= osCreateButtonControl wPtr (toTuple compoundPos) title show able (toTuple absolutePos) (toTuple size) okOrCancel tb
 		  itemH					= {itemH & wItemPtr=buttonPtr}
 		| not hasTip
 			= (itemH,tb)
@@ -253,6 +266,7 @@ where
 	where
 		show					= showContext && itemH.wItemShow
 		able					= ableContext && itemH.wItemSelect
+		absolutePos				= movePoint pos parentPos
 		pos						= itemH.wItemPos
 		size					= itemH.wItemSize
 		itemId					= itemH.wItemId
@@ -260,8 +274,8 @@ where
 		title					= (getWItemButtonInfo itemH.wItemInfo).buttonInfoText
 		(hasTip,tipAtt)			= cselect isControlTip undef itemH.wItemAtts
 	
-	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos wPtr itemH=:{wItemKind=IsCustomButtonControl} tb
-		# (buttonPtr,tb)		= osCreateCustomButtonControl wPtr (toTuple parentPos) show able (toTuple pos) (toTuple size) okOrCancel tb
+	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr itemH=:{wItemKind=IsCustomButtonControl} tb
+		# (buttonPtr,tb)		= osCreateCustomButtonControl wPtr (toTuple compoundPos) show able (toTuple absolutePos) (toTuple size) okOrCancel tb
 		  itemH					= {itemH & wItemPtr=buttonPtr}
 		| not hasTip
 			= (itemH,tb)
@@ -270,14 +284,15 @@ where
 	where
 		show					= showContext && itemH.wItemShow
 		able					= ableContext && itemH.wItemSelect
+		absolutePos				= movePoint pos parentPos
 		pos						= itemH.wItemPos
 		size					= itemH.wItemSize
 		itemId					= itemH.wItemId
 		okOrCancel				= toOKorCANCEL okId cancelId itemId
 		(hasTip,tipAtt)			= cselect isControlTip undef itemH.wItemAtts
 	
-	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos wPtr itemH=:{wItemKind=IsCustomControl} tb
-		# (customPtr,tb)		= osCreateCustomControl wPtr (toTuple parentPos) show able (toTuple pos) (toTuple size) tb
+	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr itemH=:{wItemKind=IsCustomControl} tb
+		# (customPtr,tb)		= osCreateCustomControl wPtr (toTuple compoundPos) show able (toTuple absolutePos) (toTuple size) tb
 		  itemH					= {itemH & wItemPtr=customPtr}
 		| not hasTip
 			= (itemH,tb)
@@ -286,17 +301,18 @@ where
 	where
 		show					= showContext && itemH.wItemShow
 		able					= ableContext && itemH.wItemSelect
+		absolutePos				= movePoint pos parentPos
 		pos						= itemH.wItemPos
 		size					= itemH.wItemSize
 		(hasTip,tipAtt)			= cselect isControlTip undef itemH.wItemAtts
 	
-	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos wPtr itemH=:{wItemKind=IsCompoundControl} tb
+	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr itemH=:{wItemKind=IsCompoundControl} tb
 		# (compoundPtr,hPtr,vPtr,tb)
-								= osCreateCompoundControl wMetrics wPtr (toTuple parentPos) show able False (toTuple pos) (toTuple size) hScroll vScroll tb
+								= osCreateCompoundControl wMetrics wPtr (toTuple compoundPos) show able False (toTuple absolutePos) (toTuple size) hScroll vScroll tb
 		  compoundInfo			= {info & compoundHScroll=setScrollbarPtr hPtr info.compoundHScroll
 		  								, compoundVScroll=setScrollbarPtr vPtr info.compoundVScroll
 		  						  }
-		# (itemHs,tb)			= stateMap (createWElementHandle wMetrics okId cancelId show able itemH.wItemPos compoundPtr) itemH.wItems tb
+		# (itemHs,tb)			= stateMap (createWElementHandle wMetrics okId cancelId show able absolutePos compoundPos1 compoundPtr) itemH.wItems tb
 		  itemH					= {itemH & wItemInfo=CompoundInfo compoundInfo,wItemPtr=compoundPtr,wItems=itemHs}
 		| not hasTip
 			= (itemH,tb)
@@ -305,6 +321,8 @@ where
 	where
 		show					= showContext && itemH.wItemShow
 		able					= ableContext && itemH.wItemSelect
+		absolutePos				= movePoint pos parentPos
+		compoundPos1			= compoundPos + pos
 		pos						= itemH.wItemPos
 		size					= itemH.wItemSize
 		info					= getWItemCompoundInfo itemH.wItemInfo
@@ -335,25 +353,27 @@ where
 		setScrollbarPtr :: OSWindowPtr !(Maybe ScrollInfo) -> Maybe ScrollInfo
 		setScrollbarPtr scrollPtr (Just info)	= Just {info & scrollItemPtr=scrollPtr}
 		setScrollbarPtr _ nothing				= nothing
-
-	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos wPtr itemH=:{wItemKind=IsLayoutControl,wItems} tb
-		# (itemHs,tb)			= stateMap (createWElementHandle wMetrics okId cancelId show able parentPos wPtr) wItems tb
+	
+	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr itemH=:{wItemKind=IsLayoutControl,wItems} tb
+		# (itemHs,tb)			= stateMap (createWElementHandle wMetrics okId cancelId show able absolutePos compoundPos wPtr) wItems tb
 		= ({itemH & wItems=itemHs},tb)
 	where
+		absolutePos				= movePoint itemPos parentPos
+		itemPos					= itemH.wItemPos
 		show					= showContext && itemH.wItemShow
 		able					= ableContext && itemH.wItemSelect
 
-	createWItemHandle _ _ _ _ _ _ _ itemH tb
+	createWItemHandle _ _ _ _ _ _ _ _ itemH tb
 		= (itemH,tb)
 
-createWElementHandle wMetrics okId cancelId showContext ableContext parentPos wPtr (WListLSHandle itemHs) tb
-	# (itemHs,tb)	= stateMap (createWElementHandle wMetrics okId cancelId showContext ableContext parentPos wPtr) itemHs tb
+createWElementHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr (WListLSHandle itemHs) tb
+	# (itemHs,tb)	= stateMap (createWElementHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr) itemHs tb
 	= (WListLSHandle itemHs,tb)
 
-createWElementHandle wMetrics okId cancelId showContext ableContext parentPos wPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs}) tb
-	# (itemHs,tb)	= stateMap (createWElementHandle wMetrics okId cancelId showContext ableContext parentPos wPtr) itemHs tb
+createWElementHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs}) tb
+	# (itemHs,tb)	= stateMap (createWElementHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr) itemHs tb
 	= (WExtendLSHandle {wExH & wExtendItems=itemHs},tb)
 
-createWElementHandle wMetrics okId cancelId showContext ableContext parentPos wPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs}) tb
-	# (itemHs,tb)	= stateMap (createWElementHandle wMetrics okId cancelId showContext ableContext parentPos wPtr) itemHs tb
+createWElementHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs}) tb
+	# (itemHs,tb)	= stateMap (createWElementHandle wMetrics okId cancelId showContext ableContext parentPos compoundPos wPtr) itemHs tb
 	= (WChangeLSHandle {wChH & wChangeItems=itemHs},tb)
