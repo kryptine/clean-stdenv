@@ -10,43 +10,41 @@ import GenParse
 
 // doHtml main routine for generating & handling of a Html form
 
-doHtml :: (HSt -> (Html,HSt)) *World -> *World //| gHpr{|*|} a & gUpd{|*|}  a  & gParse{|*|} a 
+:: HSt 	// unique state to pass around *** still has to define it unique !!! ***
+
+doHtml :: (HSt -> (Html,HSt)) *World -> *World 
 
 // mkHGEC converts any Clean type into a Html GEC
 
 :: FormID	 	:== String					// unique id identifying the form
+:: HMode a		= Edit (a -> a)
+				| Set 
 
-mkHGEC :: FormID (a -> a) a HSt -> (a,(Body,HSt)) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
+mkHGEC :: FormID (HMode a) a HSt -> (a,(Body,HSt)) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a 
 
-// generic functions that do the real work
-
-:: HSt // unique state to pass around *** still has to define it unique !!! ***
+// generic functions that do the real work,
+// end user just has to derive them for mkHGEC ...
 
 // gHGEC converts any Clean type to html code (form) to be used in a body
-
-generic gHGEC a :: a HSt -> (Body, HSt)	
-
-derive gHGEC Int, Real, String, UNIT, PAIR, EITHER, OBJECT, CONS 
-
 // gUpd updates a value of type t given any user input in the html form
 
 :: UpdMode
 
-generic gUpd t :: UpdMode t -> (UpdMode,t)
+generic gHGEC a :: a HSt -> (Body, HSt)	
+generic gUpd a 	:: UpdMode a -> (UpdMode,a)
 
-derive gUpd Int, UNIT, PAIR, EITHER, OBJECT, CONS, (,)
+derive gHGEC Int, Real, String, UNIT, PAIR, EITHER, OBJECT, CONS, (,) 
+derive gUpd  Int, Real, String, UNIT, PAIR, EITHER, OBJECT, CONS, (,) 
 
 // Clean types with a special representation
 
 defsize :== 10															// size of inputfield
-
 :: CHButton = CHPressed | CHButton Int String
 
-derive gHGEC 	CHButton, (,), (,,)
-derive gUpd  	CHButton
-derive gHpr 	CHButton//, (,)
+derive gHGEC 	(,,), CHButton
+derive gUpd  	(,,), CHButton
+derive gPrint 	(,,), CHButton
+derive gParse 	(,,), CHButton
 
-derive gPrint 	CHButton
-derive gParse 	CHButton
 
 

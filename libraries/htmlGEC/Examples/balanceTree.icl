@@ -14,7 +14,7 @@ import tree
 Start world  = doHtml MyPage  world
 
 MyPage hst
-# (_,(treeGEC,hst)) = mkHGEC "tree" balanceTree (Node Leaf 1 Leaf) hst
+# (_,(treeGEC,hst)) = mkHGEC "tree" (Edit balanceTree) (Node Leaf 1 Leaf) hst
 = (Head 
 	[Hd_Title "Self Balancing Tree"
 	] 

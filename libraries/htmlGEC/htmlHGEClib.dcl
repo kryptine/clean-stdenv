@@ -17,9 +17,11 @@ import StdHtml
 
 // handy HGEC's
 
-horlistHGEC 	:: String [a] 	HSt -> ([a],(Body,HSt)) 	| gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
-vertlistHGEC 	:: String [a] 	HSt -> ([a],(Body,HSt)) 	| gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
-table_hv_HGEC 	:: String [[a]] HSt -> ([[a]],(Body,HSt)) 	| gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
+counterHGEC 	:: String (HMode a) a 	HSt -> (a		,(Body,HSt)) 	| +, -, one
+																, gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+horlistHGEC 	:: String (HMode a) [a] 	HSt -> ([a]		,(Body,HSt)) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+vertlistHGEC 	:: String (HMode a) [a] 	HSt -> ([a]		,(Body,HSt)) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+table_hv_HGEC 	:: String (HMode a) [[a]] HSt -> ([[a]]	,(Body,HSt)) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 
 
 
