@@ -1417,6 +1417,7 @@ static void MoveObjects (void)
     struct USER_EVENT_INFO *uei;
     struct USER_EVENT_INFO *ueiNext;
     struct USER_EVENT_INFO *ueiPrev;
+	struct USER_EVENT_INFO *ueiTemp;		// PA++: bugfix Mike Wiering (line 1478-1486)
 
     // broadcast user events
     uei = ueiUserEventInfo;
@@ -1474,7 +1475,17 @@ static void MoveObjects (void)
                 }
             }
 
-            if (ueiPrev)
+            // bug fix: create new userevent during a userevent
+            ueiTemp = ueiUserEventInfo;
+            ueiPrev = NULL;
+            while (ueiTemp != uei)
+            {
+                ueiPrev = ueiTemp;
+                ueiTemp = ueiTemp->ueiNext;
+            }
+            // end of bug fix
+            
+			if (ueiPrev)
                 ueiPrev->ueiNext = ueiNext;
             else
                 ueiUserEventInfo = ueiNext;
