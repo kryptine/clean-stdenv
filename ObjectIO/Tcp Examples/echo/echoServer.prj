@@ -2,14 +2,14 @@ Version: 1.4
 Global
 	Built:	True
 	Target:	Object IO
-	Exec:	{Project}\Charlie.exe
+	Exec:	{Project}\echoServer.exe
 	CodeGen
 		CheckStacks:	False
-		CheckIndexes:	False
+		CheckIndexes:	True
 		TargetProcessor:	CurrentProcessor
 	Application
-		HeapSize:	4096000
-		StackSize:	1024000
+		HeapSize:	409600
+		StackSize:	102400
 		ExtraMemory:	81920
 		IntialHeapSize:	204800
 		HeapSizeMultiplier:	4096
@@ -38,10 +38,9 @@ Global
 		ExportedNames:	
 	Paths
 		Path:	{Project}
-		Path:	{Application}\Libraries\GameLib 1.2.2
-		Path:	{Application}\Examples\ObjectIO Examples 1.2.2\gui utilities
+		Path:	{Application}\Libraries\Tcp 1.2.2
 	Precompile:	
 	Postlink:	
 MainModule
-	Name:	Charlie
+	Name:	echoServer
 	Dir:	{Project}
