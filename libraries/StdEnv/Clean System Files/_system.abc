@@ -5,8 +5,7 @@
 
 .module m__system "_system"
 
-.implab	e_system_eaind
-.implab	e_system_nind
+.implab	e_system_nind e_system_eaind
 
 .export	_channel_code
 
