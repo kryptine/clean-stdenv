@@ -45,6 +45,7 @@ where
 		>>> env 
 			# (d, env) = generateCode (transform{|*|} e) env
 			= dynamicWrite [n] d env*/
+transform{|NTstatement|} (Function f) = transform{|*|} f
 
 transform{|NTexpression|} (Term e) = transform{|*|} e
 transform{|NTexpression|} (Apply f x) = CoreApply (transform{|*|} f) (transform{|*|} x)
@@ -56,6 +57,13 @@ transform{|NTdynamic|} (NTdynamic _ e) = CoreApply toDynamic (transform{|*|} e)
 where
 	toDynamic = CoreCode (overloaded "TC" (dynamic (undef, id) :: A.a: (a, (a -> Dynamic) a -> Dynamic)))
 
+transform{|NTfunction|} (NTfunction n vs _ e) = transform{|*|} (Write d Twrite n)
+where
+	d = Term (Plain (Let (Scope (NTlet Tlet (+- [NTletDef fvar Tis b]) Tin fname))))
+	b = Term (Plain (Lambda (Scope (NTlambda Tlambda vs Tarrow e))))
+	fname = Term (Plain (NameOrValue (NTname n)))
+	fvar = VariablePattern (NTvariable n)
+	
 transform{|NTnameOrValue|} (NTvalue d _) = CoreCode d
 transform{|NTnameOrValue|} (NTname y) = CoreVariable y
 

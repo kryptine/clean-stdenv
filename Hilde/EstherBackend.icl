@@ -1,7 +1,7 @@
 implementation module EstherBackend
 
 import EstherParser, StdMaybe
-import StdInt, StdString, StdList, StdBool, Debug, StdEnum, StdArray, StdDebug
+import StdInt, StdString, StdList, StdBool, Debug, StdEnum, StdArray
 
 :: Overloaded d t o = (|||) infixr 0 !(d -> t) !o
 :: Contexts a b = (&&&) infixr 0 !a !b
@@ -49,17 +49,17 @@ where
 				(f :: A.b: b) -> dynamic f x :: A.c: c
 				(f ||| c_f :: Overloaded d_f (d -> e) o_f) -> dynamic C f x ||| c_f :: Overloaded d_f e o_f
 				(f :: f -> g) -> dynamic f x :: g
-				codef -> raise (ApplyTypeError codef codex)
+				_ -> raise (ApplyTypeError codef codex)
 			(x ||| c_x :: Overloaded d_x h o_x) -> case codef of
 				(f :: A.i: i) -> dynamic B f x ||| c_x :: A.j: Overloaded d_x j o_x
 				(f ||| c_f :: Overloaded d_f (h -> k) o_f) -> dynamic P f x ||| c_f &&& c_x :: Overloaded (Contexts d_f d_x) k (Contexts o_f o_x)
 				(f :: h -> l) -> dynamic B f x ||| c_x :: Overloaded d_x l o_x
-				codef -> raise (ApplyTypeError codef codex)
+				_ -> raise (ApplyTypeError codef codex)
 			(x :: m) -> case codef of
 				(f :: A.n: n) -> dynamic f x :: A.o: o
 				(f ||| c_f :: Overloaded d_f (m -> p) o_f) -> dynamic C f x ||| c_f :: Overloaded d_f p o_f
 				(f :: m -> q) -> dynamic f x :: q
-				codef -> raise (ApplyTypeError codef codex)
+				_ -> raise (ApplyTypeError codef codex)
 		= solveOverloading d env
 /*
 applyDynamics :: !Dynamic !Dynamic -> Maybe Dynamic
@@ -142,7 +142,7 @@ where
 	check d = d
 solveOverloading d env = (d, env)
 
-import Debug, StdTuple
+/*import Debug, StdTuple
 
 (<<-) infix 0 :: .a !.b -> .a
 (<<-) value debugValue
@@ -151,6 +151,7 @@ where
 	show
 		=	debugShowWithOptions
 				[]//[DebugMaxChars 79, DebugMaxDepth 5, DebugMaxBreadth 20]
+*/
 
 Omega = raise "Do NOT evaluate Omega"
 
