@@ -2,7 +2,7 @@ definition module StdTimerDef
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2
+//	Clean Standard Object I/O library, version 1.2.1
 //	
 //	StdTimerDef contains the types to define the standard set of timers.
 //	********************************************************************************

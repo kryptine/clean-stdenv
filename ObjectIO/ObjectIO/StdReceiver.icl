@@ -1,7 +1,7 @@
 implementation module StdReceiver
 
 
-//	Clean Object I/O library, version 1.2
+//	Clean Object I/O library, version 1.2.1
 
 
 import	StdInt, StdBool, StdList, StdTuple, StdOverloaded, StdFunc

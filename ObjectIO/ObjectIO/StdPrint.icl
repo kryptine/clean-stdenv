@@ -1,8 +1,10 @@
 implementation module StdPrint
 
-//	Clean Standard Object I/O library, version 1.2
+//	Clean Standard Object I/O library, version 1.2.1
 
-import StdEnv, StdMaybe, StdPicture, osprint, commondef
+import StdArray, StdBool, StdEnum, StdInt, StdList, StdTuple
+import commondef, StdMaybe, StdPicture
+import osprint
 
 ::	PageDimensions
 	=	{	page		::	!Size

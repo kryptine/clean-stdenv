@@ -2,7 +2,7 @@ implementation module StdTimerAttribute
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2
+//	Clean Standard Object I/O library, version 1.2.1
 //	
 //	StdTimerAttribute specifies which TimerAttributes are valid for each of the
 //	standard timers.

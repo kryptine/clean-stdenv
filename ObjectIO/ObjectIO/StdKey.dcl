@@ -2,7 +2,7 @@ definition module StdKey
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2
+//	Clean Standard Object I/O library, version 1.2.1
 //	
 //	StdKey defines the special keys for the Object I/O library. 
 //	********************************************************************************

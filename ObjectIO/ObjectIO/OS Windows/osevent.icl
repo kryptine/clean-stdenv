@@ -86,13 +86,13 @@ OShandleEvents isFinalState getOSEvents setOSEvents getSleepTime handleOSEvent (
 		with
 			rccitoevent :: !(OSEvent -> .s -> ([Int],.s)) !OSEvent !.s !*OSToolbox -> (!OSEvent,!.s,!*OSToolbox)
 			rccitoevent handleOSEvent osEvent=:{ccMsg} state tb
-			//	# (reply,state)	= handleOSEvent (trace_n ("CcRqDOMESSAGE-->"+++toCleanCrossCallInfoString osEvent) osEvent) state
+//				# (reply,state)	= handleOSEvent (trace_n ("CcRqDOMESSAGE-->"+++toCleanCrossCallInfoString osEvent) osEvent) state
 				# (reply,state)	= handleOSEvent osEvent state
 				= (setReplyInOSEvent reply,state,tb)
 	| otherwise
 		# (osEvent,osEvents)	= OSremoveEvent osEvents
 		# state					= setOSEvents (osEvents,state)
-	//	# (_,state)				= handleOSEvent (trace_n ("DelayedEvent-->"+++toCleanCrossCallInfoString osEvent) osEvent) state
+//		# (_,state)				= handleOSEvent (trace_n ("DelayedEvent-->"+++toCleanCrossCallInfoString osEvent) osEvent) state
 		# (_,state)				= handleOSEvent osEvent state
 		= OShandleEvents isFinalState getOSEvents setOSEvents getSleepTime handleOSEvent (state,tb)
 

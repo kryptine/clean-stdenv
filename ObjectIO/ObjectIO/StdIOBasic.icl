@@ -2,7 +2,7 @@ implementation module StdIOBasic
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2
+//	Clean Standard Object I/O library, version 1.2.1
 //	
 //	StdIOBasic defines basic types and access functions for the I/O library.
 //	********************************************************************************

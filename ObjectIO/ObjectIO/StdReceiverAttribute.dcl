@@ -2,7 +2,7 @@ definition module StdReceiverAttribute
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2
+//	Clean Standard Object I/O library, version 1.2.1
 //	
 //	StdReceiverAttribute specifies which ReceiverAttributes are valid for each of 
 //	the standard receivers.

@@ -1,7 +1,7 @@
 definition module StdStringChannels
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2
+//	Clean Standard Object I/O library, version 1.2.1
 //	
 //	StdStringChannels provides channel instances to send and receive Strings.
 //	These channels use their own protocol above TCP.

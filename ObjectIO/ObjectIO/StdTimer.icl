@@ -1,7 +1,7 @@
 implementation module StdTimer
 
 
-//	Clean Object I/O library, version 1.2
+//	Clean Object I/O library, version 1.2.1
 
 
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple

@@ -2,7 +2,7 @@ definition module StdPicture
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2
+//	Clean Standard Object I/O library, version 1.2.1
 //	
 //	StdPicture contains the drawing operations and access to Pictures.
 //	********************************************************************************

@@ -5,7 +5,17 @@ from	ostoolbox		import OSToolbox
 from	ostypes			import HWND
 from	rgnCCall_12		import HRGN
 from	pictCCall_12	import HDC
+import code from "cCCallWindows_121.obj","cpicture_121.obj"
 
+
+WinInitialiseWindows:: !*OSToolbox -> *OSToolbox
+WinInitialiseWindows _
+	= code
+	{
+		.inline InstallCrossCallWindows
+			ccall InstallCrossCallWindows "I-I"
+		.end
+	}
 
 WinInvalidateWindow :: !HWND !*OSToolbox -> *OSToolbox
 WinInvalidateWindow _ _

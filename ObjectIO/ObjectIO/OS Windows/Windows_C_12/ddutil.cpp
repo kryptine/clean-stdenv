@@ -163,7 +163,7 @@ extern "C" HRESULT DDCopyBitmap(IDirectDrawSurface *pdds, HBITMAP hbm, int x, in
 extern "C" IDirectDrawPalette * DDLoadPalette (IDirectDraw *pdd, LPCSTR szBitmap)
 {
     IDirectDrawPalette* ddpal;
-    int i, j, r, g, b;
+    int i, r, g, b;
     int n;
 //    int                 fh;
 // Mike ... //

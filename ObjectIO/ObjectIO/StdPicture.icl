@@ -1,7 +1,7 @@
 implementation module StdPicture
 
 
-//	Clean Object I/O library, version 1.2
+//	Clean Object I/O library, version 1.2.1
 
 //	Drawing functions and other operations on Picture
 

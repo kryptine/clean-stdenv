@@ -32,6 +32,10 @@ from	ostypes				import HWND
 		,	menuClient		:: !HWND
 		}
 
+/*	Before using OSopenMDI, OSopenSDI, or OScloseOSDInfo evaluate OSinitialiseDI.
+*/
+OSinitialiseDI :: !*OSToolbox -> *OSToolbox
+
 /*	emptyOSDInfo creates a OSDInfo with dummy values for the argument document interface.
 */
 emptyOSDInfo :: !DocumentInterface -> OSDInfo

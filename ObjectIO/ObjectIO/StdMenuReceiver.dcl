@@ -2,7 +2,7 @@ definition module StdMenuReceiver
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2
+//	Clean Standard Object I/O library, version 1.2.1
 //	
 //	StdMenuReceiver defines Receiver(2) menu element instances.
 //	********************************************************************************

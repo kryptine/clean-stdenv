@@ -5,13 +5,13 @@ definition module oswindow
 
 
 import StdMaybe, StdOverloaded, StdString
+import ostypes
 from osdocumentinterface	import OSDInfo, OSMDInfo, OSSDInfo, OSInfo, OSToolbar, OSToolbarHandle, HMENU, HWND
 from osevent				import OSEvents, OSEvent, CrossCallInfo
 from osfont					import Font
 from osrgn					import OSRgnHandle
 from ossystem				import OSWindowMetrics
 from ostoolbox				import OSToolbox
-from ostypes				import Rect, OSWindowPtr
 from ospicture				import OSPictContext
 
 
@@ -24,6 +24,11 @@ OSControlTitleSpecialChars :== []					// Special prefix characters that should b
 */
 OSMinWindowSize					:: (!Int,!Int)
 OSMinCompoundSize				:: (!Int,!Int)
+
+
+/*	Initialisation:
+*/
+OSinitialiseWindows	:: !*OSToolbox -> *OSToolbox
 
 
 /*	Determine the size of controls:
@@ -102,11 +107,6 @@ OSgetSliderControlMinWidth		:: !OSWindowMetrics -> Int
 	The return  OSWindowPtr is the OSWindowPtr of the created window/dialog.
 	The return OSDInfo is the validated OSDInfo of the parent process.
 */
-::	DelayActivationInfo
-	=	DelayActivatedWindow	OSWindowPtr				// the window has become active
-	|	DelayDeactivatedWindow	OSWindowPtr				// the window has become inactive
-	|	DelayActivatedControl	OSWindowPtr OSWindowPtr	// the control (@2) in window (@1) has become active
-	|	DelayDeactivatedControl	OSWindowPtr OSWindowPtr	// the control (@2) in window (@1) has become inactive
 
 OScreateDialog :: !Bool
 				  !Bool !String !(!Int,!Int) !(!Int,!Int) !OSWindowPtr
@@ -128,9 +128,6 @@ OScreateModalDialog :: !Bool !String !OSDInfo !(Maybe OSWindowPtr) !(u:s -> (OSE
 						!u:s !*OSToolbox
 			  -> (!Bool,!u:s,!*OSToolbox)
 
-// Mike //
-OScreateGameWindow :: !Bool !(!Int,!Int) !Int !*OSToolbox -> (![DelayActivationInfo],!OSWindowPtr,!*OSToolbox)
-//
 
 /*	Control creation functions:
 	OScreateRadioControl parentWindow parentPos title able pos size selected isfirst

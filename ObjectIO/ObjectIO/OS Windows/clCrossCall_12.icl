@@ -4,7 +4,13 @@ implementation module clCrossCall_12
 
 import StdBool, StdClass, StdInt, StdMisc, StdString, StdTuple
 import ostoolbox
-import code from "cCrossCall_12.obj", "cdebug_12.obj", "cpicture_12.obj", /*"htmlhelp.obj",*/ "util_12.obj",/*MW11*/ "cprinter_12.obj", "cTCP.obj"
+import code from "cAcceleratorTable_121.obj",
+				 "cCCallWindows_121.obj", 
+				 "cCCallSystem_121.obj",
+				 "cCrossCall_121.obj", 
+				 "cCrossCallCursor_121.obj",
+				 "cCrossCallProcedureTable_121.obj",
+				 "cCrossCallWindows_121.obj"
 import code from library "advapi32_library",
                  library "comctl32_library",
                  library "kernel32_library",
@@ -16,11 +22,6 @@ import code from library "advapi32_library",
                  library "kernelExt_library",
                  library "gdiExt_library",
                  library "userExt_library"
-/*	PA: these imports have been moved from gameCrossCall_12. */
-import code from "cGameLib_12.obj", "cOSGameLib_12.obj", "ddutil.obj", "Dsutil.obj"
-import code from library "ddraw_library"
-import code from library "dsound_library"
-/*	...PA */
 //import	StdDebug, tracetypes
 
   //----------------------------------------------//
@@ -54,12 +55,12 @@ where
 	HandleCallBacks callback cci=:{ccMsg} s tb
 		| ccMsg>2000
 			= abort ("HandleCallBacks "+++toString ccMsg)
-	//	# tb					= trace_n ("IssueCleanRequest <-- "+++toCleanCrossCallInfoString cci) tb
+//		# tb					= trace_n ("IssueCleanRequest <-- "+++toCleanCrossCallInfoString cci) tb
 		| IsReturnOrQuitCci ccMsg
 			= (cci,s,tb)
 		| otherwise
 			# (returnCci,s,tb)	= callback cci s tb
-		//	# tb				= trace_n ("IssueCleanRequest --> "+++toOSCrossCallInfoString returnCci) tb
+//			# tb				= trace_n ("IssueCleanRequest --> "+++toOSCrossCallInfoString returnCci) tb
 			# (replyCci,tb)		= WinKickOsThread returnCci tb
 			= HandleCallBacks callback replyCci s tb
 
@@ -77,12 +78,12 @@ where
 	HandleCallBacks callback cci=:{ccMsg} tb
 		| ccMsg>2000
 			= abort ("HandleCallBacks "+++toString ccMsg)
-	//	# tb					= trace_n ("IssueCleanRequest2 <-- "+++toCleanCrossCallInfoString cci) tb
+//		# tb					= trace_n ("IssueCleanRequest2 <-- "+++toCleanCrossCallInfoString cci) tb
 		| IsReturnOrQuitCci ccMsg
 			= (cci,tb)
 		| otherwise
 			# (returnCci,tb) 	= callback cci tb
-		//	# tb				= trace_n ("IssueCleanRequest2 --> "+++toOSCrossCallInfoString returnCci) tb
+//			# tb				= trace_n ("IssueCleanRequest2 --> "+++toOSCrossCallInfoString returnCci) tb
 			# (replyCci, tb) 	= WinKickOsThread returnCci tb
 			= HandleCallBacks callback replyCci tb
 
@@ -211,11 +212,6 @@ WinInitOs
 		.end
 	}
 
-//	PA: added to test refreshing of desktop
-WinRefreshDesktop :: !*OSToolbox -> *OSToolbox
-WinRefreshDesktop tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "WinRefreshDesktop") (Rq0Cci CcRqUPDATEDESKTOP) tb)
-
 
   //------------------------------------------------------------------------//
  //  The message numbers for communication from Clean to OS (ccMsg field)  //
@@ -238,6 +234,8 @@ CcRqDISPATCH_MESSAGES_WHILE_PRINTING
 CcRqENDDOC					:== 1822
 CcRqSTARTDOC				:== 1821
 // ... MW
+CcRqCREATETCPWINDOW			:==	1820		/* create TCP window */
+
 CcRqDESTROYMDIDOCWINDOW 	:== 1817		// PA: added to destroy MDI document window
 CcRqCREATESDIDOCWINDOW		:==	1816		// PA: added to create SDI document window
 CcRqCREATEMDIDOCWINDOW		:== 1815		// PA: added to create MDI document window
@@ -251,8 +249,6 @@ CcRqGETCLIPBOARDCOUNT		:== 1809		/* PA: added to retrieve clipboard count. */
 CcRqDIRECTORYDIALOG			:==	1802		/* PA: added to create directory selector dialog. */
 CcRqFILESAVEDIALOG			:== 1801
 CcRqFILEOPENDIALOG			:== 1800
-
-CcRqUPDATEDESKTOP			:== 1790		/* PA: added to force refresh of desktop. */
 
 CcRqSHOWCONTROL				:== 1755		/* PA: added */
 CcRqSELECTPOPUPITEM			:== 1754

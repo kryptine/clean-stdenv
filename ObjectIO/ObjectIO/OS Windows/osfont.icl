@@ -30,6 +30,7 @@ instance == OSFont where
 	(==) :: !OSFont !OSFont -> Bool
 	(==) f1 f2 = f1.osfontsize==f2.osfontsize && f1.osfontstyles==f2.osfontstyles && f1.osfontname==f2.osfontname
 
+
 OSselectfont :: !OSFontDef !*OSToolbox -> (!Bool,!Font,!*OSToolbox)
 OSselectfont fdef=:(fName,fStyles,fSize) tb
 	= (True,{fontdef=fdef,fontimp=fimp},tb)

@@ -1,6 +1,6 @@
 implementation module StdPrintText
 
-//	Clean Standard Object I/O library, version 1.2
+//	Clean Standard Object I/O library, version 1.2.1
 
 /* 	printText1 and printText2 both call printText3, which is the most general function.
  *	printText3 calls the printPagePerPage function from the StdPrint module.

@@ -5,6 +5,7 @@ import	StdTCPDef
 from	StdChannels	import Timeout, TimeoutReport
 import	tcp
 
+
 os_eom						::	!EndpointRef !*env
 							->	(!Bool, !*env)
 os_disconnected				::	!EndpointRef !*env

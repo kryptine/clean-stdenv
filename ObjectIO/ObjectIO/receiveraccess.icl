@@ -7,6 +7,7 @@ import	StdBool, StdInt, StdList
 import	id, receiverdefaccess, receiverhandle
 import	cast, semidynamic
 
+
 // MW11 added connectedIds
 newReceiverStateHandle :: !Id .ls !SelectState ![Id] !(ReceiverFunction m *(.ls,.pst)) -> ReceiverStateHandle .pst
 newReceiverStateHandle id localState select connectedIds f
@@ -56,7 +57,7 @@ twowaytotriple f m (ls,pst)
 	= (ls,[r],pst)
 
 
-//	Functions that have moved from receiverhandle:
+//	Functions moved from receiverhandle:
 
 receiverIdentified :: !Id !(ReceiverHandle .ls .pst) -> Bool
 receiverIdentified id {rId}

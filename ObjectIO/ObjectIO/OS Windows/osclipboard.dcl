@@ -11,6 +11,9 @@ import	ostoolbox
 OSClipboardText
 	:==	1	// CF_TEXT
 
+//	OSinitialiseClipboard should be evaluated before any of the functions below.
+OSinitialiseClipboard :: !*OSToolbox -> *OSToolbox
+
 OShasClipboardText :: !*OSToolbox -> (!Bool,!*OSToolbox)
 //	OShasClipboardText checks whether the clipboard currently contains a text item.
 

@@ -1,7 +1,7 @@
 implementation module StdClipboard
 
 
-//	Clean Object I/O library, version 1.2
+//	Clean Object I/O library, version 1.2.1
 
 
 import	StdFunc, StdList, StdMisc, StdString
@@ -39,6 +39,7 @@ instance Clipboard {#Char} where
 setClipboard :: ![ClipboardItem] !(PSt .l) -> PSt .l
 setClipboard clipItems pState=:{io}
 	# (tb,ioState)	= getIOToolbox io
+	# tb			= OSinitialiseClipboard tb
 	# tb			= StrictSeq (map clipboardItemToScrap singleItems) tb
 	# ioState		= setIOToolbox tb ioState
 	= {pState & io=ioState}
@@ -64,6 +65,7 @@ where
 getClipboard :: !(PSt .l) -> (![ClipboardItem],!PSt .l)
 getClipboard pState
 	# (tb,ioState)		= getIOToolbox pState.io
+	# tb				= OSinitialiseClipboard tb
 	# (contents,tb)		= OSgetClipboardContent tb
 	  contents			= filter ((==) OSClipboardText) contents
 	# (clipItems,tb)	= StrictSeqList (map scrapToClipboardItem contents) tb
@@ -84,5 +86,8 @@ clipboardHasChanged :: !(PSt .l) -> (!Bool,!PSt .l)
 clipboardHasChanged pState
 	# (cbs,ioState)		= IOStGetClipboardState pState.io
 	  oldCount			= cbs.cbsCount
-	# (newCount,ioState)= accIOToolbox (OSgetClipboardVersion oldCount) ioState
+	# (tb,ioState)		= getIOToolbox ioState
+	# tb				= OSinitialiseClipboard tb
+	# (newCount,tb)		= OSgetClipboardVersion oldCount tb
+	# ioState			= setIOToolbox tb ioState
 	= (oldCount<>newCount,{pState & io=ioState})

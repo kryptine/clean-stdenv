@@ -1,6 +1,6 @@
 implementation module StdTCPChannels
 
-//	Clean Standard Object I/O library, version 1.2
+//	Clean Standard Object I/O library, version 1.2.1
 
 import	StdEnv
 import	StdTCPDef, StdChannels, StdTime

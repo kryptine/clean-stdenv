@@ -7,6 +7,7 @@ from	rgnCCall_12		import HRGN
 from	pictCCall_12	import HDC
 
 
+WinInitialiseWindows:: !*OSToolbox -> *OSToolbox
 WinInvalidateWindow	:: !HWND !*OSToolbox -> *OSToolbox
 WinInvalidateRect	:: !HWND !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
 WinValidateRect		:: !HWND !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox

@@ -30,6 +30,7 @@ processOpen pState=:{io=ioState}
 	| hasProcess
 		= {pState & io=ioState}
 	| otherwise
+		# ioState					= appIOToolbox OSinitialiseDI ioState
 		# ioState					= IOStSetDeviceFunctions ProcessFunctions ioState
 		# (osdinfo,ioState)			= IOStGetOSDInfo ioState
 		# ioState					= createOSDInfo osdinfo ioState
