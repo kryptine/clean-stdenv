@@ -3,7 +3,7 @@ definition module dynamicAGEC
 import StdAGEC
 
 //dynamicAGEC  :: a -> AGEC a | TC a //& gGEC {|*|} a  // shows typed in expression, resulting value + type	 					
-dynamicAGEC2 :: a -> AGEC a | TC a  // only shows typed in expression	 					
+dynamicAGEC :: a -> AGEC a | TC a  // only shows typed in expression	 					
 				
 derive gGEC (->), DynString
 
