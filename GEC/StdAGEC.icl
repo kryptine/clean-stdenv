@@ -10,7 +10,12 @@ import StdGECExt, basicAGEC
 						, pred    :: a -> (Bool,a)			// only pass through new value if its satisfies this predicate, display new value
 						}
 
-:: AGEC a = E. .b :  View !(BimapGEC a b) !(A. .ps: InfraGEC b (PSt ps)) !String
+:: GECaGECb a ps 	= E.va : {bimapto :: va -> a, bimapfrom :: a -> va ,gGEC :: (TgGEC va *(PSt ps))}
+
+:: AGEC a 			= E. .b : 	{ bimapGEC 	:: !(BimapGEC a b)
+								, bGEC 		:: !(A. .ps: TgGEC b (PSt ps))
+								, descr 	:: !String
+								}
 		
 // BimapGEC:: a b to use a b-editor for constructing an a-value
 
@@ -26,13 +31,6 @@ mkBimapGEC toGEC updGEC fromGEC pred value
 to_BimapGEC :: (Bimap a b) a -> (BimapGEC a b)
 to_BimapGEC {map_to,map_from} a 
 = {toGEC = \a _ -> map_to a, fromGEC = map_from, updGEC = id, value = a, pred = \t -> (True,t)}
-
-from_BimapGEC :: (BimapGEC a b) -> (Bimap a b)
-from_BimapGEC bimapGEC
-= {map_to = \a -> bimapGEC.toGEC a Undefined , map_from = bimapGEC.fromGEC}
-
-invBimap :: (Bimap a b) -> (Bimap b a)
-invBimap {map_to, map_from} = {map_to = map_from, map_from = map_to}
 
 Bimap_BimapGEC :: (Bimap a b) (BimapGEC a va) -> (BimapGEC b va)
 Bimap_BimapGEC bimapab bimapGava = {toGEC=toGEC,fromGEC=fromGEC,updGEC=updGEC,value=value,pred=pred}
@@ -51,7 +49,7 @@ gGEC{|BimapGEC|} _ gecb gecArgs=:{gec_value=Just bimapG} pSt
 
 // mkBimapGECeditor is a handy general conversion function
 
-mkBimapGECeditor :: (BimapGEC a b) (InfraGEC b *(PSt .ps)) -> (InfraGEC (BimapGEC a b) *(PSt .ps)) 
+mkBimapGECeditor :: (BimapGEC a b) (TgGEC b *(PSt .ps)) -> (TgGEC (BimapGEC a b) *(PSt .ps)) 
 mkBimapGECeditor bimapG gecb = bimapgec
 where
 	bimapgec gecArgs=:{gec_value=Just initbimapG,update=bimapupdate} pSt
@@ -83,18 +81,25 @@ where
 // AGEC:: Abstract version of BimapGEC
 
 mkAGEC  :: !(BimapGEC a b) !String -> AGEC a | gGEC{|*|} b
-mkAGEC bimapGEC descriptor =  View bimapGEC gGEC{|*|} descriptor
+mkAGEC bimapGEC descriptor =  {bimapGEC = bimapGEC, bGEC = gGEC{|*|}, descr = descriptor}
+
+// Varinat of mkAGEC needed for explicit dictionary passing, needs a CAST  !!!!!!!!!!!!!!!
+
+mkxAGEC :: (TgGEC b *(PSt .ps)) !(BimapGEC a b) !String -> AGEC a
+mkxAGEC gGEC bimapGEC descriptor =  {bimapGEC = bimapGEC, bGEC = cast gGEC, descr = descriptor}
 
 mkAGEC`  :: !(BimapGEC a (g b)) !String -> AGEC a | gGEC{|*->*|} g
-mkAGEC` bimapGEC descriptor =  View bimapGEC (gGEC{|*->*|} undef1) descriptor
+mkAGEC` bimapGEC descriptor =  {bimapGEC = bimapGEC, bGEC = gGEC{|*->*|} undef1, descr = descriptor} 
 where
 	undef1 = abort "mkAGEC` evaluated undefined GEC editor/1"
 
 ^^    :: (AGEC a) -> a
-^^ (View bimap ggec string) = bimap.value
+^^ {bimapGEC} = bimapGEC.value
 
 (^=) infixl  :: (AGEC a) a -> (AGEC a)
-(^=) (View bimap ggec descr) nvalue = (View {bimap & value = nvalue} ggec descr)
+(^=) {bimapGEC,bGEC,descr} nvalue = {bimapGEC=nbimapGEC,bGEC,descr}
+where
+	nbimapGEC = {bimapGEC & value = nvalue}
 
 Specialize :: a (a -> AGEC a) (GECArgs a (PSt .ps)) !(PSt .ps) -> *(!GECVALUE a (PSt .ps),!(PSt .ps))
 Specialize a toAGEC gecArgs=:{gec_value=Nothing} pSt 
@@ -102,18 +107,16 @@ Specialize a toAGEC gecArgs=:{gec_value=Nothing} pSt
 Specialize a toAGEC gecArgs=:{gec_value=Just na} pSt 
 = AGEC_to_gGEC (toAGEC na) gecArgs pSt
 
-AGEC_to_gGEC:: (AGEC a) -> (InfraGEC a (PSt .ps))
-AGEC_to_gGEC ageca=:(View bimapGa infraGECva ss)
-= a_GEC_as_b_GEC {bimapto = bimapto, bimapfrom = bimapfrom, infraGEC = ageceditor}
+AGEC_to_gGEC:: (AGEC a) -> (TgGEC a (PSt .ps))
+AGEC_to_gGEC ageca=:{bimapGEC,bGEC}
+= a_GEC_as_b_GEC {bimapto = bimapto, bimapfrom = bimapfrom, gGEC = ageceditor}
 where
-	ageceditor = mkStaticAgec undef 
-	bimapfrom a = (View {bimapGa & value = a} infraGECva ss)	
-	bimapto (View bimapGa infraGECva ss) = bimapGa.value
-
-:: GECaGECb a ps = E.va : {bimapto :: va -> a, bimapfrom :: a -> va ,infraGEC :: (InfraGEC va *(PSt ps))}
+	ageceditor 		= mkStaticAgec undef 
+	bimapfrom a 	= ageca ^= a 	
+	bimapto ageca 	= ageca.bimapGEC.value
 	
-a_GEC_as_b_GEC :: (GECaGECb b .ps)  -> (InfraGEC b *(PSt .ps))
-a_GEC_as_b_GEC {bimapto = atob, bimapfrom = btoa, infraGEC = geca} 
+a_GEC_as_b_GEC :: (GECaGECb b .ps)  -> (TgGEC b *(PSt .ps))
+a_GEC_as_b_GEC {bimapto = atob, bimapfrom = btoa, gGEC = geca} 
 	= bgec
 where
 	bgec gecArgs=:{gec_value=Just initb,update=updateb} pSt
@@ -134,23 +137,32 @@ where
 		# (na,pst) = ahandle.gecGetValue pst
 		= (atob na,pst)
 
-AGEC_a_as_AGEC_b 	:: (Bimap a b) (AGEC a) -> AGEC b 
-AGEC_a_as_AGEC_b bimap (View bimapGava gecva ss)
-= (View (Bimap_BimapGEC bimap bimapGava) gecva ss)
+// bimap definition for AGEC, needs a CAST !!
+
+import cast
+
+bimap{|AGEC|} bimapagec` =  cast { map_to= map_to, map_from=map_from }
+where
+	map_to   agec=:{bimapGEC,bGEC,descr} =   {bimapGEC = Bimap_BimapGEC  bimapagec bimapGEC,bGEC,descr}
+	map_from agec=:{bimapGEC,bGEC,descr} =   {bimapGEC = Bimap_BimapGEC  xbimapagec bimapGEC,bGEC,descr}
+	where
+		xbimapagec = cast { map_to= bimapagec.map_from, map_from=bimapagec.map_to }
+
+	bimapagec =  cast bimapagec`		
 
 // and the editor for an AGEC...
 
-gGEC{|AGEC|} gecx gecArgs pSt
+gGEC{|AGEC|} gecx gecArgs pSt			// choose one of the following ...
 //	= mkStaticAgec gecx gecArgs pSt
 	= mkDynamicAgec gecx gecArgs pSt
 
 // nice definition for a paper, but it is not one that can deal with dynamically changing agec's
 
-mkStaticAgec gecx gecArgs=:{gec_value=Just (View bimapG gecb ss)} pSt
-= a_GEC_as_b_GEC {bimapto = bimapto, bimapfrom = bimapfrom, infraGEC = mkBimapGECeditor bimapG gecb} gecArgs pSt
+mkStaticAgec gecx gecArgs=:{gec_value=Just agec=:{bimapGEC,bGEC,descr}} pSt
+= a_GEC_as_b_GEC {bimapto = bimapto, bimapfrom = bimapfrom, gGEC = mkBimapGECeditor bimapGEC bGEC} gecArgs pSt
 where
-	bimapto nbimapG 	= (View {bimapG & value = nbimapG.value} gecb ss) 
-	bimapfrom (View nbimapG _ ss) = {bimapG & value = nbimapG.value}
+	bimapto nbimapG 				= agec ^= nbimapG.value //{agec & bimapGEC.value = nbimapG.value} 
+	bimapfrom {bimapGEC=nbimapGEC} 	= {bimapGEC & value = nbimapGEC.value}
 mkStaticAgec gecx gecArgs=:{gec_value=Nothing} pSt
 # (geca,pSt)	= gecx {gecArgs & gec_value=Nothing, update = \v r env -> env} pSt
 # (a,   pSt)	= geca.gecGetValue pSt
@@ -167,9 +179,8 @@ mkStaticAgec gecx gecArgs=:{gec_value=Nothing} pSt
 		{	agecBimapGEC:: !GECVALUE (BimapGEC a b) env		// The handle to the BimapGEC
 		,	agecAGEC    :: !AGEC a							// The current AGEC value
 		}
-
-mkDynamicAgec gGECa gecArgs=:{gec_value=Just abstractGEC=:(View bimapGEC gGECb descr),update= biupdate,location,makeUpValue,outputOnly,hasOBJECT} pSt
-# (abbaGEC,pSt)	= mkBimapGECeditor  bimapGEC gGECb {gecArgs & gec_value=Just bimapGEC, update =bupdate abstractGEC} pSt
+mkDynamicAgec gGECa gecArgs=:{gec_value=Just abstractGEC=:{bimapGEC,bGEC,descr},update= biupdate,location,makeUpValue,outputOnly,hasOBJECT} pSt
+# (abbaGEC,pSt)	= mkBimapGECeditor  bimapGEC bGEC {gecArgs & gec_value=Just bimapGEC, update =bupdate abstractGEC} pSt
 # (aGEC,pSt)	= openGECId pSt
 # aDef			= GECReceiver aGEC (fun bupdate)
 # lSt			= { agecBimapGEC = abbaGEC
@@ -178,14 +189,14 @@ mkDynamicAgec gGECa gecArgs=:{gec_value=Just abstractGEC=:(View bimapGEC gGECb d
 # (_,pSt)		= openReceiver lSt aDef pSt
 = (newGEC aGEC,pSt)
 where
-	bupdate (View bimapGEC gGECb descr) reason nbimap pSt 
-		= biupdate reason (View {bimapGEC & value = nbimap.value} gGECb descr) pSt
+	bupdate ageca=:{bimapGEC=nbimapGEC,bGEC,descr} reason nbimap pSt 
+		= biupdate reason (ageca ^= nbimap.value) pSt
 	
 	fun :: !(A.b:(AGEC a) -> Update (BimapGEC a b) (PSt .ps)) !(GECMsgIn  (AGEC a)) !*(AGECSt a (PSt .ps),PSt .ps) -> (GECMsgOut (AGEC a), *(AGECSt a (PSt .ps),PSt .ps))
-	fun _ InGetValue (lSt=:{agecBimapGEC=abbaGEC,agecAGEC=View bimapGEC gGECbimapGEC descr},pSt)
+	fun _ InGetValue (lSt=:{agecBimapGEC=abbaGEC, agecAGEC = nagec=:{bimapGEC,bGEC= gGECbimapGEC,descr}},pSt)
 	# (nval,pSt)	= abbaGEC.gecGetValue pSt
-	= (OutGetValue (View {bimapGEC & value=nval.value} gGECbimapGEC descr),(lSt,pSt))
-	fun bupdate (InSetValue includeUpdate newAGECa=:(View nval ngGECb ndescr)) (lSt=:{agecBimapGEC=abbaGEC,agecAGEC=(View _ _ odescr)},pSt)
+	= (OutGetValue (nagec ^= nval.value),(lSt,pSt))
+	fun bupdate (InSetValue includeUpdate newAGECa=:{bimapGEC = nval,bGEC = ngGECb, descr = ndescr}) (lSt=:{agecBimapGEC=abbaGEC,agecAGEC={descr = odescr}},pSt)
 	| odescr == ndescr	// The same AGEC is used for the new value
 		# (bimap,pSt)	= abbaGEC.gecGetValue pSt
 		# pSt			= abbaGEC.gecSetValue includeUpdate {bimap & value=nval.value} pSt		// send new value down the current infrastructure
@@ -230,6 +241,7 @@ where
 	      , gecOpened   = accPIO (isGECIdBound tGEC)
 	      }
 
+/*
 // generic function combining AGEC's
 // it will only show the invokations made, all other types are by default not shown !
 
@@ -256,24 +268,13 @@ where
 				, 	map_from 	= \(OBJECT o) -> o
 				}
 
-//:: GECaGECb a ps = E.va : {bimapto :: va -> a, bimapfrom :: a -> va ,infraGEC :: (InfraGEC va *(PSt ps))}
-
-import cast
-
-bimap{|AGEC|} bimapagec` =  cast { map_to= map_to, map_from=map_from }
-where
-	map_to   (View bimapG agec ss) =   (View (Bimap_BimapGEC  bimapagec bimapG) agec ss)
-	map_from (View bimapG agec ss) =   (View (Bimap_BimapGEC xbimapagec bimapG) agec ss)
-	where
-		xbimapagec = cast { map_to= bimapagec.map_from, map_from=bimapagec.map_to }
-
-	bimapagec =  cast bimapagec`		
 
 // utility function defined for gAGEC ...
 
 mkPAIR_AGEC 		:: (A. ax bx:Bimap (PAIR ax bx) (tv ax bx)) (AGEC a) (AGEC b) -> AGEC (PAIR a b) | gGEC {|*->*->*|} tv
-mkPAIR_AGEC bimap ageca=:(View bimapGava gecva sa) agecb=:(View bimapGbvb gecvb sb)
-= (View bimapGPabvavb ggecGPtv (sa +++ sb))
+mkPAIR_AGEC bimap ageca=:{bimapGEC = bimapGava, bGEC = gecva, descr = sa} 
+				  agecb=:{bimapGEC = bimapGbvb, bGEC = gecvb, descr = sb}
+= {bimapGEC = bimapGPabvavb, bGEC = ggecGPtv, descr = (sa +++ sb)}
 where
 	bimapGPabvavb  	= Bimap_BimapGEC_PAIR bimap bimapGava bimapGbvb
 	ggecGPtv 		= gGEC{|*->*->*|} gecva gecvb 
@@ -294,13 +295,13 @@ where
 
 mkEITHER_AGEC 		:: (A. ax bx:Bimap (EITHER ax bx) (tv ax bx)) (EITHER (AGEC a) (AGEC b)) 
 							-> AGEC (EITHER a b) | gGEC {|*->*->*|} tv
-mkEITHER_AGEC bimap (LEFT ageca=:(View bimapGava gecva sa))
-= (View bimapLEFT ggecGPtv ("LEFT" +++ sa))
+mkEITHER_AGEC bimap (LEFT ageca=:{bimapGEC = bimapGava, bGEC = gecva, descr = sa})
+= {bimapGEC = bimapLEFT, bGEC = ggecGPtv, descr = ("LEFT" +++ sa)}
 where
 	bimapLEFT  		= Bimap_BimapGEC_EITHER bimap (LEFT bimapGava)
 	ggecGPtv 		= gGEC{|*->*->*|} gecva gecva
-mkEITHER_AGEC bimap (RIGHT ageca=:(View bimapGbvb gecvb sb))
-= (View bimapRIGHT ggecGPtv ("RIGHT" +++ sb))
+mkEITHER_AGEC bimap (RIGHT ageca=:{bimapGEC = bimapGbvb, bGEC = gecvb, descr = sb})
+= {bimapGEC = bimapRIGHT, bGEC = ggecGPtv, descr = ("RIGHT" +++ sb)}
 where
 	bimapRIGHT  	= Bimap_BimapGEC_EITHER bimap (RIGHT bimapGbvb)
 	ggecGPtv 		= gGEC{|*->*->*|} gecvb gecvb
@@ -329,6 +330,11 @@ where
 	pred nb 	= (True,nb)
 
 
+AGEC_a_as_AGEC_b 	:: (Bimap a b) (AGEC a) -> AGEC b 
+AGEC_a_as_AGEC_b bimap ageca=:{bimapGEC,bGEC,descr} 
+= {bimapGEC = Bimap_BimapGEC bimap bimapGEC,bGEC,descr}
+
+*/
 // utilities for making BimapGECs out of bimaps
 
 gGEC{|GecComb|} gGECa gGECb args pSt
@@ -347,24 +353,25 @@ CGECtoAGEC cgec a
 		 } "CGECtoAGEC"
 
 
-// all sort of perhap useful utility functions ...
+generate{|AGEC|} gena trace randomStream 
+# (a,trace,atoi,random) = gena trace randomStream
+= (undef, trace, \a -> 0, randomStream)
 
-idiAGEC :: (A. .ps: InfraGEC a *(PSt .ps)) a -> AGEC a 
-idiAGEC gec j 	= View 	{	toGEC	= \i _ ->i
-						,	fromGEC = id
-						,	value	= j
-						,	updGEC	= id
-						,	pred	= \t -> (True,t)
-						} gec "idGEC"
+// unused utility functions ...
+
+/*
+
+invBimap :: (Bimap a b) -> (Bimap b a)
+invBimap {map_to, map_from} = {map_to = map_from, map_from = map_to}
 
 
-mkiAGEC  :: (A. .ps: InfraGEC b *(PSt .ps)) !(BimapGEC a b) !String -> AGEC a 
-mkiAGEC gec bimapGEC descriptor  =  View bimapGEC gec descriptor 
+from_BimapGEC :: (BimapGEC a b) -> (Bimap a b)
+from_BimapGEC bimapGEC
+= {map_to = \a -> bimapGEC.toGEC a Undefined , map_from = bimapGEC.fromGEC}
 
-mkiAGEC2  :: (A. .ps: (GECaGECb a .ps)) a !String -> AGEC a 
-mkiAGEC2 {bimapto = vatoa, bimapfrom = atova ,infraGEC = gecva} a descriptor  
-=  View (to_BimapGEC {map_to = atova, map_from = vatoa} a) gecva descriptor 
 
+
+*/ 
 
 	
 			
