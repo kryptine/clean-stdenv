@@ -31,14 +31,12 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <strings.h>
-
+/*
 extern char** global_argv;
 extern int global_argc;
-/*
-#include <Rts.h>
-#include <RtsAPI.h>
 */
-
+char** global_argv;
+int global_argc = 0;
 /**********************************************************************************************
 	External global data section.
 **********************************************************************************************/
@@ -239,9 +237,6 @@ void InitGTK()
     printf("InitGTK\n");
 	if (!gInitiated)
 	{
-		int margc;
-		char **margv;
-
         printf("Must initialize GTK\n");
 		gtk_set_locale();
 		gtk_init(&global_argc,&global_argv);
@@ -564,22 +559,30 @@ void WinInitOs (Bool* ok, OS* os)
     printf("WinInitOs\n");
     if (gEventsInited)
     {
-       *ok = FALSE;                                                                    rprintf ("WIO: *ok = FALSE\n");
-    }                                                                               else
+       *ok = FALSE;                                                                    
+       rprintf ("WIO: *ok = FALSE\n");
+    }                                                                               
+    else
     {
        *ok = TRUE;
-       gEventsInited = TRUE;                                                           rprintf ("WIO: *ok = TRUE\n");
+       gEventsInited = TRUE;                                                           
+       rprintf ("WIO: *ok = TRUE\n");
     }
     *os = 54321;
 }   /* WinInitOs */
 
-Bool WinCloseOs (OS os)                                                         {           
+Bool WinCloseOs (OS os)                                                        
+ {           
     if (gEventsInited)
     {       
-         rprintf ("WCO: return TRUE\n");                                                 gEventsInited = FALSE;
-         return TRUE;                                                                }                                                                               else
+         rprintf ("WCO: return TRUE\n");                                                 
+         gEventsInited = FALSE;
+         return TRUE;                                                                
+     }                                                                               
+     else
      {       
-          rprintf ("WCO: return FALSE\n");                                                return FALSE;
+          rprintf ("WCO: return FALSE\n");                                                
+          return FALSE;
      }
 }   /* WinCloseOs */
 

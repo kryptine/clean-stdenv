@@ -1024,25 +1024,20 @@ void EvalCcRqGETWINDOWSIZE (CrossCallInfo *pcci) /* hwnd; width,height result. *
 /*	Set the size of windows/controls. */
 void EvalCcRqSETWINDOWSIZE (CrossCallInfo *pcci) /* hwnd, w,h, update; no result. */
 {
-#if 0
-	HWND hwnd;
-	int w,h;
-	BOOL update;
-	UINT flags;
+	GtkWindow *window;
+	gint width, height;
+	gboolean update,inclScrollbars;
 
-	hwnd   = (HWND)pcci->p1;
-	w      = pcci->p2;
-	h      = pcci->p3;
+   /* printf("EvalCcRqSETWINDOWSIZE\n"); */
+	window        = GTK_WINDOW(pcci->p1);
+	width         = pcci->p2;
+	height        = pcci->p3;
 	update = pcci->p4;
-	flags  = SWP_NOMOVE			/* retain position */
-		   | SWP_NOZORDER;		/* retain Z order  */
-	/* flags do not contain SWP_NOREDRAW because otherwise not all windows get updated properly. */
-
-	SetWindowPos (hwnd, HWND_TOP, 0,0, w,h, flags);
+	gtk_window_resize(window, width, height);
+#if 0
 	if (update!=0)				/* still, updates are not sufficient using SetWindowPos only. */
 		UpdateWindowScrollbars (hwnd);
 #endif
-	printf("EvalCcRqSETWINDOWSIZE -> not implemented\n");
 	MakeReturn0Cci (pcci);
 }
 
@@ -1745,7 +1740,7 @@ static void scrollbar_value_changed(GtkRange *range, gpointer user_data)
     GdkWindow *parent_window;
     GtkWidget *parent, *widget;
     GtkAdjustment *adjustment;
-    printf("scrollbar_value_changed\n");
+    /* printf("scrollbar_value_changed\n"); */
 
     parent_window = gtk_widget_get_parent_window(GTK_WIDGET(range));
     parent = gtk_widget_get_parent(GTK_WIDGET(range));
@@ -1753,73 +1748,49 @@ static void scrollbar_value_changed(GtkRange *range, gpointer user_data)
     position = (gint)gtk_adjustment_get_value(adjustment);
     val = g_object_get_data(G_OBJECT(range), SCROLL_POS_KEY);
 
-    printf("Value: %d -- Old Value: %d\n", (int)position, (int) *val);
+    /* printf("Value: %d -- Old Value: %d\n", (int)position, (int) *val); */
 
     discr = position - *val;
+    /* printf("discr = %d", (int) discr); */
 
-    /* Determine Scroll Code */
-/*    if (discr < 0)
-    {
-            scrollCode = SB_LINEDOWN;
-    } else if (discr > 0) {
-            scrollCode = SB_LINEUP;
-    } else {
-            scrollCode = SB_THUMBPOSITION;
-    }
-*/
-    scrollCode = SB_THUMBPOSITION; /* hmm how do we determine proper scrollCode? */
-/*        case (GTK_SCROLL_STEP_UP):
-        case (GTK_SCROLL_STEP_RIGHT):
-        case (GTK_SCROLL_STEP_FORWARD):
-            scrollCode = SB_LINEUP; break;
-        case (GTK_SCROLL_PAGE_DOWN):
-        case (GTK_SCROLL_PAGE_LEFT):
-        case (GTK_SCROLL_PAGE_BACKWARD):
-            scrollCode = SB_PAGEDOWN; break;
-        case (GTK_SCROLL_PAGE_UP):
-        case (GTK_SCROLL_PAGE_RIGHT):
-        case (GTK_SCROLL_PAGE_FORWARD):
-            scrollCode = SB_PAGEUP; break;
-        case (GTK_SCROLL_START):
-            scrollCode = SB_TOP; break;
-        case (GTK_SCROLL_END):
-            scrollCode = SB_BOTTOM; break;
-        case (GTK_SCROLL_NONE):
-        default:
-            scrollCode = SB_THUMBPOSITION;
-            break;
-    }*/
+    
+    /*
+ 	 * GTK Handles a lot of the scrollbar plumbing internally.  We have to fool the ObjectIO
+ 	 * event loop a bit here.  So, we just report a "SB_THUMBPOSITION" message, so it runs around
+ 	 * notifying changes, but does not try to modify the scrollbar itself.
+    */
+    scrollCode = SB_THUMBPOSITION;
 
-    printf("scrollCode: %d, position: %d\n", scrollCode, position);
-	
-	if (discr == 0)
-	{
-	    gtk_widget_queue_draw(range/*widget*/);
-		return;
-	}
     /*
      * If there is a parent, this is a slider (not a scrollbar)
      */
     if (GTK_IS_SCROLLED_WINDOW(parent_window))
     {
-        printf("Not a slider.\n");
+        /* printf("Not a slider.\n"); */
         controlKind = (GTK_IS_HSCROLLBAR(range) ?
                         GTK_ORIENTATION_HORIZONTAL : GTK_ORIENTATION_VERTICAL);
+        widget = GTK_WIDGET(parent_window);
+        parent = GTK_WIDGET(parent_window);
     } else {
-        printf("Hey -- it's a slider!\n");
- //       range = GTK_WIDGET(gtk_widget_get_parent(GTK_WIDGET(range)));
+        /* printf("Hey -- it's a slider!\n"); */
         controlKind = SB_CTL;
         widget = GTK_WIDGET(range);
+        parent = GetControlParent(widget);
     }
 
     *val = position;
     g_object_set_data(G_OBJECT(range), SCROLL_POS_KEY, (gpointer)val);
 
-    /* Force redraw of changed widget */
-    printf("scrollbar_value_changed - %p,%p,%p\n",widget,range,user_data);
-    SendMessage5ToClean(CcWmSCROLLBARACTION, (int)user_data, (int)range, controlKind, scrollCode, position);
+    /*
+ 	 * Force redraw of changed widget, but only during times when the
+ 	 * scrollbar was moved by the user.
+     */
+ 	if (discr != 0) {
+ 	    SendMessage5ToClean(CcWmSCROLLBARACTION, parent, (int)widget,
+                     controlKind, scrollCode, position);
+ 	}
    
-    gtk_widget_queue_draw(range/*widget*/);
+    gtk_widget_queue_draw(widget);
 }
 
 /*	Create scrollbars. */
@@ -1831,7 +1802,12 @@ void EvalCcRqCREATESCROLLBAR (CrossCallInfo *pcci)	/* hwnd, x,y,w,h bool; HWND r
 	GtkWidget *parent;
 	gboolean ishorizontal;
 
-    printf("EvalCcRqCREATESCROLLBAR\n");
+    /* printf("EvalCcRqCREATESCROLLBAR\n"); */
+    if (pcci->p1 == 0)
+    {
+    	MakeReturn0Cci (pcci);
+    }
+    
 	parent = GTK_WIDGET(pcci->p1);
 	x = pcci->p2;
 	y = pcci->p3;
