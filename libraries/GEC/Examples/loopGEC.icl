@@ -4,11 +4,10 @@ import StdEnv
 import StdGEC, StdGECExt, StdAGEC
 import GecArrow
 
-goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
-goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
-
 Start :: *World -> *World
-Start world = goGui feedbackTest5 world  
+Start world = goGui sinkTest1 world  
+where
+	goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 
 loopTest1 = startCircuit (edit "edit" >>> loop (arr \(x, y) -> (x + 1, y + 1)) >>> display "display") 42
 
@@ -55,3 +54,5 @@ derive gGEC (,)
 feedbackTest4 = startCircuit (edit "input" >>> feedback (first (arr ((+) 1))) >>> display "output") (0, 0)
 
 feedbackTest5 = startCircuit (feedback ((edit "+1" >>> arr ((+) 1)) *** (edit "+100" >>> arr ((+) 100)))) (0, 0)
+
+sinkTest1 = startCircuit (edit "input" >>> sink >>> arr (\_ -> -1) >>> display "output") 0
