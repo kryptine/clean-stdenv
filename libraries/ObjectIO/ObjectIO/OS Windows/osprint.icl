@@ -43,24 +43,43 @@ os_defaultprintsetup env
 		env				= getDefaultDevmodeC devmode printerHandle device env	// alters contents of printSetup
 	= ({devmode=devmode, device=device, driver=driver, output=output}, env)
 
-os_printsetupdialog		::	!Bool !PrintSetup !*env
-						->	(!PrintSetup, !*env)
-os_printsetupdialog isWorld {devmode,device,driver,output} env
-	# (os, env)		= EnvGetOS env
-	# (devmodePtr,os) = WinMakeCString devmode os
+printSetupDialogBoth :: !PrintSetup !(Maybe *Context) -> (!PrintSetup, !Maybe *Context)
+printSetupDialogBoth {devmode,device,driver,output} mb_context
+	# (os, mb_context)	= EnvGetOS mb_context
+	  (devmodePtr,os) = WinMakeCString devmode os
 	  (devicePtr,os) = WinMakeCString device os
 	  (driverPtr,os) = WinMakeCString driver os
 	  (outputPtr,os) = WinMakeCString output os
-	  (ok, pdPtr, os)
-	  		= CCPrintSetupDialog isWorld (size devmode) devmodePtr devicePtr driverPtr outputPtr os
+	  (ok, pdPtr, mb_context, os) = CCPrintSetupDialog mb_context (size devmode) devmodePtr devicePtr driverPtr outputPtr os
 	  os = WinReleaseCString devmodePtr os
 	  os = WinReleaseCString devicePtr os
 	  os = WinReleaseCString driverPtr os
 	  os = WinReleaseCString outputPtr os
 	| ok==0
-		= ({devmode="\0",device="\0",driver="\0",output="\0"}, EnvSetOS os env)
+		= ({devmode="\0",device="\0",driver="\0",output="\0"}, EnvSetOS os mb_context)
 	# (ndevmode,ndevice,ndriver,noutput,os)	= get_printSetup_with_PRINTDLG pdPtr os
-	= ({devmode=ndevmode,device=ndevice,driver=ndriver,output=noutput}, EnvSetOS os env)
+	= ({devmode=ndevmode,device=ndevice,driver=ndriver,output=noutput}, EnvSetOS os mb_context)
+
+/* MW was
+os_printsetupdialog		::	!Bool !PrintSetup !*env
+						->	(!PrintSetup, !*env)
+	os_printsetupdialog isWorld {devmode,device,driver,output} env
+		# (os, env)		= EnvGetOS env
+		# (devmodePtr,os) = WinMakeCString devmode os
+		  (devicePtr,os) = WinMakeCString device os
+		  (driverPtr,os) = WinMakeCString driver os
+		  (outputPtr,os) = WinMakeCString output os
+		  (ok, pdPtr, os)
+		  		= CCPrintSetupDialog isWorld (size devmode) devmodePtr devicePtr driverPtr outputPtr os
+		  os = WinReleaseCString devmodePtr os
+		  os = WinReleaseCString devicePtr os
+		  os = WinReleaseCString driverPtr os
+		  os = WinReleaseCString outputPtr os
+		| ok==0
+			= ({devmode="\0",device="\0",driver="\0",output="\0"}, EnvSetOS os env)
+		# (ndevmode,ndevice,ndriver,noutput,os)	= get_printSetup_with_PRINTDLG pdPtr os
+		= ({devmode=ndevmode,device=ndevice,driver=ndriver,output=noutput}, EnvSetOS os env)
+*/
 
 os_printsetupvalid		::	!PrintSetup !*env
 						->	(!Bool, !*env)
@@ -83,6 +102,9 @@ class PrintEnvironments printEnv
 							((.state,*Picture) -> ((.Bool,Point2),(.state,*Picture)))
 							!PrintSetup !*printEnv
 						-> 	(Alternative .x .state,!*printEnv)
+	os_printsetupdialog
+		:: !PrintSetup !*printEnv
+		-> (!PrintSetup, !*printEnv)
 
 
 instance PrintEnvironments (PSt .l)
@@ -108,6 +130,13 @@ where
 			= ((mbSelectState, id), io)
 		isEnabled (Just Able)	= True
 		isEnabled _				= False
+	os_printsetupdialog printSetup pSt
+		= accContext (accFun printSetup) pSt
+	  where
+	  	accFun printSetup context
+	  		# (printSetup, Just context) = printSetupDialogBoth printSetup (Just context)
+			= (printSetup, context)
+
 
 
 instance PrintEnvironments Files
@@ -117,6 +146,10 @@ where
 		  (x,_,os) = printPagePerPageBothSemaphor
 		  					doDialog emulateScreen x initFun transFun printSetup Nothing os
 		= (x, EnvSetOS os files) 
+	os_printsetupdialog printSetup files
+  		# (printSetup, _) = printSetupDialogBoth printSetup Nothing
+		= (printSetup, files) // oh lala
+		
 
 printPagePerPageBothSemaphor :: !.Bool !.Bool .a 
 								.(.a -> .(.PrintInfo -> .(.Picture -> *((.Bool,.Origin),*(.b,*Picture))))) ((.b,.Picture) -> *((.Bool,.Origin),*(.b,*Picture)))
@@ -262,13 +295,24 @@ CCgetDC doDialog emulateScreen devmodeSize devmodePtr devicePtr driverPtr output
 		Just context,os
 	  )
 
+CCPrintSetupDialog :: !(Maybe *Context) !.Int !.Int !.Int !.Int !.Int !*OSToolbox -> (!OkReturn,!Int,!Maybe *Context, !.OSToolbox);
+CCPrintSetupDialog nothing=:Nothing devmodeSize devmodePtr devicePtr driverPtr outputPtr os
+	# (ok, pdPtr, os) = printSetup 1 devmodeSize devmodePtr devicePtr driverPtr outputPtr os
+	= (ok, pdPtr, nothing, os)
+CCPrintSetupDialog (Just context) devmodeSize devmodePtr devicePtr driverPtr outputPtr os
+	# createcci = Rq5Cci CcRqDO_PRINT_SETUP devmodeSize devmodePtr devicePtr driverPtr outputPtr
+	  (rcci, context, os)  = IssueCleanRequest handleContextOSEvent` createcci context os
+	= (rcci.p1, rcci.p2, Just context, os)
+/* MW was
 CCPrintSetupDialog :: !.Bool .Int .Int .Int .Int .Int !*OSToolbox -> (OkReturn,Int,!.OSToolbox);
 CCPrintSetupDialog True devmodeSize devmodePtr devicePtr driverPtr outputPtr os
 	= printSetup 1 devmodeSize devmodePtr devicePtr driverPtr outputPtr os
 CCPrintSetupDialog False devmodeSize devmodePtr devicePtr driverPtr outputPtr os
 	# createcci = Rq5Cci CcRqDO_PRINT_SETUP devmodeSize devmodePtr devicePtr driverPtr outputPtr
 	  (rcci, os)  = IssueCleanRequest2 (ErrorCallback2 "ERROR in osPrint08") createcci os
+	  (rcci, os)  = IssueCleanRequest2 handleContextOSEvent` createcci os
 	= (rcci.p1, rcci.p2, os)
+*/
 
 CCstartDoc :: !.HDC !*(Maybe *Context) !*OSToolbox -> *(!Int,!*Maybe *Context,!*OSToolbox)
 // error code: -1:no error, 0: user canceled file dialog, others: other error

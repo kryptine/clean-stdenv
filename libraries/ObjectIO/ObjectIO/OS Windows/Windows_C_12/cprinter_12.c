@@ -115,7 +115,16 @@ void getDefaultDevmodeC(char *printSetup, LPHANDLE phPrinter,  CleanString *devi
 	ClosePrinter(phPrinter);
 }
 
+static HDC myCreateIC(LPCTSTR driver, LPCTSTR device, DEVMODE *devmode)
+{
+	HDC	icPrint;
 
+	icPrint	= CreateIC(driver,device,NULL,devmode);
+	if (!icPrint)
+		icPrint	= CreateIC(driver,device,NULL,devmode);
+		// try once again. Adobe printer drivers sometimes need to be told everything twice
+	return icPrint;
+}
 
 void os_getpagedimensionsC(	CleanString devmode,
 							CleanString device, CleanString driver,
@@ -132,8 +141,8 @@ void os_getpagedimensionsC(	CleanString devmode,
 		scNX, scNY, scDX, scDY;
 	
 
-	icPrint	= CreateIC(	CleanStringCharacters(driver),CleanStringCharacters(device),NULL,
-						(DEVMODE*) CleanStringCharacters(devmode));
+	icPrint	= myCreateIC(	CleanStringCharacters(driver),CleanStringCharacters(device),
+							(DEVMODE*) CleanStringCharacters(devmode));
 	
 	xResolution = GetDeviceCaps(icPrint, LOGPIXELSX);
 	yResolution = GetDeviceCaps(icPrint, LOGPIXELSY);
@@ -273,7 +282,7 @@ void printSetup(int calledFromCleanThread, int devmodeSize,
 	pd.hInstance = NULL;
 	pd.lCustData = 0L;
 	pd.lpfnPrintHook = NULL;
-	pd.lpfnSetupHook = DialogToFrontHook;
+	pd.lpfnSetupHook =  DialogToFrontHook;
 	pd.lpPrintTemplateName = NULL;
 	pd.lpSetupTemplateName = NULL;
 	pd.hPrintTemplate = NULL;
@@ -598,8 +607,8 @@ int os_printsetupvalidC(	CleanString devmode,
 {
 	HDC	icPrint;
 
-	icPrint	= CreateIC(	CleanStringCharacters(driver),CleanStringCharacters(device),NULL,
-						(DEVMODE*) CleanStringCharacters(devmode));
+	icPrint	= myCreateIC(	CleanStringCharacters(driver),CleanStringCharacters(device),
+							(DEVMODE*) CleanStringCharacters(devmode));
 	if (icPrint)
 		DeleteDC(icPrint);
 	return icPrint!=NULL;

@@ -36,8 +36,10 @@ os_getpagedimensions	::	!PrintSetup	!Bool
 							  !(!Int,!Int))
 os_defaultprintsetup	::	!*env
 						->	(!PrintSetup, !*env)
+/* MW was
 os_printsetupdialog		::	!Bool !PrintSetup !*env
 						->	(!PrintSetup, !*env)
+*/
 os_printsetupvalid		::	!PrintSetup !*env
 						->	(!Bool, !*env)
 						
@@ -51,7 +53,10 @@ class PrintEnvironments printEnv
 			((.state,*Picture) -> ((.Bool,Point2),(.state,*Picture)))
 			!PrintSetup !*printEnv
 		-> 	(Alternative .x .state,!*printEnv)
-
+	os_printsetupdialog
+		:: !PrintSetup !*printEnv
+		-> (!PrintSetup, !*printEnv)
+		
 instance PrintEnvironments Files
 instance PrintEnvironments (PSt .l)
 
