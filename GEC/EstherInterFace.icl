@@ -15,7 +15,8 @@ unifyable old new		   			= (False,old)
 stringToDynamic :: !String !*World -> (!Dynamic,!*World)
 stringToDynamic s world = (compose s catchAllIO handler) world
 
-//compose :: !String !.env -> (!Dynamic, !.env) | resolve env
+
+compose :: !String !*World -> (!Dynamic, !*World)
 compose input world
 	# syntax = parseStatement input
 	  (syntax, fv, world) = resolveNames{|*|} syntax [] world
@@ -98,6 +99,7 @@ handler (error :: ComposeException) w = (dynamic composeError error :: String, w
 where
 	composeError (ApplyTypeError {node=df, src=srcf} {node=dx, src=srcx}) = "Cannot apply " +++ srcf +++ " :: " +++ toString (typeCodeOfDynamic df) +++ " to " +++ srcx +++ " :: " +++ toString (typeCodeOfDynamic dx)
 	composeError (UnboundVariable s) = "Unbound variable " +++ s
+	composeError _ = "Poef"
 handler d w = (d, w)
 
 builtin = 
@@ -123,8 +125,8 @@ builtin =
 	,	("inc", dynamic inc :: Int -> Int)
 	,	("undef", dynamic undef :: A.a: a)
 	,	("map", dynamic map :: A.a b: (a -> b) [a] -> [b])
-	,	("f", dynamic undef :: Int Char -> Bool)
 	]
+
 	
 IF x y z = if x y z
 

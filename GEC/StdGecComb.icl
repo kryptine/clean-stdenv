@@ -154,7 +154,7 @@ CGECtoAGEC cgec a
 		 , fromGEC = \{inout = (a,Hide b)} = b
 		 , updGEC  = id
 		 , value   = a
-		 }
+		 } "CGECtoAGEC"
 
 maybeUpdate :: !UpdateReason -> .IncludeUpdate
 maybeUpdate Changed = YesUpdate
