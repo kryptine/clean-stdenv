@@ -23,7 +23,7 @@ drawwindowlook wMetrics wPtr drawFirst updState wH=:{whSelect,whSize,whWindowInf
 	#! picture				= packPicture origin (copyPen look.lookPen) True osPict tb
 	#! picture				= pictsetcliprgn clipRgn picture
 	#! picture				= drawFirst picture
-	#! picture				= appClipPicture (toRegion wFrame) (look.lookFun select updState) picture
+	#! picture				= appClipPicture (toRegion (if look.lookSysUpdate updState.updArea [wFrame])) (look.lookFun select updState) picture
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
 	#! tb					= OSreleaseWindowPictContext wPtr osPict tb
 	#! tb					= OSvalidateWindowRgn wPtr clipRgn tb		// PA: added to eliminate update of window (in drawing part)
@@ -52,7 +52,7 @@ drawwindowlook` wMetrics wPtr drawFirst updState wH=:{whSelect,whSize,whWindowIn
 	#! (additionalUpdateArea,picture)
 							= drawFirst picture
 	   updState				= {updState & updArea = [RectToRectangle r \\ r<-additionalUpdateArea | not (IsEmptyRect r)] ++ updState.updArea}
-	#! picture				= appClipPicture (toRegion wFrame) (look.lookFun select updState) picture
+	#! picture				= appClipPicture (toRegion (if look.lookSysUpdate updState.updArea [wFrame])) (look.lookFun select updState) picture
 	#! (_,pen,_,osPict,tb)	= unpackPicture picture
 	#! tb					= OSreleaseWindowPictContext wPtr osPict tb
 	#! tb					= OSvalidateWindowRgn wPtr clipRgn tb		// PA: added to eliminate update of window (in drawing part)
