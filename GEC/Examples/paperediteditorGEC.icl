@@ -2,13 +2,9 @@ module paperediteditorGEC
 
 // editor that can be used to design and test another editor --MJP
 
-import tupleAGEC
 import StdEnv
 import StdIO
-import genericgecs
-import StdGEC, StdGECExt, GecArrow, StdDynamic 
-import basicAGEC, StdAGEC, calcAGEC, dynamicAGEC, noObjectAGEC
-
+import StdGEC
 
 :: Bug = C1 | C2
 

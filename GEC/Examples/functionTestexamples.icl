@@ -2,7 +2,6 @@ module functionTestexamples
 
 import StdEnv, StdIO
 import basicEditors
-import StdAGEC, modeAGEC, dynamicAGEC, basicAGEC
 
 // TO TEST JUST REPLACE THE EXAMPLE NAME myEditor IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
 // ALL EXAMPLES HAVE TO BE OF TYPE ((PSt Void) -> (PSt Void))

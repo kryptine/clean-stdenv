@@ -11,8 +11,6 @@ import StdGEC, StdGECExt
 
 // the gGEC{|*|} (= gGECstar defined belwo) defined in the paper is a slightly simplified version of createNGEC 
 
-startGEC :: ((PSt Void) -> (PSt Void)) *World -> *World
-startGEC editor world = startIO MDI Void editor [ProcessClose closeProcess] world
 
 gGECstar (string,initval,callbackfun) pst = createNGEC string Interactive True initval (\updReason -> callbackfun) pst
 

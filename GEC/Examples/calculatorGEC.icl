@@ -2,9 +2,7 @@ module calculatorGEC
 
 import StdEnv
 import StdIO
-import genericgecs
-import StdGEC, StdGECExt, StdAGEC
-import GecArrow, basicAGEC, buttonAGEC, calcAGEC, dynamicAGEC, tupleAGEC
+import StdGEC
 
 goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world

@@ -2,9 +2,7 @@ module drawingGEC
 
 import StdEnv
 import StdIO
-import genericgecs
-import StdAGEC
-import GecArrow, basicAGEC, timedAGEC
+import StdGEC
 
 // TO TEST JUST REPLACE THE EXAMPLE NAME IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
 // ALL EXAMPLES HAVE TO BE OF FORM pst -> pst

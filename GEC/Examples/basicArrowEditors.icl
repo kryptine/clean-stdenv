@@ -11,8 +11,6 @@ import StdGEC, StdGECExt, GecArrow
 
 // the gGEC{|*|} (= gGECstar defined belwo) defined in the paper is a slightly simplified version of createNGEC 
 
-startGEC :: ((PSt Void) -> (PSt Void)) *World -> *World
-startGEC editor world = startIO MDI Void editor [ProcessClose closeProcess] world
 
 mkGEC :: String  t (PSt ps) -> (PSt ps) | gGEC{|*|} t & bimap{|*|} ps
 mkGEC s  v env = startCircuit (edit s) v env 

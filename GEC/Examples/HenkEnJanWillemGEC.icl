@@ -1,7 +1,7 @@
 module HenkEnJanWillemGEC
 
 import StdEnv, StdCircuits
-import basicArrowEditors, StdAGEC, basicAGEC
+import basicArrowEditors
 
 Start :: *World -> *World
 //Start world = startGEC aStarFBb world

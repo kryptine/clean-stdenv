@@ -19,7 +19,7 @@ Start world = startGEC myEditor2 world
         
 myEditor1 = selfGEC "My Counter" myupdCntr (0,MyNeutral)
                                   
-import updownAGEC, tupleAGEC
+import buttonGEC, layoutGEC
 
 :: MyCounter :== (Int,MyUpDown)   				       
 :: MyUpDown   = MyUp | MyDown | MyNeutral 		// UpDown is predefined in updownAGEC        
