@@ -5,12 +5,13 @@ import StdGECExt, basicAGEC
 		
 // bimap GEC a b to use a b-editor for constructing an a-value
 
-mkBimapGEC  :: (a (Current b) -> b) (b -> b) (b -> a) a -> (BimapGEC a b)
-mkBimapGEC toGEC updGEC fromGEC value 
+mkBimapGEC  :: (a (Current b) -> b) (b -> b) (b -> a) (a -> (Bool,a)) a -> (BimapGEC a b)
+mkBimapGEC toGEC updGEC fromGEC pred value 
 =	{ toGEC   = toGEC
 	, fromGEC = fromGEC
 	, updGEC  = updGEC
 	, value   = value
+	, pred	  = pred
 	}
 
 gGEC{|BimapGEC|} _ gGECb gecArgs pSt
@@ -31,8 +32,10 @@ where
 	bupdate bhandle reason b pst 
 		# nb	= bimap`.updGEC  b
 		# na	= bimap`.fromGEC nb
-		# pst	= bhandle.gecSetValue NoUpdate nb pst
-		= biupdate reason {bimap` & value = na} pst
+		= case  (bimap`.pred na) of
+					(True,na) 	# pst	= bhandle.gecSetValue NoUpdate (bimap`.toGEC na (Defined  nb)) pst
+								= biupdate reason {bimap` & value = na} pst 
+					(False,na) 	= bhandle.gecSetValue NoUpdate (bimap`.toGEC na (Defined  b)) pst 
 
 	bimapSetValue bGetValue bSetValue upd bimap pst
 		# (b,pst) = bGetValue pst
@@ -156,6 +159,7 @@ CGECtoAGEC cgec a
 		 , fromGEC = \{inout = (a,Hide b)} = b
 		 , updGEC  = id
 		 , value   = a
+		 , pred	   = \na -> (True,na)
 		 } "CGECtoAGEC"
 
 

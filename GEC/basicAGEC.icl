@@ -4,11 +4,14 @@ import StdAGEC, modeAGEC, buttonAGEC, tupleAGEC, updownAGEC
 
 // Identity 
 
+okpred n = (True,n)
+
 idAGEC :: a -> AGEC a | gGEC {|*|} a 
 idAGEC j 	= mkAGEC 	{	toGEC	= \i _ ->i
 						,	fromGEC = id
 						,	value	= j
 						,	updGEC	= id
+						,	pred	= okpred
 						} "idGEC"
 
 hidAGEC :: a -> AGEC a  // Just a store, does not require any GEC !
@@ -16,20 +19,34 @@ hidAGEC j 	= mkAGEC` 	{	toGEC	= \i _ -> Hide i
 						,	fromGEC = \(Hide i) -> i
 						,	value	= j
 						,	updGEC	= id
+						,	pred	= okpred
 						} "hidGEC"
 
+predAGEC :: (a -> (Bool,a)) a -> AGEC a | gGEC {|*|} a 
+predAGEC pred j = mkAGEC 	{	toGEC	= toPred
+							,	fromGEC = id
+							,	value	= j
+							,	updGEC	= id
+							,	pred	= pred
+							}  "predGEC"
+where
+	toPred nv Undefined    = nv
+	toPred nv (Defined oi) = nv
+
+/*  previous  version
 predAGEC :: (a -> Bool) a -> AGEC a | gGEC {|*|} a 
 predAGEC pred j = mkAGEC 	{	toGEC	= toPred
 							,	fromGEC = \(ni,oi) = ni
 							,	value	= j
 							,	updGEC	= \(ni,oi) -> test ni (^^ oi)
+							,	pred	= pred
 							}  "predGEC"
 where
 	toPred ni Undefined          = (ni, hidAGEC ni)
 	toPred ni (Defined (oi,hoi)) = test ni oi
 
 	test ni oi = if (pred ni) (ni, hidAGEC ni) (oi, hidAGEC oi)
-
+*/
 // apply GEC
 
 applyAGEC :: (b -> a) (AGEC b) -> AGEC a | gGEC {|*|} a & gGEC {|*|} b
@@ -37,6 +54,7 @@ applyAGEC fba gecb	= mkAGEC 	{	toGEC	= initgec
 								,	fromGEC = \(gecb <|> Display olda) -> fba (^^ gecb)
 								,	value	= inita
 								,	updGEC	= \(gecb <|> Display olda) -> (gecb <|> Display (fba (^^ gecb)))
+								,	pred	= okpred
 								} "applyAGEC"
 where
 	inita = fba (^^ gecb)									
@@ -51,7 +69,8 @@ modeAGEC :: (Mode a) -> AGEC a | gGEC {|*|} a
 modeAGEC mode =  mkAGEC 	{ toGEC 	= mkmode mode
 						, fromGEC 	= demode
 						, updGEC 	= id
-						, value 	= demode mode} "modeGEC"
+						, value 	= demode mode
+						,	pred	= okpred } "modeGEC"
 where
 	demode (Display a) = a
 	demode (Edit a) =  a
@@ -70,6 +89,7 @@ counterAGEC j = mkAGEC 	{	toGEC	= \i _ ->(i,Neutral)
 						,	fromGEC = fst
 						,	value	= j
 						,	updGEC	= updateCounter
+						,	pred	= okpred
 						} "counterGEC"
 where
 	updateCounter (n,UpPressed) 	= (n+one,Neutral)
@@ -84,6 +104,7 @@ horlistAGEC  list	= mkAGEC	{	toGEC	= tohorlist
 								,	fromGEC = fromhorlist
 								,	value 	= list
 								,	updGEC	= id
+								,	pred	= okpred
 								}  ("horlistGEC" +++ len)
 where
 	tohorlist []	 _ = EmptyMode <-> hidAGEC []
@@ -104,6 +125,7 @@ where
 									,	fromGEC = fromvertlist
 									,	value 	= list
 									,	updGEC	= id
+									,	pred	= okpred
 									} ("vertlistGEC" +++ len)
 
 	tovertlist []	 _ 	= EmptyMode <|> hidAGEC []
@@ -113,6 +135,30 @@ where
 	fromvertlist (Edit x <|> xs)	= [x: ^^ xs]  
 
 	len = (toString (length list))
+
+vert2listAGEC :: a [a] -> AGEC [a] | gGEC {|*|} a  
+vert2listAGEC defaultval list  
+	= 	mkAGEC	{	toGEC	= mkdisplay
+				,	fromGEC = fetchlist
+				,	value 	= list
+				,	updGEC	= adjustdisplay
+				,	pred	= \nv -> (True,nv)
+				} "list2AGEC"
+where
+	mkdisplay list Undefined 	= display list
+	mkdisplay list (Defined _) 	= display list
+
+	display list =  mlbuttons <|> vertlistAGEC list
+	where
+		mlbuttons 	= (Button width "-", Button width "+")
+		width 		= defCellWidth / 10
+
+	adjustdisplay ((_,Pressed) <|> alist) = display (^^ alist ++ [defaultval])
+	adjustdisplay ((Pressed,_) <|> alist) = display (init (^^ alist))
+	adjustdisplay (       _    <|> alist) = display (^^ alist)
+
+	fetchlist (_ <|> alist ) = ^^ alist
+
 
 // list components
 
@@ -136,6 +182,7 @@ listAGEC finite list
 				,	fromGEC = \(_,Hide (_,(list,_))) -> list
 				,	value 	= list
 				,	updGEC	= \b -> edit (parseListEditor b)
+				,	pred	= okpred
 				} "listGEC"
 where
 	mkdisplay list Undefined 							= display 0 list (list!!0)
@@ -190,6 +237,7 @@ table_hv_AGEC  list		= mkAGEC	{	toGEC	= \newlist -> mktable newlist
 								,	fromGEC = \table   -> mklist (^^ table)
 								,	value 	= list
 								,	updGEC	= id
+								,	pred	= okpred
 								} "tableGEC"
 where
 	mktable list	  _ = vertlistAGEC [(horlistAGEC xs) \\ xs <- list]
@@ -201,6 +249,7 @@ table_vh_AGEC  list		= mkAGEC	{	toGEC	= \newlist -> mktable newlist
 								,	fromGEC = \table   -> mklist (^^ table)
 								,	value 	= list
 								,	updGEC	= id
+								,	pred	= okpred
 								} "tableGEC"
 where
 	mktable list	  _ = horlistAGEC [(vertlistAGEC xs) \\ xs <- list]

@@ -31,7 +31,7 @@ instance ArrowCircuit GecCircuit
 
 probe :: String -> GecCircuit a a | toString a
 
-self :: (GecCircuit a a) (GecCircuit a a) -> GecCircuit a a
+self :: (GecCircuit a b) (GecCircuit b a) -> GecCircuit a b
 feedback :: (GecCircuit a a) -> GecCircuit a a
 
 sink :: GecCircuit a Void

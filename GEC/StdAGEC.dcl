@@ -10,10 +10,11 @@ derive gGEC BimapGEC
 						, fromGEC :: b -> a					// specify how to convert b back to a
 						, updGEC  :: b -> b					// will be called each time a b-value has been changed
 						, value   :: a						// store initial a-value, will automatically always contain latest a-value made with b-editor
+						, pred    :: a -> (Bool,a)			// only pass through new value if its satisfies this predicate, display new value
 						}
 :: Current a		=	Undefined | Defined a				// Undefined for a new-editor, Defined when a new value is set in an existing editor
 
-mkBimapGEC  		:: (a (Current b) -> b) (b -> b) (b -> a) a -> (BimapGEC a b)
+mkBimapGEC  		:: (a (Current b) -> b) (b -> b) (b -> a) (a -> (Bool,a)) a -> (BimapGEC a b)
 
 // abstract editors
 
