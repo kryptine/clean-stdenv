@@ -17,7 +17,6 @@ from	id		import	RId, R2Id, RIdtoId, R2IdtoId, ==
 
 //	Open uni- and bi-directional receivers:
 
-// MW11 reopenReceiver removed, made types unique
 class Receivers rdef where
 	openReceiver   :: .ls !*(*rdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
 	getReceiverType::      *(*rdef .ls .pst)               -> ReceiverType

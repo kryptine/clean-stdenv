@@ -203,6 +203,14 @@ instance toString MouseState where
 	toString (MouseDrag	pos modifiers)		= brackify ("MouseDrag "+++itemsList " " [toString pos,toString modifiers])
 	toString (MouseUp   pos modifiers)		= brackify ("MouseUp "  +++itemsList " " [toString pos,toString modifiers])
 	toString MouseLost						= "MouseLost"
+instance toString ButtonState where
+	toString ButtonStillUp					= "ButtonStillUp"
+	toString ButtonDown						= "ButtonDown"
+	toString ButtonDoubleDown				= "ButtonDoubleDown"
+	toString ButtonTripleDown				= "ButtonTripleDown"
+	toString ButtonStillDown				= "ButtonStillDown"
+	toString ButtonUp						= "ButtonUp"
+
 
 
 /*	The SliderState type.								*/
@@ -536,6 +544,13 @@ instance toString DocumentInterface where
 	|	SliderIncLarge
 	|	SliderDecLarge
 	|	SliderThumb Int
+
+instance toString SliderMove where
+	toString SliderIncSmall  = "SliderIncSmall"
+	toString SliderDecSmall  = "SliderDecSmall"
+	toString SliderIncLarge  = "SliderIncLarge"
+	toString SliderDecLarge  = "SliderDecLarge"
+	toString (SliderThumb x) = brackify ("SliderThumb "+++toString x)
 
 
 /*	Scrolling function.									*/

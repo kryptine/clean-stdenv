@@ -25,17 +25,17 @@ applicationpath	:: !String -> String
 	Use these directories to store preference/options/help files of an application.
 */
 
-newlineChars	:: !String // MW11++
+newlineChars	:: !String
 /*		the newline characters in a textfile
 */
+
+printSetupTypical	:: Bool
 
 //	System dependencies concerning the time resolution
 
 ticksPerSecond	:: Int
 /*	ticksPerSecond returns the maximum timer resolution per second.
 */
-
-printSetupTypical	:: Bool // MW11++
 
 //	System dependencies concerning the screen resolution.
 

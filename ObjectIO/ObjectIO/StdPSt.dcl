@@ -28,27 +28,6 @@ beep :: !(IOSt .l) -> IOSt .l
 */
 
 
-//	Operations on the global cursor:
-
-/* RWS ---
-setCursor		:: !CursorShape !(IOSt .l) -> IOSt .l
-resetCursor		::              !(IOSt .l) -> IOSt .l
-obscureCursor	::              !(IOSt .l) -> IOSt .l
-/*	setCursor		overrules the shape of the cursor of all windows. 
-	resetCursor		removes the overruled cursor shape of all windows.
-	obscureCursor	hides the cursor until the mouse is moved.
-*/
-
-
-//	Operations on the DoubleDownDistance:
-
-setDoubleDownDistance :: !Int !(IOSt .l) -> IOSt .l
-/*	setDoubleDownDistance sets the maximum distance the mouse is allowed to move to 
-	generate a ButtonDouble(Triple)Down button state. Negative values are set to 
-	zero.
-*/
---- RWS */
-
 //	Operations on the DocumentInterface of an interactive process:
 
 getDocumentInterface :: !(IOSt .l) -> (!DocumentInterface, !IOSt .l)
