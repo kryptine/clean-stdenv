@@ -73,7 +73,7 @@ initstate wordlist
 	When starting a new game the word list should not be read in again because this takes to long. 
 	For this purpose the function initialisestate is used.
 ****************************************************************************************************************/
-initialisestate :: (PSt State .p) -> PSt State .p
+initialisestate :: (PSt State) -> PSt State
 initialisestate pst=:{ls=t=:{random=rs,player1,player2}}
 	# (rs,pst)					= getRandomList rs pst
 	  (letterbox,letters1,rs)	= grab letterbox 7 rs

@@ -30,14 +30,14 @@ import StdEnv, StdIO
 	|	Quit						// Close the monitor process
 
 
-openMonitor :: ItemPos (RId MonitorMessage) (PSt .l .p) -> PSt .l .p
+openMonitor :: ItemPos (RId MonitorMessage) (PSt .l) -> PSt .l
 openMonitor pos monitorId pst
 	# (font,   pst) = accPIO (accScreenPicture openDialogFont) pst
 	# (metrics,pst) = accPIO (accScreenPicture (getFontMetrics font)) pst
 	# (ids,    pst) = accPIO (openIds 2) pst
-	= openProcesses (ProcessGroup 0 (monitorProcess pos font metrics monitorId ids)) pst
+	= openProcesses (monitorProcess pos font metrics monitorId ids) pst
 
-monitorProcess :: ItemPos Font FontMetrics (RId MonitorMessage) [Id] -> Process .p
+monitorProcess :: ItemPos Font FontMetrics (RId MonitorMessage) [Id] -> Process
 monitorProcess pos font metrics monitorId ids=:[wId,tId]
 	= Process SDI initLocal initIO []
 where
@@ -84,7 +84,7 @@ where
 				,	TimerFunction		(noLS1 (showKeyHits False))
 				]
 	
-	showKeyHits :: Bool NrOfIntervals (PSt Monitor .p) -> PSt Monitor .p
+	showKeyHits :: Bool NrOfIntervals (PSt Monitor) -> PSt Monitor
 	showKeyHits final dt monitor=:{ls=local=:{count,counts,time},io}
 		# io		= appWindowPicture wId (seq drawfs) io
 		# io		= setWindowLook wId final (True,monitorlook newlocal) io
@@ -96,10 +96,10 @@ where
 		drawfs		= snd (smap drawKeyHitColumn (time,newcounts))
 	
 //	The receiver is the interface of the monitor process to the typist process.
-	receiver :: *Receiver MonitorMessage Bool (PSt Monitor .p)
+	receiver :: *Receiver MonitorMessage Bool (PSt Monitor)
 	receiver= Receiver monitorId receive []
 	
-	receive :: MonitorMessage (Bool,PSt Monitor .p) -> (Bool,PSt Monitor .p)
+	receive :: MonitorMessage (Bool,PSt Monitor) -> (Bool,PSt Monitor)
 
 //	Starting a tracking session enables the timer and clears all previous tracking information.
 	receive BeginSession (_,monitor)

@@ -87,7 +87,7 @@ where
 	isListBoxControlAttribute _							= False
 
 instance Controls ListBoxControl where
-	controlToHandles :: !(ListBoxControl .ls (PSt .l .p)) (PSt .l .p) -> ([ControlState .ls (PSt .l .p)],PSt .l .p)
+	controlToHandles :: !(ListBoxControl .ls (PSt .l)) (PSt .l) -> ([ControlState .ls (PSt .l)],PSt .l)
 	controlToHandles {listboxState=listboxState=:{items,size,listboxId,fontInfo},listboxAtts} pst
 		= controlToHandles imp pst
 	where
@@ -198,7 +198,7 @@ instance Controls ListBoxControl where
 		mouseFilter _						= False
 		
 		//	The mouse either sets, adds, or removes items to the selection:
-		mouse :: (IdFun *(.x,PSt .l .p)) MouseState *(*(ListBoxState,.x),PSt .l .p) -> *(*(ListBoxState,.x),PSt .l .p)
+		mouse :: (IdFun *(.x,PSt .l)) MouseState *(*(ListBoxState,.x),PSt .l) -> *(*(ListBoxState,.x),PSt .l)
 		mouse f (MouseDown pos {shiftDown} _) ((listboxState,ls),pState)
 			# listboxState	= {listboxState & selection=okSelection}
 			# newLook		= customlook listboxState
@@ -220,7 +220,7 @@ instance Controls ListBoxControl where
 		
 		
 		//	The receiver function:
-		receiver :: MessageIn *(*(ListBoxState,.x),PSt .l .p) -> (MessageOut,*(*(ListBoxState,.x),PSt .l .p))
+		receiver :: MessageIn *(*(ListBoxState,.x),PSt .l) -> (MessageOut,*(*(ListBoxState,.x),PSt .l))
 		
 		//	Return the current selection:
 		receiver InGetSelection ((listboxState=:{items,selection},ls),pState)
@@ -290,7 +290,7 @@ openListBoxId env
 
 //	The functions below take care of the proper communication with the receiver that
 //	belongs to the listbox control.
-getListBoxSelection :: !ListBoxId !(PSt .l .p) -> (!(!Bool,![(String,!Index)]),!PSt .l .p)
+getListBoxSelection :: !ListBoxId !(PSt .l) -> (!(!Bool,![(String,!Index)]),!PSt .l)
 getListBoxSelection {r2Id} pState
 	# ((_,maybe_out),pState)	= syncSend2 r2Id InGetSelection pState
 	| isNothing maybe_out
@@ -301,11 +301,11 @@ getListBoxSelection {r2Id} pState
 	| otherwise
 		= (result,pState)
 
-setListBoxSelection :: !ListBoxId ![Index] !(PSt .l .p) -> PSt .l .p
+setListBoxSelection :: !ListBoxId ![Index] !(PSt .l) -> PSt .l
 setListBoxSelection {r2Id} selection pState
 	= snd (syncSend2 r2Id (InSetSelection selection) pState)
 
-getListBoxItems :: !ListBoxId !(PSt .l .p) -> (!(!Bool,![String]),!PSt .l .p)
+getListBoxItems :: !ListBoxId !(PSt .l) -> (!(!Bool,![String]),!PSt .l)
 getListBoxItems {r2Id} pState
 	# ((_,maybe_out),pState)	= syncSend2 r2Id InGetItems pState
 	| isNothing maybe_out
@@ -316,24 +316,24 @@ getListBoxItems {r2Id} pState
 	| otherwise
 		= (result,pState)
 
-openListBoxItems :: !ListBoxId !Index ![String] !(PSt .l .p) -> PSt .l .p
+openListBoxItems :: !ListBoxId !Index ![String] !(PSt .l) -> PSt .l
 openListBoxItems {r2Id} index items pState
 	= snd (syncSend2 r2Id (InOpenItems index items) pState)
 
-closeListBoxItems :: !ListBoxId ![Index] !(PSt .l .p) -> PSt .l .p
+closeListBoxItems :: !ListBoxId ![Index] !(PSt .l) -> PSt .l
 closeListBoxItems {r2Id} items pState
 	= snd (syncSend2 r2Id (InCloseItems items) pState)
 
-showListBoxControl :: !ListBoxId !(IOSt .l .p) -> IOSt .l .p
+showListBoxControl :: !ListBoxId !(IOSt .l) -> IOSt .l
 showListBoxControl {outerCompoundId} ioState = showControls [outerCompoundId] ioState
 
-hideListBoxControl :: !ListBoxId !(IOSt .l .p) -> IOSt .l .p
+hideListBoxControl :: !ListBoxId !(IOSt .l) -> IOSt .l
 hideListBoxControl {outerCompoundId} ioState = hideControls [outerCompoundId] ioState
 
-enableListBoxControl :: !ListBoxId !(IOSt .l .p) -> IOSt .l .p
+enableListBoxControl :: !ListBoxId !(IOSt .l) -> IOSt .l
 enableListBoxControl {outerCompoundId} ioState = enableControls [outerCompoundId] ioState
 
-disableListBoxControl :: !ListBoxId !(IOSt .l .p) -> IOSt .l .p
+disableListBoxControl :: !ListBoxId !(IOSt .l) -> IOSt .l
 disableListBoxControl {outerCompoundId} ioState = disableControls [outerCompoundId] ioState
 
 

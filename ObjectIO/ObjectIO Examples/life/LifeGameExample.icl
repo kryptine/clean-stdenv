@@ -29,7 +29,6 @@ Start world
 startLife :: ([Id],*World) -> *World
 startLife ([eraseID,playID,haltID,stepID,windowID,timerID],world)
 	= startIO SDI initialLife
-				  NoState
 				  initialise
 				  [ProcessClose closeProcess]
 				  world
@@ -121,7 +120,7 @@ where
 				)	[]
 	
 //	play starts the computation of successive generations given the current set of life cells.
-	play :: (PSt Life .p) -> PSt Life .p
+	play :: (PSt Life) -> PSt Life
 	play life
 		= appListPIO
 			[	disableWindowMouse	windowID
@@ -131,7 +130,7 @@ where
 			]	life
 	
 //	halt stops the computation of successive generations, but does not change the current generation. 
-	halt :: (PSt Life .p) -> PSt Life .p
+	halt :: (PSt Life) -> PSt Life
 	halt life
 		= appListPIO
 			[	enableWindowMouse	windowID
@@ -141,7 +140,7 @@ where
 			]	life
 	
 //	step calculates the next generation and displays it.
-	step :: (PSt Life .p) -> PSt Life .p
+	step :: (PSt Life) -> PSt Life
 	step life=:{ls=state=:{gen,size},io}
 		# state		= {state & gen=next}
 		# io		= appWindowPicture windowID render io
@@ -152,14 +151,14 @@ where
 		render		= drawCells (drawCell size) next o (drawCells (eraseCell size) died)
 	
 //	erase sets the current generation to empty and clears the window.
-	erase :: (PSt Life .p) -> PSt Life .p
+	erase :: (PSt Life) -> PSt Life
 	erase life=:{ls=state,io}
 		# state		= {state & gen=makeGeneration}
 		# io		= setWindowLook windowID True (True,look state) io
 		= {life & ls=state, io=io}
 	
 //	newsize changes the size in which life cells are rendered and redraws the window.
-	newsize :: Int (PSt Life .p) -> PSt Life .p
+	newsize :: Int (PSt Life) -> PSt Life
 	newsize newSize life=:{ls=state=:{size=oldSize},io}
 		# state			= {state & size=newSize}
 		# (viewframe,io)= getWindowViewFrame windowID io
@@ -185,7 +184,7 @@ where
 	onlyMouseDown _					= False
 	
 //	The window mouse action places and removes alive cells:
-	track :: MouseState (PSt Life .p) -> PSt Life .p
+	track :: MouseState (PSt Life) -> PSt Life
 	track mouse life=:{ls=state=:{gen,size},io}
 		| modifiers.commandDown
 			# state		= {state & gen=removeCell cell gen}

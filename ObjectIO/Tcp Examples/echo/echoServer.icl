@@ -12,8 +12,11 @@ import  StdEnv, StdTCP, StdIO
 
 echoPort	:== 7
 
-::	*PState	:== PSt TCP_DuplexChannel Bool
-//	The Boolean value stores, whether EOM happened on the receive channel.
+::	*LS							// the ls part of the PSt
+	=	{	chan	::	TCP_DuplexChannel
+		,	eom		::	Bool	//	The Boolean value stores, whether EOM happened on the receive channel.
+		}
+::	*PState	:==	PSt LS
 
 Start world
 	# (ok, mbListener, world)	= openTCP_Listener echoPort world
@@ -26,16 +29,16 @@ Start world
 	  ((_,duplexChan), listener, world)
 	  							= receive (fromJust mbListener) world
 	  world						= closeRChannel listener world
-	= startIO NDI duplexChan False initialize [] world
+	= startIO NDI {chan=duplexChan,eom=False} initialize [] world
 
 ///////////////////////////////////////////////////////////
 ////	initialize - the function to initialze the PSt ////
 ///////////////////////////////////////////////////////////
 
 initialize	:: PState -> PState
-initialize pSt=:{ ls={rChannel,sChannel}, io }
+initialize pSt=:{ ls=ls=:{chan={rChannel,sChannel}}, io }
 	# (tcpRcvId, io)	= openId io
-	  pSt 				= { pSt & ls = { rChannel=undef, sChannel=undef }, io=io }
+	  pSt 				= { pSt & ls = { ls & chan = { rChannel=undef, sChannel=undef } }, io=io }
 
   // open a receiver for the receive channel
 
@@ -49,14 +52,14 @@ initialize pSt=:{ ls={rChannel,sChannel}, io }
 										   (SendNotifier sChannel sndFun []) pSt
 	| errReport1<>NoError || errReport2<>NoError
 		= abort "error: can't open receiver"
-	= { pSt & ls={ rChannel=undef, sChannel=sChannel } }
+	= { pSt & ls = { ls & chan = { rChannel=undef, sChannel=sChannel } } }
 
 /////////////////////////////////////////////////////////////////////////////
 ////	rcvFun - the callback function for the receive channels receiver ////
 /////////////////////////////////////////////////////////////////////////////
 
 rcvFun :: (ReceiveMsg ByteSeq) (Id,PState) -> (Id,PState)
-rcvFun (Received byteSeq) (tcpRcvId, pSt=:{ ls=ls=:{sChannel}, io})
+rcvFun (Received byteSeq) (tcpRcvId, pSt=:{ ls=ls=:{chan=chan=:{sChannel}}, io})
 	# (sChannel, io)		= send_NB byteSeq sChannel io
 	  (buffSize,sChannel)	= bufferSize sChannel
 
@@ -65,10 +68,10 @@ rcvFun (Received byteSeq) (tcpRcvId, pSt=:{ ls=ls=:{sChannel}, io})
 	  io = case buffSize of
 	  		0 -> io
 	  		_ -> disableReceivers [tcpRcvId] io
-	= (tcpRcvId, { pSt & ls={ ls & sChannel=sChannel}, io=io })
-rcvFun EOM (tcpRcvId, pSt=:{ ls=ls=:{sChannel}, io})
+	= (tcpRcvId, { pSt & ls={ ls & chan={chan & sChannel=sChannel}}, io=io })
+rcvFun EOM (tcpRcvId, pSt=:{ ls=ls=:{chan=chan=:{sChannel}}, io})
 	# (buffSize,sChannel)	= bufferSize sChannel
-	  pSt	= { pSt & ls  = { ls & sChannel=sChannel}, ps=True, io=io }
+	  pSt	= { pSt & ls  = { ls & chan={chan & sChannel=sChannel}, eom=True}, io=io }
 
   //  close program only, if all data in the send channels ineternal buffer has been
   //  sent
@@ -83,10 +86,10 @@ rcvFun EOM (tcpRcvId, pSt=:{ ls=ls=:{sChannel}, io})
 //////////////////////////////////////////////////////////////////////////
 
 sndFun :: SendEvent (Id,PState) -> (Id,PState)
-sndFun Sendable (tcpRcvId, pSt=:{ ls=ls=:{sChannel}, ps=eomHappened ,io})
+sndFun Sendable (tcpRcvId, pSt=:{ ls=ls=:{chan=chan=:{sChannel},eom=eomHappened}, io})
 	# (sChannel, io)		= flushBuffer_NB sChannel io
 	  (buffSize,sChannel)	= bufferSize sChannel
-	  pSt	= { pSt & ls  = { ls & sChannel=sChannel}, io=io }
+	  pSt	= { pSt & ls  = { ls & chan={chan & sChannel=sChannel}}, io=io }
 
   //  enable the receive channel's receiver again, if the send channel is still
   //  sendable
@@ -100,6 +103,6 @@ sndFun Disconnected (ls, pSt)
 	= (ls, closeProcess pSt)
 
 close	::	PState -> PState
-close pSt=:{ls=ls=:{sChannel}, io}
+close pSt=:{ls=ls=:{chan=chan=:{sChannel}}, io}
 	#!	io				= closeChannel sChannel io
-	= { pSt & ls={ ls & sChannel=undef}, io=io }
+	= { pSt & ls={ ls & chan={chan & sChannel=undef}}, io=io }

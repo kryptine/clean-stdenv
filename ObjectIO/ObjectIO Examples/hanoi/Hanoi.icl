@@ -46,7 +46,6 @@ startHanoi :: ([Id],*World) -> *World
 startHanoi ([runID,haltID,contID,timerID,windowID:_],world)
 	= startIO SDI
 			(initTowers 0)						// The initial local  process state
-			NoState								// The initial public process state
 			initialise							// The initialisation action
 			[ProcessClose closeProcess]			// Only default process attributes
 			world
@@ -107,7 +106,7 @@ where
 				]
 	
 //	The function for the Run command.
-	run :: Int (PSt Towers .p) -> PSt Towers .p
+	run :: Int (PSt Towers) -> PSt Towers
 	run nr_disks hanoi=:{io}
 		# io	= disableMenuElements [runID,contID] io
 		# io	= enableMenuElements [haltID] io
@@ -118,7 +117,7 @@ where
 		towers	= initTowers nr_disks
 	
 //	The function for the Halt command.
-	halt :: (PSt Towers .p) -> PSt Towers .p
+	halt :: (PSt Towers) -> PSt Towers
 	halt hanoi=:{io}
 		# io	= enableMenuElements [runID,contID] io
 		# io	= disableMenuElements [haltID] io
@@ -126,7 +125,7 @@ where
 		= {hanoi & io=io}
 	
 //	The function for the Continue command.
-	continue :: (PSt Towers .p) -> PSt Towers .p
+	continue :: (PSt Towers) -> PSt Towers
 	continue hanoi=:{io}
 		# io	= disableMenuElements [runID,contID] io
 		# io	= enableMenuElements [haltID] io
@@ -134,13 +133,13 @@ where
 		= {hanoi & io=io}
 	
 //	Set the speed of a (possibly running) Hanoi simulation.
-	setSpeed :: Int (PSt Towers .p) -> PSt Towers .p
+	setSpeed :: Int (PSt Towers) -> PSt Towers
 	setSpeed speed hanoi=:{io}
 		# io	= setTimerInterval timerID speed io
 		= {hanoi & io=io}
 	
 //	The timer function: take a move from the list of all moves and show it in the window.
-	stepHanoi :: NrOfIntervals (PSt Towers .p) -> PSt Towers .p
+	stepHanoi :: NrOfIntervals (PSt Towers) -> PSt Towers
 	stepHanoi _ hanoi=:{ls={moves=[]},io}
 		# io	= enableMenuElements  [runID] io
 		# io	= disableMenuElements [haltID] io

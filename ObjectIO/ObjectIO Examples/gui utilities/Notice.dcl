@@ -17,6 +17,6 @@ import StdWindow
 
 instance Dialogs Notice
 
-openNotice  :: !(Notice .ls (PSt .l .p)) !(PSt .l .p) -> PSt .l .p
+openNotice  :: !(Notice .ls (PSt .l)) !(PSt .l) -> PSt .l
 /*	openNotice can be used to create a Notice without having to bother about the ErrorReport result.
 */

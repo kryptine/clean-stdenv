@@ -33,9 +33,9 @@ Start world
 	# (metrics, world)	= accScreenPicture (getFontMetrics font) world
 	# (rId,     world)	= openRId world
 	# (ids,     world)	= openIds 5 world
-	= startProcesses (ProcessGroup 0 (typistProcess font metrics rId ids)) world
+	= startProcesses (typistProcess font metrics rId ids) world
 
-typistProcess :: Font FontMetrics (RId MonitorMessage) [Id] -> Process .p
+typistProcess :: Font FontMetrics (RId MonitorMessage) [Id] -> Process
 typistProcess font metrics rId ids=:[wId,editId,mId,runId,tId]
 	= Process SDI {firstKeyTyped=False} initIO [ProcessClose quit]
 where
@@ -80,7 +80,7 @@ where
 		
 //		Key messages start with BeginSession so that monitoring will start after the first key hit.
 //		Only after the first key hit the timer stopwatch is activated.
-		sendKeys :: KeyboardState (PSt Typist .p) -> PSt Typist .p
+		sendKeys :: KeyboardState (PSt Typist) -> PSt Typist
 		sendKeys keyboard typist=:{ls=local=:{firstKeyTyped}}
 			| firstKeyTyped
 				# (_,typist)	= asyncSend rId (KeyHit char) typist
@@ -111,10 +111,10 @@ where
 				]
 	where
 //		run starts a session by enabling the edit control that receives the keyboard input.
-		run :: (PSt Typist .p) -> PSt Typist .p
+		run :: (PSt Typist) -> PSt Typist
 		run typist=:{ls,io}
-			# io	= setControlTexts [(editId,"")] io
-			# io	= enableControls  [editId] io
+			# io	= setControlText editId "" io
+			# io	= enableControl  editId io
 			# io	= disableMenuElements [runId] io
 			= {typist & ls={ls & firstKeyTyped=False},io=io}
 
@@ -126,16 +126,16 @@ where
 				]
 	where
 //		The monitor process is notified of the end of the session by receiving the EndSession message.
-		endOfSession :: NrOfIntervals (PSt Typist .p) -> PSt Typist .p
+		endOfSession :: NrOfIntervals (PSt Typist) -> PSt Typist
 		endOfSession _ typist=:{io}
 			# io			= disableTimer tId io
-			# io			= disableControls [editId] io
+			# io			= disableControl editId io
 			# io			= enableMenuElements [runId] io
 			# (_,typist)	= asyncSend rId EndSession {typist & io=io}
 			= typist
 
 //	quit closes boths processes. 
-	quit :: (PSt Typist .p) -> PSt Typist .p
+	quit :: (PSt Typist) -> PSt Typist
 	quit typist
 		# (_,typist)		= syncSend rId Quit typist
 		# typist			= closeProcess typist

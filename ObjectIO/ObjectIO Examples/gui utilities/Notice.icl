@@ -23,17 +23,17 @@ import StdEnv, StdIO
 /*  Notices are defined as a new instance of the Dialogs type constructor class.
 */
 instance Dialogs Notice where
-    openDialog :: .ls !(Notice .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p)
-    openDialog ls notice ps
-        # (wId, ps) = accPIO openId ps
-        # (okId,ps) = accPIO openId ps
-        = openDialog ls (noticeToDialog wId okId notice) ps
+    openDialog :: .ls !(Notice .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
+    openDialog ls notice pst
+        # (wId, pst) = accPIO openId pst
+        # (okId,pst) = accPIO openId pst
+        = openDialog ls (noticeToDialog wId okId notice) pst
     
-    openModalDialog :: .ls !(Notice .ls (PSt .l .p)) !(PSt .l .p) -> (!(!ErrorReport,!Maybe .ls),!PSt .l .p)
-    openModalDialog ls notice ps
-        # (wId,ps)  = accPIO openId ps
-        # (okId,ps) = accPIO openId ps
-        = openModalDialog ls (noticeToDialog wId okId notice) ps
+    openModalDialog :: .ls !(Notice .ls (PSt .l)) !(PSt .l) -> (!(!ErrorReport,!Maybe .ls),!PSt .l)
+    openModalDialog ls notice pst
+        # (wId,pst)  = accPIO openId pst
+        # (okId,pst) = accPIO openId pst
+        = openModalDialog ls (noticeToDialog wId okId notice) pst
     
     getDialogType :: (Notice .ls .pst) -> WindowType
     getDialogType notice
@@ -41,17 +41,17 @@ instance Dialogs Notice where
 
 /*  A specialised version that ignores the error report.
 */
-openNotice :: !(Notice .ls (PSt .l .p)) !(PSt .l .p) -> PSt .l .p
-openNotice notice ps
-    = snd (openModalDialog undef notice ps)
+openNotice :: !(Notice .ls (PSt .l)) !(PSt .l) -> PSt .l
+openNotice notice pst
+    = snd (openModalDialog undef notice pst)
 
 /*  noticeToDialog converts a Notice expression into a Dialog expression.
 */
-noticeToDialog :: Id Id (Notice .ls (PSt .l .p)) 
+noticeToDialog :: Id Id (Notice .ls (PSt .l)) 
                -> Dialog (:+: (CompoundControl (ListLS TextControl))
                          (:+:  ButtonControl
                               (ListLS ButtonControl)
-                         )) .ls (PSt .l .p)
+                         )) .ls (PSt .l)
 noticeToDialog wId okId (Notice texts (NoticeButton text f) buttons)
     = Dialog ""
         (   CompoundControl 

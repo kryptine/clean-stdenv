@@ -20,17 +20,17 @@ from	StdId			import Id
 		,	score	:: !Int
 		}
 
-readHiScores	:: !String !*Files					-> (!(!*File,!HiScores),!*Files)
+readHiScores	:: !String !*Files				-> (!(!*File,!HiScores),!*Files)
 //	Reads high score file from disk.
 
-writeHiScores	:: !*File  !HiScores !*Files		-> *Files
+writeHiScores	:: !*File  !HiScores !*Files	-> *Files
 //	Writes high scores to disk.
 
-itsAHighScore	:: !Int !Int !HiScores				-> Bool
+itsAHighScore	:: !Int !Int !HiScores			-> Bool
 //	Determines whether, given the number of high scores, a given score is actually a new high score.
 
-addScore		:: !Int !HiScore !HiScores			-> HiScores
+addScore		:: !Int !HiScore !HiScores		-> HiScores
 //	Add, given the number of high scores, a HiScore to the current list of high scores.
 
-showHiScores	:: String !HiScores !(PSt .l .p)	-> PSt .l .p
+showHiScores	:: String !HiScores !(PSt .l)	-> PSt .l
 //	Display current high scores to user in a modal dialog with given Id.

@@ -11,7 +11,7 @@ import	StdReceiver
 	|	Quit						// Close the monitor process
 
 
-openMonitor :: ItemPos (RId MonitorMessage) (PSt .l .p) -> PSt .l .p
+openMonitor :: ItemPos (RId MonitorMessage) (PSt .l) -> PSt .l
 /*	openMonitor creates the monitor process that will keep track of keyboard input.
 	
 	It expects a stream MonitorMessages in the following order:

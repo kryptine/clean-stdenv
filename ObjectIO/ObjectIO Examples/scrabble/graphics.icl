@@ -140,9 +140,9 @@ where
 	scoretext				= toString (lettervalue l)
 
 
-redrawboard :: !Id !Board Point2 !(IOSt .l .p) -> IOSt .l .p
+redrawboard :: !Id !Board Point2 !(IOSt .l) -> IOSt .l
 redrawboard boardId board pos iostate
-	= setControlLooks [(boardId,True,(True,boardlook board pos))] iostate
+	= setControlLook boardId True (True,boardlook board pos) iostate
 
 /*	letterboxlook is the look of the set of remaining letters.
 	It is assumed that it has the background colour rbBackground.
@@ -192,33 +192,33 @@ where
 		countletter _ _
 			= (0,[])
 
-drawletterbox :: !Id ![Char] !(IOSt .l .p) -> IOSt .l .p
+drawletterbox :: !Id ![Char] !(IOSt .l) -> IOSt .l
 drawletterbox letterboxId letters iostate
-	= setControlLooks [(letterboxId,True,(True,letterboxlook letters))] iostate
+	= setControlLook letterboxId True (True,letterboxlook letters) iostate
 
-drawplayer1letters :: !Id ![Char] !(IOSt .l .p) -> IOSt .l .p
+drawplayer1letters :: !Id ![Char] !(IOSt .l) -> IOSt .l
 drawplayer1letters letters1Id letters iostate
-	= setControlLooks [(letters1Id,True,(True,playerletterslook letters))] iostate
+	= setControlLook letters1Id True (True,playerletterslook letters) iostate
 
-drawplayer2letters :: !Id ![Char] !(IOSt .l .p) -> IOSt .l .p
+drawplayer2letters :: !Id ![Char] !(IOSt .l) -> IOSt .l
 drawplayer2letters letters2Id letters iostate
-	= setControlLooks [(letters2Id,True,(True,playerletterslook letters))] iostate
+	= setControlLook letters2Id True (True,playerletterslook letters) iostate
 
 playerletterslook :: ![Char] SelectState UpdateState !*Picture -> *Picture
 playerletterslook ws _ _ picture
 	= seq [	drawletter c (i,0) \\ c<-ws & i<-[0..] ] picture
 
-drawplayer1score :: !Id !Int !(IOSt .l .p) -> IOSt .l .p
+drawplayer1score :: !Id !Int !(IOSt .l) -> IOSt .l
 drawplayer1score player1scoreId s iostate
-	= setControlTexts [(player1scoreId,toString s)] iostate
+	= setControlText player1scoreId (toString s) iostate
 
-drawplayer2score :: !Id !Int !(IOSt .l .p) -> IOSt .l .p
+drawplayer2score :: !Id !Int !(IOSt .l) -> IOSt .l
 drawplayer2score player2scoreId s iostate
-	= setControlTexts [(player2scoreId,toString s)] iostate
+	= setControlText player2scoreId (toString s) iostate
 
-drawcommunication :: !Id ![String] !(IOSt .l .p) -> IOSt .l .p
+drawcommunication :: !Id ![String] !(IOSt .l) -> IOSt .l
 drawcommunication displayId text iostate
-	= setControlLooks [(displayId,True,(True,displaylook text))] iostate
+	= setControlLook displayId True (True,displaylook text) iostate
 
 displaylook :: ![String] SelectState !UpdateState !*Picture -> *Picture		// displaylook assumes PictureDomain
 																			// {{-2,-2},{w+2,h+2}}
@@ -234,9 +234,9 @@ where
 	size					= rectangleSize newFrame
 	{w,h}					= size
 
-drawprogress :: !Id !Player !Progress !Placing !(IOSt .l .p) -> IOSt .l .p
+drawprogress :: !Id !Player !Progress !Placing !(IOSt .l) -> IOSt .l
 drawprogress displayId player progress placing iostate
-	= setControlLooks [(displayId,True,(True,progresslook player progress placing {w=displaywidth,h=displayheight}))] iostate
+	= setControlLook displayId True (True,progresslook player progress placing {w=displaywidth,h=displayheight}) iostate
 where
 	progresslook :: !Player !Progress !Placing !Size SelectState UpdateState !*Picture -> *Picture
 	progresslook player (Letter letter _) placing size=:{w,h} _ {newFrame} picture
