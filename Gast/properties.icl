@@ -11,6 +11,7 @@ Run this program with project option "Show basic values only"
 import stdTest4
 //import StdTest//Small
 //import StdTestSmall
+import GenBimap
 
 :: Tree a = Tip | Bin a (Tree a) (Tree a)
 :: Color  = Red | Yellow | Blue // | Black
