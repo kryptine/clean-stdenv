@@ -1,7 +1,7 @@
 implementation module EstherTransform
 
 import EstherBackend
-import CleanTricks, StdList, StdString, StdBool, StdMisc
+import CleanTricks, StdList, StdString, StdBool, StdMisc, StdFunc
 import EstherPostParser
 
 generic transform e :: !e -> Core
@@ -16,6 +16,22 @@ transform{|FIELD|} gx (FIELD x) = gx x
 transform{|OBJECT|} gx (OBJECT x) = gx x
 
 transform{|Core|} srce = srce
+
+transform{|NTstatement|} (Expression e) = transform{|*|} e
+transform{|NTstatement|} (Compound s1 _ s2) = CoreApply (CoreApply bind (transform{|*|} s1)) (transform{|*|} s2)
+where
+	bind = CoreCode (dynamic >> :: A.a b env: (*env -> *(a, *env)) (*env -> *b) *env -> *b)
+	where
+		>> f g env 
+			# (_, env) = f env
+			= g env
+transform{|NTstatement|} (Pipe s1 _ s2) = CoreApply (CoreApply bind (transform{|*|} s1)) (transform{|*|} s2)
+where
+	bind = CoreCode (dynamic >>= :: A.a b env: (*env -> *(a, *env)) (a *env -> *b) *env -> *b)
+	where
+		>>= f g env 
+			# (x, env) = f env
+			= g x env
 
 transform{|NTexpression|} (Term e) = transform{|*|} e
 transform{|NTexpression|} (Apply f x) = CoreApply (transform{|*|} f) (transform{|*|} x)

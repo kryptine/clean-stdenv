@@ -26,7 +26,7 @@ abstract_ :: !Core -> Core
 
 instance generateCode Dynamic
 
-applyDynamics :: !Dynamic !Dynamic -> Maybe Dynamic
+//applyDynamics :: !Dynamic !Dynamic -> Maybe Dynamic
 
 toStringDynamic :: !Dynamic -> (![String], !String)
 

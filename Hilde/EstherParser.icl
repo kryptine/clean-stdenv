@@ -5,7 +5,7 @@ import StdParsComb, StdBool, StdList, StdEnum, StdFunc
 
 :: TryWant = Try | Want
 
-parseStatement :: !String -> /*Src*/ NTexpression //NTstatement
+parseStatement :: !String -> /*Src*/ NTstatement
 parseStatement input 
 	= case begin (sp (parser{|*|} Want) <& sp eof) (fromString input) of
 		[([], syntax)] -> syntax

@@ -1,20 +1,20 @@
 implementation module EstherBackend
 
 import EstherParser, StdMaybe
-import StdInt, StdString, StdList, StdBool, Debug, StdEnum, StdArray
+import StdInt, StdString, StdList, StdBool, Debug, StdEnum, StdArray, StdDebug
 
-:: Overloaded d t o = (.|.) infixr 0 !(d -> t) !o
-:: Contexts a b = (.&.) infixr 0 !a !b
+:: Overloaded d t o = (|||) infixr 0 !(d -> t) !o
+:: Contexts a b = (&&&) infixr 0 !a !b
 :: Context v = Class !String
 
 overloaded :: !String !Dynamic -> Dynamic
-overloaded c ((_, e) :: (v, d -> t)) = dynamic e .|. Class c :: Overloaded d t (Context v)
+overloaded c ((_, e) :: (v, d -> t)) = dynamic e ||| Class c :: Overloaded d t (Context v)
 
 overloaded2 :: !String !String !Dynamic -> Dynamic
-overloaded2 c1 c2 ((_, _, e) :: (v1, v2, d1 d2 -> t)) = dynamic (\(dict1 .&. dict2) -> e dict1 dict2) .|. Class c1 .&. Class c2 :: Overloaded (Contexts d1 d2) t (Contexts (Context v1) (Context v2))
+overloaded2 c1 c2 ((_, _, e) :: (v1, v2, d1 d2 -> t)) = dynamic (\(dict1 &&& dict2) -> e dict1 dict2) ||| Class c1 &&& Class c2 :: Overloaded (Contexts d1 d2) t (Contexts (Context v1) (Context v2))
 
 overloaded3 :: !String !String !String !Dynamic -> Dynamic
-overloaded3 c1 c2 c3 ((_, _, _, e) :: (v1, v2, v3, d1 d2 d3 -> t)) = dynamic (\(dict1 .&. dict2 .&. dict3) -> e dict1 dict2 dict3) .|. Class c1 .&. Class c2 .&. Class c3 :: Overloaded (Contexts d1 (Contexts d2 d3)) t (Contexts (Context v1) (Contexts (Context v2) (Context v3)))
+overloaded3 c1 c2 c3 ((_, _, _, e) :: (v1, v2, v3, d1 d2 d3 -> t)) = dynamic (\(dict1 &&& dict2 &&& dict3) -> e dict1 dict2 dict3) ||| Class c1 &&& Class c2 &&& Class c3 :: Overloaded (Contexts d1 (Contexts d2 d3)) t (Contexts (Context v1) (Contexts (Context v2) (Context v3)))
 
 abstract :: !String !Core -> Core
 abstract v e | notFreeVar v e = CoreApply coreK e
@@ -47,41 +47,41 @@ where
 		  d = case codex of
 			(x :: A.a: a) -> case codef of
 				(f :: A.b: b) -> dynamic f x :: A.c: c
-				(f .|. c_f :: Overloaded d_f (d -> e) o_f) -> dynamic C f x .|. c_f :: Overloaded d_f e o_f
+				(f ||| c_f :: Overloaded d_f (d -> e) o_f) -> dynamic C f x ||| c_f :: Overloaded d_f e o_f
 				(f :: f -> g) -> dynamic f x :: g
-				codex -> raise (ApplyTypeError codef codex)
-			(x .|. c_x :: Overloaded d_x h o_x) -> case codef of
-				(f :: A.i: i) -> dynamic B f x .|. c_x :: A.j: Overloaded d_x j o_x
-				(f .|. c_f :: Overloaded d_f (h -> k) o_f) -> dynamic P f x .|. c_f .&. c_x :: Overloaded (Contexts d_f d_x) k (Contexts o_f o_x)
-				(f :: h -> l) -> dynamic B f x .|. c_x :: Overloaded d_x l o_x
-				codex -> raise (ApplyTypeError codef codex)
+				codef -> raise (ApplyTypeError codef codex)
+			(x ||| c_x :: Overloaded d_x h o_x) -> case codef of
+				(f :: A.i: i) -> dynamic B f x ||| c_x :: A.j: Overloaded d_x j o_x
+				(f ||| c_f :: Overloaded d_f (h -> k) o_f) -> dynamic P f x ||| c_f &&& c_x :: Overloaded (Contexts d_f d_x) k (Contexts o_f o_x)
+				(f :: h -> l) -> dynamic B f x ||| c_x :: Overloaded d_x l o_x
+				codef -> raise (ApplyTypeError codef codex)
 			(x :: m) -> case codef of
 				(f :: A.n: n) -> dynamic f x :: A.o: o
-				(f .|. c_f :: Overloaded d_f (m -> p) o_f) -> dynamic C f x .|. c_f :: Overloaded d_f p o_f
+				(f ||| c_f :: Overloaded d_f (m -> p) o_f) -> dynamic C f x ||| c_f :: Overloaded d_f p o_f
 				(f :: m -> q) -> dynamic f x :: q
-				codex -> raise (ApplyTypeError codef codex)
+				codef -> raise (ApplyTypeError codef codex)
 		= solveOverloading d env
-
+/*
 applyDynamics :: !Dynamic !Dynamic -> Maybe Dynamic
 applyDynamics codef codex 
 	# codefx = case codex of
 		(x :: A.a: a) -> case codef of
 			(f :: A.b: b) -> Just (dynamic f x :: A.c: c)
-			(f .|. c_f :: Overloaded d_f (d -> e) o_f) -> Just (dynamic C f x .|. c_f :: Overloaded d_f e o_f)
+			(f ||| c_f :: Overloaded d_f (d -> e) o_f) -> Just (dynamic C f x ||| c_f :: Overloaded d_f e o_f)
 			(f :: f -> g) -> Just (dynamic f x :: g)
 			_ -> Nothing
-		(x .|. c_x :: Overloaded d_x h o_x) -> case codef of
-			(f :: A.i: i) -> Just (dynamic B f x .|. c_x :: A.j: Overloaded d_x j o_x)
-			(f .|. c_f :: Overloaded d_f (h -> k) o_f) -> Just (dynamic P f x .|. c_f .&. c_x :: Overloaded (Contexts d_f d_x) k (Contexts o_f o_x))
-			(f :: h -> l) -> Just (dynamic B f x .|. c_x :: Overloaded d_x l o_x)
+		(x ||| c_x :: Overloaded d_x h o_x) -> case codef of
+			(f :: A.i: i) -> Just (dynamic B f x ||| c_x :: A.j: Overloaded d_x j o_x)
+			(f ||| c_f :: Overloaded d_f (h -> k) o_f) -> Just (dynamic P f x ||| c_f &&& c_x :: Overloaded (Contexts d_f d_x) k (Contexts o_f o_x))
+			(f :: h -> l) -> Just (dynamic B f x ||| c_x :: Overloaded d_x l o_x)
 			_ -> Nothing
 		(x :: m) -> case codef of
 			(f :: A.n: n) -> Just (dynamic f x :: A.o: o)
-			(f .|. c_f :: Overloaded d_f (m -> p) o_f) -> Just (dynamic C f x .|. c_f :: Overloaded d_f p o_f)
+			(f ||| c_f :: Overloaded d_f (m -> p) o_f) -> Just (dynamic C f x ||| c_f :: Overloaded d_f p o_f)
 			(f :: m -> q) -> Just (dynamic f x :: q)
 			_ -> Nothing
 	= codefx
-
+*/
 solveOverloading :: !Dynamic !*env -> (!Dynamic, !*env) | resolveInstance env
 solveOverloading d=:(_ :: A.a: a) env = (d, env)
 solveOverloading d=:(_ :: Overloaded a b c) env
@@ -90,23 +90,23 @@ solveOverloading d=:(_ :: Overloaded a b c) env
 		Just d` -> (check d`, env)
 		_ -> (check d, env)
 where
-	solve d=:(e .|. Class c :: Overloaded d t (Context a)) env = case (dynamic Omega :: a) of 
+	solve d=:(e ||| Class c :: Overloaded d t (Context a)) env = case (dynamic Omega :: a) of 
 		(_ :: A.b: b) -> (Nothing, env)
 		type 
 			# (dyndict, env) = resolveInstance c type env
 			-> case dyndict of 
 				(dict :: d) -> (Just (dynamic e dict :: t), env)
-				(dict_e .|. dict_r :: Overloaded dict_d d dict_o) 
-					# (d`, env) = solveOverloading (dynamic B e dict_e .|. dict_r :: Overloaded dict_d t dict_o) env
+				(dict_e ||| dict_r :: Overloaded dict_d d dict_o) 
+					# (d`, env) = solveOverloading (dynamic B e dict_e ||| dict_r :: Overloaded dict_d t dict_o) env
 					-> (Just d`, env)
 				_ -> raise (InvalidInstance c dyndict)
-	solve d=:(e .|. r1 .&. r2 :: Overloaded (Contexts d1 d2) t (Contexts c1 c2)) env 
-		# (maybe1, env) = solve (dynamic I .|. r1 :: Overloaded d1 d1 c1) env
-		  (maybe2, env) = solve (dynamic I .|. r2 :: Overloaded d2 d2 c2) env
+	solve d=:(e ||| r1 &&& r2 :: Overloaded (Contexts d1 d2) t (Contexts c1 c2)) env 
+		# (maybe1, env) = solve (dynamic I ||| r1 :: Overloaded d1 d1 c1) env
+		  (maybe2, env) = solve (dynamic I ||| r2 :: Overloaded d2 d2 c2) env
 		= case (maybe1, maybe2) of
-			(Just (dict1 :: d1), Just (dict2 :: d2)) -> (Just (dynamic e (dict1 .&. dict2) :: t), env)
-			(Just (dict1 :: d1), _) -> (Just (dynamic L e dict1 .|. r2 :: Overloaded d2 t c2), env)
-			(_, Just (dict2 :: d2)) -> (Just (dynamic R e dict2 .|. r1 :: Overloaded d1 t c1), env)
+			(Just (dict1 :: d1), Just (dict2 :: d2)) -> (Just (dynamic e (dict1 &&& dict2) :: t), env)
+			(Just (dict1 :: d1), _) -> (Just (dynamic L e dict1 ||| r2 :: Overloaded d2 t c2), env)
+			(_, Just (dict2 :: d2)) -> (Just (dynamic R e dict2 ||| r1 :: Overloaded d1 t c1), env)
 			_ -> (Nothing, env)
 
 	check d=:(_ :: A.a: a) = d
@@ -152,13 +152,13 @@ S` f g h x = f (g x) (h x)
 B` f g h x = f g (h x)
 C` f g h x = f (g x) h
 
-P f g (x .&. y) = f x (g y)
-L f x y = f (x .&. y)
-R f y x = f (x .&. y)
+P f g (x &&& y) = f x (g y)
+L f x y = f (x &&& y)
+R f y x = f (x &&& y)
 
 toStringDynamic :: !Dynamic -> (![String], !String)
 toStringDynamic d=:(_ :: A.a: a) = prettyDynamic d
-toStringDynamic (e .|. c :: Overloaded d t o) = (value, type +++ " | " +++ contexts)
+toStringDynamic (e ||| c :: Overloaded d t o) = (value, type +++ " | " +++ contexts)
 where
 	(value, _) = prettyDynamic (dynamic e :: d -> t)
 	(_, type) = prettyDynamic (dynamic Omega :: t)
@@ -170,7 +170,7 @@ where
 		prettyContexts [c:cs] = prettyContexts [c] +++ " & " +++ prettyContexts cs
 	
 		listNames (Class name :: Context a) = [name]
-		listNames (x .&. y :: Contexts a b) = listNames (dynamic x :: a) ++ listNames (dynamic y :: b)
+		listNames (x &&& y :: Contexts a b) = listNames (dynamic x :: a) ++ listNames (dynamic y :: b)
 		
 		listVariables (TypeApp _ (TypeVar i)) = [if (i < 26) {'a' + toChar i} ("tv" +++ toString i)]
 		listVariables (TypeApp _ (TypeCons c)) = [toString c]

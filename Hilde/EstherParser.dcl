@@ -11,8 +11,9 @@ from StdParsComb import :: CParser, :: Parser, :: AltCont, :: XorCont, :: SucCon
 	| ParserRequired !String
 
 :: NTstatement
-	= /*Compound !NTexpression !Tsemicolon !NTstatement
-	| */Expression !NTexpression
+	= Compound !NTexpression !Tsemicolon !NTstatement
+	| Pipe !NTexpression !Tguard !NTstatement
+	| Expression !NTexpression
 
 :: NTexpression
 	= /*Function !NTnameOrValue !(+- NTpattern UNIT) !Tis !NTexpression
@@ -99,4 +100,4 @@ from StdParsComb import :: CParser, :: Parser, :: AltCont, :: XorCont, :: SucCon
 :: Tguard = Tguard
 :: Tand = Tand
 
-parseStatement :: !String -> /*Src*/ NTexpression //NTstatement
+parseStatement :: !String -> /*Src*/ NTstatement
