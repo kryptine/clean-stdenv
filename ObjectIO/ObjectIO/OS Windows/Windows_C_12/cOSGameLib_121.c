@@ -66,7 +66,7 @@ static GAMEBITMAPINFO *gbipPrev = NULL;
 
 
 /* release DirectDraw object */
-void ReleaseDD (void)
+static void ReleaseDD (void)
 {
   if (lpDDPal)
   {
@@ -90,10 +90,10 @@ void ReleaseDD (void)
     IDirectDraw_Release (lpDD);
     lpDD = NULL;
   }
-}
+} /* ReleaseDD */
 
 /* restore directdraw object */
-void DDRestoreAll ()
+void DDRestoreAll (void)
 {
     HRESULT ddrval;
 	//    DDSURFACEDESC ddsd;     PA: not used
@@ -119,13 +119,13 @@ void DDRestoreAll ()
             }
         }
     }
-}
+}	/* DDRestoreAll */
 
 
 
 
 /* --------------------- window / screen functions --------------------- */
-
+/* PA: the typedef DEVICES and the constants aDDDevs, MaxDevIndex, DevIndex appear only in commented code.
 typedef struct {
   GUID *guid;
   GUID DriverGUID;
@@ -136,7 +136,8 @@ typedef struct {
 DEVICES aDDDevs[15];
 int MaxDevIndex = 0;
 int DevIndex = 0;
-
+*/
+/* PA: DDEnumCallback does not seem to be used. Refered to only in commented code (line 8-13 of OSInitGameWindow)
 HRESULT CALLBACK DDEnumCallback (GUID *lpGUID,
                                  LPSTR DriverDesc,
                                  LPSTR DriverName,
@@ -163,9 +164,9 @@ HRESULT CALLBACK DDEnumCallback (GUID *lpGUID,
     MaxDevIndex++;
     return DDENUMRET_OK;
 }
+*/
 
-
-void ShowError (char *Msg)
+static void ShowError (char *Msg)
 {
     ReleaseDD ();
     if (ghGameWindow)
@@ -179,11 +180,11 @@ void ShowError (char *Msg)
         ghMainWindow = NULL;
     }
     MessageBox (NULL, Msg, NULL, MB_OK);
-}
+}	/* ShowError */
 
 
 /* set up the game window */
-BOOL OSInitGameWindow ()
+BOOL OSInitGameWindow (void)
 {
     HRESULT ddrval;
     DDSURFACEDESC ddsd;
@@ -347,28 +348,28 @@ BOOL OSInitGameWindow ()
         }
     }
     return result;
-}
+}	/* OSInitGameWindow */
 
 /* shut down the game window */
-void OSDeInitGameWindow ()
+void OSDeInitGameWindow (void)
 {
     ReleaseDD ();
-}
+}	/* OSDeInitGameWindow */
 
 /* get game window handle */
 BOOL OSGetGameWindowHDC (HDC *hdc)
 {
    return (IDirectDrawSurface_GetDC (lpDDSBack, hdc) == DD_OK);
-}
+}	/* OSDeInitGameWindow */
 
 /* release game window handle */
 void OSReleaseGameWindowHandle (HDC hdc)
 {
    IDirectDrawSurface_ReleaseDC (lpDDSBack, hdc);
-}
+}	/* OSReleaseGameWindowHandle */
 
 /* clear the (visual) screen */
-void OSClearScreen ()
+void OSClearScreen (void)
 {
     DDBLTFX ddbltfx;
 
@@ -377,7 +378,7 @@ void OSClearScreen ()
     ddbltfx.dwFillColor = DDColorMatch (lpDDSFront, 0);
     IDirectDrawSurface_Blt (lpDDSFront, NULL, NULL, NULL,
         DDBLT_COLORFILL | DDBLT_WAIT, &ddbltfx);
-}
+}	/* OSClearScreen */
 
 /* clear the virtual screen */
 void OSClearVirtualScreen (COLORREF c)
@@ -396,7 +397,7 @@ void OSClearVirtualScreen (COLORREF c)
     ddbltfx.dwFillColor = DDColorMatch (lpDDSBack, c);
     IDirectDrawSurface_Blt (lpDDSBack, &dst, NULL, NULL,
         DDBLT_COLORFILL | DDBLT_WAIT, &ddbltfx);
-}
+}	/* OSClearVirtualScreen */
 
 /* fill an area with black */
 void OSFillBlack (BOOL vis, RECT dst)
@@ -417,7 +418,7 @@ void OSFillBlack (BOOL vis, RECT dst)
     ddbltfx.dwFillColor = DDColorMatch (lpDDS, 0);
     IDirectDrawSurface_Blt (lpDDS, &dst, NULL, NULL,
         DDBLT_COLORFILL | DDBLT_WAIT, &ddbltfx);
-}
+}	/* OSFillBlack */
 
 /* copy (part of) virtual screen to visual screen */
 void OSBlit (RECT *r)
@@ -440,19 +441,19 @@ void OSBlit (RECT *r)
                 (lpDDSFront, &sr, lpDDSBack, &sr, flags, &ddbltfx);
     if (ddrval == DDERR_SURFACELOST)
         DDRestoreAll ();
-}
+}	/* OSBlit */
 
 /* flip pages */
-void OSFlip ()
+void OSFlip (void)
 {
     IDirectDrawSurface_Flip (lpDDSFront, NULL, DDFLIP_WAIT);
-}
+}	/* OSFlip */
 
 
 /* ------------------------- bitmap functions  ------------------------- */
 
 /* get a pointer to the GAMEBITMAPINFO structure with id BID */
-GAMEBITMAPINFO *GetGameBitmapInfo (int BID)
+static GAMEBITMAPINFO *GetGameBitmapInfo (int BID)
 {
     GAMEBITMAPINFO *gbip = gbipGameBitmapInfo;
     BOOL bFound = FALSE;
@@ -474,10 +475,10 @@ GAMEBITMAPINFO *GetGameBitmapInfo (int BID)
         }
     }
     return gbip;
-}
+}	/* GetGameBitmapInfo */
 
 /* free members of a GAMEBITMAPINFO node */
-void FreeGameBitmapInfoNode (GAMEBITMAPINFO *gbip)
+static void FreeGameBitmapInfoNode (GAMEBITMAPINFO *gbip)
 {
     GAMEBLOCKSEQUENCE *gbs;
 
@@ -504,7 +505,7 @@ void FreeGameBitmapInfoNode (GAMEBITMAPINFO *gbip)
         rfree (gbip->gbsGameBlockSequence);
         gbip->gbsGameBlockSequence = gbs;
     }
-}
+}	/* FreeGameBitmapInfoNode */
 
 
 /* initialize a game bitmap */
@@ -611,7 +612,7 @@ int OSInitGameBitmap (int id, char *name,
         return id;
     else
         return resultcode;
-}
+}	/* OSInitGameBitmap */
 
 /* get bitmap info */
 BOOL OSGetGameBitmapInfo (int id, int *width, int *height,
@@ -633,7 +634,7 @@ BOOL OSGetGameBitmapInfo (int id, int *width, int *height,
    }
     else
         return FALSE;
-}
+}	/* OSGetGameBitmapInfo */
 
 
 /* deinit a game bitmap */
@@ -674,10 +675,10 @@ int OSFreeGameBitmap (int id)
         gbipCurrent = gbipNext;
     }
     return result;
-}
+}	/* OSFreeGameBitmap */
 
 /* deinit all game bitmaps */
-void OSFreeGameBitmaps ()
+void OSFreeGameBitmaps (void)
 {
     GAMEBITMAPINFO *gbip;
 
@@ -690,7 +691,7 @@ void OSFreeGameBitmaps ()
     }
     iPrevGBIP = 0;
     gbipPrev = NULL;
-}
+}	/* OSFreeGameBitmaps */
 
 
 /* set transparent color */
@@ -721,7 +722,7 @@ int OSSetTransparentColor (int id, int x, int y)
         }
     }
     return result;
-}
+}	/* OSSetTransparentColor */
 
 /* initialize a block sequence */
 int OSInitBlockSequence (int bitmapid, int seqid, char *seq, int len)
@@ -758,10 +759,10 @@ int OSInitBlockSequence (int bitmapid, int seqid, char *seq, int len)
         resultcode = GR_OK;
     }
     return resultcode;
-}
+}	/* OSInitBlockSequence */
 
 /* run block sequences */
-void OSRunBlockSequences ()
+void OSRunBlockSequences (void)
 {
     GAMEBITMAPINFO *gbip;
     GAMEBLOCKSEQUENCE *gbs;
@@ -785,7 +786,7 @@ void OSRunBlockSequences ()
         }
         gbip = gbip->gbipNext;
     }
-}
+}	/* OSRunBlockSequences */
 
 /* get current block */
 int OSGetCurrentBlock (int bitmapid, int seqid)
@@ -808,7 +809,7 @@ int OSGetCurrentBlock (int bitmapid, int seqid)
         gbs = gbs->gbsNext;
     }
     return result;
-}
+}	/* OSGetCurrentBlock */
 
 /* draw part of a bitmap to virtual screen */
 void OSDraw (RECT *dst, int id, RECT *src, BOOL mirlr, BOOL mirud, int flags)
@@ -880,7 +881,7 @@ void OSDraw (RECT *dst, int id, RECT *src, BOOL mirlr, BOOL mirud, int flags)
         if (ddrval == DDERR_SURFACELOST)
             DDRestoreAll ();
     }
-}
+}	/* OSDraw */
 
 /* ------------------------- sound functions ------------------------- */
 
@@ -897,7 +898,7 @@ static SOUNDSAMPLEINFO *ssiSoundSampleInfo = NULL;
 
 
 /* get a pointer to the SOUNDSAMPLEINFO structure with id ID */
-SOUNDSAMPLEINFO *GetSoundSampleInfo (int ID)
+static SOUNDSAMPLEINFO *GetSoundSampleInfo (int ID)
 {
     SOUNDSAMPLEINFO *ssi = ssiSoundSampleInfo;
     BOOL bFound = FALSE;
@@ -910,9 +911,9 @@ SOUNDSAMPLEINFO *GetSoundSampleInfo (int ID)
             ssi = ssi->ssiNext;
     }
     return ssi;
-}
+}	/* GetSoundSampleInfo */
 
-BOOL OSInitSound ()
+BOOL OSInitSound (void)
 {
     bSoundEnabled = FALSE;
     if (!(DirectSoundCreate (NULL, &lpDS, NULL) == DS_OK))
@@ -932,10 +933,10 @@ BOOL OSInitSound ()
         }
     }
     return bSoundEnabled;
-}
+}	/* OSInitSound */
 
 /* deinitialize sound */
-void OSDeInitSound ()
+void OSDeInitSound (void)
 {
     if (lpDS != NULL)
     {
@@ -943,7 +944,7 @@ void OSDeInitSound ()
         lpDS = NULL;
     }
     bSoundEnabled = FALSE;
-}
+}	/* OSDeInitSound */
 
 /* initialize a sound sample */
 BOOL OSInitSoundSample (int id, char *name, int buffers)
@@ -961,10 +962,10 @@ BOOL OSInitSoundSample (int id, char *name, int buffers)
     }
     else
         return FALSE;
-}
+}	/* OSInitSoundSample */
 
 /* free the SOUNDSAMPLEINFO list */
-void OSFreeSoundSamples ()
+void OSFreeSoundSamples (void)
 {
     SOUNDSAMPLEINFO *ssi;
 
@@ -980,7 +981,7 @@ void OSFreeSoundSamples ()
         rfree (ssiSoundSampleInfo);
         ssiSoundSampleInfo = ssi;
     }
-}
+}	/* OSFreeSoundSamples */
 
 /* play a sound sample */
 BOOL OSPlaySoundSample (int id, int volume, int pan, int freq)
@@ -1003,7 +1004,7 @@ BOOL OSPlaySoundSample (int id, int volume, int pan, int freq)
         }
     }
     return bSoundEnabled;
-}
+}	/* OSPlaySoundSample */
 
 /* start playing music in the background */
 BOOL OSPlayMusic (char *midifile, BOOL restart)
@@ -1035,14 +1036,13 @@ BOOL OSPlayMusic (char *midifile, BOOL restart)
             result = TRUE;
 
     return result;
-}
+}	/* OSPlayMusic */
 
 /* stop music */
-BOOL OSStopMusic ()
+BOOL OSStopMusic (void)
 {
     BOOL result = FALSE;
     if (mciSendString ("close all", NULL, 0, NULL) == 0)
         result = TRUE;
     return result;
-}
-
+}	/* OSStopMusic */

@@ -27,7 +27,7 @@ static char TCPWindowClassName[]  = "__CleanTCPWindow";		/* Class for TCP child 
 /*	This function is used for looking up an element with a matching dnsHdl-field in
 	the DNSInfoList. This element will then be removed from the list.
 */
-void lookUpAndRemove(WPARAM dnsHdl,DNSInfo **listPtr,DNSInfo **elPtr)
+static void lookUpAndRemove(WPARAM dnsHdl,DNSInfo **listPtr,DNSInfo **elPtr)
 {
 	if ((WPARAM)(*listPtr)->dnsHdl==dnsHdl)
 		{	// the object to look up has been found, so remove it from the list
@@ -43,7 +43,7 @@ void lookUpAndRemove(WPARAM dnsHdl,DNSInfo **listPtr,DNSInfo **elPtr)
 /*	The callback routine for a TCP window (extracted from MainWindowProcedure).
 	It handles only PM_SOCKET_EVENT and PM_DNS_EVENT.
 */
-LRESULT CALLBACK TCPWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara, LPARAM lPara)
+static LRESULT CALLBACK TCPWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara, LPARAM lPara)
 {
 	printMessage ("TCP Window", hWin, uMess, wPara, lPara);
 	switch (uMess)
@@ -128,11 +128,12 @@ LRESULT CALLBACK TCPWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara, LPARAM
 
 /*	Register the TCPWindow class:
 */
-void InitialiseCrossCallTCP ()
+void InitialiseCrossCallTCP (void)
 {
-	WNDCLASS wclass;
+	WNDCLASSEX wclass;
 
 	/* register tcp window class */
+	wclass.cbSize        = sizeof (WNDCLASSEX);
 	wclass.style         = CS_NOCLOSE;
 	wclass.lpfnWndProc   = (WNDPROC) TCPWindowProcedure;
 	wclass.cbClsExtra    = 0;
@@ -143,7 +144,8 @@ void InitialiseCrossCallTCP ()
 	wclass.hbrBackground = NULL;
 	wclass.lpszMenuName  = NULL;
 	wclass.lpszClassName = TCPWindowClassName;
-	RegisterClass (&wclass);
+	wclass.hIconSm       = NULL;
+	RegisterClassEx (&wclass);
 }
 
 

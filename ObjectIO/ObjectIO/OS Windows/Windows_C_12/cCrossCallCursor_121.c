@@ -107,7 +107,7 @@ static BYTE HiddenCursorXORmask[128] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
-HCURSOR GetFatCrossCursor (void)
+static HCURSOR GetFatCrossCursor (void)
 {
 	if (ghFatCrossCursor != NULL)
 		return ghFatCrossCursor;
@@ -120,7 +120,7 @@ HCURSOR GetFatCrossCursor (void)
 		);
 
 	return ghFatCrossCursor;
-}
+}	/* GetFatCrossCursor */
 
 HCURSOR GetHiddenCursor (void)
 {
@@ -135,7 +135,7 @@ HCURSOR GetHiddenCursor (void)
 		);
 
 	return ghHiddenCursor;
-}
+}	/* GetHiddenCursor */
 
 void DeleteCursors (void)
 {
@@ -150,7 +150,7 @@ void DeleteCursors (void)
 		DestroyCursor (ghHiddenCursor);
 		ghHiddenCursor = NULL;
 	}
-}
+}	/* GetHiddenCursor */
 
 HCURSOR SetCursorFromCode (int code)
 {
@@ -171,9 +171,27 @@ HCURSOR SetCursorFromCode (int code)
 		default:
 			return NULL;
 	}
-}
+}	/* SetCursorFromCode */
 
-BOOL IsApplicationWindow (HWND hwnd)
+
+int GetGlobalCursorCode (void)
+{
+	return gGlobalCursorCode;
+}	/* GetGlobalCursorCode */
+
+BOOL GlobalCursorSet (void)
+{
+	return gGlobalCursorCode != -1;
+}	/* GlobalCursorSet */
+
+/*	PA: this routine does not seem to be used anymore.
+static void ClearGlobalCursorCode (void)
+{
+	gGlobalCursorCode = -1;
+}
+*/
+
+static BOOL IsApplicationWindow (HWND hwnd)
 {
 	while (hwnd != NULL && hwnd != ghMainWindow)
 		hwnd = GetWindow (hwnd, GW_OWNER);
@@ -181,7 +199,7 @@ BOOL IsApplicationWindow (HWND hwnd)
 	return (hwnd != NULL);
 }
 
-HWND ApplicationWindowUnderCursor ()
+static HWND ApplicationWindowUnderCursor (void)
 {
 	POINT p;
 	HWND hwnd;
@@ -193,21 +211,6 @@ HWND ApplicationWindowUnderCursor ()
 		return hwnd;
 	else
 		return NULL;
-}
-
-int GetGlobalCursorCode ()
-{
-	return gGlobalCursorCode;
-}
-
-GlobalCursorSet ()
-{
-	return gGlobalCursorCode != -1;
-}
-
-static void ClearGlobalCursorCode ()
-{
-	gGlobalCursorCode = -1;
 }
 
 

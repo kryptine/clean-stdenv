@@ -1,6 +1,6 @@
 /* C module intrface */
 
-#include "util_121.h"
+//#include "util_121.h"
 
 #define MaxRand									32767
 #define iWhitePattern							4

@@ -59,4 +59,3 @@ class accSChannel ch	::	(TCP_SChannel -> (x, TCP_SChannel)) *(*ch .a)
 
 instance accSChannel TCP_SChannel_
 instance accSChannel TCP_SCharStream_
-

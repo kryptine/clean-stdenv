@@ -4,7 +4,10 @@ import	StdMaybe
 import	StdTCPDef
 from	StdChannels	import Timeout, TimeoutReport
 import	tcp
+import	ostoolbox
 
+
+OSinstallTCP				:: !*OSToolbox -> *OSToolbox
 
 os_eom						::	!EndpointRef !*env
 							->	(!Bool, !*env)

@@ -41,7 +41,7 @@ char MDIWindowClassName[] = "__CleanMDIWindow";		/* Class for MDI windows (must 
 		This procedure assumes that hwnd is the handle of a SDI frame window.
 		If no SDI client window could be found then GetSDIClientWindow returns NULL.
 */
-HWND GetSDIClientWindow (HWND hwndFrame)
+static HWND GetSDIClientWindow (HWND hwndFrame)
 {
 	HWND client;
 	char *clientclassname;
@@ -60,6 +60,41 @@ HWND GetSDIClientWindow (HWND hwndFrame)
 	rfree (clientclassname);
 	return client;
 }
+
+
+/*	Managing the double down distance.
+*/
+OS WinSetDoubleDownDist (int dd, OS ios)
+{
+	gDoubleDownDistance = dd;
+	return ios;
+}
+
+static int GetDoubleDownDistance (void)
+{
+	if (gDoubleDownDistance == -1)
+		gDoubleDownDistance = GetSystemMetrics (SM_CXDOUBLECLK) / 2;
+
+	return gDoubleDownDistance;
+}
+
+static BOOL inDcSpaceTime (HWND curwin,  int curx,  int cury, UINT curtime, HWND prevwin, int prevx, int prevy, UINT prevtime)
+{
+	if (rabs (curx - prevx) > GetDoubleDownDistance ())
+		return FALSE;
+
+	if (rabs (cury - prevy) > GetDoubleDownDistance ())
+		return FALSE;
+
+	if (curtime - prevtime > GetDoubleClickTime ())
+		return FALSE;
+
+	if (curwin != prevwin)
+		return FALSE;
+
+	return TRUE;
+}
+
 
 /*	Sending keyboard events to Clean thread:
 */
@@ -98,39 +133,6 @@ void SendMouseStillUpToClean (HWND hwndParent, HWND hwndChild, int x, int y)
 	SendMessage6ToClean (CcWmMOUSE, hwndParent, hwndChild, BUTTONSTILLUP, x, y, GetModifiers ());
 }
 
-/*	Managing the double down distance.
-*/
-OS WinSetDoubleDownDist (int dd, OS ios)
-{
-	gDoubleDownDistance = dd;
-	return ios;
-}
-
-int GetDoubleDownDistance (void)
-{
-	if (gDoubleDownDistance == -1)
-		gDoubleDownDistance = GetSystemMetrics (SM_CXDOUBLECLK) / 2;
-
-	return gDoubleDownDistance;
-}
-
-BOOL inDcSpaceTime (HWND curwin,  int curx,  int cury, UINT curtime, HWND prevwin, int prevx, int prevy, UINT prevtime)
-{
-	if (rabs (curx - prevx) > GetDoubleDownDistance ())
-		return FALSE;
-
-	if (rabs (cury - prevy) > GetDoubleDownDistance ())
-		return FALSE;
-
-	if (curtime - prevtime > GetDoubleClickTime ())
-		return FALSE;
-
-	if (curwin != prevwin)
-		return FALSE;
-
-	return TRUE;
-}
-
 void SendMouseDownToClean (HWND hwndParent, HWND hwndChild, int x, int y)
 {
 	static int gClicks = 0;
@@ -159,14 +161,14 @@ void SendMouseDownToClean (HWND hwndParent, HWND hwndChild, int x, int y)
 	SendMessage6ToClean (CcWmMOUSE, hwndParent, hwndChild, gClicks, x, y, GetModifiers ());
 	if (gClicks == 3)
 		gClicks = 0;
-}
+}	/* SendMouseDownToClean */
 
 
 /*	This routine should be applied only in case of WM_DROPFILES messages.
 	It will copy a buffer of all involved file names into one string and send it
 	to Clean.
 */
-void SendDropFilesToClean (HWND hWin,WPARAM wPara)
+static void SendDropFilesToClean (HWND hWin,WPARAM wPara)
 {
 	int nrFiles, fileNr, nrChars, charCount;
 	char * filenames;
@@ -195,7 +197,7 @@ void SendDropFilesToClean (HWND hWin,WPARAM wPara)
 
 	DragFinish ((HANDLE)wPara);		/* free the internal memory required for DROPFILES. */
 	SendMessage2ToClean (CcWmPROCESSDROPFILES, (int) hWin, (int) filenames);
-}
+}	/* SendDropFilesToClean */
 
 
 /*********************************************************************************************
@@ -207,7 +209,7 @@ void SendDropFilesToClean (HWND hWin,WPARAM wPara)
 	should be passed to Clean which identifies the Clean SDI client window! The only exception
 	is the CcWmPROCESSCLOSE message.
 *********************************************************************************************/
-LRESULT CALLBACK SDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lPara)
+static LRESULT CALLBACK SDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lPara)
 {
 	printMessage ("Clean SDIFrameWindow",hWin,uMess,wPara,lPara);
 	switch (uMess)
@@ -556,7 +558,7 @@ LRESULT CALLBACK SDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lPa
 /*********************************************************************************************
 	Callback routine for MDI frame window procedure.
 *********************************************************************************************/
-LRESULT CALLBACK MDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lPara)
+static LRESULT CALLBACK MDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lPara)
 {
 	printMessage ("Clean MDIFrameWindow",hWin,uMess,wPara,lPara);
 	switch (uMess)
@@ -746,7 +748,7 @@ LRESULT CALLBACK MDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lPa
 	The callback routine for subclassing the client window of a MDI frame window. 
 	This routine catches only WM_WINDOWPOSCHANGING event.
 *********************************************************************************************/
-LRESULT CALLBACK MDIClientProcedure (HWND hwnd,UINT uMess,WPARAM wParam,LPARAM lParam)
+static LRESULT CALLBACK MDIClientProcedure (HWND hwnd,UINT uMess,WPARAM wParam,LPARAM lParam)
 {
 	printMessage ("Clean MDI Client", hwnd, uMess, wParam, lParam);
 
@@ -785,11 +787,12 @@ LRESULT CALLBACK MDIClientProcedure (HWND hwnd,UINT uMess,WPARAM wParam,LPARAM l
 
 /*	Initialisation:
 */
-void InitialiseCrossCallxDI ()
+static void InitialiseCrossCallxDI (void)
 {
-	WNDCLASS wclass;
+	WNDCLASSEX wclass;
 
 	/* register clean SDI frame class */
+    wclass.cbSize        = sizeof (WNDCLASSEX);
 	wclass.style         = 0;
 	wclass.lpfnWndProc   = (WNDPROC) SDIFrameProcedure;
 	wclass.cbClsExtra    = 0;
@@ -800,9 +803,11 @@ void InitialiseCrossCallxDI ()
 	wclass.hbrBackground = (HBRUSH) GetStockObject (WHITE_BRUSH);
 	wclass.lpszMenuName  = NULL;
 	wclass.lpszClassName = SDIFrameClassName;
-	RegisterClass (&wclass);
+	wclass.hIconSm       = NULL;
+	RegisterClassEx (&wclass);
 
 	/* register clean MDI frame class */
+    wclass.cbSize        = sizeof (WNDCLASSEX);
 	wclass.style         = 0;
 	wclass.lpfnWndProc   = (WNDPROC) MDIFrameProcedure;
 	wclass.cbClsExtra    = 0;
@@ -813,7 +818,8 @@ void InitialiseCrossCallxDI ()
 	wclass.hbrBackground = (HBRUSH) (COLOR_APPWORKSPACE+1);		// For best results (Petzold)
 	wclass.lpszMenuName  = NULL;
 	wclass.lpszClassName = MDIFrameClassName;
-	RegisterClass (&wclass);
+	wclass.hIconSm       = NULL;
+	RegisterClassEx (&wclass);
 }
 
 
@@ -1064,7 +1070,7 @@ void EvalCcRqCREATETOOLBARSEPARATOR (CrossCallInfo *pcci)	// hwnd; no results;
 
 /*	Install the cross call procedures in the gCrossCallProcedureTable of cCrossCall_121.
 */
-extern int InstallCrossCallxDI (int ios)
+int InstallCrossCallxDI (int ios)
 {
 	CrossCallProcedureTable newTable;
 

@@ -37,82 +37,81 @@
 #define DO_ROTATE_180           (1 << 5)
 #define DO_ROTATE_270           (1 << 6)
 
-
+/* PA: all functions changed to extern: */
 /* --------------------- window / screen functions --------------------- */
 
 /* set up the game window */
-BOOL OSInitGameWindow ();
+extern BOOL OSInitGameWindow (void);
 /* shut down the game window */
-void OSDeInitGameWindow ();
+extern void OSDeInitGameWindow (void);
 
 /* get game window handle */
-BOOL OSGetGameWindowHDC (HDC *hdc);
+extern BOOL OSGetGameWindowHDC (HDC *hdc);
 /* release game window handle */
-void OSReleaseGameWindowHandle (HDC hdc);
+extern void OSReleaseGameWindowHandle (HDC hdc);
 
 /* clear the (visual) screen */
-void OSClearScreen ();
+extern void OSClearScreen (void);
 /* clear the virtual screen */
-void OSClearVirtualScreen (COLORREF c);
+extern void OSClearVirtualScreen (COLORREF c);
 
 /* fill an area with black */
-void OSFillBlack (BOOL vis, RECT r);
+extern void OSFillBlack (BOOL vis, RECT r);
 
 /* copy (part of) virtual screen to visual screen */
-void OSBlit (RECT *r);
+extern void OSBlit (RECT *r);
 
 /* flip pages */
-void OSFlip ();
+extern void OSFlip (void);
 
 /* ------------------------- bitmap functions  ------------------------- */
 
 /* initialize a game bitmap */
-int OSInitGameBitmap (int id, char *name,
-					  int bitmapwidth, int bitmapheight,
-					  int blockwidth, int blockheight
-					 );
+extern int OSInitGameBitmap (int id, char *name,
+							 int bitmapwidth, int bitmapheight,
+							 int blockwidth, int blockheight
+							);
 /* get bitmap info */
-BOOL OSGetGameBitmapInfo (int id, int *width, int *height,
-						  int *blockwidth, int *blockheight,
-						  int *blockcountx, int *blockcounty
-						 );
+extern BOOL OSGetGameBitmapInfo (int id, int *width, int *height,
+								 int *blockwidth, int *blockheight,
+								 int *blockcountx, int *blockcounty
+								);
 
 /* deinit a game bitmap */
-int OSFreeGameBitmap (int id);
+extern int OSFreeGameBitmap (int id);
 /* deinit all game bitmaps */
-void OSFreeGameBitmaps ();
+extern void OSFreeGameBitmaps (void);
 
 /* set transparent color */
-int OSSetTransparentColor (int id, int x, int y);
+extern int OSSetTransparentColor (int id, int x, int y);
 
 /* initialize a block sequence */
-int OSInitBlockSequence (int bitmapid, int seqid, char *seq, int len);
+extern int OSInitBlockSequence (int bitmapid, int seqid, char *seq, int len);
 /* run block sequences */
-void OSRunBlockSequences ();
+extern void OSRunBlockSequences (void);
 /* get current block */
-int OSGetCurrentBlock (int bitmapid, int seqid);
+extern int OSGetCurrentBlock (int bitmapid, int seqid);
 
 /* draw part of a bitmap to virtual screen */
-void OSDraw (RECT *dst, int id, RECT *src, BOOL mirlr, BOOL mirud, int flags);
+extern void OSDraw (RECT *dst, int id, RECT *src, BOOL mirlr, BOOL mirud, int flags);
 
 /* -------------------------- sound functions -------------------------- */
 
 /* initialize sound when program starts */
-BOOL OSInitSound ();
+extern BOOL OSInitSound (void);
 /* initialize sound before program terminates */
-void OSDeInitSound ();
+extern void OSDeInitSound (void);
 
 /* initialize a sound sample so it can be played later */
-BOOL OSInitSoundSample (int id, char *name, int buffers);
+extern BOOL OSInitSoundSample (int id, char *name, int buffers);
 /* deinitialize all sound samples */
-void OSFreeSoundSamples ();
+extern void OSFreeSoundSamples (void);
 /* play a sound sample */
-BOOL OSPlaySoundSample (int id, int volume, int pan, int freq);
+extern BOOL OSPlaySoundSample (int id, int volume, int pan, int freq);
 
 /* start playing music in the background */
-BOOL OSPlayMusic (char *midifile, BOOL restart);
+extern BOOL OSPlayMusic (char *midifile, BOOL restart);
 /* stop music */
-BOOL OSStopMusic ();
+extern BOOL OSStopMusic (void);
 
 #endif
-

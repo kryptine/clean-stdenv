@@ -32,10 +32,25 @@ extern CrossCallProcedureTable gCrossCallProcedureTable;	/* The cross call proce
 #define OSMenuIDEnd		10000
 extern UINT NextMenuItemID (void);
 
-extern BOOL CleanThreadRunning( void );
-extern BOOL OsThreadRunning( void );
+
+/*	GetModifiers returns the modifiers that are currently pressed.
+*/
+extern int GetModifiers (void);
+
+/*	Translate virtual key codes to the codes shared with Clean.
+	If the keycode could not be translated, zero is returned.
+*/
+extern int CheckVirtualKeyCode (int keycode);
+
 
 extern void HandleCleanRequest( CrossCallInfo *pcci );
+extern BOOL CleanThreadRunning( void );
+extern BOOL OsThreadRunning( void );
+extern void WinInitOs (Bool*,OS*);
+extern Bool WinCloseOs (OS);
+extern OS WinStartOsThread (OS);
+extern OS WinKillOsThread (OS);
+extern void WinKickOsThread (int,int,int,int,int,int,int,OS,int*,int*,int*,int*,int*,int*,int*,OS*);
 extern void KickCleanThread( CrossCallInfo *pcci );
 
 extern void SendMessageToClean( int mess, int p1,int p2,int p3, int p4,int p5,int p6 );
@@ -58,24 +73,13 @@ extern CrossCallInfo *MakeReturn4Cci (CrossCallInfo * pcci, int v1, int v2, int 
 extern CrossCallInfo *MakeReturn5Cci (CrossCallInfo * pcci, int v1, int v2, int v3, int v4, int v5);
 extern CrossCallInfo *MakeReturn6Cci (CrossCallInfo * pcci, int v1, int v2, int v3, int v4, int v5, int v6);
 
-
-extern DWORD OsThreadFunction( DWORD param );
-
 extern BOOL IsReturnCci( CrossCallInfo *pcci );
 
 
-/*	GetModifiers returns the modifiers that are currently pressed.
-*/
-extern int GetModifiers (void);
+extern DWORD OsThreadFunction( DWORD param );
 
-/*	Translate virtual key codes to the codes shared with Clean.
-	This procedure has been filtered from TranslateKeyboardMessage.
-	If the keycode could not be translated, zero is returned.
-*/
-extern int CheckVirtualKeyCode (int keycode);
-
-extern Bool WinFileExists (CLEAN_STRING);
 extern PSTR WinGetAppPath (void);
+extern Bool WinFileExists (CLEAN_STRING);
 
 extern void WinCallProcess (PSTR,PSTR,PSTR,PSTR,PSTR,PSTR,OS,Bool*,int*,OS*);
 extern void WinLaunchApp (CLEAN_STRING,Bool,OS,Bool*,OS*);
@@ -84,10 +88,6 @@ extern void WinLaunchApp (CLEAN_STRING,Bool,OS,Bool*,OS*);
 		is the command line. 
 */
 extern void WinLaunchApp2 (CLEAN_STRING,CLEAN_STRING,Bool,OS,Bool*,OS*);
+
 extern CLEAN_STRING WinGetModulePath (void);
 extern void WinFileModifiedDate (CLEAN_STRING,Bool*,int*,int*,int*,int*,int*,int*);
-extern void WinKickOsThread (int,int,int,int,int,int,int,OS,int*,int*,int*,int*,int*,int*,int*,OS*);
-extern OS WinKillOsThread (OS);
-extern OS WinStartOsThread (OS);
-extern Bool WinCloseOs (OS);
-extern void WinInitOs (Bool*,OS*);

@@ -6,7 +6,7 @@ implementation module StdPStClass
 import	StdFile, StdTuple
 import	iostate, StdFileSelect, StdSound, StdTime
 from	scheduler			import handleOneEventForDevices
-from	StdPSt				import accPIO
+from	StdPSt				import accPIO, appPIO
 from	clCCall_12			import WinPlaySound
 import	osfileselect
 from	ostoolbox			import OSNewToolbox
@@ -46,32 +46,32 @@ instance FileSystem (PSt .l) where
 /*	PSt is an environment instance of the class FileEnv (see StdFile).
 */
 instance FileEnv (PSt .l) where
-	accFiles :: !.(*Files -> (.x,*Files)) !*(PSt .l) -> (!.x,!*PSt .l)
+	accFiles :: !.(*Files -> (.x,*Files)) !(PSt .l) -> (!.x,!PSt .l)
 	accFiles accfun pState=:{io}
 		# (world,io)		= IOStGetWorld io
-		  (x,world)			= accFiles accfun world
-		  pState			= {pState & io=IOStSetWorld world io}
+		# (x,world)			= accFiles accfun world
+		# pState			= {pState & io=IOStSetWorld world io}
 		= (x,pState)
 	
 	appFiles :: !.(*Files -> *Files) !*(PSt .l) -> *PSt .l
 	appFiles appfun pState=:{io}
 		# (world,io)		= IOStGetWorld io
-		  world				= appFiles appfun world
-		  pState			= {pState & io=IOStSetWorld world io}
+		# world				= appFiles appfun world
+		# pState			= {pState & io=IOStSetWorld world io}
 		= pState
 
 // MW11..
-instance FileEnv	(IOSt .l)
-  where
+instance FileEnv (IOSt .l) where
+	accFiles :: !.(*Files -> (.x,*Files)) !(IOSt .l) -> (!.x,!IOSt .l)
 	accFiles accfun io
 		# (world,io)		= IOStGetWorld io
-		  (x,world)			= accFiles accfun world
-		  io				=IOStSetWorld world io
+		# (x,world)			= accFiles accfun world
+		# io				= IOStSetWorld world io
 		= (x,io)
 	appFiles appfun io
 		# (world,io)		= IOStGetWorld io
-		  world				= appFiles appfun world
-		  io				= IOStSetWorld world io
+		# world				= appFiles appfun world
+		# io				= IOStSetWorld world io
 		= io
 // ..MW11
 
@@ -80,17 +80,26 @@ instance FileEnv	(IOSt .l)
 instance FileSelectEnv (PSt .l) where
 	selectInputFile :: !(PSt .l) -> (!Maybe String,!PSt .l)
 	selectInputFile pState
-		# (ok,name,pState,_)	= OSselectinputfile handleOSEvent pState OSNewToolbox
+		# (tb,pState)			= accPIO getIOToolbox pState
+		# tb					= OSinitialiseFileSelectors tb
+		# (ok,name,pState,tb)	= OSselectinputfile handleOSEvent pState tb
+		# pState				= appPIO (setIOToolbox tb) pState
 		= (if ok (Just name) Nothing,pState)
 	
 	selectOutputFile:: !String !String !(PSt .l) -> (!Maybe String,!PSt .l)
 	selectOutputFile prompt originalName pState
-		# (ok,name,pState,_)	= OSselectoutputfile handleOSEvent pState prompt originalName OSNewToolbox
+		# (tb,pState)			= accPIO getIOToolbox pState
+		# tb					= OSinitialiseFileSelectors tb
+		# (ok,name,pState,tb)	= OSselectoutputfile handleOSEvent pState prompt originalName tb
+		# pState				= appPIO (setIOToolbox tb) pState
 		= (if ok (Just name) Nothing,pState)
 	
 	selectDirectory :: !(PSt .l) -> (!Maybe String,!PSt .l)
 	selectDirectory pState
-		# (ok,name,pState,_)	= OSselectdirectory handleOSEvent pState OSNewToolbox
+		# (tb,pState)			= accPIO getIOToolbox pState
+		# tb					= OSinitialiseFileSelectors tb
+		# (ok,name,pState,tb)	= OSselectdirectory handleOSEvent pState tb
+		# pState				= appPIO (setIOToolbox tb) pState
 		= (if ok (Just name) Nothing,pState)
 
 

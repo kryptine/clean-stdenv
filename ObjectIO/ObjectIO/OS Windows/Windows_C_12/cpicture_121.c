@@ -20,7 +20,7 @@ void WinGetDC (int hwnd, OS ios, HDC * ohdc, OS * oos)
 	
 	* ohdc = hdc;
 	* oos  = ios;
-}
+}	/* WinGetDC */
 
 OS WinReleaseDC (int hwnd, HDC hdc, OS ios)
 {
@@ -30,7 +30,7 @@ OS WinReleaseDC (int hwnd, HDC hdc, OS ios)
 	if (returncode==0)
 		rMessageBox (NULL,MB_APPLMODAL,"WinReleaseDC","ReleaseDC returned zero");
 	return ios;
-}
+}	/* WinReleaseDC */
 
 int WinGetVertResolution (void)
 {
@@ -47,7 +47,7 @@ int WinGetVertResolution (void)
 	};
 
 	return res;
-}
+}	/* WinGetVertResolution */
 
 int WinGetHorzResolution (void)
 {
@@ -62,7 +62,7 @@ int WinGetHorzResolution (void)
 	};
 
 	return res;
-}
+}	/* WinGetHorzResolution */
 
 
 /*------------------------------------*\
@@ -94,6 +94,25 @@ static int thePolygonIndex;
 #define ERASING    3
 
 static int lastActivity;
+
+// MW...
+static int PointsToPix(HDC hdc, int size)
+{
+	// convert font size in points to pixels (which depends on the device resolution)
+
+    int vRes;
+	int mapMode = GetMapMode(hdc);
+	if (mapMode==MM_ISOTROPIC)	
+		vRes = WinGetVertResolution();
+	  else
+		vRes = GetDeviceCaps(hdc, LOGPIXELSY);
+	return (size * vRes) / 72;
+/*	MW: currently, the MM_ISOTROPIC mapping mode is only used for printing with the emulation
+	of the screen resolution. For that purpose, points are not subject to the scaling, which
+	MM_ISOTROPIC performs.
+*/
+}
+// ...MW
 
 void WinInitPicture (int size, int mode,
 					 int pr, int pg, int pb,
@@ -156,7 +175,7 @@ void WinInitPicture (int size, int mode,
 
 	*ohdc = hdc;
 	*oos = os;
-}
+}	/* WinInitPicture */
 
 void WinDonePicture (HDC hdc, OS os,
 					 int *size, int *mode,
@@ -196,7 +215,7 @@ void WinDonePicture (HDC hdc, OS os,
 
 	*ohdc  = hdc;
 	*oos   = os;
-}
+}	/* WinDonePicture */
 
 void WinClipPicture (int left, int top, int right, int bot, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -215,7 +234,7 @@ void WinClipPicture (int left, int top, int right, int bot, HDC ihdc, OS ios, HD
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinClipPicture */
 
 /*	PA: Set and get the clipping region of a picture:
 		WinClipRgnPicture    takes the intersection of the argument clipRgn with the current clipping region.
@@ -233,7 +252,7 @@ void WinClipRgnPicture (HRGN cliprgn, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinClipRgnPicture */
 
 void WinSetClipRgnPicture (HRGN cliprgn, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -246,7 +265,7 @@ void WinSetClipRgnPicture (HRGN cliprgn, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinSetClipRgnPicture */
 
 void WinGetClipRgnPicture (HDC ihdc, OS ios, HRGN * ocliprgn, HDC * ohdc, OS * oos)
 {
@@ -270,7 +289,8 @@ void WinGetClipRgnPicture (HDC ihdc, OS ios, HRGN * ocliprgn, HDC * ohdc, OS * o
 	*ocliprgn = theRegion;
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinGetClipRgnPicture */
+
 
 /*	Operations to create, modify, and destroy polygon shapes.
 */
@@ -281,7 +301,7 @@ void WinAllocPolyShape (int size, OS ios, PolyShape * shape, OS * oos)
 	*shape = (POINT *) rmalloc (size * sizeof (POINT));
 
 	*oos = ios;
-}
+}	/* WinAllocPolyShape */
 
 OS WinSetPolyPoint (int i, int x, int y, PolyShape shape, OS os)
 {
@@ -289,14 +309,14 @@ OS WinSetPolyPoint (int i, int x, int y, PolyShape shape, OS os)
 	shape[i].y = y;
 
 	return (os);
-}
+}	/* WinSetPolyPoint */
 
 OS WinFreePolyShape (POINT * shape, OS os)
 {
 	rfree (shape);
 
 	return (os);
-}
+}	/* WinFreePolyShape */
 
 
 /*	Operations to create, modify and destroy regions.
@@ -311,7 +331,7 @@ void WinCreateRectRgn (int nLeftRect, int nTopRect, int nRightRect, int nBottomR
 
 	*rgn = theRegion;
 	*oos = ios;
-}
+}	/* WinCreateRectRgn */
 
 void WinCreatePolygonRgn (POINT * lppt, int cPoints, int fnPolyFillMode, OS ios, HRGN * rgn, OS * oos)
 {
@@ -323,7 +343,7 @@ void WinCreatePolygonRgn (POINT * lppt, int cPoints, int fnPolyFillMode, OS ios,
 
 	*rgn = theRegion;
 	*oos = ios;
-}
+}	/* WinCreatePolygonRgn */
 
 void WinSetRgnToRect (int left, int top, int right, int bottom, HRGN rgn, OS ios, HRGN * orgn, OS * oos)
 {
@@ -342,7 +362,7 @@ void WinSetRgnToRect (int left, int top, int right, int bottom, HRGN rgn, OS ios
 
 	*orgn = rgn;
 	*oos = ios;
-}
+}	/* WinSetRgnToRect */
 
 void WinCombineRgn (HRGN hrgnDest, HRGN hrgnSrc1, HRGN hrgnSrc2, int fnCombineMode, OS ios, HRGN * ohrgnDest, OS * oos)
 {
@@ -354,7 +374,7 @@ void WinCombineRgn (HRGN hrgnDest, HRGN hrgnSrc1, HRGN hrgnSrc2, int fnCombineMo
 
 	*ohrgnDest = hrgnDest;
 	*oos = ios;
-}
+}	/* WinCombineRgn */
 
 void WinGetRgnBox (HRGN hrgn, OS ios, int *left, int *top, int *right, int *bottom, BOOL * isrect, BOOL * isempty, OS * oos)
 {
@@ -374,7 +394,7 @@ void WinGetRgnBox (HRGN hrgn, OS ios, int *left, int *top, int *right, int *bott
 	rfree (boundbox);
 
 	*oos = ios;
-}
+}	/* WinGetRgnBox */
 
 OS WinDeleteObject (HGDIOBJ hObject, OS os)
 {
@@ -396,7 +416,7 @@ lastActivity:
 		ERASING:   pen=NULL_PEN brush=theBackBrush	 ROP2=if (penMode==iModeXor) R2_NOT R2_COPYPEN
 */
 
-void StartDrawing (HDC hdc)
+static void StartDrawing (HDC hdc)
 {
 	switch (lastActivity)
 	{
@@ -422,9 +442,9 @@ void StartDrawing (HDC hdc)
 			break;
 	}
 	lastActivity = DRAWING;
-}
+}	/* StartDrawing */
 
-void StartFilling (HDC hdc)
+static void StartFilling (HDC hdc)
 {
 	switch (lastActivity)
 	{
@@ -447,9 +467,9 @@ void StartFilling (HDC hdc)
 			break;
 	}
 	lastActivity = FILLING;
-}
+}	/* StartFilling */
 
-void StartInverting (HDC hdc)
+static void StartInverting (HDC hdc)
 {
 	switch (lastActivity)
 	{
@@ -469,9 +489,9 @@ void StartInverting (HDC hdc)
 			break;
 	}
 	lastActivity = INVERTING;
-}
+}	/* StartInverting */
 
-void StartErasing (HDC hdc)
+static void StartErasing (HDC hdc)
 {
 	switch (lastActivity)
 	{
@@ -499,9 +519,9 @@ void StartErasing (HDC hdc)
 			break;
 	}
 	lastActivity = ERASING;
-}
+}	/* StartErasing */
 
-void ChangeThePen (HDC hdc)
+static void ChangeThePen (HDC hdc)
 {
 	HPEN hp;
 	LOGBRUSH lb;
@@ -523,9 +543,9 @@ void ChangeThePen (HDC hdc)
 	DeleteObject (thePen);
 
 	thePen = hp;
-}
+}	/* ChangeThePen */
 
-void ChangeNormalBrush (HDC hdc)
+static void ChangeNormalBrush (HDC hdc)
 {
 	HBRUSH hb;
 
@@ -536,9 +556,9 @@ void ChangeNormalBrush (HDC hdc)
 	DeleteObject (theNormalBrush);
 
 	theNormalBrush = hb;
-}
+}	/* ChangeNormalBrush */
 
-void ChangeBackBrush (HDC hdc)
+static void ChangeBackBrush (HDC hdc)
 {
 	HBRUSH hb;
 
@@ -549,7 +569,8 @@ void ChangeBackBrush (HDC hdc)
 	DeleteObject (theBackBrush);
 
 	theBackBrush = hb;
-}
+}	/* ChangeBackBrush */
+
 
 /*------------------------------------*\
 |	   Interface functions			   |
@@ -563,7 +584,7 @@ void WinSetPenSize (int size, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinSetPenSize */
 
 void WinSetPenColor (int red, int green, int blue, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -576,7 +597,7 @@ void WinSetPenColor (int red, int green, int blue, HDC ihdc, OS ios, HDC * ohdc,
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinSetPenColor */
 
 void WinSetBackColor (int red, int green, int blue, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -587,7 +608,7 @@ void WinSetBackColor (int red, int green, int blue, HDC ihdc, OS ios, HDC * ohdc
 	SetBkColor (ihdc, backColor);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinSetBackColor */
 
 void WinSetMode (int mode, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -612,13 +633,14 @@ void WinSetMode (int mode, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 	}
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinSetMode */
 
 void WinSetPattern (int pattern, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinSetPattern */
+
 
 void WinGetPenPos (HDC ihdc, OS ios, int *x, int *y, HDC * ohdc, OS * oos)
 {
@@ -630,7 +652,7 @@ void WinGetPenPos (HDC ihdc, OS ios, int *x, int *y, HDC * ohdc, OS * oos)
 	*y = p.y;
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinGetPenPos */
 
 void WinMovePenTo (int x, int y, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -638,7 +660,7 @@ void WinMovePenTo (int x, int y, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinMovePenTo */
 
 void WinMovePen (int dx, int dy, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -649,7 +671,7 @@ void WinMovePen (int dx, int dy, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinMovePen */
 
 void WinLinePenTo (int x, int y, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -659,7 +681,7 @@ void WinLinePenTo (int x, int y, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinLinePenTo */
 
 void WinLinePen (int dx, int dy, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -676,7 +698,7 @@ void WinLinePen (int dx, int dy, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinLinePen */
 
 // changed by MW
 void WinDrawPoint (int x, int y, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
@@ -693,7 +715,7 @@ void WinDrawPoint (int x, int y, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinDrawPoint */
 
 void WinDrawLine (int startx, int starty, int endx, int endy, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -707,7 +729,7 @@ void WinDrawLine (int startx, int starty, int endx, int endy, HDC ihdc, OS ios, 
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinDrawLine */
 
 void WinDrawCurve (int left, int top, int right, int bot,
 				   int startradx, int startrady,
@@ -721,44 +743,7 @@ void WinDrawCurve (int left, int top, int right, int bot,
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
-
-void WinDrawChar (int ic, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
-{
-	char c;
-	int oldmode;
-
-	c = ic;
-
-	oldmode = GetBkMode (ihdc);
-	SetBkMode (ihdc, TRANSPARENT);
-	TextOut (ihdc, 0, 0, &c, 1);
-	SetBkMode (ihdc, oldmode);
-
-	*ohdc = ihdc;
-	*oos = ios;
-}
-
-void WinDrawString (CLEAN_STRING clstring, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
-{
-	int oldmode;
-
-	oldmode = GetBkMode (ihdc);
-	if (penMode==iModeXor)					/* Check if currently in XOR mode */
-	{
-		SetBkMode (ihdc, OPAQUE);			/* in that case background should be OPAQUE. */
-	}
-	else
-	{
-		SetBkMode (ihdc, TRANSPARENT);		/* otherwise it should be TRANSPARENT. */
-	}
-	if (!TextOut (ihdc, 0, 0, clstring->characters, clstring->length))
-		rMessageBox (NULL,MB_APPLMODAL,"WinDrawString","TextOut failed.");
-	SetBkMode (ihdc, oldmode);
-
-	*ohdc = ihdc;
-	*oos = ios;
-}
+}	/* WinDrawCurve */
 
 // changed by MW
 void WinDrawCPoint (int x, int y,
@@ -773,7 +758,7 @@ void WinDrawCPoint (int x, int y,
 		}
 	else
 		WinDrawCLine(x,y,x,y,red,green,blue,ihdc,ios,ohdc,oos);
-}
+}	/* WinDrawCPoint */
 
 void WinDrawCLine (int startx, int starty, int endx, int endy,
 				   int red, int green, int blue,
@@ -800,7 +785,7 @@ void WinDrawCLine (int startx, int starty, int endx, int endy,
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinDrawCLine */
 
 void WinDrawCCurve (int left, int top, int right, int bot,
 					int startradx, int startrady,
@@ -825,7 +810,46 @@ void WinDrawCCurve (int left, int top, int right, int bot,
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinDrawCCurve */
+
+
+void WinDrawChar (int ic, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
+{
+	char c;
+	int oldmode;
+
+	c = ic;
+
+	oldmode = GetBkMode (ihdc);
+	SetBkMode (ihdc, TRANSPARENT);
+	TextOut (ihdc, 0, 0, &c, 1);
+	SetBkMode (ihdc, oldmode);
+
+	*ohdc = ihdc;
+	*oos = ios;
+}	/* WinDrawChar */
+
+void WinDrawString (CLEAN_STRING clstring, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
+{
+	int oldmode;
+
+	oldmode = GetBkMode (ihdc);
+	if (penMode==iModeXor)					/* Check if currently in XOR mode */
+	{
+		SetBkMode (ihdc, OPAQUE);			/* in that case background should be OPAQUE. */
+	}
+	else
+	{
+		SetBkMode (ihdc, TRANSPARENT);		/* otherwise it should be TRANSPARENT. */
+	}
+	if (!TextOut (ihdc, 0, 0, clstring->characters, clstring->length))
+		rMessageBox (NULL,MB_APPLMODAL,"WinDrawString","TextOut failed.");
+	SetBkMode (ihdc, oldmode);
+
+	*ohdc = ihdc;
+	*oos = ios;
+}	/* WinDrawString */
+
 
 void WinDrawRectangle (int left, int top, int right, int bot, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -833,7 +857,7 @@ void WinDrawRectangle (int left, int top, int right, int bot, HDC ihdc, OS ios, 
 	Rectangle (ihdc, left, top, right, bot);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinDrawRectangle */
 
 void WinFillRectangle (int left, int top, int right, int bot, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -841,7 +865,7 @@ void WinFillRectangle (int left, int top, int right, int bot, HDC ihdc, OS ios, 
 	Rectangle (ihdc, left, top, right + 1, bot + 1);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinFillRectangle */
 
 void WinEraseRectangle (int left, int top, int right, int bot, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -849,7 +873,7 @@ void WinEraseRectangle (int left, int top, int right, int bot, HDC ihdc, OS ios,
 	Rectangle (ihdc, left, top, right + 1, bot + 1);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinEraseRectangle */
 
 void WinInvertRectangle (int left, int top, int right, int bot, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -857,12 +881,12 @@ void WinInvertRectangle (int left, int top, int right, int bot, HDC ihdc, OS ios
 	Rectangle (ihdc, left, top, right + 1, bot + 1);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinInvertRectangle */
 
 void WinMoveRectangleTo (int left, int top, int right, int bot, int x, int y, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
 	WinMoveRectangle (left,top, right,bot, x-left, y-top, ihdc, ios, ohdc, oos);
-}
+}	/* WinMoveRectangleTo */
 
 void WinMoveRectangle (int left, int top, int right, int bot, int dx, int dy, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -907,12 +931,12 @@ void WinMoveRectangle (int left, int top, int right, int bot, int dx, int dy, HD
 		Rectangle (ihdc, left, bot - dy, right + 1, bot + 1);
 	else
 		Rectangle (ihdc, left, top, right + 1, top + dy + 1);
-}
+}	/* WinMoveRectangle */
 
 void WinCopyRectangleTo (int left, int top, int right, int bot, int x, int y, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
 	WinCopyRectangle (left,top, right,bot, x-left,y-top, ihdc, ios, ohdc, oos);
-}
+}	/* WinCopyRectangleTo */
 
 void WinCopyRectangle (int left, int top, int right, int bottom, int dx, int dy, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -929,7 +953,7 @@ void WinCopyRectangle (int left, int top, int right, int bottom, int dx, int dy,
 	}
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinCopyRectangle */
 
 /*	PA: new routine to scroll part of the content of a window. 
 		It is assumed that scrolling happens in one direction only (dx<>0 && dy==0 || dx==0 && dy<>0).
@@ -998,7 +1022,8 @@ void WinScrollRectangle (int left, int top, int right, int bottom, int dx, int d
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinScrollRectangle */
+
 
 void WinDrawRoundRectangle (int left, int top, int right, int bot, int width, int height, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1007,7 +1032,7 @@ void WinDrawRoundRectangle (int left, int top, int right, int bot, int width, in
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinDrawRoundRectangle */
 
 void WinFillRoundRectangle (int left, int top, int right, int bot, int width, int height, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1015,7 +1040,7 @@ void WinFillRoundRectangle (int left, int top, int right, int bot, int width, in
 	RoundRect (ihdc, left, top, right + 1, bot + 1, width, height);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinFillRoundRectangle */
 
 void WinEraseRoundRectangle (int left, int top, int right, int bot, int width, int height, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1023,7 +1048,7 @@ void WinEraseRoundRectangle (int left, int top, int right, int bot, int width, i
 	RoundRect (ihdc, left, top, right + 1, bot + 1, width, height);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinEraseRoundRectangle */
 
 void WinInvertRoundRectangle (int left, int top, int right, int bot, int width, int height, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1031,7 +1056,8 @@ void WinInvertRoundRectangle (int left, int top, int right, int bot, int width, 
 	RoundRect (ihdc, left, top, right + 1, bot + 1, width, height);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinInvertRoundRectangle */
+
 
 void WinDrawOval (int left, int top, int right, int bot, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1039,7 +1065,7 @@ void WinDrawOval (int left, int top, int right, int bot, HDC ihdc, OS ios, HDC *
 	Ellipse (ihdc, left, top, right + 0, bot + 0);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinDrawOval */
 
 void WinFillOval (int left, int top, int right, int bot, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1047,7 +1073,7 @@ void WinFillOval (int left, int top, int right, int bot, HDC ihdc, OS ios, HDC *
 	Ellipse (ihdc, left, top, right + 1, bot + 1);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinFillOval */
 
 void WinEraseOval (int left, int top, int right, int bot, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1055,7 +1081,7 @@ void WinEraseOval (int left, int top, int right, int bot, HDC ihdc, OS ios, HDC 
 	Ellipse (ihdc, left, top, right + 1, bot + 1);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinEraseOval */
 
 void WinInvertOval (int left, int top, int right, int bot, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1063,7 +1089,8 @@ void WinInvertOval (int left, int top, int right, int bot, HDC ihdc, OS ios, HDC
 	Ellipse (ihdc, left, top, right + 1, bot + 1);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinInvertOval */
+
 
 void WinDrawCircle (int centerx, int centery, int radius, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1071,7 +1098,7 @@ void WinDrawCircle (int centerx, int centery, int radius, HDC ihdc, OS ios, HDC 
 	Ellipse (ihdc, centerx - radius, centery - radius, centerx + radius + 0, centery + radius + 0);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinDrawCircle */
 
 void WinFillCircle (int centerx, int centery, int radius, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1079,7 +1106,7 @@ void WinFillCircle (int centerx, int centery, int radius, HDC ihdc, OS ios, HDC 
 	Ellipse (ihdc, centerx - radius, centery - radius, centerx + radius + 1, centery + radius + 1);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinFillCircle */
 
 void WinEraseCircle (int centerx, int centery, int radius, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1087,7 +1114,7 @@ void WinEraseCircle (int centerx, int centery, int radius, HDC ihdc, OS ios, HDC
 	Ellipse (ihdc, centerx - radius, centery - radius, centerx + radius + 1, centery + radius + 1);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinEraseCircle */
 
 void WinInvertCircle (int centerx, int centery, int radius, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1095,7 +1122,8 @@ void WinInvertCircle (int centerx, int centery, int radius, HDC ihdc, OS ios, HD
 	Ellipse (ihdc, centerx - radius, centery - radius, centerx + radius + 1, centery + radius + 1);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinInvertCircle */
+
 
 void WinDrawWedge (int left, int top, int right, int bot,
 				   int startradx, int startrady,
@@ -1116,7 +1144,7 @@ void WinDrawWedge (int left, int top, int right, int bot,
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinDrawWedge */
 
 void WinFillWedge (int left, int top, int right, int bot,
 				   int startradx, int startrady,
@@ -1130,7 +1158,7 @@ void WinFillWedge (int left, int top, int right, int bot,
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinFillWedge */
 
 void WinEraseWedge (int left, int top, int right, int bot,
 					int startradx, int startrady,
@@ -1144,7 +1172,7 @@ void WinEraseWedge (int left, int top, int right, int bot,
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinEraseWedge */
 
 void WinInvertWedge (int left, int top, int right, int bot,
 					 int startradx, int startrady,
@@ -1158,21 +1186,22 @@ void WinInvertWedge (int left, int top, int right, int bot,
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinInvertWedge */
+
 
 OS WinStartPolygon (int size, OS os)
 {
 	thePolygon = rmalloc (size * sizeof (POINT));
 	thePolygonIndex = 0;
 	return os;
-}
+}	/* WinStartPolygon */
 
 OS WinEndPolygon (OS os)
 {
 	rfree (thePolygon);
 	thePolygon = NULL;
 	return os;
-}
+}	/* WinEndPolygon */
 
 OS WinAddPolygonPoint (int x, int y, OS os)
 {
@@ -1180,7 +1209,7 @@ OS WinAddPolygonPoint (int x, int y, OS os)
 	thePolygon[thePolygonIndex].y = y;
 	thePolygonIndex++;
 	return os;
-}
+}	/* WinAddPolygonPoint */
 
 void WinDrawPolygon (HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1188,7 +1217,7 @@ void WinDrawPolygon (HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 	Polygon (ihdc, thePolygon, thePolygonIndex);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinDrawPolygon */
 
 void WinFillPolygon (HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1196,7 +1225,7 @@ void WinFillPolygon (HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 	Polygon (ihdc, thePolygon, thePolygonIndex);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinFillPolygon */
 
 void WinErasePolygon (HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1204,7 +1233,7 @@ void WinErasePolygon (HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 	Polygon (ihdc, thePolygon, thePolygonIndex);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinErasePolygon */
 
 void WinInvertPolygon (HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1212,7 +1241,8 @@ void WinInvertPolygon (HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 	Polygon (ihdc, thePolygon, thePolygonIndex);
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinInvertPolygon */
+
 
 /*	PA: two new routines that temporarily create and destroy a DISPLAY HDC.
 		Use this HDC only for local use.
@@ -1225,17 +1255,18 @@ void WinCreateScreenHDC (OS ios, HDC *ohdc, OS * oos)
 
 	*ohdc = hdcDisplay;
 	*oos = ios;
-}
+}	/* WinCreateScreenHDC */
 
 OS WinDestroyScreenHDC (HDC ihdc, OS os)
 {
 	DeleteDC (ihdc);
 
 	return os;
-}
+}	/* WinDestroyScreenHDC */
 
-void getBitmapData(/*input:*/ char *ptr,	// points to beginning of bitmap
-				   /*output*/ char **startOfData,char **startOfHeader, int *height)
+
+static void getBitmapData(/*input:*/ char *ptr,	// points to beginning of bitmap
+						  /*output*/ char **startOfData,char **startOfHeader, int *height)
 {
 	char *startOfFile	= ptr + 4;
 	int  dataOffset     = *((int*)(startOfFile + 10));
@@ -1281,7 +1312,7 @@ void WinPrintResizedBitmap (int sx2, int sy2,
 		errorcode = GetLastError ();
 		rMessageBox (NULL,MB_APPLMODAL,"WinPrintResizedBitmap","StretchDIBits returned GDI_ERROR: %i",errorcode);
 	}
-}
+}	/* WinPrintResizedBitmap */
 
 /*	WinDrawResizedBitmap draws a bitmap on screen. For reasons of efficiency it uses an 
 	already created bitmap handle.
@@ -1325,7 +1356,7 @@ void WinDrawResizedBitmap (int sourcew, int sourceh, int destx, int desty, int d
 
 	*hdcReturn = hdc;
 	*osReturn  = os;
-}
+}	/* WinDrawResizedBitmap */
 
 // ... MW
 
@@ -1368,7 +1399,7 @@ void WinDrawBitmap (int w, int h, int destx, int desty,
 
 	*hdcReturn = hdc;
 	*osReturn  = os;
-}
+}	/* WinDrawBitmap */
 
 /*	PA: new routine that creates a HBITMAP given a DIB.
 */
@@ -1397,14 +1428,11 @@ void WinCreateBitmap (int width, char *ptr, HDC hdc, int os, HBITMAP *hBitmap, i
 
 	*hBitmap  = hbmp;
 	*osReturn = os;
-}
-
+}	/* WinCreateBitmap */
 
 
 /*-----------------------------
-
 	   Font stuff
-
   -----------------------------*/
 
 void WinSetFont (CLEAN_STRING clfname, int style, int size, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
@@ -1433,7 +1461,7 @@ void WinSetFont (CLEAN_STRING clfname, int style, int size, HDC ihdc, OS ios, HD
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinSetFont */
 
 void WinSetFontName (CLEAN_STRING clfname, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1452,7 +1480,7 @@ void WinSetFontName (CLEAN_STRING clfname, HDC ihdc, OS ios, HDC * ohdc, OS * oo
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinSetFontName */
 
 void WinSetFontStyle (int style, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1471,7 +1499,7 @@ void WinSetFontStyle (int style, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinSetFontStyle */
 
 void WinSetFontSize (int size, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {
@@ -1491,7 +1519,7 @@ void WinSetFontSize (int size, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinSetFontSize */
 
 void WinGetFontInfo (CLEAN_STRING clFontName, int style, int size, int hdcPassed, HDC maybeHdc, OS ios,
 					 int *ascent, int *descent, int *maxwidth, int *leading,	OS * oos
@@ -1529,7 +1557,7 @@ void WinGetFontInfo (CLEAN_STRING clFontName, int style, int size, int hdcPassed
 	if (!hdcPassed)
 	// MW
 		DeleteDC(screen);
-}
+}	/* WinGetFontInfo */
 
 void WinGetPicFontInfo (HDC ihdc, OS ios, int *ascent, int *descent, int *maxwidth, int *leading, HDC * ohdc, OS * oos)
 {
@@ -1544,7 +1572,7 @@ void WinGetPicFontInfo (HDC ihdc, OS ios, int *ascent, int *descent, int *maxwid
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinGetPicFontInfo */
 
 void WinGetPicStringWidth (CLEAN_STRING clstring, HDC ihdc, OS ios, int *width, HDC * ohdc, OS * oos)
 {
@@ -1555,7 +1583,7 @@ void WinGetPicStringWidth (CLEAN_STRING clstring, HDC ihdc, OS ios, int *width, 
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
+}	/* WinGetPicStringWidth */
 
 void WinGetPicCharWidth (int ichar, HDC ihdc, OS ios, int *width, HDC * ohdc, OS * oos)
 {
@@ -1569,45 +1597,7 @@ void WinGetPicCharWidth (int ichar, HDC ihdc, OS ios, int *width, HDC * ohdc, OS
 
 	*ohdc = ihdc;
 	*oos = ios;
-}
-
-void WinGetCharWidth (int ichar, CLEAN_STRING clFontName, int style, int size, int hdcPassed, HDC maybeHdc, OS ios,
-					  int *width, OS * oos
-					 )
-{
-	LOGFONT lf;
-	HDC screen, dummy;
-	HFONT of;
-	int pixSize;
-
-	// MW: I added the hdcPassed and maybeHdc parameters. If (hdcPassed), then the font info
-	// will depend on the hdc, that was passed via maybeHdc. In this way font info in a printer hdc can
-	// be retrieved. If (!hdcPassed) the default hdc is a DISPLAY.
-	// MW
-	if (hdcPassed)
-		screen = maybeHdc;
-	  else
-		screen = CreateDC ("DISPLAY", NULL, NULL, NULL);
-	
-	pixSize = PointsToPix(screen,size);
-	// end MW
-
-	SetLogFontData (&lf, "", style, pixSize);
-
-	rsncopy (lf.lfFaceName, clFontName->characters, clFontName->length);
-	lf.lfFaceName[clFontName->length] = 0;
-
-	of = SelectObject (screen, CreateFontIndirect (&lf));
-
-	WinGetPicCharWidth (ichar, screen, ios, width, &dummy, oos);
-
-	DeleteObject (SelectObject (screen, of));
-
-	// MW
-	if (!hdcPassed)
-	// MW
-		DeleteDC(screen);
-}
+}	/* WinGetPicCharWidth */
 
 void WinGetStringWidth (CLEAN_STRING clstring, CLEAN_STRING clFontName, int style, int size, int hdcPassed, HDC maybeHdc, OS ios,
 						int *width, OS * oos
@@ -1656,26 +1646,48 @@ void WinGetStringWidth (CLEAN_STRING clstring, CLEAN_STRING clFontName, int styl
 	if (!hdcPassed)
 	// MW
 		DeleteDC(screen);
-}
+}	/* WinGetStringWidth */
+
+void WinGetCharWidth (int ichar, CLEAN_STRING clFontName, int style, int size, int hdcPassed, HDC maybeHdc, OS ios,
+					  int *width, OS * oos
+					 )
+{
+	LOGFONT lf;
+	HDC screen, dummy;
+	HFONT of;
+	int pixSize;
+
+	// MW: I added the hdcPassed and maybeHdc parameters. If (hdcPassed), then the font info
+	// will depend on the hdc, that was passed via maybeHdc. In this way font info in a printer hdc can
+	// be retrieved. If (!hdcPassed) the default hdc is a DISPLAY.
+	// MW
+	if (hdcPassed)
+		screen = maybeHdc;
+	  else
+		screen = CreateDC ("DISPLAY", NULL, NULL, NULL);
+	
+	pixSize = PointsToPix(screen,size);
+	// end MW
+
+	SetLogFontData (&lf, "", style, pixSize);
+
+	rsncopy (lf.lfFaceName, clFontName->characters, clFontName->length);
+	lf.lfFaceName[clFontName->length] = 0;
+
+	of = SelectObject (screen, CreateFontIndirect (&lf));
+
+	WinGetPicCharWidth (ichar, screen, ios, width, &dummy, oos);
+
+	DeleteObject (SelectObject (screen, of));
+
+	// MW
+	if (!hdcPassed)
+	// MW
+		DeleteDC(screen);
+}	/* WinGetCharWidth */
+
 
 // MW...
-
-int PointsToPix(HDC hdc, int size)
-{
-	// convert font size in points to pixels (which depends on the device resolution)
-
-    int vRes;
-	int mapMode = GetMapMode(hdc);
-	if (mapMode==MM_ISOTROPIC)	
-		vRes = WinGetVertResolution();
-	  else
-		vRes = GetDeviceCaps(hdc, LOGPIXELSY);
-	return (size * vRes) / 72;
-/*	MW: currently, the MM_ISOTROPIC mapping mode is only used for printing with the emulation
-	of the screen resolution. For that purpose, points are not subject to the scaling, which
-	MM_ISOTROPIC performs.
-*/
-}
 
 void getResolutionC(int hdc, int *xResP, int *yResP)
 {
@@ -1691,7 +1703,7 @@ void getResolutionC(int hdc, int *xResP, int *yResP)
 /*	MW: currently, the MM_ISOTROPIC mapping mode is only used for printing with the emulation
 	of the screen resolution. In that case the screen resolution will be returned.
 */
-}
+}	/* getResolutionC */
 
 void WinGetPictureScaleFactor(int ihdc, int ios, int *nh, int *dh, int *nv, int *dv, int *ohdc, int *oos)
 {
@@ -1717,5 +1729,5 @@ void WinGetPictureScaleFactor(int ihdc, int ios, int *nh, int *dh, int *nv, int 
 		MM_ISOTROPIC mapping mode, but not the clipping operations. For these, the clipping
 		coordinates have to be scaled
 	*/
-}
+}	/* WinGetPictureScaleFactor */
 // .. MW

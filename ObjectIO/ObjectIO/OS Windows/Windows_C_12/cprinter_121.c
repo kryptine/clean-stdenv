@@ -12,7 +12,6 @@
 #include <limits.h>
 #include "cpicture_121.h"
 #include "util_121.h"
-#include "cCrossCall_121.h"
 #include "cprinter_121.h"
 
 BOOL	bUserAbort;
@@ -36,7 +35,7 @@ typedef struct pass_object *PassObject;
 */
 PassObject	passObj1 = NULL, passObj2 = NULL, passObj3 = NULL, passObj4 = NULL;
 
-void mwStrcpy(char* dest, char *src)
+static void mwStrcpy(char* dest, char *src)
 {
 	int i=0;
 	while (src[i]!='\0')
@@ -47,14 +46,14 @@ void mwStrcpy(char* dest, char *src)
 	dest[i]	= '\0';
 }
 
-void mwMemcpy(char* dest, char *src, int count)
+static void mwMemcpy(char* dest, char *src, int count)
 {
 	int i;
 	for(i=0; i<count; i++)
 		dest[i]	= src[i];
 }
 
-int CStringLength(char* string)
+static int CStringLength(char* string)
 // returns length of C string INCLUDING the '\0'
 {
 	int i=0;
@@ -64,7 +63,7 @@ int CStringLength(char* string)
 	return i;
 }
 
-CleanString PassCleanString(PassObject *pPassObj, char* data,unsigned int size)
+static CleanString PassCleanString(PassObject *pPassObj, char* data,unsigned int size)
 {
 	unsigned int	passObjSize,i;
 	PassObject		passObj;
@@ -124,7 +123,7 @@ void getDefaultDevmodeC(char *printSetup, LPHANDLE phPrinter,  CleanString *devi
 	ClosePrinter(phPrinter);
 }
 
-HDC myCreateIC(LPCTSTR driver, LPCTSTR device, DEVMODE *devmode)
+static HDC myCreateIC(LPCTSTR driver, LPCTSTR device, DEVMODE *devmode)
 {
 	HDC	icPrint;
 
@@ -184,8 +183,8 @@ void os_getpagedimensionsC(	CleanString devmode,
 	DeleteDC(icPrint);
 }
 
-HANDLE setupDevnames(int deviceLength,int driverLength,int outputLength,
-					 char *device,char *driver,char *output)	
+static HANDLE setupDevnames(int deviceLength,int driverLength,int outputLength,
+							char *device,char *driver,char *output)	
 {
 	HANDLE		hDevnames;
 	DEVNAMES	*pDevnames;
@@ -202,7 +201,7 @@ HANDLE setupDevnames(int deviceLength,int driverLength,int outputLength,
 	return hDevnames;
 }
 
-HANDLE setupDevmode(int size, char *pData)
+static HANDLE setupDevmode(int size, char *pData)
 {
 	HANDLE	hDevmode;
 	DEVMODE	*pDevmode;
@@ -235,13 +234,14 @@ void get_printSetup_with_PRINTDLG(PRINTDLG *pd, CleanString *o_devmode,
 	LocalUnlock(pd->hDevNames);
 }
 
+/*	PA: called in Clean. */
 int release_memory_handles(PRINTDLG *pd, int os) {
 	LocalFree(pd->hDevNames);
 	LocalFree(pd->hDevMode);
 	return os;
 	}
 
-UINT APIENTRY DialogToFrontHook(HWND hdl, UINT msg, WPARAM wParam, LPARAM lParam)
+static UINT APIENTRY DialogToFrontHook(HWND hdl, UINT msg, WPARAM wParam, LPARAM lParam)
 // This function hooks the Print dialog. It's purpose is to set the dialog in the
 // foreground.
 {
@@ -344,7 +344,7 @@ void deleteDC(int hdc)
 	DeleteDC((HDC) hdc);
 }
 
-int wasCanceled()
+int wasCanceled(void)
 {
 	//rMessageBox(NULL, MB_APPLMODAL, "in wasCanceled", "");
 	return bUserAbort;
@@ -533,7 +533,7 @@ BOOL CALLBACK AbortProc (HDC hdcPrn, int iCode)
 #define DIALOG_HEIGHT 60
 	// in dialog units
 
-HWND CreateCancelDialog()
+HWND CreateCancelDialog(void)
 {
 	HWND hwndButton,dlgHdl;
 
@@ -613,7 +613,7 @@ HWND CreateCancelDialog()
 	return dlgHdl; 
 }
 
-
+/*	PA: Called in Clean. */
 int addSemaphor(int add)
 {
 	int old=semaphor;

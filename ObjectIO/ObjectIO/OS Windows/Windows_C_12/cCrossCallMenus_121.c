@@ -41,7 +41,7 @@ void EvalCcRqADDMENUSHORTKEY (CrossCallInfo *pcci)	/* frameptr, cmd, key; no res
 
 	if (gAcceleratorTableIsUpToDate)
 	{
-		gAcceleratorTableIsUpToDate == !(ghActiveFrameWindow==frameptr);
+		gAcceleratorTableIsUpToDate = !(ghActiveFrameWindow==frameptr);
 	}
 
 	MakeReturn0Cci (pcci);
@@ -63,7 +63,7 @@ void EvalCcRqREMOVEMENUSHORTKEY (CrossCallInfo *pcci)	/* frameptr, cmd; no resul
 
 	if (gAcceleratorTableIsUpToDate)
 	{
-		gAcceleratorTableIsUpToDate == !(ghActiveFrameWindow==frameptr);
+		gAcceleratorTableIsUpToDate = !(ghActiveFrameWindow==frameptr);
 	}
 
 	MakeReturn0Cci (pcci);

@@ -47,7 +47,9 @@ typedef struct dictitem dictitem;
 #define DNSReceiver			3
 #define ConnectReceiver		4
 
+/* PA: InitSockets has no definition.
 void InitSockets();
+*/
 extern dictitem* lookup(SOCKET endpointRef);
 
 #endif

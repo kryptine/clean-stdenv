@@ -52,7 +52,7 @@ void selectChC(int justForMac, int nonBlocking, int doTimeout, unsigned int stop
 					  SOCKET *pRChannels, int *justForMac2, SOCKET *pSChannels,
 					  int *pErrCode
 					 );
-int tcpPossibleC();
+int tcpPossibleC(void);
 
 //************************************************
 // other functions
@@ -62,7 +62,7 @@ void StartUp(int abort);
 	// if succesful: tcpStartedUp==TRUE afterwards
 	// if not succesful && abort: aborts
 	// if not succesful && !abort: tcpStartedUp==FALSE afterwards
-void CleanUp();
+void CleanUp(void);
 
 //************************************************
 // functions to deal with the endpoint dictionary:
@@ -100,7 +100,7 @@ extern	void (*exit_tcpip_function)();	// the function will be called, when the C
 
 //--------------------- FUNCTION IMPLEMENTATION -----------------------------------
 
-int tcpPossibleC()
+int tcpPossibleC(void)
 {
 	StartUp(FALSE);
 	return tcpStartedUp;
@@ -648,7 +648,7 @@ void selectChC(	int justForMac, int nonBlocking, int doTimeout, unsigned int sto
 }
 
 // this function is called from Cleans runtime system via *exit_tcpip_function
-void CleanUp()
+void CleanUp(void)
 {
 	dictitem	*pDictitem, *pTemp;
 	int			referenceCount;

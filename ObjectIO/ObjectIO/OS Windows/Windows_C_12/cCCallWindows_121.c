@@ -118,19 +118,19 @@ LONG GetGWL_USERDATA (HWND hwnd)
 		WindowHasHScroll (hwnd) returns TRUE iff hwnd has a horizontal scrollbar;
 		WindowHasVScroll (hwnd) returns TRUE iff hwnd has a vertical scrollbar;
 */
-LONG GetGWL_STYLE (HWND hwnd)
+static LONG GetGWL_STYLE (HWND hwnd)
 {
 	return GetWindowLong (hwnd, GWL_STYLE);
 }
 
-BOOL WindowHasHScroll (HWND hwnd)
+static BOOL WindowHasHScroll (HWND hwnd)
 {
 	LONG hwndStyle = GetGWL_STYLE (hwnd);
 
 	return (hwndStyle & WS_HSCROLL);
 }
 
-BOOL WindowHasVScroll (HWND hwnd)
+static BOOL WindowHasVScroll (HWND hwnd)
 {
 	LONG hwndStyle = GetGWL_STYLE (hwnd);
 
