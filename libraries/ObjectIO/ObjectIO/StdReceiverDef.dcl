@@ -19,9 +19,9 @@ import	StdIOCommon
 ::	ReceiverFunction  m   st :== m -> st ->    st
 ::	Receiver2Function m r st :== m -> st -> (r,st)
 
-::	ReceiverAttribute	st						// Default:
-	=	ReceiverInit		(IdFun st)			// no actions after opening receiver
-	|	ReceiverSelectState	SelectState			// receiver Able
-	|	ReceiverConnectedReceivers [Id]			// [] // MW11++
+::	ReceiverAttribute	st					// Default:
+	=	ReceiverInit		(IdFun st)		// no actions after opening receiver
+	|	ReceiverSelectState	SelectState		// receiver Able
+	|	ReceiverConnectedReceivers [Id]		// []
 ::	ReceiverType
 	:==	String

@@ -188,6 +188,25 @@ accControlPicture		:: !Id !.(St *Picture .x)		!(IOSt .l)
 */
 
 
+updateControl			:: !Id !(Maybe ViewFrame)		!(IOSt .l) -> IOSt .l
+/*	updateControl applies the Look attribute function of the indicated 
+	(Compound/Custom(Button))Control.
+	The Look attribute function is applied to the following arguments:
+	The current SelectState of the control, and
+	the UpdateState argument
+		{oldFrame=viewframe,newFrame=viewframe,updArea=[frame]}
+	where viewframe is the current ViewFrame of the control;
+	and frame depends on the optional ViewFrame argument:
+		in case of (Just rectangle):
+			the intersection of viewframe and rectangle.
+		in case of Nothing:
+			viewframe. 
+	updateControl has no effect in case of unknown controls, or if the indicated 
+	control is not a (Compound/Custom(Button))Control, or the optional viewframe 
+	argument is an empty rectangle.
+*/
+
+
 /*	Access functions on WState. To read the state of a control, a WState is 
 	required which can be obtained by the getWindow function. The WState value 
 	represents the state of a window or dialogue at that particular moment.

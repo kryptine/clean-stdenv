@@ -21,12 +21,12 @@ class MenuElements m where
 	getMenuElementType		::  (m .ls .pst)
 			-> MenuElementType
 
-instance MenuElements (AddLS	m)	| MenuElements m	// getMenuElementType==""
-instance MenuElements (NewLS	m)	| MenuElements m	// getMenuElementType==""
-instance MenuElements (ListLS	m)	| MenuElements m	// getMenuElementType==""
-instance MenuElements NilLS								// getMenuElementType==""
+instance MenuElements (AddLS	m)	| MenuElements m
+instance MenuElements (NewLS	m)	| MenuElements m
+instance MenuElements (ListLS	m)	| MenuElements m
+instance MenuElements NilLS
 instance MenuElements ((:+:) m1 m2)	| MenuElements m1
-									& MenuElements m2	// getMenuElementType==""
+									& MenuElements m2
 instance MenuElements (SubMenu	m)	| MenuElements m
 instance MenuElements RadioMenu
 instance MenuElements MenuItem
@@ -40,12 +40,12 @@ class PopUpMenuElements m where
 	getPopUpMenuElementType		::  (m .ls .pst)
 				-> MenuElementType
 
-instance PopUpMenuElements (AddLS	m)		| PopUpMenuElements m	// getPopUpMenuElementType==""
-instance PopUpMenuElements (NewLS	m)		| PopUpMenuElements m	// getPopUpMenuElementType==""
-instance PopUpMenuElements (ListLS	m)		| PopUpMenuElements m	// getPopUpMenuElementType==""
-instance PopUpMenuElements NilLS									// getPopUpMenuElementType==""
+instance PopUpMenuElements (AddLS	m)		| PopUpMenuElements m
+instance PopUpMenuElements (NewLS	m)		| PopUpMenuElements m
+instance PopUpMenuElements (ListLS	m)		| PopUpMenuElements m
+instance PopUpMenuElements NilLS
 instance PopUpMenuElements ((:+:) m1 m2)	| PopUpMenuElements m1
-											& PopUpMenuElements m2	// getPopUpMenuElementType==""
+											& PopUpMenuElements m2
 instance PopUpMenuElements RadioMenu
 instance PopUpMenuElements MenuItem
 instance PopUpMenuElements MenuSeparator

@@ -11,9 +11,10 @@ definition module StdPrint
 //	********************************************************************************
  
 
-from	StdPicture		import	Picture, Point2
-from	StdIOCommon		import	Size, Rectangle, IdFun, UpdateState, ViewFrame, UpdateArea
+from	StdIOCommon		import	UpdateState, ViewFrame, UpdateArea
+from	StdIOBasic		import	IdFun, Size, Rectangle, Point2
 from	StdOverloaded	import	==
+from	ospicture		import	Picture
 from	osprint			import	PrintSetup, JobInfo, PrintInfo, Alternative, 
 								Cancelled, StartedPrinting, PrintEnvironments
 from	iostate			import	IOSt, PSt

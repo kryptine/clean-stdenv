@@ -84,13 +84,13 @@ getActiveWindow	::			!(IOSt .l) -> (!Maybe Id,!IOSt .l)
 
 setActiveControl:: !Id		!( PSt .l) -> PSt .l
 getActiveControl::			!(IOSt .l) -> (!(!Bool,!Maybe Id),!IOSt .l)
-/*	setActiveControl makes the indicated (PopUp/Edit/Custom/Compound)Control the active
-		control. This succeeds only if its parent window is already active.
+/*	setActiveControl makes the indicated (PopUp/Edit/Custom/Compound)Control the 
+		active control. This succeeds only if its parent window is already active.
 	getActiveControl returns the Id of the (PopUp/Edit/Custom/Compound)Control that 
 		currently has the input focus.
 		The Boolean result is True only iff such a control could be found.
-		Nothing is returned if the control has no Id attribute or if the Boolean result
-		is False. 
+		Nothing is returned if the control has no Id attribute or if the Boolean 
+		result is False. 
 */
 
 
@@ -190,18 +190,18 @@ accWindowPicture:: !Id !.(St *Picture .x) !(IOSt .l) -> (!Maybe .x,!IOSt .l)
 
 updateWindow	:: !Id !(Maybe ViewFrame)	!(IOSt .l) -> IOSt .l
 /*	updateWindow applies the WindowLook attribute function of the indicated window.
-	The SelectState argument of the Look attribute is the current SelectState of the
-	window.
-	The UpdateState argument of the Look attribute is 
-		{oldFrame=frame,newFrame=frame,updArea=[frame]}
-	where frame depends on the optional ViewFrame argument:
+	The Look attribute function is applied to the following arguments:
+	The current SelectState of the window, and
+	the UpdateState argument
+		{oldFrame=viewframe,newFrame=viewframe,updArea=[frame]}
+	where viewframe is the current ViewFrame of the window;
+	and frame depends on the optional ViewFrame argument:
 		in case of (Just rectangle):
-			the intersection of the current ViewFrame of the window and rectangle.
+			the intersection of viewframe and rectangle.
 		in case of Nothing:
-			the current ViewFrame of the window. 
+			viewframe. 
 	updateWindow has no effect in case of unknown windows, or if the indicated 
-	window is a Dialog, or the window has no WindowLook attribute, or the optional 
-	viewframe argument is empty.
+	window is a Dialog, or the optional viewframe argument is an empty rectangle.
 */
 
 setWindowLook	:: !Id !Bool !(!Bool,!Look)	!(IOSt .l) -> IOSt .l

@@ -12,10 +12,12 @@ from	controllayout	import calcControlsSize
 from	receiverid		import unbindRIds
 from	StdPSt			import appPIO
 from	windowclipstate	import invalidateWindowClipState`, forceValidWindowClipState`
+from	windowupdate	import updatewindow
 from	wstateaccess	import iswindowitemspace`, getwindowitemspace`,
 								iswindowhmargin`,  getwindowhmargin`,
 								iswindowvmargin`,  getwindowvmargin`
 from	ostoolbox		import OSNewToolbox
+from	oswindow		import OSscrollbarsAreVisible
 
 
 StdControlFatalError :: String String -> .x
@@ -731,6 +733,107 @@ accControlPicture cId drawfun ioState
 		# ioState				= setIOToolbox tb ioState
 		# ioState				= IOStSetDevice (WindowSystemState windows) ioState
 		= (maybe_result,ioState)
+
+//	Update a selection of a (Compound/Custom(Button))Control:
+updateControl :: !Id !(Maybe ViewFrame) !(IOSt .l) -> IOSt .l
+updateControl cId maybeViewFrame ioState
+	# (idtable,ioState)			= IOStGetIdTable ioState
+	# (ioId,ioState)			= IOStGetIOId ioState
+	  maybeParent				= getIdParent cId idtable
+	| not (fst (isOkControlId ioId (cId,maybeParent)))
+		= ioState
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  wId						= (fromJust maybeParent).idpId
+	  (_,wsH,windows)			= getWindowHandlesWindow (toWID wId) windows
+	  (wKind,wsH)				= getWindowStateHandleWindowKind wsH
+	| wKind<>IsWindow
+		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
+	| otherwise
+		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# (wsH,ioState)			= accIOToolbox (updateControlBackground wMetrics wKind cId maybeViewFrame wsH) ioState
+		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
+where
+	updateControlBackground :: !OSWindowMetrics !WindowKind !Id !(Maybe ViewFrame) !(WindowStateHandle .pst) !*OSToolbox
+																				-> (!WindowStateHandle .pst, !*OSToolbox)
+	updateControlBackground wMetrics wKind cId maybeViewFrame wsH=:{wshIds,wshHandle=Just wlsH=:{wlsHandle=wH=:{whSize=whSize,whItems=itemHs}}} tb
+		# (_,updInfo,itemHs)			= getWElementHandlesUpdateInfo wMetrics cId contentRect itemHs
+		  wH							= {wH & whItems=itemHs}
+		# (wH,tb)						= updatewindow wMetrics updInfo wH tb
+		= ({wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
+	where
+		info							= getWindowInfoWindowData wH.whWindowInfo
+		(domainRect,hasScrolls)			= case wKind of
+											IsWindow -> (info.windowDomain,(isJust info.windowHScroll,isJust info.windowVScroll))
+											_        -> (SizeToRect whSize,(False,False))
+		visScrolls						= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
+		contentRect						= getWindowContentRect wMetrics visScrolls (SizeToRect whSize)
+		
+		getWElementHandlesUpdateInfo :: !OSWindowMetrics !Id !Rect ![WElementHandle .ls .pst] -> (!Bool,UpdateInfo,![WElementHandle .ls .pst])
+		getWElementHandlesUpdateInfo wMetrics cId clipRect itemHs
+			| isEmpty itemHs
+				= (False,undef,itemHs)
+			# (itemH,itemHs)			= HdTl itemHs
+			# (found,updInfo,itemH)		= getWElementHandleUpdateInfo wMetrics cId clipRect itemH
+			| found
+				= (found,updInfo,[itemH:itemHs])
+			| otherwise
+				# (found,updInfo,itemHs)= getWElementHandlesUpdateInfo wMetrics cId clipRect itemHs
+				= (found,updInfo,[itemH:itemHs])
+		where
+			getWElementHandleUpdateInfo :: !OSWindowMetrics !Id !Rect !(WElementHandle .ls .pst) -> (!Bool,UpdateInfo,!WElementHandle .ls .pst)
+			getWElementHandleUpdateInfo wMetrics cId clipRect (WItemHandle itemH=:{wItemId,wItemKind,wItemPos,wItemSize,wItems})
+				| isNothing wItemId || cId<>fromJust wItemId
+					| not (isRecursiveControl wItemKind)
+						= (False,undef,WItemHandle itemH)
+					// otherwise
+						# (found,updInfo,itemHs)	= getWElementHandlesUpdateInfo wMetrics cId visRect wItems
+						= (found,updInfo,WItemHandle {itemH & wItems=itemHs})
+				| isMember wItemKind [IsCompoundControl,IsCustomControl,IsCustomButtonControl]
+					= (True,updInfo,WItemHandle itemH)
+				| otherwise
+					= (False,undef,WItemHandle itemH)
+			where
+				itemRect				= PosSizeToRect wItemPos wItemSize
+				wItemInfo				= itemH.wItemInfo
+				compoundInfo			= getWItemCompoundInfo wItemInfo
+				origin					= if (wItemKind==IsCompoundControl)
+											compoundInfo.compoundOrigin
+											zero
+				domain					= compoundInfo.compoundDomain
+				hasScrolls				= (isJust compoundInfo.compoundHScroll,isJust compoundInfo.compoundVScroll)
+				visScrolls				= OSscrollbarsAreVisible wMetrics domain (toTuple wItemSize) hasScrolls
+				contentRect				= if (wItemKind==IsCompoundControl)
+											(getCompoundContentRect wMetrics visScrolls itemRect)
+											itemRect
+				visRect					= IntersectRects contentRect clipRect
+				updArea							= case maybeViewFrame of
+													Nothing		-> visRect
+													Just rect	-> IntersectRects (RectangleToRect (addVector (toVector wItemPos)
+																								   (subVector (toVector origin) rect)
+																								   )
+																				  ) visRect
+				updInfo							= {	updWIDS			= wshIds
+												  ,	updWindowArea	= zero
+												  ,	updControls		= [	{	cuItemNr	= itemH.wItemNr
+																		,	cuItemPtr	= itemH.wItemPtr
+																		,	cuArea		= updArea
+																		}]
+												  ,	updGContext		= Nothing
+												  }
+			getWElementHandleUpdateInfo wMetrics cId clipRect (WListLSHandle itemHs)
+				# (found,updInfo,itemHs)= getWElementHandlesUpdateInfo wMetrics cId clipRect itemHs
+				= (found,updInfo,WListLSHandle itemHs)
+			getWElementHandleUpdateInfo wMetrics cId clipRect (WExtendLSHandle wExH=:{wExtendItems=itemHs})
+				# (found,updInfo,itemHs)= getWElementHandlesUpdateInfo wMetrics cId clipRect itemHs
+				= (found,updInfo,WExtendLSHandle {wExH & wExtendItems=itemHs})
+			getWElementHandleUpdateInfo wMetrics cId clipRect (WChangeLSHandle wChH=:{wChangeItems=itemHs})
+				# (found,updInfo,itemHs)= getWElementHandlesUpdateInfo wMetrics cId clipRect itemHs
+				= (found,updInfo,WChangeLSHandle {wChH & wChangeItems=itemHs})
+	updateControlBackground _ _ _ _ _ _
+		= StdControlFatalError "updateControl" "unexpected window placeholder argument"
 
 
 //	Access operations on WState:

@@ -32,9 +32,9 @@ class Ids env where
 			is generated.
 */
 
-instance Ids World
-instance Ids (IOSt .l)
-instance Ids (PSt  .l)
+instance Ids World,
+			 IOSt .l,
+			 PSt  .l
 
 getParentId :: !Id !(IOSt .l) -> (!Maybe Id,!IOSt .l)
 /*	getParentId returns the Id of the parent top-level GUI object 
