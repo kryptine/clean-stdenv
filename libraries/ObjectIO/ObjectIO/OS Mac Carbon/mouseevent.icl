@@ -503,7 +503,7 @@ where
 			IsButtonControl				-> case (controlHit pos (movePoint wItemPos parent_pos) wItemSize) of
 											True	-> (True,(itemNr,wItemPtr,pen,NothingState),WItemHandle itemH,ps)
 											False	-> (False,(0,0,pen,NothingState),WItemHandle itemH,ps)
-			IsCheckControl				-> case (checkHit pos checkInfo.checkItems parent_pos) of
+			IsCheckControl				-> case (checkHit pos checkInfo.checkItems item_pos) of
 											(Just (checkPtr,checkMark))	-> (True,(itemNr,checkPtr,pen,CheckControlState checkMark),WItemHandle itemH,ps)
 											Nothing	-> (False,(0,0,pen,NothingState),WItemHandle itemH,ps)
 			IsCompoundControl			-> getCompoundItemNr pos pen (WItemHandle itemH) parent_pos ps
@@ -532,7 +532,7 @@ where
 													#	popupState`		= PopUpEditState (popupIndex,popupTexts,item_pos,wItemSize,popupEditP,popupEditT)
 													-> (True,(itemNr,wItemPtr,pen,popupState`),WItemHandle itemH,ps)
 												False-> (False,(0,0,pen,NothingState),WItemHandle itemH,ps)
-			IsRadioControl				-> case (radioHit pos radioInfo.radioItems parent_pos) of
+			IsRadioControl				-> case (radioHit pos radioInfo.radioItems item_pos) of
 											(Just (radioPtr,newIndex))	-> (True,(itemNr,radioPtr,pen,RadioControlState (newIndex,oldIndex,oldPtr)),WItemHandle itemH,ps)
 											Nothing	-> (False,(0,0,pen,NothingState),WItemHandle itemH,ps)
 			IsSliderControl				-> case (controlHit pos (movePoint wItemPos parent_pos) wItemSize) of
