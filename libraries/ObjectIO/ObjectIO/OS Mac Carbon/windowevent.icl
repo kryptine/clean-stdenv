@@ -1023,7 +1023,7 @@ windowUpdateIO
 	# (updRect,pState)		//= ({rleft=0,rtop=0,rright=400,rbottom=400},pState)
 							= accPIO (accIOToolbox (loadUpdateBBox wPtr)) pState
 	# clipRect				= intersectRects updRect (sizeToRect whSize)
-	# (controls,whItems)	= getUpdateControls clipRect whItems
+	# (controls,whItems)	= getUpdateControls whItems clipRect zero
 	# (info,pState) = case info of 
 						NoWindowInfo			-> (NoWindowInfo,pState)
 						(GameWindowInfo inf)	-> (GameWindowInfo inf,pState)
@@ -1034,42 +1034,39 @@ windowUpdateIO
 	# pState				= appPIO (ioStSetDevice (WindowSystemState windows)) pState
 	= (True,Nothing,Just (WindowUpdate updateInfo),pState)
 where
-	getUpdateControls :: !OSRect ![WElementHandle .ls .pst] -> ([ControlUpdateInfo],[WElementHandle .ls .pst])
-	getUpdateControls _ []
+	getUpdateControls :: ![WElementHandle .ls .pst] !OSRect !Point2 -> ([ControlUpdateInfo],[WElementHandle .ls .pst])
+	getUpdateControls [] _ parent_pos
 		= ([],[])
-	getUpdateControls clipRect [itemH:itemHs]
-		# (l,r)		= getUpdateControl clipRect itemH 
-		# (ll,rr)	= getUpdateControls clipRect itemHs
+	getUpdateControls [itemH:itemHs] clipRect parent_pos
+		# (l,r)		= getUpdateControl itemH clipRect parent_pos
+		# (ll,rr)	= getUpdateControls itemHs clipRect parent_pos
 		= (l++ll,[r:rr])
-		
-	
-	//getUpdateControl :: !OSRect !(WElementHandle .ls .pst) -> [ControlUpdateInfo]
-	getUpdateControl clipRect (WItemHandle itemH=:{wItemShow,wItemKind,wItemPtr,wItemPos,wItemSize,wItemNr})
+
+	getUpdateControl :: !(WElementHandle .ls .pst) !OSRect !Point2 -> (![ControlUpdateInfo],!(WElementHandle .ls .pst))
+	getUpdateControl (WItemHandle itemH=:{wItemShow,wItemKind,wItemPtr,wItemPos,wItemSize,wItemNr}) clipRect parent_pos
 		| not wItemShow
 			= ([],WItemHandle itemH)
 		| wItemKind == IsLayoutControl
-			# (controls,whItems)	= getUpdateControls clipRect itemH.wItems
+			# (controls,whItems)	= getUpdateControls itemH.wItems clipRect (movePoint wItemPos parent_pos)
 			= (controls,WItemHandle {itemH & wItems = whItems})
+		# item_pos = movePoint wItemPos parent_pos
+		# itemRect	= posSizeToRect item_pos wItemSize
+		  clipRect`	= intersectRects clipRect itemRect
 		| wItemKind == IsCompoundControl
-			# (controls,whItems)	= getUpdateControls clipRect itemH.wItems
+			# (controls,whItems)	= getUpdateControls itemH.wItems clipRect item_pos
+			  clipRect``	= addVector (toVector ((getWItemCompoundInfo itemH.wItemInfo).compoundOrigin - item_pos)) clipRect`
+			  control`	= {cuItemNr = wItemNr, cuItemPtr = wItemPtr, cuArea = clipRect``}
 			= ([control`:controls],WItemHandle {itemH & wItems = whItems})
+		#  control		= {cuItemNr = wItemNr, cuItemPtr = wItemPtr, cuArea = clipRect`}
 		= ([control],WItemHandle itemH)
-	where
-		itemRect	= posSizeToRect wItemPos wItemSize
-		clipRect`	= intersectRects clipRect itemRect
-//		clipRect``	= addVector (toVector (getWItemCompoundInfo itemH.wItemInfo).compoundOrigin) clipRect`
-		clipRect``	= addVector (toVector ((getWItemCompoundInfo itemH.wItemInfo).compoundOrigin - wItemPos)) clipRect`
-		control		= {cuItemNr = wItemNr, cuItemPtr = wItemPtr, cuArea = clipRect`}
-		control`	= {cuItemNr = wItemNr, cuItemPtr = wItemPtr, cuArea = clipRect``}
-	
-	getUpdateControl clipRect (WListLSHandle itemHs)
-		# (controls,itemHs) = getUpdateControls clipRect itemHs
+	getUpdateControl (WListLSHandle itemHs) clipRect parent_pos
+		# (controls,itemHs) = getUpdateControls itemHs clipRect parent_pos
 		= (controls,WListLSHandle itemHs)
-	getUpdateControl clipRect (WExtendLSHandle wExH=:{wExtendItems=itemHs})
-		# (controls,itemHs) = getUpdateControls clipRect itemHs
+	getUpdateControl (WExtendLSHandle wExH=:{wExtendItems=itemHs}) clipRect parent_pos
+		# (controls,itemHs) = getUpdateControls itemHs clipRect parent_pos
 		= (controls,WExtendLSHandle {wExH & wExtendItems = itemHs})
-	getUpdateControl clipRect (WChangeLSHandle wExH=:{wChangeItems=itemHs})
-		# (controls,itemHs) = getUpdateControls clipRect itemHs
+	getUpdateControl (WChangeLSHandle wExH=:{wChangeItems=itemHs}) clipRect parent_pos
+		# (controls,itemHs) = getUpdateControls itemHs clipRect parent_pos
 		= (controls,WChangeLSHandle {wExH & wChangeItems = itemHs})
 	
 //--
@@ -1095,7 +1092,7 @@ where
 	#	caretNr			= fromJust focusNr
 		(size,tb)		= (wH.whSize,tb)	//osGetWindowViewFrameSize wPtr tb
 		contentRect		= osGetWindowContentRect wMetrics (hasHScroll,hasVScroll) (sizeToRect size)	// ?PosSizeToRect
-		(_,items,tb)	= checkitemscaret caretNr wMetrics wPtr contentRect whItems tb
+		(_,items,tb)	= checkitemscaret whItems caretNr wMetrics wPtr contentRect zero tb
 	=	({wsH & wshHandle = Just {wlsH & wlsHandle={wH & whItems=items, whKeyFocus=whKeyFocus}}},tb)
 	where
 		(hasHScroll,hasVScroll) = case whWindowInfo of
@@ -1103,39 +1100,39 @@ where
 									_						-> (False,False)
 
 
-	checkitemscaret :: !Int !OSWindowMetrics !OSWindowPtr !OSRect ![WElementHandle .ls .ps] !*OSToolbox
+	checkitemscaret :: ![WElementHandle .ls .ps] !Int !OSWindowMetrics !OSWindowPtr !OSRect !Point2 !*OSToolbox
 								   -> (!Bool,![WElementHandle .ls .ps],!*OSToolbox)
-	checkitemscaret caretNr wMetrics wPtr clipRect [itemH:itemHs] tb
-	#	(found,itemH,tb)	= checkitemcaret caretNr wPtr clipRect itemH tb
+	checkitemscaret [itemH:itemHs] caretNr wMetrics wPtr clipRect parent_pos tb
+	#	(found,itemH,tb)	= checkitemcaret itemH caretNr wPtr clipRect parent_pos tb
 	|	found
 	=	(found,[itemH:itemHs],tb)
-	#	(found,itemHs,tb)	= checkitemscaret caretNr wMetrics wPtr clipRect itemHs tb
+	#	(found,itemHs,tb)	= checkitemscaret itemHs caretNr wMetrics wPtr clipRect parent_pos tb
 	=	(found,[itemH:itemHs],tb)
 	where
-		checkitemcaret :: !Int !OSWindowPtr !OSRect !(WElementHandle .ls .ps) !*OSToolbox
+		checkitemcaret :: !(WElementHandle .ls .ps) !Int !OSWindowPtr !OSRect !Point2 !*OSToolbox
 									   -> (!Bool,!WElementHandle .ls .ps, !*OSToolbox)
-		checkitemcaret caretNr wPtr clipRect (WListLSHandle itemHs) tb
-		#	(found,itemHs,tb)	= checkitemscaret caretNr wMetrics wPtr clipRect itemHs tb
+		checkitemcaret (WListLSHandle itemHs) caretNr wPtr clipRect parent_pos tb
+		#	(found,itemHs,tb)	= checkitemscaret itemHs caretNr wMetrics wPtr clipRect parent_pos tb
 		=	(found,WListLSHandle itemHs,tb)
-		checkitemcaret caretNr wPtr clipRect (WExtendLSHandle dExH=:{wExtendItems=itemHs}) tb
-		#	(found,itemHs,tb)	= checkitemscaret caretNr wMetrics wPtr clipRect itemHs tb
+		checkitemcaret (WExtendLSHandle dExH=:{wExtendItems=itemHs}) caretNr wPtr clipRect parent_pos tb
+		#	(found,itemHs,tb)	= checkitemscaret itemHs caretNr wMetrics wPtr clipRect parent_pos tb
 		=	(found,WExtendLSHandle {dExH & wExtendItems=itemHs},tb)
-		checkitemcaret caretNr wPtr clipRect (WChangeLSHandle dChH=:{wChangeItems=itemHs}) tb
-		#	(found,itemHs,tb)	= checkitemscaret caretNr wMetrics wPtr clipRect itemHs tb
+		checkitemcaret (WChangeLSHandle dChH=:{wChangeItems=itemHs}) caretNr wPtr clipRect parent_pos tb
+		#	(found,itemHs,tb)	= checkitemscaret itemHs caretNr wMetrics wPtr clipRect parent_pos tb
 		=	(found,WChangeLSHandle {dChH & wChangeItems=itemHs},tb)
-		checkitemcaret caretNr wPtr clipRect (WItemHandle itemH) tb
-		#	(found,itemH,tb)	= checkitemcaret` caretNr wPtr clipRect itemH tb
+		checkitemcaret (WItemHandle itemH) caretNr wPtr clipRect parent_pos tb
+		#	(found,itemH,tb)	= checkitemcaret` itemH caretNr wPtr clipRect parent_pos tb
 		=	(found,WItemHandle itemH,tb)
 		where
-			checkitemcaret` :: !Int !OSWindowPtr !OSRect !(WItemHandle .ls .ps) !*OSToolbox
+			checkitemcaret` :: !(WItemHandle .ls .ps) !Int !OSWindowPtr !OSRect !Point2 !*OSToolbox
 											-> (!Bool,!WItemHandle .ls .ps, !*OSToolbox)
-			checkitemcaret` caretNr wPtr clipRect itemH=:{wItemSelect,wItemNr,wItemPtr,wItemKind=IsEditControl} tb
+			checkitemcaret` itemH=:{wItemSelect,wItemNr,wItemPtr,wItemKind=IsEditControl} caretNr wPtr clipRect parent_pos tb
 			|	caretNr<>wItemNr		= (False,itemH,tb)
 			|	able					= (True,itemH,osIdleEditControl wPtr clipRect wItemPtr tb)
 										= (True,itemH,tb)
 			where
 				able					= wItemSelect
-			checkitemcaret` caretNr wPtr clipRect itemH=:{wItemSelect,wItemNr,wItemPtr,wItemKind=IsPopUpControl,wItemInfo} tb
+			checkitemcaret` itemH=:{wItemSelect,wItemNr,wItemPtr,wItemKind=IsPopUpControl,wItemInfo} caretNr wPtr clipRect parent_pos tb
 			|	caretNr<>wItemNr		= (False,itemH,tb)
 			|	able					= (True,itemH,osIdlePopUpControl wPtr clipRect wItemPtr editPtr tb)
 										= (True,itemH,tb)
@@ -1143,23 +1140,23 @@ where
 				able					= wItemSelect
 				info					= getWItemPopUpInfo wItemInfo
 				editPtr					= mapMaybe (\{popUpEditPtr}->popUpEditPtr) info.popUpInfoEdit
-				
-			checkitemcaret` caretNr _ _ itemH=:{wItemNr,wItemKind=IsCustomControl} tb
+			checkitemcaret` itemH=:{wItemNr,wItemKind=IsCustomControl} caretNr _ _ parent_pos tb
 			=	(caretNr==wItemNr,itemH,tb)
-			checkitemcaret` caretNr wPtr clipRect itemH=:{wItems,wItemSelect,wItemKind=IsCompoundControl} tb
-			|	not wItemSelect
-			=	(False,itemH,tb)
-			#	(found,items,tb)= checkitemscaret caretNr wMetrics wPtr clipRect1 wItems tb
-			=	(found,{itemH & wItems=items},tb)
+			checkitemcaret` itemH=:{wItems,wItemSelect,wItemKind=IsCompoundControl,wItemPos} caretNr wPtr clipRect parent_pos tb
+				|	not wItemSelect
+					=	(False,itemH,tb)
+					#	(found,items,tb)= checkitemscaret wItems caretNr wMetrics wPtr clipRect1 item_pos tb
+					=	(found,{itemH & wItems=items},tb)
 			where
+				item_pos = movePoint wItemPos parent_pos
 				info			= getWItemCompoundInfo itemH.wItemInfo
-				itemRect		= posSizeToRect itemH.wItemPos itemH.wItemSize
+				itemRect		= posSizeToRect item_pos itemH.wItemSize
 				clipRect1		= intersectRects (osGetCompoundContentRect wMetrics (hasHScroll,hasVScroll) itemRect) clipRect
 				hasHScroll		= isJust info.compoundHScroll
 				hasVScroll		= isJust info.compoundVScroll
-			checkitemcaret` _ _ _ itemH tb
+			checkitemcaret` itemH _ _ _ parent_pos tb
 			=	(False,itemH,tb)
-	checkitemscaret _ _ _ _ _ tb
+	checkitemscaret _ _ _ _ _ parent_pos tb
 	=	(False,[],tb)
 
 //--

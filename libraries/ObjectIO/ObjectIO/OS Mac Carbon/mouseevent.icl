@@ -219,7 +219,7 @@ where
 		# (_,winselect,_)
 				= getWindowKeyboardAtt (snd (cselect isWindowKeyboard (WindowKeyboard (const False) Unable undef) whAtts))
 		# hasWindowKeyboard = Able == winselect
-		# (_,(itemNr,itemPtr,itemContextPen,itemType),itemHs,(ls,ps))	= getControlsItemNr (when,mods,wPtr,wMetrics) windowPen pos whItems (ls,ps)
+		# (_,(itemNr,itemPtr,itemContextPen,itemType),itemHs,(ls,ps))	= getControlsItemNr whItems (when,mods,wPtr,wMetrics) windowPen pos zero (ls,ps)
 		# wsH = {wsH & wshHandle=Just {wlsState = ls,  wlsHandle={wH & whItems=itemHs}}}
 
 		| itemNr <> 0
@@ -480,56 +480,62 @@ where
 		= (False,Nothing,wsH,ps)
 
 getControlsItemNr
-	:: !(!Int,!Int,!OSWindowPtr,!OSWindowMetrics) !Pen !Point2 [WElementHandle .ls (PSt .pst)] (.ls,(PSt .pst))
+	:: [WElementHandle .ls (PSt .pst)] !(!Int,!Int,!OSWindowPtr,!OSWindowMetrics) !Pen !Point2 !Point2 (.ls,(PSt .pst))
 	-> (!Bool,!(!Int,!Int,!Pen,!ControlMouseState),[WElementHandle .ls (PSt .pst)],(.ls,(PSt .pst)))
-getControlsItemNr info=:(when,mods,wPtr,wMetrics) pen pos [itemH:itemHs] ps
-	# (found,result,itemH,ps)				= getControlItemNr pen pos itemH ps
+getControlsItemNr [itemH:itemHs] info=:(when,mods,wPtr,wMetrics) pen pos parent_pos ps
+	# (found,result,itemH,ps)				= getControlItemNr itemH pen pos parent_pos ps
 	| found
 		= (found,result,[itemH:itemHs],ps)
 	| otherwise
-		# (found,result,itemHs,ps)			= getControlsItemNr info/*(when,mods,wPtr,wMetrics)*/ pen pos itemHs ps
+		# (found,result,itemHs,ps)			= getControlsItemNr itemHs info pen pos parent_pos ps
 		= (found,result,[itemH:itemHs],ps)
 where
-	getControlItemNrFromwItems pen pos (WItemHandle itemH=:{wItems}) ps
-		# (found,result,items,ps)	= getControlsItemNr info/*(when,mods,wPtr,wMetrics)*/ pen pos wItems ps
+	getControlItemNrFromwItems (WItemHandle itemH=:{wItems,wItemPos}) pen pos parent_pos ps
+		# (found,result,items,ps)	= getControlsItemNr wItems info pen pos (movePoint wItemPos parent_pos) ps
 		= (found,result,WItemHandle {itemH & wItems = items},ps)
 
 	getControlItemNr
-		:: !Pen !Point2 (WElementHandle .ls (PSt .pst)) (.ls,(PSt .pst))
+		:: (WElementHandle .ls (PSt .pst)) !Pen !Point2 !Point2 (.ls,(PSt .pst))
 		-> (!Bool,!(!Int,!Int,!Pen,!ControlMouseState),(WElementHandle .ls (PSt .pst)),(.ls,(PSt .pst)))
-	getControlItemNr pen pos (WItemHandle itemH=:{wItems,wItemAtts,wItemNr,wItemSelect,wItemInfo,wItemKind,wItemPtr,wItemPos,wItemSize}) ps
+	getControlItemNr (WItemHandle itemH=:{wItems,wItemAtts,wItemNr,wItemSelect,wItemInfo,wItemKind,wItemPtr,wItemPos,wItemSize}) pen pos parent_pos ps
 		| not (itemH.wItemShow && wItemSelect) = (False,(0,0,pen,NothingState),WItemHandle itemH,ps)
 		= case wItemKind of
-			IsButtonControl				-> case (controlHit pos wItemPos wItemSize) of
+			IsButtonControl				-> case (controlHit pos (movePoint wItemPos parent_pos) wItemSize) of
 											True	-> (True,(itemNr,wItemPtr,pen,NothingState),WItemHandle itemH,ps)
 											False	-> (False,(0,0,pen,NothingState),WItemHandle itemH,ps)
-			IsCheckControl				-> case (checkHit pos checkInfo.checkItems) of
+			IsCheckControl				-> case (checkHit pos checkInfo.checkItems parent_pos) of
 											(Just (checkPtr,checkMark))	-> (True,(itemNr,checkPtr,pen,CheckControlState checkMark),WItemHandle itemH,ps)
 											Nothing	-> (False,(0,0,pen,NothingState),WItemHandle itemH,ps)
-			IsCompoundControl			-> getCompoundItemNr pos pen (WItemHandle itemH) ps
-			IsCustomButtonControl		-> case (controlHit pos wItemPos wItemSize) of
+			IsCompoundControl			-> getCompoundItemNr pos pen (WItemHandle itemH) parent_pos ps
+			IsCustomButtonControl		-> case (controlHit pos item_pos wItemSize) of
 											True	-> (True,(itemNr,wItemPtr,pen,CustomButtonState itemRect),WItemHandle itemH,ps)
 											False	-> (False,(0,0,pen,NothingState),WItemHandle itemH,ps)
-			IsCustomControl				-> case (controlHit pos wItemPos wItemSize && okCustomMouse) of
+			IsCustomControl				-> case (controlHit pos item_pos wItemSize && okCustomMouse) of
 											True	# (ls,ps) = ps
 													# (cMouse,ps) = accPIO (ioStButtonFreq when pos wPtr) ps
-													# customState = MouseDown (pos - wItemPos) (toModifiers mods) cMouse	// <- need to determine number down...
+													# customState = MouseDown (pos - item_pos) (toModifiers mods) cMouse	// <- need to determine number down...
 													# ps = (ls,ps)
 													-> (True,(itemNr,wItemPtr,pen,CustomState (customFilter customState,itemRect,customState)),WItemHandle itemH,ps)
 											False	-> (False,(0,0,pen,NothingState),WItemHandle itemH,ps)
-			IsEditControl				-> case (controlHit pos wItemPos wItemSize) of
+			IsEditControl				-> case (controlHit pos item_pos wItemSize) of
 											True	-> (True,(itemNr,wItemPtr,pen,EditTextState itemRect),WItemHandle itemH,ps)
 											False	-> (False,(0,0,pen,NothingState),WItemHandle itemH,ps)
-			IsLayoutControl				-> getControlItemNrFromwItems pen pos (WItemHandle itemH) ps
-			IsPopUpControl				-> case (controlHit pos popupPos popupSiz) of
-											True	-> (True,(itemNr,wItemPtr,pen,popupState),WItemHandle itemH,ps)
-											False	-> case (controlHit pos popupPos` popupSiz`) of
-												True-> (True,(itemNr,wItemPtr,pen,popupState`),WItemHandle itemH,ps)
+			IsLayoutControl				-> getControlItemNrFromwItems (WItemHandle itemH) pen pos parent_pos ps
+			IsPopUpControl				
+										#	popupPos = if (isJust popupInfo.popUpInfoEdit) {item_pos & x = item_pos.x + wItemSize.w - 20/*16*/} item_pos
+										-> case (controlHit pos popupPos popupSiz) of
+											True
+												#	popupState		= PopUpControlState (popupIndex,popupTexts,item_pos,wItemSize,popupEditP,popupEditT)
+												-> (True,(itemNr,wItemPtr,pen,popupState),WItemHandle itemH,ps)
+											False	-> case (controlHit pos (movePoint popupPos` parent_pos) popupSiz`) of
+												True
+													#	popupState`		= PopUpEditState (popupIndex,popupTexts,item_pos,wItemSize,popupEditP,popupEditT)
+													-> (True,(itemNr,wItemPtr,pen,popupState`),WItemHandle itemH,ps)
 												False-> (False,(0,0,pen,NothingState),WItemHandle itemH,ps)
-			IsRadioControl				-> case (radioHit pos radioInfo.radioItems) of
+			IsRadioControl				-> case (radioHit pos radioInfo.radioItems parent_pos) of
 											(Just (radioPtr,newIndex))	-> (True,(itemNr,radioPtr,pen,RadioControlState (newIndex,oldIndex,oldPtr)),WItemHandle itemH,ps)
 											Nothing	-> (False,(0,0,pen,NothingState),WItemHandle itemH,ps)
-			IsSliderControl				-> case (controlHit pos wItemPos wItemSize) of
+			IsSliderControl				-> case (controlHit pos (movePoint wItemPos parent_pos) wItemSize) of
 											True	-> (True,(itemNr,wItemPtr,pen,SliderState ((getWItemSliderInfo wItemInfo).sliderInfoState)),WItemHandle itemH,ps)
 											False	-> (False,(0,0,pen,NothingState),WItemHandle itemH,ps)
 			IsTextControl				-> (False,(0,0,pen,NothingState),WItemHandle itemH,ps)
@@ -538,7 +544,8 @@ where
 
 	where
 		itemNr							= wItemNr
-		itemRect						= posSizeToRect wItemPos wItemSize
+		item_pos = movePoint wItemPos parent_pos
+		itemRect						= posSizeToRect item_pos wItemSize
 		
 		(customFilter,customSelect,customFunction)
 								= getControlMouseAtt (snd (cselect isControlMouse dummyCustomMouse wItemAtts))
@@ -552,42 +559,38 @@ where
 		popupEditT		= case popupInfo.popUpInfoEdit of
 							(Just {popUpEditText}) -> popUpEditText
 							_ -> ""
-		popupPos		= if (isJust popupInfo.popUpInfoEdit) {wItemPos & x = wItemPos.x + wItemSize.w - 20/*16*/} wItemPos
 		popupSiz		= if (isJust popupInfo.popUpInfoEdit) {wItemSize & w = 20/*16*/} wItemSize
 		popupPos`		= wItemPos
 		popupSiz`		= if (isJust popupInfo.popUpInfoEdit) {wItemSize & w = wItemSize.w - 22} wItemSize
-		popupState		= PopUpControlState (popupIndex,popupTexts,wItemPos,wItemSize,popupEditP,popupEditT)
-		popupState`		= PopUpEditState (popupIndex,popupTexts,wItemPos,wItemSize,popupEditP,popupEditT)
 		
 		radioInfo	= getWItemRadioInfo wItemInfo
 		oldIndex	= radioInfo.radioIndex
 		oldPtr		= ((radioInfo.radioItems)!!(oldIndex-1)).radioItemPtr
 		
-		radioHit pos [] = Nothing
-		radioHit pos [{radioItemPos,radioItemSize,radioItemPtr,radioItem=(_,radioIndex,_)}:rest]
-			| controlHit pos radioItemPos radioItemSize
+		radioHit pos [] parent_pos
+			= Nothing
+		radioHit pos [{radioItemPos,radioItemSize,radioItemPtr,radioItem=(_,radioIndex,_)}:rest] parent_pos
+			| controlHit pos (movePoint radioItemPos parent_pos) radioItemSize
 				= Just (radioItemPtr,radioIndex)
-			= radioHit pos rest
+			= radioHit pos rest parent_pos
 		
 		checkInfo = getWItemCheckInfo wItemInfo
 		
-		checkHit pos [] = Nothing
-		checkHit pos [{checkItemPos,checkItemSize,checkItemPtr,checkItem=(_,_,checkMark,_)}:rest]
-			| controlHit pos checkItemPos checkItemSize
+		checkHit pos [] parent_pos
+			= Nothing
+		checkHit pos [{checkItemPos,checkItemSize,checkItemPtr,checkItem=(_,_,checkMark,_)}:rest] parent_pos
+			| controlHit pos (movePoint checkItemPos parent_pos) checkItemSize
 				= Just (checkItemPtr,checkMark)
-			= checkHit pos rest
-		
+			= checkHit pos rest parent_pos
 				
-	getControlItemNr pen cPtr (WListLSHandle itemHs) ps
-		# (found,itemNr,itemHs,ps)		= getControlsItemNr (when,mods,wPtr,wMetrics) pen cPtr itemHs ps
+	getControlItemNr (WListLSHandle itemHs) pen cPtr parent_pos ps
+		# (found,itemNr,itemHs,ps)		= getControlsItemNr itemHs (when,mods,wPtr,wMetrics) pen cPtr parent_pos ps
 		= (found,itemNr,WListLSHandle itemHs,ps)
-	
-	getControlItemNr pen cPtr (WExtendLSHandle wExH=:{wExtendLS=extLS,wExtendItems=itemHs}) (ls,ps)
-		# (found,itemNr,itemHs,((extLS,ls),ps))		= getControlsItemNr (when,mods,wPtr,wMetrics) pen cPtr itemHs ((extLS,ls),ps)
-		= (found,itemNr,WExtendLSHandle {wExtendLS=extLS, wExtendItems=itemHs},(ls,ps))
-	
-	getControlItemNr pen cPtr (WChangeLSHandle wChH=:{wChangeLS=chLS,wChangeItems=itemHs}) (ls,ps)
-		# (found,itemNr,itemHs,(chLS,ps))		= getControlsItemNr (when,mods,wPtr,wMetrics) pen cPtr itemHs (chLS,ps)
+	getControlItemNr (WExtendLSHandle wExH=:{wExtendLS=extLS,wExtendItems=itemHs}) pen cPtr parent_pos (ls,ps)
+		# (found,itemNr,itemHs,((extLS,ls),ps))		= getControlsItemNr itemHs (when,mods,wPtr,wMetrics) pen cPtr parent_pos ((extLS,ls),ps)
+		= (found,itemNr,WExtendLSHandle {wExtendLS=extLS, wExtendItems=itemHs},(ls,ps))	
+	getControlItemNr (WChangeLSHandle wChH=:{wChangeLS=chLS,wChangeItems=itemHs}) pen cPtr parent_pos (ls,ps)
+		# (found,itemNr,itemHs,(chLS,ps))		= getControlsItemNr itemHs (when,mods,wPtr,wMetrics) pen cPtr parent_pos (chLS,ps)
 		= (found,itemNr,WChangeLSHandle {wChangeLS = chLS, wChangeItems=itemHs},(ls,ps))
 
 	controlHit mPos=:{x=mx,y=my} cPos=:{x=cx,y=cy} cSize=:{w=cw,h=ch}
@@ -596,26 +599,24 @@ where
 	controlHit` mPos=:{x=mx,y=my} {rleft=cx,rtop=cy,rright=cx`,rbottom=cy`}
 		= cx < mx && mx < cx` && cy < my && my < cy`
 
-	getCompoundItemNr pos pen (WItemHandle itemH=:{wItems,wItemNr,wItemSelect,wItemInfo,wItemKind,wItemPtr,wItemPos,wItemSize,wItemAtts}) (ls,ps)
-		#! wItemNr = trace_n ("CompoundRects",contentRect,hScrollRect,vScrollRect,visHScroll,visVScroll) wItemNr
+	getCompoundItemNr pos pen (WItemHandle itemH=:{wItems,wItemNr,wItemSelect,wItemInfo,wItemKind,wItemPtr,wItemPos,wItemSize,wItemAtts}) parent_pos (ls,ps)
+//		#! wItemNr = trace_n ("CompoundRects",contentRect,hScrollRect,vScrollRect,visHScroll,visVScroll) wItemNr
 		| visHScroll && hScrollHit
 			= (True,(wItemNr,wItemPtr,compoundPen,CompoundScrollState (hPtr, hScrollRect, Horizontal, cContentRect)),WItemHandle itemH,(ls,ps))
 		| visVScroll && vScrollHit
 			= (True,(wItemNr,wItemPtr,compoundPen,CompoundScrollState (vPtr, vScrollRect, Vertical, cContentRect)),WItemHandle itemH,(ls,ps))
-		# (found,result,itemH,(ls,ps)) =  getControlItemNrFromwItems compoundPen pos (WItemHandle itemH) (ls,ps)
+		# (found,result,itemH,(ls,ps)) =  getControlItemNrFromwItems (WItemHandle itemH) compoundPen pos parent_pos (ls,ps)
 		| found			// one of the compound controls was selected
 			= (found,result,itemH,(ls,ps))
 		| contentHit && okControlMouse	// mouse-down in content region but not in control, mousefun enabled
-			//
-
 			# itemRect			= contentRect
 			# (bMouse,ps)		= accPIO (ioStButtonFreq when pos wPtr) ps
-			# mstate			= MouseDown (pos - wItemPos + compoundOrigin) (toModifiers mods) bMouse	// <- need to determine number down...
+			# mstate			= MouseDown (pos - item_pos + compoundOrigin) (toModifiers mods) bMouse	// <- need to determine number down...
 	//		#! ps				= compoundMouseIO mfilter mfunction mstate ps
 			# bool = mfilter mstate
 			= (True,(wItemNr,wItemPtr,compoundPen,CompoundContentState (bool,contentRect,mstate)), itemH,(ls,ps))
 		= (False,(0,0,pen,NothingState), itemH,(ls,ps))
-	where				
+	where
 		info			= getWItemCompoundInfo wItemInfo
 		compoundLook	= info.compoundLookInfo.compoundLook
 		compoundPen		= compoundLook.lookPen
@@ -627,7 +628,8 @@ where
 		(visHScroll,visVScroll)	= visScrolls
 		hPtr					= (fromJust info.compoundHScroll).scrollItemPtr
 		vPtr					= (fromJust info.compoundVScroll).scrollItemPtr
-		contentRect				= /*getCompoundContentRect wMetrics visScrolls*/ (posSizeToRect wItemPos wItemSize)
+		item_pos = movePoint wItemPos parent_pos
+		contentRect				= /*getCompoundContentRect wMetrics visScrolls*/ (posSizeToRect item_pos wItemSize)
 		hScrollRect				= osGetCompoundHScrollRect wMetrics visScrolls contentRect
 		vScrollRect				= osGetCompoundVScrollRect wMetrics visScrolls contentRect
 		cContentRect			= osGetCompoundContentRect wMetrics visScrolls contentRect
@@ -640,7 +642,7 @@ where
 		dummyControlMouse		= ControlMouse (const False) Unable undef
 		okControlMouse			= enabled selectState
 
-getControlsItemNr _ pen _ _ ps
+getControlsItemNr _ _ pen _ parent_pos ps
 	= (False,(0,0,pen,NothingState),[],ps)
 
 //--
