@@ -10,7 +10,7 @@ import	gameCrossCall_12, gamehandle, gameobjectutils, gst
 
 ::  OSGameData gs
     =   {   scroll    :: [(MAPID, Movement)]        // The layer movement functions
-        ,   gamestate :: gs                         // The game state
+        ,   gamest    :: gs                         // The game state
         ,   gamehnd   :: GameHandle gs              // Complete game definition
         }
 
@@ -73,10 +73,10 @@ OSGameLayerMapDone :: !MAPID !*OSToolbox -> (!GRESULT,!*OSToolbox)
 OSGameLayerMapDone mapid tb
     = WinGameLayerMapDone mapid tb
 
-OSRunGameEngine :: !(OSGameData gs) !*OSToolbox -> (gs,!*OSToolbox)
+OSRunGameEngine :: !(OSGameData .gs) !*OSToolbox -> (.gs,!*OSToolbox)
 OSRunGameEngine gd tb
     # (gd,tb)   = WinRunGameEngine handleGameEvents gd 0 0 0 tb
-    = (gd.gamestate,tb)
+    = (gd.gamest,tb)
 
 OSSetGameBoundMap :: !Int !Int !{#Char} !Int !Int !Int !Int !Int !*OSToolbox -> (!GRESULT,!*OSToolbox)
 OSSetGameBoundMap w h map mw mh objstart startobjx startobjy tb
@@ -140,7 +140,7 @@ OSSetBoundMap :: !Int !Int !Int !*OSToolbox -> (!GRESULT, !*OSToolbox)
 OSSetBoundMap x y newvalue tb
     = WinSetBoundMap x y newvalue tb
 
-handleGameEvents :: !CrossCallInfo !(OSGameData gs) !*OSToolbox -> (!CrossCallInfo,!OSGameData gs,!*OSToolbox)
+handleGameEvents :: !CrossCallInfo !(OSGameData .gs) !*OSToolbox -> (!CrossCallInfo,!OSGameData .gs,!*OSToolbox)
 handleGameEvents fromOSCci=:{ccMsg=CcWmGAMEKEYBOARD,p1=key,p2=x,p3=y} state tb
     = (Return2Cci x` y`,state,tb)
 where
@@ -151,18 +151,17 @@ where
                 GK_DOWN     -> (x, y+1)
                 otherwise   -> (x, y)
 
-handleGameEvents fromOSCci=:{ccMsg=CcWmCHECKQUIT} state tb
-    #   quitfunction        =   state.gamehnd.quitlevel`
-    #   gst                 =   toGSt state.gamestate tb
+handleGameEvents fromOSCci=:{ccMsg=CcWmCHECKQUIT} state=:{gamest,gamehnd={quitlevel`=quitfunction}} tb
+    #   gst                 =   toGSt gamest tb
     #   (quit, gst)         =   quitfunction gst
     #   (newstate, tb)      =   fromGSt gst
-    =   (Return1Cci (toInt quit), {state & gamestate = newstate}, tb)
+    =   (Return1Cci (toInt quit), {state & gamest = newstate}, tb)
 
-handleGameEvents fromOSCci=:{ccMsg=CcWmSCROLL,p1=id,p2=x,p3=y,p4=t} state tb
+handleGameEvents fromOSCci=:{ccMsg=CcWmSCROLL,p1=id,p2=x,p3=y,p4=t} state=:{scroll} tb
     = (Return2Cci x` y`, state, tb)
 where
     {x = x`, y = y`}    =   f (MakePoint x y) t
-    f                   =   FindMovement (id, state.scroll)
+    f                   =   FindMovement (id, scroll)
 	
 	FindMovement :: !(!MAPID, ![(MAPID, Movement)]) -> Movement
 	FindMovement (mapid, [(id, mv): rest])
@@ -209,20 +208,20 @@ handleGameEvents fromOSCci=:{ccMsg=CcWmOBJECTKEYUP, p1=objtype, p2=id, p3=key} s
     # (state,tb)        =   handleKeyUp objtype id key state tb
     = (Return0Cci, state, tb)
 
-handleGameEvents fromOSCci=:{ccMsg=CcWmSTATISTICS} state tb
-    #   gst             =   toGSt state.gamestate tb
-    #   (statlist, gst) =   state.gamehnd.statistics` gst
+handleGameEvents fromOSCci=:{ccMsg=CcWmSTATISTICS} state=:{gamest,gamehnd={statistics`=stats}} tb
+    #   gst             =   toGSt gamest tb
+    #   (statlist, gst) =   stats gst
     #   (newstate, tb)  =   fromGSt gst
     #   tb              =   showall statlist tb
-    = (Return0Cci, {state & gamestate = newstate}, tb)
+    = (Return0Cci, {state & gamest = newstate}, tb)
 where
-    showall :: [Statistic] !*OSToolbox -> *OSToolbox
+    showall :: ![GameText] !*OSToolbox -> *OSToolbox
     showall [] tb = tb
     showall [x:xs] tb
         # tb = showstat x tb
         = showall xs tb
     where
-        showstat :: Statistic !*OSToolbox -> *OSToolbox
+        showstat :: !GameText !*OSToolbox -> *OSToolbox
         showstat s tb
             | isJust s.shadow
                 # (_,tb) = OSShowStatistic s.position.x s.position.y s.format (mi s.value)
@@ -253,29 +252,29 @@ MakePoint :: !Int !Int -> Point2
 MakePoint a b = {x = a, y = b}
 
 
-
-handleUserEvent :: !Int !InstanceID !Int !Int !Int !(OSGameData gs) !*OSToolbox -> (OSGameData gs, !*OSToolbox)
-handleUserEvent objtype id ev par1 par2 data tb
-    #   maybefound              =   getobject objtype data.gamehnd
+handleUserEvent :: !Int !InstanceID !Int !Int !Int !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+handleUserEvent objtype id ev par1 par2 data=:{gamest,gamehnd} tb
+    #   maybefound              =   getobject objtype gamehnd
     |   isJust maybefound
         #   obj                 =   fromJust maybefound
         #   (_, _, objrec, tb)  =   GetObjectRec id tb
-        #   gst                 =   toGSt data.gamestate tb
+        #   gst                 =   toGSt gamest tb
         #   (obj,objrec,gst)    =   doUserEvent id obj objrec ev par1 par2 gst
-        #   data                =   {data & gamehnd = putobject obj data.gamehnd}
         #   (newstate, tb)      =   fromGSt gst
+        #   data                =   {data & gamehnd = putobject obj gamehnd,gamest=newstate}
         #   (_, tb)             =   SetObjectRec id objtype objrec obj.spriteids` tb
-        =   ({data & gamestate=newstate}, tb)
+        =   (data, tb)
     |   otherwise
         =   (data, tb)
 where
-    doUserEvent :: !InstanceID !.(ObjectHandle .a) !ObjectRec !Int !Int !Int !.a -> (.ObjectHandle .a,ObjectRec,.a);
+    doUserEvent :: !InstanceID !(GameObjectHandle .a) !GameObjectRec !Int !Int !Int !.a -> (!GameObjectHandle .a,!GameObjectRec,.a)
     doUserEvent id obj=:{instances`,userevent`} objrec ev par1 par2 gst
         #   maybestate          =   findinstance instances` id
         |   isNothing maybestate
             =   (obj,objrec,gst)
         #   state               =   fromJust maybestate
-        #   ((s,objrec),gst)    =   userevent` (state,objrec) ev par1 par2 gst
+        #   {objectstate=s,objectrec=objrec,gamestate=gst}
+                                =   userevent` ev par1 par2 {objectstate=state,objectrec=objrec,gamestate=gst}
         #   newinstances        =   updateinstance id s instances`
         #   obj                 =   {obj & instances`=newinstances}
         =   (obj,objrec,gst)
@@ -283,28 +282,29 @@ where
 
 
 
-handleAnimationEvent :: !Int !InstanceID !(OSGameData gs) !*OSToolbox -> (OSGameData gs, !*OSToolbox)
-handleAnimationEvent objtype id data tb
-    #   maybefound              =   getobject objtype data.gamehnd
+handleAnimationEvent :: !Int !InstanceID !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+handleAnimationEvent objtype id data=:{gamest,gamehnd} tb
+    #   maybefound              =   getobject objtype gamehnd
     |   isJust maybefound
         #   obj                 =   fromJust maybefound
         #   (_, _, objrec, tb)  =   GetObjectRec id tb
-        #   gst                 =   toGSt data.gamestate tb
+        #   gst                 =   toGSt gamest tb
         #   (obj,objrec,gst)    =   doAnimation id obj objrec gst
-        #   data                =   {data & gamehnd = putobject obj data.gamehnd}
         #   (newstate, tb)      =   fromGSt gst
+        #   data                =   {data & gamehnd = putobject obj data.gamehnd, gamest=newstate}
         #   (_, tb)             =   SetObjectRec id objtype objrec obj.spriteids` tb
-        =   ({data & gamestate=newstate}, tb)
+        =   (data, tb)
     |   otherwise
         =   (data, tb)
 where
-    doAnimation :: !InstanceID !.(ObjectHandle .a) !ObjectRec !.a -> (.ObjectHandle .a,ObjectRec,.a);
+    doAnimation :: !InstanceID !(GameObjectHandle .a) !GameObjectRec !.a -> (!GameObjectHandle .a,!GameObjectRec,.a)
     doAnimation id obj=:{instances`,animation`} objrec gst
         #   maybestate          =   findinstance instances` id
         |   isNothing maybestate
             =   (obj,objrec,gst)
         #   state               =   fromJust maybestate
-        #   ((s,objrec),gst)    =   animation` (state,objrec) gst
+        #   {objectstate=s,objectrec=objrec,gamestate=gst}
+                                =   animation` {objectstate=state,objectrec=objrec,gamestate=gst}
         #   newinstances        =   updateinstance id s instances`
         #   obj                 =   {obj & instances`=newinstances}
         =   (obj,objrec,gst)
@@ -312,28 +312,29 @@ where
 
 
 
-handleTimerEvent :: !Int !InstanceID !(OSGameData gs) !*OSToolbox -> (OSGameData gs, !*OSToolbox)
-handleTimerEvent objtype id data tb
-    #   maybefound              =   getobject objtype data.gamehnd
+handleTimerEvent :: !Int !InstanceID !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+handleTimerEvent objtype id data=:{gamest,gamehnd} tb
+    #   maybefound              =   getobject objtype gamehnd
     |   isJust maybefound
         #   obj                 =   fromJust maybefound
         #   (_, _, objrec, tb)  =   GetObjectRec id tb
-        #   gst                 =   toGSt data.gamestate tb
+        #   gst                 =   toGSt gamest tb
         #   (obj,objrec,gst)    =   doTimer id obj objrec gst
-        #   data                =   {data & gamehnd = putobject obj data.gamehnd}
         #   (newstate, tb)      =   fromGSt gst
+        #   data                =   {data & gamehnd = putobject obj data.gamehnd, gamest=newstate}
         #   (_, tb)             =   SetObjectRec id objtype objrec obj.spriteids` tb
-        =   ({data & gamestate=newstate}, tb)
+        =   (data, tb)
     |   otherwise
         =   (data, tb)
 where
-    doTimer :: !InstanceID !.(ObjectHandle .a) !ObjectRec !.a -> (.ObjectHandle .a,ObjectRec,.a);
+    doTimer :: !InstanceID !(GameObjectHandle .a) !GameObjectRec !.a -> (!GameObjectHandle .a,!GameObjectRec,.a)
     doTimer id obj=:{instances`,frametimer`} objrec gst
         #   maybestate          =   findinstance instances` id
         |   isNothing maybestate
             =   (obj,objrec,gst)
         #   state               =   fromJust maybestate
-        #   ((s,objrec),gst)    =   frametimer` (state,objrec) gst
+        #   {objectstate=s,objectrec=objrec,gamestate=gst}
+                                =   frametimer` {objectstate=state,objectrec=objrec,gamestate=gst}
         #   newinstances        =   updateinstance id s instances`
         #   obj                 =   {obj & instances`=newinstances}
         =   (obj,objrec,gst)
@@ -341,107 +342,110 @@ where
 
 
 
-moveGameObject :: !Int !InstanceID !(OSGameData gs) !*OSToolbox -> (OSGameData gs, !*OSToolbox)
-moveGameObject objtype id data tb
-    #   maybefound              =   getobject objtype data.gamehnd
+moveGameObject :: !Int !InstanceID !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+moveGameObject objtype id data=:{gamest,gamehnd} tb
+    #   maybefound              =   getobject objtype gamehnd
     |   isJust maybefound
         #   obj                 =   fromJust maybefound
         #   (_, _, objrec, tb)  =   GetObjectRec id tb
-        #   gst                 =   toGSt data.gamestate tb
+        #   gst                 =   toGSt gamest tb
         #   (obj,objrec,gst)    =   doMove id obj objrec gst
-        #   data                =   {data & gamehnd = putobject obj data.gamehnd}
         #   (newstate, tb)      =   fromGSt gst
+        #   data                =   {data & gamehnd = putobject obj gamehnd,gamest=newstate}
         #   (_, tb)             =   SetObjectRec id objtype objrec obj.spriteids` tb
-        =   ({data & gamestate=newstate}, tb)
+        =   (data, tb)
     |   otherwise
         =   (data, tb)
 where
-    doMove :: !InstanceID !.(ObjectHandle .a) !ObjectRec !.a -> (.ObjectHandle .a,ObjectRec,.a);
+    doMove :: !InstanceID !(GameObjectHandle .a) !GameObjectRec !.a -> (!GameObjectHandle .a,!GameObjectRec,.a)
     doMove id obj=:{instances`,move`} objrec gst
         #   maybestate          =   findinstance instances` id
         |   isNothing maybestate
             =   (obj,objrec,gst)
         #   state               =   fromJust maybestate
-        #   ((s,objrec),gst)    =   move` (state,objrec) gst
+        #   {objectstate=s,objectrec=objrec,gamestate=gst}
+                                =   move` {objectstate=state,objectrec=objrec,gamestate=gst}
         #   newinstances        =   updateinstance id s instances`
         #   obj                 =   {obj & instances`=newinstances}
         =   (obj,objrec,gst)
 //      =   ({obj & instances`=newinstances},objrec,gst)
 
 
-touchBound :: !Int !InstanceID !Int !Int !(OSGameData gs) !*OSToolbox -> (OSGameData gs, !*OSToolbox)
-touchBound objtype id dir mapcode data tb
+touchBound :: !Int !InstanceID !Int !Int !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+touchBound objtype id dir mapcode data=:{gamest,gamehnd} tb
     #   directions              =   makeDirectionSet dir
-    #   maybefound              =   getobject objtype data.gamehnd
+    #   maybefound              =   getobject objtype gamehnd
     |   isJust maybefound
         #   obj                 =   fromJust maybefound
         #   (_, _, objrec, tb)  =   GetObjectRec id tb
-        #   gst                 =   toGSt data.gamestate tb
+        #   gst                 =   toGSt gamest tb
         #   (obj,objrec,gst)    =   doTouchBound id obj objrec directions mapcode gst
-        #   data                =   {data & gamehnd = putobject obj data.gamehnd}
         #   (newstate, tb)      =   fromGSt gst
+        #   data                =   {data & gamehnd = putobject obj data.gamehnd,gamest=newstate}
         #   (_, tb)             =   SetObjectRec id objtype objrec obj.spriteids` tb
-        =   ({data & gamestate=newstate}, tb)
+        =   (data, tb)
     |   otherwise
         =   (data, tb)
 where
-    doTouchBound :: !InstanceID !.(ObjectHandle .a) !ObjectRec !DirectionSet !Int !.a -> (.ObjectHandle .a,ObjectRec,.a);
+    doTouchBound :: !InstanceID !(GameObjectHandle .a) !GameObjectRec !DirectionSet !Int !.a -> (!GameObjectHandle .a,!GameObjectRec,.a)
     doTouchBound id obj=:{instances`,touchbound`} objrec bounds mapcode gst
         #   maybestate          =   findinstance instances` id
         |   isNothing maybestate
             =   (obj,objrec,gst)
         #   state               =   fromJust maybestate
-        #   ((s,objrec),gst)    =   touchbound` (state,objrec) bounds mapcode gst
+        #   {objectstate=s,objectrec=objrec,gamestate=gst}
+                                =   touchbound` bounds mapcode {objectstate=state,objectrec=objrec,gamestate=gst}
         #   newinstances        =   updateinstance id s instances`
         #   obj                 =   {obj & instances`=newinstances}
         =   (obj,objrec,gst)
 
 
 
-initialiseGameObject :: !Int !Int !InstanceID !Point2 !Int !(OSGameData gs) !*OSToolbox
-                                                    -> (OSGameData gs, !*OSToolbox)
-initialiseGameObject objtype subtype id p time data tb
-    #   maybefound              =   getobject objtype data.gamehnd
+initialiseGameObject :: !Int !Int !InstanceID !Point2 !Int !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+initialiseGameObject objtype subtype id p time data=:{scroll,gamest,gamehnd} tb
+    #   maybefound              =   getobject objtype gamehnd
     |   isJust maybefound
         #   obj                 =   fromJust maybefound
-        #   gst                 =   toGSt data.gamestate tb
+        #   gst                 =   toGSt gamest tb
         #   (obj,objrec,gst)    =   doInit id subtype p time obj gst
-        #   data                =   {data & gamehnd = putobject obj data.gamehnd}
         #   (newstate, tb)      =   fromGSt gst
+        #   data                =   {data & gamehnd = putobject obj gamehnd, gamest=newstate}
         #   (_, tb)             =   SetObjectRec id objtype objrec obj.spriteids` tb
-        =   ({data & gamestate=newstate}, tb)
+        =   (data, tb)
     |   otherwise
         =   (data, tb)
 where
-    doInit :: !InstanceID !Int !Point2 !GameTime !.(ObjectHandle .a) !.a -> (.ObjectHandle .a,ObjectRec,.a);
+    doInit :: !InstanceID !Int !Point2 !GameTime !(GameObjectHandle .a) !.a -> (!GameObjectHandle .a,!GameObjectRec,.a)
     doInit id subtype p time obj=:{instances`,init`} gst
-        #   ((state,objrec), gst)       =   init` subtype p time gst
+    //  #   ((state,objrec), gst)       =   init` subtype p time gst
+        #   {objectstate=state,objectrec=objrec,gamestate=gst}
+                                        =   init` subtype p time gst
         #   newinstances                =   [(id,state):instances`]
         =   ({obj & instances`=newinstances},objrec,gst)
 
 
-doneGameObject :: !Int !InstanceID !(OSGameData gs) !*OSToolbox -> (OSGameData gs, !*OSToolbox)
-doneGameObject objtype id data tb
-    #   maybefound              =   getobject objtype data.gamehnd
+doneGameObject :: !Int !InstanceID !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+doneGameObject objtype id data=:{gamest,gamehnd} tb
+    #   maybefound              =   getobject objtype gamehnd
     |   isJust maybefound
         #   obj                 =   fromJust maybefound
         #   (_, _, objrec, tb)  =   GetObjectRec id tb
-        #   gst                 =   toGSt data.gamestate tb
+        #   gst                 =   toGSt gamest tb
         #   (obj,gst)           =   doDone id obj objrec gst
-        #   data                =   {data & gamehnd = putobject obj data.gamehnd}
         #   (newstate, tb)      =   fromGSt gst
+        #   data                =   {data & gamehnd = putobject obj gamehnd, gamest=newstate}
         #   (_, tb)             =   SetObjectRec id objtype objrec obj.spriteids` tb
-        =   ({data & gamestate=newstate}, tb)
+        =   (data, tb)
     |   otherwise
         =   (data, tb)
 where
-    doDone :: !InstanceID !.(ObjectHandle .a) !ObjectRec !.a -> (.ObjectHandle .a,.a);
+    doDone :: !InstanceID !(GameObjectHandle .a) !GameObjectRec !.a -> (!GameObjectHandle .a,.a)
     doDone id obj=:{instances`,done`} objrec gst
         #   maybestate          =   findinstance instances` id
         |   isNothing maybestate
             =   (obj, gst)
         #   state               =   fromJust maybestate
-        #   gst                 =   done` (state,objrec) gst
+        #   gst                 =   done` {objectstate=state,objectrec=objrec,gamestate=gst}
         #   newinstances        =   removeinstance id instances`
         #   obj                 =   {obj & instances`=newinstances}
         =   (obj, gst)
@@ -449,30 +453,31 @@ where
 
 
 
-handleCollision :: !Int !InstanceID !Int !InstanceID !Int !(OSGameData gs) !*OSToolbox -> (OSGameData gs, !*OSToolbox)
-handleCollision ot1 id1 ot2 id2 dir data tb
+handleCollision :: !Int !InstanceID !Int !InstanceID !Int !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+handleCollision ot1 id1 ot2 id2 dir data=:{gamest,gamehnd} tb
     #   directions              =   makeDirectionSet dir
-    #   maybefound              =   getobject ot1 data.gamehnd
+    #   maybefound              =   getobject ot1 gamehnd
     |   isJust maybefound
         #   obj                 =   fromJust maybefound
         #   (_, _, objrec2, tb) =   GetObjectRec id2 tb
         #   (_, _, objrec1, tb) =   GetObjectRec id1 tb
-        #   gst                 =   toGSt data.gamestate tb
+        #   gst                 =   toGSt gamest tb
         #   (obj,objrec1,gst)   =   doCollision id1 obj objrec1 directions ot2 objrec2 gst
-        #   data                =   {data & gamehnd = putobject obj data.gamehnd}
         #   (newstate, tb)      =   fromGSt gst
+        #   data                =   {data & gamehnd = putobject obj data.gamehnd, gamest=newstate}
         #   (_, tb)             =   SetObjectRec id1 ot1 objrec1 obj.spriteids` tb
-        =   ({data & gamestate=newstate}, tb)
+        =   (data, tb)
     |   otherwise
         =   (data, tb)
 where
-    doCollision :: !InstanceID !.(ObjectHandle .a) !ObjectRec !DirectionSet !Int !ObjectRec !.a -> (.ObjectHandle .a,ObjectRec,.a);
+    doCollision :: !InstanceID !(GameObjectHandle .a) !GameObjectRec !DirectionSet !Int !GameObjectRec !.a -> (!GameObjectHandle .a,!GameObjectRec,.a)
     doCollision id obj=:{instances`,collide`} objrec1 bounds ot2 objrec2 gst
         #   maybestate          =   findinstance instances` id
         |   isNothing maybestate
             =   (obj,objrec1,gst)
         #   state               =   fromJust maybestate
-        #   ((s,objrec1),gst)   =   collide` (state,objrec1) bounds ot2 objrec2 gst
+        #   {objectstate=s,objectrec=objrec1,gamestate=gst}
+                                =   collide` bounds ot2 objrec2 {objectstate=state,objectrec=objrec1,gamestate=gst}
         #   newinstances        =   updateinstance id s instances`
         #   obj                 =   {obj & instances`=newinstances}
         =   (obj,objrec1,gst)
@@ -480,59 +485,59 @@ where
 
 
 
-handleKeyDown :: !Int !InstanceID !Int !(OSGameData gs) !*OSToolbox -> (OSGameData gs, !*OSToolbox)
-handleKeyDown objtype id key data tb
-    #   maybefound              =   getobject objtype data.gamehnd
+handleKeyDown :: !Int !InstanceID !Int !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+handleKeyDown objtype id key data=:{gamest,gamehnd} tb
+    #   maybefound              =   getobject objtype gamehnd
     |   isJust maybefound
         #   obj                 =   fromJust maybefound
         #   (_, _, objrec, tb)  =   GetObjectRec id tb
-        #   gst                 =   toGSt data.gamestate tb
+        #   gst                 =   toGSt gamest tb
         #   (obj,objrec,gst)    =   doKeyDown id obj objrec key gst
-        #   data                =   {data & gamehnd = putobject obj data.gamehnd}
         #   (newstate, tb)      =   fromGSt gst
+        #   data                =   {data & gamehnd = putobject obj gamehnd,gamest=newstate}
         #   (_, tb)             =   SetObjectRec id objtype objrec obj.spriteids` tb
-        =   ({data & gamestate=newstate}, tb)
+        =   (data, tb)
     |   otherwise
         =   (data, tb)
 where
-    doKeyDown :: !InstanceID !.(ObjectHandle .a) !ObjectRec !Int !.a -> (.ObjectHandle .a,ObjectRec,.a);
+    doKeyDown :: !InstanceID !(GameObjectHandle .a) !GameObjectRec !Int !.a -> (!GameObjectHandle .a,!GameObjectRec,.a)
     doKeyDown id obj=:{instances`,keydown`} objrec key gst
         #   maybestate          =   findinstance instances` id
         |   isNothing maybestate
             =   (obj,objrec,gst)
         #   state               =   fromJust maybestate
-        #   ((s,objrec),gst)    =   keydown` (state,objrec) key gst
+        #   {objectstate=s,objectrec=objrec,gamestate=gst}
+                                =   keydown` key {objectstate=state,objectrec=objrec,gamestate=gst}
         #   newinstances        =   updateinstance id s instances`
         #   obj                 =   {obj & instances`=newinstances}
         =   (obj,objrec,gst)
 //      =   ({obj & instances`=newinstances},objrec,gst)
 
 
-handleKeyUp :: !Int !InstanceID !Int !(OSGameData gs) !*OSToolbox -> (OSGameData gs, !*OSToolbox)
-handleKeyUp objtype id key data tb
-    #   maybefound              =   getobject objtype data.gamehnd
+handleKeyUp :: !Int !InstanceID !Int !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+handleKeyUp objtype id key data=:{gamest,gamehnd} tb
+    #   maybefound              =   getobject objtype gamehnd
     |   isJust maybefound
         #   obj                 =   fromJust maybefound
         #   (_, _, objrec, tb)  =   GetObjectRec id tb
-        #   gst                 =   toGSt data.gamestate tb
+        #   gst                 =   toGSt gamest tb
         #   (obj,objrec,gst)    =   doKeyUp id obj objrec key gst
-        #   data                =   {data & gamehnd = putobject obj data.gamehnd}
         #   (newstate, tb)      =   fromGSt gst
+        #   data                =   {data & gamehnd = putobject obj data.gamehnd,gamest=newstate}
         #   (_, tb)             =   SetObjectRec id objtype objrec obj.spriteids` tb
-        =   ({data & gamestate=newstate}, tb)
+        =   (data, tb)
     |   otherwise
         =   (data, tb)
 where
-    doKeyUp :: !InstanceID !.(ObjectHandle .a) !ObjectRec !Int !.a -> (.ObjectHandle .a,ObjectRec,.a);
+    doKeyUp :: !InstanceID !(GameObjectHandle .a) !GameObjectRec !Int !.a -> (!GameObjectHandle .a,!GameObjectRec,.a)
     doKeyUp id obj=:{instances`,keyup`} objrec key gst
         #   maybestate          =   findinstance instances` id
         |   isNothing maybestate
             =   (obj,objrec,gst)
         #   state               =   fromJust maybestate
-        #   ((s,objrec),gst)    =   keyup` (state,objrec) key gst
+        #   {objectstate=s,objectrec=objrec,gamestate=gst}
+                                =   keyup` key {objectstate=state,objectrec=objrec,gamestate=gst}
         #   newinstances        =   updateinstance id s instances`
         #   obj                 =   {obj & instances`=newinstances}
         =   (obj,objrec,gst)
 //      =   ({obj & instances`=newinstances},objrec,gst)
-
-

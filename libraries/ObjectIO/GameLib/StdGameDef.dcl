@@ -1,9 +1,17 @@
 definition module StdGameDef
 
-//import StdEnv, StdIO, 
+
+//	********************************************************************************
+//	Clean Standard Game library, version 1.2
+//	
+//	StdGameDef contains all the type definitions needed to specify a game.
+//	********************************************************************************
+
+
+from	StdFunc			import St
 from	StdOverloaded	import zero
 from	StdString		import String
-from	StdIOBasic		import Point2, Size
+from	StdIOBasic		import Point2, Size, IdFun
 from	StdMaybe		import Maybe, Just, Nothing
 from	StdPictureDef	import Colour,
 								RGB, RGBColour, Black, White, 
@@ -12,57 +20,57 @@ from	StdPictureDef	import Colour,
 								Cyan, Magenta, Yellow
 import	StdGSt
 
+
 :: GameAttribute gs
    = ScreenSize Size     // screen resolution, default 320x240
    | ColorDepth Int      // screen color depth, default 8 (256 colors)
 
 :: Game gs
-   = { levels      :: [Level (GSt gs)]                   // levels
-     , quitlevel   :: (GSt gs) -> (Bool, GSt gs)         // when true, the game engine quits
-     , nextlevel   :: (GSt gs) -> (Int, GSt gs)          // 1,2,... level in list, 0 = exit
-     , statistics  :: (GSt gs) -> ([Statistic], GSt gs)  // all text items
+   = { levels        :: [Level (GSt gs)]        // levels
+     , quitlevel     :: St (GSt gs) Bool        // True quits the game
+     , nextlevel     :: St (GSt gs) Int         // new level if >0 (0 quits)
+     , statistics    :: St (GSt gs) [GameText]  // all game text items
      }
 
 :: Level state
-   = { boundmap      :: !BoundMap          // map of all static bounds in a level
-     , initpos       :: !Point2            // center of screen in boundmap
-     , layers        :: ![Layer]           // all visible (scrolling) layers
-                                           //   [back ... front]
-     , objects       :: ![Object state]    // all other objects in the level
-     , music         :: !Maybe Music       // background music
-     , soundsamples  :: ![SoundSample]     // list of sound samples
-     , leveloptions  :: !LevelOptions      // level options
+   = { boundmap      :: !BoundMap               // static bounds map in a level
+     , initpos       :: !Point2                 // center of screen in boundmap
+     , layers        :: ![Layer]                // all layers [back..front]
+     , objects       :: ![GameObject state]     // all other objects in the level
+     , music         :: !Maybe Music            // background music
+     , soundsamples  :: ![SoundSample]          // list of sound samples
+     , leveloptions  :: !LevelOptions           // level options
      }
 
 :: LevelOptions
-   = { fillbackground  :: !Maybe Colour    // fill the screen before drawing the layers
-     , escquit         :: !Bool            // quit the level whenever the Esc key is pressed
-     , debugscroll     :: !Bool            // scroll through the level with the arrow keys
-     , fadein          :: !Bool            // fade in from black
-     , fadeout         :: !Bool            // fade out to black
+   = { fillbackground:: !Maybe Colour    // fill the screen before drawing layers
+     , escquit       :: !Bool            // quit the level when pressing Esc key
+     , debugscroll   :: !Bool            // enable scrolling with arrow keys
+     , fadein        :: !Bool            // fade in from black
+     , fadeout       :: !Bool            // fade out to black
      }
 
 :: Music
-   = { musicfile :: !String     // MIDI file
-     , restart   :: !Bool       // restart the music when it ends?
-     , continue  :: !Bool       // music continues after end of level
+   = { musicfile     :: !String          // MIDI file
+     , restart       :: !Bool            // restart the music when it ends?
+     , continue      :: !Bool            // music continues after end of level
      }
 
 :: SoundSample
-   = { soundid      :: !SoundID    // id for the sample (any number)
-     , soundfile    :: !String     // WAV file
-     , soundbuffers :: !Int        // max times sample can be played together
+   = { soundid       :: !SoundID         // id for the sample (any number)
+     , soundfile     :: !String          // WAV file
+     , soundbuffers  :: !Int             // max times sample can be played together
      }
 
 :: SoundID
    :== Int
 
 :: BoundMap
-   = { map       :: ![{#Int}]  // map of all static bounds
-     , blocksize :: !Size      // size of the map units (in pixels)
-     , objstart  :: !Int       // min. value for objects (lower values are ignored)
-     , startobjx :: !Int       // X-distance from screen where objects are initialized
-     , startobjy :: !Int       // Y-distance from screen where objects are initialized
+   = { map        :: ![{#Int}] // map of all static bounds
+     , blocksize  :: !Size     // size of the map units (in pixels)
+     , objstart   :: !Int      // min. value for objects (lower values are ignored)
+     , startobjx  :: !Int      // X-distance from screen when to initialise objects
+     , startobjy  :: !Int      // Y-distance from screen when to initialise objects
      }
 
 :: GameRegion
@@ -72,33 +80,33 @@ import	StdGSt
    :== Int
 
 :: DirectionSet
-   = { top    :: !Bool
-     , left   :: !Bool
-     , bottom :: !Bool
-     , right  :: !Bool
+   = { top        :: !Bool
+     , left       :: !Bool
+     , bottom     :: !Bool
+     , right      :: !Bool
      }
 
 :: Layer
-   = { bmp       :: !GameBitmap        // bitmap that contains all the tiles
-     , layermap  :: !LayerMap          // map of the tiles in the level
-     , sequences :: ![TileSequence]    // tiles that change repeatedly
-     , movement  :: !Movement          // function to scroll the layer
+   = { bmp        :: !GameBitmap     // bitmap that contains all the tiles
+     , layermap   :: !LayerMap       // map of the tiles in the level
+     , sequences  :: ![TileSequence] // tiles that change repeatedly
+     , movement   :: !Movement       // function to scroll the layer
      }
 
 :: GameTime
-   :== Int     // time in frames
+   :== Int                          // time in frames
 
 :: GameBitmap
-   = { bitmapname  :: !String        // bitmap that contains smaller blocks
-     , unitsize    :: !Size          // size of these blocks (width, height)
-     , dimensions  :: !(!Int,!Int)   // number of blocks (horizontal, vertical)
-     , transparent :: !Maybe Point2  // position of a transparent pixel
+   = { bitmapname :: !String        // bitmap that contains smaller blocks
+     , unitsize   :: !Size          // size of these blocks (width, height)
+     , dimensions :: !(!Int,!Int)   // number of blocks (horizontal, vertical)
+     , transparent:: !Maybe Point2  // position of a transparent pixel
      }
 
 :: LayerMap
    :== [{#Int}]  // map of block numbers in a bitmap
                  // 0: empty; 1..n: block number; n+1..2n: mirror block;
-                 // 2n+1..3n: upsidedown; 3n+1..4n: mirror and upsidedown;
+                 // 2n+1..3n: upside down; 3n+1..4n: mirror and upsidedown;
                  // -1..-m: block sequence number
                  // (n = # blocks in gamebitmap; m = # sequences)
 
@@ -109,32 +117,38 @@ import	StdGSt
    :== [(Int, Int)]
 
 :: Movement
-   :== Point2 GameTime -> Point2   // calculate layer's position from game position
+   :== Point2 GameTime -> Point2    // calculate layer's position from game position
 
 :: SpriteID
    :== Int
 
 :: Sprite
-   = { bitmap   :: !GameBitmap   // sprites may have their own bitmap
-     , sequence :: !Sequence     // seqence of blocks
-     , loop     :: !Bool         // if FALSE, callback animation function
+   = { bitmap   :: !GameBitmap      // sprites may have their own bitmap
+     , sequence :: !Sequence        // seqence of blocks
+     , loop     :: !Bool            // if FALSE, callback animation function
      }
-
-:: Object gs
-   = E.state:
-     { objecttype :: !ObjectType    // identifier for the type of object, 0 = AutoInitObject
+:: GameObject gs
+   = E. state:
+     { objecttype :: !ObjectType    // identifier for object type (0 AutoInitObject)
      , sprites    :: ![Sprite]      // sprite 1..n
-     , init       :: !SubType !Point2 !GameTime !gs -> *(!*(state, ObjectRec), !gs)
-     , done       :: !*(state, ObjectRec) !gs -> gs
-     , move       :: !*(state, ObjectRec) !gs -> *(!*(state, ObjectRec), !gs)
-     , animation  :: !*(state, ObjectRec) !gs -> *(!*(state, ObjectRec), !gs)
-     , touchbound :: !*(state, ObjectRec) !DirectionSet !MapCode !gs -> *(!*(state, ObjectRec), !gs)
-     , collide    :: !*(state, ObjectRec) !DirectionSet !ObjectType !ObjectRec !gs -> *(!*(state, ObjectRec), !gs)
-     , frametimer :: !*(state, ObjectRec) !gs -> *(!*(state, ObjectRec), !gs)
-     , keydown    :: !*(state, ObjectRec) !KeyCode !gs -> *(!*(state, ObjectRec), !gs)
-     , keyup      :: !*(state, ObjectRec) !KeyCode !gs -> *(!*(state, ObjectRec), !gs)
-     , userevent  :: !*(state, ObjectRec) !EventType !EventPar !EventPar !gs -> *(!*(state, ObjectRec), !gs)
+     , init       :: !SubType !Point2 !GameTime !gs -> GameObjectState state gs
+     , done       :: !(GameObjectState state gs)    -> gs
+     , move       :: !                                         ObjectFun state gs
+     , animation  :: !                                         ObjectFun state gs
+     , touchbound :: !DirectionSet MapCode                  -> ObjectFun state gs
+     , collide    :: !DirectionSet ObjectType GameObjectRec -> ObjectFun state gs
+     , frametimer :: !                                         ObjectFun state gs
+     , keydown    :: !KeyCode                               -> ObjectFun state gs
+     , keyup      :: !KeyCode                               -> ObjectFun state gs
+     , userevent  :: !EventType !EventPar !EventPar         -> ObjectFun state gs
      }
+:: *GameObjectState state gs
+   = { objectstate:: state
+     , gamestate  :: gs
+     , objectrec  :: GameObjectRec
+     }
+:: ObjectFun state gs
+   :== IdFun (GameObjectState state gs)
 
 :: ObjectType
    :== Int
@@ -161,14 +175,14 @@ import	StdGSt
 
 :: FV
    = Factor !Real
-   | Value !Real
+   | Value  !Real
 
 :: RealXY
    = { rx :: !Real
      , ry :: !Real
      }
 
-:: ObjectRec
+:: GameObjectRec
    = { active              :: !Bool            // move and check collisions?
      , subtype             :: !SubType         // object's sub type
      , size                :: !Size            // the actual size
@@ -192,11 +206,11 @@ import	StdGSt
      }
 
 :: DisplayOptions
-   = { blink               :: !Bool       // object blinks
-     , stretch             :: !Bool       // stretch sprite to fit in size
-     , mirrorleftright     :: !Bool       // mirror the sprite
-     , mirrorupdown        :: !Bool       // draw sprite up side down
-     , rotation            :: !Rotation   // rotation
+   = { blink               :: !Bool            // object blinks
+     , stretch             :: !Bool            // stretch sprite to fit in size
+     , mirrorleftright     :: !Bool            // mirror the sprite
+     , mirrorupdown        :: !Bool            // draw sprite up side down
+     , rotation            :: !Rotation        // rotation
      }
 
 :: Rotation
@@ -204,15 +218,15 @@ import	StdGSt
 
 :: ObjectOptions
    = { ignorelevelbounds   :: !Bool         // object can move out of the level
-     , checkkeyboard       :: !Bool         // generate keydown event for this object
+     , checkkeyboard       :: !Bool         // allow key down event for this object
      , allowkeyboardrepeat :: !Bool         // allow pressed key to repeat
      , static              :: !Bool         // object always moves with screen
      , hdirection          :: !HDirection   // horizontal direction of the object
      , vdirection          :: !VDirection   // vertical direction of the object
-     , automirrorleftright :: !Bool         // mirror object if horizontal direction changes
-     , automirrorupdown    :: !Bool         // mirror object if vertical direction changes
-     , freeze              :: !Bool         // no movement at all until framecounter reaches 0
-     , removemapcode       :: !Bool         // remove the object completely from the map?
+     , automirrorleftright :: !Bool         // mirror if horizontal direction change
+     , automirrorupdown    :: !Bool         // mirror if vertical direction change
+     , freeze              :: !Bool         // no movement until framecounter is 0
+     , removemapcode       :: !Bool         // remove the object from the map
      }
 
 :: HDirection
@@ -224,8 +238,8 @@ import	StdGSt
 :: LayerPosition
    = InFront | AtLayer Int
 
-:: Statistic
-   = { format    :: !String        // text to display or formatstring for value
+:: GameText
+   = { format    :: !String        // text to display or format string for value
      , value     :: Maybe Int      // value to display
      , position  :: !Point2        // position on screen
      , style     :: !Style         // style to write the text in
@@ -235,20 +249,20 @@ import	StdGSt
      }
 
 :: Alignment
-   = { xyfromscreencenter :: !(!Bool,!Bool)   // center position on the screen
-     , xycentered         :: !(!Bool,!Bool)   // center text around position
+   = { xyfromscreencenter :: !(!Bool,!Bool) // center position on the screen
+     , xycentered         :: !(!Bool,!Bool) // center text around position
      }
 
 :: Style
-   = { fontname :: !String   // any font name
-     , fontsize :: !Int      // size of the text
-     , bold     :: !Bool     // bold
-     , italic   :: !Bool     // italic
+   = { fontname :: !String                  // any font name
+     , fontsize :: !Int                     // size of the text
+     , bold     :: !Bool                    // bold
+     , italic   :: !Bool                    // italic
      }
 
 :: Shadow
-   = { shadowpos   :: !Point2   // relative position of the shadow to the text
-     , shadowcolor :: Colour    // color of the shadow
+   = { shadowpos   :: !Point2               // relative position of text shadow
+     , shadowcolor :: !Colour               // color of the shadow
      }
 
 instance zero RealXY

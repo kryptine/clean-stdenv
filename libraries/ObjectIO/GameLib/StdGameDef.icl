@@ -1,8 +1,17 @@
 implementation module StdGameDef
 
+
+//	********************************************************************************
+//	Clean Standard Game library, version 1.2
+//	
+//	StdGameDef contains all the type definitions needed to specify a game.
+//	********************************************************************************
+
+
+from	StdFunc			import St
 from	StdOverloaded	import zero
 from	StdString		import String
-from	StdIOBasic		import Point2, Size
+from	StdIOBasic		import Point2, Size, IdFun
 from	StdMaybe		import Maybe, Just, Nothing
 from	StdPictureDef	import Colour,
 								RGB, RGBColour, Black, White, 
@@ -16,21 +25,20 @@ import	StdGSt
    | ColorDepth Int      // screen color depth, default 8 (256 colors)
 
 :: Game gs
-   = { levels      :: [Level (GSt gs)]                   // levels
-     , quitlevel   :: (GSt gs) -> (Bool, GSt gs)         // when true, the game engine quits
-     , nextlevel   :: (GSt gs) -> (Int, GSt gs)          // 1,2,... level in list, 0 = exit
-     , statistics  :: (GSt gs) -> ([Statistic], GSt gs)  // all text items
+   = { levels        :: [Level (GSt gs)]        // levels
+     , quitlevel     :: St (GSt gs) Bool        // True quits the game
+     , nextlevel     :: St (GSt gs) Int         // new level if >0 (0 quits)
+     , statistics    :: St (GSt gs) [GameText]  // all text items
      }
 
 :: Level state
-   = { boundmap      :: !BoundMap          // map of all static bounds in a level
-     , initpos       :: !Point2            // center of screen in boundmap
-     , layers        :: ![Layer]           // all visible (scrolling) layers
-                                           //   [back ... front]
-     , objects       :: ![Object state]    // all other objects in the level
-     , music         :: !Maybe Music       // background music
-     , soundsamples  :: ![SoundSample]     // list of sound samples
-     , leveloptions  :: !LevelOptions      // level options
+   = { boundmap      :: !BoundMap               // map of all static bounds in a level
+     , initpos       :: !Point2                 // center of screen in boundmap
+     , layers        :: ![Layer]                // all layers [back..front]
+     , objects       :: ![GameObject state]     // all other objects in the level
+     , music         :: !Maybe Music            // background music
+     , soundsamples  :: ![SoundSample]          // list of sound samples
+     , leveloptions  :: !LevelOptions           // level options
      }
 
 :: LevelOptions
@@ -119,21 +127,28 @@ import	StdGSt
      , loop     :: !Bool         // if FALSE, callback animation function
      }
 
-:: Object gs
-   = E.state:
-     { objecttype :: !ObjectType    // identifier for the type of object, 0 = AutoInitObject
+:: GameObject gs
+   = E. state:
+     { objecttype :: !ObjectType    // identifier for object type (0 AutoInitObject)
      , sprites    :: ![Sprite]      // sprite 1..n
-     , init       :: !SubType !Point2 !GameTime !gs -> *(!*(state, ObjectRec), !gs)
-     , done       :: !*(state, ObjectRec) !gs -> gs
-     , move       :: !*(state, ObjectRec) !gs -> *(!*(state, ObjectRec), !gs)
-     , animation  :: !*(state, ObjectRec) !gs -> *(!*(state, ObjectRec), !gs)
-     , touchbound :: !*(state, ObjectRec) !DirectionSet !MapCode !gs -> *(!*(state, ObjectRec), !gs)
-     , collide    :: !*(state, ObjectRec) !DirectionSet !ObjectType !ObjectRec !gs -> *(!*(state, ObjectRec), !gs)
-     , frametimer :: !*(state, ObjectRec) !gs -> *(!*(state, ObjectRec), !gs)
-     , keydown    :: !*(state, ObjectRec) !KeyCode !gs -> *(!*(state, ObjectRec), !gs)
-     , keyup      :: !*(state, ObjectRec) !KeyCode !gs -> *(!*(state, ObjectRec), !gs)
-     , userevent  :: !*(state, ObjectRec) !EventType !EventPar !EventPar !gs -> *(!*(state, ObjectRec), !gs)
+     , init       :: !SubType !Point2 !GameTime !gs -> GameObjectState state gs
+     , done       :: !(GameObjectState state gs)            -> gs
+     , move       :: !                                         ObjectFun state gs
+     , animation  :: !                                         ObjectFun state gs
+     , touchbound :: !DirectionSet MapCode                  -> ObjectFun state gs
+     , collide    :: !DirectionSet ObjectType GameObjectRec -> ObjectFun state gs
+     , frametimer :: !                                         ObjectFun state gs
+     , keydown    :: !KeyCode                               -> ObjectFun state gs
+     , keyup      :: !KeyCode                               -> ObjectFun state gs
+     , userevent  :: !EventType !EventPar !EventPar         -> ObjectFun state gs
      }
+:: *GameObjectState state gs
+   = { objectstate:: state
+     , gamestate  :: gs
+     , objectrec  :: GameObjectRec
+     }
+:: ObjectFun state gs
+   :== IdFun (GameObjectState state gs)
 
 :: ObjectType
    :== Int
@@ -167,7 +182,7 @@ import	StdGSt
      , ry :: !Real
      }
 
-:: ObjectRec
+:: GameObjectRec
    = { active              :: !Bool            // move and check collisions?
      , subtype             :: !SubType         // object's sub type
      , size                :: !Size            // the actual size
@@ -223,7 +238,7 @@ import	StdGSt
 :: LayerPosition
    = InFront | AtLayer Int
 
-:: Statistic
+:: GameText
    = { format    :: !String        // text to display or formatstring for value
      , value     :: Maybe Int      // value to display
      , position  :: !Point2        // position on screen
@@ -247,7 +262,7 @@ import	StdGSt
 
 :: Shadow
    = { shadowpos   :: !Point2   // relative position of the shadow to the text
-     , shadowcolor :: Colour    // color of the shadow
+     , shadowcolor :: !Colour    // color of the shadow
      }
 
 
@@ -260,4 +275,3 @@ where
    zero = { xyfromscreencenter = (False, False)
           , xycentered = (False, False)
           }
-

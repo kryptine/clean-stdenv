@@ -7,7 +7,7 @@ import	gamehandle, gameintrface_12
 
 ::  OSGameData gs
     =   {   scroll    :: [(MAPID, Movement)]        // The layer movement functions
-        ,   gamestate :: gs                         // The game state
+        ,   gamest    :: gs                         // The game state
         ,   gamehnd   :: GameHandle gs              // Complete game definition
         }
 
@@ -31,7 +31,7 @@ OSInitGameLayerMap :: !MAPID !BID !{#Char} !Int !Int !Bool !*OSToolbox -> (!GRES
 
 OSGameLayerMapDone :: !MAPID !*OSToolbox -> (!GRESULT,!*OSToolbox)
 
-OSRunGameEngine :: !(OSGameData gs) !*OSToolbox -> (gs,!*OSToolbox)
+OSRunGameEngine :: !(OSGameData .gs) !*OSToolbox -> (.gs,!*OSToolbox)
 
 OSSetGameBoundMap :: !Int !Int !{#Char} !Int !Int !Int !Int !Int !*OSToolbox -> (!GRESULT,!*OSToolbox)
 

@@ -20,22 +20,22 @@ GameBitmapDone :: !BID !*OSToolbox -> (!GRESULT, !*OSToolbox)
 
 ClearAllGameBitmaps :: !*OSToolbox -> (!GRESULT, !*OSToolbox)
 
-SetTransparentColor :: !BID Point2 !*OSToolbox -> (!GRESULT, !*OSToolbox)
+SetTransparentColor :: !BID !Point2 !*OSToolbox -> (!GRESULT, !*OSToolbox)
 
-InitBlockSequence :: !BID (!SEQID, [(Int,Int)]) !*OSToolbox -> (!GRESULT, !*OSToolbox)
+InitBlockSequence :: !BID !(!SEQID, ![(Int,Int)]) !*OSToolbox -> (!GRESULT, !*OSToolbox)
 
-InitGameLayerMap :: !MAPID !BID [{#Int}] !Bool !*OSToolbox -> (!GRESULT, !*OSToolbox)
+InitGameLayerMap :: !MAPID !BID ![{#Int}] !Bool !*OSToolbox -> (!GRESULT, !*OSToolbox)
 
 GameLayerMapDone :: !MAPID !*OSToolbox -> (!GRESULT, !*OSToolbox)
 
 // OSGameData gs should only contain the current level here!
-RunGameEngine :: (OSGameData gs) !*OSToolbox -> (gs, !*OSToolbox)
+RunGameEngine :: !(OSGameData .gs) !*OSToolbox -> (.gs, !*OSToolbox)
 
 SetGameBoundMap :: !Int !Int [{#Int}] !Int !Int !Int !*OSToolbox -> (!GRESULT, !*OSToolbox)
 
-MoveScreenTo :: Point2 !*OSToolbox -> (!GRESULT, !*OSToolbox)
+MoveScreenTo :: !Point2 !*OSToolbox -> (!GRESULT, !*OSToolbox)
 
-InitSpriteAnimation :: !BID [(Int,Int)] !Bool !*OSToolbox -> (!GRESULT, !*OSToolbox)
+InitSpriteAnimation :: !BID ![(Int,Int)] !Bool !*OSToolbox -> (!GRESULT, !*OSToolbox)
 
 InitGameObject :: !ObjectType !SubType !Point2 !*OSToolbox -> (!GRESULT, !*OSToolbox)
 
@@ -51,4 +51,3 @@ ShowStatistic :: !Int !Int !{#Char} !Int !Colour !{#Char} !Int !Bool !Bool  !Boo
 PlayMusic :: !{#Char} !Bool !*OSToolbox -> (!GRESULT, !*OSToolbox)
 
 StopMusic :: !*OSToolbox -> (!GRESULT, !*OSToolbox)
-
