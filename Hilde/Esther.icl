@@ -2,14 +2,6 @@ module Esther
 
 import StdEnv, EstherScript, EstherStdEnv, EstherFamkeEnv, DynamicFileSystem, FamkeProcess, StdDebug
 
-/*Start :: !*World -> *World
-Start world
-	# (console, world) = stdio world
-	  st = {searchPath = [], searchCache = [], buildin = stdEnv ++ famke, env = world}
-	  (console, st=:{env=world}) = shell console st
-	  (_, world) = fclose console world
-	= world*/
-	 
 Start :: !*World -> *World
 Start world = StartProcess Esther world
 
@@ -25,7 +17,7 @@ where
 		  (input, console) = freadline` console
 	  	  (_, env) = fclose console env
 		| input == "" = {st & env = env}
-		# (result, st=:{env}) = (interpret input catchAllIO handler) {st & env = env}
+		# (result, st=:{env}) = (interpret input catchAllIO (\d env -> (handler d, env))) {st & env = env}
 		  (console, env) = stdio env
 		  console = foldl (\f x -> fwrites x f) console result
 		  console = fwrites "\n" console
@@ -38,7 +30,7 @@ where
 			| size line > 0 && line.[size line - 1] == '\n' = (line % (0, size line - 2), file)
 			= (line, file)
 	
-	interpret :: !String !*(Esther *env) -> (![String], !*Esther *env) | TC, DynamicFileSystem, bimap{|*|} env
+	interpret :: !String !*(Esther *env) -> (![String], !*Esther *env) | TC, DynamicFileSystem, bimap{|*|}, ExceptionEnv env
 	interpret input st
 		# (d, st=:{env}) = compose input st
 		  (d, env) = eval d env
@@ -46,17 +38,21 @@ where
 		= (v ++ [" :: ", t], {st & env = env})
 	where
 		eval :: !Dynamic !*env -> (!Dynamic, !*env) | TC env
-		eval (f :: *env^ -> *env^) env = trace_n " < *World -> *World > " (dynamic UNIT, f env)
+		eval d=:(_ :: A.a: *a -> *a) env = (d, env)
+		eval (f :: *env^ -> *env^) env 
+			#!env = trace_n " < *World -> *World > " env
+			= (dynamic UNIT, f env)
+		eval d=:(_ :: A.a b: *a -> *(b, *a)) env = (d, env)
 		eval (f :: *env^ -> *(a, *env^)) env 
-			# (x, env) = f env
-			= trace_n " < *World -> *(a, *World) > " (dynamic x :: a, env)
+			#!env = trace_n " < *World -> *(a, *World) > " env
+			#!(x, env) = f env
+			= (dynamic x :: a, env)
 		eval d env = (d, env)
 
-	handler ((ApplyTypeError df dx) :: ComposeException) env = (["*** Error: cannot apply ", tf, " to ", tx, " ***"], env)
+	handler d=:(_ :: A.a: a) = ["*** Error: ":take 1000 v] ++ [" :: " , t, " ***"]
 	where
-		(vf, tf) = toStringDynamic df
-		(vx, tx) = toStringDynamic dx
-	handler (UnsolvableOverloading :: ComposeException) env = (["*** Error: unsolvable overloading ***"], env)
-	handler d env = (["*** Error: ":v] ++ [" ***"], env)
+		(v, t) = toStringDynamic d
+	handler (EstherError s :: EstherError) = ["*** Esther: ", s, " ***"]
+	handler d = ["*** Error: ":take 1000 v] ++ [" :: " , t, " ***"]
 	where
 		(v, t) = toStringDynamic d

@@ -5,6 +5,7 @@ import EstherParser, StdMaybe
 :: ComposeException 
 	= ApplyTypeError !(Dynamic) !(Dynamic)
 	| UnboundVariable !String
+	| InstanceNotFound !String !Dynamic
 	| InvalidInstance !String !Dynamic
 	| UnsolvableOverloading
 
@@ -12,8 +13,9 @@ import EstherParser, StdMaybe
 	= CoreApply !Core !Core
 	| CoreCode !Dynamic 
 	| CoreVariable !String
+	| CoreDynamic
 
-class resolveInstance env :: !String !Dynamic !*env -> (!Dynamic, !*env)
+class resolveInstance env :: !String !Dynamic !*env -> (!Maybe Dynamic, !*env)
 
 class generateCode t :: !Core !*env -> (!t, !*env) | resolveInstance env
 
@@ -25,8 +27,6 @@ abstract :: !String !Core -> Core
 abstract_ :: !Core -> Core
 
 instance generateCode Dynamic
-
-//applyDynamics :: !Dynamic !Dynamic -> Maybe Dynamic
 
 toStringDynamic :: !Dynamic -> ([String], String)
 

@@ -1,7 +1,7 @@
 implementation module EstherBackend
 
 import EstherParser, StdMaybe
-import StdInt, StdString, StdList, StdBool, StdEnum, StdArray, Debug
+import Debug, StdInt, StdString, StdList, StdBool, StdEnum, StdArray, StdTuple
 
 :: Overloaded d t o = (|||) infixr 0 !(d -> t) !o
 :: Contexts a b = (&&&) infixr 0 !a !b
@@ -39,11 +39,12 @@ notFreeVar _ _ = True
 
 instance generateCode Dynamic
 where
-	generateCode (CoreCode d) env = (d, env)
-	generateCode (CoreVariable v) env = raise (UnboundVariable v)
-	generateCode (CoreApply (CoreVariable "_dynamic_") e) env 
+	generateCode CoreDynamic env = (dynamic I ||| Class "TC" :: A.z: Overloaded (z -> Dynamic) (z -> Dynamic) (Context z), env)
+	generateCode (CoreApply CoreDynamic e) env 
 		# (codex, env) = generateCode e env
 		= (dynamic codex :: Dynamic, env)
+	generateCode (CoreCode d) env = (d, env)
+	generateCode (CoreVariable v) env = (raise (UnboundVariable v), env)
 	generateCode (CoreApply e1 e2) env 
 		# (codef, env) = generateCode e1 env
 		  (codex, env) = generateCode e2 env
@@ -93,26 +94,55 @@ solveOverloading d=:(_ :: Overloaded a b c) env
 		Just d` -> (check d`, env)
 		_ -> (check d, env)
 where
-	solve d=:(e ||| Class c :: Overloaded d t (Context a)) env = case (dynamic Omega :: a) of 
+	solve d=:(e ||| Class c :: Overloaded d t (Context a)) env = case dynamic Omega :: a of
+/*		(_ :: A.b: b) | c == "TC"
+			# n = countTypeVar (dynamic Omega :: (a, t))
+			| n > 0 -> (Nothing, env)
+			# (Just dyndict, env) = resolveInstance` c (dynamic Omega :: a) env
+			-> case dyndict of 
+				(dict :: d) -> (Just (dynamic e dict :: t), env)
+				_ -> raise (InvalidInstance c dyndict)*/
 		(_ :: A.b: b) -> (Nothing, env)
-		type 
-			# (dyndict, env) = resolveInstance` c type env
+		type
+			# (maybe, env) = resolveInstance` c type env
+			  (dyndict, env) = case maybe of
+					Just dyndict -> (dyndict, env)
+					_ 
+						# (maybe, env) = resolveInstance` c (dynamic Omega :: A.c: c) env
+						-> case maybe of
+							Just dyndict -> (dyndict, env)
+							_ -> (raise (InstanceNotFound c type), env)
 			-> case dyndict of 
 				(dict :: d) -> (Just (dynamic e dict :: t), env)
 				(dict_e ||| dict_r :: Overloaded dict_d d dict_o) 
 					# (d`, env) = solveOverloading (dynamic B e dict_e ||| dict_r :: Overloaded dict_d t dict_o) env
 					-> (Just d`, env)
-				_ -> raise (InvalidInstance c dyndict)
+				_ -> (raise (InvalidInstance c dyndict), env)
 	where
-		resolveInstance` "TC" (type :: a) env = (dynamicToDynamic type, env)
-		resolveInstance` c type env = resolveInstance c type env
-
-		dynamicToDynamic :: a -> Dynamic | TC a
-		dynamicToDynamic _ = dynamic toDynamic :: a^ -> Dynamic
+		resolveInstance` "TC" (type :: a) env = (Just (dynamicToDynamic type), env)
 		where
-			toDynamic :: b -> Dynamic | TC b
-			toDynamic x = dynamic x :: b^
+			dynamicToDynamic :: a -> Dynamic | TC a
+			dynamicToDynamic _ = dynamic toDynamic :: a^ -> Dynamic
+			where
+				toDynamic :: b -> Dynamic | TC b
+				toDynamic x = dynamic x :: b^
+		resolveInstance` c type env = resolveInstance c type env
 				
+/*		countTypeVar :: !Dynamic -> Int
+		countTypeVar d = f (typeCodeOfDynamic d)
+		where
+			f :: !TypeCode -> Int
+			f (TypeScheme n (TypeApp (TypeApp _ (TypeVar v)) t)) = g t
+			where
+				g :: !TypeCode -> Int
+				g (TypeApp t1 t2) = g t1 + g t2
+				g (TypeUnique t) = g t
+				g (TypeVar i) 
+					| i == v = 1
+					= 0
+				g _ = 0
+			f _ = 0*/
+
 	solve d=:(e ||| r1 &&& r2 :: Overloaded (Contexts d1 d2) t (Contexts c1 c2)) env 
 		# (maybe1, env) = solve (dynamic I ||| r1 :: Overloaded d1 d1 c1) env
 		  (maybe2, env) = solve (dynamic I ||| r2 :: Overloaded d2 d2 c2) env
@@ -129,7 +159,7 @@ where
 		| occur overloadedVars typeVars = d
 		= raise UnsolvableOverloading
 	where
-		occur [x:xs] [y:ys] = y - x > 0 && occur xs ys
+		occur [x:xs] [y:ys] = y > x && occur xs ys
 		occur [] _ = True
 	
 		countTypeVars :: !Dynamic -> [Int]
@@ -138,25 +168,16 @@ where
 			f :: !TypeCode -> *{#Int}
 			f (TypeScheme n type) = g type (createArray n 0)
 			where
-				g (TypeApp x y) a = g y (g x a)
-				g (TypeVar i) a=:{[i]=x} = {a & [i] = x + 1}
+				g :: !TypeCode !*{#Int} -> *{#Int}
+				g (TypeApp t1 t2) a = g t1 (g t2 a)
+				g (TypeUnique t) a = g t a
+				g (TypeVar i) a=:{[i]=n} = {a & [i] = n + 1}
 				g _ a = a
 			f _ = {}
 	check d = d
 solveOverloading d env = (d, env)
 
-/*import Debug, StdTuple
-
-(<<-) infix 0 :: .a !.b -> .a
-(<<-) value debugValue
-	=	debugBefore debugValue show value
-where
-	show
-		=	debugShowWithOptions
-				[]//[DebugMaxChars 79, DebugMaxDepth 5, DebugMaxBreadth 20]
-*/
-import StdMisc
-Omega = abort "Do NOT evaluate Omega"
+Omega = raise "Omega internal error"
 
 coreI = CoreCode (dynamic I :: A.a: a -> a)
 coreK = CoreCode (dynamic K :: A.a b: a b -> a)
@@ -200,6 +221,7 @@ where
 		listVariables (TypeApp _ (TypeCons c)) = [toString c]
 		listVariables (TypeScheme _ t) = listVariables t
 		listVariables (TypeApp t1 t2) = listVariables t1 ++ listVariables t2
+		listVariables (TypeUnique t) = listVariables t
 		listVariables _ = []
 toStringDynamic d = prettyDynamic d
 
@@ -207,9 +229,10 @@ prettyDynamic :: !Dynamic -> ([String], String)
 prettyDynamic d = (v, t)
 where
 	v = case d of 
+		(x :: A.a: a) -> debugShowWithOptions [DebugTerminator ""] x
 		(x :: a -> b) -> ["<function>"]
 //		(x :: a -> b) -> debugShowWithOptions [DebugTerminator "", DebugMaxDepth 3, DebugMaxBreadth 2, DebugClosures False] x
-		(x :: a) -> (debugShowWithOptions [DebugTerminator ""] x)
+		(x :: a) -> debugShowWithOptions [DebugTerminator ""] x
 
 	t = removeForAll (typeCodeOfDynamic d)
 	where

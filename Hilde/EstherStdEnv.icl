@@ -75,9 +75,12 @@ where
 		]
 	
 	stdMisc =
-		[	("undef", dynamic undef :: A.a: a)
-		,	("abort", dynamic abort :: A.a: String -> a)
+		[	("undef", dynamic raiseString "undef evaluated" :: A.a: a)
+		,	("abort", dynamic raiseString :: A.a: String -> a)
 		]
+	where
+		raiseString :: !String -> .a
+		raiseString msg = raise msg
 
 	stdBool =
 		[	("not", dynamic not)

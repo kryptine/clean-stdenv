@@ -5,7 +5,7 @@ import FamkeRpc, LoesListSeq, LoesKeyList, TcpIp
 import StdBool, StdInt, StdMisc, StdString, StdList, StdArray, StdTuple, ArgEnv, Windows
 from DynamicLinkerInterface import GetDynamicLinkerPath
 
-TRACE msg x :== x//trace_n msg x; import StdDebug
+TRACE msg x :== trace_n msg x; import StdDebug
 
 :: ProtocolIn
 	= ClientWorkRequest !ProcessId !Int
@@ -105,7 +105,7 @@ rpcProcessServer request famke = rpc FamkeProcessServer request famke
 
 startProcessServer :: !String !(*World -> *World) !*World -> *World
 startProcessServer executable process famke
-	# (_, server, famke) = rpcOpen FamkeProcessServer (TRACE "World Process Server" famke)
+	# (_, server, famke) = rpcOpen FamkeProcessServer (TRACE "Famke Process Server" famke)
 	  st = {working = Empty, waiting = Empty, nextid = 1, executable = executable, server = server, famke = famke, ports = [#0xFA01..0xFAFF]}
 	  {server, famke} = newProcess` process (\_ famke -> famke) st
 	= rpcClose server famke
@@ -258,9 +258,9 @@ where
 		# (reply, famke) = rpcProcessServer (ClientWorkRequest id osId) famke
 		= case reply of
 			ClientDoMoreWork f 
-				#!famke = TRACE ("World Process Client " +++ toString id +++ " working") famke
+				#!famke = TRACE ("Famke Process Client " +++ toString id +++ " working") famke
 				  famke = f famke
-			  	  famke = TRACE ("World Process Client " +++ toString id +++ " done") famke
+			  	  famke = TRACE ("Famke Process Client " +++ toString id +++ " done") famke
 			  	-> processClient id osId famke
 			ClientNoMoreWork -> famke
 
