@@ -6,13 +6,13 @@ import StdEnv
 stdEnv :: [(String, Dynamic)]
 stdEnv = 
 	[	("if", dynamic IF :: A.a: Bool a a -> a)
-//	,	("(>>>) infix 0", overloaded "TC" (dynamic (undef, >>>) :: A.a: (a, (a -> Dynamic) a String -> *World -> *(Bool, *World))))
+//	,	("(>>>>) infix 0", overloaded "TC" (dynamic (undef, >>>>) :: A.a: (a, (a -> Dynamic) a String -> *World -> *(Bool, *World))))
 	]	
 	++ stdOverloaded ++ stdClass ++ stdInt ++ stdReal ++ stdList 
 	++ stdFunc ++ stdMisc ++ stdBool ++ stdString ++ stdTuple
 where
 	IF x y z = if x y z
-//	>>> tc x n = dynamicWrite [n] (tc x)
+//	>>>> tc x n = dynamicWrite [n] (tc x)
 
 	stdOverloaded = 
 		[	("(+) infixl 6", overloaded "+" (dynamic (undef, id) :: A.a: (a, (a a -> a) a a -> a)))
