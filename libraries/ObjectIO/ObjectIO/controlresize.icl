@@ -147,6 +147,14 @@ where
 				x`				= if (x+w>rright)  (max (rright -w) rleft) x
 				y`				= if (y+h>rbottom) (max (rbottom-h) rtop ) y
 		
+		calcNewWItemSize wMetrics originShifted resizeF itemH=:{wItemKind=IsButtonControl}
+			# itemH		= {itemH & wItemSize=newSize1,wItemAtts=replaceSizeAtt newSize1 itemH.wItemAtts}
+			= (newSize1<>oldSize,itemH)
+		where
+			oldSize				= itemH.wItemSize
+			newSize				= resizeF oldSize
+			newSize1			= {w=max (osGetButtonControlMinWidth wMetrics) newSize.w,h=max 0 newSize.h}
+		
 		calcNewWItemSize _ originShifted resizeF itemH=:{wItemKind=IsCustomControl}
 			# itemH		= {itemH & wItemSize=newSize1,wItemAtts=replaceSizeAtt newSize1 itemH.wItemAtts}
 			= (newSize1<>oldSize,itemH)
