@@ -6,11 +6,19 @@ import StdEnv, GenLib
 :: Rose a = Rose a .[Rose a]
 :: Fork a = Fork a a
 :: Sequ a = SequEmpty | SequZero .(Sequ .(Fork a)) | SequOne a .(Sequ .(Fork a))
+:: InfCons 
+	= :+: infixl 2 InfCons InfCons
+	| :-: infixl 2 InfCons InfCons
+	| :*: infixl 3 InfCons InfCons
+	| :->: infixr 4 InfCons InfCons
+	| U
+	| I Int 
+:: Rec a b c = { rec_fst :: a, rec_snd :: b, rec_thd :: c }	
 
 derive bimap [], (,), Maybe
 derive bimap Tree, Rose, Fork, Sequ
 
-derive gEq 				Tree, Rose, Fork, Sequ
+derive gEq 				Tree, Rose, Fork, Sequ, InfCons, Rec
 derive gLexOrd 			Tree, Rose, Fork, Sequ
 derive gMap 			Tree, Rose, Fork, Sequ
 derive gMapLSt 			Tree, Rose, Fork, Sequ
@@ -20,6 +28,8 @@ derive gReduceRSt 		Tree, Rose, Fork, Sequ
 derive gReduce 			Tree, Rose, Fork, Sequ
 derive gZip				Tree, Rose, Fork, Sequ
 derive gMaybeZip 		Tree, Rose, Fork, Sequ
+derive gPrint			Tree, Rose, Fork, Sequ, InfCons, Rec
+derive gParse			Tree, Rose, Fork, Sequ, InfCons, Rec
 
 testEq :: [Bool]
 testEq =	
@@ -63,7 +73,72 @@ testReduceRSt =
 testReduceLSt =
 	[ 
 	]
-	
+
+testParsePrint =
+	[ test 1 
+	, test 123
+	, test -123
+
+	, test 1.09
+	, test -123.456
+	, test 1.23E-12
+	, test 1.23E+12
+	, test 1.23E5
+
+	, test True
+	, test False
+
+	, test 'a'
+	, test '\n'
+	, test '"'
+	, test '\''
+	//, test "Hello"
+	//, test "Hello\n"
+	//, test "Hello \"string\""
+
+	, test nil
+	, test [1]
+	, test [1,2,3]
+
+	, test (arr nil)
+	, test (arr [1])
+	, test (arr [1,2,3])
+
+	, test {rec_fst=1, rec_snd='a', rec_thd=1.2}
+
+	, test (Bin 'a' (Tip 1) (Bin 'b' (Tip 2) (Bin 'c' (Tip 3) (Tip 4))))
+	, test (Rose 1 [Rose 2 [], Rose 3 [], Rose 4 [Rose 5 []]])
+
+	, test (U :+: U)
+	, test (U :+: U :+: U)
+	, test (U :->: U :->: U)
+	, test (U :+: U :*: U)
+	, test (U :*: U :->: U)
+	, test (I 1 :+: I 2 :+: I 3)
+	, test (I 1 :*: I 2 :+: I 3)
+	, test (I 1 :+: I 2 :*: I 3)
+	, test (I 1 :+: I 2 :*: I 3 :+: I 4)
+	, test (I 1 :+: (I 2 :+: I 3) :+: I 4)
+
+	, test [I 1 :+: I 2 :+: I 3, I 4 :->: I 5 :->: I 6]
+	, test (arr [I 1 :+: I 2 :+: I 3, I 4 :->: I 5 :->: I 6])
+	, test 
+		{	rec_fst = I 1 :+: I 2 :+: I 3
+		, 	rec_snd = I 4 :->: I 5 :->: I 6
+		,	rec_thd = I 7 :*: I 8 :+: I 9
+		}
+	]
+where
+	test x = case parseString (printToString x) of
+		Nothing -> False
+		Just y -> x === y
+
+	nil :: [Int]
+	nil = []
+
+	arr :: [a] -> {a}
+	arr xs = {x\\x<-xs}
+
 Start :: [[Bool]]	
 Start
 	# result = foldr (&&) True (flatten tests)
@@ -79,4 +154,5 @@ where
 		, testMapLSt
 		, testReduceRSt
 		, testReduceLSt
+		, testParsePrint
 		]

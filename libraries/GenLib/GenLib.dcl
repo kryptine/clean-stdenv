@@ -8,3 +8,5 @@ import GenMap
 import GenMapSt
 import GenReduce
 import GenZip 
+import GenPrint
+import GenParse
