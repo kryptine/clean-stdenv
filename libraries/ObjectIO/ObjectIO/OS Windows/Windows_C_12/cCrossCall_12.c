@@ -823,31 +823,6 @@ EnumFontSizeProc (ENUMLOGFONT FAR * lpelf,		/* pointer to logical-font data  */
 		return 1;
 }
 
-static void
-AdjustMenuBarName (void)
-{
-/*	PA: previous version did not set the frame window title.
-		Appending the topDocWindow title should be done by the MDI interface. 
-	char apptitle[70];
-	char wintitle[32];
-
-	if (ghTopDocWindow != NULL)
-	{
-		GetWindowText (ghTopDocWindow, wintitle, 31);
-		wsprintf (apptitle, "%s - [%s]", gAppName, wintitle);
-		SetWindowText (ghActiveFrameWindow, apptitle);
-	}
-	else
-	{
-		SetWindowText (ghMainWindow, gAppName);
-	}
-*/
-	if (ghActiveFrameWindow != NULL)
-	{
-		SetWindowText (ghActiveFrameWindow, gAppName);
-	}
-}
-
 
 /*	Win(M/S)DIClientToOuterSizeDims returns the width and height needed to add/subtract
 	from the client/outer size to obtain the outer/client size. 
@@ -3444,7 +3419,6 @@ SDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lPara)
 				ProcessShortcutTable shortcuts;
 
 				ghTopDocWindow=NULL;
-				AdjustMenuBarName ();
 
 				shortcuts = (ProcessShortcutTable) GetWindowLong (hWin, 0);	// get the local shortcut table
 				DestroyProcessShortcutTable (shortcuts);					// and destroy it.
@@ -3627,7 +3601,6 @@ SDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lPara)
 					ghActiveClientWindow = NULL;
 					gAcceleratorTableIsUpToDate = FALSE; // The active global accelerator table is not up to date
 				}
-				AdjustMenuBarName ();
 				return DefWindowProc (hWin, uMess, wPara, lPara);
 			}
 			break;
@@ -3797,7 +3770,6 @@ MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lPara)
 				DestroyLocalWindowData (wdata);						//	and destroy it.
 				
 				ghTopDocWindow=NULL;
-				AdjustMenuBarName ();
 				return 0;
 			}
 		case WM_ENTERMENULOOP:
@@ -3957,7 +3929,6 @@ MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lPara)
 					ghActiveFrameWindow  = NULL;
 					ghActiveClientWindow = NULL;
 				}
-				AdjustMenuBarName ();
 				return DefMDIChildProc (hWin, uMess, wPara, lPara);
 			}
 			break;
@@ -4995,14 +4966,16 @@ HandleCleanRequest (CrossCallInfo * pcci)
 			}
 			break;
 		/*	Create a SDI document window. */
-		case CcRqCREATESDIDOCWINDOW:	/* not used, frameptr, packed pos, w,h, flags; client ptr result. */
+		case CcRqCREATESDIDOCWINDOW:	/* textptr, frameptr, packed pos, w,h, flags; client ptr result. */
 			{
 				HWND    hwndFrame, hwndClient, hwndToolbar;
 				POINT   clientDims, frameDims, winpos;
+				LPCTSTR pwintitle;
 				DWORD   styleFlags;
 				RECT    tbRect;
 				int     tbHeight;
 
+				pwintitle    = (LPCTSTR) pcci->p1;
 				hwndFrame    = (HWND) pcci->p2;
 				winpos.x     = pcci->p3>>16;
 				winpos.y     = (pcci->p3<<16)>>16;
@@ -5027,13 +5000,14 @@ HandleCleanRequest (CrossCallInfo * pcci)
 				/* Adjust the pos and size of the frame window. */
 				SetWindowPos (hwndFrame,NULL,winpos.x,winpos.y,frameDims.x,frameDims.y,SWP_NOZORDER);
 				UpdateWindow (hwndFrame);
+				SetWindowText (hwndFrame,pwintitle);
 
 				/* The client style flags are WS_CHILD and styleFlags. */
 				styleFlags |= WS_CHILD;
 
 				/* Create the new client window of the frame window. */
 				hwndClient = CreateWindow  (SDIWindowClassName,			/* Class name						*/
-											NULL,						/* No title							*/
+											pwintitle,					/* title							*/
 											styleFlags,					/* SDI client style flags			*/
 											0, tbHeight,				/* x, y								*/
 											clientDims.x,clientDims.y,	/* width, height					*/
@@ -5147,9 +5121,7 @@ HandleCleanRequest (CrossCallInfo * pcci)
 			break;
 		case CcRqSETWINDOWTITLE:		/* hwnd, textptr		no result. */
 			{
-				rprintf ("SWT: handle = %d, text = \"%s\"\n", (HWND) pcci->p1, (char *) pcci->p2);
-				SetWindowText ((HWND) pcci->p1, (char *) pcci->p2);
-				AdjustMenuBarName ();
+				SetWindowText ((HWND) pcci->p1, (LPCTSTR) pcci->p2);
 				MakeReturn0Cci (pcci);
 			}
 			break;
