@@ -47,7 +47,8 @@ pairGECGUI		::                                                   GECGUIFun (PAIR
 eitherGECGUI	::                                                   GECGUIFun (EITHER a b) (PSt .ps)
 objectGECGUI	:: !GenericTypeDefDescriptor 
 				   !(            [ConsPos] (PSt .ps) -> (PSt .ps))
-				   !(Arrangement [ConsPos] (PSt .ps) -> (PSt .ps)) -> GECGUIFun (OBJECT a)   (PSt .ps)
+				   !(Arrangement [ConsPos] (PSt .ps) -> (PSt .ps))
+				   !Bool                                          -> GECGUIFun (OBJECT a)   (PSt .ps)
 consGECGUI		:: !GenericConsDescriptor                         -> GECGUIFun (CONS   a)   (PSt .ps)
 fieldGECGUI		:: !GenericFieldDescriptor                        -> GECGUIFun (FIELD  a)   (PSt .ps)
 

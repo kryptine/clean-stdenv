@@ -3,12 +3,14 @@ definition module infragecs
 import testable
 import parseprint, guigecs
 
-::	GECArgs t env
-	=	{	location	:: !(!GUILoc,!OBJECTControlId) 
-		,	makeUpValue	:: !MakeUpValue
-	    ,   outputOnly	:: !OutputOnly
-	    ,	gec_value	:: !.Maybe t
-		,	update		:: !(Update t env)
+::	GECArgs t env										// The arguments to define a GEC:
+	=	{	location	:: !(!GUILoc,!OBJECTControlId)	// a legal value of an existing GUI component in which this GEC is to be created.
+		,	makeUpValue	:: !MakeUpValue					// for internal purposes. This value must be True.
+	    ,   outputOnly	:: !OutputOnly					// the GEC is for output purposes only (True) or can be edited by the user (False).
+	    ,	gec_value	:: !.Maybe t					// the optional initial value of type t that will be created.
+		,	update		:: !(Update t env)				// the interface function that a program can use to obtain information from
+														// the GEC at run-time without the need for polling.
+		,	hasOBJECT	:: !Bool						// create interface element to select data constructors (True) or do not create (False).
 		}
 
 derive bimap GECArgs

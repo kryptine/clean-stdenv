@@ -73,7 +73,7 @@ where
 gGEC{|AGEC|} gGECa gecArgs pSt
 	= gGEC_AGEC gGECa gecArgs pSt
 where
-	gGEC_AGEC gGECa gecArgs=:{gec_value=Just abstractGEC=:(Hidden bimapGEC gGECbimapGEC _),update=biupdate,location,makeUpValue,outputOnly} pSt
+	gGEC_AGEC gGECa gecArgs=:{gec_value=Just abstractGEC=:(Hidden bimapGEC gGECbimapGEC _),update=biupdate,location,makeUpValue,outputOnly,hasOBJECT} pSt
 		# (abbaGEC,pSt)	= gGECbimapGEC {gecArgs & gec_value=Just bimapGEC,update=bupdate abstractGEC} pSt
 		# (aGEC,pSt)	= openGECId pSt
 		# aDef			= GECReceiver aGEC (fun bupdate)
@@ -103,6 +103,7 @@ where
 								          , location    = location
 								          , makeUpValue = makeUpValue
 								          , outputOnly  = outputOnly
+								          , hasOBJECT   = hasOBJECT
 								          } pSt
 				# pSt			= nabbaGEC.gecOpenGUI location pSt  //mjp
 				# lSt			= { agecBimapGEC = nabbaGEC

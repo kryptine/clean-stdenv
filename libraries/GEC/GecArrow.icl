@@ -20,7 +20,7 @@ edit title = GecCircuit k
 where
 	k seta geta env
 		# (a, env1) = geta env
-		# ({gecGetValue, gecSetValue}, env2) = createNGEC title Interactive a (\r -> seta (includeUpdate r)) env1
+		# ({gecGetValue, gecSetValue}, env2) = createNGEC title Interactive True a (\r -> seta (includeUpdate r)) env1
 		= (gecSetValue, gecGetValue, env2)
 
 display :: String -> GecCircuit a a | gGEC{|*|} a 
@@ -28,7 +28,7 @@ display title = GecCircuit k
 where
 	k seta geta env
 		# (a, env1) = geta env
-		# ({gecGetValue, gecSetValue}, env2) = createNGEC title OutputOnly a (\r -> seta (includeUpdate r)) env1
+		# ({gecGetValue, gecSetValue}, env2) = createNGEC title OutputOnly False a (\r -> seta (includeUpdate r)) env1
 		= (gecSetValue, gecGetValue, env2)
 
 gecMouse :: String -> GecCircuit a MouseState

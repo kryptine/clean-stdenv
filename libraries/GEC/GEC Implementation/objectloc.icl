@@ -19,7 +19,7 @@ openOBJECTControlId env
 	= ({objectId=id,colId=cid,recId=rid},env)
 
 instance Controls OBJECTControl where
-	controlToHandles objControl=:(OBJECTControl _ _ _ _ atts) pSt
+	controlToHandles objControl=:(OBJECTControl _ _ _ _ _ atts) pSt
 		= case filter isControlSelectState atts of
 			[ControlSelectState Unable:_]			// This object should be represented as a colour text control
 				= uneditableOBJECTControl objControl pSt
@@ -30,12 +30,15 @@ instance Controls OBJECTControl where
 
 /** An uneditable OBJECTControl is a ColourTextControl that can be modified by the program only.
 */
-uneditableOBJECTControl (OBJECTControl {colId,recId} gtd switchFun arrangeFun atts) pSt
-	= controlToHandles impl pSt
+uneditableOBJECTControl (OBJECTControl {colId,recId} gtd switchFun arrangeFun createOBJECTControl atts) pSt
+	| createOBJECTControl
+		= controlToHandles impl pSt
+	| otherwise
+		= ([],pSt)
 where
 	conses		= gtd.gtd_conses
 	consNames	= [gtd_cons.gcd_name \\ gtd_cons <- conses]
-	impl		=     ColourTextControl colId "" defTextBackColour
+	impl		=     ColourTextControl colId "" defTextBackColour 
 						[ ControlViewSize {w=defCellWidth,h=defCellHeight}//ControlWidth (PixelWidth defTextWidths)
 						: atts
 						]
@@ -47,13 +50,14 @@ where
 
 /**	An editable OBJECTControl is a PopUpControl that can be selected by the user, and modified by the program.
 */
-editableOBJECTControl (OBJECTControl {objectId,recId} gtd switchFun arrangeFun atts) pSt
+editableOBJECTControl (OBJECTControl {objectId,recId} gtd switchFun arrangeFun createOBJECTControl atts) pSt
 	= controlToHandles impl pSt
 where
 	conses	= gtd.gtd_conses
 	index0	= 1
 	impl	= { addLS = index0
-			  , addDef=     PopUpControl
+			  , addDef= ListLS (repeatn n (
+			  			    PopUpControl
 			                   (  [  (gtd_cons.gcd_name, \((_,lSt),pSt) -> ((index,lSt),switchFun (getConsPath gtd_cons) pSt))
 			                      \\ gtd_cons <- conses & index <- [1..]
 			                      ]
@@ -66,8 +70,10 @@ where
 			                   , ControlWidth (PixelWidth defTextWidths)
 			                   : map liftControlAttribute atts
 			                   ]
+			            ))
 			            :+: Receiver recId handleMsg []
 			  }
+	n		= if createOBJECTControl 1 0
 	
 	handleMsg :: Int (.(Int,.ls),PSt .ps) -> (.(Int,.ls),PSt .ps)
 	handleMsg i ((_,lSt),pSt)

@@ -12,6 +12,7 @@ openOBJECTControlId :: !*env -> (!OBJECTControlId,!*env) | Ids env
 	              GenericTypeDefDescriptor
 	              (            [ConsPos] pst -> pst)
 	              (Arrangement [ConsPos] pst -> pst)
+	              Bool
 	              [ControlAttribute *(ls,pst)]
 
 instance Controls OBJECTControl

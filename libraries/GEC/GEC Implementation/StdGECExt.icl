@@ -8,8 +8,8 @@ import store, TRACE
 nothing _ _ pSt = pSt
 tracing r x pSt = DO_TRACE (r,x) pSt
 
-createNGEC :: String OutputOnly a (Update a (PSt .ps)) *(PSt .ps) -> *((GECVALUE a *(PSt .ps)),*(PSt .ps)) | gGEC{|*|} a & bimap{|*|} ps
-createNGEC title outputOnly initval userUpdate pSt
+createNGEC :: String OutputOnly Bool a (Update a (PSt .ps)) *(PSt .ps) -> *((GECVALUE a *(PSt .ps)),*(PSt .ps)) | gGEC{|*|} a & bimap{|*|} ps
+createNGEC title outputOnly hasOBJECT initval userUpdate pSt
 	# (objId,pSt)	= openOBJECTControlId pSt
 	= case accPIO (searchWindowIdWithTitle title) pSt of
 		(Nothing,pSt)
@@ -25,12 +25,12 @@ createNGEC title outputOnly initval userUpdate pSt
 											,	WindowViewDomain {zero & corner2={x=600,y=350}}
 											]) pSt
 			#	guiLoc		= {guiId=id,guiItemPos=(Fix,OffsetVector {vx=hOffset,vy=vOffset})}
-			# 	(setA,pSt)	= openGECVALUE (guiLoc,objId) outputOnly (Just initval) (why_changed id) pSt
+			# 	(setA,pSt)	= openGECVALUE (guiLoc,objId) outputOnly hasOBJECT (Just initval) (why_changed id) pSt
 			#	pSt			= setA.gecOpenGUI (guiLoc,objId) pSt
 			= 	(setA,pSt)
 		(Just id,pSt)
 			#	guiLoc		= {guiId=id,guiItemPos=(Left,OffsetVector {vy=vOffset, vx=hOffset})}
-			# 	(setA,pSt)	= openGECVALUE (guiLoc,objId) outputOnly (Just initval) (why_changed id) pSt
+			# 	(setA,pSt)	= openGECVALUE (guiLoc,objId) outputOnly hasOBJECT (Just initval) (why_changed id) pSt
 			#	pSt			= setA.gecOpenGUI (guiLoc,objId) pSt
 			= 	(setA,pSt)
 where
