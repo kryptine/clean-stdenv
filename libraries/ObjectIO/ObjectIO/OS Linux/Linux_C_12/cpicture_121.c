@@ -165,8 +165,16 @@ void WinDonePicture (GdkDrawable *inDraw, OS ios,
 		gdk_colormap_free_colors(gdk_drawable_get_colormap(inDraw), &backColor, 1);
 	}
 
-	gdk_font_unref(theFont);
-	pango_font_description_free(theFontDesc);
+	if (theFont)
+	{
+		gdk_font_unref(theFont);
+		theFont = NULL;
+	}
+	if (theFontDesc)
+	{
+		pango_font_description_free(theFontDesc);
+		theFontDesc = NULL;
+	}
 
 	if (theDrawGC)   gdk_gc_unref(theDrawGC);
 	if (theEraseGC)  gdk_gc_unref(theEraseGC);
@@ -1102,12 +1110,13 @@ void WinCreateScreenHDC(OS ios, GdkDrawable **outDraw, OS *oos)
 
     *oos = ios;
     *outDraw = (GdkDrawable*)theWindow;
+    printf("WinCreateScreenHDC - %d\n",theWindow);
 }	/* WinCreateScreenHDC */
 
 OS WinDestroyScreenHDC (GdkDrawable *drawable, OS os)
 {
-    printf("WinDestroyScreenHDC\n");
-    g_object_unref(drawable);
+    printf("WinDestroyScreenHDC - %d\n",drawable);
+/*    g_object_unref(drawable); */
     return os;
 }	/* WinDestroyScreenHDC */
 
@@ -1204,7 +1213,7 @@ void WinSetFont (CLEAN_STRING fontName, gint style, gint size,
                 GdkDrawable *inDraw, OS ios, GdkDrawable **outDraw, OS *oos)
 {
     printf("WinSetFont\n");
-	gdk_font_unref(theFont);
+	if (theFont) gdk_font_unref(theFont);
 
 	pango_font_description_set_family(theFontDesc,cstring(fontName));
 	pango_font_description_set_weight(theFontDesc,(style & iBold) ? PANGO_WEIGHT_BOLD : PANGO_WEIGHT_NORMAL);
@@ -1228,10 +1237,11 @@ void WinGetFontInfo (CLEAN_STRING fontName, gint style, gint size,
 	PangoFontDescription *fontDesc;
     gchar *fName = cstring(fontName);
 
-    printf("WinGetFontInfo\n");
-    if (drawablePassed == NULL)
+    printf("WinGetFontInfo - %d\n",drawable);
+    if (! GTK_IS_WIDGET(drawable))/*(drawablePassed == NULL)*/
     {
         drawable = gtk_label_new(NULL);
+        drawablePassed = 0;
     }
     pc = gtk_widget_get_pango_context(GTK_WIDGET(drawable));
     fontDesc = pango_font_description_new();

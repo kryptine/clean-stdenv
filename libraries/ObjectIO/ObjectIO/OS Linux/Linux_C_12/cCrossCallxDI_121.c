@@ -442,7 +442,8 @@ void EvalCcRqGETWINDOWPOS (CrossCallInfo *pcci)	/* hwnd;   width, heigth result 
 
 void EvalCcRqGETCLIENTSIZE (CrossCallInfo *pcci) /* hwnd;		width, height result.  */
 {
-	GtkWidget *frame = (GtkWidget *) pcci->p1;
+	printf("EvalCcRqGETCLIENTSIZE - %d\n",pcci->p1);
+	GtkWidget *frame = GTK_WIDGET(pcci->p1);/*(GtkWidget *) pcci->p1;*/
 	GtkWidget *vbox  = GTK_BIN(frame)->child;
 
     printf("EvalCcRqGETCLIENTSIZE\n");
@@ -457,7 +458,7 @@ static void toolbar_handler(GtkWidget *widget, gpointer data)
 	toolbar = gtk_widget_get_parent(widget);
 	parent  = gtk_widget_get_parent(gtk_widget_get_parent(toolbar));
 	SendMessage4ToClean (CcWmBUTTONCLICKED, parent, toolbar, GetModifiers(), (int) data);
-};
+}
 
 /*	Create a toolbar in a window. */
 void EvalCcRqCREATEMDITOOLBAR (CrossCallInfo *pcci)			/* hwnd, width, height; toolbarptr, full toolbar height result; */
