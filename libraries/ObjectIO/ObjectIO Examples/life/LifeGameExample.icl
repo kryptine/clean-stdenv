@@ -60,26 +60,11 @@ where
 					,	WindowViewDomain	(getViewDomain StartCellSize)
 					,	WindowViewSize		size
 					,	WindowOrigin		zero
-					,	WindowHScroll 		(hscroll StartCellSize)
-					,	WindowVScroll		(vscroll StartCellSize)
+					,	WindowHScroll 		(stdScrollFunction Horizontal StartCellSize)
+					,	WindowVScroll		(stdScrollFunction Vertical   StartCellSize)
 					,	WindowLook			True (look initialLife)
 					,	WindowPen			[PenBack Black]
 					]
-	where
-		hscroll dh viewframe {sliderThumb} move
-			= case move of
-				SliderIncSmall -> sliderThumb+dh
-				SliderDecSmall -> sliderThumb-dh
-				SliderIncLarge -> sliderThumb+(rectangleSize viewframe).w*9/10
-				SliderDecLarge -> sliderThumb-(rectangleSize viewframe).w*9/10
-				SliderThumb x  -> x
-		vscroll dv viewframe {sliderThumb} move
-			= case move of
-				SliderIncSmall -> sliderThumb+dv
-				SliderDecSmall -> sliderThumb-dv
-				SliderIncLarge -> sliderThumb+(rectangleSize viewframe).h*9/10
-				SliderDecLarge -> sliderThumb-(rectangleSize viewframe).h*9/10
-				SliderThumb y  -> y
 	
 //	timer defines the timer that calculates subsequent life generations.
 	timer	= Timer 0 NilLS
