@@ -136,6 +136,10 @@ getOSDInfoWindowTable {oswint} = oswint
 setOSDInfoWindowTable :: !WindowTable !OSDInfo -> OSDInfo
 setOSDInfoWindowTable wt osd = {osd & oswint = wt}
 
+getOSDInfoOffset :: !OSDInfo !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
+getOSDInfoOffset _ tb
+	= ((0,0),tb)
+
 //-- menubar stuff...
 
 import StdList
