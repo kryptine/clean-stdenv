@@ -1855,7 +1855,7 @@ CustomControlProcedure (HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 				PAINTSTRUCT ps;
 
 				parent = GetControlParent (hwnd);
-				
+
 				hdc = BeginPaint (hwnd, &ps);
 				SendMessage3ToClean (CcWmDRAWCONTROL, parent, hwnd, hdc);
 				EndPaint (hwnd, &ps);
@@ -2094,11 +2094,14 @@ CompoundControlProcedure (HWND hwnd, UINT uMess, WPARAM wParam, LPARAM lParam)
 				HDC hdc;
 				PAINTSTRUCT ps;
 
+			//	if (GetUpdateRect(hwnd,NULL,FALSE))	// determine if there is really an update area. 
+			//	{
 				parentwindow = GetControlParent (hwnd);
 				
 				hdc = BeginPaint (hwnd, &ps);
 				SendMessage3ToClean (CcWmDRAWCONTROL, parentwindow, hwnd, hdc);
 				EndPaint (hwnd, &ps);
+			//	}
 				
 				return 0;
 			} break;
@@ -3865,6 +3868,7 @@ MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lPara)
 					ghTopDocWindow       = hWin;
 					ghActiveClientWindow = GetParent (hWin);
 					ghActiveFrameWindow  = GetParent (ghActiveClientWindow);
+					UpdateWindow (hWin);		// enforce update at Clean side (necessary for setActiveWindow)
 				}
 				else
 				{
@@ -5043,9 +5047,9 @@ HandleCleanRequest (CrossCallInfo * pcci)
 				MakeReturn4Cci (pcci,(int) hwndFrame,(int) hwndClient,(int) menuBar,(int) windowMenu);
 			} break;
 		/*	Create MDI child window. */
-		case CcRqCREATEMDIDOCWINDOW:		/* textptr, clientPtr,packed pos,w,h, flags; HWND result. */
+		case CcRqCREATEMDIDOCWINDOW:		/* textptr, clientPtr, behindPtr, packed pos, packed size, flags; HWND result. */
 			{
-				HWND    whandle,hwndClient;
+				HWND    whandle,hwndClient,hwndBehind;
 				POINT   dims, winpos;
 				LPCTSTR pwintitle;
 				DWORD   styleFlags, exStyleFlags;
@@ -5053,10 +5057,11 @@ HandleCleanRequest (CrossCallInfo * pcci)
 
 				pwintitle    = (LPCTSTR) pcci->p1;
 				hwndClient   = (HWND) pcci->p2;
-				winpos.x     = pcci->p3>>16;
-				winpos.y     = (pcci->p3<<16)>>16;
-				dims.x       = pcci->p4;
-				dims.y       = pcci->p5;
+				hwndBehind   = (HWND) pcci->p3;
+				winpos.x     = pcci->p4>>16;
+				winpos.y     = (pcci->p4<<16)>>16;
+				dims.x       = pcci->p5>>16;
+				dims.y       = (pcci->p5<<16)>>16;
 				styleFlags   = (DWORD) pcci->p6;
 				exStyleFlags = (DWORD) 0;
 
@@ -5080,6 +5085,12 @@ HandleCleanRequest (CrossCallInfo * pcci)
 
 				/* create the window */
 				whandle = (HWND) SendMessage (hwndClient,WM_MDICREATE,0,(LPARAM)(LPMDICREATESTRUCT) &mdicreate);
+
+				/* take care of window stacking */
+				if (hwndBehind!=0)
+				{
+					SetWindowPos (whandle, hwndBehind, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE);
+				}
 
 				MakeReturn1Cci (pcci, (int) whandle);
 			}
@@ -5229,13 +5240,16 @@ HandleCleanRequest (CrossCallInfo * pcci)
 					           | SWP_NOZORDER;		/* retain Z order */
 
 				SetWindowPos (hwnd, HWND_TOP, x,y, 0,0, flags);
-				if (update!=0 && inclScrollbars)
-					UpdateWindowScrollbars (hwnd);
-				else if (update!=0)
-				{
-					InvalidateRect (hwnd,NULL,TRUE);
-					UpdateWindow (hwnd);
-					RedrawWindow (hwnd,NULL,NULL,RDW_FRAME | RDW_VALIDATE | RDW_UPDATENOW | RDW_NOCHILDREN);
+				if (IsWindowVisible (hwnd) && update!=0)
+				{	/* only if window is visible and update is requested, proceed to enforce update. */
+					if (inclScrollbars)
+						UpdateWindowScrollbars (hwnd);
+					else
+					{
+						InvalidateRect (hwnd,NULL,TRUE);
+						UpdateWindow (hwnd);
+						RedrawWindow (hwnd,NULL,NULL,RDW_FRAME | RDW_VALIDATE | RDW_UPDATENOW | RDW_NOCHILDREN);
+					}
 				}
 
 				MakeReturn0Cci (pcci);
@@ -5943,24 +5957,31 @@ HandleCleanRequest (CrossCallInfo * pcci)
 			}
 			break;
 		/*	Create compound controls (window in window) */
-		case CcRqCREATECOMPOUND:	/* hwnd, l,t,w,h, scrollbars; HWND result. */
+		case CcRqCREATECOMPOUND:	/* hwnd, packed pos,w,h, scrollbars, transparent; HWND result. */
 			{
 				HWND parentwindow, compoundhandle;
 				int left,top, width,height;
 				int compoundstyle;
+				BOOL transparent;
+				DWORD compoundExStyle;
 
 				parentwindow  = (HWND) pcci->p1;
-				left          = pcci->p2;
-				top	          = pcci->p3;
-				width         = pcci->p4;
-				height        = pcci->p5;
-				compoundstyle = pcci->p6;
+				left          = pcci->p2>>16;
+				top           = (pcci->p2<<16)>>16;
+				width         = pcci->p3;
+				height        = pcci->p4;
+				compoundstyle = pcci->p5;
+				transparent   = (BOOL) pcci->p6;
 
-				compoundstyle |= WS_CHILD;
+				compoundExStyle = WS_EX_CONTROLPARENT;
+				if (transparent)
+					 compoundExStyle |= WS_EX_TRANSPARENT;
+
+				compoundstyle |= WS_CHILD;// | WS_CLIPSIBLINGS;
 
 				/* create the compound window */
 				compoundhandle
-					= CreateWindowEx (WS_EX_CONTROLPARENT,			/* Extended style				 */
+					= CreateWindowEx (compoundExStyle,				/* Extended style				 */
 									  CompoundControlClassName,		/* Class name					 */
 									  "",							/* Window title 				 */
 									  compoundstyle,				/* style flags					 */
@@ -5972,6 +5993,7 @@ HandleCleanRequest (CrossCallInfo * pcci)
 									  0);
 				SendMessage  (compoundhandle, WM_SETFONT, (WPARAM)gControlFont, MAKELPARAM (TRUE,0));
 				SetWindowPos (compoundhandle, HWND_BOTTOM, 0,0,0,0, SWP_NOMOVE+SWP_NOSIZE);	// This should implement control stack
+
 				MakeReturn1Cci (pcci, (int) compoundhandle);
 			}
 			break;
@@ -6121,7 +6143,7 @@ HandleCleanRequest (CrossCallInfo * pcci)
 				style	= WS_CHILD
 						| WS_GROUP
 						| WS_TABSTOP
-						| WS_CLIPSIBLINGS;
+						| WS_CLIPSIBLINGS;		// Necessary to enforce proper control stack
 
 				ctrl = CreateWindow (CustomControlClassName,
 									 "",
@@ -6330,7 +6352,7 @@ HandleCleanRequest (CrossCallInfo * pcci)
 				int nCmdShow;
 
 				if (pcci->p2) 
-					nCmdShow = SW_SHOW;
+					nCmdShow = SW_SHOWNA;
 				else
 					nCmdShow = SW_HIDE;
 
@@ -7035,7 +7057,7 @@ OsThreadFunction (DWORD param)
 	wclass.hInstance     = ghInst;
 	wclass.hIcon         = NULL;
 	wclass.hCursor       = LoadCursor (ghInst, IDC_ARROW);
-	wclass.hbrBackground = (HBRUSH) GetStockObject (NULL_BRUSH);
+	wclass.hbrBackground = (HBRUSH) (COLOR_BTNFACE + 1);//(NULL_BRUSH);
 	wclass.lpszMenuName  = NULL;
 	wclass.lpszClassName = CompoundControlClassName;
 	RegisterClass (&wclass);
