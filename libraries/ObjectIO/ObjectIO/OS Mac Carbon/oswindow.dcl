@@ -144,7 +144,7 @@ osCreateWindow :: !OSWindowMetrics !Bool !ScrollbarInfo !ScrollbarInfo !(!Int,!I
 	=	OSModalEventCallback (s -> *(OSEvents,s)) (*(OSEvents,s) -> s) (OSEvent -> s -> *([Int],s))
 	|	OSModalEventLoop     (s -> s)
 
-osModalDialogHandlesMenuSelectState	:== False
+osModalDialogHandlesMenuSelectState	:== True//False
 osModalDialogHandlesWindowInit		:== False
 osModalDialogHandlesControlCreation	:== False
 osModalDialogHandlesEvents			:== False
@@ -307,10 +307,12 @@ osReleaseWindowPictContext	:: !OSWindowPtr !OSPictContext	!*OSToolbox -> *OSTool
 		makes additional preparations to do updates. Dummy on Windows.
 	osEndUpdate theWindow
 		administrates and ends the update. Dummy on Windows.
+	osSetUpdate theWindow
+		additional work for update in context. Dummy on Windows.
 */
 osBeginUpdate :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osEndUpdate   :: !OSWindowPtr !*OSToolbox -> *OSToolbox
-
+osSetUpdate	  :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 
 /*	(acc/app)Grafport theWindow f
 		applies f to the graphics context of theWindow (dummy on Windows).
