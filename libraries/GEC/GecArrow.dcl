@@ -1,56 +1,53 @@
 definition module GecArrow
 
-
 import StdGECExt
 
+class Arrow arr
+where
+	arr :: (a -> b) -> arr a b
+	(>>>) infixr 1 :: !(arr a b) !(arr b c) -> arr a c
+	first :: !(arr a b) -> arr (a, c) (b, c)
+
+	second :: !(arr a b) -> arr (c, a) (c, b)
+	second gecab :== gecArr swap |>>>| gecFirst gecab |>>>| gecArr swap where swap t = (snd t, fst t)
+
+	returnA :: arr a a
+	returnA :== arr id
+	
+	(<<<<) infixr 1 :: !(arr b c) !(arr a b) -> arr a c
+	(<<<<) l r :== r >>> l
+
+	(***) infixr 3 :: !(arr a b) !(arr c d) -> arr (a, c) (b, d)
+	(|***|) l r :== first l >>> second r
+
+	(&&&) infixr 3 :: !(arr a b) !(arr a c) -> arr a (b, c)
+	(&&&) l r :== arr (\x -> (x, x)) >>> (l *** r)
+
+
+class ArrowLoop arr
+where
+	loop :: !(arr (a, c) (b, c)) -> arr a b
 
 :: GecArr a b
 
-
 // Initialize GecArr circuit
-
 
 gecCreate :: !(GecArr a b) a !*(PSt .ps) -> (b, !*PSt .ps)
 
-
 // Lift visual editors to GecArr's
-
 
 gecEdit :: String -> GecArr a a | gGEC{|*|} a 
 gecDisplay :: String -> GecArr a a | gGEC{|*|} a
 
-
 // Arrow instance for GecArr
 
-
-gecArr :: (a -> b) -> GecArr a b
-(|>>>|) infixr 1 :: !(GecArr a b) !(GecArr b c) -> GecArr a c
-gecFirst :: !(GecArr a b) -> GecArr (a, c) (b, c)
-
-
-// ArrowLoop instance for GecArr
-
-
-gecLoop :: !(GecArr (a, c) (b, c)) -> GecArr a b
-
-
-// Derived arrow members for GecArr
-
-
-gecSecond :: !(GecArr a b) -> GecArr (c, a) (c, b)
-gecReturn :: GecArr a a
-
-
-(|<<<|) infixr 1 :: !(GecArr b c) !(GecArr a b) -> GecArr a c
-(|***|) infixr 3 :: !(GecArr a b) !(GecArr c d) -> GecArr (a, c) (b, d)
-(|&&&|) infixr 3 :: !(GecArr a b) !(GecArr a c) -> GecArr a (b, c)
-
+instance Arrow GecArr
+instance ArrowLoop GecArr
 
 // Other GecArr combinators
 
 
-(@|) infixl 6 :: (a -> b) !(GecArr b c) -> GecArr a c
-(|@) infixl 6 :: !(GecArr a b) (b -> c) -> GecArr a c
-
+(@>>) infixl 6 :: (a -> b) !(GecArr b c) -> GecArr a c
+(<<@) infixl 6 :: !(GecArr a b) (b -> c) -> GecArr a c
 
 gecFix :: !(GecArr a a) -> GecArr a a
