@@ -788,10 +788,12 @@ osCreateCompoundControl wMetrics parentWindow parentPos show able isTransparent 
 						hInfo=:{cbiHasScroll=hasHScroll}
 						vInfo=:{cbiHasScroll=hasVScroll} tb
 	# (hPtr,tb)			= case hasHScroll of
-							True	-> osCreateSliderControl parentWindow parentPos show able True hInfo.cbiPos hInfo.cbiSize hInfo.cbiState tb
+							True	# (cbi_pos_x,cbi_pos_y) = hInfo.cbiPos
+									-> osCreateSliderControl parentWindow parentPos show able True (x + cbi_pos_x,y + cbi_pos_y) hInfo.cbiSize hInfo.cbiState tb
 							False	-> (OSNoWindowPtr,tb)
 	# (vPtr,tb)			= case hasVScroll of
-							True	-> osCreateSliderControl parentWindow parentPos show able False vInfo.cbiPos vInfo.cbiSize vInfo.cbiState tb
+							True	# (cbi_pos_x,cbi_pos_y) = vInfo.cbiPos
+									-> osCreateSliderControl parentWindow parentPos show able False (x + cbi_pos_x,y + cbi_pos_y) vInfo.cbiSize vInfo.cbiState tb
 							False	-> (OSNoWindowPtr,tb)
 	# tb = trace_n` ("oswindow::osCreateCompoundControl",parentWindow,hPtr,vPtr) tb
 	= (parentWindow,hPtr,vPtr,tb)
@@ -1132,7 +1134,7 @@ osCreateSliderControl
 	:: !OSWindowPtr !(!Int,!Int) !Bool !Bool !Bool !(!Int,!Int) !(!Int,!Int) !(!Int,!Int,!Int,!Int) !*OSToolbox
 	-> (!OSWindowPtr,!*OSToolbox)
 osCreateSliderControl parentWindow (parent_pos_x,parent_pos_y) show able horizontal (slider_pos_x,slider_pos_y) sliderSize sliderState=:(min,thumb,max,thumbSize) tb
-	# itemRect		= posSizeToRect {x = slider_pos_x+parent_pos_x, y = slider_pos_y+parent_pos_y} (fromTuple sliderSize)
+	# itemRect		= posSizeToRect {x = slider_pos_x, y = slider_pos_y} (fromTuple sliderSize)
 	# (sliderH,tb)	= NewControl parentWindow (OSRect2Rect itemRect) "" True value min max ScrollBarProc 0 tb
 	# tb			= appGrafport parentWindow (init sliderH) tb
 	= (sliderH,tb)
