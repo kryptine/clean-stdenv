@@ -8,7 +8,7 @@ class Array .a e where
 	update				:: !*(a .e) !Int .e -> *(a .e)	
 	createArray			:: !Int e			-> *(a e)
 	_createArray		:: !Int				-> *(a .e)
-	replace				:: !*(a .e) !Int .e -> *(!.e, !*(a .e))
+	replace				:: !*(a .e) !Int .e -> *(.e, !*(a .e))
 
 instance Array {#} Int where
 	select :: .{#e:Int} Int -> e:Int
