@@ -7,7 +7,7 @@ implementation module StdReceiver
 import	StdInt, StdBool, StdList, StdTuple, StdOverloaded, StdFunc
 import	commondef, id, receiveraccess, receiverdefaccess, receiverdevice, receiverid, scheduler
 from	StdPSt	import	accPIO, appPIO, St
-
+//import tracetypes, StdDebug
 
 StdReceiverFatalError :: String String -> .x
 StdReceiverFatalError rule error
@@ -161,9 +161,10 @@ getReceivers ioState
 	# (found,rDevice,ioState)	= IOStGetDevice ReceiverDevice ioState
 	| not found
 		= ([],ioState)
-	# (idstypes,rsHs)			= getreceivers (ReceiverSystemStateGetReceiverHandles rDevice).rReceivers
-	# ioState					= IOStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
-	= (idstypes,ioState)
+	| otherwise
+		# (idstypes,rsHs)		= getreceivers (ReceiverSystemStateGetReceiverHandles rDevice).rReceivers
+		# ioState				= IOStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
+		= (idstypes,ioState)
 where
 	getreceivers :: ![ReceiverStateHandle .pst] -> ([(Id,ReceiverType)],![ReceiverStateHandle .pst])
 	getreceivers [rsH:rsHs]

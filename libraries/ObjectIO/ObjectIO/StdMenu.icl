@@ -233,10 +233,11 @@ where
 		# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 		| not found
 			= (False,ioState)
-		# windows					= WindowSystemStateGetWindowHandles wDevice
-		  (modalWIDS,windows)		= getWindowHandlesActiveModalDialog windows
-		# ioState					= IOStSetDevice (WindowSystemState windows) ioState
-		= (isJust modalWIDS,ioState)
+		| otherwise
+			# windows				= WindowSystemStateGetWindowHandles wDevice
+			  (modalWIDS,windows)	= getWindowHandlesActiveModalDialog windows
+			# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+			= (isJust modalWIDS,ioState)
 	
 	enablemenusystem :: !DocumentInterface !OSMenuBar !(MenuHandles .pst) !*OSToolbox -> (!MenuHandles .pst,!*OSToolbox)
 	enablemenusystem di osMenuBar menus=:{mEnabled,mMenus} tb

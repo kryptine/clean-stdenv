@@ -106,7 +106,7 @@ getWindow windowId ioState
 	# windows					= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)		= getWindowHandlesWindow (toWID windowId) windows
 	| not found
-		= (Nothing,ioState)
+		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
 	| otherwise
 		# (tb,ioState)			= getIOToolbox ioState
 		# (wsH`,wsH,tb)			= retrieveWindowHandle` wsH tb
@@ -137,7 +137,7 @@ setWindow windowId f ioState
 	# windows					= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)		= getWindowHandlesWindow (toWID windowId) windows
 	| not found
-		= ioState
+		= IOStSetDevice (WindowSystemState windows) ioState
 	| otherwise
 		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
 		# (tb,ioState)			= getIOToolbox ioState

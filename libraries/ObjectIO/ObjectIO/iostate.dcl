@@ -124,10 +124,9 @@ IOStHasDevice				:: !Device							!(IOSt .l) -> (!Bool,	!IOSt .l)
 IOStGetDevices				::									!(IOSt .l) -> (![Device],!IOSt .l)
 
 IOStGetDevice				:: !Device							!(IOSt .l) -> (!Bool,DeviceSystemState (PSt .l),!IOSt .l)
-//	IOStGetDevice retrieves the indicated device and returns True if found. If not found the device is undefined!
-IOStRemoveDevice			:: !Device							!(IOSt .l) -> IOSt .l
+//	IOStGetDevice removes the indicated device and returns True if found. If not found the device is undefined!
 IOStSetDevice				:: !(DeviceSystemState (PSt .l))	!(IOSt .l) -> IOSt .l
-
+//	IOStSetDevice stores the indicated device.  
 getIOToolbox				::									!(IOSt .l) -> (!*OSToolbox, !IOSt .l)
 setIOToolbox				:: !*OSToolbox						!(IOSt .l) -> IOSt .l
 appIOToolbox				:: !.(IdFun *OSToolbox)				!(IOSt .l) -> IOSt .l

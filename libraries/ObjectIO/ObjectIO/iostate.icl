@@ -15,6 +15,11 @@ from	ossystem			import OSWindowMetrics, OSDefaultWindowMetrics
 from	ostoolbox			import OSNewToolbox, OSDummyToolbox
 from	ostypes				import OSWindowPtr, OSNoWindowPtr
 from	roundrobin			import RR, emptyRR, notodoRR
+import StdDebug
+
+iostateFatalError :: String String -> .x
+iostateFatalError function error
+	= FatalError function "iostate" error
 
 
 ::	*PSt l
@@ -516,19 +521,6 @@ where
 	devicesGetDevice d []
 		= (False,undef,[])
 
-IOStRemoveDevice :: !Device !(IOSt .l) -> IOSt .l
-IOStRemoveDevice d ioState=:{iounique=iounique=:{iodevices=ds}}
-	# ds				= devicesRemoveDevice d ds
-	= {ioState & iounique={iounique & iodevices=ds}}
-where
-	devicesRemoveDevice :: !Device !*[DeviceSystemState .pst] -> *[DeviceSystemState .pst]
-	devicesRemoveDevice d [dState:dStates]
-		# (d`,dState)	= toDevice dState
-		| d`==d			= dStates
-		| otherwise		= [dState:devicesRemoveDevice d dStates]
-	devicesRemoveDevice _ []
-		= []
-
 IOStSetDevice :: !(DeviceSystemState (PSt .l)) !(IOSt .l) -> IOSt .l
 IOStSetDevice d ioState=:{iounique=iounique=:{iodevices=ds}}
 	#! (device,d)	= toDevice d
@@ -540,7 +532,7 @@ where
 	devicesSetDevice p device dState2 [dState1:dStates]
 		# (device1,dState1)	= toDevice dState1
 		| device1==device
-			= [dState2:dStates]
+			= iostateFatalError "IOStSetDevice" (toString device+++" already present") //[dState2:dStates]
 		| p>priorityDevice device1
 			= [dState2,dState1:dStates]
 		| otherwise

@@ -61,8 +61,8 @@ where
 
 processClose :: !(PSt .l) -> PSt .l
 processClose pState=:{io=ioState}
-	# ioState	= IOStRemoveDevice ProcessDevice ioState
-	# ioState	= IOStRemoveDeviceFunctions ProcessDevice ioState
+	# (_,_,ioState)	= IOStGetDevice ProcessDevice ioState
+	# ioState		= IOStRemoveDeviceFunctions ProcessDevice ioState
 	= {pState & io=ioState}
 
 processIO :: !DeviceEvent !(PSt .l) -> (!DeviceEvent,!PSt .l)
