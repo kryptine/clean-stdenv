@@ -20,15 +20,9 @@ StdMenuFatalError function error
 	= FatalError function "StdMenu" error
 
 
-::	DeltaMenuHandle pst
-	:==	!(MenuStateHandle pst) -> !*OSToolbox -> (!MenuStateHandle pst,!*OSToolbox)
-::	AccessMenuHandle x pst
-	:==	!(MenuStateHandle pst) -> (!x,!MenuStateHandle pst)
-
-
 //	General rules to access MenuHandles:
 
-accessMenuHandles :: !Id !(AccessMenuHandle x (PSt .l)) !(IOSt .l) -> (!Maybe x, !IOSt .l)
+accessMenuHandles :: !Id !((MenuStateHandle (PSt .l)) -> (x,!MenuStateHandle (PSt .l))) !(IOSt .l) -> (!Maybe x,!IOSt .l)
 accessMenuHandles id f ioState
 	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
 	| not found
@@ -38,7 +32,7 @@ accessMenuHandles id f ioState
 	# ioState					= IOStSetDevice (MenuSystemState {mHs & mMenus=msHs}) ioState
 	= (result,ioState)
 where
-	accessmenuhandles :: !Id !(AccessMenuHandle x .pst) ![MenuStateHandle .pst] -> (!Maybe x,![MenuStateHandle .pst])
+	accessmenuhandles :: !Id !((MenuStateHandle .pst) -> (x,!MenuStateHandle .pst)) ![MenuStateHandle .pst] -> (!Maybe x,![MenuStateHandle .pst])
 	accessmenuhandles id f [mH:mHs]
 		# (menu_id,mH)			= menuStateHandleGetMenuId mH
 		| id==menu_id
