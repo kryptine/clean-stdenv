@@ -498,80 +498,92 @@ where
 		absolutePos					= movePoint itemH.wItemPos` parentPos
 		itemSize					= itemH.wItemSize`
 
-
 //	Set the text of the controls and provide proper feedback.
 
-setcontroltexts :: ![(Id,String)] !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
-setcontroltexts id_texts wMetrics wPtr wH`=:{whItems`,whSize`,whWindowInfo`} tb
-	# (itemHs,(_,tb))	= setWElements (setControlText wMetrics wPtr True clipRect zero) whItems` (id_texts,tb)
-	= ({wH` & whItems`=itemHs},tb)
+setcontroltexts :: ![(Id,String)] !OSWindowMetrics !OSWindowPtr !WindowHandle2 !*OSToolbox -> (!WindowHandle2,!*OSToolbox)
+setcontroltexts id_texts wMetrics wPtr wH`=:{whItems2,whSize2,whWindowInfo2} tb
+	# clipRect = getContentRect wMetrics whWindowInfo2 whSize2
+	# (itemHs,(_,tb)) = setWElementsControlText whItems2 True clipRect zero (id_texts,tb)
+	= ({wH` & whItems2=itemHs},tb)
 where
-	clipRect		= getContentRect wMetrics whWindowInfo` whSize`
+	setWElementsControlText :: [WElementHandle2] Bool OSRect Point2 *([(Id,{#Char})],*Int) -> *(![WElementHandle2],!*(![(Id,{#Char})],!*Int))
+	setWElementsControlText [itemH:itemHs] shownContext clipRect absolutePos (args=:[_:_],s)
+		# (itemH, args_s)	= setWElementsControlText` itemH  shownContext clipRect absolutePos (args,s)
+		# (itemHs,args_s)	= setWElementsControlText  itemHs shownContext clipRect absolutePos args_s
+		= ([itemH:itemHs],args_s)
+	setWElementsControlText itemHs shownContext clipRect absolutePos (args,s)
+		= (itemHs,(args,s))
+
+	setWElementsControlText` :: WElementHandle2 Bool OSRect Point2 *([(Id,{#Char})],*Int) -> *(!WElementHandle2,!*(![(Id,{#Char})],!*Int))
+	setWElementsControlText` weh=:(WItemHandle2 itemH) shownContext clipRect absolutePos args_s
+		= setControlText wMetrics wPtr shownContext clipRect absolutePos weh args_s
+	setWElementsControlText` (WRecursiveHandle2 itemHs dRecKind) shownContext clipRect absolutePos args_s
+		# (itemHs,args_s)	= setWElementsControlText itemHs shownContext clipRect absolutePos args_s
+		= (WRecursiveHandle2 itemHs dRecKind,args_s)
+
+	setControlText :: !OSWindowMetrics !OSWindowPtr !Bool !OSRect !Point2 !WElementHandle2 !(![(Id,String)],!*OSToolbox)
+	                                                                  -> (!WElementHandle2,!(![(Id,String)],!*OSToolbox))
 	
-	setControlText :: !OSWindowMetrics !OSWindowPtr !Bool !OSRect !Point2 !WItemHandle` !(![(Id,String)],!*OSToolbox)
-	                                                                  -> (!WItemHandle`,!(![(Id,String)],!*OSToolbox))
-	
-	setControlText wMetrics wPtr shownContext clipRect parentPos itemH=:{wItemKind`=IsEditControl} (id_texts,tb)
-		# (found,id_text,id_texts)	= removeOnIdOfPair itemH.wItemId` id_texts
+	setControlText wMetrics wPtr shownContext clipRect parentPos weh=:(WItemHandle2 itemH=:{wItemKind2=IsEditControl}) (id_texts,tb)
+		# (found,id_text,id_texts)	= removeOnIdOfPair itemH.wItemId2 id_texts
 		| not found
-			= (itemH,(id_texts,tb))
+			= (weh,(id_texts,tb))
 		| otherwise
-			# shownContext1			= shownContext && itemH.wItemShow`
+			# shownContext1			= shownContext && itemH.wItemShow2
 			  (_,text)				= id_text
-			  editInfo				= getWItemEditInfo` itemH.wItemInfo`
-			  itemH					= {itemH & wItemInfo`=EditInfo` {editInfo & editInfoText=text}}
-			  itemRect				= posSizeToRect absolutePos itemH.wItemSize`
-			# tb					= osSetEditControlText wPtr itemH.wItemPtr` clipRect itemRect shownContext1 text tb
-			= (itemH,(id_texts,tb))
+			  editInfo				= getWItemEditInfo` itemH.wItemInfo2
+			  itemH					= {itemH & wItemInfo2=EditInfo` {editInfo & editInfoText=text}}
+			  itemRect				= posSizeToRect absolutePos itemH.wItemSize2
+			# tb					= osSetEditControlText wPtr itemH.wItemPtr2 clipRect itemRect shownContext1 text tb
+			= (WItemHandle2 itemH,(id_texts,tb))
 	where
-		absolutePos					= movePoint itemH.wItemPos` parentPos
+		absolutePos					= movePoint itemH.wItemPos2 parentPos
 	
-	setControlText wMetrics wPtr shownContext clipRect parentPos itemH=:{wItemKind`=IsTextControl} (id_texts,tb)
-		# (found,id_text,id_texts)	= removeOnIdOfPair itemH.wItemId` id_texts
+	setControlText wMetrics wPtr shownContext clipRect parentPos weh=:(WItemHandle2 itemH=:{wItemKind2=IsTextControl}) (id_texts,tb)
+		# (found,id_text,id_texts)	= removeOnIdOfPair itemH.wItemId2 id_texts
 		| not found
-			= (itemH,(id_texts,tb))
+			= (weh,(id_texts,tb))
 		| otherwise
 			# (_,text)				= id_text
-			  shownContext1			= shownContext && itemH.wItemShow`
-			  textInfo				= getWItemTextInfo` itemH.wItemInfo`
-			  itemH					= {itemH & wItemInfo`=TextInfo` {textInfo & textInfoText=text}}
-			  itemRect				= posSizeToRect absolutePos itemH.wItemSize`
-			# tb					= osSetTextControlText wPtr itemH.wItemPtr` clipRect itemRect shownContext1 text tb
-			= (itemH,(id_texts,tb))
+			  shownContext1			= shownContext && itemH.wItemShow2
+			  textInfo				= getWItemTextInfo` itemH.wItemInfo2
+			  itemH					= {itemH & wItemInfo2=TextInfo` {textInfo & textInfoText=text}}
+			  itemRect				= posSizeToRect absolutePos itemH.wItemSize2
+			# tb					= osSetTextControlText wPtr itemH.wItemPtr2 clipRect itemRect shownContext1 text tb
+			= (WItemHandle2 itemH,(id_texts,tb))
 	where
-		absolutePos					= movePoint itemH.wItemPos` parentPos
-	
-	setControlText wMetrics wPtr _ clipRect _ itemH=:{wItemKind`=IsButtonControl} (id_texts,tb)
-		# (found,id_text,id_texts)	= removeOnIdOfPair itemH.wItemId` id_texts
+		absolutePos					= movePoint itemH.wItemPos2 parentPos
+
+	setControlText wMetrics wPtr _ clipRect _ weh=:(WItemHandle2 itemH=:{wItemKind2=IsButtonControl}) (id_texts,tb)
+		# (found,id_text,id_texts)	= removeOnIdOfPair itemH.wItemId2 id_texts
 		| not found
-			= (itemH,(id_texts,tb))
+			= (weh,(id_texts,tb))
 		| otherwise
 			# (_,text)				= id_text
-			  buttonInfo			= getWItemButtonInfo` itemH.wItemInfo`
-			  itemH					= {itemH & wItemInfo`=ButtonInfo` {buttonInfo & buttonInfoText=text}}
-			# tb					= osSetButtonControlText wPtr itemH.wItemPtr` clipRect (validateControlTitle text) tb
-			= (itemH,(id_texts,tb))
-	
-	setControlText wMetrics wPtr shownContext clipRect parentPos itemH=:{wItemKind`=IsCompoundControl} s
-		# (itemHs,s)				= setWElements (setControlText wMetrics wPtr shownContext1 clipRect1 absolutePos) itemH.wItems` s
-		= ({itemH & wItems`=itemHs},s)
+			  buttonInfo			= getWItemButtonInfo` itemH.wItemInfo2
+			  itemH					= {itemH & wItemInfo2=ButtonInfo` {buttonInfo & buttonInfoText=text}}
+			# tb					= osSetButtonControlText wPtr itemH.wItemPtr2 clipRect (validateControlTitle text) tb
+			= (WItemHandle2 itemH,(id_texts,tb))
+
+	setControlText wMetrics wPtr shownContext clipRect parentPos (WItemHandle2 itemH=:{wItemKind2=IsCompoundControl}) s
+		# (itemHs,s)				= setWElementsControlText itemH.wItems2 shownContext1 clipRect1 absolutePos s
+		= (WItemHandle2 {itemH & wItems2=itemHs},s)
 	where
-		absolutePos					= movePoint itemH.wItemPos` parentPos
-		info						= getWItemCompoundInfo` itemH.wItemInfo`
-		clipRect1					= intersectRectContent wMetrics clipRect info absolutePos itemH.wItemSize`
-		shownContext1				= shownContext && itemH.wItemShow`
+		absolutePos					= movePoint itemH.wItemPos2 parentPos
+		info						= getWItemCompoundInfo` itemH.wItemInfo2
+		clipRect1					= intersectRectContent wMetrics clipRect info absolutePos itemH.wItemSize2
+		shownContext1				= shownContext && itemH.wItemShow2
 	
-	setControlText wMetrics wPtr shownContext clipRect parentPos itemH=:{wItemKind`=IsLayoutControl} s
-		# (itemHs,s)	= setWElements (setControlText wMetrics wPtr shownContext1 clipRect1 absolutePos) itemH.wItems` s
-		= ({itemH & wItems`=itemHs},s)
+	setControlText wMetrics wPtr shownContext clipRect parentPos (WItemHandle2 itemH=:{wItemKind2=IsLayoutControl}) s
+		# (itemHs,s)	= setWElementsControlText itemH.wItems2 shownContext1 clipRect1 absolutePos s
+		= (WItemHandle2 {itemH & wItems2=itemHs},s)
 	where
-		absolutePos					= movePoint itemH.wItemPos` parentPos
-		clipRect1					= intersectRects clipRect (posSizeToRect absolutePos itemH.wItemSize`)
-		shownContext1				= shownContext && itemH.wItemShow`
-	
+		absolutePos					= movePoint itemH.wItemPos2 parentPos
+		clipRect1					= intersectRects clipRect (posSizeToRect absolutePos itemH.wItemSize2)
+		shownContext1				= shownContext && itemH.wItemShow2
+
 	setControlText _ _ _ _ _ itemH s
 		= (itemH,s)
-
 
 //	Set the cursor position of an EditControl, and handle proper feedback.
 
