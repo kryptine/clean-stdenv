@@ -234,7 +234,7 @@ SelNewItem nr y lnht index defid wid state
 		newst=: SetAction Selected (SetDefltIndex index state);
 		};
 
-UnSelOldItem	:: !Int !Int !Int !Int !Int !Int !String ![DrawFunction] -> ![DrawFunction];
+UnSelOldItem	:: !Int !Int !Int !Int !Int !Int !String ![DrawFunction] -> [DrawFunction];
 UnSelOldItem nr y lnht index defid wid state draws
 	| nr == 0 || no_more =  draws;
 	| index == defid =  [SelectItem wid y lnht : draws];
@@ -415,7 +415,7 @@ GetNrVis state =  toInt (state.[NrVisI]);
 GetWidth	:: !String -> Int;
 GetWidth state =  GetNrFromState WidthI state;
 
-SetWidth	:: !Int !String -> !String;
+SetWidth	:: !Int !String -> String;
 SetWidth wid state =  SetNrInState WidthI wid state;
 
 GetFirstIndex	:: !String -> Int;
@@ -437,7 +437,7 @@ GetNrFromState index state =   toInt c0  +  256 *  toInt c1  ;
 		c1=: state.[inc index];
 		};
 
-SetNrInState	:: !Int !Int !String -> !String;
+SetNrInState	:: !Int !Int !String -> String;
 SetNrInState index nr state =  (state := (index, c0)) := (inc index, c1);
 		where {
 		c0=: toChar (nr mod 256);

@@ -252,7 +252,7 @@ DisableMenuItems :: ![MenuItemId] !(IOState state) -> IOState state;
 DisableMenuItems item_ids io_state
    =  ChangeMenuItems item_ids io_state (SetItemAbility Unable);
 
-SetItemAbility :: !SelectState !XHandle -> !XHandle;
+SetItemAbility :: !SelectState !XHandle -> XHandle;
 SetItemAbility able (id,w) #!
 		strict1=strict1;
 		=
@@ -270,7 +270,7 @@ UnmarkMenuItems :: ![MenuItemId] !(IOState state) -> IOState state;
 UnmarkMenuItems item_ids io_state
    =  ChangeMenuItems item_ids io_state (SetItemMark NoMark);
 
-SetItemMark :: !MarkState !XHandle -> !XHandle;
+SetItemMark :: !MarkState !XHandle -> XHandle;
 SetItemMark mark (id,w) #!
 		strict1=strict1;
 		=

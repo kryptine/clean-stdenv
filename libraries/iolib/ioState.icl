@@ -13,7 +13,7 @@ from dialogDef import :: DialogHandle (DialHandle), :: DialogMode (Modal, Modele
 
 :: Maybe a = Nothing | Just a;
     
-::   * IOState * s :== (![DeviceSystemState s], !EVENTS, !*Maybe !*World);
+::   * IOState * s :== (![DeviceSystemState s], !EVENTS, !*Maybe *World);
 ::   * EVENTS			:== Int;
 
 :: DeviceSystemState *s

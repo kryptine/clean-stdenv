@@ -1,6 +1,6 @@
 implementation module xfileselect;
 
-XSelectInputFile :: !Int -> !(!Int,!{#Char});
+XSelectInputFile :: !Int -> (!Int,!{#Char});
 XSelectInputFile _
 	= code {
 		.inline XSelectInputFile
@@ -8,7 +8,7 @@ XSelectInputFile _
 		.end
 	};
 
-XSelectOutputFile :: !{#Char} !{#Char} -> !(!Int,!{#Char});
+XSelectOutputFile :: !{#Char} !{#Char} -> (!Int,!{#Char});
 XSelectOutputFile _ _
 	= code {
 		.inline XSelectOutputFile

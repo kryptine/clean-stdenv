@@ -1,6 +1,6 @@
 implementation module xwindow;
 
-XCreateWindow :: !Int !Int !Int !Int !Int !{#Char} !Int !Int !Int !Int !Int !Int !Int !Int !Int !Int -> !(!Int,!Int);
+XCreateWindow :: !Int !Int !Int !Int !Int !{#Char} !Int !Int !Int !Int !Int !Int !Int !Int !Int !Int -> (!Int,!Int);
 XCreateWindow _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 	= code {
 		.inline XCreateWindow
@@ -8,7 +8,7 @@ XCreateWindow _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 		.end
 	};
 
-GetMouseInfo :: !Int -> !(!Int,!Int,!Int,!Int,!Int,!Int,!Int);
+GetMouseInfo :: !Int -> (!Int,!Int,!Int,!Int,!Int,!Int,!Int);
 GetMouseInfo _
 	= code {
 		.inline GetMouseInfo
@@ -16,7 +16,7 @@ GetMouseInfo _
 		.end
 	};
 
-GetXExposeArea :: !Int -> !(!Int,!Int,!Int,!Int,!Int);
+GetXExposeArea :: !Int -> (!Int,!Int,!Int,!Int,!Int);
 GetXExposeArea _
 	= code {
 		.inline GetXExposeArea
@@ -40,7 +40,7 @@ EndXUpdate _
 		.end
 	};
 
-GetKeyboardInfo :: !Int -> !(!Int,!Int,!Int,!Int,!Int,!Int);
+GetKeyboardInfo :: !Int -> (!Int,!Int,!Int,!Int,!Int,!Int);
 GetKeyboardInfo _
 	= code {
 		.inline GetKeyboardInfo
@@ -48,7 +48,7 @@ GetKeyboardInfo _
 		.end
 	};
 
-XScreenSize :: !Int -> !(!Int,!Int);
+XScreenSize :: !Int -> (!Int,!Int);
 XScreenSize _
 	= code {
 		.inline XScreenSize
@@ -64,7 +64,7 @@ GetXWindowEvent _
 		.end
 	};
 
-XSetScrollBar :: !Int !Int !Int !Int !Int !Int !Int -> !(!Int,!Int);
+XSetScrollBar :: !Int !Int !Int !Int !Int !Int !Int -> (!Int,!Int);
 XSetScrollBar _ _ _ _ _ _ _
 	= code {
 		.inline XSetScrollBar
@@ -72,7 +72,7 @@ XSetScrollBar _ _ _ _ _ _ _
 		.end
 	};
 
-XGetCurrentWindowSize :: !Int -> !(!Int,!Int);
+XGetCurrentWindowSize :: !Int -> (!Int,!Int);
 XGetCurrentWindowSize _
 	= code {
 		.inline XGetCurrentWindowSize
@@ -80,7 +80,7 @@ XGetCurrentWindowSize _
 		.end
 	};
 
-XGetCurrentWindowThumbs :: !Int -> !(!Int,!Int);
+XGetCurrentWindowThumbs :: !Int -> (!Int,!Int);
 XGetCurrentWindowThumbs _
 	= code {
 		.inline XGetCurrentWindowThumbs
@@ -96,7 +96,7 @@ ChangeXWindow _ _ _ _ _ _ _ _ _ _ _ _ _ _
 		.end
 	};
 
-GetFirstUpdateX :: !Int -> !(!Int,!Int);
+GetFirstUpdateX :: !Int -> (!Int,!Int);
 GetFirstUpdateX _
 	= code {
 		.inline GetFirstUpdateX
@@ -152,7 +152,7 @@ XSetDoubleDownDistance _
 		.end
 	};
 
-XGetWindowPosition :: !Int -> !(!Int,!Int);
+XGetWindowPosition :: !Int -> (!Int,!Int);
 XGetWindowPosition _
 	= code {
 		.inline XGetWindowPosition

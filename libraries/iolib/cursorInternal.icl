@@ -4,7 +4,7 @@ import xtypes,xcursor,deltaIOSystem;
 import ioState,windowDevice;
 
     
-SetWidgetCursor :: !Widget !CursorShape -> !Widget; 
+SetWidgetCursor :: !Widget !CursorShape -> Widget; 
 SetWidgetCursor w StandardCursor	=  XSetWidgetCursor XStandardCursor w;
 SetWidgetCursor w BusyCursor 		=  XSetWidgetCursor XBusyCursor w;
 SetWidgetCursor w IBeamCursor 	=  XSetWidgetCursor XIBeamCursor w;
