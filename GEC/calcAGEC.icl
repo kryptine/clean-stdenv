@@ -5,16 +5,18 @@ import StdAGEC, modeAGEC, buttonAGEC, tupleAGEC, updownAGEC, basicAGEC
 // buttons with functions attached
 
 calcAGEC :: a [[(Button,a->a)]] -> AGEC a | gGEC {|*|} a 
-calcAGEC a butfun = 	mkAGEC 	{	toGEC	= \a _ -> a <|> table_hv_AGEC buts
-							,	fromGEC = \(na <|> buts) -> na
-							,	value 	= a
-							,	updGEC	= calcnewa
-							} "calcGEC"
+calcAGEC a butfun
+	= mkAGEC { toGEC   = \a _ -> a <|> table_hv_AGEC buts
+	         , fromGEC = \(na <|> _) -> na
+	         , value   = a
+	         , updGEC  = calcnewa
+	         } "calcGEC"
 where
 	(buts,funs) = ([map fst list \\ list <- butfun],[map snd list \\ list <- butfun])
 
-	calcnewa (na <|> nbuts) =  hd [f na \\ (f,Pressed) <- zip2 (flatten funs) (flatten (^^ nbuts))]
-							<|> table_hv_AGEC buts
+	calcnewa (na <|> nbuts) = case [f \\ (f,Pressed) <- zip2 (flatten funs) (flatten (^^nbuts))] of
+								[]    ->   na <|> nbuts
+								[f:_] -> f na <|> table_hv_AGEC buts
 
 // Integer with calculator buttons
 
