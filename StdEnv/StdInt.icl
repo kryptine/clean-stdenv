@@ -196,14 +196,7 @@ instance rem Int
 where
 	(rem) a b
 	= code inline {
-			push_b 1
-			push_b 2
-			push_b 2
-			divI
-			mulI
-			update_b 0 2
-			pop_b 1
-			subI
+			remI
 	  }
 
 instance gcd Int
@@ -211,7 +204,7 @@ where
 	gcd x y    = gcdnat (abs x) (abs y)
 	where
 		gcdnat x 0 = x
-	    gcdnat x y = gcdnat y (x mod y)
+	    gcdnat x y = gcdnat y (x rem y)
 
 
 instance lcm Int

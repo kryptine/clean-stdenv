@@ -1,5 +1,4 @@
 .comp 916 010111011
-|.comp 918 010110011
 .code 0 0 0
 .start _nostart_
 .endinfo
@@ -28,40 +27,45 @@
 .export	n_S.1 n_S.2 n_S.3 n_S.4 n_S.5 n_S.6
 .export	ea_S.1 ea_S.2 ea_S.3 ea_S.4 ea_S.5 ea_S.6
 
+.export	d_Sr.1 d_Sr.2 d_Sr.3 d_Sr.4 d_Sr.5 d_Sr.6
+.export	n_Sr.1 n_Sr.2 n_Sr.3 n_Sr.4 n_Sr.5 n_Sr.6
+.export	ea_Sr.1 ea_Sr.2 ea_Sr.3 ea_Sr.4 ea_Sr.5 ea_Sr.6
+
 .export	_ind
 
 || don't change the order of the following 9 descriptors
 
-|.desc CHANNEL	_channel_code	_hnf	1	0 ""
-.desc GRAPH	_hnf	_hnf	0	0 ""
-.desc _ARRAY_	_hnf	_hnf	0	0 "_ARRAY_"
-.desc _STRING_	_hnf	_hnf	0	0 "_STRING_"
-|.desc STRING	_hnf	_hnf	0	0 "STRING"
-|.desc FILE	_hnf	_hnf	0	0 "FILE"
-.desc REAL	_hnf	_hnf	0	0 "REAL"
-.desc INT	_hnf	_hnf	0	0 "INT"
-.desc BOOL	_hnf	_hnf	0	0 "BOOL"
-.desc CHAR	_hnf	_hnf	0	0 "CHAR"
+|.desc CHANNEL	_channel_code	_hnf	1	""
+.desc GRAPH	_hnf	_hnf	0 0	""
+.desc _ARRAY_	_hnf	_hnf	0 0	"_ARRAY_"
+.desc _STRING_	_hnf	_hnf	0 0	"_STRING_"
+|.desc STRING	_hnf	_hnf	0	"STRING"
+|.desc FILE	_hnf	_hnf	0	"FILE"
+.desc REAL	_hnf	_hnf	0 0	"REAL"
+.desc INT	_hnf	_hnf	0 0	"INT"
+.desc BOOL	_hnf	_hnf	0 0	"BOOL"
+.desc CHAR	_hnf	_hnf	0 0	"CHAR"
 
-.desc EMPTY	_reserve	_hnf	0	0 "EMPTY"
+.desc EMPTY	_reserve	_hnf	0 0	"EMPTY"
 
-.desc _Tuple	_hnf	_hnf	32	0 "_Tuple"
-.desc _Select	_hnf	_hnf	2	0 "_Select"
+.desc _Tuple	_hnf	_hnf	32 0	"_Tuple"
+.desc _Select	_hnf	_hnf	2 0	"_Select"
 .desc _Nil	_hnf	_hnf	0	0 "Nil"
-.desc _Cons	_hnf	_l_cons	2	0 "Cons"
+
+.desc _Cons	_hnf	l_Cons	2	0 "Cons"
 
 .record FILE ii 0 2 "File"
 
-.desc e_system_dAP	_hnf	e_system_lAP	2	0 "AP"
-.desc e_system_dif	e_system_nif	e_system_lif	3	0 "if"
-.desc _ind	_hnf	_hnf	0	0 "_ind"
+.desc e_system_dAP	_hnf	e_system_lAP	2 0	"AP"
+.desc e_system_dif	e_system_nif	e_system_lif	3 0	"if"
+.desc _ind	_hnf	_hnf	0 0	"_ind"
 
-.desc _Defer	_defer_code	_hnf	0	0 "_Defer"
+.desc _Defer	_defer_code	_hnf	0 0	"_Defer"
 
-.desc ARRAY	_hnf	_hnf	1	0 "ARRAY"
+.desc ARRAY	_hnf	_hnf	1 0	"ARRAY"
 
-.desc _HnfReducer	_hnf_reducer	_hnf_reducer	0	0 "HnfReducer"
-| .desc _NfReducer	_nf_reducer	_nf_reducer	0	0 "NfReducer"
+.desc _HnfReducer	_hnf_reducer	_hnf_reducer	0 0	"HnfReducer"
+| .desc _NfReducer	_nf_reducer	_nf_reducer	0 0	"NfReducer"
 
 .o 0 2 i i
 _match_error
@@ -84,13 +88,13 @@ _defer_code
 	halt
 
 .o 2 0
-_l_cons
+l_Cons
+	push_args 0 1 1
+	update_a 2 1
 	create
-	push_a	2
-	push_args	2 2 2
-	fill	_Cons 2 _hnf 2
-	update_a	0 2
-	pop_a	2
+	update_a 0 3
+	pop_a 1
+	fill _Cons 2 _hnf 2
 .d 1 0
 	rtn
 
@@ -175,21 +179,21 @@ ea_Conssts
 	rtn
 
 .export _Consi _Consr _Consc _Consb _Consf
-.record _Consi ia 1 1 "[#Int]"
-.record _Consr ra 1 2 "[#Real]"
-.record _Consc ca 1 1 "[#Char]"
-.record _Consb ba 1 1 "[#Bool]"
-.record _Consf fa 1 2 "[#File]"
+.record _Consi lia 1 1 "[#Int]"
+.record _Consr lra 1 2 "[#Real]"
+.record _Consc lca 1 1 "[#Char]"
+.record _Consb lba 1 1 "[#Bool]"
+.record _Consf lfa 1 2 "[#File]"
 
 .export _Consits _Consrts _Conscts _Consbts _Consfts
-.record _Consits ia 1 1 "[#Int!]"
-.record _Consrts ra 1 2 "[#Real!]"
-.record _Conscts ca 1 1 "[#Char!]"
-.record _Consbts ba 1 1 "[#Bool!]"
-.record _Consfts fa 1 2 "[#File!]"
+.record _Consits lia 1 1 "[#Int!]"
+.record _Consrts lra 1 2 "[#Real!]"
+.record _Conscts lca 1 1 "[#Char!]"
+.record _Consbts lba 1 1 "[#Bool!]"
+.record _Consfts lfa 1 2 "[#File!]"
 
 .export _Consa
-.record _Consa aa 2 0 "[#{}]"
+.record _Consa laa 2 0 "[#{}]"
 
 .n -2 _ind _eaind
 .o 1 0
@@ -373,16 +377,6 @@ n_S.4
 .d 1 0
 	rtn
 
-.o 1 0
-o_S.4
-	get_node_arity	0
-	pushI	4
-	push_arg_b	0
-	update_a	0 1
-	pop_a	1
-.d 1 0
-	rtn
-
 .o 2 0
 ea_S.4
 	push_arg	0 1 1
@@ -400,6 +394,15 @@ ea_S.4
 	pop_a	1
 	jmp_eval_upd
 
+.o 1 0
+o_S.4
+	get_node_arity	0
+	pushI	4
+	push_arg_b	0
+	update_a	0 1
+	pop_a	1
+.d 1 0
+	rtn
 
 .desc d_S.5 n_S.5 o_S.5 1 0 "_S.5"
 .n -1 d_S.5 ea_S.5
@@ -415,16 +418,6 @@ n_S.5
 	fill_a 0 2
 	release
 	pop_a 2
-.d 1 0
-	rtn
-
-.o 1 0
-o_S.5
-	get_node_arity	0
-	pushI	5
-	push_arg_b	0
-	update_a	0 1
-	pop_a	1
 .d 1 0
 	rtn
 
@@ -445,6 +438,15 @@ ea_S.5
 	pop_a	1
 	jmp_eval_upd
 
+.o 1 0
+o_S.5
+	get_node_arity	0
+	pushI	5
+	push_arg_b	0
+	update_a	0 1
+	pop_a	1
+.d 1 0
+	rtn
 
 .desc d_S.6 n_S.6 o_S.6 1 0 "_S.6"
 .n -1 d_S.6 ea_S.6
@@ -460,16 +462,6 @@ n_S.6
 	fill_a 0 2
 	release
 	pop_a 2
-.d 1 0
-	rtn
-
-.o 1 0
-o_S.6
-	get_node_arity	0
-	pushI	6
-	push_arg_b	0
-	update_a	0 1
-	pop_a	1
 .d 1 0
 	rtn
 
@@ -489,6 +481,414 @@ ea_S.6
 	update_a	0 1
 	pop_a	1
 	jmp_eval_upd
+
+
+.o 1 0
+o_S.6
+	get_node_arity	0
+	pushI	6
+	push_arg_b	0
+	update_a	0 1
+	pop_a	1
+.d 1 0
+	rtn
+
+
+
+.desc d_Sr.1 n_Sr.1 o_Sr.1 1 0 "_Sr.1"
+.pb "_Sr.1"
+.n -1 d_Sr.1 ea_Sr.1
+.o 1 0
+n_Sr.1
+	push_node _reserve 1
+	jsr_eval 0
+
+	push_args_u 0 1 1
+	buildh _Nil 0
+	fill1 _Tuple 1 2 01
+.keep 1 0
+
+	jsr_eval 0
+	getWL 2
+	fill_a 0 2
+	release
+	pop_a 2
+.d 1 0
+	rtn
+
+.o 2 0
+ea_Sr.1
+	push_arg	0 1 1
+	push_a	2
+.keep 1 0
+	fill	_ind -2 ind_code 2
+.keep 1 0
+	update_a	0 1
+	pop_a	1
+	jsr_eval 0
+
+	push_args_u 0 1 1
+	buildh _Nil 0
+	fill1 _Tuple 1 2 01
+.keep 1 0
+
+	update_a	0 1
+	pop_a	1
+	jmp_eval_upd
+.pe
+
+.o 1 0
+o_Sr.1
+	push_args_u 0 1 1
+	buildh _Nil 0
+	fill1 _Tuple 1 2 01
+.keep 1 0
+
+	update_a	0 1
+	pop_a	1
+.d 1 0
+	rtn
+
+.desc d_Sr.2 n_Sr.2 o_Sr.2 1 0 "_Sr.2"
+.pb "_Sr.2"
+.n -1 d_Sr.2 ea_Sr.2
+.o 1 0
+n_Sr.2
+	push_node _reserve 1
+	jsr_eval 0
+	get_node_arity 0
+	eqI_b 2 0
+	update_b 0 1
+	pop_b 1
+	jmp_false n_Sr.2_
+
+	push_args_u 0 2 2
+	pop_a 1
+	buildh _Nil 0
+	fill1 _Tuple 2 2 001
+.keep 1 0
+	update_a 0 1
+	pop_a 1
+
+	jsr_eval 0
+	getWL 1
+	fill_a 0 1
+	release
+	pop_a 1
+.d 1 0
+	rtn
+
+n_Sr.2_
+	push_args_u 0 3 2
+	pop_a 1
+	buildh _Nil 0
+	fill2 _Tuple 3 2 0010
+.keep 1 0
+	update_a 0 1
+	pop_a 1
+
+	jsr_eval 0
+	getWL 1
+	fill_a 0 1
+	release
+	pop_a 1
+.d 1 0
+	rtn
+.o 2 0
+ea_Sr.2
+	push_arg	0 1 1
+	push_a	2
+.keep 1 0
+	fill	_ind -2 ind_code 2
+.keep 1 0
+	update_a	0 1
+	pop_a	1
+	jsr_eval 0
+	get_node_arity	0
+	eqI_b 2 0
+	update_b 0 1
+	pop_b 1
+	jmp_false ea_Sr.2_
+
+	push_args_u 0 2 2
+	pop_a 1
+	buildh _Nil 0
+	fill1 _Tuple 2 2 001
+.keep 1 0
+	update_a 0 1
+	pop_a 1
+
+	jmp_eval_upd
+
+ea_Sr.2_
+	push_args_u 0 3 2
+	pop_a 1
+	buildh _Nil 0
+	fill2 _Tuple 3 2 0010
+.keep 1 0
+	update_a 0 1
+	pop_a 1
+
+	jmp_eval_upd
+.pe
+
+.o 1 0
+o_Sr.2
+	get_node_arity	0
+	eqI_b 2 0
+	update_b 0 1
+	pop_b 1
+	jmp_false o_Sr.2_
+
+	push_args_u 0 2 2
+	pop_a 1
+	buildh _Nil 0
+	fill1 _Tuple 2 2 001
+.keep 1 0
+	update_a 0 1
+	pop_a 1
+
+.d 1 0
+	rtn
+
+o_Sr.2_
+	push_args_u 0 3 2
+	pop_a 1
+	buildh _Nil 0
+	fill2 _Tuple 3 2 0010
+.keep 1 0
+	update_a 0 1
+	pop_a 1
+
+.d 1 0
+	rtn
+
+.desc d_Sr.3 n_Sr.3 o_Sr.3 1 0 "_Sr.3"
+.pb "_Sr.3"
+.n -1 d_Sr.3 ea_Sr.3
+.o 1 0
+n_Sr.3
+	push_node _reserve 1
+	jsr_eval 0
+
+	push_args_u 0 3 3
+	pop_a 2
+	buildh _Nil 0
+	fill2 _Tuple 3 2 0001
+.keep 1 0
+
+	jsr_eval 0
+	getWL 2
+	fill_a 0 2
+	release
+	pop_a 2
+.d 1 0
+	rtn
+
+.o 2 0
+ea_Sr.3
+	push_arg	0 1 1
+	push_a	2
+.keep 1 0
+	fill	_ind -2 ind_code 2
+.keep 1 0
+	update_a	0 1
+	pop_a	1
+	jsr_eval 0
+
+	push_args_u 0 3 3
+	pop_a 2
+	buildh _Nil 0
+	fill2 _Tuple 3 2 0001
+.keep 1 0
+
+	update_a	0 1
+	pop_a	1
+	jmp_eval_upd
+.pe
+
+.o 1 0
+o_Sr.3
+	push_args_u 0 3 3
+	pop_a 2
+	buildh _Nil 0
+	fill2 _Tuple 3 2 0001
+.keep 1 0
+
+	update_a	0 1
+	pop_a	1
+.d 1 0
+	rtn
+
+.desc d_Sr.4 n_Sr.4 o_Sr.4 1 0 "_Sr.4"
+.n -1 d_Sr.4 ea_Sr.4
+.o 1 0
+n_Sr.4
+	push_node _reserve 1
+	jsr_eval 0
+
+	push_args_u 0 4 4
+	pop_a 3
+	buildh _Nil 0
+	fill2 _Tuple 4 2 00001
+.keep 1 0
+
+	jsr_eval 0
+	getWL 2
+	fill_a 0 2
+	release
+	pop_a 2
+.d 1 0
+	rtn
+
+.o 1 0
+o_Sr.4
+	push_args_u 0 4 4
+	pop_a 3
+	buildh _Nil 0
+	fill2 _Tuple 4 2 00001
+.keep 1 0
+
+	update_a	0 1
+	pop_a	1
+.d 1 0
+	rtn
+
+.o 2 0
+ea_Sr.4
+	push_arg	0 1 1
+	push_a	2
+.keep 1 0
+	fill	_ind -2 ind_code 2
+.keep 1 0
+	update_a	0 1
+	pop_a	1
+	jsr_eval 0
+
+	push_args_u 0 4 4
+	pop_a 3
+	buildh _Nil 0
+	fill2 _Tuple 4 2 00001
+.keep 1 0
+
+	update_a	0 1
+	pop_a	1
+	jmp_eval_upd
+
+
+.desc d_Sr.5 n_Sr.5 o_Sr.5 1 0 "_Sr.5"
+.n -1 d_Sr.5 ea_Sr.5
+.o 1 0
+n_Sr.5
+	push_node _reserve 1
+	jsr_eval 0
+
+	push_args_u 0 5 5
+	pop_a 4
+	buildh _Nil 0
+	fill2 _Tuple 5 2 000001
+.keep 1 0
+
+	jsr_eval 0
+	getWL 2
+	fill_a 0 2
+	release
+	pop_a 2
+.d 1 0
+	rtn
+
+.o 1 0
+o_Sr.5
+	push_args_u 0 5 5
+	pop_a 4
+	buildh _Nil 0
+	fill2 _Tuple 5 2 000001
+.keep 1 0
+
+	update_a	0 1
+	pop_a	1
+.d 1 0
+	rtn
+
+.o 2 0
+ea_Sr.5
+	push_arg	0 1 1
+	push_a	2
+.keep 1 0
+	fill	_ind -2 ind_code 2
+.keep 1 0
+	update_a	0 1
+	pop_a	1
+	jsr_eval 0
+
+	push_args_u 0 5 5
+	pop_a 4
+	buildh _Nil 0
+	fill2 _Tuple 5 2 000001
+.keep 1 0
+
+	update_a	0 1
+	pop_a	1
+	jmp_eval_upd
+
+
+.desc d_Sr.6 n_Sr.6 o_Sr.6 1 0 "_Sr.6"
+.n -1 d_Sr.6 ea_Sr.6
+.o 1 0
+n_Sr.6
+	push_node _reserve 1
+	jsr_eval 0
+
+	push_args_u 0 6 6
+	pop_a 5
+	buildh _Nil 0
+	fill2 _Tuple 6 2 0000001
+.keep 1 0
+
+	jsr_eval 0
+	getWL 2
+	fill_a 0 2
+	release
+	pop_a 2
+.d 1 0
+	rtn
+
+.o 1 0
+o_Sr.6
+	push_args_u 0 6 6
+	pop_a 5
+	buildh _Nil 0
+	fill2 _Tuple 6 2 0000001
+.keep 1 0
+
+	update_a	0 1
+	pop_a	1
+.d 1 0
+	rtn
+
+.o 2 0
+ea_Sr.6
+	push_arg	0 1 1
+	push_a	2
+.keep 1 0
+	fill	_ind -2 ind_code 2
+.keep 1 0
+	update_a	0 1
+	pop_a	1
+	jsr_eval 0
+
+	push_args_u 0 6 6
+	pop_a 5
+	buildh _Nil 0
+	fill2 _Tuple 6 2 0000001
+.keep 1 0
+
+	update_a	0 1
+	pop_a	1
+	jmp_eval_upd
+
+
+
 
 
 .n 2 _Select
@@ -721,11 +1121,169 @@ _print_rest_list
 	eq_desc	_Nil 0 0
 	jmp_true	_print_last_list
 	print_sc	","
-	jmp	_print_rest_list			
+	jmp	_print_rest_list
 _print_last_list
 	print_sc	"]"
 	pop_a	1
 	jmp	_print_brackets
+
+
+
+
+_print_unboxed_list
+	print_sc	"["
+
+_print_unboxed_list_lp0
+	incI
+	push_r_arg_t
+	eqC_b	'R' 0
+	updatepop_b 0 1
+	jmp_true _print_ul_record
+
+	push_t_r_args
+
+_print_unboxed_list_lp1
+	incI
+	push_b	0
+	push_r_arg_t
+_print_unboxed_list_lp2
+	eqC_b	'i' 0
+	jmp_true	_print_ul_integer
+	eqC_b	'c' 0
+	jmp_true	_print_ul_char
+	eqC_b	'r' 0
+	jmp_true	_print_ul_real
+	eqC_b	'b' 0
+	jmp_true	_print_ul_bool
+	eqC_b	'f' 0
+	jmp_true	_print_ul_file
+	eqC_b	'a' 0
+	jmp_true	_print_ul_graph
+	halt
+
+_print_ul_integer
+	pop_b	1
+	push_b	1
+	update_b	1 2
+	updatepop_b	0 1
+
+	print_int
+
+	jmp	_print_rest_unboxed_list
+
+_print_ul_char
+	pop_b	1
+	push_b	1
+	update_b	1 2
+	updatepop_b	0 1
+
+	print_char
+
+	jmp	_print_rest_unboxed_list
+
+_print_ul_real
+	pop_b	1
+	push_b	2
+	push_b	2
+	update_b	2 4
+	update_b	1 3
+	updatepop_b	0 2
+
+	print_real
+
+	jmp	_print_rest_unboxed_list
+
+_print_ul_bool
+	pop_b	1
+	push_b	1
+	update_b	1 2
+	updatepop_b	0 1
+.d 0 1 b
+	jsr	_print_bool
+.o 0 0
+	jmp	_print_rest_unboxed_list
+
+_print_ul_file
+	pop_b	1
+	updatepop_b	0 2
+
+	print	"File"
+
+	jmp	_print_rest_unboxed_list
+
+_print_ul_graph
+	pop_b	1
+
+	jsr_eval 0
+
+	pushI	0
+.d 1 1 i
+	jsr	_print2
+.o 0 0
+	jmp	_print_rest_unboxed_list
+
+_print_rest_unboxed_list
+	incI
+	push_b 0
+	push_r_arg_t
+	eqC_b	'a' 0
+	jmp_false _print_ul_next_field
+
+	push_b 1
+	incI
+	push_r_arg_t
+	eqI_b	0 0
+	updatepop_b 0 1
+	jmp_false	_print_ul_next_field
+
+	pop_b 2
+
+	jsr_eval 0
+	eq_desc	_Nil 0 0
+	jmp_true	_print_last_unboxed_list
+
+	print_sc	","
+
+	push_t_r_a 0
+
+	push_b	0
+	push_r_arg_t
+	eqC_b	'l' 0
+	updatepop_b 0 1
+	jmp_true	_print_unboxed_list_lp0
+	halt
+
+_print_last_unboxed_list
+	pop_a	1
+	print_sc	"]"
+	jmp	_print_brackets
+
+_print_ul_next_field
+	print_sc " "
+	jmp	_print_unboxed_list_lp2
+
+_print_ul_record
+	pushD_a 0
+.d 0 1 i
+	jsr DtoAC
+.o 1 0
+	push_a 0
+	pushI 2
+	push_arraysize CHAR 0 1
+	subI
+	pushI 2
+.d 1 2 ii
+	jsr sliceAC
+.o 1 0
+.d 1 0
+	jsr	print_chars_sc
+.o 0 0
+
+	print_sc " "
+	push_t_r_args
+	incI
+	jmp	_print_unboxed_list_lp1
+
 
 _print__array_
 .d 1 1 i
@@ -866,12 +1424,7 @@ _print_ar_real
 	update_b	0 2
 	pop_b	2
 
-	create
-	fillR_b	0 0
-	pop_b	2
-
-	print_symbol_sc	0
-	pop_a	1
+	print_real
 
 	incI
 	jmp	_print_a_record_lp
@@ -1071,6 +1624,16 @@ _exit_print_tuple
 	jmp	_print_brackets
 
 _print_record
+	push_t_r_a 0
+
+	push_b 0
+	push_r_arg_t
+	eqC_b	'l' 0
+	updatepop_b 0 1
+	jmp_true	_print_unboxed_list
+
+	pop_b 1
+
 	print_sc	"("
 	print_symbol_sc	0
 
@@ -1082,9 +1645,9 @@ _print_record
 	jmp_false	_print_record_lp_
 
 	pop_b	1
-	incI
 
 _print_record_lp
+	incI
 	push_b	0
 	push_r_arg_t
 _print_record_lp_
@@ -1114,7 +1677,6 @@ _print_r_integer
 
 	print_int
 
-	incI
 	jmp	_print_record_lp
 
 _print_r_char
@@ -1126,7 +1688,6 @@ _print_r_char
 
 	print_char
 
-	incI
 	jmp	_print_record_lp
 
 _print_r_real
@@ -1138,14 +1699,8 @@ _print_r_real
 	update_b	0 2
 	pop_b	2
 
-	create
-	fillR_b	0 0
-	pop_b	2
+	print_real
 
-	print_symbol_sc	0
-	pop_a	1
-
-	incI
 	jmp	_print_record_lp
 
 _print_r_bool
@@ -1157,7 +1712,6 @@ _print_r_bool
 .d 0 1 b
 	jsr	_print_bool
 .o 0 0
-	incI
 	jmp	_print_record_lp	
 
 .o 0 1 b
@@ -1179,7 +1733,6 @@ _print_r_file
 
 	print	"File"
 
-	incI
 	jmp	_print_record_lp
 
 _print_r_graph
@@ -1200,7 +1753,6 @@ _print_r_graph
 .d 1 1 i
 	jsr	_print2
 .o 0 0
-	incI
 	jmp	_print_record_lp
 
 _print_last_record_arg
@@ -1213,7 +1765,6 @@ _print_r_array
 .d 1 1 i
 	jsr	_print__array
 .o 0 0
-	incI
 	jmp	_print_record_lp
 
 _end_print_record
@@ -1572,6 +2123,7 @@ n_Sel
 	pop_a 1
 	jmp_eval
 .pe
+
 .export d_indirection n_indirection
 
 .descn d_indirection n_indirection 1 0 "_indirection"
@@ -1597,3 +2149,4 @@ ea_indirection
 .d 1 0
 	rtn
 .pe
+

@@ -75,7 +75,7 @@ freads		:: ! *File !Int -> (!*{#Char},!*File)
 	If the file doesn't contain n characters the file will be read to the end
 	of the file. An empty String is returned if no characters can be read. */
 
-//freadsubstring :: !Int !Int !*{#Char} !*File -> (!Int,!*{#Char},!*File)
+freadsubstring :: !Int !Int !*{#Char} !*File -> (!Int,!*{#Char},!*File)
 	/*
 	Reads n characters from a text or data file, which are returned in the string
 	arg3 at positions arg1..arg1+arg2-1. If the file doesn't contain arg2 characters
@@ -105,7 +105,7 @@ fwriter		:: !Real !*File -> *File
 fwrites		:: !{#Char} !*File -> *File
 /*	Writes a String to a text or data file. */
 
-//fwritesubstring :: !Int !Int !{#Char} !*File -> *File
+fwritesubstring :: !Int !Int !{#Char} !*File -> *File
 /*	Writes the characters at positions arg1..arg1+arg2-1 of string arg3 to
 	a text or data file. */
 

@@ -1,3 +1,0 @@
-foreign module xcursor;
-
-int set_window_cursor(int,int)		'XSetWidgetCursor';
