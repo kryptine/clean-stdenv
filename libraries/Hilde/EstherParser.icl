@@ -129,7 +129,7 @@ parser{|Twrite|} b = keyword ">>>" &> yield Twrite
 parser{|Tdynamic|} b = keyword "dynamic" &> yield Tdynamic
 
 derive parser NTstatement, NTplain, NTterm, NTsugar, NTlist, NTlistComprehension, NTqualifier, NTgenerator, NTdynamic
-derive parser NTlambda, NTpattern, NTlet, NTletDef, NTcase, NTcaseAlt
+derive parser NTfunction, NTlambda, NTpattern, NTlet, NTletDef, NTcase, NTcaseAlt
 derive parser Scope, (,)
 
 character :: ![Char] -> CParser Char Char t

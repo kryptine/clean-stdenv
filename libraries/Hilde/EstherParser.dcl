@@ -14,11 +14,11 @@ from StdParsComb import :: CParser, :: Parser, :: AltCont, :: XorCont, :: SucCon
 	= Compound !NTexpression !Tsemicolon !NTstatement
 	| Pipe !NTexpression !Tguard !NTstatement
 	| Write !NTexpression !Twrite !String
+	| Function !NTfunction 
 	| Expression !NTexpression
 
 :: NTexpression
-	= /*Function !NTnameOrValue !(+- NTpattern UNIT) !Tis !NTexpression
-	| */Apply !NTexpression !NTterm
+	= Apply !NTexpression !NTterm
 	| Term !NTterm
 
 :: NTterm
@@ -38,6 +38,8 @@ from StdParsComb import :: CParser, :: Parser, :: AltCont, :: XorCont, :: SucCon
 	| NameOrValue !NTnameOrValue
 
 :: NTdynamic = NTdynamic !Tdynamic !NTexpression
+
+:: NTfunction = NTfunction !String !(+- NTpattern UNIT) !Tis !NTexpression
 
 :: NTlist
 	= ListComprehension !NTlistComprehension
