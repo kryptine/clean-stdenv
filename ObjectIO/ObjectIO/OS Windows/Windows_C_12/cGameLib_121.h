@@ -1,7 +1,7 @@
 #ifndef _CGAMELIB_H
 #define _CGAMELIB_H
 
-/* Clean Game Library by Mike Wiering, Nijmegen */
+/* Clean Game Library by Mike Wiering */
 
 
 #include "cOSGameLib_121.h"  /* OS specific functions */
@@ -24,18 +24,18 @@ extern void WinInitSpriteAnimation (int,CLEAN_STRING,BOOL,OS,int*,OS*);
 extern void WinSetObjectFocus (int,int,int,int,int,int,OS,int*,OS*);
 // extern void WinCreateUserEvent (int,int,int,int,OS,int*,OS*);
 extern void WinSetObjectRec (int,int,int,BOOL,int,int,
-							 int,int,int,int,int,int,
-							 int,int,int,int,int,
-							 BOOL,int,int,int,int,int,int,int,int,int,int,int,int,
-							 int,OS,int*,OS*
-							);
+                             int,int,int,int,int,int,
+                             int,int,int,int,int,
+                             BOOL,int,int,int,int,int,int,int,int,int,int,int,int,
+                             int,OS,int*,OS*
+                            );
 extern void WinGetObjectRec (int,OS,int*,int*,BOOL*,
-							 int*,int*,int*,int*,int*,
-							 int*,int*,int*,
-							 int*,int*,int*,int*,int*,int*,
-							 BOOL*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,
-							 int*,OS*
-							);
+                             int*,int*,int*,int*,int*,
+                             int*,int*,int*,
+                             int*,int*,int*,int*,int*,int*,
+                             BOOL*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,int*,
+                             int*,OS*
+                            );
 extern void WinShowStatistic (int,int,CLEAN_STRING,int,int,int,int,CLEAN_STRING,int,BOOL,BOOL,BOOL,int,int,int,int,int,int,OS,int*,OS*);
 extern void WinPlayMusic (CLEAN_STRING,BOOL,OS,int*,OS*);
 extern void WinStopMusic (OS,int*,OS*);
@@ -85,15 +85,15 @@ extern void WinSetBoundMap (int,int,int,OS,int*,OS*);
 #define FC_OFFSCREEN        (0x80000001)
 
 /* game keys */
-#define GK_UNKNOWN	  0
+#define GK_UNKNOWN    0
 
 #define GK_BACKSPACE  8
 #define GK_RETURN    10
-#define GK_ESCAPE	 11
-#define GK_LEFT		 12
-#define GK_RIGHT	 13
-#define GK_UP	  	 14
-#define GK_DOWN	  	 15
+#define GK_ESCAPE    11
+#define GK_LEFT      12
+#define GK_RIGHT     13
+#define GK_UP        14
+#define GK_DOWN      15
 #define GK_HOME      16
 #define GK_END       17
 //#define GK_PAGE_UP   18

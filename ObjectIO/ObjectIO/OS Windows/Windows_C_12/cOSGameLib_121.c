@@ -1,15 +1,795 @@
-/********************************************************************************************
-	Clean OS Windows library module version 1.2.1.
-	This module is part of the Clean Object I/O library, version 1.2.1, 
-	for the Windows platform.
-********************************************************************************************/
+/****************************************************************************
+    Clean OS Windows library module version 1.2.1.
+    This module is part of the Clean Object I/O library, version 1.2.1,
+    for the Windows platform.
+****************************************************************************/
 
-/********************************************************************************************
-	About this module:
-	Clean Game Library by Mike Wiering, Nijmegen.
-	DirectX implementation of the OS specific functions.
-********************************************************************************************/
+/****************************************************************************
+    About this module:
+    Clean Game Library (low-level functions, DirectX implementation),
+    Mike Wiering (mike.wiering@cs.kun.nl).
+****************************************************************************/
+
 #include "cOSGameLib_121.h"
+
+/* DD functions from DDUTIL.CPP ... */
+
+/*
+ *  DDLoadBitmap
+ *
+ *  create a DirectDrawSurface from a bitmap resource.
+ *
+ */
+// extern "C"
+IDirectDrawSurface * DDLoadBitmap(IDirectDraw *pdd, LPCSTR szBitmap, int dx, int dy)
+{
+    HBITMAP             hbm;
+    BITMAP              bm;
+    DDSURFACEDESC       ddsd;
+    IDirectDrawSurface *pdds;
+
+    //
+    //  try to load the bitmap as a resource, if that fails, try it as a file
+    //
+    hbm = (HBITMAP)LoadImage(GetModuleHandle(NULL), szBitmap, IMAGE_BITMAP, dx, dy, LR_CREATEDIBSECTION);
+
+    if (hbm == NULL)
+    hbm = (HBITMAP)LoadImage(NULL, szBitmap, IMAGE_BITMAP, dx, dy, LR_LOADFROMFILE|LR_CREATEDIBSECTION);
+
+    if (hbm == NULL)
+    return NULL;
+
+    //
+    // get size of the bitmap
+    //
+    GetObject(hbm, sizeof(bm), &bm);      // get size of bitmap
+
+    //
+    // create a DirectDrawSurface for this bitmap
+    //
+    ZeroMemory(&ddsd, sizeof(ddsd));
+    ddsd.dwSize = sizeof(ddsd);
+    ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
+    ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
+    ddsd.dwWidth = bm.bmWidth;
+    ddsd.dwHeight = bm.bmHeight;
+
+    if (IDirectDraw_CreateSurface (pdd, &ddsd, &pdds, NULL) != DD_OK)
+    return NULL;
+
+    DDCopyBitmap(pdds, hbm, 0, 0, 0, 0);
+
+    DeleteObject(hbm);
+
+    return pdds;
+}
+
+/*
+ *  DDReLoadBitmap
+ *
+ *  load a bitmap from a file or resource into a directdraw surface.
+ *  normaly used to re-load a surface after a restore.
+ *
+ */
+HRESULT DDReLoadBitmap(IDirectDrawSurface *pdds, LPCSTR szBitmap)
+{
+    HBITMAP             hbm;
+    HRESULT             hr;
+
+    //
+    //  try to load the bitmap as a resource, if that fails, try it as a file
+    //
+    hbm = (HBITMAP)LoadImage(GetModuleHandle(NULL), szBitmap, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
+
+    if (hbm == NULL)
+    hbm = (HBITMAP)LoadImage(NULL, szBitmap, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE|LR_CREATEDIBSECTION);
+
+    if (hbm == NULL)
+    {
+    OutputDebugString("handle is null\n");
+    return E_FAIL;
+    }
+
+    hr = DDCopyBitmap(pdds, hbm, 0, 0, 0, 0);
+    if (hr != DD_OK)
+    {
+    OutputDebugString("ddcopybitmap failed\n");
+    }
+
+
+    DeleteObject(hbm);
+    return hr;
+}
+
+/*
+ *  DDCopyBitmap
+ *
+ *  draw a bitmap into a DirectDrawSurface
+ *
+ */
+// extern "C"
+HRESULT DDCopyBitmap(IDirectDrawSurface *pdds, HBITMAP hbm, int x, int y, int dx, int dy)
+{
+    HDC                 hdcImage;
+    HDC                 hdc;
+    BITMAP              bm;
+    DDSURFACEDESC       ddsd;
+    HRESULT             hr;
+
+    if (hbm == NULL || pdds == NULL)
+    return E_FAIL;
+
+    //
+    // make sure this surface is restored.
+    //
+    IDirectDrawSurface_Restore(pdds);
+
+    //
+    //  select bitmap into a memoryDC so we can use it.
+    //
+    hdcImage = CreateCompatibleDC(NULL);
+    if (!hdcImage)
+    OutputDebugString("createcompatible dc failed\n");
+    SelectObject(hdcImage, hbm);
+
+    //
+    // get size of the bitmap
+    //
+    GetObject(hbm, sizeof(bm), &bm);    // get size of bitmap
+    dx = dx == 0 ? bm.bmWidth  : dx;    // use the passed size, unless zero
+    dy = dy == 0 ? bm.bmHeight : dy;
+
+    //
+    // get size of surface.
+    //
+    ddsd.dwSize = sizeof(ddsd);
+    ddsd.dwFlags = DDSD_HEIGHT | DDSD_WIDTH;
+    IDirectDrawSurface_GetSurfaceDesc(pdds, &ddsd);
+
+    if ((hr = IDirectDrawSurface_GetDC(pdds, &hdc)) == DD_OK)
+    {
+    StretchBlt(hdc, 0, 0, ddsd.dwWidth, ddsd.dwHeight, hdcImage, x, y, dx, dy, SRCCOPY);
+    IDirectDrawSurface_ReleaseDC(pdds, hdc);
+    }
+
+    DeleteDC(hdcImage);
+
+    return hr;
+}
+
+//
+//  DDLoadPalette
+//
+//  Create a DirectDraw palette object from a bitmap resoure
+//
+//  if the resource does not exist or NULL is passed create a
+//  default 332 palette.
+//
+// extern "C"
+IDirectDrawPalette * DDLoadPalette (IDirectDraw *pdd, LPCSTR szBitmap)
+{
+    IDirectDrawPalette* ddpal;
+    int i, r, g, b;
+    int n;
+//    int                 fh;
+// Mike ... //
+    HANDLE              fh;
+    SECURITY_ATTRIBUTES sa;
+// ... Mike //
+    HRSRC               h;
+    LPBITMAPINFOHEADER  lpbi;
+    PALETTEENTRY        ape[256];
+    RGBQUAD *           prgb;
+
+// Mike ... //
+    sa.nLength = sizeof (SECURITY_ATTRIBUTES);
+    sa.lpSecurityDescriptor = NULL;
+    sa.bInheritHandle = FALSE;
+// ... Mike //
+
+    //
+    // build a 332 palette as the default.
+    //
+/*
+    for (i=0; i<256; i++)
+    {
+    ape[i].peRed   = (BYTE)(((i >> 5) & 0x07) * 255 / 7);
+    ape[i].peGreen = (BYTE)(((i >> 2) & 0x07) * 255 / 7);
+    ape[i].peBlue  = (BYTE)(((i >> 0) & 0x03) * 255 / 3);
+    ape[i].peFlags = (BYTE)0;
+    }
+*/
+    for (i = 0; i < 256; i++)
+    {
+        if (i < 6 * 7 * 6)
+        {
+            r = 224 * ( i       % 6) / 5 + 16;
+            g = 224 * ((i / 6)  % 7) / 6 + 16;
+            b = 224 * ((i / 42) % 6) / 5 + 16;
+        }
+        else
+        {
+            switch (i)
+            {
+                case 252: { r = 0; g = 0; b = 0; break; }
+                case 253: { r = 8; g = 8; b = 8; break; }
+                case 254: { r = 247; g = 247; b = 247; break; }
+                case 255: { r = 255; g = 255; b = 255; break; }
+            }
+        }
+    ape[i].peRed   = (BYTE) r;
+    ape[i].peGreen = (BYTE) g;
+    ape[i].peBlue  = (BYTE) b;
+
+    ape[i].peFlags = (BYTE) 0;
+    }
+
+    //
+    // get a pointer to the bitmap resource.
+    //
+    if (szBitmap && (h = FindResource(NULL, szBitmap, RT_BITMAP)))
+    {
+    lpbi = (LPBITMAPINFOHEADER)LockResource(LoadResource(NULL, h));
+    if (!lpbi)
+        OutputDebugString("lock resource failed\n");
+    prgb = (RGBQUAD*)((BYTE*)lpbi + lpbi->biSize);
+
+    if (lpbi == NULL || lpbi->biSize < sizeof(BITMAPINFOHEADER))
+        n = 0;
+    else if (lpbi->biBitCount > 8)
+        n = 0;
+    else if (lpbi->biClrUsed == 0)
+        n = 1 << lpbi->biBitCount;
+    else
+        n = lpbi->biClrUsed;
+
+    //
+    //  a DIB color table has its colors stored BGR not RGB
+    //  so flip them around.
+    //
+    for(i=0; i<n; i++ )
+    {
+        ape[i].peRed   = prgb[i].rgbRed;
+        ape[i].peGreen = prgb[i].rgbGreen;
+        ape[i].peBlue  = prgb[i].rgbBlue;
+        ape[i].peFlags = 0;
+    }
+    }
+    else if (szBitmap &&
+           //  (fh = _lopen(szBitmap, OF_READ)) != -1
+           // Mike ... //
+              (fh = CreateFile (szBitmap, GENERIC_READ,
+                  FILE_SHARE_READ, &sa, OPEN_EXISTING,
+                  FILE_ATTRIBUTE_NORMAL, NULL)
+              ) != NULL
+            )
+           // ... Mike //
+    {
+    BITMAPFILEHEADER bf;
+    BITMAPINFOHEADER bi;
+    unsigned long iNumRead;
+
+  /*
+    _lread(fh, &bf, sizeof(bf));
+    _lread(fh, &bi, sizeof(bi));
+    _lread(fh, ape, sizeof(ape));
+    _lclose(fh);
+  */
+    // Mike ... //
+    ReadFile (fh, &bf, sizeof (bf), &iNumRead, NULL);
+    ReadFile (fh, &bi, sizeof (bi), &iNumRead, NULL);
+    ReadFile (fh, ape, sizeof (ape), &iNumRead, NULL);
+    CloseHandle (fh);
+    // ... Mike //
+
+    if (bi.biSize != sizeof(BITMAPINFOHEADER))
+        n = 0;
+    else if (bi.biBitCount > 8)
+        n = 0;
+    else if (bi.biClrUsed == 0)
+        n = 1 << bi.biBitCount;
+    else
+        n = bi.biClrUsed;
+
+    //
+    //  a DIB color table has its colors stored BGR not RGB
+    //  so flip them around.
+    //
+    for(i=0; i<n; i++ )
+    {
+        BYTE r = ape[i].peRed;
+        ape[i].peRed  = ape[i].peBlue;
+        ape[i].peBlue = r;
+    }
+    }
+
+
+    IDirectDraw_CreatePalette(pdd, DDPCAPS_8BIT, ape, &ddpal, NULL);
+
+    return ddpal;
+}
+
+/*
+ * DDColorMatch
+ *
+ * convert a RGB color to a pysical color.
+ *
+ * we do this by leting GDI SetPixel() do the color matching
+ * then we lock the memory and see what it got mapped to.
+ */
+// extern "C"
+DWORD DDColorMatch(IDirectDrawSurface *pdds, COLORREF rgb)
+{
+    COLORREF rgbT;
+    HDC hdc;
+    DWORD dw = CLR_INVALID;
+    DDSURFACEDESC ddsd;
+    HRESULT hres;
+
+    //
+    //  use GDI SetPixel to color match for us
+    //
+    if (rgb != CLR_INVALID && IDirectDrawSurface_GetDC(pdds, &hdc) == DD_OK)
+    {
+    rgbT = GetPixel(hdc, 0, 0);             // save current pixel value
+    SetPixel(hdc, 0, 0, rgb);               // set our value
+    IDirectDrawSurface_ReleaseDC(pdds, hdc);
+    }
+
+    //
+    // now lock the surface so we can read back the converted color
+    //
+    ddsd.dwSize = sizeof(ddsd);
+    while ((hres = IDirectDrawSurface_Lock(pdds, NULL, &ddsd, 0, NULL)) == DDERR_WASSTILLDRAWING)
+    ;
+
+    if (hres == DD_OK)
+    {
+    dw  = *(DWORD *)ddsd.lpSurface;                     // get DWORD
+        if(ddsd.ddpfPixelFormat.dwRGBBitCount < 32)
+            dw &= (1 << ddsd.ddpfPixelFormat.dwRGBBitCount)-1;  // mask it to bpp
+    IDirectDrawSurface_Unlock(pdds, NULL);
+    }
+
+    //
+    //  now put the color that was there back.
+    //
+    if (rgb != CLR_INVALID && IDirectDrawSurface_GetDC(pdds, &hdc) == DD_OK)
+    {
+    SetPixel(hdc, 0, 0, rgbT);
+    IDirectDrawSurface_ReleaseDC(pdds, hdc);
+    }
+
+    return dw;
+}
+
+/*
+ * DDSetColorKey
+ *
+ * set a color key for a surface, given a RGB.
+ * if you pass CLR_INVALID as the color key, the pixel
+ * in the upper-left corner will be used.
+ */
+// extern "C"
+HRESULT DDSetColorKey(IDirectDrawSurface *pdds, COLORREF rgb)
+{
+    DDCOLORKEY          ddck;
+
+    ddck.dwColorSpaceLowValue  = DDColorMatch(pdds, rgb);
+    ddck.dwColorSpaceHighValue = ddck.dwColorSpaceLowValue;
+    return IDirectDrawSurface_SetColorKey(pdds, DDCKEY_SRCBLT, &ddck);
+}
+
+/* ... DD functions from DDUTIL.CPP */
+
+
+/* sound functions from DSUTIL.C ... */
+
+static const char c_szWAV[] = "WAV";
+
+static HGLOBAL ptr = NULL;
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// DSLoadSoundBuffer
+//
+///////////////////////////////////////////////////////////////////////////////
+
+IDirectSoundBuffer *DSLoadSoundBuffer(IDirectSound *pDS, LPCTSTR lpName)
+{
+    IDirectSoundBuffer *pDSB = NULL;
+    DSBUFFERDESC dsBD = {0};
+    BYTE *pbWaveData;
+
+    if (DSGetWaveResource(NULL, lpName, &dsBD.lpwfxFormat, &pbWaveData, &dsBD.dwBufferBytes))
+    {
+        dsBD.dwSize = sizeof(dsBD);
+        dsBD.dwFlags = DSBCAPS_STATIC | DSBCAPS_CTRLDEFAULT | DSBCAPS_GETCURRENTPOSITION2;
+
+        if (SUCCEEDED(IDirectSound_CreateSoundBuffer(pDS, &dsBD, &pDSB, NULL)))
+        {
+            if (!DSFillSoundBuffer(pDSB, pbWaveData, dsBD.dwBufferBytes))
+            {
+                IDirectSoundBuffer_Release(pDSB);
+                pDSB = NULL;
+            }
+        }
+        else
+        {
+            pDSB = NULL;
+        }
+    }
+
+    if (ptr)
+    {
+        GlobalFree (ptr);
+        ptr = NULL;
+    }
+
+    return pDSB;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// DSReloadSoundBuffer
+//
+///////////////////////////////////////////////////////////////////////////////
+
+BOOL DSReloadSoundBuffer(IDirectSoundBuffer *pDSB, LPCTSTR lpName)
+{
+    BOOL result=FALSE;
+    BYTE *pbWaveData;
+    DWORD cbWaveSize;
+
+    if (DSGetWaveResource(NULL, lpName, NULL, &pbWaveData, &cbWaveSize))
+    {
+        if (SUCCEEDED(IDirectSoundBuffer_Restore(pDSB)) &&
+            DSFillSoundBuffer(pDSB, pbWaveData, cbWaveSize))
+        {
+            result = TRUE;
+        }
+    }
+
+    if (ptr)
+    {
+        GlobalFree (ptr);
+        ptr = NULL;
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// DSGetWaveResource
+//
+///////////////////////////////////////////////////////////////////////////////
+
+BOOL DSGetWaveResource(HMODULE hModule, LPCTSTR lpName,
+    WAVEFORMATEX **ppWaveHeader, BYTE **ppbWaveData, DWORD *pcbWaveSize)
+{
+    HRSRC hResInfo;
+    HGLOBAL hResData;
+    void *pvRes;
+
+    HANDLE fh;
+    DWORD dwsize;
+    DWORD dwread;
+
+    if (((hResInfo = FindResource(hModule, lpName, c_szWAV)) != NULL) &&
+        ((hResData = LoadResource(hModule, hResInfo)) != NULL) &&
+        ((pvRes = LockResource(hResData)) != NULL) &&
+        DSParseWaveResource(pvRes, ppWaveHeader, ppbWaveData, pcbWaveSize))
+    {
+        return TRUE;
+    }
+
+    fh = CreateFile (lpName, GENERIC_READ, FILE_SHARE_READ, NULL,
+                     OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (fh != INVALID_HANDLE_VALUE)
+    {
+        dwsize = GetFileSize (fh, NULL);
+        if (dwsize != 0xFFFFFFFF)
+        {
+            if (ptr)
+            {
+                GlobalFree (ptr);
+                ptr = NULL;
+            }
+            ptr = GlobalAlloc (GPTR, dwsize);
+            if (ptr)
+            {
+                if (ReadFile (fh, ptr, dwsize, &dwread, NULL))
+                {
+                    if (DSParseWaveResource (ptr, ppWaveHeader, ppbWaveData,
+                            pcbWaveSize))
+                    {
+                        return TRUE;
+                    }
+                }
+            }
+        }
+    }
+
+    return FALSE;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// SndObj fns
+///////////////////////////////////////////////////////////////////////////////
+
+SNDOBJ *SndObjCreate(IDirectSound *pDS, LPCTSTR lpName, int iConcurrent)
+{
+    SNDOBJ *pSO = NULL;
+    LPWAVEFORMATEX pWaveHeader;
+    BYTE *pbData;
+    UINT cbData;
+
+    if (DSGetWaveResource(NULL, lpName, &pWaveHeader, &pbData, &cbData))
+    {
+        if (iConcurrent < 1)
+            iConcurrent = 1;
+
+        if ((pSO = (SNDOBJ *)LocalAlloc(LPTR, sizeof(SNDOBJ) +
+        (iConcurrent-1) * sizeof(IDirectSoundBuffer *))) != NULL)
+        {
+            int i;
+
+            pSO->iAlloc = iConcurrent;
+            pSO->pbWaveData = pbData;
+            pSO->cbWaveSize = cbData;
+            pSO->Buffers[0] = DSLoadSoundBuffer(pDS, lpName);
+
+            for (i=1; i<pSO->iAlloc; i++)
+            {
+                if (FAILED(IDirectSound_DuplicateSoundBuffer(pDS,
+                        pSO->Buffers[0], &pSO->Buffers[i])))
+                {
+                    pSO->Buffers[i] = DSLoadSoundBuffer(pDS, lpName);
+                    if (!pSO->Buffers[i])
+                    {
+                        SndObjDestroy(pSO);
+                        pSO = NULL;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    if (ptr)
+    {
+        GlobalFree (ptr);
+        ptr = NULL;
+    }
+
+    return pSO;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+void SndObjDestroy(SNDOBJ *pSO)
+{
+    if (pSO)
+    {
+        int i;
+
+        for (i=0; i<pSO->iAlloc; i++)
+        {
+            if (pSO->Buffers[i])
+            {
+                IDirectSoundBuffer_Release(pSO->Buffers[i]);
+                pSO->Buffers[i] = NULL;
+            }
+        }
+        LocalFree((HANDLE)pSO);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+IDirectSoundBuffer *SndObjGetFreeBuffer(SNDOBJ *pSO)
+{
+    IDirectSoundBuffer *pDSB;
+
+    if (pSO == NULL)
+        return NULL;
+
+    if (pDSB = pSO->Buffers[pSO->iCurrent])
+    {
+        HRESULT hres;
+        DWORD dwStatus;
+
+        hres = IDirectSoundBuffer_GetStatus(pDSB, &dwStatus);
+
+        if (FAILED(hres))
+            dwStatus = 0;
+
+        if ((dwStatus & DSBSTATUS_PLAYING) == DSBSTATUS_PLAYING)
+        {
+            if (pSO->iAlloc > 1)
+            {
+                if (++pSO->iCurrent >= pSO->iAlloc)
+                    pSO->iCurrent = 0;
+
+                pDSB = pSO->Buffers[pSO->iCurrent];
+                hres = IDirectSoundBuffer_GetStatus(pDSB, &dwStatus);
+
+                if (SUCCEEDED(hres) && (dwStatus & DSBSTATUS_PLAYING) == DSBSTATUS_PLAYING)
+                {
+                    IDirectSoundBuffer_Stop(pDSB);
+                    IDirectSoundBuffer_SetCurrentPosition(pDSB, 0);
+                }
+            }
+            else
+            {
+                pDSB = NULL;
+            }
+        }
+
+        if (pDSB && (dwStatus & DSBSTATUS_BUFFERLOST))
+        {
+            if (FAILED(IDirectSoundBuffer_Restore(pDSB)) ||
+                !DSFillSoundBuffer(pDSB, pSO->pbWaveData, pSO->cbWaveSize))
+            {
+                pDSB = NULL;
+            }
+        }
+    }
+
+    return pDSB;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+BOOL SndObjPlay(SNDOBJ *pSO, DWORD dwPlayFlags)
+{
+    BOOL result = FALSE;
+
+    if (pSO == NULL)
+        return FALSE;
+
+    if ((!(dwPlayFlags & DSBPLAY_LOOPING) || (pSO->iAlloc == 1)))
+    {
+    IDirectSoundBuffer *pDSB = SndObjGetFreeBuffer(pSO);
+    if (pDSB != NULL) {
+        result = SUCCEEDED(IDirectSoundBuffer_Play(pDSB, 0, 0, dwPlayFlags));
+    }
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+BOOL SndObjStop(SNDOBJ *pSO)
+{
+    int i;
+
+    if (pSO == NULL)
+        return FALSE;
+
+    for (i=0; i<pSO->iAlloc; i++)
+    {
+        IDirectSoundBuffer_Stop(pSO->Buffers[i]);
+        IDirectSoundBuffer_SetCurrentPosition(pSO->Buffers[i], 0);
+    }
+
+    return TRUE;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+BOOL DSFillSoundBuffer(IDirectSoundBuffer *pDSB, BYTE *pbWaveData, DWORD cbWaveSize)
+{
+    if (pDSB && pbWaveData && cbWaveSize)
+    {
+        LPVOID pMem1, pMem2;
+        DWORD dwSize1, dwSize2;
+
+        if (SUCCEEDED(IDirectSoundBuffer_Lock(pDSB, 0, cbWaveSize,
+            &pMem1, &dwSize1, &pMem2, &dwSize2, 0)))
+        {
+            CopyMemory(pMem1, pbWaveData, dwSize1);
+
+            if ( 0 != dwSize2 )
+                CopyMemory(pMem2, pbWaveData+dwSize1, dwSize2);
+
+            IDirectSoundBuffer_Unlock(pDSB, pMem1, dwSize1, pMem2, dwSize2);
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+BOOL DSParseWaveResource(void *pvRes, WAVEFORMATEX **ppWaveHeader, BYTE **ppbWaveData,DWORD *pcbWaveSize)
+{
+    DWORD *pdw;
+    DWORD *pdwEnd;
+    DWORD dwRiff;
+    DWORD dwType;
+    DWORD dwLength;
+
+    if (ppWaveHeader)
+        *ppWaveHeader = NULL;
+
+    if (ppbWaveData)
+        *ppbWaveData = NULL;
+
+    if (pcbWaveSize)
+        *pcbWaveSize = 0;
+
+    pdw = (DWORD *)pvRes;
+    dwRiff = *pdw++;
+    dwLength = *pdw++;
+    dwType = *pdw++;
+
+    if (dwRiff != mmioFOURCC('R', 'I', 'F', 'F'))
+        goto exit;      // not even RIFF
+
+    if (dwType != mmioFOURCC('W', 'A', 'V', 'E'))
+        goto exit;      // not a WAV
+
+    pdwEnd = (DWORD *)((BYTE *)pdw + dwLength-4);
+
+    while (pdw < pdwEnd)
+    {
+        dwType = *pdw++;
+        dwLength = *pdw++;
+
+        switch (dwType)
+        {
+        case mmioFOURCC('f', 'm', 't', ' '):
+            if (ppWaveHeader && !*ppWaveHeader)
+            {
+                if (dwLength < sizeof(WAVEFORMAT))
+                    goto exit;      // not a WAV
+
+                *ppWaveHeader = (WAVEFORMATEX *)pdw;
+
+                if ((!ppbWaveData || *ppbWaveData) &&
+                    (!pcbWaveSize || *pcbWaveSize))
+                {
+                    return TRUE;
+                }
+            }
+            break;
+
+        case mmioFOURCC('d', 'a', 't', 'a'):
+            if ((ppbWaveData && !*ppbWaveData) ||
+                (pcbWaveSize && !*pcbWaveSize))
+            {
+                if (ppbWaveData)
+                    *ppbWaveData = (LPBYTE)pdw;
+
+                if (pcbWaveSize)
+                    *pcbWaveSize = dwLength;
+
+                if (!ppWaveHeader || *ppWaveHeader)
+                    return TRUE;
+            }
+            break;
+        }
+
+        pdw = (DWORD *)((BYTE *)pdw + ((dwLength+1)&~1));
+    }
+
+exit:
+    return FALSE;
+}
+
+/* ... sound functions from DSUTIL.C */
+
+
 
 extern HWND ghMainWindow;
 
@@ -96,7 +876,7 @@ static void ReleaseDD (void)
 void DDRestoreAll (void)
 {
     HRESULT ddrval;
-	//    DDSURFACEDESC ddsd;     PA: not used
+    //    DDSURFACEDESC ddsd;     PA: not used
     GAMEBITMAPINFO *gbip = gbipGameBitmapInfo;
 
     if (lpDD != NULL)
@@ -119,7 +899,7 @@ void DDRestoreAll (void)
             }
         }
     }
-}	/* DDRestoreAll */
+}   /* DDRestoreAll */
 
 
 
@@ -180,7 +960,7 @@ static void ShowError (char *Msg)
         ghMainWindow = NULL;
     }
     MessageBox (NULL, Msg, NULL, MB_OK);
-}	/* ShowError */
+}   /* ShowError */
 
 
 /* set up the game window */
@@ -348,25 +1128,25 @@ BOOL OSInitGameWindow (void)
         }
     }
     return result;
-}	/* OSInitGameWindow */
+}   /* OSInitGameWindow */
 
 /* shut down the game window */
 void OSDeInitGameWindow (void)
 {
     ReleaseDD ();
-}	/* OSDeInitGameWindow */
+}   /* OSDeInitGameWindow */
 
 /* get game window handle */
 BOOL OSGetGameWindowHDC (HDC *hdc)
 {
    return (IDirectDrawSurface_GetDC (lpDDSBack, hdc) == DD_OK);
-}	/* OSDeInitGameWindow */
+}   /* OSDeInitGameWindow */
 
 /* release game window handle */
 void OSReleaseGameWindowHandle (HDC hdc)
 {
    IDirectDrawSurface_ReleaseDC (lpDDSBack, hdc);
-}	/* OSReleaseGameWindowHandle */
+}   /* OSReleaseGameWindowHandle */
 
 /* clear the (visual) screen */
 void OSClearScreen (void)
@@ -378,7 +1158,7 @@ void OSClearScreen (void)
     ddbltfx.dwFillColor = DDColorMatch (lpDDSFront, 0);
     IDirectDrawSurface_Blt (lpDDSFront, NULL, NULL, NULL,
         DDBLT_COLORFILL | DDBLT_WAIT, &ddbltfx);
-}	/* OSClearScreen */
+}   /* OSClearScreen */
 
 /* clear the virtual screen */
 void OSClearVirtualScreen (COLORREF c)
@@ -397,7 +1177,7 @@ void OSClearVirtualScreen (COLORREF c)
     ddbltfx.dwFillColor = DDColorMatch (lpDDSBack, c);
     IDirectDrawSurface_Blt (lpDDSBack, &dst, NULL, NULL,
         DDBLT_COLORFILL | DDBLT_WAIT, &ddbltfx);
-}	/* OSClearVirtualScreen */
+}   /* OSClearVirtualScreen */
 
 /* fill an area with black */
 void OSFillBlack (BOOL vis, RECT dst)
@@ -418,7 +1198,7 @@ void OSFillBlack (BOOL vis, RECT dst)
     ddbltfx.dwFillColor = DDColorMatch (lpDDS, 0);
     IDirectDrawSurface_Blt (lpDDS, &dst, NULL, NULL,
         DDBLT_COLORFILL | DDBLT_WAIT, &ddbltfx);
-}	/* OSFillBlack */
+}   /* OSFillBlack */
 
 /* copy (part of) virtual screen to visual screen */
 void OSBlit (RECT *r)
@@ -441,13 +1221,13 @@ void OSBlit (RECT *r)
                 (lpDDSFront, &sr, lpDDSBack, &sr, flags, &ddbltfx);
     if (ddrval == DDERR_SURFACELOST)
         DDRestoreAll ();
-}	/* OSBlit */
+}   /* OSBlit */
 
 /* flip pages */
 void OSFlip (void)
 {
     IDirectDrawSurface_Flip (lpDDSFront, NULL, DDFLIP_WAIT);
-}	/* OSFlip */
+}   /* OSFlip */
 
 
 /* ------------------------- bitmap functions  ------------------------- */
@@ -475,7 +1255,7 @@ static GAMEBITMAPINFO *GetGameBitmapInfo (int BID)
         }
     }
     return gbip;
-}	/* GetGameBitmapInfo */
+}   /* GetGameBitmapInfo */
 
 /* free members of a GAMEBITMAPINFO node */
 static void FreeGameBitmapInfoNode (GAMEBITMAPINFO *gbip)
@@ -505,7 +1285,7 @@ static void FreeGameBitmapInfoNode (GAMEBITMAPINFO *gbip)
         rfree (gbip->gbsGameBlockSequence);
         gbip->gbsGameBlockSequence = gbs;
     }
-}	/* FreeGameBitmapInfoNode */
+}   /* FreeGameBitmapInfoNode */
 
 
 /* initialize a game bitmap */
@@ -515,7 +1295,7 @@ int OSInitGameBitmap (int id, char *name,
 {
     HRESULT ddrval;
     DDSURFACEDESC ddsd;
-	//    DDSCAPS ddscaps;     PA: ddscaps not used
+    //    DDSCAPS ddscaps;     PA: ddscaps not used
     int resultcode;
     GAMEBITMAPINFO *gbip1;
     GAMEBITMAPINFO *gbip2;
@@ -612,7 +1392,7 @@ int OSInitGameBitmap (int id, char *name,
         return id;
     else
         return resultcode;
-}	/* OSInitGameBitmap */
+}   /* OSInitGameBitmap */
 
 /* get bitmap info */
 BOOL OSGetGameBitmapInfo (int id, int *width, int *height,
@@ -634,7 +1414,7 @@ BOOL OSGetGameBitmapInfo (int id, int *width, int *height,
    }
     else
         return FALSE;
-}	/* OSGetGameBitmapInfo */
+}   /* OSGetGameBitmapInfo */
 
 
 /* deinit a game bitmap */
@@ -675,7 +1455,7 @@ int OSFreeGameBitmap (int id)
         gbipCurrent = gbipNext;
     }
     return result;
-}	/* OSFreeGameBitmap */
+}   /* OSFreeGameBitmap */
 
 /* deinit all game bitmaps */
 void OSFreeGameBitmaps (void)
@@ -691,7 +1471,7 @@ void OSFreeGameBitmaps (void)
     }
     iPrevGBIP = 0;
     gbipPrev = NULL;
-}	/* OSFreeGameBitmaps */
+}   /* OSFreeGameBitmaps */
 
 
 /* set transparent color */
@@ -722,7 +1502,7 @@ int OSSetTransparentColor (int id, int x, int y)
         }
     }
     return result;
-}	/* OSSetTransparentColor */
+}   /* OSSetTransparentColor */
 
 /* initialize a block sequence */
 int OSInitBlockSequence (int bitmapid, int seqid, char *seq, int len)
@@ -759,7 +1539,7 @@ int OSInitBlockSequence (int bitmapid, int seqid, char *seq, int len)
         resultcode = GR_OK;
     }
     return resultcode;
-}	/* OSInitBlockSequence */
+}   /* OSInitBlockSequence */
 
 /* run block sequences */
 void OSRunBlockSequences (void)
@@ -786,7 +1566,7 @@ void OSRunBlockSequences (void)
         }
         gbip = gbip->gbipNext;
     }
-}	/* OSRunBlockSequences */
+}   /* OSRunBlockSequences */
 
 /* get current block */
 int OSGetCurrentBlock (int bitmapid, int seqid)
@@ -809,7 +1589,7 @@ int OSGetCurrentBlock (int bitmapid, int seqid)
         gbs = gbs->gbsNext;
     }
     return result;
-}	/* OSGetCurrentBlock */
+}   /* OSGetCurrentBlock */
 
 /* draw part of a bitmap to virtual screen */
 void OSDraw (RECT *dst, int id, RECT *src, BOOL mirlr, BOOL mirud, int flags)
@@ -881,7 +1661,7 @@ void OSDraw (RECT *dst, int id, RECT *src, BOOL mirlr, BOOL mirud, int flags)
         if (ddrval == DDERR_SURFACELOST)
             DDRestoreAll ();
     }
-}	/* OSDraw */
+}   /* OSDraw */
 
 /* ------------------------- sound functions ------------------------- */
 
@@ -911,7 +1691,7 @@ static SOUNDSAMPLEINFO *GetSoundSampleInfo (int ID)
             ssi = ssi->ssiNext;
     }
     return ssi;
-}	/* GetSoundSampleInfo */
+}   /* GetSoundSampleInfo */
 
 BOOL OSInitSound (void)
 {
@@ -933,7 +1713,7 @@ BOOL OSInitSound (void)
         }
     }
     return bSoundEnabled;
-}	/* OSInitSound */
+}   /* OSInitSound */
 
 /* deinitialize sound */
 void OSDeInitSound (void)
@@ -944,7 +1724,7 @@ void OSDeInitSound (void)
         lpDS = NULL;
     }
     bSoundEnabled = FALSE;
-}	/* OSDeInitSound */
+}   /* OSDeInitSound */
 
 /* initialize a sound sample */
 BOOL OSInitSoundSample (int id, char *name, int buffers)
@@ -962,7 +1742,7 @@ BOOL OSInitSoundSample (int id, char *name, int buffers)
     }
     else
         return FALSE;
-}	/* OSInitSoundSample */
+}   /* OSInitSoundSample */
 
 /* free the SOUNDSAMPLEINFO list */
 void OSFreeSoundSamples (void)
@@ -981,7 +1761,7 @@ void OSFreeSoundSamples (void)
         rfree (ssiSoundSampleInfo);
         ssiSoundSampleInfo = ssi;
     }
-}	/* OSFreeSoundSamples */
+}   /* OSFreeSoundSamples */
 
 /* play a sound sample */
 BOOL OSPlaySoundSample (int id, int volume, int pan, int freq)
@@ -1004,7 +1784,7 @@ BOOL OSPlaySoundSample (int id, int volume, int pan, int freq)
         }
     }
     return bSoundEnabled;
-}	/* OSPlaySoundSample */
+}   /* OSPlaySoundSample */
 
 /* start playing music in the background */
 BOOL OSPlayMusic (char *midifile, BOOL restart)
@@ -1036,7 +1816,7 @@ BOOL OSPlayMusic (char *midifile, BOOL restart)
             result = TRUE;
 
     return result;
-}	/* OSPlayMusic */
+}   /* OSPlayMusic */
 
 /* stop music */
 BOOL OSStopMusic (void)
@@ -1045,4 +1825,4 @@ BOOL OSStopMusic (void)
     if (mciSendString ("close all", NULL, 0, NULL) == 0)
         result = TRUE;
     return result;
-}	/* OSStopMusic */
+}   /* OSStopMusic */
