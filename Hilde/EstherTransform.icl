@@ -134,7 +134,7 @@ where
 	constructorNode :: !Dynamic -> (!Int, !Dynamic)
 	constructorNode (f :: a -> b) = (n + 1, d)
 	where
-		(n, d) = constructorNode (dynamic f (unsafeTypeCast -1) :: b)
+		(n, d) = constructorNode (dynamic f (unsafeTypeCast []) :: b)
 	constructorNode d = (0, d)
 	
 ifEqual :: !a -> Core | TC a & == a

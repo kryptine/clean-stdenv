@@ -109,7 +109,7 @@ where
 				(dict_e ||| dict_r :: Overloaded dict_d d dict_o) 
 					# (d`, env) = solveOverloading (dynamic B e dict_e ||| dict_r :: Overloaded dict_d t dict_o) env
 					-> (Just d`, env)
-				_ -> (raise (InvalidInstance c dyndict), env)
+				_ -> (raise (InvalidInstance c type dyndict), env)
 	where
 		resolveInstance` "TC" (type :: a) env = (Just (dynamicToDynamic type), env)
 		where
@@ -118,9 +118,11 @@ where
 			where
 				toDynamic :: b -> Dynamic | TC b
 				toDynamic x = dynamic x :: b^
-		resolveInstance` n t env = case resolveFilename ("instance " +++ n +++ " " +++ (outermostType t)) env of
+		resolveInstance` n t env = case resolveFilename ("instance " +++ n +++ " " +++ snd (toStringDynamic t)) env of
 			(Just (inst, _), env) -> (Just inst, env)
-			(_, env) -> (Nothing, env)
+			(_, env) -> case resolveFilename ("instance " +++ n +++ " " +++ (outermostType t)) env of
+				(Just (inst, _), env) -> (Just inst, env)
+				(_, env) -> (Nothing, env)
 		where
 			outermostType :: !Dynamic -> String
 			outermostType d = toString (snd (f (typeCodeOfDynamic d)))

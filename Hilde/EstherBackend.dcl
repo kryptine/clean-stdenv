@@ -6,7 +6,7 @@ import EstherParser, StdMaybe
 	= ApplyTypeError !(Dynamic) !(Dynamic)
 	| UnboundVariable !String
 	| InstanceNotFound !String !Dynamic
-	| InvalidInstance !String !Dynamic
+	| InvalidInstance !String !Dynamic !Dynamic
 	| UnsolvableOverloading
 
 :: EstherRuntimeException
