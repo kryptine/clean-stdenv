@@ -192,7 +192,6 @@ void EvalCcRqADDMENUSHORTKEY (CrossCallInfo *pcci)  /* frameptr, cmd, key; no re
     MakeReturn0Cci (pcci);
 }
 
-
 void EvalCcRqITEMENABLE (CrossCallInfo *pcci)	/* parent, HITEM, onoff; no result.  */
 {
 	GtkWidget *menu, *menu_item;
@@ -208,9 +207,20 @@ void EvalCcRqITEMENABLE (CrossCallInfo *pcci)	/* parent, HITEM, onoff; no result
 
 static void find_item_callback(GtkWidget *menu_item, gpointer data)
 {
-        printf("find_item_callback\n");
+    printf("find_item_callback\n");
 	if (GTK_IS_MENU_ITEM(menu_item) && GTK_MENU_ITEM (menu_item)->submenu == ((GtkWidget *) data))
 		*((GtkWidget **) data) = menu_item;
+}
+
+/*  Destroy a menu 'physically' */
+void EvalCcRqDESTROYMENU (CrossCallInfo *pcci)          /* HMENU; no result. */
+{
+    printf("EvalCcRqDESTROYMENU\n");
+
+    /*
+     * This is handled behind-the-scenes by GTK
+     */
+    MakeReturn0Cci (pcci);
 }
 
 /*	Remove a menu logically */
@@ -419,6 +429,7 @@ OS InstallCrossCallMenus (OS ios)
 	AddCrossCallEntry (newTable, CcRqINSERTMENUITEM,     EvalCcRqINSERTMENUITEM);
 	AddCrossCallEntry (newTable, CcRqITEMENABLE,         EvalCcRqITEMENABLE);
 	AddCrossCallEntry (newTable, CcRqDELETEMENU,         EvalCcRqDELETEMENU);
+    AddCrossCallEntry (newTable, CcRqDESTROYMENU,        EvalCcRqDESTROYMENU);
 	AddCrossCallEntry (newTable, CcRqREMOVEMENUITEM,     EvalCcRqREMOVEMENUITEM);
 	AddCrossCallEntry (newTable, CcRqINSERTSEPARATOR,    EvalCcRqINSERTSEPARATOR);
 	AddCrossCallEntry (newTable, CcRqMODIFYMENU,         EvalCcRqMODIFYMENU);

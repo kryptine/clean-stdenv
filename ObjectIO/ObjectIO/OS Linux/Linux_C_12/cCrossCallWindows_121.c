@@ -526,7 +526,7 @@ static gint client_expose_handler(GtkWidget *widget, GdkEventExpose *event, gpoi
 		(int) GDK_DRAWABLE(event->window));
 
 	return GTK_WIDGET_GET_CLASS(widget)->expose_event(widget,event);
-};
+}
 
 static void sw_focus_out_handler(GtkWidget *widget, GdkEventFocus *event, gpointer user_data)
 {
@@ -559,8 +559,10 @@ static gboolean sw_button_press_handler(GtkWidget *widget, GdkEventButton *event
 			SendMessage6ToClean (CcWmMOUSE, client, client, BUTTONTRIPLEDOWN, event->x, event->y, GetModifiers());
 			break;
 		}
+        return gtk_true();
 	}
-};
+    return gtk_false();
+}
 
 static gboolean sw_button_release_handler(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
 {
@@ -571,8 +573,10 @@ static gboolean sw_button_release_handler(GtkWidget *widget, GdkEventButton *eve
 
 		gInMouseDown = FALSE;
 		SendMessage6ToClean (CcWmMOUSE, client, client, BUTTONUP, event->x, event->y, GetModifiers());
+        return gtk_true();
 	}
-};
+    return gtk_false();
+}
 
 static gboolean sw_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 {
@@ -580,24 +584,27 @@ static gboolean sw_motion_notify_handler(GtkWidget *widget, GdkEventMotion *even
 
     printf("sw_motion_notify_handler\n");
 	if (gInMouseDown)
+    {
 		SendMessage6ToClean(CcWmMOUSE, client, client, BUTTONSTILLDOWN, event->x, event->y, GetModifiers());
-	else
+    } else {
 		SendMessage6ToClean (CcWmMOUSE, client, client, BUTTONSTILLUP, event->x, event->y, GetModifiers());
-};
+    }
+    return gtk_true();
+}
 
 static void client_size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data)
 {
 	GtkWidget *sw = GTK_WIDGET(user_data);
     printf("client_size_allocate\n");
 	SendMessage4ToClean (CcWmSIZE, sw, allocation->width, allocation->height, (int)FALSE);
-};
+}
 
 static void client_size_request(GtkWidget *widget, GtkRequisition *requisition, gpointer user_data)
 {
     printf("client_size_request\n");
 	*requisition = *((GtkRequisition *) user_data);
 	printf("client_size_request(%d,%d)\n", requisition->width, requisition->height);
-};
+}
 
 static gboolean client_delete_handler(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
@@ -612,7 +619,7 @@ static void compute_height(GtkWidget *widget, gpointer data)
     printf("compute_height\n");
 	gtk_widget_size_request(widget,&requisition);
 	*((int *) data) += requisition.height;
-};
+}
 
 /*	Create a SDI document window. */
 void EvalCcRqCREATESDIDOCWINDOW (CrossCallInfo *pcci)	/* textptr, frameptr, packed pos, w,h, flags; client ptr result. */
@@ -1214,11 +1221,16 @@ void EvalCcRqSETSCROLLRANGE (CrossCallInfo *pcci)	/* hwnd, iBar, min, max, redra
         adj = gtk_range_get_adjustment(GTK_RANGE(widget));
     }
 
-	adj->lower = min;
-	adj->upper = max;
-    adj->step_increment = 1;
-    adj->page_increment = (int)((max - min) / 10);
-	gtk_adjustment_changed(adj);
+    if (adj)
+    {
+        adj->lower = min;
+        adj->upper = max;
+        adj->step_increment = 1;
+        adj->page_increment = (int)((max - min) / 10);
+        gtk_adjustment_changed(adj);
+    } else {
+        printf("No adjustment to change.\n");
+    }
 
 	MakeReturn0Cci (pcci);
 }
@@ -1471,7 +1483,7 @@ static gboolean widget_focus_in_handler(GtkWidget *widget, GdkEventFocus *event,
     printf("widget_focus_in_handler\n");
 	GTK_WIDGET_GET_CLASS(widget)->focus_in_event(widget, event);
 	SendMessage2ToClean (CcWmSETFOCUS, GetControlParent(my_widget), my_widget);
-	return gtk_false();
+	return gtk_true();
 }
 
 static gboolean widget_focus_out_handler(GtkWidget *widget, GdkEventFocus *event, gpointer user_data)
@@ -1490,7 +1502,7 @@ static gboolean widget_focus_out_handler(GtkWidget *widget, GdkEventFocus *event
 	}
 
 	SendMessage2ToClean (CcWmKILLFOCUS, parent, my_widget);
-	return gtk_false();
+	return gtk_true();
 }
 
 static gboolean widget_key_press_handler(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
@@ -1524,7 +1536,7 @@ static gboolean widget_key_press_handler(GtkWidget *widget, GdkEventKey *event, 
 		gInKey = TRUE;
 	}
 
-	return gtk_false();
+	return gtk_true();
 }
 
 static gboolean widget_key_release_handler(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
@@ -1544,7 +1556,7 @@ static gboolean widget_key_release_handler(GtkWidget *widget, GdkEventKey *event
 		gCurChar = 0;
 	}
 
-	return gtk_false();
+	return gtk_true();
 }
 
 static gboolean widget_button_press_handler(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
@@ -1571,7 +1583,9 @@ static gboolean widget_button_press_handler(GtkWidget *widget, GdkEventButton *e
 			SendMessage6ToClean (CcWmMOUSE, parent, widget, BUTTONTRIPLEDOWN, event->x, event->y, GetModifiers());
 			break;
 		}
+        return gtk_true();
 	}
+    return gtk_false();
 }
 
 static gboolean widget_button_release_handler(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
@@ -1583,7 +1597,10 @@ static gboolean widget_button_release_handler(GtkWidget *widget, GdkEventButton 
 
 		gInMouseDown = FALSE;
 		SendMessage6ToClean (CcWmMOUSE, parent, widget, BUTTONUP, event->x, event->y, GetModifiers());
+        return gtk_true();
 	}
+    
+    return gtk_false();
 }
 
 static gboolean widget_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
@@ -1592,9 +1609,13 @@ static gboolean widget_motion_notify_handler(GtkWidget *widget, GdkEventMotion *
 
     printf("widget_motion_notify_handler\n");
 	if (gInMouseDown)
+    {
 		SendMessage6ToClean(CcWmMOUSE, parent, widget, BUTTONSTILLDOWN, event->x, event->y, GetModifiers());
-	else
+    } else {
 		SendMessage6ToClean (CcWmMOUSE, parent, widget, BUTTONSTILLUP, event->x, event->y, GetModifiers());
+    }
+    
+    return gtk_true();
 }
 
 /*	Create compound controls (window in window) */
@@ -1711,7 +1732,8 @@ static void scrollbar_value_changed(GtkRange *range, gpointer user_data)
 /*	Create scrollbars. */
 void EvalCcRqCREATESCROLLBAR (CrossCallInfo *pcci)	/* hwnd, x,y,w,h bool; HWND result. */
 {
-	int x, y, w, h;
+	gint x, y, w, h;
+    gint *val;
 	GtkWidget *scroll;
 	GtkWidget *parent;
 	gboolean ishorizontal;
@@ -1732,7 +1754,7 @@ void EvalCcRqCREATESCROLLBAR (CrossCallInfo *pcci)	/* hwnd, x,y,w,h bool; HWND r
     }
 
 	g_signal_connect(GTK_OBJECT(scroll), SCROLL_VALUE_CHANGED, G_CALLBACK(scrollbar_value_changed), NULL);
-    gint *val = g_new(gint,1);
+    val = g_new(gint,1);
 	gtk_widget_set_size_request(scroll, w, h);
 	gtk_fixed_put(GetFixed(parent), scroll, x, y);
     *val = 0;
@@ -1850,7 +1872,7 @@ static gint custom_expose_handler(GtkWidget *widget, GdkEventExpose *event, gpoi
 void EvalCcRqCREATECUSTOM (CrossCallInfo *pcci)	/* hwnd, x,y,w,h; HWND result. */
 {
 	GtkWidget *ctrl, *parent;
-	int x, y, w, h;
+	gint x, y, w, h;
 
     printf("EvalCcRqCREATECUSTOM\n");
 	parent	= GTK_WIDGET(pcci->p1);
@@ -2063,12 +2085,16 @@ void EvalCcRqSHOWCONTROL (CrossCallInfo *pcci)	// hwnd, bool; no result.
     printf("EvalCcRqSHOWCONTROL\n");
 	control = GTK_WIDGET(pcci->p1);
     printf("Control: %ld\n", control);
-	show    = (gboolean) pcci->p2;
 
-	if (!show)
-		gtk_widget_hide(control);
-	else
-		gtk_widget_show(control);
+    if (control)
+    {
+	    show    = (gboolean) pcci->p2;
+
+       	if (!show)
+	        gtk_widget_hide(control);
+       	else
+	        gtk_widget_show(control);
+    }
 
 	MakeReturn0Cci (pcci);
 }
@@ -2358,5 +2384,6 @@ OS InstallCrossCallWindows (OS ios)
 int GetUpdateRect(HWND hwnd, RECT updateRect, gboolean ok)
 {
         printf("GetUpdateRect\n");
+        updateRect = NULL;
         return 0;
 }
