@@ -250,11 +250,11 @@ where
 	checkOSZeroTimerEvent maybe_timer osTime osevent osEvents
 		| isJust maybe_zerotimer_start && zerotimer
 			| osTime-zerotimer_start<=zerotimelimit
-				= OSinsertEvents [osevent] osEvents
+				= OSappendEvents [osevent] osEvents
 			// otherwise
 				= osEvents
 		| isNothing maybe_zerotimer_start && zerotimer
-			= OSinsertEvents [createOSZeroTimerEvent osTime] osEvents
+			= OSappendEvents [createOSZeroTimerEvent osTime] osEvents
 		| otherwise
 			= osEvents
 	where

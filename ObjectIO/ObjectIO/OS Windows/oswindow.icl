@@ -332,6 +332,8 @@ where
 								-> (!CrossCallInfo,!u:s,!*OSToolbox)
 	OScreateModalDialogCallback getOSEvents setOSEvents handleOSEvents osEvent s tb
 		# (replyToOS,s)				= handleOSEvents osEvent s
+		| not (isEmpty replyToOS)	// information must be returned to OS
+			= (setReplyInOSEvent replyToOS,s,tb)
 		# (osEvents, s)				= getOSEvents s
 		# (noDelayEvents,osEvents)	= OSisEmptyEvents osEvents
 		| noDelayEvents
