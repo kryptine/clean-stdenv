@@ -7,6 +7,8 @@ implementation module StdDebug;
 
 import StdClass,StdFile,StdMisc;
 
+from StdString import instance toString	{#Char},instance toString Int;
+
 non_strict_abort :: !{#Char} -> .a;
 non_strict_abort a = code  {
 	.d 1 0
