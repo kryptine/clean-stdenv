@@ -98,7 +98,7 @@ handleKeyboardFunction wPtr cNr cPtr keyState keyCode macCode modifiers info wsH
 		# (wids,wsH)			= getWindowStateHandleWIDS wsH
 		# deviceevent			= Just (WindowKeyboardAction {wkWIDS=wids,wkKeyboardState=key})
 		= (deviceevent,wsH,pState)
-	# (found,ok,whItems,pState)	= toolBoxFun (okControlsKeyboard cNr wPtr key keyCode info whItems) pState
+	# (found,ok,whItems,pState)	= toolBoxFun (okControlsKeyboard whItems cNr wPtr key keyCode info zero) pState
 	# wsH						= {wsH & wshHandle = Just {wlsH & wlsHandle = {wH & whItems = whItems}}}
 	| not found || not ok
 		# pState				= trace_n "control_keyboard: not found or ok" pState
@@ -123,60 +123,58 @@ where
 handleKeyboardFunction wPtr cNr cPtr keyState keyCode macCode modifiers info wsH=:{wshHandle=Nothing} pState
 	= abort "handleKeyboardFunction: unexpected placeholder"
 
-//import ioutil
-
-okControlsKeyboard :: !Int !OSWindowPtr !KeyboardState !Char !(!Int,!Int) !*[*WElementHandle .a .b] !*OSToolbox
+okControlsKeyboard :: !*[*WElementHandle .a .b] !Int !OSWindowPtr !KeyboardState !Char !(!Int,!Int) !Point2 !*OSToolbox
 	-> *(.Bool,Bool,*[*WElementHandle .a .b],!*OSToolbox);
-okControlsKeyboard focusNr wPtr key keyCode info [] tb
+okControlsKeyboard [] focusNr wPtr key keyCode info parent_pos tb
 	= (False,False,[],tb)
-okControlsKeyboard focusNr wPtr key keyCode info [itemH:itemHs] tb
-	# (found,ok,itemH,tb)	= okControlKeyboard focusNr wPtr key keyCode itemH tb
+okControlsKeyboard [itemH:itemHs] focusNr wPtr key keyCode info parent_pos tb
+	# (found,ok,itemH,tb)	= okControlKeyboard itemH focusNr wPtr key keyCode parent_pos tb
 	| found
 		= (found,ok,[itemH:itemHs],tb)
-	# (found,ok,itemHs,tb)	= okControlsKeyboard focusNr wPtr key keyCode info itemHs tb
+	# (found,ok,itemHs,tb)	= okControlsKeyboard itemHs focusNr wPtr key keyCode info parent_pos tb
 	= (found,ok,[itemH:itemHs],tb)
 where
-	okControlKeyboard :: !Int !OSWindowPtr KeyboardState Char !*(WElementHandle .a .b) !*OSToolbox -> *(.Bool,Bool,*WElementHandle .a .b,!*OSToolbox);
-	okControlKeyboard focusNr wPtr key keyCode (WItemHandle itemH=:{wItemNr,wItemPtr,wItemKind,wItemSelect,wItemAtts,wItemInfo,wItems,wItemShow}) tb
+	okControlKeyboard :: !*(WElementHandle .a .b) !Int !OSWindowPtr KeyboardState Char !Point2 !*OSToolbox
+						-> *(.Bool,Bool,*WElementHandle .a .b,!*OSToolbox);
+	okControlKeyboard (WItemHandle itemH=:{wItemNr,wItemPtr,wItemKind,wItemSelect,wItemAtts,wItemInfo,wItems,wItemShow,wItemPos}) focusNr wPtr key keyCode parent_pos tb
 		| focusNr <> wItemNr
 			| not wItemShow || not wItemSelect
 				= (False,False,WItemHandle itemH,tb)
-			# (found,ok,wItems,tb)	= okControlsKeyboard focusNr wPtr key keyCode info wItems tb
+			# new_parent_pos = case wItemKind of
+								IsCompoundControl -> movePoint wItemPos parent_pos
+								IsLayoutControl -> movePoint wItemPos parent_pos
+								_ -> parent_pos
+			# (found,ok,wItems,tb)	= okControlsKeyboard wItems focusNr wPtr key keyCode info new_parent_pos tb
 			= (found,ok,WItemHandle {itemH & wItems = wItems},tb)
 		| wItemKind == IsEditControl && wItemShow && wItemSelect
-			# tb = trace_n "edit control keyboard" tb
 			| getKeyboardStateKeyState key == KeyUp			// willen wel doorgeven aan keyboardfun???
-				#! tb = trace_n ("okControlKeyboard: key up") tb
 				= (True,okControlKeyboardAtt,WItemHandle itemH,tb)
 			| (isSpecialKey key) && (not (validEditControlInput keyCode))
-				#! tb = trace_n ("okControlKeyboard: not ok key") tb
 				= (True,okControlKeyboardAtt,WItemHandle itemH,tb)
-			# clipRect		= posSizeToRect itemH.wItemPos itemH.wItemSize
+			# item_pos = movePoint wItemPos parent_pos
+			# clipRect		= posSizeToRect item_pos itemH.wItemSize
 			# (string,tb)	= editControlKeyboardFunction wPtr clipRect wItemPtr keyCode tb
 			# editInfo		= getWItemEditInfo wItemInfo
 			# editInfo		= {editInfo & editInfoText = string}
 			# itemH			= {itemH & wItemInfo = EditInfo editInfo}
-			#! tb = trace_n ("okControlKeyboard: ok edit") tb
 			= (True,okControlKeyboardAtt,WItemHandle itemH,tb)
 		| wItemKind == IsPopUpControl && wItemShow && wItemSelect && isEditable
-			# tb = trace_n "popup control keyboard" tb
 			| getKeyboardStateKeyState key == KeyUp			// willen wel doorgeven aan keyboardfun???
 				= (True,okControlKeyboardAtt,WItemHandle itemH,tb)
 			| (isSpecialKey key) && (not (validEditControlInput keyCode))
-				= trace_n ("okControlKeyboard",isSpecialKey key,keyCode) (True,okControlKeyboardAtt,WItemHandle itemH,tb)
+				= (True,okControlKeyboardAtt,WItemHandle itemH,tb)
 			# popupInfo		= getWItemPopUpInfo wItemInfo
 			# editInfo		= fromJust popupInfo.popUpInfoEdit
 			# editPtr		= editInfo.popUpEditPtr
-			# clipRect		= posSizeToRect itemH.wItemPos itemH.wItemSize
+			# item_pos = movePoint wItemPos parent_pos
+			# clipRect		= posSizeToRect item_pos itemH.wItemSize
 			# (string,tb)	= comboControlKeyboardFunction wPtr clipRect editPtr keyCode tb
 			# editInfo		= {editInfo & popUpEditText = string}
 			# popupInfo		= {popupInfo & popUpInfoEdit = Just editInfo}
 			# itemH			= {itemH & wItemInfo = PopUpInfo popupInfo}
 			# tb				= SetCtlValue wItemPtr 0 tb	// set popup menu to entry 0...
-			# tb = trace_n ("okControlKeyboard",string,okControlKeyboardAtt,keyCode) tb
 			= (True,okControlKeyboardAtt,WItemHandle itemH,tb)
 		| wItemShow && wItemSelect && isEditable
-			# tb = trace_n ("generic control keyboard",key,filter key,selectState,okControlKeyboardAtt) tb
 			| getKeyboardStateKeyState key == KeyUp			// willen wel doorgeven aan keyboardfun???
 				= (True,okControlKeyboardAtt,WItemHandle itemH,tb)
 //			| (isSpecialKey key) && (not (validEditControlInput keyCode))
@@ -190,17 +188,17 @@ where
 //			# popupInfo		= {popupInfo & popUpInfoEdit = Just editInfo}
 //			# itemH			= {itemH & wItemInfo = PopUpInfo popupInfo}
 			= (True,okControlKeyboardAtt,WItemHandle itemH,tb)
-		#! tb = trace_n ("okControlKeyboard: ok not edit "+++toString (wItemKind,wItemShow,wItemSelect)) tb
 		= (True,okControlKeyboardAtt,WItemHandle itemH,tb)
 	where
 		isEditable				= contains isControlKeyboard wItemAtts
-	
 		(filter,selectState,_)
 					= getControlKeyboardAtt (snd (cselect isControlKeyboard (ControlKeyboard (const False) Unable undef) wItemAtts))
 		okControlKeyboardAtt
 					= filter key && selectState == Able
+
 		isSpecialKey (SpecialKey _ _ _) = True
 		isSpecialKey _ = False
+
 		validEditControlInput key	// up/down/enter eigenlijk alleen als multiline edit???
 			| key == '\036'  = True // arrows
 			| key == '\037'  = True
@@ -210,6 +208,7 @@ where
 	//		| key == '\033'  = True // clear
 			| key == '\177'  = True // del
 			= False
+
 		comboControlKeyboardFunction wPtr clipRect hTE keyCode tb
 //			# tb			= appClipport wPtr clipRect (TEKey keyCode hTE) tb
 			# tb			= appClipport wPtr clipRect handleKey tb
@@ -219,6 +218,7 @@ where
 			handleKey tb
 				# (part,tb) = HandleControlKey hTE (getMacCode mess) (mess bitand 255) mods tb
 				= trace_n` ("HandlePopupKey",hTE,part,mods) tb
+
 		editControlKeyboardFunction wPtr clipRect hTE keyCode tb
 //			# tb			= appClipport wPtr clipRect (TEKey keyCode hTE) tb
 			# tb			= appClipport wPtr clipRect handleKey tb
@@ -229,14 +229,14 @@ where
 				# (part,tb) = HandleControlKey hTE (getMacCode mess) (mess bitand 255) mods tb
 				= trace_n` ("HandleEditKey",hTE,part,mods) tb
 	
-	okControlKeyboard focusNr wPtr key keyCode (WListLSHandle itemHs) tb
-		# (found,ok,itemHs,tb)	= okControlsKeyboard focusNr wPtr key keyCode info itemHs tb
+	okControlKeyboard (WListLSHandle itemHs) focusNr wPtr key keyCode parent_pos tb
+		# (found,ok,itemHs,tb)	= okControlsKeyboard itemHs focusNr wPtr key keyCode info parent_pos tb
 		= (found,ok,WListLSHandle itemHs,tb)
-	okControlKeyboard focusNr wPtr key keyCode (WChangeLSHandle wChH=:{wChangeItems}) tb
-		# (found,ok,wChangeItems,tb)	= okControlsKeyboard focusNr wPtr key keyCode info wChangeItems tb
+	okControlKeyboard (WChangeLSHandle wChH=:{wChangeItems}) focusNr wPtr key keyCode parent_pos tb
+		# (found,ok,wChangeItems,tb)	= okControlsKeyboard wChangeItems focusNr wPtr key keyCode info parent_pos tb
 		= (found,ok,WChangeLSHandle {wChH & wChangeItems = wChangeItems},tb)
-	okControlKeyboard focusNr wPtr key keyCode (WExtendLSHandle wExH=:{wExtendItems}) tb
-		# (found,ok,wExtendItems,tb)	= okControlsKeyboard focusNr wPtr key keyCode info wExtendItems tb
+	okControlKeyboard (WExtendLSHandle wExH=:{wExtendItems}) focusNr wPtr key keyCode parent_pos tb
+		# (found,ok,wExtendItems,tb)	= okControlsKeyboard wExtendItems focusNr wPtr key keyCode info parent_pos tb
 		= (found,ok,WExtendLSHandle {wExH & wExtendItems = wExtendItems},tb)
 
 //wil InputTrack tiepe uit iostate halen en in os-laag stoppen...lastig wordt op veel meer plaatsen gebruikt...
