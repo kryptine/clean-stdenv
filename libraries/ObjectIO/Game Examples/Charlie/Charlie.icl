@@ -1,22 +1,34 @@
 module Charlie
 
-/*  Charlie the Duck - (C) Copyright 1996-99, by Mike Wiering, Nijmegen.  */
-
 /*
-    COPYRIGHT NOTICE
-
-    GRAPHICS BY MIKE WIERING, COPYRIGHT 1996-99, ALL RIGHTS RESERVED.
-
-    This game is meant only as a demonstration for the Clean Game Library.
-    You may create new games based on this source code, however DO NOT use
-    any of the graphics, instead create your own.
-    The graphics used in this game are from CHARLIE THE DUCK and CHARLIE II
-    (a new game, still in development).
+    CHARLIE THE DUCK - (C) COPYRIGHT 1996-2000, BY MIKE WIERING, ALL RIGHTS RESERVED.
+    This material may be used for educational purposes only.
+    
+        Mike Wiering (mike.wiering@cs.kun.nl)
 */
 
-import StdProcess
-import StdGameDef, StdGame, StdGSt
+/*
+    To edit the the first level (in DOS):
+    
+        cd levels
+        edlev L1
+        conv L1 Level1
+
+    To edit the main character:
+    
+        cd objects
+        edlev CH
+        conv CH MainChar
+    
+    Use make.bat to convert all graphics.
+*/
+
+import StdGameDef
+import StdGame
+import StdGSt
 import GameFunctions
+import StdProcess
+import Random
 
 /* music notes */
 import notes
@@ -43,19 +55,19 @@ import INFRONT
 DEFAULT_LIVES :== 3
 
 :: GameState
-   = { curlevel    :: Int
-     , maxlevel    :: Int
-     , titlescreen :: Bool
-     , statusline  :: Bool
-     , exitcode    :: Int
-     , lives       :: Int
-     , coins       :: Int
-     , diamonds    :: Int
-     , score       :: Int
-     , quit        :: Bool
-     , gameover    :: Bool
+   = { curlevel    :: !Int
+     , maxlevel    :: !Int
+     , titlescreen :: !Bool
+     , statusline  :: !Bool
+     , exitcode    :: !Int
+     , lives       :: !Int
+     , coins       :: !Int
+     , diamonds    :: !Int
+     , score       :: !Int
+     , quit        :: !Bool
+     , gameover    :: !Bool
+     , randseed    :: !RandomSeed
      }
-
 
 initialGameState = { curlevel = 0
                    , maxlevel = 3
@@ -68,6 +80,7 @@ initialGameState = { curlevel = 0
                    , score = 0
                    , quit = False
                    , gameover = False
+                   , randseed = nullRandomSeed
                    }
 
 EC_NONE      :==  0
@@ -76,15 +89,13 @@ EC_FAILURE   :==  2
 EC_QUIT      :==  3
 
 
-/* ---------- main program: load game definition and start the game! ---------- */
+/* ---------- main ---------- */
 
+Start :: *World -> *World
 Start world
-    = startIO SDI 0 init [ProcessClose closeProcess] world
-where
-    init ps
-        #   (_, ps) = openGame initialGameState DuckGame [ColorDepth 16] ps
-                             /* use default mode: 230x240 */
-        =   closeProcess ps
+    # (randomSeed, world) = getNewRandomSeed world
+    # initialGameState = {initialGameState & randseed = randomSeed}
+    = startGame DuckGame initialGameState [ScreenSize {w = 320, h = 240}, ColorDepth 16] world 
 
 
 /* ---------- the complete game definition ---------- */
@@ -97,9 +108,8 @@ DuckGame =
                ]
     , quitlevel = accGSt QuitFunction
     , nextlevel = accGSt NextLevelFunction
-    , statistics = accGSt Statistics
+    , textitems = accGSt Statistics
     }
-
 
 /* if the quit function returns true, the game engine quit the level */
 
@@ -118,6 +128,9 @@ NextLevelFunction gst =: {curlevel, maxlevel, titlescreen, exitcode, lives, game
         = (next, {gst & titlescreen = False
                       , statusline = True
                       , lives = DEFAULT_LIVES
+                      , coins = 0
+                      , diamonds = 0
+                      , score = 0
                       , curlevel = next})
     | exitcode == EC_FAILURE
          | lives > 0
@@ -130,6 +143,9 @@ where
     title = (1, {gst & titlescreen = True
                      , statusline = False
                      , gameover = False
+                     , coins = 0
+                     , diamonds = 0
+                     , score = 0
                      , curlevel = 1})
     nextlevel = if (curlevel + 1 > maxlevel)
                      title
@@ -194,7 +210,7 @@ BND_KILL           :==  (1 <<  4)
 BND_WATER          :==  (1 <<  5)
 BND_ENDING         :==  (1 <<  6)
 BND_STAT           :==  (1 <<  7)
-/* predefined bounds
+/* predefined bounds:
 BND_MAP_CODES      :==  (1 << 30)
 BND_STATIC_BOUNDS  :==  (1 << 31)
 */
@@ -244,8 +260,6 @@ OBJ_FLASH            :== 0x102
 OBJ_STAT             :== 0x110
 
 
-
-
 GameObjectList = [ AutoInitObject
                  , MainCharObject
                  , StaticCoinObject
@@ -292,18 +306,18 @@ CloudObject
 where
     size    = {w = 40, h = 24}
 
-    newinit size state subtype _ time gs
-        # pos = case subtype of
+    newinit size state subcode _ time gs
+        # pos = case subcode of
                    1 -> { x =  36, y = 50 }
                    2 -> { x =  88, y = 28 }
                    3 -> { x = 240, y = 43 }
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
         # objrec = { objrec
                    & options.static             = True
                    , options.ignorelevelbounds  = True
                    , layer                      = AtLayer LYR_BACKGROUND
                    }
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
 
 
 /* ---------- palm front object ---------- */
@@ -324,14 +338,14 @@ PalmFrontObject
 where
     size    = {w = 20, h = 32}
 
-    newinit size state subtype pos time gs
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
+    newinit size state subcode pos time gs
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
         # objrec = { objrec
                    & layer          = AtLayer LYR_INFRONT
                    , offset         = {x = 0, y = ~H}
-                   , currentsprite  = (subtype + 1)
+                   , currentsprite  = (subcode + 1)
                    }
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
 
 
 BlockInFrontObject objtype spr
@@ -344,12 +358,12 @@ BlockInFrontObject objtype spr
 where
     size    = DEFAULT_SIZE
 
-    newinit size state subtype pos time gs
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
+    newinit size state subcode pos time gs
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
         # objrec = { objrec
                    & layer          = AtLayer LYR_INFRONT
                    }
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
 
 
 /* ---------- coins and diamonds ---------- */
@@ -364,8 +378,8 @@ FallingDiamondObject = FallingGameItem OBJ_FALLING_DIAMOND DiamondSprite
 HeartObject          = FallingGameItem OBJ_HEART           HeartSprite
 LifeObject           = FallingGameItem OBJ_LIFE            LifeSprite
 
-FallingGameItem objecttype sprite
-    # obj = StaticGameItem objecttype sprite
+FallingGameItem objectcode sprite
+    # obj = StaticGameItem objectcode sprite
     # obj = { obj
             & init    = newinit size Void
             }
@@ -373,10 +387,10 @@ FallingGameItem objecttype sprite
 where
     size    = DEFAULT_SIZE
 
-    newinit size state subtype pos time gs
-        # pos = {pos & x = if (subtype == 1) (pos.x + W / 2) (pos.x)}
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
-        # xv = case subtype of
+    newinit size state subcode pos time gs
+        # pos = {pos & x = if (subcode == 1) (pos.x + W / 2) (pos.x)}
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
+        # xv = case subcode of
             11        -> -1.6
             12        -> -0.8
             14        ->  0.8
@@ -393,10 +407,10 @@ where
                    , collidebounds   = BND_MAIN_CHARACTER
                    , forgetdistance  = {x = 8, y = 8}
                    }
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
 
-StaticGameItem objecttype sprite
-    # obj = defaultGameObject objecttype size Void
+StaticGameItem objectcode sprite
+    # obj = defaultGameObject objectcode size Void
     # obj = { obj
             & sprites   = [sprite, GlitterSprite 25]
             , init      = newinit size Void
@@ -407,9 +421,9 @@ StaticGameItem objecttype sprite
 where
     size    = DEFAULT_SIZE
 
-    newinit size state subtype pos time gs
-        # pos = {pos & x = if (subtype == 1) (pos.x + W / 2) (pos.x)}
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
+    newinit size state subcode pos time gs
+        # pos = {pos & x = if (subcode == 1) (pos.x + W / 2) (pos.x)}
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
         # objrec = { objrec
                    & options.ignorelevelbounds  = True
                    , ownbounds                  = BND_POWER_UP
@@ -417,19 +431,19 @@ where
                    , collidebounds              = BND_MAIN_CHARACTER
                    , layer                      = AtLayer LYR_FOREGROUND
                    }
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
 
-    newcollide bnds objtype objrec objst=:{objectstate=st, objectrec=or, gamestate=gs}
+    newcollide bnds objtype objrec objst=:{st=st, or=or, gs=gs}
         | objtype == OBJ_MAIN_CHAR
-            # (points, gs) = ItemScoreAndSound objecttype gs
+            # (points, gs) = ItemScoreAndSound objectcode gs
             # gs = addscore points gs
-            = {objst & objectrec={or & currentsprite         = SPR_GLITTER
+            = {objst & or={or & currentsprite         = SPR_GLITTER
                                      , options.removemapcode = True
                                      , layer                 = AtLayer LYR_INFRONT
                                      , ownbounds             = 0
                                      , collidebounds         = 0
                                      },
-                       gamestate=gs}
+                       gs=gs}
         = objst
 
 ItemScoreAndSound ot gs
@@ -465,8 +479,8 @@ OBJ_HEART            :==  0x14
 OBJ_LIFE             :==  0x15
 */
 
-killobject objst=:{objectrec=or}
-    = {objst & objectrec={or & active = False}}
+killobject objst=:{or=or}
+    = {objst & or={or & active = False}}
 
 
 /* ---------- crates ---------- */
@@ -490,8 +504,8 @@ Crate visible
 where
     size    = DEFAULT_SIZE
 
-    newinit size state subtype pos time gs
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
+    newinit size state subcode pos time gs
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
         # objrec = { objrec
                    & layer                      = AtLayer LYR_FOREGROUND
                    , ownbounds                  = if visible
@@ -500,9 +514,9 @@ where
                    , collidebounds              = BND_MAIN_CHARACTER
                    , currentsprite              = if visible 1 0
                    }
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
 
-    newcollide bnds othertype otherobjrec objst=:{objectstate=st, objectrec=or, gamestate=gs}
+    newcollide bnds othertype otherobjrec objst=:{st=st, or=or, gs=gs}
         | othertype == OBJ_MAIN_CHAR && bnds.bottom
             # pos1 = or.pos
             # pos2 = {pos1 & y = pos1.y + 8}
@@ -517,7 +531,7 @@ where
             # pos2 = {pos2 & x = pos2.x + 4}
             # (_, gs) = createNewGameObject OBJ_CRATE_PART 6 pos2 gs
             # or = {or & options.removemapcode = True, active = False}
-            # obj = case or.subtype of
+            # obj = case or.subcode of
                 0  ->  if visible OBJ_FALLING_COIN OBJ_STATIC_COIN
                 1  ->  if visible OBJ_FALLING_DIAMOND OBJ_STATIC_DIAMOND
                 2  ->  OBJ_HEART
@@ -525,13 +539,13 @@ where
                 4  ->  OBJ_FALLING_COIN
                 5  ->  OBJ_FALLING_DIAMOND
             # (_, gs) = createNewGameObject obj 0 or.pos gs
-            | or.subtype == 4 || or.subtype == 5
+            | or.subcode == 4 || or.subcode == 5
                 # (_, gs) = createNewGameObject obj 11 or.pos gs
                 # (_, gs) = createNewGameObject obj 15 or.pos gs
                 # (_, gs) = createNewGameObject obj 12 or.pos gs
                 # (_, gs) = createNewGameObject obj 14 or.pos gs
-                = {objst & objectrec=or, gamestate=gs}
-            = {objst & objectrec=or, gamestate=gs}
+                = {objst & or=or, gs=gs}
+            = {objst & or=or, gs=gs}
         = objst
 
 CratePartObject
@@ -544,9 +558,9 @@ CratePartObject
 where
     size    = {w = 12, h = 8}
 
-    newinit size state subtype pos time gs
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
-        # ((xv, yv), gs) = case subtype of
+    newinit size state subcode pos time gs
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
+        # ((xv, yv), gs) = case subcode of
                             1 -> rnd (-1.0, -3.0) gs
                             2 -> rnd ( 0.0, -3.2) gs
                             3 -> rnd ( 1.0, -3.0) gs
@@ -557,7 +571,7 @@ where
                             , speed          = {rx = xv, ry = yv}
                             , forgetdistance = {x = 1, y = 1}
                    }
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
     where
         rnd (x, y) gs
             # (r1, gs) = RRnd 1.0 gs
@@ -578,12 +592,12 @@ FlashObject
 where
     size    = {w = 24, h = 20}
 
-    newinit size state subtype pos time gs
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
+    newinit size state subcode pos time gs
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
         # objrec = { objrec
                    & layer         = AtLayer LYR_INFRONT
                    }
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
 
 
 /* ---------- bounce block ---------- */
@@ -600,32 +614,32 @@ BounceBlockObject
 where
     size    = DEFAULT_SIZE
 
-    newinit size state subtype pos time gs
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
+    newinit size state subcode pos time gs
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
         # objrec = { objrec
                    & layer                      = AtLayer LYR_FOREGROUND
-                   , speed                      = {rx = 0.0-toReal subtype, ry = 0.0}
+                   , speed                      = {rx = 0.0-toReal subcode, ry = 0.0}
                    , bounce                     = {fvx = Factor 1.0, fvy = Value 0.0}
-                   , forgetdistance             = {x = 5 + 15 * subtype, y = 5}
+                   , forgetdistance             = {x = 5 + 15 * subcode, y = 5}
                    , ownbounds                  = BND_STATIC_BOUNDS + BND_BLOCKS
                    , collidebounds              = BND_MAIN_CHARACTER
                    , bouncebounds               = BND_STATIC_BOUNDS
                    }
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
 
-    newcollide bnds othertype otherobjrec objst=:{objectstate=st, objectrec=or, gamestate=gs}
+    newcollide bnds othertype otherobjrec objst=:{st=st, or=or, gs=gs}
         | othertype == OBJ_MAIN_CHAR
             | bnds.top || bnds.bottom
-                = {objst & objectrec={or & offset.y = if bnds.top 4 (-4)
+                = {objst & or={or & offset.y = if bnds.top 4 (-4)
                                          , currentsprite = 2}}
             = objst
         = objst
 
-    newanimation objst=:{objectstate=st, objectrec=or, gamestate=gs}
+    newanimation objst=:{st=st, or=or, gs=gs}
         | or.offset.y == 0
-            = {objst & objectrec={or & currentsprite = 1}}
+            = {objst & or={or & currentsprite = 1}}
         # or = {or & offset.y = 0-decr or.offset.y}
-        = {objst & objectrec=or}
+        = {objst & or=or}
     where
     	decr :: !Int -> Int
         decr x
@@ -645,14 +659,14 @@ WaterObject
 where
     size    = {w = 20, h = 8}
 
-    newinit size state subtype pos time gs
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
+    newinit size state subcode pos time gs
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
         # objrec = { objrec
                    & layer         = AtLayer LYR_INFRONT
                    , ownbounds     = BND_WATER
                    , offset        = {x = 0, y = -11}
                    }
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
 
 Splash :: !Point2 !*(GSt .gs) -> (!GRESULT, !*GSt .gs)
 Splash pos gs
@@ -663,7 +677,7 @@ Splash pos gs
     = (GR_OK, gs)
 
 /*
-    Splash subtype:
+    Splash subcode:
        1: left wave
        2: right wave
        3: splash
@@ -680,18 +694,18 @@ SplashObject
 where
     size    = {w = 20, h = 14}
 
-    newinit size state subtype pos time gs
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
+    newinit size state subcode pos time gs
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
         # objrec = { objrec
                    & layer = AtLayer LYR_INFRONT
-                   , currentsprite = subtype
-                   , offset = case subtype of
+                   , currentsprite = subcode
+                   , offset = case subcode of
                                 1 -> {x = -20, y = -12}
                                 2 -> {x =  20, y = -12}
                                 3 -> {x =   0, y =  12}
-                   , displayoptions.mirrorleftright = subtype == 1
+                   , displayoptions.mirrorleftright = subcode == 1
                    }
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
 
 
 /* ---------- enemies ---------- */
@@ -707,8 +721,8 @@ EnemyObject
 where
     size    = {w = 20, h = 18}
 
-    newinit size state subtype pos time gs
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
+    newinit size state subcode pos time gs
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
         # objrec = { objrec
                    & offset         = {x = -2, y = -2}
                    , speed          = {rx = -0.5, ry = 0.0}
@@ -720,14 +734,14 @@ where
                    , ownbounds      = BND_ENEMY
                    , bouncebounds   = BND_STATIC_BOUNDS + BND_ENEMY + BND_MAP_CODES
                    , collidebounds  = BND_MAIN_CHARACTER
-                   , currentsprite  = 1 + subtype
+                   , currentsprite  = 1 + subcode
                    , forgetdistance = {x = 6, y = 4}
                    }
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
 
-    newcollide bnds othertype otherobjrec objst=:{objectstate=st, objectrec=or, gamestate=gs}
+    newcollide bnds othertype otherobjrec objst=:{st=st, or=or, gs=gs}
         | othertype == OBJ_MAIN_CHAR && bnds.bottom
-            = {objst & objectrec=kill or}
+            = {objst & or=kill or}
         = objst
 
 kill :: !GameObjectRec -> GameObjectRec
@@ -755,12 +769,12 @@ PinObject
 where
     size    = {w = 20, h = 16}
 
-    newinit size state subtype pos time gs
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
+    newinit size state subcode pos time gs
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
         # objrec = { objrec
                    & ownbounds      = BND_KILL + BND_STATIC_BOUNDS
                    }
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
 
 
 /* ---------- flying enemies ---------- */
@@ -779,8 +793,8 @@ FlyingObject objtype sprlist
 where
     size    = {w = 20, h = 16}
 
-    newinit size state subtype pos time gs
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
+    newinit size state subcode pos time gs
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
         # objrec = { objrec
                    & offset         = {x = 0, y = -3}
                    , speed          = {rx = -0.5, ry = 0.0}
@@ -792,19 +806,19 @@ where
                    , ownbounds      = BND_ENEMY
                    , bouncebounds   = BND_STATIC_BOUNDS + BND_ENEMY + BND_MAP_CODES
                    , collidebounds  = BND_MAIN_CHARACTER
-                   , currentsprite  = 1 + subtype
+                   , currentsprite  = 1 + subcode
                    , forgetdistance = {x = 6, y = 4}
                    , skipmove       = 0
                    }
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
 
-    newcollide bnds othertype otherobjrec objst=:{objectstate=st, objectrec=or, gamestate=gs}
+    newcollide bnds othertype otherobjrec objst=:{st=st, or=or, gs=gs}
         | othertype == OBJ_MAIN_CHAR && bnds.bottom
             # (_, gs) = playSoundSample SND_BEE DefaultVolume PAN_CENTER DEFAULT_FREQUENCY 0 gs
-            = {objst & gamestate=gs,objectrec=kill or}
+            = {objst & gs=gs,or=kill or}
         = objst
 
-    newmove objst=:{objectstate=st, objectrec=or, gamestate=gs}
+    newmove objst=:{st=st, or=or, gs=gs}
         # (turn, gs) = IRnd 30 gs
         # (xadd, gs) = RRnd 0.05 gs
         # (yadd, gs) = RRnd 0.085 gs
@@ -812,7 +826,7 @@ where
         # rxv = (if (turn == 1) (~ or.speed.rx) (or.speed.rx)) + xadd
         # ryv = or.speed.ry + yadd + 0.005
         # or = {or & skipmove = skmv, speed = {rx=rxv, ry=ryv}}
-        = {objst & objectrec=or,gamestate=gs}
+        = {objst & or=or,gs=gs}
 
 
 /* ---------- frog ---------- */
@@ -829,8 +843,8 @@ FrogObject
 where
     size    = {w = 20, h = 20}
 
-    newinit size state subtype pos time gs
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
+    newinit size state subcode pos time gs
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
         # objrec = { objrec
                    & speed          = {rx = -1.0, ry = 0.0}
                    , acceleration   = {rx = 0.0, ry = 1.0 / 16.0}
@@ -844,19 +858,19 @@ where
                    , collidebounds  = BND_MAIN_CHARACTER + BND_WATER
                    , forgetdistance = {x = 8, y = 4}
                    }
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
 
-    newanimation objst=:{objectstate=st, objectrec=or, gamestate=gs}
+    newanimation objst=:{st=st, or=or, gs=gs}
         # or = {or & currentsprite = if (or.speed.ry < (-0.5)) 2 1}
-        = {objst & objectrec=or}
+        = {objst & or=or}
 
-    newcollide bnds othertype otherobjrec objst=:{objectstate=st, objectrec=or, gamestate=gs}
+    newcollide bnds othertype otherobjrec objst=:{st=st, or=or, gs=gs}
         | othertype == OBJ_WATER && bnds.top
             # (_, gs) = Splash {x = or.pos.x, y = or.pos.y + H} gs
-            = {objst & gamestate=gs}
+            = {objst & gs=gs}
         | othertype == OBJ_MAIN_CHAR && bnds.bottom
             # (_, gs) = playSoundSample SND_FROG HighVolume PAN_CENTER DEFAULT_FREQUENCY 0 gs
-            = {objst & objectrec=kill or,gamestate=gs}
+            = {objst & or=kill or,gs=gs}
         = objst
 
 
@@ -876,17 +890,17 @@ EndingObject
 where
     size    = {w = 32, h = 26}
 
-    newinit size state subtype pos time gs
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
+    newinit size state subcode pos time gs
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
         # objrec = { objrec
                    & layer           = AtLayer LYR_FOREGROUND
                    , ownbounds       = BND_ENDING
                    , collidebounds   = BND_MAIN_CHARACTER
                    , offset          = {x = 4, y = 7}
                    }
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
 
-    newcollide bnds othertype otherobjrec objst=:{objectstate=st, objectrec=or, gamestate=gs}
+    newcollide bnds othertype otherobjrec objst=:{st=st, or=or, gs=gs}
         # instr = SND_FLUTE
         # vol   = HighVolume
         # (_, gs) = playSoundSample instr vol PAN_CENTER (getnotefreq 107)  0 gs
@@ -897,18 +911,18 @@ where
         # (_, gs) = playSoundSample instr LowVolume PAN_LEFT  (getnotefreq 104) 49 gs
         # (_, gs) = playSoundSample instr LowVolume PAN_RIGHT (getnotefreq 107) 50 gs
         # (_, gs) = playSoundSample instr vol PAN_CENTER (getnotefreq 112) 51 gs
-        = {objst & objectrec={or & skipmove = 0
+        = {objst & or={or & skipmove = 0
                                  , framecounter = 0
                                  , collidebounds= 0},
-                   gamestate=gs}
+                   gs=gs}
 
-    newmove objst=:{objectstate=st, objectrec=or, gamestate=gs}
+    newmove objst=:{st=st, or=or, gs=gs}
         | or.framecounter > 196
-             = {objst & objectrec={or & skipmove = -1, collidebounds = BND_MAIN_CHARACTER}}
+             = {objst & or={or & skipmove = -1, collidebounds = BND_MAIN_CHARACTER}}
         # or = {or & currentsprite = ((or.currentsprite +
                                          (add or.framecounter)) rem 8) + 1
                    , skipmove = or.framecounter / 50}
-        = {objst & objectrec=or}
+        = {objst & or=or}
     where
         add :: !Int -> Int
         add x
@@ -935,20 +949,20 @@ StatHeartObject
 where
     size    = {w = 12, h = 12}
 
-    newinit size state subtype pos time gs
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
+    newinit size state subcode pos time gs
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
         # objrec = { objrec
                    & options = {objrec.options & static = True}
                    , layer = AtLayer LYR_STATUS
-                   , currentsprite = if (subtype >= ST_X) (subtype - 7) 2
+                   , currentsprite = if (subcode >= ST_X) (subcode - 7) 2
                    , ownbounds = BND_STAT
                    }
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
 
-    newuserevent ev evpar1 evpar2 objst=:{objectstate=st, objectrec=or, gamestate=gs}
-        | ev == EV_HEALTH && or.subtype < 10
-            # or = {or & currentsprite = if (evpar1 < or.subtype) 1 2}
-            = {objst & objectrec=or}
+    newuserevent ev evpar1 evpar2 objst=:{st=st, or=or, gs=gs}
+        | ev == EV_HEALTH && or.subcode < 10
+            # or = {or & currentsprite = if (evpar1 < or.subcode) 1 2}
+            = {objst & or=or}
         = objst
 
 
@@ -966,7 +980,7 @@ AutoInitObject
     = obj
 where
     size = {w = 1, h = 1}
-    newinit size state subtype pos time gs
+    newinit size state subcode pos time gs
         # gs = setexitcode EC_QUIT gs   /* for esc key */
         # (_, gs) = createNewGameObject OBJ_STAT  1       {x = 181, y = STY} gs
         # (_, gs) = createNewGameObject OBJ_STAT  2       {x = 193, y = STY} gs
@@ -982,9 +996,9 @@ where
         # (_, gs) = createNewGameObject OBJ_CLOUD 2 pos gs
         # (_, gs) = createNewGameObject OBJ_CLOUD 3 pos gs
 
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
         # objrec = {objrec & active = False}
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
 
 
 /* ---------- main character ---------- */
@@ -1036,9 +1050,9 @@ where
     maxswimspeed = {maxwalkspeed & rx = 0.5}
     normaloffset = {x = -2, y = -2}
 
-    newinit size state subtype pos time gs
+    newinit size state subcode pos time gs
         # pos = {x = pos.x + W / 2, y = pos.y + H - size.h}
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
         # objrec = { objrec
                    & offset         = normaloffset
                    , acceleration   = {rx = 0.0, ry = 1.0 / 8.0}
@@ -1065,9 +1079,9 @@ where
                          , maxxscrollspeed =   2
                          , maxyscrollspeed =   3
                          } gs
-        = {objectstate=state,objectrec=objrec,gamestate=gs}
+        = {st=state,or=objrec,gs=gs}
 
-    newanimation objstate=:{objectstate=st=:{action = act}, objectrec=or=:{offset = ofs}, gamestate=gs}
+    newanimation objstate=:{st=st=:{action = act}, or=or=:{offset = ofs}, gs=gs}
         # xstuck = ((or.speed.rx == st.lastspeed1.rx) &&
                     (or.speed.rx == st.lastspeed2.rx) &&
                     ((toInt or.speed.rx) == 0)
@@ -1093,21 +1107,21 @@ where
         | act == MC_WALK && oldact == MC_FALL
             # (_, gs) = playSoundSample SND_PLOF LowVolume PAN_CENTER DEFAULT_FREQUENCY 0 gs
             # st = {st & enemynote = 0}
-            = {objstate & objectstate={st & action = act}, objectrec={or & currentsprite = act, offset = ofs}, gamestate=gs}
-        = {objstate & objectstate={st & action = act}, objectrec={or & currentsprite = act, offset = ofs}, gamestate=gs}
+            = {objstate & st={st & action = act}, or={or & currentsprite = act, offset = ofs}, gs=gs}
+        = {objstate & st={st & action = act}, or={or & currentsprite = act, offset = ofs}, gs=gs}
     where
         sp = 1.0 / 4.0
 
-    newkeydown key objst=:{objectstate=st=:{action}, objectrec=or, gamestate=gs}
+    newkeydown key objst=:{st=st=:{action}, or=or, gs=gs}
         | key == GK_LEFT
             # newaction = if (action == MC_IDLE) MC_WALK action
-            = {objst & objectstate = {st & action = newaction},
-                       objectrec   = {or & acceleration.rx = or.acceleration.rx - ac, currentsprite = newaction}
+            = {objst & st = {st & action = newaction},
+                       or   = {or & acceleration.rx = or.acceleration.rx - ac, currentsprite = newaction}
               }
         | key == GK_RIGHT
             # newaction = if (action == MC_IDLE) MC_WALK action
-            = {objst & objectstate = {st & action = newaction},
-                       objectrec   = {or & acceleration.rx = or.acceleration.rx + ac, currentsprite = newaction}
+            = {objst & st = {st & action = newaction},
+                       or   = {or & acceleration.rx = or.acceleration.rx + ac, currentsprite = newaction}
               }
         | key == GK_SPACE
             | isMember action [MC_IDLE, MC_WALK, MC_SWIM]
@@ -1124,10 +1138,10 @@ where
                     # (_, gs) = playSoundSample SND_WATER_JUMP DefaultVolume
                                      PAN_CENTER DEFAULT_FREQUENCY 0 gs
                     # (_, gs) = Splash {x = or.pos.x, y = or.pos.y + 32} gs
-                    = {objectstate=st, objectrec=or, gamestate=gs}
-                = {objectstate=st, objectrec=or, gamestate=gs}
-            = {objectstate=st, objectrec=or, gamestate=gs}
-        | otherwise = {objectstate=st, objectrec=or, gamestate=gs}
+                    = {st=st, or=or, gs=gs}
+                = {st=st, or=or, gs=gs}
+            = {st=st, or=or, gs=gs}
+        | otherwise = {st=st, or=or, gs=gs}
     where
         jumpspeed :: !RealXY -> RealXY
         jumpspeed sp=:{rx, ry} = {rx = rx, ry = ry - 4.35 - abs (rx) / 3.0}
@@ -1137,52 +1151,52 @@ where
                                    new
                                    cur
 
-    newkeyup key objst=:{objectstate=st, objectrec=or, gamestate=gs}
-        | key == GK_LEFT   = {objst & objectrec={or & acceleration.rx = or.acceleration.rx + ac}}
-        | key == GK_RIGHT  = {objst & objectrec={or & acceleration.rx = or.acceleration.rx - ac}}
+    newkeyup key objst=:{st=st, or=or, gs=gs}
+        | key == GK_LEFT   = {objst & or={or & acceleration.rx = or.acceleration.rx + ac}}
+        | key == GK_RIGHT  = {objst & or={or & acceleration.rx = or.acceleration.rx - ac}}
         | otherwise        = objst
 
-    newuserevent ev evpar1 evpar2 objst=:{objectstate=st, objectrec=or, gamestate=gs}
+    newuserevent ev evpar1 evpar2 objst=:{st=st, or=or, gs=gs}
         | ev == EV_QUIT_LEVEL
             # gs = setexitcode evpar1 gs
             # gs = quitlevel gs
-            = {objst & gamestate=gs}
+            = {objst & gs=gs}
         | ev == EV_GAME_OVER
-            = {objst & gamestate=setgameover gs}
+            = {objst & gs=setgameover gs}
         | ev == EV_STOP_BLINKING
-            = {objst & objectrec={or & displayoptions.blink = False}}
+            = {objst & or={or & displayoptions.blink = False}}
         | ev == EV_STOP_MOVING
-            = {objst & objectrec={or & speed = zero, acceleration = zero}}
+            = {objst & or={or & speed = zero, acceleration = zero}}
         = objst
 
-    newcollide bnds othertype otherobjrec objst=:{objectstate=st, objectrec=or, gamestate=gs}
+    newcollide bnds othertype otherobjrec objst=:{st=st, or=or, gs=gs}
         | othertype == OBJ_WATER
             | st.action == MC_SWIM
                 = objst
             # pos = {x = or.pos.x, y = otherobjrec.pos.y}
             # (_, gs) = Splash pos gs
             # (_, gs) = playSoundSample SND_SPLASH DefaultVolume PAN_CENTER DEFAULT_FREQUENCY 0 gs
-            = {objst & objectstate={st & action = MC_SWIM}, 
-                       objectrec  ={or & currentsprite = MC_SWIM
+            = {objst & st={st & action = MC_SWIM}, 
+                       or  ={or & currentsprite = MC_SWIM
                                        , maxspeed = maxswimspeed
                                        , offset = {normaloffset & y = 2} },
-                       gamestate  =gs}
+                       gs  =gs}
         | othertype == OBJ_PIN
             # st = {st & health = 0}
-            = hurt {objst & objectstate=st}
+            = hurt {objst & st=st}
         | othertype == OBJ_BOUNCEBLOCK
             | bnds.top
                 # (_, gs) = playSoundSample SND_WATER_JUMP DefaultVolume PAN_CENTER 70000 0 gs
-                = {objst & objectstate={st & action = MC_JUMP},
-                           objectrec  ={or & speed.ry = ~(abs or.speed.ry) * 2.0 - 5.25,
+                = {objst & st={st & action = MC_JUMP},
+                           or  ={or & speed.ry = ~(abs or.speed.ry) * 2.0 - 5.25,
                                              currentsprite = MC_JUMP},
-                           gamestate  =gs}
+                           gs  =gs}
             | bnds.bottom
                 # (_, gs) = playSoundSample SND_WATER_JUMP DefaultVolume PAN_CENTER 60000 0 gs
-                = {objst & objectstate={st & action = MC_FALL},
-                           objectrec  ={or & speed.ry = or.speed.ry + 3.0,
+                = {objst & st={st & action = MC_FALL},
+                           or  ={or & speed.ry = or.speed.ry + 3.0,
                                              currentsprite = MC_FALL},
-                           gamestate  =gs}
+                           gs  =gs}
             = objst
         | othertype == OBJ_ENDING
             # or = {or & acceleration.rx = ac
@@ -1193,21 +1207,21 @@ where
             # (_, gs) = createObjectFocus {zero & scrollright = 160
                                                 , maxxscrollspeed = 1} gs
             # (_, gs) = createUserGameEvent EV_QUIT_LEVEL EC_SUCCESS 0 Self ANY_SUBTYPE 800 gs
-            = {objst & objectrec=or, gamestate=gs}
+            = {objst & or=or, gs=gs}
         | othertype == OBJ_HEART
             | not (st.health < 3)
                 = objst
             # st = {st & health = st.health + 1}
             # (_, gs) = createUserGameEvent EV_HEALTH st.health 0 (BoundType BND_STAT) ANY_SUBTYPE 1 gs
-            = {objst & objectstate=st, gamestate=gs}
+            = {objst & st=st, gs=gs}
         | bnds.top
             | not (otherobjrec.ownbounds bitand BND_BLOCKS == 0)
                 # (freq, gs) = IRRnd 4000 gs
                 # (_, gs) = playSoundSample SND_CRATE VeryLowVolume PAN_CENTER (12000 + freq) 0 gs
-                = {objst & objectstate = {st & action = MC_JUMP},
-                           objectrec   = {or & speed.ry = -4.25,
+                = {objst & st = {st & action = MC_JUMP},
+                           or   = {or & speed.ry = -4.25,
                                                currentsprite = MC_JUMP},
-                           gamestate   = gs}
+                           gs   = gs}
             | not (otherobjrec.ownbounds bitand BND_ENEMY == 0)
                 # gs = addscore (100 * (2 << st.enemynote) / 2) gs
                 # (_, gs) = playSoundSample SND_HIT HighVolume
@@ -1216,10 +1230,10 @@ where
                 # st = {st & enemynote = st.enemynote + 1}
                 # pos = {x = (or.pos.x + otherobjrec.pos.x) / 2, y = or.pos.y + 20}
                 # (_, gs) = createNewGameObject OBJ_FLASH 0 pos gs
-                = {objst & objectstate={st & action = MC_JUMP},
-                           objectrec  ={or & speed.ry = -4.35, 
+                = {objst & st={st & action = MC_JUMP},
+                           or  ={or & speed.ry = -4.35, 
                                              currentsprite = MC_JUMP},
-                           gamestate  =gs}
+                           gs  =gs}
             = objst
         | not (otherobjrec.ownbounds bitand BND_ENEMY == 0)
             | or.displayoptions.blink
@@ -1227,7 +1241,7 @@ where
             = hurt objst
         = objst
 
-    hurt objst=:{objectstate=st, objectrec=or, gamestate=gs}
+    hurt objst=:{st=st, or=or, gs=gs}
             # st = {st & health = st.health - 1}
             # (_, gs) = createUserGameEvent EV_HEALTH st.health 0 
                           (BoundType BND_STAT) ANY_SUBTYPE 1 gs
@@ -1254,11 +1268,11 @@ where
                 # (l, gs) = getlives gs
                 | l == 0
                     # (_, gs) = createUserGameEvent EV_GAME_OVER 0 0 Self ANY_SUBTYPE 350 gs
-                    = {objst & objectstate=st, objectrec=or, gamestate=gs}
-                = {objst & objectstate=st, objectrec=or, gamestate=gs}
+                    = {objst & st=st, or=or, gs=gs}
+                = {objst & st=st, or=or, gs=gs}
             # (_, gs) = createUserGameEvent EV_STOP_BLINKING 0 0 Self ANY_SUBTYPE 225 gs
             # or = {or & displayoptions.blink = True}
-            = {objst & objectstate=st, objectrec=or, gamestate=gs}
+            = {objst & st=st, or=or, gs=gs}
 
 /* ---------- Menu object ---------- */
 
@@ -1279,31 +1293,31 @@ where
     size = DEFAULT_SIZE
     newstate = {selected = 1, max = 2}
 
-    newinit size state subtype pos time gs
+    newinit size state subcode pos time gs
         # gs = setexitcode EC_QUIT gs   /* for esc key */
-        # (objrec, gs) = defaultObjectRec subtype pos size time gs
+        # (objrec, gs) = defaultObjectRec subcode pos size time gs
         # objrec = {objrec & pos = {x = 126, y = 110}
                            , options = {objrec.options & static = True
                                                        , checkkeyboard = True}
                    }
-        = {objectstate=state, objectrec=objrec, gamestate=gs}
+        = {st=state, or=objrec, gs=gs}
 
-    newkeydown k objst=:{objectstate=st, objectrec=or, gamestate=gs}
+    newkeydown k objst=:{st=st, or=or, gs=gs}
         | k == GK_DOWN
             | st.selected >= st.max
                 = objst
             # st = {st & selected = st.selected + 1}
-            = {objst & objectstate=st, objectrec={or & offset = {x = 0, y = 12 * (st.selected - 1)}}}
+            = {objst & st=st, or={or & offset = {x = 0, y = 12 * (st.selected - 1)}}}
         | k == GK_UP
             | st.selected <= 1
                 = objst
             # st = {st & selected = st.selected - 1}
-            = {objst & objectstate=st, objectrec={or & offset = {x = 0, y = 12 * (st.selected - 1)}}}
+            = {objst & st=st, or={or & offset = {x = 0, y = 12 * (st.selected - 1)}}}
         | k == GK_SPACE || k == GK_RETURN
             | st.selected == 1
                 # gs = setexitcode EC_SUCCESS gs
-                = {objst & gamestate=quitlevel gs}
-            = {objst & gamestate=quitlevel gs}
+                = {objst & gs=quitlevel gs}
+            = {objst & gs=quitlevel gs}
         = objst
 
 /* ---------- Title screen ---------- */
@@ -1472,29 +1486,36 @@ setgameover gs = appGSt setgstgameover gs
 setgstgameover :: GameState -> GameState
 setgstgameover gst = {gst & gameover = True}
 
-/*
-getgameover gs = accGSt getgstgameover gs
-getgstgameover :: GameState -> (Bool, GameState)
-getgstgameover gst = (gst.gameover, gst)
-*/
 
 /* ---------- random functions ---------- */
 
 /* get random integer value 0..n */
 IRnd n gs
-    = (Rand rem n, gs)
+    # (rnd, gs) = rand gs
+    = (rnd rem n, gs)
 
 /* get random integer value -n..n */
 IRRnd n gs
-    = ((Rand rem n) - (Rand rem n), gs)
+    # (rnd1, gs) = rand gs
+    # (rnd2, gs) = rand gs
+    = ((rnd1 rem n) - (rnd2 rem n), gs)
 
 /* get random Real value -n..n */
-RRnd n gs =
-    (n * (((toReal Rand) / max) - ((toReal Rand) / max)), gs)
+RRnd n gs
+    # (rnd1, gs) = rand gs
+    # (rnd2, gs) = rand gs
+    = (n * (((toReal rnd1) / max) - ((toReal rnd2) / max)), gs)
 where
-    max = (toReal MaxRand)
+    max = (toReal MAX_RAND)
 
-Rand = 0; MaxRand = 255
+gsrand :: GameState -> (Int, GameState)
+gsrand gs=:{randseed}
+    # (x, newrandseed) = random randseed
+    = (x, {gs & randseed=newrandseed})
+
+rand gst = accGSt gsrand gst
+
+MAX_RAND = 65535
 
 /* ---------- music and sounds ---------- */
 
@@ -1593,7 +1614,6 @@ CratePartSprite
     , loop     = True
     }
 
-
 DiamondSprite :: Sprite
 DiamondSprite
   = { bitmap   = ObjectsBitmap
@@ -1628,7 +1648,6 @@ HeartSprite
     , sequence = BitmapSequence 19 2 50
     , loop     = True
     }
-
 
 EnemySprite1 :: Sprite
 EnemySprite1
