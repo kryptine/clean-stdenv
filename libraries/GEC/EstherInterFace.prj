@@ -1,0 +1,1664 @@
+Version: 1.4
+Global
+	Built:	True
+	Target:	Everything
+	Exec:	{Project}\EstherInterFace.exe
+	CodeGen
+		CheckStacks:	False
+		CheckIndexes:	True
+	Application
+		HeapSize:	1048576
+		StackSize:	1048576
+		ExtraMemory:	81920
+		IntialHeapSize:	204800
+		HeapSizeMultiplier:	4096
+		ShowExecutionTime:	False
+		ShowGC:	False
+		ShowStackSize:	False
+		MarkingCollector:	False
+		StandardRuntimeEnv:	True
+		Profile
+			Memory:	False
+			MemoryMinimumHeapSize:	0
+			Time:	False
+			Stack:	False
+		Output
+			Output:	NoConsole
+			Font:	Courier
+			FontSize:	9
+			WriteStdErr:	False
+	Link
+		LinkMethod:	Static
+		GenerateRelocations:	False
+		GenerateLinkMap:	False
+		LinkResources:	False
+		ResourceSource:	
+		GenerateDLL:	False
+		ExportedNames:	
+	Paths
+		Path:	{Project}
+		Path:	{Project}\Hilde Source\Parser combinators 2002
+		Path:	{Project}\Hilde Source\OS Windows
+		Path:	{Project}\Hilde Source\Loes 0.2
+		Path:	{Project}\Hilde Source
+	Precompile:	
+	Postlink:	
+MainModule
+	Name:	EstherInterFace
+	Dir:	{Project}
+	Compiler
+		NeverMemoryProfile:	False
+		NeverTimeProfile:	False
+		StrictnessAnalysis:	True
+		ListTypes:	StrictExportTypes
+		ListAttributes:	True
+		Warnings:	True
+		Verbose:	True
+		ReadableABC:	False
+		ReuseUniqueNodes:	True
+	Dcl
+		WindowPosition
+			X:	16
+			Y:	298
+			SizeX:	829
+			SizeY:	300
+	DclOpen:	False
+	Icl
+		WindowPosition
+			X:	17
+			Y:	24
+			SizeX:	806
+			SizeY:	503
+	IclOpen:	True
+	LastModified:	No 0 0 0 0 0 0
+OtherModules
+	Module
+		Name:	StdLibMisc
+		Dir:	{Application}\Libraries\StdLib 2.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	Directory
+		Dir:	{Application}\Libraries\Directory 1.1.2
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	20
+				Y:	-10
+				SizeX:	800
+				SizeY:	640
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	777
+				SizeY:	479
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cDirectory.obj
+		NeededLibraries
+			Library:	directory_library
+	Module
+		Name:	CleanTricks
+		Dir:	{Project}\Hilde Source
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	EstherBackend
+		Dir:	{Project}\Hilde Source
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	EstherTransform
+		Dir:	{Project}\Hilde Source
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdDebug
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	ShowWrapped
+		Dir:	{Application}\Libraries\WrapDebug 1.0.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	Wrap
+		Dir:	{Application}\Libraries\WrapDebug 1.0.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	Debug
+		Dir:	{Application}\Libraries\WrapDebug 1.0.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdParsComb
+		Dir:	{Project}\Hilde Source\Parser combinators 2002
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdGeneric
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdArrayExtensions
+		Dir:	{Application}\Libraries\StdLib 2.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	md5
+		Dir:	{Application}\Libraries\Dynamics 0.3\general
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	DynID
+		Dir:	{Application}\Libraries\Dynamics 0.3\implementation
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	memory
+		Dir:	{Application}\Libraries\Dynamics 0.3\implementation\windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	mem.obj
+	Module
+		Name:	memory_mapped_files
+		Dir:	{Application}\Libraries\Dynamics 0.3\implementation\windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	low.obj
+		NeededLibraries
+			Library:	StdDynamic_kernel32_library
+	Module
+		Name:	StdDynamicVersion
+		Dir:	{Application}\Libraries\Dynamics 0.3\implementation
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	shared_buffer
+		Dir:	{Application}\Libraries\Dynamics 0.3\implementation\windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	DynamicLinkerInterface
+		Dir:	{Application}\Libraries\Dynamics 0.3\implementation\windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	read_function.obj
+	Module
+		Name:	BitSet
+		Dir:	{Application}\Libraries\Dynamics 0.3\general
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdDynamicLowLevelInterface
+		Dir:	{Application}\Libraries\Dynamics 0.3\implementation
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	DynamicUtilities
+		Dir:	{Application}\Libraries\Dynamics 0.3\implementation
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	EnDecode
+		Dir:	{Application}\Libraries\Dynamics 0.3\general
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	DefaultElem
+		Dir:	{Application}\Libraries\Dynamics 0.3\general
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdDynamicTypes
+		Dir:	{Application}\Libraries\Dynamics 0.3\implementation
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	DynamicGraphConversion
+		Dir:	{Application}\Libraries\Dynamics 0.3\implementation\windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdMaybe
+		Dir:	{Application}\Libraries\StdLib 2.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	_SystemDynamic
+		Dir:	{Application}\Libraries\Dynamics 0.3\implementation\windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdDynamic
+		Dir:	{Application}\Libraries\Dynamics 0.3\extension
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdException
+		Dir:	{Application}\Libraries\ExceptionsWindows 0.9
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	855
+				SizeY:	363
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	EstherParser
+		Dir:	{Project}\Hilde Source
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	EstherPostParser
+		Dir:	{Project}\Hilde Source
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	782
+				SizeY:	442
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	687
+				SizeY:	349
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdFunc
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdCharList
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdTuple
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdOrdList
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	_SystemEnum
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdEnum
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdList
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdFile
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdString
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdReal
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	_SystemArray
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdArray
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdClass
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdChar
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdMisc
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdInt
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdOverloaded
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdBool
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdEnv
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+Static
+	Mods
+		Path:	{Project}\EstherInterFace.icl
+		Path:	{Application}\Libraries\StdLib 2.0\StdLibMisc.icl
+		Path:	{Application}\Libraries\Directory 1.1.2\Directory.icl
+		Path:	{Project}\Hilde Source\CleanTricks.icl
+		Path:	{Project}\Hilde Source\EstherBackend.icl
+		Path:	{Project}\Hilde Source\EstherTransform.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdDebug.icl
+		Path:	{Application}\Libraries\WrapDebug 1.0.4\ShowWrapped.icl
+		Path:	{Application}\Libraries\WrapDebug 1.0.4\Wrap.icl
+		Path:	{Application}\Libraries\WrapDebug 1.0.4\Debug.icl
+		Path:	{Project}\Hilde Source\Parser combinators 2002\StdParsComb.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdGeneric.icl
+		Path:	{Application}\Libraries\StdLib 2.0\StdArrayExtensions.icl
+		Path:	{Application}\Libraries\Dynamics 0.3\general\md5.icl
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\DynID.icl
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\windows\memory.icl
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\windows\memory_mapped_files.icl
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\StdDynamicVersion.icl
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\windows\shared_buffer.icl
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\windows\DynamicLinkerInterface.icl
+		Path:	{Application}\Libraries\Dynamics 0.3\general\BitSet.icl
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\StdDynamicLowLevelInterface.icl
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\DynamicUtilities.icl
+		Path:	{Application}\Libraries\Dynamics 0.3\general\EnDecode.icl
+		Path:	{Application}\Libraries\Dynamics 0.3\general\DefaultElem.icl
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\StdDynamicTypes.icl
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\windows\DynamicGraphConversion.icl
+		Path:	{Application}\Libraries\StdLib 2.0\StdMaybe.icl
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\windows\_SystemDynamic.icl
+		Path:	{Application}\Libraries\Dynamics 0.3\extension\StdDynamic.icl
+		Path:	{Application}\Libraries\ExceptionsWindows 0.9\StdException.icl
+		Path:	{Project}\Hilde Source\EstherParser.icl
+		Path:	{Project}\Hilde Source\EstherPostParser.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdFunc.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdCharList.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdTuple.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdOrdList.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\_SystemEnum.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdEnum.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdList.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdFile.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdString.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdReal.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\_SystemArray.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdArray.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdClass.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdChar.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdMisc.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdInt.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdOverloaded.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdBool.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdEnv.icl
+	Objs
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\_startup0.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\_startup1.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\_startup2.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\_system.o
+		Path:	{Project}\Clean System Files\EstherInterFace.o
+		Path:	{Application}\Libraries\StdLib 2.0\Clean System Files\StdLibMisc.o
+		Path:	{Application}\Libraries\Directory 1.1.2\Clean System Files\Directory.o
+		Path:	{Project}\Hilde Source\Clean System Files\CleanTricks.o
+		Path:	{Project}\Hilde Source\Clean System Files\EstherBackend.o
+		Path:	{Project}\Hilde Source\Clean System Files\EstherTransform.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdDebug.o
+		Path:	{Application}\Libraries\WrapDebug 1.0.4\Clean System Files\ShowWrapped.o
+		Path:	{Application}\Libraries\WrapDebug 1.0.4\Clean System Files\Wrap.o
+		Path:	{Application}\Libraries\WrapDebug 1.0.4\Clean System Files\Debug.o
+		Path:	{Project}\Hilde Source\Parser combinators 2002\Clean System Files\StdParsComb.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdGeneric.o
+		Path:	{Application}\Libraries\StdLib 2.0\Clean System Files\StdArrayExtensions.o
+		Path:	{Application}\Libraries\Dynamics 0.3\general\Clean System Files\md5.o
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\Clean System Files\DynID.o
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\windows\Clean System Files\memory.o
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\windows\Clean System Files\memory_mapped_files.o
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\Clean System Files\StdDynamicVersion.o
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\windows\Clean System Files\shared_buffer.o
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\windows\Clean System Files\DynamicLinkerInterface.o
+		Path:	{Application}\Libraries\Dynamics 0.3\general\Clean System Files\BitSet.o
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\Clean System Files\StdDynamicLowLevelInterface.o
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\Clean System Files\DynamicUtilities.o
+		Path:	{Application}\Libraries\Dynamics 0.3\general\Clean System Files\EnDecode.o
+		Path:	{Application}\Libraries\Dynamics 0.3\general\Clean System Files\DefaultElem.o
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\Clean System Files\StdDynamicTypes.o
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\windows\Clean System Files\DynamicGraphConversion.o
+		Path:	{Application}\Libraries\StdLib 2.0\Clean System Files\StdMaybe.o
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\windows\Clean System Files\_SystemDynamic.o
+		Path:	{Application}\Libraries\Dynamics 0.3\extension\Clean System Files\StdDynamic.o
+		Path:	{Application}\Libraries\ExceptionsWindows 0.9\Clean System Files\StdException.o
+		Path:	{Project}\Hilde Source\Clean System Files\EstherParser.o
+		Path:	{Project}\Hilde Source\Clean System Files\EstherPostParser.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdFunc.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdCharList.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdTuple.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdOrdList.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\_SystemEnum.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdEnum.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdList.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdFile.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdString.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdReal.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\_SystemArray.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdArray.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdClass.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdChar.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdMisc.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdInt.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdOverloaded.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdBool.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdEnv.o
+		Path:	{Application}\Libraries\Directory 1.1.2\Clean System Files\cDirectory.obj
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\windows\Clean System Files\low.obj
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\windows\Clean System Files\mem.obj
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\windows\Clean System Files\read_function.obj
+	Dlib
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\kernel_library
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\user_library
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\gdi_library
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\comdlg_library
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\windows\Clean System Files\StdDynamic_kernel32_library
+		Path:	{Application}\Libraries\Directory 1.1.2\Clean System Files\directory_library
+	Pths
+		Path:	{Project}
+		Path:	{Project}\Hilde Source\Parser combinators 2002
+		Path:	{Project}\Hilde Source\OS Windows
+		Path:	{Project}\Hilde Source\Loes 0.2
+		Path:	{Project}\Hilde Source
+		Path:	{Application}\Libraries\StdEnv 2.1.0
+		Path:	{Application}\Libraries\StdLib 2.0
+		Path:	{Application}\Libraries\ObjectIO 1.2.4
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Path:	{Application}\Libraries\Directory 1.1.2
+		Path:	{Application}\Libraries\Dynamics 0.3\extension
+		Path:	{Application}\Libraries\Dynamics 0.3\general
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\windows
+		Path:	{Application}\Libraries\Generics 0.2
+		Path:	{Application}\Libraries\ArgEnvWindows 1.0.3
+		Path:	{Application}\Libraries\Gast 0.2
+		Path:	{Application}\Libraries\Directory 1.1.2
+		Path:	{Application}\Libraries\Tcp 1.2.4
+		Path:	{Application}\Libraries\ExceptionsWindows 0.9
+		Path:	{Application}\Libraries\MersenneTwister 1.0.2
+		Path:	{Application}\Libraries\WrapDebug 1.0.4
+		Path:	{Application}\Libraries\ExtendedArith 1.0.2\ExtendedArith 1.0.2
+		Path:	{Application}\Libraries\GameLib 1.2.4
+		Path:	{Application}\Libraries\objectioextensions
+	AppP:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.0
+	PrjP:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.0\Dynamic Applications\Gen Visual Editor\StdGEC

@@ -1,0 +1,5915 @@
+Version: 1.4
+Global
+	Built:	True
+	Target:	Everything Editor
+	Exec:	{Project}\draw2GEC.exe
+	CodeGen
+		CheckStacks:	False
+		CheckIndexes:	True
+	Application
+		HeapSize:	8388608
+		StackSize:	3145728
+		ExtraMemory:	81920
+		IntialHeapSize:	1048576
+		HeapSizeMultiplier:	4096
+		ShowExecutionTime:	False
+		ShowGC:	False
+		ShowStackSize:	False
+		MarkingCollector:	False
+		StandardRuntimeEnv:	True
+		Profile
+			Memory:	False
+			MemoryMinimumHeapSize:	0
+			Time:	False
+			Stack:	False
+		Output
+			Output:	NoConsole
+			Font:	Courier
+			FontSize:	9
+			WriteStdErr:	False
+	Link
+		LinkMethod:	Static
+		GenerateRelocations:	False
+		GenerateLinkMap:	False
+		LinkResources:	False
+		ResourceSource:	
+		GenerateDLL:	False
+		ExportedNames:	
+	Paths
+		Path:	{Project}
+	Precompile:	
+	Postlink:	
+MainModule
+	Name:	draw2GEC
+	Dir:	{Project}
+	Compiler
+		NeverMemoryProfile:	False
+		NeverTimeProfile:	False
+		StrictnessAnalysis:	True
+		ListTypes:	StrictExportTypes
+		ListAttributes:	True
+		Warnings:	True
+		Verbose:	True
+		ReadableABC:	False
+		ReuseUniqueNodes:	True
+	Dcl
+		WindowPosition
+			X:	0
+			Y:	0
+			SizeX:	500
+			SizeY:	300
+	DclOpen:	False
+	Icl
+		WindowPosition
+			X:	34
+			Y:	25
+			SizeX:	928
+			SizeY:	680
+	IclOpen:	True
+	LastModified:	No 0 0 0 0 0 0
+OtherModules
+	Module
+		Name:	StdEnv
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdBool
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdOverloaded
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdInt
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdMisc
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdChar
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdClass
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdArray
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	_SystemArray
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdReal
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdString
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdFile
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdList
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdEnum
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	_SystemEnum
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdOrdList
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdTuple
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdCharList
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdFunc
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdIO
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdId
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdMaybe
+		Dir:	{Application}\Libraries\StdLib 2.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	id
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	device
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	systemid
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdIOCommon
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	728
+				SizeY:	358
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdBitmap
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	osbitmap
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	ospicture
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	osrgn
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	ostoolbox
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cCrossCallFont_121.obj
+	Module
+		Name:	clCrossCall_12
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cCrossCallWindows_121.obj
+			ObjectFile:	cCrossCallProcedureTable_121.obj
+			ObjectFile:	cCrossCallCursor_121.obj
+			ObjectFile:	cCrossCall_121.obj
+			ObjectFile:	cCCallSystem_121.obj
+			ObjectFile:	cCCallWindows_121.obj
+			ObjectFile:	cAcceleratorTable_121.obj
+		NeededLibraries
+			Library:	userExt_library
+			Library:	gdiExt_library
+			Library:	kernelExt_library
+			Library:	winspool_library
+			Library:	winmm_library
+			Library:	shell32_library
+			Library:	ole32_library
+			Library:	kernel32_library
+			Library:	comctl32_library
+			Library:	advapi32_library
+	Module
+		Name:	ostypes
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	pictCCall_12
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	rgnCCall_12
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	osfont
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdPictureDef
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdIOBasic
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	797
+				SizeY:	445
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdPicture
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdKey
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	oskey
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	commondef
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	clCCall_12
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	util_121.obj
+			ObjectFile:	cpicture_121.obj
+			ObjectFile:	cdebug_121.obj
+			ObjectFile:	cCrossCall_121.obj
+			ObjectFile:	cCrossCallWindows_121.obj
+			ObjectFile:	cCCallWindows_121.obj
+			ObjectFile:	cCCallSystem_121.obj
+	Module
+		Name:	iostate
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	osactivaterequests
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	osdocumentinterface
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cCrossCallxDI_121.obj
+	Module
+		Name:	menuCrossCall_12
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	ostoolbar
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowCCall_12
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cpicture_121.obj
+			ObjectFile:	cCCallWindows_121.obj
+	Module
+		Name:	ossystem
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowCrossCall_12
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	osevent
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	ostime
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	osguishare
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	devicefunctions
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	deviceevents
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	receivermessage
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	receivertable
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	semidynamic
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	cast
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	timertable
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdTimerDef
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowhandle
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	760
+				SizeY:	399
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdControlDef
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdWindowDef
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	806
+				SizeY:	485
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	receiverhandle
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	keyfocus
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	devicesystemstate
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	menuhandle
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdMenuDef
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	osmenu
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	menuCCall_12
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cCrossCallMenus_121.obj
+	Module
+		Name:	processhandle
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	timerhandle
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	processstack
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	roundrobin
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	osmouse
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdPSt
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdProcessDef
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdProcessAttribute
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	osbeep
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	world
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdPStClass
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdFileSelect
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	scheduler
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	osfileselect
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cCrossCallFileSelectors_121.obj
+	Module
+		Name:	StdTime
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	ostick
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdLibMisc
+		Dir:	{Application}\Libraries\StdLib 2.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdSystem
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdProcess
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	processdevice
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	menudevice
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdReceiverDef
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdMenuAttribute
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdMenuElementClass
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	menuaccess
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	menudefaccess
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	menuevent
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	menucreate
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	sdisize
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	oswindow
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowaccess
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdControlAttribute
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdWindowAttribute
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowupdate
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	wstate
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	738
+				SizeY:	491
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	775
+				SizeY:	469
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowclipstate
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	wstateaccess
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	receiveraccess
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdReceiverAttribute
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	receiverdefaccess
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	menuwindowmenu
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	processevent
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	toolbar
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdClipboard
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	osclipboard
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	clipboardCrossCall_12
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cCrossCallClipboard_121.obj
+	Module
+		Name:	StdPrint
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	osprint
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cprinter_121.obj
+			ObjectFile:	cCrossCallPrinter_121.obj
+	Module
+		Name:	StdControlClass
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	controlvalidate
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowvalidate
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	controllayout
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	layout
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdWindow
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	828
+				SizeY:	500
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	807
+				SizeY:	385
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	controlpos
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	controlrelayout
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	relayout
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowdraw
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowcreate
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdMenu
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	menuinternal
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	menuitems
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowdevice
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowdispose
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	receiverid
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	controldraw
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	controlresize
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowevent
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	controlcreate
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	ostooltip
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	controlinternal
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdPrintText
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdControlReceiver
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdControl
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	controlaccess
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	windowcontrols
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdMenuReceiver
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdMenuElement
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	mstate
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdReceiver
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	receiverdevice
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	receiverevent
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdTimerAttribute
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdTimerElementClass
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdTimerReceiver
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdTimer
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	timeraccess
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	timerdefaccess
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	timerdevice
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	timerevent
+		Dir:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	genericgecs
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	765
+				SizeY:	534
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	gec
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	767
+				SizeY:	422
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	721
+				SizeY:	575
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	guiloc
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	objectloc
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	GenEq
+		Dir:	{Application}\Libraries\Generics 0.2
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdGeneric
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	GenPrint
+		Dir:	{Application}\Libraries\Generics 0.2
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	parseprint
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	GenParse
+		Dir:	{Application}\Libraries\Generics 0.2
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	Debug
+		Dir:	{Application}\Libraries\WrapDebug 1.0.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	Wrap
+		Dir:	{Application}\Libraries\WrapDebug 1.0.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	ShowWrapped
+		Dir:	{Application}\Libraries\WrapDebug 1.0.4
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdDebug
+		Dir:	{Application}\Libraries\StdEnv 2.1.0
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	guigecs
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	768
+				SizeY:	532
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdObjectIOExt
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	ColourTextControl
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\objectioextensions
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdBimap
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	infragecs
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	821
+				SizeY:	525
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	testable
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	genLibTest
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	stdProperty
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	MersenneTwister
+		Dir:	{Application}\Libraries\MersenneTwister 1.0.2
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	GenDefault
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	TRACE
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdAGEC
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	762
+				SizeY:	552
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	839
+				SizeY:	584
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdGECExt
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	902
+				SizeY:	389
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	32
+				Y:	43
+				SizeX:	866
+				SizeY:	474
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdGEC
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	store
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdGecComb
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	28
+				Y:	16
+				SizeX:	867
+				SizeY:	602
+		DclOpen:	True
+		Icl
+			WindowPosition
+				X:	34
+				Y:	52
+				SizeX:	839
+				SizeY:	488
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+Static
+	Mods
+		Path:	{Project}\draw2GEC.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdEnv.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdBool.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdOverloaded.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdInt.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdMisc.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdChar.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdClass.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdArray.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\_SystemArray.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdReal.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdString.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdFile.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdList.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdEnum.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\_SystemEnum.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdOrdList.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdTuple.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdCharList.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdFunc.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdIO.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdId.icl
+		Path:	{Application}\Libraries\StdLib 2.0\StdMaybe.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\id.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\device.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\systemid.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdIOCommon.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdBitmap.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\osbitmap.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\ospicture.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\osrgn.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\ostoolbox.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\clCrossCall_12.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\ostypes.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\pictCCall_12.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\rgnCCall_12.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\osfont.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdPictureDef.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdIOBasic.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdPicture.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdKey.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\oskey.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\commondef.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\clCCall_12.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\iostate.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\osactivaterequests.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\osdocumentinterface.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\menuCrossCall_12.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\ostoolbar.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\windowCCall_12.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\ossystem.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\windowCrossCall_12.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\osevent.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\ostime.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\osguishare.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\devicefunctions.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\deviceevents.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\receivermessage.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\receivertable.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\semidynamic.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\cast.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\timertable.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdTimerDef.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\windowhandle.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdControlDef.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdWindowDef.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\receiverhandle.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\keyfocus.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\devicesystemstate.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\menuhandle.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdMenuDef.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\osmenu.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\menuCCall_12.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\processhandle.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\timerhandle.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\processstack.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\roundrobin.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\osmouse.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdPSt.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdProcessDef.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdProcessAttribute.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\osbeep.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\world.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdPStClass.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdFileSelect.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\scheduler.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\osfileselect.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdTime.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\ostick.icl
+		Path:	{Application}\Libraries\StdLib 2.0\StdLibMisc.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdSystem.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdProcess.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\processdevice.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\menudevice.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdReceiverDef.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdMenuAttribute.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdMenuElementClass.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\menuaccess.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\menudefaccess.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\menuevent.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\menucreate.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\sdisize.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\oswindow.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\windowaccess.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdControlAttribute.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdWindowAttribute.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\windowupdate.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\wstate.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\windowclipstate.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\wstateaccess.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\receiveraccess.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdReceiverAttribute.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\receiverdefaccess.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\menuwindowmenu.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\processevent.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\toolbar.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdClipboard.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\osclipboard.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\clipboardCrossCall_12.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdPrint.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\osprint.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdControlClass.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\controlvalidate.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\windowvalidate.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\controllayout.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\layout.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdWindow.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\controlpos.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\controlrelayout.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\relayout.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\windowdraw.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\windowcreate.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdMenu.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\menuinternal.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\menuitems.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\windowdevice.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\windowdispose.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\receiverid.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\controldraw.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\controlresize.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\windowevent.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\controlcreate.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\ostooltip.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\controlinternal.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdPrintText.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdControlReceiver.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdControl.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\controlaccess.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\windowcontrols.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdMenuReceiver.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdMenuElement.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\mstate.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdReceiver.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\receiverdevice.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\receiverevent.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdTimerAttribute.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdTimerElementClass.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdTimerReceiver.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\StdTimer.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\timeraccess.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\timerdefaccess.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\timerdevice.icl
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\timerevent.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\genericgecs.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\gec.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\guiloc.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\objectloc.icl
+		Path:	{Application}\Libraries\Generics 0.2\GenEq.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdGeneric.icl
+		Path:	{Application}\Libraries\Generics 0.2\GenPrint.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\parseprint.icl
+		Path:	{Application}\Libraries\Generics 0.2\GenParse.icl
+		Path:	{Application}\Libraries\WrapDebug 1.0.4\Debug.icl
+		Path:	{Application}\Libraries\WrapDebug 1.0.4\Wrap.icl
+		Path:	{Application}\Libraries\WrapDebug 1.0.4\ShowWrapped.icl
+		Path:	{Application}\Libraries\StdEnv 2.1.0\StdDebug.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\guigecs.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\StdObjectIOExt.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\objectioextensions\ColourTextControl.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\StdBimap.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\infragecs.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02\testable.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02\genLibTest.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02\stdProperty.icl
+		Path:	{Application}\Libraries\MersenneTwister 1.0.2\MersenneTwister.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GenDefault.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\TRACE.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\StdAGEC.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\StdGECExt.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\StdGEC.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\store.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\StdGecComb.icl
+	Objs
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\_startup0.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\_startup1.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\_startup2.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\_system.o
+		Path:	{Project}\Clean System Files\draw2GEC.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\StdGecComb.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\StdGEC.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\store.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\StdGECExt.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\StdAGEC.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\TRACE.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\GenDefault.o
+		Path:	{Application}\Libraries\MersenneTwister 1.0.2\Clean System Files\MersenneTwister.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02\Clean System Files\stdProperty.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02\Clean System Files\genLibTest.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02\Clean System Files\testable.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\infragecs.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\StdBimap.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\objectioextensions\Clean System Files\ColourTextControl.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\StdObjectIOExt.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\guigecs.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdDebug.o
+		Path:	{Application}\Libraries\WrapDebug 1.0.4\Clean System Files\ShowWrapped.o
+		Path:	{Application}\Libraries\WrapDebug 1.0.4\Clean System Files\Wrap.o
+		Path:	{Application}\Libraries\WrapDebug 1.0.4\Clean System Files\Debug.o
+		Path:	{Application}\Libraries\Generics 0.2\Clean System Files\GenParse.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\parseprint.o
+		Path:	{Application}\Libraries\Generics 0.2\Clean System Files\GenPrint.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdGeneric.o
+		Path:	{Application}\Libraries\Generics 0.2\Clean System Files\GenEq.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\objectloc.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\guiloc.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\gec.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\genericgecs.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\timerevent.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\timerdevice.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\timerdefaccess.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\timeraccess.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdTimer.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdTimerReceiver.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdTimerElementClass.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdTimerAttribute.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\receiverevent.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\receiverdevice.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdReceiver.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\mstate.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdMenuElement.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdMenuReceiver.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\windowcontrols.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controlaccess.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdControl.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdControlReceiver.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdPrintText.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controlinternal.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\ostooltip.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controlcreate.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\windowevent.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controlresize.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controldraw.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\receiverid.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\windowdispose.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\windowdevice.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\menuitems.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\menuinternal.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdMenu.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\windowcreate.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\windowdraw.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\relayout.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controlrelayout.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controlpos.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdWindow.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\layout.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controllayout.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\windowvalidate.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controlvalidate.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdControlClass.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osprint.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdPrint.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\clipboardCrossCall_12.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osclipboard.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdClipboard.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\toolbar.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\processevent.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\menuwindowmenu.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\receiverdefaccess.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdReceiverAttribute.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\receiveraccess.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\wstateaccess.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\windowclipstate.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\wstate.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\windowupdate.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdWindowAttribute.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdControlAttribute.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\windowaccess.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\oswindow.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\sdisize.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\menucreate.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\menuevent.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\menudefaccess.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\menuaccess.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdMenuElementClass.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdMenuAttribute.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdReceiverDef.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\menudevice.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\processdevice.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdProcess.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdSystem.o
+		Path:	{Application}\Libraries\StdLib 2.0\Clean System Files\StdLibMisc.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\ostick.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdTime.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osfileselect.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\scheduler.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdFileSelect.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdPStClass.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\world.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osbeep.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdProcessAttribute.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdProcessDef.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdPSt.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osmouse.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\roundrobin.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\processstack.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\timerhandle.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\processhandle.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\menuCCall_12.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osmenu.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdMenuDef.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\menuhandle.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\devicesystemstate.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\keyfocus.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\receiverhandle.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdWindowDef.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdControlDef.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\windowhandle.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdTimerDef.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\timertable.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\cast.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\semidynamic.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\receivertable.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\receivermessage.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\deviceevents.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\devicefunctions.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osguishare.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\ostime.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osevent.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\windowCrossCall_12.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\ossystem.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\windowCCall_12.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\ostoolbar.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\menuCrossCall_12.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osdocumentinterface.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osactivaterequests.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\iostate.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\clCCall_12.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\commondef.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\oskey.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdKey.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdPicture.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdIOBasic.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdPictureDef.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osfont.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\rgnCCall_12.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\pictCCall_12.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\ostypes.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\clCrossCall_12.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\ostoolbox.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osrgn.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\ospicture.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osbitmap.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdBitmap.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdIOCommon.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\systemid.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\device.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\id.o
+		Path:	{Application}\Libraries\StdLib 2.0\Clean System Files\StdMaybe.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdId.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdIO.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdFunc.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdCharList.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdTuple.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdOrdList.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\_SystemEnum.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdEnum.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdList.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdFile.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdString.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdReal.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\_SystemArray.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdArray.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdClass.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdChar.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdMisc.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdInt.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdOverloaded.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdBool.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdEnv.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCrossCallClipboard_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCrossCallFileSelectors_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCrossCallFont_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCrossCallMenus_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCrossCallWindows_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCrossCallProcedureTable_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCrossCallCursor_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCrossCall_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCCallSystem_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCCallWindows_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cAcceleratorTable_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCrossCallxDI_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cpicture_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCCallWindows_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cprinter_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCrossCallPrinter_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\util_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cpicture_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cdebug_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCrossCall_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCrossCallWindows_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCCallWindows_121.obj
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCCallSystem_121.obj
+	Dlib
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\kernel_library
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\user_library
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\gdi_library
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\comdlg_library
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\userExt_library
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\gdiExt_library
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\kernelExt_library
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\winspool_library
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\winmm_library
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\shell32_library
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\ole32_library
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\kernel32_library
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\comctl32_library
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\advapi32_library
+	Pths
+		Path:	{Project}
+		Path:	{Application}\Libraries\StdEnv 2.1.0
+		Path:	{Application}\Libraries\StdLib 2.0
+		Path:	{Application}\Libraries\ObjectIO 1.2.4
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows
+		Path:	{Application}\Libraries\Directory 1.1.2
+		Path:	{Application}\Libraries\Dynamics 0.3\extension
+		Path:	{Application}\Libraries\Dynamics 0.3\general
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation
+		Path:	{Application}\Libraries\Dynamics 0.3\implementation\windows
+		Path:	{Application}\Libraries\Generics 0.2
+		Path:	{Application}\Libraries\ArgEnvWindows 1.0.3
+		Path:	{Application}\Libraries\Directory 1.1.2
+		Path:	{Application}\Libraries\Tcp 1.2.4
+		Path:	{Application}\Libraries\ExceptionsWindows 0.9
+		Path:	{Application}\Libraries\MersenneTwister 1.0.2
+		Path:	{Application}\Libraries\WrapDebug 1.0.4
+		Path:	{Application}\Libraries\ExtendedArith 1.0.2\ExtendedArith 1.0.2
+		Path:	{Application}\Libraries\GameLib 1.2.4
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\objectioextensions
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02
+	AppP:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.0
+	PrjP:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.0\Dynamic Applications\Gen Visual Editor\StdGEC\Examples
