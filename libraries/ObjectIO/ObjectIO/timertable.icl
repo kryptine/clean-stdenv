@@ -1,7 +1,7 @@
 implementation module timertable
 
 
-import StdInt, StdBool, StdClass, StdList, StdMaybe, StdMisc
+import StdInt, StdBool, StdClass, StdList, StdMaybe, StdMisc, StdId
 import commondef, systemid, device
 import StdTimerDef
 

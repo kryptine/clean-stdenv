@@ -11,7 +11,10 @@ definition module StdId
 
 
 from	StdMaybe	import :: Maybe
-from	id			import :: Id, :: RId, :: R2Id, rIdtoId, r2IdtoId, class toString, class ==
+from	id			import :: Id, :: RId, :: R2Id, rIdtoId, r2IdtoId, class ==,
+							instance == Id, 
+							instance ==	(RId  mess), 
+							instance == (R2Id mess resp)
 from	iostate		import :: IOSt, :: PSt
 
 class Ids env where

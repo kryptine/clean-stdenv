@@ -1201,6 +1201,7 @@ osInvalidateCompoundRect :: !OSWindowPtr !OSRect !*OSToolbox -> *OSToolbox
 osInvalidateCompoundRect compoundPtr rect tb
 	= winInvalidateRect compoundPtr (toTuple4 rect) tb
 */
+
 osSetCompoundSliderThumb :: !OSWindowMetrics !OSWindowPtr !OSWindowPtr !OSWindowPtr !OSRect !Bool !Int !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetCompoundSliderThumb wMetrics _ compoundPtr _ _ isHorizontal thumb (maxx,maxy) redraw tb
 	= winSetScrollPos compoundPtr (if isHorizontal SB_HORZ SB_VERT) thumb maxx` maxy` extent tb
