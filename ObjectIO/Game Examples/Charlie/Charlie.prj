@@ -37,8 +37,8 @@ Global
 		ExportedNames:	
 	Paths
 		Path:	{Project}
-		Path:	{Application}\Libraries\GameLib 1.2.4
-		Path:	{Application}\Examples\ObjectIO Examples  1.2.4\gui utilities
+		Path:	{Application}\Libraries\GameLib
+		Path:	{Application}\Examples\ObjectIO Examples\gui utilities
 	Precompile:	
 	Postlink:	
 MainModule
