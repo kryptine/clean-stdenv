@@ -118,7 +118,7 @@ wrapNode node
 		jmp_true	wrap__string
 
 		is_record	0
-	.d 2 0
+|	.d 2 0
 		jmp_true	wrap_record
 
 		get_node_arity	0
@@ -161,7 +161,7 @@ wrapNode node
 		pop_b	2
 					| A: <_{args}> <node> <result>
 					| B:
-	.d 3 0
+|	.d 3 0
 		jmp	wrap_descriptor
 
 	:wrap_no_args
@@ -169,7 +169,7 @@ wrapNode node
 					| B: <0>
 		create_array_	_ 1 0
 
-	.o 3 0
+|	.o 3 0
 	:wrap_descriptor
 					| A: <_{args}> <node> <result>
 		push_a	1
@@ -180,7 +180,7 @@ wrapNode node
 		eq_nulldesc	_Tuple 0
 		jmp_false	not_a_tuple
 		build	e_Wrap_dWrappedDescriptorTuple 0 _hnf
-	.d 4 0
+|	.d 4 0
 		jmp	wrap_other
 	:not_a_tuple
 
@@ -204,7 +204,7 @@ wrapNode node
 		build_r	e_Wrap_kWrappedDescriptorOther 1 0 0 0
 		update_a	0 1
 		pop_a	1
-	.o 4 0
+|	.o 4 0
 	:wrap_other
 					| A: <descriptor> <node> <_{args}> <result>
 		update_a	0 1
@@ -216,7 +216,7 @@ wrapNode node
 	.d 1 0
 		rtn
 
-	.o 2 0
+|	.o 2 0
 	| constructors with strict arguments are also represented by records
 	:wrap_record
 		pushI	0
