@@ -16,10 +16,10 @@ where
 	buttons	  =  [ map mkBut [7..9]
 				 , map mkBut [4..6]
 				 , map mkBut [1..3]
-				 , [mkBut 0, (Button "C",\_->0), (Button "N", \v -> 0 - v)]
+				 , [mkBut 0, (Button (defCellWidth/3) "C",\_->0), (Button (defCellWidth/3) "N", \v -> 0 - v)]
 				 ]
 
-	mkBut i = (Button (toString i),\v -> v*10 + i)
+	mkBut i = (Button (defCellWidth/3) (toString i),\v -> v*10 + i)
 
 realcalcGEC :: Real -> AGEC Real
 realcalcGEC i = 	mkAGEC	{	toGEC	= newGEC
@@ -36,13 +36,13 @@ where
 				 , map mkBut [4..6]
 				 , map mkBut [1..3]
 				 , [mkBut 0]
-				 , [ (Button ".", \(v,Hide (_,_))	-> (v,  Hide (False,1.0)))
-				   , (Button "C", \(_,hide) 		-> (0.0,Hide (True,1.0)))
-				   , (Button "N", \(v,hide) 		-> (0.0 - v,hide))
+				 , [ (Button (defCellWidth/3) ".", \(v,Hide (_,_))	-> (v,  Hide (False,1.0)))
+				   , (Button (defCellWidth/3) "C", \(_,hide) 		-> (0.0,Hide (True,1.0)))
+				   , (Button (defCellWidth/3) "N", \(v,hide) 		-> (0.0 - v,hide))
 				   ]
 				 ]
 
-	mkBut i =  (  Button (toString i)
+	mkBut i =  (  Button (defCellWidth/3) (toString i)
 				, \(v,Hide (cond,base)) -> if cond (v*10.0 + toReal i,Hide (cond,base))
 											     (v+(toReal i/(base*10.0)),Hide(cond,(base*10.0)))
 				)

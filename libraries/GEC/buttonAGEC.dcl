@@ -6,4 +6,4 @@ import genericgecs
 
 derive gGEC Button
 
-:: Button = Button String | Pressed
+:: Button = Button Int String | Pressed
