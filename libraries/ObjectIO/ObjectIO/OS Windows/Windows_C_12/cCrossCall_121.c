@@ -138,12 +138,15 @@ int CheckVirtualKeyCode (int keycode)
 		case VK_HOME:
 			c = WinBeginKey;
 			break;
+/* RWS
 		case VK_BACK:
 			c = WinBackSpKey;
 			break;
+*/
 		case VK_DELETE:
 			c = WinDelKey;
 			break;
+/*
 		case VK_TAB:
 			c = WinTabKey;
 			break;
@@ -153,6 +156,7 @@ int CheckVirtualKeyCode (int keycode)
 		case VK_ESCAPE:
 			c = WinEscapeKey;
 			break;
+*/
 		case VK_HELP:
 			c = WinHelpKey;
 			break;
