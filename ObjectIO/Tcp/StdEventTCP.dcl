@@ -12,6 +12,9 @@ from	StdReceiver		import Receivers, ReceiverType
 from	StdPSt			import PSt, IOSt
 from	StdIOCommon		import ErrorReport
 from	tcp_bytestreams	import TCP_SCharStream_
+from	StdPStClass		import FileEnv, Files, TimeEnv, Date, Tick, Time
+
+instance ChannelEnv (PSt  .l), (IOSt .l)
 
 instance Receivers		TCP_ListenerReceiver
 instance Receivers 		TCP_Receiver
