@@ -2,22 +2,19 @@ implementation module dynamicAGEC
 
 import StdEnv
 import StdIO
-import genericgecs
 import StdGEC, StdGECExt, StdAGEC
-import StdGecComb, modeAGEC, tupleAGEC, basicAGEC
+import modeAGEC, tupleAGEC, basicAGEC
 import EstherInterFace
-from EstherParser import prettyDynamic
+from EstherBackend import toStringDynamic
 import StdDynamic, StdPSt, iostate
-
-// TO TEST JUST REPLACE THE EXAMPLE NAME IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
-// ALL EXAMPLES HAVE TO BE OF FORM pst -> pst
 
 dynamicAGEC2 :: a -> AGEC a | TC a & gGEC {|*|} a	 					
 dynamicAGEC2 v = mkAGEC { toGEC   = toExpr
 					  , fromGEC = fromExpr
 					  , updGEC  = updExpr
 					  , value   = v
-					  } ("dynamicGEC" +++ (snd(prettyDynamic (dynamic v))))
+					  } ("dynamicGEC2")
+//					  } ("dynamicGEC2" +++ (snd(prettyDynamic (dynamic v))))
 where
 	toExpr v Undefined 		= display v (prettyVal  v)
 	toExpr v (Defined b)	= b 				
@@ -29,14 +26,15 @@ where
 	updExpr (DynStr nd=:(d::a^) s <-> _)	= display d s
 	updExpr (_ <-> hvs) 					= display (fst (^^ hvs)) (snd (^^ hvs))
 
-	prettyVal  v  	= fst (prettyDynamic (dynamic v))
+	prettyVal  v  	= fst (toStringDynamic (dynamic v))
 
 dynamicAGEC :: a -> AGEC a | TC a & gGEC {|*|} a	 					
 dynamicAGEC v = mkAGEC { toGEC   = toExpr
 					  , fromGEC = fromExpr
 					  , updGEC  = updExpr
 					  , value   = v
-					  } ("dynamicGEC" +++ (snd(prettyDynamic (dynamic v))))
+					  } ("dynamicGEC")
+//					  } ("dynamicGEC" +++ (snd(prettyDynamic (dynamic v))))
 where
 	toExpr v Undefined 		= display v (prettyVal  v)
 	toExpr v (Defined b)	= b 				
@@ -48,13 +46,12 @@ where
 	updExpr ( _ <-> _ <-> DynStr nd=:(d::a^) s <-> hvs)	= display d s
 	updExpr ( _ <-> _ <-> _ <-> hvs) 					= display (fst (^^ hvs)) (snd (^^ hvs))
 
-	prettyVal  v  	= fst (prettyDynamic (dynamic v))
+	prettyVal  v  	= fst (toStringDynamic (dynamic v))
 	prettyValD v s	= case (dynamic v) of
 						(x::(a -> b)) = Display (strip(s +++ " "))
-						else		  = Display (fst(prettyDynamic (dynamic v)) +++ " ")  // +++ " " caused by bug in Display
-	prettyType v	= Display (":: " +++ (snd(prettyDynamic (dynamic v))) +++ " ")
+						else		  = Display (fst(toStringDynamic (dynamic v)) +++ " ")  // +++ " " caused by bug in Display
+	prettyType v	= Display (":: " +++ (snd(toStringDynamic (dynamic v))) +++ " ")
 
-	strip s = { ns \\ ns <-: s | ns >= '\020' && ns <= '\0200'}	
 	
 :: DynString = DynStr Dynamic String
 
@@ -95,3 +92,10 @@ gGEC{|(->)|} gGECa gGECb args=:{gec_value = Just (id), update = modeupdate} pSt
 gGEC{|(->)|} gGECa gGECb args=:{gec_value = Nothing, update = modeupdate} pSt
 = createDummyGEC OutputOnly (undef) modeupdate pSt
 
+ShowValueDynamic :: Dynamic -> String
+ShowValueDynamic d = strip (fst (toStringDynamic d) +++ " ")
+
+ShowTypeDynamic :: Dynamic -> String
+ShowTypeDynamic d = strip (snd (toStringDynamic d) +++ " ")
+
+strip s = { ns \\ ns <-: s | ns >= '\020' && ns <= '\0200'}	

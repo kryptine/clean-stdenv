@@ -8,3 +8,6 @@ dynamicAGEC2 :: a -> AGEC a | TC a & gGEC {|*|} a  // only shows typed in expres
 derive gGEC (->), DynString
 
 :: DynString = DynStr Dynamic String
+
+ShowValueDynamic :: Dynamic -> String
+ShowTypeDynamic  :: Dynamic -> String

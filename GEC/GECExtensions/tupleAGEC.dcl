@@ -11,3 +11,6 @@ derive gGEC (,), (,,)						// A tuple-editor is used to place things next to eac
 (<->) x y :== (x,y)
 (<|>) infixr 2	//:: a b -> (PAIR a b)		// Place a above b
 (<|>) x y :== PAIR x y
+
+:: <|> x y :== PAIR x y
+:: <-> x y :== (x,y)
