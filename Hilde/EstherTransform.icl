@@ -11,8 +11,8 @@ LAMBDA ps e :== Term (Plain (Lambda (Scope (NTlambda Tlambda (+- ps) Tarrow e)))
 LET ds e :== Term (Plain (Let (Scope (NTlet Tlet (+- ds) Tin e))))
 (LETDEF) infix 0
 (LETDEF) d e :== NTletDef d Tis e
-NAME n :== Term (Plain (NameOrValue (NTname n)))
-VAR v :== VariablePattern (NTvariable v)
+NAME n p :== Term (Plain (NameOrValue (NTname n p)))
+VAR v p :== VariablePattern (NTvariable v p)
 
 generic transform e :: !e -> Core
 
@@ -58,7 +58,7 @@ transform {|NTfunction|} (NTfunction n=:(NTnameDef v p) vs _ e) = transform{|*|}
 where
 	f = case vs of
 		[] -> e
-		_ -> LET [VAR v LETDEF LAMBDA vs e] (NAME v)
+		_ -> LET [VAR v p LETDEF LAMBDA vs e] (NAME v p)
 	
 transform{|NTexpression|} (Term e) = transform{|*|} e
 transform{|NTexpression|} (Apply f x) = transform{|*|} f @ transform{|*|} x
@@ -69,7 +69,7 @@ transform{|NTterm|} (Sugar e) = transform{|*|} (desugar e)
 transform{|NTdynamic|} (NTdynamic _ e) = CoreDynamic @ transform{|*|} e
 
 transform{|NTnameOrValue|} (NTvalue d _) = CoreCode d
-transform{|NTnameOrValue|} (NTname y) = CoreVariable y
+transform{|NTnameOrValue|} (NTname y _) = CoreVariable y
 
 transform{|NTlambda|} (NTlambda _ (+- ps) _ e) = transformMatch ps (transform{|*|} e) codeMismatch
 
@@ -111,7 +111,7 @@ where
 	patternMatch _ (NilPattern _ _) then else = patternMatch 1 (NameOrValuePattern (NTvalue dynamicNil GenConsNoPrio)) then else
 	patternMatch _ (NestedPattern _ (+- [t:ts]) _) then else = patternMatch (length ts + 1) t (transformMatch ts then else) else
 	patternMatch n (NameOrValuePattern (NTvalue constr _)) then else = match constr n @ (codeApply constr @ then) @ else
-	patternMatch _ (VariablePattern (NTvariable x)) then _ = abstract x then
+	patternMatch _ (VariablePattern (NTvariable x _)) then _ = abstract x then
 	patternMatch _ (AnyPattern _) then _ = abstract_ then
 
 match :: !Dynamic !Int -> Core

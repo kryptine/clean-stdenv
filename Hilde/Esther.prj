@@ -72,7 +72,7 @@ MainModule
 			Y:	20
 			SizeX:	759
 			SizeY:	461
-	IclOpen:	False
+	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
 	Module
@@ -1990,7 +1990,7 @@ OtherModules
 				Y:	37
 				SizeX:	750
 				SizeY:	502
-		DclOpen:	False
+		DclOpen:	True
 		Icl
 			WindowPosition
 				X:	2
@@ -2280,13 +2280,13 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_system.o
 		Path:	{Project}\Clean System Files\Esther.o
 		Path:	{Project}\Clean System Files\EstherStdEnv.o
+		Path:	{Project}\Clean System Files\CleanTricks.o
 		Path:	{Project}\Clean System Files\Marshall.o
 		Path:	{Project}\OS Windows\Clean System Files\Windows.o
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
 		Path:	{Application}\Libraries\Directory\Clean System Files\Directory.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamicFileIO.o
 		Path:	{Project}\Clean System Files\DynamicFileSystem.o
-		Path:	{Project}\Clean System Files\CleanTricks.o
 		Path:	{Project}\WrapDebugClosures\Clean System Files\ShowWrapped.o
 		Path:	{Project}\WrapDebugClosures\Clean System Files\Wrap.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
@@ -2312,6 +2312,7 @@ Static
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
 		Path:	{Application}\Libraries\ExceptionsWindows\Clean System Files\StdException.o
+		Path:	{Project}\Clean System Files\EstherPostParser.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
@@ -2334,7 +2335,6 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdCharList.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
 		Path:	{Project}\Clean System Files\EstherScript.o
-		Path:	{Project}\Clean System Files\EstherPostParser.o
 		Path:	{Project}\Clean System Files\EstherParser.o
 		Path:	{Project}\Clean System Files\EstherBackend.o
 		Path:	{Project}\Clean System Files\EstherFamkeEnv.o

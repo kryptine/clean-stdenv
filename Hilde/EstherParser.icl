@@ -63,8 +63,7 @@ where
 	p x = (sp (parser{|*|} Try) <&> \y -> p (Apply x y)) <!> yield x
 parser{|NTexpression|} Want = parser{|*|} Try <!> raise (ParserRequired "NTexpression")
 
-parser{|NTvariable|} t
-	= lowercaseIdentifier <&> (\n -> if (isMember n keywords) fail (yield (NTvariable n)))
+parser{|NTvariable|} t = variableIdentifier <@ \n -> NTvariable n GenConsNoPrio
 /*
 parser{|NTnameOrValue|}
 	= parser{|*|} <@ (\x -> NTvalue (dynamic x :: String) GenConsNoPrio)
@@ -84,21 +83,26 @@ parser{|NTnameOrValue|} Try
 	<!> parser{|*|} Try <@ (\x -> NTvalue (dynamic x :: Int) GenConsNoPrio)
 	<!> parser{|*|} Try <@ (\x -> NTvalue (dynamic x :: Char) GenConsNoPrio)
 	<!> parser{|*|} Try <@ (\x -> NTvalue (dynamic x :: Bool) GenConsNoPrio)
-	<!> clean <@ NTname
+	<!> functionIdentifier <@ (\x -> NTname x GenConsNoPrio)
 parser{|NTnameOrValue|} Want = parser{|*|} Try <!> raise (ParserRequired "NTnameOrValue")
 
-parser{|NTnameDef|} t
-	= (symbol '(' &> sp clean <&> \n -> spsymbol ')' &> sp fixity <@ NTnameDef n)
-	<!> (clean <@ \n -> NTnameDef n GenConsNoPrio)
+parser{|NTnameDef|} t = fixity functionIdentifier <@ \(n, p) -> NTnameDef n p
+
+fixity p = (symbol '(' &> sp p <&> \n -> spsymbol ')' &> sp f <@ \p -> (n, p))
+	<!> (p <@ \n -> (n, GenConsNoPrio))
 where
-	fixity = (fix <&> \f -> sp (number 1 10 <!> yield 9) <@ GenConsPrio f)
+	f = (assoc <&> \f -> sp (number 1 10 <!> yield 9) <@ GenConsPrio f)
 			<!> yield (GenConsPrio GenConsAssocLeft 9)
 	where
-		fix = keyword "infixr" &> yield GenConsAssocRight
+		assoc = keyword "infixr" &> yield GenConsAssocRight
 			<!> keyword "infixl" &> yield GenConsAssocLeft
 			<!> keyword "infix" &> yield GenConsAssocNone
 
-clean = (lowercaseIdentifier <!> uppercaseIdentifier <!> funnyIdentifier) <&> (\n -> if (isMember n keywords) fail (yield n))
+functionIdentifier = constructorIdentifier <!> variableIdentifier
+
+constructorIdentifier = (uppercaseIdentifier <!> funnyIdentifier) <&> (\n -> if (isMember n keywords) fail (yield n))
+
+variableIdentifier = lowercaseIdentifier <&> (\n -> if (isMember n keywords) fail (yield n))
 
 parser{|(|-|)|} ga ge gb t = ga t &> sp (ge t) <& sp (gb t) <@ |-|
 
