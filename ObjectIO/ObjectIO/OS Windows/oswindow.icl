@@ -874,7 +874,10 @@ where
 
 inRange :: !Int !Int !Int !Int -> Int
 inRange destMin destRange sourceValue sourceRange
-	= destMin + (toInt (((toReal sourceValue) / (toReal sourceRange)) * (toReal destRange)))
+	| sourceRange == 0
+		= 0		// DvA: avoid obscure windows bug for ide
+	| otherwise
+		= destMin + (toInt (((toReal sourceValue) / (toReal sourceRange)) * (toReal destRange)))
 
 OSSliderMin		:== 0			// 0
 OSSliderMax		:== 32767		// MaxSigned2ByteInt

@@ -22,11 +22,12 @@ class Receivers rdef where
 
 instance Receivers (Receiver m) where
 // MW11 was	openReceiver :: .ls !(Receiver m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
-	openReceiver :: .ls !*(*Receiver m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
+	openReceiver :: .ls !*(Receiver m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
 	openReceiver ls rDef pState
 		# pState					= receiverFunctions.dOpen pState
 		# (idtable,ioState)			= ioStGetIdTable pState.io
-		| memberIdTable id idtable
+		# (member,idtable)			= memberIdTable id idtable
+		| member
 			= (ErrorIdsInUse,{pState & io=ioStSetIdTable idtable ioState})
 		# (rt,ioState)				= ioStGetReceiverTable ioState
 		# (maybe_parent,rt)			= getReceiverTableEntry id rt
@@ -63,16 +64,17 @@ instance Receivers (Receiver m) where
 	reopenReceiver ls rDef pState
 		= openReceiver ls rDef (appPIO (closeReceiver (rIdtoId (receiverDefRId rDef))) pState)
 */	
-	getReceiverType :: *(*Receiver m .ls .pst) -> ReceiverType
+	getReceiverType :: *(Receiver m .ls .pst) -> ReceiverType
 	getReceiverType _			= "Receiver"
 
 instance Receivers (Receiver2 m r) where
 // MW11 was	openReceiver :: .ls !(Receiver2 m r .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
-	openReceiver :: .ls !*(*Receiver2 m r .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
+	openReceiver :: .ls !*(Receiver2 m r .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
 	openReceiver ls rDef pState
 		# pState					= receiverFunctions.dOpen pState
 		# (idtable,ioState)			= ioStGetIdTable pState.io
-		| memberIdTable id idtable
+		# (member,idtable)			= memberIdTable id idtable
+		| member
 			= (ErrorIdsInUse,{pState & io=ioStSetIdTable idtable ioState})
 		# (rt,ioState)				= ioStGetReceiverTable ioState
 		# (maybe_parent,rt)			= getReceiverTableEntry id rt
@@ -110,7 +112,7 @@ instance Receivers (Receiver2 m r) where
 		= openReceiver ls rDef (appPIO (closeReceiver (r2IdtoId (receiver2DefR2Id rDef))) pState)
 */
 	
-	getReceiverType :: *(*Receiver2 m r .ls .pst) -> ReceiverType
+	getReceiverType :: *(Receiver2 m r .ls .pst) -> ReceiverType
 	getReceiverType _			= "Receiver2"
 
 
@@ -134,19 +136,19 @@ closeReceiver id ioState
 	# ioState					= ioStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
 	| not found
 		= ioState
-	| otherwise
-		# (idtable,ioState)		= ioStGetIdTable ioState
-		  ioState				= ioStSetIdTable (snd (removeIdFromIdTable id idtable)) ioState
-		  ioState				= unbindRId id ioState
+	# (idtable,ioState)		= ioStGetIdTable ioState
+	# ioState				= ioStSetIdTable (snd (removeIdFromIdTable id idtable)) ioState
+	# ioState				= unbindRId id ioState
 // MW11..
-		  ioState				= ioStSetRcvDisabled True ioState
-		  connectedIds			= rsH.rHandle.rConnected
-		  ioState				= seq (map closeReceiver connectedIds) ioState
-		  inetInfo				= rsH.rHandle.rInetInfo
-		| isNothing inetInfo
-			= ioState
-		# (_,_,_,closeFun)		= fromJust inetInfo
-		  ioState				= appIOToolbox closeFun ioState
+	# ioState				= ioStSetRcvDisabled True ioState
+	  connectedIds			= rsH.rHandle.rConnected
+	# ioState				= seq (map closeReceiver connectedIds) ioState
+	  inetInfo				= rsH.rHandle.rInetInfo
+	| isNothing inetInfo
+		= ioState
+	| otherwise
+		# (_,_,_,closeFun)	= fromJust inetInfo
+		# ioState			= appIOToolbox closeFun ioState
 // ..MW11
 		= ioState
 where

@@ -18,7 +18,7 @@ import code from library "advapi32_library",
                  library "shell32_library",
                  library "winmm_library",
                  library "winspool_library",
-                 library "wsock_library",
+            //   library "wsock_library",		// PA: should not be necessary
                  library "kernelExt_library",
                  library "gdiExt_library",
                  library "userExt_library"

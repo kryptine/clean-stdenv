@@ -273,6 +273,28 @@ instance PopUpMenuElements ((:+:) m1 m2) | PopUpMenuElements m1 & PopUpMenuEleme
 	getPopUpMenuElementType _
 		= ""
 
+instance PopUpMenuElements (SubMenu m) | PopUpMenuElements m where
+	popUpMenuElementToHandles :: !(SubMenu m .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l) | PopUpMenuElements m
+	popUpMenuElementToHandles (SubMenu title items atts) pState
+		# (ms,pState)		= popUpMenuElementToHandles items pState
+		  (selectAtt,atts)	= validateSelectState atts
+		  (idAtt,    atts)	= validateId          atts
+		= (	[menuElementHandleToMenuElementState
+			  (SubMenuHandle {	mSubHandle	= OSNoMenu
+							 ,	mSubMenuId	= idAtt
+							 ,	mSubOSMenuNr= 0
+							 ,	mSubItems	= map menuElementStateToMenuElementHandle ms
+							 ,	mSubTitle	= title
+							 ,	mSubSelect	= enabled selectAtt
+							 ,	mSubAtts	= atts
+							 }
+			  )
+			]
+		  ,	pState
+		  )
+	getPopUpMenuElementType _
+		= "SubMenu"
+
 instance PopUpMenuElements RadioMenu where
 	popUpMenuElementToHandles :: !(RadioMenu .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
 	popUpMenuElementToHandles  radioMenu pState

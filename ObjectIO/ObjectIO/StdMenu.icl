@@ -134,12 +134,13 @@ instance Menus (Menu m)	| MenuElements m where
 
 validateMenuId :: !(Maybe Id) !(IOSt .l) -> (!Maybe Id,!IOSt .l)
 validateMenuId Nothing ioState
-	# (mId,ioState)				= openId ioState
+	# (mId,ioState)		= openId ioState
 	= (Just mId,ioState)
 validateMenuId (Just id) ioState
-	# (idtable,ioState)			= ioStGetIdTable ioState
-	| memberIdTable id idtable	= (Nothing,ioStSetIdTable idtable ioState)
-	| otherwise					= (Just id,ioStSetIdTable idtable ioState)
+	# (idtable,ioState)	= ioStGetIdTable ioState
+	# (member,idtable)	= memberIdTable id idtable
+	| member			= (Nothing,ioStSetIdTable idtable ioState)
+	| otherwise			= (Just id,ioStSetIdTable idtable ioState)
 
 instance Menus (PopUpMenu m) | PopUpMenuElements m where
 	openMenu :: .ls !(PopUpMenu m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | PopUpMenuElements m
@@ -397,7 +398,8 @@ openRadioMenuItems rId pos radioItems ioState
 	| isEmpty radioItems
 		= (NoError,ioStSetIdTable idtable ioState)
 	# radioIds				= filterMap (\(_,maybeId,_,_)->(isJust maybeId,fromJust maybeId)) radioItems
-	| not (okMembersIdTable radioIds idtable)
+	# (ok,idtable)			= okMembersIdTable radioIds idtable
+	| not ok
 		= (ErrorIdsInUse,ioStSetIdTable idtable ioState)
 	| otherwise
 		# mId				= parent.idpId

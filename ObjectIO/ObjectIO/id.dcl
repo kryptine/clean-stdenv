@@ -56,12 +56,12 @@ initialIdTable			:: *IdTable
 
 /*	memberIdTable checks if the Id argument is a member of the IdTable (True) or not (False).
 */
-memberIdTable			:: !Id !IdTable -> Bool
+memberIdTable			:: !Id !*IdTable -> (!Bool,!*IdTable)
 
 /*	okMembersIdTable returns True only iff the list of Ids contains no duplicates and all Ids in 
 					 the list do not occur in the IdTable.
 */
-okMembersIdTable		:: ![Id] !IdTable -> Bool
+okMembersIdTable		:: ![Id] !*IdTable -> (!Bool,!*IdTable)
 
 /*	getIdParent(s) returns the currently bound IdParent associated with the argument Id(s).
 	If such a parent was found, Just parent is returned. Otherwise, Nothing is returned.

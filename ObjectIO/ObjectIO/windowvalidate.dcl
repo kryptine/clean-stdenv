@@ -42,7 +42,7 @@ exactWindowSize :: OSWindowMetrics ViewDomain !Size Bool Bool !WindowKind -> Siz
 */
 
 exactWindowPos :: !OSWindowMetrics !Size !(Maybe ItemPos) !WindowKind !WindowMode !(WindowHandles .pst) !*OSToolbox
-																	   -> (!Point2, !WindowHandles .pst, !*OSToolbox)
+																	  -> (!Point2, !WindowHandles .pst, !*OSToolbox)
 /*	exactWindowPos determines the exact position of a window.
 	The size argument must be the exact size of the window.
 	The ItemPos argument must be a valid ItemPos attribute. It should not be one of (LeftOf/RightTo/Above/Below)Prev. 

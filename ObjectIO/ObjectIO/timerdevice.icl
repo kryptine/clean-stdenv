@@ -84,12 +84,22 @@ where
 			pState1			= appPIO (ioStSetDevice timers1) pState
 			(tH1,pState2)	= letTimerDoIO nrOfIntervals tH pState1
 			timers1			= TimerSystemState {timers & tTimers=tHs1++[tH1]}
-			
+/*			Compiling with 'Reuse Unique Nodes' causes a space-leak in this function definition.
+			Therefore it is replaced temporarily with the function below.
 			letTimerDoIO :: !NrOfIntervals !(TimerStateHandle .ps) !.ps -> (!TimerStateHandle .ps, .ps)
 			letTimerDoIO nrOfIntervals (TimerLSHandle tsH=:{tState=ls,tHandle=tH=:{tFun}}) pState
 				= (TimerLSHandle {tsH & tState=ls1},pState1)
 			where
 				(ls1,pState1)	= tFun nrOfIntervals (ls,pState)
+*/			
+			letTimerDoIO :: !NrOfIntervals !(TimerStateHandle .ps) !.ps -> (!TimerStateHandle .ps, .ps)
+			letTimerDoIO nrOfIntervals (TimerLSHandle tsH=:{tState=ls,tHandle=tH=:{tFun}}) pState
+				= (TimerLSHandle {tsH & tState=ls1},pState1)
+			where
+				(ls1,pState1)	= apply tFun nrOfIntervals ls pState
+				
+				apply :: !(TimerFunction *(.ls,.pst)) !NrOfIntervals .ls !.pst -> (.ls,!.pst)
+				apply f d_i ls pst = f d_i (ls,pst)
 	
 	timerIO deviceEvent=:(ReceiverEvent (QASyncMessage event)) pState
 		= (deviceEvent,timerQASync event pState)

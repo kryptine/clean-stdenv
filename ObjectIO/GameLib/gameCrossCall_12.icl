@@ -11,8 +11,8 @@ import code from "cCrossCallGame_121.obj",
 				 "cOSGameLib_121.obj"
 //				 "ddutil.obj"          
 //				 "dsutil.obj"
-//import code from library "ddraw_library"
-//import code from library "dsound_library"
+import code from library "ddraw_library"
+import code from library "dsound_library"
 
 
 gameCrossCall_12FatalError :: String String -> .x
