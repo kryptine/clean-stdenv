@@ -21,7 +21,7 @@ osInitToolbox toolbox
 		= toolbox // PA: don't abort, otherwise you can't do startIO twice. 
 	//	= abort "osInitToolbox failed\n"
 	| otherwise
-		# toolbox	= winStartOsThread toolbox	// PA: WinStartOsThread added
+		# toolbox	= winBeginOs toolbox
 		# toolbox	= osInstallFont toolbox		// Install font info cross call handling
 	//	# toolbox	= osInstallTCP  toolbox		// Install tcp cross call handling	(PA: moved to StdEventTCP)
 		= toolbox
