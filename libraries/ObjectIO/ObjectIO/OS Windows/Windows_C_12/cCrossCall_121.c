@@ -305,6 +305,8 @@ static BOOL TranslateKeyboardMessage (MSG * pmsg)
 }	// TranslateKeyboardMessage
 */
 
+void (*dispatch_null_message_hook) (MSG*)=NULL;
+
 void HandleCleanRequest (CrossCallInfo * pcci)
 {
 	switch (pcci->mess)
@@ -338,6 +340,10 @@ void HandleCleanRequest (CrossCallInfo * pcci)
 							if (gAcceleratorTable==NULL || !TranslateAccelerator (ghActiveFrameWindow, gAcceleratorTable, &ms))
 							{
 								{	
+									if (ms.hwnd==NULL && dispatch_null_message_hook!=NULL){
+										(*dispatch_null_message_hook) (&ms);
+									}
+
 								//	TranslateKeyboardMessage (&ms);		// PA: confusing message manipulation removed
 									TranslateMessage (&ms);				// PA: standard message loop code
 									DispatchMessage  (&ms);
