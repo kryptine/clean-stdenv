@@ -19,3 +19,8 @@ listAGEC 		:: Bool [a] 			-> AGEC [a] 	| gGEC {|*|} a				// list editor, set Tru
 table_hv_AGEC	:: [[a]] 				-> AGEC [[a]] 	| gGEC {|*|} a  			// horizontal lists placed below each other
 table_vh_AGEC	:: [[a]] 				-> AGEC [[a]] 	| gGEC {|*|} a  			// vertical lists placed next to each other
 
+
+
+// same definitions with explicite dictionaries that can be used for specializations of editors
+
+idxAGEC 		:: (TgGEC a *(PSt .ps)) a -> AGEC a 

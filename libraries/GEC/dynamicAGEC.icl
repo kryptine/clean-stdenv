@@ -36,6 +36,7 @@ dynamicAGEC dv = mkAGEC { toGEC   = toExpr
 						 , fromGEC = fromExpr dv
 						 , updGEC  = updExpr  dv
 						 , value   = dv
+						 , pred	   = \t -> (True,t)
 //						 } ("dynamicGEC2")
 						 } ("dynamicGEC2" +++ ShowValueDynamic (dynamic dv))
 where

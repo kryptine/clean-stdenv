@@ -6,13 +6,18 @@ import StdAGEC, modeAGEC, buttonAGEC, tupleAGEC, updownAGEC
 
 okpred n = (True,n)
 
-idAGEC :: a -> AGEC a | gGEC {|*|} a 
-idAGEC j 	= mkAGEC 	{	toGEC	= \i _ ->i
-						,	fromGEC = id
-						,	value	= j
-						,	updGEC	= id
-						,	pred	= okpred
-						} "idGEC"
+idxAGEC :: (TgGEC a *(PSt .ps)) a -> AGEC a 
+idxAGEC gGEC j 	= mkxAGEC gGEC (idBimapGEC j) "idGEC"
+
+idBimapGEC j =	{ toGEC		= \i _ ->i
+				, fromGEC 	= id
+				, value		= j
+				, updGEC	= id
+				, pred		= okpred
+				} 
+
+idAGEC :: a -> AGEC a | gGEC {|*|} a
+idAGEC j 	= mkAGEC (idBimapGEC j) "idGEC"
 
 hidAGEC :: a -> AGEC a  // Just a store, does not require any GEC !
 hidAGEC j 	= mkAGEC` 	{	toGEC	= \i _ -> Hide i
@@ -33,20 +38,7 @@ where
 	toPred nv Undefined    = nv
 	toPred nv (Defined oi) = nv
 
-/*  previous  version
-predAGEC :: (a -> Bool) a -> AGEC a | gGEC {|*|} a 
-predAGEC pred j = mkAGEC 	{	toGEC	= toPred
-							,	fromGEC = \(ni,oi) = ni
-							,	value	= j
-							,	updGEC	= \(ni,oi) -> test ni (^^ oi)
-							,	pred	= pred
-							}  "predGEC"
-where
-	toPred ni Undefined          = (ni, hidAGEC ni)
-	toPred ni (Defined (oi,hoi)) = test ni oi
 
-	test ni oi = if (pred ni) (ni, hidAGEC ni) (oi, hidAGEC oi)
-*/
 // apply GEC
 
 applyAGEC :: (b -> a) (AGEC b) -> AGEC a | gGEC {|*|} a & gGEC {|*|} b
