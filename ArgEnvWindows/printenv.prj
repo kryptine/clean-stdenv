@@ -6,7 +6,6 @@ Global
 	CodeGen
 		CheckStacks:	False
 		CheckIndexes:	False
-		TargetProcessor:	CurrentProcessor
 	Application
 		HeapSize:	204800
 		StackSize:	40960
@@ -36,7 +35,6 @@ Global
 		ResourceSource:	
 		GenerateDLL:	False
 		ExportedNames:	
-		AddCarbResource:	False
 	Paths
 		Path:	{Project}
 	Precompile:	

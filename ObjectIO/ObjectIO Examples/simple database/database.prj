@@ -6,7 +6,6 @@ Global
 	CodeGen
 		CheckStacks:	False
 		CheckIndexes:	True
-		TargetProcessor:	CurrentProcessor
 	Application
 		HeapSize:	409600
 		StackSize:	102400
@@ -38,7 +37,7 @@ Global
 		ExportedNames:	
 	Paths
 		Path:	{Project}
-		Path:	{Application}\Examples\ObjectIO Examples 1.2.2\gui utilities
+		Path:	{Application}\Examples\ObjectIO Examples  1.2.4\gui utilities
 	Precompile:	
 	Postlink:	
 MainModule

@@ -6,7 +6,6 @@ Global
 	CodeGen
 		CheckStacks:	False
 		CheckIndexes:	False
-		TargetProcessor:	CurrentProcessor
 	Application
 		HeapSize:	409600
 		StackSize:	102400
@@ -36,11 +35,10 @@ Global
 		ResourceSource:	
 		GenerateDLL:	False
 		ExportedNames:	
-		AddCarbResource:	False
 	Paths
 		Path:	{Project}
 		Path:	{Application}\Libraries\GameLib 1.2.4
-		Path:	{Application}\Examples\ObjectIO Examples 1.2.4\gui utilities
+		Path:	{Application}\Examples\ObjectIO Examples  1.2.4\gui utilities
 	Precompile:	
 	Postlink:	
 MainModule

@@ -6,7 +6,6 @@ Global
 	CodeGen
 		CheckStacks:	False
 		CheckIndexes:	True
-		TargetProcessor:	CurrentProcessor
 	Application
 		HeapSize:	409600
 		StackSize:	102400
