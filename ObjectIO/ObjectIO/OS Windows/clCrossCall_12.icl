@@ -1,6 +1,6 @@
 implementation module clCrossCall_12
 
-import StdBool, StdClass, StdInt, StdMisc, StdString, StdTuple
+import StdBool, StdClass, StdInt, StdMisc, StdString, StdTuple, StdArray;
 import ostoolbox
 import code from "cAcceleratorTable_121.obj",
 				 "cCCallWindows_121.obj", 
@@ -22,11 +22,13 @@ import code from library "advapi32_library",
                  library "userExt_library"
 //import	StdDebug, tracetypes
 
+foreign export call_back_clean_object_io;
+
   //----------------------------------------------//
  //    Crosscall infrastructure                  //
 //----------------------------------------------//
 
-//	CrossCallInfo is the basic record that is passed between the Clean thread and the OS thread:
+//	CrossCallInfo is the basic record that is passed between Clean and C:
 ::	CrossCallInfo
 	=	{	ccMsg	:: !Int		// The message nr: Clean->OS use CcRq...; OS->Clean use CcWm...
 		,	p1		:: !Int
@@ -37,55 +39,170 @@ import code from library "advapi32_library",
 		,	p6		:: !Int
 		}
 
+call_back_clean_object_io :: !Int !Int !Int !Int !Int !Int !Int !*OSToolbox -> *(!Int,!Int,!Int,!Int,!Int,!Int,!Int,!*OSToolbox);
+call_back_clean_object_io i0 i1 i2 i3 i4 i5 i6 tb
+	# (call_back_n,tb) = get_call_back0 tb;
+	| call_back_n==1
+		# ({ccMsg=i0,p1=i1,p2=i2,p3=i3,p4=i4,p5=i5,p6=i6},tb) = call_back1 {ccMsg=i0,p1=i1,p2=i2,p3=i3,p4=i4,p5=i5,p6=i6} tb;
+		= (i0,i1,i2,i3,i4,i5,i6,tb);
+	| call_back_n==2
+		# ({ccMsg=i0,p1=i1,p2=i2,p3=i3,p4=i4,p5=i5,p6=i6},tb) = call_back2 {ccMsg=i0,p1=i1,p2=i2,p3=i3,p4=i4,p5=i5,p6=i6} tb;
+		= (i0,i1,i2,i3,i4,i5,i6,tb);
 
-//	PA: restructured issueCleanRequest for readability.
-//	2 versions: first without Iprint statements, second with Iprint statements.
-//	In both cases the Bool result has also been eliminated as it is never used.
-issueCleanRequest :: !(CrossCallInfo -> .(.s -> .(*OSToolbox -> *(.CrossCallInfo,.s,*OSToolbox))))
-                     !.CrossCallInfo !.s !*OSToolbox -> (!CrossCallInfo,!.s,!*OSToolbox)
-issueCleanRequest callback cci s tb
-//	# tb			= trace_n ("issueCleanRequest :"+++toOSCrossCallInfoString cci) tb
-	# (reply,tb)	= winKickOsThread cci tb
-	= handleCallBacks callback reply s tb
-where
-	handleCallBacks :: !(CrossCallInfo -> .(.s -> .(*OSToolbox -> *(.CrossCallInfo,.s,*OSToolbox))))
-					   !CrossCallInfo !.s !*OSToolbox -> (!CrossCallInfo,!.s,!*OSToolbox)
-	handleCallBacks callback cci=:{ccMsg} s tb
-		| ccMsg>2000
-			= abort ("handleCallBacks "+++toString ccMsg)
-//		# tb					= trace_n ("issueCleanRequest <-- "+++toCleanCrossCallInfoString cci) tb
-		| isReturnOrQuitCci ccMsg
-//			# tb				= trace_n "issueCleanRequest." tb
-			= (cci,s,tb)
-		| otherwise
-			# (returnCci,s,tb)	= callback cci s tb
-//			# tb				= trace_n ("issueCleanRequest --> "+++toOSCrossCallInfoString returnCci) tb
-			# (replyCci,tb)		= winKickOsThread returnCci tb
-			= handleCallBacks callback replyCci s tb
+call_back_variable_array0 :: {#Int};
+call_back_variable_array0 =: {0};
 
-/*	PA: version of issueCleanRequest that has no state parameter.
-*/
-issueCleanRequest2 :: !(CrossCallInfo -> .(*OSToolbox -> *(.CrossCallInfo,*OSToolbox))) !.CrossCallInfo !*OSToolbox
+select_call_back_variable_array0 :: !{#Int} -> *(!Int,!{#Int});
+select_call_back_variable_array0 array
+	= code {
+		pushI 0
+		push_a 0
+		select INT 0 1
+	};
+
+update_call_back_variable_array0 :: !{#Int} !Int !*OSToolbox-> (!{#Int},!*OSToolbox);
+update_call_back_variable_array0 array call_back_variable tb
+	= code {
+		pushI 0
+		update INT 0 1
+	};
+
+get_call_back0 :: !*OSToolbox -> *(!Int,!*OSToolbox);
+get_call_back0 tb
+	# array=call_back_variable_array0;
+	# (call_back_n,array) = select_call_back_variable_array0 array;
+	= (call_back_n,tb);
+
+store_call_back0 :: !Int !*OSToolbox -> *OSToolbox;
+store_call_back0 call_back_n tb
+	# array=call_back_variable_array0;
+	# (array,tb) = update_call_back_variable_array0 array call_back_n tb;
+	= tb;
+
+replace_call_back0 :: !Int !*OSToolbox -> *(!Int,!*OSToolbox);
+replace_call_back0 call_back_n tb
+	# array=call_back_variable_array0;
+	# (old_call_back_n,array) = select_call_back_variable_array0 array;
+	# (array,tb)=update_call_back_variable_array0 array call_back_n tb;
+	= (old_call_back_n,tb);
+
+:: CallBackFunction1 s :== (CrossCallInfo->.(s->.(*OSToolbox->*(.CrossCallInfo,s,*OSToolbox))));
+
+::	*CallBackVariable1
+	= E. .s: {call_back1 :: !(CallBackFunction1 s), state :: !s};
+
+call_back_variable_array1 :: {#CallBackVariable1};
+call_back_variable_array1 =: {{call_back1=(\c s t -> abort "initial callback function 1"),state=[]}};
+
+select_call_back_variable_array1 :: !{#CallBackVariable1} -> *(!(CrossCallInfo->.(.s->.(*OSToolbox->*(CrossCallInfo,.s,*OSToolbox)))),!.s,!{#CallBackVariable1});
+select_call_back_variable_array1 array
+	= code {
+		pushI 0
+		push_a 0
+		select rCallBackVariable1 2 0
+	};
+
+update_call_back_variable_array1 :: !{#CallBackVariable1} !*CallBackVariable1 !*OSToolbox-> (!{#CallBackVariable1},!*OSToolbox);
+update_call_back_variable_array1 array call_back_variable tb
+	= code {
+		pushI 0
+		update rCallBackVariable1 2 0
+	};
+
+replace_call_back1 :: !(CrossCallInfo->.(.s1->.(*OSToolbox->*(CrossCallInfo,.s1,*OSToolbox)))) !.s1 !*OSToolbox
+				 -> *(!(CrossCallInfo->.(.s2->.(*OSToolbox->*(CrossCallInfo,.s2,*OSToolbox)))),!.s2,!*OSToolbox);
+replace_call_back1 call_back s tb
+	# array=call_back_variable_array1;
+	# (old_call_back,old_s,array) = select_call_back_variable_array1 array;
+	# (array,tb)=update_call_back_variable_array1 array {call_back1=call_back,state=s} tb;
+	= (old_call_back,old_s,tb);
+
+get_call_back1 :: !*OSToolbox -> *(!(CrossCallInfo->.(.s2->.(*OSToolbox->*(CrossCallInfo,.s2,*OSToolbox)))),!.s2,!*OSToolbox);
+get_call_back1 tb
+	# array=call_back_variable_array1;
+	# (call_back,s,array) = select_call_back_variable_array1 array;
+	= (call_back,s,tb);
+
+store_call_back1 :: !(CrossCallInfo->.(.s1->.(*OSToolbox->*(CrossCallInfo,.s1,*OSToolbox)))) !.s1 !*OSToolbox -> *OSToolbox;
+store_call_back1 call_back s tb
+	# array=call_back_variable_array1;
+	# (array,tb) = update_call_back_variable_array1 array {call_back1=call_back,state=s} tb;
+	= tb;
+
+call_back1 :: !CrossCallInfo !*OSToolbox -> *(!CrossCallInfo,!.OSToolbox);
+call_back1 cci_argument tb
+	# (call_back,s,tb) = get_call_back1 tb;
+	# (cci_result,s,tb) = call_back cci_argument s tb
+	= (cci_result,store_call_back1 call_back s tb);
+
+:: CallBackFunction2 :== (CrossCallInfo->.(*OSToolbox->*(CrossCallInfo,*OSToolbox)));
+
+::	*CallBackVariable2 = {call_back2 :: !CallBackFunction2};
+
+call_back_variable_array2 :: {#CallBackVariable2};
+call_back_variable_array2 =: {{call_back2=(\c t -> abort "initial callback function 2")}};
+
+select_call_back_variable_array2 :: !{#CallBackVariable2} -> *(!(CrossCallInfo->.(*OSToolbox->*(CrossCallInfo,*OSToolbox))),!{#CallBackVariable2});
+select_call_back_variable_array2 array
+	= code {
+		pushI 0
+		push_a 0
+		select rCallBackVariable2 1 0
+	};
+
+update_call_back_variable_array2 :: !{#CallBackVariable2} !*CallBackVariable2 !*OSToolbox-> (!{#CallBackVariable2},!*OSToolbox);
+update_call_back_variable_array2 array call_back_variable tb
+	= code {
+		pushI 0
+		update rCallBackVariable2 1 0
+	};
+
+replace_call_back2 :: !(CrossCallInfo->.(*OSToolbox->*(CrossCallInfo,*OSToolbox))) !*OSToolbox
+				 -> *(!(CrossCallInfo->.(*OSToolbox->*(CrossCallInfo,*OSToolbox))),!*OSToolbox);
+replace_call_back2 call_back tb
+	# array=call_back_variable_array2;
+	# (old_call_back,array) = select_call_back_variable_array2 array;
+	# (array,tb)=update_call_back_variable_array2 array {call_back2=call_back} tb;
+	= (old_call_back,tb);
+
+get_call_back2 :: !*OSToolbox -> *(!(CrossCallInfo->.(*OSToolbox->*(CrossCallInfo,*OSToolbox))),!*OSToolbox);
+get_call_back2 tb
+	# array=call_back_variable_array2;
+	# (call_back,array) = select_call_back_variable_array2 array;
+	= (call_back,tb);
+
+store_call_back2 :: !(CrossCallInfo->.(*OSToolbox->*(CrossCallInfo,*OSToolbox))) !*OSToolbox -> *OSToolbox;
+store_call_back2 call_back tb
+	# array=call_back_variable_array2;
+	# (array,tb) = update_call_back_variable_array2 array {call_back2=call_back} tb;
+	= tb;
+
+call_back2 :: !CrossCallInfo !*OSToolbox -> *(!CrossCallInfo,!.OSToolbox);
+call_back2 cci_argument tb
+	# (call_back,tb) = get_call_back2 tb;
+	# (cci_result,tb) = call_back cci_argument tb
+	= (cci_result,store_call_back2 call_back tb);
+
+issueCleanRequest :: !(CrossCallInfo -> .(.s -> .(*OSToolbox -> *(CrossCallInfo,.s,*OSToolbox))))
+                     !CrossCallInfo !.s !*OSToolbox -> (!CrossCallInfo,!.s,!*OSToolbox)
+issueCleanRequest call_back cci s tb
+	# (call_back,s,tb) = replace_call_back1 call_back s tb;
+	# (old_call_back_n,tb) = replace_call_back0 1 tb;
+	# (cci,tb) = winCallOsWithCallBack cci tb;
+	# (call_back,s,tb) = replace_call_back1 call_back s tb;
+	# tb = store_call_back0 old_call_back_n tb;
+	= (cci,s,tb);
+
+//	PA: version of issueCleanRequest that has no state parameter.
+issueCleanRequest2 :: !(CrossCallInfo -> .(*OSToolbox -> *(CrossCallInfo,*OSToolbox))) !CrossCallInfo !*OSToolbox
 																					 -> (!CrossCallInfo,!*OSToolbox)
-issueCleanRequest2 callback cci tb
-//	# tb			= trace_n ("issueCleanRequest2 :"+++toOSCrossCallInfoString cci) tb
-	# (reply,tb)	= winKickOsThread cci tb
-	= handleCallBacks callback reply tb
-where
-	handleCallBacks :: !(CrossCallInfo -> .(*OSToolbox -> *(.CrossCallInfo,*OSToolbox))) !CrossCallInfo !*OSToolbox
-																					 -> (!CrossCallInfo,!*OSToolbox)
-	handleCallBacks callback cci=:{ccMsg} tb
-		| ccMsg>2000
-			= abort ("HandleCallBacks "+++toString ccMsg)
-//		# tb					= trace_n ("issueCleanRequest2 <-- "+++toCleanCrossCallInfoString cci) tb
-		| isReturnOrQuitCci ccMsg
-//			# tb				= trace_n "issueCleanRequest2." tb
-			= (cci,tb)
-		| otherwise
-			# (returnCci,tb) 	= callback cci tb
-//			# tb				= trace_n ("issueCleanRequest2 --> "+++toOSCrossCallInfoString returnCci) tb
-			# (replyCci, tb) 	= winKickOsThread returnCci tb
-			= handleCallBacks callback replyCci tb
+issueCleanRequest2 call_back cci tb
+	# (call_back,tb) = replace_call_back2 call_back tb;
+	# (old_call_back_n,tb) = replace_call_back0 2 tb;
+	# (cci,tb) = winCallOsWithCallBack cci tb;
+	# (call_back,tb) = replace_call_back2 call_back tb;
+	# tb = store_call_back0 old_call_back_n tb;
+	= (cci,tb);
 
 //	PA: macros for returning proper number of arguments within a CrossCallInfo.
 Rq0Cci msg :== {ccMsg=msg,p1=0,p2=0,p3=0,p4=0,p5=0,p6=0}
@@ -167,30 +284,30 @@ consolePrint _ _
  //  Synchronisation operations between the Clean thread and OS thread  //
 //---------------------------------------------------------------------//
 
-winKickOsThread ::  !CrossCallInfo !*OSToolbox -> ( !CrossCallInfo, !*OSToolbox)
-winKickOsThread _ _
+winCallOsWithCallBack ::  !CrossCallInfo !*OSToolbox -> ( !CrossCallInfo, !*OSToolbox)
+winCallOsWithCallBack _ _
 	= code
 	{
-		.inline WinKickOsThread
-			ccall WinKickOsThread "IIIIIIII-IIIIIIII"
+		.inline WinCallOsWithCallBack
+			ccall WinCallOsWithCallBack "GIIIIIIII-IIIIIIII"
 		.end
 	}
 
-winKillOsThread ::  !*OSToolbox ->  *OSToolbox
-winKillOsThread _
+winEndOs ::  !*OSToolbox ->  *OSToolbox
+winEndOs _
 	= code
 	{
-		.inline WinKillOsThread
-			ccall WinKillOsThread "I-I"
+		.inline WinEndOs
+			ccall WinEndOs "I-I"
 		.end
 	}
 
-winStartOsThread ::  !*OSToolbox ->  *OSToolbox
-winStartOsThread _
+winBeginOs ::  !*OSToolbox ->  *OSToolbox
+winBeginOs _
 	= code
 	{
-		.inline WinStartOsThread
-			ccall WinStartOsThread "I-I"
+		.inline WinBeginOs
+			ccall WinBeginOs "I-I"
 		.end
 	}
 

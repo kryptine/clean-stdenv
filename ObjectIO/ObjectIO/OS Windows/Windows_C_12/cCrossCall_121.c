@@ -54,11 +54,6 @@ CrossCallProcedureTable gCrossCallProcedureTable;
 **********************************************************************************************/
 static BOOL gEventsInited        = FALSE;
 static BOOL gAppRunning          = FALSE;
-static HANDLE gCLEAN_DONE;
-static HANDLE gOS_DONE;
-static DWORD gCleanThreadId;
-static DWORD gOsThreadId;
-static HANDLE ghOSThreadHandle   = NULL;
 static HWND gNextClipboardViewer = NULL;		/* PA: stores next clipboardviewer. */
 static LONG gPrevMsgTime         = -1;
 static BOOL gMessStored          = FALSE;
@@ -370,19 +365,7 @@ void HandleCleanRequest (CrossCallInfo * pcci)
 				}
 			}
 	}
-	KickCleanThread (pcci);
 }	/* HandleCleanRequest */
-
-
-BOOL CleanThreadRunning (void)
-{
-	return GetCurrentThreadId () == gCleanThreadId;
-}
-
-BOOL OsThreadRunning (void)
-{
-	return GetCurrentThreadId () == gOsThreadId;
-}
 
 void WinInitOs (Bool * ok, OS * os)
 {
@@ -429,92 +412,60 @@ static void InitGlobals (void)
 	gCrossCallProcedureTable = EmptyCrossCallProcedureTable ();
 }	/* InitGlobals */
 
-OS WinStartOsThread (OS os)
+static DWORD InitWindowsAndMenu (void);
+
+OS WinBeginOs (OS os)
 {
 	rprintf ("WSOT: Started\n");
 
 	InitGlobals ();
 	rprintf ("WSOT: Globals Initialised\n");
-	gCLEAN_DONE = CreateEvent (NULL,	/* Default security attributes	*/
-							   FALSE,	/* Not a manual-reset event 	*/
-							   FALSE,	/* Initial state nonsignalled	*/
-							   NULL);	/* No name						*/
-	Check ((BOOL) gCLEAN_DONE, "\'InitOs\' could not create first event object");
-	rprintf ("WSOT: CLEANDONE event created\n");
 
-	gOS_DONE = CreateEvent (NULL, FALSE, FALSE, NULL);
-	Check ((BOOL) gOS_DONE, "\'InitOs\' could not create second event object");
-	rprintf ("WSOT: OS_DONE event created\n");
-
-	gCleanThreadId = GetCurrentThreadId ();
-	rprintf ("WSOT: gor current thread id\n");
-
-	ghOSThreadHandle = CreateThread (NULL,				/* Default security attributes		*/
-									 0,					/* Default stacksize				*/
-								  (LPTHREAD_START_ROUTINE) OsThreadFunction,
-									 0,					/* parameter to thread function		*/
-									 0,					/* Not initially suspended			*/
-									 &(gOsThreadId));	/* store threadId here				*/
-	Check ((BOOL) ghOSThreadHandle, "\'InitOs\' could not create second thread");	// PA!!! test fails
-	rprintf ("WSOT: new thread created\n");
-	WaitForSingleObject (gOS_DONE, INFINITE);
-	rprintf ("WSOT: wait done\n");
+	InitWindowsAndMenu();
 
 	return os;
-}	/* WinStartOSThread */
+}	/* WinBeginOs */
 
-OS WinKillOsThread (OS os)
+OS WinEndOs (OS os)
 {
 	rprintf ("OS WinKillOsThread (OS os)\n");
-	if (ghOSThreadHandle != NULL)
-	{
-		rprintf ("ghOSThreadHandle != NULL\n");
-		TerminateThread (ghOSThreadHandle, 0);
-		rprintf ("		TerminateThread(ghOSThreadHandle, 0);\n");
-		ghOSThreadHandle = NULL;
-		rprintf ("		ghOSThreadHandle = NULL;\n");
 
-		/* CleanUp */
-		if (gAcceleratorTable)
-			DestroyAcceleratorTable (gAcceleratorTable);
-		rprintf ("		if (gAcceleratorTable) \n");
-		rprintf ("				DestroyAcceleratorTable( gAcceleratorTable );\n");
-		DeleteCursors ();
-		rprintf ("		DeleteCursors();\n");
-		CloseHandle (gOS_DONE);
-		gOS_DONE = NULL;
-		rprintf ("		CloseHandle(gOS_DONE);	  gOS_DONE	  = NULL;\n");
-		CloseHandle (gCLEAN_DONE);
-		gCLEAN_DONE = NULL;
-		rprintf ("		CloseHandle(gCLEAN_DONE); gCLEAN_DONE = NULL;\n");
-		if (gDlogFont != NULL)
-			DeleteObject (gDlogFont);
-		rprintf ("		if(gDlogFont != NULL)\n");
-		rprintf ("		   DeleteObject(gDlogFont);\n");
+	/* CleanUp */
+	if (gAcceleratorTable)
+		DestroyAcceleratorTable (gAcceleratorTable);
+	rprintf ("		if (gAcceleratorTable) \n");
+	rprintf ("				DestroyAcceleratorTable( gAcceleratorTable );\n");
+	DeleteCursors ();
+	rprintf ("		DeleteCursors();\n");
 
-		DeleteObject (gControlFont);	// The global logical font must be deleted.
-		if (gCrossCallProcedureTable)
-			FreeCrossCallProcedureTable (gCrossCallProcedureTable);
-	};
+	if (gDlogFont != NULL)
+		DeleteObject (gDlogFont);
+	rprintf ("		if(gDlogFont != NULL)\n");
+	rprintf ("		   DeleteObject(gDlogFont);\n");
+
+	DeleteObject (gControlFont);	// The global logical font must be deleted.
+	if (gCrossCallProcedureTable)
+		FreeCrossCallProcedureTable (gCrossCallProcedureTable);
+
 // MW...
 	ghMainWindow = NULL;
 // ... MW
 
 	return os;
-}	/* WinKillOsThread*/
+}	/* WinEndOs */
 
-void WinKickOsThread (int imess,
-					  int ip1, int ip2, int ip3,
-					  int ip4, int ip5, int ip6,
-					  OS ios,
-					  int *omess,
-					  int *op1, int *op2, int *op3,
-					  int *op4, int *op5, int *op6,
-					  OS * oos
-					 )
+OS os_toolbox;
+
+void WinCallOsWithCallBack (int imess,
+					  		int ip1, int ip2, int ip3,int ip4, int ip5, int ip6,
+							OS ios,
+						 	int *omess,
+					 		int *op1, int *op2, int *op3,int *op4, int *op5, int *op6,
+							OS * oos
+					 		)
 {
 /*	rprintf("KOT: filling in Cci\n"); */
-	rprintf ("WinKickOsThread (");
+	rprintf ("WinCallOsWithCallBack (");
 	printCCI (&gCci);
 	rprintf (")\n");
 
@@ -526,41 +477,20 @@ void WinKickOsThread (int imess,
 	gCci.p5 = ip5;
 	gCci.p6 = ip6;
 
-	if (ghOSThreadHandle != NULL)
-	{
-		rprintf ("KOT: Cci filled in, setting event\n");
-		SetEvent (gCLEAN_DONE);
-		rprintf ("KOT: Event set, start wait.\n");
-		WaitForSingleObject (gOS_DONE, INFINITE);
-		rprintf ("KOT: wait done, reading out Cci.\n");
-		*omess = gCci.mess;
-		*op1 = gCci.p1;
-		*op2 = gCci.p2;
-		*op3 = gCci.p3;
-		*op4 = gCci.p4;
-		*op5 = gCci.p5;
-		*op6 = gCci.p6;
-		*oos = ios;
-		rprintf ("KOT: Cci read: {");
-		printCCI (&gCci);
-		rprintf ("}\n");
-	}
-	else
-	{
-		rprintf ("KOT: no thread existed, returning CcWASQUIT for <");
-		printCCI (&gCci);
-		rprintf (">\n");
-		*omess = CcWASQUIT;
-		*op1 = 0;
-		*op2 = 0;
-		*op3 = 0;
-		*op4 = 0;
-		*op5 = 0;
-		*op6 = 0;
-		*oos = ios;
-	}
-	rprintf ("KOT: done.\n");
-}	/* WinKickOsThread */
+	os_toolbox=ios;
+
+	HandleCleanRequest (&gCci);
+
+	*omess = gCci.mess;
+	*op1 = gCci.p1;
+	*op2 = gCci.p2;
+	*op3 = gCci.p3;
+	*op4 = gCci.p4;
+	*op5 = gCci.p5;
+	*op6 = gCci.p6;
+
+	*oos=os_toolbox;
+}	/* WinCallOsWithCallBack */
 
 #define PRINTCROSSCALLS
 
@@ -571,84 +501,7 @@ static int ossp = -1;
 static int clsp = -1;
 #endif
 
-void KickCleanThread (CrossCallInfo * pcci)
-{
-
-#ifdef PRINTCROSSCALLS
-	if (ossp == -1)
-	{
-		for (ossp = 0; ossp < 10; ossp++)
-		{
-			osstack[ossp].mess = -1;
-		}
-		ossp = 1;
-		osstack[ossp].mess = -2;
-	}
-
-	if (clsp == -1)
-	{
-		for (clsp = 0; clsp < 10; clsp++)
-		{
-			clstack[clsp].mess = -1;
-		}
-		clsp = 1;
-		clstack[clsp].mess = -2;
-	}
-#endif
-
-	if (pcci != &gCci)
-		gCci = *pcci;
-	rprintf ("KCT: started\n");
-
-#ifdef PRINTCROSSCALLS
-	if (gCci.mess < 20)
-	{
-		rprintf ("	-- %d --> OS returning <", clsp + ossp - 2);
-		printCCI (&gCci);
-		rprintf ("> from <");
-		printCCI (&(clstack[clsp]));
-		rprintf (">\n");
-		clsp--;
-	}
-	else
-	{
-		ossp++;
-		osstack[ossp] = gCci;
-		rprintf ("	-- %d --> OS calling with <", clsp + ossp - 2);
-		printCCI (&gCci);
-		rprintf (">\n");
-	}
-#endif
-
-	rprintf ("KCT: setting event\n");
-	SetEvent (gOS_DONE);
-	rprintf ("KCT: starting wait\n");
-	WaitForSingleObject (gCLEAN_DONE, INFINITE);
-	rprintf ("KCT: wait done.\n");
-
-	if (pcci != &gCci)
-		*pcci = gCci;
-
-#ifdef PRINTCROSSCALLS
-	if (gCci.mess < 20)
-	{
-		rprintf (" <-- %d --  Clean returning <", clsp + ossp - 2);
-		printCCI (&gCci);
-		rprintf ("> from <");
-		printCCI (&(osstack[ossp]));
-		rprintf (">\n");
-		ossp--;
-	}
-	else
-	{
-		clsp++;
-		clstack[clsp] = gCci;
-		rprintf (" <-- %d --  Clean calling with <", clsp + ossp - 2);
-		printCCI (&gCci);
-		rprintf (">\n");
-	}
-#endif
-}	/* KickCleanThread */
+extern void call_back_clean_object_io (int,int,int,int,int,int,int,OS,int*,int*,int*,int*,int*,int*,int*,OS*);
 
 void SendMessageToClean (int mess, int p1, int p2, int p3, int p4, int p5, int p6)
 {
@@ -660,11 +513,8 @@ void SendMessageToClean (int mess, int p1, int p2, int p3, int p4, int p5, int p
 	gCci.p5 = p5;
 	gCci.p6 = p6;
 
-	KickCleanThread (&gCci);
-	while (!IsReturnCci (&gCci))
-	{
-		HandleCleanRequest (&gCci);
-	}
+	call_back_clean_object_io (mess,p1,p2,p3,p4,p5,p6,os_toolbox,
+							   &gCci.mess,&gCci.p1,&gCci.p2,&gCci.p3,&gCci.p4,&gCci.p5,&gCci.p6,&os_toolbox);
 }
 
 CrossCallInfo *MakeReturn0Cci (CrossCallInfo * pcci)
@@ -988,7 +838,7 @@ static LRESULT CALLBACK MainWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara
 	return 0;
 }	/*	MainWindowProcedure */
 
-DWORD OsThreadFunction (DWORD param)
+static DWORD InitWindowsAndMenu (void)
 {
 	WNDCLASSEX wclass;
 	int width, height;
@@ -1049,16 +899,6 @@ DWORD OsThreadFunction (DWORD param)
 	RemoveMenu (mainSystemMenu, SC_MINIMIZE, MF_BYCOMMAND);
 	RemoveMenu (mainSystemMenu, SC_MAXIMIZE, MF_BYCOMMAND);
 	DrawMenuBar (ghMainWindow);
-
-	KickCleanThread (MakeReturn0Cci (&gCci));
-
-	while (1)
-	{
-		HandleCleanRequest (&gCci);
-	}
-
-	MakeReturn0Cci (&gCci);
-	SetEvent (gOS_DONE);
 
 	return 0;
 }	/* OsThreadFunction */
