@@ -15,7 +15,7 @@ gHpr{|Html|} prev (Head headtags body)
 									 <+> htmlAttrCmnd "body" [" background = back35.jpg "] body
 
 gHpr{|Head_Attr|} prev (Hd_Title text) = prev <+> htmlAttrCmnd "title" None text
-gHpr{|Head_Attr|} prev (`Hd_Script script) = prev <+ script
+//gHpr{|Head_Attr|} prev (`Hd_Script script) = prev <+ script
 
 
 gHpr{|Body|} prev (A link body)  	= prev <+> htmlAttrCmnd "a" 		[link] 		body
@@ -32,6 +32,7 @@ gHpr{|Body|} prev (Input inputs)	= prev <+> htmlAttrCmnd "input"		inputs 		""
 gHpr{|Body|} prev (P body)  		= prev <+> htmlAttrCmnd "p"  		None		body
 gHpr{|Body|} prev (PA align body)  	= prev <+> htmlAttrCmnd "p" 		[align] 	body
 gHpr{|Body|} prev (Pre body) 		= prev <+> htmlAttrCmnd "pre" 		None		body
+gHpr{|Body|} prev (Script attr scr) = prev <+> htmlAttrCmnd  "script" 	attr 		scr
 gHpr{|Body|} prev (Small text) 		= prev <+> htmlAttrCmnd "small" 	None		text
 gHpr{|Body|} prev (Select seltags options)	
 									= prev <+> htmlAttrCmnd "select" 	seltags 	options
@@ -51,6 +52,8 @@ gHpr{|Body|} prev (Body body)		= prev <+ body
 
 derive gHpr Align
 derive gHpr Checked
+derive gHpr ColorOption
+derive gHpr ColorName
 derive gHpr Disabled
 derive gHpr Form_Attr
 derive gHpr FrameOption
@@ -86,7 +89,6 @@ gHpr{|Language|} prev VbScript 		= prev <+ "\"text/vbscript\""
 gHpr{|Language|} prev Other     	= prev <+ "\"text/other\""
 
 
-gHpr{|Script|} prev (Script scriptattr script)= prev <+> htmlAttrCmnd  "script" scriptattr script
 
 
 gHpr{|Option|} prev (Option string tags)= prev <+> htmlAttrCmnd  "option" tags string
@@ -107,19 +109,28 @@ gHpr{|Value|} prev (RV real) 	= prev <+ toString real
 gHpr{|Value|} prev (BV bool) 	= prev <+ toString bool		
 
 
-gHpr{|ColorOption|} prev option = prev <+ option
-
-:: ColorName = Red
-
-gHpr{|ColorName|} prev Red	= prev <+ "red"
-
-
 gHpr{|NoAttr|} prev _ = prev 
 
 //derive gHpr HN, HexNum
 
-gHpr{|HN|} prev _ = prev  <+ "0"
+gHpr{|HN|} prev H_0 = prev  <+ "0"
+gHpr{|HN|} prev H_1 = prev  <+ "1"
+gHpr{|HN|} prev H_2 = prev  <+ "2"
+gHpr{|HN|} prev H_3 = prev  <+ "3"
+gHpr{|HN|} prev H_4 = prev  <+ "4"
+gHpr{|HN|} prev H_5 = prev  <+ "5"
+gHpr{|HN|} prev H_6 = prev  <+ "6"
+gHpr{|HN|} prev H_7 = prev  <+ "7"
+gHpr{|HN|} prev H_8 = prev  <+ "8"
+gHpr{|HN|} prev H_9 = prev  <+ "9"
+gHpr{|HN|} prev H_A = prev  <+ "A"
+gHpr{|HN|} prev H_B = prev  <+ "B"
+gHpr{|HN|} prev H_C = prev  <+ "C"
+gHpr{|HN|} prev H_D = prev  <+ "D"
+gHpr{|HN|} prev H_E = prev  <+ "E"
+gHpr{|HN|} prev H_F = prev  <+ "F"
 
-gHpr{|HexNum|} prev (HexNum h0 h1 h2 h3 h4 h5) = prev  <+ "#" <+ h0 <+ h1 <+ h5 
+gHpr{|HexNum|} prev (HexNum h0 h1 h2 h3 h4 h5) 
+	= prev  <+ "\"#" <+ h0 <+ h1 <+ h2 <+ h3 <+ h4 <+ h5 <+ "\"" 
 
 

@@ -8,31 +8,58 @@ derive gHGEC []
 
 Start world  = doHtml MyPage world
 
-//derive gParse (,)
+submitscript :: String String -> Body
+submitscript formname updatename
+=	Script []
+	(	" function toclean(inp)" +++
+		" { document." +++
+			formname  +++ "." +++
+			updatename +++ ".value=inp.name+\"=\"+inp.value;" +++
+			"document." +++ formname +++ ".submit(); }"
+	)
+	
+globalstateform :: String String String Value-> Body
+globalstateform formname updatename globalname globalstate
+=	Form 	[ Frm_Name formname
+			, Frm_Action MyPhP
+			, Frm_Method Post
+			]
+			[ Input [ Inp_Name updatename
+					, Inp_Type Hidden
+					]
+			, Input [ Inp_Name globalname
+					, Inp_Type Hidden
+					, Inp_Value globalstate
+					]
+			]		 
 
 MyPage hst
-# (list,(listbody,hst)) = mkEditHGEC "list" HEdit [1] hst
-# (ni1,(counter1,hst)) 	= counterHGEC "first"   0 hst
-# (ni2,(counter2,hst)) 	= counterHGEC "second"  0 hst
-# (nf, (myform,hst))    = mkEditHGEC "addingcounters" HDisplay (ni1,ni2,ni1 + ni2) hst
 = (Head 
 		[ Hd_Title "Testing"]
 		 
-		[ H1 "Counter Example"//, counter1
+		[ submitscript    "CleanForm" "UD"
+		, globalstateform "CleanForm" "UD" "GS" (SV "thisistheglobalstate") 
+
+		
+		, H1 "Counter Example"//, counter1
 		, T "test"
-		, listbody
-		, Td [Td_bgcolor  (`Col_XXX (HexNum H_0 H_0 H_0 H_0 H_0 H_0))]  [EmptyBody]
-		, counter1
-		, counter2
-		, myform
-		, T "id??:" , T CheckUpdateId, Br
+		, Input [ Inp_Name 		 (encodeInfo "(1, UpdC \"Cons\")") //"rinus"
+				, Inp_Type 		 Text
+				, Inp_Value 	 (IV 23)
+				, `Inp_ElemEvnts (OnChange "toclean(this)")
+				]
+		, Select 	[ Sel_Name ("ConsSelector")
+					, `Sel_ElemEvnts (OnChange "toclean(this)")
+					]
+					[ Option "aap" [Opt_Value "ap"]
+					, Option "noot" [Opt_Value "not"]
+					, Option "mies" [Opt_Value "mies"]
+					]
+		 ,	Input 	[	Inp_Type Button
+					, 	Inp_Value (SV "knopje")
+					,	Inp_Name (encodeInfo "(2, UpdB Pressed)")
+					,	Inp_Size 40  
+					, 	`Inp_MouseEvnts (OnClick "toclean(this)")
+					]
 		, traceHtmlInput
 		],hst)
-where
-//	changescript s = "\"document.globalform.GlobalName.value.submit();\""  //"document.forms.globalform.submit()"
-//	changescript s = "\"alert(\'kijken of dit werkt\');\""  
-	changescript s = "\"document.forms.globalform.submit();\""
-//	changescript s = "\"document.forms.localform.submit();\""
-//	changescript s = "\"alert(" +++ "SubmitClean (\"aap\")" +++ ");\""
-
-//	changescript s = "\"document.forms.globalform.submit(SubMitClean(\"aap\"));\""
