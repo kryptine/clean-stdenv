@@ -50,28 +50,3 @@ where
   max::!a !a ->	a | Ord a
   max x y  :== case (x<y) of True = y; _ = x
 
-/*
-inc :: !a -> a | + , one a
-inc x :== x + one
-
-dec :: !a -> a | - , one a
-dec x :== x - one
-
-(<>) infix  4 :: !a	!a	->	Bool | Eq a
-(<>) x y :== not (x == y)
-
-(>) infix  4 :: !a !a	-> Bool | Ord a
-(>) x y  :== y < x 
-
-(<=) infix 4 :: !a !a -> Bool | Ord a
-(<=) x y :== not (y<x)
-
-(>=) infix 4 :: !a !a -> Bool | Ord a
-(>=) x y :== not (x<y) 
-
-min::!a !a ->	a | Ord a
-min x y  :== case (x<y) of True = x; _ = y
-
-max::!a !a ->	a | Ord a
-max x y  :== case (x<y) of True = y; _ = x
-*/
