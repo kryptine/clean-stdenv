@@ -788,12 +788,10 @@ osCreateCompoundControl wMetrics parentWindow parentPos show able isTransparent 
 						hInfo=:{cbiHasScroll=hasHScroll}
 						vInfo=:{cbiHasScroll=hasVScroll} tb
 	# (hPtr,tb)			= case hasHScroll of
-							True	-> trace_n ("createHScroll") 
-										osCreateSliderControl parentWindow parentPos show able True (hInfo.cbiPos) (hInfo.cbiSize) (hInfo.cbiState) tb
+							True	-> osCreateSliderControl parentWindow parentPos show able True hInfo.cbiPos hInfo.cbiSize hInfo.cbiState tb
 							False	-> (OSNoWindowPtr,tb)
 	# (vPtr,tb)			= case hasVScroll of
-							True	-> trace_n ("createVScroll")
-										osCreateSliderControl parentWindow parentPos show able False (vInfo.cbiPos) (vInfo.cbiSize) (vInfo.cbiState) tb
+							True	-> osCreateSliderControl parentWindow parentPos show able False vInfo.cbiPos vInfo.cbiSize vInfo.cbiState tb
 							False	-> (OSNoWindowPtr,tb)
 	# tb = trace_n` ("oswindow::osCreateCompoundControl",parentWindow,hPtr,vPtr) tb
 	= (parentWindow,hPtr,vPtr,tb)
@@ -1133,10 +1131,10 @@ osGetSliderControlMinWidth _
 osCreateSliderControl
 	:: !OSWindowPtr !(!Int,!Int) !Bool !Bool !Bool !(!Int,!Int) !(!Int,!Int) !(!Int,!Int,!Int,!Int) !*OSToolbox
 	-> (!OSWindowPtr,!*OSToolbox)
-osCreateSliderControl parentWindow parentPos show able horizontal sliderPos sliderSize sliderState=:(min,thumb,max,thumbSize) tb
+osCreateSliderControl parentWindow (parent_pos_x,parent_pos_y) show able horizontal (slider_pos_x,slider_pos_y) sliderSize sliderState=:(min,thumb,max,thumbSize) tb
+	# itemRect		= posSizeToRect {x = slider_pos_x+parent_pos_x, y = slider_pos_y+parent_pos_y} (fromTuple sliderSize)
 	# (sliderH,tb)	= NewControl parentWindow (OSRect2Rect itemRect) "" True value min max ScrollBarProc 0 tb
 	# tb			= appGrafport parentWindow (init sliderH) tb
-	#! tb			= trace_n ("osCreateSliderControl",(parentWindow,itemRect,sliderState,value)) tb
 	= (sliderH,tb)
 where
 	init sliderH tb
@@ -1147,8 +1145,8 @@ where
 		# tb = HiliteControl sliderH hilite tb
 		= tb
 	hilite			= if (min<max && able) 0 255
-	itemRect		= posSizeToRect (fromTuple sliderPos) (fromTuple sliderSize)
 	value			= thumb
+
 
 osDestroySliderControl :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osDestroySliderControl wPtr tb
