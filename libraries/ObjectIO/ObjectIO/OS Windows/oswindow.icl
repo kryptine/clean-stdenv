@@ -597,7 +597,7 @@ osCreateEditControl parentWindow parentPos text show able isKeySensitive (x,y) (
 osCreateButtonControl :: !OSWindowPtr !(!Int,!Int) !String !Bool !Bool !(!Int,!Int) !(!Int,!Int) !OKorCANCEL !*OSToolbox -> (!OSWindowPtr,!*OSToolbox)
 osCreateButtonControl parentWindow parentPos title show able (x,y) (w,h) okOrCancel tb
 	# (x,y)			= (x-fst parentPos,y-snd parentPos)
-	  createcci		= Rq6Cci CcRqCREATEBUTTON parentWindow x y w h (toInt okOrCancel)
+	# createcci		= Rq6Cci CcRqCREATEBUTTON parentWindow x y w h (toInt okOrCancel)
 	# (returncci,tb)= issueCleanRequest2 osIgnoreCallback createcci tb
 	  buttonPtr		= case returncci.ccMsg of
 						CcRETURN1	-> returncci.p1
