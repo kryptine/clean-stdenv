@@ -1,7 +1,7 @@
 definition module tmfile
 
-from	StdString	import String
-from	StdFile		import FileSystem
+import	StdString
+from	StdFile		import FileSystem, Files
 from	tm			import Turing, Transition, Tape, State, Head
 
 WriteTuringToFile	:: Turing	!String !*env	-> (!Bool,!*env)           | FileSystem env

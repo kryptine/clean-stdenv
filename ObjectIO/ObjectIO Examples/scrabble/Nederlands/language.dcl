@@ -1,7 +1,7 @@
 definition module language
 
 
-import	StdList, StdArray, _SystemArray, StdEnum
+import	StdList, StdArray, /*_SystemArray,*/ StdEnum
 import	StdIOCommon, StdSystem, StdTime
 import	board
 

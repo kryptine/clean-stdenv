@@ -1,7 +1,7 @@
 definition module board
 
 
-from	StdString	import	String
+import	StdString
 import	StdClass, StdFile
 import	types
 

@@ -8,10 +8,10 @@ definition module Highscore
 //	
 //	**************************************************************************************************
 
-from	StdFile			import FileSystem
-from	StdString		import String
-from	StdPSt			import PSt, IOSt
-from	StdId			import Id
+import	StdString
+from	StdFile	import FileSystem, Files
+from	StdPSt	import PSt, IOSt
+from	StdId	import Id
 
 ::	HiScores
 	:== [HiScore]

@@ -199,13 +199,13 @@ where
 			= (({w=maxx,h=maxy},[]),pState)
 		
 		centerInfoLine :: Font Int InfoLine (PSt .l) -> (InfoLine,PSt .l)
-		centerInfoLine nft maxx info=:(inft=:NoFont centered,x,y,line) pState
+		centerInfoLine nft maxx info=:(inft=:(NoFont centered),x,y,line) pState
 			| not centered
 				= (info,pState)
 			| otherwise
 				# (width,pState)	= accPIO (accScreenPicture (getFontStringWidth nft line)) pState
 				= ((inft,(maxx-width)/2,y,line),pState)
-		centerInfoLine nft maxx info=:(inft=:InfoFont font centered,x,y,line) pState
+		centerInfoLine nft maxx info=:(inft=:(InfoFont font centered),x,y,line) pState
 			| not centered
 				= (info,pState)
 			| otherwise

@@ -50,7 +50,7 @@ where
 	where
 		compare :: (PSt Local) -> PSt Local
 		compare pst
-			# (maybeFirstFile,pst)			= selectInputFile pst
+			# (maybeFirstFile,pst)		= selectInputFile pst
 			| isNothing maybeFirstFile
 				= {pst & ls=noFilesSelected}
 			# (maybeSecondFile,pst)		= selectInputFile pst

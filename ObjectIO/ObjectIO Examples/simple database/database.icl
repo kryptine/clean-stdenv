@@ -717,7 +717,7 @@ moveinlist src dest l				// should be in StdList
 where
 	(beforedest,atdest)	= splitAt dest l	
 
-splitby :: a !.[a] -> [.[a]] | == a
+splitby :: a !.[a] -> [.[a]] | Eq a
 splitby x ys
 	=	case rest of [] -> [firstpart]; [r:rs] -> [firstpart:splitby x rs]
 where

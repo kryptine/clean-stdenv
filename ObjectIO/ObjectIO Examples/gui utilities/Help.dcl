@@ -8,8 +8,8 @@ definition module Help
 //	
 //	**************************************************************************************************
 
-from	StdString	import String
-from	StdPSt		import PSt, IOSt
+import	StdString
+from	StdPSt	import PSt, IOSt
 
 showAbout :: String String (PSt .l) -> PSt .l
 /*	showAbout opens a window:

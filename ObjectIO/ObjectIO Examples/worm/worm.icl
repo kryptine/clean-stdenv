@@ -76,23 +76,23 @@ where
 			# pict				= setPenFont font pict
 			= pict
 	
-	filemenu	= Menu "File" 
-					(	MenuItem "Play"				[MenuId playID,MenuShortKey 'r',MenuFunction (noLS Play)]
-					:+:	MenuItem "Halt"				[MenuId haltID,MenuShortKey '.',MenuFunction (noLS Halt),MenuSelectState Unable]
+	filemenu	= Menu "&File" 
+					(	MenuItem "&Play"			[MenuId playID,MenuShortKey 'r',MenuFunction (noLS Play)]
+					:+:	MenuItem "&Halt"			[MenuId haltID,MenuShortKey '.',MenuFunction (noLS Halt),MenuSelectState Unable]
 					:+:	MenuSeparator				[]
-					:+: MenuItem "About Worm..."	[MenuFunction (noLS (showAbout "Worm" HelpFile))]
-					:+:	MenuItem "Help"				[MenuFunction (noLS (showHelp HelpFile))]
+					:+: MenuItem "&About Worm..."	[MenuFunction (noLS (showAbout "Worm" HelpFile))]
+					:+:	MenuItem "H&elp"			[MenuFunction (noLS (showHelp HelpFile))]
 					:+:	MenuSeparator				[]
-					:+:	MenuItem "Quit"				[MenuId quitID,MenuShortKey 'q',MenuFunction (noLS Quit)]
+					:+:	MenuItem "&Quit"			[MenuId quitID,MenuShortKey 'q',MenuFunction (noLS Quit)]
 					)	[MenuId fileID]
-	optionsmenu	= Menu "Options"
+	optionsmenu	= Menu "&Options"
 					(	RadioMenu
-						[	("Slow"  ,Nothing,Just '1',noLS (SetSpeed EasySpeed)  )
-						,	("Medium",Nothing,Just '2',noLS (SetSpeed MediumSpeed))
-						,	("Fast"  ,Nothing,Just '3',noLS (SetSpeed HardSpeed)  )
+						[	("&Slow"  ,Nothing,Just '1',noLS (SetSpeed EasySpeed)  )
+						,	("&Medium",Nothing,Just '2',noLS (SetSpeed MediumSpeed))
+						,	("&Fast"  ,Nothing,Just '3',noLS (SetSpeed HardSpeed)  )
 						]	1	[]
 					:+:	MenuSeparator []
-					:+:	MenuItem "High Scores" [MenuShortKey 'h',MenuFunction (noLS ShowBest)]
+					:+:	MenuItem "&High Scores" [MenuShortKey 'h',MenuFunction (noLS ShowBest)]
 					)
 					[	MenuId	levelID
 					]

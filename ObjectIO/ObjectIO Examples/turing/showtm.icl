@@ -1,9 +1,8 @@
 implementation module showtm
 
-import	StdArray, StdClass, StdInt
+import	StdArray, StdBool, StdClass, StdInt
 from	StdString		import length, %
 from	StdChar			import toString
-from	StdBool			import &&, otherwise
 import	StdPicture
 import	tm
 
@@ -43,9 +42,9 @@ where
 		# pic	= DrawCellBorders x y1 y2			pic
 		= pic
 	where
-		x		= Offset-4
-		y1		= TapeY -13
-		y2		= TapeY +5
+		x		= Offset - 4
+		y1		= TapeY  - 13
+		y2		= TapeY  + 5
 		
 		DrawCellBorders :: !Int Int Int !*Picture -> *Picture
 		DrawCellBorders x y1 y2 pic
@@ -128,9 +127,9 @@ ShowTapePart {content,head} start end pic
 	# pic	= DrawHeadRect	(HeadPos head) Red									pic
 	= pic
 where
-	x		= Offset-4
-	y1		= TapeY -13
-	y2		= TapeY +5
+	x		= Offset - 4
+	y1		= TapeY  - 13
+	y2		= TapeY  + 5
 	
 	ShowContPart :: Int Int !Int String Int !Int !*Picture -> *Picture
 	ShowContPart i l x s f t pic

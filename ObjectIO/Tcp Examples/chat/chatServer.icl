@@ -34,7 +34,7 @@ loop listener channels console world
 	  glue		= (TCP_Listeners [listener]) :^: (TCP_RChannels rChans)
 	  ([(who,what):_],glue, _, world)
 				= selectChannel_MT Nothing glue Void world
-	  (TCP_Listeners [listener:_]) :^: (TCP_RChannels rChans)
+	  ((TCP_Listeners [listener:_]) :^: (TCP_RChannels rChans))
 	  			= glue
 	  channels	= zip3 sChans rChans nicknames
 		

@@ -54,17 +54,29 @@ where
 		# (error,pst)		= openReceiver False receiver pst
 		| error<>NoError	= abort "monitor could not open receiver."
 		| otherwise			= pst
+	where
+	//	window is the single document of the monitor process.
+		window	= Window "Monitor" NilLS
+					[	WindowId			wId
+					,	WindowPos			pos
+					,	WindowViewDomain	pDomain
+					,	WindowLook			True (monitorlook initLocal)
+					,	WindowInit			(noLS (appPIO (appWindowPicture wId (setPenFont font))))
+					]
+		
+		pDomain	= {corner1=zero,corner2={x=WindowWidth,y=WindowHeight}}
 	
-//	window is the single document of the monitor process.
-	window	= Window "Monitor" NilLS
-				[	WindowId			wId
-				,	WindowPos			pos
-				,	WindowViewDomain	pDomain
-				,	WindowLook			True (monitorlook initLocal)
-				,	WindowInit			(noLS (appPIO (appWindowPicture wId (setPenFont font))))
-				]
-	
-	pDomain	= {corner1=zero,corner2={x=WindowWidth,y=WindowHeight}}
+	//	The timer gathers per second the number of good and bad key hits.
+	//	The monitor window is updated by drawing only the new diagram bars.
+		timer	= Timer ticksPerSecond NilLS
+					[	TimerId				tId
+					,	TimerSelectState	Unable
+					,	TimerFunction		(noLS1 (showKeyHits False))
+					]
+		
+	//	The receiver is the interface of the monitor process to the typist process.
+		receiver :: *Receiver MonitorMessage Bool (PSt Monitor)
+		receiver= Receiver monitorId receive []
 	
 //	monitorlook defines the look of the monitor window. 
 	monitorlook :: Monitor SelectState UpdateState *Picture -> *Picture
@@ -75,14 +87,6 @@ where
 		# picture	= seq (snd (smap drawKeyHitColumn (0,counts))) picture
 		| tracking	= picture
 		| otherwise	= drawTotalAndAverage font metrics counts picture
-
-//	The timer gathers per second the number of good and bad key hits.
-//	The monitor window is updated by drawing only the new diagram bars.
-	timer	= Timer ticksPerSecond NilLS
-				[	TimerId				tId
-				,	TimerSelectState	Unable
-				,	TimerFunction		(noLS1 (showKeyHits False))
-				]
 	
 	showKeyHits :: Bool NrOfIntervals (PSt Monitor) -> PSt Monitor
 	showKeyHits final dt monitor=:{ls=local=:{count,counts,time},io}
@@ -94,10 +98,6 @@ where
 		newcounts	= [count:missedcounts]
 		newlocal	= {local & count=initcount,counts=counts++newcounts,time=time+dt}
 		drawfs		= snd (smap drawKeyHitColumn (time,newcounts))
-	
-//	The receiver is the interface of the monitor process to the typist process.
-	receiver :: *Receiver MonitorMessage Bool (PSt Monitor)
-	receiver= Receiver monitorId receive []
 	
 	receive :: MonitorMessage (Bool,PSt Monitor) -> (Bool,PSt Monitor)
 
@@ -114,8 +114,8 @@ where
 	where
 		incCount :: Char Monitor -> Monitor
 		incCount c local=:{count}
-			| c=='\b'	= {local & count={count & bads=count.bads+1}}
-			| otherwise	= {local & count={count & oks =count.oks +1}}
+			| c=='\b'	= {local & count={count & bads=count.bads + 1}}
+			| otherwise	= {local & count={count & oks =count.oks  + 1}}
 
 //	Ending a session disables the timer and presents the number and average of key hits. 
 	receive EndSession (firstkeyreceived,monitor=:{ls=local=:{time}})
