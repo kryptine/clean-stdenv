@@ -1,16 +1,16 @@
 definition module FamkeProcess
 
-from FamkeKernel import :: Famke, :: FamkePort, processId
+from FamkeKernel import :: FamkePort, processId
 
 :: ProcessId :== Int
 
-newProcess :: !(*Famke -> *Famke) !*Famke -> (!ProcessId, !*Famke)
-reuseProcess :: !ProcessId !(*Famke -> *Famke) !*Famke -> *Famke
-joinProcess :: !ProcessId !*Famke -> *Famke
-killProcess :: !ProcessId !*Famke -> *Famke
-shutdown :: !*Famke -> *Famke
+newProcess :: !(*World -> *World) !*World -> (!ProcessId, !*World)
+reuseProcess :: !ProcessId !(*World -> *World) !*World -> *World
+joinProcess :: !ProcessId !*World -> *World
+killProcess :: !ProcessId !*World -> *World
+shutdown :: !*World -> *World
 
-reservePort :: !*Famke -> (!FamkePort .a .b, !*Famke)
-freePort :: !(FamkePort .a .b) !*Famke -> *Famke
+reservePort :: !*World -> (!FamkePort .a .b, !*World)
+freePort :: !(FamkePort .a .b) !*World -> *World
 
-StartProcess :: !(*Famke -> *Famke) !*World -> *World
+StartProcess :: !(*World -> *World) !*World -> *World

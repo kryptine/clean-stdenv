@@ -94,7 +94,8 @@ where
 	connectTcpIp blocking ip port env
 		# env = tcpip env
 		  (error, socket, env) = tcpIpConnect ip port blocking env
-		= (error == 0, {socket = socket, port = -1}, if (error <> 0) (trace_n ("(connectTcpIp " +++ toString ip +++ " " +++ toString port +++ ") == " +++ toString error) env) env)
+//		= (error == 0, {socket = socket, port = -1}, if (error <> 0) (trace_n ("(connectTcpIp " +++ toString ip +++ " " +++ toString port +++ ") == " +++ toString error) env) env)
+		= (error == 0, {socket = socket, port = -1}, env)
 	where
 		tcpIpConnect :: !Int !Int !Bool !*World -> (!Int, !Int, !*World)
 		tcpIpConnect ip port blocking world = code inline {
