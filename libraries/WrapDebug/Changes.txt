@@ -1,5 +1,10 @@
+1.0.5
+    - experimental support for showing closures (only tested under Windows)
+    - wrapping in two phases (shallow, deep), shallow wrapping can also be
+      used for reifying expressions
+    - updated email addresses
 1.0.4
-	- somewhat better output for unboxed lists
+    - somewhat better output for unboxed lists
     - removed RWSDebug module, it was just intended as an example interface
     - removed Clean 1.3 compatibility
     - renamed Examples to DebugExamples
