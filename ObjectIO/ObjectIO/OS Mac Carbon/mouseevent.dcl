@@ -6,3 +6,4 @@ controlMouseDownIO :: !OSWindowMetrics !OSWindowPtr !Point2 !Int !Int !(WindowSt
   -> (!Bool,!Maybe DeviceEvent,!WindowHandles (PSt .l),!WindowStateHandle (PSt .l),!(PSt .l))
 
 changeFocus :: !Bool !(Maybe Int) !(Maybe Int) !OSWindowPtr !OSRect !*(WindowStateHandle .a) !*(PSt .c) -> *(!*(WindowStateHandle .a),!*PSt .c)
+

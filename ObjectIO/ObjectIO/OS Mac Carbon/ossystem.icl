@@ -44,10 +44,23 @@ OSnewlineChars			:== "\xD"
 OStickspersecond		:== 60
 
 mmperinch		:== 25.4
-ScrollBarWidth		:== 16									// Conventional width of a scroll bar
-TitleBarWidth		:== 20									// Conventional width of a window's title bar
-MenuBarWidth		:== 20									// Conventional width of the Mac menu bar
+
 WindowScreenBorder	:== 4									// Conventional distance between window and screen
+
+osWindowFrameWidth     :: Int;	
+osWindowFrameWidth     = 0//6;
+
+osWindowTitleBarHeight :: Int;	
+osWindowTitleBarHeight = 22//20;
+
+osMenuBarHeight			:: Int
+osMenuBarHeight			= 22
+
+osScrollBarWidth		:: Int
+osScrollBarWidth		= 15//16
+
+osScrollBarOverlap		:: Int
+osScrollBarOverlap		= 0//1
 
 osMMtoHPixels :: !Real -> Int
 osMMtoHPixels mm
@@ -61,16 +74,16 @@ osMMtoVPixels mm
 
 osMaxScrollWindowSize :: (!Int,!Int)	// moet je eigenlijk dynamisch evalueren aangezien window op verschillende schermen kan staan...
 osMaxScrollWindowSize
-	=	(	sR-ScrollBarWidth-dScrwW+1
-		,	sB-ScrollBarWidth-dScrwW-TitleBarWidth-MenuBarWidth+1
+	=	(	sR-osScrollBarWidth-dScrwW+osScrollBarOverlap
+		,	sB-osScrollBarWidth-dScrwW-osWindowTitleBarHeight-osMenuBarHeight+osScrollBarOverlap
 		)
 where	dScrwW			= WindowScreenBorder<<1
 		(_,_, sR,sB,_)	= QScreenRect OSNewToolbox
 
 osMaxFixedWindowSize :: (!Int,!Int)
 osMaxFixedWindowSize
-	=	(	w+ScrollBarWidth-1
-		,	h+ScrollBarWidth-1
+	=	(	w+osScrollBarWidth-osScrollBarOverlap
+		,	h+osScrollBarWidth-osScrollBarOverlap
 		)
 where	(w,h)			= osMaxScrollWindowSize
 
@@ -79,7 +92,7 @@ osScreenrect tb
 	# (sl,st,sr,sb, tb)	= QScreenRect tb
 	// subtract menubar from top???
 //	#! tb = trace_n ("OSscreenrect "+++toString (sl,st,sr,sb)) tb
-	= ({rleft=sl,rtop=st,rright=sr,rbottom=sb-MenuBarWidth},tb)
+	= ({rleft=sl,rtop=st,rright=sr,rbottom=sb-osMenuBarHeight},tb)
 where
 	dScrwW			= WindowScreenBorder<<1
 
@@ -89,7 +102,7 @@ osPrintSetupTypical = True
 osGetProcessWindowDimensions :: !OSDInfo !*OSToolbox -> (!OSRect,!*OSToolbox)
 osGetProcessWindowDimensions osd tb
 	# (sl,st,sr,sb, tb)	= QScreenRect tb
-	= ({rleft=sl,rtop=st,rright=sr,rbottom=sb-MenuBarWidth},tb)
+	= ({rleft=sl,rtop=st,rright=sr,rbottom=sb-osMenuBarHeight},tb)
 
 osDefaultWindowMetrics	:: !*OSToolbox -> (!OSWindowMetrics,!*OSToolbox)
 osDefaultWindowMetrics tb

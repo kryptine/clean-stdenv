@@ -116,7 +116,7 @@ osHandleEvents isFinalState getOSEvents setOSEvents getSleepTime handleOSEvent (
 					(b,OsEvent,message,_,x,y,_)	-> if ((message >> 24) bitand 0xFF == MouseMovedMessage) (QRectRgn mRgn (x,y,inc x,inc y) tb) tb
 					_ -> tb
 		# state					= setOSEvents (osEvents,state)
-		# state					= DebugTraceEvents ("Event["+++toString (now,sleep)+++"]:\t") osEvent state
+		# state					= DebugTraceEvents ("Event["+++toString (now,sleep,tracking)+++"]:\t") osEvent state
 		# (_,state)				= handleOSEvent osEvent state
 		= osHandleEvents isFinalState getOSEvents setOSEvents getSleepTime handleOSEvent (state,tb)
 	# (osEvent,osEvents)		= osRemoveEvent osEvents
@@ -301,6 +301,8 @@ tracking =: iniTrack
 iniTrack
 	# (ptr,err,tb)	= NewPtr 4 OSNewToolbox
 	| err <> 0 || tb <> OSNewToolbox = abort "initialising tracking info failed..."
+	# ptr = StoreLong ptr 0 tb
+//	| tb <> OSNewToolbox = abort "initialising tracking info failed..."
 	= ptr
 
 startTracking :: !OSTime !*OSToolbox -> *OSToolbox

@@ -29,12 +29,6 @@ OSControlTitleSpecialChars :== ['&']					// Special prefix characters that shoul
 osMinWindowSize					:: (!Int,!Int)
 osMinCompoundSize				:: (!Int,!Int)
 
-/*	Window frame dimensions:
-*/
-osWindowFrameWidth		:: Int
-osWindowTitleBarHeight	:: Int
-
-
 //	Calculating the view frame of window/compound with visibility of scrollbars.
 osGetCompoundContentRect:: !OSWindowMetrics !(!Bool,!Bool) !OSRect -> OSRect
 osGetCompoundHScrollRect:: !OSWindowMetrics !(!Bool,!Bool) !OSRect -> OSRect
@@ -556,6 +550,7 @@ osSetPopUpControlPos			:: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(
 osSetPopUpControlSize			:: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool				!*OSToolbox -> *OSToolbox
 osIdlePopUpControl				:: !OSWindowPtr !OSRect !OSWindowPtr !(Maybe OSWindowPtr) !*OSToolbox -> *OSToolbox
 osHandlePopUpControlEvent		:: !OSWindowPtr !(Maybe OSWindowPtr) !OSWindowPtr !Point2 !Size !Int !String !*OSToolbox -> (!Int,!*OSToolbox) 
+osGetPopUpControlText :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> (!String,!*OSToolbox) 
 
 /*	On edit controls:
 	osSetEditControlText parentWindow editPtr clipRect itemRect shown text 

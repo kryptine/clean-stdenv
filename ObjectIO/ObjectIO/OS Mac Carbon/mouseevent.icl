@@ -36,7 +36,7 @@ mapJust f (Just i) = Just (f i)
 	| RadioControlState (Index,Index,OSWindowPtr)
 	| CheckControlState MarkState
 	| CompoundContentState (Bool,OSRect,MouseState)
-	| CompoundScrollState (OSWindowPtr, OSRect, Direction)
+	| CompoundScrollState (OSWindowPtr, OSRect, Direction, OSRect)
 
 isCompoundContentState (CompoundContentState _) = True
 isCompoundContentState _ = False
@@ -189,8 +189,14 @@ where
 							-> (True,Just returnEvent,windows,wsH,ps)
 			InThumb			
 							# (upPart,ps)	= accPIO (accIOToolbox (trackClippedControl wPtr clipRect itemPtr mousePos)) ps
-							#  (thumb,ps)	= accPIO (accIOToolbox (GetCtlValue itemPtr)) ps
-							#  move			= SliderThumb thumb
+							#  (thumb,ps)	= accPIO (accIOToolbox (GetCtlValue` itemPtr)) ps
+							# domainRect	= rectToRectangle windowDomain
+							# (sliderMin,sliderMax)
+											= case direction of
+												Horizontal	-> (domainRect.corner1.x, domainRect.corner2.x)
+												_			-> (domainRect.corner1.y, domainRect.corner2.y)
+							# thumb`		= fromOSscrollbarRange (sliderMin, sliderMax) thumb
+							#  move			= SliderThumb thumb`
 							#  (wids,wsH)	= getWindowStateHandleWIDS wsH
 							#  returnEvent	= WindowScrollAction {wsaWIDS=wids,wsaSliderMove=move,wsaDirection=direction}
 							-> (True,Just returnEvent,windows,wsH,ps)
@@ -245,7 +251,7 @@ where
 				= (True,Nothing,wsH,ps)
 			
 			| isCompoundScrollState itemType
-				# (scrollPtr,scrollRect,scrollDirection) = fromCompoundScrollState itemType
+				# (scrollPtr,scrollRect,scrollDirection,contentRect) = fromCompoundScrollState itemType
 //				# (upPart,ps)			= accPIO (accIOToolbox (trackClippedControl wPtr scrollRect scrollPtr mousePos)) ps
 				# (upPart,ps)			= accPIO (accIOToolbox (TestControl scrollPtr mousePos.x mousePos.y)) ps
 				# ps = trace_n ("windowevent:control tracking: "+++toString itemNr +++" " +++ toString upPart) ps
@@ -277,8 +283,14 @@ where
 						-> (True,Just returnEvent,wsH,ps)
 					InThumb			
 						# (upPart,ps)	= accPIO (accIOToolbox (trackClippedControl wPtr scrollRect scrollPtr mousePos)) ps
-						#  (thumb,ps)	= accPIO (accIOToolbox (GetCtlValue scrollPtr)) ps
-						#  move			= SliderThumb thumb
+						#  (thumb,ps)	= accPIO (accIOToolbox (GetCtlValue` scrollPtr)) ps
+						# domainRect	= rectToRectangle contentRect
+						# (sliderMin,sliderMax)
+										= case scrollDirection of
+											Horizontal	-> (domainRect.corner1.x, domainRect.corner2.x)
+											_			-> (domainRect.corner1.y, domainRect.corner2.y)
+						# thumb`		= fromOSscrollbarRange (sliderMin, sliderMax) thumb
+						#  move			= SliderThumb thumb`
 						#  (wids,wsH)	= getWindowStateHandleWIDS wsH
 						#  returnEvent	= CompoundScrollAction {csaWIDS=wids,csaItemNr=itemNr,csaItemPtr=scrollPtr,csaSliderMove=move,csaDirection=scrollDirection}
 						-> (True,Just returnEvent,wsH,ps)
@@ -313,10 +325,10 @@ where
 						-> (True,Just returnEvent,wsH,ps)
 					InThumb			
 						# (upPart,ps)	= accPIO (accIOToolbox (trackClippedControl wPtr clipRect itemPtr mousePos)) ps
-						#  (thumb,ps)	= accPIO (accIOToolbox (GetCtlValue itemPtr)) ps
-//						# thumb`		= fromOSscrollbarRange (state.sliderMin, state.sliderMax) thumb
+						#  (thumb,ps)	= accPIO (accIOToolbox (GetCtlValue` itemPtr)) ps
+						# thumb`		= fromOSscrollbarRange (state.sliderMin, state.sliderMax) thumb
 //						# ps = trace_n (toString thumb+++".."+++toString thumb`) ps
-						#  move			= SliderThumb thumb
+						#  move			= SliderThumb thumb`
 						#  (wids,wsH)	= getWindowStateHandleWIDS wsH
 						#  returnEvent	= ControlSliderAction {cslWIDS=wids,cslItemNr=itemNr,cslItemPtr=itemPtr,cslSliderMove=move}
 						-> (True,Just returnEvent,wsH,ps)
@@ -332,10 +344,11 @@ where
 					# controlInfo			= Just (ControlMouseAction {cmWIDS=wids,cmItemNr=itemNr,cmItemPtr=itemPtr,cmMouseState=mouseState})
 					# (inputTrack,ps)		= accPIO ioStGetInputTrack ps
 					# inputTrack			= trackMouse wPtr itemNr inputTrack
+					# ps					= trace_n ("trackMouse: "+++toString itemNr+++":"+++toString itemPtr) ps
 					# ps					= appPIO (ioStSetInputTrack inputTrack) ps
-					# ps					= trace_n "mouse-up in custom control" ps
+					# ps					= trace_n "mouse-down in custom control" ps
 					= (True,controlInfo,wsH,ps)
-				# ps						= trace_n "mouse-up outside custom control" ps
+				# ps						= trace_n "mouse-down outside custom control" ps
 				= (True,Nothing,wsH,ps)
 			
 			| isCustomButtonState itemType
@@ -361,7 +374,9 @@ where
 //				setWindowStateHandleKeyFocus
 				// if edit control deactivate
 				// activate this one...
-				# ps				= appPIO (appIOToolbox (appClipport wPtr clipRect (TEClick (toTuple pos) shift editHandle /* o TEActivate editHandle*/))) ps
+//				# ps				= appPIO (appIOToolbox (appClipport wPtr clipRect (TEClick (toTuple pos) shift editHandle /* o TEActivate editHandle*/))) ps
+//				# ps				= appPIO (appIOToolbox (appClipport wPtr clipRect (snd o HandleControlClick editHandle (toTuple pos) mods))) ps
+				# ps				= appPIO (appIOToolbox (snd o HandleControlClick wPtr editHandle (toTuple pos) mods)) ps
 				# (wids,wsH)		= getWindowStateHandleWIDS wsH
 				# controlInfo		= case kfIt of
 										Nothing		-> Just (ControlGetKeyFocus {ckfWIDS=wids,ckfItemNr=itemNr,ckfItemPtr=itemPtr})
@@ -447,16 +462,16 @@ where
 getControlsItemNr
 	:: !(!Int,!Int,!OSWindowPtr,!OSWindowMetrics) !Pen !Point2 [WElementHandle .ls (PSt .pst)] (.ls,(PSt .pst))
 	-> (!Bool,!(!Int,!Int,!Pen,!ControlMouseState),[WElementHandle .ls (PSt .pst)],(.ls,(PSt .pst)))
-getControlsItemNr (when,mods,wPtr,wMetrics) pen pos [itemH:itemHs] ps
+getControlsItemNr info=:(when,mods,wPtr,wMetrics) pen pos [itemH:itemHs] ps
 	# (found,result,itemH,ps)				= getControlItemNr pen pos itemH ps
 	| found
 		= (found,result,[itemH:itemHs],ps)
 	| otherwise
-		# (found,result,itemHs,ps)			= getControlsItemNr (when,mods,wPtr,wMetrics) pen pos itemHs ps
+		# (found,result,itemHs,ps)			= getControlsItemNr info/*(when,mods,wPtr,wMetrics)*/ pen pos itemHs ps
 		= (found,result,[itemH:itemHs],ps)
 where
 	getControlItemNrFromwItems pen pos (WItemHandle itemH=:{wItems}) ps
-		# (found,result,items,ps)	= getControlsItemNr (when,mods,wPtr,wMetrics) pen pos wItems ps
+		# (found,result,items,ps)	= getControlsItemNr info/*(when,mods,wPtr,wMetrics)*/ pen pos wItems ps
 		= (found,result,WItemHandle {itemH & wItems = items},ps)
 
 	getControlItemNr
@@ -564,9 +579,9 @@ where
 	getCompoundItemNr pos pen (WItemHandle itemH=:{wItems,wItemNr,wItemSelect,wItemInfo,wItemKind,wItemPtr,wItemPos,wItemSize,wItemAtts}) (ls,ps)
 		#! wItemNr = trace_n ("CompoundRects",contentRect,hScrollRect,vScrollRect,visHScroll,visVScroll) wItemNr
 		| visHScroll && hScrollHit
-			= (True,(wItemNr,wItemPtr,compoundPen,CompoundScrollState (hPtr, hScrollRect, Horizontal)),WItemHandle itemH,(ls,ps))
+			= (True,(wItemNr,wItemPtr,compoundPen,CompoundScrollState (hPtr, hScrollRect, Horizontal, cContentRect)),WItemHandle itemH,(ls,ps))
 		| visVScroll && vScrollHit
-			= (True,(wItemNr,wItemPtr,compoundPen,CompoundScrollState (vPtr, vScrollRect, Vertical)),WItemHandle itemH,(ls,ps))
+			= (True,(wItemNr,wItemPtr,compoundPen,CompoundScrollState (vPtr, vScrollRect, Vertical, cContentRect)),WItemHandle itemH,(ls,ps))
 		# (found,result,itemH,(ls,ps)) =  getControlItemNrFromwItems compoundPen pos (WItemHandle itemH) (ls,ps)
 		| found			// one of the compound controls was selected
 			= (found,result,itemH,(ls,ps))
@@ -595,6 +610,7 @@ where
 		contentRect				= /*getCompoundContentRect wMetrics visScrolls*/ (posSizeToRect wItemPos wItemSize)
 		hScrollRect				= osGetCompoundHScrollRect wMetrics visScrolls contentRect
 		vScrollRect				= osGetCompoundVScrollRect wMetrics visScrolls contentRect
+		cContentRect			= osGetCompoundContentRect wMetrics visScrolls contentRect
 		hScrollHit				= controlHit` pos hScrollRect
 		vScrollHit				= controlHit` pos vScrollRect
 		contentHit				= controlHit` pos contentRect
@@ -757,6 +773,7 @@ where
 
 changeFocus :: !Bool !(Maybe Int) !(Maybe Int) !OSWindowPtr !OSRect !*(WindowStateHandle .a) !*(PSt .c) -> *(!*(WindowStateHandle .a),!*PSt .c)
 changeFocus tabbing oldItemNr newItemNr wPtr clipRect wsH=:{wshHandle=Just wlsH=:{wlsState=ls,wlsHandle=wH=:{whItems}}} ps
+	| oldItemNr == newItemNr = (wsH,ps)
 	# (found,(ptr,knd),whItems)	= getFocuseableItemPtrAndKind` oldItemNr whItems
 	# ps = case found of
 			True	-> setFocus knd wPtr clipRect ptr False ps
@@ -772,9 +789,11 @@ where
 		= appPIO (appIOToolbox set) ps
 		where
 			set tb
+/*
 				# tb = case tabbing && focus of
 						True	-> osSetEditControlSelection wPtr itemPtr clipRect clipRect 0 32767 tb 
 						_		-> tb
+*/
 				# tb = osSetEditControlFocus wPtr itemPtr clipRect focus tb
 				= tb
 	setFocus IsCompoundControl wPtr clipRect itemPtr focus ps
@@ -829,4 +848,46 @@ where
 	getControlItemPtrAndKindFromItem itemNr (WChangeLSHandle wChH=:{wChangeItems=itemHs})
 		# (found,result,itemHs)		= getFocuseableItemPtrAndKind itemNr itemHs
 		= (found,result,WChangeLSHandle {wChH & wChangeItems=itemHs})
+
+//from quickdraw import SetPortWindowPort
+HandleControlClick :: !OSWindowPtr !OSWindowPtr !(!Int,!Int) !Int !*OSToolbox -> (!Int,!*OSToolbox)
+HandleControlClick wPtr cPtr (x,y) mods tb
+//	# tb = SetPortWindowPort wPtr tb
+//	# (gpos,tb)	= lGetMouse tb
+//	# (lpos,tb) = lGlobalToLocal gpos tb
+//	# (part,tb) = HandleControlClick cPtr gpos/*pos*/ 0/*mods*/ (-1) tb
+	# (part,tb) = HandleControlClick cPtr pos mods (-1) tb
+//	# tb = trace_n ("HandleControlClick",(cPtr,(x,y),pos`),(pos,gpos,lpos,(pos2tuple pos,pos2tuple gpos,pos2tuple lpos)),mods,part) tb
+	# tb = trace_n ("HandleControlClick",(cPtr,(x,y),pos),mods,part) tb
+	= (part,tb)
+where
+	pos		= y << 16 bitor x
+//	pos` = ((pos >> 16) bitand 0xFFFF,pos bitand 0xFFFF)
+//	pos2tuple pos = ((pos >> 16) bitand 0xFFFF,pos bitand 0xFFFF)
+	HandleControlClick :: !OSWindowPtr !Int !Int !Int !*OSToolbox -> (!Int,!*OSToolbox)
+	HandleControlClick _ _ _ _ _ = code {
+		ccall HandleControlClick "PIIII:I:I"
+		}
+/*
+lGetMouse :: !*OSToolbox -> (!Int,!*OSToolbox)
+lGetMouse _ = code {
+	ccall GetMouse "P:VI:I"
+	}
+
+lGlobalToLocal :: !Int !*OSToolbox -> (!Int,!*OSToolbox)
+lGlobalToLocal g tb
+	# r		= {g}
+	# tb	= GlobalToLocal r tb
+	= (r.[0],tb)
+where
+	GlobalToLocal :: !{#Int} !*OSToolbox -> *OSToolbox
+	GlobalToLocal _ _ = code {
+		ccall GlobalToLocal "PA:V:I"
+		}
+*/
+
+GetCtlValue` :: !ControlHandle !*OSToolbox -> (!Int,!*OSToolbox);
+GetCtlValue` theControl t = code (theControl=D0,t=U)(v=D0,z=Z){
+	call	.GetControl32BitValue
+	};
 

@@ -18,11 +18,14 @@ from	quickdraw import QGetPort,QSetPort, :: GrafPtr
 	|	StartedPrinting y
 
 
-import dodebug
+//import dodebug
+DebugStr` _ s :== s
+
 eval :: !Bool !String !.a -> .a
 eval a s p
-	| a = abort s
-		= DebugStr s p
+	= p
+//	| a = abort s
+//		= DebugStr s p
 
 os_getpagedimensions	::	!PrintSetup	!Bool
 						->	(!(!Int,!Int), !(!(!Int,!Int),!(!Int,!Int)), !(!Int,!Int))

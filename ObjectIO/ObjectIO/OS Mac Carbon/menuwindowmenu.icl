@@ -67,7 +67,6 @@ where
 					(	MenuItem "&Cascade"				[MenuSelectState Unable,MenuId windowMenuCascadeId,	MenuFunction (noLS cascade)]
 					:+:	MenuItem "Tile &Horizontally"	[MenuSelectState Unable,MenuId windowMenuTileHId,	MenuFunction (noLS tileH)]
 					:+:	MenuItem "&Tile Vertically"		[MenuSelectState Unable,MenuId windowMenuTileVId,	MenuFunction (noLS tileV)]
-					:+: MenuItem "Update" [MenuFunction (noLS updateActiveWindow)]
 					:+:	RadioMenu [] 0					[MenuId windowMenuRadioId]
 					)
 					[	MenuId		wMenuId
@@ -99,7 +98,7 @@ where
 		= pState
 	where
 		pos :: !Int !Int !Int !Int -> Vector2
-		pos dx dy n i	= {vx=dx*(i mod n),vy=dy*(i mod n)}
+		pos dx dy n i	= {vx=dx*(i rem n),vy=dy*(i rem n)}
 			
 	tileH :: !(PSt .l) -> PSt .l
 	tileH pState
@@ -128,7 +127,7 @@ where
 		= pState
 	where
 		pos :: !Int !Int !Int !Int -> Vector2
-		pos w h n i		= {vx=w*(i/n),vy=h*(i mod n)}
+		pos w h n i		= {vx=w*(i/n),vy=h*(i rem n)}
 		
 		smallestNrColumns :: !Int !Int !Int -> Int
 		smallestNrColumns minHeight pwHeight nrWindows
@@ -167,7 +166,7 @@ where
 		= pState
 	where
 		pos :: !Int !Int !Int !Int -> Vector2
-		pos w h n i		= {vx=w*(i mod n),vy=h*(i/n)}
+		pos w h n i		= {vx=w*(i rem n),vy=h*(i/n)}
 		
 		smallestNrRows :: !Int !Int !Int -> Int
 		smallestNrRows minWidth pwWidth nrWindows

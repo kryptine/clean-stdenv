@@ -62,7 +62,7 @@ windowKeyboardIO wsH=:{wshIds={wPtr},wshHandle= Just wshH=:{wlsHandle=wlsH}} eve
 		# pState			= trace_n "not_valid..." pState
 		= (True, Nothing,Nothing,pState)
 	# (deviceevent,wsH,pState)
-							= handleKeyboardFunction wPtr cNr cPtr keyState theChar theCode (toModifiers mods) wsH pState
+							= handleKeyboardFunction wPtr cNr cPtr keyState theChar theCode (toModifiers mods) (message,mods) wsH pState
 	# windows				= setWindowHandlesWindow wsH windows
 	# pState				= appPIO (ioStSetDevice (WindowSystemState windows)) pState
 	| mustBuffer
@@ -83,9 +83,9 @@ windowKeyboardIO wsH=:{wshHandle= Nothing} event=:(_,what,message,i,h,v,mods) wi
 
 //-- handleKeyboardFunction
 
-handleKeyboardFunction :: !OSWindowPtr !Int !OSWindowPtr !KeyState !Char !.Int !.Modifiers !*(WindowStateHandle .a) !*(PSt .b)
+handleKeyboardFunction :: !OSWindowPtr !Int !OSWindowPtr !KeyState !Char !.Int !.Modifiers !(!Int,!Int) !*(WindowStateHandle .a) !*(PSt .b)
 	-> *(!Maybe .DeviceEvent,!*WindowStateHandle .a,!*PSt .b);
-handleKeyboardFunction wPtr cNr cPtr keyState keyCode macCode modifiers wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems,whAtts,whKind}}} pState
+handleKeyboardFunction wPtr cNr cPtr keyState keyCode macCode modifiers info wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems,whAtts,whKind}}} pState
 	# pState = trace_n ("handleKeyboardFunction`",keyState,macCode,isSpecialKey macCode) pState
 //	| macCode == 36 = trace_n "return return" (Nothing,wsH,pState)
 	| cNr == 0		// window keyboard
@@ -95,7 +95,7 @@ handleKeyboardFunction wPtr cNr cPtr keyState keyCode macCode modifiers wsH=:{ws
 		# (wids,wsH)			= getWindowStateHandleWIDS wsH
 		# deviceevent			= Just (WindowKeyboardAction {wkWIDS=wids,wkKeyboardState=key})
 		= (deviceevent,wsH,pState)
-	# (found,ok,whItems,pState)	= toolBoxFun (okControlsKeyboard cNr wPtr key keyCode whItems) pState
+	# (found,ok,whItems,pState)	= toolBoxFun (okControlsKeyboard cNr wPtr key keyCode info whItems) pState
 	# wsH						= {wsH & wshHandle = Just {wlsH & wlsHandle = {wH & whItems = whItems}}}
 	| not found || not ok
 		# pState				= trace_n "control_keyboard: not found or ok" pState
@@ -117,20 +117,20 @@ where
 				= getWindowKeyboardAtt (snd (cselect isWindowKeyboard (WindowKeyboard (const False) Unable undef) whAtts))
 	okWindowKeyboardAtt
 				= filter key && selectState == Able
-handleKeyboardFunction wPtr cNr cPtr keyState keyCode macCode modifiers wsH=:{wshHandle=Nothing} pState
+handleKeyboardFunction wPtr cNr cPtr keyState keyCode macCode modifiers info wsH=:{wshHandle=Nothing} pState
 	= abort "handleKeyboardFunction: unexpected placeholder"
 
 //import ioutil
 
-okControlsKeyboard :: !Int !OSWindowPtr !KeyboardState !Char !*[*WElementHandle .a .b] !*OSToolbox
+okControlsKeyboard :: !Int !OSWindowPtr !KeyboardState !Char !(!Int,!Int) !*[*WElementHandle .a .b] !*OSToolbox
 	-> *(.Bool,Bool,*[*WElementHandle .a .b],!*OSToolbox);
-okControlsKeyboard focusNr wPtr key keyCode [] tb
+okControlsKeyboard focusNr wPtr key keyCode info [] tb
 	= (False,False,[],tb)
-okControlsKeyboard focusNr wPtr key keyCode [itemH:itemHs] tb
+okControlsKeyboard focusNr wPtr key keyCode info [itemH:itemHs] tb
 	# (found,ok,itemH,tb)	= okControlKeyboard focusNr wPtr key keyCode itemH tb
 	| found
 		= (found,ok,[itemH:itemHs],tb)
-	# (found,ok,itemHs,tb)	= okControlsKeyboard focusNr wPtr key keyCode itemHs tb
+	# (found,ok,itemHs,tb)	= okControlsKeyboard focusNr wPtr key keyCode info itemHs tb
 	= (found,ok,[itemH:itemHs],tb)
 where
 	okControlKeyboard :: !Int !OSWindowPtr KeyboardState Char !*(WElementHandle .a .b) !*OSToolbox -> *(.Bool,Bool,*WElementHandle .a .b,!*OSToolbox);
@@ -138,7 +138,7 @@ where
 		| focusNr <> wItemNr
 			| not wItemShow || not wItemSelect
 				= (False,False,WItemHandle itemH,tb)
-			# (found,ok,wItems,tb)	= okControlsKeyboard focusNr wPtr key keyCode wItems tb
+			# (found,ok,wItems,tb)	= okControlsKeyboard focusNr wPtr key keyCode info wItems tb
 			= (found,ok,WItemHandle {itemH & wItems = wItems},tb)
 		| wItemKind == IsEditControl && wItemShow && wItemSelect
 			# tb = trace_n "edit control keyboard" tb
@@ -165,7 +165,7 @@ where
 			# editInfo		= fromJust popupInfo.popUpInfoEdit
 			# editPtr		= editInfo.popUpEditPtr
 			# clipRect		= posSizeToRect itemH.wItemPos itemH.wItemSize
-			# (string,tb)	= editControlKeyboardFunction wPtr clipRect editPtr keyCode tb
+			# (string,tb)	= comboControlKeyboardFunction wPtr clipRect editPtr keyCode tb
 			# editInfo		= {editInfo & popUpEditText = string}
 			# popupInfo		= {popupInfo & popUpInfoEdit = Just editInfo}
 			# itemH			= {itemH & wItemInfo = PopUpInfo popupInfo}
@@ -206,18 +206,27 @@ where
 	//		| key == '\033'  = True // clear
 			| key == '\177'  = True // del
 			= False
-		editControlKeyboardFunction wPtr clipRect hTE keyCode tb
+		comboControlKeyboardFunction wPtr clipRect hTE keyCode tb
 			# tb			= appClipport wPtr clipRect (TEKey keyCode hTE) tb
+			= osGetPopUpControlText wPtr hTE tb
+		editControlKeyboardFunction wPtr clipRect hTE keyCode tb
+//			# tb			= appClipport wPtr clipRect (TEKey keyCode hTE) tb
+			# tb			= appClipport wPtr clipRect handleKey tb
 			= osGetEditControlText wPtr hTE tb
+		where
+			(mess,mods)  = info
+			handleKey tb
+				# (part,tb) = HandleControlKey hTE (getMacCode mess) (mess bitand 255) mods tb
+				= trace_n ("HandleControlKey",hTE,part) tb
 	
 	okControlKeyboard focusNr wPtr key keyCode (WListLSHandle itemHs) tb
-		# (found,ok,itemHs,tb)	= okControlsKeyboard focusNr wPtr key keyCode itemHs tb
+		# (found,ok,itemHs,tb)	= okControlsKeyboard focusNr wPtr key keyCode info itemHs tb
 		= (found,ok,WListLSHandle itemHs,tb)
 	okControlKeyboard focusNr wPtr key keyCode (WChangeLSHandle wChH=:{wChangeItems}) tb
-		# (found,ok,wChangeItems,tb)	= okControlsKeyboard focusNr wPtr key keyCode wChangeItems tb
+		# (found,ok,wChangeItems,tb)	= okControlsKeyboard focusNr wPtr key keyCode info wChangeItems tb
 		= (found,ok,WChangeLSHandle {wChH & wChangeItems = wChangeItems},tb)
 	okControlKeyboard focusNr wPtr key keyCode (WExtendLSHandle wExH=:{wExtendItems}) tb
-		# (found,ok,wExtendItems,tb)	= okControlsKeyboard focusNr wPtr key keyCode wExtendItems tb
+		# (found,ok,wExtendItems,tb)	= okControlsKeyboard focusNr wPtr key keyCode info wExtendItems tb
 		= (found,ok,WExtendLSHandle {wExH & wExtendItems = wExtendItems},tb)
 
 //wil InputTrack tiepe uit iostate halen en in os-laag stoppen...lastig wordt op veel meer plaatsen gebruikt...
@@ -393,3 +402,16 @@ nextKeyInputFocus wPtr wsH windows pState
 	#! pState = trace_n ("keyboardevent","controlgetkeyfocus") pState
 	= (True, Nothing,Just deviceevent,pState)
 
+
+/*
+ControlPartCode HandleControlKey (
+    ControlRef inControl, 
+    SInt16 inKeyCode, 
+    SInt16 inCharCode, 
+    EventModifiers inModifiers
+);
+*/
+HandleControlKey :: !OSWindowPtr !Int !Int !Int !*OSToolbox -> (!Int,!*OSToolbox)
+HandleControlKey _ _ _ _ _ = code {
+	ccall HandleControlKey "PIIII:I:I"
+	}
