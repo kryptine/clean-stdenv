@@ -25,10 +25,6 @@ isNothing _		= False
 fromJust :: !(Maybe .x) -> .x
 fromJust (Just x) = x
 
-appMaybe :: .(IdFun .x) !(Maybe .x) -> Maybe .x
-appMaybe f (Just x) = Just (f x)
-appMaybe _ nothing	= nothing
-
 accMaybe :: .(St .x .a) !(Maybe .x) -> (!Maybe .a,!Maybe .x)
 accMaybe f (Just x)
 	# (a,x) = f x

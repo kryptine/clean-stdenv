@@ -1611,11 +1611,11 @@ where
 	setwindowscrollfunction :: !Direction ScrollFunction !(WindowStateHandle .pst) -> WindowStateHandle .pst
 	setwindowscrollfunction direction scrollFun wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH}}
 		| direction==Horizontal && isJust hScroll
-			# info			= {windowInfo & windowHScroll=appMaybe (setScrollFun scrollFun) hScroll}
+			# info			= {windowInfo & windowHScroll=mapMaybe (setScrollFun scrollFun) hScroll}
 			# wH			= {wH & whWindowInfo=WindowInfo info}
 			= {wsH & wshHandle=Just {wlsH & wlsHandle=wH}}
 		| direction==Vertical && isJust vScroll
-			# info			= {windowInfo & windowVScroll=appMaybe (setScrollFun scrollFun) vScroll}
+			# info			= {windowInfo & windowVScroll=mapMaybe (setScrollFun scrollFun) vScroll}
 			# wH			= {wH & whWindowInfo=WindowInfo info}
 			= {wsH & wshHandle=Just {wlsH & wlsHandle=wH}}
 		| otherwise
