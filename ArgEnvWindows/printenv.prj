@@ -1,10 +1,11 @@
-Version:	1.3
+Version: 1.4
 Global
 	Built:	True
+	Target:	StdEnv
+	Exec:	{Project}\printenv.exe
 	CodeGen
 		CheckStacks:	False
 		CheckIndexes:	False
-		KeepABC:	False
 		TargetProcessor:	CurrentProcessor
 	Application
 		HeapSize:	204800
@@ -16,24 +17,31 @@ Global
 		ShowGC:	False
 		ShowStackSize:	False
 		MarkingCollector:	True
+		StandardRuntimeEnv:	True
 		Profile
 			Memory:	False
 			MemoryMinimumHeapSize:	0
-			Time601:	False
 			Time:	False
+			Stack:	False
 		Output
 			Output:	BasicValuesOnly
 			Font:	MS Sans Serif
 			FontSize:	8
 			WriteStdErr:	False
-	Project
-		Verbose:	False
 	Link
-		DefaultSystemObjects:	True
-		DefaultLibraries:	True
+		LinkMethod:	Static
+		GenerateRelocations:	False
+		GenerateLinkMap:	False
+		LinkResources:	False
+		ResourceSource:	
+		GenerateDLL:	False
+		ExportedNames:	
+		AddCarbResource:	False
 	Paths
 		Path:	{Project}
+	Precompile:	
+	Postlink:	
 MainModule
 	Name:	printenv
 	Dir:	{Project}
-	IclOpen:	True
+
