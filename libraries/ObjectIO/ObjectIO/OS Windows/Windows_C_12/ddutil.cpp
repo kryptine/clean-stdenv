@@ -6,8 +6,6 @@
  *  Content:    Routines for loading bitmap and palettes from resources
  *
  ***************************************************************************/
-#undef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <windowsx.h>
 #include <ddraw.h>
@@ -47,7 +45,7 @@ extern "C" IDirectDrawSurface * DDLoadBitmap(IDirectDraw *pdd, LPCSTR szBitmap, 
     //
     ZeroMemory(&ddsd, sizeof(ddsd));
     ddsd.dwSize = sizeof(ddsd);
-    ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT |DDSD_WIDTH;
+    ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
     ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
     ddsd.dwWidth = bm.bmWidth;
     ddsd.dwHeight = bm.bmHeight;
@@ -162,26 +160,62 @@ extern "C" HRESULT DDCopyBitmap(IDirectDrawSurface *pdds, HBITMAP hbm, int x, in
 //  if the resource does not exist or NULL is passed create a
 //  default 332 palette.
 //
-extern "C" IDirectDrawPalette * DDLoadPalette(IDirectDraw *pdd, LPCSTR szBitmap)
+extern "C" IDirectDrawPalette * DDLoadPalette (IDirectDraw *pdd, LPCSTR szBitmap)
 {
     IDirectDrawPalette* ddpal;
-    int                 i;
-    int                 n;
-    int                 fh;
+    int i, j, r, g, b;
+    int n;
+//    int                 fh;
+// Mike ... //
+    HANDLE              fh;
+    SECURITY_ATTRIBUTES sa;
+// ... Mike //
     HRSRC               h;
     LPBITMAPINFOHEADER  lpbi;
     PALETTEENTRY        ape[256];
     RGBQUAD *           prgb;
 
+// Mike ... //
+	sa.nLength = sizeof (SECURITY_ATTRIBUTES);
+    sa.lpSecurityDescriptor = NULL;
+    sa.bInheritHandle = FALSE;
+// ... Mike //
+
     //
     // build a 332 palette as the default.
     //
+/*
     for (i=0; i<256; i++)
     {
 	ape[i].peRed   = (BYTE)(((i >> 5) & 0x07) * 255 / 7);
 	ape[i].peGreen = (BYTE)(((i >> 2) & 0x07) * 255 / 7);
 	ape[i].peBlue  = (BYTE)(((i >> 0) & 0x03) * 255 / 3);
 	ape[i].peFlags = (BYTE)0;
+    }
+*/
+    for (i = 0; i < 256; i++)
+    {
+        if (i < 6 * 7 * 6)
+        {
+            r = 224 * ( i       % 6) / 5 + 16;
+            g = 224 * ((i / 6)  % 7) / 6 + 16;
+            b = 224 * ((i / 42) % 6) / 5 + 16;
+        }
+        else
+        {
+            switch (i)
+            {
+                case 252: { r = 0; g = 0; b = 0; break; }
+                case 253: { r = 8; g = 8; b = 8; break; }
+                case 254: { r = 247; g = 247; b = 247; break; }
+                case 255: { r = 255; g = 255; b = 255; break; }
+            }
+        }
+	ape[i].peRed   = (BYTE) r;
+	ape[i].peGreen = (BYTE) g;
+	ape[i].peBlue  = (BYTE) b;
+        
+	ape[i].peFlags = (BYTE) 0;
     }
 
     //
@@ -215,15 +249,32 @@ extern "C" IDirectDrawPalette * DDLoadPalette(IDirectDraw *pdd, LPCSTR szBitmap)
 	    ape[i].peFlags = 0;
 	}
     }
-    else if (szBitmap && (fh = _lopen(szBitmap, OF_READ)) != -1)
+    else if (szBitmap &&
+           //  (fh = _lopen(szBitmap, OF_READ)) != -1
+           // Mike ... //
+              (fh = CreateFile (szBitmap, GENERIC_READ,
+                  FILE_SHARE_READ, &sa, OPEN_EXISTING,
+                  FILE_ATTRIBUTE_NORMAL, NULL)
+              ) != NULL
+            )
+           // ... Mike //
     {
 	BITMAPFILEHEADER bf;
 	BITMAPINFOHEADER bi;
+    unsigned long iNumRead;
 
+  /*
 	_lread(fh, &bf, sizeof(bf));
 	_lread(fh, &bi, sizeof(bi));
 	_lread(fh, ape, sizeof(ape));
 	_lclose(fh);
+  */
+    // Mike ... //
+    ReadFile (fh, &bf, sizeof (bf), &iNumRead, NULL);
+    ReadFile (fh, &bi, sizeof (bi), &iNumRead, NULL);
+    ReadFile (fh, ape, sizeof (ape), &iNumRead, NULL);
+	CloseHandle (fh);
+    // ... Mike //
 
 	if (bi.biSize != sizeof(BITMAPINFOHEADER))
 	    n = 0;
@@ -246,10 +297,12 @@ extern "C" IDirectDrawPalette * DDLoadPalette(IDirectDraw *pdd, LPCSTR szBitmap)
 	}
     }
 
+
     pdd->CreatePalette(DDPCAPS_8BIT, ape, &ddpal, NULL);
 
     return ddpal;
 }
+
 
 /*
  * DDColorMatch
