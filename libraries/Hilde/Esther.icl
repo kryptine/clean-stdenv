@@ -14,9 +14,9 @@ where
 	shell st=:{env}
 		# (console, env) = stdio env
 		  console = fwrites "Esther>" console
-		  (input, console) = freadline` console
+		  (continue, input, console) = freadline` console
 	  	  (_, env) = fclose console env
-		| input == "" = {st & env = env}
+		| not continue || input == "" = {st & env = env}
 		# (result, st=:{env}) = (interpret input catchAllIO (\d env -> (handler d, env))) {st & env = env}
 		  (console, env) = stdio env
 		  console = foldl (\f x -> fwrites x f) console result
@@ -24,11 +24,11 @@ where
 	  	  (_, env) = fclose console env
 		= shell {st & env = env}
 	where
-		freadline` :: !*File -> (!String, !*File)
+		freadline` :: !*File -> (!Bool, !String, !*File)
 		freadline` file
 			# (line, file) = freadline file
-			| size line > 0 && line.[size line - 1] == '\n' = (line % (0, size line - 2), file)
-			= (line, file)
+			| size line > 0 && line.[size line - 1] == '\n' = (True, line % (0, size line - 2), file)
+			= (False, line, file)
 	
 	interpret :: !String !*(Esther *env) -> (![String], !*Esther *env) | TC, DynamicFileSystem, bimap{|*|}, ExceptionEnv env
 	interpret input st
@@ -45,7 +45,7 @@ where
 		eval d=:(_ :: A.a b: *a -> *(b, *a)) env = (d, env)
 		eval (f :: *env^ -> *(a, *env^)) env 
 			#!env = trace_n " < *World -> *(a, *World) > " env
-			#!(x, env) = f env
+			# (x, env) = f env
 			= (dynamic x :: a, env)
 		eval d env = (d, env)
 

@@ -15,7 +15,7 @@ from StdParsComb import :: CParser, :: Parser, :: AltCont, :: XorCont, :: SucCon
 	| Pipe !NTstatement !Tguard !NTstatements
 	| Statement !NTstatement
 
-::NTstatement
+:: NTstatement
 	= Write !NTexpression !Twrite !NTnameDef
 	| Function !(Scope NTfunction)
 	| Expression !NTexpression
@@ -40,7 +40,7 @@ from StdParsComb import :: CParser, :: Parser, :: AltCont, :: XorCont, :: SucCon
 	| Let !(Scope NTlet)
 	| Case !NTcase
 	| Dynamic !(Scope NTdynamic)
-	| NameOrValue !NTnameOrValue
+	| NameOrValue !NTnameOrValue 
 
 :: NTdynamic = NTdynamic !Tdynamic !NTexpression
 
@@ -73,12 +73,12 @@ from StdParsComb import :: CParser, :: Parser, :: AltCont, :: XorCont, :: SucCon
 	| ConsPattern !TopenBracket !NTpattern !(Maybe (Tcolon, NTpattern)) !TcloseBracket
 	| NilPattern !TopenBracket !TcloseBracket
 	| NestedPattern !Topen !(+- NTpattern UNIT) !Tclose
-	| VariablePattern !NTvariable
+	| VariablePattern !NTvariable 
 	| NameOrValuePattern !NTnameOrValue 
 
-:: NTvariable = NTvariable !String
+:: NTvariable = NTvariable !String !GenConsPrio
 
-:: NTnameOrValue = NTname !String | NTvalue !Dynamic !GenConsPrio
+:: NTnameOrValue = NTname !String !GenConsPrio | NTvalue !Dynamic !GenConsPrio
 
 :: NTnameDef = NTnameDef !String !GenConsPrio
 

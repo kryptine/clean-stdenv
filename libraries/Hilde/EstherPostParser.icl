@@ -6,8 +6,9 @@ import StdMisc, StdList, StdString, EstherTransform
 (@) infixl 9
 (@) e1 e2 :== Apply e1 e2
 VALUE d p :== Plain (NameOrValue (NTvalue d p))
+NAME n p :== Plain (NameOrValue (NTname n p))
 
-generic resolveNames e :: !e ![String] !*env -> (!e, ![String], !*env) | resolveFilename env
+generic resolveNames e :: !e ![(String, GenConsPrio)] !*env -> (!e, ![(String, GenConsPrio)], !*env) | resolveFilename env
 
 resolveNames{|c|} e vs st = (e, vs, st)
 
@@ -46,18 +47,24 @@ where
 	(p_ds`, _, st``) = resolveNames{|*|} (+- p_ds) vs` st`
 	(e`, _, st```) = resolveNames{|*|} e vs` st``
 
-resolveNames{|NTvariable|} e=:(NTvariable n) vs st = (e, [n:vs], st)
+resolveNames{|NTvariable|} e=:(NTvariable n p) vs st = (e, [(n, p):vs], st)
 
-resolveNames{|NTnameDef|} e=:(NTnameDef n p) vs st = (e, [n:vs], st)
+resolveNames{|NTnameDef|} e=:(NTnameDef n p) vs st = (e, [(n, p):vs], st)
 
 resolveNames{|NTnameOrValue|} (NTvalue (x :: a) prio) vs st 
 	#!x = x
 	= (NTvalue (dynamic x :: a) prio, vs, st)
-resolveNames{|NTnameOrValue|} (NTname n) vs st 
-	| isMember n vs = (NTname n, vs, st)
-	= case resolveFilename n st of
-		(Just (dyn, prio), st) -> (NTvalue dyn prio, vs, st)
-		(_, st) -> (raise (NameNotFound n), vs, st)
+resolveNames{|NTnameOrValue|} (NTname n _) vs st 
+	= case member n vs of
+		Just p -> (NTname n p, vs, st)
+		_ -> case resolveFilename n st of
+			(Just (dyn, prio), st) -> (NTvalue dyn prio, vs, st)
+			(_, st) -> (raise (NameNotFound n), vs, st)
+where
+	member n [] = Nothing
+	member n [(x, p):xs]
+		| x == n = Just p
+		= member n xs
 
 resolveNames{|Scope|} ge (Scope e) vs st = (Scope e`, vs, st`)
 where
@@ -114,6 +121,7 @@ fixInfix{|NTexpression|} e = fix e []
 where
 	fix (Term e) es = foldl (@) (Term (fixInfix{|*|} e)) es
 	fix (_ @ VALUE _ (GenConsPrio _ _)) [] = raise InfixRightArgumentMissing
+	fix (_ @ NAME _ (GenConsPrio _ _)) [] = raise InfixRightArgumentMissing
 	fix (l @ r) es
 		# r = fixInfix{|*|} r
 		= case l of
@@ -129,8 +137,38 @@ where
 							(GenConsAssocLeft, GenConsAssocLeft) -> leftish
 							(GenConsAssocRight, GenConsAssocRight) -> rightish
 							-> raise UnsolvableInfixOrder
+					llll=:(Term (NAME _ (GenConsPrio leftAssoc leftPrio))) @ lllr @ llr
+						# rightish = llll @ lllr @ (Plain (Nested (|-| (Term (fixInfix{|*|} lr) @ llr @ r))))
+						| rightPrio < leftPrio -> leftish
+						| leftPrio < rightPrio -> rightish
+						-> case (rightAssoc, leftAssoc) of
+							(GenConsAssocLeft, GenConsAssocLeft) -> leftish
+							(GenConsAssocRight, GenConsAssocRight) -> rightish
+							-> raise UnsolvableInfixOrder
+					_ -> leftish
+			(ll @ lr=:(NAME _ (GenConsPrio rightAssoc rightPrio)))
+				# ll = fixInfix{|*|} ll
+				  leftish = Term (fixInfix{|*|} lr) @ Plain (Nested (|-| ll)) @ Plain (Nested (|-| (foldl (@) (Term r) es)))
+				-> case ll of
+					llll=:(Term (VALUE _ (GenConsPrio leftAssoc leftPrio))) @ lllr @ llr
+						# rightish = llll @ lllr @ (Plain (Nested (|-| (Term (fixInfix{|*|} lr) @ llr @ r))))
+						| rightPrio < leftPrio -> leftish
+						| leftPrio < rightPrio -> rightish
+						-> case (rightAssoc, leftAssoc) of
+							(GenConsAssocLeft, GenConsAssocLeft) -> leftish
+							(GenConsAssocRight, GenConsAssocRight) -> rightish
+							-> raise UnsolvableInfixOrder
+					llll=:(Term (NAME _ (GenConsPrio leftAssoc leftPrio))) @ lllr @ llr
+						# rightish = llll @ lllr @ (Plain (Nested (|-| (Term (fixInfix{|*|} lr) @ llr @ r))))
+						| rightPrio < leftPrio -> leftish
+						| leftPrio < rightPrio -> rightish
+						-> case (rightAssoc, leftAssoc) of
+							(GenConsAssocLeft, GenConsAssocLeft) -> leftish
+							(GenConsAssocRight, GenConsAssocRight) -> rightish
+							-> raise UnsolvableInfixOrder
 					_ -> leftish
 			(Term (VALUE _ (GenConsPrio _ _))) -> raise InfixLeftArgumentMissing
+			(Term (NAME _ (GenConsPrio _ _))) -> raise InfixLeftArgumentMissing
 			_ -> fix l [r:es]
 
 derive fixInfix NTstatements, NTstatement, NTfunction, NTterm, NTsugar, NTlist, NTlistComprehension, NTlambda, NTpattern, NTlet, NTletDef, NTcase, NTcaseAlt, NTplain, NTdynamic
