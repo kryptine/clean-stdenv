@@ -6,7 +6,7 @@ import StdHtml
 Start world  = doHtml MyPage world
 
 MyPage hst
-# (_,(counterGEC,hst)) = counterHGEC "counter" 0 hst
+# ((_,counterGEC),hst) = counterHGEC "counter" 0 hst
 = (Head 
 	[ Hd_Title "Counter Example"
 	] 

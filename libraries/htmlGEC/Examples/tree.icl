@@ -1,8 +1,14 @@
 implementation module tree
 
-import StdEnv
+import StdEnv, StdHtml
 
 // balance tree
+
+derive gHGEC  	Tree
+derive gPrint 	Tree
+derive gParse 	Tree
+derive gUpd 	Tree
+derive gHpr		Tree
                                               
 balanceTree :: ((Tree a) -> (Tree a)) | Ord a
 balanceTree = fromListToBalTree o fromTreeToList
