@@ -4,7 +4,7 @@ import StdEnv
 import StdIO
 import genericgecs
 import StdGEC, StdGECExt, StdAGEC
-import StdGecComb, basicAGEC, timedAGEC
+import GecArrow, basicAGEC, timedAGEC
 
 // TO TEST JUST REPLACE THE EXAMPLE NAME IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
 // ALL EXAMPLES HAVE TO BE OF FORM pst -> pst
@@ -18,7 +18,7 @@ Start world
  	example_timer1
  	world  
 
-example_timer1 = CGEC (selfGEC "TickTack" clock) (myclock,0<->0<->0)
+example_timer1 = startCircuit (feedback (edit "TickTack" >>@ clock)) (myclock,0<->0<->0)
 where
 	clock (tick,min<->59<->9) 		= clock (tick,min+1<->0<->0)
 	clock (tick,min<->secs<->9) 	= clock (tick,min<->secs+1<->0)
@@ -26,7 +26,7 @@ where
 
 myclock = Timed (\i -> 100) 100 
 
-example_timer2 = CGEC (selfGEC "TickTack" thisone) (myclock,(2,Hide allprimes))
+example_timer2 = startCircuit (feedback (edit "Show Prime Numbers" >>@ thisone)) (myclock,(2,Hide allprimes))
 where
 	thisone (tick,(p,Hide [x:xs])) = (tick,(x,Hide xs))
 

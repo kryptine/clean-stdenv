@@ -6,36 +6,13 @@ import tupleAGEC
 import StdEnv
 import StdIO
 import genericgecs
-import StdGEC, StdGECExt, StdGecComb, StdDynamic 
+import StdGEC, StdGECExt, GecArrow, StdDynamic 
 import basicAGEC, StdAGEC, calcAGEC, dynamicAGEC
 
 
-class X a b c 
-where
-	f :: a b -> c
-
-instance X Int Int Int
-where
-	f i j = i + j
-	
-instance X Int Int Real
-where
-	f i j = toReal (i + j)
-
-bla :: Int	
-bla = f g	4
-where
-	g :: Int
-	g = f 2 3
-
-:: Bug = C1 | C2
-
-derive gGEC Bug
-
-
 Start :: *World -> *World
-Start world = goGui editoreditor world  
-//Start world = goGui testDynamic world  
+//Start world = goGui editoreditor world  
+Start world = goGui testDynamic world  
 /*
 Start world = goGui mytest world
 where
@@ -51,7 +28,7 @@ where
 
 derive gGEC Maybe 
 
-testDynamic = CGEC  (%| (dotest @| gecEdit "test" ))  initval  
+testDynamic = startCircuit  (feedback (dotest @>> edit "test" ))  initval  
 where	
 	initval  = horlistAGEC [testinit] <|> showAGEC ":: String"
 	testinit = DynStr (dynamic "") "Type expression:"
@@ -80,13 +57,13 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 
 derive gGEC TypeVal, Editor, Command, ApplicationElem
 
-editoreditor = CGEC (designeditor |@ convert |>>>| applicationeditor) initvalue
+editoreditor = startCircuit (designeditor >>@ convert >>> applicationeditor) initvalue
 where
-	designeditor :: CGEC DesignEditor DesignEditor
-	designeditor 		= %| (toDesignEditor @| gecEdit "design" |@ updateDesign o fromDesignEditor)
+	designeditor :: GecCircuit DesignEditor DesignEditor
+	designeditor 		= feedback (toDesignEditor @>> edit "design" >>@ updateDesign o fromDesignEditor)
 
-	applicationeditor :: CGEC ApplicationEditor ApplicationEditor
-	applicationeditor 	= %| (toApplicEditor o updateApplication @| gecEdit "application" |@ fromApplicEditor)
+	applicationeditor :: GecCircuit ApplicationEditor ApplicationEditor
+	applicationeditor 	= feedback (toApplicEditor o updateApplication @>> edit "application" >>@ fromApplicEditor)
 
 	toDesignEditor   (table,clipboard) = (listAGEC True (map vertlistAGEC table),hidAGEC clipboard)
 	fromDesignEditor (table,clipboard) = (map (^^) (^^ table),^^ clipboard)

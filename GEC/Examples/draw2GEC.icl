@@ -4,7 +4,7 @@ import StdEnv
 import StdIO
 import genericgecs
 import StdAGEC
-import StdGecComb, StdGECExt, basicAGEC, timedAGEC
+import GecArrow, StdGECExt, basicAGEC, timedAGEC
 
 // TO TEST JUST REPLACE THE EXAMPLE NAME IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
 // ALL EXAMPLES HAVE TO BE OF FORM pst -> pst
@@ -39,14 +39,14 @@ myclock = Timed (\i -> 100) 100
 derive gGEC MouseState, Modifiers
 
 example_mouse pst
-	=	CGEC (%|  (  gecEdit "Mouse" |>>>| gecMouse "Mouse" )) MouseLost pst
+	=	startCircuit (feedback  (  edit "Mouse" >>> gecMouse "Mouse" )) MouseLost pst
 
 example_draw pst
-=	CGEC ( %| ( 		(\list -> listAGEC True [(toEditReprs fig,Hide fig) \\ fig <- list])
-				@|		gecEdit "Editor"
-				|@		(\list -> [(fromEditReprs nfig,ofig) \\ (nfig,Hide ofig) <- ^^ list])
-				|>>>|	(gecIO (mydrawfun "Drawings") |>| gecMouse "Drawings") 
-				|@		(\(list,mousestate) -> hit mousestate [fig \\ (fig,_) <- list])
+=	startCircuit ( feedback ( 		(\list -> listAGEC True [(toEditReprs fig,Hide fig) \\ fig <- list])
+				@>>		edit "Editor"
+				>>@		(\list -> [(fromEditReprs nfig,ofig) \\ (nfig,Hide ofig) <- ^^ list])
+				>>>		(gecMouse "Drawings" &&& gecIO (mydrawfun "Drawings") ) 
+				>>@		(\(mousestate,list) -> hit mousestate [fig \\ (fig,_) <- list])
 			  )
 		 ) [(initshape 30 30 100 100)] pst
 	
@@ -62,9 +62,10 @@ example_draw pst
 		= fig
 
 		mydrawfun title figlist pst
-		# (Just wid,pst) = accPIO (searchWindowIdWithTitle title) pst
+		# (Just wid,pst) = accPIO (searchWindowIdWithTitle titl
+		e) pst
 		# pst = appPIO (setWindowLook wid True (True,mapdrawfig figlist)) pst 
-		= pst
+		= (figlist,pst)
 		
 		mapdrawfig [] _ _ 			=	setPenColour Black
 		mapdrawfig [fig:figs] x xx  =	drawfig fig o mapdrawfig figs x xx

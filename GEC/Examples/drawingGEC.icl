@@ -4,7 +4,7 @@ import StdEnv
 import StdIO
 import genericgecs
 import StdAGEC
-import StdGecComb, basicAGEC, timedAGEC
+import GecArrow, basicAGEC, timedAGEC
 
 // TO TEST JUST REPLACE THE EXAMPLE NAME IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
 // ALL EXAMPLES HAVE TO BE OF FORM pst -> pst
@@ -38,11 +38,11 @@ myclock = Timed (\i -> 100) 100
 example_draw pst
 #	(wid,pst) 	= openId pst
 #    pst 		= snd (openWindow Void (Window "Drawings" NilLS [WindowId wid]) pst)
-=	CGEC ( %| ( 		gecEdit "Editor" 
-				|@ 		move 
-				|>>>|	gecIO (mydrawfun wid) 
-			  )
-		 ) (initrecord 100 100, myclock) pst
+=	startCircuit ( feedback ( 		edit "Editor" 
+							>>@ 	move 
+							>>>		gecIO (mydrawfun wid) 
+			  				)
+		 		 ) (initrecord 100 100, myclock) pst
 	
 	where
 
@@ -50,9 +50,9 @@ example_draw pst
 		| ^^ x_offset <= 300	=  ((initbox  <|> {attr & x_offset=counterAGEC(^^ x_offset + 5)},Hide (initbox  <|> attr)),	c)
 		| otherwise				=  ((initbox  <|> {attr & x_offset=counterAGEC 100},Hide(initbox  <|> attr)),			c)
 
-		mydrawfun wid (pict,_) pst
+		mydrawfun wid (pict,hpict) pst
 		# pst = appPIO (setWindowLook wid True (True,drawfun pict)) pst 
-		= pst
+		= ((pict,hpict),pst)
 		
 		drawfun (Box nrect<|>nattr, Hide (Box orect<|>oattr))  nx nxx
 											=	drawshape nrect nattr orect oattr
