@@ -55,8 +55,11 @@ osGetClipboardText tb
 	| err == NoTypeErr	= ("",tb)
 	| err <> 0		= abort ("osclipboard:osGetClipboardText:GetScrapFlavorFlags: "+++toString err)
 	# (err,siz,tb)	= GetScrapFlavorSize ref ScrapFlavorTypeText tb
+	| err == NoTypeErr	= ("",tb)	// shouldn't really occur but seems to anyway?!
 	| err <> 0		= abort ("osclipboard:osGetClipboardText:GetScrapFlavorSize: "+++toString err)
 	# (err,siz,dat,tb)	= GetScrapFlavorData ref ScrapFlavorTypeText siz tb
+	| err == NoMemErr	= ("",tb)	// triggered when debugging with codewarrior debugger
+	| err == NoTypeErr	= ("",tb)
 	| err <> 0		= abort ("osclipboard:osGetClipboardText:GetScrapFlavorData: "+++toString err)
 	= (dat,tb)
 

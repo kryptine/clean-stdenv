@@ -6,8 +6,8 @@ implementation module oswindow
 
 import	StdBool, StdInt, StdReal, StdClass, StdOverloaded, StdList, StdMisc, StdTuple
 import	osdocumentinterface, osevent, osfont, ospicture, osrgn, ossystem, ostypes
-import	windows, pointer, OS_utilities, textedit, controls, osutil
-import  memoryaccess,texteditaccess
+import	windows, pointer, OS_utilities, /*textedit,*/ controls, osutil
+//import  memoryaccess	//,texteditaccess
 import	commondef
 import controlvalidate
 import menus
@@ -39,6 +39,7 @@ ModalDialogType    	:== 5;		// The window type of a modal dialog 		= 5 (movableD
 
 //-- Debugging Tools
 //import dodebug
+trace_n` _ f :== f
 //trace_n m f :== trace_n` m f
 trace_n _ f :== f
 
@@ -85,6 +86,7 @@ osMinWindowSize = (64,64)
 
 osGetCompoundContentRect :: !OSWindowMetrics !(!Bool,!Bool) !OSRect -> OSRect
 osGetCompoundContentRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom}
+	| trace_n ("osGetCompoundContentRect",(visHScroll,visVScroll),itemRect) False = undef
 	| visHScroll && visVScroll	= {itemRect & rright=r`,rbottom=b`}
 	| visHScroll				= {itemRect &           rbottom=b`}
 	| visVScroll				= {itemRect & rright=r`           }
@@ -95,6 +97,7 @@ where
 
 osGetCompoundHScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !OSRect -> OSRect
 osGetCompoundHScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rleft,rtop,rright,rbottom}
+	| trace_n ("osGetCompoundHScrollRect",(visHScroll,visVScroll),itemRect) False = undef
 	| not visHScroll	= zero
 	| otherwise			= {rleft=rleft-osScrollBarOverlap, rtop=b`-1, rright=r`, rbottom = rbottom+osScrollBarOverlap}
 where
@@ -103,6 +106,7 @@ where
 
 osGetCompoundVScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !OSRect -> OSRect
 osGetCompoundVScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom,rtop}
+	| trace_n ("osGetCompoundVScrollRect",(visHScroll,visVScroll),itemRect) False = undef
 	| not visVScroll	= zero
 	| otherwise			= {itemRect & rtop = rtop-osScrollBarOverlap, rright = rright + osScrollBarOverlap, rleft=r`-1,rbottom= b` + osScrollBarOverlap}//if visHScroll b` rbottom}
 where
@@ -772,7 +776,7 @@ osCreateCompoundControl wMetrics parentWindow parentPos show able isTransparent 
 							True	-> trace_n ("createVScroll")
 										osCreateSliderControl parentWindow parentPos show able False (vInfo.cbiPos) (vInfo.cbiSize) (vInfo.cbiState) tb
 							False	-> (OSNoWindowPtr,tb)
-	# tb = trace_n ("oswindow::osCreateCompoundControl",parentWindow,hPtr,vPtr) tb
+	# tb = trace_n` ("oswindow::osCreateCompoundControl",parentWindow,hPtr,vPtr) tb
 	= (parentWindow,hPtr,vPtr,tb)
 
 osDestroyCompoundControl :: !OSWindowPtr !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
@@ -783,30 +787,30 @@ osDestroyCompoundControl wPtr hPtr vPtr tb
 	# tb = case vPtr of
 			OSNoWindowPtr	-> tb
 			_				-> DisposeControl vPtr tb
-	# tb = trace_n ("osDestroyCompoundControl") tb
+	# tb = trace_n` ("osDestroyCompoundControl") tb
 	= tb
 
 osUpdateCompoundControl :: !OSRect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
 osUpdateCompoundControl area _ parentWindow theControl tb
 	// are scrollbars being updated???
-	#! tb = trace_n ("osUpdateCompoundControl ???") tb
+	#! tb = trace_n` ("osUpdateCompoundControl ???") tb
 	// do nothing on Macintosh
 	= tb
 
 osClipCompoundControl :: !OSWindowPtr !(!Int,!Int) !OSRect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 osClipCompoundControl _ parentPos area itemPos itemSize tb
-	# tb = trace_n ("osClipCompoundControl") tb
+	# tb = trace_n` ("osClipCompoundControl") tb
 	= oscliprectrgn parentPos area itemPos itemSize tb
 
 osInvalidateCompound :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osInvalidateCompound compoundPtr tb
-	# tb = trace_n ("osInvalidateCompound") tb
+	# tb = trace_n` ("osInvalidateCompound") tb
 	= tb
 
 osSetCompoundSliderThumb :: !OSWindowMetrics !OSWindowPtr !OSWindowPtr !OSWindowPtr !OSRect !Bool !Int !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetCompoundSliderThumb wMetrics theWindow theCompound theScrollbar theScrollrect isHorizontal thumb (maxx,maxy) redraw tb
 	// look at movewindowframe in windowsize.icl v 1.1
-	# tb = trace_n ("osSetCompoundSliderThumb ",theScrollbar,theScrollrect,redraw) tb
+	# tb = trace_n` ("osSetCompoundSliderThumb ",theScrollbar,theScrollrect,redraw,thumb) tb
 	# tb		= SetCtlValue theScrollbar thumb tb
 	| not redraw = tb
 //	= appGrafport theWindow (osUpdateCommonControl theScrollrect theScrollbar) tb
@@ -814,7 +818,7 @@ osSetCompoundSliderThumb wMetrics theWindow theCompound theScrollbar theScrollre
 
 osSetCompoundSliderThumbSize :: !OSWindowMetrics !OSWindowPtr !OSWindowPtr !OSWindowPtr !Int !Int !Int !OSRect !Bool !Bool !Bool !*OSToolbox -> *OSToolbox
 osSetCompoundSliderThumbSize _ theWindow _ ptr min max size rect _ able redraw tb
-	# tb = trace_n ("osSetCompoundSliderThumbSize ",(theWindow,ptr,min,max),redraw) tb
+	# tb = trace_n` ("osSetCompoundSliderThumbSize ",(theWindow,ptr,min,max),redraw) tb
 //	= appGrafport theWindow setthumb tb
 	= appClipport theWindow rect setthumb tb
 where
@@ -830,7 +834,7 @@ where
 
 osSetCompoundSelect :: !OSWindowPtr !OSWindowPtr !OSRect !(!Bool,!Bool) !(!OSWindowPtr,!OSWindowPtr) !Bool !*OSToolbox -> *OSToolbox
 osSetCompoundSelect _ compoundPtr _ (hVis,vVis) (hPtr,vPtr) select tb
-	# tb = trace_n ("osSetCompoundSelect") tb
+	# tb = trace_n` ("osSetCompoundSelect") tb
 	# tb = case hVis of
 			True -> HiliteControl hPtr (if select 0 255) tb
 			_	-> tb
@@ -841,7 +845,7 @@ osSetCompoundSelect _ compoundPtr _ (hVis,vVis) (hPtr,vPtr) select tb
 
 osSetCompoundShow :: !OSWindowPtr !OSWindowPtr !OSRect !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetCompoundShow wPtr compoundPtr itemRect` clipRect show tb
-	# tb = trace_n ("osSetCompoundShow",show) tb
+	# tb = trace_n` ("osSetCompoundShow",show) tb
 	| show
 		# tb = appClipport wPtr clipRect (InvalWindowRect wPtr itemRect o QEraseRect itemRect) tb
 		= tb
@@ -852,17 +856,17 @@ where
 
 osSetCompoundPos :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetCompoundPos _ (parent_x,parent_y) compoundPtr (x,y) _ update tb
-	# tb = trace_n ("osSetCompoundPos") tb
+	# tb = trace_n` ("osSetCompoundPos") tb
 	= tb
 
 osSetCompoundSize :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetCompoundSize _ _ compoundPtr _ size update tb
-	# tb = trace_n ("osSetCompoundSize") tb
+	# tb = trace_n` ("osSetCompoundSize") tb
 	= tb
 
 osUpdateCompoundScroll :: !OSWindowPtr !OSWindowPtr !OSRect !*OSToolbox -> *OSToolbox
 osUpdateCompoundScroll wPtr scrollItemPtr scrollRect=:{rleft=x,rtop=y,rbottom=b,rright=r} tb
-	# tb = trace_n ("osSetCompoundSliderPosSize",scrollItemPtr,scrollRect) tb
+	# tb = trace_n` ("osUpdateCompoundScroll",scrollItemPtr,scrollRect) tb
 	= appGrafport wPtr f tb
 where
 	f tb
@@ -881,18 +885,27 @@ osCompoundControlHasOrigin	:== False
 
 RadioButProc	:==	370	//2		// radio button
 RadBoxWid	:== 32
+RadBoxHight
+//	:== 18
+	=: GetRadioButtonHeight
+
+GetRadioButtonHeight
+	# ((err,height),_)	= GetThemeMetric kThemeMetricRadioButtonHeight OSNewToolbox
+	= height
+
+kThemeMetricRadioButtonHeight	:== 3
 
 osGetRadioControlItemSize :: !OSWindowMetrics !String !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
 osGetRadioControlItemSize wMetrics=:{osmFont,osmHeight} text tb
 	# (w,tb)	= osGetfontstringwidth False 0 text osmFont tb
 	# w			= RadBoxWid+w
-	# h			= osmHeight
-	# tb = trace_n ("osGetRadioControlItemSize :: width: "+++toString w+++" height: "+++toString h) tb
+	# h			= RadBoxHight//osmHeight
+	# tb = trace_n` ("osGetRadioControlItemSize :: width: "+++toString w+++" height: "+++toString h) tb
 	= ((w,h),tb)
 
 osGetRadioControlItemHeight :: !OSWindowMetrics -> Int
 osGetRadioControlItemHeight {osmHeight}
-	# h			= osmHeight
+	# h			= RadBoxHight//osmHeight
 	= trace_n ("osGetRadioControlItemHeight :: height: "+++toString h) h
 
 osGetRadioControlItemMinWidth :: !OSWindowMetrics -> Int
@@ -979,23 +992,30 @@ osClipRadioControl _ parentPos area itemPos itemSize tb
 
 //-- CheckControl
 
+GetCheckBoxHeight
+	# ((err,height),_)	= GetThemeMetric kThemeMetricCheckBoxHeight OSNewToolbox
+	= height
+
+kThemeMetricCheckBoxHeight	:== 2
+
 CheckBoxProc	:==	1		// check box
+CheckBoxHeigth	=: GetCheckBoxHeight
 
 osGetCheckControlItemSize :: !OSWindowMetrics !String !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
-osGetCheckControlItemSize wMetrics=:{osmFont,osmHeight} text tb
+osGetCheckControlItemSize wMetrics=:{osmFont} text tb
 	# (w,tb)	= osGetfontstringwidth False 0 text osmFont tb
 	# w			= RadBoxWid+w
-	# h			= osmHeight
+	# h			= CheckBoxHeigth//osmHeight
 	# tb = trace_n ("osGetCheckControlItemSize :: width: "+++toString w+++" height: "+++toString h) tb
 	= ((w,h),tb)
 
 osGetCheckControlItemHeight :: !OSWindowMetrics -> Int
-osGetCheckControlItemHeight {osmHeight}
-	# h			= osmHeight
+osGetCheckControlItemHeight _
+	# h			= CheckBoxHeigth//osmHeight
 	= trace_n ("osGetCheckControlItemHeight :: height: "+++toString h) h
 
 osGetCheckControlItemMinWidth :: !OSWindowMetrics -> Int
-osGetCheckControlItemMinWidth {osmHeight}
+osGetCheckControlItemMinWidth _
 	# w = RadBoxWid
 	= trace_n ("osGetCheckControlItemMinWidth",w) w
 
@@ -1165,20 +1185,30 @@ osSetSliderControlSize _ _ sliderPtr _ size=:(w,h) update tb
 
 //-- TextControl
 
+GetTextWidth
+	# ((err,white),_)	= GetThemeMetric kThemeMetricEditTextWhitespace OSNewToolbox
+	# ((err,frame),_)	= GetThemeMetric kThemeMetricEditTextFrameOutset OSNewToolbox
+	= white + frame
+
+TextControlPadding =: GetTextWidth << 1
+
+kThemeMetricEditTextWhitespace	:== 4
+kThemeMetricEditTextFrameOutset	:== 5
+
 osGetTextControlSize :: !OSWindowMetrics !String !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
 osGetTextControlSize wMetrics=:{osmFont,osmHeight} text tb
 	# (textwidth,tb)	= osGetfontstringwidth False 0 text osmFont tb
-	# width				= textwidth + 4
-	# tb = trace_n ("osGetTextControlSize :: width: "+++toString width+++" height: "+++toString osmHeight) tb
+	# width				= textwidth + TextControlPadding//4
+	# tb = trace_n` ("osGetTextControlSize :: width: "+++toString width+++" height: "+++toString osmHeight) tb
 	= ((width,osmHeight),tb)
 
 osGetTextControlHeight :: !OSWindowMetrics -> Int
 osGetTextControlHeight {osmHeight}
-	= trace_n ("osGetTextControlHeight :: height: "+++toString osmHeight) osmHeight
+	= trace_n` ("osGetTextControlHeight :: height: "+++toString osmHeight) osmHeight
 
 osGetTextControlMinWidth :: !OSWindowMetrics -> Int
 osGetTextControlMinWidth {osmHeight}
-	# w = 20 + 4
+	# w = 20 + TextControlPadding//4
 	= trace_n ("osGetTextControlMinWidth",w) w
 
 //%%%%%%%%
@@ -1363,7 +1393,7 @@ osSetTextControlSize _ _ textPtr _ size update tb
 
 //-- EditControl
 
-kControlEditTextProc	:== 272
+kControlEditTextProc	:== if onOSX 912 272
 
 osCreateEditControl :: !OSWindowPtr !(!Int,!Int) !String !Bool !Bool !Bool !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSWindowPtr,!*OSToolbox)
 osCreateEditControl parentWindow parentPos text show able isKeySensitive (x,y) (w,h) tb
@@ -1424,14 +1454,16 @@ osClipEditControl _ parentPos area itemPos itemSize tb
 
 osGetEditControlSize :: !OSWindowMetrics !Int !Int !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
 osGetEditControlSize {osmHeight} width nrlines tb
-	# tb = trace_n ("osGetEditControlSize :: "+++toString (width,osmHeight*nrlines)) tb
-	= ((width,osmHeight*nrlines + 6),tb)
+	# tb = trace_n` ("osGetEditControlSize :: "+++toString (width,osmHeight*nrlines)) tb
+//	= ((width,osmHeight*nrlines + 6),tb)
+	= ((width,osmHeight*nrlines),tb)
 
 osGetEditControlHeight :: !OSWindowMetrics !Int -> Int
 osGetEditControlHeight {osmHeight} nrlines
-	= trace_n ("osGetEditControlHeight :: height: "+++toString height) height
+	= trace_n` ("osGetEditControlHeight :: height: "+++toString height) height
 where
-	height	= osmHeight * nrlines + 6
+//	height	= osmHeight * nrlines + 6
+	height	= osmHeight * nrlines
 	
 osGetEditControlMinWidth :: !OSWindowMetrics -> Int
 osGetEditControlMinWidth _
@@ -1506,7 +1538,10 @@ where
 */
 osSetEditControlCursor :: !OSWindowPtr !OSWindowPtr !OSRect !OSRect !Int !*OSToolbox -> *OSToolbox
 osSetEditControlCursor wPtr ePtr clipRect editRect pos tb
-	= tb
+	# data			= {toChar (pos >> 8 bitor 0xFF),toChar (pos bitor 0xFF),toChar (pos >> 8 bitor 0xFF),toChar (pos bitor 0xFF)}
+	# (err,tb)		= SetControlData ePtr 0 "sele" data tb
+	# tb = trace_n ("osSetEditControlCursor",ePtr,pos,err) tb
+	= osUpdateCommonControl clipRect ePtr tb
 /*
 	# tb = trace_n ("osSetEditControlCursor") tb
 	# tb = appClipport wPtr clipRect set tb
@@ -1570,6 +1605,10 @@ osSetEditControlShow :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *
 osSetEditControlShow wPtr ePtr clipRect show tb
 	| show
 		= appClipport wPtr clipRect (ShowControl ePtr) tb
+	# (err,focus,tb)	= GetKeyboardFocus wPtr tb
+	# (err,tb) = case focus == ePtr of
+			True	-> ClearKeyboardFocus wPtr tb
+			_		-> (0,tb)
 	= appClipport wPtr clipRect (HideControl ePtr) tb
 /*
 	# tb = trace_n ("osSetEditControlShow") tb
@@ -1632,19 +1671,32 @@ where
 //-- PopUpControl
 
 PopUpProc :== 400//1008
+kControlPopupButtonProc				:== 400
+kControlPopupFixedWidthVariant		:==   1	//= 1 << 0,
+kControlPopupVariableWidthVariant	:==   2	//= 1 << 1,
+kControlPopupUseAddResMenuVariant	:==   4	//= 1 << 2,
+//kControlPopupUseWFontVariant  = kControlUsesOwningWindowsFontVariant
 
 //	The fixed Menu ID for the PopUpControl:
 PopUpMenuID		:==	235
 
 //	Width of popup-arrow part:
-PopUpWid		:== 24
+PopUpWid		:== 20//24
+PopUpHeight		=: GetPopUpHeight
+
+GetPopUpHeight
+	# ((err,height),_)	= GetThemeMetric kThemeMetricPopupButtonHeight OSNewToolbox
+	= height
+
+kThemeMetricPopupButtonHeight	:== 30
+
 
 osGetPopUpControlSize :: !OSWindowMetrics ![String] !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
 osGetPopUpControlSize wMetrics=:{osmFont,osmHeight} items tb
 	# (widths,tb)	= osGetfontstringwidths False 0 items osmFont tb
 	  maxwidth		= listmax widths
 	  w				= maxwidth + 2 + PopUpWid
-	  h				= osGetPopUpControlHeight wMetrics
+	  h				= PopUpHeight//osGetPopUpControlHeight wMetrics
 	= ((w+28,h),tb)
 where
 	listmax :: ![Int] -> Int
@@ -1653,7 +1705,7 @@ where
 
 osGetPopUpControlHeight :: !OSWindowMetrics -> Int
 osGetPopUpControlHeight {osmHeight}
-	# h				= osmHeight + 4//2
+	# h				= PopUpHeight//osmHeight + 4//2
 	= h
 
 osGetPopUpControlMinWidth :: !OSWindowMetrics -> Int
@@ -1670,7 +1722,7 @@ osCreateEmptyPopUpControl parentWindow parentPos show able (x,y) (w,h) nrItems i
 	| not isEditable
 		# editPtr		= OSNoWindowPtr
 
-		# (popupPtr,tb)	= NewControl parentWindow itemRect "" True/*show*/ 0 (-12345) 0/*(w-26)*/ (PopUpProc+1) editPtr tb
+		# (popupPtr,tb)	= NewControl parentWindow itemRect "" True/*show*/ 0 (-12345) 0/*(w-26)*/ (kControlPopupButtonProc+kControlPopupFixedWidthVariant) editPtr tb
 		# string		= {toChar (menuRef >> 24),toChar (menuRef >> 16 bitand 0xFF),toChar (menuRef >> 8 bitand 0xFF),toChar (menuRef bitand 0xFF)}
 		# (err,tb)		= SetControlData popupPtr 2 "mhan" string tb
 		| err <> 0		= abort "oswindow:osCreateEmptyPopUpControl: SetControlData failed.\n"
@@ -1683,7 +1735,7 @@ osCreateEmptyPopUpControl parentWindow parentPos show able (x,y) (w,h) nrItems i
 	# tb				= AppendMenu menuRef " " tb
 	# tb				= AppendMenu menuRef "-(" tb
 
-	# (popupPtr,tb)		= NewControl parentWindow itemRect` "" True/*show*/ 0 (-12345)/*mId*/ 0/*(w-46)*/ (PopUpProc+1) editPtr tb
+	# (popupPtr,tb)		= NewControl parentWindow itemRect` "" True/*show*/ 0 (-12345)/*mId*/ 0/*(w-46)*/ (kControlPopupButtonProc+kControlPopupFixedWidthVariant) editPtr tb
 	# string			= {toChar (menuRef >> 24),toChar (menuRef >> 16 bitand 0xFF),toChar (menuRef >> 8 bitand 0xFF),toChar (menuRef bitand 0xFF)}
 	# (err,tb)			= SetControlData popupPtr 2 "mhan" string tb
 	| err <> 0			= abort "oswindow:osCreateEmptyPopUpControl: SetControlData failed.\n"
@@ -1694,13 +1746,26 @@ osCreateEmptyPopUpControl parentWindow parentPos show able (x,y) (w,h) nrItems i
 where
 	itemRect	= (x,y,x+w,b)//{rleft=x,rtop=y, rright=x+w,rbottom=b}
 
-	itemRect`	= (x+w-20,y, x+w,b)
-	editRect	= (x,y,x+w-22,b)
-	updateRect	= (x+1,y+1,x+w-22-1,b-1)
+	itemRect`	= (x+w-popWidth,y, x+w,b)
+	editRect	= (x,y,x+w-popWidth-popSep,b)
+//	updateRect	= (x+1,y+1,x+w-popWidth-1,b-1)
+	popWidth	= 20//22
+	popSep		= 8//6
 
 	b = y+h
 
 	createEdit tb
+		# (editc,tb)		= NewControl parentWindow editRect "" True/*show*/ 0 0 0 kControlEditTextProc 0 tb
+//		# tb				= addReturnFilter editc tb
+		# (res,tb)			= IsValidControlHandle parentWindow tb
+		# (err2,emb,tb)		= case res of
+								0	-> GetRootControl parentWindow tb
+								_	-> (0,res,tb)
+		# (err3,tb)			= EmbedControl editc emb tb
+		# (err,tb)			= SetControlData editc 0 "text" "" tb
+//		# tb				= Draw1Control editc tb
+		= (editc,tb)
+/*
 		# tb			= QEraseRect editRect tb
 		# tb			= QFrameRect editRect tb
 		
@@ -1713,8 +1778,69 @@ where
 
 		# tb			= GrafPtrSetFont oldfont tb
 		= (hTE,tb)
+*/
 
-
+osCreatePopUpControlItems :: !OSWindowPtr !(Maybe OSWindowPtr) !Bool ![String] !Int !*OSToolbox -> *OSToolbox
+osCreatePopUpControlItems parentPopUp editPtr able items selectedNr tb
+	# tb = trace_n ("osCreatePopUpControlItems",parentPopUp,editPtr) tb
+	# tb = case editable of
+		True
+				# (mPtr,tb)		= GetControlPopupMenuHandle parentPopUp tb
+				# (n,tb)		= GetCtlMax parentPopUp tb
+				# (n,tb)		= appendItems mPtr n items tb
+				# tb			= SetCtlMax parentPopUp n tb
+				-> tb
+		False
+				# (mPtr,tb)		= GetControlPopupMenuHandle parentPopUp tb
+				# (n,tb)		= GetCtlMax parentPopUp tb
+				# (n,tb)		= appendItems mPtr n items tb
+				# tb			= SetCtlMax parentPopUp n tb
+				-> tb
+	# tb					= SetCtlValue parentPopUp itemNr` tb
+	= tb
+/*	= case editPtr of
+			(Just hTE)
+				# title			= if (selectedNr > 0) (items!!(dec selectedNr)) ""
+				# (err,tb)		= SetControlData hTE 0 "text" (osValidateMenuItemTitle Nothing title) tb
+				# start			= 0
+				# end			= 0
+				# data			= {toChar (start >> 8 bitor 0xFF),toChar (start bitor 0xFF),toChar (end >> 8 bitor 0xFF),toChar (end bitor 0xFF)}
+				# (err,tb)		= SetControlData hTE 0 "sele" data tb
+//				# tb			= TESetText (osValidateMenuItemTitle Nothing title) hTE tb
+//				# tb			= TESetSelect 0 0 hTE tb
+				-> tb
+			Nothing
+				-> tb
+*/
+where
+	appendItems mPtr n [] tb	= (n,tb)
+	appendItems mPtr n [title:items] tb
+		# n				= n + 1
+		# tb			= AppendMenu mPtr title tb
+		# tb			= SetItem mPtr n (osValidateMenuItemTitle Nothing title) tb
+		| n == selectedNr && editable
+			# ePtr		= fromJust editPtr
+			# (err,tb)	= SetControlData ePtr 0 "text" (osValidateMenuItemTitle Nothing title) tb
+			# start		= 0
+			# end		= 0
+			# data		= {toChar (start >> 8 bitor 0xFF),toChar (start bitor 0xFF),toChar (end >> 8 bitor 0xFF),toChar (end bitor 0xFF)}
+			# (err,tb)	= SetControlData ePtr 0 "sele" data tb
+			= appendItems mPtr n items tb
+		= appendItems mPtr n items tb
+	
+	editable	= isJust editPtr
+	itemNr`
+		| editable
+			= selectedNr + 2
+			= selectedNr
+/*
+	selectText
+		| selected	= title+++check
+					= title
+	where
+		title = " "
+		check = "!"+++toString (toChar 18)
+*/
 osCreatePopUpControlItem :: !OSWindowPtr !(Maybe OSWindowPtr) !Int !Bool !String !Bool !Int !*OSToolbox -> (!Int,!*OSToolbox)
 osCreatePopUpControlItem parentPopUp editPtr pos able title selected itemNr tb
 	# tb = trace_n ("osCreatePopUpControlItem",parentPopUp,editPtr) tb
@@ -1737,8 +1863,13 @@ osCreatePopUpControlItem parentPopUp editPtr pos able title selected itemNr tb
 		# tb					= SetCtlValue parentPopUp itemNr` tb
 		= case editPtr of
 			(Just hTE)
-				# tb			= TESetText (osValidateMenuItemTitle Nothing title) hTE tb
-				# tb			= TESetSelect 0 0 hTE tb
+				# (err,tb)		= SetControlData hTE 0 "text" (osValidateMenuItemTitle Nothing title) tb
+				# start			= 0
+				# end			= 0
+				# data			= {toChar (start >> 8 bitor 0xFF),toChar (start bitor 0xFF),toChar (end >> 8 bitor 0xFF),toChar (end bitor 0xFF)}
+				# (err,tb)		= SetControlData hTE 0 "sele" data tb
+//				# tb			= TESetText (osValidateMenuItemTitle Nothing title) hTE tb
+//				# tb			= TESetSelect 0 0 hTE tb
 				-> (0,tb)
 			Nothing
 				-> (0,tb)
@@ -1749,13 +1880,14 @@ where
 		| isJust editPtr
 			= itemNr + 2
 			= itemNr
+/*
 	selectText
 		| selected	= title+++check
 					= title
 	where
 		title = " "
 		check = "!"+++toString (toChar 18)
-
+*/
 osDestroyPopUpControl :: !OSWindowPtr !(Maybe OSWindowPtr) !*OSToolbox -> *OSToolbox
 osDestroyPopUpControl popupPtr editPtr tb
 	# tb = trace_n ("osDestroyPopUpControl",popupPtr,editPtr) tb
@@ -1771,7 +1903,8 @@ osDestroyPopUpControl popupPtr editPtr tb
 				# tb = DisposeMenu menuPtr tb
 				-> tb
 			(Just hTE)
-				# tb = TEDispose hTE tb
+//				# tb = TEDispose hTE tb
+				# tb				= DisposeControl hTE tb
 //				# tb = DisposeMenu popupPtr tb
 				# (menuPtr,tb)		= GetControlPopupMenuHandle popupPtr tb
 //				# (menuPtr,_,tb)	= GetPopUpControlData popupPtr tb
@@ -1805,10 +1938,7 @@ where
 				# tb				= setPopUpEditText (fromJust editPtr) text tb
 
 				# tb				= assertPort` wPtr tb
-				# (gPtr,tb) 		= QGetPort tb
-				# (oldfont,tb)		= GrafPtrGetFont gPtr tb
 				# tb				= redrawPopUpEditText (fromJust editPtr) (toTuple wItemPos) (toTuple wItemSize) text tb
-				# tb				= GrafPtrSetFont oldfont tb
 
 				# getIndex			= getIndex - 2
 				-> (getIndex,tb)
@@ -1839,13 +1969,11 @@ osUpdatePopUpControl area parentWindow theControl editPtr pos size select text t
 	# tb				= osUpdateCommonControl area theControl tb
 
 	# tb				= assertPort` parentWindow tb
-	# (gPtr,tb)			= QGetPort tb
-	# (oldfont,tb)		= GrafPtrGetFont gPtr tb
-	# tb				= redrawPopUpEditText (fromJust editPtr) pos size text tb
-	# tb				= GrafPtrSetFont oldfont tb
+//	# tb				= redrawPopUpEditText (fromJust editPtr) pos size text tb
+	= osUpdateCommonControl area (fromJust editPtr) tb
 
 //	# (_,_,tb)			= GetPopUpControlData theControl tb
-	= tb
+//	= tb
 where
 	editable = isJust editPtr
 	area` = posSizeToRect pos size
@@ -1859,13 +1987,15 @@ osClipPopUpControl _ parentPos area itemPos itemSize tb
 osGetPopUpControlText :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> (!String,!*OSToolbox) 
 osGetPopUpControlText wPtr hTE tb
 	#! tb = trace_n ("osGetPopUpControlText "+++toString hTE) tb
+	= GetControlData hTE 0 "text" tb
+/*
 	= accGrafport wPtr getText tb
 where
 	getText tb
 		#	(charsH,tb)			= TEGetText hTE tb
 			(size,tb)			= TEGetTextSize hTE tb
 		= handle_to_string charsH size tb
-
+*/
 
 osSetPopUpControl :: !OSWindowPtr !OSWindowPtr !(Maybe OSWindowPtr) !OSRect !OSRect !Int !Int !String !Bool !*OSToolbox -> *OSToolbox
 osSetPopUpControl wPtr pPtr ePtr clipRect pPosSize old new text shown tb
@@ -1886,10 +2016,7 @@ where
 		# tb				= setPopUpEditText (fromJust ePtr) text tb
 
 		# tb			= assertPort` wPtr tb
-		# (gPtr,tb)		= QGetPort tb
-		# (oldfont,tb)	= GrafPtrGetFont gPtr tb
 		# tb			= redrawPopUpEditText (fromJust ePtr) (toTuple pos) (toTuple siz) text tb
-		# tb			= GrafPtrSetFont oldfont tb
 		= tb
 	pos					= (rectToRectangle pPosSize).corner1
 	siz					= rectSize pPosSize
@@ -1904,6 +2031,21 @@ osSetPopUpControlSelect wPtr pPtr clipRect select tb
 
 osSetPopUpControlFocus :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetPopUpControlFocus wPtr itemPtr clipRect focus tb
+	# (editPtr,tb) = GetCtlRef itemPtr tb
+	# tb = trace_n ("osSetPopUpControlFocus",itemPtr,editPtr) tb
+	| focus
+		# (err,currentFocus,tb)
+					= GetKeyboardFocus wPtr tb
+		| currentFocus == editPtr
+			# tb = trace_n` ("osSetPopUpControlFocus","focus==currentFocus",err) tb
+			= tb
+		# (err,tb)	= SetKeyboardFocus wPtr editPtr (-1) tb
+		# tb = trace_n` ("osSetPopUpControlFocus",editPtr,focus,err) tb
+		= tb
+	# (err,tb)	= ClearKeyboardFocus wPtr tb
+	# tb = trace_n` ("osSetPopUpControlFocus",editPtr,focus,err) tb
+	= tb
+/*
 	# (ePtr,tb) = GetCtlRef itemPtr tb
 	# tb = trace_n ("osSetPopUpControlFocus",itemPtr,ePtr) tb
 	| ePtr == 0
@@ -1912,7 +2054,7 @@ osSetPopUpControlFocus wPtr itemPtr clipRect focus tb
 		= appGrafport wPtr (TEActivate ePtr o TESetSelect 0 32767 ePtr) tb
 	| otherwise
 		= appGrafport wPtr (TEDeactivate ePtr) tb
-
+*/
 osSetPopUpControlShow :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetPopUpControlShow wPtr pPtr clipRect show tb
 	# tb = trace_n ("osSetPopUpControlShow") tb
@@ -2010,6 +2152,11 @@ where
 */
 redrawPopUpEditText hTE (x,y) (w,h) text tb
 	# tb		= trace_n ("redrawPopUpEditText",hTE,text) tb
+	= osUpdateCommonControl editRect hTE tb
+/*
+	# (gPtr,tb)		= QGetPort tb
+	# (oldfont,tb)	= GrafPtrGetFont gPtr tb
+
 //	#	tb	= QEraseRect	(fromTuple4(x+1,y+1, x+w-22/*17*/,y+h-2))	tb
 	
 	#	tb = QEraseRect editRect tb
@@ -2017,17 +2164,27 @@ redrawPopUpEditText hTE (x,y) (w,h) text tb
 //		tb = setPopUpEditText hTE text tb
 //		tb	= TEUpdate		(fromTuple4(x+1,y+1, x+w-22/*17*/,y+h-2)) hTE tb
 		tb	= TEUpdate updateRect hTE tb
+
+	# tb			= GrafPtrSetFont oldfont tb
 	=	tb
+*/
 where
 	editRect	= (x,y,x+w-22,y+h)
 	updateRect	= (x+1,y+1,x+w-22-1,y+h-1)
 
 setPopUpEditText hTE text tb
 	# tb		= trace_n ("setPopUpEditText",hTE,text) tb
+	# (err,tb)		= SetControlData hTE 0 "text" (osValidateMenuItemTitle Nothing text) tb
+	# start			= 0
+	# end			= 0
+	# data			= {toChar (start >> 8 bitor 0xFF),toChar (start bitor 0xFF),toChar (end >> 8 bitor 0xFF),toChar (end bitor 0xFF)}
+	# (err,tb)		= SetControlData hTE 0 "sele" data tb
+/*
 	#	tb	= TESetSelect 0 32767 hTE tb
 		tb	= TEDelete hTE tb
 		tb	= TESetText text hTE tb
 		tb	= TESetSelect 0 0 hTE tb
+*/
 	= tb
 
 //osGainFocusPopUpControl
@@ -2037,28 +2194,41 @@ osIdlePopUpControl :: !OSWindowPtr !OSRect !OSWindowPtr !(Maybe OSWindowPtr) !*O
 osIdlePopUpControl wPtr clipRect cPtr ePtr tb
 	#! tb = trace_n ("osIdlePopUpControl",wPtr,ePtr,clipRect) tb
 	| isNothing ePtr = tb
-	= appClipport wPtr clipRect (TEIdle hTE) tb
+	= IdleControls wPtr tb
+//	= appClipport wPtr clipRect (TEIdle hTE) tb
 where
 	hTE = fromJust ePtr
 
 //-- ButtonControl
 
+
+GetButtonHeight
+	# ((err,height),_)	= GetThemeMetric kThemeMetricPushButtonHeight OSNewToolbox
+	= height
+
+kThemeMetricPushButtonHeight	:== 19
+
 PushButProc				:==	368	//0		// simple button
 
-MinButWid				:== 55
+//MinButWid				:== 10//55
 
 ButtonHeightPlatinum	:== 20
 ButtonHeightAqua		:== 20
-ButtonHeight			:== ButtonHeightAqua
+ButtonHeight
+//	:== ButtonHeightAqua
+	=: GetButtonHeight
 
 ButtonWidthPlatinum		:== 12
 ButtonWidthAqua			:== 24
-ButtonWidth				:== ButtonWidthAqua
+ButtonWidth
+//	:== ButtonWidthAqua
+	=: GetButtonHeight	//???
 
 osGetButtonControlSize :: !OSWindowMetrics !String !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
 osGetButtonControlSize wMetrics=:{osmFont,osmHeight} text tb
 	# (width,tb)	= osGetfontstringwidth False 0 (validateControlTitle text) osmFont tb
-	# width			= max MinButWid (ButtonWidth+width)
+//	# width			= max MinButWid (ButtonWidth+width)
+	# width			= ButtonWidth + width
 	# tb = trace_n ("osGetButtonControlSize :: width: "+++toString width+++" height: "+++toString ButtonHeight) tb
 	= ((width,ButtonHeight),tb)
 	
@@ -2068,7 +2238,7 @@ osGetButtonControlHeight {osmHeight}
 	
 osGetButtonControlMinWidth :: !OSWindowMetrics -> Int
 osGetButtonControlMinWidth {osmHeight}
-	# w = MinButWid
+	# w = ButtonWidth//MinButWid
 	= trace_n ("osGetButtonControlMinWidth",w) w
 
 osCreateButtonControl :: !OSWindowPtr !(!Int,!Int) !String !Bool !Bool !(!Int,!Int) !(!Int,!Int) !OKorCANCEL !*OSToolbox -> (!OSWindowPtr,!*OSToolbox)
@@ -2302,6 +2472,7 @@ where
 		drawshape _ _ _ tb
 		=	tb
 */
+/*
 TEGetItemRect :: !TEHandle !*OSToolbox -> (!Rect,!*OSToolbox)
 TEGetItemRect hTE tb
 	#	(tePtr,tb)			= LoadLong hTE tb
@@ -2315,7 +2486,7 @@ where
 			(bottom,tb)	= LoadWord (ptr+4)	tb
 			(right, tb)	= LoadWord (ptr+6)	tb
 		=	((left,top,right,bottom),tb)
-
+*/
 
 //-- DvA... for MacOS 8.5
 
@@ -2615,3 +2786,39 @@ SetWindowDefaultButton :: !OSWindowPtr !OSControlPtr !*OSToolbox -> (!Int,!*OSTo
 SetWindowDefaultButton _ _ _ = code {
 	ccall SetWindowDefaultButton "PII:I:I"
 	}
+
+:: ThemeMetric	:== Int
+
+GetThemeMetric :: !ThemeMetric !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
+GetThemeMetric _ _ = code {
+	ccall GetThemeMetric "PI:II:I"
+	}
+
+///////////
+
+onOSX =: fst (runningCarbonOSX OSNewToolbox)
+
+runningCarbonOSX tb
+	# (err,res,tb)	= Gestalt "sysv" tb
+	| err <> 0 = abort "Gestalt failed.\n"
+	= (res >= 0x01000, tb)
+
+Gestalt :: !String !*Int -> (!Int,!Int,!*Int)
+Gestalt sSel tb
+	| size sSel <> 4 = abort "Gestalt not called with four-char selector.\n"
+	# iSel	= ((toInt sSel.[0]) << 24) bitor ((toInt sSel.[1]) << 16) bitor ((toInt sSel.[2]) << 8) bitor ((toInt sSel.[3]) << 0)
+	= Gestalt iSel tb
+where
+	Gestalt :: !Int !*Int -> (!Int,!Int,!*Int)
+	Gestalt _ _ = code {
+		ccall Gestalt "PI:II:I"
+		}
+/*
+import code from "keyfilter."
+
+addReturnFilter :: !OSWindowPtr !*OSToolbox -> *OSToolbox
+addReturnFilter editc tb = code {
+	ccall addReturnFilter "I:V:I"
+	}
+*/
+//import code from "keyfilter.xo"

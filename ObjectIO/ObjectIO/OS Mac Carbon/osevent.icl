@@ -4,7 +4,7 @@ implementation module osevent
 import	StdInt, StdBool, StdList, StdTuple
 import	events, desk, pointer
 import	StdClass, StdMisc
-import	code from "cTCP.o"
+import	code from "cTCP."
 import osrgn,commondef,ostime
 from	quickdraw import QRectRgn, QLocalToGlobal, QNewRgn
 
@@ -18,7 +18,7 @@ DebugTraceEvents msg osEvent state
 			True	-> state
 			False	-> DebugStr (msg +++ showEvent osEvent) state
 where
-	isIgnoreEvent (_,what,_,_,_,_,_) = False//what == NullEvent || what == OsEvent
+	isIgnoreEvent (_,what,_,_,_,_,_) = what == NullEvent || what == OsEvent
 */
 
 

@@ -73,13 +73,17 @@ osEnableMenu zIndex osMenuBar tb
 
 osDisableMenuItem :: !OSMenu !OSMenuItem !Int !*OSToolbox -> *OSToolbox
 osDisableMenuItem menuHandle menuItem index tb
-	# tb				= trace_n ("osDisableMenuItem",menuItem,menuHandle) tb
-	= DisableItem menuHandle index tb
+//	= DisableItem menuHandle index tb
+	# (err,tb)			= ChangeMenuItemAttributes menuHandle index kMenuItemAttrDisabled 0 tb
+	# tb				= trace_n ("osDisableMenuItem",menuItem,menuHandle,err) tb
+	= tb
 
 osEnableMenuItem :: !OSMenu !OSMenuItem !Int !*OSToolbox -> *OSToolbox
 osEnableMenuItem menuHandle menuItem index tb
+//	= EnableItem menuHandle index tb
+	# (err,tb)			= ChangeMenuItemAttributes menuHandle index 0 kMenuItemAttrDisabled tb
 	# tb				= trace_n ("osEnableMenuItem:",menuItem,menuHandle) tb
-	= EnableItem menuHandle index tb
+	= tb
 
 
 osDisableSubMenu :: !OSMenu !OSMenuItem !Int !*OSToolbox -> *OSToolbox
@@ -402,3 +406,23 @@ SetMenuTitle :: !OSMenu !String !*Toolbox -> (!Int,!*Toolbox)
 SetMenuTitle menuHandle itemString t = code (menuHandle=D0,itemString=SD1,t=U)(error=D0,z=Z){
 	call	.SetMenuTitle
 };
+
+:: MenuItemAttributes	:== Int
+kMenuItemAttrDisabled					:==    1
+kMenuItemAttrIconDisabled				:==    2
+kMenuItemAttrSubmenuParentChoosable		:==    4
+kMenuItemAttrDynamic					:==    8
+kMenuItemAttrNotPreviousAlternate		:==   16
+kMenuItemAttrHidden						:==   32
+kMenuItemAttrSeparator					:==   64
+kMenuItemAttrSectionHeader				:==  128
+kMenuItemAttrIgnoreMeta					:==  256
+kMenuItemAttrAutoRepeat					:==  512
+kMenuItemAttrUseVirtualKey				:== 1024
+kMenuItemAttrCustomDraw					:== 2048
+kMenuItemAttrIncludeInCmdKeyMatching	:== 4096
+
+ChangeMenuItemAttributes :: !OSMenu !Int !Int !Int !*Toolbox -> (!Int,!*Toolbox)
+ChangeMenuItemAttributes menu item setTheseAttributes clearTheseAttributes tb = code {
+	ccall ChangeMenuItemAttributes "PIIII:I:I"
+	}

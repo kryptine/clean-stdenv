@@ -2,7 +2,7 @@ implementation module osdirectory
 
 import	StdBool, StdInt, StdString, StdMisc, StdArray, StdClass, StdChar
 import	osevent
-import	standard_file, files, memory, pointer, navigation, appleevents
+import	/*standard_file,*/ files, memory, pointer, navigation, appleevents
 from	quickdraw	import	QScreenRect
 
 

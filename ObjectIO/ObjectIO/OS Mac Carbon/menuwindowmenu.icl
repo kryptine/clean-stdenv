@@ -28,7 +28,7 @@ menuwindowmenuFatalError rule message
 minWindowW = fst osMinWindowSize
 minWindowH = snd osMinWindowSize
 
-TitleBarWidth		:== 20									// Conventional width of a window's title bar
+TitleBarWidth		:== osWindowTitleBarHeight		// Conventional width of a window's title bar
 
 /*	openWindowMenu creates the WindowMenu. This menu contains atleast the following elements:
 	-	MenuItem "&Cascade":
@@ -518,5 +518,4 @@ accessMenuSystemState redrawMenus f x ioState
 	| otherwise
 		# ioState				= setIOToolbox (osDrawMenuBar osMenuBar tb) ioState
 		= (x,ioStSetDevice (MenuSystemState menus) ioState)
-
 

@@ -1,4 +1,5 @@
-/*			Ctcp	-	functions for using Open Transport from Clean
+/*
+			Ctcp	-	functions for using Open Transport from Clean
 
 			written by Martin Wierich
 			
@@ -103,7 +104,7 @@ is a container data structure, where one can add a new item, look it up with a k
 and remove it. The key to look up the container elements is the endpoint reference.
 An item is of type struct dictitem. The dictionary is implemented as a linked list, since a
 lookup does not happen often. The global "endpointDict" points to the head of this list
-From Clean, the following fields are seen:
+>From Clean, the following fields are seen:
 
 		void	*acceptInfo;			// !=0(nil), iff a connect request is pending (only for listening endpoints)
 		int		referenceCount;			
@@ -167,10 +168,24 @@ kOTSyncIdleEvents are NOT used
 ------------------------ TYPE DEFINITIONS -----------------------------------------
 */
 
+#ifndef __MACH__
 #include <OpenTransport.h>
 #include <OpenTptInternet.h>
 #include <events.h>
+#else
+#include <Carbon/Carbon.h>
+#endif
+
 #include "Clean.h"
+
+#ifdef __MACH__
+# define InitOpenTransport() InitOpenTransportInContext(kInitOTForApplicationMask,NULL)
+# define CloseOpenTransport() CloseOpenTransportInContext(NULL)
+# define OTAlloc(ref,structType,fields,err) OTAllocInContext(ref,structType,fields,err,NULL)
+# define OTAllocMem(size) OTAllocMemInContext(size,NULL)
+# define OTOpenEndpoint(config,oflag,info,err) OTOpenEndpointInContext(config,oflag,info,err,NULL)
+# define OTOpenMapper(config,oflag,err) OTOpenMapperInContext(config,oflag,err,NULL)
+#endif
 
 //	the items, which are stored in inetEventQueue
 struct event
@@ -385,6 +400,7 @@ void WaitNextEventC(int eventMask,int sleep,int mouseRgn, int in_tb,
 		};
 }
 
+#ifndef __MACH__
 // needed for WaitNextEventC
 asm void __ptr_glue(void)
 {
@@ -395,6 +411,7 @@ asm void __ptr_glue(void)
                 lwz             RTOC,4(r12)
                 bctr
 }
+#endif
 
 void poll(int nRChannels,EndpointRef *rChannels, dictitem **rDictitems, int *channelTypes,
 		  int nSChannels,EndpointRef *sChannels, dictitem **sDictitems,
@@ -682,9 +699,8 @@ pascal void generalHandler(	dictitem *dictitemP, void* epRef, OTEventCode eventC
 	  {	case T_LISTEN:
 			{
 				TCall	 	*tcallPtr;
-				
-				tcallPtr	= OTAlloc(	(EndpointRef) epRef, T_CALL,
-										T_ADDR | T_OPT, &err);
+
+				tcallPtr	= OTAlloc (	(EndpointRef) epRef, T_CALL,T_ADDR | T_OPT, &err);
 				if (err!=kOTNoError)
 					ew_print_string("Ctcp: out of extra memory");
 				
@@ -999,7 +1015,7 @@ void lookupHost_asyncC(char* inetAddr, int *errCode, int *endpointRef)
 	StartUp();
 	
 	*errCode	= 1;
-	
+
   	asyncDNRMapper = OTOpenMapper(OTCreateConfiguration(kDNRName), 0, &err);
 	if (err!=noErr)
 		ew_print_string("Ctcp: can't start DNR mapper");
@@ -1618,4 +1634,6 @@ void remove_invalid_dictitems(dictitem **ptr)
 					ptr		= &((*ptr)->next);
 			};
 }
+
+
 

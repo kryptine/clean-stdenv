@@ -6,6 +6,8 @@ import pointer
 from	quickdraw	import LMGetScrHRes, LMGetScrVRes, QScreenRect
 
 //import StdDebug, dodebug
+//import dodebug
+trace_n` _ f :== f
 
 ::	OSWindowMetrics
 	=	{	osmFont				:: !Font				// The internal Font used in Windows for controls
@@ -26,6 +28,8 @@ osHomepath fname
 	= fname
 
 import StdArray, files, osdirectory
+
+// app or bundle path?
 osApplicationpath :: !String -> String
 osApplicationpath fname
 	= FStartUpDir +++ ":" +++ fname
@@ -48,19 +52,61 @@ mmperinch		:== 25.4
 WindowScreenBorder	:== 4									// Conventional distance between window and screen
 
 osWindowFrameWidth     :: Int;	
-osWindowFrameWidth     = 0//6;
+osWindowFrameWidth
+//	= 0//6
+	=: osWindowFrameSizes.rleft
 
 osWindowTitleBarHeight :: Int;	
-osWindowTitleBarHeight = 22//20;
+osWindowTitleBarHeight
+//	= 22//20;
+	=: osWindowFrameSizes.rtop
+
+osWindowFrameSizes :: OSRect
+osWindowFrameSizes =: getWindowFrameSizes
+
+import windows
+
+getWindowFrameSizes
+	# (wind,tb)		= NewCWindow 0 (0,0,20,20) "" False 0 (-1) False 0 OSNewToolbox
+	| wind == 0
+		= trace_n` ("NewCWindow failed") {rleft=0,rtop=22,rright=0,rbottom=0}
+	# (err,tl,br,tb)	= GetWindowStructureWidths wind tb
+	| err <> 0
+		= trace_n` ("GetWindowStructureWidths failed") {rleft=0,rtop=22,rright=0,rbottom=0}
+	# rect = {rleft = tl bitand 0xFFFF, rtop = tl >> 16,rright = br bitand 0xFFFF, rbottom = br >> 16}
+	= rect
+	//trace_n` ("GetWindowStructureWidths",rect,wind) rect
 
 osMenuBarHeight			:: Int
-osMenuBarHeight			= 22
+osMenuBarHeight
+//	= 22
+	=: getMenuBarheight
+
+getMenuBarheight
+	# ((err,hgt),_)	= GetThemeMenuBarHeight OSNewToolbox
+	| err <> 0 = trace_n` ("getWindowTitlebarheight",err,hgt) 22
+	# hgt = (hgt >> 16) bitand 0xFFFF
+	= hgt
 
 osScrollBarWidth		:: Int
-osScrollBarWidth		= 15//16
+osScrollBarWidth
+//	= 15//16
+	=: getScrollBarWidth
+
+getScrollBarWidth
+	# ((err,wdth),_)	= GetThemeMetric kThemeMetricScrollBarWidth OSNewToolbox
+	| err <> 0			= trace_n` ("getScrollBarWidth",err,wdth) 15
+	= wdth
 
 osScrollBarOverlap		:: Int
-osScrollBarOverlap		= 0//1
+osScrollBarOverlap
+//	= 0//1
+	=: getScrollBarOverlap
+
+getScrollBarOverlap
+	# ((err,wdth),_)	= GetThemeMetric kThemeMetricScrollBarOverlap OSNewToolbox
+	| err <> 0			= trace_n` ("getScrollBarOverlap",err,wdth) 15
+	= wdth
 
 osMMtoHPixels :: !Real -> Int
 osMMtoHPixels mm
@@ -117,10 +163,49 @@ osDefaultWindowMetrics tb
 		, osmVerMargin			= 10
 		, osmHorItemSpace		= 10
 		, osmVerItemSpace		= 10
-		, osmHSliderHeight		= 16
-		, osmVSliderWidth		= 16
+		, osmHSliderHeight		= osScrollBarWidth
+		, osmVSliderWidth		= osScrollBarWidth
 		}, tb)
 
 osStripOuterSize		:: !Bool !Bool !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
-osStripOuterSize mdi resize tb = ((if resize 16 0,if resize 16 0),tb)
+osStripOuterSize mdi resize tb
+	= ((if resize (osScrollBarWidth-osScrollBarOverlap) 0,if resize (osScrollBarWidth-osScrollBarOverlap) 0),tb)
 
+///////////
+
+kThemeDocumentWindow          :== 0
+//GetThemeWindowRegion	:: OS X only!!
+/*
+extern OSStatus 
+GetThemeWindowRegion(
+  ThemeWindowType             flavor,
+  const Rect *                contRect,
+  ThemeDrawState              state,
+  const ThemeWindowMetrics *  metrics,
+  ThemeWindowAttributes       attributes,
+  WindowRegionCode            winRegion,
+  RgnHandle                   rgn)
+*/ 
+GetThemeMenuBarHeight :: !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
+GetThemeMenuBarHeight _ = code {
+	ccall GetThemeMenuBarHeight "P:II:I"
+	}
+
+:: ThemeMetric	:== Int
+
+kThemeMetricScrollBarWidth		:== 0		// 16,15
+kThemeMetricScrollBarOverlap	:== 9		//  1, 0
+
+GetThemeMetric :: !ThemeMetric !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
+GetThemeMetric _ _ = code {
+	ccall GetThemeMetric "PI:II:I"
+	}
+
+GetWindowStructureWidths :: !WindowPtr !*OSToolbox -> (!Int,!Int,!Int,!*OSToolbox)
+GetWindowStructureWidths _ _ = code {
+	ccall GetWindowStructureWidths "PI:III:I"
+	}
+//extern OSStatus 
+//GetWindowStructureWidths(
+//  WindowRef   inWindow,
+//  Rect *      outRect)                                        AVAILABLE_MAC_OS_X_VERSION_10_0_AND_LATER;

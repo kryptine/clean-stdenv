@@ -1,9 +1,17 @@
+#ifdef __MACH__
+#include <Carbon/Carbon.h>
+#else
 #include <MacTypes.h>
 #include <Files.h>
 #include <Events.h>
 #include <EPPC.h>
 #include <AppleEvents.h>
 #include <AERegistry.h>
+#endif
+
+#ifdef __MACH__
+# define NewAEEventHandlerProc(p) NewAEEventHandlerUPP(p)
+#endif
 
 static char *result_string;
 static int n_free_result_string_characters;
@@ -304,7 +312,10 @@ int search_appdied_event (void)
 	EventRecord theEvent;
 	
 	if (EventAvail(kHighLevelEvent,&theEvent))
-		return ((((AEEventID)theEvent.where) == kAEApplicationDied) && (theEvent.message == kCoreEventClass))
+		return (
+			((*(AEEventID*)&theEvent.where) == kAEApplicationDied) && 
+				(theEvent.message == kCoreEventClass));
+
 	return 0;
 }
 #else
