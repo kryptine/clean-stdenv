@@ -14,7 +14,7 @@ import	StdControlClass
 controlSize				:: !(cdef .ls (PSt .l)) !Bool
 						   !(Maybe (Int,Int)) !(Maybe (Int,Int)) !(Maybe (Int,Int))
 						   !(PSt .l)
-						-> (!Size,!PSt .l) | Controls cdef
+				  -> (!Size,!PSt .l) | Controls cdef
 /*	controlSize calculates the size of the given control definition as it would be 
 		opened as an element of a window/dialog.
 	The Boolean argument determines whether a window (True) or a dialog (False) is

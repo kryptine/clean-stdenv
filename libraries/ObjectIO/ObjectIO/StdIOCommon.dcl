@@ -82,7 +82,7 @@ getMouseStateButtonState:: !MouseState	-> ButtonState	// ButtonUp    if MouseLos
 instance ==		  MouseState				// Equality on MouseState
 instance ==		  ButtonState				// Constructor equality
 instance toString MouseState
-
+instance toString ButtonState
 
 /*	The SliderState type.								*/
 
@@ -298,6 +298,8 @@ instance	toString DocumentInterface		// Constructor as String
 	|	SliderDecLarge
 	|	SliderThumb Int
 
+instance toString SliderMove
+
 
 /*	Scrolling function.									*/
 
@@ -346,7 +348,5 @@ stdUnfillUpdAreaLook :: SelectState !UpdateState !*Picture -> *Picture
 instance	==			ErrorReport			// Constructor equality
 instance	toString	ErrorReport			// Constructor as String
 
-// MW11..
 ::	OkBool									// iff True, the operation was successful
 	:==	Bool
-// ..MW11

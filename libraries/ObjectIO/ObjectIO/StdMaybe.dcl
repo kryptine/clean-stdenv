@@ -18,6 +18,10 @@ isJust		:: !(Maybe .x) -> Bool		// case @1 of (Just _) -> True; _ -> False
 isNothing	:: !(Maybe .x) -> Bool		// not o isJust
 fromJust	:: !(Maybe .x) -> .x		// \(Just x) -> x
 
+// for possibly unique elements:
+u_isJust	:: !(Maybe .x) -> (!Bool, !Maybe .x)
+u_isNothing	:: !(Maybe .x) -> (!Bool, !Maybe .x)
+
 accMaybe	:: .(St .x .a) !(Maybe .x) -> (!Maybe .a,!Maybe .x)
 // accMaybe f (Just x) = (Just (fst (f x)),Just (snd (f x)))
 // accMaybe f Nothing  = (Nothing,Nothing)

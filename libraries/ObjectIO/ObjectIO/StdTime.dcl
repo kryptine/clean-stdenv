@@ -8,7 +8,7 @@ definition module StdTime
 //	********************************************************************************
 
 from	StdOverloaded import <
-from	ostick import Tick // MW11++
+from	ostick import Tick
 
 ::	Time
 	=	{	hours	:: !Int		// hours		(0-23)
@@ -28,18 +28,16 @@ wait				:: !Int .x -> .x
 	If n<=0, then x is evaluated immediately.
 */
 
-// MW11..
 instance < Tick
 
-intPlusTick		::	!Int  !Tick	-> Tick
-tickDifference	::	!Tick !Tick	-> Int
-// .. MW11
+intPlusTick			::	!Int  !Tick	-> Tick
+tickDifference		::	!Tick !Tick	-> Int
 
 class TimeEnv env where
 	getBlinkInterval:: !*env -> (!Int,	!*env)
 	getCurrentTime	:: !*env -> (!Time,	!*env)
 	getCurrentDate	:: !*env -> (!Date,	!*env)
-	getCurrentTick	:: !*env -> (!Tick,	!*env) // MW11++
+	getCurrentTick	:: !*env -> (!Tick,	!*env)
 /*	getBlinkInterval
 		returns the time interval in ticks that should elapse between blinks of 
 		e.g. a cursor. This interval may be changed by the user while the 
@@ -48,6 +46,8 @@ class TimeEnv env where
 		returns the current Time.
 	getCurrentDate
 		returns the current Date.
+	getCurrentTick
+		returns the current Tick.
 */
 
 instance TimeEnv World

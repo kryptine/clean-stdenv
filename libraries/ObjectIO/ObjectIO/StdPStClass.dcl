@@ -18,13 +18,11 @@ from	iostate		import PSt, IOSt
 	- FileSelectEnv	(see StdFileSelect)
 	- TimeEnv		(see StdTime)
 	- playSoundFile (see StdSound)
-	- ChannelEnv	(see StdChannels) // MW11++
-	- Ids			(see StdId) // MW11++
 	
-	IOSt is also an environment instance of the classes FileEnv, TimeEnv & ChannelEnv
+	IOSt is also an environment instance of the classes FileEnv, TimeEnv
 */
 instance FileSystem		(PSt .l)
-instance FileEnv		(PSt .l), (IOSt .l) // MW11 added IOSt
+instance FileEnv		(PSt .l), (IOSt .l)
 instance FileSelectEnv	(PSt .l)
-instance TimeEnv		(PSt .l), (IOSt .l) // MW11 added IOSt
+instance TimeEnv		(PSt .l), (IOSt .l)
 instance playSoundFile	(PSt .l)

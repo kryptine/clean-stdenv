@@ -11,7 +11,6 @@ definition module StdPrint
 //	********************************************************************************
  
 
-// MW11 was from	StdPicture		import	Picture, Point
 from	StdPicture		import	Picture, Point2
 from	StdIOCommon		import	Size, Rectangle, IdFun, UpdateState, ViewFrame, UpdateArea
 from	StdOverloaded	import	==
@@ -56,7 +55,7 @@ freadPrintSetup		::	!*File !*env -> (!Bool, !PrintSetup, !*File, !*env)
 print	::	!Bool !Bool
 			.(PrintInfo !*Picture -> ([IdFun *Picture],!*Picture))
 			!PrintSetup !*printEnv
-		->	(!PrintSetup,!*printEnv)
+		-> (!PrintSetup,!*printEnv)
 		|	PrintEnvironments printEnv
 
 /*	print doDialog emulateScreen pages printSetup env
@@ -81,8 +80,8 @@ print	::	!Bool !Bool
 printUpdateFunction
 		:: 	!Bool (UpdateState -> *Picture -> *Picture) [Rectangle]
 			!PrintSetup !*printEnv 
-		->	(!PrintSetup, !*printEnv)
-		| PrintEnvironments printEnv
+		-> (!PrintSetup,!*printEnv)
+		|  PrintEnvironments printEnv
 
 /*	printUpdateFunction doDialog update area printSetup env
 	sends the content of the update function of a given area to the printer:
@@ -98,7 +97,6 @@ printUpdateFunction
 		identical to print.
 */
 
-// MW11 changed Point into Point2
 printPagePerPage ::	!Bool !Bool 
 					.x
 					.(.x -> .(PrintInfo -> .(*Picture -> ((.Bool,Point2),(.state,*Picture)))))

@@ -37,8 +37,6 @@ fileToCharStream :: !*File -> *FileCharStream
 charStreamToFile :: !*FileCharStream -> *File
 
 
-
-
 printText1 :: !Bool !WrapMode !FontDef !Int !*charStream !PrintSetup !*printEnv
 		 ->   (!(!*charStream,!PrintSetup),!*printEnv)
 		 | CharStreams charStream & PrintEnvironments printEnv
@@ -61,8 +59,6 @@ printText1 :: !Bool !WrapMode !FontDef !Int !*charStream !PrintSetup !*printEnv
 */
 
 
-
-
 printText2	::	!String !String !Bool !WrapMode !FontDef !Int !*charStream !PrintSetup
 				!*printEnv
 			->  (!(!*charStream,!PrintSetup),!*printEnv)
@@ -78,8 +74,6 @@ printText2	::	!String !String !Bool !WrapMode !FontDef !Int !*charStream !PrintS
 		the header
 	The other parameters are identical to printText1.
 */
-
-
 
 
 printText3 ::!Bool !WrapMode !FontDef !Int 
