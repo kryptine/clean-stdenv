@@ -288,6 +288,10 @@ void printSetup(int calledFromCleanThread, int devmodeSize,
 	// Open print dialog
 	*ok	= PrintDlg(&pd);
 	*pdPtr = &pd;
+
+	if (hDevnames!=pd.hDevNames) LocalFree(hDevnames);
+	if (hDevmode!=pd.hDevMode) LocalFree(hDevmode);
+
 }
 
 
@@ -378,6 +382,7 @@ void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, int devm
 {
 	static PRINTDLG pd;
 	HDC hdcPrint;
+	int ok;
 	
 	*err = -1;
 
@@ -421,12 +426,19 @@ void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, int devm
 
 		// Open print dialog
 
-		if (!PrintDlg(&pd))
-		  {
-			*err = CommDlgExtendedError();	// will return 0 iff user canceled
-			return;							// otherwise a positive value
-		  }
+		ok = PrintDlg(&pd);
+
+		if (hDevnames!=pd.hDevNames) LocalFree(hDevnames);
+		if (hDevmode!=pd.hDevMode) LocalFree(hDevmode);
+		
+		if (!ok)
+			{
+			*err = CommDlgExtendedError();	// will return 0 iff user canceled, otherwise positive value 
+			release_memory_handles(&pd, 0);
+			return;
+			}
 	
+
 		if (pd.Flags & PD_PAGENUMS)
 			{ *first	= pd.nFromPage;
 			  *last		= pd.nToPage;
@@ -440,8 +452,7 @@ void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, int devm
 		hdcPrint		= pd.hDC;
 	  }
 
-	else // get dc for default printer
-      // This method searches in the WIN.INI file for th default printer name.
+	else
 	  
 		{ 	
 		hdcPrint = CreateDC(driver, device, output, NULL);
@@ -452,6 +463,7 @@ void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, int devm
 		*first	= 1;
 		*last	= 9999;
 		*copies	= 1;
+		*ppPrintDlg		= NULL;
 		};
 
 	if (emulateScreen)

@@ -2,9 +2,8 @@ implementation module osprint
 
 //	Clean Standard Object I/O library, version 1.2
 
-// MW11 was import StdEnv,intrface,clCrossCall_12, iostate, scheduler
 import StdEnv,clCCall_12,clCrossCall_12, iostate, scheduler
-import ospicture, osevent/*, StdPicture*/, StdWindow, StdPSt
+import ospicture, osevent, StdWindow, StdPSt
 
 ::	PrintSetup
 	=	{	devmode	::	!String
@@ -176,7 +175,6 @@ printPagePerPageBoth doDialog emulateScreen x initFun transFun printSetup mb_con
 
 	  # picture = initPicture zeroOrigin (hdc,os)
 	    (endOrig,(initState,picture)) = initFun x printInfo picture
-// MW11 was 	    (_,_,hdc,os) = unpackPicture picture
  	    (_,_,_,hdc,os) = unpackPicture picture
 
 	  // now print all pages
@@ -207,7 +205,6 @@ printPages pageNr fun (_,origin) state hdc mb_context os
   // apply drawfunctions contained in this page
 	((endOfDoc,nextOrigin),(state`,picture))	= fun (state,picture)
   // finish drawing
-// MW11 was  # (_,_,hdc,os)	= unpackPicture picture
   # (_,_,_,hdc,os)	= unpackPicture picture
    	(ok, os)	= endPage hdc os
     // (not ok) should not cause an abort, because endPage returns an error, when user chooses
@@ -239,7 +236,6 @@ getPrintInfo doDialog emulateScreen {devmode, device, driver, output} mb_context
 		# (setup_strings, os) = get_printSetup_with_PRINTDLG pdPtr os
 		  os = release_memory_handles pdPtr os
 		= continuation err data mb_context (setup_strings, os)
-	# os = release_memory_handles pdPtr os
 	= continuation err data mb_context ((devmode,device,driver,output),os)
   where
 	continuation err (first,last,copies,hdc) mb_context ((devmode,device,driver,output),os)
@@ -261,7 +257,6 @@ handleContextOSEvent` :: !OSEvent !Context !*OSToolbox -> (!CrossCallInfo,!Conte
 handleContextOSEvent` osEvent context tb
 	# (return,context) = handleContextOSEvent osEvent context
 	= (setReplyInOSEvent return,context,tb)
-// MW11 was	= (replytocrosscallinfo return,context,tb)
 
 
 CCgetDC :: !.Int !.Int !.Int !.Int !.Int !.Int !.Int !*(Maybe !*Context) !*OSToolbox -> *(!Int,!(!Int,!Int,!Int,!Int),!Int,!*Maybe *Context,!.OSToolbox);
@@ -331,7 +326,6 @@ evtlSwitchToOS pageNr hdc (Just context) os
 
 initPicture :: !.Origin !*(!.OSPictContext,!*OSToolbox) -> !.Picture
 initPicture origin intPict
-// MW11 was = packPicture origin defaultPen (fst intPict) (snd intPict)
  = packPicture origin defaultPen False (fst intPict) (snd intPict)
 	
 
