@@ -1,6 +1,7 @@
 implementation module keyboardevent
 
-import StdEnv, StdIO
+import StdEnv//, StdIO
+import StdPSt,StdControlAttribute,StdWindowAttribute
 import windowaccess,windowhandle,deviceevents,iostate
 import commondef
 import ostypes, oswindow

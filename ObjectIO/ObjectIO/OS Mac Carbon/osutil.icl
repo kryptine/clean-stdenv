@@ -1,6 +1,6 @@
 implementation module osutil
 
-import StdEnv, StdIO
+import StdEnv//, StdIO
 import ostypes, ostoolbox,commondef
 import events,pointer,controls, windows
 from quickdraw import QNewRgn, QGetClip, QClipRect, QSetClip, QGetPort, QSetPort, QDisposeRgn, :: GrafPtr

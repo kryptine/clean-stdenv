@@ -2,8 +2,8 @@ implementation module ostick
 
 // to be placed in something bigger later
 
-import StdEnv
-import events
+//import StdEnv
+from events import TickCount,::Toolbox..
 
 ::	Tick	:== Int
 
@@ -15,4 +15,5 @@ unpack_tick tick = tick
 
 os_getcurrenttick :: !*World -> (!Tick, !*World)
 os_getcurrenttick world
-	= (fst (TickCount 42), world)
+	# (tc,_)	= TickCount 42
+	= (tc, world)

@@ -4,7 +4,7 @@ implementation module ostime
 
 import StdOverloaded, StdClass, StdInt
 import ostoolbox
-from events import TickCount, GetCaretTime
+from events import TickCount, GetCaretTime, ::Toolbox..
 import OS_utilities
 //import pointer
 
