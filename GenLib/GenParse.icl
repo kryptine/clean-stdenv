@@ -1,6 +1,6 @@
 implementation module GenParse
 
-import StdGeneric, StdEnv, StdMaybe, RWSDebug
+import StdGeneric, StdEnv, StdMaybe
 
 //---------------------------------------------------------------------------
 
