@@ -34,6 +34,7 @@ derive gGEC  Rectangle,Point2,Colour,RGBColour,ShapeAttributes,Shape,Oval,Box
 
 myclock = Timed (\i -> 100) 100 
 
+derive generate Shape, ShapeAttributes, Mode, Timed, Oval, Box, Colour, RGBColour
 
 example_draw pst
 #	(wid,pst) 	= openId pst

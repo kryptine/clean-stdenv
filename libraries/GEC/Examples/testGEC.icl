@@ -100,6 +100,7 @@ fromMyEditRecord rec = 	{ value1	= fromCounter (updateCounter rec.MyEditRecord.e
 
 test24 = startCircuit (feedback (edit "self" >>@ toMyEditRecord o updRecord o fromMyEditRecord)) (toMyEditRecord (initRecord2 0 0))
 
+derive generate T, MyRecord2, MyEditRecord, Mode, GecComb, MyRecord, UpDown, T`, MyEditRecord2
 
 toDisplay :: a -> Mode a
 toDisplay a = Display a

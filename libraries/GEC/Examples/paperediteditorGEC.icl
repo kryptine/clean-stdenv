@@ -33,6 +33,19 @@ where
 
 derive gGEC Maybe 
 
+gecEdit :== edit
+(@|) infixr 8
+(@|) f g :== arr f >>> g
+(|@) infixr 8
+(|@) g f :== g >>> arr f
+%| :== feedback
+(|>>>|) infixr 1
+(|>>>|) :== (>>>)
+CGEC :== startCircuit
+:: CGEC a b :== GecCircuit a b
+
+derive generate DynString, Command, Editor, TypeVal, Maybe, ApplicationElem
+
 testDynamic = CGEC  (%| (dotest @| gecEdit "test" ))  initval  
 where	
 	initval  = horlistAGEC [testinit] <|> showAGEC ":: String"

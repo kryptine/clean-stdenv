@@ -1,16 +1,13 @@
 implementation module GecArrow
 
 import StdArrow, StdGECExt
-import store, GenDefault, StdDebug, Debug
-
-debug :: String a -> Bool
-debug s x = trace_t (s +++ foldr (+++) "" (debugShowWithOptions [DebugClosures DebugHideClosures] x))
+import store, GenDefault, StdDebug
 
 :: GecCircuit a b = GecCircuit !.(A. .ps: (GecSet b ps) *(PSt ps) -> *(GecSet a ps, *PSt ps))
 
 :: GecSet a ps :== IncludeUpdate a *(PSt ps) -> *PSt ps
 
-runCircuit (GecCircuit k) = k
+runCircuit (GecCircuit k) :== k
 
 startCircuit :: !(GecCircuit a b) a *(PSt .ps) -> *PSt .ps
 startCircuit g a env
@@ -213,3 +210,8 @@ where
 includeUpdate :: !UpdateReason -> *IncludeUpdate
 includeUpdate Changed = YesUpdate
 includeUpdate _ = NoUpdate
+
+generate{|GecCircuit|} ga gb trace stream
+	# (b, trace, _, stream) = gb trace stream
+	= (arr (const b), trace, \_ -> 0, stream)
+

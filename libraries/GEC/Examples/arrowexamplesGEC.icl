@@ -54,6 +54,8 @@ where
 //	mycircuit2 = edit "list" >>> arr toBalTree >>> edit "balanced tree" // alternative definition
 	mycircuit2 = edit "list" >>> arr toBalTree >>> edit "list" // alternative definition
 
+derive generate BalancedTree, BalancedNode
+
 /*
 example2 = startCircuit mycircuit3 (toBalTree [1..5]) // self balancing tree
 where

@@ -46,6 +46,7 @@ where
 		   		} = {all & result = showAGEC ((^^ af) (^^ av))}
 	dotest all = all
 	
+derive generate MyRecord, Command, Editor, TypeVal, Maybe, DynString, ApplicationElem
 
 Start :: *World -> *World
 //Start world = goGui testje world  

@@ -37,6 +37,7 @@ myclock = Timed (\i -> 100) 100
 
 
 derive gGEC MouseState, Modifiers
+derive generate ShapeAttributes, Mode, MouseState, Colour, Shape, Modifiers, Point2, RGBColour
 
 example_mouse pst
 	=	startCircuit (feedback  (  edit "Mouse" >>> gecMouse "Mouse" )) MouseLost pst
@@ -62,8 +63,7 @@ example_draw pst
 		= fig
 
 		mydrawfun title figlist pst
-		# (Just wid,pst) = accPIO (searchWindowIdWithTitle titl
-		e) pst
+		# (Just wid,pst) = accPIO (searchWindowIdWithTitle title) pst
 		# pst = appPIO (setWindowLook wid True (True,mapdrawfig figlist)) pst 
 		= (figlist,pst)
 		

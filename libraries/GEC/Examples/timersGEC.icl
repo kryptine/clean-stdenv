@@ -26,6 +26,8 @@ where
 
 myclock = Timed (\i -> 100) 100 
 
+derive generate Mode, Timed
+
 example_timer2 = startCircuit (edit "delay (msec)" >>> arr f >>> display "Show Prime Numbers" >>> loop (second (delay (2,Hide allprimes) >>> display "Show Prime Numbers" >>> arr thisone))) 100
 where
 	thisone (p,Hide [x:xs]) = (x,Hide xs)

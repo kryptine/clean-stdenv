@@ -9,6 +9,8 @@ import GecArrow, basicAGEC//, StdDynamicGEC, StdDynamic//, StdGeneric
 goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 
+derive generate Mode
+
 Start :: *World -> *World
 Start world 
 = 	goGui 

@@ -37,3 +37,5 @@ derive gGEC GecComb
 
 AGECtoCGEC :: String	(AGEC a) 		-> (GecCircuit a a) 	| gGEC{|*|}, generate{|*|} a		// Create CGEC in indicated window 
 CGECtoAGEC :: 			(GecCircuit a a ) a 	-> (AGEC a) 	| gGEC{|*|} a		// Use CGEC as AGEC 
+
+derive generate AGEC

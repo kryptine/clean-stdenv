@@ -1,7 +1,7 @@
 Version: 1.4
 Global
 	Built:	True
-	Target:	Really Everything
+	Target:	Everything
 	Exec:	{Project}\editeditorGEC.exe
 	CodeGen
 		CheckStacks:	False
@@ -37,15 +37,13 @@ Global
 		ExportedNames:	
 	Paths
 		Path:	{Project}
-		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC
-		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
-		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\ObjectIOExtensions
-		Path:	{Application}\Libraries\Hilde
-		Path:	{Application}\Libraries\Hilde\OS Windows\NoDynamicFileSystem
-		Path:	{Application}\Libraries\Hilde\Parser combinators 2002
-		Path:	{Application}\Libraries\Hilde\WrapDebugClosures
-		Path:	{Application}\Libraries\Hilde\OS Windows\Foreign
-		Path:	{Application}\Libraries\Hilde\OS Windows
+		Path:	D:\My Documents\GEC
+		Path:	D:\My Documents\GEC\GEC Implementation
+		Path:	D:\My Documents\GEC\ObjectIOExtensions
+		Path:	D:\My Documents\Hilde
+		Path:	D:\My Documents\Hilde\OS Windows
+		Path:	D:\My Documents\Hilde\OS Windows\NoDynamicFileSystem
+		Path:	D:\My Documents\Hilde\Parser combinators 2002
 	Precompile:	
 	Postlink:	
 MainModule
@@ -70,16 +68,44 @@ MainModule
 	DclOpen:	False
 	Icl
 		WindowPosition
-			X:	24
-			Y:	64
-			SizeX:	865
-			SizeY:	544
+			X:	5
+			Y:	3
+			SizeX:	787
+			SizeY:	498
 	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
 	Module
+		Name:	StdArrow
+		Dir:	D:\My Documents\GEC\GEC Implementation
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
 		Name:	GecArrow
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	D:\My Documents\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4686,7 +4712,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	genericgecs
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	D:\My Documents\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4714,7 +4740,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	gec
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	D:\My Documents\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4742,7 +4768,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	guiloc
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	D:\My Documents\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4770,7 +4796,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	objectloc
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	D:\My Documents\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4882,7 +4908,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	guigecs
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	D:\My Documents\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4938,7 +4964,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	Debug
-		Dir:	{Application}\Libraries\Hilde\WrapDebugClosures
+		Dir:	{Application}\Libraries\WrapDebug
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4966,7 +4992,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	Wrap
-		Dir:	{Application}\Libraries\Hilde\WrapDebugClosures
+		Dir:	{Application}\Libraries\WrapDebug
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4994,7 +5020,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ShowWrapped
-		Dir:	{Application}\Libraries\Hilde\WrapDebugClosures
+		Dir:	{Application}\Libraries\WrapDebug
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5050,7 +5076,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	parseprint
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	D:\My Documents\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5078,7 +5104,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdObjectIOExt
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	D:\My Documents\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5106,7 +5132,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ColourTextControl
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\ObjectIOExtensions
+		Dir:	D:\My Documents\GEC\ObjectIOExtensions
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5134,7 +5160,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdBimap
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	D:\My Documents\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5162,7 +5188,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	infragecs
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	D:\My Documents\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5302,7 +5328,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	GenDefault
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	D:\My Documents\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5330,7 +5356,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	TRACE
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	D:\My Documents\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5358,7 +5384,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	D:\My Documents\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5386,7 +5412,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdGECExt
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	D:\My Documents\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5414,7 +5440,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdAGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	D:\My Documents\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5442,7 +5468,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	basicAGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	D:\My Documents\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5470,7 +5496,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	store
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	D:\My Documents\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5498,7 +5524,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	calcAGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	D:\My Documents\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5526,7 +5552,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	EstherInterFace
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
+		Dir:	D:\My Documents\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5554,7 +5580,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	EstherPostParser
-		Dir:	{Application}\Libraries\Hilde
+		Dir:	D:\My Documents\Hilde
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5582,7 +5608,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	EstherParser
-		Dir:	{Application}\Libraries\Hilde
+		Dir:	D:\My Documents\Hilde
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6122,7 +6148,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdParsComb
-		Dir:	{Application}\Libraries\Hilde\Parser combinators 2002
+		Dir:	D:\My Documents\Hilde\Parser combinators 2002
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6150,7 +6176,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	EstherTransform
-		Dir:	{Application}\Libraries\Hilde
+		Dir:	D:\My Documents\Hilde
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6178,7 +6204,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	EstherBackend
-		Dir:	{Application}\Libraries\Hilde
+		Dir:	D:\My Documents\Hilde
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6206,7 +6232,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	CleanTricks
-		Dir:	{Application}\Libraries\Hilde
+		Dir:	D:\My Documents\Hilde
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6234,7 +6260,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	updownAGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	D:\My Documents\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6262,7 +6288,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	dynamicAGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	D:\My Documents\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6290,7 +6316,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	modeAGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	D:\My Documents\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6318,7 +6344,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	buttonAGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	D:\My Documents\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6346,7 +6372,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	tupleAGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	D:\My Documents\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6402,7 +6428,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	EstherScript
-		Dir:	{Application}\Libraries\Hilde
+		Dir:	D:\My Documents\Hilde
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6430,7 +6456,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	DynamicFileSystem
-		Dir:	{Application}\Libraries\Hilde
+		Dir:	D:\My Documents\Hilde
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6458,7 +6484,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	Windows
-		Dir:	{Application}\Libraries\Hilde\OS Windows
+		Dir:	D:\My Documents\Hilde\OS Windows
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6488,7 +6514,7 @@ OtherModules
 			Library:	windowsKERNEL32_library
 	Module
 		Name:	Marshall
-		Dir:	{Application}\Libraries\Hilde
+		Dir:	D:\My Documents\Hilde
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6516,7 +6542,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	EstherStdEnv
-		Dir:	{Application}\Libraries\Hilde
+		Dir:	D:\My Documents\Hilde
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6544,7 +6570,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	noObjectAGEC
-		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Dir:	D:\My Documents\GEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -6573,22 +6599,22 @@ OtherModules
 Static
 	Mods
 		Path:	{Project}\editeditorGEC.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\noObjectAGEC.icl
-		Path:	{Application}\Libraries\Hilde\EstherStdEnv.icl
-		Path:	{Application}\Libraries\Hilde\Marshall.icl
-		Path:	{Application}\Libraries\Hilde\OS Windows\Windows.icl
-		Path:	{Application}\Libraries\Hilde\DynamicFileSystem.icl
-		Path:	{Application}\Libraries\Hilde\EstherScript.icl
+		Path:	D:\My Documents\GEC\noObjectAGEC.icl
+		Path:	D:\My Documents\Hilde\EstherStdEnv.icl
+		Path:	D:\My Documents\Hilde\Marshall.icl
+		Path:	D:\My Documents\Hilde\OS Windows\Windows.icl
+		Path:	D:\My Documents\Hilde\DynamicFileSystem.icl
+		Path:	D:\My Documents\Hilde\EstherScript.icl
 		Path:	{Application}\Libraries\Dynamics\extension\StdCleanTypes.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\tupleAGEC.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\buttonAGEC.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\modeAGEC.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\dynamicAGEC.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\updownAGEC.icl
-		Path:	{Application}\Libraries\Hilde\CleanTricks.icl
-		Path:	{Application}\Libraries\Hilde\EstherBackend.icl
-		Path:	{Application}\Libraries\Hilde\EstherTransform.icl
-		Path:	{Application}\Libraries\Hilde\Parser combinators 2002\StdParsComb.icl
+		Path:	D:\My Documents\GEC\tupleAGEC.icl
+		Path:	D:\My Documents\GEC\buttonAGEC.icl
+		Path:	D:\My Documents\GEC\modeAGEC.icl
+		Path:	D:\My Documents\GEC\dynamicAGEC.icl
+		Path:	D:\My Documents\GEC\updownAGEC.icl
+		Path:	D:\My Documents\Hilde\CleanTricks.icl
+		Path:	D:\My Documents\Hilde\EstherBackend.icl
+		Path:	D:\My Documents\Hilde\EstherTransform.icl
+		Path:	D:\My Documents\Hilde\Parser combinators 2002\StdParsComb.icl
 		Path:	{Application}\Libraries\StdLib\StdArrayExtensions.icl
 		Path:	{Application}\Libraries\Dynamics\general\md5.icl
 		Path:	{Application}\Libraries\Dynamics\implementation\DynID.icl
@@ -6607,39 +6633,39 @@ Static
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\_SystemDynamic.icl
 		Path:	{Application}\Libraries\Dynamics\extension\StdDynamic.icl
 		Path:	{Application}\Libraries\ExceptionsWindows\StdException.icl
-		Path:	{Application}\Libraries\Hilde\EstherParser.icl
-		Path:	{Application}\Libraries\Hilde\EstherPostParser.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\EstherInterFace.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\calcAGEC.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\store.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\basicAGEC.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\StdAGEC.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\StdGECExt.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\StdGEC.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\TRACE.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\GenDefault.icl
+		Path:	D:\My Documents\Hilde\EstherParser.icl
+		Path:	D:\My Documents\Hilde\EstherPostParser.icl
+		Path:	D:\My Documents\GEC\GEC Implementation\EstherInterFace.icl
+		Path:	D:\My Documents\GEC\calcAGEC.icl
+		Path:	D:\My Documents\GEC\GEC Implementation\store.icl
+		Path:	D:\My Documents\GEC\basicAGEC.icl
+		Path:	D:\My Documents\GEC\StdAGEC.icl
+		Path:	D:\My Documents\GEC\GEC Implementation\StdGECExt.icl
+		Path:	D:\My Documents\GEC\GEC Implementation\StdGEC.icl
+		Path:	D:\My Documents\GEC\GEC Implementation\TRACE.icl
+		Path:	D:\My Documents\GEC\GEC Implementation\GenDefault.icl
 		Path:	{Application}\Libraries\MersenneTwister\MersenneTwister.icl
 		Path:	{Application}\Libraries\Gast\stdProperty.icl
 		Path:	{Application}\Libraries\Gast\genLibTest.icl
 		Path:	{Application}\Libraries\Gast\testable.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\infragecs.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\StdBimap.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\ObjectIOExtensions\ColourTextControl.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\StdObjectIOExt.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\parseprint.icl
+		Path:	D:\My Documents\GEC\GEC Implementation\infragecs.icl
+		Path:	D:\My Documents\GEC\GEC Implementation\StdBimap.icl
+		Path:	D:\My Documents\GEC\ObjectIOExtensions\ColourTextControl.icl
+		Path:	D:\My Documents\GEC\GEC Implementation\StdObjectIOExt.icl
+		Path:	D:\My Documents\GEC\GEC Implementation\parseprint.icl
 		Path:	{Application}\Libraries\StdEnv\StdDebug.icl
-		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\ShowWrapped.icl
-		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Wrap.icl
-		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Debug.icl
+		Path:	{Application}\Libraries\WrapDebug\ShowWrapped.icl
+		Path:	{Application}\Libraries\WrapDebug\Wrap.icl
+		Path:	{Application}\Libraries\WrapDebug\Debug.icl
 		Path:	{Application}\Libraries\Generics\GenParse.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\guigecs.icl
+		Path:	D:\My Documents\GEC\GEC Implementation\guigecs.icl
 		Path:	{Application}\Libraries\Generics\GenPrint.icl
 		Path:	{Application}\Libraries\StdEnv\StdGeneric.icl
 		Path:	{Application}\Libraries\Generics\GenEq.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\objectloc.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\guiloc.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\gec.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\genericgecs.icl
+		Path:	D:\My Documents\GEC\GEC Implementation\objectloc.icl
+		Path:	D:\My Documents\GEC\GEC Implementation\guiloc.icl
+		Path:	D:\My Documents\GEC\GEC Implementation\gec.icl
+		Path:	D:\My Documents\GEC\GEC Implementation\genericgecs.icl
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\timerevent.icl
 		Path:	{Application}\Libraries\ObjectIO\timerdevice.icl
 		Path:	{Application}\Libraries\ObjectIO\timerdefaccess.icl
@@ -6802,13 +6828,30 @@ Static
 		Path:	{Application}\Libraries\StdEnv\StdOverloaded.icl
 		Path:	{Application}\Libraries\StdEnv\StdBool.icl
 		Path:	{Application}\Libraries\StdEnv\StdEnv.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GecArrow.icl
+		Path:	D:\My Documents\GEC\GecArrow.icl
+		Path:	D:\My Documents\GEC\GEC Implementation\StdArrow.icl
 	Objs
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup0.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup1Trace.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup2.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_system.o
 		Path:	{Project}\Clean System Files\editeditorGEC.o
+		Path:	D:\My Documents\GEC\Clean System Files\noObjectAGEC.o
+		Path:	D:\My Documents\Hilde\Clean System Files\CleanTricks.o
+		Path:	D:\My Documents\Hilde\OS Windows\Clean System Files\Windows.o
+		Path:	D:\My Documents\Hilde\Clean System Files\EstherScript.o
+		Path:	D:\My Documents\Hilde\Clean System Files\EstherBackend.o
+		Path:	{Application}\Libraries\ExceptionsWindows\Clean System Files\StdException.o
+		Path:	D:\My Documents\Hilde\Clean System Files\EstherPostParser.o
+		Path:	D:\My Documents\GEC\Clean System Files\dynamicAGEC.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynID.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory_mapped_files.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\shared_buffer.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\BitSet.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynamicUtilities.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\DefaultElem.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicGraphConversion.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
@@ -6830,15 +6873,15 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdTuple.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdCharList.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\tupleAGEC.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\genericgecs.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\gec.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControl.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControlClass.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControlDef.o
+		Path:	D:\My Documents\GEC\Clean System Files\tupleAGEC.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdIO.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdId.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\id.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\device.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\systemid.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdIOCommon.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdBitmap.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osbitmap.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ospicture.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osrgn.o
@@ -6853,20 +6896,8 @@ Static
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPicture.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdKey.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\oskey.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\id.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\device.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\systemid.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\commondef.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\clCCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowhandle.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdWindowDef.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverhandle.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receivermessage.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receivertable.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\semidynamic.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\cast.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\keyfocus.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPSt.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\iostate.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osactivaterequests.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osdocumentinterface.o
@@ -6880,8 +6911,17 @@ Static
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osguishare.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\devicefunctions.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\deviceevents.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receivermessage.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receivertable.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\semidynamic.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\cast.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\timertable.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTimerDef.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowhandle.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControlDef.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdWindowDef.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverhandle.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\keyfocus.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\devicesystemstate.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuhandle.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuDef.o
@@ -6891,80 +6931,43 @@ Static
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\timerhandle.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\processstack.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\roundrobin.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdId.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\world.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osmouse.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPSt.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdProcessDef.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdProcessAttribute.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osbeep.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControlAttribute.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\wstate.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\oswindow.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlvalidate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdWindowAttribute.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowvalidate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdSystem.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controllayout.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\wstateaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\layout.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlinternal.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowclipstate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowupdate.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostooltip.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlresize.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlrelayout.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\relayout.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowdraw.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controldraw.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowcontrols.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlcreate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowdispose.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuElementClass.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuAttribute.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menudefaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenu.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\menuevent.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menucreate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\sdisize.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menudevice.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiverDef.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiveraccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiverAttribute.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverdefaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuinternal.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuitems.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverid.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\world.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPStClass.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdFileSelect.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\scheduler.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowcreate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlpos.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowdevice.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\windowevent.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\menuwindowmenu.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControlReceiver.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiver.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverdevice.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\receiverevent.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\guiloc.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdWindow.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\objectloc.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\GenEq.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\GenPrint.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\parseprint.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\GenParse.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\guigecs.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osfileselect.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTime.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostick.o
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdIO.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPStClass.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdFileSelect.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osfileselect.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdSystem.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdProcess.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\processdevice.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menudevice.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiverDef.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuAttribute.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuElementClass.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuaccess.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menudefaccess.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\menuevent.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menucreate.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\sdisize.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\oswindow.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowaccess.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControlAttribute.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdWindowAttribute.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowupdate.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\wstate.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowclipstate.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\wstateaccess.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiveraccess.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiverAttribute.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverdefaccess.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\menuwindowmenu.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\processevent.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\toolbar.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdClipboard.o
@@ -6972,10 +6975,40 @@ Static
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\clipboardCrossCall_12.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPrint.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osprint.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControlClass.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlvalidate.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowvalidate.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controllayout.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\layout.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdWindow.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlpos.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlrelayout.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\relayout.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowdraw.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowcreate.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenu.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuinternal.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuitems.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowdevice.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowdispose.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverid.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controldraw.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlresize.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\windowevent.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlcreate.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostooltip.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlinternal.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPrintText.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControlReceiver.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControl.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlaccess.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowcontrols.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuReceiver.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuElement.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\mstate.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiver.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverdevice.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\receiverevent.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTimerAttribute.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTimerElementClass.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTimerReceiver.o
@@ -6984,61 +7017,56 @@ Static
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\timerdefaccess.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\timerdevice.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\timerevent.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\ObjectIOExtensions\Clean System Files\ColourTextControl.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\StdObjectIOExt.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\StdBimap.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\infragecs.o
+		Path:	D:\My Documents\GEC\GEC Implementation\Clean System Files\genericgecs.o
+		Path:	D:\My Documents\GEC\GEC Implementation\Clean System Files\gec.o
+		Path:	D:\My Documents\GEC\GEC Implementation\Clean System Files\guiloc.o
+		Path:	D:\My Documents\GEC\GEC Implementation\Clean System Files\objectloc.o
+		Path:	{Application}\Libraries\Generics\Clean System Files\GenEq.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
+		Path:	{Application}\Libraries\Generics\Clean System Files\GenPrint.o
+		Path:	D:\My Documents\GEC\GEC Implementation\Clean System Files\parseprint.o
+		Path:	{Application}\Libraries\Generics\Clean System Files\GenParse.o
+		Path:	D:\My Documents\GEC\GEC Implementation\Clean System Files\guigecs.o
+		Path:	D:\My Documents\GEC\GEC Implementation\Clean System Files\StdObjectIOExt.o
+		Path:	D:\My Documents\GEC\ObjectIOExtensions\Clean System Files\ColourTextControl.o
+		Path:	D:\My Documents\GEC\GEC Implementation\Clean System Files\StdBimap.o
+		Path:	D:\My Documents\GEC\GEC Implementation\Clean System Files\infragecs.o
 		Path:	{Application}\Libraries\Gast\Clean System Files\testable.o
 		Path:	{Application}\Libraries\Gast\Clean System Files\genLibTest.o
 		Path:	{Application}\Libraries\Gast\Clean System Files\stdProperty.o
 		Path:	{Application}\Libraries\MersenneTwister\Clean System Files\MersenneTwister.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\GenDefault.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\TRACE.o
-		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Clean System Files\Debug.o
-		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Clean System Files\Wrap.o
-		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Clean System Files\ShowWrapped.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\StdGECExt.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\StdGEC.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\StdAGEC.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\GecArrow.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\basicAGEC.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\modeAGEC.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\buttonAGEC.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\updownAGEC.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\store.o
+		Path:	D:\My Documents\GEC\GEC Implementation\Clean System Files\GenDefault.o
+		Path:	D:\My Documents\GEC\GEC Implementation\Clean System Files\TRACE.o
+		Path:	{Application}\Libraries\WrapDebug\Clean System Files\Debug.o
+		Path:	{Application}\Libraries\WrapDebug\Clean System Files\Wrap.o
+		Path:	{Application}\Libraries\WrapDebug\Clean System Files\ShowWrapped.o
+		Path:	D:\My Documents\GEC\GEC Implementation\Clean System Files\StdGECExt.o
+		Path:	D:\My Documents\GEC\Clean System Files\StdAGEC.o
+		Path:	D:\My Documents\GEC\Clean System Files\GecArrow.o
+		Path:	D:\My Documents\GEC\GEC Implementation\Clean System Files\StdArrow.o
+		Path:	D:\My Documents\GEC\GEC Implementation\Clean System Files\store.o
+		Path:	D:\My Documents\GEC\Clean System Files\basicAGEC.o
+		Path:	D:\My Documents\GEC\Clean System Files\modeAGEC.o
+		Path:	D:\My Documents\GEC\Clean System Files\buttonAGEC.o
+		Path:	D:\My Documents\GEC\Clean System Files\updownAGEC.o
+		Path:	D:\My Documents\GEC\GEC Implementation\Clean System Files\StdGEC.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicGraphConversion.o
 		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicTypes.o
-		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\DefaultElem.o
 		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\EnDecode.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynamicUtilities.o
 		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicLowLevelInterface.o
-		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\BitSet.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicLinkerInterface.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\shared_buffer.o
 		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicVersion.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory_mapped_files.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynID.o
 		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\md5.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\calcAGEC.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\dynamicAGEC.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation\Clean System Files\EstherInterFace.o
-		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherPostParser.o
-		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherParser.o
-		Path:	{Application}\Libraries\ExceptionsWindows\Clean System Files\StdException.o
-		Path:	{Application}\Libraries\Hilde\Parser combinators 2002\Clean System Files\StdParsComb.o
-		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherBackend.o
-		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherTransform.o
-		Path:	{Application}\Libraries\Hilde\Clean System Files\CleanTricks.o
-		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherScript.o
-		Path:	{Application}\Libraries\Hilde\Clean System Files\DynamicFileSystem.o
-		Path:	{Application}\Libraries\Hilde\OS Windows\Clean System Files\Windows.o
-		Path:	{Application}\Libraries\Hilde\Clean System Files\Marshall.o
-		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherStdEnv.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\noObjectAGEC.o
+		Path:	D:\My Documents\GEC\Clean System Files\calcAGEC.o
+		Path:	D:\My Documents\GEC\GEC Implementation\Clean System Files\EstherInterFace.o
+		Path:	D:\My Documents\Hilde\Clean System Files\EstherParser.o
+		Path:	D:\My Documents\Hilde\Parser combinators 2002\Clean System Files\StdParsComb.o
+		Path:	D:\My Documents\Hilde\Clean System Files\EstherTransform.o
+		Path:	D:\My Documents\Hilde\Clean System Files\DynamicFileSystem.o
+		Path:	D:\My Documents\Hilde\Clean System Files\Marshall.o
+		Path:	D:\My Documents\Hilde\Clean System Files\EstherStdEnv.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallClipboard_121.obj
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFileSelectors_121.obj
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFont_121.obj
@@ -7074,7 +7102,7 @@ Static
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\userExt_library
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\gdiExt_library
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\kernelExt_library
-		Path:	{Application}\Libraries\Hilde\OS Windows\Clean System Files\windowsKERNEL32_library
+		Path:	D:\My Documents\Hilde\OS Windows\Clean System Files\windowsKERNEL32_library
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\winspool_library
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\winmm_library
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\shell32_library
@@ -7084,15 +7112,13 @@ Static
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\advapi32_library
 	Pths
 		Path:	{Project}
-		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC
-		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\GEC Implementation
-		Path:	C:\Peter\Projecten\Visual Editor\libraries\GEC\ObjectIOExtensions
-		Path:	{Application}\Libraries\Hilde
-		Path:	{Application}\Libraries\Hilde\OS Windows\NoDynamicFileSystem
-		Path:	{Application}\Libraries\Hilde\Parser combinators 2002
-		Path:	{Application}\Libraries\Hilde\WrapDebugClosures
-		Path:	{Application}\Libraries\Hilde\OS Windows\Foreign
-		Path:	{Application}\Libraries\Hilde\OS Windows
+		Path:	D:\My Documents\GEC
+		Path:	D:\My Documents\GEC\GEC Implementation
+		Path:	D:\My Documents\GEC\ObjectIOExtensions
+		Path:	D:\My Documents\Hilde
+		Path:	D:\My Documents\Hilde\OS Windows
+		Path:	D:\My Documents\Hilde\OS Windows\NoDynamicFileSystem
+		Path:	D:\My Documents\Hilde\Parser combinators 2002
 		Path:	{Application}\Libraries\StdEnv
 		Path:	{Application}\Libraries\StdLib
 		Path:	{Application}\Libraries\ObjectIO
@@ -7112,14 +7138,5 @@ Static
 		Path:	{Application}\Libraries\WrapDebug
 		Path:	{Application}\Libraries\ExtendedArith\ExtendedArith
 		Path:	{Application}\Libraries\GameLib
-		Path:	{Application}\Libraries\Hilde
-		Path:	{Application}\Libraries\Hilde\OS Windows
-		Path:	{Application}\Libraries\Hilde\Parser combinators 2002
-		Path:	{Application}\Libraries\Hilde\WrapDebugClosures
-		Path:	{Application}\Libraries\Hilde\Loes 0.2
-		Path:	{Application}\Libraries\Hilde\OS Windows\NoDynamicFileSystem
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GEC Implementation
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC
-		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\ObjectIOExtensions
-	AppP:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.0
-	PrjP:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Examples
+	AppP:	C:\Clean 2.1.1a3
+	PrjP:	D:\My Documents\GEC\Examples
