@@ -8,6 +8,7 @@ import EstherParser, StdMaybe
 	| InstanceNotFound !String !Dynamic
 	| InvalidInstance !String !Dynamic !Dynamic
 	| UnsolvableOverloading
+	| NotSupported` !String
 
 :: EstherRuntimeException
 	= PatternMismatch

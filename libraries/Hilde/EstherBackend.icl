@@ -20,25 +20,25 @@ overloaded3 :: !String !String !String !Dynamic -> Dynamic
 overloaded3 c1 c2 c3 ((_, _, _, e) :: (v1, v2, v3, d1 d2 d3 -> t)) = dynamic (\(dict1 &&& dict2 &&& dict3) -> e dict1 dict2 dict3) ||| Class c1 &&& Class c2 &&& Class c3 :: Overloaded (Contexts d1 (Contexts d2 d3)) t (Contexts (Context v1) (Contexts (Context v2) (Context v3)))
 
 abstract :: !String !Core -> Core
-abstract v e | notFreeVar v e = coreK @ e
+abstract v e | freeVar v e = coreK @ e
 abstract v (CoreVariable x) = coreI
 abstract v (srcf @ srcx @ srcy)
-	| notFreeVar v srcf
-		| notFreeVar v srcx = coreB` @ srcf @ srcx @ abstract v srcy
-		| notFreeVar v srcy = coreC` @ srcf @ abstract v srcx @ srcy
+	| freeVar v srcf
+		| freeVar v srcx = coreB` @ srcf @ srcx @ abstract v srcy
+		| freeVar v srcy = coreC` @ srcf @ abstract v srcx @ srcy
 		= coreS` @ srcf @ abstract v srcx @ abstract v srcy
 abstract v (srcf @ srcx)
-	| notFreeVar v srcf = coreB @ srcf @ abstract v srcx
-	| notFreeVar v srcx = coreC @ abstract v srcf @ srcx
+	| freeVar v srcf = coreB @ srcf @ abstract v srcx
+	| freeVar v srcx = coreC @ abstract v srcf @ srcx
 	= coreS @ abstract v srcf @ abstract v srcx
 
 abstract_ :: !Core -> Core
 abstract_ e = coreK @ e
 
-notFreeVar :: !String !Core -> Bool
-notFreeVar v (f @ x) = notFreeVar v f && notFreeVar v x
-notFreeVar v (CoreVariable x) = v <> x
-notFreeVar _ _ = True
+freeVar :: !String !Core -> Bool
+freeVar v (f @ x) = freeVar v f && freeVar v x
+freeVar v (CoreVariable x) = v <> x
+freeVar _ _ = True
 
 generateCode :: !Core !*env -> (!Dynamic, !*env) | resolveFilename env
 generateCode CoreDynamic env = (dynamic I ||| Class "TC" :: A.z: Overloaded (z -> Dynamic) (z -> Dynamic) (Context z), env)
@@ -124,7 +124,7 @@ where
 				(Just (inst, _), env) -> (Just inst, env)
 				(_, env) -> (Nothing, env)
 		where
-			outermostType :: !Dynamic -> String
+/*			outermostType :: !Dynamic -> String
 			outermostType d = toString (snd (f (typeCodeOfDynamic d)))
 			where
 				f (TypeScheme _ type) = f type
@@ -133,8 +133,31 @@ where
 				f (TypeApp t1 t2)
 					# (n, t1) = f t1
 					= (n + 1, TypeApp t1 (TypeVar n))
-				f type = (0, type)
+				f type = (0, type)*/
 				
+			outermostType :: !Dynamic -> String
+			outermostType d = snd (toStringDynamic (f d))
+			where
+				f d=:(_ :: A.tc: tc) = d
+				f d=:(_ :: A.tc: tc a) = d
+				f d=:(_ :: A.tc: tc a b) = d
+				f d=:(_ :: A.tc: tc a b c) = d
+				f d=:(_ :: A.tc: tc a b c d) = d
+				f d=:(_ :: A.tc: tc a b c d e) = d
+				f d=:(_ :: A.tc: tc a b c d e f) = d
+				f d=:(_ :: A.tc: tc a b c d e f g) = d
+				f d=:(_ :: A.tc: tc a b c d e f g h) = d
+				f (_ :: tc a b c d e f g h i) = raise (NotSupported` "instances for type constructors with more than eight type arguments")
+				f (_ :: tc a b c d e f g h) = dynamic Omega :: A.a1 b1 c1 d1 e1 f1 g1 h1: tc a1 b1 c1 d1 e1 f1 g1 h1
+				f (_ :: tc a b c d e f g) = dynamic Omega :: A.a1 b1 c1 d1 e1 f1 g1: tc a1 b1 c1 d1 e1 f1 g1
+				f (_ :: tc a b c d e f) = dynamic Omega :: A.a1 b1 c1 d1 e1 f1: tc a1 b1 c1 d1 e1 f1
+				f (_ :: tc a b c d e) = dynamic Omega :: A.a1 b1 c1 d1 e1: tc a1 b1 c1 d1 e1
+				f (_ :: tc a b c d) = dynamic Omega :: A.a1 b1 c1 d1: tc a1 b1 c1 d1
+				f (_ :: tc a b c) = dynamic Omega :: A.a1 b1 c1: tc a1 b1 c1
+				f (_ :: tc a b) = dynamic Omega :: A.a1 b1: tc a1 b1
+				f (_ :: tc a) = dynamic Omega :: A.a1: tc a1
+				f d=:(_ :: tc) = d
+
 /*		countTypeVar :: !Dynamic -> Int
 		countTypeVar d = f (typeCodeOfDynamic d)
 		where

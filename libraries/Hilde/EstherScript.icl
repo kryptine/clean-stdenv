@@ -37,6 +37,7 @@ where
 	handler (NameNotFound n :: PostParseException) = dynamic EstherError ("file `" +++ n +++ "' not found")
 	handler (CaseBadConstructorArity :: TransformException) = dynamic EstherError ("constructor in pattern has too many or too little arguments")
 	handler (NotSupported s :: TransformException) = dynamic EstherError ("feature not (yet) supported: `" +++ s +++ "'")
+	handler (NotSupported` s :: ComposeException) = dynamic EstherError ("feature not (yet) supported: `" +++ s +++ "'")
 	handler (_ :: ParseException) = dynamic EstherError ("parser error")
 	handler d = d
 
