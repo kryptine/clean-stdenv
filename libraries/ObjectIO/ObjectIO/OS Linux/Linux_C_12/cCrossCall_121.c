@@ -24,22 +24,26 @@
 ********************************************************************************************/
 
 #include "cCrossCall_121.h"
-#include "cCrossCallWindows_121.h"		// Contains the implementation of cursors.
+#include "cCrossCallWindows_121.h"		/* Contains the implementation of cursors. */
 #include <gdk/gdkkeysyms.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <stdlib.h>
+#include <strings.h>
 
 extern char** global_argv;
 extern int global_argc;
-//#include <Rts.h>
-//#include <RtsAPI.h>
+/*
+#include <Rts.h>
+#include <RtsAPI.h>
+*/
 
 /**********************************************************************************************
 	External global data section.
 **********************************************************************************************/
 CrossCallInfo gCci;									/* The global cross call information struct. */
-GtkWidget *gTooltip              = NULL;			/* The tooltip control. */
+GtkTooltips *gTooltip              = NULL;			/* The tooltip control. */
 CrossCallProcedureTable gCrossCallProcedureTable;
 
 /**********************************************************************************************
@@ -51,9 +55,9 @@ static pthread_mutex_t gOSMutex;
 static pthread_t gOSThread;
 static gboolean gOSThreadIsRunning = FALSE;
 static gboolean gEventsInited = FALSE; /* What is this? */
-
+/*
 static CrossCallInfo *MakeQuitCci (CrossCallInfo * pcci);
-
+*/
 
 /*	GetModifiers returns the modifiers that are currently pressed.
 */
@@ -181,7 +185,7 @@ void HandleCleanRequest (CrossCallInfo * pcci)
     printf("HandleCleanRequest: Message = %d\n", pcci->mess);
 	switch (pcci->mess)
 	{
-		case CcRqDOMESSAGE: 	// idleTimerOn, sleeptime; no result.
+		case CcRqDOMESSAGE: 	/* idleTimerOn, sleeptime; no result. */
 			{
 				gboolean gIdleTimerOn = (gboolean) pcci->p1;
 				gint interval = (gint) pcci->p2;
@@ -213,12 +217,12 @@ void HandleCleanRequest (CrossCallInfo * pcci)
                 printf("Handle Request for action logged for: %d\n", pcci->mess);
 
 				if (action == NULL)
-				{	// Cross call request code not installed.
+				{	/* Cross call request code not installed. */
 					printf("\'HandleCleanRequest\' got uninstalled CcRq request code from Haskell: %d\n", pcci->mess);
 					exit(1);
 				}
 				else
-				{	// Cross call request code found. Apply it to pcci.
+				{	/* Cross call request code found. Apply it to pcci. */
                     printf("Action Requested: %d\n", pcci->mess);
 					action (pcci);
                     printf("Action done.\n");
@@ -256,7 +260,7 @@ OS WinStartOsThread(OS os)
 	InitGTK();
     rprintf ("Init'd GTK\n");
 
-	//	The cross call procedure table is set to the empty table.
+	/*	The cross call procedure table is set to the empty table. */
 	gCrossCallProcedureTable = EmptyCrossCallProcedureTable ();
     rprintf ("Created CC Table\n");
 
@@ -291,7 +295,7 @@ OS WinKillOsThread (OS os)
     return os;
 }	/*WinKillOsThread*/
 
-/* #define PRINTCROSSCALLS */
+#undef PRINTCROSSCALLS
 
 void WinKickOsThread (int imess,
 					  int ip1, int ip2, int ip3,
@@ -621,10 +625,18 @@ char* WinGetAppPath (void)
      */
      sprintf(search, "/proc/%d/exe", pid);
      length = readlink(search, path, 261);
+     rfree(search);
+     if (length < 0)
+     {
+     	path[0] = NULL;
+     	return path;
+     }
      path[length] = 0x00;
 
      for (idx = length - 1;
-         path[idx] != '/' &&                                                             path[idx] != '\\' &&
+         idx >= 0 &&
+         path[idx] != '/' &&
+         path[idx] != '\\' &&
          path[idx] != ':';
          idx--)
         ;
@@ -639,7 +651,7 @@ char* WinGetAppPath (void)
 
 CLEAN_STRING WinGetModulePath (void)
 {
-    char path[255 + 1];
+/*    char path[255 + 1]; */
 
     printf("WinGetModulePath -- Not Implemented.\n");
 

@@ -145,10 +145,12 @@ void WinMinimumWinSize (int *mx, int *my)
 void WinScrollbarSize (OS ios, int *width, int *height, OS *oos)
 {
     GtkRequisition req;
-    GtkWidget *vbar = gtk_vscrollbar_new(NULL);
-    GtkWidget *hbar = gtk_hscrollbar_new(NULL);
-    
+    GtkWidget *vbar, *hbar;
     printf ("WinScrollbarSize\n");
+
+    vbar = gtk_vscrollbar_new(NULL);
+    hbar = gtk_hscrollbar_new(NULL);
+    
 
     gtk_widget_size_request(vbar, &req);
 	*width  = req.width; /* Width of the vertical arrow */

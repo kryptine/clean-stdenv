@@ -81,7 +81,7 @@ static HDC myCreateIC(LPCTSTR driver, LPCTSTR device, DEVMODE *devmode)
 	icPrint	= CreateIC(driver,device,NULL,devmode);
 	if (!icPrint)
 		icPrint	= CreateIC(driver,device,NULL,devmode);
-		// try once again. Adobe printer drivers sometimes need to be told everything twice
+		/* try once again. Adobe printer drivers sometimes need to be told everything twice */
 	return icPrint;
 }
 #endif
@@ -107,8 +107,9 @@ void os_getpagedimensionsC(	DEVMODE *devmode, char *device, char *driver,
 
 	xResolution = GetDeviceCapsWithDefault(icPrint, LOGPIXELSX, 300);
 	yResolution = GetDeviceCapsWithDefault(icPrint, LOGPIXELSY, 300);
-	if (emulateScreenRes)						// for emulation of the screen resolution
-		{	scNX = WinGetHorzResolution();		// all the deviceCaps will be scaled
+	if (emulateScreenRes)						/* for emulation of the screen resolution */
+		{
+            scNX = WinGetHorzResolution();		/* all the deviceCaps will be scaled */
 			scNY = WinGetVertResolution();
 			scDX = xResolution;
 			scDY = yResolution;
@@ -200,9 +201,11 @@ int release_memory_handles(PRINTDLG *pd, int os) {
 	return os;
 	}
 
+/*
+ * This function hooks the Print dialog. It's purpose is to set the dialog in
+ * the foreground.
+ */
 static UINT APIENTRY DialogToFrontHook(HWND hdl, UINT msg, WPARAM wParam, LPARAM lParam)
-// This function hooks the Print dialog. It's purpose is to set the dialog in the
-// foreground.
 {
 #if 0
      if (msg==WM_INITDIALOG)
@@ -221,25 +224,27 @@ void printSetup(int calledFromCleanThread, int devmodeSize,
 	HANDLE		hDevnames,hDevmode;
 	static PRINTDLG	pd;
 
-	// Set up DEVNAMES structure
+	/* Set up DEVNAMES structure */
 
-	//rMessageBox(NULL, MB_APPLMODAL, "in printSetup", "");
+	/*rMessageBox(NULL, MB_APPLMODAL, "in printSetup", ""); */
 	deviceLength	= strlen(device)+1;
 	driverLength	= strlen(driver)+1;
 	outputLength	= strlen(output)+1;
 
 	hDevnames	= setupDevnames(deviceLength,driverLength,outputLength,device,driver,output);
 
-	// Set up DEVMODE structure
+	/* Set up DEVMODE structure */
 	hDevmode	= setupDevmode(devmodeSize,devmode);
 
-	// Set up print dialog record
+	/* Set up print dialog record */
 	pd.lStructSize = sizeof(PRINTDLG);
-	pd.hwndOwner = calledFromCleanThread ? NULL : ghMainWindow;	// (NULL = desktop)
-//	pd.hwndOwner = NULL;	// (NULL = desktop)
-		// the handle must belong to the active thread, otherwise PrintDlg will crash
-		// When this function is called from the Clean thread, ghMainWindow will not
-		// belong to the active thread.
+	pd.hwndOwner = calledFromCleanThread ? NULL : ghMainWindow;	/* (NULL = desktop) */
+/*	pd.hwndOwner = NULL;	// (NULL = desktop) */
+		/*
+         * The handle must belong to the active thread, otherwise PrintDlg
+         * will crash.  When this function is called from the Clean thread,
+         * ghMainWindow will not belong to the active thread.
+         */
 	pd.hDevMode = hDevmode;
 	pd.hDevNames = hDevnames;
 	pd.hDC = NULL;
@@ -258,7 +263,7 @@ void printSetup(int calledFromCleanThread, int devmodeSize,
 	pd.hPrintTemplate = NULL;
 	pd.hSetupTemplate = NULL;
 
-	// Open print dialog
+	/* Open print dialog */
 	*ok	= PrintDlg(&pd);
 	*pdPtr = &pd;
 
@@ -271,7 +276,7 @@ void printSetup(int calledFromCleanThread, int devmodeSize,
 int startPage(int hdc)
 {
 #if 0
-	//rMessageBox(NULL, MB_APPLMODAL, "in startPage", "");
+	/*rMessageBox(NULL, MB_APPLMODAL, "in startPage", ""); */
 	return StartPage((HDC) hdc) > 0;
 #else
     return 0;
@@ -281,7 +286,7 @@ int startPage(int hdc)
 int endPage(int hdc)
 {
 #if 0
-	//rMessageBox(NULL, MB_APPLMODAL, "in endPage", "");
+	/*rMessageBox(NULL, MB_APPLMODAL, "in endPage", ""); */
 	return EndPage((HDC) hdc) > 0;
 #else
     return 0;
@@ -289,12 +294,12 @@ int endPage(int hdc)
 }
 
 int startDoc(int hdc)
-			// err code: >0:no error, <=0: user cancelled file dialog
+			/* err code: >0:no error, <=0: user cancelled file dialog */
 {
 #if 0
 	static DOCINFO docInfo = { sizeof (DOCINFO), "Clean", NULL, NULL, 0 } ;
 
-	//rMessageBox(NULL, MB_APPLMODAL, "in startDoc", "");
+	/*rMessageBox(NULL, MB_APPLMODAL, "in startDoc", "");*/
 	bUserAbort = FALSE ;
 
 	return StartDoc((HDC) hdc, &docInfo);
@@ -306,7 +311,7 @@ int startDoc(int hdc)
 void endDoc(int hdc)
 {
 #if 0
-	//rMessageBox(NULL, MB_APPLMODAL, "in endDoc", "");
+	/*rMessageBox(NULL, MB_APPLMODAL, "in endDoc", ""); */
 	if (bUserAbort)
 		AbortDoc((HDC) hdc);
 	  else
@@ -317,7 +322,7 @@ void endDoc(int hdc)
 void deleteDC(int hdc)
 {
 #if 0
-	//rMessageBox(NULL, MB_APPLMODAL, "in deleteDC", "");
+	/*rMessageBox(NULL, MB_APPLMODAL, "in deleteDC", ""); */
 	DeleteDC((HDC) hdc);
 #endif
 }
@@ -325,7 +330,7 @@ void deleteDC(int hdc)
 int wasCanceled(void)
 {
 #if 0
-	//rMessageBox(NULL, MB_APPLMODAL, "in wasCanceled", "");
+	/*rMessageBox(NULL, MB_APPLMODAL, "in wasCanceled", ""); */
 	return bUserAbort;
 #else
     return 0;
@@ -336,7 +341,7 @@ int wasCanceled(void)
  * lets the user change various settings or gets the default printer
  */
 
-// c-strings are passed to this function !
+/* c-strings are passed to this function ! */
 void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, int devmodeLength,
 			char *devmode,char *device,char *driver,char *output,
 			int *err,
@@ -344,7 +349,7 @@ void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, int devm
 			PRINTDLG	**ppPrintDlg,
 			int *deviceContext
 	 		)
-					// err code: -1:no error, others: non fatal error
+					/* err code: -1:no error, others: non fatal error */
 {
 #if 0
 	static PRINTDLG pd;
@@ -354,7 +359,7 @@ void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, int devm
 	*err = -1;
 
 	if (doDialog)
-	  {	// Set up print dialog record
+	  {	/* Set up print dialog record */
 		HANDLE	hDevnames, hDevmode;
 		int deviceLength,driverLength,outputLength;
 
@@ -367,16 +372,18 @@ void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, int devm
 		hDevmode	= setupDevmode(devmodeLength,devmode);
 
 		pd.lStructSize = sizeof(PRINTDLG);
-		pd.hwndOwner = calledFromCleanThread ? NULL : ghMainWindow;	// (NULL = desktop)
-			// the handle must belong to the active thread, otherwise PrintDlg will crash
-			// When this function is called from the Clean thread, ghMainWindow will not
-			// belong to the active thread.
+		pd.hwndOwner = calledFromCleanThread ? NULL : ghMainWindow;	/* (NULL = desktop) */
+			/*
+             * The handle must belong to the active thread, otherwise PrintDlg
+             * will crash.  When this function is called from the Clean thread,
+             * ghMainWindow will not belong to the active thread.
+             */
 		pd.hDevMode = hDevmode;
 		pd.hDevNames = hDevnames;
 		pd.hDC = NULL;
 		pd.Flags = PD_ALLPAGES | PD_COLLATE | PD_RETURNDC | PD_NOSELECTION
 				 | PD_ENABLEPRINTHOOK;
-		      // hide some options from print dialog
+		      /* hide some options from print dialog */
 		pd.nFromPage = 1;
 		pd.nToPage = 1;
 		pd.nMinPage = 1;
@@ -391,7 +398,7 @@ void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, int devm
 		pd.hPrintTemplate = NULL;
 		pd.hSetupTemplate = NULL;
 
-		// Open print dialog
+		/* Open print dialog */
 
 		ok = PrintDlg(&pd);
 
@@ -400,7 +407,7 @@ void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, int devm
 
 		if (!ok)
 			{
-			*err = CommDlgExtendedError();	// will return 0 iff user canceled, otherwise positive value
+			*err = CommDlgExtendedError();	/* will return 0 iff user canceled, otherwise positive value */
 			release_memory_handles(&pd, 0);
 			return;
 			}
@@ -424,7 +431,7 @@ void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, int devm
 		{
 		hdcPrint = CreateDC(driver, device, output, NULL);
 		if (hdcPrint==NULL)
-		  { *err = 0;	// non fatal error, iff e.g. no printer driver is installed
+		  { *err = 0;	/* non fatal error, iff e.g. no printer driver is installed */
 	 	    return;
 		  };
 		*first	= 1;
@@ -445,7 +452,7 @@ void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, int devm
 		};
 
 	*deviceContext	= (int) hdcPrint;
-	//rMessageBox(NULL, MB_APPLMODAL, "leaving getDC","");
+	/*rMessageBox(NULL, MB_APPLMODAL, "leaving getDC","");*/
 #endif
 }
 
@@ -488,7 +495,7 @@ BOOL CALLBACK AbortProc (HDC hdcPrn, int iCode)
 
 #define DIALOG_WIDTH 100
 #define DIALOG_HEIGHT 60
-	// in dialog units
+	/* in dialog units */
 
 #if 0
 HWND CreateCancelDialog(void)
@@ -524,15 +531,15 @@ HWND CreateCancelDialog(void)
 	*p++ = 0;		/* LOWORD (lExtendedStyle) */
 	*p++ = 0;		/* HIWORD (lExtendedStyle) */
 	*p++ = 0;		/* NumberOfItems */
-	*p++ = ((scrnWidth*4)/3)/baseunitX;		// x
-	*p++ = ((scrnHeight*8)/3)/baseunitY;	// y
+	*p++ = ((scrnWidth*4)/3)/baseunitX;		/* x */
+	*p++ = ((scrnHeight*8)/3)/baseunitY;	/* y */
 	*p++ = DIALOG_WIDTH;	/* cx */
 	*p++ = DIALOG_HEIGHT;	/* cy */
 	*p++ = 0;		/* Menu */
 	*p++ = 0;		/* Class */
 
 	/* copy the title of the dialog */
-	nchar = NULL; //nCopyAnsiToWideChar (p, (char *) "Printing in Progress");
+	nchar = NULL; /*nCopyAnsiToWideChar (p, (char *) "Printing in Progress");*/
 	p += nchar;
 
 	dlgHdl = CreateDialogIndirectParam (ghInst, (LPDLGTEMPLATE) pdlgtemplate, ghMainWindow,
@@ -540,7 +547,7 @@ HWND CreateCancelDialog(void)
 
 	rfree(pdlgtemplate);
 
-	// Add a text field
+	/* Add a text field */
 	textWidth = 19*baseunitX;
 	textHeight = baseunitY;
 	textX =    (((DIALOG_WIDTH*baseunitX)/4) - textWidth)
@@ -552,7 +559,7 @@ HWND CreateCancelDialog(void)
 									dlgHdl, (HMENU) 0, ghInst, 0);
 
 
-	// Add a Cancel button:
+	/* Add a Cancel button: */
 	buttonWidth = 10*baseunitX;
 	buttonHeight = (3*baseunitY)/2;
 	buttonX =    (((DIALOG_WIDTH*baseunitX)/4) - buttonWidth)
@@ -562,7 +569,7 @@ HWND CreateCancelDialog(void)
 	hwndButton = CreateWindow ("button", "Cancel", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
 									buttonX, buttonY, buttonWidth, buttonHeight,
 									dlgHdl, (HMENU) 0, ghInst, 0);
-//	WinSetFont (&lf,"MS Sans Serif",0,8);
+/*	WinSetFont (&lf,"MS Sans Serif",0,8); */
 	SendMessage(hwndButton,WM_SETFONT,(WPARAM)CreateFontIndirect (&lf),MAKELPARAM (TRUE,0));
 	SendMessage(hwndText,WM_SETFONT,(WPARAM)CreateFontIndirect (&lf),MAKELPARAM (TRUE,0));
 

@@ -1,7 +1,7 @@
 #include "util_121.h"
 
 
-//	Global data with external references:
+/*	Global data with external references: */
 extern OSWindowPtr ghTopDocWindow;
 extern int gComboSelection;
 extern BOOL gInMouseDown;
@@ -32,6 +32,8 @@ extern void SendMouseStillDownToClean (OSWindowPtr hwndParent, OSWindowPtr hwndC
 extern void SendMouseStillUpToClean   (OSWindowPtr hwndParent, OSWindowPtr hwndChild, int x, int y);
 extern void SendMouseDownToClean      (OSWindowPtr hwndParent, OSWindowPtr hwndChild, int x, int y);
 
-//	InstallCrossCallxDI adds the proper cross call procedures to the
-//	cross call procedures managed by cCrossCall_121.c.
+/*
+ * InstallCrossCallxDI adds the proper cross call procedures to the
+ * cross call procedures managed by cCrossCall_121.c.
+ */
 extern OS InstallCrossCallxDI (OS ios);

@@ -35,11 +35,13 @@ void EvalCcRqSETCLIPBOARDTEXT (CrossCallInfo *pcci)		/* textptr; no result. */
 
 void EvalCcRqGETCLIPBOARDTEXT (CrossCallInfo *pcci)			/* no params; string result. */
 {
-	gchar *text = gtk_clipboard_wait_for_text(gtk_clipboard_get(GDK_NONE));
-	char *result = g_strdup(text);
+	gchar *text, *result;
+    printf("EvalCcRqGETCLIPBOARDTEXT\n");
+
+	text = gtk_clipboard_wait_for_text(gtk_clipboard_get(GDK_NONE));
+	result = g_strdup(text);
 	g_free(text);
 
-    printf("EvalCcRqGETCLIPBOARDTEXT\n");
 	MakeReturn1Cci (pcci, (int) result);
 }
 

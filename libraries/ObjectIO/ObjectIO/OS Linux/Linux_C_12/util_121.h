@@ -14,6 +14,12 @@
 
 
 
+#undef LOG_CROSSCALL
+
+#define LOG_MEMORY 1
+
+
+
 typedef GtkWidget   *OSWindowPtr;
 
 typedef GdkDrawable *OSPictContext;
@@ -34,7 +40,7 @@ typedef unsigned int WORD;
 
 typedef unsigned int WPARAM;
 
-typedef int LPARAM;
+typedef unsigned long LPARAM;
 
 typedef int OS;
 
@@ -51,6 +57,8 @@ typedef int* LPWORD;
 #define SIGNEDHIWORD(i)  ((short) ((i)>>16))
 
 
+
+#define OS_NO_WINDOW_PTR -1
 
 
 

@@ -42,7 +42,7 @@ extern OSRgnHandle WinCreateEmptyRgn();
 extern void WinCreateRectRgn(int,int,int,int,OS,OSRgnHandle*,OS*);
 extern void WinCreatePolygonRgn(PointsArray,int,int,OS,OSRgnHandle*,OS*);
 extern void WinSetRgnToRect(int,int,int,int,OSRgnHandle,OS,OSRgnHandle*,OS*);
-//extern OSRgnHandle WinCombineRgn (HRGN,HRGN,HRGN,int,OS,HRGN*,OS*);
+/* extern OSRgnHandle WinCombineRgn (HRGN,HRGN,HRGN,int,OS,HRGN*,OS*); */
 extern void WinCombineRgn (OSRgnHandle,OSRgnHandle,OSRgnHandle,int,OS,
                 OSRgnHandle*,OS*);
 extern OSRgnHandle WinUnionRgn(OSRgnHandle rgn1, OSRgnHandle rgn2);
@@ -104,7 +104,10 @@ extern void WinFillPolygon (OSPictContext,OS,OSPictContext*,OS*);
 extern void WinErasePolygon (OSPictContext,OS,OSPictContext*,OS*);
 extern void WinInvertPolygon (OSPictContext,OS,OSPictContext*,OS*);
 
-//	Routines that temporarily create and destroy a DISPLAY OSPictContext. Use this OSPictContext only locally.
+/*
+ * Routines that temporarily create and destroy a DISPLAY OSPictContext. Use
+ * this OSPictContext only locally.
+ */
 extern void WinCreateScreenHDC (OS,OSPictContext*,OS*);
 extern OS   WinDestroyScreenHDC (OSPictContext,OS);
 
@@ -128,11 +131,14 @@ extern void WinGetStringWidth (CLEAN_STRING,CLEAN_STRING,int,int,int,
 extern void WinGetCharWidth (char,CLEAN_STRING,int,int,int,OSPictContext,
                 OS,int*,OS*);
 
-//	Get the resolution of a picture
+/*	Get the resolution of a picture */
 extern void getResolutionC(OSPictContext,int*,int*);
 
-//	Get scaling factors, which have to be applied to coordinates for clipping regions in case
-//	of emulating the screen resolution for printing (MM_ISOTROPIC)
+/*
+ * Get scaling factors, which have to be applied to coordinates for clipping
+ * regions in case of emulating the screen resolution for printing
+ * (MM_ISOTROPIC)
+ */
 extern void WinGetPictureScaleFactor(OSPictContext,OS,int*,int*,int*,int*,
                 OSPictContext*,OS*);
 

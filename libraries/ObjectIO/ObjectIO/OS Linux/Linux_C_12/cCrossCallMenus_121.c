@@ -30,11 +30,11 @@ void EvalCcRqREMOVEMENUSHORTKEY (CrossCallInfo *pcci)	/* frameptr, cmd; no resul
 	GtkWidget *menu_item;
 	GtkAccelGroup *accel_group;
 
-        printf("EvalCcRqREMOVEMENUSHORTKEY\n");
-	frame = (GtkWidget *) pcci->p1;
-	menu_item = (GtkWidget *) pcci->p2;
+    printf("EvalCcRqREMOVEMENUSHORTKEY\n");
+	frame = GTK_WIDGET(pcci->p1);
+	menu_item = GTK_WIDGET(pcci->p2);
 
-	accel_group = ((GtkAccelGroup *) gtk_accel_groups_from_object (G_OBJECT(frame))->data);
+	accel_group = ((GtkAccelGroup*)gtk_accel_groups_from_object(G_OBJECT(frame))->data);
 
 	for (;;)
 	{
@@ -55,11 +55,11 @@ void EvalCcRqMODIFYMENUITEM (CrossCallInfo *pcci)	/* hitem, hmenu, textptr; no r
 	GtkWidget *menu, *menu_item, *label;
 	gchar *title;
 
-        printf("EvalCcRqMODIFYMENUITEM\n");
+    printf("EvalCcRqMODIFYMENUITEM\n");
 	title = createMnemonicString((gchar *) pcci->p3);
 
-	menu = (GtkWidget *) pcci->p2;
-	menu_item = (GtkWidget *) pcci->p1;
+	menu = GTK_WIDGET(pcci->p2);
+	menu_item = GTK_WIDGET(pcci->p1);
 	label = gtk_bin_get_child(GTK_BIN(menu_item));
 	gtk_label_set_text_with_mnemonic(GTK_LABEL(label), title);
 
@@ -72,7 +72,7 @@ static int in_handler_flag = 0;
 
 static void menuitem_activate_handler(GtkMenuItem *menu_item)
 {
-        printf("menuitem_activate_handler\n");
+    printf("menuitem_activate_handler\n");
 	if (in_handler_flag == 0)
 	{
 		in_handler_flag = 1;
@@ -110,12 +110,12 @@ void EvalCcRqINSERTMENUITEM (CrossCallInfo *pcci)
     }
     printf("%s\n", (checkstate ? "checked" : "unchecked"));
 
-    printf("Calling Make Mnemonic string with: %s\n", (char*)pcci->p3);
+    printf("Calling Make Mnemonic string with: %s\n", (gchar*)pcci->p3);
 	title = createMnemonicString((gchar *) pcci->p3);
     printf("Got title: %s\n", title);
 
-	menu = (GtkWidget *) pcci->p2;
-    printf("Menu widget: %s\n", gtk_menu_get_title((GtkMenu*)menu));
+	menu = GTK_WIDGET(pcci->p2);
+    printf("Menu widget: %s\n", gtk_menu_get_title(GTK_MENU(menu)));
 
     printf("Creating new menu item\n");
 	menu_item = gtk_menu_item_new_with_mnemonic(title);
@@ -192,24 +192,26 @@ void EvalCcRqADDMENUSHORTKEY (CrossCallInfo *pcci)  /* frameptr, cmd, key; no re
     MakeReturn0Cci (pcci);
 }
 
+static void find_item_callback(GtkWidget *menu_item, gpointer data)
+{
+    printf("find_item_callback\n");
+	if (GTK_IS_MENU_ITEM(menu_item) && GTK_MENU_ITEM (menu_item)->submenu == ((GtkWidget *) data))
+		*((GtkWidget **) data) = menu_item;
+}
+
 void EvalCcRqITEMENABLE (CrossCallInfo *pcci)	/* parent, HITEM, onoff; no result.  */
 {
 	GtkWidget *menu, *menu_item;
-	menu      = (GtkWidget *) pcci->p1;
-	menu_item = (GtkWidget *) pcci->p2;
+    printf("EvalCcRqITEMENABLE\n");
+    
+	menu      = GTK_WIDGET(pcci->p1);
+	menu_item = GTK_WIDGET(pcci->p2);
 
     printf("Menu widget: %s\n", gtk_menu_get_title((GtkMenu*)menu));
         printf("EvalCcRqITEMENABLE\n");
 	gtk_widget_set_sensitive(menu_item, (gboolean) pcci->p3);
 
 	MakeReturn0Cci (pcci);
-}
-
-static void find_item_callback(GtkWidget *menu_item, gpointer data)
-{
-    printf("find_item_callback\n");
-	if (GTK_IS_MENU_ITEM(menu_item) && GTK_MENU_ITEM (menu_item)->submenu == ((GtkWidget *) data))
-		*((GtkWidget **) data) = menu_item;
 }
 
 /*  Destroy a menu 'physically' */
@@ -227,12 +229,13 @@ void EvalCcRqDESTROYMENU (CrossCallInfo *pcci)          /* HMENU; no result. */
 void EvalCcRqDELETEMENU (CrossCallInfo *pcci)			/* HMENU, HITEM; no result. */
 {
 	GtkWidget *menu, *menu_item;
-	menu = (GtkWidget *) pcci->p1;
-	menu_item = (GtkWidget *) pcci->p2;
+    printf("EvalCcRqDELETEMENU\n");
 
-        printf("EvalCcRqDELETEMENU\n");
+	menu = GTK_WIDGET(pcci->p1);
+	menu_item = GTK_WIDGET(pcci->p2);
+
 	gtk_container_foreach(GTK_CONTAINER(menu), find_item_callback, (gpointer) &menu_item);
-	if (menu_item != (GtkWidget *) pcci->p2)
+	if (menu_item != GTK_WIDGET(pcci->p2))
 	{
 		gtk_menu_item_remove_submenu(GTK_MENU_ITEM(menu_item));
 		gtk_widget_destroy(menu_item);
@@ -244,10 +247,11 @@ void EvalCcRqDELETEMENU (CrossCallInfo *pcci)			/* HMENU, HITEM; no result. */
 void EvalCcRqREMOVEMENUITEM (CrossCallInfo *pcci)		/* menu, HITEM; no result. */
 {
 	GtkWidget *menu, *menu_item;
-	menu = (GtkWidget *) pcci->p1;
-	menu_item = (GtkWidget *) pcci->p2;
+    printf("EvalCcRqREMOVEMENUITEM\n");
 
-        printf("EvalCcRqREMOVEMENUITEM\n");
+	menu = GTK_WIDGET(pcci->p1);
+	menu_item = GTK_WIDGET(pcci->p2);
+
 	gtk_menu_item_remove_submenu(GTK_MENU_ITEM(menu_item));
 	gtk_widget_destroy(menu_item);
 
@@ -257,11 +261,11 @@ void EvalCcRqREMOVEMENUITEM (CrossCallInfo *pcci)		/* menu, HITEM; no result. */
 void EvalCcRqINSERTSEPARATOR (CrossCallInfo *pcci)		/* hmenu, pos no result. */
 {
 	GtkWidget *menu, *menu_item;
+    printf("EvalCcRqINSERTSEPARATOR\n");
 
-        printf("EvalCcRqINSERTSEPARATOR\n");
-	menu = (GtkWidget *) pcci->p1;
-
+	menu = GTK_WIDGET(pcci->p1);
 	menu_item = gtk_menu_item_new();
+
 	gtk_menu_insert(GTK_MENU(menu), menu_item, (gint) pcci->p2);
 	gtk_widget_show_all(menu_item);
 
@@ -274,11 +278,11 @@ void EvalCcRqMODIFYMENU (CrossCallInfo *pcci)	/* hitem, hmenu, textptr; no resul
 	GtkWidget *menu, *menu_item, *label;
 	gchar *title;
 
-        printf("EvalCcRqMODIFYMENU\n");
+    printf("EvalCcRqMODIFYMENU\n");
 	title = createMnemonicString((gchar *) pcci->p3);
 
-	menu = (GtkWidget *) pcci->p2;
-	menu_item = (GtkWidget *) pcci->p1;
+	menu = GTK_WIDGET(pcci->p2);
+	menu_item = GTK_WIDGET(pcci->p1);
 	label = gtk_bin_get_child(GTK_BIN(menu_item));
 	gtk_label_set_text_with_mnemonic(GTK_LABEL(label), title);
 
@@ -294,19 +298,18 @@ void EvalCcRqINSERTMENU (CrossCallInfo *pcci)
 	gchar *title;
 	GtkWidget *parent_menu, *root_menu, *sub_menu;
 	GtkAccelGroup *accel_group;
-
     printf("EvalCcRqINSERTMENU\n");
 
 	title = createMnemonicString((gchar *) pcci->p3);
-	parent_menu = (GtkWidget *) pcci->p2;
-	sub_menu = (GtkWidget *) pcci->p4;
+	parent_menu = GTK_WIDGET(pcci->p2);
+	sub_menu = GTK_WIDGET(pcci->p4);
 
 	if (GTK_IS_MENU_BAR(parent_menu))
 	{
         printf("Adding to a menu bar.\n");
         printf("Menu Bar Name: %s\n", gtk_menu_get_title((GtkMenu*)parent_menu));
 		GtkWidget *frame = gtk_widget_get_parent(gtk_widget_get_parent(parent_menu));
-		accel_group = ((GtkAccelGroup *) gtk_accel_groups_from_object (G_OBJECT(frame))->data);
+		accel_group = ((GtkAccelGroup*)gtk_accel_groups_from_object (G_OBJECT(frame))->data);
 	}
 	else
 	{
@@ -326,9 +329,11 @@ void EvalCcRqINSERTMENU (CrossCallInfo *pcci)
     printf("Inserting menu called %s at position %d (%s)\n",
                         gtk_menu_get_title(GTK_MENU(root_menu)), (gint) pcci->p5, title);
     if (GTK_IS_MENU_BAR(parent_menu))
+    {
     	gtk_menu_shell_insert(GTK_MENU_SHELL(parent_menu), root_menu, (gint) pcci->p5);
-	else
+    } else {
 		gtk_menu_insert(GTK_MENU(parent_menu), root_menu, (gint) pcci->p5);
+    }
 
 	rfree(title);
 
@@ -338,54 +343,78 @@ void EvalCcRqINSERTMENU (CrossCallInfo *pcci)
 
 static void enable_menu_callback(GtkWidget *menu_item, gpointer data)
 {
-        printf("enable_menu_callback\n");
-	if (GTK_IS_MENU_ITEM(menu_item) && GTK_MENU_ITEM (menu_item)->submenu == ((GtkWidget *) data))
+    printf("enable_menu_callback\n");
+    gint *val = (gint*) data;
+    printf("Checking: %d\n", *val);
+	if (GTK_IS_MENU_ITEM(menu_item)
+                    && (*val == 0))
+    {
 		gtk_widget_set_sensitive(menu_item, gtk_true());
+    }
+    else
+    {
+        *val = *val - 1;
+    }
 }
 
 static void disable_menu_callback(GtkWidget *menu_item, gpointer data)
 {
-        printf("disable_menu_callback\n");
-	if (GTK_IS_MENU_ITEM(menu_item) && GTK_MENU_ITEM (menu_item)->submenu == ((GtkWidget *) data))
+    printf("disable_menu_callback\n");
+    gint *val = (gint*) data;
+    
+    printf("Checking: %d\n", *val);
+	if (GTK_IS_MENU_ITEM(menu_item) 
+                    && (*val == 0))
+    {
 		gtk_widget_set_sensitive(menu_item, gtk_false());
+    }
+    else
+    {
+        *val = *val - 1;
+    }
 }
 
 void EvalCcRqMENUENABLE (CrossCallInfo *pcci)	/* parent, zero based position of menu, onoff; no result. */
 {
 	GtkWidget *parent_menu, *sub_menu;
-	parent_menu = (GtkWidget *) pcci->p1;
-	sub_menu    = (GtkWidget *) pcci->p2;
+    printf("EvalCcRqMENUENABLE\n");
+    gint index = pcci->p2;
 
-        printf("EvalCcRqMENUENABLE\n");
-    printf("Parent Menu widget: %s\n", gtk_menu_get_title((GtkMenu*)parent_menu));
-	gtk_container_foreach(GTK_CONTAINER(parent_menu),
-						  pcci->p3 ? enable_menu_callback : disable_menu_callback,
-						  (gpointer) sub_menu);
+    if (pcci->p1 && GTK_IS_CONTAINER(pcci->p1))
+    {
+        printf("We have a container. Checking the widget.\n");
+        parent_menu = GTK_WIDGET(pcci->p1);
+        printf("Parent Menu widget: %s\n",
+                    gtk_menu_get_title(GTK_MENU(parent_menu)));
+        gtk_container_foreach(GTK_CONTAINER(parent_menu), pcci->p3 ?
+                        enable_menu_callback : disable_menu_callback,
+                        (gpointer) (&index));
+    }
 
 	MakeReturn0Cci (pcci);
 }
 
 void EvalCcRqDRAWMBAR (CrossCallInfo *pcci)		/* framePtr, clientPtr; no result. */
 {
-        printf("EvalCcRqDRAWMBAR\n");
+    printf("EvalCcRqDRAWMBAR\n");
 	MakeReturn0Cci (pcci);
 }
 
 /*	Track pop up menu. */
 void EvalCcRqTRACKPOPMENU (CrossCallInfo *pcci)	/* popupmenu,framePtr; BOOL result. */
 {
-	GtkWidget *popup_menu;
-	GtkWidget *frame;
-	GdkEvent  *event;
+    printf("EvalCcRqTRACKPOPMENU\n");
+    if (GTK_IS_MENU(pcci->p1))
+    {
+        GtkWidget *popup_menu = GTK_WIDGET(pcci->p1);
+        GtkWidget *frame = GTK_WIDGET(pcci->p2);
 
-        printf("EvalCcRqTRACKPOPMENU\n");
-	popup_menu = (GtkWidget *) pcci->p1;
-	frame      = (GtkWidget *) pcci->p2;
-
-	event = gtk_get_current_event();
-	gtk_menu_popup(GTK_MENU(popup_menu),NULL,NULL,NULL,NULL,
-			(event->type == GDK_BUTTON_PRESS) ? ((GdkEventButton *) event)->button : 0,
-			gdk_event_get_time(event));
+        GdkEvent *event = gtk_get_current_event();
+        gtk_menu_popup(GTK_MENU(popup_menu),NULL,NULL,NULL,NULL,
+                        (event->type == GDK_BUTTON_PRESS) ?
+                        ((GdkEventButton *) event)->button : 0,
+                        gdk_event_get_time(event));
+    }
 
 	MakeReturn1Cci (pcci,(int)gtk_true());
 }
@@ -404,12 +433,15 @@ void EvalCcRqCREATEPOPMENU (CrossCallInfo *pcci) /* no params; MENU result.   */
 
 void EvalCcRqCHECKMENUITEM (CrossCallInfo *pcci) /* menu, HITEM, on/off; no result.	*/
 {
-	GtkWidget *menu, *menu_item;
-	menu      = (GtkWidget *) pcci->p1;
-	menu_item = (GtkWidget *) pcci->p2;
+    printf("EvalCcRqCHECKMENUITEM\n");
+    if (GTK_IS_MENU(pcci->p1))
+    {
+        GtkWidget *menu = GTK_WIDGET(pcci->p1);
+        GtkWidget *menu_item = GTK_WIDGET(pcci->p2);
 
-        printf("EvalCcRqCHECKMENUITEM\n");
-	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item), (gboolean) pcci->p3);
+        gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),
+                        (gboolean) pcci->p3);
+    }
 
 	MakeReturn0Cci (pcci);
 }

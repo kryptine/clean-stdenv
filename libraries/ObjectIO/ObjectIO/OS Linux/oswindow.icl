@@ -2152,7 +2152,7 @@ where
 
 	GetUpdateRect _ _ _ _ = code {
 
-		ccall GetUpdateRect "PIII:I:I"
+		ccall GetUpdateRect "III:I:I"
 
 		}
 

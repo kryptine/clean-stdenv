@@ -10,17 +10,21 @@
 ********************************************************************************************/
 #include "util_121.h"
 #include <pango/pango.h>
+#include <pango/pangoft2.h>
 #include "cpicture_121.h"
 #include "cCrossCall_121.h"
 #include "cCrossCallWindows_121.h"
+
+extern void InitGTK();
 
 const gchar* PEN_POS_KEY = "current-pen-position";
 
 void WinGetDC (GtkWidget *widget, OS ios, GdkDrawable **outDraw, OS *oos)
 {
-	GdkWindow *window = GTK_BIN(GTK_BIN(widget)->child)->child->window;
-
+	GdkWindow *window;
     printf("WinGetDC\n");
+	window = GTK_BIN(GTK_BIN(widget)->child)->child->window;
+
 	gdk_window_ref(window);
 	*outDraw = GDK_DRAWABLE(window);
     *oos = ios;
@@ -122,8 +126,8 @@ void WinInitPicture (gint size, gint mode, gint pr, gint pg, gint pb,
 	pango_font_description_set_family(theFontDesc,cstring(fname));
 	pango_font_description_set_weight(theFontDesc,(fstyle & iBold) ? PANGO_WEIGHT_BOLD : PANGO_WEIGHT_NORMAL);
 	pango_font_description_set_style(theFontDesc,(fstyle & iItalic) ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
-	//	plf->lfUnderline = (style & iUnderline) ? TRUE : FALSE;
-	//	plf->lfStrikeOut = (style & iStrikeOut) ? TRUE : FALSE;
+	/*	plf->lfUnderline = (style & iUnderline) ? TRUE : FALSE; */
+	/*	plf->lfStrikeOut = (style & iStrikeOut) ? TRUE : FALSE; */
 	pango_font_description_set_size(theFontDesc, fsize*PANGO_SCALE);
 	theFont = gdk_font_from_description(theFontDesc);
 
@@ -154,10 +158,13 @@ void WinDonePicture (GdkDrawable *inDraw, OS ios,
     GdkPoint *p;
     PangoContext *pc;
     PangoFontDescription *fontDesc;
-    char *fontDescString;
-    gboolean inDrawIsWidget = GTK_IS_WIDGET(inDraw);
+    gchar *fontDescString;
+    GtkWidget *widget;
+    gboolean inDrawIsWidget;
 
     printf("WinDonePicture\n");
+    inDrawIsWidget = GTK_IS_WIDGET(inDraw);
+
 	if (inDraw)
 	{
         printf("inDraw non-null\n");
@@ -201,10 +208,14 @@ void WinDonePicture (GdkDrawable *inDraw, OS ios,
 	*outDraw  = inDraw;
     if (! inDrawIsWidget)
     {
-        inDraw = gtk_label_new(NULL);
+        widget = gtk_label_new(NULL);
+    }
+    else
+    {
+        widget = GTK_WIDGET(inDraw);
     }
 
-    pc = gtk_widget_get_pango_context(GTK_WIDGET(inDraw));
+    pc = gtk_widget_get_pango_context(widget);
 
     fontDesc = pango_context_get_font_description(pc);
 
@@ -217,7 +228,7 @@ void WinDonePicture (GdkDrawable *inDraw, OS ios,
     g_object_unref(G_OBJECT(pc));
     if (! inDrawIsWidget)
     {
-        gtk_widget_destroy(GTK_WIDGET(inDraw));
+        gtk_widget_destroy(widget);
     }
 
     *oos = ios;    
@@ -237,7 +248,9 @@ void WinClipRgnPicture (GdkRegion *region, GdkDrawable *drawable, OS ios,
 
     printf("WinClipRgnPicture\n");
 	if (theClipRgn != NULL)
+    {
 		gdk_region_intersect(theClipRgn, region);
+    }
 	else
 	{
 		if (region)
@@ -260,7 +273,9 @@ void WinSetClipRgnPicture (GdkRegion *region, GdkDrawable *drawable, OS ios,
 
     printf("WinSetClipRgnPicture\n");
 	if (theClipRgn != NULL)
+    {
 		gdk_region_destroy(theClipRgn);
+    }
 
 	theClipRgn = region ? gdk_region_copy(region) : NULL;
 
@@ -280,7 +295,7 @@ void WinGetClipRgnPicture (GdkDrawable *drawable,OS ios,
 	if (theClipRgn)
 	{
 		r = gdk_region_copy(theClipRgn);
-	};
+	}
 
 	*outRegion = r;
     *outDraw = drawable;
@@ -396,7 +411,7 @@ GdkRegion *WinXorRgn (GdkRegion *src1, GdkRegion *src2)
 	{
 		dst = gdk_region_copy(src1);
 		gdk_region_xor(dst, src2);
-	};
+	}
 
 	return dst;
 }	/* WinXorRgn */
@@ -406,10 +421,11 @@ void WinGetRgnBox (GdkRegion *region, OS ios, gint *left, gint *top, gint *right
 {
 	GdkRegion *tempRegion;
 	GdkRectangle rectangle;
+    printf("WinGetRgnBox\n");
+
 	gdk_region_get_clipbox(region,&rectangle);
 	tempRegion = gdk_region_rectangle(&rectangle);
 
-    printf("WinGetRgnBox\n");
 	*left   = rectangle.x;
 	*top    = rectangle.y;
 	*right  = rectangle.x+rectangle.width;
@@ -528,7 +544,7 @@ void WinSetPattern (gint pattern, GdkDrawable *inDraw, OS ios,
 }	/* WinSetPattern */
 
 
-// changed by MW
+/* changed by MW */
 void WinDrawPoint (gint x, gint y, GdkDrawable *inDraw, OS ios,
                 GdkDrawable **outDraw, OS *oos)
 {
@@ -634,7 +650,7 @@ void WinUndrawChar(gint x, gint y, gchar c, GdkDrawable *drawable)
 	if (drawable) gdk_draw_text(drawable,theFont,theEraseGC,x,y,&c,1);
 }	/* WinDrawChar */
 
-//void WinDrawString (int x, int y, CLEAN_STRING string, GdkDrawable *inDraw,
+/*void WinDrawString (int x, int y, CLEAN_STRING string, GdkDrawable *inDraw, */
 void WinDrawString (CLEAN_STRING string, GdkDrawable *inDraw, OS ios,
                 GdkDrawable **outDraw, OS *oos)
 {
@@ -677,10 +693,12 @@ void WinUndrawRectangle (gint left, gint top, gint right, gint bot,
 {
     printf("WinUndrawRectangle\n");
 	if (drawable)
+    {
 		gdk_draw_rectangle(drawable, theEraseGC, FALSE,
 	                   left, top,
 	                   right-left-1,
 	                   bot-top-1);
+    }
 }	/* WinDrawRectangle */
 
 void WinFillRectangle (gint left, gint top, gint right, gint bot,
@@ -688,10 +706,12 @@ void WinFillRectangle (gint left, gint top, gint right, gint bot,
 {
     printf("WinFillRectangle\n");
 	if (inDraw)
+    {
 		gdk_draw_rectangle(inDraw, theDrawGC, TRUE,
 	                   left, top,
 	                   right-left,
 	                   bot-top);
+    }
     *outDraw = inDraw;
     *oos = ios;
 }	/* WinFillRectangle */
@@ -701,10 +721,12 @@ void WinEraseRectangle (gint left, gint top, gint right, gint bot,
 {
     printf("WinEraseRectangle\n");
 	if (inDraw)
+    {
 		gdk_draw_rectangle(inDraw, theEraseGC, TRUE,
 					   left, top,
 					   right-left,
 	                   bot-top);
+    }
     *outDraw = inDraw;
     *oos = ios;
 }	/* WinEraseRectangle */
@@ -714,10 +736,12 @@ void WinInvertRectangle (gint left, gint top, gint right, gint bot,
 {
     printf("WinInvertRectangle\n");
 	if (inDraw)
+    {
 		gdk_draw_rectangle(inDraw, theInvertGC, TRUE,
 					   left, top,
 					   right-left,
 	                   bot-top);
+    }
     *outDraw = inDraw;
     *oos = ios;
 }	/* WinInvertRectangle */
@@ -783,7 +807,7 @@ void WinCopyRectangleTo (gint left, gint top, gint right, gint bot, gint x,
                 gint y, GdkDrawable *inDraw, OS ios, GdkDrawable **outDraw,
                 OS *oos)
 {
-//	WinCopyRectangle (left,top, right,bot, x-left,y-top, ihdc);
+/*	WinCopyRectangle (left,top, right,bot, x-left,y-top, ihdc); */
 	printf("WinCopyRectangleTo is not implemented\n");
     *outDraw = inDraw;
     *oos = ios;
@@ -930,13 +954,13 @@ void WinFillWedge (gint left, gint top, gint right, gint bottom, gint startradx,
                 gint startrady, gint endradx, gint endrady, GdkDrawable *inDraw,
                 OS ios, GdkDrawable **outDraw, OS *oos)
 {
-	int cx, cy;
-    int x = left;
-    int y = top;
-    int rx = right;
-    int ry = bottom;
-    float from = startradx;
-    float to = startrady;
+	gint cx, cy;
+    gint x = left;
+    gint y = top;
+    gint rx = right;
+    gint ry = bottom;
+    gfloat from = startradx;
+    gfloat to = startrady;
     gboolean clockwise = TRUE;
 
     printf("WinFillWedge\n");
@@ -1109,7 +1133,7 @@ void WinCreateScreenHDC(OS ios, GdkDrawable **outDraw, OS *oos)
     theWindow = gdk_screen_get_root_window(theScreen);
 
     *oos = ios;
-    *outDraw = (GdkDrawable*)theWindow;
+    *outDraw = GDK_DRAWABLE(theWindow);
     printf("WinCreateScreenHDC - %d\n",theWindow);
 }	/* WinCreateScreenHDC */
 
@@ -1164,14 +1188,12 @@ void WinDrawResizedBitmap (gint sourcew, gint sourceh, gint destx, gint desty,
     *oos = ios;
 }	/* WinDrawResizedBitmap */
 
-// ... MW
-
-
+/* ... MW */
 void WinDrawBitmap (gint w, gint h, gint destx, gint desty, GdkPixbuf *pixbuf,
                 GdkDrawable *inDraw, OS ios, GdkDrawable **outDraw, OS *oos)
 {
     printf("WinDrawBitmap\n");
-  //	if (drawable) gdk_draw_drawable(drawable,theDrawGC,GDK_DRAWABLE(pixbuf),0,0,destx,desty,w,h);
+  /*	if (drawable) gdk_draw_drawable(drawable,theDrawGC,GDK_DRAWABLE(pixbuf),0,0,destx,desty,w,h); */
   if (inDraw)
     {
       gdk_pixbuf_render_to_drawable   (pixbuf, inDraw, theDrawGC, 0, 0, destx,
@@ -1218,8 +1240,8 @@ void WinSetFont (CLEAN_STRING fontName, gint style, gint size,
 	pango_font_description_set_family(theFontDesc,cstring(fontName));
 	pango_font_description_set_weight(theFontDesc,(style & iBold) ? PANGO_WEIGHT_BOLD : PANGO_WEIGHT_NORMAL);
 	pango_font_description_set_style(theFontDesc,(style & iItalic) ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
-	//	plf->lfUnderline = (style & iUnderline) ? TRUE : FALSE;
-	//	plf->lfStrikeOut = (style & iStrikeOut) ? TRUE : FALSE;
+	/*	plf->lfUnderline = (style & iUnderline) ? TRUE : FALSE; */
+	/*	plf->lfStrikeOut = (style & iStrikeOut) ? TRUE : FALSE; */
 	pango_font_description_set_size(theFontDesc, size*PANGO_SCALE);
 	theFont = gdk_font_from_description(theFontDesc);
     *outDraw = inDraw;
@@ -1235,23 +1257,29 @@ void WinGetFontInfo (CLEAN_STRING fontName, gint style, gint size,
 	PangoFontset *fontset;
 	PangoFontMetrics *metrics;
 	PangoFontDescription *fontDesc;
-    gchar *fName = cstring(fontName);
+    GtkWidget *widget;
+    gchar *fName;
+    gboolean inDrawIsWidget;
+    printf("WinGetFontInfo\n");
+    
+    fName = cstring(fontName);
+    inDrawIsWidget = GTK_IS_WIDGET(drawable);
 
     printf("WinGetFontInfo - %d\n",drawable);
-    if (! GTK_IS_WIDGET(drawable))/*(drawablePassed == NULL)*/
+    if (! inDrawIsWidget)
     {
-        drawable = gtk_label_new(NULL);
+        widget = gtk_label_new(NULL);
         drawablePassed = 0;
-    }
-    pc = gtk_widget_get_pango_context(GTK_WIDGET(drawable));
+    } else {widget=GTK_WIDGET(drawable);}
+    pc = gtk_widget_get_pango_context(widget);
     fontDesc = pango_font_description_new();
     
     printf("Font Name: %s\n", fName);
     pango_font_description_set_family(fontDesc,fName);
     pango_font_description_set_weight(fontDesc,(style & iBold) ? PANGO_WEIGHT_BOLD : PANGO_WEIGHT_NORMAL);
 	pango_font_description_set_style(fontDesc,(style & iItalic) ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
-	//	plf->lfUnderline = (style & iUnderline) ? TRUE : FALSE;
-	//	plf->lfStrikeOut = (style & iStrikeOut) ? TRUE : FALSE;
+	/*	plf->lfUnderline = (style & iUnderline) ? TRUE : FALSE; */
+	/*	plf->lfStrikeOut = (style & iStrikeOut) ? TRUE : FALSE; */
 	pango_font_description_set_size(fontDesc, size*PANGO_SCALE);
 
     pango_context_set_font_description(pc, fontDesc);
@@ -1270,9 +1298,9 @@ void WinGetFontInfo (CLEAN_STRING fontName, gint style, gint size,
 
     printf("About to free font description\n");
     g_object_unref(G_OBJECT(pc));
-    if (! drawablePassed)
+    if (! inDrawIsWidget)
     {
-        gtk_widget_destroy(GTK_WIDGET(drawable));
+        gtk_widget_destroy(widget);
     }
 	pango_font_metrics_unref(metrics);
   	pango_font_description_free(fontDesc);
@@ -1331,22 +1359,32 @@ void WinGetStringWidth (CLEAN_STRING string, CLEAN_STRING fontName, gint style,
 	PangoFontDescription *fontDesc;
     PangoContext *pc;
     PangoLayout *pl;
-    gchar* fName = cstring(fontName);
-
+    GtkWidget *widget;
+    gchar* fName;
+    gboolean inDrawIsWidget;
     printf("WinGetStringWidth\n");
-    if (drawablePassed == NULL)
+
+    fName = cstring(fontName);
+    inDrawIsWidget = GTK_IS_WIDGET(drawable);
+    
+    if (! inDrawIsWidget)
     {
-        drawable = gtk_label_new(NULL);
+        widget = gtk_label_new(NULL);
     }
-    pc = gtk_widget_get_pango_context(drawable);
+    else
+    {
+        widget = GTK_WIDGET(drawable);
+    }
+
+    pc = gtk_widget_get_pango_context(widget);
     fontDesc = pango_font_description_new();
     
     printf("Font Name: %s\n", fName);
     pango_font_description_set_family(fontDesc,fName);
     pango_font_description_set_weight(fontDesc,(style & iBold) ? PANGO_WEIGHT_BOLD : PANGO_WEIGHT_NORMAL);
 	pango_font_description_set_style(fontDesc,(style & iItalic) ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
-	//	plf->lfUnderline = (style & iUnderline) ? TRUE : FALSE;
-	//	plf->lfStrikeOut = (style & iStrikeOut) ? TRUE : FALSE;
+	/*	plf->lfUnderline = (style & iUnderline) ? TRUE : FALSE; */
+	/*	plf->lfStrikeOut = (style & iStrikeOut) ? TRUE : FALSE; */
 	pango_font_description_set_size(fontDesc, size*PANGO_SCALE);
 
     pango_context_set_font_description(pc, fontDesc);
@@ -1356,9 +1394,9 @@ void WinGetStringWidth (CLEAN_STRING string, CLEAN_STRING fontName, gint style,
     
     g_object_unref(G_OBJECT(pl));
     g_object_unref(G_OBJECT(pc));
-    if (! drawablePassed)
+    if (! inDrawIsWidget)
     {
-        gtk_widget_destroy(GTK_WIDGET(drawable));
+        gtk_widget_destroy(GTK_WIDGET(widget));
     }
   	pango_font_description_free(fontDesc);
 
@@ -1381,22 +1419,32 @@ void WinGetCharWidth (gchar ch, CLEAN_STRING fontName, gint style, gint size,
     PangoContext *pc;
     PangoLanguage *lang;
     PangoFontMetrics *metrics;
-    gchar* fName = cstring(fontName);
-
+    GtkWidget *widget;
+    gchar *fName;
+    gboolean inDrawIsWidget;
     printf("WinGetCharWidth\n");
-    if (drawablePassed == NULL)
+
+    fName = cstring(fontName);
+    inDrawIsWidget = GTK_IS_WIDGET(drawable);
+
+    if (! inDrawIsWidget)
     {
-        drawable = gtk_label_new(NULL);
+        widget = gtk_label_new(NULL);
     }
-    pc = gtk_widget_get_pango_context(drawable);
+    else
+    {
+        widget = GTK_WIDGET(drawable);
+    }
+
+    pc = gtk_widget_get_pango_context(widget);
 	fontDesc = pango_font_description_new();
     printf("Font Name: %s\n", fName);
 
 	pango_font_description_set_family(fontDesc,cstring(fontName));
 	pango_font_description_set_weight(fontDesc,(style & iBold) ? PANGO_WEIGHT_BOLD : PANGO_WEIGHT_NORMAL);
 	pango_font_description_set_style(fontDesc,(style & iItalic) ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
-	//	plf->lfUnderline = (style & iUnderline) ? TRUE : FALSE;
-	//	plf->lfStrikeOut = (style & iStrikeOut) ? TRUE : FALSE;
+	/*	plf->lfUnderline = (style & iUnderline) ? TRUE : FALSE; */
+	/*	plf->lfStrikeOut = (style & iStrikeOut) ? TRUE : FALSE; */
 	pango_font_description_set_size(fontDesc, size*PANGO_SCALE);
     lang = pango_context_get_language(pc);
     metrics = pango_context_get_metrics(pc, fontDesc, lang);
@@ -1406,9 +1454,9 @@ void WinGetCharWidth (gchar ch, CLEAN_STRING fontName, gint style, gint size,
   	pango_font_description_free(fontDesc);
     pango_font_metrics_unref(metrics);
     g_object_unref(G_OBJECT(pc));
-    if (! drawablePassed)
+    if (! inDrawIsWidget)
     {
-        gtk_widget_destroy(GTK_WIDGET(drawable));
+        gtk_widget_destroy(widget);
     }
 
     *oos = ios;
@@ -1565,7 +1613,7 @@ void InternalGetPenPos (GdkDrawable *context, gint *x, gint *y)
 {
     GdkPoint *p;
     printf("InternalGetPenPos: ");
-    p = (GdkPoint*)g_object_get_data(G_OBJECT(context), PEN_POS_KEY);
+    p = (GdkPoint*)(g_object_get_data(G_OBJECT(context), PEN_POS_KEY));
     if (p)
     {
 	    *x = p->x;
@@ -1578,7 +1626,10 @@ void InternalGetPenPos (GdkDrawable *context, gint *x, gint *y)
 
 void InternalSetPenPos (GdkDrawable *context, gint x, gint y)
 {
-    GdkPoint *p = g_new(GdkPoint,1);
+    GdkPoint *p;
+    printf("InternalSetPenPos\n");
+    
+    p = g_new(GdkPoint,1);
     printf("InternalSetPenPos: (%d, %d)\n", x, y);
 
     p->x = x;
@@ -1779,8 +1830,8 @@ void WinSetFontStyle (gint style, GdkDrawable *inDraw, OS ios,
 {
     printf("WinSetFontStyle: %d\n", style);
 	pango_font_description_set_style(theFontDesc,(style & iItalic) ? PANGO_STYLE_ITALIC : PANGO_STYLE_NORMAL);
-	//	plf->lfUnderline = (style & iUnderline) ? TRUE : FALSE;
-	//	plf->lfStrikeOut = (style & iStrikeOut) ? TRUE : FALSE;
+	/*	plf->lfUnderline = (style & iUnderline) ? TRUE : FALSE; */
+	/*	plf->lfStrikeOut = (style & iStrikeOut) ? TRUE : FALSE; */
 	theFont = gdk_font_from_description(theFontDesc);
     *outDraw = inDraw;
     *oos = ios;

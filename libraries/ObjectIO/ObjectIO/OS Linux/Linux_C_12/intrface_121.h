@@ -166,6 +166,7 @@
 #define CcRqREMOVEMENUSHORTKEY					1217		/* removing a shortkey of a menu item. */
 #define CcRqADDMENUSHORTKEY                     1216        /* adding a shortkey of a menu item. */
 #define CcRqMODIFYMENUITEM						1215
+#define CcRqDESTROYMENU                         1214
 #define CcRqDELETEMENU							1213		/* deleting a menu */
 #define CcRqREMOVEMENUITEM						1212
 #define CcRqCHECKMENUITEM						1210

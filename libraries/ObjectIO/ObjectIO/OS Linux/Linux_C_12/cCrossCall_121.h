@@ -7,7 +7,7 @@
 extern CrossCallInfo gCci;									/* The global cross call information struct. */
 extern int gClipboardCount;									/* Keeps track of changes of clipboard. */
 extern CrossCallProcedureTable gCrossCallProcedureTable;	                                /* The cross call procedure table. */
-extern OSWindowPtr gTooltip; 	                                                                /* The tooltip control. */
+extern GtkTooltips *gTooltip; 	                                                                /* The tooltip control. */
 
 #if defined(mingw32_TARGET_OS)
 extern char *gAppName;										/* The application name. */
@@ -55,7 +55,7 @@ extern void KickCleanThread( CrossCallInfo *pcci );
 
 extern void SendMessageToClean( int mess, int p1,int p2,int p3, int p4,int p5,int p6 );
 
-//	Shorthands for SendMessageToClean:
+/*	Shorthands for SendMessageToClean: */
 #define SendMessage0ToClean(mess)                    SendMessageToClean((mess), 0,0,0,0,0,0)
 #define SendMessage1ToClean(mess, p1)                SendMessageToClean((mess), (int)(p1),0,0,0,0,0)
 #define SendMessage2ToClean(mess, p1,p2)             SendMessageToClean((mess), (int)(p1),(int)(p2),0,0,0,0)
@@ -64,7 +64,7 @@ extern void SendMessageToClean( int mess, int p1,int p2,int p3, int p4,int p5,in
 #define SendMessage5ToClean(mess, p1,p2,p3,p4,p5)    SendMessageToClean((mess), (int)(p1),(int)(p2),(int)(p3),(int)(p4),(int)(p5),0)
 #define SendMessage6ToClean(mess, p1,p2,p3,p4,p5,p6) SendMessageToClean((mess), (int)(p1),(int)(p2),(int)(p3),(int)(p4),(int)(p5),(int)(p6))
 
-//	Prototypes of convenience functions that fill CrossCallInfo struct.
+/*	Prototypes of convenience functions that fill CrossCallInfo struct. */
 extern CrossCallInfo *MakeReturn0Cci (CrossCallInfo * pcci);
 extern CrossCallInfo *MakeReturn1Cci (CrossCallInfo * pcci, int v);
 extern CrossCallInfo *MakeReturn2Cci (CrossCallInfo * pcci, int v1, int v2);
