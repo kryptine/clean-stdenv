@@ -17,6 +17,9 @@ import StdEnv, MersenneTwister, genLibTest, StdTime
 	= Pair [(Trace,Trace)] [(Trace,Trace)] | Either Bool Trace Trace | Done | Empty
 	| ListNil | ListCons Trace Trace | Unit
 	| Int [Int] | Char [Char] | String [String] | Real Bool
+emptyTrace :: Trace
+emptyTrace
+	=	Empty
 
 derive gLess Result
 instance == Result where (==) x y = x===y

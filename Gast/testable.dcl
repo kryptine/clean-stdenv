@@ -16,6 +16,7 @@ from stdProperty import ::Property // for instance of testable
 :: Result = Undef | Rej | Pass | OK | CE
 :: Trace
 :: RandomStream :== [Int]
+emptyTrace :: Trace
 
 derive gLess Result
 instance == Result
