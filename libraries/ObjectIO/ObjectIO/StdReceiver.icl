@@ -273,28 +273,33 @@ where
 	|	SendUnknownReceiver
 	|	SendUnableReceiver
 	|	SendDeadlock
+	|	OtherSendReport !String
 
 instance == SendReport where
 	(==) :: !SendReport !SendReport -> Bool
 	(==) SendOk					report	= case report of
-											SendOk	-> True
-											_		-> False
+											SendOk				-> True
+											_					-> False
 	(==) SendUnknownReceiver	report	= case report of
 											SendUnknownReceiver	-> True
-											_		-> False
+											_					-> False
 	(==) SendUnableReceiver		report	= case report of
 											SendUnableReceiver	-> True
-											_		-> False
+											_					-> False
 	(==) SendDeadlock			report	= case report of
-											SendDeadlock	-> True
-											_		-> False
+											SendDeadlock		-> True
+											_					-> False
+	(==) (OtherSendReport s1)	report	= case report of
+											OtherSendReport s2	-> s1==s2
+											_					-> False
 
 instance toString SendReport where
 	toString :: !SendReport -> {#Char}
-	toString SendOk				= "SendOk"
-	toString SendUnknownReceiver= "SendUnknownReceiver"
-	toString SendUnableReceiver	= "SendUnableReceiver"
-	toString SendDeadlock		= "SendDeadlock"
+	toString SendOk					= "SendOk"
+	toString SendUnknownReceiver	= "SendUnknownReceiver"
+	toString SendUnableReceiver		= "SendUnableReceiver"
+	toString SendDeadlock			= "SendDeadlock"
+	toString (OtherSendReport s)	= "(OtherSendReport "+++s+++")"
 
 
 /*	Asynchronous, uni-directional, message passing.
@@ -409,8 +414,11 @@ syncSend2 r2id msg pState
 		= ((toSendError (fromJust opt_error),Nothing),pState)
 	| isEmpty resp
 		= StdReceiverFatalError "syncSend2" "no response received from bi-directional receiver"
+	# maybe_response			= readDynamic (R2IdtoDId` r2id) (hd resp)
+	| isNothing maybe_response
+		= ((OtherSendReport "incorrect response received from bi-directional receiver",Nothing),pState)
 	| otherwise
-		= ((SendOk,Just (readDynamic (R2IdtoDId` r2id) (hd resp))),pState)
+		= ((SendOk,maybe_response),pState)
 where
 	PStHandleSync2Message :: !(DId resp) !SyncMessage !(PSt .l .p) -> (!(!SendReport,!Maybe resp), !PSt .l .p)
 	PStHandleSync2Message did sm pState
@@ -421,12 +429,18 @@ where
 		  							_									-> StdReceiverFatalError "syncSend2" "unexpected scheduler event"
 		  errors				= sm.smError
 		  resps					= sm.smResp
-		  resp					= if (isEmpty resps ) Nothing (Just (readDynamic did (hd resps)))
-		  report				= if (isEmpty errors) SendOk (case (hd errors) of
-																ReceiverUnable	-> SendUnableReceiver
-																ReceiverUnknown	-> SendUnknownReceiver
-															 )
-		= ((report,resp),pState)
+		| not (isEmpty errors)
+			# sendReport		= case (hd errors) of
+									ReceiverUnable	-> SendUnableReceiver
+									ReceiverUnknown	-> SendUnknownReceiver
+			= ((sendReport,Nothing),pState)
+		| isEmpty resps
+			= StdReceiverFatalError "syncSend2" "no response received from bi-directional receiver"
+		# maybe_response		= readDynamic did (hd resps)
+		| isNothing maybe_response
+			= ((OtherSendReport "incorrect response received from bi-directional receiver",Nothing),pState)
+		| otherwise
+			= ((SendOk,maybe_response),pState)
 
 toSendError :: !SwitchError -> SendReport
 toSendError SwitchToYourself				= SendUnknownReceiver

@@ -68,6 +68,7 @@ getReceiverSelectState	:: ! Id	 !(IOSt .l .p) -> (!Maybe SelectState,!IOSt .l .p
 	|	SendUnknownReceiver
 	|	SendUnableReceiver
 	|	SendDeadlock
+	|	OtherSendReport !String
 
 instance ==       SendReport
 instance toString SendReport

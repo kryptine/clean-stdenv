@@ -101,8 +101,7 @@ isSpecialId :: !Id -> Bool
 isSpecialId (SpecialId _)	= True
 isSpecialId _				= False
 
-instance == Id
-where
+instance == Id where
 	(==) :: !Id !Id -> Bool
 	(==) (CustomId	 id1)	id	= case id of
 									(CustomId	id2)	-> id1==id2

@@ -55,25 +55,25 @@ ALL : "$(OUTDIR)\Windows_C_12.exe" "$(OUTDIR)\Windows_C_12.bsc"
 
 CLEAN : 
 	-@erase ".\Release\Windows_C_12.bsc"
-	-@erase ".\Release\cCrossCall_12.sbr"
-	-@erase ".\Release\cdebug_12.sbr"
-	-@erase ".\Release\util_12.sbr"
-	-@erase ".\Release\cpicture_12.sbr"
-	-@erase ".\Release\ddutil.sbr"
-	-@erase ".\Release\cGameLib_12.sbr"
-	-@erase ".\Release\cprinter_12.sbr"
-	-@erase ".\Release\Dsutil.sbr"
 	-@erase ".\Release\cOSGameLib_12.sbr"
+	-@erase ".\Release\ddutil.sbr"
+	-@erase ".\Release\cprinter_12.sbr"
+	-@erase ".\Release\cCrossCall_12.sbr"
+	-@erase ".\Release\util_12.sbr"
+	-@erase ".\Release\cdebug_12.sbr"
+	-@erase ".\Release\Dsutil.sbr"
+	-@erase ".\Release\cGameLib_12.sbr"
+	-@erase ".\Release\cpicture_12.sbr"
 	-@erase ".\Release\Windows_C_12.exe"
-	-@erase ".\Release\cOSGameLib_12.obj"
-	-@erase ".\Release\cCrossCall_12.obj"
-	-@erase ".\Release\cdebug_12.obj"
-	-@erase ".\Release\util_12.obj"
 	-@erase ".\Release\cpicture_12.obj"
+	-@erase ".\Release\cOSGameLib_12.obj"
 	-@erase ".\Release\ddutil.obj"
-	-@erase ".\Release\cGameLib_12.obj"
 	-@erase ".\Release\cprinter_12.obj"
+	-@erase ".\Release\cCrossCall_12.obj"
+	-@erase ".\Release\util_12.obj"
+	-@erase ".\Release\cdebug_12.obj"
 	-@erase ".\Release\Dsutil.obj"
+	-@erase ".\Release\cGameLib_12.obj"
 
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
@@ -95,15 +95,15 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 BSC32_FLAGS=/nologo /o"$(OUTDIR)/Windows_C_12.bsc" 
 BSC32_SBRS= \
-	"$(INTDIR)/cCrossCall_12.sbr" \
-	"$(INTDIR)/cdebug_12.sbr" \
-	"$(INTDIR)/util_12.sbr" \
-	"$(INTDIR)/cpicture_12.sbr" \
+	"$(INTDIR)/cOSGameLib_12.sbr" \
 	"$(INTDIR)/ddutil.sbr" \
-	"$(INTDIR)/cGameLib_12.sbr" \
 	"$(INTDIR)/cprinter_12.sbr" \
+	"$(INTDIR)/cCrossCall_12.sbr" \
+	"$(INTDIR)/util_12.sbr" \
+	"$(INTDIR)/cdebug_12.sbr" \
 	"$(INTDIR)/Dsutil.sbr" \
-	"$(INTDIR)/cOSGameLib_12.sbr"
+	"$(INTDIR)/cGameLib_12.sbr" \
+	"$(INTDIR)/cpicture_12.sbr"
 
 "$(OUTDIR)\Windows_C_12.bsc" : "$(OUTDIR)" $(BSC32_SBRS)
     $(BSC32) @<<
@@ -119,15 +119,15 @@ LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib\
  /pdb:"$(OUTDIR)/Windows_C_12.pdb" /machine:I386\
  /out:"$(OUTDIR)/Windows_C_12.exe" 
 LINK32_OBJS= \
-	"$(INTDIR)/cOSGameLib_12.obj" \
-	"$(INTDIR)/cCrossCall_12.obj" \
-	"$(INTDIR)/cdebug_12.obj" \
-	"$(INTDIR)/util_12.obj" \
 	"$(INTDIR)/cpicture_12.obj" \
+	"$(INTDIR)/cOSGameLib_12.obj" \
 	"$(INTDIR)/ddutil.obj" \
-	"$(INTDIR)/cGameLib_12.obj" \
 	"$(INTDIR)/cprinter_12.obj" \
-	"$(INTDIR)/Dsutil.obj"
+	"$(INTDIR)/cCrossCall_12.obj" \
+	"$(INTDIR)/util_12.obj" \
+	"$(INTDIR)/cdebug_12.obj" \
+	"$(INTDIR)/Dsutil.obj" \
+	"$(INTDIR)/cGameLib_12.obj"
 
 "$(OUTDIR)\Windows_C_12.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -155,15 +155,15 @@ CLEAN :
 	-@erase ".\Debug\vc40.pdb"
 	-@erase ".\Debug\vc40.idb"
 	-@erase ".\Debug\Windows_C_12.exe"
-	-@erase ".\Debug\util_12.obj"
-	-@erase ".\Debug\cpicture_12.obj"
-	-@erase ".\Debug\cGameLib_12.obj"
-	-@erase ".\Debug\cOSGameLib_12.obj"
-	-@erase ".\Debug\cdebug_12.obj"
 	-@erase ".\Debug\cCrossCall_12.obj"
 	-@erase ".\Debug\ddutil.obj"
-	-@erase ".\Debug\cprinter_12.obj"
+	-@erase ".\Debug\cpicture_12.obj"
+	-@erase ".\Debug\cGameLib_12.obj"
 	-@erase ".\Debug\Dsutil.obj"
+	-@erase ".\Debug\cprinter_12.obj"
+	-@erase ".\Debug\cOSGameLib_12.obj"
+	-@erase ".\Debug\util_12.obj"
+	-@erase ".\Debug\cdebug_12.obj"
 	-@erase ".\Debug\Windows_C_12.ilk"
 	-@erase ".\Debug\Windows_C_12.pdb"
 
@@ -195,15 +195,15 @@ LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib\
  /pdb:"$(OUTDIR)/Windows_C_12.pdb" /debug /machine:I386\
  /out:"$(OUTDIR)/Windows_C_12.exe" 
 LINK32_OBJS= \
-	"$(INTDIR)/util_12.obj" \
-	"$(INTDIR)/cpicture_12.obj" \
-	"$(INTDIR)/cGameLib_12.obj" \
-	"$(INTDIR)/cOSGameLib_12.obj" \
-	"$(INTDIR)/cdebug_12.obj" \
 	"$(INTDIR)/cCrossCall_12.obj" \
 	"$(INTDIR)/ddutil.obj" \
+	"$(INTDIR)/cpicture_12.obj" \
+	"$(INTDIR)/cGameLib_12.obj" \
+	"$(INTDIR)/Dsutil.obj" \
 	"$(INTDIR)/cprinter_12.obj" \
-	"$(INTDIR)/Dsutil.obj"
+	"$(INTDIR)/cOSGameLib_12.obj" \
+	"$(INTDIR)/util_12.obj" \
+	"$(INTDIR)/cdebug_12.obj"
 
 "$(OUTDIR)\Windows_C_12.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -253,7 +253,8 @@ DEP_CPP_CCROS=\
 	".\cCrossCall_12.h"\
 	".\cpicture_12.h"\
 	".\cGameLib_12.h"\
-	".\cprinter_12.c"\
+	".\cprinter_12.h"\
+	".\cTCP.h"\
 	{$(INCLUDE)}"\htmlhelp.h"\
 	".\util_12.h"\
 	".\intrface_12.h"\
@@ -263,18 +264,15 @@ DEP_CPP_CCROS=\
 	".\Ddutil.h"\
 	".\Dsutil.h"\
 	"\dx5sdk\sdk\inc\d3dtypes.h"\
-	".\..\..\..\..\dx5sdk\sdk\inc\d3dvec.inl"\
-	".\cprinter_12.h"\
+	"..\..\..\..\..\dx5sdk\sdk\inc\d3dvec.inl"\
 	
 NODEP_CPP_CCROS=\
-	".\..\..\..\..\dx5sdk\sdk\inc\subwtype.h"\
+	"..\..\..\..\..\dx5sdk\sdk\inc\subwtype.h"\
 	
 
-"$(INTDIR)\cCrossCall_12.obj" : $(SOURCE) $(DEP_CPP_CCROS) "$(INTDIR)"\
- ".\cprinter_12.c"
+"$(INTDIR)\cCrossCall_12.obj" : $(SOURCE) $(DEP_CPP_CCROS) "$(INTDIR)"
 
-"$(INTDIR)\cCrossCall_12.sbr" : $(SOURCE) $(DEP_CPP_CCROS) "$(INTDIR)"\
- ".\cprinter_12.c"
+"$(INTDIR)\cCrossCall_12.sbr" : $(SOURCE) $(DEP_CPP_CCROS) "$(INTDIR)"
 
 
 !ELSEIF  "$(CFG)" == "Windows_C_12 - Win32 Debug"
@@ -283,18 +281,17 @@ DEP_CPP_CCROS=\
 	".\cCrossCall_12.h"\
 	".\cpicture_12.h"\
 	".\cGameLib_12.h"\
-	".\cprinter_12.c"\
+	".\cprinter_12.h"\
+	".\cTCP.h"\
 	{$(INCLUDE)}"\htmlhelp.h"\
 	".\util_12.h"\
 	".\intrface_12.h"\
 	".\cOSGameLib_12.h"\
 	".\Ddutil.h"\
 	".\Dsutil.h"\
-	".\cprinter_12.h"\
 	
 
-"$(INTDIR)\cCrossCall_12.obj" : $(SOURCE) $(DEP_CPP_CCROS) "$(INTDIR)"\
- ".\cprinter_12.c"
+"$(INTDIR)\cCrossCall_12.obj" : $(SOURCE) $(DEP_CPP_CCROS) "$(INTDIR)"
 
 
 !ENDIF 
@@ -426,10 +423,10 @@ DEP_CPP_CGAME=\
 	".\Ddutil.h"\
 	".\Dsutil.h"\
 	"\dx5sdk\sdk\inc\d3dtypes.h"\
-	".\..\..\..\..\dx5sdk\sdk\inc\d3dvec.inl"\
+	"..\..\..\..\..\dx5sdk\sdk\inc\d3dvec.inl"\
 	
 NODEP_CPP_CGAME=\
-	".\..\..\..\..\dx5sdk\sdk\inc\subwtype.h"\
+	"..\..\..\..\..\dx5sdk\sdk\inc\subwtype.h"\
 	
 
 "$(INTDIR)\cGameLib_12.obj" : $(SOURCE) $(DEP_CPP_CGAME) "$(INTDIR)"
@@ -470,10 +467,10 @@ DEP_CPP_COSGA=\
 	".\Ddutil.h"\
 	".\Dsutil.h"\
 	"\dx5sdk\sdk\inc\d3dtypes.h"\
-	".\..\..\..\..\dx5sdk\sdk\inc\d3dvec.inl"\
+	"..\..\..\..\..\dx5sdk\sdk\inc\d3dvec.inl"\
 	
 NODEP_CPP_COSGA=\
-	".\..\..\..\..\dx5sdk\sdk\inc\subwtype.h"\
+	"..\..\..\..\..\dx5sdk\sdk\inc\subwtype.h"\
 	
 
 "$(INTDIR)\cOSGameLib_12.obj" : $(SOURCE) $(DEP_CPP_COSGA) "$(INTDIR)"
@@ -538,10 +535,10 @@ DEP_CPP_DSUTI=\
 	".\Dsutil.h"\
 	"\dx5sdk\sdk\inc\d3dtypes.h"\
 	"\dx5sdk\sdk\inc\ddraw.h"\
-	".\..\..\..\..\dx5sdk\sdk\inc\d3dvec.inl"\
+	"..\..\..\..\..\dx5sdk\sdk\inc\d3dvec.inl"\
 	
 NODEP_CPP_DSUTI=\
-	".\..\..\..\..\dx5sdk\sdk\inc\subwtype.h"\
+	"..\..\..\..\..\dx5sdk\sdk\inc\subwtype.h"\
 	
 
 "$(INTDIR)\Dsutil.obj" : $(SOURCE) $(DEP_CPP_DSUTI) "$(INTDIR)"

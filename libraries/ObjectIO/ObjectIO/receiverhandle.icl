@@ -5,7 +5,7 @@ implementation module receiverhandle
 
 
 import	StdBool, StdInt, StdList
-import	receivermessage, semidynamic
+import	cast, receivermessage, semidynamic
 from	ostoolbox	import OSToolbox // MW11++
 
 
@@ -39,18 +39,6 @@ from	ostoolbox	import OSToolbox // MW11++
 ::	InetReceiverCategory`	:==	Int
 // ..MW11
 
-/*	Conversion functions:
-	Cast contains abc code because it can't be typed conventionally.
-	The function Cast is required to break the Existential Type abstraction needed
-	for message passing. (JVG/RWS)
-*/
-Cast :: !a -> b
-Cast a
-	= code
-		{
-			pop_a 0
-		}
-
 receiverIdentified :: !Id !(ReceiverHandle .ls .pst) -> Bool
 receiverIdentified id {rId}
 	= id==rId
@@ -79,14 +67,23 @@ receiverHandleSyncMessage :: !SyncMessage !(ReceiverHandle .ls .pst) (.ls,.pst) 
 receiverHandleSyncMessage {smRecLoc={rlReceiverId},smMsg} rH=:{rFun} context
 	| not (receiverIdentified rlReceiverId rH)
 		= ([],rH,context)
-	| otherwise
-		# (ls,resp,pst)	= rFun (Cast (getDynamic rlReceiverId smMsg)) context
-		= ([setDynamic rlReceiverId resp smMsg],rH,(ls,pst))
+	# maybe_content	= getDynamic rlReceiverId smMsg
+	| isNothing maybe_content
+		= ([],rH,context)
+	# (ls,resp,pst)	= rFun (Cast (fromJust maybe_content)) context
+	| isEmpty resp
+		= ([],rH,(ls,pst))
+	| otherwise	
+		= ([setDynamic rlReceiverId (hd resp) smMsg],rH,(ls,pst))
 
 receiverAddASyncMessage :: !Id !SemiDynamic !(ReceiverHandle .ls .pst) -> ReceiverHandle .ls .pst
 receiverAddASyncMessage id sd rH=:{rASMQ}
 	| receiverIdentified id rH
-		= {rH & rASMQ=rASMQ++[Cast (getDynamic id sd)]}
+		# maybe_content	= getDynamic id sd
+		| isNothing maybe_content
+			= rH
+		// otherwise
+			= {rH & rASMQ=rASMQ++[Cast (fromJust maybe_content)]}
 	| otherwise
 		= rH
 
