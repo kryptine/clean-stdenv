@@ -8,7 +8,7 @@ implementation module menuwindowmenu
 
 import	StdInt, StdBool, StdClass, StdList, StdTuple, StdFunc, StdEnum, StdMisc
 import	StdMenu, StdMenuElement, StdWindow, StdPSt, StdProcess, StdIOCommon, StdId
-import	menuinternal, menucreate, id, windowdefaccess, windowaccess
+import	menuinternal, menucreate, menudevice, id, windowdefaccess, windowaccess
 // RWS +++
 import commondef
 import oswindow, iostate, osmenu, menuaccess, menuitems
@@ -49,6 +49,7 @@ updateActiveWindow ps
 	
 openWindowMenu :: !(PSt .l) -> PSt .l
 openWindowMenu pState
+	# pState			= menuFunctions.dOpen pState
 	# (id_types,pState)	= accPIO getMenus pState
 	  ids					= map fst id_types
 	| contains ((==) wMenuId) ids
