@@ -16,7 +16,7 @@ import StdEnv, GenLib
 :: Rec a b c = { rec_fst :: a, rec_snd :: b, rec_thd :: c }	
 :: Color = Red | Green | Blue
 
-derive bimap [], (,), Maybe
+// derive bimap [], (,), Maybe
 derive bimap Tree, Rose, Fork, Sequ
 
 derive gEq 				Tree, Rose, Fork, Sequ, Color, InfCons, Rec, Maybe

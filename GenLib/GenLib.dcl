@@ -14,3 +14,4 @@ import GenCompress
 import GenMonad
 import GenHylo
 import GenFMap
+import GenBimap
