@@ -10,6 +10,7 @@ calcAGEC a butfun
 	         , fromGEC = \(na <|> _) -> na
 	         , value   = a
 	         , updGEC  = calcnewa
+			 , pred	   = \a -> (True,a)
 	         } "calcGEC"
 where
 	(buts,funs) = ([map fst list \\ list <- butfun],[map snd list \\ list <- butfun])
@@ -25,6 +26,7 @@ intcalcAGEC i = 	mkAGEC	{	toGEC	= \ni _ -> calcAGEC ni buttons
 						,	fromGEC = \b -> ^^ b
 						,	value 	= i
 						,	updGEC	= id
+						, pred	   = \a -> (True,a)
 						} "intcalcGEC"
 where
 	buttons	  =  [ map mkBut [7..9]
@@ -40,6 +42,7 @@ realcalcAGEC i = 	mkAGEC	{	toGEC	= newGEC
 							,	fromGEC = \b -> fst (^^ b)
 							,	value 	= i
 							,	updGEC	= id
+			 				, 	pred	= \a -> (True,a)
 							} "realcalcGEC"
 where
 	newGEC ni Undefined 	 = calcAGEC (ni ,Hide (True,1.0)) buttons
