@@ -118,8 +118,6 @@ WinSetScrollThumbSize	:: !HWND !Int !Int !Int !Int !Int	!*OSToolbox -> *OSToolbo
 */
 WinSetEditSelection		:: !HWND !Int !Int					!*OSToolbox -> *OSToolbox		// Note: @2<=@3, @1 must point to an edit control.
 
-WinRestackWindow		:: !HWND !HWND						!*OSToolbox -> *OSToolbox		// PA: new function to put first window behind second window
-
 WinShowControl			:: !HWND !Bool						!*OSToolbox -> *OSToolbox	// PA: new routine to hide (False) & show (True) controls.
 WinEnableControl		:: !HWND !Bool						!*OSToolbox -> *OSToolbox
 WinEnablePopupItem		:: !HWND !Int !Bool					!*OSToolbox -> *OSToolbox	// PA: this function is currently not used, but might be
