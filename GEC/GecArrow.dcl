@@ -32,6 +32,9 @@ where
 class ArrowLoop arr
 where
 	loop :: !(arr (a, b) (c, b)) -> arr a c
+
+	fix :: (arr (a, b) b) -> arr a b | Arrow arr
+	fix g :== loop (g >>> arr \b -> (b, b))
 	
 :: GecCircuit a b
 
@@ -51,8 +54,6 @@ instance Arrow GecCircuit
 instance ArrowLoop GecCircuit
 
 // Other GecCircuit combinators
-
-fix :: (arr (a, b) b) -> arr a b | Arrow, ArrowLoop arr
 
 feedback :: !(GecCircuit a a) -> GecCircuit a a
 

@@ -22,7 +22,7 @@ edit title = GecCircuit k
 where
 	k seta geta env
 		# (a, env) = geta env
-		# ({gecGetValue, gecSetValue}, env) = createNGEC title Interactive True a (\r -> seta (includeUpdate r)) env
+		  ({gecGetValue, gecSetValue}, env) = createNGEC title Interactive True a (\r -> seta (includeUpdate r)) env
 		= (gecSetValue, gecGetValue, env)
 
 display :: String -> GecCircuit a a | gGEC{|*|} a 
@@ -30,7 +30,7 @@ display title = GecCircuit k
 where
 	k seta geta env
 		# (a, env) = geta env
-		# ({gecGetValue, gecSetValue}, env) = createNGEC title OutputOnly True a (\r -> seta (includeUpdate r)) env
+		  ({gecGetValue, gecSetValue}, env) = createNGEC title OutputOnly True a (\r -> seta (includeUpdate r)) env
 		= (gecSetValue, gecGetValue, env)
 
 gecMouse :: String -> GecCircuit a MouseState
@@ -38,28 +38,20 @@ gecMouse title = GecCircuit k
 where
 	k seta geta env
 		# (a, env) = geta env
-		# ({gecGetValue, gecSetValue}, env) = createMouseGEC title Interactive (\r -> seta (includeUpdate r)) env
-		= (/*gecSetValue*/\upd a pSt -> pSt , gecGetValue, env)
-
-/*
-gecMouse title = GEC \rec=:{set} pst ->
-	let ({gecGetValue, gecSetValue}, pst1) = createMouseGEC title Interactive (\r -> set (maybeUpdate r)) pst
-	in  ({value	= MouseLost, get = gecGetValue, set = \upd a pSt -> pSt /*gecSetValue*/}, pst1)
-
-*/
+		  ({gecGetValue, gecSetValue}, env) = createMouseGEC title Interactive (\r -> seta (includeUpdate r)) env
+		= (\_ _ env -> env , gecGetValue, env)
 
 instance Arrow GecCircuit
 where
 	arr f = GecCircuit k
 	where
-		k setb geta env 
-			= (seta id, getb id, env)
+		k setb geta env = (seta, getb, env)
 		where
-			getb id env 
+			getb env 
 				# (a, env) = geta env
 				= (f a, env)
 			
-			seta id u a env = setb u (f a) env
+			seta u a env = setb u (f a) env
 	
 	(>>>) (GecCircuit l) (GecCircuit r) = GecCircuit k
 	where 
@@ -80,7 +72,7 @@ where
 	
 			getbc env 
 				# (b, env) = getb env
-				# (ac, env) = getac env
+				  (ac, env) = getac env
 				= ((b, snd ac), env)
 			
 			setb u b env 
@@ -89,7 +81,7 @@ where
 	
 			setac u ac env
 			 	# env = seta u (fst ac) env
-				# (b, env) = getb env
+				  (b, env) = getb env
 				= setbc u (b, snd ac) env
 
 instance ArrowLoop GecCircuit
@@ -110,7 +102,7 @@ where
 			
 			getab env
 				# (a, env) = geta env
-				# (b, env) = readStore id env
+				  (b, env) = readStore id env
 				= ((a, b), env)
 			
 			seta u a env
@@ -121,15 +113,12 @@ where
 				# (cb, env) = getcb env
 				= (fst cb, env)
 
-fix :: (arr (a, b) b) -> arr a b | Arrow, ArrowLoop arr
-fix g = loop (g >>> arr (\b -> (b, b)))
-	
 feedback :: !(GecCircuit a a) -> GecCircuit a a
 feedback (GecCircuit g) = GecCircuit k
 where 
 	k seta geta env
 		# (a, env) = geta` env1
-		# env = seta` NoUpdate a env
+		  env = seta` NoUpdate a env
 		= (seta`, geta`, env)
 	where
 		(seta`, geta`, env1) = g seta`` geta env
