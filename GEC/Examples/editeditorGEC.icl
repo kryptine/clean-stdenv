@@ -9,9 +9,45 @@ import genericgecs
 import StdGEC, StdGECExt, StdGecComb, StdDynamic 
 import basicAGEC, StdAGEC, calcAGEC, dynamicAGEC
 
+
+class X a b c 
+where
+	f :: a b -> c
+
+instance X Int Int Int
+where
+	f i j = i + j
+	
+instance X Int Int Real
+where
+	f i j = toReal (i + j)
+
+bla :: Int	
+bla = f g	4
+where
+	g :: Int
+	g = f 2 3
+
+:: Bug = C1 | C2
+
+derive gGEC Bug
+
+
 Start :: *World -> *World
 Start world = goGui editoreditor world  
 //Start world = goGui testDynamic world  
+/*
+Start world = goGui mytest world
+where
+	mytest pst = pst1 
+	where	
+	    (hndl,pst1) = createNGEC  "test" Interactive (vertlistAGEC [(3,C1)]) (set hndl) pst
+	   
+	    set handl _ list pst = handl.gecSetValue NoUpdate (vertlistAGEC (test1 (^^ list))) pst
+	
+		test1 [x:xs] = [x,x:xs]
+		test1 else = else
+*/	
 
 derive gGEC Maybe 
 
@@ -87,10 +123,13 @@ zeroValue 	= (Identity,Int_ 0)
 			| Expression											// allow expressions /function definitions
 			| Identity 												// identity editor (default)
 
-:: Command	= Insert												// insert element
+:: Command	= Insert												// insert element from clipboard
+			| Append												// append element from clipboard
 			| Delete												// delete element
-			| Copy													// copy   element
-			| Paste													// paste  element
+			| UpWards												// move   element upwards
+			| DownWards												// move   element downwards
+			| Copy													// copy   element to clipboard
+			| Paste													// paste  element from clipboard
 			| Choose												// noop (default)
 
 :: Maybe2 a b :== Maybe (<|> a b)
@@ -100,7 +139,7 @@ zeroValue 	= (Identity,Int_ 0)
 // Update of design editor
 
 updateDesign :: DesignEditor -> DesignEditor
-updateDesign (table,s) =  (keepone (update (paste newclipboard (initfuns table))),newclipboard)
+updateDesign (table,s) =  (keepone (update newclipboard (initfuns table)),newclipboard)
 where
 	keepone [] = [[initelem]]		// to ensure that there is at least one element...
 	keepone xs = xs
@@ -108,20 +147,18 @@ where
 	newclipboard = case [elem \\ col <- table, (Copy,elem) <- col] of // copy to clipboard
 					[elem] -> elem
 					else   -> s
-	
-	paste :: Clipboard DesignTable -> DesignTable // paste from clipboard
-	paste s table = map (map paste_elem) table 
+
+	update :: Clipboard DesignTable -> DesignTable // all other commands ...
+	update cb table = map (update_col cb) table 
 	where
-		paste_elem (Paste,_) = (Choose,s)
-		paste_elem elem		  = elem
-		
-	update :: DesignTable -> DesignTable // all other commands ...
-	update table = map update_col table 
-	where
-		update_col [(Insert,elem):xs] = [(Choose,elem),(Choose,elem):xs]
-		update_col [(Delete,_   ):xs] = xs
-		update_col [x:xs]     	  	  = [x:update_col xs]
-		update_col []      		  	  = []
+		update_col cb [(Paste,elem):xs] 		= [(Choose,cb):xs]
+		update_col cb [(Insert,elem):xs] 		= [(Choose,cb),(Choose,elem):xs]
+		update_col cb [(Append,elem):xs] 		= [(Choose,elem),(Choose,cb):xs]
+		update_col cb [(Delete,_   ):xs] 		= xs
+		update_col cb [(DownWards,elem),y:xs]	= [y,(Choose,elem):xs]
+		update_col cb [x,(UpWards,elem):xs] 	= [(Choose,elem),x:xs]
+		update_col cb [(_,elem):xs]   	  		= [(Choose,elem):update_col cb xs] 
+		update_col cb []      		  	  		= []
 
 	initfuns :: DesignTable -> DesignTable
 	initfuns table = map (map initfun) table // fill in proper default functions
@@ -213,12 +250,12 @@ where
 
 	calcfli :: ([Int] -> Int) [TableIndex] -> (Bool,Bool,Int)
 	calcfli f indexlist
-	# res				= map tryGetIntArgs indexlist
+	# res				= map tryGetIntArg indexlist
 	= (or (map fst3 res),or (map snd3 res),f (map thd3 res)) 
 	
 	calcflr :: ([Real] -> Real) [TableIndex] -> (Bool,Bool,Real)
 	calcflr f indexlist
-	# res				= map tryGetRealArgs indexlist
+	# res				= map tryGetRealArg indexlist
 	= (or (map fst3 res),or (map snd3 res),f (map thd3 res)) 
 
 	calcdyn :: DynString [TableIndex] -> (Bool,Bool,Dynamic)
@@ -228,14 +265,14 @@ where
 	where
 		apply :: Dynamic Dynamic [Dynamic] -> Dynamic
 		apply d=:(f::[a] -> b) (acc::[a]) [(x::a):xs] = apply d (dynamic [x:acc]) xs
-		apply d=:(f::[a] -> b) (acc::[a]) [(x::c):xs] = dynamic "list type error" //apply d (dynamic acc) xs
+		apply d=:(f::[a] -> b) (acc::[a]) [(x::c):xs] = dynamic "list type error"
 		apply d=:(f::[a] -> b) (acc::[a]) [] = dynamic (f (reverse acc))
 
 	calcdyn (DynStr dyn s) indexlist
 	= (False,False,dyn) 
 
-	tryGetIntArgs :: TableIndex -> (Bool,Bool,Int)
-	tryGetIntArgs (r,c) 
+	tryGetIntArg :: TableIndex -> (Bool,Bool,Int)
+	tryGetIntArg (r,c) 
 	| checkBounds (r,c) = (True,False,0)
 	= fetchIntVal (table!!c!!r)
 	where
@@ -244,8 +281,8 @@ where
 			fetchIntVal (AF_LI_I _ fi) 	= applyflii fi
 			fetchIntVal _ 				= (False,True,0)
 				 
-	tryGetRealArgs :: TableIndex -> (Bool,Bool,Real)
-	tryGetRealArgs (r,c)
+	tryGetRealArg :: TableIndex -> (Bool,Bool,Real)
+	tryGetRealArg (r,c)
 	| checkBounds (r,c) = (True,False,0.0)
 	= fetchRealVal (table!!c!!r)
 	where
@@ -265,6 +302,7 @@ where
 			fetchDynVal (AReal_ r) 	   (nn::Real) = (False,False,dynamic (^^ r))
 			fetchDynVal (AF_R_R  _ fi) (nn::Real) = mkdyn (applyfrr  fi)
 			fetchDynVal (AF_LR_R _ fi) (nn::Real) = mkdyn (applyflrr fi)
+			fetchDynVal (AString_ s)   (nn::Int)  = (False,False,dynamic (^^ s))
 			fetchDynVal (AF_Dyn  _ fi) _ 		  = (applydyn fi)
 			fetchDynVal _   _ 					  = (False,True,dynamic (23))
 			
@@ -277,4 +315,5 @@ where
 showAGEC i = (modeAGEC (Display ( i)))
 
 ToString v = toString v +++ " "
+
 
