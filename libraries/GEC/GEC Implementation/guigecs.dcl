@@ -27,7 +27,8 @@ defVMargins         :== (0,0);					vMarginAtt	:== ControlVMargin   (fst defVMarg
 defItemSpaces       :== (0,0);					itemSpaceAtt:== ControlItemSpace (fst defItemSpaces) (snd defItemSpaces)
 defTextWidths       :== defCellWidth
 defCellWidth		:== 108			// divideable by 2,3,4
-defCellHeight		:== 24			// divideable by 2,3,4
+//defCellHeight		:== 24			// divideable by 2,3,4
+defCellHeight		:== 19
 defWindowBackColour :== LightGrey
 defTextBackColour   :== RGB {r=160,g=160,b=215}
 
