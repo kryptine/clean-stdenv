@@ -252,7 +252,7 @@ applyCharCBF state=:{dummyPending, strings, index, mbMaxIterations, callback, ch
 	// "the buffer "strings" has not been emptied
 	= ({ state & strings=tl strings, allocBytes=state.allocBytes-(size string), index=0 }, pSt)
   where
-	loop :: !Id !(ReceiverFunction !(ReceiveMsg Char) (.ls,!PSt .l)) !Int !Int !String !(.ls,!PSt .l)
+	loop :: !Id !(ReceiverFunction (ReceiveMsg Char) (.ls,!PSt .l)) !Int !Int !String !(.ls,!PSt .l)
 		 -> (!Int, !(.ls,!PSt .l))
 	loop charRcvId callback nrCharsToApply index string ls_pSt=:(ls, pSt=:{io})
 		// applies string.[index] .. string.[index+nrCharsToApply-1] to the callback function

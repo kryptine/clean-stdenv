@@ -1,7 +1,7 @@
 implementation module controlcreate
 
 
-import	StdBool, StdInt, StdList, StdMisc
+import	StdBool, StdInt, StdList, StdMisc, StdTuple
 import	ostooltip, oswindow
 import	commondef, controllayout, controlvalidate, StdControlAttribute, windowaccess
 
@@ -127,7 +127,7 @@ where
 	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos wPtr itemH=:{wItemKind=IsPopUpControl} tb
 		# (popUpPtr,editPtr,tb)	= osCreateEmptyPopUpControl wPtr (toTuple parentPos) show able (toTuple pos) (toTuple size) (length items) isEditable tb
 		# maybeEditPtr			= if isEditable (Just editPtr) Nothing
-		# (_,tb)				= stateMap2 (appendPopUp popUpPtr maybeEditPtr info.popUpInfoIndex) items (1,tb)
+		# tb					= osCreatePopUpControlItems popUpPtr maybeEditPtr ableContext (map fst items) info.popUpInfoIndex tb
 		  info					= if isEditable {info & popUpInfoEdit=Just {popUpEditText="",popUpEditPtr=editPtr}} info
 		  itemH					= {itemH & wItemPtr=popUpPtr, wItemInfo=PopUpInfo info}
 		| not hasTip
@@ -143,11 +143,6 @@ where
 		items					= info.popUpInfoItems
 		(hasTip,tipAtt)			= cselect isControlTip undef itemH.wItemAtts
 		isEditable				= contains isControlKeyboard itemH.wItemAtts
-		
-		appendPopUp :: !OSWindowPtr !(Maybe OSWindowPtr) !Index !(PopUpControlItem .pst) !(!Int,!*OSToolbox) -> (!Int,!*OSToolbox)
-		appendPopUp popUpPtr editPtr index (title,_) (itemNr,tb)
-			# (_,tb)			= osCreatePopUpControlItem popUpPtr editPtr (-1) ableContext title (index==itemNr) itemNr tb
-			= (itemNr+1,tb)
 	
 	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos wPtr itemH=:{wItemKind=IsSliderControl} tb
 		# (sliderPtr,tb)		= osCreateSliderControl wPtr (toTuple parentPos) show able (direction==Horizontal) (toTuple pos) (toTuple size) (osMin,osThumb,osMax,osThumbSize) tb

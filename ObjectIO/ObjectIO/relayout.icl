@@ -110,8 +110,8 @@ where
 				moveF			= if (samePos && all isEmptyRect (map (intersectRects newFrame1) newArea))
 									id (osSetCompoundPos  wPtr newParentPos` itemPtr newPos` newSize` True)
 				updScrollbars	= if (sameSize && samePos && all isEmptyRect (flatten (map (\area->[intersectRects hRect` area,intersectRects vRect` area]) newArea)))
-									id ( (setCompoundScroll wPtr (snd hasScrolls) wMetrics itemPtr False newAble newVThumbSize oldOrigin.y newOrigin.y vRect)
-									   o (setCompoundScroll wPtr (fst hasScrolls) wMetrics itemPtr True  newAble newHThumbSize oldOrigin.x newOrigin.x hRect)
+									id ( (setCompoundScroll wPtr (snd hasScrolls) wMetrics itemPtr False newAble newVThumbSize oldOrigin.y newOrigin.y vRect`)
+									   o (setCompoundScroll wPtr (fst hasScrolls) wMetrics itemPtr True  newAble newHThumbSize oldOrigin.x newOrigin.x hRect`)
 									   )
 				updF			= if (sameSize && oldPos==newPos && oldFrame1==newFrame1 || isEmptyRect newFrame1 || not new.rliItemShow)
 									id (updatecustomcontrol wPtr clipRgn newFrame1 new)
@@ -137,31 +137,32 @@ where
 				oldContentRect	= osGetCompoundContentRect wMetrics oldVisScrolls oldCompoundRect
 				newContentRect	= osGetCompoundContentRect wMetrics newVisScrolls newCompoundRect
 				newContentSize	= rectSize newContentRect
-				hRect			= osGetCompoundHScrollRect wMetrics newVisScrolls (sizeToRect newSize);	hRect`	= addVector (toVector newPos) hRect
-				vRect			= osGetCompoundVScrollRect wMetrics newVisScrolls (sizeToRect newSize);	vRect`	= addVector (toVector newPos) vRect
+				hRect			= if osCompoundControlHasOrigin
+									(osGetCompoundHScrollRect wMetrics newVisScrolls (sizeToRect newSize))
+									(osGetCompoundHScrollRect wMetrics newVisScrolls (posSizeToRect newPos newSize))
+				hRect`			= osGetCompoundHScrollRect wMetrics newVisScrolls (posSizeToRect newPos newSize)
+				vRect			= if osCompoundControlHasOrigin
+									(osGetCompoundVScrollRect wMetrics newVisScrolls (sizeToRect newSize))
+									(osGetCompoundVScrollRect wMetrics newVisScrolls (posSizeToRect newPos newSize))
+				vRect`			= osGetCompoundVScrollRect wMetrics newVisScrolls (posSizeToRect newPos newSize)
 				
 				setCompoundScroll :: !OSWindowPtr !Bool OSWindowMetrics OSWindowPtr Bool Bool Int Int Int !OSRect !*OSToolbox -> *OSToolbox
-				setCompoundScroll wPtr hasScroll wMetrics compoundPtr isHorizontal able size old new {rright,rbottom} tb
+				setCompoundScroll wPtr hasScroll wMetrics compoundPtr isHorizontal able size old new rect=:{rright,rbottom} tb
 					| not hasScroll
 						= tb
-//					# tb			= osSetCompoundSliderThumbSize wMetrics compoundPtr isHorizontal size (rright,rbottom) (old==new) tb
-//					# tb			= osSetCompoundSliderThumbSize wMetrics wPtr compoundPtr scrollPtr scrollMin scrollMax scrollSize scrollRect isHorizontal able (old==new) tb
-					# tb			= osSetCompoundSliderThumbSize wMetrics wPtr compoundPtr scrollPtr min max wid scrollRect isHorizontal able (old==new) tb
+					# tb			= osSetCompoundSliderThumbSize wMetrics wPtr compoundPtr scrollPtr min max wid rect isHorizontal able (old==new) tb
 					| old==new
-						# tb		= osUpdateCompoundScroll wPtr scrollPtr scrollRect tb
+						# tb		= osUpdateCompoundScroll wPtr scrollPtr rect tb
 						= tb
-//					| otherwise		= osSetCompoundSliderThumb wMetrics compoundPtr isHorizontal new (rright,rbottom) True tb
 					| otherwise
-//						# tb		= osSetCompoundSliderThumb wMetrics wPtr compoundPtr scrollPtr scrollRect isHorizontal new (rright,rbottom) True tb
-						# tb		= osSetCompoundSliderThumb wMetrics wPtr compoundPtr scrollPtr scrollRect isHorizontal pos (rright,rbottom) True tb
-						# tb		= osUpdateCompoundScroll wPtr scrollPtr scrollRect tb
+						# tb		= osSetCompoundSliderThumb wMetrics wPtr compoundPtr scrollPtr rect isHorizontal pos (rright,rbottom) True tb
+						# tb		= osUpdateCompoundScroll wPtr scrollPtr rect tb
 						= tb
 				where
-					(min,pos,max,wid)	= toOSscrollbarRange (scrollMin,new,scrollMax) size
+					(min,pos,max,wid)	= toOSscrollbarRange (scrollMin,new,scrollMax) scrollSize
 					scrollPtr		= if isHorizontal (fromJust hScrollPtr) (fromJust vScrollPtr)
-					scrollMin		= if isHorizontal (newDomainRect.rleft) (newDomainRect.rtop)
-					scrollMax		= if isHorizontal (newDomainRect.rright/*-newContentSize.w*/) (newDomainRect.rbottom/*-newContentSize.h*/)
-					scrollRect		= if isHorizontal hRect` vRect`
+					scrollMin		= if isHorizontal newDomainRect.rleft  newDomainRect.rtop
+					scrollMax		= if isHorizontal newDomainRect.rright newDomainRect.rbottom
 					scrollSize		= if isHorizontal newContentSize.w newContentSize.h
 			relayout wPtr wMetrics newArea IsLayoutControl (oldFrame,oldParentPos,old) (newFrame,newParentPos,new) rgnHs picture
 				= relayoutItems` wPtr wMetrics newArea (oldFrame1,oldParentPos,old.rliItems) (newFrame1,newParentPos,new.rliItems) rgnHs picture

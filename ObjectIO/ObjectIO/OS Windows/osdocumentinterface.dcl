@@ -58,10 +58,12 @@ setOSDInfoOSInfo :: !OSInfo !OSDInfo -> OSDInfo
 		The second Bool indicates whether the process accepts file open events.
 	osOpenSDI  creates the infrastructure of a SDI process.
 		The Bool argument indicates whether the process accepts file open events.
+	osOpenNDI  creates the infrastructure of a NDI process.
 	osCloseOSDInfo destroys the infrastructure.
 */
 osOpenMDI     :: !Bool !Bool !*OSToolbox -> (!OSDInfo,!*OSToolbox)
 osOpenSDI     ::       !Bool !*OSToolbox -> (!OSDInfo,!*OSToolbox)
+osOpenNDI     ::             !*OSToolbox -> (!OSDInfo,!*OSToolbox)
 osCloseOSDInfo:: !OSDInfo    !*OSToolbox -> *OSToolbox
 
 /*	getOSDInfoOSToolbar retrieves the OSToolbar, if any.

@@ -46,7 +46,7 @@ Help			:== True
 	-	it has an Ok button that closes this window, 
 	-	it has a Help button that displays the help information (see showHelp).
 */
-showAbout :: String String (PSt *l) -> PSt *l
+showAbout :: String String (PSt .l) -> PSt .l
 showAbout appname helpfile pState
 	# (okId, pState)		= accPIO openId pState
 	# (fonts,pState)		= accPIO (accScreenPicture infoFonts) pState
@@ -67,13 +67,13 @@ showAbout appname helpfile pState
 
 /*	showHelp opens a SDI process that displays the help information found in the helpfile.
 */
-showHelp :: String (PSt *l) -> PSt *l
+showHelp :: String (PSt .l) -> PSt .l
 showHelp helpfile pState
 	# (fonts,pState)		= accPIO (accScreenPicture infoFonts) pState
 	# ((size,text),pState)	= readInfo Help fonts HelpBegin HelpEnd helpfile pState
 	= openProcesses (Process SDI NoState (initHelp fonts size text) [ProcessClose closeProcess]) pState
 where
-	initHelp :: !Fonts !Size ![InfoLine] (PSt *l) -> PSt *l
+	initHelp :: !Fonts !Size ![InfoLine] (PSt .l) -> PSt .l
 	initHelp fonts size text pState
 		= snd (openWindow undef window pState)
 	where

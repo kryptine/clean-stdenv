@@ -9,7 +9,6 @@ from	windowdraw		import drawwindowlook`
 from	windowupdate	import updatewindowbackgrounds
 import	ospicture, osrgn, ostoolbox, ostypes, oswindow
 
-//import dodebug
 
 controlposFatalError :: String String -> .x
 controlposFatalError function error
@@ -22,7 +21,7 @@ movewindowviewframe :: !OSWindowMetrics !Vector2 !WIDS !(WindowHandle .ls .pst) 
 movewindowviewframe wMetrics v wids=:{wPtr} wH=:{whWindowInfo,whItems=oldItems,whSize,whAtts,whSelect,whShow} tb
 	| newOrigin==oldOrigin			// origin has not changed
 		= (wH,tb)
-	# (hasUpdate,tb)				= hasUpdateRect wPtr tb
+	# (hasUpdate,tb)				= osWindowHasUpdateRect wPtr tb
 	# tb							= setsliderthumb (hasHScroll && newOrigin.x<>oldOrigin.x) wMetrics wPtr True  (minx,newOrigin.x,maxx) vieww (toTuple whSize) tb
 	# tb							= setsliderthumb (hasVScroll && newOrigin.y<>oldOrigin.y) wMetrics wPtr False (miny,newOrigin.y,maxy) viewh (toTuple whSize) tb
 	# (noControls,oldItems)			= myisEmpty oldItems
@@ -148,17 +147,6 @@ where
 				= ([],picture)
 			| otherwise
 				= ([restRect],picture)
-
-
-/*	Needs to be reallocated in some decent module...
-*/
-hasUpdateRect :: !OSWindowPtr !*OSToolbox -> (!Bool,!*OSToolbox)
-hasUpdateRect wPtr tb = GetUpdateRect wPtr 0 0 tb
-where
-	GetUpdateRect :: !Int !Int !Int !*Int -> (!Bool,!*Int)
-	GetUpdateRect _ _ _ _ = code {
-		ccall GetUpdateRect@12 "PIII:I:I"
-		}
 
 
 /*	myisEmpty checks for lack of real controls, in contrast with isEmpty due to existence of W(List/Extend/Change)LSHandles. 

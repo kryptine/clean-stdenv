@@ -66,14 +66,14 @@ from	timertable			import :: TimerTable
 //	Access-rules on the IOSt:
 
 emptyIOSt					:: !SystemId !(Maybe SystemId) !(Maybe GUIShare) !DocumentInterface !ProcessKind 
-								![ProcessAttribute (PSt .l)] !.(IdFun (PSt .l)) !(Maybe SystemId)
+								![ProcessAttribute (PSt .l)] !*(IdFun (PSt .l)) !(Maybe SystemId)
 							-> IOSt .l
 
 ioStButtonFreq				:: !Int !Point2 !OSWindowPtr	!(IOSt .l) -> (!Int,!IOSt .l)
 ioStSetDoubleDownDist		:: !DoubleDownDist				!(IOSt .l) -> IOSt .l
 ioStGetInputTrack			:: !(IOSt .l) -> (!Maybe InputTrack,			!IOSt .l)
 ioStGetProcessAttributes	:: !(IOSt .l) -> (![ProcessAttribute (PSt .l)],	!IOSt .l)
-ioStGetInitIO				:: !(IOSt .l) -> (!IdFun (PSt .l),				!IOSt .l)
+ioStGetInitIO				:: !(IOSt .l) -> (!*IdFun (PSt .l),				!IOSt .l)
 ioStClosed					:: !(IOSt .l) -> (!Bool,						!IOSt .l)
 ioStGetRuntimeState			:: !(IOSt .l) -> (!RuntimeState,				!IOSt .l)
 ioStGetIOIsModal			:: !(IOSt .l) -> (!Maybe SystemId,				!IOSt .l)
@@ -103,7 +103,7 @@ ioStGetRcvDisabled			:: !(IOSt .l) -> (!Bool,						!IOSt .l)	/* MW11++ */
 
 ioStSetInputTrack			:: !(Maybe InputTrack)				!(IOSt .l) -> IOSt .l
 ioStSetProcessAttributes	:: ![ProcessAttribute (PSt .l)]		!(IOSt .l) -> IOSt .l
-ioStSetInitIO				:: !(IdFun (PSt .l))				!(IOSt .l) -> IOSt .l
+ioStSetInitIO				:: !*(IdFun (PSt .l))				!(IOSt .l) -> IOSt .l
 ioStSetRuntimeState			:: !RuntimeState					!(IOSt .l) -> IOSt .l
 ioStSetIOIsModal			:: !(Maybe SystemId)	 			!(IOSt .l) -> IOSt .l
 ioStSetIdTable				:: !*IdTable						!(IOSt .l) -> IOSt .l

@@ -154,6 +154,10 @@ where
 	osCreateSDIWindowCallback {ccMsg} tb
 		= osdocumentinterfaceFatalError "osCreateSDIWindowCallback" ("received message nr:"+++toString ccMsg)
 
+osOpenNDI :: !*OSToolbox -> (!OSDInfo,!*OSToolbox)			// PA: added. Dummy on Windows.
+osOpenNDI tb
+	= (OSNoInfo,tb)
+
 osCloseOSDInfo :: !OSDInfo !*OSToolbox -> *OSToolbox
 osCloseOSDInfo (OSMDInfo {osmdOSInfo={osFrame}}) tb
 	= snd (issueCleanRequest2 (osDestroyProcessWindowCallback "osCloseMDI") (Rq1Cci CcRqDESTROYWINDOW osFrame) tb)

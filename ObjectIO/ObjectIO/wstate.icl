@@ -360,7 +360,7 @@ where
 		getPopUpInfoEdit` Nothing tb
 			= (Nothing,tb)
 		getPopUpInfoEdit` (Just info=:{popUpEditPtr}) tb
-			# (content,tb)	= osGetEditControlText wPtr popUpEditPtr tb		// DvA: Netter osGetPopUpControlText ???
+			# (content,tb)	= osGetPopUpControlText wPtr popUpEditPtr tb
 			= (Just {info & popUpEditText=content},tb)
 	getWItemInfo` wPtr itemPtr info=:(SliderInfo {sliderInfoDir,sliderInfoLength,sliderInfoState}) tb
 		= (	SliderInfo` { sliderInfoDir`    = sliderInfoDir
@@ -396,9 +396,9 @@ setWindowHandle` wH`=:{whTitle`,whItemNrs`,whKeyFocus`,whWindowInfo`,whItems`,wh
 	#! atts		= setWAtts whAtts` whAtts
 	= {	wH	& whTitle		= whTitle`
 			, whItemNrs		= whItemNrs`
-			, whKeyFocus	= case whKeyFocus`.kfItem of		// PA: volgens DvA beter??
-				(Just fItem)	-> setNewFocusItem fItem (newFocusItems (setFocusItems whKeyFocus`.kfItems))
-				Nothing			-> setNoFocusItem (newFocusItems (setFocusItems whKeyFocus`.kfItems))
+			, whKeyFocus	= case whKeyFocus`.kfItem of		// DvA: fixing space-leak with kfEval
+				(Just fItem)	-> kfEval (setNewFocusItem fItem (newFocusItems (setFocusItems whKeyFocus`.kfItems)))
+				Nothing			-> kfEval (setNoFocusItem (newFocusItems (setFocusItems whKeyFocus`.kfItems)))
 			, whWindowInfo	= whWindowInfo`
 			, whItems		= itemHs
 			, whShow		= whShow`
@@ -408,6 +408,12 @@ setWindowHandle` wH`=:{whTitle`,whItemNrs`,whKeyFocus`,whWindowInfo`,whItems`,wh
 			, whClosing		= whClosing`
 	  }
 where
+	kfEval :: !*KeyFocus -> *KeyFocus
+	kfEval {kfItem,kfItems}
+		| length kfItems <> 0
+			= {kfItem = kfItem, kfItems = kfItems}
+			= {kfItem = kfItem, kfItems = []}
+	
 	setFocusItems :: ![FocusItem] -> *[FocusItem]
 	setFocusItems [item:items] = [item:setFocusItems items]
 	setFocusItems _            = []

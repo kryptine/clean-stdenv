@@ -211,7 +211,7 @@ HeadPos pos
 
 TransPos :: !Int -> Point2
 TransPos nr
-	= {x=Offset+140*(nr/14),y=TransY+15*(nr mod 14)}
+	= {x=Offset+140*(nr/14),y=TransY+15*(nr rem 14)}
 
 MoveToHeadPos :: !Int !*Picture -> *Picture
 MoveToHeadPos pos pic

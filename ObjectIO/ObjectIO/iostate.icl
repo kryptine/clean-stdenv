@@ -32,7 +32,7 @@ iostateFatalError function error
 		,	ioreceivertable	:: !*ReceiverTable					// The table of the current whereabouts of receivers
 		,	iotimertable	:: !*TimerTable						// The table of all currently active timers
 		,	ioidtable		:: !*IdTable						// The table of all bound Ids
-		,	ioinit			:: !IdFun (PSt l)					// The initialisation functions of the process
+		,	ioinit			:: !*IdFun (PSt l)					// The initialisation functions of the process
 		,	iotoolbox		:: !*OSToolbox						// The Mac continuation value
 		,	ioid			:: !SystemId						// The Id of the process
 		,	ionr			:: !SystemId						// The max SystemId of all processes
@@ -101,7 +101,7 @@ iostateFatalError function error
 //	Creation of an initial, empty IOSt:
 
 emptyIOSt :: !SystemId !(Maybe SystemId) !(Maybe GUIShare) !DocumentInterface !ProcessKind 
-				![ProcessAttribute (PSt .l)] !.(IdFun (PSt .l)) !(Maybe SystemId)
+				![ProcessAttribute (PSt .l)] !*(IdFun (PSt .l)) !(Maybe SystemId)
 			-> IOSt .l
 emptyIOSt ioId parentId guishare documentInterface processKind processAtts initIO modalId
 	# tb				= OSNewToolbox
@@ -198,10 +198,10 @@ ioStSetProcessAttributes atts ioState = {ioState & ioatts=atts}
 
 //	Access rules to the initial actions:
 
-ioStGetInitIO :: !(IOSt .l) -> (!IdFun (PSt .l), !IOSt .l)
+ioStGetInitIO :: !(IOSt .l) -> (!*IdFun (PSt .l), !IOSt .l)
 ioStGetInitIO ioState=:{ioinit} = (ioinit,{ioState & ioinit=id})
 
-ioStSetInitIO :: !(IdFun (PSt .l)) !(IOSt .l) -> IOSt .l
+ioStSetInitIO :: !*(IdFun (PSt .l)) !(IOSt .l) -> IOSt .l
 ioStSetInitIO initIO ioState = {ioState & ioinit=initIO}
 
 

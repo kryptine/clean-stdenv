@@ -41,7 +41,7 @@ char MDIWindowClassName[] = "__CleanMDIWindow";		/* Class for MDI windows (must 
 		This procedure assumes that hwnd is the handle of a SDI frame window.
 		If no SDI client window could be found then GetSDIClientWindow returns NULL.
 */
-static HWND GetSDIClientWindow (HWND hwndFrame)
+static HWND OldGetSDIClientWindow (HWND hwndFrame)
 {
 	HWND client;
 	char *clientclassname;
@@ -61,6 +61,37 @@ static HWND GetSDIClientWindow (HWND hwndFrame)
 	return client;
 }
 
+static BOOL CALLBACK EnumSDIChildProc(HWND hwndChild, LPARAM lParam);
+
+static HWND GetSDIClientWindow (HWND hwndFrame)
+{
+	HWND hwndClient = NULL;
+	
+	EnumChildWindows(hwndFrame, EnumSDIChildProc, (LPARAM) &hwndClient);
+	
+	return hwndClient;
+}
+
+static BOOL CALLBACK EnumSDIChildProc(HWND hwndChild, LPARAM lParam)
+{
+	int classnamelength;
+	char *childclassname;
+
+	classnamelength = lstrlen (SDIWindowClassName) + 1;
+	childclassname = rmalloc (classnamelength);
+
+	GetClassName (hwndChild, childclassname, classnamelength);
+
+	if (!nstrequal (classnamelength, childclassname, SDIWindowClassName))
+	{
+		rfree (childclassname);
+		return TRUE;
+	}
+	
+	*(HWND *)lParam	= hwndChild;
+	rfree (childclassname);
+	return FALSE;
+}
 
 /*	Managing the double down distance.
 */
@@ -533,13 +564,15 @@ static LRESULT CALLBACK SDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPA
 				hwndClient = GetSDIClientWindow (hWin);
 				if (hwndClient != NULL)
 				{
-					SetWindowPos (hwndClient,												/* the SDI client */
+					if (!SetWindowPos (hwndClient,											/* the SDI client */
 								  HWND_BOTTOM,												/* this value is ignored (SWP_NOZORDER)  */
 								  0,0,														/* these values are ignored (SWP_NOMOVE) */
 								  (int)LOWORD (lPara),(int)HIWORD (lPara)-toolbarHeight,	/* new width and height */
 								  SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER
-								 );
+								 ))
+						rMessageBox (NULL,MB_APPLMODAL,"SDIFrameProcedure","SetWindowPos failed: %i",GetLastError());
 				}
+//				rMessageBox (NULL,MB_APPLMODAL,"SDIFrameProcedure","hwndFrame: %i;hwndClient: %i",hWin,hwndClient);
 			}
 			break;
 		/*	Accept the user dropping file(s) in the frame window.

@@ -27,7 +27,7 @@ OSIntListArrayToString :: ![{#Int}] -> {#Char}
 OSIntListArrayToString irs
     = IntListArrayToString "" irs
 where
-    IntListArrayToString :: !{#Char} ![{#Int}] -> !{#Char}
+    IntListArrayToString :: !{#Char} ![{#Int}] -> {#Char}
     IntListArrayToString cs [] = cs
     IntListArrayToString cs [ir:irs] = IntListArrayToString (cs+++intarrayToString ir) irs
     where

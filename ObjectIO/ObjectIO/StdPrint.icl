@@ -121,7 +121,7 @@ printUpdateFunction doDialog updateFunc rectangles printSetup printEnv
 										   			 y=min ((r+1)*hP+y1) y2
 										 }} \\ r<-rows,c<-columns]
 					ceilOfRatio num denum 		// ceil (num/denom)
-						| num mod denum == 0
+						| num rem denum == 0
 							= num/denum
 						= num/denum + 1
 					min x y

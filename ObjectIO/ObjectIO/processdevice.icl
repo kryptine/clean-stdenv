@@ -2,7 +2,7 @@ implementation module processdevice
 
 import StdBool, StdFunc, StdMisc
 import StdPSt
-import commondef, devicefunctions, processevent, StdProcessAttribute, toolbar
+import commondef, devicefunctions, menudevice, menuwindowmenu, processevent, StdProcessAttribute, toolbar
 
 
 processdeviceFatalError :: String String -> .x
@@ -31,12 +31,23 @@ processOpen pState=:{io=ioState}
 		# ioState					= ioStSetDeviceFunctions processFunctions ioState
 		# (osdinfo,ioState)			= ioStGetOSDInfo ioState
 		# ioState					= createOSDInfo osdinfo ioState
-		= {pState & io=ioState}
+		# pState					= {pState & io=ioState}
+//	PA: menudevice has higher priority than process device (see device.icl), therefore, menuFunctions.dOpen has been evaluated.
+//		# pState					= menuFunctions.dOpen pState	// DvA: ensure process menubar exists
+		# pState					= menuFunctions.dShow pState	// DvA: ensure process menubar visible
+		# pState					= case (getOSDInfoDocumentInterface osdinfo) of	// DvA: for an MDI process open the Window menu
+										MDI		-> openWindowMenu pState
+										_		-> pState
+		= pState
 where
 	createOSDInfo :: !OSDInfo !(IOSt .l) -> IOSt .l
 	createOSDInfo emptyOSDInfo ioState
 		| di==NDI
-			= ioStSetOSDInfo emptyOSDInfo ioState
+			# (tb,ioState)	= getIOToolbox ioState
+			# (osdinfo,tb)	= osOpenNDI tb
+			# ioState		= ioStSetOSDInfo osdinfo ioState
+			# ioState		= setIOToolbox tb ioState
+			= ioState
 		# (atts,ioState)	= ioStGetProcessAttributes ioState
 		  acceptOpenFiles	= contains isProcessOpenFiles atts
 		# (tb,ioState)		= getIOToolbox ioState

@@ -271,7 +271,7 @@ handleContextOSEvent` osEvent context tb
 	= (setReplyInOSEvent return,context,tb)
 
 
-CCgetDC :: !.Int !.Int !.Int !.Int !.Int !.Int !.Int !*(Maybe !*Context) !*OSToolbox -> *(!Int,!(!Int,!Int,!Int,!Int),!Int,!*Maybe *Context,!.OSToolbox);
+CCgetDC :: !.Int !.Int !.Int !.Int !.Int !.Int !.Int !*(Maybe *Context) !*OSToolbox -> *(!Int,!(!Int,!Int,!Int,!Int),!Int,!*Maybe *Context,!.OSToolbox);
 CCgetDC doDialog emulateScreen devmodeSize devmodePtr devicePtr driverPtr outputPtr Nothing os
 	# (ok,first,last,copies,pdPtr,deviceContext,os)
 		= getDC doDialog emulateScreen 1 devmodeSize devmodePtr devicePtr driverPtr outputPtr os

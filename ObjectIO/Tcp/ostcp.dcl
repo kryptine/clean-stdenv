@@ -32,4 +32,4 @@ os_connectTCP				:: !Int !Bool !(!Bool,!Int) !(!Int,!Int) !*env
 
 os_select_inetevents		:: !EndpointRef !InetReceiverCategory !Int !Bool !Bool !Bool !*env -> *env
 							//	only usable for ListenerReceiver, RChanReceiver, SChanReceiver categories
-getMbStopTime				:: !(Maybe !Timeout) !*env -> (!(!Bool, !Int), !*env) | ChannelEnv env
+getMbStopTime				:: !(Maybe Timeout) !*env -> (!(!Bool, !Int), !*env) | ChannelEnv env

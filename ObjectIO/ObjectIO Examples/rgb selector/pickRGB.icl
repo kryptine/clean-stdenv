@@ -53,12 +53,12 @@ where
 
 /*	The definition of the text-slider component:	*/
 
-::	*RGBPickControl ls pst
+::	RGBPickControl ls pst
 	:==	:+: SliderControl TextControl ls pst
 
 RGBPickControl :: RGBColour (String,Id,Id) Id (RGBColour->Int) (Int->RGBColour->RGBColour)
 				 (Maybe ItemPos)
-	-> RGBPickControl *RGBColour (PSt .l)
+	-> RGBPickControl RGBColour (PSt .l)
 RGBPickControl rgb (text,sid,tid) did get set maybePos
 	=	  SliderControl Horizontal length sliderstate slideraction
 													[ControlId sid:controlPos]
@@ -70,7 +70,7 @@ where
 	length		= PixelWidth (MaxRGB-MinRGB+1)
 	sliderstate	= {sliderMin=MinRGB, sliderMax=MaxRGB, sliderThumb=get rgb}
 	
-	slideraction :: SliderMove (*RGBColour,PSt .l) -> (*RGBColour,PSt .l)
+	slideraction :: SliderMove (RGBColour,PSt .l) -> (RGBColour,PSt .l)
 	slideraction move (rgb,pst)
 		= (	newRGBColour newrgb
 		  ,	appListPIO [ setSliderThumb sid y
@@ -98,7 +98,7 @@ ColourText text x
 ::	ColourBoxControl ls pst
 	:==	CustomControl ls pst
 
-ColourBoxControl :: RGBColour Id (Maybe ItemPos) -> *ColourBoxControl .ls .pst
+ColourBoxControl :: RGBColour Id (Maybe ItemPos) -> ColourBoxControl .ls .pst
 ColourBoxControl rgb did maybePos
 	= CustomControl {w=40,h=40} (ColourBoxLook rgb)
 			[	ControlId did
@@ -125,13 +125,13 @@ setColourBox id rgb iost
 ::	Out		=	OutGet RGBColour	| OutSet
 ::	RGBId	:==	R2Id In Out
 
-::	ColourPickAccess pst	:==	Receiver2 In Out *RGBColour pst
+::	ColourPickAccess pst	:==	Receiver2 In Out RGBColour pst
 
-ColourPickAccess :: RGBId [(String,Id,Id)] Id -> *ColourPickAccess (PSt .l)
+ColourPickAccess :: RGBId [(String,Id,Id)] Id -> ColourPickAccess (PSt .l)
 ColourPickAccess rid rgbpicks did
 	= Receiver2 rid accessRGB []
 where
-	accessRGB :: In (RGBColour,PSt .l) -> (Out,*(*RGBColour,PSt .l))
+	accessRGB :: In (RGBColour,PSt .l) -> (Out,*(RGBColour,PSt .l))
 	accessRGB InGet (rgb,pst)
 		= (OutGet rgb,(newRGBColour rgb,pst))
 	accessRGB (InSet rgb=:{r,g,b}) (_,pst=:{io})
@@ -146,7 +146,7 @@ where
 
 /*	The definition of the assembled colour picking control:	*/
 
-::	*ColourPickControl ls pst
+::	ColourPickControl ls pst
 	:==	NewLS
 		(	LayoutControl
 			(	:+:	(LayoutControl (ListLS (:+: SliderControl TextControl)))
@@ -175,6 +175,6 @@ where
 	(rpicks,gpicks,bpicks)				= ((rtext,rid,rtid),(gtext,gid,gtid),(btext,bid,btid))
 	left								= Just (Left,NoOffset)
 
-newRGBColour :: !RGBColour -> *RGBColour
+newRGBColour :: !RGBColour -> RGBColour
 newRGBColour {r,g,b}
 	= {r=r,g=g,b=b}

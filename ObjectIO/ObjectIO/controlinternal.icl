@@ -749,7 +749,7 @@ where
 	resizeable				= True
 	
 	drawInWItem :: !OSWindowMetrics !OSWindowPtr Bool (Maybe Id) !Bool !OSRect !Id !WItemHandle` !*(!v:(Maybe u:x),w:(St *Picture u:x),!*OSToolbox)
-																	     -> (!Bool,!WItemHandle`,!*(!v:(Maybe u:x),z:(St *Picture u:x),!*OSToolbox)), [v<=u,w<=z]
+																	     -> (!Bool,!WItemHandle`,!*(!v:(Maybe u:x),w:(St *Picture u:x),!*OSToolbox)), [v<=u]
 	
 	drawInWItem wMetrics wPtr resizeable defId contextShow clipRect id itemH=:{wItemId`,wItemPtr`,wItemKind`=IsCompoundControl} x_tb
 		| not (identifyMaybeId id wItemId`)
@@ -989,10 +989,7 @@ where
 									= osCreateEmptyPopUpControl wPtr /*popUpPtr*/ (0,0) itemH.wItemShow ableContext 
 																(toTuple popUpPos) (toTuple popUpSize) (length newItems) isEditable tb
 				# maybeEditPtr		= if isEditable (Just editPtr) (Nothing)
-				# (_,tb)			= stateMap2 (appendPopUp newPopUpPtr maybeEditPtr newIndex) newItems (1,tb)
-			//	# tb				= osStackWindow newPopUpPtr popUpPtr tb
-// DvA:???opMac???				# (_,_,tb)			= osStackWindow newPopUpPtr popUpPtr k` 0 tb	// PA: for control delayinfo can be ignored
-// PA: klopt, ik heb osCreateEmptyPopUpControl een extra argument meegegeven dat zelf osStackWindow aanroept.
+				# tb				= osCreatePopUpControlItems newPopUpPtr maybeEditPtr ableContext (map fst newItems) newIndex tb
 				# tb				= osDestroyPopUpControl popUpPtr popUpEdit tb
 				  newPopUpInfo		= {	popUpInfoItems = newItems
 									  ,	popUpInfoIndex = newIndex
@@ -1019,11 +1016,6 @@ where
 				newIndex		= if (curIndex<=index) curIndex (curIndex+index)
 				(before,after)	= split index curItems
 				
-				appendPopUp :: !OSWindowPtr !(Maybe OSWindowPtr) !Index !(PopUpControlItem .pst) !(!Int,!*OSToolbox) -> (!Int,!*OSToolbox)
-				appendPopUp popUpPtr editPtr index (title,_) (itemNr,tb)
-					# (_,tb)			= osCreatePopUpControlItem popUpPtr editPtr (-1) ableContext title (index==itemNr) itemNr tb
-					= (itemNr+1,tb)
-			
 			openWItemPopUpItems wPtr index newItems id itemH=:{wItemId,wItems} tb
 				| identifyMaybeId id wItemId
 					= (True,itemH,tb)
@@ -1079,10 +1071,7 @@ where
 									= osCreateEmptyPopUpControl wPtr /*popUpPtr*/ (0,0) itemH.wItemShow ableContext 
 																(toTuple popUpPos) (toTuple popUpSize) (length newItems) isEditable tb
 				# maybeEditPtr		= if isEditable (Just editPtr) Nothing
-				# (_,tb)			= stateMap2 (appendPopUp newPopUpPtr maybeEditPtr newIndex) newItems (1,tb)
-			//	# tb				= osStackWindow newPopUpPtr popUpPtr tb
-// DvA:???opMac???				# (_,_,tb)			= osStackWindow newPopUpPtr popUpPtr k` 0 tb	// PA: for control delayinfo can be ignored
-// PA: klopt, ik heb osCreateEmptyPopUpControl een extra argument meegegeven dat zelf osStackWindow aanroept.
+				# tb				= osCreatePopUpControlItems newPopUpPtr maybeEditPtr ableContext (map fst newItems) newIndex tb
 				# tb				= osDestroyPopUpControl popUpPtr maybeEditPtr tb
 				  newPopUpInfo		= {	popUpInfoItems = newItems
 									  ,	popUpInfoIndex = newIndex
@@ -1108,11 +1097,6 @@ where
 				nrNewItems			= length newItems
 				newIndex			= if (isMember curIndex indexs) 1 (min nrNewItems curIndex)
 				
-				appendPopUp :: !OSWindowPtr !(Maybe OSWindowPtr) !Index !(PopUpControlItem .ps) !(!Int,!*OSToolbox) -> (!Int,!*OSToolbox)
-				appendPopUp popUpPtr editPtr index (title,_) (itemNr,tb)
-					# (_,tb)		= osCreatePopUpControlItem popUpPtr editPtr (-1) ableContext title (index==itemNr) itemNr tb
-					= (itemNr+1,tb)
-			
 			closeWItemPopUpItems wPtr indexs id itemH=:{wItemId,wItems} tb
 				| identifyMaybeId id wItemId
 					= (True,itemH,tb)
@@ -1294,7 +1278,7 @@ where
 		spaces`					= getcontrolitemspace` (snd (cselect iscontrolitemspace` (ControlItemSpace` (fst miItemSpaces) (snd miItemSpaces)) itemAtts))
 		(minx,maxx,viewx)		= (domainRect.rleft,domainRect.rright, contentSize.w)
 		(miny,maxy,viewy)		= (domainRect.rtop, domainRect.rbottom,contentSize.h)
-		newOrigin				= {x=setBetween (oldOrigin.x+v.vx) minx (maxx-viewx),y=setBetween (oldOrigin.y+v.vy) miny (maxy-viewy)}
+		newOrigin				= {x=setBetweenCheckBounds (oldOrigin.x+v.vx) minx (maxx-viewx),y=setBetweenCheckBounds (oldOrigin.y+v.vy) miny (maxy-viewy)}
 
 
 /*	Set the ViewDomain of a CompoundControl. (In future versions also customised controls.)
@@ -1379,6 +1363,7 @@ where
 									Just rgn -> osdisposergn rgn tb
 									nothing  -> tb
 		# (itemH, tb)			= forceValidCompoundClipState` miOSMetrics True wPtr defaultId shownContext itemH tb
+		# itemH					= {itemH & wItemAtts` = replaceControlSizeAtt newContentSize itemH.wItemAtts`}		// PA: update required because controllayout.icl relies on info
 		# (updRgn,tb)			= relayoutControls` miOSMetrics ableContext1 shownContext1 newContentRect newContentRect itemPos itemPos itemPtr defaultId
 									oldItems` itemH.wItems` tb
 		| shownContext1
@@ -1415,6 +1400,10 @@ where
 		hMargins`				= getcontrolhmargin`   (snd (cselect iscontrolhmargin`   (ControlHMargin`   (fst miHMargins)   (snd miHMargins))   itemAtts))
 		vMargins`				= getcontrolvmargin`   (snd (cselect iscontrolvmargin`   (ControlVMargin`   (fst miVMargins)   (snd miVMargins))   itemAtts))
 		spaces`					= getcontrolitemspace` (snd (cselect iscontrolitemspace` (ControlItemSpace` (fst miItemSpaces) (snd miItemSpaces)) itemAtts))
+		
+		replaceControlSizeAtt :: !Size ![ControlAttribute`] -> [ControlAttribute`]
+		replaceControlSizeAtt size atts
+			= replaceOrAppend iscontrolviewsize` (ControlViewSize` size) (filter (not o iscontroloutersize`) atts)
 
 
 setcontrolscrollfun	:: !Id !Direction ScrollFunction !WindowHandle` -> WindowHandle`

@@ -69,7 +69,7 @@ instance Send				TCP_SCharStream_
 lookupIPAddress	:: !String !*env
 				-> (!Maybe IPAddress, !*env)
 				|  ChannelEnv env
-connectTCP_MT	:: !(Maybe !Timeout) !(!IPAddress,!Port) !*env
+connectTCP_MT	:: !(Maybe Timeout) !(!IPAddress,!Port) !*env
 				-> (!TimeoutReport, !Maybe TCP_DuplexChannel, !*env) 
 				|  ChannelEnv env
 openTCP_Listener:: !Port !*env
@@ -93,7 +93,7 @@ tcpPossible		:: !*env
 //	multiplexing
 //	********************************************************************************
 
-selectChannel_MT:: !(Maybe !Timeout)         !*r_channels !*s_channels !*World
+selectChannel_MT:: !(Maybe Timeout)          !*r_channels !*s_channels !*World
 				-> (![(!Int, !SelectResult)],!*r_channels,!*s_channels,!*World)
 				|  SelectReceive r_channels & SelectSend s_channels
 /*	selectChannel_MT mbTimeout r_channels s_channels world
@@ -118,7 +118,7 @@ class SelectReceive channels where
 	accRChannels	:: (PrimitiveRChannel -> (x, PrimitiveRChannel)) !*channels
 					-> (![x], !*channels)
 	getRState		:: !Int !*channels !*World
-					-> (!Maybe !SelectResult, !*channels, !*World)
+					-> (!Maybe SelectResult, !*channels, !*World)
 /*	accRChannels f channels
 		applies a function on each channel in channels and returns a list which
 		contains the result for each application.

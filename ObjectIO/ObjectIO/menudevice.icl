@@ -46,8 +46,8 @@ menuShow pState=:{io=ioState}
 		= {pState & io=ioState}
 	# (osdinfo,ioState)			= ioStGetOSDInfo ioState
 	  maybeMenuBar				= getOSDInfoOSMenuBar osdinfo
-	| isNothing maybeMenuBar
-		= menudeviceFatalError "MenuFunctions.dShow" "OSMenuBar could not be retrieved from OSDInfo"
+	| isNothing maybeMenuBar	// No menu bar present, nothing to do
+		= {pState & io=ioState}
 	| otherwise
 		# osMenuBar				= fromJust maybeMenuBar
 		# (osMenuBar,ioState)	= accIOToolbox (osMenuBarSet osMenuBar) ioState

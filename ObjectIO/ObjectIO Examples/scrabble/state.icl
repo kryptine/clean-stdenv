@@ -74,8 +74,8 @@ initstate wordlist
 	For this purpose the function initialisestate is used.
 ****************************************************************************************************************/
 initialisestate :: (PSt *State) -> PSt *State
-initialisestate pst=:{ls=t=:{random=rs,player1,player2}}
-	# (rs,pst)					= getRandomList rs pst
+initialisestate pst=:{ls=t=:{random=rs,player1,player2},io}
+	# (rs,io)					= getRandomList rs io
 	  (letterbox,letters1,rs)	= grab letterbox 7 rs
 	  (letterbox,letters2,rs)	= grab letterbox 7 rs
 	= {pst & ls={t	& playmode		= EndPlayer2
@@ -87,6 +87,7 @@ initialisestate pst=:{ls=t=:{random=rs,player1,player2}}
 					, dimensions	= initdimensions
 					, random		= rs
 				}
+	       , io=io
 	  }
 where
 	getRandomList :: ![Int] !*env -> (![Int],!*env) | TimeEnv env

@@ -76,7 +76,7 @@ rsIsClosed _				= False
 
 //	Starting an interactive process.
 
-initContext :: !.(ProcessInit (PSt .l)) !String !.l !DocumentInterface !ProcessKind !*World -> (!Context,!*OSToolbox)
+initContext :: !*(ProcessInit (PSt .l)) !String !.l !DocumentInterface !ProcessKind !*World -> (!Context,!*OSToolbox)
 initContext ioDefInit ioDefAbout local documentInterface ioKind world
 	# w						= loadWorld world
 	# world					= storeWorld w world
@@ -128,7 +128,7 @@ where
 	initModalId			= Nothing
 	ioStack				= []
 
-createNewIOSt :: ![ProcessAttribute (PSt .l)] !.(ProcessInit (PSt .l)) String !SystemId !(Maybe SystemId) 
+createNewIOSt :: ![ProcessAttribute (PSt .l)] !*(ProcessInit (PSt .l)) String !SystemId !(Maybe SystemId) 
 					!(Maybe GUIShare) !Bool !DocumentInterface !ProcessKind
 	-> IOSt .l
 createNewIOSt pAtts ioDefInit ioDefAbout nr parentId guishare isSubProcess documentInterface ioKind
@@ -460,7 +460,7 @@ NotShareGUI			:==	False
 
 //	Create a virtual process that will create other interactive processes.
 
-addVirtualProcess :: !.(ProcessInit (PSt .l)) String .l !(PSt .l`) -> PSt .l`
+addVirtualProcess :: !*(ProcessInit (PSt .l)) String .l !(PSt .l`) -> PSt .l`
 addVirtualProcess ioDefInit ioDefAbout local pState
 	# (nr,ioState)			= ioStNewMaxIONr pState.io
 	# (parentId,ioState)	= ioStGetIOId					ioState
@@ -478,7 +478,7 @@ addVirtualProcess ioDefInit ioDefAbout local pState
 
 //	Create a data sharing interactive process.
 
-addInteractiveProcess :: ![ProcessAttribute (PSt .l)] !(ProcessInit (PSt .l)) String .l !Bool !DocumentInterface !(PSt .l`) -> PSt .l`
+addInteractiveProcess :: ![ProcessAttribute (PSt .l)] !*(ProcessInit (PSt .l)) String .l !Bool !DocumentInterface !(PSt .l`) -> PSt .l`
 addInteractiveProcess pAtts ioDefInit ioDefAbout local isSubProcess documentInterface pState
 	# (nr,ioState)			= ioStNewMaxIONr pState.io
 	# (parentId,ioState)	= ioStGetIOId						ioState
