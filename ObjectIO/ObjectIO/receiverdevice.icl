@@ -4,7 +4,8 @@ implementation module receiverdevice
 //	Clean Object I/O library, version 1.2
 
 
-import	StdBool, StdFunc, StdList, StdTuple
+import	StdEnv
+import	StdReceiver
 import	devicefunctions, iostate, receiverevent, receiverid
 from	commondef	import FatalError, URemove, UCond
 from	StdPSt		import	appPIO, accPIO
@@ -37,8 +38,12 @@ receiverOpen pState=:{io=ioState}
 		= {pState & io=ioState}
 
 receiverClose :: !(PSt .l .p) -> PSt .l .p
-receiverClose pState=:{io}
-	# (receivers,ioState)	= IOStGetDevice ReceiverDevice io
+receiverClose pState=:{io=ioState}
+// MW11...
+	# ioState				= callReceiverCloseFunctions ioState
+	  ioState				= IOStSetRcvDisabled True ioState
+// ... MW11
+	# (receivers,ioState)	= IOStGetDevice ReceiverDevice ioState
 	  rHs					= (ReceiverSystemStateGetReceiverHandles receivers).rReceivers
 	  rIds					= map (\{rHandle={rId}}->rId) rHs
 	# (idtable,ioState)		= IOStGetIdTable ioState
@@ -46,7 +51,19 @@ receiverClose pState=:{io}
 	# ioState				= unbindRIds rIds ioState
 	# ioState				= IOStRemoveDevice ReceiverDevice ioState
 	= {pState & io=ioState}
-
+// MW11..
+  where
+	callReceiverCloseFunctions :: !(IOSt .l .p) -> (IOSt .l .p)
+	callReceiverCloseFunctions ioState
+		# (receivers,ioState)	= IOStGetDevice ReceiverDevice ioState
+		  rHs					= (ReceiverSystemStateGetReceiverHandles receivers).rReceivers
+		= seq (map callCloseFunc rHs) ioState
+	  where
+		callCloseFunc {rHandle={rInetInfo=Nothing, rConnected}} ioState
+			= seq (map closeReceiver rConnected) ioState
+		callCloseFunc {rHandle={rInetInfo=Just (_,_,_,closeFun), rConnected}} ioState
+			= appIOToolbox closeFun (seq (map closeReceiver rConnected) ioState)
+// .. MW11
 
 /*	The receiver handles three cases of message events (for the time being timers are not included in receivers):
 	- QASyncMessage:
@@ -142,9 +159,58 @@ where
 			= (True,[ReceiverUnable],[],[rsH:rsHs],ps)
 		applyReceiverFunction _ rsHs ps
 			= (False,[],[],rsHs,ps)
+//	MW11..
+receiverIO deviceEvent=:(InternetEvent event) pState
+	#	(receivers,pState)	= accPIO (IOStGetDevice ReceiverDevice) pState
+		rsHs				= ReceiverSystemStateGetReceiverHandles receivers
+		pState				= letOneReceiverDoInetEvent event rsHs pState
+	= (deviceEvent,pState)
+// 	..MW11
 receiverIO _ _
 	= receiverdeviceFatalError "receiverIO" "device event passed receiver event filter without handling"
 
+// MW11..
+letOneReceiverDoInetEvent (eventCode,endpointRef,inetReceiverCategory,misc) {rReceivers=rsHs} pState
+	# (opt_rsH,rsHs)		= selectReceiver (endpointRef,inetReceiverCategory) rsHs
+	| isNothing opt_rsH
+		= pState			// geen IOSetReceiverDevice nodig, omdat er geen veranderingen gebeurd zijn
+	# eventInfo				= (eventCode,endpointRef,misc)
+	# rsH = fromJust opt_rsH
+	| rsH.rHandle.rSelect==Able && isEmpty rsH.rHandle.rASMQ
+		 = applyInetEvent eventInfo rsH rsHs pState	// apply the event immediately
+	// receiver is unable, so queue the event via asyncSend to handle it later
+	# receivers			= ReceiverSystemState {rReceivers=[rsH:rsHs]} // left at the beginnig
+	  pState			= appPIO (IOStSetDevice receivers) pState
+	# (sR,pState)		= asyncSend (getInetReceiverRId rsH.rHandle) eventInfo pState
+	| sR<>SendOk
+		= abort "receiverdevice: I have a bug (78)"	
+	= pState
+  where
+
+	selectReceiver 	:: !(!EndpointRef`,!InetReceiverCategory`) ![ReceiverStateHandle .ps]
+					-> (Maybe (ReceiverStateHandle .ps),![ReceiverStateHandle .ps])
+	selectReceiver receiverId=:(endpointRef,type) [rsH=:{rHandle={rInetInfo=Just (epr,tp,_,_)}}:rsHs]
+		| endpointRef==epr && type==tp
+			= (Just rsH,rsHs)
+		# (opt_rsH, rsHs) = selectReceiver receiverId rsHs
+		= (opt_rsH,[rsH:rsHs])
+	selectReceiver receiverId [rsH:rsHs]
+		# (opt_rsH, rsHs) = selectReceiver receiverId rsHs
+		= (opt_rsH,[rsH:rsHs])
+	selectReceiver _ []
+		= (Nothing,[])
+	
+
+applyInetEvent	::	!InetReceiverASMQType !.(ReceiverStateHandle *(PSt .ls .ps))
+					[ReceiverStateHandle *(PSt .ls .ps)] !*(PSt .ls .ps)
+				->	(PSt .ls .ps)
+applyInetEvent eventInfo rsH=:{rState,rHandle} rsHs pState
+	= pState2
+	with
+		pState1				= appPIO (IOStSetDevice receivers) pState
+		(rState2,pState2)	= receiverApplyInetEvent eventInfo rHandle (rState,pState1)
+		receivers			= ReceiverSystemState {rReceivers=[{rsH & rState=rState2}:rsHs]} // left at the beginnig
+// ..MW11
 
 identifyReceiverStateHandle :: !Id !(ReceiverStateHandle .pst) -> (!Bool,!ReceiverStateHandle .pst)
 identifyReceiverStateHandle id rsH=:{rHandle={rId}}

@@ -340,7 +340,13 @@ stdUnfillUpdAreaLook :: SelectState !UpdateState !*Picture -> *Picture
 	|	ErrorViolateDI						// Violation against DocumentInterface
 	|	ErrorIdsInUse						// Object contains Ids that are bound
 	|	ErrorUnknownObject					// Object can not be found
+	|	ErrorNotifierOpen					// It was tried to open a second send notifier // MW11++
 	|	OtherError !String					// Other kind of error
 
 instance	==			ErrorReport			// Constructor equality
 instance	toString	ErrorReport			// Constructor as String
+
+// MW11..
+::	OkBool									// iff True, the operation was successful
+	:==	Bool
+// ..MW11

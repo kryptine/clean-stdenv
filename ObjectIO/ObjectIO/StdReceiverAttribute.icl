@@ -29,9 +29,15 @@ isReceiverSelectState	:: !(ReceiverAttribute .st) -> Bool
 isReceiverSelectState		(ReceiverSelectState _)	= True
 isReceiverSelectState		_						= False
 
+isReceiverConnectedReceivers	:: !(ReceiverAttribute .st) 	-> Bool // MW11++
+isReceiverConnectedReceivers	(ReceiverConnectedReceivers _)	= True
+isReceiverConnectedReceivers 	_ 								= False
 
 getReceiverInitFun :: !(ReceiverAttribute .st) -> IdFun .st
 getReceiverInitFun (ReceiverInit f) = f
 
 getReceiverSelectStateAtt :: !(ReceiverAttribute .st) -> SelectState
 getReceiverSelectStateAtt (ReceiverSelectState s) = s
+
+getReceiverConnectedReceivers	:: !(ReceiverAttribute .st) -> [Id] // MW11++
+getReceiverConnectedReceivers (ReceiverConnectedReceivers ids) = ids

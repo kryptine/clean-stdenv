@@ -14,6 +14,7 @@ from	StdIOBasic	import IdFun
 from	StdIOCommon	import DocumentInterface, MDI, SDI, NDI
 from	StdPicture	import Picture
 from	iostate		import PSt, IOSt
+from	channelenv	import  ChannelEnv // MW11++
 
 
 /*	PSt is an environment instance of the following classes:
@@ -21,11 +22,17 @@ from	iostate		import PSt, IOSt
 	- FileSelectEnv	(see StdFileSelect)
 	- TimeEnv		(see StdTime)
 	- playSoundFile (see StdSound)
+	- ChannelEnv	(see StdChannels) // MW11++
+	- Ids			(see StdId) // MW11++
+	
+	IOSt is also an environment instance of the classes FileEnv, TimeEnv & ChannelEnv
 */
-instance FileEnv		(PSt .l .p)
+instance FileEnv		(PSt .l .p), (IOSt .l .p) // MW11 added IOSt
 instance FileSelectEnv	(PSt .l .p)
-instance TimeEnv		(PSt .l .p)
+instance TimeEnv		(PSt .l .p), (IOSt .l .p) // MW11 added IOSt
 instance playSoundFile	(PSt .l .p)
+instance ChannelEnv 	(PSt .l .p), (IOSt .l .p) // MW11 added IOSt
+instance Ids		 	(PSt .l .p)
 
 
 /*	accScreenPicture provides access to an initial Picture as it would be created in

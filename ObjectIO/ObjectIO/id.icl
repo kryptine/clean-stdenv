@@ -101,15 +101,22 @@ isSpecialId :: !Id -> Bool
 isSpecialId (SpecialId _)	= True
 isSpecialId _				= False
 
-instance == Id where
+instance == Id
+where
 	(==) :: !Id !Id -> Bool
 	(==) (CustomId	 id1)	id	= case id of
 									(CustomId	id2)	-> id1==id2
+									(CustomRId	id2)	-> id1==id2 // MW11++
+									(CustomR2Id	id2)	-> id1==id2 // MW11++
 									_					-> False
 	(==) (CustomRId	 id1)	id	= case id of
+									(CustomId	id2)	-> id1==id2 // MW11++
 									(CustomRId	id2)	-> id1==id2
+									(CustomR2Id	id2)	-> id1==id2 // MW11++
 									_					-> False
 	(==) (CustomR2Id id1)	id	= case id of
+									(CustomId	id2)	-> id1==id2 // MW11++
+									(CustomRId	id2)	-> id1==id2 // MW11++
 									(CustomR2Id	id2)	-> id1==id2
 									_					-> False
 	(==) (SysId		 id1)	id	= case id of

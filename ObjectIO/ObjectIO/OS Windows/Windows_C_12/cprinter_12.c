@@ -1,3 +1,4 @@
+// CPrinter.c -- for printing in Clean (0.8 I/O library and Object I/O library)
 #include <windows.h>
 #include <limits.h>
 #include "cpicture_12.h"
@@ -13,51 +14,318 @@ int		semaphor=0;
 extern HWND   ghMainWindow;
 extern HINSTANCE ghInst;
 
-void startPage(int hdc, int os, int *ok, int *hdcReturn, int *osReturn)
+typedef struct pass_object *PassObject;
+/*	with a PassObject one can pass strings back to Clean. It's first DWORD
+	contains the size of the object -8, the second DWORD contains the length
+	of the string, and the rest contains the string itself. In
+
+	PassObject	pObj;
+	
+	the following expression points to a Clean string:
+
+	((char*)passObj)[4] 
+*/
+PassObject	passObj1 = NULL, passObj2 = NULL, passObj3 = NULL, passObj4 = NULL;
+
+void mwStrcpy(char* dest, char *src)
 {
-	*osReturn = os;
-	*hdcReturn = hdc;
-	*ok = StartPage((HDC) hdc) > 0;
+	int i=0;
+	while (src[i]!='\0')
+		{
+		dest[i]	= src[i];
+		i++;
+		};
+	dest[i]	= '\0';
 }
 
-void endPage(int hdc, int os, int *ok, int *hdcReturn, int *osReturn)
+void mwMemcpy(char* dest, char *src, int count)
 {
-	*osReturn = os;
-	*hdcReturn = hdc;
-	*ok = EndPage((HDC) hdc) > 0;
+	int i;
+	for(i=0; i<count; i++)
+		dest[i]	= src[i];
 }
 
-void startDoc(int hdc, int os, int *err, int *hdcReturn, int *osReturn)
+int CStringLength(char* string)
+// returns length of C string INCLUDING the '\0'
+{
+	int i=0;
+	while(string[i]!='\0')
+		i++;
+	i++;
+	return i;
+}
+
+CleanString PassCleanString(PassObject *pPassObj, char* data,unsigned int size)
+{
+	unsigned int	passObjSize,i;
+	PassObject		passObj;
+
+	if (*pPassObj==NULL)
+		{
+		*pPassObj	= (PassObject) LocalAlloc(LMEM_FIXED, size+8);
+		((unsigned int*)*pPassObj)[0]	= size;
+		};
+	passObjSize	= ((unsigned int*)*pPassObj)[0];
+	if (passObjSize<size)
+		{
+		LocalFree(LocalHandle(*pPassObj));
+		*pPassObj	= (PassObject) LocalAlloc(LMEM_FIXED, size+8);
+		((unsigned int*)*pPassObj)[0]	= size;
+		};
+	// now the pass object is big enough, so fill it with data
+	passObj		= *pPassObj;
+	((unsigned int*)passObj)[1]	= size;
+	for(i=0; i<size; i++)
+		((char*)passObj)[i+8]	= data[i];
+	return (CleanString) (((unsigned int*)passObj)+1);
+}
+
+#define tachtig 80
+void getDevmodeSizeC(int *size, HANDLE *phPrinter,
+					 CleanString *device, CleanString *driver,  CleanString *output)
+{
+	char	szPrinterSpace[80];
+	char	*szPrinter = szPrinterSpace;
+	char	*szDevice, *szDriver, *szOutput;
+
+	GetProfileString("windows", "device", ",,,", szPrinter, 80);
+	szDevice = strtokMW(&szPrinter,',',',');
+	szDriver = strtokMW(&szPrinter,',',' ');
+	szOutput = strtokMW(&szPrinter,',',' ');
+	if (*szDevice=='\0' || szDriver=='\0' || *szOutput=='\0')
+		{
+		*size	= 0;
+		return;
+		};
+	*device	= PassCleanString(&passObj1,szDevice,CStringLength(szDevice)+1); // add 1 so '\0' will be passed too
+	*driver	= PassCleanString(&passObj2,szDriver,CStringLength(szDriver)+1);
+	*output	= PassCleanString(&passObj3,szOutput,CStringLength(szOutput)+1);
+	OpenPrinter(szDevice,phPrinter,NULL);
+	*size = DocumentProperties(NULL,*phPrinter,szDevice,NULL,NULL,0);
+}
+
+void getDefaultDevmodeC(char *printSetup, LPHANDLE phPrinter,  CleanString *device)
+{
+	int		size,r1;
+
+	size		= ((int*)printSetup)[0];
+	printSetup	+=4;
+	r1 = DocumentProperties(NULL,phPrinter,((char*)device)+4,
+							(DEVMODE*)printSetup,NULL,DM_OUT_BUFFER);
+	ClosePrinter(phPrinter);
+}
+
+
+
+void os_getpagedimensionsC(	CleanString devmode,
+							CleanString device, CleanString driver,
+							int emulateScreenRes,
+							int *maxX, int *maxY,
+							int *leftPaper, int *topPaper,
+							int *rightPaper, int *bottomPaper,
+							int	*xRes, int *yRes
+						  )
+{
+	HDC	icPrint;
+	int horPaperPixels, verPaperPixels,
+		xResolution,yResolution,
+		scNX, scNY, scDX, scDY;
+	
+
+	icPrint	= CreateIC(	CleanStringCharacters(driver),CleanStringCharacters(device),NULL,
+						(DEVMODE*) CleanStringCharacters(devmode));
+	
+	xResolution = GetDeviceCaps(icPrint, LOGPIXELSX);
+	yResolution = GetDeviceCaps(icPrint, LOGPIXELSY);
+	if (emulateScreenRes)						// for emulation of the screen resolution
+		{	scNX = WinGetHorzResolution();		// all the deviceCaps will be scaled
+			scNY = WinGetVertResolution();
+			scDX = xResolution;
+			scDY = yResolution;
+		}
+	  else
+		{	scNX = 1; scNY = 1; scDX = 1; scDY = 1;	};
+	
+	horPaperPixels	= (GetDeviceCaps(icPrint, PHYSICALWIDTH)*scNX)/scDX;
+	verPaperPixels	= (GetDeviceCaps(icPrint, PHYSICALHEIGHT)*scNY)/scDY;
+
+	*maxX			= (GetDeviceCaps(icPrint, HORZRES)*scNX)/scDX;
+	*maxY			= (GetDeviceCaps(icPrint, VERTRES)*scNY)/scDY;
+
+    *leftPaper		= (-GetDeviceCaps(icPrint, PHYSICALOFFSETX)*scNX)/scDX;
+	*topPaper		= (-GetDeviceCaps(icPrint, PHYSICALOFFSETY)*scNY)/scDY;
+	*rightPaper		= horPaperPixels - *leftPaper;
+	*bottomPaper	= verPaperPixels - *topPaper;
+	
+	if (emulateScreenRes)
+		{	*xRes = scNX;	*yRes = scNY; }
+	  else
+		{	*xRes = xResolution ;	*yRes = yResolution; };
+	DeleteDC(icPrint);
+}
+
+HANDLE setupDevnames(int deviceLength,int driverLength,int outputLength,
+					 char *device,char *driver,char *output)	
+{
+	HANDLE		hDevnames;
+	DEVNAMES	*pDevnames;
+	hDevnames	= (HANDLE) LocalAlloc(LMEM_MOVEABLE, 16+deviceLength+driverLength+outputLength);
+	pDevnames	= LocalLock(hDevnames);
+	pDevnames->wDriverOffset	= 16;
+	pDevnames->wDeviceOffset	= 16+driverLength;
+	pDevnames->wOutputOffset	= 16+driverLength+deviceLength;
+	pDevnames->wDefault			= 0;
+	mwStrcpy(((char*)pDevnames)+pDevnames->wDriverOffset, driver);
+	mwStrcpy(((char*)pDevnames)+pDevnames->wDeviceOffset, device);
+	mwStrcpy(((char*)pDevnames)+pDevnames->wOutputOffset, output);
+	LocalUnlock(hDevnames);
+	return hDevnames;
+}
+
+HANDLE setupDevmode(int size, char *pData)
+{
+	HANDLE	hDevmode;
+	DEVMODE	*pDevmode;
+
+	hDevmode	= (HANDLE) LocalAlloc(LMEM_MOVEABLE, size);
+	pDevmode	= LocalLock(hDevmode);
+	mwMemcpy((char*)pDevmode, pData, size);
+	LocalUnlock(hDevmode);
+	return hDevmode;
+}
+
+void passBackPrintSetup(PRINTDLG *pd, CleanString *o_devmode,
+						CleanString *o_device, CleanString *o_driver, CleanString *o_output)
+{
+	char		*newDriver, *newDevice, *newOutput;
+	DEVMODE		*pDevmode;
+	DEVNAMES	*pDevnames;
+
+	pDevmode	= LocalLock(pd->hDevMode);
+	*o_devmode	= PassCleanString(&passObj1,(char*) pDevmode,
+								   pDevmode->dmSize+pDevmode->dmDriverExtra);
+	LocalUnlock(pd->hDevMode);
+	pDevnames	= LocalLock(pd->hDevNames);
+	newDriver	= ((char*)pDevnames)+(pDevnames->wDriverOffset);
+	newDevice	= ((char*)pDevnames)+(pDevnames->wDeviceOffset);
+	newOutput	= ((char*)pDevnames)+(pDevnames->wOutputOffset);
+	*o_driver	= PassCleanString(&passObj2,newDriver,CStringLength(newDriver)+1);
+	*o_device	= PassCleanString(&passObj3,newDevice,CStringLength(newDevice)+1);
+	*o_output	= PassCleanString(&passObj4,newOutput,CStringLength(newOutput)+1);
+	LocalUnlock(pd->hDevNames);
+}
+
+void get_printSetup_with_PRINTDLG(PRINTDLG *pd, CleanString *o_devmode,
+						CleanString *o_device, CleanString *o_driver, CleanString *o_output)
+{
+	//rMessageBox(NULL, MB_APPLMODAL, "in get_printSetup_with_PRINTDLG", "pd:%i", pd);
+	passBackPrintSetup(pd, o_devmode, o_device, o_driver, o_output);
+	LocalFree(pd->hDevNames);
+	LocalFree(pd->hDevMode);
+}
+
+UINT APIENTRY DialogToFrontHook(HWND hdl, UINT msg, WPARAM wParam, LPARAM lParam)
+// This function hooks the Print dialog. It's purpose is to set the dialog in the
+// foreground.
+{
+     if (msg==WM_INITDIALOG)
+		{ SetForegroundWindow(hdl);
+		};
+	 return FALSE;
+}
+
+void printSetup(int calledFromCleanThread, int devmodeSize,
+			   char *devmode, char *device, char *driver, char *output,
+			   int *ok, PRINTDLG **pdPtr)
+{
+  	int			deviceLength, driverLength, outputLength;
+	HANDLE		hDevnames,hDevmode;
+	static PRINTDLG	pd;
+
+	// Set up DEVNAMES structure
+	
+	//rMessageBox(NULL, MB_APPLMODAL, "in printSetup", "");
+	deviceLength	= CStringLength(device);
+	driverLength	= CStringLength(driver);
+	outputLength	= CStringLength(output);
+	
+	hDevnames	= setupDevnames(deviceLength,driverLength,outputLength,device,driver,output);
+
+	// Set up DEVMODE structure
+	hDevmode	= setupDevmode(devmodeSize,devmode);
+
+	// Set up print dialog record
+	pd.lStructSize = sizeof(PRINTDLG);
+	pd.hwndOwner = calledFromCleanThread ? NULL : ghMainWindow;	// (NULL = desktop)
+//	pd.hwndOwner = NULL;	// (NULL = desktop)
+		// the handle must belong to the active thread, otherwise PrintDlg will crash
+		// When this function is called from the Clean thread, ghMainWindow will not
+		// belong to the active thread.
+	pd.hDevMode = hDevmode;
+	pd.hDevNames = hDevnames;
+	pd.hDC = NULL;
+	pd.Flags =	PD_PRINTSETUP | PD_ENABLESETUPHOOK;
+	pd.nFromPage = 1;
+	pd.nToPage = 1; 
+	pd.nMinPage = 1;
+	pd.nMaxPage = USHRT_MAX;
+	pd.nCopies = 1;
+	pd.hInstance = NULL;
+	pd.lCustData = 0L;
+	pd.lpfnPrintHook = NULL;
+	pd.lpfnSetupHook = DialogToFrontHook;
+	pd.lpPrintTemplateName = NULL;
+	pd.lpSetupTemplateName = NULL;
+	pd.hPrintTemplate = NULL;
+	pd.hSetupTemplate = NULL;
+
+	// Open print dialog
+	*ok	= PrintDlg(&pd);
+	*pdPtr = &pd;
+}
+
+
+int startPage(int hdc)
+{
+	//rMessageBox(NULL, MB_APPLMODAL, "in startPage", "");
+	return StartPage((HDC) hdc) > 0;
+}
+
+int endPage(int hdc)
+{
+	//rMessageBox(NULL, MB_APPLMODAL, "in endPage", "");
+	return EndPage((HDC) hdc) > 0;
+}
+
+int startDoc(int hdc)
 			// err code: >0:no error, <=0: user cancelled file dialog
 {
-	static DOCINFO docInfo = { sizeof (DOCINFO), "Clean", NULL } ;
+	static DOCINFO docInfo = { sizeof (DOCINFO), "Clean", NULL, NULL, 0 } ;
 
-	*osReturn = os;
-	*hdcReturn = hdc;
-	
+	//rMessageBox(NULL, MB_APPLMODAL, "in startDoc", "");
 	bUserAbort = FALSE ;
     
-	*err = StartDoc((HDC) hdc, &docInfo);
+	return StartDoc((HDC) hdc, &docInfo);
 }
 
-void endDoc(int hdc, int os, int *hdcReturn, int *osReturn)
+void endDoc(int hdc)
 {
-	*osReturn = os;
-	*hdcReturn = hdc;
+	//rMessageBox(NULL, MB_APPLMODAL, "in endDoc", "");
 	if (bUserAbort)
 		AbortDoc((HDC) hdc);
 	  else
 		EndDoc((HDC) hdc);
 }
 
-int deleteDC(int hdc, int os)
+void deleteDC(int hdc)
 {
+	//rMessageBox(NULL, MB_APPLMODAL, "in deleteDC", "");
 	DeleteDC((HDC) hdc);
-	return os;
 }
 
 int wasCanceled()
 {
+	//rMessageBox(NULL, MB_APPLMODAL, "in wasCanceled", "");
 	return bUserAbort;
 }
 
@@ -92,40 +360,41 @@ char * strtokMW(char **str, const char ch1, const char ch2)
 	return start;
 }
 
-UINT APIENTRY DialogToFrontHook(HWND hdl, UINT msg, WPARAM wParam, LPARAM lParam)
-// This function hooks the Print dialog. It's purpose is to set the dialog in the
-// foreground.
-{
-     if (msg==WM_INITDIALOG)
-		{ SetForegroundWindow(hdl);
-		};
-	 return FALSE;
-}
-
-void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, int unq,
-					int *err,
-					int *first, int *last,
-					int *copies,
-					int *deviceContext, int *unqReturn
-					)
+// c-strings are passed to this function !
+void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, int devmodeLength,
+			char *devmode,char *device,char *driver,char *output,
+			int *err,
+			int *first, int *last, int *copies,
+			PRINTDLG	**ppPrintDlg,
+			int *deviceContext
+	 		)
 					// err code: -1:no error, others: non fatal error
 {
 	static PRINTDLG pd;
 	HDC hdcPrint;
 	
-	*unqReturn = unq;
 	*err = -1;
 
 	if (doDialog)
 	  {	// Set up print dialog record
+		HANDLE	hDevnames, hDevmode;
+		int deviceLength,driverLength,outputLength;
+
+		deviceLength	= CStringLength(device);
+		driverLength	= CStringLength(driver);
+		outputLength	= CStringLength(output);
+	
+		hDevnames	= setupDevnames(deviceLength,driverLength,outputLength,
+									device,driver,output);
+		hDevmode	= setupDevmode(devmodeLength,devmode);
 
 		pd.lStructSize = sizeof(PRINTDLG);
 		pd.hwndOwner = calledFromCleanThread ? NULL : ghMainWindow;	// (NULL = desktop)
 			// the handle must belong to the active thread, otherwise PrintDlg will crash
 			// When this function is called from the Clean thread, ghMainWindow will not
 			// belong to the active thread.
-		pd.hDevMode = NULL;
-		pd.hDevNames = NULL;
+		pd.hDevMode = hDevmode;
+		pd.hDevNames = hDevnames;
 		pd.hDC = NULL;
 		pd.Flags = PD_ALLPAGES | PD_COLLATE | PD_RETURNDC | PD_NOSELECTION 
 				 | PD_ENABLEPRINTHOOK;
@@ -161,32 +430,23 @@ void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, int unq,
 			  *last		= 9999;
 			};
 		*copies			= pd.nCopies;
+		*ppPrintDlg		= &pd;
 		hdcPrint		= pd.hDC;
-
 	  }
 
 	else // get dc for default printer
       // This method searches in the WIN.INI file for th default printer name.
 	  
-	  { char	szPrinterSpace[80];
-		char	*szPrinter = szPrinterSpace;
-		char	*szDevice, *szDriver, *szOutput;
-		int		success;
-		GetProfileString("windows", "device", ",,,", szPrinter, 80);
-		szDevice = strtokMW(&szPrinter,',',',');
-		szDriver = strtokMW(&szPrinter,',',' ');
-		szOutput = strtokMW(&szPrinter,',',' ');
-		success = (*szDevice!='\0') && (*szDriver!='\0') && (*szOutput!='\0');
-		if (success)
-		  hdcPrint = CreateDC(szDriver, szDevice, szOutput, NULL);
-		if (success==0 || hdcPrint==NULL)
+		{ 	
+		hdcPrint = CreateDC(driver, device, output, NULL);
+		if (hdcPrint==NULL)
 		  { *err = 0;	// non fatal error, iff e.g. no printer driver is installed
 	 	    return;
 		  };
 		*first	= 1;
 		*last	= 9999;
 		*copies	= 1;
-	  };
+		};
 
 	if (emulateScreen)
 		{	int pXdpi,pYdpi,sXdpi,sYdpi;
@@ -200,45 +460,11 @@ void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, int unq,
 		};
 	
 	*deviceContext	= (int) hdcPrint;
-}
-
-
-
-
-void getCaps( HDC hdcPrint, int unq,
-				int *maxX, int *maxY,
-				int *leftPaper, int *topPaper,
-				int *rightPaper, int *bottomPaper,
-				int *unqReturn
-			)
-{
-	// Get device capabilities
-	int horPaperPixels, verPaperPixels,
-		scNX, scNY, scDX, scDY;
-	
-	*unqReturn = unq;
-	
-	if (GetMapMode(hdcPrint)==MM_ISOTROPIC)		// for emulation of the screen resolution
-		{	scNX = WinGetHorzResolution();		// all the deviceCaps will be scaled
-			scNY = WinGetVertResolution();
-			scDX = GetDeviceCaps(hdcPrint, LOGPIXELSX);
-			scDY = GetDeviceCaps(hdcPrint, LOGPIXELSY);
-		}
-	  else
-		{	scNX = 1; scNY = 1; scDX = 1; scDY = 1;	};
-	
-	horPaperPixels	= (GetDeviceCaps(hdcPrint, PHYSICALWIDTH)*scNX)/scDX;
-	verPaperPixels	= (GetDeviceCaps(hdcPrint, PHYSICALHEIGHT)*scNY)/scDY;
-
-	*maxX			= (GetDeviceCaps(hdcPrint, HORZRES)*scNX)/scDX;
-	*maxY			= (GetDeviceCaps(hdcPrint, VERTRES)*scNY)/scDY;
-
-    *leftPaper		= (-GetDeviceCaps(hdcPrint, PHYSICALOFFSETX)*scNX)/scDX;
-	*topPaper		= (-GetDeviceCaps(hdcPrint, PHYSICALOFFSETY)*scNY)/scDY;
-	*rightPaper		= horPaperPixels - *leftPaper;
-	*bottomPaper	= verPaperPixels - *topPaper;
+	//rMessageBox(NULL, MB_APPLMODAL, "leaving getDC","");
 
 }
+
+
 
 BOOL CALLBACK PrintDlgProc (HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
      {
@@ -334,7 +560,7 @@ HWND CreateCancelDialog()
 		       / 2;
 	textY =    (((DIALOG_HEIGHT*baseunitY)/8) - textHeight)
 			   / 4; 
-	hwndText = CreateWindow ("static", "0 pages printed",WS_VISIBLE | WS_CHILD | SS_CENTER, 
+	hwndText = CreateWindow ("static", "",WS_VISIBLE | WS_CHILD | SS_CENTER, 
 									textX, textY, textWidth, textHeight,
 									dlgHdl, (HMENU) 0, ghInst, 0);
 
@@ -365,3 +591,16 @@ int addSemaphor(int add)
 	semaphor+=add;
 	return old;
 }
+
+int os_printsetupvalidC(	CleanString devmode,
+							CleanString device, CleanString driver
+					  )
+{
+	HDC	icPrint;
+
+	icPrint	= CreateIC(	CleanStringCharacters(driver),CleanStringCharacters(device),NULL,
+						(DEVMODE*) CleanStringCharacters(devmode));
+	if (icPrint)
+		DeleteDC(icPrint);
+	return icPrint!=NULL;
+}	

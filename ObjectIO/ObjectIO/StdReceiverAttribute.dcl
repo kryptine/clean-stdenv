@@ -32,11 +32,12 @@ isValidReceiver2Attribute :: !(ReceiverAttribute .st) -> Bool
 */
 isReceiverInit				:: !(ReceiverAttribute .st) -> Bool
 isReceiverSelectState		:: !(ReceiverAttribute .st) -> Bool
-
+isReceiverConnectedReceivers:: !(ReceiverAttribute .st) -> Bool // MW11++
 
 /*	The following functions return the attribute value if appropriate. 
 	THESE ARE PARTIAL FUNCTIONS! They are only defined on the corresponding
 	attribute.
 */
-getReceiverInitFun			:: !(ReceiverAttribute .st) -> IdFun .st
-getReceiverSelectStateAtt	:: !(ReceiverAttribute .st) -> SelectState
+getReceiverInitFun				:: !(ReceiverAttribute .st) -> IdFun .st
+getReceiverSelectStateAtt		:: !(ReceiverAttribute .st) -> SelectState
+getReceiverConnectedReceivers	:: !(ReceiverAttribute .st) -> [Id] // MW11++

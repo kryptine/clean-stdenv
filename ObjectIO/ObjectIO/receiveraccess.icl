@@ -7,19 +7,23 @@ implementation module receiveraccess
 import	id, receiverdefaccess, receiverhandle
 
 
-newReceiverStateHandle :: !Id .ls !SelectState !(ReceiverFunction m *(.ls,.pst)) -> ReceiverStateHandle .pst
-newReceiverStateHandle id localState select f
+// MW11 added connectedIds
+newReceiverStateHandle :: !Id .ls !SelectState ![Id] !(ReceiverFunction m *(.ls,.ps)) -> ReceiverStateHandle .ps
+newReceiverStateHandle id localState select connectedIds f
 	= {	rState	= localState
-	  ,	rHandle	= newReceiverHandle id select f	
+	  ,	rHandle	= newReceiverHandle id select connectedIds f	
 	  }
 
-newReceiverHandle :: !Id !SelectState !(ReceiverFunction m *(.ls,.pst)) -> ReceiverHandle .ls .pst
-newReceiverHandle id select f
-	= {	rId		= id
-	  ,	rASMQ	= []
-	  ,	rSelect	= select
-	  ,	rOneWay	= True
-	  ,	rFun	= onewaytotriple f
+// MW11 added rInetInfo,rConnected
+newReceiverHandle :: !Id !SelectState ![Id] !(ReceiverFunction m *(.ls,.ps)) -> ReceiverHandle .ls .ps
+newReceiverHandle id select connectedIds f
+	= {	rId			= id
+	  ,	rASMQ		= []
+	  ,	rSelect		= select
+	  ,	rOneWay		= True
+	  ,	rFun		= onewaytotriple f
+	  , rInetInfo	= Nothing
+  	  , rConnected	= connectedIds
 	  }
 
 onewaytotriple :: !(ReceiverFunction m *(.ls,.pst)) m !(.ls,.pst) -> (.ls,[r],.pst)
@@ -27,19 +31,23 @@ onewaytotriple f m (ls,ps)
 	# (ls,ps)	= f m (ls,ps)
 	= (ls,[],ps)
 
-newReceiverStateHandle2 :: !Id .ls !SelectState !(Receiver2Function m r *(.ls,.pst)) -> ReceiverStateHandle .pst
-newReceiverStateHandle2 id localState select f
+// MW11 added connectedIds
+newReceiverStateHandle2 :: !Id .ls !SelectState ![Id] !(Receiver2Function m r *(.ls,.ps)) -> ReceiverStateHandle .ps
+newReceiverStateHandle2 id localState select connectedIds f
 	= {	rState	= localState
-	  ,	rHandle	= newReceiverHandle2 id select f
+	  ,	rHandle	= newReceiverHandle2 id select connectedIds f
 	  }
 
-newReceiverHandle2 :: !Id !SelectState !(Receiver2Function m r *(.ls,.pst)) -> ReceiverHandle .ls .pst
-newReceiverHandle2 id select f
-	= {	rId		= id
-	  ,	rASMQ	= []
-	  ,	rSelect	= select
-	  ,	rOneWay	= False
-	  ,	rFun	= twowaytotriple f
+// MW11 added rInetInfo,rConnected
+newReceiverHandle2 :: !Id !SelectState ![Id] !(Receiver2Function m r *(.ls,.ps)) -> ReceiverHandle .ls .ps
+newReceiverHandle2 id select connectedIds f
+	= {	rId			= id
+	  ,	rASMQ		= []
+	  ,	rSelect		= select
+	  ,	rOneWay		= False
+	  ,	rFun		= twowaytotriple f
+	  , rInetInfo	= Nothing
+  	  , rConnected	= connectedIds
 	  }
 
 twowaytotriple :: !(Receiver2Function m r *(.ls,.pst)) m !(.ls,.pst) -> (.ls,[r],.pst)

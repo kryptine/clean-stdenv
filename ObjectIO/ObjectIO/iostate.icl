@@ -74,6 +74,7 @@ from	roundrobin			import RR, emptyRR, notodoRR
 		,	ioinputtrack	:: !Maybe InputTrack				// The process is handling mouse/key input flags
 		,	ioclipboard		:: !ClipboardState					// The state of the clipboard
 		,	iooswmetrics	:: !OSWindowMetrics					// The window metrics
+		,	iorcvdisabled	:: !Bool							// to check, whether a receiver was disabled (explicitly or via close) (MW11++)
 		}
 ::	GUIShare
 	:==	OSGUIShare
@@ -145,6 +146,7 @@ emptyIOSt ioId parentId guishare documentInterface processKind processAtts initI
   				  ,	ioinputtrack	= Nothing
   				  ,	ioclipboard		= InitClipboardState
   				  ,	iooswmetrics	= wMetrics
+				  , iorcvdisabled	= False // MW11++
   				  }
 	  }
 where
@@ -537,6 +539,15 @@ where
 	devicesSetDevice _ dState _
 		= [dState]
 
+// MW11..
+IOStGetRcvDisabled	:: !(IOSt .l .p) -> (!Bool, !(IOSt .l .p))
+IOStGetRcvDisabled io=:{ioshare={iorcvdisabled}}
+	= (iorcvdisabled, io)
+
+IOStSetRcvDisabled	:: !Bool !(IOSt .l .p) -> IOSt .l .p
+IOStSetRcvDisabled iorcvdisabled io=:{ioshare}
+	= { io & ioshare={ ioshare & iorcvdisabled=iorcvdisabled }}
+// ..MW11
 
 getIOToolbox :: !(IOSt .l .p) -> (!*OSToolbox,!IOSt .l .p)
 getIOToolbox ioState=:{iounique=unique=:{iotoolbox}} = (iotoolbox,{ioState & iounique={unique & iotoolbox=OSDummyToolbox}})

@@ -167,16 +167,6 @@ WinSetFont _ _
 	}
 
 
-//	PA: Routines to PRINT bitmaps.
-WinPrintBitmap :: !(!Int,!Int) !(!Int,!Int) !{#Char} !PIC -> PIC
-WinPrintBitmap _ _ _ _
-	= code
-	{
-		.inline WinPrintBitmap
-			ccall WinPrintBitmap "IIIISII-II"
-		.end
-	}
-
 WinPrintResizedBitmap :: !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) !{#Char} !PIC -> PIC
 WinPrintResizedBitmap _ _ _ _ _
 	= code

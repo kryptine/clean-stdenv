@@ -5,7 +5,7 @@ implementation module receiverevent
 
 
 import	StdBool
-import	deviceevents, iostate
+import	deviceevents, iostate, /*MW11*/ clCrossCall_12 
 from	StdPSt	import accPIO
 
 
@@ -24,6 +24,9 @@ receiverEvent schedulerEvent=:(ScheduleMsgEvent msgEvent) pState
 		= (True, Just (ReceiverEvent msgEvent),schedulerEvent,pState)
 	| otherwise
 		= (False,Nothing,schedulerEvent,pState)
-
+// MW11..
+receiverEvent schedulerEvent=:(ScheduleOSEvent {ccMsg=CcWmINETEVENT,p1,p2,p3,p4} _) ioState
+	= (True, Just (InternetEvent (p1,p2,p3,p4)), schedulerEvent, ioState)
+// ..MW11
 receiverEvent schedulerEvent pState
 	= (False,Nothing,schedulerEvent,pState)

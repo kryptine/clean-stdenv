@@ -1,6 +1,6 @@
 implementation module StdPrintText
-// currently PC and Mac versions are different in lines 152, 235, 239, 603 (search "PC")
 
+//	Clean Standard Object I/O library, version 1.1
 
 /* 	printText1 and printText2 both call printText3, which is the most general function.
  *	printText3 calls the printPagePerPage function from the StdPrint module.
@@ -13,13 +13,13 @@ implementation module StdPrintText
  *	to draw a single line and then recursively calls itself to draw the remaining lines.
  *	The state contains always the next line to print.
  */
+ 
+import StdEnv, StdMaybe, StdPrint, StdPicture
+ 
 
-import StdArray, StdBool, StdCharList, StdEnum, StdFunc, StdInt, StdList, StdOrdList, StdMisc, StdTuple
-import osPrint, StdMaybe, StdPicture
-
-
-NL13 :== '\xD'	// carriage return
-NL10 :== '\xA'	// linefeed
+emulateScr	:== False
+NL13 		:== '\xD'	// carriage return
+NL10 		:== '\xA'	// linefeed
 
 /////////////// the CharStreams class /////////////////////////
 
@@ -104,10 +104,11 @@ where
     printableSet	:: !{#Bool},	// this array represents the set of all printable characters in the font
     topBsLn			:: !Int,		// first baseline of a page
     maxBsLn			:: !Int,		// text won't be drawn below this baseline 
-    eachPageDrawFunc:: userInfo !Int !PrintInfo !*Picture -> *Picture,
-	wrapMode		:: !WrapMode,	// eachPageDrawFunc, wrapMode and spacePerTab are given as parameters to 
+    eachPageDrawFunc:: userInfo !Int !*Picture -> *Picture,
+	wrapMode		:: !WrapMode,	// eachPageDrawFunc, wrapMode and spacePerTab are given as parameters
+	spacePerTab		:: !Int,
     tabWidth		:: Real,		// width of tabulator in Pixels, annotating this strict won't work
-    noOfPix			:: !Int,		// =inc (fst printInfo.range) (horizontal width of page)
+    noOfPix			:: !Int,		// =inc (fst jobInfo.range) (horizontal width of page)
     maxCharWidth	:: !Int,		// the maximum length of a character in the given font
     font			:: !Font,		// the choosen font
 	lineHeight		:: !Int,		// height of one line
@@ -126,27 +127,29 @@ RightJustify :== 2
 
 
 
-printText1 :: !Bool !WrapMode !FontDef !Int !*charStream !*printEnv
-		 ->   (!*charStream,!*printEnv)
+printText1 :: !Bool !WrapMode !FontDef !Int !*charStream !PrintSetup !*printEnv
+		 ->   (!(!*charStream,!PrintSetup),!*printEnv)
 		 | CharStreams charStream & PrintEnvironments printEnv
-printText1 doDialog wrapMode fontDef spacesPerTab file printEnv
+printText1 doDialog wrapMode fontDef spacesPerTab file printSetup printEnv
   = printText3 	doDialog wrapMode fontDef spacesPerTab textRangeFunc eachPageDrawFunc
-				file printEnv
+				file printSetup printEnv
 where
-  textRangeFunc { page={h} } picture
+  textRangeFunc {printSetup} picture
+	# { page={h} } = getPageDimensions printSetup emulateScr
 	= (Nothing, (0,h-1), picture)
-  eachPageDrawFunc _ _ _ picture = picture
+  eachPageDrawFunc _ _ picture = picture
 
 
-printText2 :: !String !String !Bool !WrapMode !FontDef !Int !*charStream !*printEnv
-		 ->  (!*charStream,!*printEnv)
+printText2 :: !String !String !Bool !WrapMode !FontDef !Int !*charStream !PrintSetup !*printEnv
+		 ->  (!(!*charStream,!PrintSetup),!*printEnv)
 		 | CharStreams charStream & PrintEnvironments printEnv
  /*
-printText2 title page doDialog wrapMode fontDef=:(f1,f2,f3) spacesPerTab file printEnv
-  = printText3 doDialog wrapMode fontDef spacesPerTab textRange eachPageDraw file printEnv
+printText2 title page doDialog wrapMode fontDef=:(f1,f2,f3) spacesPerTab file printSetup printEnv
+  = printText3 doDialog wrapMode fontDef spacesPerTab textRange eachPageDraw file printSetup printEnv
 where
-	textRange printerInfo=:{page=(width,height)} picture
-		#	(_,font)			= SelectFont f1 (f2++["Bold"]) f3 
+	textRange {printSetup} picture
+		#	{page=(width,height)}= getPageDimensions printSetup emulateScr
+			(_,font)			= SelectFont f1 (f2++["Bold"]) f3 
 			picture				= SetFont font picture
 			(metrics=:(fAscent,fDescent,fMaxWidth,fLeading),picture)
 								= PictureFontMetrics picture
@@ -154,9 +157,9 @@ where
 			beamHeight			= 3*lineHeight/2
 			ascDesc				= fAscent + fDescent
 			baseLine			= fAscent + (beamHeight-ascDesc)/2
-		=	( (beamHeight,baseLine,fMaxWidth,font),
+		=	( (beamHeight,baseLine,fMaxWidth,font,width,height),
 		      (2*lineHeight,height-1),picture)
-	eachPageDraw (beamHeight,baseLine,maxwidth,font) pageNr printInfo=:{page=(width,height)} picture
+	eachPageDraw (beamHeight,baseLine,maxwidth,font,width,height) pageNr picture
 		#	picture	= SetFont font picture
 	    	pageStr = page+++(toString pageNr)
 			(pageStrWidth, picture) 
@@ -171,11 +174,12 @@ where
 			  ] 
 			  picture
  */
-printText2 title page doDialog wrapMode fontDef spacesPerTab file printEnv
-  = printText3 doDialog wrapMode fontDef spacesPerTab textRange eachPageDraw file printEnv
+printText2 title page doDialog wrapMode fontDef spacesPerTab file printSetup printEnv
+  = printText3 doDialog wrapMode fontDef spacesPerTab textRange eachPageDraw file printSetup printEnv
 where
-	textRange printerInfo=:{page={ w=width, h=height}} picture
-		#	((_,font),picture)	= openFont { fontDef & fStyles=fontDef.fStyles++[BoldStyle]} picture 
+	textRange {printSetup} picture
+		#	{page={w=width,h=height}}		= getPageDimensions printSetup emulateScr
+			((_,font),picture)	= openFont { fontDef & fStyles=fontDef.fStyles++[BoldStyle]} picture 
 			picture				= setPenFont font picture
 			(metrics=:{fAscent,fDescent,fMaxWidth},picture)
 								= getFontMetrics font picture
@@ -183,13 +187,13 @@ where
 			beamHeight			= 3*lineHeight/2
 			ascDesc				= fAscent + fDescent
 			baseLine			= fAscent + (beamHeight-ascDesc)/2
-		=	( (beamHeight,baseLine,fMaxWidth,font),
+		=	( (beamHeight,baseLine,fMaxWidth,font,width,height),
 		      (2*lineHeight,height-1),picture)
-	eachPageDraw (beamHeight,baseLine,maxwidth,font) pageNr printInfo=:{page={ w=width,h=height}} picture
+	eachPageDraw (beamHeight,baseLine,maxwidth,font,width,height) pageNr picture
 		#	picture	= setPenFont font picture
 	    	pageStr = page+++(toString pageNr)
 			(pageStrWidth, picture) 
-				= getFontStringWidth font pageStr picture
+					= getFontStringWidth font pageStr picture
 		= seq [	setPenColour LightGrey,
 				fill { zero & corner2={ x=width, y=beamHeight} },
 				setPenColour Black,
@@ -202,25 +206,26 @@ where
 
 
 printText3 ::!Bool !WrapMode !FontDef !Int 
-			 .(PrintInfo *Picture -> (userInfo, (Int,Int), *Picture))
-			 (userInfo Int PrintInfo *Picture -> *Picture)
+			 .(PrintInfo *Picture -> (state, (Int,Int), *Picture))
+			 (state Int *Picture -> *Picture)
 			 !*charStream
-			 !*printEnv
-		 ->  (!*charStream,!*printEnv)
+			 !PrintSetup !*printEnv
+		 ->  (!(!*charStream,!PrintSetup),!*printEnv)
 		 | CharStreams charStream & PrintEnvironments printEnv
-printText3 doDialog wrapMode fontDef spacesPerTab textRangeFunc eachPageDrawFunc file printEnv
-	# (alt, printEnv) = OSprintPagePerPage 
-						doDialog True
+printText3 doDialog wrapMode fontDef spacesPerTab textRangeFunc eachPageDrawFunc file printSetup printEnv
+	# (alt, printEnv) = printPagePerPage 
+						doDialog emulateScr
 						( wrapMode, fontDef, spacesPerTab,
 						  textRangeFunc, eachPageDrawFunc, file
 						)
 						initState
 						pageTransition
+						printSetup
 						printEnv
-	  file = case alt of
-				Cancelled (_,_,_,_,_,file) 					-> file
-				StartedPrinting { file } 					-> file
-	= (file,printEnv)
+	  result = case alt of
+				Cancelled (_,_,_,_,_,file) 							-> (file,printSetup)
+				StartedPrinting { file, rO={printInfo={printSetup}}}-> (file,printSetup)
+	= (result,printEnv)
 						
 
 
@@ -233,7 +238,7 @@ initState ::	!*(	.Int,
 					FontDef,
 					.Int,
 					!.(PrintInfo -> .(*Picture -> *(userInfo,(.Int,.Int),*Picture))),
-					(userInfo -> Int -> PrintInfo -> *Picture -> *Picture),
+					(userInfo -> Int -> *Picture -> *Picture),
 					*charStream
 				)
 				!.PrintInfo
@@ -241,8 +246,9 @@ initState ::	!*(	.Int,
 			 -> *((.Bool,Point2),*(*State userInfo *charStream,*Picture))
 			 | CharStreams charStream
 initState (wrapMode, fontDef, spacePerTab, textRangeFunc, eachPageDrawFunc, file) 
-		  printInfo=:{ page={ w=width, h=height }, range=(from`,to) } picture
-  #	(userInfo,(top, bot), picture) 
+		  printInfo=:{ printSetup, jobInfo={range=(from`,to)} } picture
+  # {page={w=width,h=height}} = getPageDimensions printSetup emulateScr
+   	(userInfo,(top, bot), picture) 
   		= textRangeFunc printInfo picture
 
 	((_,font),picture) = openFont fontDef picture
@@ -286,7 +292,7 @@ initState (wrapMode, fontDef, spacePerTab, textRangeFunc, eachPageDrawFunc, file
     // fill buffer with first line
 	
   	(buffer, lastCh, file) 
-		= freadLineP file printableSet ' ' noOfPix
+		= freadLineP file printableSet ' ' noOfPix spacePerTab
 	// eventually rest of first line has to be skipped 
 	skipToEoln = wrapMode==NoWrap && (not (isEoln lastCh))
 	(lastCh2,(eof,file)) = evtlSkipLine skipToEoln file 
@@ -300,6 +306,7 @@ initState (wrapMode, fontDef, spacePerTab, textRangeFunc, eachPageDrawFunc, file
 			  			topBsLn=top+fLeading+fAscent-1, maxBsLn=bot-fDescent,
 			  			eachPageDrawFunc=eachPageDrawFunc,
 						wrapMode=wrapMode,
+						spacePerTab=spacePerTab`,
 		 				tabWidth=(toReal spacePerTab`)*((toReal space100Width)/100.0),
 		  				noOfPix=noOfPix, maxCharWidth=fMaxWidth, 
 		  				font=font, lineHeight=lineHeight, printInfo=printInfo,
@@ -331,7 +338,7 @@ pageTransition ::	*(*State userInfo *charStream,*Picture)
 pageTransition (st=:{ pageNo, noDoneCopies, rO } ,picture)
   // it is assumed, that the buffer contains the next line to print
   #	(from`,to) 
-  		= rO.printInfo.range
+  		= rO.printInfo.jobInfo.range
   	
   	// if this is the first page, that will be printed in this job, then save the actual "state",
   	// so this position in the text can be recovered, when the first pages of the following copies
@@ -345,7 +352,7 @@ pageTransition (st=:{ pageNo, noDoneCopies, rO } ,picture)
   // eventually apply the drawfunction for the header (and trailer)
   
   | pageInRange
-	  	#	picture = rO.eachPageDrawFunc rO.userInfo pageNo rO.printInfo picture
+	  	#	picture = rO.eachPageDrawFunc rO.userInfo pageNo picture
 	  	= continuation st picture from` to pageInRange
   
   =continuation st picture from` to pageInRange
@@ -360,7 +367,7 @@ pageTransition (st=:{ pageNo, noDoneCopies, rO } ,picture)
 		eoCopy = eof || pageNo==to
 	  | eoCopy
 		  // another finished copy. Quit printing, if this was the last
-		  | st.noDoneCopies+1==rO.printInfo.copies = ((True,zeroOrigin), (st,picture))
+		  | st.noDoneCopies+1==rO.printInfo.jobInfo.copies = ((True,zeroOrigin), (st,picture))
 		  
 		  // there are other copies left to do. Set position in file back to first page in range
 		  // (stored in firstPageState)
@@ -389,7 +396,7 @@ restore_position st
 	# { buffer`, wasWrapped`, lastCh`} = fromJust st.firstPageState
 	  file = restorePos st.file	
 	= { st & file=file, buffer=buffer`, wasWrapped=wasWrapped`, lastCh=lastCh`,
-			 pageNo=fst st.rO.printInfo.range  }
+			 pageNo=fst st.rO.printInfo.jobInfo.range  }
 		  	
 
 
@@ -483,11 +490,11 @@ where
 		| isEoln st.lastCh
 			= ( { st & buffer=smallerBuffer, wasWrapped=True }, picture)
 		# (newContens, lastCh, file) = freadLineP st.file rO.printableSet st.lastCh 
-													(rO.noOfPix-(size smallerBuffer))
+													(rO.noOfPix-(size smallerBuffer)) rO.spacePerTab
 		= ( { st & file=file, buffer=smallerBuffer+++newContens, wasWrapped=True, lastCh=lastCh }, picture)
 						
 	// the line was not wrapped, the whole buffer contens was drawn. get new line
-	# (newBuffer, lastCh, file) = freadLineP st.file rO.printableSet st.lastCh rO.noOfPix
+	# (newBuffer, lastCh, file) = freadLineP st.file rO.printableSet st.lastCh rO.noOfPix rO.spacePerTab
 	= ( { st & file=file, buffer=newBuffer, wasWrapped=False, lastCh=lastCh }, picture)
 
 
@@ -519,7 +526,7 @@ where
 
   continuation y picture
 	// fill the buffer with the next line to draw
-	# (newBuffer, lastCh, file) = freadLineP st.file rO.printableSet st.lastCh rO.noOfPix
+	# (newBuffer, lastCh, file) = freadLineP st.file rO.printableSet st.lastCh rO.noOfPix rO.spacePerTab
 	  skipToEoln = not (isEoln lastCh)
 	  (lastCh2,(_,file)) = evtlSkipLine skipToEoln file
 	= ({ st & file=file, buffer=newBuffer, wasWrapped=False, lastCh=if skipToEoln lastCh2 lastCh }, picture)
@@ -543,45 +550,45 @@ evtlSkipLine _ file
 ////////////// freadLineP ///////////////////////////////////////////////////
 
 		
-freadLineP :: !*charStream !{#Bool} !Char !Int -> (!String, !Char, !*charStream)
+freadLineP :: !*charStream !{#Bool} !Char !Int !Int -> (!String, !Char, !*charStream)
 			| CharStreams charStream
-freadLineP file printableSet lastCh max
+freadLineP file printableSet lastCh max spacePerTab
 // reads the next line from the file, but not more than max characters. A line is at it's end,
 // when NL10,NL13, or '\f' occurs. The returned String won't contain this character, it will be
 // returned in the Char field instead. If the
 // line is longer than max, then the returned String will contain only max characters, and the
 // returned Char will be a space.
-// This function skips trailing spaces of a line.
+// This function skips trailing spaces of a line, and replaces some leading spaces with the right
+// number of tabs (because the Mac has difficulties in printing spaces with big fonts)
 	# (ok,ch,file) = getChar file
 	| not ok
 		= ("",NL13,file)
 	| lastCh==NL13 && ch==NL10
-		= freadLineP file printableSet ' ' max	// this is DOS format. Skip first character
+		= freadLineP file printableSet ' ' max spacePerTab	// this is DOS format. Skip first character
 	| isEoln ch
 		= ("",ch,file)	// the line is empty 
-	# (charList,notRead,lastCh2,file) = readA file (dec max) []
-	  (skipped,charList2) = if (isEoln lastCh2) 
-	  						   (span (\ch -> ch==' ' || ch=='\t') charList) // skip trailing spaces
-	  						   ([],charList)
-	  read = max-notRead-(length skipped)
-	  result = { fillString (createArray read ' ') (dec read) charList2 & [0]=ch }
-	= (result, lastCh2, file)
+	# (charList,lastCh2,file) = readA file (dec max) []
+	  charList2 = if (isEoln lastCh2) 
+	  						   (dropWhile (\ch -> ch==' ' || ch=='\t') charList) // skip trailing spaces
+	  						   charList
+	  charList3	= replaceLeadingSpaces [ch:reverse charList2]
+	= ({ ch \\ ch<-charList3 }, lastCh2, file)
   where
-	readA file 0 akku = (akku,0,' ',file)
+	readA file 0 akku = (akku,' ',file)
 	readA file i akku
 		# (ok,ch,file) = getChar file
 		| not ok 				// an eof will terminate the line
-			= (akku,i,NL13,file)
+			= (akku,NL13,file)
 		| isEoln ch
-			= (akku,i,ch,file)
+			= (akku,ch,file)
 		= readA file (dec i) [changeUnprintable ch:akku]
-	fillString str _ [] = str
-	fillString str i [ch:rest]
-		= fillString { str & [i]=ch } (dec i) rest
 	changeUnprintable ch
 	 	| printableSet.[toInt ch] = ch
 	 	= ' '
-		
+	replaceLeadingSpaces l
+		#!	(leadingChars, rest)	= span (\ch-> ch==' ') l
+			nrLeadingChars			= length leadingChars
+		= (repeatn (nrLeadingChars/spacePerTab) '\t')++(repeatn (nrLeadingChars mod spacePerTab) ' ')++rest
 		
 //////////// splitString /////////////////////////////////////////////////////
 

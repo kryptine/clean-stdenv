@@ -10,6 +10,7 @@ OSdirseparator			:== '\\'
 
 OShomepath				:: !String -> String
 OSapplicationpath		:: !String -> String
+OSnewlineChars			:== "\xD\xA" // MW11++
 
 OStickspersecond		:== 1000
 
@@ -18,3 +19,5 @@ OSmmToVPixels			:: !Real -> Int
 OSmaxScrollWindowSize	:: (!Int,!Int)
 OSmaxFixedWindowSize	:: (!Int,!Int)
 OSscreenrect			:: !*OSToolbox -> (!Rect,!*OSToolbox)
+
+OSprintSetupTypical		:: Bool // MW11++

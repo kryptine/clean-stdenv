@@ -76,7 +76,7 @@ WinSetFont				:: !Fnt !PIC ->  PIC
 	Routines to DRAW  bitmaps (WinDraw(Resized)Bitmap).
 	Create a bitmap (WinCreateBitmap).
 */
-WinPrintBitmap			:: !(!Int,!Int) !(!Int,!Int) !{#Char} !PIC -> PIC
+// MW11 WinPrintBitmap			:: !(!Int,!Int) !(!Int,!Int) !{#Char} !PIC -> PIC
 WinPrintResizedBitmap	:: !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) !{#Char} !PIC -> PIC
 WinDrawBitmap			:: !(!Int,!Int) !(!Int,!Int) !Int !PIC -> PIC
 WinDrawResizedBitmap	:: !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) !Int !PIC -> PIC

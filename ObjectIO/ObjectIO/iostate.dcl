@@ -101,6 +101,7 @@ IOStGetIdSeed			:: !(IOSt .l .p) -> (!Int,							 !IOSt .l .p)
 IOStGetClipboardState	:: !(IOSt .l .p) -> (!ClipboardState,				 !IOSt .l .p)
 IOStGetOSWindowMetrics	:: !(IOSt .l .p) -> (!OSWindowMetrics,				 !IOSt .l .p)
 IOStGetDeviceFunctions	:: !(IOSt .l .p) -> (![DeviceFunctions (PSt .l .p)], !IOSt .l .p)
+IOStGetRcvDisabled		:: !(IOSt .l .p) -> (!Bool,							!IOSt .l .p)	/* MW11++ */
 
 //IOStSetKeyTrack			:: !(Maybe KeyTrack)					!(IOSt .l .p) -> IOSt .l .p
 IOStSetInputTrack		:: !(Maybe InputTrack)					!(IOSt .l .p) -> IOSt .l .p
@@ -126,6 +127,7 @@ IOStSetSubProcessIds	:: ![SystemId]							!(IOSt .l .p) -> IOSt .l .p
 IOStSetIdSeed			:: !Int									!(IOSt .l .p) -> IOSt .l .p
 IOStSetClipboardState	:: !ClipboardState						!(IOSt .l .p) -> IOSt .l .p
 IOStSetDeviceFunctions	:: ![DeviceFunctions (PSt .l .p)]		!(IOSt .l .p) -> IOSt .l .p
+IOStSetRcvDisabled		:: !Bool								!(IOSt .l .p) -> IOSt .l .p /* MW11++*/
 
 IOStSwapIO				:: !(![*World],!Locals .p,!Groups)		!(IOSt .l .p) -> (!(![*World],!Locals .p,!Groups),!IOSt .l .p)
 

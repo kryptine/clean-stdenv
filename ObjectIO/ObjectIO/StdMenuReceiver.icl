@@ -14,7 +14,8 @@ instance MenuElements (Receiver m) where
 	menuElementToHandles :: !(Receiver m .ls (PSt .l .p)) !(PSt .l .p) -> (![MenuElementState .ls (PSt .l .p)],!PSt .l .p)
 	menuElementToHandles (Receiver rid f atts) pState
 		= (	[MenuElementHandleToMenuElementState
-				(MenuReceiverHandle {	mReceiverHandle	= newReceiverHandle id (getSelectState atts) f
+// MW11 was				(MenuReceiverHandle {	mReceiverHandle	= newReceiverHandle id (getSelectState atts) f
+				(MenuReceiverHandle {	mReceiverHandle	= newReceiverHandle id (getSelectState atts) (getConnectedIds atts) f
 									,	mReceiverAtts	= [MenuId id:map ReceiverAttToMenuAtt atts]
 									}
 				)
@@ -31,7 +32,8 @@ instance MenuElements (Receiver2 m r) where
 	menuElementToHandles :: !(Receiver2 m r .ls  (PSt .l .p)) !(PSt .l .p) -> (![MenuElementState .ls (PSt .l .p)],!PSt .l .p)
 	menuElementToHandles (Receiver2 rid f atts) pState
 		= (	[MenuElementHandleToMenuElementState
-				(MenuReceiverHandle {	mReceiverHandle	= newReceiverHandle2 id (getSelectState atts) f
+// MW11 was				(MenuReceiverHandle {	mReceiverHandle	= newReceiverHandle2 id (getSelectState atts) f
+				(MenuReceiverHandle {	mReceiverHandle	= newReceiverHandle2 id (getSelectState atts) (getConnectedIds atts) f
 									,	mReceiverAtts	= [MenuId id:map ReceiverAttToMenuAtt atts]
 									}
 				)
@@ -47,6 +49,12 @@ instance MenuElements (Receiver2 m r) where
 getSelectState :: ![ReceiverAttribute .ps] -> SelectState
 getSelectState rAtts
 	= getReceiverSelectStateAtt (snd (Select isReceiverSelectState (ReceiverSelectState Able) rAtts))
+
+// MW11..
+getConnectedIds :: ![ReceiverAttribute .ps] -> [Id]
+getConnectedIds rAtts
+	= getReceiverConnectedReceivers (snd (Select isReceiverConnectedReceivers (ReceiverConnectedReceivers []) rAtts))
+// .. MW11
 
 ReceiverAttToMenuAtt :: !(ReceiverAttribute .ps) -> MenuAttribute .ps
 ReceiverAttToMenuAtt (ReceiverSelectState s)

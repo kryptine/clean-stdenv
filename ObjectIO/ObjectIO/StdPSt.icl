@@ -4,10 +4,9 @@ implementation module StdPSt
 //	Clean Object I/O library, version 1.2
 
 
-import	StdBool, StdFile, StdFileSelect, StdTuple
+import	StdEnv, StdFileSelect
 import	StdSound, StdTime
-import	deviceevents
-from	commondef			import StrictSeq, StrictSeqList, Cond
+import	deviceevents, commondef
 from	iostate				import PSt, IOSt, appIOToolbox, accIOToolbox, IOStGetWorld, IOStSetWorld, IOStGetDocumentInterface, 
 									IOStGetProcessAttributes, IOStSetProcessAttributes
 from	StdProcessAttribute	import isProcessActivate, isProcessDeactivate
@@ -16,6 +15,7 @@ import	osbeep, osfileselect
 from	clCCall_12			import WinPlaySound
 from	ospicture			import peekScreen
 from	ostoolbox			import OSNewToolbox, WorldGetToolbox, WorldSetToolbox
+import	StdReceiver, receiverid, receiverhandle, receiverdevice, channelenv // MW11++
 
 
 /*	PSt is an environment instance of the class FileEnv (see StdFile).
@@ -35,6 +35,20 @@ instance FileEnv (PSt .l .p) where
 		  pState			= {pState & io=IOStSetWorld world io}
 		= pState
 
+// MW11..
+instance FileEnv	(IOSt .l .p)
+  where
+	accFiles accfun io
+		# (world,io)		= IOStGetWorld io
+		  (x,world)			= accFiles accfun world
+		  io				=IOStSetWorld world io
+		= (x,io)
+	appFiles appfun io
+		# (world,io)		= IOStGetWorld io
+		  world				= appFiles appfun world
+		  io				= IOStSetWorld world io
+		= io
+// ..MW11
 
 /*	PSt is an environment instance of the class FileSelectEnv (see StdFileSelect).
 */
@@ -63,6 +77,7 @@ handleOSEvent osEvent pState
 
 /*	PSt is an environment instance of the class TimeEnv (see StdTime).
 */
+/* MW11 was
 instance TimeEnv (PSt .l .p) where
 	getBlinkInterval :: !(PSt .l .p) -> (!Int,!PSt .l .p)
 	getBlinkInterval pState=:{io}
@@ -84,7 +99,108 @@ instance TimeEnv (PSt .l .p) where
 		# (date,world)		= getCurrentDate world
 		# pState			= {pState & io=IOStSetWorld world io}
 		= (date,pState)
+*/
 
+instance TimeEnv (PSt .l .p) where
+	getBlinkInterval :: !(PSt .l .p) -> (!Int,!PSt .l .p)
+	getBlinkInterval pState
+		= accPIO getBlinkInterval pState
+	
+	getCurrentTime :: !(PSt .l .p) -> (!Time,!PSt .l .p)
+	getCurrentTime pState
+		= accPIO getCurrentTime pState
+	
+	getCurrentDate :: !(PSt .l .p) -> (!Date,!PSt .l .p)
+	getCurrentDate pState
+		= accPIO getCurrentDate pState
+
+	getCurrentTick :: !(PSt .l .p) -> (!Tick,!PSt .l .p)
+	getCurrentTick pState
+		= accPIO getCurrentTick pState
+
+// MW11..
+instance TimeEnv (IOSt .l .p) where
+	getBlinkInterval :: !(IOSt .l .p) -> (!Int,!IOSt .l .p)
+	getBlinkInterval io
+		# (world,io)		= IOStGetWorld io
+		  (blink,world)		= getBlinkInterval world
+		= (blink,IOStSetWorld world io)
+	
+	getCurrentTime :: !(IOSt .l .p) -> (!Time,!IOSt .l .p)
+	getCurrentTime io
+		# (world,io)		= IOStGetWorld io
+		  (time,world)		= getCurrentTime world
+		= (time,IOStSetWorld world io)
+	
+	getCurrentDate :: !(IOSt .l .p) -> (!Date,!IOSt .l .p)
+	getCurrentDate io
+		# (world,io)		= IOStGetWorld io
+		  (date,world)		= getCurrentDate world
+		= (date, IOStSetWorld world io)
+
+	getCurrentTick :: !(IOSt .l .p) -> (!Tick,!IOSt .l .p)
+	getCurrentTick io
+		# (world,io)		= IOStGetWorld io
+		  (tick,world)		= getCurrentTick world
+		= (tick, IOStSetWorld world io)
+
+instance ChannelEnv (PSt .l .p)
+  where
+	channelEnvKind env
+		= (PST, env)
+	mb_close_inet_receiver_without_id reallyDoIt id_pair pSt=:{io}
+		= { pSt & io = mb_close_inet_receiver_without_id True id_pair io }
+
+instance Ids (PSt .l .p)
+  where
+	openId pSt
+		= accPIO openId pSt
+	openIds	i pSt=:{io}
+		= accPIO (openIds i) pSt
+	openRId	pSt
+		= accPIO openRId pSt
+	openRIds i pSt
+		= accPIO (openRIds i) pSt
+	openR2Id pSt
+		= accPIO openR2Id pSt
+	openR2Ids i pSt
+		= accPIO (openR2Ids i) pSt
+
+	
+/*	IOSt is also an environment instance of the class ChannelEnv	*/
+
+instance ChannelEnv (IOSt .l .p)
+  where
+	channelEnvKind env
+		= (IOST, env)
+	mb_close_inet_receiver_without_id False _ ioState
+		= ioState
+	mb_close_inet_receiver_without_id True id_pair ioState
+	#! (closed, ioState)	= IOStClosed ioState
+	| closed
+		= ioState
+	# (receivers,ioState)	= IOStGetDevice ReceiverDevice ioState
+	  rsHs					= (ReceiverSystemStateGetReceiverHandles receivers).rReceivers
+	  (found,rsH,rsHs)		= Remove (inetReceiverStateIdentified1 id_pair) undef rsHs
+	# ioState				= IOStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
+	| not found
+		= ioState
+	| otherwise
+		# id				= rsH.rHandle.rId
+		  (idtable,ioState)	= IOStGetIdTable ioState
+		  ioState			= IOStSetIdTable (snd (removeIdFromIdTable id idtable)) ioState
+		  ioState				= unbindRId id ioState
+		  ioState				= IOStSetRcvDisabled True ioState // MW11++
+		  connectedIds			= rsH.rHandle.rConnected
+		  ioState				= seq (map closeReceiver connectedIds) ioState
+		  inetInfo				= rsH.rHandle.rInetInfo
+		  (_,_,_,closeFun)		= fromJust inetInfo
+		  ioState				= appIOToolbox closeFun ioState
+		= ioState
+
+inetReceiverStateIdentified1 :: !(!EndpointRef`, !InetReceiverCategory`) !(ReceiverStateHandle .ps) -> Bool
+inetReceiverStateIdentified1 x {rHandle} = inetReceiverIdentified x rHandle
+// ..MW11
 
 /*	accScreenPicture provides access to an initial Picture as it would be created in
 	a window or control.

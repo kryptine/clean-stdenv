@@ -21,7 +21,8 @@ instance Controls (Receiver m) where
 				,	wItemKind		= IsOtherControl "Receiver"
 				,	wItemShow		= False
 				,	wItemSelect		= enabled select
-				,	wItemInfo		= ReceiverInfo (newReceiverHandle id select f)
+// MW11 was				,	wItemInfo		= ReceiverInfo (newReceiverHandle id select f)
+				,	wItemInfo		= ReceiverInfo (newReceiverHandle id select [] f)
 				,	wItemAtts		= []
 				,	wItems			= []
 				,	wItemVirtual	= True
@@ -51,7 +52,8 @@ instance Controls (Receiver2 m r) where
 				,	wItemKind		= IsOtherControl "Receiver2"
 				,	wItemShow		= False
 				,	wItemSelect		= enabled select
-				,	wItemInfo		= ReceiverInfo (newReceiverHandle2 id select f)
+// MW11 was				,	wItemInfo		= ReceiverInfo (newReceiverHandle2 id select f)
+				,	wItemInfo		= ReceiverInfo (newReceiverHandle2 id select [] f)
 				,	wItemAtts		= []
 				,	wItems			= []
 				,	wItemVirtual	= True

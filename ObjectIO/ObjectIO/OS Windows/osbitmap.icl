@@ -73,13 +73,11 @@ OSresizeBitmap size bitmap
 */
 OSdrawBitmap :: !OSBitmap !(!Int,!Int) !(!Int,!Int) !Bool !OSPictContext !*OSToolbox -> (!OSPictContext,!*OSToolbox)
 OSdrawBitmap {originalSize,reSize,bitmapContents,bitmapHandle} pos=:(px,py) origin=:(ox,oy) isScreenOutput pictContext tb
-	| originalSize==reSize
-		| isScreenOutput
-			= WinDrawBitmap  originalSize destination bitmapHandle   (pictContext,tb)
-		// otherwise
-			= WinPrintBitmap originalSize destination bitmapContents (pictContext,tb) 
 	| isScreenOutput
-		= WinDrawResizedBitmap  originalSize destination reSize bitmapHandle   (pictContext,tb)
+		| originalSize==reSize
+			= WinDrawBitmap  originalSize destination bitmapHandle (pictContext,tb)
+		// otherwise
+			= WinDrawResizedBitmap  originalSize destination reSize bitmapHandle (pictContext,tb)
 	| otherwise
 		= WinPrintResizedBitmap originalSize destination reSize bitmapContents (pictContext,tb)
 where

@@ -1398,55 +1398,6 @@ WinDestroyScreenHDC (HDC ihdc, OS os)
 	return os;
 }
 
-/*	PA: new routine to draw bitmap images (by courtesy of Arjan van IJzendoorn).
-*/
-/* Arjan's original
-extern EXPORT_TO_CLEAN void
-WinDrawBitmap (int x, int y, int bx1, int by1, int bx2, int by2,
-					char *ptr, HDC hdc, int os, 
-                    HDC *hdcReturn, int *osReturn)
-{
-	char *startOfFile  = ptr + 4;
-	int  dataOffset     = *((int*)(startOfFile + 10));
-	char *startOfData   = startOfFile + dataOffset;
-	char *startOfHeader = startOfFile + 14;
-	int  width          = *((int*)(startOfHeader + 4));
-	int  height         = *((int*)(startOfHeader + 8));
-	int  cx1, cy1, cx2, cy2;
-
-	*hdcReturn = hdc;
-	*osReturn  = os;
-
-	cx1 = (bx1 > bx2) ? bx2 : bx1;
-	cx2 = (bx1 > bx2) ? bx1 : bx2;
-	cy1 = (by1 > by2) ? by2 : by1;
-	cy2 = (by1 > by2) ? by1 : by2;
-
-	if (cx1 == cx2 || cy1 == cy2) return;
-
-	SetDIBitsToDevice ( hdc
-					  , x										// xdest
-					  , y										// ydest
-					  , cx2 - cx1								// dwWidth
-					  , cy2 - cy1								// dwHeight
-					  , cx1										// xsrc
-					  , height - cy2							// ysrc
-					  , 0										// uStartScan
-					  , height									// cScanLines
-					  , startOfData								// lpvBits
-					  , (struct tagBITMAPINFO *) startOfHeader	// lpbmi
-					  , DIB_RGB_COLORS							// fuColorUse
-					  );
-}
-*/
-// MW: The drawing of bitmaps could be speeded up. The SetDIBitsToDevice function
-// translates each time a bitmap is drawn a device independent bitmap (DIB)
-// into the device dependent form. This process invloves finding the right
-// coulours for the given device. This translation could be done only once,
-// resulting in a higher output speed for bitmaps. The disadvantage is:
-// Saving the bitmap info in a device dependent manner involves handles,
-// so that this information can not be garbage collected. The (DIB) data
-// is stored in the Clean heap !!!
 static void getBitmapData(/*input:*/ char *ptr,	// points to beginning of bitmap
 						  /*output*/ char **startOfData,char **startOfHeader, int *height)
 {
@@ -1540,51 +1491,6 @@ WinDrawResizedBitmap (	int sourcew, int sourceh, int destx, int desty, int destw
 	*osReturn  = os;
 }
 
-/*	WinPrintBitmap must be used for printing bitmaps.
-*/
-extern EXPORT_TO_CLEAN void
-WinPrintBitmap (int sx2, int sy2, int dx1, int dy1, 
-				char *ptr, HDC hdc, int os, 
-                HDC *hdcReturn, int *osReturn)
-{
-//	if (GetMapMode(hdc)==MM_ISOTROPIC)		// bitmap has to be streched (currently only
-//		WinPrintResizedBitmap				// for printing with emulation of screen resolution)
-//				(	sx2,sy2,
-//					dx1,dy1,sx2,sy2,
-//					ptr,hdc,os, 
-//					hdcReturn,osReturn);
-//	  else									// no zooming or streching: copy it 1:1
-//		{	
-			char *startOfData, *startOfHeader;
-			int  height;
-			int  error;     // PA+++
-			DWORD errorcode;// PA+++
-
-			*hdcReturn = hdc;
-			*osReturn  = os;
-			getBitmapData(ptr,&startOfData,&startOfHeader,&height);
-
-			error = SetDIBitsToDevice (
-						hdc
-					  , dx1										// xdest
-					  , dy1										// ydest
-					  , sx2										// Width
-					  , sy2										// Height
-					  , 0										// xsrc
-					  , height - sy2							// ysrc
-					  , 0										// uStartScan
-					  , height									// cScanLines
-					  , startOfData								// lpvBits
-					  , (struct tagBITMAPINFO *) startOfHeader	// lpbmi
-					  , DIB_RGB_COLORS							// fuColorUse
-					  );
-			if (error==0)
-			{
-				errorcode = GetLastError ();
-				rMessageBox (NULL,MB_APPLMODAL,"WinPrintBitmap","SetDIBitsToDevice failed: %i",errorcode);
-			}
-//		};
-}
 // ... MW
 
 
