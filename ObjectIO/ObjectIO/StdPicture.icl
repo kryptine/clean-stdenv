@@ -522,6 +522,26 @@ instance Drawables {#Char} where
 		= picture
 
 
+/*	Line2 drawing operations:
+*/
+instance Drawables Line2 where
+	draw :: !Line2 !*Picture -> *Picture
+	draw {line_end1,line_end2} picture
+		= pictdrawline line_end1 line_end2 picture
+	
+	drawAt :: !Point2 !Line2 !*Picture -> *Picture
+	drawAt _ {line_end1,line_end2} picture
+		= pictdrawline line_end1 line_end2 picture
+	
+	undraw :: !Line2 !*Picture -> *Picture
+	undraw {line_end1,line_end2} picture
+		= pictundrawline line_end1 line_end2 picture
+	
+	undrawAt :: !Point2 !Line2 !*Picture -> *Picture
+	undrawAt _ {line_end1,line_end2} picture
+		= pictundrawline line_end1 line_end2 picture
+
+
 /*	Vector2 drawing operations:
 */
 instance Drawables Vector2 where

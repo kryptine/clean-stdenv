@@ -413,6 +413,48 @@ WinGetBlinkTime (int ios, int* blinktime, int* oos)
 	*oos       = ios;
 }
 
+/* PA: The following four routines used to be crosscalls. */
+extern EXPORT_TO_CLEAN int
+WinInvalidateWindow (int hwnd, int ios)
+{
+	InvalidateRect ((HWND) hwnd, NULL, FALSE);
+	return ios;
+}
+
+extern EXPORT_TO_CLEAN int
+WinInvalidateRect (int hwnd, int left, int top, int right, int bottom, int ios)
+{
+	RECT rect;
+
+	rect.left   = left;
+	rect.top    = top;
+	rect.right  = right;
+	rect.bottom = bottom;
+	InvalidateRect ((HWND) hwnd, &rect, FALSE);
+	return ios;
+}
+
+extern EXPORT_TO_CLEAN int
+WinValidateRect (int hwnd, int left, int top, int right, int bottom, int ios)
+{
+	RECT rect;
+
+	rect.left   = left;
+	rect.top    = top;
+	rect.right  = right;
+	rect.bottom = bottom;
+	ValidateRect ((HWND) hwnd, &rect);
+	return ios;
+}
+
+extern EXPORT_TO_CLEAN int
+WinValidateRgn (int hwnd, int rgn, int ios)
+{
+	ValidateRgn ((HWND) hwnd, (HRGN) rgn);
+	return ios;
+}
+/* PA: Up to here. */
+
 static void
 InitGlobals (void)
 {
@@ -4557,47 +4599,6 @@ HandleCleanRequest (CrossCallInfo * pcci)
 		case CcRqENDPAINT:		/* hwnd; no result.  */
 			{
 				EndPaint ((HWND) pcci->p1, &gPaintStruct);
-				MakeReturn0Cci (pcci);
-			}
-			break;
-		case CcRqINVALIDATEWINDOW:		/* hwnd; no result. */
-			{
-				InvalidateRect ((HWND) pcci->p1, NULL, FALSE);
-				MakeReturn0Cci (pcci);
-			}
-			break;
-		/*	Invalidate part of window/control. */
-		case CcRqINVALIDATERECT:		/* hwnd, left,top,right,bottom; no result. */
-			{
-				RECT rect;
-
-				rect.left   = pcci->p2;
-				rect.top    = pcci->p3;
-				rect.right  = pcci->p4;
-				rect.bottom = pcci->p5;
-
-				InvalidateRect ((HWND) pcci->p1, &rect, FALSE);
-				MakeReturn0Cci (pcci);
-			}
-			break;
-		/*	Validate rect part of window/control. */
-		case CcRqVALIDATERECT:			/* hwnd, left,top,right,bottom; no result. */
-			{
-				RECT rect;
-
-				rect.left   = pcci->p2;
-				rect.top    = pcci->p3;
-				rect.right  = pcci->p4;
-				rect.bottom = pcci->p5;
-
-				ValidateRect ((HWND) pcci->p1, &rect);
-				MakeReturn0Cci (pcci);
-			}
-			break;
-		/*	Validate region part of window/control. */
-		case CcRqVALIDATERGN:			/* hwnd, rgn; no result. */
-			{
-				ValidateRgn ((HWND) pcci->p1, (HRGN) pcci->p2);
 				MakeReturn0Cci (pcci);
 			}
 			break;

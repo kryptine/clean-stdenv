@@ -1146,8 +1146,10 @@ where
 		| newOrigin==oldOrigin
 			= (True,itemH,updRgn_tb)
 		# (updRgn,tb)			= updRgn_tb
-		# tb					= setsliderthumb hasHScroll miOSMetrics itemPtr True  (minx,newOrigin.x,maxx) viewx (toTuple itemSize) tb
-		# tb					= setsliderthumb hasVScroll miOSMetrics itemPtr False (miny,newOrigin.y,maxy) viewy (toTuple itemSize) tb
+		# tb					= setsliderthumb (hasHScroll && newOrigin.x<>oldOrigin.x) miOSMetrics itemPtr True
+												 (minx,newOrigin.x,maxx) viewx (toTuple itemSize) tb
+		# tb					= setsliderthumb (hasVScroll && newOrigin.y<>oldOrigin.y) miOSMetrics itemPtr False
+												 (miny,newOrigin.y,maxy) viewy (toTuple itemSize) tb
 		  info					= {info & compoundOrigin=newOrigin}
 		  clipRect1				= IntersectRects contentRect clipRect
 		| isEmpty itemH.wItems`

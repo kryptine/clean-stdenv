@@ -95,6 +95,7 @@
 #define CcRqCLIPBOARDHASTEXT					1812
 #define CcRqGETCLIPBOARDTEXT					1811
 #define CcRqSETCLIPBOARDTEXT					1810
+#define CcRqGETCLIPBOARDCOUNT					1809		/* PA: added to retrieve clipboard count. */
 #define CcRqDIRECTORYDIALOG						1802		/* PA: added to create directory selector dialog. */
 #define CcRqFILESAVEDIALOG						1801
 #define CcRqFILEOPENDIALOG						1800
@@ -139,7 +140,7 @@
 #define CcRqSETWINDOWSIZE						1432		/* PA: new identifier for cross-calls */
 #define CcRqSETSELECTWINDOW						1431		/* PA: new identifier for cross-calls */
 #define CcRqSETWINDOWPOS						1430		/* PA: new identifier for cross-calls */
-#define CcRqINVALIDATERECT						1429		/* PA: new identifier for cross-calls */
+//#define CcRqINVALIDATERECT					1429		PA: has become obsolete because implemented as direct C call
 #define CcRqSETEDITSELECTION					1428		/* PA: new identifier for cross-calls */
 #define CcRqSETSCROLLSIZE						1427		/* PA: new identifier for cross-calls */
 #define CcRqSETSCROLLPOS						1426		/* PA: new identifier for cross-calls */
@@ -155,9 +156,9 @@
 #define CcRqUPDATEWINDOWRECT					1412		/* PA: added for updating rect part of a window/control. */
 #define CcRqGETWINDOWTEXT						1411
 #define CcRqSETWINDOWTITLE						1410
-#define CcRqVALIDATERGN							1409		/* PA: added for validating region part of a window/control. */
-#define CcRqVALIDATERECT						1408		/* PA: added for validating rect part of a window/control. */
-#define CcRqINVALIDATEWINDOW					1407
+//#define CcRqVALIDATERGN						1409		PA: has become obsolete because implemented as direct C call
+//#define CcRqVALIDATERECT						1408		PA: has become obsolete because implemented as direct C call
+//#define CcRqINVALIDATEWINDOW					1407		PA: has become obsolete because implemented as direct C call
 //#define CcRqRELEASEDC							1406		PA: has become obsolete because implemented as direct C call
 //#define CcRqGETDC								1405		PA: has become obsolete because implemented as direct C call
 #define CcRqENDPAINT							1404
@@ -306,6 +307,13 @@ extern EXPORT_TO_CLEAN void WinGetTime (int,int*,int*,int*,int*);
 extern EXPORT_TO_CLEAN void WinGetDate (int,int*,int*,int*,int*,int*);
 extern EXPORT_TO_CLEAN int  WinWait (int,int);
 extern EXPORT_TO_CLEAN void WinGetBlinkTime (int,int*,int*);
+
+/* PA: The following four routines used to be crosscalls. */
+extern EXPORT_TO_CLEAN int WinInvalidateWindow (int, int);
+extern EXPORT_TO_CLEAN int WinInvalidateRect (int, int, int, int, int, int);
+extern EXPORT_TO_CLEAN int WinValidateRect (int, int, int, int, int, int);
+extern EXPORT_TO_CLEAN int WinValidateRgn (int, int, int);
+/* PA: Up to here. */
 
 extern EXPORT_TO_CLEAN  int WinGetHorzResolution (void);
 

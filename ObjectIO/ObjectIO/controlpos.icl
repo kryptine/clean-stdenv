@@ -28,10 +28,10 @@ movewindowviewframe :: !OSWindowMetrics !Vector2 !WIDS !(WindowHandle .ls .pst) 
 movewindowviewframe wMetrics v wids=:{wPtr} wH=:{whWindowInfo,whItems=oldItems,whSize,whAtts,whSelect,whShow} tb
 	| newOrigin==oldOrigin		// origin has not changed
 		= (wH,tb)
+	# tb						= setsliderthumb (hasHScroll && newOrigin.x<>oldOrigin.x) wMetrics wPtr True  (minx,newOrigin.x,maxx) vieww (toTuple whSize) tb
+	# tb						= setsliderthumb (hasVScroll && newOrigin.y<>oldOrigin.y) wMetrics wPtr False (miny,newOrigin.y,maxy) viewh (toTuple whSize) tb
 	| isEmpty oldItems			// there are no controls: do only visual updates
-		# tb					= setsliderthumb hasHScroll wMetrics wPtr True  (minx,newOrigin.x,maxx) vieww (toTuple whSize) tb
-		# tb					= setsliderthumb hasVScroll wMetrics wPtr False (miny,newOrigin.y,maxy) viewh (toTuple whSize) tb
-		  windowInfo			= {windowInfo & windowOrigin=newOrigin}
+		# windowInfo			= {windowInfo & windowOrigin=newOrigin}
 		  wH					= {wH & whWindowInfo=WindowInfo windowInfo}
 		  (updArea,updAction)	= if (not lookInfo.lookSysUpdate || toMuch)
 		  							([newFrame],return []) (calcScrollUpdateArea oldOrigin newOrigin contentRect)
@@ -39,9 +39,7 @@ movewindowviewframe wMetrics v wids=:{wPtr} wH=:{whWindowInfo,whItems=oldItems,w
 		# (wH,tb)				= drawwindowlook` wMetrics wPtr updAction updState wH tb
 		= (wH,tb)
 	| otherwise					// there are controls: recalculate layout and do visual updates
-		# tb					= setsliderthumb hasHScroll wMetrics wPtr True  (minx,newOrigin.x,maxx) vieww (toTuple whSize) tb
-		# tb					= setsliderthumb hasVScroll wMetrics wPtr False (miny,newOrigin.y,maxy) viewh (toTuple whSize) tb
-		  reqSize				= {w=contentSize.w-fst hMargins-snd hMargins,h=contentSize.h-fst vMargins-snd vMargins}
+		# reqSize				= {w=contentSize.w-fst hMargins-snd hMargins,h=contentSize.h-fst vMargins-snd vMargins}
 		# (_,newItems,tb)		= layoutControls wMetrics hMargins vMargins spaces reqSize minSize [(domain,newOrigin)] oldItems tb
 		  windowInfo			= {windowInfo & windowOrigin=newOrigin}
 		  wH					= {wH & whItems=newItems,whWindowInfo=WindowInfo windowInfo}

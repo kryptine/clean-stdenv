@@ -148,7 +148,7 @@ CcRqSHOWWINDOW				:==	1433		/* PA: added to (hide/show) windows. */
 CcRqSETWINDOWSIZE			:==	1432		/* PA: added to resize windows/controls. */
 CcRqSETSELECTWINDOW			:== 1431		/* PA: added to (en/dis)able windows. */
 CcRqSETWINDOWPOS			:== 1430		/* PA: added to move windows/controls. */
-CcRqINVALIDATERECT			:== 1429		/* PA: added for invalidating parts of a window/control. */
+
 CcRqSETEDITSELECTION		:== 1428		/* PA: added for handling edit control selections. */
 CcRqSETSCROLLSIZE			:==	1427		/* PA: added for setting thumb size of scrollbar. */
 CcRqSETSCROLLPOS			:== 1426		/* PA: added for setting thumb of scrollbar. */
@@ -166,9 +166,7 @@ CcRqGETCLIENTSIZE			:== 1415
 CcRqUPDATEWINDOWRECT		:== 1412		/* PA: added for updating rect part of a window/control. */
 CcRqGETWINDOWTEXT			:== 1411
 CcRqSETWINDOWTITLE			:== 1410
-CcRqVALIDATERGN				:==	1409		/* PA: added for validating region part of a window/control. */
-CcRqVALIDATERECT			:==	1408		/* PA: added for validating rect part of a window/control. */
-CcRqINVALIDATEWINDOW		:== 1407
+
 CcRqENDPAINT				:== 1404
 CcRqBEGINPAINT				:== 1403
 CcRqDESTROYWINDOW			:== 1402

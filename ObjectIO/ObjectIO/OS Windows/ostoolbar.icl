@@ -9,7 +9,7 @@ import	StdMisc, StdTuple
 from	osbitmap		import OSBitmap, OSgetBitmapSize, OSgetBitmapContent
 from	ostypes			import HWND, OSWindowPtr, OSNoWindowPtr
 from	pictCCall_12	import WinCreateBitmap
-import	clCrossCall_12, windowCrossCall_12
+import	clCrossCall_12, windowCCall_12
 
 
 ::	OSToolbar
