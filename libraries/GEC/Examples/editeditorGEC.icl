@@ -50,8 +50,8 @@ where
 Start :: *World -> *World
 //Start world = goGui testje world  
 //Start world = goGui editoreditor world  
-//Start world = goGui testDynamic world  
-Start world = goGui testDynamic2 world  
+Start world = goGui testDynamic world  
+//Start world = goGui testDynamic2 world  
 /*
 Start world = goGui mytest world
 where
@@ -347,6 +347,6 @@ where
 
 showAGEC i = (modeAGEC (Display ( i)))
 
-ToString v = toString v +++ " "
+ToString v = toString v //+++ " "
 
 

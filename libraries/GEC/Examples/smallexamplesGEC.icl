@@ -16,7 +16,7 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	example_rec1
+ 	example_rose
  	world  
 
 :: T = C1 (P Int (AGEC Int))

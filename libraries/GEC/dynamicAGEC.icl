@@ -13,8 +13,8 @@ dynamicAGEC2 v = mkAGEC { toGEC   = toExpr
 					  , fromGEC = fromExpr
 					  , updGEC  = updExpr
 					  , value   = v
-					  } ("dynamicGEC2")
-//					  } ("dynamicGEC2" +++ (snd(prettyDynamic (dynamic v))))
+//					  } ("dynamicGEC2")
+					  } ("dynamicGEC2" +++ ShowValueDynamic (dynamic v))
 where
 	toExpr v Undefined 		= display v (prettyVal  v)
 	toExpr v (Defined b)	= b 				
@@ -98,4 +98,6 @@ ShowValueDynamic d = strip (fst (toStringDynamic d) +++ " ")
 ShowTypeDynamic :: Dynamic -> String
 ShowTypeDynamic d = strip (snd (toStringDynamic d) +++ " ")
 
-strip s = { ns \\ ns <-: s | ns >= '\020' && ns <= '\0200'}	
+strip s = { ns \\ ns <-: s | ns >= '\020' && ns <= '\0200'}
+
+	
