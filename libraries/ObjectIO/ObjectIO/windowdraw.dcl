@@ -15,11 +15,11 @@ import	ossystem, ostoolbox
 	drawinwindow	applies the drawing function to the given WindowHandle.
 	These functions assume that WindowHandle refers to a Window with a valid ClipState.
 */
-drawwindowlook	:: !OSWindowMetrics !OSWindowPtr !(IdFun *Picture)     !UpdateState !(WindowHandle .ls .pst) !*OSToolbox
-																				 -> (!WindowHandle .ls .pst, !*OSToolbox)
-drawwindowlook` :: !OSWindowMetrics !OSWindowPtr !(St *Picture [Rect]) !UpdateState !(WindowHandle .ls .pst) !*OSToolbox
-																				 -> (!WindowHandle .ls .pst, !*OSToolbox)
-drawinwindow	:: !OSWindowMetrics !OSWindowPtr !.(St *Picture .x)                 !(WindowHandle .ls .pst) !*OSToolbox
-																			  -> (.x,!WindowHandle .ls .pst, !*OSToolbox)
+drawwindowlook	:: !OSWindowMetrics !OSWindowPtr !(IdFun *Picture)     !UpdateState   !(WindowHandle .ls .pst) !*OSToolbox
+																				   -> (!WindowHandle .ls .pst, !*OSToolbox)
+drawwindowlook` :: !OSWindowMetrics !OSWindowPtr !(St *Picture [OSRect]) !UpdateState !(WindowHandle .ls .pst) !*OSToolbox
+																				   -> (!WindowHandle .ls .pst, !*OSToolbox)
+drawinwindow	:: !OSWindowMetrics !OSWindowPtr !.(St *Picture .x)                   !(WindowHandle .ls .pst) !*OSToolbox
+																			    -> (.x,!WindowHandle .ls .pst, !*OSToolbox)
 
 

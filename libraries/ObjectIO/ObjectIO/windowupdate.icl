@@ -84,8 +84,8 @@ where
 		# (backgrRgn,itemHs,osPict,tb)	= updatebackgrounds wMetrics (sizeToRect whSize) whSelect backgrRgn whItems osPict tb
 		= (backgrRgn,{wH & whItems=itemHs},osPict,tb)
 	where
-		updatebackgrounds :: !OSWindowMetrics !Rect !Bool !OSRgnHandle ![WElementHandle .ls .pst] !OSPictContext !*OSToolbox
-													  -> (!OSRgnHandle,![WElementHandle .ls .pst],!OSPictContext,!*OSToolbox)
+		updatebackgrounds :: !OSWindowMetrics !OSRect !Bool !OSRgnHandle ![WElementHandle .ls .pst] !OSPictContext !*OSToolbox
+													    -> (!OSRgnHandle,![WElementHandle .ls .pst],!OSPictContext,!*OSToolbox)
 		updatebackgrounds _ _ _ backgrRgn [] osPict tb
 			= (backgrRgn,[],osPict,tb)
 		updatebackgrounds wMetrics wFrame ableContext backgrRgn [itemH:itemHs] osPict tb
@@ -97,8 +97,8 @@ where
 				# (backgrRgn,itemHs,osPict,tb)	= updatebackgrounds wMetrics wFrame ableContext backgrRgn itemHs osPict tb
 				= (backgrRgn,[itemH:itemHs],osPict,tb)
 		where
-			updatebackground :: !OSWindowMetrics !Rect !Bool !OSRgnHandle !(WElementHandle .ls .pst) !OSPictContext !*OSToolbox
-														 -> (!OSRgnHandle, !WElementHandle .ls .pst, !OSPictContext,!*OSToolbox)
+			updatebackground :: !OSWindowMetrics !OSRect !Bool !OSRgnHandle !(WElementHandle .ls .pst) !OSPictContext !*OSToolbox
+														   -> (!OSRgnHandle, !WElementHandle .ls .pst, !OSPictContext,!*OSToolbox)
 			updatebackground wMetrics wFrame ableContext backgrRgn (WItemHandle itemH=:{wItemShow,wItemVirtual,wItemKind,wItemPos,wItemSize}) osPict tb
 			//	| not wItemShow || wItemVirtual || wItemKind<>IsCompoundControl
 				| not wItemShow || wItemVirtual || not (isRecursiveControl wItemKind)	// PA: isRecursive includes also LayoutControls
@@ -111,8 +111,8 @@ where
 					# (backgrRgn,itemH,osPict,tb)	= updatecompoundbackground wMetrics wFrame compoundRect ableContext backgrRgn itemH osPict tb
 					= (backgrRgn,WItemHandle itemH,osPict,tb)
 			where
-				updatecompoundbackground :: !OSWindowMetrics !Rect !Rect !Bool !OSRgnHandle !(WItemHandle .ls .pst) !OSPictContext !*OSToolbox
-														 				   -> (!OSRgnHandle, !WItemHandle .ls .pst, !OSPictContext,!*OSToolbox)
+				updatecompoundbackground :: !OSWindowMetrics !OSRect !OSRect !Bool !OSRgnHandle !(WItemHandle .ls .pst) !OSPictContext !*OSToolbox
+														 				       -> (!OSRgnHandle, !WItemHandle .ls .pst, !OSPictContext,!*OSToolbox)
 				updatecompoundbackground wMetrics wFrame compoundRect ableContext backgrRgn itemH=:{wItemKind=IsLayoutControl,wItems} osPict tb
 					# (backgrRgn,itemHs,osPict,tb)
 											= updatebackgrounds wMetrics cFrame cAble backgrRgn wItems osPict tb
@@ -164,7 +164,7 @@ where
 					updFrame				= rectToRectangle cFrame
 					updState				= {oldFrame=updFrame,newFrame=updFrame,updArea=[updFrame]}
 					
-					clipospicture :: !OSRgnHandle !Rect !(IdFun *Picture) !*Picture -> *Picture
+					clipospicture :: !OSRgnHandle !OSRect !(IdFun *Picture) !*Picture -> *Picture
 					clipospicture newClipRgn rect drawf picture
 						#! (rectRgn,picture)	= accpicttoolbox (osnewrectrgn rect) picture
 						#! (curClipRgn,picture)	= pictgetcliprgn picture
@@ -224,8 +224,8 @@ where
 		# (backgrRgn,itemHs,osPict,tb)	= updatebackgrounds wMetrics (sizeToRect whSize`) whSelect` backgrRgn whItems` osPict tb
 		= (backgrRgn,{wH & whItems`=itemHs},osPict,tb)
 	where
-		updatebackgrounds :: !OSWindowMetrics !Rect !Bool !OSRgnHandle ![WElementHandle`] !OSPictContext !*OSToolbox
-													  -> (!OSRgnHandle,![WElementHandle`],!OSPictContext,!*OSToolbox)
+		updatebackgrounds :: !OSWindowMetrics !OSRect !Bool !OSRgnHandle ![WElementHandle`] !OSPictContext !*OSToolbox
+													    -> (!OSRgnHandle,![WElementHandle`],!OSPictContext,!*OSToolbox)
 		updatebackgrounds wMetrics wFrame ableContext backgrRgn itemHs osPict tb
 			# (empty,tb)						= osisemptyrgn backgrRgn tb
 			| empty || isEmpty itemHs
@@ -236,8 +236,8 @@ where
 				# (backgrRgn,itemHs,osPict,tb)	= updatebackgrounds wMetrics wFrame ableContext backgrRgn itemHs osPict tb
 				= (backgrRgn,[itemH:itemHs],osPict,tb)
 		where
-			updatebackground :: !OSWindowMetrics !Rect !Bool !OSRgnHandle !WElementHandle` !OSPictContext !*OSToolbox
-														 -> (!OSRgnHandle,!WElementHandle`,!OSPictContext,!*OSToolbox)
+			updatebackground :: !OSWindowMetrics !OSRect !Bool !OSRgnHandle !WElementHandle` !OSPictContext !*OSToolbox
+														   -> (!OSRgnHandle,!WElementHandle`,!OSPictContext,!*OSToolbox)
 			updatebackground wMetrics wFrame ableContext backgrRgn (WItemHandle` itemH=:{wItemShow`,wItemVirtual`,wItemKind`,wItemPos`,wItemSize`}) osPict tb
 			//	| not wItemShow` || wItemVirtual` || wItemKind`<>IsCompoundControl
 				| not wItemShow` || wItemVirtual` || not (isRecursiveControl wItemKind`)	// PA: isRecursive includes also LayoutControls
@@ -250,8 +250,8 @@ where
 					# (backgrRgn,itemH,osPict,tb)	= updatecompoundbackground wMetrics wFrame compoundRect ableContext backgrRgn itemH osPict tb
 					= (backgrRgn,WItemHandle` itemH,osPict,tb)
 			where
-				updatecompoundbackground :: !OSWindowMetrics !Rect !Rect !Bool !OSRgnHandle !WItemHandle` !OSPictContext !*OSToolbox
-														 				   -> (!OSRgnHandle,!WItemHandle`,!OSPictContext,!*OSToolbox)
+				updatecompoundbackground :: !OSWindowMetrics !OSRect !OSRect !Bool !OSRgnHandle !WItemHandle` !OSPictContext !*OSToolbox
+														 					   -> (!OSRgnHandle,!WItemHandle`,!OSPictContext,!*OSToolbox)
 				updatecompoundbackground wMetrics wFrame compoundRect ableContext backgrRgn itemH=:{wItemKind`=IsLayoutControl,wItems`} osPict tb
 					# (backgrRgn,itemHs,osPict,tb)
 											= updatebackgrounds wMetrics cFrame cAble backgrRgn wItems` osPict tb
@@ -303,7 +303,7 @@ where
 					updFrame				= rectToRectangle cFrame
 					updState				= {oldFrame=updFrame,newFrame=updFrame,updArea=[updFrame]}
 					
-					clipospicture :: !OSRgnHandle !Rect !(IdFun *Picture) !*Picture -> *Picture
+					clipospicture :: !OSRgnHandle !OSRect !(IdFun *Picture) !*Picture -> *Picture
 					clipospicture newClipRgn rect drawf picture
 						#! (rectRgn,picture)	= accpicttoolbox (osnewrectrgn rect) picture
 						#! (curClipRgn,picture)	= pictgetcliprgn picture
@@ -323,11 +323,11 @@ where
 				# (backgrRgn,itemHs,osPict,tb)	= updatebackgrounds wMetrics wFrame ableContext backgrRgn itemHs osPict tb
 				= (backgrRgn,WRecursiveHandle` itemHs wKind,osPict,tb)
 
-/*	updaterectcontrols updates the controls that fit in the Rect argument of the indicated window or compound control. 
-	The Rect is in window/compound coordinates. 
+/*	updaterectcontrols updates the controls that fit in the OSRect argument of the indicated window or compound control. 
+	The OSRect is in window/compound coordinates. 
 */
-updaterectcontrols :: !OSWindowMetrics !Rect !OSWindowPtr !(WindowHandle .ls .pst) !*OSToolbox
-													   -> (!WindowHandle .ls .pst, !*OSToolbox)
+updaterectcontrols :: !OSWindowMetrics !OSRect !OSWindowPtr !(WindowHandle .ls .pst) !*OSToolbox
+													     -> (!WindowHandle .ls .pst, !*OSToolbox)
 updaterectcontrols wMetrics area wPtr wH=:{whItems,whSelect} tb
 	| isEmptyRect area
 		= (wH,tb)
@@ -337,8 +337,8 @@ updaterectcontrols wMetrics area wPtr wH=:{whItems,whSelect} tb
 		# tb				= osReleaseWindowPictContext wPtr osPict tb
 		= ({wH & whItems=itemHs},tb)
 where
-	updatecontrolsinrect :: !OSWindowMetrics !OSWindowPtr !Bool !Rect ![WElementHandle .ls .pst] !OSPictContext !*OSToolbox
-																  -> (![WElementHandle .ls .pst],!OSPictContext,!*OSToolbox)
+	updatecontrolsinrect :: !OSWindowMetrics !OSWindowPtr !Bool !OSRect ![WElementHandle .ls .pst] !OSPictContext !*OSToolbox
+																    -> (![WElementHandle .ls .pst],!OSPictContext,!*OSToolbox)
 	updatecontrolsinrect _ _ _ _ [] osPict tb
 		= ([],osPict,tb)
 	updatecontrolsinrect wMetrics parentPtr ableContext area [itemH:itemHs] osPict tb
@@ -349,8 +349,8 @@ where
 			# (itemHs,osPict,tb)	= updatecontrolsinrect wMetrics parentPtr ableContext area itemHs osPict tb
 			= ([itemH:itemHs],osPict,tb)
 	where
-		updatecontrolinrect :: !OSWindowMetrics !OSWindowPtr !Bool !Rect !(WElementHandle .ls .pst) !OSPictContext !*OSToolbox
-																	  -> (!WElementHandle .ls .pst, !OSPictContext,!*OSToolbox)
+		updatecontrolinrect :: !OSWindowMetrics !OSWindowPtr !Bool !OSRect !(WElementHandle .ls .pst) !OSPictContext !*OSToolbox
+																	    -> (!WElementHandle .ls .pst, !OSPictContext,!*OSToolbox)
 		updatecontrolinrect wMetrics parentPtr ableContext area 
 							wItemH=:(WItemHandle itemH=:{wItemInfo,wItemKind,wItemPtr,wItemPos,wItemSize,wItemShow,wItemSelect,wItemVirtual,wItems})
 							osPict tb
@@ -431,8 +431,8 @@ where
 										_						-> (False,undef)
 			
 	//		updatecustomcontrol updates a ((Custom)Button/Compound)Control.
-			updatecustomcontrol :: !OSWindowMetrics !OSWindowPtr !Bool !Rect !(WItemHandle .ls .pst) !OSPictContext !*OSToolbox
-																		  -> (!WItemHandle .ls .pst, !OSPictContext,!*OSToolbox)
+			updatecustomcontrol :: !OSWindowMetrics !OSWindowPtr !Bool !OSRect !(WItemHandle .ls .pst) !OSPictContext !*OSToolbox
+																		    -> (!WItemHandle .ls .pst, !OSPictContext,!*OSToolbox)
 			updatecustomcontrol _ parentPtr contextAble area itemH=:{wItemKind=IsCustomButtonControl,wItemPtr,wItemSelect,wItemInfo,wItemPos,wItemSize} osPict tb
 				#! picture				= packPicture (~wItemPos) (copyPen lookInfo.lookPen) True osPict tb
 				#! picture				= appClipPicture (toRegion updArea) (lookInfo.lookFun selectState updState) picture
@@ -650,8 +650,8 @@ where
 					= (updControls,itemH,osPict,tb)
 */
 			where
-				updateControl`` :: !OSWindowMetrics !WIDS !Bool !Rect !(WItemHandle .ls .pst) !OSPictContext !*OSToolbox
-																   -> (!WItemHandle .ls .pst, !OSPictContext,!*OSToolbox)
+				updateControl`` :: !OSWindowMetrics !WIDS !Bool !OSRect !(WItemHandle .ls .pst) !OSPictContext !*OSToolbox
+																     -> (!WItemHandle .ls .pst, !OSPictContext,!*OSToolbox)
 				
 				updateControl`` wMetrics wids contextAble area itemH=:{wItemPos,wItemKind=IsCustomButtonControl} osPict tb
 // PA				#! picture				= packPicture (~wItemPos) (copyPen lookInfo.lookPen) True osPict tb

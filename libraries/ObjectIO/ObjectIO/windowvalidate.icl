@@ -143,7 +143,7 @@ where
 		hScrollRect	= osGetWindowHScrollRect wMetrics hasScrolls windowRect
 		vScrollRect	= osGetWindowVScrollRect wMetrics hasScrolls windowRect
 		
-		scrollInfo :: Rect !ScrollFunction -> ScrollInfo
+		scrollInfo :: OSRect !ScrollFunction -> ScrollInfo
 		scrollInfo r=:{rleft,rtop} scrollFun
 			= {	scrollFunction	= scrollFun
 			  ,	scrollItemPos	= {x=rleft,y=rtop}

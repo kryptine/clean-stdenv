@@ -142,7 +142,7 @@ where
 			(defMinW,defMinH)	= osMinCompoundSize
 			minSize				= getControlMinimumSizeAtt (snd (cselect isControlMinimumSize (ControlMinimumSize {w=defMinW,h=defMinH}) atts))
 			
-			calcNewOrigin :: !Point2 !Rect !Size -> Point2		// This code also appears at windowdevice: windowStateSizeAction
+			calcNewOrigin :: !Point2 !OSRect !Size -> Point2		// This code also appears at windowdevice: windowStateSizeAction
 			calcNewOrigin {x,y} {rleft,rtop,rright,rbottom} {w,h}
 				= {x=x`,y=y`}
 			where

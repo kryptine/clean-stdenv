@@ -246,7 +246,7 @@ where
 		# (_,controls,itemHs)				= getUpdateControls cPtr (sizeToRect whSize) whItems
 		= (controls,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}})
 	where
-		getUpdateControls :: !OSWindowPtr !Rect ![WElementHandle .ls .pst] -> (!Bool,![ControlUpdateInfo],![WElementHandle .ls .pst])
+		getUpdateControls :: !OSWindowPtr !OSRect ![WElementHandle .ls .pst] -> (!Bool,![ControlUpdateInfo],![WElementHandle .ls .pst])
 		getUpdateControls cPtr clipRect [itemH:itemHs]
 			# (found,controls,itemH)		= getUpdateControl cPtr clipRect itemH
 			| found
@@ -255,7 +255,7 @@ where
 				# (found,controls,itemHs)	= getUpdateControls cPtr clipRect itemHs
 				= (found,controls,[itemH:itemHs])
 		where
-			getUpdateControl :: !OSWindowPtr !Rect !(WElementHandle .ls .pst) -> (!Bool,![ControlUpdateInfo],!WElementHandle .ls .pst)
+			getUpdateControl :: !OSWindowPtr !OSRect !(WElementHandle .ls .pst) -> (!Bool,![ControlUpdateInfo],!WElementHandle .ls .pst)
 			getUpdateControl cPtr clipRect (WItemHandle itemH=:{wItemPtr,wItemNr,wItemShow,wItemPos,wItemSize,wItems})
 				| cPtr==wItemPtr
 					= (True,[{cuItemNr=wItemNr,cuItemPtr=wItemPtr,cuArea=clipRect1}],WItemHandle itemH)

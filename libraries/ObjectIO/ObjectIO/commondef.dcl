@@ -25,35 +25,35 @@ minmax					::      !Int !Int -> (!Int,!Int)			// minmax a b = (min a b,max a b)
 */
 addPointSize			:: !Size !Point2 -> Point2					// {w, h }+{x,y}={x=x+w, y=y+h }
 
-instance zero Rect
-instance ==   Rect
+instance zero OSRect
+instance ==   OSRect
 class addVector a :: !Vector2 !a -> a	// add the vector argument to the second argument
 instance addVector Point2
-instance addVector Rect
+instance addVector OSRect
 instance addVector Rectangle
 class subVector a :: !Vector2 !a -> a	// subtract the vector argument from the second argument
 instance subVector Point2
-instance subVector Rect
+instance subVector OSRect
 instance subVector Rectangle
 
-rectangleToRect			:: !Rectangle			-> Rect				// (l,t, r,b) such that l<=r && t<=b
-rectToRectangle			:: !Rect				-> Rectangle		// (l,t, r,b) -> {{x=l,y=t},{x=r,y=b}}
-isEmptyRect				:: !Rect				-> Bool				// (l,t, r,b) -> l==r || t==b
+rectangleToRect			:: !Rectangle			-> OSRect			// (l,t, r,b) such that l<=r && t<=b
+rectToRectangle			:: !OSRect				-> Rectangle		// (l,t, r,b) -> {{x=l,y=t},{x=r,y=b}}
+isEmptyRect				:: !OSRect				-> Bool				// (l,t, r,b) -> l==r || t==b
 isEmptyRectangle		:: !Rectangle			-> Bool				// {corner1,corner2} -> corner1.x==corner2.x || corner1.y==corner2.y
-pointInRect				:: !Point2 !Rect		-> Bool				// {x,y} (l,t, r,b) -> l<=x<=r && t<=y<=b
+pointInRect				:: !Point2 !OSRect		-> Bool				// {x,y} (l,t, r,b) -> l<=x<=r && t<=y<=b
 pointInRectangle		:: !Point2 !Rectangle	-> Bool				// PointInRect point (RectangleToRect rectangle)
-posSizeToRect			:: !Point2 !Size		-> Rect				// {x,y} {w,h} -> ( x,y,  x+w,y+h )	// no check on negative size
+posSizeToRect			:: !Point2 !Size		-> OSRect			// {x,y} {w,h} -> ( x,y,  x+w,y+h )	// no check on negative size
 posSizeToRectangle		:: !Point2 !Size		-> Rectangle		// {x,y} {w,h} -> {{x,y},{x+w,y+h}}	// no check on negative size
-sizeToRect				::		   !Size		-> Rect				//       {w,h} -> ( 0,0,    w,  h )	// no check on negative size
+sizeToRect				::		   !Size		-> OSRect			//       {w,h} -> ( 0,0,    w,  h )	// no check on negative size
 sizeToRectangle			::		   !Size		-> Rectangle		//       {w,h} -> {zero, {  w,  h}}	// no check on negative size
-disjointRects			:: !Rect   !Rect		-> Bool
-intersectRects			:: !Rect   !Rect		-> Rect				// if disjoint: EmptyRect; otherwise the intersection
-subtractRects			:: !Rect   !Rect		-> [Rect]			// subtract @2 from @1
-rectSize				:: !Rect				-> Size				// (l,t, r,b)          -> {abs (r-l), abs (b-t)}
+disjointRects			:: !OSRect !OSRect		-> Bool
+intersectRects			:: !OSRect !OSRect		-> OSRect			// if disjoint: EmptyRect; otherwise the intersection
+subtractRects			:: !OSRect !OSRect		-> [OSRect]			// subtract @2 from @1
+rectSize				:: !OSRect				-> Size				// (l,t, r,b)          -> {abs (r-l), abs (b-t)}
 
-/*	Rules on RgnHandles and Rects:
+/*	Rules on RgnHandles and OSRects:
 */
-intersectRgnRect		:: !OSRgnHandle !Rect !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)	// the intersection of the two arguments
+intersectRgnRect		:: !OSRgnHandle !OSRect !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)	// the intersection of the two arguments
 
 /*	PA: Conversion of Size, Point2, and Vector2 to tuples (toTuple) and from tuples (fromTuple):
 */
@@ -64,12 +64,12 @@ instance toTuple Size;		instance fromTuple Size
 instance toTuple Point2;	instance fromTuple Point2
 instance toTuple Vector2;	instance fromTuple Vector2
 
-/*	PA: Conversion of Rect, and Rectangle to 4-tuples (toTuple4) and from 4-tuples (fromTuple4):
+/*	PA: Conversion of OSRect, and Rectangle to 4-tuples (toTuple4) and from 4-tuples (fromTuple4):
 */
 class toTuple4   a :: !a -> (!Int,!Int,!Int,!Int)
 class fromTuple4 a :: !(!Int,!Int,!Int,!Int) -> a
 
-instance toTuple4 Rect;		instance fromTuple4 Rect
+instance toTuple4 OSRect;	instance fromTuple4 OSRect
 instance toTuple4 Rectangle;instance fromTuple4 Rectangle
 
 /*	Tuple functions:

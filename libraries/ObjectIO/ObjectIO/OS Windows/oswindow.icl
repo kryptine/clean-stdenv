@@ -9,7 +9,7 @@ from	StdIOCommon			import CursorShape, StandardCursor, BusyCursor, IBeamCursor, 
 import	clCrossCall_12, clCCall_12, windowCCall_12, windowCrossCall_12
 import	osdocumentinterface, osevent, osfont, ospicture, osrgn, ossystem, ostypes
 from	menuCrossCall_12	import HMENU
-from	commondef			import fatalError,intersectRects,rectSize,fromTuple,toTuple4,subVector
+from	commondef			import fatalError,intersectRects,rectSize,fromTuple,toTuple4,subVector,zero
 //import StdDebug,tracetypes
 
 
@@ -49,7 +49,7 @@ osWindowTitleBarHeight :: Int;	osWindowTitleBarHeight = 0;
 
 //	Calculating the view frame of window/compound with visibility of scrollbars.
 
-osGetCompoundContentRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
+osGetCompoundContentRect :: !OSWindowMetrics !(!Bool,!Bool) !OSRect -> OSRect
 osGetCompoundContentRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom}
 	| visHScroll && visVScroll	= {itemRect & rright=r`,rbottom=b`}
 	| visHScroll				= {itemRect &           rbottom=b`}
@@ -59,7 +59,7 @@ where
 	r`							= rright -osmVSliderWidth
 	b`							= rbottom-osmHSliderHeight
 
-osGetCompoundHScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
+osGetCompoundHScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !OSRect -> OSRect
 osGetCompoundHScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom}
 	| not visHScroll	= zero
 	| otherwise			= {itemRect & rtop=b`,rright=if visVScroll r` rright}
@@ -67,7 +67,7 @@ where
 	r`					= rright -osmVSliderWidth
 	b`					= rbottom-osmHSliderHeight
 
-osGetCompoundVScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
+osGetCompoundVScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !OSRect -> OSRect
 osGetCompoundVScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom}
 	| not visVScroll	= zero
 	| otherwise			= {itemRect & rleft=r`,rbottom=if visHScroll b` rbottom}
@@ -76,7 +76,7 @@ where
 	b`					= rbottom-osmHSliderHeight
 
 
-osGetWindowContentRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
+osGetWindowContentRect :: !OSWindowMetrics !(!Bool,!Bool) !OSRect -> OSRect
 osGetWindowContentRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom}
 	| visHScroll && visVScroll	= {itemRect & rright=r`,rbottom=b`}
 	| visHScroll				= {itemRect &           rbottom=b`}
@@ -86,7 +86,7 @@ where
 	r`							= rright -osmVSliderWidth //+1
 	b`							= rbottom-osmHSliderHeight//+1
 
-osGetWindowHScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
+osGetWindowHScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !OSRect -> OSRect
 osGetWindowHScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) {rleft,rtop,rright,rbottom}
 	| not visHScroll	= zero
 	| otherwise			= {rleft=rleft-1,rtop=b`,rright=if visVScroll (r`+1) (rright+1),rbottom=rbottom+1}
@@ -94,7 +94,7 @@ where
 	r`					= rright -osmVSliderWidth  + 1
 	b`					= rbottom-osmHSliderHeight + 1
 
-osGetWindowVScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
+osGetWindowVScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !OSRect -> OSRect
 osGetWindowVScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) {rleft,rtop,rright,rbottom}
 	| not visVScroll	= zero
 	| otherwise			= {rleft=r`,rtop=rtop-1,rright=rright+1,rbottom=if visHScroll (b`+1) (rbottom+1)}
@@ -841,50 +841,50 @@ osDestroyCompoundControl wPtr _ _ tb = destroycontrol wPtr tb
 
 /*	Control update operations.
 */
-osUpdateRadioControl :: !Rect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+osUpdateRadioControl :: !OSRect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
 osUpdateRadioControl area pos parentWindow theControl tb = updatecontrol theControl (subVector (fromTuple pos) area) tb
 
-osUpdateCheckControl :: !Rect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+osUpdateCheckControl :: !OSRect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
 osUpdateCheckControl area pos parentWindow theControl tb = updatecontrol theControl (subVector (fromTuple pos) area) tb
 
-osUpdatePopUpControl :: !Rect !OSWindowPtr !OSWindowPtr !(Maybe OSWindowPtr) !(!Int,!Int) !(!Int,!Int) !Bool !String !*OSToolbox -> *OSToolbox
+osUpdatePopUpControl :: !OSRect !OSWindowPtr !OSWindowPtr !(Maybe OSWindowPtr) !(!Int,!Int) !(!Int,!Int) !Bool !String !*OSToolbox -> *OSToolbox
 osUpdatePopUpControl area parentWindow theControl editControl pos size select text tb
 	= updatecontrol theControl (subVector (fromTuple pos) area) tb
 
-osUpdateSliderControl :: !Rect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+osUpdateSliderControl :: !OSRect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
 osUpdateSliderControl area pos parentWindow theControl tb = updatecontrol theControl (subVector (fromTuple pos) area) tb
 
-//OSupdateTextControl :: !Rect !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+//OSupdateTextControl :: !OSRect !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
 //OSupdateTextControl area parentWindow theControl tb = updatecontrol theControl area tb
-osUpdateTextControl :: !Rect !Rect !String !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+osUpdateTextControl :: !OSRect !OSRect !String !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
 osUpdateTextControl area _ _ pos parentWindow theControl tb
 	= updatecontrol theControl (subVector (fromTuple pos) area) tb
 
-//OSupdateEditControl :: !Rect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+//OSupdateEditControl :: !OSRect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
 //OSupdateEditControl area pos parentWindow theControl tb = updatecontrol theControl (subVector (fromTuple pos) area) tb
-osUpdateEditControl :: !Rect !Rect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+osUpdateEditControl :: !OSRect !OSRect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
 osUpdateEditControl area _ pos parentWindow theControl tb
 	= updatecontrol theControl (subVector (fromTuple pos) area) tb
 
-//OSupdateButtonControl :: !Rect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+//OSupdateButtonControl :: !OSRect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
 //OSupdateButtonControl area pos parentWindow theControl tb = updatecontrol theControl (subVector (fromTuple pos) area) tb
-osUpdateButtonControl :: !Rect !Rect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+osUpdateButtonControl :: !OSRect !OSRect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
 osUpdateButtonControl area _ pos parentWindow theControl tb
 	= updatecontrol theControl (subVector (fromTuple pos) area) tb
 
-//OSupdateCompoundControl :: !Rect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+//OSupdateCompoundControl :: !OSRect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
 //OSupdateCompoundControl area pos parentWindow theControl tb = updatecontrol theControl (subVector (fromTuple pos) area) tb
-osUpdateCompoundControl :: !Rect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+osUpdateCompoundControl :: !OSRect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
 osUpdateCompoundControl area pos parentWindow theControl tb
 	= updatecontrol theControl (subVector (fromTuple pos) area) tb
 
-updatecontrol :: !OSWindowPtr !Rect !*OSToolbox -> *OSToolbox
+updatecontrol :: !OSWindowPtr !OSRect !*OSToolbox -> *OSToolbox
 updatecontrol theControl rect tb = winUpdateWindowRect theControl (toTuple4 rect) tb
 
 
 /*	Control clipping operations.
 */
-oscliprectrgn :: !(!Int,!Int) !Rect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+oscliprectrgn :: !(!Int,!Int) !OSRect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 oscliprectrgn parent_pos=:(parent_x,parent_y) rect (x,y) (w,h) tb
 	= osnewrectrgn (intersectRects area item) tb
 where
@@ -893,34 +893,34 @@ where
 	y`		= y-parent_y
 	item	= {rleft=x`,rtop=y`,rright=x`+w,rbottom=y`+h}
 
-osClipRadioControl :: !OSWindowPtr !(!Int,!Int) !Rect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+osClipRadioControl :: !OSWindowPtr !(!Int,!Int) !OSRect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 osClipRadioControl _ parentPos area itemPos itemSize tb = oscliprectrgn parentPos area itemPos itemSize tb
 
-osClipCheckControl :: !OSWindowPtr !(!Int,!Int) !Rect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+osClipCheckControl :: !OSWindowPtr !(!Int,!Int) !OSRect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 osClipCheckControl _ parentPos area itemPos itemSize tb = oscliprectrgn parentPos area itemPos itemSize tb
 
-osClipPopUpControl :: !OSWindowPtr !(!Int,!Int) !Rect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+osClipPopUpControl :: !OSWindowPtr !(!Int,!Int) !OSRect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 osClipPopUpControl _ parentPos area itemPos itemSize tb = oscliprectrgn parentPos area itemPos itemSize tb
 
-osClipSliderControl :: !OSWindowPtr !(!Int,!Int) !Rect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+osClipSliderControl :: !OSWindowPtr !(!Int,!Int) !OSRect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 osClipSliderControl _ parentPos area itemPos itemSize tb = oscliprectrgn parentPos area itemPos itemSize tb
 
-osClipTextControl :: !OSWindowPtr !(!Int,!Int) !Rect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+osClipTextControl :: !OSWindowPtr !(!Int,!Int) !OSRect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 osClipTextControl _ parentPos area itemPos itemSize tb = oscliprectrgn parentPos area itemPos itemSize tb
 
-osClipEditControl :: !OSWindowPtr !(!Int,!Int) !Rect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+osClipEditControl :: !OSWindowPtr !(!Int,!Int) !OSRect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 osClipEditControl _ parentPos area itemPos itemSize tb = oscliprectrgn parentPos area itemPos itemSize tb
 
-osClipButtonControl :: !OSWindowPtr !(!Int,!Int) !Rect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+osClipButtonControl :: !OSWindowPtr !(!Int,!Int) !OSRect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 osClipButtonControl _ parentPos area itemPos itemSize tb = oscliprectrgn parentPos area itemPos itemSize tb
 
-osClipCustomButtonControl :: !OSWindowPtr !(!Int,!Int) !Rect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+osClipCustomButtonControl :: !OSWindowPtr !(!Int,!Int) !OSRect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 osClipCustomButtonControl _ parentPos area itemPos itemSize tb = oscliprectrgn parentPos area itemPos itemSize tb
 
-osClipCustomControl :: !OSWindowPtr !(!Int,!Int) !Rect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+osClipCustomControl :: !OSWindowPtr !(!Int,!Int) !OSRect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 osClipCustomControl _ parentPos area itemPos itemSize tb = oscliprectrgn parentPos area itemPos itemSize tb
 
-osClipCompoundControl :: !OSWindowPtr !(!Int,!Int) !Rect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+osClipCompoundControl :: !OSWindowPtr !(!Int,!Int) !OSRect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 osClipCompoundControl _ parentPos area itemPos itemSize tb = oscliprectrgn parentPos area itemPos itemSize tb
 
 /*	Window graphics context access operations.
@@ -957,10 +957,10 @@ accGrafport _ f tb = f tb
 appGrafport :: !OSWindowPtr !.(*OSToolbox -> *OSToolbox) !*OSToolbox -> *OSToolbox
 appGrafport _ f tb = f tb
 
-accClipport :: !OSWindowPtr !Rect !.(St *OSToolbox .x) !*OSToolbox -> (!.x, !*OSToolbox)
+accClipport :: !OSWindowPtr !OSRect !.(St *OSToolbox .x) !*OSToolbox -> (!.x, !*OSToolbox)
 accClipport _ _ f tb = f tb
 
-appClipport :: !OSWindowPtr !Rect !.(*OSToolbox -> *OSToolbox) !*OSToolbox -> *OSToolbox
+appClipport :: !OSWindowPtr !OSRect !.(*OSToolbox -> *OSToolbox) !*OSToolbox -> *OSToolbox
 appClipport _ _ f tb = f tb
 
 
@@ -988,7 +988,7 @@ osScrollbarIsVisible :: !(!Int,!Int) !Int -> Bool
 osScrollbarIsVisible (domainMin,domainMax) viewSize
 	= viewSize<domainMax-domainMin
 
-osScrollbarsAreVisible :: !OSWindowMetrics !Rect !(!Int,!Int) !(!Bool,!Bool) -> (!Bool,!Bool)
+osScrollbarsAreVisible :: !OSWindowMetrics !OSRect !(!Int,!Int) !(!Bool,!Bool) -> (!Bool,!Bool)
 osScrollbarsAreVisible {osmHSliderHeight,osmVSliderWidth} {rleft=xMin,rtop=yMin,rright=xMax,rbottom=yMax} (width,height) (hasHScroll,hasVScroll)
 	= visScrollbars (False,False)
 					(hasHScroll && (osScrollbarIsVisible hRange width),hasVScroll && (osScrollbarIsVisible vRange height))
@@ -1024,14 +1024,15 @@ OSSliderMax		:== 32767		// MaxSigned2ByteInt
 OSSliderRange	:== 32767		// OSSliderMax-OSSliderMin
 
 
-osSetWindowSliderThumb :: !OSWindowMetrics !OSWindowPtr !Bool !Int !(Maybe OSWindowPtr) !(Maybe OSWindowPtr) !Rect !Rect !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
+osSetWindowSliderThumb :: !OSWindowMetrics !OSWindowPtr !Bool !Int !(Maybe OSWindowPtr) !(Maybe OSWindowPtr) !OSRect !OSRect !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetWindowSliderThumb wMetrics theWindow isHorizontal thumb _ _ _ _ (maxx,maxy) redraw tb
 	= winSetScrollPos theWindow (if isHorizontal SB_HORZ SB_VERT) thumb maxx maxy extent tb
 where
 	extent	= if isHorizontal wMetrics.osmHSliderHeight wMetrics.osmVSliderWidth
 
-osSetWindowSliderThumbSize :: !OSWindowMetrics !OSWindowPtr !OSWindowPtr !Bool !Int !Int !Int !(!Int,!Int) !Rect !Bool !Bool !*OSToolbox -> *OSToolbox
-osSetWindowSliderThumbSize wMetrics theWindow _ isHorizontal _ _ size (maxx,maxy) _ _ redraw tb
+osSetWindowSliderThumbSize :: !OSWindowMetrics !OSWindowPtr !OSWindowPtr !Bool !Int !Int !Int !(!Int,!Int) !OSRect !Bool !Bool !*OSToolbox -> *OSToolbox
+osSetWindowSliderThumbSize wMetrics theWindow _ isHorizontal min max size (maxx,maxy) _ _ redraw tb
+	# tb	= winSetScrollRange theWindow (if isHorizontal SB_HORZ SB_VERT) min max False tb
 	= winSetScrollThumbSize theWindow (if isHorizontal SB_HORZ SB_VERT) size maxx maxy extent tb
 where
 	extent	= if isHorizontal wMetrics.osmHSliderHeight wMetrics.osmVSliderWidth
@@ -1041,18 +1042,18 @@ osSetWindowSlider wMetrics theWindow isHorizontal state maxcoords tb
 	= setScrollRangeAndPos True True wMetrics (if isHorizontal SB_HORZ SB_VERT) state maxcoords theWindow tb
 
 //	PA: dummy function, required only for Mac (moved from \OS Macintosh\osutil) and made type independent of WindowHandle.
-osUpdateWindowScroll :: !OSWindowPtr !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Rect !*OSToolbox -> *OSToolbox
+osUpdateWindowScroll :: !OSWindowPtr !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !OSRect !*OSToolbox -> *OSToolbox
 osUpdateWindowScroll _ scrollPtr pos size _ tb = tb
 
 osInvalidateWindow :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osInvalidateWindow theWindow tb
 	= winInvalidateWindow theWindow tb
 
-osInvalidateWindowRect :: !OSWindowPtr !Rect !*OSToolbox -> *OSToolbox
+osInvalidateWindowRect :: !OSWindowPtr !OSRect !*OSToolbox -> *OSToolbox
 osInvalidateWindowRect theWindow rect tb
 	= winInvalidateRect theWindow (toTuple4 rect) tb
 
-osValidateWindowRect :: !OSWindowPtr !Rect !*OSToolbox -> *OSToolbox
+osValidateWindowRect :: !OSWindowPtr !OSRect !*OSToolbox -> *OSToolbox
 osValidateWindowRect theWindow rect tb
 	= winValidateRect theWindow (toTuple4 rect) tb
 
@@ -1196,32 +1197,33 @@ osInvalidateCompound compoundPtr tb
 	= winInvalidateWindow compoundPtr tb
 
 /*	PA: not used
-osInvalidateCompoundRect :: !OSWindowPtr !Rect !*OSToolbox -> *OSToolbox
+osInvalidateCompoundRect :: !OSWindowPtr !OSRect !*OSToolbox -> *OSToolbox
 osInvalidateCompoundRect compoundPtr rect tb
 	= winInvalidateRect compoundPtr (toTuple4 rect) tb
 */
-osSetCompoundSliderThumb :: !OSWindowMetrics !OSWindowPtr !OSWindowPtr !OSWindowPtr !Rect !Bool !Int !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
+osSetCompoundSliderThumb :: !OSWindowMetrics !OSWindowPtr !OSWindowPtr !OSWindowPtr !OSRect !Bool !Int !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetCompoundSliderThumb wMetrics _ compoundPtr _ _ isHorizontal thumb (maxx,maxy) redraw tb
 	= winSetScrollPos compoundPtr (if isHorizontal SB_HORZ SB_VERT) thumb maxx` maxy` extent tb
 where
 	(maxx`,maxy`,extent)	= if redraw (maxx,maxy,if isHorizontal wMetrics.osmHSliderHeight wMetrics.osmVSliderWidth) (0,0,0)
 
-osSetCompoundSliderThumbSize :: !OSWindowMetrics !OSWindowPtr !OSWindowPtr !Int !Int !Int !Rect !Bool !Bool !Bool !*OSToolbox -> *OSToolbox
-osSetCompoundSliderThumbSize wMetrics _ compoundPtr _ _ size rect isHorizontal _ redraw tb
+osSetCompoundSliderThumbSize :: !OSWindowMetrics !OSWindowPtr !OSWindowPtr !OSWindowPtr !Int !Int !Int !OSRect !Bool !Bool !Bool !*OSToolbox -> *OSToolbox
+osSetCompoundSliderThumbSize wMetrics _ compoundPtr _ min max size rect isHorizontal _ redraw tb
+	# tb	= winSetScrollRange compoundPtr (if isHorizontal SB_HORZ SB_VERT) min max False tb
 	= winSetScrollThumbSize compoundPtr (if isHorizontal SB_HORZ SB_VERT) size maxx` maxy` extent tb
 where
 	(maxx`,maxy`,extent)	= if redraw (rect.rright,rect.rbottom,if isHorizontal wMetrics.osmHSliderHeight wMetrics.osmVSliderWidth) (0,0,0)
-
+/*
 osSetCompoundSlider :: !OSWindowMetrics !OSWindowPtr !Bool !(!Int,!Int,!Int,!Int) !(!Int,!Int) !*OSToolbox -> *OSToolbox
 osSetCompoundSlider wMetrics compoundPtr isHorizontal state maxcoords tb
 	= setScrollRangeAndPos True True wMetrics (if isHorizontal SB_HORZ SB_VERT) state maxcoords compoundPtr tb
-
-osSetCompoundSelect :: !OSWindowPtr !OSWindowPtr !Rect !(!Bool,!Bool) !(!OSWindowPtr,!OSWindowPtr) !Bool !*OSToolbox -> *OSToolbox
+*/
+osSetCompoundSelect :: !OSWindowPtr !OSWindowPtr !OSRect !(!Bool,!Bool) !(!OSWindowPtr,!OSWindowPtr) !Bool !*OSToolbox -> *OSToolbox
 osSetCompoundSelect _ compoundPtr _ scrollInfo _ select tb
 	= winSetSelectStateWindow compoundPtr scrollInfo select False tb
 //	= winEnableControl compoundPtr scrollInfo select tb
 
-osSetCompoundShow :: !OSWindowPtr !OSWindowPtr !Rect !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetCompoundShow :: !OSWindowPtr !OSWindowPtr !OSRect !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetCompoundShow _ compoundPtr _ _ show tb
 	= winShowControl compoundPtr show tb
 
@@ -1234,7 +1236,7 @@ osSetCompoundSize _ _ compoundPtr _ size update tb
 	= winSetWindowSize compoundPtr size update tb
 
 //	PA: dummy function, required only for Mac
-osUpdateCompoundScroll :: !OSWindowPtr !OSWindowPtr !Rect !*OSToolbox -> *OSToolbox
+osUpdateCompoundScroll :: !OSWindowPtr !OSWindowPtr !OSRect !*OSToolbox -> *OSToolbox
 osUpdateCompoundScroll _ _ _ tb
 	= tb
 
@@ -1245,17 +1247,17 @@ osCompoundControlHasOrigin :== True
 
 //	On slider controls:
 
-osSetSliderControlThumb :: !OSWindowPtr !OSWindowPtr !Rect !Bool !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
+osSetSliderControlThumb :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
 osSetSliderControlThumb _ cPtr _ redraw (min,thumb,max,thumbsize) tb
 	# tb	= winSetScrollRange cPtr SB_CTL min max False tb
 	# tb	= winSetScrollThumbSize cPtr SB_CTL thumbsize 0 0 0 tb
 	= winSetScrollPos cPtr SB_CTL thumb 0 0 0 tb
 
-osSetSliderControlSelect :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetSliderControlSelect :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetSliderControlSelect _ cPtr _ select tb
 	= winEnableControl cPtr select tb
 
-osSetSliderControlShow :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetSliderControlShow :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetSliderControlShow _ cPtr _ show tb
 	= winShowControl cPtr show tb
 
@@ -1270,15 +1272,15 @@ osSetSliderControlSize _ _ sliderPtr _ size update tb
 
 //	On radio controls:
 
-osSetRadioControl :: !OSWindowPtr !OSWindowPtr !OSWindowPtr !Rect !*OSToolbox -> *OSToolbox
+osSetRadioControl :: !OSWindowPtr !OSWindowPtr !OSWindowPtr !OSRect !*OSToolbox -> *OSToolbox
 osSetRadioControl _ current new _ tb
 	= winCheckControl new True (winCheckControl current False tb)
 
-osSetRadioControlSelect :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetRadioControlSelect :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetRadioControlSelect _ cPtr _ select tb
 	= winEnableControl cPtr select tb
 
-osSetRadioControlShow :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetRadioControlShow :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetRadioControlShow _ cPtr _ show tb
 	= winShowControl cPtr show tb
 
@@ -1293,15 +1295,15 @@ osSetRadioControlSize _ _ radioPtr _ size update tb
 
 //	On check controls:
 
-osSetCheckControl :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetCheckControl :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetCheckControl _ cPtr _ check tb
 	= winCheckControl cPtr check tb
 
-osSetCheckControlSelect :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetCheckControlSelect :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetCheckControlSelect _ cPtr _ select tb
 	= winEnableControl cPtr select tb
 
-osSetCheckControlShow :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetCheckControlShow :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetCheckControlShow _ cPtr _ show tb
 	= winShowControl cPtr show tb
 
@@ -1316,15 +1318,15 @@ osSetCheckControlSize _ _ checkPtr _ size update tb
 
 //	On pop up controls:
 
-osSetPopUpControl :: !OSWindowPtr !OSWindowPtr !(Maybe OSWindowPtr) !Rect !Rect !Int !Int !String !Bool !*OSToolbox -> *OSToolbox
+osSetPopUpControl :: !OSWindowPtr !OSWindowPtr !(Maybe OSWindowPtr) !OSRect !OSRect !Int !Int !String !Bool !*OSToolbox -> *OSToolbox
 osSetPopUpControl _ pPtr _ _ _ _ new _ _ tb
 	= winSelectPopupItem pPtr (new-1) tb
 
-osSetPopUpControlSelect :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetPopUpControlSelect :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetPopUpControlSelect _ pPtr _ select tb
 	= winEnableControl pPtr select tb
 
-osSetPopUpControlShow :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetPopUpControlShow :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetPopUpControlShow _ pPtr _ show tb
 	= winShowControl pPtr show tb
 
@@ -1339,7 +1341,7 @@ osSetPopUpControlSize _ _ popupPtr _ size update tb
 
 //	On edit controls:
 
-osSetEditControlText :: !OSWindowPtr !OSWindowPtr !Rect !Rect !Bool !String !*OSToolbox -> *OSToolbox
+osSetEditControlText :: !OSWindowPtr !OSWindowPtr !OSRect !OSRect !Bool !String !*OSToolbox -> *OSToolbox
 osSetEditControlText _ ePtr _ _ _ text tb
 	= winSetWindowTitle ePtr text tb
 
@@ -1347,15 +1349,15 @@ osGetEditControlText :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> (!String,!*OSTo
 osGetEditControlText _ ePtr tb
 	= winGetWindowText ePtr tb
 
-osSetEditControlCursor :: !OSWindowPtr !OSWindowPtr !Rect !Rect !Int !*OSToolbox -> *OSToolbox
+osSetEditControlCursor :: !OSWindowPtr !OSWindowPtr !OSRect !OSRect !Int !*OSToolbox -> *OSToolbox
 osSetEditControlCursor _ ePtr _ _ pos tb
 	= winSetEditSelection ePtr pos (pos+1) tb
 
-osSetEditControlSelect :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetEditControlSelect :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetEditControlSelect _ ePtr _ select tb
 	= winEnableControl ePtr select tb
 
-osSetEditControlShow :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetEditControlShow :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetEditControlShow _ ePtr _ show tb
 	= winShowControl ePtr show tb
 
@@ -1368,21 +1370,21 @@ osSetEditControlSize _ _ editPtr _ size update tb
 	= winSetWindowSize editPtr size update tb
 
 //	Dummy implementation; used on Mac only (windowevent.icl):
-osIdleEditControl :: !OSWindowPtr !Rect !OSWindowPtr !*OSToolbox -> *OSToolbox
+osIdleEditControl :: !OSWindowPtr !OSRect !OSWindowPtr !*OSToolbox -> *OSToolbox
 osIdleEditControl _ _ _ tb = tb
 
 
 //	On text controls:
 
-osSetTextControlText :: !OSWindowPtr !OSWindowPtr !Rect !Rect !Bool !String !*OSToolbox -> *OSToolbox
+osSetTextControlText :: !OSWindowPtr !OSWindowPtr !OSRect !OSRect !Bool !String !*OSToolbox -> *OSToolbox
 osSetTextControlText _ tPtr _ _ _ text tb
 	= winSetWindowTitle tPtr text tb
 
-osSetTextControlSelect :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetTextControlSelect :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetTextControlSelect _ tPtr _ select tb
 	= winEnableControl tPtr select tb
 
-osSetTextControlShow :: !OSWindowPtr !OSWindowPtr !Rect !Rect !Bool !String !*OSToolbox -> *OSToolbox
+osSetTextControlShow :: !OSWindowPtr !OSWindowPtr !OSRect !OSRect !Bool !String !*OSToolbox -> *OSToolbox
 osSetTextControlShow _ tPtr _ _ show _ tb
 	= winShowControl tPtr show tb
 
@@ -1397,15 +1399,15 @@ osSetTextControlSize _ _ textPtr _ size update tb
 
 //	On button controls:
 
-osSetButtonControlText :: !OSWindowPtr !OSWindowPtr !Rect !String !*OSToolbox -> *OSToolbox
+osSetButtonControlText :: !OSWindowPtr !OSWindowPtr !OSRect !String !*OSToolbox -> *OSToolbox
 osSetButtonControlText _ bPtr _ text tb
 	= winSetWindowTitle bPtr text tb
 
-osSetButtonControlSelect :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetButtonControlSelect :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetButtonControlSelect _ bPtr _ select tb
 	= winEnableControl bPtr select tb
 
-osSetButtonControlShow :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetButtonControlShow :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetButtonControlShow _ bPtr _ show tb
 	= winShowControl bPtr show tb
 
@@ -1420,11 +1422,11 @@ osSetButtonControlSize _ _ buttonPtr _ size update tb
 
 //	On custom button controls:
 
-osSetCustomButtonControlSelect :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetCustomButtonControlSelect :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetCustomButtonControlSelect _ cPtr _ select tb
 	= winEnableControl cPtr select tb
 
-osSetCustomButtonControlShow :: !OSWindowPtr !OSWindowPtr !Rect !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetCustomButtonControlShow :: !OSWindowPtr !OSWindowPtr !OSRect !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetCustomButtonControlShow _ cPtr _ _ show tb
 	= winShowControl cPtr show tb
 
@@ -1441,11 +1443,11 @@ osCustomButtonControlHasOrigin	:== True
 
 //	On custom controls:
 
-osSetCustomControlSelect :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetCustomControlSelect :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetCustomControlSelect _ cPtr _ select tb
 	= winEnableControl cPtr select tb
 
-osSetCustomControlShow :: !OSWindowPtr !OSWindowPtr !Rect !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetCustomControlShow :: !OSWindowPtr !OSWindowPtr !OSRect !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetCustomControlShow _ cPtr _ _ show tb
 	= winShowControl cPtr show tb
 

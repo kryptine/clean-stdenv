@@ -258,10 +258,10 @@ accPicture drawf picture
 
 ::	Region
 	=	{	region_shape	:: ![RegionShape]
-		,	region_bound	:: !Rect
+		,	region_bound	:: !OSRect
 		}
 ::	RegionShape
-	=	RegionRect		!Rect
+	=	RegionRect		!OSRect
 	|	RegionPolygon	!Point2 ![Vector2]
 
 
@@ -296,7 +296,7 @@ instance toRegion PolygonAt where
 		shape				= closeShape zero polygon_shape
 		bound				= polybound p shape {rleft=x,rtop=y,rright=x,rbottom=y}
 		
-		polybound :: !Point2 ![Vector2] !Rect -> Rect
+		polybound :: !Point2 ![Vector2] !OSRect -> OSRect
 		polybound p [v:vs] {rleft=minx,rtop=miny,rright=maxx,rbottom=maxy}
 			= polybound p` vs {rleft=minx`,rtop=miny`,rright=maxx`,rbottom=maxy`}
 		where
@@ -336,7 +336,7 @@ instance + Region where
 	| otherwise
 		= {region_shape=r1.region_shape++r2.region_shape,region_bound=sumbound r1.region_bound r2.region_bound}
 	where
-		sumbound :: !Rect !Rect -> Rect
+		sumbound :: !OSRect !OSRect -> OSRect
 		sumbound {rleft=minx,rtop=miny,rright=maxx,rbottom=maxy} {rleft=minx`,rtop=miny`,rright=maxx`,rbottom=maxy`}
 			= {rleft=min minx minx`,rtop=min miny miny`,rright=max maxx maxx`,rbottom=max maxy maxy`}
 
@@ -704,7 +704,7 @@ instance Fillables Box where
 	unfillAt pos box picture
 		= pictunfillrect (boxtorect pos box) picture
 
-boxtorect :: !Point2 !Box -> Rect
+boxtorect :: !Point2 !Box -> OSRect
 boxtorect {x,y} {box_w,box_h}
 	= {rleft=l,rtop=t,rright=r,rbottom=b}
 where

@@ -693,12 +693,12 @@ where
 	vMargins					= getWindowVMargins   whKind wMetrics whAtts
 	spaces						= getWindowItemSpaces whKind wMetrics whAtts
 	
-	drawcompoundlook :: !OSWindowMetrics !Bool !Rect !Int !OSWindowPtr !(WindowHandle .ls .pst) !*OSToolbox -> (!WindowHandle .ls .pst,!*OSToolbox)
+	drawcompoundlook :: !OSWindowMetrics !Bool !OSRect !Int !OSWindowPtr !(WindowHandle .ls .pst) !*OSToolbox -> (!WindowHandle .ls .pst,!*OSToolbox)
 	drawcompoundlook wMetrics ableContext clipRect itemNr wPtr wH=:{whItems} tb
 		# (_,itemHs,tb)	= drawcompoundlook` wMetrics ableContext clipRect itemNr wPtr whItems tb
 		= ({wH & whItems=itemHs},tb)
 	where
-		drawcompoundlook` :: !OSWindowMetrics !Bool !Rect !Int !OSWindowPtr ![WElementHandle .ls .pst] !*OSToolbox
+		drawcompoundlook` :: !OSWindowMetrics !Bool !OSRect !Int !OSWindowPtr ![WElementHandle .ls .pst] !*OSToolbox
 																  -> (!Bool,![WElementHandle .ls .pst],!*OSToolbox)
 		drawcompoundlook` wMetrics ableContext clipRect itemNr wPtr [itemH:itemHs] tb
 			# (done,itemH,tb)		= drawWElementLook wMetrics ableContext clipRect itemNr wPtr itemH tb
@@ -708,7 +708,7 @@ where
 				# (done,itemHs,tb)	= drawcompoundlook` wMetrics ableContext clipRect itemNr wPtr itemHs tb
 				= (done,[itemH:itemHs],tb)
 		where
-			drawWElementLook :: !OSWindowMetrics !Bool !Rect !Int !OSWindowPtr !(WElementHandle .ls .pst) !*OSToolbox
+			drawWElementLook :: !OSWindowMetrics !Bool !OSRect !Int !OSWindowPtr !(WElementHandle .ls .pst) !*OSToolbox
 																	  -> (!Bool,!WElementHandle .ls .pst, !*OSToolbox)
 			drawWElementLook wMetrics ableContext clipRect itemNr wPtr (WItemHandle itemH=:{wItemKind,wItemSelect,wItemNr,wItemInfo,wItemPos,wItemSize,wItems}) tb
 				| info.csaItemNr<>wItemNr
@@ -765,7 +765,7 @@ where
 	where
 		calcNewWElementOrigin :: !OSWindowMetrics !CompoundScrollActionInfo !(WElementHandle .ls .pst) !*OSToolbox
 															 -> (!Bool,!Bool,!WElementHandle .ls .pst, !*OSToolbox)
-		calcNewWElementOrigin wMetrics info (WItemHandle itemH=:{wItemNr,wItemKind,wItemAtts,wItems,wItemPos,wItemSize=compoundSize,wItemInfo}) tb
+		calcNewWElementOrigin wMetrics info (WItemHandle itemH=:{wItemPtr,wItemNr,wItemKind,wItemAtts,wItems,wItemPos,wItemSize=compoundSize,wItemInfo}) tb
 			| info.csaItemNr<>wItemNr
 				| not (isRecursiveControl wItemKind)
 					= (False,False,WItemHandle itemH,tb)
@@ -1487,7 +1487,7 @@ where
 		             area is the visible area of the window view frame,
 		             scrolling occurs either horizontally or vertically.
 	*/
-		calcScrollUpdateArea :: !Point2 !Point2 !Rect -> (!Rectangle,!St *Picture [Rect])
+		calcScrollUpdateArea :: !Point2 !Point2 !OSRect -> (!Rectangle,!St *Picture [OSRect])
 		calcScrollUpdateArea oldOrigin newOrigin areaRect
 			= (updArea,scroll {newOriginAreaRect & rright=rright+1,rbottom=rbottom+1} restArea v)
 		where
@@ -1502,7 +1502,7 @@ where
 										 (if (vy>0) ({newOriginAreaRectangle & corner2={x=rright,   y=rtop+vy}},   {newOriginAreaRect & rtop   =rtop   +vy})
 										            (windowdeviceFatalError "calcScrollUpdateArea (scrolling window)" "assumption violation"))))
 			
-			scroll :: !Rect !Rect !Vector2 !*Picture -> (![Rect],!*Picture)
+			scroll :: !OSRect !OSRect !Vector2 !*Picture -> (![OSRect],!*Picture)
 			scroll scrollRect restRect v picture
 				# (updRect,picture)	= pictscroll scrollRect v picture
 				| updRect==zero
@@ -1571,14 +1571,14 @@ where
 	newScroll (Just scroll_inf=:{scrollItemPtr}) {rleft,rtop,rright,rbottom}
 		= Just {scroll_inf & scrollItemPos = {x=rleft,y=rtop},scrollItemSize = {w = rright - rleft, h = rbottom - rtop}}
 
-	newOrigin :: !Point2 !Rect !Size -> Point2
+	newOrigin :: !Point2 !OSRect !Size -> Point2
 	newOrigin {x,y} {rleft,rtop,rright,rbottom} {w,h}
 		= {x=x`,y=y`}
 	where
 		x`	= if (x+w>rright)  (max (rright -w) rleft) x
 		y`	= if (y+h>rbottom) (max (rbottom-h) rtop ) y
 	
-	setWindowScrollThumbValues :: !(Maybe ScrollInfo) !Rect !Rect !Bool !OSWindowMetrics !OSWindowPtr !Bool !Int !Int !Int !(!Int,!Int) !*OSToolbox -> *OSToolbox
+	setWindowScrollThumbValues :: !(Maybe ScrollInfo) !OSRect !OSRect !Bool !OSWindowMetrics !OSWindowPtr !Bool !Int !Int !Int !(!Int,!Int) !*OSToolbox -> *OSToolbox
 	setWindowScrollThumbValues newScroll hRect vRect hasScroll wMetrics wPtr isHorizontal size old new maxcoords tb
 		| not hasScroll	= tb
 		# tb = osUpdateWindowScroll wPtr scrollInfo.scrollItemPtr (toTuple scrollInfo.scrollItemPos) (toTuple scrollInfo.scrollItemSize) newRect tb	// PA: updateWindowScroll --> osUpdateWindowScroll and moved from osutil --> oswindow

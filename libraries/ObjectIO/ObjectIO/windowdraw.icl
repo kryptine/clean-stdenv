@@ -44,8 +44,8 @@ where
 	{w,h}					= rectSize (osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize))
 	wFrame					= {corner1=origin,corner2={x=origin.x+w,y=origin.y+h}}
 
-drawwindowlook` :: !OSWindowMetrics !OSWindowPtr !(St *Picture [Rect]) !UpdateState !(WindowHandle .ls .pst) !*OSToolbox
-																				 -> (!WindowHandle .ls .pst, !*OSToolbox)
+drawwindowlook` :: !OSWindowMetrics !OSWindowPtr !(St *Picture [OSRect]) !UpdateState !(WindowHandle .ls .pst) !*OSToolbox
+																				   -> (!WindowHandle .ls .pst, !*OSToolbox)
 drawwindowlook` wMetrics wPtr drawFirst updState wH=:{whSelect,whSize,whWindowInfo} tb
 	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb
 	#! picture				= packPicture origin (copyPen look.lookPen) True osPict tb

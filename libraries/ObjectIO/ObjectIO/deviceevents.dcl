@@ -116,14 +116,14 @@ from	receiverhandle	import InetEvent`, EndpointRef`, InetReceiverCategory` // MW
 		}
 ::	UpdateInfo
 	=	{	updWIDS				:: !WIDS					// The Id of the window/dialogue to be updated
-		,	updWindowArea		:: !Rect					// The area of the window/dialogue to be updated (case zero, no update)
+		,	updWindowArea		:: !OSRect					// The area of the window/dialogue to be updated (case zero, no update)
 		,	updControls			:: ![ControlUpdateInfo]		// For each control to be updated: its item nr and area (in window coordinates)
 		,	updGContext			:: !Maybe OSPictContext		// The graphics context to be used
 		}
 ::	ControlUpdateInfo
 	=	{	cuItemNr			:: !Int						// The wItemNr of the control
 		,	cuItemPtr			:: !OSWindowPtr				// The wItemPtr to the control (can be OSNoWindowPtr)
-		,	cuArea				:: !Rect					// The update area of the control (in window coordinates)
+		,	cuArea				:: !OSRect					// The update area of the control (in window coordinates)
 		}
 ::	OpenFilesInfo
 	:==	[String]											// The names of the files to be opened

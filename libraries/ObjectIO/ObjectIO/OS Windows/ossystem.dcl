@@ -30,12 +30,12 @@ osMMtoHPixels			:: !Real -> Int
 osMMtoVPixels			:: !Real -> Int
 osMaxScrollWindowSize	:: (!Int,!Int)
 osMaxFixedWindowSize	:: (!Int,!Int)
-osScreenrect			:: !*OSToolbox -> (!Rect,!*OSToolbox)
+osScreenrect			:: !*OSToolbox -> (!OSRect,!*OSToolbox)
 
 osPrintSetupTypical		:: Bool
 
-// osGetProcessWindowDimensions returns Rect of process window in terms of screen coordinates
-osGetProcessWindowDimensions :: !OSDInfo !*OSToolbox -> (!Rect,!*OSToolbox)
+// osGetProcessWindowDimensions returns OSRect of process window in terms of screen coordinates
+osGetProcessWindowDimensions :: !OSDInfo !*OSToolbox -> (!OSRect,!*OSToolbox)
 
 osDefaultWindowMetrics	:: !*OSToolbox -> (!OSWindowMetrics,!*OSToolbox)
 

@@ -16,22 +16,22 @@ from	wstateaccess	import getWItemRadioInfo`, getWItemCheckInfo`, getWItemCompoun
 		If the Boolean argument is True, also the invalid ClipStates are recalculated of CompoundControls
 			that are inside the window frame. 
 */
-createClipState :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !Rect !(Maybe Id) !Bool ![WElementHandle .ls .pst] !*OSToolbox
-																	  -> (!ClipState,![WElementHandle .ls .pst],!*OSToolbox)
+createClipState :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !OSRect !(Maybe Id) !Bool ![WElementHandle .ls .pst] !*OSToolbox
+																	    -> (!ClipState,![WElementHandle .ls .pst],!*OSToolbox)
 createClipState wMetrics allClipStates validate wPtr clipRect defId isVisible itemHs tb
 	# (clipRgn,tb)			= osnewrectrgn clipRect tb
 	# (itemHs,clipRgn,tb)	= createWElementsClipState wMetrics allClipStates validate wPtr clipRect defId isVisible itemHs clipRgn tb
 	= ({clipRgn=clipRgn,clipOk=True},itemHs,tb)
 where
-	createWElementsClipState :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !Rect !(Maybe Id) !Bool ![WElementHandle .ls .pst] !OSRgnHandle !*OSToolbox
-																							  -> (![WElementHandle .ls .pst],!OSRgnHandle,!*OSToolbox)
+	createWElementsClipState :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !OSRect !(Maybe Id) !Bool ![WElementHandle .ls .pst] !OSRgnHandle !*OSToolbox
+																							    -> (![WElementHandle .ls .pst],!OSRgnHandle,!*OSToolbox)
 	createWElementsClipState wMetrics allClipStates validate wPtr clipRect defId isVisible [itemH:itemHs] clipRgn tb
 		# (itemH, clipRgn,tb)	= createWElementClipState  wMetrics allClipStates validate wPtr clipRect defId isVisible itemH  clipRgn tb
 		# (itemHs,clipRgn,tb)	= createWElementsClipState wMetrics allClipStates validate wPtr clipRect defId isVisible itemHs clipRgn tb
 		= ([itemH:itemHs],clipRgn,tb)
 	where
-		createWElementClipState :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !Rect !(Maybe Id) !Bool !(WElementHandle .ls .pst) !OSRgnHandle !*OSToolbox
-																								  -> (!WElementHandle .ls .pst, !OSRgnHandle,!*OSToolbox)
+		createWElementClipState :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !OSRect !(Maybe Id) !Bool !(WElementHandle .ls .pst) !OSRgnHandle !*OSToolbox
+																								    -> (!WElementHandle .ls .pst, !OSRgnHandle,!*OSToolbox)
 		createWElementClipState wMetrics allClipStates validate wPtr clipRect defId isVisible (WItemHandle itemH=:{wItemShow,wItemKind,wItemPos,wItemSize}) clipRgn tb
 			| not itemVisible || disjointRects clipRect (posSizeToRect wItemPos wItemSize)
 				| not allClipStates || not (isRecursiveControl wItemKind)	// PA:<>IsCompoundControl
@@ -53,13 +53,13 @@ where
 		where
 			itemVisible						= isVisible && wItemShow
 			
-			createWItemClipState :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !Rect !(Maybe Id) !(WItemHandle .ls .pst) !OSRgnHandle !*OSToolbox
-																							 -> (!WItemHandle .ls .pst, !OSRgnHandle,!*OSToolbox)
+			createWItemClipState :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !OSRect !(Maybe Id) !(WItemHandle .ls .pst) !OSRgnHandle !*OSToolbox
+																							   -> (!WItemHandle .ls .pst, !OSRgnHandle,!*OSToolbox)
 			createWItemClipState _ _ _ wPtr clipRect _ itemH=:{wItemKind=IsRadioControl,wItemInfo} clipRgn tb
 				# (clipRgn,tb)	= stateMap2 (createRadioClipState wPtr clipRect) (getWItemRadioInfo wItemInfo).radioItems (clipRgn,tb)
 				= (itemH,clipRgn,tb)
 			where
-				createRadioClipState :: !OSWindowPtr !Rect !(RadioItemInfo .pst) !(!OSRgnHandle,!*OSToolbox) -> (!OSRgnHandle,!*OSToolbox)
+				createRadioClipState :: !OSWindowPtr !OSRect !(RadioItemInfo .pst) !(!OSRgnHandle,!*OSToolbox) -> (!OSRgnHandle,!*OSToolbox)
 				createRadioClipState wPtr clipRect {radioItemPos,radioItemSize} (clipRgn,tb)
 					# (radioRgn,tb)	= osClipRadioControl wPtr (0,0) clipRect (toTuple radioItemPos) (toTuple radioItemSize) tb
 					# (diffRgn, tb)	= osdiffrgn clipRgn radioRgn tb
@@ -71,7 +71,7 @@ where
 				# (clipRgn,tb)	= stateMap2 (createCheckClipState wPtr clipRect) (getWItemCheckInfo wItemInfo).checkItems (clipRgn,tb)
 				= (itemH,clipRgn,tb)
 			where
-				createCheckClipState :: !OSWindowPtr !Rect !(CheckItemInfo .pst) !(!OSRgnHandle,!*OSToolbox) -> (!OSRgnHandle,!*OSToolbox)
+				createCheckClipState :: !OSWindowPtr !OSRect !(CheckItemInfo .pst) !(!OSRgnHandle,!*OSToolbox) -> (!OSRgnHandle,!*OSToolbox)
 				createCheckClipState wPtr clipRect {checkItemPos,checkItemSize} (clipRgn,tb)
 					# (checkRgn,tb)	= osClipCheckControl wPtr (0,0) clipRect (toTuple checkItemPos) (toTuple checkItemSize) tb
 					# (diffRgn, tb)	= osdiffrgn clipRgn checkRgn tb
@@ -137,22 +137,22 @@ where
 		= ([],clipRgn,tb)
 
 
-createClipState` :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !Rect !(Maybe Id) !Bool ![WElementHandle`] !*OSToolbox
-																	   -> (!ClipState,![WElementHandle`],!*OSToolbox)
+createClipState` :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !OSRect !(Maybe Id) !Bool ![WElementHandle`] !*OSToolbox
+																	     -> (!ClipState,![WElementHandle`],!*OSToolbox)
 createClipState` wMetrics allClipStates validate wPtr clipRect defId isVisible itemHs tb
 	# (clipRgn,tb)			= osnewrectrgn clipRect tb
 	# (itemHs,clipRgn,tb)	= createWElementsClipState` wMetrics allClipStates validate wPtr clipRect defId isVisible itemHs clipRgn tb
 	= ({clipRgn=clipRgn,clipOk=True},itemHs,tb)
 where
-	createWElementsClipState` :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !Rect !(Maybe Id) !Bool ![WElementHandle`] !OSRgnHandle !*OSToolbox
-																							   -> (![WElementHandle`],!OSRgnHandle,!*OSToolbox)
+	createWElementsClipState` :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !OSRect !(Maybe Id) !Bool ![WElementHandle`] !OSRgnHandle !*OSToolbox
+																							     -> (![WElementHandle`],!OSRgnHandle,!*OSToolbox)
 	createWElementsClipState` wMetrics allClipStates validate wPtr clipRect defId isVisible [itemH:itemHs] clipRgn tb
 		# (itemH, clipRgn,tb)	= createWElementClipState`  wMetrics allClipStates validate wPtr clipRect defId isVisible itemH  clipRgn tb
 		# (itemHs,clipRgn,tb)	= createWElementsClipState` wMetrics allClipStates validate wPtr clipRect defId isVisible itemHs clipRgn tb
 		= ([itemH:itemHs],clipRgn,tb)
 	where
-		createWElementClipState` :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !Rect !(Maybe Id) !Bool !WElementHandle` !OSRgnHandle !*OSToolbox
-																								  -> (!WElementHandle`,!OSRgnHandle,!*OSToolbox)
+		createWElementClipState` :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !OSRect !(Maybe Id) !Bool !WElementHandle` !OSRgnHandle !*OSToolbox
+																								    -> (!WElementHandle`,!OSRgnHandle,!*OSToolbox)
 		createWElementClipState` wMetrics allClipStates validate wPtr clipRect defId isVisible (WItemHandle` itemH=:{wItemShow`,wItemKind`,wItemPos`,wItemSize`}) clipRgn tb
 			| not itemVisible || disjointRects clipRect (posSizeToRect wItemPos` wItemSize`)
 				| not allClipStates || not (isRecursiveControl wItemKind`)	// PA:<>IsCompoundControl
@@ -174,13 +174,13 @@ where
 		where
 			itemVisible						= isVisible && wItemShow`
 			
-			createWItemClipState` :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !Rect !(Maybe Id) !WItemHandle` !OSRgnHandle !*OSToolbox
-																							 -> (!WItemHandle`,!OSRgnHandle,!*OSToolbox)
+			createWItemClipState` :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !OSRect !(Maybe Id) !WItemHandle` !OSRgnHandle !*OSToolbox
+																							   -> (!WItemHandle`,!OSRgnHandle,!*OSToolbox)
 			createWItemClipState` _ _ _ wPtr clipRect _ itemH=:{wItemKind`=IsRadioControl,wItemInfo`} clipRgn tb
 				# (clipRgn,tb)		= stateMap2 (createRadioClipState` wPtr clipRect) (getWItemRadioInfo` wItemInfo`).radioItems` (clipRgn,tb)
 				= (itemH,clipRgn,tb)
 			where
-				createRadioClipState` :: !OSWindowPtr !Rect !RadioItemInfo` !(!OSRgnHandle,!*OSToolbox) -> (!OSRgnHandle,!*OSToolbox)
+				createRadioClipState` :: !OSWindowPtr !OSRect !RadioItemInfo` !(!OSRgnHandle,!*OSToolbox) -> (!OSRgnHandle,!*OSToolbox)
 				createRadioClipState` wPtr clipRect {radioItemPos`,radioItemSize`} (clipRgn,tb)
 					# (radioRgn,tb)	= osClipRadioControl wPtr (0,0) clipRect (toTuple radioItemPos`) (toTuple radioItemSize`) tb
 					# (diffRgn, tb)	= osdiffrgn clipRgn radioRgn tb
@@ -192,7 +192,7 @@ where
 				# (clipRgn,tb)		= stateMap2 (createCheckClipState` wPtr clipRect) (getWItemCheckInfo` wItemInfo`).checkItems` (clipRgn,tb)
 				= (itemH,clipRgn,tb)
 			where
-				createCheckClipState` :: !OSWindowPtr !Rect !CheckItemInfo` !(!OSRgnHandle,!*OSToolbox) -> (!OSRgnHandle,!*OSToolbox)
+				createCheckClipState` :: !OSWindowPtr !OSRect !CheckItemInfo` !(!OSRgnHandle,!*OSToolbox) -> (!OSRgnHandle,!*OSToolbox)
 				createCheckClipState` wPtr clipRect {checkItemPos`,checkItemSize`} (clipRgn,tb)
 					# (checkRgn,tb)	= osClipCheckControl wPtr (0,0) clipRect (toTuple checkItemPos`) (toTuple checkItemSize`) tb
 					# (diffRgn, tb)	= osdiffrgn clipRgn checkRgn tb

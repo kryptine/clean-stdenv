@@ -28,7 +28,7 @@ relayoutFatalError function error
 
 
 /*	relayoutItems resizes and moves changed items.
-		The two Rect   arguments are the window frames in which the elements reside.
+		The two OSRect arguments are the window frames in which the elements reside.
 		The two Point2 arguments are the positions of the parent window/compound.
 		The OSWindowPtr is the parent window/dialog.
 		The first  RelayoutItem list contains the elements at their original location and size.
@@ -46,7 +46,7 @@ relayoutFatalError function error
 			* the area to be updated equals validRegion - invalidRegion (so if its empty, then no update is required)
 	relayoutItems returns the update region. 
 */
-relayoutItems :: !OSWindowMetrics !Rect !Rect !Point2 !Point2 !OSWindowPtr ![RelayoutItem] ![RelayoutItem] !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+relayoutItems :: !OSWindowMetrics !OSRect !OSRect !Point2 !Point2 !OSWindowPtr ![RelayoutItem] ![RelayoutItem] !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 relayoutItems wMetrics oldFrame newFrame oldParentPos newParentPos wPtr oldHs newHs tb
 	#! (clipRgn,tb)		= osnewrectrgn newFrame tb
 	#! (validRgn,tb)	= osnewrectrgn zero tb
@@ -67,7 +67,7 @@ relayoutItems wMetrics oldFrame newFrame oldParentPos newParentPos wPtr oldHs ne
 where
 	newArea				= subtractRects newFrame oldFrame
 	
-	relayoutItems` :: !OSWindowPtr !OSWindowMetrics ![Rect] !(!Rect,!Point2,![RelayoutItem]) !(!Rect,!Point2,![RelayoutItem])
+	relayoutItems` :: !OSWindowPtr !OSWindowMetrics ![OSRect] !(!OSRect,!Point2,![RelayoutItem]) !(!OSRect,!Point2,![RelayoutItem])
 					  !(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle) !*Picture
 				  -> (!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle),!*Picture)
 	relayoutItems` wPtr wMetrics newArea (oldFrame,oldParentPos,[oldH:oldHs]) (newFrame,newParentPos,[newH:newHs]) rgnHs picture
@@ -75,7 +75,7 @@ where
 		# (rgnHs,picture)	= relayoutItems` wPtr wMetrics newArea (oldFrame,oldParentPos,oldHs) (newFrame,newParentPos,newHs) rgnHs picture
 		= (rgnHs,picture)
 	where
-		relayoutItem :: !OSWindowPtr !OSWindowMetrics ![Rect] !(!Rect,!Point2,!RelayoutItem) !(!Rect,!Point2,!RelayoutItem)
+		relayoutItem :: !OSWindowPtr !OSWindowMetrics ![OSRect] !(!OSRect,!Point2,!RelayoutItem) !(!OSRect,!Point2,!RelayoutItem)
 						!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle) !*Picture
 					-> (!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle),!*Picture)
 		relayoutItem wPtr wMetrics newArea old=:(_,_,{rliItemShow,rliItemKind=k1}) new=:(_,_,{rliItemKind=k2}) rgnHs picture
@@ -86,7 +86,7 @@ where
 			/*	relayout assumes that the two RelayoutItem arguments 
 				have the same ControlKind (fourth argument) and differ only in size or position or both.
 			*/
-			relayout :: !OSWindowPtr !OSWindowMetrics ![Rect] !ControlKind !(!Rect,!Point2,!RelayoutItem) !(!Rect,!Point2,!RelayoutItem)
+			relayout :: !OSWindowPtr !OSWindowMetrics ![OSRect] !ControlKind !(!OSRect,!Point2,!RelayoutItem) !(!OSRect,!Point2,!RelayoutItem)
 						!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle) !*Picture
 					-> (!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle),!*Picture)
 			
@@ -144,12 +144,12 @@ where
 				hRect			= osGetCompoundHScrollRect wMetrics newVisScrolls (sizeToRect newSize);	hRect`	= addVector (toVector newPos) hRect
 				vRect			= osGetCompoundVScrollRect wMetrics newVisScrolls (sizeToRect newSize);	vRect`	= addVector (toVector newPos) vRect
 				
-				setCompoundScroll :: !OSWindowPtr !Bool OSWindowMetrics OSWindowPtr Bool Bool Int Int Int !Rect !*OSToolbox -> *OSToolbox
+				setCompoundScroll :: !OSWindowPtr !Bool OSWindowMetrics OSWindowPtr Bool Bool Int Int Int !OSRect !*OSToolbox -> *OSToolbox
 				setCompoundScroll wPtr hasScroll wMetrics compoundPtr isHorizontal able size old new {rright,rbottom} tb
 					| not hasScroll
 						= tb
 //					# tb			= osSetCompoundSliderThumbSize wMetrics compoundPtr isHorizontal size (rright,rbottom) (old==new) tb
-					# tb			= osSetCompoundSliderThumbSize wMetrics compoundPtr scrollPtr scrollMin scrollMax scrollSize scrollRect isHorizontal able (old==new) tb
+					# tb			= osSetCompoundSliderThumbSize wMetrics wPtr compoundPtr scrollPtr scrollMin scrollMax scrollSize scrollRect isHorizontal able (old==new) tb
 					| old==new
 						# tb		= osUpdateCompoundScroll wPtr scrollPtr scrollRect tb
 						= tb
@@ -216,7 +216,7 @@ where
 	relayoutItems` _ _ _ _ _ _ _
 		= relayoutFatalError "relayoutItems`" "mismatching RelayoutItems"
 	
-	checkUpdateRegions :: !Rect !Rect !(!OSRgnHandle,!OSRgnHandle) !*OSToolbox -> (!(!OSRgnHandle,!OSRgnHandle),!*OSToolbox)
+	checkUpdateRegions :: !OSRect !OSRect !(!OSRgnHandle,!OSRgnHandle) !*OSToolbox -> (!(!OSRgnHandle,!OSRgnHandle),!*OSToolbox)
 	checkUpdateRegions oldFrame newFrame rgnHs=:(validRgn,invalidRgn) tb
 		| oldFrame==newFrame
 			= (rgnHs,tb)
@@ -229,7 +229,7 @@ where
 			# tb				= stateMap2 osdisposergn [validRgn,invalidRgn,newFrameRgn,oldFrameRgn,okNewRgn] tb	// PA: okNewRgn added
 			= ((newValidRgn,newInvalidRgn),tb)
 	
-	subtractRectFromRgn :: !Rect !OSRgnHandle !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+	subtractRectFromRgn :: !OSRect !OSRgnHandle !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 	subtractRectFromRgn rect rgn tb
 		| isEmptyRect rect
 			= (rgn,tb)
@@ -241,7 +241,7 @@ where
 			= (diffRgn,tb)
 	
 	//	updatecustomcontrol assumes that the item is visible.
-	updatecustomcontrol :: !OSWindowPtr !OSRgnHandle !Rect !RelayoutItem !*Picture -> *Picture
+	updatecustomcontrol :: !OSWindowPtr !OSRgnHandle !OSRect !RelayoutItem !*Picture -> *Picture
 	updatecustomcontrol parentPtr clipRgn contentRect itemH=:{rliItemKind=IsCustomButtonControl} picture
 		#! (curOrigin,picture)			= getpictorigin picture
 		#! (curPen,   picture)			= getpictpen picture
@@ -302,7 +302,7 @@ where
 		cRect							= addVector (toVector (itemPos-origin)) cFrameRect
 		clipRect						= intersectRects contentRect cRect
 	
-	clipospicture :: !OSRgnHandle !Rect !(IdFun *Picture) !*Picture -> *Picture
+	clipospicture :: !OSRgnHandle !OSRect !(IdFun *Picture) !*Picture -> *Picture
 	clipospicture newClipRgn rect drawf picture
 		#! (rectRgn,picture)	= accpicttoolbox (osnewrectrgn rect) picture
 		#! (curClipRgn,picture)	= pictgetcliprgn picture
