@@ -3650,7 +3650,7 @@ SDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPARAM lPara)
 								  HWND_BOTTOM,												/* this value is ignored (SWP_NOZORDER)  */
 								  0,0,														/* these values are ignored (SWP_NOMOVE) */
 								  (int)LOWORD (lPara),(int)HIWORD (lPara)-toolbarHeight,	/* new width and height */
-								  SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOREDRAW
+								  SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER
 								 );
 				}
 			}

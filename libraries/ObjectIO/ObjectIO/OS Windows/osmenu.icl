@@ -11,15 +11,6 @@ from	ostypes				import OSWindowPtr, OSNoWindowPtr
 
 
 //	Types for menus and menu elements:
-/*::	MenuBar
-	=	NoMenuBar
-	|	MenuBar OSMenuBar
-::	OSMenuBar
-	=	{	menuBar		:: !HMENU
-		,	menuWindow	:: !HWND
-		,	menuClient	:: !HWND		// If MDI: client window; otherwise: OSNoWindowPtr
-		}
-*/
 ::	OSMenuHandle	:== HMENU
 ::	OSMenu			:== HMENU
 ::	OSMenuItem		:== HITEM
@@ -30,11 +21,6 @@ OSNoMenu :== 0
 OSNoMenuItem :== 0
 OSNoMenuSeparator :== 0
 
-/* PA---
-OSMenuBarNew :: !HWND !HWND !HMENU -> OSMenuBar
-OSMenuBarNew frameWindow clientWindow menu
-	= {menuBar=menu, menuWindow=frameWindow, menuClient=clientWindow}
-*/
 
 //	Enabling and disabling menus and menu elements:
 

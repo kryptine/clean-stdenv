@@ -11,7 +11,7 @@ from	ostypes		import HWND
 ::	HMENU	:==  Int
 
 
-WinCreatePopupMenuHandle :: !*OSToolbox -> (!HMENU,!*OSToolbox)
+WinCreatePopupMenuHandle :: !*OSToolbox -> (!HMENU,!*OSToolbox)		// PA: check if this can be a C call
 WinCreatePopupMenuHandle tb
 	# (rcci,tb)	= IssueCleanRequest2 (ErrorCallback2 "CreatePopupMenuHandle ") (Rq0Cci CcRqCREATEPOPMENU) tb
 	  hmenu		= case rcci.ccMsg of
