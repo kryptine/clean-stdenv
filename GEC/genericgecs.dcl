@@ -23,4 +23,4 @@ import StdBimap
 */
 generic gGEC t :: !(GECArgs t (PSt .ps)) !(PSt .ps) -> (!GECVALUE t (PSt .ps),!PSt .ps)
  
-derive gGEC Bool, Int, Real, Char, String, UNIT, PAIR, EITHER, CONS, FIELD, OBJECT
+derive gGEC Bool, Int, Real, Char, String, UNIT, PAIR, EITHER, CONS, FIELD, OBJECT, []

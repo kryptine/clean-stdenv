@@ -2,6 +2,8 @@ implementation module genericgecs
 
 import infragecs
 
+derive gGEC []
+
 generic gGEC t :: !(GECArgs t (PSt .ps)) !(PSt .ps) -> (!GECVALUE t (PSt .ps),!PSt .ps)
 gGEC{|Bool|}                                                                                           gecArgs pSt
 	= let (tGEC,pSt1) = openGECId pSt
