@@ -134,8 +134,8 @@ instance Controls ButtonControl where
 		getButtonSize wMetrics text (Just size) ioState
 			= ({w=wOK,h=hOK},ioState)
 		where
-			wOK						= max (osGetButtonControlMinWidth wMetrics) reqW
-			hOK						= reqH
+			wOK						= max 0 reqW
+			hOK						= max 0 reqH
 			{w=reqW,h=reqH}			= case size of
 										ControlOuterSize size -> size
 										ControlViewSize  size -> size
