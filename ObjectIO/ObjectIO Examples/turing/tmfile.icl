@@ -40,7 +40,7 @@ instance <<< Transition where
 instance <<< Tape where
 	(<<<) :: !*File !Tape -> *File
 	(<<<) file {content}
-		  = file<<<LimitContents content
+		  = file<<<"Tape:\n"<<<LimitContents content
 		  where
 			LimitContents :: !String -> String
 			LimitContents cont
