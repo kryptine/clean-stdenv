@@ -1333,8 +1333,8 @@ where
 			# (_,newItems,tb)			= layoutControls wMetrics hMargins vMargins spaces reqSize minSize [(newDomain,newOrigin)] oldItems tb
 			  wH						= {wH & whWindowInfo=windowInfo,whItems=newItems}
 			# (wH,tb)					= forceValidWindowClipState wMetrics True wPtr wH tb
-			# (updRgn,newItems,tb)		= relayoutControls wMetrics wPtr whDefaultId whSelect whShow (newContentRect,zero,zero,oldItems`) 
-										                                                             (newContentRect,zero,zero,wH.whItems) tb
+			# (updRgn,newItems,tb)		= relayoutControls wMetrics wPtr whDefaultId False whSelect whShow (newContentRect,zero,zero,oldItems`) 
+										                                                                   (newContentRect,zero,zero,wH.whItems) tb
 			# (wH,tb)					= drawwindowlook wMetrics wPtr id updState {wH & whItems=newItems} tb
 			# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wshIds wH tb
 		//	# tb						= OSvalidateWindowRect wPtr (sizeToRect whSize) tb

@@ -80,7 +80,7 @@ opencompoundcontrols osdInfo wMetrics compoundId ls newItems
 		# (newItemHs,tb)			= createCompoundControls wMetrics compoundId nrSkip whDefaultId whCancelId whSelect wPtr newItemHs tb
 		  wH						= {wH & whItemNrs=itemNrs,whItems=newItemHs}
 		# (wH,tb)					= forceValidWindowClipState wMetrics True wPtr wH tb
-		# (updRgn,newItemHs,tb)		= relayoutControls wMetrics wPtr whDefaultId whSelect whShow (wFrame,zero,zero,oldItemHs`) (wFrame,zero,zero,wH.whItems) tb
+		# (updRgn,newItemHs,tb)		= relayoutControls wMetrics wPtr whDefaultId False whSelect whShow (wFrame,zero,zero,oldItemHs`) (wFrame,zero,zero,wH.whItems) tb
 		# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wshIds {wH & whItems=newItemHs} tb
 		= (True,{wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
 where
@@ -174,7 +174,7 @@ openrecursivecontrols osdInfo wMetrics controlId ls newItems
 		# (newItemHs,tb)			= createRecursiveControls wMetrics controlId nrSkip whDefaultId whCancelId whSelect wPtr newItemHs tb
 		  wH						= {wH & whItemNrs=itemNrs,whItems=newItemHs}
 		# (wH,tb)					= forceValidWindowClipState wMetrics True wPtr wH tb
-		# (updRgn,newItemHs,tb)		= relayoutControls wMetrics wPtr whDefaultId whSelect whShow (wFrame,zero,zero,oldItemHs`) (wFrame,zero,zero,wH.whItems) tb
+		# (updRgn,newItemHs,tb)		= relayoutControls wMetrics wPtr whDefaultId False whSelect whShow (wFrame,zero,zero,oldItemHs`) (wFrame,zero,zero,wH.whItems) tb
 		# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wshIds {wH & whItems=newItemHs} tb
 		= (True,{wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
 where
@@ -267,7 +267,7 @@ closecontrols wMetrics closeIds relayout
 		# (_,newItemHs,tb)			= layoutControls wMetrics hMargins vMargins spaces reqSize zero [(domain,origin)] oldItemHs tb
 		  wH						= {wH & whItemNrs=itemNrs, whItems=newItemHs}
 		# (wH,tb)					= forceValidWindowClipState wMetrics True wPtr wH tb
-		# (updRgn,newItemHs,tb)		= relayoutControls wMetrics wPtr whDefaultId whSelect whShow (wFrame,zero,zero,oldItemHs`) (wFrame,zero,zero,wH.whItems) tb
+		# (updRgn,newItemHs,tb)		= relayoutControls wMetrics wPtr whDefaultId False whSelect whShow (wFrame,zero,zero,oldItemHs`) (wFrame,zero,zero,wH.whItems) tb
 		# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wshIds {wH & whItems=newItemHs} tb
 		= (freeRIds,freeIds,disposeFun,{wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
 where
@@ -424,7 +424,7 @@ setcontrolpositions wMetrics newPoss
 		  updState					= rectangleToUpdateState viewFrame
 		  drawbackground			= if (whKind==IsDialog) (\x y->(x,y)) (drawwindowlook wMetrics wPtr id updState)
 		# (wH,tb)					= drawbackground wH tb	// DvA: was switched off because of clipping concerns
-		# (updRgn,newItems,tb)		= relayoutControls wMetrics wPtr whDefaultId whSelect whShow (wFrame,zero,zero,oldItems`) (wFrame,zero,zero,wH.whItems) tb
+		# (updRgn,newItems,tb)		= relayoutControls wMetrics wPtr whDefaultId False whSelect whShow (wFrame,zero,zero,oldItems`) (wFrame,zero,zero,wH.whItems) tb
 		# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wshIds {wH & whItems=newItems} tb
 		# tb						= osValidateWindowRect wPtr (sizeToRect whSize) tb
 		  wsH						= {wsH & wshHandle=Just {wlsH & wlsHandle=wH}}

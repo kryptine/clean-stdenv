@@ -20,19 +20,21 @@ import	osfont, ossystem, ostoolbox, ostypes
 		,	rliItems		:: ![RelayoutItem]		// If the control kind is Is(Compound/Layout)Control: its elements; otherwise: []
 		}
 
-relayoutItems :: !OSWindowMetrics !OSWindowPtr !(!OSRect,!Point2,!Vector2,![RelayoutItem]) 
-                                               !(!OSRect,!Point2,!Vector2,![RelayoutItem])
-                 !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
-/*	relayoutItems wMetrics wPtr (oldFrame,oldParent,oldCompound,oldItems) (newFrame,newParent,newCompound,newItems) 
+relayoutItems :: !OSWindowMetrics !OSWindowPtr !Bool !(!OSRect,!Point2,!Vector2,![RelayoutItem]) 
+                                                     !(!OSRect,!Point2,!Vector2,![RelayoutItem])
+                                                     !*OSToolbox
+                                    -> (!OSRgnHandle,!*OSToolbox)
+/*	relayoutItems wMetrics guiPtr withinCompound (oldFrame,oldParent,oldCompound,oldItems) (newFrame,newParent,newCompound,newItems) 
 	resizes and moves changed items.
-		The OSWindowPtr is the parent window/dialog.
-		The two OSRect  arguments are the window frames in which the elements reside.
-		The two Point2  arguments are the positions of the parent window/compound/layout.
-		The two Vector2 arguments are the positions of the parent window/compound.
-		The two RelayoutItem lists contain the elements at their location and size.
+		guiPtr            :: OSWindowPtr    is the parent window/compound control.
+		withinCompound    :: Bool           is True iff the elements are inside a CompoundControl.
+		(old/new)Frame    :: OSRect         are the window frames in which the elements reside.
+		(old/new)Parent   :: Point2         are the positions of the parent window/compound/layout.
+		(old/new)Compound :: Vector2        are the positions of the parent window/compound.
+		(old/new)Items    :: [RelayoutItem] contain the elements at their location and size.
 	Assumptions: 
-		* The two RelayoutItem lists contain elements that are identical except for size and position
-		* (Radio/Check)Controls are flattened and have rliItemKind Is(Radio/Check)Control
+		* (old/new)Items contain elements that are identical except for size and position.
+		* (Radio/Check)Controls are flattened and have rliItemKind Is(Radio/Check)Control.
 		* The ClipStates of CompoundControls are valid.
 	relayoutItems returns the background region that needs to be updated.
 */
