@@ -47,6 +47,11 @@ gecConst b = GEC \recba  pst ->
 			,	set		= \upd a pSt -> pSt
 			}, pst)
 
+gecMouse :: String -> CGEC a MouseState
+gecMouse title = GEC \rec=:{set} pst ->
+	let ({gecGetValue, gecSetValue}, pst1) = createMouseGEC title Interactive (\r -> set (maybeUpdate r)) pst
+	in  ({value	= MouseLost, get = gecGetValue, set = \upd a pSt -> pSt /*gecSetValue*/}, pst1)
+
 gecIO :: (A. .ps: a *(PSt .ps) -> *PSt .ps) -> CGEC a a
 gecIO f = GEC \rec=:{set} pst -> ({rec & set = \r a pst -> set r a (case r of YesUpdate -> f a pst; _ -> pst)}, pst)
 
@@ -144,11 +149,12 @@ AGECtoCGEC :: String (AGEC a) -> (CGEC a a) | gGEC{|*|} a
 AGECtoCGEC sa agec =  (\a -> agec ^= a) @| gecEdit sa |@ (\agec -> (^^ agec))
 
 CGECtoAGEC :: (CGEC a a ) a -> (AGEC a) | gGEC{|*|} a
-CGECtoAGEC cgec a = mkAGEC  { toGEC   = \a _ -> {inout = (a,a), gec = cgec}
-							, fromGEC = \{inout} = snd inout
-							, updGEC  = id
-							, value   = a
-							}
+CGECtoAGEC cgec a 
+= mkAGEC { toGEC   = \a _ -> {inout = (Hide a,Hide a), gec = (\(Hide a) -> a) @| cgec |@ (\a -> Hide a)}
+		 , fromGEC = \{inout = (a,Hide b)} = b
+		 , updGEC  = id
+		 , value   = a
+		 }
 
 maybeUpdate :: !UpdateReason -> .IncludeUpdate
 maybeUpdate Changed = YesUpdate
@@ -202,7 +208,8 @@ mutualGEC s  fba fab  = %|(gecEdit s |@ fab |&| gecEdit s |@ fba )
 
 predGEC 		:: String (a -> Bool) 		-> CGEC a a 		| gGEC{|*|} a
 predGEC s p  =  (\a -> (a,Hide a)) @| selfGEC s (\(a,Hide oa) -> if (p a) (a,Hide a) (oa,Hide oa)) |@ (\(a,Hide oa) -> a)
-/*selfState_GECps :: (A..ps : a -> .(s -> .(*(PSt .ps) -> *(a,s,*(PSt .ps))))) !(!String,!a) s -> ((CGEC (a,(Mode s)) (a,(Mode s))),(a,(Mode s))) | gGEC{|*|} a & gGEC{|*|} s 
-selfState_GECps faspst (sa,a) s
-	= (%|(gecEdit sa |&| gecIO (\(a,Hide s) pst -> thd3 (faspst a s pst))),(a,Hide s))
-*/
+
+selfState_GECps :: String (A..ps : .(a,s) -> .(*(PSt .ps) -> *(.(a,s),*(PSt .ps)))) -> CGEC (a,s) (a,s) | gGEC{|*|} a & gGEC{|*|} s 
+selfState_GECps s faspst
+	= (\(a,st) -> (a,Hide st), \(a,Hide st) -> (a,st)) @|@
+		 %|	(gecEdit s |>>>| gecIO (\(a,Hide st) pst -> snd (faspst (a,st) pst)))

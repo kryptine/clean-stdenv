@@ -29,3 +29,16 @@ where
 									  ]
 		inittable	  				= [map ((+) i) [1..5] \\ i <- [0,5..25]]	
 
+spreadsheet2	=	CGEC (selfGEC 	"spreadsheet"			updsheet)	    (mksheet inittable) 
+where
+		updsheet (table <-> _ <|>
+		          _ <-> _ )			= mksheet (^^ table)
+		mksheet table				= tableGEC table <-> vertlistGEC rowsum <|>
+									  horlistGEC colsum <-> sum rowsum
+		where
+			rowsum					= map sum table
+			colsum 					= map sum transpose
+			transpose				= [[table!!i!!j \\ i <- [0..(length table)    - 1]]
+												    \\ j <- [0..length (table!!0) - 1]
+									  ]
+		inittable	  				= [map ((+) i) [1..5] \\ i <- [0,5..25]]	
