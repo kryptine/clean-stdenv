@@ -29,7 +29,7 @@ from	ostoolbox	import OSToolbox // MW11++
 		,	rConnected	:: ![Id]						// storing the argument of the ReceiverCloseAlsoReceivers attribute
 		}
 ::	RHandleFunction ls m r pst
-	:==	m -> (ls,pst) -> (ls,[r],pst)
+	:==	m -> *(ls,pst) -> *(ls,[r],pst)
 
 // MW11..
 ::	InetReceiverASMQType	:== (!InetEvent`,!EndpointRef`,!Int)
@@ -63,14 +63,14 @@ receiverSetSelectState :: !SelectState !(ReceiverStateHandle .pst) -> ReceiverSt
 receiverSetSelectState select rsH=:{rHandle=rH}
 	= {rsH & rHandle={rH & rSelect=select}}
 
-receiverHandleSyncMessage :: !SyncMessage !(ReceiverHandle .ls .pst) (.ls,.pst) -> ([SemiDynamic],ReceiverHandle .ls .pst,(.ls,.pst))
-receiverHandleSyncMessage {smRecLoc={rlReceiverId},smMsg} rH=:{rFun} context
+receiverHandleSyncMessage :: !SyncMessage !(ReceiverHandle .ls .pst) *(.ls,.pst) -> ([SemiDynamic],ReceiverHandle .ls .pst,*(.ls,.pst))
+receiverHandleSyncMessage {smRecLoc={rlReceiverId},smMsg} rH=:{rFun} (ls,pst)
 	| not (receiverIdentified rlReceiverId rH)
-		= ([],rH,context)
+		= ([],rH,(ls,pst))
 	# maybe_content	= getDynamic rlReceiverId smMsg
 	| isNothing maybe_content
-		= ([],rH,context)
-	# (ls,resp,pst)	= rFun (Cast (fromJust maybe_content)) context
+		= ([],rH,(ls,pst))
+	# (ls,resp,pst)	= rFun (Cast (fromJust maybe_content)) (ls,pst)
 	| isEmpty resp
 		= ([],rH,(ls,pst))
 	| otherwise	
@@ -88,11 +88,10 @@ receiverAddASyncMessage id sd rH=:{rASMQ}
 		= rH
 
 // MW11..
-receiverApplyInetEvent		::	!InetReceiverASMQType !(ReceiverHandle .ls .ps) (.ls,.ps)
-							->	(.ls,.ps)
-receiverApplyInetEvent eventInfo rH=:{rFun,rInetInfo=Just _} context
-	# (ls,_,ps)	= rFun (Cast eventInfo) context
-	= (ls,ps)
+receiverApplyInetEvent :: !InetReceiverASMQType !(ReceiverHandle .ls .pst) *(.ls,.pst) -> *(.ls,.pst)
+receiverApplyInetEvent eventInfo rH=:{rFun,rInetInfo=Just _} (ls,pst)
+	# (ls,_,pst)	= rFun (Cast eventInfo) (ls,pst)
+	= (ls,pst)
 
 getInetReceiverRId			::	!(ReceiverHandle .ls .ps)	-> (RId InetReceiverASMQType)
 // converts an Id into an RId

@@ -6,8 +6,8 @@ definition module StdTCPDef
 //	StdTCPDef provides basic definitions for using TCP.
 //	********************************************************************************
 
-from	StdMaybe		import	Maybe
-from	StdReceiverDef	import	Id, ReceiverFunction, ReceiverAttribute
+import	StdReceiverDef
+from	StdMaybe		import	Maybe, Just, Nothing
 from	StdOverloaded	import	toString, ==
 from	StdChannels		import	DuplexChannel, ReceiveMsg, SendEvent
 from	tcp 			import	TCP_SChannel_,TCP_RChannel_,TCP_Listener_,IPAddress

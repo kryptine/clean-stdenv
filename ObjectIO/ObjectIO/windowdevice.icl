@@ -1034,48 +1034,48 @@ where
 			where
 				itemControlSelectionIO :: !ControlSelectInfo !(WItemHandle .ls .pst) *(.ls,.pst)
 														  -> (!WItemHandle .ls .pst, *(.ls,.pst))
-				itemControlSelectionIO info itemH=:{wItemKind=IsRadioControl} ls_ps
+				itemControlSelectionIO info itemH=:{wItemKind=IsRadioControl,wItemInfo} (ls,pst)
 					# radioInfo		= RadioInfo {radioInfo & radioIndex=index}
 					  itemH			= {itemH & wItemInfo=radioInfo}
-					= (itemH,f ls_ps)
+					= (itemH,f (ls,pst))
 				where
 					itemPtr			= info.csItemPtr
-					radioInfo		= getWItemRadioInfo itemH.wItemInfo
+					radioInfo		= getWItemRadioInfo wItemInfo
 					error			= windowdeviceFatalError "windowIO _ (ControlSelection _) _" "RadioControlItem could not be found"
 					(index,radio)	= SelectedAtIndex (\{radioItemPtr}->radioItemPtr==itemPtr) error radioInfo.radioItems
 					f				= thd3 radio.radioItem
-				itemControlSelectionIO info itemH=:{wItemKind=IsCheckControl} ls_ps
+				itemControlSelectionIO info itemH=:{wItemKind=IsCheckControl} (ls,pst)
 					# checkInfo		= CheckInfo {checkInfo & checkItems=checks}
 					  itemH			= {itemH & wItemInfo=checkInfo}
-					= (itemH,f ls_ps)
+					= (itemH,f (ls,pst))
 				where
 					itemPtr			= info.csItemPtr
 					checkInfo		= getWItemCheckInfo itemH.wItemInfo
 					error			= windowdeviceFatalError "windowIO _ (ControlSelection _) _" "CheckControlItem could not be found"
 					(_,f,checks)	= Access (isCheckItem itemPtr) error checkInfo.checkItems
 					
-					isCheckItem :: !OSWindowPtr !(CheckItemInfo *(.ls,.pst)) -> (!(!Bool,!IdFun *(.ls,.pst)),!CheckItemInfo *(.ls,.pst))
+					isCheckItem :: !OSWindowPtr !(CheckItemInfo *(.ls,.pst)) -> *(!*(!Bool,!IdFun *(.ls,.pst)),!CheckItemInfo *(.ls,.pst))
 					isCheckItem itemPtr check=:{checkItemPtr,checkItem=(title,width,mark,f)}
 						| itemPtr==checkItemPtr
 							= ((True,f),{check & checkItem=(title,width,~mark,f)})
 						| otherwise
 							= ((False,id),check)
-				itemControlSelectionIO info itemH=:{wItemKind=IsPopUpControl} ls_ps
+				itemControlSelectionIO info itemH=:{wItemKind=IsPopUpControl} (ls,pst)
 					# popUpInfo		= PopUpInfo {popUpInfo & popUpInfoIndex=index}
 					  itemH			= {itemH & wItemInfo=popUpInfo}
-					= (itemH,f ls_ps)
+					= (itemH,f (ls,pst))
 				where
 					popUpInfo		= getWItemPopUpInfo itemH.wItemInfo
 					index			= info.csMoreData
 					f				= snd (popUpInfo.popUpInfoItems!!(index-1))
-				itemControlSelectionIO info itemH=:{wItemKind} ls_ps
+				itemControlSelectionIO info itemH=:{wItemKind} (ls,pst)
 					| wItemKind==IsButtonControl || wItemKind==IsCustomButtonControl
 						| hasAtt
-							= (itemH,f ls_ps)
+							= (itemH,f (ls,pst))
 						// otherwise
-							= (itemH,  ls_ps)
+							= (itemH,  (ls,pst))
 					| otherwise
-						= (itemH,ls_ps)
+						= (itemH,(ls,pst))
 				where
 					atts			= itemH.wItemAtts
 					(hasAtt,fAtt)	= Select (\att->isControlFunction att || isControlModsFunction att) undef atts
@@ -1084,9 +1084,9 @@ where
 										(ControlModsFunction f) -> f info.csModifiers
 										wrongAttribute          -> windowdeviceFatalError "windowStateControlSelectionIO" "argument is not a function attribute"
 			
-			elementControlSelectionIO info (WListLSHandle itemHs) ls_ps
-				# (done,itemHs,ls_ps)			= elementsControlSelectionIO info itemHs ls_ps
-				= (done,WListLSHandle itemHs,ls_ps)
+			elementControlSelectionIO info (WListLSHandle itemHs) (ls,pst)
+				# (done,itemHs,(ls,pst))		= elementsControlSelectionIO info itemHs (ls,pst)
+				= (done,WListLSHandle itemHs,(ls,pst))
 			
 			elementControlSelectionIO info (WExtendLSHandle {wExtendLS=extLS,wExtendItems=itemHs}) (ls,pst)
 				# (done,itemHs,((extLS,ls),pst))= elementsControlSelectionIO info itemHs ((extLS,ls),pst)
@@ -1096,8 +1096,8 @@ where
 				# (done,itemHs,(chLS,pst))		= elementsControlSelectionIO info itemHs (chLS,pst)
 				= (done,WChangeLSHandle {wChangeLS=chLS,wChangeItems=itemHs},(ls,pst))
 		
-		elementsControlSelectionIO _ _ ls_ps
-			= (False,[],ls_ps)
+		elementsControlSelectionIO _ _ (ls,pst)
+			= (False,[],(ls,pst))
 windowStateControlSelectionIO _ _ _
 	= windowdeviceFatalError "windowStateControlSelectionIO" "unexpected window placeholder"
 

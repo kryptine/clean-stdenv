@@ -6,8 +6,8 @@ definition module StdTCPChannels
 //	StdTCPChannels provides instances to use TCP.
 //	********************************************************************************
 
+import	StdString
 import	StdTCPDef, StdChannels
-from	StdString		import String
 from	StdIOCommon		import OkBool
 from	StdIOBasic		import Void, :^:
 from	tcp_bytestreams import TCP_SCharStream_, TCP_RCharStream_

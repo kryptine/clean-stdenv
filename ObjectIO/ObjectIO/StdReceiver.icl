@@ -66,7 +66,7 @@ instance Receivers (Receiver m) where
 	reopenReceiver ls rDef pState
 		= openReceiver ls rDef (appPIO (closeReceiver (RIdtoId (receiverDefRId rDef))) pState)
 */	
-	getReceiverType :: .(Receiver m .ls .pst) -> ReceiverType
+	getReceiverType :: *(*Receiver m .ls .pst) -> ReceiverType
 	getReceiverType _			= "Receiver"
 
 instance Receivers (Receiver2 m r) where
@@ -112,7 +112,7 @@ instance Receivers (Receiver2 m r) where
 		= openReceiver ls rDef (appPIO (closeReceiver (R2IdtoId (receiver2DefR2Id rDef))) pState)
 */
 	
-	getReceiverType :: .(Receiver2 m r .ls .pst) -> ReceiverType
+	getReceiverType :: *(*Receiver2 m r .ls .pst) -> ReceiverType
 	getReceiverType _			= "Receiver2"
 
 

@@ -4,7 +4,7 @@ implementation module osfont
 //	Clean Object I/O library, version 1.2
 
 
-import	StdBool, StdEnum, StdReal
+import	StdBool, StdClass, StdEnum, StdReal
 import	clCrossCall_12, pictCCall_12
 from	clCCall_12		import WinMakeCString, WinGetCString, CSTR, WinGetVertResolution
 from	StdPictureDef	import FontName, FontSize, FontStyle, BoldStyle, ItalicsStyle, UnderlinedStyle
@@ -99,8 +99,8 @@ where
 
 OSfontnames :: !*OSToolbox -> (![String], !*OSToolbox)
 OSfontnames tb
-	# GetFontNamesCci		= {ccMsg=CcRqGETFONTNAMES,p1=0,p2=0,p3=0,p4=0,p5=0,p6=0}
-	# (_,unsortednames,tb)	= IssueCleanRequest FontnamesCallback GetFontNamesCci [] tb
+	# getFontNamesCci		= {ccMsg=CcRqGETFONTNAMES,p1=0,p2=0,p3=0,p4=0,p5=0,p6=0}
+	# (_,unsortednames,tb)	= IssueCleanRequest FontnamesCallback getFontNamesCci [] tb
 	= (SortAndRemoveDuplicates unsortednames,tb)
 where
 	FontnamesCallback :: !CrossCallInfo ![FontName] !*OSToolbox -> (!CrossCallInfo,![String],!*OSToolbox)

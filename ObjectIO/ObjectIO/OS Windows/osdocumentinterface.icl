@@ -4,9 +4,9 @@ implementation module osdocumentinterface
 //	Clean object I/O library, version 1.2
 
 
-import	StdMaybe, StdTuple
+import	StdMaybe, StdOverloaded, StdString, StdTuple
 import	clCrossCall_12, ostoolbar, ossystem, ostypes, windowCrossCall_12
-from	commondef	import FatalError,String
+from	commondef	import FatalError
 from	StdIOCommon	import DocumentInterface, MDI, SDI, NDI
 
 

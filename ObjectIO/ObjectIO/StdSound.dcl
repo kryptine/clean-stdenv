@@ -7,7 +7,7 @@ definition module StdSound
 //	StdSound specifies sound playing functions.
 //	********************************************************************************
 
-from	StdString	import String
+import	StdString
 
 
 class playSoundFile env :: !String !*env -> (!Bool,!*env)

@@ -11,7 +11,7 @@ from	receiverhandle	import ReceiverHandle, RHandleFunction, /*MW11..*/ EndpointR
 								OSToolbox
 from	receivertable	import ReceiverTable
 from	systemid		import SystemId
-from	osmenu			import OSMenuBar, OSMenu, OSMenuItem, OSMenuSeparator, OSMenuNr, OSSubMenuNr, HMENU, HWND
+from	osmenu			import OSMenuBar, OSMenu, OSMenuItem, OSMenuSeparator, OSMenuNr, OSSubMenuNr, HMENU, HITEM, HWND
 
 
 ::	MenuElementState ls pst									// The internal implementation of a menu element
@@ -100,8 +100,8 @@ MenuElementStateToMenuElementHandle	:: !(MenuElementState  .ls .pst) -> MenuElem
 	Neither the ReceiverTable nor the IdTable are changed if there are duplicate (R(2))Ids; 
 	otherwise all (R(2))Ids have been bound.
 */
-menuIdsAreConsistent :: !SystemId !Id ![MenuElementHandle .ls .pst] !ReceiverTable !IdTable
-							-> (!Bool,![MenuElementHandle .ls .pst],!ReceiverTable,!IdTable)
+menuIdsAreConsistent :: !SystemId !Id !v:[MenuElementHandle .ls .pst] !ReceiverTable !IdTable
+							-> (!Bool,!v:[MenuElementHandle .ls .pst],!ReceiverTable,!IdTable)
 
 //	Convert a RadioMenuItem to the MenuItemHandle alternative of MenuElementHandle:
 RadioMenuItemToMenuElementHandle :: !(MenuRadioItem *(.ls,.pst)) -> MenuElementHandle .ls .pst

@@ -1,10 +1,10 @@
 definition module tcp
 
-from	StdString	import String
+import	StdString
 from	id			import Id
 from	StdFile 	import FileEnv, Files
 from	StdTime		import TimeEnv, Date, Tick, Time
-from	StdId		import Ids, RId, R2Id
+from	StdId		import Ids, RId, R2Id, PSt, IOSt
 from	id			import Id
 
 class ChannelEnv env	| Ids env & TimeEnv env & FileEnv env

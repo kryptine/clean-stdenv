@@ -4,11 +4,11 @@ implementation module receiverdevice
 //	Clean Object I/O library, version 1.2
 
 
-import	StdEnv
+import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	StdReceiver
 import	devicefunctions, iostate, receiverevent, receiverid
 from	commondef	import FatalError, URemove, UCond
-from	StdPSt		import	appPIO, accPIO
+from	StdPSt		import appPIO, accPIO
 
 
 receiverdeviceFatalError :: String String -> .x
@@ -191,8 +191,8 @@ letOneReceiverDoInetEvent (eventCode,endpointRef,inetReceiverCategory,misc) rsHs
 	= pState
   where
 
-	selectReceiver 	:: !(!EndpointRef`,!InetReceiverCategory`) ![ReceiverStateHandle .ps]
-					-> (Maybe (ReceiverStateHandle .ps),![ReceiverStateHandle .ps])
+	selectReceiver 	:: !(!EndpointRef`,!InetReceiverCategory`) ![ReceiverStateHandle .pst]
+						  -> (Maybe (ReceiverStateHandle .pst),![ReceiverStateHandle .pst])
 	selectReceiver receiverId=:(endpointRef,type) [rsH=:{rHandle={rInetInfo=Just (epr,tp,_,_)}}:rsHs]
 		| endpointRef==epr && type==tp
 			= (Just rsH,rsHs)
@@ -216,6 +216,6 @@ applyInetEvent eventInfo rsH=:{rState,rHandle} rsHs pState
 		receivers			= ReceiverSystemState {rReceivers=[{rsH & rState=rState2}:rsHs]} // left at the beginnig
 // ..MW11
 
-identifyReceiverStateHandle :: !Id !(ReceiverStateHandle .pst) -> (!Bool,!ReceiverStateHandle .pst)
+identifyReceiverStateHandle :: !Id !(ReceiverStateHandle .pst) -> *(!Bool,!ReceiverStateHandle .pst)
 identifyReceiverStateHandle id rsH=:{rHandle={rId}}
 	= (id==rId,rsH)

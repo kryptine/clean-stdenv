@@ -16,7 +16,7 @@ eqfst3id id1 (id2,_,_)
 
 /*	Higher order access on [WElementHandle`].	*/
 
-mapWElementHandles` :: (WItemHandle`->[.x]) ![WElementHandle`] -> [.x]
+mapWElementHandles` :: (WItemHandle`->v:[u:x]) ![WElementHandle`] -> v:[u:x], [v<=u]
 mapWElementHandles` f itemHs
 	| isEmpty itemHs
 		= []
@@ -24,7 +24,7 @@ mapWElementHandles` f itemHs
 		# (itemH,itemHs)	= HdTl itemHs
 		= mapWElementHandle` f itemH ++ mapWElementHandles` f itemHs
 where
-	mapWElementHandle` :: (WItemHandle`->[.x]) !WElementHandle` -> [.x]
+	mapWElementHandle` :: (WItemHandle`->v:[u:x]) !WElementHandle` -> v:[u:x], [v<=u]
 	mapWElementHandle` f (WRecursiveHandle`	itemHs _)
 		= mapWElementHandles` f itemHs
 	mapWElementHandle` f (WItemHandle` itemH)

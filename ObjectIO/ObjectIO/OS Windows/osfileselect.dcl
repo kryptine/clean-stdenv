@@ -2,7 +2,7 @@ definition module osfileselect
 
 //	Clean Object I/O library, version 1.2
 
-from	StdString	import String
+import	StdString
 from	ostoolbox	import OSToolbox
 import	osevent
 

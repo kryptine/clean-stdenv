@@ -103,7 +103,7 @@ where
 	  		# (x,mb_context,os) = printPagePerPageBothSemaphor
 								doDialog emulateScreen x initFun transFun printSetup (Just context) os
 			= (x,EnvSetOS os (fromJust mb_context))
-		zipWithSelectState :: .Id *(IOSt .a) -> *(.(Maybe SelectState,Id),*IOSt .a)
+		zipWithSelectState :: Id (IOSt .l) -> (v:(Maybe SelectState,Id),IOSt .l)
 		zipWithSelectState id io
 			#!	(mbSelectState, io)	= getWindowSelectState id io
 			= ((mbSelectState, id), io)
@@ -130,10 +130,11 @@ where
 		= (printSetup, files) // oh lala
 		
 
-printPagePerPageBothSemaphor :: !.Bool !.Bool .a 
-								.(.a -> .(.PrintInfo -> .(.Picture -> *((.Bool,.Origin),*(.b,*Picture))))) ((.b,.Picture) -> *((.Bool,.Origin),*(.b,*Picture)))
-								!.PrintSetup *(Maybe *Context) !*OSToolbox
-							 -> *(Alternative .a .b,*Maybe *Context,!.OSToolbox);
+printPagePerPageBothSemaphor :: !Bool !Bool .a
+								.(.a -> .(.PrintInfo -> .(*Picture -> *((Bool,Origin),*(.b,*Picture)))))
+								(*(.b,*Picture) -> *((Bool,Origin),*(.b,*Picture)))
+								!PrintSetup *(Maybe *Context) !*OSToolbox
+							-> *(*(Alternative .a .b),*(Maybe *Context),!*OSToolbox)
 printPagePerPageBothSemaphor p1 p2 x p4 p5 printSetup mb_context os
 // with this mechanism it is assured, that only one print job can happen at a time
 // addSemaphor adds the parameter to a C global and gives back the previous value of that
@@ -146,10 +147,11 @@ printPagePerPageBothSemaphor p1 p2 x p4 p5 printSetup mb_context os
 	  (_,os) = addSemaphor (-1) os
 	= (result,mb_context,os)
 
-printPagePerPageBoth :: !.Bool !.Bool .a
-						.(.a -> .(.PrintInfo -> .(.Picture -> *((.Bool,.Origin),*(.b,*Picture))))) ((.b,.Picture) -> *((.Bool,.Origin),*(.b,*Picture)))
-						.PrintSetup *(Maybe *Context) !*OSToolbox
-					 -> *(Alternative .a .b,*Maybe *Context,!.OSToolbox);
+printPagePerPageBoth :: !Bool !Bool .a
+						.(.a -> .(.PrintInfo -> .(*Picture -> *((Bool,Origin),*(.b,*Picture))))) 
+						(*(.b,*Picture) -> *((Bool,Origin),*(.b,*Picture))) 
+						PrintSetup *(Maybe *Context) !*OSToolbox
+					-> *(*(Alternative .a .b),*(Maybe *Context),!*OSToolbox)
 printPagePerPageBoth doDialog emulateScreen x initFun transFun printSetup mb_context os
 	  // do the print dialog (or not) and get the hdc and the printInfo
 
@@ -187,11 +189,10 @@ printPagePerPageBoth doDialog emulateScreen x initFun transFun printSetup mb_con
 	    (mb_context, os) = CCendDoc hdc mb_context os
 	  = (StartedPrinting finalState, mb_context, (deleteDC hdc os))
 
-
-printPages :: Int 
-			((.a,.Picture) -> *((.Bool,u:Origin),*(.a,*Picture)))
-			(Bool,v:Origin) .a HDC *(Maybe *Context) !*OSToolbox
-		-> *(.a,HDC,*Maybe *Context,!.OSToolbox), [u <= v];
+printPages :: Int
+			(*(.a,*Picture) -> *((Bool,Origin),* (.a,*Picture)))
+			(Bool,Origin) .a HDC *(Maybe *Context) !*OSToolbox
+		-> *(.a,HDC,*(Maybe *Context),!*OSToolbox)
 printPages _ _ (True,_) state hdc mb_context os
   =(state,hdc,mb_context,os)
 printPages pageNr fun (_,origin) state hdc mb_context os
@@ -324,7 +325,7 @@ evtlSwitchToOS pageNr hdc (Just context) os
 	# os = WinReleaseCString textPtr os
 	= (Just context, os) 
 
-initPicture :: !.Origin !*(!.OSPictContext,!*OSToolbox) -> !.Picture
+initPicture :: !.Origin !*(!.OSPictContext,!*OSToolbox) -> *Picture
 initPicture origin intPict
  = packPicture origin defaultPen False (fst intPict) (snd intPict)
 	

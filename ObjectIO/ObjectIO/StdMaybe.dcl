@@ -19,10 +19,10 @@ isNothing	:: !(Maybe .x) -> Bool		// not o isJust
 fromJust	:: !(Maybe .x) -> .x		// \(Just x) -> x
 
 // for possibly unique elements:
-u_isJust	:: !(Maybe .x) -> (!Bool, !Maybe .x)
-u_isNothing	:: !(Maybe .x) -> (!Bool, !Maybe .x)
+u_isJust	:: !u:(Maybe v:x) -> (!Bool, !u:(Maybe v:x)), [u<=v]
+u_isNothing :: !u:(Maybe v:x) -> (!Bool, !u:(Maybe v:x)), [u<=v]
 
-accMaybe	:: .(St .x .a) !(Maybe .x) -> (!Maybe .a,!Maybe .x)
+accMaybe	:: .(St u:x .a) !v:(Maybe u:x) -> (!Maybe .a,!v:(Maybe u:x)), [v<=u]
 // accMaybe f (Just x) = (Just (fst (f x)),Just (snd (f x)))
 // accMaybe f Nothing  = (Nothing,Nothing)
 

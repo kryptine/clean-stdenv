@@ -72,8 +72,8 @@ getIdParents			:: ![Id] !IdTable -> [Maybe IdParent]
 /*	addId(s)ToIdTable adds the argument Id (list) to the IdTable argument.
 	The return Bool is True if no duplicate member was found, otherwise it is False.
 */
-addIdToIdTable			:: !Id !IdParent    !IdTable -> (!Bool,!IdTable)
-addIdsToIdTable			:: ![(Id,IdParent)] !IdTable -> (!Bool,!IdTable)
+addIdToIdTable			:: !Id !IdParent    !IdTable -> *(!Bool,!IdTable)
+addIdsToIdTable			:: ![(Id,IdParent)] !IdTable -> *(!Bool,!IdTable)
 
 /*	removeId(s)FromIdTable removes the Id (list) argument from the IdTable argument.
 	The Boolean result is True if the Id (list) was actually removed, and it is False otherwise.

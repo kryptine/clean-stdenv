@@ -842,7 +842,7 @@ where
 		| isEmpty after	= spread before cols
 		| otherwise		= spread before (repeat_spreading n after cols)
 	where
-		spread :: ![.x] ![[.x]] -> [[.x]]
+		spread :: v:[u:a] w:[v:[u:a]] -> w:[v:[u:a]], [v<=u,w<=v]
 		spread [x:xs] [ys:zs]	= [[x:ys]:spread xs zs]
 		spread [] zs			= zs
 	

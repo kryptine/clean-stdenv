@@ -133,11 +133,11 @@ OSgetSliderControlMinWidth _ = 0
 	|	DelayDeactivatedControl	OSWindowPtr OSWindowPtr	// the control (@2) in window (@1) has become inactive
 
 OScreateDialog :: !Bool !Bool !String !(!Int,!Int) !(!Int,!Int) !OSWindowPtr
-				  !(.s->(OSWindowPtr,.s))
-				  !(OSWindowPtr->.s->*OSToolbox->(.s,*OSToolbox))
-				  !(OSWindowPtr->OSWindowPtr->OSPictContext->.s->*OSToolbox->(.s,*OSToolbox))
-				  !OSDInfo !.s !*OSToolbox
-			   -> (![DelayActivationInfo],!OSWindowPtr,!.s,!*OSToolbox)
+				  !(u:s->*(OSWindowPtr,u:s))
+				  !(OSWindowPtr->u:s->u:(*OSToolbox->*(u:s,*OSToolbox)))
+				  !(OSWindowPtr->OSWindowPtr->OSPictContext->u:s->u:(*OSToolbox->*(u:s,*OSToolbox)))
+				  !OSDInfo !u:s !*OSToolbox
+			   -> (![DelayActivationInfo],!OSWindowPtr,!u:s,!*OSToolbox)
 OScreateDialog isModal isClosable title pos size behindPtr get_focus create_controls update_controls osdinfo control_info tb
 	# (textPtr,tb)	= WinMakeCString title tb
 	  createcci		= Rq4Cci CcRqCREATEDIALOG textPtr parentptr (if (behindPtr==OSNoWindowPtr) 0 behindPtr) (toInt isModal)
@@ -156,11 +156,11 @@ where
 						Nothing        -> 0
 						Just {osFrame} -> osFrame
 	
-	OScreateDialogCallback :: !(.s->(OSWindowPtr,.s))
-							  !(OSWindowPtr->.s->*OSToolbox->(.s,*OSToolbox))
-							  !(OSWindowPtr->OSWindowPtr->OSPictContext->.s->*OSToolbox->(.s,*OSToolbox))
-							  !CrossCallInfo !(.s,[DelayActivationInfo]) !*OSToolbox
-						  -> (!CrossCallInfo,!(.s,[DelayActivationInfo]),!*OSToolbox)
+	OScreateDialogCallback :: !(u:s->*(OSWindowPtr,u:s))
+							  !(OSWindowPtr->u:s->u:(*OSToolbox->*(u:s,*OSToolbox)))
+							  !(OSWindowPtr->OSWindowPtr->OSPictContext->u:s->u:(*OSToolbox->*(u:s,*OSToolbox)))
+							  !CrossCallInfo !*(u:s,[DelayActivationInfo]) !*OSToolbox
+						  -> (!CrossCallInfo,!*(u:s,[DelayActivationInfo]),!*OSToolbox)
 	OScreateDialogCallback _ _ _ {ccMsg=CcWmPAINT,p1=hwnd} s tb
 		= //trace_n "OScreateDialogCallback CcWmPAINT" 
 		  (Return0Cci, s, WinFakePaint hwnd tb)
@@ -194,11 +194,11 @@ where
 
 OScreateWindow :: !OSWindowMetrics !Bool !ScrollbarInfo !ScrollbarInfo !(!Int,!Int) !(!Int,!Int)
 				  !Bool !String !(!Int,!Int) !(!Int,!Int)
-				  !(.s->(OSWindowPtr,.s))
-				  !(OSWindowPtr->.s->*OSToolbox->(.s,*OSToolbox))
-				  !(OSWindowPtr->OSWindowPtr->OSPictContext->.s->*OSToolbox->(.s,*OSToolbox))
-				  !OSDInfo !OSWindowPtr !.s !*OSToolbox
-			   -> (![DelayActivationInfo],!OSWindowPtr,!OSWindowPtr,!OSWindowPtr,!OSDInfo,!.s,!*OSToolbox)
+				  !(u:s->*(OSWindowPtr,u:s))
+				  !(OSWindowPtr->u:s->u:(*OSToolbox->*(u:s,*OSToolbox)))
+				  !(OSWindowPtr->OSWindowPtr->OSPictContext->u:s->u:(*OSToolbox->*(u:s,*OSToolbox)))
+				  !OSDInfo !OSWindowPtr !u:s !*OSToolbox
+			   -> (![DelayActivationInfo],!OSWindowPtr,!OSWindowPtr,!OSWindowPtr,!OSDInfo,!u:s,!*OSToolbox)
 OScreateWindow	wMetrics isResizable hInfo=:{cbiHasScroll=hasHScroll} vInfo=:{cbiHasScroll=hasVScroll} minSize maxSize
 				isClosable title pos size
 				get_focus
@@ -254,10 +254,10 @@ where
 	osFrame			= osinfo.osFrame
 
 OScreateWindowCallback :: !Bool !(!Int,!Int) !(!Int,!Int) 
-						  !(OSWindowPtr->.s->*OSToolbox->(.s,*OSToolbox))
-						  !(OSWindowPtr->OSWindowPtr->OSPictContext->.s->*OSToolbox->(.s,*OSToolbox))
-						  !CrossCallInfo !(.s,[DelayActivationInfo]) !*OSToolbox
-					  -> (!CrossCallInfo,!(.s,[DelayActivationInfo]),!*OSToolbox)
+						  !(OSWindowPtr->u:s->u:(*OSToolbox->*(u:s,*OSToolbox)))
+						  !(OSWindowPtr->OSWindowPtr->OSPictContext->u:s->u:(*OSToolbox->*(u:s,*OSToolbox)))
+						  !CrossCallInfo !*(u:s,[DelayActivationInfo]) !*OSToolbox
+					  -> (!CrossCallInfo,!*(u:s,[DelayActivationInfo]),!*OSToolbox)
 /*	PA: This alternative replaced by WinFakePaint function.
 OScreateWindowCallback _ _ _ _ _ {ccMsg=CcWmPAINT,p1=hwnd} s tb
 	= //trace "OScreateWindowCallback CcWmPAINT" 
@@ -306,7 +306,8 @@ OScreateWindowCallback _ _ _ _ _ {ccMsg} s tb
 /*	PA: new function that creates modal dialog and handles events until termination. 
 		The Bool result is True iff no error occurred. 
 */
-OScreateModalDialog :: !Bool !String !OSDInfo !(Maybe OSWindowPtr) !(OSEvent -> .s -> ([Int],.s)) !.s !*OSToolbox -> (!Bool,!.s,!*OSToolbox)
+OScreateModalDialog :: !Bool !String !OSDInfo !(Maybe OSWindowPtr) !(OSEvent -> u:s -> *([Int],u:s)) !u:s !*OSToolbox
+																						   -> (!Bool,!u:s,!*OSToolbox)
 OScreateModalDialog isClosable title osdinfo currentActiveModal handleOSEvents s tb
 	# (textPtr,tb)		= WinMakeCString title tb
 	  createcci			= Rq2Cci CcRqCREATEMODALDIALOG textPtr parentptr
@@ -325,7 +326,7 @@ where
 							)
 							(fromJust currentActiveModal)
 	
-	OScreateModalDialogCallback :: !(OSEvent -> .s -> ([Int],.s)) !CrossCallInfo !.s !*OSToolbox -> (!CrossCallInfo,!.s,!*OSToolbox)
+	OScreateModalDialogCallback :: !(OSEvent -> u:s -> *([Int],u:s)) !CrossCallInfo !u:s !*OSToolbox -> (!CrossCallInfo,!u:s,!*OSToolbox)
 	OScreateModalDialogCallback handleOSEvents osEvent s tb
 	//	# (replyToOS,s)	= handleOSEvents (if (osEvent.ccMsg==CcWmIDLETIMER) osEvent (trace_n ("OScreateModalDialogCallback-->"+++toString osEvent) osEvent)) s
 		# (replyToOS,s)	= handleOSEvents osEvent s

@@ -7,9 +7,9 @@ implementation module StdGameDef
 //	StdGameDef contains all the type definitions needed to specify a game.
 //	********************************************************************************
 
+import	StdString
 from	StdFunc			import St
 from	StdOverloaded	import zero
-from	StdString		import String
 from	StdIOBasic		import Point2, Size, IdFun
 from	StdMaybe		import Maybe, Just, Nothing
 from	StdPictureDef	import Colour, RGB, RGBColour, Black, White, 

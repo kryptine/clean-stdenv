@@ -23,7 +23,7 @@ seteditcontrolcursor:: !Id !Int                  !OSWindowMetrics !OSWindowPtr !
 setcontrolslook		:: ![(Id,Bool,(Bool,Look))]  !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox
                                                                  -> (          !WindowHandle`,          !*OSToolbox)
 drawincontrol		:: !Id !.(St *Picture .x)    !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox
-                                                                 -> (!Maybe .x,!WindowHandle`,          !*OSToolbox)
+                                                                -> *(!Maybe .x,!WindowHandle`,          !*OSToolbox)
 setsliderstates		:: ![(Id,IdFun SliderState)] !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox
                                                                  -> (          !WindowHandle`,          !*OSToolbox)
 selectradiocontrol	:: !Id !Index                !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox

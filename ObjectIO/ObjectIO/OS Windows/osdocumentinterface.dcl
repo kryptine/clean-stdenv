@@ -2,12 +2,12 @@ definition module osdocumentinterface
 
 //	Clean object I/O library, version 1.2
 
-import	StdMaybe
+import	StdMaybe, StdOverloaded
+import	StdIOCommon
 from	menuCrossCall_12	import HMENU
 from	ostoolbox			import OSToolbox
 from	ostoolbar			import OSToolbar, OSToolbarHandle
 from	ostypes				import HWND
-from	StdIOCommon			import DocumentInterface, MDI, SDI, NDI
 
 ::	OSDInfo
 	=	OSMDInfo !OSMDInfo

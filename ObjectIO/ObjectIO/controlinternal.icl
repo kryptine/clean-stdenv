@@ -668,7 +668,7 @@ where
 
 //	Draw in a customised control.
 
-drawincontrol :: !Id !.(St *Picture .x) !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> (!Maybe .x,!WindowHandle`,!*OSToolbox)
+drawincontrol :: !Id !.(St *Picture .x) !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> *(!Maybe .x,!WindowHandle`,!*OSToolbox)
 drawincontrol controlId drawfun wMetrics wPtr wH=:{whItems`,whDefaultId`,whShow`,whSize`,whWindowInfo`} tb
 	# (_,itemHs,(x,_,tb))	= setWElement (drawInWItem wMetrics wPtr resizeable whDefaultId` whShow` clipRect) controlId whItems` (Nothing,drawfun,tb)
 	= (x,{wH & whItems`=itemHs},tb)
@@ -676,8 +676,8 @@ where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	resizeable				= True
 	
-	drawInWItem :: !OSWindowMetrics !OSWindowPtr Bool (Maybe Id) !Bool !Rect !Id !WItemHandle` !(!Maybe .x,.(St *Picture .x),!*OSToolbox)
-																	   -> (!Bool,!WItemHandle`,!(!Maybe .x,.(St *Picture .x),!*OSToolbox))
+	drawInWItem :: !OSWindowMetrics !OSWindowPtr Bool (Maybe Id) !Bool !Rect !Id !WItemHandle` !*(!v:(Maybe u:x),w:(St *Picture u:x),!*OSToolbox)
+																	   -> (!Bool,!WItemHandle`,!*(!v:(Maybe u:x),z:(St *Picture u:x),!*OSToolbox)), [v<=u,w<=z]
 	
 	drawInWItem wMetrics wPtr resizeable defId contextShow clipRect id itemH=:{wItemId`,wItemPtr`,wItemKind`=IsCompoundControl} x_tb
 		| not (identifyMaybeId id wItemId`)

@@ -103,40 +103,34 @@ getWindowVScrollRect	:: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
 	identifyWindowStateHandle
 		returns True iff the WindowStateHandle argument could be identified by the WID argument.
 */
-getWindowStateHandleWIDS		:: !(WindowStateHandle .pst) -> (!WIDS,			!WindowStateHandle .pst)
-getWindowStateHandleWindowMode	:: !(WindowStateHandle .pst) -> (!WindowMode,	!WindowStateHandle .pst)
-getWindowStateHandleWindowKind	:: !(WindowStateHandle .pst) -> (!WindowKind,	!WindowStateHandle .pst)
-getWindowStateHandleWindowTitle	:: !(WindowStateHandle .pst) -> (!Title,		!WindowStateHandle .pst)
-getWindowStateHandleItemNrs		:: !(WindowStateHandle .pst) -> (![Int],		!WindowStateHandle .pst)
-getWindowStateHandleKeyFocus	:: !(WindowStateHandle .pst) -> (!KeyFocus,		!WindowStateHandle .pst)
-/* Mike
-getWindowStateHandleWindowInfo	:: !(WindowStateHandle .pst) -> (!Maybe WindowInfo,	!WindowStateHandle .pst)
-*/
-getWindowStateHandleWindowInfo	:: !(WindowStateHandle .pst) -> (!WindowInfo,	!WindowStateHandle .pst)
-getWindowStateHandleShow		:: !(WindowStateHandle .pst) -> (!Bool,			!WindowStateHandle .pst)
-getWindowStateHandleSelect		:: !(WindowStateHandle .pst) -> (!Bool,			!WindowStateHandle .pst)
-getWindowStateHandleActive		:: !(WindowStateHandle .pst) -> (!Bool,			!WindowStateHandle .pst)
-getWindowStateHandleDefaultId	:: !(WindowStateHandle .pst) -> (!Maybe Id,		!WindowStateHandle .pst)
-getWindowStateHandleCancelId	:: !(WindowStateHandle .pst) -> (!Maybe Id,		!WindowStateHandle .pst)
-getWindowStateHandleSize		:: !(WindowStateHandle .pst) -> (!Size,			!WindowStateHandle .pst)
-getWindowStateHandleClosing		:: !(WindowStateHandle .pst) -> (!Bool,			!WindowStateHandle .pst)
-isWindowStateHandlePlaceHolder	:: !(WindowStateHandle .pst) -> (!Bool,			!WindowStateHandle .pst)
-identifyWindowStateHandle :: !WID  !(WindowStateHandle .pst) -> (!Bool,			!WindowStateHandle .pst)
+getWindowStateHandleWIDS		:: !(WindowStateHandle .pst) -> *(!WIDS,		!WindowStateHandle .pst)
+getWindowStateHandleWindowMode	:: !(WindowStateHandle .pst) -> *(!WindowMode,	!WindowStateHandle .pst)
+getWindowStateHandleWindowKind	:: !(WindowStateHandle .pst) -> *(!WindowKind,	!WindowStateHandle .pst)
+getWindowStateHandleWindowTitle	:: !(WindowStateHandle .pst) -> *(!Title,		!WindowStateHandle .pst)
+getWindowStateHandleItemNrs		:: !(WindowStateHandle .pst) -> *(![Int],		!WindowStateHandle .pst)
+getWindowStateHandleKeyFocus	:: !(WindowStateHandle .pst) -> *(!KeyFocus,	!WindowStateHandle .pst)
+getWindowStateHandleWindowInfo	:: !(WindowStateHandle .pst) -> *(!WindowInfo,	!WindowStateHandle .pst)
+getWindowStateHandleShow		:: !(WindowStateHandle .pst) -> *(!Bool,		!WindowStateHandle .pst)
+getWindowStateHandleSelect		:: !(WindowStateHandle .pst) -> *(!Bool,		!WindowStateHandle .pst)
+getWindowStateHandleActive		:: !(WindowStateHandle .pst) -> *(!Bool,		!WindowStateHandle .pst)
+getWindowStateHandleDefaultId	:: !(WindowStateHandle .pst) -> *(!Maybe Id,	!WindowStateHandle .pst)
+getWindowStateHandleCancelId	:: !(WindowStateHandle .pst) -> *(!Maybe Id,	!WindowStateHandle .pst)
+getWindowStateHandleSize		:: !(WindowStateHandle .pst) -> *(!Size,		!WindowStateHandle .pst)
+getWindowStateHandleClosing		:: !(WindowStateHandle .pst) -> *(!Bool,		!WindowStateHandle .pst)
+isWindowStateHandlePlaceHolder	:: !(WindowStateHandle .pst) -> *(!Bool,		!WindowStateHandle .pst)
+identifyWindowStateHandle :: !WID  !(WindowStateHandle .pst) -> *(!Bool,		!WindowStateHandle .pst)
 
-setWindowStateHandleWindowTitle	:: !Title			!(WindowStateHandle .pst) -> WindowStateHandle .pst
-setWindowStateHandleItemNrs		:: ![Int]			!(WindowStateHandle .pst) -> WindowStateHandle .pst
-setWindowStateHandleKeyFocus	:: !KeyFocus		!(WindowStateHandle .pst) -> WindowStateHandle .pst
-/* Mike
-setWindowStateHandleWindowInfo	:: !(Maybe WindowInfo)	!(WindowStateHandle .pst) -> WindowStateHandle .pst
-*/
-setWindowStateHandleWindowInfo	:: !WindowInfo		!(WindowStateHandle .pst) -> WindowStateHandle .pst
-setWindowStateHandleShow		:: !Bool			!(WindowStateHandle .pst) -> WindowStateHandle .pst
-setWindowStateHandleSelect		:: !Bool			!(WindowStateHandle .pst) -> WindowStateHandle .pst
-setWindowStateHandleActive		:: !Bool			!(WindowStateHandle .pst) -> WindowStateHandle .pst
-setWindowStateHandleDefaultId	:: !(Maybe Id)		!(WindowStateHandle .pst) -> WindowStateHandle .pst
-setWindowStateHandleCancelId	:: !(Maybe Id)		!(WindowStateHandle .pst) -> WindowStateHandle .pst
-setWindowStateHandleSize		:: !Size			!(WindowStateHandle .pst) -> WindowStateHandle .pst
-setWindowStateHandleClosing		:: !Bool			!(WindowStateHandle .pst) -> WindowStateHandle .pst
+setWindowStateHandleWindowTitle	:: !Title		!(WindowStateHandle .pst) -> WindowStateHandle .pst
+setWindowStateHandleItemNrs		:: ![Int]		!(WindowStateHandle .pst) -> WindowStateHandle .pst
+setWindowStateHandleKeyFocus	:: !KeyFocus	!(WindowStateHandle .pst) -> WindowStateHandle .pst
+setWindowStateHandleWindowInfo	:: !WindowInfo	!(WindowStateHandle .pst) -> WindowStateHandle .pst
+setWindowStateHandleShow		:: !Bool		!(WindowStateHandle .pst) -> WindowStateHandle .pst
+setWindowStateHandleSelect		:: !Bool		!(WindowStateHandle .pst) -> WindowStateHandle .pst
+setWindowStateHandleActive		:: !Bool		!(WindowStateHandle .pst) -> WindowStateHandle .pst
+setWindowStateHandleDefaultId	:: !(Maybe Id)	!(WindowStateHandle .pst) -> WindowStateHandle .pst
+setWindowStateHandleCancelId	:: !(Maybe Id)	!(WindowStateHandle .pst) -> WindowStateHandle .pst
+setWindowStateHandleSize		:: !Size		!(WindowStateHandle .pst) -> WindowStateHandle .pst
+setWindowStateHandleClosing		:: !Bool		!(WindowStateHandle .pst) -> WindowStateHandle .pst
 
 
 /*	Access operations on the margins and item space attributes of the window attributes.
@@ -148,7 +142,11 @@ getWindowHMargins				:: !WindowKind !OSWindowMetrics ![WindowAttribute .st] -> (
 getWindowVMargins				:: !WindowKind !OSWindowMetrics ![WindowAttribute .st] -> (!Int,!Int)
 getWindowItemSpaces				:: !WindowKind !OSWindowMetrics ![WindowAttribute .st] -> (!Int,!Int)
 
-/*	getWindowHandlesActiveWindow
+/*	getWindowHandlesWindows
+		removes all current WindowStateHandles from its argument. These HAVE to be restored with
+	setWindowHandlesWindows
+		which puts the argument WindowStateHandles back into its second argument.
+	getWindowHandlesActiveWindow
 		returns (Just WIDS) of the active window/dialogue if found, otherwise Nothing.
 	getWindowHandlesActiveModalDialog
 		returns (Just WIDS) of the active modal dialogue if found, otherwise Nothing.
@@ -184,13 +182,15 @@ getWindowItemSpaces				:: !WindowKind !OSWindowMetrics ![WindowAttribute .st] ->
 		If the window is modal, then the active position is in front of all other windows.
 		If the window is modeless, then the active position is immediately behind the last modal window.
 */
-getWindowHandlesActiveWindow		::									!(WindowHandles .pst) -> (!Maybe WIDS,!WindowHandles .pst)
-getWindowHandlesActiveModalDialog	::									!(WindowHandles .pst) -> (!Maybe WIDS,!WindowHandles .pst)
-hasWindowHandlesWindow				:: !WID								!(WindowHandles .pst) -> (!Bool,!WindowHandles .pst)
-getWindowHandlesWindow				:: !WID								!(WindowHandles .pst) -> (!Bool,!WindowStateHandle .pst,!WindowHandles .pst)
-removeWindowHandlesWindow			:: !WID								!(WindowHandles .pst) -> (!Bool,!WindowStateHandle .pst,!WindowHandles .pst)
+getWindowHandlesWindows				::									!(WindowHandles .pst) -> *(![WindowStateHandle .pst],!WindowHandles .pst)
+setWindowHandlesWindows				:: ![WindowStateHandle .pst]		!(WindowHandles .pst) -> WindowHandles .pst
+getWindowHandlesActiveWindow		::									!(WindowHandles .pst) -> *(!Maybe WIDS,!WindowHandles .pst)
+getWindowHandlesActiveModalDialog	::									!(WindowHandles .pst) -> *(!Maybe WIDS,!WindowHandles .pst)
+hasWindowHandlesWindow				:: !WID								!(WindowHandles .pst) -> *(!Bool,!WindowHandles .pst)
+getWindowHandlesWindow				:: !WID								!(WindowHandles .pst) -> *(!Bool,!WindowStateHandle .pst,!WindowHandles .pst)
+removeWindowHandlesWindow			:: !WID								!(WindowHandles .pst) -> *(!Bool,!WindowStateHandle .pst,!WindowHandles .pst)
 setWindowHandlesWindow				::        !(WindowStateHandle .pst)	!(WindowHandles .pst) -> WindowHandles .pst
-addBehindWindowHandlesWindow		:: !WID   !(WindowStateHandle .pst)	!(WindowHandles .pst) -> (!WIDS,!WindowHandles .pst)
+addBehindWindowHandlesWindow		:: !WID   !(WindowStateHandle .pst)	!(WindowHandles .pst) -> *(!WIDS,!WindowHandles .pst)
 addWindowHandlesWindow				:: !Index !(WindowStateHandle .pst)	!(WindowHandles .pst) -> WindowHandles .pst
 addWindowHandlesActiveWindow		::        !(WindowStateHandle .pst) !(WindowHandles .pst) -> WindowHandles .pst
 
@@ -198,20 +198,20 @@ addWindowHandlesActiveWindow		::        !(WindowStateHandle .pst) !(WindowHandle
 	disableWindowSystem should be used before a modal window is opened,
 	enableWindowSystem  should be used after  a modal window has been closed.
 */
-disableWindowSystem			::					!(WindowHandles .pst) !*OSToolbox -> (!(!Maybe WIDS,!WindowHandles .pst),!*OSToolbox)
-enableWindowSystem			:: !(Maybe WIDS)	!(WindowHandles .pst) !*OSToolbox -> (              !WindowHandles .pst, !*OSToolbox)
+disableWindowSystem			::					!(WindowHandles .pst) !*OSToolbox -> *(!*(!Maybe WIDS,!WindowHandles .pst),!*OSToolbox)
+enableWindowSystem			:: !(Maybe WIDS)	!(WindowHandles .pst) !*OSToolbox -> *(               !WindowHandles .pst, !*OSToolbox)
 
 
 /*	Checking WindowBounds:
 */
-checkZeroWindowHandlesBound	:: !(WindowHandles .pst) -> (!Bool,!WindowHandles .pst)
-decreaseWindowHandlesBound	:: !(WindowHandles .pst) ->         WindowHandles .pst
+checkZeroWindowHandlesBound	:: !(WindowHandles .pst) -> *(!Bool,!WindowHandles .pst)
+decreaseWindowHandlesBound	:: !(WindowHandles .pst) ->          WindowHandles .pst
 
 //	Retrieve the FocusItems of the elements that can obtain the keyboard input focus.
 getWElementKeyFocusIds		:: !Bool ![WElementHandle .ls .pst] -> (![FocusItem],![WElementHandle .ls .pst])
 
 //	Retrieve the OSWindowPtr of the control that has the initial input focus.
-getInitActiveControl :: !(WindowHandle .ls .pst) -> (!OSWindowPtr,!WindowHandle .ls .pst)
+getInitActiveControl :: !(WindowHandle .ls .pst) -> *(!OSWindowPtr,!WindowHandle .ls .pst)
 
 //	Generate internal item numbers for those WElementHandles that have none (wItemNr==0).
 genWElementItemNrs			:: ![Int] ![WElementHandle .ls .pst] -> (![Int],![WElementHandle .ls .pst])

@@ -22,7 +22,7 @@ import	deviceevents
 ::	CloseFunction pst	:==	pst -> pst
 ::	EventFunction pst	:==	SchedulerEvent
 						 ->	pst
-						 ->	(Bool, Maybe DeviceEvent, SchedulerEvent, pst)
+						 ->	*(Bool, Maybe DeviceEvent, SchedulerEvent, pst)
 ::	DoIOFunction  pst	:==	DeviceEvent
 						 -> pst
-						 -> (DeviceEvent, pst)
+						 -> *(DeviceEvent, pst)

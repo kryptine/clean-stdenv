@@ -4,11 +4,8 @@ implementation module processstack
 //	Clean Object I/O library, version 1.2
 
 
-from	StdBool			import otherwise
-from	StdOverloaded	import ==
-from	StdString		import	String
-from	commondef		import	FatalError
-from	systemid		import	SystemId, NullSystemId
+import	StdBool, StdOverloaded, StdString
+import	commondef, systemid
 
 
 ::	ProcessShowState

@@ -6,13 +6,12 @@ implementation module iostate
 
 import	StdBool, StdFunc, StdList, StdMisc
 import	commondef, devicefunctions, devicesystemstate, processstack, receivertable, timertable
-import	osdocumentinterface
+import	osdocumentinterface, ostime
 from	osactivaterequests	import OSActivateRequest
 from	osevent				import OSEvents, OSnewEvents
 from	osguishare			import OSGUIShare
 from	osmouse				import OSGetDoubleClickTime
 from	ossystem			import OSWindowMetrics, OSDefaultWindowMetrics
-from	ostime				import OSTime
 from	ostoolbox			import OSNewToolbox, OSDummyToolbox
 from	ostypes				import OSWindowPtr, OSNoWindowPtr
 from	roundrobin			import RR, emptyRR, notodoRR
@@ -36,7 +35,7 @@ from	roundrobin			import RR, emptyRR, notodoRR
 		}
 ::	*IOUnique l
 	=	{	ioevents		:: !*OSEvents						// The event stream environment
-		,	ioworld			:: ![*World]						// The world environment
+		,	ioworld			:: !*[*World]						// The world environment
 		,	ioprocesses		:: *CProcesses						// All other processes
 		,	ioinit			:: !IdFun (PSt l)					// The initialisation functions of the process
 		,	iotoolbox		:: !*OSToolbox						// The Mac continuation value
@@ -387,9 +386,6 @@ IOStGetParentId ioState=:{ioshare} = (ioshare.ioparent,ioState)
 
 IOStGetGUIShare :: !(IOSt .l) -> (!Maybe GUIShare,!IOSt .l)
 IOStGetGUIShare ioState=:{ioshare} = (ioshare.ioguishare,ioState)
-
-IOStSetGUIShare :: !(Maybe GUIShare) !(IOSt .l) -> IOSt .l
-IOStSetGUIShare guishare ioState=:{ioshare} = {ioState & ioshare={ioshare & ioguishare=guishare}}
 
 
 //	Access to the SystemIds of the subprocess of the IOSt:

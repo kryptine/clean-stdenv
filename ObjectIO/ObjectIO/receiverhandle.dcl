@@ -30,7 +30,7 @@ from	ostoolbox	import OSToolbox // MW11++
 // ..MW11
 		}
 ::	RHandleFunction ls m r pst
-	:==	m -> (ls,pst) -> (ls,[r],pst)
+	:==	m -> *(ls,pst) -> *(ls,[r],pst)
 
 // MW11..
 ::	InetReceiverASMQType	:== (!InetEvent`,!EndpointRef`,!Int)
@@ -43,16 +43,16 @@ from	ostoolbox	import OSToolbox // MW11++
 receiverIdentified			:: !Id				!(ReceiverHandle .ls .pst)	-> Bool
 // MW11..
 inetReceiverIdentified		::	!(!EndpointRef`, !InetReceiverCategory`)
-								!(ReceiverHandle .ls .ps)	-> Bool
+								!(ReceiverHandle .ls .pst)	-> Bool
 inetReceiverIdentifiedWithId::	!(!Id, !InetReceiverCategory`)
-								!(ReceiverHandle .ls .ps)	-> Bool
+								!(ReceiverHandle .ls .pst)	-> Bool
 // .. MW11
 receiverSetSelectState		:: !SelectState		!(ReceiverStateHandle .pst)	-> ReceiverStateHandle .pst
-receiverHandleSyncMessage	:: !SyncMessage		!(ReceiverHandle .ls .pst) (.ls,.pst)
-								-> ([SemiDynamic],ReceiverHandle .ls .pst, (.ls,.pst))
+receiverHandleSyncMessage	:: !SyncMessage		!(ReceiverHandle .ls .pst) *(.ls,.pst)
+								-> ([SemiDynamic],ReceiverHandle .ls .pst, *(.ls,.pst))
 receiverAddASyncMessage		:: !Id !SemiDynamic	!(ReceiverHandle .ls .pst)	-> ReceiverHandle .ls .pst
 // MW11..
-receiverApplyInetEvent		::	!InetReceiverASMQType !(ReceiverHandle .ls .ps) (.ls,.ps)
-							->	(.ls,.ps)
-getInetReceiverRId			::	!(ReceiverHandle .ls .ps)	-> (RId InetReceiverASMQType)
+receiverApplyInetEvent		::	!InetReceiverASMQType !(ReceiverHandle .ls .pst) *(.ls,.pst)
+							->	*(.ls,.pst)
+getInetReceiverRId			::	!(ReceiverHandle .ls .pst)	-> (RId InetReceiverASMQType)
 // ..MW11

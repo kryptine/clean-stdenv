@@ -302,13 +302,13 @@ where
 /*	List operations:
 */
 ::	Cond  x :== x -> Bool
-::	UCond x :== x -> (Bool,x)
+::	UCond x :== x -> *(Bool,x)
 
 IsSingleton :: ![.x] -> Bool
 IsSingleton [x]	= True
 IsSingleton _	= False
 
-HdTl :: ![.x] -> (!.x, ![.x])
+HdTl :: !u:[.x] -> (!.x, !u:[.x])
 HdTl [x:xs]		= (x,xs)
 
 InitLast :: ![.x] -> (![.x],!.x)
@@ -318,7 +318,7 @@ InitLast [x:xs]
 	# (init,last)	= InitLast xs
 	= ([x:init],last)
 
-Split :: !Int ![.x] -> (![.x],![.x])
+Split :: !Int !u:[.x] -> (![.x],!u:[.x])
 Split _ []
 	= ([],[])
 Split n xs
@@ -336,7 +336,7 @@ CondMap c f [x:xs]
 CondMap _ _ _
 	= (False, [])
 
-Uspan :: !(UCond .a) ![.a] -> (![.a],![.a])		// Same as span (StdList), but preserving uniqueness
+Uspan :: !(UCond .a) !u:[.a] -> (![.a],!u:[.a])		// Same as span (StdList), but preserving uniqueness
 Uspan c [x:xs]
 	# (keep,x) = c x
 	| keep
@@ -348,7 +348,7 @@ Uspan c [x:xs]
 Uspan _ _
 	= ([],[])
 
-FilterMap :: !(.x -> (Bool,.y)) ![.x] -> [.y]
+FilterMap :: !(.x -> *(Bool,.y)) ![.x] -> [.y]
 FilterMap f [x:xs]
 	#! (keep,y)	= f x
 	#! ys		= FilterMap f xs
@@ -357,7 +357,7 @@ FilterMap f [x:xs]
 FilterMap _ _
 	= []
 
-StateMap :: !(.x -> .s -> (.y,.s)) ![.x] !.s -> (![.y],!.s)
+StateMap :: !(.x -> .s -> *(.y,.s)) ![.x] !.s -> (![.y],!.s)
 StateMap f [x:xs] s
 	#! (y, s)	= f x s
 	#! (ys,s)	= StateMap f xs s
@@ -389,7 +389,7 @@ Contains :: !(Cond x) ![x] -> Bool
 Contains c [x:xs]	= c x || Contains c xs
 Contains _ _		= False
 
-UContains :: !(UCond .x) ![.x] -> (!Bool,![.x])
+UContains :: !(UCond .x) !u:[.x] -> (!Bool,!u:[.x])
 UContains c [x:xs]
 	# (cond,x) = c x
 	| cond
@@ -397,8 +397,8 @@ UContains c [x:xs]
 	| otherwise
 		# (b,xs) = UContains c xs
 		= (b,[x:xs])
-UContains _ _
-	= (False,[])
+UContains _ nil
+	= (False,nil)
 
 Select :: !(Cond x) x ![x] -> (!Bool, x)
 Select c n [x:xs]
@@ -406,7 +406,7 @@ Select c n [x:xs]
 	| otherwise	= Select c n xs
 Select _ n _	= (False,n)
 
-Access :: !(St .x (Bool,.y)) .y ![.x] -> (!Bool,.y,![.x])
+Access :: !(St .x *(Bool,.y)) .y !u:[.x] -> (!Bool,.y,!u:[.x])
 Access acc n [x:xs]
 	# ((cond,y),x) = acc x
 	| cond
@@ -414,8 +414,8 @@ Access acc n [x:xs]
 	| otherwise
 		# (b,y,xs) = Access acc n xs
 		= (b,y,[x:xs])
-Access _ n _
-	= (False,n,[])
+Access _ n nil
+	= (False,n,nil)
 
 AccessList :: !(St .x .y) ![.x] -> (![.y],![.x])
 AccessList acc [x:xs]
@@ -435,7 +435,7 @@ Remove c n [x:xs]
 Remove _ n _
 	= (False,n,[])
 
-URemove :: !(UCond .x) .x ![.x] -> (!Bool,.x,![.x])
+URemove :: !(UCond .x) .x !u:[.x] -> (!Bool,.x,!u:[.x])
 URemove c n [x:xs]
 	# (cond,x)	= c x
 	| cond
@@ -443,8 +443,8 @@ URemove c n [x:xs]
 	| otherwise
 		# (b,y,xs)	= URemove c n xs
 		= (b,y,[x:xs])
-URemove _ n _
-	= (False,n,[])
+URemove _ n nil
+	= (False,n,nil)
 
 Replace :: !(Cond x) x ![x] -> (!Bool,![x])
 Replace c y [x:xs]
@@ -456,7 +456,7 @@ Replace c y [x:xs]
 Replace _ _ _
 	= (False,[])
 
-UReplace :: !(UCond .x) .x ![.x] -> (!Bool,![.x])
+UReplace :: !(UCond .x) .x !u:[.x] -> (!Bool,!u:[.x])
 UReplace c y [x:xs]
 	# (cond,x)= c x
 	| cond
@@ -464,8 +464,8 @@ UReplace c y [x:xs]
 	| otherwise
 		# (b,xs)	= UReplace c y xs
 		= (b,[x:xs])
-UReplace _ _ _
-	= (False,[])
+UReplace _ _ nil
+	= (False,nil)
 
 ReplaceOrAppend :: !(Cond x) x ![x] -> [x]
 ReplaceOrAppend c y [x:xs]
@@ -476,7 +476,7 @@ ReplaceOrAppend c y [x:xs]
 ReplaceOrAppend _ y _
 	= [y]
 
-UReplaceOrAppend :: !(UCond .x) .x ![.x] -> [.x]
+UReplaceOrAppend :: !(UCond .x) .x !u:[.x] -> u:[.x]
 UReplaceOrAppend c y [x:xs]
 	# (cond,x)= c x
 	| cond
