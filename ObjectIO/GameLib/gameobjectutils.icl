@@ -23,7 +23,7 @@ toInt01 True  = 1
 toInt01 False = 0
 
 // store an objectrec in the game engine
-SetObjectRec :: !InstanceID !ObjectType !ObjectRec [SpriteID] !*OSToolbox -> (!GRESULT, !*OSToolbox)
+SetObjectRec :: !InstanceID !ObjectType !GameObjectRec ![SpriteID] !*OSToolbox -> (!GRESULT, !*OSToolbox)
 SetObjectRec id ot or spr tb
     = WinSetObjectRec id ot
         or.subtype
@@ -88,16 +88,16 @@ where
     FVToInt (Factor r) = (~ (fix r))
     FVToInt (Value  r) = (fix r)
 
-findlistvalue :: Int [Int] -> Int
-findlistvalue _ [] = 0
+findlistvalue :: !Int ![Int] -> Int
+findlistvalue _ []     = 0
 findlistvalue 1 [x:xs] = x
 findlistvalue n [x:xs]
     | n == 1    = x
-    | n > 1     = (findlistvalue (n - 1) xs)
-    | otherwise = (~n)
+    | n > 1     = findlistvalue (n-1) xs
+    | otherwise = ~n
 
-// load an ObjectRec from the game engine
-GetObjectRec :: !Int !*OSToolbox -> (!GRESULT, !ObjectType, !ObjectRec, !*OSToolbox)
+// load an GameObjectRec from the game engine
+GetObjectRec :: !Int !*OSToolbox -> (!GRESULT, !ObjectType, !GameObjectRec, !*OSToolbox)
 GetObjectRec id tb
     #  (ot, st, act, x, y, w, h,
         xofs, yofs, spr, do,
@@ -152,10 +152,10 @@ where
     IntToFV :: !Int -> FV
     IntToFV x
         | x < 0     = Factor (~ (fxr x))
-        | otherwise = Value (fxr x)
+        | otherwise = Value  (fxr x)
 
 // get the definition of an object by it's ObjectType
-getobject :: ObjectType !(GameHandle gs) -> Maybe (ObjectHandle (GSt gs))
+getobject :: !ObjectType !(GameHandle .gs) -> Maybe (GameObjectHandle (GSt .gs))
 getobject objtype gamehnd
     #   curlevel    =   hd gamehnd.levels`
     #   objectlist  =   curlevel.objects`
@@ -164,19 +164,18 @@ getobject objtype gamehnd
     =   Nothing
     =   Just (hd found)
 where
-    cmpobjtypes :: (ObjectHandle (GSt gs)) -> Bool
+    cmpobjtypes :: !(GameObjectHandle .gst) -> Bool
     cmpobjtypes ot = ot.objecttype` == objtype
 
 // store the definition of an object in the game definition
-putobject :: (ObjectHandle (GSt gs)) !(GameHandle gs) -> GameHandle gs
+putobject :: !(GameObjectHandle (GSt .gs)) !(GameHandle .gs) -> GameHandle .gs
 putobject obj gamehnd
     #   curlevel    =   hd gamehnd.levels`
     #   newobjlist  =   replaceobj curlevel.objects` obj []
     #   curlevel    =   {curlevel & objects`=newobjlist}
     =   {gamehnd & levels`=[curlevel]}
 where
-    replaceobj :: ![(ObjectHandle (GSt gs))] (ObjectHandle (GSt gs))
-                    ![(ObjectHandle (GSt gs))] -> [(ObjectHandle (GSt gs))]
+    replaceobj :: ![(GameObjectHandle .gst)] (GameObjectHandle .gst) ![(GameObjectHandle .gst)] -> [(GameObjectHandle .gst)]
     replaceobj [] _ l = l
 /*
     replaceobj [x:xs] y
@@ -241,10 +240,8 @@ fromDirectionSet :: !DirectionSet -> Int
 fromDirectionSet d = CompressBools (False, False, False, False, 
                                     d.right, d.bottom, d.left, d.top)
 
-toBoundMapCode :: (!Int,!DirectionSet) -> !Int
+toBoundMapCode :: !(!Int,!DirectionSet) -> !Int
 toBoundMapCode (c, d) = (c << 8) + (fromDirectionSet d)
 
 fromBoundMapCode :: !Int -> (!Int,!DirectionSet)
 fromBoundMapCode x = (x >> 8, makeDirectionSet x)
-
-

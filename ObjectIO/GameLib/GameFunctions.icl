@@ -51,15 +51,15 @@ ClearAllGameBitmaps :: !*OSToolbox -> (!GRESULT, !*OSToolbox)
 ClearAllGameBitmaps tb
     = OSClearAllGameBitmaps tb
 
-SetTransparentColor :: !BID Point2 !*OSToolbox -> (!GRESULT, !*OSToolbox)
+SetTransparentColor :: !BID !Point2 !*OSToolbox -> (!GRESULT, !*OSToolbox)
 SetTransparentColor id p tb
     = OSSetTransparentColor id p.x p.y tb
 
-InitBlockSequence :: !BID (!SEQID, [(Int,Int)]) !*OSToolbox -> (!GRESULT, !*OSToolbox)
+InitBlockSequence :: !BID !(!SEQID, ![(Int,Int)]) !*OSToolbox -> (!GRESULT, !*OSToolbox)
 InitBlockSequence bid (seqid, seq) tb
     = OSInitBlockSequence bid seqid (TupleListStr seq) tb
 
-InitGameLayerMap :: !MAPID !BID [{#Int}] !Bool !*OSToolbox -> (!GRESULT, !*OSToolbox)
+InitGameLayerMap :: !MAPID !BID ![{#Int}] !Bool !*OSToolbox -> (!GRESULT, !*OSToolbox)
 InitGameLayerMap mapid bid levelmap tile tb
     = OSInitGameLayerMap mapid bid (OSIntListArrayToString levelmap)
           (MapWidth levelmap) (MapHeight levelmap) tile tb
@@ -68,7 +68,7 @@ GameLayerMapDone :: !MAPID !*OSToolbox -> (!GRESULT, !*OSToolbox)
 GameLayerMapDone mapid tb
     = OSGameLayerMapDone mapid tb
 
-RunGameEngine :: (OSGameData gs) !*OSToolbox -> (gs, !*OSToolbox)
+RunGameEngine :: !(OSGameData .gs) !*OSToolbox -> (.gs, !*OSToolbox)
 RunGameEngine gd tb
     = OSRunGameEngine gd tb
 
@@ -77,11 +77,11 @@ SetGameBoundMap w h boundmap objstart startobjx startobjy tb
     = OSSetGameBoundMap w h (OSIntListArrayToString boundmap)
           (MapWidth boundmap) (MapHeight boundmap) objstart startobjx startobjy tb
 
-MoveScreenTo :: Point2 !*OSToolbox -> (!GRESULT, !*OSToolbox)
+MoveScreenTo :: !Point2 !*OSToolbox -> (!GRESULT, !*OSToolbox)
 MoveScreenTo p tb
     = OSMoveScreenTo p.x p.y tb
 
-InitSpriteAnimation :: !BID [(Int,Int)] !Bool !*OSToolbox -> (!GRESULT, !*OSToolbox)
+InitSpriteAnimation :: !BID ![(Int,Int)] !Bool !*OSToolbox -> (!GRESULT, !*OSToolbox)
 InitSpriteAnimation bid seq loop tb
     = OSInitSpriteAnimation bid (TupleListStr seq) loop tb
 
@@ -112,4 +112,3 @@ PlayMusic midifile restart tb
 StopMusic :: !*OSToolbox -> (!GRESULT, !*OSToolbox)
 StopMusic tb
     = OSStopMusic tb
-

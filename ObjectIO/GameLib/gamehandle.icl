@@ -6,39 +6,38 @@ from	StdList	import map
 import	StdGameDef
 
 :: GameHandle gs
-   = { levels`     :: [LevelHandle (GSt gs)]             // levels
-     , quitlevel`  :: (GSt gs) -> (Bool, GSt gs)         // when true, the game engine quits
-     , nextlevel`  :: (GSt gs) -> (Int, GSt gs)          // 1,2,... level in list, 0 = exit
-     , statistics` :: (GSt gs) -> ([Statistic], GSt gs)  // all text items
+   = { levels`     :: ![LevelHandle (GSt gs)]       // levels
+     , quitlevel`  :: !St (GSt gs) Bool             // when true, the game engine quits
+     , nextlevel`  :: !St (GSt gs) Int              // 1,2,... level in list, 0 = exit
+     , statistics` :: !St (GSt gs) [GameText]       // all text items
      }
 
 :: LevelHandle state
-   = { boundmap`      :: BoundMap               // map of all static bounds in a level
-     , initpos`       :: Point2                 // center of screen in boundmap
-     , layers`        :: [Layer]                // all visible (scrolling) layers
-                                                //   [back ... front]
-     , objects`       :: [ObjectHandle state]   // all other objects in the level
-     , music`         :: Maybe Music            // background music
-     , soundsamples`  :: [SoundSample]
-     , leveloptions`  :: LevelOptions
+   = { boundmap`      :: !BoundMap                   // map of all static bounds in a level
+     , initpos`       :: !Point2                     // center of screen in boundmap
+     , layers`        :: ![Layer]                    // all layers [back..front]
+     , objects`       :: ![GameObjectHandle state]   // all other objects in the level
+     , music`         :: !Maybe Music                // background music
+     , soundsamples`  :: ![SoundSample]
+     , leveloptions`  :: !LevelOptions
      }
 
-:: ObjectHandle gs
-   = E.state:
-     { objecttype` :: ObjectType
-     , sprites`    :: [Sprite]
-     , spriteids`  :: [SpriteID]
-     , instances`  :: [(InstanceID, state)]
-     , init`       :: !SubType !Point2 !GameTime !gs -> *(!*(state, ObjectRec), !gs)
-     , done`       :: !*(state, ObjectRec) !gs -> gs // *(!*(ObjectType, SubType), !gs)
-     , move`       :: !*(state, ObjectRec) !gs -> *(!*(state, ObjectRec), !gs)
-     , animation`  :: !*(state, ObjectRec) !gs -> *(!*(state, ObjectRec), !gs)
-     , touchbound` :: !*(state, ObjectRec) !DirectionSet !MapCode !gs -> *(!*(state, ObjectRec), !gs)
-     , collide`    :: !*(state, ObjectRec) !DirectionSet !ObjectType !ObjectRec !gs -> *(!*(state, ObjectRec), !gs)
-     , frametimer` :: !*(state, ObjectRec) !gs -> *(!*(state, ObjectRec), !gs)
-     , keydown`    :: !*(state, ObjectRec) !KeyCode !gs -> *(!*(state, ObjectRec), !gs)
-     , keyup`      :: !*(state, ObjectRec) !KeyCode !gs -> *(!*(state, ObjectRec), !gs)
-     , userevent`  :: !*(state, ObjectRec) !EventType !EventPar !EventPar !gs -> *(!*(state, ObjectRec), !gs)
+:: GameObjectHandle gs
+   = E. state:
+     { objecttype` :: !ObjectType
+     , sprites`    :: ![Sprite]
+     , spriteids`  :: ![SpriteID]
+     , instances`  :: ![(InstanceID, state)]
+     , init`       :: !SubType !Point2 !GameTime !gs         -> GameObjectState state gs
+     , done`       :: !(GameObjectState state gs)            -> gs
+     , move`       :: !                                         ObjectFun state gs
+     , animation`  :: !                                         ObjectFun state gs
+     , touchbound` :: !DirectionSet MapCode                  -> ObjectFun state gs
+     , collide`    :: !DirectionSet ObjectType GameObjectRec -> ObjectFun state gs
+     , frametimer` :: !                                         ObjectFun state gs
+     , keydown`    :: !KeyCode                               -> ObjectFun state gs
+     , keyup`      :: !KeyCode                               -> ObjectFun state gs
+     , userevent`  :: !EventType !EventPar !EventPar         -> ObjectFun state gs
      }
 
 :: InstanceID
@@ -46,7 +45,7 @@ import	StdGameDef
 
 
 
-createObjectHandle :: (Object .gs) -> ObjectHandle .gs
+createObjectHandle :: !(GameObject .gs) -> GameObjectHandle .gs
 createObjectHandle {objecttype, sprites, init, done, move, animation, touchbound,
                     collide, frametimer, keydown, keyup, userevent}
     = { objecttype` = objecttype
@@ -65,7 +64,7 @@ createObjectHandle {objecttype, sprites, init, done, move, animation, touchbound
       , userevent`  = userevent
       }
 
-createLevelHandle :: (Level .gs) -> LevelHandle .gs
+createLevelHandle :: !(Level .gs) -> LevelHandle .gs
 createLevelHandle {boundmap, initpos, layers, objects, music, soundsamples, leveloptions}
     = { boundmap`      = boundmap
       , initpos`       = initpos
@@ -76,7 +75,7 @@ createLevelHandle {boundmap, initpos, layers, objects, music, soundsamples, leve
       , leveloptions`  = leveloptions
       }
 
-createGameHandle :: (Game .gs) -> GameHandle .gs
+createGameHandle :: !(Game .gs) -> GameHandle .gs
 createGameHandle {levels, quitlevel, nextlevel, statistics}
     = { levels`     = map createLevelHandle levels
       , quitlevel`  = quitlevel
