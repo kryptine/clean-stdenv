@@ -671,6 +671,8 @@ where
 		basicFun _ _ _ _ st
 			= TRACE (gGECtraceDefault type_name) (OutDone,st)
 
+
+
 isLEFT :: (EITHER a b) -> Bool
 isLEFT (LEFT _) = True
 isLEFT _        = False
