@@ -64,8 +64,8 @@ where
 						  ,	rliItemLook		= undef
 						  ,	rliItems		= []
 						  }
-				RadioItemToRelayoutItems _ _ _ _
-					= []
+				RadioItemToRelayoutItems _ _ _ items
+					= items
 			
 			WItemHandleToRelayoutItems controlKind=:IsCheckControl isAble isVisible itemH=:{wItemSelect,wItemShow,wItemInfo} items
 				= (itemH,CheckItemToRelayoutItems (isAble && wItemSelect) (isVisible && wItemShow) (getWItemCheckInfo wItemInfo).checkItems items)
@@ -87,8 +87,8 @@ where
 						  ,	rliItemLook		= undef
 						  ,	rliItems		= []
 						  }
-				CheckItemToRelayoutItems _ _ _ _
-					= []
+				CheckItemToRelayoutItems _ _ _ items
+					= items
 			
 			WItemHandleToRelayoutItems controlKind isAble isVisible itemH=:{wItemPtr,wItemPos,wItemSize,wItemSelect,wItemShow} items
 				#! (info,look,items`,itemH)	= getinfo controlKind isAble` isVisible` itemH
