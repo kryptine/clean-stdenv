@@ -47,7 +47,7 @@ derive gGEC Type, Editors, Commands, ApplicationElem
 editoreditor = CGEC (designeditor |@ convert |>>>| applicationeditor) 
 			   [myinit,myinit,myinit,myinit]
 where
-	designeditor 		= %| (vertlistGEC o	updateDesign @|	gecEdit "design" |@	(^^))
+	designeditor 		= %| (vertlistGEC @| gecEdit "design" |@ updateDesign o (^^))
 
 	applicationeditor 	= %| (vertlistGEC o updateApplication @| gecEdit "user" |@ (^^))
 
@@ -65,10 +65,10 @@ where
 	update [(x,e,Insert):xs] 			= [(x,e,Choose),(x,e,Choose):xs] 
 	update [(x,e,Delete):xs] 			= xs
 
-	update [(F_I_I  ix f,e,Choose):xs] 	= [(F_I_I 	ix 				 (dynamicGEC2 (const 0))  ,e,Choose): xs]
-	update [(F_R_R  ix f,e,Choose):xs]	= [(F_R_R 	ix 				 (dynamicGEC2 (const 0.0)),e,Choose): xs]
-	update [(F_LI_I ix f,e,Choose):xs]	= [(F_LI_I  (dynamicGEC2 []) (dynamicGEC2 (const 0))  ,e,Choose): xs]
-	update [(F_LR_R ix f,e,Choose):xs]	= [(F_LR_R  (dynamicGEC2 []) (dynamicGEC2 (const 0.0)),e,Choose): xs]
+	update [(F_I_I  ix f,e,Choose):xs] 	= [(F_I_I 	ix 				 (dynamicGEC2 (const 0))  ,e,Apply): xs]
+	update [(F_R_R  ix f,e,Choose):xs]	= [(F_R_R 	ix 				 (dynamicGEC2 (const 0.0)),e,Apply): xs]
+	update [(F_LI_I ix f,e,Choose):xs]	= [(F_LI_I  (dynamicGEC2 []) (dynamicGEC2 (const 0))  ,e,Apply): xs]
+	update [(F_LR_R ix f,e,Choose):xs]	= [(F_LR_R  (dynamicGEC2 []) (dynamicGEC2 (const 0.0)),e,Apply): xs]
 
 	update [xo:xs]  					= [xo:update xs]
 	update []		  					= []
@@ -76,10 +76,10 @@ where
 // type of application editor element
 
 :: ApplicationElem											
-			= AF_I_I 	(AGEC String, AGEC (Int->Int,	  ListIndex ))
-			| AF_R_R 	(AGEC String, AGEC (Real->Real,	  ListIndex ))
-			| AF_LI_I 	(AGEC String, AGEC ([Int]->Int,	 [ListIndex]))
-			| AF_LR_R 	(AGEC String, AGEC ([Real]->Real,[ListIndex]))
+			= AF_I_I 	(AGEC String)( AGEC (Int->Int,	 ListIndex ))
+			| AF_R_R 	(AGEC String) (AGEC (Real->Real, ListIndex ))
+			| AF_LI_I 	(AGEC String) (AGEC ([Int]->Int, [ListIndex]))
+			| AF_LR_R 	(AGEC String) (AGEC ([Real]->Real,[ListIndex]))
 			| AInt_		(AGEC Int)
 			| AReal_	(AGEC Real)
 			| AString_ 	(AGEC String)
@@ -94,10 +94,10 @@ where
 	toT2 (Real_ r,agec,_)	 	 	= AReal_	(chooseAGEC agec r)
 	toT2 (String_ s,Displayval,_)	= AString_ 	(showGEC s)
 	toT2 (String_ s,_,_)			= AString_ 	(idGEC s)
-	toT2 (F_I_I i f,_,Apply)	 	= AF_I_I  	(showGEC "", hidGEC (^^ f, i))
-	toT2 (F_R_R r f,_,Apply)	 	= AF_R_R  	(showGEC "", hidGEC (^^ f, r))
-	toT2 (F_LI_I i f,_,Apply)	 	= AF_LI_I  	(showGEC "", hidGEC (^^ f, ^^ i))
-	toT2 (F_LR_R r f,_,Apply)	 	= AF_LR_R  	(showGEC "", hidGEC (^^ f, ^^ r))
+	toT2 (F_I_I i f,_,_)	 	= AF_I_I  	(showGEC "") (hidGEC (^^ f, i))
+	toT2 (F_R_R r f,_,_)	 	= AF_R_R  	(showGEC "") (hidGEC (^^ f, r))
+	toT2 (F_LI_I i f,_,_)	 	= AF_LI_I  	(showGEC "") (hidGEC (^^ f, ^^ i))
+	toT2 (F_LR_R r f,_,_)	 	= AF_LR_R  	(showGEC "") (hidGEC (^^ f, ^^ r))
 	toT2 _					 		= AString_ 	(showGEC "not implemented")
 
 	chooseAGEC Counter 		= counterGEC
@@ -109,10 +109,10 @@ where
 
 updateApplication list = map doT2 list
 where
-	doT2 (AF_I_I  (_, fi)) 	= AF_I_I 	((showGEC  (calcfi f i)),  hidGEC (f,i)) where (f,i) = ^^ fi
-	doT2 (AF_R_R  (_, fi)) 	= AF_R_R 	((showGEC  (calcfr f i)),  hidGEC (f,i)) where (f,i) = ^^ fi
-	doT2 (AF_LI_I (_, fi)) 	= AF_LI_I 	((showGEC  (calcfli f i)), hidGEC (f,i)) where (f,i) = ^^ fi
-	doT2 (AF_LR_R (_, fi)) 	= AF_LR_R 	((showGEC  (calcflr f i)), hidGEC (f,i)) where (f,i) = ^^ fi
+	doT2 (AF_I_I  _ fi) 	= AF_I_I 	(showGEC  (calcfli (f o hd) [i]))  (hidGEC (f,i)) where (f,i) = ^^ fi
+	doT2 (AF_R_R  _ fi) 	= AF_R_R 	(showGEC  (calcfr f i))  (hidGEC (f,i)) where (f,i) = ^^ fi
+	doT2 (AF_LI_I _ fi) 	= AF_LI_I 	(showGEC  (calcfli f i)) (hidGEC (f,i)) where (f,i) = ^^ fi
+	doT2 (AF_LR_R _ fi) 	= AF_LR_R 	(showGEC  (calcflr f i)) (hidGEC (f,i)) where (f,i) = ^^ fi
 	doT2 x 					= x
 
 	calcfi :: (Int -> Int) ListIndex -> String
@@ -161,5 +161,9 @@ where
 				 
 	checkBounds i = i < 0 || i > (length list) - 1
 
+// small auxilery functions
+
 showGEC i = (modeGEC (Display i))
-ToString s = toString s +++ " " 
+ToString s = toString s +++ " "
+
+
