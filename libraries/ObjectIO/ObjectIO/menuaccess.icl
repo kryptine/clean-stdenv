@@ -92,7 +92,8 @@ menuIdsAreConsistent :: !SystemId !Id !*[MenuElementHandle .ls .pst] !*ReceiverT
 							-> (!Bool,!*[MenuElementHandle .ls .pst],!*ReceiverTable,!*IdTable)
 menuIdsAreConsistent ioId menuId itemHs rt it
 	# (itemHs,ids)	= stateMap getMenuElementMenuId itemHs []
-	| not (okMembersIdTable ids it)
+	# (ok,it)		= okMembersIdTable ids it
+	| not ok
 		= (False,itemHs,rt,it)
 	# (ok,it)		= addIdsToIdTable (map (\id->(id,{idpIOId=ioId,idpDevice=MenuDevice,idpId=menuId})) ids) it
 	# (itemHs,rt)	= bindReceiverMenuIds ioId menuId itemHs rt

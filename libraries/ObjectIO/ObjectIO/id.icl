@@ -162,12 +162,12 @@ initialIdTable
 						   ]
 */	  }
 
-memberIdTable :: !Id !IdTable -> Bool
-memberIdTable (CustomId   nr) {customIds}	= membersortlist nr customIds
-memberIdTable (CustomRId  nr) {customRIds}	= membersortlist nr customRIds
-memberIdTable (CustomR2Id nr) {customR2Ids}	= membersortlist nr customR2Ids
-memberIdTable (SysId      nr) {sysIds}		= membersortlist nr sysIds
-memberIdTable (SpecialId _)    _			= False
+memberIdTable :: !Id !*IdTable -> (!Bool,!*IdTable)
+memberIdTable (CustomId   nr) it=:{customIds}	= (membersortlist nr customIds,it)
+memberIdTable (CustomRId  nr) it=:{customRIds}	= (membersortlist nr customRIds,it)
+memberIdTable (CustomR2Id nr) it=:{customR2Ids}	= (membersortlist nr customR2Ids,it)
+memberIdTable (SysId      nr) it=:{sysIds}		= (membersortlist nr sysIds,it)
+memberIdTable (SpecialId _)    it				= (False,it)
 
 // membersortlist checks for membership in a < sorted list
 membersortlist :: !Int ![(Int,x)] -> Bool
@@ -177,9 +177,26 @@ membersortlist x [(y,_):ys]
 	| otherwise		= membersortlist x ys
 membersortlist _ _	= False
 
-okMembersIdTable :: ![Id] !IdTable -> Bool
+okMembersIdTable :: ![Id] !*IdTable -> (!Bool,!*IdTable)
 okMembersIdTable ids idTable
-	= noDuplicates ids && all (\id->not (memberIdTable id idTable)) ids
+	| not (noDuplicates ids)
+		= (False,idTable)
+	| otherwise
+		= allList noMember ids idTable
+where
+	noMember :: !Id !*IdTable -> (!Bool,!*IdTable)
+	noMember id table
+		# (yes,table) = memberIdTable id table
+		= (not yes,table)
+	
+	allList :: !(.x .s -> .(Bool,.s)) ![.x] !.s -> (!Bool,!.s)
+	allList cond [x:xs] s
+		# (ok,s)	= cond x s
+		| ok		= allList cond xs s
+		| otherwise	= (False,s)
+	allList _ _ s
+		= (True,s)
+
 
 getIdParent :: !Id !*IdTable -> (!Maybe IdParent,!*IdTable)
 getIdParent (CustomId   nr) idTable=:{customIds}	= (getparentsortlist nr customIds,  idTable)

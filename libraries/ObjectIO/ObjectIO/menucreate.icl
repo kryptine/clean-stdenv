@@ -160,8 +160,9 @@ where
 			= att
 	validatePopUpMenuFunction (MenuReceiverHandle _)
 		= menucreateFatalError "validatePopUpMenuFunction" "Receiver(2) should not be an element of PopUpMenus"
-	validatePopUpMenuFunction (SubMenuHandle _)
-		= menucreateFatalError "validatePopUpMenuFunction" "SubMenu should not be an element of PopUpMenus"
+	validatePopUpMenuFunction (SubMenuHandle submH=:{mSubItems})
+//		= menucreateFatalError "validatePopUpMenuFunction" "SubMenu should not be an element of PopUpMenus"
+		= SubMenuHandle {submH & mSubItems = map validatePopUpMenuFunction mSubItems}
 	validatePopUpMenuFunction (RadioMenuHandle radioH=:{mRadioItems})
 		= RadioMenuHandle {radioH & mRadioItems=map validatePopUpMenuFunction mRadioItems}
 	validatePopUpMenuFunction (MenuSeparatorHandle separatorH)

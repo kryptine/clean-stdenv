@@ -171,7 +171,8 @@ controlIdsAreConsistent :: !SystemId !Id ![WElementHandle .ls .pst] !*ReceiverTa
 							   -> (!Bool,![WElementHandle .ls .pst],!*ReceiverTable,!*IdTable)
 controlIdsAreConsistent ioId wId itemHs rt it
 	# (ids,itemHs)	= getWElementControlIds itemHs
-	| not (okMembersIdTable ids it)
+	# (ok,it)		= okMembersIdTable ids it
+	| not ok
 		= (False,itemHs,rt,it)
 	# idParent		= {idpIOId=ioId,idpDevice=WindowDevice,idpId=wId}
 	  (ok,it)		= addIdsToIdTable [(id,idParent) \\ id<-ids] it

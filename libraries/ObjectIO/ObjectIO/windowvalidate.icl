@@ -34,7 +34,8 @@ validateWindowId Nothing ioState
 	= (Just wId,ioState)
 validateWindowId (Just id) ioState
 	# (idtable,ioState)			= ioStGetIdTable ioState
-	| memberIdTable id idtable	= (Nothing,ioStSetIdTable idtable ioState)
+	# (member,idtable)			= memberIdTable id idtable
+	| member					= (Nothing,ioStSetIdTable idtable ioState)
 	| otherwise					= (Just id,ioStSetIdTable idtable ioState)
 
 
@@ -469,29 +470,33 @@ where
 											   -> (!Point2,!WindowHandles .pst, !*OSToolbox)
 	getItemPosPosition wMetrics size itemPos windows=:{whsWindows=wsHs} tb
 		| isRelative
-			# (rect,tb)					= osScreenrect tb
-			  screenDomain				= rectToRectangle rect
-			  screenOrigin				= {x=rect.rleft,y=rect.rtop}
-			# (before,after)			= uspan (unidentifyWindow (toWID relativeTo)) wsHs
-			  (wPtr,wsH,after)			= case after of
-		  									[]                           -> windowvalidateFatalError "getItemPosPosition" "target window could not be found"
-		  									[wsH=:{wshIds={wPtr}}:after] -> (wPtr,wsH,after)
-			  (relativeSize,wsH)		= getWindowStateHandleSize wsH
-			  windows					= {windows & whsWindows=before++[wsH:after]}
-			# ((relativeX,relativeY),tb)= osGetWindowPos wPtr tb
-			/* PA: do not use OSgetWindowViewFrameSize. 
-			# ((relativeW,relativeH),tb)= OSgetWindowViewFrameSize wPtr tb
+			#  (rect,tb)					= osScreenrect tb
+			   screenDomain				= rectToRectangle rect
+			   screenOrigin				= {x=rect.rleft,y=rect.rtop}
+			#! (before,after)			= uspan (unidentifyWindow (toWID relativeTo)) wsHs
+			   (wPtr,wsH,after)			= case after of
+		  									[]
+		  										-> windowvalidateFatalError "getItemPosPosition" "target window could not be found"
+		  									[wsH:after]
+		  										#  (wPtr,wsH) = wsH!wshIds.wPtr
+		  										-> (wPtr,wsH,after)
+			   (relativeSize,wsH)		= getWindowStateHandleSize wsH
+			   wsHs						= before ++ [wsH:after]
+			   windows					= {windows & whsWindows=wsHs}
+			#  ((relativeX,relativeY),tb)= osGetWindowPos wPtr tb
+			/*	PA: do not use OSgetWindowViewFrameSize. 
+			#  ((relativeW,relativeH),tb)= OSgetWindowViewFrameSize wPtr tb
 			*/
-			  (relativeW,relativeH)		= toTuple relativeSize
-			  (exactW,exactH)			= (size.w,size.h)
-			  {vx,vy}					= itemPosOffset (snd itemPos) screenDomain screenOrigin
-			  pos						= case (fst itemPos) of
+			   (relativeW,relativeH)		= toTuple relativeSize
+			   (exactW,exactH)			= (size.w,size.h)
+			   {vx,vy}					= itemPosOffset (snd itemPos) screenDomain screenOrigin
+			   pos						= case (fst itemPos) of
 						  					(LeftOf  _)	-> {x=relativeX+vx-exactW,   y=relativeY+vy}
 						  					(RightTo _)	-> {x=relativeX+vx+relativeW,y=relativeY+vy}
 				  							(Above   _)	-> {x=relativeX+vx,          y=relativeY+vy-exactH}
 			  								(Below   _)	-> {x=relativeX+vx,          y=relativeY+vy+relativeH}
 			  								other       -> windowvalidateFatalError "getItemPosPosition" "unexpected ItemLoc alternative"
-			= (pos,windows,tb)
+			=  (pos,windows,tb)
 	where
 		(isRelative,relativeTo)		= isRelativeItemPos itemPos
 		

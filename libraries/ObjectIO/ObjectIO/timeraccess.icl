@@ -30,7 +30,8 @@ where
 	bindTimerElementIds` :: !SystemId !Id !*(TimerElementHandle .ls .pst) !*ReceiverTable !*IdTable
 								-> (!Bool, !*TimerElementHandle .ls .pst, !*ReceiverTable,!*IdTable)
 	bindTimerElementIds` pid timerid (TimerReceiverHandle itemH=:{tReceiverHandle=trH}) rt it
-		| memberIdTable rid it
+		# (member,it)		= memberIdTable rid it
+		| member
 			= (False,TimerReceiverHandle itemH,rt,it)
 		# (maybeRTE,rt)		= getReceiverTableEntry rid rt
 		| isJust maybeRTE	// This situation should not occur: the IdTable didn't contain the id while the ReceiverTable does.

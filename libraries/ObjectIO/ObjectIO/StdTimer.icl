@@ -79,7 +79,8 @@ instance Timers (Timer t) | TimerElements t where
 			= (Just tId,ioState)
 		validateTimerId (Just id) ioState
 			# (it,ioState)			= ioStGetIdTable ioState
-			| memberIdTable id it	= (Nothing,ioStSetIdTable it ioState)
+			# (member,it)			= memberIdTable id it
+			| member				= (Nothing,ioStSetIdTable it ioState)
 			| otherwise				= (Just id,ioStSetIdTable it ioState)
 		
 		addAbleTimerToTimerTable :: !Bool !TimerLoc !TimerInterval !(IOSt .l) -> IOSt .l

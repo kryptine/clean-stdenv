@@ -328,7 +328,7 @@ setcontrolpositions wMetrics newPoss
 		  viewFrame					= posSizeToRectangle origin {w=curw,h=curh}
 		  updState					= rectangleToUpdateState viewFrame
 		  drawbackground			= if (whKind==IsDialog) (\x y->(x,y)) (drawwindowlook wMetrics wPtr id updState)
-		# (wH,tb)					= drawbackground wH tb
+//		# (wH,tb)					= drawbackground wH tb	// DvA: seems to be unnecessary
 		# (updRgn,newItems,tb)		= relayoutControls wMetrics whSelect whShow wFrame wFrame zero zero wPtr whDefaultId oldItems` wH.whItems tb
 		# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wshIds {wH & whItems=newItems} tb
 		# tb						= osValidateWindowRect wPtr (sizeToRect whSize) tb
