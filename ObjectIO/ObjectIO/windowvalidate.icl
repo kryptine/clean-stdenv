@@ -20,6 +20,10 @@ windowvalidateError :: String String -> .x
 windowvalidateError function error
 	= Error function "windowvalidate" error
 
+windowvalidateFatalError :: String String -> .x
+windowvalidateFatalError function error
+	= FatalError function "windowvalidate" error
+
 
 /*	validateWindowId checks whether the Id of the window/dialogue has already been bound.
 	If so, Nothing is returned; otherwise a proper Id value for the window/dialogue is returned.
@@ -203,9 +207,9 @@ validateWindowPos mode atts windows
 		# (found,windows)	= hasWindowHandlesWindow (toWID relativeTo) windows
 		= (if found (Just itemPos) Nothing,atts`,windows)
 where
-	(hasPosAtt,posAtt,atts`)	= Remove isWindowPos undef atts
-	itemPos						= getWindowPosAtt posAtt
-	(isRelative,relativeTo)		= isRelativeItemPos itemPos
+	(hasPosAtt,posAtt,atts`)= Remove isWindowPos undef atts
+	itemPos					= getWindowPosAtt posAtt
+	(isRelative,relativeTo)	= isRelativeItemPos itemPos
 
 
 /*	The result ({corner1=A,corner2=B},_) of validateWindowDomain is such that A<B (point A lies to 
@@ -450,7 +454,7 @@ where
 	The ItemPos argument must be the validated(!) ItemPos attribute of the window.
 */
 exactWindowPos :: !OSWindowMetrics !Size !(Maybe ItemPos) !WindowKind !WindowMode !(WindowHandles .pst) !*OSToolbox
-																	   -> (!Point2, !WindowHandles .pst, !*OSToolbox)
+																	   -> (!Point2,!WindowHandles .pst, !*OSToolbox)
 exactWindowPos wMetrics exactSize maybePos wKind wMode windows tb
 	| wKind==IsDialog && wMode==Modal
 		= (pos,windows,tb1)
@@ -463,23 +467,25 @@ exactWindowPos wMetrics exactSize maybePos wKind wMode windows tb
 	| isNothing maybePos
 		= (zero,windows,tb)
 	| otherwise
-		# itemPos				= fromJust maybePos
-		# (pos,windows,tb)		= getItemPosPosition wMetrics exactSize itemPos windows tb
-		# (pos,tb)				= setWindowInsideScreen pos exactSize tb
+		# itemPos			= fromJust maybePos
+		# (pos,windows,tb)	= getItemPosPosition wMetrics exactSize itemPos windows tb
+		# (pos,tb)			= setWindowInsideScreen pos exactSize tb
 		= (pos,windows,tb)
 where
 /*	getItemPosPosition calculates the exact position of the given window. 
 	getItemPosPosition does not check whether this position will place the window off screen.
 */
 	getItemPosPosition :: !OSWindowMetrics !Size !ItemPos !(WindowHandles .pst) !*OSToolbox
-												-> (!Point2,!WindowHandles .pst, !*OSToolbox)
+											   -> (!Point2,!WindowHandles .pst, !*OSToolbox)
 	getItemPosPosition wMetrics size itemPos windows=:{whsWindows=wsHs} tb
 		| isRelative
 			# (rect,tb)					= OSscreenrect tb
 			  screenDomain				= RectToRectangle rect
 			  screenOrigin				= {x=rect.rleft,y=rect.rtop}
-			# (before,[wsH=:{wshIds={wPtr}}:after])
-										= Uspan (identifyWindow (toWID relativeTo)) wsHs
+			# (before,after)			= Uspan (unidentifyWindow (toWID relativeTo)) wsHs
+			  (wPtr,wsH,after)			= case after of
+		  									[]                           -> windowvalidateFatalError "getItemPosPosition" "target window could not be found"
+		  									[wsH=:{wshIds={wPtr}}:after] -> (wPtr,wsH,after)
 			  (relativeSize,wsH)		= getWindowStateHandleSize wsH
 			  windows					= {windows & whsWindows=before++[wsH:after]}
 			# ((relativeX,relativeY),tb)= OSgetWindowPos wPtr tb
@@ -494,14 +500,15 @@ where
 						  					(RightTo _)	-> {x=relativeX+vx+relativeW,y=relativeY+vy}
 				  							(Above   _)	-> {x=relativeX+vx,          y=relativeY+vy-exactH}
 			  								(Below   _)	-> {x=relativeX+vx,          y=relativeY+vy+relativeH}
+			  								other       -> windowvalidateFatalError "getItemPosPosition" "unexpected ItemLoc alternative"
 			= (pos,windows,tb)
 	where
 		(isRelative,relativeTo)		= isRelativeItemPos itemPos
 		
-		identifyWindow :: !WID !(WindowStateHandle .pst) -> (!Bool,!WindowStateHandle .pst)
-		identifyWindow wid wsH
+		unidentifyWindow :: !WID !(WindowStateHandle .pst) -> (!Bool,!WindowStateHandle .pst)
+		unidentifyWindow wid wsH
 			# (ids,wsH)				= getWindowStateHandleWIDS wsH
-			= (identifyWIDS wid ids,wsH)
+			= (not (identifyWIDS wid ids),wsH)
 	getItemPosPosition _ size itemPos windows tb
 		| isAbsolute
 			# (rect,tb)					= OSscreenrect tb
