@@ -5,12 +5,14 @@ implementation module clCrossCall_12
 import StdBool, StdClass, StdInt, StdMisc, StdString, StdTuple
 import ostoolbox
 import code from "cCrossCall_12.obj", "cdebug_12.obj", "cpicture_12.obj", "htmlhelp.obj", "util_12.obj",/*MW11*/ "cprinter_12.obj", "cTCP.obj"
-import code from library "advapi32_library"
-import code from library "comctl32_library"
-import code from library "shell32_library"
-import code from library "winmm_library"
-import code from library "ole32_library"
-import code from library "winspool_library", library "wsock_library"
+import code from library "advapi32_library",
+                 library "comctl32_library",
+                 library "kernel32_library",
+                 library "ole32_library",
+                 library "shell32_library",
+                 library "winmm_library",
+                 library "winspool_library",
+                 library "wsock_library"
 
 
   //----------------------------------------------//
@@ -195,6 +197,11 @@ WinInitOs
 		.end
 	}
 
+//	PA: added to test refreshing of desktop
+WinRefreshDesktop :: !*OSToolbox -> *OSToolbox
+WinRefreshDesktop tb
+	= snd (IssueCleanRequest2 (ErrorCallback2 "WinRefreshDesktop") (Rq0Cci CcRqUPDATEDESKTOP) tb)
+
 
   //------------------------------------------------------------------------//
  //  The message numbers for communication from Clean to OS (ccMsg field)  //
@@ -210,6 +217,7 @@ CcRqCREATEGAMEWINDOW		:== 1900
 // MW...
 CcRqDO_PRINT_SETUP			:== 1828 // MW11++
 CcRqDO_HTML_HELP			:==	1827
+
 CcRqGET_PRINTER_DC			:== 1824
 CcRqDISPATCH_MESSAGES_WHILE_PRINTING
 							:== 1823
@@ -221,7 +229,6 @@ CcRqCREATESDIDOCWINDOW		:==	1816		// PA: added to create SDI document window
 CcRqCREATEMDIDOCWINDOW		:== 1815		// PA: added to create MDI document window
 CcRqCREATEMDIFRAMEWINDOW	:== 1814		// PA: added to create MDI frame window
 CcRqCREATESDIFRAMEWINDOW	:== 1813		// PA: added to create SDI frame window
-
 CcRqCLIPBOARDHASTEXT		:== 1812
 CcRqGETCLIPBOARDTEXT		:== 1811
 CcRqSETCLIPBOARDTEXT		:== 1810
@@ -229,6 +236,8 @@ CcRqSETCLIPBOARDTEXT		:== 1810
 CcRqDIRECTORYDIALOG			:==	1802		/* PA: added to create directory selector dialog. */
 CcRqFILESAVEDIALOG			:== 1801
 CcRqFILEOPENDIALOG			:== 1800
+
+CcRqUPDATEDESKTOP			:== 1790		/* PA: added to force refresh of desktop. */
 
 CcRqSHOWCONTROL				:== 1755		/* PA: added */
 CcRqSELECTPOPUPITEM			:== 1754

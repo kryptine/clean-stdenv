@@ -5635,6 +5635,35 @@ HandleCleanRequest (CrossCallInfo * pcci)
 				MakeReturn0Cci (pcci);
 			}
 			break;
+		/*	CcRqUPDATEDESKTOP forces an update of the desktop and its applications.
+		*/
+		case CcRqUPDATEDESKTOP:			/* no params; no result; */
+			{
+				OSVERSIONINFO osVersionInfo;
+				DWORD osPlatformID;
+
+				osVersionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);	/* Set size BEFORE calling GetVersionEx. */
+
+				if (GetVersionEx (&osVersionInfo))
+				{
+					osPlatformID = osVersionInfo.dwPlatformId;
+
+					if (osPlatformID==VER_PLATFORM_WIN32_WINDOWS)	/* We're in Windows95. */
+					{
+						char szParam[13] = "WindowMetrics";
+
+						SendMessage (HWND_BROADCAST, WM_SETTINGCHANGE, (WPARAM)SPI_SETICONMETRICS, (LPARAM)(LPCTSTR)szParam);
+					}
+					if (osPlatformID==VER_PLATFORM_WIN32_NT)		/* We're in WindowsNT. */
+					{
+						SendMessage (HWND_BROADCAST, WM_WININICHANGE, (WPARAM)SPI_SETICONMETRICS, (LPARAM)(LPCTSTR)NULL);
+					}
+				}
+				/* if either GetVersionEx fails, or platform is different, skip refresh action altogether.
+				*/
+				MakeReturn0Cci (pcci);
+			}
+			break;
 		/*	Create the specialised directory selector dialog from Windows.
 			By courtesy of Martijn Vervoort.
 		*/

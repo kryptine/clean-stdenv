@@ -3,7 +3,7 @@ implementation module ossystem			// for Windows
 //	Clean Object I/O library, version 1.2
 
 import	StdInt, StdReal, StdString
-import	clCCall_12
+import	clCCall_12, clCrossCall_12
 from	ostypes	import Rect
 
 OSdirseparator	:==	'\\'				// OS separator between folder- and filenames in a pathname
@@ -43,3 +43,7 @@ OSscreenrect tb
 
 OSprintSetupTypical		:: Bool // MW11++
 OSprintSetupTypical = False
+
+OSrefreshDesktop :: !*OSToolbox -> *OSToolbox
+OSrefreshDesktop tb
+	= WinRefreshDesktop tb

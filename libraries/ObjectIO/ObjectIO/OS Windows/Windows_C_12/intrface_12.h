@@ -98,6 +98,7 @@
 #define CcRqDIRECTORYDIALOG						1802		/* PA: added to create directory selector dialog. */
 #define CcRqFILESAVEDIALOG						1801
 #define CcRqFILEOPENDIALOG						1800
+#define CcRqUPDATEDESKTOP						1790		/* PA: added to force refresh of desktop. */
 #define CcRqSHOWCONTROL							1755		/* PA: added */
 #define CcRqSELECTPOPUPITEM						1754
 #define CcRqENABLEPOPUPITEM						1753
