@@ -330,6 +330,7 @@ where
 		(hasAtt,cursorAtt)	= cselect isWindowCursor (WindowCursor StandardCursor) atts
 	
 
+activateFocus :: !Bool !WIDS !*(WindowHandles .a) !*(PSt .b) -> *(!*(WindowHandles .a),!*(PSt .b))
 activateFocus activate wids windows pState
 	# (found,wsH,windows)	= getWindowHandlesWindow (toWID wids) windows
 	# (keyFocus,wsH)		= getWindowStateHandleKeyFocus wsH
@@ -397,7 +398,7 @@ where
 	//	= (Just returnEvent,wsH,pState)
 		= (Nothing,wsH,pState)
 	| itControl == 0		= handleMouseUpEvent` h v mods wsH pState
-	= controlMouseUpEvent h v mods wsH pState
+	= controlMouseUpEvent itControl h v mods wsH pState
 	where
 		// handleMouseMoveEvent` :: !Int !Int !Int !(DialogStateHandle (PSt .l .p)) !(PSt .l .p) -> PSt .l .p
 		// en mouse move in control dan...?
@@ -418,11 +419,66 @@ where
 			mState								= MouseUp (whOrigin+localPos) modifiers
 			returnEvent							= WindowMouseAction {wmWIDS=wshIds,wmMouseState= mState}
 		
-		controlMouseUpEvent h v mods wsH=:{wshIds,wshHandle=Just dlsH=:{wlsHandle=wlsH=:{whWindowInfo,whSelect,whAtts}}} pState
+		controlMouseUpEvent itControl h v mods wsH=:{wshIds,wshHandle=Just dlsH=:{wlsHandle=wlsH=:{whWindowInfo,whSelect,whAtts,whItems}}} pState
 			// find control
 			// check mouse filter
 			// return event
-			= (Nothing,wsH,pState)
+			# (found,(itemPtr,itemKind),whItems)
+				= getItemPtrAndKind itControl whItems
+			| trace_n ("controlMouseUpEvent",itControl,itemPtr) False = undef
+			# controlInfo
+				= Just (ControlMouseAction {cmWIDS=wshIds,cmItemNr=itControl,cmItemPtr=itemPtr,cmMouseState=mouseState})
+//			= (Nothing,wsH,pState)
+			= (controlInfo,wsH,pState1)
+		where
+			whOrigin							= case whWindowInfo of
+													(WindowInfo {windowOrigin})	-> windowOrigin
+													_							-> zero
+			mouseState							= MouseUp (whOrigin+localPos) modifiers
+			(localPos,pState1)					= accPIO (accIOToolbox (accGrafport wPtr (GlobalToLocal {x=h,y=v}))) pState
+			modifiers							= toModifiers mods
+
+getItemPtrAndKind :: !Int [WElementHandle .ls .ps] -> (!Bool,!(!OSWindowPtr,!ControlKind),[WElementHandle .ls .ps])
+getItemPtrAndKind itemNr []
+	= (False,(OSNoWindowPtr,IsOtherControl "NoControl"),[])
+getItemPtrAndKind itemNr [itemH:itemHs]
+	# (found,result,itemH)		= getItemPtrAndKindFromItem itemNr itemH
+	| found
+		= (found,result,[itemH:itemHs])
+	| otherwise
+		# (found,result,itemHs)	= getItemPtrAndKind itemNr itemHs
+		= (found,result,[itemH:itemHs])
+where
+	getItemPtrAndKindFromItems :: !Int (WElementHandle .ls .ps) -> (!Bool,!(!OSWindowPtr,!ControlKind),WElementHandle .ls .ps)
+	getItemPtrAndKindFromItems itemNr (WItemHandle itemH=:{wItems})
+		# (found,result,items)	= getItemPtrAndKind itemNr wItems
+		= (found,result,WItemHandle {itemH & wItems = items})
+
+	getItemPtrAndKindFromItem :: !Int (WElementHandle .ls .ps) -> (!Bool,!(!OSWindowPtr,!ControlKind),(WElementHandle .ls .ps))
+	getItemPtrAndKindFromItem itemNr (WItemHandle itemH=:{wItemNr,wItemKind,wItemPtr,wItemInfo})
+		| wItemNr == itemNr	= case wItemKind of
+			IsPopUpControl		-> (isJust (getWItemPopUpInfo wItemInfo).popUpInfoEdit,(wItemNr,wItemKind),WItemHandle itemH)
+			IsCompoundControl	-> (True,(wItemPtr,wItemKind),WItemHandle itemH)
+			IsCustomControl		-> (True,(wItemPtr,wItemKind),WItemHandle itemH)
+			IsEditControl		-> (True,(wItemPtr,wItemKind),WItemHandle itemH)
+			_					-> (False,(OSNoWindowPtr,IsButtonControl),WItemHandle itemH)
+		= case wItemKind of
+			IsCompoundControl	-> getItemPtrAndKindFromItems itemNr (WItemHandle itemH)
+			IsLayoutControl		-> getItemPtrAndKindFromItems itemNr (WItemHandle itemH)
+			_					-> (False,(OSNoWindowPtr,IsButtonControl),WItemHandle itemH)
+
+	getItemPtrAndKindFromItem itemNr (WListLSHandle itemHs)
+		# (found,result,itemHs)		= getItemPtrAndKind itemNr itemHs
+		= (found,result,WListLSHandle itemHs)
+	
+	getItemPtrAndKindFromItem itemNr (WExtendLSHandle wExH=:{wExtendItems=itemHs})
+		# (found,result,itemHs)		= getItemPtrAndKind itemNr itemHs
+		= (found,result,WExtendLSHandle {wExH & wExtendItems=itemHs})
+	
+	getItemPtrAndKindFromItem itemNr (WChangeLSHandle wChH=:{wChangeItems=itemHs})
+		# (found,result,itemHs)		= getItemPtrAndKind itemNr itemHs
+		= (found,result,WChangeLSHandle {wChH & wChangeItems=itemHs})
+
 
 /*	Handling a NullEvent for a window.
 */
@@ -598,7 +654,7 @@ handleMouseMoveEvent isNull active h v when mods wsH=:{wshIds=wshIds=:{wPtr}} pS
 		# pState = appPIO (appIOToolbox (startTracking (OSTime when))) pState
 		# pState				= appPIO (ioStSetInputTrack inputTrack) pState
 		= (rEvent,wsH,pState)
-	= controlMouseDragEvent h v mods wsH pState
+	= controlMouseDragEvent itControl h v mods wsH pState
 where
 	// handleMouseMoveEvent` :: !Int !Int !Int !(DialogStateHandle (PSt .l .p)) !(PSt .l .p) -> PSt .l .p
 	// en mouse move in control dan...?
@@ -635,11 +691,24 @@ where
 		mState								= MouseDrag (whOrigin+localPos) modifiers
 		returnEvent							= WindowMouseAction {wmWIDS=wshIds,wmMouseState= mState}
 
-	controlMouseDragEvent h v mods wsH=:{wshIds,wshHandle=Just dlsH=:{wlsHandle=wlsH=:{whWindowInfo,whSelect,whAtts}}} pState
+	controlMouseDragEvent itControl h v mods wsH=:{wshIds,wshHandle=Just dlsH=:{wlsHandle=wlsH=:{whItems,whWindowInfo,whSelect,whAtts}}} pState
 		// find control
 		// check mouse filter
 		// return event
-		= (Nothing,wsH,pState)
+		# (found,(itemPtr,itemKind),whItems)
+			= getItemPtrAndKind itControl whItems
+		| trace_n ("controlMouseDragEvent",itControl,itemPtr) False = undef
+		# controlInfo
+			= Just (ControlMouseAction {cmWIDS=wshIds,cmItemNr=itControl,cmItemPtr=itemPtr,cmMouseState=mouseState})
+//			= (Nothing,wsH,pState)
+		= (controlInfo,wsH,pState1)
+	where
+		whOrigin							= case whWindowInfo of
+												(WindowInfo {windowOrigin})	-> windowOrigin
+												_							-> zero
+		mouseState							= MouseDrag (whOrigin+localPos) modifiers
+		(localPos,pState1)					= accPIO (accIOToolbox (accGrafport wPtr (GlobalToLocal {x=h,y=v}))) pState
+		modifiers							= toModifiers mods
 
 /*	Handling a MouseDownEvent for a window.
 */

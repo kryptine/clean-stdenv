@@ -605,7 +605,7 @@ where
 				= 360
 	
 	radtodeg :: !Real -> Int
-	radtodeg rads = (toInt ((rads/PI)*180.0)) mod 360
+	radtodeg rads = (toInt ((rads/PI)*180.0)) rem 360
 
 //-- OSRect
 

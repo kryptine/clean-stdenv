@@ -187,12 +187,31 @@ osAppendMenuItem menuBar index menu title able mark key tb
 	# (count,tb)		= CountMenuItems menu tb
 	# index`			= determine_index index count
 	# tb				= SetItem menu index` title tb
+	# (err,tb) = case key of
+			'X'	-> SetMenuItemCommandID menu index` kHICommandCut tb
+			'C'	-> SetMenuItemCommandID menu index` kHICommandCopy tb
+			'V'	-> SetMenuItemCommandID menu index` kHICommandPaste tb
+			_	-> (0,tb)
 	= (index`,menu,tb)
 where
 	determine_index 0 _ = 1
 	determine_index i m
 		| i >= m = m
 		= i+1
+
+kHICommandCut                 = "cut "
+kHICommandCopy                = "copy"
+kHICommandPaste               = "past"
+
+SetMenuItemCommandID :: !OSMenu !Int !String !*OSToolbox -> (!Int,!*OSToolbox)
+SetMenuItemCommandID menu index tag tb
+	# iTag	= ((toInt tag.[0]) << 24) bitor ((toInt tag.[1]) << 16) bitor ((toInt tag.[2]) << 8) bitor ((toInt tag.[3]) << 0)
+	= SetMenuItemCommandID menu index iTag tb
+where
+	SetMenuItemCommandID :: !OSMenu !Int !Int !*OSToolbox -> (!Int,!*OSToolbox)
+	SetMenuItemCommandID _ _ _ _ = code {
+		ccall SetMenuItemCommandID "PIII:I:I"
+		}
 
 menuItemHandleToMacElement key able checked
 	| not hasKey && checked && able	= s+++check

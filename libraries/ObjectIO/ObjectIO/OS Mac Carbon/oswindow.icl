@@ -39,7 +39,7 @@ ModalDialogType    	:== 5;		// The window type of a modal dialog 		= 5 (movableD
 
 //-- Debugging Tools
 //import dodebug
-
+//trace_n m f :== trace_n` m f
 trace_n _ f :== f
 
 traceClip :: !*OSToolbox -> *OSToolbox
@@ -79,15 +79,6 @@ osMinWindowSize :: (!Int,!Int)
 osMinWindowSize = (64,64)
 
 
-/*	Window frame dimensions: (PA: were defined as constants in windowvalidate. Moved here.)
-*/
-// DvA: only used in exactWindowPos in windowvalidate;
-// values are wrong for MOSX...
-
-osWindowFrameWidth     :: Int;	osWindowFrameWidth     = 6;
-osWindowTitleBarHeight :: Int;	osWindowTitleBarHeight = 16;
-
-
 /*	PA: moved from oswindow to here, because of differences between Mac and Windows.
 */
 //	Calculating the view frame of window/compound with visibility of scrollbars.
@@ -99,24 +90,24 @@ osGetCompoundContentRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScro
 	| visVScroll				= {itemRect & rright=r`           }
 	| otherwise					= itemRect
 where
-	r`							= rright -osmVSliderWidth
-	b`							= rbottom-osmHSliderHeight
+	r`							= rright -osScrollBarWidth //+ osScrollBarOverlap	//osScrollBarWidth	//osmVSliderWidth //+1
+	b`							= rbottom-osScrollBarWidth //+ osScrollBarOverlap	//osScrollBarWidth	//osmHSliderHeight//+1
 
 osGetCompoundHScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !OSRect -> OSRect
-osGetCompoundHScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom}
+osGetCompoundHScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rleft,rtop,rright,rbottom}
 	| not visHScroll	= zero
-	| otherwise			= {itemRect & rleft = itemRect.rleft - 1, rbottom = rbottom+1, rtop=b`, rright=r`+1}
+	| otherwise			= {rleft=rleft-osScrollBarOverlap, rtop=b`-1, rright=r`, rbottom = rbottom+osScrollBarOverlap}
 where
-	r`					= rright -osmVSliderWidth + 1
-	b`					= rbottom-osmHSliderHeight + 1
+	r`					= rright -osScrollBarWidth + osScrollBarOverlap	//osmVSliderWidth + 1
+	b`					= rbottom-osScrollBarWidth + osScrollBarOverlap	//osmHSliderHeight + 1
 
 osGetCompoundVScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !OSRect -> OSRect
-osGetCompoundVScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom}
+osGetCompoundVScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom,rtop}
 	| not visVScroll	= zero
-	| otherwise			= {itemRect & rtop = itemRect.rtop, rright = rright + 1, rleft=r`,rbottom= b` + 1}//if visHScroll b` rbottom}
+	| otherwise			= {itemRect & rtop = rtop-osScrollBarOverlap, rright = rright + osScrollBarOverlap, rleft=r`-1,rbottom= b` + osScrollBarOverlap}//if visHScroll b` rbottom}
 where
-	r`					= rright -osmVSliderWidth + 1
-	b`					= rbottom-osmHSliderHeight + 1
+	r`					= rright -osScrollBarWidth + osScrollBarOverlap	//osmVSliderWidth + 1
+	b`					= rbottom-osScrollBarWidth + osScrollBarOverlap	//osmHSliderHeight + 1
 
 
 osGetWindowContentRect :: !OSWindowMetrics !(!Bool,!Bool) !OSRect -> OSRect
@@ -126,24 +117,24 @@ osGetWindowContentRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll
 	| visVScroll				= {itemRect & rright=r`           }
 	| otherwise					= itemRect
 where
-	r`							= rright -osmVSliderWidth //+1
-	b`							= rbottom-osmHSliderHeight//+1
+	r`							= rright - osScrollBarWidth //+ osScrollBarOverlap	//osmVSliderWidth //+1
+	b`							= rbottom- osScrollBarWidth //+ osScrollBarOverlap	//osmHSliderHeight//+1
 
 osGetWindowHScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !OSRect -> OSRect
 osGetWindowHScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) {rleft,rtop,rright,rbottom}
 	| not visHScroll	= zero
-	| otherwise			= {rleft=rleft-1,rtop=b`,rright= /*if visVScroll*/ (r`+1) /*(rright+1)*/,rbottom=rbottom+1}
+	| otherwise			= {rleft=rleft-osScrollBarOverlap,rtop=b`,rright= r`, rbottom=rbottom+osScrollBarOverlap}
 where
-	r`					= rright -osmVSliderWidth  + 1
-	b`					= rbottom-osmHSliderHeight + 1
+	r`					= rright -osScrollBarWidth + osScrollBarOverlap	//osmVSliderWidth  + 1
+	b`					= rbottom-osScrollBarWidth + osScrollBarOverlap	//osmHSliderHeight + 1
 
 osGetWindowVScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !OSRect -> OSRect
 osGetWindowVScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) {rleft,rtop,rright,rbottom}
 	| not visVScroll	= zero
-	| otherwise			= {rleft=r`,rtop=rtop-1,rright=rright+1,rbottom=b`+1}
+	| otherwise			= {rleft=r`,rtop=rtop-osScrollBarOverlap,rright=rright+osScrollBarOverlap,rbottom=b`+osScrollBarOverlap}
 where
-	r`					= rright -osmVSliderWidth  + 1
-	b`					= rbottom-osmHSliderHeight + 1
+	r`					= rright -osScrollBarWidth + osScrollBarOverlap	//osmVSliderWidth  + 1
+	b`					= rbottom-osScrollBarWidth + osScrollBarOverlap	//osmHSliderHeight + 1
 
 
 //--
@@ -200,18 +191,18 @@ osCreateDialog isModal isClosable title pos=:(x,y) size=:(w,h) behindPtr get_foc
 where
 	(type,rect) = case isClosable || not isModal of
 			True	->	(ModelessDialogType
-//						,{rleft = x + 6 , rtop = y + 47, rright = x + w + 6, rbottom = y + 47 + h}
-						,{rleft = x + 6 , rtop = y + 42, rright = x + w + 6, rbottom = y + 42 + h}
-//						,{rleft = x + 4 , rtop = y + 20 + 16 + 4, rright = x + w + 4, rbottom = y + 20 + 16 + 4 + h}
+						,{ rleft	= x + osWindowFrameWidth 
+						 , rtop		= y + osMenuBarHeight + osWindowTitleBarHeight
+						 , rright	= x + w + osWindowFrameWidth
+						 , rbottom	= y + osMenuBarHeight + osWindowTitleBarHeight + h
+						 }
+//						,{rleft = x + 6 , rtop = y + 42, rright = x + w + 6, rbottom = y + 42 + h}
 						)
 			False	->	(ModalDialogType
 						,{rleft = x + 6 , rtop = y + 47, rright = x + w + 6, rbottom = y + 47 + h}
 						)
-//	rect = {rleft = x + 4 , rtop = y + 20 + 16 + 4, rright = x + w + 4, rbottom = y + 20 + 16 + 4 + h}
 
 import StdMisc
-allways :: !.a !String -> .a
-allways _ m = abort m
 
 osCreateWindow :: !OSWindowMetrics !Bool !ScrollbarInfo !ScrollbarInfo !(!Int,!Int) !(!Int,!Int)
 				  !Bool !String !(!Int,!Int) !(!Int,!Int)
@@ -266,8 +257,12 @@ where
 	type = case isResizable of
 			True	-> DocumentWindowType+ZoomVariationType
 			False	-> ModelessDialogType
-	rect = {rleft = x + 6 , rtop = y + 42, rright = x + w + 6, rbottom = y + 42 + h}
-//	rect = {rleft = x + 4 , rtop = y + 20 + 16 + 4, rright = x + w + 4, rbottom = y + 20 + 16 + 4 + h}
+	rect = //{rleft = x + 6 , rtop = y + 42, rright = x + w + 6, rbottom = y + 42 + h}
+			{ rleft		= x + osWindowFrameWidth 
+			, rtop		= y + osMenuBarHeight + osWindowTitleBarHeight
+			, rright	= x + w + osWindowFrameWidth
+			, rbottom	= y + osMenuBarHeight + osWindowTitleBarHeight + h
+			}
 	docf = getOSDInfoDocumentInterface osdInfo
 	doci = getOSDInfoOSInfo osdInfo
 
@@ -311,6 +306,7 @@ osCreateModalDialog wMetrics isClosable title osdinfo currentActiveModal size=:(
 	# (tb,s)		= getOSToolbox s
 	# tb			= ShowWindow windPtr tb
 	# tb			= SelectWindow windPtr tb
+	# (err,tb) = BeginAppModalStateForWindow windPtr tb
 	# s				= setOSToolbox tb s
 	# s				= dialogInit windPtr s
 	# s				= eventLoop s
@@ -352,6 +348,9 @@ where
 osDestroyWindow :: !Bool !Bool !OSWindowPtr !(OSEvent -> .s -> ([Int],.s)) !OSDInfo !.s !*OSToolbox
 												-> (![DelayActivationInfo],!OSDInfo, .s,!*OSToolbox)
 osDestroyWindow isModal isWindow wPtr handleOSEvent osdInfo state tb
+	# (err,tb) = case isModal of
+			True	-> EndAppModalStateForWindow wPtr tb
+			_		-> (0,tb)
 	# tb = DisposeWindow wPtr tb
 	# docf = getOSDInfoDocumentInterface osdInfo
 	| isWindow && docf == SDI
@@ -416,13 +415,13 @@ toOSscrollbarRange (min,pos,max) siz
 		# max` = WorkingOnFix (OSSliderMin + range)				(max - siz)
 		# pos` = WorkingOnFix (OSSliderMin + pos - min)			(pos)
 		# siz` = WorkingOnFix (siz/*OSSliderMin + siz - min*/)	(siz)
-		= (min`,pos`,max`,siz`)
+		= trace_n ((min,pos,max,siz),(min`,pos`,max`,siz`)) (min`,pos`,max`,siz`)
 	# min` = OSSliderMin
 	# max` = OSSliderMax
 	# conv = toReal range / toReal OSSliderRange
 	# siz` = toInt ((toReal (siz-min))/conv)+min`
 	# pos` = toInt ((toReal (pos-min))/conv)+min`
-	= (min`,pos`,max`,siz`)
+	= trace_n ((min,pos,max,siz),(min`,pos`,max`,siz`)) (min`,pos`,max`,siz`)
 where
 	range = max - min
 
@@ -576,7 +575,7 @@ osWindowHasUpdateRect wPtr tb
 //	# tb = abort`` tb ("loadUpdateBBox",wPtr,((l,t),(r,b)),ltLocal)
 	# (rbLocal,tb)	= accGrafport wPtr (GlobalToLocal {x=r,y=b}) tb
 
-	# tb = trace_n` ("osWindowHasUpdateRect",not empty,(l,t),(r,b),bb) tb
+	# tb = trace_n ("osWindowHasUpdateRect",not empty,(l,t),(r,b),bb) tb
 */
 	= (not empty,tb)
 
@@ -667,8 +666,6 @@ setCursorShape` cursorId tb
 
 //--
 
-MenuBarWidth		:== 20									// Conventional width of the Mac menu bar
-
 osGetWindowPos :: !OSWindowPtr !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
 osGetWindowPos wPtr tb
 	// of variant uit windowinternal 'getwindowitempos' met offsets naar contents origin...
@@ -679,7 +676,7 @@ where
 		# (err,bb,tb)	= GetWindowBounds wPtr kWindowStructureRgn tb
 		| err <> 0 = abort "oswindow:osGetWindowPos:GetWindowBounds failed\n"
 		# (l,t, r,b)	= toTuple4 bb
-		= trace_n ("osGetWindowPos",wPtr,bb) ((l,t-MenuBarWidth),tb)
+		= trace_n ("osGetWindowPos",wPtr,bb) ((l,t-osMenuBarHeight),tb)
 
 /*
 typedef UInt16                          WindowRegionCode;
@@ -712,7 +709,7 @@ osSetWindowPos wPtr pos=:(x,y) update inclScrollbars tb
 	= trace_n ("osSetWindowPos",wPtr,pos,pos`) tb
 where
 	set tb
-		= MoveWindowStructure wPtr x (y+MenuBarWidth) tb
+		= MoveWindowStructure wPtr x (y+osMenuBarHeight) tb
 
 osGetWindowViewFrameSize :: !OSWindowPtr !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
 osGetWindowViewFrameSize wPtr tb
@@ -865,6 +862,7 @@ osSetCompoundSize _ _ compoundPtr _ size update tb
 
 osUpdateCompoundScroll :: !OSWindowPtr !OSWindowPtr !OSRect !*OSToolbox -> *OSToolbox
 osUpdateCompoundScroll wPtr scrollItemPtr scrollRect=:{rleft=x,rtop=y,rbottom=b,rright=r} tb
+	# tb = trace_n ("osSetCompoundSliderPosSize",scrollItemPtr,scrollRect) tb
 	= appGrafport wPtr f tb
 where
 	f tb
@@ -1186,7 +1184,6 @@ osGetTextControlMinWidth {osmHeight}
 //%%%%%%%%
 
 kControlStaticTextProc	:== 288
-kControlEditTextProc	:== 272
 
 osCreateTextControl :: !OSWindowPtr !(!Int,!Int) !String !Bool !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSWindowPtr,!*OSToolbox)
 osCreateTextControl parentWindow parentPos text show /*able*/ (x,y) (w,h) tb
@@ -1365,9 +1362,22 @@ osSetTextControlSize _ _ textPtr _ size update tb
 */
 
 //-- EditControl
-//kControlEditTextProc
+
+kControlEditTextProc	:== 272
+
 osCreateEditControl :: !OSWindowPtr !(!Int,!Int) !String !Bool !Bool !Bool !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSWindowPtr,!*OSToolbox)
 osCreateEditControl parentWindow parentPos text show able isKeySensitive (x,y) (w,h) tb
+	# itemRect			= (x,y,x+w,y+h)
+	# (editc,tb)		= NewControl parentWindow itemRect "" True/*show*/ 0 0 0 kControlEditTextProc 0 tb
+	# (res,tb)			= IsValidControlHandle parentWindow tb
+	# (err2,emb,tb)		= case res of
+							0	-> GetRootControl parentWindow tb
+							_	-> (0,res,tb)
+	# (err3,tb)			= EmbedControl editc emb tb
+	# (err,tb)			= SetControlData editc 0 "text" text tb
+	# tb = trace_n ("osCreateEditControl "+++toString (editc,itemRect,err,res,err2,err3)) tb
+	= (editc,tb)
+/*
 	# (port,tb)		= QGetPort tb
 	# tb			= SetPortWindowPort parentWindow tb
 	# (hTE,tb)		= TENew itemRect itemRect tb
@@ -1379,14 +1389,22 @@ osCreateEditControl parentWindow parentPos text show able isKeySensitive (x,y) (
 	= (hTE,tb)
 where
 	itemRect	= (x+3,y+3,x+w-3,y+h-3)
+*/
 	
 osDestroyEditControl :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osDestroyEditControl theControl tb
 	# tb = trace_n ("osDestroyEditControl "+++toString theControl) tb
+	= DisposeControl theControl tb
+/*
 	= TEDispose theControl tb
+*/
 
 osUpdateEditControl :: !OSRect !OSRect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
 osUpdateEditControl updRect itemRect _ parentWindow theControl tb
+	#! tb = trace_n ("osUpdateEditControl") tb
+	#! tb = assertPort` parentWindow tb
+	= osUpdateCommonControl updRect theControl tb
+/*
 	#! tb = trace_n ("osUpdateEditControl",marginRect,itemRect,parentWindow,theControl) tb
 	#! tb = assertPort` parentWindow tb
 	// force standard pen...
@@ -1397,6 +1415,7 @@ osUpdateEditControl updRect itemRect _ parentWindow theControl tb
 	= tb
 where
 	marginRect		= OSRect2Rect itemRect
+*/
 
 osClipEditControl :: !OSWindowPtr !(!Int,!Int) !OSRect !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 osClipEditControl _ parentPos area itemPos itemSize tb
@@ -1422,10 +1441,18 @@ osGetEditControlMinWidth _
 osIdleEditControl :: !OSWindowPtr !OSRect !OSWindowPtr !*OSToolbox -> *OSToolbox
 osIdleEditControl wPtr clipRect hTE tb
 	#! tb = trace_n ("osIdleEditControl",wPtr,hTE,clipRect) tb
+	= IdleControls wPtr tb
+/*
 	= appClipport wPtr clipRect (TEIdle hTE) tb
-
+*/
 osSetEditControlText :: !OSWindowPtr !OSWindowPtr !OSRect !OSRect !Bool !String !*OSToolbox -> *OSToolbox
 osSetEditControlText wPtr hTE clipRect itemRect show text tb
+	#! tb = trace_n ("osSetTextControlText",hTE,show,text) tb
+	# (err,tb)	= SetControlData hTE 0 "text" text tb
+//	| show
+//		= appClipport wPtr clipRect (osUpdateCommonControl clipRect hTE) tb
+	= tb
+/*
 	#! tb = trace_n ("osSetEditControlText "+++toString (wPtr,hTE,clipRect,itemRect,show,text)) tb
 	= appGrafport wPtr settext tb
 where
@@ -1461,9 +1488,14 @@ where
 		tb						= TESetSelect 0 0 hTE tb
 		tb						= TEUpdate (OSRect2Rect clipRect) hTE tb
 	=	tb
+*/
 
 osGetEditControlText :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> (!String,!*OSToolbox) 
 osGetEditControlText wPtr hTE tb
+	# (s,tb) = GetControlData hTE 0 "text" tb
+	#! tb = trace_n ("osGetEditControlText ",s) tb
+	= (s,tb)
+/*
 	#! tb = trace_n ("osGetEditControlText "+++toString hTE) tb
 	= accGrafport wPtr getText tb
 where
@@ -1471,9 +1503,11 @@ where
 		#	(charsH,tb)			= TEGetText hTE tb
 			(size,tb)			= TEGetTextSize hTE tb
 		= handle_to_string charsH size tb
-
+*/
 osSetEditControlCursor :: !OSWindowPtr !OSWindowPtr !OSRect !OSRect !Int !*OSToolbox -> *OSToolbox
 osSetEditControlCursor wPtr ePtr clipRect editRect pos tb
+	= tb
+/*
 	# tb = trace_n ("osSetEditControlCursor") tb
 	# tb = appClipport wPtr clipRect set tb
 	= tb
@@ -1481,9 +1515,16 @@ where
 	set tb
 		# tb = TESetSelect pos pos ePtr tb
 		= tb
+*/
 		
 osSetEditControlSelection :: !OSWindowPtr !OSWindowPtr !OSRect !OSRect !Int !Int !*OSToolbox -> *OSToolbox
 osSetEditControlSelection wPtr ePtr clipRect editRect start end tb
+	# data			= {toChar (start >> 8 bitor 0xFF),toChar (start bitor 0xFF),toChar (end >> 8 bitor 0xFF),toChar (end bitor 0xFF)}
+	# (err,tb)		= SetControlData ePtr 0 "sele" data tb
+	# tb = trace_n ("osSetEditControlSelection",ePtr,(start,end),err) tb
+//	= tb
+	= osUpdateCommonControl clipRect ePtr tb
+/*
 	# tb = trace_n ("osSetEditControlSelection") tb
 	# tb = appClipport wPtr clipRect set tb
 	= tb
@@ -1491,23 +1532,46 @@ where
 	set tb
 		# tb = TESetSelect start end ePtr tb
 		= tb
+*/
 
 osSetEditControlSelect :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetEditControlSelect wPtr ePtr clipRect select tb
 	# tb = trace_n ("osSetEditControlSelect") tb
+	# tb = appClipport wPtr clipRect (HiliteControl ePtr (if select 0 255)) tb
+	= tb
+/*
 	= tb	// no action for TE implementation
+*/
 
 osSetEditControlFocus :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetEditControlFocus wPtr ePtr clipRect focus tb
-	# tb = trace_n ("osSetEditControlFocus") tb
+	| focus
+		# (err,currentFocus,tb)
+					= GetKeyboardFocus wPtr tb
+		| currentFocus == ePtr
+			# tb = trace_n ("osSetEditControlFocus","focus==currentFocus",err) tb
+			= tb
+		# (err,tb)	= SetKeyboardFocus wPtr ePtr (-1) tb
+		# tb = trace_n ("osSetEditControlFocus",ePtr,focus,err) tb
+		= tb
+	# (err,tb)	= ClearKeyboardFocus wPtr tb
+	# tb = trace_n ("osSetEditControlFocus",ePtr,focus,err) tb
+	= tb
+		
+/*
 	| focus
 		= appGrafport wPtr (TEActivate ePtr /*o TESetSelect 0 32767 ePtr*/) tb
 //		= appGrafport wPtr (TEActivate ePtr o TESetSelect 0 32767 ePtr) tb
 	| otherwise
 		= appGrafport wPtr (TEDeactivate ePtr) tb
+*/
 
 osSetEditControlShow :: !OSWindowPtr !OSWindowPtr !OSRect !Bool !*OSToolbox -> *OSToolbox
 osSetEditControlShow wPtr ePtr clipRect show tb
+	| show
+		= appClipport wPtr clipRect (ShowControl ePtr) tb
+	= appClipport wPtr clipRect (HideControl ePtr) tb
+/*
 	# tb = trace_n ("osSetEditControlShow") tb
 	# (itemRect,tb) = TEGetItemRect ePtr tb
 	#	(l,t, r,b)		= itemRect
@@ -1523,7 +1587,23 @@ osSetEditControlShow wPtr ePtr clipRect show tb
 		= tb
 	# tb = appGrafport wPtr (InvalWindowRect wPtr marginRect o QEraseRect marginRect) tb
 	= appGrafport wPtr (TEDeactivate ePtr) tb
+*/
 
+osSetEditControlPos :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
+osSetEditControlPos _ (parent_x,parent_y) buttonPtr (x,y) _ update tb
+	#! tb = trace_n ("osSetEditControlPos") tb
+	# tb = MoveControl buttonPtr h v tb
+	= tb
+where
+	h = x - parent_x
+	v = y - parent_y
+
+osSetEditControlSize :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
+osSetEditControlSize _ _ buttonPtr _ size=:(w,h) update tb
+	#! tb = trace_n ("osSetEditControlSize") tb
+	# tb = SizeControl buttonPtr w h tb
+	= tb
+/*
 osSetEditControlPos :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetEditControlPos wPtr pPos ePtr ePos eSiz upd tb
 	# tb = trace_n ("osSetEditControlPos") tb
@@ -1547,7 +1627,7 @@ osSetEditControlPosSize wPtr (parent_x,parent_y) editPtr (x,y) (w,h) tb
 where
 	itemRect	= (x+3,y+3,x+w-3,y+h-3)
 	margRect	= (x,y,x+w,y+h)
-	
+*/	
 
 //-- PopUpControl
 
@@ -1775,6 +1855,18 @@ osClipPopUpControl _ parentPos area itemPos itemSize tb
 	# tb = trace_n ("osClipPopUpControl") tb
 	= oscliprectrgn parentPos area itemPos itemSize tb
 
+
+osGetPopUpControlText :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> (!String,!*OSToolbox) 
+osGetPopUpControlText wPtr hTE tb
+	#! tb = trace_n ("osGetPopUpControlText "+++toString hTE) tb
+	= accGrafport wPtr getText tb
+where
+	getText tb
+		#	(charsH,tb)			= TEGetText hTE tb
+			(size,tb)			= TEGetTextSize hTE tb
+		= handle_to_string charsH size tb
+
+
 osSetPopUpControl :: !OSWindowPtr !OSWindowPtr !(Maybe OSWindowPtr) !OSRect !OSRect !Int !Int !String !Bool !*OSToolbox -> *OSToolbox
 osSetPopUpControl wPtr pPtr ePtr clipRect pPosSize old new text shown tb
 	# tb = trace_n ("osSetPopUpControl",clipRect,pPosSize,text,new) tb
@@ -1943,7 +2035,7 @@ setPopUpEditText hTE text tb
 
 osIdlePopUpControl :: !OSWindowPtr !OSRect !OSWindowPtr !(Maybe OSWindowPtr) !*OSToolbox -> *OSToolbox
 osIdlePopUpControl wPtr clipRect cPtr ePtr tb
-	#! tb = trace_n ("osIdleEditControl",wPtr,ePtr,clipRect) tb
+	#! tb = trace_n ("osIdlePopUpControl",wPtr,ePtr,clipRect) tb
 	| isNothing ePtr = tb
 	= appClipport wPtr clipRect (TEIdle hTE) tb
 where
@@ -1982,7 +2074,12 @@ osGetButtonControlMinWidth {osmHeight}
 osCreateButtonControl :: !OSWindowPtr !(!Int,!Int) !String !Bool !Bool !(!Int,!Int) !(!Int,!Int) !OKorCANCEL !*OSToolbox -> (!OSWindowPtr,!*OSToolbox)
 osCreateButtonControl parentWindow parentPos=:(ox,oy) title show able (x,y) (w,h) okOrCancel tb
 	# (buttonH,tb)	= NewControl parentWindow itemRect (validateControlTitle title) show 0 0 1 PushButProc refcon tb
-	# (err,tb)		= SetControlData buttonH 0 "dflt" string tb
+	# (err,root,tb)	= GetRootControl parentWindow tb
+	# (err,tb)		= EmbedControl buttonH root tb
+//	# (err,tb)		= SetControlData buttonH 0 "dflt" string tb
+	# (err,tb)		= case okOrCancel of
+						OK	-> SetWindowDefaultButton parentWindow buttonH tb
+						_	-> (0,tb)
 	| err <> 0		= abort "oswindow:osCreateButtonControl:SetControlData failed\n"
 	| able
 		= (buttonH,tb)
@@ -2363,6 +2460,25 @@ where
 		ccall MoveWindowStructure "III:I:I"
 		}
 
+GetControlData :: !OSControlPtr !OSControlPart !String !*OSToolbox -> (!String,!*OSToolbox)
+GetControlData cPtr cPart tag tb
+	# iTag	= ((toInt tag.[0]) << 24) bitor ((toInt tag.[1]) << 16) bitor ((toInt tag.[2]) << 8) bitor ((toInt tag.[3]) << 0)
+	# (err,iSize,tb)	= GetControlDataSize cPtr cPart iTag tb
+	# iBuffer			= createArray iSize '@'
+	# (err,oSize,tb)	= GetControlData cPtr cPart iTag iSize iBuffer tb
+	# tb = trace_n ("GetControlData",cPtr,iSize,oSize,iBuffer) tb
+	= (iBuffer,tb)
+where
+	GetControlData :: !OSControlPtr !OSControlPart !Int !Int !String !*OSToolbox -> (!Int,!Int,!*OSToolbox)
+	GetControlData _ _ _ _ _ _ = code {
+		ccall GetControlData "PIIIIs:II:I"
+		}
+
+	GetControlDataSize :: !OSControlPtr !OSControlPart !Int !*OSToolbox -> (!Int,!Int,!*OSToolbox)
+	GetControlDataSize _ _ _ _ = code {
+		ccall GetControlDataSize "PIII:II:I"
+		}
+	
 SetControlData :: !OSControlPtr !OSControlPart !String !String !*OSToolbox -> (!Int,!*OSToolbox)
 SetControlData cPtr cPart tag data tb
 	| size tag <> 4 = abort "oswindow:SetControlData:not a four char tag.\n"
@@ -2455,3 +2571,47 @@ EmbedControl _ _ _ = code {
 	ccall EmbedControl "PII:I:I"
 	}
 
+IdleControls :: !OSWindowPtr !*OSToolbox -> *OSToolbox
+IdleControls _ _ = code {
+	ccall IdleControls "PI:V:I"
+	}
+
+IsValidControlHandle :: !Int !*OSToolbox -> (!Int,!*OSToolbox)
+IsValidControlHandle _ _ = code {
+	ccall IsValidControlHandle "PI:I:I"
+	}
+
+GetRootControl :: !OSWindowPtr !*OSToolbox -> (!Int,!OSControlPtr,!*OSToolbox)
+GetRootControl _ _ = code {
+	ccall GetRootControl "PI:II:I"
+	}
+
+SetKeyboardFocus :: !OSWindowPtr !OSControlPtr !Int !*OSToolbox -> (!Int,!*OSToolbox)
+SetKeyboardFocus _ _ _ _ = code {
+	ccall SetKeyboardFocus "PIII:I:I"
+	}
+
+GetKeyboardFocus :: !OSWindowPtr !*OSToolbox -> (!Int,!OSControlPtr,!*OSToolbox)
+GetKeyboardFocus _ _ = code {
+	ccall GetKeyboardFocus "PI:II:I"
+	}
+
+ClearKeyboardFocus :: !OSWindowPtr !*OSToolbox -> (!Int,!*OSToolbox)
+ClearKeyboardFocus _ _ = code {
+	ccall ClearKeyboardFocus "PI:I:I"
+	}
+
+BeginAppModalStateForWindow :: !OSWindowPtr !*OSToolbox -> (!Int,!*OSToolbox)
+BeginAppModalStateForWindow _ _ = code {
+	ccall BeginAppModalStateForWindow "PI:I:I"
+	}
+
+EndAppModalStateForWindow :: !OSWindowPtr !*OSToolbox -> (!Int,!*OSToolbox)
+EndAppModalStateForWindow _ _ = code {
+	ccall EndAppModalStateForWindow "PI:I:I"
+	}
+
+SetWindowDefaultButton :: !OSWindowPtr !OSControlPtr !*OSToolbox -> (!Int,!*OSToolbox)
+SetWindowDefaultButton _ _ _ = code {
+	ccall SetWindowDefaultButton "PII:I:I"
+	}

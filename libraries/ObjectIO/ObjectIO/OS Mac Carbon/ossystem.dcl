@@ -43,3 +43,11 @@ osDefaultWindowMetrics	:: !*OSToolbox -> (!OSWindowMetrics,!*OSToolbox)
 		returns (dw,dh) required to add/subtract to view/outer size in order to obtain outer/view size.
 */
 osStripOuterSize		:: !Bool !Bool !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
+
+/*	Window frame dimensions:
+*/
+osWindowFrameWidth		:: Int
+osWindowTitleBarHeight	:: Int
+osMenuBarHeight			:: Int
+osScrollBarWidth		:: Int
+osScrollBarOverlap		:: Int
