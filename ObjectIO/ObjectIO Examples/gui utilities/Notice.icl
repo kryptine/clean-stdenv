@@ -44,13 +44,13 @@ openNotice notice pst
 /*  noticeToDialog converts a Notice expression into a Dialog expression.
 */
 noticeToDialog :: Id Id (Notice .ls (PSt .l)) 
-               -> Dialog (:+: (CompoundControl (ListLS TextControl))
+               -> Dialog (:+: (LayoutControl (ListLS TextControl))
                          (:+:  ButtonControl
                               (ListLS ButtonControl)
                          )) .ls (PSt .l)
 noticeToDialog wId okId (Notice texts (NoticeButton text f) buttons)
     = Dialog ""
-        (   CompoundControl 
+        (   LayoutControl 
         (   ListLS
         [   TextControl text [ControlPos (Left,zero)]
         \\  text <- texts

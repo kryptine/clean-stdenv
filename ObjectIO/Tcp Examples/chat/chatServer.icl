@@ -84,7 +84,7 @@ loop listener channels console world
 
 broadcastString :: !String ![ChanInfo] ![ChanInfo] !*World -> ([ChanInfo],!*World)
 broadcastString string [] akku world
-	= (reverse akku, world)
+	= (u_reverse akku, world)
 broadcastString string [channel=:{sndChan}:channels] akku world
 	# (sndChan, world)		= send (toByteSeq string) sndChan world
 	= broadcastString string channels [{channel & sndChan=sndChan}:akku] world
@@ -114,3 +114,8 @@ zip3 :: ![TCP_SChannel] ![!TCP_RChannel] ![String] -> [!ChanInfo]
 zip3 [] [] [] = []
 zip3 [sndChan:a] [rcvChan:b] [nickname:c]
 	= [{sndChan=sndChan, rcvChan=rcvChan, nickname=nickname} : zip3 a b c]
+
+u_reverse list = reverse_ list []
+where 
+	reverse_ [hd:tl] list	= reverse_ tl [hd:list]
+	reverse_ [] list		= list

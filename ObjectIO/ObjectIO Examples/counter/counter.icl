@@ -28,7 +28,7 @@ where
 								,	ControlId			displayId
 								,	ControlSelectState	Unable
 								]
-						:+:	CompoundControl
+						:+:	LayoutControl
 						(	ButtonControl "&-" 
 								[	ControlFunction		(upd (-1))
 								,	ControlTip			"Decrement counter value"

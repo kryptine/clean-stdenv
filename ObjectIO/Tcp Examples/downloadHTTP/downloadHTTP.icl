@@ -8,7 +8,7 @@ module downloadHTTP
 //	
 //	**************************************************************************************************
 
-import	StdEnv, StdTCP, StdMaybe
+import	StdEnv, StdTCP, StdIO
 from	StdSystem import ticksPerSecond
 
 server	:== "www.cs.kun.nl"
@@ -57,5 +57,3 @@ Start world
 		world						= closeRChannel rc world
 		world						= closeChannel sc world
 	= fclose console world
-
-

@@ -4,7 +4,12 @@ module slidegame
 //	**************************************************************************************************
 //
 //	A simple slide game that uses bitmaps to show nice pictures.
-//	On Macintosh one should select a PICT file; on Windows(95/NT) one should select a BMP file.
+//	On Macintosh: 
+//		* Make sure the application has sufficient 'Extra memory' (Application options)
+//		* Select a PICT file;
+//	On Windows(95/NT):
+//		* Make sure the application has sufficient 'Heap' (Application options)
+//		* Select a BMP file.
 //
 //	The program has been written in Clean 1.3.2 and uses the Clean Standard Object I/O library 1.2
 //	
@@ -21,11 +26,11 @@ import StdEnv, StdIO, Random
 	The local state of the window keeps track of the current position of the hole.
 */
 ::	WindowState
-	=	{	curHole	:: Coord		// The current position of the hole
+	=	{	curHole	:: !Coord		// The current position of the hole
 		}
 ::	Coord
-	=	{	col		:: Int			// The zero based column number
-		,	row		:: Int			// The zero based row    number
+	=	{	col		:: !Int			// The zero based column number
+		,	row		:: !Int			// The zero based row    number
 		}
 
 Start :: *World -> *World

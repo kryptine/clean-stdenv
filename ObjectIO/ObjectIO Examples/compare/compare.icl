@@ -68,9 +68,9 @@ where
 		showdifference :: (PSt Local) -> PSt Local
 		showdifference pst=:{ls={name1,name2}}
 			# pst						= closeWindow showid pst
-			# (files,pst)				= accFiles (openfilepair (name1,name2)) pst
+			# (files,pst)				= openfilepair (name1,name2) pst
 			  (maybeDifference,files)	= comparefilepair 1 files
-			# pst						= appFiles (closefilepair files) pst
+			# pst						= closefilepair files pst
 			| isNothing maybeDifference
 				= appPIO beep pst
 			# (error,pst)				= openDialog undef (dialog (fromJust maybeDifference)) pst
