@@ -356,6 +356,24 @@ where
 				where
 					(hasSize,sizeAtt)	= Select (\att->isControlViewSize att || isControlOuterSize att) undef atts
 					minSize				= OSMinCompoundSize
+				
+				validateDerivedCompoundSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) Size !Size -> Size
+				validateDerivedCompoundSize wMetrics domain hasScrolls derSize reqSize
+					| reqSize==zero		= validateScrollbarSize wMetrics domain hasScrolls derSize
+					| otherwise			= validateScrollbarSize wMetrics domain hasScrolls reqSize
+				where
+					validateScrollbarSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) !Size -> Size
+					validateScrollbarSize wMetrics domainRect (hasHScroll,hasVScroll) size=:{w,h}
+						| domainSize==zero			= size
+						| visHScroll && visVScroll	= {w=w`,h=h`}
+						| visHScroll				= {size & h=h`}
+						| visVScroll				= {size & w=w`}
+						| otherwise					= size
+					where
+						domainSize					= RectSize domainRect
+						visHScroll					= hasHScroll && OSscrollbarIsVisible (domainRect.rleft,domainRect.rright)  w
+						visVScroll					= hasVScroll && OSscrollbarIsVisible (domainRect.rtop, domainRect.rbottom) h
+						(w`,h`)						= (w+wMetrics.osmVSliderWidth,h+wMetrics.osmHSliderHeight)
 		
 		getLayoutWItem wMetrics hMargins vMargins spaces orientations prevIds prevId cId itemH=:{wItemKind=IsLayoutControl,wItemAtts,wItems} tb
 			= (itPos,prevIds1,id,cId1,{itemH & wItemAtts=[ControlId id:atts1],wItems=items},tb1)
@@ -587,7 +605,7 @@ where
 				domain					= RectToRectangle domainRect
 				newOrientations			= [(domain,origin):orientations]
 				(derSize,itemHs1,tb1)	= layoutControls` wMetrics newHMargins newVMargins newItemSpaces reqSize minSize newOrientations itemHs tb
-				okDerivedSize			= validateDerivedCompoundSize wMetrics domainRect (hasHScroll,hasVScroll) derSize reqSize
+				okDerivedSize			= validateDerivedCompoundSize` wMetrics domainRect (hasHScroll,hasVScroll) derSize reqSize
 				info1					= layoutScrollbars wMetrics okDerivedSize info
 
 				validateMinSize :: ![ControlAttribute`] -> (!Size,![ControlAttribute`])
@@ -628,6 +646,24 @@ where
 				where
 					(hasSize,sizeAtt)	= Select (\att->iscontrolviewsize` att || iscontroloutersize` att) undef atts
 					minSize				= OSMinCompoundSize
+				
+				validateDerivedCompoundSize` :: !OSWindowMetrics !Rect !(!Bool,!Bool) Size !Size -> Size
+				validateDerivedCompoundSize` wMetrics domain hasScrolls derSize reqSize
+					| reqSize==zero		= validateScrollbarSize wMetrics domain hasScrolls derSize
+					| otherwise			= validateScrollbarSize wMetrics domain hasScrolls reqSize
+				where
+					validateScrollbarSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) !Size -> Size
+					validateScrollbarSize wMetrics domainRect (hasHScroll,hasVScroll) size=:{w,h}
+						| domainSize==zero			= size
+						| visHScroll && visVScroll	= {w=w`,h=h`}
+						| visHScroll				= {size & h=h`}
+						| visVScroll				= {size & w=w`}
+						| otherwise					= size
+					where
+						domainSize					= RectSize domainRect
+						(visHScroll,visVScroll)		= OSscrollbarsAreVisible wMetrics domainRect (w,h) (hasHScroll,hasVScroll)
+						w`							= w+wMetrics.osmVSliderWidth
+						h`							= h+wMetrics.osmHSliderHeight
 		
 		getLayoutWItem` wMetrics hMargins vMargins spaces orientations prevIds prevId cId itemH=:{wItemKind`=IsLayoutControl,wItemAtts`,wItems`} tb
 			= (itPos,prevIds1,id,cId1,{itemH & wItemAtts`=[ControlId` id:atts1],wItems`=items},tb1)
@@ -731,7 +767,7 @@ where
 		(w`,h`)						= (w+wMetrics.osmVSliderWidth,h+wMetrics.osmHSliderHeight)
 
 And this version was used for WElementHandle`s (IsCompoundControl). This one is ok, since it uses OSscrollbarsAreVisible.
-*/
+
 validateDerivedCompoundSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) Size !Size -> Size
 validateDerivedCompoundSize wMetrics domain hasScrolls derSize reqSize
 	| reqSize==zero		= validateScrollbarSize wMetrics domain hasScrolls derSize
@@ -749,7 +785,7 @@ where
 		(visHScroll,visVScroll)		= OSscrollbarsAreVisible wMetrics domainRect (w,h) (hasHScroll,hasVScroll)
 		w`							= w+wMetrics.osmVSliderWidth
 		h`							= h+wMetrics.osmHSliderHeight
-
+*/
 layoutScrollbars :: !OSWindowMetrics !Size !CompoundInfo -> CompoundInfo
 layoutScrollbars wMetrics size info=:{compoundHScroll,compoundVScroll}
 	= {	info & compoundHScroll=mapMaybe (layoutScrollbar hRect) compoundHScroll
