@@ -18,7 +18,7 @@ Start world
  	test5
  	world  
 
-testX = CGEC (gecEdit "test")  (dynamicGEC 23)
+//testX = CGEC (gecEdit "test")  (dynamicGEC 23)
 
 derive gGEC MyRecord, MyRecord2, T
 				
@@ -27,24 +27,25 @@ derive gGEC MyRecord, MyRecord2, T
 				 , fun_arg:: AGEC a 
 				 }
 
-test1 = CGEC (selfGEC "self" calcsum) 	{ arg	  = dynamicGEC 0
+/*test1 = CGEC (selfGEC "self" calcsum) 	{ arg	  = dynamicGEC 0
 							  			, fun	  = dynamicGEC id
 							  			, fun_arg = modeGEC (Display 0)}
 where
 	calcsum  rec = {rec & MyRecord.fun_arg = rec.MyRecord.fun_arg ^= (^^ rec.fun) (^^ rec.arg)}
-
+*/
 :: MyRecord2 a =  { field1:: AGEC a
 				  , field2:: AGEC a
 				  , sum:: AGEC a 
 				  }
 
-test2 = CGEC (selfGEC "self" calcsum) 	{ field1	= counterGEC 0
+/*test2 = CGEC (selfGEC "self" calcsum) 	{ field1	= counterGEC 0
 							  			, field2	= dynamicGEC 0
 							  			, sum 		= modeGEC (Display 0)}
 where
 	calcsum rec = {rec & MyRecord2.sum = rec.MyRecord2.sum ^= (^^ rec.field1 + ^^ rec.field2)}
-
+*/
 :: T a b = C a | B Int Real b a
+/* PA: uit arren moede in commentaar gezet omdat de compiler anders crasht...
 :: Tdyn :== T DynString DynString
 
 fromDynString :: a DynString -> a | TC a
@@ -65,10 +66,10 @@ mapTDS2 tab = gMap {|* -> * |} counterGEC  tab
 
 //	mapFDS dynstr i r = gMap {|* -> * -> *|} (^^) (^^)  dynstr
 //	mapTDS tab = gMap {|* -> * -> *|} counterGEC dynamicGEC  tab
-
+*/
 import GenMap
 derive gMap T
-
+/*
 test3 = CGEC (selfGEC "self" calc) (mapTDS init,init)	
 where
 	init = B 3 4.5 22 5
@@ -78,7 +79,7 @@ where
 	where
 		ndyn = mapTDS nval
 		nval = mapFDS dyn 5 22
-
+*/
 
 :: MyRecord3 a b c =  	{ val1::  a
 				  		, val2::  b
@@ -88,7 +89,7 @@ where
 derive gMap MyRecord3
 derive gGEC MyRecord3
 
-test4 = CGEC (selfGEC "self" convert) (mapTo init)	
+/*test4 = CGEC (selfGEC "self" convert) (mapTo init)	
 where
 	init = 	{ val1	= 0.0
 			, val2	= 0.0
@@ -101,7 +102,7 @@ where
 	mapFrom agec  	= gMap {|* -> * -> * -> *|} (^^) (^^) (^^) agec
 	mapTo val 		= gMap {|* -> * -> * -> *|} counterGEC dynamicGEC (modeGEC o Display) val
 
-
+*/
 :: Counter a = Counter (AGEC a)
 
 test5 = CGEC (selfGEC "self" id) (mkAGECs (counterGEC) (dynamicGEC) init)	
@@ -125,6 +126,3 @@ mkAGECs  ageca agecb tab
 where
 	mapFrom agec  	= gMap {|* -> * -> *|} (^^) (^^) agec
 	mapTo val 		= gMap {|* -> * -> *|} ageca agecb  val
-
-	
-

@@ -96,8 +96,8 @@ where
 			# pSt					= guiClose pSt
 			# lSt					= {lSt & unitVisible=False}
 			= (OutDone,(lSt,pSt))
-		unitFun _ _ (InSwitchCONS p) st
-			= TRACE (gGECtraceSwitchCONS "UNIT" p) (OutDone,st)
+		unitFun _ _ (InSwitchCONS u p) st
+			= TRACE (gGECtraceSwitchCONS "UNIT" u p) (OutDone,st)
 		unitFun _ _ (InArrangeCONS a p) st
 			= TRACE (gGECtraceArrangeCONS "UNIT" a p) (OutDone,st)
 		unitFun _ _ _ st
@@ -172,8 +172,8 @@ where
 			# pSt				= pair2GECVALUE.gecCloseGUI keepActiveCONS pSt
 			# lSt				= {lSt & pairVisible=False}
 			= (OutDone,(lSt,pSt))
-		pairFun _ _ (InSwitchCONS p) st
-			= TRACE (gGECtraceSwitchCONS "PAIR" p) (OutDone,st)
+		pairFun _ _ (InSwitchCONS u p) st
+			= TRACE (gGECtraceSwitchCONS "PAIR" u p) (OutDone,st)
 		pairFun _ _ (InArrangeCONS a p) st
 			= TRACE (gGECtraceArrangeCONS "PAIR" a p) (OutDone,st)
 		pairFun _ _ _ st
@@ -264,9 +264,9 @@ where
 			# pSt				= objectGECVALUE.gecCloseGUI SkipCONS pSt
 			# lSt				= {lSt & objectVisible=False}
 			= (OutDone,(lSt,pSt))
-		objectFun _ _ _ _ (InSwitchCONS path) (lSt=:{objectGECVALUE},pSt)
-			# pSt					= TRACE (gGECtraceSwitchCONS object_trace_name path) pSt
-			# pSt				= objectGECVALUE.gecSwitch path pSt
+		objectFun _ _ _ _ (InSwitchCONS upd path) (lSt=:{objectGECVALUE},pSt)
+			# pSt					= TRACE (gGECtraceSwitchCONS object_trace_name upd path) pSt
+			# pSt				= objectGECVALUE.gecSwitch upd path pSt
 			= (OutDone,(lSt,pSt))
 		objectFun _ _ _ _ (InArrangeCONS arr path) (lSt=:{objectGECVALUE},pSt)
 			# pSt					= TRACE (gGECtraceArrangeCONS object_trace_name arr path) pSt
@@ -314,7 +314,7 @@ where
 		consFun gGECa mv cGECGUI cGEC msg=:(InSetValue yesUpdate v=:(CONS a)) (lSt,pSt)
 			# pSt					= TRACE ("gGEC{|"+++cons_trace_name+++"|}",msg) pSt
 			# (lSt=:{consGECVALUE},pSt)
-									= snd (consFun gGECa mv cGECGUI cGEC (InSwitchCONS []) (lSt,pSt))
+									= snd (consFun gGECa mv cGECGUI cGEC (InSwitchCONS NoUpdate []) (lSt,pSt))
 			# pSt					= consGECVALUE.gecSetValue NoUpdate a pSt
 			# pSt					= if (yesUpdate === YesUpdate) (update` Changed v pSt) pSt
 			= (OutDone,(lSt,pSt))
@@ -367,8 +367,8 @@ where
 				= (OutDone,(lSt,pSt))
 			| otherwise
 				= (OutDone,(lSt,pSt))
-		consFun gGECa mv cGECGUI cGEC (InSwitchCONS path) (lSt=:{consGUILoc,consVisible},pSt)
-			# pSt					= TRACE (gGECtraceSwitchCONS cons_trace_name path) pSt
+		consFun gGECa mv cGECGUI cGEC (InSwitchCONS upd path) (lSt=:{consGUILoc,consVisible},pSt)
+			# pSt					= TRACE (gGECtraceSwitchCONS cons_trace_name upd path) pSt
 			| not (isEmpty path)		// path not fully traversed: this is an error.
 				= abort ("gGEC{|"+++cons_trace_name+++"|}: handling request for InSwitchCONS failed: path not empty.")
 			| consVisible			// already visible: nothing to do
@@ -380,7 +380,7 @@ where
 				# (lSt=:{consGECVALUE},pSt)
 									= snd (consFun gGECa mv cGECGUI cGEC (InOpenGUI consGUILoc consOBJECTLoc) (lSt,pSt))
 				# (a,pSt)		= consGECVALUE.gecGetValue pSt
-				# pSt			= updateCONSA Changed a pSt
+				# pSt			= if (upd===YesUpdate) (updateCONSA Changed a pSt) pSt
 				= (OutDone,(lSt,pSt))
 		consFun gGECa mv cGECGUI cGEC (InArrangeCONS arr path) st=:({consGUILoc,consOBJECTLoc},pSt)
 			# st					= TRACE (gGECtraceArrangeCONS cons_trace_name arr path) st
@@ -470,9 +470,9 @@ where
 			# pSt				= fieldGECVALUE.gecCloseGUI SkipCONS pSt
 			# lSt				= {lSt & fieldVisible=False}
 			= (OutDone,(lSt,pSt))
-		fieldFun _ _ _ _ (InSwitchCONS path) (lSt=:{fieldGECVALUE},pSt)
-			# pSt					= TRACE (gGECtraceSwitchCONS field_trace_name path) pSt
-			# pSt				= fieldGECVALUE.gecSwitch path pSt
+		fieldFun _ _ _ _ (InSwitchCONS upd path) (lSt=:{fieldGECVALUE},pSt)
+			# pSt					= TRACE (gGECtraceSwitchCONS field_trace_name upd path) pSt
+			# pSt				= fieldGECVALUE.gecSwitch upd path pSt
 			= (OutDone,(lSt,pSt))
 		fieldFun _ _ _ _ (InArrangeCONS arr path) (lSt=:{fieldGECVALUE},pSt)
 			# pSt					= TRACE (gGECtraceArrangeCONS field_trace_name arr path) pSt
@@ -562,8 +562,8 @@ where
 			# pSt				= either2GECVALUE.gecCloseGUI keepActiveCONS pSt
 			# lSt				= {lSt & eitherVisible=False}
 			= (OutDone,(lSt,pSt))
-		eitherFun _ _ (InSwitchCONS path) (lSt=:{eitherGoLeft,either1GECVALUE,either2GECVALUE},pSt)
-			# pSt					= TRACE (gGECtraceSwitchCONS "EITHER" path) pSt
+		eitherFun _ _ (InSwitchCONS upd path) (lSt=:{eitherGoLeft,either1GECVALUE,either2GECVALUE},pSt)
+			# pSt					= TRACE (gGECtraceSwitchCONS "EITHER" upd path) pSt
 			| isEmpty path
 				= abort "gGEC{|EITHER|}: handling request for InSwitchCONS failed: path is empty."
 			| otherwise
@@ -571,8 +571,8 @@ where
 									 (if eitherGoLeft (either1GECVALUE.gecCloseGUI InactivateCONS pSt)
 									                  (either2GECVALUE.gecCloseGUI InactivateCONS pSt)
 									 )
-				# pSt				= if newEITHERGoLeft (either1GECVALUE.gecSwitch path` pSt)
-									                     (either2GECVALUE.gecSwitch path` pSt)
+				# pSt				= if newEITHERGoLeft (either1GECVALUE.gecSwitch upd path` pSt)
+									                     (either2GECVALUE.gecSwitch upd path` pSt)
 				# lSt				= {lSt & eitherGoLeft=newEITHERGoLeft}
 				= (OutDone,(lSt,pSt))
 		where
@@ -664,8 +664,8 @@ where
 			# pSt					= guiClose pSt
 			# lSt					= {lSt & basicVisible=False}
 			= (OutDone,(lSt,pSt))
-		basicFun _ _ _ (InSwitchCONS p) st
-			= TRACE (gGECtraceSwitchCONS type_name p) (OutDone,st)
+		basicFun _ _ _ (InSwitchCONS u p) st
+			= TRACE (gGECtraceSwitchCONS type_name u p) (OutDone,st)
 		basicFun _ _ _ (InArrangeCONS a p) st
 			= TRACE (gGECtraceArrangeCONS type_name a p) (OutDone,st)
 		basicFun _ _ _ _ st
@@ -701,7 +701,7 @@ gGECtraceBranchUpdate type source    :== gGECcase type +++ " " +++ source
 gGECtraceGetValue     type           :== gGECcase type +++ " InGetValue"
 gGECtraceCloseGEC     type           :== gGECcase type +++ " InCloseGEC"
 gGECtraceCloseGUI     type           :== gGECcase type +++ " InCloseGUI"
-gGECtraceSwitchCONS   type path      :== gGECcase type +++ " (InSwitchCONS "+++printToString path+++")"
+gGECtraceSwitchCONS   type upd path  :== gGECcase type +++ " (InSwitchCONS "+++printToString upd+++" "+++printToString path+++")"
 gGECtraceArrangeCONS  type arr path  :== gGECcase type +++ " (InArrangeCONS "+++printToString arr+++" "+++printToString path+++")"
 gGECtraceDefault      type           :== "Handling messages failed of "+++type
 

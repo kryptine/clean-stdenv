@@ -7,7 +7,7 @@ import GenEq, GenPrint, StdGeneric
 
 derive bimap  GECMsgIn, GECMsgOut, GECVALUE
 derive gEq    PropagationDirection, UpdateReason, IncludeUpdate, KeepActiveCONS, Arrangement
-derive gPrint ConsPos, Arrangement
+derive gPrint ConsPos, Arrangement, IncludeUpdate
 
 ::	GECId t
 	=	GECId !(R2Id (GECMsgIn t) (GECMsgOut t))
@@ -55,8 +55,8 @@ openGECGUI gecId (guiLoc,objLoc) pSt = snd (sendAndCheck gecId (InOpenGUI guiLoc
 closeGECGUI :: !(GECId t) !KeepActiveCONS !(PSt .ps) -> PSt .ps
 closeGECGUI gecId keepCONS pSt = snd (sendAndCheck gecId (InCloseGUI keepCONS) "closeGECGUI" pSt)
 
-switchGEC :: !(GECId t) ![ConsPos] !(PSt .ps) -> PSt .ps
-switchGEC gecId path pSt = snd (sendAndCheck gecId (InSwitchCONS path) "switchGEC" pSt)
+switchGEC :: !(GECId t) !IncludeUpdate ![ConsPos] !(PSt .ps) -> PSt .ps
+switchGEC gecId yesUpdate path pSt = snd (sendAndCheck gecId (InSwitchCONS yesUpdate path) "switchGEC" pSt)
 
 arrangeGEC :: !(GECId t) !Arrangement ![ConsPos] !(PSt .ps) -> PSt .ps
 arrangeGEC gecId arrangement path pSt = snd (sendAndCheck gecId (InArrangeCONS arrangement path) "arrangeGEC" pSt)
