@@ -3,13 +3,20 @@
 
 /* DirectX implementation of the OS specific functions */
 
-#include "cOSGameLib_12.h"
+#include "cOSGameLib.h"
 
 extern HWND ghMainWindow;
 
 int ScreenWidth = 320;
 int ScreenHeight = 240;
 int BitsPerPixel = 8;
+
+int ActualWidth = 320;
+int ActualHeight = 240;
+
+int XShiftScreen = 0;
+int YShiftScreen = 0;
+
 BOOL FullScreen = TRUE;
 BOOL bGameActive = FALSE;
 HWND ghGameWindow = NULL;
@@ -18,11 +25,11 @@ static LPDIRECTDRAW lpDD = NULL;
 static LPDIRECTDRAWSURFACE lpDDSFront = NULL;
 static LPDIRECTDRAWSURFACE lpDDSBack = NULL;
 static LPDIRECTDRAWPALETTE lpDDPal = NULL;
-static IDirectDrawClipper *clipper=NULL;
+static IDirectDrawClipper *clipper = NULL;
 
 typedef struct GAMEBLOCKSEQUENCE
 {
-	int iSequenceID;
+    int iSequenceID;
     int iSequenceLength;
     char *sSequence;
     int iPosition;
@@ -32,7 +39,7 @@ typedef struct GAMEBLOCKSEQUENCE
 
 typedef struct GAMEBITMAPINFO
 {
-	int iBitmapID;
+    int iBitmapID;
     LPDIRECTDRAWSURFACE lpDDSBitmap;
     int iBitmapWidth;
     int iBitmapHeight;
@@ -80,25 +87,25 @@ void DDRestoreAll ()
     DDSURFACEDESC ddsd;
     GAMEBITMAPINFO *gbip = gbipGameBitmapInfo;
 
- 	if (lpDD != NULL)
+    if (lpDD != NULL)
     {
-    	ddrval = IDirectDrawSurface_Restore (lpDDSFront);
+        ddrval = IDirectDrawSurface_Restore (lpDDSFront);
         if (ddrval == DD_OK)
         {
-	    	ddrval = IDirectDrawSurface_Restore (lpDDSBack);
+            ddrval = IDirectDrawSurface_Restore (lpDDSBack);
             if (ddrval == DD_OK)
-			{
-		        while (gbip)
-		        {
-		            ddrval = IDirectDrawSurface_Restore (gbip->lpDDSBitmap);
-		            if (ddrval == DD_OK)
-		            {
-						DDReLoadBitmap (gbip->lpDDSBitmap, gbip->sName);
-		            }
-		            gbip = gbip->gbipNext;
-		        }
-    		}
-    	}
+            {
+                while (gbip)
+                {
+                    ddrval = IDirectDrawSurface_Restore (gbip->lpDDSBitmap);
+                    if (ddrval == DD_OK)
+                    {
+                        DDReLoadBitmap (gbip->lpDDSBitmap, gbip->sName);
+                    }
+                    gbip = gbip->gbipNext;
+                }
+            }
+        }
     }
 }
 
@@ -180,57 +187,94 @@ BOOL OSInitGameWindow ()
 
 //    ddrval = DirectDrawCreate (aDDDevs[DevIndex].guid, &lpDD, NULL);
     ddrval = DirectDrawCreate (NULL, &lpDD, NULL);
-	if (!(ddrval == DD_OK))
+    if (!(ddrval == DD_OK))
         ShowError ("DirectDrawCreate failed");
     else
-	{
+    {
         if (FullScreen)
-	        ddrval = IDirectDraw_SetCooperativeLevel (lpDD, ghGameWindow,
+            ddrval = IDirectDraw_SetCooperativeLevel (lpDD, ghGameWindow,
                          DDSCL_EXCLUSIVE |
                          DDSCL_FULLSCREEN |
                          DDSCL_ALLOWMODEX |
                          DDSCL_ALLOWREBOOT);
         else
-		    ddrval = IDirectDraw_SetCooperativeLevel (lpDD, ghGameWindow,
+            ddrval = IDirectDraw_SetCooperativeLevel (lpDD, ghGameWindow,
                 DDSCL_NORMAL);
-		if (!(ddrval == DD_OK))
+        if (!(ddrval == DD_OK))
             ShowError ("IDirectDraw_SetCooperativeLevel failed");
         else
-		{
+        {
+            ActualWidth = ScreenWidth;
+            ActualHeight = ScreenHeight;
+
             if (FullScreen)
             {
-			    ShowCursor (FALSE);
-		        ddrval = IDirectDraw_SetDisplayMode (lpDD, ScreenWidth, ScreenHeight, BitsPerPixel);
+                int oldbpp = BitsPerPixel;
+
+                ShowCursor (FALSE);
+                ddrval = IDirectDraw_SetDisplayMode (lpDD, ScreenWidth, ScreenHeight, BitsPerPixel);
+
+                /* added 11-24-99, try 8 bit color if 16/24/32 bit fails */
+                if (BitsPerPixel > 8)
+                {
+                    if (!(ddrval == DD_OK))
+                    {
+                        BitsPerPixel == 8;
+                        ddrval = IDirectDraw_SetDisplayMode (lpDD, ScreenWidth, ScreenHeight, BitsPerPixel);
+                    }
+                }
+                /* added  3-29-00, try 640x480 if lower resolution fails */
+                if ((!(ddrval == DD_OK)) && ((ScreenWidth < 640) || (ScreenHeight < 480)))
+                {
+                  //  MessageBox (NULL, "Screen mode not supported. Trying higher resolution", NULL, MB_OK);
+
+                    ActualWidth = 640;
+                    ActualHeight = 480;
+                    BitsPerPixel = oldbpp;
+                    ddrval = IDirectDraw_SetDisplayMode (lpDD, ActualWidth, ActualHeight, BitsPerPixel);
+
+                    if (BitsPerPixel > 8)
+                    {
+                        if (!(ddrval == DD_OK))
+                        {
+                            BitsPerPixel == 8;
+                            ddrval = IDirectDraw_SetDisplayMode (lpDD, ScreenWidth, ScreenHeight, BitsPerPixel);
+                        }
+                    }
+                }
             }
+
+            XShiftScreen = (ActualWidth - ScreenWidth) / 2;
+            YShiftScreen = (ActualHeight - ScreenHeight) / 2;
 
             if (!(ddrval == DD_OK))
                 ShowError ("IDirectDraw_SetDisplayMode failed");
             else
             {
-                memset (&ddsd, 0, sizeof (DDSURFACEDESC));	// Mike: set non-used values to zero!
-				ddsd.dwSize = sizeof (ddsd);
+                memset (&ddsd, 0, sizeof (DDSURFACEDESC));  // set non-used values to zero!
+                ddsd.dwSize = sizeof (ddsd);
                 if (FullScreen)
                 {
-		            ddsd.dwFlags = DDSD_CAPS | DDSD_BACKBUFFERCOUNT;
-	                ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE |
-	                                      DDSCAPS_FLIP |
-	                                      DDSCAPS_COMPLEX |
+                    ddsd.dwFlags = DDSD_CAPS | DDSD_BACKBUFFERCOUNT;
+                    ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE |
+                                          DDSCAPS_FLIP |
+                                          DDSCAPS_COMPLEX |
                                           DDSCAPS_MODEX;
                 }
                 else
                 {
-	                ddsd.dwFlags = DDSD_CAPS;
-	                ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
+                    ddsd.dwFlags = DDSD_CAPS;
+                    ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
                 }
 
                 ddsd.dwBackBufferCount = 1;
-		        ddrval = IDirectDraw_CreateSurface (lpDD, &ddsd, &lpDDSFront, NULL);
+                ddrval = IDirectDraw_CreateSurface (lpDD, &ddsd, &lpDDSFront, NULL);
 
                 if (!(ddrval == DD_OK))
                     ShowError ("IDirectDraw_CreateSurface failed (lpDDSFront)");
                 else
-		        {
-	                ddrval = IDirectDraw_CreateClipper (lpDD, 0, &clipper, NULL);
+                {
+                    ddrval = IDirectDraw_CreateClipper (lpDD, 0, &clipper, NULL);
                     if (!(ddrval == DD_OK))
                         ShowError ("IDirectDraw_CreateClipper failed");
                     else
@@ -245,38 +289,38 @@ BOOL OSInitGameWindow ()
                                 ShowError ("IDirectDrawClipper_SetClipper failed");
                             else
                             {
-		                        if (!FullScreen)
-		                        {
-		
-							    	memset (&ddsd, 0, sizeof (DDSURFACEDESC));
-							        ddsd.dwSize = sizeof (ddsd);
-							        ddsd.dwFlags = DDSD_CAPS |
-							                       DDSD_WIDTH |
-							                       DDSD_HEIGHT;
-							
-							        ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
-							        ddsd.dwWidth = ScreenWidth;
-							        ddsd.dwHeight = ScreenHeight;
-							        ddrval = IDirectDraw_CreateSurface (lpDD, &ddsd, &lpDDSBack, NULL);
+                                if (!FullScreen)
+                                {
+
+                                    memset (&ddsd, 0, sizeof (DDSURFACEDESC));
+                                    ddsd.dwSize = sizeof (ddsd);
+                                    ddsd.dwFlags = DDSD_CAPS |
+                                                   DDSD_WIDTH |
+                                                   DDSD_HEIGHT;
+
+                                    ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_SYSTEMMEMORY;
+                                    ddsd.dwWidth = ScreenWidth;
+                                    ddsd.dwHeight = ScreenHeight;
+                                    ddrval = IDirectDraw_CreateSurface (lpDD, &ddsd, &lpDDSBack, NULL);
                                     if (!(ddrval == DD_OK))
                                         ShowError ("IDirectDrawClipper_CreateSurface failed (lpDDSBack)");
                                     else
                                         result = TRUE;
-		                        }
-		                        else
-		                        {
-				                    ddscaps.dwCaps = DDSCAPS_BACKBUFFER;
-	  			                    ddrval = IDirectDrawSurface_GetAttachedSurface (lpDDSFront, &ddscaps, &lpDDSBack);
+                                }
+                                else
+                                {
+                                    ddscaps.dwCaps = DDSCAPS_BACKBUFFER;
+                                    ddrval = IDirectDrawSurface_GetAttachedSurface (lpDDSFront, &ddscaps, &lpDDSBack);
                                     if (!(ddrval == DD_OK))
                                         ShowError ("IDirectDrawSurface_GetAttachedSurface failed");
                                     else
                                         result = TRUE;
-		                        }
+                                }
                             }
                         }
                     }
-		        }
-		    }
+                }
+            }
         }
     }
     return result;
@@ -316,11 +360,18 @@ void OSClearScreen ()
 void OSClearVirtualScreen (COLORREF c)
 {
     DDBLTFX ddbltfx;
+    RECT dst;
+
+    dst.left = XShiftScreen;
+    dst.top = YShiftScreen;
+    dst.right = ScreenWidth + XShiftScreen;
+    dst.bottom = ScreenHeight + YShiftScreen;
 
     memset (&ddbltfx, 0, sizeof (ddbltfx));
+
     ddbltfx.dwSize = sizeof (ddbltfx);
     ddbltfx.dwFillColor = DDColorMatch (lpDDSBack, c);
-    IDirectDrawSurface_Blt (lpDDSBack, NULL, NULL, NULL,
+    IDirectDrawSurface_Blt (lpDDSBack, &dst, NULL, NULL,
         DDBLT_COLORFILL | DDBLT_WAIT, &ddbltfx);
 }
 
@@ -329,6 +380,14 @@ void OSFillBlack (BOOL vis, RECT dst)
 {
     LPDIRECTDRAWSURFACE lpDDS = (vis)? lpDDSFront : lpDDSBack;
     DDBLTFX ddbltfx;
+
+//    if (vis)
+//    {
+      dst.left += XShiftScreen;
+      dst.top += YShiftScreen;
+      dst.right += XShiftScreen;
+      dst.bottom += YShiftScreen;
+//    }
 
     memset (&ddbltfx, 0, sizeof (ddbltfx));
     ddbltfx.dwSize = sizeof (ddbltfx);
@@ -340,16 +399,22 @@ void OSFillBlack (BOOL vis, RECT dst)
 /* copy (part of) virtual screen to visual screen */
 void OSBlit (RECT *r)
 {
-  	HRESULT ddrval;
+    HRESULT ddrval;
     DDBLTFX ddbltfx;
     int flags = DDBLT_WAIT + DDBLT_DDFX;
+    RECT sr;
+
+    sr.left = r->left + XShiftScreen;
+    sr.top = r->top + YShiftScreen;
+    sr.right = r->right + XShiftScreen;
+    sr.bottom = r->bottom + YShiftScreen;
 
     memset (&ddbltfx, 0, sizeof (ddbltfx));
     ddbltfx.dwSize = sizeof (ddbltfx);
     ddbltfx.dwDDFX = DDBLTFX_NOTEARING;
 
-   	ddrval = IDirectDrawSurface_Blt
-                (lpDDSFront, r, lpDDSBack, r, flags, &ddbltfx);
+    ddrval = IDirectDrawSurface_Blt
+                (lpDDSFront, &sr, lpDDSBack, &sr, flags, &ddbltfx);
     if (ddrval == DDERR_SURFACELOST)
         DDRestoreAll ();
 }
@@ -373,11 +438,11 @@ static GAMEBITMAPINFO *GetGameBitmapInfo (int BID)
         gbip = gbipPrev;
     else
     {
-	    while (gbip && (!bFound))
+        while (gbip && (!bFound))
         {
             if (gbip->iBitmapID == BID)
             {
-          	    bFound = TRUE;
+                bFound = TRUE;
                 iPrevGBIP = BID;
                 gbipPrev = gbip;
             }
@@ -385,7 +450,7 @@ static GAMEBITMAPINFO *GetGameBitmapInfo (int BID)
                 gbip = gbip->gbipNext;
         }
     }
-	return gbip;
+    return gbip;
 }
 
 /* free members of a GAMEBITMAPINFO node */
@@ -393,25 +458,25 @@ static void FreeGameBitmapInfoNode (GAMEBITMAPINFO *gbip)
 {
     GAMEBLOCKSEQUENCE *gbs;
 
- 	if (gbip->lpDDSBitmap)
+    if (gbip->lpDDSBitmap)
     {
         IDirectDraw_Release (gbip->lpDDSBitmap);
         gbip->lpDDSBitmap = NULL;
     }
 
-	if (gbip->sName)
+    if (gbip->sName)
     {
         rfree (gbip->sName);
         gbip->sName = NULL;
     }
 
     gbs = NULL;
-	while (gbip->gbsGameBlockSequence)
+    while (gbip->gbsGameBlockSequence)
     {
-		gbs = gbip->gbsGameBlockSequence->gbsNext;
+        gbs = gbip->gbsGameBlockSequence->gbsNext;
         if (gbip->gbsGameBlockSequence->sSequence)
         {
-         	rfree (gbip->gbsGameBlockSequence->sSequence);
+            rfree (gbip->gbsGameBlockSequence->sSequence);
         }
         rfree (gbip->gbsGameBlockSequence);
         gbip->gbsGameBlockSequence = gbs;
@@ -438,30 +503,30 @@ int OSInitGameBitmap (int id, char *name,
     if (id==0)
     {
         /* find matching id or create new id */
-	    GAMEBITMAPINFO *gbip = gbipGameBitmapInfo;
+        GAMEBITMAPINFO *gbip = gbipGameBitmapInfo;
 
         id = 1;
-		while (gbip)
-	    {
-	     	if (lstrcmp (gbip->sName, name) == 0)
+        while (gbip)
+        {
+            if (lstrcmp (gbip->sName, name) == 0)
             {
-				resultcode = gbip->iBitmapID;
+                resultcode = gbip->iBitmapID;
                 return resultcode;
             }
-	        else
+            else
             {
                 if (gbip->iBitmapID >= id)
                     id = gbip->iBitmapID + 1;
-	          	gbip = gbip->gbipNext;
+                gbip = gbip->gbipNext;
             }
-	    }
+        }
     }
 
     resultcode = GR_INVALID_BITMAP_ID;
     if (!GetGameBitmapInfo (id))  /* identifier not used yet */
     {
         /* set non-used values to zero! */
-    	memset (&ddsd, 0, sizeof (DDSURFACEDESC));
+        memset (&ddsd, 0, sizeof (DDSURFACEDESC));
         ddsd.dwSize = sizeof (ddsd);
         ddsd.dwFlags = DDSD_CAPS |
                        DDSD_WIDTH |
@@ -473,55 +538,55 @@ int OSInitGameBitmap (int id, char *name,
         ddsd.dwHeight = bitmapheight;
         ddrval = IDirectDraw_CreateSurface (lpDD, &ddsd, &lpDDS, NULL);
 
-	    resultcode = GR_NOT_FOUND;
-	    lpDDPal = DDLoadPalette (lpDD, name);
+        resultcode = GR_NOT_FOUND;
+        lpDDPal = DDLoadPalette (lpDD, name);
         if (lpDDPal)
         {
             ddrval = DDReLoadBitmap (lpDDS, name);
             if (ddrval == DD_OK)
- 			{
-		        resultcode = GR_OS_ERROR;
-		        if (ddrval == DD_OK)
-			    {
-			        /* find last element of linked list */
-			        gbip1 = gbipGameBitmapInfo;
-			        gbip2 = NULL;
-			        while (gbip1)
-			        {
-			            gbip2 = gbip1;
-			        	gbip1 = gbip1->gbipNext;
-			        }
-		
-		         	/* create new node */
-					gbip1 = rmalloc (sizeof (GAMEBITMAPINFO));
-			        gbip1->iBitmapID = id;
-			        gbip1->lpDDSBitmap = lpDDS;
-		            gbip1->bTransparent = FALSE;	/* transparency can be set later */
-			        gbip1->iBitmapWidth = bitmapwidth;
-			        gbip1->iBitmapHeight = bitmapheight;
-			        gbip1->iBlockWidth = blockwidth;
-			        gbip1->iBlockHeight = blockheight;
-			        gbip1->iBlockCountX = bitmapwidth / blockwidth;
-			        gbip1->iBlockCountY = bitmapheight / blockheight;
+            {
+                resultcode = GR_OS_ERROR;
+                if (ddrval == DD_OK)
+                {
+                    /* find last element of linked list */
+                    gbip1 = gbipGameBitmapInfo;
+                    gbip2 = NULL;
+                    while (gbip1)
+                    {
+                        gbip2 = gbip1;
+                        gbip1 = gbip1->gbipNext;
+                    }
+
+                    /* create new node */
+                    gbip1 = rmalloc (sizeof (GAMEBITMAPINFO));
+                    gbip1->iBitmapID = id;
+                    gbip1->lpDDSBitmap = lpDDS;
+                    gbip1->bTransparent = FALSE;    /* transparency can be set later */
+                    gbip1->iBitmapWidth = bitmapwidth;
+                    gbip1->iBitmapHeight = bitmapheight;
+                    gbip1->iBlockWidth = blockwidth;
+                    gbip1->iBlockHeight = blockheight;
+                    gbip1->iBlockCountX = bitmapwidth / blockwidth;
+                    gbip1->iBlockCountY = bitmapheight / blockheight;
                     gbip1->gbsGameBlockSequence = NULL;
-			        gbip1->gbipNext = NULL;
+                    gbip1->gbipNext = NULL;
                     gbip1->sName = rmalloc (strlen (name) + 1);
-			        rsncopy (gbip1->sName, name, strlen (name));
-			
-			        /* gbip2 points to the last element or is NULL */
-			        if (gbip2)
-			          	gbip2->gbipNext = gbip1;
-			        else
-			          	gbipGameBitmapInfo = gbip1;  /* first element */
-		
-		            resultcode = GR_OK;
-		        }
-        	}
-    	}
+                    rsncopy (gbip1->sName, name, strlen (name));
+
+                    /* gbip2 points to the last element or is NULL */
+                    if (gbip2)
+                        gbip2->gbipNext = gbip1;
+                    else
+                        gbipGameBitmapInfo = gbip1;  /* first element */
+
+                    resultcode = GR_OK;
+                }
+            }
+        }
     }
-	if (resultcode == GR_OK)
-      	return id;
-	else
+    if (resultcode == GR_OK)
+        return id;
+    else
         return resultcode;
 }
 
@@ -559,26 +624,26 @@ int OSFreeGameBitmap (int id)
     gbipPrev = NULL;
 
     result = GR_INVALID_BITMAP_ID;
-	while (gbipCurrent)
+    while (gbipCurrent)
     {
         if (gbipCurrent->iBitmapID != id)
         {
             gbipPrevious = gbipCurrent;
-	       	gbipNext = gbipCurrent->gbipNext;
+            gbipNext = gbipCurrent->gbipNext;
         }
-    	else
+        else
         {
-         	/* link previous node to next node */
+            /* link previous node to next node */
             if (gbipPrevious)
-              	gbipPrevious->gbipNext = gbipCurrent->gbipNext;
+                gbipPrevious->gbipNext = gbipCurrent->gbipNext;
             else
                 gbipGameBitmapInfo = gbipCurrent->gbipNext;
 
-	       	gbipNext = gbipCurrent->gbipNext;
+            gbipNext = gbipCurrent->gbipNext;
             /* free the current node */
 
             FreeGameBitmapInfoNode (gbipCurrent);
-	        rfree (gbipCurrent);
+            rfree (gbipCurrent);
 
             result = GR_OK;
         }
@@ -592,9 +657,9 @@ void OSFreeGameBitmaps ()
 {
     GAMEBITMAPINFO *gbip;
 
-	while (gbipGameBitmapInfo)
+    while (gbipGameBitmapInfo)
     {
-       	gbip = gbipGameBitmapInfo->gbipNext;
+        gbip = gbipGameBitmapInfo->gbipNext;
         FreeGameBitmapInfoNode (gbipGameBitmapInfo);
         rfree (gbipGameBitmapInfo);
         gbipGameBitmapInfo = gbip;
@@ -613,19 +678,19 @@ int OSSetTransparentColor (int id, int x, int y)
     GAMEBITMAPINFO *gbip = GetGameBitmapInfo (id);
 
     result = GR_INVALID_BITMAP_ID;
-	if (gbip)
+    if (gbip)
     {
-     	if (x < 0) x += gbip->iBitmapWidth;
-     	if (y < 0) y += gbip->iBitmapHeight;
+        if (x < 0) x += gbip->iBitmapWidth;
+        if (y < 0) y += gbip->iBitmapHeight;
 
-	    result = GR_OS_ERROR;
-	    if (IDirectDrawSurface_GetDC (gbip->lpDDSBitmap, &hdc) == DD_OK)
-	    {
-			rgb = GetPixel (hdc, x, y);
-		    IDirectDrawSurface_ReleaseDC (gbip->lpDDSBitmap, hdc);
+        result = GR_OS_ERROR;
+        if (IDirectDrawSurface_GetDC (gbip->lpDDSBitmap, &hdc) == DD_OK)
+        {
+            rgb = GetPixel (hdc, x, y);
+            IDirectDrawSurface_ReleaseDC (gbip->lpDDSBitmap, hdc);
 
             DDSetColorKey (gbip->lpDDSBitmap, rgb);
-			gbip->bTransparent = TRUE;
+            gbip->bTransparent = TRUE;
 
             // DDSetColorKey (gbip->lpDDSFront, rgb);
             result = GR_OK;
@@ -644,29 +709,29 @@ int OSInitBlockSequence (int bitmapid, int seqid, char *seq, int len)
     int resultcode;
 
     resultcode = GR_INVALID_BITMAP_ID;
-	if (gbip)
+    if (gbip)
     {
         gbsNew = rmalloc (sizeof (GAMEBLOCKSEQUENCE));
         gbsNew->iSequenceID = seqid;
         gbsNew->iSequenceLength = len / (2 * sizeof (int));
         gbsNew->sSequence = rmalloc (len + 1);
         rsncopy (gbsNew->sSequence, seq, len);
-		gbsNew->iPosition = gbsNew->iSequenceLength;
+        gbsNew->iPosition = gbsNew->iSequenceLength;
         gbsNew->iCounter = 0;
-		gbsNew->gbsNext = NULL;
+        gbsNew->gbsNext = NULL;
 
         gbs1 = gbip->gbsGameBlockSequence;
         gbs2 = NULL;
         while (gbs1)
         {
-         	gbs2 = gbs1;
+            gbs2 = gbs1;
             gbs1 = gbs1->gbsNext;
         }
-		if (gbs2)
-          	gbs2->gbsNext = gbsNew;
+        if (gbs2)
+            gbs2->gbsNext = gbsNew;
         else
             gbip->gbsGameBlockSequence = gbsNew;
-       	resultcode = GR_OK;
+        resultcode = GR_OK;
     }
     return resultcode;
 }
@@ -681,20 +746,20 @@ void OSRunBlockSequences ()
     gbip = gbipGameBitmapInfo;
     while (gbip)
     {
-     	gbs = gbip->gbsGameBlockSequence;
+        gbs = gbip->gbsGameBlockSequence;
         while (gbs)
         {
-			if (--gbs->iCounter <= 0)
+            if (--gbs->iCounter <= 0)
             {
-             	gbs->iPosition++;
+                gbs->iPosition++;
                 if (gbs->iPosition >= gbs->iSequenceLength)
-                 	gbs->iPosition = 0;
-            	i = (2 * gbs->iPosition * sizeof (int)) + sizeof (int);
-            	gbs->iCounter = (*(int *) &gbs->sSequence[i]);
+                    gbs->iPosition = 0;
+                i = (2 * gbs->iPosition * sizeof (int)) + sizeof (int);
+                gbs->iCounter = (*(int *) &gbs->sSequence[i]);
             }
             gbs = gbs->gbsNext;
         }
-    	gbip = gbip->gbipNext;
+        gbip = gbip->gbipNext;
     }
 }
 
@@ -724,14 +789,18 @@ int OSGetCurrentBlock (int bitmapid, int seqid)
 /* draw part of a bitmap to virtual screen */
 void OSDraw (RECT *dst, int id, RECT *src, BOOL mirlr, BOOL mirud, int flags)
 {
-  	HRESULT ddrval;
-	DDBLTFX ddbltfx;
+    HRESULT ddrval;
+    DDBLTFX ddbltfx;
     int bltflags, bltfastflags;
     BOOL fast;
-
     static int i;
-
     GAMEBITMAPINFO *gbip = GetGameBitmapInfo (id);
+    RECT r;
+
+    r.left = dst->left + XShiftScreen;
+    r.top = dst->top + YShiftScreen;
+    r.right = dst->right + XShiftScreen;
+    r.bottom = dst->bottom + YShiftScreen;
 
     if (gbip)
     {
@@ -779,10 +848,10 @@ void OSDraw (RECT *dst, int id, RECT *src, BOOL mirlr, BOOL mirud, int flags)
 
         if (fast)
             ddrval = IDirectDrawSurface_BltFast (lpDDSBack,
-                         dst->left, dst->top, gbip->lpDDSBitmap, src,
+                         r.left, r.top, gbip->lpDDSBitmap, src,
                          bltfastflags);
         else
-            ddrval = IDirectDrawSurface_Blt (lpDDSBack, dst,
+            ddrval = IDirectDrawSurface_Blt (lpDDSBack, &r,
                          gbip->lpDDSBitmap, src, bltflags, &ddbltfx);
         if (ddrval == DDERR_SURFACELOST)
             DDRestoreAll ();
@@ -793,7 +862,7 @@ void OSDraw (RECT *dst, int id, RECT *src, BOOL mirlr, BOOL mirud, int flags)
 
 typedef struct SOUNDSAMPLEINFO
 {
-	int iSampleID;
+    int iSampleID;
     HSNDOBJ hsoSoundBuffer;
     struct SOUNDSAMPLEINFO *ssiNext;
 } SOUNDSAMPLEINFO;
@@ -809,20 +878,20 @@ SOUNDSAMPLEINFO *GetSoundSampleInfo (int ID)
     SOUNDSAMPLEINFO *ssi = ssiSoundSampleInfo;
     BOOL bFound = FALSE;
 
-	while (ssi && (!bFound))
+    while (ssi && (!bFound))
     {
-     	if (ssi->iSampleID == ID)
-          	bFound = TRUE;
+        if (ssi->iSampleID == ID)
+            bFound = TRUE;
         else
-          	ssi = ssi->ssiNext;
+            ssi = ssi->ssiNext;
     }
-	return ssi;
+    return ssi;
 }
 
 BOOL OSInitSound ()
 {
     bSoundEnabled = FALSE;
- 	if (!(DirectSoundCreate (NULL, &lpDS, NULL) == DS_OK))
+    if (!(DirectSoundCreate (NULL, &lpDS, NULL) == DS_OK))
     {
        // MessageBox (NULL, "DirectSoundCreate failed", NULL, MB_OK);
     }
@@ -844,10 +913,10 @@ BOOL OSInitSound ()
 /* deinitialize sound */
 void OSDeInitSound ()
 {
-	if (lpDS != NULL)
+    if (lpDS != NULL)
     {
         IDirectSound_Release (lpDS);
-     	lpDS = NULL;
+        lpDS = NULL;
     }
     bSoundEnabled = FALSE;
 }
@@ -875,13 +944,13 @@ void OSFreeSoundSamples ()
 {
     SOUNDSAMPLEINFO *ssi;
 
-	while (ssiSoundSampleInfo)
+    while (ssiSoundSampleInfo)
     {
-       	ssi = ssiSoundSampleInfo->ssiNext;
+        ssi = ssiSoundSampleInfo->ssiNext;
         if (ssiSoundSampleInfo->hsoSoundBuffer)
         {
-        	SndObjDestroy (ssiSoundSampleInfo->hsoSoundBuffer);
-	        ssiSoundSampleInfo->hsoSoundBuffer = NULL;
+            SndObjDestroy (ssiSoundSampleInfo->hsoSoundBuffer);
+            ssiSoundSampleInfo->hsoSoundBuffer = NULL;
         }
 
         rfree (ssiSoundSampleInfo);
@@ -895,19 +964,19 @@ BOOL OSPlaySoundSample (int id, int volume, int pan, int freq)
     SOUNDSAMPLEINFO *ssi = GetSoundSampleInfo (id);
 
     if (bSoundEnabled)
-	{
+    {
         if (ssi)
         {
-	        IDirectSoundBuffer *pDSB = SndObjGetFreeBuffer (ssi->hsoSoundBuffer);
-	
-	     	if (pDSB)
-	        {
-	            IDirectSoundBuffer_SetVolume (pDSB, (LONG) volume);
-	            IDirectSoundBuffer_SetPan (pDSB, (LONG) pan);
-	            IDirectSoundBuffer_SetFrequency (pDSB, (LONG) freq);
-	            IDirectSoundBuffer_Play (pDSB, 0, 0, 0);
-	        }
-	    }
+            IDirectSoundBuffer *pDSB = SndObjGetFreeBuffer (ssi->hsoSoundBuffer);
+
+            if (pDSB)
+            {
+                IDirectSoundBuffer_SetVolume (pDSB, (LONG) volume);
+                IDirectSoundBuffer_SetPan (pDSB, (LONG) pan);
+                IDirectSoundBuffer_SetFrequency (pDSB, (LONG) freq);
+                IDirectSoundBuffer_Play (pDSB, 0, 0, 0);
+            }
+        }
     }
     return bSoundEnabled;
 }
@@ -920,22 +989,22 @@ BOOL OSPlayMusic (char *midifile, BOOL restart)
 
     if (midifile)
     {
-	    wsprintf (buf, "open %s type sequencer alias MUSIC", midifile);
-	    mciSendString ("close all", NULL, 0, NULL);
-	
-	    if (mciSendString (buf, NULL, 0, NULL) == 0)
-	    {
-	        if (restart)
-	        {
-	            if (mciSendString ("play MUSIC from 0 notify", NULL, 0, ghGameWindow) == 0)
-	                result = TRUE;
-	        }
-	        else
-	        {
-	            if (mciSendString ("play MUSIC from 0", NULL, 0, ghGameWindow) == 0)
-	                result = TRUE;
-	        }
-	    }
+        wsprintf (buf, "open %s type sequencer alias MUSIC", midifile);
+        mciSendString ("close all", NULL, 0, NULL);
+
+        if (mciSendString (buf, NULL, 0, NULL) == 0)
+        {
+            if (restart)
+            {
+                if (mciSendString ("play MUSIC from 0 notify", NULL, 0, ghGameWindow) == 0)
+                    result = TRUE;
+            }
+            else
+            {
+                if (mciSendString ("play MUSIC from 0", NULL, 0, ghGameWindow) == 0)
+                    result = TRUE;
+            }
+        }
     }
     else
         if (mciSendString ("play MUSIC from 0 notify", NULL, 0, ghGameWindow) == 0)
@@ -949,7 +1018,7 @@ BOOL OSStopMusic ()
 {
     BOOL result = FALSE;
     if (mciSendString ("close all", NULL, 0, NULL) == 0)
-	    result = TRUE;
+        result = TRUE;
     return result;
 }
 

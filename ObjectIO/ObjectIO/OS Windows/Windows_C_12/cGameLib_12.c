@@ -1,24 +1,24 @@
 
 /* Clean Game Library by Mike Wiering, Nijmegen */
 
-#include "util_12.h"
-#include "intrface_12.h"
+#include "util.h"
+#include "intrface.h"
 
-#include "cGameLib_12.h"
+#include "cGameLib.h"
 
-#include "cOSGameLib_12.h"  /* OS specific functions */
+#include "cOSGameLib.h"  /* OS specific functions */
 
 
 // #define SMART_DRAW
 
-/* defined in cCrossCall_12.h and cCrossCall_12.c */
+/* defined in cCrossCall.h and cCrossCall.c */
 extern CrossCallInfo gCci;
 extern char *gAppName;
 extern HWND ghMainWindow;
 extern HINSTANCE ghInst;
 
 extern void SendMessageToClean (int mess,
-				         int p1,int p2,int p3, int p4,int p5,int p6);
+                         int p1,int p2,int p3, int p4,int p5,int p6);
 
 #define SendMessage0ToClean(mess)                   SendMessageToClean((mess), 0,0,0,0,0,0)
 #define SendMessage1ToClean(mess,p1)                SendMessageToClean((mess), (int)(p1),0,0,0,0,0)
@@ -32,7 +32,7 @@ extern void SendMessageToClean (int mess,
 
 typedef struct SPRITEANIMATION
 {
-	int iSpriteID;
+    int iSpriteID;
     int iBitmapID;
     int iSequenceLength;
     char *sSequence;
@@ -49,7 +49,7 @@ typedef struct OBJECTREC
     int iMapY;
     int iObjType;
     int iSubType;
-	BOOL bActive;
+    BOOL bActive;
     int iXPos;
     int iYPos;
     int iXSize;
@@ -88,13 +88,23 @@ typedef struct OBJECTREC
     int iLastSprite;
     int iPosition;
     int iCounter;
+
+    int iDiag;
+    int iDiagUpDn;
+    int iDiagX;
+    int iDiagY;
+    int iDiagLeftX;
+    int iDiagLeftY;
+    int iDiagRightX;
+    int iDiagRightY;
+
     struct OBJECTREC *objNext;
 } OBJECTREC;
 
 
 typedef struct GAMELAYERMAPINFO
 {
-	int iMapID;
+    int iMapID;
     int iBitmapID;
     int iMapWidth;
     int iMapHeight;
@@ -112,6 +122,9 @@ extern int ScreenWidth;
 extern int ScreenHeight;
 extern int BitsPerPixel;
 extern BOOL FullScreen;
+
+extern int XShiftScreen;
+extern int YShiftScreen;
 
 int iFrameCounter;
 
@@ -147,7 +160,7 @@ static int bAllowSmartDraw;
 #endif
 
 /* min. value for objects */
-static int iObjectValueStart;  
+static int iObjectValueStart;
 
 /* smallest distance to visible screen before initializing object */
 static int iStartObjX = 5;
@@ -189,7 +202,7 @@ typedef struct USER_EVENT_INFO
     int iEventParameter4;
     int iDestination;
     int iSubDestination;
-	int iTimeCounter;
+    int iTimeCounter;
     struct USER_EVENT_INFO *ueiNext;
 } USER_EVENT_INFO;
 
@@ -242,28 +255,28 @@ static BOOL cmpflipint (int x, int value)
 
 
 /*
-	 3 / 2 =  1
-	 2 / 2 =  1
+     3 / 2 =  1
+     2 / 2 =  1
      1 / 2 =  0
      0 / 2 =  0
-    -1 / 2 =  0	  <-- fill up this gap
+    -1 / 2 =  0   <-- fill up this gap
     -2 / 2 = -1
     -3 / 2 = -1
 */
 
 int intdiv (int x, int y)
 {
- 	return (x < 0)? (x - y + 1) / y : x / y;
+    return (x < 0)? (x - y + 1) / y : x / y;
 }
 
 int Min (int x, int y)
 {
- 	return (x < y)? x : y;
+    return (x < y)? x : y;
 }
 
 int Max (int x, int y)
 {
-  	return (x > y)? x : y;
+    return (x > y)? x : y;
 }
 
 
@@ -273,15 +286,15 @@ SPRITEANIMATION *GetSpriteAnimation (int ID)
     SPRITEANIMATION *sa = saSprites;
     BOOL bFound = FALSE;
 
-	while (sa && (!bFound))
+    while (sa && (!bFound))
     {
-     	if (sa->iSpriteID == ID)
-          	bFound = TRUE;
+        if (sa->iSpriteID == ID)
+            bFound = TRUE;
         else
-          	sa = sa->saNext;
+            sa = sa->saNext;
     }
     if (bFound)
-		return sa;
+        return sa;
     else
         return NULL;
 }
@@ -291,14 +304,14 @@ void FreeSpriteAnimationList ()
 {
     SPRITEANIMATION *sa;
 
-	while (saSprites)
+    while (saSprites)
     {
-       	sa = saSprites->saNext;
-	    if (saSprites->sSequence)
-	    {
-	        rfree (saSprites->sSequence);
-	        saSprites->sSequence = NULL;
-	    }
+        sa = saSprites->saNext;
+        if (saSprites->sSequence)
+        {
+            rfree (saSprites->sSequence);
+            saSprites->sSequence = NULL;
+        }
         rfree (saSprites);
         saSprites = sa;
     }
@@ -310,14 +323,14 @@ GAMELAYERMAPINFO *GetGameLayerMapInfo (int MapID)
     GAMELAYERMAPINFO *glmip = glmipGameLayerMapInfo;
     BOOL bFound = FALSE;
 
-	while (glmip && (!bFound))
+    while (glmip && (!bFound))
     {
-     	if (glmip->iMapID == MapID)
-          	bFound = TRUE;
+        if (glmip->iMapID == MapID)
+            bFound = TRUE;
         else
-          	glmip = glmip->glmipNext;
+            glmip = glmip->glmipNext;
     }
-	return glmip;
+    return glmip;
 }
 
 /* free the GAMELAYERMAPINFO list and all the map strings */
@@ -325,9 +338,9 @@ void FreeGameLayerMapInfoList ()
 {
     GAMELAYERMAPINFO *glmip;
 
-	while (glmipGameLayerMapInfo)
+    while (glmipGameLayerMapInfo)
     {
-       	glmip = glmipGameLayerMapInfo->glmipNext;
+        glmip = glmipGameLayerMapInfo->glmipNext;
         if (glmipGameLayerMapInfo->sMap != NULL)
         {
             rfree (glmipGameLayerMapInfo->sMap);
@@ -345,14 +358,14 @@ OBJECTREC *GetObjectRec (int ID)
     OBJECTREC *obj = objObjects;
     BOOL bFound = FALSE;
 
-	while (obj && (!bFound))
+    while (obj && (!bFound))
     {
-     	if (obj->iObjectID == ID)
-          	bFound = TRUE;
+        if (obj->iObjectID == ID)
+            bFound = TRUE;
         else
-          	obj = obj->objNext;
+            obj = obj->objNext;
     }
-	return obj;
+    return obj;
 }
 
 
@@ -367,20 +380,20 @@ void InitGameObject (int mapx, int mapy)
     int newid;
 
     if ((mapx < 0) || (mapy < 0))
-      	return;
+        return;
     if ((mapx > BoundMapWidth - 1) || (mapy > BoundMapHeight - 1))
         return;
     mappos = (mapy * BoundMapWidth + mapx) * sizeof (int);
     origmapval = (*(int *) &sBoundMap[mappos]);
     mapval = origmapval >> 8;
     if (mapval < iObjectValueStart)
-      	return;
+        return;
 
     (*(int *) &sBoundMap[mappos]) = origmapval & 0x00FF;  // remove object
 
     // create a unique id number
     newid = 1;
-	while (GetObjectRec (newid))
+    while (GetObjectRec (newid))
         newid++;
 
     objNew = rmalloc (sizeof (OBJECTREC));
@@ -417,20 +430,20 @@ void InitGameObject (int mapx, int mapy)
 
     while (obj1)
     {
-     	obj2 = obj1;
+        obj2 = obj1;
         obj1 = obj1->objNext;
     }
 
     if (obj2)
     {
-      	obj2->objNext = objNew;
+        obj2->objNext = objNew;
     }
     else
     {
         objObjects = objNew;
     }
-    
-        
+
+
     // inform Clean that new object has been created
     iCCObjectID = newid;
     SendMessage6ToClean (CcWmINITOBJECT, mapval, above, newid,
@@ -447,8 +460,8 @@ UpdatePosition (OBJECTREC *obj)
     obj->iLastXPos = obj->iXPos;
     obj->iLastYPos = obj->iYPos;
 
-  	obj->iFixedXPos = obj->iXPos << 8;
-  	obj->iFixedYPos = obj->iYPos << 8;
+    obj->iFixedXPos = obj->iXPos << 8;
+    obj->iFixedYPos = obj->iYPos << 8;
     obj->iLastFixedXPos = obj->iFixedXPos;
     obj->iLastFixedYPos = obj->iFixedYPos;
 }
@@ -469,20 +482,20 @@ void GameObjectDone (int id)
             )
            )
         {
-         	/* skip this object */
-         	objPrev = objCur;
+            /* skip this object */
+            objPrev = objCur;
             objNext = objCur->objNext;
         }
         else
         {
-         	/* remove this object */
+            /* remove this object */
 
-         	if (objCur->iObjectID == iFollowID)
-              	iFollowID = 0;
+            if (objCur->iObjectID == iFollowID)
+                iFollowID = 0;
 
-	        /* link previous node to next node */
-			if (objPrev)
-              	objPrev->objNext = objCur->objNext;
+            /* link previous node to next node */
+            if (objPrev)
+                objPrev->objNext = objCur->objNext;
             else
                 objObjects = objCur->objNext;
 
@@ -492,9 +505,9 @@ void GameObjectDone (int id)
 
             if (id != -1)
             {
-	            iCCObjectID = objCur->iObjectID;
-			    SendMessage2ToClean (CcWmOBJECTDONE, objCur->iObjType, objCur->iObjectID);
-	            iCCObjectID = 0;
+                iCCObjectID = objCur->iObjectID;
+                SendMessage2ToClean (CcWmOBJECTDONE, objCur->iObjType, objCur->iObjectID);
+                iCCObjectID = 0;
 
               /*  UpdatePosition (objCur);  */
             }
@@ -504,23 +517,23 @@ void GameObjectDone (int id)
          */
             /* put ObjType and SubType back into map if >= 0 */
             if (!(objCur->iOptions & OO_REMOVE_MAP_CODE))
-	            if ((objCur->iMapX >= 0) && (objCur->iMapY >= 0))
-		            if (objCur->iObjType >= 0)
-		            {
-			            mappos = (objCur->iMapY * BoundMapWidth + objCur->iMapX) * sizeof (int);
-						mapval = (*(int *) &sBoundMap[mappos]);
-			            (*(int *) &sBoundMap[mappos]) = mapval | (objCur->iObjType << 8);
-	
-			            if (objCur->iSubType >= 0)
-			            {
-				            mappos = ((objCur->iMapY - 1) * BoundMapWidth + objCur->iMapX) * sizeof (int);
-							mapval = (*(int *) &sBoundMap[mappos]);
-				            (*(int *) &sBoundMap[mappos]) = mapval | (objCur->iSubType << 8);
-			            }
-		            }
+                if ((objCur->iMapX >= 0) && (objCur->iMapY >= 0))
+                    if (objCur->iObjType >= 0)
+                    {
+                        mappos = (objCur->iMapY * BoundMapWidth + objCur->iMapX) * sizeof (int);
+                        mapval = (*(int *) &sBoundMap[mappos]);
+                        (*(int *) &sBoundMap[mappos]) = mapval | (objCur->iObjType << 8);
+
+                        if (objCur->iSubType >= 0)
+                        {
+                            mappos = ((objCur->iMapY - 1) * BoundMapWidth + objCur->iMapX) * sizeof (int);
+                            mapval = (*(int *) &sBoundMap[mappos]);
+                            (*(int *) &sBoundMap[mappos]) = mapval | (objCur->iSubType << 8);
+                        }
+                    }
 
             /* free the current node */
-        	rfree (objCur);
+            rfree (objCur);
         }
         objCur = objNext;
     }
@@ -540,14 +553,15 @@ void InitGameGlobals ()
 static int
 GameTranslateKey (WPARAM wPara)
 {
-	switch (wPara)
-	{
+    switch (wPara)
+    {
+        case VK_BACK:        return GK_BACKSPACE; break;
         case VK_RETURN:      return GK_RETURN;    break;
-		case VK_ESCAPE:      return GK_ESCAPE;    break;
-		case VK_UP:          return GK_UP;        break;
+        case VK_ESCAPE:      return GK_ESCAPE;    break;
+        case VK_UP:          return GK_UP;        break;
         case VK_DOWN:        return GK_DOWN;      break;
-		case VK_LEFT:        return GK_LEFT;      break;
-		case VK_RIGHT:       return GK_RIGHT;     break;
+        case VK_LEFT:        return GK_LEFT;      break;
+        case VK_RIGHT:       return GK_RIGHT;     break;
         case VK_HOME:        return GK_HOME;      break;
         case VK_END:         return GK_END;       break;
 //        case VK_PAGE_UP:     return GK_PAGE_UP;   break;
@@ -565,7 +579,7 @@ GameTranslateKey (WPARAM wPara)
         case VK_F11:         return GK_F11;       break;
         case VK_F12:         return GK_F12;       break;
         case VK_SPACE:       return GK_SPACE;     break;
-      	default:
+        default:
         {
              if ((wPara > 32) && (wPara <= 127))
                  return wPara;
@@ -573,14 +587,14 @@ GameTranslateKey (WPARAM wPara)
                  return GK_UNKNOWN;
              break;
         }
-	}
+    }
 }
 
 
 
 /* buffer which holds the last state of each key */
 static BOOL gk_state[GK_MAX_KEY + 1] =
-	{FALSE};
+    {FALSE};
 
 
 //   MessageBox (NULL, "", NULL, MB_OK);
@@ -590,9 +604,9 @@ static BOOL gk_state[GK_MAX_KEY + 1] =
 static LRESULT CALLBACK
 GameWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara, LPARAM lPara)
 {
-	printMessage ("Game Window", hWin, uMess, wPara, lPara);
-	switch (uMess)
-	{
+    printMessage ("Game Window", hWin, uMess, wPara, lPara);
+    switch (uMess)
+    {
         case WM_CLOSE:
             bGameActive = FALSE;
             return 0;
@@ -602,9 +616,9 @@ GameWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara, LPARAM lPara)
             bGameActive = FALSE;
             ClearUserEvents ();
             GameObjectDone (-1);
-		    FreeGameLayerMapInfoList ();
+            FreeGameLayerMapInfoList ();
             FreeSpriteAnimationList ();
-   		    OSFreeGameBitmaps ();
+            OSFreeGameBitmaps ();
             OSStopMusic ();
             OSDeInitSound ();
             OSDeInitGameWindow ();
@@ -612,69 +626,69 @@ GameWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara, LPARAM lPara)
             return 0;
             break;
         case MCI_NOTIFY:
-	        {
+            {
                 // MessageBeep (MB_ICONASTERISK);
-    	        if (wPara == MCI_NOTIFY_SUCCESSFUL)
+                if (wPara == MCI_NOTIFY_SUCCESSFUL)
                     OSPlayMusic (NULL, TRUE);  /* restart music */
-    	    }
-        	break;
+            }
+            break;
         case WM_PAINT:
             if (!FullScreen)
             {
-		    	PAINTSTRUCT ps;
-      			HDC hdc = BeginPaint (hWin, &ps);
+                PAINTSTRUCT ps;
+                HDC hdc = BeginPaint (hWin, &ps);
 
                 NextFrame (0);
-      			EndPaint (hWin, &ps);
+                EndPaint (hWin, &ps);
             }
-           	break;
+            break;
         case WM_KEYUP:
             {
-				int keycode = GameTranslateKey (wPara);
+                int keycode = GameTranslateKey (wPara);
 
                 if (gk_state[keycode])
                 {
                     OBJECTREC *obj = objObjects;
                     while (obj)
                     {
-                     	if ((obj->bActive) && (obj->iOptions & OO_CHECK_KEYBOARD))
+                        if ((obj->bActive) && (obj->iOptions & OO_CHECK_KEYBOARD))
                         {
                             int ix = obj->iXPos;
                             int iy = obj->iYPos;
 
                             iCCObjectID = obj->iObjectID;
-    						SendMessage3ToClean (CcWmOBJECTKEYUP, obj->iObjType, obj->iObjectID, keycode);
+                            SendMessage3ToClean (CcWmOBJECTKEYUP, obj->iObjType, obj->iObjectID, keycode);
                             iCCObjectID = 0;
 
                             if ((ix != obj->iXPos) || (iy != obj->iYPos))
                                 UpdatePosition (obj);
                         }
-                    	obj = obj->objNext;
+                        obj = obj->objNext;
                     }
-	                gk_state[keycode] = FALSE;
+                    gk_state[keycode] = FALSE;
                 }
             }
             break;
         case WM_KEYDOWN:
-			{
-				int keycode = GameTranslateKey (wPara);
+            {
+                int keycode = GameTranslateKey (wPara);
                 if (keycode == GK_ESCAPE)
                     if (bCheckEscape)
                         bGameActive = FALSE;
 
-				switch (keycode)
-				{
+                switch (keycode)
+                {
                     case GK_UNKNOWN:
-						return DefWindowProc (hWin, uMess, wPara, lPara);
-                    	break;
-      				default:
-						{
+                        return DefWindowProc (hWin, uMess, wPara, lPara);
+                        break;
+                    default:
+                        {
                             BOOL found = FALSE;
                             OBJECTREC *obj = objObjects;
 
                             while (obj)
                             {
-                             	if ( (obj->bActive) &&
+                                if ( (obj->bActive) &&
                                      (obj->iOptions & OO_CHECK_KEYBOARD) &&
                                      ( (!gk_state[keycode]) ||
                                        (obj->iOptions & OO_ALLOW_KEYBOARD_REPEAT)
@@ -684,38 +698,38 @@ GameWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara, LPARAM lPara)
                                     int ix = obj->iXPos;
                                     int iy = obj->iYPos;
 
-		                            iCCObjectID = obj->iObjectID;
-								    SendMessage3ToClean (CcWmOBJECTKEYDOWN, obj->iObjType, obj->iObjectID, keycode);
-		                            iCCObjectID = 0;
+                                    iCCObjectID = obj->iObjectID;
+                                    SendMessage3ToClean (CcWmOBJECTKEYDOWN, obj->iObjType, obj->iObjectID, keycode);
+                                    iCCObjectID = 0;
 
                                     if ((ix != obj->iXPos) || (iy != obj->iYPos))
                                         UpdatePosition (obj);
 
                                     found = TRUE;
                                 }
-                            	obj = obj->objNext;
+                                obj = obj->objNext;
                             }
 
                             gk_state[keycode] = TRUE;
-						}
+                        }
 
-                       	// debugging level, just move around
-                    	if (DebugScroll == TRUE)
+                        // debugging level, just move around
+                        if (DebugScroll == TRUE)
                         {
-							SendMessage3ToClean (CcWmGAMEKEYBOARD, keycode, XScrollSpeed, YScrollSpeed);
-							XScrollSpeed = gCci.p1;
-							YScrollSpeed = gCci.p2;
+                            SendMessage3ToClean (CcWmGAMEKEYBOARD, keycode, XScrollSpeed, YScrollSpeed);
+                            XScrollSpeed = gCci.p1;
+                            YScrollSpeed = gCci.p2;
                             iMaxXScrollSpeed = 8;
                             iMaxYScrollSpeed = 8;
                         }
-				}
-			}
+                }
+            }
             break;
-		default:
-			return DefWindowProc (hWin, uMess, wPara, lPara);
-			break;
-	}
-	return 0;
+        default:
+            return DefWindowProc (hWin, uMess, wPara, lPara);
+            break;
+    }
+    return 0;
 }
 
 
@@ -723,39 +737,39 @@ GameWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara, LPARAM lPara)
 void CorrectView ()
 {
     if (iActualXView > XView)
-      	XView = Min (XView + iMaxXScrollSpeed, iActualXView);
+        XView = Min (XView + iMaxXScrollSpeed, iActualXView);
     if (iActualYView > YView)
-      	YView = Min (YView + iMaxYScrollSpeed, iActualYView);
+        YView = Min (YView + iMaxYScrollSpeed, iActualYView);
     if (iActualXView < XView)
-      	XView = Max (XView - iMaxXScrollSpeed, iActualXView);
+        XView = Max (XView - iMaxXScrollSpeed, iActualXView);
     if (iActualYView < YView)
-     	YView = Max (YView - iMaxYScrollSpeed, iActualYView);
+        YView = Max (YView - iMaxYScrollSpeed, iActualYView);
 
-	if (XView > TotalWidth - ScreenWidth)
-	{
-	    XView = TotalWidth - ScreenWidth;
+    if (XView > TotalWidth - ScreenWidth)
+    {
+        XView = TotalWidth - ScreenWidth;
         iActualXView = XView;
-	    XScrollSpeed = 0;
-	}
-	if (YView > TotalHeight - ScreenHeight)
-	{
-	    YView = TotalHeight - ScreenHeight;
+        XScrollSpeed = 0;
+    }
+    if (YView > TotalHeight - ScreenHeight)
+    {
+        YView = TotalHeight - ScreenHeight;
         iActualYView = YView;
-	    YScrollSpeed = 0;
-	}
+        YScrollSpeed = 0;
+    }
 
-	if (XView < 0)
-	{
-	    XView = 0;
+    if (XView < 0)
+    {
+        XView = 0;
         iActualXView = XView;
-	    XScrollSpeed = 0;
-	}
-	if (YView < 0)
-	{
-	    YView = 0;
+        XScrollSpeed = 0;
+    }
+    if (YView < 0)
+    {
+        YView = 0;
         iActualYView = YView;
-	    YScrollSpeed = 0;
-	}
+        YScrollSpeed = 0;
+    }
 }
 
 
@@ -778,7 +792,7 @@ void RunGame ()
     h = ScreenHeight / BoundBlockHeight;
     for (i = -iStartObjX - 1; i < w + iStartObjX + 2; i++)
         for (j = -iStartObjY - 1; j < h + iStartObjY + 2; j++)
-		    InitGameObject (x + i, y + j);
+            InitGameObject (x + i, y + j);
 
     lastx = x;
     lasty = y;
@@ -797,22 +811,22 @@ void RunGame ()
     {
         if (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
         {
-        	TranslateMessage (&msg);
-        	DispatchMessage (&msg);
+            TranslateMessage (&msg);
+            DispatchMessage (&msg);
         }
 
         if (iFollowID == 0)
         {
             iActualXView += XScrollSpeed;
-	        iActualYView += YScrollSpeed;
+            iActualYView += YScrollSpeed;
         }
 
         CorrectView ();
 
-	    x = XView / BoundBlockWidth;
-	    y = YView / BoundBlockHeight;
+        x = XView / BoundBlockWidth;
+        y = YView / BoundBlockHeight;
         if (y != lasty)
-		    for (i = -iStartObjX - 1; i < w + iStartObjX + 2; i++)
+            for (i = -iStartObjX - 1; i < w + iStartObjX + 2; i++)
             {
                 j = -iStartObjY;
                 if (y < lasty)
@@ -822,25 +836,25 @@ void RunGame ()
                     InitGameObject (x + i, y + j);
              }
         if (x != lastx)
-	        for (j = -iStartObjY - 1; j < h + iStartObjY + 2; j++)
-	        {
-	            i = -iStartObjX;
+            for (j = -iStartObjY - 1; j < h + iStartObjY + 2; j++)
+            {
+                i = -iStartObjX;
                 if (x < lastx)
-				    InitGameObject (x + i, y + j);
-	            i = w + iStartObjX + 1;
+                    InitGameObject (x + i, y + j);
+                i = w + iStartObjX + 1;
                 if (x > lastx)
-				    InitGameObject (x + i, y + j);
-	        }
+                    InitGameObject (x + i, y + j);
+            }
         lastx = x;
         lasty = y;
 
-	    NextFrame (fade);
+        NextFrame (fade);
         fade = 0;
-	    iFrameCounter++;
+        iFrameCounter++;
 
-		SendMessage0ToClean (CcWmCHECKQUIT);
+        SendMessage0ToClean (CcWmCHECKQUIT);
         if ((BOOL) gCci.p1)
-           	bGameActive = FALSE;
+            bGameActive = FALSE;
 
     }
 
@@ -849,14 +863,14 @@ void RunGame ()
         fade = 1;
         NextFrame (fade);
     }
-	bGameActive = FALSE;
+    bGameActive = FALSE;
 
     ClearUserEvents ();
-	GameObjectDone (-1);
+    GameObjectDone (-1);
 
     iFollowID = 0;
 
-	//  MessageBeep (MB_ICONASTERISK);
+    //  MessageBeep (MB_ICONASTERISK);
 }
 
 
@@ -917,7 +931,7 @@ int CreateGameWindow (int w, int h, int bpp, BOOL fs)
                            );
     else
         ghGameWindow =
-  			CreateWindowEx (WS_OVERLAPPED,
+            CreateWindowEx (WS_OVERLAPPED,
                             (LPCTSTR) GameWindowClassName,
                             (LPCTSTR) gAppName,
                             WS_THICKFRAME,
@@ -931,11 +945,14 @@ int CreateGameWindow (int w, int h, int bpp, BOOL fs)
                             NULL
                            );
 
-	ShowWindow (ghGameWindow, SW_SHOWNORMAL);
-	UpdateWindow (ghGameWindow);
+    ShowWindow (ghGameWindow, SW_SHOWNORMAL);
+    UpdateWindow (ghGameWindow);
 
     if (OSInitGameWindow ())
     {
+        OSClearScreen ();
+        if (FullScreen)
+            OSFlip ();
         OSClearScreen ();
         OSClearVirtualScreen (FillBackgroundRGB);
         OSInitSound ();
@@ -943,7 +960,7 @@ int CreateGameWindow (int w, int h, int bpp, BOOL fs)
     else
         ErrorExit ("Game Window could not be created");
 
-   	iFrameCounter = 0;
+    iFrameCounter = 0;
 
     return ((int) ghGameWindow);
 }
@@ -952,7 +969,7 @@ int CreateGameWindow (int w, int h, int bpp, BOOL fs)
 /* register game window class */
 void RegisterGameWindowClass ()
 {
-	WNDCLASS wclass;
+    WNDCLASS wclass;
 
     wclass.style = CS_HREDRAW | CS_VREDRAW;
     wclass.lpfnWndProc = (WNDPROC) GameWindowProcedure;
@@ -984,32 +1001,32 @@ void RegisterGameWindowClass ()
 extern EXPORT_TO_CLEAN CLEAN_STRING
 WinBinaryIntStr (int x)
 {
-	static CLEAN_STRING result = NULL;
+    static CLEAN_STRING result = NULL;
 
     if (result)
-      	rfree (result);
+        rfree (result);
 
     result = rmalloc (sizeof (x) + 1 + sizeof (int));
-	result->length = sizeof (x);
-	rsncopy (result->characters, (const char *) &x, sizeof (x));
+    result->length = sizeof (x);
+    rsncopy (result->characters, (const char *) &x, sizeof (x));
 
-	return result;
+    return result;
 }
 
 /* convert a boolean value to a Clean string */
 extern EXPORT_TO_CLEAN CLEAN_STRING
 WinBinaryBoolStr (BOOL b)
 {
-	static CLEAN_STRING result = NULL;
+    static CLEAN_STRING result = NULL;
 
     if (result)
-      	rfree (result);
+        rfree (result);
 
     result = rmalloc (sizeof (b) + 1 + sizeof (int));
-	result->length = sizeof (b);
-	rsncopy (result->characters, (const char *) &b, sizeof (b));
+    result->length = sizeof (b);
+    rsncopy (result->characters, (const char *) &b, sizeof (b));
 
-	return result;
+    return result;
 }
 
 /* read a new bitmap into (offscreen) memory (id==0: create new id: result) */
@@ -1024,7 +1041,7 @@ WinInitGameBitmap (int id, CLEAN_STRING name,
                                        blockwidth, blockheight);
 
     *result = resultcode;
-	*oos = ios;
+    *oos = ios;
 }
 
 /* remove all bitmaps from memory, including all sprites */
@@ -1035,7 +1052,7 @@ WinClearAllGameBitmaps (OS ios, int *result, OS* oos)
     OSFreeGameBitmaps ();
 
     *result = GR_OK;
-	*oos = ios;
+    *oos = ios;
 }
 
 /* remove bitmap from memory */
@@ -1043,7 +1060,7 @@ extern EXPORT_TO_CLEAN void
 WinGameBitmapDone (int id, OS ios, int *result, OS* oos)
 {
     *result = OSFreeGameBitmap (id);
-	*oos = ios;
+    *oos = ios;
 }
 
 /* set the transparent color for a bitmap: (x,y) is a transparent pixel */
@@ -1051,7 +1068,7 @@ extern EXPORT_TO_CLEAN void
 WinSetTransparentColor (int id, int x, int y, OS ios, int *result, OS* oos)
 {
     *result = OSSetTransparentColor (id, x, y);
-	*oos = ios;
+    *oos = ios;
 }
 
 /* initialize a block animation sequence (list of repeating blocks) */
@@ -1061,7 +1078,7 @@ WinInitBlockSequence (int bitmapid, int seqid, CLEAN_STRING seq,
 {
     *result = OSInitBlockSequence (bitmapid, seqid,
                                      cstring (seq), seq->length);
-	*oos = ios;
+    *oos = ios;
 }
 
 /* initialize the bound map */
@@ -1082,7 +1099,7 @@ WinSetGameBoundMap (int blockwidth, int blockheight, CLEAN_STRING map,
 
 #ifdef SMART_DRAW
     if (sLastTile)
-      	rfree (sLastTile);
+        rfree (sLastTile);
     iLastTileW = ScreenWidth / BoundBlockWidth + 1;
     iLastTileH = ScreenHeight / BoundBlockHeight + 1;
     sLastTile = rmalloc (((iLastTileW + 1) * (iLastTileH + 1) + 1) *
@@ -1090,7 +1107,7 @@ WinSetGameBoundMap (int blockwidth, int blockheight, CLEAN_STRING map,
 #endif
 
     if (sBoundMap)
-      	rfree (sBoundMap);
+        rfree (sBoundMap);
     sBoundMap = rmalloc ((map->length) + 1);
 
     rsncopy (sBoundMap, map->characters, map->length);
@@ -1104,7 +1121,7 @@ WinSetGameBoundMap (int blockwidth, int blockheight, CLEAN_STRING map,
     YScrollSpeed = 0;
 
     *result = resultcode;
-	*oos = ios;
+    *oos = ios;
 }
 
 
@@ -1120,7 +1137,7 @@ WinMoveScreenTo (int x, int y, OS ios, int *result ,OS *oos)
     CorrectView ();
 
     *result = GR_OK;
-	*oos = ios;
+    *oos = ios;
 }
 
 
@@ -1140,45 +1157,45 @@ WinInitGameLayerMap (int mapid, int bitmapid, CLEAN_STRING map,
     if (!GetGameLayerMapInfo (mapid))  /* identifier not used yet */
     {
         int gbW, gbH, gbBW, gbBH, gbCX, gbCY;
-	    resultcode = GR_INVALID_BITMAP_ID;
+        resultcode = GR_INVALID_BITMAP_ID;
 
         if (OSGetGameBitmapInfo (bitmapid,
                                     &gbW, &gbH, &gbBW, &gbBH, &gbCX, &gbCY))
-	    {
-	        /* find last element of linked list */
-	        glmip1 = glmipGameLayerMapInfo;
-	        glmip2 = NULL;
-	        while (glmip1)
-	        {
-	            glmip2 = glmip1;
-	        	glmip1 = glmip1->glmipNext;
-	        }
-	
-	       	/* create new node */
-			glmip1 = rmalloc (sizeof (GAMELAYERMAPINFO));
-	        glmip1->iMapID = mapid;
-	        glmip1->iBitmapID = bitmapid;
-	        glmip1->iMapWidth = mapwidth;
-	        glmip1->iMapHeight = mapheight;
-	        glmip1->sMap = rmalloc ((map->length) + 1);
-	        rsncopy (glmip1->sMap, map->characters, map->length);
+        {
+            /* find last element of linked list */
+            glmip1 = glmipGameLayerMapInfo;
+            glmip2 = NULL;
+            while (glmip1)
+            {
+                glmip2 = glmip1;
+                glmip1 = glmip1->glmipNext;
+            }
+
+            /* create new node */
+            glmip1 = rmalloc (sizeof (GAMELAYERMAPINFO));
+            glmip1->iMapID = mapid;
+            glmip1->iBitmapID = bitmapid;
+            glmip1->iMapWidth = mapwidth;
+            glmip1->iMapHeight = mapheight;
+            glmip1->sMap = rmalloc ((map->length) + 1);
+            rsncopy (glmip1->sMap, map->characters, map->length);
             glmip1->iTotalXSize = (mapwidth * gbBW);
             glmip1->iTotalYSize = (mapheight * gbBH);
             glmip1->bTile = tile;
-	        glmip1->glmipNext = NULL;
-	
-	        /* glmip2 points to the last element or is NULL */
-	        if (glmip2)
-	          	glmip2->glmipNext = glmip1;
-	        else
-	          	glmipGameLayerMapInfo = glmip1;  /* first element */
-	
-	        resultcode = GR_OK;
+            glmip1->glmipNext = NULL;
+
+            /* glmip2 points to the last element or is NULL */
+            if (glmip2)
+                glmip2->glmipNext = glmip1;
+            else
+                glmipGameLayerMapInfo = glmip1;  /* first element */
+
+            resultcode = GR_OK;
         }
     }
 
     *result = resultcode;
-	*oos = ios;
+    *oos = ios;
 }
 
 /* remove layer map from memory */
@@ -1190,37 +1207,37 @@ WinGameLayerMapDone (int mapid, OS ios, int *result, OS* oos)
     GAMELAYERMAPINFO *glmipPrevious = NULL;
 
     *result = GR_INVALID_MAP_ID;
-	while (glmipCurrent)
+    while (glmipCurrent)
     {
         if (glmipCurrent->iMapID != mapid)
         {
-	        glmipPrevious = glmipCurrent;
-	       	glmipNext = glmipCurrent->glmipNext;
+            glmipPrevious = glmipCurrent;
+            glmipNext = glmipCurrent->glmipNext;
         }
-    	else
+        else
         {
-         	/* link previous node to next node */
+            /* link previous node to next node */
             if (glmipPrevious)
-              	glmipPrevious->glmipNext = glmipCurrent->glmipNext;
+                glmipPrevious->glmipNext = glmipCurrent->glmipNext;
             else
                 glmipGameLayerMapInfo = glmipCurrent->glmipNext;
 
-	       	glmipNext = glmipCurrent->glmipNext;
+            glmipNext = glmipCurrent->glmipNext;
 
             /* free the current node */
-	        if (glmipCurrent->sMap)
+            if (glmipCurrent->sMap)
             {
-	            rfree (glmipCurrent->sMap);
+                rfree (glmipCurrent->sMap);
                 glmipCurrent->sMap = NULL;
             }
-	        rfree (glmipCurrent);
+            rfree (glmipCurrent);
 
             *result = GR_OK;
         }
         glmipCurrent = glmipNext;
     }
 
-	*oos = ios;
+    *oos = ios;
 }
 
 
@@ -1243,36 +1260,36 @@ WinInitSpriteAnimation (int bitmapid, CLEAN_STRING seq, BOOL loop,
     {
        /* if (loop) */
         {
-	        /* first look if animation sequence already is initialized */
-		    SPRITEANIMATION *sa = saSprites;
+            /* first look if animation sequence already is initialized */
+            SPRITEANIMATION *sa = saSprites;
             int slen = seq->length / (2 * sizeof (int));
             BOOL equal;
             int i, j, k;
-	
-			while (sa)
-		    {
-	            if (sa->iBitmapID == bitmapid)
-	            {
-	              	if ((sa->bLoop == loop) && (sa->iSequenceLength == slen))
+
+            while (sa)
+            {
+                if (sa->iBitmapID == bitmapid)
+                {
+                    if ((sa->bLoop == loop) && (sa->iSequenceLength == slen))
                     {
-			            equal = TRUE;
+                        equal = TRUE;
                         for (k = 0; k < slen; k++)
                         {
                             i = (*(int *) &seq->characters[k * sizeof (int)]);
                             j = (*(int *) &sa->sSequence[k * sizeof (int)]);
-                         	if (i != j)
-                              	equal = FALSE;
+                            if (i != j)
+                                equal = FALSE;
                         }
-                    	if (equal)
+                        if (equal)
                         {
-                          	*result = sa->iSpriteID;
+                            *result = sa->iSpriteID;
                             *oos = ios;
                             return;
                         }
                     }
-	            }
-	        	sa = sa->saNext;
-	        }
+                }
+                sa = sa->saNext;
+            }
         }
 
         saNew = rmalloc (sizeof (SPRITEANIMATION));
@@ -1280,9 +1297,9 @@ WinInitSpriteAnimation (int bitmapid, CLEAN_STRING seq, BOOL loop,
         saNew->iSequenceLength = seq->length / (2 * sizeof (int));
         saNew->sSequence = rmalloc ((seq->length) + 1);
         rsncopy (saNew->sSequence, seq->characters, seq->length);
-		saNew->iPosition = 0;  // saNew->iSequenceLength;
+        saNew->iPosition = 0;  // saNew->iSequenceLength;
         saNew->iCounter = (*(int *) &saNew->sSequence[sizeof (int)]);  // 0
-		saNew->saNext = NULL;
+        saNew->saNext = NULL;
         saNew->bLoop = loop;
 
         sa1 = saSprites;
@@ -1290,24 +1307,24 @@ WinInitSpriteAnimation (int bitmapid, CLEAN_STRING seq, BOOL loop,
         while (sa1)
         {
             if (sa1->iSpriteID >= newid)
-            	newid = sa1->iSpriteID + 1;
-         	sa2 = sa1;
+                newid = sa1->iSpriteID + 1;
+            sa2 = sa1;
             sa1 = sa1->saNext;
         }
-		saNew->iSpriteID = newid;
-		if (sa2)
-          	sa2->saNext = saNew;
+        saNew->iSpriteID = newid;
+        if (sa2)
+            sa2->saNext = saNew;
         else
             saSprites = saNew;
 
-       	resultcode = GR_OK;
+        resultcode = GR_OK;
     }
 
-	if (resultcode == GR_OK)
+    if (resultcode == GR_OK)
         *result = newid;
     else
-	    *result = resultcode;
-	*oos = ios;
+        *result = resultcode;
+    *oos = ios;
 }
 
 
@@ -1324,13 +1341,13 @@ int ReadBoundMapValue (int x, int y, int options, int bounds, int mccode)
         (y > BoundMapHeight - 1))
     {
         if (options & OO_IGNORE_LEVEL_BOUNDS)
-          	result = 0x0000;
+            result = 0x0000;
         else
-	        result = 0xFF0F;
+            result = 0xFF0F;
     }
     else
     {
-	    mappos = (y * BoundMapWidth + x) * sizeof (int);
+        mappos = (y * BoundMapWidth + x) * sizeof (int);
         result = (*(int *) &sBoundMap[mappos]);
     }
 
@@ -1344,6 +1361,11 @@ int ReadBoundMapValue (int x, int y, int options, int bounds, int mccode)
     else
         result &= 0x00FF;
 
+/// diagonal bounds
+    if ((result & 0x00F0) != 0)
+      result = (result << 16) | 0x00F0;
+///
+
     return result;
 }
 
@@ -1354,29 +1376,29 @@ Bounce (OBJECTREC *obj, int bound)
     int yb = obj->iYBounce;
 
     if (xb < 0)
-      	xb = abs (xb * obj->iXSpeed) / 256;
+        xb = abs (xb * obj->iXSpeed) / 256;
     if (yb < 0)
-      	yb = abs (yb * obj->iYSpeed) / 256;
+        yb = abs (yb * obj->iYSpeed) / 256;
 
- 	if ((bound & UPPER_BOUND) > 0)
+    if ((bound & UPPER_BOUND) > 0)
     {
         obj->iYPos = obj->iLastYPos;
         obj->iFixedYPos = obj->iLastFixedYPos;
         obj->iYSpeed = -yb;
     }
- 	if ((bound & LEFT_BOUND) > 0)
+    if ((bound & LEFT_BOUND) > 0)
     {
         obj->iXPos = obj->iLastXPos;
         obj->iFixedXPos = obj->iLastFixedXPos;
         obj->iXSpeed = -xb;
     }
- 	if ((bound & LOWER_BOUND) > 0)
+    if ((bound & LOWER_BOUND) > 0)
     {
         obj->iYPos = obj->iLastYPos;
         obj->iFixedYPos = obj->iLastFixedYPos;
         obj->iYSpeed = yb;
     }
- 	if ((bound & RIGHT_BOUND) > 0)
+    if ((bound & RIGHT_BOUND) > 0)
     {
         obj->iXPos = obj->iLastXPos;
         obj->iFixedXPos = obj->iLastFixedXPos;
@@ -1419,14 +1441,14 @@ void MoveObjects ()
             }
             else
             {
-	 	        obj = objObjects;
-	 		    while (obj)
-	            {
-				    if (obj->bActive)
-	                {
-	                    if (((uei->iDestination == 0) ||
-	                         (uei->iDestination == -obj->iObjectID) ||
-	                         ((uei->iDestination > 0) &&
+                obj = objObjects;
+                while (obj)
+                {
+                    if (obj->bActive)
+                    {
+                        if (((uei->iDestination == 0) ||
+                             (uei->iDestination == -obj->iObjectID) ||
+                             ((uei->iDestination > 0) &&
                               (uei->iDestination & obj->iOwnBounds)
                              )
                             )
@@ -1435,25 +1457,25 @@ void MoveObjects ()
                              (uei->iSubDestination == obj->iSubType)
                             )
                            )
-	                    {
+                        {
                             int ix = obj->iXPos;
                             int iy = obj->iYPos;
 
-			                iCCObjectID = obj->iObjectID;
-						    SendMessage5ToClean (CcWmUSEREVENT,
-			                                     obj->iObjType,
-			                                     obj->iObjectID,
-			                                     uei->iEventID,
-			                                     uei->iEventParameter1,
-			                                     uei->iEventParameter2);
-			                iCCObjectID = 0;
+                            iCCObjectID = obj->iObjectID;
+                            SendMessage5ToClean (CcWmUSEREVENT,
+                                                 obj->iObjType,
+                                                 obj->iObjectID,
+                                                 uei->iEventID,
+                                                 uei->iEventParameter1,
+                                                 uei->iEventParameter2);
+                            iCCObjectID = 0;
 
                             if ((ix != obj->iXPos) || (iy != obj->iYPos))
                                 UpdatePosition (obj);
-	                    }
-		            }
-		         	obj = obj->objNext;
-	            }
+                        }
+                    }
+                    obj = obj->objNext;
+                }
             }
 
             if (ueiPrev)
@@ -1472,56 +1494,56 @@ void MoveObjects ()
 
     // check position and call object's move function
     obj = objObjects;
- 	while (obj)
+    while (obj)
     {
-		if (obj->bActive)
+        if (obj->bActive)
         {
             if (obj->iOptions & OO_STATIC)
             {
                 obj->iXPos += XView;
-				obj->iYPos += YView;
+                obj->iYPos += YView;
             }
 
             // check if the animation sequence has ended
             sa = GetSpriteAnimation (obj->iSpriteID);
             if (sa)
                 if (!sa->bLoop)
-	            {
-	                int ps;
-	
-	                if (obj->iCounter == 0)
-	                    obj->iCounter = (*(int *) &sa->sSequence[sizeof (int)]);
-	
-	                if (--obj->iCounter <= 0)
-	                {
-	                    obj->iPosition++;
-	                    if (obj->iPosition >= sa->iSequenceLength)
-	                        obj->iPosition = -1;
-	                    if (obj->iPosition > -1)
-	                    {
-		             	    ps = (2 * obj->iPosition * sizeof (int)) + sizeof (int);
-		            	    obj->iCounter = (*(int *) &sa->sSequence[ps]);
-	                    }
-	                }
-	            }
+                {
+                    int ps;
+
+                    if (obj->iCounter == 0)
+                        obj->iCounter = (*(int *) &sa->sSequence[sizeof (int)]);
+
+                    if (--obj->iCounter <= 0)
+                    {
+                        obj->iPosition++;
+                        if (obj->iPosition >= sa->iSequenceLength)
+                            obj->iPosition = -1;
+                        if (obj->iPosition > -1)
+                        {
+                            ps = (2 * obj->iPosition * sizeof (int)) + sizeof (int);
+                            obj->iCounter = (*(int *) &sa->sSequence[ps]);
+                        }
+                    }
+                }
 
             sa = GetSpriteAnimation (obj->iSpriteID);
             if (sa)
                 if (!(sa->bLoop))
-	                if (obj->iPosition == -1)
-	                {
-	                    // send msg to Clean
+                    if (obj->iPosition == -1)
+                    {
+                        // send msg to Clean
                         int ix = obj->iXPos;
                         int iy = obj->iYPos;
 
-		                iCCObjectID = obj->iObjectID;
+                        iCCObjectID = obj->iObjectID;
                         obj->iLastSprite = -1;
-					    SendMessage2ToClean (CcWmANIMATION, obj->iObjType, obj->iObjectID);
-		                iCCObjectID = 0;
+                        SendMessage2ToClean (CcWmANIMATION, obj->iObjType, obj->iObjectID);
+                        iCCObjectID = 0;
 
                         if ((ix != obj->iXPos) || (iy != obj->iYPos))
                             UpdatePosition (obj);
-	                }
+                    }
 
 
             // object too far away?
@@ -1531,82 +1553,82 @@ void MoveObjects ()
 
             if (obj->bActive)
             {
-       	/*
+        /*
             if (sa)
             {
-		        gbip = GetGameBitmapInfo (sa->iBitmapID);
-		    	if (gbip)
-			    {
-	               	w = gbip->iBlockWidth;
-	               	h = gbip->iBlockHeight;
+                gbip = GetGameBitmapInfo (sa->iBitmapID);
+                if (gbip)
+                {
+                    w = gbip->iBlockWidth;
+                    h = gbip->iBlockHeight;
                 */
-                  	w = obj->iXSize;
+                    w = obj->iXSize;
                     h = obj->iYSize;
 
                     if (x + w < XView - ((obj->iForgetX + iStartObjX) * BoundBlockWidth))
- 						obj->bActive = FALSE;
+                        obj->bActive = FALSE;
                     if (y + h < YView - ((obj->iForgetY + iStartObjY) * BoundBlockHeight))
- 						obj->bActive = FALSE;
+                        obj->bActive = FALSE;
                     if (x > XView + ScreenWidth + ((obj->iForgetX + iStartObjX) * BoundBlockWidth))
- 						obj->bActive = FALSE;
+                        obj->bActive = FALSE;
                     if (y > YView + ScreenHeight + ((obj->iForgetY + iStartObjY) * BoundBlockHeight))
- 						obj->bActive = FALSE;
+                        obj->bActive = FALSE;
 
                     if ((obj->iTimeCounter >= 0) || (!(obj->iOptions & OO_FREEZE)))
                     {
-			            if ((obj->bActive) && (!(obj->iOptions & OO_STATIC)))
-				        {
+                        if ((obj->bActive) && (!(obj->iOptions & OO_STATIC)))
+                        {
                         //    int md = obj->iMoveDelay;
                             int slx = obj->iXSlowDown;
                             int sly = obj->iYSlowDown;
                             int xv, yv;
 
                             // save last position
-				            obj->iLastXPos = obj->iXPos;
-	            		    obj->iLastYPos = obj->iYPos;
+                            obj->iLastXPos = obj->iXPos;
+                            obj->iLastYPos = obj->iYPos;
 
-						    obj->iLastFixedXPos = obj->iFixedXPos;
-						    obj->iLastFixedYPos = obj->iFixedYPos;
+                            obj->iLastFixedXPos = obj->iFixedXPos;
+                            obj->iLastFixedYPos = obj->iFixedYPos;
 
                             // acceleration
                        //     if ((md == 0) || ((iFrameCounter % md) == 0))
                        //     {
-	                            obj->iXSpeed += obj->iXAcc;
-	                            obj->iYSpeed += obj->iYAcc;
+                                obj->iXSpeed += obj->iXAcc;
+                                obj->iYSpeed += obj->iYAcc;
                        //     }
 
                             // slow down the object?
                        //     if (obj->iOptions & OO_FIXED)
                        //     {
-	                            if (slx > 0)
-	                           	{
-	 								if (obj->iXSpeed > 0)
+                                if (slx > 0)
+                                {
+                                    if (obj->iXSpeed > 0)
                                         obj->iXSpeed = Max (obj->iXSpeed - slx, 0);
-	 								if (obj->iXSpeed < 0)
+                                    if (obj->iXSpeed < 0)
                                         obj->iXSpeed = Min (obj->iXSpeed + slx, 0);
-	                            }
-	                            if (sly > 0)
-	                           	{
-	 								if (obj->iYSpeed > 0)
+                                }
+                                if (sly > 0)
+                                {
+                                    if (obj->iYSpeed > 0)
                                         obj->iYSpeed = Max (obj->iYSpeed - sly, 0);
-	 								if (obj->iYSpeed < 0)
+                                    if (obj->iYSpeed < 0)
                                         obj->iYSpeed = Min (obj->iYSpeed + sly, 0);
-	                            }
+                                }
                        //     }
                        /*
-                        	else
+                            else
                             {
-	                            if ((slx > 0) && ((iFrameCounter % slx) == 0))
-	                           	{
-	 								if (obj->iXSpeed > 0) obj->iXSpeed--;
-	 								if (obj->iXSpeed < 0) obj->iXSpeed++;
-	                            }
-	                            if ((sly > 0) && ((iFrameCounter % sly) == 0))
-	                            {
-	 								if (obj->iYSpeed > 0) obj->iYSpeed--;
-	 								if (obj->iYSpeed < 0) obj->iYSpeed++;
-	                            }
-                        	}
+                                if ((slx > 0) && ((iFrameCounter % slx) == 0))
+                                {
+                                    if (obj->iXSpeed > 0) obj->iXSpeed--;
+                                    if (obj->iXSpeed < 0) obj->iXSpeed++;
+                                }
+                                if ((sly > 0) && ((iFrameCounter % sly) == 0))
+                                {
+                                    if (obj->iYSpeed > 0) obj->iYSpeed--;
+                                    if (obj->iYSpeed < 0) obj->iYSpeed++;
+                                }
+                            }
                        */
                             if (slx < 0)
                                 obj->iXSpeed = obj->iXSpeed * (256 + slx) / 256;
@@ -1615,52 +1637,52 @@ void MoveObjects ()
 
                             // check object's maximum speed
                             if (obj->iXSpeed > obj->iMaxXSpeed)
-                              	obj->iXSpeed = obj->iMaxXSpeed;
+                                obj->iXSpeed = obj->iMaxXSpeed;
                             if (obj->iXSpeed < -obj->iMaxXSpeed)
-                              	obj->iXSpeed = -obj->iMaxXSpeed;
+                                obj->iXSpeed = -obj->iMaxXSpeed;
                             if (obj->iYSpeed > obj->iMaxYSpeed)
-                              	obj->iYSpeed = obj->iMaxYSpeed;
+                                obj->iYSpeed = obj->iMaxYSpeed;
                             if (obj->iYSpeed < -obj->iMaxYSpeed)
-                              	obj->iYSpeed = -obj->iMaxYSpeed;
+                                obj->iYSpeed = -obj->iMaxYSpeed;
 
                             // move the object
                         //    if (obj->iOptions & OO_FIXED)
                         //    {
-								obj->iFixedXPos += obj->iXSpeed;
+                                obj->iFixedXPos += obj->iXSpeed;
                                 obj->iFixedYPos += obj->iYSpeed;
                                 obj->iXPos = (obj->iFixedXPos + 128) >> 8;
                                 obj->iYPos = (obj->iFixedYPos + 128) >> 8;
                         //    }
-                        /*	else
+                        /*  else
                             {
-    	                    	obj->iXPos += obj->iXSpeed;
-							    obj->iYPos += obj->iYSpeed;
+                                obj->iXPos += obj->iXSpeed;
+                                obj->iYPos += obj->iYSpeed;
                             }  */
 
                             if (obj->iSkipMove > 0)
                                 obj->iSkipMove--;
                             else
                                 if (obj->iSkipMove == 0)
-	                            {
+                                {
                                     // inform Clean that new object may move now
                                     int ix = obj->iXPos;
                                     int iy = obj->iYPos;
 
-					                iCCObjectID = obj->iObjectID;
-								    SendMessage2ToClean (CcWmMOVEOBJECT, obj->iObjType, obj->iObjectID);
-					                iCCObjectID = 0;
+                                    iCCObjectID = obj->iObjectID;
+                                    SendMessage2ToClean (CcWmMOVEOBJECT, obj->iObjType, obj->iObjectID);
+                                    iCCObjectID = 0;
 /*
-					              	obj->iFixedXPos = obj->iXPos << 8;
-					              	obj->iFixedYPos = obj->iYPos << 8;
-					                obj->iLastFixedXPos = obj->iFixedXPos;
-					                obj->iLastFixedYPos = obj->iFixedYPos;
+                                    obj->iFixedXPos = obj->iXPos << 8;
+                                    obj->iFixedYPos = obj->iYPos << 8;
+                                    obj->iLastFixedXPos = obj->iFixedXPos;
+                                    obj->iLastFixedYPos = obj->iFixedYPos;
 */
 
                                     if ((ix != obj->iXPos) || (iy != obj->iYPos))
                                         UpdatePosition (obj);
 
-    	                        }
-	                    }
+                                }
+                        }
                     }
             /*
                 }
@@ -1669,121 +1691,121 @@ void MoveObjects ()
         }
 
         if (obj->bActive)
-	    	iObjectCount++;
+            iObjectCount++;
 
         obj = obj->objNext;
     }
 
-	// check collisions between objects
+    // check collisions between objects
 
     if (iObjectCount > 1)
     {
-    	int pos = 0;
+        int pos = 0;
         int p = 0;
-	    int *collisions = rmalloc (4 * iObjectCount *
+        int *collisions = rmalloc (4 * iObjectCount *
                             (iObjectCount - 1) * sizeof (int));
 
-	    obj = objObjects;
-	 	while (obj)
-	    {
-	        if ((obj->bActive) &&
+        obj = objObjects;
+        while (obj)
+        {
+            if ((obj->bActive) &&
                 ((obj->iBounceBounds) || (obj->iCollideBounds)))
-			{
-			    int X1 = obj->iXPos;
-		    	int Y1 = obj->iYPos;
-	            int X2 = X1 + obj->iXSize - 1;
-	            int Y2 = Y1 + obj->iYSize - 1;
-			    int OldX1 = obj->iLastXPos;
-		    	int OldY1 = obj->iLastYPos;
-	            int OldX2 = OldX1 + obj->iXSize - 1;
-	            int OldY2 = OldY1 + obj->iYSize - 1;
-	
-	            OBJECTREC *objTmp = objObjects;
-	
-	 			while (objTmp)
-	            {
-			        if ((objTmp->bActive) &&
+            {
+                int X1 = obj->iXPos;
+                int Y1 = obj->iYPos;
+                int X2 = X1 + obj->iXSize - 1;
+                int Y2 = Y1 + obj->iYSize - 1;
+                int OldX1 = obj->iLastXPos;
+                int OldY1 = obj->iLastYPos;
+                int OldX2 = OldX1 + obj->iXSize - 1;
+                int OldY2 = OldY1 + obj->iYSize - 1;
+
+                OBJECTREC *objTmp = objObjects;
+
+                while (objTmp)
+                {
+                    if ((objTmp->bActive) &&
                         (obj != objTmp) &&
                         ((obj->iBounceBounds & objTmp->iOwnBounds) ||
                          (obj->iCollideBounds & objTmp->iOwnBounds))
                        )
-					{
-					    int x1 = objTmp->iXPos;
-				    	int y1 = objTmp->iYPos;
-			            int x2 = x1 + objTmp->iXSize - 1;
-			            int y2 = y1 + objTmp->iYSize - 1;
-					    int oldx1 = objTmp->iLastXPos;
-				    	int oldy1 = objTmp->iLastYPos;
-			            int oldx2 = oldx1 + objTmp->iXSize - 1;
-			            int oldy2 = oldy1 + objTmp->iYSize - 1;
-		
-		                // do the two objects collide?
-		 				if ((x1 <= X2) && (x2 >= X1) &&
-	                        (y1 <= Y2) && (y2 >= Y1))
-	                    {
-				            /*
-				               bit 0: upper bound
-				               bit 1: left bound
-				               bit 2: lower bound
-				               bit 3: right bound
-				            */
-	
-	                        // for each collision two messages are sent
-	                       	Bound = 0;
-	                        bound = 0;
-	    	                {
-	                        	// detect directions of new collisions
-	                            if (OldY1 > oldy2)
-	                            {
-									Bound |= UPPER_BOUND;
-									bound |= LOWER_BOUND;
-	                            }
-	                            if (OldX1 > oldx2)
-	                            {
-									Bound |= LEFT_BOUND;
-									bound |= RIGHT_BOUND;
-	                            }
-	                            if (OldY2 < oldy1)
-	                            {
-									Bound |= LOWER_BOUND;
-									bound |= UPPER_BOUND;
-	                            }
-	                            if (OldX2 < oldx1)
-	                            {
-									Bound |= RIGHT_BOUND;
-									bound |= LEFT_BOUND;
-	                            }
-	 						}
-	
+                    {
+                        int x1 = objTmp->iXPos;
+                        int y1 = objTmp->iYPos;
+                        int x2 = x1 + objTmp->iXSize - 1;
+                        int y2 = y1 + objTmp->iYSize - 1;
+                        int oldx1 = objTmp->iLastXPos;
+                        int oldy1 = objTmp->iLastYPos;
+                        int oldx2 = oldx1 + objTmp->iXSize - 1;
+                        int oldy2 = oldy1 + objTmp->iYSize - 1;
+
+                        // do the two objects collide?
+                        if ((x1 <= X2) && (x2 >= X1) &&
+                            (y1 <= Y2) && (y2 >= Y1))
+                        {
+                            /*
+                               bit 0: upper bound
+                               bit 1: left bound
+                               bit 2: lower bound
+                               bit 3: right bound
+                            */
+
+                            // for each collision two messages are sent
+                            Bound = 0;
+                            bound = 0;
+                            {
+                                // detect directions of new collisions
+                                if (OldY1 > oldy2)
+                                {
+                                    Bound |= UPPER_BOUND;
+                                    bound |= LOWER_BOUND;
+                                }
+                                if (OldX1 > oldx2)
+                                {
+                                    Bound |= LEFT_BOUND;
+                                    bound |= RIGHT_BOUND;
+                                }
+                                if (OldY2 < oldy1)
+                                {
+                                    Bound |= LOWER_BOUND;
+                                    bound |= UPPER_BOUND;
+                                }
+                                if (OldX2 < oldx1)
+                                {
+                                    Bound |= RIGHT_BOUND;
+                                    bound |= LEFT_BOUND;
+                                }
+                            }
+
                             // first store all collisions, then call
                             //   the collide function for each
                             collisions[pos++] = obj->iObjectID;
                             collisions[pos++] = objTmp->iObjectID;
                             collisions[pos++] = bound;
                             collisions[pos++] = Bound;
-		                }
-		            }
-	                objTmp = objTmp->objNext;
-	            }
-	        }
-	        obj = obj->objNext;
-	    }
+                        }
+                    }
+                    objTmp = objTmp->objNext;
+                }
+            }
+            obj = obj->objNext;
+        }
 
-    	// maybe sort the list of colliding objects?
+        // maybe sort the list of colliding objects?
         // ...
 
         // call the collide functions
-		while (p < pos)
+        while (p < pos)
         {
             OBJECTREC *objTmp;
             int bnds;
 
-        	obj = GetObjectRec (collisions[p++]);
-        	objTmp = GetObjectRec (collisions[p++]);
+            obj = GetObjectRec (collisions[p++]);
+            objTmp = GetObjectRec (collisions[p++]);
 
             bnds = collisions[p++];
             if (obj->iBounceBounds & objTmp->iOwnBounds)
-				Bounce (obj, bnds);
+                Bounce (obj, bnds);
 
             if (obj->iCollideBounds & objTmp->iOwnBounds)
             {
@@ -1791,9 +1813,9 @@ void MoveObjects ()
                 int iy = obj->iYPos;
 
                 iCCObjectID = obj->iObjectID;
- 	        	SendMessage5ToClean (CcWmCOLLISION,
+                SendMessage5ToClean (CcWmCOLLISION,
                     obj->iObjType, obj->iObjectID,
-	                objTmp->iObjType, objTmp->iObjectID, bnds);
+                    objTmp->iObjType, objTmp->iObjectID, bnds);
                 iCCObjectID = 0;
 
                 if ((ix != obj->iXPos) || (iy != obj->iYPos))
@@ -1802,35 +1824,38 @@ void MoveObjects ()
             p++;
         /*
             if (objTmp->iOptions & OO_BOUNCE_AT_COLLISIONS)
-				Bounce (objTmp, collisions[p++]);
+                Bounce (objTmp, collisions[p++]);
             else
             {
                 iCCObjectID = objTmp->iObjectID;
-	        	SendMessage5ToClean (CcWmCOLLISION,
+                SendMessage5ToClean (CcWmCOLLISION,
                     objTmp->iObjType, objTmp->iObjectID,
-	                obj->iObjType, obj->iObjectID, collisions[p++]);
+                    obj->iObjType, obj->iObjectID, collisions[p++]);
                 iCCObjectID = 0;
             }
         */
 
         }
 
-    	rfree (collisions);
+        rfree (collisions);
     }
 
 
-	// check collisions with static bounds and map codes
-	obj = objObjects;
- 	while (obj)
+    // check collisions with static bounds and map codes
+    obj = objObjects;
+    while (obj)
     {
+        int bbw = BoundBlockWidth;
+        int bbh = BoundBlockHeight;
+
         if ((obj->bActive) &&
             ((obj->iBounceBounds & (BND_STATIC_BOUNDS | BND_MAP_CODES)) ||
              (obj->iCollideBounds & (BND_STATIC_BOUNDS | BND_MAP_CODES)))
            )
-		{
-			// check if the object touches a bound in the boundmap
-		    x = obj->iXPos;
-	    	y = obj->iYPos;
+        {
+            // check if the object touches a bound in the boundmap
+            x = obj->iXPos;
+            y = obj->iYPos;
 
             newmapx1 = intdiv (x, BoundBlockWidth);
             newmapy1 = intdiv (y, BoundBlockHeight);
@@ -1905,7 +1930,7 @@ void MoveObjects ()
 
 
             /* object touches a corner? */
-			if ((xblock && yblock) && ((!xbump) && (!ybump)))
+            if ((xblock && yblock) && ((!xbump) && (!ybump)))
             {
                 bound |= (ReadBoundMapValue (newx, newy, obj->iOptions,
                              obj->iBounceBounds, 0x0F) & (xbnd | ybnd));
@@ -1913,7 +1938,180 @@ void MoveObjects ()
                 ybump = TRUE;
             }
 
-           	Bounce (obj, bound);
+            Bounce (obj, bound);
+
+
+/// diagonal bounds
+          if (obj->iBounceBounds & BND_STATIC_BOUNDS)
+          {
+            if (obj->iYSpeed < - (256))
+              obj->iDiag = 0;
+
+            if ((obj->iDiag == 0) && (obj->iYSpeed >= - (256)))
+            {
+              int CurX = obj->iLastXPos + obj->iXSize / 2;
+              int CurY = obj->iLastYPos + obj->iYSize - 1;
+              int NewX = obj->iXPos + obj->iXSize / 2;
+              int NewY = obj->iYPos + obj->iYSize - 1;
+              int CurMapX = intdiv (CurX, bbw);
+              int CurMapY = intdiv (CurY, bbh);
+              int NewMapX = intdiv (NewX, bbw);
+              int NewMapY = intdiv (NewY, bbh);
+
+              int dgx, dgy, dgbnd, bndx, bndy;
+
+              int l = CurMapX;
+              int r = NewMapX;
+              if (l > r)
+              {
+                l = NewMapX;
+                r = CurMapX;
+              }
+
+              bound = 0;
+              for (dgx = l; dgx <= r; dgx++)
+                for (dgy = CurMapY; dgy <= NewMapY; dgy++)
+                {
+                  dgbnd = ReadBoundMapValue (dgx, dgy,
+                            obj->iOptions, obj->iBounceBounds, 0) >> 16;
+                  if (dgbnd >= 0x80)
+                  {
+                    bndx = dgx;
+                    bndy = dgy;
+                    bound = dgbnd;
+                  }
+                }
+              if (bound != 0)
+              {
+                obj->iDiagX = (bndx * bbw + bbw / 2);
+                obj->iDiagY = (bndy * bbh + bbh / 2) - 1;
+                if (bound & 1 == 1)
+                  obj->iDiagUpDn = 1;  // "\"
+                else
+                  obj->iDiagUpDn = -1;  // "/"
+                i = 0;
+                while ((ReadBoundMapValue (bndx + i, bndy + obj->iDiagUpDn * i,
+                       obj->iOptions, obj->iBounceBounds, 0) >> 16) == bound)
+                  i--;
+                obj->iDiagLeftX = (bndx + i + 1) * bbw - bbw / 2;
+                obj->iDiagLeftY = (bndy + obj->iDiagUpDn * i + 1) * bbh;
+                i = 0;
+                while ((ReadBoundMapValue (bndx + i, bndy + obj->iDiagUpDn * i,
+                       obj->iOptions, obj->iBounceBounds, 0) >> 16) == bound)
+                  i++;
+                obj->iDiagRightX = (bndx + i - 1) * bbw + bbw / 2;
+                obj->iDiagRightY = (bndy + obj->iDiagUpDn * (i - 1) + 1) * bbh;
+
+                obj->iDiag = 1;
+              }
+            }
+
+            if (obj->iDiag == 1)
+            {
+              int iCurX = obj->iLastXPos + obj->iXSize / 2;
+              int iCurY = obj->iLastYPos + obj->iYSize - 1;
+              int iNewX = obj->iXPos + obj->iXSize / 2;
+              int iNewY = obj->iYPos + obj->iYSize - 1;
+
+              i = obj->iDiagY + (obj->iDiagUpDn * bbh *
+                       (iCurX - obj->iDiagX)) / bbw;
+              if (i <= iNewY)
+              {
+                obj->iYPos = i - obj->iYSize;
+                obj->iFixedYPos = obj->iYPos << 8;
+                obj->iLastYPos = obj->iYPos;
+                obj->iLastFixedYPos = obj->iYPos << 8;
+               // obj->iYSpeed = 0;
+                Bounce (obj, UPPER_BOUND);
+              }
+              if ((iCurX < obj->iDiagLeftX + bbw / 2) &&
+                  ((iNewY >= obj->iDiagLeftY)))
+              {
+                obj->iYPos = obj->iDiagLeftY - obj->iYSize;
+                obj->iFixedYPos = obj->iYPos << 8;
+                obj->iLastYPos = obj->iYPos;
+                obj->iLastFixedYPos = obj->iYPos << 8;
+               // obj->iYSpeed = 0;
+                Bounce (obj, UPPER_BOUND);
+              }
+              if ((obj->iXPos >= obj->iDiagRightX - bbw / 2) &&
+                  ((iNewY >= obj->iDiagRightY)))
+              {
+                obj->iYPos = obj->iDiagRightY - obj->iYSize;
+                obj->iFixedYPos = obj->iYPos << 8;
+                obj->iLastYPos = obj->iYPos;
+                obj->iLastFixedYPos = obj->iYPos << 8;
+               // obj->iYSpeed = 0;
+                Bounce (obj, UPPER_BOUND);
+              }
+
+              if (obj->iXPos < obj->iDiagLeftX)
+                obj->iDiag = 0;
+              if (obj->iXPos >= obj->iDiagRightX)
+                obj->iDiag = 0;
+            }
+          }
+
+/// diagonal bounds
+/*
+            int CurX = obj->iLastXPos + obj->iXSize / 2;
+            int CurY = obj->iLastYPos + obj->iYSize - 1;
+            int NewX = obj->iXPos + obj->iXSize / 2;
+            int NewY = obj->iYPos + obj->iYSize - 1;
+
+            if ((NewX != CurX) || (NewY > CurY))
+            {
+              int CurMapX = intdiv (CurX, BoundBlockWidth);
+              int CurMapY = intdiv (CurY, BoundBlockHeight);
+              int NewMapX = intdiv (NewX, BoundBlockWidth);
+              int NewMapY = intdiv (NewY, BoundBlockHeight);
+
+              int dgy;
+              int dgx;
+
+              for (dgy = Min (CurMapY, NewMapY) - 1;
+                      dgy <= Max (CurMapY, NewMapY); dgy++)
+                for (dgx = Min (CurMapX, NewMapX);
+                        dgx <= Max (CurMapX, NewMapX); dgx++)
+                {
+                  int dgbnd = ReadBoundMapValue (dgx, dgy,
+                                obj->iOptions, obj->iBounceBounds, 0) >> 16;
+                  if (dgbnd >= 0x80)
+                  {
+                    int leftx = dgx * BoundBlockWidth;
+                    int lefty = dgy * BoundBlockHeight;
+                    int RelNewX;
+                    int DiagHeight;
+
+                    int rc = 1;  // "\"
+                    if ((dgbnd & 1) == 0)
+                    {
+                      rc = -rc;       // "/"
+                      lefty += BoundBlockHeight;
+                    }
+
+                    dgbnd &= 0x7F;
+                 //   int RelCurX = CurX - leftx;
+                    RelNewX = NewX - leftx;
+
+                    DiagHeight = lefty +
+                        (rc * BoundBlockHeight * RelNewX) / BoundBlockWidth;
+
+                    if ((CurY <= DiagHeight) && (NewY >= DiagHeight))
+                    {
+                      obj->iLastYPos = DiagHeight - obj->iYSize;
+                      obj->iLastFixedYPos = (obj->iLastYPos << 8);
+
+                      if ((RelNewX >= 0) && (RelNewX < BoundBlockWidth))
+                        Bounce (obj, UPPER_BOUND);
+                    }
+
+                  }
+
+                }
+            }
+*/
+///
 
         /* --------------- collide -------------- */
 
@@ -1955,7 +2153,7 @@ void MoveObjects ()
                 ybump = TRUE;
 
             /* object touches a corner? */
-			if ((xblock && yblock) && ((!xbump) && (!ybump)))
+            if ((xblock && yblock) && ((!xbump) && (!ybump)))
             {
                 k = ReadBoundMapValue (newx, newy, obj->iOptions,
                                  obj->iCollideBounds, 0);
@@ -1967,84 +2165,84 @@ void MoveObjects ()
                 ybump = TRUE;
             }
 
-        	if ((bound > 0) || (code > 0))
+            if ((bound > 0) || (code > 0))
             {
                 int ix = obj->iXPos;
                 int iy = obj->iYPos;
 
-               	// obj has touched something, send msg to Clean
+                // obj has touched something, send msg to Clean
                 iCCObjectID = obj->iObjectID;
-		        SendMessage4ToClean (CcWmTOUCHBOUND, obj->iObjType, obj->iObjectID, bound, code);
+                SendMessage4ToClean (CcWmTOUCHBOUND, obj->iObjType, obj->iObjectID, bound, code);
                 iCCObjectID = 0;
 
                 if ((ix != obj->iXPos) || (iy != obj->iYPos))
                     UpdatePosition (obj);
             }
 
-        	/* update last directions */
+            /* update last directions */
             if (obj->iXPos < obj->iLastXPos)  /* moving left */
-            	obj->iOptions |= OO_LAST_DIRECTION_LEFT;
+                obj->iOptions |= OO_LAST_DIRECTION_LEFT;
             else
-	            if (obj->iXPos > obj->iLastXPos)  /* moving right */
-    	        	obj->iOptions &= ~ OO_LAST_DIRECTION_LEFT;
+                if (obj->iXPos > obj->iLastXPos)  /* moving right */
+                    obj->iOptions &= ~ OO_LAST_DIRECTION_LEFT;
 
             if (obj->iYPos < obj->iLastYPos)  /* moving up */
-            	obj->iOptions |= OO_LAST_DIRECTION_UP;
+                obj->iOptions |= OO_LAST_DIRECTION_UP;
             else
-	            if (obj->iYPos > obj->iLastYPos)  /* moving down */
-    	        	obj->iOptions &= ~ OO_LAST_DIRECTION_UP;
+                if (obj->iYPos > obj->iLastYPos)  /* moving down */
+                    obj->iOptions &= ~ OO_LAST_DIRECTION_UP;
         }
 
         // increment object's frame counter
         if (obj->bActive)
         {
-	    	obj->iTimeCounter++;
-	        if (obj->iTimeCounter == 0)
-	        {
-			    // send timer msg
+            obj->iTimeCounter++;
+            if (obj->iTimeCounter == 0)
+            {
+                // send timer msg
                 int ix = obj->iXPos;
                 int iy = obj->iYPos;
 
-	            iCCObjectID = obj->iObjectID;
-			    SendMessage2ToClean (CcWmOBJECTTIMER, obj->iObjType, obj->iObjectID);
-	            iCCObjectID = 0;
+                iCCObjectID = obj->iObjectID;
+                SendMessage2ToClean (CcWmOBJECTTIMER, obj->iObjType, obj->iObjectID);
+                iCCObjectID = 0;
 
                 if ((ix != obj->iXPos) || (iy != obj->iYPos))
                     UpdatePosition (obj);
-	        }
+            }
 
-	    	if (obj->iObjectID == iFollowID)
-	        {
-				// screen focus
-			    int x1 = obj->iXPos;
-		    	int y1 = obj->iYPos;
-			    int x2 = x1 + obj->iXSize;
-		    	int y2 = y1 + obj->iYSize;
+            if (obj->iObjectID == iFollowID)
+            {
+                // screen focus
+                int x1 = obj->iXPos;
+                int y1 = obj->iYPos;
+                int x2 = x1 + obj->iXSize;
+                int y2 = y1 + obj->iYSize;
 
                 if (x1 < obj->iLastXPos)
-	                if (iFollowX1 != FC_OFFSCREEN)
-	                    if (x1 - iFollowX1 < iActualXView)
-	                      	iActualXView = x1 - iFollowX1;
+                    if (iFollowX1 != FC_OFFSCREEN)
+                        if (x1 - iFollowX1 < iActualXView)
+                            iActualXView = x1 - iFollowX1;
                 if (x1 > obj->iLastXPos)
-	                if (iFollowX2 != FC_OFFSCREEN)
-	                    if (x2 + iFollowX2 > iActualXView + ScreenWidth)
-	                      	iActualXView = x2 + iFollowX2 - ScreenWidth;
+                    if (iFollowX2 != FC_OFFSCREEN)
+                        if (x2 + iFollowX2 > iActualXView + ScreenWidth)
+                            iActualXView = x2 + iFollowX2 - ScreenWidth;
 
-                if (y1 < obj->iLastYPos)
-	                if (iFollowY1 != FC_OFFSCREEN)
-    	                if (y1 - iFollowY1 < iActualYView)
-        	              	iActualYView = y1 - iFollowY1;
-                if (y1 > obj->iLastYPos)
-		            if (iFollowY2 != FC_OFFSCREEN)
-        	            if (y2 + iFollowY2 > iActualYView + ScreenHeight)
-            	          	iActualYView = y2 + iFollowY2 - ScreenHeight;
-	        }
+                if ((y1 < obj->iLastYPos) || (obj->iDiag == 1))
+                    if (iFollowY1 != FC_OFFSCREEN)
+                        if (y1 - iFollowY1 < iActualYView)
+                            iActualYView = y1 - iFollowY1;
+                if ((y1 > obj->iLastYPos) || (obj->iDiag == 1))
+                    if (iFollowY2 != FC_OFFSCREEN)
+                        if (y2 + iFollowY2 > iActualYView + ScreenHeight)
+                            iActualYView = y2 + iFollowY2 - ScreenHeight;
+            }
         }
 
         if (obj->iOptions & OO_STATIC)
         {
             obj->iXPos -= XView;
-			obj->iYPos -= YView;
+            obj->iYPos -= YView;
         }
 
         obj = obj->objNext;
@@ -2052,19 +2250,19 @@ void MoveObjects ()
 
 
     // initialize new objects
-	obj = objObjects;
- 	while (obj)
+    obj = objObjects;
+    while (obj)
     {
-     	if (!(obj->bActive))
+        if (!(obj->bActive))
         {
-         	// new object?
+            // new object?
             if ((obj->iMapX == -1) && (obj->iMapY == -1))
             {
                 obj->iMapX = -2;
                 obj->iMapY = -2;
 
                 iCCObjectID = obj->iObjectID;
-			    SendMessage6ToClean (CcWmINITOBJECT,
+                SendMessage6ToClean (CcWmINITOBJECT,
                                      obj->iObjType, obj->iSubType,
                                      obj->iObjectID, obj->iXPos, obj->iYPos,
                                      iFrameCounter);
@@ -2072,24 +2270,24 @@ void MoveObjects ()
 
                 if (obj->bActive)
                 {
-				    obj->iLastXPos = obj->iXPos;
-				    obj->iLastYPos = obj->iYPos;
-				
-				  	obj->iFixedXPos = obj->iXPos << 8;
-				  	obj->iFixedYPos = obj->iYPos << 8;
-				    obj->iLastFixedXPos = obj->iFixedXPos;
-				    obj->iLastFixedYPos = obj->iFixedYPos;
+                    obj->iLastXPos = obj->iXPos;
+                    obj->iLastYPos = obj->iYPos;
+
+                    obj->iFixedXPos = obj->iXPos << 8;
+                    obj->iFixedYPos = obj->iYPos << 8;
+                    obj->iLastFixedXPos = obj->iFixedXPos;
+                    obj->iLastFixedYPos = obj->iFixedYPos;
                 }
-			}
+            }
         }
         obj = obj->objNext;
     }
 
 
-	// remove all objects that are not active
-   	GameObjectDone (0);
+    // remove all objects that are not active
+    GameObjectDone (0);
 
-	CorrectView ();
+    CorrectView ();
 }
 
 #ifdef SMART_DRAW
@@ -2154,12 +2352,12 @@ void DrawObjects (int FromLayer, int ToLayer)
 
     SPRITEANIMATION *sa;
 
-  	RECT src, dst;
+    RECT src, dst;
     int flags, fx;
 
- 	while (obj)
+    while (obj)
     {
-		if (
+        if (
              (obj->bActive)
              &&
              ((!(obj->iDisplayOptions & DO_BLINK)) || (iFrameCounter % 2 == 0))
@@ -2174,7 +2372,7 @@ void DrawObjects (int FromLayer, int ToLayer)
             if (!(obj->iOptions & OO_STATIC))
             {
                 x -= XView;
-				y -= YView;
+                y -= YView;
             }
 
             if ((x < ScreenWidth) && (y < ScreenHeight))
@@ -2185,26 +2383,26 @@ void DrawObjects (int FromLayer, int ToLayer)
                     int gbW, gbH, gbBW, gbBH, gbCX, gbCY;
 
                     bid = sa->iBitmapID;
-			        if (OSGetGameBitmapInfo (bid,
+                    if (OSGetGameBitmapInfo (bid,
                                    &gbW, &gbH, &gbBW, &gbBH, &gbCX, &gbCY))
-				    {
-	                 	w = gbBW;
-	                 	h = gbBH;
+                    {
+                        w = gbBW;
+                        h = gbBH;
 
                         dw = w;  // dst size
                         dh = h;
                         if (obj->iDisplayOptions & DO_STRETCH)
                         {
-                         	dw = obj->iXSize;
+                            dw = obj->iXSize;
                             dh = obj->iYSize;
                         }
-		  //
-            			src.left = 0;
+          //
+                        src.left = 0;
                         src.top = 0;
                         src.right = w;
                         src.bottom = h;
 
- 						dst.left = x;
+                        dst.left = x;
                         dst.top = y;
                         dst.right = x + dw;
                         dst.bottom = y + dh;
@@ -2218,16 +2416,16 @@ void DrawObjects (int FromLayer, int ToLayer)
                             (seqpos >= 0))
                         {
                             maxblock = gbCX * gbCY;
-							mappos = 2 * sizeof (int) * seqpos;
-	                      	mapblock = (*(int *) &sa->sSequence[mappos]) - 1;
+                            mappos = 2 * sizeof (int) * seqpos;
+                            mapblock = (*(int *) &sa->sSequence[mappos]) - 1;
 
-		                    fx = (mapblock / maxblock) & 3;
-	 	                    mapblock %= maxblock;
-	                       	bmpx = (mapblock % gbCX) * w;
-	                       	bmpy = (mapblock / gbCX) * h;
+                            fx = (mapblock / maxblock) & 3;
+                            mapblock %= maxblock;
+                            bmpx = (mapblock % gbCX) * w;
+                            bmpy = (mapblock / gbCX) * h;
 
-                         	mir = FALSE;
-							if ( ((fx & 1) == 1)
+                            mir = FALSE;
+                            if ( ((fx & 1) == 1)
                                ^ (obj->iDisplayOptions & DO_MIRROR_LEFT_RIGHT)
                                ^ ( (obj->iOptions & OO_AUTO_MIRROR_LEFT_RIGHT) &&
                                    (obj->iOptions & OO_LAST_DIRECTION_LEFT)
@@ -2237,8 +2435,8 @@ void DrawObjects (int FromLayer, int ToLayer)
                                 mir = TRUE;
                             }
 
-                        	ups = FALSE;
-							if ( ((fx & 2) == 2)
+                            ups = FALSE;
+                            if ( ((fx & 2) == 2)
                                ^ (obj->iDisplayOptions & DO_MIRROR_UP_DOWN)
                                ^ ( (obj->iOptions & OO_AUTO_MIRROR_UP_DOWN) &&
                                    (obj->iOptions & OO_LAST_DIRECTION_UP)
@@ -2250,42 +2448,42 @@ void DrawObjects (int FromLayer, int ToLayer)
 
                             if (dst.right > ScreenWidth)
                             {
-								sw = ((ScreenWidth - dst.left) * w + dw - 1) / dw;
+                                sw = ((ScreenWidth - dst.left) * w + dw - 1) / dw;
                                 if (!mir)
-	                                src.right = src.left + sw;
+                                    src.right = src.left + sw;
                                 else
-	                                src.left = src.right - sw;
-								dw = ScreenWidth - dst.left;
+                                    src.left = src.right - sw;
+                                dw = ScreenWidth - dst.left;
                                 dst.right = ScreenWidth;
                             }
                             if (dst.bottom > ScreenHeight)
                             {
-								sh = ((ScreenHeight - dst.top) * h + dh - 1) / dh;
+                                sh = ((ScreenHeight - dst.top) * h + dh - 1) / dh;
                                 if (!ups)
-	                                src.bottom = src.top + sh;
+                                    src.bottom = src.top + sh;
                                 else
-	                                src.top = src.bottom - sh;
-								dh = ScreenHeight - dst.top;
+                                    src.top = src.bottom - sh;
+                                dh = ScreenHeight - dst.top;
                                 dst.bottom = ScreenHeight;
                             }
                             if (dst.left < 0)
                             {
-								sw = ((dst.right) * w + dw - 1) / dw;
+                                sw = ((dst.right) * w + dw - 1) / dw;
                                 if (!mir)
-	                                src.left = src.right - sw;
+                                    src.left = src.right - sw;
                                 else
-	                                src.right = src.left + sw;
-								dw = -dst.right;
+                                    src.right = src.left + sw;
+                                dw = -dst.right;
                                 dst.left = 0;
                             }
                             if (dst.top < 0)
                             {
-								sh = ((dst.bottom) * h + dh - 1) / dh;
+                                sh = ((dst.bottom) * h + dh - 1) / dh;
                                 if (!ups)
-	                                src.top = src.bottom - sh;
+                                    src.top = src.bottom - sh;
                                 else
-	                                src.bottom = src.top + sh;
-								dh = -dst.bottom;
+                                    src.bottom = src.top + sh;
+                                dh = -dst.bottom;
                                 dst.top = 0;
                             }
 
@@ -2302,9 +2500,9 @@ void DrawObjects (int FromLayer, int ToLayer)
 
                             OSDraw (&dst, bid, &src, mir, ups,
                                     obj->iDisplayOptions);
-	                    }
-	                }
-				}
+                        }
+                    }
+                }
             }
         }
         else
@@ -2321,15 +2519,15 @@ void DrawObjects (int FromLayer, int ToLayer)
 int DrawLayer (int mapid)
 {
 /*
-  	HRESULT ddrval;
-	DDBLTFX ddbltfx;
+    HRESULT ddrval;
+    DDBLTFX ddbltfx;
 */
-  	RECT r, src, dst;
+    RECT r, src, dst;
 
     int resultcode;
     int xstart, ystart;
-    int	x, y;
-  	int w, h;
+    int x, y;
+    int w, h;
     int mapx, mapy;
     int mapw, maph;
     int curw, curh;
@@ -2341,34 +2539,34 @@ int DrawLayer (int mapid)
 
     GAMELAYERMAPINFO *glmip = GetGameLayerMapInfo (mapid);
 
-   	resultcode = GR_INVALID_MAP_ID;
-   	if (glmip)
+    resultcode = GR_INVALID_MAP_ID;
+    if (glmip)
     {
         int gbW, gbH, gbBW, gbBH, gbCX, gbCY;
 
-    	resultcode = GR_INVALID_BITMAP_ID;
+        resultcode = GR_INVALID_BITMAP_ID;
       /*
         gbip = GetGameBitmapInfo (glmip->iBitmapID);
-    	if (gbip)
+        if (gbip)
       */
 
         if (OSGetGameBitmapInfo (glmip->iBitmapID,
                                     &gbW, &gbH, &gbBW, &gbBH, &gbCX, &gbCY))
-	    {
-           	w = gbBW;
-          	h = gbBH;
+        {
+            w = gbBW;
+            h = gbBH;
 
             maxblock = gbCX * gbCY;
 
             mapw = glmip->iMapWidth;
-			maph = glmip->iMapHeight;
+            maph = glmip->iMapHeight;
 
 
-          	/* calculate layer position */
+            /* calculate layer position */
 
-			SendMessage4ToClean (CcWmSCROLL, mapid, XView, YView, iFrameCounter);
-			xstart = gCci.p1;
-			ystart = gCci.p2;
+            SendMessage4ToClean (CcWmSCROLL, mapid, XView, YView, iFrameCounter);
+            xstart = gCci.p1;
+            ystart = gCci.p2;
 
 #ifdef SMART_DRAW
             if ((glmip->glmipNext == NULL) &&
@@ -2395,23 +2593,23 @@ int DrawLayer (int mapid)
                 iTopLayerLastY = setflipint (iTopLayerLastY, ystart);
             }
 #endif
-			mapy = ystart / h;
-           	r.top = ystart % h;
+            mapy = ystart / h;
+            r.top = ystart % h;
 
-           	for (y = 0; y < ScreenHeight; )
-           	{
-              	mapx = xstart / w;
-           		r.left = xstart % w;
-      			curh = Min (ScreenHeight - y, h - r.top);
+            for (y = 0; y < ScreenHeight; )
+            {
+                mapx = xstart / w;
+                r.left = xstart % w;
+                curh = Min (ScreenHeight - y, h - r.top);
 
-               	for (x = 0; x < ScreenWidth; )
-               	{
-                   	curw = Min (ScreenWidth - x, w - r.left);
+                for (x = 0; x < ScreenWidth; )
+                {
+                    curw = Min (ScreenWidth - x, w - r.left);
 
-                   	/* calculate position in map, read block number */
-                   	mappos = ((mapx % mapw) + ((mapy % maph) * mapw));
+                    /* calculate position in map, read block number */
+                    mappos = ((mapx % mapw) + ((mapy % maph) * mapw));
                     mappos *= sizeof (int);
-           			mapblock = (*(int *) &glmip->sMap[mappos]);
+                    mapblock = (*(int *) &glmip->sMap[mappos]);
 
                     if (mapblock < 0)  // sequence ID
                         mapblock = OSGetCurrentBlock (glmip->iBitmapID,
@@ -2424,16 +2622,16 @@ int DrawLayer (int mapid)
                         if (cmpflipint (GetSmart (x / w, y / h), mapblock))
                             mapblock = 0;
 #endif
-              		mapblock--;
+                    mapblock--;
                     fx = (mapblock / maxblock) & 3;
 
-                   	if (mapblock >= 0)
-                   	{
-	                    mapblock %= maxblock;
-                      	bmpx = (mapblock % gbCX) * w;
-                      	bmpy = (mapblock / gbCX) * h;
-                       	src.left = r.left + bmpx;
-                       	src.top = r.top + bmpy;
+                    if (mapblock >= 0)
+                    {
+                        mapblock %= maxblock;
+                        bmpx = (mapblock % gbCX) * w;
+                        bmpy = (mapblock / gbCX) * h;
+                        src.left = r.left + bmpx;
+                        src.top = r.top + bmpy;
 
                         mir = FALSE;
                         ups = FALSE;
@@ -2447,27 +2645,27 @@ int DrawLayer (int mapid)
                             ups = TRUE;
                             src.top = bmpy + h - curh - (r.top % w);
                         }
-                       	src.right = src.left + curw;
-                       	src.bottom = src.top + curh;
-                       	dst.left = x;
+                        src.right = src.left + curw;
+                        src.bottom = src.top + curh;
+                        dst.left = x;
                         dst.top = y;
                         dst.right = x + curw;
                         dst.bottom = y + curh;
                         OSDraw (&dst, glmip->iBitmapID, &src, mir, ups, 0);
 
-                   	}
-                   	x += curw;
-                   	r.left = 0;
-                   	mapx++;
-               	}
-           		y += curh;
-               	r.top = 0;
-               	mapy++;
-           	}
-	   		resultcode = GR_OK;
-       	}
-   	}
-	return resultcode;
+                    }
+                    x += curw;
+                    r.left = 0;
+                    mapx++;
+                }
+                y += curh;
+                r.top = 0;
+                mapy++;
+            }
+            resultcode = GR_OK;
+        }
+    }
+    return resultcode;
 }
 
 
@@ -2482,26 +2680,26 @@ int NextFrame (int fade)
     int i;
 
     resultcode = GR_FAILED;
-  	if (bGameActive)
+    if (bGameActive)
     {
-	    /* run block sequences */
+        /* run block sequences */
         OSRunBlockSequences ();
-	
-		/* run sprite animations */
-		while (sa)
+
+        /* run sprite animations */
+        while (sa)
         {
-			if ((sa->bLoop) && (--sa->iCounter <= 0))
+            if ((sa->bLoop) && (--sa->iCounter <= 0))
             {
-             	sa->iPosition++;
+                sa->iPosition++;
                 if (sa->iPosition >= sa->iSequenceLength)
-                 	sa->iPosition = 0;
-            	i = (2 * sa->iPosition * sizeof (int)) + sizeof (int);
-            	sa->iCounter = (*(int *) &sa->sSequence[i]);
+                    sa->iPosition = 0;
+                i = (2 * sa->iPosition * sizeof (int)) + sizeof (int);
+                sa->iCounter = (*(int *) &sa->sSequence[i]);
             }
-         	sa = sa->saNext;
+            sa = sa->saNext;
         }
 
-    	MoveObjects ();
+        MoveObjects ();
 
 
         if (iFrameCounter < 2)
@@ -2517,41 +2715,41 @@ int NextFrame (int fade)
         iNextLayer = 0x7FFFFFFF;
 
         i = 1;
-		while (glmip)
+        while (glmip)
         {
-			DrawLayer (glmip->iMapID);
+            DrawLayer (glmip->iMapID);
             iNextLayer = 0x7FFFFFFF;
-	    	DrawObjects (i, i);
+            DrawObjects (i, i);
             i++;
             glmip = glmip->glmipNext;
         }
         i = iNextLayer;
         while (i < 0x7FFFFFFF)
         {
-         	iNextLayer = 0x7FFFFFFF;
+            iNextLayer = 0x7FFFFFFF;
             DrawObjects (i, i);
             i = iNextLayer;
         }
-    	DrawObjects (0x7FFFFFFF, 0x7FFFFFFF);  /* InFront */
+        DrawObjects (0x7FFFFFFF, 0x7FFFFFFF);  /* InFront */
 
         /* now ask for the statistics */
         SendMessage0ToClean (CcWmSTATISTICS);
 
-    	resultcode = GR_OK;
+        resultcode = GR_OK;
     }
 
     if (fade != 0)  /* fade in */
     {
         int i;
        /*
-   	    int flags = DDBLT_WAIT + DDBLT_DDFX;
+        int flags = DDBLT_WAIT + DDBLT_DDFX;
         DDBLTFX ddbltfx;
         memset (&ddbltfx, 0, sizeof (ddbltfx));
         ddbltfx.dwSize = sizeof (ddbltfx);
         ddbltfx.dwDDFX = DDBLTFX_NOTEARING;
        */
 
-        if (fade == 1)          
+        if (fade == 1)
             for (i = 0; i < ScreenHeight / 2 - 1; i++)
             {
                 RECT r = {0, 0, ScreenWidth, ScreenHeight};
@@ -2568,10 +2766,10 @@ int NextFrame (int fade)
 
                 OSBlit (&r);
               /*
-    	      	ddrval = IDirectDrawSurface_Blt
-    	             (lpDDSFront, &dst, lpDDSBack, &src, flags, &ddbltfx);
-    	        if (ddrval == DDERR_SURFACELOST)
-    	            DDRestoreAll ();
+                ddrval = IDirectDrawSurface_Blt
+                     (lpDDSFront, &dst, lpDDSBack, &src, flags, &ddbltfx);
+                if (ddrval == DDERR_SURFACELOST)
+                    DDRestoreAll ();
               */
             }
 
@@ -2594,53 +2792,53 @@ int NextFrame (int fade)
 
                 OSBlit (&r);
             /*
-    	      	ddrval = IDirectDrawSurface_Blt
-    	             (lpDDSFront, &dst, lpDDSBack, &src, flags, &ddbltfx);
-    	        if (ddrval == DDERR_SURFACELOST)
-    	            DDRestoreAll ();
+                ddrval = IDirectDrawSurface_Blt
+                     (lpDDSFront, &dst, lpDDSBack, &src, flags, &ddbltfx);
+                if (ddrval == DDERR_SURFACELOST)
+                    DDRestoreAll ();
             */
             }
     }
 
     if (fade == 0)
     {
-		if (FullScreen)
+        if (FullScreen)
             OSFlip ();
-	    else
-	    {
-	        /* running in a window */
-			RECT r = {0, 0, ScreenWidth, ScreenHeight};
+        else
+        {
+            /* running in a window */
+            RECT r = {0, 0, ScreenWidth, ScreenHeight};
             OSBlit (&r);
          /*
-			int flags = DDBLTFAST_WAIT;
-			RECT src = {0, 0, ScreenWidth, ScreenHeight};
-	    / /
-	        RECT dst = {20, 20, ScreenWidth - 40, ScreenHeight - 40};
-	        DDBLTFX ddbltfx;
-	
-	        memset (&ddbltfx, 0, sizeof (ddbltfx));
-	        ddbltfx.dwSize = sizeof (ddbltfx);
-	        ddbltfx.dwAlphaDestConst = 0x001020F0;
-	        ddbltfx.dwAlphaEdgeBlend = 0x10203040;
-	        ddbltfx.dwFillDepth = 0x10709040;
-	
-	        flags = DDBLT_ALPHADESTCONSTOVERRIDE
-	              | DDBLT_ALPHAEDGEBLEND
-	              | DDBLT_ALPHASRC
-	              | DDBLT_DEPTHFILL
-	              | DDBLT_WAIT;
-	      	ddrval = IDirectDrawSurface_Blt
-	             (lpDDSFront, &dst, lpDDSBack, &src, flags, &ddbltfx);
+            int flags = DDBLTFAST_WAIT;
+            RECT src = {0, 0, ScreenWidth, ScreenHeight};
+        / /
+            RECT dst = {20, 20, ScreenWidth - 40, ScreenHeight - 40};
+            DDBLTFX ddbltfx;
+
+            memset (&ddbltfx, 0, sizeof (ddbltfx));
+            ddbltfx.dwSize = sizeof (ddbltfx);
+            ddbltfx.dwAlphaDestConst = 0x001020F0;
+            ddbltfx.dwAlphaEdgeBlend = 0x10203040;
+            ddbltfx.dwFillDepth = 0x10709040;
+
+            flags = DDBLT_ALPHADESTCONSTOVERRIDE
+                  | DDBLT_ALPHAEDGEBLEND
+                  | DDBLT_ALPHASRC
+                  | DDBLT_DEPTHFILL
+                  | DDBLT_WAIT;
+            ddrval = IDirectDrawSurface_Blt
+                 (lpDDSFront, &dst, lpDDSBack, &src, flags, &ddbltfx);
           / /
-	      	ddrval = IDirectDrawSurface_BltFast (lpDDSFront, 0, 0, lpDDSBack, &src, flags);
-	
-	        if (ddrval == DDERR_SURFACELOST)
-	            DDRestoreAll ();
-	    */
-	    }
+            ddrval = IDirectDrawSurface_BltFast (lpDDSFront, 0, 0, lpDDSBack, &src, flags);
+
+            if (ddrval == DDERR_SURFACELOST)
+                DDRestoreAll ();
+        */
+        }
     }
 
-	return resultcode;
+    return resultcode;
 }
 
 
@@ -2669,11 +2867,11 @@ WinSetObjectFocus (int x1, int y1, int x2, int y2, int maxxv, int maxyv,
                    OS ios, int *result, OS *oos)
 {
     OBJECTREC *obj = GetObjectRec (iCCObjectID);
- 	int resultcode = GR_NOT_FOUND;
+    int resultcode = GR_NOT_FOUND;
 
     if (obj)
     {
-   		iFollowID = iCCObjectID;
+        iFollowID = iCCObjectID;
 
         iFollowX1 = x1;
         iFollowY1 = y1;
@@ -2686,13 +2884,13 @@ WinSetObjectFocus (int x1, int y1, int x2, int y2, int maxxv, int maxyv,
         iActualXView = XView;
         iActualYView = YView;
 
-       	XScrollSpeed = 0;
+        XScrollSpeed = 0;
         YScrollSpeed = 0;
 
         resultcode = GR_OK;
     }
 
-	*result = resultcode;
+    *result = resultcode;
     *oos = ios;
 }
 
@@ -2709,7 +2907,7 @@ void CreateGameObject (int mapval, int above, int x, int y,
 
     // create a unique id number
     newid = 1;
-	while (GetObjectRec (newid))
+    while (GetObjectRec (newid))
         newid++;
 
     objNew = rmalloc (sizeof (OBJECTREC));
@@ -2728,18 +2926,18 @@ void CreateGameObject (int mapval, int above, int x, int y,
 
     while (obj1)
     {
-     	obj2 = obj1;
+        obj2 = obj1;
         obj1 = obj1->objNext;
     }
 
     if (obj2)
-      	obj2->objNext = objNew;
+        obj2->objNext = objNew;
     else
         objObjects = objNew;
 
     // object remains inactive until moveobject() is run
 
-	*result = GR_OK;
+    *result = GR_OK;
 }
 
 
@@ -2755,7 +2953,7 @@ WinSetObjectRec (int id, int objtype, int subtype, BOOL active,
                  OS ios, int *result, OS *oos)
 {
     OBJECTREC *obj = GetObjectRec (id);
- 	int resultcode = GR_NOT_FOUND;
+    int resultcode = GR_NOT_FOUND;
 
     if (obj)
     {
@@ -2766,7 +2964,7 @@ WinSetObjectRec (int id, int objtype, int subtype, BOOL active,
         obj->iYPos = ypos;
         obj->iXSize = xsize;
         obj->iYSize = ysize;
-		obj->iXOffset = xoffset;
+        obj->iXOffset = xoffset;
         obj->iYOffset = yoffset;
         if (spriteid != obj->iLastSprite)
         {
@@ -2800,8 +2998,8 @@ WinSetObjectRec (int id, int objtype, int subtype, BOOL active,
         resultcode = GR_OK;
     }
 
-	*result = resultcode;
-	*oos = ios;
+    *result = resultcode;
+    *oos = ios;
 }
 
 
@@ -2817,7 +3015,7 @@ WinGetObjectRec (int id, OS ios, int *objtype, int *subtype, BOOL *active,
                  int *result, OS *oos)
 {
     OBJECTREC *obj = GetObjectRec (id);
- 	int resultcode = GR_NOT_FOUND;
+    int resultcode = GR_NOT_FOUND;
 
     if (obj)
     {
@@ -2828,7 +3026,7 @@ WinGetObjectRec (int id, OS ios, int *objtype, int *subtype, BOOL *active,
         *ypos = obj->iYPos;
         *xsize = obj->iXSize;
         *ysize = obj->iYSize;
-		*xoffset = obj->iXOffset;
+        *xoffset = obj->iXOffset;
         *yoffset = obj->iYOffset;
         *spriteid = (obj->iSpriteID & 0xFFFF) | (obj->iSpriteIndex << 16);
         *displayoptions = obj->iDisplayOptions;
@@ -2854,8 +3052,8 @@ WinGetObjectRec (int id, OS ios, int *objtype, int *subtype, BOOL *active,
 
         resultcode = GR_OK;
     }
- 	*result = resultcode;
-	*oos = ios;
+    *result = resultcode;
+    *oos = ios;
 }
 
 
@@ -2870,11 +3068,12 @@ WinShowStatistic (int x, int y, CLEAN_STRING format, int value,
 {
     HDC hdc;
     char Buffer[1024];
-    RECT rect = {0, 0, ScreenWidth, ScreenHeight};
+    RECT rect = {XShiftScreen, YShiftScreen,
+                 ScreenWidth + XShiftScreen, ScreenHeight + YShiftScreen};
 
     if (OSGetGameWindowHDC (&hdc))
     {
-     	static HFONT hfont = NULL;
+        static HFONT hfont = NULL;
         SIZE size;
 
         if (hfont)
@@ -2892,50 +3091,55 @@ WinShowStatistic (int x, int y, CLEAN_STRING format, int value,
                             cstring (font));
         if (hfont)
         {
-	        SelectObject (hdc, hfont);
-	
-	     	if (value == NOTHING)
-				wsprintf (Buffer, cstring (format));
-	        else
-				wsprintf (Buffer, cstring (format), value);
-	
-			SetBkColor (hdc, 0);
-	        SetBkMode (hdc, TRANSPARENT);
+            SelectObject (hdc, hfont);
+
+            if (value == NOTHING)
+                wsprintf (Buffer, cstring (format));
+            else
+                wsprintf (Buffer, cstring (format), value);
+
+            SetBkColor (hdc, 0);
+            SetBkMode (hdc, TRANSPARENT);
 
             GetTextExtentPoint (hdc, Buffer, lstrlen (Buffer), &size);
 
             if (options & SO_X_FROM_SCREEN_CENTER)
-              	x += ScreenWidth / 2;
+                x += ScreenWidth / 2;
             if (options & SO_X_CENTERED)
                 x -= size.cx / 2;
-            if (x < 0)
-                x = ScreenWidth - size.cx + x;
+            if (Buffer[0] != ' ')
+                if (x < 0)
+                    x = ScreenWidth - size.cx + x;
 
             if (options & SO_Y_FROM_SCREEN_CENTER)
-              	y += ScreenHeight / 2;
+                y += ScreenHeight / 2;
             if (options & SO_Y_CENTERED)
                 y -= size.cy / 2;
-            if (y < 0)
-                y = ScreenHeight - size.cy + y;
+            if (Buffer[0] != ' ')
+                if (y < 0)
+                    y = ScreenHeight - size.cy + y;
+
+            x += XShiftScreen;
+            y += YShiftScreen;
 
             if (shadow)
             {
-				SetTextColor (hdc, RGB (shadowr, shadowg, shadowb));
-		        ExtTextOut (hdc, x + shadowx, y + shadowy, ETO_CLIPPED,
+                SetTextColor (hdc, RGB (shadowr, shadowg, shadowb));
+                ExtTextOut (hdc, x + shadowx, y + shadowy, ETO_CLIPPED,
                             &rect, Buffer, lstrlen (Buffer), NULL);
             }
 
-			SetTextColor (hdc, RGB (r, g, b));
-	        ExtTextOut (hdc, x, y, ETO_CLIPPED, &rect,
-	                    Buffer, lstrlen (Buffer), NULL);
+            SetTextColor (hdc, RGB (r, g, b));
+            ExtTextOut (hdc, x, y, ETO_CLIPPED, &rect,
+                        Buffer, lstrlen (Buffer), NULL);
 
         }
         OSReleaseGameWindowHandle (hdc);
     }
 
 
- 	*result = GR_OK;
-	*oos = ios;
+    *result = GR_OK;
+    *oos = ios;
 }
 
 extern EXPORT_TO_CLEAN
@@ -2948,14 +3152,14 @@ void WinPlayMusic (CLEAN_STRING midifile, BOOL restart, OS ios,
         resultcode = GR_OK;
 
     *result = resultcode;
-	*oos = ios;
+    *oos = ios;
 }
 
 extern EXPORT_TO_CLEAN
 void WinStopMusic (OS ios, int *result, OS *oos)
 {
     *result = OSStopMusic ();
-	*oos = ios;
+    *oos = ios;
 }
 
 /* set extra level options */
@@ -2971,12 +3175,12 @@ void WinGameLevelOptions (int r, int g, int b,
     if (r * g * b >= 0)
     {
         bFillBackground = TRUE;
-    	FillBackgroundRGB = RGB (r, g, b);
+        FillBackgroundRGB = RGB (r, g, b);
     }
     bFadeIn = fadein;
     bFadeOut = fadeout;
     *result = GR_OK;
-	*oos = ios;
+    *oos = ios;
 }
 
 /* init a sound sample or clear all samples if id = -1 */
@@ -2994,7 +3198,7 @@ void WinInitSoundSample (int id, CLEAN_STRING name, int buffers,
         if (!OSInitSoundSample (id, cstring (name), buffers))
             *result = GR_OS_ERROR;
     }
-	*oos = ios;
+    *oos = ios;
 }
 
 
@@ -3012,7 +3216,7 @@ void WinGetBoundMap (int x, int y, OS ios,
     if (!(sBoundMap))
         return;
     if ((x < 0) || (y < 0))
-      	return;
+        return;
     if ((x > BoundMapWidth - 1) || (y > BoundMapHeight - 1))
         return;
 
@@ -3032,7 +3236,7 @@ void WinSetBoundMap (int x, int y, int newvalue, OS ios,
     if (!(sBoundMap))
         return;
     if ((x < 0) || (y < 0))
-      	return;
+        return;
     if ((x > BoundMapWidth - 1) || (y > BoundMapHeight - 1))
         return;
 
@@ -3048,23 +3252,23 @@ void WinPlaySoundSample (int id, int volume, int pan, int freq, int delay,
 
     if (delay == 0)
     {
-	    SOUNDSAMPLEINFO *ssi = GetSoundSampleInfo (id);
-	
-	    if (ssi)
-	    {
-		    IDirectSoundBuffer *pDSB = SndObjGetFreeBuffer (ssi->hsoSoundBuffer);
-		
-		 	if (bSoundEnabled)
-		    {
-		     	if (pDSB)
-		        {
-		            IDirectSoundBuffer_SetVolume (pDSB, (LONG) volume);
-		            IDirectSoundBuffer_SetPan (pDSB, (LONG) pan);
-		            IDirectSoundBuffer_SetFrequency (pDSB, (LONG) freq);
-		            IDirectSoundBuffer_Play (pDSB, 0, 0, 0);
-		        }
-		    }
-	    }
+        SOUNDSAMPLEINFO *ssi = GetSoundSampleInfo (id);
+
+        if (ssi)
+        {
+            IDirectSoundBuffer *pDSB = SndObjGetFreeBuffer (ssi->hsoSoundBuffer);
+
+            if (bSoundEnabled)
+            {
+                if (pDSB)
+                {
+                    IDirectSoundBuffer_SetVolume (pDSB, (LONG) volume);
+                    IDirectSoundBuffer_SetPan (pDSB, (LONG) pan);
+                    IDirectSoundBuffer_SetFrequency (pDSB, (LONG) freq);
+                    IDirectSoundBuffer_Play (pDSB, 0, 0, 0);
+                }
+            }
+        }
     }
     else
     {
@@ -3072,7 +3276,7 @@ void WinPlaySoundSample (int id, int volume, int pan, int freq, int delay,
     }
 
     *result = GR_OK;
-	*oos = ios;
+    *oos = ios;
 }
 */
 
