@@ -56,9 +56,10 @@ where
 	where
 		sc` x xc` ac` ss` = sc {node = x, src = toString (take (length ss - length ss`) ss)} xc` ac` ss`
 */
-parser{|NTexpression|} t = (parser{|*|} Want <@ Term) <&> p
+parser{|NTexpression|} Try = (parser{|*|} Try <@ Term) <&> p 
 where
 	p x = (sp (parser{|*|} Try) <&> \y -> p (Apply x y)) <!> yield x
+parser{|NTexpression|} Want = parser{|*|} Try <!> raise (ParserRequired "NTexpression")
 
 parser{|NTvariable|} t
 	= lowercaseIdentifier <&> (\n -> if (isMember n keywords) fail (yield (NTvariable n)))
@@ -84,7 +85,7 @@ parser{|NTnameOrValue|} Try
 	<!> (lowercaseIdentifier <!> uppercaseIdentifier <!> funnyIdentifier) <&> (\n -> if (isMember n keywords) fail (yield (NTname n)))
 parser{|NTnameOrValue|} Want = parser{|*|} Try <!> raise (ParserRequired "NTnameOrValue")
 
-parser{|(|-|)|} ga ge gb t = ga t &> sp (ge t) <& sp (gb Want) <@ |-|
+parser{|(|-|)|} ga ge gb t = ga t &> sp (ge t) <& sp (gb t) <@ |-|
 
 parser{|(+-)|} ge gs t = parseSequence (sp (ge t)) (sp (gs t)) <@ \[x:xs] -> +- [x:xs]
 

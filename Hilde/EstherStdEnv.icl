@@ -6,18 +6,21 @@ import StdEnv
 stdEnv :: [(String, Dynamic)]
 stdEnv = 
 	[	("if", dynamic IF :: A.a: Bool a a -> a) 
-	] ++ stdOverloaded ++ stdClass ++ stdInt ++ stdReal ++ stdList ++ stdFunc ++ stdMisc
+	]	
+	++ stdOverloaded ++ stdClass ++ stdInt ++ stdReal ++ stdList 
+	++ stdFunc ++ stdMisc ++ stdBool ++ stdString ++ stdTuple
 where
 	IF x y z = if x y z
 
 	stdOverloaded = 
-		[	("(+) infixl 6", overloaded "+" (dynamic (undef, \d -> d) :: A.a: (a, (a a -> a) a a -> a)))
-		,	("(-) infixl 6", overloaded "-" (dynamic (undef, \d -> d) :: A.a: (a, (a a -> a) a a -> a)))
-		,	("(*) infixl 7", overloaded "*" (dynamic (undef, \d -> d) :: A.a: (a, (a a -> a) a a -> a)))
-		,	("(^) infixr 8", overloaded "^" (dynamic (undef, \d -> d) :: A.a: (a, (a a -> a) a a -> a)))
-		,	("(==) infix 4", overloaded "==" (dynamic (undef, \d -> d) :: A.a: (a, (a a -> Bool) a a -> Bool)))
-		,	("one", overloaded "one" (dynamic (undef, \d -> d) :: A.a: (a, a -> a)))
-		,	("(<) infix 4", overloaded "<" (dynamic (undef, \d -> d) :: A.a: (a, (a a -> Bool) a a -> Bool)))
+		[	("(+) infixl 6", overloaded "+" (dynamic (undef, id) :: A.a: (a, (a a -> a) a a -> a)))
+		,	("(-) infixl 6", overloaded "-" (dynamic (undef, id) :: A.a: (a, (a a -> a) a a -> a)))
+		,	("(*) infixl 7", overloaded "*" (dynamic (undef, id) :: A.a: (a, (a a -> a) a a -> a)))
+		,	("(^) infixr 8", overloaded "^" (dynamic (undef, id) :: A.a: (a, (a a -> a) a a -> a)))
+		,	("(==) infix 4", overloaded "==" (dynamic (undef, id) :: A.a: (a, (a a -> Bool) a a -> Bool)))
+		,	("(+++) infixr 5", overloaded "+++" (dynamic (undef, id) :: A.a: (a, (a a -> Bool) a a -> Bool)))
+		,	("one", overloaded "one" (dynamic (undef, id) :: A.a: (a, a -> a)))
+		,	("(<) infix 4", overloaded "<" (dynamic (undef, id) :: A.a: (a, (a a -> Bool) a a -> Bool)))
 		]
 	
 	stdClass =
@@ -72,3 +75,23 @@ where
 		[	("undef", dynamic undef :: A.a: a)
 		,	("abort", dynamic abort :: A.a: String -> a)
 		]
+
+	stdBool =
+		[	("not", dynamic not)
+		,	("(||) infixr 2", dynamic (||))
+		,	("(&&) infixr 3", dynamic (&&))
+		,	("instance == Bool", dynamic (==) :: Bool Bool -> Bool)
+		]
+
+	stdString =
+		[	("instance +++ {#Char}", dynamic (+++) :: String String -> String)
+		]
+
+	stdTuple =
+		[	("fst", dynamic fst :: A.a b: (a, b) -> a)
+		,	("snd", dynamic snd :: A.a b: (a, b) -> b)
+		,	("fst3", dynamic fst3 :: A.a b c: (a, b, c) -> a)
+		,	("snd3", dynamic snd3 :: A.a b c: (a, b, c) -> b)
+		,	("thd3", dynamic thd3 :: A.a b c: (a, b, c) -> c)
+		]
+		
