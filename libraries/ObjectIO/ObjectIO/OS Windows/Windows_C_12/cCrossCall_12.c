@@ -6,7 +6,9 @@
 /* ...Mike */
 
 // MW...
-#include "cprinter_12.c"
+#include "cprinter_12.h"
+#include "cTCP.h"
+#include "winsock.h"
 
 #ifdef HILT
 #include <htmlhelp.h>
@@ -14,13 +16,11 @@ int		htmlHelpInitialized = FALSE;
 DWORD	htmlHelpCookie;
 #endif
 
-// MW:	Since currently cCrosscall.o, cDebug.o, cPicture.o and util.o are the ONLY object files,
-//		which can be linked automatically, I include all routines for printing here.
-//		CPrinter.c could also be compiled separately. 
 #include <commctrl.h>
 extern BOOL bUserAbort;
 extern HWND   hDlgPrint;						/* MW: hDlgPrint is the handle of the "Cancel Printing" dialog. */
 extern HWND   hwndText;							/* MW: hwndText  is the handle of the page count text in the dialog. */
+DNSInfo		*DNSInfoList=NULL;
 // ...MW
 CrossCallInfo gCci;
 static BOOL gEventsInited = FALSE;
@@ -81,6 +81,7 @@ static CrossCallInfo *MakeReturn2Cci (CrossCallInfo * pcci, int v1, int v2);
 static CrossCallInfo *MakeReturn3Cci (CrossCallInfo * pcci, int v1, int v2, int v3);
 static CrossCallInfo *MakeReturn4Cci (CrossCallInfo * pcci, int v1, int v2, int v3, int v4);
 static CrossCallInfo *MakeReturn5Cci (CrossCallInfo * pcci, int v1, int v2, int v3, int v4, int v5);
+static CrossCallInfo *MakeReturn6Cci (CrossCallInfo * pcci, int v1, int v2, int v3, int v4, int v5, int v6);
 
 /*	Menu(item)IDs are not allowed to exceed OSMenuIDEnd.
 	This is because window ids start at (OSMenuIDEnd+5), and need to be distinct from menu ids
@@ -1610,6 +1611,22 @@ DialogProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 */
 
 
+// MW...
+void lookUpAndRemove(WPARAM dnsHdl,DNSInfo **listPtr,DNSInfo **elPtr)
+// This function is used to look up an element with a matching dnsHdl-field in
+// the DNSInfoList. This element will then be removed from the list.
+{
+	if ((WPARAM)(*listPtr)->dnsHdl==dnsHdl)
+		{	// the object to look up has been found, so remove it from the list
+			// and give it back via elPtr.
+			*elPtr = *listPtr;
+			*listPtr = (*listPtr)->next;
+		}
+	  else
+		lookUpAndRemove(dnsHdl, &(*listPtr)->next, elPtr);	
+}
+// ... MW
+
 /*	The callback routine for the main window.
 */
 static LRESULT CALLBACK
@@ -1680,6 +1697,77 @@ MainWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara, LPARAM lPara)
 				}
 			}
 			break;
+// MW...
+		case PM_SOCKET_EVENT:
+			{
+				// wPara is the socket handle
+				// LOWORD(lPara) is the message
+				// HIWORD(lPara) is an error code
+				switch (LOWORD(lPara))
+				{	case FD_OOB:
+					case FD_READ:	SendMessage3ToClean(CcWmINETEVENT,IE_RECEIVED, wPara,
+														RChanReceiver);
+									break;
+					case FD_WRITE:	SendMessage3ToClean(CcWmINETEVENT,IE_SENDABLE, wPara,
+														SChanReceiver);
+									break;
+					case FD_ACCEPT:	SendMessage3ToClean(CcWmINETEVENT,IE_CONNECTREQUEST, wPara,
+														ListenerReceiver);
+									break;
+					case FD_CONNECT:SendMessage3ToClean(
+										CcWmINETEVENT,
+										HIWORD(lPara)==0 ?	IE_ASYNCCONNECTCOMPLETE :
+															IE_ASYNCCONNECTFAILED,
+										wPara,
+										ConnectReceiver);
+									break;
+					case FD_CLOSE:	{
+									dictitem	*pDictitem;
+									pDictitem		= lookup(wPara);
+									if (pDictitem) {
+										if (pDictitem->hasReceiveNotifier)
+											SendMessage3ToClean(CcWmINETEVENT,IE_EOM, wPara,
+																RChanReceiver);
+									
+										if (pDictitem->hasSendableNotifier && HIWORD(lPara)!=0)
+											SendMessage3ToClean(CcWmINETEVENT,IE_DISCONNECTED, wPara,
+																SChanReceiver);
+										};
+									};
+									break;
+				};
+			};
+			break;
+		case PM_DNS_EVENT:
+			{ // wPara contains the DNS handle (the handle created by WSAAsyncGetHostByName
+			  // The IP-adress of the looked up host will have been written into the
+			  // corresponding element of the DNSInfoList. Look it up:
+
+			  struct DNSInfo	*elPtr;
+			  int				errCode;
+
+			  errCode = HIWORD(lPara);
+
+			  lookUpAndRemove(wPara,&DNSInfoList,&elPtr);
+			  
+			  // *elPtr contains the info
+
+			  SendMessage4ToClean(	CcWmINETEVENT,
+									errCode ?	IE_IPADDRESSNOTFOUND :
+												IE_IPADDRESSFOUND,							,
+									elPtr->dnsHdl,
+									DNSReceiver,
+									errCode ?
+										0 :
+										ntohl(((int*)(*(elPtr->junion.Hostent.h_addr_list)))[0])
+								 );
+
+			  // deallocate unused memory
+			  LocalFree(elPtr);
+			  
+			};
+			break;
+// ... MW
 		case WM_DDE_INITIATE:
 			{
 				static char apptext[256], topictext[256];
@@ -6478,25 +6566,36 @@ HandleCleanRequest (CrossCallInfo * pcci)
 			}
 			break;
 // MW...
+		case CcRqDO_PRINT_SETUP:
+			{	int ok;
+				PRINTDLG *pdPtr;
+				printSetup(0, pcci->p1,
+							(char*) pcci->p2, (char*) pcci->p3, (char*) pcci->p4, (char*) pcci->p5,
+							&ok, &pdPtr);
+				MakeReturn2Cci (pcci, ok, (int) pdPtr);
+			} break;
 		case CcRqGET_PRINTER_DC:
-			{	int doDialog,emulateScreen,ok,first,last,copies,deviceContext,dummy;
+			{	int doDialog,emulateScreenRes,
+					err,first,last,copies,pPrintDlg,deviceContext;
 	
-				//rprintf("GET_PRINTER_DC\n");
-				doDialog =  pcci->p1;
-				emulateScreen =  pcci->p2;
-				getDC(doDialog,emulateScreen,0,42,&ok,&first,&last,&copies,&deviceContext,&dummy);
-				MakeReturn5Cci (pcci,ok,first,last,copies,deviceContext);
+				// unpack doDialog and emulateScreenRes
+				doDialog			= (pcci->p1) & 1;
+				emulateScreenRes	= (pcci->p1) & 2;
+
+				getDC(	doDialog,emulateScreenRes,FALSE,pcci->p2,
+						(char*) pcci->p3,(char*) pcci->p4,(char*) pcci->p5,(char*) pcci->p6,
+						&err,&first,&last,&copies,(PRINTDLG**)&pPrintDlg,&deviceContext);
+				MakeReturn6Cci (pcci,err,first,last,copies,pPrintDlg,deviceContext);
 			} break;
 		case CcRqSTARTDOC:
-			{	HDC hdc = (HDC) pcci->p1;
-				int err,dummy1,dummy2;
-
-				//rprintf("1 Before EnableWindow ghMainWindow:%i\n",ghMainWindow);
+			{	
+				HDC hdc = (HDC) pcci->p1;
+				int err;
+				
 				EnableWindow (ghMainWindow, FALSE) ;
-				//rprintf("1 Before CreateCancelDialog\n");
-			    hDlgPrint = CreateCancelDialog ();
+				hDlgPrint = CreateCancelDialog ();
 				SetAbortProc (hdc, AbortProc) ;
-				startDoc((int) hdc,0,&err,&dummy1,&dummy2);
+				err = startDoc((int) hdc);
 				if (err<=0 && ghMainWindow!=NULL && !bUserAbort)
 					{
 						EnableWindow (ghMainWindow, TRUE) ;
@@ -6507,9 +6606,8 @@ HandleCleanRequest (CrossCallInfo * pcci)
 		case CcRqENDDOC:
 			{	
 				HDC hdc = (HDC) pcci->p1;
-				int dummy1,dummy2;
-
-				endDoc((int) hdc,0,&dummy1,&dummy2);
+				
+				endDoc((int) hdc);
 				if (ghMainWindow!=NULL && !bUserAbort)
 					{
 						EnableWindow (ghMainWindow, TRUE) ;
@@ -6523,9 +6621,7 @@ HandleCleanRequest (CrossCallInfo * pcci)
 				char	*pageMessage= (char*) (pcci->p1);
 
 				SetWindowText(hwndText,pageMessage);
-
-				//rprintf("CcRqDISPATCH_MESSAGES_WHILE_PRINTING\n");
-			    
+				
 				while (!bUserAbort && PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
 					{
 					if (!hDlgPrint || !IsDialogMessage (hDlgPrint, &msg))
@@ -6702,9 +6798,9 @@ WinKillOsThread (OS os)
 		rprintf ("         DeleteObject(gWinFont);\n");
 
 		DeleteObject (gControlFont);	// The global logical font must be deleted.
-	}
+	};
 // MW...
-	ghMainWindow = NULL;	// XXX still don't know whether this is OK
+	ghMainWindow = NULL;
 // ... MW
 
 	return os;
@@ -7095,6 +7191,19 @@ MakeReturn5Cci (CrossCallInfo * pcci, int v1, int v2, int v3, int v4, int v5)
 	pcci->p3 = v3;
 	pcci->p4 = v4;
 	pcci->p5 = v5;
+	return pcci;
+}
+
+CrossCallInfo *
+MakeReturn6Cci (CrossCallInfo * pcci, int v1, int v2, int v3, int v4, int v5, int v6)
+{
+	pcci->mess = CcRETURN6;
+	pcci->p1 = v1;
+	pcci->p2 = v2;
+	pcci->p3 = v3;
+	pcci->p4 = v4;
+	pcci->p5 = v5;
+	pcci->p6 = v6;
 	return pcci;
 }
 

@@ -12,7 +12,8 @@ instance TimerElements (Receiver m) where
 	timerElementToHandles :: !(Receiver m .ls (PSt .l .p)) !(PSt .l .p) -> (![TimerElementState .ls (PSt .l .p)],!PSt .l .p)
 	timerElementToHandles (Receiver rid f atts) pState
 		= (	[TimerElementHandleToTimerElementState
-				(TimerReceiverHandle {	tReceiverHandle	= newReceiverHandle id (getSelectState atts) f
+// MW11 was				(TimerReceiverHandle {	tReceiverHandle	= newReceiverHandle id (getSelectState atts) f
+				(TimerReceiverHandle {	tReceiverHandle	= newReceiverHandle id (getSelectState atts) (getConnectedIds atts) f
 									 ,	tReceiverAtts	= [TimerId id:map ReceiverAttToTimerAtt atts]
 									 })
 			]
@@ -28,7 +29,8 @@ instance TimerElements (Receiver2 m r) where
 	timerElementToHandles :: !(Receiver2 m r .ls (PSt .l .p)) !(PSt .l .p) -> (![TimerElementState .ls (PSt .l .p)],!PSt .l .p)
 	timerElementToHandles (Receiver2 rid f atts) pState
 		= (	[TimerElementHandleToTimerElementState
-				(TimerReceiverHandle {	tReceiverHandle	= newReceiverHandle2 id (getSelectState atts) f
+// MW11 was				(TimerReceiverHandle {	tReceiverHandle	= newReceiverHandle2 id (getSelectState atts) f
+				(TimerReceiverHandle {	tReceiverHandle	= newReceiverHandle2 id (getSelectState atts) (getConnectedIds atts) f
 									 ,	tReceiverAtts	= [TimerId id:map ReceiverAttToTimerAtt atts]
 									 })
 			]
@@ -40,10 +42,22 @@ instance TimerElements (Receiver2 m r) where
 	getTimerElementType :: (Receiver2 m r .ls .ps) -> TimerElementType
 	getTimerElementType _ = "Receiver2"
 
+/* MW11
 getSelectState :: ![ReceiverAttribute .ps] -> SelectState
 getSelectState rAtts
 	= getReceiverSelectStateAtt (snd (Select isReceiverSelectState (ReceiverSelectState Able) rAtts))
+*/
 
 ReceiverAttToTimerAtt :: !(ReceiverAttribute .ps) -> TimerAttribute .ps
 ReceiverAttToTimerAtt (ReceiverSelectState s)
 	= TimerSelectState s
+
+// MW11..
+getSelectState :: ![ReceiverAttribute .ps] -> SelectState
+getSelectState rAtts
+	= getReceiverSelectStateAtt (snd (Select isReceiverSelectState (ReceiverSelectState Able) rAtts))
+
+getConnectedIds :: ![ReceiverAttribute .ps] -> [Id]
+getConnectedIds rAtts
+	= getReceiverConnectedReceivers (snd (Select isReceiverConnectedReceivers (ReceiverConnectedReceivers []) rAtts))
+// .. MW11

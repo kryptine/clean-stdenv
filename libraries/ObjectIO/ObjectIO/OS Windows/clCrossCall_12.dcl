@@ -79,6 +79,7 @@ CcRqRUNGAME					:== 1901
 CcRqCREATEGAMEWINDOW		:== 1900
 ///
 // MW...
+CcRqDO_PRINT_SETUP			:== 1828 // MW11++
 CcRqDO_HTML_HELP			:==	1827
 CcRqGET_PRINTER_DC			:== 1824
 CcRqDISPATCH_MESSAGES_WHILE_PRINTING
@@ -218,6 +219,8 @@ CcWmINITOBJECT				:== 502     /* Mike: initialize new object */
 CcWmSCROLL					:== 501     /* Mike: calculate layer position */
 CcWmGAMEKEYBOARD			:== 500     /* Mike: keyboard input for game */
 ///
+CcWmINETEVENT				:==	140		/* MW11 */
+
 CcWmLOSTKEY					:== 135		/* PA: new constant for loosing keyboard input (generated only by Clean). */
 CcWmLOSTMOUSE				:== 134		/* PA: new constant for loosing mouse input    (generated only by Clean). */
 CcWmSPECIALBUTTON			:==	133		/* PA: new constant for info about OK/CANCEL button selected. */

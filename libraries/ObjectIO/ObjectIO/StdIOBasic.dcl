@@ -90,3 +90,5 @@ movePoint	:: !Vector2 !Point2 -> .Point2	// {vx,vy} {x,y} -> {vx+x,vy+y}
 
 
 ::	IdFun st		:==	st -> st
+
+::	Void			=	Void // MW11++

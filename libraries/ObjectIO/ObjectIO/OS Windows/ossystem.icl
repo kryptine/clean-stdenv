@@ -19,6 +19,8 @@ where
 	ptr		= WinGetAppPath 
 	(path,_)= WinGetCStringAndFree ptr 99
 
+OSnewlineChars			:== "\xD\xA" // MW11++
+
 OStickspersecond :== 1000				// OS max resolution of ticks per second
 
 OSmmToHPixels :: !Real -> Int
@@ -38,3 +40,6 @@ OSscreenrect tb
 	# (screenWidth, tb)	= WinScreenXSize tb
 	# (screenHeight,tb)	= WinScreenYSize tb
 	= ({rleft=0,rtop=0,rright=screenWidth,rbottom=screenHeight},tb)
+
+OSprintSetupTypical		:: Bool // MW11++
+OSprintSetupTypical = False

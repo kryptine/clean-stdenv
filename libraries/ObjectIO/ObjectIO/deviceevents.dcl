@@ -9,7 +9,7 @@ from	ostypes			import Rect
 from	oswindow		import OSWindowPtr
 import	receivermessage, timertable
 from	windowaccess	import WIDS
-
+from	receiverhandle	import InetEvent`, EndpointRef`, InetReceiverCategory` // MW11++
 
 ::	MsgEvent
 	=	QASyncMessage		!QASyncMessage
@@ -27,6 +27,7 @@ from	windowaccess	import WIDS
 	|	ToolbarSelection		!ToolbarSelectInfo			// Toolbar item has been selected
  //	Receiver events:
 	|	ReceiverEvent			!MsgEvent					// A (bi/uni)directional (a)synchronous message event
+	|	InternetEvent !(!InetEvent`, !EndpointRef`, !InetReceiverCategory`, !Int)	// MW11++
  //	Timer events:
 	|	TimerEvent				!TimerEvent					// A timer event
  //	Window/Dialog events:

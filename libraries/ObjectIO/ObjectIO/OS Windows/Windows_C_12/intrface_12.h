@@ -80,6 +80,7 @@
 /* ...Mike */
 
 // MW...
+#define CcRqDO_PRINT_SETUP						1828
 #define CcRqDO_HTML_HELP						1827
 #define CcRqGET_PRINTER_DC						1824
 #define CcRqDISPATCH_MESSAGES_WHILE_PRINTING	1823
@@ -200,6 +201,9 @@
 #define CcWmGAMEKEYBOARD						500			/* Mike: keyboard input for game */
 /* ...Mike */
 
+// MW ...
+#define CcWmINETEVENT							140		
+// ... MW
 #define CcWmSPECIALBUTTON						133			/* PA: new constant for info about OK/CANCEL button selected. */
 #define CcWmPROCESSDROPFILES					132			/* PA: new constant for requesting opening of files. */
 #define CcWmGETTOOLBARTIPTEXT					131			/* PA: new constant for getting tooltip text. */
@@ -244,6 +248,12 @@
 #define CcRETURNmax								19
 #define CcRETURNmin								10
 #define CcWASQUIT								1
+
+// MW: new convention: messages that are passed within the OS thread begin with PM
+// They can be in range WM_USER (currently 0x0400) to 0x7FFF. 
+
+#define	PM_SOCKET_EVENT							0x0405
+#define	PM_DNS_EVENT							0x0406
 
 # define EXPORT_TO_CLEAN	/* __declspec(dllexport) __stdcall */
 

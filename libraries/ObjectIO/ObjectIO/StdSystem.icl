@@ -20,6 +20,9 @@ homepath fname = OShomepath fname
 applicationpath :: !String -> String
 applicationpath fname = OShomepath fname
 
+// MW11++
+newlineChars	:: !String
+newlineChars = OSnewlineChars
 
 //	System dependencies concerning the time resolution
 
@@ -53,3 +56,7 @@ maxFixedWindowSize
 	= {w=w,h=h}
 where
 	(w,h)	= OSmaxScrollWindowSize
+
+// MW11++
+printSetupTypical	:: Bool
+printSetupTypical = OSprintSetupTypical

@@ -17,19 +17,15 @@ from	id		import	RId, R2Id, RIdtoId, R2IdtoId, ==
 
 //	Open uni- and bi-directional receivers:
 
+// MW11 reopenReceiver removed, made types unique
 class Receivers rdef where
-	openReceiver	:: .ls !(rdef .ls (PSt .l .p)) !(PSt .l .p)
-								   -> (!ErrorReport,!PSt .l .p)
-	reopenReceiver	:: .ls !(rdef .ls (PSt .l .p)) !(PSt .l .p)
-								   -> (!ErrorReport,!PSt .l .p)
-	getReceiverType	::     .(rdef .ls .pst)	-> ReceiverType
+	openReceiver	:: .ls !*(*rdef .ls (PSt .l .p)) !(PSt .l .p)
+				   	-> (!ErrorReport,!PSt .l .p)
+	getReceiverType	:: *(*rdef .ls .ps)
+					-> ReceiverType
 /*	openReceiver
 		opens the given receiver if no receiver currently exists with the given 
 		R(2)Id. The R(2)Id has to be used to send messages to this receiver. 
-	reopenReceiver
-		first closes the receiver with the same R(2)Id if present, and then opens a 
-		new receiver with the given receiver definition. The R(2)Id has to be used 
-		to send messages to the new receiver.
 	getReceiverType
 		returns the type of the receiver (see also getReceivers).
 */

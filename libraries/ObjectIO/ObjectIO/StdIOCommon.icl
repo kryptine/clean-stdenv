@@ -584,6 +584,7 @@ stdUnfillUpdAreaLook _ {updArea} picture = StateMap2 unfill updArea picture
 	|	ErrorViolateDI											// Violation against document interface kind
 	|	ErrorIdsInUse											// Object definition contains Ids that are already in use
 	|	ErrorUnknownObject										// Object can not be found
+	|	ErrorNotifierOpen										// It was tried to open a second send notifier // MW0++
 	|	OtherError !String										// Other kind of error
 
 instance == ErrorReport where
@@ -600,6 +601,11 @@ instance == ErrorReport where
 	(==) ErrorUnknownObject	error	= case error of
 										ErrorUnknownObject	-> True
 										_					-> False
+// MW11..
+	(==) ErrorNotifierOpen	error	= case error of
+										ErrorNotifierOpen	-> True
+										_					-> False
+// ..MW11
 	(==) (OtherError e1)	error	= case error of
 										OtherError e2		-> e1==e2
 										_					-> False
@@ -609,6 +615,7 @@ instance toString ErrorReport where
 	toString ErrorViolateDI		= "ErrorViolateDI"
 	toString ErrorIdsInUse		= "ErrorIdsInUse"
 	toString ErrorUnknownObject	= "ErrorUnknownObject"
+	toString ErrorNotifierOpen	= "ErrorNotifierOpen" // MW11++
 	toString (OtherError s)		= brackify ("OtherError "+++toString s)
 
 
@@ -628,3 +635,8 @@ where
 	itemsList` _		= ""
 itemsList _ _
 	= ""
+
+// MW11..
+::	OkBool									// iff True, the operation was successful
+	:==	Bool
+// ..MW11

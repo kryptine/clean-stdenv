@@ -18,5 +18,6 @@ import	StdIOCommon
 ::	ReceiverAttribute	st						// Default:
 	=	ReceiverInit		(IdFun st)			// no actions after opening receiver
 	|	ReceiverSelectState	SelectState			// receiver Able
+	|	ReceiverConnectedReceivers	[Id]		// [] // MW11++
 ::	ReceiverType
 	:==	String
