@@ -236,8 +236,10 @@ void get_printSetup_with_PRINTDLG(PRINTDLG *pd, CleanString *o_devmode,
 
 /*	PA: called in Clean. */
 int release_memory_handles(PRINTDLG *pd, int os) {
-	LocalFree(pd->hDevNames);
-	LocalFree(pd->hDevMode);
+	if (pd) {
+		LocalFree(pd->hDevNames);
+		LocalFree(pd->hDevMode);
+		};
 	return os;
 	}
 
