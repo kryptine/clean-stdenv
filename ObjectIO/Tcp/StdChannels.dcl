@@ -11,7 +11,7 @@ from	StdOverloaded	import	==, toString
 from	channelenv		import	ChannelEnv
 
 instance ChannelEnv World
-// other instances are IOSt & PSt (see StdPSt)
+// other instances are IOSt & PSt (see StdChannelEnv)
 
 ///////////////////////////////// receive channels /////////////////////////////////
 
