@@ -9,8 +9,10 @@ definition module wstateaccess
 import	wstate
 
 
-setWElements				:: ([arg] WItemHandle` .s -> ([arg],WItemHandle`,.s)) ![arg] ![WElementHandle`] !.s
-																			  -> (![arg],![WElementHandle`],!.s)
+//setWElements				:: ([arg] WItemHandle` .s -> ([arg],WItemHandle`,.s)) ![arg] ![WElementHandle`] !.s
+//																			  -> (![arg],![WElementHandle`],!.s)
+setWElements				:: (WItemHandle` ([arg],.s) -> (WItemHandle`,([arg],.s)))    ![WElementHandle`] !(![arg],!.s)
+																					 -> (![WElementHandle`],!(![arg],!.s))
 setAllWElements				:: (      WItemHandle` .s -> (      WItemHandle`,.s))        ![WElementHandle`] !.s
 																			  -> (       ![WElementHandle`],!.s)
 setWElement					:: (  Id  WItemHandle` .s -> ( Bool,WItemHandle`,.s))   !Id  ![WElementHandle`] !.s

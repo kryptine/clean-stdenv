@@ -59,16 +59,16 @@ wstateFatalError rule error
 		,	wItemLayoutInfo`	:: LayoutInfo					// Additional information on layout
 		}
 ::	WItemInfo`
-	=	RadioInfo`				RadioInfo`						// In case of	RadioControl		: the radio items information
+	=	ButtonInfo`				ButtonInfo						// In case of	ButtonControl		: the button information
 	|	CheckInfo`				CheckInfo`						// In case of	CheckControl		: the check items information
-	|	PopUpInfo`				PopUpInfo`						// In case of	PopUpControl		: the pop up information
-	|	SliderInfo`				SliderInfo`						// In case of	SliderControl		: the slider information
-	|	TextInfo`				TextInfo						// In case of	TextControl			: the text information
-	|	EditInfo`				EditInfo						// In case of	EditControl			: the edit text information
-	|	ButtonInfo`				ButtonInfo						// In case of	ButtonControl		: the button information
+	|	CompoundInfo`			CompoundInfo					// In case of	CompoundControl		: the compound control information
 	|	CustomButtonInfo`		CustomButtonInfo				// In case of	CustomButtonControl	: the custom button information
 	|	CustomInfo`				CustomInfo						// In case of	CustomControl		: the custom information
-	|	CompoundInfo`			CompoundInfo					// In case of	CompoundControl		: the compound control information
+	|	EditInfo`				EditInfo						// In case of	EditControl			: the edit text information
+	|	PopUpInfo`				PopUpInfo`						// In case of	PopUpControl		: the pop up information
+	|	RadioInfo`				RadioInfo`						// In case of	RadioControl		: the radio items information
+	|	SliderInfo`				SliderInfo`						// In case of	SliderControl		: the slider information
+	|	TextInfo`				TextInfo						// In case of	TextControl			: the text information
 	|	NoWItemInfo`											// No additional information
 ::	RadioInfo`
 	=	{	radioItems`			:: [RadioItemInfo`]				// The radio items and their exact position (initially zero)
@@ -119,6 +119,7 @@ wstateFatalError rule error
 	|	WindowMouse`		SelectState
 	|	WindowOk`			Id
 	|	WindowOrigin`		Point2
+	|	WindowOuterSize`	Size
 	|	WindowPen`			[PenAttribute]
 	|	WindowPos`			ItemPos
 	|	WindowSelectState`	SelectState
@@ -204,30 +205,31 @@ getWindowHandle` wPtr wH=:{	whMode
 	  )
 where
 	getWAtt :: !(WindowAttribute .st) -> WindowAttribute`
-	getWAtt (WindowId          id)			= WindowId`          id
-	getWAtt (WindowPos         pos)			= WindowPos`         pos
-	getWAtt (WindowIndex       index)		= WindowIndex`       index
-	getWAtt (WindowViewSize    size)		= WindowViewSize`    size
-	getWAtt (WindowHMargin     l r)			= WindowHMargin`     l r
-	getWAtt (WindowVMargin     t b)			= WindowVMargin`     t b
-	getWAtt (WindowItemSpace   h v)			= WindowItemSpace`   h v
-	getWAtt (WindowOk          id)			= WindowOk`          id
+	getWAtt (WindowActivate    _)			= WindowActivate`
 	getWAtt (WindowCancel      id)			= WindowCancel`      id
 	getWAtt (WindowClose       _)			= WindowClose`
-	getWAtt (WindowInit        _)			= WindowInit`
-	getWAtt (WindowSelectState select)		= WindowSelectState` select
-	getWAtt (WindowLook        sysLook look)= WindowLook`        sysLook look
-	getWAtt (WindowPen         pen)			= WindowPen`         pen
-	getWAtt (WindowViewDomain  domain)		= WindowViewDomain`  domain
-	getWAtt (WindowOrigin      origin)		= WindowOrigin`      origin
-	getWAtt (WindowHScroll     f)			= WindowHScroll`     f
-	getWAtt (WindowVScroll     f)			= WindowVScroll`     f
-	getWAtt (WindowActivate    _)			= WindowActivate`
-	getWAtt (WindowDeactivate  _)			= WindowDeactivate`
-	getWAtt (WindowInitActive  id)			= WindowInitActive`  id
-	getWAtt (WindowMouse       _ select _)	= WindowMouse`       select
-	getWAtt (WindowKeyboard    _ select _)	= WindowKeyboard`    select
 	getWAtt (WindowCursor      shape)		= WindowCursor`      shape
+	getWAtt (WindowDeactivate  _)			= WindowDeactivate`
+	getWAtt (WindowHMargin     l r)			= WindowHMargin`     l r
+	getWAtt (WindowHScroll     f)			= WindowHScroll`     f
+	getWAtt (WindowId          id)			= WindowId`          id
+	getWAtt (WindowIndex       index)		= WindowIndex`       index
+	getWAtt (WindowInit        _)			= WindowInit`
+	getWAtt (WindowInitActive  id)			= WindowInitActive`  id
+	getWAtt (WindowItemSpace   h v)			= WindowItemSpace`   h v
+	getWAtt (WindowKeyboard    _ select _)	= WindowKeyboard`    select
+	getWAtt (WindowLook        sysLook look)= WindowLook`        sysLook look
+	getWAtt (WindowMouse       _ select _)	= WindowMouse`       select
+	getWAtt (WindowOk          id)			= WindowOk`          id
+	getWAtt (WindowOrigin      origin)		= WindowOrigin`      origin
+	getWAtt (WindowOuterSize   size)		= WindowOuterSize`   size
+	getWAtt (WindowPen         pen)			= WindowPen`         pen
+	getWAtt (WindowPos         pos)			= WindowPos`         pos
+	getWAtt (WindowSelectState select)		= WindowSelectState` select
+	getWAtt (WindowViewDomain  domain)		= WindowViewDomain`  domain
+	getWAtt (WindowViewSize    size)		= WindowViewSize`    size
+	getWAtt (WindowVMargin     t b)			= WindowVMargin`     t b
+	getWAtt (WindowVScroll     f)			= WindowVScroll`     f
 
 getWElementHandles` :: !OSWindowPtr ![WElementHandle .ls .pst] !*OSToolbox -> (![WElementHandle`],![WElementHandle .ls .pst],!*OSToolbox)
 getWElementHandles` wPtr [itemH:itemHs] tb
@@ -287,31 +289,31 @@ getWItemHandle` wPtr itemH=:{	wItemId
 	  )
 where
 	getWItemAtt` :: !(ControlAttribute .st) -> ControlAttribute`
-	getWItemAtt` (ControlId           id)			= ControlId`          id
-	getWItemAtt` (ControlPos          pos)			= ControlPos`         pos
-	getWItemAtt` (ControlViewSize     size)			= ControlViewSize`    size
-	getWItemAtt` (ControlOuterSize    size)			= ControlOuterSize`   size
-	getWItemAtt` (ControlMinimumSize  size)			= ControlMinimumSize` size
-	getWItemAtt` (ControlWidth        width)		= ControlWidth`       width
-	getWItemAtt` (ControlResize       f)			= ControlResize`      f
-	getWItemAtt` (ControlSelectState  select)		= ControlSelectState` select
-	getWItemAtt`  ControlHide						= ControlHide`
-	getWItemAtt` (ControlFunction     _)			= ControlFunction`
-	getWItemAtt` (ControlModsFunction _)			= ControlModsFunction`
 	getWItemAtt` (ControlActivate     _)			= ControlActivate`
 	getWItemAtt` (ControlDeactivate   _)			= ControlDeactivate`
-	getWItemAtt` (ControlMouse        _ select _)	= ControlMouse`       select
-	getWItemAtt` (ControlKeyboard     _ select _)	= ControlKeyboard`    select
-	getWItemAtt` (ControlTip		  tip)			= ControlTip`		  tip
-	getWItemAtt` (ControlPen          pen)			= ControlPen`         pen
-	getWItemAtt` (ControlItemSpace    h v)			= ControlItemSpace`   h v
+	getWItemAtt` (ControlFunction     _)			= ControlFunction`
+	getWItemAtt`  ControlHide						= ControlHide`
 	getWItemAtt` (ControlHMargin      l r)			= ControlHMargin`     l r
-	getWItemAtt` (ControlVMargin      t b)			= ControlVMargin`     t b
-	getWItemAtt` (ControlLook         sysLook look)	= ControlLook`        sysLook look
-	getWItemAtt` (ControlViewDomain   domain)		= ControlViewDomain`  domain
-	getWItemAtt` (ControlOrigin       origin)		= ControlOrigin`      origin
 	getWItemAtt` (ControlHScroll      f)			= ControlHScroll`     f
+	getWItemAtt` (ControlId           id)			= ControlId`          id
+	getWItemAtt` (ControlItemSpace    h v)			= ControlItemSpace`   h v
+	getWItemAtt` (ControlKeyboard     _ select _)	= ControlKeyboard`    select
+	getWItemAtt` (ControlLook         sysLook look)	= ControlLook`        sysLook look
+	getWItemAtt` (ControlMinimumSize  size)			= ControlMinimumSize` size
+	getWItemAtt` (ControlModsFunction _)			= ControlModsFunction`
+	getWItemAtt` (ControlMouse        _ select _)	= ControlMouse`       select
+	getWItemAtt` (ControlOrigin       origin)		= ControlOrigin`      origin
+	getWItemAtt` (ControlOuterSize    size)			= ControlOuterSize`   size
+	getWItemAtt` (ControlPen          pen)			= ControlPen`         pen
+	getWItemAtt` (ControlPos          pos)			= ControlPos`         pos
+	getWItemAtt` (ControlResize       f)			= ControlResize`      f
+	getWItemAtt` (ControlSelectState  select)		= ControlSelectState` select
+	getWItemAtt` (ControlTip		  tip)			= ControlTip`		  tip
+	getWItemAtt` (ControlViewDomain   domain)		= ControlViewDomain`  domain
+	getWItemAtt` (ControlViewSize     size)			= ControlViewSize`    size
+	getWItemAtt` (ControlVMargin      t b)			= ControlVMargin`     t b
 	getWItemAtt` (ControlVScroll      f)			= ControlVScroll`     f
+	getWItemAtt` (ControlWidth        width)		= ControlWidth`       width
 	
 	getWItemInfo` :: !OSWindowPtr !OSWindowPtr !(WItemInfo .ls .pst) !*OSToolbox -> !(WItemInfo`,!WItemInfo .ls .pst,!*OSToolbox)
 	getWItemInfo` wPtr itemPtr info=:(RadioInfo {radioItems,radioLayout,radioIndex}) tb
@@ -416,30 +418,31 @@ where
 		= wstateFatalError "setWindowHandle`" "incompatible number of WindowAttributes"
 	
 	setWAtt :: !WindowAttribute` !(WindowAttribute .st) -> WindowAttribute .st
-	setWAtt (WindowId`          _)				att=:(WindowId           _)	= att
-	setWAtt (WindowPos`         pos)			att=:(WindowPos          _)	= WindowPos         pos
-	setWAtt (WindowIndex`       index)			att=:(WindowIndex        _)	= WindowIndex       index
-	setWAtt (WindowViewSize`    size)			att=:(WindowViewSize     _)	= WindowViewSize    size
-	setWAtt (WindowHMargin`     _ _)			att=:(WindowHMargin    _ _)	= att
-	setWAtt (WindowVMargin`     _ _)			att=:(WindowVMargin    _ _)	= att
-	setWAtt (WindowItemSpace`   _ _)			att=:(WindowItemSpace  _ _)	= att
-	setWAtt (WindowOk`          okId)			att=:(WindowOk           _)	= WindowOk          okId
+	setWAtt  WindowActivate`					att=:(WindowActivate     _)	= att
 	setWAtt (WindowCancel`      cancelId)		att=:(WindowCancel       _)	= WindowCancel      cancelId
 	setWAtt  WindowClose`						att=:(WindowClose        _)	= att
-	setWAtt  WindowInit`						att=:(WindowInit         _)	= att
-	setWAtt (WindowSelectState`	select)			att=:(WindowSelectState  _)	= WindowSelectState select
-	setWAtt (WindowLook`        sysLook look)	att=:(WindowLook       _ _)	= WindowLook        sysLook look
-	setWAtt (WindowPen`         pen)			att=:(WindowPen          _) = WindowPen         pen
-	setWAtt (WindowViewDomain`  domain)			att=:(WindowViewDomain   _)	= WindowViewDomain  domain
-	setWAtt (WindowOrigin`      origin)			att=:(WindowOrigin       _)	= WindowOrigin      origin
-	setWAtt (WindowHScroll`     scroll)			att=:(WindowHScroll      _)	= WindowHScroll		scroll
-	setWAtt (WindowVScroll`     scroll)			att=:(WindowVScroll      _)	= WindowVScroll     scroll
-	setWAtt  WindowActivate`					att=:(WindowActivate     _)	= att
-	setWAtt  WindowDeactivate`					att=:(WindowDeactivate   _)	= att
-	setWAtt (WindowInitActive`  id)				att=:(WindowInitActive   _)	= WindowInitActive id
-	setWAtt (WindowMouse`       select)			att=:(WindowMouse    s _ f)	= WindowMouse    s select f
-	setWAtt (WindowKeyboard`    select)			att=:(WindowKeyboard s _ f)	= WindowKeyboard s select f
 	setWAtt (WindowCursor`      cursor)			att=:(WindowCursor       _)	= WindowCursor      cursor
+	setWAtt  WindowDeactivate`					att=:(WindowDeactivate   _)	= att
+	setWAtt (WindowHMargin`     _ _)			att=:(WindowHMargin    _ _)	= att
+	setWAtt (WindowHScroll`     scroll)			att=:(WindowHScroll      _)	= WindowHScroll		scroll
+	setWAtt (WindowId`          _)				att=:(WindowId           _)	= att
+	setWAtt (WindowIndex`       index)			att=:(WindowIndex        _)	= WindowIndex       index
+	setWAtt  WindowInit`						att=:(WindowInit         _)	= att
+	setWAtt (WindowInitActive`  id)				att=:(WindowInitActive   _)	= WindowInitActive id
+	setWAtt (WindowItemSpace`   _ _)			att=:(WindowItemSpace  _ _)	= att
+	setWAtt (WindowKeyboard`    select)			att=:(WindowKeyboard s _ f)	= WindowKeyboard s select f
+	setWAtt (WindowLook`        sysLook look)	att=:(WindowLook       _ _)	= WindowLook        sysLook look
+	setWAtt (WindowMouse`       select)			att=:(WindowMouse    s _ f)	= WindowMouse    s select f
+	setWAtt (WindowOk`          okId)			att=:(WindowOk           _)	= WindowOk          okId
+	setWAtt (WindowOrigin`      origin)			att=:(WindowOrigin       _)	= WindowOrigin      origin
+	setWAtt (WindowOuterSize`   size)			att=:(WindowOuterSize    _)	= WindowOuterSize   size
+	setWAtt (WindowPen`         pen)			att=:(WindowPen          _) = WindowPen         pen
+	setWAtt (WindowPos`         pos)			att=:(WindowPos          _)	= WindowPos         pos
+	setWAtt (WindowSelectState`	select)			att=:(WindowSelectState  _)	= WindowSelectState select
+	setWAtt (WindowViewDomain`  domain)			att=:(WindowViewDomain   _)	= WindowViewDomain  domain
+	setWAtt (WindowViewSize`    size)			att=:(WindowViewSize     _)	= WindowViewSize    size
+	setWAtt (WindowVMargin`     _ _)			att=:(WindowVMargin    _ _)	= att
+	setWAtt (WindowVScroll`     scroll)			att=:(WindowVScroll      _)	= WindowVScroll     scroll
 	setWAtt _ _
 		= wstateFatalError "setWindowHandle`" "WindowAttributes do not match pairwise"
 	
@@ -502,7 +505,7 @@ setWItemHandle` itemH`=:{	wItemNr`
 where
 	setWItemAtts` :: ![ControlAttribute`] ![ControlAttribute .st] -> [ControlAttribute .st]
 	setWItemAtts` [att`:atts`] [att:atts]
-		#! att	= setWItemAtt` att` att
+		#! att	= setWItemAtt`  att`  att
 		#! atts	= setWItemAtts` atts` atts
 		= [att:atts]
 	setWItemAtts` [] []
@@ -511,31 +514,31 @@ where
 		= wstateFatalError "setWItemHandle`" "incompatible number of ControlAttributes"
 	
 	setWItemAtt` :: !ControlAttribute` !(ControlAttribute .st) -> ControlAttribute .st
-	setWItemAtt` (ControlId`           _)				att=:(ControlId           _)	= att
-	setWItemAtt` (ControlPos`          pos)				att=:(ControlPos          _)	= ControlPos  pos
-	setWItemAtt` (ControlViewSize`     size)			att=:(ControlViewSize     _)	= ControlViewSize size
-	setWItemAtt` (ControlOuterSize`    size)			att=:(ControlOuterSize    _)	= ControlOuterSize size
-	setWItemAtt` (ControlMinimumSize`  _)				att=:(ControlMinimumSize  _)	= att
-	setWItemAtt` (ControlWidth`        width)			att=:(ControlWidth        _)	= ControlWidth width
-	setWItemAtt` (ControlResize`       f)				att=:(ControlResize       _)	= ControlResize f
-	setWItemAtt` (ControlSelectState`  select)			att=:(ControlSelectState  _)	= ControlSelectState select
-	setWItemAtt`  ControlHide`							att=: ControlHide				= att
-	setWItemAtt`  ControlFunction`						att=:(ControlFunction     _)	= att
-	setWItemAtt`  ControlModsFunction`					att=:(ControlModsFunction _)	= att
 	setWItemAtt`  ControlActivate`						att=:(ControlActivate     _)	= att
 	setWItemAtt`  ControlDeactivate`					att=:(ControlDeactivate   _)	= att
-	setWItemAtt` (ControlMouse`        select)			att=:(ControlMouse    s _ f)	= ControlMouse    s select f
-	setWItemAtt` (ControlKeyboard`     select)			att=:(ControlKeyboard s _ f)	= ControlKeyboard s select f
-	setWItemAtt` (ControlTip`		   tip)				att=:(ControlTip		  _)	= ControlTip      tip
-	setWItemAtt` (ControlPen`          pen)				att=:(ControlPen          _)	= ControlPen      pen
-	setWItemAtt` (ControlItemSpace`    _ _)				att=:(ControlItemSpace  _ _)	= att
+	setWItemAtt`  ControlFunction`						att=:(ControlFunction     _)	= att
+	setWItemAtt`  ControlHide`							att=: ControlHide				= att
 	setWItemAtt` (ControlHMargin`      _ _)				att=:(ControlHMargin    _ _)	= att
-	setWItemAtt` (ControlVMargin`      _ _)				att=:(ControlVMargin    _ _)	= att
-	setWItemAtt` (ControlLook`         sysLook look)	att=:(ControlLook       _ _)	= ControlLook       sysLook look
+	setWItemAtt` (ControlHScroll`      scroll)			att=:(ControlHScroll      _)	= ControlHScroll scroll
+	setWItemAtt` (ControlId`           _)				att=:(ControlId           _)	= att
+	setWItemAtt` (ControlItemSpace`    _ _)				att=:(ControlItemSpace  _ _)	= att
+	setWItemAtt` (ControlKeyboard`     select)			att=:(ControlKeyboard s _ f)	= ControlKeyboard s select f
+	setWItemAtt` (ControlLook`         sysLook look)	att=:(ControlLook       _ _)	= ControlLook sysLook look
+	setWItemAtt` (ControlMinimumSize`  _)				att=:(ControlMinimumSize  _)	= att
+	setWItemAtt`  ControlModsFunction`					att=:(ControlModsFunction _)	= att
+	setWItemAtt` (ControlMouse`        select)			att=:(ControlMouse    s _ f)	= ControlMouse s select f
+	setWItemAtt` (ControlOrigin`       origin)			att=:(ControlOrigin       _)	= ControlOrigin origin
+	setWItemAtt` (ControlOuterSize`    size)			att=:(ControlOuterSize    _)	= ControlOuterSize size
+	setWItemAtt` (ControlPen`          pen)				att=:(ControlPen          _)	= ControlPen pen
+	setWItemAtt` (ControlPos`          pos)				att=:(ControlPos          _)	= ControlPos  pos
+	setWItemAtt` (ControlResize`       f)				att=:(ControlResize       _)	= ControlResize f
+	setWItemAtt` (ControlSelectState`  select)			att=:(ControlSelectState  _)	= ControlSelectState select
+	setWItemAtt` (ControlTip`		   tip)				att=:(ControlTip		  _)	= ControlTip tip
 	setWItemAtt` (ControlViewDomain`   domain)			att=:(ControlViewDomain   _)	= ControlViewDomain domain
-	setWItemAtt` (ControlOrigin`       origin)			att=:(ControlOrigin       _)	= ControlOrigin     origin
-	setWItemAtt` (ControlHScroll`      scroll)			att=:(ControlHScroll      _)	= ControlHScroll    scroll
-	setWItemAtt` (ControlVScroll`      scroll)			att=:(ControlVScroll      _)	= ControlVScroll    scroll
+	setWItemAtt` (ControlViewSize`     size)			att=:(ControlViewSize     _)	= ControlViewSize size
+	setWItemAtt` (ControlVMargin`      _ _)				att=:(ControlVMargin    _ _)	= att
+	setWItemAtt` (ControlVScroll`      scroll)			att=:(ControlVScroll      _)	= ControlVScroll scroll
+	setWItemAtt` (ControlWidth`        width)			att=:(ControlWidth        _)	= ControlWidth width
 	setWItemAtt` att` att
 		= wstateFatalError "setWItemHandle`"
 			("ControlAttributes do not match pairwise ("+++toString att`+++"vs. "+++toString att+++")")
@@ -599,52 +602,54 @@ where
 		= wstateFatalError "setWindowHandle`" "incompatible WItemInfo"
 
 instance toString ControlAttribute` where
-	toString (ControlId`			_) = "ControlId`"
-	toString (ControlPos`			_) = "ControlPos`"
-	toString (ControlViewSize`		_) = "ControlViewSize`"
-	toString (ControlOuterSize`     _) = "ControlOuterSize`"
-	toString (ControlMinimumSize`	_) = "ControlMinimumSize`"
-	toString (ControlWidth`         _) = "ControlWidth"
-	toString (ControlResize`		_) = "ControlResize`"
-	toString (ControlSelectState`	_) = "ControlSelectState`"
-	toString  ControlHide`			   = "ControlHide`"
-	toString  ControlFunction`		   = "ControlFunction`"
-	toString  ControlModsFunction`	   = "ControlModsFunction`"
 	toString  ControlActivate`         = "ControlActivate`"
 	toString  ControlDeactivate`       = "ControlDeactivate`"
-	toString (ControlMouse`			_) = "ControlMouse`"
-	toString (ControlKeyboard`		_) = "ControlKeyboard`"
-	toString (ControlTip`			_) = "ControlTip`"
-	toString (ControlPen`           _) = "ControlPen`"
-	toString (ControlItemSpace`	  _ _) = "ControlItemSpace`"
+	toString  ControlFunction`		   = "ControlFunction`"
+	toString  ControlHide`			   = "ControlHide`"
 	toString (ControlHMargin`	  _ _) = "ControlHMargin`"
-	toString (ControlVMargin`	  _ _) = "ControlVMargin`"
-	toString (ControlLook`		  _	_) = "ControlLook`"
-	toString (ControlViewDomain`	_) = "ControlViewDomain`"
-	toString (ControlOrigin`		_) = "ControlOrigin`"
 	toString (ControlHScroll`		_) = "ControlHScroll`"
+	toString (ControlId`			_) = "ControlId`"
+	toString (ControlItemSpace`	  _ _) = "ControlItemSpace`"
+	toString (ControlKeyboard`		_) = "ControlKeyboard`"
+	toString (ControlLook`		  _	_) = "ControlLook`"
+	toString (ControlMinimumSize`	_) = "ControlMinimumSize`"
+	toString  ControlModsFunction`	   = "ControlModsFunction`"
+	toString (ControlMouse`			_) = "ControlMouse`"
+	toString (ControlOrigin`		_) = "ControlOrigin`"
+	toString (ControlOuterSize`     _) = "ControlOuterSize`"
+	toString (ControlPen`           _) = "ControlPen`"
+	toString (ControlPos`			_) = "ControlPos`"
+	toString (ControlResize`		_) = "ControlResize`"
+	toString (ControlSelectState`	_) = "ControlSelectState`"
+	toString (ControlTip`			_) = "ControlTip`"
+	toString (ControlViewDomain`	_) = "ControlViewDomain`"
+	toString (ControlViewSize`		_) = "ControlViewSize`"
+	toString (ControlVMargin`	  _ _) = "ControlVMargin`"
 	toString (ControlVScroll`		_) = "ControlVScroll`"
+	toString (ControlWidth`         _) = "ControlWidth`"
 instance toString (ControlAttribute .st) where
+	toString (ControlActivate		_) = "ControlActivate"
+	toString (ControlDeactivate		_) = "ControlDeactivate"
+	toString (ControlFunction		_) = "ControlFunction"
+	toString  ControlHide			   = "ControlHide"
+	toString (ControlHMargin	  _ _) = "ControlHMargin"
+	toString (ControlHScroll		_) = "ControlHScroll"
 	toString (ControlId				_) = "ControlId"
-	toString (ControlPos			_) = "ControlPos"
-	toString (ControlViewSize		_) = "ControlViewSize"
+	toString (ControlItemSpace	  _ _) = "ControlItemSpace"
+	toString (ControlKeyboard	_ _	_) = "ControlKeyboard"
+	toString (ControlLook		  _	_) = "ControlLook"
 	toString (ControlMinimumSize	_) = "ControlMinimumSize"
+	toString (ControlModsFunction	_) = "ControlModsFunction"
+	toString (ControlMouse		_ _	_) = "ControlMouse"
+	toString (ControlOrigin			_) = "ControlOrigin"
+	toString (ControlOuterSize		_) = "ControlOuterSize"
+	toString (ControlPen			_) = "ControlPen"
+	toString (ControlPos			_) = "ControlPos"
 	toString (ControlResize			_) = "ControlResize"
 	toString (ControlSelectState	_) = "ControlSelectState"
-	toString  ControlHide			   = "ControlHide"
-	toString (ControlFunction		_) = "ControlFunction"
-	toString (ControlModsFunction	_) = "ControlModsFunction"
-	toString (ControlActivate       _) = "ControlActivate"
-	toString (ControlDeactivate     _) = "ControlDeactivate"
-	toString (ControlMouse		_ _ _) = "ControlMouse"
-	toString (ControlKeyboard	_ _ _) = "ControlKeyboard"
 	toString (ControlTip			_) = "ControlTip"
-	toString (ControlPen            _) = "ControlPen"
-	toString (ControlItemSpace	  _ _) = "ControlItemSpace"
-	toString (ControlHMargin	  _ _) = "ControlHMargin"
-	toString (ControlVMargin	  _ _) = "ControlVMargin"
-	toString (ControlLook		  _	_) = "ControlLook"
 	toString (ControlViewDomain		_) = "ControlViewDomain"
-	toString (ControlOrigin			_) = "ControlOrigin"
-	toString (ControlHScroll		_) = "ControlHScroll"
+	toString (ControlViewSize		_) = "ControlViewSize"
+	toString (ControlVMargin	  _ _) = "ControlVMargin"
 	toString (ControlVScroll		_) = "ControlVScroll"
+	toString (ControlWidth			_) = "ControlWidth"

@@ -5,8 +5,8 @@ definition module controldraw
 
 //	Drawing operations on customised controls
 
+from	ossystem	import OSWindowMetrics
 from	ostypes		import Rect
-from	oswindow	import OSWindowMetrics
 import	wstate
 
 

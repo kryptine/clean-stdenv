@@ -6,7 +6,7 @@ implementation module controlaccess
 
 import	StdBool, StdFunc, StdInt, StdList, StdMisc, StdTuple
 from	oswindow	import OSscrollbarsAreVisible
-import	commondef, id, controldefaccess, windowaccess, wstateaccess
+import	commondef, id, windowaccess, wstateaccess
 
 
 eqfst3id :: !Id !(!Id,.x,.y) -> Bool
@@ -42,19 +42,15 @@ seekmapWElementHandle` f x itemHs
 		= seekmapWElementHandle` f x itemHs
 where
 	seekmapWItemHandle` :: (WItemHandle`->(Bool,x)) x !WElementHandle` -> (!Bool,x)
-	seekmapWItemHandle` f x (WRecursiveHandle`	itemHs _)
+	seekmapWItemHandle` f x (WRecursiveHandle` itemHs _)
 		= seekmapWElementHandle` f x itemHs
-	seekmapWItemHandle` f x (WItemHandle`		itemH)
-		# (found,x)	= f itemH
-		| found		= (found,x)
-		| otherwise	= (found,x)
+	seekmapWItemHandle` f x (WItemHandle` itemH)
+		= f itemH
 
 statemapWElementHandles` :: !(Cond x) (WItemHandle` x -> x) !x ![WElementHandle`] -> x
 statemapWElementHandles` cond f s itemHs
-	| cond s
-		= s
-	| isEmpty itemHs
-		= s
+	| cond s			= s
+	| isEmpty itemHs	= s
 	| otherwise
 		# (itemH,itemHs)= HdTl itemHs
 		# s				= statemapWElementHandle`  cond f s itemH
@@ -79,16 +75,17 @@ where
 		= [(getcontroltype wItemKind`,wItemId`)]
 	where
 		getcontroltype :: !ControlKind -> ControlType
-		getcontroltype IsRadioControl			= "RadioControl"
-		getcontroltype IsCheckControl			= "CheckControl"
-		getcontroltype IsPopUpControl			= "PopUpControl"
-		getcontroltype IsSliderControl			= "SliderControl"
-		getcontroltype IsTextControl			= "TextControl"
-		getcontroltype IsEditControl			= "EditControl"
 		getcontroltype IsButtonControl			= "ButtonControl"
+		getcontroltype IsCheckControl			= "CheckControl"
+		getcontroltype IsCompoundControl		= "CompoundControl"
 		getcontroltype IsCustomButtonControl	= "CustomButtonControl"
 		getcontroltype IsCustomControl			= "CustomControl"
-		getcontroltype IsCompoundControl		= "CompoundControl"
+		getcontroltype IsEditControl			= "EditControl"
+		getcontroltype IsLayoutControl			= "LayoutControl"
+		getcontroltype IsPopUpControl			= "PopUpControl"
+		getcontroltype IsRadioControl			= "RadioControl"
+		getcontroltype IsSliderControl			= "SliderControl"
+		getcontroltype IsTextControl			= "TextControl"
 		getcontroltype (IsOtherControl type)	= type
 
 getcompoundstypes :: !Id ![WElementHandle`] -> [(ControlType,Maybe Id)]
@@ -120,7 +117,7 @@ where
 		with
 			itemPos			= if hasAtt (Just (getcontrolpos` posAtt)) Nothing
 			(hasAtt,posAtt)	= Select iscontrolpos` (ControlPos` (Left,NoOffset)) wItemAtts`
-			layout			= (itemId,True,(itemPos,{vx=wItemPos`.x,vy=wItemPos`.y}))
+			layout			= (itemId,True,(itemPos,toVector wItemPos`))
 			(_,layouts1)	= Replace (eqfst3id itemId) layout layouts
 	where
 		itemId				= fromJust wItemId`
@@ -155,9 +152,9 @@ getcontrolsoutersizes wMetrics itemHs ids_sizes
 where
 	getsizes :: !OSWindowMetrics !WItemHandle` !(![Id],![(Id,Bool,Size)]) -> (![Id],![(Id,Bool,Size)])
 	getsizes wMetrics itemH=:{wItemId`,wItemKind`,wItems`} ids_sizes=:(ids,sizes)
-		| isNothing wItemId`= getcontrolsviewsizes wMetrics wItems` ids_sizes
-		| not hadId			= getcontrolsviewsizes wMetrics wItems` ids_sizes
-		| otherwise			= getcontrolsviewsizes wMetrics wItems` (ids1,sizes1)
+		| isNothing wItemId`= getcontrolsoutersizes wMetrics wItems` ids_sizes
+		| not hadId			= getcontrolsoutersizes wMetrics wItems` ids_sizes
+		| otherwise			= getcontrolsoutersizes wMetrics wItems` (ids1,sizes1)
 		with
 			size			= itemH.wItemSize`
 			(_,sizes1)		= Replace (eqfst3id itemId) (itemId,True,size) sizes
@@ -275,12 +272,9 @@ where
 		where
 			lookInfo	= (getWItemCustomInfo` info).customInfoLook
 		getlook IsCompoundControl info
-			= (True,look)
+			= (True,Just (lookInfo.lookSysUpdate,lookInfo.lookFun))
 		where
-			compoundInfo= (getWItemCompoundInfo` info).compoundLookInfo
-			look		= case compoundInfo of
-							Just {compoundLook}	-> Just (compoundLook.lookSysUpdate,compoundLook.lookFun)
-							Nothing				-> Nothing
+			lookInfo	= (getWItemCompoundInfo` info).compoundLookInfo.compoundLook
 		getlook _ _
 			= (False,undef)
 
@@ -369,7 +363,7 @@ where
 		| otherwise						= getradioitems wItems` (ids1,titles1)
 										with
 											info		= getWItemRadioInfo` wItemInfo`
-											title		= (itemId,True,Just (map (\item->fst item.radioItem`) info.radioItems`))
+											title		= (itemId,True,Just [fst item.radioItem` \\ item<-info.radioItems`])
 											(_,titles1)	= Replace (eqfst3id itemId) title titles
 	where
 		itemId			= fromJust wItemId`
@@ -405,7 +399,7 @@ where
 		| otherwise						= getcheckitems wItems` (ids1,titles1)
 										with
 											info		= getWItemCheckInfo` wItemInfo`
-											title		= (itemId,True,Just (map (\item->fst3 item.checkItem`) info.checkItems`))
+											title		= (itemId,True,Just [fst3 item.checkItem` \\ item<-info.checkItems`])
 											(_,titles1)	= Replace (eqfst3id itemId) title titles
 	where
 		itemId			= fromJust wItemId`
@@ -547,17 +541,18 @@ getcontrolsspaces initspaces itemHs ids_spaces
 where
 	getspaces :: (Int,Int) !WItemHandle` !(![Id],![(Id,Bool,Maybe (Int,Int))]) -> (![Id],![(Id,Bool,Maybe (Int,Int))])
 	getspaces curspaces itemH=:{wItemId`,wItemKind`,wItemAtts`} ids_spaces=:(ids,spaces)
-		| wItemKind`<>IsCompoundControl	= (ids,spaces)
-		| isNothing wItemId`			= getcontrolsspaces newspaces itemH.wItems` ids_spaces
-		| not hadId						= getcontrolsspaces newspaces itemH.wItems` (ids1,spaces )
-		| otherwise						= getcontrolsspaces newspaces itemH.wItems` (ids1,spaces1)
-										with
-											space		= (itemId,True,Just newspaces)
-											(_,spaces1)	= Replace (eqfst3id itemId) space spaces
+		| wItemKind`<>IsCompoundControl && wItemKind`<>IsLayoutControl
+								= (ids,spaces)
+		| isNothing wItemId`	= getcontrolsspaces newspaces itemH.wItems` ids_spaces
+		| not hadId				= getcontrolsspaces newspaces itemH.wItems` (ids1,spaces )
+		| otherwise				= getcontrolsspaces newspaces itemH.wItems` (ids1,spaces1)
+								with
+									space		= (itemId,True,Just newspaces)
+									(_,spaces1)	= Replace (eqfst3id itemId) space spaces
 	where
-		itemId			= fromJust wItemId`
-		(hadId,ids1)	= RemoveCheck itemId ids
-		newspaces		= getcontrolitemspace` (snd (Select iscontrolitemspace` (ControlItemSpace` (fst curspaces) (snd curspaces)) wItemAtts`))
+		itemId					= fromJust wItemId`
+		(hadId,ids1)			= RemoveCheck itemId ids
+		newspaces				= getcontrolitemspace` (snd (Select iscontrolitemspace` (ControlItemSpace` (fst curspaces) (snd curspaces)) wItemAtts`))
 
 getcontrolsmargins :: ((Int,Int),(Int,Int)) ![WElementHandle`] !(![Id],![(Id,Bool,Maybe ((Int,Int),(Int,Int)))])
 															 -> (![Id],![(Id,Bool,Maybe ((Int,Int),(Int,Int)))])
@@ -567,18 +562,18 @@ where
 	getmargins :: ((Int,Int),(Int,Int)) !WItemHandle` !(![Id],![(Id,Bool,Maybe ((Int,Int),(Int,Int)))])
 													-> (![Id],![(Id,Bool,Maybe ((Int,Int),(Int,Int)))])
 	getmargins curmargins itemH=:{wItemId`,wItemKind`,wItemAtts`} ids_margins=:(ids,margins)
-		| wItemKind`<>IsCompoundControl	= (ids,margins)
-		| isNothing wItemId`			= getcontrolsmargins newmargins itemH.wItems` ids_margins
-		| not hadId						= getcontrolsmargins newmargins itemH.wItems` (ids1,margins )
-		| otherwise						= getcontrolsmargins newmargins itemH.wItems` (ids1,margins1)
-										with
-											margin		= (itemId,True,Just newmargins)
-											(_,margins1)= Replace (eqfst3id itemId) margin margins
+		| wItemKind`<>IsCompoundControl || wItemKind`<>IsLayoutControl
+									= (ids,margins)
+		| isNothing wItemId`		= getcontrolsmargins newmargins itemH.wItems` ids_margins
+		| not hadId					= getcontrolsmargins newmargins itemH.wItems` (ids1,margins )
+		| otherwise					= getcontrolsmargins newmargins itemH.wItems` (ids1,margins1)
+									with
+										margin		= (itemId,True,Just newmargins)
+										(_,margins1)= Replace (eqfst3id itemId) margin margins
 	where
-		itemId			= fromJust wItemId`
-		(hadId,ids1)	= RemoveCheck itemId ids
-		(left,right)	= fst curmargins
-		(top,bottom)	= snd curmargins
-		newHMargins		= getcontrolhmargin` (snd (Select iscontrolhmargin` (ControlHMargin` left right) wItemAtts`))
-		newVMargins		= getcontrolvmargin` (snd (Select iscontrolvmargin` (ControlVMargin` top bottom) wItemAtts`))
-		newmargins		= (newHMargins,newVMargins)
+		itemId						= fromJust wItemId`
+		(hadId,ids1)				= RemoveCheck itemId ids
+		((left,right),(top,bottom))	= curmargins
+		newHMargins					= getcontrolhmargin` (snd (Select iscontrolhmargin` (ControlHMargin` left right) wItemAtts`))
+		newVMargins					= getcontrolvmargin` (snd (Select iscontrolvmargin` (ControlVMargin` top bottom) wItemAtts`))
+		newmargins					= (newHMargins,newVMargins)

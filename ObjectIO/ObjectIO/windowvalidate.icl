@@ -12,7 +12,7 @@ from	StdSystem		import maxScrollWindowSize
 import	osdocumentinterface, ostypes, oswindow
 from	ospicture		import defaultPen, setPenAttribute
 from	ossystem		import OSscreenrect, OSstripOuterSize
-import	commondef, controllayout, keyfocus, StdControlAttribute, StdWindowAttribute, windowaccess, windowdefaccess
+import	commondef, controllayout, keyfocus, StdControlAttribute, StdWindowAttribute, windowaccess
 from	iostate			import IOSt, IOStGetIdTable
 
 
@@ -45,15 +45,15 @@ validateWindow :: !OSWindowMetrics !OSDInfo !(WindowHandle .ls .pst) !(WindowHan
 		   -> (!Index,!Point2,!Size,!Vector2,!WindowHandle .ls .pst,  !WindowHandles .pst, !*OSToolbox)
 
 validateWindow wMetrics _ wH=:{whMode=mode,whKind=IsDialog,whItemNrs,whItems,whAtts} windows tb
-	# atts						= filter (not o isWindowOnlyAttribute) whAtts
-	  (index,atts,windows)		= validateWindowIndex mode	atts windows
-	  (pos,  atts,windows)		= validateWindowPos   mode	atts windows
-	  sizeAtt					= attrSize					atts			// Retrieve Window(View/Outer)Size (identical for Dialogs)
-	  (hMargins,vMargins)		= attrMargins         False	atts wMetrics
-	  spaces					= attrItemSpaces      False	atts wMetrics
-	  (defid,whItems)			= getOkId					atts whItems
-	  (canid,whItems)			= getCancelId				atts whItems
-	  (atts, whItems)			= validateWindowInitActive	atts whItems
+	# atts						= filter isValidDialogAttribute whAtts
+	  (index,atts,windows)		= validateWindowIndex mode				atts windows
+	  (pos,  atts,windows)		= validateWindowPos   mode				atts windows
+	  sizeAtt					= attrSize								atts			// Retrieve Window(View/Outer)Size (identical for Dialogs)
+	  (hMargins,vMargins)		= attrMargins         IsDialog wMetrics	atts
+	  spaces					= getWindowItemSpaces IsDialog wMetrics	atts
+	  (defid,whItems)			= getOkId								atts whItems
+	  (canid,whItems)			= getCancelId							atts whItems
+	  (atts, whItems)			= validateWindowInitActive				atts whItems
 	  reqSize					= determineRequestedSize zero sizeAtt
 	  (minWidth,minHeight)		= OSMinWindowSize
 	  minSize					= {w=minWidth,h=minHeight}
@@ -83,22 +83,22 @@ validateWindow wMetrics _ wH=:{whMode=mode,whKind=IsDialog,whItemNrs,whItems,whA
 	  )
 
 validateWindow wMetrics osdInfo wH=:{whKind=IsWindow,whItemNrs,whItems,whAtts} windows tb
-	# atts						= filter (not o isDialogOnlyAttribute) whAtts
+	# atts						= filter isValidWindowAttribute whAtts
 	  mode						= Modeless
-	  (domain,atts)				= validateWindowDomain			atts
-	  (maybe_hScroll,atts)		= validateWindowHScroll			atts
-	  (maybe_vScroll,atts)		= validateWindowVScroll			atts
-	  (sysLook,look,atts)		= validateWindowLook			atts
+	  (domain,atts)				= validateWindowDomain					atts
+	  (maybe_hScroll,atts)		= validateWindowHScroll					atts
+	  (maybe_vScroll,atts)		= validateWindowVScroll					atts
+	  (sysLook,look,atts)		= validateWindowLook					atts
 	  (reqSize,atts,tb)			= validateWindowSize wMetrics domain isMDI True (isJust maybe_hScroll,isJust maybe_vScroll) atts tb
-	  (index,atts,windows)		= validateWindowIndex mode		atts windows
-	  (pos,  atts,windows)		= validateWindowPos   mode		atts windows
-	  (penAtts,atts)			= attrPen						atts
-	  (hMargins,vMargins)		= attrMargins         True		atts wMetrics
-	  spaces					= attrItemSpaces      True		atts wMetrics
-	  isAble					= attrSelectState				atts
-	  (defid,whItems)			= getOkId						atts whItems
-	  (canid,whItems)			= getCancelId					atts whItems
-	  (atts, whItems)			= validateWindowInitActive		atts whItems
+	  (index,atts,windows)		= validateWindowIndex mode				atts windows
+	  (pos,  atts,windows)		= validateWindowPos   mode				atts windows
+	  (penAtts,atts)			= attrPen								atts
+	  (hMargins,vMargins)		= attrMargins         IsWindow wMetrics	atts
+	  spaces					= getWindowItemSpaces IsWindow wMetrics	atts
+	  isAble					= attrSelectState						atts
+	  (defid,whItems)			= getOkId								atts whItems
+	  (canid,whItems)			= getCancelId							atts whItems
+	  (atts, whItems)			= validateWindowInitActive				atts whItems
 	  pen						= StateMap2 setPenAttribute (reverse penAtts) defaultPen
 	# (derSize,items,tb)		= layoutControls wMetrics hMargins vMargins spaces reqSize minSize [(domain,domain.corner1)] whItems tb
 	  (itemNrs,items)			= genWElementItemNrs whItemNrs items
@@ -137,22 +137,20 @@ where
 	
 	validScrollInfos :: OSWindowMetrics !Size !(Maybe ScrollFunction) !(Maybe ScrollFunction) -> (!Maybe ScrollInfo,!Maybe ScrollInfo)
 	validScrollInfos wMetrics wSize maybe_hScroll maybe_vScroll
-		= (scrollInfo hScrollRect maybe_hScroll,scrollInfo vScrollRect maybe_vScroll)
+		= (mapMaybe (scrollInfo hScrollRect) maybe_hScroll,mapMaybe (scrollInfo vScrollRect) maybe_vScroll)
 	where
 		windowRect	= SizeToRect wSize
 		hasScrolls	= (isJust maybe_hScroll,isJust maybe_vScroll)
 		hScrollRect	= getWindowHScrollRect wMetrics hasScrolls windowRect
 		vScrollRect	= getWindowVScrollRect wMetrics hasScrolls windowRect
 		
-		scrollInfo :: Rect !(Maybe ScrollFunction) -> Maybe ScrollInfo
-		scrollInfo _ Nothing
-			= Nothing
-		scrollInfo r=:{rleft,rtop} (Just scrollFun)
-			= Just {	scrollFunction	= scrollFun
-				   ,	scrollItemPos	= {x=rleft,y=rtop}
-  				   ,	scrollItemSize	= RectSize r
-				   ,	scrollItemPtr	= OSNoWindowPtr
-				   }
+		scrollInfo :: Rect !ScrollFunction -> ScrollInfo
+		scrollInfo r=:{rleft,rtop} scrollFun
+			= {	scrollFunction	= scrollFun
+			  ,	scrollItemPos	= {x=rleft,y=rtop}
+  			  ,	scrollItemSize	= RectSize r
+			  ,	scrollItemPtr	= OSNoWindowPtr
+			  }
 
 validateWindow wMetrics osdInfo wH=:{whKind=IsGameWindow,whWindowInfo} windows tb
     = (0,zero,okSize,zero,{wH & whSize=okSize},windows,tb)
@@ -161,9 +159,8 @@ where
 
 
 determineRequestedSize :: Size !(Maybe Size) -> Size
-determineRequestedSize size maybe_size
-	| isNothing maybe_size	= size
-	| otherwise				= fromJust maybe_size
+determineRequestedSize size Nothing	= size
+determineRequestedSize _ (Just size)= size
 
 
 /*	validateWindowIndex validates the WindowIndex attribute. 
@@ -324,18 +321,9 @@ attrSize atts
 where
 	(hasSize,att)			= Select (\att->isWindowViewSize att || isWindowOuterSize att) undef atts
 
-attrMargins :: !Bool ![WindowAttribute .st] !OSWindowMetrics -> (!(!Int,!Int),!(!Int,!Int))
-attrMargins isWindow atts wMetrics
-	= (hMargins,vMargins)
-where
-	defHMargin	= if isWindow 0 wMetrics.osmHorMargin
-	defVMargin	= if isWindow 0 wMetrics.osmVerMargin
-	hMargins	= getWindowHMarginAtt (snd (Select isWindowHMargin (WindowHMargin defHMargin defHMargin) atts))
-	vMargins	= getWindowVMarginAtt (snd (Select isWindowVMargin (WindowVMargin defVMargin defVMargin) atts))
-
-attrItemSpaces :: !Bool ![WindowAttribute .st] !OSWindowMetrics -> (!Int,!Int)
-attrItemSpaces isWindow atts {osmHorItemSpace,osmVerItemSpace}
-	= getWindowItemSpaceAtt (snd (Select isWindowItemSpace (WindowItemSpace osmHorItemSpace osmVerItemSpace) atts))
+attrMargins :: !WindowKind !OSWindowMetrics ![WindowAttribute .st] -> (!(!Int,!Int),!(!Int,!Int))
+attrMargins wKind wMetrics atts
+	= (getWindowHMargins wKind wMetrics atts,getWindowVMargins wKind wMetrics atts)
 
 attrSelectState :: ![WindowAttribute .st] -> Bool
 attrSelectState atts
@@ -354,11 +342,8 @@ getOkId :: ![WindowAttribute *(.ls,.pst)] ![WElementHandle .ls .pst] -> (!Maybe 
 getOkId atts itemHs
 	| not hasid
 		= (Nothing,itemHs)
-	# (maybeKind,itemHs)= getControlKind id itemHs
-	  kind				= fromJust maybeKind
-	| isNothing maybeKind
-		= (Nothing,itemHs)
-	| kind==IsButtonControl || kind==IsCustomButtonControl
+	# (ok,itemHs)		= isOkOrCancelControlId id itemHs
+	| ok
 		= (Just id,itemHs)
 	| otherwise
 		= (Nothing,itemHs)
@@ -370,17 +355,23 @@ getCancelId :: ![WindowAttribute *(.ls,.pst)] ![WElementHandle .ls .pst] -> (!Ma
 getCancelId atts itemHs
 	| not hasid
 		= (Nothing,itemHs)
-	# (maybeKind,itemHs)= getControlKind id itemHs
-	  kind				= fromJust maybeKind
-	| isNothing maybeKind
-		= (Nothing,itemHs)
-	| kind==IsButtonControl || kind==IsCustomButtonControl
+	# (ok,itemHs)		= isOkOrCancelControlId id itemHs
+	| ok
 		= (Just id,itemHs)
 	| otherwise
 		= (Nothing,itemHs)
 where
 	(hasid,idAtt)		= Select isWindowCancel undef atts
 	id					= getWindowCancelAtt idAtt
+
+isOkOrCancelControlId :: !Id ![WElementHandle .ls .pst] -> (!Bool,![WElementHandle .ls .pst])
+isOkOrCancelControlId id itemHs
+	# (maybeKind,itemHs)	= getControlKind id itemHs
+	| isNothing maybeKind
+		= (False,itemHs)
+	| otherwise
+		# kind				= fromJust maybeKind
+		= (kind==IsButtonControl || kind==IsCustomButtonControl,itemHs)
 
 
 /*	validateWindowInitActive checks if the WindowInitActive attribute corresponds with an existing control.

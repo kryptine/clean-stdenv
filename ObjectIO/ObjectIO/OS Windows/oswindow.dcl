@@ -156,8 +156,9 @@ OScreateGameWindow :: !Bool !(!Int,!Int) !Int !*OSToolbox -> (![DelayActivationI
 		creates a CustomButtonControl in the window identified by parentWindow.
 	OScreateCustomControl parentWindow parentPos able pos size 
 		creates a CustomControl in the window identified by parentWindow.
-	OScreateCompoundControl parentWindow parentPos show able pos size hScrollInfo vScrollInfo
+	OScreateCompoundControl parentWindow parentPos show able isTransparent pos size hScrollInfo vScrollInfo
 		creates a CompoundControl in the window identified by parentWindow.
+		The Boolean isTransparent should be True iff the CompoundControl has no ControlLook attribute.
 */
 ::	OKorCANCEL
 	=	OK | CANCEL | NORMAL
@@ -189,7 +190,7 @@ OScreateCustomControl		:: !OSWindowPtr !(!Int,!Int) !Bool !Bool !(!Int,!Int) !(!
 		,	cbiState		:: (Int,Int,Int,Int)	// Its (min,thumb,max,thumbsize) settings
 		}
 
-OScreateCompoundControl		:: !OSWindowMetrics !OSWindowPtr !(!Int,!Int) !Bool !Bool !(!Int,!Int) !(!Int,!Int)
+OScreateCompoundControl		:: !OSWindowMetrics !OSWindowPtr !(!Int,!Int) !Bool !Bool !Bool !(!Int,!Int) !(!Int,!Int)
 										 !ScrollbarInfo !ScrollbarInfo !*OSToolbox
 							-> (!OSWindowPtr,!OSWindowPtr,!OSWindowPtr,!*OSToolbox)
 

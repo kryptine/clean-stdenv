@@ -16,17 +16,17 @@ import StdControlDef
 /*	The following functions specify the valid attributes for each standard control.
 */
 
-isValidRadioControlAttribute :: !(ControlAttribute .st) -> Bool
-/*	RadioControl		(y = valid, . = invalid)
+isValidButtonControlAttribute :: !(ControlAttribute .st) -> Bool
+/*	ButtonControl		(y = valid, . = invalid)
 	ControlActivate		. |	ControlKeyboard		. |	ControlPos			y |
 	ControlDeactivate	. |	ControlLook			. |	ControlResize		. |
-	ControlFunction		. |	ControlMinimumSize	. |	ControlSelectState	y |
-	ControlHide			y |	ControlModsFunction	. |	ControlTip			y |
+	ControlFunction		y |	ControlMinimumSize	. |	ControlSelectState	y |
+	ControlHide			y |	ControlModsFunction	y |	ControlTip			y |
 	ControlHMargin		. |	ControlMouse		. |	ControlViewDomain	. |
 	ControlHScroll		. |	ControlOrigin		. |	ControlViewSize		. |
 	ControlId			y | ControlOuterSize	. |	ControlVMargin		. |
-	ControlItemSpace	. |	ControlPen			. |	ControlVScroll		. | 
-												  | ControlWidth		. |
+	ControlItemSpace	. |	ControlPen			. | ControlVScroll		. |
+												  | ControlWidth		y |
 */
 
 isValidCheckControlAttribute :: !(ControlAttribute .st) -> Bool
@@ -42,69 +42,17 @@ isValidCheckControlAttribute :: !(ControlAttribute .st) -> Bool
 												  | ControlWidth		. |
 */
 
-isValidPopUpControlAttribute :: !(ControlAttribute .st) -> Bool
-/*	PopUpControl		(y = valid, . = invalid)
-	ControlActivate		y |	ControlKeyboard		. |	ControlPos			y |
-	ControlDeactivate	y |	ControlLook			. |	ControlResize		. |
-	ControlFunction		. |	ControlMinimumSize	. |	ControlSelectState	y |
+isValidCompoundControlAttribute :: !(ControlAttribute .st) -> Bool
+/*	CompoundControl		(y = valid, . = invalid)
+	ControlActivate		y |	ControlKeyboard		y |	ControlPos			y
+	ControlDeactivate	y |	ControlLook			y |	ControlResize		y |
+	ControlFunction		. |	ControlMinimumSize	y |	ControlSelectState	y |
 	ControlHide			y |	ControlModsFunction	. |	ControlTip			y |
-	ControlHMargin		. |	ControlMouse		. |	ControlViewDomain	. |
-	ControlHScroll		. |	ControlOrigin		. |	ControlViewSize		. |
-	ControlId			y | ControlOuterSize	. |	ControlVMargin		. |
-	ControlItemSpace	. |	ControlPen			. |	ControlVScroll		. | 
-												  | ControlWidth		y |
-*/
-
-isValidSliderControlAttribute :: !(ControlAttribute .st) -> Bool
-/*	SliderControl		(y = valid, . = invalid)
-	ControlActivate		. |	ControlKeyboard		. |	ControlPos			y |
-	ControlDeactivate	. |	ControlLook			. |	ControlResize		y |
-	ControlFunction		. |	ControlMinimumSize	. |	ControlSelectState	y |
-	ControlHide			y |	ControlModsFunction	. |	ControlTip			y |
-	ControlHMargin		. |	ControlMouse		. |	ControlViewDomain	. |
-	ControlHScroll		. |	ControlOrigin		. |	ControlViewSize		. |
-	ControlId			y | ControlOuterSize	. |	ControlVMargin		. |
-	ControlItemSpace	. |	ControlPen			. |	ControlVScroll		. |
+	ControlHMargin		y |	ControlMouse		y |	ControlViewDomain	y |
+	ControlHScroll		y |	ControlOrigin		y |	ControlViewSize		y |
+	ControlId			y | ControlOuterSize	y |	ControlVMargin		y |
+	ControlItemSpace	y |	ControlPen			y |	ControlVScroll		y |
 												  | ControlWidth		. |
-*/
-
-isValidTextControlAttribute :: !(ControlAttribute .st) -> Bool
-/*	TextControl			(y = valid, . = invalid)
-	ControlActivate		. |	ControlKeyboard		. |	ControlPos			y |
-	ControlDeactivate	. |	ControlLook			. |	ControlResize		. |
-	ControlFunction		. |	ControlMinimumSize	. |	ControlSelectState	. |
-	ControlHide			y |	ControlModsFunction	. |	ControlTip			y |
-	ControlHMargin		. |	ControlMouse		. |	ControlViewDomain	. |
-	ControlHScroll		. |	ControlOrigin		. |	ControlViewSize		. |
-	ControlId			y | ControlOuterSize	. |	ControlVMargin		. |
-	ControlItemSpace	. |	ControlPen			. |	ControlVScroll		. |
-												  | ControlWidth		y |
-*/
-
-isValidEditControlAttribute :: !(ControlAttribute .st) -> Bool
-/*	EditControl			(y = valid, . = invalid)
-	ControlActivate		y |	ControlKeyboard		y |	ControlPos			y |
-	ControlDeactivate	y |	ControlLook			. |	ControlResize		y |
-	ControlFunction		. |	ControlMinimumSize	. |	ControlSelectState	y |
-	ControlHide			y |	ControlModsFunction	. |	ControlTip			y |
-	ControlHMargin		. |	ControlMouse		. |	ControlViewDomain	. |
-	ControlHScroll		. |	ControlOrigin		. |	ControlViewSize		. |
-	ControlId			y | ControlOuterSize	. |	ControlVMargin		. |
-	ControlItemSpace	. |	ControlPen			. | ControlVScroll		. |
-												  | ControlWidth		. |
-*/
-
-isValidButtonControlAttribute :: !(ControlAttribute .st) -> Bool
-/*	ButtonControl		(y = valid, . = invalid)
-	ControlActivate		. |	ControlKeyboard		. |	ControlPos			y |
-	ControlDeactivate	. |	ControlLook			. |	ControlResize		. |
-	ControlFunction		y |	ControlMinimumSize	. |	ControlSelectState	y |
-	ControlHide			y |	ControlModsFunction	y |	ControlTip			y |
-	ControlHMargin		. |	ControlMouse		. |	ControlViewDomain	. |
-	ControlHScroll		. |	ControlOrigin		. |	ControlViewSize		. |
-	ControlId			y | ControlOuterSize	. |	ControlVMargin		. |
-	ControlItemSpace	. |	ControlPen			. | ControlVScroll		. |
-												  | ControlWidth		y |
 */
 
 isValidCustomButtonControlAttribute :: !(ControlAttribute .st) -> Bool
@@ -133,17 +81,82 @@ isValidCustomControlAttribute :: !(ControlAttribute .st) -> Bool
 												  | ControlWidth		. |
 */
 
-isValidCompoundControlAttribute :: !(ControlAttribute .st) -> Bool
-/*	CompoundControl		(y = valid, . = invalid)
-	ControlActivate		y |	ControlKeyboard		y |	ControlPos			y
-	ControlDeactivate	y |	ControlLook			y |	ControlResize		y |
-	ControlFunction		. |	ControlMinimumSize	y |	ControlSelectState	y |
+isValidEditControlAttribute :: !(ControlAttribute .st) -> Bool
+/*	EditControl			(y = valid, . = invalid)
+	ControlActivate		y |	ControlKeyboard		y |	ControlPos			y |
+	ControlDeactivate	y |	ControlLook			. |	ControlResize		y |
+	ControlFunction		. |	ControlMinimumSize	. |	ControlSelectState	y |
 	ControlHide			y |	ControlModsFunction	. |	ControlTip			y |
-	ControlHMargin		y |	ControlMouse		y |	ControlViewDomain	y |
-	ControlHScroll		y |	ControlOrigin		y |	ControlViewSize		y |
-	ControlId			y | ControlOuterSize	y |	ControlVMargin		y |
-	ControlItemSpace	y |	ControlPen			y |	ControlVScroll		y |
+	ControlHMargin		. |	ControlMouse		. |	ControlViewDomain	. |
+	ControlHScroll		. |	ControlOrigin		. |	ControlViewSize		. |
+	ControlId			y | ControlOuterSize	. |	ControlVMargin		. |
+	ControlItemSpace	. |	ControlPen			. | ControlVScroll		. |
 												  | ControlWidth		. |
+*/
+
+isValidLayoutControlAttribute :: !(ControlAttribute .st) -> Bool
+/*	LayoutControl		(y = valid, . = invalid)
+	ControlActivate		. |	ControlKeyboard		. |	ControlPos			y |
+	ControlDeactivate	. |	ControlLook			. |	ControlResize		y |
+	ControlFunction		. |	ControlMinimumSize	y |	ControlSelectState	y |
+	ControlHide			y |	ControlModsFunction	. |	ControlTip			. |
+	ControlHMargin		y |	ControlMouse		. |	ControlViewDomain	. |
+	ControlHScroll		. |	ControlOrigin		. |	ControlViewSize		y |
+	ControlId			y | ControlOuterSize	y |	ControlVMargin		y |
+	ControlItemSpace	y |	ControlPen			. |	ControlVScroll		. | 
+												  | ControlWidth		. |
+*/
+
+isValidPopUpControlAttribute :: !(ControlAttribute .st) -> Bool
+/*	PopUpControl		(y = valid, . = invalid)
+	ControlActivate		y |	ControlKeyboard		. |	ControlPos			y |
+	ControlDeactivate	y |	ControlLook			. |	ControlResize		. |
+	ControlFunction		. |	ControlMinimumSize	. |	ControlSelectState	y |
+	ControlHide			y |	ControlModsFunction	. |	ControlTip			y |
+	ControlHMargin		. |	ControlMouse		. |	ControlViewDomain	. |
+	ControlHScroll		. |	ControlOrigin		. |	ControlViewSize		. |
+	ControlId			y | ControlOuterSize	. |	ControlVMargin		. |
+	ControlItemSpace	. |	ControlPen			. |	ControlVScroll		. | 
+												  | ControlWidth		y |
+*/
+
+isValidRadioControlAttribute :: !(ControlAttribute .st) -> Bool
+/*	RadioControl		(y = valid, . = invalid)
+	ControlActivate		. |	ControlKeyboard		. |	ControlPos			y |
+	ControlDeactivate	. |	ControlLook			. |	ControlResize		. |
+	ControlFunction		. |	ControlMinimumSize	. |	ControlSelectState	y |
+	ControlHide			y |	ControlModsFunction	. |	ControlTip			y |
+	ControlHMargin		. |	ControlMouse		. |	ControlViewDomain	. |
+	ControlHScroll		. |	ControlOrigin		. |	ControlViewSize		. |
+	ControlId			y | ControlOuterSize	. |	ControlVMargin		. |
+	ControlItemSpace	. |	ControlPen			. |	ControlVScroll		. | 
+												  | ControlWidth		. |
+*/
+
+isValidSliderControlAttribute :: !(ControlAttribute .st) -> Bool
+/*	SliderControl		(y = valid, . = invalid)
+	ControlActivate		. |	ControlKeyboard		. |	ControlPos			y |
+	ControlDeactivate	. |	ControlLook			. |	ControlResize		y |
+	ControlFunction		. |	ControlMinimumSize	. |	ControlSelectState	y |
+	ControlHide			y |	ControlModsFunction	. |	ControlTip			y |
+	ControlHMargin		. |	ControlMouse		. |	ControlViewDomain	. |
+	ControlHScroll		. |	ControlOrigin		. |	ControlViewSize		. |
+	ControlId			y | ControlOuterSize	. |	ControlVMargin		. |
+	ControlItemSpace	. |	ControlPen			. |	ControlVScroll		. |
+												  | ControlWidth		. |
+*/
+
+isValidTextControlAttribute :: !(ControlAttribute .st) -> Bool
+/*	TextControl			(y = valid, . = invalid)
+	ControlActivate		. |	ControlKeyboard		. |	ControlPos			y |
+	ControlDeactivate	. |	ControlLook			. |	ControlResize		. |
+	ControlFunction		. |	ControlMinimumSize	. |	ControlSelectState	. |
+	ControlHide			y |	ControlModsFunction	. |	ControlTip			y |
+	ControlHMargin		. |	ControlMouse		. |	ControlViewDomain	. |
+	ControlHScroll		. |	ControlOrigin		. |	ControlViewSize		. |
+	ControlId			y | ControlOuterSize	. |	ControlVMargin		. |
+	ControlItemSpace	. |	ControlPen			. |	ControlVScroll		. |
+												  | ControlWidth		y |
 */
 
 

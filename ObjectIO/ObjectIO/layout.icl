@@ -4,18 +4,18 @@ implementation module layout
 //	Clean Object I/O library, version 1.2
 
 
-import	StdInt, StdBool, StdFunc, StdList, StdMisc, StdTuple
+import	StdBool, StdInt, StdList, StdMisc, StdTuple
 import	commondef, id
 from	windowhandle	import LayoutInfo, LayoutFix, LayoutFun, LayoutFrame, Origin
 
 
 layoutError :: String String -> .x
 layoutError rule error
-	=	Error rule "layout" error
+	= Error rule "layout" error
 
 layoutFatalError :: String String -> .x
 layoutFatalError rule error
-	=	FatalError rule "layout" error
+	= FatalError rule "layout" error
 
 
 //	The data types used for calculating the layout:

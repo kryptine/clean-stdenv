@@ -7,11 +7,12 @@ implementation module StdMenu
 import	StdBool, StdList, StdTuple
 import	osmenu
 import	commondef, iostate, menucreate, menudevice, menuinternal, menuitems, StdId
-from	menuaccess		import menuStateHandleGetMenuId, menuStateHandleGetSelect, menuStateHandleGetTitle, menuStateHandleGetHandle
-from	menudefaccess	import menuDefGetMenuId
-from	menuevent		import MenuSystemStateGetMenuHandles, MenuHandlesGetMenuStateHandles
-from	StdPSt			import accPIO
-from	windowaccess	import getWindowHandlesActiveModalDialog, WindowSystemStateGetWindowHandles
+from	devicesystemstate	import WindowSystemStateGetWindowHandles
+from	menuaccess			import menuStateHandleGetMenuId, menuStateHandleGetSelect, menuStateHandleGetTitle, menuStateHandleGetHandle
+from	menudefaccess		import menuDefGetMenuId
+from	menuevent			import MenuSystemStateGetMenuHandles, MenuHandlesGetMenuStateHandles
+from	StdPSt				import accPIO
+from	windowaccess		import getWindowHandlesActiveModalDialog
 
 
 StdMenuFatalError :: String String -> .x

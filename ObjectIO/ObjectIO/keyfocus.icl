@@ -4,13 +4,13 @@ implementation module keyfocus
 //	Clean Object I/O library, version 1.2
 
 
-import	StdInt, StdBool, StdList, StdTuple, StdFunc, StdMisc
+import	StdBool, StdFunc, StdList, StdMisc
 import	commondef
 import	StdMaybe
 
 
 ::	KeyFocus
-	=	{	kfItem		:: !Maybe Int	// Case (Just nr): the item with (dItemNr nr) has the keyboard input focus; Nothing: no item has focus
+	=	{	kfItem		:: !Maybe Int	// Case (Just nr): the item with (wItemNr nr) has the keyboard input focus; Nothing: no item has focus
 		,	kfItems		:: ![FocusItem]	// The items of the window that can have the keyboard input focus
 		}
 ::	FocusItem

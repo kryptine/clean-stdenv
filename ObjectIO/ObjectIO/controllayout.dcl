@@ -4,9 +4,9 @@ definition module controllayout
 //	Clean Object I/O library, version 1.2
 
 
+from	ossystem	import OSWindowMetrics
 from	ostoolbox	import OSToolbox
 from	ostypes		import Rect
-from	oswindow	import OSWindowMetrics
 import	wstate
 
 

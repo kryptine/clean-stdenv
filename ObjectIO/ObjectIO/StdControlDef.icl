@@ -15,6 +15,7 @@ import	StdIOCommon, StdPictureDef
 ::	CustomButtonControl ls pst = CustomButtonControl Size Look                                        [ControlAttribute *(ls,pst)]
 ::	CustomControl       ls pst = CustomControl       Size Look                                        [ControlAttribute *(ls,pst)]
 ::	EditControl         ls pst = EditControl         String ControlWidth NrLines                      [ControlAttribute *(ls,pst)]
+::	LayoutControl     c ls pst = LayoutControl       (c ls pst)                                       [ControlAttribute *(ls,pst)]
 ::	PopUpControl        ls pst = PopUpControl        [PopUpControlItem *(ls,pst)]               Index [ControlAttribute *(ls,pst)]
 ::	RadioControl        ls pst = RadioControl        [RadioControlItem *(ls,pst)] RowsOrColumns Index [ControlAttribute *(ls,pst)]
 ::	SliderControl       ls pst = SliderControl       Direction ControlWidth SliderState               (SliderAction     *(ls,pst))
@@ -56,7 +57,7 @@ import	StdIOCommon, StdPictureDef
 	|	ControlHMargin      Int Int                 // system dependent
 	|	ControlHScroll      ScrollFunction          // no horizontal scrolling
 	|	ControlItemSpace    Int Int                 // system dependent
-	|	ControlLook         Bool Look               // control is transparant
+	|	ControlLook         Bool Look               // control has white background
 	|	ControlOrigin       Point2                  // Left top of ViewDomain
 	|	ControlOuterSize	Size					// enclose elements
 	|	ControlViewDomain   ViewDomain              // {zero,max range}
@@ -65,9 +66,9 @@ import	StdIOCommon, StdPictureDef
 	|	ControlVScroll      ScrollFunction          // no vertical   scrolling
 
 ::	ControlResizeFunction
-	:==	Size ->                                     // current control size
-		Size ->                                     // old     window  size
-		Size ->                                     // new     window  size
-		Size                                        // new     control size
+	:==	Size ->                                     // current control outer size
+		Size ->                                     // old     parent  view  size
+		Size ->                                     // new     parent  view  size
+		Size                                        // new     control outer size
 ::	ControlType
 	:==	String

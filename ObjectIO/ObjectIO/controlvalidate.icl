@@ -7,6 +7,12 @@ implementation module controlvalidate
 import	StdBool, StdInt, StdList
 import	ospicture, oswindow
 import	commondef, windowhandle, wstate
+from	windowaccess import getWItemReceiverInfo
+
+
+controlvalidateFatalError :: String String -> .x
+controlvalidateFatalError function error
+	= FatalError function "controlvalidate" error
 
 
 //	Validate the title of a control.
@@ -110,3 +116,67 @@ disjointControlIds ids itemHs
 disjointControlIds` :: ![Id] ![WElementHandle`] -> Bool
 disjointControlIds` ids itemHs
 	= disjointLists ids (getWElementControlIds` itemHs)
+
+
+/*	Bind all free R(2)Ids that are contained in the WElementHandles.
+	It assumes that it has already been checked that no R(2)Id is already bound in the ReceiverTable.
+*/
+bindReceiverControlIds :: !SystemId !Id ![WElementHandle .ls .pst] !ReceiverTable -> (![WElementHandle .ls .pst],!ReceiverTable)
+bindReceiverControlIds ioId wId [itemH:itemHs] rt
+	# (itemH, rt) = bindReceiverControlIds` ioId wId itemH  rt
+	# (itemHs,rt) = bindReceiverControlIds  ioId wId itemHs rt
+	= ([itemH:itemHs],rt)
+where
+	bindReceiverControlIds` :: !SystemId !Id !(WElementHandle .ls .pst) !ReceiverTable
+										  -> (!WElementHandle .ls .pst, !ReceiverTable)
+	bindReceiverControlIds` ioId wId (WItemHandle itemH=:{wItemKind,wItemInfo}) rt
+		| not (isReceiverControl wItemKind)
+			# (itemHs,rt1)	= bindReceiverControlIds ioId wId itemH.wItems rt
+			  itemH1		= {itemH & wItems=itemHs}
+			= (WItemHandle itemH1,rt1)
+		| otherwise
+			# recLoc		= {rlIOId=ioId,rlDevice=WindowDevice,rlParentId=wId,rlReceiverId=id}
+			# rte			= {rteLoc=recLoc,rteSelectState=if itemH.wItemSelect Able Unable,rteASMCount=0}
+			# (_,rt)		= addReceiverToReceiverTable rte rt
+			= (WItemHandle itemH,rt)
+	where
+		rH					= getWItemReceiverInfo wItemInfo
+		id					= rH.rId
+		
+		isReceiverControl :: !ControlKind -> Bool
+		isReceiverControl (IsOtherControl type)	= type=="Receiver" || type=="Receiver2"
+		isReceiverControl _						= False
+	
+	bindReceiverControlIds` ioId wId (WListLSHandle itemHs) rt
+		# (itemHs,rt)	= bindReceiverControlIds ioId wId itemHs rt
+		= (WListLSHandle itemHs,rt)
+	
+	bindReceiverControlIds` ioId wId (WExtendLSHandle wExH=:{wExtendItems}) rt
+		# (itemHs,rt)	= bindReceiverControlIds ioId wId wExtendItems rt
+		= (WExtendLSHandle {wExH & wExtendItems=itemHs},rt)
+	
+	bindReceiverControlIds` ioId wId (WChangeLSHandle wChH=:{wChangeItems}) rt
+		# (itemHs,rt)	= bindReceiverControlIds ioId wId wChangeItems rt
+		= (WChangeLSHandle {wChH & wChangeItems=itemHs},rt)
+
+bindReceiverControlIds _ _ itemHs rt
+	= (itemHs,rt)
+
+
+/*	controlIdsAreConsistent checks whether the WElementHandles contain (R(2))Ids that have already been
+	associated with open receivers or other I/O objects and if there are no duplicate Ids. 
+	The ReceiverTable is not changed if there are duplicate (R(2))Ids; otherwise all (R(2))Ids have been bound.
+*/
+controlIdsAreConsistent :: !SystemId !Id ![WElementHandle .ls .pst] !ReceiverTable !IdTable
+							   -> (!Bool,![WElementHandle .ls .pst],!ReceiverTable,!IdTable)
+controlIdsAreConsistent ioId wId itemHs rt it
+	# (ids,itemHs)	= getWElementControlIds itemHs
+	| not (okMembersIdTable ids it)
+		= (False,itemHs,rt,it)
+	# idParent		= {idpIOId=ioId,idpDevice=WindowDevice,idpId=wId}
+	  (ok,it)		= addIdsToIdTable [(id,idParent) \\ id<-ids] it
+	  (itemHs,rt)	= bindReceiverControlIds ioId wId itemHs rt
+	| not ok
+		= controlvalidateFatalError "controlIdsAreConsistent" "could not add all Ids to IdTable"
+	| otherwise
+		= (True,itemHs,rt,it)

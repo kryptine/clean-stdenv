@@ -22,7 +22,7 @@ from	windowaccess	import getCompoundContentRect, getCompoundHScrollRect, getComp
 		,	rliItemShow		:: !Bool				// The item is visible (True) or invisible (False)
 		,	rliItemInfo		:: CompoundInfo			// If the control kind is IsCompoundControl: its CompoundInfo; otherwise undefined
 		,	rliItemLook		:: LookInfo				// If the control kind is IsCustom(Button)Control: its LookInfo; otherwise undefined
-		,	rliItems		:: ![RelayoutItem]		// If the control kind is IsCompoundControl: its elements; otherwise: []
+		,	rliItems		:: ![RelayoutItem]		// If the control kind is Is(Compound/Layout)Control: its elements; otherwise: []
 		}
 
 relayoutFatalError :: String String -> .x
@@ -31,7 +31,7 @@ relayoutFatalError function error
 
 
 /*	relayoutItems resizes and moves changed items.
-		The two Rect  arguments are the window frames in which the elements reside.
+		The two Rect   arguments are the window frames in which the elements reside.
 		The two Point2 arguments are the positions of the parent window/compound.
 		The OSWindowPtr is the parent window/dialog.
 		The first  RelayoutItem list contains the elements at their original location and size.
@@ -86,11 +86,12 @@ where
 			| otherwise		= relayoutFatalError "relayoutItem" "mismatching RelayoutItems"
 		where
 			/*	relayout assumes that the two RelayoutItem arguments 
-				have the same ControlKind (fourth argument) and differ only in size or position or both.
+				have the same ControlKind (fifth argument) and differ only in size or position or both.
 			*/
 			relayout :: !OSWindowPtr !OSWindowMetrics !Bool ![Rect] !ControlKind !(!Rect,!Point2,!RelayoutItem) !(!Rect,!Point2,!RelayoutItem)
 						!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle) !*Picture
 					-> (!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle),!*Picture)
+			
 			relayout wPtr wMetrics isAble newArea IsCompoundControl (oldFrame,oldParentPos,old) (newFrame,newParentPos,new)
 																	(clipRgn,validRgn,invalidRgn) picture
 				#! picture				= apppicttoolbox (moveF o sizeF) picture
@@ -100,14 +101,10 @@ where
 										= relayoutItems` wPtr wMetrics (isAble && new.rliItemSelect) newArea1 (oldFrame1,oldPos,old.rliItems)
 																											  (newFrame1,newPos,new.rliItems)
 																											  (clipRgn,validRgn,invalidRgn) picture
-				| isNothing newInfo.compoundLookInfo	// Compound is transparant
-					# (clipRgn,picture)	= StateMap2 (\r (rgn,p)->accpicttoolbox (subtractRectFromRgn r rgn) p) [hRect`,vRect`] (clipRgn,picture)
-					= ((clipRgn,validRgn,invalidRgn),picture)
-				| otherwise
-					# ((validRgn,invalidRgn),picture)
+				#! ((validRgn,invalidRgn),picture)
 										= accpicttoolbox (checkUpdateRegions oldFrame1 newFrame1 (validRgn,invalidRgn)) picture
-					# (clipRgn,picture)	= accpicttoolbox (subtractRectFromRgn (IntersectRects newFrame newCompoundRect) clipRgn) picture
-					= ((clipRgn,validRgn,invalidRgn),picture)
+				#! (clipRgn,picture)	= accpicttoolbox (subtractRectFromRgn (IntersectRects newFrame newCompoundRect) clipRgn) picture
+				=  ((clipRgn,validRgn,invalidRgn),picture)
 			where
 				sameSize		= oldSize==newSize
 				samePos			= OSCompoundMovesControls && oldPos-oldParentPos==newPos-newParentPos || oldPos==newPos
@@ -148,6 +145,23 @@ where
 					| old==new		= tb
 					| otherwise		= OSsetCompoundSliderThumb wMetrics compoundPtr isHorizontal new (rright,rbottom) True tb
 			
+			relayout wPtr wMetrics isAble newArea IsLayoutControl (oldFrame,oldParentPos,old) (newFrame,newParentPos,new)
+																  (clipRgn, validRgn,invalidRgn) picture
+				#! ((clipRgn,validRgn,invalidRgn),picture)
+										= relayoutItems` wPtr wMetrics (isAble && new.rliItemSelect) newArea1 (oldFrame1,oldPos,old.rliItems)
+																											  (newFrame1,newPos,new.rliItems)
+																											  (clipRgn,validRgn,invalidRgn) picture
+				#! ((validRgn,invalidRgn),picture)
+										= accpicttoolbox (checkUpdateRegions oldFrame1 newFrame1 (validRgn,invalidRgn)) picture
+				#! (clipRgn,picture)	= accpicttoolbox (subtractRectFromRgn (IntersectRects newFrame newLayoutRect) clipRgn) picture
+				=  ((clipRgn,validRgn,invalidRgn),picture)
+			where
+				newSize					= new.rliItemSize;								oldSize			= old.rliItemSize;
+				newPos					= new.rliItemPos;								oldPos			= old.rliItemPos;
+				newLayoutRect			= PosSizeToRect newPos newSize;					oldLayoutRect	= PosSizeToRect oldPos oldSize
+				newFrame1				= IntersectRects newFrame newLayoutRect;		oldFrame1		= IntersectRects oldFrame oldLayoutRect
+				newArea1				= SubtractRects newLayoutRect oldLayoutRect
+				
 			relayout wPtr wMetrics isAble newArea controlKind (oldFrame,oldParentPos,old)
 															  (newFrame,newParentPos,new)
 															  (clipRgn,validRgn,invalidRgn) picture
@@ -253,7 +267,7 @@ where
 		updState					= {oldFrame=cFrame,newFrame=cFrame,updArea=[cFrame]}
 	
 	updatecustomcontrol parentPtr clipRgn contentRect isAble itemH=:{rliItemKind=IsCompoundControl} picture
-		| not itemH.rliItemShow || isNothing info.compoundLookInfo
+		| not itemH.rliItemShow
 			= picture
 		| otherwise
 			#! (curOrigin,picture)		= getpictorigin picture
@@ -276,7 +290,7 @@ where
 		visScrolls						= OSscrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
 		cFrameRect						= getCompoundContentRect wMetrics visScrolls (PosSizeToRect origin itemSize)
 		cFrame							= RectToRectangle cFrameRect
-		compLookInfo					= fromJust info.compoundLookInfo
+		compLookInfo					= info.compoundLookInfo
 		{lookFun,lookPen}				= compLookInfo.compoundLook
 		clipInfo						= compLookInfo.compoundClip
 		updState						= {oldFrame=cFrame,newFrame=cFrame,updArea=[cFrame]}

@@ -9,12 +9,10 @@ import	commondef, windowhandle
 from	StdControlAttribute	import isControlResize,       getControlResizeFun,
 									isControlMinimumSize, getControlMinimumSizeAtt,
 									isControlPos,         getControlPosAtt, isControlViewSize
-from	StdWindowAttribute	import isWindowHMargin,      getWindowHMarginAtt, 
-									isWindowVMargin,     getWindowVMarginAtt,
-									isWindowItemSpace,   getWindowItemSpaceAtt
 from	controllayout		import layoutControls
 from	controlrelayout		import relayoutControls
-from	windowaccess		import getWItemCompoundInfo, getWItemEditInfo, getWItemSliderInfo, getWindowInfoWindowData, getCompoundContentRect
+from	windowaccess		import getWItemCompoundInfo, getWItemEditInfo, getWItemSliderInfo, getWindowInfoWindowData, getCompoundContentRect,
+									getWindowHMargins, getWindowVMargins, getWindowItemSpaces
 from	windowclipstate		import forceValidWindowClipState, invalidateCompoundClipState
 from	windowdraw			import drawwindowlook
 from	windowupdate		import updatewindowbackgrounds
@@ -46,7 +44,7 @@ resizeControls wMetrics isActive updateAll wids=:{wPtr} oldOrigin oldWSize newWS
 		# (_,newItems,tb)		= layoutControls wMetrics hMargins vMargins spaces newWSize minSize [(domain,newOrigin)] newItems tb
 		  wH					= {wH & whItems=newItems}
 		# (wH,tb)				= forceValidWindowClipState wMetrics True wPtr wH tb
-		# (updRgn,tb)			= relayoutControls wMetrics wH.whSelect (SizeToRect oldWSize) (SizeToRect newWSize) zero zero wPtr whDefaultId oldItems wH.whItems tb
+		# (updRgn,tb)			= relayoutControls wMetrics wH.whSelect wH.whShow (SizeToRect oldWSize) (SizeToRect newWSize) zero zero wPtr whDefaultId oldItems wH.whItems tb
 		# (wH,tb)				= updatewindowbackgrounds wMetrics updRgn wids wH tb
 		  {x,y}					= oldOrigin
 		  (oldw,oldh)			= toTuple oldWSize
@@ -65,12 +63,11 @@ where
 								= (windowInfo.windowOrigin,windowInfo.windowDomain,windowInfo.windowLook)
 	domain						= RectToRectangle domainRect
 	lookSysUpdate				= lookInfo.lookSysUpdate
-	(defHMargin,defVMargin)		= if (wH.whKind==IsDialog) (wMetrics.osmHorMargin,wMetrics.osmVerMargin) (0,0)
 	(defMinW,   defMinH)		= OSMinWindowSize
-	(defHSpace, defVSpace)		= (wMetrics.osmHorItemSpace,wMetrics.osmVerItemSpace)
-	hMargins					= getWindowHMarginAtt   (snd (Select isWindowHMargin   (WindowHMargin   defHMargin defHMargin) whAtts))
-	vMargins					= getWindowVMarginAtt   (snd (Select isWindowVMargin   (WindowVMargin   defVMargin defVMargin) whAtts))
-	spaces						= getWindowItemSpaceAtt (snd (Select isWindowItemSpace (WindowItemSpace defHSpace  defVSpace)  whAtts))
+	wKind						= wH.whKind
+	hMargins					= getWindowHMargins   wKind wMetrics whAtts
+	vMargins					= getWindowVMargins   wKind wMetrics whAtts
+	spaces						= getWindowItemSpaces wKind wMetrics whAtts
 	minSize						= {w=defMinW,h=defMinH}
 	oldFrame					= PosSizeToRectangle oldOrigin oldWSize
 	newFrame					= PosSizeToRectangle newOrigin newWSize
@@ -121,83 +118,9 @@ where
 									False
 		
 		calcNewWItemSize :: !OSWindowMetrics !Bool !(IdFun Size) !(WItemHandle .ls .pst) -> (!Bool,!WItemHandle .ls .pst)
-		calcNewWItemSize _ originShifted resizeF itemH=:{wItemKind=IsCustomButtonControl}
-			# itemH		= {itemH & wItemSize=newSize1,wItemAtts=replaceSizeAtt newSize1 itemH.wItemAtts}
-			= (newSize1<>oldSize,itemH)
-		where
-			oldSize		= itemH.wItemSize
-			newSize		= resizeF oldSize
-			newSize1	= {w=max 0 newSize.w,h=max 0 newSize.h}
 		
-		calcNewWItemSize wMetrics originShifted resizeF itemH=:{wItemKind=IsEditControl}
-			# itemH		= {itemH & wItemSize=newSize1,wItemInfo=editInfo,wItemAtts=replaceSizeAtt newSize1 itemH.wItemAtts}
-			= (newSize1<>oldSize,itemH)
-		where
-			oldSize		= itemH.wItemSize
-			newSize		= resizeF oldSize
-			info		= getWItemEditInfo itemH.wItemInfo
-			lineHeight	= wMetrics.osmHeight
-			nrLines1	= max 1 (newSize.h/lineHeight)
-			newSize1	= {w=max 0 newSize.w,h=nrLines1*lineHeight}
-			editInfo	= EditInfo {info & editInfoWidth=newSize1.w,editInfoNrLines=nrLines1}
-		
-		calcNewWItemSize _ originShifted resizeF itemH=:{wItemKind=IsCustomControl}
-			# itemH		= {itemH & wItemSize=newSize1,wItemAtts=replaceSizeAtt newSize1 itemH.wItemAtts}
-			= (newSize1<>oldSize,itemH)
-		where
-			oldSize		= itemH.wItemSize
-			newSize		= resizeF oldSize
-			newSize1	= {w=max 0 newSize.w,h=max 0 newSize.h}
-		
-		calcNewWItemSize wMetrics originShifted resizeF itemH=:{wItemKind=IsSliderControl}
-			# itemH		= {itemH & wItemSize=newSize1,wItemInfo=sliderInfo,wItemAtts=replaceSizeAtt newSize1 itemH.wItemAtts}
-			= (newSize1<>oldSize,itemH)
-		where
-			oldSize		= itemH.wItemSize
-			newSize		= resizeF oldSize
-			info		= getWItemSliderInfo itemH.wItemInfo
-			horizontal	= info.sliderInfoDir==Horizontal
-			newSize1	= if horizontal	{w=max newSize.w 0,h=wMetrics.osmHSliderHeight} {w=wMetrics.osmVSliderWidth,h=max newSize.h 0}
-			sSize		= if horizontal newSize1.w newSize1.h
-			sliderInfo	= SliderInfo {info & sliderInfoLength=sSize}
-		
-/*	PA: previous version for CompoundControls: the current size argument of the resize function must be the outline size, not the viewframe
-		size. Similar: the result size is also the outline size. 
-		calcNewWItemSize wMetrics originShifted resizeF itemH=:{wItemKind=IsCompoundControl}
-			# visScrolls		= OSscrollbarsAreVisible wMetrics domainRect (toTuple itemSize) (hasHScroll,hasVScroll)
-			  contentRect		= getCompoundContentRect wMetrics visScrolls (PosSizeToRect itemPos itemSize)
-			  oldSize			= RectSize contentRect
-			  newSize			= resizeF oldSize
-			  newSize			= {w=max minSize.w newSize.w,h=max minSize.h newSize.h}
-			| newSize==oldSize
-				= (False,itemH)
-			| otherwise
-				# (newW,newH)	= toTuple newSize
-				  newOrigin		= calcNewOrigin origin domainRect (newW,newH)
-				  newInfo		= CompoundInfo {info & compoundOrigin=newOrigin}
-				  visHScroll	= hasHScroll && (OSscrollbarIsVisible (domain.corner1.x,domain.corner2.x) newW)
-				  visVScroll	= hasVScroll && (OSscrollbarIsVisible (domain.corner1.y,domain.corner2.y) newH)
-				  (newW`,newH`)	= (newW+wMetrics.osmVSliderWidth,newH+wMetrics.osmHSliderHeight)
-				  newItemSize	= if (visHScroll && visVScroll) {w=newW`,h=newH`}
-								 (if  visHScroll				{newSize & h=newH`}
-								 (if  visVScroll				{newSize & w=newW`}
-										 								newSize))
-				  (_,itemHs)	= calcNewControlsSize wMetrics (originShifted || newOrigin<>origin) oldSize newSize itemH.wItems
-				  itemH			= {itemH & wItemSize=newItemSize,wItemAtts=replaceSizeAtt newSize atts,wItemInfo=newInfo,wItems=itemHs}
-				  itemH			= invalidateCompoundClipState itemH
-				= (True,itemH)
-		where
-			atts				= itemH.wItemAtts
-			itemPos				= itemH.wItemPos
-			itemSize			= itemH.wItemSize
-			info				= getWItemCompoundInfo itemH.wItemInfo
-			origin				= info.compoundOrigin
-			domain				= info.compoundDomain
-			domainRect			= RectangleToRect domain
-			hasHScroll			= isJust info.compoundHScroll
-			hasVScroll			= isJust info.compoundVScroll
-			(defMinW,defMinH)	= OSMinCompoundSize
-			minSize				= getControlMinimumSizeAtt (snd (Select isControlMinimumSize (ControlMinimumSize {w=defMinW,h=defMinH}) atts))
+/*	PA: the current size argument of the resize function must be the outer size, not the view size.
+		Similar: the result size is also the outer size. 
 */		calcNewWItemSize wMetrics originShifted resizeF itemH=:{wItemKind=IsCompoundControl}
 			# visScrolls		= OSscrollbarsAreVisible wMetrics domainRect (toTuple oldSize) hasScrolls
 			  oldFrameSize		= RectSize (getCompoundContentRect wMetrics visScrolls (SizeToRect oldSize))
@@ -228,8 +151,62 @@ where
 			calcNewOrigin {x,y} {rleft,rtop,rright,rbottom} {w,h}
 				= {x=x`,y=y`}
 			where
-				x`	= if (x+w>rright)  (max (rright -w) rleft) x
-				y`	= if (y+h>rbottom) (max (rbottom-h) rtop ) y
+				x`				= if (x+w>rright)  (max (rright -w) rleft) x
+				y`				= if (y+h>rbottom) (max (rbottom-h) rtop ) y
+		
+		calcNewWItemSize _ originShifted resizeF itemH=:{wItemKind=IsCustomControl}
+			# itemH		= {itemH & wItemSize=newSize1,wItemAtts=replaceSizeAtt newSize1 itemH.wItemAtts}
+			= (newSize1<>oldSize,itemH)
+		where
+			oldSize				= itemH.wItemSize
+			newSize				= resizeF oldSize
+			newSize1			= {w=max 0 newSize.w,h=max 0 newSize.h}
+		
+		calcNewWItemSize _ originShifted resizeF itemH=:{wItemKind=IsCustomButtonControl}
+			# itemH				= {itemH & wItemSize=newSize1,wItemAtts=replaceSizeAtt newSize1 itemH.wItemAtts}
+			= (newSize1<>oldSize,itemH)
+		where
+			oldSize				= itemH.wItemSize
+			newSize				= resizeF oldSize
+			newSize1			= {w=max 0 newSize.w,h=max 0 newSize.h}
+		
+		calcNewWItemSize wMetrics originShifted resizeF itemH=:{wItemKind=IsEditControl}
+			# itemH				= {itemH & wItemSize=newSize1,wItemInfo=editInfo,wItemAtts=replaceSizeAtt newSize1 itemH.wItemAtts}
+			= (newSize1<>oldSize,itemH)
+		where
+			oldSize				= itemH.wItemSize
+			newSize				= resizeF oldSize
+			info				= getWItemEditInfo itemH.wItemInfo
+			lineHeight			= wMetrics.osmHeight
+			nrLines1			= max 1 (newSize.h/lineHeight)
+			newSize1			= {w=max 0 newSize.w,h=nrLines1*lineHeight}
+			editInfo			= EditInfo {info & editInfoWidth=newSize1.w,editInfoNrLines=nrLines1}
+		
+		calcNewWItemSize wMetrics originShifted resizeF itemH=:{wItemKind=IsLayoutControl}
+			# newSize			= resizeF oldSize
+			  newSize			= {w=max minSize.w newSize.w,h=max minSize.h newSize.h}
+			| newSize==oldSize
+				= (False,itemH)
+			| otherwise
+				# (_,itemHs)	= calcNewControlsSize wMetrics originShifted oldSize newSize itemH.wItems
+				  itemH			= {itemH & wItemSize=newSize,wItemAtts=replaceSizeAtt newSize atts,wItems=itemHs}
+				= (True,itemH)
+		where
+			atts				= itemH.wItemAtts
+			oldSize				= itemH.wItemSize
+			minSize				= getControlMinimumSizeAtt (snd (Select isControlMinimumSize (ControlMinimumSize zero) atts))
+		
+		calcNewWItemSize wMetrics originShifted resizeF itemH=:{wItemKind=IsSliderControl}
+			# itemH				= {itemH & wItemSize=newSize1,wItemInfo=sliderInfo,wItemAtts=replaceSizeAtt newSize1 itemH.wItemAtts}
+			= (newSize1<>oldSize,itemH)
+		where
+			oldSize				= itemH.wItemSize
+			newSize				= resizeF oldSize
+			info				= getWItemSliderInfo itemH.wItemInfo
+			horizontal			= info.sliderInfoDir==Horizontal
+			newSize1			= if horizontal	{w=max newSize.w 0,h=wMetrics.osmHSliderHeight} {w=wMetrics.osmVSliderWidth,h=max newSize.h 0}
+			sSize				= if horizontal newSize1.w newSize1.h
+			sliderInfo			= SliderInfo {info & sliderInfoLength=sSize}
 		
 		calcNewWItemSize _ _ _ itemH
 			= (False,itemH)
@@ -254,30 +231,3 @@ where
 		| otherwise			= atts++[sizeAtt]
 	where
 		sizeAtt				= ControlViewSize size
-
-
-/* Mac oswindow version.
-OSsetEditControlPos :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> *OSToolbox
-OSsetEditControlPos parentWindow (parent_x,parent_y) hTE (x,y) (w,h) tb
-	# (tePtr,tb)	= LoadLong hTE tb
-	# tb			= StoreRect (tePtr+destRectOffset) newRect tb	// Directly write destination field for moving
-	# tb			= StoreRect (tePtr+viewRectOffset) newRect tb	// Directly write view        field for moving
-	# tb			= TECalText hTe tb
-	= tb
-where
-	destRectOffset	= 0
-	viewRectOffset	= 8
-	newRect			= (x,y, x+w,y+h)
-
-OSsetEditControlSize :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !*OSToolbox -> *OSToolbox
-OSsetEditControlSize parentWindow (parent_x,parent_y) hTE (x,y) (w,h) tb
-	# (tePtr,tb)	= LoadLong hTE tb
-	# tb			= StoreRect (tePtr+destRectOffset) newRect tb	// Directly write destination field for sizing
-	# tb			= StoreRect (tePtr+viewRectOffset) newRect tb	// Directly write view        field for sizing
-	# tb			= TECalText hTe tb
-	= tb
-where
-	destRectOffset	= 0
-	viewRectOffset	= 8
-	newRect			= (x,y, x+w,y+h)
-*/

@@ -5,10 +5,10 @@ implementation module controldraw
 
 //	Drawing in customised controls
 
-import	StdBool, StdFunc, StdList
 from	ospicture		import packPicture, unpackPicture, pictsetcliprgn, copyPen
 from	osrgn			import osnewrectrgn, osdisposergn, ossectrgn
-from	oswindow		import OSWindowMetrics, OSgrabWindowPictContext, OSreleaseWindowPictContext, OSscrollbarsAreVisible
+from	ossystem		import OSWindowMetrics
+from	oswindow		import OSgrabWindowPictContext, OSreleaseWindowPictContext, OSscrollbarsAreVisible
 import	commondef, wstate
 from	windowaccess	import getWItemCompoundInfo,  getWItemCustomButtonInfo,  getWItemCustomInfo, getCompoundContentRect
 from	wstateaccess	import getWItemCompoundInfo`, getWItemCustomButtonInfo`, getWItemCustomInfo`
@@ -26,20 +26,17 @@ from	wstateaccess	import getWItemCompoundInfo`, getWItemCustomButtonInfo`, getWI
 */
 drawCompoundLook :: !OSWindowMetrics !Bool !OSWindowPtr !Rect !(WItemHandle .ls .pst) !*OSToolbox -> (!WItemHandle .ls .pst,!*OSToolbox)
 drawCompoundLook wMetrics able wPtr contextClip itemH=:{wItemInfo} tb
-	| isNothing info.compoundLookInfo
-		= (itemH,tb)
-	| otherwise
-		#! (contextRgn,tb)			= osnewrectrgn contextClip tb
-		#! (clipRgn,tb)				= ossectrgn contextRgn itemClip.clipRgn tb
-		#! (osPict,tb)				= OSgrabWindowPictContext wPtr tb
-		#! picture					= packPicture (origin-itemPos) (copyPen itemLook.lookPen) True osPict tb
-		#! picture					= pictsetcliprgn clipRgn picture
-		#! picture					= itemLook.lookFun selectState updState picture
-		#! (_,pen,_,osPict,tb)		= unpackPicture picture
-		#! tb						= OSreleaseWindowPictContext wPtr osPict tb
-		#! tb						= StateMap2 osdisposergn [contextRgn,clipRgn] tb
-		   info						= {info & compoundLookInfo=Just {compoundLookInfo & compoundLook={itemLook & lookPen=pen}}}
-		= ({itemH & wItemInfo=CompoundInfo info},tb)
+	#! (contextRgn,tb)				= osnewrectrgn contextClip tb
+	#! (clipRgn,tb)					= ossectrgn contextRgn itemClip.clipRgn tb
+	#! (osPict,tb)					= OSgrabWindowPictContext wPtr tb
+	#! picture						= packPicture (origin-itemPos) (copyPen itemLook.lookPen) True osPict tb
+	#! picture						= pictsetcliprgn clipRgn picture
+	#! picture						= itemLook.lookFun selectState updState picture
+	#! (_,pen,_,osPict,tb)			= unpackPicture picture
+	#! tb							= OSreleaseWindowPictContext wPtr osPict tb
+	#! tb							= StateMap2 osdisposergn [contextRgn,clipRgn] tb
+	   info							= {info & compoundLookInfo={compoundLookInfo & compoundLook={itemLook & lookPen=pen}}}
+	= ({itemH & wItemInfo=CompoundInfo info},tb)
 where
 	itemPos							= itemH.wItemPos
 	itemSize						= itemH.wItemSize
@@ -50,27 +47,24 @@ where
 	clipRectangle					= RectToRectangle (addVector (toVector (origin-itemPos)) (IntersectRects (addVector (toVector (itemPos-origin)) contentRect) contextClip))
 	viewFrame						= RectToRectangle contentRect
 	updState						= {oldFrame=viewFrame,newFrame=viewFrame,updArea=[clipRectangle]}
-	compoundLookInfo				= fromJust info.compoundLookInfo
+	compoundLookInfo				= info.compoundLookInfo
 	itemLook						= compoundLookInfo.compoundLook
 	itemClip						= compoundLookInfo.compoundClip
 	selectState						= if able Able Unable
 
 drawCompoundLook` :: !OSWindowMetrics !Bool !OSWindowPtr !Rect !WItemHandle` !*OSToolbox -> (!WItemHandle`,!*OSToolbox)
 drawCompoundLook` wMetrics able wPtr contextClip itemH=:{wItemInfo`} tb
-	| isNothing info.compoundLookInfo
-		= (itemH,tb)
-	| otherwise
-		#! (contextRgn,tb)			= osnewrectrgn contextClip tb
-		#! (clipRgn,tb)				= ossectrgn contextRgn itemClip.clipRgn tb
-		#! (osPict,tb)				= OSgrabWindowPictContext wPtr tb
-		#! picture					= packPicture (origin-itemPos) (copyPen itemLook.lookPen) True osPict tb
-		#! picture					= pictsetcliprgn clipRgn picture
-		#! picture					= itemLook.lookFun selectState updState picture
-		#! (_,pen,_,osPict,tb)		= unpackPicture picture
-		#! tb						= OSreleaseWindowPictContext wPtr osPict tb
-		#! tb						= StateMap2 osdisposergn [contextRgn,clipRgn] tb
-		   info						= {info & compoundLookInfo=Just {compoundLookInfo & compoundLook={itemLook & lookPen=pen}}}
-		= ({itemH & wItemInfo`=CompoundInfo` info},tb)
+	#! (contextRgn,tb)				= osnewrectrgn contextClip tb
+	#! (clipRgn,tb)					= ossectrgn contextRgn itemClip.clipRgn tb
+	#! (osPict,tb)					= OSgrabWindowPictContext wPtr tb
+	#! picture						= packPicture (origin-itemPos) (copyPen itemLook.lookPen) True osPict tb
+	#! picture						= pictsetcliprgn clipRgn picture
+	#! picture						= itemLook.lookFun selectState updState picture
+	#! (_,pen,_,osPict,tb)			= unpackPicture picture
+	#! tb							= OSreleaseWindowPictContext wPtr osPict tb
+	#! tb							= StateMap2 osdisposergn [contextRgn,clipRgn] tb
+	   info							= {info & compoundLookInfo={compoundLookInfo & compoundLook={itemLook & lookPen=pen}}}
+	= ({itemH & wItemInfo`=CompoundInfo` info},tb)
 where
 	itemPos							= itemH.wItemPos`
 	itemSize						= itemH.wItemSize`
@@ -81,7 +75,7 @@ where
 	clipRectangle					= RectToRectangle (addVector (toVector (origin-itemPos)) (IntersectRects (addVector (toVector (itemPos-origin)) contentRect) contextClip))
 	viewFrame						= RectToRectangle contentRect
 	updState						= {oldFrame=viewFrame,newFrame=viewFrame,updArea=[clipRectangle]}
-	compoundLookInfo				= fromJust info.compoundLookInfo
+	compoundLookInfo				= info.compoundLookInfo
 	itemLook						= compoundLookInfo.compoundLook
 	itemClip						= compoundLookInfo.compoundClip
 	selectState						= if able Able Unable
@@ -194,13 +188,13 @@ drawInCompound wPtr drawfun contextClip itemH=:{wItemPtr,wItemInfo,wItemPos,wIte
 	#! (_,pen,_,osPict,tb)		= unpackPicture picture
 	#! tb						= OSreleaseWindowPictContext wPtr osPict tb
 	#! tb						= StateMap2 osdisposergn [contextRgn,clipRgn] tb
-	   info						= {info & compoundLookInfo=Just {compoundLookInfo & compoundLook={compoundLook & lookPen=pen}}}
+	   info						= {info & compoundLookInfo={compoundLookInfo & compoundLook={compoundLook & lookPen=pen}}}
 	   itemH					= {itemH & wItemInfo=CompoundInfo info}
 	= (x,itemH,tb)
 where
 	info						= getWItemCompoundInfo wItemInfo
 	origin						= info.compoundOrigin
-	compoundLookInfo			= fromJust info.compoundLookInfo
+	compoundLookInfo			= info.compoundLookInfo
 	{compoundLook,compoundClip}	= compoundLookInfo
 
 drawInCompound` :: !OSWindowPtr !.(St *Picture .x) !Rect !WItemHandle` !*OSToolbox -> (.x,!WItemHandle`,!*OSToolbox)
@@ -214,13 +208,13 @@ drawInCompound` wPtr drawfun contextClip itemH=:{wItemPtr`,wItemInfo`,wItemPos`,
 	#! (_,pen,_,osPict,tb)		= unpackPicture picture
 	#! tb						= OSreleaseWindowPictContext wPtr osPict tb
 	#! tb						= StateMap2 osdisposergn [contextRgn,clipRgn] tb
-	   info						= {info & compoundLookInfo=Just {compoundLookInfo & compoundLook={compoundLook & lookPen=pen}}}
+	   info						= {info & compoundLookInfo={compoundLookInfo & compoundLook={compoundLook & lookPen=pen}}}
 	   itemH					= {itemH & wItemInfo`=CompoundInfo` info}
 	= (x,itemH,tb)
 where
 	info						= getWItemCompoundInfo` wItemInfo`
 	origin						= info.compoundOrigin
-	compoundLookInfo			= fromJust info.compoundLookInfo
+	compoundLookInfo			= info.compoundLookInfo
 	{compoundLook,compoundClip}	= compoundLookInfo
 
 drawInCustomButton :: !OSWindowPtr !.(St *Picture .x) !Rect !(WItemHandle .ls .ps) !*OSToolbox -> (.x,!WItemHandle .ls .ps,!*OSToolbox)

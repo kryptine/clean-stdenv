@@ -143,17 +143,17 @@ from	ospicture	import OSPictContext, Origin, Pen, Font,
 	|	LayoutFun ParentIndex OffsetFun							// ItemOffset = OffsetFun
 	|	LayoutFrame												// any other attribute
 ::	WItemInfo		ls pst
-	=	RadioInfo			(RadioInfo	  *(ls,pst))			// In case of	RadioControl	: the radio items information
+	=	ButtonInfo			ButtonInfo							// In case of	ButtonControl	: the button information
 	|	CheckInfo			(CheckInfo	  *(ls,pst))			// In case of	CheckControl	: the check items information
-	|	PopUpInfo			(PopUpInfo	  *(ls,pst))			// In case of	PopUpControl	: the pop up information
-	|	SliderInfo			(SliderInfo	  *(ls,pst))			// In case of	SliderControl	: the slider information
-	|	TextInfo			TextInfo							// In case of	TextControl		: the text information
-	|	EditInfo			EditInfo							// In case of	EditControl		: the edit text information
-	|	ButtonInfo			ButtonInfo							// In case of	ButtonControl	: the button information
+	|	CompoundInfo		CompoundInfo						// In case of	CompoundControl	: the compound control information
 	|	CustomButtonInfo	CustomButtonInfo					// In case of	CustomButtonControl	: the custom button information
 	|	CustomInfo			CustomInfo							// In case of	CustomControl		: the custom information
-	|	CompoundInfo		CompoundInfo						// In case of	CompoundControl	: the compound control information
+	|	EditInfo			EditInfo							// In case of	EditControl		: the edit text information
+	|	PopUpInfo			(PopUpInfo	  *(ls,pst))			// In case of	PopUpControl	: the pop up information
+	|	RadioInfo			(RadioInfo	  *(ls,pst))			// In case of	RadioControl	: the radio items information
 	|	ReceiverInfo		(ReceiverHandle	ls pst)				// In case of	ReceiverControl	: the receiver information
+	|	SliderInfo			(SliderInfo	  *(ls,pst))			// In case of	SliderControl	: the slider information
+	|	TextInfo			TextInfo							// In case of	TextControl		: the text information
 	|	NoWItemInfo												// No additional information
 ::	RadioInfo		st
 	=	{	radioItems		:: [RadioItemInfo st]				// The radio items and their exact position (initially zero)
@@ -213,24 +213,25 @@ from	ospicture	import OSPictContext, Origin, Pen, Font,
 		,	compoundOrigin	:: Point2							// The Origin of the view domain
 		,	compoundHScroll	:: Maybe ScrollInfo					// The scroll data of the ControlHScroll attribute
 		,	compoundVScroll	:: Maybe ScrollInfo					// The scroll data of the ControlVScroll attribute
-		,	compoundLookInfo:: Maybe CompoundLookInfo			// The look information of the compound control
+		,	compoundLookInfo:: CompoundLookInfo					// The look information of the compound control
 		}
 ::	CompoundLookInfo
 	=	{	compoundLook	:: LookInfo							// The look of the compound control
 		,	compoundClip	:: ClipState						// The clipped elements of the compound control
 		}
 ::	ControlKind
-	=	IsRadioControl
+	=	IsButtonControl
 	|	IsCheckControl
-	|	IsPopUpControl
-	|	IsSliderControl
-	|	IsTextControl
-	|	IsEditControl
-	|	IsButtonControl
+	|	IsCompoundControl
 	|	IsCustomButtonControl
 	|	IsCustomControl
-	|	IsCompoundControl
-	|	IsOtherControl ControlType								// Of other controls the non LS variant
+	|	IsEditControl
+	|	IsLayoutControl
+	|	IsPopUpControl
+	|	IsRadioControl
+	|	IsSliderControl
+	|	IsTextControl
+	|	IsOtherControl ControlType								// Of other controls the ControlType
 
 instance == WIDS
 instance == WindowMode

@@ -4,13 +4,11 @@ implementation module windowdevice
 //	Clean Object I/O library, version 1.2
 
 
-import	StdBool, StdEnum, StdFunc, StdList, StdMisc, StdTuple
+import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	osevent, ospicture, osrgn, oswindow
-import	commondef, controldefaccess, controldraw, controllayout, controlrelayout, controlresize, devicefunctions, receiverid, scheduler, 
-		windowaccess, windowclipstate, windowdefaccess, windowdispose, windowdraw, windowevent, windowupdate
+import	commondef, controldraw, controllayout, controlrelayout, controlresize, iostate, processstack, receiverid, scheduler
+import	StdControlAttribute, StdWindowAttribute, windowaccess, windowclipstate, windowdispose, windowdraw, windowevent, windowupdate
 from	keyfocus		import setNoFocusItem, setNewFocusItem
-from	menuevent		import MenuSystemStateGetMenuHandles
-from	processstack	import selectProcessShowState
 from	StdPSt			import accPIO
 
 
@@ -480,7 +478,7 @@ where
 			elementControlQASyncIO :: !Id !SemiDynamic !(WElementHandle .ls .pst) -> (!Bool,!WElementHandle .ls .pst)
 			elementControlQASyncIO rId msg (WItemHandle itemH)
 				| not (identifyMaybeId rId itemH.wItemId)
-					| itemKind<>IsCompoundControl
+					| not (isRecursiveControl itemKind)
 						= (False,WItemHandle itemH)
 					// otherwise
 						# (done,itemHs)	= elementsControlQASyncIO rId msg itemH.wItems
@@ -532,7 +530,7 @@ where
 								-> (!Bool,!WElementHandle .ls .pst, *(.ls,.pst))
 			elementControlASyncIO rId (WItemHandle itemH) ls_ps
 				| not (identifyMaybeId rId itemH.wItemId)
-					| itemKind<>IsCompoundControl
+					| not (isRecursiveControl itemKind)
 						= (False,WItemHandle itemH,ls_ps)
 					// otherwise
 						# (done,itemHs,ls_ps)	= elementsControlASyncIO rId itemH.wItems ls_ps
@@ -592,7 +590,7 @@ where
 							  -> (!Bool,!SyncMessage,  WElementHandle .ls .pst, *(.ls,.pst))
 			elementControlSyncIO r2Id msg (WItemHandle itemH) ls_ps
 				| not (identifyMaybeId r2Id itemH.wItemId)
-					| itemKind<>IsCompoundControl
+					| not (isRecursiveControl itemKind)
 						= (False,msg,WItemHandle itemH,ls_ps)
 					// otherwise
 						# (done,msg,itemHs,ls_ps)	= elementsControlSyncIO r2Id msg itemH.wItems ls_ps
@@ -636,7 +634,7 @@ windowStateMsgIO  _ _ _
 windowStateCompoundScrollActionIO :: !OSWindowMetrics !CompoundScrollActionInfo !(WindowStateHandle .pst) !*OSToolbox
 																			 -> (!WindowStateHandle .pst, !*OSToolbox)
 windowStateCompoundScrollActionIO wMetrics info=:{csaWIDS={wPtr}}
-								  wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whKind,whWindowInfo,whItems,whSize,whAtts,whSelect}}} tb
+								  wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whKind,whWindowInfo,whItems,whSize,whAtts,whSelect,whShow}}} tb
 	# (done,originChanged,itemHs,tb)
 							= calcNewCompoundOrigin wMetrics info whItems tb
 	| not done
@@ -648,7 +646,7 @@ windowStateCompoundScrollActionIO wMetrics info=:{csaWIDS={wPtr}}
 		# (_,newItems,tb)	= layoutControls wMetrics hMargins vMargins spaces contentSize minSize [(domain,origin)] itemHs tb
 		  wH				= {wH & whItems=newItems}
 		# (wH,tb)			= forceValidWindowClipState wMetrics True wPtr wH tb
-		# (updRgn,tb)		= relayoutControls wMetrics whSelect wFrame wFrame zero zero wPtr wH.whDefaultId whItems wH.whItems tb
+		# (updRgn,tb)		= relayoutControls wMetrics whSelect whShow wFrame wFrame zero zero wPtr wH.whDefaultId whItems wH.whItems tb
 		# (wH,tb)			= drawcompoundlook wMetrics whSelect wFrame info.csaItemNr wPtr wH tb	// PA: this might be redundant now because of updatewindowbackgrounds
 		# (wH,tb)			= updatewindowbackgrounds wMetrics updRgn info.csaWIDS wH tb
 		# tb				= OSvalidateWindowRect wPtr (SizeToRect whSize) tb
@@ -665,11 +663,9 @@ where
 	contentSize				= RectSize wFrame
 	(defMinW,  defMinH)		= OSMinWindowSize
 	minSize					= {w=defMinW,h=defMinH}
-	(defHSpace, defVSpace)	= (wMetrics.osmHorItemSpace,wMetrics.osmVerItemSpace)
-	(defHMargin,defVMargin)	= if (whKind==IsDialog) (wMetrics.osmHorMargin,wMetrics.osmVerMargin) (0,0)
-	hMargins				= getWindowHMarginAtt     (snd (Select isWindowHMargin     (WindowHMargin   defHMargin defHMargin) whAtts))
-	vMargins				= getWindowVMarginAtt     (snd (Select isWindowVMargin     (WindowVMargin   defVMargin defVMargin) whAtts))
-	spaces					= getWindowItemSpaceAtt   (snd (Select isWindowItemSpace   (WindowItemSpace defHSpace  defVSpace ) whAtts))
+	hMargins				= getWindowHMargins   whKind wMetrics whAtts
+	vMargins				= getWindowVMargins   whKind wMetrics whAtts
+	spaces					= getWindowItemSpaces whKind wMetrics whAtts
 	
 	drawcompoundlook :: !OSWindowMetrics !Bool !Rect !Int !OSWindowPtr !(WindowHandle .ls .pst) !*OSToolbox -> (!WindowHandle .ls .pst,!*OSToolbox)
 	drawcompoundlook wMetrics ableContext clipRect itemNr wPtr wH=:{whItems} tb
@@ -690,24 +686,32 @@ where
 																	  -> (!Bool,!WElementHandle .ls .pst, !*OSToolbox)
 			drawWElementLook wMetrics ableContext clipRect itemNr wPtr (WItemHandle itemH=:{wItemKind,wItemSelect}) tb
 				| info.csaItemNr<>itemH.wItemNr
-					| wItemKind<>IsCompoundControl
+					| not (isRecursiveControl wItemKind)
 						= (False,WItemHandle itemH,tb)
+					| wItemKind==IsLayoutControl
+						# (done,itemHs,tb)	= drawcompoundlook` wMetrics isAble (IntersectRects clipRect itemRect) itemNr wPtr itemH.wItems tb
+						  itemH				= {itemH & wItems=itemHs}
+						= (done,WItemHandle itemH,tb)
 					// otherwise
 						# (done,itemHs,tb)	= drawcompoundlook` wMetrics isAble clipRect1 itemNr wPtr itemH.wItems tb
 						  itemH				= {itemH & wItems=itemHs}
 						= (done,WItemHandle itemH,tb)
+				| wItemKind<>IsCompoundControl
+					= windowdeviceFatalError "drawWElementLook (windowStateCompoundScrollActionIO)" "argument control is not a CompoundControl"
 				| otherwise
 					# (itemH,tb)			= drawCompoundLook wMetrics isAble wPtr clipRect1 itemH tb
 					# tb					= OSvalidateWindowRect itemH.wItemPtr clipRect1 tb//(SizeToRect itemSize) tb	// PA: validation of (SizeToRect itemSize) is to much
 					= (True,WItemHandle itemH,tb)
 			where
 				isAble						= ableContext && wItemSelect
+				itemPos						= itemH.wItemPos
 				itemSize					= itemH.wItemSize
 				itemInfo					= getWItemCompoundInfo itemH.wItemInfo
 				domainRect					= itemInfo.compoundDomain
 				hasScrolls					= (isJust itemInfo.compoundHScroll,isJust itemInfo.compoundVScroll)
 				visScrolls					= OSscrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
-				contentRect					= getCompoundContentRect wMetrics visScrolls (PosSizeToRect itemH.wItemPos itemSize) 
+				itemRect					= PosSizeToRect itemPos itemSize
+				contentRect					= getCompoundContentRect wMetrics visScrolls itemRect 
 				clipRect1					= IntersectRects clipRect contentRect
 		
 			drawWElementLook wMetrics ableContext clipRect itemNr wPtr (WListLSHandle itemHs) tb
@@ -739,43 +743,41 @@ where
 															 -> (!Bool,!Bool,!WElementHandle .ls .pst, !*OSToolbox)
 		calcNewWElementOrigin wMetrics info (WItemHandle itemH=:{wItemKind,wItemAtts}) tb
 			| info.csaItemNr<>itemH.wItemNr
-				| wItemKind<>IsCompoundControl
+				| not (isRecursiveControl wItemKind)
 					= (False,False,WItemHandle itemH,tb)
 				// otherwise
-					# (done,changed,itemHs,tb)
-											= calcNewCompoundOrigin wMetrics info itemH.wItems tb
-					  itemH					= {itemH & wItems=itemHs}
+					# (done,changed,itemHs,tb)	= calcNewCompoundOrigin wMetrics info itemH.wItems tb
+					  itemH						= {itemH & wItems=itemHs}
 					= (done,changed,WItemHandle itemH,tb)
 			| wItemKind<>IsCompoundControl		// This alternative should never occur
 				= windowdeviceFatalError "windowStateCompoundScrollActionIO" "CompoundScrollAction does not correspond with CompoundControl"
 			| newThumb==oldThumb
 				= (True,False,WItemHandle itemH,tb)
 			| otherwise
-				# tb						= OSsetCompoundSliderThumb wMetrics itemPtr isHorizontal newOSThumb (toTuple compoundSize) True tb
-				# itemH						= {itemH & wItemInfo=CompoundInfo {compoundInfo & compoundOrigin=newOrigin}
-													 , wItemAtts=ReplaceOrAppend isControlViewSize (ControlViewSize {w=w,h=h}) wItemAtts
-											  }
+				# tb							= OSsetCompoundSliderThumb wMetrics itemPtr isHorizontal newOSThumb (toTuple compoundSize) True tb
+				# itemH							= {itemH & wItemInfo=CompoundInfo {compoundInfo & compoundOrigin=newOrigin}
+														 , wItemAtts=ReplaceOrAppend isControlViewSize (ControlViewSize {w=w,h=h}) wItemAtts
+												  }
 				= (True,True,WItemHandle itemH,tb)
 		where
-			itemPtr							= info.csaItemPtr
-			compoundSize					= itemH.wItemSize
-			compoundInfo					= getWItemCompoundInfo itemH.wItemInfo
-			(domainRect,origin,hScroll,vScroll)
-											= (compoundInfo.compoundDomain,compoundInfo.compoundOrigin,compoundInfo.compoundHScroll,compoundInfo.compoundVScroll)
-			visScrolls						= OSscrollbarsAreVisible wMetrics domainRect (toTuple compoundSize) (isJust hScroll,isJust vScroll)
-			{w,h}							= RectSize (getCompoundContentRect wMetrics visScrolls (SizeToRect compoundSize))
-			isHorizontal					= info.csaDirection==Horizontal
-			scrollInfo						= fromJust (if isHorizontal hScroll vScroll)
-			scrollFun						= scrollInfo.scrollFunction
-			viewFrame						= PosSizeToRectangle origin {w=w,h=h}
-			(min`,oldThumb,max`,viewSize)	= if isHorizontal
-												(domainRect.rleft,origin.x,domainRect.rright, w)
-												(domainRect.rtop, origin.y,domainRect.rbottom,h)
-			sliderState						= {sliderMin=min`,sliderThumb=oldThumb,sliderMax=max min` (max`-viewSize)}
-			newThumb`						= scrollFun viewFrame sliderState info.csaSliderMove
-			newThumb						= SetBetween newThumb` min` (max min` (max`-viewSize))
-			(_,newOSThumb,_,_)				= toOSscrollbarRange (min`,newThumb,max`) viewSize
-			newOrigin						= if isHorizontal {origin & x=newThumb} {origin & y=newThumb}
+			itemPtr								= info.csaItemPtr
+			compoundSize						= itemH.wItemSize
+			compoundInfo						= getWItemCompoundInfo itemH.wItemInfo
+			(domainRect,origin,hScroll,vScroll)	= (compoundInfo.compoundDomain,compoundInfo.compoundOrigin,compoundInfo.compoundHScroll,compoundInfo.compoundVScroll)
+			visScrolls							= OSscrollbarsAreVisible wMetrics domainRect (toTuple compoundSize) (isJust hScroll,isJust vScroll)
+			{w,h}								= RectSize (getCompoundContentRect wMetrics visScrolls (SizeToRect compoundSize))
+			isHorizontal						= info.csaDirection==Horizontal
+			scrollInfo							= fromJust (if isHorizontal hScroll vScroll)
+			scrollFun							= scrollInfo.scrollFunction
+			viewFrame							= PosSizeToRectangle origin {w=w,h=h}
+			(min`,oldThumb,max`,viewSize)		= if isHorizontal
+													(domainRect.rleft,origin.x,domainRect.rright, w)
+													(domainRect.rtop, origin.y,domainRect.rbottom,h)
+			sliderState							= {sliderMin=min`,sliderThumb=oldThumb,sliderMax=max min` (max`-viewSize)}
+			newThumb`							= scrollFun viewFrame sliderState info.csaSliderMove
+			newThumb							= SetBetween newThumb` min` (max min` (max`-viewSize))
+			(_,newOSThumb,_,_)					= toOSscrollbarRange (min`,newThumb,max`) viewSize
+			newOrigin							= if isHorizontal {origin & x=newThumb} {origin & y=newThumb}
 		
 		calcNewWElementOrigin wMetrics info (WListLSHandle itemHs) tb
 			# (done,changed,itemHs,tb)	= calcNewCompoundOrigin wMetrics info itemHs tb
@@ -826,7 +828,7 @@ where
 																-> (!Bool,!WElementHandle .ls .pst, *(.ls,.pst))
 			elementControlKeyFocusActionIO activated info (WItemHandle itemH) ls_ps
 				| info.ckfItemNr<>itemH.wItemNr
-					| itemH.wItemKind<>IsCompoundControl
+					| not (isRecursiveControl itemH.wItemKind)
 						= (False,WItemHandle itemH,ls_ps)
 					// otherwise
 						# (done,itemHs,ls_ps)	= elementsControlKeyFocusActionIO activated info itemH.wItems ls_ps
@@ -892,7 +894,7 @@ where
 																-> (!Bool,!WElementHandle .ls .pst, *(.ls,.pst))
 			elementControlKeyboardActionIO info (WItemHandle itemH) ls_ps
 				| info.ckItemNr<>itemH.wItemNr
-					| itemH.wItemKind<>IsCompoundControl
+					| not (isRecursiveControl itemH.wItemKind)
 						= (False,WItemHandle itemH,ls_ps)
 					// otherwise
 						# (done,itemHs,ls_ps)	= elementsControlKeyboardActionIO info itemH.wItems ls_ps
@@ -956,7 +958,7 @@ where
 														  -> (!Bool,!WElementHandle .ls .pst, *(.ls,.pst))
 			elementControlMouseActionIO info (WItemHandle itemH) ls_ps
 				| info.cmItemNr<>itemH.wItemNr
-					| itemH.wItemKind<>IsCompoundControl
+					| not (isRecursiveControl itemH.wItemKind)
 						= (False,WItemHandle itemH,ls_ps)
 					// otherwise
 						# (done,itemHs,ls_ps)	= elementsControlMouseActionIO info itemH.wItems ls_ps
@@ -1019,7 +1021,7 @@ where
 												   -> (!Bool,!WElementHandle .ls .pst, *(.ls,.pst))
 			elementControlSelectionIO info (WItemHandle itemH) ls_ps
 				| info.csItemNr<>itemH.wItemNr
-					| itemH.wItemKind<>IsCompoundControl
+					| not (isRecursiveControl itemH.wItemKind)
 						= (False,WItemHandle itemH,ls_ps)
 					// otherwise
 						# (done,itemHs,ls_ps)	= elementsControlSelectionIO info itemH.wItems ls_ps
@@ -1127,7 +1129,7 @@ where
 													  -> (!Bool,!WElementHandle .ls .pst, *(.ls,.pst))
 			elementControlSliderActionIO info (WItemHandle itemH) ls_ps
 				| info.cslItemNr<>itemH.wItemNr
-					| itemH.wItemKind<>IsCompoundControl
+					| not (isRecursiveControl itemH.wItemKind)
 						= (False,WItemHandle itemH,ls_ps)
 					// otherwise
 						# (done,itemHs,ls_ps)	= elementsControlSliderActionIO info itemH.wItems ls_ps
@@ -1284,7 +1286,7 @@ where
 							-> (!Bool,!WElementHandle .ls .pst, *(.ls,.pst))
 		elementButtonActionIO id (WItemHandle itemH=:{wItemId}) ls_ps
 			| isNothing wItemId || fromJust wItemId<>id
-				| itemH.wItemKind<>IsCompoundControl
+				| not (isRecursiveControl itemH.wItemKind)
 					= (False,WItemHandle itemH,ls_ps)
 				// otherwise
 					# (done,itemHs,ls_ps)	= elementsButtonActionIO id itemH.wItems ls_ps
@@ -1382,7 +1384,7 @@ windowStateScrollActionIO wMetrics info wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH
 where
 	windowScrollActionIO :: !OSWindowMetrics !WindowScrollActionInfo !(WindowHandle .ls .pst) !*OSToolbox
 																  -> (!WindowHandle .ls .pst, !*OSToolbox)
-	windowScrollActionIO wMetrics info=:{wsaWIDS={wPtr}} wH=:{whWindowInfo,whItems=oldItems,whSize,whAtts,whSelect} tb
+	windowScrollActionIO wMetrics info=:{wsaWIDS={wPtr}} wH=:{whWindowInfo,whItems=oldItems,whSize,whAtts,whSelect,whShow} tb
 		| newThumb==oldThumb
 			= (wH,tb)
 		| otherwise
@@ -1397,7 +1399,7 @@ where
 			# (isRect,areaRect,tb)	= case wH.whWindowInfo of
 			  							WindowInfo {windowClip={clipRgn}} -> osgetrgnbox clipRgn tb
 			  							_                                 -> windowdeviceFatalError "windowScrollActionIO" "unexpected whWindowInfo field"
-			# (updRgn,tb)			= relayoutControls wMetrics whSelect contentRect contentRect zero zero wPtr wH.whDefaultId oldItems wH.whItems tb
+			# (updRgn,tb)			= relayoutControls wMetrics whSelect whShow contentRect contentRect zero zero wPtr wH.whDefaultId oldItems wH.whItems tb
 			# (wH,tb)				= updatewindowbackgrounds wMetrics updRgn info.wsaWIDS wH tb
 			  newFrame				= PosSizeToRectangle newOrigin contentSize
 			  toMuch				= if isHorizontal (abs (newOrigin.x-oldOrigin.x)>=w`) (abs (newOrigin.y-oldOrigin.y)>=h`)
@@ -1429,10 +1431,9 @@ where
 		newThumb					= SetBetween newThumb` min` (max`-viewSize)
 		(defMinW,  defMinH)			= OSMinWindowSize
 		minSize						= {w=defMinW,h=defMinH}
-		(defHSpace,defVSpace)		= (wMetrics.osmHorItemSpace,wMetrics.osmVerItemSpace)
-		hMargins					= getWindowHMarginAtt   (snd (Select isWindowHMargin   (WindowHMargin 0 0) whAtts))
-		vMargins					= getWindowVMarginAtt   (snd (Select isWindowVMargin   (WindowVMargin 0 0) whAtts))
-		spaces						= getWindowItemSpaceAtt (snd (Select isWindowItemSpace (WindowItemSpace defHSpace defVSpace) whAtts))
+		hMargins					= getWindowHMargins   IsWindow wMetrics whAtts
+		vMargins					= getWindowVMargins   IsWindow wMetrics whAtts
+		spaces						= getWindowItemSpaces IsWindow wMetrics whAtts
 		
 	/*	calcScrollUpdateArea p1 p2 area calculates the new Rectangle that has to be updated. 
 		Assumptions: p1 is the origin before scrolling,
