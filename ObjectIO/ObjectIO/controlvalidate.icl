@@ -31,62 +31,68 @@ where
 	min` = min sMin sMax
 	max` = max sMin sMax
 
-
 //	Collect all Ids of the given [WElementHandle].
 
 getWElementControlIds :: ![WElementHandle .ls .pst] -> (![Id],![WElementHandle .ls .pst])
-getWElementControlIds [itemH:itemHs]
-	# (ids1,itemH)	= getWElementIds itemH
-	# (ids2,itemHs)	= getWElementControlIds itemHs
-	= (ids1++ids2,[itemH:itemHs])
+getWElementControlIds itemHs = getWElementControlIdsAppend itemHs []
 where
-	getWElementIds :: !(WElementHandle .ls .pst) -> (![Id],!WElementHandle .ls .pst)
-	getWElementIds (WItemHandle itemH)
-		# (ids,itemH)	= getWElementIds` itemH
-		= (ids,WItemHandle itemH)
+	getWElementControlIdsAppend :: ![WElementHandle .ls .pst] ![Id] -> (![Id],![WElementHandle .ls .pst])
+	getWElementControlIdsAppend [itemH:itemHs] idst
+		# (ids2,itemHs)	= getWElementControlIdsAppend itemHs idst
+		# (ids12,itemH)	= getWElementIdsAppend itemH ids2
+		= (ids12,[itemH:itemHs])
 	where
-		getWElementIds` :: !(WItemHandle .ls .pst) -> (![Id],!WItemHandle .ls .pst)
-		getWElementIds` itemH=:{wItemId,wItems}
-			# (ids,itemHs)		= getWElementControlIds wItems
-			# itemH				= {itemH & wItems=itemHs}
-			| isJust wItemId	= ([fromJust wItemId:ids],itemH)
-			| otherwise			= (ids,itemH)
-	
-	getWElementIds (WListLSHandle itemHs)
-		# (ids,itemHs)	= getWElementControlIds itemHs
-		= (ids,WListLSHandle itemHs)
-	
-	getWElementIds (WExtendLSHandle wExH=:{wExtendItems=itemHs})
-		# (ids,itemHs)	= getWElementControlIds itemHs
-		= (ids,WExtendLSHandle {wExH & wExtendItems=itemHs})
-	
-	getWElementIds (WChangeLSHandle wChH=:{wChangeItems=itemHs})
-		# (ids,itemHs)	= getWElementControlIds itemHs
-		= (ids,WChangeLSHandle {wChH & wChangeItems=itemHs})
-getWElementControlIds _
-	= ([],[])
+		getWElementIdsAppend :: !(WElementHandle .ls .pst) ![Id] -> (![Id],!WElementHandle .ls .pst)
+		getWElementIdsAppend (WItemHandle itemH) idst
+			# (ids,itemH)	= getWElementIdsAppend` itemH idst
+			= (ids,WItemHandle itemH)
+		where
+			getWElementIdsAppend` :: !(WItemHandle .ls .pst) ![Id] -> (![Id],!WItemHandle .ls .pst)
+			getWElementIdsAppend` itemH=:{wItemId,wItems} idst
+				# (ids,itemHs)		= getWElementControlIdsAppend wItems idst
+				# itemH				= {itemH & wItems=itemHs}
+				| isJust wItemId	= ([fromJust wItemId:ids],itemH)
+				| otherwise			= (ids,itemH)
+		
+		getWElementIdsAppend (WListLSHandle itemHs) idst
+			# (ids,itemHs)	= getWElementControlIdsAppend itemHs idst
+			= (ids,WListLSHandle itemHs)
+		
+		getWElementIdsAppend (WExtendLSHandle wExH=:{wExtendItems=itemHs}) idst
+			# (ids,itemHs)	= getWElementControlIdsAppend itemHs idst
+			= (ids,WExtendLSHandle {wExH & wExtendItems=itemHs})
+		
+		getWElementIdsAppend (WChangeLSHandle wChH=:{wChangeItems=itemHs}) idst
+			# (ids,itemHs)	= getWElementControlIdsAppend itemHs idst
+			= (ids,WChangeLSHandle {wChH & wChangeItems=itemHs})
+	getWElementControlIdsAppend _ idst
+		= (idst,[])
 
 
 //	Collect all Ids of the given [WElementHandle`].
 
 getWElementControlIds` :: ![WElementHandle`] -> [Id]
-getWElementControlIds` [itemH:itemHs]
-	= getWElementIds itemH ++ getWElementControlIds` itemHs
+getWElementControlIds` itemHs
+	= getWElementControlIdsAppend` itemHs []
 where
-	getWElementIds :: !WElementHandle` -> [Id]
-	getWElementIds (WItemHandle` itemH)
-		= getWElementIds` itemH
+	getWElementControlIdsAppend` :: ![WElementHandle`] ![Id] -> [Id]
+	getWElementControlIdsAppend` [itemH:itemHs] idst
+		= getWElementIdsAppend itemH (getWElementControlIdsAppend` itemHs idst)
 	where
-		getWElementIds` :: !WItemHandle` -> [Id]
-		getWElementIds` itemH=:{wItemId`,wItems`}
-			# ids				= getWElementControlIds` wItems`
-			| isJust wItemId`	= [fromJust wItemId`:ids]
-			| otherwise			= ids
-	
-	getWElementIds (WRecursiveHandle` itemHs _)
-		= getWElementControlIds` itemHs
-getWElementControlIds` _
-	= []
+		getWElementIdsAppend :: !WElementHandle` ![Id] -> [Id]
+		getWElementIdsAppend (WItemHandle` itemH) idst
+			= getWElementIdsAppend` itemH idst
+		where
+			getWElementIdsAppend` :: !WItemHandle` ![Id] -> [Id]
+			getWElementIdsAppend` itemH=:{wItemId`,wItems`} idst
+				# ids				= getWElementControlIdsAppend` wItems` idst
+				| isJust wItemId`	= [fromJust wItemId`:ids]
+				| otherwise			= ids
+		
+		getWElementIdsAppend (WRecursiveHandle` itemHs _) idst
+			= getWElementControlIdsAppend` itemHs idst
+	getWElementControlIdsAppend` _ idst
+		= idst
 
 
 //	Id occurrence checks on [WElementHandle .ls .pst] and [WElementHandle`].
