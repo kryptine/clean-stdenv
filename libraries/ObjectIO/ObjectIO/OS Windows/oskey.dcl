@@ -1,4 +1,4 @@
-definition module key
+definition module oskey
 
 //	Clean Object I/O library, version 1.2
 
@@ -36,6 +36,7 @@ helpKey		:: SpecialKey							// Help
 leftKey		:: SpecialKey							// Arrow left
 pgDownKey	:: SpecialKey							// Page down
 pgUpKey		:: SpecialKey							// Page up
+returnKey	:: SpecialKey							// Return
 rightKey	:: SpecialKey							// Arrow right
 upKey		:: SpecialKey							// Arrow up
 
