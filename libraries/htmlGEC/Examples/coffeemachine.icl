@@ -26,17 +26,19 @@ coffeemachine hst
 		] ,hst)
 where
 	commandbuttons  = 
-		[	[("Insert_Coins",	\m -> CoffeeMachine (InsertCoin,	m))]
-		,	[("Add_beans",   	\m -> CoffeeMachine (AddBeans,		m))]
-		,	[("Empty_Trash", 	\m -> CoffeeMachine (EmptyTrash,	m))]
+		[	[(but "Insert_Coins",	\m -> CoffeeMachine (InsertCoin,	m))]
+		,	[(but "Add_beans",   	\m -> CoffeeMachine (AddBeans,		m))]
+		,	[(but "Empty_Trash", 	\m -> CoffeeMachine (EmptyTrash,	m))]
 		]
 
 	optionbuttons  =
-		[	[("Coffee",			\m -> CoffeeMachine (Ask Coffee,	m))
-			,("Capuccino",   	\m -> CoffeeMachine (Ask Capuccino,	m))
-			,("Espresso", 		\m -> CoffeeMachine (Ask Espresso,	m))
+		[	[(but "Coffee",			\m -> CoffeeMachine (Ask Coffee,	m))
+			,(but "Capuccino",   	\m -> CoffeeMachine (Ask Capuccino,	m))
+			,(but "Espresso", 		\m -> CoffeeMachine (Ask Espresso,	m))
 			]
 		]
+
+	but s = CHButton defpixel s
 
 	initmachine = {money=0,beans=6,trash=0,out=Message "Welcome."} 
 

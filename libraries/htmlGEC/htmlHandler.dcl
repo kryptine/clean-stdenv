@@ -83,7 +83,7 @@ derive gParse 	(,), (,,), (<->), <|>, CHButton, CHHidden
 
 // Some default constants used for the length of input boxes
 
-defsize  :== 8										// size of inputfield
-defpixel :== 72										// size in pixels
+defsize  :== 10										// size of inputfield
+defpixel :== 83										// size in pixels for buttons, pull-down buttons
 backcolor :== "#6699CC"								// background color of non-editable fields
 

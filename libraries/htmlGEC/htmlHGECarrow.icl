@@ -7,7 +7,7 @@ import StdArrow
 startCircuit :: (GecCircuit a b) a HSt -> ((b,[Body]),HSt) 
 startCircuit (HGC circuit) initval hst 
 # ((val,body),bool,hst) = circuit ((initval,[]),False,hst)
-= ((val,removedup body []),hst)
+= ((val,reverse (removedup body [])),hst)
 where
 	removedup [] _ = []
 	removedup [(id,body):rest] ids
@@ -47,14 +47,21 @@ where
 	mkApplyEdit` ((initval,prevbody),True,hst) // second time I come here: don't use the old state, but the new one ! 
 	# ((a,bodya),hst) = mkEditHGEC2 title HEdit initval hst //to be implemented
 	= ((a,[(title,bodya):prevbody]),True,hst)
-	
+
 display :: String -> GecCircuit a a |  gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 display title = HGC mkEditHGEC`
 where
 	mkEditHGEC` ((val,prevbody),bool,hst) 
 	# ((a,bodya),hst) = mkEditHGEC title HDisplay val hst
 	= ((a,[(title,bodya):prevbody]),bool,hst)
-	
+
+store :: String s -> GecCircuit (s -> s) s |  gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} s
+store title initstore = HGC mkStoreHGEC`
+where
+	mkStoreHGEC` ((fun,prevbody),bool,hst) 
+	# ((store,bodystore),hst) = mkStoreHGEC title fun initstore hst
+	= ((store,[(title,bodystore):prevbody]),bool,hst)
+
 self :: (a -> a) (GecCircuit a a) -> GecCircuit a a
 self fun gecaa = gecaa >>> arr fun
 	
@@ -65,3 +72,11 @@ where
 	# (res,bool,hst) = (gec_ba o gec_ab) input 
 	# (res,bool,hst) = gec_ab (res,True,hst)
 	= (res,False,hst)							// indicates that we loop from here 
+
+lift :: String HMode (String HMode a HSt -> ((b,Body),HSt)) -> (GecCircuit a b)
+lift name mode fun = HGC fun`
+where
+	fun` ((a,body),bool,hst)
+	# ((b,nbody),hst) =  fun name mode a hst
+	= ((b,[(name,nbody):body]),bool,hst) 
+

@@ -3,10 +3,8 @@ module listTobalanceTree
 import StdEnv
 import StdHtml
 
-derive gUpd   Tree, []
-derive gHGEC  Tree, []
-derive gPrint Tree
-derive gParse Tree
+derive gUpd   []
+derive gHGEC  []
 
 import tree
 

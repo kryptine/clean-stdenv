@@ -212,11 +212,14 @@ where
 							HEdit 		-> `Sel_ElemEvnts (OnChange callClean)
 							HDisplay 	-> Sel_Disabled Disabled
 			setstyle	= case mode of
-							HEdit 		-> Sel_Style "width:72px"
-							HDisplay 	-> Sel_Style "width:72px; background-color:#6699CC"
+							HEdit 		-> Sel_Style width
+							HDisplay 	-> Sel_Style (width +++ ";" +++ color)
 			optionstyle	= case mode of
 							HEdit 		-> []
-							HDisplay 	-> [Opt_Style "background-color:#6699CC"]
+							HDisplay 	-> [Opt_Style color]
+
+			width = "width:" +++ (toString defpixel) +++ "px"
+			color = "background-color:" +++ backcolor
 
 mkInput :: HMode Value UpdValue HSt -> (Body,HSt) 
 mkInput HEdit val updval (inidx,lhsts=:[(uniqueid,lst):lsts]) 
@@ -231,17 +234,28 @@ mkInput HDisplay val _ (inidx,lhsts=:[(uniqueid,lst):lsts])
 	= ( Input [	Inp_Type Text
 				, 	Inp_Value val
 				,	Inp_ReadOnly ReadOnly
-				, 	Inp_Style "background-color:#6699CC"
+				, 	Inp_Style color
 				,	Inp_Size defsize
 				]
 		,(inidx+1,lhsts))
-
+where
+	color = "background-color:" +++ backcolor
 
 gHGEC{|FIELD of d |} gHx mode (FIELD x) hst 
 # (bx,mode) = gHx mode x hst
 = (Table [Tbl_CellPadding 0, Tbl_CellSpacing 0] [[fieldname,bx]],hst)
 where
-	fieldname = T (d.gfd_name +++ ": ")
+//	fieldname = T (d.gfd_name +++ ": ")
+	fieldname =Input 	[	Inp_Type Text
+						, 	Inp_Value (SV (d.gfd_name +++ ": "))
+						,	Inp_ReadOnly ReadOnly
+						, 	Inp_Style color
+						,	Inp_Size defsize
+						]
+
+	color = "background-color:" +++ backcolor
+	
+
 
 // generic function to update any type, great miracle function
 // will look for an input object with a certain id, updates it
@@ -383,7 +397,7 @@ gHGEC{|CHButton|} mode (CHButton size bname) (inidx,lhsts=:[(uniqueid,lst):lsts]
 = ( Input [	Inp_Type Button
 			, 	Inp_Value (SV bname)
 			,	Inp_Name (encodeInfo (uniqueid,inidx,UpdS bname))
-			,	Inp_Size size  
+			,	Inp_Style ("width:" +++ toString size)
 			, 	`Inp_MouseEvnts (OnClick callClean)
 			]
 	, (inidx+1,lhsts))
