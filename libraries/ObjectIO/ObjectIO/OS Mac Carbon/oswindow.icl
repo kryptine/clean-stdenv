@@ -985,8 +985,8 @@ osSetRadioControlPos wPtr (parent_x,parent_y) radioPtr (x,y) _ update tb
 	# tb = MoveControl radioPtr h v tb
 	= tb
 where
-	h = x - parent_x
-	v = y - parent_y
+	h = x //- parent_x
+	v = y //- parent_y
 
 osSetRadioControlSize :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetRadioControlSize wPtr _ radioPtr _ size=:(w,h) update tb
@@ -1093,8 +1093,8 @@ osSetCheckControlPos wPtr (parent_x,parent_y) checkPtr (x,y) _ update tb
 	# tb = MoveControl checkPtr h v tb
 	= tb
 where
-	h = x - parent_x
-	v = y - parent_y
+	h = x //- parent_x
+	v = y //- parent_y
 
 osSetCheckControlSize :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetCheckControlSize wPtr _ checkPtr _ size=:(w,h) update tb
@@ -1184,8 +1184,8 @@ osSetSliderControlPos _ (parent_x,parent_y) sliderPtr (x,y) _ update tb
 	# tb = MoveControl sliderPtr h v tb
 	= tb
 where
-	h = x - parent_x
-	v = y - parent_y
+	h = x //- parent_x
+	v = y //- parent_y
 
 osSetSliderControlSize :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetSliderControlSize _ _ sliderPtr _ size=:(w,h) update tb
@@ -1291,8 +1291,8 @@ osSetTextControlPos wPtr (parent_x,parent_y) checkPtr (x,y) _ update tb
 	# tb = MoveControl checkPtr h v tb
 	= tb
 where
-	h = x - parent_x
-	v = y - parent_y
+	h = x //- parent_x
+	v = y //- parent_y
 
 osSetTextControlSize :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetTextControlSize wPtr _ checkPtr _ size=:(w,h) update tb
@@ -1645,8 +1645,8 @@ osSetEditControlPos _ (parent_x,parent_y) buttonPtr (x,y) _ update tb
 	# tb = MoveControl buttonPtr h v tb
 	= tb
 where
-	h = x - parent_x
-	v = y - parent_y
+	h = x //- parent_x
+	v = y //- parent_y
 
 osSetEditControlSize :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetEditControlSize _ _ buttonPtr _ size=:(w,h) update tb
@@ -2085,8 +2085,8 @@ osSetPopUpControlPos wPtr (parent_x,parent_y) popupPtr (x,y) _ update tb
 where
 	editable = isJust editPtr
 	editPtr = Nothing
-	h = x - parent_x
-	v = y - parent_y
+	h = x //- parent_x
+	v = y //- parent_y
 
 osSetPopUpControlSize :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetPopUpControlSize wPtr _ popupPtr _ (w,h) update tb
@@ -2338,8 +2338,8 @@ osSetButtonControlPos _ (parent_x,parent_y) buttonPtr (x,y) _ update tb
 	# tb = MoveControl buttonPtr h v tb
 	= tb
 where
-	h = x - parent_x
-	v = y - parent_y
+	h = x //- parent_x
+	v = y //- parent_y
 
 osSetButtonControlSize :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetButtonControlSize _ _ buttonPtr _ size=:(w,h) update tb
