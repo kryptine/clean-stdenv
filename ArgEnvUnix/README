@@ -1,5 +1,5 @@
 ArgEnv
-Version  1.0.1
+Version  1.0.2
 Ronny Wichers Schreur
 ronny@cs.kun.nl
 
@@ -16,6 +16,8 @@ FILES
 
     README
         This file
+    CHANGES.txt
+        Changes history
     ArgEnv.dcl
         Definition of the interface
     ArgEnv.icl
