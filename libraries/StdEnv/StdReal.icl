@@ -171,11 +171,11 @@ where
 
 instance sinh Real
 where
-	sinh x = (exp x - exp (~ x)) / 2.0
+	sinh x = (exp x - exp (~ x)) * 0.5
 
 instance cosh Real
 where
-	cosh x =  (exp x + exp (~ x)) * 2.0
+	cosh x =  (exp x + exp (~ x)) * 0.5
 
 instance tanh Real
 where
@@ -194,7 +194,7 @@ where
 
 instance atanh Real
 where
-	atanh x = ln ((1.0 + x)/(1.0 - x)) / 2.0
+	atanh x = ln ((1.0 + x)/(1.0 - x)) * 0.5
 
 instance toReal	Int
 where
