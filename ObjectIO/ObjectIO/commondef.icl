@@ -50,26 +50,26 @@ addPointSize :: !Size !Point2 -> Point2
 addPointSize {w,h} {x,y} = {x=x+w,y=y+h}
 
 
-instance zero Rect where
+instance zero OSRect where
 	zero = {rleft=0,rtop=0,rright=0,rbottom=0}
-instance == Rect where
+instance == OSRect where
 	(==) r1 r2 = r1.rleft==r2.rleft && r1.rtop==r2.rtop && r1.rright==r2.rright && r1.rbottom==r2.rbottom
 class addVector a :: !Vector2 !a -> a	// add the vector argument to the second argument
 instance addVector Point2 where
 	addVector {vx,vy} {x,y} = {x=x+vx,y=y+vy}
-instance addVector Rect where
+instance addVector OSRect where
 	addVector {vx,vy} {rleft,rtop,rright,rbottom} = {rleft=rleft+vx,rtop=rtop+vy,rright=rright+vx,rbottom=rbottom+vy}
 instance addVector Rectangle where
 	addVector v {corner1,corner2} = {corner1=addVector v corner1,corner2=addVector v corner2}
 class subVector a :: !Vector2 !a -> a	// subtract the vector argument from the second argument
 instance subVector Point2 where
 	subVector {vx,vy} {x,y} = {x=x-vx,y=y-vy}
-instance subVector Rect where
+instance subVector OSRect where
 	subVector {vx,vy} {rleft,rtop,rright,rbottom} = {rleft=rleft-vx,rtop=rtop-vy,rright=rright-vx,rbottom=rbottom-vy}
 instance subVector Rectangle where
 	subVector v {corner1,corner2} = {corner1=subVector v corner1,corner2=subVector v corner2}
 
-rectangleToRect :: !Rectangle -> Rect
+rectangleToRect :: !Rectangle -> OSRect
 rectangleToRect {corner1={x=a,y=b},corner2={x=a`,y=b`}}
 	| x_less_x` && y_less_y`= {rleft=a, rtop=b, rright=a`,rbottom=b`}
 	| x_less_x`				= {rleft=a, rtop=b`,rright=a`,rbottom=b }
@@ -80,11 +80,11 @@ where
 	x_less_x` = a<=a`
 	y_less_y` = b<=b`
 
-rectToRectangle :: !Rect -> Rectangle
+rectToRectangle :: !OSRect -> Rectangle
 rectToRectangle {rleft,rtop,rright,rbottom}
 	= {corner1={x=rleft,y=rtop},corner2={x=rright,y=rbottom}}
 
-isEmptyRect :: !Rect -> Bool
+isEmptyRect :: !OSRect -> Bool
 isEmptyRect {rleft,rtop,rright,rbottom}
 	= rleft==rright || rtop==rbottom
 
@@ -92,7 +92,7 @@ isEmptyRectangle :: !Rectangle -> Bool
 isEmptyRectangle {corner1,corner2}
 	= corner1.x==corner2.x || corner1.y==corner2.y
 
-pointInRect :: !Point2 !Rect -> Bool
+pointInRect :: !Point2 !OSRect -> Bool
 pointInRect {x,y} {rleft,rtop,rright,rbottom}
 	= isBetween x rleft rright && isBetween y rtop rbottom
 
@@ -100,7 +100,7 @@ pointInRectangle :: !Point2 !Rectangle -> Bool
 pointInRectangle point rectangle
 	= pointInRect point (rectangleToRect rectangle)
 
-posSizeToRect :: !Point2 !Size -> Rect
+posSizeToRect :: !Point2 !Size -> OSRect
 posSizeToRect {x,y} {w,h}
 	= {rleft=left,rtop=top, rright=right,rbottom=bottom}
 where
@@ -111,7 +111,7 @@ posSizeToRectangle :: !Point2 !Size -> Rectangle
 posSizeToRectangle pos=:{x,y} {w,h}
 	= {corner1=pos,corner2={x=x+w,y=y+h}}
 
-sizeToRect :: !Size -> Rect
+sizeToRect :: !Size -> OSRect
 sizeToRect size
 	= posSizeToRect zero size
 
@@ -119,11 +119,11 @@ sizeToRectangle :: !Size -> Rectangle
 sizeToRectangle {w,h}
 	= {zero & corner2={x=w,y=h}}
 
-disjointRects :: !Rect !Rect -> Bool
+disjointRects :: !OSRect !OSRect -> Bool
 disjointRects rect1 rect2
 	= isEmptyRect rect1 || isEmptyRect rect2 || rect1.rleft>=rect2.rright || rect1.rbottom<=rect2.rtop || rect1.rright<=rect2.rleft || rect1.rtop>=rect2.rbottom
 
-intersectRects :: !Rect !Rect -> Rect
+intersectRects :: !OSRect !OSRect -> OSRect
 intersectRects rect1 rect2
 	| disjointRects rect1 rect2	= zero
 	| otherwise					= {	rleft	= max rect1.rleft   rect2.rleft
@@ -132,24 +132,24 @@ intersectRects rect1 rect2
 								  ,	rbottom	= min rect1.rbottom rect2.rbottom
 								  }
 
-subtractRects :: !Rect !Rect -> [Rect]
+subtractRects :: !OSRect !OSRect -> [OSRect]
 subtractRects rect1 rect2
 	= subtractFittingRect rect1 (intersectRects rect1 rect2)
 where
 //	subtractFittingRect r1 r2 subtracts r2 from r1 assuming that r2 fits inside r1
-	subtractFittingRect :: !Rect !Rect -> [Rect]
+	subtractFittingRect :: !OSRect !OSRect -> [OSRect]
 	subtractFittingRect {rleft=l1,rtop=t1,rright=r1,rbottom=b1} {rleft=l2,rtop=t2,rright=r2,rbottom=b2}
 		= filter (not o isEmptyRect) (map fromTuple4 [(l1,t1,r1,t2),(l1,t2,l2,b2),(r2,t2,r1,b2),(l1,b2,r1,b1)])
 
 
-rectSize :: !Rect -> Size
+rectSize :: !OSRect -> Size
 rectSize {rleft,rtop,rright,rbottom}
 	= {w=abs (rright-rleft),h=abs (rbottom-rtop)}
 
 
 /*	Rules on RgnHandles and Rects:
 */
-intersectRgnRect :: !OSRgnHandle !Rect !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+intersectRgnRect :: !OSRgnHandle !OSRect !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 intersectRgnRect rgnH rect tb
 	# (aidRgn,tb)	= osnewrectrgn rect tb
 	# (secRgn,tb)	= ossectrgn rgnH aidRgn tb
@@ -175,16 +175,16 @@ instance fromTuple Point2 where
 instance fromTuple Vector2 where
 	fromTuple (vx,vy) = {vx=vx,vy=vy}
 
-/*	PA: Conversion of Rect, and Rectangle to 4-tuples (toTuple4) and from 4-tuples (fromTuple4):
+/*	PA: Conversion of OSRect, and Rectangle to 4-tuples (toTuple4) and from 4-tuples (fromTuple4):
 */
 class toTuple4   a :: !a -> (!Int,!Int,!Int,!Int)
 class fromTuple4 a :: !(!Int,!Int,!Int,!Int) -> a
 
-instance toTuple4 Rect where
+instance toTuple4 OSRect where
 	toTuple4 {rleft,rtop,rright,rbottom} = (rleft,rtop,rright,rbottom)
 instance toTuple4 Rectangle where
 	toTuple4 r = toTuple4 (rectangleToRect r)
-instance fromTuple4 Rect where
+instance fromTuple4 OSRect where
 	fromTuple4 r = rectangleToRect (fromTuple4 r)
 instance fromTuple4 Rectangle where
 	fromTuple4 (l,t,r,b) = {corner1={x=l,y=t},corner2={x=r,y=b}}

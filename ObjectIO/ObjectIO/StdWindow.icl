@@ -1361,7 +1361,7 @@ where
 		(defMinW,defMinH)		= osMinWindowSize
 		minSize					= {w=defMinW,h=defMinH}
 		
-		setwindowslider :: !Bool OSWindowMetrics OSWindowPtr Bool (Int,Int,Int,Int) Rect Rect (Int,Int) !*OSToolbox -> *OSToolbox
+		setwindowslider :: !Bool OSWindowMetrics OSWindowPtr Bool (Int,Int,Int,Int) OSRect OSRect (Int,Int) !*OSToolbox -> *OSToolbox
 		setwindowslider hasScroll wMetrics wPtr isHorizontal state=:(osMin,osThumb,osMax,osSize) hrect vrect maxcoords=:(min,max) tb
 //			| hasScroll			= OSsetWindowSlider wMetrics wPtr isHorizontal state maxcoords tb
 // vgl met gebruik in bv controlpos, verschil is waarschijnlijk dat setWindoweSLider ook thumbsize zet...
@@ -1385,7 +1385,7 @@ where
 		where
 			(_,osThumb,_,_)			= toOSscrollbarRange scrollValues viewSize
 */		
-		getdomainviewmax :: !Rect !Rect -> Point2
+		getdomainviewmax :: !OSRect !OSRect -> Point2
 		getdomainviewmax domainRect viewframeRect
 			= {x=min domainRect.rright viewframeRect.rright,y=min domainRect.rbottom viewframeRect.rbottom}
 	setwindowviewdomain _ _ _ _

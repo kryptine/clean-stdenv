@@ -3,7 +3,7 @@ implementation module osrgn
 //	Clean Object I/O library, version 1.2
 
 import	StdBool, StdInt, StdList
-from	ostypes	import Rect
+from	ostypes	import OSRect
 import	pictCCall_12, rgnCCall_12
 
 ::	OSRgnHandle
@@ -16,7 +16,7 @@ osnewrgn :: !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 osnewrgn tb
 	= winCreateRectRgn 0 0 1 1 tb
 
-osnewrectrgn :: !Rect !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+osnewrectrgn :: !OSRect !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 osnewrectrgn {rleft,rtop,rright,rbottom} tb
 	= winCreateRectRgn rleft rtop rright rbottom tb
 
@@ -26,7 +26,7 @@ osdisposergn osrgn tb
 
 
 //	Setting the shape of a Region.
-osrectrgn :: !Rect !OSRgnHandle !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+osrectrgn :: !OSRect !OSRgnHandle !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 osrectrgn {rleft,rtop,rright,rbottom} osrgn tb
 	= winSetRgnToRect rleft rtop rright rbottom osrgn tb
 
@@ -76,7 +76,7 @@ osdiffrgn rgn1 rgn2 tb
 
 
 //	Region property access functions.
-osgetrgnbox	:: !OSRgnHandle !*OSToolbox -> (!Bool,!Rect,!*OSToolbox)
+osgetrgnbox	:: !OSRgnHandle !*OSToolbox -> (!Bool,!OSRect,!*OSToolbox)
 osgetrgnbox rgn tb
 	# (l,t, r,b, isRect,_,tb)	= winGetRgnBox rgn tb
 	= (isRect,{rleft=l,rtop=t,rright=r,rbottom=b}, tb)

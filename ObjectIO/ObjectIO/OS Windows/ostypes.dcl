@@ -8,7 +8,7 @@ definition module ostypes
 	:== HDC
 ::	HDC								// PA: moved from pictCCall_12
 	:== Int
-::	Rect							// A Rect is supposed to be an ordered rectangle with
+::	OSRect							// A OSRect is supposed to be an ordered rectangle with
 	=	{	rleft		:: !Int		// rleft<=rright && rtop<=rbottom
 		,	rtop		:: !Int
 		,	rright		:: !Int

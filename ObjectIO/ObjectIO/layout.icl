@@ -93,17 +93,17 @@ shiftRoot offset item=:{rootPos,rootTree}
 /*	getRootBoundingBox calculates the smallest enclosing rectangle of the Root
 	argument and its Relatives.
 */
-getRootBoundingBox :: !Root -> Rect
+getRootBoundingBox :: !Root -> OSRect
 getRootBoundingBox item=:{rootPos={vx,vy},rootItem={liItemSize},rootTree}
 	= getRelativeBoundingBox rootTree (posSizeToRect {x=vx,y=vy} liItemSize)
 where
-	getRelativeBoundingBox :: ![Relative] !Rect -> Rect
+	getRelativeBoundingBox :: ![Relative] !OSRect -> OSRect
 	getRelativeBoundingBox [item:items] boundBox
 		= getRelativeBoundingBox items (mergeBoundingBox boundBox (posSizeToRect {x=vx,y=vy} item.relativeItem.liItemSize))
 	where
 		{vx,vy}	= item.relativePos
 		
-		mergeBoundingBox :: !Rect !Rect -> Rect
+		mergeBoundingBox :: !OSRect !OSRect -> OSRect
 		mergeBoundingBox {rleft=lR,rtop=tR,rright=rR,rbottom=bR} {rleft=lB,rtop=tB,rright=rB,rbottom=bB}
 			= {rleft=min lR lB,rtop=min tR tB,rright=max rR rB,rbottom=max bR bB}
 	getRelativeBoundingBox _ boundBox
@@ -357,7 +357,7 @@ where
 		itemBoundBox	= getRootBoundingBox root
 		(reqX,reqY)		= delimit loc itemBoundBox
 		
-		delimit :: !ItemLoc !Rect -> (!Int,!Int)
+		delimit :: !ItemLoc !OSRect -> (!Int,!Int)
 		delimit Fix {rright,rbottom}
 			| r`<=0 || b`<=0
 				= (0,0)

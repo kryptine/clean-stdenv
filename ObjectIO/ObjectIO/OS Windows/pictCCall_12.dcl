@@ -3,7 +3,7 @@ definition module pictCCall_12
 
 from	rgnCCall_12	import HRGN
 from	ostoolbox	import OSToolbox
-from	ostypes		import Rect, HDC
+from	ostypes		import OSRect, HDC
 
 
 ::	*PIC
@@ -94,10 +94,10 @@ winSetPolyPoint			:: !Int !Int !Int !Int !*OSToolbox -> *OSToolbox
 winFreePolyShape		:: !Int !*OSToolbox -> *OSToolbox
 
 
-winInvertWedge			:: !Rect !Pt !Pt !PIC ->  PIC
-winEraseWedge			:: !Rect !Pt !Pt !PIC ->  PIC
-winFillWedge			:: !Rect !Pt !Pt !PIC ->  PIC
-winDrawWedge			:: !Rect !Pt !Pt !PIC ->  PIC
+winInvertWedge			:: !OSRect !Pt !Pt !PIC ->  PIC
+winEraseWedge			:: !OSRect !Pt !Pt !PIC ->  PIC
+winFillWedge			:: !OSRect !Pt !Pt !PIC ->  PIC
+winDrawWedge			:: !OSRect !Pt !Pt !PIC ->  PIC
 
 
 winInvertCircle			:: !Pt !Int !PIC ->  PIC
@@ -106,39 +106,39 @@ winFillCircle			:: !Pt !Int !PIC ->  PIC
 winDrawCircle			:: !Pt !Int !PIC ->  PIC
 
 
-winInvertOval			:: !Rect !PIC ->  PIC
-winEraseOval			:: !Rect !PIC ->  PIC
-winFillOval				:: !Rect !PIC ->  PIC
-winDrawOval				:: !Rect !PIC ->  PIC
+winInvertOval			:: !OSRect !PIC ->  PIC
+winEraseOval			:: !OSRect !PIC ->  PIC
+winFillOval				:: !OSRect !PIC ->  PIC
+winDrawOval				:: !OSRect !PIC ->  PIC
 
 
-winInvertRoundRectangle	:: !Rect !Int !Int !PIC ->  PIC
-winEraseRoundRectangle	:: !Rect !Int !Int !PIC ->  PIC
-winFillRoundRectangle	:: !Rect !Int !Int !PIC ->  PIC
-winDrawRoundRectangle	:: !Rect !Int !Int !PIC ->  PIC
+winInvertRoundRectangle	:: !OSRect !Int !Int !PIC ->  PIC
+winEraseRoundRectangle	:: !OSRect !Int !Int !PIC ->  PIC
+winFillRoundRectangle	:: !OSRect !Int !Int !PIC ->  PIC
+winDrawRoundRectangle	:: !OSRect !Int !Int !PIC ->  PIC
 
 
-winScrollRectangle		:: !Rect !Pt !PIC -> (!Rect,!PIC)
-winCopyRectangle		:: !Rect !Pt !PIC ->  PIC
-winCopyRectangleTo		:: !Rect !Pt !PIC ->  PIC
-winMoveRectangle		:: !Rect !Pt !PIC ->  PIC
-winMoveRectangleTo		:: !Rect !Pt !PIC ->  PIC
+winScrollRectangle		:: !OSRect !Pt !PIC -> (!OSRect,!PIC)
+winCopyRectangle		:: !OSRect !Pt !PIC ->  PIC
+winCopyRectangleTo		:: !OSRect !Pt !PIC ->  PIC
+winMoveRectangle		:: !OSRect !Pt !PIC ->  PIC
+winMoveRectangleTo		:: !OSRect !Pt !PIC ->  PIC
 
 
-winInvertRectangle		:: !Rect !PIC ->  PIC
-winEraseRectangle		:: !Rect !PIC ->  PIC
-winFillRectangle		:: !Rect !PIC ->  PIC
-winDrawRectangle		:: !Rect !PIC ->  PIC
+winInvertRectangle		:: !OSRect !PIC ->  PIC
+winEraseRectangle		:: !OSRect !PIC ->  PIC
+winFillRectangle		:: !OSRect !PIC ->  PIC
+winDrawRectangle		:: !OSRect !PIC ->  PIC
 
 
 winDrawChar				:: !Int !PIC ->  PIC
 winDrawString			:: !{#Char} !PIC ->  PIC
 
 
-winDrawCCurve			:: !Rect !Pt !Pt !RGBcolor !PIC ->  PIC
+winDrawCCurve			:: !OSRect !Pt !Pt !RGBcolor !PIC ->  PIC
 winDrawCLine			:: !Pt !Pt !RGBcolor !PIC ->  PIC
 winDrawCPoint			:: !Pt !RGBcolor !PIC ->  PIC
-winDrawCurve			:: !Rect !Pt !Pt !PIC ->  PIC
+winDrawCurve			:: !OSRect !Pt !Pt !PIC ->  PIC
 winDrawLine				:: !Pt !Pt !PIC ->  PIC
 winDrawPoint			:: !Pt !PIC ->  PIC
 
@@ -156,7 +156,7 @@ winSetMode				:: !Int !PIC ->  PIC
 winSetBackColor			:: !RGBcolor !PIC ->  PIC
 winSetPenColor			:: !RGBcolor !PIC ->  PIC
 
-winClipPicture			:: !Rect !PIC ->  PIC
+winClipPicture			:: !OSRect !PIC ->  PIC
 winClipRgnPicture		:: !HRGN !PIC -> PIC			//	Operation to set the clipping region
 winSetClipRgnPicture	:: !HRGN !PIC -> PIC			//	Operation to completely set the clipping region
 winGetClipRgnPicture	::       !PIC -> (!HRGN,!PIC)	//  Operation to retrieve the current clipping region

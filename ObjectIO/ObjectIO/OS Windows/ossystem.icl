@@ -6,7 +6,7 @@ import	StdBool, StdInt, StdReal, StdString
 import	StdMaybe
 import	clCCall_12, clCrossCall_12, windowCrossCall_12
 import	osdocumentinterface, osfont
-from	ostypes	import Rect
+from	ostypes	import OSRect
 
 
 ::	OSWindowMetrics
@@ -50,7 +50,7 @@ osMaxScrollWindowSize = winMaxScrollWindowSize
 osMaxFixedWindowSize :: (!Int,!Int)
 osMaxFixedWindowSize = winMaxFixedWindowSize
 
-osScreenrect :: !*OSToolbox -> (!Rect,!*OSToolbox)
+osScreenrect :: !*OSToolbox -> (!OSRect,!*OSToolbox)
 osScreenrect tb
 	# (screenWidth, tb)	= winScreenXSize tb
 	# (screenHeight,tb)	= winScreenYSize tb
@@ -59,7 +59,7 @@ osScreenrect tb
 osPrintSetupTypical :: Bool // MW11++
 osPrintSetupTypical = False
 
-osGetProcessWindowDimensions :: !OSDInfo !*OSToolbox -> (!Rect,!*OSToolbox)
+osGetProcessWindowDimensions :: !OSDInfo !*OSToolbox -> (!OSRect,!*OSToolbox)
 osGetProcessWindowDimensions osdinfo tb
 	# maybeOSInfo		= getOSDInfoOSInfo osdinfo
 	| isNothing maybeOSInfo

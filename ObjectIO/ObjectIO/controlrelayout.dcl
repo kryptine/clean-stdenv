@@ -7,10 +7,10 @@ definition module controlrelayout
 import	relayout, wstate
 
 
-relayoutControls :: !OSWindowMetrics !Bool !Bool !Rect !Rect !Point2 !Point2 !OSWindowPtr !(Maybe Id) ![WElementHandle`] 
+relayoutControls :: !OSWindowMetrics !Bool !Bool !OSRect !OSRect !Point2 !Point2 !OSWindowPtr !(Maybe Id) ![WElementHandle`] 
 					 !*[WElementHandle .ls .pst] !*OSToolbox
 	-> (!OSRgnHandle,!*[WElementHandle .ls .pst],!*OSToolbox)
-relayoutControls`:: !OSWindowMetrics !Bool !Bool !Rect !Rect !Point2 !Point2 !OSWindowPtr !(Maybe Id) ![WElementHandle`]
+relayoutControls`:: !OSWindowMetrics !Bool !Bool !OSRect !OSRect !Point2 !Point2 !OSWindowPtr !(Maybe Id) ![WElementHandle`]
 					 ![WElementHandle`] !*OSToolbox
 	-> (!OSRgnHandle,!*OSToolbox)
 /*	relayoutControls(`) wMetrics isAble isVisible oldFrame newFrame oldParentPos newParentPos parentPtr defaultId old new

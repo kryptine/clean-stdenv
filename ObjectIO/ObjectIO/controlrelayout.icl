@@ -23,7 +23,7 @@ import relayout, windowaccess, windowclipstate, wstateaccess
 	relayoutControls(`) assumes that the ClipStates of all compound elements are valid.
 	The return OSRgnHandle is the area of the window that requires to be updated (use updatewindowbackgrounds [windowupdate] for this purpose).
 */
-relayoutControls :: !OSWindowMetrics !Bool !Bool !Rect !Rect !Point2 !Point2 !OSWindowPtr !(Maybe Id) ![WElementHandle`]
+relayoutControls :: !OSWindowMetrics !Bool !Bool !OSRect !OSRect !Point2 !Point2 !OSWindowPtr !(Maybe Id) ![WElementHandle`]
 					 !*[WElementHandle .ls .pst] !*OSToolbox
 	-> (!OSRgnHandle,!*[WElementHandle .ls .pst],!*OSToolbox)
 relayoutControls wMetrics isAble isVisible oldFrame newFrame oldParentPos newParentPos wPtr defaultId oldHs newHs tb
@@ -139,7 +139,7 @@ where
 		= ([],items)
 
 
-relayoutControls` :: !OSWindowMetrics !Bool !Bool !Rect !Rect !Point2 !Point2 !OSWindowPtr !(Maybe Id) ![WElementHandle`] ![WElementHandle`] !*OSToolbox
+relayoutControls` :: !OSWindowMetrics !Bool !Bool !OSRect !OSRect !Point2 !Point2 !OSWindowPtr !(Maybe Id) ![WElementHandle`] ![WElementHandle`] !*OSToolbox
 																															-> (!OSRgnHandle,!*OSToolbox)
 relayoutControls` wMetrics isAble isVisible oldFrame newFrame oldParentPos newParentPos wPtr defaultId oldHs newHs tb
 	= relayoutItems wMetrics oldFrame newFrame oldParentPos newParentPos wPtr

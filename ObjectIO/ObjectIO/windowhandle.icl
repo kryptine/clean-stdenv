@@ -81,7 +81,7 @@ import	ospicture, ostypes
 	|	GameWindowInfo		!GameWindowData
 	|	NoWindowInfo
 ::	WindowData
-	=	{	windowDomain	:: !Rect							// The optional view domain of the window
+	=	{	windowDomain	:: !OSRect							// The optional view domain of the window
 		,	windowOrigin	:: !Point2							// The Origin of the view domain
 		,	windowHScroll	:: !Maybe ScrollInfo				// The scroll data of the WindowHScroll attribute
 		,	windowVScroll	:: !Maybe ScrollInfo				// The scroll data of the WindowVScroll attribute
@@ -209,7 +209,7 @@ import	ospicture, ostypes
 	=	{	customInfoLook	:: LookInfo							// The look of the custom control
 		}
 ::	CompoundInfo
-	=	{	compoundDomain	:: Rect								// The optional view domain of the compound control
+	=	{	compoundDomain	:: OSRect							// The optional view domain of the compound control
 		,	compoundOrigin	:: Point2							// The Origin of the view domain
 		,	compoundHScroll	:: Maybe ScrollInfo					// The scroll data of the ControlHScroll attribute
 		,	compoundVScroll	:: Maybe ScrollInfo					// The scroll data of the ControlVScroll attribute

@@ -794,7 +794,7 @@ where
 		visScrolls						= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
 		contentRect						= osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize)
 		
-		getWElementHandlesUpdateInfo :: !OSWindowMetrics !Id !Rect ![WElementHandle .ls .pst] -> (!Bool,UpdateInfo,![WElementHandle .ls .pst])
+		getWElementHandlesUpdateInfo :: !OSWindowMetrics !Id !OSRect ![WElementHandle .ls .pst] -> (!Bool,UpdateInfo,![WElementHandle .ls .pst])
 		getWElementHandlesUpdateInfo _ _ _ []
 			= (False,undef,[])
 		getWElementHandlesUpdateInfo wMetrics cId clipRect [itemH:itemHs]
@@ -805,7 +805,7 @@ where
 				# (found,updInfo,itemHs)= getWElementHandlesUpdateInfo wMetrics cId clipRect itemHs
 				= (found,updInfo,[itemH:itemHs])
 		where
-			getWElementHandleUpdateInfo :: !OSWindowMetrics !Id !Rect !(WElementHandle .ls .pst) -> (!Bool,UpdateInfo,!WElementHandle .ls .pst)
+			getWElementHandleUpdateInfo :: !OSWindowMetrics !Id !OSRect !(WElementHandle .ls .pst) -> (!Bool,UpdateInfo,!WElementHandle .ls .pst)
 			getWElementHandleUpdateInfo wMetrics cId clipRect (WItemHandle itemH=:{wItemId,wItemNr,wItemPtr,wItemKind,wItemPos,wItemSize,wItems,wItemInfo})
 				| isNothing wItemId || cId<>fromJust wItemId
 					| not (isRecursiveControl wItemKind)

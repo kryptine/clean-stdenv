@@ -1,7 +1,7 @@
 implementation module pictCCall_12
 
 
-from	ostypes	import Rect, HDC
+from	ostypes	import OSRect, HDC
 import	rgnCCall_12//, intrface_12
 
 
@@ -295,7 +295,7 @@ winFreePolyShape _ _
 	}
 
 
-winInvertWedge ::  !Rect !Pt !Pt !PIC ->  PIC
+winInvertWedge ::  !OSRect !Pt !Pt !PIC ->  PIC
 winInvertWedge _ _ _ _
 	= code
 	{
@@ -304,7 +304,7 @@ winInvertWedge _ _ _ _
 		.end
 	}
 
-winEraseWedge ::  !Rect !Pt !Pt !PIC ->  PIC
+winEraseWedge ::  !OSRect !Pt !Pt !PIC ->  PIC
 winEraseWedge _ _ _ _
 	= code
 	{
@@ -313,7 +313,7 @@ winEraseWedge _ _ _ _
 		.end
 	}
 
-winFillWedge ::  !Rect !Pt !Pt !PIC ->  PIC
+winFillWedge ::  !OSRect !Pt !Pt !PIC ->  PIC
 winFillWedge _ _ _ _
 	= code
 	{
@@ -322,7 +322,7 @@ winFillWedge _ _ _ _
 		.end
 	}
 
-winDrawWedge ::  !Rect !Pt !Pt !PIC ->  PIC
+winDrawWedge ::  !OSRect !Pt !Pt !PIC ->  PIC
 winDrawWedge _ _ _ _
 	= code
 	{
@@ -369,7 +369,7 @@ winDrawCircle _ _ _
 	}
 
 
-winInvertOval ::  !Rect !PIC ->  PIC
+winInvertOval ::  !OSRect !PIC ->  PIC
 winInvertOval _ _
 	= code
 	{
@@ -378,7 +378,7 @@ winInvertOval _ _
 		.end
 	}
 
-winEraseOval ::  !Rect !PIC ->  PIC
+winEraseOval ::  !OSRect !PIC ->  PIC
 winEraseOval _ _
 	= code
 	{
@@ -387,7 +387,7 @@ winEraseOval _ _
 		.end
 	}
 
-winFillOval ::  !Rect !PIC ->  PIC
+winFillOval ::  !OSRect !PIC ->  PIC
 winFillOval _ _
 	= code
 	{
@@ -396,7 +396,7 @@ winFillOval _ _
 		.end
 	}
 
-winDrawOval ::  !Rect !PIC ->  PIC
+winDrawOval ::  !OSRect !PIC ->  PIC
 winDrawOval _ _
 	= code
 	{
@@ -406,7 +406,7 @@ winDrawOval _ _
 	}
 
 
-winInvertRoundRectangle ::  !Rect !Int !Int !PIC ->  PIC
+winInvertRoundRectangle ::  !OSRect !Int !Int !PIC ->  PIC
 winInvertRoundRectangle _ _ _ _
 	= code
 	{
@@ -415,7 +415,7 @@ winInvertRoundRectangle _ _ _ _
 		.end
 	}
 
-winEraseRoundRectangle ::  !Rect !Int !Int !PIC ->  PIC
+winEraseRoundRectangle ::  !OSRect !Int !Int !PIC ->  PIC
 winEraseRoundRectangle _ _ _ _
 	= code
 	{
@@ -424,7 +424,7 @@ winEraseRoundRectangle _ _ _ _
 		.end
 	}
 
-winFillRoundRectangle ::  !Rect !Int !Int !PIC ->  PIC
+winFillRoundRectangle ::  !OSRect !Int !Int !PIC ->  PIC
 winFillRoundRectangle _ _ _ _
 	= code
 	{
@@ -433,7 +433,7 @@ winFillRoundRectangle _ _ _ _
 		.end
 	}
 
-winDrawRoundRectangle ::  !Rect !Int !Int !PIC ->  PIC
+winDrawRoundRectangle ::  !OSRect !Int !Int !PIC ->  PIC
 winDrawRoundRectangle _ _ _ _
 	= code
 	{
@@ -443,7 +443,7 @@ winDrawRoundRectangle _ _ _ _
 	}
 
 
-winScrollRectangle :: !Rect !Pt !PIC -> (!Rect,!PIC)
+winScrollRectangle :: !OSRect !Pt !PIC -> (!OSRect,!PIC)
 winScrollRectangle _ _ _
 	= code
 	{
@@ -452,7 +452,7 @@ winScrollRectangle _ _ _
 		.end
 	}
 
-winCopyRectangle ::  !Rect !Pt !PIC ->  PIC
+winCopyRectangle ::  !OSRect !Pt !PIC ->  PIC
 winCopyRectangle _ _ _
 	= code
 	{
@@ -461,7 +461,7 @@ winCopyRectangle _ _ _
 		.end
 	}
 
-winCopyRectangleTo ::  !Rect !Pt !PIC ->  PIC
+winCopyRectangleTo ::  !OSRect !Pt !PIC ->  PIC
 winCopyRectangleTo _ _ _
 	= code
 	{
@@ -470,7 +470,7 @@ winCopyRectangleTo _ _ _
 		.end
 	}
 
-winMoveRectangle ::  !Rect !Pt !PIC ->  PIC
+winMoveRectangle ::  !OSRect !Pt !PIC ->  PIC
 winMoveRectangle _ _ _
 	= code
 	{
@@ -479,7 +479,7 @@ winMoveRectangle _ _ _
 		.end
 	}
 
-winMoveRectangleTo ::  !Rect !Pt !PIC ->  PIC
+winMoveRectangleTo ::  !OSRect !Pt !PIC ->  PIC
 winMoveRectangleTo _ _ _
 	= code
 	{
@@ -489,7 +489,7 @@ winMoveRectangleTo _ _ _
 	}
 
 
-winInvertRectangle ::  !Rect !PIC ->  PIC
+winInvertRectangle ::  !OSRect !PIC ->  PIC
 winInvertRectangle _ _
 	= code
 	{
@@ -498,7 +498,7 @@ winInvertRectangle _ _
 		.end
 	}
 
-winEraseRectangle ::  !Rect !PIC ->  PIC
+winEraseRectangle ::  !OSRect !PIC ->  PIC
 winEraseRectangle _ _
 	= code
 	{
@@ -507,7 +507,7 @@ winEraseRectangle _ _
 		.end
 	}
 
-winFillRectangle ::  !Rect !PIC ->  PIC
+winFillRectangle ::  !OSRect !PIC ->  PIC
 winFillRectangle _ _
 	= code
 	{
@@ -516,7 +516,7 @@ winFillRectangle _ _
 		.end
 	}
 
-winDrawRectangle ::  !Rect !PIC ->  PIC
+winDrawRectangle ::  !OSRect !PIC ->  PIC
 winDrawRectangle _ _
 	= code
 	{
@@ -545,7 +545,7 @@ winDrawString _ _
 	}
 
 
-winDrawCCurve ::  !Rect !Pt !Pt !RGBcolor !PIC ->  PIC
+winDrawCCurve ::  !OSRect !Pt !Pt !RGBcolor !PIC ->  PIC
 winDrawCCurve _ _ _ _ _
 	= code
 	{
@@ -572,7 +572,7 @@ winDrawCPoint _ _ _
 		.end
 	}
 
-winDrawCurve ::  !Rect !Pt !Pt !PIC ->  PIC
+winDrawCurve ::  !OSRect !Pt !Pt !PIC ->  PIC
 winDrawCurve _ _ _ _
 	= code
 	{
@@ -692,7 +692,7 @@ winSetPenColor _ _
 	}
 
 
-winClipPicture ::  !Rect !PIC ->  PIC
+winClipPicture ::  !OSRect !PIC ->  PIC
 winClipPicture _ _
 	= code
 	{

@@ -42,7 +42,7 @@ removeOnIdOfTriple nothing id_args
 
 /*	getContentRect returns the content rect of the window. 
 */
-getContentRect :: !OSWindowMetrics !WindowInfo !Size -> Rect
+getContentRect :: !OSWindowMetrics !WindowInfo !Size -> OSRect
 getContentRect wMetrics (WindowInfo wInfo) size
 	= osGetWindowContentRect wMetrics visScrolls (sizeToRect size)
 where
@@ -54,9 +54,9 @@ getContentRect _ (GameWindowInfo gwInfo) _
 getContentRect _ NoWindowInfo size
 	= sizeToRect size
 
-/*	Calculate the intersection of the given Rect with the content of a CompoundControl.
+/*	Calculate the intersection of the given OSRect with the content of a CompoundControl.
 */
-intersectRectContent :: !OSWindowMetrics !Rect !CompoundInfo !Point2 !Size -> Rect
+intersectRectContent :: !OSWindowMetrics !OSRect !CompoundInfo !Point2 !Size -> OSRect
 intersectRectContent wMetrics clipRect info itemPos itemSize
 	= intersectRects clipRect contentRect
 where
@@ -81,8 +81,8 @@ enablecontrols ids overrule wMetrics wPtr wH=:{whItems`,whShow`,whSelect`,whSize
 where
 	clipRect			= getContentRect wMetrics wH.whWindowInfo` whSize`
 	
-	enableWItemHandle` :: !OSWindowMetrics !OSWindowPtr !(Maybe Id) !Bool !Bool !Bool !Rect !WItemHandle` !(![Id],!*OSToolbox)
-																						-> (!WItemHandle`,!(![Id],!*OSToolbox))
+	enableWItemHandle` :: !OSWindowMetrics !OSWindowPtr !(Maybe Id) !Bool !Bool !Bool !OSRect !WItemHandle` !(![Id],!*OSToolbox)
+																						  -> (!WItemHandle`,!(![Id],!*OSToolbox))
 	
 	enableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect itemH=:{wItemKind`} (ids,tb)
 		| systemControl
@@ -198,8 +198,8 @@ disablecontrols ids overrule wMetrics wPtr wH=:{whItems`,whShow`,whSelect`,whSiz
 where
 	clipRect			= getContentRect wMetrics wH.whWindowInfo` whSize`
 	
-	disableWItemHandle` :: !OSWindowMetrics !OSWindowPtr !(Maybe Id) !Bool !Bool !Bool !Rect !WItemHandle` !(![Id],!*OSToolbox)
-																						 -> (!WItemHandle`,!(![Id],!*OSToolbox))
+	disableWItemHandle` :: !OSWindowMetrics !OSWindowPtr !(Maybe Id) !Bool !Bool !Bool !OSRect !WItemHandle` !(![Id],!*OSToolbox)
+																						   -> (!WItemHandle`,!(![Id],!*OSToolbox))
 	
 	disableWItemHandle` wMetrics wPtr defId overrule contextSelect contextShow clipRect itemH=:{wItemKind`} (ids,tb)
 		| systemControl
@@ -314,8 +314,8 @@ where
 	contextShow			= True	// DvA: moet dit niet itemsShow zijn? PA: nee, want itemsShow bepaalt de nieuwe show-state van elementen; contextShow bepaalt show-state window
 	contextSelect		= if whSelect` Able Unable
 	
-	setWItemShowStates :: !OSWindowMetrics !OSWindowPtr !Bool !Bool !Bool !SelectState !Rect !WItemHandle` !(![Id],!*OSToolbox)
-																						 -> (!WItemHandle`,!(![Id],!*OSToolbox))
+	setWItemShowStates :: !OSWindowMetrics !OSWindowPtr !Bool !Bool !Bool !SelectState !OSRect !WItemHandle` !(![Id],!*OSToolbox)
+																						   -> (!WItemHandle`,!(![Id],!*OSToolbox))
 	
 	setWItemShowStates wMetrics wPtr overrule itemsShow contextShow contextSelect clipRect itemH=:{wItemKind`=IsRadioControl} (ids,tb)
 		# (found,ids)			= maybeRemoveCheck itemH.wItemId` ids
@@ -328,7 +328,7 @@ where
 			# tb				= stateMap2 (setradio osShow clipRect) info.radioItems` tb
 			= (itemH,(ids,tb))
 	where
-		setradio :: !Bool !Rect !RadioItemInfo` !*OSToolbox -> *OSToolbox
+		setradio :: !Bool !OSRect !RadioItemInfo` !*OSToolbox -> *OSToolbox
 		setradio osShow clipRect {radioItemPtr`,radioItemPos`,radioItemSize`} tb
 			= osSetRadioControlShow wPtr radioItemPtr` clipRect osShow tb
 	
@@ -343,7 +343,7 @@ where
 			# tb				= stateMap2 (setcheck osShow clipRect) info.checkItems` tb
 			= (itemH,(ids,tb))
 	where
-		setcheck :: !Bool !Rect !CheckItemInfo` !*OSToolbox -> *OSToolbox
+		setcheck :: !Bool !OSRect !CheckItemInfo` !*OSToolbox -> *OSToolbox
 		setcheck osShow clipRect {checkItemPtr`,checkItemPos`,checkItemSize`} tb
 			= osSetCheckControlShow wPtr checkItemPtr` clipRect osShow tb
 	
@@ -461,7 +461,7 @@ setcontrolsmarkstate id mark indexs wMetrics wPtr wH=:{whItems`,whSize`,whWindow
 where
 	clipRect						= getContentRect wMetrics whWindowInfo` whSize`
 	
-	setWItemMarks :: !OSWindowMetrics !OSWindowPtr !MarkState !Rect ![Index] !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
+	setWItemMarks :: !OSWindowMetrics !OSWindowPtr !MarkState !OSRect ![Index] !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
 	
 	setWItemMarks wMetrics wPtr mark clipRect indexs id itemH=:{wItemKind`=IsCheckControl} tb
 		| identifyMaybeId id itemH.wItemId`
@@ -478,7 +478,7 @@ where
 		| otherwise
 			= (False,itemH,tb)
 	where
-		setCheckMark :: !OSWindowPtr !Rect !MarkState !Index !(![CheckItemInfo`],!*OSToolbox) -> (![CheckItemInfo`],!*OSToolbox)
+		setCheckMark :: !OSWindowPtr !OSRect !MarkState !Index !(![CheckItemInfo`],!*OSToolbox) -> (![CheckItemInfo`],!*OSToolbox)
 		setCheckMark wPtr clipRect mark index (checkItems,tb)
 			# (before,[item:after])	= split (index-1) checkItems
 			  (title,width,_)		= item.checkItem`
@@ -510,8 +510,8 @@ setcontroltexts id_texts wMetrics wPtr wH`=:{whItems`,whSize`,whWindowInfo`} tb
 where
 	clipRect		= getContentRect wMetrics whWindowInfo` whSize`
 	
-	setControlText :: !OSWindowMetrics !OSWindowPtr !Bool !Rect !WItemHandle` !(![(Id,String)],!*OSToolbox)
-															-> (!WItemHandle`,!(![(Id,String)],!*OSToolbox))
+	setControlText :: !OSWindowMetrics !OSWindowPtr !Bool !OSRect !WItemHandle` !(![(Id,String)],!*OSToolbox)
+															  -> (!WItemHandle`,!(![(Id,String)],!*OSToolbox))
 	
 	setControlText wMetrics wPtr shownContext clipRect itemH=:{wItemKind`=IsEditControl} (id_texts,tb)
 		# (found,id_text,id_texts)	= removeOnIdOfPair itemH.wItemId` id_texts
@@ -578,7 +578,7 @@ seteditcontrolcursor id pos wMetrics wPtr wH`=:{whItems`,whSize`,whWindowInfo`} 
 where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	
-	setEditCursor :: !OSWindowMetrics !OSWindowPtr !Bool !Rect !Int !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
+	setEditCursor :: !OSWindowMetrics !OSWindowPtr !Bool !OSRect !Int !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
 	
 	setEditCursor wMetrics wPtr shownContext clipRect pos id itemH=:{wItemKind`=IsEditControl} tb
 		| not (identifyMaybeId id itemH.wItemId`)
@@ -617,8 +617,8 @@ where
 	clipRect			= getContentRect wMetrics whWindowInfo` whSize`
 	resizeable			= True
 	
-	setWItemLook :: !OSWindowMetrics !OSWindowPtr !Bool !Bool !Bool (Maybe Id) !Rect !WItemHandle` !(![(Id,Bool,(Bool,Look))],!*OSToolbox)
-																				 -> (!WItemHandle`,!(![(Id,Bool,(Bool,Look))],!*OSToolbox))
+	setWItemLook :: !OSWindowMetrics !OSWindowPtr !Bool !Bool !Bool (Maybe Id) !OSRect !WItemHandle` !(![(Id,Bool,(Bool,Look))],!*OSToolbox)
+																				   -> (!WItemHandle`,!(![(Id,Bool,(Bool,Look))],!*OSToolbox))
 	
 	setWItemLook wMetrics wPtr ableContext shownContext resizeable defId clipRect itemH=:{wItemId`,wItemKind`=IsCompoundControl,wItemSize`} (looks,tb)
 		# (found,look,looks)		= removeOnIdOfTriple wItemId` looks
@@ -713,8 +713,8 @@ where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	resizeable				= True
 	
-	drawInWItem :: !OSWindowMetrics !OSWindowPtr Bool (Maybe Id) !Bool !Rect !Id !WItemHandle` !*(!v:(Maybe u:x),w:(St *Picture u:x),!*OSToolbox)
-																	   -> (!Bool,!WItemHandle`,!*(!v:(Maybe u:x),z:(St *Picture u:x),!*OSToolbox)), [v<=u,w<=z]
+	drawInWItem :: !OSWindowMetrics !OSWindowPtr Bool (Maybe Id) !Bool !OSRect !Id !WItemHandle` !*(!v:(Maybe u:x),w:(St *Picture u:x),!*OSToolbox)
+																	     -> (!Bool,!WItemHandle`,!*(!v:(Maybe u:x),z:(St *Picture u:x),!*OSToolbox)), [v<=u,w<=z]
 	
 	drawInWItem wMetrics wPtr resizeable defId contextShow clipRect id itemH=:{wItemId`,wItemPtr`,wItemKind`=IsCompoundControl} x_tb
 		| not (identifyMaybeId id wItemId`)
@@ -776,8 +776,8 @@ setslidercontrolstates id_fs wMetrics wPtr wH`=:{whItems`,whSize`,whWindowInfo`}
 where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	
-	setSliderState :: !OSWindowMetrics !OSWindowPtr !Rect !WItemHandle` !(![(Id,IdFun SliderState)],!*OSToolbox)
-													  -> (!WItemHandle`,!(![(Id,IdFun SliderState)],!*OSToolbox))
+	setSliderState :: !OSWindowMetrics !OSWindowPtr !OSRect !WItemHandle` !(![(Id,IdFun SliderState)],!*OSToolbox)
+													    -> (!WItemHandle`,!(![(Id,IdFun SliderState)],!*OSToolbox))
 	
 	setSliderState wMetrics wPtr clipRect itemH=:{wItemId`,wItemKind`=IsSliderControl,wItemPtr`} (id_fs,tb)
 		# (found,id_f,id_fs)= removeOnIdOfPair wItemId` id_fs
@@ -822,7 +822,7 @@ selectradiocontrol id index wMetrics wPtr wH=:{whItems`,whSize`,whWindowInfo`} t
 where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	
-	selectWItemRadioControl :: !OSWindowMetrics !OSWindowPtr !Rect !Index !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
+	selectWItemRadioControl :: !OSWindowMetrics !OSWindowPtr !OSRect !Index !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
 	
 	selectWItemRadioControl wMetrics wPtr clipRect index id itemH=:{wItemId`,wItemKind`=IsRadioControl} tb
 		| not (identifyMaybeId id wItemId`)
@@ -872,7 +872,7 @@ selectpopupitem id index wMetrics wPtr wH=:{whItems`,whSize`,whWindowInfo`} tb
 where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	
-	selectWItemPopUp :: !OSWindowMetrics !OSWindowPtr !Bool !Index !Rect !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
+	selectWItemPopUp :: !OSWindowMetrics !OSWindowPtr !Bool !Index !OSRect !Id !WItemHandle` !*OSToolbox -> (!Bool,!WItemHandle`,!*OSToolbox)
 	
 	selectWItemPopUp wMetrics wPtr shownContext index clipRect id itemH=:{wItemId`,wItemKind`=IsPopUpControl} tb
 		| not (identifyMaybeId id wItemId`)
@@ -1133,8 +1133,8 @@ setsliderthumb hasScroll wMetrics itemPtr isHScroll scrollValues viewSize maxcoo
 	# tb			= osSetCompoundSliderThumbSize compoundPtr scrollPtr scrollMin scrollMax scrollSize scrollRect able (old==new) tb
 */
 
-setcompoundsliderthumb :: !Bool Bool OSWindowMetrics OSWindowPtr OSWindowPtr Bool (Int,Int,Int) Int (Int,Int) !(Rect,Rect) !*OSToolbox -> *OSToolbox
-setcompoundsliderthumb hasScroll able wMetrics windPtr itemPtr isHScroll scrollValues viewSize maxcoords (hRect,vRect) tb
+setcompoundsliderthumb :: !Bool Bool OSWindowMetrics OSWindowPtr OSWindowPtr OSWindowPtr Bool (Int,Int,Int) Int (Int,Int) !(OSRect,OSRect) !*OSToolbox -> *OSToolbox
+setcompoundsliderthumb hasScroll able wMetrics windPtr compPtr itemPtr isHScroll scrollValues viewSize maxcoords (hRect,vRect) tb
 	| not hasScroll
 		= tb
 //	| otherwise			= osSetCompoundSlider wMetrics itemPtr isHScroll (toOSscrollbarRange scrollValues viewSize) maxcoords tb
@@ -1182,7 +1182,7 @@ where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	orientation				= [(rectToRectangle domainRect,origin)]
 	
-	moveWItemFrame :: !MetricsInfo !OSWindowPtr !(Maybe Id) !Bool !Bool !Rect !Vector2 !Id
+	moveWItemFrame :: !MetricsInfo !OSWindowPtr !(Maybe Id) !Bool !Bool !OSRect !Vector2 !Id
 							!WItemHandle` !(!Maybe OSRgnHandle,!*OSToolbox)
 				  -> (!Bool,!WItemHandle`,!(!Maybe OSRgnHandle,!*OSToolbox))
 	
@@ -1293,8 +1293,8 @@ where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	orientation				= [(rectToRectangle domainRect,origin)]
 	
-	setWItemDomain :: !MetricsInfo !OSWindowPtr !(Maybe Id) !Bool !Bool !Rect !ViewDomain !Id !WItemHandle` !(!Maybe OSRgnHandle,!*OSToolbox)
-																					-> (!Bool,!WItemHandle`,!(!Maybe OSRgnHandle,!*OSToolbox))
+	setWItemDomain :: !MetricsInfo !OSWindowPtr !(Maybe Id) !Bool !Bool !OSRect !ViewDomain !Id !WItemHandle` !(!Maybe OSRgnHandle,!*OSToolbox)
+																					  -> (!Bool,!WItemHandle`,!(!Maybe OSRgnHandle,!*OSToolbox))
 	
 	setWItemDomain metricsInfo=:{miOSMetrics,miHMargins,miVMargins,miItemSpaces,miOrientation} wPtr defaultId shownContext ableContext clipRect newDomain id
 				   itemH=:{wItemId`,wItemKind`} updRgn_tb=:(updRgn,tb)

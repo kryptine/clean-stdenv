@@ -443,7 +443,7 @@ pictunfilloval center oval picture=:{pictContext,pictToolbox,pictOrigin,pictPen}
 where
 	rect	= ovalToRect (center-pictOrigin) oval
 
-ovalToRect :: !Point2 !Oval -> Rect
+ovalToRect :: !Point2 !Oval -> OSRect
 ovalToRect {x,y} {oval_rx,oval_ry}
 	= {rleft=x-rx,rtop=y-ry,rright=x+rx,rbottom=y+ry}
 where
@@ -505,7 +505,7 @@ where
 	(wrect,wstart,wend)	= getcurve_rect_begin_end start` curve
 	end					= wend+pictOrigin
 
-getcurve_rect_begin_end :: !Point2 !Curve -> (!Rect,!Point2,!Point2)
+getcurve_rect_begin_end :: !Point2 !Curve -> (!OSRect,!Point2,!Point2)
 getcurve_rect_begin_end start=:{x,y} {curve_oval={oval_rx,oval_ry},curve_from,curve_to,curve_clockwise}
 	| curve_clockwise	= (rect,end,start)
 	| otherwise			= (rect,start,end)
@@ -520,28 +520,28 @@ where
 	rect				= {rleft=cx-oval_rx,rtop=cy-oval_ry,rright=cx+oval_rx,rbottom=cy+oval_ry}
 
 
-/*	Rect drawing operations.
+/*	OSRect drawing operations.
 	pict(draw/fill)rect rect
 		draws/fills a rect. The pen position is not changed.
 */
-pictdrawrect :: !Rect !*Picture -> *Picture
+pictdrawrect :: !OSRect !*Picture -> *Picture
 pictdrawrect r picture=:{pictContext,pictToolbox,pictOrigin}
 	# (context,tb)	= winDrawRectangle (subVector (toVector pictOrigin) r) (pictContext,pictToolbox)
 	= {picture & pictContext=context,pictToolbox=tb}
 
-pictundrawrect :: !Rect !*Picture -> *Picture
+pictundrawrect :: !OSRect !*Picture -> *Picture
 pictundrawrect r picture=:{pictContext,pictToolbox,pictOrigin,pictPen={penForeColour,penBackColour}}
 	# (context,tb)	= winSetPenColor (toRGBtriple penBackColour) (pictContext,pictToolbox)
 	# (context,tb)	= winDrawRectangle (subVector (toVector pictOrigin) r) (context,tb)
 	# (context,tb)	= winSetPenColor (toRGBtriple penForeColour) (context,tb)
 	= {picture & pictContext=context,pictToolbox=tb}
 
-pictfillrect :: !Rect !*Picture -> *Picture
+pictfillrect :: !OSRect !*Picture -> *Picture
 pictfillrect r picture=:{pictContext,pictToolbox,pictOrigin}
 	# (context,tb)	= winFillRectangle (subVector (toVector pictOrigin) r) (pictContext,pictToolbox)
 	= {picture & pictContext=context,pictToolbox=tb}
 
-pictunfillrect :: !Rect !*Picture -> *Picture
+pictunfillrect :: !OSRect !*Picture -> *Picture
 pictunfillrect r picture=:{pictContext,pictToolbox,pictOrigin}
 	# (context,tb)	= winEraseRectangle (subVector (toVector pictOrigin) r) (pictContext,pictToolbox)
 	= {picture & pictContext=context,pictToolbox=tb}
@@ -549,7 +549,7 @@ pictunfillrect r picture=:{pictContext,pictToolbox,pictOrigin}
 
 /*	Scrolling operation (handle with care).
 */
-pictscroll :: !Rect !Vector2 !*Picture -> (!Rect,!*Picture)
+pictscroll :: !OSRect !Vector2 !*Picture -> (!OSRect,!*Picture)
 pictscroll r v picture=:{pictContext,pictToolbox,pictOrigin}
 	# (updRect,(context,tb))	= winScrollRectangle (subVector (toVector pictOrigin) r) (toTuple v) (pictContext,pictToolbox)
 	= (updRect,{picture & pictContext=context,pictToolbox=tb})

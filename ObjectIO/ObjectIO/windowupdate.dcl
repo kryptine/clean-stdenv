@@ -22,7 +22,7 @@ updatewindowbackgrounds :: !OSWindowMetrics !OSRgnHandle !WIDS !(WindowHandle .l
 updatewindowbackgrounds`:: !OSWindowMetrics !OSRgnHandle !WIDS  !WindowHandle` !*OSToolbox
 															-> (!WindowHandle`,!*OSToolbox)
 
-/*	updaterectcontrols redraws the controls that are element of the argument window and inside the Rect.
+/*	updaterectcontrols redraws the controls that are element of the argument window and inside the OSRect.
 */
-updaterectcontrols :: !OSWindowMetrics !Rect !OSWindowPtr !(WindowHandle .ls .pst) !*OSToolbox
-													   -> (!WindowHandle .ls .pst, !*OSToolbox)
+updaterectcontrols :: !OSWindowMetrics !OSRect !OSWindowPtr !(WindowHandle .ls .pst) !*OSToolbox
+													     -> (!WindowHandle .ls .pst, !*OSToolbox)

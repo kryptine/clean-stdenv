@@ -9,12 +9,12 @@ import ostoolbox, ostypes
 
 //	Region creation and disposal operations.
 osnewrgn	::                                        !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
-osnewrectrgn:: !Rect                                  !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+osnewrectrgn:: !OSRect                                !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 osdisposergn::                           !OSRgnHandle !*OSToolbox -> *OSToolbox
 
 //	Setting the shape of a region to a rectangle or a polygon.
 /*	PA: used nowhere.
-osrectrgn	:: !Rect                     !OSRgnHandle !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+osrectrgn	:: !OSRect                   !OSRgnHandle !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 */
 ospolyrgn	:: !(!Int,!Int) ![(Int,Int)] !OSRgnHandle !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 
@@ -30,5 +30,5 @@ osdiffrgn	:: !OSRgnHandle !OSRgnHandle !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 				 the bounding box equals the region.
 	osisemptyrgn determines whether the region is empty (its bounding box is empty). 
 */
-osgetrgnbox	:: !OSRgnHandle !*OSToolbox -> (!Bool,!Rect,!*OSToolbox)
-osisemptyrgn:: !OSRgnHandle !*OSToolbox -> (!Bool,		!*OSToolbox)
+osgetrgnbox	:: !OSRgnHandle !*OSToolbox -> (!Bool,!OSRect,!*OSToolbox)
+osisemptyrgn:: !OSRgnHandle !*OSToolbox -> (!Bool,		  !*OSToolbox)

@@ -356,12 +356,12 @@ where
 					(hasSize,sizeAtt)	= cselect (\att->isControlViewSize att || isControlOuterSize att) undef atts
 					minSize				= osMinCompoundSize
 				
-				validateDerivedCompoundSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) Size !Size -> Size
+				validateDerivedCompoundSize :: !OSWindowMetrics !OSRect !(!Bool,!Bool) Size !Size -> Size
 				validateDerivedCompoundSize wMetrics domain hasScrolls derSize reqSize
 					| reqSize==zero		= validateScrollbarSize wMetrics domain hasScrolls derSize
 					| otherwise			= validateScrollbarSize wMetrics domain hasScrolls reqSize
 				where
-					validateScrollbarSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) !Size -> Size
+					validateScrollbarSize :: !OSWindowMetrics !OSRect !(!Bool,!Bool) !Size -> Size
 					validateScrollbarSize wMetrics domainRect (hasHScroll,hasVScroll) size=:{w,h}
 						| domainSize==zero			= size
 						| visHScroll && visVScroll	= {w=w`,h=h`}
@@ -646,12 +646,12 @@ where
 					(hasSize,sizeAtt)	= cselect (\att->iscontrolviewsize` att || iscontroloutersize` att) undef atts
 					minSize				= osMinCompoundSize
 				
-				validateDerivedCompoundSize` :: !OSWindowMetrics !Rect !(!Bool,!Bool) Size !Size -> Size
+				validateDerivedCompoundSize` :: !OSWindowMetrics !OSRect !(!Bool,!Bool) Size !Size -> Size
 				validateDerivedCompoundSize` wMetrics domain hasScrolls derSize reqSize
 					| reqSize==zero		= validateScrollbarSize wMetrics domain hasScrolls derSize
 					| otherwise			= validateScrollbarSize wMetrics domain hasScrolls reqSize
 				where
-					validateScrollbarSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) !Size -> Size
+					validateScrollbarSize :: !OSWindowMetrics !OSRect !(!Bool,!Bool) !Size -> Size
 					validateScrollbarSize wMetrics domainRect (hasHScroll,hasVScroll) size=:{w,h}
 						| domainSize==zero			= size
 						| visHScroll && visVScroll	= {w=w`,h=h`}
@@ -757,7 +757,7 @@ where
 	hRect		= osGetCompoundHScrollRect wMetrics hasScrolls rect
 	vRect		= osGetCompoundVScrollRect wMetrics hasScrolls rect
 	
-	layoutScrollbar :: Rect !ScrollInfo -> ScrollInfo
+	layoutScrollbar :: OSRect !ScrollInfo -> ScrollInfo
 	layoutScrollbar r=:{rleft,rtop} scrollInfo
 		= {scrollInfo & scrollItemPos={x=rleft,y=rtop},scrollItemSize=rectSize r}
 

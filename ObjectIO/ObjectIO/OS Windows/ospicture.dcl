@@ -165,24 +165,24 @@ pictdrawcurve			:: !Bool !Point2 !Curve		!*Picture -> *Picture
 pictundrawcurve			:: !Bool !Point2 !Curve		!*Picture -> *Picture
 pictfillcurve			:: !Bool !Point2 !Curve		!*Picture -> *Picture
 pictunfillcurve			:: !Bool !Point2 !Curve		!*Picture -> *Picture
-getcurve_rect_begin_end	::       !Point2 !Curve -> (!Rect,!Point2,!Point2)
+getcurve_rect_begin_end	::       !Point2 !Curve -> (!OSRect,!Point2,!Point2)
 
 
-/*	Rect drawing operations.
+/*	OSRect drawing operations.
 	pict(draw/fill)rect rect
 		draws/fills a rect. The pen position is not changed.
 	pictun(draw/fill)rect 
 		is equal to pict(draw/fill)rect, using the background colour temporarily.
 */
-pictdrawrect			:: !Rect	!*Picture -> *Picture
-pictundrawrect			:: !Rect	!*Picture -> *Picture
-pictfillrect			:: !Rect	!*Picture -> *Picture
-pictunfillrect			:: !Rect	!*Picture -> *Picture
+pictdrawrect			:: !OSRect	!*Picture -> *Picture
+pictundrawrect			:: !OSRect	!*Picture -> *Picture
+pictfillrect			:: !OSRect	!*Picture -> *Picture
+pictunfillrect			:: !OSRect	!*Picture -> *Picture
 
 
 /*	Scrolling operation (handle with care).
 */
-pictscroll				:: !Rect !Vector2 !*Picture -> (!Rect,!*Picture)
+pictscroll				:: !OSRect !Vector2 !*Picture -> (!OSRect,!*Picture)
 
 
 /*	Polygon drawing operations.

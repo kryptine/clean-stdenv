@@ -91,7 +91,7 @@ where
 	             p2 is the origin after  scrolling,
 	             area is the visible area of the window view frame.
 */
-	calcScrollUpdateArea :: !Point2 !Point2 !Rect -> (![Rectangle],!St *Picture [Rect])
+	calcScrollUpdateArea :: !Point2 !Point2 !OSRect -> (![Rectangle],!St *Picture [OSRect])
 	calcScrollUpdateArea oldOrigin newOrigin areaRect
 		= (map rectToRectangle updArea,scroll {newOriginAreaRect & rright=rright+1,rbottom=rbottom+1} restArea v)
 	where
@@ -138,7 +138,7 @@ where
 									 	(	[zero],newOriginAreaRect)
 									 )))))))
 		
-		scroll :: !Rect !Rect !Vector2 !*Picture -> (![Rect],!*Picture)
+		scroll :: !OSRect !OSRect !Vector2 !*Picture -> (![OSRect],!*Picture)
 		scroll scrollRect restRect v picture
 			# (updRect,picture)	= pictscroll scrollRect v picture
 			| updRect==zero
