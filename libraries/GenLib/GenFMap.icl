@@ -59,6 +59,7 @@ gLookupFMap{|EITHER|} fl fr key FMEmpty 	= FMEmpty
 
 gLookupFMap{|CONS|} f (CONS key) fm = f key fm
 gLookupFMap{|FIELD|} f (FIELD key) fm = f key fm
+gLookupFMap{|OBJECT|} f (OBJECT key) fm = f key fm
 
 derive gLookupFMap []
 
@@ -125,6 +126,7 @@ gInsertFMap{|EITHER|} fl fr (RIGHT key) (v, FMEmpty)
 	
 gInsertFMap{|CONS|} f (CONS key) x = f key x
 gInsertFMap{|FIELD|} f (FIELD key) x = f key x
+gInsertFMap{|OBJECT|} f (OBJECT key) x = f key x
 
 derive gInsertFMap []
 

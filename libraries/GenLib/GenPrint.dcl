@@ -22,6 +22,6 @@ instance PrintOutput File
 
 generic gPrint a :: a (PrintState *s) -> (PrintState *s) | PrintOutput s
 
-derive gPrint Int, Real, Char, Bool, String, UNIT, PAIR, EITHER, FIELD, CONS, [], {!}, {}
-derive bimap PrintState
+derive gPrint Int, Real, Char, Bool, String, UNIT, PAIR, EITHER, FIELD, CONS, OBJECT, [], {!}, {}
+//derive bimap PrintState
 

@@ -122,7 +122,7 @@ needParenthesis (CtxInfix _ this_assoc this_prio _) (CtxInfix _ outer_assoc oute
 	= 	outer_prio > this_prio 
 	||  (outer_prio == this_prio && not (this_assoc == outer_assoc && this_assoc == branch))
 
-derive bimap PrintState
+//derive bimap PrintState
 
 //-------------------------------------------------------------------------------------
 
@@ -180,10 +180,12 @@ gPrint{|Int|} x st
 	= printString (toString x) st
 gPrint{|Real|} x st 
 	# str = toString x
-	# st = printString (toString x) st 
 	| all isDigit [c\\c<-:str] // add .0 if needed
-		= printString ".0" st
-		= st
+		= printString (str +++ ".0") st 
+	| str.[0] == '.'
+		= printString ("0" +++ str) st
+	| otherwise 	
+		= printString str st
 gPrint{|Bool|} x st 
 	= printString (toString x) st
 gPrint{|Char|} x st 
@@ -252,6 +254,8 @@ gPrint{|FIELD of d|} f (FIELD x) st
 	$ printString " = " 
 	$ f x 
 	@ st
+gPrint{|OBJECT|} f (OBJECT x) st
+	= f x st	
 	
 gPrint{|[]|} f xs st
 	= printChar '['

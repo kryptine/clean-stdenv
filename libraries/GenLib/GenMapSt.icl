@@ -13,6 +13,7 @@ gMapLSt{|PAIR|} fx fy (PAIR x y) st
 gMapLSt{|EITHER|} fl fr x st 	= mapStEITHER fl fr x st
 gMapLSt{|CONS|} f x st 			= mapStCONS f x st
 gMapLSt{|FIELD|} f x st 		= mapStFIELD f x st
+gMapLSt{|OBJECT|} f x st 		= mapStOBJECT f x st
 gMapLSt{|{}|} f x st			= mapArrayLSt f x st
 gMapLSt{|{!}|} f x st			= mapArrayLSt f x st
 
@@ -27,6 +28,7 @@ gMapRSt{|PAIR|} fx fy (PAIR x y) st
 gMapRSt{|EITHER|} fx fy x st 	= mapStEITHER fx fy x st	
 gMapRSt{|CONS|} f x st 			= mapStCONS f x st
 gMapRSt{|FIELD|} f x st 		= mapStFIELD f x st
+gMapRSt{|OBJECT|} f x st 		= mapStOBJECT f x st
 gMapRSt{|{}|} f x st			= mapArrayRSt f x st
 gMapRSt{|{!}|} f x st			= mapArrayRSt f x st
 
@@ -45,3 +47,7 @@ mapStCONS f (CONS x) st
 mapStFIELD f (FIELD x) st 		
 	# (x, st) = f x st 
 	= (FIELD x, st)	
+mapStOBJECT f (OBJECT x) st 		
+	# (x, st) = f x st 
+	= (OBJECT x, st)	
+	
