@@ -14,16 +14,14 @@ loopTest1 = startCircuit (edit "edit" >>> loop (arr \(x, y) -> (x + 1, y + 1)) >
 
 loopTest2 = startCircuit (edit "edit" >>> loop (first (edit "loop")) >>> display "display") 42
 
-/* out of order
-import StdDebug
+:: LoopTest3 = Reset | Higher | Not_Higher
+derive gGEC LoopTest3
 
 loopTest3 = startCircuit (edit "enter number (0 resets)" >>> loop (arr f) >>> display "number higher than all before?") 0
 where
 	f (x, xs)
-		| x == 0 = (True, [])
-		| trace_tn [x:xs]
-		= (all ((>) x) xs, [x:xs])
-*/
+		| x == 0 = (Reset, [])
+		= (if (all ((>) x) xs) Higher Not_Higher, [x:xs])
 
 loopTest4 = startCircuit (edit "reset" >>> fix (second (arr incr >>> delay 0) >>> arr cond) >>> display "output") False
 where

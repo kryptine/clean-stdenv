@@ -1,7 +1,7 @@
 implementation module GecArrow
 
-import StdGECExt
-import store
+import StdArrow, StdGECExt
+import store, StdDebug
 
 :: GecCircuit a b = GecCircuit (A. .ps: (GecSet b ps) (GecGet a ps) *(PSt ps) -> *(GecSet a ps, GecGet b ps, *PSt ps))
 
@@ -88,31 +88,36 @@ instance ArrowLoop GecCircuit
 where
 	loop (GecCircuit g) = GecCircuit k
 	where
-		k setc geta env = (seta, getc, env3)
+		k setc geta env = (seta, getc, env4)
 		where
 			(id, env1) = openStoreId env
-			(_, env2) = openStore id (Just b) env1
-			(setab, getcb, env3) = g setcb getab env2
+			(setab, getcb, env2) = g setcb getab env1
+			(cb, env3) = getcb env2
+			(_, env4) = openStore id (Just (snd cb)) env3
 	
-			b => abort "Run-time error: cycle in loop detected"
-			
 			setcb u cb env
 				# env = writeStore id (snd cb) env
 				= setc u (fst cb) env
 			
 			getab env
 				# (a, env) = geta env
-				  (b, env) = readStore id env
+				  (b, env) = getStore id env
 				= ((a, b), env)
 			
 			seta u a env
-				# (cb, env) = getcb env
-				  b = snd cb
+				# (b, env) = getStore id env
 				= setab u (a, b) env
 	
 			getc env
 				# (cb, env) = getcb env
 				= (fst cb, env)
+
+		getStore id env
+			# (ok, env) = valueStored id env
+			| not ok = (cycle, env)
+			= readStore id env
+		where
+			cycle => abort "Run-time error: cycle in loop detected"
 
 instance ArrowCircuit GecCircuit
 where
@@ -123,12 +128,14 @@ where
 			(id, env1) = openStoreId env
 			(_, env2) = openStore id (Just a) env1
 				
-			geta` env = readStore id env
+			geta` env 
+				# (a, env) = readStore id env
+				= (a, env)
 
 			seta` u a` env
 				# (a, env) = readStore id env
-				  env = writeStore id a` env
-				= seta u a env
+				  env = seta u a env
+				= writeStore id a` env
 
 feedback :: !(GecCircuit a a) -> GecCircuit a a
 feedback (GecCircuit g) = GecCircuit k
