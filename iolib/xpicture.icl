@@ -32,7 +32,7 @@ ShowPenX _
 		.end
 	};
 
-GetPenX :: !Int -> !(!Int,!Int);
+GetPenX :: !Int -> (!Int,!Int);
 GetPenX _
 	= code {
 		.inline GetPenX
@@ -384,7 +384,7 @@ GetFontNameX _
 		.end
 	};
 
-GetFontInfoX :: !Int -> !(!Int,!Int,!Int,!Int,!Int);
+GetFontInfoX :: !Int -> (!Int,!Int,!Int,!Int,!Int);
 GetFontInfoX _
 	= code {
 		.inline GetFontInfoX
@@ -392,7 +392,7 @@ GetFontInfoX _
 		.end
 	};
 
-GetFontFontInfoX :: !Int -> !(!Int,!Int,!Int,!Int);
+GetFontFontInfoX :: !Int -> (!Int,!Int,!Int,!Int);
 GetFontFontInfoX _
 	= code {
 		.inline GetFontFontInfoX
@@ -400,7 +400,7 @@ GetFontFontInfoX _
 		.end
 	};
 
-GetStringWidthX :: !Int !{#Char} -> !(!Int,!Int);
+GetStringWidthX :: !Int !{#Char} -> (!Int,!Int);
 GetStringWidthX _ _
 	= code {
 		.inline GetStringWidthX
@@ -464,7 +464,7 @@ SelectFontX _
 		.end
 	};
 
-GetFontStylesX :: !{#Char} -> !(!Int,!Int,!Int,!Int,!Int);
+GetFontStylesX :: !{#Char} -> (!Int,!Int,!Int,!Int,!Int);
 GetFontStylesX _
 	= code {
 		.inline GetFontStylesX

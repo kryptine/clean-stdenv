@@ -152,7 +152,7 @@ XPressRadioWidget _ _
 		.end
 	};
 
-GetXDialogEvent :: !Int -> !(!Int,!Int);
+GetXDialogEvent :: !Int -> (!Int,!Int);
 GetXDialogEvent _
 	= code {
 		.inline GetXDialogEvent
@@ -216,7 +216,7 @@ XBeep _
 		.end
 	};
 
-XGetCurrentRect :: !Int -> !(!Int,!Int,!Int,!Int);
+XGetCurrentRect :: !Int -> (!Int,!Int,!Int,!Int);
 XGetCurrentRect _
 	= code {
 		.inline XGetCurrentRect

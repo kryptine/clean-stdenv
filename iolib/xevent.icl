@@ -55,9 +55,9 @@ XAboutHelp              :== 42;
 :: XDevice      :== Int;
 :: XEvent       :== Int;
 :: Event        :== (Widget,XDevice,XEvent);
-:: MouseEvent   :== !(!Int,!Int,!Int,!Int,!Int,!Int,!Int);
-:: KeyEvent     :== !(!Int,!Int,!Int,!Int,!Int,!Int);
-:: NullEvent    :== !(!Int,!Int,!Int);
+:: MouseEvent   :== (!Int,!Int,!Int,!Int,!Int,!Int,!Int);
+:: KeyEvent     :== (!Int,!Int,!Int,!Int,!Int,!Int);
+:: NullEvent    :== (!Int,!Int,!Int);
 :: DialogEvent  :== (!Int, !Widget);
 
 

@@ -104,7 +104,7 @@ ShowMenuX _
 		.end
 	};
 
-GetItemInfo :: !Int -> !(!Int,!Int,!{#Char},!{#Char});
+GetItemInfo :: !Int -> (!Int,!Int,!{#Char},!{#Char});
 GetItemInfo _
 	= code {
 		.inline GetItemInfo
@@ -112,7 +112,7 @@ GetItemInfo _
 		.end
 	};
 
-GetSubmenuInfo :: !Int -> !(!{#Char},!Int);
+GetSubmenuInfo :: !Int -> (!{#Char},!Int);
 GetSubmenuInfo _
 	= code {
 		.inline GetSubmenuInfo

@@ -40,7 +40,7 @@ DisableTheTimer _
 		.end
 	};
 
-XGetCurrentTime :: !Int -> !(!Int,!Int,!Int);
+XGetCurrentTime :: !Int -> (!Int,!Int,!Int);
 XGetCurrentTime _
 	= code {
 		.inline XGetCurrentTime
@@ -48,7 +48,7 @@ XGetCurrentTime _
 		.end
 	};
 
-XGetCurrentDate :: !Int -> !(!Int,!Int,!Int,!Int);
+XGetCurrentDate :: !Int -> (!Int,!Int,!Int,!Int);
 XGetCurrentDate _
 	= code {
 		.inline XGetCurrentDate

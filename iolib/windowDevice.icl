@@ -151,7 +151,7 @@ WindowDeviceNotEmpty device =  True;
 /* Handling all window I/O.
    First we check whether it is a window event and next what window event.
 */
-WindowIO :: !Event !*s (!IOState *s) -> (!Bool, !*s, !IOState *s);
+WindowIO :: !Event !*s !(IOState *s) -> (!Bool, !*s, !IOState *s);
 WindowIO (w, XWindowDevice, e) s io_state
    #!
       strict1=GetXWindowEvent e;

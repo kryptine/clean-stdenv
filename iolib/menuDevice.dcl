@@ -13,10 +13,10 @@ MenuFunctions ::    DeviceFunctions state;
 
 // 	Creation and allocation.
 InsertInGroup :: !MenuItemGroupId !Int ![MenuElement s (IOState s)]
-                 !(DeviceSystemState s) -> !DeviceSystemState s;
+                 !(DeviceSystemState s) -> DeviceSystemState s;
 DelFromGroupIndex :: !MenuItemGroupId ![Int] !(DeviceSystemState s)
                      -> DeviceSystemState s;
-DelFromGroups :: ![MenuItemId] !(DeviceSystemState s) -> !DeviceSystemState s;
+DelFromGroups :: ![MenuItemId] !(DeviceSystemState s) -> DeviceSystemState s;
 
 //	Controlling the Appearance of Items
 CheckXWidget :: !Widget !MarkState -> Widget;
@@ -25,4 +25,4 @@ SetMenuAbility :: !Widget !SelectState -> Widget;
 
 // general
 IdListContainsId :: ![Int] !Int -> Bool;
-AddKey :: !KeyShortcut ![KeyShortcut] -> ![KeyShortcut];
+AddKey :: !KeyShortcut ![KeyShortcut] -> [KeyShortcut];

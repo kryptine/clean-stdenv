@@ -48,7 +48,7 @@ HideToplevelX _
 		.end
 	};
 
-CatchXWidget :: !Int -> !(!Int,!Int);
+CatchXWidget :: !Int -> (!Int,!Int);
 CatchXWidget _
 	= code {
 		.inline CatchXWidget

@@ -448,7 +448,7 @@ GetNrVis state = toInt (state.[NrVisI]);
 GetWidth :: !String -> Int;
 GetWidth state = GetNrFromState WidthI state;
 
-SetWidth :: !Int !String -> !String;
+SetWidth :: !Int !String -> String;
 SetWidth width state = SetNrInState WidthI width state;
 
 GetFirstIndex :: !String -> Int;
@@ -471,7 +471,7 @@ GetNrFromState index state
 		c1 = state.[inc index];
 	};
 
-SetNrInState :: !Int !Int !String -> !String;
+SetNrInState :: !Int !Int !String -> String;
 SetNrInState index nr state
 	=	(state := (index, c0)) := (inc index, c1);
 	where {

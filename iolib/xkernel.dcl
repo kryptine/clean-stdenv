@@ -6,5 +6,5 @@ CloseToplevelX :: !Int -> Int;
 OpenToplevelX :: !Int -> Int;
 ShowToplevelX :: !Int -> Int;
 HideToplevelX :: !Int -> Int;
-CatchXWidget :: !Int -> !(!Int,!Int);
+CatchXWidget :: !Int -> (!Int,!Int);
 DestroyWidget :: !Int -> Int;

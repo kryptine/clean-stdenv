@@ -368,7 +368,7 @@ IsGroupItem MenuSeparator                        =  True;
 IsGroupItem item =  False;
 
 InsertInGroup :: !MenuItemGroupId !Int ![MenuElement s (IOState s)]
-                 !(DeviceSystemState s) -> !DeviceSystemState s;
+                 !(DeviceSystemState s) -> DeviceSystemState s;
 InsertInGroup id index item (MenuSystemState w (keys, menu_specs, able))
    #!
       strict1=InsertInGroup` id index item menu_specs keys;
@@ -536,7 +536,7 @@ DelFromThisGroup index indexes [item : items]
 		};
 DelFromThisGroup index indexes items =  items;
 
-DelFromGroups :: ![MenuItemId] !(DeviceSystemState s) -> !DeviceSystemState s;
+DelFromGroups :: ![MenuItemId] !(DeviceSystemState s) -> DeviceSystemState s;
 DelFromGroups ids (MenuSystemState w (keys, menuhandles, able))
    #!
 		strict1=strict1;
@@ -752,7 +752,7 @@ DisposeMenuSystemState (MenuSystemState w handles)
 ClearMenuSystem :: !(DeviceSystemState s) -> DeviceSystemState s;
 ClearMenuSystem h=:(MenuSystemState w handles) =  Evaluate_2 h (HideMenuX w);
 
-DrawMenuSystem :: !(DeviceSystemState s) -> !DeviceSystemState s;
+DrawMenuSystem :: !(DeviceSystemState s) -> DeviceSystemState s;
 DrawMenuSystem h=:(MenuSystemState w handles) =  Evaluate_2 h (ShowMenuX w);
 
 
@@ -762,7 +762,7 @@ InstallKeyShortcut :: !Widget !KeyShortcut -> Widget;
 InstallKeyShortcut w (Key c) =  InstallShortcut w (toString c);
 InstallKeyShortcut w key =  w;
 
-AddKey :: !KeyShortcut ![KeyShortcut] -> ![KeyShortcut];
+AddKey :: !KeyShortcut ![KeyShortcut] -> [KeyShortcut];
 AddKey NoKey keys =  keys;
 AddKey key keys =  [key : keys];
 
