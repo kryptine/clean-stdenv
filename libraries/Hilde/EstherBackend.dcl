@@ -30,4 +30,3 @@ instance generateCode Dynamic
 
 toStringDynamic :: !Dynamic -> (![String], !String)
 
-(<<-) infixl 0 :: .a !.b -> .a

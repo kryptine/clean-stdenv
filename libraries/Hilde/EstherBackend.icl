@@ -93,13 +93,23 @@ where
 	solve d=:(e ||| Class c :: Overloaded d t (Context a)) env = case (dynamic Omega :: a) of 
 		(_ :: A.b: b) -> (Nothing, env)
 		type 
-			# (dyndict, env) = resolveInstance c type env
+			# (dyndict, env) = resolveInstance` c type env
 			-> case dyndict of 
 				(dict :: d) -> (Just (dynamic e dict :: t), env)
 				(dict_e ||| dict_r :: Overloaded dict_d d dict_o) 
 					# (d`, env) = solveOverloading (dynamic B e dict_e ||| dict_r :: Overloaded dict_d t dict_o) env
 					-> (Just d`, env)
 				_ -> raise (InvalidInstance c dyndict)
+	where
+		resolveInstance` "TC" (type :: a) env = (dynamicToDynamic type, env)
+		resolveInstance` c type env = resolveInstance c type env
+
+		dynamicToDynamic :: a -> Dynamic | TC a
+		dynamicToDynamic _ = dynamic toDynamic :: a^ -> Dynamic
+		where
+			toDynamic :: b -> Dynamic | TC b
+			toDynamic x = dynamic x :: b^
+				
 	solve d=:(e ||| r1 &&& r2 :: Overloaded (Contexts d1 d2) t (Contexts c1 c2)) env 
 		# (maybe1, env) = solve (dynamic I ||| r1 :: Overloaded d1 d1 c1) env
 		  (maybe2, env) = solve (dynamic I ||| r2 :: Overloaded d2 d2 c2) env
@@ -114,7 +124,7 @@ where
 		# typeVars = countTypeVars (dynamic Omega :: o -> t) 
 		  overloadedVars = countTypeVars (dynamic Omega :: o)
 		| occur overloadedVars typeVars = d
-		= raise UnsolvableOverloading
+		= raise UnsolvableOverloading //<<- snd (toStringDynamic d)
 	where
 		occur [x:xs] [y:ys] = y - x > 0 && occur xs ys
 		occur [] _ = True
@@ -131,6 +141,16 @@ where
 			f _ = {}
 	check d = d
 solveOverloading d env = (d, env)
+
+import Debug, StdTuple
+
+(<<-) infix 0 :: .a !.b -> .a
+(<<-) value debugValue
+	=	debugBefore debugValue show value
+where
+	show
+		=	debugShowWithOptions
+				[]//[DebugMaxChars 79, DebugMaxDepth 5, DebugMaxBreadth 20]
 
 Omega = raise "Do NOT evaluate Omega"
 
@@ -191,8 +211,3 @@ where
 	where
 		removeForAll (TypeScheme _ t) = toString t
 		removeForAll t = toString t
-
-(<<-) infixl 0 :: .a !.b -> .a
-(<<-) value debugValue = debugBefore debugValue show value
-where
-	show = debugShowWithOptions []

@@ -13,6 +13,7 @@ from StdParsComb import :: CParser, :: Parser, :: AltCont, :: XorCont, :: SucCon
 :: NTstatement
 	= Compound !NTexpression !Tsemicolon !NTstatement
 	| Pipe !NTexpression !Tguard !NTstatement
+	| Write !NTexpression !Twrite !String
 	| Expression !NTexpression
 
 :: NTexpression
@@ -33,7 +34,10 @@ from StdParsComb import :: CParser, :: Parser, :: AltCont, :: XorCont, :: SucCon
 	| Lambda !(Scope NTlambda)
 	| Let !(Scope NTlet)
 	| Case !NTcase
+	| Dynamic !(Scope NTdynamic)
 	| NameOrValue !NTnameOrValue
+
+:: NTdynamic = NTdynamic !Tdynamic !NTexpression
 
 :: NTlist
 	= ListComprehension !NTlistComprehension
@@ -99,5 +103,7 @@ from StdParsComb import :: CParser, :: Parser, :: AltCont, :: XorCont, :: SucCon
 :: TbackArrow = TbackArrow
 :: Tguard = Tguard
 :: Tand = Tand
+:: Twrite = Twrite
+:: Tdynamic = Tdynamic
 
 parseStatement :: !String -> /*Src*/ NTstatement
