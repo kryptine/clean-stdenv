@@ -5,8 +5,8 @@ import StdGECExt
 class Arrow arr
 where
 	arr :: (a -> b) -> arr a b
-	(>>>) infixr 1 :: (arr a b) (arr b c) -> arr a c
-	first :: (arr a b) -> arr (a, c) (b, c)
+	(>>>) infixr 1 :: !(arr a b) !(arr b c) -> arr a c
+	first :: !(arr a b) -> arr (a, c) (b, c)
 
 	second :: (arr a b) -> arr (c, a) (c, b)
 	second gecab :== arr swap >>> first gecab >>> arr swap where swap t = (snd t, fst t)
@@ -28,12 +28,16 @@ where
 	 
 	(>>@) infixr 8 :: (arr a b) (b -> c) -> arr a c
 	(>>@) gec f :== gec >>> arr f
+
+class ArrowLoop arr
+where
+	loop :: !(arr (a, b) (c, b)) -> arr a c
 	
 :: GecCircuit a b
 
 // Initialize GecCircuit circuit
 
-startCircuit :: (GecCircuit a b) a *(PSt .ps) -> *PSt .ps
+startCircuit :: !(GecCircuit a b) a *(PSt .ps) -> *PSt .ps
 
 // Lift visual editors to GecCircuit's
 
@@ -44,8 +48,12 @@ gecMouse	:: String -> GecCircuit a MouseState					// Assign a mouse to a fresh w
 // Arrow instance for GecCircuit
 
 instance Arrow GecCircuit
+instance ArrowLoop GecCircuit
 
 // Other GecCircuit combinators
 
-feedback :: (GecCircuit a a) -> GecCircuit a a
+fix :: (arr (a, b) b) -> arr a b | Arrow, ArrowLoop arr
+
+feedback :: !(GecCircuit a a) -> GecCircuit a a
+
 gecIO :: (A. .ps: a *(PSt .ps) -> *(b, *PSt .ps)) -> GecCircuit a b
