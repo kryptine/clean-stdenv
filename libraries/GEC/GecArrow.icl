@@ -39,8 +39,14 @@ display title = GecCircuit k
 where
 	k seta env
 		# (a, env) = gDefaultVal env
-		  ({gecSetValue}, env) = createNGEC title OutputOnly True a (\r -> seta (includeUpdate r)) env
-		= (gecSetValue, env)
+		  ({gecSetValue, gecGetValue}, env) = createNGEC title OutputOnly True a  (\r -> seta (includeUpdate r)) env
+		= (seta` gecGetValue gecSetValue seta, env)
+	
+	seta` gecGetValue gecSetValue seta NoUpdate a env
+		# env = gecSetValue NoUpdate a env
+		  (a`, env) = gecGetValue env
+		= seta NoUpdate a` env
+	seta` _ gecSetValue _ u a env = gecSetValue u a env
 
 gecMouse :: String -> GecCircuit a MouseState
 gecMouse title = GecCircuit k
