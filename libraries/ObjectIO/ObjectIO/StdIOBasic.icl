@@ -64,62 +64,45 @@ class toVector x :: !x -> Vector2
 
 
 instance == Size where
-	(==) :: !Size !Size -> Bool
 	(==) {w=a,h=b} {w=c,h=d} = a==c && b==d
 instance zero Size where
-	zero :: Size
 	zero = {w=0,h=0}
 instance toVector Size where
-	toVector :: !Size -> Vector2
 	toVector {w,h} = {vx=w,vy=h}
 instance toString Size where
-	toString :: !Size -> {#Char}
 	toString {w,h}
 		= curlify (itemsList "," (map recordFieldtoString (zip2 ["w","h"] [w,h])))
 
 
 instance == Vector2 where
-	(==) :: !Vector2 !Vector2 -> Bool
 	(==) {vx=a,vy=b} {vx=c,vy=d} = a==c && b==d
 instance + Vector2 where
-	(+) :: !Vector2 !Vector2 -> Vector2
 	(+) {vx=vx1,vy=vy1} {vx=vx2,vy=vy2} = {vx=vx1+vx2,vy=vy1+vy2}
 instance - Vector2 where
-	(-) :: !Vector2 !Vector2 -> Vector2
 	(-) {vx=vx1,vy=vy1} {vx=vx2,vy=vy2} = {vx=vx1-vx2,vy=vy1-vy2}
 instance zero Vector2 where
-	zero :: Vector2
 	zero = {vx=0,vy=0}
 instance ~ Vector2 where
-	(~) :: !Vector2 -> Vector2
 	(~) {vx,vy} = {vx=0-vx,vy=0-vy}
 instance toString Vector2 where
-	toString :: !Vector2 -> {#Char}
 	toString {vx,vy}
 		= curlify (itemsList "," (map recordFieldtoString (zip2 ["vx","vy"] [vx,vy])))
 
 
 instance == Point2 where
-	(==) :: !Point2 !Point2 -> Bool
 	(==) {x=a,y=b} {x=c,y=d} = a==c && b==d
 instance + Point2 where
-	(+) :: !Point2 !Point2 -> Point2
 	(+) {x=x1,y=y1} {x=x2,y=y2} = {x=x1+x2,y=y1+y2}
 instance - Point2 where
-	(-) :: !Point2 !Point2 -> Point2
 	(-) {x=x1,y=y1} {x=x2,y=y2} = {x=x1-x2,y=y1-y2}
 instance zero Point2 where
-	zero :: Point2
 	zero = {x=0,y=0}
 instance ~ Point2 where
-	(~) :: !Point2 -> Point2
 	(~) {x,y} = {x=0-x,y=0-y}
 instance toVector Point2 where
-	toVector :: !Point2 -> Vector2
 	toVector {x,y}
 		= {vx=x,vy=y}
 instance toString Point2 where
-	toString :: !Point2 -> {#Char}
 	toString {x,y}
 		= curlify (itemsList "," (map recordFieldtoString (zip2 ["x","y"] [x,y])))
 
@@ -128,18 +111,16 @@ movePoint {vx,vy} {x,y} = {x=vx+x,y=vy+y}
 
 
 instance == Rectangle where
-	(==) :: !Rectangle !Rectangle -> Bool
 	(==) {corner1=a,corner2=b} {corner1=c,corner2=d} = a==c && b==d
 instance zero Rectangle where
-	zero :: Rectangle
 	zero = {corner1=zero,corner2=zero}
 instance toString Rectangle where
-	toString :: !Rectangle -> {#Char}
 	toString {corner1,corner2}
 		= curlify (itemsList "," (map recordFieldtoString (zip2 ["corner1","corner2"] [corner1,corner2])))
 
 rectangleSize :: !Rectangle -> Size
-rectangleSize {corner1={x=x1,y=y1},corner2={x=x2,y=y2}} = {w=abs (x2-x1),h=abs (y2-y1)}
+rectangleSize {corner1={x=x1,y=y1},corner2={x=x2,y=y2}}
+	= {w=abs (x2-x1),h=abs (y2-y1)}
 
 
 ::	IdFun st
@@ -161,4 +142,5 @@ where
 itemsList _ _
 	= ""
 
-::	Void			=	Void // MW11++
+::	Void
+ =	Void // MW11++

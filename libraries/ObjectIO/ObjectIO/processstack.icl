@@ -19,11 +19,11 @@ import	commondef, systemid
 
 
 processstackFatalError :: String String -> .x
-processstackFatalError rule error = FatalError rule "processstack" error
+processstackFatalError rule error
+	= fatalError rule "processstack" error
 
 
 instance == ProcessKind where
-	(==) :: !ProcessKind !ProcessKind -> Bool
 	(==) InteractiveProcess kind	= case kind of
 										InteractiveProcess	-> True
 										_					-> False
@@ -64,4 +64,4 @@ topShowProcessShowState [{psId,psShow}:psStack]
 	| psShow	= (psShow,psId)
 	| otherwise	= topShowProcessShowState psStack
 topShowProcessShowState _
-	= (False,NullSystemId)
+	= (False,nullSystemId)

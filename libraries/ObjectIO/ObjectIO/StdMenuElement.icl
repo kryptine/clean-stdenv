@@ -6,12 +6,12 @@ implementation module StdMenuElement
 
 import	StdBool, StdChar, StdFunc, StdList, StdMisc, StdTuple
 import	commondef, iostate, menuaccess, mstate
-from	osmenu		import DrawMenuBar, OSEnableMenuItem, OSDisableMenuItem, OSChangeMenuItemTitle, OSValidateMenuItemTitle, OSMenuItemCheck
+from	osmenu		import osDrawMenuBar, osEnableMenuItem, osDisableMenuItem, osChangeMenuItemTitle, osValidateMenuItemTitle, osMenuItemCheck
 
 
-StdMenuElementFatalError :: String String -> .x
-StdMenuElementFatalError function error
-	= FatalError function "StdMenuElement" error
+stdMenuElementFatalError :: String String -> .x
+stdMenuElementFatalError function error
+	= fatalError function "StdMenuElement" error
 
 
 /*	The function isOkMenuElementId can be used to filter out the proper IdParent records.
@@ -24,17 +24,17 @@ isOkMenuElementId _ _
 
 /*	The following functions conveniently retrieve IdParents from the IOSt.
 */
-IOStGetIdParent :: !Id !(IOSt .l) -> (!Maybe IdParent,!IOSt .l)
-IOStGetIdParent id ioState
-	# (idtable,ioState)		= IOStGetIdTable ioState
+ioStGetIdParent :: !Id !(IOSt .l) -> (!Maybe IdParent,!IOSt .l)
+ioStGetIdParent id ioState
+	# (idtable,ioState)		= ioStGetIdTable ioState
 	# (maybeParent,idtable)	= getIdParent id idtable
-	= (maybeParent,IOStSetIdTable idtable ioState)
+	= (maybeParent,ioStSetIdTable idtable ioState)
 
-IOStGetIdParents :: ![Id] !(IOSt .l) -> (![Maybe IdParent],!IOSt .l)
-IOStGetIdParents ids ioState
-	# (idtable,ioState)		= IOStGetIdTable ioState
+ioStGetIdParents :: ![Id] !(IOSt .l) -> (![Maybe IdParent],!IOSt .l)
+ioStGetIdParents ids ioState
+	# (idtable,ioState)		= ioStGetIdTable ioState
 	# (maybeParents,idtable)= getIdParents ids idtable
-	= (maybeParents,IOStSetIdTable idtable ioState)
+	= (maybeParents,ioStSetIdTable idtable ioState)
 
 /*	gatherMenuIds collects all first Ids (menu element Ids) that belong to the same second Id (MenuId).
 	gatherMenuIds` does the same, except that not only menu element Ids are collected, but also their data item.
@@ -100,17 +100,17 @@ insertMenuHandle` mH` (MenuLSHandle mlsH=:{mlsHandle=mH})
 
 getMenu :: !Id !(IOSt .l) -> (!Maybe MState, !IOSt .l)
 getMenu menuId ioState
-	# (ok,ioState)				= IOStHasDevice MenuDevice ioState
+	# (ok,ioState)				= ioStHasDevice MenuDevice ioState
 	| not ok
 		= (Nothing,ioState)
-	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
+	# (found,mDevice,ioState)	= ioStGetDevice MenuDevice ioState
 	| not found
 		= (Nothing,ioState)
-	# menus						= MenuSystemStateGetMenuHandles mDevice
+	# menus						= menuSystemStateGetMenuHandles mDevice
 	# (mHs,menus)				= menuHandlesGetMenus menus
 	# (found,mState,mHs)		= getMState menuId mHs
 	# menus						= menuHandlesSetMenus mHs menus
-	# ioState					= IOStSetDevice (MenuSystemState menus) ioState
+	# ioState					= ioStSetDevice (MenuSystemState menus) ioState
 	| found
 		= (Just {mRep=mState,mTb=0},ioState)
 	| otherwise
@@ -130,11 +130,11 @@ where
 
 getParentMenu :: !Id !(IOSt .l) -> (!Maybe MState, !IOSt .l)
 getParentMenu itemId ioState
-	# (maybeParent,ioState)	= IOStGetIdParent itemId ioState
+	# (maybeParent,ioState)	= ioStGetIdParent itemId ioState
 	| isNothing maybeParent
 		= (Nothing,ioState)
 	# parent				= fromJust maybeParent
-	# (ioId,ioState)		= IOStGetIOId ioState
+	# (ioId,ioState)		= ioStGetIOId ioState
 	| ioId==parent.idpIOId && parent.idpDevice==MenuDevice
 		= getMenu parent.idpId ioState
 	| otherwise
@@ -142,23 +142,23 @@ getParentMenu itemId ioState
 
 setMenu :: !Id !(IdFun *MState) !(IOSt .l) -> IOSt .l
 setMenu menuId f ioState
-	# (ok,ioState)				= IOStHasDevice MenuDevice ioState
+	# (ok,ioState)				= ioStHasDevice MenuDevice ioState
 	| not ok
 		= ioState
-	# (osdinfo,ioState)			= IOStGetOSDInfo ioState
+	# (osdinfo,ioState)			= ioStGetOSDInfo ioState
 	  maybeOSMenuBar			= getOSDInfoOSMenuBar osdinfo
 	| isNothing maybeOSMenuBar	// This condition should never occur
-		= StdMenuElementFatalError "setMenu" "OSMenuBar could not be retrieved from OSDInfo"
+		= stdMenuElementFatalError "setMenu" "OSMenuBar could not be retrieved from OSDInfo"
 	# osMenuBar					= fromJust maybeOSMenuBar
-	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
+	# (found,mDevice,ioState)	= ioStGetDevice MenuDevice ioState
 	| not found					// This condition should never occur
-		= StdMenuElementFatalError "setMenu" "MenuSystemState could not be retrieved from IOSt"
+		= stdMenuElementFatalError "setMenu" "MenuSystemState could not be retrieved from IOSt"
 	| otherwise
-		# menus					= MenuSystemStateGetMenuHandles mDevice
+		# menus					= menuSystemStateGetMenuHandles mDevice
 		# (mHs,menus)			= menuHandlesGetMenus menus
 		# (mHs,ioState)			= accIOToolbox (setMState osMenuBar menuId f mHs) ioState
 		# menus					= menuHandlesSetMenus mHs menus
-		# ioState				= IOStSetDevice (MenuSystemState menus) ioState
+		# ioState				= ioStSetDevice (MenuSystemState menus) ioState
 		= ioState
 where
 	setMState :: !OSMenuBar !Id !(IdFun *MState) !*[MenuStateHandle .pst] !*OSToolbox -> (!*[MenuStateHandle .pst],!*OSToolbox)
@@ -168,7 +168,7 @@ where
 			# (msH`,msH)		= retrieveMenuHandle` msH
 			# {mRep=msH`,mTb=tb}= f {mRep=msH`,mTb=tb}
 			# msH				= insertMenuHandle` msH` msH
-			# tb				= DrawMenuBar osMenuBar tb
+			# tb				= osDrawMenuBar osMenuBar tb
 			= ([msH:msHs],tb)
 		| otherwise
 			# (msHs,tb)			= setMState osMenuBar menuId f msHs tb
@@ -181,25 +181,25 @@ where
 
 enableMenuElements :: ![Id] !(IOSt .l) -> IOSt .l
 enableMenuElements ids ioState
-	# (ioId,ioState)		= IOStGetIOId ioState
-	# (idparents,ioState)	= IOStGetIdParents ids ioState
-	  ids_mIds				= FilterMap (isOkMenuElementId ioId) (zip2 ids idparents)
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (idparents,ioState)	= ioStGetIdParents ids ioState
+	  ids_mIds				= filterMap (isOkMenuElementId ioId) (zip2 ids idparents)
 	  ids_mIds				= gatherMenuIds ids_mIds
 	| isEmpty ids_mIds
 		= ioState
 	| otherwise
-		= StrictSeq [setMenu mId (changeMenuItemsSelect (map (\id->(id,True)) ids)) \\ (ids,mId)<-ids_mIds] ioState
+		= strictSeq [setMenu mId (changeMenuItemsSelect (map (\id->(id,True)) ids)) \\ (ids,mId)<-ids_mIds] ioState
 
 disableMenuElements :: ![Id] !(IOSt .l) -> IOSt .l
 disableMenuElements ids ioState
-	# (ioId,ioState)		= IOStGetIOId ioState
-	# (idparents,ioState)	= IOStGetIdParents ids ioState
-	  ids_mIds				= FilterMap (isOkMenuElementId ioId) (zip2 ids idparents)
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (idparents,ioState)	= ioStGetIdParents ids ioState
+	  ids_mIds				= filterMap (isOkMenuElementId ioId) (zip2 ids idparents)
 	  ids_mIds				= gatherMenuIds ids_mIds
 	| isEmpty ids_mIds
 		= ioState
 	| otherwise
-		= StrictSeq [setMenu mId (changeMenuItemsSelect (map (\id->(id,False)) ids)) \\ (ids,mId)<-ids_mIds] ioState
+		= strictSeq [setMenu mId (changeMenuItemsSelect (map (\id->(id,False)) ids)) \\ (ids,mId)<-ids_mIds] ioState
 
 changeMenuItemsSelect :: ![(Id,Bool)] !*MState -> *MState
 changeMenuItemsSelect idSelects mState
@@ -208,8 +208,8 @@ where
 	setItemAbility :: !Bool !OSMenu !Int !MenuElementHandle` !*OSToolbox -> (!MenuElementHandle`,!*OSToolbox)
 	
 	setItemAbility enabled menu itemNr (SubMenuHandle` itemH=:{mSubHandle`}) tb
-		| enabled	= (submenu,OSEnableMenuItem  menu mSubHandle` tb)
-		| otherwise	= (submenu,OSDisableMenuItem menu mSubHandle` tb)
+		| enabled	= (submenu,osEnableMenuItem  menu mSubHandle` tb)
+		| otherwise	= (submenu,osDisableMenuItem menu mSubHandle` tb)
 	where
 		submenu		= SubMenuHandle` {itemH & mSubSelect`=enabled}
 	
@@ -222,18 +222,18 @@ where
 		enableAbleItems :: !OSMenu ![MenuElementHandle`] !Int !*OSToolbox -> *OSToolbox
 		enableAbleItems menu [MenuItemHandle` itemH=:{mItemSelect`,mOSMenuItem`}:itemHs] itemNr tb
 			# tb			= enableAbleItems menu itemHs (itemNr+1) tb
-			| mItemSelect`	= OSEnableMenuItem menu mOSMenuItem` tb
+			| mItemSelect`	= osEnableMenuItem menu mOSMenuItem` tb
 			| otherwise		= tb
 		enableAbleItems _ _ _ tb
 			= tb
 		
 		disableAllItems :: !OSMenu ![MenuElementHandle`] !Int !*OSToolbox -> *OSToolbox
 		disableAllItems menu itemHs itemNr tb
-			= StateMap2 (\(MenuItemHandle` {mOSMenuItem`}) tb->OSDisableMenuItem menu mOSMenuItem` tb) itemHs tb
+			= stateMap2 (\(MenuItemHandle` {mOSMenuItem`}) tb->osDisableMenuItem menu mOSMenuItem` tb) itemHs tb
 	
 	setItemAbility enabled menu itemNr (MenuItemHandle` itemH=:{mOSMenuItem`}) tb
-		| enabled	= (menuitem,OSEnableMenuItem  menu mOSMenuItem` tb)
-		| otherwise	= (menuitem,OSDisableMenuItem menu mOSMenuItem` tb)
+		| enabled	= (menuitem,osEnableMenuItem  menu mOSMenuItem` tb)
+		| otherwise	= (menuitem,osDisableMenuItem menu mOSMenuItem` tb)
 		where
 			menuitem= MenuItemHandle` {itemH & mItemSelect`=enabled}
 	
@@ -245,23 +245,23 @@ where
 
 markMenuItems :: ![Id] !(IOSt .l) -> IOSt .l
 markMenuItems ids ioState
-	# (ioId,ioState)		= IOStGetIOId ioState
-	# (idparents,ioState)	= IOStGetIdParents ids ioState
-	  ids_mIds				= FilterMap (isOkMenuElementId ioId) (zip2 ids idparents)
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (idparents,ioState)	= ioStGetIdParents ids ioState
+	  ids_mIds				= filterMap (isOkMenuElementId ioId) (zip2 ids idparents)
 	  ids_mIds				= gatherMenuIds ids_mIds
 	| isEmpty ids_mIds		= ioState
-	| otherwise				= StrictSeq [setMenu mId (changeMenuItemsMark (map (\id->(id,True)) ids)) \\ (ids,mId)<-ids_mIds] ioState
+	| otherwise				= strictSeq [setMenu mId (changeMenuItemsMark (map (\id->(id,True)) ids)) \\ (ids,mId)<-ids_mIds] ioState
 
 unmarkMenuItems :: ![Id] !(IOSt .l) -> IOSt .l
 unmarkMenuItems ids ioState
-	# (ioId,ioState)		= IOStGetIOId ioState
-	# (idparents,ioState)	= IOStGetIdParents ids ioState
-	  ids_mIds				= FilterMap (isOkMenuElementId ioId) (zip2 ids idparents)
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (idparents,ioState)	= ioStGetIdParents ids ioState
+	  ids_mIds				= filterMap (isOkMenuElementId ioId) (zip2 ids idparents)
 	  ids_mIds				= gatherMenuIds ids_mIds
 	| isEmpty ids_mIds
 		= ioState
 	| otherwise
-		= StrictSeq [setMenu mId (changeMenuItemsMark (map (\id->(id,False)) ids)) \\ (ids,mId)<-ids_mIds] ioState
+		= strictSeq [setMenu mId (changeMenuItemsMark (map (\id->(id,False)) ids)) \\ (ids,mId)<-ids_mIds] ioState
 
 changeMenuItemsMark :: ![(Id,Bool)] !*MState -> *MState
 changeMenuItemsMark idMarks mState
@@ -269,7 +269,7 @@ changeMenuItemsMark idMarks mState
 where
 	setItemMark :: !Bool !OSMenu !Int !MenuElementHandle` !*OSToolbox -> (!MenuElementHandle`,!*OSToolbox)
 	setItemMark marked menu itemNr (MenuItemHandle` itemH) tb
-		= (MenuItemHandle` {itemH & mItemMark`=marked},OSMenuItemCheck marked menu itemH.mOSMenuItem` tb)
+		= (MenuItemHandle` {itemH & mItemMark`=marked},osMenuItemCheck marked menu itemH.mOSMenuItem` tb)
 	setItemMark _ _ _ itemH tb
 		= (itemH,tb)
 
@@ -278,21 +278,21 @@ where
 
 setMenuElementTitles :: ![(Id,Title)] !(IOSt .l) -> IOSt .l
 setMenuElementTitles id_titles ioState
-	# (ioId,ioState)			= IOStGetIOId ioState
+	# (ioId,ioState)			= ioStGetIOId ioState
 	  (ids,_)					= unzip id_titles
-	# (idparents,ioState)		= IOStGetIdParents ids ioState
-	  id_titles_mIds			= FilterMap (isOkMenuElementId ioId) (zip2 id_titles idparents)
+	# (idparents,ioState)		= ioStGetIdParents ids ioState
+	  id_titles_mIds			= filterMap (isOkMenuElementId ioId) (zip2 id_titles idparents)
 	  id_titles_mIds			= gatherMenuIds` id_titles_mIds
 	| isEmpty id_titles_mIds	= ioState
-	| otherwise					= StrictSeq [setMenu mId (changeMenuItems RecurseAll setItemTitle id_titles) \\ (id_titles,mId)<-id_titles_mIds] ioState
+	| otherwise					= strictSeq [setMenu mId (changeMenuItems RecurseAll setItemTitle id_titles) \\ (id_titles,mId)<-id_titles_mIds] ioState
 where
 	setItemTitle :: !Title !OSMenu !Int !MenuElementHandle` !*OSToolbox -> (!MenuElementHandle`,!*OSToolbox)
 	setItemTitle title menu itemNr (SubMenuHandle` itemH) tb
-		= (SubMenuHandle` {itemH & mSubTitle`=title},OSChangeMenuItemTitle menu itemH.mSubHandle` (OSValidateMenuItemTitle title) tb)
+		= (SubMenuHandle` {itemH & mSubTitle`=title},osChangeMenuItemTitle menu itemH.mSubHandle` (osValidateMenuItemTitle title) tb)
 	setItemTitle title menu itemNr (MenuItemHandle` itemH=:{mOSMenuItem`,mItemKey`}) tb
-		= (MenuItemHandle` {itemH & mItemTitle`=title},OSChangeMenuItemTitle menu mOSMenuItem` okTitle tb)
+		= (MenuItemHandle` {itemH & mItemTitle`=title},osChangeMenuItemTitle menu mOSMenuItem` okTitle tb)
 	where
-		validTitle	= OSValidateMenuItemTitle title
+		validTitle	= osValidateMenuItemTitle title
 		okTitle		= case mItemKey` of
 						Just key	-> validTitle +++ "\tCtrl+" +++ toString (toUpper key)
 						_			-> validTitle
@@ -304,8 +304,8 @@ where
 
 selectRadioMenuItem :: !Id !Id !(IOSt .l) -> IOSt .l
 selectRadioMenuItem id itemId ioState
-	# (ioId,ioState)		= IOStGetIOId ioState
-	# (maybeParent,ioState)	= IOStGetIdParent id ioState
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (maybeParent,ioState)	= ioStGetIdParent id ioState
 	| not (fst (isOkMenuElementId ioId (id,maybeParent)))
 		= ioState
 	| otherwise
@@ -319,7 +319,7 @@ where
 		| new==0
 			= (RadioMenuHandle` radioH,tb)
 		| otherwise
-			# (items,(_,tb))= StateMap (setmark menu new) mRadioItems` (1,tb)
+			# (items,(_,tb))= stateMap (setmark menu new) mRadioItems` (1,tb)
 			= (RadioMenuHandle` {radioH & mRadioIndex`=new,mRadioItems`=items},tb)
 	where
 		getRadioMenuItemIndex :: !Id ![MenuElementHandle`] !Index -> Index
@@ -333,7 +333,7 @@ where
 
 setmark :: !OSMenu !Index !MenuElementHandle` !(!Int,!*OSToolbox) -> (!MenuElementHandle`,!(!Int,!*OSToolbox))
 setmark menu new (MenuItemHandle` itemH=:{mOSMenuItem`}) (index,tb)
-	= (MenuItemHandle` {itemH & mItemMark`=marked},(index+1,OSMenuItemCheck marked menu mOSMenuItem` tb))
+	= (MenuItemHandle` {itemH & mItemMark`=marked},(index+1,osMenuItemCheck marked menu mOSMenuItem` tb))
 where
 	marked	= index==new
 
@@ -342,8 +342,8 @@ where
 
 selectRadioMenuIndexItem :: !Id !Index !(IOSt .l) -> IOSt .l
 selectRadioMenuIndexItem id index ioState
-	# (ioId,ioState)		= IOStGetIOId ioState
-	# (maybeParent,ioState)	= IOStGetIdParent id ioState
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (maybeParent,ioState)	= ioStGetIdParent id ioState
 	| not (fst (isOkMenuElementId ioId (id,maybeParent)))
 		= ioState
 	| otherwise
@@ -353,11 +353,11 @@ where
 	selectradiomenuindexitem new menu itemNr (RadioMenuHandle` radioH=:{mRadioIndex`=now,mRadioItems`}) tb
 		| isEmpty mRadioItems`
 			= (RadioMenuHandle` radioH,tb)
-		# new				= SetBetween new 1 (length mRadioItems`)
+		# new				= setBetween new 1 (length mRadioItems`)
 		| new==now
 			= (RadioMenuHandle` radioH,tb)
 		| otherwise
-			# (items,(_,tb))= StateMap (setmark menu new) mRadioItems` (1,tb)
+			# (items,(_,tb))= stateMap (setmark menu new) mRadioItems` (1,tb)
 			= (RadioMenuHandle` {radioH & mRadioIndex`=new,mRadioItems`=items},tb)
 	selectradiomenuindexitem _ _ _ itemH tb
 		= (itemH,tb)
@@ -392,7 +392,7 @@ where
 		| isEmpty changes || isEmpty mItems
 			= (changes,mItems,itemNr,tb)
 		| otherwise
-			# (h,hs)					= HdTl mItems
+			# (h,hs)					= hdtl mItems
 			# (changes,h, itemNr,tb)	= changeMenuItem`  menu recurse change changes h  itemNr tb
 			# (changes,hs,itemNr,tb)	= changeMenuItems` menu recurse change changes hs itemNr tb
 			= (changes,[h:hs],itemNr,tb)
@@ -403,7 +403,7 @@ where
 		changeMenuItem` menu recurse change changes h=:(MenuItemHandle` itemH=:{mItemId`}) itemNr tb
 			# (anItem,(_,x),changes)	= case mItemId` of
 											Nothing	-> (False,(undef,undef),changes)
-											Just id	-> Remove (eqfst2id id) (id,undef) changes
+											Just id	-> remove (eqfst2id id) (id,undef) changes
 			| not anItem
 				= (changes,h,itemNr+1,tb)
 			| otherwise
@@ -413,7 +413,7 @@ where
 		changeMenuItem` menu recurse=:(visitSubMenus,_) change changes h=:(SubMenuHandle` subH=:{mSubHandle`,mSubMenuId`,mSubItems`}) itemNr tb
 			# (anItem,(_,x),changes)	= case mSubMenuId` of
 											Nothing	-> (False,(undef,undef),changes)
-											Just id	-> Remove (eqfst2id id) (id,undef) changes
+											Just id	-> remove (eqfst2id id) (id,undef) changes
 			| not anItem && not visitSubMenus
 				= (changes,h,itemNr+1,tb)
 			# (changes,subItems,_,tb)	= changeMenuItems` mSubHandle` recurse change changes mSubItems` 1 tb
@@ -427,7 +427,7 @@ where
 		changeMenuItem` menu recurse=:(_,visitRadios) change changes h=:(RadioMenuHandle` radioH=:{mRadioId`,mRadioItems`}) itemNr tb
 			# (anItem,(_,x),changes)	= case mRadioId` of
 											Nothing	-> (False,(undef,undef),changes)
-											Just id	-> Remove (eqfst2id id) (id,undef) changes
+											Just id	-> remove (eqfst2id id) (id,undef) changes
 			  nrItems					= length mRadioItems`
 			| not anItem && not visitRadios
 				= (changes,h,itemNr+nrItems,tb)
@@ -454,7 +454,7 @@ statemapMenuElementHandles` cond f s itemHs
 	| cond s || isEmpty itemHs
 		= s
 	| otherwise
-		# (itemH,itemHs)= HdTl itemHs
+		# (itemH,itemHs)= hdtl itemHs
 		# s				= statemapMenuElementHandle`  cond f s itemH
 		# s				= statemapMenuElementHandles` cond f s itemHs
 		= s
@@ -532,9 +532,9 @@ where
 		getradioitemselect (RadioMenuHandle` itemH=:{mRadioId`,mRadioItems`,mRadioIndex`}) ids_selects=:(ids,selects)
 			# (hadId,id,ids)			= case mRadioId` of
 											Nothing	-> (False,undef,ids)
-											Just id	-> Remove ((==) id) id ids
+											Just id	-> remove ((==) id) id ids
 			| not hadId					= (ids,selects)
-			| otherwise					= (ids,snd (Replace (eqfst3id id) (id,mRadioIndex`,selectid) selects))
+			| otherwise					= (ids,snd (creplace (eqfst3id id) (id,mRadioIndex`,selectid) selects))
 		where
 			selectid					= if (mRadioIndex`==0) Nothing mItemId`
 			(MenuItemHandle` {mItemId`})= mRadioItems`!!(mRadioIndex`-1)
@@ -562,25 +562,25 @@ where
 		getmenuitemselect (SubMenuHandle` itemH=:{mSubMenuId`}) (ids,selects)
 			# (hadId,id,ids)	= case mSubMenuId` of
 									Nothing	-> (False,undef,ids)
-									Just id	-> Remove ((==) id) id ids
+									Just id	-> remove ((==) id) id ids
 			  (ids,selects)		= getmenuitemsselect itemH.mSubItems` (ids,selects)
 			| not hadId			= (ids,selects)
-			| otherwise			= (ids,snd (Replace (eqfst3id id) (id,True,if itemH.mSubSelect` Able Unable) selects))
+			| otherwise			= (ids,snd (creplace (eqfst3id id) (id,True,if itemH.mSubSelect` Able Unable) selects))
 		
 		getmenuitemselect (RadioMenuHandle` itemH=:{mRadioId`}) (ids,selects)
 			# (hadId,id,ids)	= case mRadioId` of
 									Nothing	-> (False,undef,ids)
-									Just id	-> Remove ((==) id) id ids
+									Just id	-> remove ((==) id) id ids
 			  (ids,selects)		= getmenuitemsselect itemH.mRadioItems` (ids,selects)
 			| not hadId			= (ids,selects)
-			| otherwise			= (ids,snd (Replace (eqfst3id id) (id,True,if itemH.mRadioSelect` Able Unable) selects))
+			| otherwise			= (ids,snd (creplace (eqfst3id id) (id,True,if itemH.mRadioSelect` Able Unable) selects))
 		
 		getmenuitemselect (MenuItemHandle` itemH=:{mItemId`}) (ids,selects)
 			# (hadId,id,ids)	= case mItemId` of
 									Nothing	-> (False,undef,ids)
-									Just id	-> Remove ((==) id) id ids
+									Just id	-> remove ((==) id) id ids
 			| not hadId			= (ids,selects)
-			| otherwise			= (ids,snd (Replace (eqfst3id id) (id,True,if itemH.mItemSelect` Able Unable) selects))
+			| otherwise			= (ids,snd (creplace (eqfst3id id) (id,True,if itemH.mItemSelect` Able Unable) selects))
 		
 		getmenuitemselect _ ids_selects
 			= ids_selects
@@ -608,9 +608,9 @@ where
 		getmenuitemmark (MenuItemHandle` itemH=:{mItemId`}) (ids,marks)
 			# (hadId,id,ids)	= case mItemId` of
 									Nothing	-> (False,undef,ids)
-									Just id	-> Remove ((==) id) id ids
+									Just id	-> remove ((==) id) id ids
 			| not hadId			= (ids,marks)
-			| otherwise			= (ids,snd (Replace (eqfst3id id) (id,True,if itemH.mItemMark` Mark NoMark) marks))
+			| otherwise			= (ids,snd (creplace (eqfst3id id) (id,True,if itemH.mItemMark` Mark NoMark) marks))
 		
 		getmenuitemmark _ ids_marks
 			= ids_marks
@@ -635,25 +635,25 @@ where
 		getmenuitemtitle (SubMenuHandle` itemH=:{mSubMenuId`}) (ids,titles)
 			# (hadId,id,ids)	= case mSubMenuId` of
 									Nothing	-> (False,undef,ids)
-									Just id	-> Remove ((==) id) id ids
+									Just id	-> remove ((==) id) id ids
 			  (ids,titles)		= getmenuitemstitle itemH.mSubItems` (ids,titles)
 			| not hadId			= (ids,titles)
-			| otherwise			= (ids,snd (Replace (eqfst3id id) (id,True,Just itemH.mSubTitle`) titles))
+			| otherwise			= (ids,snd (creplace (eqfst3id id) (id,True,Just itemH.mSubTitle`) titles))
 		
 		getmenuitemtitle (RadioMenuHandle` itemH=:{mRadioId`}) (ids,titles)
 			# (hadId,id,ids)	= case mRadioId` of
 									Nothing	-> (False,undef,ids)
-									Just id	-> Remove ((==) id) id ids
+									Just id	-> remove ((==) id) id ids
 			  (ids,titles)		= getmenuitemstitle itemH.mRadioItems` (ids,titles)
 			| not hadId			= (ids,titles)
-			| otherwise			= (ids,snd (Replace (eqfst3id id) (id,True,Nothing) titles))
+			| otherwise			= (ids,snd (creplace (eqfst3id id) (id,True,Nothing) titles))
 		
 		getmenuitemtitle (MenuItemHandle` itemH=:{mItemId`}) (ids,titles)
 			# (hadId,id,ids)	= case mItemId` of
 									Nothing	-> (False,undef,ids)
-									Just id	-> Remove ((==) id) id ids
+									Just id	-> remove ((==) id) id ids
 			| not hadId			= (ids,titles)
-			| otherwise			= (ids,snd (Replace (eqfst3id id) (id,True,Just itemH.mItemTitle`) titles))
+			| otherwise			= (ids,snd (creplace (eqfst3id id) (id,True,Just itemH.mItemTitle`) titles))
 		
 		getmenuitemtitle _ ids_titles
 			= ids_titles
@@ -681,9 +681,9 @@ where
 		getmenuitemshortkey (MenuItemHandle` {mItemId`,mItemKey`}) (ids,keys)
 			# (hadId,id,ids)	= case mItemId` of
 									Nothing	-> (False,undef,ids)
-									Just id	-> Remove ((==) id) id ids
+									Just id	-> remove ((==) id) id ids
 			| not hadId			= (ids,keys)
-			| otherwise			= (ids,snd (Replace (eqfst3id id) (id,True,mItemKey`) keys))
+			| otherwise			= (ids,snd (creplace (eqfst3id id) (id,True,mItemKey`) keys))
 		
 		getmenuitemshortkey _ ids_keys
 			= ids_keys

@@ -7,13 +7,13 @@ implementation module StdClipboard
 import	StdFunc, StdList, StdMisc, StdString
 import	osclipboard
 import	StdMaybe
-from	commondef	import FatalError, StrictSeq, StrictSeqList, Remove, Cond
-from	iostate		import PSt, IOSt, getIOToolbox, setIOToolbox, accIOToolbox, IOStGetClipboardState, IOStSetClipboardState, ClipboardState
+from	commondef	import fatalError, strictSeq, strictSeqList, remove, Cond
+from	iostate		import PSt, IOSt, getIOToolbox, setIOToolbox, accIOToolbox, ioStGetClipboardState, ioStSetClipboardState, ClipboardState
 
 
-StdClipboardFatalError :: String String -> .x
-StdClipboardFatalError function error
-	= FatalError function "StdClipboard" error
+stdClipboardFatalError :: String String -> .x
+stdClipboardFatalError function error
+	= fatalError function "StdClipboard" error
 
 
 //	The clipboard item type:
@@ -39,8 +39,8 @@ instance Clipboard {#Char} where
 setClipboard :: ![ClipboardItem] !(PSt .l) -> PSt .l
 setClipboard clipItems pState=:{io}
 	# (tb,ioState)	= getIOToolbox io
-	# tb			= OSinitialiseClipboard tb
-	# tb			= StrictSeq (map clipboardItemToScrap singleItems) tb
+	# tb			= osInitialiseClipboard tb
+	# tb			= strictSeq (map clipboardItemToScrap singleItems) tb
 	# ioState		= setIOToolbox tb ioState
 	= {pState & io=ioState}
 where
@@ -48,7 +48,7 @@ where
 	
 	removeDuplicateClipItems :: ![ClipboardItem] -> [ClipboardItem]
 	removeDuplicateClipItems [item:items]
-		# (_,_,items)	= Remove (eqClipboardType item) undef items
+		# (_,_,items)	= remove (eqClipboardType item) undef items
 		= [item:removeDuplicateClipItems items]
 	where
 		eqClipboardType :: !ClipboardItem !ClipboardItem -> Bool
@@ -60,34 +60,34 @@ where
 	
 	clipboardItemToScrap :: !ClipboardItem !*OSToolbox -> *OSToolbox
 	clipboardItemToScrap (ClipboardString text) tb
-		= OSsetClipboardText text tb
+		= osSetClipboardText text tb
 
 getClipboard :: !(PSt .l) -> (![ClipboardItem],!PSt .l)
 getClipboard pState
 	# (tb,ioState)		= getIOToolbox pState.io
-	# tb				= OSinitialiseClipboard tb
-	# (contents,tb)		= OSgetClipboardContent tb
+	# tb				= osInitialiseClipboard tb
+	# (contents,tb)		= osGetClipboardContent tb
 	  contents			= filter ((==) OSClipboardText) contents
-	# (clipItems,tb)	= StrictSeqList (map scrapToClipboardItem contents) tb
-	# (cbs,ioState)		= IOStGetClipboardState ioState
-	# (version,tb)		= OSgetClipboardVersion cbs.cbsCount tb
-	# ioState			= IOStSetClipboardState {cbs & cbsCount=version} ioState
+	# (clipItems,tb)	= strictSeqList (map scrapToClipboardItem contents) tb
+	# (cbs,ioState)		= ioStGetClipboardState ioState
+	# (version,tb)		= osGetClipboardVersion cbs.cbsCount tb
+	# ioState			= ioStSetClipboardState {cbs & cbsCount=version} ioState
 	# ioState			= setIOToolbox tb ioState
 	= (clipItems,{pState & io=ioState})
 where
 	scrapToClipboardItem :: !Int !*OSToolbox -> (!ClipboardItem,!*OSToolbox)
 	scrapToClipboardItem OSClipboardText tb
-		# (text,tb)	= OSgetClipboardText tb
+		# (text,tb)	= osGetClipboardText tb
 		= (ClipboardString text,tb)
 	scrapToClipboardItem type tb
-		= StdClipboardFatalError "getClipboard" ("unimplemented clipboard content of type: "+++toString type)
+		= stdClipboardFatalError "getClipboard" ("unimplemented clipboard content of type: "+++toString type)
 
 clipboardHasChanged :: !(PSt .l) -> (!Bool,!PSt .l)
 clipboardHasChanged pState
-	# (cbs,ioState)		= IOStGetClipboardState pState.io
+	# (cbs,ioState)		= ioStGetClipboardState pState.io
 	  oldCount			= cbs.cbsCount
 	# (tb,ioState)		= getIOToolbox ioState
-	# tb				= OSinitialiseClipboard tb
-	# (newCount,tb)		= OSgetClipboardVersion oldCount tb
+	# tb				= osInitialiseClipboard tb
+	# (newCount,tb)		= osGetClipboardVersion oldCount tb
 	# ioState			= setIOToolbox tb ioState
 	= (oldCount<>newCount,{pState & io=ioState})

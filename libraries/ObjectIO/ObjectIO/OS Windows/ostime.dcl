@@ -7,22 +7,22 @@ import ostoolbox
 
 ::	OSTime
 
-OSMaxTime :: OSTime
+osMaxTime :: OSTime
 
-OSGetTime			::			!*OSToolbox -> (!OSTime,!*OSToolbox)
-//	OSGetTime returns the current OS time
+osGetTime			::			!*OSToolbox -> (!OSTime,!*OSToolbox)
+//	osGetTime returns the current OS time
 
-OSWait				:: !Int	.x	!*OSToolbox -> (.x,		!*OSToolbox)
-//	OSWait waits atleast the given time (in milliseconds).
+osWait				:: !Int	.x	!*OSToolbox -> (.x,		!*OSToolbox)
+//	osWait waits atleast the given time (in milliseconds).
 
-OSGetBlinkInterval	::			!*OSToolbox -> (!Int,	!*OSToolbox)
-//	OSGetBlinkInterval returns the recommended blink interval time of a cursor (in milliseconds).
+osGetBlinkInterval	::			!*OSToolbox -> (!Int,	!*OSToolbox)
+//	osGetBlinkInterval returns the recommended blink interval time of a cursor (in milliseconds).
 
-OSGetCurrentTime	::			!*OSToolbox -> (!(!Int,!Int,!Int),!*OSToolbox)
-//	OSGetCurrentTime returns current (hours,minutes,seconds).
+osGetCurrentTime	::			!*OSToolbox -> (!(!Int,!Int,!Int),!*OSToolbox)
+//	osGetCurrentTime returns current (hours,minutes,seconds).
 
-OSGetCurrentDate	::			!*OSToolbox -> (!(!Int,!Int,!Int,!Int),!*OSToolbox)
-//	OSGetCurrentTime returns current (year,month,day,day_of_week).
+osGetCurrentDate	::			!*OSToolbox -> (!(!Int,!Int,!Int,!Int),!*OSToolbox)
+//	osGetCurrentTime returns current (year,month,day,day_of_week).
 
 instance -       OSTime		// Calculate difference between arg 1 and arg 2
 instance <       OSTime		// True iff arg 1 < arg 2

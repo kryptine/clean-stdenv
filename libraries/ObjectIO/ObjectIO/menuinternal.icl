@@ -8,13 +8,13 @@ import	StdBool, StdList, StdMisc
 import	osmenu
 from	ostypes		import OSNoWindowPtr
 import	iostate, menuaccess, menuitems, sdisize
-from	commondef	import FatalError, StateMap, RemoveCheck, URemove, UCond, HdTl
+from	commondef	import fatalError, stateMap, removeCheck, uremove, UCond, hdtl
 from	menucreate	import disposeMenuIds, disposeShortcutkeys, disposeSubMenuHandles
 
 
 menuinternalFatalError :: String String -> .x
 menuinternalFatalError function error
-	= FatalError function "menuinternal" error
+	= fatalError function "menuinternal" error
 
 
 //	General rules to access MenuHandles:
@@ -24,23 +24,23 @@ changeMenuSystemState :: !Bool
 						 !(IOSt .l)
 						-> IOSt .l
 changeMenuSystemState redrawMenus f ioState
-	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
+	# (found,mDevice,ioState)	= ioStGetDevice MenuDevice ioState
 	| not found
 		= ioState
-	# (osdinfo,ioState)			= IOStGetOSDInfo ioState
+	# (osdinfo,ioState)			= ioStGetOSDInfo ioState
 	  maybeOSMenuBar			= getOSDInfoOSMenuBar osdinfo
 	| isNothing maybeOSMenuBar	// This condition should never hold
 		= menuinternalFatalError "changeMenuSystemState" "could not retrieve OSMenuBar from OSDInfo"
 	# osMenuBar					= fromJust maybeOSMenuBar
 	# (tb,ioState)				= getIOToolbox ioState
-	  menus						= MenuSystemStateGetMenuHandles mDevice
+	  menus						= menuSystemStateGetMenuHandles mDevice
 	# (menus,tb)				= f osMenuBar menus tb
 	| not redrawMenus
 		# ioState				= setIOToolbox tb ioState
-		= IOStSetDevice (MenuSystemState menus) ioState
+		= ioStSetDevice (MenuSystemState menus) ioState
 	| otherwise
-		# ioState				= setIOToolbox (DrawMenuBar osMenuBar tb) ioState
-		= IOStSetDevice (MenuSystemState menus) ioState
+		# ioState				= setIOToolbox (osDrawMenuBar osMenuBar tb) ioState
+		= ioStSetDevice (MenuSystemState menus) ioState
 
 accessMenuSystemState :: !Bool
 						 !(OSMenuBar -> u:x -> u:((MenuHandles (PSt .l)) -> u:(*OSToolbox -> *(u:x,MenuHandles (PSt .l),*OSToolbox))))
@@ -48,23 +48,23 @@ accessMenuSystemState :: !Bool
 						 !(IOSt .l)
 				  -> *(u:x,!IOSt .l)
 accessMenuSystemState redrawMenus f x ioState
-	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
+	# (found,mDevice,ioState)	= ioStGetDevice MenuDevice ioState
 	| not found
 		= (x,ioState)
-	# (osdinfo,ioState)			= IOStGetOSDInfo ioState
+	# (osdinfo,ioState)			= ioStGetOSDInfo ioState
 	  maybeOSMenuBar			= getOSDInfoOSMenuBar osdinfo
 	| isNothing maybeOSMenuBar	// This condition should never hold
 		= menuinternalFatalError "accessMenuSystemState" "could not retrieve OSMenuBar from OSDInfo"
 	# osMenuBar					= fromJust maybeOSMenuBar
 	# (tb,ioState)				= getIOToolbox ioState
-	  menus						= MenuSystemStateGetMenuHandles mDevice
+	  menus						= menuSystemStateGetMenuHandles mDevice
 	# (x,menus,tb)				= f osMenuBar x menus tb
 	| not redrawMenus
 		# ioState				= setIOToolbox tb ioState
-		= (x,IOStSetDevice (MenuSystemState menus) ioState)
+		= (x,ioStSetDevice (MenuSystemState menus) ioState)
 	| otherwise
-		# ioState				= setIOToolbox (DrawMenuBar osMenuBar tb) ioState
-		= (x,IOStSetDevice (MenuSystemState menus) ioState)
+		# ioState				= setIOToolbox (osDrawMenuBar osMenuBar tb) ioState
+		= (x,ioStSetDevice (MenuSystemState menus) ioState)
 
 
 /*	Closing a menu.
@@ -74,41 +74,41 @@ accessMenuSystemState redrawMenus f x ioState
 */
 closemenu :: !Id !(IOSt .l) -> IOSt .l
 closemenu id ioState
-	# (osdInfo,ioState)			= IOStGetOSDInfo ioState
+	# (osdInfo,ioState)			= ioStGetOSDInfo ioState
 	| getOSDInfoDocumentInterface osdInfo==NDI
 		= ioState
 	# maybeOSMenuBar			= getOSDInfoOSMenuBar osdInfo
 	| isNothing maybeOSMenuBar
 		= menuinternalFatalError "closemenu" "could not retrieve OSMenuBar from OSDInfo"
-	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
+	# (found,mDevice,ioState)	= ioStGetDevice MenuDevice ioState
 	| not found
 		= ioState
-	# mHs						= MenuSystemStateGetMenuHandles mDevice
+	# mHs						= menuSystemStateGetMenuHandles mDevice
 	  (menus,mHs)				= menuHandlesGetMenus mHs
-	  (found,mH,menus)			= URemove (isMenuWithThisId id) undef menus
+	  (found,mH,menus)			= uremove (isMenuWithThisId id) undef menus
 	| not found
-		= IOStSetDevice (MenuSystemState {mHs & mMenus=menus}) ioState
+		= ioStSetDevice (MenuSystemState {mHs & mMenus=menus}) ioState
 	# (menu,mH)					= menuStateHandleGetHandle mH
 	  (keys,mHs)				= menuHandlesGetKeys mHs
 	# (sdiSize1,sdiPtr,ioState)	= getSDIWindowSize ioState
 	# (tb,ioState)				= getIOToolbox ioState
 	# (mH,(keys,tb))			= filterShortcutkeys osdInfo mH keys tb
-	# (rt,ioState)				= IOStGetReceiverTable ioState
-	# (it,ioState)				= IOStGetIdTable ioState
+	# (rt,ioState)				= ioStGetReceiverTable ioState
+	# (it,ioState)				= ioStGetIdTable ioState
 	  (_,it)					= removeIdFromIdTable id it
-	# (ioid,ioState)			= IOStGetIOId ioState
+	# (ioid,ioState)			= ioStGetIOId ioState
 	  (mH,(rt,it))				= closeMenuIds ioid mH (rt,it)
-	# ioState					= IOStSetIdTable it ioState
-	# ioState					= IOStSetReceiverTable rt ioState
+	# ioState					= ioStSetIdTable it ioState
+	# ioState					= ioStSetReceiverTable rt ioState
 	# (_,tb)					= closeSubMenus mH tb
 	  osMenuBar					= fromJust maybeOSMenuBar
-	# (osMenuBar,tb)			= OSMenuRemove menu osMenuBar tb
-	# tb						= DrawMenuBar osMenuBar tb
+	# (osMenuBar,tb)			= osMenuRemove menu osMenuBar tb
+	# tb						= osDrawMenuBar osMenuBar tb
 	  osdInfo					= setOSDInfoOSMenuBar osMenuBar osdInfo
-	# ioState					= IOStSetOSDInfo osdInfo ioState
+	# ioState					= ioStSetOSDInfo osdInfo ioState
 	  mHs						= {mHs & mMenus=menus,mKeys=keys}
 	# ioState					= setIOToolbox tb ioState
-	# ioState					= IOStSetDevice (MenuSystemState mHs) ioState
+	# ioState					= ioStSetDevice (MenuSystemState mHs) ioState
 	# (sdiSize2,_,ioState)		= getSDIWindowSize ioState
 	| sdiSize1==sdiSize2
 		= ioState
@@ -123,17 +123,17 @@ where
 
 closeSubMenus :: !(MenuStateHandle .pst) !*OSToolbox -> (!MenuStateHandle .pst,!*OSToolbox)
 closeSubMenus (MenuLSHandle mH=:{mlsHandle=mlsH=:{mItems=itemHs}}) tb
-	# (itemHs,tb)	= StateMap disposeSubMenuHandles itemHs tb
+	# (itemHs,tb)	= stateMap disposeSubMenuHandles itemHs tb
 	= (MenuLSHandle {mH & mlsHandle={mlsH & mItems=itemHs}},tb)
 
 closeMenuIds :: !SystemId !(MenuStateHandle .pst) !*(!*ReceiverTable,!*IdTable) -> (!MenuStateHandle .pst,!*(!*ReceiverTable,!*IdTable))
 closeMenuIds pid (MenuLSHandle mH=:{mlsHandle=mlsH=:{mItems=itemHs}}) (rt,it)
-	# (itemHs,ts)	= StateMap (disposeMenuIds pid) itemHs (rt,it)
+	# (itemHs,ts)	= stateMap (disposeMenuIds pid) itemHs (rt,it)
 	= (MenuLSHandle {mH & mlsHandle={mlsH & mItems=itemHs}},ts)
 
 filterShortcutkeys :: !OSDInfo !(MenuStateHandle .pst) ![Char] !*OSToolbox -> (!MenuStateHandle .pst,!(![Char],!*OSToolbox))
 filterShortcutkeys osdInfo (MenuLSHandle mH=:{mlsHandle=mlsH=:{mItems=itemHs}}) keys tb
-	# (itemHs,keys_tb)	= StateMap (disposeShortcutkeys framePtr) itemHs (keys,tb)
+	# (itemHs,keys_tb)	= stateMap (disposeShortcutkeys framePtr) itemHs (keys,tb)
 	= (MenuLSHandle {mH & mlsHandle={mlsH & mItems=itemHs}},keys_tb)
 where
 	framePtr			= case (getOSDInfoOSInfo osdInfo) of
@@ -171,25 +171,25 @@ where
 		setSelectMenuHandle :: !Int !SelectState !OSMenuBar !Bool ![Id] !(MenuStateHandle .ps) !*OSToolbox
 															  -> (![Id], !MenuStateHandle .ps, !*OSToolbox)
 		setSelectMenuHandle zIndex select osMenuBar systemAble ids msH=:(MenuLSHandle mlsH=:{mlsHandle=mH=:{mMenuId}}) tb
-			# (containsId,ids)	= RemoveCheck mMenuId ids
+			# (containsId,ids)	= removeCheck mMenuId ids
 			| not containsId	= (ids,msH,tb)
 			# msH				= MenuLSHandle {mlsH & mlsHandle={mH & mSelect=enabled select}}
 			| not systemAble	= (ids,msH,tb)
-			| enabled select	= (ids,msH,OSEnableMenu  zIndex osMenuBar tb)
-			| otherwise			= (ids,msH,OSDisableMenu zIndex osMenuBar tb)
+			| enabled select	= (ids,msH,osEnableMenu  zIndex osMenuBar tb)
+			| otherwise			= (ids,msH,osDisableMenu zIndex osMenuBar tb)
 
 
 //	Removing menu elements from (sub/radio)menus:
 
 closemenuelements :: !Id ![Id] !(IOSt .l) -> IOSt .l
 closemenuelements mId ids ioState
-	# (pid,ioState)		= IOStGetIOId ioState
-	# (rt,ioState)		= IOStGetReceiverTable ioState
-	# (it,ioState)		= IOStGetIdTable ioState
-	# (osdInfo,ioState)	= IOStGetOSDInfo ioState
+	# (pid,ioState)		= ioStGetIOId ioState
+	# (rt,ioState)		= ioStGetReceiverTable ioState
+	# (it,ioState)		= ioStGetIdTable ioState
+	# (osdInfo,ioState)	= ioStGetOSDInfo ioState
 	# ((rt,it),ioState)	= accessMenuSystemState True (removeMenusItems osdInfo mId ids pid) (rt,it) ioState
-	# ioState			= IOStSetIdTable it ioState
-	# ioState			= IOStSetReceiverTable rt ioState
+	# ioState			= ioStSetIdTable it ioState
+	# ioState			= ioStSetReceiverTable rt ioState
 	= ioState
 
 
@@ -200,12 +200,12 @@ NotRemoveSpecialMenuElements:==	False		// For closemenuindexelements: do not rem
 
 closemenuindexelements :: !Bool !Bool !SystemId !(!Id,!Maybe Id) ![Index] !(IOSt .l) -> IOSt .l
 closemenuindexelements removeSpecialElements fromRadioMenu pid loc indices ioState
-	# (rt,ioState)		= IOStGetReceiverTable ioState
-	# (it,ioState)		= IOStGetIdTable ioState
-	# (osdInfo,ioState)	= IOStGetOSDInfo ioState
+	# (rt,ioState)		= ioStGetReceiverTable ioState
+	# (it,ioState)		= ioStGetIdTable ioState
+	# (osdInfo,ioState)	= ioStGetOSDInfo ioState
 	# ((rt,it),ioState)	= accessMenuSystemState True (removeMenusIndexItems osdInfo removeSpecialElements fromRadioMenu loc indices pid) (rt,it) ioState
-	# ioState			= IOStSetIdTable it ioState
-	# ioState			= IOStSetReceiverTable rt ioState
+	# ioState			= ioStSetIdTable it ioState
+	# ioState			= ioStSetReceiverTable rt ioState
 	= ioState
 
 
@@ -226,7 +226,7 @@ where
 			| id==menuId
 				# (mH,msH)	= menuStateHandleGetHandle msH
 				  msH		= menuStateHandleSetTitle title msH
-				# tb		= OSChangeMenuTitle osMenuBar mH title tb
+				# tb		= osChangeMenuTitle osMenuBar mH title tb
 				= ([msH:msHs],tb)
 			| otherwise
 				# (msHs,tb)	= setOSMenusTitle id title osMenuBar msHs tb

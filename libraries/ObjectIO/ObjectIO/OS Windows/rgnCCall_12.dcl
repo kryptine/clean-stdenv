@@ -17,8 +17,8 @@ RGN_COPY			:== 5
 
 
 // PA: operations to create, modify and destroy regions.
-WinCreateRectRgn		:: !Int !Int !Int !Int !*OSToolbox -> (!HRGN,!*OSToolbox)
-WinCreatePolygonRgn		:: !Int !Int !Int !*OSToolbox -> (!HRGN,!*OSToolbox)
-WinSetRgnToRect			:: !Int !Int !Int !Int !HRGN !*OSToolbox -> (!HRGN,!*OSToolbox)
-WinCombineRgn			:: !HRGN !HRGN !HRGN !Int !*OSToolbox -> (!HRGN,!*OSToolbox)
-WinGetRgnBox			:: !HRGN !*OSToolbox -> (!Int,!Int,!Int,!Int,!Bool,!Bool,!*OSToolbox)
+winCreateRectRgn		:: !Int !Int !Int !Int !*OSToolbox -> (!HRGN,!*OSToolbox)
+winCreatePolygonRgn		:: !Int !Int !Int !*OSToolbox -> (!HRGN,!*OSToolbox)
+winSetRgnToRect			:: !Int !Int !Int !Int !HRGN !*OSToolbox -> (!HRGN,!*OSToolbox)
+winCombineRgn			:: !HRGN !HRGN !HRGN !Int !*OSToolbox -> (!HRGN,!*OSToolbox)
+winGetRgnBox			:: !HRGN !*OSToolbox -> (!Int,!Int,!Int,!Int,!Bool,!Bool,!*OSToolbox)

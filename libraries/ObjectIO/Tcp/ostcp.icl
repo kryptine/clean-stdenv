@@ -12,7 +12,7 @@ import	code from "cCrossCallTCP_121.obj"	// PA: moved from ostoolbox
 // PA: moved from ostoolbox:
 OSinstallTCP :: !*OSToolbox -> *OSToolbox
 OSinstallTCP tb
-	= snd (IssueCleanRequest2 (\_ tb->(Return0Cci,tb)) (Rq0Cci CcRqCREATETCPWINDOW) (osInstallTCP tb))
+	= snd (issueCleanRequest2 (\_ tb->(return0Cci,tb)) (Rq0Cci CcRqCREATETCPWINDOW) (osInstallTCP tb))
 
 osInstallTCP :: !*OSToolbox -> *OSToolbox
 osInstallTCP _

@@ -8,6 +8,6 @@ definition module controldefaccess
 import	StdControlAttribute
 
 
-ControlAttributesHaveThisId	:: !Id ![ControlAttribute .st]	-> Bool
+controlAttributesHaveThisId	:: !Id ![ControlAttribute .st]	-> Bool
 
 sameControlAttribute		:: !(ControlAttribute .st) !(ControlAttribute .st) -> Bool

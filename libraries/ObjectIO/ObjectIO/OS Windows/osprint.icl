@@ -59,15 +59,15 @@ printSetupDialogBoth :: !PrintSetup !(Maybe *Context) -> (!PrintSetup, !Maybe *C
 printSetupDialogBoth print_setup=:{devmode,device,driver,output} mb_context
 	# (os, mb_context)	= EnvGetOS mb_context
 	# os				= os_installprinter os
-	  (devmodePtr,os) = WinMakeCString devmode os
-	  (devicePtr,os) = WinMakeCString device os
-	  (driverPtr,os) = WinMakeCString driver os
-	  (outputPtr,os) = WinMakeCString output os
+	  (devmodePtr,os) = winMakeCString devmode os
+	  (devicePtr,os) = winMakeCString device os
+	  (driverPtr,os) = winMakeCString driver os
+	  (outputPtr,os) = winMakeCString output os
 	  (ok, pdPtr, mb_context, os) = CCPrintSetupDialog mb_context (size devmode) devmodePtr devicePtr driverPtr outputPtr os
-	  os = WinReleaseCString devmodePtr os
-	  os = WinReleaseCString devicePtr os
-	  os = WinReleaseCString driverPtr os
-	  os = WinReleaseCString outputPtr os
+	  os = winReleaseCString devmodePtr os
+	  os = winReleaseCString devicePtr os
+	  os = winReleaseCString driverPtr os
+	  os = winReleaseCString outputPtr os
 	| ok==0
 		# os = release_memory_handles pdPtr os
 		= (print_setup, EnvSetOS os mb_context)
@@ -238,17 +238,17 @@ zeroOrigin :== zero
 getPrintInfo :: !.Bool !.Bool .PrintSetup *(Maybe *Context) !*OSToolbox
 			 -> *(Int,Int,.PrintInfo,*Maybe *Context,!.OSToolbox);
 getPrintInfo doDialog emulateScreen {devmode, device, driver, output} mb_context os
-	# (devmodePtr,os) = WinMakeCString devmode os
-	  (devicePtr,os) = WinMakeCString device os
-	  (driverPtr,os) = WinMakeCString driver os
-	  (outputPtr,os) = WinMakeCString output os
+	# (devmodePtr,os) = winMakeCString devmode os
+	  (devicePtr,os) = winMakeCString device os
+	  (driverPtr,os) = winMakeCString driver os
+	  (outputPtr,os) = winMakeCString output os
 	  ( err, data, pdPtr, mb_context, os)
 	  		= CCgetDC	(if doDialog 1 0) (if emulateScreen 2 0)	// these two bits will be packed into one word in CCgetDC
 						(size devmode) devmodePtr devicePtr driverPtr outputPtr mb_context os
-	  os = WinReleaseCString devmodePtr os
-	  os = WinReleaseCString devicePtr os
-	  os = WinReleaseCString driverPtr os
-	  os = WinReleaseCString outputPtr os
+	  os = winReleaseCString devmodePtr os
+	  os = winReleaseCString devicePtr os
+	  os = winReleaseCString driverPtr os
+	  os = winReleaseCString outputPtr os
 	| doDialog && (err==(-1))
 		# (setup_strings, os) = get_printSetup_with_PRINTDLG pdPtr os
 		  os = release_memory_handles pdPtr os
@@ -284,7 +284,7 @@ CCgetDC doDialog emulateScreen devmodeSize devmodePtr devicePtr driverPtr output
 CCgetDC doDialog emulateScreen devmodeSize devmodePtr devicePtr driverPtr outputPtr (Just context) os
 	# createcci = Rq6Cci 	CcRqGET_PRINTER_DC (doDialog bitor emulateScreen) devmodeSize
 							devmodePtr devicePtr driverPtr outputPtr
-	# (rcci, context, os)  = IssueCleanRequest handleContextOSEvent` createcci context os
+	# (rcci, context, os)  = issueCleanRequest handleContextOSEvent` createcci context os
 	= (	rcci.p1, (rcci.p2, rcci.p3, rcci.p4,rcci.p6), rcci.p5,
 ////////err,	 (first,   last,    copies, deviceContext),pdPtr,
 		Just context,os
@@ -296,7 +296,7 @@ CCPrintSetupDialog nothing=:Nothing devmodeSize devmodePtr devicePtr driverPtr o
 	= (ok, pdPtr, nothing, os)
 CCPrintSetupDialog (Just context) devmodeSize devmodePtr devicePtr driverPtr outputPtr os
 	# createcci				= Rq5Cci CcRqDO_PRINT_SETUP devmodeSize devmodePtr devicePtr driverPtr outputPtr
-	  (rcci, context, os)	= IssueCleanRequest handleContextOSEvent` createcci context os
+	  (rcci, context, os)	= issueCleanRequest handleContextOSEvent` createcci context os
 	= (rcci.p1, rcci.p2, Just context, os)
 /* MW was
 CCPrintSetupDialog :: !.Bool .Int .Int .Int .Int .Int !*OSToolbox -> (OkReturn,Int,!.OSToolbox);
@@ -304,8 +304,8 @@ CCPrintSetupDialog True devmodeSize devmodePtr devicePtr driverPtr outputPtr os
 	= printSetup 1 devmodeSize devmodePtr devicePtr driverPtr outputPtr os
 CCPrintSetupDialog False devmodeSize devmodePtr devicePtr driverPtr outputPtr os
 	# createcci = Rq5Cci CcRqDO_PRINT_SETUP devmodeSize devmodePtr devicePtr driverPtr outputPtr
-	  (rcci, os)  = IssueCleanRequest2 (ErrorCallback2 "ERROR in osPrint08") createcci os
-	  (rcci, os)  = IssueCleanRequest2 handleContextOSEvent` createcci os
+	  (rcci, os)  = issueCleanRequest2 (ErrorCallback2 "ERROR in osPrint08") createcci os
+	  (rcci, os)  = issueCleanRequest2 handleContextOSEvent` createcci os
 	= (rcci.p1, rcci.p2, os)
 */
 
@@ -316,7 +316,7 @@ CCstartDoc hdc Nothing os
 	= (err,Nothing,os)
 CCstartDoc hdc (Just context) os
 	# createcci = Rq1Cci CcRqSTARTDOC hdc
-	  (rcci,context, os)  = IssueCleanRequest handleContextOSEvent` createcci context os
+	  (rcci,context, os)  = issueCleanRequest handleContextOSEvent` createcci context os
 	= (rcci.p1, Just context, os)
 
 CCendDoc :: !.HDC !*(Maybe *Context) !*OSToolbox -> *(!*Maybe *Context,!*OSToolbox)
@@ -325,7 +325,7 @@ CCendDoc hdc Nothing os
 	= (Nothing,os)
 CCendDoc hdc (Just context) os
 	# createcci = Rq1Cci CcRqENDDOC hdc
-	  (_,context, os)  = IssueCleanRequest handleContextOSEvent` createcci context os
+	  (_,context, os)  = issueCleanRequest handleContextOSEvent` createcci context os
 	= (Just context,os)
 
 evtlSwitchToOS :: !Int !.Int !*(Maybe *Context) !*OSToolbox -> *(!*Maybe *Context,!.OSToolbox)
@@ -335,10 +335,10 @@ evtlSwitchToOS pageNr hdc (Just context) os
 	# nrStr = toString pageNr
 	# messageText = if (pageNr==0)	""
 									(nrStr+++" page"+++(if (pageNr==1) "" "s")+++" printed")
-	# (textPtr,os) = WinMakeCString messageText os
+	# (textPtr,os) = winMakeCString messageText os
 	# createcci = Rq1Cci CcRqDISPATCH_MESSAGES_WHILE_PRINTING textPtr
-	# (_,context, os)  = IssueCleanRequest handleContextOSEvent` createcci context os
-	# os = WinReleaseCString textPtr os
+	# (_,context, os)  = issueCleanRequest handleContextOSEvent` createcci context os
+	# os = winReleaseCString textPtr os
 	= (Just context, os) 
 
 initPicture :: !.Origin !*(!.OSPictContext,!*OSToolbox) -> *Picture

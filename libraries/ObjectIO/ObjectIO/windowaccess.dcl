@@ -22,12 +22,10 @@ initWindowHandle :: !Title								// the window title
 				 -> *WindowHandle .ls .pst
 
 
-// Mike //
 /*  Access to the particular WindowInfo alternatives (partial functions!).
 */
 getWindowInfoWindowData		:: !WindowInfo -> WindowData
 getWindowInfoGameWindowData	:: !WindowInfo -> GameWindowData
-///
 
 
 /*	Access to the particular WItemInfo alternatives. These functions are partially defined!
@@ -56,10 +54,10 @@ instance toWID Id
 instance toWID Int
 instance toWID WIDS
 
-WIDbyId					:: !WID -> Bool				// WIDbyId   (ById  _)  = True; False
-WIDbyPtr				:: !WID -> Bool				// WIDbyPtr  (ByPtr _)  = True; False
-WIDgetId				:: !WID -> Id				// WIDgetId  (ById  id) = id	(partial function)
-WIDgetPtr				:: !WID -> OSWindowPtr		// WIDgetPtr (ByPtr ptr)= ptr	(partial function)
+widById					:: !WID -> Bool				// WIDbyId   (ById  _)  = True; False
+widByPtr				:: !WID -> Bool				// WIDbyPtr  (ByPtr _)  = True; False
+widGetId				:: !WID -> Id				// WIDgetId  (ById  id) = id	(partial function)
+widGetPtr				:: !WID -> OSWindowPtr		// WIDgetPtr (ByPtr ptr)= ptr	(partial function)
 identifyWIDS			:: !WID !WIDS      -> Bool	// identifyWIDS (ById  id)  {wId}  = id ==wId
 													// identifyWIDS (ByPtr ptr) {wPtr} = ptr==wPtr
 identifyMaybeId			:: !Id !(Maybe Id) -> Bool	// identifyMaybeId id (Just id`) = id==id`

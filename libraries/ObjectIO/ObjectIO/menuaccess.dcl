@@ -41,4 +41,4 @@ menuIdsAreConsistent :: !SystemId !Id !*[MenuElementHandle .ls .pst] !*ReceiverT
 							-> (!Bool,!*[MenuElementHandle .ls .pst],!*ReceiverTable,!*IdTable)
 
 //	Convert a RadioMenuItem to the MenuItemHandle alternative of MenuElementHandle:
-RadioMenuItemToMenuElementHandle :: !(MenuRadioItem *(.ls,.pst)) -> *MenuElementHandle .ls .pst
+radioMenuItemToMenuElementHandle :: !(MenuRadioItem *(.ls,.pst)) -> *MenuElementHandle .ls .pst

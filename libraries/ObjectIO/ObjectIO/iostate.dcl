@@ -61,72 +61,72 @@ emptyIOSt					:: !SystemId !(Maybe SystemId) !(Maybe GUIShare) !DocumentInterfac
 								![ProcessAttribute (PSt .l)] !(IdFun (PSt .l)) !(Maybe SystemId)
 							-> IOSt .l
 
-IOStButtonFreq				:: !Int !Point2 !OSWindowPtr	!(IOSt .l) -> (!Int,!IOSt .l)
-IOStSetDoubleDownDist		:: !DoubleDownDist				!(IOSt .l) -> IOSt .l
-IOStGetInputTrack			:: !(IOSt .l) -> (!Maybe InputTrack,			!IOSt .l)
-IOStGetProcessAttributes	:: !(IOSt .l) -> (![ProcessAttribute (PSt .l)],	!IOSt .l)
-IOStGetInitIO				:: !(IOSt .l) -> (!IdFun (PSt .l),				!IOSt .l)
-IOStClosed					:: !(IOSt .l) -> (!Bool,						!IOSt .l)
-IOStGetRuntimeState			:: !(IOSt .l) -> (!RuntimeState,				!IOSt .l)
-IOStGetIOIsModal			:: !(IOSt .l) -> (!Maybe SystemId,				!IOSt .l)
-IOStGetIdTable				:: !(IOSt .l) -> (!*IdTable,					!IOSt .l)
-IOStGetReceiverTable		:: !(IOSt .l) -> (!*ReceiverTable,				!IOSt .l)
-IOStGetTimerTable			:: !(IOSt .l) -> (!*TimerTable,					!IOSt .l)
-IOStGetOSTime				:: !(IOSt .l) -> (!OSTime,						!IOSt .l)
-IOStGetActivateRequests		:: !(IOSt .l) -> (!ActivateRequests,			!IOSt .l)
-IOStGetEvents				:: !(IOSt .l) -> (!*OSEvents,					!IOSt .l)
-IOStGetWorld				:: !(IOSt .l) -> (!*World,						!IOSt .l)
-IOStGetCProcesses			:: !(IOSt .l) -> (!CProcesses,					!IOSt .l)
-IOStGetProcessStack			:: !(IOSt .l) -> (!ProcessStack,				!IOSt .l)
-IOStGetDocumentInterface	:: !(IOSt .l) -> (!DocumentInterface,			!IOSt .l)
-IOStGetOSDInfo				:: !(IOSt .l) -> (!OSDInfo,						!IOSt .l)
-IOStGetProcessKind			:: !(IOSt .l) -> (!ProcessKind,					!IOSt .l)
-IOStGetIOId					:: !(IOSt .l) -> (!SystemId,					!IOSt .l)
-IOStGetMaxIONr				:: !(IOSt .l) -> (!SystemId,					!IOSt .l)
-IOStNewMaxIONr				:: !(IOSt .l) -> (!SystemId,					!IOSt .l)
-IOStGetParentId				:: !(IOSt .l) -> (!Maybe SystemId,				!IOSt .l)
-IOStGetGUIShare				:: !(IOSt .l) -> (!Maybe GUIShare,				!IOSt .l)
-IOStGetSubProcessIds		:: !(IOSt .l) -> (![SystemId],					!IOSt .l)
-IOStGetIdSeed				:: !(IOSt .l) -> (!Int,							!IOSt .l)
-IOStGetClipboardState		:: !(IOSt .l) -> (!ClipboardState,				!IOSt .l)
-IOStGetOSWindowMetrics		:: !(IOSt .l) -> (!OSWindowMetrics,				!IOSt .l)
-IOStGetDeviceFunctions		:: !(IOSt .l) -> (![DeviceFunctions (PSt .l)],	!IOSt .l)
-IOStGetRcvDisabled			:: !(IOSt .l) -> (!Bool,						!IOSt .l)	/* MW11++ */
+ioStButtonFreq				:: !Int !Point2 !OSWindowPtr	!(IOSt .l) -> (!Int,!IOSt .l)
+ioStSetDoubleDownDist		:: !DoubleDownDist				!(IOSt .l) -> IOSt .l
+ioStGetInputTrack			:: !(IOSt .l) -> (!Maybe InputTrack,			!IOSt .l)
+ioStGetProcessAttributes	:: !(IOSt .l) -> (![ProcessAttribute (PSt .l)],	!IOSt .l)
+ioStGetInitIO				:: !(IOSt .l) -> (!IdFun (PSt .l),				!IOSt .l)
+ioStClosed					:: !(IOSt .l) -> (!Bool,						!IOSt .l)
+ioStGetRuntimeState			:: !(IOSt .l) -> (!RuntimeState,				!IOSt .l)
+ioStGetIOIsModal			:: !(IOSt .l) -> (!Maybe SystemId,				!IOSt .l)
+ioStGetIdTable				:: !(IOSt .l) -> (!*IdTable,					!IOSt .l)
+ioStGetReceiverTable		:: !(IOSt .l) -> (!*ReceiverTable,				!IOSt .l)
+ioStGetTimerTable			:: !(IOSt .l) -> (!*TimerTable,					!IOSt .l)
+ioStGetOSTime				:: !(IOSt .l) -> (!OSTime,						!IOSt .l)
+ioStGetActivateRequests		:: !(IOSt .l) -> (!ActivateRequests,			!IOSt .l)
+ioStGetEvents				:: !(IOSt .l) -> (!*OSEvents,					!IOSt .l)
+ioStGetWorld				:: !(IOSt .l) -> (!*World,						!IOSt .l)
+ioStGetCProcesses			:: !(IOSt .l) -> (!CProcesses,					!IOSt .l)
+ioStGetProcessStack			:: !(IOSt .l) -> (!ProcessStack,				!IOSt .l)
+ioStGetDocumentInterface	:: !(IOSt .l) -> (!DocumentInterface,			!IOSt .l)
+ioStGetOSDInfo				:: !(IOSt .l) -> (!OSDInfo,						!IOSt .l)
+ioStGetProcessKind			:: !(IOSt .l) -> (!ProcessKind,					!IOSt .l)
+ioStGetIOId					:: !(IOSt .l) -> (!SystemId,					!IOSt .l)
+ioStGetMaxIONr				:: !(IOSt .l) -> (!SystemId,					!IOSt .l)
+ioStNewMaxIONr				:: !(IOSt .l) -> (!SystemId,					!IOSt .l)
+ioStGetParentId				:: !(IOSt .l) -> (!Maybe SystemId,				!IOSt .l)
+ioStGetGUIShare				:: !(IOSt .l) -> (!Maybe GUIShare,				!IOSt .l)
+ioStGetSubProcessIds		:: !(IOSt .l) -> (![SystemId],					!IOSt .l)
+ioStGetIdSeed				:: !(IOSt .l) -> (!Int,							!IOSt .l)
+ioStGetClipboardState		:: !(IOSt .l) -> (!ClipboardState,				!IOSt .l)
+ioStGetOSWindowMetrics		:: !(IOSt .l) -> (!OSWindowMetrics,				!IOSt .l)
+ioStGetDeviceFunctions		:: !(IOSt .l) -> (![DeviceFunctions (PSt .l)],	!IOSt .l)
+ioStGetRcvDisabled			:: !(IOSt .l) -> (!Bool,						!IOSt .l)	/* MW11++ */
 
-IOStSetInputTrack			:: !(Maybe InputTrack)				!(IOSt .l) -> IOSt .l
-IOStSetProcessAttributes	:: ![ProcessAttribute (PSt .l)]		!(IOSt .l) -> IOSt .l
-IOStSetInitIO				:: !(IdFun (PSt .l))				!(IOSt .l) -> IOSt .l
-IOStSetRuntimeState			:: !RuntimeState					!(IOSt .l) -> IOSt .l
-IOStSetIOIsModal			:: !(Maybe SystemId)	 			!(IOSt .l) -> IOSt .l
-IOStSetIdTable				:: !*IdTable						!(IOSt .l) -> IOSt .l
-IOStSetReceiverTable		:: !*ReceiverTable					!(IOSt .l) -> IOSt .l
-IOStSetTimerTable			:: !*TimerTable						!(IOSt .l) -> IOSt .l
-IOStSetOSTime				:: !OSTime							!(IOSt .l) -> IOSt .l
-IOStSetActivateRequests		:: !ActivateRequests				!(IOSt .l) -> IOSt .l
-IOStSetEvents				:: !*OSEvents						!(IOSt .l) -> IOSt .l
-IOStSetWorld				:: !*World							!(IOSt .l) -> IOSt .l
-IOStSetCProcesses			:: !CProcesses						!(IOSt .l) -> IOSt .l
-IOStSetProcessStack			:: !ProcessStack					!(IOSt .l) -> IOSt .l
-SelectIOSt					::									!(IOSt .l) -> IOSt .l
-IOStSetOSDInfo				:: !OSDInfo							!(IOSt .l) -> IOSt .l
-IOStSetMaxIONr				:: !SystemId						!(IOSt .l) -> IOSt .l
-IOStSetSubProcessIds		:: ![SystemId]						!(IOSt .l) -> IOSt .l
-IOStSetIdSeed				:: !Int								!(IOSt .l) -> IOSt .l
-IOStSetClipboardState		:: !ClipboardState					!(IOSt .l) -> IOSt .l
-IOStSetDeviceFunctions		:: !(DeviceFunctions (PSt .l))		!(IOSt .l) -> IOSt .l
-IOStRemoveDeviceFunctions	:: !Device							!(IOSt .l) -> IOSt .l
-IOStSetRcvDisabled			:: !Bool							!(IOSt .l) -> IOSt .l /* MW11++*/
+ioStSetInputTrack			:: !(Maybe InputTrack)				!(IOSt .l) -> IOSt .l
+ioStSetProcessAttributes	:: ![ProcessAttribute (PSt .l)]		!(IOSt .l) -> IOSt .l
+ioStSetInitIO				:: !(IdFun (PSt .l))				!(IOSt .l) -> IOSt .l
+ioStSetRuntimeState			:: !RuntimeState					!(IOSt .l) -> IOSt .l
+ioStSetIOIsModal			:: !(Maybe SystemId)	 			!(IOSt .l) -> IOSt .l
+ioStSetIdTable				:: !*IdTable						!(IOSt .l) -> IOSt .l
+ioStSetReceiverTable		:: !*ReceiverTable					!(IOSt .l) -> IOSt .l
+ioStSetTimerTable			:: !*TimerTable						!(IOSt .l) -> IOSt .l
+ioStSetOSTime				:: !OSTime							!(IOSt .l) -> IOSt .l
+ioStSetActivateRequests		:: !ActivateRequests				!(IOSt .l) -> IOSt .l
+ioStSetEvents				:: !*OSEvents						!(IOSt .l) -> IOSt .l
+ioStSetWorld				:: !*World							!(IOSt .l) -> IOSt .l
+ioStSetCProcesses			:: !CProcesses						!(IOSt .l) -> IOSt .l
+ioStSetProcessStack			:: !ProcessStack					!(IOSt .l) -> IOSt .l
+selectIOSt					::									!(IOSt .l) -> IOSt .l
+ioStSetOSDInfo				:: !OSDInfo							!(IOSt .l) -> IOSt .l
+ioStSetMaxIONr				:: !SystemId						!(IOSt .l) -> IOSt .l
+ioStSetSubProcessIds		:: ![SystemId]						!(IOSt .l) -> IOSt .l
+ioStSetIdSeed				:: !Int								!(IOSt .l) -> IOSt .l
+ioStSetClipboardState		:: !ClipboardState					!(IOSt .l) -> IOSt .l
+ioStSetDeviceFunctions		:: !(DeviceFunctions (PSt .l))		!(IOSt .l) -> IOSt .l
+ioStRemoveDeviceFunctions	:: !Device							!(IOSt .l) -> IOSt .l
+ioStSetRcvDisabled			:: !Bool							!(IOSt .l) -> IOSt .l /* MW11++*/
 
-IOStSwapIO					:: !(![*World],!CProcesses)	!(IOSt .l) -> (!(![*World],!CProcesses),!IOSt .l)
+ioStSwapIO					:: !(![*World],!CProcesses)	!(IOSt .l) -> (!(![*World],!CProcesses),!IOSt .l)
 
-IOStLastInteraction			::									!(IOSt .l) -> (!Bool,	!IOSt .l)
-IOStHasDevice				:: !Device							!(IOSt .l) -> (!Bool,	!IOSt .l)
-IOStGetDevices				::									!(IOSt .l) -> (![Device],!IOSt .l)
+ioStLastInteraction			::									!(IOSt .l) -> (!Bool,	!IOSt .l)
+ioStHasDevice				:: !Device							!(IOSt .l) -> (!Bool,	!IOSt .l)
+ioStGetDevices				::									!(IOSt .l) -> (![Device],!IOSt .l)
 
-IOStGetDevice				:: !Device							!(IOSt .l) -> (!Bool,DeviceSystemState (PSt .l),!IOSt .l)
-//	IOStGetDevice removes the indicated device and returns True if found. If not found the device is undefined!
-IOStSetDevice				:: !(DeviceSystemState (PSt .l))	!(IOSt .l) -> IOSt .l
-//	IOStSetDevice stores the indicated device.  
+ioStGetDevice				:: !Device							!(IOSt .l) -> (!Bool,DeviceSystemState (PSt .l),!IOSt .l)
+//	ioStGetDevice removes the indicated device and returns True if found. If not found the device is undefined!
+ioStSetDevice				:: !(DeviceSystemState (PSt .l))	!(IOSt .l) -> IOSt .l
+//	ioStSetDevice stores the indicated device.  
 getIOToolbox				::									!(IOSt .l) -> (!*OSToolbox, !IOSt .l)
 setIOToolbox				:: !*OSToolbox						!(IOSt .l) -> IOSt .l
 appIOToolbox				:: !.(IdFun *OSToolbox)				!(IOSt .l) -> IOSt .l

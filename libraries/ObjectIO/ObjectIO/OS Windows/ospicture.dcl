@@ -212,4 +212,3 @@ getResolutionC :: !OSPictContext !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
 
 // MW: scaling of screen coordinates to printer coordinates.
 getPictureScalingFactors :: !OSPictContext !*OSToolbox -> (!(!Int,!Int),!(!Int,!Int),!OSPictContext,!*OSToolbox)
-

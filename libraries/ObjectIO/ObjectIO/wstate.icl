@@ -11,7 +11,7 @@ import	commondef, keyfocus, windowhandle
 
 wstateFatalError :: String String -> .x
 wstateFatalError rule error
-	= FatalError rule "wstate" error
+	= fatalError rule "wstate" error
 
 
 /*	The WindowHandle` data type.
@@ -363,7 +363,7 @@ where
 		getPopUpInfoEdit` Nothing tb
 			= (Nothing,tb)
 		getPopUpInfoEdit` (Just info=:{popUpEditPtr}) tb
-			# (content,tb)	= OSgetEditControlText wPtr popUpEditPtr tb
+			# (content,tb)	= osGetEditControlText wPtr popUpEditPtr tb
 			= (Just {info & popUpEditText=content},tb)
 	getWItemInfo` wPtr itemPtr info=:(SliderInfo {sliderInfoDir,sliderInfoLength,sliderInfoState}) tb
 		= (	SliderInfo` { sliderInfoDir`    = sliderInfoDir
@@ -376,7 +376,7 @@ where
 	getWItemInfo` wPtr itemPtr info=:(TextInfo textInfo) tb
 		= (TextInfo` textInfo,info,tb)
 	getWItemInfo` wPtr itemPtr info=:(EditInfo editInfo) tb
-		# (content,tb)	= OSgetEditControlText wPtr itemPtr tb
+		# (content,tb)	= osGetEditControlText wPtr itemPtr tb
 		#! editInfo		= {editInfo & editInfoText=content}
 		= (EditInfo` editInfo,info,tb)
 	getWItemInfo` wPtr itemPtr info=:(ButtonInfo buttonInfo) tb

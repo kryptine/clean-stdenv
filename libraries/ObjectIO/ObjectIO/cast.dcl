@@ -1,3 +1,3 @@
 definition module cast
 
-Cast :: !.a -> .b
+cast :: !.a -> .b

@@ -56,8 +56,8 @@ WINDING				:== 2
 
 //	PA: Win(Create/Destroy)ScreenHDC added to temporarily create a HDC of a screen.
 //		Never use these values for a window or control.
-WinCreateScreenHDC :: !*OSToolbox -> PIC
-WinCreateScreenHDC _
+winCreateScreenHDC :: !*OSToolbox -> PIC
+winCreateScreenHDC _
 	= code
 	{
 		.inline WinCreateScreenHDC
@@ -65,8 +65,8 @@ WinCreateScreenHDC _
 		.end
 	}
 
-WinDestroyScreenHDC :: !PIC -> *OSToolbox
-WinDestroyScreenHDC _
+winDestroyScreenHDC :: !PIC -> *OSToolbox
+winDestroyScreenHDC _
 	= code
 	{
 		.inline WinDestroyScreenHDC
@@ -75,8 +75,8 @@ WinDestroyScreenHDC _
 	}
 
 // MW: this is never used in the object IO
-WinGetPicStringWidth ::  !{#Char} !PIC -> ( !Int, !PIC)
-WinGetPicStringWidth _ _
+winGetPicStringWidth ::  !{#Char} !PIC -> ( !Int, !PIC)
+winGetPicStringWidth _ _
 	= code
 	{
 		.inline WinGetPicStringWidth
@@ -84,8 +84,8 @@ WinGetPicStringWidth _ _
 		.end
 	}
 
-WinGetPicCharWidth ::  !Char !PIC -> ( !Int, !PIC)
-WinGetPicCharWidth _ _
+winGetPicCharWidth ::  !Char !PIC -> ( !Int, !PIC)
+winGetPicCharWidth _ _
 	= code
 	{
 		.inline WinGetPicCharWidth
@@ -94,8 +94,8 @@ WinGetPicCharWidth _ _
 	}
 // END MW
 
-WinGetStringWidth ::  !{#Char} !Fnt !Int !HDC !*OSToolbox -> ( !Int, !*OSToolbox)
-WinGetStringWidth _ _ _ _ _
+winGetStringWidth ::  !{#Char} !Fnt !Int !HDC !*OSToolbox -> ( !Int, !*OSToolbox)
+winGetStringWidth _ _ _ _ _
 	= code
 	{
 		.inline WinGetStringWidth
@@ -103,8 +103,8 @@ WinGetStringWidth _ _ _ _ _
 		.end
 	}
 
-WinGetCharWidth ::  !Char !Fnt !Int !HDC !*OSToolbox -> ( !Int, !*OSToolbox)
-WinGetCharWidth _ _ _ _ _
+winGetCharWidth ::  !Char !Fnt !Int !HDC !*OSToolbox -> ( !Int, !*OSToolbox)
+winGetCharWidth _ _ _ _ _
 	= code
 	{
 		.inline WinGetCharWidth
@@ -112,8 +112,8 @@ WinGetCharWidth _ _ _ _ _
 		.end
 	}
 
-WinGetPicFontInfo ::  !PIC -> ( !Int, !Int, !Int, !Int, !PIC)
-WinGetPicFontInfo _
+winGetPicFontInfo ::  !PIC -> ( !Int, !Int, !Int, !Int, !PIC)
+winGetPicFontInfo _
 	= code
 	{
 		.inline WinGetPicFontInfo
@@ -121,8 +121,8 @@ WinGetPicFontInfo _
 		.end
 	}
 
-WinGetFontInfo ::  !Fnt !Int !HDC !*OSToolbox -> ( !Int, !Int, !Int, !Int, !*OSToolbox)
-WinGetFontInfo _ _ _ _
+winGetFontInfo ::  !Fnt !Int !HDC !*OSToolbox -> ( !Int, !Int, !Int, !Int, !*OSToolbox)
+winGetFontInfo _ _ _ _
 	= code
 	{
 		.inline WinGetFontInfo
@@ -130,8 +130,8 @@ WinGetFontInfo _ _ _ _
 		.end
 	}
 
-WinSetFontStyle ::  !Int !PIC ->  PIC
-WinSetFontStyle _ _
+winSetFontStyle ::  !Int !PIC ->  PIC
+winSetFontStyle _ _
 	= code
 	{
 		.inline WinSetFontStyle
@@ -139,8 +139,8 @@ WinSetFontStyle _ _
 		.end
 	}
 
-WinSetFontSize ::  !Int !PIC ->  PIC
-WinSetFontSize _ _
+winSetFontSize ::  !Int !PIC ->  PIC
+winSetFontSize _ _
 	= code
 	{
 		.inline WinSetFontSize
@@ -148,8 +148,8 @@ WinSetFontSize _ _
 		.end
 	}
 
-WinSetFontName ::  !{#Char} !PIC ->  PIC
-WinSetFontName _ _
+winSetFontName ::  !{#Char} !PIC ->  PIC
+winSetFontName _ _
 	= code
 	{
 		.inline WinSetFontName
@@ -157,8 +157,8 @@ WinSetFontName _ _
 		.end
 	}
 
-WinSetFont ::  !Fnt !PIC ->  PIC
-WinSetFont _ _
+winSetFont ::  !Fnt !PIC ->  PIC
+winSetFont _ _
 	= code
 	{
 		.inline WinSetFont
@@ -167,8 +167,8 @@ WinSetFont _ _
 	}
 
 
-WinPrintResizedBitmap :: !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) !{#Char} !PIC -> PIC
-WinPrintResizedBitmap _ _ _ _ _
+winPrintResizedBitmap :: !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) !{#Char} !PIC -> PIC
+winPrintResizedBitmap _ _ _ _ _
 	= code
 	{
 		.inline WinPrintResizedBitmap
@@ -177,8 +177,8 @@ WinPrintResizedBitmap _ _ _ _ _
 	}
 
 //	PA: Routines to DRAW bitmaps.
-WinDrawBitmap :: !(!Int,!Int) !(!Int,!Int) !Int !PIC -> PIC
-WinDrawBitmap _ _ _ _
+winDrawBitmap :: !(!Int,!Int) !(!Int,!Int) !Int !PIC -> PIC
+winDrawBitmap _ _ _ _
 	= code
 	{
 		.inline WinDrawBitmap
@@ -186,8 +186,8 @@ WinDrawBitmap _ _ _ _
 		.end
 	}
 
-WinDrawResizedBitmap :: !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) !Int !PIC -> PIC
-WinDrawResizedBitmap _ _ _ _ _
+winDrawResizedBitmap :: !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) !Int !PIC -> PIC
+winDrawResizedBitmap _ _ _ _ _
 	= code
 	{
 		.inline WinDrawResizedBitmap
@@ -195,8 +195,8 @@ WinDrawResizedBitmap _ _ _ _ _
 		.end
 	}
 
-WinCreateBitmap :: !Int !{#Char} !HDC !*OSToolbox -> (!Int,!*OSToolbox)
-WinCreateBitmap _ _ _ _
+winCreateBitmap :: !Int !{#Char} !HDC !*OSToolbox -> (!Int,!*OSToolbox)
+winCreateBitmap _ _ _ _
 	= code
 	{
 		.inline WinCreateBitmap
@@ -204,8 +204,8 @@ WinCreateBitmap _ _ _ _
 		.end
 	}
 
-WinInvertPolygon ::  !PIC ->  PIC
-WinInvertPolygon _
+winInvertPolygon ::  !PIC ->  PIC
+winInvertPolygon _
 	= code
 	{
 		.inline WinInvertPolygon
@@ -213,8 +213,8 @@ WinInvertPolygon _
 		.end
 	}
 
-WinErasePolygon ::  !PIC ->  PIC
-WinErasePolygon _
+winErasePolygon ::  !PIC ->  PIC
+winErasePolygon _
 	= code
 	{
 		.inline WinErasePolygon
@@ -222,8 +222,8 @@ WinErasePolygon _
 		.end
 	}
 
-WinFillPolygon ::  !PIC ->  PIC
-WinFillPolygon _
+winFillPolygon ::  !PIC ->  PIC
+winFillPolygon _
 	= code
 	{
 		.inline WinFillPolygon
@@ -231,8 +231,8 @@ WinFillPolygon _
 		.end
 	}
 
-WinDrawPolygon ::  !PIC ->  PIC
-WinDrawPolygon _
+winDrawPolygon ::  !PIC ->  PIC
+winDrawPolygon _
 	= code
 	{
 		.inline WinDrawPolygon
@@ -240,8 +240,8 @@ WinDrawPolygon _
 		.end
 	}
 
-WinAddPolygonPoint ::  !Pt !*OSToolbox ->  *OSToolbox
-WinAddPolygonPoint _ _
+winAddPolygonPoint ::  !Pt !*OSToolbox ->  *OSToolbox
+winAddPolygonPoint _ _
 	= code
 	{
 		.inline WinAddPolygonPoint
@@ -249,8 +249,8 @@ WinAddPolygonPoint _ _
 		.end
 	}
 
-WinStartPolygon ::  !Int !*OSToolbox ->  *OSToolbox
-WinStartPolygon _ _
+winStartPolygon ::  !Int !*OSToolbox ->  *OSToolbox
+winStartPolygon _ _
 	= code
 	{
 		.inline WinStartPolygon
@@ -258,8 +258,8 @@ WinStartPolygon _ _
 		.end
 	}
 
-WinEndPolygon :: !*OSToolbox -> *OSToolbox
-WinEndPolygon _
+winEndPolygon :: !*OSToolbox -> *OSToolbox
+winEndPolygon _
 	= code
 	{	
 		.inline WinEndPolygon
@@ -269,8 +269,8 @@ WinEndPolygon _
 
 /*	Operations to create, modify, and destroy polygon shapes.
 */
-WinAllocPolyShape :: !Int !*OSToolbox -> (!Int,!*OSToolbox)
-WinAllocPolyShape _ _
+winAllocPolyShape :: !Int !*OSToolbox -> (!Int,!*OSToolbox)
+winAllocPolyShape _ _
 	= code
 	{	
 		.inline WinAllocPolyShape
@@ -278,8 +278,8 @@ WinAllocPolyShape _ _
 		.end
 	}
 
-WinSetPolyPoint :: !Int !Int !Int !Int !*OSToolbox -> *OSToolbox
-WinSetPolyPoint _ _ _ _ _
+winSetPolyPoint :: !Int !Int !Int !Int !*OSToolbox -> *OSToolbox
+winSetPolyPoint _ _ _ _ _
 	= code
 	{	
 		.inline WinSetPolyPoint
@@ -287,8 +287,8 @@ WinSetPolyPoint _ _ _ _ _
 		.end
 	}
 
-WinFreePolyShape :: !Int !*OSToolbox -> *OSToolbox
-WinFreePolyShape _ _
+winFreePolyShape :: !Int !*OSToolbox -> *OSToolbox
+winFreePolyShape _ _
 	= code
 	{	
 		.inline WinFreePolyShape
@@ -297,8 +297,8 @@ WinFreePolyShape _ _
 	}
 
 
-WinInvertWedge ::  !Rect !Pt !Pt !PIC ->  PIC
-WinInvertWedge _ _ _ _
+winInvertWedge ::  !Rect !Pt !Pt !PIC ->  PIC
+winInvertWedge _ _ _ _
 	= code
 	{
 		.inline WinInvertWedge
@@ -306,8 +306,8 @@ WinInvertWedge _ _ _ _
 		.end
 	}
 
-WinEraseWedge ::  !Rect !Pt !Pt !PIC ->  PIC
-WinEraseWedge _ _ _ _
+winEraseWedge ::  !Rect !Pt !Pt !PIC ->  PIC
+winEraseWedge _ _ _ _
 	= code
 	{
 		.inline WinEraseWedge
@@ -315,8 +315,8 @@ WinEraseWedge _ _ _ _
 		.end
 	}
 
-WinFillWedge ::  !Rect !Pt !Pt !PIC ->  PIC
-WinFillWedge _ _ _ _
+winFillWedge ::  !Rect !Pt !Pt !PIC ->  PIC
+winFillWedge _ _ _ _
 	= code
 	{
 		.inline WinFillWedge
@@ -324,8 +324,8 @@ WinFillWedge _ _ _ _
 		.end
 	}
 
-WinDrawWedge ::  !Rect !Pt !Pt !PIC ->  PIC
-WinDrawWedge _ _ _ _
+winDrawWedge ::  !Rect !Pt !Pt !PIC ->  PIC
+winDrawWedge _ _ _ _
 	= code
 	{
 		.inline WinDrawWedge
@@ -334,8 +334,8 @@ WinDrawWedge _ _ _ _
 	}
 
 
-WinInvertCircle ::  !Pt !Int !PIC ->  PIC
-WinInvertCircle _ _ _
+winInvertCircle ::  !Pt !Int !PIC ->  PIC
+winInvertCircle _ _ _
 	= code
 	{
 		.inline WinInvertCircle
@@ -343,8 +343,8 @@ WinInvertCircle _ _ _
 		.end
 	}
 
-WinEraseCircle ::  !Pt !Int !PIC ->  PIC
-WinEraseCircle _ _ _
+winEraseCircle ::  !Pt !Int !PIC ->  PIC
+winEraseCircle _ _ _
 	= code
 	{
 		.inline WinEraseCircle
@@ -352,8 +352,8 @@ WinEraseCircle _ _ _
 		.end
 	}
 
-WinFillCircle ::  !Pt !Int !PIC ->  PIC
-WinFillCircle _ _ _
+winFillCircle ::  !Pt !Int !PIC ->  PIC
+winFillCircle _ _ _
 	= code
 	{
 		.inline WinFillCircle
@@ -361,8 +361,8 @@ WinFillCircle _ _ _
 		.end
 	}
 
-WinDrawCircle ::  !Pt !Int !PIC ->  PIC
-WinDrawCircle _ _ _
+winDrawCircle ::  !Pt !Int !PIC ->  PIC
+winDrawCircle _ _ _
 	= code
 	{
 		.inline WinDrawCircle
@@ -371,8 +371,8 @@ WinDrawCircle _ _ _
 	}
 
 
-WinInvertOval ::  !Rect !PIC ->  PIC
-WinInvertOval _ _
+winInvertOval ::  !Rect !PIC ->  PIC
+winInvertOval _ _
 	= code
 	{
 		.inline WinInvertOval
@@ -380,8 +380,8 @@ WinInvertOval _ _
 		.end
 	}
 
-WinEraseOval ::  !Rect !PIC ->  PIC
-WinEraseOval _ _
+winEraseOval ::  !Rect !PIC ->  PIC
+winEraseOval _ _
 	= code
 	{
 		.inline WinEraseOval
@@ -389,8 +389,8 @@ WinEraseOval _ _
 		.end
 	}
 
-WinFillOval ::  !Rect !PIC ->  PIC
-WinFillOval _ _
+winFillOval ::  !Rect !PIC ->  PIC
+winFillOval _ _
 	= code
 	{
 		.inline WinFillOval
@@ -398,8 +398,8 @@ WinFillOval _ _
 		.end
 	}
 
-WinDrawOval ::  !Rect !PIC ->  PIC
-WinDrawOval _ _
+winDrawOval ::  !Rect !PIC ->  PIC
+winDrawOval _ _
 	= code
 	{
 		.inline WinDrawOval
@@ -408,8 +408,8 @@ WinDrawOval _ _
 	}
 
 
-WinInvertRoundRectangle ::  !Rect !Int !Int !PIC ->  PIC
-WinInvertRoundRectangle _ _ _ _
+winInvertRoundRectangle ::  !Rect !Int !Int !PIC ->  PIC
+winInvertRoundRectangle _ _ _ _
 	= code
 	{
 		.inline WinInvertRoundRectangle
@@ -417,8 +417,8 @@ WinInvertRoundRectangle _ _ _ _
 		.end
 	}
 
-WinEraseRoundRectangle ::  !Rect !Int !Int !PIC ->  PIC
-WinEraseRoundRectangle _ _ _ _
+winEraseRoundRectangle ::  !Rect !Int !Int !PIC ->  PIC
+winEraseRoundRectangle _ _ _ _
 	= code
 	{
 		.inline WinEraseRoundRectangle
@@ -426,8 +426,8 @@ WinEraseRoundRectangle _ _ _ _
 		.end
 	}
 
-WinFillRoundRectangle ::  !Rect !Int !Int !PIC ->  PIC
-WinFillRoundRectangle _ _ _ _
+winFillRoundRectangle ::  !Rect !Int !Int !PIC ->  PIC
+winFillRoundRectangle _ _ _ _
 	= code
 	{
 		.inline WinFillRoundRectangle
@@ -435,8 +435,8 @@ WinFillRoundRectangle _ _ _ _
 		.end
 	}
 
-WinDrawRoundRectangle ::  !Rect !Int !Int !PIC ->  PIC
-WinDrawRoundRectangle _ _ _ _
+winDrawRoundRectangle ::  !Rect !Int !Int !PIC ->  PIC
+winDrawRoundRectangle _ _ _ _
 	= code
 	{
 		.inline WinDrawRoundRectangle
@@ -445,8 +445,8 @@ WinDrawRoundRectangle _ _ _ _
 	}
 
 
-WinScrollRectangle :: !Rect !Pt !PIC -> (!Rect,!PIC)
-WinScrollRectangle _ _ _
+winScrollRectangle :: !Rect !Pt !PIC -> (!Rect,!PIC)
+winScrollRectangle _ _ _
 	= code
 	{
 		.inline WinScrollRectangle
@@ -454,8 +454,8 @@ WinScrollRectangle _ _ _
 		.end
 	}
 
-WinCopyRectangle ::  !Rect !Pt !PIC ->  PIC
-WinCopyRectangle _ _ _
+winCopyRectangle ::  !Rect !Pt !PIC ->  PIC
+winCopyRectangle _ _ _
 	= code
 	{
 		.inline WinCopyRectangle
@@ -463,8 +463,8 @@ WinCopyRectangle _ _ _
 		.end
 	}
 
-WinCopyRectangleTo ::  !Rect !Pt !PIC ->  PIC
-WinCopyRectangleTo _ _ _
+winCopyRectangleTo ::  !Rect !Pt !PIC ->  PIC
+winCopyRectangleTo _ _ _
 	= code
 	{
 		.inline WinCopyRectangleTo
@@ -472,8 +472,8 @@ WinCopyRectangleTo _ _ _
 		.end
 	}
 
-WinMoveRectangle ::  !Rect !Pt !PIC ->  PIC
-WinMoveRectangle _ _ _
+winMoveRectangle ::  !Rect !Pt !PIC ->  PIC
+winMoveRectangle _ _ _
 	= code
 	{
 		.inline WinMoveRectangle
@@ -481,8 +481,8 @@ WinMoveRectangle _ _ _
 		.end
 	}
 
-WinMoveRectangleTo ::  !Rect !Pt !PIC ->  PIC
-WinMoveRectangleTo _ _ _
+winMoveRectangleTo ::  !Rect !Pt !PIC ->  PIC
+winMoveRectangleTo _ _ _
 	= code
 	{
 		.inline WinMoveRectangleTo
@@ -491,8 +491,8 @@ WinMoveRectangleTo _ _ _
 	}
 
 
-WinInvertRectangle ::  !Rect !PIC ->  PIC
-WinInvertRectangle _ _
+winInvertRectangle ::  !Rect !PIC ->  PIC
+winInvertRectangle _ _
 	= code
 	{
 		.inline WinInvertRectangle
@@ -500,8 +500,8 @@ WinInvertRectangle _ _
 		.end
 	}
 
-WinEraseRectangle ::  !Rect !PIC ->  PIC
-WinEraseRectangle _ _
+winEraseRectangle ::  !Rect !PIC ->  PIC
+winEraseRectangle _ _
 	= code
 	{
 		.inline WinEraseRectangle
@@ -509,8 +509,8 @@ WinEraseRectangle _ _
 		.end
 	}
 
-WinFillRectangle ::  !Rect !PIC ->  PIC
-WinFillRectangle _ _
+winFillRectangle ::  !Rect !PIC ->  PIC
+winFillRectangle _ _
 	= code
 	{
 		.inline WinFillRectangle
@@ -518,8 +518,8 @@ WinFillRectangle _ _
 		.end
 	}
 
-WinDrawRectangle ::  !Rect !PIC ->  PIC
-WinDrawRectangle _ _
+winDrawRectangle ::  !Rect !PIC ->  PIC
+winDrawRectangle _ _
 	= code
 	{
 		.inline WinDrawRectangle
@@ -528,8 +528,8 @@ WinDrawRectangle _ _
 	}
 
 
-WinDrawChar ::  !Int !PIC ->  PIC
-WinDrawChar _ _
+winDrawChar ::  !Int !PIC ->  PIC
+winDrawChar _ _
 	= code
 	{
 		.inline WinDrawChar
@@ -537,8 +537,8 @@ WinDrawChar _ _
 		.end
 	}
 
-WinDrawString ::  !{#Char} !PIC ->  PIC
-WinDrawString _ _
+winDrawString ::  !{#Char} !PIC ->  PIC
+winDrawString _ _
 	= code
 	{
 		.inline WinDrawString
@@ -547,8 +547,8 @@ WinDrawString _ _
 	}
 
 
-WinDrawCCurve ::  !Rect !Pt !Pt !RGBcolor !PIC ->  PIC
-WinDrawCCurve _ _ _ _ _
+winDrawCCurve ::  !Rect !Pt !Pt !RGBcolor !PIC ->  PIC
+winDrawCCurve _ _ _ _ _
 	= code
 	{
 		.inline WinDrawCCurve
@@ -556,8 +556,8 @@ WinDrawCCurve _ _ _ _ _
 		.end
 	}
 
-WinDrawCLine ::  !Pt !Pt !RGBcolor !PIC ->  PIC
-WinDrawCLine _ _ _ _
+winDrawCLine ::  !Pt !Pt !RGBcolor !PIC ->  PIC
+winDrawCLine _ _ _ _
 	= code
 	{
 		.inline WinDrawCLine
@@ -565,8 +565,8 @@ WinDrawCLine _ _ _ _
 		.end
 	}
 
-WinDrawCPoint ::  !Pt !RGBcolor !PIC ->  PIC
-WinDrawCPoint _ _ _
+winDrawCPoint ::  !Pt !RGBcolor !PIC ->  PIC
+winDrawCPoint _ _ _
 	= code
 	{
 		.inline WinDrawCPoint
@@ -574,8 +574,8 @@ WinDrawCPoint _ _ _
 		.end
 	}
 
-WinDrawCurve ::  !Rect !Pt !Pt !PIC ->  PIC
-WinDrawCurve _ _ _ _
+winDrawCurve ::  !Rect !Pt !Pt !PIC ->  PIC
+winDrawCurve _ _ _ _
 	= code
 	{
 		.inline WinDrawCurve
@@ -583,8 +583,8 @@ WinDrawCurve _ _ _ _
 		.end
 	}
 
-WinDrawLine ::  !Pt !Pt !PIC ->  PIC
-WinDrawLine _ _ _
+winDrawLine ::  !Pt !Pt !PIC ->  PIC
+winDrawLine _ _ _
 	= code
 	{
 		.inline WinDrawLine
@@ -592,8 +592,8 @@ WinDrawLine _ _ _
 		.end
 	}
 
-WinDrawPoint ::  !Pt !PIC ->  PIC
-WinDrawPoint _ _
+winDrawPoint ::  !Pt !PIC ->  PIC
+winDrawPoint _ _
 	= code
 	{
 		.inline WinDrawPoint
@@ -602,8 +602,8 @@ WinDrawPoint _ _
 	}
 
 
-WinLinePen ::  !Pt !PIC ->  PIC
-WinLinePen _ _
+winLinePen ::  !Pt !PIC ->  PIC
+winLinePen _ _
 	= code
 	{
 		.inline WinLinePen
@@ -611,8 +611,8 @@ WinLinePen _ _
 		.end
 	}
 
-WinLinePenTo ::  !Pt !PIC ->  PIC
-WinLinePenTo _ _
+winLinePenTo ::  !Pt !PIC ->  PIC
+winLinePenTo _ _
 	= code
 	{
 		.inline WinLinePenTo
@@ -620,8 +620,8 @@ WinLinePenTo _ _
 		.end
 	}
 
-WinMovePen ::  !Pt !PIC ->  PIC
-WinMovePen _ _
+winMovePen ::  !Pt !PIC ->  PIC
+winMovePen _ _
 	= code
 	{
 		.inline WinMovePen
@@ -629,8 +629,8 @@ WinMovePen _ _
 		.end
 	}
 
-WinMovePenTo ::  !Pt !PIC ->  PIC
-WinMovePenTo _ _
+winMovePenTo ::  !Pt !PIC ->  PIC
+winMovePenTo _ _
 	= code
 	{
 		.inline WinMovePenTo
@@ -638,8 +638,8 @@ WinMovePenTo _ _
 		.end
 	}
 
-WinGetPenPos :: !PIC -> (!Int,!Int,!HDC,!*OSToolbox)
-WinGetPenPos _
+winGetPenPos :: !PIC -> (!Int,!Int,!HDC,!*OSToolbox)
+winGetPenPos _
 	= code
 	{	
 		.inline WinGetPenPos
@@ -648,8 +648,8 @@ WinGetPenPos _
 	}
 
 
-WinSetPenSize ::  !Int !PIC ->  PIC
-WinSetPenSize _ _
+winSetPenSize ::  !Int !PIC ->  PIC
+winSetPenSize _ _
 	= code
 	{
 		.inline WinSetPenSize
@@ -657,8 +657,8 @@ WinSetPenSize _ _
 		.end
 	}
 
-WinSetPattern ::  !Int !PIC ->  PIC
-WinSetPattern _ _
+winSetPattern ::  !Int !PIC ->  PIC
+winSetPattern _ _
 	= code
 	{
 		.inline WinSetPattern
@@ -666,8 +666,8 @@ WinSetPattern _ _
 		.end
 	}
 
-WinSetMode ::  !Int !PIC ->  PIC
-WinSetMode _ _
+winSetMode ::  !Int !PIC ->  PIC
+winSetMode _ _
 	= code
 	{
 		.inline WinSetMode
@@ -675,8 +675,8 @@ WinSetMode _ _
 		.end
 	}
 
-WinSetBackColor ::  !RGBcolor !PIC ->  PIC
-WinSetBackColor _ _
+winSetBackColor ::  !RGBcolor !PIC ->  PIC
+winSetBackColor _ _
 	= code
 	{
 		.inline WinSetBackColor
@@ -684,8 +684,8 @@ WinSetBackColor _ _
 		.end
 	}
 
-WinSetPenColor ::  !RGBcolor !PIC ->  PIC
-WinSetPenColor _ _
+winSetPenColor ::  !RGBcolor !PIC ->  PIC
+winSetPenColor _ _
 	= code
 	{
 		.inline WinSetPenColor
@@ -694,8 +694,8 @@ WinSetPenColor _ _
 	}
 
 
-WinClipPicture ::  !Rect !PIC ->  PIC
-WinClipPicture _ _
+winClipPicture ::  !Rect !PIC ->  PIC
+winClipPicture _ _
 	= code
 	{
 		.inline WinClipPicture
@@ -704,8 +704,8 @@ WinClipPicture _ _
 	}
 
 //	PA: operation to set the clipping region.
-WinClipRgnPicture :: !HRGN !PIC -> PIC
-WinClipRgnPicture _ _
+winClipRgnPicture :: !HRGN !PIC -> PIC
+winClipRgnPicture _ _
 	= code
 	{	
 		.inline WinClipRgnPicture
@@ -714,8 +714,8 @@ WinClipRgnPicture _ _
 	}
 
 //	PA+++: new operation to set the complete clipping region.
-WinSetClipRgnPicture :: !HRGN !PIC -> PIC
-WinSetClipRgnPicture _ _
+winSetClipRgnPicture :: !HRGN !PIC -> PIC
+winSetClipRgnPicture _ _
 	= code
 	{
 		.inline WinSetClipRgnPicture
@@ -724,8 +724,8 @@ WinSetClipRgnPicture _ _
 	}
 
 //	PA+++: new operation to retrieve the current clipping region.
-WinGetClipRgnPicture :: !PIC -> (!HRGN,!PIC)
-WinGetClipRgnPicture _
+winGetClipRgnPicture :: !PIC -> (!HRGN,!PIC)
+winGetClipRgnPicture _
 	= code
 	{
 		.inline WinGetClipRgnPicture
@@ -733,8 +733,8 @@ WinGetClipRgnPicture _
 		.end
 	}
 
-WinDeleteObject :: !Int !*OSToolbox -> *OSToolbox
-WinDeleteObject _ _
+winDeleteObject :: !Int !*OSToolbox -> *OSToolbox
+winDeleteObject _ _
 	= code
 	{	
 		.inline WinDeleteObject
@@ -743,8 +743,8 @@ WinDeleteObject _ _
 	}
 
 
-WinDonePicture :: !PIC -> (!Int,!Int,!RGBcolor,!RGBcolor,!Pt,!Fnt,!PIC)
-WinDonePicture _
+winDonePicture :: !PIC -> (!Int,!Int,!RGBcolor,!RGBcolor,!Pt,!Fnt,!PIC)
+winDonePicture _
 	= code
 	{
 		.inline WinDonePicture
@@ -752,8 +752,8 @@ WinDonePicture _
 		.end
 	}
 
-WinInitPicture :: !Int !Int !RGBcolor !RGBcolor !Pt !Fnt !Pt !PIC -> PIC
-WinInitPicture _ _ _ _ _ _ _ _
+winInitPicture :: !Int !Int !RGBcolor !RGBcolor !Pt !Fnt !Pt !PIC -> PIC
+winInitPicture _ _ _ _ _ _ _ _
 	= code
 	{
 		.inline WinInitPicture

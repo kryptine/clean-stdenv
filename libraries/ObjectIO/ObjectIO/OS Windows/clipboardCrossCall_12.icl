@@ -1,13 +1,13 @@
 implementation module clipboardCrossCall_12
 
 
-import	StdClass, StdInt, StdMisc
+import	StdBool, StdClass, StdInt, StdMisc
 import	clCrossCall_12
-from	clCCall_12	import WinMakeCString, WinGetCStringAndFree, WinReleaseCString, CSTR
+from	clCCall_12	import winMakeCString, winGetCStringAndFree, winReleaseCString, CSTR
 import	code from "cCrossCallClipboard_121.obj"
 
 
-//	PA: Predefined Clipboard Formats.
+//	Predefined Clipboard Formats.
 CF_TEXT             :==	1
 CF_BITMAP           :==	2
 CF_METAFILEPICT     :==	3
@@ -22,11 +22,10 @@ CF_RIFF             :==	11
 CF_WAVE             :==	12
 CF_UNICODETEXT      :==	13
 CF_ENHMETAFILE      :==	14
-//	PA: end of addition.
 
 
-WinInitialiseClipboard :: !*OSToolbox -> *OSToolbox
-WinInitialiseClipboard _
+winInitialiseClipboard :: !*OSToolbox -> *OSToolbox
+winInitialiseClipboard _
 	= code
 	{
 		.inline InstallCrossCallClipboard
@@ -34,36 +33,33 @@ WinInitialiseClipboard _
 		.end
 	}
 		
-WinGetClipboardText :: !*OSToolbox -> (!String,!*OSToolbox)
-WinGetClipboardText tb
-	# (rcci,tb)	= IssueCleanRequest2 (ErrorCallback2 "WinGetClipboardText") (Rq0Cci CcRqGETCLIPBOARDTEXT) tb
-	# (text,tb)	= case rcci.ccMsg of
-					CcRETURN1	-> WinGetCStringAndFree rcci.p1 tb
-					CcWASQUIT	-> ("",tb)
-					other		-> abort "[WinGetClipboardText] expected CcRETURN1 value.\n"
-	= (text,tb)
+winGetClipboardText :: !*OSToolbox -> (!String,!*OSToolbox)
+winGetClipboardText tb
+	# (rcci,tb)			= issueCleanRequest2 (errorCallback2 "winGetClipboardText") (Rq0Cci CcRqGETCLIPBOARDTEXT) tb
+	  rmsg				= rcci.ccMsg
+	| rmsg==CcRETURN1	= winGetCStringAndFree rcci.p1 tb
+	| rmsg==CcWASQUIT	= ("",tb)
+	| otherwise			= abort "[winGetClipboardText] expected CcRETURN1 value.\n"
 
-WinSetClipboardText :: !String !*OSToolbox -> *OSToolbox
-WinSetClipboardText text tb
-	# (textptr,tb)	= WinMakeCString text tb
-	# (_,tb)		= IssueCleanRequest2 (ErrorCallback2 "SetClipboardText") (Rq1Cci CcRqSETCLIPBOARDTEXT textptr) tb
-	# tb			= WinReleaseCString textptr tb
+winSetClipboardText :: !String !*OSToolbox -> *OSToolbox
+winSetClipboardText text tb
+	# (textptr,tb)		= winMakeCString text tb
+	# (_,tb)			= issueCleanRequest2 (errorCallback2 "winSetClipboardText") (Rq1Cci CcRqSETCLIPBOARDTEXT textptr) tb
+	# tb				= winReleaseCString textptr tb
 	= tb
 
-WinHasClipboardText :: !*OSToolbox -> (!Bool,!*OSToolbox)
-WinHasClipboardText tb
-	# (rcci,tb)	= IssueCleanRequest2 (ErrorCallback2 "WinHasClipboardText") (Rq0Cci CcRqCLIPBOARDHASTEXT) tb
-	  ok		= case rcci.ccMsg of
-	  				CcRETURN1	-> rcci.p1<>0
-	  				CcWASQUIT	-> False
-	  				_			-> abort "[WinHasClipboardText] expected CcRETURN1 value."
-	= (ok,tb)
+winHasClipboardText :: !*OSToolbox -> (!Bool,!*OSToolbox)
+winHasClipboardText tb
+	# (rcci,tb)			= issueCleanRequest2 (errorCallback2 "winHasClipboardText") (Rq0Cci CcRqCLIPBOARDHASTEXT) tb
+	  rmsg				= rcci.ccMsg
+	| rmsg==CcRETURN1	= (rcci.p1<>0,tb)
+	| rmsg==CcWASQUIT	= (False,     tb)
+	| otherwise			= abort "[winHasClipboardText] expected CcRETURN1 value."
 
-WinGetClipboardCount :: !*OSToolbox -> (!Int,!*OSToolbox)
-WinGetClipboardCount tb
-	# (rcci,tb)			= IssueCleanRequest2 (ErrorCallback2 "GetClipboardCount") (Rq0Cci CcRqGETCLIPBOARDCOUNT) tb
-	  clipboardCount	= case rcci.ccMsg of
-	  						CcRETURN1	-> rcci.p1
-	  						CcWASQUIT	-> 0
-	  						other		-> abort "[WinGetClipboardCount] expected CcRETURN1 value.\n"
-	= (clipboardCount,tb)
+winGetClipboardCount :: !*OSToolbox -> (!Int,!*OSToolbox)
+winGetClipboardCount tb
+	# (rcci,tb)			= issueCleanRequest2 (errorCallback2 "winGetClipboardCount") (Rq0Cci CcRqGETCLIPBOARDCOUNT) tb
+	  rmsg				= rcci.ccMsg
+	| rmsg==CcRETURN1	= (rcci.p1,tb)
+	| rmsg==CcWASQUIT	= (0,      tb)
+	| otherwise			= abort "[winGetClipboardCount] expected CcRETURN1 value.\n"

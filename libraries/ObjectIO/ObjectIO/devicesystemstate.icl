@@ -14,7 +14,7 @@ import receiverhandle
 
 devicesystemstateFatalError :: String String -> .x
 devicesystemstateFatalError rule error
-	= FatalError rule "devicesystemstate" error
+	= fatalError rule "devicesystemstate" error
 
 
 ::	*DeviceSystemState pst
@@ -32,32 +32,32 @@ toDevice ds=:(TimerSystemState    _) = (TimerDevice,   ds)
 toDevice ds=:(WindowSystemState   _) = (WindowDevice,  ds)
 
 
-MenuSystemStateGetMenuHandles :: !(DeviceSystemState .pst) -> *MenuHandles .pst
-MenuSystemStateGetMenuHandles (MenuSystemState msHs)
+menuSystemStateGetMenuHandles :: !(DeviceSystemState .pst) -> *MenuHandles .pst
+menuSystemStateGetMenuHandles (MenuSystemState msHs)
 	= msHs
-MenuSystemStateGetMenuHandles _
-	= devicesystemstateFatalError "MenuSystemStateGetMenuHandles" "argument is no MenuSystemState"
+menuSystemStateGetMenuHandles _
+	= devicesystemstateFatalError "nenuSystemStateGetMenuHandles" "argument is no MenuSystemState"
 
-ProcessSystemStateGetProcessHandles :: !(DeviceSystemState .pst) -> *ProcessHandles .pst
-ProcessSystemStateGetProcessHandles (ProcessSystemState psHs)
+processSystemStateGetProcessHandles :: !(DeviceSystemState .pst) -> *ProcessHandles .pst
+processSystemStateGetProcessHandles (ProcessSystemState psHs)
 	= psHs
-ProcessSystemStateGetProcessHandles _
-	= devicesystemstateFatalError "ProcessSystemStateGetProcessHandles" "argument is no ProcessSystemState"
+processSystemStateGetProcessHandles _
+	= devicesystemstateFatalError "processSystemStateGetProcessHandles" "argument is no ProcessSystemState"
 
-ReceiverSystemStateGetReceiverHandles :: !(DeviceSystemState .pst) -> *ReceiverHandles .pst
-ReceiverSystemStateGetReceiverHandles (ReceiverSystemState rsHs)
+receiverSystemStateGetReceiverHandles :: !(DeviceSystemState .pst) -> *ReceiverHandles .pst
+receiverSystemStateGetReceiverHandles (ReceiverSystemState rsHs)
 	= rsHs
-ReceiverSystemStateGetReceiverHandles _
-	= devicesystemstateFatalError "ReceiverSystemStateGetReceiverHandles" "argument is no ReceiverSystemState"
+receiverSystemStateGetReceiverHandles _
+	= devicesystemstateFatalError "receiverSystemStateGetReceiverHandles" "argument is no ReceiverSystemState"
 
-TimerSystemStateGetTimerHandles :: !(DeviceSystemState .pst) -> *TimerHandles .pst
-TimerSystemStateGetTimerHandles (TimerSystemState tsHs)
+timerSystemStateGetTimerHandles :: !(DeviceSystemState .pst) -> *TimerHandles .pst
+timerSystemStateGetTimerHandles (TimerSystemState tsHs)
 	= tsHs
-TimerSystemStateGetTimerHandles _
-	= devicesystemstateFatalError "TimerSystemStateGetTimerHandles" "argument is no TimerSystemState"
+timerSystemStateGetTimerHandles _
+	= devicesystemstateFatalError "timerSystemStateGetTimerHandles" "argument is no TimerSystemState"
 
-WindowSystemStateGetWindowHandles :: !(DeviceSystemState .pst) -> *WindowHandles .pst
-WindowSystemStateGetWindowHandles (WindowSystemState wsHs)
+windowSystemStateGetWindowHandles :: !(DeviceSystemState .pst) -> *WindowHandles .pst
+windowSystemStateGetWindowHandles (WindowSystemState wsHs)
 	= wsHs
-WindowSystemStateGetWindowHandles _
-	= devicesystemstateFatalError "WindowSystemStateGetWindowHandles" "argument is no WindowSystemState"
+windowSystemStateGetWindowHandles _
+	= devicesystemstateFatalError "windowSystemStateGetWindowHandles" "argument is no WindowSystemState"

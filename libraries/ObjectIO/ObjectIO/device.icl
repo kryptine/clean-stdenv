@@ -11,9 +11,7 @@ import StdOverloaded, StdString
 	|	ReceiverDevice
 	|	ProcessDevice
 
-/* RWS +++ */
 instance == Device where
-	(==) :: !Device			!Device	-> Bool
 	(==) TimerDevice		device	= case device of
 										TimerDevice		-> True
 										_				-> False
@@ -32,7 +30,6 @@ instance == Device where
 	(==) _					_		= False
 
 instance toString Device where
-	toString :: !Device -> {#Char}
 	toString TimerDevice		= "TimerDevice"
 	toString MenuDevice			= "MenuDevice"
 	toString WindowDevice		= "WindowDevice"
@@ -46,10 +43,11 @@ priorityDevice MenuDevice		= 3
 priorityDevice WindowDevice		= 2
 priorityDevice ProcessDevice	= 0
 
-Devices							// The device list in order of descending priority
-	:== [	ReceiverDevice
-		,	TimerDevice
-		,	MenuDevice
-		,	WindowDevice
-		,	ProcessDevice
-		]
+devices :: [Device]
+devices							// The device list in order of descending priority
+	= [	ReceiverDevice
+	  ,	TimerDevice
+	  ,	MenuDevice
+	  ,	WindowDevice
+	  ,	ProcessDevice
+	  ]

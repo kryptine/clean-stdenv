@@ -8,12 +8,12 @@ import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	StdMenuElementClass, StdPSt
 import	commondef, devicesystemstate, iostate, menuaccess, menudefaccess, menuhandle, sdisize
 import	osmenu
-from	menuCrossCall_12 import WinRemoveMenuShortKey
+from	menuCrossCall_12 import winRemoveMenuShortKey
 
 
 menucreateFatalError :: String String -> .x
 menucreateFatalError rule error
-	= FatalError rule "menucreate" error
+	= fatalError rule "menucreate" error
 
 
 /*	Creating menus:
@@ -22,38 +22,38 @@ menucreateFatalError rule error
 		In that case, the layout of the controls should be recalculated, and the window updated.
 	OpenMenu` assumes that the Id argument has been verified and that the MenuDevice exists.
 */
-OpenMenu` :: !Id .ls !(Menu m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | MenuElements m
-OpenMenu` menuId ls mDef pState=:{io=ioState}
-	# (osdInfo,ioState)			= IOStGetOSDInfo ioState
+openMenu` :: !Id .ls !(Menu m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | MenuElements m
+openMenu` menuId ls mDef pState=:{io=ioState}
+	# (osdInfo,ioState)			= ioStGetOSDInfo ioState
 	  maybeOSMenuBar			= getOSDInfoOSMenuBar osdInfo
 	| isNothing maybeOSMenuBar	// This condition should never hold
 		= menucreateFatalError "openMenu (Menu)" "could not retrieve OSMenuBar from IOSt"
 	# osMenuBar					= fromJust maybeOSMenuBar
-	# (idtable,ioState)			= IOStGetIdTable ioState
-	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
-	  mHs						= MenuSystemStateGetMenuHandles mDevice
+	# (idtable,ioState)			= ioStGetIdTable ioState
+	# (found,mDevice,ioState)	= ioStGetDevice MenuDevice ioState
+	  mHs						= menuSystemStateGetMenuHandles mDevice
 	# (menus,mHs)				= menuHandlesGetMenus mHs
-	  (exists,menus)			= UContains (isMenuWithThisId menuId) menus
+	  (exists,menus)			= ucontains (isMenuWithThisId menuId) menus
 	| exists					// This condition should never hold
 		= menucreateFatalError "openMenu (Menu)" "inconsistency detected between IdTable and ReceiverTable"
-	# (nrmenus,menus)			= Ulength menus
+	# (nrmenus,menus)			= ulength menus
 	  (optIndex,mDef)			= menuDefGetIndex mDef
 	  index						= if (isJust optIndex) (fromJust optIndex) nrmenus
-	  (hasMenuWindowMenu,menus)	= UContains (isMenuWithThisId WindowMenuId) menus
-	  index`					= SetBetween index 0 (max 0 (if hasMenuWindowMenu (nrmenus-1) nrmenus))
-	# (rt,ioState)				= IOStGetReceiverTable ioState
-	# (ioid,ioState)			= IOStGetIOId ioState
+	  (hasMenuWindowMenu,menus)	= ucontains (isMenuWithThisId windowMenuId) menus
+	  index`					= setBetween index 0 (max 0 (if hasMenuWindowMenu (nrmenus-1) nrmenus))
+	# (rt,ioState)				= ioStGetReceiverTable ioState
+	# (ioid,ioState)			= ioStGetIOId ioState
 	# (sdiSize1,sdiPtr,ioState)	= getSDIWindowSize ioState
 	# pState					= {pState & io=ioState}
 	  (mKeys,mHs)				= menuHandlesGetKeys mHs
 	# (ok,mH,mKeys,rt,idtable,osMenuBar,pState)
 								= createMenu index` ioid menuId mDef mKeys rt idtable osMenuBar pState
  	  mHs						= menuHandlesSetKeys mKeys mHs
- 	# ioState					= IOStSetReceiverTable rt pState.io
- 	# ioState					= IOStSetIdTable idtable ioState
+ 	# ioState					= ioStSetReceiverTable rt pState.io
+ 	# ioState					= ioStSetIdTable idtable ioState
 	| not ok
 		# mHs					= menuHandlesSetMenus menus mHs
-		# ioState				= IOStSetDevice (MenuSystemState mHs) ioState
+		# ioState				= ioStSetDevice (MenuSystemState mHs) ioState
 		= (ErrorIdsInUse,{pState & io=ioState})
 	| otherwise
 		= (NoError,pState2)
@@ -61,8 +61,8 @@ OpenMenu` menuId ls mDef pState=:{io=ioState}
 		(before,after)			= splitAt index` menus
 		msH						= MenuLSHandle {mlsState=ls1,mlsHandle=mH}
 		mHs1					= {mHs & mMenus=before++[msH:after]}
-		ioState1				= appIOToolbox (DrawMenuBar osMenuBar) ioState
-		ioState2				= IOStSetDevice (MenuSystemState mHs1) ioState1
+		ioState1				= appIOToolbox (osDrawMenuBar osMenuBar) ioState
+		ioState2				= ioStSetDevice (MenuSystemState mHs1) ioState1
 		ioState3				= checkSDISize sdiPtr sdiSize1 ioState2
 		pState1					= {pState & io=ioState3}
 		(ls1,pState2)			= menuInit (ls,pState1)
@@ -77,14 +77,14 @@ where
 	
 	getMenuDefInit :: !(Menu m .ls .pst) -> IdFun *(.ls,.pst)
 	getMenuDefInit (Menu _ _ atts)
-		= getMenuInitFun (snd (Select isMenuInit (MenuInit id) atts))
+		= getMenuInitFun (snd (cselect isMenuInit (MenuInit id) atts))
 
 	createMenu :: !Int !SystemId !Id !(Menu m .ls (PSt .l)) ![Char] !*ReceiverTable !*IdTable !OSMenuBar !(PSt .l)
 						 -> (!Bool,MenuHandle .ls (PSt .l), ![Char],!*ReceiverTable,!*IdTable,!OSMenuBar, !PSt .l)
 						 |  MenuElements m
 	createMenu index ioId menuId mDef keys rt it osMenuBar pState
 		# (ms,pState)				= menuElementToHandles (menuDefGetElements mDef) pState
-		  itemHs					= map MenuElementStateToMenuElementHandle ms
+		  itemHs					= map menuElementStateToMenuElementHandle ms
 		  (ok,itemHs,rt,it)			= menuIdsAreConsistent ioId menuId itemHs rt it
 		| not ok
 			= (False,undef,keys,rt,it,osMenuBar,pState)
@@ -111,14 +111,14 @@ createPopUpMenu :: !SystemId .ls !(PopUpMenu m .ls (PSt .l)) !(MenuHandles (PSt 
 													|  PopUpMenuElements m
 createPopUpMenu ioId ls (PopUpMenu items) mHs=:{mMenus, mKeys=keys, mPopUpId} rt it osMenuBar pState
 	# (ms,pState)			= popUpMenuElementToHandles items pState
-	  itemHs				= map MenuElementStateToMenuElementHandle ms
+	  itemHs				= map menuElementStateToMenuElementHandle ms
 	  menuId				= fromJust mPopUpId
 	  (ok,itemHs,rt,it)		= menuIdsAreConsistent ioId menuId itemHs rt it
 	| not ok
 		= (False,mHs,rt,it,osMenuBar,pState)
 	| otherwise
 		# (tb,ioState)		= getIOToolbox pState.io
-		# (menu,tb)			= OScreatePopUpMenu tb
+		# (menu,tb)			= osCreatePopUpMenu tb
 		# (_,itemHs,keys,tb)= createMenuElements osMenuBar menu 1 itemHs keys tb
 		  itemHs			= map validatePopUpMenuFunction itemHs
 		  mlsH				= {	mHandle		= menu
@@ -178,13 +178,13 @@ where
 */
 	closePopUpMenu :: !(PSt .l) -> PSt .l
 	closePopUpMenu pState=:{io}
-		# (found,mDevice,ioState)	= IOStGetDevice MenuDevice io
+		# (found,mDevice,ioState)	= ioStGetDevice MenuDevice io
 		| not found
 			= menucreateFatalError "closePopUpMenu" "could not retrieve MenuSystemState from IOSt"
 		| otherwise
-			# mHs					= MenuSystemStateGetMenuHandles mDevice
+			# mHs					= menuSystemStateGetMenuHandles mDevice
 			  mHs					= closepopupmenu mHs
-			# ioState				= IOStSetDevice (MenuSystemState mHs) ioState
+			# ioState				= ioStSetDevice (MenuSystemState mHs) ioState
 			= {pState & io=ioState}
 
 
@@ -193,11 +193,11 @@ where
 createMenuElements :: !OSMenuBar !OSMenu !Int ![MenuElementHandle .ls .pst] ![Char] !*OSToolbox
 									 -> (!Int,![MenuElementHandle .ls .pst],![Char],!*OSToolbox)
 createMenuElements osmenubar menu iNr itemHs keys tb
-	# (empty,itemHs)			= u_isEmpty itemHs
+	# (empty,itemHs)			= uisEmpty itemHs
 	| empty
 		= (iNr,itemHs,keys,tb)
 	| otherwise
-		# (itemH,itemHs)		= HdTl itemHs
+		# (itemH,itemHs)		= hdtl itemHs
 		# (iNr,itemH, keys,tb)	= createMenuElement  osmenubar menu iNr itemH keys tb
 		# (iNr,itemHs,keys,tb)	= createMenuElements osmenubar menu iNr itemHs keys tb
 		= (iNr,[itemH:itemHs],keys,tb)
@@ -218,7 +218,7 @@ where
 		  itemH					= {itemH & mOSMenuItem=osMenuItem}
 		= (iNr+1,MenuItemHandle itemH,keys,tb)
 	createMenuElement osmenubar menu iNr (MenuSeparatorHandle itemH) keys tb
-		# (osMenuSeparator,_,tb)= OSAppendMenuSeparator iNr menu tb
+		# (osMenuSeparator,_,tb)= osAppendMenuSeparator iNr menu tb
 		  itemH					= {itemH & mOSMenuSeparator=osMenuSeparator}
 		= (iNr+1,MenuSeparatorHandle itemH,keys,tb)
 	createMenuElement _ _ iNr itemH=:(MenuReceiverHandle _) keys tb
@@ -241,11 +241,11 @@ where
 extendMenu :: !OSMenuBar !OSMenu !Int ![MenuElementHandle .ls .pst] ![MenuElementHandle .ls .pst] ![Char] !*OSToolbox
 															    -> (![MenuElementHandle .ls .pst],![Char],!*OSToolbox)
 extendMenu osmenubar menu iNr itemHs items keys tb
-	# (empty,itemHs)		= u_isEmpty itemHs
+	# (empty,itemHs)		= uisEmpty itemHs
 	| empty
 		= (items,keys,tb)
 	| otherwise
-		# (itemH,itemHs)	= HdTl itemHs
+		# (itemH,itemHs)	= hdtl itemHs
 		# (items,keys,tb)	= extendMenu  osmenubar menu iNr itemHs items keys tb
 		# (itemH,keys,tb)	= extendMenu` osmenubar menu iNr itemH        keys tb
 		= ([itemH:items],keys,tb)
@@ -265,7 +265,7 @@ where
 		# (osMenuItem,itemH,tb)			= insertMenu osmenubar menu iNr itemH tb
 		= (MenuItemHandle {itemH & mOSMenuItem=osMenuItem},keys,tb)
 	extendMenu` osmenubar menu iNr (MenuSeparatorHandle itemH) keys tb
-		# (osMenuItem,_,tb)				= OSAppendMenuSeparator iNr menu tb
+		# (osMenuItem,_,tb)				= osAppendMenuSeparator iNr menu tb
 		= (MenuSeparatorHandle {itemH & mOSMenuSeparator=osMenuItem},keys,tb)
 	extendMenu` _ _ _ itemH=:(MenuReceiverHandle _) keys tb
 		= (itemH,keys,tb)
@@ -284,7 +284,7 @@ where
 
 insertMenu :: !OSMenuBar !OSMenu !Int !*(MenuItemHandle .ls .pst) !*OSToolbox -> (!OSMenuItem,!*MenuItemHandle .ls .pst,!*OSToolbox)
 insertMenu osmenubar menu iNr itemH=:{mItemKey,mItemTitle,mItemSelect,mItemMark,mItemAtts} tb
-	# (osMenuItem,_,tb)	= OSAppendMenuItem osmenubar iNr menu mItemTitle mItemSelect mItemMark shortcut tb
+	# (osMenuItem,_,tb)	= osAppendMenuItem osmenubar iNr menu mItemTitle mItemSelect mItemMark shortcut tb
 	= (osMenuItem,itemH,tb)
 where
 	shortcut			= case mItemKey of
@@ -310,12 +310,12 @@ SystemUnable		:== False
 
 NewMenuHandle :: !(Menu m .ls .pst) !Int !Id !OSMenuBar !*OSToolbox -> (!OSMenu,!MenuHandle .ls .pst,!OSMenuBar,!*OSToolbox)
 NewMenuHandle mDef index menuId menuBar tb
-	# (ok,osMenuNr,tb)	= OSNewMenuNr tb		// PA: generation of internal menu numbers added
+	# (ok,osMenuNr,tb)	= osNewMenuNr tb		// PA: generation of internal menu numbers added
 	| not ok
 		= menucreateFatalError "NewMenuHandle" "To many Menus created for one interactive process"
 	# (select,mDef)		= menuDefGetSelectState	mDef
 	  (title,_)			= menuDefGetTitle		mDef
-	# (menu,menuBar,tb)	= OSMenuInsert index osMenuNr title menuBar tb
+	# (menu,menuBar,tb)	= osMenuInsert index osMenuNr title menuBar tb
 	  mH				= {	mHandle		= menu
 						  , mMenuId		= menuId
 						  ,	mOSMenuNr	= osMenuNr
@@ -324,36 +324,36 @@ NewMenuHandle mDef index menuId menuBar tb
 						  ,	mItems		= []
 						  }
 	| enabled select
-		= (menu,mH,menuBar,OSEnableMenu  index menuBar tb)
+		= (menu,mH,menuBar,osEnableMenu  index menuBar tb)
 	| otherwise
-		= (menu,mH,menuBar,OSDisableMenu index menuBar tb)
+		= (menu,mH,menuBar,osDisableMenu index menuBar tb)
 
 //	PA: New version of creating a SubMenu:
 NewSubMenuHandle :: !(SubMenuHandle .ls .pst) !Int !OSMenu !*OSToolbox -> (!SubMenuHandle .ls .pst,!*OSToolbox)
 NewSubMenuHandle mH=:{mSubTitle,mSubSelect} index menu tb
-	# (ok,osMenuNr,tb)	= OSNewSubMenuNr tb
+	# (ok,osMenuNr,tb)	= osNewSubMenuNr tb
 	| not ok
 		= menucreateFatalError "NewSubMenuHandle" "To many SubMenus created for one interactive process"
-	# (osH,_,tb)		= OSSubMenuInsert index osMenuNr mSubTitle menu tb
+	# (osH,_,tb)		= osSubMenuInsert index osMenuNr mSubTitle menu tb
 	# mH				= {mH & mSubHandle=osH,mSubOSMenuNr=osMenuNr}
 	| mSubSelect
-		= (mH,OSEnableMenuItem  menu osH tb)
+		= (mH,osEnableMenuItem  menu osH tb)
 	| otherwise
-		= (mH,OSDisableMenuItem menu osH tb)
+		= (mH,osDisableMenuItem menu osH tb)
 
 closepopupmenu :: !(MenuHandles .pst) -> MenuHandles .pst
 closepopupmenu mHs=:{mMenus,mPopUpId}
 	| isJust mPopUpId
 		= mHs
 	| otherwise
-		# (msH,msHs)	= HdTl mMenus
+		# (msH,msHs)	= hdtl mMenus
 		  (id,_)		= menuStateHandleGetMenuId msH
 		= {mHs & mMenus=msHs,mPopUpId=Just id}
 
 disposeMenuItemHandle :: !OSMenu !Int !(MenuItemHandle .ls .pst) !(![Char],!*IdTable,!*OSToolbox)
 								   -> (!MenuItemHandle .ls .pst, !(![Char],!*IdTable,!*OSToolbox))
 disposeMenuItemHandle menu iNr itemH=:{mItemKey,mItemId,mOSMenuItem} (keys,it,tb)
-	# tb		= snd (OSMenuRemoveItem mOSMenuItem menu tb)
+	# tb		= snd (osMenuRemoveItem mOSMenuItem menu tb)
 	| isJust mItemId
 		# it	= snd (removeIdFromIdTable (fromJust mItemId) it)
 		= (itemH,(keys`,it,tb))
@@ -366,13 +366,13 @@ where
 disposeSubMenuHandles :: !(MenuElementHandle .ls .pst) !*OSToolbox
 					  -> (!MenuElementHandle .ls .pst, !*OSToolbox)
 disposeSubMenuHandles (MenuListLSHandle mListItems) tb
-	# (itemHs,tb)	= StateMap disposeSubMenuHandles mListItems tb
+	# (itemHs,tb)	= stateMap disposeSubMenuHandles mListItems tb
 	= (MenuListLSHandle itemHs,tb)
 disposeSubMenuHandles (MenuExtendLSHandle mExH=:{mExtendItems=itemHs}) tb
-	# (itemHs,tb)	= StateMap disposeSubMenuHandles itemHs tb
+	# (itemHs,tb)	= stateMap disposeSubMenuHandles itemHs tb
 	= (MenuExtendLSHandle {mExH & mExtendItems=itemHs},tb)
 disposeSubMenuHandles (MenuChangeLSHandle mChH=:{mChangeItems=itemHs}) tb
-	# (itemHs,tb)	= StateMap disposeSubMenuHandles itemHs tb
+	# (itemHs,tb)	= stateMap disposeSubMenuHandles itemHs tb
 	= (MenuChangeLSHandle {mChH & mChangeItems=itemHs},tb)
 disposeSubMenuHandles itemH tb
 	= (itemH,tb)
@@ -381,25 +381,25 @@ disposeShortcutkeys :: !OSWindowPtr !(MenuElementHandle .ls .pst) !(![Char],!*OS
 								 -> (!MenuElementHandle .ls .pst, !(![Char],!*OSToolbox))
 disposeShortcutkeys framePtr (MenuItemHandle itemH=:{mItemKey,mOSMenuItem}) (keys,tb)
 	| isJust mItemKey
-		= (MenuItemHandle itemH,(thd3 (Remove ((==) key) key keys),WinRemoveMenuShortKey framePtr mOSMenuItem tb))
+		= (MenuItemHandle itemH,(thd3 (remove ((==) key) key keys),winRemoveMenuShortKey framePtr mOSMenuItem tb))
 	with
 		key = fromJust mItemKey
 	| otherwise
 		= (MenuItemHandle itemH,(keys,tb))
 disposeShortcutkeys framePtr (SubMenuHandle itemH=:{mSubItems=itemHs}) keys_tb
-	# (itemHs,keys_tb)	= StateMap (disposeShortcutkeys framePtr) itemHs keys_tb
+	# (itemHs,keys_tb)	= stateMap (disposeShortcutkeys framePtr) itemHs keys_tb
 	= (SubMenuHandle {itemH & mSubItems=itemHs},keys_tb)
 disposeShortcutkeys framePtr (RadioMenuHandle itemH=:{mRadioItems=itemHs}) keys_tb
-	# (itemHs,keys_tb)	= StateMap (disposeShortcutkeys framePtr) itemHs keys_tb
+	# (itemHs,keys_tb)	= stateMap (disposeShortcutkeys framePtr) itemHs keys_tb
 	= (RadioMenuHandle {itemH & mRadioItems=itemHs},keys_tb)
 disposeShortcutkeys framePtr (MenuListLSHandle itemHs) keys_tb
-	# (itemHs,keys_tb)	= StateMap (disposeShortcutkeys framePtr) itemHs keys_tb
+	# (itemHs,keys_tb)	= stateMap (disposeShortcutkeys framePtr) itemHs keys_tb
 	= (MenuListLSHandle itemHs,keys_tb)
 disposeShortcutkeys framePtr (MenuExtendLSHandle mExH=:{mExtendItems=itemHs}) keys_tb
-	# (itemHs,keys_tb)	= StateMap (disposeShortcutkeys framePtr) itemHs keys_tb
+	# (itemHs,keys_tb)	= stateMap (disposeShortcutkeys framePtr) itemHs keys_tb
 	= (MenuExtendLSHandle {mExH & mExtendItems=itemHs},keys_tb)
 disposeShortcutkeys framePtr (MenuChangeLSHandle mChH=:{mChangeItems=itemHs}) keys_tb
-	# (itemHs,keys_tb)	= StateMap (disposeShortcutkeys framePtr) itemHs keys_tb
+	# (itemHs,keys_tb)	= stateMap (disposeShortcutkeys framePtr) itemHs keys_tb
 	= (MenuChangeLSHandle {mChH & mChangeItems=itemHs},keys_tb)
 disposeShortcutkeys _ itemH keys_tb
 	= (itemH,keys_tb)
@@ -414,10 +414,10 @@ disposeMenuIds pid (MenuItemHandle itemH=:{mItemId}) (rt,it)
 disposeMenuIds pid (MenuReceiverHandle itemH=:{mReceiverHandle={rId}}) (rt,it)
 	= (MenuReceiverHandle itemH,(snd (removeReceiverFromReceiverTable rId rt),snd (removeIdFromIdTable rId it)))
 disposeMenuIds pid (SubMenuHandle itemH=:{mSubItems=itemHs}) ts
-	# (itemHs,ts)		= StateMap (disposeMenuIds pid) itemHs ts
+	# (itemHs,ts)		= stateMap (disposeMenuIds pid) itemHs ts
 	= (SubMenuHandle {itemH & mSubItems=itemHs},ts)
 disposeMenuIds pid (RadioMenuHandle itemH=:{mRadioId,mRadioItems=itemHs}) ts
-	# (itemHs,(rt,it))	= StateMap (disposeMenuIds pid) itemHs ts
+	# (itemHs,(rt,it))	= stateMap (disposeMenuIds pid) itemHs ts
 	# radioH			= RadioMenuHandle {itemH & mRadioItems=itemHs}
 	| isNothing mRadioId
 		= (radioH,(rt,it))
@@ -429,22 +429,22 @@ disposeMenuIds pid (MenuSeparatorHandle itemH=:{mSepId}) (rt,it)
 	| otherwise
 		= (MenuSeparatorHandle itemH,(rt,snd (removeIdFromIdTable (fromJust mSepId) it)))
 disposeMenuIds pid (MenuListLSHandle itemHs) ts
-	# (itemHs,ts)	= StateMap (disposeMenuIds pid) itemHs ts
+	# (itemHs,ts)	= stateMap (disposeMenuIds pid) itemHs ts
 	= (MenuListLSHandle itemHs,ts)
 disposeMenuIds pid (MenuExtendLSHandle itemH=:{mExtendItems=itemHs}) ts
-	# (itemHs,ts)	= StateMap (disposeMenuIds pid) itemHs ts
+	# (itemHs,ts)	= stateMap (disposeMenuIds pid) itemHs ts
 	= (MenuExtendLSHandle {itemH & mExtendItems=itemHs},ts)
 disposeMenuIds pid (MenuChangeLSHandle itemH=:{mChangeItems=itemHs}) ts
-	# (itemHs,ts)	= StateMap (disposeMenuIds pid) itemHs ts
+	# (itemHs,ts)	= stateMap (disposeMenuIds pid) itemHs ts
 	= (MenuChangeLSHandle {itemH & mChangeItems=itemHs},ts)
 
 disposeMenuHandles :: !Bool !(MenuHandles .pst) !(!OSMenuBar,!*OSToolbox)
 						 -> (!MenuHandles .pst, !(!OSMenuBar,!*OSToolbox))
 disposeMenuHandles _ menus=:{mMenus} (osMenuBar,tb)
-	# (mHs,(osMenuBar,tb))	= StateMap dispose mMenus (osMenuBar,tb)
+	# (mHs,(osMenuBar,tb))	= stateMap dispose mMenus (osMenuBar,tb)
 	= ({menus & mMenus=mHs},(osMenuBar,tb))
 where
 	dispose :: !(MenuStateHandle .pst) !(!OSMenuBar,!*OSToolbox) -> (!MenuStateHandle .pst,(!OSMenuBar,!*OSToolbox))
 	dispose msH (osMenuBar,tb)
 		# (menuH,msH)	= menuStateHandleGetHandle msH
-		= (msH,OSMenuRemove menuH osMenuBar tb)
+		= (msH,osMenuRemove menuH osMenuBar tb)

@@ -6,7 +6,7 @@ implementation module StdControlReceiver
 
 import	StdTuple
 import	StdControlClass, StdReceiverAttribute, windowhandle
-from	commondef		import Select, Cond
+from	commondef		import cselect, Cond
 from	receiveraccess	import newReceiverHandle, newReceiverHandle2
 from	ostypes			import OSNoWindowPtr
 
@@ -14,7 +14,7 @@ from	ostypes			import OSNoWindowPtr
 instance Controls (Receiver m) where
 	controlToHandles :: !(Receiver m .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (Receiver rid f atts) pState
-		= (	[WElementHandleToControlState
+		= (	[wElementHandleToControlState
 				(WItemHandle 
 				{	wItemId			= Just id
 				,	wItemNr			= 0
@@ -35,7 +35,7 @@ instance Controls (Receiver m) where
 		  ,	pState
 		  )
 	where
-		id		= RIdtoId rid
+		id		= rIdtoId rid
 		select	= getSelectState atts
 	
 	getControlType :: (Receiver m .ls .pst) -> ControlType
@@ -45,7 +45,7 @@ instance Controls (Receiver m) where
 instance Controls (Receiver2 m r) where
 	controlToHandles :: !(Receiver2 m r .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (Receiver2 r2id f atts) pState
-		= (	[WElementHandleToControlState
+		= (	[wElementHandleToControlState
 				(WItemHandle 
 				{	wItemId			= Just id
 				,	wItemNr			= 0
@@ -66,7 +66,7 @@ instance Controls (Receiver2 m r) where
 		  ,	pState
 		  )
 	where
-		id		= R2IdtoId r2id
+		id		= r2IdtoId r2id
 		select	= getSelectState atts
 	
 	getControlType :: (Receiver2 m r .ls .pst) -> ControlType
@@ -75,4 +75,4 @@ instance Controls (Receiver2 m r) where
 
 getSelectState :: ![ReceiverAttribute .pst] -> SelectState
 getSelectState rAtts
-	= getReceiverSelectStateAtt (snd (Select isReceiverSelectState (ReceiverSelectState Able) rAtts))
+	= getReceiverSelectStateAtt (snd (cselect isReceiverSelectState (ReceiverSelectState Able) rAtts))

@@ -7,7 +7,7 @@ import	StdFile, StdTuple
 import	iostate, StdFileSelect, StdSound, StdTime
 from	scheduler			import handleOneEventForDevices
 from	StdPSt				import accPIO, appPIO
-from	clCCall_12			import WinPlaySound
+from	clCCall_12			import winPlaySound
 import	osfileselect
 from	ostoolbox			import OSNewToolbox
 
@@ -48,30 +48,30 @@ instance FileSystem (PSt .l) where
 instance FileEnv (PSt .l) where
 	accFiles :: !.(*Files -> (.x,*Files)) !(PSt .l) -> (!.x,!PSt .l)
 	accFiles accfun pState=:{io}
-		# (world,io)		= IOStGetWorld io
+		# (world,io)		= ioStGetWorld io
 		# (x,world)			= accFiles accfun world
-		# pState			= {pState & io=IOStSetWorld world io}
+		# pState			= {pState & io=ioStSetWorld world io}
 		= (x,pState)
 	
 	appFiles :: !.(*Files -> *Files) !*(PSt .l) -> *PSt .l
 	appFiles appfun pState=:{io}
-		# (world,io)		= IOStGetWorld io
+		# (world,io)		= ioStGetWorld io
 		# world				= appFiles appfun world
-		# pState			= {pState & io=IOStSetWorld world io}
+		# pState			= {pState & io=ioStSetWorld world io}
 		= pState
 
 // MW11..
 instance FileEnv (IOSt .l) where
 	accFiles :: !.(*Files -> (.x,*Files)) !(IOSt .l) -> (!.x,!IOSt .l)
 	accFiles accfun io
-		# (world,io)		= IOStGetWorld io
+		# (world,io)		= ioStGetWorld io
 		# (x,world)			= accFiles accfun world
-		# io				= IOStSetWorld world io
+		# io				= ioStSetWorld world io
 		= (x,io)
 	appFiles appfun io
-		# (world,io)		= IOStGetWorld io
+		# (world,io)		= ioStGetWorld io
 		# world				= appFiles appfun world
-		# io				= IOStSetWorld world io
+		# io				= ioStSetWorld world io
 		= io
 // ..MW11
 
@@ -81,29 +81,29 @@ instance FileSelectEnv (PSt .l) where
 	selectInputFile :: !(PSt .l) -> (!Maybe String,!PSt .l)
 	selectInputFile pState
 		# (tb,pState)			= accPIO getIOToolbox pState
-		# tb					= OSinitialiseFileSelectors tb
-		# (ok,name,pState,tb)	= OSselectinputfile handleOSEvent pState tb
+		# tb					= osInitialiseFileSelectors tb
+		# (ok,name,pState,tb)	= osSelectinputfile handleOSEvent pState tb
 		# pState				= appPIO (setIOToolbox tb) pState
 		= (if ok (Just name) Nothing,pState)
 	
 	selectOutputFile:: !String !String !(PSt .l) -> (!Maybe String,!PSt .l)
 	selectOutputFile prompt originalName pState
 		# (tb,pState)			= accPIO getIOToolbox pState
-		# tb					= OSinitialiseFileSelectors tb
-		# (ok,name,pState,tb)	= OSselectoutputfile handleOSEvent pState prompt originalName tb
+		# tb					= osInitialiseFileSelectors tb
+		# (ok,name,pState,tb)	= osSelectoutputfile handleOSEvent pState prompt originalName tb
 		# pState				= appPIO (setIOToolbox tb) pState
 		= (if ok (Just name) Nothing,pState)
 	
 	selectDirectory :: !(PSt .l) -> (!Maybe String,!PSt .l)
 	selectDirectory pState
 		# (tb,pState)			= accPIO getIOToolbox pState
-		# tb					= OSinitialiseFileSelectors tb
-		# (ok,name,pState,tb)	= OSselectdirectory handleOSEvent pState tb
+		# tb					= osInitialiseFileSelectors tb
+		# (ok,name,pState,tb)	= osSelectdirectory handleOSEvent pState tb
 		# pState				= appPIO (setIOToolbox tb) pState
 		= (if ok (Just name) Nothing,pState)
 
 
-//	handleOSEvent turns handleOneEventForDevices into the form required by OSselect(in/out)putfile.
+//	handleOSEvent turns handleOneEventForDevices into the form required by osSelect(in/out)putfile.
 handleOSEvent :: !OSEvent !(PSt .l) -> PSt .l
 handleOSEvent osEvent pState
 	= thd3 (handleOneEventForDevices (ScheduleOSEvent osEvent []) pState)
@@ -115,23 +115,23 @@ handleOSEvent osEvent pState
 instance TimeEnv (PSt .l) where
 	getBlinkInterval :: !(PSt .l) -> (!Int,!PSt .l)
 	getBlinkInterval pState=:{io}
-		# (world,io)		= IOStGetWorld io
+		# (world,io)		= ioStGetWorld io
 		# (blink,world)		= getBlinkInterval world
-		# pState			= {pState & io=IOStSetWorld world io}
+		# pState			= {pState & io=ioStSetWorld world io}
 		= (blink,pState)
 	
 	getCurrentTime :: !(PSt .l) -> (!Time,!PSt .l)
 	getCurrentTime pState=:{io}
-		# (world,io)		= IOStGetWorld io
+		# (world,io)		= ioStGetWorld io
 		# (time,world)		= getCurrentTime world
-		# pState			= {pState & io=IOStSetWorld world io}
+		# pState			= {pState & io=ioStSetWorld world io}
 		= (time,pState)
 	
 	getCurrentDate :: !(PSt .l) -> (!Date,!PSt .l)
 	getCurrentDate pState=:{io}
-		# (world,io)		= IOStGetWorld io
+		# (world,io)		= ioStGetWorld io
 		# (date,world)		= getCurrentDate world
-		# pState			= {pState & io=IOStSetWorld world io}
+		# pState			= {pState & io=ioStSetWorld world io}
 		= (date,pState)
 */
 
@@ -156,31 +156,31 @@ instance TimeEnv (PSt .l) where
 instance TimeEnv (IOSt .l) where
 	getBlinkInterval :: !(IOSt .l) -> (!Int,!IOSt .l)
 	getBlinkInterval io
-		# (world,io)		= IOStGetWorld io
+		# (world,io)		= ioStGetWorld io
 		  (blink,world)		= getBlinkInterval world
-		= (blink,IOStSetWorld world io)
+		= (blink,ioStSetWorld world io)
 	
 	getCurrentTime :: !(IOSt .l) -> (!Time,!IOSt .l)
 	getCurrentTime io
-		# (world,io)		= IOStGetWorld io
+		# (world,io)		= ioStGetWorld io
 		  (time,world)		= getCurrentTime world
-		= (time,IOStSetWorld world io)
+		= (time,ioStSetWorld world io)
 	
 	getCurrentDate :: !(IOSt .l) -> (!Date,!IOSt .l)
 	getCurrentDate io
-		# (world,io)		= IOStGetWorld io
+		# (world,io)		= ioStGetWorld io
 		  (date,world)		= getCurrentDate world
-		= (date, IOStSetWorld world io)
+		= (date, ioStSetWorld world io)
 
 	getCurrentTick :: !(IOSt .l) -> (!Tick,!IOSt .l)
 	getCurrentTick io
-		# (world,io)		= IOStGetWorld io
+		# (world,io)		= ioStGetWorld io
 		  (tick,world)		= getCurrentTick world
-		= (tick, IOStSetWorld world io)
+		= (tick, ioStSetWorld world io)
 // ..MW11
 
 instance playSoundFile (PSt .l) where
 	playSoundFile :: !String !(PSt .l) -> (!Bool,!PSt .l)
 	playSoundFile soundFileName pState=:{io}
-		# (ok,io)	= accIOToolbox (WinPlaySound soundFileName) io
+		# (ok,io)	= accIOToolbox (winPlaySound soundFileName) io
 		= (ok,{pState & io=io})

@@ -10,8 +10,8 @@ implementation module menuevent
 
 import	StdBool, StdList, StdMisc
 import	clCrossCall_12
-from	clCCall_12			import WinMakeCString, CSTR, ALTBIT, CTRLBIT, SHIFTBIT
-from	osmenu				import OSMenuItemCheck
+from	clCCall_12			import winMakeCString, CSTR, ALTBIT, CTRLBIT, SHIFTBIT
+from	osmenu				import osMenuItemCheck
 import	commondef, deviceevents, iostate
 from	menuaccess			import menuStateHandleGetHandle, menuStateHandleGetMenuId
 from	processstack		import topShowProcessShowState
@@ -21,7 +21,7 @@ from	StdPSt				import accPIO
 
 menueventFatalError :: String String -> .x
 menueventFatalError function error
-	= FatalError function "menuevent" error
+	= fatalError function "menuevent" error
 
 
 /*	menuEvent filters the scheduler events that can be handled by this menu device.
@@ -31,7 +31,7 @@ menueventFatalError function error
 */
 menuEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
 menuEvent schedulerEvent pState
-	# (hasMenuDevice,pState)	= accPIO (IOStHasDevice MenuDevice) pState
+	# (hasMenuDevice,pState)	= accPIO (ioStHasDevice MenuDevice) pState
 	| not hasMenuDevice			// This condition should never hold
 		= menueventFatalError "menuEvent" "MenuDevice.dEvent applied while MenuDevice not present in IOSt"
 	| otherwise
@@ -40,22 +40,22 @@ where
 	menuEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
 	menuEvent schedulerEvent=:(ScheduleOSEvent osEvent=:{ccMsg} _) pState=:{io=ioState}
 		| isToolbarOSEvent ccMsg
-			# (osdInfo,ioState)				= IOStGetOSDInfo ioState
+			# (osdInfo,ioState)				= ioStGetOSDInfo ioState
 			# (myEvent,replyToOS,deviceEvent,ioState)
 											= filterToolbarEvent osdInfo osEvent ioState
 			# pState						= {pState & io=ioState}
 			  schedulerEvent				= if (isJust replyToOS) (ScheduleOSEvent osEvent (fromJust replyToOS)) schedulerEvent
 			= (myEvent,deviceEvent,schedulerEvent,pState)
 		| isMenuOSEvent ccMsg
-			# (processStack,ioState)		= IOStGetProcessStack ioState
+			# (processStack,ioState)		= ioStGetProcessStack ioState
 			  (found,systemId)				= topShowProcessShowState processStack
-			# (ioId,ioState)				= IOStGetIOId ioState
+			# (ioId,ioState)				= ioStGetIOId ioState
 			# (tb,ioState)					= getIOToolbox ioState
-			# (found,mDevice,ioState)		= IOStGetDevice MenuDevice ioState
-			# menus							= MenuSystemStateGetMenuHandles mDevice
+			# (found,mDevice,ioState)		= ioStGetDevice MenuDevice ioState
+			# menus							= menuSystemStateGetMenuHandles mDevice
 			# (myEvent,replyToOS,deviceEvent,menus,tb)
 			  								= filterOSEvent osEvent (found && systemId==ioId) menus tb
-			# ioState						= IOStSetDevice (MenuSystemState menus) ioState
+			# ioState						= ioStSetDevice (MenuSystemState menus) ioState
 			# ioState						= setIOToolbox tb ioState
 			# pState						= {pState & io=ioState}
 			  schedulerEvent				= if (isJust replyToOS) (ScheduleOSEvent osEvent (fromJust replyToOS)) schedulerEvent
@@ -73,22 +73,22 @@ where
 		isToolbarOSEvent _						= False
 	
 	menuEvent schedulerEvent=:(ScheduleMsgEvent msgEvent) pState=:{io=ioState}
-		# (ioId,ioState)				= IOStGetIOId ioState
+		# (ioId,ioState)				= ioStGetIOId ioState
 		| ioId<>recLoc.rlIOId || recLoc.rlDevice<>MenuDevice
 			= (False,Nothing,schedulerEvent,{pState & io=ioState})
 		| otherwise
-			# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
-			  menus						= MenuSystemStateGetMenuHandles mDevice
+			# (found,mDevice,ioState)	= ioStGetDevice MenuDevice ioState
+			  menus						= menuSystemStateGetMenuHandles mDevice
 			  (found,menus)				= hasMenuHandlesMenu recLoc.rlParentId menus
 			  deviceEvent				= if found (Just (ReceiverEvent msgEvent)) Nothing
-			# ioState					= IOStSetDevice (MenuSystemState menus) ioState
+			# ioState					= ioStSetDevice (MenuSystemState menus) ioState
 			= (found,deviceEvent,schedulerEvent,{pState & io=ioState})
 	where
 		recLoc							= getMsgEventRecLoc msgEvent
 		
 		hasMenuHandlesMenu :: !Id !*(MenuHandles .pst) -> (!Bool,!*MenuHandles .pst)
 		hasMenuHandlesMenu menuId mHs=:{mMenus}
-			# (found,mMenus)= UContains (eqMenuId menuId) mMenus
+			# (found,mMenus)= ucontains (eqMenuId menuId) mMenus
 			= (found,{mHs & mMenus=mMenus})
 		where
 			eqMenuId :: !Id !*(MenuStateHandle .pst) -> *(!Bool,!*MenuStateHandle .pst)
@@ -117,15 +117,15 @@ filterToolbarEvent osdInfo {ccMsg=CcWmBUTTONCLICKED,p2=toolbarPtr,p4=toolbarInde
 */
 filterToolbarEvent osdInfo {ccMsg=CcWmGETTOOLBARTIPTEXT,p1=toolbarPtr,p2=toolbarIndex} ioState
 	| isToolbarEvent osdInfo toolbarPtr
-		# (atts,ioState)		= IOStGetProcessAttributes ioState
-		  (found,att)			= Select isProcessToolbar undef atts
+		# (atts,ioState)		= ioStGetProcessAttributes ioState
+		  (found,att)			= cselect isProcessToolbar undef atts
 		| not found
 			= (True,Nothing,Nothing,ioState)
 		# maybe_tip				= gettooltip toolbarIndex (getProcessToolbarAtt att)
 		| isNothing maybe_tip
 			= (True,Nothing,Nothing,ioState)
 		// otherwise
-			# (textptr,ioState)	= accIOToolbox (WinMakeCString (fromJust maybe_tip)) ioState
+			# (textptr,ioState)	= accIOToolbox (winMakeCString (fromJust maybe_tip)) ioState
 			= (True,Just [textptr],Nothing,ioState)
 	| otherwise
 		= (False,Nothing,Nothing,ioState)
@@ -167,10 +167,10 @@ where
 	getSelectedMenuStateHandlesItem :: !Int !Int !*[*MenuStateHandle .pst] !*OSToolbox
 					-> (!Bool,!Maybe DeviceEvent,!*[*MenuStateHandle .pst],!*OSToolbox)
 	getSelectedMenuStateHandlesItem item mods msHs tb
-		# (empty,msHs)					= u_isEmpty msHs
+		# (empty,msHs)					= uisEmpty msHs
 		| empty
 			= (False,Nothing,msHs,tb)
-		# (msH,msHs)					= HdTl msHs
+		# (msH,msHs)					= hdtl msHs
 		# (found,menuEvent,msH,tb)		= getSelectedMenuStateHandleItem item mods msH tb
 		| found
 			= (found,menuEvent,[msH:msHs],tb)
@@ -190,10 +190,10 @@ where
 			getSelectedMenuElementHandlesItem :: !Int !OSMenu !Id !Int ![Int] !Int !*[*MenuElementHandle .ls .pst] !*OSToolbox
 										  -> (!Bool,!Maybe DeviceEvent,![Int],!Int,!*[*MenuElementHandle .ls .pst],!*OSToolbox)
 			getSelectedMenuElementHandlesItem item mH menuId mods parents zIndex itemHs tb
-				# (empty,itemHs)							= u_isEmpty itemHs
+				# (empty,itemHs)							= uisEmpty itemHs
 				| empty
 					= (False,Nothing,parents,zIndex,itemHs,tb)
-				# (itemH,itemHs)							= HdTl itemHs
+				# (itemH,itemHs)							= hdtl itemHs
 				# (found,menuEvent,parents,zIndex,itemH,tb)	= getSelectedMenuElementHandle item mH menuId mods parents zIndex itemH tb
 				| found
 					= (found,menuEvent,parents,zIndex,[itemH:itemHs],tb)
@@ -242,7 +242,7 @@ where
 					getMenuItemOSMenuItem (MenuItemHandle {mOSMenuItem}) = mOSMenuItem
 			*/	
 				getSelectedMenuElementHandle item mH menuId mods parents zIndex (RadioMenuHandle rH=:{mRadioSelect,mRadioItems=itemHs,mRadioIndex}) tb
-					# (nrRadios,itemHs)	= Ulength itemHs
+					# (nrRadios,itemHs)	= ulength itemHs
 					| not mRadioSelect
 						= (False,Nothing,parents,zIndex+nrRadios,RadioMenuHandle {rH & mRadioItems=itemHs},tb)
 					# (found,menuEvent,parents,zIndex1,itemHs,tb)	= getSelectedMenuElementHandlesItem item mH menuId mods parents zIndex itemHs tb
@@ -257,8 +257,8 @@ where
 						# (curH,itemH)			= getMenuItemOSMenuItem itemH
 						# (before,[itemH:after])= splitAt (newIndex-1) (before ++ [itemH:after])
 						# (newH,itemH)			= getMenuItemOSMenuItem itemH
-						# tb					= OSMenuItemCheck False mH curH tb
-						# tb					= OSMenuItemCheck True  mH newH tb
+						# tb					= osMenuItemCheck False mH curH tb
+						# tb					= osMenuItemCheck True  mH newH tb
 						= (found,menuEvent,parents,zIndex1,RadioMenuHandle {rH & mRadioItems=before ++ [itemH:after],mRadioIndex=newIndex},tb)
 				where
 					getMenuItemOSMenuItem :: !*(MenuElementHandle .ls .pst) -> (!OSMenuItem,!MenuElementHandle .ls .pst)
@@ -305,6 +305,6 @@ isToolbarEvent osdInfo toolbarPtr
 where
 	maybeToolbar				= getOSDInfoOSToolbar osdInfo
 
-MenuHandlesGetMenuStateHandles :: !(MenuHandles .pst) -> (![MenuStateHandle .pst],!MenuHandles .pst)
-MenuHandlesGetMenuStateHandles mHs=:{mMenus}
+menuHandlesGetMenuStateHandles :: !(MenuHandles .pst) -> (![MenuStateHandle .pst],!MenuHandles .pst)
+menuHandlesGetMenuStateHandles mHs=:{mMenus}
 	= (mMenus,{mHs & mMenus=[]})

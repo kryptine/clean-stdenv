@@ -10,7 +10,7 @@ definition module StdIOCommon
 
 import	StdOverloaded, StdString
 import	StdBitmap, StdIOBasic, StdKey, StdMaybe
-from	id			import	Id, RId, R2Id, RIdtoId, R2IdtoId, toString, ==
+from	id			import	Id, RId, R2Id, rIdtoId, r2IdtoId, toString, ==
 
 
 /*	The SelectState and MarkState types.				*/
@@ -111,18 +111,14 @@ instance toString SliderState
 
 instance toString UpdateState
 
-RectangleToUpdateState	:: !Rectangle -> UpdateState
+rectangleToUpdateState	:: !Rectangle -> UpdateState
 											// r -> {oldFrame=newFrame=r,updArea=[r]}
 
 /*	viewDomainRange defines the minimum and maximum values for ViewDomains.
 	viewFrameRange  defines the minimum and maximum values for ViewFrames.
 */
-viewDomainRange			:== {	corner1 = {x = 0-(2^30),y = 0-(2^30)}
-							,	corner2 = {x =    2^30 ,y =    2^30 }
-							}
-viewFrameRange			:==	{	corner1 = {x = 1-(2^31),y = 1-(2^31)}
-							,	corner2 = {x = (2^31)-1,y = (2^31)-1}
-							}
+viewDomainRange			:: ViewDomain
+viewFrameRange			:: ViewFrame
 
 
 /*	Modifiers indicates the meta keys that have been pressed (True) or not (False).

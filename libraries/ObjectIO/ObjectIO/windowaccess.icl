@@ -20,7 +20,7 @@ import	cast
 
 windowaccessFatalError :: String String -> .x
 windowaccessFatalError function error
-	= FatalError function "windowaccess" error
+	= fatalError function "windowaccess" error
 
 
 initWindowHandle :: !Title !WindowMode !WindowKind !WindowInfo !*[WElementHandle .ls .pst] ![WindowAttribute *(.ls,.pst)] -> *WindowHandle .ls .pst
@@ -41,7 +41,6 @@ initWindowHandle title mode kind info itemHs atts
 	  ,	whClosing	= False
 	  }
 
-// Mike //
 /*  Access to the particular WindowInfo alternatives (partial functions!).
 */
 getWindowInfoWindowData :: !WindowInfo -> WindowData
@@ -49,7 +48,7 @@ getWindowInfoWindowData (WindowInfo wData) = wData
 
 getWindowInfoGameWindowData :: !WindowInfo -> GameWindowData
 getWindowInfoGameWindowData (GameWindowInfo gwData) = gwData
-///
+
 
 //	Access to the additional WItemInfo field of a WItemHandle (partial functions!).
 
@@ -105,19 +104,19 @@ instance toWID WIDS where
 	toWID :: !WIDS -> WID
 	toWID {wPtr} = ByPtr wPtr
 
-WIDbyId :: !WID -> Bool
-WIDbyId (ById _)	= True
-WIDbyId _			= False
+widById :: !WID -> Bool
+widById (ById _)	= True
+widById _			= False
 
-WIDbyPtr :: !WID -> Bool
-WIDbyPtr (ByPtr _)	= True
-WIDbyPtr _			= False
+widByPtr :: !WID -> Bool
+widByPtr (ByPtr _)	= True
+widByPtr _			= False
 
-WIDgetId :: !WID -> Id
-WIDgetId (ById id)	= id
+widGetId :: !WID -> Id
+widGetId (ById id)	= id
 
-WIDgetPtr :: !WID -> OSWindowPtr
-WIDgetPtr (ByPtr ptr) = ptr
+widGetPtr :: !WID -> OSWindowPtr
+widGetPtr (ByPtr ptr) = ptr
 
 //identifyWindowIds :: !WID !WIDS -> Bool
 identifyWIDS :: !WID !WIDS -> Bool
@@ -317,7 +316,7 @@ setWindowStateHandleClosing closing wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH}}
 */
 getWindowHMargins :: !WindowKind !OSWindowMetrics ![WindowAttribute .st] -> (!Int,!Int)
 getWindowHMargins type wMetrics atts
-	= getWindowHMarginAtt (snd (Select isWindowHMargin (WindowHMargin defaultLeft defaultRight) atts))
+	= getWindowHMarginAtt (snd (cselect isWindowHMargin (WindowHMargin defaultLeft defaultRight) atts))
 where
 	(defaultLeft,defaultRight)	= case type of
 									IsDialog -> (wMetrics.osmHorMargin,wMetrics.osmHorMargin)
@@ -325,7 +324,7 @@ where
 
 getWindowVMargins :: !WindowKind !OSWindowMetrics ![WindowAttribute .st] -> (!Int,!Int)
 getWindowVMargins type wMetrics atts
-	= getWindowVMarginAtt (snd (Select isWindowVMargin (WindowVMargin defaultTop defaultBottom) atts))
+	= getWindowVMarginAtt (snd (cselect isWindowVMargin (WindowVMargin defaultTop defaultBottom) atts))
 where
 	(defaultTop,defaultBottom)	= case type of
 									IsDialog -> (wMetrics.osmVerMargin,wMetrics.osmVerMargin)
@@ -333,7 +332,7 @@ where
 
 getWindowItemSpaces :: !WindowKind !OSWindowMetrics ![WindowAttribute .st] -> (!Int,!Int)
 getWindowItemSpaces type wMetrics atts
-	= getWindowItemSpaceAtt (snd (Select isWindowItemSpace (WindowItemSpace defaultHor defaultVer) atts))
+	= getWindowItemSpaceAtt (snd (cselect isWindowItemSpace (WindowItemSpace defaultHor defaultVer) atts))
 where
 	(defaultHor,defaultVer)		= case type of
 									IsDialog -> (wMetrics.osmHorItemSpace,wMetrics.osmVerItemSpace)
@@ -351,7 +350,7 @@ setWindowHandlesWindows wsHs wHs
 
 getWindowHandlesActiveWindow :: !(WindowHandles .pst) -> *(!Maybe WIDS,!WindowHandles .pst)
 getWindowHandlesActiveWindow wHs=:{whsWindows=wsHs}
-	# (found,wids,wsHs)	= Access get_active_wids undef wsHs
+	# (found,wids,wsHs)	= access get_active_wids undef wsHs
 	  wHs				= {wHs & whsWindows=wsHs}
 	| found				= (Just wids,wHs)
 	| otherwise			= (Nothing,  wHs)
@@ -407,7 +406,7 @@ where
 
 removeWindowHandlesWindow :: !WID !(WindowHandles .pst) -> *(!Bool,WindowStateHandle .pst,!WindowHandles .pst)
 removeWindowHandlesWindow wid wHs=:{whsWindows}
-	# (ok,wsH,wsHs)	= URemove (identifyWindowStateHandle wid) undef whsWindows
+	# (ok,wsH,wsHs)	= uremove (identifyWindowStateHandle wid) undef whsWindows
 	= (ok,wsH,{wHs & whsWindows=wsHs})
 where
 	identifyWindowStateHandle :: !WID !(WindowStateHandle .pst) -> *(!Bool,!WindowStateHandle .pst)
@@ -516,13 +515,13 @@ addWindowHandlesActiveWindow wsH wHs=:{whsWindows}
 disableWindowSystem :: !(WindowHandles .pst) !*OSToolbox -> *(!*(!Maybe WIDS,!WindowHandles .pst),!*OSToolbox)
 disableWindowSystem windows=:{whsModal,whsWindows} tb
 	| not whsModal
-		# (wHs,tb)	= StateMap disablewindow whsWindows tb
+		# (wHs,tb)	= stateMap disablewindow whsWindows tb
 		= ((Nothing,{windows & whsModal=True,whsWindows=wHs}),tb)
 	# (activeWIDS,windows)	= getWindowHandlesActiveWindow windows
 	| isNothing activeWIDS
 		= windowaccessFatalError "disableWindowSystem" "no active window found"
 	| otherwise
-		= ((activeWIDS,windows),OSdisableWindow (fromJust activeWIDS).wPtr (False,False) True tb)
+		= ((activeWIDS,windows),osDisableWindow (fromJust activeWIDS).wPtr (False,False) True tb)
 where
 	disablewindow :: !(WindowStateHandle .pst) !*OSToolbox -> *(!WindowStateHandle .pst,!*OSToolbox)
 	disablewindow wsH tb
@@ -531,14 +530,14 @@ where
 		# scrollInfo		= case windowInfo of
 								WindowInfo info	-> (isJust info.windowHScroll,isJust info.windowVScroll)
 								other			-> (False,False)
-		= (wsH,OSdisableWindow wids.wPtr scrollInfo True tb)
+		= (wsH,osDisableWindow wids.wPtr scrollInfo True tb)
 
 /*	enableWindowSystem Nothing re-enables all current windows.
 	enableWindowSystem (Just wids) re-enables the modal dialogue indicated by wids.
 */
 enableWindowSystem :: !(Maybe WIDS) !(WindowHandles .pst) !*OSToolbox -> *(!WindowHandles .pst,!*OSToolbox)
 enableWindowSystem Nothing windows=:{whsWindows} tb
-	# (wHs,tb)	= StateMap enablewindow whsWindows tb
+	# (wHs,tb)	= stateMap enablewindow whsWindows tb
 	= ({windows & whsModal=False,whsWindows=wHs},tb)
 where
 	enablewindow :: !(WindowStateHandle .pst) !*OSToolbox -> *(!WindowStateHandle .pst,!*OSToolbox)
@@ -552,9 +551,9 @@ where
 			  scrollInfo		= case windowInfo of
 			  						WindowInfo info	-> (isJust info.windowHScroll,isJust info.windowVScroll)
 			  						other			-> (False,False)
-			= (wsH,OSenableWindow wids.wPtr scrollInfo True tb)
+			= (wsH,osEnableWindow wids.wPtr scrollInfo True tb)
 enableWindowSystem (Just wids) windows tb
-	= (windows,OSenableWindow wids.wPtr (False,False) True tb)
+	= (windows,osEnableWindow wids.wPtr (False,False) True tb)
 
 
 /*	Checking WindowBounds:
@@ -576,7 +575,7 @@ getInitActiveControl wH=:{whItems=itemHs,whAtts}
 	# (found,itemPtr,itemHs)			= getFocusWElementHandles initActiveId itemHs
 	= (if found itemPtr OSNoWindowPtr,{wH & whItems=itemHs})
 where
-	(hasInitActiveAtt,initActiveAtt)	= Select isWindowInitActive undef whAtts
+	(hasInitActiveAtt,initActiveAtt)	= cselect isWindowInitActive undef whAtts
 	initActiveId						= if hasInitActiveAtt (Just (getWindowInitActiveAtt initActiveAtt)) Nothing
 	
 	getFocusWElementHandles :: !(Maybe Id) ![WElementHandle .ls .pst] -> (!Bool,!OSWindowPtr,![WElementHandle .ls .pst])
@@ -635,7 +634,7 @@ where
 				= (focus,itemH)
 		where
 			focus				= [{focusNr=wItemNr,focusShow=shownContext}]
-			hasKeyAtt			= Contains isControlKeyboard wItemAtts
+			hasKeyAtt			= contains isControlKeyboard wItemAtts
 			keySensitive		= wItemKind==IsCustomControl
 	
 	getWElementKeyFocusIds` shownContext (WListLSHandle itemHs)
@@ -668,7 +667,7 @@ where
 		| wItemNr<>0
 			= (nrs,WItemHandle {itemH & wItems=itemHs})
 		| otherwise
-			# (nr,nrs)	= HdTl nrs
+			# (nr,nrs)	= hdtl nrs
 			= (nrs,WItemHandle {itemH & wItemNr=nr,wItems=itemHs})
 	
 	genWElementNrs nrs (WListLSHandle itemHs)
@@ -690,6 +689,6 @@ genWElementItemNrs nrs _
 getFinalModalLS :: !WID FinalModalLS -> Maybe .ls
 getFinalModalLS wid {fmWIDS,fmLS}
 	| identifyWIDS wid fmWIDS
-		= Just (Cast fmLS)
+		= Just (cast fmLS)
 	| otherwise
 		= Nothing

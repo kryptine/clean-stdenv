@@ -5,4 +5,4 @@ definition module osmouse
 from ostoolbox import OSToolbox
 
 // RWS ??? returned resolution
-OSGetDoubleClickTime :: !*OSToolbox -> (!Int, !*OSToolbox)
+osGetDoubleClickTime :: !*OSToolbox -> (!Int, !*OSToolbox)

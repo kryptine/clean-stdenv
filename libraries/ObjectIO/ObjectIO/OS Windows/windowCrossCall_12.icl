@@ -4,7 +4,7 @@ implementation module windowCrossCall_12
 import	StdMisc, StdTuple
 import	clCrossCall_12
 from	ostypes			import HWND
-from	clCCall_12		import WinMakeCString, WinGetCStringAndFree, WinReleaseCString, CSTR
+from	clCCall_12		import winMakeCString, winGetCStringAndFree, winReleaseCString, CSTR
 from	pictCCall_12	import HDC
 from	rgnCCall_12		import HRGN
 
@@ -86,144 +86,144 @@ ISCANCELBUTTON		:==	2			/* The button is the CANCEL button. */
 //	PA: end of addition
 
 
-WinSetWindowCursor :: !HWND !Int !*OSToolbox -> *OSToolbox
-WinSetWindowCursor hwnd cursorcode tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "WinSetWindowCursor") (Rq2Cci CcRqCHANGEWINDOWCURSOR hwnd cursorcode) tb)
+winSetWindowCursor :: !HWND !Int !*OSToolbox -> *OSToolbox
+winSetWindowCursor hwnd cursorcode tb
+	= snd (issueCleanRequest2 (errorCallback2 "winSetWindowCursor") (Rq2Cci CcRqCHANGEWINDOWCURSOR hwnd cursorcode) tb)
 
-WinObscureCursor :: !*OSToolbox -> *OSToolbox
-WinObscureCursor tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "WinObscureCursor") (Rq0Cci CcRqOBSCURECURSOR) tb)
+winObscureCursor :: !*OSToolbox -> *OSToolbox
+winObscureCursor tb
+	= snd (issueCleanRequest2 (errorCallback2 "winObscureCursor") (Rq0Cci CcRqOBSCURECURSOR) tb)
 
-WinSetWindowTitle :: !HWND !String !*OSToolbox -> *OSToolbox
-WinSetWindowTitle hwnd title tb
-	# (textptr,tb)	= WinMakeCString title tb
-	# (_,tb)		= IssueCleanRequest2 (ErrorCallback2 "SetWindowTitle") (Rq2Cci CcRqSETWINDOWTITLE hwnd textptr) tb
-	= WinReleaseCString textptr tb
+winSetWindowTitle :: !HWND !String !*OSToolbox -> *OSToolbox
+winSetWindowTitle hwnd title tb
+	# (textptr,tb)	= winMakeCString title tb
+	# (_,tb)		= issueCleanRequest2 (errorCallback2 "SetWindowTitle") (Rq2Cci CcRqSETWINDOWTITLE hwnd textptr) tb
+	= winReleaseCString textptr tb
 
-WinGetWindowText :: !HWND !*OSToolbox -> (!String, !*OSToolbox)
-WinGetWindowText hwnd tb
-	# (rcci,tb)	= IssueCleanRequest2 (ErrorCallback2 "WinGetWindowText") (Rq1Cci CcRqGETWINDOWTEXT hwnd) tb
+winGetWindowText :: !HWND !*OSToolbox -> (!String, !*OSToolbox)
+winGetWindowText hwnd tb
+	# (rcci,tb)	= issueCleanRequest2 (errorCallback2 "winGetWindowText") (Rq1Cci CcRqGETWINDOWTEXT hwnd) tb
 	# (text,tb)	= case rcci.ccMsg of
-					CcRETURN1	-> WinGetCStringAndFree rcci.p1 tb
+					CcRETURN1	-> winGetCStringAndFree rcci.p1 tb
 					CcWASQUIT	-> ("",tb)
-					other		-> abort "[WinGetWindowText] expected CcRETURN1 value."
+					other		-> abort "[winGetWindowText] expected CcRETURN1 value."
 	= (text,tb)
 
 /* PA: the following four functions are now implemented as C-calls.
-WinInvalidateWindow :: !HWND !*OSToolbox -> *OSToolbox
-WinInvalidateWindow hwnd tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "WinInvalidateWindow") (Rq1Cci CcRqINVALIDATEWINDOW hwnd) tb)
+winInvalidateWindow :: !HWND !*OSToolbox -> *OSToolbox
+winInvalidateWindow hwnd tb
+	= snd (issueCleanRequest2 (errorCallback2 "winInvalidateWindow") (Rq1Cci CcRqINVALIDATEWINDOW hwnd) tb)
 
-WinInvalidateRect :: !HWND !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
-WinInvalidateRect hwnd (left,top, right,bottom) tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "InvalidateRect") (Rq5Cci CcRqINVALIDATERECT hwnd left top right bottom) tb)
+winInvalidateRect :: !HWND !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
+winInvalidateRect hwnd (left,top, right,bottom) tb
+	= snd (issueCleanRequest2 (errorCallback2 "InvalidateRect") (Rq5Cci CcRqINVALIDATERECT hwnd left top right bottom) tb)
 
-WinValidateRect :: !HWND !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
-WinValidateRect hwnd (left,top, right,bottom) tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "ValidateRect") (Rq5Cci CcRqVALIDATERECT hwnd left top right bottom) tb)
+winValidateRect :: !HWND !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
+winValidateRect hwnd (left,top, right,bottom) tb
+	= snd (issueCleanRequest2 (errorCallback2 "ValidateRect") (Rq5Cci CcRqVALIDATERECT hwnd left top right bottom) tb)
 
-WinValidateRgn :: !HWND !HRGN !*OSToolbox -> *OSToolbox
-WinValidateRgn hwnd rgn tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "ValidateRgn") (Rq2Cci CcRqVALIDATERGN hwnd rgn) tb)
+winValidateRgn :: !HWND !HRGN !*OSToolbox -> *OSToolbox
+winValidateRgn hwnd rgn tb
+	= snd (issueCleanRequest2 (errorCallback2 "ValidateRgn") (Rq2Cci CcRqVALIDATERGN hwnd rgn) tb)
 */
 
-WinUpdateWindowRect :: !HWND !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
-WinUpdateWindowRect hwnd (left,top,right,bottom) tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "UpdateWindowRect") (Rq5Cci CcRqUPDATEWINDOWRECT hwnd left top right bottom) tb)
+winUpdateWindowRect :: !HWND !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
+winUpdateWindowRect hwnd (left,top,right,bottom) tb
+	= snd (issueCleanRequest2 (errorCallback2 "winUpdateWindowRect") (Rq5Cci CcRqUPDATEWINDOWRECT hwnd left top right bottom) tb)
 
-WinSetSelectStateWindow :: !HWND !(!Bool,!Bool) !Bool !Bool !*OSToolbox -> *OSToolbox
-WinSetSelectStateWindow hwnd (hasHScroll,hasVScroll) toAble modalContext tb
+winSetSelectStateWindow :: !HWND !(!Bool,!Bool) !Bool !Bool !*OSToolbox -> *OSToolbox
+winSetSelectStateWindow hwnd (hasHScroll,hasVScroll) toAble modalContext tb
 	# selectCci	= Rq5Cci CcRqSETSELECTWINDOW hwnd (toInt hasHScroll) (toInt hasVScroll) (toInt toAble) (toInt modalContext)
-	= snd (IssueCleanRequest2 (ErrorCallback2 "SetSelectStateWindow") selectCci tb)
+	= snd (issueCleanRequest2 (errorCallback2 "winSetSelectStateWindow") selectCci tb)
 
-WinBeginPaint :: !HWND !*OSToolbox -> (!HDC,!*OSToolbox) 
-WinBeginPaint hwnd tb
-	# (rcci,tb)	= IssueCleanRequest2 (ErrorCallback2 "BeginPaint") (Rq1Cci CcRqBEGINPAINT hwnd) tb
+winBeginPaint :: !HWND !*OSToolbox -> (!HDC,!*OSToolbox) 
+winBeginPaint hwnd tb
+	# (rcci,tb)	= issueCleanRequest2 (errorCallback2 "BeginPaint") (Rq1Cci CcRqBEGINPAINT hwnd) tb
 	  hdc		= case rcci.ccMsg of
 					CcRETURN1	-> rcci.p1
 					CcWASQUIT	-> 0 
-					other		-> abort "[WinBeginPaint] expected CcRETURN1 value."
+					other		-> abort "[winBeginPaint] expected CcRETURN1 value."
 	= (hdc,tb)
 
-WinEndPaint :: !HWND !(!HDC, !*OSToolbox) -> *OSToolbox
-WinEndPaint hwnd (hdc,tb)
-	= snd (IssueCleanRequest2 (ErrorCallback2 "EndPaint") (Rq2Cci CcRqENDPAINT hwnd hdc) tb)
+winEndPaint :: !HWND !(!HDC, !*OSToolbox) -> *OSToolbox
+winEndPaint hwnd (hdc,tb)
+	= snd (issueCleanRequest2 (errorCallback2 "EndPaint") (Rq2Cci CcRqENDPAINT hwnd hdc) tb)
 
-WinFakePaint :: !HWND !*OSToolbox -> *OSToolbox
-WinFakePaint hwnd tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "FakePaint") (Rq1Cci CcRqFAKEPAINT hwnd) tb)
+winFakePaint :: !HWND !*OSToolbox -> *OSToolbox
+winFakePaint hwnd tb
+	= snd (issueCleanRequest2 (errorCallback2 "FakePaint") (Rq1Cci CcRqFAKEPAINT hwnd) tb)
 
-WinGetClientSize :: !HWND !*OSToolbox -> (!(!Int,!Int), !*OSToolbox)
-WinGetClientSize hwnd tb
-	# (rcci,tb)	= IssueCleanRequest2 (ErrorCallback2 "WinGetClientSize") (Rq1Cci CcRqGETCLIENTSIZE hwnd) tb
+winGetClientSize :: !HWND !*OSToolbox -> (!(!Int,!Int), !*OSToolbox)
+winGetClientSize hwnd tb
+	# (rcci,tb)	= issueCleanRequest2 (errorCallback2 "winGetClientSize") (Rq1Cci CcRqGETCLIENTSIZE hwnd) tb
 	  size		= case rcci.ccMsg of
 					CcRETURN2	-> (rcci.p1,rcci.p2)
 					CcWASQUIT	-> (0,0) 
-					other		-> abort "[WinGetClientSize] expected CcRETURN2 value."
+					other		-> abort "[winGetClientSize] expected CcRETURN2 value."
 	= (size,tb)
 
-WinGetWindowSize :: !HWND !*OSToolbox -> (!(!Int,!Int), !*OSToolbox)
-WinGetWindowSize hwnd tb
-	# (rcci,tb)	= IssueCleanRequest2 (ErrorCallback2 "WinGetWindowSize") (Rq1Cci CcRqGETWINDOWSIZE hwnd) tb
+winGetWindowSize :: !HWND !*OSToolbox -> (!(!Int,!Int), !*OSToolbox)
+winGetWindowSize hwnd tb
+	# (rcci,tb)	= issueCleanRequest2 (errorCallback2 "winGetWindowSize") (Rq1Cci CcRqGETWINDOWSIZE hwnd) tb
 	  size		= case rcci.ccMsg of
 	  				CcRETURN2	-> (rcci.p1,rcci.p2)
 	  				CcWASQUIT	-> (0,0)
-	  				other		-> abort "[WinGetWindowSize] expected CcRETURN2 value."
+	  				other		-> abort "[winGetWindowSize] expected CcRETURN2 value."
 	= (size,tb)
 
-WinSetClientSize :: !HWND !(!Int,!Int) !*OSToolbox -> *OSToolbox
-WinSetClientSize hwnd (w,h) tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "WinSetClientSize") (Rq3Cci CcRqSETCLIENTSIZE hwnd w h) tb)
+winSetClientSize :: !HWND !(!Int,!Int) !*OSToolbox -> *OSToolbox
+winSetClientSize hwnd (w,h) tb
+	= snd (issueCleanRequest2 (errorCallback2 "winSetClientSize") (Rq3Cci CcRqSETCLIENTSIZE hwnd w h) tb)
 
-WinSetWindowSize :: !HWND !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
-WinSetWindowSize hwnd (w,h) update tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "WinSetWindowSize") (Rq4Cci CcRqSETWINDOWSIZE hwnd w h (toInt update)) tb)
+winSetWindowSize :: !HWND !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
+winSetWindowSize hwnd (w,h) update tb
+	= snd (issueCleanRequest2 (errorCallback2 "winSetWindowSize") (Rq4Cci CcRqSETWINDOWSIZE hwnd w h (toInt update)) tb)
 
-WinGetWindowPos :: !HWND !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
-WinGetWindowPos hwnd tb
-	# (rcci,tb)	= IssueCleanRequest2 (ErrorCallback2 "WinGetWindowPos") (Rq1Cci CcRqGETWINDOWPOS hwnd) tb
+winGetWindowPos :: !HWND !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
+winGetWindowPos hwnd tb
+	# (rcci,tb)	= issueCleanRequest2 (errorCallback2 "winGetWindowPos") (Rq1Cci CcRqGETWINDOWPOS hwnd) tb
 	  pos		= case rcci.ccMsg of
 					CcRETURN2	-> (rcci.p1,rcci.p2)
 					CcWASQUIT	-> (0,0) 
-					other		-> abort "[WinGetWindowPos] expected CcRETURN2 value."
+					other		-> abort "[winGetWindowPos] expected CcRETURN2 value."
 	= (pos,tb)
 
-WinSetWindowPos :: !HWND !(!Int,!Int) !Bool !Bool !*OSToolbox -> *OSToolbox
-WinSetWindowPos hwnd (x,y) update inclScrollbars tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "WinSetWindowPos") (Rq5Cci CcRqSETWINDOWPOS hwnd x y (toInt update) (toInt inclScrollbars)) tb)
+winSetWindowPos :: !HWND !(!Int,!Int) !Bool !Bool !*OSToolbox -> *OSToolbox
+winSetWindowPos hwnd (x,y) update inclScrollbars tb
+	= snd (issueCleanRequest2 (errorCallback2 "winSetWindowPos") (Rq5Cci CcRqSETWINDOWPOS hwnd x y (toInt update) (toInt inclScrollbars)) tb)
 
-WinSetScrollRange :: !HWND !Int !Int !Int !Bool !*OSToolbox -> *OSToolbox
-WinSetScrollRange scrollHWND iBar min max redraw tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "WinSetScrollRange") (Rq5Cci CcRqSETSCROLLRANGE scrollHWND iBar min max (toInt redraw)) tb)
+winSetScrollRange :: !HWND !Int !Int !Int !Bool !*OSToolbox -> *OSToolbox
+winSetScrollRange scrollHWND iBar min max redraw tb
+	= snd (issueCleanRequest2 (errorCallback2 "winSetScrollRange") (Rq5Cci CcRqSETSCROLLRANGE scrollHWND iBar min max (toInt redraw)) tb)
 	
-WinSetScrollPos :: !HWND !Int !Int !Int !Int !Int !*OSToolbox -> *OSToolbox
-WinSetScrollPos scrollHWND iBar thumb maxx maxy extent tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "WinSetScrollPos") (Rq6Cci CcRqSETSCROLLPOS scrollHWND iBar thumb maxx maxy extent) tb)
+winSetScrollPos :: !HWND !Int !Int !Int !Int !Int !*OSToolbox -> *OSToolbox
+winSetScrollPos scrollHWND iBar thumb maxx maxy extent tb
+	= snd (issueCleanRequest2 (errorCallback2 "winSetScrollPos") (Rq6Cci CcRqSETSCROLLPOS scrollHWND iBar thumb maxx maxy extent) tb)
 
-WinSetScrollThumbSize :: !HWND !Int !Int !Int !Int !Int !*OSToolbox -> *OSToolbox
-WinSetScrollThumbSize scrollHWND iBar size maxx maxy extent tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "WinSetScrollThumbSize") (Rq6Cci CcRqSETSCROLLSIZE scrollHWND iBar size maxx maxy extent) tb)
+winSetScrollThumbSize :: !HWND !Int !Int !Int !Int !Int !*OSToolbox -> *OSToolbox
+winSetScrollThumbSize scrollHWND iBar size maxx maxy extent tb
+	= snd (issueCleanRequest2 (errorCallback2 "winSetScrollThumbSize") (Rq6Cci CcRqSETSCROLLSIZE scrollHWND iBar size maxx maxy extent) tb)
 
-WinSetEditSelection :: !HWND !Int !Int !*OSToolbox -> *OSToolbox
-WinSetEditSelection editHWND first last tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "WinSetEditSelection") (Rq3Cci CcRqSETEDITSELECTION editHWND first last) tb)
+winSetEditSelection :: !HWND !Int !Int !*OSToolbox -> *OSToolbox
+winSetEditSelection editHWND first last tb
+	= snd (issueCleanRequest2 (errorCallback2 "winSetEditSelection") (Rq3Cci CcRqSETEDITSELECTION editHWND first last) tb)
 
-WinShowControl :: !HWND !Bool !*OSToolbox -> *OSToolbox
-WinShowControl hwnd bool tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "WinShowControl") (Rq2Cci CcRqSHOWCONTROL hwnd (toInt bool)) tb)
+winShowControl :: !HWND !Bool !*OSToolbox -> *OSToolbox
+winShowControl hwnd bool tb
+	= snd (issueCleanRequest2 (errorCallback2 "winShowControl") (Rq2Cci CcRqSHOWCONTROL hwnd (toInt bool)) tb)
 
-WinEnableControl :: !HWND !Bool !*OSToolbox -> *OSToolbox
-WinEnableControl hwnd bool tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "WinEnableControl") (Rq2Cci CcRqENABLECONTROL hwnd (toInt bool)) tb)
+winEnableControl :: !HWND !Bool !*OSToolbox -> *OSToolbox
+winEnableControl hwnd bool tb
+	= snd (issueCleanRequest2 (errorCallback2 "winEnableControl") (Rq2Cci CcRqENABLECONTROL hwnd (toInt bool)) tb)
 
-WinEnablePopupItem :: !HWND !Int !Bool !*OSToolbox -> *OSToolbox
-WinEnablePopupItem hwnd pos bool tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "WinEnablePopupItem") (Rq3Cci CcRqENABLEPOPUPITEM hwnd pos (toInt bool)) tb)
+winEnablePopupItem :: !HWND !Int !Bool !*OSToolbox -> *OSToolbox
+winEnablePopupItem hwnd pos bool tb
+	= snd (issueCleanRequest2 (errorCallback2 "winEnablePopupItem") (Rq3Cci CcRqENABLEPOPUPITEM hwnd pos (toInt bool)) tb)
 
-WinCheckControl :: !HWND !Bool !*OSToolbox -> *OSToolbox
-WinCheckControl hwnd bool tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "WinCheckControl") (Rq2Cci CcRqSETITEMCHECK hwnd (toInt bool)) tb)
+winCheckControl :: !HWND !Bool !*OSToolbox -> *OSToolbox
+winCheckControl hwnd bool tb
+	= snd (issueCleanRequest2 (errorCallback2 "winCheckControl") (Rq2Cci CcRqSETITEMCHECK hwnd (toInt bool)) tb)
 
-WinSelectPopupItem :: !HWND !Int !*OSToolbox -> *OSToolbox
-WinSelectPopupItem hwnd pos tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "WinSelectPopupItem") (Rq2Cci CcRqSELECTPOPUPITEM hwnd pos) tb)
+winSelectPopupItem :: !HWND !Int !*OSToolbox -> *OSToolbox
+winSelectPopupItem hwnd pos tb
+	= snd (issueCleanRequest2 (errorCallback2 "winSelectPopupItem") (Rq2Cci CcRqSELECTPOPUPITEM hwnd pos) tb)

@@ -15,7 +15,7 @@ from	StdPSt	import accPIO
 */
 receiverEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
 receiverEvent schedulerEvent=:(ScheduleMsgEvent msgEvent) pState
-	# (ioid,pState)	= accPIO IOStGetIOId pState
+	# (ioid,pState)	= accPIO ioStGetIOId pState
 	  recloc		= case msgEvent of
 		  				(QASyncMessage {qasmRecLoc}) -> qasmRecLoc
 		  				(ASyncMessage  { asmRecLoc}) -> asmRecLoc

@@ -18,7 +18,7 @@ from	windowupdate		import updatewindowbackgrounds
 from	ossystem			import OSWindowMetrics
 from	ostypes				import Rect, OSWindowPtr
 from	ostoolbox			import OSToolbox
-from	oswindow			import OSMinWindowSize, OSMinCompoundSize, OSscrollbarsAreVisible
+from	oswindow			import osMinWindowSize, osMinCompoundSize, osScrollbarsAreVisible
 
 
 /*	resizeControls proceeds as follows:
@@ -45,7 +45,7 @@ resizeControls wMetrics isActive updateAll wids=:{wPtr} oldOrigin oldWSize newWS
 		# (_,newItems,tb)		= layoutControls wMetrics hMargins vMargins spaces newWSize minSize [(domain,newOrigin)] newItems tb
 		  wH					= {wH & whItems=newItems}
 		# (wH,tb)				= forceValidWindowClipState wMetrics True wPtr wH tb
-		# (updRgn,newItems,tb)	= relayoutControls wMetrics whSelect whShow (SizeToRect oldWSize) (SizeToRect newWSize) zero zero wPtr whDefaultId oldItems` wH.whItems tb
+		# (updRgn,newItems,tb)	= relayoutControls wMetrics whSelect whShow (sizeToRect oldWSize) (sizeToRect newWSize) zero zero wPtr whDefaultId oldItems` wH.whItems tb
 		# (wH,tb)				= updatewindowbackgrounds wMetrics updRgn wids {wH & whItems=newItems} tb
 		  {x,y}					= oldOrigin
 		  (oldw,oldh)			= toTuple oldWSize
@@ -62,16 +62,16 @@ where
 	windowInfo					= getWindowInfoWindowData whWindowInfo
 	(newOrigin,domainRect,lookInfo)
 								= (windowInfo.windowOrigin,windowInfo.windowDomain,windowInfo.windowLook)
-	domain						= RectToRectangle domainRect
+	domain						= rectToRectangle domainRect
 	lookSysUpdate				= lookInfo.lookSysUpdate
-	(defMinW,   defMinH)		= OSMinWindowSize
+	(defMinW,   defMinH)		= osMinWindowSize
 	wKind						= wH.whKind
 	hMargins					= getWindowHMargins   wKind wMetrics whAtts
 	vMargins					= getWindowVMargins   wKind wMetrics whAtts
 	spaces						= getWindowItemSpaces wKind wMetrics whAtts
 	minSize						= {w=defMinW,h=defMinH}
-	oldFrame					= PosSizeToRectangle oldOrigin oldWSize
-	newFrame					= PosSizeToRectangle newOrigin newWSize
+	oldFrame					= posSizeToRectangle oldOrigin oldWSize
+	newFrame					= posSizeToRectangle newOrigin newWSize
 
 
 /*	calcNewControlsSize applies to a Control its ControlResizeFunction if it has one.
@@ -93,8 +93,8 @@ where
 			# (layoutChanged,itemH)	= calcNewWItemSize wMetrics originShifted (\oldCSize -> resizeF oldCSize oldWSize newWSize) itemH
 			= (isViewFrameSensitive || isOriginSensitive || layoutChanged,WItemHandle itemH)
 	where
-		(resizable,resizeAtt)	= Select isControlResize undef wItemAtts
-		(hasPos,posAtt)			= Select isControlPos undef wItemAtts
+		(resizable,resizeAtt)	= cselect isControlResize undef wItemAtts
+		(hasPos,posAtt)			= cselect isControlPos undef wItemAtts
 		itemPos					= getControlPosAtt posAtt
 		resizeF					= getControlResizeFun resizeAtt
 		isViewFrameSensitive	= if hasPos
@@ -120,12 +120,12 @@ where
 /*	PA: the current size argument of the resize function must be the outer size, not the view size.
 		Similar: the result size is also the outer size. 
 */		calcNewWItemSize wMetrics originShifted resizeF itemH=:{wItemKind=IsCompoundControl}
-			# visScrolls		= OSscrollbarsAreVisible wMetrics domainRect (toTuple oldSize) hasScrolls
-			  oldFrameSize		= RectSize (getCompoundContentRect wMetrics visScrolls (SizeToRect oldSize))
+			# visScrolls		= osScrollbarsAreVisible wMetrics domainRect (toTuple oldSize) hasScrolls
+			  oldFrameSize		= rectSize (getCompoundContentRect wMetrics visScrolls (sizeToRect oldSize))
 			  newSize			= resizeF oldSize
 			  newSize			= {w=max minSize.w newSize.w,h=max minSize.h newSize.h}
-			  visScrolls		= OSscrollbarsAreVisible wMetrics domainRect (toTuple newSize) hasScrolls
-			  newFrameSize		= RectSize (getCompoundContentRect wMetrics visScrolls (SizeToRect newSize))
+			  visScrolls		= osScrollbarsAreVisible wMetrics domainRect (toTuple newSize) hasScrolls
+			  newFrameSize		= rectSize (getCompoundContentRect wMetrics visScrolls (sizeToRect newSize))
 			| newFrameSize==oldFrameSize
 				= (False,itemH)
 			| otherwise
@@ -142,8 +142,8 @@ where
 			origin				= info.compoundOrigin
 			domainRect			= info.compoundDomain
 			hasScrolls			= (isJust info.compoundHScroll,isJust info.compoundVScroll)
-			(defMinW,defMinH)	= OSMinCompoundSize
-			minSize				= getControlMinimumSizeAtt (snd (Select isControlMinimumSize (ControlMinimumSize {w=defMinW,h=defMinH}) atts))
+			(defMinW,defMinH)	= osMinCompoundSize
+			minSize				= getControlMinimumSizeAtt (snd (cselect isControlMinimumSize (ControlMinimumSize {w=defMinW,h=defMinH}) atts))
 			
 			calcNewOrigin :: !Point2 !Rect !Size -> Point2		// This code also appears at windowdevice: windowStateSizeAction
 			calcNewOrigin {x,y} {rleft,rtop,rright,rbottom} {w,h}
@@ -192,7 +192,7 @@ where
 		where
 			atts				= itemH.wItemAtts
 			oldSize				= itemH.wItemSize
-			minSize				= getControlMinimumSizeAtt (snd (Select isControlMinimumSize (ControlMinimumSize zero) atts))
+			minSize				= getControlMinimumSizeAtt (snd (cselect isControlMinimumSize (ControlMinimumSize zero) atts))
 		
 		calcNewWItemSize wMetrics originShifted resizeF itemH=:{wItemKind=IsSliderControl}
 			# itemH				= {itemH & wItemSize=newSize1,wItemInfo=sliderInfo,wItemAtts=replaceSizeAtt newSize1 itemH.wItemAtts}
@@ -223,8 +223,8 @@ where
 	
 	replaceSizeAtt :: !Size ![ControlAttribute .pst] -> [ControlAttribute .pst]
 	replaceSizeAtt size atts
-//		= snd (Replace isControlSize sizeAtt atts)
-		# (replaced,atts)	= Replace isControlViewSize sizeAtt atts
+//		= snd (creplace isControlSize sizeAtt atts)
+		# (replaced,atts)	= creplace isControlViewSize sizeAtt atts
 		| replaced			= atts
 		| otherwise			= atts++[sizeAtt]
 	where

@@ -23,62 +23,62 @@ from	ostypes	import Rect
 
 OSdirseparator	:==	'\\'				// OS separator between folder- and filenames in a pathname
 
-OShomepath :: !String -> String
-OShomepath fname = theApplicationPath +++ fname
+osHomepath :: !String -> String
+osHomepath fname = theApplicationPath +++ fname
 
-OSapplicationpath :: !String -> String
-OSapplicationpath fname = theApplicationPath +++ fname
+osApplicationpath :: !String -> String
+osApplicationpath fname = theApplicationPath +++ fname
 
 theApplicationPath =: path
 where
-	ptr		= WinGetAppPath 
-	(path,_)= WinGetCStringAndFree ptr 99
+	ptr		= winGetAppPath 
+	(path,_)= winGetCStringAndFree ptr 99
 
 OSnewlineChars			:== "\xD\xA" // MW11++
 
 OStickspersecond :== 1000				// OS max resolution of ticks per second
 
-OSmmToHPixels :: !Real -> Int
-OSmmToHPixels mm = toInt ( (mm/25.4) * toReal WinGetHorzResolution )
+osMMtoHPixels :: !Real -> Int
+osMMtoHPixels mm = toInt ( (mm/25.4) * toReal winGetHorzResolution )
 
-OSmmToVPixels :: !Real -> Int
-OSmmToVPixels mm = toInt ( (mm/25.4) * toReal WinGetVertResolution )
+osMMtoVPixels :: !Real -> Int
+osMMtoVPixels mm = toInt ( (mm/25.4) * toReal winGetVertResolution )
 
-OSmaxScrollWindowSize :: (!Int,!Int)
-OSmaxScrollWindowSize = WinMaxScrollWindowSize
+osMaxScrollWindowSize :: (!Int,!Int)
+osMaxScrollWindowSize = winMaxScrollWindowSize
 
-OSmaxFixedWindowSize :: (!Int,!Int)
-OSmaxFixedWindowSize = WinMaxFixedWindowSize
+osMaxFixedWindowSize :: (!Int,!Int)
+osMaxFixedWindowSize = winMaxFixedWindowSize
 
-OSscreenrect :: !*OSToolbox -> (!Rect,!*OSToolbox)
-OSscreenrect tb
-	# (screenWidth, tb)	= WinScreenXSize tb
-	# (screenHeight,tb)	= WinScreenYSize tb
+osScreenrect :: !*OSToolbox -> (!Rect,!*OSToolbox)
+osScreenrect tb
+	# (screenWidth, tb)	= winScreenXSize tb
+	# (screenHeight,tb)	= winScreenYSize tb
 	= ({rleft=0,rtop=0,rright=screenWidth,rbottom=screenHeight},tb)
 
-OSprintSetupTypical		:: Bool // MW11++
-OSprintSetupTypical = False
+osPrintSetupTypical :: Bool // MW11++
+osPrintSetupTypical = False
 
-OSGetProcessWindowDimensions :: !OSDInfo !*OSToolbox -> (!Rect,!*OSToolbox)
-OSGetProcessWindowDimensions osdinfo tb
+osGetProcessWindowDimensions :: !OSDInfo !*OSToolbox -> (!Rect,!*OSToolbox)
+osGetProcessWindowDimensions osdinfo tb
 	# maybeOSInfo		= getOSDInfoOSInfo osdinfo
 	| isNothing maybeOSInfo
-		= OSscreenrect tb
+		= osScreenrect tb
 	| otherwise
 		# osinfo		= fromJust maybeOSInfo
-		# ((x,y),tb)	= WinGetWindowPos  osinfo.osFrame  tb
-		# ((w,h),tb)	= WinGetClientSize osinfo.osClient tb
+		# ((x,y),tb)	= winGetWindowPos  osinfo.osFrame  tb
+		# ((w,h),tb)	= winGetClientSize osinfo.osClient tb
 		= ({rleft=x,rtop=y,rright=x+w,rbottom=y+h},tb)
 
-OSDefaultWindowMetrics :: !*OSToolbox -> (!OSWindowMetrics,!*OSToolbox)
-OSDefaultWindowMetrics tb
-	# (font,tb)							= OSdialogfont tb
-	# ((ascent,descent,leading,_),tb)	= OSgetfontmetrics False 0 font tb
+osDefaultWindowMetrics :: !*OSToolbox -> (!OSWindowMetrics,!*OSToolbox)
+osDefaultWindowMetrics tb
+	# (font,tb)							= osDialogfont tb
+	# ((ascent,descent,leading,_),tb)	= osGetfontmetrics False 0 font tb
 	  height							= ascent+descent+leading
 	  unit								= (toReal height)/8.0
 	  margin							= toInt (unit*7.0)
 	  itemspace							= toInt (unit*4.0)
-	# (scrollWidth,scrollHeight,tb)		= WinScrollbarSize tb
+	# (scrollWidth,scrollHeight,tb)		= winScrollbarSize tb
 	= (	{	osmFont				= font
 		,	osmFontMetrics		= (ascent,descent,leading)
 		,	osmHeight			= height
@@ -92,17 +92,17 @@ OSDefaultWindowMetrics tb
 	  ,	tb
 	  )
 
-/*	OSstripOuterSize isMDI isResizable (width,height)
+/*	osStripOuterSize isMDI isResizable (width,height)
 		returns (dw,dh) required to add/subtract to view size/outer size in order to obtain
 		outer size/view size.
 */
-OSstripOuterSize :: !Bool !Bool !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
-OSstripOuterSize isMDI isResizable tb
+osStripOuterSize :: !Bool !Bool !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
+osStripOuterSize isMDI isResizable tb
 	| isMDI
-		# (dw,dh,tb)	= WinMDIClientToOuterSizeDims styleFlags tb
+		# (dw,dh,tb)	= winMDIClientToOuterSizeDims styleFlags tb
 		= ((dw,dh),tb)
 	| otherwise
-		# (dw,dh,tb)	= WinSDIClientToOuterSizeDims styleFlags tb
+		# (dw,dh,tb)	= winSDIClientToOuterSizeDims styleFlags tb
 		= ((dw,dh),tb)
 where
 	styleFlags			= if isResizable WS_THICKFRAME 0

@@ -56,8 +56,8 @@ handleEvents	:: !Context !*OSToolbox -> (!Context,!*OSToolbox)
 /*	Consecutively handle events until termination of all interactive processes.
 */
 
-CondHandleEvents :: !(St Context Bool) !*OSToolbox !Context -> (!*OSToolbox,!Context)
-/*	CondHandleEvents consecutively handles events while condition holds.
+chandleEvents :: !(St Context Bool) !*OSToolbox !Context -> (!*OSToolbox,!Context)
+/*	chandleEvents consecutively handles events while condition holds.
 */
 
 handleContextOSEvent :: !OSEvent !Context -> (![Int],!Context)

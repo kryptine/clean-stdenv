@@ -11,10 +11,10 @@ import	commondef, devicefunctions, iostate, receiveraccess, timeraccess, timerde
 
 timerdeviceFatalError :: String String -> .x
 timerdeviceFatalError function error
-	= FatalError function "timerdevice" error
+	= fatalError function "timerdevice" error
 
-TimerFunctions :: DeviceFunctions (PSt .l)
-TimerFunctions
+timerFunctions :: DeviceFunctions (PSt .l)
+timerFunctions
 	= {	dDevice	= TimerDevice
 	  ,	dShow	= id
 	  ,	dHide	= id
@@ -26,30 +26,30 @@ TimerFunctions
 
 timerOpen :: !(PSt .l) -> PSt .l
 timerOpen pState=:{io=ioState}
-	# (hasTimer,ioState)	= IOStHasDevice TimerDevice ioState
+	# (hasTimer,ioState)	= ioStHasDevice TimerDevice ioState
 	| hasTimer
 		= {pState & io=ioState}
 	| otherwise
-		# ioState			= IOStSetDevice (TimerSystemState {tTimers=[]}) ioState
-		# ioState			= IOStSetDeviceFunctions TimerFunctions ioState
+		# ioState			= ioStSetDevice (TimerSystemState {tTimers=[]}) ioState
+		# ioState			= ioStSetDeviceFunctions timerFunctions ioState
 		= {pState & io=ioState}
 
 timerClose :: !(PSt .l) -> PSt .l
 timerClose pState=:{io=ioState}
-	# (found,timers,ioState)= IOStGetDevice TimerDevice ioState
+	# (found,timers,ioState)= ioStGetDevice TimerDevice ioState
 	| not found
 		= {pState & io=ioState}
 	| otherwise
-		# (rt,ioState)		= IOStGetReceiverTable ioState
-		# (tt,ioState)		= IOStGetTimerTable ioState
-		# (idtable,ioState)	= IOStGetIdTable ioState
-		# (pid,ioState)		= IOStGetIOId ioState
-		  tHs				= TimerSystemStateGetTimerHandles timers
-		  (tt,rt,idtable)	= StateMap2 (closeTimerIds pid) tHs.tTimers (tt,rt,idtable)
-		# ioState			= IOStSetReceiverTable rt ioState
-		# ioState			= IOStSetTimerTable tt ioState
-		# ioState			= IOStSetIdTable idtable ioState
-		# ioState			= IOStRemoveDeviceFunctions TimerDevice ioState
+		# (rt,ioState)		= ioStGetReceiverTable ioState
+		# (tt,ioState)		= ioStGetTimerTable ioState
+		# (idtable,ioState)	= ioStGetIdTable ioState
+		# (pid,ioState)		= ioStGetIOId ioState
+		  tHs				= timerSystemStateGetTimerHandles timers
+		  (tt,rt,idtable)	= stateMap2 (closeTimerIds pid) tHs.tTimers (tt,rt,idtable)
+		# ioState			= ioStSetReceiverTable rt ioState
+		# ioState			= ioStSetTimerTable tt ioState
+		# ioState			= ioStSetIdTable idtable ioState
+		# ioState			= ioStRemoveDeviceFunctions TimerDevice ioState
 		= {pState & io=ioState}
 where
 	closeTimerIds :: !SystemId !(TimerStateHandle .pst) !*(!*TimerTable,!*ReceiverTable,!*IdTable) -> *(!*TimerTable,!*ReceiverTable,!*IdTable)
@@ -62,16 +62,16 @@ where
 
 timerIO	:: !DeviceEvent !(PSt .l) -> (!DeviceEvent,!PSt .l)
 timerIO deviceEvent pState
-	# (hasDevice,pState)= accPIO (IOStHasDevice TimerDevice) pState
+	# (hasDevice,pState)= accPIO (ioStHasDevice TimerDevice) pState
 	| not hasDevice
-		= timerdeviceFatalError "TimerFunctions.dDoIO" "could not retrieve TimerSystemState from IOSt"
+		= timerdeviceFatalError "timerFunctions.dDoIO" "could not retrieve TimerSystemState from IOSt"
 	| otherwise
 		= timerIO deviceEvent pState
 where
 	timerIO	:: !DeviceEvent !(PSt .l) -> (!DeviceEvent,!PSt .l)
 	timerIO deviceEvent=:(TimerEvent te=:{teLoc={tlParentId,tlTimerId},teNrInterval}) pState=:{io}
-		# (_,timer,ioState)	= IOStGetDevice TimerDevice io
-		  timers			= TimerSystemStateGetTimerHandles timer
+		# (_,timer,ioState)	= ioStGetDevice TimerDevice io
+		  timers			= timerSystemStateGetTimerHandles timer
 		  pState			= {pState & io=ioState}
 		# pState			= letOneTimerDoIO tlParentId tlTimerId teNrInterval timers pState
 		= (deviceEvent,pState)
@@ -80,8 +80,8 @@ where
 		letOneTimerDoIO parent timer nrOfIntervals timers=:{tTimers=tHs} pState
 			= pState2
 		where
-			(_,tH,tHs1)		= URemove (identifyTimerStateHandle parent) (timerdeviceFatalError "timerIO (TimerEvent _)" "timer could not be found") tHs
-			pState1			= appPIO (IOStSetDevice timers1) pState
+			(_,tH,tHs1)		= uremove (identifyTimerStateHandle parent) (timerdeviceFatalError "timerIO (TimerEvent _)" "timer could not be found") tHs
+			pState1			= appPIO (ioStSetDevice timers1) pState
 			(tH1,pState2)	= letTimerDoIO nrOfIntervals tH pState1
 			timers1			= TimerSystemState {timers & tTimers=tHs1++[tH1]}
 			
@@ -96,11 +96,11 @@ where
 	where
 		timerQASync :: !QASyncMessage !(PSt .l) -> PSt .l
 		timerQASync msg=:{qasmRecLoc={rlReceiverId=rid}} pState
-			# (_,timer,ioState)	= IOStGetDevice TimerDevice pState.io
-			  timers			= TimerSystemStateGetTimerHandles timer
+			# (_,timer,ioState)	= ioStGetDevice TimerDevice pState.io
+			  timers			= timerSystemStateGetTimerHandles timer
 			  tsHs				= handleASyncReceiver rid msg timers.tTimers
 			  timers			= {timers & tTimers=tsHs}
-			# ioState			= IOStSetDevice (TimerSystemState timers) ioState
+			# ioState			= ioStSetDevice (TimerSystemState timers) ioState
 			# pState			= {pState & io=ioState}
 			= pState
 		where
@@ -150,11 +150,11 @@ where
 		timerASync {asmRecLoc={rlReceiverId=rid}} pState
 			= pState2
 		where
-			(_,timers,ioState)	= IOStGetDevice TimerDevice pState.io
-			tHs					= TimerSystemStateGetTimerHandles timers
+			(_,timers,ioState)	= ioStGetDevice TimerDevice pState.io
+			tHs					= timerSystemStateGetTimerHandles timers
 			(tsHs,pState2)		= aSyncTimerStateHandles rid tHs.tTimers pState1
 			tHs1				= {tHs & tTimers=tsHs}
-			ioState1			= IOStSetDevice (TimerSystemState tHs1) ioState
+			ioState1			= ioStSetDevice (TimerSystemState tHs1) ioState
 			pState1				= {pState & io=ioState1}
 			
 			aSyncTimerStateHandles :: !Id ![TimerStateHandle .pst] .pst -> *(![TimerStateHandle .pst],.pst)
@@ -219,11 +219,11 @@ where
 		timerSync msg=:{smRecLoc={rlReceiverId=rid}} pState
 			= (msg1,pState2)
 		where
-			(_,timers,ioState)	= IOStGetDevice TimerDevice pState.io
-			tHs					= TimerSystemStateGetTimerHandles timers
+			(_,timers,ioState)	= ioStGetDevice TimerDevice pState.io
+			tHs					= timerSystemStateGetTimerHandles timers
 			(msg1,tsHs,pState2)	= syncTimerStateHandles rid msg tHs.tTimers pState1
 			tHs1				= {tHs & tTimers=tsHs}
-			ioState1			= IOStSetDevice (TimerSystemState tHs1) ioState
+			ioState1			= ioStSetDevice (TimerSystemState tHs1) ioState
 			pState1				= {pState & io=ioState1}
 			
 			syncTimerStateHandles :: !Id !SyncMessage ![TimerStateHandle .pst] .pst

@@ -28,9 +28,9 @@ newReceiverHandle id select connectedIds f
 	  }
 
 onewaytotriple :: !(ReceiverFunction m *(.ls,.pst)) m !*(.ls,.pst) -> *(.ls,[r],.pst)
-onewaytotriple f m (ls,ps)
-	# (ls,ps)	= f m (ls,ps)
-	= (ls,[],ps)
+onewaytotriple f m (ls,pst)
+	# (ls,pst)	= f m (ls,pst)
+	= (ls,[],pst)
 
 // MW11 added connectedIds
 newReceiverStateHandle2 :: !Id .ls !SelectState ![Id] !(Receiver2Function m r *(.ls,.pst)) -> ReceiverStateHandle .pst
@@ -64,15 +64,13 @@ receiverIdentified id {rId}
 	= id==rId
 
 // MW11..
-inetReceiverIdentified		::	!(!EndpointRef`, !InetReceiverCategory`)
-								!(ReceiverHandle .ls .ps)	-> Bool
+inetReceiverIdentified :: !(!EndpointRef`, !InetReceiverCategory`) !(ReceiverHandle .ls .pst) -> Bool
 inetReceiverIdentified _ {rInetInfo=Nothing}
 	= False
 inetReceiverIdentified (epR1,type1) {rInetInfo=Just (epR2,type2,_,_)}
 	= epR1==epR2 && type1==type2
 
-inetReceiverIdentifiedWithId	::	!(!Id, !InetReceiverCategory`)
-									!(ReceiverHandle .ls .ps)	-> Bool
+inetReceiverIdentifiedWithId :: !(!Id, !InetReceiverCategory`) !(ReceiverHandle .ls .pst) -> Bool
 inetReceiverIdentifiedWithId _ {rInetInfo=Nothing}
 	= False
 inetReceiverIdentifiedWithId (id,category) {rId, rInetInfo=Just (_,rCategory,_,_)}
@@ -90,7 +88,7 @@ receiverHandleSyncMessage {smRecLoc={rlReceiverId},smMsg} rH=:{rFun} (ls,pst)
 	# maybe_content	= getDynamic rlReceiverId smMsg
 	| isNothing maybe_content
 		= ([],rH,(ls,pst))
-	# (ls,resp,pst)	= rFun (Cast (fromJust maybe_content)) (ls,pst)
+	# (ls,resp,pst)	= rFun (cast (fromJust maybe_content)) (ls,pst)
 	| isEmpty resp
 		= ([],rH,(ls,pst))
 	| otherwise	
@@ -103,14 +101,14 @@ receiverAddASyncMessage id sd rH=:{rASMQ}
 		| isNothing maybe_content
 			= rH
 		// otherwise
-			= {rH & rASMQ=rASMQ++[Cast (fromJust maybe_content)]}
+			= {rH & rASMQ=rASMQ++[cast (fromJust maybe_content)]}
 	| otherwise
 		= rH
 
 // MW11..
 receiverApplyInetEvent :: !InetReceiverASMQType !(ReceiverHandle .ls .pst) *(.ls,.pst) -> *(.ls,.pst)
 receiverApplyInetEvent eventInfo rH=:{rFun,rInetInfo=Just _} (ls,pst)
-	# (ls,_,pst)	= rFun (Cast eventInfo) (ls,pst)
+	# (ls,_,pst)	= rFun (cast eventInfo) (ls,pst)
 	= (ls,pst)
 
 getInetReceiverRId :: !(ReceiverHandle .ls .ps) -> RId InetReceiverASMQType

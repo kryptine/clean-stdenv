@@ -36,9 +36,9 @@ instance Controls (AddLS c) | Controls c where
 	controlToHandles :: !(AddLS c .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)	| Controls c
 	controlToHandles {addLS,addDef} pState
 		# (cs,pState)	= controlToHandles addDef pState
-		= (	[WElementHandleToControlState
+		= (	[wElementHandleToControlState
 				(WExtendLSHandle {	wExtendLS		= addLS
-								 ,	wExtendItems	= map ControlStateToWElementHandle cs
+								 ,	wExtendItems	= map controlStateToWElementHandle cs
 								 }
 				)
 			]
@@ -51,9 +51,9 @@ instance Controls (NewLS c) | Controls c where
 	controlToHandles :: !(NewLS c .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)	| Controls c
 	controlToHandles {newLS,newDef} pState
 		# (cs,pState)	= controlToHandles newDef pState
-		= (	[WElementHandleToControlState
+		= (	[wElementHandleToControlState
 				(WChangeLSHandle {	wChangeLS		= newLS
-								 ,	wChangeItems	= map ControlStateToWElementHandle cs
+								 ,	wChangeItems	= map controlStateToWElementHandle cs
 								 }
 				)
 			]
@@ -65,15 +65,15 @@ instance Controls (NewLS c) | Controls c where
 instance Controls (ListLS c) | Controls c where
 	controlToHandles :: !(ListLS c .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)	| Controls c
 	controlToHandles (ListLS cDefs) pState
-		# (css,pState)	= StateMap controlToHandles cDefs pState
-		= ([WElementHandleToControlState (WListLSHandle (map ControlStateToWElementHandle (flatten css)))],pState)
+		# (css,pState)	= stateMap controlToHandles cDefs pState
+		= ([wElementHandleToControlState (WListLSHandle (map controlStateToWElementHandle (flatten css)))],pState)
 	getControlType _
 		= ""
 
 instance Controls NilLS where
 	controlToHandles :: !(NilLS .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles NilLS pState
-		= ([WElementHandleToControlState (WListLSHandle [])],pState)
+		= ([wElementHandleToControlState (WListLSHandle [])],pState)
 	getControlType _
 		= ""
 
@@ -89,14 +89,14 @@ instance Controls ((:+:) c1 c2)	| Controls c1 & Controls c2 where
 instance Controls ButtonControl where
 	controlToHandles :: !(ButtonControl .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (ButtonControl textLine atts) pState
-		# (wMetrics,ioState)		= IOStGetOSWindowMetrics pState.io
+		# (wMetrics,ioState)		= ioStGetOSWindowMetrics pState.io
 		# (size,ioState)			= getButtonSize wMetrics textLine cWidth ioState
-		= (	[WElementHandleToControlState
+		= (	[wElementHandleToControlState
 				(WItemHandle 
 				{	wItemId			= getIdAttribute atts
 				,	wItemNr			= 0
 				,	wItemKind		= IsButtonControl
-				,	wItemShow		= not (Contains isControlHide atts)
+				,	wItemShow		= not (contains isControlHide atts)
 				,	wItemSelect		= getSelectStateAttribute atts
 				,	wItemInfo		= ButtonInfo {buttonInfoText=textLine}
 				,	wItemAtts		= filter (not o redundantAttribute) atts
@@ -115,21 +115,21 @@ instance Controls ButtonControl where
 		
 		getButtonSize :: !OSWindowMetrics String !(Maybe ControlWidth) !(IOSt .l) -> (!Size,!IOSt .l)
 		getButtonSize wMetrics _ (Just (PixelWidth reqW)) ioState
-			# wOK					= max (OSgetButtonControlMinWidth wMetrics) reqW
-			# hOK					= OSgetButtonControlHeight wMetrics
+			# wOK					= max (osGetButtonControlMinWidth wMetrics) reqW
+			# hOK					= osGetButtonControlHeight wMetrics
 			= ({w=wOK,h=hOK},ioState)
 		getButtonSize wMetrics _ (Just (TextWidth wtext)) ioState
 			# (w,ioState)			= getDialogFontTextWidth wtext ioState
-			  wOK					= max (OSgetButtonControlMinWidth wMetrics) w
-			  hOK					= OSgetButtonControlHeight wMetrics
+			  wOK					= max (osGetButtonControlMinWidth wMetrics) w
+			  hOK					= osGetButtonControlHeight wMetrics
 			= ({w=wOK,h=hOK},ioState)
 		getButtonSize wMetrics _ (Just (ContentWidth wtext)) ioState
-			# ((w,hOK),ioState)		= accIOToolbox (OSgetButtonControlSize wMetrics wtext) ioState
-			  wOK					= max (OSgetButtonControlMinWidth wMetrics) w
+			# ((w,hOK),ioState)		= accIOToolbox (osGetButtonControlSize wMetrics wtext) ioState
+			  wOK					= max (osGetButtonControlMinWidth wMetrics) w
 			= ({w=wOK,h=hOK},ioState)
 		getButtonSize wMetrics text Nothing ioState
-			# ((w,hOK),ioState)		= accIOToolbox (OSgetButtonControlSize wMetrics text) ioState
-			  wOK					= max (OSgetButtonControlMinWidth wMetrics) w
+			# ((w,hOK),ioState)		= accIOToolbox (osGetButtonControlSize wMetrics text) ioState
+			  wOK					= max (osGetButtonControlMinWidth wMetrics) w
 			= ({w=wOK,h=hOK},ioState)
 	getControlType _
 		= "ButtonControl"
@@ -137,15 +137,15 @@ instance Controls ButtonControl where
 instance Controls CheckControl where
 	controlToHandles :: !(CheckControl .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (CheckControl items layout atts) pState
-		# (wMetrics,ioState)		= IOStGetOSWindowMetrics pState.io
-		  (nrItems,items)			= Ulength items
-		# (infoItems,ioState)		= StateMap (checkItemToInfo wMetrics) items ioState
-		= (	[WElementHandleToControlState
+		# (wMetrics,ioState)		= ioStGetOSWindowMetrics pState.io
+		  (nrItems,items)			= ulength items
+		# (infoItems,ioState)		= stateMap (checkItemToInfo wMetrics) items ioState
+		= (	[wElementHandleToControlState
 				(WItemHandle 
 				{	wItemId			= getIdAttribute atts
 				,	wItemNr			= 0
 				,	wItemKind		= IsCheckControl
-				,	wItemShow		= not (Contains isControlHide atts)
+				,	wItemShow		= not (contains isControlHide atts)
 				,	wItemSelect		= getSelectStateAttribute atts
 				,	wItemInfo		= CheckInfo
 										{	checkItems = infoItems
@@ -166,21 +166,21 @@ instance Controls CheckControl where
 		checkItemToInfo :: !OSWindowMetrics !(CheckControlItem *(.ls,PSt .l)) !(IOSt .l)
 											-> (!CheckItemInfo *(.ls,PSt .l), ! IOSt .l)
 		checkItemToInfo wMetrics (text,Just (PixelWidth reqW),mark,f) ioState
-			# wOK				= max (OSgetCheckControlItemMinWidth wMetrics) reqW
-			# hOK				= OSgetCheckControlItemHeight wMetrics
+			# wOK				= max (osGetCheckControlItemMinWidth wMetrics) reqW
+			# hOK				= osGetCheckControlItemHeight wMetrics
 			= ({checkItem=(text,wOK,mark,f),checkItemSize={w=wOK,h=hOK},checkItemPos=zero,checkItemPtr=OSNoWindowPtr},ioState)
 		checkItemToInfo wMetrics (text,Just (TextWidth wtext),mark,f) ioState
 			# (w,ioState)		= getDialogFontTextWidth wtext ioState
-			  wOK				= max (OSgetCheckControlItemMinWidth wMetrics) w
-			# hOK				= OSgetCheckControlItemHeight wMetrics
+			  wOK				= max (osGetCheckControlItemMinWidth wMetrics) w
+			# hOK				= osGetCheckControlItemHeight wMetrics
 			= ({checkItem=(text,wOK,mark,f),checkItemSize={w=wOK,h=hOK},checkItemPos=zero,checkItemPtr=OSNoWindowPtr},ioState)
 		checkItemToInfo wMetrics (text,Just (ContentWidth wtext),mark,f) ioState
-			# ((w,hOK),ioState)	= accIOToolbox (OSgetCheckControlItemSize wMetrics wtext) ioState
-			  wOK				= max (OSgetCheckControlItemMinWidth wMetrics) w
+			# ((w,hOK),ioState)	= accIOToolbox (osGetCheckControlItemSize wMetrics wtext) ioState
+			  wOK				= max (osGetCheckControlItemMinWidth wMetrics) w
 			= ({checkItem=(text,wOK,mark,f),checkItemSize={w=wOK,h=hOK},checkItemPos=zero,checkItemPtr=OSNoWindowPtr},ioState)
 		checkItemToInfo wMetrics (text,Nothing,mark,f) ioState
-			# ((w,hOK),ioState)	= accIOToolbox (OSgetCheckControlItemSize wMetrics text) ioState
-			  wOK				= max (OSgetCheckControlItemMinWidth wMetrics) w
+			# ((w,hOK),ioState)	= accIOToolbox (osGetCheckControlItemSize wMetrics text) ioState
+			  wOK				= max (osGetCheckControlItemMinWidth wMetrics) w
 			= ({checkItem=(text,wOK,mark,f),checkItemSize={w=wOK,h=hOK},checkItemPos=zero,checkItemPtr=OSNoWindowPtr},ioState)
 	getControlType _
 		= "CheckControl"
@@ -189,15 +189,15 @@ instance Controls (CompoundControl c)	| Controls c where
 	controlToHandles :: !(CompoundControl c .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)	| Controls c
 	controlToHandles (CompoundControl controls atts) pState
 		# (cs,pState)	= controlToHandles controls pState
-		= (	[WElementHandleToControlState
+		= (	[wElementHandleToControlState
 				(WItemHandle 
 				{	wItemId			= getIdAttribute atts
 				,	wItemNr			= 0
 				,	wItemKind		= IsCompoundControl
-				,	wItemShow		= not (Contains isControlHide atts)
+				,	wItemShow		= not (contains isControlHide atts)
 				,	wItemSelect		= getSelectStateAttribute atts
 				,	wItemInfo		= CompoundInfo
-										{	compoundDomain	= RectangleToRect domain
+										{	compoundDomain	= rectangleToRect domain
 										,	compoundOrigin	= origin
 										,	compoundHScroll	= if hasHScroll (Just hScrollInfo) Nothing
 										,	compoundVScroll	= if hasVScroll (Just vScrollInfo) Nothing
@@ -209,7 +209,7 @@ instance Controls (CompoundControl c)	| Controls c where
 															  }
 										}
 				,	wItemAtts		= filter (not o redundantAttribute) atts
-				,	wItems			= map ControlStateToWElementHandle cs
+				,	wItems			= map controlStateToWElementHandle cs
 				,	wItemVirtual	= False
 				,	wItemPos		= zero
 				,	wItemSize		= zero
@@ -220,14 +220,14 @@ instance Controls (CompoundControl c)	| Controls c where
 		  ,	pState
 		  )
 	where
-		(hasHScroll,hScrollAtt)		= Select isControlHScroll undef atts
-		(hasVScroll,vScrollAtt)		= Select isControlVScroll undef atts
-		(_,lookAtt)					= Select isControlLook (ControlLook True stdUnfillUpdAreaLook) atts
+		(hasHScroll,hScrollAtt)		= cselect isControlHScroll undef atts
+		(hasVScroll,vScrollAtt)		= cselect isControlVScroll undef atts
+		(_,lookAtt)					= cselect isControlLook (ControlLook True stdUnfillUpdAreaLook) atts
 		(sysLook,lookFun)			= getControlLookAtt lookAtt
 		defaultDomain				= ControlViewDomain {viewDomainRange & corner1=zero}
-		(_,domainAtt)				= Select isControlViewDomain defaultDomain atts
+		(_,domainAtt)				= cselect isControlViewDomain defaultDomain atts
 		domain						= validateViewDomain (getControlViewDomainAtt domainAtt)
-		(_,originAtt)				= Select isControlOrigin (ControlOrigin domain.corner1) atts
+		(_,originAtt)				= cselect isControlOrigin (ControlOrigin domain.corner1) atts
 		origin						= validateOrigin domain (getControlOriginAtt originAtt)
 		hScrollInfo					= {	scrollFunction	= getControlHScrollFun hScrollAtt
 									  ,	scrollItemPos	= zero
@@ -247,12 +247,12 @@ instance Controls CustomButtonControl where
 	controlToHandles :: !(CustomButtonControl .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (CustomButtonControl {w,h} controlLook atts) pState
 		# size	= {w=max 0 w,h=max 0 h}
-		= (	[WElementHandleToControlState
+		= (	[wElementHandleToControlState
 				(WItemHandle 
 				{	wItemId			= getIdAttribute atts
 				,	wItemNr			= 0
 				,	wItemKind		= IsCustomButtonControl
-				,	wItemShow		= not (Contains isControlHide atts)
+				,	wItemShow		= not (contains isControlHide atts)
 				,	wItemSelect		= getSelectStateAttribute atts
 				,	wItemInfo		= CustomButtonInfo {cButtonInfoLook={lookFun=controlLook,lookPen=getInitialPen atts,lookSysUpdate=True}}
 				,	wItemAtts		= filter (not o redundantAttribute) atts
@@ -273,12 +273,12 @@ instance Controls CustomControl where
 	controlToHandles :: !(CustomControl .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (CustomControl {w,h} controlLook atts) pState
 		# size	= {w=max 0 w,h=max 0 h}
-		= (	[WElementHandleToControlState
+		= (	[wElementHandleToControlState
 				(WItemHandle 
 				{	wItemId			= getIdAttribute atts
 				,	wItemNr			= 0
 				,	wItemKind		= IsCustomControl
-				,	wItemShow		= not (Contains isControlHide atts)
+				,	wItemShow		= not (contains isControlHide atts)
 				,	wItemSelect		= getSelectStateAttribute atts
 				,	wItemInfo		= CustomInfo {customInfoLook={lookFun=controlLook,lookPen=getInitialPen atts,lookSysUpdate=True}}
 				,	wItemAtts		= filter (not o redundantAttribute) atts
@@ -298,14 +298,14 @@ instance Controls CustomControl where
 instance Controls EditControl where
 	controlToHandles :: !(EditControl .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (EditControl textLine cWidth nrLines atts) pState
-		# (wMetrics,ioState)		= IOStGetOSWindowMetrics pState.io
+		# (wMetrics,ioState)		= ioStGetOSWindowMetrics pState.io
 		# (size,ioState)			= getEditSize wMetrics nrLines cWidth ioState
-		= (	[WElementHandleToControlState
+		= (	[wElementHandleToControlState
 				(WItemHandle 
 				{	wItemId			= getIdAttribute atts
 				,	wItemNr			= 0
 				,	wItemKind		= IsEditControl
-				,	wItemShow		= not (Contains isControlHide atts)
+				,	wItemShow		= not (contains isControlHide atts)
 				,	wItemSelect		= getSelectStateAttribute atts
 				,	wItemInfo		= EditInfo
 										{	editInfoText	= textLine
@@ -326,18 +326,18 @@ instance Controls EditControl where
 	where
 		getEditSize :: !OSWindowMetrics Int !ControlWidth !(IOSt .l) -> (!Size,!IOSt .l)
 		getEditSize wMetrics nrLines (PixelWidth reqW) ioState
-			# ((w,hOK),ioState)		= accIOToolbox (OSgetEditControlSize wMetrics reqW nrLines) ioState
-			# wOK					= max (OSgetEditControlMinWidth wMetrics) w
+			# ((w,hOK),ioState)		= accIOToolbox (osGetEditControlSize wMetrics reqW nrLines) ioState
+			# wOK					= max (osGetEditControlMinWidth wMetrics) w
 			= ({w=wOK,h=hOK},ioState)
 		getEditSize wMetrics nrLines (TextWidth wtext) ioState
 			# (w,ioState)			= getDialogFontTextWidth wtext ioState
-			# ((w,hOK),ioState)		= accIOToolbox (OSgetEditControlSize wMetrics w nrLines) ioState
-			  wOK					= max (OSgetEditControlMinWidth wMetrics) w
+			# ((w,hOK),ioState)		= accIOToolbox (osGetEditControlSize wMetrics w nrLines) ioState
+			  wOK					= max (osGetEditControlMinWidth wMetrics) w
 			= ({w=wOK,h=hOK},ioState)
 		getEditSize wMetrics nrLines (ContentWidth wtext) ioState
 			# (w,ioState)			= getDialogFontTextWidth (wtext+++"mm") ioState
-			# ((w,hOK),ioState)		= accIOToolbox (OSgetEditControlSize wMetrics w nrLines) ioState
-			  wOK					= max (OSgetEditControlMinWidth wMetrics) w
+			# ((w,hOK),ioState)		= accIOToolbox (osGetEditControlSize wMetrics w nrLines) ioState
+			  wOK					= max (osGetEditControlMinWidth wMetrics) w
 			= ({w=wOK,h=hOK},ioState)
 	getControlType _
 		= "EditControl"
@@ -346,16 +346,16 @@ instance Controls (LayoutControl c)	| Controls c where
 	controlToHandles :: !(LayoutControl c .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)	| Controls c
 	controlToHandles (LayoutControl controls atts) pState
 		# (cs,pState)	= controlToHandles controls pState
-		= (	[WElementHandleToControlState
+		= (	[wElementHandleToControlState
 				(WItemHandle 
 				{	wItemId			= getIdAttribute atts
 				,	wItemNr			= 0
 				,	wItemKind		= IsLayoutControl
-				,	wItemShow		= not (Contains isControlHide atts)
+				,	wItemShow		= not (contains isControlHide atts)
 				,	wItemSelect		= getSelectStateAttribute atts
 				,	wItemInfo		= NoWItemInfo
 				,	wItemAtts		= filter (not o redundantAttribute) atts
-				,	wItems			= map ControlStateToWElementHandle cs
+				,	wItems			= map controlStateToWElementHandle cs
 				,	wItemVirtual	= False
 				,	wItemPos		= zero
 				,	wItemSize		= zero
@@ -371,15 +371,15 @@ instance Controls (LayoutControl c)	| Controls c where
 instance Controls PopUpControl where
 	controlToHandles :: !(PopUpControl .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (PopUpControl popUpItems index atts) pState
-		# (wMetrics,ioState)		= IOStGetOSWindowMetrics pState.io
+		# (wMetrics,ioState)		= ioStGetOSWindowMetrics pState.io
 		# (size,ioState)			= getPopUpSize wMetrics (map fst popUpItems) cWidth ioState
 		# nrItems					= length popUpItems
-		= (	[WElementHandleToControlState
+		= (	[wElementHandleToControlState
 				(WItemHandle 
 				{	wItemId			= getIdAttribute atts
 				,	wItemNr			= 0
 				,	wItemKind		= IsPopUpControl
-				,	wItemShow		= not (Contains isControlHide atts)
+				,	wItemShow		= not (contains isControlHide atts)
 				,	wItemSelect		= getSelectStateAttribute atts
 				,	wItemInfo		= PopUpInfo 
 										{	popUpInfoItems = popUpItems
@@ -402,21 +402,21 @@ instance Controls PopUpControl where
 		
 		getPopUpSize :: !OSWindowMetrics [String] !(Maybe ControlWidth) !(IOSt .l) -> (!Size,!IOSt .l)
 		getPopUpSize wMetrics _ (Just (PixelWidth reqW)) ioState
-			# wOK					= max (OSgetPopUpControlMinWidth wMetrics) reqW
-			  hOK					= OSgetPopUpControlHeight wMetrics
+			# wOK					= max (osGetPopUpControlMinWidth wMetrics) reqW
+			  hOK					= osGetPopUpControlHeight wMetrics
 			= ({w=wOK,h=hOK},ioState)
 		getPopUpSize wMetrics _ (Just (TextWidth wtext)) ioState
 			# (w,ioState)			= getDialogFontTextWidth wtext ioState
-			  wOK					= max (OSgetPopUpControlMinWidth wMetrics) w
-			  hOK					= OSgetPopUpControlHeight wMetrics
+			  wOK					= max (osGetPopUpControlMinWidth wMetrics) w
+			  hOK					= osGetPopUpControlHeight wMetrics
 			= ({w=wOK,h=hOK},ioState)
 		getPopUpSize wMetrics _ (Just (ContentWidth wtext)) ioState
-			# ((w,hOK),ioState)		= accIOToolbox (OSgetPopUpControlSize wMetrics [wtext]) ioState
-			  wOK					= max (OSgetPopUpControlMinWidth wMetrics) w
+			# ((w,hOK),ioState)		= accIOToolbox (osGetPopUpControlSize wMetrics [wtext]) ioState
+			  wOK					= max (osGetPopUpControlMinWidth wMetrics) w
 			= ({w=wOK,h=hOK},ioState)
 		getPopUpSize wMetrics itemtexts Nothing ioState
-			# ((w,hOK),ioState)		= accIOToolbox (OSgetPopUpControlSize wMetrics (if (isEmpty itemtexts) ["MMMMMMMMMM"] itemtexts)) ioState
-			  wOK					= max (OSgetPopUpControlMinWidth wMetrics) w
+			# ((w,hOK),ioState)		= accIOToolbox (osGetPopUpControlSize wMetrics (if (isEmpty itemtexts) ["MMMMMMMMMM"] itemtexts)) ioState
+			  wOK					= max (osGetPopUpControlMinWidth wMetrics) w
 			= ({w=wOK,h=hOK},ioState)
 	getControlType _
 		= "PopUpControl"
@@ -424,20 +424,20 @@ instance Controls PopUpControl where
 instance Controls RadioControl where
 	controlToHandles :: !(RadioControl .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (RadioControl items layout index atts) pState
-		# (wMetrics, ioState)		= IOStGetOSWindowMetrics pState.io
-		  (nrItems,items)			= Ulength items
-		# (infoItems,ioState)		= StateMap (radioItemToInfo wMetrics) items ioState
-		= (	[WElementHandleToControlState
+		# (wMetrics, ioState)		= ioStGetOSWindowMetrics pState.io
+		  (nrItems,items)			= ulength items
+		# (infoItems,ioState)		= stateMap (radioItemToInfo wMetrics) items ioState
+		= (	[wElementHandleToControlState
 				(WItemHandle 
 				{	wItemId			= getIdAttribute atts
 				,	wItemNr			= 0
 				,	wItemKind		= IsRadioControl
-				,	wItemShow		= not (Contains isControlHide atts)
+				,	wItemShow		= not (contains isControlHide atts)
 				,	wItemSelect		= getSelectStateAttribute atts
 				,	wItemInfo		= RadioInfo 
 										{	radioItems = infoItems
 										,	radioLayout= validateLayout nrItems layout
-										,	radioIndex = SetBetween index 1 nrItems
+										,	radioIndex = setBetween index 1 nrItems
 										}
 				,	wItemAtts		= filter (not o redundantAttribute) atts
 				,	wItems			= []
@@ -454,21 +454,21 @@ instance Controls RadioControl where
 		radioItemToInfo :: !OSWindowMetrics !(RadioControlItem *(.ls,PSt .l)) !(IOSt .l)
 											-> (!RadioItemInfo *(.ls,PSt .l), ! IOSt .l)
 		radioItemToInfo wMetrics (text,Just (PixelWidth reqW),f) ioState
-			# wOK				= max (OSgetRadioControlItemMinWidth wMetrics) reqW
-			# hOK				= OSgetRadioControlItemHeight wMetrics
+			# wOK				= max (osGetRadioControlItemMinWidth wMetrics) reqW
+			# hOK				= osGetRadioControlItemHeight wMetrics
 			= ({radioItem=(text,wOK,f),radioItemSize={w=wOK,h=hOK},radioItemPos=zero,radioItemPtr=OSNoWindowPtr},ioState)
 		radioItemToInfo wMetrics (text,Just (TextWidth wtext),f) ioState
 			# (w,ioState)		= getDialogFontTextWidth wtext ioState
-			  wOK				= max (OSgetRadioControlItemMinWidth wMetrics) w
-			# hOK				= OSgetRadioControlItemHeight wMetrics
+			  wOK				= max (osGetRadioControlItemMinWidth wMetrics) w
+			# hOK				= osGetRadioControlItemHeight wMetrics
 			= ({radioItem=(text,wOK,f),radioItemSize={w=wOK,h=hOK},radioItemPos=zero,radioItemPtr=OSNoWindowPtr},ioState)
 		radioItemToInfo wMetrics (text,Just (ContentWidth wtext),f) ioState
-			# ((w,hOK),ioState)	= accIOToolbox (OSgetRadioControlItemSize wMetrics wtext) ioState
-			  wOK				= max (OSgetRadioControlItemMinWidth wMetrics) w
+			# ((w,hOK),ioState)	= accIOToolbox (osGetRadioControlItemSize wMetrics wtext) ioState
+			  wOK				= max (osGetRadioControlItemMinWidth wMetrics) w
 			= ({radioItem=(text,wOK,f),radioItemSize={w=wOK,h=hOK},radioItemPos=zero,radioItemPtr=OSNoWindowPtr},ioState)
 		radioItemToInfo wMetrics (text,Nothing,f) ioState
-			# ((w,hOK),ioState)	= accIOToolbox (OSgetRadioControlItemSize wMetrics text) ioState
-			  wOK				= max (OSgetRadioControlItemMinWidth wMetrics) w
+			# ((w,hOK),ioState)	= accIOToolbox (osGetRadioControlItemSize wMetrics text) ioState
+			  wOK				= max (osGetRadioControlItemMinWidth wMetrics) w
 			= ({radioItem=(text,wOK,f),radioItemSize={w=wOK,h=hOK},radioItemPos=zero,radioItemPtr=OSNoWindowPtr},ioState)
 	getControlType _
 		= "RadioControl"
@@ -476,14 +476,14 @@ instance Controls RadioControl where
 instance Controls SliderControl where
 	controlToHandles :: !(SliderControl .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (SliderControl direction cWidth sliderState action atts) pState
-		# (wMetrics,ioState)		= IOStGetOSWindowMetrics pState.io
+		# (wMetrics,ioState)		= ioStGetOSWindowMetrics pState.io
 		# (size,ioState)			= getSliderSize wMetrics isHorizontal cWidth ioState
-		= (	[WElementHandleToControlState
+		= (	[wElementHandleToControlState
 				(WItemHandle 
 				{	wItemId			= getIdAttribute atts
 				,	wItemNr			= 0
 				,	wItemKind		= IsSliderControl
-				,	wItemShow		= not (Contains isControlHide atts)
+				,	wItemShow		= not (contains isControlHide atts)
 				,	wItemSelect		= getSelectStateAttribute atts
 				,	wItemInfo		= SliderInfo 
 				 						{	sliderInfoDir	= direction
@@ -507,15 +507,15 @@ instance Controls SliderControl where
 		
 		getSliderSize :: !OSWindowMetrics !Bool !ControlWidth !(IOSt .l) -> (!Size,!IOSt .l)
 		getSliderSize wMetrics isHorizontal (PixelWidth reqW) ioState
-			# (wOK,hOK)				= OSgetSliderControlSize wMetrics isHorizontal reqW
+			# (wOK,hOK)				= osGetSliderControlSize wMetrics isHorizontal reqW
 			= ({w=wOK,h=hOK},ioState)
 		getSliderSize wMetrics isHorizontal (TextWidth wtext) ioState
 			# (w,ioState)			= getDialogFontTextWidth wtext ioState
-			  (wOK,hOK)				= OSgetSliderControlSize wMetrics isHorizontal w
+			  (wOK,hOK)				= osGetSliderControlSize wMetrics isHorizontal w
 			= ({w=wOK,h=hOK},ioState)
 		getSliderSize wMetrics isHorizontal (ContentWidth wtext) ioState
 			# (w,ioState)			= getDialogFontTextWidth wtext ioState
-			  (wOK,hOK)				= OSgetSliderControlSize wMetrics isHorizontal w
+			  (wOK,hOK)				= osGetSliderControlSize wMetrics isHorizontal w
 			= ({w=wOK,h=hOK},ioState)
 	getControlType _
 		= "SliderControl"
@@ -523,14 +523,14 @@ instance Controls SliderControl where
 instance Controls TextControl where
 	controlToHandles :: !(TextControl .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (TextControl textLine atts) pState
-		# (wMetrics,ioState)		= IOStGetOSWindowMetrics pState.io
+		# (wMetrics,ioState)		= ioStGetOSWindowMetrics pState.io
 		# (size,ioState)			= getTextSize wMetrics textLine cWidth ioState
-		= (	[WElementHandleToControlState
+		= (	[wElementHandleToControlState
 				(WItemHandle 
 				{	wItemId			= getIdAttribute atts
 				,	wItemNr			= 0
 				,	wItemKind		= IsTextControl
-				,	wItemShow		= not (Contains isControlHide atts)
+				,	wItemShow		= not (contains isControlHide atts)
 				,	wItemSelect		= getSelectStateAttribute atts
 				,	wItemInfo		= TextInfo {textInfoText=textLine}
 				,	wItemAtts		= filter (not o redundantAttribute) atts
@@ -549,21 +549,21 @@ instance Controls TextControl where
 		
 		getTextSize :: !OSWindowMetrics !String !(Maybe ControlWidth) !(IOSt .l) -> (!Size,!IOSt .l)
 		getTextSize wMetrics _ (Just (PixelWidth reqW)) ioState
-			# wOK					= max (OSgetTextControlMinWidth wMetrics) reqW
-			  hOK					= OSgetTextControlHeight wMetrics
+			# wOK					= max (osGetTextControlMinWidth wMetrics) reqW
+			  hOK					= osGetTextControlHeight wMetrics
 			= ({w=wOK,h=hOK},ioState)
 		getTextSize wMetrics _ (Just (TextWidth wtext)) ioState
 			# (w,ioState)			= getDialogFontTextWidth wtext ioState
-			  wOK					= max (OSgetTextControlMinWidth wMetrics) w
-			  hOK					= OSgetTextControlHeight wMetrics
+			  wOK					= max (osGetTextControlMinWidth wMetrics) w
+			  hOK					= osGetTextControlHeight wMetrics
 			= ({w=wOK,h=hOK},ioState)
 		getTextSize wMetrics _ (Just (ContentWidth wtext)) ioState
-			# ((w,hOK),ioState)	= accIOToolbox (OSgetTextControlSize wMetrics wtext) ioState
-			  wOK				= max (OSgetTextControlMinWidth wMetrics) w
+			# ((w,hOK),ioState)	= accIOToolbox (osGetTextControlSize wMetrics wtext) ioState
+			  wOK				= max (osGetTextControlMinWidth wMetrics) w
 			= ({w=wOK,h=hOK},ioState)
 		getTextSize wMetrics text Nothing ioState
-			# ((w,hOK),ioState)	= accIOToolbox (OSgetTextControlSize wMetrics text) ioState
-			  wOK				= max (OSgetTextControlMinWidth wMetrics) w
+			# ((w,hOK),ioState)	= accIOToolbox (osGetTextControlSize wMetrics text) ioState
+			  wOK				= max (osGetTextControlMinWidth wMetrics) w
 			= ({w=wOK,h=hOK},ioState)
 	getControlType _
 		= "TextControl"
@@ -585,18 +585,18 @@ getIdAttribute atts
 	| hasId			= Just (getControlIdAtt idAtt)
 	| otherwise		= Nothing
 where
-	(hasId,idAtt)	= Select isControlId undef atts
+	(hasId,idAtt)	= cselect isControlId undef atts
 
 getControlWidthAttribute :: ![ControlAttribute .st] -> Maybe ControlWidth
 getControlWidthAttribute atts
 	| hasControlWidth			= Just (getControlWidthAtt widthAtt)
 	| otherwise					= Nothing
 where
-	(hasControlWidth,widthAtt)	= Select isControlWidth undef atts
+	(hasControlWidth,widthAtt)	= cselect isControlWidth undef atts
 
 getSelectStateAttribute :: ![ControlAttribute .st] -> Bool
 getSelectStateAttribute atts
-	= enabled (getControlSelectStateAtt (snd (Select isControlSelectState (ControlSelectState Able) atts)))
+	= enabled (getControlSelectStateAtt (snd (cselect isControlSelectState (ControlSelectState Able) atts)))
 
 redundantAttribute :: !(ControlAttribute .st) -> Bool
 redundantAttribute (ControlId _)			= True
@@ -609,23 +609,23 @@ redundantAttribute _						= False
 getInitialPen :: ![ControlAttribute .st] -> Pen
 getInitialPen atts
 	| hasPenAtts
-		= StateMap2 setPenAttribute (reverse (getControlPenAtt penAttsAtt)) defaultPen
+		= stateMap2 setPenAttribute (reverse (getControlPenAtt penAttsAtt)) defaultPen
 	| otherwise
 		= defaultPen
 where
-	(hasPenAtts,penAttsAtt)	= Select isControlPen undef atts
+	(hasPenAtts,penAttsAtt)	= cselect isControlPen undef atts
 
 validateLayout :: !Int !RowsOrColumns -> RowsOrColumns
-validateLayout nrItems (Rows    n) = Rows    (SetBetween n 1 nrItems)
-validateLayout nrItems (Columns n) = Columns (SetBetween n 1 nrItems)
+validateLayout nrItems (Rows    n) = Rows    (setBetween n 1 nrItems)
+validateLayout nrItems (Columns n) = Columns (setBetween n 1 nrItems)
 
 validatePopUpIndex :: !Int !Index -> Index
 validatePopUpIndex nrItems index
-	| IsBetween index 1 nrItems	= index
+	| isBetween index 1 nrItems	= index
 	| otherwise					= 1
 
 validateOrigin :: !ViewDomain !Point2 -> Point2
 validateOrigin domain origin
-	= {	x=SetBetween origin.x domain.corner1.x domain.corner2.x
-	  ,	y=SetBetween origin.y domain.corner1.y domain.corner2.y
+	= {	x=setBetween origin.x domain.corner1.x domain.corner2.x
+	  ,	y=setBetween origin.y domain.corner1.y domain.corner2.y
 	  }

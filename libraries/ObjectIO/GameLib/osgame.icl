@@ -5,7 +5,7 @@ implementation module osgame
 import	StdArray, StdBool, StdChar, StdInt
 import	StdMaybe
 from	ospicture	import toRGBtriple
-from	clCCall_12	import WinBeep
+from	clCCall_12	import winBeep
 import	gameCrossCall_12, gamehandle, gameobjectutils, gst
 
 
@@ -151,7 +151,7 @@ OSSetBoundMap x y newvalue tb
 
 handleGameEvents :: !CrossCallInfo !v:(OSGameData u:gs) !*OSToolbox -> (!CrossCallInfo,!v:OSGameData u:gs,!*OSToolbox), [v<=u]
 handleGameEvents fromOSCci=:{ccMsg=CcWmGAMEKEYBOARD,p1=key,p2=x,p3=y} state tb
-    = (Return2Cci x` y`,state,tb)
+    = (return2Cci x` y`,state,tb)
 where
     (x`,y`) = case key of
                 GK_LEFT     -> (x-1, y)
@@ -164,10 +164,10 @@ handleGameEvents fromOSCci=:{ccMsg=CcWmCHECKQUIT} state=:{gamest,gamehnd={quitle
     #   gst                 =   toGSt gamest tb
     #   (quit, gst)         =   quitfunction gst
     #   (newstate, tb)      =   fromGSt gst
-    =   (Return1Cci (toInt quit), {state & gamest = newstate}, tb)
+    =   (return1Cci (toInt quit), {state & gamest = newstate}, tb)
 
 handleGameEvents fromOSCci=:{ccMsg=CcWmSCROLL,p1=id,p2=x,p3=y,p4=t} state=:{scroll} tb
-    = (Return2Cci x` y`, state, tb)
+    = (return2Cci x` y`, state, tb)
 where
     {x = x`, y = y`}    =   f (MakePoint x y) t
     f                   =   FindMovement (id, scroll)
@@ -179,50 +179,50 @@ where
 
 handleGameEvents fromOSCci=:{ccMsg=CcWmINITOBJECT, p1=objtype, p2=subtype, p3=id, p4=x, p5=y, p6=time} state tb
     # (state,tb)        =   initialiseGameObject objtype subtype id {x=x,y=y} time state tb
-    = (Return0Cci, state, tb)
+    = (return0Cci, state, tb)
 
 handleGameEvents fromOSCci=:{ccMsg=CcWmOBJECTDONE, p1=objtype, p2=id} state tb
     # (state, tb) = doneGameObject objtype id state tb
-    = (Return0Cci, state, tb)
+    = (return0Cci, state, tb)
 
 handleGameEvents fromOSCci=:{ccMsg=CcWmMOVEOBJECT, p1=objtype, p2=id} state tb
     # (state,tb)        =   moveGameObject objtype id state tb
-    = (Return0Cci, state, tb)
+    = (return0Cci, state, tb)
 
 handleGameEvents fromOSCci=:{ccMsg=CcWmTOUCHBOUND, p1=objtype, p2=id, p3=dir, p4=mapcode} state tb
     # (state,tb)        =   touchBound objtype id dir mapcode state tb
-    = (Return0Cci, state, tb)
+    = (return0Cci, state, tb)
 
 handleGameEvents fromOSCci=:{ccMsg=CcWmCOLLISION, p1=ot1, p2=id1, p3=ot2, p4=id2, p5=dir} state tb
     # (state,tb)        =   handleCollision ot1 id1 ot2 id2 dir state tb
-    = (Return0Cci, state, tb)
+    = (return0Cci, state, tb)
 
 handleGameEvents fromOSCci=:{ccMsg=CcWmANIMATION, p1=objtype, p2=id} state tb
     # (state,tb)        =   handleAnimationEvent objtype id state tb
-    = (Return0Cci, state, tb)
+    = (return0Cci, state, tb)
 
 handleGameEvents fromOSCci=:{ccMsg=CcWmUSEREVENT, p1=objtype, p2=id, p3=ev, p4=par1, p5=par2} state tb
     # (state,tb)        =   handleUserEvent objtype id ev par1 par2 state tb
-    = (Return0Cci, state, tb)
+    = (return0Cci, state, tb)
 
 handleGameEvents fromOSCci=:{ccMsg=CcWmOBJECTTIMER, p1=objtype, p2=id} state tb
     # (state,tb)        =   handleTimerEvent objtype id state tb
-    = (Return0Cci, state, tb)
+    = (return0Cci, state, tb)
 
 handleGameEvents fromOSCci=:{ccMsg=CcWmOBJECTKEYDOWN, p1=objtype, p2=id, p3=key} state tb
     # (state,tb)        =   handleKeyDown objtype id key state tb
-    = (Return0Cci, state, tb)
+    = (return0Cci, state, tb)
 
 handleGameEvents fromOSCci=:{ccMsg=CcWmOBJECTKEYUP, p1=objtype, p2=id, p3=key} state tb
     # (state,tb)        =   handleKeyUp objtype id key state tb
-    = (Return0Cci, state, tb)
+    = (return0Cci, state, tb)
 
 handleGameEvents fromOSCci=:{ccMsg=CcWmSTATISTICS} state=:{gamest,gamehnd={textitems`=stats}} tb
     #   gst             =   toGSt gamest tb
     #   (statlist, gst) =   stats gst
     #   (newstate, tb)  =   fromGSt gst
     #   tb              =   showall statlist tb
-    = (Return0Cci, {state & gamest = newstate}, tb)
+    = (return0Cci, {state & gamest = newstate}, tb)
 where
     showall :: ![GameText] !*OSToolbox -> *OSToolbox
     showall [] tb = tb
@@ -254,7 +254,7 @@ where
                 (sx,sy) = al.xyfromscreencenter
 
 handleGameEvents fromOSCci state tb
-    = (Return0Cci,state,WinBeep tb)
+    = (return0Cci,state,winBeep tb)
 
 
 MakePoint :: !Int !Int -> Point2

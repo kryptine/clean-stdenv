@@ -10,23 +10,21 @@ implementation module StdIOCommon
 
 import	StdArray, StdBool, StdFunc, StdInt, StdList, StdOverloaded, StdString
 import	id, StdBitmap, StdIOBasic, StdKey, StdMaybe
-from	commondef	import StateMap2
+from	commondef	import stateMap2
 
 
 /*	The SelectState type.								*/
 
-::	SelectState		=	Able | Unable
+::	SelectState
+	=	Able | Unable
 
 instance == SelectState where
-	(==) :: !SelectState !SelectState -> Bool
 	(==) Able	select = enabled select
 	(==) Unable	select = not (enabled select)
 instance ~ SelectState where
-	(~) :: !SelectState -> SelectState
 	(~) Able	= Unable
 	(~) Unable	= Able
 instance toString SelectState where
-	toString :: !SelectState -> {#Char}
 	toString Able   = "Able"
 	toString Unable = "Unable"
 
@@ -37,18 +35,16 @@ enabled _		= False
 
 /*	The MarkState type.									*/
 
-::	MarkState		=	Mark | NoMark
+::	MarkState
+	=	Mark | NoMark
 
 instance == MarkState where
-	(==) :: !MarkState	!MarkState	-> Bool
 	(==) Mark	mark = marked mark
 	(==) NoMark	mark = not (marked mark)
 instance ~ MarkState where
-	(~) :: !MarkState -> MarkState
 	(~) Mark	= NoMark
 	(~) _		= Mark
 instance toString MarkState where
-	toString :: !MarkState -> {#Char}
 	toString Mark   = "Mark"
 	toString NoMark = "NoMark"
 
@@ -85,7 +81,6 @@ getKeyboardStateKey (SpecialKey key _ _) = Just (IsSpecialKey key)
 getKeyboardStateKey KeyLost              = Nothing
 
 instance == KeyboardState where
-	(==) :: !KeyboardState !KeyboardState -> Bool
 	(==) (CharKey char key) keySt			= case keySt of
 												(CharKey char` key`)			-> char==char` && key==key`
 												_								-> False
@@ -96,7 +91,6 @@ instance == KeyboardState where
 												KeyLost							-> True
 												_								-> False
 instance == KeyState where
-	(==) :: !KeyState !KeyState -> Bool
 	(==) KeyUp				key	= case key of
 									KeyUp				-> True
 									_					-> False
@@ -104,7 +98,6 @@ instance == KeyState where
 									(KeyDown repeat`)	-> repeat==repeat`
 									_					-> False
 instance toString KeyboardState where
-	toString :: !KeyboardState -> {#Char}
 	toString (CharKey char keystate)
 		= brackify ("CharKey "+++toString char+++" "+++brackify ("ASCII: "+++toString (toInt char))+++" "+++toString keystate)
 	toString (SpecialKey special keystate modifiers)
@@ -112,7 +105,6 @@ instance toString KeyboardState where
 	toString KeyLost
 		= "KeyLost"
 instance toString KeyState where
-	toString :: !KeyState -> {#Char}
 	toString (KeyDown isRepeat)	= brackify ("KeyDown "+++fromBool isRepeat)
 	toString KeyUp				= "KeyUp"
 
@@ -160,7 +152,6 @@ getMouseStateButtonState (MouseUp   _ _)	= ButtonUp
 getMouseStateButtonState MouseLost			= ButtonUp
 
 instance == MouseState where
-	(==) :: !MouseState !MouseState -> Bool
 	(==) (MouseMove pos mods)	 mouseSt	= case mouseSt of
 												(MouseMove pos` mods`)		-> pos==pos` && mods==mods`
 												_							-> False
@@ -177,7 +168,6 @@ instance == MouseState where
 												MouseLost					-> True
 												_							-> False
 instance == ButtonState where
-	(==) :: !ButtonState	!ButtonState					-> Bool
 	(==) ButtonStillUp		button	= case button of
 										ButtonStillUp		-> True
 										_					-> False
@@ -221,10 +211,8 @@ instance toString ButtonState where
 		}
 
 instance == SliderState where								// Equality on SliderState
-	(==) :: !SliderState !SliderState -> Bool
 	(==) s1 s2 = s1.sliderMin==s2.sliderMin && s1.sliderMax==s2.sliderMax && s1.sliderThumb==s2.sliderThumb
 instance toString SliderState where
-	toString :: !SliderState -> {#Char}
 	toString {sliderMin,sliderThumb,sliderMax}
 		= curlify (itemsList "," (map recordFieldtoString (zip2	["sliderMin","sliderThumb","sliderMax"]
 																[ sliderMin,  sliderThumb,  sliderMax ])))
@@ -242,7 +230,6 @@ instance toString SliderState where
 ::	UpdateArea			:==	[ViewFrame]
 
 instance toString UpdateState where
-	toString :: !UpdateState -> {#Char}
 	toString {oldFrame,newFrame,updArea}
 		= curlify (itemsList "," ["oldFrame="+++toString oldFrame
 								 ,"newFrame="+++toString newFrame
@@ -250,19 +237,24 @@ instance toString UpdateState where
 								 ]
 				  )
 
-RectangleToUpdateState :: !Rectangle -> UpdateState
-RectangleToUpdateState frame
+rectangleToUpdateState :: !Rectangle -> UpdateState
+rectangleToUpdateState frame
 	= {oldFrame=frame,newFrame=frame,updArea=[frame]}
 
 /*	viewDomainRange defines the minimum and maximum values for ViewDomains.
 	viewFrameRange  defines the minimum and maximum values for ViewFrames.
 */
-viewDomainRange			:== {	corner1 = {x = 0-(2^30),y = 0-(2^30)}
-							,	corner2 = {x =    2^30 ,y =    2^30 }
-							}
-viewFrameRange			:==	{	corner1 = {x = 1-(2^31),y = 1-(2^31)}
-							,	corner2 = {x = (2^31)-1,y = (2^31)-1}
-							}
+viewDomainRange :: ViewDomain
+viewDomainRange
+	= {	corner1 = {x = 0-(2^30),y = 0-(2^30)}
+	  ,	corner2 = {x =    2^30 ,y =    2^30 }
+	  }
+
+viewFrameRange :: ViewFrame
+viewFrameRange
+	= {	corner1 = {x = 1-(2^31),y = 1-(2^31)}
+	  ,	corner2 = {x = (2^31)-1,y = (2^31)-1}
+	  }
 
 
 /*	Modifiers indicates the meta keys that have been pressed (True) or not (False).	*/
@@ -283,14 +275,12 @@ ControlOnly	:== {shiftDown=False,optionDown=False,commandDown=True, controlDown=
 AltOnly		:==	{shiftDown=False,optionDown=True, commandDown=False,controlDown=False,altDown=True }
 
 instance == Modifiers where
-	(==) :: !Modifiers !Modifiers -> Bool
 	(==) m1 m2 = m1.shiftDown   == m2.shiftDown
 			  && m1.optionDown  == m2.optionDown
 			  && m1.commandDown == m2.commandDown
 			  && m1.controlDown == m2.controlDown
 			  && m1.altDown     == m2.altDown
 instance toString Modifiers where
-	toString :: !Modifiers -> {#Char}
 	toString {shiftDown,optionDown,commandDown,controlDown,altDown}
 		= curlify (itemsList "," (flatten [	if shiftDown   ["shiftDown"]   []
 										  ,	if optionDown  ["optionDown"]  []
@@ -338,11 +328,9 @@ instance toString Modifiers where
 	:==	(ViewDomain,Point2) -> Vector2		// Current view domain and origin
 
 instance zero ItemOffset where
-	zero :: ItemOffset
 	zero = NoOffset
 
 instance == ItemLoc where
-	(==) :: !ItemLoc		!ItemLoc -> Bool
 	(==) Fix				itemLoc	= case itemLoc of
 										Fix				-> True
 										_				-> False
@@ -392,7 +380,6 @@ instance == ItemLoc where
 										BelowPrev		-> True
 										_				-> False
 instance toString ItemLoc where
-	toString :: !ItemLoc -> {#Char}
 	toString Fix			= "Fix"
 	toString LeftTop		= "LeftTop"
 	toString RightTop		= "RightTop"
@@ -418,7 +405,6 @@ instance toString ItemLoc where
 	|	Vertical
 
 instance == Direction where
-	(==) :: !Direction !Direction -> Bool
 	(==) Horizontal direction	= case direction of
 									Horizontal	-> True
 									_			-> False
@@ -426,7 +412,6 @@ instance == Direction where
 									Vertical	-> True
 									_			-> False
 instance toString Direction where
-	toString :: !Direction -> {#Char}
 	toString Horizontal = "Horizontal"
 	toString Vertical   = "Vertical"
 
@@ -443,7 +428,6 @@ instance toString Direction where
 	|	HiddenCursor
 
 instance == CursorShape where
-	(==) :: !CursorShape !CursorShape -> Bool
 	(==) StandardCursor	cursor	= case cursor of
 									StandardCursor	-> True
 									_				-> False
@@ -466,7 +450,6 @@ instance == CursorShape where
 									HiddenCursor	-> True
 									_				-> False
 instance toString CursorShape where
-	toString :: !CursorShape -> {#Char}
 	toString StandardCursor	= "StandardCursor"
 	toString BusyCursor		= "BusyCursor"
 	toString IBeamCursor	= "IBeamCursor"
@@ -484,7 +467,6 @@ instance toString CursorShape where
 	|	MDI														// Multiple Document Interface
 
 instance == DocumentInterface where
-	(==) :: !DocumentInterface !DocumentInterface -> Bool
 	(==) NDI xdi	= case xdi of
 						NDI	-> True
 						_	-> False
@@ -495,7 +477,6 @@ instance == DocumentInterface where
 						MDI	-> True
 						_	-> False
 instance toString DocumentInterface where
-	toString :: !DocumentInterface -> {#Char}
 	toString NDI = "NDI"
 	toString SDI = "SDI"
 	toString MDI = "MDI"
@@ -588,7 +569,7 @@ stdUnfillNewFrameLook :: SelectState !UpdateState !*Picture -> *Picture
 stdUnfillNewFrameLook _ {newFrame} picture = unfill newFrame picture
 
 stdUnfillUpdAreaLook :: SelectState !UpdateState !*Picture -> *Picture
-stdUnfillUpdAreaLook _ {updArea} picture = StateMap2 unfill updArea picture
+stdUnfillUpdAreaLook _ {updArea} picture = stateMap2 unfill updArea picture
 
 
 /*	Common error report types.							*/
@@ -602,7 +583,6 @@ stdUnfillUpdAreaLook _ {updArea} picture = StateMap2 unfill updArea picture
 	|	OtherError !String										// Other kind of error
 
 instance == ErrorReport where
-	(==) :: !ErrorReport !ErrorReport -> Bool
 	(==) NoError			error	= case error of
 										NoError				-> True
 										_					-> False
@@ -624,7 +604,6 @@ instance == ErrorReport where
 										OtherError e2		-> e1==e2
 										_					-> False
 instance toString ErrorReport where
-	toString :: !ErrorReport -> {#Char}
 	toString NoError			= "NoError"
 	toString ErrorViolateDI		= "ErrorViolateDI"
 	toString ErrorIdsInUse		= "ErrorIdsInUse"

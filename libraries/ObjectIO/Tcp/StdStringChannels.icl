@@ -122,7 +122,7 @@ instance Receivers 			StringChannelReceiver
 			= (ls, pSt)
 		checkEOM id callback EOM ls_pSt
 			#!	(ls,pSt)	= callback EOM ls_pSt
-				pSt			= appPIO (closeReceiver (RIdtoId id)) pSt
+				pSt			= appPIO (closeReceiver (rIdtoId id)) pSt
 			= (ls, pSt)
 		checkEOM id callback m ls_pSt
 			= callback m ls_pSt

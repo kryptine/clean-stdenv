@@ -8,7 +8,7 @@ definition module StdReceiver
 
 import	StdReceiverDef, StdMaybe
 from	iostate	import	PSt, IOSt
-from	id		import	RId, R2Id, RIdtoId, R2IdtoId, ==
+from	id		import	RId, R2Id, rIdtoId, r2IdtoId, ==
 
 
 //	Open uni- and bi-directional receivers:

@@ -2,4 +2,4 @@ definition module menuCCall_12
 
 import ostoolbox
 
-WinInitialiseMenus :: !*OSToolbox -> *OSToolbox
+winInitialiseMenus :: !*OSToolbox -> *OSToolbox

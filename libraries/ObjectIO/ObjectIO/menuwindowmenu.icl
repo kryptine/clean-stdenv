@@ -9,11 +9,11 @@ implementation module menuwindowmenu
 import	StdInt, StdBool, StdClass, StdList, StdTuple, StdFunc, StdEnum, StdMisc
 import	StdMenu, StdMenuElement, StdWindow, StdPSt, StdProcess, StdIOCommon
 import	menuinternal, menucreate, id, windowdefaccess, windowaccess
-// RWS +++
 import commondef
 
 menuwindowmenuError :: String String -> .x
-menuwindowmenuError rule error = Error rule "menuwindowmenu" error
+menuwindowmenuError rule error
+	= error rule "menuwindowmenu" error
 
 
 /*	openWindowMenu creates the WindowMenu. This menu contains atleast the following elements:

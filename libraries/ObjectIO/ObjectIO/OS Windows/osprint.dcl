@@ -58,4 +58,3 @@ instance PrintEnvironments (PSt .l)
 
 os_printsetuptostring	::	!PrintSetup -> String
 os_stringtoprintsetup	::	!String -> PrintSetup
-

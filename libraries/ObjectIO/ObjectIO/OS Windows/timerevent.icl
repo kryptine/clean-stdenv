@@ -6,14 +6,14 @@ implementation module timerevent
 
 import	StdBool, StdClass
 import	deviceevents, timeraccess
-from	commondef	import FatalError, UContains, UCond
-from	iostate		import PSt, IOSt, IOStHasDevice, IOStGetDevice, IOStSetDevice, IOStGetIOId
+from	commondef	import fatalError, ucontains, UCond
+from	iostate		import PSt, IOSt, ioStHasDevice, ioStGetDevice, ioStSetDevice, ioStGetIOId
 from	StdPSt		import accPIO
 
 
 timereventFatalError :: String String -> .x
 timereventFatalError function error
-	= FatalError function "timerevent" error
+	= fatalError function "timerevent" error
 
 
 /*	The timerEvent function determines whether the given SchedulerEvent can be applied
@@ -24,7 +24,7 @@ timereventFatalError function error
 */
 timerEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
 timerEvent schedulerEvent pState
-	# (hasDevice,pState)	= accPIO (IOStHasDevice TimerDevice) pState
+	# (hasDevice,pState)	= accPIO (ioStHasDevice TimerDevice) pState
 	| not hasDevice			// This condition should never occur: TimerDevice must have been 'installed'
 		= timereventFatalError "TimerFunctions.dEvent" "could not retrieve TimerSystemState from IOSt"
 	| otherwise
@@ -32,13 +32,13 @@ timerEvent schedulerEvent pState
 where
 	timerEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
 	timerEvent schedulerEvent=:(ScheduleTimerEvent te=:{teLoc}) pState=:{io=ioState}
-		# (ioid,ioState)	= IOStGetIOId ioState
+		# (ioid,ioState)	= ioStGetIOId ioState
 		| teLoc.tlIOId<>ioid || teLoc.tlDevice<>TimerDevice
 			= (False,Nothing,schedulerEvent,{pState & io=ioState})
-		# (_,timer,ioState)	= IOStGetDevice TimerDevice ioState
-		# timers			= TimerSystemStateGetTimerHandles timer
+		# (_,timer,ioState)	= ioStGetDevice TimerDevice ioState
+		# timers			= timerSystemStateGetTimerHandles timer
 		  (found,timers)	= lookForTimer teLoc.tlParentId timers
-		# ioState			= IOStSetDevice (TimerSystemState timers) ioState
+		# ioState			= ioStSetDevice (TimerSystemState timers) ioState
 		# pState			= {pState & io=ioState}
 		| found
 			#! deviceEvent	= TimerEvent te
@@ -48,11 +48,11 @@ where
 	where
 		lookForTimer :: !Id !(TimerHandles .pst) -> (!Bool,!TimerHandles .pst)
 		lookForTimer parent timers=:{tTimers=tHs}
-			# (found,tHs)	= UContains (identifyTimerStateHandle parent) tHs
+			# (found,tHs)	= ucontains (identifyTimerStateHandle parent) tHs
 			= (found,{timers & tTimers=tHs})
 	
 	timerEvent schedulerEvent=:(ScheduleMsgEvent msgEvent) pState
-		# (ioid,pState)		= accPIO IOStGetIOId pState
+		# (ioid,pState)		= accPIO ioStGetIOId pState
 		  recloc			= case msgEvent of
 							  	(QASyncMessage {qasmRecLoc}) -> qasmRecLoc
 							  	(ASyncMessage  { asmRecLoc}) -> asmRecLoc

@@ -14,13 +14,13 @@ from	ostoolbox	import OSToolbox
 from	ostypes		import Rect
 
 
-K`						:: .x !.y -> .y
+k`						:: .x !.y -> .y
 
 /*	Calculation rules on Integers:
 */
-Dist					::		!Int !Int -> Int
-SetBetween				:: !Int !Int !Int -> Int
-IsBetween				:: !Int !Int !Int -> Bool
+dist					::		!Int !Int -> Int
+setBetween				:: !Int !Int !Int -> Int
+isBetween				:: !Int !Int !Int -> Bool
 minmax					::      !Int !Int -> (!Int,!Int)			// minmax a b = (min a b,max a b)
 
 
@@ -39,24 +39,24 @@ instance subVector Point2
 instance subVector Rect
 instance subVector Rectangle
 
-RectangleToRect			:: !Rectangle			-> Rect				// (l,t, r,b) such that l<=r && t<=b
-RectToRectangle			:: !Rect				-> Rectangle		// (l,t, r,b) -> {{x=l,y=t},{x=r,y=b}}
-IsEmptyRect				:: !Rect				-> Bool				// (l,t, r,b) -> l==r || t==b
-IsEmptyRectangle		:: !Rectangle			-> Bool				// {corner1,corner2} -> corner1.x==corner2.x || corner1.y==corner2.y
-PointInRect				:: !Point2 !Rect		-> Bool				// {x,y} (l,t, r,b) -> l<=x<=r && t<=y<=b
-PointInRectangle		:: !Point2 !Rectangle	-> Bool				// PointInRect point (RectangleToRect rectangle)
-PosSizeToRect			:: !Point2 !Size		-> Rect				// {x,y} {w,h} -> ( x,y,  x+w,y+h )	// no check on negative size
-PosSizeToRectangle		:: !Point2 !Size		-> Rectangle		// {x,y} {w,h} -> {{x,y},{x+w,y+h}}	// no check on negative size
-SizeToRect				::		   !Size		-> Rect				//       {w,h} -> ( 0,0,    w,  h )	// no check on negative size
-SizeToRectangle			::		   !Size		-> Rectangle		//       {w,h} -> {zero, {  w,  h}}	// no check on negative size
-DisjointRects			:: !Rect   !Rect		-> Bool
-IntersectRects			:: !Rect   !Rect		-> Rect				// if disjoint: EmptyRect; otherwise the intersection
-SubtractRects			:: !Rect   !Rect		-> [Rect]			// subtract @2 from @1
-RectSize				:: !Rect				-> Size				// (l,t, r,b)          -> {abs (r-l), abs (b-t)}
+rectangleToRect			:: !Rectangle			-> Rect				// (l,t, r,b) such that l<=r && t<=b
+rectToRectangle			:: !Rect				-> Rectangle		// (l,t, r,b) -> {{x=l,y=t},{x=r,y=b}}
+isEmptyRect				:: !Rect				-> Bool				// (l,t, r,b) -> l==r || t==b
+isEmptyRectangle		:: !Rectangle			-> Bool				// {corner1,corner2} -> corner1.x==corner2.x || corner1.y==corner2.y
+pointInRect				:: !Point2 !Rect		-> Bool				// {x,y} (l,t, r,b) -> l<=x<=r && t<=y<=b
+pointInRectangle		:: !Point2 !Rectangle	-> Bool				// PointInRect point (RectangleToRect rectangle)
+posSizeToRect			:: !Point2 !Size		-> Rect				// {x,y} {w,h} -> ( x,y,  x+w,y+h )	// no check on negative size
+posSizeToRectangle		:: !Point2 !Size		-> Rectangle		// {x,y} {w,h} -> {{x,y},{x+w,y+h}}	// no check on negative size
+sizeToRect				::		   !Size		-> Rect				//       {w,h} -> ( 0,0,    w,  h )	// no check on negative size
+sizeToRectangle			::		   !Size		-> Rectangle		//       {w,h} -> {zero, {  w,  h}}	// no check on negative size
+disjointRects			:: !Rect   !Rect		-> Bool
+intersectRects			:: !Rect   !Rect		-> Rect				// if disjoint: EmptyRect; otherwise the intersection
+subtractRects			:: !Rect   !Rect		-> [Rect]			// subtract @2 from @1
+rectSize				:: !Rect				-> Size				// (l,t, r,b)          -> {abs (r-l), abs (b-t)}
 
 /*	Rules on RgnHandles and Rects:
 */
-IntersectRgnRect		:: !OSRgnHandle !Rect !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)	// the intersection of the two arguments
+intersectRgnRect		:: !OSRgnHandle !Rect !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)	// the intersection of the two arguments
 
 /*	PA: Conversion of Size, Point2, and Vector2 to tuples (toTuple) and from tuples (fromTuple):
 */
@@ -76,10 +76,10 @@ instance toTuple4 Rect;		instance fromTuple4 Rect
 instance toTuple4 Rectangle;instance fromTuple4 Rectangle
 
 
-/*	Common Error generation rule:
+/*	Common error generation rule:
 */
-Error					:: !String !String !String -> .x
-FatalError				:: !String !String !String -> .x
+error					:: !String !String !String -> .x
+fatalError				:: !String !String !String -> .x
 
 
 /*	Universal dummy value (!!evaluation causes termination with the message: "Fatal error: dummy evaluated!"!!)
@@ -110,35 +110,35 @@ incBound :: !Bound -> Bound										// Finite i -> Finite (max 1 (i+1)); Infini
 ::	Cond  x :== x -> Bool
 ::	UCond x :== x -> *(Bool,x)
 
-u_isEmpty				:: !v:[u:x] -> (!Bool,!v:[u:x]), [v<=u]
-IsSingleton				:: ![.x] -> Bool
-HdTl					:: !u:[.x] -> (!.x, !u:[.x])
-InitLast				:: ![.x] -> (![.x],!.x)
-Split					:: !Int !u:[.x] -> (![.x],!u:[.x])
+uisEmpty				:: !v:[u:x] -> (!Bool,!v:[u:x]), [v<=u]
+isSingleton				:: ![.x] -> Bool
+hdtl					:: !u:[.x] -> (!.x, !u:[.x])
+initLast				:: ![.x] -> (![.x],!.x)
+split					:: !Int !u:[.x] -> (![.x],!u:[.x])
 
-CondMap					:: (Cond x) !(IdFun x)		![x]		-> (!Bool, ![x])
-Uspan					:: !(UCond .x)				!u:[.x]		-> (![.x],!u:[.x])	// Same as span (StdList), but preserving uniqueness
-FilterMap				:: !(.x -> *(Bool,.y))		![.x]		-> [.y]
-StateMap				:: !(u:x -> v:(.s -> (.y,.s))) ![u:x] !.s -> (![.y],!.s), [v<=u]
-StateMap2				:: !(u:x -> v:(.s -> .s))	![u:x] !.s -> .s, [v<=u]
-StrictSeq				:: ![.(.s -> .s)]				  !.s	-> .s				// Same as seq (StdFunc), but with strict state argument
-StrictSeqList			:: !.[.St .s .x]				  !.s	-> (![.x],!.s)		// Same as seqList (StdFunc), but with strict state argument
+condMap					:: (Cond x) !(IdFun x)		![x]		-> (!Bool, ![x])
+uspan					:: !(UCond .x)				!u:[.x]		-> (![.x],!u:[.x])	// Same as span (StdList), but preserving uniqueness
+filterMap				:: !(.x -> *(Bool,.y))		![.x]		-> [.y]
+stateMap				:: !(u:x -> v:(.s -> (.y,.s))) ![u:x] !.s -> (![.y],!.s), [v<=u]
+stateMap2				:: !(u:x -> v:(.s -> .s))	![u:x] !.s -> .s, [v<=u]
+strictSeq				:: ![.(.s -> .s)]				  !.s	-> .s				// Same as seq (StdFunc), but with strict state argument
+strictSeqList			:: !.[.St .s .x]				  !.s	-> (![.x],!.s)		// Same as seqList (StdFunc), but with strict state argument
 
-Contains				:: !(Cond    x)				![ x] -> Bool
-UContains				:: !(UCond  .x)				!u:[.x] -> (!Bool,	!u:[.x])
-Select					:: !(Cond    x)		 x		![ x] -> (!Bool, x)
-USelect					:: !(Cond    x)		 x		!u:[ x] -> (!Bool, x,!u:[x])
-Access					:: !(St .x *(Bool,.y)) .y	!u:[.x] -> (!Bool,.y,!u:[.x])
-AccessList				:: !(St .x .y)				![.x] -> (![.y],	![.x])
-Remove					:: !(Cond    x)		 x		!u:[x] -> (!Bool, x,	!u:[x])
-URemove					:: !(UCond  .x)		.x		!u:[.x] -> (!Bool,.x,	!u:[.x])
-Replace					:: !(Cond    x)		 x		![ x] -> (!Bool,	![ x])
-UReplace				:: !(UCond  .x)		.x		!u:[.x] -> (!Bool,	!u:[.x])
-ReplaceOrAppend			:: !(Cond    x)      x		![ x] -> [ x]
-UReplaceOrAppend		:: !(UCond  .x)     .x		!u:[.x] -> u:[.x]
-RemoveCheck				::					 x	  !u:[x] -> (!Bool,  !u:[ x])	| Eq x
-RemoveSpecialChars		:: ![Char] !{#Char}	-> {#Char}
-Ulength					:: ![.x]			-> (!Int, ![.x])
+contains				:: !(Cond    x)				![ x] -> Bool
+ucontains				:: !(UCond  .x)				!u:[.x] -> (!Bool,	!u:[.x])
+cselect					:: !(Cond    x)		 x		![ x] -> (!Bool, x)
+ucselect				:: !(Cond    x)		 x		!u:[ x] -> (!Bool, x,!u:[x])
+access					:: !(St .x *(Bool,.y)) .y	!u:[.x] -> (!Bool,.y,!u:[.x])
+accessList				:: !(St .x .y)				![.x] -> (![.y],	![.x])
+remove					:: !(Cond    x)		 x		!u:[x] -> (!Bool, x,	!u:[x])
+uremove					:: !(UCond  .x)		.x		!u:[.x] -> (!Bool,.x,	!u:[.x])
+creplace				:: !(Cond    x)		 x		![ x] -> (!Bool,	![ x])
+ucreplace				:: !(UCond  .x)		.x		!u:[.x] -> (!Bool,	!u:[.x])
+replaceOrAppend			:: !(Cond    x)      x		![ x] -> [ x]
+ureplaceOrAppend		:: !(UCond  .x)     .x		!u:[.x] -> u:[.x]
+removeCheck				::					 x	  !u:[x] -> (!Bool,  !u:[ x])	| Eq x
+removeSpecialChars		:: ![Char] !{#Char}	-> {#Char}
+ulength					:: ![.x]			-> (!Int, ![.x])
 disjointLists			:: ![x] ![x]		-> Bool		| Eq x
 noDuplicates			:: ![x]				-> Bool		| Eq x
 unzip3					:: ![(.a,.b,.c)]	-> (![.a],![.b],![.c])

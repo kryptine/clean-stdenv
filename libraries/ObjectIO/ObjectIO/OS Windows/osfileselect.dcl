@@ -6,7 +6,7 @@ import	StdString
 from	ostoolbox	import OSToolbox
 import	osevent
 
-OSinitialiseFileSelectors	:: !*OSToolbox -> *OSToolbox
-OSselectinputfile			:: !(OSEvent->.s->.s) !.s                 !*OSToolbox -> (!Bool,!String,!.s,!*OSToolbox)
-OSselectoutputfile			:: !(OSEvent->.s->.s) !.s !String !String !*OSToolbox -> (!Bool,!String,!.s,!*OSToolbox)
-OSselectdirectory			:: !(OSEvent->.s->.s) !.s                 !*OSToolbox -> (!Bool,!String,!.s,!*OSToolbox)
+osInitialiseFileSelectors	:: !*OSToolbox -> *OSToolbox
+osSelectinputfile			:: !(OSEvent->.s->.s) !.s                 !*OSToolbox -> (!Bool,!String,!.s,!*OSToolbox)
+osSelectoutputfile			:: !(OSEvent->.s->.s) !.s !String !String !*OSToolbox -> (!Bool,!String,!.s,!*OSToolbox)
+osSelectdirectory			:: !(OSEvent->.s->.s) !.s                 !*OSToolbox -> (!Bool,!String,!.s,!*OSToolbox)

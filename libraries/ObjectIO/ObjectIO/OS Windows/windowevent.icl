@@ -11,7 +11,7 @@ implementation module windowevent
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	clCCall_12, clCrossCall_12, windowCrossCall_12
 from	ostypes				import	OSNoWindowPtr
-from	oswindow			import	fromOSscrollbarRange, OSscrollbarsAreVisible
+from	oswindow			import	fromOSscrollbarRange, osScrollbarsAreVisible
 import	commondef, controlcreate, deviceevents, iostate, windowaccess
 from	StdControlAttribute	import	isControlKeyboard, getControlKeyboardAtt, 
 									isControlMouse,    getControlMouseAtt, 
@@ -24,7 +24,7 @@ from	StdWindowAttribute	import	isWindowKeyboard,  getWindowKeyboardAtt,
 
 windoweventFatalError :: String String -> .x
 windoweventFatalError function error
-	= FatalError function "windowevent" error
+	= fatalError function "windowevent" error
 
 
 /*	windowEvent filters the scheduler events that can be handled by this window device.
@@ -33,9 +33,9 @@ windoweventFatalError function error
 */
 windowEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
 windowEvent schedulerEvent pState
-	# (hasDevice,pState)	= accPIO (IOStHasDevice WindowDevice) pState
+	# (hasDevice,pState)	= accPIO (ioStHasDevice WindowDevice) pState
 	| not hasDevice			// This condition should never occur: WindowDevice must have been 'installed'
-		= windoweventFatalError "WindowFunctions.dEvent" "could not retrieve WindowSystemState from IOSt"
+		= windoweventFatalError "windowFunctions.dEvent" "could not retrieve WindowSystemState from IOSt"
 	| otherwise
 		= windowEvent schedulerEvent pState
 where
@@ -44,12 +44,12 @@ where
 		| not (isWindowOSEvent osEvent.ccMsg)
 			= (False,Nothing,schedulerEvent,pState)
 		| otherwise
-			# (_,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
-			# (wMetrics, ioState)	= IOStGetOSWindowMetrics ioState
-			  windows				= WindowSystemStateGetWindowHandles wDevice
+			# (_,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
+			# (wMetrics, ioState)	= ioStGetOSWindowMetrics ioState
+			  windows				= windowSystemStateGetWindowHandles wDevice
 			  (myEvent,replyToOS,deviceEvent,windows,ioState)
 			  						= filterOSEvent wMetrics osEvent windows ioState
-			# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+			# ioState				= ioStSetDevice (WindowSystemState windows) ioState
 			# pState				= {pState & io=ioState}
 			  schedulerEvent		= if (isJust replyToOS) (ScheduleOSEvent osEvent (fromJust replyToOS)) schedulerEvent
 			= (myEvent,deviceEvent,schedulerEvent,pState)
@@ -76,15 +76,15 @@ where
 		isWindowOSEvent _					= False
 	
 	windowEvent schedulerEvent=:(ScheduleMsgEvent msgEvent) pState=:{io=ioState}
-		# (ioId,ioState)			= IOStGetIOId ioState
+		# (ioId,ioState)			= ioStGetIOId ioState
 		| ioId<>recLoc.rlIOId || recLoc.rlDevice<>WindowDevice
 			= (False,Nothing,schedulerEvent,{pState & io=ioState})
 		| otherwise
-			# (_,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
-			  windows				= WindowSystemStateGetWindowHandles wDevice
+			# (_,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
+			  windows				= windowSystemStateGetWindowHandles wDevice
 			  (found,windows)		= hasWindowHandlesWindow (toWID recLoc.rlParentId) windows
 			  deviceEvent			= if found (Just (ReceiverEvent msgEvent)) Nothing
-			# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+			# ioState				= ioStSetDevice (WindowSystemState windows) ioState
 			# pState				= {pState & io=ioState}
 			= (found,deviceEvent,schedulerEvent,pState)
 	where
@@ -137,8 +137,8 @@ where
 			getControlItemNr :: !OSWindowPtr !(WElementHandle .ls .pst) -> (!Bool,!Int,!WElementHandle .ls .pst)
 			getControlItemNr cPtr (WItemHandle itemH=:{wItemPtr,wItemNr,wItemInfo,wItemKind,wItemSelect,wItemShow,wItems})
 				| cPtr==wItemPtr			= (True,itemNr,WItemHandle itemH)
-				| wItemKind==IsRadioControl	= (Contains (\{radioItemPtr}->radioItemPtr==cPtr) (getWItemRadioInfo wItemInfo).radioItems,itemNr,WItemHandle itemH)
-				| wItemKind==IsCheckControl	= (Contains (\{checkItemPtr}->checkItemPtr==cPtr) (getWItemCheckInfo wItemInfo).checkItems,itemNr,WItemHandle itemH)
+				| wItemKind==IsRadioControl	= (contains (\{radioItemPtr}->radioItemPtr==cPtr) (getWItemRadioInfo wItemInfo).radioItems,itemNr,WItemHandle itemH)
+				| wItemKind==IsCheckControl	= (contains (\{checkItemPtr}->checkItemPtr==cPtr) (getWItemCheckInfo wItemInfo).checkItems,itemNr,WItemHandle itemH)
 				| wItemSelect && wItemShow
 					# (found,itemNr,itemHs)	= getControlsItemNr cPtr wItems
 					= (found,itemNr,WItemHandle {itemH & wItems=itemHs})
@@ -242,7 +242,7 @@ filterOSEvent _ {ccMsg=CcWmDRAWCONTROL,p1=wPtr,p2=cPtr,p3=gc} windows ioState
 where
 	getUpdateControls :: !OSWindowPtr !(WindowStateHandle .pst) -> (![ControlUpdateInfo],!WindowStateHandle .pst)
 	getUpdateControls cPtr wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems,whSize}}}
-		# (_,controls,itemHs)				= getUpdateControls cPtr (SizeToRect whSize) whItems
+		# (_,controls,itemHs)				= getUpdateControls cPtr (sizeToRect whSize) whItems
 		= (controls,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}})
 	where
 		getUpdateControls :: !OSWindowPtr !Rect ![WElementHandle .ls .pst] -> (!Bool,![ControlUpdateInfo],![WElementHandle .ls .pst])
@@ -264,7 +264,7 @@ where
 				| otherwise
 					= (False,[],WItemHandle itemH)
 			where
-				clipRect1						= IntersectRects clipRect (PosSizeToRect wItemPos wItemSize)
+				clipRect1						= intersectRects clipRect (posSizeToRect wItemPos wItemSize)
 			
 			getUpdateControl cPtr clipRect (WListLSHandle itemHs)
 				# (found,controls,itemHs)		= getUpdateControls cPtr clipRect itemHs
@@ -483,9 +483,9 @@ filterOSEvent _ {ccMsg=CcWmKEYBOARD,p1=wPtr,p2=cPtr,p3=keycode,p4=state,p5=mods}
 		= (False,Nothing,Nothing,windows,ioState)
 	# (wids,wsH)					= getWindowStateHandleWIDS wsH
 	| wPtr==cPtr					// The keyboard action takes place in the window
-		# (inputTrack,ioState)		= IOStGetInputTrack ioState
+		# (inputTrack,ioState)		= ioStGetInputTrack ioState
 		  (ok,key,wsH,inputTrack)	= okWindowKeyboardState keycode state mods wsH inputTrack
-		# ioState					= IOStSetInputTrack inputTrack ioState
+		# ioState					= ioStSetInputTrack inputTrack ioState
 		  deviceEvent				= if ok (Just (WindowKeyboardAction {wkWIDS=wids,wkKeyboardState=key})) Nothing
 		= (True,Nothing,deviceEvent,setWindowHandlesWindow wsH windows,ioState)
 	with
@@ -509,14 +509,14 @@ filterOSEvent _ {ccMsg=CcWmKEYBOARD,p1=wPtr,p2=cPtr,p3=keycode,p4=state,p5=mods}
 			keystate				= keyState keycode state mods
 			pressState				= getKeyboardStateKeyState keystate
 			isDownKey				= pressState==KeyDown False
-			(filter,selectState,_)	= getWindowKeyboardAtt (snd (Select isWindowKeyboard (WindowKeyboard (const False) Unable undef) whAtts))
+			(filter,selectState,_)	= getWindowKeyboardAtt (snd (cselect isWindowKeyboard (WindowKeyboard (const False) Unable undef) whAtts))
 			okKeyboardAtt			= filter keystate && selectState==Able
 		okWindowKeyboardState _ _ _ _ _
 			= windoweventFatalError "okWindowKeyboardState" "placeholder not expected"
 	| otherwise				// The keyboard action takes place in a control
-		# (inputTrack,ioState)			= IOStGetInputTrack ioState
+		# (inputTrack,ioState)			= ioStGetInputTrack ioState
 		  (ok,itemNr,key,wsH,inputTrack)= okControlItemsNrKeyboardState wPtr cPtr keycode state mods wsH inputTrack
-		# ioState						= IOStSetInputTrack inputTrack ioState
+		# ioState						= ioStSetInputTrack inputTrack ioState
 		  info							= {	ckWIDS			= wids
 										  ,	ckItemNr		= itemNr
 										  ,	ckItemPtr		= cPtr
@@ -566,7 +566,7 @@ filterOSEvent _ {ccMsg=CcWmKEYBOARD,p1=wPtr,p2=cPtr,p3=keycode,p4=state,p5=mods}
 				where
 					contextAble1			= contextAble && wItemSelect
   					noKeyboardAtt			= ControlKeyboard (const False) Unable undef
-					(filter,selectState,_)	= getControlKeyboardAtt (snd (Select isControlKeyboard noKeyboardAtt wItemAtts))
+					(filter,selectState,_)	= getControlKeyboardAtt (snd (cselect isControlKeyboard noKeyboardAtt wItemAtts))
 					okKeyboardAtt			= contextAble1 && enabled selectState && filter keystate
 					keystate				= keyState keycode state mods
 					pressState				= getKeyboardStateKeyState keystate
@@ -601,31 +601,31 @@ where
 								KEYREPEAT	-> KeyDown True
 								KEYUP		-> KeyUp
 		(isSpecial,special)	= case keycode of
-								WinBackSpKey-> (True,BackSpaceKey)
-								WinBeginKey	-> (True,BeginKey)
-								WinDelKey	-> (True,DeleteKey)
-								WinDownKey	-> (True,DownKey)
-								WinEndKey	-> (True,EndKey)
-								WinEscapeKey-> (True,EscapeKey)
-								WinHelpKey	-> (True,HelpKey)
-								WinLeftKey	-> (True,LeftKey)
-								WinPgDownKey-> (True,PgDownKey)
-								WinPgUpKey	-> (True,PgUpKey)
-								WinReturnKey-> (True,EnterKey)
-								WinRightKey	-> (True,RightKey)
-								WinUpKey	-> (True,UpKey)
-								WinF1Key	-> (True,F1Key)
-								WinF2Key	-> (True,F2Key)
-								WinF3Key	-> (True,F3Key)
-								WinF4Key	-> (True,F4Key)
-								WinF5Key	-> (True,F5Key)
-								WinF6Key	-> (True,F6Key)
-								WinF7Key	-> (True,F7Key)
-								WinF8Key	-> (True,F8Key)
-								WinF9Key	-> (True,F9Key)
-								WinF10Key	-> (True,F10Key)
-								WinF11Key	-> (True,F11Key)
-								WinF12Key	-> (True,F12Key)
+								WinBackSpKey-> (True,backSpaceKey)
+								WinBeginKey	-> (True,beginKey)
+								WinDelKey	-> (True,deleteKey)
+								WinDownKey	-> (True,downKey)
+								WinEndKey	-> (True,endKey)
+								WinEscapeKey-> (True,escapeKey)
+								WinHelpKey	-> (True,helpKey)
+								WinLeftKey	-> (True,leftKey)
+								WinPgDownKey-> (True,pgDownKey)
+								WinPgUpKey	-> (True,pgUpKey)
+								WinReturnKey-> (True,enterKey)
+								WinRightKey	-> (True,rightKey)
+								WinUpKey	-> (True,upKey)
+								WinF1Key	-> (True,f1Key)
+								WinF2Key	-> (True,f2Key)
+								WinF3Key	-> (True,f3Key)
+								WinF4Key	-> (True,f4Key)
+								WinF5Key	-> (True,f5Key)
+								WinF6Key	-> (True,f6Key)
+								WinF7Key	-> (True,f7Key)
+								WinF8Key	-> (True,f8Key)
+								WinF9Key	-> (True,f9Key)
+								WinF10Key	-> (True,f10Key)
+								WinF11Key	-> (True,f11Key)
+								WinF12Key	-> (True,f12Key)
 								_			-> (False,undef)
 
 filterOSEvent _ {ccMsg=CcWmKILLFOCUS,p1=wPtr,p2=cPtr} windows ioState
@@ -658,7 +658,7 @@ filterOSEvent _ {ccMsg=CcWmLOSTKEY,p1=wPtr,p2=cPtr} windows ioState
 			| otherwise
 				= (okKeyAtt,wsH)
 		where
-			(filter,selectState,_)	= getWindowKeyboardAtt (snd (Select isWindowKeyboard (WindowKeyboard (const False) Unable undef) whAtts))
+			(filter,selectState,_)	= getWindowKeyboardAtt (snd (cselect isWindowKeyboard (WindowKeyboard (const False) Unable undef) whAtts))
 			okKeyAtt				= filter KeyLost && selectState==Able
 		okWindowKeyLost _
 			= windoweventFatalError "okWindowKeyLost" "placeholder not expected"
@@ -699,7 +699,7 @@ filterOSEvent _ {ccMsg=CcWmLOSTKEY,p1=wPtr,p2=cPtr} windows ioState
 				where
 					contextAble1= contextAble && wItemSelect
 					(filter,selectState,_)
-								= getControlKeyboardAtt (snd (Select isControlKeyboard (ControlKeyboard (const False) Unable undef) wItemAtts))
+								= getControlKeyboardAtt (snd (cselect isControlKeyboard (ControlKeyboard (const False) Unable undef) wItemAtts))
 					okKeyAtt	= contextAble1 && enabled selectState && filter KeyLost
 									
 				okControlItemNrKeyLost contextAble itemPtr (WListLSHandle itemHs)
@@ -740,7 +740,7 @@ filterOSEvent _ {ccMsg=CcWmLOSTMOUSE,p1=wPtr,p2=cPtr} windows ioState
 			| otherwise
 				= (okMouseAtt,wsH)
 		where
-			(filter,selectState,_)	= getWindowMouseAtt (snd (Select isWindowMouse (WindowMouse (const False) Unable undef) whAtts))
+			(filter,selectState,_)	= getWindowMouseAtt (snd (cselect isWindowMouse (WindowMouse (const False) Unable undef) whAtts))
 			okMouseAtt				= filter MouseLost && selectState==Able
 		okWindowMouseLost _
 			= windoweventFatalError "okWindowMouseLost" "placeholder not expected"
@@ -781,7 +781,7 @@ filterOSEvent _ {ccMsg=CcWmLOSTMOUSE,p1=wPtr,p2=cPtr} windows ioState
 				where
 					contextAble1= contextAble && wItemSelect
 					(filter,selectState,_)
-								= getControlMouseAtt (snd (Select isControlMouse (ControlMouse (const False) Unable undef) wItemAtts))
+								= getControlMouseAtt (snd (cselect isControlMouse (ControlMouse (const False) Unable undef) wItemAtts))
 					okMouseAtt	= contextAble1 && enabled selectState && filter MouseLost
 									
 				okControlItemNrMouseLost contextAble itemPtr (WListLSHandle itemHs)
@@ -811,10 +811,10 @@ filterOSEvent _ {ccMsg=CcWmMOUSE,p1=wPtr,p2=cPtr,p3=action,p4=x,p5=y,p6=mods} wi
 		= (True,Nothing,Nothing,setWindowHandlesWindow wsH windows,ioState)
 	# (wids,wsH)					= getWindowStateHandleWIDS wsH
 	| wPtr==cPtr	// The mouse action takes place in the window
-		# (inputTrack,ioState)		= IOStGetInputTrack ioState
+		# (inputTrack,ioState)		= ioStGetInputTrack ioState
 		  (ok,mouse,wsH,inputTrack)	= okWindowMouseState action {x=x,y=y} wsH inputTrack
 		  deviceEvent				= if ok (Just (WindowMouseAction {wmWIDS=wids,wmMouseState=mouse})) Nothing
-		# ioState					= IOStSetInputTrack inputTrack ioState
+		# ioState					= ioStSetInputTrack inputTrack ioState
 		= (True,Nothing,deviceEvent,setWindowHandlesWindow wsH windows,ioState)
 	with
 		okWindowMouseState :: !Int !Point2 !(WindowStateHandle .pst) !(Maybe InputTrack)
@@ -840,15 +840,15 @@ filterOSEvent _ {ccMsg=CcWmMOUSE,p1=wPtr,p2=cPtr,p3=action,p4=x,p5=y,p6=mods} wi
 			mousestate				= mouseState action (eventPos+origin)
 			buttonstate				= getMouseStateButtonState mousestate
 			isDownButton			= isMember buttonstate [ButtonDown,ButtonDoubleDown,ButtonTripleDown]
-			(filter,selectState,_)	= getWindowMouseAtt (snd (Select isWindowMouse (WindowMouse (const False) Unable undef) whAtts))
+			(filter,selectState,_)	= getWindowMouseAtt (snd (cselect isWindowMouse (WindowMouse (const False) Unable undef) whAtts))
 			okMouseAtt				= filter mousestate && selectState==Able
 		okWindowMouseState _ _ _ _
 			= windoweventFatalError "okWindowMouseState" "placeholder not expected"
 	| otherwise				// The mouse action takes place in a control
-		# (inputTrack,ioState)		= IOStGetInputTrack ioState
+		# (inputTrack,ioState)		= ioStGetInputTrack ioState
 		  (ok,itemNr,mouse,wsH,inputTrack)
 		  							= okControlItemsNrMouseState wPtr cPtr action {x=x,y=y} wsH inputTrack
-		# ioState					= IOStSetInputTrack inputTrack ioState
+		# ioState					= ioStSetInputTrack inputTrack ioState
 		  info						= {	cmWIDS			= wids
 									  ,	cmItemNr		= itemNr
 									  ,	cmItemPtr		= cPtr
@@ -902,7 +902,7 @@ filterOSEvent _ {ccMsg=CcWmMOUSE,p1=wPtr,p2=cPtr,p3=action,p4=x,p5=y,p6=mods} wi
 				where
 					contextAble1= contextAble && wItemSelect
 					(filter,selectState,_)
-								= getControlMouseAtt (snd (Select isControlMouse (ControlMouse (const False) Unable undef) wItemAtts))
+								= getControlMouseAtt (snd (cselect isControlMouse (ControlMouse (const False) Unable undef) wItemAtts))
 					okMouseAtt	= contextAble1 && enabled selectState && filter mousestate
 					mousestate	= mouseState action (origin+eventPos)
 					buttonstate	= getMouseStateButtonState mousestate
@@ -975,7 +975,7 @@ where
 		windowInfo				= getWindowInfoWindowData whWindowInfo
 		domainRect				= windowInfo.windowDomain
 		hasScrolls				= (isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll)
-		(visHScroll,visVScroll)	= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
+		(visHScroll,visVScroll)	= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
 		newW`					= if visVScroll (newW+wMetrics.osmVSliderWidth)  newW	// Correct newW in case of visible vertical   scrollbar
 		newH`					= if visHScroll (newH+wMetrics.osmHSliderHeight) newH	// Correct newH in case of visible horizontal scrollbar
 	getWindowStateHandleSize _ _ _ _ _ _
@@ -1047,7 +1047,7 @@ where
 					= (0,WItemHandle itemH)
 				| not wItemSelect
 					= (0,WItemHandle itemH)
-				| Contains reqAttribute wItemAtts
+				| contains reqAttribute wItemAtts
 					= (wItemNr,WItemHandle itemH)
 				// otherwise
 					= (0,WItemHandle itemH)

@@ -24,113 +24,113 @@ OSNoMenuSeparator :== 0
 
 /*	Initialisation:
 */
-OSinitialiseMenus :: !*OSToolbox -> *OSToolbox
-OSinitialiseMenus tb
-	= WinInitialiseMenus tb
+osInitialiseMenus :: !*OSToolbox -> *OSToolbox
+osInitialiseMenus tb
+	= winInitialiseMenus tb
 
 
 //	Enabling and disabling menus and menu elements:
 
-OSDisableMenu :: !Int !OSMenuBar !*OSToolbox -> *OSToolbox
-OSDisableMenu zIndex osMenuBar=:{menuBar} tb
-	= WinChangeMenuAbility menuBar zIndex False tb
+osDisableMenu :: !Int !OSMenuBar !*OSToolbox -> *OSToolbox
+osDisableMenu zIndex osMenuBar=:{menuBar} tb
+	= winChangeMenuAbility menuBar zIndex False tb
 
-OSEnableMenu :: !Int !OSMenuBar !*OSToolbox -> *OSToolbox
-OSEnableMenu zIndex osMenuBar=:{menuBar} tb
-	= WinChangeMenuAbility menuBar zIndex True tb
+osEnableMenu :: !Int !OSMenuBar !*OSToolbox -> *OSToolbox
+osEnableMenu zIndex osMenuBar=:{menuBar} tb
+	= winChangeMenuAbility menuBar zIndex True tb
 
-OSEnableMenuItem :: !OSMenu !OSMenuItem !*OSToolbox -> *OSToolbox
-OSEnableMenuItem menuHandle item tb
-	= WinChangeItemAbility menuHandle item True tb
+osEnableMenuItem :: !OSMenu !OSMenuItem !*OSToolbox -> *OSToolbox
+osEnableMenuItem menuHandle item tb
+	= winChangeItemAbility menuHandle item True tb
 
-OSDisableMenuItem :: !OSMenu !OSMenuItem !*OSToolbox -> *OSToolbox
-OSDisableMenuItem menuHandle item tb
-	= WinChangeItemAbility menuHandle item False tb
+osDisableMenuItem :: !OSMenu !OSMenuItem !*OSToolbox -> *OSToolbox
+osDisableMenuItem menuHandle item tb
+	= winChangeItemAbility menuHandle item False tb
 
 
 //	Changing and updating the menu bar:
 
-DrawMenuBar :: !OSMenuBar !*OSToolbox -> *OSToolbox
-DrawMenuBar {menuWindow,menuClient} tb
-	= WinDrawMenuBar menuWindow (if (menuClient==OSNoWindowPtr) 0 menuClient) tb
+osDrawMenuBar :: !OSMenuBar !*OSToolbox -> *OSToolbox
+osDrawMenuBar {menuWindow,menuClient} tb
+	= winDrawMenuBar menuWindow (if (menuClient==OSNoWindowPtr) 0 menuClient) tb
 
-OSMenuBarClear :: !*OSToolbox -> *OSToolbox
-OSMenuBarClear tb
+osMenuBarClear :: !*OSToolbox -> *OSToolbox
+osMenuBarClear tb
 	= tb
 
-OSMenuBarSet :: !OSMenuBar !*OSToolbox -> (!OSMenuBar,!*OSToolbox)
-OSMenuBarSet menuBar tb
+osMenuBarSet :: !OSMenuBar !*OSToolbox -> (!OSMenuBar,!*OSToolbox)
+osMenuBarSet menuBar tb
 	= (menuBar,tb)
 	
-OSMenuInsert :: !Int !OSMenuNr !{#Char} !OSMenuBar !*OSToolbox -> (!OSMenu,!OSMenuBar,!*OSToolbox)
-OSMenuInsert index osMenuNr title menuBar tb
-	# (menu,tb) = WinCreatePopupMenuHandle tb
-	= (menu,menuBar,WinInsertMenu title True menu menuBar.menuBar index tb)
+osMenuInsert :: !Int !OSMenuNr !{#Char} !OSMenuBar !*OSToolbox -> (!OSMenu,!OSMenuBar,!*OSToolbox)
+osMenuInsert index osMenuNr title menuBar tb
+	# (menu,tb) = winCreatePopupMenuHandle tb
+	= (menu,menuBar,winInsertMenu title True menu menuBar.menuBar index tb)
 	
-OSSubMenuInsert :: !Int !OSMenuNr !{#Char} !OSMenu !*OSToolbox -> (!OSMenu, !OSMenu, !*OSToolbox)
-OSSubMenuInsert index osMenuNr title parentMenu tb
-	# (menu,tb) = WinCreatePopupMenuHandle tb
-	= (menu,parentMenu,WinInsertMenu title True menu parentMenu index tb)
+osSubMenuInsert :: !Int !OSMenuNr !{#Char} !OSMenu !*OSToolbox -> (!OSMenu, !OSMenu, !*OSToolbox)
+osSubMenuInsert index osMenuNr title parentMenu tb
+	# (menu,tb) = winCreatePopupMenuHandle tb
+	= (menu,parentMenu,winInsertMenu title True menu parentMenu index tb)
 
-OSMenuRemove :: !OSMenu !OSMenuBar !*OSToolbox -> (!OSMenuBar, !*OSToolbox)
-OSMenuRemove menu menuBar=:{menuBar=hmenu} tb
-	# tb	= WinDeleteMenu hmenu menu tb
-	# tb	= WinDestroyMenu menu tb
+osMenuRemove :: !OSMenu !OSMenuBar !*OSToolbox -> (!OSMenuBar, !*OSToolbox)
+osMenuRemove menu menuBar=:{menuBar=hmenu} tb
+	# tb	= winDeleteMenu hmenu menu tb
+	# tb	= winDestroyMenu menu tb
 	= (menuBar,tb)
 
-OSSubMenuRemove :: !OSMenu !OSMenu !*OSToolbox -> (!OSMenu,!*OSToolbox)
-OSSubMenuRemove submenu hmenu tb
-	# tb	= WinDeleteMenu hmenu submenu tb
-	# tb	= WinDestroyMenu submenu tb
+osSubMenuRemove :: !OSMenu !OSMenu !*OSToolbox -> (!OSMenu,!*OSToolbox)
+osSubMenuRemove submenu hmenu tb
+	# tb	= winDeleteMenu hmenu submenu tb
+	# tb	= winDestroyMenu submenu tb
 	= (hmenu,tb)
 
-OScreatePopUpMenu :: !*OSToolbox -> (!OSMenu,!*OSToolbox)
-OScreatePopUpMenu tb
-	= WinCreatePopupMenuHandle tb
+osCreatePopUpMenu :: !*OSToolbox -> (!OSMenu,!*OSToolbox)
+osCreatePopUpMenu tb
+	= winCreatePopupMenuHandle tb
 
-OStrackPopUpMenu :: !OSMenu !OSWindowPtr !*OSToolbox -> (!Bool,!*OSToolbox)
-OStrackPopUpMenu menu framePtr tb
-	= WinTrackPopupMenu menu framePtr tb
+osTrackPopUpMenu :: !OSMenu !OSWindowPtr !*OSToolbox -> (!Bool,!*OSToolbox)
+osTrackPopUpMenu menu framePtr tb
+	= winTrackPopupMenu menu framePtr tb
 
 
 //	Changing (sub)menus:
-OSAppendMenuItem :: !OSMenuBar !Int !OSMenu !{#Char} !Bool !Bool !Char !*OSToolbox -> (!OSMenuItem,!OSMenu,!*OSToolbox)
-OSAppendMenuItem {menuWindow} index menu title able mark key tb
+osAppendMenuItem :: !OSMenuBar !Int !OSMenu !{#Char} !Bool !Bool !Char !*OSToolbox -> (!OSMenuItem,!OSMenu,!*OSToolbox)
+osAppendMenuItem {menuWindow} index menu title able mark key tb
 	# title		= if (key <> '\0')
 					(title +++ "\tCtrl+" +++ toString (toUpper key))
 					title
-	# (item,tb)	= WinInsertMenuItem title able mark menu index tb
+	# (item,tb)	= winInsertMenuItem title able mark menu index tb
 	| key <> '\0'
-		= (item,menu,WinAddMenuShortKey menuWindow item key tb)
+		= (item,menu,winAddMenuShortKey menuWindow item key tb)
 	| otherwise
 		= (item,menu,tb)
 
-OSAppendMenuSeparator :: !Int !OSMenu !*OSToolbox -> (!OSMenuSeparator,!OSMenu,!*OSToolbox)
-OSAppendMenuSeparator index menu tb
-	# tb	= WinInsertSeparator menu index tb
+osAppendMenuSeparator :: !Int !OSMenu !*OSToolbox -> (!OSMenuSeparator,!OSMenu,!*OSToolbox)
+osAppendMenuSeparator index menu tb
+	# tb	= winInsertSeparator menu index tb
 	= (OSNoMenuSeparator,menu,tb)
 
-OSChangeMenuTitle :: !OSMenuBar !OSMenu !{#Char} !*OSToolbox -> *OSToolbox
-OSChangeMenuTitle {menuBar} menu title tb
-	= WinModifyMenu title menu menuBar tb
+osChangeMenuTitle :: !OSMenuBar !OSMenu !{#Char} !*OSToolbox -> *OSToolbox
+osChangeMenuTitle {menuBar} menu title tb
+	= winModifyMenu title menu menuBar tb
 
-OSChangeMenuItemTitle :: !OSMenu !OSMenuItem !{#Char} !*OSToolbox -> *OSToolbox
-OSChangeMenuItemTitle menu item title tb
-	= WinModifyMenuItem title item menu tb
+osChangeMenuItemTitle :: !OSMenu !OSMenuItem !{#Char} !*OSToolbox -> *OSToolbox
+osChangeMenuItemTitle menu item title tb
+	= winModifyMenuItem title item menu tb
 
-OSMenuItemCheck :: !Bool !OSMenu !OSMenuItem !*OSToolbox -> *OSToolbox
-OSMenuItemCheck check menu item tb
-	= WinChangeMenuItemCheck menu item check tb
+osMenuItemCheck :: !Bool !OSMenu !OSMenuItem !*OSToolbox -> *OSToolbox
+osMenuItemCheck check menu item tb
+	= winChangeMenuItemCheck menu item check tb
 
-OSMenuRemoveItem :: !OSMenuItem !OSMenu !*OSToolbox -> (!OSMenu,!*OSToolbox)
-OSMenuRemoveItem item menu tb
-	= (menu,WinRemoveMenuItem menu item tb)
+osMenuRemoveItem :: !OSMenuItem !OSMenu !*OSToolbox -> (!OSMenu,!*OSToolbox)
+osMenuRemoveItem item menu tb
+	= (menu,winRemoveMenuItem menu item tb)
 
 
 //	Validation of (sub)menu (element) attributes:
 
-OSValidateMenuItemTitle :: !{#Char} -> {#Char}
-OSValidateMenuItemTitle title = title
+osValidateMenuItemTitle :: !{#Char} -> {#Char}
+osValidateMenuItemTitle title = title
 
 
 /*	Two functions that generate free OS ids for menus and sub menus.
@@ -140,10 +140,10 @@ OSValidateMenuItemTitle title = title
 ::	OSMenuNr	:== Int
 ::	OSSubMenuNr	:== Int
 
-OSNewMenuNr :: !*OSToolbox -> (!Bool,!OSMenuNr,!*OSToolbox)
-OSNewMenuNr tb
+osNewMenuNr :: !*OSToolbox -> (!Bool,!OSMenuNr,!*OSToolbox)
+osNewMenuNr tb
 	= (True,0,tb)
 
-OSNewSubMenuNr :: !*OSToolbox -> (!Bool,!OSSubMenuNr,!*OSToolbox)
-OSNewSubMenuNr tb
+osNewSubMenuNr :: !*OSToolbox -> (!Bool,!OSSubMenuNr,!*OSToolbox)
+osNewSubMenuNr tb
 	= (True,0,tb)

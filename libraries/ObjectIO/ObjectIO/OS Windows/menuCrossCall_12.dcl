@@ -10,19 +10,19 @@ from	ostypes		import HWND
 ::	HMENU	:==  Int
 
 
-WinCreatePopupMenuHandle::										!*OSToolbox -> (!HMENU, !*OSToolbox)
-WinTrackPopupMenu		:: !HMENU !HWND							!*OSToolbox -> (!Bool,  !*OSToolbox)	// Bool: if True then item is selected; otherwise menu closed
-WinInsertMenu			:: !String !Bool !HMENU !HMENU !Int		!*OSToolbox -> *OSToolbox
-WinInsertMenuItem       :: !String !Bool !Bool !HMENU !Int		!*OSToolbox -> (!HITEM, !*OSToolbox)
-WinInsertSeparator		:: !HMENU !Int							!*OSToolbox -> *OSToolbox
-WinChangeMenuItemCheck  :: !HMENU !HITEM !Bool					!*OSToolbox -> *OSToolbox
-WinModifyMenu			:: !String !HMENU !HMENU				!*OSToolbox -> *OSToolbox
-WinModifyMenuItem       :: !String !HITEM !HMENU				!*OSToolbox -> *OSToolbox
-WinDestroyMenu			:: !HMENU								!*OSToolbox -> *OSToolbox	// PA: new as crosscall
-WinDeleteMenu			:: !HMENU !HITEM						!*OSToolbox -> *OSToolbox	// PA: new as crosscall
-WinRemoveMenuItem       :: !HMENU !HITEM						!*OSToolbox -> *OSToolbox
-WinChangeItemAbility    :: !HMENU !HITEM !Bool					!*OSToolbox -> *OSToolbox
-WinChangeMenuAbility	:: !HMENU !Int   !Bool					!*OSToolbox -> *OSToolbox
-WinDrawMenuBar			:: !HWND !HWND							!*OSToolbox -> *OSToolbox
-WinAddMenuShortKey		:: !HWND !Int !Char						!*OSToolbox -> *OSToolbox	// PA: new
-WinRemoveMenuShortKey	:: !HWND !Int							!*OSToolbox -> *OSToolbox	// PA: new
+winCreatePopupMenuHandle::										!*OSToolbox -> (!HMENU, !*OSToolbox)
+winTrackPopupMenu		:: !HMENU !HWND							!*OSToolbox -> (!Bool,  !*OSToolbox)	// Bool: if True then item is selected; otherwise menu closed
+winInsertMenu			:: !String !Bool !HMENU !HMENU !Int		!*OSToolbox -> *OSToolbox
+winInsertMenuItem       :: !String !Bool !Bool !HMENU !Int		!*OSToolbox -> (!HITEM, !*OSToolbox)
+winInsertSeparator		:: !HMENU !Int							!*OSToolbox -> *OSToolbox
+winChangeMenuItemCheck  :: !HMENU !HITEM !Bool					!*OSToolbox -> *OSToolbox
+winModifyMenu			:: !String !HMENU !HMENU				!*OSToolbox -> *OSToolbox
+winModifyMenuItem       :: !String !HITEM !HMENU				!*OSToolbox -> *OSToolbox
+winDestroyMenu			:: !HMENU								!*OSToolbox -> *OSToolbox
+winDeleteMenu			:: !HMENU !HITEM						!*OSToolbox -> *OSToolbox
+winRemoveMenuItem       :: !HMENU !HITEM						!*OSToolbox -> *OSToolbox
+winChangeItemAbility    :: !HMENU !HITEM !Bool					!*OSToolbox -> *OSToolbox
+winChangeMenuAbility	:: !HMENU !Int   !Bool					!*OSToolbox -> *OSToolbox
+winDrawMenuBar			:: !HWND !HWND							!*OSToolbox -> *OSToolbox
+winAddMenuShortKey		:: !HWND !Int !Char						!*OSToolbox -> *OSToolbox
+winRemoveMenuShortKey	:: !HWND !Int							!*OSToolbox -> *OSToolbox

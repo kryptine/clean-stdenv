@@ -92,5 +92,5 @@ from	osmenu			import OSMenuBar, OSMenu, OSMenuItem, OSMenuSeparator, OSMenuNr, O
 		}
 
 //	Conversion functions from MenuElementState to MenuElementHandle, and vice versa:
-MenuElementHandleToMenuElementState	:: !*(MenuElementHandle .ls .pst) -> *MenuElementState  .ls .pst
-MenuElementStateToMenuElementHandle	:: !*(MenuElementState  .ls .pst) -> *MenuElementHandle .ls .pst
+menuElementHandleToMenuElementState	:: !*(MenuElementHandle .ls .pst) -> *MenuElementState  .ls .pst
+menuElementStateToMenuElementHandle	:: !*(MenuElementState  .ls .pst) -> *MenuElementHandle .ls .pst

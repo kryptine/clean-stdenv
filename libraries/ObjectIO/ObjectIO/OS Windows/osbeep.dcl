@@ -4,4 +4,4 @@ definition module osbeep
 
 from ostoolbox import OSToolbox
 
-OSBeep :: !*OSToolbox -> *OSToolbox
+osBeep :: !*OSToolbox -> *OSToolbox

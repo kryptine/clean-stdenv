@@ -20,8 +20,8 @@ toDevice								:: !(DeviceSystemState .pst) -> (!Device,!DeviceSystemState .pst
 
 /*	The following are PARTIAL access functions:
 */
-MenuSystemStateGetMenuHandles			:: !(DeviceSystemState .pst) -> *MenuHandles     .pst
-ProcessSystemStateGetProcessHandles		:: !(DeviceSystemState .pst) -> *ProcessHandles  .pst
-ReceiverSystemStateGetReceiverHandles	:: !(DeviceSystemState .pst) -> *ReceiverHandles .pst
-TimerSystemStateGetTimerHandles			:: !(DeviceSystemState .pst) -> *TimerHandles    .pst
-WindowSystemStateGetWindowHandles		:: !(DeviceSystemState .pst) -> *WindowHandles   .pst
+menuSystemStateGetMenuHandles			:: !(DeviceSystemState .pst) -> *MenuHandles     .pst
+processSystemStateGetProcessHandles		:: !(DeviceSystemState .pst) -> *ProcessHandles  .pst
+receiverSystemStateGetReceiverHandles	:: !(DeviceSystemState .pst) -> *ReceiverHandles .pst
+timerSystemStateGetTimerHandles			:: !(DeviceSystemState .pst) -> *TimerHandles    .pst
+windowSystemStateGetWindowHandles		:: !(DeviceSystemState .pst) -> *WindowHandles   .pst

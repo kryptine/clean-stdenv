@@ -34,11 +34,11 @@ where
 		createWElementClipState :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !Rect !(Maybe Id) !Bool !(WElementHandle .ls .pst) !OSRgnHandle !*OSToolbox
 																								  -> (!WElementHandle .ls .pst, !OSRgnHandle,!*OSToolbox)
 		createWElementClipState wMetrics allClipStates validate wPtr clipRect defId isVisible (WItemHandle itemH=:{wItemShow,wItemKind,wItemPos,wItemSize}) clipRgn tb
-			| not itemVisible || DisjointRects clipRect (PosSizeToRect wItemPos wItemSize)
+			| not itemVisible || disjointRects clipRect (posSizeToRect wItemPos wItemSize)
 				| not allClipStates || not (isRecursiveControl wItemKind)	// PA:<>IsCompoundControl
 					= (WItemHandle itemH,clipRgn,tb)
 				| wItemKind==IsLayoutControl								// PA: this alternative added
-					# clipRect				= PosSizeToRect wItemPos wItemSize
+					# clipRect				= posSizeToRect wItemPos wItemSize
 					# (itemHs,clipRgn,tb)	= createWElementsClipState wMetrics allClipStates validate wPtr clipRect defId False itemH.wItems clipRgn tb
 					# itemH					= {itemH & wItems=itemHs}
 					= (WItemHandle itemH,clipRgn,tb)
@@ -57,31 +57,31 @@ where
 			createWItemClipState :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !Rect !(Maybe Id) !(WItemHandle .ls .pst) !OSRgnHandle !*OSToolbox
 																							 -> (!WItemHandle .ls .pst, !OSRgnHandle,!*OSToolbox)
 			createWItemClipState _ _ _ wPtr clipRect _ itemH=:{wItemKind=IsRadioControl,wItemInfo} clipRgn tb
-				# (clipRgn,tb)	= StateMap2 (createRadioClipState wPtr clipRect) (getWItemRadioInfo wItemInfo).radioItems (clipRgn,tb)
+				# (clipRgn,tb)	= stateMap2 (createRadioClipState wPtr clipRect) (getWItemRadioInfo wItemInfo).radioItems (clipRgn,tb)
 				= (itemH,clipRgn,tb)
 			where
 				createRadioClipState :: !OSWindowPtr !Rect !(RadioItemInfo .pst) !(!OSRgnHandle,!*OSToolbox) -> (!OSRgnHandle,!*OSToolbox)
 				createRadioClipState wPtr clipRect {radioItemPos,radioItemSize} (clipRgn,tb)
-					# (radioRgn,tb)	= OSclipRadioControl wPtr (0,0) clipRect (toTuple radioItemPos) (toTuple radioItemSize) tb
+					# (radioRgn,tb)	= osClipRadioControl wPtr (0,0) clipRect (toTuple radioItemPos) (toTuple radioItemSize) tb
 					# (diffRgn, tb)	= osdiffrgn clipRgn radioRgn tb
 					# tb			= osdisposergn clipRgn tb
 					# tb			= osdisposergn radioRgn tb
 					= (diffRgn,tb)
 			
 			createWItemClipState _ _ _ wPtr clipRect defId itemH=:{wItemKind=IsCheckControl,wItemInfo} clipRgn tb
-				# (clipRgn,tb)	= StateMap2 (createCheckClipState wPtr clipRect) (getWItemCheckInfo wItemInfo).checkItems (clipRgn,tb)
+				# (clipRgn,tb)	= stateMap2 (createCheckClipState wPtr clipRect) (getWItemCheckInfo wItemInfo).checkItems (clipRgn,tb)
 				= (itemH,clipRgn,tb)
 			where
 				createCheckClipState :: !OSWindowPtr !Rect !(CheckItemInfo .pst) !(!OSRgnHandle,!*OSToolbox) -> (!OSRgnHandle,!*OSToolbox)
 				createCheckClipState wPtr clipRect {checkItemPos,checkItemSize} (clipRgn,tb)
-					# (checkRgn,tb)	= OSclipCheckControl wPtr (0,0) clipRect (toTuple checkItemPos) (toTuple checkItemSize) tb
+					# (checkRgn,tb)	= osClipCheckControl wPtr (0,0) clipRect (toTuple checkItemPos) (toTuple checkItemSize) tb
 					# (diffRgn, tb)	= osdiffrgn clipRgn checkRgn tb
 					# tb			= osdisposergn clipRgn tb
 					# tb			= osdisposergn checkRgn tb
 					= (diffRgn,tb)
 			
 			createWItemClipState wMetrics allClipStates validate wPtr clipRect defId itemH=:{wItemKind=IsCompoundControl,wItems,wItemPos,wItemSize} clipRgn tb
-				# (rectRgn,tb)			= OSclipCompoundControl wPtr (0,0) clipRect (toTuple wItemPos) (toTuple wItemSize) tb
+				# (rectRgn,tb)			= osClipCompoundControl wPtr (0,0) clipRect (toTuple wItemPos) (toTuple wItemSize) tb
 				# (diffRgn,tb)			= osdiffrgn clipRgn rectRgn tb
 				# tb					= osdisposergn clipRgn tb
 				# tb					= osdisposergn rectRgn tb
@@ -99,7 +99,7 @@ where
 				# (itemHs,clipRgn,tb)	= createWElementsClipState wMetrics allClipStates validate wPtr clipRect1 defId True wItems clipRgn tb
 				= ({itemH & wItems=itemHs},clipRgn,tb)
 			where
-				clipRect1				= IntersectRects (PosSizeToRect wItemPos wItemSize) clipRect
+				clipRect1				= intersectRects (posSizeToRect wItemPos wItemSize) clipRect
 			
 			createWItemClipState _ _ _ wPtr clipRect defId itemH=:{wItemKind,wItemPos,wItemSize} clipRgn tb
 				| okItem
@@ -110,13 +110,13 @@ where
 					= (itemH,diffRgn,tb)
 			where
 				(okItem,clipItem)		= case wItemKind of
-											IsPopUpControl			-> (True,OSclipPopUpControl)
-											IsSliderControl			-> (True,OSclipSliderControl)
-											IsTextControl			-> (True,OSclipTextControl)
-											IsEditControl			-> (True,OSclipEditControl)
-											IsButtonControl			-> (True,OSclipButtonControl)
-											IsCustomButtonControl	-> (True,OSclipCustomButtonControl)
-											IsCustomControl			-> (True,OSclipCustomControl)
+											IsPopUpControl			-> (True,osClipPopUpControl)
+											IsSliderControl			-> (True,osClipSliderControl)
+											IsTextControl			-> (True,osClipTextControl)
+											IsEditControl			-> (True,osClipEditControl)
+											IsButtonControl			-> (True,osClipButtonControl)
+											IsCustomButtonControl	-> (True,osClipCustomButtonControl)
+											IsCustomControl			-> (True,osClipCustomControl)
 											_						-> (False,undef)
 				
 			createWItemClipState _ _ _ _ _ _ itemH clipRgn tb
@@ -155,11 +155,11 @@ where
 		createWElementClipState` :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !Rect !(Maybe Id) !Bool !WElementHandle` !OSRgnHandle !*OSToolbox
 																								  -> (!WElementHandle`,!OSRgnHandle,!*OSToolbox)
 		createWElementClipState` wMetrics allClipStates validate wPtr clipRect defId isVisible (WItemHandle` itemH=:{wItemShow`,wItemKind`,wItemPos`,wItemSize`}) clipRgn tb
-			| not itemVisible || DisjointRects clipRect (PosSizeToRect wItemPos` wItemSize`)
+			| not itemVisible || disjointRects clipRect (posSizeToRect wItemPos` wItemSize`)
 				| not allClipStates || not (isRecursiveControl wItemKind`)	// PA:<>IsCompoundControl
 					= (WItemHandle` itemH,clipRgn,tb)
 				| wItemKind`==IsLayoutControl								// PA: this alternative added
-					# clipRect				= PosSizeToRect wItemPos` wItemSize`
+					# clipRect				= posSizeToRect wItemPos` wItemSize`
 					# (itemHs,clipRgn,tb)	= createWElementsClipState` wMetrics allClipStates validate wPtr clipRect defId False itemH.wItems` clipRgn tb
 					# itemH					= {itemH & wItems`=itemHs}
 					= (WItemHandle` itemH,clipRgn,tb)
@@ -178,31 +178,31 @@ where
 			createWItemClipState` :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !Rect !(Maybe Id) !WItemHandle` !OSRgnHandle !*OSToolbox
 																							 -> (!WItemHandle`,!OSRgnHandle,!*OSToolbox)
 			createWItemClipState` _ _ _ wPtr clipRect _ itemH=:{wItemKind`=IsRadioControl,wItemInfo`} clipRgn tb
-				# (clipRgn,tb)		= StateMap2 (createRadioClipState` wPtr clipRect) (getWItemRadioInfo` wItemInfo`).radioItems` (clipRgn,tb)
+				# (clipRgn,tb)		= stateMap2 (createRadioClipState` wPtr clipRect) (getWItemRadioInfo` wItemInfo`).radioItems` (clipRgn,tb)
 				= (itemH,clipRgn,tb)
 			where
 				createRadioClipState` :: !OSWindowPtr !Rect !RadioItemInfo` !(!OSRgnHandle,!*OSToolbox) -> (!OSRgnHandle,!*OSToolbox)
 				createRadioClipState` wPtr clipRect {radioItemPos`,radioItemSize`} (clipRgn,tb)
-					# (radioRgn,tb)	= OSclipRadioControl wPtr (0,0) clipRect (toTuple radioItemPos`) (toTuple radioItemSize`) tb
+					# (radioRgn,tb)	= osClipRadioControl wPtr (0,0) clipRect (toTuple radioItemPos`) (toTuple radioItemSize`) tb
 					# (diffRgn, tb)	= osdiffrgn clipRgn radioRgn tb
 					# tb			= osdisposergn clipRgn tb
 					# tb			= osdisposergn radioRgn tb
 					= (diffRgn,tb)
 			
 			createWItemClipState` _ _ _ wPtr clipRect defId itemH=:{wItemKind`=IsCheckControl,wItemInfo`} clipRgn tb
-				# (clipRgn,tb)		= StateMap2 (createCheckClipState` wPtr clipRect) (getWItemCheckInfo` wItemInfo`).checkItems` (clipRgn,tb)
+				# (clipRgn,tb)		= stateMap2 (createCheckClipState` wPtr clipRect) (getWItemCheckInfo` wItemInfo`).checkItems` (clipRgn,tb)
 				= (itemH,clipRgn,tb)
 			where
 				createCheckClipState` :: !OSWindowPtr !Rect !CheckItemInfo` !(!OSRgnHandle,!*OSToolbox) -> (!OSRgnHandle,!*OSToolbox)
 				createCheckClipState` wPtr clipRect {checkItemPos`,checkItemSize`} (clipRgn,tb)
-					# (checkRgn,tb)	= OSclipCheckControl wPtr (0,0) clipRect (toTuple checkItemPos`) (toTuple checkItemSize`) tb
+					# (checkRgn,tb)	= osClipCheckControl wPtr (0,0) clipRect (toTuple checkItemPos`) (toTuple checkItemSize`) tb
 					# (diffRgn, tb)	= osdiffrgn clipRgn checkRgn tb
 					# tb			= osdisposergn clipRgn tb
 					# tb			= osdisposergn checkRgn tb
 					= (diffRgn,tb)
 			
 			createWItemClipState` wMetrics allClipStates validate wPtr clipRect defId itemH=:{wItemKind`=IsCompoundControl,wItems`} clipRgn tb
-				# (rectRgn,tb)			= OSclipCompoundControl wPtr (0,0) clipRect (toTuple itemPos) (toTuple itemSize) tb
+				# (rectRgn,tb)			= osClipCompoundControl wPtr (0,0) clipRect (toTuple itemPos) (toTuple itemSize) tb
 				# (diffRgn,tb)			= osdiffrgn clipRgn rectRgn tb
 				# tb					= osdisposergn clipRgn tb
 				# tb					= osdisposergn rectRgn tb
@@ -223,7 +223,7 @@ where
 				# (itemHs,clipRgn,tb)	= createWElementsClipState` wMetrics allClipStates validate wPtr clipRect1 defId True wItems` clipRgn tb
 				= ({itemH & wItems`=itemHs},clipRgn,tb)
 			where
-				clipRect1				= IntersectRects (PosSizeToRect itemH.wItemPos` itemH.wItemSize`) clipRect
+				clipRect1				= intersectRects (posSizeToRect itemH.wItemPos` itemH.wItemSize`) clipRect
 			
 			createWItemClipState` _ _ _ wPtr clipRect defId itemH=:{wItemKind`,wItemPos`,wItemSize`} clipRgn tb
 				| okItem
@@ -234,13 +234,13 @@ where
 					= (itemH,diffRgn,tb)
 			where
 				(okItem,clipItem)		= case wItemKind` of
-											IsPopUpControl			-> (True,OSclipPopUpControl)
-											IsSliderControl			-> (True,OSclipSliderControl)
-											IsTextControl			-> (True,OSclipTextControl)
-											IsEditControl			-> (True,OSclipEditControl)
-											IsButtonControl			-> (True,OSclipButtonControl)
-											IsCustomButtonControl	-> (True,OSclipCustomButtonControl)
-											IsCustomControl			-> (True,OSclipCustomControl)
+											IsPopUpControl			-> (True,osClipPopUpControl)
+											IsSliderControl			-> (True,osClipSliderControl)
+											IsTextControl			-> (True,osClipTextControl)
+											IsEditControl			-> (True,osClipEditControl)
+											IsButtonControl			-> (True,osClipButtonControl)
+											IsCustomButtonControl	-> (True,osClipCustomButtonControl)
+											IsCustomControl			-> (True,osClipCustomControl)
 											_						-> (False,undef)
 				
 			createWItemClipState` _ _ _ _ _ _ itemH clipRgn tb
@@ -265,13 +265,13 @@ disposeClipState {clipRgn} tb
 */
 validateAllClipStates :: !OSWindowMetrics !Bool !OSWindowPtr !(Maybe Id) !Bool ![WElementHandle .ls .pst] !*OSToolbox -> (![WElementHandle .ls .pst],!*OSToolbox)
 validateAllClipStates wMetrics validate wPtr defaultId isVisible itemHs tb
-	= StateMap (validateclipstate wMetrics validate wPtr defaultId isVisible) itemHs tb
+	= stateMap (validateclipstate wMetrics validate wPtr defaultId isVisible) itemHs tb
 where
 	validateclipstate :: !OSWindowMetrics !Bool !OSWindowPtr !(Maybe Id) !Bool !(WElementHandle .ls.pst) !*OSToolbox -> (!WElementHandle .ls .pst,!*OSToolbox)
 	validateclipstate wMetrics validate wPtr defaultId isVisible (WItemHandle itemH=:{wItemKind,wItemShow,wItems}) tb
 		| wItemKind<>IsCompoundControl
 			| isRecursiveControl wItemKind	// PA: added for LayoutControls
-				# (itemHs,tb)	= StateMap (validateclipstate wMetrics validate wPtr defaultId itemVisible) wItems tb
+				# (itemHs,tb)	= stateMap (validateclipstate wMetrics validate wPtr defaultId itemVisible) wItems tb
 				= (WItemHandle {itemH & wItems=itemHs},tb)
 			// otherwise
 				= (WItemHandle itemH,tb)
@@ -285,27 +285,27 @@ where
 		itemVisible			= isVisible && wItemShow
 	
 	validateclipstate wMetrics validate wPtr defaultId isVisible (WListLSHandle itemHs) tb
-		# (itemHs,tb)	= StateMap (validateclipstate wMetrics validate wPtr defaultId isVisible) itemHs tb
+		# (itemHs,tb)	= stateMap (validateclipstate wMetrics validate wPtr defaultId isVisible) itemHs tb
 		= (WListLSHandle itemHs,tb)
 	
 	validateclipstate wMetrics validate wPtr defaultId isVisible (WExtendLSHandle wExH=:{wExtendItems=itemHs}) tb
-		# (itemHs,tb)	= StateMap (validateclipstate wMetrics validate wPtr defaultId isVisible) itemHs tb
+		# (itemHs,tb)	= stateMap (validateclipstate wMetrics validate wPtr defaultId isVisible) itemHs tb
 		= (WExtendLSHandle {wExH & wExtendItems=itemHs},tb)
 	
 	validateclipstate wMetrics validate wPtr defaultId isVisible (WChangeLSHandle wChH=:{wChangeItems=itemHs}) tb
-		# (itemHs,tb)	= StateMap (validateclipstate wMetrics validate wPtr defaultId isVisible) itemHs tb
+		# (itemHs,tb)	= stateMap (validateclipstate wMetrics validate wPtr defaultId isVisible) itemHs tb
 		= (WChangeLSHandle {wChH & wChangeItems=itemHs},tb)
 
 
 validateAllClipStates` :: !OSWindowMetrics !Bool !OSWindowPtr !(Maybe Id) !Bool ![WElementHandle`] !*OSToolbox -> (![WElementHandle`],!*OSToolbox)
 validateAllClipStates` wMetrics validate wPtr defaultId isVisible itemHs tb
-	= StateMap (validateclipstate wMetrics validate wPtr defaultId isVisible) itemHs tb
+	= stateMap (validateclipstate wMetrics validate wPtr defaultId isVisible) itemHs tb
 where
 	validateclipstate :: !OSWindowMetrics !Bool !OSWindowPtr !(Maybe Id) !Bool !WElementHandle` !*OSToolbox -> (!WElementHandle`,!*OSToolbox)
 	validateclipstate wMetrics validate wPtr defaultId isVisible (WItemHandle` itemH=:{wItemKind`}) tb
 		| wItemKind`<>IsCompoundControl
 			| isRecursiveControl wItemKind`	// PA: added for LayoutControls
-				# (itemHs,tb)	= StateMap (validateclipstate wMetrics validate wPtr defaultId itemVisible) itemH.wItems` tb
+				# (itemHs,tb)	= stateMap (validateclipstate wMetrics validate wPtr defaultId itemVisible) itemH.wItems` tb
 				= (WItemHandle` {itemH & wItems`=itemHs},tb)
 			// otherwise
 				= (WItemHandle` itemH,tb)
@@ -319,7 +319,7 @@ where
 		itemVisible			= isVisible && itemH.wItemShow`
 	
 	validateclipstate wMetrics validate wPtr defaultId isVisible (WRecursiveHandle` itemHs wKind) tb
-		# (itemHs,tb)	= StateMap (validateclipstate wMetrics validate wPtr defaultId isVisible) itemHs tb
+		# (itemHs,tb)	= stateMap (validateclipstate wMetrics validate wPtr defaultId isVisible) itemHs tb
 		= (WRecursiveHandle` itemHs wKind,tb)
 
 
@@ -349,8 +349,8 @@ where
 	clipState					= windowInfo.windowClip
 	domainRect					= windowInfo.windowDomain
 	hasScrolls					= (isJust windowInfo.windowHScroll, isJust windowInfo.windowVScroll)
-	visScrolls					= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
-	contentRect					= getWindowContentRect wMetrics visScrolls (SizeToRect whSize)
+	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
+	contentRect					= getWindowContentRect wMetrics visScrolls (sizeToRect whSize)
 
 validateWindowClipState` :: !OSWindowMetrics !Bool !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
 validateWindowClipState` wMetrics allClipStates wPtr wH=:{whKind`,whWindowInfo`,whItems`,whSize`,whDefaultId`,whShow`} tb
@@ -378,8 +378,8 @@ where
 	clipState					= windowInfo.windowClip
 	domainRect					= windowInfo.windowDomain
 	hasScrolls					= (isJust windowInfo.windowHScroll, isJust windowInfo.windowVScroll)
-	visScrolls					= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize`) hasScrolls
-	contentRect					= getWindowContentRect wMetrics visScrolls (SizeToRect whSize`)
+	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize`) hasScrolls
+	contentRect					= getWindowContentRect wMetrics visScrolls (sizeToRect whSize`)
 
 forceValidWindowClipState :: !OSWindowMetrics !Bool !OSWindowPtr !(WindowHandle .ls .pst) !*OSToolbox -> (!WindowHandle .ls .pst,!*OSToolbox)
 forceValidWindowClipState wMetrics allClipStates wPtr wH=:{whKind,whWindowInfo,whItems,whSize,whDefaultId,whShow} tb
@@ -401,8 +401,8 @@ where
 	clipState					= windowInfo.windowClip
 	domainRect					= windowInfo.windowDomain
 	hasScrolls					= (isJust windowInfo.windowHScroll, isJust windowInfo.windowVScroll)
-	visScrolls					= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
-	contentRect					= getWindowContentRect wMetrics visScrolls (SizeToRect whSize)
+	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
+	contentRect					= getWindowContentRect wMetrics visScrolls (sizeToRect whSize)
 
 forceValidWindowClipState` :: !OSWindowMetrics !Bool !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
 forceValidWindowClipState` wMetrics allClipStates wPtr wH=:{whKind`,whWindowInfo`,whItems`,whSize`,whDefaultId`,whShow`} tb
@@ -424,8 +424,8 @@ where
 	clipState					= windowInfo.windowClip
 	domainRect					= windowInfo.windowDomain
 	hasScrolls					= (isJust windowInfo.windowHScroll, isJust windowInfo.windowVScroll)
-	visScrolls					= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize`) hasScrolls
-	contentRect					= getWindowContentRect wMetrics visScrolls (SizeToRect whSize`)
+	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize`) hasScrolls
+	contentRect					= getWindowContentRect wMetrics visScrolls (sizeToRect whSize`)
 
 
 invalidateWindowClipState :: !(WindowHandle .ls .pst) -> WindowHandle .ls .pst
@@ -467,8 +467,8 @@ where
 	clipState					= compoundLook.compoundClip
 	domainRect					= compoundInfo.compoundDomain
 	hasScrolls					= (isJust compoundInfo.compoundHScroll, isJust compoundInfo.compoundVScroll)
-	visScrolls					= OSscrollbarsAreVisible wMetrics domainRect (toTuple wItemSize) hasScrolls
-	contentRect					= getCompoundContentRect wMetrics visScrolls (PosSizeToRect wItemPos wItemSize)
+	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple wItemSize) hasScrolls
+	contentRect					= getCompoundContentRect wMetrics visScrolls (posSizeToRect wItemPos wItemSize)
 
 validateCompoundClipState` :: !OSWindowMetrics !Bool !OSWindowPtr !(Maybe Id) !Bool !WItemHandle` !*OSToolbox -> (!WItemHandle`,!*OSToolbox)
 validateCompoundClipState` wMetrics allClipStates wPtr defId isVisible itemH=:{wItemShow`, wItemPos`,wItemSize`,wItemInfo`,wItems`} tb
@@ -490,8 +490,8 @@ where
 	clipState					= compoundLook.compoundClip
 	domainRect					= compoundInfo.compoundDomain
 	hasScrolls					= (isJust compoundInfo.compoundHScroll, isJust compoundInfo.compoundVScroll)
-	visScrolls					= OSscrollbarsAreVisible wMetrics domainRect (toTuple wItemSize`) hasScrolls
-	contentRect					= getCompoundContentRect wMetrics visScrolls (PosSizeToRect wItemPos` wItemSize`)
+	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple wItemSize`) hasScrolls
+	contentRect					= getCompoundContentRect wMetrics visScrolls (posSizeToRect wItemPos` wItemSize`)
 
 forceValidCompoundClipState :: !OSWindowMetrics !Bool !OSWindowPtr !(Maybe Id) !Bool !(WItemHandle .ls .pst) !*OSToolbox -> (!WItemHandle .ls .pst,!*OSToolbox)
 forceValidCompoundClipState wMetrics allClipStates wPtr defId isVisible itemH=:{wItemShow,wItemPos,wItemSize,wItemInfo,wItems} tb
@@ -506,8 +506,8 @@ where
 	clipState					= compoundLook.compoundClip
 	domainRect					= compoundInfo.compoundDomain
 	hasScrolls					= (isJust compoundInfo.compoundHScroll, isJust compoundInfo.compoundVScroll)
-	visScrolls					= OSscrollbarsAreVisible wMetrics domainRect (toTuple wItemSize) hasScrolls
-	contentRect					= getCompoundContentRect wMetrics visScrolls (PosSizeToRect wItemPos wItemSize)
+	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple wItemSize) hasScrolls
+	contentRect					= getCompoundContentRect wMetrics visScrolls (posSizeToRect wItemPos wItemSize)
 
 forceValidCompoundClipState` :: !OSWindowMetrics !Bool !OSWindowPtr !(Maybe Id) !Bool !WItemHandle` !*OSToolbox -> (!WItemHandle`,!*OSToolbox)
 forceValidCompoundClipState` wMetrics allClipStates wPtr defId isVisible itemH=:{wItemShow`,wItemPos`,wItemSize`,wItemInfo`,wItems`} tb
@@ -522,8 +522,8 @@ where
 	clipState					= compoundLook.compoundClip
 	domainRect					= compoundInfo.compoundDomain
 	hasScrolls					= (isJust compoundInfo.compoundHScroll, isJust compoundInfo.compoundVScroll)
-	visScrolls					= OSscrollbarsAreVisible wMetrics domainRect (toTuple wItemSize`) hasScrolls
-	contentRect					= getCompoundContentRect wMetrics visScrolls (PosSizeToRect wItemPos` wItemSize`)
+	visScrolls					= osScrollbarsAreVisible wMetrics domainRect (toTuple wItemSize`) hasScrolls
+	contentRect					= getCompoundContentRect wMetrics visScrolls (posSizeToRect wItemPos` wItemSize`)
 
 invalidateCompoundClipState :: !(WItemHandle .ls .pst) -> WItemHandle .ls .pst
 invalidateCompoundClipState itemH=:{wItemInfo}

@@ -58,8 +58,8 @@ import	StdTimerDef
 
 //	Conversion functions from TimerElementState to TimerElementHandle, and vice versa:
 
-TimerElementHandleToTimerElementState :: !*(TimerElementHandle .ls .pst) -> *TimerElementState .ls .pst
-TimerElementHandleToTimerElementState tHs = tHs
+timerElementHandleToTimerElementState :: !*(TimerElementHandle .ls .pst) -> *TimerElementState .ls .pst
+timerElementHandleToTimerElementState tHs = tHs
 
-TimerElementStateToTimerElementHandle :: !*(TimerElementState .ls .pst) -> *TimerElementHandle .ls .pst
-TimerElementStateToTimerElementHandle tHs = tHs
+timerElementStateToTimerElementHandle :: !*(TimerElementState .ls .pst) -> *TimerElementHandle .ls .pst
+timerElementStateToTimerElementHandle tHs = tHs

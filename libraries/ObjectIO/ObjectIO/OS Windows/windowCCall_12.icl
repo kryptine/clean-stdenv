@@ -8,8 +8,8 @@ from	pictCCall_12	import HDC
 import code from "cCCallWindows_121.obj","cpicture_121.obj"
 
 
-WinInitialiseWindows:: !*OSToolbox -> *OSToolbox
-WinInitialiseWindows _
+winInitialiseWindows:: !*OSToolbox -> *OSToolbox
+winInitialiseWindows _
 	= code
 	{
 		.inline InstallCrossCallWindows
@@ -17,8 +17,8 @@ WinInitialiseWindows _
 		.end
 	}
 
-WinInvalidateWindow :: !HWND !*OSToolbox -> *OSToolbox
-WinInvalidateWindow _ _
+winInvalidateWindow :: !HWND !*OSToolbox -> *OSToolbox
+winInvalidateWindow _ _
 	= code
 	{	
 		.inline WinInvalidateWindow
@@ -26,8 +26,8 @@ WinInvalidateWindow _ _
 		.end
 	}
 
-WinInvalidateRect :: !HWND !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
-WinInvalidateRect hwnd (left,top, right,bottom) tb
+winInvalidateRect :: !HWND !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
+winInvalidateRect hwnd (left,top, right,bottom) tb
 	= code
 	{	
 		.inline WinInvalidateRect
@@ -35,8 +35,8 @@ WinInvalidateRect hwnd (left,top, right,bottom) tb
 		.end
 	}
 
-WinValidateRect :: !HWND !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
-WinValidateRect hwnd (left,top, right,bottom) tb
+winValidateRect :: !HWND !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
+winValidateRect hwnd (left,top, right,bottom) tb
 	= code
 	{	
 		.inline WinValidateRect
@@ -44,8 +44,8 @@ WinValidateRect hwnd (left,top, right,bottom) tb
 		.end
 	}
 
-WinValidateRgn :: !HWND !HRGN !*OSToolbox -> *OSToolbox
-WinValidateRgn hwnd rgn tb
+winValidateRgn :: !HWND !HRGN !*OSToolbox -> *OSToolbox
+winValidateRgn hwnd rgn tb
 	= code
 	{	
 		.inline WinValidateRgn
@@ -53,8 +53,8 @@ WinValidateRgn hwnd rgn tb
 		.end
 	}
 
-WinGetDC :: !HWND !*OSToolbox -> (!HDC,!*OSToolbox)
-WinGetDC _ _
+winGetDC :: !HWND !*OSToolbox -> (!HDC,!*OSToolbox)
+winGetDC _ _
 	= code
 	{
 		.inline WinGetDC
@@ -62,8 +62,8 @@ WinGetDC _ _
 		.end
 	}
 
-WinReleaseDC :: !HWND !(!HDC,!*OSToolbox) -> *OSToolbox
-WinReleaseDC hwnd (hdc,tb)
+winReleaseDC :: !HWND !(!HDC,!*OSToolbox) -> *OSToolbox
+winReleaseDC hwnd (hdc,tb)
 	= code
 	{
 		.inline WinReleaseDC

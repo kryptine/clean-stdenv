@@ -53,47 +53,47 @@ BUTTONDOWN			:== 1
 BUTTONSTILLUP		:== 0		/* PA: new constant for passing mouse move events. */
 
 
-WinLaunchApp			:: !{#Char} !Bool !*OSToolbox -> (!Bool,!*OSToolbox)
-WinLaunchApp2			:: !{#Char} !{#Char} !Bool !*OSToolbox -> (!Bool,!*OSToolbox)
-WinCallProcess			:: !CSTR !CSTR !CSTR !CSTR !CSTR !CSTR !*OSToolbox -> (!Bool,!Int,!*OSToolbox)
+winLaunchApp			:: !{#Char} !Bool !*OSToolbox -> (!Bool,!*OSToolbox)
+winLaunchApp2			:: !{#Char} !{#Char} !Bool !*OSToolbox -> (!Bool,!*OSToolbox)
+winCallProcess			:: !CSTR !CSTR !CSTR !CSTR !CSTR !CSTR !*OSToolbox -> (!Bool,!Int,!*OSToolbox)
 
-WinGetModulePath		:: {#Char}
-WinFileModifiedDate		:: !{#Char} -> (!Bool,!Int,!Int,!Int,!Int,!Int,!Int)
-WinFileExists			:: !{#Char} ->  Bool
+winGetModulePath		:: {#Char}
+winFileModifiedDate		:: !{#Char} -> (!Bool,!Int,!Int,!Int,!Int,!Int,!Int)
+winFileExists			:: !{#Char} ->  Bool
 
-WinBeep					:: !*OSToolbox -> *OSToolbox
+winBeep					:: !*OSToolbox -> *OSToolbox
 
-Rand					:: Int
+rand					:: Int
 
-WinReleaseCString		:: !CSTR !*OSToolbox -> *OSToolbox
-WinGetCStringAndFree	:: !CSTR !*OSToolbox -> (!{#Char},!*OSToolbox)
-WinGetCString			:: !CSTR !*OSToolbox -> (!{#Char},!*OSToolbox)
-WinMakeCString			:: !{#Char} !*OSToolbox -> (!CSTR,!*OSToolbox)
+winReleaseCString		:: !CSTR !*OSToolbox -> *OSToolbox
+winGetCStringAndFree	:: !CSTR !*OSToolbox -> (!{#Char},!*OSToolbox)
+winGetCString			:: !CSTR !*OSToolbox -> (!{#Char},!*OSToolbox)
+winMakeCString			:: !{#Char} !*OSToolbox -> (!CSTR,!*OSToolbox)
 
-WinGetAppPath			:: CSTR
+winGetAppPath			:: CSTR
 
-WinSetDoubleDownDist	:: !Int !*OSToolbox ->  *OSToolbox
+winSetDoubleDownDist	:: !Int !*OSToolbox ->  *OSToolbox
 
-WinGetHorzResolution	:: Int
-WinGetVertResolution	:: Int
+winGetHorzResolution	:: Int
+winGetVertResolution	:: Int
 
-WinMaxFixedWindowSize	:: (!Int,!Int)
-WinMaxScrollWindowSize	:: (!Int,!Int)
+winMaxFixedWindowSize	:: (!Int,!Int)
+winMaxScrollWindowSize	:: (!Int,!Int)
 
 //	PA: interfaces added for determining screen width and height.
-WinScreenYSize			:: !*OSToolbox -> (!Int,!*OSToolbox)
-WinScreenXSize			:: !*OSToolbox -> (!Int,!*OSToolbox)
+winScreenYSize			:: !*OSToolbox -> (!Int,!*OSToolbox)
+winScreenXSize			:: !*OSToolbox -> (!Int,!*OSToolbox)
 
-WinMinimumWinSize		:: (!Int,!Int)
+winMinimumWinSize		:: (!Int,!Int)
 
 //	PA: function added to get system metrics for width and height of scrollbars.
-WinScrollbarSize		:: !*OSToolbox -> (!Int,!Int,!*OSToolbox)
+winScrollbarSize		:: !*OSToolbox -> (!Int,!Int,!*OSToolbox)
 
-/*	PA: two new routines (Win(M/S)DIClientToOuterSizeDims added to convert between the
+/*	PA: two new routines (win(M/S)DIClientToOuterSizeDims added to convert between the
 		client and outer size of (M/S)DI windows. The Int argument contains the style flags 
 		of the window.
 */
-WinMDIClientToOuterSizeDims :: !Int !*OSToolbox -> (!Int,!Int,!*OSToolbox)
-WinSDIClientToOuterSizeDims :: !Int !*OSToolbox -> (!Int,!Int,!*OSToolbox)
+winMDIClientToOuterSizeDims :: !Int !*OSToolbox -> (!Int,!Int,!*OSToolbox)
+winSDIClientToOuterSizeDims :: !Int !*OSToolbox -> (!Int,!Int,!*OSToolbox)
 
-WinPlaySound			:: !{#Char} !*OSToolbox -> (!Bool,!*OSToolbox)
+winPlaySound			:: !{#Char} !*OSToolbox -> (!Bool,!*OSToolbox)

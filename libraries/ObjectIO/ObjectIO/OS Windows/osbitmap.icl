@@ -23,9 +23,9 @@ toBitmap osBitmap = OSBitmap osBitmap
 fromBitmap :: !Bitmap -> OSBitmap
 fromBitmap (OSBitmap osBitmap) = osBitmap
 
-//	OSreadBitmap reads a bitmap from a file. See page 176 of Programming Windows 95 (Charles Petzold)
-OSreadBitmap :: !*File -> (!Bool,!OSBitmap,!*File)
-OSreadBitmap file
+//	osReadBitmap reads a bitmap from a file. See page 176 of Programming Windows 95 (Charles Petzold)
+osReadBitmap :: !*File -> (!Bool,!OSBitmap,!*File)
+osReadBitmap file
 	# (_, c1,file) = freadc file
 	# (ok,c2,file) = freadc file      // read first two bytes
 	| not ok || c1<>'B' || c2<>'M'	  // are they "BM"? 
@@ -43,42 +43,42 @@ OSreadBitmap file
 	| size data <> fileSize
 		= (False,noBitmap,file)
 	| otherwise
-		# (hdc, tb)			= WinCreateScreenHDC OSNewToolbox
-		# (hbmp,tb)			= WinCreateBitmap w data hdc tb
-		# tb				= WinDestroyScreenHDC (hdc,tb)
+		# (hdc, tb)			= winCreateScreenHDC OSNewToolbox
+		# (hbmp,tb)			= winCreateBitmap w data hdc tb
+		# tb				= winDestroyScreenHDC (hdc,tb)
 		= (if (tb==OSDummyToolbox) True True,{originalSize=(w,h),reSize=(w,h),bitmapContents=data,bitmapHandle=hbmp},file)
 where
 	noBitmap = {originalSize=(0,0),reSize=(0,0),bitmapContents={},bitmapHandle=0}
 
-//	OSgetBitmapSize returns the size of the bitmap.
-OSgetBitmapSize :: !OSBitmap -> (!Int,!Int)
-OSgetBitmapSize {reSize}
+//	osGetBitmapSize returns the size of the bitmap.
+osGetBitmapSize :: !OSBitmap -> (!Int,!Int)
+osGetBitmapSize {reSize}
 	= reSize
 
-//	OSgetBitmapContent returns the content string of the bitmap
-OSgetBitmapContent :: !OSBitmap -> {#Char}
-OSgetBitmapContent {bitmapContents}
+//	osGetBitmapContent returns the content string of the bitmap
+osGetBitmapContent :: !OSBitmap -> {#Char}
+osGetBitmapContent {bitmapContents}
 	= bitmapContents
 
-/*	OSresizeBitmap (w,h) bitmap
+/*	osResizeBitmap (w,h) bitmap
 		resizes the argument bitmap to the given size.
 	It is assumed that w and h are not negative.
 */
-OSresizeBitmap :: !(!Int,!Int) !OSBitmap -> OSBitmap
-OSresizeBitmap size bitmap
+osResizeBitmap :: !(!Int,!Int) !OSBitmap -> OSBitmap
+osResizeBitmap size bitmap
 	= {bitmap & reSize=size}
 
-/*	OSdrawBitmap bitmap pos origin pictContext
+/*	osDrawBitmap bitmap pos origin pictContext
 		draws the argument bitmap with the left top corner at pos, given the current origin and drawing context.
 */
-OSdrawBitmap :: !OSBitmap !(!Int,!Int) !(!Int,!Int) !Bool !OSPictContext !*OSToolbox -> (!OSPictContext,!*OSToolbox)
-OSdrawBitmap {originalSize,reSize,bitmapContents,bitmapHandle} pos=:(px,py) origin=:(ox,oy) isScreenOutput pictContext tb
+osDrawBitmap :: !OSBitmap !(!Int,!Int) !(!Int,!Int) !Bool !OSPictContext !*OSToolbox -> (!OSPictContext,!*OSToolbox)
+osDrawBitmap {originalSize,reSize,bitmapContents,bitmapHandle} pos=:(px,py) origin=:(ox,oy) isScreenOutput pictContext tb
 	| isScreenOutput
 		| originalSize==reSize
-			= WinDrawBitmap  originalSize destination bitmapHandle (pictContext,tb)
+			= winDrawBitmap  originalSize destination bitmapHandle (pictContext,tb)
 		// otherwise
-			= WinDrawResizedBitmap  originalSize destination reSize bitmapHandle (pictContext,tb)
+			= winDrawResizedBitmap  originalSize destination reSize bitmapHandle (pictContext,tb)
 	| otherwise
-		= WinPrintResizedBitmap originalSize destination reSize bitmapContents (pictContext,tb)
+		= winPrintResizedBitmap originalSize destination reSize bitmapContents (pictContext,tb)
 where
 	destination	= (px-ox,py-oy)

@@ -11,7 +11,7 @@ import osmenu
 
 menuaccessFatalError :: String String -> .x
 menuaccessFatalError function error
-	= FatalError function "menuaccess" error
+	= fatalError function "menuaccess" error
 
 
 //	Access operations on MenuHandles:
@@ -91,7 +91,7 @@ menuStateHandleSetSelect select (MenuLSHandle mlsH=:{mlsHandle=mH}) = MenuLSHand
 menuIdsAreConsistent :: !SystemId !Id !*[MenuElementHandle .ls .pst] !*ReceiverTable !*IdTable
 							-> (!Bool,!*[MenuElementHandle .ls .pst],!*ReceiverTable,!*IdTable)
 menuIdsAreConsistent ioId menuId itemHs rt it
-	# (itemHs,ids)	= StateMap getMenuElementMenuId itemHs []
+	# (itemHs,ids)	= stateMap getMenuElementMenuId itemHs []
 	| not (okMembersIdTable ids it)
 		= (False,itemHs,rt,it)
 	# (ok,it)		= addIdsToIdTable (map (\id->(id,{idpIOId=ioId,idpDevice=MenuDevice,idpId=menuId})) ids) it
@@ -108,12 +108,12 @@ where
 	getMenuElementMenuId itemH=:(MenuReceiverHandle _) ids
 		= (itemH,ids)
 	getMenuElementMenuId (SubMenuHandle itemH=:{mSubMenuId,mSubItems=itemHs}) ids
-		# (itemHs,ids)			= StateMap getMenuElementMenuId itemHs ids
+		# (itemHs,ids)			= stateMap getMenuElementMenuId itemHs ids
 		  subH					= SubMenuHandle {itemH & mSubItems=itemHs}
 		| isNothing mSubMenuId	= (subH,ids)
 		| otherwise				= (subH,[fromJust mSubMenuId:ids])
 	getMenuElementMenuId (RadioMenuHandle itemH=:{mRadioId,mRadioItems=itemHs}) ids
-		# (itemHs,ids)			= StateMap getMenuElementMenuId itemHs ids
+		# (itemHs,ids)			= stateMap getMenuElementMenuId itemHs ids
 		  radioH				= RadioMenuHandle {itemH & mRadioItems=itemHs}
 		| isNothing mRadioId	= (radioH,ids)
 		| otherwise				= (radioH,[fromJust mRadioId:ids])
@@ -121,13 +121,13 @@ where
 		| isNothing mSepId		= (itemH,ids)
 		| otherwise				= (itemH,[fromJust mSepId:ids])
 	getMenuElementMenuId (MenuListLSHandle itemHs) ids
-		# (itemHs,ids)			= StateMap getMenuElementMenuId itemHs ids
+		# (itemHs,ids)			= stateMap getMenuElementMenuId itemHs ids
 		= (MenuListLSHandle itemHs,ids)
 	getMenuElementMenuId (MenuExtendLSHandle mExH=:{mExtendItems=itemHs}) ids
-		# (itemHs,ids)			= StateMap getMenuElementMenuId itemHs ids
+		# (itemHs,ids)			= stateMap getMenuElementMenuId itemHs ids
 		= (MenuExtendLSHandle {mExH & mExtendItems=itemHs},ids)
 	getMenuElementMenuId (MenuChangeLSHandle mChH=:{mChangeItems=itemHs}) ids
-		# (itemHs,ids)			= StateMap getMenuElementMenuId itemHs ids
+		# (itemHs,ids)			= stateMap getMenuElementMenuId itemHs ids
 		= (MenuChangeLSHandle {mChH & mChangeItems=itemHs},ids)
 	
 /*	bindReceiverMenuIds binds all R(2)Ids in the MenuElementState list. 
@@ -171,8 +171,8 @@ where
 		= (itemHs,rt)
 
 //	Convert a RadioMenuItem to the MenuItemHandle alternative of MenuElementHandle:
-RadioMenuItemToMenuElementHandle :: !(MenuRadioItem *(.ls,.pst)) -> *MenuElementHandle .ls .pst
-RadioMenuItemToMenuElementHandle (title,optId,optShortKey,f)
+radioMenuItemToMenuElementHandle :: !(MenuRadioItem *(.ls,.pst)) -> *MenuElementHandle .ls .pst
+radioMenuItemToMenuElementHandle (title,optId,optShortKey,f)
 	= MenuItemHandle {	mItemId		= optId
 					 ,	mItemKey	= optShortKey
 					 ,	mItemTitle	= title

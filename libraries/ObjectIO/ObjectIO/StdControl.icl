@@ -17,12 +17,12 @@ from	wstateaccess	import iswindowitemspace`, getwindowitemspace`,
 								iswindowhmargin`,  getwindowhmargin`,
 								iswindowvmargin`,  getwindowvmargin`
 from	ostoolbox		import OSNewToolbox
-from	oswindow		import OSscrollbarsAreVisible
+from	oswindow		import osScrollbarsAreVisible
 
 
 StdControlFatalError :: String String -> .x
 StdControlFatalError function error
-	= FatalError function "StdControl" error
+	= fatalError function "StdControl" error
 
 /*	The function isOkControlId can be used to filter out the proper IdParent records.
 */
@@ -33,18 +33,18 @@ isOkControlId _ _
 	= (False,undef)
 
 // PA: two locally used functions that retrieve the parent Id(s).
-IOStGetIdParent :: !Id !(IOSt .l) -> (!Maybe IdParent,!IOSt .l)
-IOStGetIdParent id ioState
-	# (idtable,ioState)		= IOStGetIdTable ioState
+ioStGetIdParent :: !Id !(IOSt .l) -> (!Maybe IdParent,!IOSt .l)
+ioStGetIdParent id ioState
+	# (idtable,ioState)		= ioStGetIdTable ioState
 	# (idparent,idtable)	= getIdParent id idtable
-	# ioState				= IOStSetIdTable idtable ioState
+	# ioState				= ioStSetIdTable idtable ioState
 	= (idparent,ioState)
 
-IOStGetIdParents:: ![Id] !(IOSt .l) -> (![Maybe IdParent],!IOSt .l)
-IOStGetIdParents ids ioState
-	# (idtable,ioState)		= IOStGetIdTable ioState
+ioStGetIdParents:: ![Id] !(IOSt .l) -> (![Maybe IdParent],!IOSt .l)
+ioStGetIdParents ids ioState
+	# (idtable,ioState)		= ioStGetIdTable ioState
 	# (idparents,idtable)	= getIdParents ids idtable
-	# ioState				= IOStSetIdTable idtable ioState
+	# ioState				= ioStSetIdTable idtable ioState
 	= (idparents,ioState)
 
 
@@ -100,30 +100,30 @@ gatherWindowIds` []
 
 getWindow :: !Id !(IOSt .l) -> (!Maybe WState, !IOSt .l)
 getWindow windowId ioState
-	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	# (found,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
 	| not found
 		= (Nothing,ioState)
-	# windows					= WindowSystemStateGetWindowHandles wDevice
+	# windows					= windowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)		= getWindowHandlesWindow (toWID windowId) windows
 	| not found
-		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
+		= (Nothing,ioStSetDevice (WindowSystemState windows) ioState)
 	| otherwise
 		# (tb,ioState)			= getIOToolbox ioState
 		# (wsH`,wsH,tb)			= retrieveWindowHandle` wsH tb
 		# (wids,wsH)			= getWindowStateHandleWIDS wsH
 		  windows				= setWindowHandlesWindow wsH windows
 		# ioState				= setIOToolbox tb ioState
-		# ioState				= IOStSetDevice (WindowSystemState windows) ioState
-		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# ioState				= ioStSetDevice (WindowSystemState windows) ioState
+		# (wMetrics,ioState)	= ioStGetOSWindowMetrics ioState
 		= (Just {wIds=wids,wRep=wsH`,wTb=OSNewToolbox,wMetrics=wMetrics},ioState)
 
 getParentWindow :: !Id !(IOSt .l) -> (!Maybe WState, !IOSt .l)
 getParentWindow controlId ioState
-	# (maybeParent,ioState)		= IOStGetIdParent controlId ioState
+	# (maybeParent,ioState)		= ioStGetIdParent controlId ioState
 	| isNothing maybeParent
 		= (Nothing,ioState)
 	# parent					= fromJust maybeParent
-	# (ioId,ioState)			= IOStGetIOId ioState
+	# (ioId,ioState)			= ioStGetIOId ioState
 	| ioId==parent.idpIOId && parent.idpDevice==WindowDevice
 		= getWindow parent.idpId ioState
 	| otherwise
@@ -131,15 +131,15 @@ getParentWindow controlId ioState
 
 setWindow :: !Id !(IdFun *WState) !(IOSt .l) -> IOSt .l
 setWindow windowId f ioState
-	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	# (found,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
 	| not found
 		= ioState
-	# windows					= WindowSystemStateGetWindowHandles wDevice
+	# windows					= windowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)		= getWindowHandlesWindow (toWID windowId) windows
 	| not found
-		= IOStSetDevice (WindowSystemState windows) ioState
+		= ioStSetDevice (WindowSystemState windows) ioState
 	| otherwise
-		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# (wMetrics,ioState)	= ioStGetOSWindowMetrics ioState
 		# (tb,ioState)			= getIOToolbox ioState
 		# (wsH`,wsH,tb)			= retrieveWindowHandle` wsH tb
 		# (wids,wsH)			= getWindowStateHandleWIDS wsH
@@ -147,7 +147,7 @@ setWindow windowId f ioState
 		  wsH					= insertWindowHandle` wsH` wsH
 		  windows				= setWindowHandlesWindow wsH windows
 		# ioState				= setIOToolbox tb ioState
-		# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+		# ioState				= ioStSetDevice (WindowSystemState windows) ioState
 		= ioState
 
 
@@ -157,9 +157,9 @@ controlSize :: !(cdef .ls (PSt .l)) !Bool !(Maybe (Int,Int)) !(Maybe (Int,Int)) 
 			-> (!Size,!PSt .l) | Controls cdef
 controlSize cdef isWindow hMargins vMargins itemSpaces pState
 	# (cs,pState)		= controlToHandles cdef pState
-	  itemHs			= map ControlStateToWElementHandle cs
+	  itemHs			= map controlStateToWElementHandle cs
 	# (tb,ioState)		= getIOToolbox pState.io
-	# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
+	# (wMetrics,ioState)= ioStGetOSWindowMetrics ioState
 	  hMargins			= case hMargins of
 		  					(Just (left,right))	-> (max 0 left,max 0 right)
 		  					_					-> if isWindow (0,0) (wMetrics.osmHorMargin,wMetrics.osmHorMargin)
@@ -181,38 +181,38 @@ controlSize cdef isWindow hMargins vMargins itemSpaces pState
 */
 openControls :: !Id .ls (cdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | Controls cdef
 openControls wId ls newControls pState
-	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+	# (found,wDevice,ioState)	= ioStGetDevice WindowDevice pState.io
 	| not found
 		= (ErrorUnknownObject,{pState & io=ioState})
-	# wHs						= WindowSystemStateGetWindowHandles wDevice
+	# wHs						= windowSystemStateGetWindowHandles wDevice
 	# (found,wsH,wHs)			= getWindowHandlesWindow (toWID wId) wHs
 	| not found
-		= (ErrorUnknownObject,{pState & io=IOStSetDevice (WindowSystemState wHs) ioState})
+		= (ErrorUnknownObject,{pState & io=ioStSetDevice (WindowSystemState wHs) ioState})
     // Mike //
     # (wKind,wsH)				= getWindowStateHandleWindowKind wsH
     | wKind==IsGameWindow
-    	= (OtherError "WrongObject",{pState & io=IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState})
+    	= (OtherError "WrongObject",{pState & io=ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState})
     ///
 	# (cs,pState)				= controlToHandles newControls {pState & io=ioState}
-	# newItemHs					= map ControlStateToWElementHandle cs
+	# newItemHs					= map controlStateToWElementHandle cs
 	  (currentIds,wsH)			= getWindowStateHandleIds wsH
 	  (disjoint,newItemHs)		= disjointControlIds currentIds newItemHs
 	| not disjoint
-		= (ErrorIdsInUse,appPIO (IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs))) pState)
-	# (rt,ioState)				= IOStGetReceiverTable pState.io
-	# (it,ioState)				= IOStGetIdTable ioState
-	# (ioId,ioState)			= IOStGetIOId ioState
+		= (ErrorIdsInUse,appPIO (ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs))) pState)
+	# (rt,ioState)				= ioStGetReceiverTable pState.io
+	# (it,ioState)				= ioStGetIdTable ioState
+	# (ioId,ioState)			= ioStGetIOId ioState
 	  (ok,newItemHs,rt,it)		= controlIdsAreConsistent ioId wId newItemHs rt it
-	# ioState					= IOStSetIdTable it ioState
-	# ioState					= IOStSetReceiverTable rt ioState
+	# ioState					= ioStSetIdTable it ioState
+	# ioState					= ioStSetReceiverTable rt ioState
 	| not ok
-		# ioState				= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+		# ioState				= ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
 		# pState				= {pState & io=ioState}
 		= (ErrorIdsInUse,pState)
 	| otherwise
-		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# (wMetrics,ioState)	= ioStGetOSWindowMetrics ioState
 		# (wsH,ioState)			= accIOToolbox (opencontrols wMetrics ls newItemHs wsH) ioState
-		# ioState				= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+		# ioState				= ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
 		# pState				= {pState & io=ioState}
 		= (NoError,pState)
 
@@ -233,13 +233,13 @@ getWindowStateHandleIds _
 */
 getParentWindowId :: !Id !(IOSt .l) -> (!Maybe Id,!IOSt .l)
 getParentWindowId controlId ioState
-	# (maybeParent,ioState)	= IOStGetIdParent controlId ioState
+	# (maybeParent,ioState)	= ioStGetIdParent controlId ioState
 	| isNothing maybeParent
 		= (Nothing,ioState)
 	# parent				= fromJust maybeParent
 	| parent.idpDevice<>WindowDevice
 		= (Nothing,ioState)
-	# (pid,ioState)			= IOStGetIOId ioState
+	# (pid,ioState)			= ioStGetIOId ioState
 	| parent.idpIOId<>pid
 		= (Nothing,ioState)
 	| otherwise
@@ -253,41 +253,41 @@ openCompoundControls cId ls newControls pState=:{io=ioState}
 	| isNothing maybeId
 		= (ErrorUnknownObject,{pState & io=ioState})
 	# wId						= fromJust maybeId
-	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	# (found,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
 	| not found
 		= (ErrorUnknownObject,{pState & io=ioState})
-	# wHs						= WindowSystemStateGetWindowHandles wDevice
+	# wHs						= windowSystemStateGetWindowHandles wDevice
 	# (found,wsH,wHs)			= getWindowHandlesWindow (toWID wId) wHs
 	| not found
-		= (ErrorUnknownObject,{pState & io=IOStSetDevice (WindowSystemState wHs) ioState})
+		= (ErrorUnknownObject,{pState & io=ioStSetDevice (WindowSystemState wHs) ioState})
     // Mike //
     # (wKind,wsH)				= getWindowStateHandleWindowKind wsH
     | wKind==IsGameWindow
-		= (OtherError "WrongObject",{pState & io=IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState})
+		= (OtherError "WrongObject",{pState & io=ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState})
     ///
 	# (cs,pState)				= controlToHandles newControls {pState & io=ioState}
-	# newItemHs					= map ControlStateToWElementHandle cs
+	# newItemHs					= map controlStateToWElementHandle cs
 	  (currentIds,wsH)			= getWindowStateHandleIds wsH
 	  (disjoint,newItemHs)		= disjointControlIds currentIds newItemHs
 	| not disjoint
-		= (ErrorIdsInUse,appPIO (IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs))) pState)
-	# (rt,ioState)				= IOStGetReceiverTable pState.io
-	# (it,ioState)				= IOStGetIdTable ioState
-	# (ioId,ioState)			= IOStGetIOId ioState
+		= (ErrorIdsInUse,appPIO (ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs))) pState)
+	# (rt,ioState)				= ioStGetReceiverTable pState.io
+	# (it,ioState)				= ioStGetIdTable ioState
+	# (ioId,ioState)			= ioStGetIOId ioState
 	  (ok,newItemHs,rt,it)		= controlIdsAreConsistent ioId wId newItemHs rt it
-	# ioState					= IOStSetIdTable it ioState
-	# ioState					= IOStSetReceiverTable rt ioState
+	# ioState					= ioStSetIdTable it ioState
+	# ioState					= ioStSetReceiverTable rt ioState
 	| not ok
-		# ioState				= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+		# ioState				= ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
 		# pState				= {pState & io=ioState}
 		= (ErrorIdsInUse,pState)
 	| otherwise
-		# (osdInfo, ioState)	= IOStGetOSDInfo ioState
-		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# (osdInfo, ioState)	= ioStGetOSDInfo ioState
+		# (wMetrics,ioState)	= ioStGetOSWindowMetrics ioState
 		# (tb,ioState)			= getIOToolbox ioState
 		# (ok,wsH,tb)			= opencompoundcontrols osdInfo wMetrics cId ls newItemHs wsH tb
 		# ioState				= setIOToolbox tb ioState
-		# ioState				= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+		# ioState				= ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
 		# pState				= {pState & io=ioState}
 		= (if ok NoError ErrorUnknownObject,pState)
 
@@ -302,23 +302,23 @@ openPopUpControlItems popUpId index items ioState
 	| isNothing maybeId
 		= ioState
 	# wId						= fromJust maybeId
-	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	# (found,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
 	| not found
 		= ioState
-	# wHs						= WindowSystemStateGetWindowHandles wDevice
+	# wHs						= windowSystemStateGetWindowHandles wDevice
 	# (found,wsH,wHs)			= getWindowHandlesWindow (toWID wId) wHs
 	| not found
-		= IOStSetDevice (WindowSystemState wHs) ioState
+		= ioStSetDevice (WindowSystemState wHs) ioState
     // Mike //
 	# (wKind,wsH)				= getWindowStateHandleWindowKind wsH
 	| wKind==IsGameWindow
-		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+		= ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
     ///
 	| otherwise
 		# (tb,ioState)			= getIOToolbox ioState
 		# (wsH,tb)				= openpopupcontrolitems popUpId index items wsH tb
 		# ioState				= setIOToolbox tb ioState
-		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+		= ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
 where
 	openpopupcontrolitems :: !Id !Index ![PopUpControlItem (PSt .l)] !(WindowStateHandle (PSt .l)) !*OSToolbox
 																	 -> (!WindowStateHandle (PSt .l), !*OSToolbox)
@@ -333,54 +333,54 @@ where
 */
 closeControls :: !Id [Id] !Bool !(IOSt .l) -> IOSt .l
 closeControls wId ids relayout ioState
-	# (found,wDevice,ioState)					= IOStGetDevice WindowDevice ioState
+	# (found,wDevice,ioState)					= ioStGetDevice WindowDevice ioState
 	| not found
 		= ioState
-	# wHs										= WindowSystemStateGetWindowHandles wDevice
+	# wHs										= windowSystemStateGetWindowHandles wDevice
 	# (found,wsH,wHs)							= getWindowHandlesWindow (toWID wId) wHs
 	| not found
-		= IOStSetDevice (WindowSystemState wHs) ioState
+		= ioStSetDevice (WindowSystemState wHs) ioState
     // Mike //
     # (wKind,wsH)								= getWindowStateHandleWindowKind wsH
     | wKind==IsGameWindow
-    	= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+    	= ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
     ///
 	| otherwise
-		# (wMetrics,ioState)					= IOStGetOSWindowMetrics ioState
+		# (wMetrics,ioState)					= ioStGetOSWindowMetrics ioState
 		# (tb,ioState)							= getIOToolbox ioState
 		# (freeRIds,freeIds,disposeFun,wsH,tb)	= closecontrols wMetrics ids relayout wsH tb
 		# ioState								= setIOToolbox tb ioState
 		# ioState								= unbindRIds freeRIds ioState
-		# (idtable,ioState)						= IOStGetIdTable ioState
+		# (idtable,ioState)						= ioStGetIdTable ioState
 		  (_,idtable)							= removeIdsFromIdTable (freeRIds++freeIds) idtable
-		# ioState								= IOStSetIdTable idtable ioState
-		# (f,ioState)							= IOStGetInitIO ioState
-		# ioState								= IOStSetInitIO ((appPIO (appIOToolbox disposeFun)) o f) ioState
-		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+		# ioState								= ioStSetIdTable idtable ioState
+		# (f,ioState)							= ioStGetInitIO ioState
+		# ioState								= ioStSetInitIO ((appPIO (appIOToolbox disposeFun)) o f) ioState
+		= ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
 
 
 /*	closeAllControls closes all controls from the indicated window.
 */
 closeAllControls :: !Id !(IOSt .l) -> IOSt .l
 closeAllControls wId ioState
-	# (found,wDevice,ioState)					= IOStGetDevice WindowDevice ioState
+	# (found,wDevice,ioState)					= ioStGetDevice WindowDevice ioState
 	| not found
 		= ioState
-	# wHs										= WindowSystemStateGetWindowHandles wDevice
+	# wHs										= windowSystemStateGetWindowHandles wDevice
 	# (found,wsH,wHs)							= getWindowHandlesWindow (toWID wId) wHs
 	| not found
-		= IOStSetDevice (WindowSystemState wHs) ioState
+		= ioStSetDevice (WindowSystemState wHs) ioState
 	| otherwise
 		# (tb,ioState)							= getIOToolbox ioState
 		# (freeRIds,freeIds,disposeFun,wsH,tb)	= closeallcontrols wsH tb
 		# ioState								= setIOToolbox tb ioState
 		# ioState								= unbindRIds freeRIds ioState
-		# (idtable,ioState)						= IOStGetIdTable ioState
+		# (idtable,ioState)						= ioStGetIdTable ioState
 		  (_,idtable)							= removeIdsFromIdTable (freeRIds++freeIds) idtable
-		# ioState								= IOStSetIdTable idtable ioState
-		# (f,ioState)							= IOStGetInitIO ioState
-		# ioState								= IOStSetInitIO ((appPIO (appIOToolbox disposeFun)) o f) ioState
-		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+		# ioState								= ioStSetIdTable idtable ioState
+		# (f,ioState)							= ioStGetInitIO ioState
+		# ioState								= ioStSetInitIO ((appPIO (appIOToolbox disposeFun)) o f) ioState
+		= ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
 
 
 /*	closePopUpControlItems closes items from the indicated PopUpControl in the indicated window/dialogue.
@@ -392,18 +392,18 @@ closePopUpControlItems popUpId indexs ioState
 	# (maybeId,ioState)			= getParentWindowId popUpId ioState
 	| isNothing maybeId
 		= ioState
-	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	# (found,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
 	| not found
 		= ioState
-	# wHs						= WindowSystemStateGetWindowHandles wDevice
+	# wHs						= windowSystemStateGetWindowHandles wDevice
 	  (found,wsH,wHs)			= getWindowHandlesWindow (toWID (fromJust maybeId)) wHs
 	| not found
-		= IOStSetDevice (WindowSystemState wHs) ioState
+		= ioStSetDevice (WindowSystemState wHs) ioState
 	| otherwise
 		# (tb,ioState)			= getIOToolbox ioState
 		# (wsH,tb)				= closepopupcontrolitems popUpId indexs wsH tb
 		# ioState				= setIOToolbox tb ioState
-		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+		= ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
 where
 	closepopupcontrolitems :: !Id ![Index] !(WindowStateHandle (PSt .l)) !*OSToolbox
 										-> (!WindowStateHandle (PSt .l), !*OSToolbox)
@@ -418,49 +418,49 @@ where
 */
 setControlPos :: !Id ![(Id,ItemPos)] !(IOSt .l) -> (!Bool,!IOSt .l)
 setControlPos wId newPoss ioState
-	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	# (found,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
 	| not found
 		= (False,ioState)
-	# wHs						= WindowSystemStateGetWindowHandles wDevice
+	# wHs						= windowSystemStateGetWindowHandles wDevice
 	# (found,wsH,wHs)			= getWindowHandlesWindow (toWID wId) wHs
 	| not found
-		= (False,IOStSetDevice (WindowSystemState wHs) ioState)
+		= (False,ioStSetDevice (WindowSystemState wHs) ioState)
 	// Mike //
 	# (wKind,wsH)				= getWindowStateHandleWindowKind wsH
 	| wKind==IsGameWindow
-		= (False,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState)
+		= (False,ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState)
 	///
 	| otherwise
-		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# (wMetrics,ioState)	= ioStGetOSWindowMetrics ioState
 		# (tb,ioState)			= getIOToolbox ioState
 		# (ok,wsH,tb)			= setcontrolpositions wMetrics newPoss wsH tb
 		# ioState				= setIOToolbox tb ioState
 		  wHs					= setWindowHandlesWindow wsH wHs
-		= (ok,IOStSetDevice (WindowSystemState wHs) ioState)
+		= (ok,ioStSetDevice (WindowSystemState wHs) ioState)
 
 
 //	Show/Hide controls.
 
 showControls :: ![Id] !(IOSt .l) -> IOSt .l
 showControls ids ioState
-	# (ioId,ioState)		= IOStGetIOId ioState
-	# (idparents,ioState)	= IOStGetIdParents ids ioState
-	  cIds_wIds				= FilterMap (isOkControlId ioId) (zip2 ids idparents)
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (idparents,ioState)	= ioStGetIdParents ids ioState
+	  cIds_wIds				= filterMap (isOkControlId ioId) (zip2 ids idparents)
 	  cIds_wIds				= gatherWindowIds cIds_wIds
 	| isEmpty cIds_wIds		= ioState
-	| otherwise				= StrictSeq [setWindow wId (setControlsShowState` True cIds) \\ (cIds,wId)<-cIds_wIds] ioState
+	| otherwise				= strictSeq [setWindow wId (setControlsShowState` True cIds) \\ (cIds,wId)<-cIds_wIds] ioState
 
 showControl :: !Id !(IOSt .l) -> IOSt .l
 showControl id ioState = showControls [id] ioState
 
 hideControls :: ![Id] !(IOSt .l) -> IOSt .l
 hideControls ids ioState
-	# (ioId,ioState)		= IOStGetIOId ioState
-	# (idparents,ioState)	= IOStGetIdParents ids ioState
-	  cIds_wIds				= FilterMap (isOkControlId ioId) (zip2 ids idparents)
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (idparents,ioState)	= ioStGetIdParents ids ioState
+	  cIds_wIds				= filterMap (isOkControlId ioId) (zip2 ids idparents)
 	  cIds_wIds				= gatherWindowIds cIds_wIds
 	| isEmpty cIds_wIds		= ioState
-	| otherwise				= StrictSeq [setWindow wId (setControlsShowState` False cIds) \\ (cIds,wId)<-cIds_wIds] ioState
+	| otherwise				= strictSeq [setWindow wId (setControlsShowState` False cIds) \\ (cIds,wId)<-cIds_wIds] ioState
 
 hideControl :: !Id !(IOSt .l) -> IOSt .l
 hideControl id ioState = hideControls [id] ioState
@@ -477,12 +477,12 @@ setControlsShowState` show ids wState=:{wIds,wRep,wTb,wMetrics}
 */
 enableControls :: ![Id] !(IOSt .l) -> IOSt .l
 enableControls ids ioState
-	# (ioId,ioState)		= IOStGetIOId ioState
-	# (idparents,ioState)	= IOStGetIdParents ids ioState
-	  cIds_wIds				= FilterMap (isOkControlId ioId) (zip2 ids idparents)
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (idparents,ioState)	= ioStGetIdParents ids ioState
+	  cIds_wIds				= filterMap (isOkControlId ioId) (zip2 ids idparents)
 	  cIds_wIds				= gatherWindowIds cIds_wIds
 	| isEmpty cIds_wIds		= ioState
-	| otherwise				= StrictSeq [setWindow wId (enableControls` cIds) \\ (cIds,wId)<-cIds_wIds] ioState
+	| otherwise				= strictSeq [setWindow wId (enableControls` cIds) \\ (cIds,wId)<-cIds_wIds] ioState
 where
 	enableControls` :: ![Id] !*WState -> *WState
 	enableControls` ids wState=:{wIds={wPtr},wRep,wTb,wMetrics}
@@ -494,12 +494,12 @@ enableControl id ioState = enableControls [id] ioState
 
 disableControls :: ![Id] !(IOSt .l) -> IOSt .l
 disableControls ids ioState
-	# (ioId,ioState)		= IOStGetIOId ioState
-	# (idparents,ioState)	= IOStGetIdParents ids ioState
-	  cIds_wIds				= FilterMap (isOkControlId ioId) (zip2 ids idparents)
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (idparents,ioState)	= ioStGetIdParents ids ioState
+	  cIds_wIds				= filterMap (isOkControlId ioId) (zip2 ids idparents)
 	  cIds_wIds				= gatherWindowIds cIds_wIds
 	| isEmpty cIds_wIds		= ioState
-	| otherwise				= StrictSeq [setWindow wId (disableControls` cIds) \\ (cIds,wId)<-cIds_wIds] ioState
+	| otherwise				= strictSeq [setWindow wId (disableControls` cIds) \\ (cIds,wId)<-cIds_wIds] ioState
 where
 	disableControls` :: ![Id] !*WState -> *WState
 	disableControls` ids wState=:{wIds={wPtr},wRep,wTb,wMetrics}
@@ -524,8 +524,8 @@ setControlsMarkState :: !MarkState !Id ![Index] !(IOSt .l) -> IOSt .l
 setControlsMarkState mark cId indexs ioState
 	| isEmpty indexs
 		= ioState
-	# (ioId,ioState)		= IOStGetIOId ioState
-	# (maybeParent,ioState)	= IOStGetIdParent cId ioState
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (maybeParent,ioState)	= ioStGetIdParent cId ioState
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
 		= ioState
 	| otherwise
@@ -541,8 +541,8 @@ where
 
 selectRadioControlItem :: !Id !Index !(IOSt .l) -> IOSt .l
 selectRadioControlItem cId index ioState
-	# (ioId,ioState)		= IOStGetIOId ioState
-	# (maybeParent,ioState)	= IOStGetIdParent cId ioState
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (maybeParent,ioState)	= ioStGetIdParent cId ioState
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
 		= ioState
 	| otherwise
@@ -558,8 +558,8 @@ where
 
 selectPopUpControlItem :: !Id !Index !(IOSt .l) -> IOSt .l
 selectPopUpControlItem cId index ioState
-	# (ioId,ioState)		= IOStGetIOId ioState
-	# (maybeParent,ioState)	= IOStGetIdParent cId ioState
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (maybeParent,ioState)	= ioStGetIdParent cId ioState
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
 		= ioState
 	| otherwise
@@ -575,8 +575,8 @@ where
 
 moveControlViewFrame :: !Id Vector2 !(IOSt .l) -> IOSt .l
 moveControlViewFrame cId v ioState
-	# (ioId,ioState)		= IOStGetIOId ioState
-	# (maybeParent,ioState)	= IOStGetIdParent cId ioState
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (maybeParent,ioState)	= ioStGetIdParent cId ioState
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
 		= ioState
 	| otherwise
@@ -593,8 +593,8 @@ where
 
 setControlViewDomain :: !Id ViewDomain !(IOSt .l) -> IOSt .l
 setControlViewDomain cId newDomain ioState
-	# (ioId,ioState)		= IOStGetIOId ioState
-	# (maybeParent,ioState)	= IOStGetIdParent cId ioState
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (maybeParent,ioState)	= ioStGetIdParent cId ioState
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
 		= ioState
 	| otherwise
@@ -610,8 +610,8 @@ where
 
 setControlScrollFunction :: !Id Direction ScrollFunction !(IOSt .l) -> IOSt .l
 setControlScrollFunction cId direction scrollFun ioState
-	# (ioId,ioState)		= IOStGetIOId ioState
-	# (maybeParent,ioState)	= IOStGetIdParent cId ioState
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (maybeParent,ioState)	= ioStGetIdParent cId ioState
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
 		= ioState
 	| otherwise
@@ -627,14 +627,14 @@ where
 
 setControlTexts :: ![(Id,String)] !(IOSt .l) -> IOSt .l
 setControlTexts cid_texts ioState
-	# (ioId,ioState)			= IOStGetIOId ioState
-	# (idparents,ioState)		= IOStGetIdParents cids ioState
-	  cid_texts_wIds			= FilterMap (isOkControlId ioId) (zip2 cid_texts idparents)
+	# (ioId,ioState)			= ioStGetIOId ioState
+	# (idparents,ioState)		= ioStGetIdParents cids ioState
+	  cid_texts_wIds			= filterMap (isOkControlId ioId) (zip2 cid_texts idparents)
 	  cid_texts_wIds			= gatherWindowIds` cid_texts_wIds
 	| isEmpty cid_texts_wIds
 		= ioState
 	| otherwise
-		= StrictSeq [setWindow wId (setControlTexts` cid_texts) \\ (cid_texts,wId)<-cid_texts_wIds] ioState
+		= strictSeq [setWindow wId (setControlTexts` cid_texts) \\ (cid_texts,wId)<-cid_texts_wIds] ioState
 where
 	(cids,_)					= unzip cid_texts
 	
@@ -651,8 +651,8 @@ setControlText id text ioState = setControlTexts [(id,text)] ioState
 
 setEditControlCursor :: !Id !Int !(IOSt .l) -> IOSt .l
 setEditControlCursor cId pos ioState
-	# (ioId,ioState)		= IOStGetIOId ioState
-	# (maybeParent,ioState)	= IOStGetIdParent cId ioState
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (maybeParent,ioState)	= ioStGetIdParent cId ioState
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
 		= ioState
 	| otherwise
@@ -669,16 +669,16 @@ where
 */
 setControlLooks :: ![(Id,Bool,(Bool,Look))] !(IOSt .l) -> IOSt .l
 setControlLooks cid_looks ioState
-	# (ioId,ioState)			= IOStGetIOId ioState
+	# (ioId,ioState)			= ioStGetIOId ioState
 	  cid_looks					= [(cid,(redraw,look)) \\ (cid,redraw,look)<-cid_looks]
 	  (cids,_)					= unzip cid_looks
-	# (idparents,ioState)		= IOStGetIdParents cids ioState
-	  cid_looks_wIds			= FilterMap (isOkControlId ioId) (zip2 cid_looks idparents)
+	# (idparents,ioState)		= ioStGetIdParents cids ioState
+	  cid_looks_wIds			= filterMap (isOkControlId ioId) (zip2 cid_looks idparents)
 	  cid_looks_wIds			= gatherWindowIds` cid_looks_wIds
 	| isEmpty cid_looks_wIds
 		= ioState
 	| otherwise
-		= StrictSeq [	setWindow wId (setControlLooks` [(cid,redraw,look) \\ (cid,(redraw,look))<-cid_looks])
+		= strictSeq [	setWindow wId (setControlLooks` [(cid,redraw,look) \\ (cid,(redraw,look))<-cid_looks])
 					\\	(cid_looks,wId)<-cid_looks_wIds
 					]	ioState
 where
@@ -695,14 +695,14 @@ setControlLook id redraw newlook ioState = setControlLooks [(id,redraw,newlook)]
 
 setSliderStates :: ![(Id,IdFun SliderState)] !(IOSt .l) -> IOSt .l
 setSliderStates cid_fs ioState
-	# (ioId,ioState)		= IOStGetIOId ioState
-	# (idparents,ioState)	= IOStGetIdParents cids ioState
-	  cid_funs_wIds			= FilterMap (isOkControlId ioId) (zip2 cid_fs idparents)
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (idparents,ioState)	= ioStGetIdParents cids ioState
+	  cid_funs_wIds			= filterMap (isOkControlId ioId) (zip2 cid_fs idparents)
 	  cid_funs_wIds			= gatherWindowIds` cid_funs_wIds
 	| isEmpty cid_funs_wIds
 		= ioState
 	| otherwise
-		= StrictSeq [setWindow wId (setSliderStates` cid_funs) \\ (cid_funs,wId)<-cid_funs_wIds] ioState
+		= strictSeq [setWindow wId (setSliderStates` cid_funs) \\ (cid_funs,wId)<-cid_funs_wIds] ioState
 where
 	(cids,_)				= unzip cid_fs
 	
@@ -733,18 +733,18 @@ appControlPicture cId drawfun ioState
 
 accControlPicture :: !Id !.(St *Picture .x) !(IOSt .l) -> (!Maybe .x,!IOSt .l)
 accControlPicture cId drawfun ioState
-	# (ioId,ioState)			= IOStGetIOId ioState
-	# (maybeParent,ioState)		= IOStGetIdParent cId ioState
+	# (ioId,ioState)			= ioStGetIOId ioState
+	# (maybeParent,ioState)		= ioStGetIdParent cId ioState
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
 		= (Nothing,ioState)
-	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	# (found,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
 	| not found
 		= (Nothing,ioState)
 	| otherwise
-		# windows				= WindowSystemStateGetWindowHandles wDevice
+		# windows				= windowSystemStateGetWindowHandles wDevice
 		  wId					= (fromJust maybeParent).idpId
 		  (_,wsH,windows)		= getWindowHandlesWindow (toWID wId) windows
-		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# (wMetrics,ioState)	= ioStGetOSWindowMetrics ioState
 		# (tb,ioState)			= getIOToolbox ioState
 		# (wsH`,wsH,tb)			= retrieveWindowHandle` wsH tb
 		# (wids,wsH)			= getWindowStateHandleWIDS wsH
@@ -752,29 +752,29 @@ accControlPicture cId drawfun ioState
 		  wsH					= insertWindowHandle` wsH` wsH
 		  windows				= setWindowHandlesWindow wsH windows
 		# ioState				= setIOToolbox tb ioState
-		# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+		# ioState				= ioStSetDevice (WindowSystemState windows) ioState
 		= (maybe_result,ioState)
 
 //	Update a selection of a (Compound/Custom(Button))Control:
 updateControl :: !Id !(Maybe ViewFrame) !(IOSt .l) -> IOSt .l
 updateControl cId maybeViewFrame ioState
-	# (ioId,ioState)			= IOStGetIOId ioState
-	# (maybeParent,ioState)		= IOStGetIdParent cId ioState
+	# (ioId,ioState)			= ioStGetIOId ioState
+	# (maybeParent,ioState)		= ioStGetIdParent cId ioState
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
 		= ioState
-	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	# (found,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
 	| not found
 		= ioState
-	# windows					= WindowSystemStateGetWindowHandles wDevice
+	# windows					= windowSystemStateGetWindowHandles wDevice
 	  wId						= (fromJust maybeParent).idpId
 	  (_,wsH,windows)			= getWindowHandlesWindow (toWID wId) windows
 	  (wKind,wsH)				= getWindowStateHandleWindowKind wsH
 	| wKind<>IsWindow
-		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
+		= ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 	| otherwise
-		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# (wMetrics,ioState)	= ioStGetOSWindowMetrics ioState
 		# (wsH,ioState)			= accIOToolbox (updateControlBackground wMetrics wKind cId maybeViewFrame wsH) ioState
-		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
+		= ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 where
 	updateControlBackground :: !OSWindowMetrics !WindowKind !Id !(Maybe ViewFrame) !(WindowStateHandle .pst) !*OSToolbox
 																				-> (!WindowStateHandle .pst, !*OSToolbox)
@@ -787,9 +787,9 @@ where
 		info							= getWindowInfoWindowData wH.whWindowInfo
 		(domainRect,hasScrolls)			= case wKind of
 											IsWindow -> (info.windowDomain,(isJust info.windowHScroll,isJust info.windowVScroll))
-											_        -> (SizeToRect whSize,(False,False))
-		visScrolls						= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
-		contentRect						= getWindowContentRect wMetrics visScrolls (SizeToRect whSize)
+											_        -> (sizeToRect whSize,(False,False))
+		visScrolls						= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
+		contentRect						= getWindowContentRect wMetrics visScrolls (sizeToRect whSize)
 		
 		getWElementHandlesUpdateInfo :: !OSWindowMetrics !Id !Rect ![WElementHandle .ls .pst] -> (!Bool,UpdateInfo,![WElementHandle .ls .pst])
 		getWElementHandlesUpdateInfo _ _ _ []
@@ -815,21 +815,21 @@ where
 				| otherwise
 					= (False,undef,WItemHandle itemH)
 			where
-				itemRect				= PosSizeToRect wItemPos wItemSize
+				itemRect				= posSizeToRect wItemPos wItemSize
 				compoundInfo			= getWItemCompoundInfo wItemInfo
 				origin					= if (wItemKind==IsCompoundControl)
 											compoundInfo.compoundOrigin
 											zero
 				domain					= compoundInfo.compoundDomain
 				hasScrolls				= (isJust compoundInfo.compoundHScroll,isJust compoundInfo.compoundVScroll)
-				visScrolls				= OSscrollbarsAreVisible wMetrics domain (toTuple wItemSize) hasScrolls
+				visScrolls				= osScrollbarsAreVisible wMetrics domain (toTuple wItemSize) hasScrolls
 				contentRect				= if (wItemKind==IsCompoundControl)
 											(getCompoundContentRect wMetrics visScrolls itemRect)
 											itemRect
-				visRect					= IntersectRects contentRect clipRect
+				visRect					= intersectRects contentRect clipRect
 				updArea							= case maybeViewFrame of
 													Nothing		-> visRect
-													Just rect	-> IntersectRects (RectangleToRect (addVector (toVector wItemPos)
+													Just rect	-> intersectRects (rectangleToRect (addVector (toVector wItemPos)
 																								   (subVector (toVector origin) rect)
 																								   )
 																				  ) visRect
@@ -1088,7 +1088,7 @@ getControlItemSpaces ids {wRep={whItems`,whAtts`},wMetrics={osmHorItemSpace,osmV
 where
 	defaultBool	= False
 	defaultValue= Nothing
-	spaces		= getwindowitemspace` (snd (Select iswindowitemspace` (WindowItemSpace` osmHorItemSpace osmVerItemSpace) whAtts`))
+	spaces		= getwindowitemspace` (snd (cselect iswindowitemspace` (WindowItemSpace` osmHorItemSpace osmVerItemSpace) whAtts`))
 
 getControlItemSpace :: !Id !WState -> (Bool,Maybe (Int,Int))
 getControlItemSpace id wstate = hd (getControlItemSpaces [id] wstate)
@@ -1101,8 +1101,8 @@ where
 	defaultValue= Nothing
 	(hMargin,vMargin)
 				= if (whKind`==IsDialog) (osmHorMargin,osmVerMargin) (0,0)
-	hMargins	= getwindowhmargin` (snd (Select iswindowhmargin` (WindowHMargin` hMargin hMargin) whAtts`))
-	vMargins	= getwindowvmargin` (snd (Select iswindowvmargin` (WindowVMargin` vMargin vMargin) whAtts`))
+	hMargins	= getwindowhmargin` (snd (cselect iswindowhmargin` (WindowHMargin` hMargin hMargin) whAtts`))
+	vMargins	= getwindowvmargin` (snd (cselect iswindowvmargin` (WindowVMargin` vMargin vMargin) whAtts`))
 
 getControlMargin :: !Id !WState -> (Bool,Maybe ((Int,Int),(Int,Int)))
 getControlMargin id wstate = hd (getControlMargins [id] wstate)

@@ -17,15 +17,15 @@ from	ostypes		import HWND
 
 OSdefaultToolbarHeight :== 16	// The default height of the toolbar
 
-/*	OScreateToolbar forMDI wPtr (width,height)
+/*	osCreateToolbar forMDI wPtr (width,height)
 		creates a toolbar in the argument window that contains buttons of the given width and height. 
 		The forMDI is True in case the toolbar must be created for a MDI process, and False otherwise.
 		The return Int is the actual height of the toolbar.
-	OScreateBitmapToolbarItem toolbarPtr bitmap index
+	osCreateBitmapToolbarItem toolbarPtr bitmap index
 		adds a button with the given bitmap to the toolbar. The index must be the button item number.
-	OScreateToolbarSeparator toolbarPtr
+	osCreateToolbarSeparator toolbarPtr
 		adds a separator to the toolbar.
 */
-OScreateToolbar				:: !Bool !HWND !(!Int,!Int)			!*OSToolbox -> (!(!OSToolbarHandle,!Int),!*OSToolbox)
-OScreateBitmapToolbarItem	:: !OSToolbarHandle !OSBitmap !Int	!*OSToolbox -> *OSToolbox
-OScreateToolbarSeparator	:: !OSToolbarHandle					!*OSToolbox -> *OSToolbox
+osCreateToolbar				:: !Bool !HWND !(!Int,!Int)			!*OSToolbox -> (!(!OSToolbarHandle,!Int),!*OSToolbox)
+osCreateBitmapToolbarItem	:: !OSToolbarHandle !OSBitmap !Int	!*OSToolbox -> *OSToolbox
+osCreateToolbarSeparator	:: !OSToolbarHandle					!*OSToolbox -> *OSToolbox

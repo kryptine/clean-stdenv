@@ -89,8 +89,8 @@ import osmenu
 
 
 //	Conversion functions from MenuElementState to MenuElementHandle, and vice versa:
-MenuElementHandleToMenuElementState	:: !*(MenuElementHandle .ls .pst) -> *MenuElementState  .ls .pst
-MenuElementHandleToMenuElementState mH = mH
+menuElementHandleToMenuElementState	:: !*(MenuElementHandle .ls .pst) -> *MenuElementState  .ls .pst
+menuElementHandleToMenuElementState mH = mH
 
-MenuElementStateToMenuElementHandle	:: !*(MenuElementState  .ls .pst) -> *MenuElementHandle .ls .pst
-MenuElementStateToMenuElementHandle mH = mH
+menuElementStateToMenuElementHandle	:: !*(MenuElementState  .ls .pst) -> *MenuElementHandle .ls .pst
+menuElementStateToMenuElementHandle mH = mH

@@ -2,8 +2,7 @@ definition module clipboardCrossCall_12
 
 import	clCrossCall_12
 
-
-//	PA: Predefined Clipboard Formats.
+//	Predefined Clipboard Formats.
 CF_TEXT             :==	1
 CF_BITMAP           :==	2
 CF_METAFILEPICT     :==	3
@@ -18,10 +17,10 @@ CF_RIFF             :==	11
 CF_WAVE             :==	12
 CF_UNICODETEXT      :==	13
 CF_ENHMETAFILE      :==	14
-//	PA: end of addition.
 
-WinInitialiseClipboard	::         !*OSToolbox ->           *OSToolbox
-WinGetClipboardText		::         !*OSToolbox -> (!String,!*OSToolbox)
-WinSetClipboardText		:: !String !*OSToolbox ->           *OSToolbox
-WinHasClipboardText		::         !*OSToolbox -> (!Bool,  !*OSToolbox)
-WinGetClipboardCount	::         !*OSToolbox -> (!Int,   !*OSToolbox)
+
+winInitialiseClipboard	::         !*OSToolbox ->           *OSToolbox
+winGetClipboardText		::         !*OSToolbox -> (!String,!*OSToolbox)
+winSetClipboardText		:: !String !*OSToolbox ->           *OSToolbox
+winHasClipboardText		::         !*OSToolbox -> (!Bool,  !*OSToolbox)
+winGetClipboardCount	::         !*OSToolbox -> (!Int,   !*OSToolbox)

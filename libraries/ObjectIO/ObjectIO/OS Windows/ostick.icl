@@ -15,10 +15,10 @@ unpack_tick tick = tick
 
 os_getcurrenttick :: !*World -> (!Tick, !*World)
 os_getcurrenttick world
-	= (fst (WinGetTickCount 42), world)
+	= (fst (winGetTickCount 42), world)
 
-WinGetTickCount ::  !*OSToolbox -> (!Int, !*OSToolbox)
-WinGetTickCount _
+winGetTickCount ::  !*OSToolbox -> (!Int, !*OSToolbox)
+winGetTickCount _
 	= code
 	{
 		.inline WinGetTickCount

@@ -6,12 +6,12 @@ implementation module mstate
 
 import	StdBool, StdClass, StdInt
 import	menuhandle
-from	commondef	import FatalError
+from	commondef	import fatalError
 
 
 mstateFatalError :: String String -> .x
 mstateFatalError rule error
-	= FatalError rule "mstate" error
+	= fatalError rule "mstate" error
 
 
 /*	The MenuHandle` data type.

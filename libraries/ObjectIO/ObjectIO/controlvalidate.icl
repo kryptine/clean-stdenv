@@ -12,14 +12,14 @@ from	windowaccess import getWItemReceiverInfo
 
 controlvalidateFatalError :: String String -> .x
 controlvalidateFatalError function error
-	= FatalError function "controlvalidate" error
+	= fatalError function "controlvalidate" error
 
 
 //	Validate the title of a control.
 
 validateControlTitle :: !String -> String
 validateControlTitle string
-	= RemoveSpecialChars OSControlTitleSpecialChars string
+	= removeSpecialChars OSControlTitleSpecialChars string
 
 
 //	Validate the settings of a slider.
@@ -28,7 +28,7 @@ validateSliderState :: !SliderState -> SliderState
 validateSliderState {sliderMin=sMin, sliderMax=sMax, sliderThumb=thumb}
 	= {	sliderMin	= min`
 	  ,	sliderMax	= max`
-	  ,	sliderThumb	= SetBetween thumb min` max`
+	  ,	sliderThumb	= setBetween thumb min` max`
 	  }
 where
 	min` = min sMin sMax
