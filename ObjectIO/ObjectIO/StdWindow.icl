@@ -196,7 +196,9 @@ closeActiveWindow pState
 */
 closeControls :: !Id [Id] !Bool !(IOSt .l .p) -> IOSt .l .p
 closeControls wId ids relayout ioState
-	# (wDevice,ioState)							= IOStGetDevice WindowDevice ioState
+	# (found,wDevice,ioState)					= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
 	# wHs										= WindowSystemStateGetWindowHandles wDevice
 	# (found,wsH,wHs)							= getWindowHandlesWindow (toWID wId) wHs
 	| not found
@@ -224,7 +226,9 @@ closeControls wId ids relayout ioState
 */
 closeAllControls :: !Id !(IOSt .l .p) -> IOSt .l .p
 closeAllControls wId ioState
-	# (wDevice,ioState)							= IOStGetDevice WindowDevice ioState
+	# (found,wDevice,ioState)					= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
 	# wHs										= WindowSystemStateGetWindowHandles wDevice
 	# (found,wsH,wHs)							= getWindowHandlesWindow (toWID wId) wHs
 	| not found
@@ -248,18 +252,20 @@ closePopUpControlItems :: !Id ![Index] !(IOSt .l .p) -> IOSt .l .p
 closePopUpControlItems popUpId indexs ioState
 	| isEmpty indexs
 		= ioState
-	# (maybeId,ioState)	= getParentWindowId popUpId ioState
+	# (maybeId,ioState)			= getParentWindowId popUpId ioState
 	| isNothing maybeId
 		= ioState
-	# (wDevice,ioState)	= IOStGetDevice WindowDevice ioState
-	  wHs				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,wHs)	= getWindowHandlesWindow (toWID (fromJust maybeId)) wHs
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# wHs						= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,wHs)			= getWindowHandlesWindow (toWID (fromJust maybeId)) wHs
 	| not found
 		= IOStSetDevice (WindowSystemState wHs) ioState
 	| otherwise
-		# (tb,ioState)	= getIOToolbox ioState
-		# (wsH,tb)		= closepopupcontrolitems popUpId indexs wsH tb
-		# ioState		= setIOToolbox tb ioState
+		# (tb,ioState)			= getIOToolbox ioState
+		# (wsH,tb)				= closepopupcontrolitems popUpId indexs wsH tb
+		# ioState				= setIOToolbox tb ioState
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
 where
 	closepopupcontrolitems :: !Id ![Index] !(WindowStateHandle (PSt .l .p)) !*OSToolbox
@@ -285,17 +291,19 @@ getWindowStateHandleIds _
 */
 openControls :: !Id .ls (cdef .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p) | Controls cdef
 openControls wId ls newControls pState
-	# (wDevice,pState)			= accPIO (IOStGetDevice WindowDevice) pState
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+	| not found
+		= (ErrorUnknownObject,{pState & io=ioState})
 	# wHs						= WindowSystemStateGetWindowHandles wDevice
 	# (found,wsH,wHs)			= getWindowHandlesWindow (toWID wId) wHs
 	| not found
-		= (ErrorUnknownObject,appPIO (IOStSetDevice (WindowSystemState wHs)) pState)
+		= (ErrorUnknownObject,{pState & io=IOStSetDevice (WindowSystemState wHs) ioState})
     // Mike //
     # (wKind,wsH)				= getWindowStateHandleWindowKind wsH
     | wKind==IsGameWindow
-    	= (OtherError "WrongObject",appPIO (IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs))) pState)
+    	= (OtherError "WrongObject",{pState & io=IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState})
     ///
-	# (cs,pState)				= controlToHandles newControls pState
+	# (cs,pState)				= controlToHandles newControls {pState & io=ioState}
 	# newItemHs					= map ControlStateToWElementHandle cs
 	  (currentIds,wsH)			= getWindowStateHandleIds wsH
 	  (disjoint,newItemHs)		= disjointControlIds currentIds newItemHs
@@ -321,22 +329,24 @@ openControls wId ls newControls pState
 /*	openCompoundControls adds controls to the indicated CompoundControl of the indicated window.
 */
 openCompoundControls :: !Id .ls (cdef .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p) | Controls cdef
-openCompoundControls cId ls newControls pState
-	# (maybeId,pState)			= accPIO (getParentWindowId cId) pState
+openCompoundControls cId ls newControls pState=:{io=ioState}
+	# (maybeId,ioState)			= getParentWindowId cId ioState
 	| isNothing maybeId
-		= (ErrorUnknownObject,pState)
+		= (ErrorUnknownObject,{pState & io=ioState})
 	# wId						= fromJust maybeId
-	# (wDevice,pState)			= accPIO (IOStGetDevice WindowDevice) pState
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (ErrorUnknownObject,{pState & io=ioState})
 	# wHs						= WindowSystemStateGetWindowHandles wDevice
 	# (found,wsH,wHs)			= getWindowHandlesWindow (toWID wId) wHs
 	| not found
-		= (ErrorUnknownObject,appPIO (IOStSetDevice (WindowSystemState wHs)) pState)
+		= (ErrorUnknownObject,{pState & io=IOStSetDevice (WindowSystemState wHs) ioState})
     // Mike //
     # (wKind,wsH)				= getWindowStateHandleWindowKind wsH
     | wKind==IsGameWindow
-		= (OtherError "WrongObject",appPIO (IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs))) pState)
+		= (OtherError "WrongObject",{pState & io=IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState})
     ///
-	# (cs,pState)				= controlToHandles newControls pState
+	# (cs,pState)				= controlToHandles newControls {pState & io=ioState}
 	# newItemHs					= map ControlStateToWElementHandle cs
 	  (currentIds,wsH)			= getWindowStateHandleIds wsH
 	  (disjoint,newItemHs)		= disjointControlIds currentIds newItemHs
@@ -369,24 +379,26 @@ openPopUpControlItems :: !Id !Index ![PopUpControlItem (PSt .l .p)] !(IOSt .l .p
 openPopUpControlItems popUpId index items ioState
 	| isEmpty items
 		= ioState
-	# (maybeId,ioState)	= getParentWindowId popUpId ioState
+	# (maybeId,ioState)			= getParentWindowId popUpId ioState
 	| isNothing maybeId
 		= ioState
-	# wId				= fromJust maybeId
-	# (wDevice,ioState)	= IOStGetDevice WindowDevice ioState
-	# wHs				= WindowSystemStateGetWindowHandles wDevice
-	# (found,wsH,wHs)	= getWindowHandlesWindow (toWID wId) wHs
+	# wId						= fromJust maybeId
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# wHs						= WindowSystemStateGetWindowHandles wDevice
+	# (found,wsH,wHs)			= getWindowHandlesWindow (toWID wId) wHs
 	| not found
 		= IOStSetDevice (WindowSystemState wHs) ioState
     // Mike //
-	# (wKind,wsH)		= getWindowStateHandleWindowKind wsH
+	# (wKind,wsH)				= getWindowStateHandleWindowKind wsH
 	| wKind==IsGameWindow
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
     ///
 	| otherwise
-		# (tb,ioState)	= getIOToolbox ioState
-		# (wsH,tb)		= openpopupcontrolitems popUpId index items wsH tb
-		# ioState		= setIOToolbox tb ioState
+		# (tb,ioState)			= getIOToolbox ioState
+		# (wsH,tb)				= openpopupcontrolitems popUpId index items wsH tb
+		# ioState				= setIOToolbox tb ioState
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
 where
 	openpopupcontrolitems :: !Id !Index ![PopUpControlItem (PSt .l .p)] !(WindowStateHandle (PSt .l .p)) !*OSToolbox
@@ -402,22 +414,24 @@ where
 */
 setControlPos :: !Id ![(Id,ItemPos)] !(IOSt .l .p) -> (!Bool,!IOSt .l .p)
 setControlPos wId newPoss ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	# wHs					= WindowSystemStateGetWindowHandles wDevice
-	# (found,wsH,wHs)		= getWindowHandlesWindow (toWID wId) wHs
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (False,ioState)
+	# wHs						= WindowSystemStateGetWindowHandles wDevice
+	# (found,wsH,wHs)			= getWindowHandlesWindow (toWID wId) wHs
 	| not found
 		= (False,IOStSetDevice (WindowSystemState wHs) ioState)
 	// Mike //
-	# (wKind,wsH)			= getWindowStateHandleWindowKind wsH
+	# (wKind,wsH)				= getWindowStateHandleWindowKind wsH
 	| wKind==IsGameWindow
 		= (False,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState)
 	///
 	| otherwise
-		# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
-		# (tb,ioState)		= getIOToolbox ioState
-		# (ok,wsH,tb)		= setcontrolpositions wMetrics newPoss wsH tb
-		# ioState			= setIOToolbox tb ioState
-		  wHs				= setWindowHandlesWindow wsH wHs
+		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# (tb,ioState)			= getIOToolbox ioState
+		# (ok,wsH,tb)			= setcontrolpositions wMetrics newPoss wsH tb
+		# ioState				= setIOToolbox tb ioState
+		  wHs					= setWindowHandlesWindow wsH wHs
 		= (ok,IOStSetDevice (WindowSystemState wHs) ioState)
 
 
@@ -450,8 +464,10 @@ controlSize cdef isWindow hMargins vMargins itemSpaces pState
 */
 setActiveWindow :: !Id !(PSt .l .p) -> PSt .l .p
 setActiveWindow wId pState
-	# (wDevice,ioState)			= IOStGetDevice WindowDevice pState.io
-	  windows					= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+	| not found
+		= {pState & io=ioState}
+	# windows					= WindowSystemStateGetWindowHandles wDevice
 	  (exists,windows)			= hasWindowHandlesWindow wid windows
 	| not exists				// Indicated window does not exist
 		= {pState & io=IOStSetDevice (WindowSystemState windows) ioState}
@@ -467,9 +483,10 @@ setActiveWindow wId pState
 	| isModal					// Modal windows should be activated
 		= {pState & io=IOStSetDevice (WindowSystemState {windows & whsWindows=modal++modeless}) ioState}
 	# (osdInfo,ioState)			= IOStGetOSDInfo ioState
-	  (isSDI,framePtr,clientPtr)= case osdInfo of
-	  								OSSDInfo info	-> (True,info.ossdFrame,info.ossdClient)
-	  								_				-> (False,OSNoWindowPtr,OSNoWindowPtr)
+	  isSDI						= getOSDInfoDocumentInterface osdInfo==SDI
+	  (framePtr,clientPtr)		= case (getOSDInfoOSInfo osdInfo) of
+	  								Just info -> (info.osFrame,info.osClient)
+	  								_         -> (OSNoWindowPtr,OSNoWindowPtr)
 	| isEmpty modal				// There are no modal windows, so put activated window in front
 		# (_,wsH,others)		= URemove (identifyWindowStateHandle wid) undef modeless
 		  (shown,wsH)			= getWindowStateHandleShow wsH
@@ -503,10 +520,12 @@ where
 */
 getActiveWindow :: !(IOSt .l .p) -> (!Maybe Id, !IOSt .l .p)
 getActiveWindow ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (activeWIDS,windows)	= getWindowHandlesActiveWindow windows
-	# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (activeWIDS,windows)		= getWindowHandlesActiveWindow windows
+	# ioState					= IOStSetDevice (WindowSystemState windows) ioState
 	= (mapMaybe (\{wId}->wId) activeWIDS,ioState)
 
 
@@ -514,28 +533,30 @@ getActiveWindow ioState
 */
 setActiveControl :: !Id !(PSt .l .p) -> PSt .l .p
 setActiveControl controlId pState=:{io}
-	# (parentId,ioState)	= getParentId controlId io
+	# (parentId,ioState)		= getParentId controlId io
 	| isNothing parentId
 		= {pState & io=ioState}
-	# (activeId,ioState)	= getActiveWindow ioState
+	# (activeId,ioState)		= getActiveWindow ioState
 	| isNothing activeId
 		= {pState & io=ioState}
-	# parentId				= fromJust parentId
-	# activeId				= fromJust activeId
+	# parentId					= fromJust parentId
+	# activeId					= fromJust activeId
 	| parentId<>activeId
 		= {pState & io=ioState}
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	# (found,wsH,windows)	= getWindowHandlesWindow (toWID activeId) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= {pState & io=ioState}
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	# (found,wsH,windows)		= getWindowHandlesWindow (toWID activeId) windows
 	| not found
 		= StdWindowFatalError "setActiveControl" "parent window could not be located"
 	| otherwise
-		# (tb,ioState)		= getIOToolbox ioState
-		# (delayinfo,wsH,tb)= setactivecontrol controlId wsH tb
-		# ioState			= setIOToolbox tb ioState
-		  windows			= setWindowHandlesWindow wsH windows
-		# ioState			= IOStSetDevice (WindowSystemState windows) ioState
-		# ioState			= bufferDelayedEvents delayinfo ioState
+		# (tb,ioState)			= getIOToolbox ioState
+		# (delayinfo,wsH,tb)	= setactivecontrol controlId wsH tb
+		# ioState				= setIOToolbox tb ioState
+		  windows				= setWindowHandlesWindow wsH windows
+		# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+		# ioState				= bufferDelayedEvents delayinfo ioState
 		= {pState & io=ioState}
 where
 	setactivecontrol :: !Id !(WindowStateHandle .pst) !*OSToolbox -> (![DelayActivationInfo],!WindowStateHandle .pst,!*OSToolbox)
@@ -588,8 +609,10 @@ getActiveControl ioState
 	| isNothing activeId
 		= ((False,Nothing),ioState)
 	# activeId					= fromJust activeId
-	# (wDevice,ioState)			= IOStGetDevice WindowDevice ioState
-	  windows					= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ((False,Nothing),ioState)
+	# windows					= WindowSystemStateGetWindowHandles wDevice
 	# (hasWindow,wsH,windows)	= getWindowHandlesWindow (toWID activeId) windows
 	| not hasWindow
 		= StdWindowFatalError "getActiveControl" "active window could not be located"
@@ -646,8 +669,10 @@ stackWindow :: !Id !Id !(IOSt .l .p) -> IOSt .l .p
 stackWindow windowId behindId ioState
 	| windowId==behindId	// Don't stack a window behind itself
 		= ioState
-	# (wDevice,ioState)				= IOStGetDevice WindowDevice ioState
-	  windows						= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)		= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows						= WindowSystemStateGetWindowHandles wDevice
 	# (hasBehind,windows)			= hasWindowHandlesWindow (toWID behindId) windows
 	| not hasBehind			// Behind window does not exist
 		= IOStSetDevice (WindowSystemState windows) ioState
@@ -661,9 +686,10 @@ stackWindow windowId behindId ioState
 		# (_,_,windows)				= removeWindowHandlesWindow (toWID windowId) windows		// remove placeholder window
 		# (wids,wsH)				= getWindowStateHandleWIDS wsH
 		# (osdInfo,ioState)			= IOStGetOSDInfo ioState
-		  (isSDI,framePtr,clientPtr)= case osdInfo of
-	  									OSSDInfo info	-> (True,info.ossdFrame,info.ossdClient)
-	  									_				-> (False,OSNoWindowPtr,OSNoWindowPtr)
+		  isSDI						= getOSDInfoDocumentInterface osdInfo==SDI
+		  (framePtr,clientPtr)		= case (getOSDInfoOSInfo osdInfo) of
+	  									Just info -> (info.osFrame,info.osClient)
+	  									_         -> (OSNoWindowPtr,OSNoWindowPtr)
 		  wPtr						= if (isSDI && wids.wPtr==clientPtr) framePtr wids.wPtr
 		# (tb,ioState)				= getIOToolbox ioState
 		# (windows,tb)				= stackwindows wsH wPtr behindId windows tb
@@ -710,10 +736,12 @@ where
 
 getWindowStack :: !(IOSt .l .p) -> (![(Id,WindowType)],!IOSt .l .p)
 getWindowStack ioState
-	# (wDevice,ioState)	= IOStGetDevice WindowDevice ioState
-	  windows			= WindowSystemStateGetWindowHandles wDevice
-	  wsHs				= windows.whsWindows
-	  (id_types,wsHs)	= unzip (map getWindowIdType wsHs)
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ([],ioState)
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  wsHs						= windows.whsWindows
+	  (id_types,wsHs)			= unzip (map getWindowIdType wsHs)
 	= (id_types,IOStSetDevice (WindowSystemState {windows & whsWindows=wsHs}) ioState)
 where
 	getWindowIdType :: !(WindowStateHandle .pst) -> ((Id,WindowType),!WindowStateHandle .pst)
@@ -758,8 +786,10 @@ getDefaultItemSpace _ ioState
 
 getWindowHMargin :: !Id	!(IOSt .l .p) -> (!Maybe (Int,Int),!IOSt .l .p)
 getWindowHMargin id ioState
-	# (wDevice,ioState)				= IOStGetDevice WindowDevice ioState
-	  windows						= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)		= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows						= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)			= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
@@ -776,8 +806,10 @@ where
 
 getWindowVMargin :: !Id	!(IOSt .l .p) -> (!Maybe (Int,Int),!IOSt .l .p)
 getWindowVMargin id ioState
-	# (wDevice,ioState)				= IOStGetDevice WindowDevice ioState
-	  windows						= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)		= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows						= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)			= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
@@ -794,8 +826,10 @@ where
 
 getWindowItemSpace :: !Id !(IOSt .l .p) -> (!Maybe (Int,Int),!IOSt .l .p)
 getWindowItemSpace id ioState
-	# (wDevice,ioState)			= IOStGetDevice WindowDevice ioState
-	  windows					= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows					= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
@@ -816,8 +850,10 @@ where
 */
 enableWindow :: !Id !(IOSt .l .p) -> IOSt .l .p
 enableWindow id ioState
-	# (wDevice,ioState)			= IOStGetDevice WindowDevice ioState
-	  windows					= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= IOStSetDevice (WindowSystemState windows) ioState
@@ -829,9 +865,10 @@ enableWindow id ioState
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 	| otherwise
 		# (osdInfo, ioState)	= IOStGetOSDInfo ioState
-		  (isSDI,framePtr)		= case osdInfo of
-		  							OSSDInfo info	-> (True,info.ossdFrame)
-		  							_				-> (False,OSNoWindowPtr)
+		  isSDI					= getOSDInfoDocumentInterface osdInfo==SDI
+		  framePtr				= case (getOSDInfoOSInfo osdInfo) of
+		  							Just info -> info.osFrame
+		  							_         -> OSNoWindowPtr
 		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
 		# (tb,ioState)			= getIOToolbox ioState
 		  wsH					= setWindowStateHandleSelect True wsH
@@ -851,8 +888,10 @@ enableWindow id ioState
 
 disableWindow :: !Id !(IOSt .l .p) -> IOSt .l .p
 disableWindow id ioState
-	# (wDevice,ioState)			= IOStGetDevice WindowDevice ioState
-	  windows					= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= IOStSetDevice (WindowSystemState windows) ioState
@@ -864,9 +903,10 @@ disableWindow id ioState
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 	| otherwise
 		# (osdInfo, ioState)	= IOStGetOSDInfo ioState
-		  (isSDI,framePtr)		= case osdInfo of
-		  							OSSDInfo info	-> (True,info.ossdFrame)
-		  							_				-> (False,OSNoWindowPtr)
+		  isSDI					= getOSDInfoDocumentInterface osdInfo==SDI
+		  framePtr				= case (getOSDInfoOSInfo osdInfo) of
+		  							Just info -> info.osFrame
+		  							_         -> OSNoWindowPtr
 		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
 		# (tb,ioState)			= getIOToolbox ioState
 		  wsH					= setWindowStateHandleSelect False wsH
@@ -900,16 +940,18 @@ disableWindowMouse id ioState
 
 setWindowMouseSelectState :: !SelectState !Id !(IOSt .l .p) -> IOSt .l .p
 setWindowMouseSelectState selectState id ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= IOStSetDevice (WindowSystemState windows) ioState
-	# (wKind,wsH)			= getWindowStateHandleWindowKind wsH
+	# (wKind,wsH)				= getWindowStateHandleWindowKind wsH
 	| wKind<>IsWindow
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 	| otherwise
-		# wsH				= setMouseSelectState selectState wsH
+		# wsH					= setMouseSelectState selectState wsH
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 where
 	setMouseSelectState :: !SelectState !(WindowStateHandle .pst) -> WindowStateHandle .pst
@@ -937,16 +979,18 @@ disableWindowKeyboard id ioState
 
 setWindowKeyboardSelectState :: !SelectState !Id !(IOSt .l .p) -> IOSt .l .p
 setWindowKeyboardSelectState selectState id ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= IOStSetDevice (WindowSystemState windows) ioState
-	# (wKind,wsH)			= getWindowStateHandleWindowKind wsH
+	# (wKind,wsH)				= getWindowStateHandleWindowKind wsH
 	| wKind<>IsWindow
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 	| otherwise
-		# wsH				= setKeyboardSelectState selectState wsH
+		# wsH					= setKeyboardSelectState selectState wsH
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 where
 	setKeyboardSelectState :: !SelectState !(WindowStateHandle .pst) -> WindowStateHandle .pst
@@ -966,22 +1010,26 @@ where
 
 getWindowSelectState :: !Id !(IOSt .l .p) -> (!Maybe SelectState,!IOSt .l .p)
 getWindowSelectState id ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
-	# (wKind,wsH)			= getWindowStateHandleWindowKind wsH
+	# (wKind,wsH)				= getWindowStateHandleWindowKind wsH
 	| wKind<>IsWindow
 		= (Nothing,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 	| otherwise
-		# (wSelect,wsH)		= getWindowStateHandleSelect wsH
+		# (wSelect,wsH)			= getWindowStateHandleSelect wsH
 		= (Just (if wSelect Able Unable),IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 
 getWindowMouseSelectState :: !Id !(IOSt .l .p) -> (!Maybe SelectState,!IOSt .l .p)
 getWindowMouseSelectState id ioState
-	# (wDevice,ioState)			= IOStGetDevice WindowDevice ioState
-	  windows					= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows					= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
@@ -1005,8 +1053,10 @@ getWindowMouseAttInfo _
 
 getWindowKeyboardSelectState :: !Id !(IOSt .l .p) -> (!Maybe SelectState,!IOSt .l .p)
 getWindowKeyboardSelectState id ioState
-	# (wDevice,ioState)			= IOStGetDevice WindowDevice ioState
-	  windows					= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows					= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
@@ -1030,8 +1080,10 @@ getWindowKeyboardAttInfo _
 
 getWindowMouseStateFilter :: !Id !(IOSt .l .p) -> (!Maybe MouseStateFilter,!IOSt .l .p)
 getWindowMouseStateFilter id ioState
-	# (wDevice,ioState)			= IOStGetDevice WindowDevice ioState
-	  windows					= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows					= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
@@ -1044,8 +1096,10 @@ getWindowMouseStateFilter id ioState
 
 getWindowKeyboardStateFilter :: !Id !(IOSt .l .p) -> (!Maybe KeyboardStateFilter,!IOSt .l .p)
 getWindowKeyboardStateFilter id ioState
-	# (wDevice,ioState)			= IOStGetDevice WindowDevice ioState
-	  windows					= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows					= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
@@ -1058,16 +1112,18 @@ getWindowKeyboardStateFilter id ioState
 
 setWindowMouseStateFilter :: !Id !MouseStateFilter !(IOSt .l .p) -> IOSt .l .p
 setWindowMouseStateFilter id filter ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= IOStSetDevice (WindowSystemState windows) ioState
-	# (wKind,wsH)			= getWindowStateHandleWindowKind wsH
+	# (wKind,wsH)				= getWindowStateHandleWindowKind wsH
 	| wKind<>IsWindow
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 	| otherwise
-		# wsH				= setMouseFilter filter wsH
+		# wsH					= setMouseFilter filter wsH
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 where
 	setMouseFilter :: !MouseStateFilter !(WindowStateHandle .pst) -> WindowStateHandle .pst
@@ -1087,16 +1143,18 @@ where
 
 setWindowKeyboardStateFilter :: !Id !KeyboardStateFilter !(IOSt .l .p) -> IOSt .l .p
 setWindowKeyboardStateFilter id filter ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)		= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows						= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)			= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= IOStSetDevice (WindowSystemState windows) ioState
-	# (wKind,wsH)			= getWindowStateHandleWindowKind wsH
+	# (wKind,wsH)					= getWindowStateHandleWindowKind wsH
 	| wKind<>IsWindow
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 	| otherwise
-		# wsH				= setKeyboardFilter filter wsH
+		# wsH						= setKeyboardFilter filter wsH
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 where
 	setKeyboardFilter :: !KeyboardStateFilter !(WindowStateHandle .pst) -> WindowStateHandle .pst
@@ -1127,17 +1185,19 @@ accWindowPicture id drawf ioState
 
 drawInWindow :: String !Id !.(St *Picture .x) !(IOSt .l .p) -> (!Maybe .x,!IOSt .l .p)
 drawInWindow functionname id drawf ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
-	# (wKind,wsH)			= getWindowStateHandleWindowKind wsH
+	# (wKind,wsH)				= getWindowStateHandleWindowKind wsH
 	| wKind<>IsWindow
 		= (Nothing,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 	| otherwise
-		# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
-		# ((x,wsH),ioState)	= accIOToolbox (drawinwindow` wMetrics drawf wsH) ioState
+		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# ((x,wsH),ioState)		= accIOToolbox (drawinwindow` wMetrics drawf wsH) ioState
 		= (Just x,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 where
 	drawinwindow` :: !OSWindowMetrics !.(St *Picture .x) !(WindowStateHandle .pst) !*OSToolbox
@@ -1151,17 +1211,19 @@ where
 
 updateWindow :: !Id !(Maybe ViewFrame) !(IOSt .l .p) -> IOSt .l .p
 updateWindow id maybeViewFrame ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= IOStSetDevice (WindowSystemState windows) ioState
-	# (wKind,wsH)			= getWindowStateHandleWindowKind wsH
+	# (wKind,wsH)				= getWindowStateHandleWindowKind wsH
 	| wKind<>IsWindow
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 	| otherwise
-		# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
-		# (wsH,ioState)		= accIOToolbox (updateWindowBackground wMetrics maybeViewFrame wsH) ioState
+		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# (wsH,ioState)			= accIOToolbox (updateWindowBackground wMetrics maybeViewFrame wsH) ioState
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 where
 	updateWindowBackground :: !OSWindowMetrics !(Maybe ViewFrame) !(WindowStateHandle .pst) !*OSToolbox
@@ -1190,8 +1252,10 @@ where
 
 setWindowLook :: !Id !Bool !(!Bool,!Look) !(IOSt .l .p) -> IOSt .l .p
 setWindowLook wId redraw (sysLook,lookFun) ioState
-	# (wDevice,ioState)			= IOStGetDevice WindowDevice ioState
-	  windows					= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)		= getWindowHandlesWindow (toWID wId) windows
 	| not found
 		= IOStSetDevice (WindowSystemState windows) ioState
@@ -1231,8 +1295,10 @@ where
 
 getWindowLook :: !Id !(IOSt .l .p) -> (!Maybe (Bool,Look),!IOSt .l .p)
 getWindowLook id ioState
-	# (wDevice,ioState)				= IOStGetDevice WindowDevice ioState
-	  windows						= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)		= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows						= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)			= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
@@ -1250,32 +1316,34 @@ getWindowLook id ioState
 
 setWindowPos :: !Id !ItemPos !(IOSt .l .p) -> IOSt .l .p
 setWindowPos id pos ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= IOStSetDevice (WindowSystemState windows) ioState
-	# (wMode,wsH)			= getWindowStateHandleWindowMode wsH
+	# (wMode,wsH)				= getWindowStateHandleWindowMode wsH
 	| wMode==Modal
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
-	# (okId,pos,windows)	= validateRelativeId id pos windows
+	# (okId,pos,windows)		= validateRelativeId id pos windows
 	| not okId
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 	| otherwise
-		# (wids, wsH)		= getWindowStateHandleWIDS wsH
-		  (wSize,wsH)		= getWindowStateHandleSize wsH
-		  (wKind,wsH)		= getWindowStateHandleWindowKind wsH
-		  windows			= setWindowHandlesWindow wsH windows
-		# (osdInfo, ioState)= IOStGetOSDInfo ioState
-		  (isSDI,framePtr,clientPtr)
-		  					= case osdInfo of
-		  						OSSDInfo info	-> (True,info.ossdFrame,info.ossdClient)
-		  						_				-> (False,OSNoWindowPtr,OSNoWindowPtr)
-		# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
-		# (tb,ioState)		= getIOToolbox ioState
-		# (pos,windows,tb)	= exactWindowPos wMetrics wSize (Just pos) wKind Modeless windows tb
-		# tb				= OSsetWindowPos (if (isSDI && wids.wPtr==clientPtr) framePtr wids.wPtr) (toTuple pos) True True tb
-		# ioState			= setIOToolbox tb ioState
+		# (wids, wsH)			= getWindowStateHandleWIDS wsH
+		  (wSize,wsH)			= getWindowStateHandleSize wsH
+		  (wKind,wsH)			= getWindowStateHandleWindowKind wsH
+		  windows				= setWindowHandlesWindow wsH windows
+		# (osdInfo, ioState)	= IOStGetOSDInfo ioState
+		  isSDI					= getOSDInfoDocumentInterface osdInfo==SDI
+		  (framePtr,clientPtr)	= case (getOSDInfoOSInfo osdInfo) of
+		  							Just info -> (info.osFrame,info.osClient)
+		  							_         -> (OSNoWindowPtr,OSNoWindowPtr)
+		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# (tb,ioState)			= getIOToolbox ioState
+		# (pos,windows,tb)		= exactWindowPos wMetrics wSize (Just pos) wKind Modeless windows tb
+		# tb					= OSsetWindowPos (if (isSDI && wids.wPtr==clientPtr) framePtr wids.wPtr) (toTuple pos) True True tb
+		# ioState				= setIOToolbox tb ioState
 		= IOStSetDevice (WindowSystemState windows) ioState
 where
 	// validateRelativeId checks the validity of the ItemPos. 
@@ -1323,24 +1391,28 @@ where
 
 getWindowPos :: !Id !(IOSt .l .p) -> (!Maybe Vector2,!IOSt .l .p)
 getWindowPos id ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
 	| otherwise
-		# (osdInfo,ioState)	= IOStGetOSDInfo ioState
-		  (isSDI,framePtr,clientPtr,getParentPos)
-		  					= case osdInfo of
-		  						OSMDInfo info	-> (False,info.osmdFrame,info.osmdClient,OSgetWindowPos info.osmdClient)
-							  	OSSDInfo info	-> (True, info.ossdFrame,info.ossdClient,\tb->((0,0),tb))
-							  	_				-> (False,OSNoWindowPtr, OSNoWindowPtr,  \tb->((0,0),tb))
-		# (wids,wsH)		= getWindowStateHandleWIDS wsH
-		# (tb,ioState)		= getIOToolbox ioState
-		# ((wx,wy),tb)		= OSgetWindowPos (if (isSDI && wids.wPtr==clientPtr) framePtr wids.wPtr) tb
-		# ((fx,fy),tb)		= getParentPos tb
-		# ioState			= setIOToolbox tb ioState
-		# ioState			= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
+		# (osdInfo,ioState)		= IOStGetOSDInfo ioState
+		  di					= getOSDInfoDocumentInterface osdInfo
+		  isSDI					= di==SDI
+		  isMDI					= di==MDI
+		  (framePtr,clientPtr,getParentPos)
+		  						= case (getOSDInfoOSInfo osdInfo) of
+		  							Just info -> (info.osFrame,info.osClient,if isMDI (OSgetWindowPos info.osClient) (return (0,0)))
+							  		nothing   -> (OSNoWindowPtr, OSNoWindowPtr,return (0,0))
+		# (wids,wsH)			= getWindowStateHandleWIDS wsH
+		# (tb,ioState)			= getIOToolbox ioState
+		# ((wx,wy),tb)			= OSgetWindowPos (if (isSDI && wids.wPtr==clientPtr) framePtr wids.wPtr) tb
+		# ((fx,fy),tb)			= getParentPos tb
+		# ioState				= setIOToolbox tb ioState
+		# ioState				= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 		= (Just {vx=wx-fx,vy=wy-fy},ioState)
 
 
@@ -1348,17 +1420,19 @@ getWindowPos id ioState
 
 moveWindowViewFrame :: !Id Vector2 !(IOSt .l .p) -> IOSt .l .p
 moveWindowViewFrame id v ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= IOStSetDevice (WindowSystemState windows) ioState
-	# (wKind,wsH)			= getWindowStateHandleWindowKind wsH
+	# (wKind,wsH)				= getWindowStateHandleWindowKind wsH
 	| wKind<>IsWindow
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 	| otherwise
-		# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
-		# (wsH,ioState)		= accIOToolbox (movewindowviewframe` wMetrics v wsH) ioState
+		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# (wsH,ioState)			= accIOToolbox (movewindowviewframe` wMetrics v wsH) ioState
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 where
 	movewindowviewframe` :: !OSWindowMetrics !Vector2 !(WindowStateHandle .pst) !*OSToolbox -> (!WindowStateHandle .pst,!*OSToolbox)
@@ -1370,14 +1444,16 @@ where
 
 getWindowViewFrame :: !Id !(IOSt .l .p) -> (!ViewFrame,!IOSt .l .p)
 getWindowViewFrame id ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (zero,ioState)
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (zero,IOStSetDevice (WindowSystemState windows) ioState)
 	| otherwise
-		# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
-		# (viewFrame,wsH)	= getwindowviewframe wMetrics wsH
+		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# (viewFrame,wsH)		= getwindowviewframe wMetrics wsH
 		= (viewFrame,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 
 //	getwindowviewframe is also used by getWindowOuterSize.
@@ -1401,8 +1477,10 @@ getwindowviewframe _ _
 
 setWindowViewSize :: !Id !Size !(IOSt .l .p) -> IOSt .l .p
 setWindowViewSize wid reqSize ioState
-	# (wDevice,ioState)			= IOStGetDevice WindowDevice ioState
-	  windows					= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)		= getWindowHandlesWindow (toWID wid) windows
 	| not found
 		= IOStSetDevice (WindowSystemState windows) ioState
@@ -1417,13 +1495,14 @@ setWindowViewSize wid reqSize ioState
 	| otherwise
 		# (activeWIDS,windows)	= getWindowHandlesActiveWindow windows
 		# (osdInfo,ioState)		= IOStGetOSDInfo ioState
-		  (isSDI,framePtr,clientPtr,tbHeight)
-		  						= case osdInfo of
-		  							OSSDInfo info	-> (True,info.ossdFrame,info.ossdClient,case info.ossdToolbar of
-		  																						Just {toolbarHeight} -> toolbarHeight
-		  																						_					 -> 0
-		  											   )
-		  							_				-> (False,OSNoWindowPtr,OSNoWindowPtr,0)
+		  isSDI					= getOSDInfoDocumentInterface osdInfo==SDI
+		  (framePtr,clientPtr,tbHeight)
+		  						= case (getOSDInfoOSInfo osdInfo) of
+		  							Just info -> (info.osFrame,info.osClient,case info.osToolbar of
+		  																		Just {toolbarHeight} -> toolbarHeight
+		  																		_					 -> 0
+		  										 )
+		  							_         -> (OSNoWindowPtr,OSNoWindowPtr,0)
 		# (wids,wsH)			= getWindowStateHandleWIDS wsH
 		# (tb,ioState)			= getIOToolbox ioState
 	//	# tb					= OSsetWindowSize wids.wPtr (toTuple reqSize) True tb
@@ -1473,8 +1552,10 @@ setWindowOuterSize id {w,h} ioState
 
 getWindowOuterSize :: !Id !(IOSt .l .p) -> (!Size,!IOSt .l .p)
 getWindowOuterSize id ioState
-	# (wDevice,ioState)				= IOStGetDevice WindowDevice ioState
-	  windows						= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)		= IOStGetDevice WindowDevice ioState
+	| not found
+		= (zero,ioState)
+	# windows						= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)			= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (zero,IOStSetDevice (WindowSystemState windows) ioState)
@@ -1508,17 +1589,19 @@ getWindowOuterSize id ioState
 
 setWindowViewDomain :: !Id ViewDomain !(IOSt .l .p) -> IOSt .l .p
 setWindowViewDomain wId newDomain ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID wId) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID wId) windows
 	| not found
 		= IOStSetDevice (WindowSystemState windows) ioState
-	# (wKind,wsH)			= getWindowStateHandleWindowKind wsH
+	# (wKind,wsH)				= getWindowStateHandleWindowKind wsH
 	| wKind<>IsWindow
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 	| otherwise
-		# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
-		# (wsH,ioState)		= accIOToolbox (setwindowviewdomain wMetrics newDomain wsH) ioState
+		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# (wsH,ioState)			= accIOToolbox (setwindowviewdomain wMetrics newDomain wsH) ioState
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 where
 	setwindowviewdomain :: !OSWindowMetrics !ViewDomain !(WindowStateHandle .pst) !*OSToolbox -> (!WindowStateHandle .pst,!*OSToolbox)
@@ -1577,18 +1660,20 @@ where
 
 getWindowViewDomain :: !Id !(IOSt .l .p) -> (!Maybe ViewDomain,!IOSt .l .p)
 getWindowViewDomain id ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
-	# (wKind,wsH)			= getWindowStateHandleWindowKind wsH
+	# (wKind,wsH)				= getWindowStateHandleWindowKind wsH
 	| wKind<>IsWindow
 		= (Nothing,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 	| otherwise
-		# (wInfo,wsH)		= getWindowStateHandleWindowInfo wsH
-	//	  domain			= RectToRectangle (fromJust wInfo).windowDomain	Mike: fromJust changed into getWindowInfoWindowData
-		  domain			= RectToRectangle (getWindowInfoWindowData wInfo).windowDomain
+		# (wInfo,wsH)			= getWindowStateHandleWindowInfo wsH
+	//	  domain				= RectToRectangle (fromJust wInfo).windowDomain	Mike: fromJust changed into getWindowInfoWindowData
+		  domain				= RectToRectangle (getWindowInfoWindowData wInfo).windowDomain
 		= (Just domain,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 
 
@@ -1596,16 +1681,18 @@ getWindowViewDomain id ioState
 
 setWindowScrollFunction :: !Id Direction ScrollFunction !(IOSt .l .p) -> IOSt .l .p
 setWindowScrollFunction wId direction scrollFun ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID wId) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID wId) windows
 	| not found
 		= IOStSetDevice (WindowSystemState windows) ioState
-	# (wKind,wsH)			= getWindowStateHandleWindowKind wsH
+	# (wKind,wsH)				= getWindowStateHandleWindowKind wsH
 	| wKind<>IsWindow
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 	| otherwise
-		# wsH				= setwindowscrollfunction direction scrollFun wsH
+		# wsH					= setwindowscrollfunction direction scrollFun wsH
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 where
 	setwindowscrollfunction :: !Direction ScrollFunction !(WindowStateHandle .pst) -> WindowStateHandle .pst
@@ -1633,8 +1720,10 @@ where
 
 getWindowScrollFunction :: !Id Direction !(IOSt .l .p) -> (!Maybe ScrollFunction,!IOSt .l .p)
 getWindowScrollFunction wId direction ioState
-	# (wDevice,ioState)			= IOStGetDevice WindowDevice ioState
-	  windows					= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows					= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)		= getWindowHandlesWindow (toWID wId) windows
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
@@ -1669,31 +1758,35 @@ where
 
 setWindowTitle :: !Id Title !(IOSt .l .p) -> IOSt .l .p
 setWindowTitle id title ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= IOStSetDevice (WindowSystemState windows) ioState
 	| otherwise
-		# (osdInfo,ioState)	= IOStGetOSDInfo ioState
-		  (isSDI,framePtr,clientPtr)
-							= case osdInfo of
-								OSSDInfo info	-> (True,info.ossdFrame,info.ossdClient)
-								_				-> (False,OSNoWindowPtr,OSNoWindowPtr)
-		  (wids,wsH)		= getWindowStateHandleWIDS wsH
-		  wsH				= setWindowStateHandleWindowTitle title wsH
-		# ioState			= appIOToolbox (OSsetWindowTitle (if (isSDI && wids.wPtr==clientPtr) framePtr wids.wPtr) title) ioState
+		# (osdInfo,ioState)		= IOStGetOSDInfo ioState
+		  isSDI					= getOSDInfoDocumentInterface osdInfo==SDI
+		  (framePtr,clientPtr)	= case (getOSDInfoOSInfo osdInfo) of
+									Just info -> (info.osFrame, info.osClient)
+									_         -> (OSNoWindowPtr,OSNoWindowPtr)
+		  (wids,wsH)			= getWindowStateHandleWIDS wsH
+		  wsH					= setWindowStateHandleWindowTitle title wsH
+		# ioState				= appIOToolbox (OSsetWindowTitle (if (isSDI && wids.wPtr==clientPtr) framePtr wids.wPtr) title) ioState
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 
 setWindowOk :: !Id Id !(IOSt .l .p) -> IOSt .l .p
 setWindowOk id okId ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= IOStSetDevice (WindowSystemState windows) ioState
 	| otherwise
-		# (wsH,ioState)		= accIOToolbox (setwindowok okId wsH) ioState
+		# (wsH,ioState)			= accIOToolbox (setwindowok okId wsH) ioState
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 where
 	setwindowok :: !Id !(WindowStateHandle .pst) !*OSToolbox -> (!WindowStateHandle .pst,!*OSToolbox)
@@ -1704,13 +1797,15 @@ where
 
 setWindowCancel :: !Id Id !(IOSt .l .p) -> IOSt .l .p
 setWindowCancel id cancelId ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= IOStSetDevice (WindowSystemState windows) ioState
 	| otherwise
-		# (wsH,ioState)		= accIOToolbox (setwindowcancel cancelId wsH) ioState
+		# (wsH,ioState)			= accIOToolbox (setwindowcancel cancelId wsH) ioState
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 where
 	setwindowcancel :: !Id !(WindowStateHandle .pst) !*OSToolbox -> (!WindowStateHandle .pst,!*OSToolbox)
@@ -1721,13 +1816,15 @@ where
 
 setWindowCursor :: !Id CursorShape !(IOSt .l .p) -> IOSt .l .p
 setWindowCursor id shape ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= IOStSetDevice (WindowSystemState windows) ioState
 	| otherwise
-		# (wsH,ioState)		= accIOToolbox (setwindowcursor shape wsH) ioState
+		# (wsH,ioState)			= accIOToolbox (setwindowcursor shape wsH) ioState
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 where
 	setwindowcursor :: !CursorShape !(WindowStateHandle .pst) !*OSToolbox -> (!WindowStateHandle .pst,!*OSToolbox)
@@ -1742,30 +1839,36 @@ where
 
 getWindowTitle :: !Id !(IOSt .l .p) -> (!Maybe Title,!IOSt .l .p)
 getWindowTitle id ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
 	| otherwise
-		# (title,wsH)		= getWindowStateHandleWindowTitle wsH
+		# (title,wsH)			= getWindowStateHandleWindowTitle wsH
 		= (Just title,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 
 getWindowOk :: !Id !(IOSt .l .p) -> (!Maybe Id,!IOSt .l .p)
 getWindowOk id ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
 	| otherwise
-		# (okId,wsH)		= getWindowStateHandleDefaultId wsH
+		# (okId,wsH)			= getWindowStateHandleDefaultId wsH
 		= (okId,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 
 getWindowCancel :: !Id !(IOSt .l .p) -> (!Maybe Id,!IOSt .l .p)
 getWindowCancel id ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows				= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
@@ -1775,13 +1878,15 @@ getWindowCancel id ioState
 
 getWindowCursor :: !Id !(IOSt .l .p) -> (!Maybe CursorShape,!IOSt .l .p)
 getWindowCursor id ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
 	| otherwise
-		# (shape,wsH)		= getcursor wsH
+		# (shape,wsH)			= getcursor wsH
 		= (shape,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 where
 	getcursor :: !(WindowStateHandle .pst) -> (!Maybe CursorShape,!WindowStateHandle .pst)

@@ -4,14 +4,14 @@ implementation module iostate
 //	Clean Object I/O library, version 1.2
 
 
-import	StdBool, StdFunc, StdList
+import	StdBool, StdFunc, StdList, StdMisc
 import	commondef, devicefunctions, devicesystemstate, processstack, receivertable, timertable
 import	osdocumentinterface
 from	osactivaterequests	import OSActivateRequest
+from	osevent				import OSEvents, OSnewEvents
 from	osguishare			import OSGUIShare
 from	osmouse				import OSGetDoubleClickTime
 from	ostime				import OSTime
-from	osevent				import OSEvents, OSnewEvents
 from	ostoolbox			import OSNewToolbox, OSDummyToolbox
 from	oswindow			import OSWindowPtr, OSNoWindowPtr, OSWindowMetrics, OSDefaultWindowMetrics
 from	roundrobin			import RR, emptyRR, notodoRR
@@ -107,10 +107,10 @@ from	roundrobin			import RR, emptyRR, notodoRR
 	=	{	cbsCount	:: !Int									// ScrapCount of last access
 		}
 
-
+/*
 iostateError :: String String -> .x
 iostateError rule error = Error rule "iostate" error
-
+*/
 
 //	Access rules to the IOSt:
 
@@ -132,7 +132,7 @@ emptyIOSt ioId parentId guishare documentInterface processKind processAtts initI
   				  ,	iodevices		= []
   				  ,	ioatts			= processAtts
   				  ,	ioruntime		= Running
-		 		  ,	ioosdinfo		= osdinfo
+		 		  ,	ioosdinfo		= emptyOSDInfo documentInterface
   				  ,	iokind			= processKind
   				  ,	ioismodal		= modalId
   				  ,	ioidtable		= initialIdTable
@@ -149,11 +149,6 @@ emptyIOSt ioId parentId guishare documentInterface processKind processAtts initI
 				  , iorcvdisabled	= False // MW11++
   				  }
 	  }
-where
-	osdinfo	= case documentInterface of
-				MDI	-> OSMDInfo {osmdFrame=(-1),osmdToolbar=Nothing,osmdClient=(-1),osmdMenubar=(-1),osmdWindowMenu=(-1)}
-				SDI	-> OSSDInfo {ossdFrame=(-1),ossdToolbar=Nothing,ossdClient=(-1),ossdMenubar=(-1)}
-				NDI	-> OSNoInfo
 
 emptyIOUnique :: !(IdFun (PSt .l .p)) -> (!OSWindowMetrics,!*IOUnique .l .p)
 emptyIOUnique initIO
@@ -496,17 +491,25 @@ where
 IOStGetDevices :: !(IOSt .l .p) -> (![Device],!IOSt .l .p)
 IOStGetDevices ioState=:{ioshare={iodevices=ds}} = (map toDevice ds,ioState)
 
-IOStGetDevice :: !Device !(IOSt .l .p) -> (!DeviceSystemState (PSt .l .p),!IOSt .l .p)
+IOStGetDevice :: !Device !(IOSt .l .p) -> (!Bool,DeviceSystemState (PSt .l .p),!IOSt .l .p)
+/*
 IOStGetDevice device {ioshare={iodevices=[]}}
-	= iostateError ("IOStGetDevice ["+++toString device+++"]") "Event I/O operations on empty IOSt not allowed"
-IOStGetDevice d ioState=:{ioshare={iodevices=ds}}
-	= (devicesGetDevice d ds,ioState)
+	= iostateError ("IOStGetDevice ["+++toString device+++"]") "I/O operations on empty IOSt not allowed"
+*/
+IOStGetDevice d ioState=:{ioshare=ioshare=:{iodevices=ds}}
+	# (found,device,ds)	= devicesGetDevice d ds
+	= (found,device,{ioState & ioshare={ioshare & iodevices=ds}})
 where
-	devicesGetDevice :: !Device ![DeviceSystemState .ps] -> DeviceSystemState .ps
+	devicesGetDevice :: !Device ![DeviceSystemState .pst] -> (!Bool,DeviceSystemState .pst,![DeviceSystemState .pst])
 	devicesGetDevice d [dState:dStates]
-		| toDevice dState==d	= dState
-		| otherwise				= devicesGetDevice d dStates
-	devicesGetDevice d _		= iostateError "IOStGetDevice" (toString d+++" not present in IOSt")
+		| toDevice dState==d
+			= (True,dState,[dState:dStates])
+		| otherwise
+			# (found,device,dStates)	= devicesGetDevice d dStates
+			= (found,device,[dState:dStates])
+	devicesGetDevice d empty
+	//	= iostateError "IOStGetDevice" (toString d+++" not present in IOSt")
+		= (False,undef,empty)
 
 IOStRemoveDevice :: !Device !(IOSt .l .p) -> IOSt .l .p
 IOStRemoveDevice d ioState=:{ioshare}

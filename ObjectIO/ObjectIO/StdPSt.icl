@@ -207,19 +207,21 @@ instance ChannelEnv (IOSt .l .p)
 	mb_close_inet_receiver_without_id False _ ioState
 		= ioState
 	mb_close_inet_receiver_without_id True id_pair ioState
-	#! (closed, ioState)	= IOStClosed ioState
+	#! (closed,ioState)			= IOStClosed ioState
 	| closed
 		= ioState
-	# (receivers,ioState)	= IOStGetDevice ReceiverDevice ioState
-	  rsHs					= (ReceiverSystemStateGetReceiverHandles receivers).rReceivers
-	  (found,rsH,rsHs)		= Remove (inetReceiverStateIdentified1 id_pair) undef rsHs
-	# ioState				= IOStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
+	# (found,receivers,ioState)	= IOStGetDevice ReceiverDevice ioState
+	| not found			// PA: guard added
+		= ioState
+	# rsHs						= (ReceiverSystemStateGetReceiverHandles receivers).rReceivers
+	  (found,rsH,rsHs)			= Remove (inetReceiverStateIdentified1 id_pair) undef rsHs
+	# ioState					= IOStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
 	| not found
 		= ioState
 	| otherwise
-		# id				= rsH.rHandle.rId
-		  (idtable,ioState)	= IOStGetIdTable ioState
-		  ioState			= IOStSetIdTable (snd (removeIdFromIdTable id idtable)) ioState
+		# id					= rsH.rHandle.rId
+		  (idtable,ioState)		= IOStGetIdTable ioState
+		  ioState				= IOStSetIdTable (snd (removeIdFromIdTable id idtable)) ioState
 		  ioState				= unbindRId id ioState
 		  ioState				= IOStSetRcvDisabled True ioState // MW11++
 		  connectedIds			= rsH.rHandle.rConnected

@@ -26,8 +26,10 @@ windowdisposeFatalError function error
 */
 disposeWindow :: !WID !(PSt .l .p) -> PSt .l .p
 disposeWindow wid pState=:{io=ioState}
-	# (wDevice,ioState)				= IOStGetDevice WindowDevice ioState
-	  windows						= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)		= IOStGetDevice WindowDevice ioState
+	| not found
+		= {pState & io=ioState}
+	# windows						= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)			= getWindowHandlesWindow wid windows
 	// The window could not be found
 	| not found

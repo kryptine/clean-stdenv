@@ -3,23 +3,25 @@ definition module devicesystemstate
 //	Clean Object I/O library, version 1.2
 
 import	device
-import	timerhandle
 import	menuhandle
-import	windowhandle
+import	processhandle
 import	receiverhandle
+import	timerhandle
+import	windowhandle
 
 ::	DeviceSystemState pst
-	= 	TimerSystemState	(TimerHandles		pst)
+	=	ProcessSystemState	(ProcessHandles		pst)
 	|	MenuSystemState		(MenuHandles		pst)
-	|	WindowSystemState	(WindowHandles		pst)
 	|	ReceiverSystemState	(ReceiverHandles	pst)
+	| 	TimerSystemState	(TimerHandles		pst)
+	|	WindowSystemState	(WindowHandles		pst)
 
 toDevice								:: !(DeviceSystemState .pst) -> Device
 
-
 /*	The following are PARTIAL access functions:
 */
-TimerSystemStateGetTimerHandles			:: !(DeviceSystemState .pst) -> TimerHandles    .pst
 MenuSystemStateGetMenuHandles			:: !(DeviceSystemState .pst) -> MenuHandles     .pst
-WindowSystemStateGetWindowHandles		:: !(DeviceSystemState .pst) -> WindowHandles   .pst
+ProcessSystemStateGetProcessHandles		:: !(DeviceSystemState .pst) -> ProcessHandles  .pst
 ReceiverSystemStateGetReceiverHandles	:: !(DeviceSystemState .pst) -> ReceiverHandles .pst
+TimerSystemStateGetTimerHandles			:: !(DeviceSystemState .pst) -> TimerHandles    .pst
+WindowSystemStateGetWindowHandles		:: !(DeviceSystemState .pst) -> WindowHandles   .pst

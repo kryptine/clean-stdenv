@@ -8,7 +8,7 @@ definition module StdSystem
 //	********************************************************************************
 
 
-import	StdIOCommon
+import	StdIOBasic
 
 
 //	System dependencies concerning the file system.

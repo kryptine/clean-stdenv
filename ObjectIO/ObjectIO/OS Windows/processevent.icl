@@ -91,6 +91,7 @@ filterOSEvent _ _ _ _
 
 
 getOSDInfoFramePtr :: !OSDInfo -> OSWindowPtr
-getOSDInfoFramePtr (OSMDInfo {osmdFrame})	= osmdFrame
-getOSDInfoFramePtr (OSSDInfo {ossdFrame})	= ossdFrame
-getOSDInfoFramePtr _						= OSNoWindowPtr
+getOSDInfoFramePtr osdInfo
+	= case (getOSDInfoOSInfo osdInfo) of
+		Just info -> info.osFrame
+		_         -> OSNoWindowPtr

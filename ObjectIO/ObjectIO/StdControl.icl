@@ -75,19 +75,21 @@ gatherWindowIds` []
 
 getWindow :: !Id !(IOSt .l .p) -> (!Maybe WState, !IOSt .l .p)
 getWindow windowId ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID windowId) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID windowId) windows
 	| not found
 		= (Nothing,ioState)
 	| otherwise
-		# (tb,ioState)		= getIOToolbox ioState
-		# (wsH`,wsH,tb)		= retrieveWindowHandle` wsH tb
-		# (wids,wsH)		= getWindowStateHandleWIDS wsH
-		  windows			= setWindowHandlesWindow wsH windows
-		# ioState			= setIOToolbox tb ioState
-		# ioState			= IOStSetDevice (WindowSystemState windows) ioState
-		# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
+		# (tb,ioState)			= getIOToolbox ioState
+		# (wsH`,wsH,tb)			= retrieveWindowHandle` wsH tb
+		# (wids,wsH)			= getWindowStateHandleWIDS wsH
+		  windows				= setWindowHandlesWindow wsH windows
+		# ioState				= setIOToolbox tb ioState
+		# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
 		= (Just {wIds=wids,wRep=wsH`,wTb=OSNewToolbox,wMetrics=wMetrics},ioState)
 
 getParentWindow :: !Id !(IOSt .l .p) -> (!Maybe WState, !IOSt .l .p)
@@ -105,21 +107,23 @@ getParentWindow controlId ioState
 
 setWindow :: !Id !(IdFun *WState) !(IOSt .l .p) -> IOSt .l .p
 setWindow windowId f ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID windowId) windows
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID windowId) windows
 	| not found
 		= ioState
 	| otherwise
-		# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
-		# (tb,ioState)		= getIOToolbox ioState
-		# (wsH`,wsH,tb)		= retrieveWindowHandle` wsH tb
-		# (wids,wsH)		= getWindowStateHandleWIDS wsH
-		# {wRep=wsH`,wTb=tb}= f {wIds=wids,wRep=wsH`,wTb=tb,wMetrics=wMetrics}
-		  wsH				= insertWindowHandle` wsH` wsH
-		  windows			= setWindowHandlesWindow wsH windows
-		# ioState			= setIOToolbox tb ioState
-		# ioState			= IOStSetDevice (WindowSystemState windows) ioState
+		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# (tb,ioState)			= getIOToolbox ioState
+		# (wsH`,wsH,tb)			= retrieveWindowHandle` wsH tb
+		# (wids,wsH)			= getWindowStateHandleWIDS wsH
+		# {wRep=wsH`,wTb=tb}	= f {wIds=wids,wRep=wsH`,wTb=tb,wMetrics=wMetrics}
+		  wsH					= insertWindowHandle` wsH` wsH
+		  windows				= setWindowHandlesWindow wsH windows
+		# ioState				= setIOToolbox tb ioState
+		# ioState				= IOStSetDevice (WindowSystemState windows) ioState
 		= ioState
 
 
@@ -413,9 +417,11 @@ accControlPicture cId drawfun ioState
 	  maybeParent				= getIdParent cId idtable
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
 		= (Nothing,ioState)
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (Nothing,ioState)
 	| otherwise
-		# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-		  windows				= WindowSystemStateGetWindowHandles wDevice
+		# windows				= WindowSystemStateGetWindowHandles wDevice
 		  wId					= (fromJust maybeParent).idpId
 		  (_,wsH,windows)		= getWindowHandlesWindow (toWID wId) windows
 		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState

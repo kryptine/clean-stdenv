@@ -19,17 +19,14 @@ oswindowFatalError function error
 
 OSGetProcessWindowDimensions :: !OSDInfo !*OSToolbox -> (!Rect,!*OSToolbox)
 OSGetProcessWindowDimensions osdinfo tb
-	| framePtr==OSNoWindowPtr || clientPtr==OSNoWindowPtr
+	# maybeOSInfo		= getOSDInfoOSInfo osdinfo
+	| isNothing maybeOSInfo
 		= OSscreenrect tb
 	| otherwise
-		# ((x,y),tb)	= OSgetWindowPos framePtr tb
-		# ((w,h),tb)	= OSgetWindowViewFrameSize clientPtr tb
+		# osinfo		= fromJust maybeOSInfo
+		# ((x,y),tb)	= OSgetWindowPos osinfo.osFrame tb
+		# ((w,h),tb)	= OSgetWindowViewFrameSize osinfo.osClient tb
 		= ({rleft=x,rtop=y,rright=x+w,rbottom=y+h},tb)
-where
-	(framePtr,clientPtr)= case osdinfo of
-							OSMDInfo info -> (info.osmdFrame,info.osmdClient)
-							OSSDInfo info -> (info.ossdFrame,info.ossdClient)
-							OSNoInfo      -> (OSNoWindowPtr, OSNoWindowPtr  )
 
 OSNoWindowPtr
 	:== -1
@@ -218,10 +215,9 @@ OScreateDialog isModal isClosable title pos size behindPtr get_focus create_cont
 	  					_			-> oswindowCreateError 1 "OScreateDialog"
 	= (reverse delay_info,wPtr,control_info,tb)
 where
-	parentptr		= case osdinfo of
-						OSMDInfo info	-> info.osmdFrame
-						OSSDInfo info	-> info.ossdFrame
-						_				-> 0
+	parentptr		= case (getOSDInfoOSInfo osdinfo) of
+						Nothing        -> 0
+						Just {osFrame} -> osFrame
 	
 	OScreateDialogCallback :: !(.s->(OSWindowPtr,.s))
 							  !(OSWindowPtr->.s->*OSToolbox->(.s,*OSToolbox))
@@ -271,57 +267,54 @@ OScreateWindow	wMetrics isResizable hInfo=:{cbiHasScroll=hasHScroll} vInfo=:{cbi
 				get_focus
 				create_controls
 				update_controls
-				(OSMDInfo mdi) control_info tb
-	# (textPtr,tb)	= WinMakeCString title tb
-	  styleFlags	= WS_SYSMENU
-	  					bitor WS_OVERLAPPED
-	  					bitor (if hasHScroll  WS_HSCROLL    0)
-	  					bitor (if hasVScroll  WS_VSCROLL    0)
-	  					bitor (if isResizable WS_THICKFRAME 0)
-	  				//	bitor WS_CLIPCHILDREN
-	  createcci		= Rq6Cci CcRqCREATEMDIDOCWINDOW textPtr mdi.osmdClient (x<<16+(y<<16)>>16) w h styleFlags
-	# (returncci,(control_info,delay_info),tb)
-					= IssueCleanRequest (OScreateWindowCallback isResizable minSize maxSize create_controls update_controls)
-										createcci
-										(control_info,[]) tb
-	# tb			= WinReleaseCString textPtr tb
-	  wPtr			= case returncci.ccMsg of
-	  					CcRETURN1	-> returncci.p1
-	  					CcWASQUIT	-> OSNoWindowPtr
-	  					_			-> oswindowCreateError 1 "OScreateWindow (MDI)"
-	# tb			= setScrollRangeAndPos hasHScroll False wMetrics SB_HORZ hInfo.cbiState (0,0) wPtr tb
-	# tb			= setScrollRangeAndPos hasVScroll False wMetrics SB_VERT vInfo.cbiState (0,0) wPtr tb
-	= (reverse delay_info,wPtr,OSNoWindowPtr,OSNoWindowPtr,OSMDInfo mdi,control_info,tb)
+				osdInfo control_info tb
+	| di==MDI
+		# (textPtr,tb)	= WinMakeCString title tb
+		  styleFlags	= WS_SYSMENU
+		  					bitor WS_OVERLAPPED
+		  					bitor (if hasHScroll  WS_HSCROLL    0)
+		  					bitor (if hasVScroll  WS_VSCROLL    0)
+		  					bitor (if isResizable WS_THICKFRAME 0)
+		  				//	bitor WS_CLIPCHILDREN
+		  createcci		= Rq6Cci CcRqCREATEMDIDOCWINDOW textPtr osinfo.osClient (x<<16+(y<<16)>>16) w h styleFlags
+		# (returncci,(control_info,delay_info),tb)
+						= IssueCleanRequest (OScreateWindowCallback isResizable minSize maxSize create_controls update_controls)
+											createcci
+											(control_info,[]) tb
+		# tb			= WinReleaseCString textPtr tb
+		  wPtr			= case returncci.ccMsg of
+		  					CcRETURN1	-> returncci.p1
+		  					CcWASQUIT	-> OSNoWindowPtr
+		  					_			-> oswindowCreateError 1 "OScreateWindow (MDI)"
+		# tb			= setScrollRangeAndPos hasHScroll False wMetrics SB_HORZ hInfo.cbiState (0,0) wPtr tb
+		# tb			= setScrollRangeAndPos hasVScroll False wMetrics SB_VERT vInfo.cbiState (0,0) wPtr tb
+		= (reverse delay_info,wPtr,OSNoWindowPtr,OSNoWindowPtr,osdInfo,control_info,tb)
+
+	| di==SDI
+		# styleFlags	= (if hasHScroll WS_HSCROLL 0) bitor (if hasVScroll WS_VSCROLL 0)
+		  createcci		= Rq6Cci CcRqCREATESDIDOCWINDOW 0 osFrame (x<<16+(y<<16)>>16) w h styleFlags
+		# (returncci,(control_info,delay_info),tb)
+						= IssueCleanRequest (OScreateWindowCallback isResizable minSize maxSize create_controls update_controls)
+											createcci
+											(control_info,[]) tb
+		  clientPtr		= case returncci.ccMsg of
+		  					CcRETURN1	-> returncci.p1
+		  					CcWASQUIT	-> OSNoWindowPtr
+		  					_			-> oswindowCreateError 1 "OScreateWindow (SDI)"
+		  osdInfo		= setOSDInfoOSInfo {osinfo & osClient=clientPtr} osdInfo
+		# tb			= setScrollRangeAndPos hasHScroll False wMetrics SB_HORZ hInfo.cbiState (0,0) clientPtr tb
+		# tb			= setScrollRangeAndPos hasVScroll False wMetrics SB_VERT vInfo.cbiState (0,0) clientPtr tb
+		# tb			= OSsetWindowTitle osFrame title tb
+		= (reverse delay_info,clientPtr,OSNoWindowPtr,OSNoWindowPtr,osdInfo,control_info,tb)
+	
+	| otherwise
+		= oswindowFatalError "OScreateWindow" "unexpected OSDInfo (OSNoInfo) argument"
 where
 	(x,y)			= pos	// packed into one 32-bit integer
 	(w,h)			= size
-
-OScreateWindow	wMetrics isResizable hInfo=:{cbiHasScroll=hasHScroll} vInfo=:{cbiHasScroll=hasVScroll} minSize maxSize
-				isClosable title pos size
-				get_focus
-				create_controls
-				update_controls
-				(OSSDInfo sdi) control_info tb
-	# styleFlags	= (if hasHScroll WS_HSCROLL 0) bitor (if hasVScroll WS_VSCROLL 0)
-	  createcci		= Rq6Cci CcRqCREATESDIDOCWINDOW 0 sdi.ossdFrame (x<<16+(y<<16)>>16) w h styleFlags
-	# (returncci,(control_info,delay_info),tb)
-					= IssueCleanRequest (OScreateWindowCallback isResizable minSize maxSize create_controls update_controls)
-										createcci
-										(control_info,[]) tb
-	  clientPtr		= case returncci.ccMsg of
-	  					CcRETURN1	-> returncci.p1
-	  					CcWASQUIT	-> OSNoWindowPtr
-	  					_			-> oswindowCreateError 1 "OScreateWindow (SDI)"
-	# tb			= setScrollRangeAndPos hasHScroll False wMetrics SB_HORZ hInfo.cbiState (0,0) clientPtr tb
-	# tb			= setScrollRangeAndPos hasVScroll False wMetrics SB_VERT vInfo.cbiState (0,0) clientPtr tb
-	# tb			= OSsetWindowTitle sdi.ossdFrame title tb
-	= (reverse delay_info,clientPtr,OSNoWindowPtr,OSNoWindowPtr,OSSDInfo {sdi & ossdClient=clientPtr},control_info,tb)
-where
-	(x,y)			= pos	// packed into one 32-bit integer
-	(w,h)			= size
-
-OScreateWindow _ _ _ _ _ _ _ _ _ _ _ _ _ OSNoInfo _ _
-	= oswindowFatalError "OScreateWindow" "unexpected OSDInfo (OSNoInfo) argument"
+	di				= getOSDInfoDocumentInterface osdInfo
+	osinfo			= fromJust (getOSDInfoOSInfo  osdInfo)
+	osFrame			= osinfo.osFrame
 
 OScreateWindowCallback :: !Bool !(!Int,!Int) !(!Int,!Int) 
 						  !(OSWindowPtr->.s->*OSToolbox->(.s,*OSToolbox))
@@ -391,10 +384,9 @@ OScreateModalDialog isClosable title osdinfo currentActiveModal handleOSEvents s
 	= (ok,s,tb)
 where
 	parentptr			= if (isNothing currentActiveModal)
-							(case osdinfo of
-								OSMDInfo info	-> info.osmdFrame
-								OSSDInfo info	-> info.ossdFrame
-								_				-> 0
+							(case (getOSDInfoOSInfo osdinfo) of
+								Just info -> info.osFrame
+								nothing   -> 0
 							)
 							(fromJust currentActiveModal)
 	
@@ -743,28 +735,29 @@ where
 */
 OSdestroyWindow :: !OSDInfo !Bool !Bool !OSWindowPtr !(OSEvent -> .s -> ([Int],.s)) !.s !*OSToolbox
 														  -> (![DelayActivationInfo],.s,!*OSToolbox)
-OSdestroyWindow (OSMDInfo {osmdFrame,osmdClient}) isModal isWindow wPtr handleOSEvent state tb
-	# (_,(delayInfo,state),tb)	= IssueCleanRequest (osDelayCallback handleOSEvent) destroycci ([],state) tb
-	= (reverse delayInfo,state,tb)
-where
-	destroycci	= if isWindow (Rq3Cci CcRqDESTROYMDIDOCWINDOW osmdFrame osmdClient wPtr)
-				 (if isModal  (Rq1Cci CcRqDESTROYMODALDIALOG wPtr)
-							  (Rq1Cci CcRqDESTROYWINDOW wPtr))
-OSdestroyWindow (OSSDInfo _) isModal isWindow wPtr handleOSEvent state tb
-	# (_,(delayInfo,state),tb)	= IssueCleanRequest (osDelayCallback handleOSEvent) destroycci ([],state) tb
-	= (reverse delayInfo,state,tb)
-where
-	destroycci	= if isModal (Rq1Cci CcRqDESTROYMODALDIALOG wPtr)
-							 (Rq1Cci CcRqDESTROYWINDOW wPtr)
-OSdestroyWindow OSNoInfo isModal isWindow wPtr handleOSEvent state tb
+OSdestroyWindow osdInfo isModal isWindow wPtr handleOSEvent state tb
+	| di==MDI
+		# destroycci				= if isWindow (Rq3Cci CcRqDESTROYMDIDOCWINDOW osFrame osClient wPtr)
+									 (if isModal  (Rq1Cci CcRqDESTROYMODALDIALOG wPtr)
+												  (Rq1Cci CcRqDESTROYWINDOW wPtr))
+		# (_,(delayInfo,state),tb)	= IssueCleanRequest (osDelayCallback handleOSEvent) destroycci ([],state) tb
+		= (reverse delayInfo,state,tb)
+	| di==SDI
+		# destroycci				= if isModal (Rq1Cci CcRqDESTROYMODALDIALOG wPtr)
+												 (Rq1Cci CcRqDESTROYWINDOW wPtr)
+		# (_,(delayInfo,state),tb)	= IssueCleanRequest (osDelayCallback handleOSEvent) destroycci ([],state) tb
+		= (reverse delayInfo,state,tb)
+	// It's a NDI process
 	| isWindow		/* This condition should never occur (NDI processes have only dialogues). */
 		= oswindowFatalError "OSdestroyWindow" "trying to destroy window of NDI process"
 	| otherwise
-		# (_,(delayInfo,state),tb)= IssueCleanRequest (osDelayCallback handleOSEvent) destroycci ([],state) tb
+		# destroycci				= if isModal (Rq1Cci CcRqDESTROYMODALDIALOG wPtr)
+												 (Rq1Cci CcRqDESTROYWINDOW wPtr)
+		# (_,(delayInfo,state),tb)	= IssueCleanRequest (osDelayCallback handleOSEvent) destroycci ([],state) tb
 		= (reverse delayInfo,state,tb)
 where
-	destroycci	= if isModal (Rq1Cci CcRqDESTROYMODALDIALOG wPtr)
-							 (Rq1Cci CcRqDESTROYWINDOW wPtr)
+	di								= getOSDInfoDocumentInterface osdInfo
+	{osFrame,osClient}				= fromJust (getOSDInfoOSInfo  osdInfo)
 
 osDelayCallback :: !(OSEvent -> .s -> ([Int],.s)) !CrossCallInfo !(![DelayActivationInfo],.s) !*OSToolbox
 											  -> (!CrossCallInfo,!(![DelayActivationInfo],.s),!*OSToolbox)
@@ -1047,10 +1040,10 @@ OSactivateWindow osdInfo thisWindow tb
 	# (_,delayinfo,tb)	= IssueCleanRequest osIgnoreCallback` (Rq3Cci CcRqACTIVATEWINDOW (toInt isMDI) clientPtr thisWindow) [] tb
 	= (reverse delayinfo,tb)
 where
-	(isMDI,clientPtr)	= case osdInfo of
-							OSMDInfo info	-> (True, info.osmdClient)
-							OSSDInfo info	-> (False,info.ossdClient)
-							_				-> oswindowFatalError "OSactivateWindow" "illegal DocumentInterface context"
+	isMDI				= getOSDInfoDocumentInterface osdInfo==MDI
+	clientPtr			= case (getOSDInfoOSInfo osdInfo) of
+							Just {osClient} -> osClient
+							nothing         -> oswindowFatalError "OSactivateWindow" "illegal DocumentInterface context"
 
 OSactivateControl :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> (![DelayActivationInfo],!*OSToolbox)
 OSactivateControl parentWindow controlPtr tb

@@ -11,21 +11,26 @@ from	StdIOCommon	import DocumentInterface, MDI, SDI, NDI
 
 
 ::	OSDInfo
-	=	OSMDInfo OSMDInfo
-	|	OSSDInfo OSSDInfo
+	=	OSMDInfo !OSMDInfo
+	|	OSSDInfo !OSSDInfo
 	|	OSNoInfo
 ::	OSMDInfo
-	=	{	osmdFrame		:: !HWND			// The frame window of the MDI frame window
-		,	osmdToolbar		:: !Maybe OSToolbar	// The toolbar of the MDI frame window (Nothing if no toolbar)
-		,	osmdClient		:: !HWND			// The client window of the MDI frame window
-		,	osmdMenubar		:: !HMENU			// The menu bar of the MDI frame window
-		,	osmdWindowMenu	:: !HMENU			// The Window menu in the menu bar
+	=	{	osmdOSInfo		:: !OSInfo			// The general document interface infrastructure
+		,	osmdWindowMenu	:: !HMENU			// The Window menu in the MDI menu bar
 		}
 ::	OSSDInfo
-	=	{	ossdFrame		:: !HWND			// The frame window of the SDI frame window
-		,	ossdToolbar		:: !Maybe OSToolbar	// The toolbar of the SDI frame window (Nothing if no toolbar)
-		,	ossdClient		:: !HWND			// The client window of the SDI frame window
-		,	ossdMenubar		:: !HMENU			// The menu bar of the SDI frame window
+	=	{	ossdOSInfo		:: !OSInfo			// The general document interface infrastructure
+		}
+::	OSInfo
+	=	{	osFrame			:: !HWND			// The frame window of the (M/S)DI frame window
+		,	osToolbar		:: !Maybe OSToolbar	// The toolbar of the (M/S)DI frame window (Nothing if no toolbar)
+		,	osClient		:: !HWND			// The client window of the (M/S)DI frame window
+		,	osMenuBar		:: !HMENU			// The menu bar of the (M/S)DI frame window
+		}
+::	OSMenuBar
+	=	{	menuBar			:: !HMENU
+		,	menuWindow		:: !HWND
+		,	menuClient		:: !HWND
 		}
 
 
@@ -34,17 +39,67 @@ osdocumentinterfaceFatalError function error
 	= FatalError function "osdocumentinterface" error
 
 
+/*	emptyOSDInfo creates a OSDInfo with dummy values for the argument document interface.
+*/
+emptyOSDInfo :: !DocumentInterface -> OSDInfo
+emptyOSDInfo di
+	= case di of
+		MDI -> OSMDInfo {osmdOSInfo=emptyOSInfo,osmdWindowMenu=(-1)}
+		SDI -> OSSDInfo {ossdOSInfo=emptyOSInfo}
+		NDI -> OSNoInfo
+where
+	emptyOSInfo = {osFrame=(-1),osToolbar=Nothing,osClient=(-1),osMenuBar=(-1)}
+
+
+/*	getOSDInfoDocumentInterface returns the DocumentInterface of the argument OSDInfo.
+*/
 getOSDInfoDocumentInterface :: !OSDInfo -> DocumentInterface
 getOSDInfoDocumentInterface (OSMDInfo _)	= MDI
 getOSDInfoDocumentInterface (OSSDInfo _)	= SDI
 getOSDInfoDocumentInterface OSNoInfo		= NDI
 
 
+/*	getOSDInfoOSMenuBar returns the OSMenuBar info from the argument OSDInfo.
+	setOSDInfoOSMenuBar sets the OSMenuBar info in the OSDInfo.
+*/
+getOSDInfoOSMenuBar :: !OSDInfo -> Maybe OSMenuBar
+getOSDInfoOSMenuBar osdInfo
+	= case osdInfo of
+		OSMDInfo {osmdOSInfo} -> get osmdOSInfo
+		OSSDInfo {ossdOSInfo} -> get ossdOSInfo
+		osnoinfo              -> Nothing
+where
+	get {osFrame,osClient,osMenuBar} = Just {menuBar=osMenuBar,menuWindow=osFrame,menuClient=osClient}
+
+setOSDInfoOSMenuBar :: !OSMenuBar !OSDInfo -> OSDInfo
+setOSDInfoOSMenuBar {menuBar,menuWindow,menuClient} osdInfo
+	= case osdInfo of
+		OSMDInfo mdi=:{osmdOSInfo=info} -> OSMDInfo {mdi & osmdOSInfo=set info}
+		OSSDInfo sdi=:{ossdOSInfo=info} -> OSSDInfo {sdi & ossdOSInfo=set info}
+		osnoinfo                        -> osnoinfo
+where
+	set info = {info & osMenuBar=menuBar,osFrame=menuWindow,osClient=menuClient}
+
+
+/*	getOSDInfoOSInfo returns the OSInfo from the argument OSDInfo if present.
+	setOSDInfoOSInfo sets the OSInfo in the OSDInfo.
+*/
+getOSDInfoOSInfo :: !OSDInfo -> Maybe OSInfo
+getOSDInfoOSInfo (OSMDInfo {osmdOSInfo}) = Just osmdOSInfo
+getOSDInfoOSInfo (OSSDInfo {ossdOSInfo}) = Just ossdOSInfo
+getOSDInfoOSInfo osnoinfo                = Nothing
+
+setOSDInfoOSInfo :: !OSInfo !OSDInfo -> OSDInfo
+setOSDInfoOSInfo osinfo (OSMDInfo osm) = OSMDInfo {osm & osmdOSInfo=osinfo}
+setOSDInfoOSInfo osinfo (OSSDInfo oss) = OSSDInfo {oss & ossdOSInfo=osinfo}
+setOSDInfoOSInfo _       osnoinfo      = osnoinfo
+
+
 /*	OSopenMDI creates the infrastructure of an MDI process.
 		If the first Bool argument is True, then the frame window is shown, otherwise it is hidden.
 		The second Bool indicates whether the process accepts file open events.
 */
-OSopenMDI :: !Bool !Bool !*OSToolbox -> (!OSMDInfo,!*OSToolbox)
+OSopenMDI :: !Bool !Bool !*OSToolbox -> (!OSDInfo,!*OSToolbox)
 OSopenMDI show acceptFileOpen tb
 	# createCci			= Rq2Cci CcRqCREATEMDIFRAMEWINDOW (toInt show) (toInt acceptFileOpen)
 	# (returncci,tb)	= IssueCleanRequest2 osCreateMDIWindowCallback createCci tb
@@ -53,7 +108,14 @@ OSopenMDI show acceptFileOpen tb
 			  				CcRETURN4	-> (returncci.p1,returncci.p2,returncci.p3,returncci.p4)
 			  				CcWASQUIT	-> (OSNoWindowPtr,OSNoWindowPtr,OSNoWindowPtr,OSNoWindowPtr)
 			  				msg			-> osdocumentinterfaceFatalError "OSopenMDI" ("CcRETURN4 expected instead of "+++toString msg)
-	= ({osmdFrame=framePtr,osmdToolbar=Nothing,osmdClient=clientPtr,osmdMenubar=menuBar,osmdWindowMenu=windowMenu},tb)
+	# osmdinfo			= {	osmdOSInfo		= {	osFrame		= framePtr
+											  ,	osToolbar	= Nothing
+											  ,	osClient	= clientPtr
+											  ,	osMenuBar	= menuBar
+											  }
+						  ,	osmdWindowMenu	= windowMenu
+						  }
+	= (OSMDInfo osmdinfo,tb)
 where
 	osCreateMDIWindowCallback :: !CrossCallInfo !*OSToolbox -> (!CrossCallInfo,!*OSToolbox)
 	osCreateMDIWindowCallback {ccMsg=CcWmDEACTIVATE} tb
@@ -63,11 +125,7 @@ where
 	osCreateMDIWindowCallback {ccMsg} tb
 		= osdocumentinterfaceFatalError "osCreateMDIWindowCallback" ("received message nr:"+++toString ccMsg)
 
-OScloseMDI :: !OSMDInfo !*OSToolbox -> *OSToolbox
-OScloseMDI {osmdFrame} tb
-	= snd (IssueCleanRequest2 (osDestroyProcessWindowCallback "OScloseMDI") (Rq1Cci CcRqDESTROYWINDOW osmdFrame) tb)
-
-OSopenSDI :: !Bool !*OSToolbox -> (!OSSDInfo,!*OSToolbox)
+OSopenSDI :: !Bool !*OSToolbox -> (!OSDInfo,!*OSToolbox)
 OSopenSDI acceptFileOpen tb
 	# createCci			= Rq1Cci CcRqCREATESDIFRAMEWINDOW (toInt acceptFileOpen)
 	# (returncci,tb)	= IssueCleanRequest2 osCreateSDIWindowCallback createCci tb
@@ -75,7 +133,8 @@ OSopenSDI acceptFileOpen tb
 	  						CcRETURN2	-> (returncci.p1,returncci.p2)
 	  						CcWASQUIT	-> (OSNoWindowPtr,OSNoWindowPtr)
 	  						msg			-> osdocumentinterfaceFatalError "OSopenSDI" ("CcRETURN2 expected instead of "+++toString msg)
-	= ({ossdFrame=framePtr,ossdToolbar=Nothing,ossdClient=OSNoWindowPtr,ossdMenubar=menuBar},tb)
+	# ossdinfo			= {	ossdOSInfo = {osFrame=framePtr,osToolbar=Nothing,osClient=OSNoWindowPtr,osMenuBar=menuBar} }
+	= (OSSDInfo ossdinfo,tb)
 where
 	osCreateSDIWindowCallback :: !CrossCallInfo !*OSToolbox -> (!CrossCallInfo,!*OSToolbox)
 	osCreateSDIWindowCallback {ccMsg=CcWmDEACTIVATE} tb
@@ -85,9 +144,13 @@ where
 	osCreateSDIWindowCallback {ccMsg} tb
 		= osdocumentinterfaceFatalError "osCreateSDIWindowCallback" ("received message nr:"+++toString ccMsg)
 
-OScloseSDI :: !OSSDInfo !*OSToolbox -> *OSToolbox
-OScloseSDI {ossdFrame} tb
-	= snd (IssueCleanRequest2 (osDestroyProcessWindowCallback "OScloseSDI") (Rq1Cci CcRqDESTROYWINDOW ossdFrame) tb)
+OScloseOSDInfo :: !OSDInfo !*OSToolbox -> *OSToolbox
+OScloseOSDInfo (OSMDInfo {osmdOSInfo={osFrame}}) tb
+	= snd (IssueCleanRequest2 (osDestroyProcessWindowCallback "OScloseMDI") (Rq1Cci CcRqDESTROYWINDOW osFrame) tb)
+OScloseOSDInfo (OSSDInfo {ossdOSInfo={osFrame}}) tb
+	= snd (IssueCleanRequest2 (osDestroyProcessWindowCallback "OScloseSDI") (Rq1Cci CcRqDESTROYWINDOW osFrame) tb)
+OScloseOSDInfo _ tb
+	= tb
 
 osDestroyProcessWindowCallback :: String !CrossCallInfo !*OSToolbox -> (!CrossCallInfo,!*OSToolbox)
 osDestroyProcessWindowCallback function {ccMsg=CcWmDEACTIVATE} tb
@@ -101,6 +164,6 @@ osDestroyProcessWindowCallback function {ccMsg} tb
 
 //	getOSDInfoOSToolbar retrieves the OSToolbar, if any.
 getOSDInfoOSToolbar :: !OSDInfo -> Maybe OSToolbar
-getOSDInfoOSToolbar (OSMDInfo {osmdToolbar}) = osmdToolbar
-getOSDInfoOSToolbar (OSSDInfo {ossdToolbar}) = ossdToolbar
-getOSDInfoOSToolbar _						 = Nothing
+getOSDInfoOSToolbar (OSMDInfo {osmdOSInfo={osToolbar}})	= osToolbar
+getOSDInfoOSToolbar (OSSDInfo {ossdOSInfo={osToolbar}})	= osToolbar
+getOSDInfoOSToolbar _									= Nothing

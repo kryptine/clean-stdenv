@@ -11,6 +11,11 @@ from	menuevent	import MenuSystemStateGetMenuHandles
 from	osmenu		import DrawMenuBar, OSEnableMenuItem, OSDisableMenuItem, OSChangeMenuItemTitle, OSValidateMenuItemTitle, OSMenuItemCheck
 
 
+StdMenuElementFatalError :: String String -> .x
+StdMenuElementFatalError function error
+	= FatalError function "StdMenuElement" error
+
+
 /*	The function isOkMenuElementId can be used to filter out the proper IdParent records.
 */
 isOkMenuElementId :: !SystemId !(.x,!Maybe IdParent) -> (!Bool,(.x,Id))
@@ -82,15 +87,20 @@ insertMenuHandle` mH` (MenuLSHandle mlsH=:{mlsHandle=mH})
 
 getMenu :: !Id !(IOSt .l .p) -> (!Maybe MState, !IOSt .l .p)
 getMenu menuId ioState
-	# (menus,ioState)	= IOStGetDevice MenuDevice ioState
-	  mHs				= MenuSystemStateGetMenuHandles menus
-	  (found,msH)		= Select (eqMenuLSHandleId  menuId) (dummy "GetMenu") mHs.mMenus
+	# (ok,ioState)			= IOStHasDevice MenuDevice ioState
+	| not ok
+		= (Nothing,ioState)
+	# (found,menus,ioState)	= IOStGetDevice MenuDevice ioState
+	| not found
+		= (Nothing,ioState)
+	# mHs					= MenuSystemStateGetMenuHandles menus
+	  (found,msH)			= Select (eqMenuLSHandleId  menuId) (dummy "GetMenu") mHs.mMenus
 	| not found
 		= (Nothing,ioState)
 	| otherwise
-		# (msH`,msH)	= retrieveMenuHandle` msH
-		  (_,msHs)		= Replace (eqMenuLSHandleId menuId) msH mHs.mMenus
-		# ioState		= IOStSetDevice (MenuSystemState {mHs & mMenus=msHs}) ioState
+		# (msH`,msH)		= retrieveMenuHandle` msH
+		  (_,msHs)			= Replace (eqMenuLSHandleId menuId) msH mHs.mMenus
+		# ioState			= IOStSetDevice (MenuSystemState {mHs & mMenus=msHs}) ioState
 		= (Just {mRep=msH`,mTb=0},ioState)
 
 getParentMenu :: !Id !(IOSt .l .p) -> (!Maybe MState, !IOSt .l .p)
@@ -108,8 +118,18 @@ getParentMenu itemId ioState
 
 setMenu :: !Id !(IdFun *MState) !(IOSt .l .p) -> IOSt .l .p
 setMenu menuId f ioState
-	# (menus,ioState)		= IOStGetDevice MenuDevice ioState
-	  mHs					= MenuSystemStateGetMenuHandles menus
+	# (ok,ioState)			= IOStHasDevice MenuDevice ioState
+	| not ok
+		= ioState
+	# (osdinfo,ioState)		= IOStGetOSDInfo ioState
+	  maybeOSMenuBar		= getOSDInfoOSMenuBar osdinfo
+	| isNothing maybeOSMenuBar	// This condition should never occur
+		= StdMenuElementFatalError "setMenu" "OSMenuBar could not be retrieved from OSDInfo"
+	# osMenuBar				= fromJust maybeOSMenuBar
+	# (found,menus,ioState)	= IOStGetDevice MenuDevice ioState
+	| not found					// This condition should never occur
+		= StdMenuElementFatalError "setMenu" "MenuSystemState could not be retrieved from IOSt"
+	# mHs					= MenuSystemStateGetMenuHandles menus
 	  (found,msH)			= Select (eqMenuLSHandleId menuId) (dummy "SetMenu") mHs.mMenus
 	| not found
 		= ioState
@@ -118,7 +138,7 @@ setMenu menuId f ioState
 		  (msH`,msH)		= retrieveMenuHandle` msH
 		# (msH`,tb)			= (\{mRep,mTb}->(mRep,mTb)) (f {mRep=msH`,mTb=tb})
 		  msH				= insertMenuHandle` msH` msH
-		# tb				= DrawMenuBar mHs.mOSMenuBar tb
+		# tb				= DrawMenuBar osMenuBar tb
 		# ioState			= setIOToolbox tb ioState
 		  (_,msHs)			= Replace (eqMenuLSHandleId menuId) msH mHs.mMenus
 		# ioState			= IOStSetDevice (MenuSystemState {mHs & mMenus=msHs}) ioState
