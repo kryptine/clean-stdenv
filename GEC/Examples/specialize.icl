@@ -20,10 +20,10 @@ derive defval Tree
 myeditor = startCircuit mycircuit defaultv
 where
 	mycircuit =  edit "Family Tree Editor" 
-										>>> edit "bla"
+								
 
-//	defaultv :: Checkbox
-	defaultv =  vertlistAGEC (map (\i -> (NotChecked,i)) [1..10])
+	defaultv :: Family
+	defaultv = defval`
 
 :: Family	=	Family  Person Status (Maybe Partner)
 :: Status	=	Married			
