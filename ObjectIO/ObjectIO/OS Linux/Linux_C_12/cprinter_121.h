@@ -2,11 +2,11 @@
 #define _CPRINTER
 
 #if defined(mingw32_TARGET_OS)
-//	PA: all made extern
+/*	PA: all made extern */
 extern int startPage(int hdc);
 extern int endPage  (int hdc);
 extern int startDoc (int hdc);
-			// returns err code: >0:no error, <=0: user cancelled file dialog
+			/* returns err code: >0:no error, <=0: user cancelled file dialog */
 extern void endDoc  (int hdc);
 extern void deleteDC(int hdc);
 extern int wasCanceled(void);
@@ -21,7 +21,7 @@ extern void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, i
 				   PRINTDLG	**ppPrintDlg,
 				   int *deviceContext
 	 			  );
-					// err code: -1:no error, others: non fatal error
+					/* err code: -1:no error, others: non fatal error */
 extern void get_printSetup_with_PRINTDLG(PRINTDLG *pd, char **o_devmode,
 										 char **o_device, char **o_driver, char **o_output);
 extern void getCaps(HDC hdcPrint, int unq,

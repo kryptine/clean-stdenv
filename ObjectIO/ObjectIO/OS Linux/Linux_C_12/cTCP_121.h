@@ -16,7 +16,7 @@ struct DNSInfo
 	};
 typedef struct DNSInfo DNSInfo;
 
-// the dictionary items
+/* the dictionary items */
 struct dictitem
 	{	SOCKET			endpointRef;
 		struct dictitem	*next;
@@ -24,8 +24,10 @@ struct dictitem
 		unsigned		availByteValid		: 1;
 		unsigned		referenceCount		: 2;
 		unsigned		hasReceiveNotifier	: 1;
-			// three kinds of receivers: receivers for established connections,
-			// receivers for dns requests, receivers for asynchronous connect
+        /*
+         * three kinds of receivers: receivers for established connections,
+         * receivers for dns requests, receivers for asynchronous connect
+         */
 		unsigned		hasSendableNotifier	: 1;
 		unsigned		aborted				: 1;
 		unsigned		disconnected		: 1;

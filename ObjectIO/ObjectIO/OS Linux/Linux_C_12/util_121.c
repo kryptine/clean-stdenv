@@ -88,7 +88,11 @@ HGLOBAL rmalloc (DWORD bytes)
 
 {
 
-	HGLOBAL ptr = malloc(bytes);
+	HGLOBAL ptr;
+
+    printf("rmalloc\n");
+
+    ptr = malloc(bytes);
 
 
 
@@ -114,6 +118,8 @@ void rfree (HGLOBAL ptr)
 
 {
 
+    printf("rfree\n");
+
     free(ptr);    
 
 }	/* rfree */
@@ -125,6 +131,8 @@ int rstrlen (char *s)
 {
 
 	int l;
+
+    printf("rstrlen\n");
 
 
 
@@ -144,6 +152,8 @@ void rsncopy (char *d, const char *s, int n)
 
 	int i;
 
+    printf("rsncopy\n");
+
 	for (i = 0; i < n; i++)
 
 	{
@@ -161,6 +171,8 @@ void rscopy (char *d, const char *s)
 {
 
 	int i;
+
+    printf("rscopy\n");
 
 	for (i = 0; s[i] != 0; i++)
 
@@ -181,6 +193,8 @@ BOOL strequal (char *s1, char *s2)
 {
 
 	int i = 0;
+
+    printf("strequal\n");
 
 	while (s1[i] == s2[i])
 
@@ -206,6 +220,8 @@ BOOL nstrequal (int length, char *s1, char *s2)
 
 	int i = 0;
 
+    printf("nstrequal\n");
+
 	while (s1[i] == s2[i])
 
 	{
@@ -227,6 +243,8 @@ BOOL nstrequal (int length, char *s1, char *s2)
 int rabs (int i)
 
 {
+
+    printf("rabs\n");
 
 	if (i < 0)
 
@@ -256,11 +274,11 @@ char * cstring (CLEAN_STRING s)
 
 {
 
-	static char *cstr = (char *) NULL;
+    static char *cstr = (char *) NULL;
 
 
 
-/* rprintf("{cstring"); */
+    rprintf("{cstring");
 
 	if (cstr)
 
@@ -294,7 +312,7 @@ CLEAN_STRING cleanstring (char *s)
 
 	static CLEAN_STRING result_clean_string = NULL;
 
-     rprintf("[cleanstring: "); 
+    rprintf("[cleanstring: "); 
 
 	if (result_clean_string)
 
@@ -330,17 +348,21 @@ OS WinReleaseCString (PSTR cs, OS ios)
 
 {
 
-/*		rprintf("(RCS: \"%s\"", cs); */
+	rprintf("(RCS: \"%s\"", cs);
 
 
 
 	if (cs)
 
+    {
+
 		rfree (cs);
 
+    }
 
 
-/*		rprintf(")\n"); */
+
+	rprintf(")\n");
 
 
 
@@ -354,7 +376,7 @@ void WinGetCString (PSTR cs, OS ios, CLEAN_STRING * cls, OS * oos)
 
 {
 
-/*	rprintf("<Gcs"); */
+	rprintf("<Gcs");
 
 
 
@@ -362,7 +384,7 @@ void WinGetCString (PSTR cs, OS ios, CLEAN_STRING * cls, OS * oos)
 
 	*oos = ios;
 
-/*	rprintf(">\n"); */
+	rprintf(">\n");
 
 }	/* WinGetCString */
 
@@ -372,7 +394,7 @@ void WinGetCStringAndFree (PSTR cs, OS ios, CLEAN_STRING * cls, OS * oos)
 
 {
 
-/*	rprintf("{GcsF"); */
+	rprintf("{GcsF");
 
 	*cls = cleanstring (cs);
 
@@ -380,7 +402,7 @@ void WinGetCStringAndFree (PSTR cs, OS ios, CLEAN_STRING * cls, OS * oos)
 
 	rfree (cs);
 
-/*	rprintf("}\n"); */
+	rprintf("}\n");
 
 }	/* WinGetCStringAndFree */
 
@@ -392,7 +414,7 @@ void WinMakeCString (CLEAN_STRING s, OS ios, PSTR * cs, OS * oos)
 
 {
 
-/*		rprintf("(MCS: \""); */
+	rprintf("(MCS: \"");
 
 	*cs = (char *) rmalloc ((s->length) + 1);
 
@@ -406,7 +428,7 @@ void WinMakeCString (CLEAN_STRING s, OS ios, PSTR * cs, OS * oos)
 
 	*oos = ios;
 
-/*	  rprintf("\"%s)\n",*cs); */
+    rprintf("\"%s)\n",*cs);
 
 }	/* WinMakeCString */
 
@@ -420,7 +442,7 @@ int nCopyAnsiToWideChar (LPWORD lpWCStr, LPSTR lpAnsiIn)
 
 	int nChar = 0;
 
-
+    printf("nCopyAnsiToWideChar\n");
 
 	do
 
@@ -570,6 +592,8 @@ void CheckF (BOOL theCheck, char *checkText, char *checkMess,
 
 {
 
+    printf("CheckF\n");
+
 	if (!theCheck)
 
 	{
@@ -626,7 +650,7 @@ void DumpMem (int *ptr, int lines)
 
 
 
-	/*rprintf ("DUMP FROM %d\n", ptr);*/
+	rprintf ("DUMP FROM %d\n", ptr);
 
 
 
@@ -714,7 +738,7 @@ void printCCI (CrossCallInfo * pcci)
 
 	{
 
-			case CcRETURN0:
+		case CcRETURN0:
 
 			{
 
@@ -1069,6 +1093,30 @@ void printCCI (CrossCallInfo * pcci)
 				rprintf ("CcRqENDPAINT");
 
 			} break;
+
+        case CcRqSETSCROLLPOS:
+
+            {
+
+                rprintf("CcRqSETSCROLLPOS");
+
+            } break;
+
+        case CcRqSETSCROLLRANGE:
+
+            {
+
+                rprintf("CcRqSETSCROLLRANGE");
+
+            } break;
+
+        case CcRqSETSCROLLSIZE:
+
+            {
+
+                rprintf("CcRqSETSCROLLSIZE");
+
+            } break;
 
 		/*case CcRqGETDC:*/ /* hwnd; HDC result. */
 
@@ -3103,6 +3151,8 @@ gchar *createMnemonicString(gchar *source)
 	gchar *dest;
 
 	gchar *s;
+
+    printf("createMnemonicString\n");
 
 
 

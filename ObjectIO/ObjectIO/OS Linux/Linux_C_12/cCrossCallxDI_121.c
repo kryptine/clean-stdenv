@@ -21,7 +21,7 @@
 GtkWidget *gActiveTopLevelWindow = NULL;
 gboolean gInMouseDown = FALSE;
 gboolean gInKey       = FALSE;
-int gCurChar;
+gint gCurChar;
 
 
 /*	GetSDIClientWindow finds the first SDI client window of the argument hwnd.
@@ -52,22 +52,24 @@ static HWND GetSDIClientWindow (HWND hwndFrame)
 
 /*	Sending keyboard events to Clean thread:
 */
-void SendKeyDownToClean (GtkWidget *parent, GtkWidget *child, int c)
+void SendKeyDownToClean (GtkWidget *parent, GtkWidget *child, gint c)
 {
     printf("SendKeyDownToClean\n");
-	SendMessage5ToClean (CcWmKEYBOARD, parent, child, c, KEYDOWN, GetModifiers ());
+	SendMessage5ToClean (CcWmKEYBOARD, parent, child, c, KEYDOWN,
+                    GetModifiers());
 }
 
-void SendKeyStillDownToClean (GtkWidget *parent, GtkWidget *child, int c)
+void SendKeyStillDownToClean (GtkWidget *parent, GtkWidget *child, gint c)
 {
     printf("SendKeyStillDownToClean\n");
-	SendMessage5ToClean (CcWmKEYBOARD, parent, child, c, KEYREPEAT, GetModifiers ());
+	SendMessage5ToClean (CcWmKEYBOARD, parent, child, c, KEYREPEAT,
+                    GetModifiers());
 }
 
-void SendKeyUpToClean (GtkWidget *parent, GtkWidget *child, int c)
+void SendKeyUpToClean (GtkWidget *parent, GtkWidget *child, gint c)
 {
     printf("SendKeyUpToClean\n");
-	SendMessage5ToClean (CcWmKEYBOARD, parent, child, c, KEYUP, GetModifiers ());
+	SendMessage5ToClean (CcWmKEYBOARD, parent, child, c, KEYUP, GetModifiers());
 }
 
 static void prcs(GtkWidget *widget, gpointer data)
@@ -81,8 +83,10 @@ static void prcs(GtkWidget *widget, gpointer data)
 
 static GtkWidget *get_client(GtkWidget *widget)
 {
+	GtkWidget *box;
     printf("get_client\n");
-	GtkWidget *box = gtk_bin_get_child(GTK_BIN(widget));
+
+    box = gtk_bin_get_child(GTK_BIN(widget));
 	if (box)
 	{
 		GtkWidget *client = NULL;
@@ -91,9 +95,10 @@ static GtkWidget *get_client(GtkWidget *widget)
 	}
 
 	return NULL;
-};
+}
 
-static void frame_focus_in_handler(GtkWidget *widget, GdkEventFocus *event, gpointer user_data)
+static void frame_focus_in_handler(GtkWidget *widget, GdkEventFocus *event,
+                gpointer user_data)
 {
     printf("frame_focus_in_handler\n");
 	SendMessage1ToClean (CcWmACTIVATE, get_client(widget));
@@ -101,13 +106,17 @@ static void frame_focus_in_handler(GtkWidget *widget, GdkEventFocus *event, gpoi
 	gActiveTopLevelWindow = widget;
 }
 
-static void frame_focus_out_handler(GtkWidget *widget, GdkEventFocus *event, gpointer user_data)
+static void frame_focus_out_handler(GtkWidget *widget, GdkEventFocus *event,
+                gpointer user_data)
 {
-	GtkWidget *client = get_client(widget);
+	GtkWidget *client;
     printf("frame_focus_out_handler\n");
 
+	client = get_client(widget);
 	if (gInKey)
+    {
 		SendKeyUpToClean (client, client, gCurChar);
+    }
 
 	SendMessage1ToClean (CcWmDEACTIVATE, client);
 	GTK_WIDGET_GET_CLASS(widget)->focus_out_event(widget, event);
@@ -115,14 +124,19 @@ static void frame_focus_out_handler(GtkWidget *widget, GdkEventFocus *event, gpo
 }
 
 
-static gboolean frame_delete_handler(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+static gboolean frame_delete_handler(GtkWidget *widget, GdkEvent *event,
+                gpointer user_data)
 {
     printf("frame_delete_handler\n");
 	if (gActiveTopLevelWindow == widget)
+    {
 		gActiveTopLevelWindow = NULL;
+    }
 
 	if (gtk_object_get_data(GTK_OBJECT (widget), "gtk-drag-dest") != NULL)
+    {
 		gtk_drag_dest_unset(widget);
+    }
 
 	SendMessage1ToClean (CcWmPROCESSCLOSE, widget);
 	return gtk_true();
@@ -145,7 +159,7 @@ static void frame_drag_data_handler
 		{
 			guchar *s = data->data;
 			guchar *e = s + data->length - 2;
-			char *d = filenames;
+			gchar *d = filenames;
 
 			while (s < e)
 			{
@@ -155,30 +169,46 @@ static void frame_drag_data_handler
 			*d = 0;
 
 			gtk_drag_finish (context, TRUE, FALSE, time);
-			SendMessage2ToClean (CcWmPROCESSDROPFILES, (int) widget, (int) filenames);
+			SendMessage2ToClean (CcWmPROCESSDROPFILES, (gint) widget,
+                            (gint) filenames);
 		}
     }
 	else
+    {
   		gtk_drag_finish (context, FALSE, FALSE, time);
+    }
 }
 
-static gboolean frame_key_press_handler(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+static gboolean frame_key_press_handler(GtkWidget *widget, GdkEventKey *event,
+                gpointer user_data)
 {
-	GtkWidget *client = get_client(widget);
+	GtkWidget *client;
+    gint c;
     printf("frame_key_press_handler\n");
-	int c = (event->length > 0) ? event->string[0] : CheckVirtualKeyCode (event->keyval);
-	if (!c) return gtk_false();
+
+	client = get_client(widget);
+    
+	c = (event->length > 0) ?
+            event->string[0] : CheckVirtualKeyCode (event->keyval);
+	if (!c)
+    {
+        return gtk_false();
+    }
 
 	if (event->keyval == GDK_Tab)
+    {
 		return gtk_false();
+    }
 
 	GTK_WIDGET_GET_CLASS(widget)->key_press_event(widget, event);
 
 	if (gInKey)
 	{
 		if (gCurChar == c)
+        {
 			SendKeyStillDownToClean (client, client, gCurChar);
-		else
+        }
+        else
 		{
 			SendKeyUpToClean (client, client, gCurChar);
 			gCurChar = c;
@@ -195,11 +225,13 @@ static gboolean frame_key_press_handler(GtkWidget *widget, GdkEventKey *event, g
 	return gtk_true();
 }
 
-static gboolean frame_key_release_handler(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+static gboolean frame_key_release_handler(GtkWidget *widget, GdkEventKey *event,
+                gpointer user_data)
 {
-	GtkWidget *client = get_client(widget);
-
+	GtkWidget *client;
     printf("frame_key_release_handler\n");
+
+	client = get_client(widget);
 	if (event->keyval == GDK_Tab)
 		return gtk_false();
 
@@ -268,8 +300,10 @@ void EvalCcRqCREATESDIFRAMEWINDOW (CrossCallInfo *pcci)	/* accept file open; fra
 
 static void frame_close_page_handler(GtkWidget *client)
 {
-  GtkWidget *window = gtk_notebook_get_nth_page(GTK_NOTEBOOK(client),  gtk_notebook_get_current_page(GTK_NOTEBOOK(client)));
+    GtkWidget *window;
     printf("frame_close_page_handler\n");
+
+    window = gtk_notebook_get_nth_page(GTK_NOTEBOOK(client),  gtk_notebook_get_current_page(GTK_NOTEBOOK(client)));
 	SendMessage1ToClean(CcWmCLOSE, window);
 }
 
@@ -297,16 +331,22 @@ static void frame_notebook_right_handler(GtkWidget *client)
 	gtk_notebook_set_tab_pos(GTK_NOTEBOOK(client), GTK_POS_RIGHT);
 }
 
-static void frame_switch_page_handler(GtkNotebook *notebook,GtkNotebookPage *page,gint page_num,gpointer user_data)
+static void frame_switch_page_handler(GtkNotebook *notebook,
+                GtkNotebookPage *page, gint page_num, gpointer user_data)
 {
-  // send deactivate message for old
+    /* send deactivate message for old */
+	gint old_page_num;
     printf("frame_switch_page_handler\n");
-	gint old_page_num = g_list_index(notebook->children, notebook->cur_page);
-	SendMessage1ToClean (CcWmDEACTIVATE, gtk_notebook_get_nth_page(notebook, old_page_num));
+	old_page_num = g_list_index(notebook->children, notebook->cur_page);
+    
+	SendMessage1ToClean (CcWmDEACTIVATE, gtk_notebook_get_nth_page(notebook,
+                            old_page_num));
 
-	// send activate message for new
-	SendMessage1ToClean (CcWmACTIVATE, gtk_notebook_get_nth_page(notebook, page_num));
-	gActiveTopLevelWindow = gtk_widget_get_parent(gtk_widget_get_parent(GTK_WIDGET(notebook)));
+	/* send activate message for new */
+	SendMessage1ToClean (CcWmACTIVATE, gtk_notebook_get_nth_page(notebook,
+                            page_num));
+	gActiveTopLevelWindow = gtk_widget_get_parent(
+                    gtk_widget_get_parent(GTK_WIDGET(notebook)));
 
 }
 
@@ -316,10 +356,11 @@ void EvalCcRqCREATEMDIFRAMEWINDOW (CrossCallInfo *pcci)	/* show, accept file ope
 	GtkWidget *window, *client, *menuBar, *box;
 	GtkWidget *notebook_menu, *menu_item, *pages_menu;
 	GtkAccelGroup *accel_group;
-	GList *group;
+	GSList *group;
 
     printf("EvalCcRqCREATEMDIFRAMEWINDOW\n");
 	/* Create the window. */
+
 	window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	gtk_signal_connect (GTK_OBJECT(window), "delete-event",
 				GTK_SIGNAL_FUNC(frame_delete_handler),
@@ -401,7 +442,7 @@ void EvalCcRqCREATEMDIFRAMEWINDOW (CrossCallInfo *pcci)	/* show, accept file ope
 	gtk_menu_append(GTK_MENU(notebook_menu), menu_item);
 
 	menu_item = gtk_radio_menu_item_new_with_label(group, "Right");
-	group = gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(menu_item));
+	group = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(menu_item));
 	gtk_signal_connect_object (GTK_OBJECT (menu_item), "activate",
 		GTK_SIGNAL_FUNC (frame_notebook_right_handler), client);
 	gtk_menu_append(GTK_MENU(notebook_menu), menu_item);
@@ -424,30 +465,37 @@ void EvalCcRqCREATEMDIFRAMEWINDOW (CrossCallInfo *pcci)	/* show, accept file ope
 	MakeReturn4Cci (pcci, (int) window, (int) client, (int) menuBar, (int) pages_menu);
 }
 
-void EvalCcRqDESTROYWINDOW (CrossCallInfo *pcci) /* hwnd; no result. */
+void EvalCcRqDESTROYWINDOW (CrossCallInfo *pcci)
 {
     printf("EvalCcRqDESTROYWINDOW\n");
-	gtk_widget_destroy((GtkWidget *) pcci->p1);
+	gtk_widget_destroy(GTK_WIDGET(pcci->p1));
 	MakeReturn0Cci (pcci);
 }
 
-void EvalCcRqGETWINDOWPOS (CrossCallInfo *pcci)	/* hwnd;   width, heigth result */
+void EvalCcRqGETWINDOWPOS (CrossCallInfo *pcci)
 {
-    int left, top;
+	/* hwnd;   width, heigth result */
+    gint left, top;
 
 	printf("EvalCcRqGETWINDOWPOS\n");
-    gtk_window_get_position((GtkWindow*)pcci->p1, &left, &top);
+    gtk_window_get_position(GTK_WINDOW(pcci->p1), &left, &top);
 	MakeReturn2Cci (pcci, left, top);
 }
 
-void EvalCcRqGETCLIENTSIZE (CrossCallInfo *pcci) /* hwnd;		width, height result.  */
+void EvalCcRqGETCLIENTSIZE (CrossCallInfo *pcci) 
 {
-	printf("EvalCcRqGETCLIENTSIZE - %d\n",pcci->p1);
-	GtkWidget *frame = GTK_WIDGET(pcci->p1);/*(GtkWidget *) pcci->p1;*/
-	GtkWidget *vbox  = GTK_BIN(frame)->child;
-
+    /* hwnd;	width, height result.  */
     printf("EvalCcRqGETCLIENTSIZE\n");
-	MakeReturn2Cci (pcci, vbox->allocation.width, vbox->allocation.height);
+
+    if (pcci->p1 && (pcci->p1 != OS_NO_WINDOW_PTR))
+    {
+        GtkRequisition requisition;
+        GtkWidget *frame = GTK_WIDGET(pcci->p1);
+        gtk_widget_size_request(frame, &requisition);
+	    MakeReturn2Cci (pcci, requisition.width, requisition.height);
+    } else {
+        MakeReturn2Cci (pcci, 0, 0);
+    }
 }
 
 static void toolbar_handler(GtkWidget *widget, gpointer data)
@@ -457,70 +505,84 @@ static void toolbar_handler(GtkWidget *widget, gpointer data)
     printf("toolbar_handler\n");
 	toolbar = gtk_widget_get_parent(widget);
 	parent  = gtk_widget_get_parent(gtk_widget_get_parent(toolbar));
-	SendMessage4ToClean (CcWmBUTTONCLICKED, parent, toolbar, GetModifiers(), (int) data);
+	SendMessage4ToClean (CcWmBUTTONCLICKED, parent, toolbar, GetModifiers(),
+                    (int) data);
 }
 
 /*	Create a toolbar in a window. */
-void EvalCcRqCREATEMDITOOLBAR (CrossCallInfo *pcci)			/* hwnd, width, height; toolbarptr, full toolbar height result; */
+void EvalCcRqCREATEMDITOOLBAR (CrossCallInfo *pcci)
 {
+	/* hwnd, width, height; toolbarptr, full toolbar height result; */
 	GtkWidget *parent,*box,*toolbar;
 
     printf("EvalCcRqCREATEMDITOOLBAR\n");
-	parent  = (GtkWidget *) pcci->p1;
+    if (pcci->p1 && (pcci->p1 != OS_NO_WINDOW_PTR))
+    {
+	    parent = GTK_WIDGET(pcci->p1);
+        
+        box = gtk_bin_get_child(GTK_BIN(parent));
+        toolbar = gtk_toolbar_new();
 
-	box = gtk_bin_get_child(GTK_BIN(parent));
-	toolbar = gtk_toolbar_new();
+        gtk_box_pack_start (GTK_BOX (box), toolbar, FALSE, FALSE, 0);
+        gtk_widget_show(toolbar);
 
-	gtk_box_pack_start (GTK_BOX (box), toolbar, FALSE, FALSE, 0);
-	gtk_widget_show(toolbar);
-
-	gtk_window_maximize(GTK_WINDOW(parent));
-
-	MakeReturn2Cci (pcci, (int) toolbar, pcci->p3);
+        gtk_window_maximize(GTK_WINDOW(parent));
+	    MakeReturn2Cci (pcci, (int) toolbar, pcci->p3);
+    }
 }
 
 /*	Create a toolbar in a SDI window. */
-void EvalCcRqCREATESDITOOLBAR (CrossCallInfo *pcci)			/* hwnd, width, height; toolbarptr, full toolbar height result; */
+void EvalCcRqCREATESDITOOLBAR (CrossCallInfo *pcci)
 {
 	GtkWidget *parent,*box,*toolbar;
     printf("EvalCcRqCREATESDITOOLBAR\n");
 
-	parent  = (GtkWidget *) pcci->p1;
+    if (pcci->p1 && (pcci->p1 != OS_NO_WINDOW_PTR))
+    {
+        parent  = GTK_WIDGET(pcci->p1);
 
-	box = gtk_bin_get_child(GTK_BIN(parent));
-	toolbar = gtk_toolbar_new();
+        box = gtk_bin_get_child(GTK_BIN(parent));
+        toolbar = gtk_toolbar_new();
 
-	gtk_box_pack_start (GTK_BOX (box), toolbar, FALSE, FALSE, 0);
-	gtk_widget_show(toolbar);
+        gtk_box_pack_start (GTK_BOX(box), toolbar, FALSE, FALSE, 0);
+        gtk_widget_show(toolbar);
 
-	MakeReturn2Cci (pcci, (int) toolbar, pcci->p3);
+        MakeReturn2Cci (pcci, (int)toolbar, pcci->p3);
+    }
 }
 
 /*	Create a bitmap toolbar item. */
-void EvalCcRqCREATETOOLBARITEM (CrossCallInfo *pcci)		// hwnd, hbmp, index; no results;
+void EvalCcRqCREATETOOLBARITEM (CrossCallInfo *pcci)
 {
 	GtkWidget *toolbar;
 	GdkPixbuf *pixbuf;
-	int index;
+	gint index;
 
     printf("EvalCcRqCREATETOOLBARITEM\n");
-	toolbar = (GtkWidget *) pcci->p1;
-	pixbuf  = (GdkPixbuf *) pcci->p2;
-	index   = pcci->p3;
+    if (pcci->p1 && (pcci->p1 != OS_NO_WINDOW_PTR))
+    {
+        toolbar = GTK_WIDGET(pcci->p1);
+        pixbuf  = GDK_PIXBUF(pcci->p2);
+        index   = pcci->p3;
 
-	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, NULL, NULL, gtk_image_new_from_pixbuf(pixbuf), GTK_SIGNAL_FUNC(toolbar_handler), (gpointer) index);
-
-	MakeReturn0Cci (pcci);
+        gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, NULL, NULL,
+                    gtk_image_new_from_pixbuf(pixbuf),
+                    GTK_SIGNAL_FUNC(toolbar_handler), (gpointer) index);
+    }
+    MakeReturn0Cci (pcci);
 }
 
 /*	Create a separator toolbar item. */
-void EvalCcRqCREATETOOLBARSEPARATOR (CrossCallInfo *pcci)	// hwnd; no results;
+void EvalCcRqCREATETOOLBARSEPARATOR (CrossCallInfo *pcci)	
 {
 	GtkWidget *toolbar;
 
     printf("EvalCcRqCREATETOOLBARSEPARATOR\n");
-	toolbar = (GtkWidget *) pcci->p1;
-	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
+    if (pcci->p1 && (pcci->p1 != OS_NO_WINDOW_PTR))
+    {
+        toolbar = GTK_WIDGET(pcci->p1);
+        gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
+    }
 
 	MakeReturn0Cci (pcci);
 }

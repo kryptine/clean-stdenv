@@ -493,8 +493,9 @@ void EvalCcRqFAKEPAINT (CrossCallInfo *pcci)		/* hwnd; no result. */
 
 void EvalCcRqDESTROYMODALDIALOG (CrossCallInfo *pcci) /* hwnd; no result. */
 {
-	GtkWidget *dialog = GTK_WIDGET(pcci->p1);
+	GtkWidget *dialog;
     printf("EvalCcRqDESTROYMODALDIALOG\n");
+    dialog = GTK_WIDGET(pcci->p1);
 	gtk_dialog_response (GTK_DIALOG(dialog), 0);
 	MakeReturn0Cci (pcci);
 }
@@ -532,9 +533,11 @@ static void sw_focus_out_handler(GtkWidget *widget, GdkEventFocus *event, gpoint
 {
     printf("sw_focus_out_handler\n");
 	if (gInKey)
+    {
 		SendKeyUpToClean (widget, widget, gCurChar);
+    }
 
-	gInKey = FALSE;
+	gInKey = gtk_false();
 	gCurChar = 0;
 }
 
@@ -580,9 +583,10 @@ static gboolean sw_button_release_handler(GtkWidget *widget, GdkEventButton *eve
 
 static gboolean sw_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 {
-	GtkWidget *client = gtk_widget_get_parent(widget);
-
+	GtkWidget *client;
     printf("sw_motion_notify_handler\n");
+    client = gtk_widget_get_parent(widget);
+
 	if (gInMouseDown)
     {
 		SendMessage6ToClean(CcWmMOUSE, client, client, BUTTONSTILLDOWN, event->x, event->y, GetModifiers());
@@ -594,8 +598,9 @@ static gboolean sw_motion_notify_handler(GtkWidget *widget, GdkEventMotion *even
 
 static void client_size_allocate(GtkWidget *widget, GtkAllocation *allocation, gpointer user_data)
 {
-	GtkWidget *sw = GTK_WIDGET(user_data);
+	GtkWidget *sw;
     printf("client_size_allocate\n");
+    sw = GTK_WIDGET(user_data);
 	SendMessage4ToClean (CcWmSIZE, sw, allocation->width, allocation->height, (int)FALSE);
 }
 
@@ -609,7 +614,7 @@ static void client_size_request(GtkWidget *widget, GtkRequisition *requisition, 
 static gboolean client_delete_handler(GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
 	printf("client_delete_handler(%d,%d)\n", ((GtkRequisition *) user_data)->width, ((GtkRequisition *) user_data)->height);
-	g_free((GtkRequisition *) user_data);
+	g_free(((GtkRequisition*)user_data));
 	return gtk_true();
 }
 
@@ -645,7 +650,9 @@ void EvalCcRqCREATESDIDOCWINDOW (CrossCallInfo *pcci)	/* textptr, frameptr, pack
 	gtk_widget_set_uposition(window, left, top);
 
 	if (pwintitle)
+    {
 		gtk_window_set_title(GTK_WINDOW(window), pwintitle);
+    }
 
 	/* Create a Scrolled Window */
 	sw = gtk_scrolled_window_new (NULL, NULL);
@@ -692,7 +699,7 @@ void EvalCcRqCREATESDIDOCWINDOW (CrossCallInfo *pcci)	/* textptr, frameptr, pack
 	gtk_widget_realize(window);
 
 	{
-		int depth;
+		gint depth;
 		GdkRectangle ext_rect, rect;
 
 		gdk_window_get_geometry(window->window, &rect.x, &rect.y, &rect.width, &rect.height, &depth);
@@ -707,7 +714,7 @@ void EvalCcRqCREATESDIDOCWINDOW (CrossCallInfo *pcci)	/* textptr, frameptr, pack
 
 	gdk_window_set_events(GTK_BIN(sw)->child->window,
 	    gdk_window_get_events(GTK_BIN(sw)->child->window) | GDK_BUTTON_RELEASE_MASK | GDK_POINTER_MOTION_MASK);
-
+	fprintf(stderr,"EvalCcRqCREATESDIDOCWINDOW - window: %d sw: %d\n",window,sw);
 	MakeReturn1Cci (pcci, (int) sw);
 }
 
@@ -790,16 +797,23 @@ void EvalCcRqCREATEMDIDOCWINDOW (CrossCallInfo *pcci)		/* textptr, clientPtr, be
 
 void EvalCcRqSETWINDOWTITLE (CrossCallInfo *pcci)		/* hwnd, textptr		no result. */
 {
-	GtkWidget *window = GTK_WIDGET(pcci->p1);
+	GtkWidget *window;
 	gchar *title = (gchar *) pcci->p2;
 
     printf("EvalCcRqSETWINDOWTITLE\n");
+    window = GTK_WIDGET(pcci->p1);
 	if (GTK_IS_WINDOW(window))
+    {
 		gtk_window_set_title(GTK_WINDOW(window), title);
+    }
 	else
+    {
 		if (GTK_IS_LABEL(window))
+        {
 			gtk_label_set_text(GTK_LABEL(window), title);
+        }
 		else
+        {
 			if (GTK_IS_BUTTON(window))
 			{
 				title = createMnemonicString(title);
@@ -807,16 +821,26 @@ void EvalCcRqSETWINDOWTITLE (CrossCallInfo *pcci)		/* hwnd, textptr		no result. 
 				rfree(title);
 			}
 			else
+            {
 				if (GTK_IS_ENTRY(window))
+                {
 					gtk_entry_set_text(GTK_ENTRY(window), title);
+                }
 				else
+                {
 					if (GTK_IS_TEXT_VIEW(window))
 					{
 						GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(window));
 						gtk_text_buffer_set_text (buffer, title, strlen(title));
 					}
 					else
+                    {
 						printf("EvalCcRqSETWINDOWTITLE -> unknown widget type");
+                    }
+                }
+            }
+        }
+    }
 
 	MakeReturn0Cci (pcci);
 }
@@ -824,34 +848,53 @@ void EvalCcRqSETWINDOWTITLE (CrossCallInfo *pcci)		/* hwnd, textptr		no result. 
 void EvalCcRqGETWINDOWTEXT (CrossCallInfo *pcci) /* hwnd;  textptr result. */
 {
 	G_CONST_RETURN gchar *title = NULL;
-	char *textptr;
+    GtkWidget *window;
+	gchar *textptr;
 
     printf("EvalCcRqGETWINDOWTEXT\n");
-	GtkWidget *window = GTK_WIDGET(pcci->p1);
+	window = GTK_WIDGET(pcci->p1);
 
 	if (GTK_IS_WINDOW(window))
-			title = gtk_window_get_title(GTK_WINDOW(window));
-		else
-			if (GTK_IS_LABEL(window))
-				title = gtk_label_get_text(GTK_LABEL(window));
+    {
+		title = gtk_window_get_title(GTK_WINDOW(window));
+    }
+	else
+    {
+		if (GTK_IS_LABEL(window))
+        {
+			title = gtk_label_get_text(GTK_LABEL(window));
+        }
+        else
+        {
+			if (GTK_IS_BUTTON(window))
+            {
+				title = gtk_button_get_label(GTK_BUTTON(window));
+            }
 			else
-				if (GTK_IS_BUTTON(window))
-					title = gtk_button_get_label(GTK_BUTTON(window));
+            {
+				if (GTK_IS_ENTRY(window))
+                {
+					title = gtk_entry_get_text(GTK_ENTRY(window));
+                }
 				else
-					if (GTK_IS_ENTRY(window))
-						title = gtk_entry_get_text(GTK_ENTRY(window));
-					else
-						if (GTK_IS_TEXT_VIEW(window))
-						{
-							GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(window));
-							GtkTextIter start, end;
+                {
+					if (GTK_IS_TEXT_VIEW(window))
+	            	{
+						GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(window));
+						GtkTextIter start, end;
 
-							gtk_text_buffer_get_start_iter(buffer, &start);
-							gtk_text_buffer_get_end_iter(buffer, &end);
-							title = gtk_text_buffer_get_text (buffer, &start, &end, gtk_true());
-						}
-						else
-							printf("EvalCcRqSETWINDOWTITLE -> unknown widget type");
+						gtk_text_buffer_get_start_iter(buffer, &start);
+						gtk_text_buffer_get_end_iter(buffer, &end);
+						title = gtk_text_buffer_get_text (buffer, &start, &end, gtk_true());
+					}
+					else
+                    {
+						printf("EvalCcRqSETWINDOWTITLE -> unknown widget type");
+                    }
+                }
+            }
+        }
+    }
 
 	if (GTK_IS_BUTTON(window))
     {
@@ -860,7 +903,7 @@ void EvalCcRqGETWINDOWTEXT (CrossCallInfo *pcci) /* hwnd;  textptr result. */
 		textptr =  g_strdup(title);
     }
 
-	MakeReturn1Cci (pcci, (int) textptr);
+	MakeReturn1Cci (pcci, (gint) textptr);
 }
 
 /*	Update rect part of a window. */
@@ -949,9 +992,11 @@ void EvalCcRqSETWINDOWPOS (CrossCallInfo *pcci)	/* hwnd, x,y, update, include sc
 	parent         = gtk_widget_get_parent(widget);
 
 	if (parent)
+    {
 	  gtk_fixed_move(GTK_FIXED(parent), widget, x, y);
-	else
+    } else {
 	  gtk_widget_set_uposition(widget, x, y);
+    }
 
 	if (GTK_WIDGET_VISIBLE(widget) && update!=0)
 	{	// only if window is visible and update is requested, proceed to enforce update.
@@ -970,8 +1015,9 @@ void EvalCcRqSETWINDOWPOS (CrossCallInfo *pcci)	/* hwnd, x,y, update, include sc
 /*	Get the size of the bounding rectangle of windows/controls. */
 void EvalCcRqGETWINDOWSIZE (CrossCallInfo *pcci) /* hwnd; width,height result. */
 {
-	GtkAllocation *alloc = &((GTK_WIDGET(pcci->p1))->allocation);
+	GtkAllocation *alloc;
     printf("EvalCcRqGETWINDOWSIZE\n");
+    alloc = &((GTK_WIDGET(pcci->p1))->allocation);
 	MakeReturn2Cci (pcci, alloc->width, alloc->height);
 }
 
@@ -1020,9 +1066,14 @@ void EvalCcRqACTIVATEWINDOW (CrossCallInfo *pcci)	/* isMDI, clientPtr, thisWindo
 	thisWindow  = GTK_WIDGET(pcci->p3);
 
 	if (isMDI)
+    {
 		gtk_notebook_set_page(GTK_NOTEBOOK(client), gtk_notebook_page_num(GTK_NOTEBOOK(client), thisWindow));
+    }
 	else
+    {
 		 gtk_window_activate_focus (GTK_WINDOW(thisWindow));
+    }
+
 	MakeReturn0Cci (pcci);
 }
 
@@ -1129,37 +1180,37 @@ void DeleteCursors()
 	{
 		gdk_cursor_destroy(gArrowCursor);
 		gArrowCursor = NULL;
-	};
+	}
 
 	if (gBusyCursor)
 	{
 		gdk_cursor_destroy(gBusyCursor);
 		gIBeamCursor = NULL;
-	};
+	}
 
 	if (gIBeamCursor)
 	{
 		gdk_cursor_destroy(gIBeamCursor);
 		gIBeamCursor = NULL;
-	};
+	}
 
 	if (gCrossCursor)
 	{
 		gdk_cursor_destroy(gCrossCursor);
 		gCrossCursor = NULL;
-	};
+	}
 
 	if (gFatCrossCursor)
 	{
 		gdk_cursor_destroy(gFatCrossCursor);
 		gFatCrossCursor = NULL;
-	};
+	}
 
 	if (gHiddenCursor)
 	{
 		gdk_cursor_destroy(gHiddenCursor);
 		gHiddenCursor = NULL;
-	};
+	}
 }
 
 /*	Set range of scrollbars. */
@@ -1242,7 +1293,6 @@ void EvalCcRqSETSCROLLPOS (CrossCallInfo *pcci)	/* hwnd, iBar, thumb, maxx, maxy
     GtkAdjustment *adj;
 	gint thumb, iBar, maxx, maxy, extent;
 
-    printf("EvalCcRqSETSCROLLPOS: %d\n", thumb);
 	widget = GTK_WIDGET(pcci->p1);
 	iBar   = pcci->p2;
 	thumb  = pcci->p3;
@@ -1250,6 +1300,7 @@ void EvalCcRqSETSCROLLPOS (CrossCallInfo *pcci)	/* hwnd, iBar, thumb, maxx, maxy
 	maxy   = pcci->p5;		// maxy   is the bottom-most y coordinate of the enclosing rectangle of the scrollbar
 	extent = pcci->p6;		// extent is the width (height) of the vertical (horizontal) scrollbar
 
+    printf("EvalCcRqSETSCROLLPOS: %d\n", thumb);
     if (GTK_IS_SCROLLED_WINDOW(widget))
     {
         if (iBar == 0) /* Horizontal */
@@ -1351,7 +1402,7 @@ void EvalCcRqCREATEDIALOG (CrossCallInfo *pcci)	// textptr,parentptr,behindPtr; 
 {
 	GtkWidget *dialog, *fixed, *defctrl;
 	const gchar *pwintitle;
-	int x, y, w, h;
+	gint x, y, w, h;
 
     printf("EvalCcRqCREATEDIALOG\n");
 	pwintitle    = (const gchar *) pcci->p1;
@@ -1370,7 +1421,9 @@ void EvalCcRqCREATEDIALOG (CrossCallInfo *pcci)	// textptr,parentptr,behindPtr; 
 		NULL);
 
 	if (pwintitle)
+    {
 		gtk_window_set_title(GTK_WINDOW(dialog), pwintitle);
+    }
 
 	/* Create a Fixed Container */
 	fixed = gtk_fixed_new();
@@ -1391,12 +1444,14 @@ void EvalCcRqCREATEDIALOG (CrossCallInfo *pcci)	// textptr,parentptr,behindPtr; 
 	/* Adjust the pos and size of the frame window. */
 	gtk_widget_set_size_request(dialog, w, h);
 	if (x == -1 && y == -1)
+    {
 		gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+    }
 	else
-	  {
+    {
 	    gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_NONE);
 		gtk_widget_set_uposition(dialog, x, y);
-	  }
+    }
 
 	if (defctrl != NULL)
 	{
@@ -1416,7 +1471,7 @@ void EvalCcRqCREATEMODALDIALOG (CrossCallInfo *pcci)	/* textptr,parentptr; error
 {
 	GtkWidget *dialog, *fixed, *defctrl, *parent;
 	const gchar *pwintitle;
-	int x, y, w, h;
+	gint x, y, w, h;
 	guint delete_handler;
 
     printf("EvalCcRqCREATEMODALDIALOG\n");
@@ -1437,7 +1492,9 @@ void EvalCcRqCREATEMODALDIALOG (CrossCallInfo *pcci)	/* textptr,parentptr; error
 		NULL);
 
 	if (pwintitle)
+    {
 		gtk_window_set_title(GTK_WINDOW(dialog), pwintitle);
+    }
 
 	/* Create a Fixed Container */
 	fixed = gtk_fixed_new();
@@ -1458,12 +1515,14 @@ void EvalCcRqCREATEMODALDIALOG (CrossCallInfo *pcci)	/* textptr,parentptr; error
 	/* Adjust the pos and size of the frame window. */
 	gtk_widget_set_size_request(dialog, w, h);
 	if (x == -1 && y == -1)
+    {
 		gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
+    }
 	else
-	  {
+    {
 	    gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_NONE);
 		gtk_widget_set_uposition(dialog, x, y);
-	  }
+    }
 
 	if (defctrl != NULL)
 	{
@@ -1479,8 +1538,9 @@ void EvalCcRqCREATEMODALDIALOG (CrossCallInfo *pcci)	/* textptr,parentptr; error
 
 static gboolean widget_focus_in_handler(GtkWidget *widget, GdkEventFocus *event, gpointer user_data)
 {
-	GtkWidget *my_widget = GTK_WIDGET(user_data);
+	GtkWidget *my_widget;
     printf("widget_focus_in_handler\n");
+    my_widget = GTK_WIDGET(user_data);
 	GTK_WIDGET_GET_CLASS(widget)->focus_in_event(widget, event);
 	SendMessage2ToClean (CcWmSETFOCUS, GetControlParent(my_widget), my_widget);
 	return gtk_true();
@@ -1488,10 +1548,11 @@ static gboolean widget_focus_in_handler(GtkWidget *widget, GdkEventFocus *event,
 
 static gboolean widget_focus_out_handler(GtkWidget *widget, GdkEventFocus *event, gpointer user_data)
 {
-	GtkWidget *my_widget = GTK_WIDGET(user_data);
-	GtkWidget *parent = GetControlParent(my_widget);
-
+	GtkWidget *my_widget, *parent;
     printf("widget_focus_out_handler\n");
+
+    my_widget = GTK_WIDGET(user_data);
+	parent = GetControlParent(my_widget);
 	GTK_WIDGET_GET_CLASS(widget)->focus_in_event(widget, event);
 
 	if (gInKey)
@@ -1507,21 +1568,33 @@ static gboolean widget_focus_out_handler(GtkWidget *widget, GdkEventFocus *event
 
 static gboolean widget_key_press_handler(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 {
-	GtkWidget *my_widget = GTK_WIDGET(user_data);
-	GtkWidget *parent = GetControlParent(my_widget);
+	GtkWidget *my_widget, *parent;
+    gint c;
     printf("widget_key_press_handler\n");
-	int c = (event->length > 0) ? event->string[0] : CheckVirtualKeyCode (event->keyval);
-	if (!c) return gtk_false();
+    
+    my_widget = GTK_WIDGET(user_data);
+    parent = GetControlParent(my_widget);
+	c = (event->length > 0) ?
+            event->string[0] : CheckVirtualKeyCode (event->keyval);
+    
+	if (!c)
+    {
+        return gtk_false();
+    }
 
 	if (event->keyval == GDK_Tab)
+    {
 		return gtk_false();
+    }
 
 	GTK_WIDGET_GET_CLASS(widget)->key_press_event(widget, event);
 
 	if (gInKey)
 	{
 		if (gCurChar == c)
+        {
 			SendKeyStillDownToClean (parent, my_widget, gCurChar);
+        }
 		else
 		{
 			SendKeyUpToClean (parent, my_widget, gCurChar);
@@ -1541,11 +1614,15 @@ static gboolean widget_key_press_handler(GtkWidget *widget, GdkEventKey *event, 
 
 static gboolean widget_key_release_handler(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
 {
-	GtkWidget *my_widget = GTK_WIDGET(user_data);
-
+	GtkWidget *my_widget;
     printf("widget_key_release_handler\n");
+
+    my_widget = GTK_WIDGET(user_data);
+    
 	if (event->keyval == GDK_Tab)
+    {
 		return gtk_false();
+    }
 
 	GTK_WIDGET_GET_CLASS(widget)->key_press_event(widget, event);
 
@@ -1605,9 +1682,11 @@ static gboolean widget_button_release_handler(GtkWidget *widget, GdkEventButton 
 
 static gboolean widget_motion_notify_handler(GtkWidget *widget, GdkEventMotion *event, gpointer user_data)
 {
-	GtkWidget *parent = GetControlParent(widget);
-
+	GtkWidget *parent;
     printf("widget_motion_notify_handler\n");
+
+    parent = GetControlParent(widget);
+    
 	if (gInMouseDown)
     {
 		SendMessage6ToClean(CcWmMOUSE, parent, widget, BUTTONSTILLDOWN, event->x, event->y, GetModifiers());
@@ -1662,19 +1741,24 @@ void EvalCcRqCREATECOMPOUND (CrossCallInfo *pcci)	/* hwnd, packed pos,w,h, scrol
 
 static void scrollbar_value_changed(GtkRange *range, gpointer user_data)
 {
-    gint scrollCode, controlKind, discr;
-    GtkWidget* widget = GTK_WIDGET(gtk_widget_get_parent_window(GTK_WIDGET(range)));
-    GtkAdjustment* adjustment = gtk_range_get_adjustment(range);
-    gint position = (gint)gtk_adjustment_get_value(adjustment);
-    gint *val = g_object_get_data(G_OBJECT(range), SCROLL_POS_KEY);
-
+    gint scrollCode, controlKind, discr, position, *val;
+    GdkWindow *parent_window;
+    GtkWidget *parent, *widget;
+    GtkAdjustment *adjustment;
     printf("scrollbar_value_changed\n");
+
+    parent_window = gtk_widget_get_parent_window(GTK_WIDGET(range));
+    parent = gtk_widget_get_parent(GTK_WIDGET(range));
+    adjustment = gtk_range_get_adjustment(range);
+    position = (gint)gtk_adjustment_get_value(adjustment);
+    val = g_object_get_data(G_OBJECT(range), SCROLL_POS_KEY);
+
     printf("Value: %d -- Old Value: %d\n", (int)position, (int) *val);
 
     discr = position - *val;
 
     /* Determine Scroll Code */
-    if (discr < 0)
+/*    if (discr < 0)
     {
             scrollCode = SB_LINEDOWN;
     } else if (discr > 0) {
@@ -1682,6 +1766,8 @@ static void scrollbar_value_changed(GtkRange *range, gpointer user_data)
     } else {
             scrollCode = SB_THUMBPOSITION;
     }
+*/
+    scrollCode = SB_THUMBPOSITION; /* hmm how do we determine proper scrollCode? */
 /*        case (GTK_SCROLL_STEP_UP):
         case (GTK_SCROLL_STEP_RIGHT):
         case (GTK_SCROLL_STEP_FORWARD):
@@ -1705,28 +1791,35 @@ static void scrollbar_value_changed(GtkRange *range, gpointer user_data)
     }*/
 
     printf("scrollCode: %d, position: %d\n", scrollCode, position);
-
+	
+	if (discr == 0)
+	{
+	    gtk_widget_queue_draw(range/*widget*/);
+		return;
+	}
     /*
      * If there is a parent, this is a slider (not a scrollbar)
      */
-    if (GTK_IS_SCROLLED_WINDOW(widget))
+    if (GTK_IS_SCROLLED_WINDOW(parent_window))
     {
         printf("Not a slider.\n");
         controlKind = (GTK_IS_HSCROLLBAR(range) ?
                         GTK_ORIENTATION_HORIZONTAL : GTK_ORIENTATION_VERTICAL);
     } else {
         printf("Hey -- it's a slider!\n");
-        range = GTK_WIDGET(gtk_widget_get_parent(GTK_WIDGET(range)));
+ //       range = GTK_WIDGET(gtk_widget_get_parent(GTK_WIDGET(range)));
         controlKind = SB_CTL;
+        widget = GTK_WIDGET(range);
     }
 
     *val = position;
     g_object_set_data(G_OBJECT(range), SCROLL_POS_KEY, (gpointer)val);
 
     /* Force redraw of changed widget */
-    SendMessage5ToClean(CcWmSCROLLBARACTION, (int)widget, (int)range, controlKind, scrollCode, position);
+    printf("scrollbar_value_changed - %p,%p,%p\n",widget,range,user_data);
+    SendMessage5ToClean(CcWmSCROLLBARACTION, (int)user_data, (int)range, controlKind, scrollCode, position);
    
-    gtk_widget_queue_draw(widget);
+    gtk_widget_queue_draw(range/*widget*/);
 }
 
 /*	Create scrollbars. */
@@ -1753,22 +1846,25 @@ void EvalCcRqCREATESCROLLBAR (CrossCallInfo *pcci)	/* hwnd, x,y,w,h bool; HWND r
 		scroll = gtk_vscrollbar_new(NULL);
     }
 
-	g_signal_connect(GTK_OBJECT(scroll), SCROLL_VALUE_CHANGED, G_CALLBACK(scrollbar_value_changed), NULL);
+	g_signal_connect(GTK_OBJECT(scroll), SCROLL_VALUE_CHANGED, G_CALLBACK(scrollbar_value_changed), parent);/*NULL);*/
     val = g_new(gint,1);
 	gtk_widget_set_size_request(scroll, w, h);
 	gtk_fixed_put(GetFixed(parent), scroll, x, y);
     *val = 0;
     g_object_set_data(G_OBJECT(scroll), SCROLL_POS_KEY, (gpointer)val);
 
+    printf("EvalCcRqCREATESCROLLBAR - %p,%p\n",parent,scroll);
 	MakeReturn1Cci (pcci, (int) scroll);
 }
 
 static void button_clicked (GtkButton *button, gpointer user_data)
 {
-	GtkWidget *wbutton = GTK_WIDGET(button);
-	GtkWidget *window  = GetControlParent(wbutton);
-
+	GtkWidget *wbutton, *window;
     printf("button_clicked\n");
+
+	wbutton = GTK_WIDGET(button);
+	window  = GetControlParent(wbutton);
+
 	switch (GPOINTER_TO_INT(user_data))
 	{
 		case ISOKBUTTON:
@@ -1785,9 +1881,11 @@ static void button_clicked (GtkButton *button, gpointer user_data)
 
 static gint button_expose_handler(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
-    GtkWidget *button = gtk_widget_get_parent(widget);
-    GtkWidget *parent = gtk_widget_get_parent(gtk_widget_get_parent(gtk_widget_get_parent(button)));
+    GtkWidget *button, *parent;
     printf("button_expose_handler\n");
+
+    button = gtk_widget_get_parent(widget);
+    parent = gtk_widget_get_parent(gtk_widget_get_parent(gtk_widget_get_parent(button)));
 	SendMessage3ToClean(CcWmDRAWCONTROL, (int) parent, (int) button, (int) GDK_DRAWABLE(event->window));
 	return 0;
 }
@@ -1796,7 +1894,7 @@ void EvalCcRqCREATEBUTTON (CrossCallInfo *pcci)	/* hwnd, x,y,w,h, kind;  HWND re
 {
 	GtkWidget *button, *parent;
     GtkRequisition asked;
-	int x, y, w, h, kind;
+	gint x, y, w, h, kind;
 
     printf("EvalCcRqCREATEBUTTON\n");
 	parent	= GTK_WIDGET(pcci->p1);
@@ -1835,7 +1933,7 @@ void EvalCcRqCREATEBUTTON (CrossCallInfo *pcci)	/* hwnd, x,y,w,h, kind;  HWND re
 void EvalCcRqCREATEICONBUT (CrossCallInfo *pcci)	/* hwnd, x,y,w,h,kind; HWND result. */
 {
 	GtkWidget *button, *parent, *drawing_area;
-	int x, y, w, h, kind;
+	gint x, y, w, h, kind;
 
     printf("EvalCcRqCREATEICONBUT\n");
 	parent	= GTK_WIDGET(pcci->p1);
@@ -1863,8 +1961,10 @@ void EvalCcRqCREATEICONBUT (CrossCallInfo *pcci)	/* hwnd, x,y,w,h,kind; HWND res
 
 static gint custom_expose_handler(GtkWidget *widget, GdkEventExpose *event, gpointer user_data)
 {
-	GtkWidget *parent = gtk_widget_get_parent(gtk_widget_get_parent(gtk_widget_get_parent(widget)));
+	GtkWidget *parent;
     printf("custom_expose_handler\n");
+    
+    parent = gtk_widget_get_parent(gtk_widget_get_parent(gtk_widget_get_parent(widget)));
 	SendMessage3ToClean(CcWmDRAWCONTROL, (int) parent, (int) widget, (int) GDK_DRAWABLE(event->window));
 	return 0;
 }
@@ -1984,10 +2084,12 @@ void EvalCcRqCREATEEDITTXT (CrossCallInfo *pcci) /* hwnd, x,y,w,h, flags; HWND r
 
 static void radio_button_clicked (GtkButton *button, gpointer user_data)
 {
-	GtkWidget *wbutton = GTK_WIDGET(button);
-	GtkWidget *window  = GetControlParent(wbutton);
-
+	GtkWidget *wbutton, *window;
     printf("radio_button_clicked\n");
+
+	wbutton = GTK_WIDGET(button);
+	window  = GetControlParent(wbutton);
+
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(wbutton)))
 		SendMessage4ToClean (CcWmBUTTONCLICKED, window, wbutton, GetModifiers (), 0);
 
@@ -2013,7 +2115,9 @@ void EvalCcRqCREATERADIOBUT (CrossCallInfo *pcci)		/* hwnd, x,y,w,h, isfirst;	HW
 		gFirstRadioButton = radio_btn;
 	}
 	else
+    {
 		radio_btn = gtk_radio_button_new_from_widget(GTK_RADIO_BUTTON(gFirstRadioButton));
+    }
 
 	gtk_button_set_use_underline(GTK_BUTTON(radio_btn), gtk_true());
     gtk_widget_set_size_request(radio_btn, w, h);
@@ -2069,10 +2173,13 @@ void EvalCcRqSETITEMCHECK (CrossCallInfo *pcci)	/* hwnd, bool; no result. */
 
 void EvalCcRqENABLECONTROL (CrossCallInfo *pcci) /* hwnd, bool; no result. */
 {
-	GtkWidget *widget = GTK_WIDGET(pcci->p1);
-	gboolean newSelect = (gboolean) pcci->p2;
-
+	GtkWidget *widget;
+	gboolean newSelect;
     printf("EvalCcRqENABLECONTROL\n");
+    
+    widget = GTK_WIDGET(pcci->p1);
+	newSelect = (gboolean) pcci->p2;
+
 	gtk_widget_set_sensitive(widget, newSelect);
 	MakeReturn0Cci (pcci);
 }
@@ -2123,10 +2230,14 @@ void EvalCcRqSHOWWINDOW (CrossCallInfo *pcci)	/* hwnd, show, activate; no result
 
 static void combo_changed_handler(GtkWidget *entry, gpointer user_data)
 {
-	int newsel = 0;
-	GtkWidget *combo = GTK_WIDGET(user_data);
-	GList *child = GTK_LIST(GTK_COMBO(combo)->list)->children;
+	gint newsel = 0;
+	GtkWidget *combo;
+    GList *child;
     printf("combo_changed_handler\n");
+
+	combo = GTK_WIDGET(user_data);
+	child = GTK_LIST(GTK_COMBO(combo)->list)->children;
+
 	while (child)
 	{
 		GtkWidget *item = GTK_WIDGET(child->data);
@@ -2194,10 +2305,10 @@ void EvalCcRqCREATEPOPUP (CrossCallInfo *pcci)	/* hwnd, x,y,w,h,isEditable;  HWN
 
 void EvalCcRqADDTOPOPUP (CrossCallInfo *pcci)	/* hwnd, textptr, enabled, selected, index; Pos result. */
 {
-	int pos;
+	gint pos;
 	GtkWidget *combo, *li;
 	gchar *text;
-	BOOL selected;
+	gboolean selected;
 
     printf("EvalCcRqADDTOPOPUP\n");
 	combo    = GTK_WIDGET(pcci->p1);
@@ -2211,7 +2322,9 @@ void EvalCcRqADDTOPOPUP (CrossCallInfo *pcci)	/* hwnd, textptr, enabled, selecte
 	pos = gtk_list_child_position(GTK_LIST(GTK_COMBO(combo)->list), li);
 
 	if (selected)
-	 	  gtk_list_select_item(GTK_LIST(GTK_COMBO(combo)->list), pos);
+    {
+	    gtk_list_select_item(GTK_LIST(GTK_COMBO(combo)->list), pos);
+    }
 
 	MakeReturn1Cci (pcci, pos);
 }
@@ -2219,7 +2332,7 @@ void EvalCcRqADDTOPOPUP (CrossCallInfo *pcci)	/* hwnd, textptr, enabled, selecte
 void EvalCcRqSELECTPOPUPITEM (CrossCallInfo *pcci)		/* hwnd, pos; no result */
 {
 	GtkWidget *combo;
-	int pos;
+	gint pos;
 
     printf("EvalCcRqSELECTPOPUP\n");
 	combo = GTK_WIDGET(pcci->p1);
@@ -2247,11 +2360,14 @@ void EvalCcRqRESTACKWINDOW (CrossCallInfo *pcci)		/* thewindow,behind; no result
 /*	Add controls to tooltip area. */
 void EvalCcRqADDCONTROLTIP (CrossCallInfo *pcci) /* parentPtr, controlPtr, textPtr; no result. */
 {
-	GtkWidget *parent  = GTK_WIDGET(pcci->p1);
-	GtkWidget *control = GTK_WIDGET(pcci->p2);
-	gchar *text = (gchar *)pcci->p3;
-
+	GtkWidget *parent, *control;
+    gchar *text;
     printf("EvalCcRqADDCONTROLTIP\n");
+
+	parent  = GTK_WIDGET(pcci->p1);
+	control = GTK_WIDGET(pcci->p2);
+	text = (gchar *)pcci->p3;
+
 	gtk_tooltips_set_tip(GTK_TOOLTIPS(gTooltip), control, text, text);
 
 	MakeReturn0Cci (pcci);
@@ -2260,10 +2376,12 @@ void EvalCcRqADDCONTROLTIP (CrossCallInfo *pcci) /* parentPtr, controlPtr, textP
 /*	Remove controls from tooltip area. */
 void EvalCcRqDELCONTROLTIP (CrossCallInfo *pcci) /* parentPtr, controlPtr; no result. */
 {
-	GtkWidget *parent  = GTK_WIDGET(pcci->p1);
-	GtkWidget *control = GTK_WIDGET(pcci->p2);
-
+	GtkWidget *parent, *control;
     printf("EvalCcRqDELCONTROLTIP\n");
+
+	parent  = GTK_WIDGET(pcci->p1);
+	control = GTK_WIDGET(pcci->p2);
+
 	gtk_tooltips_set_tip(GTK_TOOLTIPS(gTooltip), control, NULL, NULL);
 
 	MakeReturn0Cci (pcci);
@@ -2381,9 +2499,8 @@ OS InstallCrossCallWindows (OS ios)
     return ios;
 }
 
-int GetUpdateRect(HWND hwnd, RECT updateRect, gboolean ok)
+int GetUpdateRect(OSWindowPtr hwnd, GdkRectangle *updateRect, gboolean ok)
 {
         printf("GetUpdateRect\n");
-        updateRect = NULL;
         return 0;
 }

@@ -1,7 +1,4 @@
 #include "util_121.h"
-#define RECT void*
-#define HWND void*
-
 extern OSWindowPtr ghCaretWnd;
 
 extern void DeleteCursors(); /* Delete all created mouse cursors */
@@ -13,4 +10,4 @@ extern void DeleteCursors(); /* Delete all created mouse cursors */
 extern OS InstallCrossCallWindows (OS);
 
 /* GetUpdateRect */
-extern int GetUpdateRect(HWND hWin, RECT updateRect, gboolean ok);
+extern int GetUpdateRect(OSWindowPtr, GdkRectangle*, gboolean);

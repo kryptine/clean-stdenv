@@ -16,8 +16,9 @@ extern GtkWidget *gActiveTopLevelWindow;
 
 void EvalCcRqDIRECTORYDIALOG (CrossCallInfo *pcci)		/* no params;  bool, textptr result; */
 {
-	GtkWidget *file_selector = gtk_file_selection_new("Select directory");
+	GtkWidget *file_selector;
     printf("EvalCcRqDIRECTORYDIALOG\n");
+	file_selector = gtk_file_selection_new("Select directory");
 
 	if (gActiveTopLevelWindow)
 	{
@@ -60,9 +61,10 @@ void EvalCcRqDIRECTORYDIALOG (CrossCallInfo *pcci)		/* no params;  bool, textptr
 
 void EvalCcRqFILEOPENDIALOG (CrossCallInfo *pcci)		/* no params;  bool, textptr result; */
 {
-	GtkWidget *file_selector = gtk_file_selection_new("Open");
-
+	GtkWidget *file_selector;
     printf("EvalCcFILEOPENDIALOG\n");
+	file_selector = gtk_file_selection_new("Open");
+
 	if (gActiveTopLevelWindow)
 	{
 		gtk_widget_set_parent(file_selector, gActiveTopLevelWindow);
@@ -105,8 +107,9 @@ void EvalCcRqFILEOPENDIALOG (CrossCallInfo *pcci)		/* no params;  bool, textptr 
 
 void EvalCcRqFILESAVEDIALOG (CrossCallInfo *pcci)		/* promptptr, nameptr; bool, textptr result; */
 {
-	GtkWidget *file_selector = gtk_file_selection_new((gchar *) pcci->p1);
+	GtkWidget *file_selector;
     printf("EvalCcFILESAVEDDIALOG\n");
+	file_selector = gtk_file_selection_new((gchar *) pcci->p1);
 
 	if (gActiveTopLevelWindow)
 	{
