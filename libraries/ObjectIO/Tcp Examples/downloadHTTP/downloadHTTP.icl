@@ -7,7 +7,7 @@ module downloadHTTP
 //	The program has been written in Clean 1.3.2 and uses the Clean Standard Object I/O library 1.2
 //	
 //	**************************************************************************************************
-import StdIO
+
 import	StdEnv, StdTCP, StdMaybe
 from	StdSystem import ticksPerSecond
 

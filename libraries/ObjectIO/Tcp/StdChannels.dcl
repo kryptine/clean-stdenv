@@ -9,10 +9,8 @@ definition module StdChannels
 from	StdMaybe		import	Maybe
 from	StdOverloaded	import	==, toString
 from	channelenv		import	ChannelEnv
-from	iostate import PSt, IOSt
-import StdPStClass
 
-instance ChannelEnv World, (PSt  .l), (IOSt .l)
+instance ChannelEnv World
 
 ///////////////////////////////// receive channels /////////////////////////////////
 
