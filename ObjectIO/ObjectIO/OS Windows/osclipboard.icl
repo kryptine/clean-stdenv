@@ -31,4 +31,4 @@ OSgetClipboardContent tb
 
 OSgetClipboardVersion :: !Int !*OSToolbox -> (!Int,!*OSToolbox)
 OSgetClipboardVersion nr tb
-	= (if (isEven nr) (nr+1) (nr-1),tb)
+	= WinGetClipboardCount tb

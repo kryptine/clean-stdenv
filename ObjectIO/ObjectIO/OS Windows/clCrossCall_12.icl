@@ -4,7 +4,7 @@ implementation module clCrossCall_12
 
 import StdBool, StdClass, StdInt, StdMisc, StdString, StdTuple
 import ostoolbox
-import code from "cCrossCall_12.obj", "cdebug_12.obj", "cpicture_12.obj", "htmlhelp.obj", "util_12.obj",/*MW11*/ "cprinter_12.obj", "cTCP.obj"
+import code from "cCrossCall_12.obj", "cdebug_12.obj", "cpicture_12.obj", /*"htmlhelp.obj",*/ "util_12.obj",/*MW11*/ "cprinter_12.obj", "cTCP.obj"
 import code from library "advapi32_library",
                  library "comctl32_library",
                  library "kernel32_library",
@@ -239,6 +239,7 @@ CcRqCREATESDIFRAMEWINDOW	:== 1813		// PA: added to create SDI frame window
 CcRqCLIPBOARDHASTEXT		:== 1812
 CcRqGETCLIPBOARDTEXT		:== 1811
 CcRqSETCLIPBOARDTEXT		:== 1810
+CcRqGETCLIPBOARDCOUNT		:== 1809		/* PA: added to retrieve clipboard count. */
 
 CcRqDIRECTORYDIALOG			:==	1802		/* PA: added to create directory selector dialog. */
 CcRqFILESAVEDIALOG			:== 1801

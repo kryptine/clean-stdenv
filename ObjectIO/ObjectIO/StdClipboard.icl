@@ -49,11 +49,11 @@ where
 	removeDuplicateClipItems [item:items]
 		# (_,_,items)	= Remove (eqClipboardType item) undef items
 		= [item:removeDuplicateClipItems items]
-		where
-			eqClipboardType :: !ClipboardItem !ClipboardItem -> Bool
-			eqClipboardType (ClipboardString _) item	= case item of
-															(ClipboardString _)	-> True
-															_					-> False
+	where
+		eqClipboardType :: !ClipboardItem !ClipboardItem -> Bool
+		eqClipboardType (ClipboardString _) item	= case item of
+														(ClipboardString _)	-> True
+														_					-> False
 	removeDuplicateClipItems items
 		= items
 	

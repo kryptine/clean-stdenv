@@ -20,6 +20,7 @@ CF_UNICODETEXT      :==	13
 CF_ENHMETAFILE      :==	14
 //	PA: end of addition.
 
-WinGetClipboardText :: !*OSToolbox -> (!String, !*OSToolbox)
-WinSetClipboardText :: !String !*OSToolbox -> *OSToolbox
-WinHasClipboardText :: !*OSToolbox -> (!Bool,!*OSToolbox)
+WinGetClipboardText ::         !*OSToolbox -> (!String,!*OSToolbox)
+WinSetClipboardText :: !String !*OSToolbox ->           *OSToolbox
+WinHasClipboardText ::         !*OSToolbox -> (!Bool,  !*OSToolbox)
+WinGetClipboardCount::         !*OSToolbox -> (!Int,   !*OSToolbox)

@@ -37,7 +37,8 @@ WinSetClipboardText :: !String !*OSToolbox -> *OSToolbox
 WinSetClipboardText text tb
 	# (textptr,tb)	= WinMakeCString text tb
 	# (_,tb)		= IssueCleanRequest2 (ErrorCallback2 "SetClipboardText") (Rq1Cci CcRqSETCLIPBOARDTEXT textptr) tb
-	= WinReleaseCString textptr tb
+	# tb			= WinReleaseCString textptr tb
+	= tb
 
 WinHasClipboardText :: !*OSToolbox -> (!Bool,!*OSToolbox)
 WinHasClipboardText tb
@@ -47,3 +48,12 @@ WinHasClipboardText tb
 	  				CcWASQUIT	-> False
 	  				_			-> abort "[WinHasClipboardText] expected CcRETURN1 value."
 	= (ok,tb)
+
+WinGetClipboardCount :: !*OSToolbox -> (!Int,!*OSToolbox)
+WinGetClipboardCount tb
+	# (rcci,tb)			= IssueCleanRequest2 (ErrorCallback2 "GetClipboardCount") (Rq0Cci CcRqGETCLIPBOARDCOUNT) tb
+	  clipboardCount	= case rcci.ccMsg of
+	  						CcRETURN1	-> rcci.p1
+	  						CcWASQUIT	-> 0
+	  						other		-> abort "[WinGetClipboardCount] expected CcRETURN1 value.\n"
+	= (clipboardCount,tb)
