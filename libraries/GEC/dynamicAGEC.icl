@@ -31,8 +31,8 @@ where
 	prettyVal  v  	= fst (toStringDynamic (dynamic v))
 */
 
-dynamicAGEC2 :: d -> AGEC d | TC d
-dynamicAGEC2 dv = mkAGEC { toGEC   = toExpr
+dynamicAGEC :: d -> AGEC d | TC d
+dynamicAGEC dv = mkAGEC { toGEC   = toExpr
 						 , fromGEC = fromExpr dv
 						 , updGEC  = updExpr  dv
 						 , value   = dv
@@ -56,7 +56,7 @@ where
 
 	prettyVal x				= fst (toStringDynamic (dynamic x))
 
-dynamicAGEC :: a -> AGEC a | TC a & gGEC {|*|} a	 					
+/*dynamicAGEC :: a -> AGEC a | TC a & gGEC {|*|} a	 					
 dynamicAGEC v = mkAGEC { toGEC   = toExpr
 					  , fromGEC = fromExpr
 					  , updGEC  = updExpr
@@ -79,7 +79,7 @@ where
 						(x::(a -> b)) = Display (strip(s +++ " "))
 						else		  = Display (fst(toStringDynamic (dynamic v)) +++ " ")  // +++ " " caused by bug in Display
 	prettyType v	= Display (":: " +++ (snd(toStringDynamic (dynamic v))) +++ " ")
-
+*/
 	
 :: DynString = DynStr Dynamic String
 
