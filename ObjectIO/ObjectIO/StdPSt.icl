@@ -20,6 +20,37 @@ import	StdReceiver, receiverid, receiverhandle, receiverdevice, channelenv // MW
 
 /*	PSt is an environment instance of the class FileEnv (see StdFile).
 */
+instance FileSystem (PSt .l .p) where
+	fopen :: !{#Char} !Int !(PSt .l .p) -> (!Bool,!*File,!PSt .l .p)
+	fopen fName fMode pState
+		# ((ok,file),pState)	= accFiles (fopen` fName fMode) pState
+		= (ok,file,pState)
+	where
+		fopen` :: !{#Char} !Int !*Files -> (!(!Bool,!*File),!*Files)
+		fopen` fName fMode files
+			# (ok,file,files)	= fopen fName fMode files
+			= ((ok,file),files)
+	
+	fclose :: !*File !(PSt .l .p) -> (!Bool,!PSt .l .p)
+	fclose file pState
+		= accFiles (fclose file) pState
+	
+	stdio :: !(PSt .l .p) -> (!*File,!PSt .l .p)
+	stdio pState
+		= accFiles stdio pState
+	
+	sfopen :: !{#Char} !Int !(PSt .l .p) -> (!Bool,!File,!PSt .l .p)
+	sfopen fName fMode pState
+		# ((ok,sfile),pState)	= accFiles (sfopen` fName fMode) pState
+		= (ok,sfile,pState)
+	where
+		sfopen` :: !{#Char} !Int !*Files -> (!(!Bool,!File),!*Files)
+		sfopen` fName fMode files
+			# (ok,file,files)	= sfopen fName fMode files
+			= ((ok,file),files)
+
+/*	PSt is an environment instance of the class FileEnv (see StdFile).
+*/
 instance FileEnv (PSt .l .p) where
 	accFiles :: !.(*Files -> (.x,*Files)) !*(PSt .l .p) -> (!.x,!*PSt .l .p)
 	accFiles accfun pState=:{io}

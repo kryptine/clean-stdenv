@@ -1253,10 +1253,10 @@ where
 			# (found,itemHs,s)	= setWElement (setCompoundScrollFun direction scrollFun) id itemH.wItems` s
 			= (found,{itemH & wItems`=itemHs},s)
 		| direction==Horizontal && isJust hScroll
-			# info				= {info & compoundHScroll=appMaybe (setScrollFun scrollFun) hScroll}
+			# info				= {info & compoundHScroll=mapMaybe (setScrollFun scrollFun) hScroll}
 			= (True,{itemH & wItemInfo`=CompoundInfo` info},s)
 		| direction==Vertical && isJust vScroll
-			# info				= {info & compoundVScroll=appMaybe (setScrollFun scrollFun) vScroll}
+			# info				= {info & compoundVScroll=mapMaybe (setScrollFun scrollFun) vScroll}
 			= (True,{itemH & wItemInfo`=CompoundInfo` info},s)
 		| otherwise
 			= (True,itemH,s)

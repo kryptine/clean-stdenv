@@ -18,6 +18,7 @@ from	channelenv	import  ChannelEnv // MW11++
 
 
 /*	PSt is an environment instance of the following classes:
+	- FileSystem	(see StdFile)
 	- FileEnv		(see StdFile)
 	- FileSelectEnv	(see StdFileSelect)
 	- TimeEnv		(see StdTime)
@@ -27,6 +28,7 @@ from	channelenv	import  ChannelEnv // MW11++
 	
 	IOSt is also an environment instance of the classes FileEnv, TimeEnv & ChannelEnv
 */
+instance FileSystem		(PSt .l .p)
 instance FileEnv		(PSt .l .p), (IOSt .l .p) // MW11 added IOSt
 instance FileSelectEnv	(PSt .l .p)
 instance TimeEnv		(PSt .l .p), (IOSt .l .p) // MW11 added IOSt
