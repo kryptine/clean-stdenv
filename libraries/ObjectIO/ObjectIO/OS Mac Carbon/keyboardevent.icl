@@ -302,45 +302,6 @@ pressDefaultButton return mods wsH=:{wshHandle= Nothing} // pState
 	= abort "pressDefaultButton: unexpected placeholder"
 
 //--
-/*
-getControlsItemPtr :: !Int !*[*WElementHandle .ls .pst] -> (!Bool,!(!OSWindowPtr,!ControlKind),!*[*WElementHandle .ls .pst])
-getControlsItemPtr itemNr [itemH:itemHs]
-	# (found,result,itemH)				= getControlItemPtr itemNr itemH
-	| found
-		= (found,result,[itemH:itemHs])
-	| otherwise
-		# (found,result,itemHs)			= getControlsItemPtr itemNr itemHs
-		= (found,result,[itemH:itemHs])
-where
-	getControlItemPtrFromwItems itemNr (WItemHandle itemH=:{wItems})
-		# (found,result,items)			= getControlsItemPtr itemNr wItems
-		= (found,result,WItemHandle {itemH & wItems = items})
-	getControlItemPtrFromwItems itemNr _ = abort "getControlItemPtrFromwItems: called with non-item handle"
-
-	getControlItemPtr :: !Int !(WElementHandle .ls .pst) -> (!Bool,!(!OSWindowPtr,!ControlKind),!(WElementHandle .ls .pst))
-	getControlItemPtr itemNr (WItemHandle itemH=:{wItems,wItemNr,wItemSelect,wItemInfo,wItemKind,wItemPtr,wItemPos,wItemSize})
-		| itemNr == wItemNr
-			= (True,(wItemPtr,wItemKind),WItemHandle itemH)
-		= case wItemKind of
-			IsCompoundControl			-> getControlItemPtrFromwItems itemNr (WItemHandle itemH)
-			IsLayoutControl				-> getControlItemPtrFromwItems itemNr (WItemHandle itemH)
-			_							-> (False,(0,IsButtonControl),WItemHandle itemH)
-				
-	getControlItemPtr cPtr (WListLSHandle itemHs)
-		# (found,result,itemHs)		= getControlsItemPtr cPtr itemHs
-		= (found,result,WListLSHandle itemHs)
-	
-	getControlItemPtr cPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs})
-		# (found,result,itemHs)		= getControlsItemPtr cPtr itemHs
-		= (found,result,WExtendLSHandle {wExH & wExtendItems=itemHs})
-	
-	getControlItemPtr cPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs})
-		# (found,result,itemHs)		= getControlsItemPtr cPtr itemHs
-		= (found,result,WChangeLSHandle {wChH & wChangeItems=itemHs})
-
-getControlsItemPtr _ _
-	= (False,(0,IsButtonControl),[])
-*/
 ///
 
 getControlsItemNr :: !OSWindowPtr !*[*WElementHandle .ls .pst] -> (!Bool,!(!Int,!ControlKind),!*[*WElementHandle .ls .pst])
@@ -418,7 +379,7 @@ getControlFocusPtr wPtr wsH
 */
 	# ((err,itemPtr),_)	= GetKeyboardFocus wPtr OSNewToolbox
 	| itemPtr == 0
-		= (0,(OSNoWindowPtr,IsButtonControl),wsH)
+		= oldControlFocusPtr wPtr wsH
 	# wlsH = case wsH.wshHandle of
 				(Just wlsH) -> wlsH
 				_ -> abort "getControlFocusPtr unexpected placeholder"
@@ -427,6 +388,65 @@ getControlFocusPtr wPtr wsH
 						= getControlsItemNr itemPtr wH.whItems
 	# wsH				= {wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}}
 	= (itemNr,(itemPtr,itemKind),wsH)
+
+oldControlFocusPtr wPtr wsH
+	# (keyFocus,wsH)	= getWindowStateHandleKeyFocus wsH
+	# (focusItem,keyFocus)
+						= getCurrentFocusItem keyFocus
+	# wsH				= setWindowStateHandleKeyFocus keyFocus wsH
+	| isNothing focusItem
+		= (0,(OSNoWindowPtr,IsButtonControl),wsH)
+	# itemNr			= fromJust focusItem
+//	# {wshHandle = Just wlsH=:{wlsHandle=wH}}
+//						= wsH
+	# wlsH = case wsH.wshHandle of
+				(Just wlsH) -> wlsH
+				_ -> abort "getControlFocusPtr unexpected placeholder"
+	# wH = wlsH.wlsHandle
+	# (found,result,itemHs)
+						= getControlsItemPtr itemNr wH.whItems
+	# wsH				= {wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}}
+	= (itemNr,result,wsH)
+
+
+getControlsItemPtr :: !Int !*[*WElementHandle .ls .pst] -> (!Bool,!(!OSWindowPtr,!ControlKind),!*[*WElementHandle .ls .pst])
+getControlsItemPtr itemNr [itemH:itemHs]
+	# (found,result,itemH)				= getControlItemPtr itemNr itemH
+	| found
+		= (found,result,[itemH:itemHs])
+	| otherwise
+		# (found,result,itemHs)			= getControlsItemPtr itemNr itemHs
+		= (found,result,[itemH:itemHs])
+where
+	getControlItemPtrFromwItems itemNr (WItemHandle itemH=:{wItems})
+		# (found,result,items)			= getControlsItemPtr itemNr wItems
+		= (found,result,WItemHandle {itemH & wItems = items})
+	getControlItemPtrFromwItems itemNr _ = abort "getControlItemPtrFromwItems: called with non-item handle"
+
+	getControlItemPtr :: !Int !(WElementHandle .ls .pst) -> (!Bool,!(!OSWindowPtr,!ControlKind),!(WElementHandle .ls .pst))
+	getControlItemPtr itemNr (WItemHandle itemH=:{wItems,wItemNr,wItemSelect,wItemInfo,wItemKind,wItemPtr,wItemPos,wItemSize})
+		| itemNr == wItemNr
+			= (True,(wItemPtr,wItemKind),WItemHandle itemH)
+		= case wItemKind of
+			IsCompoundControl			-> getControlItemPtrFromwItems itemNr (WItemHandle itemH)
+			IsLayoutControl				-> getControlItemPtrFromwItems itemNr (WItemHandle itemH)
+			_							-> (False,(0,IsButtonControl),WItemHandle itemH)
+				
+	getControlItemPtr cPtr (WListLSHandle itemHs)
+		# (found,result,itemHs)		= getControlsItemPtr cPtr itemHs
+		= (found,result,WListLSHandle itemHs)
+	
+	getControlItemPtr cPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs})
+		# (found,result,itemHs)		= getControlsItemPtr cPtr itemHs
+		= (found,result,WExtendLSHandle {wExH & wExtendItems=itemHs})
+	
+	getControlItemPtr cPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs})
+		# (found,result,itemHs)		= getControlsItemPtr cPtr itemHs
+		= (found,result,WChangeLSHandle {wChH & wChangeItems=itemHs})
+
+getControlsItemPtr _ _
+	= (False,(0,IsButtonControl),[])
+
 //===
 
 nextKeyInputFocus wPtr wsH windows pState
