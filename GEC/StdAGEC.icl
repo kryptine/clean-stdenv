@@ -143,10 +143,14 @@ where
 		= gGEC_AGEC gGECa {gecArgs & gec_value=Just (hidAGEC a)} pSt
 
 
-AGECtoCGEC :: String (AGEC a) -> (GecCircuit a a) | gGEC{|*|} a
+AGECtoCGEC :: String	(AGEC a) 		-> (GecCircuit a a) 	| gGEC{|*|}, generate{|*|} a
 AGECtoCGEC sa agec =  (\a -> agec ^= a) @>> edit sa >>@ (\agec -> (^^ agec))
 
-CGECtoAGEC :: (GecCircuit a a ) a -> (AGEC a) | gGEC{|*|} a
+generate{|AGEC|} ga trace stream 
+	# (a, trace, _, stream) = ga trace stream
+	= (hidAGEC a, trace, \_ -> 0, stream)
+
+CGECtoAGEC :: 			(GecCircuit a a ) a 	-> (AGEC a) 	| gGEC{|*|} a		// Use CGEC as AGEC 
 CGECtoAGEC cgec a 
 = mkAGEC { toGEC   = \a _ -> {inout = (Hide a,Hide a), gec = (\(Hide a) -> a) @>> cgec >>@ (\a -> Hide a)}
 		 , fromGEC = \{inout = (a,Hide b)} = b

@@ -2,7 +2,8 @@ definition module StdArrow
 
 from StdFunc import id
 from StdTuple import fst, snd
-from StdGeneric import :: EITHER (..)
+
+:: EIther a b = LEft a | RIght b
 
 class Arrow arr
 where
@@ -12,7 +13,7 @@ where
 
 class ArrowChoice arr | Arrow arr
 where
-	left :: (arr a b) -> arr (EITHER a c) (EITHER b c)
+	left :: (arr a b) -> arr (EIther a c) (EIther b c)
 
 class ArrowApply arr | Arrow arr
 where
@@ -20,7 +21,7 @@ where
 
 class ArrowLoop arr | Arrow arr
 where
-	loop :: (arr (a, b) (c, b)) -> arr a c
+	loop :: (arr (a, b) (c, b)) -> arr a c 
 
 class ArrowCircuit arr | ArrowLoop arr
 where
@@ -44,8 +45,8 @@ returnA :== arr id
 //right :: (arr a b) -> arr (EITHER c a) (EITHER c b)
 right f :== arr mirror >>> left f >>> arr mirror
 where
-	mirror (LEFT x) = RIGHT x
-	mirror (RIGHT y) = LEFT y
+	mirror (LEft x) = RIght x
+	mirror (RIght y) = LEft y
 
 (++++) infix //:: (arr a b) (arr a` b`) -> arr (EITHER a a`) (EITHER b b`) | ArrowChoice arr
 (++++) l r :== left l >>> right r
@@ -53,8 +54,8 @@ where
 (|||) infix //:: (arr a b) (arr c b) -> arr (EITHER a c) b | ArrowChoice arr
 (|||) l r :== l ++++ r >>> arr untag
 where
-	untag (LEFT x) = x
-	untag (RIGHT x) = x
+	untag (LEft x) = x
+	untag (RIght x) = x
 
 //fix :: (arr (a, b) b) -> arr a b | ArrowLoop arr
 fix g :== loop (g >>> arr \b -> (b, b))

@@ -16,8 +16,8 @@ startCircuit :: !(GecCircuit a b) a *(PSt .ps) -> *PSt .ps
 
 // Lift visual editors to GecCircuit's
 
-edit 		:: String -> GecCircuit a a | gGEC{|*|} a 
-display 	:: String -> GecCircuit a a | gGEC{|*|} a
+edit 		:: String -> GecCircuit a a | gGEC{|*|}, generate{|*|} a
+display 	:: String -> GecCircuit a a | gGEC{|*|}, generate{|*|} a
 gecMouse	:: String -> GecCircuit a MouseState					// Assign a mouse to a fresh window
 
 // Arrow instance for GecCircuit
@@ -29,9 +29,13 @@ instance ArrowCircuit GecCircuit
 
 // Other GecCircuit combinators
 
+probe :: String -> GecCircuit a a | toString a
+
 feedback :: (GecCircuit a a) -> GecCircuit a a
 
+//initial :: a -> GecCircuit a a
 sink :: GecCircuit a Void
 source :: (GecCircuit a b) -> GecCircuit Void b
+flowControl :: (IncludeUpdate -> a -> Maybe (IncludeUpdate, b)) -> GecCircuit a b
 
 gecIO :: (A. .ps: a *(PSt .ps) -> *(b, *PSt .ps)) -> GecCircuit a b
