@@ -6,7 +6,7 @@ implementation module StdControlDef
 //	Definition of controls.
 
 
-import	StdIOCommon
+import	StdIOCommon, StdPictureDef
 
 
 ::	ButtonControl       ls pst = ButtonControl       String                                           [ControlAttribute *(ls,pst)]

@@ -10,7 +10,7 @@ definition module StdIOCommon
 
 import	StdOverloaded, StdString
 import	StdBitmap, StdIOBasic, StdKey, StdMaybe
-from	id	import	Id, RId, R2Id, RIdtoId, R2IdtoId, toString, ==
+from	id			import	Id, RId, R2Id, RIdtoId, R2IdtoId, toString, ==
 
 
 /*	The SelectState and MarkState types.				*/

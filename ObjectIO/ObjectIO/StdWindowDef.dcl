@@ -9,7 +9,7 @@ definition module StdWindowDef
 //	********************************************************************************
 
 
-import	StdIOCommon
+import	StdIOCommon, StdPictureDef
 
 
 ::	Dialog c ls pst = Dialog Title (c ls pst) [WindowAttribute *(ls,pst)]
