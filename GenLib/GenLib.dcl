@@ -10,3 +10,7 @@ import GenReduce
 import GenZip 
 import GenPrint
 import GenParse
+import GenCompress
+import GenMonad
+import GenHylo
+import GenFMap

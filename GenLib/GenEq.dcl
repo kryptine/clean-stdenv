@@ -5,7 +5,7 @@ import StdGeneric
 generic gEq a  :: a a -> Bool
 
 // base cases
-derive gEq Int, Char, Bool, Real, UNIT, PAIR, EITHER, CONS, FIELD, {}, {!} 
+derive gEq Int, Char, Bool, Real, String, UNIT, PAIR, EITHER, CONS, FIELD, {}, {!} 
 
 // standard types
 derive gEq [], (,), (,,), (,,,), (,,,,), (,,,,,), (,,,,,,), (,,,,,,,)

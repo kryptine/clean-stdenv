@@ -1,6 +1,6 @@
 implementation module GenMap
 
-import StdClass, StdArray, StdInt
+import StdClass, StdArray, StdInt, StdFunc
 import StdGeneric, _Array
 
 generic gMap a b :: .a -> .b
@@ -14,3 +14,4 @@ gMap{|{}|} f xs 				= mapArray f xs
 gMap{|{!}|} f xs				= mapArray f xs
 
 derive gMap [], (,), (,,),  (,,,), (,,,,), (,,,,,), (,,,,,,), (,,,,,,,)
+

@@ -8,7 +8,7 @@ derive gEq LexOrd
 generic gLexOrd a b :: a b -> LexOrd
 
 // base cases
-derive gLexOrd Char, Bool, Int, Real, UNIT, PAIR, EITHER, FIELD, CONS, [], {}, {!}
+derive gLexOrd Char, Bool, Int, Real, String, UNIT, PAIR, EITHER, FIELD, CONS, [], {}, {!}
 
 // standard types
 derive gLexOrd (,), (,,),  (,,,), (,,,,), (,,,,,), (,,,,,,), (,,,,,,,)
