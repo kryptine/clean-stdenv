@@ -1,6 +1,6 @@
 implementation module TcpIp
 
-import StdClass, StdBool, StdInt, StdArray, StdMisc, Marshall, StdDebug, StdString
+import StdClass, StdBool, StdInt, StdArray, StdMisc, Marshall, StdString
 import code from "windowsTcpIp.obj", library "windowsWS2_32_library"
 
 :: TcpIp a

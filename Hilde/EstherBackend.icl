@@ -1,7 +1,7 @@
 implementation module EstherBackend
 
 import EstherParser, StdMaybe
-import StdInt, StdString, StdList, StdBool, Debug, StdEnum, StdArray
+import StdInt, StdString, StdList, StdBool, StdEnum, StdArray, Debug
 
 :: Overloaded d t o = (|||) infixr 0 !(d -> t) !o
 :: Contexts a b = (&&&) infixr 0 !a !b
@@ -124,7 +124,7 @@ where
 		# typeVars = countTypeVars (dynamic Omega :: o -> t) 
 		  overloadedVars = countTypeVars (dynamic Omega :: o)
 		| occur overloadedVars typeVars = d
-		= raise UnsolvableOverloading //<<- snd (toStringDynamic d)
+		= raise UnsolvableOverloading
 	where
 		occur [x:xs] [y:ys] = y - x > 0 && occur xs ys
 		occur [] _ = True
@@ -152,8 +152,8 @@ where
 		=	debugShowWithOptions
 				[]//[DebugMaxChars 79, DebugMaxDepth 5, DebugMaxBreadth 20]
 */
-
-Omega = raise "Do NOT evaluate Omega"
+import StdMisc
+Omega = abort "Do NOT evaluate Omega"
 
 coreI = CoreCode (dynamic I :: A.a: a -> a)
 coreK = CoreCode (dynamic K :: A.a b: a b -> a)
@@ -177,7 +177,7 @@ P f g (x &&& y) = f x (g y)
 L f x y = f (x &&& y)
 R f y x = f (x &&& y)
 
-toStringDynamic :: !Dynamic -> (![String], !String)
+toStringDynamic :: !Dynamic -> ([String], String)
 toStringDynamic d=:(_ :: A.a: a) = prettyDynamic d
 toStringDynamic (e ||| c :: Overloaded d t o) = (value, type +++ " | " +++ contexts)
 where
@@ -200,7 +200,7 @@ where
 		listVariables _ = []
 toStringDynamic d = prettyDynamic d
 
-prettyDynamic :: !Dynamic -> (![String], !String)
+prettyDynamic :: !Dynamic -> ([String], String)
 prettyDynamic d = (v, t)
 where
 	v = case d of 

@@ -64,7 +64,7 @@ resolveNames{|NTterm|} (Plain e) vs st = (Plain e`, vs`, st`)
 where
 	(e`, vs`, st`) = resolveNames{|*|} e vs st
 
-derive resolveNames NTstatement, NTexpression, NTsugar, NTplain, NTlist, NTfunction, NTlambda, NTpattern, NTletDef, NTcase, NTcaseAlt, NTlistComprehension
+derive resolveNames NTstatement, NTexpression, NTsugar, NTplain, NTlist, NTfunction, NTlambda, NTpattern, NTletDef, NTcase, NTcaseAlt, NTlistComprehension, NTdynamic
 derive resolveNames +-, |-|, [], Maybe, (,)
 
 desugar :: !NTsugar -> NTexpression
@@ -132,7 +132,7 @@ where
 
 Value d p :== Plain (NameOrValue (NTvalue d p))
 
-derive fixInfix NTstatement, NTterm, NTsugar, NTlist, NTlistComprehension, NTlambda, NTpattern, NTlet, NTletDef, NTcase, NTcaseAlt, NTfunction, NTplain
+derive fixInfix NTstatement, NTterm, NTsugar, NTlist, NTlistComprehension, NTlambda, NTpattern, NTlet, NTletDef, NTcase, NTcaseAlt, NTfunction, NTplain, NTdynamic
 derive fixInfix +-, |-|, [], Maybe, (,), Scope
 
 derive bimap (,), (,,)
