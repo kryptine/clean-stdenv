@@ -18,7 +18,7 @@
 .export	_Select _select_code
 .export	_Nil _Cons
 
-.export	e_system_dAP e_system_nAP e_system_eaAP _ind
+.export	e_system_dAP e_system_nAP e_system_eaAP
 .export	e_system_dif e_system_lif e_system_sif e_system_nif e_system_eaif
 .export	_HnfReducer _hnf_reducer
 .export	_Defer _defer_code
@@ -66,6 +66,11 @@
 
 .desc _HnfReducer	_hnf_reducer	_hnf_reducer	0 0	"HnfReducer"
 | .desc _NfReducer	_nf_reducer	_nf_reducer	0 0	"NfReducer"
+
+.export e__system_kFinalizer
+.record e__system_kFinalizer diii 0 3 "Finalizer"
+.export e__system_kFinalizerGCTemp
+.record e__system_kFinalizerGCTemp daii 1 2 "FinalizerGCTemp"
 
 .o 0 2 i i
 _match_error
