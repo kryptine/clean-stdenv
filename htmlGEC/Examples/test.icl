@@ -8,7 +8,7 @@ derive gHGEC []
 
 Start world  = doHtml MyPage world
 
-derive gParse (,)
+//derive gParse (,)
 
 MyPage hst
 # (list,(listbody,hst)) = mkEditHGEC "list" HEdit [1] hst
@@ -21,6 +21,7 @@ MyPage hst
 		[ H1 "Counter Example"//, counter1
 		, T "test"
 		, listbody
+		, Td [Td_bgcolor  (`Col_XXX (HexNum H_0 H_0 H_0 H_0 H_0 H_0))]  [EmptyBody]
 		, counter1
 		, counter2
 		, myform

@@ -87,3 +87,5 @@ htmlAttrCmnd hdr attr txt
 
 htmlAttr :: !String !a -> Spaces FtoF | gHpr{|*|} a
 htmlAttr attrname attrvalue = (Spaces (print attrname <+ " = " <+ Quotes attrvalue))
+
+

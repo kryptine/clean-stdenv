@@ -107,7 +107,7 @@ None			:== [NoAttr]
 
 :: ColorOption
 			= Col_RGB Int Int Int
-			| Col_XXX Int
+			| `Col_XXX HexNum
 			| Col_Name ColorName
 
 :: ColorName = Red
@@ -146,8 +146,12 @@ None			:== [NoAttr]
 			| Inp_Name 			String
 			| Inp_Checked		Checked
 			| Inp_Size 			Int
+			| Inp_Disabled		Disabled
+			| Inp_ReadOnly		ReadOnly
 			| `Inp_ElemEvnts	FormElementEvents
 			| `Inp_MouseEvnts	MouseEvents
+			| Inp_Width			String
+			| Inp_Style			String
 
 :: Link_Attr = Lnk_Href 		Url
 			| Lnk_Target 		TargetOption
@@ -160,6 +164,7 @@ None			:== [NoAttr]
 			= Opt_Value			String
 			| Opt_Selected		Selected
 			| Opt_Disabled		Disabled
+			| Opt_Style			String
 
 :: RuleOption
 			= Rul_None
@@ -168,6 +173,8 @@ None			:== [NoAttr]
 			| Rul_Cols
 			| Rul_All				
 
+:: ReadOnly = ReadOnly
+
 :: Selected = Selected
 
 :: Select_Attr
@@ -175,6 +182,8 @@ None			:== [NoAttr]
 			| Sel_Multiple
 			| Sel_Name 			UniqueName
 			| Sel_Size 			Int
+			| Sel_Style			String
+			| Sel_Disabled		Disabled
 			| `Sel_ElemEvnts	FormElementEvents
 			
 :: Table_Attr = Tbl_Border 		Int
@@ -225,5 +234,9 @@ None			:== [NoAttr]
 			| IV Int
 			| RV Real
 			| BV Bool
+
+:: HexNum = HexNum HN HN HN HN HN HN
+
+:: HN = H_0 | H_1 | H_2 | H_3 | H_4 | H_5 | H_6 | H_F
 
 

@@ -29,15 +29,16 @@ encodeHidden (id,state) = ";i;" +++  encodeInfo id +++  ";s;" +++ state
 // decoding
 
 // all input information is obtained via the arguments given to the executable
+// defined as CAFs such that they are calculated only once
 
 GetArgs :: String 
-GetArgs = foldl (+++) "" [strings \\ strings <-: getCommandLine]
+GetArgs =: foldl (+++) "" [strings \\ strings <-: getCommandLine]
 
 ThisExe :: String
-ThisExe = mkString (urlDecode (takeWhile ((<>) '#') (mkList GetArgs)))
+ThisExe =: mkString (urlDecode (takeWhile ((<>) '#') (mkList GetArgs)))
 
 MyPhP :: String
-MyPhP = (mkString (takeWhile ((<>) '.') (mkList ThisExe))) +++ ".php"
+MyPhP =: (mkString (takeWhile ((<>) '.') (mkList ThisExe))) +++ ".php"
 
 UpdateInfo :: (String,String,String) // id + update , new , state
 UpdateInfo
@@ -48,9 +49,7 @@ UpdateInfo
 # (notused,input)	= scan '='  input
 # input				= skipping [';i;']  input
 # (state, input)	= scan ';' input
-//# input				= skipping ['s;'] input
-//# (state,  input)	= scan ';' input
-= 	( decode update
+=: ( decode update
 	, decode (Tl new)			// skip '='
 	, decode state)
 where
@@ -114,8 +113,6 @@ where
 	
 
 derive gParse (,), (,,)
-
-
 
 decodeInfo :: String -> Maybe a | gParse{|*|} a // parsing input parameters submitted to applications
 decodeInfo s = parseString (mkString (urlDecode (mkList s)))
