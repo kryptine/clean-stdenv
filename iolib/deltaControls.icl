@@ -160,7 +160,7 @@ DrawItemTitles able nr base lnht index wid defid state pic
 		pic2		=: UnableSelectItem wid defy lnht (DrawString item (MovePenTo (3,base) pic));
 		pic3		=: DrawString item (MovePenTo (3,base) pic);
 		base`		=: base + lnht;
-		defy		=: base -  base mod lnht ;
+		defy		=: base -  base rem lnht ;
 		defitem	=: index == defid;
 		};
 
@@ -440,7 +440,7 @@ GetNrFromState index state =   toInt c0  +  256 *  toInt c1  ;
 SetNrInState	:: !Int !Int !String -> String;
 SetNrInState index nr state =  (state := (index, c0)) := (inc index, c1);
 		where {
-		c0=: toChar (nr mod 256);
+		c0=: toChar (nr rem 256);
 		c1=: toChar (nr / 256);
 		};
 
@@ -616,13 +616,13 @@ SetSliderChanged changed (IntCS state)
 	=  IntCS state;
 
 GetSliderPos	:: !ControlState -> SliderPos;
-GetSliderPos (IntCS state) =  state mod 1000;
+GetSliderPos (IntCS state) =  state rem 1000;
 
 SetSliderPos	:: !SliderPos !ControlState -> ControlState;
-SetSliderPos pos (IntCS state) =  IntCS ( state -  state mod 1000   + pos);
+SetSliderPos pos (IntCS state) =  IntCS ( state -  state rem 1000   + pos);
 
 GetSliderMax	:: !ControlState -> SliderMax;
-GetSliderMax (IntCS state) =  (state mod 1000000) / 1000;
+GetSliderMax (IntCS state) =  (state rem 1000000) / 1000;
 
 IsHorizontal	:: !SliderDirection -> Bool;
 IsHorizontal Horizontal =  True;

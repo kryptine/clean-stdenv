@@ -167,7 +167,7 @@ DrawItemTitles able nr base lineH index width defId state pic
 		pic2				= UnableSelectItem	width defY lineH pic3;
 		pic3				= DrawString item (MovePenTo (3,base) pic);
 		base`				= base + lineH;
-		defY				= base - base mod lineH;
+		defY				= base - base rem lineH;
 		defItem				= index == defId;
 	};
  
@@ -475,7 +475,7 @@ SetNrInState :: !Int !Int !String -> String;
 SetNrInState index nr state
 	=	(state := (index, c0)) := (inc index, c1);
 	where {
-		c0 = toChar (nr mod 256);
+		c0 = toChar (nr rem 256);
 		c1 = toChar (nr / 256);
 	};
 
