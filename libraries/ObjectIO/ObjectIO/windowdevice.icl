@@ -74,8 +74,8 @@ windowClose pState=:{io=ioState}
 		  windows				= WindowSystemStateGetWindowHandles wDevice
 		# (inputTrack,ioState)	= IOStGetInputTrack ioState
 		# (tb,ioState)			= getIOToolbox ioState
-		# pState				= {pState & io=ioState}
 		  (wsHs,windows)		= (\windows=:{whsWindows}->(whsWindows,{windows & whsWindows=[]})) windows
+		# pState				= {pState & io=IOStSetDevice (WindowSystemState windows) ioState}
 		# (disposeInfo,(inputTrack,pState,tb))
 								= StateMap (disposeWindowStateHandle` osdinfo) wsHs (inputTrack,pState,tb)
 		# ioState				= setIOToolbox tb pState.io
@@ -89,9 +89,8 @@ windowClose pState=:{io=ioState}
 		# (idtable,ioState)		= IOStGetIdTable ioState
 		  (_,idtable)			= removeIdsFromIdTable (freeRIds++freeIds) idtable
 		# ioState				= IOStSetIdTable idtable ioState
-		  windows				= (\windows=:{whsFinalModalLS=finalLS}->{windows & whsFinalModalLS=finalLS++finalLSs}) windows
-		# ioState				= IOStSetDevice (WindowSystemState windows) ioState
-	//	# ioState				= IOStRemoveDeviceFunction WindowDevice ioState		PA: it is not clear whether this should be done
+	//	# ioState				= IOStRemoveDeviceFunctions WindowDevice ioState		// PA: it is not clear whether this should be done
+		# ioState				= setFinalLS finalLSs ioState
 		# pState				= {pState & io=ioState}
 		= pState
 where
@@ -103,6 +102,16 @@ where
 	
 	handleOSEvent :: !OSEvent !(PSt .l) -> (![Int],!PSt .l)
 	handleOSEvent osEvent pState = accContext (handleContextOSEvent osEvent) pState
+	
+	setFinalLS :: ![FinalModalLS] !(IOSt .l) -> IOSt .l
+	setFinalLS finalLSs ioState
+		# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+		| not found
+			= windowdeviceFatalError "WindowFunctions.dClose" "setFinalLS could not retrieve WindowSystemState from IOSt"
+		| otherwise
+			# windows				= WindowSystemStateGetWindowHandles wDevice
+			# windows				= {windows & whsFinalModalLS=windows.whsFinalModalLS++finalLSs}
+			= IOStSetDevice (WindowSystemState windows) ioState
 
 
 /*	windowIO handles the DeviceEvents that have been filtered by windowEvent.
@@ -206,6 +215,8 @@ where
 			# (osDelayEvents,ioState)= accIOToolbox (StrictSeqList (lostInputEvents ++ [createOSDeactivateControlEvent wids.wPtr info.ckfItemPtr])) ioState
 			# (osEvents,ioState)	= IOStGetEvents ioState
 			# ioState				= IOStSetEvents (OSappendEvents osDelayEvents osEvents) ioState
+			# windows				= setWindowHandlesWindow wsH windows
+			# ioState				= IOStSetDevice (WindowSystemState windows) ioState
 			# pState				= {pState & io=ioState}
 			= (deviceEvent,pState)
 	
@@ -299,6 +310,8 @@ where
 								= accIOToolbox (StrictSeqList (lostInputEvents ++ [createOSDeactivateWindowEvent wids.wPtr])) ioState
 			# (osEvents,ioState)= IOStGetEvents ioState
 			# ioState			= IOStSetEvents (OSappendEvents osDelayEvents osEvents) ioState
+			# windows			= setWindowHandlesWindow wsH windows
+			# ioState			= IOStSetDevice (WindowSystemState windows) ioState
 			# pState			= {pState & io=ioState}
 			= (deviceEvent,pState)
 	

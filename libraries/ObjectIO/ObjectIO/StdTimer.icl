@@ -103,20 +103,21 @@ eqTimerStateHandleId id tsH=:(TimerLSHandle {tHandle={tId}})
 
 closeTimer :: !Id !(IOSt .l) -> IOSt .l
 closeTimer id ioState
-	# (ok,tHs,ioState)	= IOStGetTimerHandles ioState
+	# (ok,tHs,ioState)		= IOStGetTimerHandles ioState
 	| not ok
 		= ioState
-	# (pid,ioState)		= IOStGetIOId ioState
-	# (rt,ioState)		= IOStGetReceiverTable ioState
-	# (tt,ioState)		= IOStGetTimerTable ioState
-	# (it,ioState)		= IOStGetIdTable ioState
-	  (rt,tt,it,tsHs)	= closetimer id pid rt tt it tHs.tTimers
-	# ioState			= IOStSetIdTable it ioState
-	# ioState			= IOStSetReceiverTable rt ioState
-	# ioState			= IOStSetTimerTable tt ioState
-	  tHs				= {tHs & tTimers=tsHs}
-	# ioState			= IOStSetDevice (TimerSystemState tHs) ioState
-	= ioState
+	| otherwise
+		# (pid,ioState)		= IOStGetIOId ioState
+		# (rt,ioState)		= IOStGetReceiverTable ioState
+		# (tt,ioState)		= IOStGetTimerTable ioState
+		# (it,ioState)		= IOStGetIdTable ioState
+		  (rt,tt,it,tsHs)	= closetimer id pid rt tt it tHs.tTimers
+		# ioState			= IOStSetIdTable it ioState
+		# ioState			= IOStSetReceiverTable rt ioState
+		# ioState			= IOStSetTimerTable tt ioState
+		  tHs				= {tHs & tTimers=tsHs}
+		# ioState			= IOStSetDevice (TimerSystemState tHs) ioState
+		= ioState
 where
 	closetimer :: !Id !SystemId !*ReceiverTable !*TimerTable !*IdTable ![TimerStateHandle .pst]
 							-> (!*ReceiverTable,!*TimerTable,!*IdTable,![TimerStateHandle .pst])
@@ -144,18 +145,19 @@ where
 
 getTimers :: !(IOSt .l) -> (![(Id,TimerType)],!IOSt .l)
 getTimers ioState
-	# (ok,tHs,ioState)	= IOStGetTimerHandles ioState
+	# (ok,tHs,ioState)		= IOStGetTimerHandles ioState
 	| not ok
 		= ([],ioState)
-	# (idtypes,timers)	= getidtypes tHs.tTimers
-	  tHs				= {tHs & tTimers=timers}
-	# ioState			= IOStSetDevice (TimerSystemState tHs) ioState
-	= (idtypes,ioState)
+	| otherwise
+		# (idtypes,timers)	= getidtypes tHs.tTimers
+		  tHs				= {tHs & tTimers=timers}
+		# ioState			= IOStSetDevice (TimerSystemState tHs) ioState
+		= (idtypes,ioState)
 where
 	getidtypes :: ![TimerStateHandle .pst] -> (![(Id,TimerType)],![TimerStateHandle .pst])
 	getidtypes [TimerLSHandle tlsH=:{tHandle=tH}:tsHs]
-		# (idtype, tH)	= getidtype  tH
-		  (idtypes,tsHs)= getidtypes tsHs
+		# (idtype, tH)		= getidtype  tH
+		  (idtypes,tsHs)	= getidtypes tsHs
 		= ([idtype:idtypes],[TimerLSHandle {tlsH & tHandle=tH}:tsHs])
 	where
 		getidtype :: !(TimerHandle .ls .pst) -> ((Id,TimerType),!TimerHandle .ls .pst)

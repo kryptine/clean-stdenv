@@ -67,25 +67,25 @@ disposeWindow wid pState=:{io=ioState}
 		= dispose wids wsH windows {pState & io=ioState}
 where
 	dispose :: !WIDS !(WindowStateHandle (PSt .l)) !(WindowHandles (PSt .l)) !(PSt .l) -> PSt .l
-	dispose wids=:{wId} wsH windows pState
-		# (disposeFun,pState)	= accPIO IOStGetInitIO pState
-		# pState				= disposeFun pState
+	dispose wids=:{wId} wsH windows pState=:{io=ioState}
+		# (_,_,windows)			= removeWindowHandlesWindow (toWID wId) windows	// Remove window placeholder
+		# (windows,ioState)		= enableProperWindows windows ioState			// PA: before disposing last modal window, the window and menu system should be enabled
+		# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+		# (disposeFun,ioState)	= IOStGetInitIO ioState
+		# pState				= disposeFun {pState & io=ioState}
 		# (osdinfo,ioState)		= IOStGetOSDInfo pState.io
 		# (inputTrack,ioState)	= IOStGetInputTrack ioState
-		  (_,_,windows)			= removeWindowHandlesWindow (toWID wId) windows
-		# (windows,ioState)		= enableProperWindows windows ioState	// PA: before disposing last modal window, the window and menu system should be enabled
 		# (tb,ioState)			= getIOToolbox ioState
 		# pState				= {pState & io=ioState}
 		# ((rids,ids,delayinfo,finalLS,inputTrack),(_,pState),tb)
 								= disposeWindowStateHandle osdinfo inputTrack handleOSEvent (wsH,pState) tb
 		# ioState				= setIOToolbox tb pState.io
 		# ioState				= IOStSetInputTrack inputTrack ioState
-		# ioState				= unbindRIds rids ioState				// When timers are part of windows, also unbind timers
+		# ioState				= unbindRIds rids ioState						// When timers are part of windows, also unbind timers
 		# (idtable,ioState)		= IOStGetIdTable ioState
 		  (_,idtable)			= removeIdsFromIdTable (rids++ids) idtable
 		# ioState				= IOStSetIdTable idtable ioState
-		# windows				= {windows & whsFinalModalLS=finalLS++windows.whsFinalModalLS}
-		# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+		# ioState				= addFinalLS finalLS ioState
 		# ioState				= bufferDelayedEvents delayinfo ioState
 		= {pState & io=ioState}
 	
@@ -97,6 +97,16 @@ where
 		# (modalWIDS,windows)	= getWindowHandlesActiveModalDialog windows
 		| isJust modalWIDS		= (windows,ioState)
 		| otherwise				= (windows,IOStSetIOIsModal Nothing ioState)
+	
+	addFinalLS :: ![FinalModalLS] !(IOSt .l) -> IOSt .l
+	addFinalLS finalLS ioState
+		# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+		| not found
+			= windowdisposeFatalError "disposeWindow" "could not restore final local window state"
+		| otherwise
+			# windows				= WindowSystemStateGetWindowHandles wDevice
+			# windows				= {windows & whsFinalModalLS=finalLS++windows.whsFinalModalLS}
+			= IOStSetDevice (WindowSystemState windows) ioState
 
 
 /*	disposeCursorInfo disposes all system resources associated with the given CursorInfo.

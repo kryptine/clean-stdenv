@@ -49,7 +49,7 @@ timerClose pState=:{io=ioState}
 		# ioState			= IOStSetReceiverTable rt ioState
 		# ioState			= IOStSetTimerTable tt ioState
 		# ioState			= IOStSetIdTable idtable ioState
-		# ioState			= IOStRemoveDevice TimerDevice ioState
+		# ioState			= IOStRemoveDevice TimerDevice ioState		// PA: this is redundant, because IOStGetDevice already removed it
 		# ioState			= IOStRemoveDeviceFunctions TimerDevice ioState
 		= {pState & io=ioState}
 where

@@ -84,7 +84,7 @@ menuClose pState=:{io=ioState}
 		  (_,(rt,it))				= StateMap (disposeIds ioid) mHs (rt,it)
 		# ioState					= IOStSetIdTable it ioState
 		# ioState					= IOStSetReceiverTable rt ioState
-		# ioState					= IOStRemoveDevice MenuDevice ioState
+		# ioState					= IOStRemoveDevice MenuDevice ioState		// PA: This is actually redundant, since IOStGetDevice already removed it
 		# ioState					= IOStRemoveDeviceFunctions MenuDevice ioState
 		= {pState & io=ioState}
 where

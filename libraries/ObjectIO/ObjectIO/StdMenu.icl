@@ -475,14 +475,15 @@ getMenus ioState
 	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
 	| not found
 		= ([],ioState)
-	# mHs						= MenuSystemStateGetMenuHandles mDevice
-	  (idtypes,msHs)			= AccessList getIdType mHs.mMenus
-	# ioState					= IOStSetDevice (MenuSystemState {mHs & mMenus=msHs}) ioState
-	= (tl idtypes,ioState)
+	| otherwise
+		# mHs					= MenuSystemStateGetMenuHandles mDevice
+		  (idtypes,msHs)		= AccessList getIdType mHs.mMenus
+		# ioState				= IOStSetDevice (MenuSystemState {mHs & mMenus=msHs}) ioState
+		= (tl idtypes,ioState)
 where
 	getIdType :: !(MenuStateHandle .pst) -> *((Id,MenuType),!MenuStateHandle .pst)
 	getIdType msH
-		# (id,msH)		= menuStateHandleGetMenuId msH
+		# (id,msH)				= menuStateHandleGetMenuId msH
 		= ((id,"Menu"),msH)
 
 
@@ -493,18 +494,19 @@ getMenuPos id ioState
 	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
 	| not found
 		= (Nothing,ioState)
-	# mHs						= MenuSystemStateGetMenuHandles mDevice
-	  (optIndex,msHs)			= getmenuindex id 0 mHs.mMenus
-	# ioState					= IOStSetDevice (MenuSystemState {mHs & mMenus=msHs}) ioState
-	= (optIndex,ioState)
+	| otherwise
+		# mHs					= MenuSystemStateGetMenuHandles mDevice
+		  (optIndex,msHs)		= getmenuindex id 0 mHs.mMenus
+		# ioState				= IOStSetDevice (MenuSystemState {mHs & mMenus=msHs}) ioState
+		= (optIndex,ioState)
 where
 	getmenuindex :: !Id !Int ![MenuStateHandle .pst] -> (!Maybe Int,![MenuStateHandle .pst])
 	getmenuindex id index [mH:mHs]
-		# (menu_id,mH)	= menuStateHandleGetMenuId mH
+		# (menu_id,mH)			= menuStateHandleGetMenuId mH
 		| id==menu_id
 			= (Just index,[mH:mHs])
 		| otherwise
-			# (optIndex,mHs)= getmenuindex id (index+1) mHs
+			# (optIndex,mHs)	= getmenuindex id (index+1) mHs
 			= (optIndex, [mH:mHs])
 	getmenuindex _ _ _
 		= (Nothing,[])
