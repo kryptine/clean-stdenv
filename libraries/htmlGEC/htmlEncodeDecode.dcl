@@ -11,6 +11,7 @@ GetArgs 		:: String 		// returns the arguments passed to this executable as is
 ThisExe			:: String		// name of this executable
 MyPhP 			:: String		// name of php script interface between server and this executable
 UpdateInfo  	:: (String,String,String,String) // update, new value, state, id of state
+CheckUpdateInfo :: (Maybe a, Maybe b, Maybe c, Maybe d) | gParse{|*|} a & gParse{|*|} b & gParse{|*|} c & gParse{|*|} d
 traceHtmlInput	:: Body			// to show in html page what we have received
 
 // encoding of special input

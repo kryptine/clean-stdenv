@@ -25,7 +25,7 @@ UpdateInfo
 # (x,      input)	= scan ';' input
 # (state,  input)	= scan ';' input
 # (who,    input)	= scan ';' input
-= (mkString update, mkString (Tl new), mkString state, mkString (Tl who))
+= (mkString update, mkString (Tl new), mkString (urlDecode state), mkString (Tl who))
 where
 	scan c list = case (span ((<>) c) list) of
 					(x,[])	= (x,[])
@@ -33,6 +33,10 @@ where
 	Tl [] = []
 	Tl list = tl list
 
+CheckUpdateInfo :: (Maybe a, Maybe b, Maybe c, Maybe d) | gParse{|*|} a & gParse{|*|} b & gParse{|*|} c & gParse{|*|} d
+CheckUpdateInfo = (parseString update, parseString new, parseString state, parseString id)
+where
+	(update, new, state, id) = UpdateInfo
 
 traceHtmlInput :: Body
 traceHtmlInput
