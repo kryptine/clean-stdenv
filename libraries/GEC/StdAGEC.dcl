@@ -2,39 +2,6 @@ definition module StdAGEC
 
 import genericgecs
 
-// simple lay out macro's
-
-derive gGEC (,) 							// A tuple-editor is used to place things next to each other
-											// A PAIR-editor by default places things below each other
-
-(<->) infixr 3	//:: a b -> (a,b)			// Place a and b next to each other	
-(<->) x y :== (x,y)
-(<|>) infixr 2	//:: a b -> (PAIR a b)		// Place a above b
-(<|>) x y :== PAIR x y
-
-// various buttons
-
-derive gGEC Button, UpDown
-
-:: Button  = 	Button String | Pressed
-:: UpDown  = 	UpPressed | DownPressed | Neutral
-
-// Mode = Display (non editable) ; Hide (invisable) ; Edit (regular)
-
-derive gGEC Mode
-
-:: Mode a 	= Display a
-			| Hide a
-			| Edit a
-			| EmptyMode
-
-// Timer editor: will cause an automatic update when it is part of any datastructure displayed in a gGEC
-
-derive gGEC Timed
-
-:: Timed = Timed (Int ->Int) Int		// function will be called automatically after given timeout in miliseconds						
-										// function will receive the time left and should set the new timeout time
-
 // BimapGEC:  make an a-value with a b-editor
 
 derive gGEC BimapGEC								
@@ -57,23 +24,3 @@ derive gGEC AGEC
 mkAGEC  	:: (BimapGEC a b) String -> AGEC a |  gGEC{|*|} b
 ^^			:: (AGEC a) -> a
 (^=) infixl	:: (AGEC a) a -> (AGEC a)
-
-
-// examples of abstract editors
-
-idGEC 			:: a   					-> AGEC a 		| gGEC {|*|} a				// identity editor  
-hidGEC 			:: a 					-> AGEC a 		| gGEC {|*|} a 				// identity, no editor created
-constGEC 		:: a 					-> AGEC a 					 				// identity, no editor created, constant
-modeGEC 		:: (Mode a) 			-> AGEC a 		| gGEC {|*|} a				// convert Mode to AGEC
-applyAGEC 		:: (b -> a) (AGEC b) 	-> AGEC a 		| gGEC {|*|} a & gGEC {|*|} b // apply fba; show both b and a
-horlistGEC 		:: [a] 					-> AGEC [a]		| gGEC {|*|} a 				// all elements of a list displayed in a row
-vertlistGEC 	:: [a] 					-> AGEC [a] 	| gGEC {|*|} a 				// all elements of a list displayed in a column
-tableGEC 		:: [[a]] 				-> AGEC [[a]] 	| gGEC {|*|} a  			// a vertical list of horizontal lists
-
-counterGEC 		:: a   					-> AGEC a 		| IncDec a & gGEC {|*|} a	// counter with UpDown buttons 
-calcGEC 		:: a [[(Button,a->a)]] 	-> AGEC a 		| gGEC {|*|} a 				// apply pressed function to argument
-listGEC 		:: Bool [a] 			-> AGEC [a] 	| gGEC {|*|} a				// list editor, set True for finite lists  
-
-intcalcGEC		:: Int 					-> AGEC Int									// create Int calculator with calculator buttons
-realcalcGEC 	:: Real 				-> AGEC Real								// create Real calculator with calculator buttons
-
