@@ -154,8 +154,8 @@ hideControl :: !Id !(IOSt .l) -> IOSt .l
 hideControl id ioState = hideControls [id] ioState
 
 setControlsShowState` :: !Bool ![Id] !*WState -> *WState
-setControlsShowState` show ids wState=:{wIds={wPtr},wRep,wTb,wMetrics}
-	# (wH,tb)	= setcontrolsshowstate ids show wMetrics wPtr wRep wTb
+setControlsShowState` show ids wState=:{wIds,wRep,wTb,wMetrics}
+	# (wH,tb)	= setcontrolsshowstate ids show wMetrics wIds wRep wTb
 	  wH		= invalidateWindowClipState` wH
 	= {wState & wRep=wH,wTb=tb}
 
