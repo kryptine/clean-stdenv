@@ -1,6 +1,6 @@
 definition module htmlPrintUtil
 
-// a collection of hand print routines to write html to Std Output
+// a collection of handy print routines to write html to Std Output
 // (c) MJP 2005
 
 import StdGeneric

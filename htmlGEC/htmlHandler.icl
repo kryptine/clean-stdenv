@@ -40,19 +40,37 @@ doHtml pagehandler world
 where
 	(Head head body,(_,lhst)) = pagehandler mkHSt
 
+// experimental function:
+
+mkEditHGEC2:: FormID HMode d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkEditHGEC2 uniqueid  mode data (inidx,lhst)
+=	case findInLocalStore uniqueid lhst 0 lhst of
+		(Just id, Just state,lhst)	-> mkSetHGEC uniqueid mode state (inidx,lhst)
+		(_,_,				 lhst)	-> mkSetHGEC uniqueid mode data (inidx,lhst)
+where
+	findInLocalStore :: String [(FormID,FormValue)] Int [(FormID,FormValue)] -> (Maybe Int, Maybe d,[(FormID,FormValue)]) | gParse{|*|} d
+	findInLocalStore s [] 			 _ lhst	 = (Nothing,Nothing,lhst)
+	findInLocalStore s [(id,st):lst] n lhst
+	| uniqueid == id = (Just n, parseString st, removeAt n lhst) 
+	| otherwise 	 = findInLocalStore s lst (n+1) lhst
+
 // simple editor for either editing or showing a simple value
 
-mkEditHGEC:: FormID HMode d HSt -> (d,(Body,HSt)) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkEditHGEC:: FormID HMode d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkEditHGEC uniqueid  HEdit data hst
 = mkViewHGEC uniqueid HEdit 
 	{toHGEC = id , updHGEC = \_ v -> v , fromHGEC = id , resetHGEC = id} data hst
-mkEditHGEC uniqueid  HDisplay data hst
-= mkViewHGEC uniqueid HDisplay 
+mkEditHGEC uniqueid  mode data hst
+= mkSetHGEC uniqueid mode data hst
+
+mkSetHGEC:: FormID HMode d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSetHGEC uniqueid  mode data hst
+= mkViewHGEC uniqueid mode 
 	{toHGEC = id , updHGEC = \_ _ -> data , fromHGEC = id , resetHGEC = id} data hst
 
 // editor with feedback to its self
 
-mkSelfHGEC  :: FormID 	(d -> d) d HSt -> (d,(Body,HSt)) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSelfHGEC  :: FormID 	(d -> d) d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkSelfHGEC uniqueid cbf initdata hst
 = mkViewHGEC uniqueid HEdit 
 	{toHGEC = id , updHGEC = update , fromHGEC = id , resetHGEC = id} initdata hst
@@ -62,19 +80,19 @@ where
 	
 // editor which applies the function to its argument
 
-mkApplyHGEC :: FormID (d -> d) d HSt -> (d,(Body,HSt)) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyHGEC :: FormID (d -> d) d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkApplyHGEC uniqueid cbf data hst
 = mkViewHGEC uniqueid HDisplay 
 	{toHGEC = id , updHGEC = \_ v = cbf data , fromHGEC = id, resetHGEC = id} data hst
 
 // editor which applies the function to its argument
 
-mkStoreHGEC :: FormID 	(d -> d) d HSt -> (d,(Body,HSt)) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkStoreHGEC :: FormID 	(d -> d) d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkStoreHGEC uniqueid cbf data hst
 = mkViewHGEC uniqueid HDisplay 
 	{toHGEC = id , updHGEC = \_ v = cbf v , fromHGEC = id, resetHGEC = id} data hst
 
-mkApplyEditHGEC	:: FormID d d HSt -> (d,(Body,HSt)) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyEditHGEC	:: FormID d d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkApplyEditHGEC uniqueid inputval initval hst
 = mkViewHGEC uniqueid HEdit 
 	{toHGEC = id , updHGEC = update , fromHGEC = id, resetHGEC = id} initval hst
@@ -84,9 +102,11 @@ where
 
 // swiss army nife editor that makes coffee too ...
 
-mkViewHGEC :: FormID HMode (HBimap d v) d HSt -> (d,(Body,HSt)) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
+mkViewHGEC :: FormID HMode (HBimap d v) d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
 mkViewHGEC uniqueid mode {toHGEC, updHGEC, fromHGEC, resetHGEC} data (inidx,lhsts) 
-= (newdata,gHGEC{|*|} mode nextview (0,[(uniqueid,viewtostore):lhsts]))
+//= (newdata,gHGEC{|*|} mode nextview (0,[(uniqueid,viewtostore):lhsts]))
+# (body,hst) = gHGEC{|*|} mode nextview (0,[(uniqueid,viewtostore):lhsts])
+= ((newdata,body),hst)
 where
 	initview 			= toHGEC data						// convert init data to view domain
 	(isupdated,newview) = updateFormInfo uniqueid initview	// has to form been updated or is it in the global storage ?	 
@@ -127,7 +147,7 @@ where
 							else = case CheckUpdate of
 								(Just (sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns) ,find sid CheckGlobalState) 
 								(Just (sid,pos,UpdS s),	_)			= (Just (pos,UpdS s)  ,find sid CheckGlobalState) 
-								(upd,new) 							= abort "cannot find global state" //(Nothing,Nothing)
+								(upd,new) 							= (Nothing, find uniqueid CheckGlobalState)
 		| otherwise = (Nothing, find uniqueid CheckGlobalState)
 
 		find :: FormId  String -> (Maybe a) | gParse{|*|} a

@@ -1,6 +1,6 @@
 definition module htmlEncodeDecode
 
-// encoding and decoding of information
+// encoding and decoding of information between browser and myprogram.exe via myprogram.php
 // (c) 2005 - MJP
 
 import StdMaybe

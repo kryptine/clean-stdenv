@@ -19,13 +19,13 @@ import StdHtml
 
 // handy HGEC's
 
-counterHGEC 		:: String 		a 		HSt -> (a		,(Body,HSt)) 	| +, -, one
-																		, gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-horlistHGEC 		:: String HMode [a] 	HSt -> ([a]		,(Body,HSt)) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-vertlistHGEC 		:: String HMode [a] 	HSt -> ([a]		,(Body,HSt)) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-table_hv_HGEC 		:: String HMode [[a]] 	HSt -> ([[a]]	,(Body,HSt)) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+counterHGEC 		:: String 		a 		HSt -> ((a		,Body),HSt) 	| +, -, one
+																			, gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+horlistHGEC 		:: String HMode [a] 	HSt -> (([a]	,Body),HSt) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+vertlistHGEC 		:: String HMode [a] 	HSt -> (([a]	,Body),HSt) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+table_hv_HGEC 		:: String HMode [[a]] 	HSt -> (([[a]]	,Body),HSt) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 
-assignTableFuncBut 	:: [[(String, a -> a)]] HSt -> (a -> a,(Body,HSt))
+assignTableFuncBut 	:: [[(String, a -> a)]] HSt -> ((a -> a,Body) ,HSt)
 
 
 

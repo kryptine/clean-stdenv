@@ -21,7 +21,7 @@ import StdHtml
 
 // HGEC collection:
 
-counterHGEC 	:: String a HSt -> (a,(Body,HSt)) | +, -, one,  gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+counterHGEC 	:: String a HSt -> ((a,Body),HSt) | +, -, one,  gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 counterHGEC name i hst = mkViewHGEC name HEdit bimap i hst
 where
 	bimap =	{ toHGEC 	= toCounter
@@ -44,42 +44,42 @@ where
 	up 		= CHButton defsize "+"
 	down	= CHButton defsize "-"
 
-horlistHGEC 	:: String HMode [a] 	HSt -> ([a]		,(Body,HSt)) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-horlistHGEC s mode [] hst  = ([],(EmptyBody,hst))
+horlistHGEC 	:: String HMode [a] 	HSt -> (([a],Body),HSt) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+horlistHGEC s mode [] hst  = (([],EmptyBody),hst)
 horlistHGEC s mode [x:xs] hst
-# (xs,(xsbody,hst)) 	= horlistHGEC s mode xs hst
-# (x, (xbody,   hst))  	= mkEditHGEC (s +++ toString (length xs)) mode x hst
-= ([x:xs],(xbody <=> xsbody,hst))
+# ((xs,xsbody),hst) = horlistHGEC s mode xs hst
+# ((x, xbody), hst) = mkEditHGEC (s +++ toString (length xs)) mode x hst
+= (([x:xs],xbody <=> xsbody),hst)
 	
-vertlistHGEC :: String HMode [a] HSt -> ([a],(Body,HSt)) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
-vertlistHGEC s mode [] hst  = ([],(EmptyBody,hst))
+vertlistHGEC :: String HMode [a] HSt -> (([a],Body),HSt) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
+vertlistHGEC s mode [] hst  = (([],EmptyBody),hst)
 vertlistHGEC s mode [x:xs] hst
-# (xs,(xsbody,hst)) 	= vertlistHGEC s mode xs hst
-# (x, (xbody,   hst))  	= mkEditHGEC (s +++ toString (length xs)) mode x hst
-= ([x:xs],(xbody <||> xsbody,hst))
+# ((xs,xsbody),hst)	= vertlistHGEC s mode xs hst
+# ((x, xbody), hst)	= mkEditHGEC (s +++ toString (length xs)) mode x hst
+= (([x:xs],xbody <||> xsbody),hst)
 
-table_hv_HGEC :: String HMode [[a]] HSt -> ([[a]],(Body,HSt)) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
-table_hv_HGEC s mode [] hst = ([],(EmptyBody,hst))
+table_hv_HGEC :: String HMode [[a]] HSt -> (([[a]],Body),HSt) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
+table_hv_HGEC s mode [] hst = (([],EmptyBody),hst)
 table_hv_HGEC s mode [x:xs] hst
-# (xs,(xsbody,hst)) 	= table_hv_HGEC s mode xs hst
-# (x, (xbody,  hst))  	= horlistHGEC (s +++ toString (length xs)) mode x hst
-= ([x:xs],(xbody <||> xsbody,hst))
+# ((xs,xsbody),hst)	= table_hv_HGEC s mode xs hst
+# ((x, xbody), hst)	= horlistHGEC (s +++ toString (length xs)) mode x hst
+= (([x:xs],xbody <||> xsbody),hst)
 
-assignTableFuncBut :: [[(String, a -> a)]] HSt -> (a -> a,(Body,HSt))
-assignTableFuncBut [] hst = (id,(EmptyBody,hst))
+assignTableFuncBut :: [[(String, a -> a)]] HSt -> ((a -> a,Body),HSt)
+assignTableFuncBut [] hst = ((id,EmptyBody),hst)
 assignTableFuncBut [row:rows] hst 
-# (rowsfun,(rowsb,hst)) = assignTableFuncBut rows hst
-# (rowfun,(rowb,hst)) 	= assignRowFuncBut row hst
-= (rowfun o rowsfun,(rowb <||> rowsb,hst))
+# ((rowsfun,rowsb),hst) = assignTableFuncBut rows hst
+# ((rowfun,rowb),  hst)	= assignRowFuncBut row hst
+= ((rowfun o rowsfun,rowb <||> rowsb),hst)
 where
-	assignRowFuncBut :: [(String, a -> a)] HSt -> (a -> a,(Body,HSt))
-	assignRowFuncBut [] hst = (id,(EmptyBody,hst))
+	assignRowFuncBut :: [(String, a -> a)] HSt -> ((a -> a,Body),HSt)
+	assignRowFuncBut [] hst = ((id,EmptyBody),hst)
 	assignRowFuncBut [x:xs] hst 
-	# (rowfun,(rowb,hst)) 	= assignRowFuncBut xs hst
-	# (fun,(oneb,hst)) 		= assignFuncBut x hst
-	= (fun o rowfun,(oneb <=> rowb,hst))
+	# ((rowfun,rowb),hst) 	= assignRowFuncBut xs hst
+	# ((fun,oneb)   ,hst)	= assignFuncBut x hst
+	= ((fun o rowfun,oneb <=> rowb),hst)
 
-	assignFuncBut :: (String, a -> a) HSt -> (a -> a,(Body,HSt))
+	assignFuncBut :: (String, a -> a) HSt -> ((a -> a,Body),HSt)
 	assignFuncBut (name,cbf) hst = mkViewHGEC name HEdit bimap id hst
 	where
 		bimap =	{ toHGEC 	= \_ 	-> button

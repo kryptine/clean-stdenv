@@ -12,18 +12,18 @@ import tree
 
 Start world  = doHtml MyPage world
 
+
 MyPage hst
-# (list,(listGEC,hst)) = mkEditHGEC "list" HEdit    [1] hst
-# (_,   (treeGEC,hst)) = mkEditHGEC "tree" HDisplay (fromListToBalTree list) hst
+# ((_,[list,tree:_]),hst) = startCircuit mycircuit [1] hst
 = (Head 
 	[Hd_Title "List to Balance Tree"
 	] 
 	[ H1 "List to Balance Tree"
-	, Br , T "This is the list: ", Br, Br
-	, listGEC
-	, Br , T "This is the resulting balanced Tree: ", Br, Br
-	, treeGEC
-//	, traceHtmlInput
+	, T "This is the list :", Br
+	, list
+	, T "This is the resulting balanced tree :", Br
+	, tree
 	],hst)
-
-
+where
+	mycircuit :: GecCircuit [Int] (Tree Int)
+	mycircuit = edit "list" >>> arr fromListToBalTree >>> display "tree"
