@@ -71,7 +71,7 @@ foldl op r l :== foldl r l
 		foldl r []		= r
 		foldl r [a:x]	= foldl (op r a) x
 
-// foldr :: (.a -> .(.b -> .b)) .b ![.a] -> .b	//	op e0 (op e1(...(op r e##)...)
+// foldr :: (.a -> .(.b -> .b)) .b ![.a] -> .b	//	op e0 (op e1(...(op e## r)...)
 foldr op r l :== foldr l
 	where
 		foldr []	= r
