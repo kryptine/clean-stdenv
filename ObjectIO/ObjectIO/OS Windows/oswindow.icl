@@ -197,14 +197,14 @@ OScreateWindow :: !OSWindowMetrics !Bool !ScrollbarInfo !ScrollbarInfo !(!Int,!I
 				  !(.s->(OSWindowPtr,.s))
 				  !(OSWindowPtr->.s->*OSToolbox->(.s,*OSToolbox))
 				  !(OSWindowPtr->OSWindowPtr->OSPictContext->.s->*OSToolbox->(.s,*OSToolbox))
-				  !OSDInfo !.s !*OSToolbox
+				  !OSDInfo !OSWindowPtr !.s !*OSToolbox
 			   -> (![DelayActivationInfo],!OSWindowPtr,!OSWindowPtr,!OSWindowPtr,!OSDInfo,!.s,!*OSToolbox)
 OScreateWindow	wMetrics isResizable hInfo=:{cbiHasScroll=hasHScroll} vInfo=:{cbiHasScroll=hasVScroll} minSize maxSize
 				isClosable title pos size
 				get_focus
 				create_controls
 				update_controls
-				osdInfo control_info tb
+				osdInfo behindPtr control_info tb
 	| di==MDI
 		# (textPtr,tb)	= WinMakeCString title tb
 		  styleFlags	= WS_SYSMENU
@@ -213,7 +213,7 @@ OScreateWindow	wMetrics isResizable hInfo=:{cbiHasScroll=hasHScroll} vInfo=:{cbi
 		  					bitor (if hasVScroll  WS_VSCROLL    0)
 		  					bitor (if isResizable WS_THICKFRAME 0)
 		  				//	bitor WS_CLIPCHILDREN
-		  createcci		= Rq6Cci CcRqCREATEMDIDOCWINDOW textPtr osinfo.osClient (x<<16+(y<<16)>>16) w h styleFlags
+		  createcci		= Rq6Cci CcRqCREATEMDIDOCWINDOW textPtr osinfo.osClient behindPtr (x<<16+(y<<16)>>16) (w<<16+(h<<16)>>16) styleFlags
 		# (returncci,(control_info,delay_info),tb)
 						= IssueCleanRequest (OScreateWindowCallback isResizable minSize maxSize create_controls update_controls)
 											createcci
@@ -972,15 +972,30 @@ OSenableWindow :: !OSWindowPtr !(!Bool,!Bool) !Bool !*OSToolbox -> *OSToolbox
 OSenableWindow theWindow scrollInfo modalContext tb
 	= WinSetSelectStateWindow theWindow scrollInfo True modalContext tb
 
-OSactivateWindow :: !OSDInfo !OSWindowPtr !*OSToolbox -> (![DelayActivationInfo],!*OSToolbox)
-OSactivateWindow osdInfo thisWindow tb
-	# (_,delayinfo,tb)	= IssueCleanRequest osIgnoreCallback` (Rq3Cci CcRqACTIVATEWINDOW (toInt isMDI) clientPtr thisWindow) [] tb
-	= (reverse delayinfo,tb)
+OSactivateWindow :: !OSDInfo !OSWindowPtr !(OSEvent->(.s,*OSToolbox)->(.s,*OSToolbox)) !.s !*OSToolbox
+	-> (![DelayActivationInfo],!.s,!*OSToolbox)
+OSactivateWindow osdInfo thisWindow handleOSEvent state tb
+	# (_,(delayinfo,state),tb)	= IssueCleanRequest (osCallback handleOSEvent) (Rq3Cci CcRqACTIVATEWINDOW (toInt isMDI) clientPtr thisWindow) ([],state) tb
+	= (reverse delayinfo,state,tb)
 where
 	isMDI				= getOSDInfoDocumentInterface osdInfo==MDI
 	clientPtr			= case (getOSDInfoOSInfo osdInfo) of
 							Just {osClient} -> osClient
 							nothing         -> oswindowFatalError "OSactivateWindow" "illegal DocumentInterface context"
+	
+/*	osCallback delays activate and deactivate events.
+	All other events are passed to the callback function.
+	PA: is now identical to OSstackWindow!!
+*/	osCallback :: !(OSEvent->(.s,*OSToolbox)->(.s,*OSToolbox)) !CrossCallInfo !(![DelayActivationInfo],!.s) !*OSToolbox
+		-> (!CrossCallInfo,!(![DelayActivationInfo],!.s),!*OSToolbox)
+	osCallback handleOSEvent {ccMsg=CcWmACTIVATE,p1=hwnd} (delayinfo,s) tb
+		= (Return0Cci,([DelayActivatedWindow hwnd:delayinfo],s),tb)
+	osCallback handleOSEvent {ccMsg=CcWmDEACTIVATE,p1=hwnd} (delayinfo,s) tb
+		= (Return0Cci,([DelayDeactivatedWindow hwnd:delayinfo],s),tb)
+	osCallback handleOSEvent osEvent (delayinfo,s) tb
+		# (s,tb)	= handleOSEvent osEvent (s,tb)
+		= (Return0Cci,(delayinfo,s),tb)
+
 
 OSactivateControl :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> (![DelayActivationInfo],!*OSToolbox)
 OSactivateControl parentWindow controlPtr tb
@@ -997,9 +1012,34 @@ where
 	osIgnoreCallback` _ s tb
 		= (Return0Cci,s,tb)
 
+/*	PA: previous implementation of OSstackWindow ignored window updates and resizes. This is fixed below.
 OSstackWindow :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
 OSstackWindow thisWindow behindWindow tb
 	= WinRestackWindow thisWindow behindWindow tb
+
+WinRestackWindow :: !HWND !HWND !*OSToolbox -> *OSToolbox
+WinRestackWindow theWindow behindWindow tb
+	= snd (IssueCleanRequest2 (ErrorCallback2 "WinRestackWindow") (Rq2Cci CcRqRESTACKWINDOW theWindow behindWindow) tb)
+*/
+
+OSstackWindow :: !OSWindowPtr !OSWindowPtr !(OSEvent->(.s,*OSToolbox)->(.s,*OSToolbox)) !.s !*OSToolbox
+	-> (![DelayActivationInfo],!.s,!*OSToolbox)
+OSstackWindow thisWindow behindWindow handleOSEvent state tb
+	# (_,(delayinfo,state),tb)	= IssueCleanRequest (osCallback handleOSEvent) (Rq2Cci CcRqRESTACKWINDOW thisWindow behindWindow) ([],state) tb
+	= (reverse delayinfo,state,tb)
+where
+/*	osCallback delays activate and deactivate events.
+	All other events are passed to the callback function. 
+	PA: is now identical to OSactivateWindow!!
+*/	osCallback :: !(OSEvent->(.s,*OSToolbox)->(.s,*OSToolbox)) !CrossCallInfo !(![DelayActivationInfo],!.s) !*OSToolbox
+		-> (!CrossCallInfo,!(![DelayActivationInfo],!.s),!*OSToolbox)
+	osCallback handleOSEvent {ccMsg=CcWmACTIVATE,p1=hwnd} (delayinfo,s) tb
+		= (Return0Cci,([DelayActivatedWindow hwnd:delayinfo],s),tb)
+	osCallback handleOSEvent {ccMsg=CcWmDEACTIVATE,p1=hwnd} (delayinfo,s) tb
+		= (Return0Cci,([DelayDeactivatedWindow hwnd:delayinfo],s),tb)
+	osCallback handleOSEvent osEvent (delayinfo,s) tb
+		# (s,tb)	= handleOSEvent osEvent (s,tb)
+		= (Return0Cci,(delayinfo,s),tb)
 
 OShideWindow :: !OSWindowPtr !Bool !*OSToolbox -> (![DelayActivationInfo],!*OSToolbox)
 OShideWindow wPtr activate tb

@@ -220,10 +220,6 @@ WinSetEditSelection :: !HWND !Int !Int !*OSToolbox -> *OSToolbox
 WinSetEditSelection editHWND first last tb
 	= snd (IssueCleanRequest2 (ErrorCallback2 "WinSetEditSelection") (Rq3Cci CcRqSETEDITSELECTION editHWND first last) tb)
 
-WinRestackWindow :: !HWND !HWND !*OSToolbox -> *OSToolbox
-WinRestackWindow theWindow behindWindow tb
-	= snd (IssueCleanRequest2 (ErrorCallback2 "WinRestackWindow") (Rq2Cci CcRqRESTACKWINDOW theWindow behindWindow) tb)
-
 WinShowControl :: !HWND !Bool !*OSToolbox -> *OSToolbox
 WinShowControl hwnd bool tb
 	= snd (IssueCleanRequest2 (ErrorCallback2 "WinShowControl") (Rq2Cci CcRqSHOWCONTROL hwnd (toInt bool)) tb)

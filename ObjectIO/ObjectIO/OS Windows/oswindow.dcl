@@ -82,7 +82,7 @@ OSgetSliderControlMinWidth		:: !OSWindowMetrics -> Int
 									it is an OSWindowPtr if it must be placed behind a given window.
 	OScreateWindow	isResizable hScrollInfo vScrollInfo minSize maxSize
 					isClosable title pos size
-					getcontrolfocus createcontrols updatecontrols osdocinfo controlinfo
+					getcontrolfocus createcontrols updatecontrols osdocinfo behindPtr controlinfo
 					creates a window with the given title, position and size. 
 					The isResizable	argument is True iff the window is user resizable.
 					The hScrollInfo	argument represents the horizontal scrollbar of the window.
@@ -122,9 +122,10 @@ OScreateWindow :: !OSWindowMetrics !Bool !ScrollbarInfo !ScrollbarInfo !(!Int,!I
 				  !(.s->(OSWindowPtr,.s))
 				  !(OSWindowPtr-> .s -> *OSToolbox -> (.s,*OSToolbox))
 				  !(OSWindowPtr->OSWindowPtr->OSPictContext->.s->*OSToolbox->(.s,*OSToolbox))
-				  !OSDInfo !.s !*OSToolbox
+				  !OSDInfo !OSWindowPtr !.s !*OSToolbox
 			   -> (![DelayActivationInfo],!OSWindowPtr,!OSWindowPtr,!OSWindowPtr,!OSDInfo,!.s,!*OSToolbox)
-OScreateModalDialog :: !Bool !String !OSDInfo !(Maybe OSWindowPtr) !(OSEvent -> .s -> ([Int],.s)) !.s !*OSToolbox-> (!Bool,!.s,!*OSToolbox)
+OScreateModalDialog :: !Bool !String !OSDInfo !(Maybe OSWindowPtr) !(OSEvent -> .s -> ([Int],.s)) !.s !*OSToolbox
+																						-> (!Bool,!.s,!*OSToolbox)
 
 
 // Mike //
@@ -339,17 +340,21 @@ OSvalidateWindowRgn		:: !OSWindowPtr !OSRgnHandle	!*OSToolbox -> *OSToolbox
 OSdisableWindow			:: !OSWindowPtr !(!Bool,!Bool) !Bool !*OSToolbox -> *OSToolbox
 OSenableWindow			:: !OSWindowPtr !(!Bool,!Bool) !Bool !*OSToolbox -> *OSToolbox
 
-/*	OSactivateWindow osdInfo thisWindow
-		activates thisWindow.
+/*	OSactivateWindow osdInfo thisWindow handleEvents info
+		activates thisWindow. The handleEvents function is applied when updates are required.
 	OSactivateControl parentWindow theControl
 		activates theControl which is in parentWindow. 
 	OSstackWindow thisWindow behindWindow
 		moves the window identified by thisWindow behind the window identified by behindWindow.
 		OSstackWindow assumes that thisWindow and behindWindow are valid values.
 */
-OSactivateWindow	:: !OSDInfo     !OSWindowPtr	!*OSToolbox -> (![DelayActivationInfo],!*OSToolbox)
+//OSactivateWindow	:: !OSDInfo     !OSWindowPtr	!*OSToolbox -> (![DelayActivationInfo],!*OSToolbox)
+OSactivateWindow	:: !OSDInfo !OSWindowPtr !(OSEvent->(.s,*OSToolbox)->(.s,*OSToolbox)) !.s !*OSToolbox
+															   -> (![DelayActivationInfo],!.s,!*OSToolbox)
 OSactivateControl	:: !OSWindowPtr !OSWindowPtr	!*OSToolbox -> (![DelayActivationInfo],!*OSToolbox)
-OSstackWindow		:: !OSWindowPtr !OSWindowPtr	!*OSToolbox -> *OSToolbox
+//OSstackWindow		:: !OSWindowPtr !OSWindowPtr	!*OSToolbox -> *OSToolbox
+OSstackWindow		:: !OSWindowPtr !OSWindowPtr !(OSEvent->(.s,*OSToolbox)->(.s,*OSToolbox)) !.s !*OSToolbox
+																   -> (![DelayActivationInfo],!.s,!*OSToolbox)
 
 /*	OShideWindow thisWindow activate
 		hides the window. If the Boolean activate is True then a new window is made the active window.
