@@ -32,7 +32,7 @@ processOpen pState=:{io=ioState}
 		# (osdinfo,ioState)			= ioStGetOSDInfo ioState
 		# ioState					= createOSDInfo osdinfo ioState
 		# pState					= {pState & io=ioState}
-//	PA: menudevice has higher priority than process device (see device.icl), therefore, menuFunctions.dOpen has been evaluated.
+//	PA: openWindowMenu will ensure that menu device has been created.
 //		# pState					= menuFunctions.dOpen pState	// DvA: ensure process menubar exists
 		# pState					= menuFunctions.dShow pState	// DvA: ensure process menubar visible
 		# pState					= case (getOSDInfoDocumentInterface osdinfo) of	// DvA: for an MDI process open the Window menu
