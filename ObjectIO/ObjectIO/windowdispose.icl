@@ -247,6 +247,3 @@ where
 							IsCustomControl			-> (osSetCustomControlShow,			osDestroyCustomControl)
 							_						-> windowdisposeFatalError "disposeWItemHandle" ("unmatched ControlKind: "+++toString wItemKind)
 
-maybeToList :: !(Maybe .x) -> [.x]
-maybeToList (Just x)	= [x]
-maybeToList _			= []
