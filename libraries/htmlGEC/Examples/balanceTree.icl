@@ -11,13 +11,14 @@ derive gHpr		Tree
 
 import tree
 
-Start world  = doHtml MyPage (Node Leaf 1 Leaf) world
+Start world  = doHtml MyPage  world
 
-MyPage tree
-	 = Head 
-		[Hd_Title "Balance Tree"
-		] 
-		[ H1 "Balance Tree"
-		, Br
-		, showClean (balanceTree tree)
-		]
+MyPage hst
+# (_,(treeGEC,hst)) = mkHGEC "tree" balanceTree (Node Leaf 1 Leaf) hst
+= (Head 
+	[Hd_Title "Self Balancing Tree"
+	] 
+	[ H1 "Self Balancing Tree"
+	, Br, Br
+	, treeGEC
+	], hst)

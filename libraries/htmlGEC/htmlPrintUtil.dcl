@@ -1,8 +1,9 @@
 definition module htmlPrintUtil
 
-import StdGeneric
-
 // a collection of hand print routines to write html to Std Output
+// (c) MJP 2005
+
+import StdGeneric
 
 :: FtoF :== (*File -> *File)
 
@@ -29,7 +30,7 @@ htmlAttr 		:: !String !a 			-> Spaces FtoF 	| gHpr{|*|} a
 
 // special types for creating small effects
 
-:: Quotes a 	= Quotes a 		// for putting " " around a term
+:: Quotes a 	= Quotes a 			// for putting " " around a term
 :: Spaces a 	= Spaces a 			// for putting spaces around a term
 
 derive gHpr Quotes, Spaces

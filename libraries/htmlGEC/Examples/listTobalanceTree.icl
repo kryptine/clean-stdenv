@@ -10,17 +10,19 @@ derive gParse Tree
 
 import tree
 
-Start world  = doHtml MyPage [1] world
+Start world  = doHtml MyPage world
 
-MyPage list
-	= Head 
-		[Hd_Title "List to Balance Tree"
-		] 
-		[ H1 "List to Balance Tree"
-		, Br , T "This is the list: ", Br
-		, showClean list
-		, Br , T "This is the resulting balanced Tree: ", Br
-		, showClean (fromListToBalTree list)
-		]
+MyPage hst
+# (list,(listGEC,hst)) = mkHGEC "list" id [1] hst
+# (_,   (treeGEC,hst)) = mkHGEC "tree" id (fromListToBalTree list) hst
+= (Head 
+	[Hd_Title "List to Balance Tree"
+	] 
+	[ H1 "List to Balance Tree"
+	, Br , T "This is the list: ", Br, Br
+	, listGEC
+	, Br , T "This is the resulting balanced Tree: ", Br, Br
+	, treeGEC
+	],hst)
 
 
