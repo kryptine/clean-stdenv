@@ -68,7 +68,10 @@ where
 instance abs Real
 where
  abs::!Real -> Real
- abs x = if (x<0.0) (0.0 - x) x
+ abs x
+	= code inline {
+			absR
+	}
 
 instance sign Real
 where
