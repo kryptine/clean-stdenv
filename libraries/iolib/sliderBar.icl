@@ -191,13 +191,13 @@ SetSliderChanged changed (IntCS state)
 									= IntCS state;
 
 GetSliderPos :: !ControlState -> SliderPos;
-GetSliderPos (IntCS state) = state mod 1000;
+GetSliderPos (IntCS state) = state rem 1000;
 
 SetSliderPos :: !SliderPos !ControlState -> ControlState;
-SetSliderPos pos (IntCS state) = IntCS (state-state mod 1000+pos);
+SetSliderPos pos (IntCS state) = IntCS (state-state rem 1000+pos);
 
 GetSliderMax :: !ControlState -> SliderMax;
-GetSliderMax (IntCS state) = (state mod 1000000) / 1000;
+GetSliderMax (IntCS state) = (state rem 1000000) / 1000;
 
 IsHorizontal :: !SliderDirection -> Bool;
 IsHorizontal Horizontal = True;

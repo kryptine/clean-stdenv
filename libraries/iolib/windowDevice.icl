@@ -457,7 +457,7 @@ Align_thumb :: !Int !Int !Int !Int -> Int;
 Align_thumb thumb min max scroll
 	| thumb == max
 		=  thumb;
-		=  min + (d_thumb -  d_thumb mod scroll );
+		=  min + (d_thumb -  d_thumb rem scroll );
 	where {
 		d_thumb=: thumb - min;
 	};

@@ -63,7 +63,7 @@ TimerGCD x y
 	| xmy == 0 =  y;
 	=  TimerGCD y xmy;
 	   where {
-	   xmy=: x mod y;
+	   xmy=: x rem y;
 	   };
 
 /*	The Timer event handling */
@@ -97,7 +97,7 @@ CalcTimerState	:: !Int !Int !Int -> (!Bool,!Int,!Int);
 CalcTimerState interval time int
 	| int <= 0 =  (True , 1                   , 0          );
 	| int <= Minterval =  (True , interval / Minterval, 0          );
-	| int <= time` =  (True , time` / int         , time` mod int);
+	| int <= time` =  (True , time` / int         , time` rem int);
 	=  (False, 0                   , time`      );
 	   where {
 	   time`=: time + interval;
