@@ -1,6 +1,6 @@
 Version: 1.4
 Global
-	Built:	True
+	Built:	False
 	Target:	Everything
 	Exec:	{Project}\loopGEC.exe
 	CodeGen
@@ -49,7 +49,7 @@ MainModule
 		NeverMemoryProfile:	False
 		NeverTimeProfile:	False
 		StrictnessAnalysis:	True
-		ListTypes:	InferredTypes
+		ListTypes:	StrictExportTypes
 		ListAttributes:	True
 		Warnings:	True
 		Verbose:	True
@@ -90,7 +90,7 @@ OtherModules
 				Y:	50
 				SizeX:	706
 				SizeY:	430
-		DclOpen:	True
+		DclOpen:	False
 		Icl
 			WindowPosition
 				X:	323

@@ -8,7 +8,7 @@ goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 
 Start :: *World -> *World
-Start world = goGui loopTest5 world  
+Start world = goGui feedbackTest5 world  
 
 loopTest1 = startCircuit (edit "edit" >>> loop (arr \(x, y) -> (x + 1, y + 1)) >>> display "display") 42
 
@@ -39,3 +39,19 @@ where
 		       (\ (next, reset) ->
 			  case if reset /*then*/ 0 /*else*/ next of
 			      out -> (out, out)))))
+
+feedbackTest1 = startCircuit (self (edit "") ((+) 1)) 1
+where
+	self g f = feedback (g >>> arr f)
+
+feedbackTest2 = startCircuit (self2 ((+) 100) (edit "") ((+) 1)) 0
+where
+	self2 f1 g f2 = feedback (arr f1 >>> g >>> arr f2)
+
+feedbackTest3 = startCircuit (edit "input" >>> feedback (arr ((+) 1)) >>> display "output") 0
+
+derive gGEC (,)
+
+feedbackTest4 = startCircuit (edit "input" >>> feedback (first (arr ((+) 1))) >>> display "output") (0, 0)
+
+feedbackTest5 = startCircuit (feedback ((edit "+1" >>> arr ((+) 1)) *** (edit "+100" >>> arr ((+) 100)))) (0, 0)

@@ -11,7 +11,6 @@ import store, StdDebug
 startCircuit :: !(GecCircuit a b) a *(PSt .ps) -> *PSt .ps
 startCircuit (GecCircuit k) a env
 	# (seta, getb, env) = k setb geta env
-	  env = seta YesUpdate a env
 	= env
 where
 	geta env = (a, env)
@@ -71,18 +70,18 @@ where
 				= (fst ac, env)
 	
 			getbc env 
-				# (b, env) = getb env
-				  (ac, env) = getac env
+				# (ac, env) = getac env
+				  (b, env) = getb env
 				= ((b, snd ac), env)
 			
-			setb u b env 
+			setb u b env
 				# (ac, env) = getac env
 				= setbc u (b, snd ac) env
 	
 			setac u ac env
-			 	# env = seta u (fst ac) env
-				  (b, env) = getb env
-				= setbc u (b, snd ac) env
+				# env = seta u (fst ac) env
+			 	  (b, env) = getb env
+			 	= setbc NoUpdate (b, snd ac) env
 
 instance ArrowLoop GecCircuit
 where
@@ -101,23 +100,21 @@ where
 			
 			getab env
 				# (a, env) = geta env
-				  (b, env) = getStore id env
+				  (b, env) = fromStore id env
 				= ((a, b), env)
 			
 			seta u a env
-				# (b, env) = getStore id env
+				# (b, env) = fromStore id env
 				= setab u (a, b) env
 	
 			getc env
 				# (cb, env) = getcb env
 				= (fst cb, env)
 
-		getStore id env
+		fromStore id env
 			# (ok, env) = valueStored id env
-			| not ok = (cycle, env)
+			| not ok = (abort "Run-time error: cycle in loop detected", env)
 			= readStore id env
-		where
-			cycle => abort "Run-time error: cycle in loop detected"
 
 instance ArrowCircuit GecCircuit
 where
@@ -128,9 +125,7 @@ where
 			(id, env1) = openStoreId env
 			(_, env2) = openStore id (Just a) env1
 				
-			geta` env 
-				# (a, env) = readStore id env
-				= (a, env)
+			geta` env = readStore id env
 
 			seta` u a` env
 				# (a, env) = readStore id env
@@ -140,14 +135,20 @@ where
 feedback :: !(GecCircuit a a) -> GecCircuit a a
 feedback (GecCircuit g) = GecCircuit k
 where 
-	k seta geta env
-		# (a, env) = geta` env1
-		  env = seta` NoUpdate a env
-		= (seta`, geta`, env)
+	k seta geta env = (seta`, geta`, env4)
 	where
-		(seta`, geta`, env1) = g seta`` geta env
+		(id, env1) = openStoreId env
+		(a, env2) = geta env1
+		(_, env3) = openStore id (Just a) env2
+		(seta`, geta`, env4) = g seta`` geta`` env3
 
-		seta`` u a env = seta u a (seta` NoUpdate a env)
+		geta`` env = readStore id env
+
+		seta`` NoUpdate a env = env
+		seta`` YesUpdate a env 
+			# env = writeStore id a env
+			  env = seta` NoUpdate a env
+			= seta YesUpdate a env
 
 gecIO :: (A. .ps: a *(PSt .ps) -> *(b, *PSt .ps)) -> GecCircuit a b
 gecIO f = GecCircuit k
