@@ -45,6 +45,8 @@ setOSDInfoOSMenuBar :: !OSMenuBar !OSDInfo -> OSDInfo
 getOSDInfoOSInfo ::         !OSDInfo -> Maybe OSInfo
 setOSDInfoOSInfo :: !OSInfo !OSDInfo -> OSDInfo
 
+getOSDInfoOffset :: !OSDInfo !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
+
 /*	osOpenMDI  creates  the infrastructure of a MDI process.
 		If the first Bool argument is True, then the frame window is shown, otherwise it is hidden.
 		The second Bool indicates whether the process accepts file open events.
