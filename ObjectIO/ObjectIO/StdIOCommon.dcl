@@ -153,22 +153,22 @@ OptionOnly	:== {shiftDown	= False
 				,optionDown	= True
 				,commandDown= False
 				,controlDown= False
-				,altDown	= False
+				,altDown	= True
 				}
 CommandOnly	:== {shiftDown	= False
 				,optionDown	= False
 				,commandDown= True
-				,controlDown= False
+				,controlDown= True
 				,altDown	= False
 				}
 ControlOnly	:== {shiftDown	= False
 				,optionDown	= False
-				,commandDown= False
+				,commandDown= True
 				,controlDown= True
 				,altDown	= False
 				}
 AltOnly		:==	{shiftDown	= False
-				,optionDown	= False
+				,optionDown	= True
 				,commandDown= False
 				,controlDown= False
 				,altDown	= True
