@@ -5,6 +5,7 @@ import	StdBool, StdEnum, StdList, StdMisc
 import	menuevent, osdocumentinterface, osmenu, ostypes
 import	commondef, devicefunctions, iostate, menuaccess, menucreate, menudefaccess, receiveraccess, StdId
 from	StdProcessAttribute	import getProcessToolbarAtt, isProcessToolbar
+from	StdProcessAttribute	import getProcessCloseFun,	 isProcessClose
 from	StdPSt				import accPIO
 
 
@@ -236,6 +237,13 @@ where
 		gettoolbarfunction _ []
 			= menudeviceFatalError "menuIO (ToolbarSelection)" "toolbar index out of range"
 	
+	menuIO deviceEvent=:ProcessRequestClose pState
+		# (atts,pState)		= accPIO ioStGetProcessAttributes pState
+		  (hasCloseAtt,att)	= cselect isProcessClose undef atts
+		| not hasCloseAtt
+			= (deviceEvent,pState)
+		| otherwise
+			= (deviceEvent,getProcessCloseFun att pState)
 	menuIO _ _
 		= menudeviceFatalError "menuIO" "unexpected DeviceEvent"
 
