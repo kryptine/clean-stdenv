@@ -467,6 +467,15 @@ WaitMouseUp
 WaitNextEvent
 ZoomWindow
 __CFStringMakeConstantString
+GetIndMenuItemWithCommandID
+SetMenuItemCommandID
+GetCurrentEventLoop
+RemoveEventLoopTimer
+NewEventLoopTimerUPP
+InstallEventLoopTimer
+IsMenuItemEnabled
+SetWindowModified
+GetProcessForPID
 acos
 asin
 atan
