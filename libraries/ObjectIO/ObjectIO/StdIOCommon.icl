@@ -270,10 +270,10 @@ viewFrameRange			:==	{	corner1 = {x = 1-(2^31),y = 1-(2^31)}
 
 NoModifiers	:==	{shiftDown=False,optionDown=False,commandDown=False,controlDown=False,altDown=False}
 ShiftOnly	:==	{shiftDown=True	,optionDown=False,commandDown=False,controlDown=False,altDown=False}
-OptionOnly	:== {shiftDown=False,optionDown=True, commandDown=False,controlDown=False,altDown=False}
-CommandOnly	:== {shiftDown=False,optionDown=False,commandDown=True, controlDown=False,altDown=False}
-ControlOnly	:== {shiftDown=False,optionDown=False,commandDown=False,controlDown=True, altDown=False}
-AltOnly		:==	{shiftDown=False,optionDown=False,commandDown=False,controlDown=False,altDown=True }
+OptionOnly	:== {shiftDown=False,optionDown=True, commandDown=False,controlDown=False,altDown=True }
+CommandOnly	:== {shiftDown=False,optionDown=False,commandDown=True, controlDown=True, altDown=False}
+ControlOnly	:== {shiftDown=False,optionDown=False,commandDown=True, controlDown=True, altDown=False}
+AltOnly		:==	{shiftDown=False,optionDown=True, commandDown=False,controlDown=False,altDown=True }
 
 instance == Modifiers where
 	(==) :: !Modifiers !Modifiers -> Bool
