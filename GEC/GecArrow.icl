@@ -7,7 +7,7 @@ import store, GenDefault, StdDebug
 
 :: GecSet a ps :== IncludeUpdate a *(PSt ps) -> *PSt ps
 
-runCircuit (GecCircuit k) :== k
+runCircuit (GecCircuit k) = k
 
 startCircuit :: !(GecCircuit a b) a *(PSt .ps) -> *PSt .ps
 startCircuit g a env
@@ -18,25 +18,16 @@ where
 	setb _ _ env = env
 
 edit :: String -> GecCircuit a a | gGEC{|*|}, generate{|*|} a 
-edit title = GecCircuit k
-where
-	k seta env
-		# (a, env) = gDefaultVal env
-		  ({gecSetValue, gecGetValue}, env) = createNGEC title Interactive True a  (\r -> seta (includeUpdate r)) env
-		= (seta` gecGetValue gecSetValue seta, env)
-	
-	seta` gecGetValue gecSetValue seta NoUpdate a env
-		# env = gecSetValue NoUpdate a env
-		  (a`, env) = gecGetValue env
-		= seta NoUpdate a` env
-	seta` _ gecSetValue _ u a env = gecSetValue u a env
+edit title = gecEdit True title
 	
 display :: String -> GecCircuit a a | gGEC{|*|}, generate{|*|} a 
-display title = GecCircuit k
+display title = gecEdit False title
+
+gecEdit edit title = GecCircuit k
 where
 	k seta env
 		# (a, env) = gDefaultVal env
-		  ({gecSetValue, gecGetValue}, env) = createNGEC title OutputOnly True a  (\r -> seta (includeUpdate r)) env
+		  ({gecSetValue, gecGetValue}, env) = createNGEC title (if edit Interactive OutputOnly) True a  (\r -> seta (includeUpdate r)) env
 		= (seta` gecGetValue gecSetValue seta, env)
 	
 	seta` gecGetValue gecSetValue seta NoUpdate a env
@@ -164,9 +155,8 @@ where
 	where
 		(seta`, env4) = runCircuit g seta`` env
 
-		seta`` NoUpdate a env = env
-		seta`` u a env 
-			# env = seta u a env
+		seta`` NoUpdate a env = seta YesUpdate a env
+		seta`` YesUpdate a env 
 			= seta` NoUpdate a env
 /*
 initial :: a -> GecCircuit a a
