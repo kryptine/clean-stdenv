@@ -40,13 +40,13 @@ instance Controls ListBoxControl
 
 openListBoxId			:: !*env -> (!ListBoxId,!*env)	| Ids env
 
-getListBoxSelection 	:: !ListBoxId					!(PSt .l .p) -> (!(!Bool,![(String,!Index)]),!PSt .l .p)
-setListBoxSelection 	:: !ListBoxId ![Index]			!(PSt .l .p) -> PSt .l .p
-getListBoxItems			:: !ListBoxId					!(PSt .l .p) -> (!(!Bool,![String]),!PSt .l .p)
-openListBoxItems		:: !ListBoxId !Index ![String]	!(PSt .l .p) -> PSt .l .p
-closeListBoxItems		:: !ListBoxId ![Index]			!(PSt .l .p) -> PSt .l .p
+getListBoxSelection 	:: !ListBoxId					!(PSt .l) -> (!(!Bool,![(String,!Index)]),!PSt .l)
+setListBoxSelection 	:: !ListBoxId ![Index]			!(PSt .l) -> PSt .l
+getListBoxItems			:: !ListBoxId					!(PSt .l) -> (!(!Bool,![String]),!PSt .l)
+openListBoxItems		:: !ListBoxId !Index ![String]	!(PSt .l) -> PSt .l
+closeListBoxItems		:: !ListBoxId ![Index]			!(PSt .l) -> PSt .l
 
-showListBoxControl		:: !ListBoxId !(IOSt .l .p) -> IOSt .l .p
-hideListBoxControl		:: !ListBoxId !(IOSt .l .p) -> IOSt .l .p
-enableListBoxControl	:: !ListBoxId !(IOSt .l .p) -> IOSt .l .p
-disableListBoxControl	:: !ListBoxId !(IOSt .l .p) -> IOSt .l .p
+showListBoxControl		:: !ListBoxId !(IOSt .l) -> IOSt .l
+hideListBoxControl		:: !ListBoxId !(IOSt .l) -> IOSt .l
+enableListBoxControl	:: !ListBoxId !(IOSt .l) -> IOSt .l
+disableListBoxControl	:: !ListBoxId !(IOSt .l) -> IOSt .l

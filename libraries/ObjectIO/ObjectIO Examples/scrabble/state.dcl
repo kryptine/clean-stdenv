@@ -29,5 +29,5 @@ import	board
 		}
 
 initstate		:: Tree  -> State
-initialisestate	:: (PSt State .p) -> PSt State .p
+initialisestate	:: (PSt State) -> PSt State
 getboardletters	:: State -> ([Char],State)

@@ -94,7 +94,6 @@ StartDataBase ids=:(recordWindowId,edDialogId,fieldDialogId) initState world
 	=	startIO
 			SDI																// Show one database a time
 			initState														// The initial database state
-			NoState															// No public state
 			(seq [snd o (openMenu undef menu),ShowRecords,ShowEditDialog])	// The initialisation actions
 			[ProcessOpenFiles OpenFiles,ProcessClose Quit]					// The process attributes
 			world
@@ -111,15 +110,15 @@ where
 				)	[]
 
 //	The callback and initialisation functions of the menu:
-	OpenFiles :: [String] (PSt DataBase .p) -> PSt DataBase .p
+	OpenFiles :: [String] (PSt DataBase) -> PSt DataBase
 	OpenFiles dbnames database
 		=	ReadNew (if (isEmpty dbnames) Nothing (Just (hd dbnames))) database
 	
-	ReadNew :: (Maybe String) (PSt DataBase .p) -> PSt DataBase .p
+	ReadNew :: (Maybe String) (PSt DataBase) -> PSt DataBase
 	ReadNew maybe_dbname database
 		=	seq (map closeWindow [recordWindowId,edDialogId,fieldDialogId] ++ [ReadDataBase maybe_dbname,ShowRecords,ShowEditDialog]) database
 	
-	ReadDataBase :: (Maybe String) (PSt DataBase .p) -> PSt DataBase .p
+	ReadDataBase :: (Maybe String) (PSt DataBase) -> PSt DataBase
 	ReadDataBase maybe_dbname database=:{ls={dbfont={font}}}
 		#	(maybe_dbname,database)	= case maybe_dbname of
 										(Just _)	-> (maybe_dbname,database)
@@ -166,7 +165,7 @@ where
 			#	(line,file)	= freadline file
 			=	(line%(0,size line - 2),file)		// strip "\n"
 	
-	ShowRecords :: (PSt DataBase .p) -> PSt DataBase .p
+	ShowRecords :: (PSt DataBase) -> PSt DataBase
 	ShowRecords database=:{ls=state=:{records,descriptor,name,dbfont}}
 		#	domain			= DbViewDomain state 0 (max (length records) 1)
 		#	(_,database)	= openWindow undef (window domain) database
@@ -186,7 +185,7 @@ where
 		namewithoutdirectories
 			=	toString (last (splitby dirseparator (fromString name)))
 	
-	ShowEditDialog :: (PSt DataBase .p) -> PSt DataBase .p
+	ShowEditDialog :: (PSt DataBase) -> PSt DataBase
 	ShowEditDialog database=:{ls=state=:{descriptor=descr,records=recs,selection,dffont,editinfoid}}
 		#	(ids,database)	= accPIO (openIds nr_of_ids) database
 		#	database		= {database & ls={state & edittextids=tl ids}}
@@ -254,7 +253,7 @@ where
 			left			= ControlPos (Left,NoOffset)
 			addId			= hd ids
 	
-	ShowFieldDialog :: (PSt DataBase .p) -> PSt DataBase .p
+	ShowFieldDialog :: (PSt DataBase) -> PSt DataBase
 	ShowFieldDialog database=:{ls=state=:{descriptor=d,dffont}}
 		|	isEmpty d.fields
 			#	inputboxwidth	= CharsInInputBox*dffont.width
@@ -303,7 +302,7 @@ where
 			[addId,selectId:_]
 				=	ids
 	
-	SaveRecords :: (PSt DataBase .p) -> PSt DataBase .p
+	SaveRecords :: (PSt DataBase) -> PSt DataBase
 	SaveRecords database=:{ls=state=:{name,descriptor={fields=desc},records}}
 		#	(maybe_dbname,database)	= selectOutputFile "Save As: " name database
 		|	isNothing maybe_dbname
@@ -322,20 +321,20 @@ where
 		writerecords		= [FWriteRecord rec.fields \\ rec <- records]
 		FWriteRecord rec	= fwrites (foldl (+++) "\n" (map (\field -> field +++ "\n") rec))
 	
-	Quit :: (PSt DataBase .p) -> PSt DataBase .p
+	Quit :: (PSt DataBase) -> PSt DataBase
 	Quit database
 		=	closeProcess (warn ["Save database before quitting?"] "&No" OK SaveRecords database)
 	
 	// Field set up changes
 	
-	FieldChangeIO :: (IdFun (PSt DataBase .p)) (PSt DataBase .p) -> PSt DataBase .p
+	FieldChangeIO :: (IdFun (PSt DataBase)) (PSt DataBase) -> PSt DataBase
 	FieldChangeIO changefun database
 		#	database	= changefun database
 		#	database	= seq (map closeWindow [fieldDialogId,edDialogId]) database
 		#	database	= UpdateDbDomain database
 		=	database
 	
-	AddField :: Id (WState -> Int) (PSt DataBase .p) -> PSt DataBase .p
+	AddField :: Id (WState -> Int) (PSt DataBase) -> PSt DataBase
 	AddField windowid getfield database=:{ls=state=:{dffont}}
 		#	(maybe_wstate,database)	= accPIO (getWindow windowid) database
 		|	isNothing maybe_wstate
@@ -347,7 +346,7 @@ where
 				inputboxwidth			= CharsInInputBox*dffont.width
 			=	inputdialog infotext inputboxwidth (\input->FieldChangeIO (add fieldname input)) database
 	
-	RenameField :: Id (WState -> Int) (PSt DataBase .p) -> PSt DataBase .p
+	RenameField :: Id (WState -> Int) (PSt DataBase) -> PSt DataBase
 	RenameField windowid getfield database=:{ls=state=:{dffont}}
 		#	(maybe_wstate,database)	= accPIO (getWindow windowid) database
 		|	isNothing maybe_wstate
@@ -359,7 +358,7 @@ where
 				inputboxwidth			= CharsInInputBox*dffont.width
 			=	inputdialog infotext inputboxwidth (\input->FieldChangeIO (rename fieldtorename input)) database
 	
-	MoveField :: Id (WState -> Int) (PSt DataBase .p) -> PSt DataBase .p
+	MoveField :: Id (WState -> Int) (PSt DataBase) -> PSt DataBase
 	MoveField windowid getfield database=:{ls={descriptor=d}}
 		#	(maybe_wstate,database)	= accPIO (getWindow windowid) database
 		|	isNothing maybe_wstate
@@ -393,7 +392,7 @@ where
 						destinationfield		= fromJust (snd (getRadioControlSelection selectId dialoginfo))-1
 					=	FieldChangeIO (mvf destinationfield) (closeWindow id pState)
 	
-	DeleteField :: Id (WState -> Int) (PSt DataBase .p) -> PSt DataBase .p
+	DeleteField :: Id (WState -> Int) (PSt DataBase) -> PSt DataBase
 	DeleteField windowid getfield database
 		#	(maybe_wstate,database)	= accPIO (getWindow windowid) database
 		|	isNothing maybe_wstate
@@ -404,16 +403,16 @@ where
 	
 	//	Handling the edit dialog
 	
-	DisplQuery :: (PSt DataBase .p) -> PSt DataBase .p
+	DisplQuery :: (PSt DataBase) -> PSt DataBase
 	DisplQuery database=:{ls={descriptor,query}}
 		=	SetTextFields "Query :" query database
 	
-	SetQuery :: (PSt DataBase .p) -> PSt DataBase .p
+	SetQuery :: (PSt DataBase) -> PSt DataBase
 	SetQuery database=:{ls=state}
 		#	(nquery,database)	= GetTextFields database
 		=	{database & ls={state & query = nquery.fields}}
 	
-	Search :: (PSt DataBase .p) -> PSt DataBase .p
+	Search :: (PSt DataBase) -> PSt DataBase
 	Search database=:{ls=state=:{records,query,selection=sel,edittextids},io}
 		|	isEmpty found
 			=	appPIO beep database
@@ -438,7 +437,7 @@ where
 			size_pref	= size pref
 			size_name	= size name
 	
-	SelectAll :: (PSt DataBase .p) -> PSt DataBase .p
+	SelectAll :: (PSt DataBase) -> PSt DataBase
 	SelectAll database=:{ls=state=:{records,query,selection,descriptor,dbfont,edittextids}}
 		#	recs				= filter (QueryRecord query) records
 		|	isEmpty recs
@@ -451,7 +450,7 @@ where
 			#	database		= UpdateDbDomain database
 			=	database
 	
-	MakeSelectionVisible :: (PSt DataBase .p) -> PSt DataBase .p
+	MakeSelectionVisible :: (PSt DataBase) -> PSt DataBase
 	MakeSelectionVisible database=:{ls=state=:{records,selection,descriptor,dbfont},io}
 		|	isEmpty records
 			=	database
@@ -465,7 +464,7 @@ where
 	where
 		selthumb			= toPicCo dbfont descriptor selection
 	
-	DeleteRecord :: (PSt DataBase .p) -> PSt DataBase .p
+	DeleteRecord :: (PSt DataBase) -> PSt DataBase
 	DeleteRecord database=:{ls=state=:{records=oldrecs,selection=oldindex}}
 		|	isEmpty oldrecs
 			=	appPIO beep database
@@ -475,7 +474,7 @@ where
 		newrecs	= removeAt oldindex oldrecs
 		newindex= if (isEmpty newrecs) 0 (oldindex mod length newrecs) 
 	
-	AddRecord :: Bool (PSt DataBase .p) -> PSt DataBase .p
+	AddRecord :: Bool (PSt DataBase) -> PSt DataBase
 	AddRecord replace database=:{ls=state=:{selection,records=recs,dbfont},io}
 		|	isEmpty recs && replace
 			=	appPIO beep database
@@ -485,15 +484,15 @@ where
 				nstate				= {state & records=newrecs,selection=index}
 			=	UpdateDbDomain {database & ls=nstate}
 	
-	Sort :: (PSt DataBase .p) -> PSt DataBase .p
+	Sort :: (PSt DataBase) -> PSt DataBase
 	Sort database=:{ls=state=:{records=recs}}
 		=	UpdateDbDomain {database & ls={state & records = sort recs}}
 	
-	Clear :: (PSt DataBase .p) -> PSt DataBase .p
+	Clear :: (PSt DataBase) -> PSt DataBase
 	Clear database=:{ls={editinfoid,edittextids}}
 		=	appPIO (setControlTexts [(id,"") \\ id<-edittextids]) database
 	
-	NextPrev :: Modifiers (PSt DataBase .p) -> PSt DataBase .p
+	NextPrev :: Modifiers (PSt DataBase) -> PSt DataBase
 	NextPrev {shiftDown} database=:{ls=state=:{records,selection=sel,edittextids}}
 		#	database	= ChangeSelection edittextids sel nsel {database & ls = {state & selection=nsel}}
 		=	MakeSelectionVisible database
@@ -503,20 +502,20 @@ where
 				 (if (sel==0) max_i (sel-1))
 				 (if (sel==max_i) 0 (sel+1))
 	
-	GetTextFields :: (PSt DataBase .p) -> (Entry,PSt DataBase .p)
+	GetTextFields :: (PSt DataBase) -> (Entry,PSt DataBase)
 	GetTextFields database=:{ls={edittextids,dbfont}}
 		#	(Just dialog,database)	= accPIO (getWindow edDialogId) database
 			fields					= [text \\ (_,Just text) <- getControlTexts edittextids dialog]
 		#	(widths,database)		= accPIO (accScreenPicture (getFontStringWidths dbfont.font fields)) database
 		=	({maxwidth=maxList widths,fields=fields},database)
 	
-	SetTextFields :: String [String] (PSt DataBase .p) -> PSt DataBase .p
+	SetTextFields :: String [String] (PSt DataBase) -> PSt DataBase
 	SetTextFields s rec database=:{ls={editinfoid,edittextids}}
 		=	appPIO (setControlTexts (zip2 [editinfoid:edittextids] [s:rec])) database
 	
 	//	Handling mouse clicks in database window
 	
-	MouseSelectItem	:: MouseState (PSt DataBase .p) -> PSt DataBase .p
+	MouseSelectItem	:: MouseState (PSt DataBase) -> PSt DataBase
 	MouseSelectItem (MouseDown {y} _ _) database=:{ls=state=:{records,descriptor,selection,dbfont,edittextids},io}
 		|	isEmpty records
 			=	database
@@ -530,7 +529,7 @@ where
 	
 	//	Update the whole window in case the ViewDomain has changed
 	
-	UpdateDbDomain :: (PSt DataBase .p) -> PSt DataBase .p
+	UpdateDbDomain :: (PSt DataBase) -> PSt DataBase
 	UpdateDbDomain database=:{ls=state}
 		#	viewdomain	= DbViewDomain state 0 (max (length state.records) 1)
 		#	database	= appPIO (setWindowLook recordWindowId True (True,RecordWindowLook state)) database
@@ -538,7 +537,7 @@ where
 		#	database	= MakeSelectionVisible database
 		=	database
 
-	ChangeSelection :: [Id] Int Int (PSt DataBase .p) -> PSt DataBase .p
+	ChangeSelection :: [Id] Int Int (PSt DataBase) -> PSt DataBase
 	ChangeSelection edittextids old new database=:{ls=state=:{descriptor=descr,records},io}
 		#	io		= appWindowPicture recordWindowId (HiliteSelection state new o (HiliteSelection state old)) io
 		#	io		= setWindowLook recordWindowId False (True,RecordWindowLook state) io

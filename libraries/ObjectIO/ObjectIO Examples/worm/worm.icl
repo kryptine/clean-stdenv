@@ -18,9 +18,6 @@ HelpFile		:== "WormHelp"
 HiScoresFile	:== "wormhi"
 NrOfHiScores	:== 8
 
-//	Dummy state.
-::	NoState		=	NoState
-
 //	The local state.
 ::	*Local
 	=	{	hifile	:: *File
@@ -36,9 +33,9 @@ Start world
 
 startWorm :: !(!*File,!HiScores) ![Id] !*World -> *World
 startWorm (hifile,best) ids world
-	= startIO SDI {hifile=hifile,state=InitState best} NoState (initialise ids) [] world
+	= startIO SDI {hifile=hifile,state=InitState best} (initialise ids) [] world
 
-initialise :: [Id] !(PSt Local .p) -> PSt Local .p
+initialise :: [Id] !(PSt Local) -> PSt Local
 initialise ids pst=:{ls={state={best}}}
 	# (error,pst)	= openWindow undef window pst
 	| error<>NoError
@@ -61,13 +58,13 @@ where
 	[fileID,playID,haltID,quitID,levelID,contID,windowID,timerID:_]
 		= ids		// The global Ids
 
-	initFoodSupply :: RandomSeed (PSt Local .p) -> PSt Local .p
+	initFoodSupply :: RandomSeed (PSt Local) -> PSt Local
 	initFoodSupply seed pst=:{ls=ls=:{state=state=:{worm,gamelevel}}}
 		# foods				= FoodSupply seed
 		  (food,foods)		= NewFood worm gamelevel foods
 		= {pst & ls={ls & state={state & food=food,foodsupply=foods}}}
 	
-	initWindowPicture :: (PSt Local .p) -> PSt Local .p
+	initWindowPicture :: (PSt Local) -> PSt Local
 	initWindowPicture pst
 		= appPIO (appWindowPicture windowID (setPenFontSize WormFontSize)) pst
 	where
@@ -116,7 +113,7 @@ where
 		= DrawGame gamelevel food points worm lives pict
 	
 	//	The function for the Play command.
-	Play :: (PSt Local .p) -> PSt Local .p
+	Play :: (PSt Local) -> PSt Local
 	Play pst=:{ls=ls=:{state},io}
 		# io	= disableMenus			[levelID]						io
 		# io	= disableMenuElements	[playID,quitID]					io
@@ -145,7 +142,7 @@ where
 						  }
 	
 	//	The functions for the Halt/Continue command(s).
-	Halt :: (PSt Local .p) -> PSt Local .p
+	Halt :: (PSt Local) -> PSt Local
 	Halt pst=:{io}
 		# io			= setWindowCursor		windowID StandardCursor	io
 		# io			= disableWindowKeyboard	windowID				io
@@ -161,7 +158,7 @@ where
 	where
 		continue		= MenuItem "Continue" [MenuId contID, MenuShortKey '.', MenuFunction (noLS Continue)]
 		
-		Continue :: (PSt Local .p) -> PSt Local .p
+		Continue :: (PSt Local) -> PSt Local
 		Continue pst=:{io}
 			# io			= enableWindowKeyboard	windowID				io
 			# io			= enableTimer			timerID					io
@@ -178,17 +175,17 @@ where
 			halt			= MenuItem "Halt" [MenuId haltID, MenuShortKey '.', MenuFunction (noLS Halt)]
 	
 	//	The function for the Quit command: stop the program and write the high scores to file.
-	Quit :: (PSt Local .p) -> PSt Local .p
+	Quit :: (PSt Local) -> PSt Local
 	Quit pst=:{ls=ls=:{hifile,state={best}}}
 		= appFiles (writeHiScores hifile best) (closeProcess {pst & ls={ls & hifile=undef}})
 	
 	//	Set a new speed (called when one of the Options commands is chosen).
-	SetSpeed :: Int (PSt Local .p) -> PSt Local .p
+	SetSpeed :: Int (PSt Local) -> PSt Local
 	SetSpeed fix pst=:{ls=ls=:{state}}
 		= {pst & ls={ls & state={state & gamelevel={state.gamelevel & fix=fix,speed=fix}}}}
 	
 	//	Show the high scores.
-	ShowBest :: (PSt Local .p) -> PSt Local .p
+	ShowBest :: (PSt Local) -> PSt Local
 	ShowBest pst=:{ls={state={best}}}
 		= showHiScores "Worm High Scores:" best pst
 	
@@ -199,14 +196,14 @@ where
 	KeyFilter _
 		= False
 	
-	MakeTurn :: KeyboardState (PSt Local .p) -> PSt Local .p
+	MakeTurn :: KeyboardState (PSt Local) -> PSt Local
 	MakeTurn (SpecialKey key _ _) pst=:{ls=ls=:{state=state=:{dir}}}
 		| (dir==UpKey   || dir==DownKey)  && (key==LeftKey || key==RightKey)	= OneStep 1 {pst & ls={ls & state={state & dir=key}}}
 		| (dir==LeftKey || dir==RightKey) && (key==UpKey   || key==DownKey )	= OneStep 1 {pst & ls={ls & state={state & dir=key}}}
 		| otherwise																= pst
 	
 	//	The function for the Timer device: do one step of the worm game.
-	OneStep :: NrOfIntervals (PSt Local .p) -> PSt Local .p
+	OneStep :: NrOfIntervals (PSt Local) -> PSt Local
 	OneStep _ pst=:{ls=ls=:{state=state=:{gamelevel,food,foodsupply,grow,points,dir,worm,best,lives}},io}
 		| newlevel<>curlevel	= SwitchLevel gamelevel foodsupply points2 points best lives pst
 		# state					= {state & food=food1,foodsupply=foods1,grow=grow1,points=points2,worm=worm1}
@@ -263,7 +260,7 @@ where
 			| key==RightKey	= {segment & x=x+1}
 			| otherwise		= abort ("NewHead applied to unknown SpecialKey: "+++toString key)
 		
-		SwitchLevel :: Level [Food] Points Points HiScores Lives (PSt Local .p) -> PSt Local .p
+		SwitchLevel :: Level [Food] Points Points HiScores Lives (PSt Local) -> PSt Local
 		SwitchLevel curlevel foods newPoints oldPoints high lives pst=:{ls,io}
 			# (id,io)	= openId io
 			= NextLevelAnimation id {pst & ls={ls & state=newstate},io=io}
@@ -282,7 +279,7 @@ where
 							  ,	lives		= if (newPoints>oldPoints) (lives+1) (lives-1)
 							  }
 			
-			NextLevelAnimation :: Id (PSt Local .p) -> PSt Local .p
+			NextLevelAnimation :: Id (PSt Local) -> PSt Local
 			NextLevelAnimation id pst=:{io}
 				# io			= disableWindowKeyboard windowID	io
 				# io			= disableTimer			timerID		io
@@ -296,7 +293,7 @@ where
 			where
 				nrAnimationSteps= 40
 				
-				BetweenLevels :: NrOfIntervals ((Int,Int),PSt Local .p) -> ((Int,Int),PSt Local .p)
+				BetweenLevels :: NrOfIntervals ((Int,Int),PSt Local) -> ((Int,Int),PSt Local)
 				BetweenLevels _ ((animationStep,step),pst=:{ls={state={gamelevel,food,points,worm,lives}},io})
 					| animationStep<=1
 						= ((2,1),pst)
@@ -310,7 +307,7 @@ where
 						# io		= enableWindowKeyboard	windowID												io
 						= ((animationStep,step),{pst & io=io})
 		
-		NextLife :: (PSt Local .p) -> PSt Local .p
+		NextLife :: (PSt Local) -> PSt Local
 		NextLife pst=:{ls=ls=:{state=state=:{gamelevel,foodsupply,points,best,worm,lives}},io}
 			| lives>0
 				# (id,io)	= openId io
@@ -328,7 +325,7 @@ where
 				(newfood,foods1)= NewFood newworm gamelevel foodsupply
 				newworm			= NewWorm gamelevel
 				
-				DeadWormAlert :: Id Worm (PSt Local .p) -> PSt Local .p
+				DeadWormAlert :: Id Worm (PSt Local) -> PSt Local
 				DeadWormAlert id worm pst=:{io}
 					# io			= disableTimer			timerID		io
 					# io			= disableWindowKeyboard	windowID	io
@@ -337,7 +334,7 @@ where
 					| error<>NoError= abort "Worm could not open a timer for desintegration."
 					| otherwise		= pst
 				where
-					DeadWorm :: NrOfIntervals (Worm,PSt Local .p) -> (Worm,PSt Local .p)
+					DeadWorm :: NrOfIntervals (Worm,PSt Local) -> (Worm,PSt Local)
 					DeadWorm _ ([segment:rest],pst=:{io})
 						# io	= appWindowPicture windowID (EraseSegment segment) io
 						= (rest,{pst & io=io})
@@ -370,7 +367,7 @@ where
 						,	WindowItemSpace	(hmm 6.0) (vmm 6.0)
 						]
 				where
-					OverOK :: (PSt Local .p) -> PSt Local .p
+					OverOK :: (PSt Local) -> PSt Local
 					OverOK pst=:{ls=ls=:{state}}
 						# (maybeDialog,pst)		= accPIO (getWindow overId) pst
 						| isNothing maybeDialog	= abort "OK button could not retrieve WState of 'Game Over' dialog."
@@ -378,7 +375,7 @@ where
 						| name==""				= closeWindow overId pst
 						| otherwise				= closeWindow overId (addscore name pst)
 					where
-						addscore :: String (PSt Local .p) -> PSt Local .p
+						addscore :: String (PSt Local) -> PSt Local
 						addscore name pst=:{ls=ls=:{state}}
 							# best	= addScore NrOfHiScores {name=name,score=state.points} state.best
 							= {pst & ls={ls & state={state & best=best}}}

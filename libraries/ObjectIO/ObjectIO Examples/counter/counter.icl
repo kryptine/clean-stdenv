@@ -14,7 +14,7 @@ import StdEnv, StdIO
 
 Start :: *World -> *World
 Start world
-	= startIO NDI NoState NoState initIO [] world
+	= startIO NDI NoState initIO [] world
 
 initIO pst
 	# (dialogid, pst)	= accPIO openId pst
@@ -49,7 +49,7 @@ where
 		displayheight	= 1
 		init			= 0
 		
-		upd :: Int (Int,PSt .l .p) -> (Int,PSt .l .p)
+		upd :: Int (Int,PSt .l) -> (Int,PSt .l)
 		upd dx (count,pst)
 			# count	= count+dx
-			= (count,appPIO (setControlTexts [(displayId,toString count)]) pst)
+			= (count,appPIO (setControlText displayId (toString count)) pst)

@@ -56,7 +56,7 @@ Start world
 	# (allcids, world)		= openIds   15 world
 	# (allr2ids,world)		= openR2Ids 15 world
 	  wdef					= window bitmap blocksize windowId allcids allr2ids coords
-	= startIO SDI NoState NoState (snd o openWindow {curHole=hole} wdef) [ProcessClose closeProcess] world
+	= startIO SDI NoState (snd o openWindow {curHole=hole} wdef) [ProcessClose closeProcess] world
 where
 	nr_shuffle				= 200
 	
@@ -80,7 +80,7 @@ where
 	Closing the window will terminate the program.
 */
 window :: Bitmap Size Id [Id] [SlideR2Id] [(Coord,Coord)]
-	-> Window (ListLS (AddLS (:+: CustomButtonControl (Receiver2 SlideMsgIn Bool)))) WindowState (PSt .l .p)
+	-> Window (ListLS (AddLS (:+: CustomButtonControl (Receiver2 SlideMsgIn Bool)))) WindowState (PSt .l)
 window bitmap blocksize windowId allcids allr2ids coords
 	= Window "SlideGame"
 		(	ListLS (map (slideControl bitmap blocksize windowId allr2ids) coord_ids)
@@ -123,7 +123,7 @@ where
 	:==	AddLS (:+: CustomButtonControl (Receiver2 SlideMsgIn SlideMsgOut)) ls ps
 
 slideControl :: Bitmap Size Id [SlideR2Id] ((Coord,Coord),(Id,SlideR2Id))
-	-> SlideControl WindowState (PSt .l .p)
+	-> SlideControl WindowState (PSt .l)
 slideControl bitmap size windowId allr2ids ((okCoord,initCoord),(cid,r2id))
 	= {	addLS	= { curCoord=initCoord }
 	  ,	addDef	= custombutton :+: receiver2
@@ -142,7 +142,7 @@ where
 		| otherwise			= picture
 	offset {col,row}= {vx=size.w*col,vy=size.h*row}
 	
-	slideMove :: (.(SlideState,WindowState),PSt .l .p) -> (.(SlideState,WindowState),PSt .l .p)
+	slideMove :: (.(SlideState,WindowState),PSt .l) -> (.(SlideState,WindowState),PSt .l)
 	slideMove ((slide=:{curCoord},ls=:{curHole}),ps)
 		| distCoord curCoord curHole<>1
 			= ((slide,ls),ps)
@@ -158,14 +158,14 @@ where
 		| otherwise
 			= ((slide,ls),ps)
 	
-	areYouOk :: SlideR2Id (PSt .l .p) -> (Bool,PSt .l .p)
+	areYouOk :: SlideR2Id (PSt .l) -> (Bool,PSt .l)
 	areYouOk r2id ps
 		# (response,ps)	= syncSend2 r2id AreYouOk ps
 		= (fromJust (snd response),ps)
 	
 	receiver2	= Receiver2 r2id receive2 []
 	
-	receive2 :: SlideMsgIn ((SlideState,.ls),PSt .l .p) -> (SlideMsgOut,((SlideState,.ls),PSt .l .p))
+	receive2 :: SlideMsgIn ((SlideState,.ls),PSt .l) -> (SlideMsgOut,((SlideState,.ls),PSt .l))
 	receive2 AreYouOk (slide=:({curCoord},_),ps)
 		= (okCoord==curCoord,(slide,ps))
 

@@ -26,13 +26,13 @@ Start world
 	#	(b,    world)	= openRId world
 	#	(talkA,world)	= talk "A" a b world
 	#	(talkB,world)	= talk "B" b a world
-	=	startProcesses (ProcessGroup NoState (ListCS [talkA,talkB])) world
+	=	startProcesses [talkA,talkB] world
 
 /*	talk name me you
 	defines a talk process named name, to which messages can be sent of type Message
 	via me, and that sends messages of type Message to a receiver you.
 */
-talk :: String (RId Message) (RId Message) *World -> (Process .p,*World)
+talk :: String (RId Message) (RId Message) *World -> (Process,*World)
 talk name me you world
 	#	(wId,  world)	= openId world
 	#	(outId,world)	= openId world
@@ -83,11 +83,11 @@ inputfilter :: KeyboardState -> Bool
 inputfilter keystate
 	=	getKeyboardStateKeyState keystate<>KeyUp
 
-input :: Id Id (RId Message) KeyboardState (PSt .l .p) -> PSt .l .p
-input wId inId you _ ps
-	#	(Just window,ps)	= accPIO (getWindow wId) ps
-		text				= fromJust (snd (hd (getControlTexts [inId] window)))
-	=	snd (asyncSend you (NewLine text) ps)
+input :: Id Id (RId Message) KeyboardState (PSt .l) -> PSt .l
+input wId inId you _ pst
+	#	(Just window,pst)	= accPIO (getWindow wId) pst
+		text				= fromJust (snd (getControlText inId window))
+	=	snd (asyncSend you (NewLine text) pst)
 	
 /*	The message passing protocol of a talk process.
 	On receipt of:
@@ -95,14 +95,14 @@ input wId inId you _ ps
 	(2) Quit:	     this is always the last message of the other talk process when termination is 
 		              requested. The process should terminate itself.
 */
-receive :: Id Id Message (PSt .l .p) -> PSt .l .p
-receive wId outId (NewLine text) ps=:{io}
-	=	{ps & io=setControlTexts [(outId,text)] (setEditControlCursor outId (size text) io)}
-receive _ _ Quit ps
-	=	closeProcess ps
+receive :: Id Id Message (PSt .l) -> PSt .l
+receive wId outId (NewLine text) pst=:{io}
+	=	{pst & io=setEditControlCursor outId (size text) (setControlText outId text io)}
+receive _ _ Quit pst
+	=	closeProcess pst
 
 /*	The quit command first sends the Quit message to the other talk process and then quits itself.
 */	
-quit :: (RId Message) (PSt .l .p) -> PSt .l .p
-quit you ps
-	=	closeProcess (snd (syncSend you Quit ps))
+quit :: (RId Message) (PSt .l) -> PSt .l
+quit you pst
+	=	closeProcess (snd (syncSend you Quit pst))

@@ -53,7 +53,7 @@ fopen2 fileName mode files
 	-	it has an Ok button that closes this window, 
 	-	it has a Help button that displays the help information (see showHelp).
 */
-showAbout :: String String (PSt .l .p) -> PSt .l .p
+showAbout :: String String (PSt .l) -> PSt .l
 showAbout appname helpfile pState
 	# (okId, pState)		= accPIO openId pState
 	# (fonts,pState)		= accPIO (accScreenPicture infoFonts) pState
@@ -74,7 +74,7 @@ showAbout appname helpfile pState
 
 /*	showHelp opens a SDI process that displays the help information found in the helpfile.
 */
-showHelp :: String (PSt .l .p) -> PSt .l .p
+showHelp :: String (PSt .l) -> PSt .l
 showHelp helpfile pState
 	# (fonts,pState)		= accPIO (accScreenPicture infoFonts) pState
 	# ((size,text),pState)	= readInfo Help fonts HelpBegin HelpEnd helpfile pState
@@ -87,7 +87,7 @@ showHelp helpfile pState
 	  							,	WindowClose			(noLS closeProcess)
 	  							,	WindowViewDomain	{zero & corner2={x=size.w,y=size.h}}
 	  							]
-	= openProcesses (ProcessGroup NoState (Process SDI NoState (snd o openWindow undef window) [ProcessClose closeProcess])) pState
+	= openProcesses (Process SDI NoState (snd o openWindow undef window) [ProcessClose closeProcess]) pState
 where
 	hscroll curViewFrame {sliderThumb} move
 		= case move of
@@ -133,7 +133,7 @@ where
 
 //	Determine the line height and leading of a given font:
 
-getFontHeightAndAscent :: Fonts (PSt .l .p) -> (((Int,Int),(Int,Int)),PSt .l .p)
+getFontHeightAndAscent :: Fonts (PSt .l) -> (((Int,Int),(Int,Int)),PSt .l)
 getFontHeightAndAscent fonts pState
 	# ((normal,large),pState)	= accPIO (accScreenPicture (getmetrics fonts)) pState
 	= (((fontLineHeight normal,normal.fAscent), (fontLineHeight large,large.fAscent)),pState)
@@ -147,7 +147,7 @@ where
 
 //	Reading and pre-processing of the file containing the about- and help-info. */
 
-readInfo :: Bool Fonts String String String (PSt .l .p) -> ((Size,[InfoLine]),PSt .l .p)
+readInfo :: Bool Fonts String String String (PSt .l) -> ((Size,[InfoLine]),PSt .l)
 readInfo help fonts begin end filename pState
 	# (metrics,      pState)	= getFontHeightAndAscent fonts pState
 	# ((succes,file),pState)	= accFiles (fopen2 (applicationpath filename) FReadText) pState
@@ -166,14 +166,14 @@ readInfo help fonts begin end filename pState
 where
 	errpref						= "The help file \'"+++filename+++"\' " 
 	
-	processInfoStrings :: Fonts ((Int,Int),(Int,Int)) [String] (PSt .l .p) -> (InfoDef,PSt .l .p)
+	processInfoStrings :: Fonts ((Int,Int),(Int,Int)) [String] (PSt .l) -> (InfoDef,PSt .l)
 	processInfoStrings fonts ((normalHeight,normalAscent),(largeHeight,largeAscent)) lines pState
 		# ((size,lines),pState)	= addFontToInfoLines fonts (normalHeight,largeHeight) 0 (Margin+largeAscent) lines pState
 		  width					= Margin+size.w+Margin
 		# (lines,pState)		= seqList (map (centerInfoLine fonts.normal width) lines) pState
 		= (({w=width,h=size.h+Margin-largeAscent},lines),pState)
 	where
-		addFontToInfoLines :: Fonts Heights Int Int [String] (PSt .l .p) -> (InfoDef,PSt .l .p)
+		addFontToInfoLines :: Fonts Heights Int Int [String] (PSt .l) -> (InfoDef,PSt .l)
 		addFontToInfoLines fonts heights maxx maxy [line:rest] pState
 			# ((font,wid,hgt,line),pState)	= parseInfoLine fonts heights line pState
 			# ((size,rest),        pState)	= addFontToInfoLines fonts heights (max maxx wid) (maxy+hgt) rest pState
@@ -183,7 +183,7 @@ where
 			If line == '\{L,b,B,c,C,d,D}'+++line1 then a special font is used, otherwise the default font is used.
 			parseInfoLine also calculates the width and height of the line.
 		*/
-			parseInfoLine :: Fonts Heights String (PSt .l .p) -> ((InfoFontDef,Int,Int,String),PSt .l .p)
+			parseInfoLine :: Fonts Heights String (PSt .l) -> ((InfoFontDef,Int,Int,String),PSt .l)
 			parseInfoLine fonts=:{normal,large,bold,large_bold} heights=:(nhgt,lhgt) line pState
 				# linelen	= size line
 				| linelen<2 || line.[0]<>'\\'
@@ -205,7 +205,7 @@ where
 		addFontToInfoLines _ _ maxx maxy _ pState
 			= (({w=maxx,h=maxy},[]),pState)
 		
-		centerInfoLine :: Font Int InfoLine (PSt .l .p) -> (InfoLine,PSt .l .p)
+		centerInfoLine :: Font Int InfoLine (PSt .l) -> (InfoLine,PSt .l)
 		centerInfoLine nft maxx info=:(inft=:NoFont centered,x,y,line) pState
 			| not centered
 				= (info,pState)

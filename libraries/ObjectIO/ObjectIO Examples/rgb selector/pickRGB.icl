@@ -26,7 +26,7 @@ Start world
 where
  	initrgb				= {r=MaxRGB,g=MaxRGB,b=MaxRGB}
 	startColourPicker rgbid pickcontrol world
-		= startIO SDI NoState NoState initialise [ProcessClose closeProcess] world
+		= startIO SDI NoState initialise [ProcessClose closeProcess] world
 	where
 		initialise pst
 			# (rgbsize,pst)	= controlSize pickcontrol True Nothing Nothing Nothing pst
@@ -55,12 +55,12 @@ where
 
 /*	The definition of the text-slider component:	*/
 
-::	RGBPickControl ls ps
-	:==	:+: SliderControl TextControl ls ps
+::	RGBPickControl ls pst
+	:==	:+: SliderControl TextControl ls pst
 
 RGBPickControl :: RGBColour (String,Id,Id) Id (RGBColour->Int) (Int->RGBColour->RGBColour)
 				 (Maybe ItemPos)
-	-> RGBPickControl RGBColour (PSt .l .p)
+	-> RGBPickControl RGBColour (PSt .l)
 RGBPickControl rgb (text,sid,tid) did get set maybePos
 	=	  SliderControl Horizontal length sliderstate slideraction
 													[ControlId sid:controlPos]
@@ -72,11 +72,11 @@ where
 	length		= PixelWidth (MaxRGB-MinRGB+1)
 	sliderstate	= {sliderMin=MinRGB, sliderMax=MaxRGB, sliderThumb=get rgb}
 	
-	slideraction :: SliderMove (RGBColour,PSt .l .p) -> (RGBColour,PSt .l .p)
+	slideraction :: SliderMove (RGBColour,PSt .l) -> (RGBColour,PSt .l)
 	slideraction move (rgb,pst)
 		= (	newrgb
-		  ,	appListPIO [ setSliderThumbs [(sid,y)]
-		  			   , setControlTexts [(tid,ColourText text y)]
+		  ,	appListPIO [ setSliderThumb sid y
+		  			   , setControlText tid (ColourText text y)
 		  			   , SetColourBox did newrgb
 		  			   ] pst
 		  )
@@ -98,10 +98,10 @@ ColourText text x
 
 /*	The definition of a colour box:		*/
 
-::	ColourBoxControl ls ps
-	:==	CustomControl ls ps
+::	ColourBoxControl ls pst
+	:==	CustomControl ls pst
 
-ColourBoxControl :: RGBColour Id (Maybe ItemPos) -> ColourBoxControl .ls .ps
+ColourBoxControl :: RGBColour Id (Maybe ItemPos) -> ColourBoxControl .ls .pst
 ColourBoxControl rgb did maybePos
 	= CustomControl {w=40,h=40} (ColourBoxLook rgb)
 			[	ControlId did
@@ -116,9 +116,9 @@ ColourBoxLook colour _ {newFrame} picture
 	# picture	= draw			newFrame	 picture
 	= picture
 
-SetColourBox :: Id RGBColour (IOSt .l .p) -> IOSt .l .p
+SetColourBox :: Id RGBColour (IOSt .l) -> IOSt .l
 SetColourBox id rgb iost
-	= setControlLooks [(id,True,(True,ColourBoxLook rgb))] iost
+	= setControlLook id True (True,ColourBoxLook rgb) iost
 
 
 
@@ -128,20 +128,20 @@ SetColourBox id rgb iost
 ::	Out		=	OutGet RGBColour	| OutSet
 ::	RGBId	:==	R2Id In Out
 
-::	ColourPickAccess ps	:==	Receiver2 In Out RGBColour ps
+::	ColourPickAccess pst	:==	Receiver2 In Out RGBColour pst
 
-ColourPickAccess :: RGBId [(String,Id,Id)] Id -> ColourPickAccess (PSt .l .p)
+ColourPickAccess :: RGBId [(String,Id,Id)] Id -> ColourPickAccess (PSt .l)
 ColourPickAccess rid rgbpicks did
 	= Receiver2 rid accessRGB []
 where
-	accessRGB :: In (RGBColour,PSt .l .p) -> (Out,(RGBColour,PSt .l .p))
-	accessRGB InGet (rgb,ps)
-		= (OutGet rgb,(rgb,ps))
-	accessRGB (InSet rgb=:{r,g,b}) (_,ps=:{io})
+	accessRGB :: In (RGBColour,PSt .l) -> (Out,(RGBColour,PSt .l))
+	accessRGB InGet (rgb,pst)
+		= (OutGet rgb,(rgb,pst))
+	accessRGB (InSet rgb=:{r,g,b}) (_,pst=:{io})
 		# io	= SetColourBox    did rgb io
 		# io	= setSliderThumbs (map (\(y,(_,sid,_))->(sid,y)) settings) io
 		# io	= setControlTexts (map (\(y,(text,_,tid))->(tid,ColourText text y)) settings) io
-		= (OutSet,(rgb,{ps & io=io}))
+		= (OutSet,(rgb,{pst & io=io}))
 	where
 		settings= zip2 [r,g,b] rgbpicks
 
@@ -149,22 +149,22 @@ where
 
 /*	The definition of the assembled colour picking control:	*/
 
-::	ColourPickControl ls ps
+::	ColourPickControl ls pst
 /*	:==	(	CompoundControl
 			(	:+: (CompoundControl (ListLS RGBPickControl)))
 			(	:+:	ColourBoxControl
 					ColourPickAccess
 			))
-		) ls ps
+		) ls pst
 */	:==	NewLS
 		(	CompoundControl
 			(	:+:	(CompoundControl (ListLS (:+: SliderControl TextControl)))
 			(	:+:	CustomControl
 					(Receiver2 In Out)
 			))
-		)	ls	ps
+		)	ls	pst
 
-ColourPickControl :: RGBId [Id] RGBColour (Maybe ItemPos) -> ColourPickControl .ls (PSt .l .p)
+ColourPickControl :: RGBId [Id] RGBColour (Maybe ItemPos) -> ColourPickControl .ls (PSt .l)
 ColourPickControl rgbid ids initrgb maybePos
 	= {	newLS = initrgb
 	  ,	newDef= CompoundControl

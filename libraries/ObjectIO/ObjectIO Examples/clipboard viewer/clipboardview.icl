@@ -19,7 +19,6 @@ Start world
 	# (ids,world)	= openIds 3 world						// Create 3 Id values
 	= startIO NDI											// Evaluate an interactive process with:
 			  NoState										//    no local  process state
-			  NoState										//    no public process state
 			  (initialise ids)								//    the initialisation action
 			  []											//    only default attributes
 			  world

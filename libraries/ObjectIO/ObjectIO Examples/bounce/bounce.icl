@@ -25,8 +25,8 @@ import bounceDraw
 		}
 ::	NoState									// NoState is a simple singleton type constructor
 	=	NoState
-::	*Bounce	x
-	:==	PSt Local x							// Synonym for PSt
+::	*Bounce
+	:==	PSt Local							// Synonym for PSt
 
 
 //	Create the initial interactive process:
@@ -43,9 +43,9 @@ Start world
 					 ,	bounce wIdA tIdA rIdA rIdB "Bounce A" LeftTop  leftBarrelSetUp
 					 ]	world
 
-bounce :: Id Id (RId Message) (RId Message) Title ItemLoc (Barrel,[Ball]) -> ProcessGroup Process
+bounce :: Id Id (RId Message) (RId Message) Title ItemLoc (Barrel,[Ball]) -> Process
 bounce wId tId me you name itemLoc (barrel,balls)
-	= ProcessGroup 0 (Process SDI initLocal initIO [ProcessClose quit])
+	= Process SDI initLocal initIO [ProcessClose quit]
 where
 	barrelDomain		= barrel.bDomain
 	barrelSize			= rectangleSize barrelDomain
@@ -97,7 +97,7 @@ where
 				:+:	MenuItem "Quit"				[MenuFunction (noLS quit),MenuShortKey 'q']
 				)	[]
 	
-	quit :: (Bounce .x) -> Bounce .x
+	quit :: Bounce -> Bounce
 	quit bounce=:{ls={talkTo}}
 		= closeProcess (snd (syncSend talkTo QuitBounce bounce))
 	
@@ -107,7 +107,7 @@ where
 				,	TimerFunction	(noLS1 (bounceBalls splitWalls))
 				]
 	where
-		bounceBalls :: !(![SingleWall],![SingleWall]) NrOfIntervals (Bounce .x) -> Bounce .x
+		bounceBalls :: !(![SingleWall],![SingleWall]) NrOfIntervals Bounce -> Bounce
 		bounceBalls splitWalls _ bounce=:{ls=local=:{talkTo,balls,barrel},io}
 			# (windowSize,io)	= getWindowViewSize wId io
 			  scale				= scaleSize windowSize barrelSize
@@ -128,10 +128,10 @@ where
 			(ins,outs)			= splitBallsInBarrel domain ballsMoved
 	
 //	receiver defines the receiver that will receive new balls and termination requests.
-	receiver :: *Receiver Message .ls (Bounce .x)
+	receiver :: *Receiver Message .ls Bounce
 	receiver = Receiver me (noLS1 (receive splitWalls)) []
 	where
-		receive :: !(![SingleWall],![SingleWall]) !Message !(Bounce .x) -> Bounce .x
+		receive :: !(![SingleWall],![SingleWall]) !Message !Bounce -> Bounce
 		receive (horizontal,vertical) (BallsArrive newBalls) bounce=:{ls}
 			#!	newBalls = map correctBall newBalls
 			=	{bounce & ls={ls & balls=newBalls++ls.balls}}
@@ -149,7 +149,7 @@ where
 			= closeProcess bounce
 	
 //	bounceHelp opens a dialog that tells something about this application.
-	bounceHelp :: (Bounce .x) -> Bounce .x
+	bounceHelp :: Bounce -> Bounce
 	bounceHelp bounce
 		# (okId, bounce)	= accPIO openId bounce
 		# ((error,_),bounce)= openModalDialog undef (dDef okId) bounce
@@ -168,7 +168,7 @@ where
 								]
 		center	= (Center,NoOffset)
 		
-		close :: (Bounce .x) -> Bounce .x
+		close :: Bounce -> Bounce
 		close bounce
 			# (Just id,bounce)	= accPIO getActiveWindow  bounce
 			# bounce			= closeWindow id bounce

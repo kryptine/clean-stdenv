@@ -18,14 +18,14 @@ CR			:== '\xD'					// carriage return
 	=	{	sndChan		::	TCP_SChannel
 		,	nickname	::	String
 		}
-::	*PState	:==	PSt LS NoState
+::	*PState	:==	PSt LS
 
 ::	NoState
 	=	NoState							// The singleton data type
 
 Start :: *World -> *World
 Start world
-	= startIO SDI { sndChan=undef, nickname=""} NoState initialize [ProcessWindowSize zero] world
+	= startIO SDI { sndChan=undef, nickname=""} initialize [ProcessWindowSize zero] world
 
 initialize ::  PState -> PState
 initialize ps

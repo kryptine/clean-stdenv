@@ -91,7 +91,7 @@ where
 
 
 //	Display high scores in a modal dialog to the user:
-showHiScores :: String !HiScores !(PSt .l .p) -> PSt .l .p
+showHiScores :: String !HiScores !(PSt .l) -> PSt .l
 showHiScores header highs pState=:{io}
 	# (okId,io)	= openId io
 	# (wId, io)	= openId io

@@ -49,7 +49,7 @@ openTmIds env
 
 /*	The dialog to alter the contents of a tape cell.
 */
-AlterCell :: Int (PSt Tm .p) -> PSt Tm .p
+AlterCell :: Int (PSt Tm) -> PSt Tm
 AlterCell pos pst=:{ls=tm=:{tmstate={turing={tape}},tmids={tapeWdID}}}
 	# (ids,pst)	= accPIO (openIds 3) pst
 	# pst		= appPIO (appWindowPicture tapeWdID (HiliteCell pos cell)) pst
@@ -76,7 +76,7 @@ where
 		okId	= ids!!1
 		celId	= ids!!2
 		
-		Ok :: Int (PSt Tm .p) -> PSt Tm .p
+		Ok :: Int (PSt Tm) -> PSt Tm
 		Ok pos pst=:{ls=tm=:{tmstate,tmids={tapeWdID}},io}
 			# (maybeDialog,io)	= getWindow wId io
 			  cell				= FirstChar (fromJust (snd (getControlText celId (fromJust maybeDialog))))
@@ -85,12 +85,12 @@ where
 			# io				= appWindowPicture tapeWdID (DrawTapeCell pos cell) io
 			= closeWindow wId {pst & ls=tm,io=io}
 		
-		Cancel :: Int Char (PSt Tm .p) -> PSt Tm .p
+		Cancel :: Int Char (PSt Tm) -> PSt Tm
 		Cancel pos cell pst=:{ls={tmids={tapeWdID}},io}
 			= closeWindow wId {pst & io=appWindowPicture tapeWdID (DrawTapeCell pos cell) io}
 
 //	The dialog to alter a transition.
-AlterTransition :: Int (PSt Tm .p) -> PSt Tm .p
+AlterTransition :: Int (PSt Tm) -> PSt Tm
 AlterTransition tnr pst=:{ls=tm=:{tmstate={turing={transitions}},tmids={windowID,tapeWdID}}}
 	# (ids,pst)	= accPIO (openIds 6)													pst
 	# pst		= appPIO (appWindowPicture windowID (HiliteTransition tnr transition))	pst
@@ -141,7 +141,7 @@ where
 		[wId,fromId,headId,toId,moveId,okId:_]
 				= ids
 		
-		Ok :: Int (PSt Tm .p) -> PSt Tm .p
+		Ok :: Int (PSt Tm) -> PSt Tm
 		Ok tnr pst=:{ls=tm=:{tmstate,tmids={windowID,fileMenuId,saveItemId}},io}
 			# (maybeDialog,io)	= getWindow wId io
 			  dialog			= fromJust maybeDialog
@@ -159,13 +159,13 @@ where
 		where
 			turing				= tmstate.turing
 		
-		Cancel :: Int Transition (PSt Tm .p) -> PSt Tm .p
+		Cancel :: Int Transition (PSt Tm) -> PSt Tm
 		Cancel tnr transition=:{start} pst=:{ls={tmids={windowID}}}
 			# pst			= closeWindow wId pst
 			| start==""		= appPIO (appWindowPicture windowID (EraseTrans tnr)) pst
 			| otherwise		= appPIO (appWindowPicture windowID (ShowTrans  tnr transition)) pst
 		
-		Remove :: Int (PSt Tm .p) -> PSt Tm .p
+		Remove :: Int (PSt Tm) -> PSt Tm
 		Remove tnr pst=:{ls=tm=:{tmstate,tmids={fileMenuId,saveItemId}}}
 			# pst			= closeWindow wId pst
 			# pst			= appPIO (enableMenuElements [saveItemId]) pst
@@ -179,7 +179,7 @@ where
 
 
 //	The dialog to alter the state of the T.M.
-AlterState :: (PSt Tm .p) -> PSt Tm .p
+AlterState :: (PSt Tm) -> PSt Tm
 AlterState pst=:{ls=tm=:{tmstate={turing={state}},tmids={tapeWdID,windowID}}}
 	# pst		= appPIO (appWindowPicture tapeWdID EraseError) pst
 	# pst		= appPIO (appWindowPicture windowID (HiliteState state)) pst
@@ -202,7 +202,7 @@ where
 		[wId,okId,editId:_]
 				= ids
 		
-		Ok :: (PSt Tm .p) -> PSt Tm .p
+		Ok :: (PSt Tm) -> PSt Tm
 		Ok pst=:{ls=tm=:{tmstate,tmids={windowID,machineMenuId,stepItemId,haltItemId}},io}
 			# (dialog,io)	= getWindow wId io
 			  dialog		= fromJust dialog
@@ -213,7 +213,7 @@ where
 			# pst			= closeWindow wId pst
 			= pst
 		
-		Cancel :: String (PSt Tm .p) -> PSt Tm .p
+		Cancel :: String (PSt Tm) -> PSt Tm
 		Cancel state pst=:{ls={tmids={windowID}},io}
 			# pst	= closeWindow wId pst
 			# pst	= appPIO (appWindowPicture windowID (ShowNextState state)) pst
@@ -221,7 +221,7 @@ where
 
 
 //	The function to redraw the entire machine when an update event takes place.
-ReDraw :: (PSt Tm .p) -> PSt Tm .p
+ReDraw :: (PSt Tm) -> PSt Tm
 ReDraw pst=:{ls=tm=:{tmstate={turing={transitions,tape,state}},tmids={tapeWdID,windowID}},io}
 	# io	= setWindowLook tapeWdID True (True,\_ _->ShowTape tape)						io
 	# io	= setWindowLook windowID True (True,\_ _->ShowTransitions transitions state)	io
@@ -229,13 +229,13 @@ ReDraw pst=:{ls=tm=:{tmstate={turing={transitions,tape,state}},tmids={tapeWdID,w
 
 
 //	General alert dialog.
-Alert :: String String (PSt Tm .p) -> PSt Tm .p
+Alert :: String String (PSt Tm) -> PSt Tm
 Alert mes1 mes2 pst
 	= openNotice (Notice [mes1,mes2] (NoticeButton "OK" id) []) pst
 
 
 //	Save before close dialog.
-SaveBeforeClose :: String (IdFun (PSt Tm .p)) (PSt Tm .p) -> PSt Tm .p
+SaveBeforeClose :: String (IdFun (PSt Tm)) (PSt Tm) -> PSt Tm
 SaveBeforeClose message action pst=:{ls=tm=:{name},io}
 	= openNotice notice pst
 where
@@ -248,7 +248,7 @@ where
 				,	NoticeButton "Cancel" id
 				]
 	
-	SvBfClSave :: (PSt Tm .p) -> PSt Tm .p
+	SvBfClSave :: (PSt Tm) -> PSt Tm
 	SvBfClSave pst=:{ls=tm=:{tmstate={turing},name,tmids={saveItemId}},io}
 		# pst	= {pst & ls={tm & saved=True}, io=disableMenuElements [saveItemId] io}
 		= snd (accFiles (WriteTuringToFile turing name) pst)

@@ -11,7 +11,7 @@ definition module Help
 from	StdString	import String
 from	StdPSt		import PSt, IOSt
 
-showAbout :: String String (PSt .l .p) -> PSt .l .p
+showAbout :: String String (PSt .l) -> PSt .l
 /*	showAbout opens a window:
 	-	it has the title of the application name (argument 1),
 	-	it displays the about information of the application (found in the helpfile, argument 2),
@@ -20,7 +20,7 @@ showAbout :: String String (PSt .l .p) -> PSt .l .p
 */
 
 
-showHelp :: String (PSt .l .p) -> PSt .l .p
+showHelp :: String (PSt .l) -> PSt .l
 /*	showHelp opens a SDI process that displays the help information found in the helpfile 
 	(argument 1).
 */

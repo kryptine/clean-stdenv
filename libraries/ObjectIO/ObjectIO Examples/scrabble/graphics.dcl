@@ -14,20 +14,20 @@ squareheight		::	Int
 
 abs2rel				:: !(!Int,!Int) -> (!Int,!Int)
 
-boardlook			:: !Board Point2 !SelectState !UpdateState	!*Picture		-> *Picture
-redrawboard			:: !Id !Board Point2						!(IOSt .l .p)	-> IOSt .l .p
-drawfocus			:: !Bool !Point2							!*Picture		-> *Picture
+boardlook			:: !Board Point2 !SelectState !UpdateState	!*Picture	-> *Picture
+redrawboard			:: !Id !Board Point2						!(IOSt .l)	-> IOSt .l
+drawfocus			:: !Bool !Point2							!*Picture	-> *Picture
 
-letterboxlook		:: ![Char] SelectState UpdateState			!*Picture		-> *Picture
-drawletterbox		:: !Id ![Char]								!(IOSt .l .p)	-> IOSt .l .p
+letterboxlook		:: ![Char] SelectState UpdateState			!*Picture	-> *Picture
+drawletterbox		:: !Id ![Char]								!(IOSt .l)	-> IOSt .l
 
-drawplayer1letters	:: !Id ![Char]								!(IOSt .l .p)	-> IOSt .l .p
-drawplayer2letters	:: !Id ![Char]								!(IOSt .l .p)	-> IOSt .l .p
-playerletterslook	:: ![Char] SelectState UpdateState			!*Picture		-> *Picture
+drawplayer1letters	:: !Id ![Char]								!(IOSt .l)	-> IOSt .l
+drawplayer2letters	:: !Id ![Char]								!(IOSt .l)	-> IOSt .l
+playerletterslook	:: ![Char] SelectState UpdateState			!*Picture	-> *Picture
 
-drawplayer1score	:: !Id !Int									!(IOSt .l .p)	-> IOSt .l .p
-drawplayer2score	:: !Id !Int									!(IOSt .l .p)	-> IOSt .l .p
+drawplayer1score	:: !Id !Int									!(IOSt .l)	-> IOSt .l
+drawplayer2score	:: !Id !Int									!(IOSt .l)	-> IOSt .l
 
-drawcommunication	:: !Id ![String]							!(IOSt .l .p)	-> IOSt .l .p
-displaylook			:: ![String] SelectState !UpdateState		!*Picture		-> *Picture
-drawprogress		:: !Id !Player !Progress !Placing			!(IOSt .l .p)	-> IOSt .l .p
+drawcommunication	:: !Id ![String]							!(IOSt .l)	-> IOSt .l
+displaylook			:: ![String] SelectState !UpdateState		!*Picture	-> *Picture
+drawprogress		:: !Id !Player !Progress !Placing			!(IOSt .l)	-> IOSt .l

@@ -24,9 +24,9 @@ noFilesSelected
 
 Start :: *World -> *World
 Start world
-    = startIO NDI noFilesSelected 0 initIO [] world
+    = startIO NDI noFilesSelected initIO [] world
 
-initIO :: (PSt Local .p) -> PSt Local .p
+initIO :: (PSt Local) -> PSt Local
 initIO pst
 	# (showid,pst)	= accPIO openId pst
 	# (_,pst)		= openDialog undef (dialog showid) pst
@@ -48,7 +48,7 @@ where
 					]
 			)	[]
 	where
-		compare :: (PSt Local .p) -> PSt Local .p
+		compare :: (PSt Local) -> PSt Local
 		compare pst
 			# (maybeFirstFile,pst)			= selectInputFile pst
 			| isNothing maybeFirstFile
@@ -60,12 +60,12 @@ where
 				# pst	= {pst & ls={name1=fromJust maybeFirstFile,name2=fromJust maybeSecondFile}}
 				= showdifference pst
 		
-		again :: (PSt Local .p) -> PSt Local .p
+		again :: (PSt Local) -> PSt Local
 		again pst=:{ls={name1,name2}}
 			| name1=="" || name2==""	= compare pst
 			| otherwise					= showdifference pst
 		
-		showdifference :: (PSt Local .p) -> PSt Local .p
+		showdifference :: (PSt Local) -> PSt Local
 		showdifference pst=:{ls={name1,name2}}
 			# pst						= closeWindow showid pst
 			# (files,pst)				= accFiles (openfilepair (name1,name2)) pst
