@@ -161,6 +161,7 @@
 //#define CcRqINVALIDATEWINDOW					1407		PA: has become obsolete because implemented as direct C call
 //#define CcRqRELEASEDC							1406		PA: has become obsolete because implemented as direct C call
 //#define CcRqGETDC								1405		PA: has become obsolete because implemented as direct C call
+#define CcRqFAKEPAINT							1405		/* PA: added combination of BeginPaint; EndPaint; InvalidateRect; */
 #define CcRqENDPAINT							1404
 #define CcRqBEGINPAINT							1403
 #define CcRqDESTROYWINDOW						1402

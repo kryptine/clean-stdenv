@@ -5,7 +5,7 @@ implementation module osdocumentinterface
 
 
 import	StdMaybe, StdTuple
-import	clCrossCall_12, ostoolbar, ossystem, ostypes, windowCCall_12, windowCrossCall_12
+import	clCrossCall_12, ostoolbar, ossystem, ostypes, windowCrossCall_12
 from	commondef	import FatalError,String
 from	StdIOCommon	import DocumentInterface, MDI, SDI, NDI
 
@@ -164,7 +164,7 @@ osDestroyProcessWindowCallback _ {ccMsg=CcWmACTIVATE} tb
 osDestroyProcessWindowCallback _ {ccMsg=CcWmKEYBOARD} tb
 	= (Return0Cci,tb)
 osDestroyProcessWindowCallback _ {ccMsg=CcWmPAINT,p1=hwnd} tb
-	= (Return0Cci,WinInvalidateWindow hwnd (WinEndPaint hwnd (WinBeginPaint hwnd tb)))
+	= (Return0Cci,WinFakePaint hwnd tb)
 osDestroyProcessWindowCallback function {ccMsg} tb
 	= osdocumentinterfaceFatalError function ("received message nr:"+++toString ccMsg)
 

@@ -167,6 +167,7 @@ CcRqUPDATEWINDOWRECT		:== 1412		/* PA: added for updating rect part of a window/
 CcRqGETWINDOWTEXT			:== 1411
 CcRqSETWINDOWTITLE			:== 1410
 
+CcRqFAKEPAINT				:==	1405		/* PA: added combination of BeginPaint; EndPaint; InvalidateRect; */
 CcRqENDPAINT				:== 1404
 CcRqBEGINPAINT				:== 1403
 CcRqDESTROYWINDOW			:== 1402

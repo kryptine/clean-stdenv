@@ -163,7 +163,7 @@ where
 						  -> (!CrossCallInfo,!(.s,[DelayActivationInfo]),!*OSToolbox)
 	OScreateDialogCallback _ _ _ {ccMsg=CcWmPAINT,p1=hwnd} s tb
 		= //trace_n "OScreateDialogCallback CcWmPAINT" 
-		  (Return0Cci, s, OSdelayWindowUpdate hwnd tb)
+		  (Return0Cci, s, WinFakePaint hwnd tb)
 	OScreateDialogCallback _ _ _ {ccMsg=CcWmACTIVATE,p1=hwnd} (control_info,delay_info) tb
 		= //trace_n "OScreateDialogCallback CcWmACTIVATE" 
 		  (Return0Cci, (control_info,[DelayActivatedWindow hwnd:delay_info]), tb)
@@ -258,6 +258,7 @@ OScreateWindowCallback :: !Bool !(!Int,!Int) !(!Int,!Int)
 						  !(OSWindowPtr->OSWindowPtr->OSPictContext->.s->*OSToolbox->(.s,*OSToolbox))
 						  !CrossCallInfo !(.s,[DelayActivationInfo]) !*OSToolbox
 					  -> (!CrossCallInfo,!(.s,[DelayActivationInfo]),!*OSToolbox)
+/*	PA: This alternative replaced by WinFakePaint function.
 OScreateWindowCallback _ _ _ _ _ {ccMsg=CcWmPAINT,p1=hwnd} s tb
 	= //trace "OScreateWindowCallback CcWmPAINT" 
 	  (Return0Cci, s, OSdummyWindowUpdate hwnd tb)
@@ -266,6 +267,10 @@ where
 	OSdummyWindowUpdate wPtr tb
 		# (hdc,tb) = WinBeginPaint wPtr tb
 		= WinEndPaint wPtr (hdc,tb)
+*/
+OScreateWindowCallback _ _ _ _ _ {ccMsg=CcWmPAINT,p1=hwnd} s tb
+	= //trace "OScreateWindowCallback CcWmPAINT"
+	  (Return0Cci, s, WinFakePaint hwnd tb)
 OScreateWindowCallback _ _ _ _ _ {ccMsg=CcWmACTIVATE,p1=hwnd} (control_info,delay_info) tb
 	= //trace "OScreateWindowCallback CcWmACTIVATE" 
 	  (Return0Cci, (control_info,[DelayActivatedWindow hwnd:delay_info]), tb)
@@ -296,13 +301,6 @@ OScreateWindowCallback _ _ _ _ _ {ccMsg=CcWmKEYBOARD,p1=hwnd,p2=hctrl,p3=char,p4
 	  (Return0Cci, s,tb)
 OScreateWindowCallback _ _ _ _ _ {ccMsg} s tb
 	= oswindowFatalError "OScreateWindowCallback" ("unknown message type ("+++toString ccMsg+++")")
-
-
-OSdelayWindowUpdate :: !OSWindowPtr !*OSToolbox -> *OSToolbox
-OSdelayWindowUpdate wPtr tb
-	# (hdc,tb)	= WinBeginPaint wPtr tb
-	# tb		= WinEndPaint wPtr (hdc,tb)
-	= WinInvalidateWindow wPtr tb
 
 
 /*	PA: new function that creates modal dialog and handles events until termination. 
@@ -358,12 +356,12 @@ where
                               -> (!CrossCallInfo,![DelayActivationInfo],!*OSToolbox)
     OScreateGameWindowCallback {ccMsg=CcWmPAINT,p1=hwnd} s tb
         = //trace "OScreateGameWindowCallback CcWmPAINT"
-          (Return0Cci, s, OSdummyWindowUpdate hwnd tb)
-    where
+          (Return0Cci, s, WinFakePaint hwnd tb)//OSdummyWindowUpdate hwnd tb)
+/*    where
         OSdummyWindowUpdate :: !OSWindowPtr !*OSToolbox -> *OSToolbox
         OSdummyWindowUpdate wPtr tb
             # (hdc,tb) = WinBeginPaint wPtr tb
-            = WinEndPaint wPtr (hdc,tb)
+            = WinEndPaint wPtr (hdc,tb) */
     OScreateGameWindowCallback {ccMsg=CcWmACTIVATE,p1=hwnd} delay_info tb
         = //trace "OScreateGameWindowCallback CcWmACTIVATE"
           (Return0Cci, [DelayActivatedWindow hwnd:delay_info], tb)
@@ -387,13 +385,13 @@ oswindowCreateError arity function
 
 osIgnoreCallback :: !CrossCallInfo !*OSToolbox -> (!CrossCallInfo,!*OSToolbox)
 osIgnoreCallback ccinfo=:{ccMsg=CcWmPAINT,p1=hwnd} tb
-	= (Return0Cci,WinEndPaint hwnd (WinBeginPaint hwnd tb))
+	= (Return0Cci,WinFakePaint hwnd tb)//WinEndPaint hwnd (WinBeginPaint hwnd tb))
 osIgnoreCallback ccinfo tb 
 	= (Return0Cci,tb)
 
 osIgnoreCallback` :: !CrossCallInfo ![DelayActivationInfo] !*OSToolbox -> (!CrossCallInfo,![DelayActivationInfo],!*OSToolbox)
 osIgnoreCallback` {ccMsg=CcWmPAINT,p1=hwnd} s tb
-	= (Return0Cci,s,WinEndPaint hwnd (WinBeginPaint hwnd tb))
+	= (Return0Cci,s,WinFakePaint hwnd tb)//WinEndPaint hwnd (WinBeginPaint hwnd tb))
 osIgnoreCallback` {ccMsg=CcWmACTIVATE,p1=hwnd} delayinfo tb
 	= (Return0Cci,[DelayActivatedWindow hwnd:delayinfo],tb)
 osIgnoreCallback` {ccMsg=CcWmDEACTIVATE,p1=hwnd} delayinfo tb
@@ -650,7 +648,7 @@ where
 osDelayCallback :: !CrossCallInfo ![DelayActivationInfo] !*OSToolbox
 			   -> (!CrossCallInfo,![DelayActivationInfo],!*OSToolbox)
 osDelayCallback {ccMsg=CcWmPAINT,p1=wPtr} s tb
-	= (Return0Cci,s,OSdelayWindowUpdate wPtr tb)
+	= (Return0Cci,s,WinFakePaint wPtr tb)
 osDelayCallback {ccMsg=CcWmACTIVATE,p1=wPtr} delayinfo tb
 	= (Return0Cci,[DelayActivatedWindow wPtr:delayinfo],tb)
 osDelayCallback {ccMsg=CcWmDEACTIVATE,p1=wPtr} delayinfo tb
@@ -735,7 +733,7 @@ where
 	osDestroyControlCallback :: !CrossCallInfo !*OSToolbox -> (!CrossCallInfo,!*OSToolbox)
 	osDestroyControlCallback info=:{ccMsg} tb
 		| ccMsg==CcWmPAINT
-			= (Return0Cci,WinEndPaint info.p1 (WinBeginPaint info.p1 tb))
+			= (Return0Cci,WinFakePaint info.p1 tb)//WinEndPaint info.p1 (WinBeginPaint info.p1 tb))
 		| expected
 			= (Return0Cci,tb)
 		| otherwise
@@ -1004,7 +1002,7 @@ OSactivateControl parentWindow controlPtr tb
 where
 	osIgnoreCallback` :: !CrossCallInfo ![DelayActivationInfo] !*OSToolbox -> (!CrossCallInfo,![DelayActivationInfo],!*OSToolbox)
 	osIgnoreCallback` {ccMsg=CcWmPAINT,p1=hwnd} s tb
-		= (Return0Cci,s,WinEndPaint hwnd (WinBeginPaint hwnd tb))
+		= (Return0Cci,s,WinFakePaint hwnd tb)//WinEndPaint hwnd (WinBeginPaint hwnd tb))
 	osIgnoreCallback` {ccMsg=CcWmKILLFOCUS,p1=hwnd,p2=cptr} delayinfo tb
 		= (Return0Cci,[DelayDeactivatedControl hwnd cptr:delayinfo],tb)
 	osIgnoreCallback` {ccMsg=CcWmSETFOCUS,p1=hwnd,p2=cptr} delayinfo tb

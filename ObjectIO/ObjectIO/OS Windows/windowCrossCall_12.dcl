@@ -95,6 +95,8 @@ WinUpdateWindowRect		:: !HWND !(!Int,!Int,!Int,!Int)		!*OSToolbox -> *OSToolbox
 WinSetSelectStateWindow :: !HWND !(!Bool,!Bool) !Bool !Bool	!*OSToolbox -> *OSToolbox
 WinBeginPaint			:: !HWND							!*OSToolbox -> (!HDC, !*OSToolbox) 
 WinEndPaint				:: !HWND					!(!HDC, !*OSToolbox) -> *OSToolbox
+//	PA: new function to fake an update. Added for efficiency reasons.
+WinFakePaint			:: !HWND							!*OSToolbox -> *OSToolbox
 WinGetClientSize		:: !HWND							!*OSToolbox -> (!(!Int,!Int), !*OSToolbox)
 WinGetWindowSize		:: !HWND							!*OSToolbox -> (!(!Int,!Int), !*OSToolbox)	// PA: added; returns bounding size of window
 WinSetClientSize		:: !HWND !(!Int,!Int)				!*OSToolbox -> *OSToolbox					// PA: added
