@@ -278,9 +278,9 @@ WaitEvent sleep mouseRgn tb
 //# tb = abort`` tb "WaitEvent: after GetCaretTime"
 # sleep = min sleep caret
 //#	(event=:(interesting,what,message,i,h,v,mods),tb)	= WaitNextEventC DeviceMaskWaitNextEvent sleep mouseRgn tb
-//#	(event=:(interesting,what,message,i,h,v,mods),tb)	= WaitNextEventC DeviceMaskWNHEvent sleep mouseRgn tb
-# (interesting,what,message,i,h,v,mods,tb)				= WaitNextEvent DeviceMaskWNHEvent sleep mouseRgn tb
-# event = (interesting,what,message,i,h,v,mods)
+#	(event=:(interesting,what,message,i,h,v,mods),tb)	= WaitNextEventC DeviceMaskWNHEvent sleep mouseRgn tb
+//# (interesting,what,message,i,h,v,mods,tb)				= WaitNextEvent DeviceMaskWNHEvent sleep mouseRgn tb
+//# event = (interesting,what,message,i,h,v,mods)
 //# tb = abort`` tb "WaitEvent: after WaitNextEventC"
 |	interesting || what==NullEvent
 	=	(event, tb)
