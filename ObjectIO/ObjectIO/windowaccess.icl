@@ -12,6 +12,7 @@ from	windowCrossCall_12	import CURSARROW, CURSBUSY, CURSCROSS, CURSFATCROSS, CUR
 import	commondef, devicesystemstate, windowhandle
 from	StdControlAttribute	import isControlKeyboard
 from	StdWindowAttribute	import isWindowInitActive, getWindowInitActiveAtt
+import cast // PA+++
 
 
 windowaccessFatalError :: String String -> .x
@@ -662,18 +663,6 @@ where
 genWElementItemNrs nrs _
 	= (nrs,[])
 
-
-/*	Cast contains abc code because it can't be typed conventionally.
-	The function Cast is required to break the Existential Type abstraction needed
-	for retrieving the final modal dialog local state. This code should be replaced as soon as
-	unique messages can be passed using receivers.
-*/
-Cast :: !.a -> .b
-Cast a
-	= code
-		{
-			pop_a 0
-		}
 
 getFinalModalLS :: !WID FinalModalLS -> Maybe .ls
 getFinalModalLS wid {fmWIDS,fmLS}

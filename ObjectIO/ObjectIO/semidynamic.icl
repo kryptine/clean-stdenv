@@ -6,7 +6,7 @@ implementation module semidynamic
 */
 
 import	StdBool
-import	commondef, id
+import	cast, commondef, id
 
 semidynamicFatalError :: String String -> .x
 semidynamicFatalError function error
@@ -26,19 +26,19 @@ openDynamic did x = {value=x,id=did}
 matchDynamic :: !(DId m) !SemiDynamic -> Bool
 matchDynamic did {id} = did==id
 
-readDynamic :: !(DId m) !SemiDynamic -> m
+readDynamic :: !(DId m) !SemiDynamic -> Maybe m
 readDynamic did {value,id}
 	| did==id
-		= Cast value
+		= Just (Cast value)
 	| otherwise
-		= semidynamicFatalError "readDynamic" "SemiDynamic did not match argument DId"
+		= Nothing
 
-getDynamic :: !Id !SemiDynamic -> m
+getDynamic :: !Id !SemiDynamic -> Maybe m
 getDynamic did {value,id}
 	| did==id
-		= Cast value
+		= Just (Cast value)
 	| otherwise
-		= semidynamicFatalError "getDynamic" "SemiDynamic did not match argument Id"
+		= Nothing
 
 setDynamic :: !Id m !SemiDynamic -> SemiDynamic
 setDynamic did x sd=:{id}
@@ -58,14 +58,3 @@ R2IdtoDId` r2id = R2IdtoId r2id
 
 DIdtoId :: !(DId m) -> Id
 DIdtoId did = did
-
-/*	Conversion functions:
-	Cast contains abc code because it can't be typed conventionally.
-	The function Cast is required to break the Existential Type abstraction.
-*/
-Cast :: !a -> b
-Cast a
-	= code
-		{
-			pop_a 0
-		}

@@ -27,8 +27,8 @@ import id
 */
 openDynamic	:: !(DId m) m -> SemiDynamic
 matchDynamic:: !(DId m) !SemiDynamic -> Bool
-readDynamic	:: !(DId m) !SemiDynamic -> m
-getDynamic	:: !Id      !SemiDynamic -> m
+readDynamic	:: !(DId m) !SemiDynamic -> Maybe m
+getDynamic	:: !Id      !SemiDynamic -> Maybe m
 setDynamic	:: !Id m    !SemiDynamic -> SemiDynamic
 
 RIdtoDId	:: !(RId  m  ) -> DId m
