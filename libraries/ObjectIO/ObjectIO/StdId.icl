@@ -4,7 +4,7 @@ implementation module StdId
 //	Clean Object I/O library, version 1.2
 
 import	StdBool, StdInt, StdEnum
-import	id, iostate, world
+import	id, iostate, StdPSt, world
 
 
 class Ids env where
@@ -82,6 +82,14 @@ instance Ids (IOSt .l) where
 	openR2Ids n ioState
 		# (idseed,ioState)	= IOStGetIdSeed ioState
 		= ([toR2Id nr \\ nr<-[idseed-n+1..idseed]],IOStSetIdSeed (idseed-n) ioState)
+
+instance Ids (PSt .l) where
+	openId      pSt			= accPIO  openId       pSt
+	openIds	i   pSt=:{io}	= accPIO (openIds i)   pSt
+	openRId	    pSt			= accPIO  openRId      pSt
+	openRIds i  pSt			= accPIO (openRIds i)  pSt
+	openR2Id    pSt			= accPIO  openR2Id     pSt
+	openR2Ids i pSt			= accPIO (openR2Ids i) pSt
 
 
 getParentId :: !Id !(IOSt .l) -> (!Maybe Id,!IOSt .l)

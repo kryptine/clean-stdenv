@@ -10,7 +10,7 @@ definition module StdId
 
 from	StdMaybe	import Maybe, Just, Nothing
 from	id			import Id, RId, R2Id, RIdtoId, R2IdtoId, toString, ==
-from	iostate		import IOSt
+from	iostate		import PSt, IOSt
 
 class Ids env where
 	openId		::      !*env -> (!Id,			!*env)
@@ -34,6 +34,7 @@ class Ids env where
 
 instance Ids World
 instance Ids (IOSt .l)
+instance Ids (PSt  .l)
 
 getParentId :: !Id !(IOSt .l) -> (!Maybe Id,!IOSt .l)
 /*	getParentId returns the Id of the parent top-level GUI object 

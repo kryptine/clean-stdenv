@@ -8,7 +8,7 @@ definition module StdControlDef
 //	********************************************************************************
 
 
-import	StdIOCommon
+import	StdIOCommon, StdPictureDef
 
 
 ::	ButtonControl       ls pst

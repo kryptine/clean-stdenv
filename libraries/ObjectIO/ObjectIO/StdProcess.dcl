@@ -9,6 +9,7 @@ definition module StdProcess
 
 
 import	StdProcessDef
+from	iostate	import PSt, IOSt
 
 
 /*	General process topology creation functions:

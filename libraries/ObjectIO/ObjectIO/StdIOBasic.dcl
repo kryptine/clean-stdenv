@@ -62,7 +62,7 @@ instance			toVector	Size		// {w,h}->{vx=w,vy=h}
 instance			toString	Size
 
 
-::	Point2	
+::	Point2
 	=	{	x		:: !Int
 		,	y		:: !Int
 		}
