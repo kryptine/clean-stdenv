@@ -4,8 +4,8 @@ implementation module menudevice
 import	StdBool, StdEnum, StdList, StdMisc
 import	menuevent, osdocumentinterface, osmenu, ostypes
 import	commondef, devicefunctions, iostate, menuaccess, menucreate, menudefaccess, receiveraccess, StdId
-from	StdProcessAttribute	import getProcessToolbarAtt, isProcessToolbar
-from	StdProcessAttribute	import getProcessCloseFun,	 isProcessClose
+from	StdProcessAttribute	import getProcessToolbarAtt, isProcessToolbar,
+		                           getProcessCloseFun,	 isProcessClose
 from	StdPSt				import accPIO
 
 
@@ -244,6 +244,7 @@ where
 			= (deviceEvent,pState)
 		| otherwise
 			= (deviceEvent,getProcessCloseFun att pState)
+	
 	menuIO _ _
 		= menudeviceFatalError "menuIO" "unexpected DeviceEvent"
 

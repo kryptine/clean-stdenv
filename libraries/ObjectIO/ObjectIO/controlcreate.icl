@@ -58,6 +58,53 @@ where
 		# (itemHs,tb)	= stateMap (createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext ableContext parentPos wPtr) itemHs tb
 		= (WChangeLSHandle {wChH & wChangeItems=itemHs},tb)
 
+/*	createRecursiveControls generates the proper system resources for those controls that are part of the 
+	(Compound/Layout)Control with the given Id, skipping its first nr of controls given by the Int argument.
+	The WElementHandles must be the complete list of controls of the window.
+*/
+createRecursiveControls :: !OSWindowMetrics !Id !Int !(Maybe Id) !(Maybe Id) !Bool !OSWindowPtr ![WElementHandle .ls .pst] !*OSToolbox
+																										 -> (![WElementHandle .ls .pst],!*OSToolbox)
+createRecursiveControls wMetrics controlId nrSkip okId cancelId ableContext wPtr itemHs tb
+	= stateMap (createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId True ableContext zero wPtr) itemHs tb
+where
+	createRecursiveWElementHandle :: !OSWindowMetrics !Id !Int !(Maybe Id) !(Maybe Id) !Bool !Bool !Point2 !OSWindowPtr
+									!(WElementHandle .ls .pst) !*OSToolbox
+								 -> (!WElementHandle .ls .pst, !*OSToolbox)
+	createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos wPtr (WItemHandle itemH=:{wItemKind,wItemId}) tb
+		| not (identifyMaybeId controlId wItemId)
+			| isRecursiveControl wItemKind
+				# (itemHs,tb)		= stateMap (createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext1 ableContext1 itemPos1 itemPtr1) itemH.wItems tb
+				= (WItemHandle {itemH & wItems=itemHs},tb)
+			| otherwise
+				= (WItemHandle itemH,tb)
+		| not (isRecursiveControl wItemKind)
+			= (WItemHandle itemH,tb)
+		| otherwise
+			# (oldItems,newItems)	= split nrSkip itemH.wItems
+			# (newItems,tb)			= stateMap (createWElementHandle wMetrics okId cancelId showContext1 ableContext1 itemPos1 itemPtr1) newItems tb
+			# itemH					= {itemH & wItems=oldItems++newItems}
+			| wItemKind==IsCompoundControl
+				= (WItemHandle itemH,osInvalidateCompound itemPtr1 tb)
+			| otherwise
+				= (WItemHandle itemH,tb)
+	where
+		showContext1				= showContext && itemH.wItemShow
+		ableContext1				= ableContext && itemH.wItemSelect
+		(itemPos1,itemPtr1)			= if (wItemKind==IsCompoundControl) (itemH.wItemPos,itemH.wItemPtr)
+									                                    (itemH.wItemPos,wPtr          )
+	
+	createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos wPtr (WListLSHandle itemHs) tb
+		# (itemHs,tb)	= stateMap (createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos wPtr) itemHs tb
+		= (WListLSHandle itemHs,tb)
+	
+	createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos wPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs}) tb
+		# (itemHs,tb)	= stateMap (createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos wPtr) itemHs tb
+		= (WExtendLSHandle {wExH & wExtendItems=itemHs},tb)
+	
+	createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos wPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs}) tb
+		# (itemHs,tb)	= stateMap (createRecursiveWElementHandle wMetrics controlId nrSkip okId cancelId showContext ableContext parentPos wPtr) itemHs tb
+		= (WChangeLSHandle {wChH & wChangeItems=itemHs},tb)
+
 
 /*	toOKorCANCEL okId cancelId controlId
 		checks if the optional Id of a control (controlId) is the OK control (OK), the CANCEL control (CANCEL), or a normal button (NORMAL).

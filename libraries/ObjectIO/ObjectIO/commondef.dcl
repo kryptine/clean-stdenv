@@ -88,7 +88,7 @@ fatalError				:: !String !String !String -> .x
 
 /*	Universal dummy value (!!evaluation causes termination with the message: "Fatal error: dummy evaluated!"!!)
 */
-dummy					:: String -> .x
+dummy					:: !String -> .x
 
 
 /*	Max Integer constants:

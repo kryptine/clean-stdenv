@@ -1,7 +1,8 @@
 implementation module wstateaccess
 
-import	StdInt, StdBool, StdList
+import	StdBool, StdInt, StdList, StdTuple
 import	commondef, wstate, keyfocus
+import	ossystem
 
 
 //	Higher order access functions on [WElementHandle`]
@@ -265,3 +266,33 @@ getcontrolhscrollfunction` (ControlHScroll` f)	= f
 
 getcontrolvscrollfunction` :: !ControlAttribute` -> ScrollFunction
 getcontrolvscrollfunction` (ControlVScroll` f)	= f
+
+
+/*	Access operations on the margins and item space attributes of the window attributes.
+	getWindow((H/V)Margin/ItemSpace)s type metrics atts
+		retrieves the indicated attribute if present from the attribute list. If the attribute
+		could not be found, the appropriate default value is returned. 
+*/
+getWindowHMargins` :: !WindowKind !OSWindowMetrics ![WindowAttribute`] -> (!Int,!Int)
+getWindowHMargins` type wMetrics atts
+	= getwindowhmargin` (snd (cselect iswindowhmargin` (WindowHMargin` defaultLeft defaultRight) atts))
+where
+	(defaultLeft,defaultRight)	= case type of
+									IsDialog -> (wMetrics.osmHorMargin,wMetrics.osmHorMargin)
+									other    -> (0,0)
+
+getWindowVMargins` :: !WindowKind !OSWindowMetrics ![WindowAttribute`] -> (!Int,!Int)
+getWindowVMargins` type wMetrics atts
+	= getwindowvmargin` (snd (cselect iswindowvmargin` (WindowVMargin` defaultTop defaultBottom) atts))
+where
+	(defaultTop,defaultBottom)	= case type of
+									IsDialog -> (wMetrics.osmVerMargin,wMetrics.osmVerMargin)
+									other    -> (0,0)
+
+getWindowItemSpaces` :: !WindowKind !OSWindowMetrics ![WindowAttribute`] -> (!Int,!Int)
+getWindowItemSpaces` type wMetrics atts
+	= getwindowitemspace` (snd (cselect iswindowitemspace` (WindowItemSpace` defaultHor defaultVer) atts))
+where
+	(defaultHor,defaultVer)		= case type of
+									IsDialog -> (wMetrics.osmHorItemSpace,wMetrics.osmVerItemSpace)
+									other    -> (0,0)

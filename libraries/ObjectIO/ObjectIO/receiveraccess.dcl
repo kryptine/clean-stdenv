@@ -31,10 +31,10 @@ inetReceiverIdentified		:: !(!EndpointRef`, !InetReceiverCategory`)	!(ReceiverHa
 inetReceiverIdentifiedWithId:: !(!Id, !InetReceiverCategory`)			!(ReceiverHandle .ls .pst)	-> Bool
 // .. MW11
 receiverSetSelectState		:: !SelectState								!*(ReceiverStateHandle .pst)-> *ReceiverStateHandle .pst
-receiverHandleSyncMessage	:: !SyncMessage		!(ReceiverHandle .ls .pst) *(.ls,.pst)
-								-> ([SemiDynamic],ReceiverHandle .ls .pst, *(.ls,.pst))
+receiverHandleSyncMessage	:: !SyncMessage		!(ReceiverHandle .ls .pst) !*(.ls,.pst)
+								-> ([SemiDynamic],ReceiverHandle .ls .pst,  *(.ls,.pst))
 receiverAddASyncMessage		:: !Id !SemiDynamic	!(ReceiverHandle .ls .pst) -> ReceiverHandle .ls .pst
 // MW11..
-receiverApplyInetEvent		:: !InetReceiverASMQType !(ReceiverHandle .ls .pst) *(.ls,.pst) -> *(.ls,.pst)
+receiverApplyInetEvent		:: !InetReceiverASMQType !(ReceiverHandle .ls .pst) !*(.ls,.pst) -> *(.ls,.pst)
 getInetReceiverRId			:: !(ReceiverHandle .ls .pst) -> RId InetReceiverASMQType
 // ..MW11

@@ -244,6 +244,7 @@ getParentWindowId controlId ioState
 		= (Just parent.idpId,ioState)
 
 /*	openCompoundControls adds controls to the indicated CompoundControl of the indicated window.
+	THIS FUNCTION IS DEPRECATED. USE openRecursiveControls INSTEAD WITH EXACTLY THE SAME ARGUMENTS.
 */
 openCompoundControls :: !Id .ls .(cdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | Controls cdef
 openCompoundControls cId ls newControls pState=:{io=ioState}
@@ -289,6 +290,51 @@ openCompoundControls cId ls newControls pState=:{io=ioState}
 		# pState				= {pState & io=ioState}
 		= (if ok NoError ErrorUnknownObject,pState)
 
+/*	openRecursiveControls adds controls to the indicated LayoutControl.
+*/
+openRecursiveControls :: !Id .ls .(cdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | Controls cdef
+openRecursiveControls cId ls newControls pState=:{io=ioState}
+	# (maybeId,ioState)			= getParentWindowId cId ioState
+	| isNothing maybeId
+		= (ErrorUnknownObject,{pState & io=ioState})
+	# wId						= fromJust maybeId
+	# (found,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
+	| not found
+		= (ErrorUnknownObject,{pState & io=ioState})
+	# wHs						= windowSystemStateGetWindowHandles wDevice
+	# (found,wsH,wHs)			= getWindowHandlesWindow (toWID wId) wHs
+	| not found
+		= (ErrorUnknownObject,{pState & io=ioStSetDevice (WindowSystemState wHs) ioState})
+    // Mike //
+    # (wKind,wsH)				= getWindowStateHandleWindowKind wsH
+    | wKind==IsGameWindow
+		= (OtherError "WrongObject",{pState & io=ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState})
+    ///
+	# (cs,pState)				= controlToHandles newControls {pState & io=ioState}
+	# newItemHs					= map controlStateToWElementHandle cs
+	  (currentIds,wsH)			= getWindowStateHandleIds wsH
+	  (disjoint,newItemHs)		= disjointControlIds currentIds newItemHs
+	| not disjoint
+		= (ErrorIdsInUse,appPIO (ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs))) pState)
+	# (rt,ioState)				= ioStGetReceiverTable pState.io
+	# (it,ioState)				= ioStGetIdTable ioState
+	# (ioId,ioState)			= ioStGetIOId ioState
+	  (ok,newItemHs,rt,it)		= controlIdsAreConsistent ioId wId newItemHs rt it
+	# ioState					= ioStSetIdTable it ioState
+	# ioState					= ioStSetReceiverTable rt ioState
+	| not ok
+		# ioState				= ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+		# pState				= {pState & io=ioState}
+		= (ErrorIdsInUse,pState)
+	| otherwise
+		# (osdInfo, ioState)	= ioStGetOSDInfo ioState
+		# (wMetrics,ioState)	= ioStGetOSWindowMetrics ioState
+		# (tb,ioState)			= getIOToolbox ioState
+		# (ok,wsH,tb)			= openrecursivecontrols osdInfo wMetrics cId ls newItemHs wsH tb
+		# ioState				= setIOToolbox tb ioState
+		# ioState				= ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+		# pState				= {pState & io=ioState}
+		= (if ok NoError ErrorUnknownObject,pState)
 
 /*	openPopUpControlItems opens items to the PopUpControl of the indicated window/dialogue.
 */
@@ -580,7 +626,7 @@ moveControlViewFrame cId v ioState
 	| otherwise
 		= setWindow (fromJust maybeParent).idpId (moveControlViewFrame` cId v) ioState
 where
-	moveControlViewFrame` :: !Id Vector2 !*WState -> *WState
+	moveControlViewFrame` :: !Id !Vector2 !*WState -> *WState
 	moveControlViewFrame` id v wState=:{wIds,wRep,wTb,wMetrics}
 		# (wH,tb)	= movecontrolviewframe id v wMetrics wIds wRep wTb
 	//	  wH		= invalidateWindowClipState` wH		PA: seems to me that this is a bit exagerated
@@ -615,10 +661,44 @@ setControlScrollFunction cId direction scrollFun ioState
 	| otherwise
 		= setWindow (fromJust maybeParent).idpId (setControlScrollFunction` cId direction scrollFun) ioState
 where
-	setControlScrollFunction` :: !Id !Direction ScrollFunction !*WState -> *WState
+	setControlScrollFunction` :: !Id !Direction !ScrollFunction !*WState -> *WState
 	setControlScrollFunction` id direction scrollFun wState=:{wRep}
 		# wH			= setcontrolscrollfun id direction scrollFun wRep
 		= {wState & wRep=wH}
+
+
+//	Set the complete size of a (Compound/Custom(Button)/Layout)Control.
+
+setControlOuterSize :: !Id Size Bool !(IOSt .l) -> IOSt .l
+setControlOuterSize cId newSize relayout ioState
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (maybeParent,ioState)	= ioStGetIdParent cId ioState
+	| not (fst (isOkControlId ioId (cId,maybeParent)))
+		= ioState
+	| otherwise
+		= setWindow (fromJust maybeParent).idpId (setControlOuterSize` cId newSize relayout) ioState
+where
+	setControlOuterSize` :: !Id !Size !Bool !*WState -> *WState
+	setControlOuterSize` id newSize relayout wState=:{wIds,wRep,wTb,wMetrics}
+		# (wH,tb)	= setcontroloutersize id newSize relayout wMetrics wIds wRep wTb
+		= {wState & wRep=wH,wTb=tb}
+
+
+//	Set the width of a (Button/Edit/PopUp/Text)Control.
+
+setControlWidth :: !Id ControlWidth Bool !(IOSt .l) -> IOSt .l
+setControlWidth cId newWidth relayout ioState
+	# (ioId,ioState)		= ioStGetIOId ioState
+	# (maybeParent,ioState)	= ioStGetIdParent cId ioState
+	| not (fst (isOkControlId ioId (cId,maybeParent)))
+		= ioState
+	| otherwise
+		= setWindow (fromJust maybeParent).idpId (setControlWidth` cId newWidth relayout) ioState
+where
+	setControlWidth` :: !Id !ControlWidth !Bool !*WState -> *WState
+	setControlWidth` id newWidth relayout wState=:{wIds,wRep,wTb,wMetrics}
+		# (wH,tb)	= setcontrolwidth id newWidth relayout wMetrics wIds wRep wTb
+		= {wState & wRep=wH,wTb=tb}
 
 
 //	Change the text of (Text/Edit/Button)Control.

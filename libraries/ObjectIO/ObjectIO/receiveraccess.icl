@@ -78,7 +78,7 @@ receiverSetSelectState :: !SelectState !*(ReceiverStateHandle .pst) -> *Receiver
 receiverSetSelectState select rsH=:{rHandle=rH}
 	= {rsH & rHandle={rH & rSelect=select}}
 
-receiverHandleSyncMessage :: !SyncMessage !(ReceiverHandle .ls .pst) *(.ls,.pst) -> ([SemiDynamic],ReceiverHandle .ls .pst,*(.ls,.pst))
+receiverHandleSyncMessage :: !SyncMessage !(ReceiverHandle .ls .pst) !*(.ls,.pst) -> ([SemiDynamic],ReceiverHandle .ls .pst,*(.ls,.pst))
 receiverHandleSyncMessage {smRecLoc={rlReceiverId},smMsg} rH=:{rFun} (ls,pst)
 	| not (receiverIdentified rlReceiverId rH)
 		= ([],rH,(ls,pst))
@@ -103,7 +103,7 @@ receiverAddASyncMessage id sd rH=:{rASMQ}
 		= rH
 
 // MW11..
-receiverApplyInetEvent :: !InetReceiverASMQType !(ReceiverHandle .ls .pst) *(.ls,.pst) -> *(.ls,.pst)
+receiverApplyInetEvent :: !InetReceiverASMQType !(ReceiverHandle .ls .pst) !*(.ls,.pst) -> *(.ls,.pst)
 receiverApplyInetEvent eventInfo rH=:{rFun,rInetInfo=Just _} (ls,pst)
 	# (ls,_,pst)	= rFun (cast eventInfo) (ls,pst)
 	= (ls,pst)

@@ -25,6 +25,13 @@ opencompoundcontrols:: !OSDInfo !OSWindowMetrics !Id .ls ![WElementHandle .ls .p
 	The Boolean result is True iff the compound control could be found.
 */
 
+openrecursivecontrols :: !OSDInfo !OSWindowMetrics !Id .ls ![WElementHandle .ls .pst] !(WindowStateHandle .pst) !*OSToolbox
+																			-> (!Bool, !WindowStateHandle .pst, !*OSToolbox)
+/*	openrecursivecontrols adds the given controls to the indicated (Compound/Layout)Control of the given window.
+	It is assumed that no Id conflicts can arise with the current set of controls.
+	The Boolean result is True iff the (Compound/Layout)Control could be found.
+*/
+
 closecontrols		:: !OSWindowMetrics ![Id] !Bool !(WindowStateHandle .pst) !*OSToolbox
 				   -> (![Id],![Id],!IdFun *OSToolbox,!WindowStateHandle .pst, !*OSToolbox)
 /*	closecontrols removes the indicated controls from the window.

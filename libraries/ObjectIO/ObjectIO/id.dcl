@@ -48,8 +48,8 @@ instance ==	Id
 instance ==	(RId  mess)
 instance == (R2Id mess resp)
 
-rIdtoId					:: (RId  mess)		-> Id
-r2IdtoId				:: (R2Id mess resp)	-> Id
+rIdtoId					:: !(RId  mess)		-> Id
+r2IdtoId				:: !(R2Id mess resp)-> Id
 
 instance toString	Id
 

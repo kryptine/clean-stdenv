@@ -706,7 +706,7 @@ genWElementItemNrs nrs _
 	= (nrs,[])
 
 
-getFinalModalLS :: !WID FinalModalLS -> Maybe .ls
+getFinalModalLS :: !WID !FinalModalLS -> Maybe .ls
 getFinalModalLS wid {fmWIDS,fmLS}
 	| identifyWIDS wid fmWIDS
 		= Just (cast fmLS)

@@ -381,7 +381,8 @@ where
 									  ![WElementHandle .ls .pst] ![ControlAttribute *(.ls,.pst)] !*OSToolbox
 							-> (!Size,![WElementHandle .ls .pst],![ControlAttribute *(.ls,.pst)],!*OSToolbox)
 			calcLayoutSize wMetrics hMargins=:(lMargin,rMargin) vMargins=:(tMargin,bMargin) spaces orientations itemHs atts tb
-				= (okDerivedSize,itemHs1,if hadSize atts2 [ControlViewSize okDerivedSize:atts2],tb1)
+//				= (okDerivedSize,itemHs1,if hadSize atts2 [ControlViewSize okDerivedSize:atts2],tb1)
+				= (okDerivedSize,itemHs1,atts2,tb1)		// PA: do not modify attribute list, because this fixes size of LayoutControl during life-cycle!
 			where
 				(minSize,atts1)			= validateMinSize atts
 				(hadSize,reqSize,atts2)	= validateLayoutSize wMetrics atts1
