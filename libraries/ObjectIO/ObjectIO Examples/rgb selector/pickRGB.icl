@@ -146,15 +146,15 @@ where
 /*	The definition of the assembled colour picking control:	*/
 
 ::	ColourPickControl ls pst
-/*	:==	(	CompoundControl
-			(	:+: (CompoundControl (ListLS RGBPickControl)))
+/*	:==	(	LayoutControl
+			(	:+: (LayoutControl (ListLS RGBPickControl)))
 			(	:+:	ColourBoxControl
 					ColourPickAccess
 			))
 		) ls pst
 */	:==	NewLS
-		(	CompoundControl
-			(	:+:	(CompoundControl (ListLS (:+: SliderControl TextControl)))
+		(	LayoutControl
+			(	:+:	(LayoutControl (ListLS (:+: SliderControl TextControl)))
 			(	:+:	CustomControl
 					(Receiver2 In Out)
 			))
@@ -163,8 +163,8 @@ where
 ColourPickControl :: RGBId [Id] RGBColour (Maybe ItemPos) -> ColourPickControl .ls (PSt .l)
 ColourPickControl rgbid ids initrgb maybePos
 	= {	newLS = initrgb
-	  ,	newDef= CompoundControl
-					(	CompoundControl
+	  ,	newDef= LayoutControl
+					(	LayoutControl
 					(	ListLS
 					[	RGBPickControl initrgb rpicks did (\rgb->rgb.r) (\x rgb->{rgb&r=x}) left
 					,	RGBPickControl initrgb gpicks did (\rgb->rgb.g) (\x rgb->{rgb&g=x}) left

@@ -14,7 +14,7 @@ chatPort	:== 2000
 remote		:== "martinpc.cs.kun.nl"
 CR			:== '\xD'					// carriage return
 
-::	*LS									// the ls part of th PSt
+::	*LS									// the ls part of the PSt
 	=	{	sndChan		::	TCP_SChannel
 		,	nickname	::	String
 		}
@@ -23,6 +23,7 @@ CR			:== '\xD'					// carriage return
 ::	NoState
 	=	NoState							// The singleton data type
 
+Start :: *World -> *World
 Start world
 	= startIO SDI { sndChan=undef, nickname=""} initialize [ProcessWindowSize zero] world
 

@@ -177,7 +177,9 @@ where
 	//	The function for the Quit command: stop the program and write the high scores to file.
 	Quit :: (PSt Local) -> PSt Local
 	Quit pst=:{ls=ls=:{hifile,state={best}}}
-		= writeHiScores hifile best (closeProcess {pst & ls={ls & hifile=undef}})
+		# pst				= {pst & ls={ls & hifile=undef}}
+		# pst				= closeProcess pst
+		= writeHiScores hifile best pst
 	
 	//	Set a new speed (called when one of the Options commands is chosen).
 	SetSpeed :: Int (PSt Local) -> PSt Local

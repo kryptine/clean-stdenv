@@ -59,11 +59,11 @@ where
 	cell		= CellContents pos tape
 	
 	dialog ids	= Dialog "Change Tape Cell"
-					(	CompoundControl
+					(	LayoutControl
 					(	TextControl		"Write:"						[]
 					:+:	EditControl		"" (PixelWidth (hmm 15.0)) 1	[ControlId celId]
 					)	[ControlPos (Center,zero)]
-					:+:	CompoundControl
+					:+:	LayoutControl
 					(	ButtonControl	"Cancel"						[ControlFunction (noLS (Cancel pos cell))]
 					:+:	ButtonControl	"OK"							[ControlFunction (noLS (Ok     pos     )),ControlId okId]
 					)	[ControlPos (Center,zero)]
@@ -104,7 +104,7 @@ where
 	ctos c		= if (c==' ') "" (toString c)
 	
 	dialog ids	= Dialog "Change Transition" 
-					(	CompoundControl
+					(	LayoutControl
 					(	TextControl		"From:"												[	ControlPos (Left,zero)
 																							,	ControlWidth (PixelWidth (hmm 20.0))
 																							]
@@ -116,7 +116,7 @@ where
 					:+:	EditControl		(ctos transition.sigma) (PixelWidth (hmm 25.0)) 1	[	ControlId headId
 																							]
 					)	[ControlHMargin 0 0,ControlVMargin 0 0]
-					:+:	CompoundControl
+					:+:	LayoutControl
 					(	TextControl		"To:"												[	ControlPos (Left,zero)
 																							,	ControlWidth (PixelWidth (hmm 20.0))
 																							]
@@ -128,7 +128,7 @@ where
 					:+:	EditControl		(ctos transition.move) (PixelWidth (hmm 25.0)) 1	[	ControlId moveId
 																							]
 					)	[ControlHMargin 0 0,ControlVMargin 0 0]
-					:+:	CompoundControl
+					:+:	LayoutControl
 					(	ButtonControl	"Cancel"	[ControlFunction (noLS (Cancel tnr transition))]
 					:+:	ButtonControl	"Remove"	[ControlFunction (noLS (Remove tnr))]
 					:+:	ButtonControl	"OK"		[ControlFunction (noLS (Ok tnr)),ControlId okId]
@@ -190,7 +190,7 @@ where
 	dialog ids	= Dialog "Change State" 
 					(	TextControl		"State:"						[ControlPos (Left,zero)]
 					:+:	EditControl		"" (PixelWidth (hmm 25.0)) 1	[ControlId editId]
-					:+:	CompoundControl
+					:+:	LayoutControl
 					(	ButtonControl	"Cancel"						[ControlFunction (noLS (Cancel state))]
 					:+:	ButtonControl	"OK"							[ControlId okId,ControlFunction (noLS Ok)]
 					)	[ControlPos (Center,zero)]
