@@ -9,12 +9,11 @@ definition module controlinternal
 import	ossystem
 import	wstate
 
-
 enablecontrols			:: ![Id] !Bool               !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox -> (!WindowHandle`,           !*OSToolbox)
 disablecontrols			:: ![Id] !Bool               !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox -> (!WindowHandle`,           !*OSToolbox)
 setcontrolsshowstate	:: ![Id] !Bool               !OSWindowMetrics !WIDS        !WindowHandle`           !*OSToolbox -> (!WindowHandle`,           !*OSToolbox)
 setcontrolsmarkstate	:: !Id !MarkState ![Index]   !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox -> (!WindowHandle`,           !*OSToolbox)
-setcontroltexts			:: ![(Id,String)]            !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox -> (!WindowHandle`,           !*OSToolbox)
+setcontroltexts			:: ![(Id,String)]            !OSWindowMetrics !OSWindowPtr !WindowHandle2           !*OSToolbox -> (!WindowHandle2,           !*OSToolbox)
 seteditcontrolcursor	:: !Id !Int                  !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox -> (!WindowHandle`,           !*OSToolbox)
 seteditcontrolselection	:: !Id !Int !Int             !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox -> (!WindowHandle`,           !*OSToolbox)
 setcontrolslook			:: ![(Id,Bool,(Bool,Look))]  !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox -> (!WindowHandle`,           !*OSToolbox)
