@@ -67,7 +67,7 @@ showNonList options node
 	// otherwise
 		=	[" : " : showNode options node]
 
-showApplication :: ShowWrappedOptions {#Char} {a} -> [{#Char}] | showWrapped a
+showApplication :: ShowWrappedOptions {#Char} {!a} -> [{#Char}] | showWrapped a
 showApplication options symbol args
 	| options == ShowParentheses && size args > 0
 		=	["(" : application] ++ [")"]

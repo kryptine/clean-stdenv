@@ -20,7 +20,7 @@ instance toString WrappedDescriptorId
     |   WrappedDescriptorOther !WrappedDescriptorId
 
 :: UnwrappedArg
-	=	E.a: {node :: !a}
+	=	E.a: {node :: a}
 :: ShallowlyWrappedNode
 	:==	WrappedNode UnwrappedArg
 :: DeeplyWrappedNode
@@ -44,19 +44,19 @@ instance toString WrappedDescriptorId
     |   WrappedFileArray !{#File}
 
 	// other arrays
-    |   WrappedArray !{arg}
+    |   WrappedArray !{!arg}
 
 	// records
-    |   WrappedRecord !WrappedDescriptor !{arg}
+    |   WrappedRecord !WrappedDescriptor !{!arg}
 
 	// unboxed lists
-    |   WrappedUnboxedList !WrappedDescriptor !{arg}
+    |   WrappedUnboxedList !WrappedDescriptor !{!arg}
 
 	// unboxed lists of records
-    |   WrappedUnboxedRecordList !WrappedDescriptor !{arg}
+    |   WrappedUnboxedRecordList !WrappedDescriptor !{!arg}
 
 	// other nodes
-    |   WrappedOther !WrappedDescriptor !{arg}
+    |   WrappedOther !WrappedDescriptor !{!arg}
 
 
 deepWrap :: !.a -> DeeplyWrappedNode

@@ -20,5 +20,5 @@ instance showWrapped (WrappedNode arg) | showWrapped arg
 instance showWrapped WrappedArg
 
 showWrappedNode :: a -> [{#Char}] | showWrapped a
-showApplication :: ShowWrappedOptions {#Char} {arg} -> [{#Char}]
+showApplication :: ShowWrappedOptions {#Char} {!arg} -> [{#Char}]
 															| showWrapped arg
