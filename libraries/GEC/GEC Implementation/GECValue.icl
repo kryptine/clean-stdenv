@@ -1,4 +1,4 @@
-implementation module StdGEC
+implementation module GECValue
 
 import genericgecs
 

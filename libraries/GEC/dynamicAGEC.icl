@@ -3,7 +3,7 @@ implementation module dynamicAGEC
 import StdEnv
 import StdIO
 import StdGEC, StdGECExt, StdAGEC
-import modeAGEC, tupleAGEC, basicAGEC
+import modeGEC, layoutGEC, basicAGEC
 import EstherInterFace
 from EstherBackend import toStringDynamic
 import StdDynamic, StdPSt, iostate

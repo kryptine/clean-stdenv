@@ -1,7 +1,7 @@
 module specialize
 
 import StdEnv, StdIO
-import GecArrow, basicArrowEditors, StdAGEC, basicAGEC, StdArrow, noObjectAGEC
+import StdGEC
 
 derive defval Family, Status, Maybe, (,), [], NoObject, YesObject, Person, Partner, Kids
 derive gGEC Status

@@ -1,4 +1,4 @@
-definition module tupleAGEC
+definition module layoutGEC
 
 import genericgecs
 

@@ -1,4 +1,4 @@
-implementation module tupleAGEC
+implementation module layoutGEC
 
 import genericgecs, guigecs, infragecs, StdGECExt
 
@@ -49,18 +49,3 @@ where
 		# ((a,(b,c)),pst) = tuple2GetValue pst
 		= ((a,b,c),pst)
 
-//	gGEC{|Maybe|} gGECa gecArgs=:{gec_value=mval,update=mbupdate} pSt
-//		= case mval of
-//			Nothing -> createDummyGEC OutputOnly Nothing mbupdate pSt
-//			Just a  -> convert (gGECa {gecArgs & gec_value=a,update=aupdate} pSt)
-//	where
-//		aupdate reason na pst = mbupdate reason (Just na) pst
-//	
-//		convert (ahandle,pst) = ({ahandle & gecSetValue = aSetValue ahandle.gecSetValue
-//		                                  , gecGetValue = aGetValue ahandle.gecGetValue
-//		                         },pst)
-//		
-//		aSetValue aSetValue upd (Just a)  = aSetValue upd a
-//		aGetValue aGetValue pst
-//			# (na,pst) = aGetValue pst
-//			= (Just na,pst)

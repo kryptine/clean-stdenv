@@ -1,4 +1,4 @@
-implementation module noObjectAGEC
+implementation module noObjectGEC
 
 import StdAGEC
 

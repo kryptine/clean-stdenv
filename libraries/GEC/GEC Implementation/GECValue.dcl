@@ -1,4 +1,4 @@
-definition module StdGEC
+definition module GECValue
 
 import genericgecs
 from   guigecs import defTextWidths, defWindowBackColour

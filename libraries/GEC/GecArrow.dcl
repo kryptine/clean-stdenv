@@ -2,6 +2,10 @@ definition module GecArrow
 
 import StdArrow, StdGECExt
 
+// Initialize Editors
+
+startGEC 	 :: ((PSt Void) -> (PSt Void)) *World -> *World
+
 :: GecCircuit a b
 
 // Initialize GecCircuit circuit

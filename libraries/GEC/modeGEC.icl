@@ -1,4 +1,4 @@
-implementation module modeAGEC
+implementation module modeGEC
 
 import genericgecs, guigecs, infragecs
 import StdGECExt
