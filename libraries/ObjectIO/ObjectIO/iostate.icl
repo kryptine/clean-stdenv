@@ -22,12 +22,12 @@ from	roundrobin			import RR, emptyRR, notodoRR
 		,	io				:: !*IOSt l							// The IOSt environment of the process
 		}
 
-::	*Locals
-	:==	RR *LocalIO
-::	*LocalIO
+::	*CProcesses													// The 'context-free' processes administration
+	:==	RR *CProcess											//	is a round-robin
+::	*CProcess													// The context-free process
 	=	E. .l:
-		{	localState		:: !Maybe l
-		,	localIOSt		:: !*IOSt l
+		{	localState	:: !Maybe l								//	its local state
+		,	localIOSt	:: !*IOSt l								//	its context-free IOSt
 		}
 ::	*IOSt l
 	=	{	iounique		:: !*IOUnique l
@@ -36,7 +36,7 @@ from	roundrobin			import RR, emptyRR, notodoRR
 ::	*IOUnique l
 	=	{	ioevents		:: !*OSEvents						// The event stream environment
 		,	ioworld			:: ![*World]						// The world environment
-		,	iolocal			:: *Locals							// All other processes
+		,	ioprocesses		:: *CProcesses						// All other processes
 		,	ioinit			:: !IdFun (PSt l)					// The initialisation functions of the process
 		,	iotoolbox		:: !*OSToolbox						// The Mac continuation value
 		}
@@ -148,7 +148,7 @@ emptyIOUnique initIO
 	= (	wMetrics
 	  ,	{	ioevents	= OSnewEvents
 		,	ioworld		= []
-		,	iolocal		= emptyRR
+		,	ioprocesses	= emptyRR
 		,	ioinit		= initIO
 		,	iotoolbox	= tb
 		}
@@ -306,13 +306,13 @@ IOStSetWorld :: !*World !(IOSt .l) -> IOSt .l
 IOStSetWorld w ioState=:{iounique=unique=:{ioworld=ws}} = {ioState & iounique={unique & ioworld=[w:ws]}}
 
 
-//	Access rules to Locals:
+//	Access rules to CProcesses:
 
-IOStGetLocals :: !(IOSt .l) -> (!Locals, !IOSt .l)
-IOStGetLocals ioState=:{iounique=unique=:{iolocal}} = (iolocal,{ioState & iounique={unique & iolocal=emptyRR}})
+IOStGetCProcesses :: !(IOSt .l) -> (!CProcesses, !IOSt .l)
+IOStGetCProcesses ioState=:{iounique=unique=:{ioprocesses}} = (ioprocesses,{ioState & iounique={unique & ioprocesses=emptyRR}})
 
-IOStSetLocals :: !Locals !(IOSt .l) -> IOSt .l
-IOStSetLocals local ioState = {ioState & iounique={ioState.iounique & iolocal=local}}
+IOStSetCProcesses :: !CProcesses !(IOSt .l) -> IOSt .l
+IOStSetCProcesses processes ioState = {ioState & iounique={ioState.iounique & ioprocesses=processes}}
 
 
 //	Access to the ProcessStack of the IOSt:
@@ -350,9 +350,9 @@ IOStGetProcessKind ioState=:{ioshare} = (ioshare.iokind, ioState)
 
 //	Swapping of IOSt environments:
 
-IOStSwapIO :: !(![*World],!Locals) !(IOSt .l) -> (!(![*World],!Locals),!IOSt .l)
-IOStSwapIO (world`,locals`) ioState=:{iounique=unique=:{ioworld,iolocal}}
-	= ((ioworld,iolocal),{ioState & iounique={unique & ioworld=world`,iolocal=locals`}})
+IOStSwapIO :: !(![*World],!CProcesses) !(IOSt .l) -> (!(![*World],!CProcesses),!IOSt .l)
+IOStSwapIO (world`,cprocesses`) ioState=:{iounique=unique=:{ioworld,ioprocesses}}
+	= ((ioworld,ioprocesses),{ioState & iounique={unique & ioworld=world`,ioprocesses=cprocesses`}})
 
 
 //	Access to the SystemId of the IOSt:
@@ -441,9 +441,9 @@ IOStSetDeviceFunctions funcs ioState=:{ioshare} = {ioState & ioshare={ioshare & 
 
 IOStLastInteraction :: !(IOSt .l) -> (!Bool,!IOSt .l)
 IOStLastInteraction ioState
-	# (locals,ioState)		= IOStGetLocals ioState
-	  (empty,locals)		= notodoRR locals
-	# ioState				= IOStSetLocals locals ioState
+	# (processes,ioState)	= IOStGetCProcesses ioState
+	  (empty,processes)		= notodoRR processes
+	# ioState				= IOStSetCProcesses processes ioState
 	= (not empty,ioState)
 
 IOStHasDevice :: !Device !(IOSt .l) -> (!Bool,!IOSt .l)

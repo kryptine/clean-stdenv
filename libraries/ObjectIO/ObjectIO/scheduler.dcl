@@ -8,7 +8,7 @@ definition module scheduler
 import	deviceevents, StdMaybe
 from	StdString		import String
 from	id				import Id
-from	iostate			import PSt, IOSt, RR, Locals, LocalIO
+from	iostate			import PSt, IOSt, RR, CProcesses, CProcess
 from	receivertable	import ReceiverTable, ReceiverTableEntry, RecLoc
 from	device			import Device
 from	processstack	import ProcessStack, ProcessShowState, ShowFlag, ProcessKind, InteractiveProcess, VirtualProcess
@@ -32,18 +32,11 @@ from	StdProcessDef	import ProcessInit, DocumentInterface, NDI, SDI, MDI
 	=	{	envsEvents		:: !*OSEvents
 		,	envsWorld		:: !*World
 		}
-/*
-::	*GContext p
-	=	{	groupPublic		:: p
-		,	groupLocals		:: !*Locals p
-		}
-*/
 ::	*Context
 	=	{	cEnvs			:: !*Environs			// The global environments
 		,	cProcessStack	:: ProcessStack			// The global process stack
 		,	cMaxIONr		:: SystemId				// The global maximum system number
-//		,	cGroups			:: *Groups				// All process groups
-		,	cProcesses		:: *Locals				// All processes
+		,	cProcesses		:: *CProcesses				// All processes
 		,	cModalProcess	:: Maybe SystemId		// The SystemId of the interactive process that has a modal window
 		,	cReceiverTable	:: ReceiverTable		// The global receiver-process table
 		,	cTimerTable		:: TimerTable			// The table of all currently active timers
@@ -149,11 +142,11 @@ accContext :: !.(St Context .x) !(PSt .l) -> (!.x, !PSt .l)
 		,	!Maybe r		//	optional access information
 		)
 
-accessLocals :: !(St LocalIO (Result r)) !*Locals -> (!Result r,!*Locals)
+accessLocals :: !(St CProcess (Result r)) !*CProcesses -> (!Result r,!*CProcesses)
 /*	Let f::(IOSt .l .p) -> (Result r,IOSt .l .p) be an IOSt access function. 
-	To thread f through *Locals until fst(fst(f io)), define gLocals as follows:
+	To thread f through *CProcesses until fst(fst(f io)), define gLocals as follows:
 	
-		gLocals :: *(Locals .p) -> (Result r, *Locals .p)
+		gLocals :: *CProcesses -> (Result r, *CProcesses)
 		gLocals locals = accessLocals f` locals
 		where	f` localIO	= (r,{localIO & localIOSt=ioState})
 				where	(r,ioState)	= f localIO.localIOSt
