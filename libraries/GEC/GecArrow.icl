@@ -2,13 +2,13 @@ implementation module GecArrow
 
 import StdGECExt
 
-:: GecCircuit a b = GecCircuit (A. .ps: (SetCallback b ps) (GetCallback a ps) *(PSt ps) -> *(SetCallback a ps, GetCallback b ps, *PSt ps))
+:: GecCircuit a b = GecCircuit (A. .ps: (GecSet b ps) (GecGet a ps) *(PSt ps) -> *(GecSet a ps, GecGet b ps, *PSt ps))
 
-:: SetCallback a ps :== IncludeUpdate a *(PSt ps) -> *PSt ps
-:: GetCallback a ps :== *(PSt ps) -> *(a, *PSt ps)
+:: GecSet a ps :== IncludeUpdate a *(PSt ps) -> *PSt ps
+:: GecGet a ps :== *(PSt ps) -> *(a, *PSt ps)
 
-StartCircuit :: (GecCircuit a b) a *(PSt .ps) -> *PSt .ps
-StartCircuit (GecCircuit k) a env
+startCircuit :: (GecCircuit a b) a *(PSt .ps) -> *PSt .ps
+startCircuit (GecCircuit k) a env
 	# (seta, getb, env1) = k setb geta env
 	= env1
 where
@@ -74,10 +74,13 @@ where
 				# (b, env2) = getb env1
 				= setbc u (b, c) env2
 
-fix :: (GecCircuit a a) -> GecCircuit a a
-fix (GecCircuit g) = GecCircuit k
+feedback :: (GecCircuit a a) -> GecCircuit a a
+feedback (GecCircuit g) = GecCircuit k
 where 
-	k seta geta env = (seta`, geta`, env1)
+	k seta geta env 
+		# (a, env1) = geta` env1
+		# env1 = seta` NoUpdate a env1
+		= (seta`, geta`, env1)
 	where
 		(seta`, geta`, env1) = g seta`` geta env
 
@@ -180,13 +183,13 @@ gecIO f = GecCircuit k
 where
 	k setb geta env = (seta, getb, env)
 	where
-		getb env = f a env1
-		where
-			(a, env1) = geta env
+		getb env 
+			# (a, env1) = geta env
+			= f a env1
 
-		seta u a env = setb u b env1
-		where
-			(b, env1) = f a env
+		seta u a env 
+			# (b, env1) = f a env
+			= setb u b env1
 
 includeUpdate :: !UpdateReason -> *IncludeUpdate
 includeUpdate Changed = YesUpdate
