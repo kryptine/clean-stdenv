@@ -168,7 +168,7 @@ kOTSyncIdleEvents are NOT used
 ------------------------ TYPE DEFINITIONS -----------------------------------------
 */
 
-#define KARBON
+#define KARBON 1
 
 #ifndef __MACH__
 #include <Carbon.h>
@@ -244,6 +244,19 @@ There are two special groups of functions: functions, which are called from Clea
 functions to deal with the endpoint dictionary.
 */
 
+void WaitNextEventC(int eventMask,int sleep,int mouseRgn, int in_tb,
+					int *interesting,int *what,int *message,int *when,int *h,int *v,int *mods,
+					int *out_tb);
+void gNextInetEvent(int *eventCode, int *endpointRef, int *receiverCategory, int *misc);
+void poll(int nRChannels,EndpointRef *rChannels, dictitem **rDictitems, int *channelTypes,
+		  int nSChannels,EndpointRef *sChannels, dictitem **sDictitems,
+		  int *pSomething_happened);
+int CS_found(int endpointRef, int eventCode, event *queueP);
+void setupLookupParams(char *inetAddr,
+					   TLookupRequest *request, TLookupReply *reply,
+					   int *err);
+OTResult event_pending(EndpointRef endpointRef);
+int simple_receive(EndpointRef endpointRef, int maxSize, char* empty);
 //************************************************
 // functions, which are called from Clean (semantic is explained in tcp.icl or ostcp.icl)
 
@@ -308,6 +321,7 @@ void handle_update_or_mouse_down_event (EventRecord *event_p);
 
 void ew_print_string(char*);
 void ew_print_int(int);
+void IO_error(char *);
 //************************************************
 // functions to deal with the endpoint dictionary:
 
