@@ -4,7 +4,7 @@ import StdEnv, StdIO
 import GecArrow, basicArrowEditors, StdAGEC, basicAGEC, StdArrow, noObjectAGEC
 
 derive defval Family, BurgelijkeStaat, Maybe, (,), [], NoObject, YesObject, Persoon, Partner, Kids
-derive gGEC BurgelijkeStaat, Bimap
+derive gGEC BurgelijkeStaat
 
 // This Example shows how one can make specialize editors for user defined types
 // The default view of a type can be overwritten with a user defined view
@@ -20,7 +20,6 @@ where
 	defaultv :: Family
 	defaultv =  defval`
 
-// data domain
 :: Family	 	 	=	Family    		Persoon BurgelijkeStaat (Maybe Partner)
 :: BurgelijkeStaat	=	Married			
 					|	Divorced		
@@ -32,8 +31,7 @@ where
 
 derive gGEC Persoon
 
-derive gGEC Maybe
-//derive gGEC Family, Kids, Partner
+//derive gGEC Family, Kids, Partner, Maybe
 
 
 gGEC{|Family|} gecArgs pSt 
@@ -70,10 +68,8 @@ where
 		defaultfam = (Family (Man "") Single (Nothing))
 
 gGEC{|Partner|} gecArgs pSt 
-= Specialize defval PartnerAGEC gecArgs pSt
+= Specialize (Partner (Man "") NoKids) PartnerAGEC gecArgs pSt
 where
-	defval = Partner (Man "") NoKids
-
 	PartnerAGEC :: Partner -> AGEC(Partner)
 	PartnerAGEC p = mkAGEC (to_BimapGEC bimapPartner p) "Partner" 
 	where
@@ -84,31 +80,19 @@ where
 
 // additional hacking conversions funcions just to hide constructors on one level
 
-/*
-
 gGEC{|Maybe|} geca gecArgs pSt 
-= Specialize Nothing MaybeAGEC gecArgs pSt
+= Specialize Nothing (MaybeAGEC (gGEC{|*->*|} (gGEC{|*->*|} (gGEC{|*->*|} geca)))) gecArgs pSt
 where
-	MaybeAGEC n = mkxAGEC (editor geca) (to_BimapGEC bimapMaybe Nothing) "Maybe"
-
-	bimapMaybe = {map_to = map_to, map_from = map_from}
+	MaybeAGEC :: (TgGEC (NoObject [YesObject a]) (PSt .ps)) (Maybe a) -> AGEC (Maybe a)
+	MaybeAGEC geca n = mkxAGEC geca (to_BimapGEC bimapMaybe Nothing) "Maybe"
 	where
-		map_to (Nothing) = undef
-		map_to (Just a)  = a
-
-		map_from a = Just a
-
-//(A.u:a:TgGEC b *(PSt .a)) -> TgGEC b *(PSt .c) conflicts with derived type 
-//(A.u:a:TgGEC b *(PSt .a)) -> TgGEC b *(PSt .c)
-
-*/			
-//	editor :: (A. .ps : TgGEC a *(PSt .ps)) -> (TgGEC a *(PSt .ps)) //| bimap {|*|} ps
-	editor geca = geca
-
-gGEC{|(->)|} gGECa gGECb args=:{gec_value = Just (id), update = modeupdate} pSt
-= createDummyGEC OutputOnly (id) modeupdate pSt
-gGEC{|(->)|} gGECa gGECb args=:{gec_value = Nothing, update = modeupdate} pSt
-= createDummyGEC OutputOnly (undef) modeupdate pSt
+		bimapMaybe = {map_to = map_to, map_from = map_from}
+		where
+			map_to (Nothing) =  NoObject [] 
+			map_to (Just a)  =  NoObject [YesObject a]
+	
+			map_from (NoObject [])  		 = Nothing
+			map_from (NoObject [YesObject a]) = Just a
 
 
 // default values generator
@@ -184,6 +168,13 @@ where
 
 			map_from (NoObject Nothing) = Nothing
 			map_from (NoObject (Just (YesObject a))) = Just a
+
+
+gGEC{|(->)|} gGECa gGECb args=:{gec_value = Just (id), update = modeupdate} pSt
+= createDummyGEC OutputOnly (id) modeupdate pSt
+gGEC{|(->)|} gGECa gGECb args=:{gec_value = Nothing, update = modeupdate} pSt
+= createDummyGEC OutputOnly (undef) modeupdate pSt
+
 */
 
 
