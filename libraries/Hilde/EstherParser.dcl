@@ -8,6 +8,7 @@ from StdParsComb import :: CParser, :: Parser, :: AltCont, :: XorCont, :: SucCon
 :: ParseException
 	= SyntaxError
 	| AmbigiousParser
+	| ParserRequired !String
 
 :: NTstatement
 	= /*Compound !NTexpression !Tsemicolon !NTstatement
@@ -16,19 +17,22 @@ from StdParsComb import :: CParser, :: Parser, :: AltCont, :: XorCont, :: SucCon
 :: NTexpression
 	= /*Function !NTnameOrValue !(+- NTpattern UNIT) !Tis !NTexpression
 	| */Apply !NTexpression !NTterm
-	| Sugar !NTsugar
 	| Term !NTterm
 
 :: NTterm
+	= Sugar !NTsugar
+	| Plain !NTplain
+
+:: NTsugar 
+	= Tuple !Topen !NTexpression !Tcomma !(+- NTexpression Tcomma) !Tclose
+	| List !(|-| TopenBracket NTlist TcloseBracket)
+
+:: NTplain
 	= Nested !(|-| Topen NTexpression Tclose)
 	| Lambda !(Scope NTlambda)
 	| Let !(Scope NTlet)
 	| Case !NTcase
 	| NameOrValue !NTnameOrValue
-
-:: NTsugar 
-	= Tuple !Topen !NTexpression !Tcomma !(+- NTexpression Tcomma) !Tclose
-	| List !(|-| TopenBracket NTlist TcloseBracket)
 
 :: NTlist
 	= ListComprehension !NTlistComprehension

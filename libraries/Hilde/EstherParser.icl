@@ -3,34 +3,37 @@ implementation module EstherParser
 import StdException, StdGeneric, StdMaybe
 import StdParsComb, StdBool, StdList, StdEnum, StdFunc
 
+:: TryWant = Try | Want
+
 parseStatement :: !String -> /*Src*/ NTexpression //NTstatement
 parseStatement input 
-	= case begin (sp parser{|*|} <& sp eof) (fromString input) of
+	= case begin (sp (parser{|*|} Want) <& sp eof) (fromString input) of
 		[([], syntax)] -> syntax
 		[] -> raise SyntaxError
 		_ -> raise AmbigiousParser
 
-generic parser a :: CParser Char a b
+generic parser a :: !TryWant -> CParser Char a b
 
-parser{|UNIT|} = yield UNIT
+parser{|UNIT|} _ = yield UNIT
 
-parser{|PAIR|} gl gr = gl <&> \l -> sp gr <@ PAIR l
+parser{|PAIR|} gl gr t = gl t <&> \l -> sp (gr t) <@ PAIR l
 
-parser{|EITHER|} gl gr = gl <@ LEFT <!> gr <@ RIGHT
+parser{|EITHER|} gl gr t = gl Try <@ LEFT <!> gr t <@ RIGHT
 
-parser{|CONS|} gx = gx <@ CONS
+parser{|CONS|} gx t = gx t <@ CONS
 
-parser{|FIELD|} gx = gx <@ FIELD
+parser{|FIELD|} gx t = gx t <@ FIELD
 
-parser{|OBJECT|} gx = gx <@ OBJECT
+parser{|OBJECT|} gx t=:Try = gx t <@ OBJECT
+parser{|OBJECT of {gtd_name}|} gx t=:Want = gx t <@ OBJECT <!> raise (ParserRequired gtd_name)
 
-parser{|Bool|} 
+parser{|Bool|} b
 	= token ['True'] &> yield True 
 	<!> token ['False'] &> yield False
 
-parser{|Char|} = symbol '\'' &> character ['\''] <& symbol '\''
+parser{|Char|} b = symbol '\'' &> character ['\''] <& symbol '\''
 
-parser{|Int|} 
+parser{|Int|} b 
 	= <?> (symbol '+') &> nat 
 	<!> symbol '-' &> nat <@ ~
 where
@@ -39,13 +42,13 @@ where
 		<!> symbol '0' &> number_ 8
 		<!> number_ 10
 	
-parser{|Real|} = (realWithExp <!> realWithoutExp) <@ toReal o toString
+parser{|Real|} b = (realWithExp <!> realWithoutExp) <@ toReal o toString
 where
 	realWithoutExp = int <?= ['0'] <++> symbol '.' <:&> numberList_ 10
 	realWithExp = int <++> (symbol '.' <:&> numberList_ 10) <?= ['0'] <++> symbol 'E' <:&> int
 	int = symbol '-' <:&> numberList_ 10 <!> <?> (symbol '+') &> numberList_ 10 
 
-parser{|String|} = symbol '"' &> <*> (character ['"']) <& symbol '"' <@ toString
+parser{|String|} b = symbol '"' &> <*> (character ['"']) <& symbol '"' <@ toString
 /*
 parser{|Src|} ge = p
 where
@@ -53,12 +56,11 @@ where
 	where
 		sc` x xc` ac` ss` = sc {node = x, src = toString (take (length ss - length ss`) ss)} xc` ac` ss`
 */
-parser{|NTexpression|} = (parser{|*|} <@ Sugar <!> parser{|*|} <@ Term) <&> p
+parser{|NTexpression|} t = (parser{|*|} Want <@ Term) <&> p
 where
-	p a = (sp parser{|*|} <&> \b -> p (Apply a b)) 
-		<!> yield a
+	p x = (sp (parser{|*|} Try) <&> \y -> p (Apply x y)) <!> yield x
 
-parser{|NTvariable|} 
+parser{|NTvariable|} t
 	= lowercaseIdentifier <&> (\n -> if (isMember n keywords) fail (yield (NTvariable n)))
 /*
 parser{|NTnameOrValue|}
@@ -73,44 +75,49 @@ where
 		<!> (lowercaseIdentifier <!> uppercaseIdentifier <!> funnyIdentifier) <& eof <@ (\n -> if (isMember n keywords) fail (yield (NTname n)))
 		<!> <+> (satisfy (const True)) <@ (\n -> yield (NTname (toString n)))
 */
-parser{|NTnameOrValue|}
-	= parser{|*|} <@ (\x -> NTvalue (dynamic x :: String) GenConsNoPrio)
-	<!> parser{|*|} <@ (\x -> NTvalue (dynamic x :: Real) GenConsNoPrio)
-	<!> parser{|*|} <@ (\x -> NTvalue (dynamic x :: Int) GenConsNoPrio)
-	<!> parser{|*|} <@ (\x -> NTvalue (dynamic x :: Char) GenConsNoPrio)
-	<!> parser{|*|} <@ (\x -> NTvalue (dynamic x :: Bool) GenConsNoPrio)
+parser{|NTnameOrValue|} Try
+	= parser{|*|} Try <@ (\x -> NTvalue (dynamic x :: String) GenConsNoPrio)
+	<!> parser{|*|} Try <@ (\x -> NTvalue (dynamic x :: Real) GenConsNoPrio)
+	<!> parser{|*|} Try <@ (\x -> NTvalue (dynamic x :: Int) GenConsNoPrio)
+	<!> parser{|*|} Try <@ (\x -> NTvalue (dynamic x :: Char) GenConsNoPrio)
+	<!> parser{|*|} Try <@ (\x -> NTvalue (dynamic x :: Bool) GenConsNoPrio)
 	<!> (lowercaseIdentifier <!> uppercaseIdentifier <!> funnyIdentifier) <&> (\n -> if (isMember n keywords) fail (yield (NTname n)))
+parser{|NTnameOrValue|} Want = parser{|*|} Try <!> raise (ParserRequired "NTnameOrValue")
 
-parser{|(|-|)|} ga ge gb = ga &> sp ge <& sp gb <@ |-|
+parser{|(|-|)|} ga ge gb t = ga t &> sp (ge t) <& sp (gb Want) <@ |-|
 
-parser{|(+-)|} ge gs = parseSequence (sp ge) (sp gs) <@ \[x:xs] -> +- [x:xs]
+parser{|(+-)|} ge gs t = parseSequence (sp (ge t)) (sp (gs t)) <@ \[x:xs] -> +- [x:xs]
 
-parser{|Maybe|} ge 
-	= ge <@ Just
+parser{|Maybe|} ge t
+	= ge Try <@ Just
 	<!> yield Nothing
 
-parser{|Topen|} = symbol '(' &> yield Topen
-parser{|Tclose|} = symbol ')' &> yield Tclose
-parser{|TopenBracket|} = symbol '[' &> yield TopenBracket
-parser{|TcloseBracket|} = symbol ']' &> yield TcloseBracket
-parser{|Tlambda|} = keyword "\\" &> yield Tlambda
-parser{|Tarrow|} = keyword "->" &> yield Tarrow
-parser{|Tlet|} = keyword "let" &> yield Tlet
-parser{|Tin|} = keyword "in" &> yield Tin
-parser{|Tcase|} = keyword "case" &> yield Tcase
-parser{|Tof|} = keyword "of" &> yield Tof
-parser{|Tsemicolon|} = symbol ';' &> yield Tsemicolon
-parser{|Tcolon|} = keyword ":" &> yield Tcolon
-parser{|Tcomma|} = symbol ',' &> yield Tcomma
-parser{|Tunderscore|} = keyword "_" &> yield Tunderscore
-parser{|Tis|} = keyword "=" &> yield Tis
-parser{|Tdotdot|} = keyword ".." &> yield Tdotdot
-parser{|Tzf|} = keyword "\\\\" &> yield Tzf
-parser{|TbackArrow|} = keyword "<-" &> yield TbackArrow
-parser{|Tguard|} = keyword "|" &> yield Tguard
-parser{|Tand|} = keyword "&" &> yield Tand
+want :: !TryWant !String -> CParser a b c
+want Try _ = fail
+want Want s = raise (ParserRequired s)
 
-derive parser NTstatement, NTterm, NTsugar, NTlist, NTlistComprehension, NTqualifier, NTgenerator
+parser{|Topen|} t = symbol '(' &> yield Topen <!> want t "("
+parser{|Tclose|} t = symbol ')' &> yield Tclose <!> want t ")"
+parser{|TopenBracket|} b = symbol '[' &> yield TopenBracket
+parser{|TcloseBracket|} b = symbol ']' &> yield TcloseBracket
+parser{|Tlambda|} b = keyword "\\" &> yield Tlambda
+parser{|Tarrow|} b = keyword "->" &> yield Tarrow
+parser{|Tlet|} b = keyword "let" &> yield Tlet
+parser{|Tin|} b = keyword "in" &> yield Tin
+parser{|Tcase|} b = keyword "case" &> yield Tcase
+parser{|Tof|} b = keyword "of" &> yield Tof
+parser{|Tsemicolon|} b = symbol ';' &> yield Tsemicolon
+parser{|Tcolon|} b = keyword ":" &> yield Tcolon
+parser{|Tcomma|} b = symbol ',' &> yield Tcomma
+parser{|Tunderscore|} b = keyword "_" &> yield Tunderscore
+parser{|Tis|} b = keyword "=" &> yield Tis
+parser{|Tdotdot|} b = keyword ".." &> yield Tdotdot
+parser{|Tzf|} b = keyword "\\\\" &> yield Tzf
+parser{|TbackArrow|} b = keyword "<-" &> yield TbackArrow
+parser{|Tguard|} b = keyword "|" &> yield Tguard
+parser{|Tand|} b = keyword "&" &> yield Tand
+
+derive parser NTstatement, NTplain, NTterm, NTsugar, NTlist, NTlistComprehension, NTqualifier, NTgenerator
 derive parser NTlambda, NTpattern, NTlet, NTletDef, NTcase, NTcaseAlt
 derive parser Scope, (,)
 
