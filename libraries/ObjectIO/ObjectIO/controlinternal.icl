@@ -5,10 +5,10 @@ implementation module controlinternal
 
 
 import	StdBool, StdEnum, StdList, StdMisc, StdTuple
-import	oswindow
+import	osrgn, oswindow
 from	ospicture			import defaultPen
 from	ostooltip			import OSaddControlToolTip
-from	osrgn				import osisemptyrgn, osdisposergn
+//from	osrgn				import osisemptyrgn, osdisposergn
 import	commondef, wstateaccess
 from	StdControlAttribute	import isControlTip, getControlTipAtt, isControlKeyboard
 from	controldraw			import drawCustomButtonLook`, drawCustomLook`, drawCompoundLook`,
@@ -275,45 +275,68 @@ where
 
 //	Set the show state of the controls and provide proper feedback.
 
-setcontrolsshowstate :: ![Id] !Bool !OSWindowMetrics !OSWindowPtr !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
-setcontrolsshowstate ids itemsShow wMetrics wPtr wH=:{whItems`,whSelect`,whSize`,whWindowInfo`} tb
-	# (_,itemHs,tb)			= setWElements (setWItemShowStates wMetrics wPtr itemsShow contextShow contextSelect clipRect) ids whItems` tb
-	= ({wH & whItems`=itemHs},tb)
+setcontrolsshowstate :: ![Id] !Bool !OSWindowMetrics !WIDS !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
+setcontrolsshowstate ids itemsShow wMetrics wids=:{wPtr} wH=:{whItems`,whSelect`,whSize`,whWindowInfo`} tb
+	# (updRgn,tb)			= osnewrgn tb											// PA+++
+	# (_,itemHs,(updRgn,tb))= setWElements (setWItemShowStates wMetrics wPtr itemsShow contextShow contextSelect clipRect) ids whItems` (updRgn,tb)
+	  wH					= {wH & whItems`=itemHs}
+//	# (wH,tb)				= updatewindowbackgrounds` wMetrics updRgn wids wH tb	// PA+++
+	# (_,updRgnRect,tb)		= osgetrgnbox updRgn tb
+	# tb					= OSinvalidateWindowRect wPtr updRgnRect tb
+//	# tb					= OSinvalidateWindow wPtr tb
+	# tb					= osdisposergn updRgn tb
+	= (wH,tb)
 where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	contextShow				= True
 	contextSelect			= if whSelect` Able Unable
 	
-	setWItemShowStates :: !OSWindowMetrics !OSWindowPtr !Bool !Bool !SelectState !Rect ![Id] !WItemHandle` !*OSToolbox
-																				   -> (![Id],!WItemHandle`,!*OSToolbox)
+	setWItemShowStates :: !OSWindowMetrics !OSWindowPtr !Bool !Bool !SelectState !Rect ![Id] !WItemHandle` !(!OSRgnHandle,!*OSToolbox)
+																				   -> (![Id],!WItemHandle`,!(!OSRgnHandle,!*OSToolbox))
 	
-	setWItemShowStates wMetrics wPtr itemsShow contextShow contextSelect clipRect ids itemH=:{wItemKind`=IsRadioControl} tb
+	setWItemShowStates wMetrics wPtr itemsShow contextShow contextSelect clipRect ids itemH=:{wItemKind`=IsRadioControl} (updRgn,tb)
 		# (found,ids)		= maybeRemoveCheck itemH.wItemId` ids
 		| not found
-			= (ids,itemH,tb)
+			= (ids,itemH,(updRgn,tb))
 		| otherwise
 			# osShow		= contextShow && itemsShow
 			  itemH			= {itemH & wItemShow`=itemsShow}
 			  info			= getWItemRadioInfo` itemH.wItemInfo`
-			# tb			= StateMap2 (\{radioItemPtr`} tb->OSsetRadioControlShow wPtr radioItemPtr` clipRect osShow tb) info.radioItems` tb
-			= (ids,itemH,tb)
+		//	# (updRgn,tb)	= StateMap2 (\{radioItemPtr`} tb->OSsetRadioControlShow wPtr radioItemPtr` clipRect osShow tb) info.radioItems` (updRgn,tb)
+			# (updRgn,tb)	= StateMap2 (setradio osShow clipRect) info.radioItems` (updRgn,tb)
+			= (ids,itemH,(updRgn,tb))
+	where
+		setradio osShow clipRect {radioItemPtr`,radioItemPos`,radioItemSize`} (updRgn,tb)
+			# (itemRgn,tb)	= osnewrectrgn (PosSizeToRect radioItemPos` radioItemSize`) tb
+			# (unionRgn,tb)	= osunionrgn updRgn itemRgn tb
+			# tb			= osdisposergn updRgn (osdisposergn itemRgn tb)
+			# tb			= OSsetRadioControlShow wPtr radioItemPtr` clipRect osShow tb
+			= (unionRgn,tb)
 	
-	setWItemShowStates wMetrics wPtr itemsShow contextShow contextSelect clipRect ids itemH=:{wItemKind`=IsCheckControl} tb
+	setWItemShowStates wMetrics wPtr itemsShow contextShow contextSelect clipRect ids itemH=:{wItemKind`=IsCheckControl} (updRgn,tb)
 		# (found,ids)		= maybeRemoveCheck itemH.wItemId` ids
 		| not found
-			= (ids,itemH,tb)
+			= (ids,itemH,(updRgn,tb))
 		| otherwise
 			# osShow		= contextShow && itemsShow
 			  itemH			= {itemH & wItemShow`=itemsShow}
 			  info			= getWItemCheckInfo` itemH.wItemInfo`
-			# tb			= StateMap2 (\{checkItemPtr`} tb->OSsetCheckControlShow wPtr checkItemPtr` clipRect osShow tb) info.checkItems` tb
-			= (ids,itemH,tb)
+		//	# (updRgn,tb)	= StateMap2 (\{checkItemPtr`} tb->OSsetCheckControlShow wPtr checkItemPtr` clipRect osShow tb) info.checkItems` (updRgn,tb)
+			# (updRgn,tb)	= StateMap2 (setcheck osShow clipRect) info.checkItems` (updRgn,tb)
+			= (ids,itemH,(updRgn,tb))
+	where
+		setcheck osShow clipRect {checkItemPtr`,checkItemPos`,checkItemSize`} (updRgn,tb)
+			# (itemRgn,tb)	= osnewrectrgn (PosSizeToRect checkItemPos` checkItemSize`) tb
+			# (unionRgn,tb)	= osunionrgn updRgn itemRgn tb
+			# tb			= osdisposergn updRgn (osdisposergn itemRgn tb)
+			# tb			= OSsetRadioControlShow wPtr checkItemPtr` clipRect osShow tb
+			= (unionRgn,tb)
 	
-	setWItemShowStates wMetrics wPtr itemsShow contextShow contextSelect clipRect ids itemH=:{wItemKind`} tb
+	setWItemShowStates wMetrics wPtr itemsShow contextShow contextSelect clipRect ids itemH=:{wItemKind`} (updRgn,tb)
 		| isMember wItemKind` [IsPopUpControl,IsSliderControl,IsTextControl,IsEditControl,IsButtonControl,IsCustomControl,IsCustomButtonControl]
 			# (found,ids)	= maybeRemoveCheck itemH.wItemId` ids
 			| not found
-				= (ids,itemH,tb)
+				= (ids,itemH,(updRgn,tb))
 			// otherwise
 				# osShow	= contextShow && itemsShow
 				  itemH		= {itemH & wItemShow`=itemsShow}
@@ -327,18 +350,27 @@ where
 				  				IsCustomControl			-> OSsetCustomControlShow
 				  				_						-> controlinternalFatalError "setWItemShowStates" "unexpected ControlKind alternative"
 				# tb		= osAction wPtr itemH.wItemPtr` clipRect osShow tb
-				= (ids,itemH,tb)
+				# (updRgn,tb)	= set osShow clipRect itemH.wItemPtr` (PosSizeToRect itemH.wItemPos` itemH.wItemSize`) (updRgn,tb)
+				= (ids,itemH,(updRgn,tb))
+		where
+			set osShow clipRect itemPtr` itemRect (updRgn,tb)
+				# (itemRgn,tb)	= osnewrectrgn itemRect tb
+				# (unionRgn,tb)	= osunionrgn updRgn itemRgn tb
+				# tb			= osdisposergn updRgn (osdisposergn itemRgn tb)
+				# tb			= OSsetRadioControlShow wPtr itemPtr` clipRect osShow tb
+				= (unionRgn,tb)
 	
-	setWItemShowStates wMetrics wPtr itemsShow contextShow contextSelect clipRect ids itemH=:{wItemKind`=IsCompoundControl} tb
+	setWItemShowStates wMetrics wPtr itemsShow contextShow contextSelect clipRect ids itemH=:{wItemKind`=IsCompoundControl} (updRgn,tb)
 		# (found,ids)		= maybeRemoveCheck itemH.wItemId` ids
-		# (ids,itemHs,tb)	= setWElements (setWItemShowStates wMetrics wPtr itemsShow contextShow1 contextSelect1 clipRect1) ids itemH.wItems` tb
+		# (ids,itemHs,(updRgn,tb))
+							= setWElements (setWItemShowStates wMetrics wPtr itemsShow contextShow1 contextSelect1 clipRect1) ids itemH.wItems` (updRgn,tb)
 		  itemH				= {itemH & wItems`=itemHs}
 		| not found
-			= (ids,itemH,tb)
+			= (ids,itemH,(updRgn,tb))
 		| otherwise
 			# itemH			= {itemH & wItemShow`=itemsShow}
 			# tb			= OSsetCompoundShow wPtr itemH.wItemPtr` clipRect itemsShow tb
-			= (ids,itemH,tb)
+			= (ids,itemH,(updRgn,tb))
 	where
 		contextSelect1		= if (enabled contextSelect) (if itemH.wItemSelect` Able Unable) contextSelect
 		contextShow1		= contextShow && itemH.wItemShow`
@@ -346,15 +378,15 @@ where
 		itemSize			= itemH.wItemSize`
 		clipRect1			= intersectRectContent wMetrics clipRect info itemH.wItemPos` itemSize
 	
-	setWItemShowStates wMetrics wPtr itemsShow contextShow contextSelect clipRect ids itemH=:{wItemKind`=IsOtherControl _} tb
+	setWItemShowStates wMetrics wPtr itemsShow contextShow contextSelect clipRect ids itemH=:{wItemKind`=IsOtherControl _} (updRgn,tb)
 		# (found,ids)		= maybeRemoveCheck itemH.wItemId` ids
 		| not found
-			= (ids,itemH,tb)
+			= (ids,itemH,(updRgn,tb))
 		| otherwise
 			# itemSelect	= if (enabled contextSelect) (if itemH.wItemSelect` Able Unable) contextSelect
 			  itemSelected	= enabled itemSelect
 			  itemH			= {itemH & wItemSelect`=itemSelected}
-			= (ids,itemH,tb)
+			= (ids,itemH,(updRgn,tb))
 
 
 //	Set the MarkState of the controls and provide proper feedback.

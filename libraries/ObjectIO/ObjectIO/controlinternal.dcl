@@ -12,7 +12,7 @@ enablecontrols		:: ![Id] !Bool               !OSWindowMetrics !OSWindowPtr !Wind
                                                                  -> (          !WindowHandle`,          !*OSToolbox)
 disablecontrols		:: ![Id] !Bool               !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox
                                                                  -> (          !WindowHandle`,          !*OSToolbox)
-setcontrolsshowstate:: ![Id] !Bool               !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox
+setcontrolsshowstate:: ![Id] !Bool               !OSWindowMetrics !WIDS        !WindowHandle`           !*OSToolbox
                                                                  -> (          !WindowHandle`,          !*OSToolbox)
 setcontrolsmarkstate:: !Id !MarkState ![Index]   !OSWindowMetrics !OSWindowPtr !WindowHandle`           !*OSToolbox
                                                                  -> (          !WindowHandle`,          !*OSToolbox)
