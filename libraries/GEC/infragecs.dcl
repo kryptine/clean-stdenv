@@ -3,13 +3,13 @@ definition module infragecs
 import testable
 import parseprint, guigecs
 
-:: GECArgs t env =
-	{	location :: !(!GUILoc,!OBJECTControlId) 
-	,	makeUpValue :: !MakeUpValue
-    ,   outputOnly :: !OutputOnly
-    ,	gec_value :: !.Maybe t
-	,	update :: !(Update t env)
-	}
+::	GECArgs t env
+	=	{	location	:: !(!GUILoc,!OBJECTControlId) 
+		,	makeUpValue	:: !MakeUpValue
+	    ,   outputOnly	:: !OutputOnly
+	    ,	gec_value	:: !.Maybe t
+		,	update		:: !(Update t env)
+		}
 
 derive bimap GECArgs
 

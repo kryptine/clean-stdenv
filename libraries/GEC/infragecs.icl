@@ -528,7 +528,7 @@ where
 		eitherFun {guiLocs} eGEC msg=:InOpenGEC (lSt=:{eitherGUILoc,eitherOBJECTLoc},pSt)
 			# pSt					= TRACE ("gGEC{|EITHER|}",msg) pSt
 			# [aLoc,bLoc:_]			= guiLocs (eitherGUILoc,eitherOBJECTLoc)
-			# (setA,pSt)			= gGECa {gecArgs & location=aLoc, makeUpValue = makeUpLeft,gec_value=maybeLEFT  me,update=updateLEFT} pSt
+			# (setA,pSt)			= gGECa {gecArgs & location=aLoc, makeUpValue = makeUpLeft, gec_value=maybeLEFT  me,update=updateLEFT}  pSt
 			# (setB,pSt)			= gGECb {gecArgs & location=bLoc, makeUpValue = makeUpRight,gec_value=maybeRIGHT me,update=updateRIGHT} pSt
 			# lSt					= {lSt & either1GECVALUE=setA,either2GECVALUE=setB}
 			= (OutDone,(lSt,pSt))
@@ -703,26 +703,50 @@ gGECtraceSwitchCONS   type path      :== gGECcase type +++ " (InSwitchCONS "+++p
 gGECtraceArrangeCONS  type arr path  :== gGECcase type +++ " (InArrangeCONS "+++printToString arr+++" "+++printToString path+++")"
 gGECtraceDefault      type           :== "Handling messages failed of "+++type
 
-newGEC cGEC =
-	{ gecOpen     = openGEC     cGEC
-    , gecClose    = closeGEC    cGEC
-    , gecOpenGUI  = openGECGUI  cGEC
-    , gecCloseGUI = closeGECGUI cGEC
-    , gecGetValue = getGECvalue cGEC
-    , gecSetValue = setGECvalue cGEC
-    , gecSwitch   = switchGEC   cGEC
-    , gecArrange  = arrangeGEC  cGEC
-    , gecOpened   = accPIO (isGECIdBound cGEC)
-    }
 
+/**	Factoring common functionality of the major functions above (unitGEC .. basicGEC). 
+	Two 'kinds' of entry points:
+		GEC:  allocates a GECId before calling GEC2;
+		GEC2: captures the common functionality. 
+		      (1) Determine the GUI component; 
+		      (2) set-up the receiver infrastructure,
+		      (3) activate it, 
+		      (4) and finally return the handle as a result.
+*/
+GEC :: !String 
+       !(GECGUIFun a (PSt .ps)) 
+       !((GECGUI a (PSt .ps)) (GECId a) -> Receiver2Function (GECMsgIn a) (GECMsgOut a) *(.lst,PSt .ps))
+       !OutputOnly
+       .lst (PSt .ps)
+    -> (!.GECVALUE a (PSt .ps), !PSt .ps)
 GEC name gecguiFun fun outputOnly lSt pSt
-	# (pGEC,  pSt)				= openGECId pSt
+	# (pGEC,pSt)	= openGECId pSt
 	= GEC2 pGEC name gecguiFun fun outputOnly lSt pSt
 
+GEC2 :: !(GECId a) 
+        !String 
+        !(GECGUIFun a (PSt .ps)) 
+        !((GECGUI a (PSt .ps)) (GECId a) -> Receiver2Function (GECMsgIn a) (GECMsgOut a) *(.lst,PSt .ps))
+        !OutputOnly
+        .lst (PSt .ps)
+     -> (!.GECVALUE a (PSt .ps), !PSt .ps)
 GEC2 pGEC name gecguiFun fun outputOnly lSt pSt
-	# pSt						= TRACE (gGECtrace name) pSt
-	# (gecGUI,pSt)				= gecguiFun outputOnly pSt
-	# tDef						= GECReceiver pGEC (fun gecGUI pGEC)
-	# (_,pSt)					= openReceiver lSt tDef pSt
-	# pSt						= openGEC pGEC pSt
-	= (newGEC pGEC, pSt)
+	# pSt			= TRACE (gGECtrace name) pSt
+	# (gecGUI,pSt)	= gecguiFun outputOnly pSt				// (1)
+	# tDef			= GECReceiver pGEC (fun gecGUI pGEC)	// (2)
+	# (_,pSt)		= openReceiver lSt tDef pSt				// (2)
+	# pSt			= openGEC pGEC pSt						// (3)
+	= (newGEC pGEC,pSt)										// (4)
+where
+	newGEC :: !(GECId t) -> .GECVALUE t (PSt .ps)
+	newGEC tGEC
+		= { gecOpen     = openGEC     tGEC
+	      , gecClose    = closeGEC    tGEC
+	      , gecOpenGUI  = openGECGUI  tGEC
+	      , gecCloseGUI = closeGECGUI tGEC
+	      , gecGetValue = getGECvalue tGEC
+	      , gecSetValue = setGECvalue tGEC
+	      , gecSwitch   = switchGEC   tGEC
+	      , gecArrange  = arrangeGEC  tGEC
+	      , gecOpened   = accPIO (isGECIdBound tGEC)
+	      }

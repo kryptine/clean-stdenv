@@ -3,7 +3,7 @@ module demoGEC
 import StdEnv
 import StdIO
 import genericgecs
-import StdGEC, StdGECExt, StdAGEC
+import StdGEC, StdGECExt, StdAGEC, StdGecComb
 import GenMap
 
 :: VT t
