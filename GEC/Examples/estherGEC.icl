@@ -1,7 +1,7 @@
 module estherGEC
 
 import StdEnv
-import StdGEC, StdGECExt, StdAGEC, StdDynamicGEC
+import StdGEC, StdGECExt, StdAGEC, dynamicAGEC
 import StdGecComb
 import StdDynamic
 import EstherInterFace, basicAGEC
@@ -100,12 +100,12 @@ where
 	convert = mapTo o calcsum o mapFrom
 
 	mapFrom agec  	= gMap {|* -> * -> * -> *|} (^^) (^^) (^^) agec
-	mapTo val 		= gMap {|* -> * -> * -> *|} counterGEC dynamicGEC (modeGEC o Display) val
+	mapTo val 		= gMap {|* -> * -> * -> *|} counterAGEC dynamicAGEC (modeAGEC o Display) val
 
 
 :: Counter a = Counter (AGEC a)
 
-test5 = CGEC (selfGEC "self" id) (mkAGECs (counterGEC) (dynamicGEC) init)	
+test5 = CGEC (selfGEC "self" id) (mkAGECs (counterAGEC) (dynamicAGEC) init)	
 where
 	init :: (T Int Real)
 	init = 	C 19
@@ -113,7 +113,7 @@ where
 	convert = mapTo o id o mapFrom
 
 	mapFrom agec  	= gMap {|* -> * -> *|} (^^) (^^) agec
-	mapTo val 		= gMap {|* -> * -> *|} counterGEC dynamicGEC  val
+	mapTo val 		= gMap {|* -> * -> *|} counterAGEC dynamicAGEC  val
 	
 //mkAGECs :: (AGEC a,a) (AGEC b,b) (t a b) ->  (t a b)
 mkAGECs  ageca agecb tab
@@ -134,10 +134,10 @@ derive gGEC X
 //test7 = CGEC (selfGEC "self" convert2) (mapto2 init) //(mapTo init)	
 test7 = CGEC (selfGEC "self" mapto2) init //(mapTo init)	
 where
-	init = 	X (3,(idGEC [1..3]))
+	init = 	X (3,(idAGEC [1..3]))
 
-	mapto2 (X (n,list`)) = if (isEven (length list)) (X (n,(idGEC  (mytest list)))) 
-												 (X (n,(horlistGEC (mytest list))))
+	mapto2 (X (n,list`)) = if (isEven (length list)) (X (n,(idAGEC  (mytest list)))) 
+												 (X (n,(horlistAGEC (mytest list))))
 	where
 		list = ^^ list`											
 
@@ -149,4 +149,4 @@ where
 	convert = mapTo o mytest o mapFrom
 
 	mapFrom agec  	= gMap {|* -> * |} (^^) agec
-	mapTo val 		= gMap {|* -> * |} horlistGEC val
+	mapTo val 		= gMap {|* -> * |} horlistAGEC val

@@ -3,7 +3,7 @@ implementation module StdGecComb
 import genericgecs
 import StdGECExt, store, StdFunc, StdMisc
 import StdAGEC
-import modeGEC, tupleGEC
+import modeAGEC, tupleAGEC
 
 :: GecRec a b ps =
 		{	value	:: b

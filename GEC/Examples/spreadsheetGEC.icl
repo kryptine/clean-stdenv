@@ -12,15 +12,15 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	spreadsheet5
+ 	spreadsheet1
  	world  
 
-spreadsheet	=	CGEC (selfGEC 	"spreadsheet"			updsheet)	    (mksheet inittable) 
+spreadsheet1	=	CGEC (selfGEC 	"spreadsheet"			updsheet)	    (mksheet inittable) 
 where
 		updsheet (table <-> _ <|>
 		          _ <-> _ )			= mksheet (^^ table)
-		mksheet table				= tableGEC table <-> Display (vertlistGEC rowsum) <|>
-									  Display (horlistGEC colsum) <-> Display (sum rowsum)
+		mksheet table				= table_hv_AGEC table <-> Display (vertlistAGEC rowsum) <|>
+									  Display (horlistAGEC colsum) <-> Display (sum rowsum)
 		where
 			rowsum					= map sum table
 			colsum 					= map sum transpose
@@ -33,8 +33,8 @@ spreadsheet2	=	CGEC (selfGEC 	"spreadsheet"			updsheet)	    (mksheet inittable)
 where
 		updsheet (table <-> _ <|>
 		          _ <-> _ )			= mksheet (^^ table)
-		mksheet table				= tableGEC table <-> vertlistGEC rowsum <|>
-									  horlistGEC colsum <-> sum rowsum
+		mksheet table				= table_hv_AGEC table <-> vertlistAGEC rowsum <|>
+									  horlistAGEC colsum <-> sum rowsum
 		where
 			rowsum					= map sum table
 			colsum 					= map sum transpose
@@ -49,7 +49,7 @@ where
 				  costs <-> _ <-> _ <-> vat <|>
 		          _ <-> _ <-> _ )	= mksheet (^^ costs) vat
 		mksheet costs vat			= Display "Result " <-> Display "Tax " <-> Display "Result + Tax " <-> Display "VAT " <|>
-									  vertlistGEC costs <-> Display (vertlistGEC tax) <-> Display (vertlistGEC rowsum) <-> vat <|>
+									  vertlistAGEC costs <-> Display (vertlistAGEC tax) <-> Display (vertlistAGEC rowsum) <-> vat <|>
 									  Display sumcosts  <-> Display sumtax <-> Display (sumcosts + sumtax)
 		where
 			sumcosts				= sum costs
@@ -59,88 +59,4 @@ where
 			
 		initcosts	  				= [10.00 .. 16.00]
 		initvat						= 0.19	
-
-spreadsheet4 = CGEC ( %| 	(		mapTo
-							@|		gecEdit "design"
-							|@		mapFrom 
-							)
-					 ) 
-					 init
-where
-	init = (1,[3])
-
-	mapTo  (l,list)	= vertlistGEC list <-> l 
-	mapFrom (edlist <-> l) = (l, calc (^^ edlist) l)
-	where
-		calc edlist l = take l edlist ++ (repeatn (num edlist) 0)
-		num edlist = if ((l - length edlist) <= 0) 0 (l - length edlist)
-
-// ---------
-
-:: T 	 	:== (Type,Editors,Commands)
-			
-:: Type 	=	FI Int //(Int -> Int) 
-			|	S String 
-			|	R Real 
-			|	I Int 
-			
-:: Editors 	= Calculator
-			| Expression
-			| Counter
-			| Displayval
-			| Identity
-
-:: Commands	= Insert
-			| Append
-			| Delete
-			| Choose
-
-:: T2 a b c	= INT a
-			| REAL b
-			| STRING c
-
-import GenMap
-derive gGEC Editors, T2, Type, Commands
-
-spreadsheet5 = CGEC ( %| 	(		ToEdit
-							@|		gecEdit "design"
-							|@		update` o FromEdit 
-							)
-							|@		vertlistGEC o  mapT2
-							|>>>| 	gecEdit "spreadsheet"
-					 ) 
-					 [init,init]
-where
-	
-	init = (I 0, Identity, Choose)
-
-	ToEdit  list	 = (vertlistGEC list) 
-	FromEdit edlist  = (^^ edlist)
-
-	update` xs		  			= keepone (update xs)
-	where
-		keepone [] = [init]
-		keepone xs = xs
-
-	update [(x,e,Insert):xs] 		= [(x,e,Choose),(x,e,Choose):update xs] 
-	update [(x,e,Append):xs] 		= [(x,e,Choose),(x,e,Choose):update xs] 
-	update [(x,e,Delete):xs] 		= update xs
-	update [xo:xs]  			= [xo:update xs]
-	update []		  			= []
-
-	mapT2 list = map toT2 list
-	where
-		toT2 (I i,Counter,c)  	= INT 	 (counterGEC i)
-		toT2 (I i,Calculator,c)	= INT 	 (intcalcGEC i)
-		toT2 (I i,Displayval,c)	= INT 	 (modeGEC (Display i))
-//		toT2 (I i,Expression,c)	= INT 	 (dynamicGEC2 i)
-		toT2 (I i,_,c)			= INT 	 (idGEC i)
-		toT2 (R r,Counter,c)	= REAL 	 (counterGEC r)
-		toT2 (R r,Calculator,c)	= REAL 	 (realcalcGEC r)
-		toT2 (R r,Displayval,c)	= REAL 	 (modeGEC (Display r))
-//		toT2 (R r,Expression,c)	= REAL 	 (dynamicGEC2 r)
-		toT2 (R r,_,c)			= REAL 	 (idGEC r)
-		toT2 (S s,Displayval,c)	= STRING (modeGEC (Display s))
-		toT2 (S s,_,c)			= STRING (idGEC s)
-		toT2 (_,_,_)			= INT    (modeGEC (Display ( 43)))
 

@@ -18,7 +18,7 @@ Start world
  	example_lists3
  	world  
 
-example_lists1	= CGEC (mkGEC "InfiniteListDisplay") (listGEC False allprimes) 
+example_lists1	= CGEC (mkGEC "InfiniteListDisplay") (listAGEC False allprimes) 
 where
 	allprimes = sieve [2..]
 	where
@@ -27,7 +27,7 @@ where
 			filter x [y:ys] | y rem x == 0 = filter x ys
 			| otherwise = [y: filter x ys]
 	
-example_lists2 = CGEC (applyGEC "Henks demo" (\n -> listGEC True (calcnum n))) 1 
+example_lists2 = CGEC (applyGEC "Henks demo" (\n -> listAGEC True (calcnum n))) 1 
 where
 	calcnum n | n <= 0 = [0]
 	calcnum 1  	= 	[1]
@@ -36,7 +36,7 @@ where
 	| otherwise 	= [n31: calcnum n31]	with n31 = (3 * n) + 1	
 
 example_lists3 = CGEC (selfGEC "Try ou demo" update) 
-					(listGEC True (
-							[vertlistGEC (repeatn 5 i) \\ i <- [0..2]]))
+					(listAGEC True (
+							[vertlistAGEC (repeatn 5 i) \\ i <- [0..2]]))
 where
 	update = id

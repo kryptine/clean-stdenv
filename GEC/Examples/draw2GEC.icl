@@ -4,7 +4,7 @@ import StdEnv
 import StdIO
 import genericgecs
 import StdAGEC
-import StdGecComb, StdGECExt, basicAGEC, timedGEC
+import StdGecComb, StdGECExt, basicAGEC, timedAGEC
 
 // TO TEST JUST REPLACE THE EXAMPLE NAME IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
 // ALL EXAMPLES HAVE TO BE OF FORM pst -> pst
@@ -42,7 +42,7 @@ example_mouse pst
 	=	CGEC (%|  (  gecEdit "Mouse" |>>>| gecMouse "Mouse" )) MouseLost pst
 
 example_draw pst
-=	CGEC ( %| ( 		(\list -> listGEC True [(toEditReprs fig,Hide fig) \\ fig <- list])
+=	CGEC ( %| ( 		(\list -> listAGEC True [(toEditReprs fig,Hide fig) \\ fig <- list])
 				@|		gecEdit "Editor"
 				|@		(\list -> [(fromEditReprs nfig,ofig) \\ (nfig,Hide ofig) <- ^^ list])
 				|>>>|	(gecIO (mydrawfun "Drawings") |>| gecMouse "Drawings") 
@@ -95,11 +95,11 @@ example_draw pst
 
 		toEditReprs :: (ShapeAttributes Int) -> ShapeAttributes (AGEC Int)
 		toEditReprs all=:{pen_size,heigth,width,x_offset,y_offset}
-			= {all & pen_size 	= counterGEC pen_size
-				   , heigth 	= counterGEC heigth
-				   , width 		= counterGEC width
-				   , x_offset 	= counterGEC x_offset
-				   , y_offset 	= counterGEC y_offset
+			= {all & pen_size 	= counterAGEC pen_size
+				   , heigth 	= counterAGEC heigth
+				   , width 		= counterAGEC width
+				   , x_offset 	= counterAGEC x_offset
+				   , y_offset 	= counterAGEC y_offset
 				   } 
 		fromEditReprs :: (ShapeAttributes (AGEC Int)) -> ShapeAttributes Int
 		fromEditReprs all=:{pen_size,heigth,width,x_offset,y_offset}

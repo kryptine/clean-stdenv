@@ -1,11 +1,11 @@
 implementation module calcAGEC
 
-import StdAGEC, modeGEC, buttonGEC, tupleGEC, updownGEC, basicAGEC
+import StdAGEC, modeAGEC, buttonAGEC, tupleAGEC, updownAGEC, basicAGEC
 
 // buttons with functions attached
 
-calcGEC :: a [[(Button,a->a)]] -> AGEC a | gGEC {|*|} a 
-calcGEC a butfun = 	mkAGEC 	{	toGEC	= \a _ -> a <|> tableGEC buts
+calcAGEC :: a [[(Button,a->a)]] -> AGEC a | gGEC {|*|} a 
+calcAGEC a butfun = 	mkAGEC 	{	toGEC	= \a _ -> a <|> table_hv_AGEC buts
 							,	fromGEC = \(na <|> buts) -> na
 							,	value 	= a
 							,	updGEC	= calcnewa
@@ -14,12 +14,12 @@ where
 	(buts,funs) = ([map fst list \\ list <- butfun],[map snd list \\ list <- butfun])
 
 	calcnewa (na <|> nbuts) =  hd [f na \\ (f,Pressed) <- zip2 (flatten funs) (flatten (^^ nbuts))]
-							<|> tableGEC buts
+							<|> table_hv_AGEC buts
 
 // Integer with calculator buttons
 
-intcalcGEC :: Int -> AGEC Int
-intcalcGEC i = 	mkAGEC	{	toGEC	= \ni _ -> calcGEC ni buttons
+intcalcAGEC :: Int -> AGEC Int
+intcalcAGEC i = 	mkAGEC	{	toGEC	= \ni _ -> calcAGEC ni buttons
 						,	fromGEC = \b -> ^^ b
 						,	value 	= i
 						,	updGEC	= id
@@ -33,16 +33,16 @@ where
 
 	mkBut i = (Button (toString i),\v -> v*10 + i)
 
-realcalcGEC :: Real -> AGEC Real
-realcalcGEC i = 	mkAGEC	{	toGEC	= newGEC
+realcalcAGEC :: Real -> AGEC Real
+realcalcAGEC i = 	mkAGEC	{	toGEC	= newGEC
 							,	fromGEC = \b -> fst (^^ b)
 							,	value 	= i
 							,	updGEC	= id
 							} "realcalcGEC"
 where
-	newGEC ni Undefined 	 = calcGEC (ni ,Hide (True,1.0)) buttons
-	newGEC 0.0 (Defined oval)= calcGEC (0.0,Hide (True,1.0)) buttons
-	newGEC ni  (Defined oval)= calcGEC (ni,snd (^^ oval)) buttons 
+	newGEC ni Undefined 	 = calcAGEC (ni ,Hide (True,1.0)) buttons
+	newGEC 0.0 (Defined oval)= calcAGEC (0.0,Hide (True,1.0)) buttons
+	newGEC ni  (Defined oval)= calcAGEC (ni,snd (^^ oval)) buttons 
 
 	buttons	  =  [ map mkBut [7..9]
 				 , map mkBut [4..6]

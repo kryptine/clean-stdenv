@@ -5,14 +5,16 @@ module editeditorGEC
 import StdEnv
 import StdIO
 import genericgecs
-import StdGEC, StdGECExt, StdAGEC, calcAGEC
-import StdGecComb, basicAGEC, StdDynamicGEC, StdDynamic
+import StdGEC, StdGECExt, StdGecComb, StdDynamic
+import basicAGEC, StdAGEC, calcAGEC, dynamicAGEC
 
 Start :: *World -> *World
 Start world = goGui editoreditor world  
-//Start world = goGui testbool world  
+//Start world = goGui testval world  
 
-testbool = CGEC (gecEdit "design")  [True]
+testval = CGEC  (predAGEC isEven @| gecEdit "test" |>>>| gecEdit "output")  34
+
+
 
 goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
@@ -30,10 +32,10 @@ where
 	applicationeditor :: CGEC ApplicationEditor ApplicationEditor
 	applicationeditor 	= %| (toApplicEditor o updateApplication @| gecEdit "application" |@ fromApplicEditor)
 
-	toDesignEditor   (table,clipboard) = (listGEC True (map vertlistGEC table),hidGEC clipboard)
+	toDesignEditor   (table,clipboard) = (listAGEC True (map vertlistAGEC table),hidAGEC clipboard)
 	fromDesignEditor (table,clipboard) = (map (^^) (^^ table),^^ clipboard)
 
-	toApplicEditor		= tableGEC2	
+	toApplicEditor		= table_hv_AGEC	
 	fromApplicEditor	= ^^
 	
 // Initial value of design editor
@@ -58,11 +60,11 @@ zeroValue 	= (Int_ 0, Identity)
 			| Real_   Real											// define initial real value 
 			| Int_ 	  Int											// define initial int value (default)
 			
-:: Editor 	= Calculator											// ad calculator
-			| Expression											// allow expressions /function definitions
-			| Counter												// ad counter
+:: Editor 	= Counter												// ad counter
 			| Displayval											// display non editable value
-			| Identity												// identity editor (default)
+			| Calculator											// ad Calculator
+			| Expression											// allow expressions /function definitions
+			| Identity 												// identity editor (default)
 
 :: Command	= Insert												// insert element
 			| Delete												// delete element
@@ -96,20 +98,20 @@ where
 	where
 		update_col [(elem,Insert):xs] = [(elem,Choose),(elem,Choose):xs]
 		update_col [(_   ,Delete):xs] = xs
-		update_col [x: xs]      	  = [x:update_col xs]
+		update_col [(x,_): xs]     	  = [(x,Choose):update_col xs]
 		update_col []      			  = []
 
 	initfuns :: DesignTable -> DesignTable
 	initfuns table = map (map initfun) table // fill in proper default functions
 	where
 		initfun :: (Element,Command) -> (Element,Command)
-		initfun elem=:((F_I_I  ix f b, e),c) = if (^^ b) ((F_I_I  ix 				 (dynamicGEC2 (const 0))   nb,e),c) elem
-		initfun elem=:((F_R_R  ix f b, e),c) = if (^^ b) ((F_R_R  ix 				 (dynamicGEC2 (const 0.0)) nb,e),c) elem
-		initfun elem=:((F_LI_I ix f b, e),c) = if (^^ b) ((F_LI_I (dynamicGEC2 []) (dynamicGEC2 (const 0))   nb,e),c) elem
-		initfun elem=:((F_LR_R ix f b, e),c) = if (^^ b) ((F_LR_R (dynamicGEC2 []) (dynamicGEC2 (const 0.0)) nb,e),c) elem
+		initfun elem=:((F_I_I  ix f b, e),c) = if (^^ b) ((F_I_I  ix 			   (dynamicAGEC2 (const 0))   nb,e),c) elem
+		initfun elem=:((F_R_R  ix f b, e),c) = if (^^ b) ((F_R_R  ix 			   (dynamicAGEC2 (const 0.0)) nb,e),c) elem
+		initfun elem=:((F_LI_I ix f b, e),c) = if (^^ b) ((F_LI_I (dynamicAGEC2 []) (dynamicAGEC2 (const 0))   nb,e),c) elem
+		initfun elem=:((F_LR_R ix f b, e),c) = if (^^ b) ((F_LR_R (dynamicAGEC2 []) (dynamicAGEC2 (const 0.0)) nb,e),c) elem
 		initfun elem = elem
 	
-		nb =  hidGEC False 
+		nb =  hidAGEC False 
 
 // the application editor types:
 
@@ -129,22 +131,22 @@ where
 convert :: DesignEditor -> ApplicationEditor
 convert (table,clipboard) = map (map toAppl) table
 where
-	toAppl ((Int_ i,Calculator)   ,_)	= AInt_		(intcalcGEC i)
+	toAppl ((Int_ i,Calculator)   ,_)	= AInt_		(intcalcAGEC i)
 	toAppl ((Int_ i,agec)         ,_)	= AInt_ 	(chooseAGEC agec i)
-	toAppl ((Real_ r,Calculator)  ,_)	= AReal_  	(realcalcGEC r)
+	toAppl ((Real_ r,Calculator)  ,_)	= AReal_  	(realcalcAGEC r)
 	toAppl ((Real_ r,agec)        ,_)	= AReal_	(chooseAGEC agec r)
-	toAppl ((String_ s,Displayval),_)	= AString_ 	(showGEC s)
-	toAppl ((String_ s,_)         ,_)	= AString_ 	(idGEC s)
-	toAppl ((F_I_I  ix f _,_)     ,_)	= AF_I_I  	(showGEC "") (hidGEC (^^ f, ix))
-	toAppl ((F_R_R  ix f _,_)     ,_)	= AF_R_R  	(showGEC "") (hidGEC (^^ f, ix))
-	toAppl ((F_LI_I ix f _,_)     ,_)	= AF_LI_I  	(showGEC "") (hidGEC (^^ f, ^^ ix))
-	toAppl ((F_LR_R ix f _,_)     ,_)	= AF_LR_R  	(showGEC "") (hidGEC (^^ f, ^^ ix))
-	toAppl _					 		= AString_ 	(showGEC "not implemented")
+	toAppl ((String_ s,Displayval),_)	= AString_ 	(showAGEC s)
+	toAppl ((String_ s,_)         ,_)	= AString_ 	(idAGEC s)
+	toAppl ((F_I_I  ix f _,_)     ,_)	= AF_I_I  	(showAGEC "") (hidAGEC (^^ f, ix))
+	toAppl ((F_R_R  ix f _,_)     ,_)	= AF_R_R  	(showAGEC "") (hidAGEC (^^ f, ix))
+	toAppl ((F_LI_I ix f _,_)     ,_)	= AF_LI_I  	(showAGEC "") (hidAGEC (^^ f, ^^ ix))
+	toAppl ((F_LR_R ix f _,_)     ,_)	= AF_LR_R  	(showAGEC "") (hidAGEC (^^ f, ^^ ix))
+	toAppl _					 		= AString_ 	(showAGEC "not implemented")
 
-	chooseAGEC Counter 		= counterGEC
-	chooseAGEC Displayval 	= showGEC
-	chooseAGEC Expression 	= dynamicGEC2
-	chooseAGEC _ 			= idGEC
+	chooseAGEC Counter 		= counterAGEC
+	chooseAGEC Displayval 	= showAGEC
+	chooseAGEC Expression 	= dynamicAGEC2
+	chooseAGEC _ 			= idAGEC
 
 // the handling of the application editor boils down to applying all defined functions like in a spreadsheet ...
 
@@ -159,15 +161,15 @@ where
 
 	showIFUN :: (Bool,Bool,Int) -> AGEC String
 	showIFUN (bix,bty,ival)
-		| bix	= showGEC "Index error "
-		| bty	= showGEC "Int arg expected "
-		= showGEC (ToString ival)
+		| bix	= showAGEC "Index error "
+		| bty	= showAGEC "Int arg expected "
+		= showAGEC (ToString ival)
 	
 	showRFUN :: (Bool,Bool,Real) -> AGEC String
 	showRFUN (bix,bty,rval)
-		| bix	= showGEC "Index error "
-		| bty	= showGEC "Real arg expected "
-		= showGEC (ToString rval)
+		| bix	= showAGEC "Index error "
+		| bty	= showAGEC "Real arg expected "
+		= showAGEC (ToString rval)
 
 	applyfii  fix = calcfli (f o hd) [ix] 	where (f,ix) = ^^ fix
 	applyflii fix = calcfli f ix			where (f,ix) = ^^ fix
@@ -206,7 +208,7 @@ where
 
 // small auxilery functions
 
-showGEC i = (modeGEC (Display ( i)))
+showAGEC i = (modeAGEC (Display ( i)))
 
 strip s = { ns \\ ns <-: s | ns >= '\020' && ns <= '\0200'}	
 

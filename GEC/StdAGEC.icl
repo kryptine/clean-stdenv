@@ -139,7 +139,7 @@ where
 		# (aGEC,pSt)	= gGECa {gecArgs & gec_value=Nothing, update = \v r env -> env} pSt
 		# (a,   pSt)	= aGEC.gecGetValue pSt
 		# pSt			= aGEC.gecClose    pSt
-		= gGEC_AGEC gGECa {gecArgs & gec_value=Just (hidGEC a)} pSt
+		= gGEC_AGEC gGECa {gecArgs & gec_value=Just (hidAGEC a)} pSt
 
 
 /******************************************************************************************************

@@ -24,17 +24,17 @@ Start world
 	 
 derive gGEC T
 
-testX` pst = let (cGEC,pst`) = createNGEC "self" Interactive (C1 (P -10 (counterGEC 0))) (\_ t -> cGEC.gecSetValue NoUpdate (test t)) pst
+testX` pst = let (cGEC,pst`) = createNGEC "self" Interactive (C1 (P -10 (counterAGEC 0))) (\_ t -> cGEC.gecSetValue NoUpdate (test t)) pst
              in  pst`
 where
 	 test (C1 (P x igec))
-	 	| isEven i	= C1 (P x (counterGEC i))
-	 	| otherwise	= C2 (P x (counterGEC (toReal (^^ igec) + 5.0)))
+	 	| isEven i	= C1 (P x (counterAGEC i))
+	 	| otherwise	= C2 (P x (counterAGEC (toReal (^^ igec) + 5.0)))
 	 where
 	 	i	= ^^igec
 	 test (C2 (P x rgec))
-	 	| isEven i	= C2 (P x (counterGEC ((^^ rgec) + 5.0)))
-	 	| otherwise	= C1 (P x (counterGEC i))
+	 	| isEven i	= C2 (P x (counterAGEC ((^^ rgec) + 5.0)))
+	 	| otherwise	= C1 (P x (counterAGEC i))
 	 where
 	 	i	= toInt (^^rgec)
 
@@ -69,21 +69,21 @@ where
 	toPounds {euros} 	= {pounds = euros / exchangerate}
 	toEuro {pounds} 	= {euros = pounds * exchangerate}
 	exchangerate 		= 1.4
-example_cnt1 	= CGEC (mkGEC "Counter") (counterGEC 0)
-example_cnt2 	= CGEC (selfGEC "Counter" updateDoubleCounters) {cntr1=counterGEC 0,cntr2=intcalcGEC 0,sum=0}
+example_cnt1 	= CGEC (mkGEC "Counter") (counterAGEC 0)
+example_cnt2 	= CGEC (selfGEC "Counter" updateDoubleCounters) {cntr1=counterAGEC 0,cntr2=intcalcAGEC 0,sum=0}
 where
 	updateDoubleCounters cntrs = {cntrs & sum = ^^ cntrs.cntr1 + ^^ cntrs.cntr2}
-example_cnt3 	= CGEC (selfGEC "Counter" updateTwoIntCounters) (intcalcGEC 0 <|> counterGEC 0 <|> 0)
+example_cnt3 	= CGEC (selfGEC "Counter" updateTwoIntCounters) (intcalcAGEC 0 <|> counterAGEC 0 <|> 0)
 where
 	updateTwoIntCounters (i1 <|> i2 <|> sum) = (i1 <|> i2 <|> ^^ i1 + ^^ i2)
-example_cnt4 	= CGEC (selfGEC "Counter" updateTwoIntCounters) (idGEC 0 <|> idGEC 0 <|> counterGEC 0)
+example_cnt4 	= CGEC (selfGEC "Counter" updateTwoIntCounters) (idAGEC 0 <|> idAGEC 0 <|> counterAGEC 0)
 where
 	updateTwoIntCounters (i1 <|> i2 <|> sum) = (i1 <|> i2 <|> sum ^= (^^ i1 + ^^ i2))
 example_cnt5 	= CGEC mycounter 0
 example_cnt6 	= CGEC mydoublecounter 0 
 example_cnt7	= CGEC (gecEdit "kwadrateer") kwadrateer
 where
-	kwadrateer = applyAGEC (\x -> x + 1) (applyAGEC (\x -> x * x) (idGEC 0))
+	kwadrateer = applyAGEC (\x -> x + 1) (applyAGEC (\x -> x * x) (idAGEC 0))
 example_cnt8 	= CGEC kwadrateer 0
 where
 	kwadrateer = gecloop (f  @| gecEdit "res")

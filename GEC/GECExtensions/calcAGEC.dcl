@@ -1,8 +1,8 @@
 definition module calcAGEC
 
 import StdClass
-import StdAGEC, buttonGEC
+import StdAGEC, buttonAGEC
 
-calcGEC 	:: a [[(Button,a->a)]] 	-> AGEC a | gGEC {|*|} a // apply pressed function to argument
-intcalcGEC 	:: Int 					-> AGEC Int
-realcalcGEC :: Real 				-> AGEC Real
+calcAGEC 	 :: a [[(Button,a->a)]] 	-> AGEC a | gGEC {|*|} a // apply pressed function to argument
+intcalcAGEC  :: Int 					-> AGEC Int
+realcalcAGEC :: Real 				-> AGEC Real
