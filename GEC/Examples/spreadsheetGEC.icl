@@ -4,7 +4,7 @@ import StdEnv
 import StdIO
 import genericgecs
 import StdGEC, StdGECExt, StdAGEC, calcAGEC
-import StdGecComb, basicAGEC, StdDynamicGEC, StdDynamic//, StdGeneric
+import StdGecComb, basicAGEC//, StdDynamicGEC, StdDynamic//, StdGeneric
 
 goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
@@ -12,7 +12,7 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	spreadsheet4
+ 	spreadsheet5
  	world  
 
 spreadsheet	=	CGEC (selfGEC 	"spreadsheet"			updsheet)	    (mksheet inittable) 
@@ -60,73 +60,7 @@ where
 		initcosts	  				= [10.00 .. 16.00]
 		initvat						= 0.19	
 
-
-:: T 	 	:== (Type,Options)
-			
-:: Type 	=	FI (Int -> Int) 
-			|	S String 
-			|	R Real 
-			|	I Int 
-			
-:: Options 	= Insert
-			| Delete
-			| Calculator
-			| Expression
-			| Counter
-			| Displayval
-			| Identity
-
-:: T2 a b c	= INT a
-			| REAL b
-			| STRING c
-
-import GenMap
-derive gGEC Options, T2, Type
-
-spreadsheet4 = CGEC ( %| 	(		ToEdit
-							@|		gecEdit "design"
-							|@		update` o FromEdit 
-							)
-//							|@		vertlistGEC o  mapT2
-							|>>>| 	gecEdit "spreadsheet"
-					 ) 
-					 [init,init]
-where
-	
-	init = (I 0, Identity)
-
-	ToEdit  list	 = (idGEC list) // Bug? Crash als idGEC = vertlistGEC, en kies "Insert"
-									// Bug? Delete van laatste element geeft crash, zelfs al gebruik je geen abstracte editor
-	FromEdit edlist  = (^^ edlist)
-
-	update` xs		  			= keepone (update xs)
-	where
-		keepone [] = [init]
-		keepone xs = xs
-
-	update [(x,Insert):xs] 		= [(x,Identity),(x,Identity):update xs] 
-	update [(x,Delete):xs] 		= update xs
-	update [xo:xs]  			= [xo:update xs]
-	update []		  			= []
-
-//		mapT2 list = list // map toT2 list
-//		where
-//			toT2 (I i,Counter)  	= INT 	 (counterGEC i)
-//			toT2 (I i,Calculator)	= INT 	 (intcalcGEC i)
-//			toT2 (I i,Displayval)	= INT 	 (modeGEC (Display i))
-//			toT2 (I i,Expression)	= INT 	 (dynamicGEC2 i)
-//			toT2 (I i,_)			= INT 	 (idGEC i)
-//			toT2 (R r,Counter)	 	= REAL 	 (counterGEC r)
-//			toT2 (R r,Calculator)	= REAL 	 (realcalcGEC r)
-//			toT2 (R r,Displayval)	= REAL 	 (modeGEC (Display r))
-//			toT2 (R r,Expression)	= REAL 	 (dynamicGEC2 r)
-//			toT2 (R r,_)			= REAL 	 (idGEC r)
-//			toT2 (S s,Displayval)	= STRING (modeGEC (Display s))
-//			toT2 (S s,_)			= STRING (idGEC s)
-//			toT2 (FI fun,_)			= INT    (modeGEC (Display ( 43)))
-
-
-spreadsheet5 = CGEC ( %| 	(		mapTo
+spreadsheet4 = CGEC ( %| 	(		mapTo
 							@|		gecEdit "design"
 							|@		mapFrom 
 							)
@@ -140,4 +74,73 @@ where
 	where
 		calc edlist l = take l edlist ++ (repeatn (num edlist) 0)
 		num edlist = if ((l - length edlist) <= 0) 0 (l - length edlist)
+
+// ---------
+
+:: T 	 	:== (Type,Editors,Commands)
+			
+:: Type 	=	FI Int //(Int -> Int) 
+			|	S String 
+			|	R Real 
+			|	I Int 
+			
+:: Editors 	= Calculator
+			| Expression
+			| Counter
+			| Displayval
+			| Identity
+
+:: Commands	= Insert
+			| Append
+			| Delete
+			| Choose
+
+:: T2 a b c	= INT a
+			| REAL b
+			| STRING c
+
+import GenMap
+derive gGEC Editors, T2, Type, Commands
+
+spreadsheet5 = CGEC ( %| 	(		ToEdit
+							@|		gecEdit "design"
+							|@		update` o FromEdit 
+							)
+							|@		vertlistGEC o  mapT2
+							|>>>| 	gecEdit "spreadsheet"
+					 ) 
+					 [init,init]
+where
+	
+	init = (I 0, Identity, Choose)
+
+	ToEdit  list	 = (vertlistGEC list) 
+	FromEdit edlist  = (^^ edlist)
+
+	update` xs		  			= keepone (update xs)
+	where
+		keepone [] = [init]
+		keepone xs = xs
+
+	update [(x,e,Insert):xs] 		= [(x,e,Choose),(x,e,Choose):update xs] 
+	update [(x,e,Append):xs] 		= [(x,e,Choose),(x,e,Choose):update xs] 
+	update [(x,e,Delete):xs] 		= update xs
+	update [xo:xs]  			= [xo:update xs]
+	update []		  			= []
+
+	mapT2 list = map toT2 list
+	where
+		toT2 (I i,Counter,c)  	= INT 	 (counterGEC i)
+		toT2 (I i,Calculator,c)	= INT 	 (intcalcGEC i)
+		toT2 (I i,Displayval,c)	= INT 	 (modeGEC (Display i))
+//		toT2 (I i,Expression,c)	= INT 	 (dynamicGEC2 i)
+		toT2 (I i,_,c)			= INT 	 (idGEC i)
+		toT2 (R r,Counter,c)	= REAL 	 (counterGEC r)
+		toT2 (R r,Calculator,c)	= REAL 	 (realcalcGEC r)
+		toT2 (R r,Displayval,c)	= REAL 	 (modeGEC (Display r))
+//		toT2 (R r,Expression,c)	= REAL 	 (dynamicGEC2 r)
+		toT2 (R r,_,c)			= REAL 	 (idGEC r)
+		toT2 (S s,Displayval,c)	= STRING (modeGEC (Display s))
+		toT2 (S s,_,c)			= STRING (idGEC s)
+		toT2 (_,_,_)			= INT    (modeGEC (Display ( 43)))
 

@@ -4,7 +4,7 @@ import genericgecs
 
 // simple lay out macro's
 
-derive gGEC (,) 							// A tuple-editor is used to place things next to each other
+derive gGEC (,), (,,)						// A tuple-editor is used to place things next to each other
 											// A PAIR-editor by default places things below each other
 
 (<->) infixr 3	//:: a b -> (a,b)			// Place a and b next to each other	

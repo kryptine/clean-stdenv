@@ -98,18 +98,21 @@ where
 // All elements of a list shown in a column
 
 vertlistGEC :: [a] -> AGEC [a] | gGEC {|*|} a  
-vertlistGEC  list	= mkAGEC	{	toGEC	= tovertlist
-								,	fromGEC = fromvertlist
-								,	value 	= list
-								,	updGEC	= id
-								} ("vertlistGEC" +++ toString (length list))
+vertlistGEC  list = vertlistGEC` list
 where
+	vertlistGEC` list = mkAGEC	{	toGEC	= tovertlist
+									,	fromGEC = fromvertlist
+									,	value 	= list
+									,	updGEC	= id
+									} ("vertlistGEC" +++ len)
+
 	tovertlist []	 _ 	= EmptyMode <|> hidGEC []
-	tovertlist [x:xs] _ = Edit x    <|> vertlistGEC xs
+	tovertlist [x:xs] _ = Edit x    <|> vertlistGEC` xs
 
 	fromvertlist (EmptyMode <|> xs)	= []  
 	fromvertlist (Edit x <|> xs)	= [x: ^^ xs]  
 
+	len = (toString (length list))
 
 // list components
 

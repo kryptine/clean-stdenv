@@ -92,4 +92,6 @@ applyWorld funworld pst
 
 gGEC{|(->)|} gGECa gGECb args=:{gec_value = Just (id), update = modeupdate} pSt
 = createDummyGEC OutputOnly (id) modeupdate pSt
+gGEC{|(->)|} gGECa gGECb args=:{gec_value = Nothing, update = modeupdate} pSt
+= createDummyGEC OutputOnly (undef) modeupdate pSt
 
