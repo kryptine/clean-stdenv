@@ -457,7 +457,8 @@ sethilitemode tb
 
 pictdrawpoint :: !Point2 !*Picture -> *Picture
 pictdrawpoint point=:{x,y} pict=:{pOrigin={x=ox,y=oy},pTb=tb,pPen}
-	# tb	= QLineTo (x-ox) (y-oy) tb
+//	# tb	= QLineTo (x-ox) (y-oy) tb
+	# tb	= QPaintRect (x-ox,y-oy,x-ox+1,y-oy+1) tb
 	# pp	= {pPen & penPos = {pPen.penPos & x = x + 1}}
 	= {pict & pTb = tb, pPen = pp}
 
