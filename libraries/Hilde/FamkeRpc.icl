@@ -6,7 +6,7 @@ import StdBool, StdMisc
 :: RpcServer a b
 	:== FamkeServer a b
 
-rpc :: !(RpcId a b) a !*Famke -> (b, !*Famke) | TC a & TC b
+rpc :: !(RpcId a b) a !*World -> (b, !*World) | TC a & TC b
 rpc id request famke
 	# (ok, comm, famke) = famkeConnect True id famke
 	| not ok = abort "rpc: clientConnect failed"
@@ -17,13 +17,13 @@ rpc id request famke
 	# famke = famkeDisconnect comm famke
 	= (reply, famke)
 
-rpcOpen :: !(RpcId .a .b) !*Famke -> (!RpcId .a .b, !*RpcServer .a .b, !*Famke)
+rpcOpen :: !(RpcId .a .b) !*World -> (!RpcId .a .b, !*RpcServer .a .b, !*World)
 rpcOpen id famke 
 	# (ok, id, server, famke) = famkeOpen id famke
 	| not ok = abort "rpcOpen: famkeOpen failed"
 	= (id, server, famke)
 
-rpcWait :: !*(RpcServer a b) !*Famke -> (a, !*(b -> *(*Famke -> *Famke)), !*RpcServer a b, !*Famke) | TC a & TC b
+rpcWait :: !*(RpcServer a b) !*World -> (a, !*(b -> *(*World -> *World)), !*RpcServer a b, !*World) | TC a & TC b
 rpcWait server famke
 	# (ok, comm, server, famke) = famkeAccept True server famke
 	| not ok = abort "rpcWait: serverConnect failed"
@@ -31,16 +31,16 @@ rpcWait server famke
 	| not ok = abort "rpcWait: famkeReceive failed"
 	= (request, rpcReply comm, server, famke)
 where
-	rpcReply :: !*(FamkeChannel b .a) b !*Famke  -> *Famke | TC b
+	rpcReply :: !*(FamkeChannel b .a) b !*World  -> *World | TC b
 	rpcReply comm reply famke
 		# (ok, comm, famke) = famkeSend reply comm famke
 		| not ok = abort "rpcReply: famkeSend failed"
 		= famkeDisconnect comm famke
 
-rpcClose :: !*(RpcServer .a .b) !*Famke -> *Famke
+rpcClose :: !*(RpcServer .a .b) !*World -> *World
 rpcClose server famke = famkeClose server famke
 
-rpcHandle :: !.(a -> *(*Famke -> *(b, *Famke))) !*(RpcServer a b) !*Famke -> (!*RpcServer a b, !*Famke) | TC a & TC b
+rpcHandle :: !.(a -> *(*World -> *(b, *World))) !*(RpcServer a b) !*World -> (!*RpcServer a b, !*World) | TC a & TC b
 rpcHandle handler server famke
 	# (request, return, server, famke) = rpcWait server famke
 	  (reply, famke) = handler request famke

@@ -28,29 +28,29 @@ TRACE msg x :== trace_n msg x; import StdDebug
 	| PortReserved !Int
 	| PortFreed
 
-newProcess :: !(*Famke -> *Famke) !*Famke -> (!ProcessId, !*Famke)
+newProcess :: !(*World -> *World) !*World -> (!ProcessId, !*World)
 newProcess process famke
 	# (ProcessCreated id, famke) = rpcProcessServer (NewProcess process) famke
 	= (id, famke)
 
-reuseProcess :: !ProcessId !(*Famke -> *Famke) !*Famke -> *Famke
+reuseProcess :: !ProcessId !(*World -> *World) !*World -> *World
 reuseProcess id process famke
 	# (reply, famke) = rpcProcessServer (ReuseProcess id process) famke
 	= case reply of ProcessReused-> famke
 
-joinProcess :: !ProcessId !*Famke -> *Famke
+joinProcess :: !ProcessId !*World -> *World
 joinProcess id famke
 	# (self, famke) = processId famke
 	  (reply, famke) = rpcProcessServer (JoinProcess self id) famke
 	= case reply of ProcessJoined -> famke
 
-killProcess :: !ProcessId !*Famke -> *Famke
+killProcess :: !ProcessId !*World -> *World
 killProcess id famke
 	# (self, famke) = processId famke
 	  (reply, famke) = rpcProcessServer (KillProcess self id) famke
 	= case reply of ProcessKilled -> famke
 
-shutdown :: !*Famke -> *Famke
+shutdown :: !*World -> *World
 shutdown famke
 	# (reply, famke) = rpcProcessServer Shutdown famke
 	= eval famke
@@ -58,21 +58,21 @@ where
 	eval :: !.a -> .a
 	eval _ = abort "Shutdown failed"
 
-reservePort :: !*Famke -> (!FamkePort .a .b, !*Famke)
+reservePort :: !*World -> (!FamkePort .a .b, !*World)
 reservePort famke
 	# (_, ip, famke) = localhostIp famke
 	  (reply, famke) = rpcProcessServer ReservePort famke
 	= case reply of PortReserved p -> (FamkeServer {famkeIp = ip, famkePort = p}, famke)
 
-freePort :: !(FamkePort .a .b) !*Famke -> *Famke
+freePort :: !(FamkePort .a .b) !*World -> *World
 freePort (FamkeServer {famkePort}) famke
 	# (reply, famke) = rpcProcessServer (FreePort famkePort) famke
 	= case reply of PortFreed -> famke
 
-rpcProcessServer :: !ProtocolIn !*Famke -> (!ProtocolOut, !*Famke)
+rpcProcessServer :: !ProtocolIn !*World -> (!ProtocolOut, !*World)
 rpcProcessServer request famke = rpc FamkeProcessServer request famke
 
-:: Process :== *Famke -> *Famke
+:: Process :== *World -> *World
 
 :: *State =
 	{	working		:: !.KeyList ProcessId .Working
@@ -80,7 +80,7 @@ rpcProcessServer request famke = rpc FamkeProcessServer request famke
 	,	nextid		:: !Int
 	,	executable	:: !String
 	,	server		:: !.RpcServer ProtocolIn ProtocolOut
-	,	famke		:: !.Famke
+	,	famke		:: !.World
 	,	ports		:: !.[#Int]
 	}
 
@@ -95,17 +95,17 @@ rpcProcessServer request famke = rpc FamkeProcessServer request famke
 
 :: Join =
 	{	joinId		:: !ProcessId
-	,	joinReply	:: !.(ProtocolOut -> *(*Famke -> *Famke))
+	,	joinReply	:: !.(ProtocolOut -> *(*World -> *World))
 	}
 
 :: Waiting =
-	{	waitingReply	:: !.(ProtocolOut -> *(*Famke -> *Famke))
+	{	waitingReply	:: !.(ProtocolOut -> *(*World -> *World))
 	,	waitingWorking	:: !.Working
 	}
 
-startProcessServer :: !String !(*Famke -> *Famke) !*Famke -> *Famke
+startProcessServer :: !String !(*World -> *World) !*World -> *World
 startProcessServer executable process famke
-	# (_, server, famke) = rpcOpen FamkeProcessServer (TRACE "Famke Process Server" famke)
+	# (_, server, famke) = rpcOpen FamkeProcessServer (TRACE "World Process Server" famke)
 	  st = {working = Empty, waiting = Empty, nextid = 1, executable = executable, server = server, famke = famke, ports = [#0xFA01..0xFAFF]}
 	  {server, famke} = newProcess` process (\_ famke -> famke) st
 	= rpcClose server famke
@@ -243,7 +243,7 @@ where
 		  st = {st & ports = [|p:ports], famke = famke}
 		= TRACE ("Process freed port " +++ toString p) (processServer st)
 
-startProcessClient :: !*Famke -> *Famke
+startProcessClient :: !*World -> *World
 startProcessClient famke
 	# (id, famke) = processId famke
 	  (osId, famke) = GetCurrentProcessId famke
@@ -253,13 +253,13 @@ where
 		# (reply, famke) = rpcProcessServer (ClientWorkRequest id osId) famke
 		= case reply of
 			ClientDoMoreWork f 
-				#!famke = TRACE ("Famke Process Client " +++ toString id +++ " working") famke
+				#!famke = TRACE ("World Process Client " +++ toString id +++ " working") famke
 				  famke = f famke
-			  	  famke = TRACE ("Famke Process Client " +++ toString id +++ " done") famke
+			  	  famke = TRACE ("World Process Client " +++ toString id +++ " done") famke
 			  	-> processClient id osId famke
 			ClientNoMoreWork -> famke
 
-StartProcess :: !(*Famke -> *Famke) !*World -> *World
+StartProcess :: !(*World -> *World) !*World -> *World
 StartProcess f world 
 	# (_, executable, args, world) = commandLine world
 	= case args of
@@ -277,7 +277,7 @@ where
 	getPath ['\\':xs] = xs
 	getPath [x:xs] = [x:getPath xs]
 
-launchExecutable :: !String ![String] !*Famke -> (!Bool, !*Famke)
+launchExecutable :: !String ![String] !*World -> (!Bool, !*World)
 launchExecutable program args famke 
 	# (ok, info, famke) = CreateProcess (foldl concat ("\"" +++ program +++ "\"") args) False 0 famke
 	| not ok = (False, famke)

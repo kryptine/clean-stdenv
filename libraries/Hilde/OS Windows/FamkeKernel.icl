@@ -15,11 +15,13 @@ from StdDynamicLowLevelInterface import
 
 TRACE msg x :== x//trace_n msg x; import StdDebug
 
-:: Famke
-	= {processId :: !ProcessId, world :: !.World}
-
-processId :: !*Famke -> (!ProcessId, !*Famke)
-processId famke = famke!processId
+processId :: !*World -> (!ProcessId, !*World)
+processId famke = (cast famke, cast famke)//famke!processId
+where
+	cast :: !.a -> .b
+	cast _ = code inline {
+			pop_a	0
+		}
 
 :: FamkeServer a b 
 	:== TcpIp .(FamkeChannel b a)
@@ -27,41 +29,41 @@ processId famke = famke!processId
 :: FamkeChannel a b 
 	:== TcpIp String
 
-famkeOpen :: !(FamkePort .a .b) !*Famke -> (!Bool, FamkePort .a .b, *FamkeServer .a .b, !*Famke)
+famkeOpen :: !(FamkePort .a .b) !*World -> (!Bool, FamkePort .a .b, *FamkeServer .a .b, !*World)
 famkeOpen comport famke
 	# (ip, port, famke) = toTcpIpPort comport famke
 	  (ok, port, tcpip, famke) = listenTcpIp port famke
 	| not ok = (False, abort "famkeOpen failed", abort "famkeOpen failed", famke)
 	= (True, FamkeServer {famkeIp = ip, famkePort = port}, tcpip, famke)
 
-famkeAccept :: !Bool !*(FamkeServer .a .b) !*Famke -> (!Bool, !*FamkeChannel .b .a, !*FamkeServer .a .b, !*Famke)
+famkeAccept :: !Bool !*(FamkeServer .a .b) !*World -> (!Bool, !*FamkeChannel .b .a, !*FamkeServer .a .b, !*World)
 famkeAccept blocking tcpip famke
 	# (ok, comm, tcpip) = receiveTcpIp blocking tcpip
 	= (ok, comm, tcpip, famke)
 
-famkeClose :: !*(FamkeServer .a .b) !*Famke -> *Famke
+famkeClose :: !*(FamkeServer .a .b) !*World -> *World
 famkeClose tcpip famke
 	# (ok, famke) = closeTcpIp tcpip famke
 	| not ok = abort "famkeClose failed"
 	= famke
 
-famkeConnect :: !Bool !(FamkePort .a .b) !*Famke -> (!Bool, !*FamkeChannel .a .b, !*Famke)
+famkeConnect :: !Bool !(FamkePort .a .b) !*World -> (!Bool, !*FamkeChannel .a .b, !*World)
 famkeConnect blocking comport famke
 	# (ip, FixedPort port, famke) = toTcpIpPort comport famke
 	  (ok, comm, famke) = connectTcpIp blocking ip port famke
 	| not ok && blocking = famkeConnect blocking comport famke
 	= (ok, comm, famke)
 
-famkeDisconnect :: !*(FamkeChannel .a .b) !*Famke -> *Famke
+famkeDisconnect :: !*(FamkeChannel .a .b) !*World -> *World
 famkeDisconnect comm famke
 	# (ok, famke) = closeTcpIp comm famke
 	| not ok = abort "famkeDisconnect failed"
 	= famke
 
-famkeSend :: a !*(FamkeChannel a .b) !*Famke -> (!Bool, !*FamkeChannel a .b, !*Famke) | TC a
+famkeSend :: a !*(FamkeChannel a .b) !*World -> (!Bool, !*FamkeChannel a .b, !*World) | TC a
 famkeSend x comm famke = unsafeFamkeSendDynamic (dynamic x :: a^) comm famke
 
-famkeReceive :: !Bool !*(FamkeChannel .a b) !*Famke -> (!Bool, b, !*FamkeChannel .a b, !*Famke) | TC b
+famkeReceive :: !Bool !*(FamkeChannel .a b) !*World -> (!Bool, b, !*FamkeChannel .a b, !*World) | TC b
 famkeReceive blocking comm famke
 	# (ok, d, comm, famke) = unsafeFamkeReceiveDynamic blocking comm famke
 	| not ok = (False, abort "famkeReceive: nothing received", comm, famke)
@@ -69,53 +71,59 @@ famkeReceive blocking comm famke
 		(x :: b^) -> (True, x, comm, famke)
 		_ -> abort "famkeReceive: Type pattern match failed"
 
-unsafeFamkeSendDynamic :: !Dynamic !*(FamkeChannel .a .b) !*Famke -> (!Bool, !*FamkeChannel .a .b, !*Famke)
-unsafeFamkeSendDynamic d comm famke=:{world}
-	# world = TRACE (case d of
+unsafeFamkeSendDynamic :: !Dynamic !*(FamkeChannel .a .b) !*World -> (!Bool, !*FamkeChannel .a .b, !*World)
+unsafeFamkeSendDynamic d comm famke//=:{world}
+	# famke = TRACE (case d of
 		(s :: String) -> "famkeSendDynamic: " +++ s +++ " :: String.\n"
-		d -> "famkeSendDynamic: ? :: " +++ toString (typeCodeOfDynamic d) +++ ".\n") world
-	# (s, world) = dynamicToString d world
+		d -> "famkeSendDynamic: ? :: " +++ toString (typeCodeOfDynamic d) +++ ".\n") famke
+	# (s, famke) = dynamicToString d famke
 	  (ok, comm) = sendTcpIp s comm
 	| not ok = (False, comm, famke)
-	# (comm, famke) = handleRequestsForFiles comm {famke & world = world}
+	# (comm, famke) = handleRequestsForFiles comm famke//{famke & world = world}
 	= (True, comm, famke)
 where
-	handleRequestsForFiles comm famke=:{world}
+	handleRequestsForFiles comm famke//=:{world}
 		# (_, f, comm) = receiveTcpIp True comm
 		| f == "" = (comm, famke)
-		# (data, world) = readFileInDynamicPath f world
+		# (data, famke) = readFileInDynamicPath f famke
 		  (ok, comm) = sendTcpIp data comm
-		= handleRequestsForFiles comm {famke & world = world}
+		= handleRequestsForFiles comm famke//{famke & world = world}
 
-unsafeFamkeReceiveDynamic :: !Bool !*(FamkeChannel .a .b) !*Famke -> (!Bool, !Dynamic, !*FamkeChannel .a .b, !*Famke)
+unsafeFamkeReceiveDynamic :: !Bool !*(FamkeChannel .a .b) !*World -> (!Bool, !Dynamic, !*FamkeChannel .a .b, !*World)
 unsafeFamkeReceiveDynamic blocking comm famke
 	# (ok, s, comm) = receiveTcpIp blocking comm
 	| not ok = (False, dynamic abort "unsafeFamkeReceiveDynamic: nothing received" :: A.c: c, comm, famke)
 	# (s, sysdyns, libtyps) = fileReferencesInDynamicAsString ("" +++. s)
-      (comm, famke=:{world}) = doRequestsForFiles (sysdyns ++ libtyps) comm famke
-	  (d, world) = stringToDynamic s world
-	# world = TRACE (case d of
+      (comm, famke/*=:{world}*/) = doRequestsForFiles (sysdyns ++ libtyps) comm famke
+	  (d, famke) = stringToDynamic s famke
+	# famke = TRACE (case d of
 		(s :: String) -> "famkeReceiveDynamic: " +++ s +++ " :: String.\n"
-		d -> "famkeReceiveDynamic: ? :: " +++ toString (typeCodeOfDynamic d) +++ ".\n") world
-	= (True, d, comm, {famke & world = world})
+		d -> "famkeReceiveDynamic: ? :: " +++ toString (typeCodeOfDynamic d) +++ ".\n") famke
+	= (True, d, comm, famke/*{famke & world = world}*/)
 where
 	doRequestsForFiles [] comm famke 
 		# (ok, comm) = sendTcpIp "" comm
 		= (comm, famke)
-	doRequestsForFiles [f:fs] comm famke=:{world}
-		# (exists, world) = fileExistsInDynamicPath f world
-		| exists = doRequestsForFiles fs comm {famke & world = world}
+	doRequestsForFiles [f:fs] comm famke//=:{world}
+		# (exists, famke) = fileExistsInDynamicPath f famke
+		| exists = doRequestsForFiles fs comm famke//{famke & world = world}
 		# (ok, comm) = sendTcpIp f comm
 		  (_, data, comm) = receiveTcpIp True comm
-		  world = writeFileInDynamicPath f data world
-		= doRequestsForFiles fs comm {famke & world = world}
+		  famke = writeFileInDynamicPath f data famke
+		= doRequestsForFiles fs comm famke//{famke & world = world}
 
-StartKernel :: !ProcessId !.(*Famke -> *Famke) !*World -> *World
+StartKernel :: !ProcessId !.(*World -> *World) !*World -> *World
 StartKernel id f world
-	# {world} = f {processId = id, world = world}
+//	# {world} = f {processId = id, world = world}
+	# world = f (cast id)
 	= world
-
-instance TcpIp Famke
+where
+	cast :: !.a -> .b
+	cast _ = code inline {
+			pop_a	0
+		}
+/*
+instance TcpIp World
 where
 	listenTcpIp port famke=:{world}
 		# (ok, port, tcpip, world) = listenTcpIp port world
@@ -123,13 +131,13 @@ where
 
 	connectTcpIp blocking ip port famke=:{world}
 		# (ok, tcpip, world) = connectTcpIp blocking ip port world
-		= (ok, tcpip, {famke & world = world})
+		= (ok, tcpip, famke & world = world})
 
 	resolveTcpIp hostname famke=:{world}
 		# (ok, ip, world) = resolveTcpIp hostname world
 		= (ok, ip, {famke & world = world})
 
-instance FileSystem Famke
+instance FileSystem World
 where
 	fopen name mode famke=:{world}
 		# (ok, file, world) = fopen name mode world
@@ -146,8 +154,8 @@ where
 	sfopen name mode famke=:{world}
 		# (ok, file, world) = sfopen name mode world
 		= (ok, file, {famke & world = world})
-
-toTcpIpPort :: !(FamkePort .a .b) !*Famke -> (!Int, !TcpIpPort, !*Famke)
+*/
+toTcpIpPort :: !(FamkePort .a .b) !*World -> (!Int, !TcpIpPort, !*World)
 toTcpIpPort FamkeProcessServer famke
 	# (_, ip, famke) = localhostIp famke
 	= (ip, FixedPort 0xFA00, famke)

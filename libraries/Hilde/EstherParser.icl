@@ -14,18 +14,20 @@ parseStatement input
 
 generic parser a :: !TryWant -> CParser Char a b
 
-parser{|UNIT|} _ = yield UNIT
+parser{|UNIT|} _ = sp (yield UNIT)
 
 parser{|PAIR|} gl gr t = gl t <&> \l -> sp (gr t) <@ PAIR l
 
 parser{|EITHER|} gl gr t = gl Try <@ LEFT <!> gr t <@ RIGHT
 
+parser{|CONS of {gcd_type_def={gtd_name}}|} gx t=:Want = gx Try <@ CONS <!> raise (ParserRequired gtd_name)
 parser{|CONS|} gx t = gx t <@ CONS
 
 parser{|FIELD|} gx t = gx t <@ FIELD
 
-parser{|OBJECT|} gx t=:Try = gx t <@ OBJECT
-parser{|OBJECT of {gtd_name}|} gx t=:Want = gx t <@ OBJECT <!> raise (ParserRequired gtd_name)
+parser{|OBJECT|} gx t = gx t <@ OBJECT
+//parser{|OBJECT|} gx t=:Try = gx t <@ OBJECT
+//parser{|OBJECT of {gtd_name}|} gx t=:Want = gx t <@ OBJECT <!> raise (ParserRequired gtd_name)
 
 parser{|Bool|} b
 	= token ['True'] &> yield True 
@@ -87,7 +89,13 @@ parser{|NTnameOrValue|} Want = parser{|*|} Try <!> raise (ParserRequired "NTname
 
 parser{|(|-|)|} ga ge gb t = ga t &> sp (ge t) <& sp (gb t) <@ |-|
 
-parser{|(+-)|} ge gs t = parseSequence (sp (ge t)) (sp (gs t)) <@ \[x:xs] -> +- [x:xs]
+//parser{|(+-)|} ge gs t = parseSequence (sp (ge t)) (sp (gs Try)) <@ \[x:xs] -> +- [x:xs]
+parser{|(+-)|} ge gs t = p t
+where
+	p t
+		= (ge t <&> \x -> sp (gs t) &> sp (p t) <@ \(+- xs) -> +- [x:xs])
+		<!> (ge t <@ \x -> +- [x])
+		<!> (case t of Want -> raise (ParserRequired "+-"); _ -> fail)
 
 parser{|Maybe|} ge t
 	= ge Try <@ Just

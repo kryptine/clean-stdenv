@@ -1,56 +1,48 @@
 module Esther
 
-import StdEnv, EstherScript, EstherStdEnv, DynamicFileSystem
+import StdEnv, EstherScript, EstherStdEnv, EstherFamkeEnv, DynamicFileSystem, FamkeProcess, StdDebug
 
-Start :: !*World -> *World
+/*Start :: !*World -> *World
 Start world
 	# (console, world) = stdio world
-	  st = {searchPath = [], searchCache = [], buildin = stdEnv, env = world}
+	  st = {searchPath = [], searchCache = [], buildin = stdEnv ++ famke, env = world}
 	  (console, st=:{env=world}) = shell console st
 	  (_, world) = fclose console world
-	= world
+	= world*/
 	 
-shell console st
-	# console = fwrites "Esther>" console
-	  (input, console) = freadline console
-	| input == "" || input == "\n" = (console, st)
-	# input = input % (0, size input - 1)
-	  (d, st) = compose input st
-	  (v, t) = toStringDynamic d
-	  console = foldl (\f x -> fwrites x f) console v
-	  console = fwrites (" :: " +++ t +++ "\n") console
-	= shell console st
-/*where
-//	input = "[1,3 .. 10]"
-//	input = "(+) one"
-//	input = "(\\((1, 4), (2, 3)) -> True) ((1, 4), (2, 3))"
-//	input = "let f = \\xs -> case xs of (Cons 3 _) -> True in f (Cons 3 Nil)"
-//	input = "let x = Cons 1 Nil in case x of (Cons 1 Nil)  -> True; _ -> False"
-//	input = "case [False, True, False] of [True] -> False; [False :_] -> True"
-//	input = "(\\x -> case x of (1, \"a\") -> True; _ -> False) (1, \"a\")"
-//	input = "(\\(1, y) -> True) (1, \"a\")"
-//	input = "\\x y z -> (1 2)"
-//	input = "let x = [1 : y]; y = [2 : x] in (\\n -> take n x) 10"
-//	input = "let fac = \\x -> if (x >R 1.0) (x *R fac (x -R 1.0)) 1.0 in fac 170.0"
-//	input = "let (x, y) = (1, x) in y"
-//	input = "let tak = \\x y z -> if (x <= y) z (tak (tak (dec x) y z) (tak (dec y) z x) (tak (dec z) x y)) in tak 24 16 8"
-//	input = "let nfib = \\n -> if (n < 2) 1 (nfib (n - 1) + nfib (n - 2) + 1) in nfib 32"
-//	input = "let ones = [1 : ones] in ones"
-//	input = "(\\x -> const (x + 1) undef) 41"
-//	input = "\\x -> x + True"
-//	input = "2 ^ 3 infixK 2"
-//	input = "1 - 4 - 9"
-//	input = "1 - 4 * 9 - 10"
-//	input = "3 + const 1 2"
-//	input = "[ 1 , 4 .. 100 ]"
-//	input = "(\\x -> max (inc x) x) 1"
-//	input = "f\\ x y = 42"
-//	input = "[ x \\\\ x <- [ 1 .. 100 ] ]"
-	input = "2 * 3 * 4"*/
+Start :: !*World -> *World
+Start world = StartProcess Esther world
 
-/*	eval :: !Int !(a -> b) !a -> b
-	eval 1 f x = f x
-	eval n f x = eval (force (f x) (n - 1)) f x
+Esther :: !*World -> *World
+Esther env
+	# st = {searchPath = [], searchCache = [], buildin = [("Esther", dynamic Esther :: *World -> *World)] ++ stdEnv ++ famkeEnv, env = env}
+	  st=:{env} = shell st
+	= env
+where
+	shell st=:{env}
+		# (console, env) = stdio env
+		  console = fwrites "Esther>" console
+		  (input, console) = freadline` console
+	  	  (_, env) = fclose console env
+		| input == "" = {st & env = env}
+		# (d, st=:{env}) = compose input {st & env = env}
+		  (d, env) = eval d env
+		  (v, t) = toStringDynamic d
+		  (console, env) = stdio env
+		  console = foldl (\f x -> fwrites x f) console v
+		  console = fwrites (" :: " +++ t +++ "\n") console
+	  	  (_, env) = fclose console env
+		= shell {st & env = env}
 	where
-		force :: !.a !.b -> .b
-		force _ r = r*/
+		freadline` :: !*File -> (!String, !*File)
+		freadline` file
+			# (line, file) = freadline file
+			| size line > 0 && line.[size line - 1] == '\n' = (line % (0, size line - 2), file)
+			= (line, file)
+	
+	eval :: !Dynamic !*env -> (!Dynamic, !*env) | TC env
+	eval (f :: *env^ -> *env^) env = trace "<*World -> *World>" (dynamic UNIT, f env)
+	eval (f :: *env^ -> *(a, *env^)) env 
+		# (x, env) = f env
+		= trace "<*World -> *(a, *World)>" (dynamic x :: a, env)
+	eval d env = (d, env)

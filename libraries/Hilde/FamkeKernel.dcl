@@ -2,12 +2,8 @@ definition module FamkeKernel
 
 import StdDynamic
 from FamkeProcess import :: ProcessId(..)
-from TcpIp import class TcpIp
-from StdFile import class FileSystem
 
-:: Famke
-
-processId :: !*Famke -> (!ProcessId, !*Famke)
+processId :: !*World -> (!ProcessId, !*World)
 
 :: FamkePort a b
 	= FamkeProcessServer
@@ -19,20 +15,17 @@ processId :: !*Famke -> (!ProcessId, !*Famke)
 :: FamkeServer a b 
 :: FamkeChannel a b 
 
-famkeOpen :: !(FamkePort .a .b) !*Famke -> (!Bool, FamkePort .a .b, *FamkeServer .a .b, !*Famke)
-famkeAccept :: !Bool !*(FamkeServer .a .b) !*Famke -> (!Bool, !*FamkeChannel .b .a, !*FamkeServer .a .b, !*Famke)
-famkeClose :: !*(FamkeServer .a .b) !*Famke -> *Famke
+famkeOpen :: !(FamkePort .a .b) !*World -> (!Bool, FamkePort .a .b, *FamkeServer .a .b, !*World)
+famkeAccept :: !Bool !*(FamkeServer .a .b) !*World -> (!Bool, !*FamkeChannel .b .a, !*FamkeServer .a .b, !*World)
+famkeClose :: !*(FamkeServer .a .b) !*World -> *World
 
-famkeConnect :: !Bool !(FamkePort .a .b) !*Famke -> (!Bool, !*FamkeChannel .a .b, !*Famke)
-famkeDisconnect :: !*(FamkeChannel .a .b) !*Famke -> *Famke
+famkeConnect :: !Bool !(FamkePort .a .b) !*World -> (!Bool, !*FamkeChannel .a .b, !*World)
+famkeDisconnect :: !*(FamkeChannel .a .b) !*World -> *World
 
-famkeSend :: a !*(FamkeChannel a .b) !*Famke -> (!Bool, !*FamkeChannel a .b, !*Famke) | TC a
-famkeReceive :: !Bool !*(FamkeChannel .a b) !*Famke -> (!Bool, b, !*FamkeChannel .a b, !*Famke) | TC b
+famkeSend :: a !*(FamkeChannel a .b) !*World -> (!Bool, !*FamkeChannel a .b, !*World) | TC a
+famkeReceive :: !Bool !*(FamkeChannel .a b) !*World -> (!Bool, b, !*FamkeChannel .a b, !*World) | TC b
 
-unsafeFamkeSendDynamic :: !Dynamic !*(FamkeChannel .a .b) !*Famke -> (!Bool, !*FamkeChannel .a .b, !*Famke)
-unsafeFamkeReceiveDynamic :: !Bool !*(FamkeChannel .a .b) !*Famke -> (!Bool, !Dynamic, !*FamkeChannel .a .b, !*Famke)
+unsafeFamkeSendDynamic :: !Dynamic !*(FamkeChannel .a .b) !*World -> (!Bool, !*FamkeChannel .a .b, !*World)
+unsafeFamkeReceiveDynamic :: !Bool !*(FamkeChannel .a .b) !*World -> (!Bool, !Dynamic, !*FamkeChannel .a .b, !*World)
 
-StartKernel :: !ProcessId !.(*Famke -> *Famke) !*World -> *World
-
-instance TcpIp Famke
-instance FileSystem Famke
+StartKernel :: !ProcessId !.(*World -> *World) !*World -> *World

@@ -1,13 +1,13 @@
 definition module FamkeRpc
 
-from FamkeKernel import :: Famke(..), :: FamkePort(..), :: FamkeId(..)
+from FamkeKernel import :: ProcessId(..), :: FamkePort(..), :: FamkeId(..)
 
 :: RpcId a b :== FamkePort a b
 
 :: RpcServer a b
 
-rpc :: !(RpcId a b) a !*Famke -> (b, !*Famke) | TC a & TC b
+rpc :: !(RpcId a b) a !*World -> (b, !*World) | TC a & TC b
 
-rpcOpen :: !(RpcId .a .b) !*Famke -> (!RpcId .a .b, !*RpcServer .a .b, !*Famke)
-rpcWait :: !*(RpcServer a b) !*Famke -> (a, !*(b -> *(*Famke -> *Famke)), !*RpcServer a b, !*Famke) | TC a & TC b
-rpcClose :: !*(RpcServer .a .b) !*Famke -> *Famke
+rpcOpen :: !(RpcId .a .b) !*World -> (!RpcId .a .b, !*RpcServer .a .b, !*World)
+rpcWait :: !*(RpcServer a b) !*World -> (a, !*(b -> *(*World -> *World)), !*RpcServer a b, !*World) | TC a & TC b
+rpcClose :: !*(RpcServer .a .b) !*World -> *World
