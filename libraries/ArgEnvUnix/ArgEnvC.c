@@ -1,8 +1,16 @@
 /*
-	Version 1.0.1
+	Version 1.0.3
 	Ronny Wichers Schreur
 	ronny@cs.kun.nl
 */
+
+# ifdef _WINDOWS_
+# include <windows.h>
+# else
+# include <stdlib.h>
+# endif
+
+
 # define kVariableSize	1
 
 # ifndef NULL
@@ -12,10 +20,6 @@
 /* defined by the Clean run-time system */
 extern int global_argc;
 extern char **global_argv;
-
-# ifndef _WINDOWS_
-# include <stdlib.h>
-# endif
 
 typedef struct
 {

@@ -1,4 +1,8 @@
- 
+/*
+	Version 1.0.3
+	Ronny Wichers Schreur
+	ronny@cs.kun.nl
+*/
 implementation module ArgEnv
 
 import StdEnv
@@ -12,10 +16,8 @@ NULL :== 0
 
 getEnv :: !{#Char} -> (!Int, !CString)
 getEnv _
-	= code {
-		.inline getEnv
+	= code inline {
 			ccall ArgEnvGetEnvironmentVariableC "S-II"
-		.end
 	}
 
 getEnvironmentVariable :: !{#Char} -> *EnvironmentVariable
@@ -31,17 +33,7 @@ getEnvironmentVariable name
 
 copy :: !Int !CString -> {#.Char}
 copy length cString
-	= code {
-		.inline copy
-			| Clean 1.1: use create_array
-			| pushC	'\000'
-			| push_b	1
-			| update_b	1 2
-			| update_b	0 1
-			| pop_b	1
-			| create_array	CHAR 0 1
-
-			| Clean 1.2 and later: use create_array_
+	= code inline {
 			create_array_	CHAR 0 1
 
 			push_a	0
@@ -52,18 +44,14 @@ copy length cString
 
 getCommandLineCount :: Int
 getCommandLineCount 
-	= code {
-		.inline getCommandLineCount
+	= code inline {
 			ccall ArgEnvGetCommandLineCountC "-I"
-		.end
 	}
 
 getCommandLineArgument :: !Int -> (!Int, !Int)
 getCommandLineArgument _
-	= code {
-		.inline getCommandLineArgument
+	= code inline {
 			ccall ArgEnvGetCommandLineArgumentC "I-II"
-		.end
 	}
 
 getArg :: !Int -> {#.Char}
@@ -73,7 +61,6 @@ getArg i
 		(size, cString)
 			=	getCommandLineArgument i
 
-// Clean 1.1: getCommandLine :: {{#Char}}
 getCommandLine :: {.{#Char}}
 getCommandLine
 	=	{getArg i \\ i <- [0 .. getCommandLineCount-1]}
