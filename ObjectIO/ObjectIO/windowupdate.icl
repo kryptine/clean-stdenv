@@ -318,159 +318,151 @@ updaterectcontrols wMetrics area wPtr wH=:{whItems,whSelect} tb
 	| IsEmptyRect area
 		= (wH,tb)
 	| otherwise
-		# (itemHs,tb)	= updatecontrolsinrect wMetrics wPtr whSelect area whItems tb
+		# (osPict,tb)		= OSgrabWindowPictContext wPtr tb
+		# (itemHs,osPict,tb)= updatecontrolsinrect wMetrics wPtr whSelect area whItems osPict tb
+		# tb				= OSreleaseWindowPictContext wPtr osPict tb
 		= ({wH & whItems=itemHs},tb)
 where
-	updatecontrolsinrect :: !OSWindowMetrics !OSWindowPtr !Bool !Rect ![WElementHandle .ls .pst] !*OSToolbox
-																  -> (![WElementHandle .ls .pst],!*OSToolbox)
-	updatecontrolsinrect _ _ _ _ [] tb
-		= ([],tb)
-	updatecontrolsinrect wMetrics parentPtr ableContext area [itemH:itemHs] tb
+	updatecontrolsinrect :: !OSWindowMetrics !OSWindowPtr !Bool !Rect ![WElementHandle .ls .pst] !OSPictContext !*OSToolbox
+																  -> (![WElementHandle .ls .pst],!OSPictContext,!*OSToolbox)
+	updatecontrolsinrect _ _ _ _ [] osPict tb
+		= ([],osPict,tb)
+	updatecontrolsinrect wMetrics parentPtr ableContext area [itemH:itemHs] osPict tb
 		| IsEmptyRect area
-			= ([itemH:itemHs],tb)
+			= ([itemH:itemHs],osPict,tb)
 		| otherwise
-			# (itemH, tb)	= updatecontrolinrect  wMetrics parentPtr ableContext area itemH  tb
-			# (itemHs,tb)	= updatecontrolsinrect wMetrics parentPtr ableContext area itemHs tb
-			= ([itemH:itemHs],tb)
+			# (itemH, osPict,tb)	= updatecontrolinrect  wMetrics parentPtr ableContext area itemH  osPict tb
+			# (itemHs,osPict,tb)	= updatecontrolsinrect wMetrics parentPtr ableContext area itemHs osPict tb
+			= ([itemH:itemHs],osPict,tb)
 	where
-		updatecontrolinrect :: !OSWindowMetrics !OSWindowPtr !Bool !Rect !(WElementHandle .ls .pst) !*OSToolbox
-																	  -> (!WElementHandle .ls .pst, !*OSToolbox)
+		updatecontrolinrect :: !OSWindowMetrics !OSWindowPtr !Bool !Rect !(WElementHandle .ls .pst) !OSPictContext !*OSToolbox
+																	  -> (!WElementHandle .ls .pst, !OSPictContext,!*OSToolbox)
 		updatecontrolinrect wMetrics parentPtr ableContext area 
-							wItemH=:(WItemHandle itemH=:{wItemKind,wItemPtr,wItemPos,wItemSize,wItemShow,wItemVirtual}) tb
-			| not itemH.wItemShow || wItemVirtual || IsEmptyRect intersectRect || ignorecontrol
-				= (wItemH,tb)
+							wItemH=:(WItemHandle itemH=:{wItemKind,wItemPtr,wItemPos,wItemSize,wItemShow,wItemSelect,wItemVirtual,wItems})
+							osPict tb
+			| not wItemShow || wItemVirtual || IsEmptyRect intersectRect || ignorecontrol
+				= (wItemH,osPict,tb)
 			| iscustomcontrol
-				# (itemH,tb)	= updatecustomcontrol wMetrics parentPtr ableContext intersectRect itemH tb
-				= (WItemHandle itemH,tb)
+				# (itemH,osPict,tb)	= updatecustomcontrol wMetrics parentPtr ableContext intersectRect itemH osPict tb
+				= (WItemHandle itemH,osPict,tb)
 			| isoscontrol
-				# tb			= updateoscontrol (subVector (toVector wItemPos) intersectRect) parentPtr wItemPtr tb
-				= (wItemH,tb)
+				# tb				= updateoscontrol (subVector (toVector wItemPos) intersectRect) parentPtr wItemPtr tb
+				= (wItemH,osPict,tb)
 			| isRecursiveControl wItemKind	// This includes LayoutControl and excludes CompoundControl which is already guarded as iscustomcontrol
-				# ableContext1	= ableContext && itemH.wItemSelect
-				# (itemHs,tb)	= updatecontrolsinrect wMetrics parentPtr ableContext1 area itemH.wItems tb	// PA: shouldn't area be clipped (also below at updatecustomcontrol?)
-				= (WItemHandle {itemH & wItems=itemHs},tb)
-			| otherwise			// This alternative should never be reached
+				# ableContext1		= ableContext && wItemSelect
+				# (itemHs,osPict,tb)= updatecontrolsinrect wMetrics parentPtr ableContext1 area wItems osPict tb	// PA: shouldn't area be clipped (also below at updatecustomcontrol?)
+				= (WItemHandle {itemH & wItems=itemHs},osPict,tb)
+			| otherwise				// This alternative should never be reached
 				= windowupdateFatalError "updatecontrolinrect" "unexpected ControlKind"
 		where
-			controlRect			= PosSizeToRect wItemPos wItemSize
-			intersectRect		= IntersectRects area controlRect
-			iscustomcontrol		= case wItemKind of
-									IsCustomButtonControl	-> True
-									IsCustomControl			-> True
-									IsCompoundControl		-> True
-									_						-> False
-			ignorecontrol		= case wItemKind of
-									IsOtherControl _		-> True
-									_						-> False
+			controlRect				= PosSizeToRect wItemPos wItemSize
+			intersectRect			= IntersectRects area controlRect
+			iscustomcontrol			= case wItemKind of
+										IsCustomButtonControl	-> True
+										IsCustomControl			-> True
+										IsCompoundControl		-> True
+										_						-> False
+			ignorecontrol			= case wItemKind of
+										IsOtherControl _		-> True
+										_						-> False
 			(isoscontrol,updateoscontrol)
-								= case wItemKind of
-									IsRadioControl			-> (True,OSupdateRadioControl)
-									IsCheckControl			-> (True,OSupdateCheckControl)
-									IsPopUpControl			-> (True,OSupdatePopUpControl)
-									IsSliderControl			-> (True,OSupdateSliderControl)
-									IsTextControl			-> (True,OSupdateTextControl)
-									IsEditControl			-> (True,OSupdateEditControl)
-									IsButtonControl			-> (True,OSupdateButtonControl)
-									_						-> (False,undef)
+									= case wItemKind of
+										IsRadioControl			-> (True,OSupdateRadioControl)
+										IsCheckControl			-> (True,OSupdateCheckControl)
+										IsPopUpControl			-> (True,OSupdatePopUpControl)
+										IsSliderControl			-> (True,OSupdateSliderControl)
+										IsTextControl			-> (True,OSupdateTextControl)
+										IsEditControl			-> (True,OSupdateEditControl)
+										IsButtonControl			-> (True,OSupdateButtonControl)
+										_						-> (False,undef)
 			
 	//		updatecustomcontrol updates a ((Custom)Button/Compound)Control.
-			updatecustomcontrol :: !OSWindowMetrics !OSWindowPtr !Bool !Rect !(WItemHandle .ls .pst) !*OSToolbox
-																		  -> (!WItemHandle .ls .pst, !*OSToolbox)
-			updatecustomcontrol _ parentPtr contextAble area itemH=:{wItemKind=IsCustomButtonControl} tb
-				#! (osPict,tb)			= OSgrabControlPictContext parentPtr itemPtr tb
-				#! picture				= packPicture zero (copyPen lookInfo.lookPen) True osPict tb
+			updatecustomcontrol :: !OSWindowMetrics !OSWindowPtr !Bool !Rect !(WItemHandle .ls .pst) !OSPictContext !*OSToolbox
+																		  -> (!WItemHandle .ls .pst, !OSPictContext,!*OSToolbox)
+			updatecustomcontrol _ parentPtr contextAble area itemH=:{wItemKind=IsCustomButtonControl,wItemPtr,wItemSelect,wItemInfo,wItemPos,wItemSize} osPict tb
+				#! picture				= packPicture (~wItemPos) (copyPen lookInfo.lookPen) True osPict tb
 				#! picture				= appClipPicture (toRegion updArea) (lookInfo.lookFun selectState updState) picture
 				#! (_,pen,_,osPict,tb)	= unpackPicture picture
 				   info					= {info & cButtonInfoLook={lookInfo & lookPen=pen}}
-				#! tb					= OSreleaseControlPictContext itemPtr osPict tb
-				#! tb					= OSvalidateWindowRect itemPtr areaLocal tb
-				= ({itemH & wItemInfo=CustomButtonInfo info},tb)
+				#! tb					= OSvalidateWindowRect wItemPtr areaLocal tb
+				= ({itemH & wItemInfo=CustomButtonInfo info},osPict,tb)
 			where
-				itemPtr					= itemH.wItemPtr
-				selectState				= if (contextAble && itemH.wItemSelect) Able Unable
-				info					= getWItemCustomButtonInfo itemH.wItemInfo
+				selectState				= if (contextAble && wItemSelect) Able Unable
+				info					= getWItemCustomButtonInfo wItemInfo
 				lookInfo				= info.cButtonInfoLook
-				areaLocal				= subVector (toVector itemH.wItemPos) area
-				cFrame					= SizeToRectangle itemH.wItemSize
+				areaLocal				= subVector (toVector wItemPos) area
+				cFrame					= SizeToRectangle wItemSize
 				updArea					= RectToRectangle areaLocal
 				updState				= {oldFrame=cFrame,newFrame=cFrame,updArea=[updArea]}
 			
-			updatecustomcontrol _ parentPtr contextAble area itemH=:{wItemKind=IsCustomControl} tb
-				#! (osPict,tb)			= OSgrabControlPictContext parentPtr itemPtr tb
-				#! picture				= packPicture zero (copyPen lookInfo.lookPen) True osPict tb
+			updatecustomcontrol _ parentPtr contextAble area itemH=:{wItemKind=IsCustomControl,wItemPtr,wItemSelect,wItemInfo,wItemPos,wItemSize} osPict tb
+				#! picture				= packPicture (~wItemPos) (copyPen lookInfo.lookPen) True osPict tb
 				#! picture				= appClipPicture (toRegion updArea) (lookInfo.lookFun selectState updState) picture
 				#! (_,pen,_,osPict,tb)	= unpackPicture picture
 				   info					= {info & customInfoLook={lookInfo & lookPen=pen}}
-				#! tb					= OSreleaseControlPictContext itemPtr osPict tb
-				#! tb					= OSvalidateWindowRect itemPtr areaLocal tb
-				= ({itemH & wItemInfo=CustomInfo info},tb)
+				#! tb					= OSvalidateWindowRect wItemPtr areaLocal tb
+				= ({itemH & wItemInfo=CustomInfo info},osPict,tb)
 			where
-				itemPtr					= itemH.wItemPtr
-				selectState				= if (contextAble && itemH.wItemSelect) Able Unable
-				info					= getWItemCustomInfo itemH.wItemInfo
+				selectState				= if (contextAble && wItemSelect) Able Unable
+				info					= getWItemCustomInfo wItemInfo
 				lookInfo				= info.customInfoLook
-				areaLocal				= subVector (toVector itemH.wItemPos) area
-				cFrame					= SizeToRectangle itemH.wItemSize
+				areaLocal				= subVector (toVector wItemPos) area
+				cFrame					= SizeToRectangle wItemSize
 				updArea					= RectToRectangle areaLocal
 				updState				= {oldFrame=cFrame,newFrame=cFrame,updArea=[updArea]}
 			
-			updatecustomcontrol wMetrics parentPtr contextAble area itemH=:{wItemKind=IsCompoundControl,wItems} tb
-				#! (osPict,tb)			= OSgrabControlPictContext parentPtr itemPtr tb
-				#! picture				= packPicture origin (copyPen lookInfo.lookPen) True osPict tb
+			updatecustomcontrol wMetrics parentPtr contextAble area itemH=:{wItemKind=IsCompoundControl,wItemPtr,wItemSelect,wItemInfo,wItemPos,wItemSize,wItems} osPict tb
+				#! picture				= packPicture (~wItemPos) (copyPen lookInfo.lookPen) True osPict tb
 				#! picture				= appClipPicture (toRegion updArea) (lookInfo.lookFun selectState updState) picture
 				#! (_,pen,_,osPict,tb)	= unpackPicture picture
 				   info					= {info & compoundLookInfo={compLookInfo & compoundLook={lookInfo & lookPen=pen}}}
-				#! tb					= OSreleaseControlPictContext itemPtr osPict tb
 				#! tb					= updatescrollareas tb
-				#! (itemHs,tb)			= updatecontrolsinrect wMetrics parentPtr compoundAble area wItems tb
-				#! tb					= OSvalidateWindowRect itemPtr areaLocal tb
-				= ({itemH & wItemInfo=CompoundInfo info,wItems=itemHs},tb)
+				#! (itemHs,osPict,tb)	= updatecontrolsinrect wMetrics parentPtr compoundAble area wItems osPict tb
+				#! tb					= OSvalidateWindowRect wItemPtr areaLocal tb
+				= ({itemH & wItemInfo=CompoundInfo info,wItems=itemHs},osPict,tb)
 			where
-				itemPtr						= itemH.wItemPtr
-				itemPos						= itemH.wItemPos		// PA+++
-				itemSize					= itemH.wItemSize
-				compoundAble				= contextAble && itemH.wItemSelect
-				selectState					= if compoundAble Able Unable
-				info						= getWItemCompoundInfo itemH.wItemInfo
-				compLookInfo				= info.compoundLookInfo
-				lookInfo					= compLookInfo.compoundLook
+				compoundAble			= contextAble && wItemSelect
+				selectState				= if compoundAble Able Unable
+				info					= getWItemCompoundInfo wItemInfo
+				compLookInfo			= info.compoundLookInfo
+				lookInfo				= compLookInfo.compoundLook
 				(origin,domainRect,hasScrolls)
-											= (info.compoundOrigin,info.compoundDomain,(isJust info.compoundHScroll,isJust info.compoundVScroll))
-				visScrolls					= OSscrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
-				contentRect					= getCompoundContentRect wMetrics visScrolls (PosSizeToRect origin itemSize)
-				areaLocal					= subVector (toVector itemH.wItemPos) area
-				cFrame						= RectToRectangle contentRect
-				updArea						= RectToRectangle (IntersectRects contentRect (subVector (toVector (itemH.wItemPos-origin)) area))
-				updState					= {oldFrame=cFrame,newFrame=cFrame,updArea=[updArea]}
+										= (info.compoundOrigin,info.compoundDomain,(isJust info.compoundHScroll,isJust info.compoundVScroll))
+				visScrolls				= OSscrollbarsAreVisible wMetrics domainRect (toTuple wItemSize) hasScrolls
+				contentRect				= getCompoundContentRect wMetrics visScrolls (PosSizeToRect origin wItemSize)
+				areaLocal				= subVector (toVector wItemPos) area
+				cFrame					= RectToRectangle contentRect
+				updArea					= RectToRectangle (IntersectRects contentRect (subVector (toVector (wItemPos-origin)) area))
+				updState				= {oldFrame=cFrame,newFrame=cFrame,updArea=[updArea]}
 				
-				updatescrollareas			= if (emptyH && emptyV) id
-											 (if emptyH				(OSupdateCompoundControl updVRect parentPtr itemPtr)
-											 (if emptyV				(OSupdateCompoundControl updHRect parentPtr itemPtr)
-											 						(OSupdateCompoundControl updHRect parentPtr itemPtr o
-											 						 OSupdateCompoundControl {updVRect & rbottom=updHRect.rbottom} parentPtr itemPtr)))
-				itemRect					= PosSizeToRect itemPos itemSize
-				hRect						= getCompoundHScrollRect wMetrics hasScrolls itemRect
-				vRect						= getCompoundVScrollRect wMetrics hasScrolls itemRect
-				updHRect					= IntersectRects hRect area
-				updVRect					= IntersectRects vRect area
-				emptyH						= IsEmptyRect updHRect
-				emptyV						= IsEmptyRect updVRect
+				updatescrollareas		= if (emptyH && emptyV) id
+										 (if emptyH				(OSupdateCompoundControl updVRect parentPtr wItemPtr)
+										 (if emptyV				(OSupdateCompoundControl updHRect parentPtr wItemPtr)
+										 						(OSupdateCompoundControl updHRect parentPtr wItemPtr o
+										 						 OSupdateCompoundControl {updVRect & rbottom=updHRect.rbottom} parentPtr wItemPtr)))
+				itemRect				= PosSizeToRect wItemPos wItemSize
+				hRect					= getCompoundHScrollRect wMetrics hasScrolls itemRect
+				vRect					= getCompoundVScrollRect wMetrics hasScrolls itemRect
+				updHRect				= IntersectRects hRect area
+				updVRect				= IntersectRects vRect area
+				emptyH					= IsEmptyRect updHRect
+				emptyV					= IsEmptyRect updVRect
 			
-			updatecustomcontrol _ _ _ _ {wItemKind} _
+			updatecustomcontrol _ _ _ _ {wItemKind} _ _
 				= windowupdateFatalError "updatecustomcontrol" ("unexpected ControlKind: "+++toString wItemKind)
 		
-		updatecontrolinrect wMetrics parentPtr ableContext area (WListLSHandle itemHs) tb
-			# (itemHs,tb)		= updatecontrolsinrect wMetrics parentPtr ableContext area itemHs tb
-			= (WListLSHandle itemHs,tb)
+		updatecontrolinrect wMetrics parentPtr ableContext area (WListLSHandle itemHs) osPict tb
+			# (itemHs,osPict,tb)	= updatecontrolsinrect wMetrics parentPtr ableContext area itemHs osPict tb
+			= (WListLSHandle itemHs,osPict,tb)
 		
-		updatecontrolinrect wMetrics parentPtr ableContext area (WExtendLSHandle wExH=:{wExtendItems=itemHs}) tb
-			# (itemHs,tb)		= updatecontrolsinrect wMetrics parentPtr ableContext area itemHs tb
-			= (WExtendLSHandle {wExH & wExtendItems=itemHs},tb)
+		updatecontrolinrect wMetrics parentPtr ableContext area (WExtendLSHandle wExH=:{wExtendItems=itemHs}) osPict tb
+			# (itemHs,osPict,tb)	= updatecontrolsinrect wMetrics parentPtr ableContext area itemHs osPict tb
+			= (WExtendLSHandle {wExH & wExtendItems=itemHs},osPict,tb)
 		
-		updatecontrolinrect wMetrics parentPtr ableContext area (WChangeLSHandle wChH=:{wChangeItems=itemHs}) tb
-			# (itemHs,tb)		= updatecontrolsinrect wMetrics parentPtr ableContext area itemHs tb
-			= (WChangeLSHandle {wChH & wChangeItems=itemHs},tb)
-			
+		updatecontrolinrect wMetrics parentPtr ableContext area (WChangeLSHandle wChH=:{wChangeItems=itemHs}) osPict tb
+			# (itemHs,osPict,tb)	= updatecontrolsinrect wMetrics parentPtr ableContext area itemHs osPict tb
+			= (WChangeLSHandle {wChH & wChangeItems=itemHs},osPict,tb)
+
 
 /*	updatebackground(`) updates the background of the window.
 */
