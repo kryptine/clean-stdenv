@@ -18,18 +18,11 @@ from	StdProcessAttribute	import isProcessKindAttribute
 	=	{	envsEvents		:: !*OSEvents
 		,	envsWorld		:: !*World
 		}
-/*
-::	*GContext p
-	=	{	groupPublic		:: p
-		,	groupLocals		:: !*Locals p
-		}
-*/
 ::	*Context
 	=	{	cEnvs			:: !*Environs			// The global environments
 		,	cProcessStack	:: ProcessStack			// The global process stack
 		,	cMaxIONr		:: SystemId				// The global maximum system number
-//		,	cGroups			:: *Groups				// All processes
-		,	cProcesses		:: *Locals				// All processes
+		,	cProcesses		:: *CProcesses			// All processes
 		,	cModalProcess	:: Maybe SystemId		// The SystemId of the interactive process that has a modal window
 		,	cReceiverTable	:: ReceiverTable		// The global receiver-process table
 		,	cTimerTable		:: TimerTable			// The table of all currently active timers
@@ -51,12 +44,8 @@ schedulerFatalError rule error
 ContextGetProcessStack :: !Context -> (!ProcessStack,!Context)
 ContextGetProcessStack context=:{cProcessStack}
 	= (cProcessStack,context)
-/*
-ContextGetGroups :: !Context -> (!Groups,!Context)
-ContextGetGroups context=:{cGroups}
-	= (cGroups,{context & cGroups=emptyRR})
-*/
-ContextGetProcesses :: !Context -> (!Locals,!Context)
+
+ContextGetProcesses :: !Context -> (!CProcesses,!Context)
 ContextGetProcesses context=:{cProcesses}
 	= (cProcesses,{context & cProcesses=emptyRR})
 
@@ -77,22 +66,6 @@ ContextSetOSEvents :: !(!OSEvents,!Context) -> Context
 ContextSetOSEvents (osEvents,context=:{cEnvs=envs})
 	= {context & cEnvs={envs & envsEvents=osEvents}}
 
-
-//	On GContext:
-/*
-splitGContext :: !(GContext .p) -> (!LocalIO .p,!GContext .p)
-splitGContext gContext=:{groupLocals=locals}
-	# (local,locals) = getcurrentRR locals
-	= (local,{gContext & groupLocals=locals})
-
-adddoneLocal :: !(LocalIO .p) !(GContext .p) -> GContext .p
-adddoneLocal localIO gContext=:{groupLocals}
-	= {gContext & groupLocals=adddoneRR localIO groupLocals}
-
-GContextToGroupIO :: !(GContext .p) -> GroupIO
-GContextToGroupIO {groupPublic,groupLocals}
-	= {groupState=groupPublic,groupIO=groupLocals}
-*/
 
 //	On RuntimeState:
 
@@ -117,7 +90,6 @@ initContext ioDefInit ioDefAbout local documentInterface ioKind world
 	= (	{	cEnvs			= initEnvs
 		,	cProcessStack	= ioStack
 		,	cMaxIONr		= InitSystemId
-	//	,	cGroups			= initGroups
 		,	cProcesses		= toRR [] [openLocalIO ioState local]
 		,	cModalProcess	= initModalId
 		,	cReceiverTable	= initialReceiverTable
@@ -134,8 +106,6 @@ where
 	show					= ioKind==InteractiveProcess
 	ioStack					= [{psId=InitSystemId,psShow=show,psKind=ioKind}]
 	ioState					= createNewIOSt [] ioDefInit ioDefAbout InitSystemId Nothing Nothing ShareGUI documentInterface ioKind
-//	groupIO					= openGroupIO ioState local public
-//	initGroups				= toRR [] [groupIO]
 
 initContext` :: !*World -> (!Context,!*OSToolbox)
 initContext` world
@@ -147,7 +117,6 @@ initContext` world
 	= (	{	cEnvs			= initEnvs
 		,	cProcessStack	= ioStack
 		,	cMaxIONr		= InitSystemId
-	//	,	cGroups			= initGroups
 		,	cProcesses		= toRR [] []
 		,	cModalProcess	= initModalId
 		,	cReceiverTable	= initialReceiverTable
@@ -162,7 +131,6 @@ initContext` world
 where
 	initModalId				= Nothing
 	ioStack					= []
-//	initGroups				= toRR [] []
 
 createNewIOSt :: ![ProcessAttribute (PSt .l)] !(ProcessInit (PSt .l)) String !SystemId !(Maybe SystemId) 
 					!(Maybe GUIShare) !Bool !DocumentInterface !ProcessKind
@@ -204,7 +172,7 @@ where
 		= (not continue,context)
 
 handleContextOSEvent :: !OSEvent !Context -> (![Int],!Context)
-handleContextOSEvent osEvent context=:{cProcessStack,/*cGroups,*/cProcesses,cReceiverTable,cTimerTable,cOSTime,cOSToolbox}
+handleContextOSEvent osEvent context=:{cProcessStack,cProcesses,cReceiverTable,cTimerTable,cOSTime,cOSToolbox}
 //	PA: shift the time in the timertable.
 	# (ostime,tb)				= OSGetTime cOSToolbox
 	  timeshift					= toInt (ostime-cOSTime)
@@ -212,9 +180,8 @@ handleContextOSEvent osEvent context=:{cProcessStack,/*cGroups,*/cProcesses,cRec
 //	PA: determine whether a TimerEvent or ASyncMessage can be generated
 	  (schedulerEvent,receivertable,timertable)
 	  							= toSchedulerEvent osEvent cReceiverTable timertable cOSTime
-	//groups					= resetRR cGroups
 	  processes					= resetRR cProcesses
-	# context					= {context & /*cGroups=groups,*/cProcesses=processes,cReceiverTable=receivertable,cTimerTable=timertable,cOSTime=ostime,cOSToolbox=tb}
+	# context					= {context & cProcesses=processes,cReceiverTable=receivertable,cTimerTable=timertable,cOSTime=ostime,cOSToolbox=tb}
 	# (schedulerEvent,context)	= handleEventForContext False schedulerEvent context
 	  replyToOS					= case schedulerEvent of
 	  								(ScheduleOSEvent _ reply)	-> reply
@@ -225,10 +192,9 @@ handleContextOSEvent osEvent context=:{cProcessStack,/*cGroups,*/cProcesses,cRec
 	| oldTopIO==newTopIO || not newTopIOVis
 		= (replyToOS,context)
 	| otherwise
-	//	# (groups,context)		= ContextGetGroups context
 		# (processes,context)	= ContextGetProcesses context
-		# (ioStack,/*groups*/processes)		= activateTopOfGroups newTopIO ioStack (resetRR /*groups*/processes)
-		= (replyToOS,{context & cProcessStack=ioStack,/*cGroups=groups*/cProcesses=processes})
+		# (ioStack,processes)	= activateTopOfGroups newTopIO ioStack (resetRR processes)
+		= (replyToOS,{context & cProcessStack=ioStack,cProcesses=processes})
 
 
 /*	PA: new function:
@@ -293,19 +259,19 @@ handleEventForContext eventDone schedulerEvent context=:{cProcesses=processes}
 						= handleEventForLocalIO eventDone schedulerEvent process {context & cProcesses=processes}
 		= handleEventForContext eventDone schedulerEvent {context & cProcesses=adddoneRR process context.cProcesses}
 where
-	processQuitted :: !LocalIO -> (!Bool,!LocalIO)
+	processQuitted :: !CProcess -> (!Bool,!CProcess)
 	processQuitted localIO
 		# (closed,ioState) = IOStClosed localIO.localIOSt
 		= (closed,{localIO & localIOSt=ioState})
 	
-	processModal :: !LocalIO -> (!Bool,!LocalIO)
+	processModal :: !CProcess -> (!Bool,!CProcess)
 	processModal localIO
 		# (optModal,ioState)= IOStGetIOIsModal localIO.localIOSt
 		# (myId,ioState)	= IOStGetIOId ioState
 		= (isJust optModal && myId==fromJust optModal,{localIO & localIOSt=ioState})
 
-handleEventForLocalIO :: !Bool !SchedulerEvent !LocalIO !Context
-					 -> (!Bool,!SchedulerEvent,!LocalIO,!Context)
+handleEventForLocalIO :: !Bool !SchedulerEvent !CProcess !Context
+					 -> (!Bool,!SchedulerEvent,!CProcess,!Context)
 handleEventForLocalIO eventDone schedulerEvent {localState=opt_local,localIOSt=ioState} context
 	# (runtime,ioState)						= IOStGetRuntimeState ioState
 	| fst (rsIsBlocked runtime)
@@ -343,7 +309,7 @@ where
 			# ioState			= IOStSetRuntimeState Closed ioState
 			= {pState & io=ioState}
 
-cSwitchIn :: !.l !Context !(IOSt .l) -> (!(![*World],!Locals),!PSt .l)
+cSwitchIn :: !.l !Context !(IOSt .l) -> (!(![*World],!CProcesses),!PSt .l)
 cSwitchIn local {cEnvs={envsEvents,envsWorld},cProcessStack,cMaxIONr,cProcesses,cModalProcess,cReceiverTable,cTimerTable,cIdTable,cOSTime,cIdSeed} ioState
 	# ioState				= IOStSetProcessStack cProcessStack ioState
 	# ioState				= IOStSetEvents envsEvents ioState
@@ -358,7 +324,7 @@ cSwitchIn local {cEnvs={envsEvents,envsWorld},cProcessStack,cMaxIONr,cProcesses,
 	# pState				= {ls=local,io=ioState}
 	= (ioContext,pState)
 
-cSwitchOut :: !(![*World],!Locals) !(PSt .l) -> (!.l,!Context,!IOSt .l)
+cSwitchOut :: !(![*World],!CProcesses) !(PSt .l) -> (!.l,!Context,!IOSt .l)
 cSwitchOut ioContext {ls,io}
 	# (ostime,   ioState)		= IOStGetOSTime			io
 	# (tt,       ioState)		= IOStGetTimerTable		ioState
@@ -449,10 +415,10 @@ addVirtualProcess ioDefInit ioDefAbout local pState
 	# (ioStack, ioState)	= IOStGetProcessStack			ioState
 	  ioStack				= pushProcessShowState {psId=nr,psShow=False,psKind=VirtualProcess} ioStack
 	# ioState				= IOStSetProcessStack ioStack	ioState
-	# (processes,ioState)	= IOStGetLocals					ioState
+	# (processes,ioState)	= IOStGetCProcesses				ioState
 	# newIOSt				= createNewIOSt [] ioDefInit ioDefAbout nr (Just parentId) guishare ShareGUI NDI VirtualProcess
 	# process				= openLocalIO newIOSt local
-	# ioState				= IOStSetLocals (inserttodoRR process processes) ioState
+	# ioState				= IOStSetCProcesses (inserttodoRR process processes) ioState
 	= {pState & io=ioState}
 
 
@@ -467,15 +433,15 @@ addInteractiveProcess pAtts ioDefInit ioDefAbout local isSubProcess documentInte
 	# (ioStack, ioState)	= IOStGetProcessStack				ioState
 	  ioStack				= pushProcessShowState {psId=nr,psShow=True,psKind=InteractiveProcess} ioStack
 	# ioState				= IOStSetProcessStack ioStack		ioState
-	# (processes,ioState)	= IOStGetLocals						ioState
+	# (processes,ioState)	= IOStGetCProcesses					ioState
 	  parent				= if isSubProcess (Just parentId) Nothing
 	  pAtts					= filter (isProcessKindAttribute documentInterface) pAtts
 	# newIOSt				= createNewIOSt pAtts ioDefInit ioDefAbout nr parent guishare isSubProcess documentInterface InteractiveProcess
 	# process				= openLocalIO newIOSt local
-	# ioState				= IOStSetLocals (inserttodoRR process processes) ioState
+	# ioState				= IOStSetCProcesses (inserttodoRR process processes) ioState
 	= {pState & io=ioState}
 
-openLocalIO :: !(IOSt .l) !.l -> LocalIO
+openLocalIO :: !(IOSt .l) !.l -> CProcess
 openLocalIO ioState local
 	= {	localState	= Just local
 	  ,	localIOSt	= ioState
@@ -506,7 +472,7 @@ addSubProcessId isSubProcess nr ioState
 
 //	Make the proper interactive process active.
 
-activateTopOfGroups :: !SystemId !ProcessStack !Locals -> (!ProcessStack,!Locals)
+activateTopOfGroups :: !SystemId !ProcessStack !CProcesses -> (!ProcessStack,!CProcesses)
 activateTopOfGroups topIONr ioStack processes
 	# (emptytodo,processes)			= notodoRR processes
 	| emptytodo
@@ -519,7 +485,7 @@ activateTopOfGroups topIONr ioStack processes
 		# (ioStack,processes)		= activateTopOfGroups  topIONr ioStack processes
 		= (ioStack,inserttodoRR process processes)
 where
-	activateTopProcess :: !SystemId !ProcessStack !LocalIO -> (!Bool,!ProcessStack,!LocalIO)
+	activateTopProcess :: !SystemId !ProcessStack !CProcess -> (!Bool,!ProcessStack,!CProcess)
 	activateTopProcess topIONr ioStack process=:{localIOSt=ioState}
 		# (nr,ioState)			= IOStGetIOId ioState
 		| nr<>topIONr
@@ -569,12 +535,12 @@ quitProcess pState
 */
 quitSubProcesses :: ![SystemId] !(IOSt .l) -> IOSt .l
 quitSubProcesses ids ioState
-	# (processes,ioState)	= IOStGetLocals ioState
+	# (processes,ioState)	= IOStGetCProcesses ioState
 	  (_,processes)			= quitLocalSubProcesses ids processes
-	# ioState				= IOStSetLocals processes ioState
+	# ioState				= IOStSetCProcesses processes ioState
 	= ioState
 where
-	quitLocalSubProcesses :: ![SystemId] !Locals -> (![SystemId],!Locals)
+	quitLocalSubProcesses :: ![SystemId] !CProcesses -> (![SystemId],!CProcesses)
 	quitLocalSubProcesses ids processes
 		| isEmpty ids
 			= (ids,processes)
@@ -584,7 +550,7 @@ where
 			  (ids,todo)	= quitLocalSubProcesses` ids todo
 			= (ids,toRR done todo)
 	where
-		quitLocalSubProcesses` :: ![SystemId] ![LocalIO] -> (![SystemId],![LocalIO])
+		quitLocalSubProcesses` :: ![SystemId] ![CProcess] -> (![SystemId],![CProcess])
 		quitLocalSubProcesses` ids=:[] processes
 			= (ids,processes)
 		quitLocalSubProcesses` ids processes=:[]
@@ -614,15 +580,15 @@ removeIOIdFromParentProcess me ioState
 	| isNothing opt_parent
 		= ioState
 	# parent				= fromJust opt_parent
-	# (locals,ioState)		= IOStGetLocals ioState
+	# (locals,ioState)		= IOStGetCProcesses ioState
 	# (done,locals)			= removeIOIdFromLocals me parent locals
-	# ioState				= IOStSetLocals locals ioState
+	# ioState				= IOStSetCProcesses locals ioState
 	| done
 		= ioState
 	| otherwise
 		= schedulerFatalError "CloseProcess" "parent process could not be located"
 where
-	removeIOIdFromLocals :: !SystemId !SystemId !Locals -> (!Bool,!Locals)
+	removeIOIdFromLocals :: !SystemId !SystemId !CProcesses -> (!Bool,!CProcesses)
 	removeIOIdFromLocals me parent locals
 		# (done,todo)			= fromRR locals
 		  (removed,done)		= removeIOIdFromLocals` me parent done
@@ -632,7 +598,7 @@ where
 			# (removed, todo)	= removeIOIdFromLocals` me parent todo
 			= (removed,toRR done todo)
 	where
-		removeIOIdFromLocals` :: !SystemId !SystemId ![LocalIO] -> (!Bool,![LocalIO])
+		removeIOIdFromLocals` :: !SystemId !SystemId ![CProcess] -> (!Bool,![CProcess])
 		removeIOIdFromLocals` me parent [process=:{localState,localIOSt=ioState}:processes]
 			# (ioid,ioState)			= IOStGetIOId ioState
 			| parent==ioid
@@ -678,58 +644,44 @@ cswitchProcess processId message pState
 	| not switchToExists
 		= (Just SwitchToDoesNotExist,[],pState2)
 	with
-		context2						= {context1 & cProcesses=groups2}//cGroups=groups2}
-		pState2							= switchToPSt /*typeGContext*/ typeIOSt returnId context2 local
+		context2						= {context1 & cProcesses=groups2}
+		pState2							= switchToPSt typeIOSt returnId context2 local
 	| inDeadlock
 		= (Just SwitchEndsUpInDeadlock,[],pState2)
 	with
-		context2						= {context1 & cProcesses=groups3}//cGroups=groups3}
-		pState2							= switchToPSt /*typeGContext*/ typeIOSt returnId context2 local
+		context2						= {context1 & cProcesses=groups3}
+		pState2							= switchToPSt typeIOSt returnId context2 local
 	| otherwise
 		= (checkSyncMessageError message1,getSyncMessageResponse message1,pState2)
 	with
-		context2						= {context1 & cProcesses=groups3}//cGroups=groups3}
+		context2						= {context1 & cProcesses=groups3}
 		(_,context3)					= CondHandleEvents (processIsBlocked processId) OSNewToolbox context2
-//		(groups4,context4)				= ContextGetGroups context3
 		(groups4,context4)				= ContextGetProcesses context3
-		context5						= {context4 & cProcesses=resetRR groups4}//cGroups=resetRR groups4}
+		context5						= {context4 & cProcesses=resetRR groups4}
 		(message1,context6)				= handleEventForContext False message context5
-		pState2							= switchToPSt /*typeGContext*/ typeIOSt returnId context6 local
+		pState2							= switchToPSt typeIOSt returnId context6 local
 where
 	(returnId,pState1)					= accPIO IOStGetIOId pState
-	(/*gcontext,*/local,context,ioState)= switchFromPSt pState1
+	(local,context,ioState)= switchFromPSt pState1
 	(groups,context1)					= ContextGetProcesses context
 	ioState1							= IOStSetRuntimeState (Blocked processId) ioState
-//	(typeGContext,ioState2)				= typeIsGContext ioState1
 	(typeIOSt, ioState3)				= typeIsIOSt  ioState1
 	blockedLocalIO						= {localState=Nothing,localIOSt=ioState3}
-//	group								= GContextToGroupIO (adddoneLocal blockedLocalIO gcontext)
-//	groups1								= adddoneRR group groups
 	groups1								= adddoneRR blockedLocalIO groups
 	(switchToExists,groups2)			= turnRRToProcessInGroups processId groups1
 	(inDeadlock,groups3)				= checkDeadlock  returnId processId groups2
 	
-	switchToPSt :: /*!(UnguardType (GContext .p))*/ !(UnguardType (IOSt .l)) !SystemId !Context .l -> PSt .l
-	switchToPSt /*typeGContext*/ typeIOSt returnId context=:{/*cGroups*/cProcesses} local
-		# (_,groups)					= turnRRToProcessInGroups returnId cProcesses//cGroups
+	switchToPSt :: !(UnguardType (IOSt .l)) !SystemId !Context .l -> PSt .l
+	switchToPSt typeIOSt returnId context=:{cProcesses} local
+		# (_,groups)					= turnRRToProcessInGroups returnId cProcesses
 		  (group,groups)				= getcurrentRR groups
 		  (gDone,gToDo)					= fromRR groups
-	//	  (GContext` share lDone lToDo)	= splitGroupIO group
-	//	  gcontext						= {groupPublic=share,groupLocals=toRR lDone lToDo}
-	//	  (l,gcontext)					= splitGContext (castType typeGContext gcontext)
-	//	  (LocalIO` blockedIO)			= splitLocalIO l
 		  {localIOSt=blockedIO}			= group
 		  blockedIO						= castType typeIOSt blockedIO
-		  context						= {context & cProcesses=toRR gDone gToDo}//cGroups=toRR gDone gToDo}
-		  (_,pState)					= cSwitchIn /*gcontext*/ local context (IOStSetRuntimeState Running blockedIO)
+		  context						= {context & cProcesses=toRR gDone gToDo}
+		  (_,pState)					= cSwitchIn local context (IOStSetRuntimeState Running blockedIO)
 		= pState
-/*	where
-		splitGroupIO {groupState,groupIO=groups}
-			# (done,todo) = fromRR groups
-			= GContext` groupState done todo
-		splitLocalIO {localIOSt}
-			= LocalIO`  localIOSt
-*/	
+	
 	checkSyncMessageError :: !SchedulerEvent -> Maybe SwitchError
 	checkSyncMessageError (ScheduleMsgEvent (SyncMessage {smError}))
 		| isEmpty smError
@@ -749,10 +701,6 @@ where
 	getSyncMessageResponse _
 		= []
 
-/*
-typeIsGContext :: !(IOSt .l .p) -> (UnguardType (GContext .p),!IOSt .l .p)
-typeIsGContext ioState = (Unguard,ioState)
-*/
 typeIsIOSt :: !(IOSt .l) -> (UnguardType (IOSt .l),!IOSt .l)
 typeIsIOSt ioState = (Unguard,ioState)
 
@@ -762,65 +710,46 @@ typeIsLocal ioState = (Unguard,ioState)
 
 accContext :: !.(St Context .x) !(PSt .l) -> (!.x, !PSt .l)
 accContext fun pState
-	# (returnId,pState)					= accPIO IOStGetIOId pState
-	# (/*gcontext,*/local,context,ioState)	= switchFromPSt pState
-//	# (groups,context)					= ContextGetGroups context
-	# (groups,context)					= ContextGetProcesses context
-//	# (typeGContext,ioState)			= typeIsGContext ioState
-	# (typeIOSt, ioState)				= typeIsIOSt  ioState
-	# (typeLocal,ioState)				= typeIsLocal ioState
-	# localIO							= {localState=Just local,localIOSt=ioState}
-//	# group								= GContextToGroupIO (adddoneLocal localIO gcontext)
-//	# groups							= adddoneRR group groups
-	# groups							= adddoneRR localIO groups
-	# context							= {context & cProcesses=groups}//cGroups=groups}
-	# (x, context)						= fun context
-//	# (groups,context)					= ContextGetGroups context
-	# (groups,context)					= ContextGetProcesses context
-	# context							= {context & cProcesses=resetRR groups}//cGroups=resetRR groups}
-	# pState							= switchToPSt /*typeGContext*/ typeIOSt typeLocal returnId context
+	# (returnId,pState)			= accPIO IOStGetIOId pState
+	# (local,context,ioState)	= switchFromPSt pState
+	# (groups,context)			= ContextGetProcesses context
+	# (typeIOSt, ioState)		= typeIsIOSt  ioState
+	# (typeLocal,ioState)		= typeIsLocal ioState
+	# localIO					= {localState=Just local,localIOSt=ioState}
+	# groups					= adddoneRR localIO groups
+	# context					= {context & cProcesses=groups}
+	# (x, context)				= fun context
+	# (groups,context)			= ContextGetProcesses context
+	# context					= {context & cProcesses=resetRR groups}
+	# pState					= switchToPSt typeIOSt typeLocal returnId context
 	= (x, pState)
 where
-	switchToPSt :: /*!(UnguardType (GContext .p))*/ !(UnguardType (IOSt .l)) !(UnguardType (Maybe .l)) !SystemId !Context -> PSt .l
-	switchToPSt /*typeGContext*/ typeIOSt typeLocal returnId context=:{/*cGroups*/cProcesses}
-		| not found						= schedulerFatalError "accContext" "interactive process not found"
-		| closed						= snd (cSwitchIn /*gcontext1*/ (fromJust local1) {context1 & cModalProcess=Nothing} ioState2)
-		| otherwise						= snd (cSwitchIn /*gcontext1*/ (fromJust local1)  context1 ioState2)
+	switchToPSt :: !(UnguardType (IOSt .l)) !(UnguardType (Maybe .l)) !SystemId !Context -> PSt .l
+	switchToPSt typeIOSt typeLocal returnId context=:{cProcesses}
+		| not found				= schedulerFatalError "accContext" "interactive process not found"
+		| closed				= snd (cSwitchIn (fromJust local1) {context1 & cModalProcess=Nothing} ioState2)
+		| otherwise				= snd (cSwitchIn (fromJust local1)  context1 ioState2)
 	where
-		(found,groups)					= turnRRToProcessInGroups returnId cProcesses//cGroups
-		(gDone,gToDo)					= fromRR groups
-		(group,gToDo1)					= HdTl gToDo
-	//	(GContext` share lDone lToDo)	= splitGroupIO group
-	//	gcontext						= {groupPublic=share,groupLocals=toRR lDone lToDo}
-	//	(l,gcontext1)					= splitGContext (castType typeGContext gcontext)
-	//	(LocalIO`` local ioState)		= splitLocalIO l
-		{localState=local,localIOSt=ioState}	= group
-		ioState1						= castType typeIOSt ioState
-		local1							= castType typeLocal   local
-		groups1							= toRR gDone gToDo1
-		context1						= {context & cProcesses=groups1}//cGroups=groups1}
-		(closed,ioState2)				= IOStClosed ioState1
-	/*	
-		splitGroupIO {groupState,groupIO=groups}
-			# (done,todo) = fromRR groups
-			= GContext` groupState done todo
-		splitLocalIO {localState,localIOSt}
-			= LocalIO`` localState localIOSt
-*/
-switchFromPSt :: !(PSt .l) -> (/*!GContext .p,*/!.l,!Context,!IOSt .l)
+		(found,groups)			= turnRRToProcessInGroups returnId cProcesses
+		(gDone,gToDo)			= fromRR groups
+		(group,gToDo1)			= HdTl gToDo
+		{localState=local,localIOSt=ioState}
+								= group
+		ioState1				= castType typeIOSt ioState
+		local1					= castType typeLocal   local
+		groups1					= toRR gDone gToDo1
+		context1				= {context & cProcesses=groups1}
+		(closed,ioState2)		= IOStClosed ioState1
+
+switchFromPSt :: !(PSt .l) -> (!.l,!Context,!IOSt .l)
 switchFromPSt pState
 	= cSwitchOut ([],emptyRR) pState
-/*
-::	*GContext`		= E..p: GContext` p [*LocalIO p] [*LocalIO p]
-::	*LocalIO`	p	= E..l: LocalIO`			(IOSt l p)
-::	*LocalIO``	p	= E..l: LocalIO`` (Maybe l)	(IOSt l p)
-*/
 
-turnRRToProcessInGroups :: !SystemId !*Locals -> (!Bool,!*Locals)
+turnRRToProcessInGroups :: !SystemId !*CProcesses -> (!Bool,!*CProcesses)
 turnRRToProcessInGroups id gs
 	= turnRRToProcess id (resetRR gs)
 where
-	turnRRToProcess :: !SystemId !*Locals -> (!Bool,!*Locals)
+	turnRRToProcess :: !SystemId !*CProcesses -> (!Bool,!*CProcesses)
 	turnRRToProcess id locals
 		# (notodo,locals)	= notodoRR locals
 		| notodo
@@ -832,7 +761,7 @@ where
 		| otherwise
 			= turnRRToProcess id (adddoneRR local locals)
 	where
-		turnRRToProcess` :: !SystemId !*LocalIO -> (!Bool,!*LocalIO)
+		turnRRToProcess` :: !SystemId !*CProcess -> (!Bool,!*CProcess)
 		turnRRToProcess` id l=:{localIOSt=ioState}
 			# (ioid,ioState)	= IOStGetIOId ioState
 			= (id==ioid,{l & localIOSt=ioState})
@@ -840,11 +769,11 @@ where
 
 //	A deadlock situation arises if this process would be blocked.
 
-checkDeadlock :: !SystemId !SystemId !*Locals -> (!Bool,!*Locals)
+checkDeadlock :: !SystemId !SystemId !*CProcesses -> (!Bool,!*CProcesses)
 checkDeadlock returnId switchToId gs
 	= checkDeadlock` [returnId] switchToId gs
 where
-	checkDeadlock` :: ![SystemId] !SystemId *Locals -> (!Bool,!*Locals)
+	checkDeadlock` :: ![SystemId] !SystemId *CProcesses -> (!Bool,!*CProcesses)
 	checkDeadlock` blockedprocs nextproc gs
 		# ((nextprocfound,opt_id),gs)	= checkBlockedProcess nextproc gs
 		| not nextprocfound
@@ -864,11 +793,11 @@ where
 		If this is the case then the id is returned of the process for which this process is waiting.
 		If this is not the case, then no id is returned.
 */
-checkBlockedProcess :: !SystemId !*Locals -> (!Result SystemId,!*Locals)
+checkBlockedProcess :: !SystemId !*CProcesses -> (!Result SystemId,!*CProcesses)
 checkBlockedProcess nextproc groups
 	= accessLocals (checkInLocal nextproc) groups
 where
-	checkInLocal :: !SystemId !*LocalIO -> (!Result SystemId,!LocalIO)
+	checkInLocal :: !SystemId !*CProcess -> (!Result SystemId,!CProcess)
 	checkInLocal nextproc localIO=:{localIOSt=ioState}
 		# (blocked,ioState)	= checkProcess nextproc ioState
 		= (blocked,{localIO & localIOSt=ioState})
@@ -889,9 +818,9 @@ where
 /*	The process with SystemId id has a (Blocked id`) RuntimeState.
 */
 processIsBlocked :: !SystemId !Context -> (!Bool,!Context)
-processIsBlocked id context=:{cProcesses}//cGroups}
-	# ((procfound,opt_id),groups)	= checkBlockedProcess id cProcesses//cGroups
-	  context						= {context & cProcesses=groups}//cGroups=groups}
+processIsBlocked id context=:{cProcesses}
+	# ((procfound,opt_id),groups)	= checkBlockedProcess id cProcesses
+	  context						= {context & cProcesses=groups}
 	| procfound						= (isJust opt_id,context)
 	| otherwise						= (procfound,context)
 
@@ -901,14 +830,14 @@ processIsBlocked id context=:{cProcesses}//cGroups}
 		,	!Maybe r		// optional access information
 		)
 
-/*	Threading f::(IOSt .l .p) -> (Result r,IOSt .l .p) through *Locals 
-	applies f to every IOSt member ioState of Locals until fst (f ioState) = (True,r) is done
+/*	Threading f::(IOSt .l .p) -> (Result r,IOSt .l .p) through *CProcesses 
+	applies f to every IOSt member ioState of CProcesses until fst (f ioState) = (True,r) is done
 	by defining the function gLocals:
 	
-		gLocals :: *(Locals .p) -> (Result r, *Locals .p)
+		gLocals :: *CProcesses -> (Result r, *CProcesses)
 		gLocals locals = accessLocals f locals
 */
-accessLocals :: !(St LocalIO (Result r)) !*Locals -> (!Result r,!*Locals)
+accessLocals :: !(St CProcess (Result r)) !*CProcesses -> (!Result r,!*CProcesses)
 accessLocals accLocal locals
 	# (lsDone,lsToDo)	= fromRR locals
 	  (rDone,lsDone) 	= accessLocalIOs accLocal lsDone
@@ -918,7 +847,7 @@ accessLocals accLocal locals
 		# (rToDo,lsToDo)= accessLocalIOs accLocal lsToDo
 		= (rToDo,toRR lsDone lsToDo)
 where
-	accessLocalIOs :: !(St LocalIO (Result r)) ![*LocalIO] -> (!Result r, ![*LocalIO])
+	accessLocalIOs :: !(St CProcess (Result r)) ![*CProcess] -> (!Result r, ![*CProcess])
 	accessLocalIOs accLocal [local:locals]
 		# (r, local)		= accLocal local
 		| fst r

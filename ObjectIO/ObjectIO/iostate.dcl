@@ -19,38 +19,38 @@ from	timertable			import TimerTable
 
 ::	*IOSt l
 ::	*PSt  l
-	=	{	ls			:: !l								// The local (and private) data of the process
-		,	io			:: !*IOSt l							// The IOSt environment of the process
+	=	{	ls			:: !l					// The local (and private) data of the process
+		,	io			:: !*IOSt l				// The IOSt environment of the process
 		}
 
-::	*Locals
-	:==	RR *LocalIO
-::	*LocalIO
+::	*CProcesses									// The 'context-free' processes administration
+	:==	RR *CProcess							//	is a round-robin
+::	*CProcess									// The context-free process
 	=	E. .l:
-		{	localState	:: !Maybe l
-		,	localIOSt	:: !*IOSt l
+		{	localState	:: !Maybe l				//	its local state
+		,	localIOSt	:: !*IOSt l				//	its context-free IOSt
 		}
 
 ::	RuntimeState
-	=	Running												// The process is running
-	|	Blocked !SystemId									// The process is blocked for the process with given id
-	|	Closed												// The process is closed
+	=	Running									// The process is running
+	|	Blocked !SystemId						// The process is blocked for the process with given id
+	|	Closed									// The process is closed
 ::	GUIShare
 	:==	OSGUIShare
 
 ::	ActivateRequests	:== [OSActivateRequest]
 ::	DoubleDownDist		:== Int
-::	InputTrack												// Input being tracked:
-	=	{	itWindow	:: !OSWindowPtr						// the parent window
-		,	itControl	:: !Int								// zero if parent window, otherwise item nr of control (>0)
-		,	itKind		:: !InputTrackKind					// the input kinds being tracked
+::	InputTrack									// Input being tracked:
+	=	{	itWindow	:: !OSWindowPtr			// the parent window
+		,	itControl	:: !Int					// zero if parent window, otherwise item nr of control (>0)
+		,	itKind		:: !InputTrackKind		// the input kinds being tracked
 		}
-::	InputTrackKind											// Input source kinds:
-	=	{	itkMouse	:: !Bool							// mouse
-		,	itkKeyboard	:: !Bool							// keyboard
+::	InputTrackKind								// Input source kinds:
+	=	{	itkMouse	:: !Bool				// mouse
+		,	itkKeyboard	:: !Bool				// keyboard
 		}
 ::	ClipboardState
-	=	{	cbsCount	:: !Int								// ScrapCount of last access
+	=	{	cbsCount	:: !Int					// ScrapCount of last access
 		}
 
 
@@ -75,7 +75,7 @@ IOStGetOSTime			:: !(IOSt .l) -> (!OSTime,						!IOSt .l)
 IOStGetActivateRequests	:: !(IOSt .l) -> (!ActivateRequests,			!IOSt .l)
 IOStGetEvents			:: !(IOSt .l) -> (!*OSEvents,					!IOSt .l)
 IOStGetWorld			:: !(IOSt .l) -> (!*World,						!IOSt .l)
-IOStGetLocals			:: !(IOSt .l) -> (!Locals,						!IOSt .l)
+IOStGetCProcesses		:: !(IOSt .l) -> (!CProcesses,					!IOSt .l)
 IOStGetProcessStack		:: !(IOSt .l) -> (!ProcessStack,				!IOSt .l)
 IOStGetDocumentInterface:: !(IOSt .l) -> (!DocumentInterface,			!IOSt .l)
 IOStGetOSDInfo			:: !(IOSt .l) -> (!OSDInfo,						!IOSt .l)
@@ -104,7 +104,7 @@ IOStSetOSTime			:: !OSTime							!(IOSt .l) -> IOSt .l
 IOStSetActivateRequests	:: !ActivateRequests				!(IOSt .l) -> IOSt .l
 IOStSetEvents			:: !*OSEvents						!(IOSt .l) -> IOSt .l
 IOStSetWorld			:: !*World							!(IOSt .l) -> IOSt .l
-IOStSetLocals			:: !Locals							!(IOSt .l) -> IOSt .l
+IOStSetCProcesses		:: !CProcesses						!(IOSt .l) -> IOSt .l
 IOStSetProcessStack		:: !ProcessStack					!(IOSt .l) -> IOSt .l
 SelectIOSt				::									!(IOSt .l) -> IOSt .l
 IOStSetOSDInfo			:: !OSDInfo							!(IOSt .l) -> IOSt .l
@@ -116,7 +116,7 @@ IOStSetClipboardState	:: !ClipboardState					!(IOSt .l) -> IOSt .l
 IOStSetDeviceFunctions	:: ![DeviceFunctions (PSt .l)]		!(IOSt .l) -> IOSt .l
 IOStSetRcvDisabled		:: !Bool							!(IOSt .l) -> IOSt .l /* MW11++*/
 
-IOStSwapIO				:: !(![*World],!Locals)	!(IOSt .l) -> (!(![*World],!Locals),!IOSt .l)
+IOStSwapIO				:: !(![*World],!CProcesses)	!(IOSt .l) -> (!(![*World],!CProcesses),!IOSt .l)
 
 IOStLastInteraction		::									!(IOSt .l) -> (!Bool,	!IOSt .l)
 IOStHasDevice			:: !Device							!(IOSt .l) -> (!Bool,	!IOSt .l)
