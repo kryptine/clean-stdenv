@@ -4,7 +4,7 @@
 /* Clean Game Library by Mike Wiering, Nijmegen */
 
 
-#include "cOSGameLib.h"  /* OS specific functions */
+#include "cOSGameLib_12.h"  /* OS specific functions */
 
 
 /* Nothing value for integer, used with Maybe values */

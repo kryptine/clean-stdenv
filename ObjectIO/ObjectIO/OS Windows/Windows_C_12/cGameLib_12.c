@@ -1,12 +1,12 @@
 
 /* Clean Game Library by Mike Wiering, Nijmegen */
 
-#include "util.h"
-#include "intrface.h"
+#include "util_12.h"
+#include "intrface_12.h"
 
-#include "cGameLib.h"
+#include "cGameLib_12.h"
 
-#include "cOSGameLib.h"  /* OS specific functions */
+#include "cOSGameLib_12.h"  /* OS specific functions */
 
 
 // #define SMART_DRAW
@@ -211,7 +211,7 @@ static USER_EVENT_INFO *ueiUserEventInfo = NULL;
 #define EV_PLAY_SOUND  (-1)
 
 
-ClearUserEvents ()
+void ClearUserEvents ()
 {
     struct USER_EVENT_INFO *ueiNext;
 
@@ -782,7 +782,6 @@ void RunGame ()
     int fade;
 
     int result;
-    int oos;
 
     iFrameCounter = 0;
     CorrectView ();
@@ -1391,7 +1390,7 @@ int ReadBoundMapValue (int x, int y, int options, int bounds, int mccode)
 }
 
 
-Bounce (OBJECTREC *obj, int bound)
+void Bounce (OBJECTREC *obj, int bound)
 {
     int xb = obj->iXBounce;
     int yb = obj->iYBounce;
@@ -1602,7 +1601,6 @@ void MoveObjects ()
                         //    int md = obj->iMoveDelay;
                             int slx = obj->iXSlowDown;
                             int sly = obj->iYSlowDown;
-                            int xv, yv;
 
                             // save last position
                             obj->iLastXPos = obj->iXPos;
@@ -2374,7 +2372,7 @@ void DrawObjects (int FromLayer, int ToLayer)
     SPRITEANIMATION *sa;
 
     RECT src, dst;
-    int flags, fx;
+    int fx;
 
     while (obj)
     {
@@ -2554,7 +2552,7 @@ int DrawLayer (int mapid)
     int curw, curh;
     int mappos, mapblock;
     int bmpx, bmpy;
-    int flags, bltflags, fx;
+    int fx;
     int maxblock;
     BOOL mir, ups;
 
@@ -2694,7 +2692,6 @@ int DrawLayer (int mapid)
 int NextFrame (int fade)
 {
     int resultcode;
-    DDBLTFX ddbltfx;
     BOOL clear;
     GAMELAYERMAPINFO *glmip = glmipGameLayerMapInfo;
     SPRITEANIMATION *sa = saSprites;
