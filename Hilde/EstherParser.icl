@@ -55,7 +55,7 @@ where
 */
 parser{|NTexpression|} = (parser{|*|} <@ Sugar <!> parser{|*|} <@ Term) <&> p
 where
-	p a = (parser{|*|} <&> \UNIT -> parser{|*|} <&> \b -> p (Apply a b)) 
+	p a = (sp parser{|*|} <&> \b -> p (Apply a b)) 
 		<!> yield a
 
 parser{|NTvariable|} 

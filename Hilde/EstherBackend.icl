@@ -166,7 +166,7 @@ prettyDynamic :: !Dynamic -> (String, !String)
 prettyDynamic d = (v, toString` (typeCodeOfDynamic d))
 where
 	v = case d of 
-		(x :: a -> b) -> foldl (+++) "" (debugShowWithOptions [DebugTerminator "", DebugClosures False] x)
+		(x :: a -> b) -> "<function>"//foldl (+++) "" (debugShowWithOptions [DebugTerminator "", DebugClosures False] x)
 		(x :: a) -> foldl (+++) "" (debugShowWithOptions [DebugTerminator ""] x)
 
 	toString` (TypeScheme _ t) = toString t

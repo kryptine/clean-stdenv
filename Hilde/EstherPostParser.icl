@@ -117,7 +117,7 @@ where
 		= case l of
 			(Apply ll lr=:(Value _ (GenConsPrio rightAssoc rightPrio)))
 				# ll = fixInfix{|*|} ll
-				  leftish = Apply (Apply (Term (fixInfix{|*|} lr)) (Nested (|-| (fixInfix{|*|} ll)))) (Nested (|-| (ap (Term r) es)))
+				  leftish = Apply (Apply (Term (fixInfix{|*|} lr)) (Nested (|-| ll))) (Nested (|-| (ap (Term r) es)))
 				-> case ll of
 					Apply (Apply llll=:(Term (Value _ (GenConsPrio leftAssoc leftPrio))) lllr) llr
 						# rightish = Apply (Apply llll lllr) (Nested (|-| (Apply (Apply (Term (fixInfix{|*|} lr)) llr) r)))

@@ -40,7 +40,7 @@ where
 //	input = "(\\x -> max (inc x) x) 1"
 //	input = "f\\ x y = 42"
 //	input = "[ x \\\\ x <- [ 1 .. 100 ] ]"
-	input = "[1,2,3,4]"
+	input = "2 * 3 * 4"
 
 /*	eval :: !Int !(a -> b) !a -> b
 	eval 1 f x = f x
