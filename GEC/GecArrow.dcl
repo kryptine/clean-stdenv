@@ -33,7 +33,7 @@ where
 
 // Initialize GecCircuit circuit
 
-StartCircuit :: (GecCircuit a b) a *(PSt .ps) -> *PSt .ps
+startCircuit :: (GecCircuit a b) a *(PSt .ps) -> *PSt .ps
 
 // Lift visual editors to GecCircuit's
 
@@ -46,7 +46,7 @@ instance Arrow GecCircuit
 
 // Other GecCircuit combinators
 
-fix :: (GecCircuit a a) -> GecCircuit a a
+feedback :: (GecCircuit a a) -> GecCircuit a a
 //gecFixViaLoop` :: (GecCircuit a a) -> GecCircuit a a
 //gecFixViaLoop`ViaGecLoop :: (GecCircuit a a) -> GecCircuit a a
 //gecFixViaLoop`ViaGecLoopViaLoop` :: (GecCircuit a a) -> GecCircuit a a
