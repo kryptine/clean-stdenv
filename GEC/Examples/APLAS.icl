@@ -14,7 +14,7 @@ import StdDynamic
 // ALL EXAMPLES HAVE TO BE OF TYPE ((PSt Void) -> (PSt Void))
 
 Start :: *World -> *World
-Start world = startIO MDI Void myEditor6 [ProcessClose closeProcess] world
+Start world = startIO MDI Void myEditor1 [ProcessClose closeProcess] world
 
 selfGEC :: String (t -> t) t (PSt .ps) -> PSt .ps | gGEC{|*|} t & bimap{|*|} ps
 selfGEC gui f x0 env = env1

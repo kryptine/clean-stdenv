@@ -89,7 +89,7 @@ where
 derive gMap MyRecord3
 derive gGEC MyRecord3
 
-test4 = startCircuit (feedback (edit "self" >>@ convert)) (mapTo init)	
+test4 = startCircuit (feedback (edit "self" >>> arr convert)) (mapTo init)	
 where
 	init = 	{ val1	= 0.0
 			, val2	= 0.0
@@ -132,7 +132,7 @@ where
 derive gGEC X
 
 //test7 = CGEC (selfGEC "self" convert2) (mapto2 init) //(mapTo init)	
-test7 = startCircuit (edit "self" >>@ mapto2) init //(mapTo init)	
+test7 = startCircuit (edit "self" >>> arr mapto2) init //(mapTo init)	
 where
 	init = 	X (3,(idAGEC [1..3]))
 
@@ -180,7 +180,7 @@ derive generate Mode, DynString, MyRecord3, T, X, MyRecord10
 /*	Section 4.1. Example 2
 */
 test9
-   = startCircuit (feedback (guiApply o (^^) @>> edit "test" ))
+   = startCircuit (feedback (arr (guiApply o (^^)) >>> edit "test" ))
                   (vertlistAGEC [show "expression " 0])
 where
    guiApply [f:args]
@@ -202,7 +202,7 @@ where
 derive gGEC MyRecord10
 
 test10
-   = startCircuit (feedback (guiApply @>> edit "test"))
+   = startCircuit (feedback (arr guiApply >>> edit "test"))
                   (initval ((+) 1.0) 3.0)
 where
    initval f v = { function = dynamicAGEC f
@@ -218,7 +218,7 @@ displayAGEC x = modeAGEC (Display x)
 /*	Section 4.2. Example 2
 */
 test11
-   = startCircuit (feedback (guiApply @>> edit "test"))
+   = startCircuit (feedback (arr guiApply >>> edit "test"))
                   (initval ((+) 1.0) 3.0)
 where
    initval f v = { function = dynamicAGEC f

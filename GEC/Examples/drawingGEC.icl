@@ -40,7 +40,7 @@ example_draw pst
 #	(wid,pst) 	= openId pst
 #    pst 		= snd (openWindow Void (Window "Drawings" NilLS [WindowId wid]) pst)
 =	startCircuit ( feedback ( 		edit "Editor" 
-							>>@ 	move 
+							>>> 	arr move 
 							>>>		gecIO (mydrawfun wid) 
 			  				)
 		 		 ) (initrecord 100 100, myclock) pst

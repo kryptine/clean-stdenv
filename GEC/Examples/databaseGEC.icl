@@ -34,9 +34,9 @@ where
 											&& isAlpha zipcode.[5] //|| zipcode==""
 
 predGEC 		:: String (a -> Bool) 		-> GecCircuit a a 		| gGEC{|*|}, generate{|*|} a
-predGEC s p  =  	(\a -> (a,Hide a)) 
-				@>> edit s 
-				>>@	(\(a,Hide oa) -> if (p a) a oa)
+predGEC s p  =  	arr (\a -> (a,Hide a)) 
+				>>> edit s 
+				>>>	arr (\(a,Hide oa) -> if (p a) a oa)
 
 example_db3	= startCircuit (edit "ListDisplay") (listAGEC True initrecords) 
 where

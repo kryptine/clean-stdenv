@@ -28,7 +28,7 @@ where
 			| otherwise = [y: filter x ys]
 	
 example_lists2 = startCircuit (		edit "Henks input" 
-								>>@ (\n -> listAGEC True (calcnum n))
+								>>> arr (\n -> listAGEC True (calcnum n))
 								>>> edit "Henks output"
 								) 1 
 where

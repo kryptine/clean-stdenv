@@ -14,7 +14,7 @@ Start world = startGEC myEditor5 world
 :: ViewGEC a b :== BimapGEC a b
 
 mkViewGEC:: a (a -> b) (b -> b) (b -> a) -> (ViewGEC a b)
-mkViewGEC val toGec updGec fromGec = mkBimapGEC toGec` updGec fromGec val
+mkViewGEC val toGec updGec fromGec = mkBimapGEC toGec` updGec fromGec (\t -> (True,t)) val
 where
 	toGec` nval (Defined oval) =  oval //toGec nval //oval
 	toGec` nval _ = toGec nval

@@ -43,11 +43,11 @@ example_mouse pst
 	=	startCircuit (feedback  (  edit "Mouse" >>> gecMouse "Mouse" )) MouseLost pst
 
 example_draw pst
-=	startCircuit ( feedback ( 		(\list -> listAGEC True [(toEditReprs fig,Hide fig) \\ fig <- list])
-				@>>		edit "Editor"
-				>>@		(\list -> [(fromEditReprs nfig,ofig) \\ (nfig,Hide ofig) <- ^^ list])
+=	startCircuit ( feedback ( 		arr (\list -> listAGEC True [(toEditReprs fig,Hide fig) \\ fig <- list])
+				>>>		edit "Editor"
+				>>>		arr	(\list -> [(fromEditReprs nfig,ofig) \\ (nfig,Hide ofig) <- ^^ list])
 				>>>		(gecMouse "Drawings" &&& gecIO (mydrawfun "Drawings") ) 
-				>>@		(\(mousestate,list) -> hit mousestate [fig \\ (fig,_) <- list])
+				>>>		arr	(\(mousestate,list) -> hit mousestate [fig \\ (fig,_) <- list])
 			  )
 		 ) [(initshape 30 30 100 100)] pst
 	

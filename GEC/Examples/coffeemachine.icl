@@ -98,7 +98,7 @@ isPressed Pressed      = True
 derive generate Mode, Button, Machine, Output, Product
 
 coffeemachine
-	= startCircuit (feedback (edit "Coffee" >>@ updCoffee)) (toViewModel (Idle,initCoffee))
+	= startCircuit (feedback (edit "Coffee" >>> arr updCoffee)) (toViewModel (Idle,initCoffee))
 where
 	updCoffee = toViewModel o dataModelFun o fromViewModel
 	
