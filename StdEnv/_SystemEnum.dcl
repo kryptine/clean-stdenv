@@ -14,8 +14,8 @@ definition module _SystemEnum
 		[from, then .. to]	-> _from_then_to from then to
 */
 
-//from StdClass import Enum,IncDec,Ord,<=,inc
-from StdClass import class Enum (..), class IncDec (..), inc, class Ord (..), <=
+from StdClass import class Enum (..), class IncDec (..), class Ord (..),<=,inc,dec
+
 from StdBool import not 
 
 import StdInt
