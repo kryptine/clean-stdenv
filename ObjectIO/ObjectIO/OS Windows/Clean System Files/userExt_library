@@ -1,10 +1,10 @@
 user32.dll
-ShowScrollBar@12
-RedrawWindow@16
-WaitMessage@0
-LoadImageA@24
-TrackPopupMenu@28
 GetNextDlgTabItem@12
+IsWindowVisible@4
+LoadImageA@24
+RedrawWindow@16
 ScrollDC@28
 ShowCursor@4
-
+ShowScrollBar@12
+TrackPopupMenu@28
+WaitMessage@0
