@@ -9,12 +9,15 @@ definition module StdPrint
 //	********************************************************************************
  
 
+from	StdFile			import :: Files
 from	StdIOCommon		import :: UpdateState
 from	StdIOBasic		import :: IdFun, :: Size, :: Rectangle, :: Point2
 from	StdOverloaded	import class ==
 from	ospicture		import :: Picture
 from	osprint			import :: Alternative(..), class PrintEnvironments(..),
-							:: PrintInfo(..), :: PrintSetup, :: JobInfo(..)
+							:: PrintInfo(..), :: PrintSetup, :: JobInfo(..),
+							instance PrintEnvironments Files,
+							instance PrintEnvironments (PSt .l)
 from	iostate			import :: PSt
 from	StdFile			import class FileEnv
 
