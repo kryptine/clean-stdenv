@@ -4,7 +4,8 @@ implementation module mouseevent
 - need to incorporate input-tracking...
 ***/
 
-import StdEnv, StdIO
+import StdEnv//, StdIO
+import StdPSt,StdControlAttribute
 import windowaccess,windowhandle,deviceevents,iostate
 import commondef
 import ostypes, oswindow, ospicture
