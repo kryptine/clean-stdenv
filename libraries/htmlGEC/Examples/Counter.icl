@@ -7,13 +7,15 @@ Start world  = doHtml MyPage world
 
 MyPage hst
 # ((_,counterGEC),hst) = counterHGEC "counter" HEdit 0 hst
-= (Head 
-	[ Hd_Title "Counter Example"
-	] 
-	[ H1 "Counter Example"
+= mkHtml "Counter Example"
+	[ H1 [] "Counter Example"
 	, Br  
 	, counterGEC
-	],hst)
+	] hst
+where
+	mkHtml s tags hst 	= (Html (header s) (body tags),hst)
+	header s 			= Head [`Hd_Std [Std_Title s]] [] 
+	body tags 			= Body [] tags
 
 
 

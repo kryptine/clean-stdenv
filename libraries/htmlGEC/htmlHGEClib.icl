@@ -11,17 +11,17 @@ import StdHtml
 
 // Place two bodies next to each other
 
-(<=>) infixl 5 :: Body Body -> Body
-(<=>) b1 b2 =  Table [Tbl_CellPadding 0, Tbl_CellSpacing 0] [[b1,b2]]
+(<=>) infixl 5 :: BodyTag BodyTag -> BodyTag
+(<=>) b1 b2 =  STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[b1,b2]]
 
 // Place second body below first
 
-(<||>) infixl 4	:: Body Body -> Body	// Place a above b
-(<||>) b1 b2 =  Table [Tbl_CellPadding 0, Tbl_CellSpacing 0] [[b1],[b2]]
+(<||>) infixl 4	:: BodyTag BodyTag -> BodyTag	// Place a above b
+(<||>) b1 b2 =  STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[b1],[b2]]
 
 // HGEC collection:
 
-counterHGEC 	:: !String !HMode a !*HSt -> ((a,!Body),!*HSt) | +, -, one,  gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+counterHGEC 	:: !String !HMode a !*HSt -> ((a,!BodyTag),!*HSt) | +, -, one,  gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 counterHGEC name mode i hst = mkViewHGEC name mode bimap i hst
 where
 	bimap =	{ toHGEC 	= toCounter
@@ -45,7 +45,7 @@ where
 	down	= CHButton (defpixel / 6) "-"
 
 
-horlist2HGEC :: !String !HMode a ![a] !*HSt -> (([a],!Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+horlist2HGEC :: !String !HMode a ![a] !*HSt -> (([a],!BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 horlist2HGEC s mode defaultval list hst 
 # ((fun,butbody),hst) 	= assignTableFuncBut  s mode [[(but "-", less),(but "+", more)]] hst
 # ((nlist,nbody),hst) 	= horlistHGEC s mode (fun list) hst  
@@ -59,42 +59,42 @@ where
 	less [x:xs] = xs
 	less [] = []
 	
-horlistHGEC 	:: !String !HMode ![a] 	!*HSt -> (([a],!Body),!*HSt) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+horlistHGEC 	:: !String !HMode ![a] 	!*HSt -> (([a],!BodyTag),!*HSt) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 horlistHGEC s mode [] hst  = (([],EmptyBody),hst)
 horlistHGEC s mode [x:xs] hst
 # ((xs,xsbody),hst) = horlistHGEC s mode xs hst
 # ((x, xbody), hst) = mkEditHGEC (s +++ toString (length xs)) mode x hst
 = (([x:xs],xbody <=> xsbody),hst)
 	
-vertlistHGEC :: !String !HMode ![a] !*HSt -> (([a],!Body),!*HSt) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
+vertlistHGEC :: !String !HMode ![a] !*HSt -> (([a],!BodyTag),!*HSt) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
 vertlistHGEC s mode [] hst  = (([],EmptyBody),hst)
 vertlistHGEC s mode [x:xs] hst
 # ((xs,xsbody),hst)	= vertlistHGEC s mode xs hst
 # ((x, xbody), hst)	= mkEditHGEC (s +++ toString (length xs)) mode x hst
 = (([x:xs],xbody <||> xsbody),hst)
 
-table_hv_HGEC :: !String !HMode ![[a]] !*HSt -> (([[a]],!Body),!*HSt) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
+table_hv_HGEC :: !String !HMode ![[a]] !*HSt -> (([[a]],!BodyTag),!*HSt) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
 table_hv_HGEC s mode [] hst = (([],EmptyBody),hst)
 table_hv_HGEC s mode [x:xs] hst
 # ((xs,xsbody),hst)	= table_hv_HGEC s mode xs hst
 # ((x, xbody), hst)	= horlistHGEC (s +++ toString (length xs)) mode x hst
 = (([x:xs],xbody <||> xsbody),hst)
 
-assignTableFuncBut :: !String !HMode ![[(CHButton, a -> a)]] !*HSt -> ((a -> a,!Body),!*HSt)
+assignTableFuncBut :: !String !HMode ![[(CHButton, a -> a)]] !*HSt -> ((a -> a,!BodyTag),!*HSt)
 assignTableFuncBut s mode [] hst = ((id,EmptyBody),hst)
 assignTableFuncBut s mode [row:rows] hst 
 # ((rowsfun,rowsb),hst) = assignTableFuncBut s mode rows hst
 # ((rowfun,rowb),  hst)	= assignRowFuncBut s mode row hst
 = ((rowfun o rowsfun,rowb <||> rowsb),hst)
 where
-	assignRowFuncBut :: !String !HMode [(CHButton, a -> a)] !*HSt -> ((a -> a,!Body),!*HSt)
+	assignRowFuncBut :: !String !HMode [(CHButton, a -> a)] !*HSt -> ((a -> a,!BodyTag),!*HSt)
 	assignRowFuncBut s mode [] hst = ((id,EmptyBody),hst)
 	assignRowFuncBut s mode [x:xs] hst 
 	# ((rowfun,rowb),hst) 	= assignRowFuncBut s mode xs hst
 	# ((fun,oneb)   ,hst)	= assignFuncBut s mode x hst
 	= ((fun o rowfun,oneb <=> rowb),hst)
 
-	assignFuncBut :: !String !HMode !(CHButton, a -> a) !*HSt -> ((a -> a,!Body),!*HSt)
+	assignFuncBut :: !String !HMode !(CHButton, a -> a) !*HSt -> ((a -> a,!BodyTag),!*HSt)
 	assignFuncBut s mode (button=:CHButton size name ,cbf) hst = mkViewHGEC (s +++ name) mode bimap id hst
 	where
 		bimap =	{ toHGEC 	= \_ _	-> button
