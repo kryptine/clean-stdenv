@@ -12,14 +12,14 @@ DummyTrans		:== {start="",sigma=' ',end="",move=' '}
 
 
 //	Write a Turing Machine to a file.
-WriteTuringToFile :: Turing !String !*Files -> (!Bool,!*Files)
-WriteTuringToFile turing fname files
-	# (success,file,files)	= fopen fname FWriteText files
+WriteTuringToFile :: Turing !String !*env -> (!Bool,!*env) | FileSystem env
+WriteTuringToFile turing fname env
+	# (success,file,env)	= fopen fname FWriteText env
 	| not success
-		= (False,files)
+		= (False,env)
 	| otherwise
-		# (_,files)			= fclose (file<<<turing) files
-		= (True,files)
+		# (_,env)			= fclose (file<<<turing) env
+		= (True,env)
 
 instance <<< Turing where
 	(<<<) :: !*File !Turing -> *File
@@ -72,15 +72,15 @@ instance <<< [x] | <<< x where
 	(<<<) file []		= file
 
 //	Read a Turing Machine from a file
-ReadTuring :: !String !*Files -> (!(!Int,!Turing),!*Files)
-ReadTuring filename disk
-	# (success,file,disk)		= fopen filename FReadText disk
+ReadTuring :: !String !*env -> (!(!Int,!Turing),!*env) | FileSystem env
+ReadTuring filename env
+	# (success,file,env)		= fopen filename FReadText env
 	| not success
-		= ((-2,DummyTuring),disk)
+		= ((-2,DummyTuring),env)
 	| otherwise
 		# (linenr,turing,file)	= ReadTuringFile file
-		  (_,disk)				= fclose file disk
-		= ((linenr,turing),disk)
+		  (_,env)				= fclose file env
+		= ((linenr,turing),env)
 where
 	ReadTuringFile :: !*File -> (!Int,!Turing,!*File)
 	ReadTuringFile file
@@ -176,7 +176,8 @@ where
 					| otherwise			= i
 				
 				IsLayoutChar :: !Int !String -> Bool
-				IsLayoutChar i s = isMember s.[i] [' ', '(', ')', '-', '>', ',', '.', '[', ']', '{', '}', ':']
+			//	IsLayoutChar i s = isMember s.[i] [' ', '(', ')', '-', '>', ',', '.', '[', ']', '{', '}', ':']
+				IsLayoutChar i s = isMember s.[i] [' ()->,.[]{}:']
 
 
 //	Given a pathname, return the filename (remove the path).

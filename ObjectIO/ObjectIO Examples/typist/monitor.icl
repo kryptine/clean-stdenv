@@ -198,10 +198,10 @@ where
 		
 		drawAverage :: Int *Picture -> *Picture
 		drawAverage height picture
-			|	height<=0	= picture
-			|	otherwise	= appXorPicture (drawLine {x=GraphX,y=y} {x=GraphX+GraphWidth,y=y}) picture
+			| height<=0	= picture
+			| otherwise	= appXorPicture (drawLine {x=GraphX,y=y} {x=GraphX+GraphWidth,y=y}) picture
 		where
-			y				= GraphY-height
+			y			= GraphY-height
 
 drawKeyHitColumn :: (Int,Count) -> (Int,IdFun *Picture)
 drawKeyHitColumn (i,count)
@@ -259,7 +259,7 @@ round decimals r
 	# p				= toReal (10^decimals)
 	| otherwise		= toReal (toInt (r*p))/p
 
-smap :: ((.s,.x) -> (.s,.y)) !(.s,![.x]) -> (!.s,![.y])
+smap :: ((.s,.x) -> (.s,.y)) !(!.s,![.x]) -> (!.s,![.y])
 smap f (s,[x:xs])
 	# (s,y ) = f (s,x)
 	# (s,ys) = smap f (s,xs)

@@ -19,8 +19,6 @@ initialLife
 	=	{	gen	= makeGeneration
 		,	size= StartCellSize
 		}
-::	NoState
-	=	NoState
 
 Start :: *World -> *World
 Start world

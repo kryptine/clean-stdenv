@@ -14,14 +14,6 @@ module slidegame
 import StdEnv, StdIO, Random
 
 
-/*	Start simply creates the slide game process.
-	Note that the slide game process is polymorphic in the local and public process state.
-	Because we need to choose a value for these states we use the singleton type NoState.
-*/
-::	NoState							// A dummy state
-	=	NoState
-
-
 /*	openSlideGame first attempts to read in the bitmap.
 	If successfull, openSlideGame then checks whether the given bitmap has proper dimensions.
 	If this is the case then a window is opened that will contain the slide game.
@@ -41,7 +33,7 @@ Start world
 	# (maybeFile,world)		= selectInputFile world
 	| isNothing maybeFile
 		= world
-	# (maybeBitmap,world)	= accFiles (openBitmap (fromJust maybeFile)) world
+	# (maybeBitmap,world)	= openBitmap (fromJust maybeFile) world
 	| isNothing maybeBitmap
 		= world
 	# bitmap				= fromJust maybeBitmap
@@ -49,14 +41,15 @@ Start world
 	  blocksize				= {w=bitmapsize.w/4,h=bitmapsize.h/4}
 	| not (ok_blocksize blocksize)
 		= world
-	# (seed,world)			= getNewRandomSeed world
-	  (okCoords,hole)		= initlast [{col=col,row=row} \\ row<-[0..3],col<-[0..3]]
-	  (_,coords,hole)		= iteraten nr_shuffle shuffle (seed,zip2 okCoords okCoords,hole)
-	# (windowId,world)		= openId world
-	# (allcids, world)		= openIds   15 world
-	# (allr2ids,world)		= openR2Ids 15 world
-	  wdef					= window bitmap blocksize windowId allcids allr2ids coords
-	= startIO SDI NoState (snd o openWindow {curHole=hole} wdef) [ProcessClose closeProcess] world
+	| otherwise
+		# (seed,world)		= getNewRandomSeed world
+		  (okCoords,hole)	= initlast [{col=col,row=row} \\ row<-[0..3],col<-[0..3]]
+		  (_,coords,hole)	= iteraten nr_shuffle shuffle (seed,zip2 okCoords okCoords,hole)
+		# (windowId,world)	= openId world
+		# (allcids, world)	= openIds   15 world
+		# (allr2ids,world)	= openR2Ids 15 world
+		  wdef				= window bitmap blocksize windowId allcids allr2ids coords
+		= startIO SDI Void (snd o openWindow {curHole=hole} wdef) [ProcessClose closeProcess] world
 where
 	nr_shuffle				= 200
 	
@@ -119,8 +112,8 @@ where
 	:==	Bool						// True iff the control is currently at its desired location
 ::	SlideR2Id						// Shorthand for the receiver id of a slide control
 	:==	R2Id SlideMsgIn SlideMsgOut
-::	SlideControl ls ps				// Shorthand for the slide control constructor type
-	:==	AddLS (:+: CustomButtonControl (Receiver2 SlideMsgIn SlideMsgOut)) ls ps
+::	SlideControl ls pst				// Shorthand for the slide control constructor type
+	:==	AddLS (:+: CustomButtonControl (Receiver2 SlideMsgIn SlideMsgOut)) ls pst
 
 slideControl :: Bitmap Size Id [SlideR2Id] ((Coord,Coord),(Id,SlideR2Id))
 	-> SlideControl WindowState (PSt .l)
@@ -143,31 +136,31 @@ where
 	offset {col,row}= {vx=size.w*col,vy=size.h*row}
 	
 	slideMove :: (.(SlideState,WindowState),PSt .l) -> (.(SlideState,WindowState),PSt .l)
-	slideMove ((slide=:{curCoord},ls=:{curHole}),ps)
+	slideMove ((slide=:{curCoord},ls=:{curHole}),pst)
 		| distCoord curCoord curHole<>1
-			= ((slide,ls),ps)
-		# slide			= {slide & curCoord=curHole }
-		  ls			= {ls    & curHole =curCoord}
-		# (_,ps)		= accPIO (setControlPos windowId [(cid,(LeftTop,OffsetVector (offset curHole)))]) ps
-		# i_am_ok		= curHole==okCoord
+			= ((slide,ls),pst)
+		# slide				= {slide & curCoord=curHole }
+		  ls				= {ls    & curHole =curCoord}
+		# (_,pst)			= accPIO (setControlPos windowId [(cid,(LeftTop,OffsetVector (offset curHole)))]) pst
+		# i_am_ok			= curHole==okCoord
 		| not i_am_ok
-			= ((slide,ls),ps)
-		# (others_ok,ps)= seqList (map areYouOk others) ps
+			= ((slide,ls),pst)
+		# (others_ok,pst)	= seqList (map areYouOk others) pst
 		| and others_ok
-			= ((slide,ls),appPIO (disableWindow windowId) ps)
+			= ((slide,ls),appPIO (disableWindow windowId) pst)
 		| otherwise
-			= ((slide,ls),ps)
+			= ((slide,ls),pst)
 	
 	areYouOk :: SlideR2Id (PSt .l) -> (Bool,PSt .l)
-	areYouOk r2id ps
-		# (response,ps)	= syncSend2 r2id AreYouOk ps
-		= (fromJust (snd response),ps)
+	areYouOk r2id pst
+		# (response,pst)	= syncSend2 r2id AreYouOk pst
+		= (fromJust (snd response),pst)
 	
 	receiver2	= Receiver2 r2id receive2 []
 	
 	receive2 :: SlideMsgIn ((SlideState,.ls),PSt .l) -> (SlideMsgOut,((SlideState,.ls),PSt .l))
-	receive2 AreYouOk (slide=:({curCoord},_),ps)
-		= (okCoord==curCoord,(slide,ps))
+	receive2 AreYouOk (slide=:({curCoord},_),pst)
+		= (okCoord==curCoord,(slide,pst))
 
 //	The distance between two Coords:
 distCoord :: !Coord !Coord -> Int

@@ -12,6 +12,6 @@ import StdEnv, StdIO
 
 Start :: *World -> *World
 Start world
-	= startIO NDI 0 (snd o openDialog undef hello) [] world
+	= startIO NDI Void (snd o openDialog undef hello) [] world
 where
 	hello	= Dialog "" (TextControl "Hello world!" []) [WindowClose (noLS closeProcess)]

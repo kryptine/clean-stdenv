@@ -22,8 +22,6 @@ import StdEnv, StdIO
 	=	{	pos		:: Int
 		,	tower	:: Tower
 		}
-::	NoState
-	=	NoState
 
 ViewDomain	:== {corner1={x=50,y=0},corner2={x=480,y=180}}
 Speed1		:== ticksPerSecond / 2

@@ -6,7 +6,8 @@ implementation module Highscore
 */
 
 
-import	StdEnv, StdIO
+import	StdBool, StdEnum, StdFile, StdInt, StdList, StdMisc, StdString, StdTuple
+import	StdId, StdSystem, StdWindow
 
 ::	HiScores
 	:== [HiScore]
@@ -16,15 +17,15 @@ import	StdEnv, StdIO
 		}
 
 //	Read in the high scores:
-readHiScores :: !String !*Files -> (!(!*File,!HiScores),!*Files)
-readHiScores fname files
-	# (exists,file,files)	= fopen fpath FReadData files
+readHiScores :: !String !*env -> (!(!*File,!HiScores),!*env) | FileSystem env
+readHiScores fname env
+	# (exists,file,env)		= fopen fpath FReadData env
 	| exists
 		# (highs,file)		= readHighs file
-		= ((file,highs),files)
+		= ((file,highs),env)
 	| otherwise
-		# (_,create,files)	= fopen fpath FWriteData files
-		= ((create,[]),files)
+		# (_,create,env)	= fopen fpath FWriteData env
+		= ((create,[]),env)
 where
 	fpath = homepath fname
 	
@@ -44,11 +45,11 @@ where
 			= ([{name=name,score=hi}:rest],file)
 
 //	Write the high scores:
-writeHiScores :: !*File !HiScores !*Files -> *Files
-writeHiScores file highs files
+writeHiScores :: !*File !HiScores !*env -> *env | FileSystem env
+writeHiScores file highs env
 	# (ok,file)	= freopen file FWriteData
 	| not ok	= abort "Could not reopen file.\n"
-	| otherwise	= snd (fclose (file<<<highs) files)
+	| otherwise	= snd (fclose (file<<<highs) env)
 
 instance <<< HiScore where
 	(<<<) :: !*File !HiScore -> *File

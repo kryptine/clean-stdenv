@@ -10,16 +10,14 @@ module counter
 
 import StdEnv, StdIO
 
-::	NoState	= NoState
-
 Start :: *World -> *World
 Start world
-	= startIO NDI NoState initIO [] world
+	= startIO NDI Void initIO [] world
 
 initIO pst
 	# (dialogid, pst)	= accPIO openId pst
 	# (displayid,pst)	= accPIO openId pst
-	# (_,pst)			= openDialog NoState (dialog dialogid displayid) pst
+	# (_,pst)			= openDialog Void (dialog dialogid displayid) pst
 	= pst
 where
 	dialog dialogId displayId

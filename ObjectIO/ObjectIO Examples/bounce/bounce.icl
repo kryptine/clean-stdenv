@@ -23,8 +23,6 @@ import bounceDraw
 		,	barrel	:: !Barrel				// the shape of the barrel
 		,	balls	:: ![Ball]				// the balls in the barrel
 		}
-::	NoState									// NoState is a simple singleton type constructor
-	=	NoState
 ::	*Bounce
 	:==	PSt Local							// Synonym for PSt
 

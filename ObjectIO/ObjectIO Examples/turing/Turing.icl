@@ -108,40 +108,21 @@ where
 					,	WindowLook			True (tmLook tm)
 					,	WindowMouse			tmMouseFilter Able (noLS1 EditTransitions)
 					,	WindowClose			(noLS DoQuit)
-					,	WindowHScroll		(hscroll 24)
-					,	WindowVScroll		(vscroll 8)
+					,	WindowHScroll		(stdScrollFunction Horizontal 24)
+					,	WindowVScroll		(stdScrollFunction Vertical   8)
 					]
 		tapewd	= Window "Tape" NilLS
 					[	WindowId			tapeWdID
 					,	WindowViewDomain	{zero & corner2={x=MaxX,y=92}}
-					,	WindowViewSize		{w=400,h=60}
+					,	WindowViewSize		{w=500,h=92}
 					,	WindowLook			True (tpLook tape)
 					,	WindowMouse			tpMouseFilter Able (noLS1 EditTape)
 					,	WindowClose			(noLS DoQuit)
-					,	WindowHScroll		(hscroll 24)
-					,	WindowVScroll		(vscroll 8)
+					,	WindowHScroll		(stdScrollFunction Horizontal 24)
+					,	WindowVScroll		(stdScrollFunction Vertical   8)
+					,	WindowPos			(Below windowID,zero)
 					]
 		timer	= Timer Speed3 NilLS [TimerId timerID,TimerSelectState Unable,TimerFunction (noLS1 TimerStep)]
-		
-		hscroll dx viewFrame {sliderThumb} move
-				= case move of
-					SliderIncSmall	-> sliderThumb+dx
-					SliderDecSmall	-> sliderThumb-dx
-					SliderIncLarge	-> sliderThumb+width
-					SliderDecLarge	-> sliderThumb-width
-					SliderThumb x	-> x
-		where
-			width	= (rectangleSize viewFrame).w
-		vscroll dy viewFrame {sliderThumb} move
-				= case move of
-					SliderIncSmall	-> sliderThumb+dy
-					SliderDecSmall	-> sliderThumb-dy
-					SliderIncLarge	-> sliderThumb+height
-					SliderDecLarge	-> sliderThumb-height
-					SliderThumb x	-> x
-		where
-			height	= (rectangleSize viewFrame).h
-	
 	
 	//	Open a new empty Turing machine.
 	DoNew :: (PSt Tm) -> PSt Tm
@@ -174,7 +155,7 @@ where
 	//	Save the Turing machine.
 	DoSave :: (PSt Tm) -> PSt Tm
 	DoSave pst=:{ls=tm=:{tmstate={turing},name}}
-		# (success,pst)	= accFiles (WriteTuringToFile turing name) pst
+		# (success,pst)	= WriteTuringToFile turing name pst
 		| success
 			# pst		= {pst & ls={tm & saved=True}}
 			# pst		= appPIO (disableMenuElements [saveItemId]) pst
@@ -191,7 +172,7 @@ where
 		# fname							= fromJust fname
 		| RemovePath fname==HelpFile
 			= Alert "The Turing machine cannot be saved to" ("the help file \'"+++HelpFile+++"\'.") pst
-		# (success,pst)					= accFiles (WriteTuringToFile turing fname) pst
+		# (success,pst)					= WriteTuringToFile turing fname pst
 		| not success
 			= Alert "The Turing machine has not been saved." "The file could not be opened." pst
 		# pst							= appPIO (setWindowTitle windowID (RemovePath fname)) pst
@@ -224,7 +205,7 @@ where
 		  fstring				= " \'"+++fname+++"\'"
 		| fname==HelpFile
 			= Alert ("The help file"+++fstring) "cannot be opened as a T.M." pst
-		# ((status,turing),pst)	= accFiles (ReadTuring name) pst
+		# ((status,turing),pst)	= ReadTuring name pst
 		| status==0
 			# tmstate			= {turing=turing,transition=0,command=None}
 			# pst				= appListPIO 

@@ -1,9 +1,9 @@
 definition module tmfile
 
 from	StdString	import String
-from	StdFile		import Files
+from	StdFile		import FileSystem
 from	tm			import Turing, Transition, Tape, State, Head
 
-WriteTuringToFile	:: Turing	!String !*Files	-> (!Bool,!*Files)
-ReadTuring			::			!String !*Files	-> (!(!Int,!Turing),!*Files)
+WriteTuringToFile	:: Turing	!String !*env	-> (!Bool,!*env)           | FileSystem env
+ReadTuring			::			!String !*env	-> (!(!Int,!Turing),!*env) | FileSystem env
 RemovePath			::			!String			-> String

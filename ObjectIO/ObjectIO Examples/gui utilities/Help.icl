@@ -8,8 +8,8 @@ implementation module Help
 //	
 //	**************************************************************************************************
 
-import	StdArray, StdBool, StdFunc, StdInt, StdList, StdTuple, StdMisc
-import	StdId, StdProcess, StdPSt, StdSystem, StdWindow
+import	StdArray, StdBool, StdFile, StdFunc, StdInt, StdList, StdTuple, StdMisc
+import	StdId, StdProcess, StdPSt, StdPStClass, StdSystem, StdWindow
 
 ::	NoState		=	NoState
 ::	InfoDef		:== (Size,[InfoLine])
@@ -39,13 +39,6 @@ HelpEnd			:== "\\EndHelp"
 About			:== False
 Help			:== True
 
-
-//	fopen for use with accFiles
-fopen2 fileName mode files
-	:==	((ok,file),files2)
-	where
-		(ok,file,files2)
-			= fopen fileName mode files
 
 /*	showAbout opens a window:
 	-	it has the title of the application name (String argument 1),
@@ -149,14 +142,14 @@ where
 
 readInfo :: Bool Fonts String String String (PSt .l) -> ((Size,[InfoLine]),PSt .l)
 readInfo help fonts begin end filename pState
-	# (metrics,      pState)	= getFontHeightAndAscent fonts pState
-	# ((succes,file),pState)	= accFiles (fopen2 (applicationpath filename) FReadText) pState
+	# (metrics,    pState)	= getFontHeightAndAscent fonts pState
+	# (succes,file,pState)	= fopen (applicationpath filename) FReadText pState
 	| not succes && help
 		= processInfoStrings fonts metrics [errpref+++"could not be found."] pState
 	| not succes
 		= processInfoStrings fonts metrics ["\\DThis is a Clean program."] pState
-	# (found,info,file)			= readInfoFile begin end file
-	# (_,pState)				= accFiles (fclose file) pState
+	# (found,info,file)		= readInfoFile begin end file
+	# (_,pState)			= fclose file pState
 	| not found && help
 		= processInfoStrings fonts metrics [errpref+++"does not contain help information."] pState
 	| not found

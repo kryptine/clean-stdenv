@@ -37,8 +37,6 @@ import StdEnv, StdIO, Notice
 		,	width		:: Int				// Its widest character
 		,	height		:: Int				// Its line height
 		}
-::	NoState
-	=	NoState
 
 instance zero Entry where
 	zero = {maxwidth=0,fields=[""]}

@@ -27,7 +27,7 @@ NrOfHiScores	:== 8
 //	Start of the program.
 Start :: *World -> *World
 Start world
-	# (hiscores,world)	= accFiles (readHiScores HiScoresFile) world
+	# (hiscores,world)	= readHiScores HiScoresFile world
 	# (ids,     world)	= openIds 8 world
 	= startWorm hiscores ids world
 
@@ -177,7 +177,7 @@ where
 	//	The function for the Quit command: stop the program and write the high scores to file.
 	Quit :: (PSt Local) -> PSt Local
 	Quit pst=:{ls=ls=:{hifile,state={best}}}
-		= appFiles (writeHiScores hifile best) (closeProcess {pst & ls={ls & hifile=undef}})
+		= writeHiScores hifile best (closeProcess {pst & ls={ls & hifile=undef}})
 	
 	//	Set a new speed (called when one of the Options commands is chosen).
 	SetSpeed :: Int (PSt Local) -> PSt Local

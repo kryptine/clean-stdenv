@@ -8,7 +8,7 @@ definition module Highscore
 //	
 //	**************************************************************************************************
 
-from	StdFile			import Files
+from	StdFile			import FileSystem
 from	StdString		import String
 from	StdPSt			import PSt, IOSt
 from	StdId			import Id
@@ -20,10 +20,10 @@ from	StdId			import Id
 		,	score	:: !Int
 		}
 
-readHiScores	:: !String !*Files				-> (!(!*File,!HiScores),!*Files)
+readHiScores	:: !String !*env				-> (!(!*File,!HiScores),!*env) | FileSystem env
 //	Reads high score file from disk.
 
-writeHiScores	:: !*File  !HiScores !*Files	-> *Files
+writeHiScores	:: !*File  !HiScores !*env		-> *env | FileSystem env
 //	Writes high scores to disk.
 
 itsAHighScore	:: !Int !Int !HiScores			-> Bool

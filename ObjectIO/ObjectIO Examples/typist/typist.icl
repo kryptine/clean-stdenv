@@ -62,8 +62,9 @@ where
 				[	ControlKeyboard		keyFilter Able (noLS1 sendKeys)
 				,	ControlId			editId
 				,	ControlSelectState	Unable
-				,	ControlPos			(Center,NoOffset)
+				,	ControlPos			(Center,zero)
 				,	ControlTip			"Type your text in here"
+				,	ControlResize		(\_ _ newWindowSize->newWindowSize)
 				]
 				)
 				[	WindowId			wId
@@ -128,15 +129,15 @@ where
 //		The monitor process is notified of the end of the session by receiving the EndSession message.
 		endOfSession :: NrOfIntervals (PSt Typist) -> PSt Typist
 		endOfSession _ typist=:{io}
-			# io			= disableTimer tId io
-			# io			= disableControl editId io
-			# io			= enableMenuElements [runId] io
-			# (_,typist)	= asyncSend rId EndSession {typist & io=io}
+			# io		= disableTimer tId io
+			# io		= disableControl editId io
+			# io		= enableMenuElements [runId] io
+			# (_,typist)= asyncSend rId EndSession {typist & io=io}
 			= typist
 
 //	quit closes boths processes. 
 	quit :: (PSt Typist) -> PSt Typist
 	quit typist
-		# (_,typist)		= syncSend rId Quit typist
-		# typist			= closeProcess typist
+		# (_,typist)	= syncSend rId Quit typist
+		# typist		= closeProcess typist
 		= typist

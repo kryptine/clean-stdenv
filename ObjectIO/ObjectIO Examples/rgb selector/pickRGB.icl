@@ -13,10 +13,6 @@ module pickRGB
 import StdEnv, StdIO
 
 
-::	NoState
-	=	NoState
-
-
 Start :: *World -> *World
 Start world
 	# (rgbid,world)		= openR2Id  world
@@ -26,7 +22,7 @@ Start world
 where
  	initrgb				= {r=MaxRGB,g=MaxRGB,b=MaxRGB}
 	startColourPicker rgbid pickcontrol world
-		= startIO SDI NoState initialise [ProcessClose closeProcess] world
+		= startIO SDI Void initialise [ProcessClose closeProcess] world
 	where
 		initialise pst
 			# (rgbsize,pst)	= controlSize pickcontrol True Nothing Nothing Nothing pst
