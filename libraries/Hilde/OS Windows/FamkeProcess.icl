@@ -5,7 +5,7 @@ import FamkeRpc, LoesListSeq, LoesKeyList, TcpIp
 import StdBool, StdInt, StdMisc, StdString, StdList, StdArray, StdTuple, ArgEnv, Windows
 from DynamicLinkerInterface import GetDynamicLinkerPath
 
-TRACE msg x :== trace_n msg x; import StdDebug
+TRACE msg x :== x//trace_n msg x; import StdDebug
 
 :: ProtocolIn
 	= ClientWorkRequest !ProcessId !Int
