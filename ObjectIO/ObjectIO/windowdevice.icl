@@ -647,9 +647,9 @@ windowStateCompoundScrollActionIO wMetrics info=:{csaWIDS={wPtr}}
 		  wH				= {wH & whItems=newItems}
 		# (wH,tb)			= forceValidWindowClipState wMetrics True wPtr wH tb
 		# (updRgn,tb)		= relayoutControls wMetrics whSelect whShow wFrame wFrame zero zero wPtr wH.whDefaultId whItems wH.whItems tb
-		# (wH,tb)			= drawcompoundlook wMetrics whSelect wFrame info.csaItemNr wPtr wH tb	// PA: this might be redundant now because of updatewindowbackgrounds
 		# (wH,tb)			= updatewindowbackgrounds wMetrics updRgn info.csaWIDS wH tb
-		# tb				= OSvalidateWindowRect wPtr (SizeToRect whSize) tb
+		# (wH,tb)			= drawcompoundlook wMetrics whSelect wFrame info.csaItemNr wPtr wH tb	// PA: this might be redundant now because of updatewindowbackgrounds
+//		# tb				= OSvalidateWindowRect wPtr (SizeToRect whSize) tb
 		= ({wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
 where
 	windowInfo				= getWindowInfoWindowData whWindowInfo
@@ -700,7 +700,7 @@ where
 					= windowdeviceFatalError "drawWElementLook (windowStateCompoundScrollActionIO)" "argument control is not a CompoundControl"
 				| otherwise
 					# (itemH,tb)			= drawCompoundLook wMetrics isAble wPtr clipRect1 itemH tb
-					# tb					= OSvalidateWindowRect itemH.wItemPtr clipRect1 tb//(SizeToRect itemSize) tb	// PA: validation of (SizeToRect itemSize) is to much
+				//	# tb					= OSvalidateWindowRect itemH.wItemPtr clipRect1 tb//(SizeToRect itemSize) tb	// PA: validation of (SizeToRect itemSize) is to much
 					= (True,WItemHandle itemH,tb)
 			where
 				isAble						= ableContext && wItemSelect

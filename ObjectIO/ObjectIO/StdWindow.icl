@@ -10,7 +10,7 @@ import	StdControlClass
 from	StdId				import getParentId
 from	StdPSt				import appPIO, accPIO
 from	StdSystem			import maxScrollWindowSize
-import	commondef, controlpos, iostate, windowaccess, windowcreate, windowdevice, windowhandle, windowupdate, wstate
+import	commondef, controlpos, iostate, scheduler, windowaccess, windowcreate, windowdevice, windowhandle, windowupdate, wstate
 from	controlinternal		import enablecontrols, disablecontrols
 from	controllayout		import layoutControls
 from	controlrelayout		import relayoutControls
@@ -180,7 +180,7 @@ setActiveWindow wId pState
 	# wHs						= windows.whsWindows
 	  (modal,modeless)			= Uspan ismodalwindow wHs
 	  (isModal,modal)			= UContains (identifyWindowStateHandle wid) modal
-	| isModal					// Modal windows should be activated
+	| isModal					// Modal windows should not be activated
 		= {pState & io=IOStSetDevice (WindowSystemState {windows & whsWindows=modal++modeless}) ioState}
 	# (osdInfo,ioState)			= IOStGetOSDInfo ioState
 	  isSDI						= getOSDInfoDocumentInterface osdInfo==SDI
@@ -194,7 +194,11 @@ setActiveWindow wId pState
 		  activatePtr			= if (isSDI && wids.wPtr==clientPtr) framePtr wids.wPtr		// Do not activate SDI client, but SDI frame
 		  showAction			= if shown id (snd o OSshowWindow activatePtr True)
 		# ioState				= IOStSetDevice (WindowSystemState {windows & whsWindows=[wsH:others]}) ioState
-		# (delayinfo,ioState)	= accIOToolbox (OSactivateWindow osdInfo activatePtr o showAction) ioState
+//		# (delayinfo,ioState)	= accIOToolbox (OSactivateWindow osdInfo activatePtr o showAction) ioState
+		# (tb,ioState)			= getIOToolbox ioState
+		# pState				= {pState & io=ioState}
+		# (delayinfo,pState,tb)	= OSactivateWindow osdInfo activatePtr handleOSEvent pState (showAction tb)
+		# ioState				= setIOToolbox tb pState.io
 		# ioState				= bufferDelayedEvents delayinfo ioState
 		= {pState & io=ioState}
 	| otherwise					// There are modal windows, so put activated window behind last modal
@@ -215,6 +219,12 @@ where
 	ismodalwindow wsH
 		# (mode,wsH)			= getWindowStateHandleWindowMode wsH
 		= (mode==Modal,wsH)
+
+//	handleOSEvent turns handleOneEventForDevices into the form required by OSactivateWindow.
+	handleOSEvent :: !OSEvent !(!PSt .l,!*OSToolbox) -> (!PSt .l,!*OSToolbox)
+	handleOSEvent osEvent (pState,tb)
+		= (thd3 (handleOneEventForDevices (ScheduleOSEvent osEvent []) pState),tb)
+
 
 /*	getActiveWindow returns the Id of the currently active window.
 */

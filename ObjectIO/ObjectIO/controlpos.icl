@@ -26,9 +26,19 @@ controlposFatalError function error
 */
 movewindowviewframe :: !OSWindowMetrics !Vector2 !WIDS !(WindowHandle .ls .pst) !*OSToolbox -> (!WindowHandle .ls .pst,!*OSToolbox)
 movewindowviewframe wMetrics v wids=:{wPtr} wH=:{whWindowInfo,whItems=oldItems,whSize,whAtts,whSelect,whShow} tb
-	| newOrigin==oldOrigin
+	| newOrigin==oldOrigin		// origin has not changed
 		= (wH,tb)
-	| otherwise
+	| isEmpty oldItems			// there are no controls: do only visual updates
+		# tb					= setsliderthumb hasHScroll wMetrics wPtr True  (minx,newOrigin.x,maxx) vieww (toTuple whSize) tb
+		# tb					= setsliderthumb hasVScroll wMetrics wPtr False (miny,newOrigin.y,maxy) viewh (toTuple whSize) tb
+		  windowInfo			= {windowInfo & windowOrigin=newOrigin}
+		  wH					= {wH & whWindowInfo=WindowInfo windowInfo}
+		  (updArea,updAction)	= if (not lookInfo.lookSysUpdate || toMuch)
+		  							([newFrame],return []) (calcScrollUpdateArea oldOrigin newOrigin contentRect)
+		  updState				= {oldFrame=PosSizeToRectangle oldOrigin contentSize,newFrame=newFrame,updArea=updArea}
+		# (wH,tb)				= drawwindowlook` wMetrics wPtr updAction updState wH tb
+		= (wH,tb)
+	| otherwise					// there are controls: recalculate layout and do visual updates
 		# tb					= setsliderthumb hasHScroll wMetrics wPtr True  (minx,newOrigin.x,maxx) vieww (toTuple whSize) tb
 		# tb					= setsliderthumb hasVScroll wMetrics wPtr False (miny,newOrigin.y,maxy) viewh (toTuple whSize) tb
 		  reqSize				= {w=contentSize.w-fst hMargins-snd hMargins,h=contentSize.h-fst vMargins-snd vMargins}
@@ -41,8 +51,6 @@ movewindowviewframe wMetrics v wids=:{wPtr} wH=:{whWindowInfo,whItems=oldItems,w
 		  							_                                 -> controlposFatalError "movewindowviewframe" "unexpected whWindowInfo field"
 		# (updRgn,tb)			= relayoutControls wMetrics whSelect whShow contentRect contentRect zero zero wPtr wH.whDefaultId oldItems wH.whItems tb
 		# (wH,tb)				= updatewindowbackgrounds wMetrics updRgn wids wH tb
-		  newFrame				= PosSizeToRectangle newOrigin contentSize
-		  toMuch				= (abs (newOrigin.x-oldOrigin.x)>=w`) || (abs (newOrigin.y-oldOrigin.y)>=h`)
 		  (updArea,updAction)	= if (not lookInfo.lookSysUpdate || toMuch || not isRect)
 		  							([newFrame],return []) (calcScrollUpdateArea oldOrigin newOrigin areaRect)
 		  updState				= {oldFrame=PosSizeToRectangle oldOrigin contentSize,newFrame=newFrame,updArea=updArea}
@@ -62,6 +70,8 @@ where
 	newOrigin					= {	x = SetBetween (oldOrigin.x+v.vx) minx (max minx (maxx-vieww))
 								  ,	y = SetBetween (oldOrigin.y+v.vy) miny (max miny (maxy-viewh))
 								  }
+	newFrame					= PosSizeToRectangle newOrigin contentSize
+	toMuch						= (abs (newOrigin.x-oldOrigin.x)>=w`) || (abs (newOrigin.y-oldOrigin.y)>=h`)
 	(defMinW,defMinH)			= OSMinWindowSize
 	minSize						= {w=defMinW,h=defMinH}
 	hMargins					= getWindowHMargins   IsWindow wMetrics whAtts

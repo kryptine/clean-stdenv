@@ -26,22 +26,22 @@ import relayout, windowaccess, windowclipstate, wstateaccess
 relayoutControls :: !OSWindowMetrics !Bool !Bool !Rect !Rect !Point2 !Point2 !OSWindowPtr !(Maybe Id)
 					![WElementHandle .ls .pst] ![WElementHandle .ls .pst] !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 relayoutControls wMetrics isAble isVisible oldFrame newFrame oldParentPos newParentPos wPtr defaultId oldHs newHs tb
-	= relayoutItems wMetrics isAble oldFrame newFrame oldParentPos newParentPos wPtr
-					(WElementHandlesToRelayoutItems isVisible oldHs [])
-					(WElementHandlesToRelayoutItems isVisible newHs [])
+	= relayoutItems wMetrics oldFrame newFrame oldParentPos newParentPos wPtr
+					(WElementHandlesToRelayoutItems isAble isVisible oldHs [])
+					(WElementHandlesToRelayoutItems isAble isVisible newHs [])
 					tb
 where
-	WElementHandlesToRelayoutItems :: !Bool ![WElementHandle .ls .pst] ![RelayoutItem] -> [RelayoutItem]
-	WElementHandlesToRelayoutItems isVisible [itemH:itemHs] items
-		= WElementHandleToRelayoutItems isVisible itemH (WElementHandlesToRelayoutItems isVisible itemHs items)
+	WElementHandlesToRelayoutItems :: !Bool !Bool ![WElementHandle .ls .pst] ![RelayoutItem] -> [RelayoutItem]
+	WElementHandlesToRelayoutItems isAble isVisible [itemH:itemHs] items
+		= WElementHandleToRelayoutItems isAble isVisible itemH (WElementHandlesToRelayoutItems isAble isVisible itemHs items)
 	where
-		WElementHandleToRelayoutItems :: !Bool !(WElementHandle .ls .pst) ![RelayoutItem] -> [RelayoutItem]
-		WElementHandleToRelayoutItems isVisible (WItemHandle itemH=:{wItemKind}) items
-			= WItemHandleToRelayoutItems wItemKind isVisible itemH items
+		WElementHandleToRelayoutItems :: !Bool !Bool !(WElementHandle .ls .pst) ![RelayoutItem] -> [RelayoutItem]
+		WElementHandleToRelayoutItems isAble isVisible (WItemHandle itemH=:{wItemKind}) items
+			= WItemHandleToRelayoutItems wItemKind isAble isVisible itemH items
 		where
-			WItemHandleToRelayoutItems :: !ControlKind !Bool !(WItemHandle .ls .pst) ![RelayoutItem] -> [RelayoutItem]
-			WItemHandleToRelayoutItems controlKind=:IsRadioControl isVisible itemH=:{wItemSelect,wItemShow} items
-				= RadioItemToRelayoutItems wItemSelect (isVisible && wItemShow) (getWItemRadioInfo itemH.wItemInfo).radioItems items
+			WItemHandleToRelayoutItems :: !ControlKind !Bool !Bool !(WItemHandle .ls .pst) ![RelayoutItem] -> [RelayoutItem]
+			WItemHandleToRelayoutItems controlKind=:IsRadioControl isAble isVisible itemH=:{wItemSelect,wItemShow} items
+				= RadioItemToRelayoutItems (isAble && wItemSelect) (isVisible && wItemShow) (getWItemRadioInfo itemH.wItemInfo).radioItems items
 			where
 				RadioItemToRelayoutItems :: !Bool !Bool ![RadioItemInfo *(.ls,.pst)] ![RelayoutItem] -> [RelayoutItem]
 				RadioItemToRelayoutItems isAble isVisible [radio:radios] items
@@ -63,8 +63,8 @@ where
 				RadioItemToRelayoutItems _ _ _ items
 					= items
 			
-			WItemHandleToRelayoutItems controlKind=:IsCheckControl isVisible itemH=:{wItemSelect,wItemShow} items
-				= CheckItemToRelayoutItems wItemSelect (isVisible && wItemShow) (getWItemCheckInfo itemH.wItemInfo).checkItems items
+			WItemHandleToRelayoutItems controlKind=:IsCheckControl isAble isVisible itemH=:{wItemSelect,wItemShow} items
+				= CheckItemToRelayoutItems (isAble && wItemSelect) (isVisible && wItemShow) (getWItemCheckInfo itemH.wItemInfo).checkItems items
 			where
 				CheckItemToRelayoutItems :: !Bool !Bool ![CheckItemInfo *(.ls,.pst)] ![RelayoutItem] -> [RelayoutItem]
 				CheckItemToRelayoutItems isAble isVisible [check:checks] items
@@ -86,12 +86,12 @@ where
 				CheckItemToRelayoutItems _ _ _ items
 					= items
 			
-			WItemHandleToRelayoutItems controlKind isVisible itemH=:{wItemPtr,wItemPos,wItemSize,wItemSelect,wItemShow} items
+			WItemHandleToRelayoutItems controlKind isAble isVisible itemH=:{wItemPtr,wItemPos,wItemSize,wItemSelect,wItemShow} items
 				#! item		=	{	rliItemKind		= controlKind
 								,	rliItemPtr		= wItemPtr
 								,	rliItemPos		= wItemPos
 								,	rliItemSize		= wItemSize
-								,	rliItemSelect	= wItemSelect
+								,	rliItemSelect	= isAble`
 								,	rliItemShow		= isVisible`
 								,	rliItemInfo		= info
 								,	rliItemLook		= look
@@ -99,55 +99,56 @@ where
 								}
 				= [item:items]
 			where
+				isAble`				= isAble    && wItemSelect
 				isVisible`			= isVisible && wItemShow
-				(info,look,items`)	= getinfo controlKind isVisible` itemH
+				(info,look,items`)	= getinfo controlKind isAble` isVisible` itemH
 				
-				getinfo :: !ControlKind !Bool !(WItemHandle .ls .pst) -> (CompoundInfo,LookInfo,![RelayoutItem])
-				getinfo IsCompoundControl isVisible {wItemInfo,wItems}
-					= (info,info.compoundLookInfo.compoundLook,WElementHandlesToRelayoutItems isVisible wItems [])
+				getinfo :: !ControlKind !Bool !Bool !(WItemHandle .ls .pst) -> (CompoundInfo,LookInfo,![RelayoutItem])
+				getinfo IsCompoundControl isAble isVisible {wItemInfo,wItems}
+					= (info,info.compoundLookInfo.compoundLook,WElementHandlesToRelayoutItems isAble isVisible wItems [])
 				where
 					info	= getWItemCompoundInfo wItemInfo
-				getinfo IsCustomButtonControl _ {wItemInfo}
+				getinfo IsCustomButtonControl _ _ {wItemInfo}
 					= (undef,(getWItemCustomButtonInfo wItemInfo).cButtonInfoLook,[])
-				getinfo IsCustomControl _ {wItemInfo}
+				getinfo IsCustomControl _ _ {wItemInfo}
 					= (undef,(getWItemCustomInfo wItemInfo).customInfoLook,[])
-				getinfo IsLayoutControl isVisible {wItems}
-					= (undef,undef,WElementHandlesToRelayoutItems isVisible wItems [])
-				getinfo _ _ _
+				getinfo IsLayoutControl isAble isVisible {wItems}
+					= (undef,undef,WElementHandlesToRelayoutItems isAble isVisible wItems [])
+				getinfo _ _ _ _
 					= (undef,undef,[])
 		
-		WElementHandleToRelayoutItems isVisible (WListLSHandle itemHs) items
-			= WElementHandlesToRelayoutItems isVisible itemHs items
+		WElementHandleToRelayoutItems isAble isVisible (WListLSHandle itemHs) items
+			= WElementHandlesToRelayoutItems isAble isVisible itemHs items
 		
-		WElementHandleToRelayoutItems isVisible (WExtendLSHandle {wExtendItems=itemHs}) items
-			= WElementHandlesToRelayoutItems isVisible itemHs items
+		WElementHandleToRelayoutItems isAble isVisible (WExtendLSHandle {wExtendItems=itemHs}) items
+			= WElementHandlesToRelayoutItems isAble isVisible itemHs items
 		
-		WElementHandleToRelayoutItems isVisible (WChangeLSHandle {wChangeItems=itemHs}) items
-			= WElementHandlesToRelayoutItems isVisible itemHs items
+		WElementHandleToRelayoutItems isAble isVisible (WChangeLSHandle {wChangeItems=itemHs}) items
+			= WElementHandlesToRelayoutItems isAble isVisible itemHs items
 	
-	WElementHandlesToRelayoutItems _ _ items
+	WElementHandlesToRelayoutItems _ _ _ items
 		= items
 
 
 relayoutControls` :: !OSWindowMetrics !Bool !Bool !Rect !Rect !Point2 !Point2 !OSWindowPtr !(Maybe Id)
 					 ![WElementHandle`] ![WElementHandle`] !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 relayoutControls` wMetrics isAble isVisible oldFrame newFrame oldParentPos newParentPos wPtr defaultId oldHs newHs tb
-	= relayoutItems wMetrics isAble oldFrame newFrame oldParentPos newParentPos wPtr
-					(WElementHandles`ToRelayoutItems isVisible oldHs [])
-					(WElementHandles`ToRelayoutItems isVisible newHs [])
+	= relayoutItems wMetrics oldFrame newFrame oldParentPos newParentPos wPtr
+					(WElementHandles`ToRelayoutItems isAble isVisible oldHs [])
+					(WElementHandles`ToRelayoutItems isAble isVisible newHs [])
 					tb
 where
-	WElementHandles`ToRelayoutItems :: !Bool ![WElementHandle`] ![RelayoutItem] -> [RelayoutItem]
-	WElementHandles`ToRelayoutItems isVisible [itemH:itemHs] items
-		= WElementHandle`ToRelayoutItems isVisible itemH (WElementHandles`ToRelayoutItems isVisible itemHs items)
+	WElementHandles`ToRelayoutItems :: !Bool !Bool ![WElementHandle`] ![RelayoutItem] -> [RelayoutItem]
+	WElementHandles`ToRelayoutItems isAble isVisible [itemH:itemHs] items
+		= WElementHandle`ToRelayoutItems isAble isVisible itemH (WElementHandles`ToRelayoutItems isAble isVisible itemHs items)
 	where
-		WElementHandle`ToRelayoutItems :: !Bool !WElementHandle` ![RelayoutItem] -> [RelayoutItem]
-		WElementHandle`ToRelayoutItems isVisible (WItemHandle` itemH=:{wItemKind`}) items
-			= WItemHandle`ToRelayoutItems wItemKind` isVisible itemH items
+		WElementHandle`ToRelayoutItems :: !Bool !Bool !WElementHandle` ![RelayoutItem] -> [RelayoutItem]
+		WElementHandle`ToRelayoutItems isAble isVisible (WItemHandle` itemH=:{wItemKind`}) items
+			= WItemHandle`ToRelayoutItems wItemKind` isAble isVisible itemH items
 		where
-			WItemHandle`ToRelayoutItems :: !ControlKind !Bool !WItemHandle` ![RelayoutItem] -> [RelayoutItem]
-			WItemHandle`ToRelayoutItems controlKind=:IsRadioControl isVisible itemH=:{wItemSelect`,wItemShow`} items
-				= RadioItem`ToRelayoutItems wItemSelect` (isVisible && wItemShow`) (getWItemRadioInfo` itemH.wItemInfo`).radioItems` items
+			WItemHandle`ToRelayoutItems :: !ControlKind !Bool !Bool !WItemHandle` ![RelayoutItem] -> [RelayoutItem]
+			WItemHandle`ToRelayoutItems controlKind=:IsRadioControl isAble isVisible itemH=:{wItemSelect`,wItemShow`} items
+				= RadioItem`ToRelayoutItems (isAble && wItemSelect`) (isVisible && wItemShow`) (getWItemRadioInfo` itemH.wItemInfo`).radioItems` items
 			where
 				RadioItem`ToRelayoutItems :: !Bool !Bool ![RadioItemInfo`] ![RelayoutItem] -> [RelayoutItem]
 				RadioItem`ToRelayoutItems isAble isVisible [radio:radios] items
@@ -169,8 +170,8 @@ where
 				RadioItem`ToRelayoutItems _ _ _ items
 					= items
 			
-			WItemHandle`ToRelayoutItems controlKind=:IsCheckControl isVisible itemH=:{wItemSelect`,wItemShow`} items
-				= CheckItem`ToRelayoutItems wItemSelect` (isVisible && wItemShow`) (getWItemCheckInfo` itemH.wItemInfo`).checkItems` items
+			WItemHandle`ToRelayoutItems controlKind=:IsCheckControl isAble isVisible itemH=:{wItemSelect`,wItemShow`} items
+				= CheckItem`ToRelayoutItems (isAble && wItemSelect`) (isVisible && wItemShow`) (getWItemCheckInfo` itemH.wItemInfo`).checkItems` items
 			where
 				CheckItem`ToRelayoutItems :: !Bool !Bool ![CheckItemInfo`] ![RelayoutItem] -> [RelayoutItem]
 				CheckItem`ToRelayoutItems isAble isVisible [check:checks] items
@@ -192,12 +193,12 @@ where
 				CheckItem`ToRelayoutItems _ _ _ items
 					= items
 			
-			WItemHandle`ToRelayoutItems controlKind isVisible itemH=:{wItemPtr`,wItemPos`,wItemSize`,wItemSelect`,wItemShow`} items
+			WItemHandle`ToRelayoutItems controlKind isAble isVisible itemH=:{wItemPtr`,wItemPos`,wItemSize`,wItemSelect`,wItemShow`} items
 				#! item		=	{	rliItemKind		= controlKind
 								,	rliItemPtr		= wItemPtr`
 								,	rliItemPos		= wItemPos`
 								,	rliItemSize		= wItemSize`
-								,	rliItemSelect	= wItemSelect`
+								,	rliItemSelect	= isAble`
 								,	rliItemShow		= isVisible`
 								,	rliItemInfo		= info
 								,	rliItemLook		= look
@@ -205,25 +206,26 @@ where
 								}
 				= [item:items]
 			where
+				isAble`				= isAble    && wItemSelect`
 				isVisible`			= isVisible && wItemShow`
-				(info,look,items`)	= getinfo controlKind isVisible` itemH
+				(info,look,items`)	= getinfo controlKind isAble` isVisible` itemH
 				
-				getinfo :: !ControlKind !Bool !WItemHandle` -> (CompoundInfo,LookInfo,![RelayoutItem])
-				getinfo IsCompoundControl isVisible {wItemInfo`,wItems`}
-					= (info,info.compoundLookInfo.compoundLook,WElementHandles`ToRelayoutItems isVisible wItems` [])
+				getinfo :: !ControlKind !Bool !Bool !WItemHandle` -> (CompoundInfo,LookInfo,![RelayoutItem])
+				getinfo IsCompoundControl isAble isVisible {wItemInfo`,wItems`}
+					= (info,info.compoundLookInfo.compoundLook,WElementHandles`ToRelayoutItems isAble isVisible wItems` [])
 				where
 					info	= getWItemCompoundInfo` wItemInfo`
-				getinfo IsCustomButtonControl _ {wItemInfo`}
+				getinfo IsCustomButtonControl _ _ {wItemInfo`}
 					= (undef,(getWItemCustomButtonInfo` wItemInfo`).cButtonInfoLook,[])
-				getinfo IsCustomControl _ {wItemInfo`}
+				getinfo IsCustomControl _ _ {wItemInfo`}
 					= (undef,(getWItemCustomInfo` wItemInfo`).customInfoLook,[])
-				getinfo IsLayoutControl isVisible {wItems`}
-					= (undef,undef,WElementHandles`ToRelayoutItems isVisible wItems` [])
-				getinfo _ _ _
+				getinfo IsLayoutControl isAble isVisible {wItems`}
+					= (undef,undef,WElementHandles`ToRelayoutItems isAble isVisible wItems` [])
+				getinfo _ _ _ _
 					= (undef,undef,[])
 		
-		WElementHandle`ToRelayoutItems isVisible (WRecursiveHandle` itemHs _) items
-			= WElementHandles`ToRelayoutItems isVisible itemHs items
+		WElementHandle`ToRelayoutItems isAble isVisible (WRecursiveHandle` itemHs _) items
+			= WElementHandles`ToRelayoutItems isAble isVisible itemHs items
 	
-	WElementHandles`ToRelayoutItems _ _ items
+	WElementHandles`ToRelayoutItems _ _ _ items
 		= items

@@ -49,8 +49,8 @@ relayoutFatalError function error
 			* the area to be updated equals validRegion - invalidRegion (so if its empty, then no update is required)
 	relayoutItems returns the update region. 
 */
-relayoutItems :: !OSWindowMetrics !Bool !Rect !Rect !Point2 !Point2 !OSWindowPtr ![RelayoutItem] ![RelayoutItem] !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
-relayoutItems wMetrics isAble oldFrame newFrame oldParentPos newParentPos wPtr oldHs newHs tb
+relayoutItems :: !OSWindowMetrics !Rect !Rect !Point2 !Point2 !OSWindowPtr ![RelayoutItem] ![RelayoutItem] !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+relayoutItems wMetrics oldFrame newFrame oldParentPos newParentPos wPtr oldHs newHs tb
 	#! (clipRgn,tb)		= osnewrectrgn newFrame tb
 	#! (validRgn,tb)	= osnewrectrgn zero tb
 	#! (invalidRgn,tb)	= osnewrectrgn zero tb
@@ -58,9 +58,9 @@ relayoutItems wMetrics isAble oldFrame newFrame oldParentPos newParentPos wPtr o
 	#! picture			= packPicture zero defaultPen True osPict tb
 	#! ((clipRgn,validRgn,invalidRgn),picture)
 						= accClipPicture (toRegion (RectToRectangle newFrame)) 
-							(relayoutItems` wPtr wMetrics isAble newArea (oldFrame,oldParentPos,oldHs)
-																		 (newFrame,newParentPos,newHs)
-																		 (clipRgn,validRgn,invalidRgn)
+							(relayoutItems` wPtr wMetrics newArea (oldFrame,oldParentPos,oldHs)
+																  (newFrame,newParentPos,newHs)
+																  (clipRgn,validRgn,invalidRgn)
 							) picture
 	#! (_,_,_,osPict,tb)= unpackPicture picture
 	#! tb				= OSreleaseWindowPictContext wPtr osPict tb
@@ -70,37 +70,39 @@ relayoutItems wMetrics isAble oldFrame newFrame oldParentPos newParentPos wPtr o
 where
 	newArea				= SubtractRects newFrame oldFrame
 	
-	relayoutItems` :: !OSWindowPtr !OSWindowMetrics !Bool ![Rect] !(!Rect,!Point2,![RelayoutItem]) !(!Rect,!Point2,![RelayoutItem])
+	relayoutItems` :: !OSWindowPtr !OSWindowMetrics ![Rect] !(!Rect,!Point2,![RelayoutItem]) !(!Rect,!Point2,![RelayoutItem])
 					  !(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle) !*Picture
 				  -> (!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle),!*Picture)
-	relayoutItems` wPtr wMetrics isAble newArea (oldFrame,oldParentPos,[oldH:oldHs]) (newFrame,newParentPos,[newH:newHs]) rgnHs picture
-		# (rgnHs,picture)	= relayoutItem   wPtr wMetrics isAble newArea (oldFrame,oldParentPos,oldH)  (newFrame,newParentPos,newH)  rgnHs picture
-		# (rgnHs,picture)	= relayoutItems` wPtr wMetrics isAble newArea (oldFrame,oldParentPos,oldHs) (newFrame,newParentPos,newHs) rgnHs picture
+	relayoutItems` wPtr wMetrics newArea (oldFrame,oldParentPos,[oldH:oldHs]) (newFrame,newParentPos,[newH:newHs]) rgnHs picture
+		# (rgnHs,picture)	= relayoutItem   wPtr wMetrics newArea (oldFrame,oldParentPos,oldH)  (newFrame,newParentPos,newH)  rgnHs picture
+		# (rgnHs,picture)	= relayoutItems` wPtr wMetrics newArea (oldFrame,oldParentPos,oldHs) (newFrame,newParentPos,newHs) rgnHs picture
 		= (rgnHs,picture)
 	where
-		relayoutItem :: !OSWindowPtr !OSWindowMetrics !Bool ![Rect] !(!Rect,!Point2,!RelayoutItem) !(!Rect,!Point2,!RelayoutItem)
+		relayoutItem :: !OSWindowPtr !OSWindowMetrics ![Rect] !(!Rect,!Point2,!RelayoutItem) !(!Rect,!Point2,!RelayoutItem)
 						!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle) !*Picture
 					-> (!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle),!*Picture)
-		relayoutItem wPtr wMetrics isAble newArea old=:(_,_,{rliItemKind=k1}) new=:(_,_,{rliItemKind=k2}) rgnHs picture
-			| k1==k2		= relayout wPtr wMetrics isAble newArea k1 old new rgnHs picture
-			| otherwise		= relayoutFatalError "relayoutItem" "mismatching RelayoutItems"
+		relayoutItem wPtr wMetrics newArea old=:(_,_,{rliItemShow,rliItemKind=k1}) new=:(_,_,{rliItemKind=k2}) rgnHs picture
+			| k1<>k2			= relayoutFatalError "relayoutItem" "mismatching RelayoutItems"
+		//	| not rliItemShow	= (rgnHs,picture)		// the items are invisible, so nothing needs to be relayn out
+			| otherwise			= relayout wPtr wMetrics newArea k1 old new rgnHs picture
 		where
 			/*	relayout assumes that the two RelayoutItem arguments 
 				have the same ControlKind (fifth argument) and differ only in size or position or both.
+				In addition, it can be assumed safely that the element is visible. 
 			*/
-			relayout :: !OSWindowPtr !OSWindowMetrics !Bool ![Rect] !ControlKind !(!Rect,!Point2,!RelayoutItem) !(!Rect,!Point2,!RelayoutItem)
+			relayout :: !OSWindowPtr !OSWindowMetrics ![Rect] !ControlKind !(!Rect,!Point2,!RelayoutItem) !(!Rect,!Point2,!RelayoutItem)
 						!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle) !*Picture
 					-> (!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle),!*Picture)
 			
-			relayout wPtr wMetrics isAble newArea IsCompoundControl (oldFrame,oldParentPos,old) (newFrame,newParentPos,new)
-																	(clipRgn,validRgn,invalidRgn) picture
+			relayout wPtr wMetrics newArea IsCompoundControl (oldFrame,oldParentPos,old) (newFrame,newParentPos,new)
+					(clipRgn,validRgn,invalidRgn) picture
 				#! picture				= apppicttoolbox (moveF o sizeF) picture
 				#! picture				= updF picture
 				#! picture				= apppicttoolbox updScrollbars picture		// update scrollbars AFTER moving/sizing/updating
 				#! ((clipRgn,validRgn,invalidRgn),picture)
-										= relayoutItems` wPtr wMetrics (isAble && new.rliItemSelect) newArea1 (oldFrame1,oldPos,old.rliItems)
-																											  (newFrame1,newPos,new.rliItems)
-																											  (clipRgn,validRgn,invalidRgn) picture
+										= relayoutItems` wPtr wMetrics newArea1 (oldFrame1,oldPos,old.rliItems)
+																				(newFrame1,newPos,new.rliItems)
+																				(clipRgn,validRgn,invalidRgn) picture
 				#! ((validRgn,invalidRgn),picture)
 										= accpicttoolbox (checkUpdateRegions oldFrame1 newFrame1 (validRgn,invalidRgn)) picture
 				#! (clipRgn,picture)	= accpicttoolbox (subtractRectFromRgn (IntersectRects newFrame newCompoundRect) clipRgn) picture
@@ -116,8 +118,8 @@ where
 									id ( (setCompoundScroll (snd hasScrolls) wMetrics itemPtr False newVThumbSize oldOrigin.y newOrigin.y vRect)
 									   o (setCompoundScroll (fst hasScrolls) wMetrics itemPtr True  newHThumbSize oldOrigin.x newOrigin.x hRect)
 									   )
-				updF			= if (sameSize && oldPos==newPos && oldFrame1==newFrame1 || IsEmptyRect newFrame1)
-									id (updatecustomcontrol wPtr clipRgn newFrame1 isAble new)
+				updF			= if (sameSize && oldPos==newPos && oldFrame1==newFrame1 || IsEmptyRect newFrame1 || not new.rliItemShow)
+									id (updatecustomcontrol wPtr clipRgn newFrame1 new)
 				newParentPos`	= toTuple newParentPos;
 				itemPtr			= new.rliItemPtr
 				newSize			= new.rliItemSize;		newSize`	= toTuple newSize;	oldSize			= old.rliItemSize;
@@ -145,26 +147,17 @@ where
 					| old==new		= tb
 					| otherwise		= OSsetCompoundSliderThumb wMetrics compoundPtr isHorizontal new (rright,rbottom) True tb
 			
-			relayout wPtr wMetrics isAble newArea IsLayoutControl (oldFrame,oldParentPos,old) (newFrame,newParentPos,new)
-																  (clipRgn, validRgn,invalidRgn) picture
-				#! ((clipRgn,validRgn,invalidRgn),picture)
-										= relayoutItems` wPtr wMetrics (isAble && new.rliItemSelect) newArea1 (oldFrame1,oldPos,old.rliItems)
-																											  (newFrame1,newPos,new.rliItems)
-																											  (clipRgn,validRgn,invalidRgn) picture
-				#! ((validRgn,invalidRgn),picture)
-										= accpicttoolbox (checkUpdateRegions oldFrame1 newFrame1 (validRgn,invalidRgn)) picture
-				#! (clipRgn,picture)	= accpicttoolbox (subtractRectFromRgn (IntersectRects newFrame newLayoutRect) clipRgn) picture
-				=  ((clipRgn,validRgn,invalidRgn),picture)
+			relayout wPtr wMetrics newArea IsLayoutControl (oldFrame,oldParentPos,old) (newFrame,newParentPos,new) rgnHs picture
+				= relayoutItems` wPtr wMetrics newArea (oldFrame1,oldPos,old.rliItems) (newFrame1,newPos,new.rliItems) rgnHs picture
 			where
 				newSize					= new.rliItemSize;								oldSize			= old.rliItemSize;
 				newPos					= new.rliItemPos;								oldPos			= old.rliItemPos;
 				newLayoutRect			= PosSizeToRect newPos newSize;					oldLayoutRect	= PosSizeToRect oldPos oldSize
 				newFrame1				= IntersectRects newFrame newLayoutRect;		oldFrame1		= IntersectRects oldFrame oldLayoutRect
-				newArea1				= SubtractRects newLayoutRect oldLayoutRect
 				
-			relayout wPtr wMetrics isAble newArea controlKind (oldFrame,oldParentPos,old)
-															  (newFrame,newParentPos,new)
-															  (clipRgn,validRgn,invalidRgn) picture
+			relayout wPtr wMetrics newArea controlKind (oldFrame,oldParentPos,old)
+													   (newFrame,newParentPos,new)
+													   (clipRgn,validRgn,invalidRgn) picture
 				#! picture				= apppicttoolbox (moveF o sizeF) picture
 				#! picture				= updF picture
 				#! ((validRgn,invalidRgn),picture)
@@ -177,8 +170,8 @@ where
 				sizeF					= if sameSize id (setSize wPtr newParentPos` itemPtr newPos` newSize` (not redraw))
 				moveF					= if (samePos && all IsEmptyRect (map (IntersectRects newFrame1) newArea))
 											          id (setPos  wPtr newParentPos` itemPtr newPos` (toTuple oldSize) (not redraw))
-				updF					= if (not redraw || sameSize && oldPos==newPos && newFrame1==oldFrame1 || IsEmptyRect newFrame1)
-													  id (updatecustomcontrol wPtr clipRgn newFrame1 isAble new)
+				updF					= if (not redraw || sameSize && oldPos==newPos && newFrame1==oldFrame1 || IsEmptyRect newFrame1 || not new.rliItemShow)
+													  id (updatecustomcontrol wPtr clipRgn newFrame1 new)
 				newParentPos`			= toTuple newParentPos
 				itemPtr					= new.rliItemPtr
 				newPos					= new.rliItemPos;		newPos`		= toTuple newPos;		oldPos	= old.rliItemPos;
@@ -198,9 +191,9 @@ where
 											(IsOtherControl _)		-> (\_ _ _ _ _ _ tb->tb,		\_ _ _ _ _ _ tb->tb,		 False)
 											_						-> relayoutFatalError "relayout" "unexpected ControlKind alternative"
 			
-	relayoutItems` _ _ _ _ (_,_,[]) (_,_,[]) rgnHs picture
+	relayoutItems` _ _ _ (_,_,[]) (_,_,[]) rgnHs picture
 		= (rgnHs,picture)
-	relayoutItems` _ _ _ _ _ _ _ _
+	relayoutItems` _ _ _ _ _ _ _
 		= relayoutFatalError "relayoutItems`" "mismatching RelayoutItems"
 	
 	checkUpdateRegions :: !Rect !Rect !(!OSRgnHandle,!OSRgnHandle) !*OSToolbox -> (!(!OSRgnHandle,!OSRgnHandle),!*OSToolbox)
@@ -227,62 +220,54 @@ where
 			# tb			= osdisposergn rgn tb
 			= (diffRgn,tb)
 	
-	updatecustomcontrol :: !OSWindowPtr !OSRgnHandle !Rect !Bool !RelayoutItem !*Picture -> *Picture
-	updatecustomcontrol parentPtr clipRgn contentRect isAble itemH=:{rliItemKind=IsCustomButtonControl} picture
-		| not itemH.rliItemShow
-			= picture
-		| otherwise
-			#! (curOrigin,picture)	= getpictorigin picture
-			#! (curPen,   picture)	= getpictpen picture
-			#! picture				= setpictorigin (zero-itemPos) picture
-			#! picture				= setpictpen lookPen picture
-			#! picture				= clipospicture clipRgn contentRect (lookFun selectState updState) picture
-			#! picture				= setpictpen curPen picture
-			#  picture				= setpictorigin curOrigin picture
-			= picture
+	//	updatecustomcontrol assumes that the item is visible.
+	updatecustomcontrol :: !OSWindowPtr !OSRgnHandle !Rect !RelayoutItem !*Picture -> *Picture
+	updatecustomcontrol parentPtr clipRgn contentRect itemH=:{rliItemKind=IsCustomButtonControl} picture
+		#! (curOrigin,picture)			= getpictorigin picture
+		#! (curPen,   picture)			= getpictpen picture
+		#! picture						= setpictorigin (zero-itemPos) picture
+		#! picture						= setpictpen lookPen picture
+		#! picture						= clipospicture clipRgn contentRect (lookFun selectState updState) picture
+		#! picture						= setpictpen curPen picture
+		#  picture						= setpictorigin curOrigin picture
+		= picture
 	where
-		selectState					= if (isAble && itemH.rliItemSelect) Able Unable
-		itemPos						= itemH.rliItemPos
-		{lookFun,lookPen}			= itemH.rliItemLook
-		cFrame						= SizeToRectangle itemH.rliItemSize
-		updState					= {oldFrame=cFrame,newFrame=cFrame,updArea=[cFrame]}
+		selectState						= if itemH.rliItemSelect Able Unable
+		itemPos							= itemH.rliItemPos
+		{lookFun,lookPen}				= itemH.rliItemLook
+		cFrame							= SizeToRectangle itemH.rliItemSize
+		updState						= {oldFrame=cFrame,newFrame=cFrame,updArea=[cFrame]}
 	
-	updatecustomcontrol parentPtr clipRgn contentRect isAble itemH=:{rliItemKind=IsCustomControl} picture
-		| not itemH.rliItemShow
-			= picture
-		| otherwise
-			#! (curOrigin,picture)	= getpictorigin picture
-			#! (curPen,   picture)	= getpictpen picture
-			#! picture				= setpictorigin (zero-itemPos) picture
-			#! picture				= setpictpen lookPen picture
-			#! picture				= clipospicture clipRgn contentRect (lookFun selectState updState) picture
-			#! picture				= setpictpen curPen picture
-			# picture				= setpictorigin curOrigin picture
-			= picture
+	updatecustomcontrol parentPtr clipRgn contentRect itemH=:{rliItemKind=IsCustomControl} picture
+		#! (curOrigin,picture)			= getpictorigin picture
+		#! (curPen,   picture)			= getpictpen picture
+		#! picture						= setpictorigin (zero-itemPos) picture
+		#! picture						= setpictpen lookPen picture
+		#! picture						= clipospicture clipRgn contentRect (lookFun selectState updState) picture
+		#! picture						= setpictpen curPen picture
+		# picture						= setpictorigin curOrigin picture
+		= picture
 	where
-		selectState					= if (isAble && itemH.rliItemSelect) Able Unable
-		itemPos						= itemH.rliItemPos
-		{lookFun,lookPen}			= itemH.rliItemLook
-		cFrame						= SizeToRectangle itemH.rliItemSize
-		updState					= {oldFrame=cFrame,newFrame=cFrame,updArea=[cFrame]}
+		selectState						= if itemH.rliItemSelect Able Unable
+		itemPos							= itemH.rliItemPos
+		{lookFun,lookPen}				= itemH.rliItemLook
+		cFrame							= SizeToRectangle itemH.rliItemSize
+		updState						= {oldFrame=cFrame,newFrame=cFrame,updArea=[cFrame]}
 	
-	updatecustomcontrol parentPtr clipRgn contentRect isAble itemH=:{rliItemKind=IsCompoundControl} picture
-		| not itemH.rliItemShow
-			= picture
-		| otherwise
-			#! (curOrigin,picture)		= getpictorigin picture
-			#! (curPen,   picture)		= getpictpen picture
-			#! picture					= setpictorigin (origin-itemPos) picture
-			#! picture					= setpictpen lookPen picture
-			#! (clip,picture)			= accpicttoolbox (ossectrgn clipRgn clipInfo.clipRgn) picture	// PA+++
-			#! picture					= clipospicture /*clipInfo.clipRgn*/clip clipRect (lookFun selectState updState) picture
-		//	#! picture					= clipospicture clip (PosSizeToRect itemPos itemSize) drawbackground picture
-			#! picture					= apppicttoolbox (osdisposergn clip) picture					// PA+++
-			#! picture					= setpictpen curPen picture
-			# picture					= setpictorigin curOrigin picture
-			= picture
+	updatecustomcontrol parentPtr clipRgn contentRect itemH=:{rliItemKind=IsCompoundControl} picture
+		#! (curOrigin,picture)			= getpictorigin picture
+		#! (curPen,   picture)			= getpictpen picture
+		#! picture						= setpictorigin (origin-itemPos) picture
+		#! picture						= setpictpen lookPen picture
+		#! (clip,picture)				= accpicttoolbox (ossectrgn clipRgn clipInfo.clipRgn) picture	// PA+++
+		#! picture						= clipospicture /*clipInfo.clipRgn*/clip clipRect (lookFun selectState updState) picture
+	//	#! picture						= clipospicture clip (PosSizeToRect itemPos itemSize) drawbackground picture
+		#! picture						= apppicttoolbox (osdisposergn clip) picture					// PA+++
+		#! picture						= setpictpen curPen picture
+		# picture						= setpictorigin curOrigin picture
+		= picture
 	where
-		selectState						= if (isAble && itemH.rliItemSelect) Able Unable
+		selectState						= if itemH.rliItemSelect Able Unable
 		itemSize						= itemH.rliItemSize
 		itemPos							= itemH.rliItemPos
 		info							= itemH.rliItemInfo
