@@ -8,7 +8,7 @@ implementation module xevent;
 
 
 from xtypes  import :: Widget;
-from xkernel import CatchXWidget;
+from xkernel import single_event_catch;
 
 
      
@@ -66,6 +66,6 @@ XAboutHelp              :== 42;
 GetNextEvent ::    Event;
 GetNextEvent = (w,d,e);
                    where {
-                   (w,d)=: CatchXWidget 0;
+                   (w,d)=: single_event_catch 0;
                    e=: 0;
                    }; // this is were an event specification should be.
