@@ -1387,33 +1387,29 @@ where
 			= (wH,tb)
 		| otherwise
 			# (_,newOSThumb,_,_)	= toOSscrollbarRange (min`,newThumb,max`) viewSize
-			  newOrigin				= if isHorizontal {origin & x=newThumb} {origin & y=newThumb}
+			  newOrigin				= if isHorizontal {oldOrigin & x=newThumb} {oldOrigin & y=newThumb}
 			# tb					= OSsetWindowSliderThumb wMetrics wPtr isHorizontal newOSThumb (toTuple whSize) True tb
 			# (_,newItems,tb)		= layoutControls wMetrics hMargins vMargins spaces contentSize minSize [(domain,newOrigin)] oldItems tb
 			  wH					= {	wH & whWindowInfo	= WindowInfo {windowInfo & windowOrigin=newOrigin}
 						  				   , whItems		= newItems
 							  		  }
 			# (wH,tb)				= forceValidWindowClipState wMetrics True wPtr wH tb
-			  (scrollWindowInfo,wH)	= (\wH=:{whWindowInfo}->(whWindowInfo,wH)) wH
-			# (isRect,areaRect,tb)	= case scrollWindowInfo of
+			# (isRect,areaRect,tb)	= case wH.whWindowInfo of
 			  							WindowInfo {windowClip={clipRgn}} -> osgetrgnbox clipRgn tb
-			  							_                                 -> windowdeviceFatalError "windowScrollActionIO" "unexpected empty whWindowInfo field"
+			  							_                                 -> windowdeviceFatalError "windowScrollActionIO" "unexpected whWindowInfo field"
 			# (updRgn,tb)			= relayoutControls wMetrics whSelect contentRect contentRect zero zero wPtr wH.whDefaultId oldItems wH.whItems tb
 			# (wH,tb)				= updatewindowbackgrounds wMetrics updRgn info.wsaWIDS wH tb
 			  newFrame				= PosSizeToRectangle newOrigin contentSize
-			  toMuch				= if isHorizontal (abs (newOrigin.x-origin.x)>=w`) (abs (newOrigin.y-origin.y)>=h`)
+			  toMuch				= if isHorizontal (abs (newOrigin.x-oldOrigin.x)>=w`) (abs (newOrigin.y-oldOrigin.y)>=h`)
 			  (updArea,updAction)	= if (not lookInfo.lookSysUpdate || toMuch || not isRect)
-			  							(newFrame,\s->(zero,s)) (calcScrollUpdateArea origin newOrigin areaRect)
-			  updState				= {	oldFrame=oldFrame
-			  						  ,	newFrame=newFrame
-			  						  ,	updArea =[updArea]
-			  						  }
+			  							(newFrame,return []) (calcScrollUpdateArea oldOrigin newOrigin areaRect)
+			  updState				= {oldFrame=oldFrame,newFrame=newFrame,updArea=[updArea]}
 			# (wH,tb)				= drawwindowlook` wMetrics wPtr updAction updState wH tb
-			# tb					= OSvalidateWindowRect wPtr (SizeToRect whSize) tb
+		//	# tb					= OSvalidateWindowRect wPtr (SizeToRect whSize) tb
 			= (wH,tb)
 	where
 		windowInfo					= getWindowInfoWindowData whWindowInfo
-		(origin,domainRect,hasHScroll,hasVScroll,lookInfo)
+		(oldOrigin,domainRect,hasHScroll,hasVScroll,lookInfo)
 									= (windowInfo.windowOrigin,windowInfo.windowDomain,isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll,windowInfo.windowLook)
 		isHorizontal				= info.wsaDirection==Horizontal
 		domain						= RectToRectangle domainRect
@@ -1421,11 +1417,11 @@ where
 		contentRect					= getWindowContentRect wMetrics visScrolls (SizeToRect whSize)
 		contentSize					= RectSize contentRect
 		{w=w`,h=h`}					= contentSize
-		oldFrame					= PosSizeToRectangle origin contentSize
+		oldFrame					= PosSizeToRectangle oldOrigin contentSize
 		(min`,oldThumb,max`,viewSize)
 									= if isHorizontal
-										(domain.corner1.x,origin.x,domain.corner2.x,w`)
-										(domain.corner1.y,origin.y,domain.corner2.y,h`)
+										(domain.corner1.x,oldOrigin.x,domain.corner2.x,w`)
+										(domain.corner1.y,oldOrigin.y,domain.corner2.y,h`)
 		sliderState					= {sliderMin=min`,sliderThumb=oldThumb,sliderMax=max`-viewSize}
 		scrollInfo					= fromJust (if isHorizontal windowInfo.windowHScroll windowInfo.windowVScroll)
 		scrollFun					= scrollInfo.scrollFunction
@@ -1444,28 +1440,28 @@ where
 		             area is the visible area of the window view frame,
 		             scrolling occurs either horizontally or vertically.
 	*/
-		calcScrollUpdateArea :: !Point2 !Point2 !Rect -> (!Rectangle,!St *Picture Rect)
+		calcScrollUpdateArea :: !Point2 !Point2 !Rect -> (!Rectangle,!St *Picture [Rect])
 		calcScrollUpdateArea oldOrigin newOrigin areaRect
-			= (updArea,scroll {originAreaRect & rright=rright+1,rbottom=rbottom+1} restArea v)
+			= (updArea,scroll {newOriginAreaRect & rright=rright+1,rbottom=rbottom+1} restArea v)
 		where
-			originAreaRect				= addVector (toVector newOrigin) areaRect
-			{rleft,rtop,rright,rbottom}	= originAreaRect
-			originAreaRectangle			= RectToRectangle originAreaRect
+			newOriginAreaRect			= addVector (toVector newOrigin) areaRect
+			{rleft,rtop,rright,rbottom}	= newOriginAreaRect
+			newOriginAreaRectangle		= RectToRectangle newOriginAreaRect
 			v							= toVector (oldOrigin-newOrigin)
 			{vx,vy}						= v
-			(updArea,restArea)			= if (vx<0) ({originAreaRectangle & corner1={x=rright+vx,y=rtop}},      {originAreaRect & rright =rright +vx})
-										 (if (vx>0) ({originAreaRectangle & corner2={x=rleft+vx, y=rbottom}},   {originAreaRect & rleft  =rleft  +vx})
-										 (if (vy<0) ({originAreaRectangle & corner1={x=rleft,    y=rbottom+vy}},{originAreaRect & rbottom=rbottom+vy})
-										 (if (vy>0) ({originAreaRectangle & corner2={x=rright,   y=rbottom+vy}},{originAreaRect & rtop   =rtop   +vy})
-										            (windowdeviceFatalError "calcUpdateArea (scrolling window)" "assumption violation"))))
+			(updArea,restArea)			= if (vx<0) ({newOriginAreaRectangle & corner1={x=rright+vx,y=rtop}},      {newOriginAreaRect & rright =rright +vx})
+										 (if (vx>0) ({newOriginAreaRectangle & corner2={x=rleft+vx, y=rbottom}},   {newOriginAreaRect & rleft  =rleft  +vx})
+										 (if (vy<0) ({newOriginAreaRectangle & corner1={x=rleft,    y=rbottom+vy}},{newOriginAreaRect & rbottom=rbottom+vy})
+										 (if (vy>0) ({newOriginAreaRectangle & corner2={x=rright,   y=rtop+vy}},   {newOriginAreaRect & rtop   =rtop   +vy})
+										            (windowdeviceFatalError "calcScrollUpdateArea (scrolling window)" "assumption violation"))))
 			
-			scroll :: !Rect !Rect !Vector2 !*Picture -> (!Rect,!*Picture)
+			scroll :: !Rect !Rect !Vector2 !*Picture -> (![Rect],!*Picture)
 			scroll scrollRect restRect v picture
 				# (updRect,picture)	= pictscroll scrollRect v picture
 				| updRect==zero
-					= (zero,picture)
+					= ([],picture)
 				| otherwise
-					= (restRect,picture)
+					= ([restRect],picture)
 
 windowStateScrollActionIO _ _ _ _
 	= windowdeviceFatalError "windowStateScrollActionIO" "unexpected window placeholder"
