@@ -4,7 +4,7 @@ import StdEnv
 import StdIO
 import genericgecs
 import StdGEC, StdGECExt, StdAGEC
-import StdGecComb
+import StdGecComb, modeGEC, tupleGEC, basicAGEC
 import EstherInterFace
 from EstherParser import prettyDynamic
 import StdDynamic, StdPSt, iostate
