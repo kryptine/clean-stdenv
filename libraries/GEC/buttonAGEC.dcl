@@ -4,6 +4,8 @@ import genericgecs
 
 // various buttons
 
-derive gGEC Button
+derive gGEC Button, Checkbox, Text
 
-:: Button = Button Int String | Pressed
+:: Button 	= Button Int String | Pressed
+:: Checkbox = Checked | NotChecked 
+:: Text 	= Text String
