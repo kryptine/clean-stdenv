@@ -138,16 +138,17 @@ eitherGECGUI = trivialGECGUIFun 2
 objectGECGUI :: !GenericTypeDefDescriptor
 				                          !(            [ConsPos] (PSt .ps) -> (PSt .ps))
 				                          !(Arrangement [ConsPos] (PSt .ps) -> (PSt .ps))
+				                          !Bool
 				                       -> GECGUIFun (OBJECT a) (PSt .ps)
-objectGECGUI t switchFun arrangeFun = objectGECGUI` t switchFun arrangeFun 
+objectGECGUI t switchFun arrangeFun createOBJECTControl = objectGECGUI` t switchFun arrangeFun 
 where
 	objectGECGUI` t switchFun arrangeFun outputOnly pSt
-		| it_is_a_record t	// Of records we do not want to show the singleton data constructor
+		| it_is_a_record t			// Of records we do not want to show the singleton data constructor
 			= trivialGECGUIFun 1 outputOnly pSt
-		| otherwise			// Of all other OBJECTs, we want to display the OBJECTControl
+		| otherwise					// Of all other OBJECTs, we want to display the OBJECTControl
 			# (eId,  pSt)	= openId pSt
 			# (objId,pSt)	= openOBJECTControlId pSt
-			# objectGUI		= OBJECTControl objId t switchFun arrangeFun
+			# objectGUI		= OBJECTControl objId t switchFun arrangeFun createOBJECTControl
 		                        [ ControlTip (tipTypeText t.gtd_name)
 			                    , ControlSelectState (if (outputOnly===OutputOnly) Unable Able)		// PA: from previous version
 			                    ]

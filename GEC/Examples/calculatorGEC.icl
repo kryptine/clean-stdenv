@@ -12,9 +12,9 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	calcEditor
+ 	example_calc
  	world  
-/*
+
 example_calc	= startCircuit (feedback (edit "Calculator" >>@ update_calc)) calculator
 where
 	calculator	= 	zero  	   <|> 
@@ -32,7 +32,7 @@ where
 	buttons		= [Button buttonWidth "+", Button buttonWidth "-", Button buttonWidth "*"]
 	operators 	= [(+),(-),(*)]
 	whichopper buttons operators = [x \\ (Pressed,x) <- (zip2 buttons operators)]
-*/
+
 :: ButtonEditor 	:== [(String,AGEC (Int Int -> Int))]
 :: MyButtonFuns 	:== ([Button],[Int Int -> Int])
 
