@@ -1,10 +1,10 @@
 definition module windowCCall_12
 
 
-from	ostoolbox		import OSToolbox
-from	ostypes			import HWND
-from	rgnCCall_12		import HRGN
-from	pictCCall_12	import HDC
+from	ostoolbox		import :: OSToolbox
+from	ostypes			import :: HWND
+from	rgnCCall_12		import :: HRGN
+from	pictCCall_12	import :: HDC
 
 
 winInitialiseWindows:: !*OSToolbox -> *OSToolbox

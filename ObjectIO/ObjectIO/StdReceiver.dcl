@@ -9,8 +9,8 @@ definition module StdReceiver
 //	********************************************************************************
 
 import	StdReceiverDef, StdMaybe
-from	iostate	import	PSt, IOSt
-from	id		import	RId, R2Id, rIdtoId, r2IdtoId, ==
+from	iostate	import :: PSt, :: IOSt
+from	id		import class ==, :: R2Id, :: RId
 
 
 //	Open uni- and bi-directional receivers:

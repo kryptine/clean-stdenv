@@ -9,9 +9,8 @@ definition module Highscore
 //	**************************************************************************************************
 
 import	StdString
-from	StdFile	import FileSystem, Files
-from	StdPSt	import PSt, IOSt
-from	StdId	import Id
+from	StdFile	import class FileSystem
+from	StdPSt	import :: PSt
 
 ::	HiScores
 	:== [HiScore]

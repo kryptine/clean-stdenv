@@ -2,12 +2,12 @@ definition module osevent
 
 //	Clean Object I/O library, version 1.2
 
-from	StdInt			import ^,-
-from	clCrossCall_12	import CrossCallInfo
-from	ostoolbox		import OSToolbox
-from	ostime			import OSTime
-from	ostypes			import OSWindowPtr
-from	StdMaybe		import Maybe, Just, Nothing
+from	StdInt			import class ^(..), instance ^ Int, class -(..), instance - Int
+from	clCrossCall_12	import :: CrossCallInfo
+from	ostoolbox		import :: OSToolbox
+from	ostime			import :: OSTime
+from	ostypes			import :: OSWindowPtr
+from	StdMaybe		import :: Maybe
 
 
 ::	*OSEvents

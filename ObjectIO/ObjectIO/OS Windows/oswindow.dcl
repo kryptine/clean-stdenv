@@ -6,12 +6,12 @@ definition module oswindow
 
 import	StdMaybe, StdOverloaded, StdString
 import	osdocumentinterface, osevent, ostypes
-from	StdIOCommon			import CursorShape, StandardCursor, BusyCursor, IBeamCursor, CrossCursor, FatCrossCursor, ArrowCursor, HiddenCursor
-from	osfont				import Font
-from	osrgn				import OSRgnHandle
-from	ossystem			import OSWindowMetrics
-from	ostoolbox			import OSToolbox
-from	ospicture			import OSPictContext
+from	StdIOCommon			import :: CursorShape
+from	osfont				import :: Font
+from	osrgn				import :: OSRgnHandle
+from	ossystem			import :: OSWindowMetrics
+from	ostoolbox			import :: OSToolbox
+from	ospicture			import :: OSPictContext
 
 
 /*	Initialisation:

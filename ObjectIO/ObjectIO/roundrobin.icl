@@ -2,7 +2,7 @@ implementation module roundrobin
 
 
 import	StdList, StdString
-from	commondef	import fatalError
+from commondef import fatalError
 
 
 roundrobinFatalError :: String String -> .x

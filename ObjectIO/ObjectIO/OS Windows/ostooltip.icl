@@ -2,8 +2,8 @@ implementation module ostooltip
 
 import	StdTuple
 import	clCrossCall_12
-from	clCCall_12	import winMakeCString, winReleaseCString, CSTR
-from	oswindow	import OSWindowPtr
+from	clCCall_12	import winMakeCString, winReleaseCString, :: CSTR
+from	oswindow	import :: OSWindowPtr
 
 osIgnoreCallback :: !CrossCallInfo !*OSToolbox -> (!CrossCallInfo,!*OSToolbox)
 osIgnoreCallback _ tb 

@@ -3,7 +3,7 @@ implementation module osfileselect
 
 import	StdBool, StdInt
 import	clCrossCall_12, osevent
-from	clCCall_12	import winMakeCString, winGetCStringAndFree, winReleaseCString, CSTR
+from	clCCall_12	import winMakeCString, winGetCStringAndFree, winReleaseCString, :: CSTR
 from	commondef	import fatalError
 import code from "cCrossCallFileSelectors_121.obj"
 

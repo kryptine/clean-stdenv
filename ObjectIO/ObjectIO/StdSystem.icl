@@ -3,7 +3,7 @@ implementation module StdSystem
 
 import	StdString, StdReal, StdInt, StdTuple
 import	ossystem
-from	StdIOBasic	import Size
+from	StdIOBasic	import :: Size{..}
 
 
 //	System dependencies concerning the file system

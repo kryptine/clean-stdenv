@@ -11,7 +11,7 @@ definition module StdPStClass
 
 
 import	StdFile, StdFileSelect, StdTime
-from	iostate		import PSt, IOSt
+from	iostate		import :: PSt, :: IOSt
 
 
 /*	PSt is an environment instance of the following classes:

@@ -8,11 +8,10 @@ definition module tcp
 //	********************************************************************************
 
 import	StdString
-from	id			import Id
-from	StdFile 	import FileEnv, Files
-from	StdTime		import TimeEnv, Date, Tick, Time
-from	StdId		import Ids, RId, R2Id, PSt, IOSt
-from	id			import Id
+from	StdFile		import class FileEnv
+from	StdTime		import class TimeEnv, instance TimeEnv World
+from	StdId		import class Ids, instance Ids World
+from	id			import :: Id
 
 class ChannelEnv env	| Ids env & TimeEnv env & FileEnv env
 where

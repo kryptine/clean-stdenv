@@ -11,8 +11,8 @@ definition module StdTimerElementClass
 
 
 import	StdIOCommon, StdTimerDef
-from	iostate		import PSt, IOSt
-from	timerhandle	import TimerElementState
+from	iostate		import :: PSt
+from	timerhandle	import :: TimerElementState
 
 
 class TimerElements t where

@@ -3,7 +3,7 @@ implementation module StdReceiver
 
 import	StdInt, StdBool, StdList, StdTuple, StdOverloaded, StdFunc
 import	commondef, id, receiveraccess, receiverdefaccess, receiverdevice, receiverid, scheduler
-from	StdPSt	import	accPIO, appPIO, St
+from	StdPSt	import	accPIO, appPIO, :: St
 
 
 stdReceiverFatalError :: String String -> .x

@@ -1,8 +1,9 @@
 implementation module gst
 
 import ostoolbox
-from   StdFunc    import St
-from   StdIOBasic import IdFun
+
+from StdFunc		import :: St
+from StdIOBasic		import :: IdFun
 
 ::  *GSt gs
     =   { gs    :: gs

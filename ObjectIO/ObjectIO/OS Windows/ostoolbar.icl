@@ -1,8 +1,8 @@
 implementation module ostoolbar
 
 import	StdMisc, StdTuple
-from	osbitmap		import OSBitmap, osGetBitmapHandle
-from	ostypes			import HWND, OSWindowPtr, OSNoWindowPtr
+from	osbitmap		import :: OSBitmap, osGetBitmapHandle
+from	ostypes			import :: HWND, :: OSWindowPtr, OSNoWindowPtr
 from	pictCCall_12	import winCreateBitmap
 import	clCrossCall_12, windowCCall_12
 

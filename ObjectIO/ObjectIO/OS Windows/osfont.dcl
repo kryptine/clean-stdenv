@@ -4,9 +4,9 @@ definition module osfont
 //	Clean Object I/O library, version 1.2
 
 
-from	StdOverloaded	import ==
-from	ostoolbox		import OSToolbox
-from	ostypes			import OSPictContext
+from	StdOverloaded	import class ==
+from	ostoolbox		import :: OSToolbox
+from	ostypes			import :: OSPictContext
 
 
 ::	Font

@@ -4,7 +4,7 @@ implementation module StdControlClass
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	commondef, iostate, StdControlAttribute, windowhandle
 from	controlvalidate	import validateSliderState
-from	StdPSt			import accScreenPicture
+from	StdPSt			import class accScreenPicture(..), instance accScreenPicture IOSt
 from	windowvalidate	import validateViewDomain
 import	ospicture, ostypes, oswindow
 

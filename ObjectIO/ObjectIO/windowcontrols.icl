@@ -3,13 +3,13 @@ implementation module windowcontrols
 
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	commondef, controlcreate, windowclipstate
-from	StdControlAttribute	import isControlPos
-from	controllayout		import layoutControls
-from	controlrelayout		import relayoutControls
+from StdControlAttribute import isControlPos
+from controllayout import layoutControls
+from controlrelayout import relayoutControls
 from	windowaccess		import identifyMaybeId, genWElementItemNrs, getWindowHMargins, getWindowVMargins, getWindowItemSpaces
-from	windowdispose		import disposeWItemHandle
-from	windowdraw			import drawwindowlook
-from	windowupdate		import updatewindowbackgrounds
+from windowdispose import disposeWItemHandle
+from windowdraw import drawwindowlook
+from windowupdate import updatewindowbackgrounds
 import	osdocumentinterface, oswindow
 
 

@@ -2,9 +2,8 @@ implementation module relayout
 
 
 import	StdBool, StdFunc, StdList, StdTuple
-import	ospicture, osrgn, oswindow
+import	ospicture, osrgn, oswindow, ossystem
 import	commondef, windowhandle
-//import osutil
 
 
 ::	RelayoutItem

@@ -9,7 +9,7 @@ definition module timerevent
 
 
 import	deviceevents
-from	iostate	import PSt, IOSt
+from	iostate import :: PSt
 
 
 timerEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)

@@ -10,7 +10,7 @@ definition module timerdevice
 
 
 import	devicefunctions
-from	iostate	import PSt, IOSt
+from	iostate import :: PSt
 
 
 timerFunctions :: DeviceFunctions (PSt .l)

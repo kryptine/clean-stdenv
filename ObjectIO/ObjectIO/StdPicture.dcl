@@ -10,9 +10,9 @@ definition module StdPicture
 //	********************************************************************************
 
 
-from	StdFunc		import	St
-from	osfont		import	Font
-from	ospicture	import	Picture
+from	StdFunc		import :: St
+from	osfont		import :: Font
+from	ospicture	import :: Picture
 import	StdPictureDef
 
 

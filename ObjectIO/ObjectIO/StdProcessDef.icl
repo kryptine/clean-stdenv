@@ -2,7 +2,7 @@ implementation module StdProcessDef
 
 
 import	StdIOCommon
-from	iostate	import PSt, IOSt
+from	iostate	import :: PSt
 
 
 ::  Process

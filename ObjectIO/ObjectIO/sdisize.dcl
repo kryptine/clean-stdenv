@@ -8,8 +8,8 @@ definition module sdisize
 //	Modified: 7 September 2001 for Clean 2.0
 //	********************************************************************************
 
-from	StdIOBasic	import Size
-from	iostate		import IOSt
+from	StdIOBasic	import :: Size
+from	iostate		import :: IOSt
 import	ostypes
 
 /*	getSDIWindowSize retrieves the OSWindowPtr and current Size of the WindowViewFrame of the SDI window

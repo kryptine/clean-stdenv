@@ -3,7 +3,7 @@ implementation module mstate
 
 import	StdBool, StdClass, StdInt
 import	menuhandle
-from	commondef	import fatalError
+from commondef import fatalError
 
 
 mstateFatalError :: String String -> .x

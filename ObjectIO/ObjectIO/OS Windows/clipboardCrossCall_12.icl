@@ -3,7 +3,7 @@ implementation module clipboardCrossCall_12
 
 import	StdBool, StdClass, StdInt, StdMisc
 import	clCrossCall_12
-from	clCCall_12	import winMakeCString, winGetCStringAndFree, winReleaseCString, CSTR
+from	clCCall_12	import winMakeCString, winGetCStringAndFree, winReleaseCString, :: CSTR
 import	code from "cCrossCallClipboard_121.obj"
 
 

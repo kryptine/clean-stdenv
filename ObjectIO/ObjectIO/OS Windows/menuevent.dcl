@@ -9,8 +9,8 @@ definition module menuevent
 
 
 import	deviceevents, devicesystemstate, menuhandle
-from	iostate	import PSt, IOSt
-from	osmenu	import OSTrackPopUpMenu, OSTrackPopUpMenuResult, PopUpTrackedByIndex, PopUpTrackedByItemId
+from	iostate	import :: PSt
+from	osmenu	import :: OSTrackPopUpMenu
 
 
 menuEvent		:: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)

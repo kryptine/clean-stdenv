@@ -11,7 +11,7 @@ definition module StdMenu
 
 
 import	StdMenuElementClass
-from	iostate	import PSt, IOSt
+from	iostate import :: IOSt, :: PSt
 
 
 //	Operations on unknown Ids are ignored.

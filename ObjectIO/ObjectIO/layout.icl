@@ -3,7 +3,7 @@ implementation module layout
 
 import	StdBool, StdInt, StdList, StdMisc, StdTuple
 import	commondef, id
-from	windowhandle	import LayoutInfo, LayoutFix, LayoutFun, LayoutFrame, Origin
+from	windowhandle	import :: LayoutInfo(LayoutFix,LayoutFun,LayoutFrame), :: Origin
 
 
 layoutError :: String String -> .x

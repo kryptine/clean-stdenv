@@ -12,7 +12,7 @@ definition module windowvalidate
 
 import	windowhandle
 import	osdocumentinterface, ossystem, ostoolbox
-from	iostate				import IOSt
+from	iostate				import :: IOSt
 
 
 validateWindowId :: !(Maybe Id) !(IOSt .l) -> (!Maybe Id,!IOSt .l)

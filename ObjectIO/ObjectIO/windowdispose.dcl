@@ -10,8 +10,8 @@ definition module windowdispose
 
 
 import	windowhandle
-from	iostate				import PSt, IOSt, InputTrack, InputTrackKind, SliderTrackInfo
-from	windowaccess		import WID
+from	iostate				import :: InputTrack, :: PSt
+from	windowaccess		import :: WID
 import	osdocumentinterface, osevent, ostoolbox, oswindow
 
 

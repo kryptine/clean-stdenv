@@ -2,10 +2,10 @@ implementation module menuCrossCall_12
 
 
 import	StdInt, StdMisc, StdTuple
-from	StdIOCommon	import Modifiers
+from	StdIOCommon	import :: Modifiers
 import	clCrossCall_12
-from	clCCall_12	import winMakeCString, winReleaseCString, CSTR, toModifiers
-from	ostypes		import HWND
+from	clCCall_12	import winMakeCString, winReleaseCString, :: CSTR, toModifiers
+from	ostypes		import :: HWND
 
 
 ::	HITEM	:==  Int

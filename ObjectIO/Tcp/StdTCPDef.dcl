@@ -9,10 +9,10 @@ definition module StdTCPDef
 //	********************************************************************************
 
 import	StdReceiverDef
-from	StdMaybe		import	Maybe, Just, Nothing
-from	StdOverloaded	import	toString, ==
-from	StdChannels		import	DuplexChannel, ReceiveMsg, SendEvent
-from	tcp 			import	TCP_SChannel_,TCP_RChannel_,TCP_Listener_,IPAddress
+from	StdMaybe		import :: Maybe
+from	StdOverloaded	import class ==, class toString
+from	StdChannels		import :: SendEvent, :: ReceiveMsg, :: DuplexChannel
+from	tcp				import :: IPAddress, :: TCP_Listener_, :: TCP_RChannel_, :: TCP_SChannel_
 
 
 ::	*TCP_SChannel		:==	TCP_SChannel_ ByteSeq

@@ -10,10 +10,10 @@ definition module StdPSt
 //	********************************************************************************
 
 
-from	StdFunc		import St
-from	StdIOCommon	import IdFun, DocumentInterface, MDI, SDI, NDI
-from	StdPicture	import Picture
-from	iostate		import PSt, IOSt
+from	StdFunc		import :: St
+from	StdIOCommon	import :: DocumentInterface, :: IdFun
+from	StdPicture	import :: Picture
+from	iostate		import :: IOSt, :: PSt{..}
 
 
 /*	accScreenPicture provides access to an initial Picture as it would be created in

@@ -5,7 +5,7 @@ definition module osclipboard
 //	Clipboard operations.
 
 import	ostoolbox
-from	clipboardCrossCall_12	import CF_TEXT
+from clipboardCrossCall_12	import CF_TEXT
 
 
 ::	OSClipboardItemType

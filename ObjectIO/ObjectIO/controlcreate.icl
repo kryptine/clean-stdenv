@@ -4,7 +4,6 @@ implementation module controlcreate
 import	StdBool, StdInt, StdList, StdMisc
 import	ostooltip, oswindow
 import	commondef, controllayout, controlvalidate, StdControlAttribute, windowaccess
-from	StdPSt	import PSt, IOSt
 
 
 /*	createControls generates the proper system resources for all given WElementHandles of the window.

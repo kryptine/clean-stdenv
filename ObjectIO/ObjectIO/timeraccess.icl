@@ -3,7 +3,7 @@ implementation module timeraccess
 
 import	StdBool, StdTuple
 import	devicesystemstate, timerhandle, timertable
-from	commondef	import fatalError, stateMap2
+from commondef import fatalError, stateMap2
 
 
 timeraccessFatalError :: String String -> .x

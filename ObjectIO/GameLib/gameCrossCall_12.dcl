@@ -8,8 +8,8 @@ definition module gameCrossCall_12
 //	********************************************************************************
 
 import	clCrossCall_12, gameintrface_12
-from	ostypes		import OSWindowPtr
-from	oswindow	import DelayActivationInfo
+from	ostypes		import :: OSWindowPtr
+from	oswindow	import :: DelayActivationInfo
 
 //	Initialisation of game. This function must be called before any game cross call can be done!
 WinInitialiseGame :: !*OSToolbox -> *OSToolbox

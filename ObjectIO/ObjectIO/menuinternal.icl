@@ -4,7 +4,7 @@ implementation module menuinternal
 import	StdBool, StdList, StdMisc
 import	osmenu, ostypes
 import	iostate, menuaccess, menuitems, sdisize
-from	commondef	import fatalError, stateMap, removeCheck, uremove, UCond, hdtl
+from	commondef	import fatalError, stateMap, removeCheck, uremove, :: UCond, hdtl
 from	menucreate	import disposeMenuIds, disposeShortcutkeys, disposeSubMenuHandles
 
 

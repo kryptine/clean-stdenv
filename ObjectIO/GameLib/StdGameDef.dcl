@@ -9,13 +9,11 @@ definition module StdGameDef
 //	********************************************************************************
 
 import	StdString
-from	StdFunc			import St
-from	StdOverloaded	import zero
-from	StdIOBasic		import Point2, Size, IdFun
-from	StdMaybe		import Maybe, Just, Nothing
-from	StdPictureDef	import Colour, RGB, RGBColour, Black, White, 
-                               DarkGrey, Grey, LightGrey, Red, Green,
-                               Blue, Cyan, Magenta, Yellow
+from	StdFunc			import :: St
+from	StdOverloaded	import class zero
+from	StdIOBasic		import :: IdFun, :: Size(..), :: Point2(..)
+from	StdMaybe		import :: Maybe(..)
+from	StdPictureDef	import :: Colour(..), ::RGBColour(..)
 import	StdGSt
 
 

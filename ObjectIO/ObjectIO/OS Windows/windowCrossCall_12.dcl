@@ -2,10 +2,10 @@ definition module windowCrossCall_12
 
 
 import	StdString
-from	ostoolbox		import OSToolbox
-from	ostypes			import HWND
-from	rgnCCall_12		import HRGN
-from	pictCCall_12	import HDC
+from	ostoolbox		import :: OSToolbox
+from	ostypes			import :: HWND
+from	rgnCCall_12		import :: HRGN
+from	pictCCall_12	import :: HDC
 
 
 //	Cursor shape constants:

@@ -8,7 +8,7 @@ definition module receiverevent
 
 
 import	deviceevents
-from	iostate	import PSt, IOSt
+from	iostate import :: PSt
 
 
 receiverEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)

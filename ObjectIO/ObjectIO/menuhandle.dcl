@@ -11,12 +11,12 @@ definition module menuhandle
 
 import	StdMenuDef
 import	osmenu
-from	commondef		import Bound, Finite, Infinite
-from	id				import IdTable
-from	receiverhandle	import ReceiverHandle, RHandleFunction, /*MW11..*/ EndpointRef`, InetReceiverCategory`,
-								OSToolbox
-from	receivertable	import ReceiverTable
-from	systemid		import SystemId
+from	commondef		import :: Bound
+from	id				import :: IdTable
+from	receiverhandle	import :: ReceiverHandle(..), 
+							:: InetReceiverCategory`, :: EndpointRef`, :: RHandleFunction
+from	receivertable	import :: ReceiverTable
+from	systemid		import :: SystemId
 
 
 ::	*MenuElementState ls pst								// The internal implementation of a menu element

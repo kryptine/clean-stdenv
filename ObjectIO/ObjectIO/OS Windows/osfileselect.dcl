@@ -3,7 +3,7 @@ definition module osfileselect
 //	Clean Object I/O library, version 1.2
 
 import	StdString
-from	ostoolbox	import OSToolbox
+from	ostoolbox	import :: OSToolbox
 import	osevent
 
 osInitialiseFileSelectors	:: !*OSToolbox -> *OSToolbox

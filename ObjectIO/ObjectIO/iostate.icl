@@ -4,7 +4,7 @@ implementation module iostate
 import	StdBool, StdFunc, StdList, StdMisc
 import	commondef, devicefunctions, devicesystemstate, processstack, receivertable, timertable
 import	osactivaterequests, osdocumentinterface, osevent, osguishare, osmouse, ossystem, ostime, ostoolbox, ostypes
-from	roundrobin	import RR, emptyRR, notodoRR
+from	roundrobin	import :: RR, emptyRR, notodoRR
 
 
 iostateFatalError :: String String -> .x

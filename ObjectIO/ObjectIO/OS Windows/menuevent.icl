@@ -3,8 +3,8 @@ implementation module menuevent
 
 import	StdBool, StdList, StdMisc
 import	clCrossCall_12
-from	clCCall_12			import winMakeCString, CSTR, toModifiers
-from	osmenu				import osMenuItemCheck, OSTrackPopUpMenu, OSTrackPopUpMenuResult, PopUpTrackedByIndex, PopUpTrackedByItemId
+from	clCCall_12			import winMakeCString, :: CSTR, toModifiers
+from	osmenu				import osMenuItemCheck, :: OSTrackPopUpMenu{..}, :: OSTrackPopUpMenuResult(..)
 import	commondef, deviceevents, iostate
 from	menuaccess			import menuStateHandleGetHandle, menuStateHandleGetMenuId
 from	processstack		import topShowProcessShowState

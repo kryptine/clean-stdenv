@@ -11,7 +11,7 @@ definition module StdClipboard
 
 
 import	StdMaybe
-from	iostate	import	PSt, IOSt
+from	iostate import :: PSt
 
 
 //	Clipboard data items:

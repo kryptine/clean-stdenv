@@ -9,14 +9,14 @@ definition module StdPrint
 //	********************************************************************************
  
 
-from	StdIOCommon		import	UpdateState, ViewFrame, UpdateArea
-from	StdIOBasic		import	IdFun, Size, Rectangle, Point2
-from	StdOverloaded	import	==
-from	ospicture		import	Picture
-from	osprint			import	PrintSetup, JobInfo, PrintInfo, Alternative, 
-								Cancelled, StartedPrinting, PrintEnvironments
-from	iostate			import	IOSt, PSt
-from	StdFile			import	FileEnv, Files
+from	StdIOCommon		import :: UpdateState
+from	StdIOBasic		import :: IdFun, :: Size, :: Rectangle, :: Point2
+from	StdOverloaded	import class ==
+from	ospicture		import :: Picture
+from	osprint			import :: Alternative(..), class PrintEnvironments(..),
+							:: PrintInfo(..), :: PrintSetup, :: JobInfo(..)
+from	iostate			import :: PSt
+from	StdFile			import class FileEnv
 
 ::	PageDimensions
 	=	{	page		:: !Size		// Size of the drawable area of the page 

@@ -11,6 +11,7 @@ definition module windowaccess
 
 import	windowhandle
 import	ossystem, ostoolbox
+from	keyfocus	import :: FocusItem
 
 
 /*	Initial window handle. The following arguments are passed:

@@ -9,7 +9,7 @@ definition module StdPrintText
 //	********************************************************************************
 
 import	StdString
-from	StdPictureDef	import FontDef, FontName, FontStyle, FontSize
+from	StdPictureDef	import :: FontDef
 import	StdPrint
 
 

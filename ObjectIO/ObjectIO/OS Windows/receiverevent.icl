@@ -2,7 +2,7 @@ implementation module receiverevent
 
 import	StdBool
 import	deviceevents, iostate, /*MW11*/ clCrossCall_12 
-from	StdPSt	import accPIO
+from StdPSt import accPIO
 
 
 /*	receiverEvent filters the appropriate events for the receiver device.

@@ -4,7 +4,7 @@ implementation module StdTimer
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	commondef, id, iostate, timeraccess, timerdefaccess, timerdevice, timertable
 import	StdId, StdTimerAttribute, StdTimerElementClass
-from	StdPSt	import appPIO, accPIO
+from StdPSt import appPIO, accPIO
 
 
 stdTimerFatalError :: String String -> .x

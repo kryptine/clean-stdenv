@@ -10,9 +10,9 @@ definition module timeraccess
 
 
 import	devicesystemstate, timerhandle
-from	id				import IdTable
-from	receivertable	import ReceiverTable
-from	timertable		import TimerTable
+from	id				import :: IdTable
+from	receivertable	import :: ReceiverTable
+from	timertable		import :: TimerTable
 
 
 

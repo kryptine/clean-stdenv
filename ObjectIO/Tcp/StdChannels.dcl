@@ -8,13 +8,12 @@ definition module StdChannels
 //	Modified: 15 October 2001 for Clean 2.0 (Peter Achten)
 //	********************************************************************************
 
-from	StdMaybe		import Maybe, Just, Nothing
-from	StdOverloaded	import ==, toString
-from	tcp				import ChannelEnv
-from	StdFile 		import FileEnv, Files
-from	StdTime			import TimeEnv, Date, Tick, Time
-from	StdId			import Ids
-from	iostate			import PSt, IOSt
+from	StdMaybe		import :: Maybe
+from	StdOverloaded	import class toString, class ==
+from	tcp				import class ChannelEnv,
+							class FileEnv, class TimeEnv, class Ids,
+							instance TimeEnv World, instance Ids World
+from	iostate			import :: PSt
 
 instance ChannelEnv World
 

@@ -8,7 +8,7 @@ definition module GameFunctions
 //	********************************************************************************
 
 import	gameintrface_12, osgame
-from	StdIOBasic	import Point2
+from	StdIOBasic	import :: Point2
 
 // game result codes (GRESULT)
 GR_OK                  :==  0

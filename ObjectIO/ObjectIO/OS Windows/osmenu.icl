@@ -3,10 +3,10 @@ implementation module osmenu
 
 import	StdBool, StdChar, StdClass, StdInt, StdString
 import	StdMaybe
-from	StdIOCommon			import Modifiers
+from	StdIOCommon			import :: Modifiers
 import	menuCCall_12, menuCrossCall_12
-from	osdocumentinterface	import OSMenuBar
-from	ostypes				import OSWindowPtr, OSNoWindowPtr
+from	osdocumentinterface	import :: OSMenuBar{..}
+from	ostypes				import :: OSWindowPtr, OSNoWindowPtr
 
 
 //	Types for menus and menu elements:

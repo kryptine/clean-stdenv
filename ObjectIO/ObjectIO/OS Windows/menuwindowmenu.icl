@@ -3,7 +3,7 @@ implementation module menuwindowmenu
 //	The definition and implementation of the WindowMenu. 
 //	PA: implementation not required on Windows platform.
 
-from	iostate import PSt, IOSt
+from	iostate import :: IOSt, :: PSt
 import	windowhandle
 
 

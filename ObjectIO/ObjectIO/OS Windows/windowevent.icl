@@ -13,7 +13,7 @@ from	StdPSt				import	accPIO
 from	StdWindowAttribute	import	isWindowKeyboard,  getWindowKeyboardAtt,
 									isWindowMouse,     getWindowMouseAtt,
 									isWindowCursor,    getWindowCursorAtt
-from	windowcreate		import	createModalDialogControls
+from windowcreate		import	createModalDialogControls
 
 
 windoweventFatalError :: String String -> .x

@@ -11,7 +11,7 @@ from	controlcreate		import createControls
 from	windowclipstate		import validateWindowClipState
 from	windowdevice		import windowFunctions
 from	windowupdate		import updatewindow
-from	windowvalidate		import validateWindow
+from windowvalidate		import validateWindow
 import	menuwindowmenu
 
 

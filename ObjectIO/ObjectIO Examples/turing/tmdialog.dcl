@@ -1,8 +1,8 @@
 definition module tmdialog
 
-from	StdId	import Ids, Id, R2Id, RId
-from	StdPSt	import PSt, IOSt
-from	StdIOCommon	import IdFun
+from	StdId	import :: Id, class Ids
+from	StdPSt	import :: PSt
+from	StdIOCommon import :: IdFun
 import	tm
 
 HelpFile

@@ -12,7 +12,7 @@ definition module windowupdate
 
 import	ospicture, ossystem, ostoolbox, ostypes
 import	windowhandle, wstate
-from	deviceevents	import UpdateInfo, ControlUpdateInfo
+from	deviceevents	import :: UpdateInfo
 
 
 /*	updatewindow redraws the controls indicated by the UpdateInfo.

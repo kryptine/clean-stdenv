@@ -9,7 +9,7 @@ definition module windowevent
 
 
 import	deviceevents
-from	iostate	import PSt, IOSt
+from	iostate import :: PSt
 
 
 windowEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)

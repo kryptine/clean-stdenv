@@ -1,7 +1,7 @@
 definition module state
 
 
-from	StdPSt	import PSt,IOSt
+from	StdPSt	import :: PSt
 import	board
 
 

@@ -1,8 +1,8 @@
 implementation module clCCall_12
 
 import	StdClass, StdInt
-from	StdIOCommon	import Modifiers
-from	ostoolbox import OSToolbox
+from	StdIOCommon	import :: Modifiers{..}
+from	ostoolbox	import :: OSToolbox
 import code from "cCCallSystem_121.obj", 
 				 "cCCallWindows_121.obj",
 				 "cCrossCallWindows_121.obj", 

@@ -7,9 +7,9 @@ definition module ospicture
 */
 
 import	osrgn, ostypes
-from	StdFunc			import St
-from	osfont			import Font
-from	ostoolbox		import OSToolbox
+from	StdFunc			import :: St
+from	osfont			import :: Font
+from	ostoolbox		import :: OSToolbox
 import	StdPictureDef
 
 

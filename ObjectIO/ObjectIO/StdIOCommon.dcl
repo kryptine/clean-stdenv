@@ -12,7 +12,8 @@ definition module StdIOCommon
 
 import	StdOverloaded, StdString
 import	StdBitmap, StdIOBasic, StdKey, StdMaybe
-from	id			import	Id, RId, R2Id, rIdtoId, r2IdtoId, toString, ==
+from	id			import	:: Id, :: RId, :: R2Id, instance toString Id, instance == Id, 
+						instance == RId, instance == R2Id
 
 
 /*	The SelectState and MarkState types.				*/

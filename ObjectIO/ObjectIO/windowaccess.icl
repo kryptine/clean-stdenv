@@ -5,7 +5,7 @@ import	StdBool, StdEnum, StdInt, StdList, StdMisc, StdTuple
 import	ossystem, ostypes, oswindow
 import	commondef, keyfocus, windowhandle
 from	StdControlAttribute	import isControlKeyboard
-from	StdWindowAttribute	import isWindowInitActive, getWindowInitActiveAtt,
+from StdWindowAttribute	import isWindowInitActive, getWindowInitActiveAtt,
 									isWindowHMargin,   getWindowHMarginAtt,
 									isWindowVMargin,   getWindowVMarginAtt,
 									isWindowItemSpace, getWindowItemSpaceAtt

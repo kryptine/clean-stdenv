@@ -10,8 +10,8 @@ definition module deviceevents
 
 import	osevent, ostypes
 import	receivermessage, timertable
-from	windowhandle	import WIDS
-from	receiverhandle	import InetEvent`, EndpointRef`, InetReceiverCategory` // MW11++
+from	windowhandle	import :: WIDS
+from	receiverhandle	import :: InetEvent`, :: EndpointRef`, :: InetReceiverCategory`
 
 ::	MsgEvent
 	=	QASyncMessage		!QASyncMessage
