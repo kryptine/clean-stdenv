@@ -138,12 +138,15 @@ where
 self :: (GecCircuit a a) (GecCircuit a a) -> GecCircuit a a
 self g f = GecCircuit k
 where 
-	k seta env = (self_seta id_B gseta, env````)
+	k seta env 
+		# (id_B, env) = openStore` (Just False) env
+		  (seta`, env) = self_k` id_B seta env
+		= (self_seta id_B seta`, env)
+
+	self_k` id_B seta env = (gseta, env``)
 	where
-		(id_B, env`) = openStoreId env
-		(_, env``) = openStore id_B (Just False) env`
-		(fseta, env```) = runCircuit f gseta env``
-		(gseta, env````) = runCircuit g (self_setrec id_B seta fseta) env```
+		(fseta, env`) = runCircuit f gseta env
+		(gseta, env``) = runCircuit g (self_setrec id_B seta fseta) env`
 
 	self_setrec id_B setout setrec a env 
 		# (exit, env) = readStore id_B env
@@ -194,7 +197,8 @@ where
 			# (b, env) = f a env
 			= setb b env
 			
-openStore` :: !(Maybe a) !(PSt .ps) -> (!(StoreId a), !PSt .ps)
+openStore` :: !(Maybe a) !(PSt .ps) -> (!StoreId a, !PSt .ps)
 openStore` maybe env
 	# (id, env) = openStoreId env
-	= (id, openStore id maybe env)
+	  (_, env) = openStore id maybe env
+	= (id, env)
