@@ -30,9 +30,9 @@ where
 			, resetHGEC = Nothing
 			}
 
-	toCounter n = (n,down,up)
+	toCounter n _ = (n,down,up)
 
-	fromCounter (n,_,_) = n
+	fromCounter _ (n,_,_) = n
 
 	updCounter` True val = updCounter val
 	updCounter` _ val = val
@@ -97,9 +97,9 @@ where
 	assignFuncBut :: !String !HMode !(CHButton, a -> a) !*HSt -> ((a -> a,!Body),!*HSt)
 	assignFuncBut s mode (button=:CHButton size name ,cbf) hst = mkViewHGEC (s +++ name) mode bimap id hst
 	where
-		bimap =	{ toHGEC 	= \_ 	-> button
+		bimap =	{ toHGEC 	= \_ _	-> button
 				, updHGEC	= \_ v -> v
-				, fromHGEC	= \but -> case but of 
+				, fromHGEC	= \_ but -> case but of 
 										CHPressed -> cbf
 										_		  -> id
 				, resetHGEC	= Just (\_ 	-> button)

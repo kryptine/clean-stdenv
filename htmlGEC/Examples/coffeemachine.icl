@@ -11,8 +11,8 @@ derive gParse Machine, Output, Product
 Start world  = doHtml coffeemachine world
 
 coffeemachine hst
-# ((command,combody),hst)	= assignTableFuncBut commandbuttons hst	
-# ((option, optbody),hst)	= assignTableFuncBut optionbuttons  hst	
+# ((command,combody),hst)	= assignTableFuncBut "cb" HEdit commandbuttons hst	
+# ((option, optbody),hst)	= assignTableFuncBut "ob" HEdit optionbuttons  hst	
 # ((machine,_)      ,hst)	= mkStoreHGEC "hidden"  (option o command) initmachine hst
 # ((_,contbody)		,hst)	= mkEditHGEC "cont" HDisplay (displaycontents  machine) hst	
 = (Head [ Hd_Title "Coffee Machine"

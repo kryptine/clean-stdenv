@@ -59,21 +59,21 @@ where
 mkEditHGEC:: !FormID !HMode d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkEditHGEC uniqueid  HEdit data hst
 = mkViewHGEC uniqueid HEdit 
-	{toHGEC = id , updHGEC = \_ v -> v , fromHGEC = id , resetHGEC = Nothing} data hst
+	{toHGEC = toHGECid , updHGEC = \_ v -> v , fromHGEC = \_ v -> v , resetHGEC = Nothing} data hst
 mkEditHGEC uniqueid  mode data hst
 = mkSetHGEC uniqueid mode data hst
 
 mkSetHGEC:: !FormID !HMode d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkSetHGEC uniqueid  mode data hst
 = mkViewHGEC uniqueid mode 
-	{toHGEC = id , updHGEC = \_ _ -> data , fromHGEC = id , resetHGEC = Nothing} data hst
+	{toHGEC = toHGECid , updHGEC = \_ _ -> data , fromHGEC = \_ v -> v , resetHGEC = Nothing} data hst
 
 // editor with feedback to its self
 
 mkSelfHGEC  :: !FormID 	!(d -> d) d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkSelfHGEC uniqueid cbf initdata hst
 = mkViewHGEC uniqueid HEdit 
-	{toHGEC = id , updHGEC = update , fromHGEC = id , resetHGEC = Nothing} initdata hst
+	{toHGEC = toHGECid , updHGEC = update , fromHGEC = \_ v -> v , resetHGEC = Nothing} initdata hst
 where
 	update True newval = cbf newval
 	update _ val = val
@@ -83,74 +83,82 @@ where
 mkApplyHGEC :: !FormID !(d -> d) d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkApplyHGEC uniqueid cbf data hst
 = mkViewHGEC uniqueid HDisplay 
-	{toHGEC = id , updHGEC = \_ v = cbf data , fromHGEC = id, resetHGEC = Nothing} data hst
+	{toHGEC = toHGECid , updHGEC = \_ v = cbf data , fromHGEC = \_ v -> v, resetHGEC = Nothing} data hst
 
 // editor which applies the function to its argument
 
 mkStoreHGEC :: !FormID 	!(d -> d) d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkStoreHGEC uniqueid cbf data hst
 = mkViewHGEC uniqueid HDisplay 
-	{toHGEC = id , updHGEC = \_ v = cbf v , fromHGEC = id, resetHGEC = Nothing} data hst
+	{toHGEC = toHGECid , updHGEC = \_ v = cbf v , fromHGEC = \_ v -> v, resetHGEC = Nothing} data hst
 
 mkApplyEditHGEC	:: !FormID !d d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkApplyEditHGEC uniqueid inputval initval hst
 = mkViewHGEC uniqueid HEdit 
-	{toHGEC = id , updHGEC = update , fromHGEC = id, resetHGEC = Nothing} initval hst
+	{toHGEC =  toHGECid , updHGEC = update , fromHGEC = \_ v -> v, resetHGEC = Nothing} initval hst
 where
 	update True  newval = newval
 	update False val    = inputval
 
 mkSpecialEditor :: !FormID !HMode !(Bimap d v) d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
 mkSpecialEditor fid mode {map_to,map_from} d hst
-= mkViewHGEC fid mode 	{ toHGEC = map_to
+= mkViewHGEC fid mode 	{ toHGEC = \d _ -> map_to d
 						, updHGEC = \b v -> map_to (map_from v)
-						, fromHGEC = map_from
+						, fromHGEC = \b v -> map_from v
 						, resetHGEC = Nothing
 						} d hst 
 
+toHGECid d Nothing = d
+toHGECid d (Just v) = v
 
 
 // swiss army nife editor that makes coffee too ...
 
 mkViewHGEC :: !FormID !HMode !(HBimap d v) d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
-mkViewHGEC uniqueid mode {toHGEC, updHGEC, fromHGEC, resetHGEC} data (inidx,lhsts) 
+mkViewHGEC uniqueid mode {toHGEC, updHGEC, fromHGEC, resetHGEC} initdata (inidx,lhsts) 
 # ((updview,body),(nr,[(uniqueid,mystore):lhsts])) = gHGEC{|*|} mode nextview (0,[(uniqueid,viewtostore):lhsts])
 = ((fromHGEC2 updview,body),(0,[(uniqueid,encodeInfo2 updview):lhsts]))
 where
-	initview 			= toHGEC data						// convert init data to view domain
-	(isupdated,newview) = updateFormInfo uniqueid initview	// has to form been updated or is it in the global storage ?	 
-	updateview			= updHGEC isupdated newview			// apply update function and tell user if an update has taken place
-	newdata				= fromHGEC updateview				// convert back to data domain	 
+//	initview 			= toHGEC initdata Nothing				// convert init data to view domain
+	
+	(isupdated,newview) = case updateFormInfo uniqueid of
+							(False,Nothing) 		= (False,toHGEC initdata Nothing)
+							(False,Just oldview) 	= (False,toHGEC initdata (Just oldview))
+							(True, Just newview)	= (True,newview)  
+
+	updateview			= updHGEC  isupdated newview		// apply update function telling user if an update has taken place
+	newdata				= fromHGEC isupdated updateview		// convert back to data domain telling if an update has taken place	 
+
 	nextview			= case resetHGEC of
 								Nothing -> updateview		// adjust view 
 								Just upd -> upd updateview
 	viewtostore			= encodeInfo  nextview				// in this terrible format
 
 	fromHGEC2 updview 	= case resetHGEC of
-							Nothing -> fromHGEC updview
+							Nothing -> fromHGEC isupdated updview 
 							(Just reset)	-> newdata
 							
 	encodeInfo2 updview = case resetHGEC of
 							Nothing -> encodeInfo updview
 							(Just reset)	-> viewtostore
 
-	updateFormInfo :: FormID a -> (Bool,a) | gUpd{|*|} a & gParse{|*|} a
-	updateFormInfo uniqueid v 
+	updateFormInfo :: FormID -> (Bool,Maybe a) | gUpd{|*|} a & gParse{|*|} a
+	updateFormInfo uniqueid
 		= case (decodeInput1 uniqueid) of
 
 			// an update for this form is detected
 
 			((Just (pos,updval), Just oldstate)) 
-					-> (True, snd (gUpd{|*|} (UpdSearch updval pos) oldstate))
+					-> (True, Just (snd (gUpd{|*|} (UpdSearch updval pos) oldstate)))
 
 			// no update found, determine the current stored state
 
 			((_, Just oldstate))	
-					-> (False, oldstate)
+					-> (False, Just oldstate)
 
 			// no update, no state stored, the current value is taken as (new) state
 
-			else	-> (False, v)	
+			else	-> (False, Nothing)	
 	where
 		decodeInput1 :: String -> (Maybe FormUpdate, Maybe a) | gParse{|*|} a
 		decodeInput1 uniqueid
