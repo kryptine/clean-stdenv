@@ -36,7 +36,6 @@ instance Testable Bool
 instance Testable Property
 instance Testable (a->b) | Testable b & TestArg a  
 
-derive bimap [], (,), (,,), (,,,), (,,,,), (,,,,,)
 derive generate (,), (,,), (,,,), (,,,,), (,,,,,), [], Int, Char, Bool, Real, String, UNIT, PAIR, EITHER, CONS, FIELD, OBJECT, (->)
 
 predInts	:== [0,1,-1]
