@@ -10,7 +10,7 @@ module Worms
 import StdEnv, StdIO
 import StdGameDef, StdGame, StdGSt, GameFunctions
 import L1, L2, L3, WORM, HEAD
-import Random
+import Random, notes
 
 ::  GameState
     = { curlevel    :: !Int
@@ -120,6 +120,7 @@ OBJ_WALL        :== 0x80
 EV_STOP         :== 0
 EV_DIE          :== 1
 EV_GAMEOVER     :== 2
+EV_END_LEVEL    :== 3
 
 
 /* ---------- level 1 ---------- */
@@ -134,8 +135,8 @@ GameLevel1
     , initpos      = {x = W - 8, y = 0}
     , layers       = [Level1Layer]
     , objects      = ObjectList
-    , music        = Nothing // Just BackGroundMusic
-    , soundsamples = []
+    , music        = Just BackGroundMusic
+    , soundsamples = SoundSampleList
     , leveloptions = { fillbackground = Nothing
                      , escquit        = False
                      , debugscroll    = False
@@ -164,8 +165,8 @@ GameLevel2
     , initpos      = {x = W - 8, y = 0}
     , layers       = [Level2Layer]
     , objects      = ObjectList
-    , music        = Nothing // Just BackGroundMusic
-    , soundsamples = []
+    , music        = Nothing
+    , soundsamples = SoundSampleList
     , leveloptions = { fillbackground = Nothing
                      , escquit        = False
                      , debugscroll    = False
@@ -194,8 +195,8 @@ GameLevel3
     , initpos      = {x = W - 8, y = 0}
     , layers       = [Level3Layer]
     , objects      = ObjectList
-    , music        = Nothing       // Just BackGroundMusic
-    , soundsamples = []
+    , music        = Nothing
+    , soundsamples = SoundSampleList
     , leveloptions = { fillbackground = Nothing
                      , escquit        = False
                      , debugscroll    = False
@@ -336,12 +337,17 @@ where
 
     newCollide bounds othertype _ objst=:{st, or, gs}
         |   othertype == OBJ_FOOD
+            #   (_, gs) = playSoundSample SND_FOOD (MAX_VOLUME * 7 / 8) PAN_CENTER
+                            (getnotefreq (67 + st.add * 2)) 0 gs
+            #   (_, gs) = playSoundSample SND_FOOD (MAX_VOLUME * 7 / 8) PAN_CENTER
+                            (getnotefreq (71 + st.add * 2)) 2 gs
             #   st = {st & count = st.count + st.add
                          , more = st.more + st.add
                          , add = st.add + 1
                          }
             |   st.add == 10
-                = quitlevel {st=st, or=or, gs=gs}
+                # (_,gs) = createUserGameEvent EV_END_LEVEL 0 0 Self ANY_SUBTYPE 3 gs
+                = {st=st, or=or, gs=gs}
             = {st=st, or=or, gs=gs}
         |   othertype == OBJ_WORMSEGMENT
             # or = {or & ownbounds = 0, collidebounds = 0}
@@ -358,6 +364,14 @@ where
 
     newUserEvent ev par1 par2 objst=:{st, or, gs}
         | ev == EV_STOP
+            #   (_, gs) = playSoundSample SND_HIT MAX_VOLUME PAN_CENTER
+                            (getnotefreq 85) 0 gs
+            #   (_, gs) = playSoundSample SND_HIT (MAX_VOLUME * 18 / 19) PAN_CENTER
+                            (getnotefreq 81) 3 gs
+            #   (_, gs) = playSoundSample SND_HIT (MAX_VOLUME * 17 / 19) PAN_CENTER
+                            (getnotefreq 77) 6 gs
+            #   (_, gs) = playSoundSample SND_HIT (MAX_VOLUME * 16 / 19) PAN_CENTER
+                            (getnotefreq 73) 10 gs
             # (rnd, gs) = Rnd gs
             # (_, gs)   = createUserGameEvent EV_DIE 0 0 Self ANY_SUBTYPE (rnd rem 150) gs
             = {st=st, or={or & speed = {rx = 0.0, ry = 0.0}
@@ -368,6 +382,8 @@ where
             = {st=st, or = {or & currentsprite = SPR_INVISIBLE}, gs=gs}
         | ev == EV_GAMEOVER
             = {st=st, or=or, gs=gs}
+        | ev == EV_END_LEVEL
+            = quitlevel {st=st, or=or, gs=gs}
         = {st=st, or=or, gs=gs}
 
 
@@ -536,9 +552,9 @@ getgstgameover gst = (gst.gameover, gst)
 /* ---------- music ---------- */
 
 BackGroundMusic
-  = { musicfile = "Helio.mid"
+  = { musicfile = "Worms.mid"
     , restart   = True
-    , continue  = False
+    , continue  = True
     }
 
 
@@ -625,5 +641,14 @@ Rnd gs = accGSt gsrand gs
 gsrand gs=:{randseed}
     # (x, newseed) = random randseed
     = (x, {gs & randseed = newseed})
+
+
+SND_FOOD  :==  1
+SND_HIT   :==  2
+
+SoundSampleList =
+  [ { soundid = SND_FOOD, soundfile = "FOOD.WAV", soundbuffers = 3 } 
+  , { soundid = SND_HIT,  soundfile = "HIT.WAV",  soundbuffers = 5 } 
+  ]
 
 
