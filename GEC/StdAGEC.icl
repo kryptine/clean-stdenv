@@ -16,9 +16,9 @@ mkBimapGEC toGEC updGEC fromGEC value
 gGEC{|BimapGEC|} _ gGECb gecArgs pSt
 	= bimapgec gGECb gecArgs pSt
 bimapgec gGECb gecArgs=:{gec_value=mbimap,update=biupdate} pSt
-	= convert (bhandle,pst1)
+	= convert (bhandle,pSt1)
 where
-	(bhandle,pst1) = gGECb {gecArgs & gec_value=mb,update=bupdate bhandle} pSt
+	(bhandle,pSt1)	= gGECb {gecArgs & gec_value=mb,update=bupdate bhandle} pSt
 
 	convert (bhandle,pst) = ({bhandle & gecSetValue = bimapSetValue bhandle.gecGetValue bhandle.gecSetValue
 	                                  , gecGetValue = bimapGetValue bhandle.gecGetValue
@@ -98,6 +98,7 @@ where
 								          , makeUpValue = makeUpValue
 								          , outputOnly  = outputOnly
 								          } pSt
+				# pSt			= nabbaGEC.gecOpenGUI location pSt  //mjp
 				# lSt			= { agecBimapGEC = nabbaGEC
 								  , agecAGEC     = newAGECa
 								  }
