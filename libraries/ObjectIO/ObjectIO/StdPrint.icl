@@ -1,6 +1,6 @@
 implementation module StdPrint
 
-//	Clean Standard Object I/O library, version 1.1
+//	Clean Standard Object I/O library, version 1.2
 
 import StdEnv, StdMaybe, StdPicture, osprint, commondef
 

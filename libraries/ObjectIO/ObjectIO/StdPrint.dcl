@@ -1,7 +1,7 @@
 definition module StdPrint
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.1
+//	Clean Standard Object I/O library, version 1.2
 //	
 //	StdPrint specifies general printing functions.
 //	Related functions and modules:
