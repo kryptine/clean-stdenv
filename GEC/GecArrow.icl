@@ -1,16 +1,18 @@
 implementation module GecArrow
 
 import StdArrow, StdGECExt
-import store, StdDebug
+import store
 
-:: GecCircuit a b = GecCircuit (A. .ps: (GecSet b ps) (GecGet a ps) *(PSt ps) -> *(GecSet a ps, GecGet b ps, *PSt ps))
+:: GecCircuit a b = GecCircuit !.(A. .ps: (GecSet b ps) (GecGet a ps) *(PSt ps) -> *(GecSet a ps, GecGet b ps, *PSt ps))
 
 :: GecSet a ps :== IncludeUpdate a *(PSt ps) -> *PSt ps
 :: GecGet a ps :== *(PSt ps) -> *(a, *PSt ps)
 
+runCircuit (GecCircuit k) = k
+
 startCircuit :: !(GecCircuit a b) a *(PSt .ps) -> *PSt .ps
-startCircuit (GecCircuit k) a env
-	# (seta, getb, env) = k setb geta env
+startCircuit g a env
+	# (seta, getb, env) = runCircuit g setb geta env
 	= env
 where
 	geta env = (a, env)
@@ -52,18 +54,18 @@ where
 			
 			seta u a env = setb u (f a) env
 	
-	(>>>) (GecCircuit l) (GecCircuit r) = GecCircuit k
+	(>>>) l r = GecCircuit k
 	where 
 		k setc geta env = (seta, getc, env2)
 		where
-			(seta, getb, env1) = l setb geta env
-			(setb, getc, env2) = r setc getb env1
+			(seta, getb, env1) = runCircuit l setb geta env
+			(setb, getc, env2) = runCircuit r setc getb env1
 	
-	first (GecCircuit g) = GecCircuit k
+	first g = GecCircuit k
 	where
 		k setbc getac env = (setac, getbc, env1)
 		where
-			(seta, getb, env1) = g setb geta env
+			(seta, getb, env1) = runCircuit g setb geta env
 			
 			geta env 
 				# (ac, env) = getac env
@@ -83,14 +85,41 @@ where
 			 	  (b, env) = getb env
 			 	= setbc NoUpdate (b, snd ac) env
 
+instance ArrowChoice GecCircuit
+where
+	left g = GecCircuit k
+	where
+		k setbc getac env = (setac, getbc, env1)
+		where
+			(seta, getb, env1) = runCircuit g setb geta env
+
+			setac u (LEFT a) env = seta u a env
+			setac u (RIGHT c) env = setbc u (RIGHT c) env
+
+			getbc env
+				# (ac, env) = getac env
+				= case ac of
+					LEFT _ 
+						# (b, env) = getb env
+						-> (LEFT b, env)
+					RIGHT c -> (RIGHT c, env)
+
+			setb u b env = setbc u (LEFT b) env
+
+			geta env
+				# (ac, env) = getac env
+				= case ac of
+					LEFT a -> (a, env)
+					RIGHT _ -> (abort "Internal error in left", env)
+
 instance ArrowLoop GecCircuit
 where
-	loop (GecCircuit g) = GecCircuit k
+	loop g = GecCircuit k
 	where
 		k setc geta env = (seta, getc, env4)
 		where
 			(id, env1) = openStoreId env
-			(setab, getcb, env2) = g setcb getab env1
+			(setab, getcb, env2) = runCircuit g setcb getab env1
 			(cb, env3) = getcb env2
 			(_, env4) = openStore id (Just (snd cb)) env3
 	
@@ -132,15 +161,15 @@ where
 				  env = seta u a env
 				= writeStore id a` env
 
-feedback :: !(GecCircuit a a) -> GecCircuit a a
-feedback (GecCircuit g) = GecCircuit k
+feedback :: (GecCircuit a a) -> GecCircuit a a
+feedback g = GecCircuit k
 where 
 	k seta geta env = (seta`, geta`, env4)
 	where
 		(id, env1) = openStoreId env
 		(a, env2) = geta env1
 		(_, env3) = openStore id (Just a) env2
-		(seta`, geta`, env4) = g seta`` geta`` env3
+		(seta`, geta`, env4) = runCircuit g seta`` geta`` env3
 
 		geta`` env = readStore id env
 
@@ -149,6 +178,14 @@ where
 			# env = writeStore id a env
 			  env = seta` NoUpdate a env
 			= seta YesUpdate a env
+
+sink :: GecCircuit a Void
+sink = GecCircuit k
+where
+	k setb geta env = (\_ _ env -> env, \env -> (Void, env), env)
+
+source :: (GecCircuit a b) -> GecCircuit Void b
+source g = sink >>> arr (\_ -> abort "Internal error in source") >>> g
 
 gecIO :: (A. .ps: a *(PSt .ps) -> *(b, *PSt .ps)) -> GecCircuit a b
 gecIO f = GecCircuit k

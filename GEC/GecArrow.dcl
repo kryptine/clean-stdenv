@@ -23,11 +23,15 @@ gecMouse	:: String -> GecCircuit a MouseState					// Assign a mouse to a fresh w
 // Arrow instance for GecCircuit
 
 instance Arrow GecCircuit
+instance ArrowChoice GecCircuit
 instance ArrowLoop GecCircuit
 instance ArrowCircuit GecCircuit
 
 // Other GecCircuit combinators
 
-feedback :: !(GecCircuit a a) -> GecCircuit a a
+feedback :: (GecCircuit a a) -> GecCircuit a a
+
+sink :: GecCircuit a Void
+source :: (GecCircuit a b) -> GecCircuit Void b
 
 gecIO :: (A. .ps: a *(PSt .ps) -> *(b, *PSt .ps)) -> GecCircuit a b

@@ -66,7 +66,7 @@ where
 
 ::	AGECSt a env
 	=	E. b:
-		{	agecBimapGEC:: !GECVALUE !(BimapGEC a b) !env		// The handle to the BimapGEC
+		{	agecBimapGEC:: !GECVALUE (BimapGEC a b) env		// The handle to the BimapGEC
 		,	agecAGEC    :: !AGEC a							// The current AGEC value
 		}
 
