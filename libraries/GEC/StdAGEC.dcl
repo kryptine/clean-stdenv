@@ -14,19 +14,42 @@ derive gGEC BimapGEC
 						}
 :: Current a		=	Undefined | Defined a				// Undefined for a new-editor, Defined when a new value is set in an existing editor
 
+
 mkBimapGEC  		:: (a (Current b) -> b) (b -> b) (b -> a) (a -> (Bool,a)) a -> (BimapGEC a b)
+
+to_BimapGEC 		:: (Bimap a b) a  				-> (BimapGEC a b)
+from_BimapGEC 		:: (BimapGEC a b) 				-> (Bimap a b)
+Bimap_BimapGEC 		:: (Bimap a b) (BimapGEC a va) 	-> (BimapGEC b va)
+invBimap 			:: (Bimap a b)    				-> (Bimap b a)
 
 // abstract editors
 
-derive gGEC AGEC
+derive gGEC  AGEC
+derive bimap AGEC
 
-:: AGEC a		// abstract GEC for an a-value maintained with a b-editor
+:: AGEC a			// abstract GEC for an a-value maintained with a b-editor
 
-mkAGEC  	:: !(BimapGEC a b) !String -> AGEC a |  gGEC{|*|} b
-^^			:: (AGEC a) -> a
-(^=) infixl	:: (AGEC a) a -> (AGEC a)
+mkAGEC  			:: !(BimapGEC a b)     !String -> AGEC a | gGEC{|*|} b
+mkAGEC`  			:: !(BimapGEC a (g b)) !String -> AGEC a | gGEC{|*->*|} g // variant used to make dummy AGEC's
 
-mkAGEC`  	:: !(BimapGEC a (g b)) !String -> AGEC a | gGEC{|*->*|} g // variant used to make dummy AGEC's
+^^					:: (AGEC a) -> a
+(^=) infixl			:: (AGEC a) a -> (AGEC a)
+
+// conversion function for defining a gGEC specialization in terms of an AGEC
+
+Specialize 			:: a (a -> AGEC a) (GECArgs a (PSt .ps)) !(PSt .ps) -> *(!GECVALUE a (PSt .ps),!(PSt .ps))
+AGEC_a_as_AGEC_b 	:: (Bimap a b) (AGEC a) -> AGEC b 
+
+
+// lifting AGEC's to the GEC domain
+
+:: GECaGECb a ps = E.va : {bimapto :: va -> a, bimapfrom :: a -> va ,infraGEC :: (InfraGEC va *(PSt ps))}
+	
+a_GEC_as_b_GEC 	:: (GECaGECb b .ps)  -> (InfraGEC b *(PSt .ps))
+mkiAGEC2  		:: (A. .ps: (GECaGECb a .ps)) a !String -> AGEC a 
+
+// utility functions for creating BimapGEC's
+
 
 // converting AGEC to GecCircuits and vica versa
 
@@ -39,4 +62,9 @@ derive gGEC GecComb
 AGECtoCGEC :: String	(AGEC a) 		-> (GecCircuit a a) 	| gGEC{|*|}/*, generate{|*|}*/ a		// Create CGEC in indicated window 
 CGECtoAGEC :: 			(GecCircuit a a ) a 	-> (AGEC a) 	| gGEC{|*|} a		// Use CGEC as AGEC 
 
-//derive generate AGEC
+
+// try outs ::
+
+generic gAGEC d :: d -> AGEC d	// generates an AGEC for any value
+derive  gAGEC Int, Real, String, UNIT, PAIR, EITHER, OBJECT, CONS /*
+
