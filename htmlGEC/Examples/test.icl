@@ -3,52 +3,57 @@ module test
 import StdEnv
 import StdHtml
 
-//from buttonGEC import :: Button (..), :: UpDown (..)
+derive gUpd   (,,), []
+derive gPrint (,,)
+derive gParse (,,)
+derive gHpr   (,,)
+derive gHGEC []
 
+Start world  = doHtml MyPage world
 
-derive gUpd   (,,)
-derive gHGEC  (,), (,,)
-derive gPrint (,), (,,)
-derive gParse (,), (,,)
-derive gHpr   (,), (,,)
-
-
-initCounter = (0,upButton,downButton)
-upButton 	= CHButton defsize "Up"
-downButton 	= CHButton defsize "Down"
-
-Start world  = doHtml MyPage (0,0,0) world
-
-MyPage (i1,i2,i3)
-	= Head 
+MyPage hst
+# (list,(listbody,hst)) = mkHGEC "list" id [1] hst
+# (ni1,(counter1,hst)) 	= counterHGEC "first"   0 hst
+# (ni2,(counter2,hst)) 	= counterHGEC "second"  0 hst
+# (nf, (myform,hst))    = mkHGEC "addingcounters" id (ni1,ni2,ni1 + ni2) hst
+= (Head 
 		[ Hd_Title "Testing"
+//			, `Hd_Script (Script [Scr_Language JavaScript] 
+//						"globalstate = \"Hello World\") " )
+		
+		
 		] 
 		[ H1 "Counter Example"
+		, T "test"
+		, Form 	[Frm_Action MyPhP, Frm_Name "globalform", Frm_Method Post, Frm_Style "margin:0"] 
+					[	Input	[	Inp_Type Hidden
+								,	Inp_Value (SV "spelen")
+								,	Inp_Name "globalinput"
+								]
+
+					 ]
+		, listbody
 		, counter1
 		, counter2
-		, showClean (res1,res2,res1 + res2)
+		, myform
 		, traceHtmlInput
-		]
+		],hst)
+
+// self contained counter
+
+counterHGEC :: String Int HSt -> (Int,(Body,HSt))
+counterHGEC name i hst 
+# (nc, result) = mkHGEC name updCounter (toCounter i) hst
+= (fromCounter nc, result)
 where
-	(counter1,res1) = HCounter "first"  i1
-	(counter2,res2) = HCounter "second" i2
+	toCounter n = (n,down,up)
 
+	fromCounter (n,_,_) = n
 
-doHtml2 :: (a -> Body, a -> Body) a -> Body | gHpr{|*|} a & gUpd{|*|}  a  & gParse{|*|} a 
-doHtml2 (before,after) nv = undef
-
-
-HCounter :: String Int -> (Body,Int)
-HCounter name init
-= (Body [	T "Lets count this counter named ", T name, T " :", Br
-		,   showClean result
-  		], fst3 result)
-where
-	result = updCounter (toCounter  init)
-
-	updCounter (n,CHPressed,_)  = (n+1,upButton,downButton)
-	updCounter (n,_,CHPressed) 	= (n-1,upButton,downButton)
+	updCounter (n,CHPressed,_)  = (n-1,down,up)
+	updCounter (n,_,CHPressed) 	= (n+1,down,up)
 	updCounter else 			= else
 
-	toCounter i = (i,upButton,downButton)
+	up 		= CHButton defsize "+"
+	down	= CHButton defsize "-"
 

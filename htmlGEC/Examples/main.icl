@@ -11,14 +11,14 @@ derive gHpr 	Tree
 
 :: Tree a = Node (Tree a) a (Tree a) | Leaf
 
-Start world  = doHtml MyPage [Node Leaf 1 Leaf] world
+Start world  = doHtml MyPage world
 
-MyPage  mydata
-	= Head 
+MyPage  hst
+# (_,(treeGEC,hst)) = mkHGEC "tree" id [Node Leaf 1 Leaf] hst
+= (Head 
 		[Hd_Title "Main Test Program"
 		] 
 		[ H1 "My Test"
-		, Br
-		, showClean mydata
-		]
-
+		, Br, T "Here we show an editor for a tree data structure :", Br, Br
+		, treeGEC
+		],hst)

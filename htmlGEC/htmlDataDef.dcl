@@ -1,10 +1,18 @@
 definition module htmlDataDef
 
+// Clean ADT pendant for HTML  *** Under Construction ***
+// (c) 2005 MJP
+
+import htmlPrintUtil
+
+derive gHpr Html	
+derive gHpr Body	
+
 :: Url			:== String
 :: UniqueName 	:== String
+:: NoAttr = NoAttr
 
 None			:== [NoAttr]
-:: NoAttr = NoAttr
 
 // a Clean data structure representing a subset of html
 
@@ -15,6 +23,7 @@ None			:== [NoAttr]
 			| Hd_Meta
 			| Hd_Script
 			| Hd_Title String
+			| `Hd_Script Script
 										
 :: Body 	= A 			[Link_Attr] 	Body	// link ancor
 			| B  			String					// bold
@@ -218,7 +227,3 @@ None			:== [NoAttr]
 			| BV Bool
 
 
-import htmlPrintUtil
-
-derive gHpr Html	
-derive gHpr Body	
