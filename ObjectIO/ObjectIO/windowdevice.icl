@@ -277,7 +277,6 @@ where
 			= (deviceEvent,pState2)
 		with
 			(_,_,windows1)		= removeWindowHandlesWindow wid windows		// Remove the placeholder from windows
-		//	windows2			= addWindowHandlesWindow 0 wsH1 windows1	// Place  the change window in front of all windows
 			windows2			= addWindowHandlesActiveWindow wsH1 windows1	// Place the change window in front of all (modal/modeless) windows
 			ioState1			= IOStSetDevice (WindowSystemState windows2) ioState
 			pState1				= {pState & io=ioState1}

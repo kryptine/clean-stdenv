@@ -12,7 +12,7 @@ import	commondef, devicefunctions, iostate, processstack, roundrobin, timertable
 from	StdProcessDef		import ProcessInit
 from	StdPSt				import accPIO, appPIO
 from	StdProcessAttribute	import isProcessKindAttribute
-
+//import StdDebug,tracetypes
 
 ::	*Environs
 	=	{	envsEvents		:: !*OSEvents
@@ -424,6 +424,7 @@ handleOneEventForDevices :: !SchedulerEvent !(PSt .l) -> (!Bool,!SchedulerEvent,
 handleOneEventForDevices schedulerEvent pState
 	# (deviceFunctions,pState)	= accPIO IOStGetDeviceFunctions pState
 	  ioFunctions				= [(df.dEvent,df.dDoIO) \\ df<-deviceFunctions]
+//	# pState					= trace_n ("handleOneEventForDevices (handling device functions): "+++listToString deviceFunctions) pState
 	= handleEventForDevices ioFunctions False schedulerEvent pState
 
 

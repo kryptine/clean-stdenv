@@ -38,10 +38,8 @@ receiverOpen pState=:{io=ioState}
 
 receiverClose :: !(PSt .l) -> PSt .l
 receiverClose pState=:{io=ioState}
-// MW11...
 	# ioState					= callReceiverCloseFunctions ioState
-	  ioState					= IOStSetRcvDisabled True ioState
-// ... MW11
+	# ioState					= IOStSetRcvDisabled True ioState
 	# (found,rDevice,ioState)	= IOStGetDevice ReceiverDevice ioState
 	| not found
 		= {pState & io=ioState}
@@ -51,10 +49,8 @@ receiverClose pState=:{io=ioState}
 		# (idtable,ioState)		= IOStGetIdTable ioState
 		# ioState				= IOStSetIdTable (snd (removeIdsFromIdTable rIds idtable)) ioState
 		# ioState				= unbindRIds rIds ioState
-		# ioState				= IOStRemoveDevice ReceiverDevice ioState		// PA: this is redundant, because IOStGetDevice already removed it
 		# ioState				= IOStRemoveDeviceFunctions ReceiverDevice ioState
 		= {pState & io=ioState}
-// MW11..
 where
 	callReceiverCloseFunctions :: !(IOSt .l) -> (IOSt .l)
 	callReceiverCloseFunctions ioState
@@ -65,20 +61,13 @@ where
 			# rHs					= (ReceiverSystemStateGetReceiverHandles rDevice).rReceivers
 			# (funcs,rHs)			= AccessList getCloseFunc rHs
 			# ioState				= IOStSetDevice (ReceiverSystemState {rReceivers=rHs}) ioState
-// PA		= seq (map callCloseFunc rHs) ioState
 			= StrictSeq funcs ioState
 	where
-		callCloseFunc {rHandle={rInetInfo=Nothing, rConnected}} ioState
-			= seq (map closeReceiver rConnected) ioState
-		callCloseFunc {rHandle={rInetInfo=Just (_,_,_,closeFun), rConnected}} ioState
-			= appIOToolbox closeFun (seq (map closeReceiver rConnected) ioState)
-
 		getCloseFunc :: !(ReceiverStateHandle (PSt .l)) -> (!IdFun (IOSt .l),!ReceiverStateHandle (PSt .l))
 		getCloseFunc rsH=:{rHandle={rInetInfo=Nothing, rConnected}}
 			= (StrictSeq (map closeReceiver rConnected),rsH)
 		getCloseFunc rsH=:{rHandle={rInetInfo=Just (_,_,_,closeFun),rConnected}}
 			= (appIOToolbox closeFun o StrictSeq (map closeReceiver rConnected),rsH)
-// .. MW11
 
 /*	The receiver handles three cases of message events (for the time being timers are not included in receivers):
 	- QASyncMessage:

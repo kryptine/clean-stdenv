@@ -992,7 +992,6 @@ getWindowLook id ioState
 		= (Nothing,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 	| otherwise
 		# (windowInfo,wsH)			= getWindowStateHandleWindowInfo wsH
-	//	  {lookFun,lookSysUpdate}	= (fromJust windowInfo).windowLook	Mike: fromJust changed into getWindowInfoWindowData
 		  {lookFun,lookSysUpdate}	= (getWindowInfoWindowData windowInfo).windowLook
 		= (Just (lookSysUpdate,lookFun),IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 
@@ -1379,7 +1378,6 @@ getWindowViewDomain id ioState
 		= (Nothing,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 	| otherwise
 		# (wInfo,wsH)			= getWindowStateHandleWindowInfo wsH
-	//	  domain				= RectToRectangle (fromJust wInfo).windowDomain	Mike: fromJust changed into getWindowInfoWindowData
 		  domain				= RectToRectangle (getWindowInfoWindowData wInfo).windowDomain
 		= (Just domain,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 
