@@ -15,7 +15,7 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	example_timer1
+ 	example_timer2
  	world  
 
 example_timer1 = startCircuit (feedback (edit "TickTack" >>@ clock)) (myclock,0<->0<->0)
@@ -26,10 +26,15 @@ where
 
 myclock = Timed (\i -> 100) 100 
 
+example_timer2 = startCircuit (edit "delay (msec)" >>> arr f >>> display "Show Prime Numbers" >>> loop (second (delay (2,Hide allprimes) >>> display "Show Prime Numbers" >>> arr thisone))) 100
+where
+	thisone (p,Hide [x:xs]) = (x,Hide xs)
+	f d = Timed (\_ -> d) d 
+/*
 example_timer2 = startCircuit (feedback (edit "Show Prime Numbers" >>@ thisone)) (myclock,(2,Hide allprimes))
 where
 	thisone (tick,(p,Hide [x:xs])) = (tick,(x,Hide xs))
-
+*/
 allprimes = sieve [2..]
 where
 	sieve [x:xs] = [x : sieve  (filter x xs)]
