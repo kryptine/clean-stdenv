@@ -573,7 +573,7 @@ freadLineP file printableSet lastCh max spacePerTab
 	replaceLeadingSpaces l
 		#!	(leadingChars, rest)	= span (\ch-> ch==' ') l
 			nrLeadingChars			= length leadingChars
-		= (repeatn (nrLeadingChars/spacePerTab) '\t')++(repeatn (nrLeadingChars mod spacePerTab) ' ')++rest
+		= (repeatn (nrLeadingChars/spacePerTab) '\t')++(repeatn (nrLeadingChars rem spacePerTab) ' ')++rest
 		
 //////////// splitString /////////////////////////////////////////////////////
 

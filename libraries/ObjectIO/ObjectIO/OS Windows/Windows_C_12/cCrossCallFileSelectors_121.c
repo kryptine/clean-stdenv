@@ -8,6 +8,8 @@
 	About this module:
 	Routines related to standard file selector dialogues.
 ********************************************************************************************/
+#define WINVER 0x0500
+
 #include "cCrossCallFileSelectors_121.h"
 #include "util_121.h"
 #include "cCrossCall_121.h"
@@ -71,16 +73,87 @@ void EvalCcRqDIRECTORYDIALOG (CrossCallInfo *pcci)		/* no params;  bool, textptr
 	}
 }
 
+#define MAXBUF 300
+#define MAXFILTERS     10
+static LPTSTR lpszFilterString ;
+static TCHAR szFilterString[MAXBUF] ;
+static TCHAR szFilterInits[MAXFILTERS][30] ;
+
+void InitFilterString(void)
+{
+  int i ;
+  int nInc = 0 ;
+  LPTSTR lpStr = szFilterString ;
+
+
+  /* First, zero out this memory just for the sake of sanity */
+
+  for (i=0; i<MAXBUF; i++)
+    szFilterString[i] = 0 ;
+
+
+  /* Now, for each string in the szFilterInits array, concatenate it to
+     the last one right after the last one's null terminator */
+
+  i = 0 ;
+
+  while (szFilterInits[i][0] != (TCHAR) 0)
+  {
+    lstrcpy(lpStr, &szFilterInits[i][0]) ;
+    nInc+=lstrlen(&szFilterInits[i][0]) + 1 ;   //1 past null term...
+    lpStr = &szFilterString[nInc] ;
+    i++ ;
+  }
+
+  szFilterString[nInc] = (TCHAR) 0 ;  //double terminator
+
+
+  /* Set the lpszFilterString to point to the memory we just filled in
+     with the filters because lpszFilterString is what is in
+     OPENFILENAME->lpstrFilter */
+
+  lpszFilterString = szFilterString ;
+
+  return ;
+}
+
+BOOL IsModernPlatform()
+{ 
+    OSVERSIONINFOA osvi = {0};
+    osvi.dwOSVersionInfoSize = sizeof(osvi);
+    GetVersionExA((OSVERSIONINFOA*)&osvi);
+    return (5 <= osvi.dwMajorVersion);    
+}
+
 void EvalCcRqFILEOPENDIALOG (CrossCallInfo *pcci)		/* no params;  bool, textptr result; */
 {
 	OPENFILENAME ofn;
-	BOOL success;
+	BOOL recent,success;
 
-	ofn.lStructSize       = sizeof (OPENFILENAME);
+   recent = IsModernPlatform();
 
+   lstrcpy(&szFilterInits[0][0], TEXT("All Files (*.*)")) ;
+   lstrcpy(&szFilterInits[1][0], TEXT("*.*")) ;
+//   lstrcpy(&szFilterInits[2][0], TEXT("Fat Files (*.fat)")) ;
+//   lstrcpy(&szFilterInits[3][0], TEXT("*.fat")) ;
+//   szFilterInits[4][0] = (TCHAR) 0 ;
+   szFilterInits[2][0] = (TCHAR) 0 ;
+
+   InitFilterString();
+   if (recent)
+   {
+	   ofn.lStructSize       = sizeof (OPENFILENAME);
+   } 
+   else
+   {
+	   ofn.lStructSize       = OPENFILENAME_SIZE_VERSION_400;
+   } 
+   
 	ofn.hwndOwner         = GetActiveWindow ();
 	ofn.hInstance         = NULL;
-	ofn.lpstrFilter       = NULL;
+	ofn.lpstrFilter       = lpszFilterString;//(LPSTR) rmalloc (MAX_PATH);// NULL;
+//	ofn.lpstrFilter[0] = '\0';
+//	ofn.lpstrFilter[1] = '\0';
 	ofn.lpstrCustomFilter = NULL;
 	ofn.nMaxCustFilter    = 0;
 	ofn.nFilterIndex      = 0;
@@ -91,15 +164,23 @@ void EvalCcRqFILEOPENDIALOG (CrossCallInfo *pcci)		/* no params;  bool, textptr 
 	ofn.nMaxFileTitle     = 0;
 	ofn.lpstrInitialDir   = NULL;
 	ofn.lpstrTitle        = NULL;
-	ofn.Flags             = OFN_EXPLORER
-						  | OFN_FILEMUSTEXIST
-						  |	OFN_HIDEREADONLY
-						  | OFN_PATHMUSTEXIST
-						  | OFN_ENABLEHOOK;		// PA: OFN_ENABLEHOOK added from Ronny
+	ofn.Flags             = 0x81c24;
+		//OFN_EXPLORER
+		//				  | OFN_FILEMUSTEXIST
+		//				  |	OFN_HIDEREADONLY
+		//				  | OFN_PATHMUSTEXIST;
+//						  | OFN_NODEREFERENCELINKS;
+						   
+//						  | OFN_ENABLEHOOK;		// PA: OFN_ENABLEHOOK added from Ronny
 	ofn.lpstrDefExt       = NULL;
 	ofn.lCustData         = 0;
 	ofn.lpfnHook          = &FileSelectorHook;	// PA: &FileSelectorHook instead of NULL from Ronny
 	ofn.lpTemplateName    = NULL;
+#if (_WIN32_WINNT >= 0x0500)
+	ofn.pvReserved		  = NULL;
+	ofn.dwReserved		  = 0;
+	ofn.FlagsEx			  = 0;
+#endif // (_WIN32_WINNT >= 0x0500)
 
 	success = GetOpenFileName (&ofn);
 
@@ -159,6 +240,9 @@ void EvalCcRqFILESAVEDIALOG (CrossCallInfo *pcci)		/* promptptr, nameptr; bool, 
 	ofn.lCustData       = 0;
 	ofn.lpfnHook        = &FileSelectorHook;		// PA: &FileSelectorHook instead of NULL from Ronny
 	ofn.lpTemplateName  = NULL;
+	ofn.pvReserved		  = NULL;
+	ofn.dwReserved		  = 0;
+	ofn.FlagsEx			  = 0;
 
 	success = GetSaveFileName (&ofn);
 

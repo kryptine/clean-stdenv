@@ -44,6 +44,6 @@ makeDirectionSet :: !Int -> DirectionSet
 
 fromDirectionSet :: !DirectionSet -> Int
 
-toBoundMapCode :: !(!Int,!DirectionSet) -> !Int
+toBoundMapCode :: !(!Int,!DirectionSet) -> Int
 
 fromBoundMapCode :: !Int -> (!Int,!DirectionSet)

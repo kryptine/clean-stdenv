@@ -341,11 +341,6 @@ closeMenu id ioState
 
 enableMenuSystem :: !(IOSt .l) -> IOSt .l
 enableMenuSystem ioState
-/*	# (optModal,ioState)	= ioStGetIOIsModal ioState
-	# (ioId,    ioState)	= ioStGetIOId ioState
-	  modalId				= fromJust optModal
-	| isJust optModal && ioId==modalId
-		= ioState */
 	# (isModal,ioState)		= hasModalDialog ioState
 	| isModal
 		= ioState
@@ -372,7 +367,8 @@ where
 			= (menus,tb)
 		| otherwise
 			# (nrMenus,msHs)= ulength mMenus
-			# tb			= enablemenus (if (di==MDI) (nrMenus+1) (nrMenus-1)) osMenuBar tb
+//			# tb			= enablemenus (if (di==MDI) (nrMenus+1) (nrMenus-1)) osMenuBar tb
+			# tb			= enablemenus nrMenus osMenuBar tb
 			= ({menus & mMenus=msHs,mEnabled=SystemAble},tb)
 	where
 		enablemenus :: !Int !OSMenuBar !*OSToolbox -> *OSToolbox
@@ -393,8 +389,9 @@ where
 			= (menus,tb)
 		| otherwise
 			# (nrMenus,msHs)= ulength mMenus
-			# tb			= disablemenus (if (di==MDI) (nrMenus+1) (nrMenus-1)) osMenuBar tb
-		//	# tb			= osDrawMenuBar {mbHandle=0,amHandle=0,mbInfo=[]} tb	PA: not necessary, as this is taken care of by (changeMenuSystemState True)
+//			# tb			= disablemenus (if (di==MDI) (nrMenus+1) (nrMenus-1)) osMenuBar tb
+			# tb			= disablemenus nrMenus osMenuBar tb
+			// DvA: zou MDI (en SDI/NDI?) geval nu niet gewoon nrMenus moeten zijn?
 			= ({menus & mMenus=msHs,mEnabled=SystemUnable},tb)
 	where
 		disablemenus :: !Int !OSMenuBar !*OSToolbox -> *OSToolbox

@@ -14,7 +14,7 @@ import	StdIOCommon
 from	iostate import :: PSt
 
 
-::  Process
+::  *Process
 	=	E. .l: Process
 					DocumentInterface			// The process DocumentInterface
 					l							// The process private state

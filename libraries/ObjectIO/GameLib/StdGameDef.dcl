@@ -130,7 +130,7 @@ import	StdGSt
 // = E. state:
    = { objectcode :: !ObjectCode    // code for object type (0 AutoInitObject)
      , sprites    :: ![Sprite]      // sprite 1..n
-     , init       :: !SubCode !Point2 !GameTime !gs -> GameObjectState state gs
+     , init       :: !SubCode Point2 GameTime gs -> GameObjectState state gs
      , done       :: !(GameObjectState state gs)    -> gs
      , move       :: !                                         ObjectFun state gs
      , animation  :: !                                         ObjectFun state gs
@@ -139,7 +139,7 @@ import	StdGSt
      , frametimer :: !                                         ObjectFun state gs
      , keydown    :: !KeyCode                               -> ObjectFun state gs
      , keyup      :: !KeyCode                               -> ObjectFun state gs
-     , userevent  :: !EventCode !EventPar !EventPar         -> ObjectFun state gs
+     , userevent  :: !EventCode EventPar EventPar           -> ObjectFun state gs
      }
 
 :: *GameObjectState state gs

@@ -463,7 +463,7 @@ where
 			= UpdateDbDomain {database & ls={state & records = newrecs, selection = newindex}}
 	where
 		newrecs	= removeAt oldindex oldrecs
-		newindex= if (isEmpty newrecs) 0 (oldindex mod length newrecs) 
+		newindex= if (isEmpty newrecs) 0 (oldindex rem length newrecs) 
 	
 	AddRecord :: Bool (PSt DataBase) -> PSt DataBase
 	AddRecord replace database=:{ls=state=:{selection,records=recs,dbfont},io}

@@ -798,6 +798,7 @@ where
 	updateControlBackground wMetrics wKind cId maybeViewFrame wsH=:{wshIds,wshHandle=Just wlsH=:{wlsHandle=wH=:{whSize=whSize,whItems=itemHs}}} tb
 		# (_,updInfo,itemHs)			= getWElementHandlesUpdateInfo wMetrics cId contentRect itemHs
 		  wH							= {wH & whItems=itemHs}
+		# tb							= strictSeq [osInvalidateWindowRect updInfo.updWIDS.wPtr cuArea \\ {cuArea} <- updInfo.updControls] tb // DvA
 		# (wH,tb)						= updatewindow wMetrics updInfo wH tb
 		= ({wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
 	where

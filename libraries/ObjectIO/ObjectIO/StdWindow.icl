@@ -1360,8 +1360,9 @@ where
 		setwindowslider hasScroll wMetrics wPtr isHorizontal state=:(osMin,osThumb,osMax,osSize) hrect vrect maxcoords=:(min,max) tb
 //			| hasScroll			= OSsetWindowSlider wMetrics wPtr isHorizontal state maxcoords tb
 // vgl met gebruik in bv controlpos, verschil is waarschijnlijk dat setWindoweSLider ook thumbsize zet...
-//			| hasScroll				= osSetWindowSliderThumb wMetrics wPtr isHorizontal osThumb hScroll vScroll hrect vrect maxcoords True tb
+//			| hasScroll			= osSetWindowSliderThumb wMetrics wPtr isHorizontal osThumb hScroll vScroll hrect vrect maxcoords True tb
 			| hasScroll
+				# tb			= osSetWindowSliderPosSize wPtr sPtr (if isHorizontal hrect vrect) tb
 				# tb			= osSetWindowSliderThumbSize wMetrics wPtr sPtr isHorizontal osMin osMax osSize (osMin,osMax) (if isHorizontal hrect vrect) whSelect True tb
 //				# tb			= osSetWindowSliderThumbSize wPtr sPtr min max (if isHorizontal hrect vrect) whSelect True tb
 //				= osSetWindowSliderThumb wMetrics wPtr isHorizontal osThumb hScroll vScroll hrect vrect (osMin,osMax) True tb
@@ -1372,14 +1373,6 @@ where
 					True	-> fromJust hScroll
 					_		-> fromJust vScroll
 
-/*		
-		setsliderthumb :: !Bool !OSWindowMetrics !OSWindowPtr !Bool !(!Int,!Int,!Int) !Int !(!Int,!Int) !*OSToolbox -> *OSToolbox
-		setsliderthumb hasScroll wMetrics wPtr isHScroll scrollValues viewSize maxcoords tb
-			| hasScroll				= OSsetWindowSliderThumb wMetrics wPtr isHScroll osThumb hScroll vScroll maxcoords True tb
-			| otherwise				= tb
-		where
-			(_,osThumb,_,_)			= toOSscrollbarRange scrollValues viewSize
-*/		
 		getdomainviewmax :: !OSRect !OSRect -> Point2
 		getdomainviewmax domainRect viewframeRect
 			= {x=min domainRect.rright viewframeRect.rright,y=min domainRect.rbottom viewframeRect.rbottom}

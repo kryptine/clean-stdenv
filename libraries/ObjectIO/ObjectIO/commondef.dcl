@@ -5,7 +5,7 @@ definition module commondef
 //	
 //	Common types for the Clean Object I/O system and their access rules:
 //	Author: Peter Achten
-//	Modified: 7 September 2001 for Clean 2.0
+//	Modified: 17 March 2003
 //	********************************************************************************
 
 
@@ -18,9 +18,10 @@ k`						:: .x !.y -> .y
 
 /*	Calculation rules on Integers:
 */
-dist					::		!Int !Int -> Int
-setBetween				:: !Int !Int !Int -> Int
-isBetween				:: !Int !Int !Int -> Bool
+dist					::		!Int !Int -> Int					// dist x y = abs (x-y)
+setBetween				:: !Int !Int !Int -> Int					// setBetween x low up sets low<=x<=up assuming low<=up 
+setBetweenCheckBounds	:: !Int !Int !Int -> Int					// setBetweenCheckBounds x low up sets low<=x<=up if low<=up, low otherwise
+isBetween				:: !Int !Int !Int -> Bool					// isBetween x low up returns low<=x<=up
 minmax					::      !Int !Int -> (!Int,!Int)			// minmax a b = (min a b,max a b)
 
 
@@ -132,6 +133,7 @@ contains				:: !(Cond    x)				![ x] -> Bool
 ucontains				:: !(UCond  .x)				!u:[.x] -> (!Bool,	!u:[.x])
 cselect					:: !(Cond    x)		 x		![ x] -> (!Bool, x)
 ucselect				:: !(Cond    x)		 x		!u:[ x] -> (!Bool, x,!u:[x])
+selectedAtIndex			:: !(Cond    x)      x      ![ x] -> (!Index, x)			// if index==0 then not found; item was found at index
 access					:: !(St .x *(Bool,.y)) .y	!u:[.x] -> (!Bool,.y,!u:[.x])
 accessList				:: !(St .x .y)				![.x] -> (![.y],	![.x])
 remove					:: !(Cond    x)		 x		!u:[x] -> (!Bool, x,	!u:[x])

@@ -13,10 +13,10 @@ import	osdocumentinterface, ossystem, ostypes
 //	General process topology creation functions:
 
 class Processes pdef where
-	startProcesses :: !.pdef !*World   -> *World
-	openProcesses  :: !.pdef !(PSt .l) -> PSt .l
+	startProcesses :: !*pdef !*World   -> *World
+	openProcesses  :: !*pdef !(PSt .l) -> PSt .l
 
-instance Processes [.pdef]	| Processes pdef where
+instance Processes [*pdef]	| Processes pdef where
 	startProcesses pDefs world
 		# (initContext, tb)	= initContext (stateMap2 openProcesses (reverse pDefs)) "" 0 NDI VirtualProcess world
 		# (finalContext,tb)	= handleEvents initContext tb
@@ -38,10 +38,9 @@ instance Processes Process  where
 
 //	Specialised process creation functions:
 
-startIO :: !DocumentInterface !.l !.(ProcessInit (PSt .l)) ![ProcessAttribute (PSt .l)] !*World -> *World
+startIO :: !DocumentInterface !.l !(ProcessInit (PSt .l)) ![ProcessAttribute (PSt .l)] !*World -> *World
 startIO documentInterface local init atts world
-	= startProcesses
-		(Process documentInterface local init (if (documentInterface==MDI) [ProcessNoWindowMenu:atts] atts)) world
+	= startProcesses (Process documentInterface local init atts) world
 
 
 //	Close this interactive process.

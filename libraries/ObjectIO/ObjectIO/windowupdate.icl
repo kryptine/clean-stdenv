@@ -40,6 +40,7 @@ where
 	setUpdateContext :: !OSWindowPtr !(Maybe OSPictContext) !OSPictContext !*OSToolbox -> *OSToolbox
 	setUpdateContext wPtr updContext osPict tb
 		| isJust updContext
+			# tb		= osSetUpdate wPtr tb
 			= tb
 		| otherwise
 			# tb		= osEndUpdate wPtr tb
@@ -385,7 +386,7 @@ where
 				# (_,tb)		= stateMap (updatecheckcontrolitem area) info.checkItems tb
 				= (wItemH,osPict,tb)
 			| isoscontrol
-				# tb				= updateoscontrol /*(subVector (toVector wItemPos) intersectRect)*/intersectRect (toTuple wItemPos) parentPtr wItemPtr tb
+				# tb				= updateoscontrol intersectRect (toTuple wItemPos) parentPtr wItemPtr tb
 				= (wItemH,osPict,tb)
 			| isRecursiveControl wItemKind	// This includes LayoutControl and excludes CompoundControl which is already guarded as iscustomcontrol
 				# ableContext1		= ableContext && wItemSelect
@@ -686,11 +687,14 @@ where
 					#! picture				= appClipPicture (toRegion cFrame) (lookInfo.lookFun selectState updState) picture
 					#! (_,pen,_,osPict,tb)	= unpackPicture picture
 					   info					= {info & compoundLookInfo={compLookInfo & compoundLook={lookInfo & lookPen=pen}}}
+					# area`					= if osCompoundControlHasOrigin
+												area
+												(addVector (toVector (itemPos - origin)) area)
 					#! tb = case visHScroll of
-								True	-> osUpdateSliderControl /*(addVector (toVector (~origin)) area)*/area (toTuple origin) wids.wPtr hPtr tb
+								True	-> osUpdateSliderControl area` (toTuple origin) wids.wPtr hPtr tb
 								_		-> tb
 					#! tb = case visVScroll of
-								True	-> osUpdateSliderControl /*(addVector (toVector (~origin)) area)*/area (toTuple origin) wids.wPtr vPtr tb
+								True	-> osUpdateSliderControl area` (toTuple origin) wids.wPtr vPtr tb
 								_		-> tb
 					= ({itemH & wItemInfo=CompoundInfo info},osPict,tb)
 				where
@@ -708,8 +712,7 @@ where
 					lookInfo				= compLookInfo.compoundLook
 					origin					= info.compoundOrigin
 					cFrame					= posSizeToRectangle origin (rectSize (osGetCompoundContentRect wMetrics visScrolls (sizeToRect itemSize)))
-//					cFrame					= sizeToRectangle (rectSize (osGetCompoundContentRect wMetrics visScrolls (sizeToRect itemSize)))
-					updArea					= rectToRectangle (intersectRects (rectangleToRect cFrame) (addVector (toVector (origin-itemPos)) area))
+					updArea					= rectToRectangle (intersectRects (rectangleToRect cFrame) (if osCompoundControlHasOrigin (addVector (toVector (origin-itemPos)) area) area))
 					updState				= {oldFrame=cFrame,newFrame=cFrame,updArea=[updArea]}
 				
 				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsRadioControl,wItemPtr,wItemInfo} osPict tb

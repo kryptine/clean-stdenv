@@ -16,14 +16,17 @@ k` _ y = y
 /*	Calculation rules on Integers:
 */
 dist :: !Int !Int -> Int
-dist x y
-	| d>=0		= d
-	| otherwise	= y-x
-where
-	d			= x-y
+dist x y = abs (x-y)
 
 setBetween :: !Int !Int !Int -> Int
 setBetween x low up
+	| x<=low	= low
+	| x>=up		= up
+	| otherwise	= x
+
+setBetweenCheckBounds :: !Int !Int !Int -> Int
+setBetweenCheckBounds x low up
+	| up <= low	= low
 	| x<=low	= low
 	| x>=up		= up
 	| otherwise	= x
@@ -372,6 +375,19 @@ ucselect c n [x:xs]
 		= (found,y,[x:xs])
 ucselect _ n []
 	= (False,n,[])
+
+selectedAtIndex :: !(Cond x) x ![x] -> (!Index, x)
+selectedAtIndex cond dummy xs
+	= (if found i 0,x)
+where
+	(found,i,x) = selected cond dummy xs 1
+	
+	selected :: (Cond x) x ![x] !Int -> (!Bool,!Int,x)
+	selected cond dummy [x:xs] i
+		| cond x	= (True,i,x)
+		| otherwise	= selected cond dummy xs (i+1)
+	selected _ dummy _ i
+		= (False,i,dummy)
 
 access :: !(St .x *(Bool,.y)) .y !u:[.x] -> (!Bool,.y,!u:[.x])
 access acc n [x:xs]

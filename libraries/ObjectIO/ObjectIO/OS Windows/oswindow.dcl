@@ -202,7 +202,8 @@ osCreateCheckControl		:: !OSWindowPtr !(!Int,!Int) !String !Bool !Bool !(!Int,!I
 																					 -> (!OSWindowPtr,!*OSToolbox)
 osCreateEmptyPopUpControl	:: !OSWindowPtr !(!Int,!Int) !Bool !Bool !(!Int,!Int) !(!Int,!Int) !Int !Bool !*OSToolbox
 																			-> (!OSWindowPtr,!OSWindowPtr,!*OSToolbox)
-osCreatePopUpControlItem	:: !OSWindowPtr !(Maybe !OSWindowPtr) !Int !Bool !String !Bool !Int !*OSToolbox -> (!Int,!*OSToolbox)
+osCreatePopUpControlItem	:: !OSWindowPtr !(Maybe OSWindowPtr) !Int !Bool !String !Bool !Int !*OSToolbox -> (!Int,!*OSToolbox)
+osCreatePopUpControlItems	:: !OSWindowPtr !(Maybe OSWindowPtr) !Bool ![String] !Int !*OSToolbox -> *OSToolbox
 osCreateSliderControl		:: !OSWindowPtr !(!Int,!Int) !Bool !Bool !Bool !(!Int,!Int) !(!Int,!Int) !(!Int,!Int,!Int,!Int) !*OSToolbox
 																										   -> (!OSWindowPtr,!*OSToolbox)
 osCreateTextControl			:: !OSWindowPtr !(!Int,!Int) !String !Bool !(!Int,!Int) !(!Int,!Int) !*OSToolbox
@@ -242,7 +243,7 @@ osDestroyWindow :: !Bool !Bool !OSWindowPtr !(OSEvent -> .s -> ([Int],.s)) !OSDI
 */
 osDestroyRadioControl		:: !OSWindowPtr	!*OSToolbox -> *OSToolbox
 osDestroyCheckControl		:: !OSWindowPtr !*OSToolbox -> *OSToolbox
-osDestroyPopUpControl		:: !OSWindowPtr !(Maybe !OSWindowPtr) !*OSToolbox -> *OSToolbox
+osDestroyPopUpControl		:: !OSWindowPtr !(Maybe OSWindowPtr) !*OSToolbox -> *OSToolbox
 osDestroySliderControl		:: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osDestroyTextControl		:: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osDestroyEditControl		:: !OSWindowPtr !*OSToolbox -> *OSToolbox
@@ -315,6 +316,7 @@ osReleaseWindowPictContext	:: !OSWindowPtr !OSPictContext	!*OSToolbox -> *OSTool
 */
 osBeginUpdate :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osEndUpdate   :: !OSWindowPtr !*OSToolbox -> *OSToolbox
+osSetUpdate   :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 
 
 /*	(acc/app)Grafport theWindow f
@@ -356,14 +358,10 @@ osScrollbarsAreVisible	:: !OSWindowMetrics !OSRect !(!Int,!Int) !(!Bool,!Bool) -
 		sets the thumb value of the horizontal/vertical slider of the given window.
 	osSetWindowSliderThumbSize theWindow isHorizontal size redraw
 		sets the view size of the horizontal/vertical slider of the given window.
-PA: obsolete:
-	osSetWindowSlider theWindow isHorizontal (osRangeMin,osThumb,osRangeMax,osThumbSize)
-		sets all values of the horizontal/vertical slider of the given window.
 */
 osSetWindowSliderThumb		:: !OSWindowMetrics !OSWindowPtr !Bool !Int !(Maybe OSWindowPtr) !(Maybe OSWindowPtr) !OSRect !OSRect !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetWindowSliderThumbSize	:: !OSWindowMetrics !OSWindowPtr !OSWindowPtr !Bool !Int !Int !Int !(!Int,!Int) !OSRect !Bool !Bool !*OSToolbox -> *OSToolbox
-//osSetWindowSlider			:: !OSWindowMetrics !OSWindowPtr !Bool !(!Int,!Int,!Int,!Int) !(!Int,!Int) !*OSToolbox -> *OSToolbox
-osUpdateWindowScroll		:: !OSWindowPtr !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !OSRect !*OSToolbox -> *OSToolbox
+osSetWindowSliderPosSize	:: !OSWindowPtr !OSWindowPtr !OSRect !*OSToolbox -> *OSToolbox
 
 
 /*	osInvalidateWindow theWindow
@@ -379,6 +377,7 @@ osInvalidateWindow		:: !OSWindowPtr					!*OSToolbox -> *OSToolbox
 osInvalidateWindowRect	:: !OSWindowPtr !OSRect			!*OSToolbox -> *OSToolbox
 osValidateWindowRect	:: !OSWindowPtr !OSRect			!*OSToolbox -> *OSToolbox
 osValidateWindowRgn		:: !OSWindowPtr !OSRgnHandle	!*OSToolbox -> *OSToolbox
+osWindowHasUpdateRect	:: !OSWindowPtr					!*OSToolbox -> (!Bool,!*OSToolbox)
 
 
 /*	os(Dis/En)ableWindow theWindow
@@ -552,6 +551,7 @@ osSetPopUpControlSelect			:: !OSWindowPtr !OSWindowPtr !OSRect !Bool												
 osSetPopUpControlShow			:: !OSWindowPtr !OSWindowPtr !OSRect !Bool												!*OSToolbox -> *OSToolbox
 osSetPopUpControlPos			:: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool				!*OSToolbox -> *OSToolbox
 osSetPopUpControlSize			:: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool				!*OSToolbox -> *OSToolbox
+osGetPopUpControlText			:: !OSWindowPtr !OSWindowPtr															!*OSToolbox -> (!String,!*OSToolbox) 
 
 /*	On edit controls:
 	osSetEditControlText parentWindow editPtr clipRect itemRect shown text 

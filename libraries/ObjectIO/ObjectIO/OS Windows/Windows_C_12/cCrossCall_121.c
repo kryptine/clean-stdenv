@@ -1113,9 +1113,9 @@ void WinCallProcess (PSTR commandline,
 	PROCESS_INFORMATION pi;
 	BOOL fsuccess;
 	char *ep;
-	HANDLE saveStdin, infile;
-	HANDLE saveStdout, outfile;
-	HANDLE saveStderr, errfile;
+	HANDLE infile;
+	HANDLE outfile;
+	HANDLE errfile;
 
 	rprintf ("WCP: starting...\n");
 
@@ -1184,20 +1184,12 @@ void WinCallProcess (PSTR commandline,
 			rprintf ("infile creation failed\n");
 			return;
 		}
-
-		saveStdin = GetStdHandle (STD_INPUT_HANDLE);
-
-		if (!SetStdHandle (STD_INPUT_HANDLE, infile))
-		{
-			rprintf ("could not redirect input\n");
-			return;
-		}
 		rprintf ("redirection of input ok\n");
 	}
 	else
 	{
 		rprintf ("in == NULL\n");
-		infile = NULL;
+		infile = GetStdHandle(STD_INPUT_HANDLE);
 	}
 
 	if (out != NULL)
@@ -1215,21 +1207,13 @@ void WinCallProcess (PSTR commandline,
 			rprintf ("outfile creation failed\n");
 			return;
 		}
-
-		saveStdout = GetStdHandle (STD_OUTPUT_HANDLE);
-
-		if (!SetStdHandle (STD_OUTPUT_HANDLE, outfile))
-		{
-			rprintf ("could not redirect output\n");
-			return;
-		}
 		rprintf ("redirection of output ok\n");
 
 	}
 	else
 	{
 		rprintf ("out == NULL\n");
-		outfile = NULL;
+		outfile = GetStdHandle(STD_OUTPUT_HANDLE);
 	}
 
 	if (err != NULL)
@@ -1248,19 +1232,12 @@ void WinCallProcess (PSTR commandline,
 			return;
 		}
 
-		saveStderr = GetStdHandle (STD_ERROR_HANDLE);
-
-		if (!SetStdHandle (STD_ERROR_HANDLE, errfile))
-		{
-			rprintf ("could not redirect errput\n");
-			return;
-		}
 		rprintf ("redirection of errors ok\n");
 	}
 	else
 	{
 		rprintf ("err == NULL\n");
-		errfile = NULL;
+		errfile = GetStdHandle(STD_ERROR_HANDLE);
 	}
 
 	si.cb = sizeof (STARTUPINFO);
@@ -1269,7 +1246,10 @@ void WinCallProcess (PSTR commandline,
 	si.cbReserved2 = 0;
 	si.lpDesktop = NULL;
 	si.lpTitle = NULL;
-	si.dwFlags = 0;
+	si.dwFlags = STARTF_USESTDHANDLES;
+	si.hStdInput = infile;
+	si.hStdOutput = outfile;
+	si.hStdError = errfile;
 
 	fsuccess =
 		CreateProcess (NULL,				/* pointer to name of executable module		*/
@@ -1298,13 +1278,8 @@ void WinCallProcess (PSTR commandline,
 		*exitcode = -1;
 	}
 
-	if (infile != NULL)
+	if (in != NULL && infile != NULL)
 	{
-		if (SetStdHandle (STD_INPUT_HANDLE, saveStdin))
-			rprintf ("resetting stdin ok\n");
-		else
-			rprintf ("resetting stdin failed\n");
-
 		if (CloseHandle (infile))
 			rprintf ("closing infile ok\n");
 		else
@@ -1313,13 +1288,8 @@ void WinCallProcess (PSTR commandline,
 	else
 		rprintf ("no need to close and reset input\n");
 
-	if (outfile != NULL)
+	if (out != NULL && outfile != NULL)
 	{
-		if (SetStdHandle (STD_OUTPUT_HANDLE, saveStdout))
-			rprintf ("resetting stdout ok\n");
-		else
-			rprintf ("resetting stdout failed\n");
-
 		if (CloseHandle (outfile))
 			rprintf ("closing outfile ok\n");
 		else
@@ -1328,13 +1298,8 @@ void WinCallProcess (PSTR commandline,
 	else
 		rprintf ("no need to close and reset output\n");
 
-	if (errfile != NULL)
+	if (err != NULL && errfile != NULL)
 	{
-		if (SetStdHandle (STD_ERROR_HANDLE, saveStderr))
-			rprintf ("resetting stderr ok\n");
-		else
-			rprintf ("resetting stderr failed\n");
-
 		if (CloseHandle (errfile))
 			rprintf ("closing errfile ok\n");
 		else

@@ -18,8 +18,8 @@ from	iostate import :: PSt, :: IOSt
 */
 
 class Processes pdef where
-	startProcesses	:: !.pdef !*World   -> *World
-	openProcesses	:: !.pdef !(PSt .l) -> PSt .l
+	startProcesses	:: !*pdef !*World   -> *World
+	openProcesses	:: !*pdef !(PSt .l) -> PSt .l
 /*	(start/open)Processes creates an interactive process topology specified by
 		the pdef argument. 
 		All interactive processes can communicate with each other by means of the 
@@ -30,10 +30,10 @@ class Processes pdef where
 		to be created. 
 */
 
-instance Processes [.pdef]	| Processes pdef
+instance Processes [*pdef]	| Processes pdef
 instance Processes Process
 
-startIO :: !DocumentInterface !.l !.(ProcessInit (PSt .l))
+startIO :: !DocumentInterface !.l !(ProcessInit (PSt .l))
 							  ![ProcessAttribute (PSt .l)]
 			!*World -> *World
 /*	startIO creates one process group of one interactive process. 

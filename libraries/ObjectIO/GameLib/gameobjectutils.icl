@@ -238,7 +238,7 @@ fromDirectionSet :: !DirectionSet -> Int
 fromDirectionSet d = CompressBools (False, False, False, False, 
                                     d.right, d.bottom, d.left, d.top)
 
-toBoundMapCode :: !(!Int,!DirectionSet) -> !Int
+toBoundMapCode :: !(!Int,!DirectionSet) -> Int
 toBoundMapCode (c, d) = (c << 8) + (fromDirectionSet d)
 
 fromBoundMapCode :: !Int -> (!Int,!DirectionSet)

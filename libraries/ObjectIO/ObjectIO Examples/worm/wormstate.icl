@@ -72,7 +72,7 @@ NewWorm :: Level -> Worm
 NewWorm {Level | level}
 	= [{x=x,y=y}\\x<-[5,4..1]]
 where
-	y	= StartHeights!!(level mod NrOfLevels)
+	y	= StartHeights!!(level rem NrOfLevels)
 
 StartHeights :: [Int]
 StartHeights =: [13,5,13,13,13,1,1,14]
@@ -86,21 +86,21 @@ InitLevel fix
 DecreaseLevel :: Level -> Level
 DecreaseLevel curlevel=:{speed,level}
 	# level	= level-1
-	  speed	= if (level mod NrOfLevels==0 && level<>0) (speed+Accelation) speed
+	  speed	= if (level rem NrOfLevels==0 && level<>0) (speed+Accelation) speed
 	= {	curlevel &	fix			= speed
 				 ,	speed		= speed
 				 ,	level		= level
-				 ,	obstacles	= Obstacles!!(level mod NrOfLevels)
+				 ,	obstacles	= Obstacles!!(level rem NrOfLevels)
 	  }
 
 IncreaseLevel :: Level -> Level
 IncreaseLevel curlevel=:{speed,level}
-	# speed	= if (level mod NrOfLevels==0 && level<>0) (speed-Accelation) speed
+	# speed	= if (level rem NrOfLevels==0 && level<>0) (speed-Accelation) speed
 	  level	= level+1
 	= {	curlevel &	fix			= speed
 				 ,	speed		= speed
 				 ,	level		= level
-				 ,	obstacles	= Obstacles!!(level mod NrOfLevels)
+				 ,	obstacles	= Obstacles!!(level rem NrOfLevels)
 	  }
 
 Obstacles :: [[Obstacle]]
@@ -129,7 +129,7 @@ where
 	pos				= {x=foodx,y=foody}
 	value			= IncMod random1 9
 	
-	IncMod a b		= (a mod b)+1
+	IncMod a b		= (a rem b)+1
 
 //	Think of some new random food.
 NewFood :: Worm Level [Food] -> (Food, [Food])

@@ -11,7 +11,7 @@ module chatClient
 import	StdEnv, StdIO, StdTCP
 
 chatPort	:== 2000
-remote		:== "martinpc.cs.kun.nl"
+remote		:== "Please enter IP adress of chat server"
 CR			:== '\xD'					// carriage return
 
 ::	*LS									// the ls part of the PSt
@@ -33,10 +33,9 @@ initialize ps
 
 	  // prompt for chat parameters nickname and server address
 	  dDef	= Dialog "Enter Chat Parameters" 
-				(   TextControl "Type in below your nickname and the internet address of the server"
+				(   TextControl "Type in your nickname and the internet address of the server."
 								[]
-				 :+:TextControl ("If there is no server running on the specified machine then this "
-				 				 +++"program aborts.") [ControlPos (BelowPrev, zero)]
+				 :+:TextControl ("If there is no server running on the specified machine then this program aborts.") [ControlPos (BelowPrev, zero)]
 				 :+:EditControl "" (PixelWidth 400) 1 [ControlId nicknameId, ControlPos (Right, zero)]
 				 :+:TextControl "Nickname:" [ControlPos (LeftOfPrev, zero)]
 				 :+:EditControl remote (PixelWidth 400) 1 [ControlId rmtsiteId, ControlPos (Right, zero)]

@@ -142,30 +142,25 @@ where
 					checkIOStQuitted :: !Id !SystemId !(IOSt .l) -> (!Result Bool,!IOSt .l)
 					checkIOStQuitted modalWindowId ioid ioState
 						# (ioid`,ioState)		= ioStGetIOId ioState
-						| not (ioid == ioid`)//(eqSystemId ioid ioid`)
+						| not (ioid == ioid`)
 							= ((False,Nothing),ioState)
 						# (closed,ioState)	= ioStClosed ioState
 						| closed
 							= ((True, Just False),ioState)
-	//						= ((True, Just closed),ioState)
-			//			# (found,dsH,ioState)	= IOStGetDialog (toWID modalWindowId) ioState
-			//			# (found,wsH,windows)	= getWindowHandlesWindow (toWID wPtr) windows
-			//			| not found
-			//				= ((True, Just False),ioState)
-			//			# (isModal,_,dsH)		= IsModalDialog dsH
-			//			# ioState				= IOStReplaceDialog dsH ioState
-			//			= ((True, Just isModal),ioState)
-						= ((True, Just True),ioState)
-	/* PA: not used:		
-			gGroups :: !Id !SystemId !*CProcesses -> (!Result Bool,!*CProcesses)
-			gGroups modalWindowId id groups
-				= accessGroups (f` modalWindowId id) groups
-			where
-				f` modalWindowId id {groupState=p,groupIO=locals}
-					= (r,{groupState=p,groupIO=locals`})
-				where
-					(r,locals`) = gLocals modalWindowId id locals
-	*/
+						# (_,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
+						# windows				= windowSystemStateGetWindowHandles wDevice
+						# (found,wsH,windows)	= getWindowHandlesWindow (toWID modalWindowId) windows
+						| not found
+							# ioState			= ioStSetDevice (WindowSystemState windows) ioState
+							= ((True, Just False),ioState)
+						# (mode,wsH)			= getWindowStateHandleWindowMode wsH
+						# windows				= setWindowHandlesWindow wsH windows
+						# ioState				= ioStSetDevice (WindowSystemState windows) ioState
+						| mode<>Modal
+							= ((True, Just False),ioState)
+						| otherwise
+							= ((True, Just True),ioState)
+		
 		modalDialogExists context
 			= (False,context)
 	
@@ -253,7 +248,8 @@ openwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
 		ioState3				= ioStSetDevice (WindowSystemState windows2) ioState2
 		ioState4				= bufferDelayedEvents delayinfo ioState3
 		pState1					= {pState & io=ioState4}
-		(ls1,pState2)			= windowInit (wlsState,pState1)
+		(ls1,pState2)			= windowInit (wlsState,pState1)	// DvA: netter om hier delayed WindowInitialise voor te genereren?
+																// PA:  nu is het conform andere initialisatie functies. Nog eens over nadenken.
 		
 		getWindowHandleInit :: !(WindowHandle .ls .pst) -> (!IdFun *(.ls,.pst),!WindowHandle .ls .pst)
 		getWindowHandleInit wH=:{whAtts}
@@ -297,9 +293,7 @@ createAnyWindow wMetrics behindPtr wId {x,y} {w,h} originv osdinfo wH=:{whMode,w
 						  			  }
 		  wH						= {wH & whWindowInfo=WindowInfo windowInfo}
 		# (wH,tb)					= movewindowviewframe wMetrics originv {wPtr=wPtr,wId=wId,wActive=False} wH tb	// PA: check WIDS value
-	//	# tb						= stackWindow wPtr behindPtr tb		PA: moved to OScreateWindow
 		# (delay_info`,tb)			= osShowWindow wPtr False tb
-//		# tb						= OSsetWindowCursor wPtr (toCursorCode (getWindowCursorAtt cursorAtt)) tb
 		# tb						= osSetWindowCursor wPtr (getWindowCursorAtt cursorAtt) tb
 		= (delay_info++delay_info`,wPtr,osdinfo,wH,tb)
 		with
@@ -311,19 +305,23 @@ createAnyWindow wMetrics behindPtr wId {x,y} {w,h} originv osdinfo wH=:{whMode,w
 			vScroll					= windowInfo.windowVScroll
 			visScrolls				= osScrollbarsAreVisible wMetrics viewDomain (w,h) (isJust hScroll,isJust vScroll)
 			{rright=w`,rbottom=h`}	= osGetWindowContentRect wMetrics visScrolls (sizeToRect {w=w,h=h})
-			hInfo					= toScrollbarInfo hScroll (viewDomain.rleft,viewOrigin.x,viewDomain.rright, w`)
-			vInfo					= toScrollbarInfo vScroll (viewDomain.rtop, viewOrigin.y,viewDomain.rbottom,h`)
+			hRect					= osGetWindowHScrollRect wMetrics visScrolls (sizeToRect {w=w,h=h})
+			vRect					= osGetWindowVScrollRect wMetrics visScrolls (sizeToRect {w=w,h=h})
+			hInfo					= toScrollbarInfo hScroll hRect (viewDomain.rleft,viewOrigin.x,viewDomain.rright, w`)
+			vInfo					= toScrollbarInfo vScroll vRect (viewDomain.rtop, viewOrigin.y,viewDomain.rbottom,h`)
 			minSize					= osMinWindowSize
 			maxSize					= rectSize viewDomain
 			(_,cursorAtt)			= cselect isWindowCursor (WindowCursor StandardCursor) whAtts
 			
-			toScrollbarInfo :: !(Maybe ScrollInfo) (Int,Int,Int,Int) -> ScrollbarInfo
-			toScrollbarInfo Nothing scrollState
+			toScrollbarInfo :: !(Maybe ScrollInfo) OSRect (Int,Int,Int,Int) -> ScrollbarInfo
+			toScrollbarInfo Nothing _ scrollState
 				= {cbiHasScroll=False,cbiPos=undef,cbiSize=undef,cbiState=undef}
-			toScrollbarInfo (Just {scrollItemPos,scrollItemSize}) (min,origin,max,size)
-				= {cbiHasScroll=True,cbiPos=toTuple scrollItemPos,cbiSize=toTuple scrollItemSize,cbiState=osScrollState}
+			toScrollbarInfo (Just {scrollItemPos,scrollItemSize}) rect (min,origin,max,size)
+				= {cbiHasScroll=True,cbiPos=toTuple scrollItemPos`,cbiSize=toTuple scrollItemSize`,cbiState=osScrollState}
 			where
 				osScrollState		= toOSscrollbarRange (min,origin,max) size
+				scrollItemPos`		= {x=rect.rleft, y=rect.rtop}
+				scrollItemSize`		= rectSize rect
 			
 			setScrollInfoPtr :: !(Maybe ScrollInfo) !OSWindowPtr -> Maybe ScrollInfo
 			setScrollInfoPtr (Just info) scrollPtr	= Just {info & scrollItemPtr=scrollPtr}

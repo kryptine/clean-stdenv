@@ -62,7 +62,7 @@ os_select_inetevents endpointRef receiverType referenceCount get_receive_events 
 			ccall os_select_inetevents "IIIIII:V:A"
 		}
 
-getMbStopTime :: !(Maybe !Timeout) !*env -> (!(!Bool, !Int), !*env) | ChannelEnv env
+getMbStopTime :: !(Maybe Timeout) !*env -> (!(!Bool, !Int), !*env) | ChannelEnv env
 getMbStopTime Nothing env
 	=((False,0), env)
 getMbStopTime (Just timeout) env

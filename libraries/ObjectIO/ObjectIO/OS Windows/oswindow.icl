@@ -6,9 +6,9 @@ from	StdIOCommon			import :: CursorShape(StandardCursor,BusyCursor,IBeamCursor,C
 import	clCrossCall_12, clCCall_12, windowCCall_12, windowCrossCall_12
 import	osdocumentinterface, osevent, osfont, ospicture, osrgn, ossystem, ostypes
 from	menuCrossCall_12	import :: HMENU
-from	commondef			import fatalError, intersectRects, rectSize,
+from	commondef			import fatalError, intersectRects, rectSize, stateMap2,
 								class fromTuple(..), instance fromTuple Vector2,
-								class toTuple4(..), instance toTuple4 OSRect,
+								class toTuple4(..),  instance toTuple4  OSRect,
 								class subVector(..), instance subVector OSRect,
 								instance zero OSRect
 
@@ -523,7 +523,7 @@ osCreateEmptyPopUpControl parentWindow /*stackBehind*/ parentPos show able (x,y)
 						//		is placed at the proper stacking order.)
 	= (popUpPtr,editPtr,tb)
 
-osCreatePopUpControlItem :: !OSWindowPtr !(Maybe !OSWindowPtr) !Int !Bool !String !Bool !Int !*OSToolbox -> (!Int,!*OSToolbox)
+osCreatePopUpControlItem :: !OSWindowPtr !(Maybe OSWindowPtr) !Int !Bool !String !Bool !Int !*OSToolbox -> (!Int,!*OSToolbox)
 osCreatePopUpControlItem parentPopUp _ pos able title selected _ tb
 	# (textPtr,tb)	= winMakeCString title tb
 	  addcci		= Rq5Cci CcRqADDTOPOPUP parentPopUp textPtr (toInt able) (toInt selected) pos
@@ -534,6 +534,16 @@ osCreatePopUpControlItem parentPopUp _ pos able title selected _ tb
 						CcWASQUIT	-> 0
 						_			-> oswindowCreateError 1 "osCreatePopUpControlItem"
 	= (index,tb)
+
+osCreatePopUpControlItems :: !OSWindowPtr !(Maybe OSWindowPtr) !Bool ![String] !Int !*OSToolbox -> *OSToolbox
+osCreatePopUpControlItems newPopUpPtr maybeEditPtr ableContext newItems newIndex tb
+	# (_,tb)			= stateMap2 (appendPopUp newPopUpPtr maybeEditPtr newIndex) newItems (1,tb)
+	= tb
+where
+	appendPopUp :: !OSWindowPtr !(Maybe OSWindowPtr) !Index !String !(!Int,!*OSToolbox) -> (!Int,!*OSToolbox)
+	appendPopUp popUpPtr editPtr index title (itemNr,tb)
+		# (_,tb)			= osCreatePopUpControlItem popUpPtr editPtr (-1) ableContext title (index==itemNr) itemNr tb
+		= (itemNr+1,tb)
 
 osCreateSliderControl :: !OSWindowPtr !(!Int,!Int) !Bool !Bool !Bool !(!Int,!Int) !(!Int,!Int) !(!Int,!Int,!Int,!Int) !*OSToolbox
 																									 -> (!OSWindowPtr,!*OSToolbox)
@@ -814,7 +824,7 @@ osDestroyRadioControl wPtr tb = destroycontrol wPtr tb
 osDestroyCheckControl :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osDestroyCheckControl wPtr tb = destroycontrol wPtr tb
 
-osDestroyPopUpControl :: !OSWindowPtr !(Maybe !OSWindowPtr) !*OSToolbox -> *OSToolbox
+osDestroyPopUpControl :: !OSWindowPtr !(Maybe OSWindowPtr) !*OSToolbox -> *OSToolbox
 osDestroyPopUpControl wPtr _ tb = destroycontrol wPtr tb
 
 osDestroySliderControl :: !OSWindowPtr !*OSToolbox -> *OSToolbox
@@ -945,6 +955,9 @@ osBeginUpdate _ tb = tb
 osEndUpdate :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osEndUpdate _ tb = tb
 
+osSetUpdate :: !OSWindowPtr !*OSToolbox -> *OSToolbox
+osSetUpdate _ tb = tb
+
 
 /*	(acc/app)Grafport theWindow f
 		applies f to the graphics context of theWindow (dummy on Windows).
@@ -1037,13 +1050,9 @@ osSetWindowSliderThumbSize wMetrics theWindow _ isHorizontal min max size (maxx,
 where
 	extent	= if isHorizontal wMetrics.osmHSliderHeight wMetrics.osmVSliderWidth
 
-osSetWindowSlider :: !OSWindowMetrics !OSWindowPtr !Bool !(!Int,!Int,!Int,!Int) !(!Int,!Int) !*OSToolbox -> *OSToolbox
-osSetWindowSlider wMetrics theWindow isHorizontal state maxcoords tb
-	= setScrollRangeAndPos True True wMetrics (if isHorizontal SB_HORZ SB_VERT) state maxcoords theWindow tb
-
 //	PA: dummy function, required only for Mac (moved from \OS Macintosh\osutil) and made type independent of WindowHandle.
-osUpdateWindowScroll :: !OSWindowPtr !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !OSRect !*OSToolbox -> *OSToolbox
-osUpdateWindowScroll _ scrollPtr pos size _ tb = tb
+osSetWindowSliderPosSize :: !OSWindowPtr !OSWindowPtr !OSRect !*OSToolbox -> *OSToolbox
+osSetWindowSliderPosSize _ scrollPtr possize tb = tb
 
 osInvalidateWindow :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osInvalidateWindow theWindow tb
@@ -1060,6 +1069,14 @@ osValidateWindowRect theWindow rect tb
 osValidateWindowRgn :: !OSWindowPtr !OSRgnHandle !*OSToolbox -> *OSToolbox
 osValidateWindowRgn theWindow rgn tb
 	= winValidateRgn theWindow rgn tb
+
+osWindowHasUpdateRect :: !OSWindowPtr !*OSToolbox -> (!Bool,!*OSToolbox)
+osWindowHasUpdateRect wPtr tb = GetUpdateRect wPtr 0 0 tb
+where
+	GetUpdateRect :: !Int !Int !Int !*Int -> (!Bool,!*Int)
+	GetUpdateRect _ _ _ _ = code {
+		ccall GetUpdateRect@12 "PIII:I:I"
+		}
 
 osDisableWindow :: !OSWindowPtr !(!Bool,!Bool) !Bool !*OSToolbox -> *OSToolbox
 osDisableWindow theWindow scrollInfo modalContext tb
@@ -1338,6 +1355,10 @@ osSetPopUpControlPos _ (parent_x,parent_y) popupPtr (x,y) _ update tb
 osSetPopUpControlSize :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetPopUpControlSize _ _ popupPtr _ size update tb
 	= winSetWindowSize popupPtr size update tb
+
+osGetPopUpControlText :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> (!String,!*OSToolbox) 
+osGetPopUpControlText _ ePtr tb
+	= winGetWindowText ePtr tb
 
 
 //	On edit controls:

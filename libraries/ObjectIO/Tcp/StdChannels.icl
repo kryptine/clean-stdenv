@@ -35,20 +35,20 @@ class closeRChannel	ch	:: !*(ch .a) !*env -> *env	| ChannelEnv env
 	
 class Send ch
 where
-	send_MT			::	!(Maybe !Timeout) !.a		!*(ch .a)  !*env
+	send_MT			::	!(Maybe Timeout) !.a		!*(ch .a)  !*env
 					->	(!TimeoutReport, !Int,		!*(ch .a), !*env)
 													| ChannelEnv  env
-	nsend_MT		:: 	!(Maybe !Timeout) ![.a]		!*(ch .a)	!*env
+	nsend_MT		:: 	!(Maybe Timeout) ![.a]		!*(ch .a)	!*env
 					->	(!TimeoutReport, !Int,		!*(ch .a), !*env)
 													| ChannelEnv  env
-	flushBuffer_MT	::	!(Maybe !Timeout) 			!*(ch .a)  !*env
+	flushBuffer_MT	::	!(Maybe Timeout) 			!*(ch .a)  !*env
 					->	(!TimeoutReport, !Int,		!*(ch .a), !*env)
 													| ChannelEnv  env
-	closeChannel_MT	::	!(Maybe !Timeout) 			!*(ch .a)  !*env
+	closeChannel_MT	::	!(Maybe Timeout) 			!*(ch .a)  !*env
 					->	(!TimeoutReport, !Int,					!*env)
 													| ChannelEnv  env
 	abortConnection	::								!*(ch .a)	!*env
-					->											!*env
+					->											 *env
 													| ChannelEnv  env
 	disconnected	::								!*(ch .a)	!*env
 					->	(!Bool,						!*(ch .a), !*env)
@@ -95,7 +95,7 @@ instance toString TimeoutReport
 	
 /////////////////// derived functions ////////////////////////////////////////////////////
 
-nreceive_MT			::	!(Maybe !Timeout) !Int		!*(ch .a)  !*env	
+nreceive_MT			::	!(Maybe Timeout) !Int		!*(ch .a)  !*env	
 					->	(!TimeoutReport, ![.a],		!*(ch .a), !*env)	
 													| Receive ch & ChannelEnv  env
 nreceive_MT mbTimeout n ch env
@@ -159,8 +159,7 @@ send msg ch env
 	#!	(_,_,ch,env)	= send_MT Nothing msg ch env
 	= (ch, env)
 
-closeChannel:: 			!*(ch .a) !*env
-			->			  			   !*env	| 	ChannelEnv env & Send ch
+closeChannel:: !*(ch .a) !*env -> *env	| ChannelEnv env & Send ch
 closeChannel ch env
 	#!	(_,_,env)	= closeChannel_MT Nothing ch env
 	= env

@@ -139,25 +139,25 @@ where
     (nh, nv)    =   b.dimensions
     newmapid    =   (FindMaxID 0 mapids) + 1
 
-InitBlockSequences :: !BID ![TileSequence] !*OSToolbox -> !*OSToolbox
+InitBlockSequences :: !BID ![TileSequence] !*OSToolbox -> *OSToolbox
 InitBlockSequences bid [] tb = tb
 InitBlockSequences bid [s:ss] tb
     #   (_, tb) =   InitBlockSequence bid s tb
     =   InitBlockSequences bid ss tb
 
-LayersDone :: ![BID] ![MAPID] !*OSToolbox -> !*OSToolbox
+LayersDone :: ![BID] ![MAPID] !*OSToolbox -> *OSToolbox
 LayersDone bids mapids tb
     #   tb      =   MapsDone mapids tb
     #   tb      =   BitmapsDone bids tb
     =   tb
 
-MapsDone :: ![MAPID] !*OSToolbox -> !*OSToolbox
+MapsDone :: ![MAPID] !*OSToolbox -> *OSToolbox
 MapsDone [] tb = tb
 MapsDone [m:ms] tb
     #   (_, tb)     =   GameLayerMapDone m tb
     =   MapsDone ms tb
 
-BitmapsDone :: ![BID] !*OSToolbox -> !*OSToolbox
+BitmapsDone :: ![BID] !*OSToolbox -> *OSToolbox
 BitmapsDone [] tb = tb
 BitmapsDone [b:bs] tb
     #   (_, tb)     =   GameBitmapDone b tb
@@ -196,12 +196,12 @@ where
       startobjx = stx,
       startobjy = sty}  =   curLevelHnd.boundmap`
     { w = wid, h = ht } =   bs
-    maybePlayMusic :: !(Maybe Music) !*OSToolbox -> !*OSToolbox
+    maybePlayMusic :: !(Maybe Music) !*OSToolbox -> *OSToolbox
     maybePlayMusic Nothing tb = tb
     maybePlayMusic (Just m) tb
         #   (_, tb)     =   PlayMusic m.musicfile m.restart tb
         = tb
-    maybeStopMusic :: !(Maybe Music) !*OSToolbox -> !*OSToolbox
+    maybeStopMusic :: !(Maybe Music) !*OSToolbox -> *OSToolbox
     maybeStopMusic Nothing tb = tb
     maybeStopMusic (Just m) tb
         |   m.continue

@@ -114,7 +114,7 @@ where
 				= pict
 			where
 				x			= lx+20*(dec n / 2) 
-				y			= ly+ 7*(dec n mod 2) 
+				y			= ly+ 7*(dec n rem 2) 
 				{x=lx,y=ly}	= LifesPos
 
 DrawBorders :: !*Picture -> *Picture

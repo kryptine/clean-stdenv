@@ -39,7 +39,7 @@ from	StdProcessDef	import :: DocumentInterface, :: ProcessInit
 		,	cOSToolbox		:: !*OSToolbox			// The toolbox environment
 		}
 
-initContext		:: !.(ProcessInit (PSt .l)) !String !.l !DocumentInterface !ProcessKind !*World -> (!Context,!*OSToolbox)
+initContext		:: !*(ProcessInit (PSt .l)) !String !.l !DocumentInterface !ProcessKind !*World -> (!Context,!*OSToolbox)
 /*	Generate an initial Context, given the initial actions, state, and (document/process)kind of an interactive
 	process, and World.
 */
@@ -69,7 +69,7 @@ handleOneEventForDevices :: !SchedulerEvent !(PSt .l) -> (!Bool,!SchedulerEvent,
 */
 
 
-addVirtualProcess		:: !.(ProcessInit (PSt .l)) String .l !(PSt .l`) -> PSt .l`
+addVirtualProcess		:: !*(ProcessInit (PSt .l)) String .l !(PSt .l`) -> PSt .l`
 /*	addVirtualProcess adds a process to the process administration as a virtual process.
 	For virtual processes no initial devices are created. If the initial actions of the
 	virtual process attempt to create a device instance this results in a runtime error.
@@ -80,7 +80,7 @@ addVirtualProcess		:: !.(ProcessInit (PSt .l)) String .l !(PSt .l`) -> PSt .l`
 ShareGUI			:==	True
 NotShareGUI			:==	False
 
-addInteractiveProcess	:: ![ProcessAttribute (PSt .l)] !(ProcessInit (PSt .l)) String .l 
+addInteractiveProcess	:: ![ProcessAttribute (PSt .l)] !*(ProcessInit (PSt .l)) String .l 
 							!Bool !DocumentInterface !(PSt .l`) -> PSt .l`
 /*	addInteractiveProcess adds a process to the process administration as an interactive process.
 	For interactive processes initial devices are created. 

@@ -70,7 +70,7 @@ where
 		# (candidates,others)	= splitFilter (\(okCoord,coord)->distCoord coord hole==1) coords
 		  (random_nr,seed)		= random seed
 		  (before,[(okCandidate,candidate):after])
-		  						= splitAt (random_nr mod (length candidates)) candidates
+		  						= splitAt (random_nr rem (length candidates)) candidates
 		= (seed,before++[(okCandidate,hole):after]++others,candidate)
 
 

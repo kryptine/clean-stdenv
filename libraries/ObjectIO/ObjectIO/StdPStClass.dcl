@@ -6,7 +6,7 @@ definition module StdPStClass
 //	
 //	StdPStClass collects (PSt .l) and (IOSt .l) class instances.
 //	Author: Peter Achten
-//	Modified: 7 September 2001 for Clean 2.0
+//	Modified: 14 March 2003 for Clean 2.0.3 
 //	********************************************************************************
 
 
@@ -20,9 +20,9 @@ from	iostate		import :: PSt, :: IOSt
 	- FileSelectEnv	(see StdFileSelect)
 	- TimeEnv		(see StdTime)
 	
-	IOSt is also an environment instance of the classes FileEnv, TimeEnv
+	and so is IOSt, except FileSelectEnv.
 */
-instance FileSystem		(PSt .l)
+instance FileSystem		(PSt .l), (IOSt .l)
 instance FileEnv		(PSt .l), (IOSt .l)
 instance FileSelectEnv	(PSt .l)
 instance TimeEnv		(PSt .l), (IOSt .l)

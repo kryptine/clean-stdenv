@@ -28,7 +28,7 @@ import	StdGameDef
      , sprites`    :: ![Sprite]
      , spriteids`  :: ![SpriteID]
      , instances`  :: ![(InstanceID, state)]
-     , init`       :: !SubCode !Point2 !GameTime !gs         -> GameObjectState state gs
+     , init`       :: !SubCode Point2 GameTime gs            -> GameObjectState state gs
      , done`       :: !(GameObjectState state gs)            -> gs
      , move`       :: !                                         ObjectFun state gs
      , animation`  :: !                                         ObjectFun state gs
@@ -37,7 +37,7 @@ import	StdGameDef
      , frametimer` :: !                                         ObjectFun state gs
      , keydown`    :: !KeyCode                               -> ObjectFun state gs
      , keyup`      :: !KeyCode                               -> ObjectFun state gs
-     , userevent`  :: !EventCode !EventPar !EventPar         -> ObjectFun state gs
+     , userevent`  :: !EventCode EventPar EventPar           -> ObjectFun state gs
      }
 
 :: InstanceID

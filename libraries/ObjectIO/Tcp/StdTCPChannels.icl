@@ -36,8 +36,8 @@ instance closeRChannel	TCP_Listener_
 		# endpointRef			= unpack_tcplistener ch
 		= close_listener endpointRef env
 
-receive_mb_Listener	::	!(Maybe !Timeout) !EndpointRef !*env
-						->	(!TimeoutReport, !Maybe !(!IPAddress, !TCP_DuplexChannel), !*env) | ChannelEnv env
+receive_mb_Listener	::	!(Maybe Timeout) !EndpointRef !*env
+						->	(!TimeoutReport, !Maybe (!IPAddress, !TCP_DuplexChannel), !*env) | ChannelEnv env
 receive_mb_Listener mbTimeout endpointRef env
 	|	isJust mbTimeout && (fromJust mbTimeout)<0
 		= (TR_Expired, Nothing, env)
@@ -85,8 +85,8 @@ instance closeRChannel	TCP_RChannel_
 		# (endpointRef, _)			= unpack_tcprchan ch
 		= close_tcprchan endpointRef env
 
-receive_mb_TCP ::	!(Maybe !Timeout) !(!EndpointRef,!Int) !*env 
-					->	(!TimeoutReport, !Maybe !ByteSeq, !*env)
+receive_mb_TCP ::	!(Maybe Timeout) !(!EndpointRef,!Int) !*env 
+					->	(!TimeoutReport, !Maybe ByteSeq, !*env)
 					| 	ChannelEnv env
 receive_mb_TCP mbTimeout rchan=:(endpointRef,maxSize) env
 	|	isJust mbTimeout && (fromJust mbTimeout)<0
@@ -209,7 +209,7 @@ lookupIPAddress inetAddr env
 		= (Nothing, env)
 	= (Just (pack_ipaddr inetHost), env)
 
-connectTCP_MT		::	!(Maybe !Timeout) !(!IPAddress,!Port) !*env
+connectTCP_MT		::	!(Maybe Timeout) !(!IPAddress,!Port) !*env
 					->	(!TimeoutReport, !Maybe TCP_DuplexChannel, !*env) 
 					|	ChannelEnv env
 connectTCP_MT mbTimeout (inetHost,inetPort) env
@@ -306,7 +306,7 @@ class SelectReceive channels
 	accRChannels	:: (PrimitiveRChannel -> (x, PrimitiveRChannel)) !*channels 
 					-> (![x], !*channels)
 	getRState		:: !Int !*channels !*World
-					-> (!Maybe !SelectResult, !*channels, !*World)
+					-> (!Maybe SelectResult, !*channels, !*World)
 
 class SelectSend channels
   where
@@ -498,7 +498,7 @@ instance toString SelectResult
   	toString SR_Sendable		= "SR_Sendable"
   	toString SR_Disconnected	= "SR_Disconnected"
 
-selectChannel_MT		:: !(Maybe !Timeout) !*r_channels !*s_channels !*World
+selectChannel_MT		:: !(Maybe Timeout) !*r_channels !*s_channels !*World
 					-> (![(!Int, !SelectResult)], !*r_channels, !*s_channels, !*World) 
 					|	SelectReceive r_channels & SelectSend s_channels
 selectChannel_MT mbTimeout r_channels s_channels env
