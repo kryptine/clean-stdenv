@@ -10,7 +10,6 @@ definition module StdPStClass
 
 import	StdFile, StdFileSelect, StdSound, StdTime
 from	iostate		import PSt, IOSt
-//from	channelenv	import ChannelEnv // MW11++
 
 
 /*	PSt is an environment instance of the following classes:
@@ -29,4 +28,3 @@ instance FileEnv		(PSt .l), (IOSt .l) // MW11 added IOSt
 instance FileSelectEnv	(PSt .l)
 instance TimeEnv		(PSt .l), (IOSt .l) // MW11 added IOSt
 instance playSoundFile	(PSt .l)
-//instance ChannelEnv 	(PSt .l), (IOSt .l) // MW11 added IOSt
