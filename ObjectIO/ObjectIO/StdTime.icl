@@ -2,7 +2,9 @@ implementation module StdTime
 
 import	StdBool, StdClass, StdFunc, StdInt, StdReal
 import	ostime, ossystem, /*MW11++*/ ostick
+from	StdLibMisc		import :: Time(..), :: Date(..)
 
+/*
 ::	Time
 	=	{	hours	:: !Int		// hours		(0-23)
 		,	minutes	:: !Int		// minutes		(0-59)
@@ -14,7 +16,7 @@ import	ostime, ossystem, /*MW11++*/ ostick
 		,	day		:: !Int		// day			(1-31)
 		,	dayNr	:: !Int		// day of week	(1-7, Sunday=1, Saturday=7)
 		}
-
+*/
 //	Suspend evaluation of the second argument modally for a number of ticks (see StdSystem).
 
 wait :: !Int .x -> .x
