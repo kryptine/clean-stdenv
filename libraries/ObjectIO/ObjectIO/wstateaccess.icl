@@ -1,7 +1,7 @@
 implementation module wstateaccess
 
 import	StdInt, StdBool, StdList
-import	commondef, wstate
+import	commondef, wstate, keyfocus
 
 
 //	Higher order access functions on [WElementHandle`]

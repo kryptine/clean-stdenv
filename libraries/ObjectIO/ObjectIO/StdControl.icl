@@ -681,7 +681,6 @@ where
 		= {wState & wRep=wH,wTb=tb}
 
 
-
 /*	Change the Look of the corresponding (Custom(Button)/Compound)Controls and redraw
 	only if the first Boolean is True.
 */

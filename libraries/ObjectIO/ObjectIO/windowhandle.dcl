@@ -11,11 +11,11 @@ definition module windowhandle
 
 import	StdControlDef, StdMaybe, StdWindowDef
 import	receiverhandle
-from	commondef	import Bound, Finite, Infinite
-from	keyfocus	import KeyFocus, FocusItem
+from	commondef	import :: Bound
+from	keyfocus	import :: KeyFocus
 import	ospicture, osrgn, ostypes
 
-//import windowcursor
+
 ::	CursorInfo
 	=	{	cInfoChanged	:: !Bool							// True if cLocalRgn or cMouseWasInRgn has changed
 		,	cLocalRgn		:: !OSRgnHandle					// Background region of active window

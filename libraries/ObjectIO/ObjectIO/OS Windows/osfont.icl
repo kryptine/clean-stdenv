@@ -3,10 +3,10 @@ implementation module osfont
 
 import	StdBool, StdClass, StdEnum, StdReal
 import	clCrossCall_12, pictCCall_12
-from	clCCall_12		import winMakeCString, winGetCString, CSTR, winGetVertResolution
-from	StdPictureDef	import FontName, FontSize, FontStyle, BoldStyle, ItalicsStyle, UnderlinedStyle
+from	clCCall_12		import winMakeCString, winGetCString, :: CSTR, winGetVertResolution
+from	StdPictureDef	import :: FontName, :: FontSize, :: FontStyle, BoldStyle, ItalicsStyle, UnderlinedStyle
 from	commondef		import fatalError, isBetween, minmax, stateMap
-from	ostypes			import OSPictContext, HDC
+from	ostypes			import :: OSPictContext, :: HDC
 
 
 ::	Font

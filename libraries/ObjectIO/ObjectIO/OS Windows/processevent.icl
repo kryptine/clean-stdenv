@@ -2,13 +2,12 @@ implementation module processevent
 
 
 import	StdArray, StdBool, StdList
-from	clCrossCall_12	import CcWmDDEEXECUTE, CcWmPROCESSCLOSE, CcWmPROCESSDROPFILES
-from	clCCall_12		import winGetCStringAndFree, CSTR
-from	ostypes			import OSNoWindowPtr, OSWindowPtr
+from	clCrossCall_12	import CcWmDDEEXECUTE, CcWmPROCESSCLOSE, CcWmPROCESSDROPFILES, :: CrossCallInfo(..)
+from	clCCall_12		import winGetCStringAndFree, :: CSTR
+from	ostypes			import OSNoWindowPtr, :: OSWindowPtr
 import	deviceevents, iostate
 from	commondef		import fatalError
 from	processstack	import topShowProcessShowState
-
 
 processeventFatalError :: String String -> .x
 processeventFatalError function error

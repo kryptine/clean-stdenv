@@ -12,22 +12,13 @@ definition module scheduler
 import	StdString
 import	deviceevents, StdMaybe
 import	osevent, ostime, ostoolbox
-from	id				import Id
-from	iostate			import PSt, IOSt, RR, CProcesses, CProcess
-from	receivertable	import ReceiverTable, ReceiverTableEntry, RecLoc
-from	device			import Device
-from	processstack	import ProcessStack, ProcessShowState, ShowFlag, ProcessKind, InteractiveProcess, VirtualProcess
-from	systemid		import SystemId
-from	StdIOCommon		import SelectState, Able, Unable, IdFun,
-								ProcessAttribute, ProcessWindowPos,
-									ItemPos, ItemLoc, Fix, LeftTop, RightTop, LeftBottom, RightBottom, 
-										Left, Center, Right, LeftOf, RightTo, Above, Below, 
-										LeftOfPrev, RightToPrev, AbovePrev, BelowPrev, 
-									ItemOffset, 
-								ProcessWindowSize, ProcessWindowResize, ProcessWindowResizeFunction,
-								ProcessActivate, ProcessDeactivate, ProcessClose, ProcessNoWindowMenu,
-								Vector2, Point2, Size
-from	StdProcessDef	import ProcessInit, DocumentInterface, NDI, SDI, MDI
+from	id				import :: Id
+from	iostate			import :: PSt, :: CProcess, :: CProcesses, :: RR
+from	receivertable	import :: ReceiverTable
+from	processstack	import :: ProcessKind, :: ProcessStack, :: ProcessShowState
+from	systemid		import :: SystemId
+from	StdIOCommon		import :: ProcessAttribute, :: IdFun
+from	StdProcessDef	import :: DocumentInterface, :: ProcessInit
 
 
 ::	*Environs

@@ -3,10 +3,10 @@ implementation module windowCrossCall_12
 
 import	StdMisc, StdTuple
 import	clCrossCall_12
-from	ostypes			import HWND
-from	clCCall_12		import winMakeCString, winGetCStringAndFree, winReleaseCString, CSTR
-from	pictCCall_12	import HDC
-from	rgnCCall_12		import HRGN
+from	ostypes			import :: HWND
+from	clCCall_12		import winMakeCString, winGetCStringAndFree, winReleaseCString, :: CSTR
+from	pictCCall_12	import :: HDC
+from	rgnCCall_12		import :: HRGN
 
 
 //	Cursor shape constants:

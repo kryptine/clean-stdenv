@@ -4,9 +4,9 @@ implementation module windowdispose
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	menuevent, osmenu, ostypes, oswindow
 import	commondef, iostate, receiverid, scheduler, StdPSt, windowaccess, windowclipstate
-from	StdMenu				import enableMenuSystem
-from	StdWindowAttribute	import isWindowDeactivate
-from	windowcreate		import bufferDelayedEvents
+from StdMenu import enableMenuSystem
+from StdWindowAttribute import isWindowDeactivate
+from windowcreate import bufferDelayedEvents
 //import menuwindowmenu
 
 

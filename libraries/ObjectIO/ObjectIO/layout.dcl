@@ -10,7 +10,7 @@ definition module layout
 
 
 import	StdIOCommon
-from	windowhandle	import LayoutInfo, LayoutFix, LayoutFun, LayoutFrame
+from	windowhandle	import :: LayoutInfo
 
 
 ::	LayoutItem

@@ -10,7 +10,7 @@ definition module menudevice
 
 
 import	devicefunctions
-from	iostate	import PSt, IOSt
+from	iostate import :: IOSt, :: PSt
 
 
 menuFunctions			:: DeviceFunctions (PSt .l)

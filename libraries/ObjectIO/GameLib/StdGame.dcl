@@ -10,12 +10,10 @@ definition module StdGame
 
 
 import	StdInt, StdString
-from	StdIOCommon	import ErrorReport,
-							NoError, ErrorViolateDI, ErrorIdsInUse, 
-							ErrorUnknownObject, OtherError
-from	StdPSt		import PSt, IOSt
+from	StdIOCommon	import :: ErrorReport
+from	StdPSt		import :: PSt
 import	StdGameDef
-from	osgame		import GRESULT
+from	osgame		import :: GRESULT
 
 
 /* predefined bounds */

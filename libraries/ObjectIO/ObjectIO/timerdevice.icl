@@ -2,7 +2,7 @@ implementation module timerdevice
 
 
 import	StdInt, StdBool, StdFunc, StdEnum, StdList, StdTuple
-from	StdPSt	import	accPIO, appPIO
+from StdPSt import accPIO, appPIO
 import	commondef, devicefunctions, iostate, receiveraccess, timeraccess, timerdefaccess, timerevent
 
 

@@ -1,6 +1,6 @@
 definition module showtm
 
-from	StdPicture  import Picture, Point2
+from	StdPicture	import :: Point2, :: Picture
 import	tm
 
 MaxX	:== 29900

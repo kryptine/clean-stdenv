@@ -9,11 +9,10 @@ definition module StdEventTCP
 //	********************************************************************************
 
 import	StdChannels, StdId, StdTCPDef
-from	StdReceiver		import Receivers, ReceiverType
-from	StdPSt			import PSt, IOSt
-from	StdIOCommon		import ErrorReport
-from	tcp_bytestreams	import TCP_SCharStream_
-from	StdPStClass		import FileEnv, Files, TimeEnv, Date, Tick, Time
+from	StdReceiver		import class Receivers
+from	StdPSt			import :: IOSt, :: PSt
+from	StdIOCommon		import :: ErrorReport
+from	tcp_bytestreams import :: TCP_SCharStream_
 
 instance ChannelEnv (PSt  .l), (IOSt .l)
 

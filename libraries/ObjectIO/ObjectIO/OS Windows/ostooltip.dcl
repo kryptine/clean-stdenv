@@ -5,8 +5,8 @@ definition module ostooltip
 //	Operations to add and remove tooltip controls and areas.
 
 import	StdString
-from	ostoolbox	import OSToolbox
-from	oswindow	import OSWindowPtr
+from	ostoolbox	import :: OSToolbox
+from	oswindow	import :: OSWindowPtr
 
 /*	Tooltip controls are added and removed by osAddControlToolTip and osRemoveControlToolTip.
 	The first  OSWindowPtr argument identifies the parent window.

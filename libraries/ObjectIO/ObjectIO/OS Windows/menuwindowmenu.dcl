@@ -6,7 +6,7 @@ definition module menuwindowmenu
 //	The definition and implementation of the WindowMenu. 
 
 
-from	iostate import PSt, IOSt
+from	iostate import :: PSt, :: IOSt
 import	windowhandle
 
 

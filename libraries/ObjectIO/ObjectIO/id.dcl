@@ -11,8 +11,8 @@ definition module id
 
 import	StdOverloaded
 import	StdMaybe
-from	device		import Device, TimerDevice, MenuDevice, WindowDevice, ReceiverDevice, ProcessDevice
-from	systemid	import SystemId
+from	device		import :: Device
+from	systemid	import :: SystemId
 
 
 ::	Id										// General identification

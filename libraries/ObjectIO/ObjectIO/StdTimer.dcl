@@ -12,7 +12,7 @@ definition module StdTimer
 
 import	StdTimerElementClass, StdMaybe
 from	StdSystem	import ticksPerSecond
-from	iostate		import PSt, IOSt
+from	iostate		import :: PSt, :: IOSt
 
 
 class Timers tdef where

@@ -10,9 +10,9 @@ definition module StdTCPChannels
 
 import	StdString
 import	StdTCPDef, StdChannels
-from	StdIOCommon		import OkBool
-from	StdIOBasic		import Void, :^:
-from	tcp_bytestreams import TCP_SCharStream_, TCP_RCharStream_
+from	StdIOCommon		import :: OkBool
+from	StdIOBasic		import :: :^:, :: Void
+from	tcp_bytestreams	import :: TCP_RCharStream_{..}, :: TCP_SCharStream_{..}
 
 
 //	********************************************************************************

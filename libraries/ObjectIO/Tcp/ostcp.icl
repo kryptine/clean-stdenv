@@ -1,7 +1,7 @@
 implementation module ostcp
 
 import	StdInt, StdTuple
-import	StdTCPDef
+import	StdTCPDef, StdTime
 import	StdChannels
 import	tcp, ostick
 import	code from "cTCP_121.obj", library "wsock_library"

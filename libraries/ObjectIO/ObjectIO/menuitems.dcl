@@ -12,10 +12,10 @@ definition module menuitems
 import	StdMenuElementClass
 import	menuhandle
 import	osdocumentinterface, ostoolbox
-from	id					import IdTable
-from	iostate				import PSt, IOSt
-from	receivertable		import ReceiverTable
-from	systemid			import SystemId
+from	id					import :: IdTable
+from	iostate				import :: PSt
+from	receivertable		import :: ReceiverTable
+from	systemid			import :: SystemId
 
 
 //	Adding and removing menu elements to and from existing menus.

@@ -11,7 +11,7 @@ definition module StdMenuElement
 
 
 import	StdMenuDef
-from	iostate	import IOSt
+from	iostate import :: IOSt
 
 
 /*	Functions that change the state of menu elements.

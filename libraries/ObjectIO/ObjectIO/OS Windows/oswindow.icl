@@ -2,12 +2,15 @@ implementation module oswindow
 
 
 import	StdBool, StdInt, StdReal, StdClass, StdOverloaded, StdList, StdMisc, StdTuple
-from	StdIOCommon			import CursorShape, StandardCursor, BusyCursor, IBeamCursor, CrossCursor, FatCrossCursor, ArrowCursor, HiddenCursor
+from	StdIOCommon			import :: CursorShape(StandardCursor,BusyCursor,IBeamCursor,CrossCursor,FatCrossCursor,ArrowCursor,HiddenCursor)
 import	clCrossCall_12, clCCall_12, windowCCall_12, windowCrossCall_12
 import	osdocumentinterface, osevent, osfont, ospicture, osrgn, ossystem, ostypes
-from	menuCrossCall_12	import HMENU
-from	commondef			import fatalError,intersectRects,rectSize,fromTuple,toTuple4,subVector,zero
-//import StdDebug,tracetypes
+from	menuCrossCall_12	import :: HMENU
+from	commondef			import fatalError, intersectRects, rectSize,
+								class fromTuple(..), instance fromTuple Vector2,
+								class toTuple4(..), instance toTuple4 OSRect,
+								class subVector(..), instance subVector OSRect,
+								instance zero OSRect
 
 
 oswindowFatalError :: String String -> .x

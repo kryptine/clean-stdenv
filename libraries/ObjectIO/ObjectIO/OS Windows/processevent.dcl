@@ -8,7 +8,7 @@ definition module processevent
 
 
 import	deviceevents
-from	iostate	import PSt, IOSt
+from	iostate import :: PSt
 
 
 processEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)

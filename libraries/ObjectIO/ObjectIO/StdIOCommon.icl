@@ -3,7 +3,7 @@ implementation module StdIOCommon
 
 import	StdArray, StdBool, StdFunc, StdInt, StdList, StdOverloaded, StdString
 import	id, StdBitmap, StdIOBasic, StdKey, StdMaybe
-from	commondef	import stateMap2
+from commondef import stateMap2
 
 
 /*	The SelectState type.								*/

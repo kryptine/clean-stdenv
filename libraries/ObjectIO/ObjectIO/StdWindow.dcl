@@ -10,9 +10,9 @@ definition module StdWindow
 //	********************************************************************************
 
 
-from	StdFunc			import St
+from	StdFunc			import :: St
 import	StdControlClass, StdWindowDef
-from	StdPSt			import PSt, IOSt
+from	StdPSt			import :: PSt{..}, :: IOSt
 
 
 //	Functions applied to non-existent windows or unknown ids have no effect.

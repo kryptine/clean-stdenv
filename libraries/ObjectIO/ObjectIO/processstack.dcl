@@ -9,8 +9,8 @@ definition module processstack
 //	********************************************************************************
 
 
-from	StdOverloaded	import ==
-from	systemid		import	SystemId
+from	StdOverloaded	import class ==
+from	systemid		import :: SystemId
 
 
 ::	ProcessShowState

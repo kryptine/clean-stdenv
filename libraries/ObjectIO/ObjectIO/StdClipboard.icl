@@ -4,8 +4,9 @@ implementation module StdClipboard
 import	StdFunc, StdList, StdMisc, StdString
 import	osclipboard
 import	StdMaybe
-from	commondef	import fatalError, strictSeq, strictSeqList, remove, Cond
-from	iostate		import PSt, IOSt, getIOToolbox, setIOToolbox, accIOToolbox, ioStGetClipboardState, ioStSetClipboardState, ClipboardState
+from	commondef	import fatalError, strictSeq, strictSeqList, remove, :: Cond
+from	iostate		import :: PSt{..}, :: IOSt, getIOToolbox, setIOToolbox, accIOToolbox,
+						ioStGetClipboardState, ioStSetClipboardState, :: ClipboardState(..)
 
 
 stdClipboardFatalError :: String String -> .x

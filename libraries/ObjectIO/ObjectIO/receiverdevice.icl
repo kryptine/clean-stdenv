@@ -4,7 +4,7 @@ implementation module receiverdevice
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	StdReceiver
 import	devicefunctions, iostate, receiveraccess, receiverevent, receiverid
-from	commondef	import fatalError, uremove, UCond, strictSeq, accessList
+from	commondef	import fatalError, uremove, :: UCond, strictSeq, accessList
 from	StdPSt		import appPIO, accPIO
 
 

@@ -5,7 +5,8 @@ import	StdBool, StdList, StdFunc, StdTuple, StdMisc
 import	osdocumentinterface, ospicture, ossystem, ostypes, oswindow
 import	commondef, controllayout, keyfocus, StdControlAttribute, StdId, StdWindowAttribute, windowaccess
 from	StdSystem	import maxScrollWindowSize
-from	iostate		import IOSt, ioStGetIdTable, ioStSetIdTable
+from	iostate		import :: IOSt, ioStGetIdTable, ioStSetIdTable
+
 
 //import dodebug
 

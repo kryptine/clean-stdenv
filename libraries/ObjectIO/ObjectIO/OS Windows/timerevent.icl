@@ -3,8 +3,8 @@ implementation module timerevent
 
 import	StdBool, StdClass
 import	deviceevents, timeraccess
-from	commondef	import fatalError, ucontains, UCond
-from	iostate		import PSt, IOSt, ioStHasDevice, ioStGetDevice, ioStSetDevice, ioStGetIOId
+from	commondef	import fatalError, ucontains, :: UCond
+from	iostate		import :: PSt{..}, :: IOSt, ioStHasDevice, ioStGetDevice, ioStSetDevice, ioStGetIOId
 from	StdPSt		import accPIO
 
 

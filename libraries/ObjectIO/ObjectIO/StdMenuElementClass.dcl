@@ -11,8 +11,8 @@ definition module StdMenuElementClass
 
 
 import	StdMenuDef
-from	StdPSt		import PSt, IOSt
-from	menuhandle	import MenuElementState
+from	StdPSt		import :: PSt
+from	menuhandle	import :: MenuElementState
 
 
 /*	Menu elements for Menus:

@@ -4,7 +4,7 @@ implementation module controlvalidate
 import	StdBool, StdInt, StdList
 import	ospicture, oswindow
 import	commondef, windowhandle, wstate
-from	windowaccess import getWItemReceiverInfo
+from windowaccess import getWItemReceiverInfo
 
 
 controlvalidateFatalError :: String String -> .x

@@ -11,7 +11,7 @@ definition module menuinternal
 
 
 import	StdMenuElementClass
-from	iostate		import IOSt, SystemId
+from	iostate		import :: IOSt, :: SystemId
 
 
 RemoveSpecialMenuElements	:==	True		// For closemenuindexelements:        remove elements with special ids

@@ -2,9 +2,9 @@ implementation module menuitems
 
 
 import	StdBool, StdList, StdMisc, StdTuple
-import	commondef, menuaccess, menucreate, receivertable
+import	commondef, menuaccess, menucreate, receivertable, receiverhandle
 import	osdocumentinterface, osmenu, ostypes
-from	iostate	import getIOToolbox, setIOToolbox
+from	iostate	import getIOToolbox, setIOToolbox, :: IOSt, :: PSt(..)
 
 
 /*	Adding menu elements to (Sub)Menus:

@@ -2,8 +2,8 @@ definition module clCCall_12
 
 //	Clean Object I/O library, version 1.2
 
-from StdIOCommon	import Modifiers
-from ostoolbox		import OSToolbox
+from StdIOCommon	import :: Modifiers
+from ostoolbox		import :: OSToolbox
 
 
 ::	CSTR	:==  Int

@@ -1,7 +1,8 @@
 implementation module gameintrface_12
 
-from	ostoolbox		import OSToolbox
-from	pictCCall_12	import RGBcolor
+
+from ostoolbox		import :: OSToolbox
+from pictCCall_12	import :: RGBcolor
 
 
 ::  BID     :== Int  // Bitmap ID

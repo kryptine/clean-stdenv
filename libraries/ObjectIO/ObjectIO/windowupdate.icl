@@ -6,8 +6,8 @@ import	ospicture, osrgn, oswindow
 import	commondef, deviceevents, windowhandle, wstate
 from	windowaccess	import getWItemCompoundInfo, getWItemCustomButtonInfo, getWItemCustomInfo, getWindowInfoWindowData,
 								getWItemPopUpInfo, getWItemRadioInfo, getWItemCheckInfo, getWItemTextInfo
-from	windowclipstate	import validateWindowClipState
-from	wstateaccess	import getWItemCompoundInfo`
+from windowclipstate import validateWindowClipState
+from wstateaccess import getWItemCompoundInfo`
 
 //import windows
 

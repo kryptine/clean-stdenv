@@ -10,7 +10,7 @@ definition module StdKey
 //	********************************************************************************
 
 
-from	oskey		import	SpecialKey, 
+from	oskey		import	:: SpecialKey, 
 							backSpaceKey, beginKey, 
 							clearKey, 
 							deleteKey, downKey, 
@@ -23,4 +23,5 @@ from	oskey		import	SpecialKey,
 							pgDownKey, pgUpKey, 
 							returnKey, rightKey, 
 							upKey,
-						==, toString
+						class ==, instance == SpecialKey,
+						class toString, instance toString SpecialKey

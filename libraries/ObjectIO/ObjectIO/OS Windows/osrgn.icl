@@ -1,7 +1,7 @@
 implementation module osrgn
 
 import	StdBool, StdInt, StdList
-from	ostypes	import OSRect
+from	ostypes import :: OSRect{..}
 import	pictCCall_12, rgnCCall_12
 
 ::	OSRgnHandle

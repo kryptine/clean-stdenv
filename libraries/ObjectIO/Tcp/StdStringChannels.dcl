@@ -11,10 +11,8 @@ definition module StdStringChannels
 
 import	StdString
 import	StdTCPDef, StdChannels, StdEventTCP
-from	StdReceiver		import Receivers, ReceiverType, RId
-from	StdTCPChannels	import SelectSend, SelectReceive, getNrOfChannels, 
-								TCP_SCharStreams, TCP_SCharStream, 
-								TCP_RCharStreams, TCP_RCharStream, TCP_RCharStream_
+from	StdReceiver		import :: ReceiverType, :: RId, class Receivers(..);
+from	StdTCPChannels	import class getNrOfChannels, class SelectReceive, class SelectSend
 
 /*	If a string via a StringChannel is sent, then first the length of the string is
 	sent, and then the string itself, e.g. sending the string "abc" will result in

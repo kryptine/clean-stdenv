@@ -10,7 +10,7 @@ definition module menucreate
 import	StdMenuElementClass
 import	menuhandle
 import	ostoolbox, ostypes
-from	iostate		import PSt, IOSt
+from	iostate		import :: PSt
 
 /*	Creating menus:
 	In case the Boolean result is False nothing has been created due to duplicate Ids.

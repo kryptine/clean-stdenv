@@ -4,9 +4,8 @@ implementation module windowclipstate
 import	StdBool, StdList, StdMisc
 import	osrgn, oswindow
 import	commondef, wstate
-from	windowaccess	import getWItemRadioInfo,  getWItemCheckInfo,  getWItemCompoundInfo, getWindowInfoWindowData
+from windowaccess	import getWItemRadioInfo,  getWItemCheckInfo,  getWItemCompoundInfo, getWindowInfoWindowData
 from	wstateaccess	import getWItemRadioInfo`, getWItemCheckInfo`, getWItemCompoundInfo`
-
 
 /*	createClipState wMetrics allClipStates validate wPtr clipRect defId isVisible items
 		calculates the ClipState that corresponds with items.

@@ -7,7 +7,7 @@ definition module notes
 //	Modified: 7 Sept 2001 for Clean 2.0 (Peter Achten)
 //	********************************************************************************
 
-from	StdGame	import Frequency
+from	StdGame import :: Frequency
 
 MIDDLE_C :== 38
 

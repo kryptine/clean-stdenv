@@ -9,7 +9,7 @@ definition module Help
 //	**************************************************************************************************
 
 import	StdString
-from	StdPSt	import PSt, IOSt
+from	StdPSt import :: PSt
 
 showAbout :: String String (PSt *l) -> PSt *l
 /*	showAbout opens a window:

@@ -4,9 +4,9 @@ definition module osmenu
 //	Clean Object I/O library, version 1.2
 
 
-from	StdMaybe			import Maybe, Just, Nothing
-from	StdIOCommon			import Modifiers
-from	menuCrossCall_12	import HMENU, HITEM
+from	StdMaybe			import :: Maybe
+from	StdIOCommon			import :: Modifiers
+from	menuCrossCall_12	import :: HMENU, :: HITEM
 import	osdocumentinterface, ostoolbox, ostypes
 
 

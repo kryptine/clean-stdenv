@@ -10,9 +10,9 @@ definition module StdId
 //	********************************************************************************
 
 
-from	StdMaybe	import Maybe, Just, Nothing
-from	id			import Id, RId, R2Id, rIdtoId, r2IdtoId, toString, ==
-from	iostate		import PSt, IOSt
+from	StdMaybe	import :: Maybe
+from	id			import :: Id, :: RId, :: R2Id, rIdtoId, r2IdtoId, class toString, class ==
+from	iostate		import :: IOSt, :: PSt
 
 class Ids env where
 	openId		::      !*env -> (!Id,         !*env)

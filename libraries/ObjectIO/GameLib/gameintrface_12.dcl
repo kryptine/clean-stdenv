@@ -7,8 +7,8 @@ definition module gameintrface_12
 //	Modified: 7 Sept 2001 for Clean 2.0 (Peter Achten)
 //	********************************************************************************
 
-from	ostoolbox		import OSToolbox
-from	pictCCall_12	import RGBcolor
+from	ostoolbox		import :: OSToolbox
+from	pictCCall_12	import :: RGBcolor
 
 
 ::  BID     :== Int  // Bitmap ID

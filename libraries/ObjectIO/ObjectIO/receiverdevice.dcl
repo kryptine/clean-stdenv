@@ -10,7 +10,7 @@ definition module receiverdevice
 
 
 import	devicefunctions
-from	iostate	import PSt, IOSt
+from	iostate import :: PSt
 
 
 receiverFunctions :: DeviceFunctions (PSt .l)

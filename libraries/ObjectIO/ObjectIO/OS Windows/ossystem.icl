@@ -4,7 +4,7 @@ import	StdBool, StdInt, StdReal, StdString
 import	StdMaybe
 import	clCCall_12, clCrossCall_12, windowCrossCall_12
 import	osdocumentinterface, osfont
-from	ostypes	import OSRect
+from	ostypes import :: OSRect{..}
 
 
 ::	OSWindowMetrics

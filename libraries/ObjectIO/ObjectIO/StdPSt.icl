@@ -3,7 +3,7 @@ implementation module StdPSt
 
 import	StdBool, StdFunc
 import	commondef, iostate
-from	StdIOCommon			import IdFun
+from	StdIOCommon			import :: IdFun
 from	StdProcessAttribute	import isProcessActivate, isProcessDeactivate
 import	osbeep, ospicture, ostoolbox
 

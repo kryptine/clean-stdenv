@@ -9,7 +9,7 @@ definition module windowdevice
 //	********************************************************************************
 
 
-from	iostate		import PSt, IOSt
+from	iostate		import :: PSt
 import	ossystem, ostoolbox
 import	devicefunctions, windowhandle
 

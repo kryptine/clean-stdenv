@@ -1,8 +1,8 @@
 implementation module pictCCall_12
 
 
-from	ostypes	import OSRect, HDC
-import	rgnCCall_12//, intrface_12
+from	ostypes	import :: OSRect{..}, :: HDC
+import	rgnCCall_12
 
 
 ::	*PIC

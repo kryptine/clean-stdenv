@@ -2,10 +2,11 @@ implementation module ospicture
 
 import	StdBool, StdFunc, StdInt, StdList, StdReal, StdTuple
 import	pictCCall_12, osfont, ostypes
-from	osrgn		import OSRgnHandle
+from	osrgn		import :: OSRgnHandle
 from	ostoolbox	import OSNewToolbox
 import	StdPictureDef
-from	commondef	import toTuple, subVector, setBetween
+from	commondef	import class toTuple(..), instance toTuple Point2, instance toTuple Vector2,
+						class subVector(..), instance subVector OSRect, setBetween
 
 ::	Picture
 	=	{	pictContext		:: !OSPictContext	// The context for drawing operations

@@ -8,7 +8,7 @@ definition module windowcreate
 //	Modified: 7 September 2001 for Clean 2.0
 //	********************************************************************************
 
-from	iostate		import PSt, IOSt
+from	iostate		import :: PSt, :: IOSt
 import	windowhandle
 import	osfont, ossystem, oswindow
 

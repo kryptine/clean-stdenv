@@ -4,7 +4,7 @@ implementation module scheduler
 import	StdBool, StdList, StdTuple
 import	osevent, ossystem, ostime, ostoolbox
 import	commondef, devicefunctions, iostate, processstack, roundrobin, timertable, world
-from	StdProcessDef		import ProcessInit
+from	StdProcessDef		import :: ProcessInit
 from	StdPSt				import accPIO, appPIO
 from	StdProcessAttribute	import isProcessKindAttribute
 

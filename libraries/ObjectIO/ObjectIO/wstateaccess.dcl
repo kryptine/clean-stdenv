@@ -11,6 +11,7 @@ definition module wstateaccess
 
 
 import	wstate
+from	keyfocus	import :: FocusItem
 
 
 setWElements				:: (WItemHandle` *([arg],.s) -> (WItemHandle`,*([arg],.s)))    ![WElementHandle`] !*(![arg],!.s)

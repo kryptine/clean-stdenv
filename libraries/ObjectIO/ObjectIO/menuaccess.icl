@@ -2,7 +2,7 @@ implementation module menuaccess
 
 
 import StdBool, StdList, StdTuple
-import commondef, menuhandle, receivertable
+import commondef, menuhandle, receivertable, receiverhandle
 import osmenu
 
 

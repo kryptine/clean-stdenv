@@ -690,7 +690,9 @@ warn info canceltext oktext fun pState
 	= openNotice (Notice info (NoticeButton oktext (noLS (fun o cancel))) [NoticeButton canceltext id]) pState
 
 cancel pState
-	# (Just id,pState)	= accPIO getActiveWindow pState
+	# (maybeId,pState)	= accPIO getActiveWindow pState
+	| isNothing maybeId = pState
+	# id				= fromJust maybeId
 	= closeWindow id pState
 
 insertindex :: !(a -> a -> Bool) !a !u:[a] -> (!Int,!v:[a]), [u <= v]

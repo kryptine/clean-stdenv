@@ -10,7 +10,7 @@ definition module processdevice
 
 
 import	devicefunctions
-from	iostate	import PSt, IOSt
+from	iostate import :: PSt
 
 
 processFunctions :: DeviceFunctions (PSt .l)

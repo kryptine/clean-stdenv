@@ -3,7 +3,7 @@ implementation module tmfile
 
 import	StdArray, StdBool, StdChar, StdClass, StdFile, StdInt, StdList, StdString
 from	StdSystem	import dirseparator
-from	tm			import Turing, State, Tape, Transition, Head
+from	tm			import :: Turing{..}, :: State, :: Tape{..}, :: Transition{..}, :: Head
 
     
 DummyTuring		:== {transitions=[],tape=DummyTape,state=""}

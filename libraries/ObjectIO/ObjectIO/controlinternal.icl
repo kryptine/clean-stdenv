@@ -2,7 +2,7 @@ implementation module controlinternal
 
 
 import	StdBool, StdEnum, StdList, StdMisc, StdTuple
-import	ospicture, osrgn, ostooltip, oswindow
+import	ospicture, osrgn, ostooltip, oswindow, ossystem
 import	commondef, wstateaccess
 from	StdControlAttribute	import isControlTip, getControlTipAtt, isControlKeyboard
 from	controldraw			import drawCustomButtonLook`, drawCustomLook`, drawCompoundLook`,

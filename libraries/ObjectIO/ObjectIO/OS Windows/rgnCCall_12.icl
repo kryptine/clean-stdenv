@@ -1,7 +1,7 @@
 implementation module rgnCCall_12
 
 
-from	ostoolbox	import OSToolbox
+from	ostoolbox	import :: OSToolbox
 
 
 ::	HRGN	:==  Int

@@ -11,8 +11,8 @@ definition module StdControlClass
 
 
 import	StdControlDef
-from	windowhandle	import ControlState
-from	StdPSt			import PSt, IOSt
+from	windowhandle	import :: ControlState
+from	StdPSt			import :: PSt, :: IOSt
 
 
 class Controls cdef where

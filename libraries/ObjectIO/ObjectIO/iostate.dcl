@@ -11,10 +11,10 @@ definition module iostate
 
 import	osactivaterequests, osdocumentinterface, osevent, osguishare, ossystem, ostime, ostypes
 import	devicefunctions, devicesystemstate
-from	processstack		import ProcessStack, ProcessShowState, ShowFlag, ProcessKind
-from	receivertable		import ReceiverTable
-from	roundrobin			import RR
-from	timertable			import TimerTable
+from	processstack		import :: ProcessStack, :: ProcessKind(..), :: ProcessShowState
+from	receivertable		import :: ReceiverTable
+from	roundrobin			import :: RR
+from	timertable			import :: TimerTable
 
 
 ::	*IOSt l

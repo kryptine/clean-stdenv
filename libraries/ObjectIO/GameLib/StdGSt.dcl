@@ -8,4 +8,4 @@ definition module StdGSt
 //	Modified: 7 Sept 2001 for Clean 2.0 (Peter Achten)
 //	********************************************************************************
 
-from gst import GSt, appGSt, accGSt, IdFun, St
+from gst import :: St, :: IdFun, accGSt, appGSt, :: GSt;

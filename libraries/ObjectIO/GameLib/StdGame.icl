@@ -11,7 +11,6 @@ from	windowcreate	import bufferDelayedEvents
 from	windowvalidate	import validateWindowId
 from	ostypes			import OSNoWindowPtr
 
-
 /* predefined bounds */
 BND_MAP_CODES      :== 1 << 30
 BND_STATIC_BOUNDS  :== 1 << 31

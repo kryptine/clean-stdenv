@@ -7,7 +7,7 @@ definition module osgame
 //	Modified: 7 Sept 2001 for Clean 2.0 (Peter Achten)
 //	********************************************************************************
 
-from	StdIOBasic	import Point2
+from	StdIOBasic	import :: Point2
 import	gamehandle, gameintrface_12, ostypes
 
 ::  OSGameData gs

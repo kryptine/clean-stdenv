@@ -3,8 +3,8 @@ definition module osdocumentinterface
 //	Clean object I/O library, version 1.2
 
 import	StdIOCommon
-from	menuCrossCall_12	import HMENU
-import ostoolbar, ostoolbox, ostypes
+from	menuCrossCall_12	import :: HMENU
+import	ostoolbar, ostoolbox, ostypes
 
 ::	OSDInfo
 	=	OSMDInfo !OSMDInfo

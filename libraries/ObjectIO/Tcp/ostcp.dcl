@@ -9,7 +9,7 @@ definition module ostcp
 
 import	StdMaybe
 import	StdTCPDef
-from	StdChannels	import Timeout, TimeoutReport
+from	StdChannels import :: Timeout
 import	tcp
 import	ostoolbox
 

@@ -5,8 +5,8 @@ import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	osevent, ospicture, osrgn, oswindow
 import	commondef, controldraw, controllayout, controlrelayout, controlresize, iostate, processstack, receiveraccess, receiverid, scheduler
 import	StdControlAttribute, StdWindowAttribute, windowaccess, windowclipstate, windowdispose, windowdraw, windowevent, windowupdate
-from	keyfocus		import setNoFocusItem, setNewFocusItem
-from	StdPSt			import accPIO
+from keyfocus import setNoFocusItem, setNewFocusItem
+from StdPSt import accPIO
 
 //import controls,quickdraw
 //import osutil

@@ -2,9 +2,9 @@ definition module menuCrossCall_12
 
 
 import	StdString
-from	StdIOCommon	import Modifiers
-from	ostoolbox	import OSToolbox
-from	ostypes		import HWND
+from	StdIOCommon	import :: Modifiers
+from	ostoolbox	import :: OSToolbox
+from	ostypes		import :: HWND
 
 
 ::	HITEM	:==  Int

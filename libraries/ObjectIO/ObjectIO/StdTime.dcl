@@ -9,8 +9,8 @@ definition module StdTime
 //	Modified: 7 September 2001 for Clean 2.0
 //	********************************************************************************
 
-from	StdOverloaded	import <
-from	ostick			import Tick
+from	StdOverloaded	import class <
+from	ostick			import :: Tick
 
 ::	Time
 	=	{	hours	:: !Int		// hours		(0-23)

@@ -2,8 +2,8 @@ implementation module StdMenuReceiver
 
 
 import	StdTuple, StdList
-import	StdReceiverAttribute, StdMenuElementClass, menuhandle
-from	commondef			import cselect, Cond
+import	StdReceiverAttribute, StdMenuElementClass, StdId, menuhandle
+from	commondef			import cselect, :: Cond
 from	receiveraccess		import newReceiverHandle, newReceiverHandle2
 
 

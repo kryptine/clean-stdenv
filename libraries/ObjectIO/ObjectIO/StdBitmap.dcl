@@ -11,12 +11,9 @@ definition module StdBitmap
 
 
 import	StdMaybe
-from	StdFile	import FileSystem,Files
+from	StdFile import class FileSystem
 import	osbitmap
 import	StdPicture
-//1.3
-export	FileSystem World
-//3.1
 
 openBitmap		:: !{#Char} !*env -> (!Maybe Bitmap,!*env)	| FileSystem env
 /*	openBitmap reads in a bitmap from file.

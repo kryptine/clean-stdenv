@@ -11,7 +11,7 @@ definition module StdPictureDef
 
 
 import	StdIOBasic
-from	osfont		import	Font
+from	osfont		import :: Font
 
 
 ::	Line2									// A line connects two points
