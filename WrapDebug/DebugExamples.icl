@@ -1,19 +1,32 @@
 /*
 	Examples of Debug behaviour
 
-	Version 1.0.3
+	Version 1.0.4
 	Ronny Wichers Schreur
 	ronny@cs.kun.nl
 */
-module Examples
+module DebugExamples
 
 import StdEnv
+import Debug
 
-/*
-	these examples use Ronny's syntax (->>, <<- and <<->>)
-	and options (see RWSDebug.icl)
-*/
-import RWSDebug
+// these examples use double arrow syntax (->>, <<- and <<->>)
+(<<-) infix 0 :: .a !.b -> .a
+(<<-) value debugValue
+	=	debugBefore debugValue show value
+
+(->>) infix 0 :: !.a .b -> .a
+(->>) value debugValue
+	=	debugAfter debugValue show value
+
+<<->> :: !.a -> .a
+<<->> value
+	=	debugValue show value
+
+// show function with debug options
+show
+	=	debugShowWithOptions
+			[DebugMaxChars 79, DebugMaxDepth 5, DebugMaxBreadth 20]
 
 // choose your example here
 Start
@@ -41,7 +54,7 @@ example3
 	=	<<->> "example3"
 
 /*
-	debugging also works with infinity values (provided you
+	debugging also works with infinite values (provided you
 	limit the debug output with the DebugMax... options)
 */
 example4
@@ -117,13 +130,13 @@ example11
 
 /* the following examples only work with Clean 2.0.2 or better */
 
-/*
+
 import StdStrictLists
 
 /*
 	debugging with strict lists, the strictness (head strict, tail
-	strict) doesn't appear in the output (strict list use the same
-	consructors as ordinary list
+	strict) doesn't appear in the output (strict lists use the same
+	constructors at run-time as ordinary list)
 */
 example12
 	=	"example12" <<- [! 1 .. 10 !]
@@ -143,4 +156,3 @@ example13
 example14
 	=	"example14" <<- [# {f = 1}, {f = 2} !]
 
-*/

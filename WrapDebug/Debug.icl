@@ -1,7 +1,7 @@
 /*
 	Debug functions.
 
-	Version 1.0.3
+	Version 1.0.4
 	Ronny Wichers Schreur
 	ronny@cs.kun.nl
 */
@@ -96,7 +96,6 @@ debugShowWithOptions debugOptions debugValue
 					=	{options & terminator=terminator}
 
 :: Indicators
-// MW 2.0 was:	=	...
 	=	@...
 	|	.+.
 
@@ -105,12 +104,11 @@ MaxCharsString
 MaxBreadthString
 	:== "..."
 MaxBreadthIndicator
-// MW 2.0 was:	:== wrapNode ...
 	:== wrapNode @...
 MaxDepthIndicator
 	:==	wrapNode .+.
 
-pruneWrappedNode :: !Int !Int !WrappedNode -> !WrappedNode
+pruneWrappedNode :: !Int !Int !WrappedNode -> WrappedNode
 pruneWrappedNode maxDepth maxBreadth value
 	=	prune 0 value
 	where
@@ -152,12 +150,7 @@ pruneWrappedNode maxDepth maxBreadth value
 			// otherwise
 				=	{prune (depth+1) e \\ e <-: a}
 
-//1.3
-		pruneBasicArray :: !Int !(a b) -> WrappedNode | Array .a & ArrayElem b
-//3.1
-/*2.0
 		pruneBasicArray :: !Int !(a b) -> WrappedNode | Array a b
-0.2*/
 		pruneBasicArray depth a
 			| size a > maxBreadth
 				=	WrappedArray (pruneArray depth {wrapNode e \\ e <-: a & i <- [0 .. maxBreadth]})

@@ -1,6 +1,12 @@
+1.0.4
+	- somewhat better output for unboxed lists
+    - removed RWSDebug module, it was just intended as an example interface
+    - removed Clean 1.3 compatibility
+    - renamed Examples to DebugExamples
 1.0.3
     - changed output for records (for example "{R | 1}" instead of "{R 1}")
-    - added support for wrapping unboxed lists, output for this could still be improved
+    - added support for wrapping unboxed lists, output for this could still be
+      improved
 1.0.2
     - Made Clean 2.0 compatible 
 1.0.1
