@@ -16,8 +16,8 @@ startCircuit :: !(GecCircuit a b) a *(PSt .ps) -> *PSt .ps
 
 // Lift visual editors to GecCircuit's
 
-edit 		:: String -> GecCircuit a a | gGEC{|*|}, generate{|*|} a
-display 	:: String -> GecCircuit a a | gGEC{|*|}, generate{|*|} a
+edit 		:: String -> GecCircuit a a | gGEC{|*|}/*, generate{|*|}*/ a
+display 	:: String -> GecCircuit a a | gGEC{|*|}/*, generate{|*|}*/ a
 gecMouse	:: String -> GecCircuit a MouseState					// Assign a mouse to a fresh window
 
 // Arrow instance for GecCircuit

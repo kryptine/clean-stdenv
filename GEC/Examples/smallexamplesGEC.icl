@@ -52,10 +52,6 @@ where
 
 derive generate Tree, GecComb, MyCounter, Up_Down, UpDown, DoubleCounter, BalancedTree, Rose, Euros, Pounds, BalancedNode
 
-generate{|GecCircuit|} ga gb trace stream 
-	# (b, trace, _, stream) = gb trace stream
-	= (arr \_ -> b, trace, \_ -> 0, stream)
-
 example_l1		= 	startCircuit (edit		"Simple List Editor")					[1]
 example_l2  	=	startCircuit (edit	"list" >>@ sum >>> edit "sum") 				[1..5]  									
 example_l4  	=	startCircuit (edit	"list" >>@ (\(a,b) ->  a + b) >>> edit "Sum List Elements") ([1..5],[5,4..1])			
