@@ -18,8 +18,10 @@ transform{|OBJECT|} gx (OBJECT x) = gx x
 transform{|Core|} srce = srce
 
 transform{|NTexpression|} (Term e) = transform{|*|} e
-transform{|NTexpression|} (Sugar e) = transform{|*|} (desugar e)
 transform{|NTexpression|} (Apply f x) = CoreApply (transform{|*|} f) (transform{|*|} x)
+
+transform{|NTterm|} (Plain e) = transform{|*|} e
+transform{|NTterm|} (Sugar e) = transform{|*|} (desugar e)
 
 transform{|NTnameOrValue|} (NTvalue d _) = CoreCode d
 transform{|NTnameOrValue|} (NTname y) = CoreVariable y
@@ -29,15 +31,15 @@ transform{|NTlambda|} (NTlambda t1 (+- ps) t2 e) = transformMatch ps (transform{
 transform{|NTlet|} (NTlet _ (+- ds) _ e) = transformLet Nothing (p, d`, e)
 where
 	(p, d) = combine ds
-	d` = CoreApply codeY (transform{|*|} (Term (Lambda (Scope (NTlambda Tlambda (+- [p]) Tarrow d)))))
+	d` = CoreApply codeY (transform{|*|} (Term (Plain (Lambda (Scope (NTlambda Tlambda (+- [p]) Tarrow d))))))
 
 	combine [NTletDef p _ d] = (p, d)
-	combine [d:ds] = (TuplePattern Topen p1` Tcomma (+- [p2]) Tclose, Sugar (Tuple Topen d1` Tcomma (+- [d2]) Tclose))
+	combine [d:ds] = (TuplePattern Topen p1` Tcomma (+- [p2]) Tclose, Term (Sugar (Tuple Topen d1` Tcomma (+- [d2]) Tclose)))
 	where
 		(p1`, d1`) = combine [d]
 		(p2, d2) = combine ds
 
-	transformLet Nothing (p, srcd, srce) = CoreApply (transform{|*|} (Term (Lambda (Scope (NTlambda Tlambda (+- [p]) Tarrow srce))))) (transform{|*|} srcd)
+	transformLet Nothing (p, srcd, srce) = CoreApply (transform{|*|} (Term (Plain (Lambda (Scope (NTlambda Tlambda (+- [p]) Tarrow srce)))))) (transform{|*|} srcd)
 
 transform{|NTcase|} (NTcase _ e` _ (+- as`)) = CoreApply (transformAlts as`) m
 where
@@ -50,7 +52,7 @@ transform{|(|-|)|} _ ge _ (|-| e) = ge e
 
 transform{|UNIT|} src = CoreCode (dynamic UNIT :: UNIT)
 
-derive transform NTterm, Scope, Tclose, Topen
+derive transform NTplain, Scope, Tclose, Topen
 
 transformMatch :: ![NTpattern] !e !e -> Core | transform{|*|} e
 transformMatch [] th _ = transform{|*|} th

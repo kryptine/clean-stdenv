@@ -180,15 +180,17 @@ where
 toStringDynamic d = prettyDynamic d
 
 prettyDynamic :: !Dynamic -> (![String], !String)
-prettyDynamic d = (v, removeForAll (typeCodeOfDynamic d))
+prettyDynamic d = (v, t)
 where
 	v = case d of 
 //		(x :: a -> b) -> ["<function>"]
-//		(x :: a -> b) -> debugShowWithOptions [DebugTerminator "", DebugClosures False] x
-		(x :: a) -> /*drop 35300*/ (debugShowWithOptions [DebugTerminator ""] x)
+		(x :: a -> b) -> debugShowWithOptions [DebugTerminator "", DebugMaxDepth 3, DebugMaxBreadth 2, DebugClosures False] x
+		(x :: a) -> (debugShowWithOptions [DebugTerminator ""] x)
 
-	removeForAll (TypeScheme _ t) = toString t
-	removeForAll t = toString t
+	t = removeForAll (typeCodeOfDynamic d)
+	where
+		removeForAll (TypeScheme _ t) = toString t
+		removeForAll t = toString t
 
 (<<-) infixl 0 :: .a !.b -> .a
 (<<-) value debugValue = debugBefore debugValue show value

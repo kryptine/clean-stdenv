@@ -57,39 +57,35 @@ resolveNames{|Scope|} ge (Scope e) vs st = (Scope e`, vs, st`)
 where
 	(e`, _, st`) = ge e vs st
 
-resolveNames{|NTexpression|} (Apply f x) vs st = (Apply f` x`, vs``, st``)
-where
-	(f`, vs`, st`) = resolveNames{|*|} f vs st
-	(x`, vs``, st``) = resolveNames{|*|} x vs` st`
-resolveNames{|NTexpression|} (Sugar e) vs st = (e`, vs`, st`)
+resolveNames{|NTterm|} (Sugar e) vs st = (Plain (Nested (|-| e`)), vs`, st`)
 where
 	(e`, vs`, st`) = resolveNames{|*|} (desugar e) vs st
-resolveNames{|NTexpression|} (Term e) vs st = (Term e`, vs`, st`)
+resolveNames{|NTterm|} (Plain e) vs st = (Plain e`, vs`, st`)
 where
 	(e`, vs`, st`) = resolveNames{|*|} e vs st
 
-derive resolveNames NTstatement, NTterm, NTsugar, NTlist, NTlambda, NTpattern, NTletDef, NTcase, NTcaseAlt, NTlistComprehension
+derive resolveNames NTstatement, NTexpression, NTsugar, NTplain, NTlist, NTlambda, NTpattern, NTletDef, NTcase, NTcaseAlt, NTlistComprehension
 derive resolveNames +-, |-|, [], Maybe, (,)
 
 desugar :: !NTsugar -> NTexpression
-desugar (Tuple _ e _ (+- es) _) = foldl (\f x -> Apply f (Nested (|-| x))) (Term (NameOrValue (NTvalue (dynamicTuple (length es`)) GenConsNoPrio))) es`
+desugar (Tuple _ e _ (+- es) _) = foldl (\f x -> Apply f (Plain (Nested (|-| x)))) (Term (Plain (NameOrValue (NTvalue (dynamicTuple (length es`)) GenConsNoPrio)))) es`
 where
 	es` = [e:es]
 desugar (List (|-| e)) = desugarList e
 where
-	desugarList (Cons hds Nothing) = desugarList (Cons hds (Just (Tcolon, Sugar (List (|-| Nil)))))
-	desugarList (Cons (+- [hd:hds]) (Just tl)) = Apply (Apply (Term (NameOrValue (NTvalue dynamicCons GenConsNoPrio))) (Nested (|-| hd))) (Nested (|-| (Sugar (List (|-| (Cons (+- hds) (Just tl)))))))
+	desugarList (Cons hds Nothing) = desugarList (Cons hds (Just (Tcolon, Term (Sugar (List (|-| Nil))))))
+	desugarList (Cons (+- [hd:hds]) (Just tl)) = Apply (Apply (Term (Plain (NameOrValue (NTvalue dynamicCons GenConsNoPrio)))) (Plain (Nested (|-| hd)))) (Plain (Nested (|-| (Term (Sugar (List (|-| (Cons (+- hds) (Just tl)))))))))
 	desugarList (Cons (+- []) (Just (_, tl))) = tl
-	desugarList Nil = Term (NameOrValue (NTvalue dynamicNil GenConsNoPrio))
+	desugarList Nil = Term (Plain (NameOrValue (NTvalue dynamicNil GenConsNoPrio)))
 	desugarList (ListComprehension c) = desugarListComprehension c
 	
 	desugarListComprehension (DotDot f t _ e) = desugarDotDot f t e
 	desugarListComprehension (ZF e _ qs) = raise "ZF not implemented"
 
-	desugarDotDot f Nothing Nothing = Apply (Term (NameOrValue (NTvalue dynamicFrom GenConsNoPrio))) (Nested (|-| f))
-	desugarDotDot f Nothing (Just e) = Apply (Apply (Term (NameOrValue (NTvalue dynamicFromTo GenConsNoPrio))) (Nested (|-| f))) (Nested (|-| e))
-	desugarDotDot f (Just (_, t)) Nothing = Apply (Apply (Term (NameOrValue (NTvalue dynamicFromThen GenConsNoPrio))) (Nested (|-| f))) (Nested (|-| t))
-	desugarDotDot f (Just (_, t)) (Just e) = Apply (Apply (Apply (Term (NameOrValue (NTvalue dynamicFromThenTo GenConsNoPrio))) (Nested (|-| f))) (Nested (|-| t))) (Nested (|-| e))
+	desugarDotDot f Nothing Nothing = Apply (Term (Plain (NameOrValue (NTvalue dynamicFrom GenConsNoPrio)))) (Plain (Nested (|-| f)))
+	desugarDotDot f Nothing (Just e) = Apply (Apply (Term (Plain (NameOrValue (NTvalue dynamicFromTo GenConsNoPrio)))) (Plain (Nested (|-| f)))) (Plain (Nested (|-| e)))
+	desugarDotDot f (Just (_, t)) Nothing = Apply (Apply (Term (Plain (NameOrValue (NTvalue dynamicFromThen GenConsNoPrio)))) (Plain (Nested (|-| f)))) (Plain (Nested (|-| t)))
+	desugarDotDot f (Just (_, t)) (Just e) = Apply (Apply (Apply (Term (Plain (NameOrValue (NTvalue dynamicFromThenTo GenConsNoPrio)))) (Plain (Nested (|-| f)))) (Plain (Nested (|-| t)))) (Plain (Nested (|-| e)))
 
 generic fixInfix e :: !e -> e
 
@@ -117,10 +113,10 @@ where
 		= case l of
 			(Apply ll lr=:(Value _ (GenConsPrio rightAssoc rightPrio)))
 				# ll = fixInfix{|*|} ll
-				  leftish = Apply (Apply (Term (fixInfix{|*|} lr)) (Nested (|-| ll))) (Nested (|-| (ap (Term r) es)))
+				  leftish = Apply (Apply (Term (fixInfix{|*|} lr)) (Plain (Nested (|-| ll)))) (Plain (Nested (|-| (ap (Term r) es))))
 				-> case ll of
 					Apply (Apply llll=:(Term (Value _ (GenConsPrio leftAssoc leftPrio))) lllr) llr
-						# rightish = Apply (Apply llll lllr) (Nested (|-| (Apply (Apply (Term (fixInfix{|*|} lr)) llr) r)))
+						# rightish = Apply (Apply llll lllr) (Plain (Nested (|-| (Apply (Apply (Term (fixInfix{|*|} lr)) llr) r))))
 						| rightPrio < leftPrio -> leftish
 						| leftPrio < rightPrio -> rightish
 						-> case (rightAssoc, leftAssoc) of
@@ -134,7 +130,7 @@ where
 	ap f [] = f
 	ap f [x:xs] = ap (Apply f x) xs
 
-Value d p :== NameOrValue (NTvalue d p)
+Value d p :== Plain (NameOrValue (NTvalue d p))
 
 derive fixInfix NTstatement, NTterm, NTsugar, NTlist, NTlistComprehension, NTlambda, NTpattern, NTlet, NTletDef, NTcase, NTcaseAlt
 derive fixInfix +-, |-|, [], Maybe, (,), Scope
