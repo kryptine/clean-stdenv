@@ -51,8 +51,7 @@ where
 example1 = startCircuit mycircuit2 [1..5]  // connecting two editors 
 where
 //	mycircuit  = edit "list" <<@ toBalTree >>> edit "balanced tree"
-//	mycircuit2 = edit "list" >>> arr toBalTree >>> edit "balanced tree" // alternative definition
-	mycircuit2 = edit "list" >>> arr toBalTree >>> edit "list" // alternative definition
+	mycircuit2 = edit "list" >>> arr toBalTree >>> edit "balanced tree" // alternative definition
 
 derive generate BalancedTree, BalancedNode
 
