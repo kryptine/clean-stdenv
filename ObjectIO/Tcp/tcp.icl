@@ -148,8 +148,13 @@ openTCP_ListenerC _ _
 
 data_availableC		::	!EndpointRef !*env -> (!Bool, !*env)
 // returns whether data is available
-data_availableC _ _
-	= code
+data_availableC er env
+	# (avail,env) = data_availableC er env
+	= (avail <> 0, env)
+where
+	data_availableC		::	!EndpointRef !*env -> (!Int, !*env)
+	data_availableC _ _
+		= code
 		{
 			ccall data_availableC "I:I:A"
 		}
@@ -230,8 +235,13 @@ setEndpointDataC _ _ _ _ _ _
 getEndpointDataC			::	!EndpointRef !*env -> (!(!Int, !Bool, !Bool, !Bool), !*env)
 // get the endpointRef data. result: referenceCount hasReceiveNotifier hasSendableNotifier aborted
 // if the item is already deallocated by the C side, then the returned values are undefined
-getEndpointDataC _ _
-	= code
+getEndpointDataC er env
+	# ((a,b,c,d),env) = getEndpointDataC er env
+	= ((a,b<>0,c<>0,d<>0),env)
+where
+	getEndpointDataC			::	!EndpointRef !*env -> (!(!Int, !Int, !Int, !Int), !*env)
+	getEndpointDataC _ _
+		= code
 		{
 			ccall getEndpointDataC "I:VIIII:A"
 		}
@@ -265,8 +275,13 @@ selectChC _ _ _ _ _ _ _
 
 tcpPossibleC		::	!*env -> (!Bool, !*env)	
 // whether tcp can be started up
-tcpPossibleC _
-	= code
+tcpPossibleC env
+	# (res,env)	= tcpPossibleC env
+	= (res<>0,env)
+where
+	tcpPossibleC		::	!*env -> (!Int, !*env)	
+	tcpPossibleC _
+		= code
 		{
 			ccall tcpPossibleC ":I:A"
 		}
