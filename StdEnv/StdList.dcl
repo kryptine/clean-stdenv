@@ -1,7 +1,7 @@
 definition module StdList
 
 //	****************************************************************************************
-//	Concurrent Clean Standard Library Module Version 2.0
+//	Concurrent Clean Standard Library Module Version 2.01
 //	Copyright 1998 University of Nijmegen
 //	****************************************************************************************
 
@@ -22,7 +22,7 @@ instance fromString [x] | fromChar x // Convert String via [Char] into [x]
 
 //	List Operators:
 
-(!!) 	infixl 9	:: ![.a] Int -> .a				//	Get nth element of the list
+(!!) 	infixl 9	:: ![.a] !Int -> .a				//	Get nth element of the list
 (++)	infixr 5	:: ![.a] u:[.a] -> u:[.a]		//	Append args
 flatten				:: ![[.a]] -> [.a]				//	e0 ++ e1 ++ ... ++ e##
 isEmpty				:: ![.a] -> Bool				//	[] ?
@@ -43,7 +43,7 @@ reverse		:: ![.a] -> [.a]							//	Reverse the list
 insert 		:: (a -> a -> .Bool) a !u:[a] -> u:[a]		//	Insert arg2 when pred arg2 elem holds   
 insertAt	:: !Int .a u:[.a] -> u:[.a]				//	Insert arg2 on position arg1 in list
 removeAt	:: !Int !u:[.a] -> u:[.a]				//	Remove arg2!!arg1 from list
-updateAt 	:: !Int .a u:[.a] -> u:[.a]				//	Replace list!!arg1 by arg2
+updateAt 	:: !Int .a !u:[.a] -> u:[.a]			//	Replace list!!arg1 by arg2
 splitAt		:: !Int u:[.a] -> ([.a],u:[.a])			//	(take n list,drop n list)
 
 //	Creating lists:

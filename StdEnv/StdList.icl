@@ -1,7 +1,7 @@
 implementation module StdList
 
 // ****************************************************************************************
-//	Concurrent Clean Standard Library Module Version 2.0
+//	Concurrent Clean Standard Library Module Version 2.01
 //	Copyright 1998 University of Nijmegen
 // ****************************************************************************************
 
@@ -81,7 +81,7 @@ instance fromString [x] | fromChar x
 // ****************************************************************************************
 // standard operators
 // ****************************************************************************************
-(!!) infixl 9::![.a] Int -> .a
+(!!) infixl 9::![.a] !Int -> .a
 (!!) [] _
 	= subscript_error
 (!!) list i
@@ -188,7 +188,7 @@ removeAt 0 [y : ys]	= ys
 removeAt n [y : ys]	= [y : removeAt (n-1) ys]
 removeAt n []		= []
 
-updateAt :: !Int .a u:[.a] -> u:[.a]
+updateAt :: !Int .a !u:[.a] -> u:[.a]
 updateAt 0 x []	= []
 updateAt 0 x [y:ys]	= [x:ys]
 updateAt _ x []	= []
