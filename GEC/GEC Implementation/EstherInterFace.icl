@@ -6,8 +6,8 @@ import EstherScript, EstherStdEnv
 
 /*MyEstherState world = 
 	{	searchPath	= [["."]]
-	,	searchCache	= []
-	,	buildin		= stdEnv
+//	,	searchCache	= []
+	,	builtin		= stdEnv
 	,	env			= world
 	}*/
 
