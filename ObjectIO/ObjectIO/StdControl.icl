@@ -8,10 +8,10 @@ implementation module StdControl
 
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	commondef, controlaccess, controlinternal, controlvalidate, id, iostate, StdControlClass, windowaccess, windowcontrols, wstate
-from	controllayout	import layoutControls
+from	controllayout	import calcControlsSize
 from	receiverid		import unbindRIds
 from	StdPSt			import appPIO
-from	windowclipstate	import invalidateWindowClipState`
+from	windowclipstate	import invalidateWindowClipState`, forceValidWindowClipState`
 from	wstateaccess	import iswindowitemspace`, getwindowitemspace`,
 								iswindowhmargin`,  getwindowhmargin`,
 								iswindowvmargin`,  getwindowvmargin`
@@ -153,7 +153,8 @@ controlSize cdef isWindow hMargins vMargins itemSpaces pState
 		  					(Just (hor,vert))	-> (max 0 hor,max 0 vert)
 		  					_					-> (wMetrics.osmHorItemSpace,wMetrics.osmVerItemSpace)
 	  domain			= {viewDomainRange & corner1=zero}
-	# (derSize,_,tb)	= layoutControls wMetrics hMargins vMargins itemSpaces zero zero [(domain,zero)] itemHs tb
+//	# (derSize,_,tb)	= layoutControls wMetrics hMargins vMargins itemSpaces zero zero [(domain,zero)] itemHs tb
+	# (derSize,tb)		= calcControlsSize wMetrics hMargins vMargins itemSpaces zero zero [(domain,zero)] itemHs tb
 	# ioState			= setIOToolbox tb ioState
 	# pState			= {pState & io=ioState}
 	= (derSize,pState)
@@ -451,7 +452,8 @@ hideControl id ioState = hideControls [id] ioState
 setControlsShowState` :: !Bool ![Id] !*WState -> *WState
 setControlsShowState` show ids wState=:{wIds,wRep,wTb,wMetrics}
 	# (wH,tb)	= setcontrolsshowstate ids show wMetrics wIds wRep wTb
-	  wH		= invalidateWindowClipState` wH
+//	  wH		= invalidateWindowClipState` wH
+	# (wH,tb)	= forceValidWindowClipState` wMetrics True wIds.wPtr wH tb
 	= {wState & wRep=wH,wTb=tb}
 
 

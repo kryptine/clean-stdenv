@@ -169,6 +169,13 @@ getWindowItemSpaces				:: !WindowKind !OSWindowMetrics ![WindowAttribute .st] ->
 			* the WindowHandles contain a matching non place holder entry
 			* the WindowHandles contain no matching place holder entry
 		In all of these cases, the function aborts.
+	addBehindWindowHandlesWindow adds a new window behind the indicated window (first argument).
+		If the indicated window is modal, then the new window is added behind the last modal dialogue.
+		The WIDS of the actual behind (window/modal dialogue) is returned.
+		Exceptions:
+			* the argument WindowStateHandle is a place holder
+			* the behind window could not be found.
+		In all of these cases, the function aborts.
 	addWindowHandlesWindow adds a new window at the indicated position.
 		If index<=0 then the new window is added at the front.
 		If index>#windows then the new window is added at the end.
@@ -183,6 +190,7 @@ hasWindowHandlesWindow				:: !WID								!(WindowHandles .pst) -> (!Bool,!Window
 getWindowHandlesWindow				:: !WID								!(WindowHandles .pst) -> (!Bool,!WindowStateHandle .pst,!WindowHandles .pst)
 removeWindowHandlesWindow			:: !WID								!(WindowHandles .pst) -> (!Bool,!WindowStateHandle .pst,!WindowHandles .pst)
 setWindowHandlesWindow				::        !(WindowStateHandle .pst)	!(WindowHandles .pst) -> WindowHandles .pst
+addBehindWindowHandlesWindow		:: !WID   !(WindowStateHandle .pst)	!(WindowHandles .pst) -> (!WIDS,!WindowHandles .pst)
 addWindowHandlesWindow				:: !Index !(WindowStateHandle .pst)	!(WindowHandles .pst) -> WindowHandles .pst
 addWindowHandlesActiveWindow		::        !(WindowStateHandle .pst) !(WindowHandles .pst) -> WindowHandles .pst
 

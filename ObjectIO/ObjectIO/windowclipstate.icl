@@ -33,21 +33,26 @@ where
 	where
 		createWElementClipState :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !Rect !(Maybe Id) !Bool !(WElementHandle .ls .pst) !OSRgnHandle !*OSToolbox
 																								  -> (!WElementHandle .ls .pst, !OSRgnHandle,!*OSToolbox)
-		createWElementClipState wMetrics allClipStates validate wPtr clipRect defId isVisible (WItemHandle itemH=:{wItemShow,wItemPos,wItemSize}) clipRgn tb
+		createWElementClipState wMetrics allClipStates validate wPtr clipRect defId isVisible (WItemHandle itemH=:{wItemShow,wItemKind,wItemPos,wItemSize}) clipRgn tb
 			| not itemVisible || DisjointRects clipRect (PosSizeToRect wItemPos wItemSize)
-				| not allClipStates || itemH.wItemKind<>IsCompoundControl
+				| not allClipStates || not (isRecursiveControl wItemKind)	// PA:<>IsCompoundControl
+					= (WItemHandle itemH,clipRgn,tb)
+				| wItemKind==IsLayoutControl								// PA: this alternative added
+					# clipRect				= PosSizeToRect wItemPos wItemSize
+					# (itemHs,clipRgn,tb)	= createWElementsClipState wMetrics allClipStates validate wPtr clipRect defId False itemH.wItems clipRgn tb
+					# itemH					= {itemH & wItems=itemHs}
 					= (WItemHandle itemH,clipRgn,tb)
 				| validate
-					# (itemH,tb)	= validateCompoundClipState wMetrics allClipStates wPtr defId itemVisible itemH tb
+					# (itemH,tb)			= validateCompoundClipState wMetrics allClipStates wPtr defId itemVisible itemH tb
 					= (WItemHandle itemH,clipRgn,tb)
 				// otherwise
-					# (itemH,tb)	= forceValidCompoundClipState wMetrics allClipStates wPtr defId itemVisible itemH tb
+					# (itemH,tb)			= forceValidCompoundClipState wMetrics allClipStates wPtr defId itemVisible itemH tb
 					= (WItemHandle itemH,clipRgn,tb)
 			| otherwise
-				# (itemH,clipRgn,tb)= createWItemClipState wMetrics allClipStates validate wPtr clipRect defId itemH clipRgn tb
+				# (itemH,clipRgn,tb)		= createWItemClipState wMetrics allClipStates validate wPtr clipRect defId itemH clipRgn tb
 				= (WItemHandle itemH,clipRgn,tb)
 		where
-			itemVisible				= isVisible && wItemShow
+			itemVisible						= isVisible && wItemShow
 			
 			createWItemClipState :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !Rect !(Maybe Id) !(WItemHandle .ls .pst) !OSRgnHandle !*OSToolbox
 																							 -> (!WItemHandle .ls .pst, !OSRgnHandle,!*OSToolbox)
@@ -152,21 +157,26 @@ where
 	where
 		createWElementClipState` :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !Rect !(Maybe Id) !Bool !WElementHandle` !OSRgnHandle !*OSToolbox
 																								  -> (!WElementHandle`,!OSRgnHandle,!*OSToolbox)
-		createWElementClipState` wMetrics allClipStates validate wPtr clipRect defId isVisible (WItemHandle` itemH=:{wItemShow`,wItemPos`,wItemSize`}) clipRgn tb
+		createWElementClipState` wMetrics allClipStates validate wPtr clipRect defId isVisible (WItemHandle` itemH=:{wItemShow`,wItemKind`,wItemPos`,wItemSize`}) clipRgn tb
 			| not itemVisible || DisjointRects clipRect (PosSizeToRect wItemPos` wItemSize`)
-				| not allClipStates || itemH.wItemKind`<>IsCompoundControl
+				| not allClipStates || not (isRecursiveControl wItemKind`)	// PA:<>IsCompoundControl
+					= (WItemHandle` itemH,clipRgn,tb)
+				| wItemKind`==IsLayoutControl								// PA: this alternative added
+					# clipRect				= PosSizeToRect wItemPos` wItemSize`
+					# (itemHs,clipRgn,tb)	= createWElementsClipState` wMetrics allClipStates validate wPtr clipRect defId False itemH.wItems` clipRgn tb
+					# itemH					= {itemH & wItems`=itemHs}
 					= (WItemHandle` itemH,clipRgn,tb)
 				| validate
-					# (itemH,tb)	= validateCompoundClipState` wMetrics allClipStates wPtr defId itemVisible itemH tb
+					# (itemH,tb)			= validateCompoundClipState` wMetrics allClipStates wPtr defId itemVisible itemH tb
 					= (WItemHandle` itemH,clipRgn,tb)
 				// otherwise
-					# (itemH,tb)	= forceValidCompoundClipState` wMetrics allClipStates wPtr defId itemVisible itemH tb
+					# (itemH,tb)			= forceValidCompoundClipState` wMetrics allClipStates wPtr defId itemVisible itemH tb
 					= (WItemHandle` itemH,clipRgn,tb)
 			| otherwise
-				# (itemH,clipRgn,tb)= createWItemClipState` wMetrics allClipStates validate wPtr clipRect defId itemH clipRgn tb
+				# (itemH,clipRgn,tb)		= createWItemClipState` wMetrics allClipStates validate wPtr clipRect defId itemH clipRgn tb
 				= (WItemHandle` itemH,clipRgn,tb)
 		where
-			itemVisible				= isVisible && wItemShow`
+			itemVisible						= isVisible && wItemShow`
 			
 			createWItemClipState` :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !Rect !(Maybe Id) !WItemHandle` !OSRgnHandle !*OSToolbox
 																							 -> (!WItemHandle`,!OSRgnHandle,!*OSToolbox)
@@ -298,7 +308,7 @@ where
 	validateclipstate wMetrics validate wPtr defaultId isVisible (WItemHandle` itemH=:{wItemKind`}) tb
 		| wItemKind`<>IsCompoundControl
 			| isRecursiveControl wItemKind`	// PA: added for LayoutControls
-				# (itemHs,tb)	= StateMap (validateclipstate wMetrics validate wPtr defaultId itemVisible) itemHs tb
+				# (itemHs,tb)	= StateMap (validateclipstate wMetrics validate wPtr defaultId itemVisible) itemH.wItems` tb
 				= (WItemHandle` {itemH & wItems`=itemHs},tb)
 			// otherwise
 				= (WItemHandle` itemH,tb)

@@ -434,9 +434,35 @@ IOStGetOSWindowMetrics ioState=:{ioshare} = (ioshare.iooswmetrics,ioState)
 IOStGetDeviceFunctions :: !(IOSt .l) -> (![DeviceFunctions (PSt .l)],!IOSt .l)
 IOStGetDeviceFunctions ioState=:{ioshare} = (ioshare.iodevicefuncs,ioState)
 
-IOStSetDeviceFunctions :: ![DeviceFunctions (PSt .l)] !(IOSt .l) -> IOSt .l
-IOStSetDeviceFunctions funcs ioState=:{ioshare} = {ioState & ioshare={ioshare & iodevicefuncs=funcs}}
+IOStSetDeviceFunctions :: !(DeviceFunctions (PSt .l)) !(IOSt .l) -> IOSt .l
+IOStSetDeviceFunctions funcs=:{dDevice} ioState=:{ioshare=ioshare=:{iodevicefuncs}}
+	= {ioState & ioshare={ioshare & iodevicefuncs=setdevicefunctions (priorityDevice dDevice) dDevice funcs iodevicefuncs}}
+where
+	setdevicefunctions :: !Int !Device !(DeviceFunctions .pst) ![DeviceFunctions .pst] -> [DeviceFunctions .pst]
+	setdevicefunctions p device funcs fs=:[dfunc=:{dDevice}:dfuncs]
+		| device==dDevice
+			= [funcs:dfuncs]
+		| p>priorityDevice dDevice
+			= [funcs:fs]
+		| otherwise
+			#! fs	= setdevicefunctions p device funcs dfuncs
+			= [dfunc:fs]
+	setdevicefunctions _ _ funcs _
+		= [funcs]
 
+IOStRemoveDeviceFunctions :: !Device !(IOSt .l) -> IOSt .l
+IOStRemoveDeviceFunctions device ioState=:{ioshare=ioshare=:{iodevicefuncs}}
+	= {ioState & ioshare={ioshare & iodevicefuncs=removedevicefunctions device iodevicefuncs}}
+where
+	removedevicefunctions :: !Device ![DeviceFunctions .pst] -> [DeviceFunctions .pst]
+	removedevicefunctions device [dfunc=:{dDevice}:dfuncs]
+		| device==dDevice
+			= dfuncs
+		| otherwise
+			#! dfuncs	= removedevicefunctions device dfuncs
+			= [dfunc:dfuncs]
+	removedevicefunctions _ empty
+		= empty
 
 //	Access to the DeviceSystemStates:
 
@@ -490,23 +516,22 @@ where
 
 IOStSetDevice :: !(DeviceSystemState (PSt .l)) !(IOSt .l) -> IOSt .l
 IOStSetDevice d ioState=:{ioshare=ioshare=:{iodevices}}
-	#! ds 		= devicesSetDevice priority d iodevices
+	#! device	= toDevice d
+	#! ds 		= devicesSetDevice (priorityDevice device) device d iodevices
 	#! ioshare	= {ioshare & iodevices=ds}
 	= {ioState & ioshare=ioshare}
 where
-	priority	= priorityDevice (toDevice d)
-	
-	devicesSetDevice :: !Int !(DeviceSystemState .ps) ![DeviceSystemState .ps] -> [DeviceSystemState .ps]
-	devicesSetDevice p dState2 ds=:[dState1:dStates]
+	devicesSetDevice :: !Int !Device !(DeviceSystemState .ps) ![DeviceSystemState .ps] -> [DeviceSystemState .ps]
+	devicesSetDevice p device dState2 ds=:[dState1:dStates]
 		# device1	= toDevice dState1
-		| device1==toDevice dState2
+		| device1==device
 			= [dState2:dStates]
 		| p>priorityDevice device1
 			= [dState2:ds]
 		| otherwise
-			#! ds	= devicesSetDevice p dState2 dStates
+			#! ds	= devicesSetDevice p device dState2 dStates
 			= [dState1:ds]
-	devicesSetDevice _ dState _
+	devicesSetDevice _ _ dState _
 		= [dState]
 
 // MW11..

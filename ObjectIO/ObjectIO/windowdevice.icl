@@ -19,7 +19,8 @@ windowdeviceFatalError function error
 
 WindowFunctions :: DeviceFunctions (PSt .l)
 WindowFunctions
-	= {	dShow	= id //windowShow not yet implemented
+	= {	dDevice	= WindowDevice
+	  ,	dShow	= id //windowShow not yet implemented
 	  ,	dHide	= id //windowHide not yet implemented
 	  ,	dEvent	= windowEvent
 	  ,	dDoIO	= windowIO
@@ -53,8 +54,7 @@ windowOpen pState=:{io=ioState}
 									  ,	whsFinalModalLS	= []
 									  }
 		# ioState					= IOStSetDevice (WindowSystemState windows) ioState
-		# (deviceFunctions,ioState)	= IOStGetDeviceFunctions ioState
-		# ioState					= IOStSetDeviceFunctions [WindowFunctions:deviceFunctions] ioState
+		# ioState					= IOStSetDeviceFunctions WindowFunctions ioState
 		= {pState & io=ioState}
 
 
@@ -66,34 +66,36 @@ windowOpen pState=:{io=ioState}
 */
 windowClose :: !(PSt .l) -> PSt .l
 windowClose pState=:{io=ioState}
-	# (found,wDevice,ioState)				= IOStGetDevice WindowDevice ioState
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
 		= {pState & io=ioState}
 	| otherwise
-		# (osdinfo,ioState)					= IOStGetOSDInfo ioState
-		  windows							= WindowSystemStateGetWindowHandles wDevice
-		# (inputTrack,ioState)				= IOStGetInputTrack ioState
-		# (tb,ioState)						= getIOToolbox ioState
-		# pState							= {pState & io=ioState}
+		# (osdinfo,ioState)		= IOStGetOSDInfo ioState
+		  windows				= WindowSystemStateGetWindowHandles wDevice
+		# (inputTrack,ioState)	= IOStGetInputTrack ioState
+		# (tb,ioState)			= getIOToolbox ioState
+		# pState				= {pState & io=ioState}
 		# (disposeInfo,(inputTrack,pState,tb))
-											= StateMap (disposeWindowStateHandle` osdinfo) windows.whsWindows (inputTrack,pState,tb)
-		# ioState							= setIOToolbox tb pState.io
-		# ioState							= IOStSetInputTrack inputTrack ioState
-		  (freeRIdss,freeIdss,_,finalLSs)	= unzip4 disposeInfo
-		  freeRIds							= flatten freeRIdss
-		  freeIds							= flatten freeIdss
-		  finalLSs							= flatten finalLSs
-		# ioState							= unbindRIds freeRIds ioState
-		# (idtable,ioState)					= IOStGetIdTable ioState
-		  (_,idtable)						= removeIdsFromIdTable (freeRIds++freeIds) idtable
-		# ioState							= IOStSetIdTable idtable ioState
-		  windows							= (\windows=:{whsFinalModalLS=finalLS}->{windows & whsWindows=[],whsFinalModalLS=finalLS++finalLSs}) windows
-		# ioState							= IOStSetDevice (WindowSystemState windows) ioState
-		# pState							= {pState & io=ioState}
+								= StateMap (disposeWindowStateHandle` osdinfo) windows.whsWindows (inputTrack,pState,tb)
+		# ioState				= setIOToolbox tb pState.io
+		# ioState				= IOStSetInputTrack inputTrack ioState
+		  (freeRIdss,freeIdss,_,finalLSs)
+		  						= unzip4 disposeInfo
+		  freeRIds				= flatten freeRIdss
+		  freeIds				= flatten freeIdss
+		  finalLSs				= flatten finalLSs
+		# ioState				= unbindRIds freeRIds ioState
+		# (idtable,ioState)		= IOStGetIdTable ioState
+		  (_,idtable)			= removeIdsFromIdTable (freeRIds++freeIds) idtable
+		# ioState				= IOStSetIdTable idtable ioState
+		  windows				= (\windows=:{whsFinalModalLS=finalLS}->{windows & whsWindows=[],whsFinalModalLS=finalLS++finalLSs}) windows
+		# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+	//	# ioState				= IOStRemoveDeviceFunction WindowDevice ioState		PA: it is not clear whether this should be done
+		# pState				= {pState & io=ioState}
 		= pState
 where
 	disposeWindowStateHandle` :: !OSDInfo !(WindowStateHandle (PSt .l)) !(!Maybe InputTrack,PSt .l,!*OSToolbox)
-				  -> ((![Id],![Id],![DelayActivationInfo],![FinalModalLS]),!(!Maybe InputTrack,PSt .l,!*OSToolbox))
+			   -> ((![Id],![Id],![DelayActivationInfo],![FinalModalLS]),!(!Maybe InputTrack,PSt .l,!*OSToolbox))
 	disposeWindowStateHandle` osdinfo wsH (inputTrack,state,tb)
 		# ((a,b,c,d,inputTrack),state,tb) = disposeWindowStateHandle osdinfo inputTrack wsH handleOSEvent state tb
 		= ((a,b,c,d),(inputTrack,state,tb))
@@ -1473,10 +1475,10 @@ windowStateScrollActionIO _ _ _ _
 windowStateSizeAction :: !OSWindowMetrics !Bool !WindowSizeActionInfo !(WindowStateHandle .pst) !*OSToolbox
 																   -> (!WindowStateHandle .pst, !*OSToolbox)
 windowStateSizeAction wMetrics isActive info=:{wsWIDS={wPtr},wsSize,wsUpdateAll} wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH}} tb
-	#  visScrolls		= OSscrollbarsAreVisible wMetrics domainRect (oldW,oldH) (hasHScroll,hasVScroll)
+	#  visScrolls		= OSscrollbarsAreVisible wMetrics domainRect oldSize` (hasHScroll,hasVScroll)
 	   oldContent		= getWindowContentRect wMetrics visScrolls (SizeToRect oldSize)
 	   oldContentSize	= RectSize oldContent
-	   visScrolls		= OSscrollbarsAreVisible wMetrics domainRect (newW,newH) (hasHScroll,hasVScroll)
+	   visScrolls		= OSscrollbarsAreVisible wMetrics domainRect newSize` (hasHScroll,hasVScroll)
 	   newContent		= getWindowContentRect wMetrics visScrolls (SizeToRect wsSize)
 	   newContentSize	= RectSize newContent
 	   newOrigin		= newOrigin oldOrigin domainRect newContentSize
@@ -1486,16 +1488,16 @@ windowStateSizeAction wMetrics isActive info=:{wsWIDS={wPtr},wsSize,wsUpdateAll}
 	   (replaced,atts)	= Replace isWindowViewSize resizedAtt wH.whAtts
 	   resizedAtts		= if replaced atts [resizedAtt:atts]
 	#! wH				= {wH & whSize=wsSize,whWindowInfo=newWindowInfo,whAtts=resizedAtts}
-	#  tb				= setWindowScrollThumbValues hasHScroll wMetrics wPtr True  (newContentSize.w+1) oldOrigin.x newOrigin.x (newW,newH) tb
-	#  tb				= setWindowScrollThumbValues hasVScroll wMetrics wPtr False (newContentSize.h+1) oldOrigin.y newOrigin.y (newW,newH) tb
+	#  tb				= setWindowScrollThumbValues hasHScroll wMetrics wPtr True  (newContentSize.w+1) oldOrigin.x newOrigin.x newSize` tb
+	#  tb				= setWindowScrollThumbValues hasVScroll wMetrics wPtr False (newContentSize.h+1) oldOrigin.y newOrigin.y newSize` tb
 	#  (wH,tb)			= resizeControls wMetrics isActive wsUpdateAll info.wsWIDS oldOrigin oldContentSize newContentSize wH tb
 	#! wlsH				= {wlsH & wlsHandle=wH}
 	   wsH				= {wsH & wshHandle=Just wlsH}
 	=  (wsH,tb)
 where
 	oldSize				= wH.whSize
-	(oldW,oldH)			= toTuple oldSize
-	(newW,newH)			= toTuple wsSize
+	oldSize`			= toTuple oldSize
+	newSize`			= toTuple wsSize
 	windowInfo			= getWindowInfoWindowData wH.whWindowInfo
 	(oldOrigin,domainRect,hasHScroll,hasVScroll)
 						= (windowInfo.windowOrigin,windowInfo.windowDomain,isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll)

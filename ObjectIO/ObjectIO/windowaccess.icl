@@ -480,6 +480,42 @@ where
 	setwindow _ _ _
 		= windowaccessFatalError "setWindowHandlesWindow" "place holder not found"
 
+addBehindWindowHandlesWindow :: !WID !(WindowStateHandle .pst) !(WindowHandles .pst) -> (!WIDS,!WindowHandles .pst)
+addBehindWindowHandlesWindow behindWID wsH wHs=:{whsWindows}
+	# (isPlaceHolder,wsH)	= isWindowStateHandlePlaceHolder wsH
+	| isPlaceHolder
+		= windowaccessFatalError "addBehindWindowHandlesWindow" "WindowStateHandle argument should not be a place holder"
+	| otherwise
+		# (behindWIDS,wsHs)	= stackBehind behindWID wsH whsWindows
+		= (behindWIDS,{wHs & whsWindows=wsHs})
+where
+	stackBehind :: !WID !(WindowStateHandle .pst) ![WindowStateHandle .pst] -> (!WIDS,![WindowStateHandle .pst])
+	stackBehind behindWID wsH [wsH`:wsHs]
+		# (wids`,wsH`)			= getWindowStateHandleWIDS wsH`
+		| not (identifyWIDS behindWID wids`)
+			# (behindWIDS,wsHs) = stackBehind behindWID wsH wsHs
+			= (behindWIDS,[wsH`:wsHs])
+		# (mode`,wsH`)	= getWindowStateHandleWindowMode wsH`
+		| mode`==Modal
+			# (behindWIDS,wsHs)	= stackBehindLastModal wsH wids` wsHs
+			= (behindWIDS,[wsH`:wsHs])
+		with
+			stackBehindLastModal :: !(WindowStateHandle .pst) !WIDS ![WindowStateHandle .pst] -> (!WIDS,![WindowStateHandle .pst])
+			stackBehindLastModal wsH behindModal [wsH`:wsHs]
+				# (wids`,wsH`)			= getWindowStateHandleWIDS wsH`
+				# (mode`,wsH`)			= getWindowStateHandleWindowMode wsH`
+				| mode`==Modal
+					# (modalWIDS,wsHs)	= stackBehindLastModal wsH wids` wsHs
+					= (modalWIDS,[wsH`:wsHs])
+				| otherwise
+					= (behindModal,[wsH,wsH`:wsHs])
+			stackBehindLastModal wsH behindModal _
+				= (behindModal,[wsH])
+		| otherwise
+			= (wids`,[wsH`,wsH:wsHs])
+	stackBehind _ _ _
+		= windowaccessFatalError "addBehindWindowHandlesWindow" "behind window could not be found"
+
 addWindowHandlesWindow :: !Index !(WindowStateHandle .pst) !(WindowHandles .pst) -> WindowHandles .pst
 addWindowHandlesWindow index wsH wHs=:{whsWindows}
 	#! wsHs	= insert (max 0 index) wsH whsWindows
