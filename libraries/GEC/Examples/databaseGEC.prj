@@ -1,7 +1,7 @@
 Version: 1.4
 Global
-	Built:	False
-	Target:	Everything Editor
+	Built:	True
+	Target:	Everything Editor +
 	Exec:	{Project}\databaseGEC.exe
 	CodeGen
 		CheckStacks:	False
@@ -20,8 +20,8 @@ Global
 		Profile
 			Memory:	False
 			MemoryMinimumHeapSize:	0
-			Time:	False
-			Stack:	False
+			Time:	True
+			Stack:	True
 		Output
 			Output:	NoConsole
 			Font:	Courier
@@ -71,8 +71,8 @@ MainModule
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
 	Module
-		Name:	updownGEC
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions
+		Name:	updownAGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GECExtensions
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -99,8 +99,8 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
-		Name:	tupleGEC
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions
+		Name:	tupleAGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GECExtensions
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -127,8 +127,8 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
-		Name:	buttonGEC
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions
+		Name:	buttonAGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GECExtensions
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -155,8 +155,8 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
-		Name:	modeGEC
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions
+		Name:	modeAGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GECExtensions
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -184,7 +184,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	basicAGEC
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GECExtensions
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4791,7 +4791,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	genericgecs
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4819,7 +4819,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	gec
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4847,7 +4847,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	guiloc
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4875,7 +4875,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	objectloc
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -4987,7 +4987,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	parseprint
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5155,7 +5155,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	guigecs
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5183,7 +5183,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdObjectIOExt
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5211,7 +5211,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ColourTextControl
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\objectioextensions
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC\ObjectIOExtensions
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5239,7 +5239,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdBimap
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5267,7 +5267,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	infragecs
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5295,7 +5295,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	testable
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02
+		Dir:	{Application}\Libraries\GAST_02
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5323,7 +5323,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	genLibTest
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02
+		Dir:	{Application}\Libraries\GAST_02
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5351,7 +5351,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	stdProperty
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02
+		Dir:	{Application}\Libraries\GAST_02
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5407,7 +5407,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	GenDefault
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5435,7 +5435,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	TRACE
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5463,7 +5463,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdGEC
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5491,7 +5491,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdGECExt
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5519,7 +5519,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdAGEC
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5547,7 +5547,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	store
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5575,7 +5575,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdGecComb
-		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Dir:	C:\Documents and Settings\Administrator\Desktop\StdGEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -5604,11 +5604,11 @@ OtherModules
 Static
 	Mods
 		Path:	{Project}\databaseGEC.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\updownGEC.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\tupleGEC.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\buttonGEC.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\modeGEC.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\basicAGEC.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GECExtensions\updownAGEC.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GECExtensions\tupleAGEC.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GECExtensions\buttonAGEC.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GECExtensions\modeAGEC.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GECExtensions\basicAGEC.icl
 		Path:	{Application}\Libraries\StdEnv 2.1.0\StdEnv.icl
 		Path:	{Application}\Libraries\StdEnv 2.1.0\StdBool.icl
 		Path:	{Application}\Libraries\StdEnv 2.1.0\StdOverloaded.icl
@@ -5771,38 +5771,38 @@ Static
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\timerdefaccess.icl
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\timerdevice.icl
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\timerevent.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\genericgecs.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\gec.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\guiloc.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\objectloc.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\genericgecs.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\gec.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\guiloc.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\objectloc.icl
 		Path:	{Application}\Libraries\Generics 0.2\GenEq.icl
 		Path:	{Application}\Libraries\StdEnv 2.1.0\StdGeneric.icl
 		Path:	{Application}\Libraries\Generics 0.2\GenPrint.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\parseprint.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\parseprint.icl
 		Path:	{Application}\Libraries\Generics 0.2\GenParse.icl
 		Path:	{Application}\Libraries\WrapDebug 1.0.4\Debug.icl
 		Path:	{Application}\Libraries\WrapDebug 1.0.4\Wrap.icl
 		Path:	{Application}\Libraries\WrapDebug 1.0.4\ShowWrapped.icl
 		Path:	{Application}\Libraries\StdEnv 2.1.0\StdDebug.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\guigecs.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\StdObjectIOExt.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\objectioextensions\ColourTextControl.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\StdBimap.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\infragecs.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02\testable.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02\genLibTest.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02\stdProperty.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\guigecs.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\StdObjectIOExt.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\ObjectIOExtensions\ColourTextControl.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\StdBimap.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\infragecs.icl
+		Path:	{Application}\Libraries\GAST_02\testable.icl
+		Path:	{Application}\Libraries\GAST_02\genLibTest.icl
+		Path:	{Application}\Libraries\GAST_02\stdProperty.icl
 		Path:	{Application}\Libraries\MersenneTwister 1.0.2\MersenneTwister.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GenDefault.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\TRACE.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\StdGEC.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\StdGECExt.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\StdAGEC.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\store.icl
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\StdGecComb.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GenDefault.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\TRACE.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\StdGEC.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\StdGECExt.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\StdAGEC.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\store.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\StdGecComb.icl
 	Objs
 		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\_startup0.o
-		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\_startup1.o
+		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\_startup1Trace.o
 		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\_startup2.o
 		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\_system.o
 		Path:	{Project}\Clean System Files\databaseGEC.o
@@ -5968,40 +5968,40 @@ Static
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\timerdefaccess.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\timerdevice.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\timerevent.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\genericgecs.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\gec.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\guiloc.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\objectloc.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\genericgecs.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\gec.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\guiloc.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\objectloc.o
 		Path:	{Application}\Libraries\Generics 0.2\Clean System Files\GenEq.o
 		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdGeneric.o
 		Path:	{Application}\Libraries\Generics 0.2\Clean System Files\GenPrint.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\guigecs.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\guigecs.o
 		Path:	{Application}\Libraries\Generics 0.2\Clean System Files\GenParse.o
 		Path:	{Application}\Libraries\WrapDebug 1.0.4\Clean System Files\Debug.o
 		Path:	{Application}\Libraries\WrapDebug 1.0.4\Clean System Files\Wrap.o
 		Path:	{Application}\Libraries\WrapDebug 1.0.4\Clean System Files\ShowWrapped.o
 		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdDebug.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\parseprint.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\StdObjectIOExt.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\objectioextensions\Clean System Files\ColourTextControl.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\StdBimap.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\infragecs.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02\Clean System Files\testable.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02\Clean System Files\genLibTest.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02\Clean System Files\stdProperty.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\parseprint.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\StdObjectIOExt.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\ObjectIOExtensions\Clean System Files\ColourTextControl.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\StdBimap.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\infragecs.o
+		Path:	{Application}\Libraries\GAST_02\Clean System Files\testable.o
+		Path:	{Application}\Libraries\GAST_02\Clean System Files\genLibTest.o
+		Path:	{Application}\Libraries\GAST_02\Clean System Files\stdProperty.o
 		Path:	{Application}\Libraries\MersenneTwister 1.0.2\Clean System Files\MersenneTwister.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\GenDefault.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\TRACE.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\StdGEC.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\StdGECExt.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\StdAGEC.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\Clean System Files\basicAGEC.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\Clean System Files\modeGEC.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\Clean System Files\buttonGEC.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\Clean System Files\tupleGEC.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\Clean System Files\updownGEC.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\store.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\StdGecComb.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\GenDefault.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\TRACE.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\StdGEC.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\StdGECExt.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\StdAGEC.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GECExtensions\Clean System Files\basicAGEC.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GECExtensions\Clean System Files\modeAGEC.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GECExtensions\Clean System Files\buttonAGEC.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GECExtensions\Clean System Files\tupleAGEC.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GECExtensions\Clean System Files\updownAGEC.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\store.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Clean System Files\StdGecComb.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCrossCallClipboard_121.obj
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCrossCallFileSelectors_121.obj
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCrossCallFont_121.obj
@@ -6062,7 +6062,13 @@ Static
 		Path:	{Application}\Libraries\WrapDebug 1.0.4
 		Path:	{Application}\Libraries\ExtendedArith 1.0.2\ExtendedArith 1.0.2
 		Path:	{Application}\Libraries\GameLib 1.2.4
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\objectioextensions
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02
+		Path:	{Application}\Libraries\GAST_02
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\GECExtensions
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\ObjectIOExtensions
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Hilde Source
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Hilde Source\Loes 0.2
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Hilde Source\OS Windows
+		Path:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Hilde Source\Parser combinators 2002
 	AppP:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.0
-	PrjP:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.0\Dynamic Applications\Gen Visual Editor\StdGEC\Examples
+	PrjP:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Examples

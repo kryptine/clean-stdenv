@@ -30,7 +30,7 @@ where
 											&& isDigit zipcode.[3]
 											&& isAlpha zipcode.[4]
 											&& isAlpha zipcode.[5] //|| zipcode==""
-example_db3	= CGEC (mkGEC "ListDisplay") (listGEC True initrecords) 
+example_db3	= CGEC (mkGEC "ListDisplay") (listAGEC True initrecords) 
 where
 	initrecords 	= [MyRecord]
 

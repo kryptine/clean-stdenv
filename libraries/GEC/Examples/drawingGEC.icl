@@ -4,7 +4,7 @@ import StdEnv
 import StdIO
 import genericgecs
 import StdAGEC
-import StdGecComb, basicAGEC, timedGEC
+import StdGecComb, basicAGEC, timedAGEC
 
 // TO TEST JUST REPLACE THE EXAMPLE NAME IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
 // ALL EXAMPLES HAVE TO BE OF FORM pst -> pst
@@ -47,8 +47,8 @@ example_draw pst
 	where
 
 		move ((initbox  <|> attr=:{x_offset},old),c) 
-		| ^^ x_offset <= 300	=  ((initbox  <|> {attr & x_offset=counterGEC(^^ x_offset + 5)},Hide (initbox  <|> attr)),	c)
-		| otherwise				=  ((initbox  <|> {attr & x_offset=counterGEC 100},Hide(initbox  <|> attr)),			c)
+		| ^^ x_offset <= 300	=  ((initbox  <|> {attr & x_offset=counterAGEC(^^ x_offset + 5)},Hide (initbox  <|> attr)),	c)
+		| otherwise				=  ((initbox  <|> {attr & x_offset=counterAGEC 100},Hide(initbox  <|> attr)),			c)
 
 		mydrawfun wid (pict,_) pst
 		# pst = appPIO (setWindowLook wid True (True,drawfun pict)) pst 
@@ -73,4 +73,4 @@ example_draw pst
 		initrecord	i j = (initstate i j,Hide (initstate (i-5) j))
 		initstate i j = initbox  <|> initattr i j
 		initbox  = Box {box_w=30,box_h=30}
-		initattr i j = {pen_colour=Black,pen_size=counterGEC 2,fill_colour=Red,x_offset=counterGEC i,y_offset=counterGEC j}
+		initattr i j = {pen_colour=Black,pen_size=counterAGEC 2,fill_colour=Red,x_offset=counterAGEC i,y_offset=counterAGEC j}

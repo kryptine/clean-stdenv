@@ -1,22 +1,34 @@
 implementation module basicAGEC
 
-import StdAGEC, modeGEC, buttonGEC, tupleGEC, updownGEC
+import StdAGEC, modeAGEC, buttonAGEC, tupleAGEC, updownAGEC
 
 // Identity 
 
-idGEC :: a -> AGEC a | gGEC {|*|} a 
-idGEC j 	= mkAGEC 	{	toGEC	= \i _ ->i
+idAGEC :: a -> AGEC a | gGEC {|*|} a 
+idAGEC j 	= mkAGEC 	{	toGEC	= \i _ ->i
 						,	fromGEC = id
 						,	value	= j
 						,	updGEC	= id
 						} "idGEC"
 
-hidGEC :: a -> AGEC a  // Just a store, does not require any GEC !
-hidGEC j 	= mkAGEC` 	{	toGEC	= \i _ -> Hide i
+hidAGEC :: a -> AGEC a  // Just a store, does not require any GEC !
+hidAGEC j 	= mkAGEC` 	{	toGEC	= \i _ -> Hide i
 						,	fromGEC = \(Hide i) -> i
 						,	value	= j
 						,	updGEC	= id
 						} "hidGEC"
+
+predAGEC :: (a -> Bool) a -> AGEC a | gGEC {|*|} a 
+predAGEC pred j = mkAGEC 	{	toGEC	= toPred
+							,	fromGEC = \(ni,oi) = ni
+							,	value	= j
+							,	updGEC	= \(ni,oi) -> test ni (^^ oi)
+							}  "predGEC"
+where
+	toPred ni Undefined          = (ni, hidAGEC ni)
+	toPred ni (Defined (oi,hoi)) = test ni oi
+
+	test ni oi = if (pred ni) (ni, hidAGEC ni) (oi, hidAGEC oi)
 
 // apply GEC
 
@@ -35,8 +47,8 @@ where
 
 // convert mode to agec
 
-modeGEC :: (Mode a) -> AGEC a | gGEC {|*|} a
-modeGEC mode =  mkAGEC 	{ toGEC 	= mkmode mode
+modeAGEC :: (Mode a) -> AGEC a | gGEC {|*|} a
+modeAGEC mode =  mkAGEC 	{ toGEC 	= mkmode mode
 						, fromGEC 	= demode
 						, updGEC 	= id
 						, value 	= demode mode} "modeGEC"
@@ -53,8 +65,8 @@ where
 
 // Integer with up down counter
 
-counterGEC :: a -> AGEC a | gGEC {|*|} a & IncDec a
-counterGEC j = mkAGEC 	{	toGEC	= \i _ ->(i,Neutral)
+counterAGEC :: a -> AGEC a | gGEC {|*|} a & IncDec a
+counterAGEC j = mkAGEC 	{	toGEC	= \i _ ->(i,Neutral)
 						,	fromGEC = fst
 						,	value	= j
 						,	updGEC	= updateCounter
@@ -67,15 +79,15 @@ where
 
 // All elements of a list shown in a row
 
-horlistGEC :: [a] -> AGEC [a] | gGEC {|*|} a  
-horlistGEC  list	= mkAGEC	{	toGEC	= tohorlist
+horlistAGEC :: [a] -> AGEC [a] | gGEC {|*|} a  
+horlistAGEC  list	= mkAGEC	{	toGEC	= tohorlist
 								,	fromGEC = fromhorlist
 								,	value 	= list
 								,	updGEC	= id
 								}  ("horlistGEC" +++ len)
 where
-	tohorlist []	 _ = EmptyMode <-> hidGEC []
-	tohorlist [x:xs] _ = Edit x    <-> horlistGEC xs
+	tohorlist []	 _ = EmptyMode <-> hidAGEC []
+	tohorlist [x:xs] _ = Edit x    <-> horlistAGEC xs
 
 	fromhorlist (EmptyMode <-> xs) = []  
 	fromhorlist (Edit x <-> xs)    = [x: ^^ xs]  
@@ -85,8 +97,8 @@ where
 
 // All elements of a list shown in a column
 
-vertlistGEC :: [a] -> AGEC [a] | gGEC {|*|} a  
-vertlistGEC  list = vertlistGEC` list
+vertlistAGEC :: [a] -> AGEC [a] | gGEC {|*|} a  
+vertlistAGEC  list = vertlistGEC` list
 where
 	vertlistGEC` list = mkAGEC	{	toGEC	= tovertlist
 									,	fromGEC = fromvertlist
@@ -94,7 +106,7 @@ where
 									,	updGEC	= id
 									} ("vertlistGEC" +++ len)
 
-	tovertlist []	 _ 	= EmptyMode <|> hidGEC []
+	tovertlist []	 _ 	= EmptyMode <|> hidAGEC []
 	tovertlist [x:xs] _ = Edit x    <|> vertlistGEC` xs
 
 	fromvertlist (EmptyMode <|> xs)	= []  
@@ -118,8 +130,8 @@ derive gGEC Actions,Action
 			|	Choose	
 
 
-listGEC :: Bool [a] -> AGEC [a] | gGEC {|*|} a  
-listGEC finite list  
+listAGEC :: Bool [a] -> AGEC [a] | gGEC {|*|} a  
+listAGEC finite list  
 	= 	mkAGEC	{	toGEC	= mkdisplay
 				,	fromGEC = \(_,Hide (_,(list,_))) -> list
 				,	value 	= list
@@ -134,7 +146,7 @@ where
 	mklistEditor list i = 	 list!!ni <|> 
 							 mkaction ni  
 	where
-		mkaction nr			= {	element_nr 	= counterGEC nr
+		mkaction nr			= {	element_nr 	= counterAGEC nr
 							  , goto		= (Button "0",Button (toString next))
 							  , actions 	= Choose 
 							  }
@@ -173,24 +185,24 @@ where
 
 // All elements of a list shown in a column
 
-tableGEC :: [[a]] -> AGEC [[a]] | gGEC {|*|} a  
-tableGEC  list		= mkAGEC	{	toGEC	= \newlist -> mktable newlist
+table_hv_AGEC :: [[a]] -> AGEC [[a]] | gGEC {|*|} a  
+table_hv_AGEC  list		= mkAGEC	{	toGEC	= \newlist -> mktable newlist
 								,	fromGEC = \table   -> mklist (^^ table)
 								,	value 	= list
 								,	updGEC	= id
 								} "tableGEC"
 where
-	mktable list	  _ = vertlistGEC [(horlistGEC xs) \\ xs <- list]
+	mktable list	  _ = vertlistAGEC [(horlistAGEC xs) \\ xs <- list]
 	mklist  []			= []	
 	mklist  [hor:hors]	= [^^ hor: mklist hors]	
 
-tableGEC2 :: [[a]] -> AGEC [[a]] | gGEC {|*|} a  
-tableGEC2  list		= mkAGEC	{	toGEC	= \newlist -> mktable newlist
+table_vh_AGEC :: [[a]] -> AGEC [[a]] | gGEC {|*|} a  
+table_vh_AGEC  list		= mkAGEC	{	toGEC	= \newlist -> mktable newlist
 								,	fromGEC = \table   -> mklist (^^ table)
 								,	value 	= list
 								,	updGEC	= id
 								} "tableGEC"
 where
-	mktable list	  _ = horlistGEC [(vertlistGEC xs) \\ xs <- list]
+	mktable list	  _ = horlistAGEC [(vertlistAGEC xs) \\ xs <- list]
 	mklist  []			= []	
 	mklist  [hor:hors]	= [^^ hor: mklist hors]	

@@ -23,11 +23,11 @@ Start world
 	 
 derive gGEC T
 
-testX = CGEC (selfGEC "self" test) (C1 (counterGEC 0))
+testX = CGEC (selfGEC "self" test) (C1 (counterAGEC 0))
 where
-	 test (C1 igec) = C1 (counterGEC ((^^ igec) + 5))
-//	 test (C1 igec) = C2 (counterGEC (toReal (^^ igec)))
-	 test (C2 rgec) = C1 (counterGEC (toInt (^^ rgec)))
+	 test (C1 igec) = C1 (counterAGEC ((^^ igec) + 5))
+//	 test (C1 igec) = C2 (counterAGEC (toReal (^^ igec)))
+	 test (C2 rgec) = C1 (counterAGEC (toInt (^^ rgec)))
 
 :: T` = C1` Int
 	  | C2` Real
@@ -42,11 +42,11 @@ where
 
 testbetsy = CGEC (selfGEC "self" mytestje) (mydata 5)
 where
-	mydata i = i <|> horlistGEC (repeatn i i)
+	mydata i = i <|> horlistAGEC (repeatn i i)
 	mytestje (i <|> _) = mydata i
 
 
-test12 = CGEC (gecEdit "Editor") (hidGEC 1)
+test12 = CGEC (gecEdit "Editor") (hidAGEC 1)
 
 // paper stuf
 
@@ -121,11 +121,11 @@ fromCounter (n,_) = n
 
 toMyEditRecord2 :: (MyRecord2 a) -> (MyEditRecord2 a) | IncDec a & gGEC {|*|} a 
 toMyEditRecord2 edrec = 	{ MyEditRecord2 |
-							  edvalue1	= idGEC edrec.MyRecord2.value1
-							, edvalue2	= idGEC edrec.MyRecord2.value2
-//							, edvalue2	= doubleCounterGEC edrec.MyRecord2.value2
-//							, edvalue2	= idGEC edrec.MyRecord2.value2
-							, edsum		= modeGEC (Display edrec.MyRecord2.sum)
+							  edvalue1	= idAGEC edrec.MyRecord2.value1
+							, edvalue2	= idAGEC edrec.MyRecord2.value2
+//							, edvalue2	= doubleCounterAGEC edrec.MyRecord2.value2
+//							, edvalue2	= idAGEC edrec.MyRecord2.value2
+							, edsum		= modeAGEC (Display edrec.MyRecord2.sum)
 							}
 
 
@@ -139,12 +139,12 @@ test25 = CGEC (selfGEC "self" (toMyEditRecord2 o updRecord o fromMyEditRecord2))
 												(toMyEditRecord2 (initRecord2 22 23))
 
 
-doubleCounterGEC :: a -> AGEC a | IncDec a & gGEC {|*|} a 
-doubleCounterGEC a = mkAGEC    { toGEC   = toEditRec //\arg _ -> toMyEditRecord21 (toMyData arg)
+doubleCounterAGEC :: a -> AGEC a | IncDec a & gGEC {|*|} a 
+doubleCounterAGEC a = mkAGEC    { toGEC   = toEditRec //\arg _ -> toMyEditRecord21 (toMyData arg)
 							, fromGEC = fromMyData o fromMyEditRecord2
 							, updGEC  = toMyEditRecord21 o updRecord o fromMyEditRecord2
 							, value   = a
-							} "doubleCounterGEC"
+							} "doubleCounterAGEC"
 							where 
 							 toMyData n 	= initRecord2 zero n
 							 toEditRec arg Undefined = toMyEditRecord21 (toMyData arg)
@@ -153,9 +153,9 @@ doubleCounterGEC a = mkAGEC    { toGEC   = toEditRec //\arg _ -> toMyEditRecord2
 
 toMyEditRecord21 :: (MyRecord2 a) -> (MyEditRecord2 a) | IncDec a & gGEC {|*|} a 
 toMyEditRecord21 edrec = 	{ MyEditRecord2 |
-							  edvalue1	= counterGEC edrec.MyRecord2.value1
-							, edvalue2	= counterGEC edrec.MyRecord2.value2
-							, edsum		= modeGEC (Display edrec.MyRecord2.sum)
+							  edvalue1	= counterAGEC edrec.MyRecord2.value1
+							, edvalue2	= counterAGEC edrec.MyRecord2.value2
+							, edsum		= modeAGEC (Display edrec.MyRecord2.sum)
 							}
 
 
@@ -166,26 +166,26 @@ toMyEditRecord21 edrec = 	{ MyEditRecord2 |
 test0 = CGEC (gecEdit "test") mylist
 where
 	mylist :: AGEC [[Int]]
-	mylist = tableGEC [list\\j <- list] where list = []
+	mylist = table_vh_AGEC [list\\j <- list] where list = []
 test1 = CGEC mycgec 23
 test2 = CGEC (AGECtoCGEC "test" (CGECtoAGEC mycgec 27)) 23
 test3 = CGEC (gecEdit "test") (CGECtoAGEC (selfGEC "self" inc) 22)
 test4 = CGEC (gecEdit "test") { inout = (Edit 1,Display 1) , gec = gecDisplay "circuit"}
 
-mycgec = (AGECtoCGEC "test" (counterGEC 0))
+mycgec = (AGECtoCGEC "test" (counterAGEC 0))
 
 
 				
-test6 = CGEC (selfGEC "self" incsum) 	{ field1	= counterGEC 0
-							  			, field2	= counterGEC 0
-							  			, sum 		= idGEC 0}
+test6 = CGEC (selfGEC "self" incsum) 	{ field1	= counterAGEC 0
+							  			, field2	= counterAGEC 0
+							  			, sum 		= idAGEC 0}
 where
 	incsum rec = {rec & MyRecord.sum = rec.MyRecord.sum ^= (^^ rec.field1 + ^^ rec.field2)}
 
 			
 test5 = CGEC (%| (test @| gecEdit "test" |@ (^^)) ) 23
 where
-	test n = if (isEven n) (counterGEC n) (idGEC n)
+	test n = if (isEven n) (counterAGEC n) (idAGEC n)
 
 :: MyRecord a =  { field1:: AGEC a
 				 , field2:: AGEC a

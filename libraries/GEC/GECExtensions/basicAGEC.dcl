@@ -2,19 +2,19 @@ definition module basicAGEC
 
 import StdClass
 import StdAGEC
-import modeGEC, buttonGEC, tupleGEC, updownGEC
+import modeAGEC, buttonAGEC, tupleAGEC, updownAGEC
 
 // examples of abstract editors
 
-idGEC 			:: a   					-> AGEC a 		| gGEC {|*|} a				// identity editor  
-hidGEC 			:: a 					-> AGEC a 		 							// identity, no editor created
-//constGEC 		:: a 					-> AGEC a 					 				// identity, no editor created, constant
-modeGEC 		:: (Mode a) 			-> AGEC a 		| gGEC {|*|} a				// convert Mode to AGEC
+idAGEC 			:: a   					-> AGEC a 		| gGEC {|*|} a				// identity editor  
+hidAGEC 		:: a 					-> AGEC a 		 							// identity, no editor created
+predAGEC 		:: (a -> Bool) a 		-> AGEC a 		| gGEC {|*|} a 				// id editor only accepts values satifying the given predicate
+modeAGEC 		:: (Mode a) 			-> AGEC a 		| gGEC {|*|} a				// convert Mode to AGEC
 applyAGEC 		:: (b -> a) (AGEC b) 	-> AGEC a 		| gGEC {|*|} a & gGEC {|*|} b // apply fba; show both b and a
-counterGEC		:: a					-> AGEC a		| gGEC {|*|} a & IncDec a 
-horlistGEC 		:: [a] 					-> AGEC [a]		| gGEC {|*|} a 				// all elements of a list displayed in a row
-vertlistGEC 	:: [a] 					-> AGEC [a] 	| gGEC {|*|} a 				// all elements of a list displayed in a column
-listGEC 		:: Bool [a] 			-> AGEC [a] 	| gGEC {|*|} a				// list editor, set True for finite lists  
-tableGEC 		:: [[a]] 				-> AGEC [[a]] 	| gGEC {|*|} a  			// horizontal lists placed below each other
-tableGEC2 		:: [[a]] 				-> AGEC [[a]] 	| gGEC {|*|} a  			// vertical lists placed next to each other
+counterAGEC		:: a					-> AGEC a		| gGEC {|*|} a & IncDec a 
+horlistAGEC 	:: [a] 					-> AGEC [a]		| gGEC {|*|} a 				// all elements of a list displayed in a row
+vertlistAGEC 	:: [a] 					-> AGEC [a] 	| gGEC {|*|} a 				// all elements of a list displayed in a column
+listAGEC 		:: Bool [a] 			-> AGEC [a] 	| gGEC {|*|} a				// list editor, set True for finite lists  
+table_hv_AGEC	:: [[a]] 				-> AGEC [[a]] 	| gGEC {|*|} a  			// horizontal lists placed below each other
+table_vh_AGEC	:: [[a]] 				-> AGEC [[a]] 	| gGEC {|*|} a  			// vertical lists placed next to each other
 
