@@ -3224,7 +3224,7 @@ void EvalCcRqCREATEEDITTXT (CrossCallInfo *pcci) /* hwnd, x,y,w,h, flags; HWND r
 	if (isml)
 		style |= ES_AUTOVSCROLL | ES_MULTILINE | ES_WANTRETURN;
 	else
-		style |= ES_AUTOHSCROLL | ES_MULTILINE;
+		style |= ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_MULTILINE;
 
 	handle = CreateWindowEx (WS_EX_CLIENTEDGE,
 							 "edit",
