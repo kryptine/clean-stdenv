@@ -35,6 +35,8 @@ CLEAN_MODULES_ABC = $(CLEAN_MODULES:%=Clean\ System\ Files/%.abc)
 
 SYSTEM_MODULES_ABC = $(SYSTEM_MODULES:%=Clean\ System\ Files/%.abc)
 
+SYSTEM_MODULES_ICL = $(SYSTEM_MODULES:%=%.icl)
+
 ABC_MODULES_ABC = $(ABC_MODULES:%=Clean\ System\ Files/%.abc)
 
 CLEAN_MODULES_O = $(CLEAN_MODULES:%=Clean\ System\ Files/%.o)
@@ -271,7 +273,7 @@ Clean\ System\ Files/_system.o : Clean\ System\ Files/_system.abc
 system_abc: $(SYSTEM_MODULES_ABC) system_abc_touch
 
 system_abc_touch:
-	touch $(SYSTEM_MODULES_ABC)
+	touch $(SYSTEM_MODULES_ICL)
 	$(MAKE) system_abc_again
 
 system_abc_again: $(SYSTEM_MODULES_ABC)
