@@ -144,6 +144,7 @@ where
 	modeSetValue ahandle upd (Edit a) 		=  ahandle.gecSetValue upd a
 	modeSetValue ahandle upd (Display a) 	=  ahandle.gecSetValue upd a
 	modeSetValue ahandle upd (Hide a) 		=  ahandle.gecSetValue upd a
+	modeSetValue ahandle upd (EmptyMode) 	=  \pst 	=  pst
 
 	aupdate reason na pst = modeupdate reason (Display na) pst
 
@@ -160,6 +161,7 @@ where
 	modeSetValue ahandle upd (Edit a) 		=  ahandle.gecSetValue upd a
 	modeSetValue ahandle upd (Display a) 	=  ahandle.gecSetValue upd a
 	modeSetValue ahandle upd (Hide a) 		=  ahandle.gecSetValue upd a
+	modeSetValue ahandle upd (EmptyMode) 	=  \pst 	=  pst
 
 	aupdate reason na pst = modeupdate reason (Edit na) pst
 
@@ -377,14 +379,19 @@ where
 // convert mode to agec
 
 modeGEC :: (Mode a) -> AGEC a | gGEC {|*|} a
-modeGEC mode =  mkAGEC 	{ toGEC = \a _ -> mode
-						, fromGEC = demode
-						, updGEC = id
-						, value = demode mode}
+modeGEC mode =  mkAGEC 	{ toGEC 	= mkmode mode
+						, fromGEC 	= demode
+						, updGEC 	= id
+						, value 	= demode mode}
 where
 	demode (Display a) = a
 	demode (Edit a) =  a
 	demode (Hide a) =  a
+
+	mkmode (Display om) nm Undefined = Display nm
+	mkmode (Edit om)    nm Undefined = Edit nm
+	mkmode (Hide om)    nm Undefined = Hide nm
+	mkmode mode nm         (Defined om) = mkmode mode nm Undefined
 
 // All elements of a list shown in a row
 

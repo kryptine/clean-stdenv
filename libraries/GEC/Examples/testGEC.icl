@@ -15,8 +15,16 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	test5
+ 	test25
  	world  
+
+testbetsy = CGEC (selfGEC "self" mytestje) (mydata 5)
+where
+	mydata i = i <|> horlistGEC (repeatn i i)
+	mytestje (i <|> _) = mydata i
+
+
+test12 = CGEC (gecEdit "Editor") (hidGEC 1)
 
 // paper stuf
 
@@ -31,40 +39,41 @@ updateCounter (n,UpPressed) 	= (n+one,UpPressed)
 updateCounter (n,DownPressed) 	= (n-one,DownPressed)
 updateCounter (n,any)	 	 	= (n,any)
 
-:: MyRecord2 a = { rfield1::  a
-				 , rfield2::  a
-				 , rsum::  a
+:: MyRecord2 a = { value1::  a
+				 , value2::  a
+				 , sum   ::  a
 				 }
 
-initRecord2 a b = { rfield1 =  a
-				 , rfield2 =  b
-				 , rsum =  a+b
-				 }				 
+initRecord2 a b = { value1 =  a
+				  , value2 =  b
+				  , sum    =  a+b
+				  }				 
 
 updRecord :: (MyRecord2 a) -> (MyRecord2 a) | IncDec a
 updRecord rec = { rec
-			 	& rsum  = rec.rfield1 +  rec.rfield2
+			 	& MyRecord2.sum  = rec.value1 +  rec.value2
 			 	}
 
 test23 = CGEC (selfGEC "self" updRecord) (initRecord2 0 0)
 
 // basic example with counters
 
-:: MyEditRecord a = { efield1	:: MCounter a
-					, efield2	:: MCounter a
-					, esum		:: Mode a
+:: MyEditRecord a = { edvalue1	:: MCounter a
+					, edvalue2	:: MCounter a
+					, edsum		:: Mode a
 					}
 
 toMyEditRecord :: (MyRecord2 a) -> (MyEditRecord a)
-toMyEditRecord edrec = 	{ efield1	= toCounter edrec.rfield1
-						, efield2	= toCounter edrec.rfield2
-						, esum		= toDisplay edrec.rsum
+toMyEditRecord edrec = 	{ MyEditRecord |
+						  edvalue1	= toCounter edrec.MyRecord2.value1
+						, edvalue2	= toCounter edrec.MyRecord2.value2
+						, edsum		= toDisplay edrec.MyRecord2.sum
 						}
 
 fromMyEditRecord :: (MyEditRecord a) -> (MyRecord2 a) | IncDec a
-fromMyEditRecord rec = 	{ rfield1	= fromCounter (updateCounter rec.efield1)
-						, rfield2	= fromCounter (updateCounter rec.efield2)
-						, rsum		= fromDisplay rec.esum
+fromMyEditRecord rec = 	{ value1	= fromCounter (updateCounter rec.MyEditRecord.edvalue1)
+						, value2	= fromCounter (updateCounter rec.MyEditRecord.edvalue2)
+						, sum		= fromDisplay rec.MyEditRecord.edsum
 						}
 
 test24 = CGEC (selfGEC "self" (toMyEditRecord o updRecord o fromMyEditRecord)) (toMyEditRecord (initRecord2 0 0))
@@ -83,29 +92,49 @@ fromCounter (n,_) = n
 	
 // basic example with AGECs
 						
-:: MyEditRecord2 a = { afield1	:: AGEC a
-					, afield2	:: AGEC a
-					, asum		:: AGEC a
-					}
+:: MyEditRecord2 a = { edvalue1	:: AGEC a
+					 , edvalue2	:: AGEC a
+					 , edsum	:: AGEC a
+					 }
 
 toMyEditRecord2 :: (MyRecord2 a) -> (MyEditRecord2 a) | IncDec a & gGEC {|*|} a 
-toMyEditRecord2 edrec = 	{ afield1	= counterGEC edrec.rfield1
-							, afield2	= counterGEC edrec.rfield2
-							, asum		= idGEC edrec.rsum
+toMyEditRecord2 edrec = 	{ MyEditRecord2 |
+							  edvalue1	= idGEC edrec.MyRecord2.value1
+							, edvalue2	= idGEC edrec.MyRecord2.value2
+//							, edvalue2	= doubleCounterGEC edrec.MyRecord2.value2
+//							, edvalue2	= idGEC edrec.MyRecord2.value2
+							, edsum		= modeGEC (Display edrec.MyRecord2.sum)
 							}
+
 
 fromMyEditRecord2 :: (MyEditRecord2 a) -> (MyRecord2 a)
-fromMyEditRecord2 rec = 	{ rfield1	= ^^ rec.afield1
-							, rfield2	= ^^ rec.afield2
-							, rsum		= ^^ rec.asum
+fromMyEditRecord2 rec = 	{ value1	= ^^ rec.MyEditRecord2.edvalue1
+							, value2	= ^^ rec.MyEditRecord2.edvalue2
+							, sum		= ^^ rec.MyEditRecord2.edsum
 							}
 
-test25 = CGEC (selfGEC "self" (toMyEditRecord2 o updRecord o fromMyEditRecord2)) (toMyEditRecord2 (initRecord2 0 0))
+test25 = CGEC (selfGEC "self" (toMyEditRecord2 o updRecord o fromMyEditRecord2)) 
+												(toMyEditRecord2 (initRecord2 22 23))
 
 
+doubleCounterGEC :: a -> AGEC a | IncDec a & gGEC {|*|} a 
+doubleCounterGEC a = mkAGEC    { toGEC   = toEditRec //\arg _ -> toMyEditRecord21 (toMyData arg)
+							, fromGEC = fromMyData o fromMyEditRecord2
+							, updGEC  = toMyEditRecord21 o updRecord o fromMyEditRecord2
+							, value   = a
+							}
+							where 
+							 toMyData n 	= initRecord2 zero n
+							 toEditRec arg Undefined = toMyEditRecord21 (toMyData arg)
+							 toEditRec arg (Defined oarg) = oarg
+							 fromMyData rec = rec.MyRecord2.sum
 
-
-
+toMyEditRecord21 :: (MyRecord2 a) -> (MyEditRecord2 a) | IncDec a & gGEC {|*|} a 
+toMyEditRecord21 edrec = 	{ MyEditRecord2 |
+							  edvalue1	= counterGEC edrec.MyRecord2.value1
+							, edvalue2	= counterGEC edrec.MyRecord2.value2
+							, edsum		= modeGEC (Display edrec.MyRecord2.sum)
+							}
 
 
 
@@ -129,7 +158,7 @@ test6 = CGEC (selfGEC "self" incsum) 	{ field1	= counterGEC 0
 							  			, field2	= counterGEC 0
 							  			, sum 		= idGEC 0}
 where
-	incsum rec = {rec & sum = rec.sum ^= (^^ rec.field1 + ^^ rec.field2)}
+	incsum rec = {rec & MyRecord.sum = rec.MyRecord.sum ^= (^^ rec.field1 + ^^ rec.field2)}
 
 			
 test5 = CGEC (gecEdit "test") (counterCGEC 23)
