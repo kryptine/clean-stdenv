@@ -1,138 +1,108 @@
 implementation module xmenu;
 
-AddMenuBar :: !Int -> Int;
-AddMenuBar _
-	= code {
-		.inline AddMenuBar
-			ccall add_menu_bar "I-I"
-		.end
-	};
+//1.3
+from StdString import String;
+//3.1
 
-AddMenu :: !Int !{#Char} -> Int;
-AddMenu _ _
-	= code {
-		.inline AddMenu
-			ccall add_menu "IS-I"
-		.end
-	};
 
-AddSubMenu :: !Int !{#Char} -> Int;
-AddSubMenu _ _
-	= code {
-		.inline AddSubMenu
-			ccall add_sub_menu "IS-I"
-		.end
-	};
+add_menu_bar :: !Int -> Int;
+add_menu_bar a0 = code {
+	ccall add_menu_bar "I:I"
+}
+// int add_menu_bar (int);
 
-AddCheckItem :: !Int !{#Char} !Int -> Int;
-AddCheckItem _ _ _
-	= code {
-		.inline AddCheckItem
-			ccall add_check_item "ISI-I"
-		.end
-	};
+add_menu :: !Int !{#Char} -> Int;
+add_menu a0 a1 = code {
+	ccall add_menu "IS:I"
+}
+// int add_menu (int,CleanString);
 
-AddMenuSeparator :: !Int -> Int;
-AddMenuSeparator _
-	= code {
-		.inline AddMenuSeparator
-			ccall add_menu_separator "I-I"
-		.end
-	};
+add_sub_menu :: !Int !{#Char} -> Int;
+add_sub_menu a0 a1 = code {
+	ccall add_sub_menu "IS:I"
+}
+// int add_sub_menu (int,CleanString);
 
-AddMenuItem :: !Int !{#Char} -> Int;
-AddMenuItem _ _
-	= code {
-		.inline AddMenuItem
-			ccall add_menu_item "IS-I"
-		.end
-	};
+add_check_item :: !Int !{#Char} !Int -> Int;
+add_check_item a0 a1 a2 = code {
+	ccall add_check_item "ISI:I"
+}
+// int add_check_item (int,CleanString,int);
 
-EnableMenuWidgetX :: !Int -> Int;
-EnableMenuWidgetX _
-	= code {
-		.inline EnableMenuWidgetX
-			ccall enable_menu_widget "I-I"
-		.end
-	};
+add_menu_separator :: !Int -> Int;
+add_menu_separator a0 = code {
+	ccall add_menu_separator "I:I"
+}
+// int add_menu_separator (int);
 
-DisableMenuWidgetX :: !Int -> Int;
-DisableMenuWidgetX _
-	= code {
-		.inline DisableMenuWidgetX
-			ccall disable_menu_widget "I-I"
-		.end
-	};
+add_menu_item :: !Int !{#Char} -> Int;
+add_menu_item a0 a1 = code {
+	ccall add_menu_item "IS:I"
+}
+// int add_menu_item (int,CleanString);
 
-CheckWidget :: !Int !Int -> Int;
-CheckWidget _ _
-	= code {
-		.inline CheckWidget
-			ccall check_widget "II-I"
-		.end
-	};
+enable_menu_widget :: !Int -> Int;
+enable_menu_widget a0 = code {
+	ccall enable_menu_widget "I:I"
+}
+// int enable_menu_widget (int);
 
-SetWidgetTitle :: !Int !{#Char} -> Int;
-SetWidgetTitle _ _
-	= code {
-		.inline SetWidgetTitle
-			ccall set_widget_title "IS-I"
-		.end
-	};
+disable_menu_widget :: !Int -> Int;
+disable_menu_widget a0 = code {
+	ccall disable_menu_widget "I:I"
+}
+// int disable_menu_widget (int);
 
-InstallShortcut :: !Int !{#Char} -> Int;
-InstallShortcut _ _
-	= code {
-		.inline InstallShortcut
-			ccall install_shortcut "IS-I"
-		.end
-	};
+check_widget :: !Int !Int -> Int;
+check_widget a0 a1 = code {
+	ccall check_widget "II:I"
+}
+// int check_widget (int,int);
 
-HideMenuX :: !Int -> Int;
-HideMenuX _
-	= code {
-		.inline HideMenuX
-			ccall hide_menu "I-I"
-		.end
-	};
+set_widget_title :: !Int !{#Char} -> Int;
+set_widget_title a0 a1 = code {
+	ccall set_widget_title "IS:I"
+}
+// int set_widget_title (int,CleanString);
 
-ShowMenuX :: !Int -> Int;
-ShowMenuX _
-	= code {
-		.inline ShowMenuX
-			ccall show_menu "I-I"
-		.end
-	};
+install_shortcut :: !Int !{#Char} -> Int;
+install_shortcut a0 a1 = code {
+	ccall install_shortcut "IS:I"
+}
+// int install_shortcut (int,CleanString);
 
-GetItemInfo :: !Int -> (!Int,!Int,!{#Char},!{#Char});
-GetItemInfo _
-	= code {
-		.inline GetItemInfo
-			ccall get_item_info "I-IISS"
-		.end
-	};
+hide_menu :: !Int -> Int;
+hide_menu a0 = code {
+	ccall hide_menu "I:I"
+}
+// int hide_menu (int);
 
-GetSubmenuInfo :: !Int -> (!{#Char},!Int);
-GetSubmenuInfo _
-	= code {
-		.inline GetSubmenuInfo
-			ccall get_submenu_info "I-SI"
-		.end
-	};
+show_menu :: !Int -> Int;
+show_menu a0 = code {
+	ccall show_menu "I:I"
+}
+// int show_menu (int);
 
-DestroyItemWidget :: !Int -> Int;
-DestroyItemWidget _
-	= code {
-		.inline DestroyItemWidget
-			ccall destroy_item_widget "I-I"
-		.end
-	};
+get_item_info :: !Int -> (!Int,!Int,!String,!String);
+get_item_info a0 = code {
+	ccall get_item_info "I:VIISS"
+}
+// void get_item_info (int,int*,int*,CleanString*,CleanString*);
 
-DestroyMenu :: !Int -> Int;
-DestroyMenu _
-	= code {
-		.inline DestroyMenu
-			ccall destroy_menu "I-I"
-		.end
-	};
+get_submenu_info :: !Int -> (!String,!Int);
+get_submenu_info a0 = code {
+	ccall get_submenu_info "I:VSI"
+}
+// void get_submenu_info (int,CleanString*,int*);
 
+destroy_item_widget :: !Int -> Int;
+destroy_item_widget a0 = code {
+	ccall destroy_item_widget "I:I"
+}
+// int destroy_item_widget (int);
+
+destroy_menu :: !Int -> Int;
+destroy_menu a0 = code {
+	ccall destroy_menu "I:I"
+}
+// int destroy_menu (int);

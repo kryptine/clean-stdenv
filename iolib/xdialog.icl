@@ -1,322 +1,246 @@
 implementation module xdialog;
 
-XCreateCommandDialog :: !{#Char} !Int !Int !Int -> Int;
-XCreateCommandDialog _ _ _ _
-	= code {
-		.inline XCreateCommandDialog
-			ccall create_commanddial "SIII-I"
-		.end
-	};
+//1.3
+from StdString import String;
+//3.1
 
-XCreatePropertyDialog :: !{#Char} !Int !Int -> Int;
-XCreatePropertyDialog _ _ _
-	= code {
-		.inline XCreatePropertyDialog
-			ccall create_propertydial "SII-I"
-		.end
-	};
 
-XCreateDialButton :: !Int !Int !Int !Int !Int !{#Char} -> Int;
-XCreateDialButton _ _ _ _ _ _
-	= code {
-		.inline XCreateDialButton
-			ccall add_dialog_button "IIIIIS-I"
-		.end
-	};
+create_commanddial :: !{#Char} !Int !Int !Int -> Int;
+create_commanddial a0 a1 a2 a3 = code {
+	ccall create_commanddial "SIII:I"
+}
+// int create_commanddial (CleanString,int,int,int);
 
-XCreateStaticText :: !Int !Int !Int !Int !Int !{#Char} -> Int;
-XCreateStaticText _ _ _ _ _ _
-	= code {
-		.inline XCreateStaticText
-			ccall add_static_text "IIIIIS-I"
-		.end
-	};
+create_propertydial :: !{#Char} !Int !Int -> Int;
+create_propertydial a0 a1 a2 = code {
+	ccall create_propertydial "SII:I"
+}
+// int create_propertydial (CleanString,int,int);
 
-XCreateEditText :: !Int !Int !Int !Int !Int !Int !{#Char} -> Int;
-XCreateEditText _ _ _ _ _ _ _
-	= code {
-		.inline XCreateEditText
-			ccall add_edit_text "IIIIIIS-I"
-		.end
-	};
+add_dialog_button :: !Int !Int !Int !Int !Int !{#Char} -> Int;
+add_dialog_button a0 a1 a2 a3 a4 a5 = code {
+	ccall add_dialog_button "IIIIIS:I"
+}
+// int add_dialog_button (int,int,int,int,int,CleanString);
 
-XCreateRadioGroup :: !Int !Int !Int !Int !Int !Int !Int -> Int;
-XCreateRadioGroup _ _ _ _ _ _ _
-	= code {
-		.inline XCreateRadioGroup
-			ccall add_dialog_exclusives "IIIIIII-I"
-		.end
-	};
+add_static_text :: !Int !Int !Int !Int !Int !{#Char} -> Int;
+add_static_text a0 a1 a2 a3 a4 a5 = code {
+	ccall add_static_text "IIIIIS:I"
+}
+// int add_static_text (int,int,int,int,int,CleanString);
 
-XCreateDialogPopup :: !Int !Int !Int !Int !Int -> Int;
-XCreateDialogPopup _ _ _ _ _
-	= code {
-		.inline XCreateDialogPopup
-			ccall add_dialog_popup "IIIII-I"
-		.end
-	};
+add_edit_text :: !Int !Int !Int !Int !Int !Int !{#Char} -> Int;
+add_edit_text a0 a1 a2 a3 a4 a5 a6 = code {
+	ccall add_edit_text "IIIIIIS:I"
+}
+// int add_edit_text (int,int,int,int,int,int,CleanString);
 
-XGetPopupEx :: !Int -> Int;
-XGetPopupEx _
-	= code {
-		.inline XGetPopupEx
-			ccall get_popup_ex "I-I"
-		.end
-	};
+add_dialog_exclusives :: !Int !Int !Int !Int !Int !Int !Int -> Int;
+add_dialog_exclusives a0 a1 a2 a3 a4 a5 a6 = code {
+	ccall add_dialog_exclusives "IIIIIII:I"
+}
+// int add_dialog_exclusives (int,int,int,int,int,int,int);
 
-XCorrectPopupSize :: !Int -> Int;
-XCorrectPopupSize _
-	= code {
-		.inline XCorrectPopupSize
-			ccall correct_popup_size "I-I"
-		.end
-	};
+add_dialog_popup :: !Int !Int !Int !Int !Int -> Int;
+add_dialog_popup a0 a1 a2 a3 a4 = code {
+	ccall add_dialog_popup "IIIII:I"
+}
+// int add_dialog_popup (int,int,int,int,int);
 
-XCreateDialogRadioItem :: !Int !Int !{#Char} !Int -> Int;
-XCreateDialogRadioItem _ _ _ _
-	= code {
-		.inline XCreateDialogRadioItem
-			ccall add_dialog_radiob "IISI-I"
-		.end
-	};
+get_popup_ex :: !Int -> Int;
+get_popup_ex a0 = code {
+	ccall get_popup_ex "I:I"
+}
+// int get_popup_ex (int);
 
-XCreateCheckGroup :: !Int !Int !Int !Int !Int !Int !Int -> Int;
-XCreateCheckGroup _ _ _ _ _ _ _
-	= code {
-		.inline XCreateCheckGroup
-			ccall add_dialog_nonexclusives "IIIIIII-I"
-		.end
-	};
+correct_popup_size :: !Int -> Int;
+correct_popup_size a0 = code {
+	ccall correct_popup_size "I:I"
+}
+// int correct_popup_size (int);
 
-XCreateDialogCheckItem :: !Int !Int !{#Char} !Int -> Int;
-XCreateDialogCheckItem _ _ _ _
-	= code {
-		.inline XCreateDialogCheckItem
-			ccall add_dialog_checkb "IISI-I"
-		.end
-	};
+add_dialog_radiob :: !Int !Int !{#Char} !Int -> Int;
+add_dialog_radiob a0 a1 a2 a3 = code {
+	ccall add_dialog_radiob "IISI:I"
+}
+// int add_dialog_radiob (int,int,CleanString,int);
 
-XCreateDialogControl :: !Int !Int !Int !Int !Int !Int !Int !Int -> Int;
-XCreateDialogControl _ _ _ _ _ _ _ _
-	= code {
-		.inline XCreateDialogControl
-			ccall add_dialog_control "IIIIIIII-I"
-		.end
-	};
+add_dialog_nonexclusives :: !Int !Int !Int !Int !Int !Int !Int -> Int;
+add_dialog_nonexclusives a0 a1 a2 a3 a4 a5 a6 = code {
+	ccall add_dialog_nonexclusives "IIIIIII:I"
+}
+// int add_dialog_nonexclusives (int,int,int,int,int,int,int);
 
-XSetCommandDefault :: !Int !Int -> Int;
-XSetCommandDefault _ _
-	= code {
-		.inline XSetCommandDefault
-			ccall set_command_default "II-I"
-		.end
-	};
+add_dialog_checkb :: !Int !Int !{#Char} !Int -> Int;
+add_dialog_checkb a0 a1 a2 a3 = code {
+	ccall add_dialog_checkb "IISI:I"
+}
+// int add_dialog_checkb (int,int,CleanString,int);
 
-XGetEditText :: !Int -> {#Char};
-XGetEditText _
-	= code {
-		.inline XGetEditText
-			ccall get_edit_text "I-S"
-		.end
-	};
+add_dialog_control :: !Int !Int !Int !Int !Int !Int !Int !Int -> Int;
+add_dialog_control a0 a1 a2 a3 a4 a5 a6 a7 = code {
+	ccall add_dialog_control "IIIIIIII:I"
+}
+// int add_dialog_control (int,int,int,int,int,int,int,int);
 
-XSetEditText :: !Int !{#Char} -> Int;
-XSetEditText _ _
-	= code {
-		.inline XSetEditText
-			ccall set_edit_text "IS-I"
-		.end
-	};
+set_command_default :: !Int !Int -> Int;
+set_command_default a0 a1 = code {
+	ccall set_command_default "II:I"
+}
+// int set_command_default (int,int);
 
-XSetStaticText :: !Int !{#Char} -> Int;
-XSetStaticText _ _
-	= code {
-		.inline XSetStaticText
-			ccall set_static_text "IS-I"
-		.end
-	};
+get_edit_text :: !Int -> {#Char};
+get_edit_text a0 = code {
+	ccall get_edit_text "I:S"
+}
+// CleanString get_edit_text (int);
 
-XGetMark :: !Int -> Int;
-XGetMark _
-	= code {
-		.inline XGetMark
-			ccall get_mark "I-I"
-		.end
-	};
+set_edit_text :: !Int !{#Char} -> Int;
+set_edit_text a0 a1 = code {
+	ccall set_edit_text "IS:I"
+}
+// int set_edit_text (int,CleanString);
 
-XPressRadioWidget :: !Int !{#Char} -> Int;
-XPressRadioWidget _ _
-	= code {
-		.inline XPressRadioWidget
-			ccall press_radio_widget "IS-I"
-		.end
-	};
+set_static_text :: !Int !{#Char} -> Int;
+set_static_text a0 a1 = code {
+	ccall set_static_text "IS:I"
+}
+// int set_static_text (int,CleanString);
 
-GetXDialogEvent :: !Int -> (!Int,!Int);
-GetXDialogEvent _
-	= code {
-		.inline GetXDialogEvent
-			ccall get_dialog_event "I-II"
-		.end
-	};
+get_mark :: !Int -> Int;
+get_mark a0 = code {
+	ccall get_mark "I:I"
+}
+// int get_mark (int);
 
-XPopupModal :: !Int -> Int;
-XPopupModal _
-	= code {
-		.inline XPopupModal
-			ccall popup_modaldialog "I-I"
-		.end
-	};
+press_radio_widget :: !Int !{#Char} -> Int;
+press_radio_widget a0 a1 = code {
+	ccall press_radio_widget "IS:I"
+}
+// int press_radio_widget (int,CleanString);
 
-XPopupModeless :: !Int -> Int;
-XPopupModeless _
-	= code {
-		.inline XPopupModeless
-			ccall popup_modelessdialog "I-I"
-		.end
-	};
+get_dialog_event :: !Int -> (!Int,!Int);
+get_dialog_event a0 = code {
+	ccall get_dialog_event "I:VII"
+}
+// void get_dialog_event (int,int*,int*);
 
-XCreateNotice :: !{#Char} -> Int;
-XCreateNotice _
-	= code {
-		.inline XCreateNotice
-			ccall create_notice "S-I"
-		.end
-	};
+popup_modaldialog :: !Int -> Int;
+popup_modaldialog a0 = code {
+	ccall popup_modaldialog "I:I"
+}
+// int popup_modaldialog (int);
 
-XCreateAboutDialog :: !Int !Int !Int !Int !Int !{#Char} -> Int;
-XCreateAboutDialog _ _ _ _ _ _
-	= code {
-		.inline XCreateAboutDialog
-			ccall create_about_dialog "IIIIIS-I"
-		.end
-	};
+popup_modelessdialog :: !Int -> Int;
+popup_modelessdialog a0 = code {
+	ccall popup_modelessdialog "I:I"
+}
+// int popup_modelessdialog (int);
 
-XCreateNoticeButton :: !Int !{#Char} !Int -> Int;
-XCreateNoticeButton _ _ _
-	= code {
-		.inline XCreateNoticeButton
-			ccall add_n_button "ISI-I"
-		.end
-	};
+create_notice :: !{#Char} -> Int;
+create_notice a0 = code {
+	ccall create_notice "S:I"
+}
+// int create_notice (CleanString);
 
-XHandleNotice :: !Int -> Int;
-XHandleNotice _
-	= code {
-		.inline XHandleNotice
-			ccall handle_notice "I-I"
-		.end
-	};
+create_about_dialog :: !Int !Int !Int !Int !Int !{#Char} -> Int;
+create_about_dialog a0 a1 a2 a3 a4 a5 = code {
+	ccall create_about_dialog "IIIIIS:I"
+}
+// int create_about_dialog (int,int,int,int,int,CleanString);
 
-XBeep :: !Int -> Int;
-XBeep _
-	= code {
-		.inline XBeep
-			ccall beep "I-I"
-		.end
-	};
+add_n_button :: !Int !{#Char} !Int -> Int;
+add_n_button a0 a1 a2 = code {
+	ccall add_n_button "ISI:I"
+}
+// int add_n_button (int,CleanString,int);
 
-XGetCurrentRect :: !Int -> (!Int,!Int,!Int,!Int);
-XGetCurrentRect _
-	= code {
-		.inline XGetCurrentRect
-			ccall get_current_rect "I-IIII"
-		.end
-	};
+handle_notice :: !Int -> Int;
+handle_notice a0 = code {
+	ccall handle_notice "I:I"
+}
+// int handle_notice (int);
 
-XRepositionWidget :: !Int !Int !Int !Int !Int -> Int;
-XRepositionWidget _ _ _ _ _
-	= code {
-		.inline XRepositionWidget
-			ccall repos_widget "IIIII-I"
-		.end
-	};
+beep :: !Int -> Int;
+beep a0 = code {
+	ccall beep "I:I"
+}
+// int beep (int);
 
-XGetFatherWidth :: !Int -> Int;
-XGetFatherWidth _
-	= code {
-		.inline XGetFatherWidth
-			ccall get_father_width "I-I"
-		.end
-	};
+get_current_rect :: !Int -> (!Int,!Int,!Int,!Int);
+get_current_rect a0 = code {
+	ccall get_current_rect "I:VIIII"
+}
+// void get_current_rect (int,int*,int*,int*,int*);
 
-XSetDialogMargins :: !Int !Int !Int -> Int;
-XSetDialogMargins _ _ _
-	= code {
-		.inline XSetDialogMargins
-			ccall set_dialog_margins "III-I"
-		.end
-	};
+repos_widget :: !Int !Int !Int !Int !Int -> Int;
+repos_widget a0 a1 a2 a3 a4 = code {
+	ccall repos_widget "IIIII:I"
+}
+// int repos_widget (int,int,int,int,int);
 
-XMMToPixelHor :: !Real -> Int;
-XMMToPixelHor _
-	= code {
-		.inline XMMToPixelHor
-			ccall mm_to_pixel_hor "R-I"
-		.end
-	};
+get_father_width :: !Int -> Int;
+get_father_width a0 = code {
+	ccall get_father_width "I:I"
+}
+// int get_father_width (int);
 
-XMMToPixelVer :: !Real -> Int;
-XMMToPixelVer _
-	= code {
-		.inline XMMToPixelVer
-			ccall mm_to_pixel_ver "R-I"
-		.end
-	};
+set_dialog_margins :: !Int !Int !Int -> Int;
+set_dialog_margins a0 a1 a2 = code {
+	ccall set_dialog_margins "III:I"
+}
+// int set_dialog_margins (int,int,int);
 
-ActivateDialogX :: !Int -> Int;
-ActivateDialogX _
-	= code {
-		.inline ActivateDialogX
-			ccall activate_dialog "I-I"
-		.end
-	};
+mm_to_pixel_hor :: !Real -> Int;
+mm_to_pixel_hor a0 = code {
+	ccall mm_to_pixel_hor "R:I"
+}
+// int mm_to_pixel_hor (double);
 
-XEnableDialogItem :: !Int -> Int;
-XEnableDialogItem _
-	= code {
-		.inline XEnableDialogItem
-			ccall enable_dialog_item "I-I"
-		.end
-	};
+mm_to_pixel_ver :: !Real -> Int;
+mm_to_pixel_ver a0 = code {
+	ccall mm_to_pixel_ver "R:I"
+}
+// int mm_to_pixel_ver (double);
 
-XDisableDialogItem :: !Int -> Int;
-XDisableDialogItem _
-	= code {
-		.inline XDisableDialogItem
-			ccall disable_dialog_item "I-I"
-		.end
-	};
+activate_dialog :: !Int -> Int;
+activate_dialog a0 = code {
+	ccall activate_dialog "I:I"
+}
+// int activate_dialog (int);
 
-CheckDialogItemX :: !Int !Int -> Int;
-CheckDialogItemX _ _
-	= code {
-		.inline CheckDialogItemX
-			ccall check_dialog_item "II-I"
-		.end
-	};
+enable_dialog_item :: !Int -> Int;
+enable_dialog_item a0 = code {
+	ccall enable_dialog_item "I:I"
+}
+// int enable_dialog_item (int);
 
-DestroyDialogX :: !Int -> Int;
-DestroyDialogX _
-	= code {
-		.inline DestroyDialogX
-			ccall destroy_dialog "I-I"
-		.end
-	};
+disable_dialog_item :: !Int -> Int;
+disable_dialog_item a0 = code {
+	ccall disable_dialog_item "I:I"
+}
+// int disable_dialog_item (int);
 
-XPopDownDialog :: !Int -> Int;
-XPopDownDialog _
-	= code {
-		.inline XPopDownDialog
-			ccall popdown_dialog "I-I"
-		.end
-	};
+check_dialog_item :: !Int !Int -> Int;
+check_dialog_item a0 a1 = code {
+	ccall check_dialog_item "II:I"
+}
+// int check_dialog_item (int,int);
 
-DialogItem2Object :: !Int -> Int;
-DialogItem2Object _
-	= code {
-		.inline DialogItem2Object
-			ccall dialog_item_to_object "I-I"
-		.end
-	};
+destroy_dialog :: !Int -> Int;
+destroy_dialog a0 = code {
+	ccall destroy_dialog "I:I"
+}
+// int destroy_dialog (int);
 
+popdown_dialog :: !Int -> Int;
+popdown_dialog a0 = code {
+	ccall popdown_dialog "I:I"
+}
+// int popdown_dialog (int);
+
+dialog_item_to_object :: !Int -> Int;
+dialog_item_to_object a0 = code {
+	ccall dialog_item_to_object "I:I"
+}
+// int dialog_item_to_object (int);
