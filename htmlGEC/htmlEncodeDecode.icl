@@ -63,23 +63,23 @@ where
 	
 	decode n = mkString (urlDecode n)
 
-traceHtmlInput :: Body
+traceHtmlInput :: BodyTag
 traceHtmlInput
-=:	Body 	[	T "this executable      : " , B ThisExe, Br 
-			, 	T "my php script        : " , B MyPhP, Br 
-			, 	T "update				: " , B update, Br 
-			, 	T "new value		  	: " , B new, Br 
-			, 	T "state			  	: " , Body (showstate (mkList state)), Br 
-			,	T "decoded input  		: " , B (convert GetArgs), Br
-			,	T "encoded input        : " , B GetArgs, Br 
+=:	BodyTag	[	Txt "this executable    : " , B [] ThisExe, Br 
+			, 	Txt "my php script      : " , B [] MyPhP, Br 
+			, 	Txt "update				: " , B [] update, Br 
+			, 	Txt "new value		  	: " , B [] new, Br 
+			, 	Txt "state			  	: " , BodyTag (showstate (mkList state)), Br 
+			,	Txt "decoded input  	: " , B [] (convert GetArgs), Br
+			,	Txt "encoded input       : " , B [] GetArgs, Br 
 			]
 where
 	(executable,update,new,state) = UpdateInfo
 	convert s = mkString (urlDecode (mkList s))
 
-	showstate :: [Char] -> [Body]
+	showstate :: [Char] -> [BodyTag]
 	showstate [] 			= []
-	showstate listofchar	= [Br, B (mkString first)] ++ showstate (tl second)
+	showstate listofchar	= [Br, B [] (mkString first)] ++ showstate (tl second)
 	where
 		(first,second) = span ((<>) '$') listofchar
 
@@ -179,9 +179,9 @@ globalInpName =: "GS"
 selectorInpName :: String
 selectorInpName =: "CS"
 
-addScript :: GlobalState -> Body
+addScript :: GlobalState -> BodyTag
 addScript globalstate
-=	Body
+=	BodyTag
 	[ submitscript    globalFormName updateInpName
 	, globalstateform globalFormName updateInpName globalInpName (SV encodedglobalstate) 
 	]
@@ -189,7 +189,7 @@ where
 	encodedglobalstate = urlEncodeState ( globalstate) 
 //	encodedglobalstate = urlEncodeState (reverse globalstate) 
 
-submitscript :: String String -> Body
+submitscript :: String String -> BodyTag
 submitscript formname updatename
 =	Script []
 	(	" function toclean(inp)" +++
@@ -201,18 +201,18 @@ submitscript formname updatename
 
 // form that contains global state and empty input form for storing updated input
 	
-globalstateform :: String String String Value -> Body
+globalstateform :: String String String Value -> BodyTag
 globalstateform formname updatename globalname globalstate
 =	Form 	[ Frm_Name formname
 			, Frm_Action MyPhP
 			, Frm_Method Post
 			]
 			[ Input [ Inp_Name updatename
-					, Inp_Type Hidden
-					]
+					, Inp_Type Inp_Hidden
+					] ""
 			, Input [ Inp_Name globalname
-					, Inp_Type Hidden
+					, Inp_Type Inp_Hidden
 					, Inp_Value globalstate
-					]
+					] ""
 			]		 
 

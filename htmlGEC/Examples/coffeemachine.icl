@@ -15,16 +15,19 @@ coffeemachine hst
 # ((option, optbody),hst)	= assignTableFuncBut "ob" HEdit optionbuttons  hst	
 # ((machine,_)      ,hst)	= mkStoreHGEC "hidden"  (option o command) initmachine hst
 # ((_,contbody)		,hst)	= mkEditHGEC "cont" HDisplay (displaycontents  machine) hst	
-= (Head [ Hd_Title "Coffee Machine"
-		] 
-		[ H1 "Coffee Machine: "
+= mkHtml "Coffee Machine"
+		[ H1 [] "Coffee Machine: "
 		, contbody <=> combody
 		, optbody
-		,Br
-		, B (displayoutput machine)
-		,Br,Br,Br
-		] ,hst)
+		, Br
+		, B [] (displayoutput machine)
+		, Br,Br,Br
+		] hst
 where
+	mkHtml s tags hst 	= (Html (header s) (body tags),hst)
+	header s 			= Head [`Hd_Std [Std_Title s]] [] 
+	body tags 			= Body [] tags
+
 	commandbuttons  = 
 		[	[(but "Insert_Coins",	\m -> CoffeeMachine (InsertCoin,	m))]
 		,	[(but "Add_beans",   	\m -> CoffeeMachine (AddBeans,		m))]

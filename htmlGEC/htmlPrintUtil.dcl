@@ -27,6 +27,7 @@ print 			:: !String 				-> FtoF
 (<+>) infixl 	:: !FtoF !FtoF 			-> FtoF
 htmlAttrCmnd 	:: !hdr !tag !body  	-> FtoF | gHpr{|*|} hdr & gHpr{|*|} tag & gHpr{|*|} body
 htmlAttr 		:: !String !a 			-> Spaces FtoF 	| gHpr{|*|} a
+openCmnd 		:: !a !b 				-> FtoF | gHpr{|*|} a & gHpr{|*|} b
 
 // special types for creating small effects
 

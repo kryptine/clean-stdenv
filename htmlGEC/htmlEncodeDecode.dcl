@@ -11,7 +11,7 @@ import GenParse, GenPrint, htmlDataDef
 ThisExe			:: String		// name of this executable
 MyPhP 			:: String		// name of php script interface between server and this executable
 
-traceHtmlInput	:: Body			// for debugging to show which information is received from browser
+traceHtmlInput	:: BodyTag		// for debugging to show which information is received from browser
 
 // encoding of information
 
@@ -19,7 +19,7 @@ traceHtmlInput	:: Body			// for debugging to show which information is received 
 
 encodeInfo 		:: a -> String | gPrint{|*|} a	// format required for storing stuf in html
 callClean 		:: String						// call script that will transmit input info to this executable
-addScript 		:: GlobalState -> Body			// the corresponding script, stores global state as well					
+addScript 		:: GlobalState -> BodyTag		// the corresponding script, stores global state as well					
 
 // decoding of information
 
