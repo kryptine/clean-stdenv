@@ -8,7 +8,7 @@ definition module StdKey
 //	********************************************************************************
 
 
-from	key		import	SpecialKey, 
+from	oskey		import	SpecialKey, 
 							backSpaceKey, beginKey, 
 							clearKey, 
 							deleteKey, downKey, 
@@ -19,6 +19,6 @@ from	key		import	SpecialKey,
 							helpKey, 
 							leftKey, 
 							pgDownKey, pgUpKey, 
-							rightKey, 
+							returnKey, rightKey, 
 							upKey,
 						==, toString

@@ -1,4 +1,4 @@
-implementation module key
+implementation module oskey
 
 
 //	Clean Object I/O library, version 1.2
@@ -11,13 +11,13 @@ import	StdBool, StdClass, StdInt, StdOverloaded, StdString
 	=	{	virtual	:: !Int
 		}
 
-BackSpaceVirtualCode:==  51		// BackSpace
+BackSpaceVirtualCode:==   8		// BackSpace
 BeginVirtualCode	:== 115		// Begin of text
 ClearVirtualCode	:==  71		// Clear
 DeleteVirtualCode	:== 117		// Delete
 DownVirtualCode		:== 125		// Arrow down
 EndVirtualCode		:== 119		// End of text
-EnterVirtualCode	:==  76		// Enter			// PA: wat was er mis met 13?
+EnterVirtualCode	:==  13		// Enter
 EscapeVirtualCode	:==  53		// Escape
 F1VirtualCode		:== 122		// Function 1
 F2VirtualCode		:== 120		// Function 2
@@ -38,6 +38,7 @@ HelpVirtualCode		:== 114		// Help
 LeftVirtualCode		:== 123		// Arrow left
 PgDownVirtualCode	:== 121		// Page down
 PgUpVirtualCode		:== 116		// Page up
+ReturnVirtualCode	:==  -1		// Return (dummy under Windows)
 RightVirtualCode	:== 124		// Arrow right
 UpVirtualCode		:== 126		// Arrow up
 
@@ -76,6 +77,7 @@ instance toString SpecialKey where
 		specialKeyCodeName LeftVirtualCode		= "LeftKey"
 		specialKeyCodeName PgDownVirtualCode	= "PgDownKey"
 		specialKeyCodeName PgUpVirtualCode		= "PgUpKey"
+		specialKeyCodeName ReturnVirtualCode	= "ReturnKey"
 		specialKeyCodeName RightVirtualCode		= "RightKey"
 		specialKeyCodeName UpVirtualCode		= "UpKey"
 		specialKeyCodeName otherCode			= "toSpecialKey "+++toString otherCode
@@ -107,6 +109,7 @@ helpKey		:: SpecialKey;			helpKey		= {virtual=HelpVirtualCode}		// Help
 leftKey		:: SpecialKey;			leftKey		= {virtual=LeftVirtualCode}		// Arrow left
 pgDownKey	:: SpecialKey;			pgDownKey	= {virtual=PgDownVirtualCode}	// Page down
 pgUpKey		:: SpecialKey;			pgUpKey		= {virtual=PgUpVirtualCode}		// Page up
+returnKey	:: SpecialKey;			returnKey	= {virtual=ReturnVirtualCode}	// Return
 rightKey	:: SpecialKey;			rightKey	= {virtual=RightVirtualCode}	// Arrow right
 upKey		:: SpecialKey;			upKey		= {virtual=UpVirtualCode}		// Arrow up
 
@@ -126,9 +129,9 @@ where
 
 virtualKeyCodes :: [Int]						// The < sorted list of virtual key codes
 virtualKeyCodes	=:	[	BackSpaceVirtualCode	//   8
+					,	EnterVirtualCode		//  13
 					,	EscapeVirtualCode		//  53
 					,	ClearVirtualCode		//  71
-					,	EnterVirtualCode		//  76
 					,	F5VirtualCode			//  96
 					,	F6VirtualCode			//  97
 					,	F7VirtualCode			//  98
