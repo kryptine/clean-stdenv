@@ -136,22 +136,22 @@ osMenuInsert zIndex osMenuNr title menuBar=:{mbHandle} tb
 osSubMenuInsert :: !Int !OSMenuNr !{#Char} !OSMenu !*OSToolbox -> (!OSMenu,!OSMenu,!*OSToolbox)
 osSubMenuInsert index osMenuNr title parentMenu tb
 	# title				= validateMenuItemTitle title
-	# data				= subMenuHandleToMacElement osMenuNr enabled
+	# data				= subMenuHandleToMacElement osMenuNr enabled title
 	# (menuHandle,tb)	= NewMenu osMenuNr title tb
 //	# tb				= EnableItem menuHandle 0 tb			// DvA: unnecessary?
 	# tb				= InsertMenu menuHandle beforeId tb
 	# tb				= AppendMenu parentMenu data tb
-	# tb				= SetItem parentMenu index title tb
+//	# tb				= SetItem parentMenu (index+1) title tb
 	# tb				= trace_n ("osSubMenuInsert",osMenuNr,index,parentMenu,menuHandle) tb
 	= (menuHandle,parentMenu,tb)
 where
 	beforeId	= -1
 	enabled		= True											// DvA: ???
 
-subMenuHandleToMacElement id enabled
+subMenuHandleToMacElement id enabled title
 	| enabled
-	= submenu_id+++"D"
-	= submenu_id+++"D"+++disable
+	= submenu_id+++title
+	= submenu_id+++title+++disable
 where
 	submenu_id	= submenu+++menu_id
 	submenu		= "/"+++toString (toChar 27)			// /$1B this item is a SubMenu
