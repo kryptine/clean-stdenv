@@ -273,6 +273,9 @@ static int GetMessageQuickly (BOOL gIdleTimerOn, int gSleeptime, MSG * pmsg)
 
 
 
+/*  PA: TranslateKeyboardMessage has been removed because it messes with the message queue.
+        This makes it hard to memorize and keep correct. 
+		Now all WindowProcedures handle virtual key codes themselves. 
 //	TranslateKeyboardMessage is used by HandleCleanRequest only. 
 static BOOL TranslateKeyboardMessage (MSG * pmsg)
 {
@@ -300,7 +303,8 @@ static BOOL TranslateKeyboardMessage (MSG * pmsg)
 	}
 	else
 		return TranslateMessage (pmsg);
-}	/* TranslateKeyboardMessage */
+}	// TranslateKeyboardMessage
+*/
 
 void HandleCleanRequest (CrossCallInfo * pcci)
 {
@@ -335,8 +339,9 @@ void HandleCleanRequest (CrossCallInfo * pcci)
 							if (gAcceleratorTable==NULL || !TranslateAccelerator (ghActiveFrameWindow, gAcceleratorTable, &ms))
 							{
 								{	
-									TranslateKeyboardMessage (&ms);
-									DispatchMessage (&ms);
+								//	TranslateKeyboardMessage (&ms);		// PA: confusing message manipulation removed
+									TranslateMessage (&ms);				// PA: standard message loop code
+									DispatchMessage  (&ms);
 								}
 							}
 						}

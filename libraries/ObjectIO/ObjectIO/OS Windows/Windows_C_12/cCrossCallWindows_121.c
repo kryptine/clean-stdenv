@@ -575,17 +575,13 @@ static LRESULT CALLBACK CustomControlProcedure (HWND hwnd, UINT uMess, WPARAM wP
 		case WM_SYSKEYDOWN:
 		case WM_KEYDOWN:
 			{
-				int c = 0;
 				HWND hwndParent;
+				int c = CheckVirtualKeyCode ((int) wParam);;
 
-				c = CheckVirtualKeyCode ((int) wParam);
-
-				if (!c)
-				/* Ignore non-virtual keys, because they arrive as WM_SYSCHAR and WM_CHAR. */
+				if (!c || (uMess==WM_SYSKEYDOWN && c>=VK_F1 && c<=VK_F12))
 				{
 					return DefWindowProc (hwnd, uMess, wParam, lParam);
 				}
-				/* Handle virtual keys analogously to keys received as WM_SYSCHAR and WM_CHAR. */
 				hwndParent = GetControlParent (hwnd);
 				if (gInKey)
 				{
@@ -607,7 +603,7 @@ static LRESULT CALLBACK CustomControlProcedure (HWND hwnd, UINT uMess, WPARAM wP
 				return 0;
 			}
 			break;
-		case WM_SYSCHAR:
+//		case WM_SYSCHAR:
 		case WM_CHAR:
 			{
 				HWND hwndParent = GetControlParent (hwnd);
@@ -877,17 +873,13 @@ static LRESULT CALLBACK CompoundControlProcedure (HWND hwnd, UINT uMess, WPARAM 
 		case WM_SYSKEYDOWN:
 		case WM_KEYDOWN:
 			{
-				int c = 0;
 				HWND hwndParent;
+				int c = CheckVirtualKeyCode ((int) wParam);
 
-				c = CheckVirtualKeyCode ((int) wParam);
-
-				if (!c)
-				/* Ignore non-virtual keys, because they arrive as WM_SYSCHAR and WM_CHAR. */
+				if (!c || (uMess==WM_SYSKEYDOWN && c>=VK_F1 && c<=VK_F12))
 				{
 					return DefWindowProc (hwnd, uMess, wParam, lParam);
 				}
-				/* Handle virtual keys analogously to keys received as WM_SYSCHAR and WM_CHAR. */
 				hwndParent = GetControlParent (hwnd);
 				if (gInKey)
 				{
@@ -909,7 +901,7 @@ static LRESULT CALLBACK CompoundControlProcedure (HWND hwnd, UINT uMess, WPARAM 
 				return 0;
 			}
 			break;
-		case WM_SYSCHAR:
+//		case WM_SYSCHAR:
 		case WM_CHAR:
 			{
 				HWND hwndParent = GetControlParent (hwnd);
@@ -1091,7 +1083,7 @@ static LRESULT CALLBACK EditControlProcedure (HWND hwnd,UINT uMess,WPARAM wParam
 
 	switch (uMess)
 	{
-		case WM_SYSKEYDOWN:
+//		case WM_SYSKEYDOWN:
 		case WM_KEYDOWN:
 			{
 				int c = 0;
@@ -1159,7 +1151,7 @@ static LRESULT CALLBACK EditControlProcedure (HWND hwnd,UINT uMess,WPARAM wParam
 				return stdresult;
 			}
 			break;
-		case WM_SYSCHAR:
+//		case WM_SYSCHAR:
 		case WM_CHAR:
 			{
 				HWND hwndParent;
@@ -1192,7 +1184,7 @@ static LRESULT CALLBACK EditControlProcedure (HWND hwnd,UINT uMess,WPARAM wParam
 				return stdresult;
 			}
 			break;
-		case WM_SYSKEYUP:
+//		case WM_SYSKEYUP:
 		case WM_KEYUP:
 			{
 				/* First check if tab/escape key should be suppressed inside Dialog. */
@@ -1256,7 +1248,7 @@ static LRESULT CALLBACK SimpleEditControlProcedure (HWND hwnd,UINT uMess,WPARAM 
 
 	switch (uMess)
 	{
-		case WM_SYSKEYDOWN:
+//		case WM_SYSKEYDOWN:
 		case WM_KEYDOWN:
 			{
 				int c = 0;
@@ -1332,7 +1324,7 @@ static LRESULT CALLBACK PopUpControlProcedure (HWND hwnd,UINT uMess,WPARAM wPara
 
 	switch (uMess)
 	{
-		case WM_SYSKEYDOWN:
+//		case WM_SYSKEYDOWN:
 		case WM_KEYDOWN:
 			{
 				int c = 0;
@@ -1369,7 +1361,7 @@ static LRESULT CALLBACK PopUpControlProcedure (HWND hwnd,UINT uMess,WPARAM wPara
 				return stdresult;
 			}
 			break;
-		case WM_SYSCHAR:
+//		case WM_SYSCHAR:
 		case WM_CHAR:
 			{
 				HWND hwndCombo  = GetParent (hwnd);
@@ -1395,7 +1387,7 @@ static LRESULT CALLBACK PopUpControlProcedure (HWND hwnd,UINT uMess,WPARAM wPara
 				return stdresult;
 			}
 			break;
-		case WM_SYSKEYUP:
+//		case WM_SYSKEYUP:
 		case WM_KEYUP:
 			{
 				HWND hwndCombo  = GetParent (hwnd);
@@ -1551,7 +1543,35 @@ static LRESULT CALLBACK SDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 				SetCursorFromCode (cursorcode);
 			}
 			break;
-		case WM_SYSCHAR:
+		case WM_SYSKEYDOWN:
+		case WM_KEYDOWN:
+			{
+				int c = CheckVirtualKeyCode ((int) wPara);
+
+				if (!c || (uMess == WM_SYSKEYDOWN && c >= VK_F1 && c <= VK_F12))
+				{
+					return DefMDIChildProc (hWin,uMess,wPara,lPara);
+				}
+				if (gInKey)
+				{
+					if (gCurChar == c)
+						SendKeyStillDownToClean (hWin, hWin, gCurChar);
+					else
+					{
+						SendKeyUpToClean (hWin, hWin, gCurChar);
+						gCurChar = c;
+						SendKeyDownToClean (hWin, hWin, gCurChar);
+					}
+				}
+				else
+				{
+					gCurChar = c;
+					SendKeyDownToClean (hWin, hWin, gCurChar);
+					gInKey = TRUE;
+				}
+				break;
+			}
+//		case WM_SYSCHAR:
 		case WM_CHAR:
 			{
 				if (gInKey)
@@ -1969,7 +1989,35 @@ static LRESULT CALLBACK MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 				SetCursorFromCode (cursorcode);
 			}
 			break;
-		case WM_SYSCHAR:
+		case WM_SYSKEYDOWN:
+		case WM_KEYDOWN:
+			{
+				int c = CheckVirtualKeyCode ((int) wPara);
+
+				if (!c || (uMess == WM_SYSKEYDOWN && c >= VK_F1 && c <= VK_F12))
+				{
+					return DefMDIChildProc (hWin,uMess,wPara,lPara);
+				}
+				if (gInKey)
+				{
+					if (gCurChar == c)
+						SendKeyStillDownToClean (hWin, hWin, gCurChar);
+					else
+					{
+						SendKeyUpToClean (hWin, hWin, gCurChar);
+						gCurChar = c;
+						SendKeyDownToClean (hWin, hWin, gCurChar);
+					}
+				}
+				else
+				{
+					gCurChar = c;
+					SendKeyDownToClean (hWin, hWin, gCurChar);
+					gInKey = TRUE;
+				}
+				break;
+			}
+//		case WM_SYSCHAR:
 		case WM_CHAR:
 			{
 				if (gInKey)
@@ -2141,6 +2189,8 @@ static LRESULT CALLBACK MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 		case WM_SIZE:
 			{
 				HWND hwndToolbar;
+				int width,height;
+				LocalWindowData wdata;
 
 				hwndToolbar = (HWND) GetGWL_USERDATA (hWin);
 				// First resize the toolbar if present
@@ -2149,9 +2199,6 @@ static LRESULT CALLBACK MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 
 				if (wPara != SIZE_MAXHIDE && wPara != SIZE_MAXSHOW)
 				{
-					int width,height;
-					LocalWindowData wdata;
-
 					width  = LOWORD (lPara);		// Width  of window excluding vertical scrollbar
 					height = HIWORD (lPara);		// Height of window excluding horizontal scrollbar
 					wdata  = (LocalWindowData) GetWindowLong (hWin,0);

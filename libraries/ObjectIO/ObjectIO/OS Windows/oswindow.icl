@@ -11,6 +11,7 @@ from	commondef			import fatalError, intersectRects, rectSize, stateMap2,
 								class toTuple4(..),  instance toTuple4  OSRect,
 								class subVector(..), instance subVector OSRect,
 								instance zero OSRect
+//import	StdDebug, tracetypes	// PA: for debugging purposes
 
 
 oswindowFatalError :: String String -> .x
@@ -353,7 +354,7 @@ osCreateWindowCallback _ _ _ _ _ {ccMsg=CcWmKILLFOCUS} s tb
 	= //trace "osCreateWindowCallback CcWmKILLFOCUS" 
 	  (return0Cci, s, tb)
 osCreateWindowCallback _ _ _ _ _ {ccMsg=CcWmKEYBOARD,p1=hwnd,p2=hctrl,p3=char,p4=ks,p5=mods} s tb
-	= //trace "osCreateWindowCallback CcWmKEYBOARD "+++toString (hwnd,hctrl,char,ks,mods))
+	= //trace ("osCreateWindowCallback CcWmKEYBOARD "+++toString (hwnd,hctrl,char,ks,mods))
 	  (return0Cci, s,tb)
 osCreateWindowCallback _ _ _ _ _ {ccMsg} s tb
 	= oswindowFatalError "osCreateWindowCallback" ("unknown message type ("+++toString ccMsg+++")")
