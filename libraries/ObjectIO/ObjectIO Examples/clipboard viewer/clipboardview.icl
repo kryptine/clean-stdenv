@@ -75,15 +75,19 @@ where
 	width	= PixelWidth (hmm 100.0)
 	nrlines	= 5
 	
-	show pst
-		# (content,pst)	= getClipboard pst
-		  text			= getString content
-		= appPIO (setControlTexts [(showid,text)]) pst
+	show pst												// The Show function:
+		# (changed,pst)		= clipboardHasChanged pst		//	if clipboard has not changed:
+		| not changed										//		then the content is already ok
+			= pst
+		| otherwise											//	otherwise:
+			# (content,pst)	= getClipboard pst				//		retrieve new clipboard content
+			  text			= getString content				//		as a String
+			= appPIO (setControlText showid text) pst		//		and display it
 	
-	set pst
-		# (dialog,pst)	= accPIO (getWindow viewid) pst
-		  text			= fromJust (snd (getControlText setid (fromJust dialog)))
-		= setClipboard [toClipboard text] pst
+	set pst													// The Set function:
+		# (Just dialog,pst)	= accPIO (getWindow viewid) pst	//	get the current dialogue state
+		  (_,Just text)		= getControlText setid dialog	//	get the current edit control content
+		= setClipboard [toClipboard text] pst				//	store it in the clipboard
 	
 	getString [clip:clips]
 		| isNothing item	= getString clips
