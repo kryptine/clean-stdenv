@@ -8,7 +8,7 @@ implementation module commondef
 
 import	StdArray, StdBool, StdChar, StdClass, StdEnum, StdFunc, StdInt, StdList, StdMisc, StdReal, StdString
 from	ostypes		import Rect	// PA: Rect type is defined in the ostypes module.
-import	osrgn
+import	osrgn					// PA: required for IntersectRgnRect
 import	StdIOCommon
 
 
