@@ -2,6 +2,7 @@ implementation module StdIOBasic
 
 
 import	StdBool, StdInt, StdList, StdOverloaded, StdString
+from	commondef	import error
 
 
 /*	General type constructors for composing context-independent data structures.
@@ -137,3 +138,22 @@ itemsList _ _
 
 ::	Void
  =	Void // MW11++
+
+
+::	Alt2 a b = Alt1Of2 a | Alt2Of2 b	// Alternative data type in cases where Either causes name clashes
+
+alt1Of2 :: !(Alt2 a b) -> a				// Take first  alternative if applicable (test with isAlt1Of2)
+alt1Of2 (Alt1Of2 a)	= a
+alt1Of2 _			= error "alt1Of2" "StdIOBasic" "argument is (Alt2Of2 _) instead of (Alt1Of2 _)"
+
+alt2Of2 :: !(Alt2 a b) -> b				// Take second alternative if applicable (test with isAlt2Of2)
+alt2Of2 (Alt2Of2 b)	= b
+alt2Of2 _			= error "alt2Of2" "StdIOBasic" "argument is (Alt1Of2 _) instead of (Alt2Of2 _)"
+
+isAlt1Of2 :: !(Alt2 a b) -> Bool		// True iff (Alt1Of2 _)
+isAlt1Of2 (Alt1Of2 _)	= True
+isAlt1Of2 _				= False
+
+isAlt2Of2 :: !(Alt2 a b) -> Bool		// True iff (Alt2Of2 _)
+isAlt2Of2 (Alt2Of2 _)	= True
+isAlt2Of2 _				= False

@@ -4,11 +4,11 @@ implementation module windowvalidate
 import	StdBool, StdList, StdFunc, StdTuple, StdMisc
 import	osdocumentinterface, ospicture, ossystem, ostypes, oswindow
 import	commondef, controllayout, keyfocus, StdControlAttribute, StdId, StdWindowAttribute, windowaccess
-from	StdSystem	import maxScrollWindowSize
-from	iostate		import :: IOSt, ioStGetIdTable, ioStSetIdTable
+from	controlvalidate	import validateItemPos
+from	StdSystem		import maxScrollWindowSize
+from	iostate			import :: IOSt, ioStGetIdTable, ioStSetIdTable
+from	layout			import itemPosOffset
 
-
-//import dodebug
 
 windowvalidateError :: String String -> .x
 windowvalidateError function message
@@ -39,7 +39,7 @@ validateWindowId (Just id) ioState
 validateWindow :: !OSWindowMetrics !OSDInfo !(WindowHandle .ls .pst) !(WindowHandles .pst) !*OSToolbox
 		   -> (!Index,!Point2,!Size,!Vector2,!WindowHandle .ls .pst,  !WindowHandles .pst, !*OSToolbox)
 
-validateWindow wMetrics _ wH=:{whMode=mode,whKind=IsDialog,whItemNrs,whItems,whAtts} windows tb
+validateWindow wMetrics osdInfo wH=:{whMode=mode,whKind=IsDialog,whItemNrs,whItems,whAtts} windows tb
 	# atts						= filter isValidDialogAttribute whAtts
 	  (index,atts,windows)		= validateWindowIndex mode				atts windows
 	  (pos,  atts,windows)		= validateWindowPos   mode				atts windows
@@ -59,7 +59,7 @@ validateWindow wMetrics _ wH=:{whMode=mode,whKind=IsDialog,whItemNrs,whItems,whA
 	  derSize					= determineRequestedSize derSize sizeAtt
 	  domain					= sizeToRectangle derSize
 	# okSize					= exactWindowSize wMetrics domain derSize False False IsDialog
-	# (okPos,windows,tb)		= exactWindowPos wMetrics okSize pos IsDialog mode windows tb
+	# (okPos,windows,tb)		= exactWindowPos wMetrics osdInfo okSize pos IsDialog mode windows tb
 	= (	index
 	  ,	okPos
 	  ,	okSize
@@ -100,7 +100,7 @@ validateWindow wMetrics osdInfo wH=:{whKind=IsWindow,whItemNrs,whItems,whAtts} w
 	  (focusItems,items)		= getWElementKeyFocusIds True items
 	  (origin,atts)				= validateOrigin derSize domain atts
 	# okSize					= exactWindowSize wMetrics domain derSize (isJust maybe_hScroll) (isJust maybe_vScroll) IsWindow
-	# (okPos,windows,tb)		= exactWindowPos wMetrics okSize pos IsWindow mode windows tb
+	# (okPos,windows,tb)		= exactWindowPos wMetrics osdInfo okSize pos IsWindow mode windows tb
 	  (hScroll,vScroll)			= validScrollInfos wMetrics okSize maybe_hScroll maybe_vScroll
 	= (	index
 	  ,	okPos
@@ -194,14 +194,15 @@ validateWindowPos mode atts windows
 	| not hasPosAtt
 		= (Nothing,atts`,windows)
 	| not isRelative
-		= (Just itemPos,atts`,windows)
+		= (Just okItemPos,atts`,windows)
 	| otherwise
 		# (found,windows)	= hasWindowHandlesWindow (toWID relativeTo) windows
-		= (if found (Just itemPos) Nothing,atts`,windows)
+		= (if found (Just okItemPos) Nothing,atts`,windows)
 where
 	(hasPosAtt,posAtt,atts`)= remove isWindowPos undef atts
 	itemPos					= getWindowPosAtt posAtt
 	(isRelative,relativeTo)	= isRelativeItemPos itemPos
+	okItemPos				= validateItemPos itemPos
 
 
 /*	The result ({corner1=A,corner2=B},_) of validateWindowDomain is such that A<B (point A lies to 
@@ -440,9 +441,9 @@ where
 	The size argument must be the exact size as calculated by exactWindowSize of the window.
 	The ItemPos argument must be the validated(!) ItemPos attribute of the window.
 */
-exactWindowPos :: !OSWindowMetrics !Size !(Maybe ItemPos) !WindowKind !WindowMode !(WindowHandles .pst) !*OSToolbox
-																	   -> (!Point2,!WindowHandles .pst, !*OSToolbox)
-exactWindowPos wMetrics exactSize=:{w,h} maybePos wKind wMode windows tb
+exactWindowPos :: !OSWindowMetrics !OSDInfo !Size !(Maybe ItemPos) !WindowKind !WindowMode !(WindowHandles .pst) !*OSToolbox
+																	            -> (!Point2,!WindowHandles .pst, !*OSToolbox)
+exactWindowPos wMetrics osdInfo exactSize=:{w,h} maybePos wKind wMode windows tb
 	# exactSize = {w = w + osWindowFrameWidth + osWindowFrameWidth, h = h + osWindowFrameWidth + osWindowFrameWidth + osWindowTitleBarHeight - 1}
 	| wKind==IsDialog && wMode==Modal
 		= (pos,windows,tb1)
@@ -456,16 +457,16 @@ exactWindowPos wMetrics exactSize=:{w,h} maybePos wKind wMode windows tb
 		= (zero,windows,tb)
 	| otherwise
 		# itemPos			= fromJust maybePos
-		# (pos,windows,tb)	= getItemPosPosition wMetrics exactSize itemPos windows tb
+		# (pos,windows,tb)	= getItemPosPosition wMetrics osdInfo exactSize itemPos windows tb
 		# (pos,tb)			= setWindowInsideScreen pos exactSize tb
 		= (pos,windows,tb)
 where
 /*	getItemPosPosition calculates the exact position of the given window. 
 	getItemPosPosition does not check whether this position will place the window off screen.
 */
-	getItemPosPosition :: !OSWindowMetrics !Size !ItemPos !(WindowHandles .pst) !*OSToolbox
-											   -> (!Point2,!WindowHandles .pst, !*OSToolbox)
-	getItemPosPosition wMetrics size itemPos windows=:{whsWindows=wsHs} tb
+	getItemPosPosition :: !OSWindowMetrics !OSDInfo !Size !ItemPos !(WindowHandles .pst) !*OSToolbox
+											            -> (!Point2,!WindowHandles .pst, !*OSToolbox)
+	getItemPosPosition wMetrics osdInfo size itemPos windows=:{whsWindows=wsHs} tb
 		| isRelative
 			# (rect,tb)					= osScreenrect tb
 			  screenDomain				= rectToRectangle rect
@@ -476,45 +477,70 @@ where
 		  									[wsH:after]
 		  										#  (wPtr,wsH) = wsH!wshIds.wPtr
 		  										-> (wPtr,wsH,after)
-			   (relativeSize,wsH)		= getWindowStateHandleSize wsH
+//			   (relativeSize,wsH)		= getWindowStateHandleSize wsH
 			   windows					= {windows & whsWindows=before++[wsH:after]}
-			# ((relativeX,relativeY),tb)= osGetWindowPos wPtr tb
+			# ((relativeW,relativeH),tb)= osGetWindowSize wPtr tb		// size of outer window
+			# ((relativeX,relativeY),tb)= osGetWindowPos  wPtr tb		// position of outer window
+			# ((xDIx,xDIy),tb)			= getOSDInfoOffset osdInfo tb	// offset of outer (M/S/N)DI frame to content
 			/* PA: do not use OSgetWindowViewFrameSize. 
 			# ((relativeW,relativeH),tb)= OSgetWindowViewFrameSize wPtr tb
 			*/
-			  (relativeW,relativeH)		= toTuple relativeSize
+//			  (relativeW,relativeH)		= toTuple relativeSize
 			  (exactW,exactH)			= (size.w,size.h)
-			  {vx,vy}					= itemPosOffset (snd itemPos) screenDomain screenOrigin
-			  pos						= case (fst itemPos) of
-						  					(LeftOf  _)	-> {x=relativeX+vx-exactW,   y=relativeY+vy}
-						  					(RightTo _)	-> {x=relativeX+vx+relativeW,y=relativeY+vy}
-				  							(Above   _)	-> {x=relativeX+vx,          y=relativeY+vy-exactH}
-			  								(Below   _)	-> {x=relativeX+vx,          y=relativeY+vy+relativeH}
+			  offset					= itemPosOffset (snd itemPos) [(screenDomain,screenOrigin)]
+			  isVectorOffset			= isAlt1Of2 offset;		v		= alt1Of2 offset;
+			  isAlignOffset				= isAlt2Of2 offset;		align	= alt2Of2 offset;
+			  (vx,vy)					= if isVectorOffset (toTuple v)					// Exact offset is the vector
+			  							                    (0,0)						// otherwise, it is zero
+			  (dx,dy)					= if isVectorOffset (0,0)						// Align offset is zero in case of vector
+			  							 (if isRelativeX    (case align of
+			  							 						AlignTop	= (0,0)
+			  							 						AlignCenter	= (0,(relativeH-exactH)/2)
+			  							 						AlignBottom = (0, relativeH-exactH)
+			  							 					)
+			  							 /*  isRelativeY */ (case align of
+			  							 						AlignLeft	= (0,0)
+			  							 						AlignCenter	= ((relativeW-exactW)/2,0)
+			  							 						AlignRight  = ( relativeW-exactW,   0)
+			  							 					)
+			  							 )
+			  pos						= case fst itemPos of
+						  					(LeftOf  _)	-> {x=relativeX+vx+dx-xDIx-exactW,   y=relativeY+vy+dy-xDIy}
+						  					(RightTo _)	-> {x=relativeX+vx+dx-xDIx+relativeW,y=relativeY+vy+dy-xDIy}
+				  							(Above   _)	-> {x=relativeX+vx+dx-xDIx,          y=relativeY+vy+dy-xDIy-exactH}
+			  								(Below   _)	-> {x=relativeX+vx+dx-xDIx,          y=relativeY+vy+dy-xDIy+relativeH}
 			  								other       -> windowvalidateFatalError "getItemPosPosition" "unexpected ItemLoc alternative"
 			= (pos,windows,tb)
 	where
-		(isRelative,relativeTo)		= isRelativeItemPos itemPos
+		(isRelative,relativeTo)		= isRelativeItemPos  itemPos
+		isRelativeX					= isRelativeXItemPos itemPos
+		isRelativeY					= isRelativeYItemPos itemPos
 		
 		unidentifyWindow :: !WID !(WindowStateHandle .pst) -> *(!Bool,!WindowStateHandle .pst)
 		unidentifyWindow wid wsH
 			# (ids,wsH)				= getWindowStateHandleWIDS wsH
 			= (not (identifyWIDS wid ids),wsH)
 
-	getItemPosPosition _ size itemPos windows tb
+	getItemPosPosition _ _ size itemPos windows tb
 		| isAbsolute
 			# (rect,tb)					= osScreenrect tb
 			  screenDomain				= rectToRectangle rect
 			  screenOrigin				= {x=rect.rleft,y=rect.rtop}
-			= (movePoint (itemPosOffset offset screenDomain screenOrigin) zero,windows,tb)
+			  v							= case itemPosOffset offset [(screenDomain,screenOrigin)] of
+											Alt1Of2 v	= v
+											otherwise	= windowvalidateFatalError "getItemPosPosition _ _ (Fix,offset)" "offset is illegal: OffsetAlign"
+			= (movePoint v zero,windows,tb)
 	where
-		(isAbsolute,offset)			= isAbsoluteItemPos itemPos
-	getItemPosPosition _ size itemPos windows tb
+		(isAbsolute,offset)				= isAbsoluteItemPos itemPos
+	getItemPosPosition _ _ size itemPos windows tb
 		| isCornerItemPos itemPos
 			# (rect,tb)					= osScreenrect tb
 			  screenDomain				= rectToRectangle rect
 			  screenOrigin				= {x=rect.rleft,y=rect.rtop}
 			  (exactW,exactH)			= toTuple size
-			  {vx,vy}					= itemPosOffset (snd itemPos) screenDomain screenOrigin
+			  {vx,vy}					= case itemPosOffset (snd itemPos) [(screenDomain,screenOrigin)] of
+			  								Alt1Of2 v	= v
+			  								_			= windowvalidateFatalError "getItemPosPosition _ _ (pos,offset)" "pos in {LeftTop,LeftBottom,RightTop,RightBottom}, but offset is illegal: OffsetAlign"
 			  pos						= case (fst itemPos) of
 					  						LeftTop		-> {x=rect.rleft +vx,       y=rect.rtop   +vy}
 					  						RightTop	-> {x=rect.rright+vx-exactW,y=rect.rtop   +vy}
@@ -522,7 +548,7 @@ where
 					  						RightBottom	-> {x=rect.rright+vx-exactW,y=rect.rbottom+vy-exactH}
 			= (pos,windows,tb)
 
-	getItemPosPosition _ _ _ windows tb
+	getItemPosPosition _ _ _ _ windows tb
 		= (zero,windows,tb)
 
 /*	setWindowInsideScreen makes sure that a window at the given position and given size will be on screen.
@@ -540,18 +566,6 @@ where
 
 
 
-//	itemPosOffset calculates the actual offset vector of the given ItemOffset value.
-
-itemPosOffset :: !ItemOffset ViewDomain Point2 -> Vector2
-itemPosOffset NoOffset _ _
-	= zero
-itemPosOffset (OffsetVector v) _ _
-	= v
-itemPosOffset (OffsetFun i f) domain origin
-	| i==1		= f (domain,origin)
-	| otherwise	= windowvalidateError "calculating OffsetFun" ("illegal ParentIndex value: "+++toString i)
-
-
 //	Predicates on ItemPos:
 isRelativeItemPos :: !ItemPos -> (!Bool,Id)
 isRelativeItemPos (LeftOf  id,_)	= (True, id)
@@ -559,6 +573,16 @@ isRelativeItemPos (RightTo id,_)	= (True, id)
 isRelativeItemPos (Above   id,_)	= (True, id)
 isRelativeItemPos (Below   id,_)	= (True, id)
 isRelativeItemPos _					= (False,undef)
+
+isRelativeXItemPos :: !ItemPos -> Bool
+isRelativeXItemPos (LeftOf  _,_)	= True
+isRelativeXItemPos (RightTo _,_)	= True
+isRelativeXItemPos _				= False
+
+isRelativeYItemPos :: !ItemPos -> Bool
+isRelativeYItemPos (Above _,_)		= True
+isRelativeYItemPos (Below _,_)		= True
+isRelativeYItemPos _				= False
 
 isAbsoluteItemPos :: !ItemPos -> (!Bool,ItemOffset)
 isAbsoluteItemPos (Fix,offset)		= (True, offset)

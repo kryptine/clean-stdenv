@@ -3,7 +3,7 @@ implementation module StdControlClass
 
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	commondef, iostate, StdControlAttribute, windowhandle
-from	controlvalidate	import validateSliderState
+from	controlvalidate	import validateItemPos, validateSliderState
 from	StdPSt			import class accScreenPicture(..), instance accScreenPicture IOSt
 from	windowvalidate	import validateViewDomain
 import	ospicture, ostypes, oswindow
@@ -92,7 +92,7 @@ instance Controls ButtonControl where
 				,	wItemShow		= not (contains isControlHide atts)
 				,	wItemSelect		= getSelectStateAttribute atts
 				,	wItemInfo		= ButtonInfo {buttonInfoText=textLine}
-				,	wItemAtts		= filter (not o redundantAttribute) atts
+				,	wItemAtts		= map validateControlPos (filter (not o redundantAttribute) atts)
 				,	wItems			= []
 				,	wItemVirtual	= False
 				,	wItemPos		= zero
@@ -159,7 +159,7 @@ instance Controls CheckControl where
 										{	checkItems = infoItems
 										,	checkLayout= validateLayout nrItems layout
 										}
-				,	wItemAtts		= filter (not o redundantAttribute) atts
+				,	wItemAtts		= map validateControlPos (filter (not o redundantAttribute) atts)
 				,	wItems			= []
 				,	wItemVirtual	= False
 				,	wItemPos		= zero
@@ -215,7 +215,7 @@ instance Controls (CompoundControl c)	| Controls c where
 															  ,compoundClip={clipRgn=0,clipOk=False}
 															  }
 										}
-				,	wItemAtts		= filter (not o redundantAttribute) atts
+				,	wItemAtts		= map validateControlPos (filter (not o redundantAttribute) atts)
 				,	wItems			= map controlStateToWElementHandle cs
 				,	wItemVirtual	= False
 				,	wItemPos		= zero
@@ -261,7 +261,7 @@ instance Controls CustomButtonControl where
 				,	wItemShow		= not (contains isControlHide atts)
 				,	wItemSelect		= getSelectStateAttribute atts
 				,	wItemInfo		= CustomButtonInfo {cButtonInfoLook={lookFun=controlLook,lookPen=getInitialPen atts,lookSysUpdate=True}}
-				,	wItemAtts		= filter (not o redundantAttribute) atts
+				,	wItemAtts		= map validateControlPos (filter (not o redundantAttribute) atts)
 				,	wItems			= []
 				,	wItemVirtual	= False
 				,	wItemPos		= zero
@@ -286,7 +286,7 @@ instance Controls CustomControl where
 				,	wItemShow		= not (contains isControlHide atts)
 				,	wItemSelect		= getSelectStateAttribute atts
 				,	wItemInfo		= CustomInfo {customInfoLook={lookFun=controlLook,lookPen=getInitialPen atts,lookSysUpdate=True}}
-				,	wItemAtts		= filter (not o redundantAttribute) atts
+				,	wItemAtts		= map validateControlPos (filter (not o redundantAttribute) atts)
 				,	wItems			= []
 				,	wItemVirtual	= False
 				,	wItemPos		= zero
@@ -316,7 +316,7 @@ instance Controls EditControl where
 										,	editInfoWidth	= size.w			// PA: this field might have become redundant
 										,	editInfoNrLines	= nrLines
 										}
-				,	wItemAtts		= filter (not o redundantAttribute) atts
+				,	wItemAtts		= map validateControlPos (filter (not o redundantAttribute) atts)
 				,	wItems			= []
 				,	wItemVirtual	= False
 				,	wItemPos		= zero
@@ -357,7 +357,7 @@ instance Controls (LayoutControl c)	| Controls c where
 				,	wItemShow		= not (contains isControlHide atts)
 				,	wItemSelect		= getSelectStateAttribute atts
 				,	wItemInfo		= NoWItemInfo
-				,	wItemAtts		= filter (not o redundantAttribute) atts
+				,	wItemAtts		= map validateControlPos (filter (not o redundantAttribute) atts)
 				,	wItems			= map controlStateToWElementHandle cs
 				,	wItemVirtual	= False
 				,	wItemPos		= zero
@@ -388,7 +388,7 @@ instance Controls PopUpControl where
 										,	popUpInfoIndex = validatePopUpIndex nrItems index
 										,	popUpInfoEdit  = Nothing
 										}
-				,	wItemAtts		= filter (not o redundantAttribute) atts
+				,	wItemAtts		= map validateControlPos (filter (not o redundantAttribute) atts)
 				,	wItems			= []
 				,	wItemVirtual	= False
 				,	wItemPos		= zero
@@ -440,7 +440,7 @@ instance Controls RadioControl where
 										,	radioLayout= validateLayout nrItems layout
 										,	radioIndex = setBetween index 1 nrItems
 										}
-				,	wItemAtts		= filter (not o redundantAttribute) atts
+				,	wItemAtts		= map validateControlPos (filter (not o redundantAttribute) atts)
 				,	wItems			= []
 				,	wItemVirtual	= False
 				,	wItemPos		= zero
@@ -491,7 +491,7 @@ instance Controls SliderControl where
 			 							,	sliderInfoState	= validateSliderState sliderState
 			 							,	sliderInfoAction= action
 			 							}
-				,	wItemAtts		= filter (not o redundantAttribute) atts
+				,	wItemAtts		= map validateControlPos (filter (not o redundantAttribute) atts)
 				,	wItems			= []
 				,	wItemVirtual	= False
 				,	wItemPos		= zero
@@ -532,7 +532,7 @@ instance Controls TextControl where
 				,	wItemShow		= not (contains isControlHide atts)
 				,	wItemSelect		= getSelectStateAttribute atts
 				,	wItemInfo		= TextInfo {textInfoText=textLine}
-				,	wItemAtts		= filter (not o redundantAttribute) atts
+				,	wItemAtts		= map validateControlPos (filter (not o redundantAttribute) atts)
 				,	wItems			= []
 				,	wItemVirtual	= False
 				,	wItemPos		= zero
@@ -628,3 +628,7 @@ validateOrigin domain origin
 	= {	x=setBetween origin.x domain.corner1.x domain.corner2.x
 	  ,	y=setBetween origin.y domain.corner1.y domain.corner2.y
 	  }
+
+validateControlPos :: !(ControlAttribute .st) -> ControlAttribute .st
+validateControlPos (ControlPos itemPos) = ControlPos (validateItemPos itemPos)
+validateControlPos att                  = att

@@ -74,3 +74,8 @@ getOSDInfoOSToolbar :: !OSDInfo -> Maybe OSToolbar
 	active menu system. (Always True on Windows; use menu bar on Mac.)
 */
 osOSDInfoIsActive :: !OSDInfo !*OSToolbox -> (!Bool, !*OSToolbox)
+
+/*	getOSDInfoOffset returns the offset vector (dx,dy) that points to the left-top corner of the client area
+	of the corresponding infrastructure.
+*/
+getOSDInfoOffset :: !OSDInfo !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)

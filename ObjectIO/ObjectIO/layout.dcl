@@ -39,3 +39,7 @@ layoutItems				:: !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) !Size !Size ![(ViewDoma
 	requested size, minimum size. The list of (ViewDomain,Point2) is the current view domains and origins of all 
 	parent objects in ascending order.
 */
+
+itemPosOffset			:: !ItemOffset [(ViewDomain,Origin)] -> Alt2 Vector2 Alignment
+/*	itemPosOffset calculates the actual offset vector of the given ItemOffset value.
+*/

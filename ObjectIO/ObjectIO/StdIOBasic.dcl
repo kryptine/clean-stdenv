@@ -92,3 +92,10 @@ movePoint	:: !Vector2 !Point2 -> .Point2	// {vx,vy} {x,y} -> {vx+x,vy+y}
 ::	IdFun st		:==	st -> st
 
 ::	Void			=	Void
+
+
+::	Alt2 a b		= Alt1Of2 a | Alt2Of2 b		// Alternative data type in cases where Either causes name clashes
+alt1Of2				:: !(Alt2 a b) -> a			// Take first  alternative if applicable (test with isAlt1Of2)
+alt2Of2				:: !(Alt2 a b) -> b			// Take second alternative if applicable (test with isAlt2Of2)
+isAlt1Of2			:: !(Alt2 a b) -> Bool		// True iff (Alt1Of2 _)
+isAlt2Of2			:: !(Alt2 a b) -> Bool		// True iff (Alt2Of2 _)

@@ -245,14 +245,16 @@ where
 */
 calcRootPosition :: !(!Int,!Int) ![(ViewDomain,Origin)] !LayoutItem !(!Int,![Root]) -> (!Int,![Root])
 calcRootPosition itemSpaces orientations item1 sDone=:(sizeY,done)
-	| isFix
+	| isFix					// {Fix}
 		= (sizeY, [item1`:done])
 		with
 			(_,origin)		= hd orientations
-			itemoffset		= itemPosOffset fixpos orientations
+			itemoffset		= case itemPosOffset fixpos orientations of
+								Alt1Of2 v	= v
+								otherwise	= layoutFatalError "calcRootPosition" "root item with ItemPos=Fix has illegal ItemOffset argument: OffsetAlign"
 			pos				= itemoffset-toVector origin
 			item1`			= {rootItem=item1,rootPos=pos,rootTree=[]}
-	| isRelative && exists
+	| isRelative && exists	// {LeftOf,RightTo,Above,Below}
 		= (sizeY`,[item2`:done1])
 		with
 			(sizeY`,item2`)	= if (IsRelativeX pos1)
@@ -260,15 +262,17 @@ calcRootPosition itemSpaces orientations item1 sDone=:(sizeY,done)
 								 (calcYPosition itemSpaces orientations item1 id2 sizeY item2)
 	| isRelative
 		= layoutFatalError "calculating layout" "reference to unknown Id (not caught by sortLayoutItems)"
-	| IsCorner pos1
+	| IsCorner pos1			// {LeftTop,RightTop,LeftBottom,RightBottom}
 		= (sizeY, [item1`:done])
 		with
 			item1`			= {rootItem=item1,rootPos=zero,rootTree=[]}
-	| otherwise
+	| otherwise				// {Left,Center,Right}
 		= (max sizeY (sizeY+yOffset1+h), [{rootItem=item1,rootPos={zero & vy=sizeY+yOffset1},rootTree=[]}:done])
 		with
 			h				= item1.liItemSize.h
-			itemoffset		= itemPosOffset (snd pos1) orientations
+			itemoffset		= case itemPosOffset (snd pos1) orientations of
+								Alt1Of2 v	= v
+								otherwise	= layoutFatalError "calcRootPosition" "root item with ItemPos in {Left,Center,Right} has illegal ItemOffset argument: OffsetAlign"
 			yOffset			= itemoffset.vy
 			yOffset1		= if (sizeY==0) yOffset (snd itemSpaces+yOffset)
 where
@@ -290,13 +294,23 @@ where
 			  ,	{item2 & rootTree=[depend:tree2]}
 			  )
 	where
-		pos1				= item1.liItemPos;	size1	= item1.liItemSize;
+		pos1				= item1.liItemPos;		size1		= item1.liItemSize;
 		pos2				= root2.liItemPos;
 		(isFix2,_)			= IsFix pos2
-		l					= if (IsLeftOf pos1) (corner2.vx-size1.w-fst itemSpaces+offset.vx)
-												 (corner2.vx+size2.w+fst itemSpaces+offset.vx)
-		t					= corner2.vy+offset.vy
+		l					= if (IsLeftOf pos1)
+								(corner2.vx-size1.w-fst itemSpaces+if isVectorOffset v.vx zero)
+								(corner2.vx+size2.w+fst itemSpaces+if isVectorOffset v.vx zero)
+		t					= corner2.vy + dy
+		dy					= if isVectorOffset							// determine vertical offset:
+								v.vy									// take exact offset of vector
+								(case align of
+									AlignTop	= zero					// align top coordinates
+									AlignCenter	= (size2.h-size1.h)/2	// center bodies of items
+									AlignBottom	=  size2.h-size1.h		// align bottom coordinates
+								)
 		offset				= itemPosOffset (snd pos1) orientations
+		isVectorOffset		= isAlt1Of2 offset;		v		= alt1Of2 offset
+		isAlignOffset		= isAlt2Of2 offset;		align	= alt2Of2 offset;
 		(ok,corner2,size2)	= getLayoutItemPosSize id2 item2
 		depend				= {relativeItem=item1,relativePos={vx=l,vy=t}}
 	
@@ -313,13 +327,23 @@ where
 			  ,	{item2 & rootTree=[depend:tree2]}
 			  )
 	where
-		pos1				= item1.liItemPos;	size1	= item1.liItemSize;
+		pos1				= item1.liItemPos;		size1	= item1.liItemSize;
 		pos2				= root2.liItemPos;
 		(isFix2,_)			= IsFix pos2
-		l					= corner2.vx+offset.vx
-		t					= if (IsBelow pos1) (corner2.vy+size2.h+snd itemSpaces+offset.vy)
-												(corner2.vy-size1.h-snd itemSpaces+offset.vy)
+		l					= corner2.vx + dx
+		dx					= if isVectorOffset 						// determine horizontal offset:
+								v.vx									// take exact offset of vector
+								(case align of
+									AlignLeft	= zero					// align left coordinates
+									AlignCenter	= (size2.w-size1.w)/2	// align bodies of items
+									AlignRight	=  size2.w-size1.w		// align right coordinates
+								)
+		t					= if (IsBelow pos1) 
+								(corner2.vy+size2.h+snd itemSpaces+if isVectorOffset v.vy zero)
+								(corner2.vy-size1.h-snd itemSpaces+if isVectorOffset v.vy zero)
 		offset				= itemPosOffset (snd pos1) orientations
+		isVectorOffset		= isAlt1Of2 offset;		v		= alt1Of2 offset;
+		isAlignOffset		= isAlt2Of2 offset;		align	= alt2Of2 offset;
 		(ok,corner2,size2)	= getLayoutItemPosSize id2 item2
 		depend				= {relativeItem=item1,relativePos={vx=l,vy=t}}
 
@@ -350,7 +374,9 @@ where
 		corner			= root.rootPos
 		size			= root.rootItem.liItemSize
 		(loc,offset)	= root.rootItem.liItemPos
-		v				= itemPosOffset offset orientations
+		v				= case itemPosOffset offset orientations of
+							Alt1Of2 v	= v
+							otherwise	= layoutFatalError "fitRootInArea" "root control has illegal ItemOffset argument"
 		itemBoundBox	= getRootBoundingBox root
 		(reqX,reqY)		= delimit loc itemBoundBox
 		
@@ -411,43 +437,51 @@ calcFramePosition hMargins=:(lMargin,_) vMargins=:(tMargin,_) orientations sizeA
 where
 	pos	= item.rootItem.liItemPos
 	
+/*	lineShift determines the offset of centered and right-oriented elements.
+	Note that this function assumes that ItemOffset in ItemPos is not OffsetAlign.
+*/
 	lineShift :: [(ViewDomain,Origin)] !ItemPos !Int -> Int
 	lineShift orientations (Center,offset) space
-		= space/2+vx
-	where
-		{vx}	= itemPosOffset offset orientations
+		= case itemPosOffset offset orientations of
+			Alt1Of2 {vx} = space/2+vx
 	lineShift orientations (_,offset) space
-		= space+vx
-	where
-		{vx}	= itemPosOffset offset orientations
-	
+		= case itemPosOffset offset orientations of
+			Alt1Of2 {vx} = space+vx
+
+/*	cornerShift determines the offset vector of the ItemPos argument.
+	Note that this function assumes that ItemOffset in ItemPos is not OffsetAlign.
+*/
 	cornerShift :: [(ViewDomain,Origin)] !ItemPos !Size !Size -> Vector2
 	cornerShift orientations (LeftTop,offset) _ _
-		= itemPosOffset offset orientations
+		= case itemPosOffset offset orientations of
+			Alt1Of2 v	= v
+			otherwise	= layoutFatalError "cornerShift _ (LeftTop,_) _ _" "ItemOffset argument is an Alignment instead of a Vector2"
 	cornerShift orientations (RightTop,offset) {w=wItem} {w}
-		= {v & vx=w-wItem+v.vx}
-	where
-		v	= itemPosOffset offset orientations
+		= case itemPosOffset offset orientations of
+			Alt1Of2	v	= {v & vx=w-wItem+v.vx}
+			otherwise	= layoutFatalError "cornerShift _ (RightTop,_) _ _" "ItemOffset argument is an Alignment instead of a Vector2"
 	cornerShift orientations (LeftBottom,offset) {h=hItem} {h}
-		= {v & vy=h-hItem+v.vy}
-	where
-		v	= itemPosOffset offset orientations
+		= case itemPosOffset offset orientations of
+			Alt1Of2 v	= {v & vy=h-hItem+v.vy}
+			otherwise	= layoutFatalError "cornerShift _ (LeftBottom,_) _ _" "ItemOffset argument is an Alignment instead of a Vector2"
 	cornerShift orientations (RightBottom,offset) {w=wItem,h=hItem} {w,h}
-		= {vx=w-wItem+v.vx,vy=h-hItem+v.vy}
-	where
-		v	= itemPosOffset offset orientations
+		= case itemPosOffset offset orientations of
+			Alt1Of2 v	= {vx=w-wItem+v.vx,vy=h-hItem+v.vy}
+			otherwise	= layoutFatalError "cornerShift _ (RightBottom,_) _ _" "ItemOffset argument is an Alignment instead of a Vector2"
 
 
 //	itemPosOffset calculates the actual offset vector of the given ItemOffset value.
 
-itemPosOffset :: !ItemOffset [(ViewDomain,Origin)] -> Vector2
+itemPosOffset :: !ItemOffset [(ViewDomain,Origin)] -> Alt2 Vector2 Alignment
 itemPosOffset NoOffset _
-	= zero
+	= Alt1Of2 zero
 itemPosOffset (OffsetVector v) _
-	= v
+	= Alt1Of2 v
+itemPosOffset (OffsetAlign a) _
+	= Alt2Of2 a
 itemPosOffset (OffsetFun i f) orientations
 	| isBetween i 1 (length orientations)
-		= f (orientations!!(i-1))
+		= Alt1Of2 (f (orientations!!(i-1)))
 	| otherwise
 		= layoutError "calculating OffsetFun" ("illegal ParentIndex value: "+++toString i)
 

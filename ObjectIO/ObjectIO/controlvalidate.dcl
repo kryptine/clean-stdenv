@@ -35,3 +35,8 @@ bindReceiverControlIds	:: !SystemId !Id ![WElementHandle .ls .pst] !*ReceiverTab
 */
 controlIdsAreConsistent :: !SystemId !Id ![WElementHandle .ls .pst] !*ReceiverTable !*IdTable
 							   -> (!Bool,![WElementHandle .ls .pst],!*ReceiverTable,!*IdTable)
+
+
+/*	validateItemPos checks if the OffsetAlign argument of ItemPos matches the ItemLoc argument.
+*/
+validateItemPos			:: !ItemPos -> ItemPos

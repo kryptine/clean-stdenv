@@ -1024,7 +1024,7 @@ setWindowPos id pos ioState
 		  							_         -> (OSNoWindowPtr,OSNoWindowPtr)
 		# (wMetrics,ioState)	= ioStGetOSWindowMetrics ioState
 		# (tb,ioState)			= getIOToolbox ioState
-		# (pos,windows,tb)		= exactWindowPos wMetrics wSize (Just pos) wKind Modeless windows tb
+		# (pos,windows,tb)		= exactWindowPos wMetrics osdInfo wSize (Just pos) wKind Modeless windows tb
 		# tb					= osSetWindowPos (if (isSDI && wids.wPtr==clientPtr) framePtr wids.wPtr) (toTuple pos) True True tb
 		# ioState				= setIOToolbox tb ioState
 		= ioStSetDevice (WindowSystemState windows) ioState
