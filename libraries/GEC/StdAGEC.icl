@@ -58,97 +58,82 @@ mkAGEC bimapGEC descriptor =  Hidden bimapGEC (gGEC{|*->*->*|} undef gGEC{|*|}) 
 (^=) infixl  :: (AGEC a) a -> (AGEC a)
 (^=) (Hidden bimap ggec descr) nvalue = (Hidden {bimap & value = nvalue} ggec descr)
 
-
-gGEC{|AGEC|} gGECa gecArgs pSt
-	= let (aGEC,pSt1) = openGECId pSt
-	  in  agecGEC aGEC gGECa gecArgs pSt1
-
 ::	AGECSt a env
-	=	{	aGECVisible    :: !Bool
-		,	aGECGUILoc     :: !GUILoc
-		,	aGECOBJECTLoc  :: !OBJECTControlId
-		,	aGECGECVALUE   :: GECVALUE a env
+	=	E. b:
+		{	agecBimapGEC:: !GECVALUE (BimapGEC a b) env		// The handle to the BimapGEC
+		,	agecAGEC    :: !AGEC a							// The current AGEC value
 		}
 
-agecGEC :: !(GECId (AGEC a)) !(InfraGEC a (PSt .ps)) -> InfraGEC (AGEC a) (PSt .ps)
-/**************************************************************************************/
-agecGEC ::   !(GECId     (AGEC a)) 
-             !(InfraGEC  a        (PSt .ps))
-           -> InfraGEC   (AGEC a) (PSt .ps)
-agecGEC tGEC gGECa = aGECGEC` tGEC gGECa
+gGEC{|AGEC|} gGECa gecArgs pSt
+	= gGEC_AGEC gGECa gecArgs pSt
 where
-	aGECGEC` tGEC /*gecguiFun*/ gGECa gecArgs=:{location=(guiLoc,objLoc),outputOnly,gec_value=mcv,update} pSt
-		# lSt =
-			{ aGECVisible  = False 
-			, aGECGECVALUE = undef
-			, aGECGUILoc   = guiLoc
-			, aGECOBJECTLoc= objLoc
-			}
-		= GEC2 tGEC aGEC_trace_name gecguiFun (aGECFun gGECa mv) outputOnly lSt pSt
+	gGEC_AGEC gGECa gecArgs=:{gec_value=Just abstractGEC=:(Hidden bimapGEC gGECbimapGEC _),update=biupdate,location,makeUpValue,outputOnly} pSt
+		# (abbaGEC,pSt)	= gGECbimapGEC {gecArgs & gec_value=Just bimapGEC,update=bupdate abstractGEC} pSt
+		# (aGEC,pSt)	= openGECId pSt
+		# aDef			= GECReceiver aGEC (fun bupdate)
+		# lSt			= { agecBimapGEC = abbaGEC
+						  , agecAGEC     = abstractGEC
+						  }
+		# (_,pSt)		= openReceiver lSt aDef pSt
+		# pSt			= openGEC aGEC pSt
+		= (newGEC aGEC,pSt)
 	where
-		aGEC_trace_name				= "AGEC"
-		update` r x y				= update r x y
-	
-		updateOBJECTA reason a pSt
-			= update` reason (OBJECT a) pSt
-	
-		mv							= case mcv of
-										Just (OBJECT x) = Just x
-										_               = Nothing
+		bupdate (Hidden bimap gGECb descr) reason nbimap pSt 
+			= biupdate reason (Hidden {bimap & value = nbimap.value} gGECb descr) pSt
 		
-		aGECFun _ _ _ _ InGetValue (lSt=:{aGECGECVALUE},pSt)
-			# (bound,pSt)			= aGECGECVALUE.gecOpened pSt
-			| bound
-				# (a,pSt)			= aGECGECVALUE.gecGetValue pSt
-				= (OutGetValue (OBJECT a),(lSt,pSt))
-			| otherwise
-				= abort ("gGEC{|"+++aGEC_trace_name+++"|}: handling request for InGetValue failed: no child GEC.")
-		aGECFun gGECa _ _ _ msg=:(InSetValue yesUpdate v=:(OBJECT a)) (lSt=:{aGECVisible,aGECGECVALUE},pSt)
-			# pSt				= aGECGECVALUE.gecSetValue NoUpdate a pSt
-			# pSt				= if (yesUpdate === YesUpdate) (update` Changed v pSt) pSt
-			= (OutDone,(lSt,pSt))
-		aGECFun gGECa mv {guiLocs} tGEC msg=:InOpenGEC (lSt=:{aGECGUILoc,aGECOBJECTLoc},pSt)
-			# [aLoc:_]				= guiLocs (aGECGUILoc,aGECOBJECTLoc)
-			# (setA,pSt)			= gGECa {gecArgs & location=aLoc, gec_value=mv,update=updateOBJECTA} pSt
-			# lSt					= {lSt & aGECGECVALUE=setA}
-			= (OutDone,(lSt,pSt))
-		aGECFun _ _ {guiClose} tGEC InCloseGEC (lSt=:{aGECVisible,aGECGECVALUE},pSt)
-			# pSt					= if aGECVisible (guiClose pSt) pSt
-			# pSt					= appPIO (closeReceiver (GECIdtoId tGEC)) pSt
-			# lSt					= {lSt & aGECVisible=False}
-			# (bound,pSt)			= aGECGECVALUE.gecOpened pSt
-			| bound
-				# pSt				= aGECGECVALUE.gecClose pSt
+		fun :: (A.b:(AGEC a) -> Update (BimapGEC a b) (PSt .ps)) (GECMsgIn  (AGEC a)) *(AGECSt a (PSt .ps),PSt .ps) -> (GECMsgOut (AGEC a), *(AGECSt a (PSt .ps),PSt .ps))
+		fun _ InGetValue (lSt=:{agecBimapGEC=abbaGEC,agecAGEC=Hidden bimapGEC gGECbimapGEC descr},pSt)
+			# (nval,pSt)	= abbaGEC.gecGetValue pSt
+			= (OutGetValue (Hidden {bimapGEC & value=nval.value} gGECbimapGEC descr),(lSt,pSt))
+		fun bupdate (InSetValue includeUpdate newAGECa=:(Hidden nval nGECfun ndescr)) (lSt=:{agecBimapGEC=abbaGEC,agecAGEC=(Hidden _ _ odescr)},pSt)
+			| odescr == ndescr	// The same AGEC is used for the new value
+				# (bimap,pSt)	= abbaGEC.gecGetValue pSt
+				# pSt			= abbaGEC.gecSetValue includeUpdate {bimap & value=nval.value} pSt		// send new value down the current infrastructure
 				= (OutDone,(lSt,pSt))
-			| otherwise
+			| otherwise			// A different AGEC, of unknown type, is used for the new value
+				# pSt			= abbaGEC.gecClose pSt													// close old infrastructure
+				# (nabbaGEC,pSt)= nGECfun { gec_value   = Just nval										// build new infrastructure
+								          , update      = bupdate newAGECa
+								          , location    = location
+								          , makeUpValue = makeUpValue
+								          , outputOnly  = outputOnly
+								          } pSt
+				# lSt			= { agecBimapGEC = nabbaGEC
+								  , agecAGEC     = newAGECa
+								  }
 				= (OutDone,(lSt,pSt))
-		aGECFun gGECa mv tGUIGEC=:{guiLocs,guiOpen} tGEC msg=:(InOpenGUI guiLoc objLoc) (lSt=:{aGECVisible,aGECGECVALUE,aGECGUILoc},pSt)
-			| aGECVisible && sameGUILoc
-				= (OutDone,(lSt,pSt))
-			| otherwise
-				# (lSt,pSt)			= if sameGUILoc (lSt,pSt)
-									                (snd (aGECFun gGECa mv tGUIGEC tGEC (InCloseGUI SkipCONS) (lSt,pSt)))
-				# [aLoc:_]			= guiLocs (guiLoc,objLoc)
-				# pSt				= guiOpen guiLoc pSt
-				# pSt				= aGECGECVALUE.gecOpenGUI aLoc pSt
-				# lSt				= {lSt & aGECVisible=True,aGECGUILoc=guiLoc,aGECOBJECTLoc=objLoc}
-				= (OutDone,(lSt,pSt))
-		where
-			sameGUILoc				= guiLoc==aGECGUILoc
-		aGECFun _ _ {guiClose} _ msg=:(InCloseGUI _) (lSt=:{aGECVisible,aGECGECVALUE},pSt)
-			# pSt				= guiClose pSt
-			# pSt				= aGECGECVALUE.gecCloseGUI SkipCONS pSt
-			# lSt				= {lSt & aGECVisible=False}
-			= (OutDone,(lSt,pSt))
-		aGECFun _ _ _ _ (InSwitchCONS path) (lSt=:{aGECGECVALUE},pSt)
-			# pSt				= aGECGECVALUE.gecSwitch path pSt
-			= (OutDone,(lSt,pSt))
-		aGECFun _ _ _ _ (InArrangeCONS arr path) (lSt=:{aGECGECVALUE},pSt)
-			# pSt				= aGECGECVALUE.gecArrange arr path pSt
-			= (OutDone,(lSt,pSt))
-		aGECFun _ _ _ _ _ st
-			= (OutDone,st)
-/**************************************************************************************/
+		fun _ InOpenGEC (lSt=:{agecBimapGEC=abbaGEC},pSt)
+			= (OutDone,(lSt,abbaGEC.gecOpen pSt))
+		fun _ InCloseGEC (lSt=:{agecBimapGEC=abbaGEC},pSt)
+			= (OutDone,(lSt,abbaGEC.gecClose pSt))
+		fun _ (InOpenGUI guiLoc objControlId) (lSt=:{agecBimapGEC=abbaGEC},pSt)
+			= (OutDone,(lSt,abbaGEC.gecOpenGUI (guiLoc,objControlId) pSt))
+		fun _ (InCloseGUI keepActiveCONS) (lSt=:{agecBimapGEC=abbaGEC},pSt)
+			= (OutDone,(lSt,abbaGEC.gecCloseGUI keepActiveCONS pSt))
+		fun _ (InSwitchCONS upd consPos) (lSt=:{agecBimapGEC=abbaGEC},pSt)
+			= (OutDone,(lSt,abbaGEC.gecSwitch upd consPos pSt))
+		fun _ (InArrangeCONS arrangement consPos) (lSt=:{agecBimapGEC=abbaGEC},pSt)
+			= (OutDone,(lSt,abbaGEC.gecArrange arrangement consPos pSt))
+		
+		newGEC :: !(GECId t) -> .GECVALUE t (PSt .ps)
+		newGEC tGEC
+			= { gecOpen     = openGEC     tGEC
+		      , gecClose    = closeGEC    tGEC
+		      , gecOpenGUI  = openGECGUI  tGEC
+		      , gecCloseGUI = closeGECGUI tGEC
+		      , gecGetValue = getGECvalue tGEC
+		      , gecSetValue = setGECvalue tGEC
+		      , gecSwitch   = switchGEC   tGEC
+		      , gecArrange  = arrangeGEC  tGEC
+		      , gecOpened   = accPIO (isGECIdBound tGEC)
+		      }
+
+	gGEC_AGEC gGECa gecArgs pSt		// No AGEC argument, use constGEC as default implementation
+		# (aGEC,pSt)	= gGECa {gecArgs & gec_value=Nothing, update = \v r env -> env} pSt
+		# (a,   pSt)	= aGEC.gecGetValue pSt
+		# pSt			= aGEC.gecClose    pSt
+		= gGEC_AGEC gGECa {gecArgs & gec_value=Just (constGEC a)} pSt
+
 
 /******************************************************************************************************
 gGEC{|AGEC|} gGECa gecArgs=:{gec_value=mbimap,update=biupdate} pSt

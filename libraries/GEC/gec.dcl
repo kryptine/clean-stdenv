@@ -28,7 +28,7 @@ derive bimap GECMsgIn, GECMsgOut
 	|	InCloseGEC								/** Close the GEC infrastructure.                                        */
 	|	InOpenGUI !GUILoc !OBJECTControlId		/** Show this visual interface and proceed downwards.                    */
 	|	InCloseGUI !KeepActiveCONS				/** Close this visual interface and proceed downwards.                   */
-	|	InSwitchCONS ![ConsPos]					/** Make given CONS path active.                                         */
+	|	InSwitchCONS !IncludeUpdate ![ConsPos]	/** Make given CONS path active.                                         */
 	|	InArrangeCONS !Arrangement ![ConsPos]	/** Arrange given CONS.                                                  */
 ::	GECMsgOut t
 	=	OutGetValue t							/** Reply to InGetValue request. Return current value.                   */
@@ -43,7 +43,7 @@ derive bimap GECMsgIn, GECMsgOut
 	|	ArrangeShow								/** Show CONS.                                                           */
 
 derive gEq IncludeUpdate, KeepActiveCONS, Arrangement
-derive gPrint ConsPos, Arrangement
+derive gPrint ConsPos, Arrangement, IncludeUpdate
 
 ::	GECReceiver t ls pst
  =	GECReceiver (GECId t) (Receiver2Function (GECMsgIn t) (GECMsgOut t) *(ls,pst))
@@ -75,15 +75,15 @@ derive gEq UpdateReason
 		}
 
 ::	GECVALUE t env
-	=	{ gecOpen     ::                             env -> env // RWS not used ???
-		, gecClose    ::                             env -> env
-		, gecOpenGUI  :: (GUILoc,OBJECTControlId) -> env -> env
-		, gecCloseGUI :: KeepActiveCONS           -> env -> env
-		, gecGetValue ::                             env -> *(t,   env)
+	=	{ gecOpen     ::                               env -> env // RWS not used ???
+		, gecClose    ::                               env -> env
+		, gecOpenGUI  :: (GUILoc,OBJECTControlId)   -> env -> env
+		, gecCloseGUI :: KeepActiveCONS             -> env -> env
+		, gecGetValue ::                               env -> *(t,   env)
 		, gecSetValue :: SetValue t env
-		, gecSwitch   :: [ConsPos]                -> env -> env
-		, gecArrange  :: Arrangement -> [ConsPos] -> env -> env
-		, gecOpened   ::                             env -> *(Bool,env)
+		, gecSwitch   :: IncludeUpdate -> [ConsPos] -> env -> env
+		, gecArrange  :: Arrangement   -> [ConsPos] -> env -> env
+		, gecOpened   ::                               env -> *(Bool,env)
 		}
 derive bimap GECVALUE
 
@@ -109,12 +109,12 @@ derive gEq PropagationDirection
 getGECvalue		:: !(GECId t)                   !(PSt .ps) -> (t,!PSt .ps)
 setGECvalue		:: !(GECId t) !IncludeUpdate !t !(PSt .ps) -> PSt .ps
 
-/**	switchGEC gec path
+/**	switchGEC gec yesUpdate path
 		when sent to a EITHER root GEC, it will cause this particular constructor to be chosen
 		as the `active' alternative of the value that is being edited.
 		When sent to any other GEC, it will have no effect.
 */
-switchGEC :: !(GECId t) ![ConsPos] !(PSt .ps) -> PSt .ps
+switchGEC :: !(GECId t) !IncludeUpdate ![ConsPos] !(PSt .ps) -> PSt .ps
 
 /** arrangeGEC gec arrangement path
 		when sent to a EITHER root GEC, it will cause this particular constructor to be rearranged

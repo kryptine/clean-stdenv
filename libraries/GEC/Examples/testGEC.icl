@@ -4,7 +4,7 @@ import StdEnv
 import StdIO
 import genericgecs
 import StdGEC, StdGECExt, StdAGEC
-import StdGecComb
+import StdGecComb, basicAGEC
 
 // TO TEST JUST REPLACE THE EXAMPLE NAME IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
 // ALL EXAMPLES HAVE TO BE OF FORM pst -> pst
@@ -15,8 +15,30 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	test25
+ 	testX`
  	world  
+
+:: T = C1 (AGEC Int)
+	 | C2 (AGEC Real)
+	 
+derive gGEC T
+
+testX = CGEC (selfGEC "self" test) (C1 (counterGEC 0))
+where
+	 test (C1 igec) = C1 (counterGEC ((^^ igec) + 5))
+//	 test (C1 igec) = C2 (counterGEC (toReal (^^ igec)))
+	 test (C2 rgec) = C1 (counterGEC (toInt (^^ rgec)))
+
+:: T` = C1` Int
+	  | C2` Real
+	 
+derive gGEC T`
+
+testX` = CGEC (selfGEC "self" test) (C1` 0)
+where
+//	 test (C1` i) = C1` (i + 5)
+	 test (C1` i) = C2` (toReal i)
+	 test (C2` r) = C1` (toInt r)
 
 testbetsy = CGEC (selfGEC "self" mytestje) (mydata 5)
 where
@@ -122,7 +144,7 @@ doubleCounterGEC a = mkAGEC    { toGEC   = toEditRec //\arg _ -> toMyEditRecord2
 							, fromGEC = fromMyData o fromMyEditRecord2
 							, updGEC  = toMyEditRecord21 o updRecord o fromMyEditRecord2
 							, value   = a
-							}
+							} "doubleCounterGEC"
 							where 
 							 toMyData n 	= initRecord2 zero n
 							 toEditRec arg Undefined = toMyEditRecord21 (toMyData arg)

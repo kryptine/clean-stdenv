@@ -85,7 +85,7 @@ createDummyGEC outputOnly a userUpdate pSt
 	, gecCloseGUI = \_ -> id
 	, gecGetValue = readStore myStore
 	, gecSetValue = update myStore
-	, gecSwitch   = \_ -> id
+	, gecSwitch   = \_ _-> id
 	, gecArrange  = \_ _ -> id
 	, gecOpened   = \env -> (True,env)
 	},pSt)

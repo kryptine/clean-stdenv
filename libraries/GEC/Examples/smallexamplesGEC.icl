@@ -16,8 +16,39 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	example_cnt6
+ 	testX`//example_cnt6
  	world  
+
+:: T = C1 (P Int (AGEC Int))
+	 | C2 (P Int (AGEC Real))
+	 
+derive gGEC T
+
+testX` pst = let (cGEC,pst`) = createNGEC "self" Interactive (C1 (P -10 (counterGEC 0))) (\_ t -> cGEC.gecSetValue NoUpdate (test t)) pst
+             in  pst`
+where
+	 test (C1 (P x igec))
+	 	| isEven i	= C1 (P x (counterGEC i))
+	 	| otherwise	= C2 (P x (counterGEC (toReal (^^ igec) + 5.0)))
+	 where
+	 	i	= ^^igec
+	 test (C2 (P x rgec))
+	 	| isEven i	= C2 (P x (counterGEC ((^^ rgec) + 5.0)))
+	 	| otherwise	= C1 (P x (counterGEC i))
+	 where
+	 	i	= toInt (^^rgec)
+
+:: T` = C1` (P Int  Bool)
+	  | C2` (P Real Bool)
+:: P a b = P a b
+derive gGEC T`,P
+
+testXX` pst = let (cGEC,pst`) = createNGEC "self" Interactive (C1` (P 0 False)) (\_ t -> cGEC.gecSetValue NoUpdate (test t)) pst
+             in  pst`
+//testX` = CGEC (selfGEC "self" test) (C1` 0)
+where
+	 test (C1` (P i b)) = C2` (P (toReal i) b)
+	 test (C2` (P r b)) = C1` (P (toInt  r) b)
 
 example_l1		= 	CGEC (mkGEC		"Simple List Editor")					[1] 
 example_l2  	=	CGEC (applyGEC	"Sum of List" sum) 						[1..5]  									
