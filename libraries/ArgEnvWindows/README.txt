@@ -1,5 +1,5 @@
 ArgEnv
-Version  1.0.2
+Version  1.0.3
 Ronny Wichers Schreur
 ronny@cs.kun.nl
 
@@ -7,8 +7,8 @@ The ArgEnv package provides a Clean interface to the command line
 arguments and the environment variables. 
 
 This is the README for the Windows version. The Windows version has
-been tested on Windows 2000 with Clean 1.3.2, but it should work with
-all Windows versions with Clean 1.3.2 or better.
+been tested on Windows XP with Clean 2.1, but it should work with
+all Windows versions with Clean 2.0 or better.
 
 
 FILES
