@@ -1,9 +1,6 @@
 implementation module StdTimer
 
 
-//	Clean Object I/O library, version 1.2.1
-
-
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	commondef, id, iostate, timeraccess, timerdefaccess, timerdevice, timertable
 import	StdId, StdTimerAttribute, StdTimerElementClass
@@ -18,12 +15,11 @@ stdTimerFatalError function error
 //	Open timer:
 
 class Timers tdef where
-	openTimer	:: .ls !(tdef .ls (PSt .l)) !(PSt .l)	-> (!ErrorReport,!PSt .l)
-	getTimerType::      (tdef .ls .pst)					-> TimerType
+	openTimer	:: .ls !.(tdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
+	getTimerType::      .(tdef .ls .pst)               -> TimerType
 
 instance Timers (Timer t) | TimerElements t where
-	openTimer :: .ls !(Timer t .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | TimerElements t
-	openTimer ls tDef=:(Timer period items atts) pState
+	openTimer ls (Timer period items atts) pState
 		# pState				= timerFunctions.dOpen pState
 		# (maybe_okId,pState)	= accPIO (validateTimerId maybeId) pState
 		| isNothing maybe_okId
@@ -91,7 +87,6 @@ instance Timers (Timer t) | TimerElements t where
 		addAbleTimerToTimerTable _ _ _ ioState
 			= ioState
 	
-	getTimerType :: (Timer t .ls .pst) -> TimerType	| TimerElements t
 	getTimerType _
 		= "Timer"
 
@@ -273,7 +268,7 @@ ioStGetTimerHandles ioState
 //	General TimerHandle changing function:
 
 ::	DeltaTimerStateHandle pst
-	:== TimerLoc -> *TimerTable -> *((TimerStateHandle pst) -> (*TimerTable,TimerStateHandle pst))
+	:== TimerLoc -> *TimerTable -> *((TimerStateHandle pst) -> *(*TimerTable,TimerStateHandle pst))
 
 changeTimer :: !Id !(DeltaTimerStateHandle (PSt .l)) !(IOSt .l) -> IOSt .l
 changeTimer id f ioState

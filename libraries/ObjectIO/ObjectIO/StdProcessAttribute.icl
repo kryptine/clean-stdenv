@@ -1,15 +1,6 @@
 implementation module StdProcessAttribute
 
 
-//	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
-//	
-//	StdProcessAttribute specifies which ProcessAttributes are valid for each of the
-//	standard interactive processes.
-//	Basic comparison operations and retrieval functions are also included.
-//	********************************************************************************
-
-
 import StdClass
 import StdProcessDef
 

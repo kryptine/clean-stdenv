@@ -1,9 +1,6 @@
 implementation module relayout
 
 
-//	Clean object I/O library, version 1.2
-
-
 import	StdBool, StdFunc, StdList, StdTuple
 import	ospicture, osrgn, oswindow
 import	commondef, windowhandle

@@ -2,9 +2,11 @@ definition module StdKey
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard Object I/O library, version 1.2.2
 //	
 //	StdKey defines the special keys for the Object I/O library. 
+//	Author: Peter Achten
+//	Modified: 7 September 2001 for Clean 2.0
 //	********************************************************************************
 
 

@@ -1,9 +1,6 @@
 implementation module devicefunctions
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	deviceevents
 
 

@@ -1,9 +1,6 @@
 implementation module receiverhandle
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	receivermessage
 import	ostoolbox
 

@@ -183,6 +183,7 @@ pictunfillrect			:: !OSRect	!*Picture -> *Picture
 /*	Scrolling operation (handle with care).
 */
 pictscroll				:: !OSRect !Vector2 !*Picture -> (!OSRect,!*Picture)
+pictscroll2				:: !OSRect !Vector2 !*Picture -> (!OSRect,!*Picture)
 
 
 /*	Polygon drawing operations.

@@ -1,9 +1,6 @@
 implementation module wstate
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdInt, StdList, StdTuple, StdFunc
 import	oswindow
 import	commondef, keyfocus, windowhandle

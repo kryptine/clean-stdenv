@@ -1,10 +1,11 @@
 definition module StdGame
 
-
 //	********************************************************************************
-//	Clean Standard Game library, version 1.2.1
+//	Clean Standard Game library, version 1.2.2
 //	
 //	StdGame contains the functions one needs during a game.
+//	Author:   Mike Wiering
+//	Modified: 15 October 2001 for Clean 2.0 (Peter Achten)
 //	********************************************************************************
 
 
@@ -90,23 +91,24 @@ playSoundSample   :: !SoundID
                      !GameTime !(GSt .gs) -> (!GRESULT, !GSt .gs)
 
 
-getBoundMap       :: !Int !Int !(GSt .gs)
-                  -> (!GRESULT, !(!Int, !DirectionSet), !GSt .gs)
-setBoundMap       :: !Int !Int  !(!Int, !DirectionSet) !(GSt .gs)
-                  -> (!GRESULT, !GSt .gs)
+getBoundMap				:: !Int !Int !(GSt .gs)
+						-> (!GRESULT, !(!Int, !DirectionSet), !GSt .gs)
+setBoundMap				:: !Int !Int  !(!Int, !DirectionSet) !(GSt .gs)
+						-> (!GRESULT, !GSt .gs)
 
 
-defaultInitObject :: Size state SubCode Point2 GameTime 
-                                 !*(GSt .gs) -> GameObjectState state *(GSt .gs)
-defaultGameObject :: !ObjectCode !Size state -> GameObject *(GSt .gs)
-defaultObjectRec  :: SubCode Point2 Size GameTime 
-                                 !*(GSt .gs) -> (!GameObjectRec,!*GSt .gs)
+defaultInitObject		:: Size state SubCode Point2 GameTime !*(GSt .gs)
+									  -> GameObjectState state *(GSt .gs)
+defaultGameObject		:: !ObjectCode !Size state
+									  -> GameObject state *(GSt .gs)
+defaultObjectRec		:: SubCode Point2 Size GameTime !*(GSt .gs)
+									  -> (!GameObjectRec,!*GSt .gs)
 
-blankScreen       :: Level (GSt .gs)
+blankScreen				:: Level (GSt .gs)
 
-defaultShadow     :: !Int -> Shadow
+defaultShadow			:: !Int -> Shadow
 
-defaultMovement       :: Movement
-defaultScrollMovement :: !Int -> Movement
+defaultMovement			:: Movement
+defaultScrollMovement	:: !Int -> Movement
 
-alignCentered     :: Alignment
+alignCentered			:: Alignment

@@ -1,7 +1,5 @@
 implementation module device
 
-//	Clean Object I/O library, version 1.2
-
 import StdOverloaded, StdString
 
 ::	Device						// The set of devices

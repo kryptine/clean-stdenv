@@ -35,17 +35,17 @@ os_defaultprintsetup	::             !*env -> (!PrintSetup, !*env)
 os_printsetupvalid		:: !PrintSetup !*env -> (!Bool,       !*env)
 						
 class PrintEnvironments printEnv where
-	os_printpageperpage	:: !.Bool !Bool 
+	os_printpageperpage :: !Bool !Bool 
 						   !.x
-						   .(.x -> .(PrintInfo -> .(*Picture -> ((.Bool,Point2),(.state,*Picture)))))
-						   ((.state,*Picture) -> ((.Bool,Point2),(.state,*Picture)))
+						   .(.x -> .(PrintInfo -> .(*Picture -> *((.Bool,Point2),*(.state,*Picture)))))
+						   (*(.state,*Picture) -> *((.Bool,Point2),*(.state,*Picture)))
 						   !PrintSetup !*printEnv
 						-> (Alternative .x .state,!*printEnv)
-	os_printsetupdialog	:: !PrintSetup  !*printEnv
+	os_printsetupdialog	::  !PrintSetup !*printEnv
 						-> (!PrintSetup,!*printEnv)
 		
 instance PrintEnvironments Files
-instance PrintEnvironments (PSt .ps)
+instance PrintEnvironments (PSt .l)
 
 os_printsetuptostring	:: !PrintSetup -> String
 os_stringtoprintsetup	:: !String     -> PrintSetup

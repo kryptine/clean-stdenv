@@ -1,7 +1,5 @@
 implementation module osrgn
 
-//	Clean Object I/O library, version 1.2
-
 import	StdBool, StdInt, StdList
 from	ostypes	import OSRect
 import	pictCCall_12, rgnCCall_12

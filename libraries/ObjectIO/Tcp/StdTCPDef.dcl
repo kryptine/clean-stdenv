@@ -1,9 +1,11 @@
 definition module StdTCPDef
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard TCP library, version 1.2.2
 //	
 //	StdTCPDef provides basic definitions for using TCP.
+//	Author: Martin Wierich
+//	Modified: 7 September 2001 for Clean 2.0 (Peter Achten)
 //	********************************************************************************
 
 import	StdReceiverDef
@@ -15,7 +17,7 @@ from	tcp 			import	TCP_SChannel_,TCP_RChannel_,TCP_Listener_,IPAddress
 
 ::	*TCP_SChannel		:==	TCP_SChannel_ ByteSeq
 ::	*TCP_RChannel		:==	TCP_RChannel_ ByteSeq
-::	*TCP_Listener		:== TCP_Listener_ (IPAddress, TCP_DuplexChannel)
+::	*TCP_Listener		:== TCP_Listener_ *(IPAddress, TCP_DuplexChannel)
 
 ::	Port				:== Int
 
@@ -55,7 +57,7 @@ instance toString IPAddress
 ::	*TCP_ListenerReceiver ls pst	
  =	 TCP_ListenerReceiver
 		Id TCP_Listener	
-		((ReceiveMsg (IPAddress,TCP_DuplexChannel)) -> *(*(ls,pst) -> *(ls,pst)))
+		(*(ReceiveMsg *(IPAddress,TCP_DuplexChannel)) -> *(*(ls,pst) -> *(ls,pst)))
 		[ReceiverAttribute *(ls,pst)]
 
 //	To receive characters
@@ -70,16 +72,16 @@ instance toString IPAddress
 	parameter limits the maximum number of iterations.
 */
 ::	NrOfIterations			:== Int
-::	InetLookupFunction  st	:== (Maybe IPAddress)         -> *(st -> st)
-::	InetConnectFunction st 	:== (Maybe TCP_DuplexChannel) -> *(st -> st)
+::	InetLookupFunction  st	:== (Maybe IPAddress)          -> st -> st
+::	InetConnectFunction st 	:== *(Maybe TCP_DuplexChannel) -> *(st -> st)
 
 //	********************************************************************************
 //	for multiplexing
 //	********************************************************************************
 
-:: *TCP_RChannels = TCP_RChannels [TCP_RChannel]	
-:: *TCP_SChannels = TCP_SChannels [TCP_SChannel]
-:: *TCP_Listeners = TCP_Listeners [TCP_Listener]
+:: *TCP_RChannels = TCP_RChannels *[TCP_RChannel]	
+:: *TCP_SChannels = TCP_SChannels *[TCP_SChannel]
+:: *TCP_Listeners = TCP_Listeners *[TCP_Listener]
 
 ::	*PrimitiveRChannel
  =	TCP_RCHANNEL TCP_RChannel

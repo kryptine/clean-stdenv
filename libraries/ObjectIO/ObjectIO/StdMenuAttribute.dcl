@@ -2,11 +2,13 @@ definition module StdMenuAttribute
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard Object I/O library, version 1.2.2
 //	
 //	StdMenuAttribute specifies which MenuAttributes are valid for each of the
 //	standard menus and menu elements.
 //	Basic comparison operations and retrieval functions are also included.
+//	Author: Peter Achten
+//	Modified: 7 September 2001 for Clean 2.0
 //	********************************************************************************
 
 

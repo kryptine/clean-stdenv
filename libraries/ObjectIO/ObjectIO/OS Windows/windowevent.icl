@@ -1,13 +1,6 @@
 implementation module windowevent
 
 
-//	Clean Object I/O library, version 1.2
-
-/*	windowevent defines the DeviceEventFunction for the window device.
-	This function is placed in a separate module because it is platform dependent.
-*/
-
-
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	clCCall_12, clCrossCall_12, windowCrossCall_12
 from	ostypes				import	OSNoWindowPtr

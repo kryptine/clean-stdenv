@@ -1,9 +1,5 @@
 implementation module deviceevents
 
-//	Clean Object I/O library, version 1.2
-//	This module contains all type definitions for OS independent events.
-
-
 import	osevent, ospicture, ostypes
 import	receivermessage, timertable
 from	windowhandle	import WIDS

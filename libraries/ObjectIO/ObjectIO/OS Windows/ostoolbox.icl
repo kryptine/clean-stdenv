@@ -1,7 +1,5 @@
 implementation module ostoolbox
 
-//	Clean Object I/O library, version 1.2
-
 import	StdBool, StdClass, StdInt, StdMisc, StdTuple
 import	clCrossCall_12
 import	code from "cCrossCallFont_121.obj"// PA: moved to ostcp, "cCrossCallTCP_121.obj", "cTCP_121.obj"

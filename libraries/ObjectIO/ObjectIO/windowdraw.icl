@@ -1,10 +1,5 @@
 implementation module windowdraw
 
-
-//	Clean Object I/O library, version 1.2
-
-//	Drawing operations on windows.
-
 import	StdBool, StdFunc, StdInt, StdList
 import	ospicture, osrgn, oswindow
 import	commondef, controllayout, StdPicture, windowaccess

@@ -1,7 +1,5 @@
 implementation module StdTCPChannels
 
-//	Clean Standard Object I/O library, version 1.2.1
-
 import	StdEnv
 import	StdTCPDef, StdChannels, StdTime
 import	StdIOCommon
@@ -159,7 +157,7 @@ instance Send		TCP_SChannel_
 		= (chan.bUnsent, pack_tcpschan chan)
 
 
-addToBuffer :: !.ByteSeq !u:Buffered_SChan -> v:Buffered_SChan, [u <= v]
+addToBuffer :: !ByteSeq !u:Buffered_SChan -> v:Buffered_SChan, [u <= v]
 addToBuffer byteSeq chan
 	# data		= toString byteSeq
 	| size data==0
@@ -312,8 +310,8 @@ class SelectReceive channels
 
 class SelectSend channels
   where
-	accSChannels	:: (TCP_SChannel -> (x, TCP_SChannel)) !*channels
-					-> (![x], !*channels)
+	accSChannels	:: (TCP_SChannel -> *(.x, TCP_SChannel)) !*channels
+					-> (![.x], !*channels)
 	appDisconnected	:: !Int !*channels !*World
 					-> (!Bool, !*channels, !*World)
 
@@ -567,7 +565,7 @@ pollSState [sndIndex:sndIndices] akku s_channels env
 ////////////////////// TCP byte streams to receive ////////////////////////////////////
 
 ::	*TCP_RCharStream	:==		TCP_RCharStream_ Char
-::	*TCP_RCharStreams	= 		TCP_RCharStreams [TCP_RCharStream]
+::	*TCP_RCharStreams	= 		TCP_RCharStreams *[TCP_RCharStream]
 
 toRCharStream	::	!TCP_RChannel -> TCP_RCharStream
 toRCharStream tcp_rchan
@@ -626,7 +624,7 @@ instance closeRChannel			TCP_RCharStream_
 ////////////////////// TCP byte streams to send ////////////////////////////////////
 
 ::	*TCP_SCharStream	:==		TCP_SCharStream_ Char
-::	*TCP_SCharStreams	= 		TCP_SCharStreams [TCP_SCharStream]
+::	*TCP_SCharStreams	= 		TCP_SCharStreams *[TCP_SCharStream]
 
 toSCharStream	::	!TCP_SChannel -> TCP_SCharStream
 toSCharStream tcp_schan

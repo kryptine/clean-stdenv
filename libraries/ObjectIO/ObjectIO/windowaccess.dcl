@@ -1,10 +1,13 @@
 definition module windowaccess
 
 
-//	Clean Object I/O library, version 1.2
-
-/*	Access operations to Window(State)Handle(s).
-*/
+//	********************************************************************************
+//	Clean Standard Object I/O library, version 1.2.2
+//	
+//	Access operations to Window(State)Handle(s).
+//	Author: Peter Achten
+//	Modified: 7 September 2001 for Clean 2.0
+//	********************************************************************************
 
 import	windowhandle
 import	ossystem, ostoolbox

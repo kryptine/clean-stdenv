@@ -5,7 +5,7 @@ module pickRGB
 //
 //	This program creates a windows that allows a user to create a RGB colour.
 //
-//	The program has been written in Clean 1.3.2 and uses the Clean Standard Object I/O library 1.2
+//	The program has been written in Clean 2.0 and uses the Clean Standard Object I/O library 1.2.2
 //	
 //	**************************************************************************************************
 
@@ -17,16 +17,15 @@ Start :: *World -> *World
 Start world
 	# (rgbid,world)		= openR2Id  world
 	# (ids,  world)		= openIds 7 world
-	# pickcontrol		= ColourPickControl rgbid ids initrgb Nothing
-	= startColourPicker rgbid pickcontrol world
+	= startColourPicker rgbid ids world
 where
- 	initrgb				= {r=MaxRGB,g=MaxRGB,b=MaxRGB}
-	startColourPicker rgbid pickcontrol world
+	startColourPicker rgbid ids world
 		= startIO SDI Void initialise [ProcessClose closeProcess] world
 	where
 		initialise pst
-			# (rgbsize,pst)	= controlSize pickcontrol True Nothing Nothing Nothing pst
-			# wdef			= Window "Pick a colour" pickcontrol
+			# (rgbsize,pst)	= controlSize (ColourPickControl rgbid ids initrgb Nothing) 
+			                              True Nothing Nothing Nothing pst
+			# wdef			= Window "Pick a colour" (ColourPickControl rgbid ids initrgb Nothing)
 								[	WindowViewSize   rgbsize
 								,	WindowPen        [PenBack LightGrey]
 								]
@@ -45,18 +44,21 @@ where
 			# (_,pst)		= openWindow undef wdef pst
 			# (_,pst)		= openMenu   undef mdef pst
 			= pst
+		where
+		 	initrgb			= {r=MaxRGB,g=MaxRGB,b=MaxRGB}
 
 		set rid rgb pst		= snd (syncSend2 rid (InSet rgb) pst)
 
 
+
 /*	The definition of the text-slider component:	*/
 
-::	RGBPickControl ls pst
+::	*RGBPickControl ls pst
 	:==	:+: SliderControl TextControl ls pst
 
 RGBPickControl :: RGBColour (String,Id,Id) Id (RGBColour->Int) (Int->RGBColour->RGBColour)
 				 (Maybe ItemPos)
-	-> RGBPickControl RGBColour (PSt .l)
+	-> RGBPickControl *RGBColour (PSt .l)
 RGBPickControl rgb (text,sid,tid) did get set maybePos
 	=	  SliderControl Horizontal length sliderstate slideraction
 													[ControlId sid:controlPos]
@@ -68,18 +70,17 @@ where
 	length		= PixelWidth (MaxRGB-MinRGB+1)
 	sliderstate	= {sliderMin=MinRGB, sliderMax=MaxRGB, sliderThumb=get rgb}
 	
-	slideraction :: SliderMove (RGBColour,PSt .l) -> (RGBColour,PSt .l)
+	slideraction :: SliderMove (*RGBColour,PSt .l) -> (*RGBColour,PSt .l)
 	slideraction move (rgb,pst)
-		= (	newrgb
+		= (	newRGBColour newrgb
 		  ,	appListPIO [ setSliderThumb sid y
 		  			   , setControlText tid (ColourText text y)
-		  			   , SetColourBox did newrgb
+		  			   , setColourBox did newrgb
 		  			   ] pst
 		  )
 	where
 		y		= case move of
 					SliderIncSmall	-> min (get rgb+1 ) MaxRGB
-
 					SliderDecSmall	-> max (get rgb-1 ) MinRGB
 					SliderIncLarge	-> min (get rgb+10) MaxRGB
 					SliderDecLarge	-> max (get rgb-10) MinRGB
@@ -97,7 +98,7 @@ ColourText text x
 ::	ColourBoxControl ls pst
 	:==	CustomControl ls pst
 
-ColourBoxControl :: RGBColour Id (Maybe ItemPos) -> ColourBoxControl .ls .pst
+ColourBoxControl :: RGBColour Id (Maybe ItemPos) -> *ColourBoxControl .ls .pst
 ColourBoxControl rgb did maybePos
 	= CustomControl {w=40,h=40} (ColourBoxLook rgb)
 			[	ControlId did
@@ -112,8 +113,8 @@ ColourBoxLook colour _ {newFrame} picture
 	# picture	= draw			newFrame	 picture
 	= picture
 
-SetColourBox :: Id RGBColour (IOSt .l) -> IOSt .l
-SetColourBox id rgb iost
+setColourBox :: Id RGBColour (IOSt .l) -> IOSt .l
+setColourBox id rgb iost
 	= setControlLook id True (True,ColourBoxLook rgb) iost
 
 
@@ -124,20 +125,20 @@ SetColourBox id rgb iost
 ::	Out		=	OutGet RGBColour	| OutSet
 ::	RGBId	:==	R2Id In Out
 
-::	ColourPickAccess pst	:==	Receiver2 In Out RGBColour pst
+::	ColourPickAccess pst	:==	Receiver2 In Out *RGBColour pst
 
-ColourPickAccess :: RGBId [(String,Id,Id)] Id -> ColourPickAccess (PSt .l)
+ColourPickAccess :: RGBId [(String,Id,Id)] Id -> *ColourPickAccess (PSt .l)
 ColourPickAccess rid rgbpicks did
 	= Receiver2 rid accessRGB []
 where
-	accessRGB :: In (RGBColour,PSt .l) -> (Out,(RGBColour,PSt .l))
+	accessRGB :: In (RGBColour,PSt .l) -> (Out,*(*RGBColour,PSt .l))
 	accessRGB InGet (rgb,pst)
-		= (OutGet rgb,(rgb,pst))
+		= (OutGet rgb,(newRGBColour rgb,pst))
 	accessRGB (InSet rgb=:{r,g,b}) (_,pst=:{io})
-		# io	= SetColourBox    did rgb io
+		# io	= setColourBox    did rgb io
 		# io	= setSliderThumbs (map (\(y,(_,sid,_))->(sid,y)) settings) io
 		# io	= setControlTexts (map (\(y,(text,_,tid))->(tid,ColourText text y)) settings) io
-		= (OutSet,(rgb,{pst & io=io}))
+		= (OutSet,(newRGBColour rgb,{pst & io=io}))
 	where
 		settings= zip2 [r,g,b] rgbpicks
 
@@ -145,14 +146,8 @@ where
 
 /*	The definition of the assembled colour picking control:	*/
 
-::	ColourPickControl ls pst
-/*	:==	(	LayoutControl
-			(	:+: (LayoutControl (ListLS RGBPickControl)))
-			(	:+:	ColourBoxControl
-					ColourPickAccess
-			))
-		) ls pst
-*/	:==	NewLS
+::	*ColourPickControl ls pst
+	:==	NewLS
 		(	LayoutControl
 			(	:+:	(LayoutControl (ListLS (:+: SliderControl TextControl)))
 			(	:+:	CustomControl
@@ -162,7 +157,7 @@ where
 
 ColourPickControl :: RGBId [Id] RGBColour (Maybe ItemPos) -> ColourPickControl .ls (PSt .l)
 ColourPickControl rgbid ids initrgb maybePos
-	= {	newLS = initrgb
+	= {	newLS = newRGBColour initrgb
 	  ,	newDef= LayoutControl
 					(	LayoutControl
 					(	ListLS
@@ -179,3 +174,7 @@ where
 	(rtext,gtext,btext)					= ("Red","Green","Blue")
 	(rpicks,gpicks,bpicks)				= ((rtext,rid,rtid),(gtext,gid,gtid),(btext,bid,btid))
 	left								= Just (Left,NoOffset)
+
+newRGBColour :: !RGBColour -> *RGBColour
+newRGBColour {r,g,b}
+	= {r=r,g=g,b=b}

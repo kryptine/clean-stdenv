@@ -1,7 +1,12 @@
 definition module windowhandle
 
 
-//	Clean Object I/O library, version 1.2
+//	********************************************************************************
+//	Clean Standard Object I/O library, version 1.2.2
+//	
+//	Author: Peter Achten
+//	Modified: 7 September 2001 for Clean 2.0
+//	********************************************************************************
 
 
 import	StdControlDef, StdMaybe, StdWindowDef
@@ -27,9 +32,9 @@ import	ospicture, osrgn, ostypes
 		,	whsCursorInfo	:: !CursorInfo						// The global cursor information
 		,	whsNrWindowBound:: !Bound							// The maximum number of windows that are allowed to be opened
 		,	whsModal		:: !Bool							// Flag: the window system is modal (used in combination with modal dialogues)
-		,	whsFinalModalLS	:: ![FinalModalLS]					// The final local states of terminated modal dialogs
+		,	whsFinalModalLS	:: !*[FinalModalLS]					// The final local states of terminated modal dialogs
 		}
-::	FinalModalLS
+::	*FinalModalLS
 	=	E. .ls:
 		{	fmWIDS			:: !WIDS							// Its identification
 		,	fmLS			:: ls								// The final local state

@@ -1,13 +1,6 @@
 implementation module processevent
 
 
-//	Clean Object I/O library, version 1.2
-
-/*	processevent defines the DeviceEventFunction for the process device.
-	This function is placed in a separate module because it is platform dependent.
-*/
-
-
 import	StdArray, StdBool, StdList
 from	clCrossCall_12	import CcWmDDEEXECUTE, CcWmPROCESSCLOSE, CcWmPROCESSDROPFILES
 from	clCCall_12		import winGetCStringAndFree, CSTR

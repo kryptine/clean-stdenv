@@ -1,11 +1,6 @@
 implementation module StdWindowDef
 
 
-//	Clean Object I/O library, version 1.2.1
-
-//	Window definitions.
-
-
 import	StdIOCommon, StdPictureDef
 
 

@@ -1,7 +1,5 @@
 implementation module GameFunctions
 
-//      Version 1.0
-
 import	StdArray, StdList, StdString
 import  osgame
 

@@ -4,7 +4,7 @@ module chatClient
 //
 //	This chat program runs together with the "chatServer" program
 //
-//	The program has been written in Clean 1.3.2 and uses the Clean Standard Object I/O library 1.2
+//	The program has been written in Clean 2.0 and uses the Clean Standard Object I/O library 1.2.2
 //
 //	**************************************************************************************************
 
@@ -69,7 +69,7 @@ initialize ps
 		= abort ("ABORT: CAN'T CONNECT with "+++remoteSite)
 	continuation nickname _ (Just { sChannel, rChannel }) ps
 		// connection with server has been established.
-		# (dialogId, ps)	= accPIO openId ps
+		# (dialogId, ps)= accPIO openId ps
 		  (inId, ps)	= accPIO openId ps
 		  (outId, ps)	= accPIO openId ps
 
@@ -159,7 +159,7 @@ sReceiver Sendable ps=:{ls=ls=:{sndChan}, io}
 sReceiver Disconnected ps
 	= abort "ABORT: CONNECTION DISRUPTED "
 		
-rReceiver :: !(ReceiveMsg ByteSeq) ((Id,Id),PState) -> ((Id,Id),PState)
+rReceiver :: !(ReceiveMsg ByteSeq) (*(Id,Id),PState) -> (*(Id,Id),PState)
 // the function for the send channel's send notifier
 // the local state of type (Id,Id) contains the id of the chat window and the id of the
 // text control for the output

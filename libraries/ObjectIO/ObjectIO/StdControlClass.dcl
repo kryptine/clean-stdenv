@@ -2,9 +2,11 @@ definition module StdControlClass
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard Object I/O library, version 1.2.2
 //	
 //	StdControlClass define the standard set of controls instances.
+//	Author: Peter Achten
+//	Modified: 14 September 2001 for Clean 2.0
 //	********************************************************************************
 
 
@@ -14,10 +16,10 @@ from	StdPSt			import PSt, IOSt
 
 
 class Controls cdef where
-	controlToHandles	:: !(cdef      .ls (PSt .l)) !(PSt .l)
-					-> (![ControlState .ls (PSt .l)], !PSt .l)
-	getControlType		::  (cdef      .ls .pst)
-					-> ControlType
+	controlToHandles	:: !.(cdef      .ls (PSt .l)) !(PSt .l)
+					 -> (![ControlState .ls (PSt .l)], !PSt .l)
+	getControlType		::  .(cdef      .ls .pst)
+					 -> ControlType
 
 instance Controls (AddLS  c)			| Controls c
 instance Controls (NewLS  c)			| Controls c

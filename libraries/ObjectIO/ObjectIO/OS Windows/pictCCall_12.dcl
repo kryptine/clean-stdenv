@@ -119,6 +119,7 @@ winDrawRoundRectangle	:: !OSRect !Int !Int !PIC ->  PIC
 
 
 winScrollRectangle		:: !OSRect !Pt !PIC -> (!OSRect,!PIC)
+winScrollRectangle2		:: !OSRect !Pt !PIC -> (!OSRect,!PIC)
 winCopyRectangle		:: !OSRect !Pt !PIC ->  PIC
 winCopyRectangleTo		:: !OSRect !Pt !PIC ->  PIC
 winMoveRectangle		:: !OSRect !Pt !PIC ->  PIC

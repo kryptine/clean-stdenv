@@ -42,7 +42,7 @@ initdimensions = (8,6,8,6)
 /***************************************************************************************************************
 	The initstate fixes the starting players. 
 ****************************************************************************************************************/
-initstate :: Tree -> State
+initstate :: Tree -> *State
 initstate wordlist
 	= {	playmode		= EndPlayer2
 	  ,	board			= initboard
@@ -73,7 +73,7 @@ initstate wordlist
 	When starting a new game the word list should not be read in again because this takes to long. 
 	For this purpose the function initialisestate is used.
 ****************************************************************************************************************/
-initialisestate :: (PSt State) -> PSt State
+initialisestate :: (PSt *State) -> PSt *State
 initialisestate pst=:{ls=t=:{random=rs,player1,player2}}
 	# (rs,pst)					= getRandomList rs pst
 	  (letterbox,letters1,rs)	= grab letterbox 7 rs
@@ -102,6 +102,6 @@ where
 			# (r,seed)	= random seed
 			= [r : random_list seed]
 
-getboardletters :: State -> ([Char],State)
+getboardletters :: *State -> ([Char],*State)
 getboardletters t=:{board}
 	= (getplacedletters board,t)

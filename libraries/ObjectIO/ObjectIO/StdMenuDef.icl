@@ -1,26 +1,22 @@
 implementation module StdMenuDef
 
 
-//	Version 1.2.1
-
-//	Definition of Menus and MenuElements:
-
-
 import	StdIOCommon, StdMaybe
 
 
 /*	Menus:				*/
 
-::	Menu        m ls pst = Menu        Title         (m ls pst)        [MenuAttribute *(ls,pst)]
-::	PopUpMenu   m ls pst = PopUpMenu                 (m ls pst)
+::	Menu      m ls pst = Menu Title (m ls pst) [MenuAttribute *(ls,pst)]
+::	PopUpMenu m ls pst = PopUpMenu  (m ls pst)
 
 
 /*	Menu elements:		*/
 
-::	MenuItem      ls pst = MenuItem    Title                           [MenuAttribute *(ls,pst)]
-::	MenuSeparator ls pst = MenuSeparator                               [MenuAttribute *(ls,pst)]
-::	RadioMenu     ls pst = RadioMenu   [MenuRadioItem *(ls,pst)] Index [MenuAttribute *(ls,pst)]
-::	SubMenu     m ls pst = SubMenu     Title         (m ls pst)        [MenuAttribute *(ls,pst)]
+::	MenuItem      ls pst = MenuItem Title           [MenuAttribute *(ls,pst)]
+::	MenuSeparator ls pst = MenuSeparator            [MenuAttribute *(ls,pst)]
+::	RadioMenu     ls pst = RadioMenu                [MenuRadioItem *(ls,pst)]  
+                                              Index [MenuAttribute *(ls,pst)]
+::	SubMenu     m ls pst = SubMenu Title (m ls pst) [MenuAttribute *(ls,pst)]
 
 ::	MenuRadioItem st  :== (Title,Maybe Id,Maybe Char,IdFun st)
 

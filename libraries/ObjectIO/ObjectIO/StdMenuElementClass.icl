@@ -1,11 +1,6 @@
 implementation module StdMenuElementClass
 
 
-//	Clean Object I/O library, version 1.2.1
-
-//	Definition of the MenuElements class for menu elements.
-
-
 import	StdBool, StdList, StdMisc, StdTuple
 import	StdMenuDef, StdPSt
 import	commondef, menuaccess, menudefaccess
@@ -13,8 +8,8 @@ import	osmenu
 
 
 class MenuElements m where
-	menuElementToHandles	:: !(m .ls (PSt .l)) !(PSt .l)	-> (![MenuElementState .ls (PSt .l)],!PSt .l)
-	getMenuElementType		::  (m .ls .pst)				-> MenuElementType
+	menuElementToHandles :: !.(m .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
+	getMenuElementType   ::  .(m .ls .pst)               -> MenuElementType
 
 
 /*	Translating menu elements into the internal representation.
@@ -30,7 +25,6 @@ class MenuElements m where
 	The remaining attributes are copied.
 */
 instance MenuElements (AddLS m)	| MenuElements m where
-	menuElementToHandles :: !(AddLS m .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l) | MenuElements m
 	menuElementToHandles {addLS,addDef} pState
 		# (ms,pState)	= menuElementToHandles addDef pState
 		= (	[menuElementHandleToMenuElementState 
@@ -45,7 +39,6 @@ instance MenuElements (AddLS m)	| MenuElements m where
 		= ""
 
 instance MenuElements (NewLS m)	| MenuElements m where
-	menuElementToHandles :: !(NewLS m .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l) | MenuElements m
 	menuElementToHandles {newLS,newDef} pState
 		# (ms,pState)	= menuElementToHandles newDef pState
 		= (	[menuElementHandleToMenuElementState
@@ -60,7 +53,6 @@ instance MenuElements (NewLS m)	| MenuElements m where
 		= ""
 
 instance MenuElements (ListLS m)	| MenuElements m where
-	menuElementToHandles :: !(ListLS m .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l) | MenuElements m
 	menuElementToHandles (ListLS mDefs) pState
 		# (mss,pState)	= stateMap menuElementToHandles mDefs pState
 		= (	[menuElementHandleToMenuElementState
@@ -72,15 +64,12 @@ instance MenuElements (ListLS m)	| MenuElements m where
 		= ""
 
 instance MenuElements NilLS where
-	menuElementToHandles :: !(NilLS .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
 	menuElementToHandles NilLS pState
 		= ([menuElementHandleToMenuElementState (MenuListLSHandle [])],pState)
 	getMenuElementType _
 		= ""
 
 instance MenuElements ((:+:) m1 m2)	| MenuElements m1 & MenuElements m2 where
-	menuElementToHandles :: !((:+:) m1 m2 .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
-						 | MenuElements m1 & MenuElements m2
 	menuElementToHandles (m1:+:m2) pState
 		# (ms1,pState)	= menuElementToHandles m1 pState
 		# (ms2,pState)	= menuElementToHandles m2 pState
@@ -89,7 +78,6 @@ instance MenuElements ((:+:) m1 m2)	| MenuElements m1 & MenuElements m2 where
 		= ""
 
 instance MenuElements (SubMenu m)	| MenuElements m where
-	menuElementToHandles :: !(SubMenu m .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l) | MenuElements m
 	menuElementToHandles (SubMenu title items atts) pState
 		# (ms,pState)		= menuElementToHandles items pState
 		  (selectAtt,atts)	= validateSelectState atts
@@ -111,7 +99,6 @@ instance MenuElements (SubMenu m)	| MenuElements m where
 		= "SubMenu"
 
 instance MenuElements RadioMenu where
-	menuElementToHandles :: !(RadioMenu .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
 	menuElementToHandles (RadioMenu items index atts) pState
 		# nrRadios			= length items
 		  validIndex		= if (nrRadios==0) 0 (setBetween index 1 nrRadios)
@@ -133,7 +120,6 @@ instance MenuElements RadioMenu where
 		= "RadioMenu"
 
 instance MenuElements MenuItem where
-	menuElementToHandles :: !(MenuItem .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
 	menuElementToHandles (MenuItem title atts) pState
 		# (selectAtt,atts)	= validateSelectState atts
 		  (markAtt,  atts)	= validateMarkState   atts
@@ -156,7 +142,6 @@ instance MenuElements MenuItem where
 		= "MenuItem"
 
 instance MenuElements MenuSeparator where
-	menuElementToHandles :: !(MenuSeparator .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
 	menuElementToHandles (MenuSeparator atts) pState
 		# (idAtt,_)		= validateId atts
 		= (	[menuElementHandleToMenuElementState 
@@ -209,13 +194,12 @@ validateRadioMenuIndex index itemHs
 /*	Menu elements for PopUpMenus:
 */
 class PopUpMenuElements m where
-	popUpMenuElementToHandles	:: !(m .ls (PSt .l)) !(PSt .l)
-				-> (![MenuElementState .ls (PSt .l)], !PSt .l)
-	getPopUpMenuElementType		::  (m .ls .pst)
-				-> MenuElementType
+	popUpMenuElementToHandles	:: !.(m .ls (PSt .l)) !(PSt .l)
+				 -> (![MenuElementState .ls (PSt .l)], !PSt .l)
+	getPopUpMenuElementType		::  .(m .ls .pst)
+				 -> MenuElementType
 
 instance PopUpMenuElements (AddLS m) | PopUpMenuElements m where
-	popUpMenuElementToHandles :: !(AddLS m .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l) | PopUpMenuElements m
 	popUpMenuElementToHandles {addLS,addDef} pState
 		# (ms,pState)	= popUpMenuElementToHandles addDef pState
 		= (	[menuElementHandleToMenuElementState 
@@ -230,7 +214,6 @@ instance PopUpMenuElements (AddLS m) | PopUpMenuElements m where
 		= ""
 
 instance PopUpMenuElements (NewLS m) | PopUpMenuElements m where
-	popUpMenuElementToHandles :: !(NewLS m .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l) | PopUpMenuElements m
 	popUpMenuElementToHandles {newLS,newDef} pState
 		# (ms,pState)	= popUpMenuElementToHandles newDef pState
 		= (	[menuElementHandleToMenuElementState
@@ -245,7 +228,6 @@ instance PopUpMenuElements (NewLS m) | PopUpMenuElements m where
 		= ""
 
 instance PopUpMenuElements (ListLS m) | PopUpMenuElements m where
-	popUpMenuElementToHandles :: !(ListLS m .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l) | PopUpMenuElements m
 	popUpMenuElementToHandles (ListLS mDefs) pState
 		# (mss,pState)	= stateMap popUpMenuElementToHandles mDefs pState
 		= (	[menuElementHandleToMenuElementState
@@ -257,15 +239,12 @@ instance PopUpMenuElements (ListLS m) | PopUpMenuElements m where
 		= ""
 
 instance PopUpMenuElements NilLS where
-	popUpMenuElementToHandles :: !(NilLS .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
 	popUpMenuElementToHandles NilLS pState
 		= ([menuElementHandleToMenuElementState (MenuListLSHandle [])],pState)
 	getPopUpMenuElementType _
 		= ""
 
 instance PopUpMenuElements ((:+:) m1 m2) | PopUpMenuElements m1 & PopUpMenuElements m2 where
-	popUpMenuElementToHandles :: !((:+:) m1 m2 .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
-							  |  PopUpMenuElements m1 & PopUpMenuElements m2
 	popUpMenuElementToHandles (m1:+:m2) pState
 		# (ms1,pState)	= popUpMenuElementToHandles m1 pState
 		# (ms2,pState)	= popUpMenuElementToHandles m2 pState
@@ -274,21 +253,18 @@ instance PopUpMenuElements ((:+:) m1 m2) | PopUpMenuElements m1 & PopUpMenuEleme
 		= ""
 
 instance PopUpMenuElements RadioMenu where
-	popUpMenuElementToHandles :: !(RadioMenu .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
 	popUpMenuElementToHandles  radioMenu pState
 		= menuElementToHandles radioMenu pState
 	getPopUpMenuElementType    radioMenu
 		= getMenuElementType   radioMenu
 
 instance PopUpMenuElements MenuItem where
-	popUpMenuElementToHandles :: !(MenuItem .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
 	popUpMenuElementToHandles  menuItem pState
 		= menuElementToHandles menuItem pState
 	getPopUpMenuElementType    menuItem
 		= getMenuElementType   menuItem
 
 instance PopUpMenuElements MenuSeparator where
-	popUpMenuElementToHandles :: !(MenuSeparator .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
 	popUpMenuElementToHandles  menuSeparator pState
 		= menuElementToHandles menuSeparator pState
 	getPopUpMenuElementType    menuSeparator
@@ -297,7 +273,6 @@ instance PopUpMenuElements MenuSeparator where
 //-- DvA --
 
 instance PopUpMenuElements (SubMenu	m) | PopUpMenuElements m where
-	popUpMenuElementToHandles :: !(SubMenu m .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l) | PopUpMenuElements m
 	popUpMenuElementToHandles (SubMenu title items atts) pState
 		# (ms,pState)		= popUpMenuElementToHandles items pState
 		  (selectAtt,atts)	= validateSelectState atts
@@ -317,4 +292,3 @@ instance PopUpMenuElements (SubMenu	m) | PopUpMenuElements m where
 		  )
 	getPopUpMenuElementType _
 		= "SubMenu"
-

@@ -1,7 +1,5 @@
 implementation module StdEventTCP
 
-//	Clean Standard Object I/O library, version 1.2.1
-
 import StdEnv
 import StdChannels, StdTCPDef, StdTCPChannels
 import StdReceiver
@@ -10,20 +8,18 @@ import tcp, ostcp, tcp_bytestreams
 import commondef, receiverid, receiverdevice, receiverdefaccess, receiveraccess
 //import intrface
 
-/*	PSt is also an environment instance of the class ChannelEnv	*/
+/*	PSt is an environment instance of the class ChannelEnv	*/
 
-instance ChannelEnv (PSt .l)
-  where
+instance ChannelEnv (PSt .l) where
 	channelEnvKind env
 		= (PST, env)
 	mb_close_inet_receiver_without_id reallyDoIt id_pair pSt=:{io}
 		= { pSt & io = mb_close_inet_receiver_without_id True id_pair io }
 
 	
-/*	IOSt is also an environment instance of the class ChannelEnv	*/
+/*	IOSt is an environment instance of the class ChannelEnv	*/
 
-instance ChannelEnv (IOSt .l)
-  where
+instance ChannelEnv (IOSt .l) where
 	channelEnvKind env
 		= (IOST, env)
 	mb_close_inet_receiver_without_id False _ ioState
@@ -55,10 +51,7 @@ instance ChannelEnv (IOSt .l)
 		inetReceiverStateIdentified1 :: !(!EndpointRef`, !InetReceiverCategory`) !(ReceiverStateHandle .ps) -> (!Bool,!ReceiverStateHandle .ps)
 		inetReceiverStateIdentified1 x rsH=:{rHandle} = (inetReceiverIdentified x rHandle,rsH)
 
-openSendNotifier		::	.ls !(SendNotifier *(*ch .a) .ls (PSt .l))
-							!(PSt .l)
-						->	(!ErrorReport,!*(*ch .a),!PSt .l)
-						|	accSChannel ch & Send ch
+openSendNotifier :: .ls !(SendNotifier *(ch .a) .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!*(ch .a),!PSt .l) | accSChannel ch & Send ch
 openSendNotifier ls (SendNotifier sChan f rAttributes) pSt
 	#!	(chan, sChan)	= accSChannel getChan sChan
 		((referenceCount, hasReceiveNotifier, hasSendableNotifier, aborted), pSt)
@@ -73,9 +66,9 @@ openSendNotifier ls (SendNotifier sChan f rAttributes) pSt
 							pSt
 	| errReport<>NoError
 		= (errReport, sChan, pSt)
-	#!	pSt				= os_select_inetevents	chan.bEndpointRef SChanReceiver referenceCount 
-	  												hasReceiveNotifier True aborted pSt
-	#!	(isDisconnected, sChan, pSt)	= disconnected sChan pSt
+	#!	pSt				= os_select_inetevents chan.bEndpointRef SChanReceiver referenceCount hasReceiveNotifier True aborted pSt
+	#!	(isDisconnected, sChan, pSt)
+						= disconnected sChan pSt
 	|	not isDisconnected
 		= (errReport, sChan, pSt)
 	#!	(_,pSt)	= asyncSend (toSendEventRId chan.bId) Disconnected pSt
@@ -90,17 +83,13 @@ getChan tcp_schan
 		#!	chan	= unpack_tcpschan tcp_schan
 		= (chan, pack_tcpschan chan)
 	
-close_tcpschan_receiver		:: !EndpointRef !*OSToolbox	->	*OSToolbox
+close_tcpschan_receiver :: !EndpointRef !*OSToolbox	-> *OSToolbox
 close_tcpschan_receiver endpointRef tb
 	# ((referenceCount,hr,_,aborted),tb)	= getEndpointDataC endpointRef tb
 	  tb							= setEndpointDataC endpointRef referenceCount hr False aborted tb
 	= tb
 
-handleSendableEvent	::	!Id
-						(SendEvent -> (.ls, PSt .a) -> (.ls, PSt .a))
-					 	(!InetEvent, !EndpointRef, !Int) 
-					 	(.ls, PSt .a)
-					->	(.ls, PSt .a)
+handleSendableEvent :: !Id (SendEvent -> *(.ls, PSt .l) -> *(.ls, PSt .l)) (!InetEvent, !EndpointRef, !Int) *(.ls, PSt .l) -> *(.ls, PSt .l)
 handleSendableEvent	_ f (IE_SENDABLE,_,_) (ls,ps)
 	= f Sendable (ls,ps)
 handleSendableEvent	id f (IE_DISCONNECTED,_,_) (ls,ps)
@@ -108,9 +97,7 @@ handleSendableEvent	id f (IE_DISCONNECTED,_,_) (ls,ps)
 	  io			= closeReceiver id io
 	= (ls, { ps & io=io } )
 
-closeSendNotifier		::	!*(*ch .a) !(IOSt .l)
-						->	(!*(*ch .a), !IOSt .l)
-						|	accSChannel ch
+closeSendNotifier :: !*(ch .a) !(IOSt .l) -> (!*(ch .a), !IOSt .l) | accSChannel ch
 closeSendNotifier chan io
 	#!	(ch,chan)	= accSChannel getChan chan 
 		((referenceCount, hasReceiveNotifier, hasSendableNotifier, aborted), io)
@@ -121,34 +108,26 @@ closeSendNotifier chan io
 		io					= setEndpointDataC ch.bEndpointRef referenceCount hasReceiveNotifier False aborted io
 	= (chan, io)
 
-instance Receivers TCP_ListenerReceiver
-  where
-	openReceiver	:: .ls !*(TCP_ListenerReceiver .ls (PSt .l)) !(PSt .l)
-								   -> (!ErrorReport,!PSt .l)
+instance Receivers TCP_ListenerReceiver where
 	openReceiver ls (TCP_ListenerReceiver id tcp_listener f rAttributes) pSt
 		# endpointRef		= unpack_tcplistener tcp_listener
 		= open_RChan_or_Listener close_listener ls id rAttributes endpointRef 0 (handleConnectRequest f) ListenerReceiver pSt
+	where
+		handleConnectRequest f (IE_CONNECTREQUEST,endpointRef,_) (ls,ps=:{io})
+			# (_, mbHostDuplexChan,_,io) = receive_MT (Just 0) (pack_tcplistener endpointRef) io
+			  (isNothin`,mbHostDuplexChan) = u_isNothing mbHostDuplexChan
+			| isNothin`
+				= (ls,{ ps & io=io})
+			= f (Received (fromJust mbHostDuplexChan)) (ls,{ ps & io=io})
 
-	getReceiverType	::     *(TCP_ListenerReceiver .ls .ps)	-> ReceiverType
 	getReceiverType _
 		= "TCP_ListenerReceiver"
-		
-handleConnectRequest	f (IE_CONNECTREQUEST,endpointRef,_) (ls,ps=:{io})
-	# (_, mbHostDuplexChan,_,io) = receive_MT (Just 0) (pack_tcplistener endpointRef) io
-	  (isNothin`,mbHostDuplexChan) = u_isNothing mbHostDuplexChan
-	| isNothin`
-		= (ls,{ ps & io=io})
-	= f (Received (fromJust mbHostDuplexChan)) (ls,{ ps & io=io})
 
-instance Receivers TCP_Receiver
-  where
-	openReceiver	:: .ls !*(TCP_Receiver .ls (PSt .l)) !(PSt .l)
-								   -> (!ErrorReport,!PSt .l)
+instance Receivers TCP_Receiver where
 	openReceiver ls (TCP_Receiver id tcp_RChan f rAttributes) pSt
 		# (endpointRef,maxSize)		= unpack_tcprchan tcp_RChan
 		= open_RChan_or_Listener close_tcprchan ls id rAttributes endpointRef maxSize (handleReceiveEvent id maxSize f) RChanReceiver pSt
 				
-	getReceiverType	::     *(TCP_Receiver .ls .ps)	-> ReceiverType
 	getReceiverType _
 		= "TCP_Receiver"
 		
@@ -164,14 +143,11 @@ instance Receivers TCP_Receiver
 	The two callback functions for the receivers are tcpCallback and charCallback 
 */
 
-instance Receivers TCP_CharReceiver
-  where
-	openReceiver	:: .ls !*(TCP_CharReceiver .ls (PSt .l)) !(PSt .l)
-					-> (!ErrorReport,!PSt .l)
+instance Receivers TCP_CharReceiver where
 	openReceiver ls (TCP_CharReceiver charRcvId tcp_rchan mbNrIterations callback attributes) pSt
 		#!	(tcpRcvId, pSt)		= accPIO openId pSt
 			selectState			= getSelectState attributes
-			(errReport, pSt)	= openReceiver	charRcvRId
+			(errReport, pSt)	= openReceiver	(USt charRcvRId)
 												(TCP_Receiver tcpRcvId (clearMaxSize tcp_rchan) tcpCallback 
 															[ReceiverSelectState selectState]) pSt
 		|	errReport<>NoError
@@ -195,18 +171,19 @@ instance Receivers TCP_CharReceiver
 									,	tcpRcvId		= tcpRcvId
 									,	tcpRcvDisabled	= False
 									}
-	getReceiverType	::     *(TCP_CharReceiver .ls .ps)	-> ReceiverType
+		
+		tcpCallback (Received byteSeq) (USt charRcvId, pSt)
+			|	byteSeqSize byteSeq==0
+				= (USt charRcvId, pSt)
+			#!	(_, pSt)	= asyncSend charRcvId (Message (Received (toString byteSeq))) pSt
+			= (USt charRcvId, pSt)
+		tcpCallback EOM (USt charRcvId, pSt)
+			#!	(_, pSt)	= asyncSend charRcvId (Message EOM) pSt
+			= (USt charRcvId, pSt)
+	
 	getReceiverType _
 		= "TCP_CharReceiver"
 
-tcpCallback (Received byteSeq) (charRcvId, pSt)
-	|	byteSeqSize byteSeq==0
-		= (charRcvId, pSt)
-	#!	(_, pSt)	= asyncSend charRcvId (Message (Received (toString byteSeq))) pSt
-	= (charRcvId, pSt)
-tcpCallback EOM (charRcvId, pSt)
-	#!	(_, pSt)	= asyncSend charRcvId (Message EOM) pSt
-	= (charRcvId, pSt)
 
 ::	CharRcvMessage x	= Message x | Dummy
 ::	*CharRcvLocalState ls l p
@@ -219,7 +196,7 @@ tcpCallback EOM (charRcvId, pSt)
 		,	index			::	!Int				// (hd strings).[index] is the next character to apply to callback
 													// It holds: 0<=index<size (hd strings) || (isEmpty strings && index==0)
 		,	mbMaxIterations	::	!Maybe Int			// as specified in TCP_CharReceiver
-		,	callback		::	ReceiverFunction (ReceiveMsg Char) (ls,PSt l) // dito
+		,	callback		::	ReceiverFunction (ReceiveMsg Char) *(ls,PSt l) // dito
 		,	charRcvRId		::	RId (CharRcvMessage (ReceiveMsg String)) // the id of the "ordinary" receiver
 		,	tcpRcvId		::	!Id					// the id of the tcp receiver
 		,	tcpRcvDisabled	::	!Bool				// whether the tcp receiver is disabled
@@ -230,7 +207,7 @@ THRESHOLD2	:== THRESHOLD1/2						// if allocBytes<THRESHOLD2 && tcpRcvDisabled t
 													// will be enabled again
 
 charCallback:: !(CharRcvMessage (ReceiveMsg String)) !*(!*CharRcvLocalState .ls .l .p,!*PSt .l)
-			 -> *(!*CharRcvLocalState .ls .l .p,!*PSt .l);
+			 -> *(!*CharRcvLocalState .ls .l .p,!PSt .l)
 charCallback Dummy (state, pSt)
 	= applyCharCBF { state & dummyPending=False } pSt
 charCallback (Message (Received string)) (state, pSt)
@@ -244,9 +221,9 @@ charCallback (Message (Received string)) (state, pSt)
 charCallback (Message EOM) (state=:{strings}, pSt)
 	= applyCharCBF { state & eomHappened=True } pSt
 
-applyCharCBF :: !*(CharRcvLocalState .a .b .c) !*(PSt .b) -> *(!*CharRcvLocalState .a .b .c,!*PSt .b);
-applyCharCBF state=:{dummyPending, strings, index, mbMaxIterations, callback, charRcvRId} pSt
-	|	isEmpty state.strings
+applyCharCBF :: !*(CharRcvLocalState .a .l .c) !(PSt .l) -> *(!*CharRcvLocalState .a .l .c,!PSt .l)
+applyCharCBF state=:{dummyPending, strings, index, mbMaxIterations, callback, charRcvRId, c_ls} pSt
+	|	isEmpty strings
 		=  checkEOM2 state pSt
 	#!	string			= hd strings
 		nrCharsInString	= (size string) - index
@@ -256,7 +233,7 @@ applyCharCBF state=:{dummyPending, strings, index, mbMaxIterations, callback, ch
 	#!	pSt				= appPIO (ioStSetRcvDisabled False) pSt
 						// set a flag  in the ioState to False
 		(newIndex, (c_ls, pSt))
-						= loop (rIdtoId charRcvRId) callback nrCharsToApply index string (state.c_ls, pSt)
+						= loop (rIdtoId charRcvRId) callback nrCharsToApply index string (c_ls, pSt)
 						// apply the callback function nrCharsToApply characters, this can possibly not succeed,
 						// because the callback function closed/disabled this receiver 
 		nrCharsApplied	= newIndex-index
@@ -293,6 +270,7 @@ applyCharCBF state=:{dummyPending, strings, index, mbMaxIterations, callback, ch
 			= loop	charRcvId callback (dec nrCharsToApply) (inc index) string 
 					(callback (Received string.[index]) (ls, { pSt & io=io }))
 		= (index, (ls, { pSt & io=io }))
+	
 	checkEOM2 state=:{eomHappened, callback, charRcvRId} pSt
 		// when all bytes in the buffer "strings" have been applied to the callback function, then
 		// this function is called to possibly apply EOM to the callback function
@@ -302,19 +280,18 @@ applyCharCBF state=:{dummyPending, strings, index, mbMaxIterations, callback, ch
 		= ({ state & c_ls=c_ls }, appPIO (closeReceiver (rIdtoId charRcvRId)) pSt)
 
 
+open_RChan_or_Listener :: !.(EndpointRef -> *OSToolbox -> *OSToolbox) .ls !Id ![ReceiverAttribute .st] !EndpointRef !Int !(ReceiverFunction m *(.ls,PSt .l)) !Int 
+							(PSt .l) -> (!ErrorReport, !PSt .l)
 open_RChan_or_Listener closeFun ls id rAttributes endpointRef maxSize callbackFun receiverType pSt
 	# ((referenceCount, _, hasSendableNotifier, aborted), pSt)
 	  					= getEndpointDataC endpointRef pSt
 	# (errReport, pSt)	= openReceiverGeneral
-									(	newInetStateHandle	ls callbackFun maxSize
-											(closeFun endpointRef)
-									)
+									(newInetStateHandle ls callbackFun maxSize (closeFun endpointRef))
 									id rAttributes endpointRef receiverType
 									pSt
 	| errReport<>NoError
 		= (errReport, pSt)
-	# pSt				= os_select_inetevents	endpointRef receiverType referenceCount
-												True hasSendableNotifier aborted pSt
+	# pSt				= os_select_inetevents endpointRef receiverType referenceCount True hasSendableNotifier aborted pSt
 	| receiverType<>RChanReceiver
 	  	= (errReport, pSt)
 	// send an EOM if the TCP receive channel is closed
@@ -323,16 +300,12 @@ open_RChan_or_Listener closeFun ls id rAttributes endpointRef maxSize callbackFu
 	  	= (errReport, pSt)
 	# (_,pSt)	= asyncSend (toReceiveEventRId id) EOM pSt
 	= (errReport, pSt)
-  where
+where
 	toReceiveEventRId :: Id -> RId (ReceiveMsg ByteSeq)
 	toReceiveEventRId id
 		= toRId (fromId id) // dangerous stuff
 
-handleReceiveEvent	::	!Id !Int
-						((ReceiveMsg ByteSeq) -> (.ls, PSt .a) -> (.ls, PSt .a))
-					 	(!InetEvent, !EndpointRef, !Int) 
-					 	(.ls, PSt .a)
-					->	(.ls, PSt .a)
+handleReceiveEvent :: !Id !Int ((ReceiveMsg ByteSeq) -> *(.ls, PSt .a) -> *(.ls, PSt .a)) (!InetEvent, !EndpointRef, !Int) *(.ls, PSt .a) -> *(.ls, PSt .a)
 handleReceiveEvent _ maxSize f (IE_RECEIVED,endpointRef,_) (ls,ps=:{io})
 	# (_,mbTCPData,_,io) = receive_MT (Just 0) (pack_tcprchan (endpointRef,maxSize)) io
 	| isNothing mbTCPData
@@ -348,10 +321,11 @@ handleReceiveEvent id maxSize f event=:(IE_EOM,endpointRef,misc) (ls,pSt)
 		= (ls, { pSt & io=io })
 	# (ls,pSt)				= handleReceiveEvent id maxSize f (IE_RECEIVED,endpointRef,misc) (ls, pSt)
 	= handleReceiveEvent id maxSize f event (ls,pSt)
-	  
-openReceiverGeneral ::	.(Id -> .(SelectState -> .([Id] -> .(.a -> .(.b -> ReceiverStateHandle *(PSt .c))))))
-						!.Id [.ReceiverAttribute .e] .a .b !*(PSt .c)
-					->	*(.ErrorReport,!*PSt .c);
+
+
+openReceiverGeneral :: .(Id -> .(SelectState -> .([Id] -> .(.a -> .(.b -> ReceiverStateHandle (PSt .l))))))
+						!Id [ReceiverAttribute .st] .a .b !(PSt .l)
+					->	(ErrorReport,!PSt .l)
 openReceiverGeneral createStateHandleFunc id rAttributes endpointRef isReceiver pState
 	# pState					= appPIO (appIOToolbox OSinstallTCP) pState
 	# (pState=:{io=ioState})	= receiverFunctions.dOpen pState // MW11++
@@ -373,6 +347,9 @@ where
 // MW11 was	closeAlso				= getConnected rAttributes
 	closeAlso				= getConnectedIds rAttributes
 
+::	*USt x
+ =	USt x
+/*
 newInetStateHandle ls rFun maxSize closeFun id select connectedIds endpointRef isReceiver
 	= {	rState	=	ls
 	  ,	rHandle	=	{	rId			= id
@@ -383,10 +360,26 @@ newInetStateHandle ls rFun maxSize closeFun id select connectedIds endpointRef i
 					  , rInetInfo	= Just (endpointRef, isReceiver, maxSize, closeFun)
 				  	  , rConnected	= connectedIds
 					}
+	  } */
+newInetStateHandle :: .ls (ReceiverFunction m *(.ls,.pst)) !Int !(IdFun *OSToolbox) !Id !SelectState ![Id] !EndpointRef` !InetReceiverCategory`
+	-> *ReceiverStateHandle .pst
+newInetStateHandle ls rFun maxSize closeFun id select connectedIds endpointRef isReceiver
+	= {	rState	=	USt ls
+	  ,	rHandle	=	{	rId			= id
+					  ,	rASMQ		= []
+					  ,	rSelect		= Able
+					  ,	rOneWay		= True
+					  ,	rFun		= onewaytotriple (wrapUSt rFun)
+					  , rInetInfo	= Just (endpointRef, isReceiver, maxSize, closeFun)
+				  	  , rConnected	= connectedIds
+					}
 	  }
+where
+	wrapUSt rFun msg (USt ls,pst)
+		# (ls,pst) = rFun msg (ls,pst)
+		= (USt ls,pst)
 
-lookupIPAddress_async	::	!String !(InetLookupFunction (PSt .l)) !(PSt .l)
-						->	(PSt .l)
+lookupIPAddress_async :: !String !(InetLookupFunction (PSt .l)) !(PSt .l) -> PSt .l
 lookupIPAddress_async inetAddr lookupFunction pSt
 	# pSt							= appPIO (appIOToolbox OSinstallTCP) pSt		// PA: added
 	# ((errCode,endpointRef),pSt)	= lookupHost_asyncC (inetAddr+++"\0") pSt
@@ -399,10 +392,7 @@ lookupIPAddress_async inetAddr lookupFunction pSt
 										pSt
 	= pSt
 
-handleDNREvent		::	((Maybe IPAddress) -> *((PSt .a) -> (PSt .a)))
-					 	(!InetEvent, !EndpointRef, !Int) 
-					 	(Id, PSt .a)
-					->	(Id, PSt .a)
+handleDNREvent :: ((Maybe IPAddress) -> (PSt .a) -> PSt .a) (!InetEvent, !EndpointRef, !Int) (Id, PSt .a) -> (Id, PSt .a)
 handleDNREvent f (IE_IPADDRESSFOUND,_,ipAddr) (recId,ps=:{io})
 	#  io				= closeReceiver recId io
 	= (recId, f (Just (pack_ipaddr ipAddr)) { ps & io=io })
@@ -410,8 +400,7 @@ handleDNREvent f (IE_IPADDRESSNOTFOUND,_,_) (recId,ps=:{io})
 	#  io				= closeReceiver recId io
 	= (recId, f Nothing { ps & io=io } )
 
-connectTCP_async		::	!(!IPAddress,!Port) !(InetConnectFunction (PSt .l)) !(PSt .l)
-						->	(PSt .l)
+connectTCP_async :: !(!IPAddress,!Port) !(InetConnectFunction (PSt .l)) !(PSt .l) -> PSt .l
 connectTCP_async (inetHost,inetPort) callback pSt
 	# pSt								= appPIO (appIOToolbox OSinstallTCP) pSt		// PA: added
 	# destination						= (unpack_ipaddr inetHost, inetPort)
@@ -425,10 +414,7 @@ connectTCP_async (inetHost,inetPort) callback pSt
 											pSt
 	= pSt
 
-handleConnectEvent	::	((Maybe TCP_DuplexChannel) -> *((PSt .a) -> (PSt .a)))
-					 	(!InetEvent, !EndpointRef, !Int) 
-					 	(Id, PSt .a)
-					->	!(Id, !PSt .a)
+handleConnectEvent :: ((Maybe TCP_DuplexChannel) -> *((PSt .a) -> PSt .a)) (!InetEvent, !EndpointRef, !Int) (Id, PSt .a) -> (Id, !PSt .a)
 handleConnectEvent f (IE_ASYNCCONNECTCOMPLETE,endpointRef,_) (recId,ps)
 	# io				= ps.io
 	  io				= appIOToolbox (setEndpointDataC endpointRef 2 False False False) io
@@ -496,16 +482,14 @@ inetReceiverStateIdentified2 :: !(!Id, !InetReceiverCategory) !(ReceiverStateHan
 inetReceiverStateIdentified2 x {rHandle} = inetReceiverIdentifiedWithId x rHandle
 */
 
-class accSChannel ch :: (TCP_SChannel -> (x, TCP_SChannel)) *(*ch .a) -> (x, *(*ch .a))
+class accSChannel ch :: (TCP_SChannel -> (x, TCP_SChannel)) *(ch .a) -> (x, *(ch .a))
 
-instance accSChannel TCP_SChannel_
-  where
+instance accSChannel TCP_SChannel_ where
 	accSChannel f tcpSChanPolymorph
 		#!	(x, tcpSChanByteSeq)	= f (Cast tcpSChanPolymorph)
 		= (x, Cast tcpSChanByteSeq)
 
-instance accSChannel TCP_SCharStream_
-  where
+instance accSChannel TCP_SCharStream_ where
 	accSChannel f sChannel=:{sbs_schan}
 		#!	(x, sbs_schan)	= f sbs_schan
 		= (x, { sChannel & sbs_schan=sbs_schan })

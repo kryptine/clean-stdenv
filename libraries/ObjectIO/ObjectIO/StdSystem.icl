@@ -1,9 +1,6 @@
 implementation module StdSystem
 
 
-//	Clean Object I/O library, version 1.2.1
-
-
 import	StdString, StdReal, StdInt, StdTuple
 import	ossystem
 from	StdIOBasic	import Size

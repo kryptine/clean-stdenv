@@ -1,9 +1,6 @@
 implementation module controlinternal
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdEnum, StdList, StdMisc, StdTuple
 import	ospicture, osrgn, ostooltip, oswindow
 import	commondef, wstateaccess
@@ -1139,10 +1136,10 @@ setcompoundsliderthumb hasScroll able wMetrics windPtr compPtr itemPtr isHScroll
 		= tb
 //	| otherwise			= osSetCompoundSlider wMetrics itemPtr isHScroll (toOSscrollbarRange scrollValues viewSize) maxcoords tb
 	| otherwise	
-		# tb			= osSetCompoundSliderThumbSize wMetrics windPtr itemPtr min max wid scrollRect isHScroll able False tb
+		# tb			= osSetCompoundSliderThumbSize wMetrics windPtr compPtr itemPtr min max wid scrollRect isHScroll able False tb
 	//	# tb			= appGrafport windPtr (updateCompoundScroll windPtr itemPtr scrollRect) tb		PA: line turned into function of oswindow, osUpdateCompoundScroll
 		# tb			= osUpdateCompoundScroll windPtr itemPtr scrollRect tb
-		# tb			= osSetCompoundSliderThumb wMetrics windPtr itemPtr itemPtr scrollRect isHScroll pos /*(42,42)*/maxcoords True tb
+		# tb			= osSetCompoundSliderThumb wMetrics windPtr compPtr itemPtr scrollRect isHScroll pos /*(42,42)*/maxcoords True tb
 		= tb
 where
 	(min,pos,max,wid)	= toOSscrollbarRange scrollValues viewSize
@@ -1209,9 +1206,9 @@ where
 		| newOrigin==oldOrigin
 			= (True,itemH,updRgn_tb)
 		# (updRgn,tb)			= updRgn_tb
-		# tb					= setcompoundsliderthumb (hasHScroll && newOrigin.x<>oldOrigin.x) ableContext1 miOSMetrics wPtr hPtr True
+		# tb					= setcompoundsliderthumb (hasHScroll && newOrigin.x<>oldOrigin.x) ableContext1 miOSMetrics wPtr itemPtr hPtr True
 												 (minx,newOrigin.x,maxx) viewx (toTuple itemSize) (hRect,vRect) tb
-		# tb					= setcompoundsliderthumb (hasVScroll && newOrigin.y<>oldOrigin.y) ableContext1 miOSMetrics wPtr vPtr False
+		# tb					= setcompoundsliderthumb (hasVScroll && newOrigin.y<>oldOrigin.y) ableContext1 miOSMetrics wPtr itemPtr vPtr False
 												 (miny,newOrigin.y,maxy) viewy (toTuple itemSize) (hRect,vRect) tb
 		  info					= {info & compoundOrigin=newOrigin}
 		  clipRect1				= intersectRects contentRect clipRect
@@ -1325,8 +1322,8 @@ where
 		  (miny,maxy,viewy)		= (newDomainRect.rtop, newDomainRect.rbottom,newContentSize.h)
 		  newOrigin				= {x=setBetween oldOrigin.x minx (max minx (maxx-viewx)),y=setBetween oldOrigin.y miny (max miny (maxy-viewy))}
 		  info					= {info & compoundOrigin=newOrigin,compoundDomain=newDomainRect}
-		# tb					= setcompoundsliderthumb hasHScroll ableContext1 miOSMetrics wPtr hPtr True  (minx,newOrigin.x,maxx) viewx itemSize` (hRect,vRect) tb
-		# tb					= setcompoundsliderthumb hasVScroll ableContext1 miOSMetrics wPtr vPtr False (miny,newOrigin.y,maxy) viewy itemSize` (hRect,vRect) tb
+		# tb					= setcompoundsliderthumb hasHScroll ableContext1 miOSMetrics wPtr itemPtr hPtr True  (minx,newOrigin.x,maxx) viewx itemSize` (hRect,vRect) tb
+		# tb					= setcompoundsliderthumb hasVScroll ableContext1 miOSMetrics wPtr itemPtr vPtr False (miny,newOrigin.y,maxy) viewy itemSize` (hRect,vRect) tb
 		  oldItems`				= itemH.wItems`
 		| isEmpty oldItems`		// CompoundControl has no controls
 			# itemH				= {itemH & wItemInfo`=CompoundInfo` info}

@@ -2,9 +2,11 @@ definition module StdMenu
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard Object I/O library, version 1.2.2
 //	
 //	StdMenu defines functions on menus.
+//	Author: Peter Achten
+//	Modified: 7 September 2001 for Clean 2.0
 //	********************************************************************************
 
 
@@ -15,8 +17,8 @@ from	iostate	import PSt, IOSt
 //	Operations on unknown Ids are ignored.
 
 class Menus mdef where
-	openMenu	:: .ls !(mdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
-	getMenuType	::      (mdef .ls .pst)               -> MenuType
+	openMenu	:: .ls !.(mdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
+	getMenuType	::      .(mdef .ls .pst)               -> MenuType
 /*	Open the given menu definition for this interactive process. 
 	openMenu may not be permitted to open a menu depending on its DocumentInterface 
 		(see the comments at the shareProcesses instances in module StdProcess).
@@ -53,11 +55,11 @@ closeMenu :: !Id !(IOSt .l) -> IOSt .l
 */
 
 
-openMenuElements	:: !Id !Index .ls (m .ls (PSt .l))      !(PSt .l)
-											-> (!ErrorReport,!PSt .l)
+openMenuElements	:: !Id !Index .ls .(m .ls (PSt .l))      !(PSt .l)
+											-> (!ErrorReport, !PSt .l)
 											|  MenuElements m
-openSubMenuElements	:: !Id !Index .ls (m .ls (PSt .l))      !(PSt .l)
-											-> (!ErrorReport,!PSt .l)
+openSubMenuElements	:: !Id !Index .ls .(m .ls (PSt .l))      !(PSt .l)
+											-> (!ErrorReport, !PSt .l)
 											|  MenuElements m
 openRadioMenuItems	:: !Id !Index ![MenuRadioItem (PSt .l)] !(IOSt .l)
 											-> (!ErrorReport,!IOSt .l)

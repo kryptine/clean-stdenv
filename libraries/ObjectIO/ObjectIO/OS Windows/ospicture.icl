@@ -1,10 +1,5 @@
 implementation module ospicture
 
-//	Clean Object I/O libary, version 1.2
-
-/*	Drawing functions and other operations on Pictures. 
-*/
-
 import	StdBool, StdFunc, StdInt, StdList, StdReal, StdTuple
 import	pictCCall_12, osfont, ostypes
 from	osrgn		import OSRgnHandle
@@ -552,6 +547,11 @@ pictunfillrect r picture=:{pictContext,pictToolbox,pictOrigin}
 pictscroll :: !OSRect !Vector2 !*Picture -> (!OSRect,!*Picture)
 pictscroll r v picture=:{pictContext,pictToolbox,pictOrigin}
 	# (updRect,(context,tb))	= winScrollRectangle (subVector (toVector pictOrigin) r) (toTuple v) (pictContext,pictToolbox)
+	= (updRect,{picture & pictContext=context,pictToolbox=tb})
+
+pictscroll2 :: !OSRect !Vector2 !*Picture -> (!OSRect,!*Picture)
+pictscroll2 r v picture=:{pictContext,pictToolbox,pictOrigin}
+	# (updRect,(context,tb))	= winScrollRectangle2 (subVector (toVector pictOrigin) r) (toTuple v) (pictContext,pictToolbox)
 	= (updRect,{picture & pictContext=context,pictToolbox=tb})
 
 /*	Polygon drawing operations.

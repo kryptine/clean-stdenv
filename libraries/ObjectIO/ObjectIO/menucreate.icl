@@ -1,9 +1,6 @@
 implementation module menucreate
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	StdMenuElementClass, StdPSt
 import	commondef, devicesystemstate, iostate, menuaccess, menudefaccess, menuhandle, sdisize
@@ -21,8 +18,8 @@ menucreateFatalError rule error
 		In that case, the layout of the controls should be recalculated, and the window updated.
 	OpenMenu` assumes that the Id argument has been verified and that the MenuDevice exists.
 */
-openMenu` :: !Id .ls !(Menu m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | MenuElements m
-openMenu` menuId ls mDef pState=:{io=ioState}
+openMenu` :: !Id .ls !.(Menu m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | MenuElements m
+openMenu` menuId ls (Menu title items atts) pState=:{io=ioState}
 	# (osdInfo,ioState)			= ioStGetOSDInfo ioState
 	  maybeOSMenuBar			= getOSDInfoOSMenuBar osdInfo
 	| isNothing maybeOSMenuBar	// This condition should never hold
@@ -38,8 +35,7 @@ openMenu` menuId ls mDef pState=:{io=ioState}
 	| exists					// This condition should never hold
 		= menucreateFatalError "openMenu (Menu)" "inconsistency detected between IdTable and ReceiverTable"
 	# (nrmenus,menus)			= ulength menus
-	  (optIndex,mDef)			= menuDefGetIndex mDef
-	  index						= if (isJust optIndex) (fromJust optIndex) nrmenus
+	# index						= getMenuIndexAtt (snd (cselect isMenuIndex (MenuIndex nrmenus) atts))
 	  (hasMenuWindowMenu,menus)	= ucontains (isMenuWithThisId windowMenuId) menus
 	  index`					= setBetween index 0 (max 0 (if hasMenuWindowMenu (nrmenus-1) nrmenus))
 	# (rt,ioState)				= ioStGetReceiverTable ioState
@@ -48,7 +44,7 @@ openMenu` menuId ls mDef pState=:{io=ioState}
 	# pState					= {pState & io=ioState}
 	  (mKeys,mHs)				= menuHandlesGetKeys mHs
 	# (ok,mH,mKeys,rt,idtable,osMenuBar,pState)
-								= createMenu index` ioid menuId mDef mKeys rt idtable osMenuBar pState
+								= createMenu index` ioid menuId (Menu title items atts) mKeys rt idtable osMenuBar pState
  	  mHs						= menuHandlesSetKeys mKeys mHs
  	# ioState					= ioStSetReceiverTable rt pState.io
  	# ioState					= ioStSetIdTable idtable ioState
@@ -70,7 +66,7 @@ openMenu` menuId ls mDef pState=:{io=ioState}
 		pState1					= {pState & io=ioState3}
 		(ls1,pState2)			= menuInit (ls,pState1)
 where
-	menuInit					= getMenuDefInit mDef
+	menuInit					= getMenuInitFun (snd (cselect isMenuInit (MenuInit id) atts))
 	
 	checkSDISize :: !OSWindowPtr !Size !(IOSt .l) -> IOSt .l
 	checkSDISize sdiPtr sdiSize1 ioState
@@ -78,22 +74,18 @@ where
 		| sdiSize1==sdiSize2	= ioState
 		| otherwise				= resizeSDIWindow sdiPtr sdiSize1 sdiSize2 ioState
 	
-	getMenuDefInit :: !(Menu m .ls .pst) -> IdFun *(.ls,.pst)
-	getMenuDefInit (Menu _ _ atts)
-		= getMenuInitFun (snd (cselect isMenuInit (MenuInit id) atts))
-
 	createMenu :: !Int !SystemId !Id !(Menu m .ls (PSt .l)) ![Char] !*ReceiverTable !*IdTable !OSMenuBar !(PSt .l)
 						 -> (!Bool,MenuHandle .ls (PSt .l), ![Char],!*ReceiverTable,!*IdTable,!OSMenuBar, !PSt .l)
 						 |  MenuElements m
-	createMenu index ioId menuId mDef keys rt it osMenuBar pState
-		# (ms,pState)				= menuElementToHandles (menuDefGetElements mDef) pState
+	createMenu index ioId menuId (Menu title items atts) keys rt it osMenuBar pState
+		# (ms,pState)				= menuElementToHandles items pState
 		  itemHs					= map menuElementStateToMenuElementHandle ms
 		  (ok,itemHs,rt,it)			= menuIdsAreConsistent ioId menuId itemHs rt it
 		| not ok
 			= (False,undef,keys,rt,it,osMenuBar,pState)
 		| otherwise
 			# (tb,ioState)			= getIOToolbox pState.io
-			# (menu,mH,osMenuBar,tb)= NewMenuHandle mDef index menuId osMenuBar tb
+			# (menu,mH,osMenuBar,tb)= NewMenuHandle title atts index menuId osMenuBar tb
 			# (_,itemHs,keys,tb)	= createMenuElements osMenuBar menu 1 itemHs keys tb
 			  mH					= {mH & mItems=itemHs}
 			# ioState				= setIOToolbox tb ioState
@@ -109,9 +101,9 @@ isMenuWithThisId id msH
 /*	Creating pop up menus.
 	It is assumed that MenuHandles contains no pop up menu in mMenus and that mPopUpId contains an Id.
 */
-createPopUpMenu :: !SystemId .ls !(PopUpMenu m .ls (PSt .l)) !(MenuHandles (PSt .l)) !*ReceiverTable !*IdTable !OSMenuBar !(PSt .l)
-													-> (!Bool,!MenuHandles (PSt .l), !*ReceiverTable,!*IdTable,!OSMenuBar, !PSt .l)
-													|  PopUpMenuElements m
+createPopUpMenu :: !SystemId .ls !.(PopUpMenu m .ls (PSt .l)) !(MenuHandles (PSt .l)) !*ReceiverTable !*IdTable !OSMenuBar !(PSt .l)
+													 -> (!Bool,!MenuHandles (PSt .l), !*ReceiverTable,!*IdTable,!OSMenuBar, !PSt .l)
+													 |  PopUpMenuElements m
 createPopUpMenu ioId ls (PopUpMenu items) mHs=:{mMenus, mKeys=keys, mPopUpId} rt it osMenuBar pState
 	# (ms,pState)			= popUpMenuElementToHandles items pState
 	  itemHs				= map menuElementStateToMenuElementHandle ms
@@ -312,14 +304,13 @@ SystemUnable		:== False
 
 //	Initialisation and Allocation:
 
-NewMenuHandle :: !(Menu m .ls .pst) !Int !Id !OSMenuBar !*OSToolbox -> (!OSMenu,!MenuHandle .ls .pst,!OSMenuBar,!*OSToolbox)
-NewMenuHandle mDef index menuId menuBar tb
+NewMenuHandle :: !String ![MenuAttribute *(.ls,.pst)] !Int !Id !OSMenuBar !*OSToolbox -> (!OSMenu,!MenuHandle .ls .pst,!OSMenuBar,!*OSToolbox)
+NewMenuHandle title atts index menuId menuBar tb
 	# (ok,osMenuNr,tb)	= osNewMenuNr tb		// PA: generation of internal menu numbers added
 	| not ok
 		= menucreateFatalError "NewMenuHandle" "To many Menus created for one interactive process"
-	# (select,mDef)		= menuDefGetSelectState	mDef
-	  (title,_)			= menuDefGetTitle		mDef
 	# (menu,menuBar,tb)	= osMenuInsert index osMenuNr title menuBar tb
+	  select			= getMenuSelectStateAtt (snd (cselect isMenuSelectState (MenuSelectState Able) atts))
 	  mH				= {	mHandle		= menu
 						  , mMenuId		= menuId
 						  ,	mOSMenuNr	= osMenuNr

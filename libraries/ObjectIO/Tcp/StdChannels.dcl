@@ -1,14 +1,20 @@
 definition module StdChannels
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard TCP library, version 1.2.2
 //	
 //	StdChannels defines operations on channels
+//	Author: Martin Wierich
+//	Modified: 15 October 2001 for Clean 2.0 (Peter Achten)
 //	********************************************************************************
 
-from	StdMaybe		import	Maybe
-from	StdOverloaded	import	==, toString
-from	tcp				import	ChannelEnv
+from	StdMaybe		import Maybe, Just, Nothing
+from	StdOverloaded	import ==, toString
+from	tcp				import ChannelEnv
+from	StdFile 		import FileEnv, Files
+from	StdTime			import TimeEnv, Date, Tick, Time
+from	StdId			import Ids
+from	iostate			import PSt, IOSt
 
 instance ChannelEnv World
 
@@ -18,17 +24,17 @@ instance ChannelEnv World
 //	********************************************************************************
 
 class Receive ch where
-	receive_MT	::	!(Maybe !Timeout)			!*(*ch .a)  !*env	
-				->	(!TimeoutReport, !Maybe !.a,!*(*ch .a), !*env)	
+	receive_MT	::	!(Maybe Timeout)			!*(ch .a)   !*env	
+				->	(!TimeoutReport, !Maybe .a, !*(ch .a),  !*env)	
 												| ChannelEnv  env
-	receiveUpTo	::	!Int						!*(*ch .a)  !*env	
-				->	(![.a],						!*(*ch .a), !*env)	
+	receiveUpTo	::	!Int						!*(ch .a)   !*env	
+				->	(![.a],						!*(ch .a),  !*env)	
 												| ChannelEnv  env
-	available	:: 								!*(*ch .a)  !*env
-				->	(!Bool,						!*(*ch .a), !*env)
+	available	:: 								!*(ch .a)   !*env
+				->	(!Bool,						!*(ch .a),  !*env)
 												| ChannelEnv  env
-	eom			:: 								!*(*ch .a)  !*env
-				->	(!Bool,						!*(*ch .a), !*env)
+	eom			:: 								!*(ch .a)   !*env
+				->	(!Bool,						!*(ch .a),  !*env)
 												| ChannelEnv  env
 /*	receive_MT
 		tries to receive on a channel. This function will block until data can be
@@ -44,7 +50,7 @@ class Receive ch where
 		polls on a channel whether data can't be received anymore.
 */
 
-class closeRChannel	ch	:: !*(*ch .a) !*env -> !*env	| ChannelEnv  env
+class closeRChannel	ch	:: !*(ch .a) !*env -> *env	| ChannelEnv env
 //	Closes the channel
 
 
@@ -53,26 +59,26 @@ class closeRChannel	ch	:: !*(*ch .a) !*env -> !*env	| ChannelEnv  env
 //	********************************************************************************
 	
 class Send ch where
-	send_MT			::	!(Maybe !Timeout) !.a	!*(*ch .a)  !*env
-					->	(!TimeoutReport, !Int,	!*(*ch .a), !*env)
+	send_MT			::	!(Maybe !Timeout) !.a	!*(ch .a)  !*env
+					->	(!TimeoutReport, !Int,	!*(ch .a), !*env)
 												| ChannelEnv  env
-	nsend_MT		:: 	!(Maybe !Timeout) ![.a]	!*(*ch .a)	!*env
-					->	(!TimeoutReport, !Int,	!*(*ch .a), !*env)
+	nsend_MT		:: 	!(Maybe !Timeout) ![.a]	!*(ch .a)  !*env
+					->	(!TimeoutReport, !Int,	!*(ch .a), !*env)
 												| ChannelEnv  env
-	flushBuffer_MT	::	!(Maybe !Timeout) 		!*(*ch .a)  !*env
-					->	(!TimeoutReport, !Int,	!*(*ch .a), !*env)
+	flushBuffer_MT	::	!(Maybe !Timeout) 		!*(ch .a)  !*env
+					->	(!TimeoutReport, !Int,	!*(ch .a), !*env)
 												| ChannelEnv  env
-	closeChannel_MT	::	!(Maybe !Timeout) 		!*(*ch .a)  !*env
-					->	(!TimeoutReport, !Int,				!*env)
+	closeChannel_MT	::	!(Maybe !Timeout) 		!*(ch .a)  !*env
+					->	(!TimeoutReport, !Int,			   !*env)
 												| ChannelEnv  env
-	abortConnection	::							!*(*ch .a)	!*env
-					->										!*env
+	abortConnection	::							!*(ch .a)  !*env
+					->									   !*env
 												| ChannelEnv  env
-	disconnected	::							!*(*ch .a)	!*env
-					->	(!Bool,					!*(*ch .a), !*env)
+	disconnected	::							!*(ch .a)  !*env
+					->	(!Bool,					!*(ch .a), !*env)
 												| ChannelEnv  env
-	bufferSize		::							!*(*ch .a)
-					->	(!Int, 					!*(*ch .a))	
+	bufferSize		::							!*(ch .a)
+					->	(!Int, 					!*(ch .a))	
 /*	send_MT mbTimeout a ch env
 		adds the data a to the channels internal buffer and tries to send this
 		buffer.
@@ -103,9 +109,9 @@ class Send ch where
 //	********************************************************************************
 
 class MaxSize ch where
-	setMaxSize		::	!Int !*(*ch .a)	-> *(*ch .a)
-	getMaxSize		::		 !*(*ch .a)	-> (!Int, !*(*ch .a))
-	clearMaxSize	::		 !*(*ch .a)	-> *(*ch .a)
+	setMaxSize		::	!Int !*(ch .a)	-> *(ch .a)
+	getMaxSize		::		 !*(ch .a)	-> (!Int, !*(ch .a))
+	clearMaxSize	::		 !*(ch .a)	-> *(ch .a)
 //	Set, get, or clear the maximum size of the data that can be received
 
 ::	DuplexChannel sChannel rChannel a
@@ -135,8 +141,8 @@ instance toString	TimeoutReport
 //	derived functions
 //	********************************************************************************
 
-nreceive_MT	:: !(Maybe !Timeout) !Int !*(*ch .a) !*env	
-			-> (!TimeoutReport, ![.a],!*(*ch .a),!*env)
+nreceive_MT	:: !(Maybe !Timeout) !Int !*(ch .a) !*env	
+			-> (!TimeoutReport, ![.a],!*(ch .a),!*env)
 			|  Receive ch & ChannelEnv env
 /*	nreceive_MT mbTimeout n ch env
 		tries to call receive_MT n times. If the result is (tReport, l, ch2, env2),
@@ -149,31 +155,31 @@ nreceive_MT	:: !(Maybe !Timeout) !Int !*(*ch .a) !*env
 	timeout. If the data can't be received because eom became True the function will
 	abort.
 */
-receive			::			!*(*ch .a)  !*env
-				-> (!.a,	!*(*ch .a), !*env)	
+receive			::			!*(ch .a)  !*env
+				-> (!.a,	!*(ch .a), !*env)	
 				| 	ChannelEnv env & Receive ch
-nreceive		::	!Int 	!*(*ch .a)  !*env
-				->	(![.a], !*(*ch .a), !*env)
+nreceive		::	!Int 	!*(ch .a)  !*env
+				->	(![.a], !*(ch .a), !*env)
 				|	ChannelEnv env & Receive ch
 
 /*	The following three send functions call their "_MT" counterpart with no timeout. 
 */
-send		 	:: !.a			!*(*ch .a)  !*env
-				->			   (!*(*ch .a), !*env)
+send		 	:: !.a			!*(ch .a)  !*env
+				->			   (!*(ch .a), !*env)
 				| 	ChannelEnv env & Send ch
-nsend	 		:: ![.a]		!*(*ch .a)  !*env
-				->			   (!*(*ch .a), !*env)
-				| 	ChannelEnv env & nsend_MT ch
-closeChannel	:: 				!*(*ch .a)  !*env
+nsend	 		:: ![.a]		!*(ch .a)  !*env
+				->			   (!*(ch .a), !*env)
+				| 	ChannelEnv env & Send ch
+closeChannel	:: 				!*(ch .a)  !*env
 				->			   				!*env
 				| 	ChannelEnv env & Send ch
 
 /*	The following two send functions call their "_MT" counterpart with timeout == 0.
 	"NB" is a shorthand for "non blocking"
 */
-send_NB 	 	:: !.a			!*(*ch .a)  !*env
-				->			   (!*(*ch .a), !*env)
+send_NB 	 	:: !.a			!*(ch .a)  !*env
+				->			   (!*(ch .a), !*env)
 				| 	ChannelEnv env & Send ch
-flushBuffer_NB	::				!*(*ch .a)  !*env
-				->			   (!*(*ch .a), !*env)
+flushBuffer_NB	::				!*(ch .a)  !*env
+				->			   (!*(ch .a), !*env)
 				| 	ChannelEnv env & Send ch

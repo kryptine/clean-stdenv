@@ -5,7 +5,6 @@ definition module osfont
 
 
 from	StdOverloaded	import ==
-from	StdString		import String
 from	ostoolbox		import OSToolbox
 from	ostypes			import OSPictContext
 

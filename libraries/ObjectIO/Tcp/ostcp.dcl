@@ -1,5 +1,12 @@
 definition module ostcp
 
+//	********************************************************************************
+//	Clean Standard TCP library, version 1.2.2
+//	
+//	Author: Martin Wierich
+//	Modified: 15 October 2001 for Clean 2.0 (Peter Achten)
+//	********************************************************************************
+
 import	StdMaybe
 import	StdTCPDef
 from	StdChannels	import Timeout, TimeoutReport
@@ -9,14 +16,11 @@ import	ostoolbox
 
 OSinstallTCP				:: !*OSToolbox -> *OSToolbox
 
-os_eom						::	!EndpointRef !*env
-							->	(!Bool, !*env)
-os_disconnected				::	!EndpointRef !*env
-							->	(!Bool, !*env)
-os_connectrequestavailable	::	!EndpointRef !*env
-							->	(!Bool, !*env)
-os_connectTCP				::	!Int !Bool !(!Bool, !Int) !(!Int,!Int) !*env
-							->	(!(!InetErrCode,!Bool,!EndpointRef), !*env)
+os_eom						:: !EndpointRef !*env -> (!Bool, !*env)
+os_disconnected				:: !EndpointRef !*env -> (!Bool, !*env)
+os_connectrequestavailable	:: !EndpointRef !*env -> (!Bool, !*env)
+os_connectTCP				:: !Int !Bool !(!Bool,!Int) !(!Int,!Int) !*env
+							-> (!(!InetErrCode,!Bool,!EndpointRef),  !*env)
 //	os_connectTCPC isIOProg block (doTimeout, stopTime) (ipAddr, portnum) env
 //	gets ip address and port number of destination in host order, returns new endpoint, and whether the timeout expired
 //	iff block==True, the function blocks, otherwise an event will be generated later.
@@ -25,9 +29,7 @@ os_connectTCP				::	!Int !Bool !(!Bool, !Int) !(!Int,!Int) !*env
 //		block: 		(referencecount=2, hasSNotif=False, hasRNotif=False)
 //		not block:	(referencecount=1, hasSNotif=False, hasRNotif=True)
 // if timeout or error occurs, then resources (endpoint and dictionary entry) will be removed
-os_select_inetevents		::	!EndpointRef !InetReceiverCategory !Int !Bool !Bool !Bool !*env
-							->	!*env
+
+os_select_inetevents		:: !EndpointRef !InetReceiverCategory !Int !Bool !Bool !Bool !*env -> *env
 							//	only usable for ListenerReceiver, RChanReceiver, SChanReceiver categories
-getMbStopTime				::	!(Maybe !Timeout) !*env
-							->	(!(!Bool, !Int), !*env)
-							|	ChannelEnv env
+getMbStopTime				:: !(Maybe !Timeout) !*env -> (!(!Bool, !Int), !*env) | ChannelEnv env

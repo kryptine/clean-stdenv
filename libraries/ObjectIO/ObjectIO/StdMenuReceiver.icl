@@ -1,9 +1,6 @@
 implementation module StdMenuReceiver
 
 
-//	Clean Object I/O library, version 1.2.1
-
-
 import	StdTuple, StdList
 import	StdReceiverAttribute, StdMenuElementClass, menuhandle
 from	commondef			import cselect, Cond
@@ -11,7 +8,6 @@ from	receiveraccess		import newReceiverHandle, newReceiverHandle2
 
 
 instance MenuElements (Receiver m) where
-	menuElementToHandles :: !(Receiver m .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
 	menuElementToHandles (Receiver rid f atts) pState
 		= (	[menuElementHandleToMenuElementState
 // MW11 was				(MenuReceiverHandle {	mReceiverHandle	= newReceiverHandle id (getSelectState atts) f
@@ -25,11 +21,9 @@ instance MenuElements (Receiver m) where
 	where
 		id	= rIdtoId rid
 	
-	getMenuElementType :: (Receiver m .ls .ps) -> MenuElementType
 	getMenuElementType _ = "Receiver"
 
 instance MenuElements (Receiver2 m r) where
-	menuElementToHandles :: !(Receiver2 m r .ls  (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
 	menuElementToHandles (Receiver2 rid f atts) pState
 		= (	[menuElementHandleToMenuElementState
 // MW11 was				(MenuReceiverHandle {	mReceiverHandle	= newReceiverHandle2 id (getSelectState atts) f
@@ -43,7 +37,6 @@ instance MenuElements (Receiver2 m r) where
 	where
 		id	= r2IdtoId rid
 	
-	getMenuElementType :: (Receiver2 m r .ls .ps) -> MenuElementType
 	getMenuElementType _ = "Receiver2"
 
 getSelectState :: ![ReceiverAttribute .ps] -> SelectState

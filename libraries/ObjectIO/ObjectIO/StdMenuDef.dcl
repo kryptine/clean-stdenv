@@ -2,10 +2,12 @@ definition module StdMenuDef
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard Object I/O library, version 1.2.2
 //	
 //	StdMenu contains the types to define the standard set of menus and their 
 //	elements.
+//	Author: Peter Achten
+//	Modified: 14 September 2001 for Clean 2.0
 //	********************************************************************************
 
 
@@ -13,18 +15,15 @@ import	StdIOCommon, StdMaybe
 
 
 /*	Menus:				*/
-::	Menu        m ls pst = Menu          Title         (m ls pst)
-										 [MenuAttribute *(ls,pst)]
-::	PopUpMenu   m ls pst = PopUpMenu                   (m ls pst)
+::	Menu      m ls pst = Menu Title (m ls pst) [MenuAttribute *(ls,pst)]
+::	PopUpMenu m ls pst = PopUpMenu  (m ls pst)
 
 /*	Menu elements:		*/
-::	MenuItem      ls pst = MenuItem      Title
-										 [MenuAttribute *(ls,pst)]
-::	MenuSeparator ls pst = MenuSeparator [MenuAttribute *(ls,pst)]
-::	RadioMenu     ls pst = RadioMenu     [MenuRadioItem *(ls,pst)] Index
-										 [MenuAttribute *(ls,pst)]
-::	SubMenu     m ls pst = SubMenu       Title         (m ls pst)
-									     [MenuAttribute *(ls,pst)]
+::	MenuItem      ls pst = MenuItem Title           [MenuAttribute *(ls,pst)]
+::	MenuSeparator ls pst = MenuSeparator            [MenuAttribute *(ls,pst)]
+::	RadioMenu     ls pst = RadioMenu                [MenuRadioItem *(ls,pst)]  
+                                              Index [MenuAttribute *(ls,pst)]
+::	SubMenu     m ls pst = SubMenu Title (m ls pst) [MenuAttribute *(ls,pst)]
 
 ::	MenuRadioItem st  :== (Title,Maybe Id,Maybe Char,IdFun st)
 

@@ -1,7 +1,6 @@
 implementation module osbitmap
 
 
-//	Clean object I/O library, version 1.2
 //	PA: other version of bitmaps: create a bitmap handle instead of continuesly copying String to OS
 
 import	StdArray, StdBool, StdChar, StdClass, StdInt, StdFile, StdTuple
@@ -59,6 +58,12 @@ osGetBitmapSize {reSize}
 osGetBitmapContent :: !OSBitmap -> {#Char}
 osGetBitmapContent {bitmapContents}
 	= bitmapContents
+
+//	osGetBitmapHandle returns the handle of the bitmap
+osGetBitmapHandle :: !OSBitmap -> Int
+osGetBitmapHandle {bitmapHandle}
+	= bitmapHandle
+
 
 /*	osResizeBitmap (w,h) bitmap
 		resizes the argument bitmap to the given size.

@@ -1,7 +1,5 @@
 implementation module StdStringChannels
 
-//	Clean Standard Object I/O library, version 1.2.1
-
 import	StdEnv
 import	StdPSt, StdPStClass
 import	StdChannels, StdTCPDef, StdTCPChannels, StdReceiver, StdEventTCP
@@ -16,7 +14,7 @@ import	receiverdefaccess
 		,	maxSize			::	!Int
 		}
 ::	*StringRChannel		:== StringRChannel_ String
-::	*StringRChannels	=	StringRChannels [StringRChannel]
+::	*StringRChannels	=	StringRChannels *[StringRChannel]
 ::	*StringChannelReceiver ls ps 	
 	=	StringChannelReceiver
 			(RId (ReceiveMsg String)) StringRChannel	
@@ -83,10 +81,7 @@ addString (string, stringBegin) readPhase=:(ReadingString wholeString stillToRec
 /*	For a StringChannelReceiver two receivers are opened: one tcp receiver and one "ordinary" receiver.
 	The latter receives strings from the tcp receiver which contains the ReadPhase state.
 */
-instance Receivers 			StringChannelReceiver
-  where
-	openReceiver	:: .ls !*(*StringChannelReceiver .ls (PSt .l)) !(PSt .l)
-					-> (!ErrorReport,!PSt .l)
+instance Receivers StringChannelReceiver where
 	openReceiver ls (StringChannelReceiver id {tcp_rchan, readPhase, maxSize} callback attributes) pSt
 		#!	(isEom, readPhase)	= isEOM readPhase
 			(tcpRcvId, pSt)		= accPIO openId pSt
@@ -127,8 +122,6 @@ instance Receivers 			StringChannelReceiver
 		checkEOM id callback m ls_pSt
 			= callback m ls_pSt
 		
-	getReceiverType	:: *(*StringChannelReceiver .ls .ps)
-					-> ReceiverType
 	getReceiverType _	= "StringChannelReceiver"
 		
 strcpy	::	!*{#Char} !Int !{#Char} !Int !Int -> *{#Char}
@@ -138,10 +131,7 @@ strcpy dest destBegin src srcBegin nrOfBytes
 	= strcpy { dest & [destBegin] = src.[srcBegin] } (inc destBegin) src (inc srcBegin) (dec nrOfBytes)
 
 
-instance Receive			StringRChannel_
-  where
-	receive_MT		::	!(Maybe !Timeout)			!*(*StringRChannel_ .a)  !*env	
-				->	(!TimeoutReport, !Maybe !.a,!*(*StringRChannel_ .a), !*env)	| ChannelEnv  env
+instance Receive StringRChannel_ where
 	receive_MT mbTimeout rchan=:{receivedStrings, maxSize} env
 		|	isJust mbTimeout && (fromJust mbTimeout)<0
 			= (TR_Expired, Nothing, rchan, env)
@@ -166,8 +156,7 @@ instance Receive			StringRChannel_
 			
 	receiveUpTo max ch env
 		= receiveUpToGeneral [] max ch env
-	available	:: 								!*(*StringRChannel_ .a)  !*env
-				->	(!Bool,						!*(*StringRChannel_ .a), !*env)	| ChannelEnv  env
+	
 	available rchan=:{maxSize} env
 		|	not (isEmpty rchan.receivedStrings)
 			= (True, rchan, env)
@@ -181,8 +170,7 @@ instance Receive			StringRChannel_
 		  ,	{ rchan & tcp_rchan=tcp_rchan, readPhase=readPhase, receivedStrings=newStrings }
 		  ,	env
 		  )
-	eom			:: 								!*(*StringRChannel_ .a)  !*env
-				->	(!Bool,						!*(*StringRChannel_ .a), !*env)	| ChannelEnv  env
+	
 	eom rchan env
 		|	not (isEmpty rchan.receivedStrings)
 			= (False, rchan, env)
@@ -227,7 +215,7 @@ instance MaxSize			StringRChannel_
 
 ::	*StringSChannel_ a	=	StringSChannel_ TCP_SChannel
 ::	*StringSChannel		:== StringSChannel_ String
-::	*StringSChannels	=	StringSChannels [StringSChannel]
+::	*StringSChannels	=	StringSChannels *[StringSChannel]
 
 toStringSChannel	::	TCP_SChannel -> StringSChannel
 toStringSChannel tcp_schan
@@ -255,14 +243,12 @@ instance Send				StringSChannel_
 		= closeChannel_MT mbTimeout tcp_schan env
 	abortConnection (StringSChannel_ tcp_schan) env
 		= abortConnection tcp_schan env
-	disconnected::								!*(*StringSChannel_ .a)	!*env
-				->	(!Bool,						!*(*StringSChannel_ .a), !*env)	| ChannelEnv  env
+	
 	disconnected (StringSChannel_ tcp_schan) env
 		#!	(isDisconnected, tcp_schan, env)
 				= disconnected tcp_schan env
 		= (isDisconnected, StringSChannel_ tcp_schan, env)
-	bufferSize	::								!*(*StringSChannel_ .a)
-				->	(!Int, 						!*(*StringSChannel_ .a))	
+
 	bufferSize (StringSChannel_ tcp_schan)
 		#!	(buffSize, tcp_schan)
 				= bufferSize tcp_schan

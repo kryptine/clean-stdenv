@@ -1,9 +1,6 @@
 implementation module StdReceiver
 
 
-//	Clean Object I/O library, version 1.2.1
-
-
 import	StdInt, StdBool, StdList, StdTuple, StdOverloaded, StdFunc
 import	commondef, id, receiveraccess, receiverdefaccess, receiverdevice, receiverid, scheduler
 from	StdPSt	import	accPIO, appPIO, St
@@ -17,12 +14,10 @@ stdReceiverFatalError rule error
 //	Open one-way receiver:
 
 class Receivers rdef where
-	openReceiver	:: .ls !*(*rdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
-	getReceiverType	::      *(*rdef .ls .pst)				-> ReceiverType
+	openReceiver	:: .ls !*(rdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
+	getReceiverType	::      *(rdef .ls .pst)               -> ReceiverType
 
 instance Receivers (Receiver m) where
-// MW11 was	openReceiver :: .ls !(Receiver m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
-	openReceiver :: .ls !*(Receiver m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
 	openReceiver ls rDef pState
 		# pState					= receiverFunctions.dOpen pState
 		# (idtable,ioState)			= ioStGetIdTable pState.io
@@ -58,18 +53,10 @@ instance Receivers (Receiver m) where
 		connectedIds			= getReceiverConnectedReceivers (snd (cselect isReceiverConnectedReceivers (ReceiverConnectedReceivers []) rDefAttributes)) // MW11++
 		id						= rIdtoId rid
 		rDefAttributes			= receiverDefAttributes rDef // MW11++
-	
-/* MW11
-	reopenReceiver :: .ls !(Receiver m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
-	reopenReceiver ls rDef pState
-		= openReceiver ls rDef (appPIO (closeReceiver (rIdtoId (receiverDefRId rDef))) pState)
-*/	
-	getReceiverType :: *(Receiver m .ls .pst) -> ReceiverType
+
 	getReceiverType _			= "Receiver"
 
 instance Receivers (Receiver2 m r) where
-// MW11 was	openReceiver :: .ls !(Receiver2 m r .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
-	openReceiver :: .ls !*(Receiver2 m r .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
 	openReceiver ls rDef pState
 		# pState					= receiverFunctions.dOpen pState
 		# (idtable,ioState)			= ioStGetIdTable pState.io
@@ -105,14 +92,7 @@ instance Receivers (Receiver2 m r) where
 		connectedIds			= getReceiverConnectedReceivers (snd (cselect isReceiverConnectedReceivers (ReceiverConnectedReceivers []) rDefAttributes)) // MW11++
 		id						= r2IdtoId r2id
 		rDefAttributes			= receiver2DefAttributes rDef // MW11++
-	
-/* MW11
-	reopenReceiver :: .ls !(Receiver2 m r .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
-	reopenReceiver ls rDef pState
-		= openReceiver ls rDef (appPIO (closeReceiver (r2IdtoId (receiver2DefR2Id rDef))) pState)
-*/
-	
-	getReceiverType :: *(Receiver2 m r .ls .pst) -> ReceiverType
+
 	getReceiverType _			= "Receiver2"
 
 

@@ -1,9 +1,6 @@
 implementation module StdPSt
 
 
-//	Clean Object I/O library, version 1.2.1
-
-
 import	StdBool, StdFunc
 import	commondef, iostate
 from	StdIOCommon			import IdFun

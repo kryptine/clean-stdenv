@@ -1,13 +1,6 @@
 implementation module StdIOBasic
 
 
-//	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
-//	
-//	StdIOBasic defines basic types and access functions for the I/O library.
-//	********************************************************************************
-
-
 import	StdBool, StdInt, StdList, StdOverloaded, StdString
 
 
@@ -18,19 +11,19 @@ import	StdBool, StdInt, StdList, StdOverloaded, StdString
 
 /*	General type constructors for composing context-dependent data structures.
 */
-::	:~:		t1 t2		cs	= (:~:) infixr 9 (t1 cs) (t2 cs)
-::	ListCS		t		cs	= ListCS [t cs]
+::	:~:		t1 t2		cs	= (:~:) infixr 9 .(t1 cs) .(t2 cs)
+::	ListCS	t			cs	= ListCS .[t cs]
 ::	NilCS				cs	= NilCS
 
 
 /*	General type constructors for composing local and context-dependent 
 	data structures.
 */
-::	:+:		t1 t2	ls	cs	= (:+:) infixr 9 (t1 ls cs) (t2 ls cs)
-::	ListLS		t	ls	cs	= ListLS [t ls cs]
+::	:+:		t1 t2	ls	cs	= (:+:) infixr 9 .(t1 ls cs) .(t2 ls cs)
+::	ListLS		t	ls	cs	= ListLS .[t ls cs]
 ::	NilLS			ls	cs	= NilLS
-::	NewLS		t	ls	cs	= E. .new: {newLS::new, newDef:: t   new		cs}
-::	AddLS		t	ls	cs	= E. .add: {addLS::add, addDef:: t *(add,ls)	cs}
+::	NewLS		t	ls	cs	= E. .new: {newLS :: new, newDef :: t   new		cs}
+::	AddLS		t	ls	cs	= E. .add: {addLS :: add, addDef :: t *(add,ls)	cs}
 
 noLS :: (.a->.b) (.c,.a) -> (.c,.b)
 noLS f (c,a) = (c,f a)

@@ -1,9 +1,6 @@
 implementation module receivertable
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import StdBool, StdInt, StdMisc
 import StdMaybe, commondef, id, systemid, device
 

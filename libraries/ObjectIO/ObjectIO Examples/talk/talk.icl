@@ -5,7 +5,7 @@ module talk
 //	This program creates two interactive processes that communicate via message passing.
 //	In a future distributed version this program can be used as a graphical talk application.
 //
-//	The program has been written in Clean 1.3.2 and uses the Clean Standard Object I/O library 1.2
+//	The program has been written in Clean 2.0 and uses the Clean Standard Object I/O library 1.2.2
 //	
 //	**************************************************************************************************
 
@@ -34,26 +34,13 @@ talk name me you world
 	# (wId,  world)	= openId world
 	# (outId,world)	= openId world
 	# (inId, world)	= openId world
-	  input			= EditControl	"" (PixelWidth (hmm 50.0)) 5
-						[	ControlId		inId
-						,	ControlKeyboard	inputfilter Able (noLS1 (input wId inId you))
-						,	ControlResize	editResize
-						,	ControlTip		"Type your message here"
-						]
-	  output		= EditControl	"" (PixelWidth (hmm 50.0)) 5
-						[	ControlId		outId
-						,	ControlPos		(Below inId,NoOffset)
-						,	ControlSelectState Unable
-						,	ControlResize	editResize
-						,	ControlTip		"Received messages appear here"
-						]
-	= (	Process SDI	Void (initialise input output wId outId inId) [ProcessClose (quit you)]
+	= (	Process SDI	Void (initialise wId outId inId) [ProcessClose (quit you)]
 	  ,	world
 	  )
 where
-	initialise input output wId outId inId pst
-		# (size,pst)	= controlSize (input:+:output) True Nothing Nothing Nothing pst
-		  talkwindow	= Window ("Talk "+++name) (input:+:output)
+	initialise wId outId inId pst
+		# (size,pst)	= controlSize (input wId inId you :+: output outId inId) True Nothing Nothing Nothing pst
+		  talkwindow	= Window ("Talk "+++name) (input wId inId you :+: output outId inId)
 							[	WindowId		wId
 							,	WindowViewSize	size
 							]
@@ -65,6 +52,20 @@ where
 		# (_,pst)		= openMenu     undef menu       pst
 		# (_,pst)		= openReceiver undef receiver   pst
 		= pst		
+	
+	input wId inId you	= EditControl	"" (PixelWidth (hmm 50.0)) 5
+							[	ControlId		inId
+							,	ControlKeyboard	inputfilter Able (noLS1 (keyinput wId inId you))
+							,	ControlResize	editResize
+							,	ControlTip		"Type your message here"
+							]
+	output outId inId	= EditControl	"" (PixelWidth (hmm 50.0)) 5
+							[	ControlId		outId
+							,	ControlPos		(Below inId,NoOffset)
+							,	ControlSelectState Unable
+							,	ControlResize	editResize
+							,	ControlTip		"Received messages appear here"
+							]
 
 /*	editResize handles the resize of the two input fields. 
 */
@@ -72,7 +73,7 @@ editResize :: Size Size Size -> Size
 editResize _ _ newWindowSize=:{h}
 	= {newWindowSize & h=h/2}
 
-/*	input handles keyboard input in the input EditControl: 
+/*	keyinput handles keyboard input in the input EditControl: 
 	for every KeyDown keyboard input that has been accepted by the input EditControl, input sends the 
 	current content text of the input EditControl to the other talk process with (NewLine text).
 */
@@ -80,8 +81,8 @@ inputfilter :: KeyboardState -> Bool
 inputfilter keystate
 	= getKeyboardStateKeyState keystate<>KeyUp
 
-input :: Id Id (RId Message) KeyboardState (PSt .l) -> PSt .l
-input wId inId you _ pst
+keyinput :: Id Id (RId Message) KeyboardState (PSt .l) -> PSt .l
+keyinput wId inId you _ pst
 	# (Just window,pst)	= accPIO (getWindow wId) pst
 	  text				= fromJust (snd (getControlText inId window))
 	= snd (asyncSend you (NewLine text) pst)

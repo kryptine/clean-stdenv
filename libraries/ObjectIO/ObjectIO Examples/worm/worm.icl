@@ -4,7 +4,7 @@ module worm
 //
 //	The famous Unix game 'worm' (or 'snake').
 //
-//	The program has been written in Clean 1.3.2 and uses the Clean Standard Object I/O library 1.2
+//	The program has been written in Clean 2.0 and uses the Clean Standard Object I/O library 1.2.2
 //	
 //	**************************************************************************************************
 
@@ -295,7 +295,7 @@ where
 			where
 				nrAnimationSteps= 40
 				
-				BetweenLevels :: NrOfIntervals ((Int,Int),PSt Local) -> ((Int,Int),PSt Local)
+				BetweenLevels :: NrOfIntervals ((Int,Int),PSt Local) -> (*(Int,Int),PSt Local)
 				BetweenLevels _ ((animationStep,step),pst=:{ls={state={gamelevel,food,points,worm,lives}},io})
 					| animationStep<=1
 						= ((2,1),pst)
@@ -332,20 +332,20 @@ where
 					# io			= disableTimer			timerID		io
 					# io			= disableWindowKeyboard	windowID	io
 					# pst			= {pst & io=io}
-					# (error,pst)	= openTimer worm (Timer (ticksPerSecond/30) NilLS [TimerId id,TimerFunction DeadWorm]) pst
+					# (error,pst)	= openTimer {corpse=worm} (Timer (ticksPerSecond/30) NilLS [TimerId id,TimerFunction DeadWorm]) pst
 					| error<>NoError= abort "Worm could not open a timer for desintegration."
 					| otherwise		= pst
 				where
-					DeadWorm :: NrOfIntervals (Worm,PSt Local) -> (Worm,PSt Local)
-					DeadWorm _ ([segment:rest],pst=:{io})
+					DeadWorm :: NrOfIntervals (*DeadWormSt,PSt Local) -> (*DeadWormSt,PSt Local)
+					DeadWorm _ (deadWormSt=:{corpse=[segment:rest]},pst=:{io})
 						# io	= appWindowPicture windowID (EraseSegment segment) io
-						= (rest,{pst & io=io})
-					DeadWorm _ (segments,pst=:{ls={state={gamelevel,food,points,worm,lives}},io})
+						= ({deadWormSt & corpse=rest},{pst & io=io})
+					DeadWorm _ (deadWormSt,pst=:{ls={state={gamelevel,food,points,worm,lives}},io})
 						# io	= appWindowPicture		windowID (DrawGame gamelevel food points worm lives)	io
 						# io	= enableTimer			timerID													io
 						# io	= closeTimer			id														io
 						# io	= enableWindowKeyboard	windowID												io
-						= (segments,{pst & io=io})
+						= (deadWormSt,{pst & io=io})
 			
 			# io	= enableMenus			[levelID]		io
 			# io	= enableMenuElements	[playID,quitID]	io
@@ -383,3 +383,7 @@ where
 							= {pst & ls={ls & state={state & best=best}}}
 			| otherwise
 				= openNotice (Notice ["Game Over, no high score."] (NoticeButton "OK" id) []) {pst & io=io}
+
+::	DeadWormSt
+	=	{	corpse	:: Worm		// The corpse of the worm that desintegrates
+		}

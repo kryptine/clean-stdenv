@@ -1,14 +1,12 @@
 implementation module StdTCPDef
 
-//	Clean Standard Object I/O library, version 1.2.1
-
 import	StdEnv
 import	StdReceiverDef, StdMaybe, StdChannels
 import	tcp
 
 ::	*TCP_SChannel			:==	TCP_SChannel_ ByteSeq
 ::	*TCP_RChannel			:==	TCP_RChannel_ ByteSeq
-::	*TCP_Listener			:== TCP_Listener_ (IPAddress, TCP_DuplexChannel)
+::	*TCP_Listener			:== TCP_Listener_ *(IPAddress, TCP_DuplexChannel)
 
 ::	Port					:== Int
 
@@ -56,7 +54,7 @@ instance toString IPAddress
 ::	*TCP_ListenerReceiver ls ps 	
 	=	TCP_ListenerReceiver
 			Id TCP_Listener	
-			((ReceiveMsg (IPAddress,TCP_DuplexChannel)) -> *(*(ls,ps) -> *(ls,ps)))
+			(*(ReceiveMsg *(IPAddress,TCP_DuplexChannel)) -> *(*(ls,ps) -> *(ls,ps)))
 			[ReceiverAttribute							*(ls,ps)]
 
 ::	*TCP_CharReceiver ls ps 	
@@ -66,14 +64,14 @@ instance toString IPAddress
 			[ReceiverAttribute							*(ls,ps)]
 
 ::	NrOfIterations			:== Int
-::	InetLookupFunction ps	:== (Maybe IPAddress) -> *(ps -> ps)
-::	InetConnectFunction ps 	:== (Maybe TCP_DuplexChannel) -> *(ps -> ps)
+::	InetLookupFunction  ps	:== (Maybe IPAddress) -> ps -> ps
+::	InetConnectFunction ps 	:== *(Maybe TCP_DuplexChannel) -> *(ps -> ps)
 
 //////////////////////////////// for multiplexing //////////////////////////////////
 
-:: *TCP_RChannels = TCP_RChannels [TCP_RChannel]	
-:: *TCP_SChannels = TCP_SChannels [TCP_SChannel]
-:: *TCP_Listeners = TCP_Listeners [TCP_Listener]
+:: *TCP_RChannels = TCP_RChannels *[TCP_RChannel]
+:: *TCP_SChannels = TCP_SChannels *[TCP_SChannel]
+:: *TCP_Listeners = TCP_Listeners *[TCP_Listener]
 
 ::	*PrimitiveRChannel
 	=	TCP_RCHANNEL TCP_RChannel

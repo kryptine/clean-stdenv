@@ -1,11 +1,6 @@
 implementation module StdControl
 
 
-//	Clean Object I/O library, version 1.2.1
-
-//	Operations to change controls.
-
-
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	commondef, controlaccess, controlinternal, controlvalidate, id, iostate, StdControlClass, windowaccess, windowcontrols, wstate
 import	ostoolbox, oswindow
@@ -152,7 +147,7 @@ setWindow windowId f ioState
 
 /*	controlSize calculates the size of the given control.
 */
-controlSize :: !(cdef .ls (PSt .l)) !Bool !(Maybe (Int,Int)) !(Maybe (Int,Int)) !(Maybe (Int,Int)) !(PSt .l)
+controlSize :: !.(cdef .ls (PSt .l)) !Bool !(Maybe (Int,Int)) !(Maybe (Int,Int)) !(Maybe (Int,Int)) !(PSt .l)
 			-> (!Size,!PSt .l) | Controls cdef
 controlSize cdef isWindow hMargins vMargins itemSpaces pState
 	# (cs,pState)		= controlToHandles cdef pState
@@ -178,7 +173,7 @@ controlSize cdef isWindow hMargins vMargins itemSpaces pState
 
 /*	openControls adds controls to the indicated window.
 */
-openControls :: !Id .ls (cdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | Controls cdef
+openControls :: !Id .ls .(cdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | Controls cdef
 openControls wId ls newControls pState
 	# (found,wDevice,ioState)	= ioStGetDevice WindowDevice pState.io
 	| not found
@@ -250,7 +245,7 @@ getParentWindowId controlId ioState
 
 /*	openCompoundControls adds controls to the indicated CompoundControl of the indicated window.
 */
-openCompoundControls :: !Id .ls (cdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | Controls cdef
+openCompoundControls :: !Id .ls .(cdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | Controls cdef
 openCompoundControls cId ls newControls pState=:{io=ioState}
 	# (maybeId,ioState)			= getParentWindowId cId ioState
 	| isNothing maybeId

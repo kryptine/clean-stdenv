@@ -1,9 +1,6 @@
 implementation module menudevice
 
 
-//	Clean object I/O library, version 1.2
-
-
 import	StdBool, StdEnum, StdList, StdMisc
 import	menuevent, osdocumentinterface, osmenu, ostypes
 import	commondef, devicefunctions, iostate, menuaccess, menucreate, menudefaccess, receiveraccess, StdId

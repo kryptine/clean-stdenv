@@ -1,9 +1,6 @@
 implementation module oswindow
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdInt, StdReal, StdClass, StdOverloaded, StdList, StdMisc, StdTuple
 from	StdIOCommon			import CursorShape, StandardCursor, BusyCursor, IBeamCursor, CrossCursor, FatCrossCursor, ArrowCursor, HiddenCursor
 import	clCrossCall_12, clCCall_12, windowCCall_12, windowCrossCall_12

@@ -1,9 +1,6 @@
 implementation module receivermessage
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import receivertable, semidynamic
 
 

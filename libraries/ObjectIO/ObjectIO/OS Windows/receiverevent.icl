@@ -1,9 +1,5 @@
 implementation module receiverevent
 
-
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool
 import	deviceevents, iostate, /*MW11*/ clCrossCall_12 
 from	StdPSt	import accPIO

@@ -1,11 +1,16 @@
 definition module ostypes
 
-//	Clean Object I/O library, version 1.2
-
-//	Standard types for the OS
+//	********************************************************************************
+//	Clean Standard Object I/O library, version 1.2.2
+//	
+//	Standard types for the OS layer
+//
+//	Author: Peter Achten
+//	Modified: 8 October 2001 for Clean 2.0
+//	********************************************************************************
 
 ::	OSPictContext					// PA: moved from ospicture by DvA
-	:== HDC
+	:== Int // HDC
 ::	HDC								// PA: moved from pictCCall_12
 	:== Int
 ::	OSRect							// A OSRect is supposed to be an ordered rectangle with
@@ -15,7 +20,7 @@ definition module ostypes
 		,	rbottom		:: !Int
 		}
 ::	OSWindowPtr
-	:== HWND
+	:== Int // HWND
 ::	HWND
 	:==	Int
 

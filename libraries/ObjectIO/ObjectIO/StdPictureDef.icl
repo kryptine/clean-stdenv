@@ -1,13 +1,6 @@
 implementation module StdPictureDef
 
 
-//	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
-//	
-//	StdPictureDef contains the predefined figures that can be drawn.
-//	********************************************************************************
-
-
 import	StdIOBasic
 import	osfont
 

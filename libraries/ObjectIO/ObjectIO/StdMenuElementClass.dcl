@@ -2,9 +2,11 @@ definition module StdMenuElementClass
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard Object I/O library, version 1.2.2
 //	
 //	StdMenuElementClass defines the standard set of menu element instances.
+//	Author: Peter Achten
+//	Modified: 8 October 2001 for Clean 2.0
 //	********************************************************************************
 
 
@@ -16,10 +18,10 @@ from	menuhandle	import MenuElementState
 /*	Menu elements for Menus:
 */
 class MenuElements m where
-	menuElementToHandles	:: !(m .ls (PSt .l)) !(PSt .l)
-			-> (![MenuElementState .ls (PSt .l)], !PSt .l)
-	getMenuElementType		::  (m .ls .pst)
-			-> MenuElementType
+	menuElementToHandles	:: !.(m .ls (PSt .l)) !(PSt .l)
+			 -> (![MenuElementState .ls (PSt .l)], !PSt .l)
+	getMenuElementType		::  .(m .ls .pst)
+			 -> MenuElementType
 
 instance MenuElements (AddLS	m)	| MenuElements m
 instance MenuElements (NewLS	m)	| MenuElements m
@@ -35,10 +37,10 @@ instance MenuElements MenuSeparator
 /*	Menu elements for PopUpMenus:
 */
 class PopUpMenuElements m where
-	popUpMenuElementToHandles	:: !(m .ls (PSt .l)) !(PSt .l)
-				-> (![MenuElementState .ls (PSt .l)], !PSt .l)
-	getPopUpMenuElementType		::  (m .ls .pst)
-				-> MenuElementType
+	popUpMenuElementToHandles	:: !.(m .ls (PSt .l)) !(PSt .l)
+				 -> (![MenuElementState .ls (PSt .l)], !PSt .l)
+	getPopUpMenuElementType		::  .(m .ls .pst)
+				 -> MenuElementType
 
 instance PopUpMenuElements (AddLS	m)		| PopUpMenuElements m
 instance PopUpMenuElements (NewLS	m)		| PopUpMenuElements m

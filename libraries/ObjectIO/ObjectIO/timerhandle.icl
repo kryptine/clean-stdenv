@@ -1,9 +1,6 @@
 implementation module timerhandle
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdList
 import	commondef, receiverhandle, receivertable
 import	StdTimerDef

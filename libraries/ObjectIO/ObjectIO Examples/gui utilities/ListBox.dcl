@@ -2,7 +2,7 @@ definition module ListBox
 
 
 /*	Definition of the list box control.
-	This definition uses the Object I/O library, version 1.2
+	This definition has been written in Clean 2.0 and uses the Object I/O library, version 1.2.2
 	The list box control is constructed out of predefined control elements, and is therefore platform independent.
 	In future versions it will be added as a standard library component.
 */
@@ -34,17 +34,17 @@ import StdControl, StdControlClass, StdId, StdPSt
 	The environment argument must atleast be a FontEnv.
 */
 ListBoxControl			:: Int [String] [Index] ListBoxId [ControlAttribute *(.ls,.ps)] !*env
-						-> (!ListBoxControl .ls .ps,!*env) | accScreenPicture env
+						-> (!.ListBoxControl .ls .ps,!*env) | accScreenPicture env
 
 instance Controls ListBoxControl
 
 openListBoxId			:: !*env -> (!ListBoxId,!*env)	| Ids env
 
-getListBoxSelection 	:: !ListBoxId					!(PSt .l) -> (!(!Bool,![(String,!Index)]),!PSt .l)
-setListBoxSelection 	:: !ListBoxId ![Index]			!(PSt .l) -> PSt .l
-getListBoxItems			:: !ListBoxId					!(PSt .l) -> (!(!Bool,![String]),!PSt .l)
-openListBoxItems		:: !ListBoxId !Index ![String]	!(PSt .l) -> PSt .l
-closeListBoxItems		:: !ListBoxId ![Index]			!(PSt .l) -> PSt .l
+getListBoxSelection 	:: !ListBoxId					!(PSt *l) -> (!(!Bool,![(String,!Index)]),!PSt *l)
+setListBoxSelection 	:: !ListBoxId ![Index]			!(PSt *l) -> PSt *l
+getListBoxItems			:: !ListBoxId					!(PSt *l) -> (!(!Bool,![String]),!PSt *l)
+openListBoxItems		:: !ListBoxId !Index ![String]	!(PSt *l) -> PSt *l
+closeListBoxItems		:: !ListBoxId ![Index]			!(PSt *l) -> PSt *l
 
 showListBoxControl		:: !ListBoxId !(IOSt .l) -> IOSt .l
 hideListBoxControl		:: !ListBoxId !(IOSt .l) -> IOSt .l

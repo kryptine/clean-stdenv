@@ -1,9 +1,6 @@
 implementation module StdMenu
 
 
-//	Clean Object I/O library, version 1.2.1
-
-
 import	StdBool, StdList, StdTuple
 import	osmenu
 import	commondef, iostate, menuaccess, menucreate, menudevice, menuevent, menuinternal, menuitems, StdId
@@ -99,11 +96,10 @@ accessMenuSystemState redrawMenus f ioState
 //	Opening a menu for an interactive process.
 
 class Menus mdef where
-	openMenu	:: .ls !(mdef .ls (PSt .l)) !(PSt .l)	-> (!ErrorReport,!PSt .l)
-	getMenuType	::      (mdef .ls .pst)					-> MenuType
+	openMenu	:: .ls !.(mdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
+	getMenuType	::      .(mdef .ls .pst)               -> MenuType
 
 instance Menus (Menu m)	| MenuElements m where
-	openMenu :: .ls !(Menu m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)	| MenuElements m
 	openMenu ls mDef pState
 		# pState			= menuFunctions.dOpen pState
 		# (isZero,pState)	= accPIO checkZeroMenuBound pState
@@ -129,7 +125,6 @@ instance Menus (Menu m)	| MenuElements m where
 			# ioState					= ioStSetDevice (MenuSystemState mHs) ioState
 			= (zeroBound bound,ioState)
 	
-	getMenuType :: (Menu m .ls .pst) -> MenuType | MenuElements m
 	getMenuType _ = "Menu"
 
 validateMenuId :: !(Maybe Id) !(IOSt .l) -> (!Maybe Id,!IOSt .l)
@@ -143,7 +138,6 @@ validateMenuId (Just id) ioState
 	| otherwise					= (Just id,ioStSetIdTable idtable ioState)
 
 instance Menus (PopUpMenu m) | PopUpMenuElements m where
-	openMenu :: .ls !(PopUpMenu m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | PopUpMenuElements m
 	openMenu ls mDef pState
 		# (osdInfo,pState)			= accPIO ioStGetOSDInfo pState
 		| getOSDInfoDocumentInterface osdInfo==NDI
@@ -232,7 +226,6 @@ instance Menus (PopUpMenu m) | PopUpMenuElements m where
 			| otherwise						// Evaluate the abstract event
 				= snd (menuFunctions.dDoIO (fromJust maybePopUpEvent) pState)
 	
-	getMenuType :: (PopUpMenu m .ls .pst) -> MenuType | PopUpMenuElements m
 	getMenuType _ = "PopUpMenu"
 
 
@@ -442,7 +435,7 @@ getMenuSelectState id ioState
 		the end.
 		Open an item on a position adds the item AFTER the item on that position.
 */
-openMenuElements :: !Id !Index .ls (m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | MenuElements m
+openMenuElements :: !Id !Index .ls .(m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | MenuElements m
 openMenuElements mId pos ls new pState
 	# (it,ioState)					= ioStGetIdTable pState.io
 	# (maybeParent,it)				= getIdParent mId it
@@ -481,7 +474,7 @@ openMenuElements mId pos ls new pState
 		# pState					= {pState & io=ioState}
 		= (error,pState)
 
-openSubMenuElements :: !Id !Index .ls (m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)	| MenuElements m
+openSubMenuElements :: !Id !Index .ls .(m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)	| MenuElements m
 openSubMenuElements sId pos ls new pState
 	# (it,ioState)				= ioStGetIdTable pState.io
 	# (maybeParent,it)			= getIdParent sId it

@@ -1,9 +1,6 @@
 implementation module windowdefaccess
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdTuple, StdList
 import	commondef, StdWindowAttribute
 

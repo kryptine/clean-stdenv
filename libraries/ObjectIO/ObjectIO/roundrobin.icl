@@ -1,9 +1,6 @@
 implementation module roundrobin
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdList, StdString
 from	commondef	import fatalError
 

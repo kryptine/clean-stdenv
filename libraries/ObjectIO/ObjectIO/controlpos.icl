@@ -1,8 +1,6 @@
 implementation module controlpos
 
 
-//	Clean Object I/O library version 1.2
-
 import	StdBool, StdFunc, StdInt, StdList, StdMisc, StdTuple
 import	commondef, controlrelayout, windowaccess
 from	controllayout	import layoutControls
@@ -24,13 +22,14 @@ movewindowviewframe :: !OSWindowMetrics !Vector2 !WIDS !(WindowHandle .ls .pst) 
 movewindowviewframe wMetrics v wids=:{wPtr} wH=:{whWindowInfo,whItems=oldItems,whSize,whAtts,whSelect,whShow} tb
 	| newOrigin==oldOrigin			// origin has not changed
 		= (wH,tb)
+	# (hasUpdate,tb)				= hasUpdateRect wPtr tb
 	# tb							= setsliderthumb (hasHScroll && newOrigin.x<>oldOrigin.x) wMetrics wPtr True  (minx,newOrigin.x,maxx) vieww (toTuple whSize) tb
 	# tb							= setsliderthumb (hasVScroll && newOrigin.y<>oldOrigin.y) wMetrics wPtr False (miny,newOrigin.y,maxy) viewh (toTuple whSize) tb
-	# (noControls,oldItems)			= uisEmpty oldItems	// geeft nu foute resultaat?! PA: wat bedoel je hier mee?
+	# (noControls,oldItems)			= myisEmpty oldItems
 	| noControls					// there are no controls: do only visual updates
 		# windowInfo				= {windowInfo & windowOrigin=newOrigin}
 		  wH						= {wH & whWindowInfo=WindowInfo windowInfo,whItems=oldItems}
-		  (updArea,updAction)		= if (not lookInfo.lookSysUpdate || toMuch)
+		  (updArea,updAction)		= if (not lookInfo.lookSysUpdate || toMuch || hasUpdate)
 		  								([newFrame],return []) (calcScrollUpdateArea oldOrigin newOrigin contentRect)
 		  updState					= {oldFrame=posSizeToRectangle oldOrigin contentSize,newFrame=newFrame,updArea=updArea}
 		# (wH,tb)					= drawwindowlook` wMetrics wPtr updAction updState wH tb
@@ -48,7 +47,7 @@ movewindowviewframe wMetrics v wids=:{wPtr} wH=:{whWindowInfo,whItems=oldItems,w
 		  								_                                 -> controlposFatalError "movewindowviewframe" "unexpected whWindowInfo field"
 		# (updRgn,newItems,tb)		= relayoutControls wMetrics whSelect whShow contentRect contentRect zero zero wPtr wH.whDefaultId oldItems` wH.whItems tb
 		# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wids {wH & whItems=newItems} tb
-		  (updArea,updAction)		= if (not lookInfo.lookSysUpdate || toMuch || not isRect)
+		  (updArea,updAction)		= if (not lookInfo.lookSysUpdate || toMuch || not isRect || hasUpdate)
 		  								([newFrame],return []) (calcScrollUpdateArea oldOrigin newOrigin areaRect)
 		  updState					= {oldFrame=posSizeToRectangle oldOrigin contentSize,newFrame=newFrame,updArea=updArea}
 		# (wH,tb)					= drawwindowlook` wMetrics wPtr updAction updState wH tb
@@ -99,7 +98,7 @@ where
 		{rleft,rtop,rright,rbottom}	= newOriginAreaRect
 		v							= toVector (oldOrigin-newOrigin)
 		{vx,vy}						= v
-		(updArea,restArea)			= if (vx<0 && vy<0)		// PA: waarom zijn deze verschillend van CVS versie?
+		(updArea,restArea)			= if (vx<0 && vy<0)
 										(	[{newOriginAreaRect & rleft=rright+vx,rbottom=rbottom+vy}
 											,{newOriginAreaRect & rtop=rbottom+vy}
 											]
@@ -111,37 +110,76 @@ where
 									 		]
 									 	,	 {newOriginAreaRect & rtop=rtop+vy,rright=rright+vx}
 									 	)
-									 (if (vx<0)	//@@@@
+									 (if (vx<0)
 									 	(	[{newOriginAreaRect & rleft=rright+vx}]
 									 	,	 {newOriginAreaRect & rright=rright+vx}
 									 	)
 									 (if (vx>0 && vy<0)
-									 	(	[{newOriginAreaRect & rleft=rright-vx}
-									 		,{newOriginAreaRect & rright=rright-vx,rbottom=rtop-vy}
+									 	(	[{newOriginAreaRect & rright=rleft+vx,rbottom=rbottom+vy}
+									 		,{newOriginAreaRect & rtop=rbottom+vy}
 									 		]
 									 	,	 {newOriginAreaRect & rleft=rleft+vx,rbottom=rbottom+vy}
 									 	)
 									 (if (vx>0 && vy>0)
-									 	(	[{newOriginAreaRect & rright=rright-vx,rtop=rbottom-vy}
-									 		,{newOriginAreaRect & rleft=rright-vx}
+									 	(	[{newOriginAreaRect & rright=rleft+vx,rtop=rtop+vy}
+									 		,{newOriginAreaRect & rbottom=rtop+vy}
 									 		]
 									 	,	 {newOriginAreaRect & rleft=rleft+vx,rtop=rtop+vy}
 									 	)
-									 (if (vx>0)	//@@@@
+									 (if (vx>0)
 									 	(	[{newOriginAreaRect & rright=rleft+vx}]
 									 	,	 {newOriginAreaRect & rleft=rleft+vx}
 									 	)
-									 (if (vy<0)	//@@@@
-									 	(	[{newOriginAreaRect & rtop=rbottom+vy}],{newOriginAreaRect & rbottom = rbottom+vy})
-									 (if (vy>0)	//@@@@
-									 	(	[{newOriginAreaRect & rbottom=rtop+vy}],{newOriginAreaRect & rtop = rtop+vy})
+									 (if (vy<0)
+									 	(	[{newOriginAreaRect & rtop=rbottom+vy}]
+									 	,	{newOriginAreaRect & rbottom = rbottom+vy}
+									 	)
+									 (if (vy>0)
+									 	(	[{newOriginAreaRect & rbottom=rtop+vy}]
+									 	,	{newOriginAreaRect & rtop = rtop+vy}
+									 	)
 									 	(	[zero],newOriginAreaRect)
 									 )))))))
 		
 		scroll :: !OSRect !OSRect !Vector2 !*Picture -> (![OSRect],!*Picture)
 		scroll scrollRect restRect v picture
-			# (updRect,picture)	= pictscroll scrollRect v picture
+			# (updRect,picture)	= pictscroll2 scrollRect v picture
 			| updRect==zero
 				= ([],picture)
 			| otherwise
 				= ([restRect],picture)
+
+
+/*	Needs to be reallocated in some decent module...
+*/
+hasUpdateRect :: !OSWindowPtr !*OSToolbox -> (!Bool,!*OSToolbox)
+hasUpdateRect wPtr tb = GetUpdateRect wPtr 0 0 tb
+where
+	GetUpdateRect :: !Int !Int !Int !*Int -> (!Bool,!*Int)
+	GetUpdateRect _ _ _ _ = code {
+		ccall GetUpdateRect@12 "PIII:I:I"
+		}
+
+
+/*	myisEmpty checks for lack of real controls, in contrast with isEmpty due to existence of W(List/Extend/Change)LSHandles. 
+*/
+myisEmpty :: ![WElementHandle .a .b] -> (!Bool,![WElementHandle .a .b])
+myisEmpty [] = (True,[])
+myisEmpty [wH: wHs]
+	# (isEmpty, wH)		= myisEmptyItem wH
+	| isEmpty
+		# (isEmpty, wHs)	= myisEmpty wHs
+		= (isEmpty, [wH: wHs])
+	= (isEmpty, [wH: wHs])
+where
+	myisEmptyItem :: !(WElementHandle .ls .pst) -> (!Bool,!WElementHandle .ls .pst)
+	myisEmptyItem (WItemHandle wiH)		= (False,WItemHandle wiH)
+	myisEmptyItem (WListLSHandle wHs)
+		# (isEmpty,wHs)			= myisEmpty wHs
+		= (isEmpty, WListLSHandle wHs)
+	myisEmptyItem (WExtendLSHandle {wExtendLS,wExtendItems})
+		#   (isEmpty,wHs)			= myisEmpty wExtendItems
+		= (isEmpty, WExtendLSHandle {wExtendLS=wExtendLS,wExtendItems=wHs})
+	myisEmptyItem (WChangeLSHandle {wChangeLS,wChangeItems})
+		#! (isEmpty,wHs)			= myisEmpty wChangeItems
+		= (isEmpty, WChangeLSHandle {wChangeLS = wChangeLS, wChangeItems = wHs})

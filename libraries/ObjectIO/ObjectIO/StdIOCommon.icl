@@ -1,13 +1,6 @@
 implementation module StdIOCommon
 
 
-//	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
-//	
-//	StdIOCommon defines common types and access functions for the I/O library.
-//	********************************************************************************
-
-
 import	StdArray, StdBool, StdFunc, StdInt, StdList, StdOverloaded, StdString
 import	id, StdBitmap, StdIOBasic, StdKey, StdMaybe
 from	commondef	import stateMap2

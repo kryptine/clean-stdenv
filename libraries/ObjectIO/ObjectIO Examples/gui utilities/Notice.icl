@@ -4,7 +4,7 @@ implementation module Notice
 //
 //	A new instance of the Dialogs type constructor class to easily create simple notice dialogues.
 //
-//	This module has been written in Clean 1.3.1 and uses the Clean Standard Object I/O library 1.0.2
+//	This module has been written in Clean 2.0 and uses the Clean Standard Object I/O library 1.2.2
 //	
 //	**************************************************************************************************
 
@@ -19,19 +19,16 @@ import StdId, StdPSt, StdWindow
 /*  Notices are defined as a new instance of the Dialogs type constructor class.
 */
 instance Dialogs Notice where
-    openDialog :: .ls !(Notice .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
     openDialog ls notice pst
         # (wId, pst) = accPIO openId pst
         # (okId,pst) = accPIO openId pst
         = openDialog ls (noticeToDialog wId okId notice) pst
     
-    openModalDialog :: .ls !(Notice .ls (PSt .l)) !(PSt .l) -> (!(!ErrorReport,!Maybe .ls),!PSt .l)
     openModalDialog ls notice pst
         # (wId,pst)  = accPIO openId pst
         # (okId,pst) = accPIO openId pst
         = openModalDialog ls (noticeToDialog wId okId notice) pst
     
-    getDialogType :: (Notice .ls .pst) -> WindowType
     getDialogType notice
         = "Notice"
 
@@ -44,10 +41,10 @@ openNotice notice pst
 /*  noticeToDialog converts a Notice expression into a Dialog expression.
 */
 noticeToDialog :: Id Id (Notice .ls (PSt .l)) 
-               -> Dialog (:+: (LayoutControl (ListLS TextControl))
-                         (:+:  ButtonControl
-                              (ListLS ButtonControl)
-                         )) .ls (PSt .l)
+               -> *Dialog (:+: (LayoutControl (ListLS TextControl))
+                          (:+:  ButtonControl
+                               (ListLS ButtonControl)
+                          )) .ls (PSt .l)
 noticeToDialog wId okId (Notice texts (NoticeButton text f) buttons)
     = Dialog ""
         (   LayoutControl 

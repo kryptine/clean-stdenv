@@ -1,9 +1,11 @@
 definition module StdTCPChannels
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard TCP library, version 1.2.2
 //	
 //	StdTCPChannels provides instances to use TCP.
+//	Author: Martin Wierich
+//	Modified: 7 September 2001 for Clean 2.0 (Peter Achten)
 //	********************************************************************************
 
 import	StdString
@@ -42,7 +44,7 @@ instance MaxSize			TCP_RChannel_
 //	********************************************************************************
 
 ::	*TCP_RCharStream	:==	TCP_RCharStream_ Char
-::	*TCP_RCharStreams	= 	TCP_RCharStreams [TCP_RCharStream]
+::	*TCP_RCharStreams	= 	TCP_RCharStreams *[TCP_RCharStream]
 
 toRCharStream			:: !TCP_RChannel -> TCP_RCharStream
 
@@ -54,7 +56,7 @@ instance closeRChannel		TCP_RCharStream_
 //	********************************************************************************
 
 ::	*TCP_SCharStream	:==	TCP_SCharStream_ Char
-::	*TCP_SCharStreams	= 	TCP_SCharStreams [TCP_SCharStream]
+::	*TCP_SCharStreams	= 	TCP_SCharStreams *[TCP_SCharStream]
 
 toSCharStream			::	!TCP_SChannel -> TCP_SCharStream
 
@@ -126,8 +128,8 @@ class SelectReceive channels where
 */
 
 class SelectSend channels where
-	accSChannels	:: (TCP_SChannel -> (x, TCP_SChannel)) !*channels
-					-> (![x], !*channels)
+	accSChannels	:: (TCP_SChannel -> *(.x, TCP_SChannel)) !*channels
+					-> (![.x], !*channels)
 	appDisconnected	:: !Int !*channels !*World
 					-> (!Bool, !*channels, !*World)
 /*	accSChannels

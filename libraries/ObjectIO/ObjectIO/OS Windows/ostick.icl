@@ -1,7 +1,5 @@
 implementation module ostick
 
-// to be placed in something bigger later
-
 import StdEnv
 import ostoolbox
 

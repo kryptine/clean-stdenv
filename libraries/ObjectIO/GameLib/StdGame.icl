@@ -1,6 +1,5 @@
 implementation module StdGame
 
-
 import	StdArray, StdBool, StdClass, StdFunc, StdInt, StdList, StdMisc
 import	StdId, StdProcess
 import	fixed, GameFunctions, gamehandle, gameutils, gst
@@ -36,16 +35,16 @@ where
 
 openGame :: .gs !(Game .gs) ![GameAttribute .gs] !(PSt .l) -> (.gs, !ErrorReport, !PSt .l)
 openGame gs gdef attr ps
-    #   (wId, ps)       =   accPIO openId ps
-    #   size            =   findSize attr {w=320,h=240}
-    #   bpp             =   findBPP attr 8
-    #   (_, ps)         =   OpenGameWindow wId size bpp True ps
-    #   (tb,ps)         =   accPIO getIOToolbox ps
-    #   gst             =   toGSt gs tb
-    #   (initLevel,gst) =   gdef.nextlevel gst
-    #   (gs,tb)         =   fromGSt gst
-    #   (gs, _, tb)     =   PlayLevels initLevel gs gdef tb
-    #   ps              =   appPIO (setIOToolbox tb) ps
+    #   (wId, ps)       = accPIO openId ps
+    #   size            = findSize attr {w=320,h=240}
+    #   bpp             = findBPP attr 8
+    #   (_, ps)         = openGameWindow wId size bpp True ps
+    #   (tb,ps)         = accPIO getIOToolbox ps
+    #   gst             = toGSt gs tb
+    #   (initLevel,gst) = gdef.nextlevel gst
+    #   (gs,tb)         = fromGSt gst
+    #   (gs, _, tb)     = PlayLevels initLevel gs gdef tb
+    #   ps              = appPIO (setIOToolbox tb) ps
     =   (gs, NoError, ps)
 where
     findSize :: ![GameAttribute .gs] !Size -> Size
@@ -58,8 +57,8 @@ where
     findBPP [x:xs] s = findBPP xs s
 
     // always full screen, game in a window not implemented yet
-	OpenGameWindow :: !Id !Size !Int !Bool !(PSt .l) -> (!ErrorReport, !PSt .l)
-	OpenGameWindow id gamewindowsize bitsperpixel fullscreen pState
+	openGameWindow :: !Id !Size !Int !Bool !(PSt .l) -> (!ErrorReport, !PSt .l)
+	openGameWindow id gamewindowsize bitsperpixel fullscreen pState
 		# pState					= windowFunctions.dOpen pState	// Install the window device
 		# maybe_id					= Just id
 		# (maybe_okId,ioState)		= validateWindowId maybe_id pState.io
@@ -176,7 +175,7 @@ PlayLevel levelnumber gs gamehnd tb
     #   tb                  =   maybePlayMusic curLevelHnd.music` tb
     #   gst                 =   toGSt gs tb
     #   firstlevel          =   curLevelHnd
-    #   (obj, gst)          =   convertallobjsprites firstlevel.objects` gst
+    #   (obj, gst)          =   map2 convertobjsprites firstlevel.objects` gst
     #   firstlevel          =   {firstlevel & objects` = obj}
     #   curgamehnd          =   {gamehnd & levels` = [firstlevel]}
     #   (gs,tb)             =   fromGSt gst
@@ -226,17 +225,15 @@ initsoundsamples sndlist gs
 initsoundsample sample gs
     = OSInitSoundSample sample.soundid sample.soundfile sample.soundbuffers gs
 
-convertallobjsprites obj gst = map2 convertobjsprites obj gst
+convertobjsprites (GameObjectHandleLS obj) gst
+    # (sprids, gst) = convertsprites obj.sprites` gst
+    = (GameObjectHandleLS {obj & spriteids` = sprids}, gst)
 where
-    convertobjsprites obj gst
-        # (sprids, gst) = convertsprites obj.sprites` gst
-        = ({obj & spriteids` = sprids}, gst)
-
-convertsprites :: ![Sprite] !(GSt .gs) -> (![SpriteID], !GSt .gs)
-convertsprites spr gst
-    # (idlst, gst) = map2 createAnimation spr gst
-    # idlst        = map (\x->0-x)/*(~)*/ idlst
-    = (idlst, gst)
+	convertsprites :: ![Sprite] !(GSt .gs) -> (![SpriteID], !GSt .gs)
+	convertsprites spr gst
+	    # (idlst, gst) = map2 createAnimation spr gst
+	    # idlst        = map (\x->0-x)/*(~)*/ idlst
+	    = (idlst, gst)
 
 
 createGameBitmap :: !GameBitmap !(GSt .gs) -> (!GRESULT, !GSt .gs)
@@ -387,7 +384,7 @@ defaultInitObject size state subtype pos time gs
     # (newobjrec, gs) = defaultObjectRec subtype pos size time gs
     = {st=state,gs=gs,or=newobjrec}
 
-defaultGameObject :: !ObjectCode !Size state -> GameObject *(GSt .gs)
+defaultGameObject :: !ObjectCode !Size state -> GameObject state *(GSt .gs)
 defaultGameObject objcode size state
   = { objectcode = objcode
     , sprites    = []

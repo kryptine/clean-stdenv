@@ -1,9 +1,6 @@
 implementation module timertable
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import StdInt, StdBool, StdClass, StdList, StdMaybe, StdMisc
 import commondef, systemid, device
 import StdTimerDef

@@ -452,6 +452,15 @@ winScrollRectangle _ _ _
 		.end
 	}
 
+winScrollRectangle2 :: !OSRect !Pt !PIC -> (!OSRect,!PIC)
+winScrollRectangle2 _ _ _
+	= code
+	{
+		.inline WinScrollRectangle2
+			ccall WinScrollRectangle2 "IIIIIIII-IIIIII"
+		.end
+	}
+
 winCopyRectangle ::  !OSRect !Pt !PIC ->  PIC
 winCopyRectangle _ _ _
 	= code

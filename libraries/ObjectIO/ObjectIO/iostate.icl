@@ -1,9 +1,6 @@
 implementation module iostate
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdFunc, StdList, StdMisc
 import	commondef, devicefunctions, devicesystemstate, processstack, receivertable, timertable
 import	osactivaterequests, osdocumentinterface, osevent, osguishare, osmouse, ossystem, ostime, ostoolbox, ostypes
@@ -24,7 +21,7 @@ iostateFatalError function error
 	:==	RR *CProcess											//	is a round-robin
 ::	*CProcess													// The context-free process
 	=	E. .l:
-		{	localState		:: !Maybe l							//	its local state
+		{	localState		:: !*Maybe l						//	its local state
 		,	localIOSt		:: !*IOSt l							//	its context-free IOSt
 		}
 ::	*IOSt l
@@ -104,7 +101,7 @@ iostateFatalError function error
 //	Creation of an initial, empty IOSt:
 
 emptyIOSt :: !SystemId !(Maybe SystemId) !(Maybe GUIShare) !DocumentInterface !ProcessKind 
-				![ProcessAttribute (PSt .l)] !(IdFun (PSt .l)) !(Maybe SystemId)
+				![ProcessAttribute (PSt .l)] !.(IdFun (PSt .l)) !(Maybe SystemId)
 			-> IOSt .l
 emptyIOSt ioId parentId guishare documentInterface processKind processAtts initIO modalId
 	# tb				= OSNewToolbox

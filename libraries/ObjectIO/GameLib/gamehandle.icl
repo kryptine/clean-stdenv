@@ -1,7 +1,5 @@
 implementation module gamehandle
 
-//  This module defines the internal representation of a game
-
 from	StdList	import map
 import	StdGameDef
 
@@ -16,15 +14,17 @@ import	StdGameDef
    = { boundmap`      :: !BoundMap                   // map of all static bounds in a level
      , initpos`       :: !Point2                     // center of screen in boundmap
      , layers`        :: ![Layer]                    // all layers [back..front]
-     , objects`       :: ![GameObjectHandle state]   // all other objects in the level
+     , objects`       :: ![GameObjectHandleLS state] // all other objects in the level
      , music`         :: !Maybe Music                // background music
      , soundsamples`  :: ![SoundSample]
      , leveloptions`  :: !LevelOptions
      }
 
-:: GameObjectHandle gs
-   = E. state:
-     { objectcode` :: !ObjectCode
+:: GameObjectHandleLS gs
+   = E. state: GameObjectHandleLS (GameObjectHandle state gs)
+:: GameObjectHandle state gs
+// = E. state:
+   = { objectcode` :: !ObjectCode
      , sprites`    :: ![Sprite]
      , spriteids`  :: ![SpriteID]
      , instances`  :: ![(InstanceID, state)]
@@ -45,7 +45,7 @@ import	StdGameDef
 
 
 
-createObjectHandle :: !(GameObject .gs) -> GameObjectHandle .gs
+createObjectHandle :: !(GameObject state .gs) -> GameObjectHandle state .gs
 createObjectHandle {objectcode, sprites, init, done, move, animation, touchbound,
                     collide, frametimer, keydown, keyup, userevent}
     = { objectcode` = objectcode
@@ -64,12 +64,16 @@ createObjectHandle {objectcode, sprites, init, done, move, animation, touchbound
       , userevent`  = userevent
       }
 
+createObjectHandleLS :: !(GameObjectLS .gs) -> GameObjectHandleLS .gs
+createObjectHandleLS (GameObjectLS obj)
+	= GameObjectHandleLS (createObjectHandle obj)
+
 createLevelHandle :: !(Level .gs) -> LevelHandle .gs
 createLevelHandle {boundmap, initpos, layers, objects, music, soundsamples, leveloptions}
     = { boundmap`      = boundmap
       , initpos`       = initpos
       , layers`        = layers
-      , objects`       = map createObjectHandle objects
+      , objects`       = map createObjectHandleLS objects
       , music`         = music
       , soundsamples`  = soundsamples
       , leveloptions`  = leveloptions
@@ -82,3 +86,14 @@ createGameHandle {levels, quitlevel, nextlevel, textitems}
       , nextlevel`  = nextlevel
       , textitems`  = textitems
       }
+
+
+//	PA: Newly added access functions due to additional type constructor.
+getGameObjectHandleLS_objectcode` :: !(GameObjectHandleLS .gs) -> ObjectCode
+getGameObjectHandleLS_objectcode` (GameObjectHandleLS {objectcode`}) = objectcode`
+
+getGameObjectHandleLS_sprites` :: !(GameObjectHandleLS .gs) -> [Sprite]
+getGameObjectHandleLS_sprites` (GameObjectHandleLS {sprites`}) = sprites`
+
+getGameObjectHandleLS_spriteids` :: !(GameObjectHandleLS .gs) -> [SpriteID]
+getGameObjectHandleLS_spriteids` (GameObjectHandleLS {spriteids`}) = spriteids`

@@ -1,9 +1,6 @@
 implementation module keyfocus
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdFunc, StdList, StdMisc
 import	commondef
 import	StdMaybe

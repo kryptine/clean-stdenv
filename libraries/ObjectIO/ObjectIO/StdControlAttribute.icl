@@ -1,14 +1,6 @@
 implementation module StdControlAttribute
 
 
-//	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
-//	
-//	StdControlAttribute specifies which ControlAttributes are valid for each of the
-//	standard controls.
-//	********************************************************************************
-
-
 import StdControlDef
 
 

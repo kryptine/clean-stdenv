@@ -1,7 +1,5 @@
 implementation module StdFileSelect
 
-//	Clean Object I/O library, version 1.2.1
-
 import StdFunc, StdMaybe, StdTuple
 import osfileselect
 import scheduler

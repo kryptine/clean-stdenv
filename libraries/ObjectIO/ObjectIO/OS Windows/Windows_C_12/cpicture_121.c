@@ -1036,6 +1036,78 @@ void WinScrollRectangle (int left, int top, int right, int bottom, int dx, int d
 	*oos = ios;
 }	/* WinScrollRectangle */
 
+void WinScrollRectangle2 (int left, int top, int right, int bottom, int dx, int dy, HDC ihdc, OS ios, 
+						 int * oleft, int * otop, int * oright, int * obottom, HDC * ohdc, OS * oos
+					    )
+{
+	RECT scrollRect;
+	HRGN hrgnUpdate, hrgnRect1, hrgnRect2;
+
+	scrollRect.left   = left;
+	scrollRect.top    = top;
+	scrollRect.right  = right;
+	scrollRect.bottom = bottom;
+
+	if (dx<0)
+	{
+		hrgnRect1   = CreateRectRgn (right+dx-1,top-1,right+1,bottom+1);
+	}
+	else if (dx>0)
+	{
+		hrgnRect1   = CreateRectRgn (left-1,top-1,left+dx+1,bottom+1);
+	}
+	else
+	{
+		hrgnRect1   = CreateRectRgn (0,0,0,0);
+	}
+	
+	if (dy<0)
+	{
+		hrgnRect2   = CreateRectRgn (left-1,bottom+dy-1,right+1,bottom+1);
+	}
+	else if (dy>0)
+	{
+		hrgnRect2   = CreateRectRgn (left-1,top-1,right+1,top+dy+1);
+	}
+	else
+	{
+		hrgnRect2   = CreateRectRgn (0,0,0,0);
+	}
+
+	hrgnUpdate = CreateRectRgn (0,0,1,1);
+
+	if (!ScrollDC (ihdc, dx,dy, &scrollRect, &scrollRect, hrgnUpdate, NULL))
+	{
+		rMessageBox (NULL,MB_APPLMODAL,"WinScrollRectangle","ScrollDC failed");
+	}
+	else
+	{
+		CombineRgn (hrgnUpdate, hrgnUpdate, hrgnRect1, RGN_DIFF);
+		if (CombineRgn (hrgnUpdate, hrgnUpdate, hrgnRect2, RGN_DIFF) == NULLREGION)
+		{
+			*oleft   = 0;
+			*otop    = 0;
+			*oright  = 0;
+			*obottom = 0;
+		}
+		else
+		{
+			RECT box;
+			GetRgnBox (hrgnUpdate,&box);
+			*oleft   = box.left;
+			*otop    = box.top;
+			*oright  = box.right;
+			*obottom = box.bottom;
+		}
+	}
+	DeleteObject (hrgnUpdate);
+	DeleteObject (hrgnRect1);
+	DeleteObject (hrgnRect2);
+
+	*ohdc = ihdc;
+	*oos = ios;
+}	/* WinScrollRectangle2 */
+
 
 void WinDrawRoundRectangle (int left, int top, int right, int bot, int width, int height, HDC ihdc, OS ios, HDC * ohdc, OS * oos)
 {

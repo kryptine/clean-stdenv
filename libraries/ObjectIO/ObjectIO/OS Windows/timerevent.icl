@@ -1,9 +1,6 @@
 implementation module timerevent
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdClass
 import	deviceevents, timeraccess
 from	commondef	import fatalError, ucontains, UCond

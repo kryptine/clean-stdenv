@@ -1,9 +1,6 @@
 implementation module controlresize
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	commondef, controlrelayout, windowhandle
 from	StdControlAttribute	import isControlResize,       getControlResizeFun,

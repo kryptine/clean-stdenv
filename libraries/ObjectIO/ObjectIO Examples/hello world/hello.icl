@@ -4,7 +4,7 @@ module hello
 //
 //	This program is the graphical counterpart of the ubiquitous 'hello world' program.
 //
-//	The program has been written in Clean 1.3.2 and uses the Clean Standard Object I/O library 1.2
+//	The program has been written in Clean 2.0 and uses the Clean Standard Object I/O library 1.2.2
 //	
 //	**************************************************************************************************
 

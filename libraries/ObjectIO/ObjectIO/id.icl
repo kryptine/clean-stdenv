@@ -1,9 +1,6 @@
 implementation module id
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import StdBool, StdFunc, StdInt, StdList, StdOrdList, StdOverloaded, StdString
 import commondef, device, systemid
 

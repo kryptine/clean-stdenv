@@ -1,8 +1,5 @@
 implementation module receiveraccess
 
-
-//	Clean Object I/O library, version 1.2
-
 import	StdBool, StdInt, StdList
 import	id, receiverdefaccess, receiverhandle
 import	cast, semidynamic

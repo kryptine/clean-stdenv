@@ -1,14 +1,30 @@
 definition module StdPrintText
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard Object I/O library, version 1.2.2
 //	
 //	StdPrintText specifies functions to print text.
+//	Author: Martin Wierich
+//	Modified: 7 September 2001 for Clean 2.0 (Peter Achten)
 //	********************************************************************************
 
 import	StdString
 from	StdPictureDef	import FontDef, FontName, FontStyle, FontSize
 import	StdPrint
+
+
+/* 	printText1 and printText2 both call printText3, which is the most general function.
+ *	printText3 calls the printPagePerPage function from the StdPrint module.
+ *	Therefore printText3 has to pass two functions to printPagePerPage: a function that
+ *	calculates a initial state, and a function that draws one page and alters the state
+ *	accordingly. These two functions are "initState" and "pageTransition".
+ *	
+ *	Further: pageTransition calls drawLines. drawLines should draw the text of one page.
+ *	Depending on the wrapMode, drawLines calls either drawLineWrap or drawLineNoWrap
+ *	to draw a single line and then recursively calls itself to draw the remaining lines.
+ *	The state contains always the next line to print.
+ */
+
 
 ::	WrapMode	:== Int
 

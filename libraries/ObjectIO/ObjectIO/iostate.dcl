@@ -1,7 +1,12 @@
 definition module iostate
 
 
-//	Clean Object I/O library, version 1.2
+//	********************************************************************************
+//	Clean Standard Object I/O library, version 1.2.2
+//	
+//	Author: Peter Achten
+//	Modified: 7 September 2001 for Clean 2.0
+//	********************************************************************************
 
 
 import	osactivaterequests, osdocumentinterface, osevent, osguishare, ossystem, ostime, ostypes
@@ -22,7 +27,7 @@ from	timertable			import TimerTable
 	:==	RR *CProcess								//	is a round-robin
 ::	*CProcess										// The context-free process
 	=	E. .l:
-		{	localState	:: !Maybe l					//	its local state
+		{	localState	:: !*Maybe l				//	its local state
 		,	localIOSt	:: !*IOSt l					//	its context-free IOSt
 		}
 
@@ -61,7 +66,7 @@ from	timertable			import TimerTable
 //	Access-rules on the IOSt:
 
 emptyIOSt					:: !SystemId !(Maybe SystemId) !(Maybe GUIShare) !DocumentInterface !ProcessKind 
-								![ProcessAttribute (PSt .l)] !(IdFun (PSt .l)) !(Maybe SystemId)
+								![ProcessAttribute (PSt .l)] !.(IdFun (PSt .l)) !(Maybe SystemId)
 							-> IOSt .l
 
 ioStButtonFreq				:: !Int !Point2 !OSWindowPtr	!(IOSt .l) -> (!Int,!IOSt .l)

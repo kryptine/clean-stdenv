@@ -1,7 +1,5 @@
 implementation module gameobjectutils
 
-//	Utilities for working with game objects
-
 import	StdBool, StdList
 import	StdMaybe
 import	gameCrossCall_12
@@ -155,7 +153,7 @@ where
         | otherwise = Value  (fxr x)
 
 // get the definition of an object by it's ObjectType
-getobject :: !ObjectCode !(GameHandle .gs) -> Maybe (GameObjectHandle (GSt .gs))
+getobject :: !ObjectCode !(GameHandle .gs) -> Maybe (GameObjectHandleLS (GSt .gs))
 getobject objcode gamehnd
     #   curlevel    =   hd gamehnd.levels`
     #   objectlist  =   curlevel.objects`
@@ -164,18 +162,18 @@ getobject objcode gamehnd
     =   Nothing
     =   Just (hd found)
 where
-    cmpobjtypes :: !(GameObjectHandle .gst) -> Bool
-    cmpobjtypes ot = ot.objectcode` == objcode
+    cmpobjtypes :: !(GameObjectHandleLS .gst) -> Bool
+    cmpobjtypes (GameObjectHandleLS ot) = ot.objectcode` == objcode
 
 // store the definition of an object in the game definition
-putobject :: !(GameObjectHandle (GSt .gs)) !(GameHandle .gs) -> GameHandle .gs
+putobject :: !(GameObjectHandleLS (GSt .gs)) !(GameHandle .gs) -> GameHandle .gs
 putobject obj gamehnd
     #   curlevel    =   hd gamehnd.levels`
     #   newobjlist  =   replaceobj curlevel.objects` obj []
     #   curlevel    =   {curlevel & objects`=newobjlist}
     =   {gamehnd & levels`=[curlevel]}
 where
-    replaceobj :: ![(GameObjectHandle .gst)] (GameObjectHandle .gst) ![(GameObjectHandle .gst)] -> [(GameObjectHandle .gst)]
+    replaceobj :: ![GameObjectHandleLS .gst] (GameObjectHandleLS .gst) ![GameObjectHandleLS .gst] -> [GameObjectHandleLS .gst]
     replaceobj [] _ l = l
 /*
     replaceobj [x:xs] y
@@ -183,9 +181,9 @@ where
         | otherwise                         =   [x:replaceobj xs y]
 */  
 // optimization:
-    replaceobj [x:xs] y l
-        | x.objectcode` == y.objectcode` = l ++ [y:xs]
-        | otherwise                      = replaceobj xs y (l ++ [x])
+    replaceobj [GameObjectHandleLS x:xs] obj=:(GameObjectHandleLS y) l
+        | x.objectcode` == y.objectcode` = l ++ [obj:xs]
+        | otherwise                      = replaceobj xs obj (l ++ [GameObjectHandleLS x])
 
 // find object state in tuple list
 findinstance :: ![(a,b)] a -> Maybe b  | ==a

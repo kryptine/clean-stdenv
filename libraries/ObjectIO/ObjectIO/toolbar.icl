@@ -1,9 +1,6 @@
 implementation module toolbar
 
 
-//	Clean object I/O library, version 1.2
-
-
 import StdBool, StdInt, StdMisc
 import osbitmap, osdocumentinterface, ostoolbar, ostypes
 import commondef, iostate, sdisize, StdProcessAttribute

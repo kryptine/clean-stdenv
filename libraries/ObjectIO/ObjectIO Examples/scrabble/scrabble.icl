@@ -25,7 +25,7 @@ Start world
 	# (wordlist,world)	= readtree  world
 	= startIO SDI (initstate wordlist) (initGUI ids) [] world
 
-initGUI :: [Id] (PSt State) -> PSt State
+initGUI :: [Id] (PSt *State) -> PSt *State
 initGUI ids pst=:{ls={player1={kind=kind1},player2={kind=kind2},strength}}
 	# (error,pst)	= openWindow undef (wdef (hd ids)) pst
 	| error<>NoError
@@ -91,18 +91,18 @@ where
 			| kind1==Person  && kind2==Person	= 3
 			| kind1==Person  && kind2==Computer	= 4
 		
-		setplayerkinds :: Playerkind Playerkind (PSt State) -> PSt State
+		setplayerkinds :: Playerkind Playerkind (PSt *State) -> PSt *State
 		setplayerkinds s1 s2 pst=:{ls=t=:{player1,player2}}
 			= new {pst & ls={t & player1={player1 & kind=s1},player2={player2 & kind=s2}}}
 		
-		new :: (PSt State) -> PSt State
+		new :: (PSt *State) -> PSt *State
 		new pst
 			# pst	= initialisestate pst
 			# pst	= scrabblepanel pst
 			# pst	= arbitrate pst
 			= pst
 		
-		quit :: (PSt State) -> PSt State
+		quit :: (PSt *State) -> PSt *State
 		quit pst=:{ls={wordsadded,lexicon}}
 			| not wordsadded
 				= closeProcess pst
@@ -143,7 +143,7 @@ where
 			| strength==VeryEasyStrength= 4
 			| strength==First			= 5
 		
-		setstrength :: Strength (PSt State) -> PSt State
+		setstrength :: Strength (PSt *State) -> PSt *State
 		setstrength nst pst=:{ls=t}
 			= {pst & ls={t & strength=nst}}
 
@@ -163,7 +163,7 @@ where
 			]
 	
 //	The scrabble game is played in a Dialog:
-	scrabblepanel :: (PSt State) -> PSt State
+	scrabblepanel :: (PSt *State) -> PSt *State
 	scrabblepanel pst=:{ls={lexicon,player1,player2,player,letterbox,boardinput},io}
 		# (wordId,io)		= openId io
 		# io				= closeAllControls scrabbleId io
@@ -257,20 +257,20 @@ where
 		boardFilter (MouseDown _ _ _)	= True
 		boardFilter _					= False
 		
-		boardfeel :: MouseState (PSt State) -> PSt State
+		boardfeel :: MouseState (PSt *State) -> PSt *State
 		boardfeel (MouseDown pos _ _) pst=:{ls=state=:{board,boardinput=oldpos}}
 			= appPIO (	setControlLooks [(boardId,False,(True,boardlook board pos))] 
 					 o	appControlPicture boardId (drawfocus True pos o drawfocus False oldpos)
 					 ) {pst & ls={state & boardinput=pos}}
 
 //	The user request the placement of a word:
-	placeword :: (PSt State) -> PSt State
+	placeword :: (PSt *State) -> PSt *State
 	placeword pst
 		# (maybeScrabble,pst)		= accPIO (getWindow scrabbleId) pst
 		| isNothing maybeScrabble	= abort "placeword could not retrieve WState from Scrabble window."
 		| otherwise					= placeword` (fromJust maybeScrabble) pst
 	
-	placeword` :: WState (PSt State) -> PSt State
+	placeword` :: WState (PSt *State) -> PSt *State
 	placeword` info pst=:{ls=t=:{	board
 								,	playmode
 								,	dimensions=(minx,maxx,miny,maxy)
@@ -390,7 +390,7 @@ where
 
 
 //	arbitrate determines who's to play:
-	arbitrate :: (PSt State) -> PSt State
+	arbitrate :: (PSt *State) -> PSt *State
 	arbitrate pst=:{ls=t=:{playmode,player,player1,player2,letterbox},io}
 		| isEmpty letterbox && not player1.placedword && not player2.placedword
 			# io	= disableTimer computerId  io
@@ -434,7 +434,7 @@ where
 	
 
 //	The computer player (a timer) determines a move:
-	computer :: NrOfIntervals (PSt State) -> PSt State
+	computer :: NrOfIntervals (PSt *State) -> PSt *State
 	computer _ pst=:{ls=t=:{	board
 						   ,	dimensions
 						   ,	player
@@ -455,7 +455,7 @@ where
 			(newplacing,t2)	= getnewplacing t1
 			nt				= {t2 & progress=newprogress}
 	
-			getnewplacing :: State -> (Placing,State)
+			getnewplacing :: *State -> (Placing,*State)
 			getnewplacing t=:{	board
 							 ,	dimensions
 							 ,	player
@@ -553,7 +553,7 @@ where
 	where
 		(announce1,announce2)	= addwordsheading (length words)
 		
-		add :: (PSt State) -> PSt State
+		add :: (PSt *State) -> PSt *State
 		add pst=:{ls=t=:{lexicon}}
 			# pst	= {pst & ls={t & lexicon=seq (map addToDictionary words) lexicon,wordsadded=True}}
 			# pst	= closeWindow addWordsId pst

@@ -1,9 +1,6 @@
 implementation module menuhandle
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import StdMenuDef
 import commondef, receiverhandle
 import osmenu

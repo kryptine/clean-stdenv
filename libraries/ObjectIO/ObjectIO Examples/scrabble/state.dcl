@@ -28,6 +28,6 @@ import	board
 		,	placedword		:: Bool					//	Player placed a word in last turn (initially True)
 		}
 
-initstate		:: Tree  -> State
-initialisestate	:: (PSt State) -> PSt State
-getboardletters	:: State -> ([Char],State)
+initstate		:: Tree  -> *State
+initialisestate	:: (PSt *State) -> PSt *State
+getboardletters	:: *State -> ([Char],*State)

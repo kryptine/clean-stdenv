@@ -1,9 +1,6 @@
 implementation module controlvalidate
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdInt, StdList
 import	ospicture, oswindow
 import	commondef, windowhandle, wstate

@@ -1,7 +1,12 @@
 definition module gameintrface_12
 
+//	********************************************************************************
+//	Clean Standard Game library, version 1.2.2
+//	
+//	Author:   Mike Wiering
+//	Modified: 7 Sept 2001 for Clean 2.0 (Peter Achten)
+//	********************************************************************************
 
-//import intrface_12
 from	ostoolbox		import OSToolbox
 from	pictCCall_12	import RGBcolor
 

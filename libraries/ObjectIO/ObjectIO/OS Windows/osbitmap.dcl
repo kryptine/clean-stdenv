@@ -19,6 +19,9 @@ osGetBitmapSize :: !OSBitmap -> (!Int,!Int)
 //	osGetBitmapContent returns the content string of the bitmap
 osGetBitmapContent :: !OSBitmap -> {#Char}
 
+//	osGetBitmapHandle returns the handle of the bitmap
+osGetBitmapHandle :: !OSBitmap -> Int
+
 /*	osResizeBitmap (w,h) bitmap
 		resizes the argument bitmap to the given size.
 		It is assumed that w and h are not negative.

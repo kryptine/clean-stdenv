@@ -1,18 +1,4 @@
 implementation module StdPrintText
-
-//	Clean Standard Object I/O library, version 1.2.1
-
-/* 	printText1 and printText2 both call printText3, which is the most general function.
- *	printText3 calls the printPagePerPage function from the StdPrint module.
- *	Therefore printText3 has to pass two functions to printPagePerPage: a function that
- *	calculates a initial state, and a function that draws one page and alters the state
- *	accordingly. These two functions are "initState" and "pageTransition".
- *	
- *	Further: pageTransition calls drawLines. drawLines should draw the text of one page.
- *	Depending on the wrapMode, drawLines calls either drawLineWrap or drawLineNoWrap
- *	to draw a single line and then recursively calls itself to draw the remaining lines.
- *	The state contains always the next line to print.
- */
  
 import StdEnv, StdMaybe, StdPrint, StdPicture
  
@@ -670,7 +656,7 @@ splitInTabs str length tabWidth font picture
   		| pos == max+1 = pos
   		| str.[pos]=='\t' = pos
   		= searchTab str (inc pos) max
-	getBeginningPos :: [!Int] !Int [!Int] -> (!Int, [!Int])
+	getBeginningPos :: ![Int] !Int ![Int] -> (!Int, ![Int])
 	getBeginningPos [width] sum akku= (width+sum,reverse [sum:akku])
 	getBeginningPos [width:rest] sum akku
 		# nextTabNr = ceil (  (	  (toReal (sum+(if (width<=0) 1 width)))

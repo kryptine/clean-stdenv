@@ -1,9 +1,6 @@
 implementation module receiverdevice
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	StdReceiver
 import	devicefunctions, iostate, receiveraccess, receiverevent, receiverid
@@ -181,7 +178,7 @@ letOneReceiverDoInetEvent (eventCode,endpointRef,inetReceiverCategory,misc) rsHs
 	  (nothing,opt_rsH)	= u_isNothing opt_rsH
 	| nothing
 /* PA: receiver device must be restored, because it is removed from the IOSt
-		= pState		// No IOSetReceiverDevice needed, because nothing has been changed
+		= pState		// No ioSetReceiverDevice needed, because nothing has been changed
 */		= appPIO (ioStSetDevice (ReceiverSystemState {rReceivers=rsHs})) pState
 	# eventInfo			= (eventCode,endpointRef,misc)
 	# rsH				= fromJust opt_rsH

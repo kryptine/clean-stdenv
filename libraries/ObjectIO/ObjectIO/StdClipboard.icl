@@ -1,9 +1,6 @@
 implementation module StdClipboard
 
 
-//	Clean Object I/O library, version 1.2.1
-
-
 import	StdFunc, StdList, StdMisc, StdString
 import	osclipboard
 import	StdMaybe

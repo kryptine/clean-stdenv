@@ -1,10 +1,6 @@
 implementation module StdBitmap
 
 
-//	Clean Object I/O library, version 1.2.1
-//	Interface functions for drawing bitmaps.
-
-
 import	StdBool, StdFile, StdInt
 import	osbitmap, ospicture
 import	commondef

@@ -1,11 +1,6 @@
 implementation module windowcreate
 
 
-//	Clean Object I/O library, version 1.2
-
-//	Window creation
-
-
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	osevent, ostoolbox, ostypes, oswindow
 from	StdMenu				import enableMenuSystem, disableMenuSystem
@@ -139,10 +134,10 @@ where
 			gLocals modalWindowId id locals
 				= accessLocals (checkIOStQuitted` modalWindowId id) locals
 			where
-				checkIOStQuitted` modalWindowId id localIO
+				checkIOStQuitted` modalWindowId id localIO=:{localIOSt}
 					= (r,{localIO & localIOSt=ioState})
 				where
-					(r,ioState)	= checkIOStQuitted modalWindowId id localIO.localIOSt
+					(r,ioState)	= checkIOStQuitted modalWindowId id localIOSt
 					
 					checkIOStQuitted :: !Id !SystemId !(IOSt .l) -> (!Result Bool,!IOSt .l)
 					checkIOStQuitted modalWindowId ioid ioState
@@ -195,8 +190,9 @@ where
 		getFinalLS :: !WID !(WindowHandles .pst) -> (!Maybe FinalModalLS,!Bool,!WindowHandles .pst)
 		getFinalLS wid windows=:{whsFinalModalLS}
 			# (removed,finalLS,finalLSs)	= uremove (\fmLS=:{fmWIDS}->(identifyWIDS wid fmWIDS,fmLS)) undef whsFinalModalLS
+			  (empty,finalLSs)				= uisEmpty finalLSs
 			  windows						= {windows & whsFinalModalLS=finalLSs}
-			  more							= not (isEmpty finalLSs)
+			  more							= not empty
 			| not removed					= (Nothing,more,windows)
 			| otherwise						= (Just finalLS,more,windows)
 

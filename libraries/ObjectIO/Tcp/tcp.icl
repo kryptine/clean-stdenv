@@ -44,7 +44,7 @@ LISTENER				:==	1
 			,	bId				::	!Id				// a unique id for send channels. will be strored in ReceiverHandle
 			}
 ::	Buffer
-		=	{	bPackets		::	![!{#Char}]		// no element has size 0
+		=	{	bPackets		::	![{#Char}]		// no element has size 0
 			,	bBegin			::	!Int			// bBegin bytesfrom (hd bPackets) are sent, the rest is unsent
 													// (bPackets==[]) => (bBegin==0)
 													// bBegin<size (hd bPackets)
@@ -59,22 +59,22 @@ SChanReceiver		:== 2
 DNSReceiver			:== 3
 ConnectReceiver		:== 4
 
-pack_tcplistener	::	!EndpointRef	->	(TCP_Listener_ .a)
+pack_tcplistener :: !EndpointRef -> TCP_Listener_ .a
 pack_tcplistener endpointRef
 	= TCP_Listener_ endpointRef
 	
-pack_tcpschan	:: !Buffered_SChan -> (TCP_SChannel_ .a)
+pack_tcpschan :: !Buffered_SChan -> TCP_SChannel_ .a
 pack_tcpschan buffered_SChan
 	= TCP_SChannel_ buffered_SChan
 
-pack_tcprchan	::	!(!EndpointRef,!Int) 	->	(TCP_RChannel_ .a)
+pack_tcprchan :: !(!EndpointRef,!Int) -> TCP_RChannel_ .a
 pack_tcprchan x
 	= TCP_RChannel_ x
 
-pack_ipaddr		::	!Int			->	IPAddress
+pack_ipaddr :: !Int -> IPAddress
 pack_ipaddr i = i
 
-unpack_tcplistener	::	!.(TCP_Listener_ .a)	->	EndpointRef
+unpack_tcplistener :: !.(TCP_Listener_ .a) -> EndpointRef
 unpack_tcplistener (TCP_Listener_ endpointRef)
 	= endpointRef
 
@@ -86,16 +86,16 @@ unpack_tcprchan :: !.(TCP_RChannel_ .a) -> (!EndpointRef, !Int)
 unpack_tcprchan (TCP_RChannel_ x)
 	= x
 	
-unpack_ipaddr		::	!IPAddress				->	Int
+unpack_ipaddr :: !IPAddress -> Int
 unpack_ipaddr i = i
 
-close_listener	:: !EndpointRef !*env	->	*env
+close_listener :: !EndpointRef !*env -> *env
 close_listener endpointRef env
 	#	env	= setEndpointDataC endpointRef 0 False False True env
 		env	= garbageCollectEndpointC endpointRef env
 	= env
 
-close_tcprchan	:: !EndpointRef !*env	->	*env
+close_tcprchan :: !EndpointRef !*env -> *env
 close_tcprchan endpointRef env
 	#	((referenceCount,_,hs,aborted),env)
 						= getEndpointDataC endpointRef env
@@ -107,7 +107,7 @@ close_tcprchan endpointRef env
 		env	= garbageCollectEndpointC endpointRef env
 	= env
 
-toDottedDecimal	::	!Int	->	String
+toDottedDecimal :: !Int -> String
 toDottedDecimal ip
 	=	(toString ((ip>>24) bitand 255))	+++"."+++
 		(toString ((ip>>16) bitand 255))	+++"."+++
@@ -116,7 +116,7 @@ toDottedDecimal ip
 
 ///////////////////////////// low level stuff //////////////////////
 
-lookupHost_syncC	::	!String !*env -> (!(!InetErrCode, !Int), !*env)
+lookupHost_syncC :: !String !*env -> (!(!InetErrCode, !Int), !*env)
 // returns ip address in host order; string can be in aplhanumerical or dotted decimal form; (null terminated)
 // error code: 0 ok, otherwise error (also: addr doesn't exist)
 lookupHost_syncC _ _
