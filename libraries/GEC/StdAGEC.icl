@@ -6,7 +6,7 @@ import StdObjectIOExt
 import ColourTextControl
 import objectloc, gec
 import parseprint, GenPrint, StdArray
-import StdGeneric
+import StdGeneric, StdGECExt
 import store
 import StdFunc, StdInt, StdMisc, StdEnum
 from   StdObjectIOExt import closeControl
@@ -127,25 +127,84 @@ where
 
 // an hidden editor will show noting but behavious like an editor
 
-:: Hide a = Hide a
+// Mode = Hide: hidden editor will show noting but behavious like an editor
+// Mode = Display: Non editable
+// Mode = Edit: identity
 
-gGEC{|Hide|} gGECa gecArgs=:{gec_value=mbhide} pSt
-#	(myStore,pSt)	=	openStoreId pSt
-#	(_,pSt)			=	openStore myStore (Just a) pSt
-= 	({ gecOpen    = id
-	, gecClose    = id
-	, gecOpenGUI  = \_ -> id
-	, gecCloseGUI = \_ -> id
-	, gecGetValue = readStore myStore
-	, gecSetValue = \upd na pst -> writeStore myStore na pst
-	, gecSwitch   = \_ -> id
-	, gecArrange  = \_ _ -> id
-	, gecOpened   = \env -> (False,env)
-	},pSt)
+gGEC{|Mode|} gGECa args=:{gec_value = Just (Display a), update = modeupdate} pSt
+= convert (gGECa {args & gec_value = Just a, update = aupdate,outputOnly = OutputOnly} pSt)
 where
-	a = case mbhide of
-			Just a  -> a
-			Nothing	-> abort "cannot make Hide GEC for Nothing"
+	convert (ahandle,pst) = ({ahandle & gecSetValue = modeSetValue ahandle
+	                                  , gecGetValue = displayGetValue ahandle
+	                          },pst)
+	displayGetValue ahandle pst
+	# (na,pst) = ahandle.gecGetValue pst
+	= (Display na,pst)
+	
+	modeSetValue ahandle upd (Edit a) 		=  ahandle.gecSetValue upd a
+	modeSetValue ahandle upd (Display a) 	=  ahandle.gecSetValue upd a
+	modeSetValue ahandle upd (Hide a) 		=  ahandle.gecSetValue upd a
+
+	aupdate reason na pst = modeupdate reason (Display na) pst
+
+gGEC{|Mode|} gGECa args=:{gec_value = Just (Edit a), update = modeupdate} pSt
+= convert (gGECa {args & gec_value = Just a, update = aupdate} pSt)
+where
+	convert (ahandle,pst) = ({ahandle & gecSetValue = modeSetValue ahandle
+	                                  , gecGetValue = modeGetValue ahandle
+	                          },pst)
+	modeGetValue ahandle pst
+	# (na,pst) = ahandle.gecGetValue pst
+	= (Edit na,pst)
+	
+	modeSetValue ahandle upd (Edit a) 		=  ahandle.gecSetValue upd a
+	modeSetValue ahandle upd (Display a) 	=  ahandle.gecSetValue upd a
+	modeSetValue ahandle upd (Hide a) 		=  ahandle.gecSetValue upd a
+
+	aupdate reason na pst = modeupdate reason (Edit na) pst
+
+gGEC{|Mode|} gGECa args=:{gec_value = Just (Hide a), update = modeupdate} pSt
+= createDummyGEC OutputOnly (Hide a) modeupdate pSt
+	
+		
+gGEC{|Mode|} gGECa args pSt
+= abort "cannot display Mode for Nothing"
+
+// Timer driven GEC
+
+
+:: Timed = Timed (Int ->Int) Int						
+//	{location,makeUpValue,outputOnly,gec_value,update}
+
+gGEC{|Timed|} args=:{gec_value=Just (Timed updfun i),update=tiupdate} pSt
+# (tid,pSt) 		= openId pSt
+# (ahandle,pSt)		= gGEC {|*|} {args & gec_value=Just (Hide i),update=aupdate} pSt
+# pSt				= snd (openTimer Void (timer tid ahandle) pSt)
+= convert tid (ahandle,pSt)
+where
+	convert tid (ahandle,pSt) = ({ahandle & gecSetValue = set tid ahandle
+	                               		  , gecGetValue = get tid ahandle
+	                          	 },pSt)
+
+	set tid ahandle upd (Timed updfun ni) pSt
+	# pSt = appPIO (setTimerInterval tid ni) pSt
+	= ahandle.gecSetValue upd (Hide ni) pSt
+
+	get tid ahandle pSt
+	# (Hide ni,pSt) = ahandle.gecGetValue pSt
+	= (Timed updfun ni,pSt)
+
+	aupdate reason (Hide ni) pSt = tiupdate reason (Timed updfun ni) pSt
+		
+	timer tid ahandle = (Timer i NilLS [TimerId tid, TimerFunction (timeout tid ahandle)])
+	where
+		timeout tid ahandle _ (lSt,pSt)
+		# (Hide i,pSt) = ahandle.gecGetValue pSt
+		# ni = updfun i
+		# pSt = appPIO (setTimerInterval tid ni) pSt
+		= (lSt,ahandle.gecSetValue YesUpdate (Hide ni) pSt)
+
+
 			
 // bimap GEC a b to use a b-editor for constructing an a-value
 
@@ -191,6 +250,9 @@ mkAGEC bimapGEC =  Hidden bimapGEC gGEC{|*|}
 ^^    :: (AGEC a) -> a
 ^^ (Hidden bimap ggec) = bimap.value
 
+(^=) infixl  :: (AGEC a) a -> (AGEC a)
+(^=) (Hidden bimap ggec) nvalue = (Hidden {bimap & value = nvalue} ggec)
+
 gGEC{|AGEC|} gGECa gecArgs=:{gec_value=mbimap,update=biupdate} pSt
 	= case mbimap of 
 		Just abstractGEC=:(Hidden bimapGEC gGECbimapGEC) 
@@ -229,6 +291,20 @@ hidGEC j 	= mkAGEC 	{	toGEC	= \i _ -> Hide i
 						,	value	= j
 						,	updGEC	= id
 						}
+
+// apply GEC
+
+applyAGEC :: (b -> a) (AGEC b) -> AGEC a | gGEC {|*|} a & gGEC {|*|} b
+applyAGEC fba gecb	= mkAGEC 	{	toGEC	= initgec
+								,	fromGEC = \(gecb <|> Display olda) -> fba (^^ gecb)
+								,	value	= inita
+								,	updGEC	= \(gecb <|> Display olda) -> (gecb <|> Display (fba (^^ gecb)))
+								}
+where
+	inita = fba (^^ gecb)									
+
+	initgec _ Undefined = gecb <|> Display inita
+	initgec _ (Defined b) = b
 
 // Integer with up down counter
 
@@ -341,7 +417,7 @@ where
 
 // list components
 
-derive gGEC Actions,Action,[]
+derive gGEC Actions,Action
 
 :: Action 	= 	{ element_nr :: AGEC Int
 				, goto		 :: (Button,Button)

@@ -19,11 +19,20 @@ derive gGEC Button, UpDown
 :: Button  = 	Button String | Pressed
 :: UpDown  = 	UpPressed | DownPressed | Neutral
 
-// an invisable editor is handy to store a type without showing it
+// Mode = Display (non editable) ; Hide (invisable) ; Edit (regular)
 
-derive gGEC Hide
+derive gGEC Mode
 
-:: Hide a = Hide a
+:: Mode a 	= Display a
+			| Hide a
+			| Edit a
+
+// Timer editor: will cause an automatic update when it is part of any datastructure displayed in a gGEC
+
+derive gGEC Timed
+
+:: Timed = Timed (Int ->Int) Int		// function will be called automatically after given timeout in miliseconds						
+										// function will receive the time left and should set the new timeout time
 
 // BimapGEC:  make an a-value with a b-editor
 
@@ -42,13 +51,15 @@ derive gGEC AGEC
 
 :: AGEC a		// abstract GEC for an a-value maintained with a b-editor
 
-mkAGEC	:: (BimapGEC a b) -> AGEC a | gGEC{|*|} b & gGEC{|*|} a
-^^		:: (AGEC a) -> a
+mkAGEC		:: (BimapGEC a b) -> AGEC a | gGEC{|*|} b & gGEC{|*|} a
+^^			:: (AGEC a) -> a
+(^=) infixl	:: (AGEC a) a -> (AGEC a)
 
 // examples of abstract editors
 
 idGEC 			:: a   					-> AGEC a 		| gGEC {|*|} a				// identity editor  
 hidGEC 			:: a 					-> AGEC a 		| gGEC {|*|} a 				// identity, no editor created
+applyAGEC 		:: (b -> a) (AGEC b) 	-> AGEC a 		| gGEC {|*|} a & gGEC {|*|} b // apply fba; show both b and a
 horlistGEC 		:: [a] 					-> AGEC [a]		| gGEC {|*|} a 				// all elements of a list displayed in a row
 vertlistGEC 	:: [a] 					-> AGEC [a] 	| gGEC {|*|} a 				// all elements of a list displayed in a column
 tableGEC 		:: [[a]] 				-> AGEC [[a]] 	| gGEC {|*|} a  			// a vertical list of horizontal lists
