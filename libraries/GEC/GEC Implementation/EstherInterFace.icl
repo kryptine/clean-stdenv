@@ -4,18 +4,18 @@ import StdEnv, EstherPostParser, EstherTransform, StdDynamic
 import EstherScript, EstherStdEnv
 
 
-MyEstherState world = 
+/*MyEstherState world = 
 	{	searchPath	= [["."]]
 	,	searchCache	= []
 	,	buildin		= stdEnv
 	,	env			= world
-	}
+	}*/
 
 
-Start world 
+/*Start world 
 	# (console, world)	= stdio world
 	# (console,world)	= shell 1 console world
-	= fclose console world
+	= fclose console world*/
  
 unifyable :: !Dynamic !Dynamic -> (!Bool,!Dynamic)
 unifyable old=:(d1::a) new=:(d2::a) = (True,new)
@@ -23,8 +23,10 @@ unifyable old new		   			= (False,old)
 
 stringToDynamic :: !String !*World -> (!Dynamic,!*World)
 stringToDynamic s world 
-	# (d, {env}) = compose s (MyEstherState world)
-	= (d, env)
+	# (maybe, {env=world}) = compose s {builtin = stdEnv, env = world}
+	= case maybe of
+		NoException d -> (d, world)
+		Exception d -> (d, world)
 
 shell :: !Int !*File !*World -> (!*File,!*World)
 shell lineNr console world
