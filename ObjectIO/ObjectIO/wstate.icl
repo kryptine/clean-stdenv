@@ -494,6 +494,7 @@ setWItemHandle` itemH`=:{	wItemNr`
 						,	wItemPos`
 						,	wItemSize`
 						,	wItemLayoutInfo`
+						,	wItemKind`
 						}
 				itemH =:{	wItemInfo	= info
 						,	wItemAtts	= atts
@@ -552,7 +553,7 @@ where
 	setWItemAtt` (ControlWidth`        width)			att=:(ControlWidth        _)	= ControlWidth width
 	setWItemAtt` att` att
 		= wstateFatalError "setWItemHandle`"
-			("ControlAttributes do not match pairwise ("+++toString att`+++"vs. "+++toString att+++")")
+			("ControlAttributes of "+++toString wItemKind`+++" do not match pairwise ("+++toString att`+++" vs. "+++toString att+++")")
 	
 	setWItemInfo` :: !WItemInfo` !(WItemInfo .ls .pst) -> WItemInfo .ls .pst
 	setWItemInfo` (RadioInfo` {radioItems`,radioIndex`}) (RadioInfo radio=:{radioItems,radioIndex})
