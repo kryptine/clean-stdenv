@@ -3,7 +3,7 @@ implementation module ostcp
 import	StdEnv, StdMaybe
 import	StdTCPDef
 import	StdChannels
-import	tcp, channelenv, ostick
+import	tcp, ostick
 import	code from "cTCP.obj", library "wsock_library"
 
 os_eom					::	!EndpointRef !*env

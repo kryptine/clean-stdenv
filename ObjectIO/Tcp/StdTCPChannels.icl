@@ -5,7 +5,7 @@ implementation module StdTCPChannels
 import	StdEnv
 import	StdTCPDef, StdChannels, StdTime
 import	StdIOCommon
-import	id, tcp, ostcp, channelenv, ostick, tcp_bytestreams
+import	id, tcp, ostcp, ostick, tcp_bytestreams
 
 //////////////////////// Listeners ////////////////////////////////////
 

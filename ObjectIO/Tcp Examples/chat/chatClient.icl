@@ -23,7 +23,6 @@ CR			:== '\xD'					// carriage return
 ::	NoState
 	=	NoState							// The singleton data type
 
-Start :: *World -> *World
 Start world
 	= startIO SDI { sndChan=undef, nickname=""} initialize [ProcessWindowSize zero] world
 
@@ -35,19 +34,23 @@ initialize ps
 	  (buttonId, ps)	= accPIO openId ps
 
 	  // prompt for chat parameters nickname and server address
-	  dDef			= Dialog "Enter Chat Parameters" 
-						(	EditControl "" (PixelWidth 400) 1 [ControlId nicknameId, ControlPos (Right, zero)]
-						 :+:TextControl "Nickname:" [ControlPos (LeftOfPrev, zero)]
-						 :+:EditControl remote (PixelWidth 400) 1 [ControlId rmtsiteId, ControlPos (Right, zero)]
-						 :+:TextControl "Chat Server:" [ControlPos (LeftOfPrev, zero)]
-						 :+:ButtonControl "OK" 
-						 				  [ControlId buttonId,
-						 				   ControlFunction (noLS1 ok (dialogId, nicknameId, rmtsiteId)),
-						 				   ControlPos (Right, zero)]
-						) [WindowId dialogId, WindowOk buttonId]
+	  dDef	= Dialog "Enter Chat Parameters" 
+				(   TextControl "Type in below your nickname and the internet address of the server"
+								[]
+				 :+:TextControl ("If there is no server running on the specified machine then this "
+				 				 +++"program aborts.") [ControlPos (BelowPrev, zero)]
+				 :+:EditControl "" (PixelWidth 400) 1 [ControlId nicknameId, ControlPos (Right, zero)]
+				 :+:TextControl "Nickname:" [ControlPos (LeftOfPrev, zero)]
+				 :+:EditControl remote (PixelWidth 400) 1 [ControlId rmtsiteId, ControlPos (Right, zero)]
+				 :+:TextControl "Chat Server:" [ControlPos (LeftOfPrev, zero)]
+				 :+:ButtonControl "OK" 
+				 				  [ControlId buttonId,
+				 				   ControlFunction (noLS1 ok (dialogId, nicknameId, rmtsiteId)),
+				 				   ControlPos (Right, zero)]
+				) [WindowId dialogId, WindowOk buttonId]
 	# ((errReport, _), ps) = openModalDialog NoState dDef ps
 	| errReport<>NoError
-		= abort "abort: can't open modal dialog"
+		= abort "can't open modal dialog"
 	# (_, ps) = openWindow NoState (Window "dummy" NilLS [WindowViewSize {w=100,h=30}]) ps
 	= ps
   where
@@ -65,7 +68,7 @@ initialize ps
 		= closeWindow dialogId ps
 	continuation :: !String !String (Maybe TCP_DuplexChannel) PState -> PState
 	continuation _ remoteSite Nothing ps
-		= abort ("CAN'T CONNECT with "+++remoteSite)
+		= abort ("ABORT: CAN'T CONNECT with "+++remoteSite)
 	continuation nickname _ (Just { sChannel, rChannel }) ps
 		// connection with server has been established.
 		# (dialogId, ps)	= accPIO openId ps
@@ -156,7 +159,7 @@ sReceiver Sendable ps=:{ls=ls=:{sndChan}, io}
 	# (sndChan, io)			= flushBuffer_NB sndChan io
 	= { ps & ls={ ls & sndChan=sndChan}, io=io }
 sReceiver Disconnected ps
-	= abort "CONNECTION DISRUPTED "
+	= abort "ABORT: CONNECTION DISRUPTED "
 		
 rReceiver :: !(ReceiveMsg ByteSeq) ((Id,Id),PState) -> ((Id,Id),PState)
 // the function for the send channel's send notifier
@@ -174,7 +177,7 @@ rReceiver (Received byteSeq) (ls=:(dialogId, outId), ps)
 		= str
 
 rReceiver EOM _
-	= abort "CONNECTION DISRUPTED "
+	= abort "ABORT: CONNECTION DISRUPTED "
 
 quit ps=:{ls=ls=:{sndChan}, io}
 	# io	= closeChannel sndChan io

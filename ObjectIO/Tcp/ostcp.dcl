@@ -3,7 +3,7 @@ definition module ostcp
 import	StdMaybe
 import	StdTCPDef
 from	StdChannels	import Timeout, TimeoutReport
-import	tcp, channelenv
+import	tcp
 
 os_eom						::	!EndpointRef !*env
 							->	(!Bool, !*env)

@@ -6,9 +6,9 @@ implementation module StdChannels
 import	StdEnv
 import  StdMaybe
 import	StdIOCommon, StdTime
-import	channelenv
 import	id
-import commondef, iostate, receiverid, StdPStClass, StdReceiver
+import	commondef, iostate, receiverid, StdPStClass, StdReceiver
+import	tcp
 
 instance ChannelEnv World
   where
