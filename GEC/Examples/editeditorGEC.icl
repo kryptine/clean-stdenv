@@ -10,53 +10,17 @@ import StdGecComb, basicAGEC, StdDynamicGEC, StdDynamic
 
 Start :: *World -> *World
 Start world = goGui editoreditor world  
+//Start world = goGui testbool world  
+
+testbool = CGEC (gecEdit "design")  [True]
 
 goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 
-// the design editor types:
-
-:: DesignEditor :== ([[(Element,Commands)]],Element)				// the table is displayed as col x rows
-:: Element 		:== (Type,Editors)
-:: TableIndex	:== (Int,Int)			
-
-:: Type 	= F_I_I   TableIndex (AGEC (Int -> Int))				// define function :: Int -> Int 
-			| F_R_R   TableIndex (AGEC (Real -> Real)) 				// define function :: Real -> Real
-			| F_LI_I  (AGEC [TableIndex]) (AGEC ([Int] -> Int))  	// define function :: [Int] -> Int
-			| F_LR_R  (AGEC [TableIndex]) (AGEC ([Real] -> Real))  	// define function :: [Real] -> Real
-			| String_ String										// define initial string 								
-			| Real_   Real											// define initial real value 
-			| Int_ 	  Int											// define initial int value (default)
-			
-:: Editors 	= Calculator											// ad calculator
-			| Expression											// allow expressions /function definitions
-			| Counter												// ad counter
-			| Displayval											// display non editable value
-			| Identity												// identity editor (default)
-
-:: Commands	= Insert												// insert element
-			| Delete												// delete element
-			| Copy													// copy   element
-			| Paste													// paste  element
-			| Apply													// function can be applied, hack to avoid evaluation of undefined function
-			| Choose												// noop (default)
-
-// the application editor types:
-
-:: ApplicationEditor :== [[ApplicationElem]]
-
-:: ApplicationElem											
-			= AF_I_I 	(AGEC String) (AGEC (Int->Int,	   TableIndex ))
-			| AF_R_R 	(AGEC String) (AGEC (Real->Real,   TableIndex ))
-			| AF_LI_I 	(AGEC String) (AGEC ([Int]->Int,  [TableIndex]))
-			| AF_LR_R 	(AGEC String) (AGEC ([Real]->Real,[TableIndex]))
-			| AInt_		(AGEC Int)
-			| AReal_	(AGEC Real)
-			| AString_ 	(AGEC String)
 
 // The Editors and Circuits:
 
-derive gGEC Type, Editors, Commands, ApplicationElem
+derive gGEC TypeVal, Editor, Command, ApplicationElem
 
 editoreditor = CGEC (designeditor |@ convert |>>>| applicationeditor) initvalue
 where
@@ -78,10 +42,41 @@ initvalue	= ([[initelem,initelem,initelem],[initelem,initelem]],zeroValue)
 initelem	= (zeroValue, Choose)
 zeroValue 	= (Int_ 0, Identity)
 
+// the design editor types:
+
+:: DesignEditor :== (DesignTable,Clipboard)				// the table is displayed as col x rows
+:: DesignTable	:== [[(Element,Command)]]
+:: Clipboard	:== Element
+:: Element 		:== (TypeVal,Editor)
+:: TableIndex	:== (Int,Int)			
+
+:: TypeVal 	= F_I_I   TableIndex		  (AGEC (Int -> Int))    (AGEC Bool) // define function :: Int -> Int 
+			| F_R_R   TableIndex 		  (AGEC (Real -> Real))  (AGEC Bool) // define function :: Real -> Real
+			| F_LI_I  (AGEC [TableIndex]) (AGEC ([Int] -> Int))  (AGEC Bool) // define function :: [Int] -> Int
+			| F_LR_R  (AGEC [TableIndex]) (AGEC ([Real] -> Real))(AGEC Bool) // define function :: [Real] -> Real
+			| String_ String										// define initial string 								
+			| Real_   Real											// define initial real value 
+			| Int_ 	  Int											// define initial int value (default)
+			
+:: Editor 	= Calculator											// ad calculator
+			| Expression											// allow expressions /function definitions
+			| Counter												// ad counter
+			| Displayval											// display non editable value
+			| Identity												// identity editor (default)
+
+:: Command	= Insert												// insert element
+			| Delete												// delete element
+			| Copy													// copy   element
+			| Paste													// paste  element
+			| Choose												// noop (default)
+
+// create default functions
+
+
 // Update of design editor
 
 updateDesign :: DesignEditor -> DesignEditor
-updateDesign (table,s) =  (keepone (update (paste newclipboard table)),newclipboard)
+updateDesign (table,s) =  (keepone (update (paste newclipboard (initfuns table))),newclipboard)
 where
 	keepone [] = [[initelem]]		// to ensure that there is at least one element...
 	keepone xs = xs
@@ -90,41 +85,60 @@ where
 					[elem] -> elem
 					else   -> s
 	
-	paste s table = map (map paste_elem) table // paste from clipboard
+	paste :: Clipboard DesignTable -> DesignTable // paste from clipboard
+	paste s table = map (map paste_elem) table 
 	where
-		paste_elem (_, Paste) = (s,Apply)
+		paste_elem (_,Paste) = (s,Choose)
 		paste_elem elem		  = elem
 		
-	update table = map update_col table // all other commands ...
-	
-	update_col [(elem,Insert):xs] = [(elem,Choose),(elem,Choose):xs]
-	update_col [(_   ,Delete):xs] = xs
-	
-	update_col [((F_I_I  ix f,e),Choose):xs] = [((F_I_I   ix 			  (dynamicGEC2 (const 0))  ,e),Apply): xs]
-	update_col [((F_R_R  ix f,e),Choose):xs] = [((F_R_R   ix 			  (dynamicGEC2 (const 0.0)),e),Apply): xs]
-	update_col [((F_LI_I ix f,e),Choose):xs] = [((F_LI_I (dynamicGEC2 []) (dynamicGEC2 (const 0))  ,e),Apply): xs]
-	update_col [((F_LR_R ix f,e),Choose):xs] = [((F_LR_R (dynamicGEC2 []) (dynamicGEC2 (const 0.0)),e),Apply): xs]
-	
-	update_col [(x,Choose): xs] = [(x,Choose):update_col xs]
-	update_col [(x,_): xs]      = [(x,Apply):update_col xs]
-	update_col []      = []
+	update :: DesignTable -> DesignTable // all other commands ...
+	update table = map update_col table 
+	where
+		update_col [(elem,Insert):xs] = [(elem,Choose),(elem,Choose):xs]
+		update_col [(_   ,Delete):xs] = xs
+		update_col [x: xs]      	  = [x:update_col xs]
+		update_col []      			  = []
 
+	initfuns :: DesignTable -> DesignTable
+	initfuns table = map (map initfun) table // fill in proper default functions
+	where
+		initfun :: (Element,Command) -> (Element,Command)
+		initfun elem=:((F_I_I  ix f b, e),c) = if (^^ b) ((F_I_I  ix 				 (dynamicGEC2 (const 0))   nb,e),c) elem
+		initfun elem=:((F_R_R  ix f b, e),c) = if (^^ b) ((F_R_R  ix 				 (dynamicGEC2 (const 0.0)) nb,e),c) elem
+		initfun elem=:((F_LI_I ix f b, e),c) = if (^^ b) ((F_LI_I (dynamicGEC2 []) (dynamicGEC2 (const 0))   nb,e),c) elem
+		initfun elem=:((F_LR_R ix f b, e),c) = if (^^ b) ((F_LR_R (dynamicGEC2 []) (dynamicGEC2 (const 0.0)) nb,e),c) elem
+		initfun elem = elem
+	
+		nb =  hidGEC False 
+
+// the application editor types:
+
+:: ApplicationEditor :== [[ApplicationElem]]
+
+:: ApplicationElem											
+			= AF_I_I 	(AGEC String) (AGEC (Int->Int,	   TableIndex ))
+			| AF_R_R 	(AGEC String) (AGEC (Real->Real,   TableIndex ))
+			| AF_LI_I 	(AGEC String) (AGEC ([Int]->Int,  [TableIndex]))
+			| AF_LR_R 	(AGEC String) (AGEC ([Real]->Real,[TableIndex]))
+			| AInt_		(AGEC Int)
+			| AReal_	(AGEC Real)
+			| AString_ 	(AGEC String)
 
 // turn design editor info in working user application editor
 
 convert :: DesignEditor -> ApplicationEditor
 convert (table,clipboard) = map (map toAppl) table
 where
-	toAppl ((Int_ i,Calculator),   _)	= AInt_		(intcalcGEC i)
-	toAppl ((Int_ i,agec),         _)	= AInt_ 	(chooseAGEC agec i)
-	toAppl ((Real_ r,Calculator),  _)	= AReal_  	(realcalcGEC r)
-	toAppl ((Real_ r,agec),        _)	= AReal_	(chooseAGEC agec r)
+	toAppl ((Int_ i,Calculator)   ,_)	= AInt_		(intcalcGEC i)
+	toAppl ((Int_ i,agec)         ,_)	= AInt_ 	(chooseAGEC agec i)
+	toAppl ((Real_ r,Calculator)  ,_)	= AReal_  	(realcalcGEC r)
+	toAppl ((Real_ r,agec)        ,_)	= AReal_	(chooseAGEC agec r)
 	toAppl ((String_ s,Displayval),_)	= AString_ 	(showGEC s)
-	toAppl ((String_ s,_),         _)	= AString_ 	(idGEC s)
-	toAppl ((F_I_I ix f,_),         _)	= AF_I_I  	(showGEC "") (hidGEC (^^ f, ix))
-	toAppl ((F_R_R ix f,_),         _)	= AF_R_R  	(showGEC "") (hidGEC (^^ f, ix))
-	toAppl ((F_LI_I ix f,_),        _)	= AF_LI_I  	(showGEC "") (hidGEC (^^ f, ^^ ix))
-	toAppl ((F_LR_R ix f,_),        _)	= AF_LR_R  	(showGEC "") (hidGEC (^^ f, ^^ ix))
+	toAppl ((String_ s,_)         ,_)	= AString_ 	(idGEC s)
+	toAppl ((F_I_I  ix f _,_)     ,_)	= AF_I_I  	(showGEC "") (hidGEC (^^ f, ix))
+	toAppl ((F_R_R  ix f _,_)     ,_)	= AF_R_R  	(showGEC "") (hidGEC (^^ f, ix))
+	toAppl ((F_LI_I ix f _,_)     ,_)	= AF_LI_I  	(showGEC "") (hidGEC (^^ f, ^^ ix))
+	toAppl ((F_LR_R ix f _,_)     ,_)	= AF_LR_R  	(showGEC "") (hidGEC (^^ f, ^^ ix))
 	toAppl _					 		= AString_ 	(showGEC "not implemented")
 
 	chooseAGEC Counter 		= counterGEC
