@@ -136,7 +136,7 @@ where
 								 , foodsupply	= foods1
 								 , grow			= 0
 								 , points		= initpoints
-								 , dir			= RightKey
+								 , dir			= rightKey
 								 , worm			= initworm
 								 , lives		= initlives
 						  }
@@ -194,14 +194,14 @@ where
 	//	The MakeTurn function is called when an arrow key is pressed.
 	KeyFilter :: KeyboardState -> Bool
 	KeyFilter (SpecialKey key (KeyDown _) _)
-		= isMember key [DownKey,LeftKey,RightKey,UpKey]
+		= isMember key [downKey,leftKey,rightKey,upKey]
 	KeyFilter _
 		= False
 	
 	MakeTurn :: KeyboardState (PSt Local) -> PSt Local
 	MakeTurn (SpecialKey key _ _) pst=:{ls=ls=:{state=state=:{dir}}}
-		| (dir==UpKey   || dir==DownKey)  && (key==LeftKey || key==RightKey)	= OneStep 1 {pst & ls={ls & state={state & dir=key}}}
-		| (dir==LeftKey || dir==RightKey) && (key==UpKey   || key==DownKey )	= OneStep 1 {pst & ls={ls & state={state & dir=key}}}
+		| (dir==upKey   || dir==downKey)  && (key==leftKey || key==rightKey)	= OneStep 1 {pst & ls={ls & state={state & dir=key}}}
+		| (dir==leftKey || dir==rightKey) && (key==upKey   || key==downKey )	= OneStep 1 {pst & ls={ls & state={state & dir=key}}}
 		| otherwise																= pst
 	
 	//	The function for the Timer device: do one step of the worm game.
@@ -256,10 +256,10 @@ where
 		
 		NewHead :: SpecialKey Segment -> Segment
 		NewHead key segment=:{x,y}
-			| key==UpKey	= {segment & y=y-1}
-			| key==DownKey	= {segment & y=y+1}
-			| key==LeftKey	= {segment & x=x-1}
-			| key==RightKey	= {segment & x=x+1}
+			| key==upKey	= {segment & y=y-1}
+			| key==downKey	= {segment & y=y+1}
+			| key==leftKey	= {segment & x=x-1}
+			| key==rightKey	= {segment & x=x+1}
 			| otherwise		= abort ("NewHead applied to unknown SpecialKey: "+++toString key)
 		
 		SwitchLevel :: Level [Food] Points Points HiScores Lives (PSt Local) -> PSt Local
@@ -275,7 +275,7 @@ where
 							  ,	foodsupply	= foods1
 							  ,	grow		= 0
 							  ,	points		= newPoints
-							  ,	dir			= RightKey
+							  ,	dir			= rightKey
 							  ,	worm		= initworm
 							  ,	best		= high
 							  ,	lives		= if (newPoints>oldPoints) (lives+1) (lives-1)
@@ -316,7 +316,7 @@ where
 				= DeadWormAlert id worm {pst & ls={ls & state={state & food       = newfood
 																	 , foodsupply = foods1
 																	 , grow       = 0
-																	 , dir        = RightKey
+																	 , dir        = rightKey
 																	 , worm       = newworm
 																	 , lives      = lives-1
 															  }

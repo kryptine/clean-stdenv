@@ -13,8 +13,8 @@ from	StdMaybe		import Maybe, Just, Nothing
 ::	*OSEvents
 
 osNewEvents		:: OSEvents
-osCopyEvents	:: !OSEvents -> (!OSEvents,!OSEvents)
 osAppendEvents	:: !*[OSEvent] !OSEvents -> OSEvents		// osAppendEvents adds events at the end of the queue
+osInsertEvents	:: !*[OSEvent] !OSEvents -> OSEvents		// osAppendEvents adds events at the front of the queue
 osIsEmptyEvents	:: !OSEvents -> (!Bool,!OSEvents)
 osRemoveEvent	:: !OSEvents -> (!OSEvent,!OSEvents)
 

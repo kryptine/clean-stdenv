@@ -468,9 +468,6 @@ filterOSEvent _ {ccMsg=CcWmDEACTIVATE,p1=wPtr} windows ioState
 	# (found,wsH,windows)		= getWindowHandlesWindow (toWID wPtr) windows
 	| not found
 		= (False,Nothing,Nothing,windows,ioState)
-	# (active,wsH)				= getWindowStateHandleActive wsH
-	| not active				// The window is already inactive, skip
-		= (True,Nothing,Nothing,setWindowHandlesWindow wsH windows,ioState)
 	| otherwise
 		# (wids,wsH)			= getWindowStateHandleWIDS wsH
 		  windows				= setWindowHandlesWindow wsH windows
@@ -632,10 +629,12 @@ filterOSEvent _ {ccMsg=CcWmKILLFOCUS,p1=wPtr,p2=cPtr} windows ioState
 	# (found,wsH,windows)	= getWindowHandlesWindow (toWID wPtr) windows
 	| not found
 		= (False,Nothing,Nothing,windows,ioState)
+	# (wids,wsH)			= getWindowStateHandleWIDS wsH
+	  (found,itemNr,wsH)	= getControlKeyFocusItemNr False cPtr wsH
+	  windows				= setWindowHandlesWindow wsH windows
+	| not found
+		= (True,Nothing,Nothing,windows,ioState)
 	| otherwise
-		# (wids,wsH)		= getWindowStateHandleWIDS wsH
-		  (itemNr,wsH)		= getControlKeyFocusItemNr False cPtr wsH
-		  windows			= setWindowHandlesWindow wsH windows
 		= (True,Nothing,Just (ControlLooseKeyFocus {ckfWIDS=wids,ckfItemNr=itemNr,ckfItemPtr=cPtr}),windows,ioState)
 
 filterOSEvent _ {ccMsg=CcWmLOSTKEY,p1=wPtr,p2=cPtr} windows ioState
@@ -818,7 +817,7 @@ filterOSEvent _ {ccMsg=CcWmMOUSE,p1=wPtr,p2=cPtr,p3=action,p4=x,p5=y,p6=mods} wi
 		= (True,Nothing,deviceEvent,setWindowHandlesWindow wsH windows,ioState)
 	with
 		okWindowMouseState :: !Int !Point2 !(WindowStateHandle .pst) !(Maybe InputTrack)
-					  -> (!Bool,MouseState,!WindowStateHandle .pst, ! Maybe InputTrack)
+					   -> (!Bool,MouseState,!WindowStateHandle .pst, ! Maybe InputTrack)
 		okWindowMouseState action eventPos wsH=:{wshHandle=Just {wlsHandle={whKind,whWindowInfo,whAtts}}} inputTrack
 			| whKind==IsDialog
 				= (False,undef,wsH,inputTrack)
@@ -858,7 +857,7 @@ filterOSEvent _ {ccMsg=CcWmMOUSE,p1=wPtr,p2=cPtr,p3=action,p4=x,p5=y,p6=mods} wi
 		= (True,Nothing,deviceEvent,setWindowHandlesWindow wsH windows,ioState)
 	with
 		okControlItemsNrMouseState :: !OSWindowPtr !OSWindowPtr !Int !Point2 !(WindowStateHandle .pst) !(Maybe InputTrack)
-												   -> (!Bool,!Int,MouseState,!WindowStateHandle .pst, ! Maybe InputTrack)
+												   -> (!Bool,!Int,MouseState, !WindowStateHandle .pst, ! Maybe InputTrack)
 		okControlItemsNrMouseState wPtr itemPtr action eventPos wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems}}} inputTrack
 			# (_,ok,itemNr,itemPos,itemHs,inputTrack)
 									= okControlsItemNrMouseState True wPtr itemPtr action eventPos whItems inputTrack
@@ -946,10 +945,12 @@ filterOSEvent _ {ccMsg=CcWmSETFOCUS,p1=wPtr,p2=cPtr} windows ioState
 	# (found,wsH,windows)	= getWindowHandlesWindow (toWID wPtr) windows
 	| not found
 		= (False,Nothing,Nothing,windows,ioState)
+	# (wids,wsH)			= getWindowStateHandleWIDS wsH
+	  (found,itemNr,wsH)	= getControlKeyFocusItemNr True cPtr wsH
+	  windows				= setWindowHandlesWindow wsH windows
+	| not found
+		= (True,Nothing,Nothing,windows,ioState)
 	| otherwise
-		# (wids,wsH)		= getWindowStateHandleWIDS wsH
-		  (itemNr,wsH)		= getControlKeyFocusItemNr True cPtr wsH
-		  windows			= setWindowHandlesWindow wsH windows
 		= (True,Nothing,Just (ControlGetKeyFocus {ckfWIDS=wids,ckfItemNr=itemNr,ckfItemPtr=cPtr}),windows,ioState)
 
 filterOSEvent wMetrics {ccMsg=CcWmSIZE,p1=wPtr,p2=w,p3=h,p4=usersizing} windows ioState
@@ -1024,52 +1025,46 @@ where
 	alton	= i bitand ALTBIT   <> 0
 	ctrlon	= i bitand CTRLBIT  <> 0
 
-getControlKeyFocusItemNr :: !Bool !OSWindowPtr !(WindowStateHandle .pst) -> (!Int,!WindowStateHandle .pst)
+getControlKeyFocusItemNr :: !Bool !OSWindowPtr !(WindowStateHandle .pst) -> (!Bool,!Int,!WindowStateHandle .pst)
 getControlKeyFocusItemNr activated cPtr wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH}}
-	# (itemNr,itemHs)	= getControlsKeyFocusItemNr` activated cPtr wH.whItems
-	= (itemNr,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}})
+	# (found,itemNr,itemHs)	= getControlsKeyFocusItemNr` activated cPtr wH.whItems
+	= (found,itemNr,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}})
 where
-	getControlsKeyFocusItemNr` :: !Bool !OSWindowPtr ![WElementHandle .ls .pst] -> (!Int,![WElementHandle .ls .pst])
+	getControlsKeyFocusItemNr` :: !Bool !OSWindowPtr ![WElementHandle .ls .pst] -> (!Bool,!Int,![WElementHandle .ls .pst])
 	getControlsKeyFocusItemNr` activated cPtr []
-		= (0,[])
+		= (False,0,[])
 	getControlsKeyFocusItemNr` activated cPtr [itemH:itemHs]
-		# (itemNr,itemH)		= getControlKeyFocusItemNr` activated cPtr itemH
-		| itemNr<>0
-			= (itemNr,[itemH:itemHs])
+		# (found,itemNr,itemH)		= getControlKeyFocusItemNr` activated cPtr itemH
+		| found
+			= (found,itemNr,[itemH:itemHs])
 		| otherwise
-			# (itemNr,itemHs)	= getControlsKeyFocusItemNr` activated cPtr itemHs
-			= (itemNr,[itemH:itemHs])
+			# (found,itemNr,itemHs)	= getControlsKeyFocusItemNr` activated cPtr itemHs
+			= (found,itemNr,[itemH:itemHs])
 	where
-		getControlKeyFocusItemNr` :: !Bool !OSWindowPtr !(WElementHandle .ls .pst) -> (!Int,!WElementHandle .ls .pst)
+		getControlKeyFocusItemNr` :: !Bool !OSWindowPtr !(WElementHandle .ls .pst) -> (!Bool,!Int,!WElementHandle .ls .pst)
 		getControlKeyFocusItemNr` activated cPtr (WItemHandle itemH=:{wItemPtr,wItemNr,wItemKind,wItemSelect,wItemAtts,wItems})
 			| cPtr==wItemPtr
 				| not (isMember wItemKind [IsCompoundControl,IsCustomControl,IsEditControl,IsPopUpControl])
-					= (0,WItemHandle itemH)
-				| not wItemSelect
-					= (0,WItemHandle itemH)
-				| contains reqAttribute wItemAtts
-					= (wItemNr,WItemHandle itemH)
+					= (True,0,WItemHandle itemH)
 				// otherwise
-					= (0,WItemHandle itemH)
+					= (True,wItemNr,WItemHandle itemH)
 			| not (isRecursiveControl wItemKind)
-				= (0,WItemHandle itemH)
+				= (False,0,WItemHandle itemH)
 			| otherwise
-				# (itemNr,itemHs)	= getControlsKeyFocusItemNr` activated cPtr wItems
-				= (itemNr,WItemHandle {itemH & wItems=itemHs})
-		where
-			reqAttribute	= if activated isControlActivate isControlDeactivate
+				# (found,itemNr,itemHs)	= getControlsKeyFocusItemNr` activated cPtr wItems
+				= (found,itemNr,WItemHandle {itemH & wItems=itemHs})
 		
 		getControlKeyFocusItemNr` activated cPtr (WListLSHandle itemHs)
-			# (itemNr,itemHs)	= getControlsKeyFocusItemNr` activated cPtr itemHs
-			= (itemNr,WListLSHandle itemHs)
+			# (found,itemNr,itemHs)	= getControlsKeyFocusItemNr` activated cPtr itemHs
+			= (found,itemNr,WListLSHandle itemHs)
 		
 		getControlKeyFocusItemNr` activated cPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs})
-			# (itemNr,itemHs)	= getControlsKeyFocusItemNr` activated cPtr itemHs
-			= (itemNr,WExtendLSHandle {wExH & wExtendItems=itemHs})
+			# (found,itemNr,itemHs)	= getControlsKeyFocusItemNr` activated cPtr itemHs
+			= (found,itemNr,WExtendLSHandle {wExH & wExtendItems=itemHs})
 		
 		getControlKeyFocusItemNr` activated cPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs})
-			# (itemNr,itemHs)	= getControlsKeyFocusItemNr` activated cPtr itemHs
-			= (itemNr,WChangeLSHandle {wChH & wChangeItems=itemHs})
+			# (found,itemNr,itemHs)	= getControlsKeyFocusItemNr` activated cPtr itemHs
+			= (found,itemNr,WChangeLSHandle {wChH & wChangeItems=itemHs})
 getControlKeyFocusItemNr _ _ _
 	= windoweventFatalError "getControlKeyFocusItemNr" "window placeholder not expected"
 

@@ -53,6 +53,7 @@ openmodalwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
 	# pState					= {pState & io=ioState}
 	# (noError,pState,_)		= osCreateModalDialog closable title osdinfo (mapMaybe (\{wPtr}->wPtr) modalWIDS)
 									getOSEvent setOSEvent handleOSEvent pState OSNewToolbox
+	  errorReport				= if noError NoError (OtherError "could not create modal dialog")
 	  (delayMouse,delayKey)		= case inputTrack of						// after handling modal dialog, generate proper (Mouse/Key)Lost events
 	  								Nothing	-> ([],[])
 	  								Just it=:{itWindow,itControl,itKind}
@@ -63,8 +64,14 @@ openmodalwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
 	# (osEvents,ioState)		= ioStGetEvents ioState
 	# ioState					= ioStSetEvents (osAppendEvents osDelayEvents osEvents) ioState
 	# (finalLS,ioState)			= getFinalModalDialogLS noError (toWID wId) ioState
-	# pState					= {pState & io=ioState}
-	= (if noError NoError (OtherError "could not create modal dialog"),finalLS,pState)
+	| isJust modalWIDS			// there still are modal dialogs
+		= (errorReport,finalLS,{pState & io=ioState})
+	# (closed,ioState)			= ioStClosed ioState
+	| closed					// process has been requested to close; remove WindowDevice, so process can removed (scheduler)
+		# (_,_,ioState)			= ioStGetDevice WindowDevice ioState
+		= (errorReport,finalLS,{pState & io=ioState})
+	| otherwise
+		= (errorReport,finalLS,{pState & io=ioState})
 where
 	handleOSEvent :: !OSEvent !(PSt .l) -> (![Int],!PSt .l)
 	handleOSEvent osEvent pState = accContext (handleContextOSEvent osEvent) pState

@@ -75,7 +75,7 @@ where
 		keyFilter (CharKey _ (KeyDown repeat))
 			= not repeat
 		keyFilter (SpecialKey key (KeyDown repeat) _)
-			= isMember key [BackSpaceKey,DeleteKey] && not repeat
+			= isMember key [backSpaceKey,deleteKey] && not repeat
 		keyFilter _
 			= False
 		
