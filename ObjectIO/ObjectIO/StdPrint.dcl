@@ -18,6 +18,7 @@ from	StdOverloaded	import	==
 from	osprint			import	PrintSetup, JobInfo, PrintInfo, Alternative, 
 								Cancelled, StartedPrinting, PrintEnvironments
 from	iostate			import	IOSt, PSt
+from	StdFile			import	FileEnv, Files
 
 ::	PageDimensions
 	=	{	page		:: !Size		// size of the drawable area of the page 
@@ -32,16 +33,14 @@ from	iostate			import	IOSt, PSt
 										// resolution in dpi
 		}
 
-class PrintSetupEnvironments env
-  where
-	defaultPrintSetup	::	!*env -> (!PrintSetup, !*env)
+defaultPrintSetup	::	!*env -> (!PrintSetup, !*env)
+					| FileEnv env
 		// returns a default print setup 
-	printSetupDialog	::	!PrintSetup !*env -> (!PrintSetup, !*env)
+
+printSetupDialog	::	!PrintSetup !*printEnv -> (!PrintSetup, !*printEnv)
+					|	PrintEnvironments printEnv
 		// lets the user choose a print setup via the print setup dialog
 		
-instance PrintSetupEnvironments World
-instance PrintSetupEnvironments (IOSt .l)
-
 getPageDimensions	::	!PrintSetup	!Bool->	PageDimensions
 instance == PageDimensions
 
@@ -49,7 +48,7 @@ fwritePrintSetup	::	!PrintSetup !*File -> *File
 //	writes PrintSetup to file (text or data)
 
 freadPrintSetup		::	!*File !*env -> (!Bool, !PrintSetup, !*File, !*env)	
-					|	PrintSetupEnvironments env
+					|	FileEnv env
 //	reads PrintSetup from File (text or data). If resulting Boolean is True:success,
 //	otherwise the default PrintSetup is returned
 

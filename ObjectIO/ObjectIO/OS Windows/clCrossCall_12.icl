@@ -22,7 +22,6 @@ import code from library "ddraw_library"
 import code from library "dsound_library"
 /*	...PA */
 
-
   //----------------------------------------------//
  //    Crosscall infrastructure                  //
 //----------------------------------------------//

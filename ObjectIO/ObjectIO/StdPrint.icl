@@ -10,24 +10,14 @@ import StdEnv, StdMaybe, StdPicture, osprint, commondef
 		,	resolution	::	!(!Int,!Int)
 		}
 
-class PrintSetupEnvironments env
-  where
-	defaultPrintSetup	::	!*env -> (!PrintSetup, !*env)
-	printSetupDialog	::	!PrintSetup !*env -> (!PrintSetup, !*env)
+defaultPrintSetup	::	!*env -> (!PrintSetup, !*env) | FileEnv env
+defaultPrintSetup env
+	= os_defaultprintsetup env
 
-instance PrintSetupEnvironments World
-  where
-	defaultPrintSetup env
-		= os_defaultprintsetup env
-	printSetupDialog printSetup env
-		= os_printsetupdialog True printSetup env
-
-instance PrintSetupEnvironments (IOSt .l)
-  where
-	defaultPrintSetup env
-		= os_defaultprintsetup env
-	printSetupDialog printSetup env
-		= os_printsetupdialog False printSetup env
+printSetupDialog	::	!PrintSetup !*printEnv -> (!PrintSetup, !*printEnv)
+					|	PrintEnvironments printEnv
+printSetupDialog printSetup env
+	= os_printsetupdialog printSetup env
 
 getPageDimensions	::	!PrintSetup !Bool	->	PageDimensions
 getPageDimensions printSetup emulateScreenRes
@@ -55,7 +45,7 @@ fwritePrintSetup printSetup file
 			|	 0<=nibble && nibble<=9		= toChar (nibble+(toInt '0'))
 			
 
-freadPrintSetup		::	!*File !*env -> (!Bool, !PrintSetup, !*File, !*env)	| PrintSetupEnvironments env
+freadPrintSetup		::	!*File !*env -> (!Bool, !PrintSetup, !*File, !*env)	| FileEnv env
 freadPrintSetup file env
 	#!	(hexChList, file)	= readline [] file
 		chList				= map hexToChar (pair hexChList)
@@ -159,3 +149,5 @@ instance PrintEnvironments World
   where
 	os_printpageperpage p1 p2 p3 p4 p5 p6 world
 		= accFiles (os_printpageperpage p1 p2 p3 p4 p5 p6) world
+	os_printsetupdialog p1 world
+		= accFiles (os_printsetupdialog p1) world
