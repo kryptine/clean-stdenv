@@ -283,7 +283,7 @@ where
 	=	OSModalEventCallback (s -> *(OSEvents,s)) (*(OSEvents,s) -> s) (OSEvent -> s -> *([Int],s))
 	|	OSModalEventLoop     (s -> s)
 
-osModalDialogHandlesMenuSelectState	:== False
+osModalDialogHandlesMenuSelectState	:== True//False
 osModalDialogHandlesWindowInit		:== False
 osModalDialogHandlesControlCreation	:== False
 osModalDialogHandlesEvents			:== False
@@ -391,12 +391,23 @@ osReleaseWindowPictContext wPtr hdc tb
 		makes additional preparations to do updates. Dummy on Windows.
 	osEndUpdate theWindow
 		administrates and ends the update. Dummy on Windows.
+	osSetUpdate theWindow
+		additional work for update in context. Dummy on Windows.
 */
 osBeginUpdate :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osBeginUpdate wPtr tb = BeginUpdate wPtr tb
 
 osEndUpdate :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osEndUpdate wPtr tb = EndUpdate wPtr tb
+
+osSetUpdate	  :: !OSWindowPtr !*OSToolbox -> *OSToolbox
+osSetUpdate wPtr tb
+	= QDFlushPortBuffer wPtr 0 tb
+
+QDFlushPortBuffer :: !Int !Int !*OSToolbox -> *OSToolbox
+QDFlushPortBuffer _ _ _ = code {
+	ccall QDFlushPortBuffer "II:V:I"
+	}
 
 /*	Window access operations.
 */
