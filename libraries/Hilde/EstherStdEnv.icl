@@ -28,7 +28,7 @@ where
 		,	("isOdd", overloaded "isOdd" (dynamic (undef, id) :: A.a: (a, (a -> Bool) a -> Bool)))
 		,	("length", overloaded "length" (dynamic (undef, id) :: A.a: (a, (a -> Int) a -> Int)))
 		,	("(%) infixl 9", overloaded "%" (dynamic (undef, id) :: A.a: (a, (a (Int, Int) -> a) a (Int, Int) -> a)))
-		,	("(+++) infixr 5", overloaded "+++" (dynamic (undef, id) :: A.a: (a, (a a -> Bool) a a -> Bool)))
+		,	("(+++) infixr 5", overloaded "+++" (dynamic (undef, id) :: A.a: (a, (a a -> a) a a -> a)))
 		,	("(^) infixr 8", overloaded "^" (dynamic (undef, id) :: A.a: (a, (a a -> a) a a -> a)))
 		,	("abs", overloaded "abs" (dynamic (undef, id) :: A.a: (a, (a -> a) a -> a)))
 		,	("sign", overloaded "sign" (dynamic (undef, id) :: A.a: (a, (a -> Int) a -> Int)))

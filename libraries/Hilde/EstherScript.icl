@@ -29,7 +29,7 @@ where
 		(vx, tx) = toStringDynamic dx
 	handler (UnboundVariable v :: ComposeException) = dynamic EstherError ("unbound variable (internal error) `" +++ v +++ "'")
 	handler (InstanceNotFound c dt :: ComposeException) = dynamic EstherError ("`instance " +++ c +++ " " +++ snd (toStringDynamic dt) +++ "' not found")
-	handler (InvalidInstance c dt :: ComposeException) = dynamic EstherError ("`instance " +++ c +++ " " +++ snd (toStringDynamic dt) +++ "' is invalid (type not an instance of the class type)")
+	handler (InvalidInstance c t dt :: ComposeException) = dynamic EstherError ("`instance " +++ c +++ " " +++ snd (toStringDynamic t) +++ "' has invalid type `" +++ snd (toStringDynamic dt) +++ "'")
 	handler (UnsolvableOverloading :: ComposeException) = dynamic EstherError ("unsolvable overloading")
 	handler (InfixRightArgumentMissing :: PostParseException) = dynamic EstherError ("right argument of infix operator is missing")
 	handler (InfixLeftArgumentMissing :: PostParseException) = dynamic EstherError ("left argument of infix operator is missing")
