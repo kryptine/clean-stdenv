@@ -27,7 +27,7 @@ applicationpath	:: !String -> String
 	Use these directories to store preference/options/help files of an application.
 */
 
-newlineChars	:: !String
+newlineChars	:: String
 /*		the newline characters in a textfile
 */
 

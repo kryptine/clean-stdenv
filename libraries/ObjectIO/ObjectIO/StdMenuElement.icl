@@ -369,7 +369,7 @@ where
 		,	x
 		)
 ::	DeltaItemHandle x
-	:==	x !OSMenu !Int !MenuElementHandle` !*OSToolbox -> *(!MenuElementHandle`,!*OSToolbox)
+	:==	x OSMenu Int MenuElementHandle` *OSToolbox -> *(MenuElementHandle`,*OSToolbox)
 ::	Recurse
 	:==	(	!Bool	// Visit SubMenu elements
 		,	!Bool	// Visit RadioMenu elements

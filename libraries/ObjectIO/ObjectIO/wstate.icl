@@ -314,7 +314,7 @@ where
 	getWItemAtt` (ControlVScroll      f)			= ControlVScroll`     f
 	getWItemAtt` (ControlWidth        width)		= ControlWidth`       width
 	
-	getWItemInfo` :: !OSWindowPtr !OSWindowPtr !(WItemInfo .ls .pst) !*OSToolbox -> !(WItemInfo`,!WItemInfo .ls .pst,!*OSToolbox)
+	getWItemInfo` :: !OSWindowPtr !OSWindowPtr !(WItemInfo .ls .pst) !*OSToolbox -> (WItemInfo`,!WItemInfo .ls .pst,!*OSToolbox)
 	getWItemInfo` wPtr itemPtr info=:(RadioInfo {radioItems,radioLayout,radioIndex}) tb
 		= (	RadioInfo` { radioItems`  = map getRadioInfo` radioItems
 					   , radioLayout` = radioLayout
@@ -360,8 +360,7 @@ where
 		getPopUpInfoEdit` Nothing tb
 			= (Nothing,tb)
 		getPopUpInfoEdit` (Just info=:{popUpEditPtr}) tb
-			# (content,tb)	= osGetEditControlText wPtr popUpEditPtr tb
-			# tb = trace_n ("getPopUpInfoEdit`",content) tb
+			# (content,tb)	= osGetEditControlText wPtr popUpEditPtr tb		// DvA: Netter osGetPopUpControlText ???
 			= (Just {info & popUpEditText=content},tb)
 	getWItemInfo` wPtr itemPtr info=:(SliderInfo {sliderInfoDir,sliderInfoLength,sliderInfoState}) tb
 		= (	SliderInfo` { sliderInfoDir`    = sliderInfoDir
@@ -660,24 +659,3 @@ instance toString (ControlAttribute .st) where
 	toString (ControlVScroll		_) = "ControlVScroll"
 	toString (ControlWidth			_) = "ControlWidth"
 
-//--
-trace_n _ f :== f
-/*
-from StdFile import fwritec,fwrites,stderr
-from dodebug import toString
-from StdMisc import undef
-l_trace_n :: !msg .a -> .a | toString msg;
-l_trace_n message a
-  | l_file_to_true (fwritec '\n' (fwrites (toString message) stderr))
-      = a;
-      = undef;
-
-l_file_to_true :: !File -> Bool;
-l_file_to_true file
-	= code {
-			  .inline l_file_to_true
-			          pop_b 2
-			          pushB TRUE
-			  .end
-			}
-*/

@@ -85,7 +85,7 @@ where
 
 
 //	Determine the list of window items that can obtain the keyboard input focus.
-
+/*
 getWElementKeyFocusIds` :: !Bool ![WElementHandle`] -> [FocusItem]
 getWElementKeyFocusIds` shownContext [itemH:itemHs]
 	= getWElementKeyFocusIds`` shownContext itemH++getWElementKeyFocusIds` shownContext itemHs
@@ -106,7 +106,7 @@ where
 		= getWElementKeyFocusIds` shownContext itemHs
 getWElementKeyFocusIds` _ _
 	= []
-
+*/
 
 instance == WRecursiveKind where
 	(==) IsWListLSHandle	wRecKind	= case wRecKind of

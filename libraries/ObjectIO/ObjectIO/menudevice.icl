@@ -71,6 +71,7 @@ menuClose pState=:{io=ioState}
 		# (tb,ioState)				= getIOToolbox ioState
 		// DvA: what about sub menu's, seem to be forgetting these here...
 		// PA: this happens automatically on Windows, but you're right. The function disposeMenuHandles should take of this. Not yet done.
+		// DvA: can't we call closemenu from menuinternal instead of this whole function?
 		# (menus,(osMenuBar,tb))	= disposeMenuHandles (isJust opt_guishare) menus (osMenuBar,tb)
 		# ioState					= setIOToolbox tb ioState
 		  osdinfo					= setOSDInfoOSMenuBar osMenuBar osdinfo

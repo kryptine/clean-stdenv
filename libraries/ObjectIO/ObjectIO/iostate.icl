@@ -82,15 +82,15 @@ iostateFatalError function error
 ::	InputTrackKind												// Input source kinds:
 	=	{	itkMouse	:: !Bool								// mouse
 		,	itkKeyboard	:: !Bool								// keyboard
-		,	itkChar		:: !Int									// DvA: key that is being tracked
-		,	itkSlider	:: !Maybe !SliderTrackInfo				// DvA: slider tracking
+		,	itkChar		:: !Int									// key that is being tracked
+		,	itkSlider	:: !Maybe SliderTrackInfo				// extra slider tracking info
 		}
-::	SliderTrackInfo												// PA: please add comments to meaning of record and fields
-	=	{	stiControl	:: !OSWindowPtr
-		,	stiPart		:: !Int
-		,	stiHilite	:: !Bool
-		,	stiDirection:: !Direction
-		,	stiIsControl:: !Bool
+::	SliderTrackInfo												// Slider being tracked:
+	=	{	stiControl	:: !OSWindowPtr							// control being tracked (OSNoWindowPtr if window)
+		,	stiPart		:: !Int									// part of slider being tracked
+		,	stiHilite	:: !Bool								// currently highlighted
+		,	stiDirection:: !Direction							// slider direction
+		,	stiIsControl:: !Bool								// is slider control
 		}
 ::	ClipboardState
 	=	{	cbsCount	:: !Int									// ScrapCount of last access

@@ -1019,7 +1019,7 @@ where
 				newIndex		= if (curIndex<=index) curIndex (curIndex+index)
 				(before,after)	= split index curItems
 				
-				appendPopUp :: !OSWindowPtr !(Maybe !OSWindowPtr) !Index !(PopUpControlItem .pst) !(!Int,!*OSToolbox) -> (!Int,!*OSToolbox)
+				appendPopUp :: !OSWindowPtr !(Maybe OSWindowPtr) !Index !(PopUpControlItem .pst) !(!Int,!*OSToolbox) -> (!Int,!*OSToolbox)
 				appendPopUp popUpPtr editPtr index (title,_) (itemNr,tb)
 					# (_,tb)			= osCreatePopUpControlItem popUpPtr editPtr (-1) ableContext title (index==itemNr) itemNr tb
 					= (itemNr+1,tb)
@@ -1108,7 +1108,7 @@ where
 				nrNewItems			= length newItems
 				newIndex			= if (isMember curIndex indexs) 1 (min nrNewItems curIndex)
 				
-				appendPopUp :: !OSWindowPtr !(Maybe !OSWindowPtr) !Index !(PopUpControlItem .ps) !(!Int,!*OSToolbox) -> (!Int,!*OSToolbox)
+				appendPopUp :: !OSWindowPtr !(Maybe OSWindowPtr) !Index !(PopUpControlItem .ps) !(!Int,!*OSToolbox) -> (!Int,!*OSToolbox)
 				appendPopUp popUpPtr editPtr index (title,_) (itemNr,tb)
 					# (_,tb)		= osCreatePopUpControlItem popUpPtr editPtr (-1) ableContext title (index==itemNr) itemNr tb
 					= (itemNr+1,tb)

@@ -59,7 +59,7 @@ freadPrintSetup		:: !*File !*env -> (!Bool,!PrintSetup,!*File,!*env)
 */
 
 print	::	!Bool !Bool
-			.(PrintInfo !*Picture -> ([IdFun *Picture],!*Picture))
+			.(PrintInfo *Picture -> ([IdFun *Picture],*Picture))
 			!PrintSetup !*env
 		-> (!PrintSetup,!*env)
 		|  PrintEnvironments env
