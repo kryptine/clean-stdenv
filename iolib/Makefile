@@ -20,6 +20,16 @@ CLEAN_MODULES = \
 	windowDevice cursorInternal ioState scrollList scrollList sliderBar misc \
 	picture xevent xtypes
 
+XV_OBJECT_FILES = \
+	xv/cdialog.o \
+	xv/cpath.o \
+	xv/cfileselect.o \
+  	xv/cpicture.o \
+	xv/ckernel.o \
+	xv/ctimer.o \
+	xv/cmenu.o \
+	xv/cwindow.o
+
 # Link options files
 LO_FILES = \
 	x.lo \
@@ -45,7 +55,8 @@ IOLIB_FILES = \
 	$(INTERFACE_MODULES:%=%.icl) \
 	$(LO_FILES) \
 	$(SHARED_LIB_LINKS) \
-	$(LIBRARIES)
+	$(LIBRARIES) \
+	$(XV_OBJECT_FILES)
 
 #
 # Install section
@@ -55,10 +66,13 @@ IOLIB_FILES = \
 INSTALL_IOLIB_FILES = $(IOLIB_FILES:%=$(INSTALL_IOLIB_DIR)/%)
 INSTALL_SHARED_LIB_LINKS = $(SHARED_LIB_LINKS:%=$(INSTALL_IOLIB_DIR)/%)
 
-install: compile $(INSTALL_IOLIB_DIR) $(INSTALL_IOLIB_FILES) \
+install: compile $(INSTALL_IOLIB_DIR) $(INSTALL_IOLIB_DIR)/xv $(INSTALL_IOLIB_FILES) \
 											$(INSTALL_SHARED_LIB_LINKS)
 
 $(INSTALL_IOLIB_DIR) :
+	mkdir -p $@
+
+$(INSTALL_IOLIB_DIR)/xv :
 	mkdir -p $@
 
 $(INSTALL_IOLIB_DIR)/% : %
@@ -150,16 +164,23 @@ $(INSTALL_IOLIB_DIR)/xs.lo: $(INSTALL_IOLIB_DIR)/$(DEFAULT_TOOLKIT)s.lo
 # Commands
 #
 
-.SUFFIXES: .fcl .icl .dcl .abc .o
+.SUFFIXES: .fcl .h .icl .dcl .abc .o
 
 RANLIB = ranlib
 # RANLIB = /bin/true
 FCLC = fclc
-CLM = $(HOME)/Clean2/bin/clm
+HTOCLEAN = htoclean 
+CLM = clm
 CLMFLAGS = -nw
 
 # Solaris:
 # LDSHARED = -G
+
+.h.dcl:
+	$(HTOCLEAN) $<
+
+.h.icl:
+	$(HTOCLEAN) $<
 
 .fcl.o:
 	$(FCLC) $<
@@ -181,73 +202,73 @@ CLMFLAGS = -nw
 	$(CLM) $(CLMFLAGS) -O $*
 
 
-xcursor.icl : xcursor.fcl
+xcursor.icl : xcursor.h
 
-xcursor.dcl : xcursor.fcl
+xcursor.dcl : xcursor.h
 
 Clean\ System\ Files/xcursor.o : xcursor.icl xcursor.dcl
 	$(RM) Clean\ System\ Files/xcursor.abc
 	$(CLM) -nw -O xcursor
 
-xfileselect.icl : xfileselect.fcl
+xfileselect.icl : xfileselect.h
 
-xfileselect.dcl : xfileselect.fcl
+xfileselect.dcl : xfileselect.h
 
 Clean\ System\ Files/xfileselect.o : xfileselect.icl xfileselect.dcl
 	$(RM) Clean\ System\ Files/xfileselect.abc
 	$(CLM) -nw -O xfileselect
 
-xpath.icl : xpath.fcl
+xpath.icl : xpath.h
 
-xpath.dcl : xpath.fcl
+xpath.dcl : xpath.h
 
 Clean\ System\ Files/xpath.o : xpath.icl xpath.dcl
 	$(RM) Clean\ System\ Files/xpath.abc
 	$(CLM) -nw -O xpath
 
-xdialog.icl : xdialog.fcl
+xdialog.icl : xdialog.h
 
-xdialog.dcl : xdialog.fcl
+xdialog.dcl : xdialog.h
 
 Clean\ System\ Files/xdialog.o : xdialog.icl xdialog.dcl
 	$(RM) Clean\ System\ Files/xdialog.abc
 	$(CLM) -nw -O xdialog
 
-xkernel.icl : xkernel.fcl
+xkernel.icl : xkernel.h
 
-xkernel.dcl : xkernel.fcl
+xkernel.dcl : xkernel.h
 
 Clean\ System\ Files/xkernel.o : xkernel.icl xkernel.dcl
 	$(RM) Clean\ System\ Files/xkernel.abc
 	$(CLM) -nw -O xkernel
 
-xpicture.icl : xpicture.fcl
+xpicture.icl : xpicture.h
 
-xpicture.dcl : xpicture.fcl
+xpicture.dcl : xpicture.h
 
 Clean\ System\ Files/xpicture.o : xpicture.icl xpicture.dcl
 	$(RM) Clean\ System\ Files/xpicture.abc
 	$(CLM) -nw -O xpicture
 
-xwindow.icl : xwindow.fcl
+xwindow.icl : xwindow.h
 
-xwindow.dcl : xwindow.fcl
+xwindow.dcl : xwindow.h
 
 Clean\ System\ Files/xwindow.o : xwindow.icl xwindow.dcl
 	$(RM) Clean\ System\ Files/xwindow.abc
 	$(CLM) -nw -O xwindow
 
-xmenu.icl : xmenu.fcl
+xmenu.icl : xmenu.h
 
-xmenu.dcl : xmenu.fcl
+xmenu.dcl : xmenu.h
 
 Clean\ System\ Files/xmenu.o : xmenu.icl xmenu.dcl
 	$(RM) Clean\ System\ Files/xmenu.abc
 	$(CLM) -nw -O xmenu
 
-xtimer.icl : xtimer.fcl
+xtimer.icl : xtimer.h
 
-xtimer.dcl : xtimer.fcl
+xtimer.dcl : xtimer.h
 
 Clean\ System\ Files/xtimer.o : xtimer.icl xtimer.dcl
 	$(RM) Clean\ System\ Files/xtimer.abc
