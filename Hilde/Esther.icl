@@ -121,7 +121,9 @@ where
 
 	cd path env
 		# (p, env) = relativepath path env
-		  (ok, env) = dynamicWrite ENV_CWD (dynamic p :: DynamicPath) env
+		  (ok, env) = dynamicExists p env
+		| not ok = raise "cd: cannot find directory"
+		# (ok, env) = dynamicWrite ENV_CWD (dynamic p :: DynamicPath) env
 		| not ok = raise "cd: cannot change current working directory"
 		= env
 

@@ -72,7 +72,7 @@ MainModule
 			Y:	20
 			SizeX:	759
 			SizeY:	461
-	IclOpen:	False
+	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
 	Module
@@ -778,14 +778,14 @@ OtherModules
 				Y:	20
 				SizeX:	702
 				SizeY:	449
-		DclOpen:	False
+		DclOpen:	True
 		Icl
 			WindowPosition
 				X:	45
 				Y:	154
 				SizeX:	758
 				SizeY:	474
-		IclOpen:	False
+		IclOpen:	True
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	Wrap
@@ -2109,7 +2109,7 @@ OtherModules
 				Y:	6
 				SizeX:	734
 				SizeY:	475
-		IclOpen:	True
+		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	EstherBackend
