@@ -168,17 +168,21 @@ kOTSyncIdleEvents are NOT used
 ------------------------ TYPE DEFINITIONS -----------------------------------------
 */
 
+#define KARBON
+
 #ifndef __MACH__
-#include <OpenTransport.h>
-#include <OpenTptInternet.h>
-#include <events.h>
+#include <Carbon.h>
+//#include <OpenTransport.h>
+//#include <OpenTptInternet.h>
+//#include <events.h>
 #else
 #include <Carbon/Carbon.h>
 #endif
 
 #include "Clean.h"
 
-#ifdef __MACH__
+//#ifdef __MACH__
+#if defined __MACH__ || defined KARBON
 # define InitOpenTransport() InitOpenTransportInContext(kInitOTForApplicationMask,NULL)
 # define CloseOpenTransport() CloseOpenTransportInContext(NULL)
 # define OTAlloc(ref,structType,fields,err) OTAllocInContext(ref,structType,fields,err,NULL)
@@ -366,6 +370,9 @@ int			connectErrCode;
 void (*getNextInetEventP)(int*,int*,int*,int*); // see function WaitNextEventC
 extern void (*exit_tcpip_function)();			// this function will be called when the Clean
 												// program terminates
+
+OTNotifyUPP notifierUPP = NULL;
+
 //--------------------- FUNCTION IMPLEMENTATION -----------------------------------
 
 
@@ -400,7 +407,7 @@ void WaitNextEventC(int eventMask,int sleep,int mouseRgn, int in_tb,
 		};
 }
 
-#ifndef __MACH__
+#ifndef KARBON
 // needed for WaitNextEventC
 asm void __ptr_glue(void)
 {
@@ -673,6 +680,7 @@ void StartUp()
 			IO_error("cTCP.o: can't start OpenTransport");
 		csRcvBuff		= (CleanString) rcvBuff;
 		exit_tcpip_function	= CleanUp;
+		notifierUPP		= NewOTNotifyUPP(notifier);
 		tcpStartedUp	= true;
 	  };
 }
@@ -1031,7 +1039,7 @@ void lookupHost_asyncC(char* inetAddr, int *errCode, int *endpointRef)
 	dictitemP->dnsEndpointRef = dnsEndpointRefCounter;
 	dnsEndpointRefCounter++;
 	
-	OTInstallNotifier(asyncDNRMapper, notifier, dictitemP);
+	OTInstallNotifier(asyncDNRMapper, notifierUPP, dictitemP);
 
 	lookupRequestP	= OTAllocMem(sizeof(TLookupRequest));
 	if (lookupRequestP==nil)
@@ -1091,7 +1099,7 @@ void createChannelEndpoint(int *errCode, EndpointRef *ep_p)
 	setEndpointDataC((int) ep, 2, 0, 0, 0);
 	dictitemP	= lookup(ep);
 
-	err	= OTInstallNotifier(ep, notifier, (void*) dictitemP);
+	err	= OTInstallNotifier(ep, notifierUPP, (void*) dictitemP);
 	if (err!=kOTNoError)
 		return;
 
@@ -1154,7 +1162,7 @@ void openTCP_ListenerC(int portNum, int *errCode, int *endpointRef)
 	setEndpointDataC((int) ep, 1, 0, 0, 0);
 	dictitemP	= lookup(ep);
 
-	err	= OTInstallNotifier(ep, notifier, (void*) dictitemP);
+	err	= OTInstallNotifier(ep, notifierUPP, (void*) dictitemP);
 
 	if (err!=kOTNoError)
 		return;
