@@ -6,7 +6,7 @@ implementation module receiverdevice
 
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	StdReceiver
-import	devicefunctions, iostate, receiverevent, receiverid
+import	devicefunctions, iostate, receiveraccess, receiverevent, receiverid
 from	commondef	import FatalError, URemove, UCond
 from	StdPSt		import appPIO, accPIO
 

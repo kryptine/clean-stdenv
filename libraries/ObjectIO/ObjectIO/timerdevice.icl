@@ -6,7 +6,7 @@ implementation module timerdevice
 
 import	StdInt, StdBool, StdFunc, StdEnum, StdList, StdTuple
 from	StdPSt	import	accPIO, appPIO
-import	commondef, devicefunctions, iostate, receiverhandle, timeraccess, timerdefaccess, timerevent
+import	commondef, devicefunctions, iostate, receiveraccess, timeraccess, timerdefaccess, timerevent
 
 
 timerdeviceFatalError :: String String -> .x
