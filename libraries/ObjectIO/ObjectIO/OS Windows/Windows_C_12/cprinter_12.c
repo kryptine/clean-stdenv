@@ -203,7 +203,7 @@ HANDLE setupDevmode(int size, char *pData)
 	return hDevmode;
 }
 
-void passBackPrintSetup(PRINTDLG *pd, CleanString *o_devmode,
+void get_printSetup_with_PRINTDLG(PRINTDLG *pd, CleanString *o_devmode,
 						CleanString *o_device, CleanString *o_driver, CleanString *o_output)
 {
 	char		*newDriver, *newDevice, *newOutput;
@@ -224,14 +224,11 @@ void passBackPrintSetup(PRINTDLG *pd, CleanString *o_devmode,
 	LocalUnlock(pd->hDevNames);
 }
 
-void get_printSetup_with_PRINTDLG(PRINTDLG *pd, CleanString *o_devmode,
-						CleanString *o_device, CleanString *o_driver, CleanString *o_output)
-{
-	//rMessageBox(NULL, MB_APPLMODAL, "in get_printSetup_with_PRINTDLG", "pd:%i", pd);
-	passBackPrintSetup(pd, o_devmode, o_device, o_driver, o_output);
+int release_memory_handles(PRINTDLG *pd, int os) {
 	LocalFree(pd->hDevNames);
 	LocalFree(pd->hDevMode);
-}
+	return os;
+	}
 
 UINT APIENTRY DialogToFrontHook(HWND hdl, UINT msg, WPARAM wParam, LPARAM lParam)
 // This function hooks the Print dialog. It's purpose is to set the dialog in the
