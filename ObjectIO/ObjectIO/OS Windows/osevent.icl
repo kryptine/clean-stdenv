@@ -3,8 +3,9 @@ implementation module osevent
 //	Clean Object I/O library, version 1.2
 
 import	StdBool, StdList, StdMisc, StdTuple
-import	clCrossCall_12, ostoolbox, ostypes
+import	clCrossCall_12, ostime, ostoolbox, ostypes
 from	commondef	import HdTl, FatalError
+from	StdMaybe	import Maybe, Just, Nothing
 //import	StdDebug, tracetypes
 
 
@@ -38,6 +39,14 @@ OSremoveEvent [osEvent:osEvents]
 	= (osEvent,osEvents)
 OSremoveEvent []
 	= oseventFatalError "OSremoveEvent" "OSEvents argument is empty"
+
+OScopyEvents :: !OSEvents -> (!OSEvents,!OSEvents)
+OScopyEvents []
+	= ([],[])
+OScopyEvents [e:es]
+	= ([e:es1],[e:es2])
+where
+	(es1,es2)	= OScopyEvents es
 
 OSnewEvents :: OSEvents
 OSnewEvents = []
@@ -81,13 +90,13 @@ OShandleEvents isFinalState getOSEvents setOSEvents getSleepTime handleOSEvent (
 		with
 			rccitoevent :: !(OSEvent -> .s -> ([Int],.s)) !OSEvent !.s !*OSToolbox -> (!OSEvent,!.s,!*OSToolbox)
 			rccitoevent handleOSEvent osEvent=:{ccMsg} state tb
-			//	# (reply,state)	= handleOSEvent (trace_n ("CcRqDOMESSAGE-->"+++toString osEvent) osEvent) state
+			//	# (reply,state)	= handleOSEvent (trace_n ("CcRqDOMESSAGE-->"+++toCleanCrossCallInfoString osEvent) osEvent) state
 				# (reply,state)	= handleOSEvent osEvent state
 				= (setReplyInOSEvent reply,state,tb)
 	| otherwise
 		# (osEvent,osEvents)	= OSremoveEvent osEvents
 		# state					= setOSEvents (osEvents,state)
-	//	# (_,state)				= handleOSEvent (trace_n ("DelayedEvent-->"+++toString osEvent) osEvent) state
+	//	# (_,state)				= handleOSEvent (trace_n ("DelayedEvent-->"+++toCleanCrossCallInfoString osEvent) osEvent) state
 		# (_,state)				= handleOSEvent osEvent state
 		= OShandleEvents isFinalState getOSEvents setOSEvents getSleepTime handleOSEvent (state,tb)
 
@@ -114,26 +123,40 @@ OSEventIsUrgent {ccMsg}
 		CcWmDRAWCLIPBOARD	-> False	// PA: in a future version, use this event to evaluate a clipboard callback function.
 		CcWmIDLETIMER		-> False
 		CcWmTIMER			-> False
+		CcWmZEROTIMER		-> False
 		_					-> True
 
 
-/* createOS(Dea/A)ctivateWindowEvent creates the event the platform would generate for a genuine (de)activate event. */
+/*	createOS(Dea/A)ctivateWindowEvent creates the event the platform would generate for a genuine (de)activate event. */
 createOSActivateWindowEvent :: !OSWindowPtr !*OSToolbox -> (!OSEvent,!*OSToolbox)
 createOSActivateWindowEvent wPtr tb = (Rq1Cci CcWmACTIVATE wPtr,tb)
 
 createOSDeactivateWindowEvent :: !OSWindowPtr !*OSToolbox -> (!OSEvent,!*OSToolbox)
 createOSDeactivateWindowEvent wPtr tb = (Rq1Cci CcWmDEACTIVATE wPtr,tb)
 
-/* createOS(Dea/A)ctivateControlEvent creates the event the platform would generate for a genuine (de)activate event. */
+/*	createOS(Dea/A)ctivateControlEvent creates the event the platform would generate for a genuine (de)activate event. */
 createOSActivateControlEvent :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> (!OSEvent,!*OSToolbox)
 createOSActivateControlEvent wPtr cPtr tb = (Rq2Cci CcWmSETFOCUS wPtr cPtr,tb)
 
 createOSDeactivateControlEvent :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> (!OSEvent,!*OSToolbox)
 createOSDeactivateControlEvent wPtr cPtr tb = (Rq2Cci CcWmKILLFOCUS wPtr cPtr,tb)
 
-/* createOSLoose(Mouse/Key)Event creates the event for reporting loss of mouse/keyboard input (virtual event). */
+/*	createOSLoose(Mouse/Key)Event creates the event for reporting loss of mouse/keyboard input (virtual event). */
 createOSLooseMouseEvent :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> (!OSEvent,!*OSToolbox)
 createOSLooseMouseEvent wPtr cPtr tb = (Rq2Cci CcWmLOSTMOUSE wPtr cPtr,tb)
 
 createOSLooseKeyEvent :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> (!OSEvent,!*OSToolbox)
 createOSLooseKeyEvent wPtr cPtr tb = (Rq2Cci CcWmLOSTKEY wPtr cPtr,tb)
+
+/*	createOSZeroTimerEvent  creates the event for reporting continued zero timer (virtual event).
+	getOSZeroTimerStartTime returns the registered time in the virtual event. Zero if wrong argument.
+*/
+createOSZeroTimerEvent :: !OSTime -> OSEvent
+createOSZeroTimerEvent zeroStart = Rq1Cci CcWmZEROTIMER (toInt zeroStart)
+
+getOSZeroTimerStartTime :: !OSEvent -> Maybe OSTime
+getOSZeroTimerStartTime {ccMsg,p1}
+	| ccMsg==CcWmZEROTIMER
+		= Just (fromInt p1)
+	| otherwise
+		= Nothing

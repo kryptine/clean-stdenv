@@ -25,5 +25,6 @@ OSGetCurrentDate	::			!*OSToolbox -> (!(!Int,!Int,!Int,!Int),!*OSToolbox)
 //	OSGetCurrentTime returns current (year,month,day,day_of_week).
 
 instance -       OSTime		// Calculate difference between arg 1 and arg 2
+instance <       OSTime		// True iff arg 1 < arg 2
 instance toInt   OSTime		// Coerce OSTime to Integer (always positive or zero)
 instance fromInt OSTime		// Coerce Int to OSTime (Integer will be made zero if negative)

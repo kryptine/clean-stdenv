@@ -6,6 +6,7 @@ implementation module scheduler
 
 import	StdBool, StdList, StdTuple
 import	osevent, ostime
+from	ossystem			import OStickspersecond
 from	ostoolbox			import OSNewToolbox, OSInitToolbox
 import	commondef, devicefunctions, iostate, processstack, roundrobin, timertable, world
 from	StdProcessDef		import ProcessInit
@@ -19,15 +20,15 @@ from	StdProcessAttribute	import isProcessKindAttribute
 		}
 ::	*Context
 	=	{	cEnvs			:: !*Environs			// The global environments
-		,	cProcessStack	:: ProcessStack			// The global process stack
-		,	cMaxIONr		:: SystemId				// The global maximum system number
-		,	cProcesses		:: *CProcesses			// All processes
-		,	cModalProcess	:: Maybe SystemId		// The SystemId of the interactive process that has a modal window
-		,	cReceiverTable	:: ReceiverTable		// The global receiver-process table
-		,	cTimerTable		:: TimerTable			// The table of all currently active timers
-		,	cIdTable		:: IdTable				// The table of all bound Ids
-		,	cOSTime			:: OSTime				// The current OSTime
-		,	cIdSeed			:: Int					// The global id generating number (actually the World)
+		,	cProcessStack	:: !ProcessStack		// The global process stack
+		,	cMaxIONr		:: !SystemId			// The global maximum system number
+		,	cProcesses		:: !*CProcesses			// All processes
+		,	cModalProcess	:: !Maybe SystemId		// The SystemId of the interactive process that has a modal window
+		,	cReceiverTable	:: !ReceiverTable		// The global receiver-process table
+		,	cTimerTable		:: !TimerTable			// The table of all currently active timers
+		,	cIdTable		:: !IdTable				// The table of all bound Ids
+		,	cOSTime			:: !OSTime				// The current OSTime
+		,	cIdSeed			:: !Int					// The global id generating number (actually the World)
 		,	cOSToolbox		:: !*OSToolbox			// The toolbox environment
 		}
 
@@ -52,14 +53,15 @@ ContextGetSleepTime :: !Context -> (!Int,!Context)
 ContextGetSleepTime context=:{cTimerTable,cReceiverTable}
 	# maybe_sleep	= getTimeIntervalFromTimerTable cTimerTable
 	# maybe_receiver= getActiveReceiverTableEntry cReceiverTable
-	  sleep			= if (isJust maybe_receiver) 0						// a receiver with a non-empty message queue exists
-	  				 (if (isJust maybe_sleep)	(fromJust maybe_sleep)	// a timer with given interval is waiting
-	  				 							OSLongSleep)			// neither a receiver nor timer
+	  sleep			= if (isJust maybe_receiver) 0								// a receiver with a non-empty message queue exists
+	  				 (if (isJust maybe_sleep)	(snd (fromJust maybe_sleep))	// a timer with given interval is waiting
+	  				 							OSLongSleep)					// neither a receiver nor timer
 	= (sleep,context)
 
 ContextGetOSEvents :: !Context -> (!OSEvents,!Context)
-ContextGetOSEvents context=:{cEnvs=envs=:{envsEvents}}
-	= (envsEvents,{context & cEnvs={envs & envsEvents=OSnewEvents}})
+ContextGetOSEvents context=:{cEnvs=envs=:{envsEvents=es}}
+	# (es1,es2)		= OScopyEvents es
+	= (es1,{context & cEnvs={envs & envsEvents=es2}})
 
 ContextSetOSEvents :: !(!OSEvents,!Context) -> Context
 ContextSetOSEvents (osEvents,context=:{cEnvs=envs})
@@ -171,16 +173,22 @@ where
 		= (not continue,context)
 
 handleContextOSEvent :: !OSEvent !Context -> (![Int],!Context)
-handleContextOSEvent osEvent context=:{cProcessStack,cProcesses,cReceiverTable,cTimerTable,cOSTime,cOSToolbox}
+handleContextOSEvent osEvent context=:{cEnvs=envs=:{envsEvents=osEvents},cProcessStack,cProcesses,cReceiverTable,cTimerTable,cOSTime,cOSToolbox}
 //	PA: shift the time in the timertable.
 	# (ostime,tb)				= OSGetTime cOSToolbox
 	  timeshift					= toInt (ostime-cOSTime)
 	  timertable				= shiftTimeInTimerTable timeshift cTimerTable
 //	PA: determine whether a TimerEvent or ASyncMessage can be generated
-	  (schedulerEvent,receivertable,timertable)
-	  							= toSchedulerEvent osEvent cReceiverTable timertable cOSTime
+	  (schedulerEvent,receivertable,timertable,osEvents)
+	  							= toSchedulerEvent osEvent cReceiverTable timertable cOSTime osEvents
 	  processes					= resetRR cProcesses
-	# context					= {context & cProcesses=processes,cReceiverTable=receivertable,cTimerTable=timertable,cOSTime=ostime,cOSToolbox=tb}
+	# context					= {context & cEnvs			= {envs & envsEvents=osEvents}
+										   , cProcesses		= processes
+										   , cReceiverTable	= receivertable
+										   , cTimerTable	= timertable
+										   , cOSTime		= ostime
+										   , cOSToolbox		= tb
+								  }
 	# (schedulerEvent,context)	= handleEventForContext False schedulerEvent context
 	  replyToOS					= case schedulerEvent of
 	  								(ScheduleOSEvent _ reply)	-> reply
@@ -201,45 +209,75 @@ handleContextOSEvent osEvent context=:{cProcessStack,cProcesses,cReceiverTable,c
 	can be generated instead. If both a TimerEvent and an ASyncMessage are available, use the OSTime to 
 	decide which one to choose.
 */
-toSchedulerEvent :: !OSEvent !ReceiverTable !TimerTable !OSTime -> (!SchedulerEvent,!ReceiverTable,!TimerTable)
-toSchedulerEvent osevent receivertable timertable osTime
-	| OSEventIsUrgent osevent
-		= (schedulerEvent,receivertable,timertable)
-	| not sure_timer && not sure_receiver
-		= (schedulerEvent,receivertable,timertable)
+zerotimelimit :: OSTime
+zerotimelimit =: fromInt (max 1 (OStickspersecond/20))
+
+toSchedulerEvent :: !OSEvent !ReceiverTable !TimerTable !OSTime !*OSEvents -> (!SchedulerEvent,!ReceiverTable,!TimerTable,!*OSEvents)
+toSchedulerEvent osevent receivertable timertable osTime osEvents
+	| eventIsUrgent
+		= (schedulerEvent,receivertable,timertable,osEvents)
+	| (not sure_timer) && not sure_receiver
+		= (schedulerEvent,receivertable,timertable,osEvents)
 	| sure_timer && sure_receiver
 		| isEven (toInt osTime)
-			= (timerEvent,receivertable,timertable`)
+			= (timerEvent,receivertable,timertable`,osEvents`)
 		// otherwise
-			= (asyncEvent,receivertable`,timertable)
+			= (asyncEvent,receivertable`,timertable,osEvents`)
 	| sure_timer
-		= (timerEvent,receivertable,timertable`)
+		= (timerEvent,receivertable,timertable`,osEvents`)
 	| otherwise
-		= (asyncEvent,receivertable`,timertable)
+		= (asyncEvent,receivertable`,timertable,osEvents)
 where
+	eventIsUrgent				= OSEventIsUrgent osevent
 	maybe_timer					= getTimeIntervalFromTimerTable timertable
+	(zerotimer,interval)		= fromJust maybe_timer
 	maybe_receiver				= getActiveReceiverTableEntry receivertable
-	sure_timer					= isJust maybe_timer && fromJust maybe_timer<=0
+	sure_timer					= isJust maybe_timer && interval<=0
 	sure_receiver				= isJust maybe_receiver
 	schedulerEvent				= ScheduleOSEvent osevent []
 	(asyncEvent,receivertable`)	= toASyncEvent (fromJust maybe_receiver) receivertable
 	(timerEvent,timertable`)	= toTimerEvent timertable
+//	osEvents`					= checkOSZeroTimerEvent zerotimer osTime osevent osEvents
+	osEvents`					= checkOSZeroTimerEvent maybe_timer osTime osevent osEvents
+
+//	In case the original event is a virtual zero timer event:
+//		check if another should be inserted in the OSEvents to circumvent the event system call. 
+//	In case the original event is a non urgent event:
+//		check if an initial virtual zero timer event must be inserted to start circumventing event system calls.
+//	checkOSZeroTimerEvent :: !Bool !OSTime !OSEvent !*OSEvents -> *OSEvents
+	checkOSZeroTimerEvent :: !(Maybe (Bool,Int)) !OSTime !OSEvent !*OSEvents -> *OSEvents
+//	checkOSZeroTimerEvent zerotimer osTime osevent osEvents
+	checkOSZeroTimerEvent maybe_timer osTime osevent osEvents
+		| isJust maybe_zerotimer_start && zerotimer
+			| osTime-zerotimer_start<=zerotimelimit
+				= OSinsertEvents [osevent] osEvents
+			// otherwise
+				= osEvents
+		| isNothing maybe_zerotimer_start && zerotimer
+			= OSinsertEvents [createOSZeroTimerEvent osTime] osEvents
+		| otherwise
+			= osEvents
+	where
+		(zerotimer,_)			= fromJust maybe_timer
+		maybe_zerotimer_start	= getOSZeroTimerStartTime osevent
+		zerotimer_start			= fromJust maybe_zerotimer_start
 	
-	//	The receiver for which an ASyncMessage is generated is placed behind all other receivers, 
-	//	creating a round-robin order. Its asynchronous message queue length field is decreased.
+//	The receiver for which an ASyncMessage is generated is placed behind all other receivers, 
+//	creating a round-robin order. Its asynchronous message queue length field is decreased.
 	toASyncEvent :: !Id !ReceiverTable -> (!SchedulerEvent,!ReceiverTable)
 	toASyncEvent rid receivertable
-		#! rte				= fromJust (getReceiverTableEntry rid receivertable)
-		#! rte				= {rte & rteASMCount=rte.rteASMCount-1}
-		#! receivertable	= setReceiverTableEntry rte (snd (removeReceiverFromReceiverTable rid receivertable))
+		#! rte					= fromJust (getReceiverTableEntry rid receivertable)
+		#! rte					= {rte & rteASMCount=rte.rteASMCount-1}
+		#! receivertable		= setReceiverTableEntry rte (snd (removeReceiverFromReceiverTable rid receivertable))
 		= (ScheduleMsgEvent (ASyncMessage {asmRecLoc=rte.rteLoc}),receivertable)
 	
-	//	The timer for which a TimerEvent is generated is determined by getActiveTimerInTable.
-	//	This function already takes care of fairness using a round robin scheme.
+//	The timer for which a TimerEvent is generated is determined by getActiveTimerInTable.
+//	This function already takes care of fairness using a round robin scheme.
 	toTimerEvent :: !TimerTable -> (!SchedulerEvent,!TimerTable)
 	toTimerEvent timertable
 		# (maybeTimerEvent,timertable)	= getActiveTimerInTimerTable timertable
 		= (ScheduleTimerEvent (fromJust maybeTimerEvent),timertable)
+
 
 handleEventForContext :: !Bool !SchedulerEvent !Context -> (!SchedulerEvent,!Context)
 handleEventForContext eventDone schedulerEvent context=:{cProcesses=processes}

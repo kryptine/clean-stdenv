@@ -128,22 +128,23 @@ getActiveTimerInTimerTable [tte=:{tteElapse,tteInterval,tteLoc}:ttes]
 getActiveTimerInTimerTable _
 	= (Nothing,[])
 
-/*	getTimeIntervalFromTimerTable returns the (Just time) interval that can be waited for the next timer to
-	become active.
+/*	getTimeIntervalFromTimerTable returns the (Just (zerotimer,time)) interval that can be 
+	waited for the next timer to become active. The Boolean zerotimer holds iff the time
+	returned belongs to a zero timer.
 	If there are no timers, then Nothing is returned.
 */
-getTimeIntervalFromTimerTable :: !TimerTable -> Maybe Int
+getTimeIntervalFromTimerTable :: !TimerTable -> Maybe (Bool,Int)
 getTimeIntervalFromTimerTable timers=:[]
 	= Nothing
 getTimeIntervalFromTimerTable timers
 	#! wait	= getSleepTime (2^31-1) timers
 	= Just wait
 where
-	getSleepTime :: !Int ![TimerTableEntry] -> Int
-	getSleepTime sleep [tte=:{tteElapse}:ttes]
+	getSleepTime :: !Int ![TimerTableEntry] -> (Bool,Int)
+	getSleepTime sleep [tte=:{tteElapse,tteInterval}:ttes]
 		| tteElapse<=0
-			= 0
+			= (tteInterval==0,0)
 		| otherwise
 			= getSleepTime (min sleep tteElapse) ttes
 	getSleepTime sleep _
-		= sleep
+		= (False,sleep)
