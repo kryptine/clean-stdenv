@@ -12,9 +12,9 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	example_calc3
+ 	calcEditor
  	world  
-
+/*
 example_calc	= startCircuit (feedback (edit "Calculator" >>@ update_calc)) calculator
 where
 	calculator	= 	zero  	   <|> 
@@ -33,7 +33,7 @@ where
 	operators 	= [(+),(-),(*)]
 	whichopper buttons operators = [x \\ (Pressed,x) <- (zip2 buttons operators)]
 
-
+*/
 :: ButtonEditor 	:== [(String,AGEC (Int Int -> Int))]
 :: MyButtonFuns 	:== ([Button],[Int Int -> Int])
 
@@ -74,10 +74,12 @@ initCalculator mem ival (mybuttons,myfunctions)
 	   intcalcAGEC ival <|>
 	   horlistAGEC mybuttons, hidAGEC (mybuttons,myfunctions))		
 
-//myCalculator :: GecCircuit myCalculatorType myCalculatorType
+//myCalculator :: GecCircuit myCalculatorType myCalculatorType // BUG
+myCalculator :: GecCircuit ((<|> Int (<|> (AGEC Int) (AGEC [Button]))),AGEC MyButtonFuns) ((<|> Int (<|> (AGEC Int) (AGEC [Button]))),AGEC MyButtonFuns)
 myCalculator =  feedback (edit "calculator" >>@ updateCalculator)
 							 
-//updateCalculator :: myCalculatorType -> myCalculatorType
+//updateCalculator :: myCalculatorType -> myCalculatorType // BUG 
+//updateCalculator :: ((<|> Int (<|> (AGEC Int) (AGEC [Button]))),AGEC MyButtonFuns) -> ((<|> Int (<|> (AGEC Int) (AGEC [Button]))),AGEC MyButtonFuns)
 updateCalculator((mem <|> i <|> buttons),butsfun) = initCalculator nmem ni (^^ butsfun)
 where
 	(nmem,ni)	= case whichopper (^^ buttons) fun of
