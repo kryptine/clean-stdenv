@@ -4,7 +4,7 @@ import StdEnv
 import StdGEC, StdGECExt, StdAGEC, StdDynamicGEC
 import StdGecComb
 import StdDynamic
-import EstherInterFace
+import EstherInterFace, basicAGEC
 
 // TO TEST JUST REPLACE THE EXAMPLE NAME IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
 // ALL EXAMPLES HAVE TO BE OF FORM pst -> pst
@@ -15,7 +15,7 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	test5
+ 	test7
  	world  
 
 //testX = CGEC (gecEdit "test")  (dynamicGEC 23)
@@ -89,7 +89,7 @@ where
 derive gMap MyRecord3
 derive gGEC MyRecord3
 
-/*test4 = CGEC (selfGEC "self" convert) (mapTo init)	
+test4 = CGEC (selfGEC "self" convert) (mapTo init)	
 where
 	init = 	{ val1	= 0.0
 			, val2	= 0.0
@@ -102,7 +102,7 @@ where
 	mapFrom agec  	= gMap {|* -> * -> * -> *|} (^^) (^^) (^^) agec
 	mapTo val 		= gMap {|* -> * -> * -> *|} counterGEC dynamicGEC (modeGEC o Display) val
 
-*/
+
 :: Counter a = Counter (AGEC a)
 
 test5 = CGEC (selfGEC "self" id) (mkAGECs (counterGEC) (dynamicGEC) init)	
@@ -126,3 +126,27 @@ mkAGECs  ageca agecb tab
 where
 	mapFrom agec  	= gMap {|* -> * -> *|} (^^) (^^) agec
 	mapTo val 		= gMap {|* -> * -> *|} ageca agecb  val
+
+
+:: X a = X a
+derive gGEC X
+
+//test7 = CGEC (selfGEC "self" convert2) (mapto2 init) //(mapTo init)	
+test7 = CGEC (selfGEC "self" mapto2) init //(mapTo init)	
+where
+	init = 	X (3,(idGEC [1..3]))
+
+	mapto2 (X (n,list`)) = if (isEven (length list)) (X (n,(idGEC  (mytest list)))) 
+												 (X (n,(horlistGEC (mytest list))))
+	where
+		list = ^^ list`											
+
+	convert2 list = list
+	
+	mytest [x:xs] = [x+1,x:xs]
+	mytest [] = [1]
+		
+	convert = mapTo o mytest o mapFrom
+
+	mapFrom agec  	= gMap {|* -> * |} (^^) agec
+	mapTo val 		= gMap {|* -> * |} horlistGEC val

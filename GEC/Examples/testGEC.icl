@@ -183,7 +183,9 @@ where
 	incsum rec = {rec & MyRecord.sum = rec.MyRecord.sum ^= (^^ rec.field1 + ^^ rec.field2)}
 
 			
-test5 = CGEC (gecEdit "test") (counterCGEC 23)
+test5 = CGEC (%| (test @| gecEdit "test" |@ (^^)) ) 23
+where
+	test n = if (isEven n) (counterGEC n) (idGEC n)
 
 :: MyRecord a =  { field1:: AGEC a
 				 , field2:: AGEC a
