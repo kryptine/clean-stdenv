@@ -121,6 +121,9 @@ filterOSEvent osdInfo osEvent=:(_,MouseDownEvent,mess,i,h,v,mods) parentActive m
 	# (region,wPtr,tb)				= FindWindow h v tb
 	| region==menuBar
 		# (menuId,itemNr,tb)		= MenuSelect h v tb
+		# (ret,tb)					= ReceivedQuit tb
+		| ret == 1
+			= (True,Nothing,Just ProcessRequestClose,menus,tb)
 		# (ok,deviceEvent,menus,tb) = menuSelection True menuId itemNr mods menus osdInfo tb
 		= (ok,Nothing,deviceEvent,menus,tb)
 	= (False,Nothing,Nothing,menus,tb)
@@ -129,6 +132,9 @@ where
 	inSysWindow				= 2
 
 filterOSEvent _ osEvent=:(_,KeyUpEvent,message,_,_,_,mods) parentActive menus tb
+	# (ret,tb)					= ReceivedQuit tb
+	| ret == 1
+		= (True,Nothing,Just ProcessRequestClose,menus,tb)
 	| commandKeyUp
 		= (False,Nothing,Nothing,menus,tb)
 	# (menuId,itemNr,tb)	= getMenuEvent osEvent tb
@@ -319,3 +325,11 @@ popUpMenuEvent {ospupItem=PopUpTrackedByIndex _ itemNr,ospupModifiers=mods} msH=
 popUpMenuEvent _ _ _
 	= menueventFatalError "popUpMenuEvent" "PopUpTrackedByItemId not expected"
 
+//--
+
+import code from "cae."
+
+ReceivedQuit :: !*OSToolbox -> (!Int,!*OSToolbox)
+ReceivedQuit _ = code {
+	ccall ReceivedQuit ":I:I"
+	}

@@ -1,5 +1,10 @@
+#define CARBON 1
+
 #ifdef __MACH__
 #include <Carbon/Carbon.h>
+#else
+#ifdef CARBON
+#include <Carbon.h>
 #else
 #include <MacTypes.h>
 #include <Files.h>
@@ -8,20 +13,25 @@
 #include <AppleEvents.h>
 #include <AERegistry.h>
 #endif
+#endif
 
 #ifdef __MACH__
 # define NewAEEventHandlerProc(p) NewAEEventHandlerUPP(p)
+#else
+#ifdef CARBON
+# define NewAEEventHandlerProc(p) NewAEEventHandlerUPP(p)
+#endif
 #endif
 
 static char *result_string;
 static int n_free_result_string_characters;
 
-static pascal OSErr DoAEOpenApplication (AppleEvent *theAppleEvent,AppleEvent *replyAppleEvent,long refCon)
+static pascal OSErr DoAEOpenApplication (const AppleEvent *theAppleEvent,AppleEvent *replyAppleEvent,long refCon)
 {
 	return noErr;
 }
 
-static int has_required_parameters (AppleEvent *theAppleEvent)
+static int has_required_parameters (const AppleEvent *theAppleEvent)
 {
 	Size actual_size;
 	DescType returned_type;
@@ -35,7 +45,7 @@ static int has_required_parameters (AppleEvent *theAppleEvent)
 	return r;
 }
 
-static pascal OSErr DoAEOpenDocuments (AppleEvent *theAppleEvent,AppleEvent *replyAppleEvent, long refCon)
+static pascal OSErr DoAEOpenDocuments (const AppleEvent *theAppleEvent,AppleEvent *replyAppleEvent, long refCon)
 {
 	OSErr r;
 	AEDescList document_list;
@@ -103,13 +113,27 @@ static pascal OSErr DoAEOpenDocuments (AppleEvent *theAppleEvent,AppleEvent *rep
 	return r;
 }
 
-static pascal OSErr DoAEPrintDocuments (AppleEvent *theAppleEvent,AppleEvent *replyAppleEvent,long refCon)
+static pascal OSErr DoAEPrintDocuments (const AppleEvent *theAppleEvent,AppleEvent *replyAppleEvent,long refCon)
 {
 	return errAEEventNotHandled;
 }
 
-static pascal OSErr DoAEQuitApplication (AppleEvent *theAppleEvent,AppleEvent *replyAppleEvent,long refCon)
+static int in_handle_apple_event = 0;
+static int received_quit = 0;
+
+int ReceivedQuit(void)
 {
+	return received_quit;
+}
+
+static pascal OSErr DoAEQuitApplication (const AppleEvent *theAppleEvent,AppleEvent *replyAppleEvent,long refCon)
+{
+//	DebugStr("\pDoAEQuitApplication");
+	if (!in_handle_apple_event){
+//		AESend(theAppleEvent,replyAppleEvent,kAENoReply,kAENormalPriority,kAEDefaultTimeout,NULL,NULL);
+		received_quit = 1;
+		return noErr;
+	}
 	if (n_free_result_string_characters>=4){
 		result_string[0]='Q';
 		result_string[1]='U';
@@ -121,12 +145,13 @@ static pascal OSErr DoAEQuitApplication (AppleEvent *theAppleEvent,AppleEvent *r
 	return noErr;
 }
 
-static pascal OSErr DoAEScript (AppleEvent *apple_event,AppleEvent *replyAppleEvent,long refCon)
+static pascal OSErr DoAEScript (const AppleEvent *apple_event,AppleEvent *replyAppleEvent,long refCon)
 {
 	DescType returned_type;
 	long actual_size;
 	int error;
 
+//	DebugStr("\pDoAEScript");
 	if (n_free_result_string_characters>=6){
 		result_string[0]='S';
 		result_string[1]='C';
@@ -151,12 +176,13 @@ static pascal OSErr DoAEScript (AppleEvent *apple_event,AppleEvent *replyAppleEv
 	return error;
 }
 
-static pascal OSErr DoAEApplicationDied (AppleEvent *apple_event,AppleEvent *replyAppleEvent,long refCon)
+static pascal OSErr DoAEApplicationDied (const AppleEvent *apple_event,AppleEvent *replyAppleEvent,long refCon)
 { 
 	DescType returned_type;
 	long actual_size;
 	int error;
 	
+//	DebugStr("\pDoAEApplicationDied");
 	if (n_free_result_string_characters>=7){	
 		result_string[0]='A';
 		result_string[1]='P';
@@ -175,6 +201,7 @@ static pascal OSErr DoAEApplicationDied (AppleEvent *apple_event,AppleEvent *rep
 		result_string+=actual_size;
 	}
 
+//	DebugStr("\pDoAEApplicationDied exit");
 	return error;
 }
 
@@ -185,12 +212,13 @@ static int compiler_exit_code[MAX_N_COMPILERS];
 
 static int n_unknown_finished_compilers=0;
 
-static pascal OSErr DoAEAnswer (AppleEvent *apple_event,AppleEvent *replyAppleEvent,long refCon)
+static pascal OSErr DoAEAnswer (const AppleEvent *apple_event,AppleEvent *replyAppleEvent,long refCon)
 {
 	DescType returned_type;
 	long actual_size;
 	int error;
 
+//	DebugStr("\pDoAEAnswer");
 	if (n_free_result_string_characters>=6){
 		result_string[0]='A';
 		result_string[1]='N';
@@ -283,25 +311,25 @@ int install_apple_event_handlers (void)
 {
 	OSErr r;
 
-	r=AEInstallEventHandler (kCoreEventClass,kAEOpenApplication,NewAEEventHandlerProc (DoAEOpenApplication),0,false);
+	r=AEInstallEventHandler (kCoreEventClass,kAEOpenApplication,NewAEEventHandlerProc (&DoAEOpenApplication),0,false);
 
 	if (r==noErr)
-		r=AEInstallEventHandler (kCoreEventClass,kAEOpenDocuments,NewAEEventHandlerProc (DoAEOpenDocuments),0,false);
+		r=AEInstallEventHandler (kCoreEventClass,kAEOpenDocuments,NewAEEventHandlerProc (&DoAEOpenDocuments),0,false);
 
 	if (r==noErr)
-		r=AEInstallEventHandler (kCoreEventClass,kAEPrintDocuments,NewAEEventHandlerProc (DoAEPrintDocuments),0,false);
+		r=AEInstallEventHandler (kCoreEventClass,kAEPrintDocuments,NewAEEventHandlerProc (&DoAEPrintDocuments),0,false);
 
 	if (r==noErr)
-		r=AEInstallEventHandler (kCoreEventClass,kAEQuitApplication,NewAEEventHandlerProc (DoAEQuitApplication),0,false);
+		r=AEInstallEventHandler (kCoreEventClass,kAEQuitApplication,NewAEEventHandlerProc (&DoAEQuitApplication),0,false);
 	
 	if (r==noErr)
-		r=AEInstallEventHandler (kCoreEventClass,kAEApplicationDied,NewAEEventHandlerProc (DoAEApplicationDied),0,false);
+		r=AEInstallEventHandler (kCoreEventClass,kAEApplicationDied,NewAEEventHandlerProc (&DoAEApplicationDied),0,false);
 	
 	if (r==noErr)
-		r=AEInstallEventHandler (kCoreEventClass,kAEAnswer,NewAEEventHandlerProc (DoAEAnswer),0,false);
+		r=AEInstallEventHandler (kCoreEventClass,kAEAnswer,NewAEEventHandlerProc (&DoAEAnswer),0,false);
 	
 	if (r==noErr)
-		r=AEInstallEventHandler (kAEMiscStandards,kAEDoScript,NewAEEventHandlerProc (DoAEScript),0,false);
+		r=AEInstallEventHandler (kAEMiscStandards,kAEDoScript,NewAEEventHandlerProc (&DoAEScript),0,false);
 			
 	return r;
 }
@@ -311,6 +339,7 @@ int search_appdied_event (void)
 {
 	EventRecord theEvent;
 	
+//	DebugStr("\psearch_appdied_event");
 	if (EventAvail(kHighLevelEvent,&theEvent))
 		return (
 			((*(AEEventID*)&theEvent.where) == kAEApplicationDied) && 
@@ -351,7 +380,10 @@ int handle_apple_event (EventRecord *event_p,long *clean_string)
 	result_string=string;
 	n_free_result_string_characters=string_length;
 
+	in_handle_apple_event = 1;
+//	DebugStr("\phandle_apple_event");
 	AEProcessAppleEvent (event_p);
+	in_handle_apple_event = 0;
 
 	if (result_string!=NULL)
 		string_length=result_string-string;
