@@ -60,29 +60,29 @@ None			:== [NoAttr]
 			| VbScript
 			| Other
 
-:: Script` :== String
+:: SScript :== String
 
 :: FormElementEvents
-			= OnChange		Script`					// run when element changes
-			| OnSubmit		Script					// run when form submitted
-			| OnReset		Script					// run when form is reset
-			| OnSelect		Script					// run when selected
-			| OnBlur		Script					// run when element loses focus
-			| OnFocus		Script					// run when element gets focus
+			= OnChange		SScript					// run when element changes
+			| OnSubmit		SScript					// run when form submitted
+			| OnReset		SScript					// run when form is reset
+			| OnSelect		SScript					// run when selected
+			| OnBlur		SScript					// run when element loses focus
+			| OnFocus		SScript					// run when element gets focus
 
 :: KeyboardEvents
-			= OnKeyDown		Script					// run when key pressed
-			| OnKeyPress	Script					// run when key pressed and released
-			| OnKeyUp		Script					// run when key released
+			= OnKeyDown		SScript					// run when key pressed
+			| OnKeyPress	SScript					// run when key pressed and released
+			| OnKeyUp		SScript					// run when key released
 
 :: MouseEvents
-			= OnClick		Script					// run when mouse clicked
-			| OnDClick		Script					// run when mouse doubleclicked
-			| OnMouseDown	Script					// run when mouse button pressed
-			| OnMouseMove	Script					// run when mouse pointer moves
-			| OnMouseOver	Script					// run when mouse pointer moves over an element
-			| OnMouseOut	Script					// run when mouse pointer moves out of an element
-			| OnMouseUp		Script					// run when mouse button is released
+			= OnClick		SScript					// run when mouse clicked
+			| OnDClick		SScript					// run when mouse doubleclicked
+			| OnMouseDown	SScript					// run when mouse button pressed
+			| OnMouseMove	SScript					// run when mouse pointer moves
+			| OnMouseOver	SScript					// run when mouse pointer moves over an element
+			| OnMouseOut	SScript					// run when mouse pointer moves out of an element
+			| OnMouseUp		SScript					// run when mouse button is released
 
 
 
@@ -138,6 +138,7 @@ None			:== [NoAttr]
 			| Inp_Checked		Checked
 			| Inp_Size 			Int
 			| `Inp_ElemEvnts	FormElementEvents
+			| `Inp_MouseEvnts	MouseEvents
 
 :: Link_Attr = Lnk_Href 		Url
 			| Lnk_Target 		TargetOption

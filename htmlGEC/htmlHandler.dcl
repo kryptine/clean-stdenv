@@ -16,9 +16,22 @@ showClean 	:: a -> Body 			| gHGEC{|*|} a	& gPrint{|*|} a
 
 updClean  	:: a -> a				| gUpd{|*|}  a  & gParse{|*|} a	
 
+// Clean types with a special representation
+
+defsize :== 10															// size of inputfield
+
+:: CHButton = CHPressed | CHButton Int String
+
+derive gHGEC CHButton
+derive gUpd  CHButton
+derive gPrint CHButton
+derive gHpr CHButton
+derive gParse CHButton
+
 // generic stuf ...
 
-:: HSt 		// state to pass around
+:: HSt 		// not yet unique state to pass around
+:: State	// state of the application
 
 // gHGEC converts any Clean type to html code (form) to be used in a body
 
@@ -34,5 +47,5 @@ generic gUpd t :: UpdMode t -> (UpdMode,t)
 
 derive gUpd Int, UNIT, PAIR, EITHER, OBJECT, CONS, (,)
 
-:: State :== (String,String) // (id,global state)
+
 
