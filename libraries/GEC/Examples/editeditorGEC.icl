@@ -16,7 +16,8 @@ Start :: *World -> *World
 Start world 
 = 	goGui editoreditor world  
 
-:: DesignElem 	:== (Type,Editors,Commands)
+:: DesignEditor :== ([(Element,Commands)],Element)
+:: Element 		:== (Type,Editors)
 :: ListIndex	:== Int			
 
 // options of design editor
@@ -37,6 +38,8 @@ Start world
 
 :: Commands	= Insert												// insert element
 			| Delete												// delete element
+			| Copy													// copy   element
+			| Paste													// paste  element
 			| Apply													// function can be applied, hack to avoid evaluation of undefined function
 			| Choose												// noop (default)
 
@@ -45,33 +48,48 @@ Start world
 derive gGEC Type, Editors, Commands, ApplicationElem
 
 editoreditor = CGEC (designeditor |@ convert |>>>| applicationeditor) 
-			   [myinit,myinit,myinit,myinit]
+			   ([myinit,myinit,myinit,myinit],zeroElem)
 where
-	designeditor 		= %| (vertlistGEC @| gecEdit "design" |@ updateDesign o (^^))
+	designeditor 		= %| (vertlistGEC` @| gecEdit "design" |@ updateDesign o unvert)
 
 	applicationeditor 	= %| (vertlistGEC o updateApplication @| gecEdit "user" |@ (^^))
 
+	vertlistGEC` (list,clipboard) = (vertlistGEC list,hidGEC clipboard)
+	unvert (vertlist,clipboard)   = (^^ vertlist,^^ clipboard)
+
 // Initial value of design editor
 
-myinit = (Int_ 0, Identity, Choose)
+myinit 		= (zeroElem, Choose)
+zeroElem 	= (Int_ 0, Identity)
 
 // Update of design editor
+// DesignEditor :== ([((Type,Editors),Commands)],Element)
 
-updateDesign xs = keepone (update xs)
+updateDesign :: DesignEditor -> DesignEditor
+updateDesign (elems,s) =  (keepone (update (paste elems s)),(copy elems s))
 where
 	keepone [] = [myinit]
 	keepone xs = xs
 
-	update [(x,e,Insert):xs] 			= [(x,e,Choose),(x,e,Choose):xs] 
-	update [(x,e,Delete):xs] 			= xs
-
-	update [(F_I_I  ix f,e,Choose):xs] 	= [(F_I_I 	ix 				 (dynamicGEC2 (const 0))  ,e,Apply): xs]
-	update [(F_R_R  ix f,e,Choose):xs]	= [(F_R_R 	ix 				 (dynamicGEC2 (const 0.0)),e,Apply): xs]
-	update [(F_LI_I ix f,e,Choose):xs]	= [(F_LI_I  (dynamicGEC2 []) (dynamicGEC2 (const 0))  ,e,Apply): xs]
-	update [(F_LR_R ix f,e,Choose):xs]	= [(F_LR_R  (dynamicGEC2 []) (dynamicGEC2 (const 0.0)),e,Apply): xs]
-
-	update [xo:xs]  					= [xo:update xs]
-	update []		  					= []
+	copy [(elem,Copy  ):xs] s = elem
+	copy [x:xs] s			  = copy xs s
+	copy [] s				  = s
+	
+	paste [(elem, Paste):xs]s = [(s,Apply):xs]
+	paste [x:xs] s			  = [x: paste xs s]
+	paste [] s				  = []
+	
+	update [(elem,Insert):xs] = [(elem,Choose),(elem,Choose):xs]
+	update [(_   ,Delete):xs] = xs
+	
+	update [((F_I_I  ix f,e),Choose):xs] = [((F_I_I   ix 			  (dynamicGEC2 (const 0))  ,e),Apply): xs]
+	update [((F_R_R  ix f,e),Choose):xs] = [((F_R_R   ix 			  (dynamicGEC2 (const 0.0)),e),Apply): xs]
+	update [((F_LI_I ix f,e),Choose):xs] = [((F_LI_I (dynamicGEC2 []) (dynamicGEC2 (const 0))  ,e),Apply): xs]
+	update [((F_LR_R ix f,e),Choose):xs] = [((F_LR_R (dynamicGEC2 []) (dynamicGEC2 (const 0.0)),e),Apply): xs]
+	
+	update [(x,Apply): xs] = [(x,Apply):update xs]
+	update [(x,_): xs]     = [(x,Choose):update xs]
+	update []      = []
 
 // type of application editor element
 
@@ -86,19 +104,20 @@ where
 
 // turn design editor info in working user application editor
 
-convert list = map toT2 list
+convert :: DesignEditor -> [ApplicationElem]
+convert designeditor = map toAppl (fst designeditor)
 where
-	toT2 (Int_ i,Calculator,_)  	= AInt_		(intcalcGEC i)
-	toT2 (Int_ i,agec,_)	 	 	= AInt_ 	(chooseAGEC agec i)
-	toT2 (Real_ r,Calculator,_)	 	= AReal_  	(realcalcGEC r)
-	toT2 (Real_ r,agec,_)	 	 	= AReal_	(chooseAGEC agec r)
-	toT2 (String_ s,Displayval,_)	= AString_ 	(showGEC s)
-	toT2 (String_ s,_,_)			= AString_ 	(idGEC s)
-	toT2 (F_I_I i f,_,_)	 		= AF_I_I  	(showGEC "") (hidGEC (^^ f, i))
-	toT2 (F_R_R r f,_,_)	 		= AF_R_R  	(showGEC "") (hidGEC (^^ f, r))
-	toT2 (F_LI_I i f,_,_)	 		= AF_LI_I  	(showGEC "") (hidGEC (^^ f, ^^ i))
-	toT2 (F_LR_R r f,_,_)	 		= AF_LR_R  	(showGEC "") (hidGEC (^^ f, ^^ r))
-	toT2 _					 		= AString_ 	(showGEC "not implemented")
+	toAppl ((Int_ i,Calculator),   _)	= AInt_		(intcalcGEC i)
+	toAppl ((Int_ i,agec),         _)	= AInt_ 	(chooseAGEC agec i)
+	toAppl ((Real_ r,Calculator),  _)	= AReal_  	(realcalcGEC r)
+	toAppl ((Real_ r,agec),        _)	= AReal_	(chooseAGEC agec r)
+	toAppl ((String_ s,Displayval),_)	= AString_ 	(showGEC s)
+	toAppl ((String_ s,_),         _)	= AString_ 	(idGEC s)
+	toAppl ((F_I_I i f,_),         _)	= AF_I_I  	(showGEC "") (hidGEC (^^ f, i))
+	toAppl ((F_R_R r f,_),         _)	= AF_R_R  	(showGEC "") (hidGEC (^^ f, r))
+	toAppl ((F_LI_I i f,_),        _)	= AF_LI_I  	(showGEC "") (hidGEC (^^ f, ^^ i))
+	toAppl ((F_LR_R r f,_),        _)	= AF_LR_R  	(showGEC "") (hidGEC (^^ f, ^^ r))
+	toAppl _					 		= AString_ 	(showGEC "not implemented")
 
 	chooseAGEC Counter 		= counterGEC
 	chooseAGEC Displayval 	= showGEC
@@ -107,6 +126,7 @@ where
 
 // the handling of the application editor boils down to applying all defined functions like in a spreadsheet ...
 
+updateApplication :: [ApplicationElem] -> [ApplicationElem]
 updateApplication list = map updatefun list
 where
 	updatefun (AF_I_I  _ fi) = AF_I_I  (showIFUN (applyfii  fi)) fi
@@ -164,6 +184,8 @@ where
 
 // small auxilery functions
 
-showGEC i = (modeGEC (Display i))
+showGEC i = (modeGEC (Display ( i)))
+
+strip s = { ns \\ ns <-: s | ns >= '\020' && ns <= '\0200'}	
 
 ToString v = toString v +++ " "
