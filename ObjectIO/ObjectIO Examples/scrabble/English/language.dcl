@@ -2,8 +2,8 @@ definition module language
 
 
 import	StdList, StdArray, _SystemArray, StdEnum
-import	deltaTimer, deltaSystem
-import	types
+import	StdIOCommon, StdSystem, StdTime
+import	board
 
 
 /*	This module contains macro's to make the scrabble application language customisable.
@@ -11,11 +11,11 @@ import	types
 
 //	The filename of the lexicon:
 
-lexiconfilename	:==	toString DirSeparator+++"English"+++toString DirSeparator+++"English_lexicon"
+lexiconfilename	:==	toString dirseparator+++"English"+++toString dirseparator+++"English_lexicon"
 
 //	The filename of the help file:
 
-helpfilename	:==	toString DirSeparator+++"English"+++toString DirSeparator+++"ScrabbleHelp"
+helpfilename	:==	toString dirseparator+++"English"+++toString dirseparator+++"ScrabbleHelp"
 
 
 //	The set of letters used in the scrabble game.
@@ -87,7 +87,7 @@ scrabbledialogdirection	:==	"Direction"
 scrabbledialogplaceword	:==	"Place Word"
 scrabbledialoginittext lexicon
 	:==	[	"Number of read words: "
-		,	toString (sizetree lexicon)
+		,	toString (sizeDictionary lexicon)
 		,	wait (2*ticksPerSecond) ""
 		]
 

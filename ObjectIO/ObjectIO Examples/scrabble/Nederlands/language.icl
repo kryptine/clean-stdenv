@@ -124,10 +124,10 @@ scrabbledialoginittext lexicon
 		]
 
 //	The Add Words dialog:
-addwordstitle			:==	"Toevoegen"
 addwordsheading nr
 	:==	if (nr==1)	("Woord komt niet voor.",	"Wil je het woord toevoegen?")
 					("Woorden komen niet voor.","Wil je de woorden toevoegen?")
+addwordstitle			:==	"Toevoegen"
 addwords_yes			:==	"Ja"
 addwords_no				:==	"Nee"
 

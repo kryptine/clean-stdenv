@@ -3,7 +3,7 @@ implementation module types
 
 import	StdEnv, StdDebug, StdIOCommon
 import	dictionary, language
-import StdDebug
+
 
 /***************************************************************************************************************
 	Type definitions.
