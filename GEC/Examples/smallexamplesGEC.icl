@@ -4,6 +4,7 @@ import StdEnv
 import StdIO
 import genericgecs
 import StdGEC, StdGECExt, StdAGEC
+import basicAGEC, examplesAGEC
 import StdGecComb
 
 // TO TEST JUST REPLACE THE EXAMPLE NAME IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
