@@ -40,7 +40,7 @@ where
 
 derive gGEC MoreOrLess
 
-derive generate Button, MoreOrLess
+derive generate MoreOrLess
 
 calcEditor	= startCircuit (designButtons >>@ convert >>> myCalculator) init
 where

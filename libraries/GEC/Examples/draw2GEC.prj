@@ -142,17 +142,17 @@ OtherModules
 			ReuseUniqueNodes:	True
 		Dcl
 			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+				X:	10
+				Y:	10
+				SizeX:	800
+				SizeY:	640
 		DclOpen:	False
 		Icl
 			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+				X:	10
+				Y:	10
+				SizeX:	800
+				SizeY:	640
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -226,17 +226,17 @@ OtherModules
 			ReuseUniqueNodes:	True
 		Dcl
 			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+				X:	10
+				Y:	10
+				SizeX:	800
+				SizeY:	640
 		DclOpen:	False
 		Icl
 			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+				X:	10
+				Y:	10
+				SizeX:	800
+				SizeY:	640
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1096,8 +1096,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	728
+				SizeY:	358
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -1296,6 +1296,25 @@ OtherModules
 				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cCrossCallWindows_121.obj
+			ObjectFile:	cCrossCallProcedureTable_121.obj
+			ObjectFile:	cCrossCallCursor_121.obj
+			ObjectFile:	cCrossCall_121.obj
+			ObjectFile:	cCCallSystem_121.obj
+			ObjectFile:	cCCallWindows_121.obj
+			ObjectFile:	cAcceleratorTable_121.obj
+		NeededLibraries
+			Library:	userExt_library
+			Library:	gdiExt_library
+			Library:	kernelExt_library
+			Library:	winspool_library
+			Library:	winmm_library
+			Library:	shell32_library
+			Library:	ole32_library
+			Library:	kernel32_library
+			Library:	comctl32_library
+			Library:	advapi32_library
 	Module
 		Name:	pictCCall_12
 		Dir:	{Application}\Libraries\ObjectIO\OS Windows
@@ -1453,8 +1472,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	797
+				SizeY:	445
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -1612,6 +1631,14 @@ OtherModules
 				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	util_121.obj
+			ObjectFile:	cpicture_121.obj
+			ObjectFile:	cdebug_121.obj
+			ObjectFile:	cCrossCall_121.obj
+			ObjectFile:	cCrossCallWindows_121.obj
+			ObjectFile:	cCCallWindows_121.obj
+			ObjectFile:	cCCallSystem_121.obj
 	Module
 		Name:	osactivaterequests
 		Dir:	{Application}\Libraries\ObjectIO\OS Windows
@@ -1698,6 +1725,8 @@ OtherModules
 				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cCrossCallxDI_121.obj
 	Module
 		Name:	ostoolbar
 		Dir:	{Application}\Libraries\ObjectIO\OS Windows
@@ -1785,6 +1814,9 @@ OtherModules
 				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cpicture_121.obj
+			ObjectFile:	cCCallWindows_121.obj
 	Module
 		Name:	windowCrossCall_12
 		Dir:	{Application}\Libraries\ObjectIO\OS Windows
@@ -2173,8 +2205,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	760
+				SizeY:	399
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2222,8 +2254,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	806
+				SizeY:	485
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -2431,6 +2463,8 @@ OtherModules
 				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cCrossCallMenus_121.obj
 	Module
 		Name:	timerhandle
 		Dir:	{Application}\Libraries\ObjectIO
@@ -2825,6 +2859,8 @@ OtherModules
 				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cCrossCallFileSelectors_121.obj
 	Module
 		Name:	ostick
 		Dir:	{Application}\Libraries\ObjectIO\OS Windows
@@ -2910,7 +2946,7 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
-		Name:	StdProcess
+		Name:	StdSystem
 		Dir:	{Application}\Libraries\ObjectIO
 		Compiler
 			NeverMemoryProfile:	False
@@ -3402,15 +3438,15 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	738
+				SizeY:	491
 		DclOpen:	False
 		Icl
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	775
+				SizeY:	469
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3723,6 +3759,8 @@ OtherModules
 				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cCrossCallClipboard_121.obj
 	Module
 		Name:	osprint
 		Dir:	{Application}\Libraries\ObjectIO\OS Windows
@@ -3782,6 +3820,9 @@ OtherModules
 				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cprinter_121.obj
+			ObjectFile:	cCrossCallPrinter_121.obj
 	Module
 		Name:	controlvalidate
 		Dir:	{Application}\Libraries\ObjectIO
@@ -3939,15 +3980,15 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	828
+				SizeY:	500
 		DclOpen:	False
 		Icl
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	807
+				SizeY:	385
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -5003,15 +5044,15 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	767
+				SizeY:	422
 		DclOpen:	False
 		Icl
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	721
+				SizeY:	575
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -5346,8 +5387,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	768
+				SizeY:	532
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -5458,8 +5499,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	821
+				SizeY:	525
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -5665,7 +5706,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -5675,15 +5716,15 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	902
+				SizeY:	389
 		DclOpen:	False
 		Icl
 			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+				X:	32
+				Y:	43
+				SizeX:	866
+				SizeY:	474
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -6169,21 +6210,31 @@ Static
 		Path:	{Application}\Libraries\StdEnv
 		Path:	{Application}\Libraries\StdLib
 		Path:	{Application}\Libraries\ObjectIO
-		Path:	{Application}\Libraries\ObjectIO\OS Windows
+		Path:	{Application}\Libraries\ObjectIOExtensions
+		Path:	{Application}\Libraries\Generics
+		Path:	{Application}\Libraries\Dynamics
+		Path:	{Application}\Libraries\Dynamics\implementation\windows
+		Path:	{Application}\Libraries\Gast
+		Path:	{Application}\Libraries\StdGEC
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation
+		Path:	{Application}\Libraries\Hilde
+		Path:	{Application}\Libraries\Hilde\OS Windows
+		Path:	{Application}\Libraries\Hilde\OS Windows\NoDynamicFileSystem
+		Path:	{Application}\Libraries\Hilde\OS Windows\Foreign
+		Path:	{Application}\Libraries\Hilde\Parser combinators 2002
+		Path:	{Application}\Libraries\Hilde\WrapDebugClosures
+		Path:	{Application}\Libraries\ArgEnvWindows
 		Path:	{Application}\Libraries\Directory
+		Path:	{Application}\Libraries\ExceptionsWindows
+		Path:	{Application}\Libraries\ExtendedArith
+		Path:	{Application}\Libraries\MersenneTwister
+		Path:	{Application}\Libraries\Tcp
+		Path:	{Application}\Libraries\WrapDebug
+		Path:	{Application}\Libraries\ObjectIO\OS Windows
 		Path:	{Application}\Libraries\Dynamics\extension
 		Path:	{Application}\Libraries\Dynamics\general
 		Path:	{Application}\Libraries\Dynamics\implementation
-		Path:	{Application}\Libraries\Dynamics\implementation\windows
-		Path:	{Application}\Libraries\Generics
-		Path:	{Application}\Libraries\ArgEnvWindows
-		Path:	{Application}\Libraries\Gast
-		Path:	{Application}\Libraries\Directory
-		Path:	{Application}\Libraries\Tcp
-		Path:	{Application}\Libraries\ExceptionsWindows
-		Path:	{Application}\Libraries\MersenneTwister
-		Path:	{Application}\Libraries\WrapDebug
-		Path:	{Application}\Libraries\ExtendedArith\ExtendedArith
+		Path:	{Application}\Examples\ObjectIO Examples\gui utilities
 		Path:	{Application}\Libraries\GameLib
-	AppP:	C:\Clean 2.1.1a3
-	PrjP:	D:\My Documents\GEC\Examples
+	AppP:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0
+	PrjP:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Examples

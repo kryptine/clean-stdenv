@@ -6735,42 +6735,42 @@ Static
 		Path:	{Application}\Libraries\ObjectIO\timerdefaccess.icl
 		Path:	{Application}\Libraries\ObjectIO\timerdevice.icl
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\timerevent.icl
-		Path:	D:\My Documents\GEC\GEC Implementation\genericgecs.icl
-		Path:	D:\My Documents\GEC\GEC Implementation\gec.icl
-		Path:	D:\My Documents\GEC\GEC Implementation\guiloc.icl
-		Path:	D:\My Documents\GEC\GEC Implementation\objectloc.icl
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\genericgecs.icl
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\gec.icl
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\guiloc.icl
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\objectloc.icl
 		Path:	{Application}\Libraries\Generics\GenEq.icl
 		Path:	{Application}\Libraries\StdEnv\StdGeneric.icl
 		Path:	{Application}\Libraries\Generics\GenPrint.icl
-		Path:	D:\My Documents\GEC\GEC Implementation\parseprint.icl
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\parseprint.icl
 		Path:	{Application}\Libraries\Generics\GenParse.icl
-		Path:	D:\My Documents\GEC\GEC Implementation\guigecs.icl
-		Path:	D:\My Documents\GEC\GEC Implementation\StdObjectIOExt.icl
-		Path:	D:\My Documents\GEC\ObjectIOExtensions\ColourTextControl.icl
-		Path:	D:\My Documents\GEC\GEC Implementation\StdBimap.icl
-		Path:	D:\My Documents\GEC\GEC Implementation\infragecs.icl
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\guigecs.icl
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\StdObjectIOExt.icl
+		Path:	{Application}\Libraries\ObjectIOExtensions\ColourTextControl.icl
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\StdBimap.icl
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\infragecs.icl
 		Path:	{Application}\Libraries\Gast\testable.icl
 		Path:	{Application}\Libraries\Gast\genLibTest.icl
 		Path:	{Application}\Libraries\Gast\stdProperty.icl
 		Path:	{Application}\Libraries\MersenneTwister\MersenneTwister.icl
 		Path:	{Application}\Libraries\StdEnv\StdDebug.icl
-		Path:	D:\My Documents\GEC\GEC Implementation\GenDefault.icl
-		Path:	D:\My Documents\GEC\GEC Implementation\TRACE.icl
-		Path:	{Application}\Libraries\WrapDebug\Debug.icl
-		Path:	{Application}\Libraries\WrapDebug\Wrap.icl
-		Path:	{Application}\Libraries\WrapDebug\ShowWrapped.icl
-		Path:	D:\My Documents\GEC\GEC Implementation\StdGEC.icl
-		Path:	D:\My Documents\GEC\GEC Implementation\StdGECExt.icl
-		Path:	D:\My Documents\GEC\GecArrow.icl
-		Path:	D:\My Documents\GEC\StdAGEC.icl
-		Path:	D:\My Documents\GEC\tupleAGEC.icl
-		Path:	D:\My Documents\GEC\basicAGEC.icl
-		Path:	D:\My Documents\GEC\modeAGEC.icl
-		Path:	D:\My Documents\GEC\buttonAGEC.icl
-		Path:	D:\My Documents\GEC\updownAGEC.icl
-		Path:	D:\My Documents\GEC\GEC Implementation\store.icl
-		Path:	D:\My Documents\GEC\calcAGEC.icl
-		Path:	D:\My Documents\GEC\dynamicAGEC.icl
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\GenDefault.icl
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\TRACE.icl
+		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Debug.icl
+		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Wrap.icl
+		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\ShowWrapped.icl
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\StdGEC.icl
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\StdGECExt.icl
+		Path:	{Application}\Libraries\StdGEC\GecArrow.icl
+		Path:	{Application}\Libraries\StdGEC\StdAGEC.icl
+		Path:	{Application}\Libraries\StdGEC\tupleAGEC.icl
+		Path:	{Application}\Libraries\StdGEC\basicAGEC.icl
+		Path:	{Application}\Libraries\StdGEC\modeAGEC.icl
+		Path:	{Application}\Libraries\StdGEC\buttonAGEC.icl
+		Path:	{Application}\Libraries\StdGEC\updownAGEC.icl
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\store.icl
+		Path:	{Application}\Libraries\StdGEC\calcAGEC.icl
+		Path:	{Application}\Libraries\StdGEC\dynamicAGEC.icl
 		Path:	{Application}\Libraries\Dynamics\extension\StdDynamic.icl
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\DynamicGraphConversion.icl
 		Path:	{Application}\Libraries\Dynamics\implementation\StdDynamicTypes.icl
@@ -6787,20 +6787,20 @@ Static
 		Path:	{Application}\Libraries\Dynamics\implementation\DynID.icl
 		Path:	{Application}\Libraries\Dynamics\general\md5.icl
 		Path:	{Application}\Libraries\StdLib\StdArrayExtensions.icl
-		Path:	D:\My Documents\GEC\GEC Implementation\EstherInterFace.icl
-		Path:	D:\My Documents\Hilde\EstherBackend.icl
-		Path:	D:\My Documents\Hilde\EstherParser.icl
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\EstherInterFace.icl
+		Path:	{Application}\Libraries\Hilde\EstherBackend.icl
+		Path:	{Application}\Libraries\Hilde\EstherParser.icl
 		Path:	{Application}\Libraries\ExceptionsWindows\StdException.icl
-		Path:	D:\My Documents\Hilde\Parser combinators 2002\StdParsComb.icl
-		Path:	D:\My Documents\Hilde\EstherPostParser.icl
-		Path:	D:\My Documents\Hilde\EstherTransform.icl
-		Path:	D:\My Documents\Hilde\CleanTricks.icl
-		Path:	D:\My Documents\Hilde\EstherScript.icl
-		Path:	D:\My Documents\Hilde\DynamicFileSystem.icl
-		Path:	D:\My Documents\Hilde\OS Windows\Windows.icl
-		Path:	D:\My Documents\Hilde\Marshall.icl
-		Path:	D:\My Documents\Hilde\EstherStdEnv.icl
-		Path:	D:\My Documents\GEC\GEC Implementation\StdArrow.icl
+		Path:	{Application}\Libraries\Hilde\Parser combinators 2002\StdParsComb.icl
+		Path:	{Application}\Libraries\Hilde\EstherPostParser.icl
+		Path:	{Application}\Libraries\Hilde\EstherTransform.icl
+		Path:	{Application}\Libraries\Hilde\CleanTricks.icl
+		Path:	{Application}\Libraries\Hilde\EstherScript.icl
+		Path:	{Application}\Libraries\Hilde\DynamicFileSystem.icl
+		Path:	{Application}\Libraries\Hilde\OS Windows\Windows.icl
+		Path:	{Application}\Libraries\Hilde\Marshall.icl
+		Path:	{Application}\Libraries\Hilde\EstherStdEnv.icl
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation\StdArrow.icl
 	Objs
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup0.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup1Trace.o
@@ -6902,12 +6902,13 @@ Static
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdProcess.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\processdevice.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menudevice.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\menuevent.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menucreate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuElementClass.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menudefaccess.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiverDef.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuAttribute.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuElementClass.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuaccess.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menudefaccess.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\menuevent.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menucreate.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\sdisize.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\oswindow.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowaccess.o
@@ -6918,9 +6919,8 @@ Static
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowclipstate.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\wstateaccess.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiveraccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiverDef.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverdefaccess.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiverAttribute.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverdefaccess.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\menuwindowmenu.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\processevent.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\toolbar.o
@@ -6929,12 +6929,12 @@ Static
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\clipboardCrossCall_12.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPrint.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osprint.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdWindow.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControlClass.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlvalidate.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowvalidate.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controllayout.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\layout.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdWindow.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlpos.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlrelayout.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\relayout.o
@@ -6987,6 +6987,8 @@ Static
 		Path:	D:\My Documents\GEC\GEC Implementation\Clean System Files\infragecs.o
 		Path:	{Application}\Libraries\Gast\Clean System Files\testable.o
 		Path:	{Application}\Libraries\Gast\Clean System Files\genLibTest.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
+		Path:	{Application}\Libraries\Generics\Clean System Files\GenEq.o
 		Path:	{Application}\Libraries\Gast\Clean System Files\stdProperty.o
 		Path:	{Application}\Libraries\MersenneTwister\Clean System Files\MersenneTwister.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
@@ -7072,7 +7074,7 @@ Static
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\userExt_library
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\gdiExt_library
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\kernelExt_library
-		Path:	D:\My Documents\Hilde\OS Windows\Clean System Files\windowsKERNEL32_library
+		Path:	{Application}\Libraries\Hilde\OS Windows\Clean System Files\windowsKERNEL32_library
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\winspool_library
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\winmm_library
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\shell32_library
@@ -7092,21 +7094,31 @@ Static
 		Path:	{Application}\Libraries\StdEnv
 		Path:	{Application}\Libraries\StdLib
 		Path:	{Application}\Libraries\ObjectIO
-		Path:	{Application}\Libraries\ObjectIO\OS Windows
+		Path:	{Application}\Libraries\ObjectIOExtensions
+		Path:	{Application}\Libraries\Generics
+		Path:	{Application}\Libraries\Dynamics
+		Path:	{Application}\Libraries\Dynamics\implementation\windows
+		Path:	{Application}\Libraries\Gast
+		Path:	{Application}\Libraries\StdGEC
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation
+		Path:	{Application}\Libraries\Hilde
+		Path:	{Application}\Libraries\Hilde\OS Windows
+		Path:	{Application}\Libraries\Hilde\OS Windows\NoDynamicFileSystem
+		Path:	{Application}\Libraries\Hilde\OS Windows\Foreign
+		Path:	{Application}\Libraries\Hilde\Parser combinators 2002
+		Path:	{Application}\Libraries\Hilde\WrapDebugClosures
+		Path:	{Application}\Libraries\ArgEnvWindows
 		Path:	{Application}\Libraries\Directory
+		Path:	{Application}\Libraries\ExceptionsWindows
+		Path:	{Application}\Libraries\ExtendedArith
+		Path:	{Application}\Libraries\MersenneTwister
+		Path:	{Application}\Libraries\Tcp
+		Path:	{Application}\Libraries\WrapDebug
+		Path:	{Application}\Libraries\ObjectIO\OS Windows
 		Path:	{Application}\Libraries\Dynamics\extension
 		Path:	{Application}\Libraries\Dynamics\general
 		Path:	{Application}\Libraries\Dynamics\implementation
-		Path:	{Application}\Libraries\Dynamics\implementation\windows
-		Path:	{Application}\Libraries\Generics
-		Path:	{Application}\Libraries\ArgEnvWindows
-		Path:	{Application}\Libraries\Gast
-		Path:	{Application}\Libraries\Directory
-		Path:	{Application}\Libraries\Tcp
-		Path:	{Application}\Libraries\ExceptionsWindows
-		Path:	{Application}\Libraries\MersenneTwister
-		Path:	{Application}\Libraries\WrapDebug
-		Path:	{Application}\Libraries\ExtendedArith\ExtendedArith
+		Path:	{Application}\Examples\ObjectIO Examples\gui utilities
 		Path:	{Application}\Libraries\GameLib
-	AppP:	C:\Clean 2.1.1a3
-	PrjP:	D:\My Documents\GEC\Examples
+	AppP:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0
+	PrjP:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Examples
