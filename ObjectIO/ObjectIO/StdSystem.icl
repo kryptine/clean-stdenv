@@ -18,7 +18,7 @@ applicationpath :: !String -> String
 applicationpath fname = osApplicationpath fname
 
 // MW11++
-newlineChars :: !String
+newlineChars :: String
 newlineChars = OSnewlineChars
 
 //	System dependencies concerning the time resolution

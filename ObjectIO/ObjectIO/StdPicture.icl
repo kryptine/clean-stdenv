@@ -319,7 +319,7 @@ instance toRegion (:^: area1 area2)	| toRegion area1 & toRegion area2 where
 	toRegion (r1 :^: r2) = toRegion r1 + toRegion r2
 
 instance zero Region where
-	zero :: !Region
+	zero :: Region
 	zero = {region_shape=[],region_bound=zero}
 instance + Region where
 	(+) :: !Region !Region -> Region

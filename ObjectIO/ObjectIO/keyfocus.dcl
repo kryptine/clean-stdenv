@@ -26,9 +26,10 @@ copyKeyFocus				:: !*KeyFocus								-> (!KeyFocus,!*KeyFocus)
 /* DvA: unused?
 openFocusItems				:: !(Maybe Int) !*[FocusItem]	!*KeyFocus	-> *KeyFocus
 closeFocusItems				:: ![Int]						!*KeyFocus	-> *KeyFocus
+*/
 showFocusItems				:: ![Int]						!*KeyFocus	-> *KeyFocus
 hideFocusItems				:: ![Int]						!*KeyFocus	-> *KeyFocus
-*/
+
 getCurrentFocusItem			::								!*KeyFocus	-> (!Maybe Int,!*KeyFocus)
 setNoFocusItem				::								!*KeyFocus	-> *KeyFocus
 setNewFocusItem				:: !Int							!*KeyFocus	-> *KeyFocus

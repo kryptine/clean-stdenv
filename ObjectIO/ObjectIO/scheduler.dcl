@@ -25,7 +25,7 @@ from	StdProcessDef	import :: DocumentInterface, :: ProcessInit
 	=	{	envsEvents		:: !*OSEvents
 		,	envsWorld		:: !*World
 		}
-::	*Context
+::	*Context	// DvA: can be made abstract if we move modalDialogExists from windowcreate to here...
 	=	{	cEnvs			:: !*Environs			// The global environments
 		,	cProcessStack	:: !ProcessStack		// The global process stack
 		,	cMaxIONr		:: !SystemId			// The global maximum system number

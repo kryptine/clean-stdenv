@@ -144,7 +144,7 @@ where
 		(hasTip,tipAtt)			= cselect isControlTip undef itemH.wItemAtts
 		isEditable				= contains isControlKeyboard itemH.wItemAtts
 		
-		appendPopUp :: !OSWindowPtr !(Maybe !OSWindowPtr) !Index !(PopUpControlItem .pst) !(!Int,!*OSToolbox) -> (!Int,!*OSToolbox)
+		appendPopUp :: !OSWindowPtr !(Maybe OSWindowPtr) !Index !(PopUpControlItem .pst) !(!Int,!*OSToolbox) -> (!Int,!*OSToolbox)
 		appendPopUp popUpPtr editPtr index (title,_) (itemNr,tb)
 			# (_,tb)			= osCreatePopUpControlItem popUpPtr editPtr (-1) ableContext title (index==itemNr) itemNr tb
 			= (itemNr+1,tb)

@@ -11,7 +11,7 @@ definition module wstateaccess
 
 
 import	wstate
-from	keyfocus	import :: FocusItem
+//from	keyfocus	import :: FocusItem
 
 
 setWElements				:: (WItemHandle` *([arg],.s) -> (WItemHandle`,*([arg],.s)))    ![WElementHandle`] !*(![arg],!.s)
@@ -22,7 +22,7 @@ setWElement					:: (  Id  WItemHandle` .s -> *( Bool,WItemHandle`,.s))   !Id  ![
 																			  -> *(!Bool, ![WElementHandle`],!.s)
 setWItemHandle				:: (      WItemHandle` .s -> *( Bool,WItemHandle`,.s))        ![WElementHandle`] !.s
 																			  -> *(!Bool, ![WElementHandle`],!.s)
-getWElementKeyFocusIds`		:: !Bool ![WElementHandle`] -> [FocusItem]
+//getWElementKeyFocusIds`		:: !Bool ![WElementHandle`] -> [FocusItem]
 
 
 instance == WRecursiveKind

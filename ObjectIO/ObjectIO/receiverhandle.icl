@@ -20,7 +20,7 @@ import	ostoolbox
 		,	rSelect		:: SelectState					// The current SelectState of the receiver
 		,	rOneWay		:: Bool							// Flag: True iff receiver is uni-directional
 		,	rFun		:: RHandleFunction ls m r pst	// If rOneWay then [r]==[], otherwise [r]==[_]
-		,	rInetInfo	:: !Maybe (!EndpointRef`,!InetReceiverCategory`,!Int,!IdFun !*OSToolbox)
+		,	rInetInfo	:: !Maybe (EndpointRef`,InetReceiverCategory`,Int,IdFun *OSToolbox)
 														// For internet receivers
 		,	rConnected	:: ![Id]						// storing the argument of the ReceiverCloseAlsoReceivers attribute
 		}

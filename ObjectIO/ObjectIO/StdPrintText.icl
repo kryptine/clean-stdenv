@@ -60,7 +60,7 @@ where
     lastCh			:: !Char,		// contains the last character, that was read via freadLineP or evtlSkipLine
     pageNo			:: !Int,		// actual page number
     noDoneCopies	:: !Int,		// # copies done yet
-	firstPageState	:: Maybe !FirstPageState,
+	firstPageState	:: Maybe FirstPageState,
     rO				:: !ReadOnly userInfo	
     								// these values won't be altered 
   }
@@ -90,7 +90,7 @@ where
     printableSet	:: !{#Bool},	// this array represents the set of all printable characters in the font
     topBsLn			:: !Int,		// first baseline of a page
     maxBsLn			:: !Int,		// text won't be drawn below this baseline 
-    eachPageDrawFunc:: userInfo !Int !*Picture -> *Picture,
+    eachPageDrawFunc:: userInfo Int *Picture -> *Picture,
 	wrapMode		:: !WrapMode,	// eachPageDrawFunc, wrapMode and spacePerTab are given as parameters
 	spacePerTab		:: !Int,
     tabWidth		:: Real,		// width of tabulator in Pixels, annotating this strict won't work
@@ -234,20 +234,13 @@ initState ::	!*(	.Int,
 			 | CharStreams charStream
 initState (wrapMode, fontDef, spacePerTab, textRangeFunc, eachPageDrawFunc, file) 
 		  printInfo=:{ printSetup, jobInfo={range=(from`,to)} } picture
-  # {page={w=width,h=height}} = getPageDimensions printSetup emulateScr
-   	(userInfo,(top, bot), picture) 
-  		= textRangeFunc printInfo picture
+  # {page={w=width,h=height}}		= getPageDimensions printSetup emulateScr
+   	(userInfo,(top, bot), picture)	= textRangeFunc printInfo picture
 
-	((_,font),picture) = openFont fontDef picture
+  # ((_,font),picture)				= openFont fontDef picture
     ({fAscent, fDescent, fMaxWidth, fLeading}, picture)
-    	= getFontMetrics font picture
-/*	PA: I guess Diederik added this for debugging purposes. 
-  # (res,_) = os_getresolution 42
-//  # res = trace_n ("PrintRes",res) res
-  | fst res == 42 = abort "aaaarggh"
-*/
-  # lineHeight 
-    	= fAscent + fDescent + fLeading
+									= getFontMetrics font picture
+  # lineHeight						= fAscent + fDescent + fLeading
   
   // Check top and bot
     
