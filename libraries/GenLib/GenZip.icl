@@ -11,6 +11,7 @@ gZip{|Int|} x y 	= if (x == y) x (abort "zip Int failed\n")
 gZip{|Bool|} x y 	= if (x == y) x (abort "zip Bool failed\n")
 gZip{|Char|} x y 	= if (x == y) x (abort "zip Char failed\n")
 gZip{|Real|} x y 	= if (x == y) x (abort "zip Real failed\n")
+gZip{|String|} x y 	= if (x == y) x (abort "zip String failed\n")
 gZip{|UNIT|} UNIT UNIT 					= UNIT
 gZip{|PAIR|} fx fy (PAIR x1 y1) (PAIR x2 y2) = PAIR (fx x1 x2) (fy y1 y2)
 gZip{|EITHER|} fl fr (LEFT x) (LEFT y) 	= LEFT (fl x y) 
@@ -25,6 +26,7 @@ gMaybeZip{|Int|} x y = if (x == y) (Just x) Nothing
 gMaybeZip{|Bool|} x y = if (x == y) (Just x) Nothing
 gMaybeZip{|Char|} x y = if (x == y) (Just x) Nothing
 gMaybeZip{|Real|} x y = if (x == y) (Just x) Nothing
+gMaybeZip{|String|} x y = if (x == y) (Just x) Nothing
 gMaybeZip{|UNIT|} UNIT UNIT = Just UNIT
 gMaybeZip{|PAIR|} fx fy (PAIR x1 y1) (PAIR x2 y2) = zipMaybe PAIR (fx x1 x2) (fy y1 y2)
 gMaybeZip{|EITHER|} fl fr (LEFT x) (LEFT y) 		= mapMaybe LEFT (fl x y)

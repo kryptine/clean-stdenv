@@ -1,6 +1,6 @@
 implementation module GenLexOrd
 
-import StdInt, StdBool, StdReal, StdChar, StdClass, StdArray
+import StdEnv
 import StdGeneric, GenEq
 
 :: LexOrd = LT |EQ | GT
@@ -23,6 +23,10 @@ gLexOrd{|Char|} x y
 	| x == y = EQ
 	| x < y	 = LT
 			 = GT
+gLexOrd{|String|} x y
+	| x == y = EQ
+	| x < y	 = LT
+			 = GT			 
 gLexOrd{|UNIT|} UNIT UNIT = EQ
 gLexOrd{|PAIR|} fx fy (PAIR x1 y1) (PAIR x2 y2) = case fx x1 x2 of
 	 	EQ -> fy y1 y2

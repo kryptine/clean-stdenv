@@ -1,6 +1,11 @@
 implementation module _Array
 
-import StdArray, StdInt, StdClass
+import _SystemArray, StdInt, StdClass
+
+
+createArrayUnsafe :: .Int -> u:(a v:b) | Array a b, [u <= v]
+createArrayUnsafe n = _createArray n
+
 
 instance UnsafeArray {} where 
 	unsafeCreate size =

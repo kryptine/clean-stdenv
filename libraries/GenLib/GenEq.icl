@@ -1,12 +1,13 @@
 implementation module GenEq
 
-import StdGeneric, StdBool, StdChar, StdInt, StdReal, StdClass, StdArray
+import StdGeneric, StdEnv
 
 generic gEq a  :: a a -> Bool
 gEq{|Int|} 	x y 							= x == y
 gEq{|Char|} x y 							= x == y
 gEq{|Bool|} x y 							= x == y
 gEq{|Real|} x y 							= x == y
+gEq{|String|} x y 							= x == y
 gEq{|UNIT|} UNIT UNIT 						= True
 gEq{|PAIR|} fx fy (PAIR x1 y1) (PAIR x2 y2) = fx x1 x2 && fy y1 y2
 gEq{|EITHER|} fl fr (LEFT x) (LEFT y) 		= fl x y

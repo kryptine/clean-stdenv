@@ -2,6 +2,9 @@ definition module _Array
 
 import StdArray
 
+createArrayUnsafe :: .Int -> u:(a v:b) | Array a b, [u <= v]
+
+
 /*
 class UnsafeArray a e | Array a e where
 	unsafeCreate				:: !Int				-> *(a .e)
