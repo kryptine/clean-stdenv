@@ -37,7 +37,7 @@ Global
 		ExportedNames:	
 	Paths
 		Path:	{Project}
-		Path:	{Application}\Libraries\Tcp 1.2.4
+		Path:	{Application}\Libraries\Tcp
 	Precompile:	
 	Postlink:	
 MainModule

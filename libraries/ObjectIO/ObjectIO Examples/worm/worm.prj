@@ -37,7 +37,7 @@ Global
 		ExportedNames:	
 	Paths
 		Path:	{Project}
-		Path:	{Application}\Examples\ObjectIO Examples  1.2.4\gui utilities
+		Path:	{Application}\Examples\ObjectIO Examples\gui utilities
 	Precompile:	
 	Postlink:	
 MainModule
