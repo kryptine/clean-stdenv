@@ -4602,6 +4602,17 @@ HandleCleanRequest (CrossCallInfo * pcci)
 				MakeReturn0Cci (pcci);
 			}
 			break;
+		case CcRqFAKEPAINT:		/* hwnd; no result. */
+			{
+				HWND hwnd = (HWND) pcci->p1;
+
+				BeginPaint (hwnd, &gPaintStruct);
+				EndPaint (hwnd,&gPaintStruct);
+				InvalidateRect (hwnd, NULL, FALSE);
+
+				MakeReturn0Cci (pcci);
+			}
+			break;
 		case CcRqDOMESSAGE: 	// idleTimerOn, sleeptime; no result. 
 			{
 				MSG ms;

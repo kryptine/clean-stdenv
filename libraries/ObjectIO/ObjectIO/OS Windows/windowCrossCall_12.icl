@@ -149,6 +149,10 @@ WinEndPaint :: !HWND !(!HDC, !*OSToolbox) -> *OSToolbox
 WinEndPaint hwnd (hdc,tb)
 	= snd (IssueCleanRequest2 (ErrorCallback2 "EndPaint") (Rq2Cci CcRqENDPAINT hwnd hdc) tb)
 
+WinFakePaint :: !HWND !*OSToolbox -> *OSToolbox
+WinFakePaint hwnd tb
+	= snd (IssueCleanRequest2 (ErrorCallback2 "FakePaint") (Rq1Cci CcRqFAKEPAINT hwnd) tb)
+
 WinGetClientSize :: !HWND !*OSToolbox -> (!(!Int,!Int), !*OSToolbox)
 WinGetClientSize hwnd tb
 	# (rcci,tb)	= IssueCleanRequest2 (ErrorCallback2 "WinGetClientSize") (Rq1Cci CcRqGETCLIENTSIZE hwnd) tb
