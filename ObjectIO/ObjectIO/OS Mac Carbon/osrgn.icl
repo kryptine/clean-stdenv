@@ -1,6 +1,6 @@
 implementation module osrgn
 
-import	StdInt
+import	StdInt,StdClass
 import ostypes,ostoolbox
 import quickdraw
 import	pointer
@@ -43,9 +43,9 @@ osgetrgnbox	:: !OSRgnHandle !*OSToolbox -> (!Bool,!OSRect,!*OSToolbox)
 osgetrgnbox rgnH tb
 	# (isRect,tb)	= IsRegionRectangular rgnH tb
 	# (rect,tb)		= GetRegionBounds rgnH tb
-	= (isRect,Rect2OSRect rect,tb)
+	= (isRect<>0,Rect2OSRect rect,tb)
 
-IsRegionRectangular :: !OSRgnHandle !*OSToolbox -> (!Bool,!*OSToolbox)
+IsRegionRectangular :: !OSRgnHandle !*OSToolbox -> (!Int,!*OSToolbox)
 IsRegionRectangular _ _ = code {
 	ccall IsRegionRectangular "I:I:I"
 	}
