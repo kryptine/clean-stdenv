@@ -10,8 +10,8 @@ import StdGEC, StdGECExt, StdGecComb, StdDynamic
 import basicAGEC, StdAGEC, calcAGEC, dynamicAGEC
 
 Start :: *World -> *World
-//Start world = goGui editoreditor world  
-Start world = goGui testDynamic world  
+Start world = goGui editoreditor world  
+//Start world = goGui testDynamic world  
 
 derive gGEC Maybe 
 
@@ -76,7 +76,7 @@ zeroValue 	= (Identity,Int_ 0)
 			| F_R_R   (Maybe (PAIR (AGEC (Real -> Real))    TableIndex)) 		 // define function :: Real -> Real
 			| F_LI_I  (Maybe (PAIR (AGEC ([Int] -> Int))   (AGEC [TableIndex]))) // define function :: [Int] -> Int
 			| F_LR_R  (Maybe (PAIR (AGEC ([Real] -> Real)) (AGEC [TableIndex]))) // define function :: [Real] -> Real
-			| Dyn_    (Maybe (PAIR DynString String)) 					// any dynamic 								
+			| Dyn_    (Maybe (PAIR DynString (AGEC [TableIndex]))) 				 // any dynamic 								
 			| String_ String										// define initial string 								
 			| Real_   Real											// define initial real value 
 			| Int_ 	  Int											// define initial int value (default)
@@ -133,9 +133,7 @@ where
 		init (F_R_R  Nothing) = (F_R_R  (Just (PAIR (dynamicAGEC2 (const 0.0)) (0,0))))
 		init (F_LI_I Nothing) = (F_LI_I (Just (PAIR (dynamicAGEC2 (const 0))   (dynamicAGEC2 []))))
 		init (F_LR_R Nothing) = (F_LR_R (Just (PAIR (dynamicAGEC2 (const 0.0)) (dynamicAGEC2 []))))
-		init (Dyn_   Nothing) = (Dyn_   (Just (PAIR (DynStr (dynamic 0) "0") ("Int")))) 
-		init (Dyn_  (Just (PAIR (DynStr d s) str))) 
-							  = (Dyn_   (Just (PAIR (DynStr d s) (ShowTypeDynamic d)))) 
+		init (Dyn_   Nothing) = (Dyn_   (Just (PAIR (DynStr (dynamic 0) "0") (dynamicAGEC2 [])))) 
 		init elem = elem
 
 // the application editor types:
@@ -147,6 +145,7 @@ where
 			| AF_R_R 	(AGEC String) (AGEC (Real->Real,   TableIndex ))
 			| AF_LI_I 	(AGEC String) (AGEC ([Int]->Int,  [TableIndex]))
 			| AF_LR_R 	(AGEC String) (AGEC ([Real]->Real,[TableIndex]))
+			| AF_Dyn 	(AGEC String) (AGEC (DynString,   [TableIndex]))
 			| AInt_		(AGEC Int)
 			| AReal_	(AGEC Real)
 			| AString_ 	(AGEC String)
@@ -166,6 +165,7 @@ where
 	toAppl (_, F_R_R  (Just (PAIR f ix)))	= AF_R_R  	(showAGEC "") (hidAGEC (^^ f, ix))
 	toAppl (_, F_LI_I (Just (PAIR f ix)))	= AF_LI_I  	(showAGEC "") (hidAGEC (^^ f, ^^ ix))
 	toAppl (_, F_LR_R (Just (PAIR f ix)))	= AF_LR_R  	(showAGEC "") (hidAGEC (^^ f, ^^ ix))
+	toAppl (_, Dyn_   (Just (PAIR d ix)))	= AF_Dyn  	(showAGEC "") (hidAGEC (   d, ^^ ix))
 	toAppl _					 			= AString_ 	(showAGEC "not implemented")
 
 	chooseAGEC Counter 		= counterAGEC
@@ -182,6 +182,7 @@ where
 	updatefun (AF_R_R  _ fix) = AF_R_R  (showRFUN (applyfrr  fix)) fix
 	updatefun (AF_LI_I _ fix) = AF_LI_I (showIFUN (applyflii fix)) fix
 	updatefun (AF_LR_R _ fix) = AF_LR_R (showRFUN (applyflrr fix)) fix
+	updatefun (AF_Dyn  _ fix) = AF_Dyn  (showDyn  (applydyn  fix)) fix
 	updatefun x 			 = x
 
 	showIFUN :: (Bool,Bool,Int) -> AGEC String
@@ -196,10 +197,19 @@ where
 		| bty	= showAGEC "Real arg expected "
 		= showAGEC (ToString rval)
 
+	showDyn :: (Bool,Bool,Dynamic) -> AGEC String
+	showDyn (bix,bty,rval)
+		| bix	= showAGEC "Index error "
+		| bty	= showAGEC "Dynamic Type Error "
+		= case rval of
+			dyn=:(f::a -> b) -> (showAGEC (ShowTypeDynamic   dyn))
+			dyn				 -> (showAGEC (ShowValueDynamic  dyn))
+
 	applyfii  fix = calcfli (f o hd) [ix] 	where (f,ix) = ^^ fix
 	applyflii fix = calcfli f ix			where (f,ix) = ^^ fix
 	applyfrr  fix = calcflr (f o hd) [ix] 	where (f,ix) = ^^ fix
 	applyflrr fix = calcflr f ix 			where (f,ix) = ^^ fix
+	applydyn  fix = calcdyn f ix 			where (f,ix) = ^^ fix
 
 	calcfli :: ([Int] -> Int) [TableIndex] -> (Bool,Bool,Int)
 	calcfli f indexlist
@@ -211,6 +221,20 @@ where
 	# res				= map tryGetRealArgs indexlist
 	= (or (map fst3 res),or (map snd3 res),f (map thd3 res)) 
 
+	calcdyn :: DynString [TableIndex] -> (Bool,Bool,Dynamic)
+	calcdyn (DynStr d=:(f::[a]->b) s) indexlist
+	# res				= map (tryDynArgs d) indexlist
+	= (or (map fst3 res),or (map snd3 res),apply d (dynamic [] :: A.c: [c]) (map thd3 res))
+	where
+		apply :: Dynamic Dynamic [Dynamic] -> Dynamic
+		apply d=:(f::[a] -> b) (acc::[a]) [(x::a):xs] = apply d (dynamic [x:acc]) xs
+		apply d=:(f::[a] -> b) (acc::[a]) [(x::c):xs] = dynamic "list type error" //apply d (dynamic acc) xs
+		apply d=:(f::[a] -> b) (acc::[a]) [] = dynamic (f (reverse acc))
+
+	calcdyn (DynStr dyn s) indexlist
+	= (False,False,dyn) 
+
+	tryGetIntArgs :: TableIndex -> (Bool,Bool,Int)
 	tryGetIntArgs (r,c) 
 	| checkBounds (r,c) = (True,False,0)
 	= fetchIntVal (table!!c!!r)
@@ -220,6 +244,7 @@ where
 			fetchIntVal (AF_LI_I _ fi) 	= applyflii fi
 			fetchIntVal _ 				= (False,True,0)
 				 
+	tryGetRealArgs :: TableIndex -> (Bool,Bool,Real)
 	tryGetRealArgs (r,c)
 	| checkBounds (r,c) = (True,False,0.0)
 	= fetchRealVal (table!!c!!r)
@@ -229,13 +254,27 @@ where
 			fetchRealVal (AF_LR_R _ fi) = applyflrr fi
 			fetchRealVal _ 				= (False,True,0.0)
 
+	tryDynArgs :: Dynamic TableIndex -> (Bool,Bool,Dynamic)
+	tryDynArgs (f::[a]->b) (r,c)
+	| checkBounds (r,c) = (True,False,dynamic "error")
+	= fetchDynVal (table!!c!!r) (dynamic undef :: a)
+	where
+			fetchDynVal (AInt_ i)      (nn::Int)  = (False,False,dynamic (^^ i))
+			fetchDynVal (AF_I_I  _ fi) (nn::Int)  = mkdyn (applyfii  fi)
+			fetchDynVal (AF_LI_I _ fi) (nn::Int)  = mkdyn (applyflii fi)
+			fetchDynVal (AReal_ r) 	   (nn::Real) = (False,False,dynamic (^^ r))
+			fetchDynVal (AF_R_R  _ fi) (nn::Real) = mkdyn (applyfrr  fi)
+			fetchDynVal (AF_LR_R _ fi) (nn::Real) = mkdyn (applyflrr fi)
+			fetchDynVal (AF_Dyn  _ fi) _ 		  = (applydyn fi)
+			fetchDynVal _   _ 					  = (False,True,dynamic (23))
+			
+			mkdyn (b1,b2,v) = (b1,b2,dynamic v)
+
 	checkBounds (i,j) = j < 0 || j >= length table || i < 0 || i >= length (table!!j)
 
 // small auxilery functions
 
 showAGEC i = (modeAGEC (Display ( i)))
-
-strip s = { ns \\ ns <-: s | ns >= '\020' && ns <= '\0200'}	
 
 ToString v = toString v +++ " "
 
