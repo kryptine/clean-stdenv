@@ -18,8 +18,6 @@ doHtml :: (/* * */HSt -> (Html,/* * */HSt)) *World -> *World
 
 :: FormID	 	:== String				// unique id identifying the form
 
-
-
 // the editors below are just versiosn of "mkViewHGEC".
 // make shure that all editors have a unique identifier !
 
@@ -33,12 +31,12 @@ doHtml :: (/* * */HSt -> (Html,/* * */HSt)) *World -> *World
 :: HMode		= HEdit					// indicates an editor
 				| HDisplay				// indicates that one just wants to display something
 
-mkEditHGEC 		:: FormID 	HMode 				d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSetHGEC 		:: FormID 	HMode 				d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSelfHGEC 		:: FormID 	(d -> d)			d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkApplyHGEC 	:: FormID 	(d -> d)			d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkStoreHGEC 	:: FormID 	(d -> d) 			d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkApplyEditHGEC	:: FormID 	d 					d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkEditHGEC 		:: FormID 	HMode		d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSetHGEC 		:: FormID 	HMode		d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSelfHGEC 		:: FormID 	(d -> d)	d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyHGEC 	:: FormID 	(d -> d)	d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkStoreHGEC 	:: FormID 	(d -> d)	d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyEditHGEC	:: FormID 	d			d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 
 mkEditHGEC2:: FormID HMode d HSt -> ((d,Body),HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 
@@ -87,3 +85,4 @@ defsize  :== 10										// size of inputfield
 defpixel :== 83										// size in pixels for buttons, pull-down buttons
 backcolor :== "#6699CC"								// background color of non-editable fields
 
+specialize :: a (a HSt -> ((a,Body),HSt)) HSt -> (Body,HSt) | gUpd {|*|} a

@@ -410,3 +410,12 @@ gUpd{|CHButton|} mode 			  	    	b = (mode,b)							// don't change
 derive gParse CHButton
 derive gPrint CHButton
 
+// specialize attempt ...
+
+specialize :: a (a HSt -> ((a,Body),HSt)) HSt -> (Body,HSt) | gUpd {|*|} a
+specialize v editor hst=:(inidx,[mylst:lsts])
+# (UpdSearch _ cnt,v) = gUpd {|*|} (UpdSearch (UpdI 0) -1) v
+# inidx = inidx + (-1 - cnt)
+# ((v,body),(_,lsts)) = editor v (0,lsts)
+= (body,(inidx,[mylst:lsts]))
+
