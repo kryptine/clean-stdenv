@@ -8,7 +8,6 @@ definition module basicArrowEditors
 
 import StdGEC
                                                
-startGEC 	:: ((PSt Void) -> (PSt Void)) *World -> *World
 
 mkGEC 		:: String  t 			      (PSt ps) -> (PSt ps) | gGEC{|*|} t & bimap{|*|} ps
 selfGEC 	:: String (t -> t) t 		  (PSt ps) -> (PSt ps) | gGEC{|*|} t & bimap{|*|} ps

@@ -2,9 +2,7 @@ module calculator2GEC
 
 import StdEnv
 import StdIO
-import genericgecs
-import StdGEC, StdGECExt, StdAGEC
-import GecArrow, basicAGEC, buttonAGEC, calcAGEC, dynamicAGEC, tupleAGEC
+import StdGEC
 
 goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
@@ -15,7 +13,7 @@ Start world
  	calcEditor
  	world  
 
-example_calc	= startCircuit (feedback (edit "Calculator" >>@ update_calc)) calculator
+example_calc	= startCircuit (feedback (edit "Calculator" >>> arr update_calc)) calculator
 where
 	calculator	= 	zero  	   <|> 
 					calc zero  <|> 
@@ -42,15 +40,15 @@ derive gGEC MoreOrLess
 
 derive generate MoreOrLess
 
-calcEditor	= startCircuit (designButtons >>@ convert >>> myCalculator) init
+calcEditor	= startCircuit (designButtons >>> arr convert >>> myCalculator) init
 where
 	init:: ButtonEditor
 	init = [("+",dynamicAGEC (+))]
 
 	designButtons ::  GecCircuit ButtonEditor ButtonEditor
-	designButtons =  feedback (toDesignButtons
-								 @>> edit "design buttons" 
-								 >>@ fromDesignButtons)
+	designButtons =  feedback (arr toDesignButtons
+								 >>> edit "design buttons" 
+								 >>> arr fromDesignButtons)
 	
 	toDesignButtons :: ButtonEditor -> (<|> (AGEC ButtonEditor) MoreOrLess)							 
 	toDesignButtons list = vertlistAGEC list <|> EndOfList 							 
@@ -68,7 +66,7 @@ where
 		mybuttons = unzip [(Button buttonWidth string,^^ fun)\\ (string,fun) <- editbuttons]
 
 	myCalculator :: GecCircuit MyCalculatorType MyCalculatorType
-	myCalculator =  feedback (edit "calculator" >>@ updateCalculator)
+	myCalculator =  feedback (edit "calculator" >>> arr updateCalculator)
 
 
 							 

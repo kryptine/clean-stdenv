@@ -38,7 +38,6 @@ initRecord = { name = "Blair", street = "Downingstreet"
 
 // some combinations of simple editors using layout combinators <-> and <|> from tupleAGEC
 
-import tupleAGEC
 
 myEditor3 = mkGEC "LayOut" init
 where
@@ -46,7 +45,6 @@ where
 	
 // showing buttons
 
-import buttonAGEC
 from   guigecs import defTextWidths
 
 myEditor4 = mkGEC "Buttons" init

@@ -1,7 +1,7 @@
 module loopGEC
 
 import StdEnv
-import StdGEC, StdGECExt, StdAGEC
+import StdGECExt, StdAGEC
 import GecArrow, StdDebug
 
 Start :: !*World -> *World

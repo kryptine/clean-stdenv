@@ -1,7 +1,7 @@
 module doubleCounterexamples
 
 import StdEnv, StdIO
-import basicEditors, calcAGEC
+import basicEditors
 
 // TO TEST JUST REPLACE THE EXAMPLE NAME myEditor IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
 // ALL EXAMPLES HAVE TO BE OF TYPE ((PSt Void) -> (PSt Void))

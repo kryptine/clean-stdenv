@@ -7,7 +7,7 @@ module selfGECexamples
 ********************************************************************/
 
 import StdEnv, StdIO
-import basicEditors
+import basicEditors, StdGEC
 
 // TO TEST JUST REPLACE THE EXAMPLE NAME myEditor IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
 // ALL EXAMPLES HAVE TO BE OF TYPE ((PSt Void) -> (PSt Void))
@@ -28,7 +28,6 @@ myEditor2 = selfGEC "Tree" balanceTree (Node Leaf 1 Leaf)
 
 // Playing with buttons
 
-import buttonAGEC, tupleAGEC
 from   guigecs import defTextWidths
 
 myEditor3 = selfGEC "Buttons" handlebuts (initbuts 0)

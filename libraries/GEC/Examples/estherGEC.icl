@@ -1,10 +1,9 @@
 module estherGEC
 
 import StdEnv
-import StdGEC, StdGECExt, StdAGEC, dynamicAGEC
-import GecArrow
+import StdGEC
 import StdDynamic
-import EstherInterFace, basicAGEC
+import EstherInterFace
 
 // TO TEST JUST REPLACE THE EXAMPLE NAME IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
 // ALL EXAMPLES HAVE TO BE OF FORM pst -> pst
@@ -103,29 +102,7 @@ where
 	mapTo val 		= gMap {|* -> * -> * -> *|} counterAGEC dynamicAGEC (modeAGEC o Display) val
 
 
-:: Counter a = Counter (AGEC a)
 
-test5 = startCircuit (feedback (edit "self")) (mkAGECs (counterAGEC) (dynamicAGEC) init)	
-where
-	init :: (T Int Real)
-	init = 	C 19
-	
-	convert = mapTo o id o mapFrom
-
-	mapFrom agec  	= gMap {|* -> * -> *|} (^^) (^^) agec
-	mapTo val 		= gMap {|* -> * -> *|} counterAGEC dynamicAGEC  val
-	
-//mkAGECs :: (AGEC a,a) (AGEC b,b) (t a b) ->  (t a b)
-mkAGECs  ageca agecb tab
-=	(mkAGEC (mkBimapGEC  
-					(\a _ -> mapTo a) 
-			    	(mapTo o mapFrom) 
-			    	mapFrom 
-			     	tab
-			     ) "mkAGECs")
-where
-	mapFrom agec  	= gMap {|* -> * -> *|} (^^) (^^) agec
-	mapTo val 		= gMap {|* -> * -> *|} ageca agecb  val
 
 
 :: X a = X a

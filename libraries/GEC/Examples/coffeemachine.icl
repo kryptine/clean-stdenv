@@ -2,9 +2,7 @@ module coffeemachine
 
 import StdEnv
 import StdIO
-import genericgecs
-import StdGEC, StdGECExt, StdAGEC
-import basicAGEC, calcAGEC
+import StdGEC
 
 /****************************************************************************************
 *
