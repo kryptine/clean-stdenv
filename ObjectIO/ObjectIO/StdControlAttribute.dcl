@@ -19,12 +19,12 @@ import StdControlDef
 isValidButtonControlAttribute :: !(ControlAttribute .st) -> Bool
 /*	ButtonControl		(y = valid, . = invalid)
 	ControlActivate		. |	ControlKeyboard		. |	ControlPos			y |
-	ControlDeactivate	. |	ControlLook			. |	ControlResize		. |
+	ControlDeactivate	. |	ControlLook			. |	ControlResize		y |
 	ControlFunction		y |	ControlMinimumSize	. |	ControlSelectState	y |
 	ControlHide			y |	ControlModsFunction	y |	ControlTip			y |
 	ControlHMargin		. |	ControlMouse		. |	ControlViewDomain	. |
-	ControlHScroll		. |	ControlOrigin		. |	ControlViewSize		. |
-	ControlId			y | ControlOuterSize	. |	ControlVMargin		. |
+	ControlHScroll		. |	ControlOrigin		. |	ControlViewSize		y |
+	ControlId			y | ControlOuterSize	y |	ControlVMargin		. |
 	ControlItemSpace	. |	ControlPen			. | ControlVScroll		. |
 												  | ControlWidth		y |
 */

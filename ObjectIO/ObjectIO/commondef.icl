@@ -251,6 +251,12 @@ incBound bound	= bound
 ::	Cond  x :== x -> Bool
 ::	UCond x :== x -> *(Bool,x)
 
+(orc) infixr 2 :: !(Cond x) (Cond x) x -> Bool
+(orc) ca cb x = ca x || cb x
+
+(andc) infixr 3 :: !(Cond x) (Cond x) x -> Bool
+(andc) ca cb x = ca x && cb x
+
 uisEmpty :: !v:[u:x] -> (!Bool,!v:[u:x]), [v<=u]
 uisEmpty []   = (True,[])
 uisEmpty full = (False,full)

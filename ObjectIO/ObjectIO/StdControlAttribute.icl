@@ -9,9 +9,12 @@ isValidButtonControlAttribute (ControlFunction     _)	= True
 isValidButtonControlAttribute  ControlHide				= True
 isValidButtonControlAttribute (ControlId           _)	= True
 isValidButtonControlAttribute (ControlModsFunction _)	= True
+isValidButtonControlAttribute (ControlOuterSize    _)	= True
 isValidButtonControlAttribute (ControlPos          _)	= True
+isValidButtonControlAttribute (ControlResize       _)	= True
 isValidButtonControlAttribute (ControlSelectState  _)	= True
 isValidButtonControlAttribute (ControlTip          _)	= True
+isValidButtonControlAttribute (ControlViewSize     _)	= True
 isValidButtonControlAttribute (ControlWidth        _)	= True
 isValidButtonControlAttribute _							= False
 

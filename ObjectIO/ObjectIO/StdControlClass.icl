@@ -9,6 +9,11 @@ from	windowvalidate	import validateViewDomain
 import	ospicture, ostypes, oswindow
 
 
+stdControlClassFatalError :: String String -> .x
+stdControlClassFatalError function error
+	= fatalError function "StdControlClass" error
+
+
 class Controls cdef where
 	controlToHandles:: !.(cdef .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	getControlType	::  .(cdef .ls .pst)               -> ControlType
@@ -78,7 +83,7 @@ instance Controls ((:+:) c1 c2)	| Controls c1 & Controls c2 where
 instance Controls ButtonControl where
 	controlToHandles (ButtonControl textLine atts) pState
 		# (wMetrics,ioState)		= ioStGetOSWindowMetrics pState.io
-		# (size,ioState)			= getButtonSize wMetrics textLine cWidth ioState
+		# (size,ioState)			= getButtonSize wMetrics textLine /*cWidth*/sizeAtt ioState
 		= (	[wElementHandleToControlState
 				(WItemHandle 
 				{	wItemId			= getIdAttribute atts
@@ -99,26 +104,42 @@ instance Controls ButtonControl where
 		  ,	{pState & io=ioState}
 		  )
 	where
-		cWidth						= getControlWidthAttribute atts
+	//	cWidth						= getControlWidthAttribute atts
+		sizeAtt						= case filter (isControlOuterSize orc isControlWidth orc isControlViewSize) atts of
+										[att : _] = Just att
+										nothing   = Nothing
 		
-		getButtonSize :: !OSWindowMetrics String !(Maybe ControlWidth) !(IOSt .l) -> (!Size,!IOSt .l)
-		getButtonSize wMetrics _ (Just (PixelWidth reqW)) ioState
-			# wOK					= max (osGetButtonControlMinWidth wMetrics) reqW
-			# hOK					= osGetButtonControlHeight wMetrics
-			= ({w=wOK,h=hOK},ioState)
-		getButtonSize wMetrics _ (Just (TextWidth wtext)) ioState
-			# (w,ioState)			= getDialogFontTextWidth wtext ioState
-			  wOK					= max (osGetButtonControlMinWidth wMetrics) w
-			  hOK					= osGetButtonControlHeight wMetrics
-			= ({w=wOK,h=hOK},ioState)
-		getButtonSize wMetrics _ (Just (ContentWidth wtext)) ioState
-			# ((w,hOK),ioState)		= accIOToolbox (osGetButtonControlSize wMetrics wtext) ioState
-			  wOK					= max (osGetButtonControlMinWidth wMetrics) w
-			= ({w=wOK,h=hOK},ioState)
+		getButtonSize :: !OSWindowMetrics String !(Maybe (ControlAttribute *(.ls,PSt .l))) !(IOSt .l) -> (!Size,!IOSt .l)
 		getButtonSize wMetrics text Nothing ioState
 			# ((w,hOK),ioState)		= accIOToolbox (osGetButtonControlSize wMetrics text) ioState
 			  wOK					= max (osGetButtonControlMinWidth wMetrics) w
 			= ({w=wOK,h=hOK},ioState)
+		getButtonSize wMetrics text (Just (ControlWidth w)) ioState
+			= getButtonWidth wMetrics text w ioState
+		where
+			getButtonWidth :: !OSWindowMetrics String !ControlWidth !(IOSt .l) -> (!Size,!IOSt .l)
+			getButtonWidth wMetrics _ (PixelWidth reqW) ioState
+				# wOK				= max (osGetButtonControlMinWidth wMetrics) reqW
+				# hOK				= osGetButtonControlHeight wMetrics
+				= ({w=wOK,h=hOK},ioState)
+			getButtonWidth wMetrics _ (TextWidth wtext) ioState
+				# (w,ioState)		= getDialogFontTextWidth wtext ioState
+				  wOK				= max (osGetButtonControlMinWidth wMetrics) w
+				  hOK				= osGetButtonControlHeight wMetrics
+				= ({w=wOK,h=hOK},ioState)
+			getButtonWidth wMetrics _ (ContentWidth wtext) ioState
+				# ((w,hOK),ioState)	= accIOToolbox (osGetButtonControlSize wMetrics wtext) ioState
+				  wOK				= max (osGetButtonControlMinWidth wMetrics) w
+				= ({w=wOK,h=hOK},ioState)
+		getButtonSize wMetrics text (Just size) ioState
+			= ({w=wOK,h=hOK},ioState)
+		where
+			wOK						= max (osGetButtonControlMinWidth wMetrics) reqW
+			hOK						= reqH
+			{w=reqW,h=reqH}			= case size of
+										ControlOuterSize size -> size
+										ControlViewSize  size -> size
+										otherAttribute        -> stdControlClassFatalError "controlToHandles (ButtonControl)" "unexpected ControlAttribute"
 	getControlType _
 		= "ButtonControl"
 

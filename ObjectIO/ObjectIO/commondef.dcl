@@ -112,6 +112,9 @@ incBound :: !Bound -> Bound										// Finite i -> Finite (max 1 (i+1)); Infini
 ::	Cond  x :== x -> Bool
 ::	UCond x :== x -> *(Bool,x)
 
+(orc)  infixr 2 :: !(Cond x) (Cond x) x -> Bool
+(andc) infixr 3 :: !(Cond x) (Cond x) x -> Bool
+
 uisEmpty				:: !v:[u:x] -> (!Bool,!v:[u:x]), [v<=u]
 isSingleton				:: ![.x] -> Bool
 hdtl					:: !u:[.x] -> (!.x, !u:[.x])
