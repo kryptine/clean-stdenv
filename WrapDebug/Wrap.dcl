@@ -19,6 +19,8 @@ instance toString WrappedDescriptorId
     |   WrappedDescriptorTuple
     |   WrappedDescriptorOther !WrappedDescriptorId
 
+instance toString WrappedDescriptor
+
 :: UnwrappedArg
 	=	E.a: {node :: a}
 :: ShallowlyWrappedNode

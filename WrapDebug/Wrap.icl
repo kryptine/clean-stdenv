@@ -25,6 +25,18 @@ instance toString WrappedDescriptorId where
 			.o 1 0
 			}
 
+instance toString WrappedDescriptor where
+	toString WrappedDescriptorCons
+		=	"[:]"
+	toString WrappedDescriptorNil
+		=	"[]"
+	toString WrappedDescriptorCons
+		=	"[:]"
+	toString WrappedDescriptorTuple
+		=	"(,..,)"
+	toString (WrappedDescriptorOther descriptorId)
+		=	toString descriptorId
+
 instance wrap WrappedArg where
 	wrap x
 		=	{arg = wrap x}
