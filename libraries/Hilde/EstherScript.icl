@@ -4,7 +4,7 @@ import EstherPostParser, EstherTransform, DynamicFileSystem
 import StdBool, StdList, StdMisc, StdParsComb, StdFunc, StdTuple
 
 compose :: !String !*(Esther *env) -> (!Dynamic, !*Esther *env) | DynamicFileSystem, bimap{|*|}, ExceptionEnv env
-compose input env = (compile input catchAllIO (\d env -> (raise (EstherError (handler d)), env))) env 
+compose input env = (compile input catchAllIO (\d env -> (raiseDynamic (handler d), env))) env 
 where
 	compile :: !String !*(Esther *env) -> (!Dynamic, !*Esther *env) | DynamicFileSystem, bimap{|*|} env
 	compile input env
@@ -14,22 +14,23 @@ where
 		  core = transform{|*|} syntax
 		= generateCode core env`
 
-	handler :: !Dynamic -> String
-	handler ((ApplyTypeError df dx) :: ComposeException) = "cannot apply `" +++ tf +++ "' to `" +++ tx +++ "'"
+	handler :: !Dynamic -> Dynamic
+	handler ((ApplyTypeError df dx) :: ComposeException) = dynamic EstherError ("cannot apply `" +++ tf +++ "' to `" +++ tx +++ "'")
 	where
 		(vf, tf) = toStringDynamic df
 		(vx, tx) = toStringDynamic dx
-	handler (UnboundVariable v :: ComposeException) = "unbound variable (internal error) `" +++ v +++ "'"
-	handler (InstanceNotFound c dt :: ComposeException) = "`instance " +++ c +++ " " +++ snd (toStringDynamic dt) +++ "' not found"
-	handler (InvalidInstance c dt :: ComposeException) = "`instance " +++ c +++ " " +++ snd (toStringDynamic dt) +++ "' is invalid (type not an instance of the class type)"
-	handler (UnsolvableOverloading :: ComposeException) = "unsolvable overloading"
-	handler (InfixRightArgumentMissing :: PostParseException) = "right argument of infix operator is missing"
-	handler (InfixLeftArgumentMissing :: PostParseException) = "left argument of infix operator is missing"
-	handler (UnsolvableInfixOrder :: PostParseException) = "conflicting priorities of infix operators"
-	handler (NameNotFound n :: PostParseException) = "file `" +++ n +++ "' not found"
-	handler (CaseBadConstructorArity :: TransformException) = "constructor in pattern has too many or too little arguments"
-	handler (NotSupported s :: TransformException) = "feature not (yet) supported: `" +++ s +++ "'"
-	handler d = raise d
+	handler (UnboundVariable v :: ComposeException) = dynamic EstherError ("unbound variable (internal error) `" +++ v +++ "'")
+	handler (InstanceNotFound c dt :: ComposeException) = dynamic EstherError ("`instance " +++ c +++ " " +++ snd (toStringDynamic dt) +++ "' not found")
+	handler (InvalidInstance c dt :: ComposeException) = dynamic EstherError ("`instance " +++ c +++ " " +++ snd (toStringDynamic dt) +++ "' is invalid (type not an instance of the class type)")
+	handler (UnsolvableOverloading :: ComposeException) = dynamic EstherError ("unsolvable overloading")
+	handler (InfixRightArgumentMissing :: PostParseException) = dynamic EstherError ("right argument of infix operator is missing")
+	handler (InfixLeftArgumentMissing :: PostParseException) = dynamic EstherError ("left argument of infix operator is missing")
+	handler (UnsolvableInfixOrder :: PostParseException) = dynamic EstherError ("conflicting priorities of infix operators")
+	handler (NameNotFound n :: PostParseException) = dynamic EstherError ("file `" +++ n +++ "' not found")
+	handler (CaseBadConstructorArity :: TransformException) = dynamic EstherError ("constructor in pattern has too many or too little arguments")
+	handler (NotSupported s :: TransformException) = dynamic EstherError ("feature not (yet) supported: `" +++ s +++ "'")
+	handler (_ :: ParseException) = dynamic EstherError ("parser error")
+	handler d = d
 
 evaluate :: !Bool a !Dynamic !*(Esther *env) -> (!a, !*Esther *env) | TC a & TC, DynamicFileSystem, ExceptionEnv, bimap{|*|} env
 evaluate unsafe def input esther 
