@@ -13,8 +13,8 @@ import tree
 Start world  = doHtml MyPage world
 
 MyPage hst
-# (list,(listGEC,hst)) = mkHGEC "list" (Edit id) [1] hst
-# (_,   (treeGEC,hst)) = mkHGEC "tree" Set (fromListToBalTree list) hst
+# (list,(listGEC,hst)) = mkEditHGEC "list" HEdit    [1] hst
+# (_,   (treeGEC,hst)) = mkEditHGEC "tree" HDisplay (fromListToBalTree list) hst
 = (Head 
 	[Hd_Title "List to Balance Tree"
 	] 

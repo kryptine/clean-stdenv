@@ -14,7 +14,7 @@ derive gHpr 	Tree
 Start world  = doHtml MyPage world
 
 MyPage  hst
-# (_,(treeGEC,hst)) = mkHGEC "tree" id [Node Leaf 1 Leaf] hst
+# (_,(treeGEC,hst)) = mkEditHGEC "tree" HEdit [Node Leaf 1 Leaf] hst
 = (Head 
 		[Hd_Title "Main Test Program"
 		] 

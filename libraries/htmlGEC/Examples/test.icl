@@ -11,10 +11,10 @@ Start world  = doHtml MyPage world
 derive gParse (,)
 
 MyPage hst
-# (list,(listbody,hst)) = mkHGEC "list" (Edit id) [1] hst
-# (ni1,(counter1,hst)) 	= counterHGEC "first"   Set 0 hst
-# (ni2,(counter2,hst)) 	= counterHGEC "second"  Set 0 hst
-# (nf, (myform,hst))    = mkHGEC "addingcounters" Set (ni1,ni2,ni1 + ni2) hst
+# (list,(listbody,hst)) = mkEditHGEC "list" HEdit [1] hst
+# (ni1,(counter1,hst)) 	= counterHGEC "first"   0 hst
+# (ni2,(counter2,hst)) 	= counterHGEC "second"  0 hst
+# (nf, (myform,hst))    = mkEditHGEC "addingcounters" HDisplay (ni1,ni2,ni1 + ni2) hst
 = (Head 
 		[ Hd_Title "Testing"]
 		 
