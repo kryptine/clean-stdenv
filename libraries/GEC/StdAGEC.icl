@@ -47,9 +47,9 @@ where
 
 // Abstract editors
 
-:: AGEC a = E. .b :  Hidden (BimapGEC a b) (A. .ps: InfraGEC (BimapGEC a b) (PSt ps)) String
+:: AGEC a = E. .b :  Hidden !(BimapGEC a b) !(A. .ps: InfraGEC (BimapGEC a b) (PSt ps)) !String
 
-mkAGEC  :: (BimapGEC a b) String -> AGEC a | gGEC{|*|} b
+mkAGEC  :: !(BimapGEC a b) !String -> AGEC a | gGEC{|*|} b
 mkAGEC bimapGEC descriptor =  Hidden bimapGEC (gGEC{|*->*->*|} undef gGEC{|*|}) descriptor
 
 ^^    :: (AGEC a) -> a
@@ -60,7 +60,7 @@ mkAGEC bimapGEC descriptor =  Hidden bimapGEC (gGEC{|*->*->*|} undef gGEC{|*|}) 
 
 ::	AGECSt a env
 	=	E. b:
-		{	agecBimapGEC:: !GECVALUE (BimapGEC a b) env		// The handle to the BimapGEC
+		{	agecBimapGEC:: !GECVALUE !(BimapGEC a b) !env		// The handle to the BimapGEC
 		,	agecAGEC    :: !AGEC a							// The current AGEC value
 		}
 
@@ -75,13 +75,13 @@ where
 						  , agecAGEC     = abstractGEC
 						  }
 		# (_,pSt)		= openReceiver lSt aDef pSt
-		# pSt			= openGEC aGEC pSt
+//		# pSt			= openGEC aGEC pSt  // removed by mjp, saved a lot of space
 		= (newGEC aGEC,pSt)
 	where
 		bupdate (Hidden bimap gGECb descr) reason nbimap pSt 
 			= biupdate reason (Hidden {bimap & value = nbimap.value} gGECb descr) pSt
 		
-		fun :: (A.b:(AGEC a) -> Update (BimapGEC a b) (PSt .ps)) (GECMsgIn  (AGEC a)) *(AGECSt a (PSt .ps),PSt .ps) -> (GECMsgOut (AGEC a), *(AGECSt a (PSt .ps),PSt .ps))
+		fun :: !(A.b:(AGEC a) -> Update (BimapGEC a b) (PSt .ps)) !(GECMsgIn  (AGEC a)) !*(AGECSt a (PSt .ps),PSt .ps) -> (GECMsgOut (AGEC a), *(AGECSt a (PSt .ps),PSt .ps))
 		fun _ InGetValue (lSt=:{agecBimapGEC=abbaGEC,agecAGEC=Hidden bimapGEC gGECbimapGEC descr},pSt)
 			# (nval,pSt)	= abbaGEC.gecGetValue pSt
 			= (OutGetValue (Hidden {bimapGEC & value=nval.value} gGECbimapGEC descr),(lSt,pSt))
