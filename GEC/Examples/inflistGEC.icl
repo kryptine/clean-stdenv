@@ -15,7 +15,7 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	example_lists2
+ 	example_lists1
  	world  
 
 example_lists1	= startCircuit (edit "InfiniteListDisplay") (listAGEC False allprimes) 

@@ -6169,21 +6169,31 @@ Static
 		Path:	{Application}\Libraries\StdEnv
 		Path:	{Application}\Libraries\StdLib
 		Path:	{Application}\Libraries\ObjectIO
-		Path:	{Application}\Libraries\ObjectIO\OS Windows
+		Path:	{Application}\Libraries\ObjectIOExtensions
+		Path:	{Application}\Libraries\Generics
+		Path:	{Application}\Libraries\Dynamics
+		Path:	{Application}\Libraries\Dynamics\implementation\windows
+		Path:	{Application}\Libraries\Gast
+		Path:	{Application}\Libraries\StdGEC
+		Path:	{Application}\Libraries\StdGEC\GEC Implementation
+		Path:	{Application}\Libraries\Hilde
+		Path:	{Application}\Libraries\Hilde\OS Windows
+		Path:	{Application}\Libraries\Hilde\OS Windows\NoDynamicFileSystem
+		Path:	{Application}\Libraries\Hilde\OS Windows\Foreign
+		Path:	{Application}\Libraries\Hilde\Parser combinators 2002
+		Path:	{Application}\Libraries\Hilde\WrapDebugClosures
+		Path:	{Application}\Libraries\ArgEnvWindows
 		Path:	{Application}\Libraries\Directory
+		Path:	{Application}\Libraries\ExceptionsWindows
+		Path:	{Application}\Libraries\ExtendedArith
+		Path:	{Application}\Libraries\MersenneTwister
+		Path:	{Application}\Libraries\Tcp
+		Path:	{Application}\Libraries\WrapDebug
+		Path:	{Application}\Libraries\ObjectIO\OS Windows
 		Path:	{Application}\Libraries\Dynamics\extension
 		Path:	{Application}\Libraries\Dynamics\general
 		Path:	{Application}\Libraries\Dynamics\implementation
-		Path:	{Application}\Libraries\Dynamics\implementation\windows
-		Path:	{Application}\Libraries\Generics
-		Path:	{Application}\Libraries\ArgEnvWindows
-		Path:	{Application}\Libraries\Gast
-		Path:	{Application}\Libraries\Directory
-		Path:	{Application}\Libraries\Tcp
-		Path:	{Application}\Libraries\ExceptionsWindows
-		Path:	{Application}\Libraries\MersenneTwister
-		Path:	{Application}\Libraries\WrapDebug
-		Path:	{Application}\Libraries\ExtendedArith\ExtendedArith
+		Path:	{Application}\Examples\ObjectIO Examples\gui utilities
 		Path:	{Application}\Libraries\GameLib
-	AppP:	C:\Clean 2.1.1a3
-	PrjP:	D:\My Documents\GEC\Examples
+	AppP:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0
+	PrjP:	C:\Documents and Settings\Administrator\Desktop\StdGEC\Examples

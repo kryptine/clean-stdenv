@@ -35,7 +35,7 @@ where
 
 derive gGEC MyRecord
 
-testje = startCircuit (feedback (dotest @>> edit "test")) (initval ((+) 1) 3)
+testje = startCircuit (feedback (arr dotest >>> edit "test")) (initval ((+) 1) 3)
 where
 	initval f v = { function = dynamicAGEC f
                   , argument = dynamicAGEC v
@@ -68,7 +68,7 @@ where
 
 derive gGEC Maybe 
 
-testDynamic2 = startCircuit  (feedback (dotest @>> edit "test" ))  initval  
+testDynamic2 = startCircuit  (feedback (arr dotest >>> edit "test" ))  initval  
 where	
 	initval  = vertlistAGEC [show "expression " (toDynStr (dynamic 0))] 
 	 
@@ -85,7 +85,7 @@ where
 	toDynStr v 					  = DynStr v (ShowValueDynamic v)
 	fromDynStr (_,(DynStr d str)) = d
 
-testDynamic = startCircuit  (feedback (dotest @>> edit "test" ))  initval  
+testDynamic = startCircuit  (feedback (arr dotest >>> edit "test" ))  initval  
 where	
 	initval  = horlistAGEC [testinit] <|> showAGEC ":: String"
 	testinit = DynStr (dynamic "") "Type expression:"
@@ -115,13 +115,13 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 derive gGEC TypeVal, Editor, Command, ApplicationElem
 
 
-editoreditor = startCircuit (designeditor >>@ convert >>> applicationeditor) initvalue
+editoreditor = startCircuit (designeditor >>> arr convert >>> applicationeditor) initvalue
 where
 	designeditor :: GecCircuit DesignEditor DesignEditor
-	designeditor 		= feedback (toDesignEditor @>> edit "design" >>@ updateDesign o fromDesignEditor)
+	designeditor 		= feedback (arr toDesignEditor >>> edit "design" >>> arr updateDesign o fromDesignEditor)
 
 	applicationeditor :: GecCircuit ApplicationEditor ApplicationEditor
-	applicationeditor 	= feedback (toApplicEditor o updateApplication @>> edit "application" >>@ fromApplicEditor)
+	applicationeditor 	= feedback (arr (toApplicEditor o updateApplication) >> edit "application" >>> arr fromApplicEditor)
 
 	toDesignEditor   (table,clipboard) = (listAGEC True (map vertlistAGEC table),hidAGEC clipboard)
 	fromDesignEditor (table,clipboard) = (map (^^) (^^ table),^^ clipboard)
