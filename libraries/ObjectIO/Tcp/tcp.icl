@@ -1,10 +1,7 @@
 implementation module tcp
 
 import	StdEnv
-import	StdFile
-import	id
-import	StdTime
-from	StdId import Ids
+import	id, StdId, StdTime
 
 class ChannelEnv env	| Ids env & TimeEnv env & FileEnv env
 where

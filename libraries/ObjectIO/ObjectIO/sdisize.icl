@@ -4,12 +4,9 @@ implementation module sdisize
 //	Clean Object I/O library, version 1.2
 
 import	StdBool, StdClass, StdInt
-import	oswindow
-import	iostate, windowaccess, windowupdate
-from	commondef	import FatalError
-//
-import ostypes
-//
+import	ostypes, oswindow
+import	commondef, iostate, windowaccess, windowupdate
+
 
 sdisizeFatalError :: String String -> .x
 sdisizeFatalError rule error = FatalError rule "sdisize" error

@@ -226,86 +226,83 @@ getWindowHScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) 
 	| not visHScroll	= zero
 	| otherwise			= {rleft=rleft-1,rtop=b`,rright=if visVScroll (r`+1) (rright+1),rbottom=rbottom+1}
 where
-	r`					= rright -osmVSliderWidth +1
-	b`					= rbottom-osmHSliderHeight+1
+	r`					= rright -osmVSliderWidth  + 1
+	b`					= rbottom-osmHSliderHeight + 1
 
 getWindowVScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
 getWindowVScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) {rleft,rtop,rright,rbottom}
 	| not visVScroll	= zero
 	| otherwise			= {rleft=r`,rtop=rtop-1,rright=rright+1,rbottom=if visHScroll (b`+1) (rbottom+1)}
 where
-	r`					= rright -osmVSliderWidth +1
-	b`					= rbottom-osmHSliderHeight+1
+	r`					= rright -osmVSliderWidth  + 1
+	b`					= rbottom-osmHSliderHeight + 1
 
 
 //	Access operations on WindowStateHandles:
 
-getWindowStateHandleWIDS :: !(WindowStateHandle .pst) -> (!WIDS,!WindowStateHandle .pst)
+getWindowStateHandleWIDS :: !(WindowStateHandle .pst) -> *(!WIDS,!WindowStateHandle .pst)
 getWindowStateHandleWIDS wsH=:{wshIds}
 	= (wshIds,wsH)
 
-getWindowStateHandleWindowMode :: !(WindowStateHandle .pst) -> (!WindowMode,!WindowStateHandle .pst)
+getWindowStateHandleWindowMode :: !(WindowStateHandle .pst) -> *(!WindowMode,!WindowStateHandle .pst)
 getWindowStateHandleWindowMode wsH=:{wshHandle=Just {wlsHandle={whMode}}}
 	= (whMode,wsH)
 
-getWindowStateHandleWindowKind :: !(WindowStateHandle .pst) -> (!WindowKind,!WindowStateHandle .pst)
+getWindowStateHandleWindowKind :: !(WindowStateHandle .pst) -> *(!WindowKind,!WindowStateHandle .pst)
 getWindowStateHandleWindowKind wsH=:{wshHandle=Just {wlsHandle={whKind}}}
 	= (whKind,wsH)
 
-getWindowStateHandleWindowTitle :: !(WindowStateHandle .pst) -> (!Title,!WindowStateHandle .pst)
+getWindowStateHandleWindowTitle :: !(WindowStateHandle .pst) -> *(!Title,!WindowStateHandle .pst)
 getWindowStateHandleWindowTitle wsH=:{wshHandle=Just {wlsHandle={whTitle}}}
 	= (whTitle,wsH)
 
-getWindowStateHandleItemNrs :: !(WindowStateHandle .pst) -> (![Int],!WindowStateHandle .pst)
+getWindowStateHandleItemNrs :: !(WindowStateHandle .pst) -> *(![Int],!WindowStateHandle .pst)
 getWindowStateHandleItemNrs wsH=:{wshHandle=Just {wlsHandle={whItemNrs}}}
 	= (whItemNrs,wsH)
 
-getWindowStateHandleKeyFocus :: !(WindowStateHandle .pst) -> (!KeyFocus,!WindowStateHandle .pst)
+getWindowStateHandleKeyFocus :: !(WindowStateHandle .pst) -> *(!KeyFocus,!WindowStateHandle .pst)
 getWindowStateHandleKeyFocus wsH=:{wshHandle=Just {wlsHandle={whKeyFocus}}}
 	= (whKeyFocus,wsH)
 
-/* Mike
-getWindowStateHandleWindowInfo :: !(WindowStateHandle .pst) -> (!Maybe WindowInfo,!WindowStateHandle .pst)
-*/
-getWindowStateHandleWindowInfo :: !(WindowStateHandle .pst) -> (!WindowInfo,!WindowStateHandle .pst)
+getWindowStateHandleWindowInfo :: !(WindowStateHandle .pst) -> *(!WindowInfo,!WindowStateHandle .pst)
 getWindowStateHandleWindowInfo wsH=:{wshHandle=Just {wlsHandle={whWindowInfo}}}
 	= (whWindowInfo,wsH)
 
-getWindowStateHandleShow :: !(WindowStateHandle .pst) -> (!Bool,!WindowStateHandle .pst)
+getWindowStateHandleShow :: !(WindowStateHandle .pst) -> *(!Bool,!WindowStateHandle .pst)
 getWindowStateHandleShow wsH=:{wshHandle=Just {wlsHandle={whShow}}}
 	= (whShow,wsH)
 
-getWindowStateHandleSelect :: !(WindowStateHandle .pst) -> (!Bool,!WindowStateHandle .pst)
+getWindowStateHandleSelect :: !(WindowStateHandle .pst) -> *(!Bool,!WindowStateHandle .pst)
 getWindowStateHandleSelect wsH=:{wshHandle=Just {wlsHandle={whSelect}}}
 	= (whSelect,wsH)
 
-getWindowStateHandleActive :: !(WindowStateHandle .pst) -> (!Bool,!WindowStateHandle .pst)
+getWindowStateHandleActive :: !(WindowStateHandle .pst) -> *(!Bool,!WindowStateHandle .pst)
 getWindowStateHandleActive wsH=:{wshIds={wActive}}
 	= (wActive,wsH)
 
-getWindowStateHandleDefaultId :: !(WindowStateHandle .pst) -> (!Maybe Id,!WindowStateHandle .pst)
+getWindowStateHandleDefaultId :: !(WindowStateHandle .pst) -> *(!Maybe Id,!WindowStateHandle .pst)
 getWindowStateHandleDefaultId wsH=:{wshHandle=Just {wlsHandle={whDefaultId}}}
 	= (whDefaultId,wsH)
 
-getWindowStateHandleCancelId :: !(WindowStateHandle .pst) -> (!Maybe Id,!WindowStateHandle .pst)
+getWindowStateHandleCancelId :: !(WindowStateHandle .pst) -> *(!Maybe Id,!WindowStateHandle .pst)
 getWindowStateHandleCancelId wsH=:{wshHandle=Just {wlsHandle={whCancelId}}}
 	= (whCancelId,wsH)
 
-getWindowStateHandleSize :: !(WindowStateHandle .pst) -> (!Size,!WindowStateHandle .pst)
+getWindowStateHandleSize :: !(WindowStateHandle .pst) -> *(!Size,!WindowStateHandle .pst)
 getWindowStateHandleSize wsH=:{wshHandle=Just {wlsHandle={whSize}}}
 	= (whSize,wsH)
 
-getWindowStateHandleClosing :: !(WindowStateHandle .pst) -> (!Bool,!WindowStateHandle .pst)
+getWindowStateHandleClosing :: !(WindowStateHandle .pst) -> *(!Bool,!WindowStateHandle .pst)
 getWindowStateHandleClosing wsH=:{wshHandle=Just {wlsHandle={whClosing}}}
 	= (whClosing,wsH)
 
-isWindowStateHandlePlaceHolder :: !(WindowStateHandle .pst) -> (!Bool,!WindowStateHandle .pst)
+isWindowStateHandlePlaceHolder :: !(WindowStateHandle .pst) -> *(!Bool,!WindowStateHandle .pst)
 isWindowStateHandlePlaceHolder wsH=:{wshHandle=Nothing}
 	= (True,wsH)
 isWindowStateHandlePlaceHolder wsH
 	= (False,wsH)
 
-identifyWindowStateHandle :: !WID !(WindowStateHandle .pst) -> (!Bool,!WindowStateHandle .pst)
+identifyWindowStateHandle :: !WID !(WindowStateHandle .pst) -> *(!Bool,!WindowStateHandle .pst)
 identifyWindowStateHandle wid wsH
 	# (wids,wsH)	= getWindowStateHandleWIDS wsH
 	= (identifyWIDS wid wids,wsH)
@@ -322,9 +319,6 @@ setWindowStateHandleKeyFocus :: !KeyFocus !(WindowStateHandle .pst) -> WindowSta
 setWindowStateHandleKeyFocus keyFocus wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH}}
 	= {wsH & wshHandle=Just {wlsH & wlsHandle={wH & whKeyFocus=keyFocus}}}
 
-/* Mike
-setWindowStateHandleWindowInfo :: !(Maybe WindowInfo) !(WindowStateHandle .pst) -> WindowStateHandle .pst
-*/
 setWindowStateHandleWindowInfo :: !WindowInfo !(WindowStateHandle .pst) -> WindowStateHandle .pst
 setWindowStateHandleWindowInfo windowInfo wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH}}
 	= {wsH & wshHandle=Just {wlsH & wlsHandle={wH & whWindowInfo=windowInfo}}}
@@ -389,20 +383,28 @@ where
 
 //	Search, get, and set WindowStateHandles.
 
-getWindowHandlesActiveWindow :: !(WindowHandles .pst) -> (!Maybe WIDS,!WindowHandles .pst)
+getWindowHandlesWindows :: !(WindowHandles .pst) -> *(![WindowStateHandle .pst],!WindowHandles .pst)
+getWindowHandlesWindows wHs=:{whsWindows=wsHs}
+	= (wsHs,{wHs & whsWindows=[]})
+
+setWindowHandlesWindows :: ![WindowStateHandle .pst] !(WindowHandles .pst) -> WindowHandles .pst
+setWindowHandlesWindows wsHs wHs
+	= {wHs & whsWindows=wsHs}
+
+getWindowHandlesActiveWindow :: !(WindowHandles .pst) -> *(!Maybe WIDS,!WindowHandles .pst)
 getWindowHandlesActiveWindow wHs=:{whsWindows=wsHs}
 	# (found,wids,wsHs)	= Access get_active_wids undef wsHs
 	  wHs				= {wHs & whsWindows=wsHs}
 	| found				= (Just wids,wHs)
 	| otherwise			= (Nothing,  wHs)
 where
-	get_active_wids :: !(WindowStateHandle .pst) -> (!(!Bool,WIDS),!WindowStateHandle .pst)
+	get_active_wids :: !(WindowStateHandle .pst) -> *(!*(!Bool,WIDS),!WindowStateHandle .pst)
 	get_active_wids wsH
 		# (wids,wsH)	= getWindowStateHandleWIDS wsH
 		= ((wids.wActive,wids),wsH)
 
 //	getWindowHandlesActiveModalDialog assumes that all modal dialogues are at the front of the list
-getWindowHandlesActiveModalDialog :: !(WindowHandles .pst) -> (!Maybe WIDS,!WindowHandles .pst)
+getWindowHandlesActiveModalDialog :: !(WindowHandles .pst) -> *(!Maybe WIDS,!WindowHandles .pst)
 getWindowHandlesActiveModalDialog wHs=:{whsWindows=wsHs}
 	| isEmpty wsHs
 		= (Nothing,wHs)
@@ -414,12 +416,12 @@ getWindowHandlesActiveModalDialog wHs=:{whsWindows=wsHs}
 		# (wids,wsH)= getWindowStateHandleWIDS wsH
 		= (Just wids,{wHs & whsWindows=[wsH:wsHs]})
 
-hasWindowHandlesWindow :: !WID !(WindowHandles .pst) -> (!Bool,!WindowHandles .pst)
+hasWindowHandlesWindow :: !WID !(WindowHandles .pst) -> *(!Bool,!WindowHandles .pst)
 hasWindowHandlesWindow wid wHs=:{whsWindows}
 	# (found,windows)	= haswindow wid whsWindows
 	= (found,{wHs & whsWindows=windows})
 where
-	haswindow :: !WID ![WindowStateHandle .pst] -> (!Bool,![WindowStateHandle .pst])
+	haswindow :: !WID ![WindowStateHandle .pst] -> *(!Bool,![WindowStateHandle .pst])
 	haswindow wid [wsH:wsHs]
 		# (wIds,wsH)		= getWindowStateHandleWIDS wsH
 		| identifyWIDS wid wIds
@@ -430,12 +432,12 @@ where
 	haswindow _ _
 		= (False,[])
 
-getWindowHandlesWindow :: !WID !(WindowHandles .pst) -> (!Bool,!WindowStateHandle .pst,!WindowHandles .pst)
+getWindowHandlesWindow :: !WID !(WindowHandles .pst) -> *(!Bool,!WindowStateHandle .pst,!WindowHandles .pst)
 getWindowHandlesWindow wid wHs=:{whsWindows}
 	# (ok,wsH,wsHs)	= getwindow wid whsWindows
 	= (ok,wsH,{wHs & whsWindows=wsHs})
 where
-	getwindow :: !WID ![WindowStateHandle .pst] -> (!Bool,!WindowStateHandle .pst,![WindowStateHandle .pst])
+	getwindow :: !WID ![WindowStateHandle .pst] -> *(!Bool,!WindowStateHandle .pst,![WindowStateHandle .pst])
 	getwindow wid [wsH:wsHs]
 		# (wIds,wsH)	= getWindowStateHandleWIDS wsH
 		| identifyWIDS wid wIds
@@ -446,12 +448,12 @@ where
 	getwindow _ _
 		= (False,dummyWindowStateHandle,[])
 
-removeWindowHandlesWindow :: !WID !(WindowHandles .pst) -> (!Bool,!WindowStateHandle .pst,!WindowHandles .pst)
+removeWindowHandlesWindow :: !WID !(WindowHandles .pst) -> *(!Bool,!WindowStateHandle .pst,!WindowHandles .pst)
 removeWindowHandlesWindow wid wHs=:{whsWindows}
 	# (ok,wsH,wsHs)	= URemove (identifyWindowStateHandle wid) dummyWindowStateHandle whsWindows
 	= (ok,wsH,{wHs & whsWindows=wsHs})
 where
-	identifyWindowStateHandle :: !WID !(WindowStateHandle .pst) -> (!Bool,!WindowStateHandle .pst)
+	identifyWindowStateHandle :: !WID !(WindowStateHandle .pst) -> *(!Bool,!WindowStateHandle .pst)
 	identifyWindowStateHandle wid wsH
 		# (windowIds,wsH)	= getWindowStateHandleWIDS wsH
 		= (identifyWIDS wid windowIds,wsH)
@@ -480,7 +482,7 @@ where
 	setwindow _ _ _
 		= windowaccessFatalError "setWindowHandlesWindow" "place holder not found"
 
-addBehindWindowHandlesWindow :: !WID !(WindowStateHandle .pst) !(WindowHandles .pst) -> (!WIDS,!WindowHandles .pst)
+addBehindWindowHandlesWindow :: !WID !(WindowStateHandle .pst) !(WindowHandles .pst) -> *(!WIDS,!WindowHandles .pst)
 addBehindWindowHandlesWindow behindWID wsH wHs=:{whsWindows}
 	# (isPlaceHolder,wsH)	= isWindowStateHandlePlaceHolder wsH
 	| isPlaceHolder
@@ -489,7 +491,7 @@ addBehindWindowHandlesWindow behindWID wsH wHs=:{whsWindows}
 		# (behindWIDS,wsHs)	= stackBehind behindWID wsH whsWindows
 		= (behindWIDS,{wHs & whsWindows=wsHs})
 where
-	stackBehind :: !WID !(WindowStateHandle .pst) ![WindowStateHandle .pst] -> (!WIDS,![WindowStateHandle .pst])
+	stackBehind :: !WID !(WindowStateHandle .pst) ![WindowStateHandle .pst] -> *(!WIDS,![WindowStateHandle .pst])
 	stackBehind behindWID wsH [wsH`:wsHs]
 		# (wids`,wsH`)			= getWindowStateHandleWIDS wsH`
 		| not (identifyWIDS behindWID wids`)
@@ -500,7 +502,7 @@ where
 			# (behindWIDS,wsHs)	= stackBehindLastModal wsH wids` wsHs
 			= (behindWIDS,[wsH`:wsHs])
 		with
-			stackBehindLastModal :: !(WindowStateHandle .pst) !WIDS ![WindowStateHandle .pst] -> (!WIDS,![WindowStateHandle .pst])
+			stackBehindLastModal :: !(WindowStateHandle .pst) !WIDS ![WindowStateHandle .pst] -> *(!WIDS,![WindowStateHandle .pst])
 			stackBehindLastModal wsH behindModal [wsH`:wsHs]
 				# (wids`,wsH`)			= getWindowStateHandleWIDS wsH`
 				# (mode`,wsH`)			= getWindowStateHandleWindowMode wsH`
@@ -521,7 +523,7 @@ addWindowHandlesWindow index wsH wHs=:{whsWindows}
 	#! wsHs	= insert (max 0 index) wsH whsWindows
 	= {wHs & whsWindows=wsHs}
 where
-	insert :: !Index !.x ![.x] -> [.x]
+	insert :: !Index !u:x !v:[u:x] -> v:[u:x]
 	insert 0 x ys
 		= [x:ys]
 	insert i x [y:ys]
@@ -554,7 +556,7 @@ addWindowHandlesActiveWindow wsH wHs=:{whsWindows}
 /*	disableWindowSystem disables all current windows.
 	The return WIDS is the WIDS of the topmost active modal dialogue, if present. 
 */
-disableWindowSystem :: !(WindowHandles .pst) !*OSToolbox -> (!(!Maybe WIDS,!WindowHandles .pst),!*OSToolbox)
+disableWindowSystem :: !(WindowHandles .pst) !*OSToolbox -> *(!*(!Maybe WIDS,!WindowHandles .pst),!*OSToolbox)
 disableWindowSystem windows=:{whsModal,whsWindows} tb
 	| not whsModal
 		# (wHs,tb)	= StateMap disablewindow whsWindows tb
@@ -565,7 +567,7 @@ disableWindowSystem windows=:{whsModal,whsWindows} tb
 	| otherwise
 		= ((activeWIDS,windows),OSdisableWindow (fromJust activeWIDS).wPtr (False,False) True tb)
 where
-	disablewindow :: !(WindowStateHandle .pst) !*OSToolbox -> (!WindowStateHandle .pst,!*OSToolbox)
+	disablewindow :: !(WindowStateHandle .pst) !*OSToolbox -> *(!WindowStateHandle .pst,!*OSToolbox)
 	disablewindow wsH tb
 		# (wids,wsH)		= getWindowStateHandleWIDS wsH
 		# (windowInfo,wsH)	= getWindowStateHandleWindowInfo wsH
@@ -577,12 +579,12 @@ where
 /*	enableWindowSystem Nothing re-enables all current windows.
 	enableWindowSystem (Just wids) re-enables the modal dialogue indicated by wids.
 */
-enableWindowSystem :: !(Maybe WIDS) !(WindowHandles .pst) !*OSToolbox -> (!WindowHandles .pst,!*OSToolbox)
+enableWindowSystem :: !(Maybe WIDS) !(WindowHandles .pst) !*OSToolbox -> *(!WindowHandles .pst,!*OSToolbox)
 enableWindowSystem Nothing windows=:{whsWindows} tb
 	# (wHs,tb)	= StateMap enablewindow whsWindows tb
 	= ({windows & whsModal=False,whsWindows=wHs},tb)
 where
-	enablewindow :: !(WindowStateHandle .pst) !*OSToolbox -> (!WindowStateHandle .pst,!*OSToolbox)
+	enablewindow :: !(WindowStateHandle .pst) !*OSToolbox -> *(!WindowStateHandle .pst,!*OSToolbox)
 	enablewindow wsH tb
 		# (whSelect,wsH)		= getWindowStateHandleSelect wsH
 		| not whSelect
@@ -600,7 +602,7 @@ enableWindowSystem (Just wids) windows tb
 
 /*	Checking WindowBounds:
 */
-checkZeroWindowHandlesBound :: !(WindowHandles .pst) -> (!Bool,!WindowHandles .pst)
+checkZeroWindowHandlesBound :: !(WindowHandles .pst) -> *(!Bool,!WindowHandles .pst)
 checkZeroWindowHandlesBound wHs=:{whsNrWindowBound}
 	= (zeroBound whsNrWindowBound,wHs)
 
@@ -612,7 +614,7 @@ decreaseWindowHandlesBound wHs=:{whsNrWindowBound}
 /*	getInitActiveControl retrieves the OSWindowPtr of the control that has the initial input focus.
 	It is assumed that the control identified by the WindowInitActive attribute exists.
 */
-getInitActiveControl :: !(WindowHandle .ls .pst) -> (!OSWindowPtr,!WindowHandle .ls .pst)
+getInitActiveControl :: !(WindowHandle .ls .pst) -> *(!OSWindowPtr,!WindowHandle .ls .pst)
 getInitActiveControl wH=:{whItems=itemHs,whAtts}
 	# (found,itemPtr,itemHs)			= getFocusWElementHandles initActiveId itemHs
 	= (if found itemPtr OSNoWindowPtr,{wH & whItems=itemHs})

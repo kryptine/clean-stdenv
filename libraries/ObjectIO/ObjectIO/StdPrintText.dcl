@@ -6,9 +6,9 @@ definition module StdPrintText
 //	StdPrintText specifies functions to print text.
 //	********************************************************************************
 
+import	StdString
 from	StdPictureDef	import FontDef, FontName, FontStyle, FontSize
 import	StdPrint
-from	StdString import String
 
 ::	WrapMode	:== Int
 

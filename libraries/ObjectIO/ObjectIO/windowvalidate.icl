@@ -7,12 +7,11 @@ implementation module windowvalidate
 
 
 import	StdBool, StdList, StdFunc, StdTuple, StdMisc
-from	StdId			import openId
 from	StdSystem		import maxScrollWindowSize
 import	osdocumentinterface, ostypes, oswindow
 from	ospicture		import defaultPen, setPenAttribute
 from	ossystem		import OSscreenrect, OSstripOuterSize
-import	commondef, controllayout, keyfocus, StdControlAttribute, StdWindowAttribute, windowaccess
+import	commondef, controllayout, keyfocus, StdControlAttribute, StdId, StdWindowAttribute, windowaccess
 from	iostate			import IOSt, IOStGetIdTable
 
 
@@ -181,7 +180,7 @@ where
 	  							 0													// Open modal windows frontmost
 	  							 (SetBetween index nrModals (nrModals+nrModeless))	// Open modeless windows behind the modal windows
 	
-	isModalWindow :: !(WindowStateHandle .pst) -> (!Bool,!WindowStateHandle .pst)
+	isModalWindow :: !(WindowStateHandle .pst) -> *(!Bool,!WindowStateHandle .pst)
 	isModalWindow wsH
 		# (mode,wsH)	= getWindowStateHandleWindowMode wsH
 		= (mode==Modal,wsH)
@@ -496,7 +495,7 @@ where
 	where
 		(isRelative,relativeTo)		= isRelativeItemPos itemPos
 		
-		unidentifyWindow :: !WID !(WindowStateHandle .pst) -> (!Bool,!WindowStateHandle .pst)
+		unidentifyWindow :: !WID !(WindowStateHandle .pst) -> *(!Bool,!WindowStateHandle .pst)
 		unidentifyWindow wid wsH
 			# (ids,wsH)				= getWindowStateHandleWIDS wsH
 			= (not (identifyWIDS wid ids),wsH)

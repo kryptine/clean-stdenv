@@ -1,7 +1,7 @@
 definition module menuCrossCall_12
 
 
-from	StdString	import String
+import	StdString
 from	ostoolbox	import OSToolbox
 from	ostypes		import HWND
 

@@ -7,7 +7,7 @@ implementation module StdControlClass
 
 
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
-import	commondef, iostate, StdControlAttribute, windowhandle//, id, iostate, StdControlAttribute
+import	commondef, iostate, StdControlAttribute, windowhandle
 from	controlvalidate	import validateSliderState
 from	StdPSt			import accScreenPicture
 from	windowvalidate	import validateViewDomain

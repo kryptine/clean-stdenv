@@ -5,8 +5,7 @@ implementation module scheduler
 
 
 import	StdBool, StdList, StdTuple
-import	osevent
-from	ostime				import OSGetTime, OSTime
+import	osevent, ostime
 from	ostoolbox			import OSNewToolbox, OSInitToolbox
 import	commondef, devicefunctions, iostate, processstack, roundrobin, timertable, world
 from	StdProcessDef		import ProcessInit
@@ -260,13 +259,13 @@ handleEventForContext eventDone schedulerEvent context=:{cProcesses=processes}
 		= handleEventForContext eventDone schedulerEvent {context & cProcesses=adddoneRR process context.cProcesses}
 where
 	processQuitted :: !CProcess -> (!Bool,!CProcess)
-	processQuitted localIO
-		# (closed,ioState) = IOStClosed localIO.localIOSt
+	processQuitted localIO=:{localIOSt}
+		# (closed,ioState) = IOStClosed localIOSt
 		= (closed,{localIO & localIOSt=ioState})
 	
 	processModal :: !CProcess -> (!Bool,!CProcess)
-	processModal localIO
-		# (optModal,ioState)= IOStGetIOIsModal localIO.localIOSt
+	processModal localIO=:{localIOSt}
+		# (optModal,ioState)= IOStGetIOIsModal localIOSt
 		# (myId,ioState)	= IOStGetIOId ioState
 		= (isJust optModal && myId==fromJust optModal,{localIO & localIOSt=ioState})
 

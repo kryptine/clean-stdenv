@@ -20,10 +20,6 @@ StdMenuFatalError function error
 	= FatalError function "StdMenu" error
 
 
-::	DeltaMenuSystem l p
-	:==	!OSMenuBar -> !(MenuHandles (PSt l)) -> !*OSToolbox -> (!MenuHandles (PSt l),!*OSToolbox)
-::	AccessMenuSystem x pst
-	:==	!OSMenuBar -> !(MenuHandles pst) -> !*OSToolbox -> (!x,!MenuHandles pst,!*OSToolbox)
 ::	DeltaMenuHandle pst
 	:==	!(MenuStateHandle pst) -> !*OSToolbox -> (!MenuStateHandle pst,!*OSToolbox)
 ::	AccessMenuHandle x pst
@@ -54,7 +50,10 @@ where
 	accessmenuhandles _ _ _
 		= (Nothing,[])
 
-changeMenuSystemState :: !Bool !(DeltaMenuSystem .l .p) !(IOSt .l) -> IOSt .l
+changeMenuSystemState :: !Bool
+						 !(OSMenuBar -> (MenuHandles (PSt .l)) -> *OSToolbox -> *(MenuHandles (PSt .l),*OSToolbox))
+						 !(IOSt .l)
+						-> IOSt .l
 changeMenuSystemState redrawMenus f ioState
 	# (osdInfo,ioState)			= IOStGetOSDInfo ioState
 	  maybeOSMenuBar			= getOSDInfoOSMenuBar osdInfo
@@ -77,7 +76,10 @@ changeMenuSystemState redrawMenus f ioState
 		# ioState				= setIOToolbox tb ioState
 		= IOStSetDevice (MenuSystemState menus) ioState
 
-accessMenuSystemState :: !Bool !(AccessMenuSystem .x (PSt .l)) !(IOSt .l) -> (!Maybe .x,!IOSt .l)
+accessMenuSystemState :: !Bool
+						 !(OSMenuBar -> (MenuHandles (PSt .l)) -> *OSToolbox -> *(.x,MenuHandles (PSt .l),*OSToolbox))
+						 !(IOSt .l)
+					-> (!Maybe .x,!IOSt .l)
 accessMenuSystemState redrawMenus f ioState
 	# (osdInfo,ioState)			= IOStGetOSDInfo ioState
 	  maybeOSMenuBar			= getOSDInfoOSMenuBar osdInfo
@@ -482,7 +484,7 @@ getMenus ioState
 	# ioState					= IOStSetDevice (MenuSystemState {mHs & mMenus=msHs}) ioState
 	= (tl idtypes,ioState)
 where
-	getIdType :: !(MenuStateHandle .pst) -> ((Id,MenuType),!MenuStateHandle .pst)
+	getIdType :: !(MenuStateHandle .pst) -> *((Id,MenuType),!MenuStateHandle .pst)
 	getIdType msH
 		# (id,msH)		= menuStateHandleGetMenuId msH
 		= ((id,"Menu"),msH)

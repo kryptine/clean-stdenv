@@ -108,32 +108,32 @@ incBound :: !Bound -> Bound										// Finite i -> Finite (max 1 (i+1)); Infini
 /*	List operations:
 */
 ::	Cond  x :== x -> Bool
-::	UCond x :== x -> (Bool,x)
+::	UCond x :== x -> *(Bool,x)
 
 IsSingleton				:: ![.x] -> Bool
-HdTl					:: ![.x] -> (!.x, ![.x])
+HdTl					:: !u:[.x] -> (!.x, !u:[.x])
 InitLast				:: ![.x] -> (![.x],!.x)
-Split					:: !Int ![.x] -> (![.x],![.x])
+Split					:: !Int !u:[.x] -> (![.x],!u:[.x])
 
 CondMap					:: (Cond x) !(IdFun x)		![x]		-> (!Bool, ![x])
-Uspan					:: !(UCond .x)				![.x]		-> (![.x],![.x])	// Same as span (StdList), but preserving uniqueness
-FilterMap				:: !(.x -> (Bool,.y))		![.x]		-> [.y]
-StateMap				:: !(.x -> .s -> (.y,.s))	![.x] !.s	-> (![.y], !.s)
+Uspan					:: !(UCond .x)				!u:[.x]		-> (![.x],!u:[.x])	// Same as span (StdList), but preserving uniqueness
+FilterMap				:: !(.x -> *(Bool,.y))		![.x]		-> [.y]
+StateMap				:: !(.x -> .s -> *(.y,.s))	![.x] !.s	-> (![.y], !.s)
 StateMap2				:: !(.x -> .s -> .s)		![.x] !.s	-> .s
 StrictSeq				:: ![.(.s -> .s)]				  !.s	-> .s				// Same as seq (StdFunc), but with strict state argument
 StrictSeqList			:: !.[.St .s .x]				  !.s	-> (![.x],!.s)		// Same as seqList (StdFunc), but with strict state argument
 
 Contains				:: !(Cond    x)				![ x] -> Bool
-UContains				:: !(UCond  .x)				![.x] -> (!Bool,	![.x])
+UContains				:: !(UCond  .x)				!u:[.x] -> (!Bool,	!u:[.x])
 Select					:: !(Cond    x)		 x		![ x] -> (!Bool, x)
-Access					:: !(St .x (Bool,.y)) .y	![.x] -> (!Bool,.y,	![.x])
+Access					:: !(St .x *(Bool,.y)) .y	!u:[.x] -> (!Bool,.y,!u:[.x])
 AccessList				:: !(St .x .y)				![.x] -> (![.y],	![.x])
 Remove					:: !(Cond    x)		 x		![ x] -> (!Bool, x,	![ x])
-URemove					:: !(UCond  .x)		.x		![.x] -> (!Bool,.x,	![.x])
+URemove					:: !(UCond  .x)		.x		!u:[.x] -> (!Bool,.x,	!u:[.x])
 Replace					:: !(Cond    x)		 x		![ x] -> (!Bool,	![ x])
-UReplace				:: !(UCond  .x)		.x		![.x] -> (!Bool,	![.x])
+UReplace				:: !(UCond  .x)		.x		!u:[.x] -> (!Bool,	!u:[.x])
 ReplaceOrAppend			:: !(Cond    x)      x		![ x] -> [ x]
-UReplaceOrAppend		:: !(UCond  .x)     .x		![.x] -> [.x]
+UReplaceOrAppend		:: !(UCond  .x)     .x		!u:[.x] -> u:[.x]
 RemoveCheck				::					 x	  !u:[x] -> (!Bool,  !u:[ x])	| Eq x
 RemoveSpecialChars		:: ![Char] !{#Char}	-> {#Char}
 Ulength					:: ![.x]			-> (!Int, ![.x])

@@ -177,7 +177,7 @@ setActiveWindow wId pState
 	# wids						= fromJust activeWIDS
 	| exists && wids.wId==wId	// If already active, then skip
 		= {pState & io=IOStSetDevice (WindowSystemState windows) ioState}
-	# wHs						= windows.whsWindows
+	# (wHs,windows)				= getWindowHandlesWindows windows
 	  (modal,modeless)			= Uspan ismodalwindow wHs
 	  (isModal,modal)			= UContains (identifyWindowStateHandle wid) modal
 	| isModal					// Modal windows should not be activated
@@ -220,7 +220,7 @@ setActiveWindow wId pState
 where
 	wid							= toWID wId
 	
-	ismodalwindow :: !(WindowStateHandle .pst) -> (!Bool,!WindowStateHandle .pst)
+	ismodalwindow :: !(WindowStateHandle .pst) -> *(!Bool,!WindowStateHandle .pst)
 	ismodalwindow wsH
 		# (mode,wsH)			= getWindowStateHandleWindowMode wsH
 		= (mode==Modal,wsH)
@@ -1518,8 +1518,8 @@ getWindowScrollFunction wId direction ioState
 		# (maybeScrollFun,wsH)	= getwindowscrollfunction direction wsH
 		= (maybeScrollFun,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 where
-	getwindowscrollfunction :: !Direction !(WindowStateHandle .pst) -> (!Maybe ScrollFunction,!WindowStateHandle .pst)
-	getwindowscrollfunction direction wsH=:{wshHandle=Just {wlsHandle=wH}}
+	getwindowscrollfunction :: !Direction !(WindowStateHandle .pst) -> *(!Maybe ScrollFunction,!WindowStateHandle .pst)
+	getwindowscrollfunction direction wsH=:{wshHandle=Just {wlsHandle=wH=:{whWindowInfo}}}
 		| direction==Horizontal && isJust hScroll
 			= (fst (accMaybe getScrollFun hScroll),wsH)
 		| direction==Vertical && isJust vScroll
@@ -1527,11 +1527,11 @@ where
 		| otherwise
 			= (Nothing,wsH)
 	where
-		windowInfo			= getWindowInfoWindowData wH.whWindowInfo
+		windowInfo			= getWindowInfoWindowData whWindowInfo
 		hScroll				= windowInfo.windowHScroll
 		vScroll				= windowInfo.windowVScroll
 		
-		getScrollFun :: !ScrollInfo -> (!ScrollFunction,!ScrollInfo)
+		getScrollFun :: !ScrollInfo -> *(!ScrollFunction,!ScrollInfo)
 		getScrollFun info=:{scrollFunction}
 			= (scrollFunction,info)
 	getwindowscrollfunction _ _

@@ -110,7 +110,6 @@ IOStSetProcessStack			:: !ProcessStack					!(IOSt .l) -> IOSt .l
 SelectIOSt					::									!(IOSt .l) -> IOSt .l
 IOStSetOSDInfo				:: !OSDInfo							!(IOSt .l) -> IOSt .l
 IOStSetMaxIONr				:: !SystemId						!(IOSt .l) -> IOSt .l
-IOStSetGUIShare				:: !(Maybe GUIShare)				!(IOSt .l) -> IOSt .l
 IOStSetSubProcessIds		:: ![SystemId]						!(IOSt .l) -> IOSt .l
 IOStSetIdSeed				:: !Int								!(IOSt .l) -> IOSt .l
 IOStSetClipboardState		:: !ClipboardState					!(IOSt .l) -> IOSt .l

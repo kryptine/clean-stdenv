@@ -13,16 +13,6 @@ from	commondef	import FatalError, StateMap2, RemoveCheck, URemove, UCond, HdTl
 from	menucreate	import disposeMenuIds, disposeShortcutkeys, disposeSubMenuHandles
 
 
-::	DeltaMenuSystem l p
-	:==	!OSMenuBar -> !(MenuHandles (PSt l)) -> !*OSToolbox -> (!MenuHandles (PSt l),!*OSToolbox)
-::	AccessMenuSystem x pst
-	:==	!OSMenuBar -> !(MenuHandles pst) -> !*OSToolbox -> (!x,!MenuHandles pst,!*OSToolbox)
-::	DeltaMenuHandles pst
-	:==	[MenuStateHandle pst] -> *OSToolbox -> ([MenuStateHandle pst],*OSToolbox)
-::	DeltaMenuHandle pst
-	:==	(MenuStateHandle pst) -> *OSToolbox -> ( MenuStateHandle pst, *OSToolbox)
-
-
 menuinternalFatalError :: String String -> .x
 menuinternalFatalError function error
 	= FatalError function "menuinternal" error
@@ -30,7 +20,10 @@ menuinternalFatalError function error
 
 //	General rules to access MenuHandles:
 
-changeMenuSystemState :: !Bool !(DeltaMenuSystem .l .p) !(IOSt .l) -> IOSt .l
+changeMenuSystemState :: !Bool 
+						 !(OSMenuBar -> (MenuHandles (PSt .l)) -> (*OSToolbox -> *(MenuHandles (PSt .l),*OSToolbox)))
+						 !(IOSt .l)
+						-> IOSt .l
 changeMenuSystemState redrawMenus f ioState
 	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
 	| not found
@@ -50,7 +43,10 @@ changeMenuSystemState redrawMenus f ioState
 		# ioState				= setIOToolbox (DrawMenuBar osMenuBar tb) ioState
 		= IOStSetDevice (MenuSystemState menus) ioState
 
-accessMenuSystemState :: !Bool !(AccessMenuSystem x (PSt .l)) !(IOSt .l) -> (!Maybe x, !IOSt .l)
+accessMenuSystemState :: !Bool
+						 !(OSMenuBar -> (MenuHandles (PSt .l)) -> *OSToolbox -> *(.x,MenuHandles (PSt .l),*OSToolbox))
+						 !(IOSt .l)
+		   -> *(!Maybe .x,!IOSt .l)
 accessMenuSystemState redrawMenus f ioState
 	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
 	| not found
@@ -119,7 +115,7 @@ closemenu id ioState
 	| otherwise
 		= resizeSDIWindow sdiPtr sdiSize1 sdiSize2 ioState
 where
-	isMenuWithThisId :: !Id !(MenuStateHandle .pst) -> (!Bool,!MenuStateHandle .pst)
+	isMenuWithThisId :: !Id !(MenuStateHandle .pst) -> *(!Bool,!MenuStateHandle .pst)
 	isMenuWithThisId id msH
 		# (menuId,msH)	= menuStateHandleGetMenuId msH
 		= (id==menuId,msH)

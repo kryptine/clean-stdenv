@@ -1,7 +1,7 @@
 definition module windowCrossCall_12
 
 
-from	StdString		import String
+import	StdString
 from	ostoolbox		import OSToolbox
 from	ostypes			import HWND
 from	rgnCCall_12		import HRGN

@@ -8,10 +8,9 @@ implementation module StdIOCommon
 //	********************************************************************************
 
 
-import	StdBool, StdFunc, StdInt, StdList, StdOverloaded, StdString
-import	StdBitmap, StdIOBasic, StdKey, StdMaybe
+import	StdArray, StdBool, StdFunc, StdInt, StdList, StdOverloaded, StdString
+import	id, StdBitmap, StdIOBasic, StdKey, StdMaybe
 from	commondef	import StateMap2
-from	id			import Id, WindowMenuId, toId, RId, R2Id, RIdtoId, R2IdtoId, toString
 
 
 /*	The SelectState type.								*/
@@ -107,14 +106,14 @@ instance == KeyState where
 instance toString KeyboardState where
 	toString :: !KeyboardState -> {#Char}
 	toString (CharKey char keystate)
-		= brackify ("CharKey "+++fromChar char+++" "+++brackify ("ASCII: "+++toString (toInt char))+++" "+++toString keystate)
+		= brackify ("CharKey "+++toString char+++" "+++brackify ("ASCII: "+++toString (toInt char))+++" "+++toString keystate)
 	toString (SpecialKey special keystate modifiers)
 		= brackify ("SpecialKey "+++itemsList " " [toString special,toString keystate,toString modifiers])
 	toString KeyLost
 		= "KeyLost"
 instance toString KeyState where
 	toString :: !KeyState -> {#Char}
-	toString (KeyDown isRepeat)	= brackify ("KeyDown "+++toString isRepeat)
+	toString (KeyDown isRepeat)	= brackify ("KeyDown "+++fromBool isRepeat)
 	toString KeyUp				= "KeyUp"
 
 

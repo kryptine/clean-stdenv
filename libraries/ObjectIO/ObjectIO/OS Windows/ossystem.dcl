@@ -2,7 +2,7 @@ definition module ossystem
 
 //	Clean Object I/O library, version 1.2
 
-from	StdString			import String
+import	StdString
 from	StdMaybe			import Maybe, Just, Nothing
 from	menuCrossCall_12	import HMENU
 from	osdocumentinterface	import OSDInfo, OSMDInfo, OSSDInfo, OSInfo, OSToolbar, OSToolbarHandle

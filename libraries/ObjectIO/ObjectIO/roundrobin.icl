@@ -4,8 +4,7 @@ implementation module roundrobin
 //	Clean Object I/O library, version 1.2
 
 
-from	StdList		import ++
-from	StdString	import String
+import	StdList, StdString
 from	commondef	import FatalError
 
 
@@ -21,37 +20,37 @@ roundrobinFatalError rule error
 emptyRR :: RR .x
 emptyRR = {done=[],todo=[]}
 
-toRR :: ![.x] ![.x] -> RR .x
+toRR :: !u:[.x] !u:[.x] -> u:RR .x
 toRR done todo = {done=done,todo=todo}
 
-fromRR :: !(RR .x) -> (![.x],![.x])
+fromRR :: !u:(RR .x) -> (!u:[.x],!u:[.x])
 fromRR {done,todo} = (done,todo)
 
-isEmptyRR :: !(RR .x) -> (!Bool,!RR .x)
+isEmptyRR :: !u:(RR .x) -> (!Bool,!u:RR .x)
 isEmptyRR rr=:{done=[],todo=[]}	= (True, rr)
 isEmptyRR rr					= (False,rr)
 
-nodoneRR :: !(RR .x) -> (!Bool,!RR .x)
+nodoneRR :: !u:(RR .x) -> (!Bool,!u:RR .x)
 nodoneRR rr=:{done=[]}			= (True, rr)
 nodoneRR rr						= (False,rr)
 
-notodoRR :: !(RR .x) -> (!Bool,!RR .x)
+notodoRR :: !u:(RR .x) -> (!Bool,!u:RR .x)
 notodoRR rr=:{todo=[]}			= (True, rr)
 notodoRR rr						= (False,rr)
 
-resetRR :: !(RR .x) -> RR .x
+resetRR :: !u:(RR .x) -> u:RR .x
 resetRR {done=[x:xs],todo}		= resetRR {done=xs,todo=[x:todo]}
 resetRR rr						= rr
 
-adddoneRR :: .x !(RR .x) -> RR .x
+adddoneRR :: .x !u:(RR .x) -> u:RR .x
 adddoneRR x rr=:{done}			= {rr & done=[x:done]}
 
-inserttodoRR :: .x !(RR .x) -> RR .x
+inserttodoRR :: .x !u:(RR .x) -> u:RR .x
 inserttodoRR x rr=:{todo}		= {rr & todo=[x:todo]}
 
-appendtodoRR :: .x !(RR .x) -> RR .x
+appendtodoRR :: .x !u:(RR .x) -> u:RR .x
 appendtodoRR x rr=:{todo}		= {rr & todo=todo++[x]}
 
-getcurrentRR :: !(RR .x) -> (!.x,!RR .x)
+getcurrentRR :: !u:(RR .x) -> (!.x,!u:RR .x)
 getcurrentRR rr=:{todo=[current:todo]} = (current,{rr & todo=todo})
 getcurrentRR _ = roundrobinFatalError "getcurrentRR" "todo field is empty"

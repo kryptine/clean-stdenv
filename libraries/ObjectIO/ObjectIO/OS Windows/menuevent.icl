@@ -91,7 +91,7 @@ where
 			# (found,mMenus)= UContains (eqMenuId menuId) mMenus
 			= (found,{mHs & mMenus=mMenus})
 		where
-			eqMenuId :: !Id !(MenuStateHandle .pst) -> (!Bool,!MenuStateHandle .pst)
+			eqMenuId :: !Id !(MenuStateHandle .pst) -> *(!Bool,!MenuStateHandle .pst)
 			eqMenuId theId msH
 				# (mId,msH)	= menuStateHandleGetMenuId msH
 				= (theId==mId,msH)

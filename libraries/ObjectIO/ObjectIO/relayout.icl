@@ -135,8 +135,8 @@ where
 				hasScrolls		= (isJust newInfo.compoundHScroll,isJust newInfo.compoundVScroll)
 				newVisScrolls	= OSscrollbarsAreVisible wMetrics newDomainRect newSize` hasScrolls
 				oldVisScrolls	= OSscrollbarsAreVisible wMetrics oldDomainRect (toTuple oldSize) hasScrolls
-				newHThumbSize	= if (snd newVisScrolls) (newSize.w-wMetrics.osmVSliderWidth +1) (newSize.w+1)
-				newVThumbSize	= if (fst newVisScrolls) (newSize.h-wMetrics.osmHSliderHeight+1) (newSize.h+1)
+				newHThumbSize	= if (snd newVisScrolls) (newSize.w-wMetrics.osmVSliderWidth  + 1) (newSize.w+1)
+				newVThumbSize	= if (fst newVisScrolls) (newSize.h-wMetrics.osmHSliderHeight + 1) (newSize.h+1)
 				oldContentRect	= getCompoundContentRect wMetrics oldVisScrolls oldCompoundRect
 				newContentRect	= getCompoundContentRect wMetrics newVisScrolls newCompoundRect
 				hRect			= getCompoundHScrollRect wMetrics newVisScrolls (SizeToRect newSize);	hRect`	= addVector (toVector newPos) hRect

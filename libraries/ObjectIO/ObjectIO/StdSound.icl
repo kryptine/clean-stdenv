@@ -8,7 +8,7 @@ implementation module StdSound
 //	********************************************************************************
 
 
-from	StdString	import String
+import	StdString
 from	clCCall_12	import WinPlaySound
 import	ostoolbox
 

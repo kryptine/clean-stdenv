@@ -86,6 +86,6 @@ where
 	unbindTimerElementIds` (TimerChangeLSHandle {tChangeItems}) tables
 		= StateMap2 unbindTimerElementIds` tChangeItems tables
 
-identifyTimerStateHandle :: !Id !(TimerStateHandle .ps) -> (!Bool,!TimerStateHandle .ps)
+identifyTimerStateHandle :: !Id !(TimerStateHandle .pst) -> *(!Bool,!TimerStateHandle .pst)
 identifyTimerStateHandle id tlsH=:(TimerLSHandle {tHandle={tId}})
 	= (id==tId,tlsH)

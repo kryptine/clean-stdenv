@@ -9,8 +9,8 @@ import	commondef, wstate
 
 //	Higher order access functions on [WElementHandle`]
 
-setWElements :: (WItemHandle` ([arg],.s) -> (WItemHandle`,([arg],.s))) ![WElementHandle`] !(![arg],!.s)
-																   -> (![WElementHandle`],!(![arg],!.s))
+setWElements :: (WItemHandle` *([arg],.s) -> (WItemHandle`,*([arg],.s))) ![WElementHandle`] !*(![arg],!.s)
+																	-> *(![WElementHandle`],!*(![arg],!.s))
 setWElements f itemHs (args,s)
 	| isEmpty args || isEmpty itemHs
 		= (itemHs,(args,s))
@@ -20,8 +20,8 @@ setWElements f itemHs (args,s)
 		# (itemHs,args_s)	= setWElements  f itemHs args_s
 		= ([itemH:itemHs],args_s)
 where
-	setWElements` :: (WItemHandle` ([arg],.s) -> (WItemHandle`,([arg],.s))) !WElementHandle` !(![arg],!.s)
-																		-> (!WElementHandle`,!(![arg],!.s))
+	setWElements` :: (WItemHandle` *([arg],.s) -> (WItemHandle`,*([arg],.s))) !WElementHandle` !*(![arg],!.s)
+																		  -> *(!WElementHandle`,!*(![arg],!.s))
 	setWElements` f (WItemHandle` itemH) args_s
 		# (itemH,args_s)	= f itemH args_s
 		= (WItemHandle` itemH,args_s)
@@ -29,14 +29,14 @@ where
 		# (itemHs,args_s)	= setWElements f itemHs args_s
 		= (WRecursiveHandle` itemHs dRecKind,args_s)
 
-setAllWElements :: (WItemHandle` .s -> (WItemHandle`,.s)) ![WElementHandle`] !.s
-													  -> (![WElementHandle`],!.s)
+setAllWElements :: (WItemHandle` .s -> *(WItemHandle`,.s)) ![WElementHandle`] !.s
+													  -> *(![WElementHandle`],!.s)
 setAllWElements f [itemH:itemHs] s
 	# (itemH, s)	= setWElement     f itemH  s
 	# (itemHs,s)	= setAllWElements f itemHs s
 	= ([itemH:itemHs],s)
 where
-	setWElement :: (WItemHandle` .s -> (WItemHandle`,.s)) !WElementHandle` !.s -> (!WElementHandle`,!.s)
+	setWElement :: (WItemHandle` .s -> *(WItemHandle`,.s)) !WElementHandle` !.s -> *(!WElementHandle`,!.s)
 	setWElement f (WItemHandle` itemH) s
 		# (itemH,s)		= f itemH s
 		= (WItemHandle` itemH,s)
@@ -46,7 +46,7 @@ where
 setAllWElements _ _ s
 	= ([],s)
 
-setWElement :: (Id WItemHandle` .s -> (Bool,WItemHandle`,.s)) !Id ![WElementHandle`] !.s -> (!Bool,![WElementHandle`],!.s)
+setWElement :: (Id WItemHandle` .s -> *(Bool,WItemHandle`,.s)) !Id ![WElementHandle`] !.s -> *(!Bool,![WElementHandle`],!.s)
 setWElement f id itemHs s
 	| isEmpty itemHs
 		= (False,itemHs,s)
@@ -58,7 +58,7 @@ setWElement f id itemHs s
 		# (done,itemHs,s)	= setWElement  f id itemHs s
 		= (done,[itemH:itemHs],s)
 where
-	setWElement` :: (Id WItemHandle` .s -> (Bool,WItemHandle`,.s)) !Id !WElementHandle` !.s -> (!Bool,!WElementHandle`,!.s)
+	setWElement` :: (Id WItemHandle` .s -> *(Bool,WItemHandle`,.s)) !Id !WElementHandle` !.s -> *(!Bool,!WElementHandle`,!.s)
 	setWElement` f id (WItemHandle` itemH) s
 		# (done,itemH,s)	= f id itemH s
 		= (done,WItemHandle` itemH,s)
@@ -66,7 +66,7 @@ where
 		# (done,itemHs,s)	= setWElement f id itemHs s
 		= (done,WRecursiveHandle` itemHs dRecKind,s)
 
-setWItemHandle :: (WItemHandle` .s -> (Bool,WItemHandle`,.s)) ![WElementHandle`] !.s -> (!Bool,![WElementHandle`],!.s)
+setWItemHandle :: (WItemHandle` .s -> *(Bool,WItemHandle`,.s)) ![WElementHandle`] !.s -> *(!Bool,![WElementHandle`],!.s)
 setWItemHandle f itemHs s
 	| isEmpty itemHs
 		= (False,itemHs,s)
@@ -78,7 +78,7 @@ setWItemHandle f itemHs s
 		# (done,itemHs,s)	= setWItemHandle  f itemHs s
 		= (done,[itemH:itemHs],s)
 where
-	setWItemHandle` :: (WItemHandle` .s -> (Bool,WItemHandle`,.s)) !WElementHandle` !.s -> (!Bool,!WElementHandle`,!.s)
+	setWItemHandle` :: (WItemHandle` .s -> *(Bool,WItemHandle`,.s)) !WElementHandle` !.s -> *(!Bool,!WElementHandle`,!.s)
 	setWItemHandle` f (WItemHandle` itemH) s
 		# (done,itemH,s)	= f itemH s
 		= (done,WItemHandle` itemH,s)

@@ -140,7 +140,7 @@ OSSetBoundMap :: !Int !Int !Int !*OSToolbox -> (!GRESULT, !*OSToolbox)
 OSSetBoundMap x y newvalue tb
     = WinSetBoundMap x y newvalue tb
 
-handleGameEvents :: !CrossCallInfo !(OSGameData .gs) !*OSToolbox -> (!CrossCallInfo,!OSGameData .gs,!*OSToolbox)
+handleGameEvents :: !CrossCallInfo !v:(OSGameData u:gs) !*OSToolbox -> (!CrossCallInfo,!v:OSGameData u:gs,!*OSToolbox), [v<=u]
 handleGameEvents fromOSCci=:{ccMsg=CcWmGAMEKEYBOARD,p1=key,p2=x,p3=y} state tb
     = (Return2Cci x` y`,state,tb)
 where
@@ -252,7 +252,7 @@ MakePoint :: !Int !Int -> Point2
 MakePoint a b = {x = a, y = b}
 
 
-handleUserEvent :: !Int !InstanceID !Int !Int !Int !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+handleUserEvent :: !Int !InstanceID !Int !Int !Int !v:(OSGameData u:gs) !*OSToolbox -> (!v:(OSGameData u:gs), !*OSToolbox), [v<=u]
 handleUserEvent objtype id ev par1 par2 data=:{gamest,gamehnd} tb
     #   maybefound              =   getobject objtype gamehnd
     |   isJust maybefound
@@ -282,7 +282,7 @@ where
 
 
 
-handleAnimationEvent :: !Int !InstanceID !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+handleAnimationEvent :: !Int !InstanceID !v:(OSGameData u:gs) !*OSToolbox -> (!v:(OSGameData u:gs), !*OSToolbox), [v<=u]
 handleAnimationEvent objtype id data=:{gamest,gamehnd} tb
     #   maybefound              =   getobject objtype gamehnd
     |   isJust maybefound
@@ -312,7 +312,7 @@ where
 
 
 
-handleTimerEvent :: !Int !InstanceID !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+handleTimerEvent :: !Int !InstanceID !v:(OSGameData u:gs) !*OSToolbox -> (!v:OSGameData u:gs, !*OSToolbox), [v<=u]
 handleTimerEvent objtype id data=:{gamest,gamehnd} tb
     #   maybefound              =   getobject objtype gamehnd
     |   isJust maybefound
@@ -342,7 +342,7 @@ where
 
 
 
-moveGameObject :: !Int !InstanceID !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+moveGameObject :: !Int !InstanceID !v:(OSGameData u:gs) !*OSToolbox -> (!v:OSGameData u:gs, !*OSToolbox)
 moveGameObject objtype id data=:{gamest,gamehnd} tb
     #   maybefound              =   getobject objtype gamehnd
     |   isJust maybefound
@@ -371,7 +371,7 @@ where
 //      =   ({obj & instances`=newinstances},objrec,gst)
 
 
-touchBound :: !Int !InstanceID !Int !Int !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+touchBound :: !Int !InstanceID !Int !Int !v:(OSGameData u:gs) !*OSToolbox -> (!v:OSGameData u:gs, !*OSToolbox)
 touchBound objtype id dir mapcode data=:{gamest,gamehnd} tb
     #   directions              =   makeDirectionSet dir
     #   maybefound              =   getobject objtype gamehnd
@@ -401,7 +401,7 @@ where
 
 
 
-initialiseGameObject :: !Int !Int !InstanceID !Point2 !Int !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+initialiseGameObject :: !Int !Int !InstanceID !Point2 !Int !v:(OSGameData u:gs) !*OSToolbox -> (!v:OSGameData u:gs, !*OSToolbox)
 initialiseGameObject objtype subtype id p time data=:{scroll,gamest,gamehnd} tb
     #   maybefound              =   getobject objtype gamehnd
     |   isJust maybefound
@@ -424,7 +424,7 @@ where
         =   ({obj & instances`=newinstances},objrec,gst)
 
 
-doneGameObject :: !Int !InstanceID !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+doneGameObject :: !Int !InstanceID !v:(OSGameData u:gs) !*OSToolbox -> (!v:OSGameData u:gs, !*OSToolbox)
 doneGameObject objtype id data=:{gamest,gamehnd} tb
     #   maybefound              =   getobject objtype gamehnd
     |   isJust maybefound
@@ -453,7 +453,7 @@ where
 
 
 
-handleCollision :: !Int !InstanceID !Int !InstanceID !Int !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+handleCollision :: !Int !InstanceID !Int !InstanceID !Int !v:(OSGameData u:gs) !*OSToolbox -> (!v:OSGameData u:gs, !*OSToolbox), [v<=u]
 handleCollision ot1 id1 ot2 id2 dir data=:{gamest,gamehnd} tb
     #   directions              =   makeDirectionSet dir
     #   maybefound              =   getobject ot1 gamehnd
@@ -485,7 +485,7 @@ where
 
 
 
-handleKeyDown :: !Int !InstanceID !Int !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+handleKeyDown :: !Int !InstanceID !Int !v:(OSGameData u:gs) !*OSToolbox -> (!v:OSGameData u:gs, !*OSToolbox), [v<=u]
 handleKeyDown objtype id key data=:{gamest,gamehnd} tb
     #   maybefound              =   getobject objtype gamehnd
     |   isJust maybefound
@@ -514,7 +514,7 @@ where
 //      =   ({obj & instances`=newinstances},objrec,gst)
 
 
-handleKeyUp :: !Int !InstanceID !Int !(OSGameData .gs) !*OSToolbox -> (!OSGameData .gs, !*OSToolbox)
+handleKeyUp :: !Int !InstanceID !Int !v:(OSGameData u:gs) !*OSToolbox -> (!v:OSGameData u:gs, !*OSToolbox), [v<=u]
 handleKeyUp objtype id key data=:{gamest,gamehnd} tb
     #   maybefound              =   getobject objtype gamehnd
     |   isJust maybefound

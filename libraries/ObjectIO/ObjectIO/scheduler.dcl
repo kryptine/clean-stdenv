@@ -5,8 +5,8 @@ definition module scheduler
 
 //	Process creation, termination, and handling functions.
 
+import	StdString
 import	deviceevents, StdMaybe
-from	StdString		import String
 from	id				import Id
 from	iostate			import PSt, IOSt, RR, CProcesses, CProcess
 from	receivertable	import ReceiverTable, ReceiverTableEntry, RecLoc

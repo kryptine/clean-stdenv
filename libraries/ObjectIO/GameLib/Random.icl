@@ -2,7 +2,7 @@ implementation module Random
 
 
 import	StdInt, StdClass
-from	StdTime	import	getCurrentTime, Time
+import	StdTime
 
 
 ::	RandomSeed	:== Int

@@ -264,13 +264,12 @@ where
 						# ((freeRIds1,freeIds1,f2),tb)				= disposeWItemHandle parentPtr itemH tb
 						# tb										= OSinvalidateWindowRect parentPtr (PosSizeToRect itemH.wItemPos itemH.wItemSize) tb
 						= (close,freeRIds1++freeRIds,freeIds1++freeIds,f2 o f1,ids,itemNrs,itemH,tb)
+				| not close
+					= (close,[],[],id,ids,itemNrs,itemH,tb)
 				| otherwise
-					| not close
-						= (close,[],[],id,ids,itemNrs,itemH,tb)
-					// otherwise
-						# ((freeRIds,freeIds,f),tb)					= disposeWItemHandle parentPtr itemH tb
-						# tb										= OSinvalidateWindowRect parentPtr (PosSizeToRect itemH.wItemPos itemH.wItemSize) tb
-						= (close,freeRIds,freeIds,f,ids,[itemH.wItemNr:itemNrs],itemH,tb)
+					# ((freeRIds,freeIds,f),tb)						= disposeWItemHandle parentPtr itemH tb
+					# tb											= OSinvalidateWindowRect parentPtr (PosSizeToRect itemH.wItemPos itemH.wItemSize) tb
+					= (close,freeRIds,freeIds,f,ids,[itemH.wItemNr:itemNrs],itemH,tb)
 		
 		closeWElementHandle parentPtr ids itemNrs (WListLSHandle itemHs) tb
 			# (freeRIds,freeIds,f,ids,itemNrs,itemHs,tb)	= closeWElementHandles parentPtr ids itemNrs itemHs tb

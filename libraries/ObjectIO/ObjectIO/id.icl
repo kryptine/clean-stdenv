@@ -205,7 +205,7 @@ getIdParents :: ![Id] !IdTable -> [Maybe IdParent]
 getIdParents ids idTable
 	= [getIdParent id idTable \\ id<-ids]
 
-addIdToIdTable :: !Id !IdParent !IdTable -> (!Bool,!IdTable)
+addIdToIdTable :: !Id !IdParent !IdTable -> *(!Bool,!IdTable)
 addIdToIdTable (CustomId nr) idParent idTable=:{customIds}		= (not found,{idTable & customIds=ids})
 where	(found,ids)	= addtosortlist nr idParent customIds
 addIdToIdTable (CustomRId nr) idParent idTable=:{customRIds}	= (not found,{idTable & customRIds=ids})
@@ -230,13 +230,13 @@ addtosortlist x px [(y,py):ys]
 addtosortlist x px _
 	= (False,[(x,px)])
 
-addIdsToIdTable :: ![(Id,IdParent)] !IdTable -> (!Bool,!IdTable)
+addIdsToIdTable :: ![(Id,IdParent)] !IdTable -> *(!Bool,!IdTable)
 addIdsToIdTable idparents idTable
 //	# (oks,idTable)	= seqList (map (\(id,parent)->addIdToIdTable id parent) idparents) idTable
 	# (oks,idTable)	= StrictSeqList (map add idparents) idTable
 	= (and oks,idTable)
 where
-	add :: !(!Id,!IdParent) !IdTable -> (!Bool,!IdTable)
+	add :: !(!Id,!IdParent) !IdTable -> *(!Bool,!IdTable)
 	add (id,parent) idTable = addIdToIdTable id parent idTable
 
 removeIdFromIdTable :: !Id !IdTable -> (!Bool,!IdTable)
@@ -251,7 +251,7 @@ where	(found,ids)	= removefromsortlist nr sysIds
 removeIdFromIdTable (SpecialId _) idTable					= (False,idTable)
 
 // removefromsortlist removes an element from a < sorted list. True iff element was member.
-removefromsortlist :: !Int ![(Int,.x)] -> (!Bool,![(Int,.x)])
+removefromsortlist :: !Int !w:[v:(Int,u:x)] -> (!Bool,!w:[v:(Int,u:x)]), [v<=u,w<=v]
 removefromsortlist x [(y,py):ys]
 	| x==y			= (True, ys)
 	| x>y			= (False,[(y,py):ys])

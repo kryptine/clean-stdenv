@@ -6,7 +6,7 @@ definition module StdEventTCP
 //	StdEventTCP provides functions for using event driven TCP
 //	********************************************************************************
 
-import	StdChannels, StdTCPDef
+import	StdChannels, StdId, StdTCPDef
 from	StdString		import String
 from	StdReceiver		import Receivers, ReceiverType
 from	StdPSt			import PSt, IOSt

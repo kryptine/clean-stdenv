@@ -158,7 +158,7 @@ where
 			ioState1			= IOStSetDevice (TimerSystemState tHs1) ioState
 			pState1				= {pState & io=ioState1}
 			
-			aSyncTimerStateHandles :: !Id ![TimerStateHandle .pst] .pst -> (![TimerStateHandle .pst],.pst)
+			aSyncTimerStateHandles :: !Id ![TimerStateHandle .pst] .pst -> *(![TimerStateHandle .pst],.pst)
 			aSyncTimerStateHandles rid [TimerLSHandle {tState=ls,tHandle=tH=:{tItems}}:tsHs] ps
 				# (done,tItems,(ls,ps))	= aSyncTimerElementHandles rid tItems (ls,ps)
 				  tsH					= TimerLSHandle {tState=ls,tHandle={tH & tItems=tItems}}
@@ -168,8 +168,8 @@ where
 					# (tsHs,ps)			= aSyncTimerStateHandles rid tsHs ps
 					= ([tsH:tsHs],ps)
 			where
-				aSyncTimerElementHandles :: !Id ![TimerElementHandle .ls .pst] (.ls,.pst)
-									  -> (!Bool,![TimerElementHandle .ls .pst],(.ls,.pst))
+				aSyncTimerElementHandles :: !Id ![TimerElementHandle .ls .pst] *(.ls,.pst)
+									  -> (!Bool,![TimerElementHandle .ls .pst],*(.ls,.pst))
 				aSyncTimerElementHandles rid [itemH:itemHs] ps
 					# (done,itemH, ps)	= aSyncTimerElementHandle  rid itemH  ps
 					| done
@@ -178,8 +178,8 @@ where
 						# (done,itemHs,ps)	= aSyncTimerElementHandles rid itemHs ps
 						= (done,[itemH:itemHs],ps)
 				where
-					aSyncTimerElementHandle :: !Id !(TimerElementHandle .ls .pst) (.ls,.pst)
-										  -> (!Bool,!TimerElementHandle .ls .pst, (.ls,.pst))
+					aSyncTimerElementHandle :: !Id !(TimerElementHandle .ls .pst) *(.ls,.pst)
+										  -> (!Bool,!TimerElementHandle .ls .pst, *(.ls,.pst))
 					aSyncTimerElementHandle rid (TimerListLSHandle itemHs) ps
 						# (done,itemHs,ps) = aSyncTimerElementHandles rid itemHs ps
 						= (done,TimerListLSHandle itemHs,ps)
@@ -202,7 +202,7 @@ where
 						(rH1,(ls1,ps1))	= aSyncReceiverHandle rH (ls,ps)
 						trH1			= {trH & tReceiverHandle=rH1}
 						
-						aSyncReceiverHandle :: !(ReceiverHandle .ls .pst) (.ls,.pst) -> (!ReceiverHandle .ls .pst,(.ls,.pst))
+						aSyncReceiverHandle :: !(ReceiverHandle .ls .pst) *(.ls,.pst) -> *(!ReceiverHandle .ls .pst,*(.ls,.pst))
 						aSyncReceiverHandle rH=:{rFun,rASMQ=[m:tailQ]} (ls,ps)
 							# (ls,_,ps)	= rFun m (ls,ps)
 							= ({rH & rASMQ=tailQ},(ls,ps))

@@ -106,8 +106,8 @@ MenuElementStateToMenuElementHandle mH = mH
 	Neither the ReceiverTable nor the IdTable are changed if there are duplicate (R(2))Ids; 
 	otherwise all (R(2))Ids have been bound.
 */
-menuIdsAreConsistent :: !SystemId !Id ![MenuElementHandle .ls .pst] !ReceiverTable !IdTable
-							-> (!Bool,![MenuElementHandle .ls .pst],!ReceiverTable,!IdTable)
+menuIdsAreConsistent :: !SystemId !Id !v:[MenuElementHandle .ls .pst] !ReceiverTable !IdTable
+							-> (!Bool,!v:[MenuElementHandle .ls .pst],!ReceiverTable,!IdTable)
 menuIdsAreConsistent ioId menuId itemHs rt it
 	# (itemHs,ids)	= StateMap getMenuElementMenuId itemHs []
 	| not (okMembersIdTable ids it)
@@ -119,7 +119,7 @@ menuIdsAreConsistent ioId menuId itemHs rt it
 	| otherwise
 		= (True,itemHs,rt,it)
 where
-	getMenuElementMenuId :: !(MenuElementHandle .ls .pst) ![Id] -> (!MenuElementHandle .ls .pst,![Id])
+	getMenuElementMenuId :: !(MenuElementHandle .ls .pst) ![Id] -> *(!MenuElementHandle .ls .pst,![Id])
 	getMenuElementMenuId itemH=:(MenuItemHandle {mItemId}) ids
 		| isNothing mItemId		= (itemH,ids)
 		| otherwise				= (itemH,[fromJust mItemId:ids])
@@ -151,8 +151,8 @@ where
 /*	bindReceiverMenuIds binds all R(2)Ids in the MenuElementState list. 
 	It assumes that it has already been checked that no R(2)Id is already bound in the ReceiverTable.
 */
-	bindReceiverMenuIds :: !SystemId !Id ![MenuElementState .ls .pst] !ReceiverTable
-									 -> (![MenuElementState .ls .pst],!ReceiverTable)
+	bindReceiverMenuIds :: !SystemId !Id !v:[MenuElementState .ls .pst] !ReceiverTable
+									 -> (!v:[MenuElementState .ls .pst],!ReceiverTable)
 	bindReceiverMenuIds ioId menuId [itemH:itemHs] rt
 		# (itemH, rt)	= bindReceiverMenuId` ioId menuId itemH rt
 		# (itemHs,rt)	= bindReceiverMenuIds ioId menuId itemHs rt
@@ -160,7 +160,7 @@ where
 	where
 		bindReceiverMenuId` :: !SystemId !Id !(MenuElementHandle .ls .pst) !ReceiverTable
 										  -> (!MenuElementHandle .ls .pst, !ReceiverTable)
-		bindReceiverMenuId` ioId menuId itemH=:(MenuReceiverHandle {mReceiverHandle={rId,rSelect}}) rt
+		bindReceiverMenuId` ioId menuId itemH=:(MenuReceiverHandle rH=:{mReceiverHandle={rId,rSelect}}) rt
 			= (itemH,snd (addReceiverToReceiverTable rte rt))
 		where
 			rte	= {	rteLoc			= {	rlIOId		= ioId

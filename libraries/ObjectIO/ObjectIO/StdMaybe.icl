@@ -22,13 +22,13 @@ isNothing :: !(Maybe .x) -> Bool
 isNothing Nothing	= True
 isNothing _		= False
 
-u_isJust :: !(Maybe .x) -> (!Bool, !Maybe .x)
+u_isJust :: !u:(Maybe v:x) -> (!Bool, !u:(Maybe v:x)), [u<=v]
 u_isJust nothing=:Nothing
 	= (False, nothing)
 u_isJust just
 	= (True, just)
 
-u_isNothing :: !(Maybe .x) -> (!Bool, !Maybe .x)
+u_isNothing :: !u:(Maybe v:x) -> (!Bool, !u:(Maybe v:x)), [u<=v]
 u_isNothing nothing=:Nothing
 	= (True, nothing)
 u_isNothing just
@@ -37,7 +37,7 @@ u_isNothing just
 fromJust :: !(Maybe .x) -> .x
 fromJust (Just x) = x
 
-accMaybe :: .(St .x .a) !(Maybe .x) -> (!Maybe .a,!Maybe .x)
+accMaybe :: .(St u:x .a) !v:(Maybe u:x) -> (!Maybe .a,!v:(Maybe u:x)), [v<=u]
 accMaybe f (Just x)
 	# (a,x) = f x
 	= (Just a,Just x)

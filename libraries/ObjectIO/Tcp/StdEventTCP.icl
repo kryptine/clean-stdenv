@@ -5,7 +5,7 @@ implementation module StdEventTCP
 import StdEnv
 import StdChannels, StdTCPDef, StdTCPChannels
 import StdReceiver
-import StdPSt, StdPStClass
+import StdId, StdPSt, StdPStClass
 import tcp, ostcp, tcp_bytestreams
 import commondef, receiverid, receiverdevice, receiverdefaccess, receiveraccess
 //import intrface

@@ -4,9 +4,7 @@ definition module oswindow
 //	Clean Object I/O library, version 1.2
 
 
-from StdString				import String
-from StdOverloaded			import ==
-from StdMaybe				import Maybe, Just, Nothing
+import StdMaybe, StdOverloaded, StdString
 from osdocumentinterface	import OSDInfo, OSMDInfo, OSSDInfo, OSInfo, OSToolbar, OSToolbarHandle, HMENU, HWND
 from osevent				import OSEvent, CrossCallInfo
 from osfont					import Font
@@ -112,20 +110,20 @@ OSgetSliderControlMinWidth		:: !OSWindowMetrics -> Int
 
 OScreateDialog :: !Bool
 				  !Bool !String !(!Int,!Int) !(!Int,!Int) !OSWindowPtr
-				  !(.s->(OSWindowPtr,.s))
-				  !(OSWindowPtr-> .s -> *OSToolbox -> (.s,*OSToolbox))
-				  !(OSWindowPtr->OSWindowPtr->OSPictContext->.s->*OSToolbox->(.s,*OSToolbox))
-				  !OSDInfo !.s !*OSToolbox
-			   -> (![DelayActivationInfo],!OSWindowPtr,!.s,!*OSToolbox)
+				  !(u:s->*(OSWindowPtr,u:s))
+				  !(OSWindowPtr-> u:s -> u:(*OSToolbox -> *(u:s,*OSToolbox)))
+				  !(OSWindowPtr->OSWindowPtr->OSPictContext->u:s->u:(*OSToolbox->*(u:s,*OSToolbox)))
+				  !OSDInfo !u:s !*OSToolbox
+			   -> (![DelayActivationInfo],!OSWindowPtr,!u:s,!*OSToolbox)
 OScreateWindow :: !OSWindowMetrics !Bool !ScrollbarInfo !ScrollbarInfo !(!Int,!Int) !(!Int,!Int)
 				  !Bool !String !(!Int,!Int) !(!Int,!Int)
-				  !(.s->(OSWindowPtr,.s))
-				  !(OSWindowPtr-> .s -> *OSToolbox -> (.s,*OSToolbox))
-				  !(OSWindowPtr->OSWindowPtr->OSPictContext->.s->*OSToolbox->(.s,*OSToolbox))
-				  !OSDInfo !OSWindowPtr !.s !*OSToolbox
-			   -> (![DelayActivationInfo],!OSWindowPtr,!OSWindowPtr,!OSWindowPtr,!OSDInfo,!.s,!*OSToolbox)
-OScreateModalDialog :: !Bool !String !OSDInfo !(Maybe OSWindowPtr) !(OSEvent -> .s -> ([Int],.s)) !.s !*OSToolbox
-																						-> (!Bool,!.s,!*OSToolbox)
+				  !(u:s->*(OSWindowPtr,u:s))
+				  !(OSWindowPtr-> u:s -> u:(*OSToolbox -> *(u:s,*OSToolbox)))
+				  !(OSWindowPtr->OSWindowPtr->OSPictContext->u:s->u:(*OSToolbox->*(u:s,*OSToolbox)))
+				  !OSDInfo !OSWindowPtr !u:s !*OSToolbox
+			   -> (![DelayActivationInfo],!OSWindowPtr,!OSWindowPtr,!OSWindowPtr,!OSDInfo,!u:s,!*OSToolbox)
+OScreateModalDialog :: !Bool !String !OSDInfo !(Maybe OSWindowPtr) !(OSEvent -> u:s -> *([Int],u:s)) !u:s !*OSToolbox
+																						   -> (!Bool,!u:s,!*OSToolbox)
 
 
 // Mike //
