@@ -5,15 +5,24 @@ implementation module oswindow
 
 
 import	StdBool, StdInt, StdReal, StdClass, StdOverloaded, StdList, StdMisc, StdTuple
+from	StdIOCommon			import CursorShape, StandardCursor, BusyCursor, IBeamCursor, CrossCursor, FatCrossCursor, ArrowCursor, HiddenCursor
 import	clCrossCall_12, clCCall_12, windowCCall_12, windowCrossCall_12
 import	osdocumentinterface, osevent, osfont, ospicture, osrgn, ossystem, ostypes
 from	menuCrossCall_12	import HMENU
 from	commondef			import fatalError,intersectRects,rectSize,fromTuple,toTuple4,subVector
+//import StdDebug,tracetypes
 
 
 oswindowFatalError :: String String -> .x
 oswindowFatalError function error
 	= fatalError function "oswindow" error
+
+
+/*	Initialisation:
+*/
+osInitialiseWindows :: !*OSToolbox -> *OSToolbox
+osInitialiseWindows tb
+	= winInitialiseWindows tb
 
 
 /*	System dependent constants:
@@ -29,14 +38,69 @@ osMinWindowSize :: (!Int,!Int)
 osMinWindowSize = winMinimumWinSize
 
 osMinCompoundSize :: (!Int,!Int)
-osMinCompoundSize = (0,0)	// PA: (0,0)<--WinMinimumWinSize (Check if this safe)
+osMinCompoundSize = (0,0)	// PA: (0,0)<--winMinimumWinSize (Check if this safe)
 
 
-/*	Initialisation:
+/*	Window frame dimensions: (PA: were defined as constants in windowvalidate. Moved here.)
 */
-osInitialiseWindows :: !*OSToolbox -> *OSToolbox
-osInitialiseWindows tb
-	= winInitialiseWindows tb
+osWindowFrameWidth     :: Int;	osWindowFrameWidth     = 0;
+osWindowTitleBarHeight :: Int;	osWindowTitleBarHeight = 0;
+
+
+//	Calculating the view frame of window/compound with visibility of scrollbars.
+
+osGetCompoundContentRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
+osGetCompoundContentRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom}
+	| visHScroll && visVScroll	= {itemRect & rright=r`,rbottom=b`}
+	| visHScroll				= {itemRect &           rbottom=b`}
+	| visVScroll				= {itemRect & rright=r`           }
+	| otherwise					= itemRect
+where
+	r`							= rright -osmVSliderWidth
+	b`							= rbottom-osmHSliderHeight
+
+osGetCompoundHScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
+osGetCompoundHScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom}
+	| not visHScroll	= zero
+	| otherwise			= {itemRect & rtop=b`,rright=if visVScroll r` rright}
+where
+	r`					= rright -osmVSliderWidth
+	b`					= rbottom-osmHSliderHeight
+
+osGetCompoundVScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
+osGetCompoundVScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom}
+	| not visVScroll	= zero
+	| otherwise			= {itemRect & rleft=r`,rbottom=if visHScroll b` rbottom}
+where
+	r`					= rright -osmVSliderWidth
+	b`					= rbottom-osmHSliderHeight
+
+
+osGetWindowContentRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
+osGetWindowContentRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) itemRect=:{rright,rbottom}
+	| visHScroll && visVScroll	= {itemRect & rright=r`,rbottom=b`}
+	| visHScroll				= {itemRect &           rbottom=b`}
+	| visVScroll				= {itemRect & rright=r`           }
+	| otherwise					= itemRect
+where
+	r`							= rright -osmVSliderWidth //+1
+	b`							= rbottom-osmHSliderHeight//+1
+
+osGetWindowHScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
+osGetWindowHScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) {rleft,rtop,rright,rbottom}
+	| not visHScroll	= zero
+	| otherwise			= {rleft=rleft-1,rtop=b`,rright=if visVScroll (r`+1) (rright+1),rbottom=rbottom+1}
+where
+	r`					= rright -osmVSliderWidth  + 1
+	b`					= rbottom-osmHSliderHeight + 1
+
+osGetWindowVScrollRect :: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
+osGetWindowVScrollRect {osmHSliderHeight,osmVSliderWidth} (visHScroll,visVScroll) {rleft,rtop,rright,rbottom}
+	| not visVScroll	= zero
+	| otherwise			= {rleft=r`,rtop=rtop-1,rright=rright+1,rbottom=if visHScroll (b`+1) (rbottom+1)}
+where
+	r`					= rright -osmVSliderWidth  + 1
+	b`					= rbottom-osmHSliderHeight + 1
 
 
 /*	Determine the size of controls.
@@ -295,13 +359,36 @@ osCreateWindowCallback _ _ _ _ _ {ccMsg} s tb
 	= oswindowFatalError "osCreateWindowCallback" ("unknown message type ("+++toString ccMsg+++")")
 
 
-/*	PA: new function that creates modal dialog and handles events until termination. 
-		The Bool result is True iff no error occurred. 
+/*	osCreateModalDialog wMetrics isCloseable title osdocinfo currentModal size 
+						dialogControls dialogInit handleOSEvents
+	creates a modal dialog and handles the events until either the dialog is closed or its parent process terminated.
+	Events are handled according to handleOSEvents.
+	Controls are created according to dialogControls                       (only if (not osModalDialogHandlesControlCreation)!).
+	Before the event loop is entered, the dialogInit function is evaluated (only if (not osModalDialogHandlesWindowInit)!).
 */
-osCreateModalDialog :: !Bool !String !OSDInfo !(Maybe OSWindowPtr) !(u:s -> (OSEvents,u:s)) !((OSEvents,u:s)-> u:s) !(OSEvent -> u:s -> *([Int],u:s))
-						!u:s !*OSToolbox
-			  -> (!Bool,!u:s,!*OSToolbox)
-osCreateModalDialog isClosable title osdinfo currentActiveModal getOSEvents setOSEvents handleOSEvents s tb
+::	OSModalEventHandling s
+	=	OSModalEventCallback (s -> *(OSEvents,s)) (*(OSEvents,s) -> s) (OSEvent -> s -> *([Int],s))
+	|	OSModalEventLoop     (s -> s)
+
+osModalDialogHandlesMenuSelectState	:== True
+osModalDialogHandlesWindowInit		:== True
+osModalDialogHandlesControlCreation	:== True
+osModalDialogHandlesEvents			:== True
+
+osCreateModalDialog ::	!OSWindowMetrics !Bool !String !OSDInfo !(Maybe OSWindowPtr) !(!Int,!Int) 
+						!(OSWindowPtr u:s -> u:s)
+						!(OSWindowPtr u:s -> u:s)
+						!(OSModalEventHandling u:s)
+						!(!u:s -> *(*OSToolbox,u:s), !*OSToolbox -> *(u:s -> u:s))
+						!u:s
+			  -> (!Bool,!u:s)
+osCreateModalDialog wMetrics isClosable title osdinfo currentActiveModal size 
+					dialogControls	// evaluated iff not osModalDialogHandlesControlCreation
+					dialogInit		// evaluated iff not osModalDialogHandlesWindowInit
+					(OSModalEventCallback getOSEvents setOSEvents handleOSEvents)
+					(getOSToolbox,setOSToolbox)
+					s
+	# (tb,s)			= getOSToolbox s
 	# (textPtr,tb)		= winMakeCString title tb
 	  createcci			= Rq2Cci CcRqCREATEMODALDIALOG textPtr parentptr
 	# (returncci,s,tb)	= issueCleanRequest (osCreateModalDialogCallback getOSEvents setOSEvents handleOSEvents) createcci s tb
@@ -310,16 +397,16 @@ osCreateModalDialog isClosable title osdinfo currentActiveModal getOSEvents setO
 	  						CcRETURN1	-> returncci.p1==0
 	  						CcWASQUIT	-> True
 		  					_			-> oswindowCreateError 1 "osCreateModalDialog"
-	= (ok,s,tb)
+	# s					= setOSToolbox tb s
+	= (ok,s)
 where
-	parentptr			= if (isNothing currentActiveModal)
-							(case (getOSDInfoOSInfo osdinfo) of
-								Just info -> info.osFrame
-								nothing   -> 0
-							)
-							(fromJust currentActiveModal)
+	parentptr			= case currentActiveModal of
+							Just wPtr -> wPtr
+							nothing   -> case getOSDInfoOSInfo osdinfo of
+											Just info -> info.osFrame
+											nothing   -> 0
 	
-	osCreateModalDialogCallback :: !(u:s -> (OSEvents,u:s)) !((OSEvents,u:s)-> u:s) !(OSEvent -> u:s -> *([Int],u:s)) 
+	osCreateModalDialogCallback :: !(u:s -> (OSEvents,u:s)) !((OSEvents,u:s)-> u:s) !(OSEvent -> u:s -> *([Int],u:s))
 									!CrossCallInfo !u:s !*OSToolbox
 								-> (!CrossCallInfo,!u:s,!*OSToolbox)
 	osCreateModalDialogCallback getOSEvents setOSEvents handleOSEvents osEvent s tb
@@ -334,6 +421,8 @@ where
 			# (osEvent,osEvents)	= osRemoveEvent osEvents
 			# s						= setOSEvents (osEvents,s)
 			= osCreateModalDialogCallback getOSEvents setOSEvents handleOSEvents osEvent s tb
+osCreateModalDialog _ _ _ _ _ _ _ _ (OSModalEventLoop _) _ _
+	= oswindowFatalError "osCreateModalDialog" "OSModalEventCallback argument expected instead of OSModalEventLoop"
 
 
 /*	Control creation functions.
@@ -412,7 +501,7 @@ MaxComboElementsScroll	:==	12			// otherwise, show MaxComboElementsScroll elemen
 
 osCreateEmptyPopUpControl :: !OSWindowPtr !(!Int,!Int) !Bool !Bool !(!Int,!Int) !(!Int,!Int) !Int !Bool !*OSToolbox
 	-> (!OSWindowPtr,!OSWindowPtr,!*OSToolbox)
-osCreateEmptyPopUpControl parentWindow parentPos show able (x,y) (w,h) nrItems isEditable tb
+osCreateEmptyPopUpControl parentWindow /*stackBehind*/ parentPos show able (x,y) (w,h) nrItems isEditable tb
 	# (x,y)				= (x-fst parentPos,y-snd parentPos)
 	# (screenRect,tb)	= osScreenrect tb
 	# (wMetrics,tb)		= osDefaultWindowMetrics tb
@@ -429,10 +518,13 @@ osCreateEmptyPopUpControl parentWindow parentPos show able (x,y) (w,h) nrItems i
 							_			-> oswindowCreateError 2 "osCreateEmptyPopUpControl"
 	# tb				= winEnableControl popUpPtr able tb
 	# tb				= winShowControl   popUpPtr show tb
+//	# (_,_,tb)			= osStackWindow    popUpPtr stackBehind k` 0 tb		PA: parameter not passed anymore
+						// PA: for control delayinfo can be ignored (this call has been moved from controlinternal to oswindow to ensure the control
+						//		is placed at the proper stacking order.)
 	= (popUpPtr,editPtr,tb)
 
-osCreatePopUpControlItem :: !OSWindowPtr !Int !Bool !String !Bool !*OSToolbox -> (!Int,!*OSToolbox)
-osCreatePopUpControlItem parentPopUp pos able title selected tb
+osCreatePopUpControlItem :: !OSWindowPtr !(Maybe !OSWindowPtr) !Int !Bool !String !Bool !Int !*OSToolbox -> (!Int,!*OSToolbox)
+osCreatePopUpControlItem parentPopUp _ pos able title selected _ tb
 	# (textPtr,tb)	= winMakeCString title tb
 	  addcci		= Rq5Cci CcRqADDTOPOPUP parentPopUp textPtr (toInt able) (toInt selected) pos
 	# (returncci,tb)= issueCleanRequest2 osIgnoreCallback addcci tb
@@ -455,6 +547,7 @@ osCreateSliderControl parentWindow parentPos show able horizontal (x,y) (w,h) (m
 						_			-> oswindowCreateError 1 "osCreateSliderControl"
 	# tb			= winSetScrollRange sliderPtr SB_CTL min max False tb
 	# tb			= winSetScrollPos   sliderPtr SB_CTL thumb (x+w) (y+h) (if horizontal h w) tb
+	# tb			= winSetScrollThumbSize sliderPtr SB_CTL thumbSize 0 0 0 tb		// PA: hint by Diederik to add this code to solve Maarten's bug
 	# tb			= winEnableControl  sliderPtr able tb
 	# tb			= winShowControl	sliderPtr show tb
 	= (sliderPtr,tb)
@@ -627,20 +720,24 @@ where
 					CcWmSIZE			-> True
 					_					-> False
 */
-osDestroyWindow :: !OSDInfo !Bool !Bool !OSWindowPtr !(OSEvent -> .s -> ([Int],.s)) !.s !*OSToolbox
-														  -> (![DelayActivationInfo],.s,!*OSToolbox)
-osDestroyWindow osdInfo isModal isWindow wPtr handleOSEvent state tb
+/*	PA: OSDInfo is now also returned by osDestroyWindow. 
+		By - personal - convention its argument position has been moved to the end of osDestroyWindow.
+		Note: on Windows platform OSDInfo is not modified.
+*/
+osDestroyWindow :: !Bool !Bool !OSWindowPtr !(OSEvent -> .s -> ([Int],.s)) !OSDInfo !.s !*OSToolbox
+												-> (![DelayActivationInfo],!OSDInfo,.s,!*OSToolbox)
+osDestroyWindow isModal isWindow wPtr handleOSEvent osdInfo state tb
 	| di==MDI
 		# destroycci				= if isWindow (Rq3Cci CcRqDESTROYMDIDOCWINDOW osFrame osClient wPtr)
 									 (if isModal  (Rq1Cci CcRqDESTROYMODALDIALOG wPtr)
 												  (Rq1Cci CcRqDESTROYWINDOW wPtr))
 		# (_,(delayInfo,state),tb)	= issueCleanRequest (osDelayCallback handleOSEvent) destroycci ([],state) tb
-		= (reverse delayInfo,state,tb)
+		= (reverse delayInfo,osdInfo,state,tb)
 	| di==SDI
 		# destroycci				= if isModal (Rq1Cci CcRqDESTROYMODALDIALOG wPtr)
 												 (Rq1Cci CcRqDESTROYWINDOW wPtr)
 		# (_,(delayInfo,state),tb)	= issueCleanRequest (osDelayCallback handleOSEvent) destroycci ([],state) tb
-		= (reverse delayInfo,state,tb)
+		= (reverse delayInfo,osdInfo,state,tb)
 	// It's a NDI process
 	| isWindow		/* This condition should never occur (NDI processes have only dialogues). */
 		= oswindowFatalError "osDestroyWindow" "trying to destroy window of NDI process"
@@ -648,7 +745,7 @@ osDestroyWindow osdInfo isModal isWindow wPtr handleOSEvent state tb
 		# destroycci				= if isModal (Rq1Cci CcRqDESTROYMODALDIALOG wPtr)
 												 (Rq1Cci CcRqDESTROYWINDOW wPtr)
 		# (_,(delayInfo,state),tb)	= issueCleanRequest (osDelayCallback handleOSEvent) destroycci ([],state) tb
-		= (reverse delayInfo,state,tb)
+		= (reverse delayInfo,osdInfo,state,tb)
 where
 	di								= getOSDInfoDocumentInterface osdInfo
 	{osFrame,osClient}				= fromJust (getOSDInfoOSInfo  osdInfo)
@@ -717,8 +814,8 @@ osDestroyRadioControl wPtr tb = destroycontrol wPtr tb
 osDestroyCheckControl :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osDestroyCheckControl wPtr tb = destroycontrol wPtr tb
 
-osDestroyPopUpControl :: !OSWindowPtr !*OSToolbox -> *OSToolbox
-osDestroyPopUpControl wPtr tb = destroycontrol wPtr tb
+osDestroyPopUpControl :: !OSWindowPtr !(Maybe !OSWindowPtr) !*OSToolbox -> *OSToolbox
+osDestroyPopUpControl wPtr _ tb = destroycontrol wPtr tb
 
 osDestroySliderControl :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osDestroySliderControl wPtr tb = destroycontrol wPtr tb
@@ -738,35 +835,48 @@ osDestroyCustomButtonControl wPtr tb = destroycontrol wPtr tb
 osDestroyCustomControl :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osDestroyCustomControl wPtr tb = destroycontrol wPtr tb
 
-osDestroyCompoundControl :: !OSWindowPtr !*OSToolbox -> *OSToolbox
-osDestroyCompoundControl wPtr tb = destroycontrol wPtr tb
+osDestroyCompoundControl :: !OSWindowPtr !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+osDestroyCompoundControl wPtr _ _ tb = destroycontrol wPtr tb
 
 
 /*	Control update operations.
 */
-osUpdateRadioControl :: !Rect !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
-osUpdateRadioControl area parentWindow theControl tb = updatecontrol theControl area tb
+osUpdateRadioControl :: !Rect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+osUpdateRadioControl area pos parentWindow theControl tb = updatecontrol theControl (subVector (fromTuple pos) area) tb
 
-osUpdateCheckControl :: !Rect !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
-osUpdateCheckControl area parentWindow theControl tb = updatecontrol theControl area tb
+osUpdateCheckControl :: !Rect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+osUpdateCheckControl area pos parentWindow theControl tb = updatecontrol theControl (subVector (fromTuple pos) area) tb
 
-osUpdatePopUpControl :: !Rect !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
-osUpdatePopUpControl area parentWindow theControl tb = updatecontrol theControl area tb
+osUpdatePopUpControl :: !Rect !OSWindowPtr !OSWindowPtr !(Maybe OSWindowPtr) !(!Int,!Int) !(!Int,!Int) !Bool !String !*OSToolbox -> *OSToolbox
+osUpdatePopUpControl area parentWindow theControl editControl pos size select text tb
+	= updatecontrol theControl (subVector (fromTuple pos) area) tb
 
-osUpdateSliderControl :: !Rect !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
-osUpdateSliderControl area parentWindow theControl tb = updatecontrol theControl area tb
+osUpdateSliderControl :: !Rect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+osUpdateSliderControl area pos parentWindow theControl tb = updatecontrol theControl (subVector (fromTuple pos) area) tb
 
-osUpdateTextControl :: !Rect !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
-osUpdateTextControl area parentWindow theControl tb = updatecontrol theControl area tb
+//OSupdateTextControl :: !Rect !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+//OSupdateTextControl area parentWindow theControl tb = updatecontrol theControl area tb
+osUpdateTextControl :: !Rect !Rect !String !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+osUpdateTextControl area _ _ pos parentWindow theControl tb
+	= updatecontrol theControl (subVector (fromTuple pos) area) tb
 
-osUpdateEditControl :: !Rect !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
-osUpdateEditControl area parentWindow theControl tb = updatecontrol theControl area tb
+//OSupdateEditControl :: !Rect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+//OSupdateEditControl area pos parentWindow theControl tb = updatecontrol theControl (subVector (fromTuple pos) area) tb
+osUpdateEditControl :: !Rect !Rect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+osUpdateEditControl area _ pos parentWindow theControl tb
+	= updatecontrol theControl (subVector (fromTuple pos) area) tb
 
-osUpdateButtonControl :: !Rect !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
-osUpdateButtonControl area parentWindow theControl tb = updatecontrol theControl area tb
+//OSupdateButtonControl :: !Rect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+//OSupdateButtonControl area pos parentWindow theControl tb = updatecontrol theControl (subVector (fromTuple pos) area) tb
+osUpdateButtonControl :: !Rect !Rect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+osUpdateButtonControl area _ pos parentWindow theControl tb
+	= updatecontrol theControl (subVector (fromTuple pos) area) tb
 
-osUpdateCompoundControl :: !Rect !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
-osUpdateCompoundControl area parentWindow theControl tb = updatecontrol theControl area tb
+//OSupdateCompoundControl :: !Rect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+//OSupdateCompoundControl area pos parentWindow theControl tb = updatecontrol theControl (subVector (fromTuple pos) area) tb
+osUpdateCompoundControl :: !Rect !(!Int,!Int) !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
+osUpdateCompoundControl area pos parentWindow theControl tb
+	= updatecontrol theControl (subVector (fromTuple pos) area) tb
 
 updatecontrol :: !OSWindowPtr !Rect !*OSToolbox -> *OSToolbox
 updatecontrol theControl rect tb = winUpdateWindowRect theControl (toTuple4 rect) tb
@@ -822,6 +932,36 @@ osGrabWindowPictContext wPtr tb
 osReleaseWindowPictContext :: !OSWindowPtr !OSPictContext !*OSToolbox -> *OSToolbox
 osReleaseWindowPictContext wPtr hdc tb
 	= winReleaseDC wPtr (hdc,tb)
+
+
+/*	osBeginUpdate theWindow
+		makes additional preparations to do updates. Dummy on Windows.
+	osEndUpdate theWindow
+		administrates and ends the update. Dummy on Windows.
+*/
+osBeginUpdate :: !OSWindowPtr !*OSToolbox -> *OSToolbox
+osBeginUpdate _ tb = tb
+
+osEndUpdate :: !OSWindowPtr !*OSToolbox -> *OSToolbox
+osEndUpdate _ tb = tb
+
+
+/*	(acc/app)Grafport theWindow f
+		applies f to the graphics context of theWindow (dummy on Windows).
+	(acc/app)Clipport theWindow clipRect f
+		applies f to the graphics context of theWindow while clipping clipRect (dummy on Windows).
+*/
+accGrafport :: !OSWindowPtr !.(St *OSToolbox .x) !*OSToolbox -> (!.x, !*OSToolbox)
+accGrafport _ f tb = f tb
+
+appGrafport :: !OSWindowPtr !.(*OSToolbox -> *OSToolbox) !*OSToolbox -> *OSToolbox
+appGrafport _ f tb = f tb
+
+accClipport :: !OSWindowPtr !Rect !.(St *OSToolbox .x) !*OSToolbox -> (!.x, !*OSToolbox)
+accClipport _ _ f tb = f tb
+
+appClipport :: !OSWindowPtr !Rect !.(*OSToolbox -> *OSToolbox) !*OSToolbox -> *OSToolbox
+appClipport _ _ f tb = f tb
 
 
 /*	Window access operations.
@@ -884,14 +1024,14 @@ OSSliderMax		:== 32767		// MaxSigned2ByteInt
 OSSliderRange	:== 32767		// OSSliderMax-OSSliderMin
 
 
-osSetWindowSliderThumb :: !OSWindowMetrics !OSWindowPtr !Bool !Int !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
-osSetWindowSliderThumb wMetrics theWindow isHorizontal thumb (maxx,maxy) redraw tb
+osSetWindowSliderThumb :: !OSWindowMetrics !OSWindowPtr !Bool !Int !(Maybe OSWindowPtr) !(Maybe OSWindowPtr) !Rect !Rect !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
+osSetWindowSliderThumb wMetrics theWindow isHorizontal thumb _ _ _ _ (maxx,maxy) redraw tb
 	= winSetScrollPos theWindow (if isHorizontal SB_HORZ SB_VERT) thumb maxx maxy extent tb
 where
 	extent	= if isHorizontal wMetrics.osmHSliderHeight wMetrics.osmVSliderWidth
 
-osSetWindowSliderThumbSize :: !OSWindowMetrics !OSWindowPtr !Bool !Int !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
-osSetWindowSliderThumbSize wMetrics theWindow isHorizontal size (maxx,maxy) redraw tb
+osSetWindowSliderThumbSize :: !OSWindowMetrics !OSWindowPtr !OSWindowPtr !Bool !Int !Int !Int !(!Int,!Int) !Rect !Bool !Bool !*OSToolbox -> *OSToolbox
+osSetWindowSliderThumbSize wMetrics theWindow _ isHorizontal _ _ size (maxx,maxy) _ _ redraw tb
 	= winSetScrollThumbSize theWindow (if isHorizontal SB_HORZ SB_VERT) size maxx maxy extent tb
 where
 	extent	= if isHorizontal wMetrics.osmHSliderHeight wMetrics.osmVSliderWidth
@@ -899,6 +1039,10 @@ where
 osSetWindowSlider :: !OSWindowMetrics !OSWindowPtr !Bool !(!Int,!Int,!Int,!Int) !(!Int,!Int) !*OSToolbox -> *OSToolbox
 osSetWindowSlider wMetrics theWindow isHorizontal state maxcoords tb
 	= setScrollRangeAndPos True True wMetrics (if isHorizontal SB_HORZ SB_VERT) state maxcoords theWindow tb
+
+//	PA: dummy function, required only for Mac (moved from \OS Macintosh\osutil) and made type independent of WindowHandle.
+osUpdateWindowScroll :: !OSWindowPtr !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Rect !*OSToolbox -> *OSToolbox
+osUpdateWindowScroll _ scrollPtr pos size _ tb = tb
 
 osInvalidateWindow :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osInvalidateWindow theWindow tb
@@ -927,31 +1071,34 @@ osEnableWindow theWindow scrollInfo modalContext tb
 osActivateWindow :: !OSDInfo !OSWindowPtr !(OSEvent->(.s,*OSToolbox)->(.s,*OSToolbox)) !.s !*OSToolbox
 	-> (![DelayActivationInfo],!.s,!*OSToolbox)
 osActivateWindow osdInfo thisWindow handleOSEvent state tb
-	# (_,(delayinfo,state),tb)	= issueCleanRequest (osCallback handleOSEvent) (Rq3Cci CcRqACTIVATEWINDOW (toInt isMDI) clientPtr thisWindow) ([],state) tb
+	# (_,(delayinfo,state),tb)	= issueCleanRequest (osDelayActivationEventsCallback handleOSEvent) (Rq3Cci CcRqACTIVATEWINDOW (toInt isMDI) clientPtr thisWindow) ([],state) tb
 	= (reverse delayinfo,state,tb)
 where
 	isMDI				= getOSDInfoDocumentInterface osdInfo==MDI
 	clientPtr			= case (getOSDInfoOSInfo osdInfo) of
 							Just {osClient} -> osClient
 							nothing         -> oswindowFatalError "osActivateWindow" "illegal DocumentInterface context"
-	
-/*	osCallback delays activate and deactivate events.
+
+/*	osDelayActivationEventsCallback delays activate and deactivate events for windows/dialogues/controls.
 	All other events are passed to the callback function.
-*/	osCallback :: !(OSEvent->(.s,*OSToolbox)->(.s,*OSToolbox)) !CrossCallInfo !(![DelayActivationInfo],!.s) !*OSToolbox
-		-> (!CrossCallInfo,!(![DelayActivationInfo],!.s),!*OSToolbox)
-	osCallback handleOSEvent osEvent=:{ccMsg,p1,p2} (delayinfo,s) tb
-		| isDelayEvent
-			= (return0Cci,([delayEvent:delayinfo],s),tb)
-		| otherwise
-			# (s,tb)	= handleOSEvent osEvent (s,tb)
-			= (return0Cci,(delayinfo,s),tb)
-	where
-		(isDelayEvent,delayEvent)	= case ccMsg of
-										CcWmACTIVATE   -> (True,DelayActivatedWindow    p1)
-										CcWmDEACTIVATE -> (True,DelayDeactivatedWindow  p1)
-										CcWmKILLFOCUS  -> (True,DelayDeactivatedControl p1 p2)
-										CcWmSETFOCUS   -> (True,DelayActivatedControl   p1 p2)
-										_              -> (False,undef)
+	Note that the returned [DelayActivationInfo] is in reversed order.
+	This function is also used by osActivateControl.
+*/
+osDelayActivationEventsCallback :: !(OSEvent->(.s,*OSToolbox)->(.s,*OSToolbox)) !CrossCallInfo !(![DelayActivationInfo],!.s) !*OSToolbox
+								-> (!CrossCallInfo,!(![DelayActivationInfo],!.s),!*OSToolbox)
+osDelayActivationEventsCallback handleOSEvent osEvent=:{ccMsg,p1,p2} (delayinfo,s) tb
+	| isDelayEvent
+		= (return0Cci,([delayEvent:delayinfo],s),tb)
+	| otherwise
+		# (s,tb)	= handleOSEvent osEvent (s,tb)
+		= (return0Cci,(delayinfo,s),tb)
+where
+	(isDelayEvent,delayEvent)	= case ccMsg of
+									CcWmACTIVATE   -> (True,DelayActivatedWindow    p1)
+									CcWmDEACTIVATE -> (True,DelayDeactivatedWindow  p1)
+									CcWmKILLFOCUS  -> (True,DelayDeactivatedControl p1 p2)
+									CcWmSETFOCUS   -> (True,DelayActivatedControl   p1 p2)
+									_              -> (False,undef)
 
 
 osActivateControl :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> (![DelayActivationInfo],!*OSToolbox)
@@ -976,27 +1123,14 @@ osStackWindow thisWindow behindWindow tb
 
 winRestackWindow :: !HWND !HWND !*OSToolbox -> *OSToolbox
 winRestackWindow theWindow behindWindow tb
-	= snd (issueCleanRequest2 (errorCallback2 "WinRestackWindow") (Rq2Cci CcRqRESTACKWINDOW theWindow behindWindow) tb)
+	= snd (issueCleanRequest2 (errorCallback2 "winRestackWindow") (Rq2Cci CcRqRESTACKWINDOW theWindow behindWindow) tb)
 */
 
 osStackWindow :: !OSWindowPtr !OSWindowPtr !(OSEvent->(.s,*OSToolbox)->(.s,*OSToolbox)) !.s !*OSToolbox
 	-> (![DelayActivationInfo],!.s,!*OSToolbox)
 osStackWindow thisWindow behindWindow handleOSEvent state tb
-	# (_,(delayinfo,state),tb)	= issueCleanRequest (osCallback handleOSEvent) (Rq2Cci CcRqRESTACKWINDOW thisWindow behindWindow) ([],state) tb
+	# (_,(delayinfo,state),tb)	= issueCleanRequest (osDelayActivationEventsCallback handleOSEvent) (Rq2Cci CcRqRESTACKWINDOW thisWindow behindWindow) ([],state) tb
 	= (reverse delayinfo,state,tb)
-where
-/*	osCallback delays activate and deactivate events.
-	All other events are passed to the callback function. 
-	PA: is now identical to osActivateWindow!!
-*/	osCallback :: !(OSEvent->(.s,*OSToolbox)->(.s,*OSToolbox)) !CrossCallInfo !(![DelayActivationInfo],!.s) !*OSToolbox
-		-> (!CrossCallInfo,!(![DelayActivationInfo],!.s),!*OSToolbox)
-	osCallback handleOSEvent {ccMsg=CcWmACTIVATE,p1=hwnd} (delayinfo,s) tb
-		= (return0Cci,([DelayActivatedWindow hwnd:delayinfo],s),tb)
-	osCallback handleOSEvent {ccMsg=CcWmDEACTIVATE,p1=hwnd} (delayinfo,s) tb
-		= (return0Cci,([DelayDeactivatedWindow hwnd:delayinfo],s),tb)
-	osCallback handleOSEvent osEvent (delayinfo,s) tb
-		# (s,tb)	= handleOSEvent osEvent (s,tb)
-		= (return0Cci,(delayinfo,s),tb)
 
 osHideWindow :: !OSWindowPtr !Bool !*OSToolbox -> (![DelayActivationInfo],!*OSToolbox)
 osHideWindow wPtr activate tb
@@ -1008,9 +1142,21 @@ osShowWindow wPtr activate tb
 	# (_,delayinfo,tb)	= issueCleanRequest osIgnoreCallback` (Rq3Cci CcRqSHOWWINDOW wPtr (toInt True) (toInt activate)) [] tb
 	= (reverse delayinfo,tb)
 
-osSetWindowCursor :: !OSWindowPtr !Int !*OSToolbox -> *OSToolbox
-osSetWindowCursor wPtr cursorCode tb
+osSetWindowCursor :: !OSWindowPtr !CursorShape !*OSToolbox -> *OSToolbox
+osSetWindowCursor wPtr shape tb
 	= winSetWindowCursor wPtr cursorCode tb
+where
+	cursorCode = toCursorCode shape
+	
+//	PA: moved from windowaccess.
+	toCursorCode :: !CursorShape -> Int
+	toCursorCode StandardCursor	= CURSARROW
+	toCursorCode BusyCursor		= CURSBUSY
+	toCursorCode IBeamCursor	= CURSIBEAM
+	toCursorCode CrossCursor	= CURSCROSS
+	toCursorCode FatCrossCursor	= CURSFATCROSS
+	toCursorCode ArrowCursor	= CURSARROW
+	toCursorCode HiddenCursor	= CURSHIDDEN
 
 osGetWindowPos :: !OSWindowPtr !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
 osGetWindowPos wPtr tb
@@ -1049,33 +1195,34 @@ osInvalidateCompound :: !OSWindowPtr !*OSToolbox -> *OSToolbox
 osInvalidateCompound compoundPtr tb
 	= winInvalidateWindow compoundPtr tb
 
+/*	PA: not used
 osInvalidateCompoundRect :: !OSWindowPtr !Rect !*OSToolbox -> *OSToolbox
 osInvalidateCompoundRect compoundPtr rect tb
 	= winInvalidateRect compoundPtr (toTuple4 rect) tb
-
-osSetCompoundSliderThumb :: !OSWindowMetrics !OSWindowPtr !Bool !Int !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
-osSetCompoundSliderThumb wMetrics compoundPtr isHorizontal thumb (maxx,maxy) redraw tb
+*/
+osSetCompoundSliderThumb :: !OSWindowMetrics !OSWindowPtr !OSWindowPtr !OSWindowPtr !Rect !Bool !Int !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
+osSetCompoundSliderThumb wMetrics _ compoundPtr _ _ isHorizontal thumb (maxx,maxy) redraw tb
 	= winSetScrollPos compoundPtr (if isHorizontal SB_HORZ SB_VERT) thumb maxx` maxy` extent tb
 where
 	(maxx`,maxy`,extent)	= if redraw (maxx,maxy,if isHorizontal wMetrics.osmHSliderHeight wMetrics.osmVSliderWidth) (0,0,0)
 
-osSetCompoundSliderThumbSize :: !OSWindowMetrics !OSWindowPtr !Bool !Int !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
-osSetCompoundSliderThumbSize wMetrics compoundPtr isHorizontal size (maxx,maxy) redraw tb
+osSetCompoundSliderThumbSize :: !OSWindowMetrics !OSWindowPtr !OSWindowPtr !Int !Int !Int !Rect !Bool !Bool !Bool !*OSToolbox -> *OSToolbox
+osSetCompoundSliderThumbSize wMetrics _ compoundPtr _ _ size rect isHorizontal _ redraw tb
 	= winSetScrollThumbSize compoundPtr (if isHorizontal SB_HORZ SB_VERT) size maxx` maxy` extent tb
 where
-	(maxx`,maxy`,extent)	= if redraw (maxx,maxy,if isHorizontal wMetrics.osmHSliderHeight wMetrics.osmVSliderWidth) (0,0,0)
+	(maxx`,maxy`,extent)	= if redraw (rect.rright,rect.rbottom,if isHorizontal wMetrics.osmHSliderHeight wMetrics.osmVSliderWidth) (0,0,0)
 
 osSetCompoundSlider :: !OSWindowMetrics !OSWindowPtr !Bool !(!Int,!Int,!Int,!Int) !(!Int,!Int) !*OSToolbox -> *OSToolbox
 osSetCompoundSlider wMetrics compoundPtr isHorizontal state maxcoords tb
 	= setScrollRangeAndPos True True wMetrics (if isHorizontal SB_HORZ SB_VERT) state maxcoords compoundPtr tb
 
-osSetCompoundSelect :: !OSWindowPtr !OSWindowPtr !Rect !(!Bool,!Bool) !Bool !*OSToolbox -> *OSToolbox
-osSetCompoundSelect _ compoundPtr _ scrollInfo select tb
+osSetCompoundSelect :: !OSWindowPtr !OSWindowPtr !Rect !(!Bool,!Bool) !(!OSWindowPtr,!OSWindowPtr) !Bool !*OSToolbox -> *OSToolbox
+osSetCompoundSelect _ compoundPtr _ scrollInfo _ select tb
 	= winSetSelectStateWindow compoundPtr scrollInfo select False tb
 //	= winEnableControl compoundPtr scrollInfo select tb
 
-osSetCompoundShow :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
-osSetCompoundShow _ compoundPtr _ show tb
+osSetCompoundShow :: !OSWindowPtr !OSWindowPtr !Rect !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetCompoundShow _ compoundPtr _ _ show tb
 	= winShowControl compoundPtr show tb
 
 osSetCompoundPos :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
@@ -1086,15 +1233,29 @@ osSetCompoundSize :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,
 osSetCompoundSize _ _ compoundPtr _ size update tb
 	= winSetWindowSize compoundPtr size update tb
 
-OSCompoundMovesControls :== True
+//	PA: dummy function, required only for Mac
+osUpdateCompoundScroll :: !OSWindowPtr !OSWindowPtr !Rect !*OSToolbox -> *OSToolbox
+osUpdateCompoundScroll _ _ _ tb
+	= tb
+
+osCompoundMovesControls :== True
+
+osCompoundControlHasOrigin :== True
 
 
 //	On slider controls:
 
-osSetSliderThumb :: !OSWindowPtr !OSWindowPtr !Rect !Bool !(!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
-osSetSliderThumb _ cPtr _ redraw (min,thumb,max) tb
+osSetSliderControlThumb :: !OSWindowPtr !OSWindowPtr !Rect !Bool !(!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
+osSetSliderControlThumb _ cPtr _ redraw (min,thumb,max) tb
 	= winSetScrollPos cPtr SB_CTL thumb 0 0 0 tb//redraw tb
-
+/*	PA: Diederik proposed the following to solve Maarten's bug:
+osSetSliderControlThumb :: !OSWindowPtr !OSWindowPtr !Rect !Bool !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
+osSetSliderControlThumb _ cPtr _ redraw (min,thumb,max,thumbsize) tb
+	# tb	= winSetScrollRange cPtr SB_CTL min max False tb
+//	# tb	= winSetScrollPos   sliderPtr SB_CTL thumb (x+w) (y+h) (if horizontal h w) tb
+	# tb	= winSetScrollThumbSize cPtr SB_CTL thumbsize 0 0 0 tb
+	= winSetScrollPos cPtr SB_CTL thumb 0 0 0 tb//redraw tb
+*/
 osSetSliderControlSelect :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
 osSetSliderControlSelect _ cPtr _ select tb
 	= winEnableControl cPtr select tb
@@ -1160,8 +1321,8 @@ osSetCheckControlSize _ _ checkPtr _ size update tb
 
 //	On pop up controls:
 
-osSetPopUpControl :: !OSWindowPtr !OSWindowPtr !Rect !Rect !Int !Int !String !Bool !*OSToolbox -> *OSToolbox
-osSetPopUpControl _ pPtr _ _ _ new _ _ tb
+osSetPopUpControl :: !OSWindowPtr !OSWindowPtr !(Maybe OSWindowPtr) !Rect !Rect !Int !Int !String !Bool !*OSToolbox -> *OSToolbox
+osSetPopUpControl _ pPtr _ _ _ _ new _ _ tb
 	= winSelectPopupItem pPtr (new-1) tb
 
 osSetPopUpControlSelect :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
@@ -1211,6 +1372,10 @@ osSetEditControlSize :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!I
 osSetEditControlSize _ _ editPtr _ size update tb
 	= winSetWindowSize editPtr size update tb
 
+//	Dummy implementation; used on Mac only (windowevent.icl):
+osIdleEditControl :: !OSWindowPtr !Rect !OSWindowPtr !*OSToolbox -> *OSToolbox
+osIdleEditControl _ _ _ tb = tb
+
 
 //	On text controls:
 
@@ -1222,8 +1387,8 @@ osSetTextControlSelect :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *
 osSetTextControlSelect _ tPtr _ select tb
 	= winEnableControl tPtr select tb
 
-osSetTextControlShow :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
-osSetTextControlShow _ tPtr _ show tb
+osSetTextControlShow :: !OSWindowPtr !OSWindowPtr !Rect !Rect !Bool !String !*OSToolbox -> *OSToolbox
+osSetTextControlShow _ tPtr _ _ show _ tb
 	= winShowControl tPtr show tb
 
 osSetTextControlPos :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
@@ -1264,8 +1429,8 @@ osSetCustomButtonControlSelect :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSTool
 osSetCustomButtonControlSelect _ cPtr _ select tb
 	= winEnableControl cPtr select tb
 
-osSetCustomButtonControlShow :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
-osSetCustomButtonControlShow _ cPtr _ show tb
+osSetCustomButtonControlShow :: !OSWindowPtr !OSWindowPtr !Rect !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetCustomButtonControlShow _ cPtr _ _ show tb
 	= winShowControl cPtr show tb
 
 osSetCustomButtonControlPos :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
@@ -1276,6 +1441,8 @@ osSetCustomButtonControlSize :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!I
 osSetCustomButtonControlSize _ _ cPtr _ size update tb
 	= winSetWindowSize cPtr size update tb
 
+osCustomButtonControlHasOrigin	:== True
+
 
 //	On custom controls:
 
@@ -1283,8 +1450,8 @@ osSetCustomControlSelect :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox ->
 osSetCustomControlSelect _ cPtr _ select tb
 	= winEnableControl cPtr select tb
 
-osSetCustomControlShow :: !OSWindowPtr !OSWindowPtr !Rect !Bool !*OSToolbox -> *OSToolbox
-osSetCustomControlShow _ cPtr _ show tb
+osSetCustomControlShow :: !OSWindowPtr !OSWindowPtr !Rect !Rect !Bool !*OSToolbox -> *OSToolbox
+osSetCustomControlShow _ cPtr _ _ show tb
 	= winShowControl cPtr show tb
 
 osSetCustomControlPos :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
@@ -1294,3 +1461,11 @@ osSetCustomControlPos _ (parent_x,parent_y) customPtr (x,y) _ update tb
 osSetCustomControlSize :: !OSWindowPtr !(!Int,!Int) !OSWindowPtr !(!Int,!Int) !(!Int,!Int) !Bool !*OSToolbox -> *OSToolbox
 osSetCustomControlSize _ _ customPtr _ size update tb
 	= winSetWindowSize customPtr size update tb
+
+osCustomControlHasOrigin :== True
+
+
+//--
+//	PA: copied from OS Macintosh. I suppose this is to set the global cursor?
+osSetCursorShape :: !CursorShape !*OSToolbox -> *OSToolbox
+osSetCursorShape _ tb = tb

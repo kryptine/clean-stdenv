@@ -10,9 +10,14 @@ definition module menuevent
 
 import	deviceevents, devicesystemstate, menuhandle
 from	iostate	import PSt, IOSt
+from	osmenu	import OSTrackPopUpMenu, OSTrackPopUpMenuResult, PopUpTrackedByIndex, PopUpTrackedByItemId
 
 
-menuEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
+menuEvent		:: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
 
-menuHandlesGetMenuStateHandles :: !(MenuHandles .pst) -> (![MenuStateHandle .pst], !MenuHandles .pst)
-// PA: moved from menudevice
+/*	For pop up menu's an alternative way to determine the DeviceEvent is required:
+*/
+popUpMenuEvent	:: !OSTrackPopUpMenu !(MenuStateHandle .ps) !*OSToolbox -> (!Maybe DeviceEvent, !MenuStateHandle .ps, !*OSToolbox)
+
+//menuHandlesGetMenuStateHandles :: !(MenuHandles .pst) -> (![MenuStateHandle .pst], !MenuHandles .pst)
+// PA: not used

@@ -2,6 +2,7 @@ definition module menuCrossCall_12
 
 
 import	StdString
+from	StdIOCommon	import Modifiers
 from	ostoolbox	import OSToolbox
 from	ostypes		import HWND
 
@@ -11,7 +12,7 @@ from	ostypes		import HWND
 
 
 winCreatePopupMenuHandle::										!*OSToolbox -> (!HMENU, !*OSToolbox)
-winTrackPopupMenu		:: !HMENU !HWND							!*OSToolbox -> (!Bool,  !*OSToolbox)	// Bool: if True then item is selected; otherwise menu closed
+winTrackPopupMenu		:: !HMENU !HWND							!*OSToolbox -> (!Int,!Modifiers,!*OSToolbox)
 winInsertMenu			:: !String !Bool !HMENU !HMENU !Int		!*OSToolbox -> *OSToolbox
 winInsertMenuItem       :: !String !Bool !Bool !HMENU !Int		!*OSToolbox -> (!HITEM, !*OSToolbox)
 winInsertSeparator		:: !HMENU !Int							!*OSToolbox -> *OSToolbox

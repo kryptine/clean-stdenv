@@ -485,17 +485,18 @@ instance toString DocumentInterface where
 /*	Process attributes.									*/
 
 ::	ProcessAttribute st									// Default:
-	=	ProcessActivate		(IdFun st)					// No action on activate
-	|	ProcessDeactivate	(IdFun st)					// No action on deactivate
-	|	ProcessClose		(IdFun st)					// Process is closed
+	=	ProcessActivate			(IdFun st)				// No action on activate
+	|	ProcessDeactivate		(IdFun st)				// No action on deactivate
+	|	ProcessClose			(IdFun st)				// Process is closed
  //	Attributes for (M/S)DI process only:
-	|	ProcessOpenFiles	(ProcessOpenFilesFunction st)
+	|	ProcessOpenFiles		(ProcessOpenFilesFunction st)
 														// Request to open files
-	|	ProcessWindowPos	ItemPos						// Platform dependent
-	|	ProcessWindowSize	Size						// Platform dependent
-	|	ProcessWindowResize	(ProcessWindowResizeFunction st)
+	|	ProcessClipboardChanged	(IdFun st)
+	|	ProcessWindowPos		ItemPos					// Platform dependent
+	|	ProcessWindowSize		Size					// Platform dependent
+	|	ProcessWindowResize		(ProcessWindowResizeFunction st)
 														// Platform dependent
- 	|	ProcessToolbar		[ToolbarItem st]			// Process has no toolbar
+ 	|	ProcessToolbar			[ToolbarItem st]		// Process has no toolbar
  //	Attributes for MDI processes only:
 	|	ProcessNoWindowMenu								// Process has WindowMenu
 

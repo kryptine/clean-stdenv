@@ -19,6 +19,7 @@ isValidWindowAttribute att = isAllWindowsAttribute att || isWindowOnlyAttribute 
 isValidDialogAttribute :: !(WindowAttribute .st) -> Bool
 isValidDialogAttribute att = isAllWindowsAttribute att || isDialogOnlyAttribute att
 
+// DvA: following also exported by windowdefaccess?! PA: Nee.
 isAllWindowsAttribute :: !(WindowAttribute .st) -> Bool
 isAllWindowsAttribute (WindowActivate	_)		= True
 isAllWindowsAttribute (WindowClose		_)		= True

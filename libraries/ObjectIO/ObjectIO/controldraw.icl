@@ -5,12 +5,9 @@ implementation module controldraw
 
 //	Drawing in customised controls
 
-from	ospicture		import packPicture, unpackPicture, pictsetcliprgn, copyPen
-from	osrgn			import osnewrectrgn, osdisposergn, ossectrgn
-from	ossystem		import OSWindowMetrics
-from	oswindow		import osGrabWindowPictContext, osReleaseWindowPictContext, osScrollbarsAreVisible
 import	commondef, wstate
-from	windowaccess	import getWItemCompoundInfo,  getWItemCustomButtonInfo,  getWItemCustomInfo, getCompoundContentRect
+import	ospicture, osrgn, ossystem, oswindow
+from	windowaccess	import getWItemCompoundInfo,  getWItemCustomButtonInfo,  getWItemCustomInfo
 from	wstateaccess	import getWItemCompoundInfo`, getWItemCustomButtonInfo`, getWItemCustomInfo`
 
 
@@ -43,7 +40,7 @@ where
 	info							= getWItemCompoundInfo wItemInfo
 	(origin,domainRect,hasScrolls)	= (info.compoundOrigin,info.compoundDomain,(isJust info.compoundHScroll,isJust info.compoundVScroll))
 	visScrolls						= osScrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
-	contentRect						= getCompoundContentRect wMetrics visScrolls (posSizeToRect origin itemSize)
+	contentRect						= osGetCompoundContentRect wMetrics visScrolls (posSizeToRect origin itemSize)
 	clipRectangle					= rectToRectangle (addVector (toVector (origin-itemPos)) (intersectRects (addVector (toVector (itemPos-origin)) contentRect) contextClip))
 	viewFrame						= rectToRectangle contentRect
 	updState						= {oldFrame=viewFrame,newFrame=viewFrame,updArea=[clipRectangle]}
@@ -71,7 +68,7 @@ where
 	info							= getWItemCompoundInfo` wItemInfo`
 	(origin,domainRect,hasScrolls)	= (info.compoundOrigin,info.compoundDomain,(isJust info.compoundHScroll,isJust info.compoundVScroll))
 	visScrolls						= osScrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
-	contentRect						= getCompoundContentRect wMetrics visScrolls (posSizeToRect origin itemSize)
+	contentRect						= osGetCompoundContentRect wMetrics visScrolls (posSizeToRect origin itemSize)
 	clipRectangle					= rectToRectangle (addVector (toVector (origin-itemPos)) (intersectRects (addVector (toVector (itemPos-origin)) contentRect) contextClip))
 	viewFrame						= rectToRectangle contentRect
 	updState						= {oldFrame=viewFrame,newFrame=viewFrame,updArea=[clipRectangle]}

@@ -9,8 +9,8 @@ definition module StdBitmap
 
 
 import	StdMaybe
-from	StdFile		import FileSystem//, Files
-from	osbitmap	import Bitmap
+from	StdFile	import FileSystem,Files
+import	osbitmap
 import	StdPicture
 //1.3
 export	FileSystem World

@@ -95,20 +95,17 @@ winBeginPaint			:: !HWND							!*OSToolbox -> (!HDC, !*OSToolbox)
 winEndPaint				:: !HWND					!(!HDC, !*OSToolbox) -> *OSToolbox
 winFakePaint			:: !HWND							!*OSToolbox -> *OSToolbox
 winGetClientSize		:: !HWND							!*OSToolbox -> (!(!Int,!Int), !*OSToolbox)
-winGetWindowSize		:: !HWND							!*OSToolbox -> (!(!Int,!Int), !*OSToolbox)	// Returns bounding size of window
+winGetWindowSize		:: !HWND							!*OSToolbox -> (!(!Int,!Int), !*OSToolbox)
 winSetClientSize		:: !HWND !(!Int,!Int)				!*OSToolbox -> *OSToolbox
 winSetWindowSize		:: !HWND !(!Int,!Int) !Bool			!*OSToolbox -> *OSToolbox
 winGetWindowPos			:: !HWND							!*OSToolbox -> (!(!Int,!Int), !*OSToolbox)
 winSetWindowPos			:: !HWND !(!Int,!Int) !Bool !Bool	!*OSToolbox -> *OSToolbox
-
 winSetScrollRange		:: !HWND !Int !Int !Int !Bool		!*OSToolbox -> *OSToolbox
 winSetScrollPos			:: !HWND !Int !Int !Int !Int !Int	!*OSToolbox -> *OSToolbox
 winSetScrollThumbSize	:: !HWND !Int !Int !Int !Int !Int	!*OSToolbox -> *OSToolbox
-
-winSetEditSelection		:: !HWND !Int !Int					!*OSToolbox -> *OSToolbox					// Note: @2<=@3, @1 must point to an edit control.
-
-winShowControl			:: !HWND !Bool						!*OSToolbox -> *OSToolbox
+winSetEditSelection		:: !HWND !Int !Int					!*OSToolbox -> *OSToolbox	// Note: @2<=@3, @1 must point to an edit control.
+winShowControl			:: !HWND !Bool						!*OSToolbox -> *OSToolbox	// Hide (False) & show (True) controls.
 winEnableControl		:: !HWND !Bool						!*OSToolbox -> *OSToolbox
-winEnablePopupItem		:: !HWND !Int !Bool					!*OSToolbox -> *OSToolbox					// PA: this function is currently not used, but might be
+winEnablePopupItem		:: !HWND !Int !Bool					!*OSToolbox -> *OSToolbox	// PA: this function is currently not used, but might be
 winCheckControl			:: !HWND !Bool						!*OSToolbox -> *OSToolbox
 winSelectPopupItem		:: !HWND !Int						!*OSToolbox -> *OSToolbox

@@ -15,20 +15,25 @@ import StdProcessDef
 
 
 isProcessKindAttribute :: !DocumentInterface !(ProcessAttribute .st) -> Bool 
-isProcessKindAttribute di (ProcessActivate     _) = True
-isProcessKindAttribute di (ProcessClose        _) = True
-isProcessKindAttribute di (ProcessDeactivate   _) = True
-isProcessKindAttribute di  ProcessNoWindowMenu	  = di==MDI
-isProcessKindAttribute di (ProcessOpenFiles    _) = di<>NDI
-isProcessKindAttribute di (ProcessToolbar      _) = di<>NDI
-isProcessKindAttribute di (ProcessWindowPos    _) = di<>NDI
-isProcessKindAttribute di (ProcessWindowResize _) = di<>NDI
-isProcessKindAttribute di (ProcessWindowSize   _) = di<>NDI
+isProcessKindAttribute di (ProcessActivate         _) = True
+isProcessKindAttribute di (ProcessClipboardChanged _) = di<>NDI
+isProcessKindAttribute di (ProcessClose            _) = True
+isProcessKindAttribute di (ProcessDeactivate       _) = True
+isProcessKindAttribute di  ProcessNoWindowMenu	      = di==MDI
+isProcessKindAttribute di (ProcessOpenFiles        _) = di<>NDI
+isProcessKindAttribute di (ProcessToolbar          _) = di<>NDI
+isProcessKindAttribute di (ProcessWindowPos        _) = di<>NDI
+isProcessKindAttribute di (ProcessWindowResize     _) = di<>NDI
+isProcessKindAttribute di (ProcessWindowSize       _) = di<>NDI
 
 
 isProcessActivate :: !(ProcessAttribute .st) -> Bool
 isProcessActivate (ProcessActivate _) = True
 isProcessActivate _ = False
+
+isProcessClipboardChanged :: !(ProcessAttribute .st) -> Bool
+isProcessClipboardChanged (ProcessClipboardChanged _) = True
+isProcessClipboardChanged _ = False
 
 isProcessClose :: !(ProcessAttribute .st) -> Bool
 isProcessClose (ProcessClose _) = True
@@ -65,6 +70,9 @@ isProcessWindowSize _ = False
 
 getProcessActivateFun :: !(ProcessAttribute .st) -> IdFun .st
 getProcessActivateFun (ProcessActivate f) = f
+
+getProcessClipboardChangedFun :: !(ProcessAttribute .st) -> IdFun .st
+getProcessClipboardChangedFun (ProcessClipboardChanged f) = f
 
 getProcessCloseFun :: !(ProcessAttribute .st) -> IdFun .st
 getProcessCloseFun (ProcessClose f) = f

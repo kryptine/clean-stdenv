@@ -6,8 +6,7 @@ implementation module StdMenuElement
 
 import	StdBool, StdChar, StdFunc, StdList, StdMisc, StdTuple
 import	commondef, iostate, menuaccess, mstate
-from	osmenu		import osDrawMenuBar, osEnableMenuItem, osDisableMenuItem, osChangeMenuItemTitle, osValidateMenuItemTitle, osMenuItemCheck
-
+import	osmenu
 
 stdMenuElementFatalError :: String String -> .x
 stdMenuElementFatalError function error
@@ -208,8 +207,9 @@ where
 	setItemAbility :: !Bool !OSMenu !Int !MenuElementHandle` !*OSToolbox -> (!MenuElementHandle`,!*OSToolbox)
 	
 	setItemAbility enabled menu itemNr (SubMenuHandle` itemH=:{mSubHandle`}) tb
-		| enabled	= (submenu,osEnableMenuItem  menu mSubHandle` tb)
-		| otherwise	= (submenu,osDisableMenuItem menu mSubHandle` tb)
+		# index = itemNr													// DvA: ???
+		| enabled	= (submenu,osEnableSubMenu  menu mSubHandle` index tb)	// DvA
+		| otherwise	= (submenu,osDisableSubMenu menu mSubHandle` index tb)	// DvA
 	where
 		submenu		= SubMenuHandle` {itemH & mSubSelect`=enabled}
 	
@@ -222,24 +222,29 @@ where
 		enableAbleItems :: !OSMenu ![MenuElementHandle`] !Int !*OSToolbox -> *OSToolbox
 		enableAbleItems menu [MenuItemHandle` itemH=:{mItemSelect`,mOSMenuItem`}:itemHs] itemNr tb
 			# tb			= enableAbleItems menu itemHs (itemNr+1) tb
-			| mItemSelect`	= osEnableMenuItem menu mOSMenuItem` tb
+			| mItemSelect`	= osEnableMenuItem menu mOSMenuItem` itemNr tb
 			| otherwise		= tb
 		enableAbleItems _ _ _ tb
 			= tb
 		
 		disableAllItems :: !OSMenu ![MenuElementHandle`] !Int !*OSToolbox -> *OSToolbox
-		disableAllItems menu itemHs itemNr tb
-			= stateMap2 (\(MenuItemHandle` {mOSMenuItem`}) tb->osDisableMenuItem menu mOSMenuItem` tb) itemHs tb
+		disableAllItems menu [MenuItemHandle` itemH=:{mItemSelect`,mOSMenuItem`}:itemHs] itemNr tb
+			# tb			= disableAllItems menu itemHs (itemNr+1) tb
+			# tb			= osDisableMenuItem menu mOSMenuItem` itemNr tb
+			= tb
+		disableAllItems _ _ _ tb
+			= tb
+//		disableAllItems menu itemHs itemNr tb
+//			= StateMap2 (\(MenuItemHandle` {mOSMenuItem`}) tb->OSDisableMenuItem menu mOSMenuItem` tb) itemHs tb
 	
-	setItemAbility enabled menu itemNr (MenuItemHandle` itemH=:{mOSMenuItem`}) tb
-		| enabled	= (menuitem,osEnableMenuItem  menu mOSMenuItem` tb)
-		| otherwise	= (menuitem,osDisableMenuItem menu mOSMenuItem` tb)
+	setItemAbility enabled menu itemNr (MenuItemHandle` itemH=:{mOSMenuItem`,mItemId`}) tb
+		| enabled	= (menuitem,osEnableMenuItem  menu mOSMenuItem` itemNr tb)
+		| otherwise	= (menuitem,osDisableMenuItem menu mOSMenuItem` itemNr tb)
 		where
 			menuitem= MenuItemHandle` {itemH & mItemSelect`=enabled}
 	
 	setItemAbility _ _ _ itemH tb
 		= (itemH,tb)
-
 
 //	Marking and Unmarking of MenuItems only:
 
@@ -269,7 +274,7 @@ changeMenuItemsMark idMarks mState
 where
 	setItemMark :: !Bool !OSMenu !Int !MenuElementHandle` !*OSToolbox -> (!MenuElementHandle`,!*OSToolbox)
 	setItemMark marked menu itemNr (MenuItemHandle` itemH) tb
-		= (MenuItemHandle` {itemH & mItemMark`=marked},osMenuItemCheck marked menu itemH.mOSMenuItem` tb)
+		= (MenuItemHandle` {itemH & mItemMark`=marked},osMenuItemCheck marked menu itemH.mOSMenuItem` itemNr itemNr tb)
 	setItemMark _ _ _ itemH tb
 		= (itemH,tb)
 
@@ -288,14 +293,11 @@ setMenuElementTitles id_titles ioState
 where
 	setItemTitle :: !Title !OSMenu !Int !MenuElementHandle` !*OSToolbox -> (!MenuElementHandle`,!*OSToolbox)
 	setItemTitle title menu itemNr (SubMenuHandle` itemH) tb
-		= (SubMenuHandle` {itemH & mSubTitle`=title},osChangeMenuItemTitle menu itemH.mSubHandle` (osValidateMenuItemTitle title) tb)
+		= (SubMenuHandle` {itemH & mSubTitle`=title},osChangeMenuItemTitle menu itemH.mSubHandle` itemNr (osValidateMenuItemTitle Nothing title) tb)
 	setItemTitle title menu itemNr (MenuItemHandle` itemH=:{mOSMenuItem`,mItemKey`}) tb
-		= (MenuItemHandle` {itemH & mItemTitle`=title},osChangeMenuItemTitle menu mOSMenuItem` okTitle tb)
+		= (MenuItemHandle` {itemH & mItemTitle`=title},osChangeMenuItemTitle menu mOSMenuItem` itemNr validTitle tb)
 	where
-		validTitle	= osValidateMenuItemTitle title
-		okTitle		= case mItemKey` of
-						Just key	-> validTitle +++ "\tCtrl+" +++ toString (toUpper key)
-						_			-> validTitle
+		validTitle	= osValidateMenuItemTitle mItemKey` title
 	setItemTitle _ _ _ itemH tb
 		= (itemH,tb)
 
@@ -319,7 +321,7 @@ where
 		| new==0
 			= (RadioMenuHandle` radioH,tb)
 		| otherwise
-			# (items,(_,tb))= stateMap (setmark menu new) mRadioItems` (1,tb)
+			# (items,(_,tb))= stateMap (setmark menu new itemNr) mRadioItems` (1,tb)
 			= (RadioMenuHandle` {radioH & mRadioIndex`=new,mRadioItems`=items},tb)
 	where
 		getRadioMenuItemIndex :: !Id ![MenuElementHandle`] !Index -> Index
@@ -331,9 +333,9 @@ where
 	selectradiomenuitem _ _ _ itemH tb
 		= (itemH,tb)
 
-setmark :: !OSMenu !Index !MenuElementHandle` !(!Int,!*OSToolbox) -> (!MenuElementHandle`,!(!Int,!*OSToolbox))
-setmark menu new (MenuItemHandle` itemH=:{mOSMenuItem`}) (index,tb)
-	= (MenuItemHandle` {itemH & mItemMark`=marked},(index+1,osMenuItemCheck marked menu mOSMenuItem` tb))
+setmark :: !OSMenu !Index !Int !MenuElementHandle` !(!Int,!*OSToolbox) -> (!MenuElementHandle`,!(!Int,!*OSToolbox))
+setmark menu new rootNr (MenuItemHandle` itemH=:{mOSMenuItem`}) (index,tb)
+	= (MenuItemHandle` {itemH & mItemMark`=marked},(index+1,osMenuItemCheck marked menu mOSMenuItem` index (rootNr+index-1) tb))
 where
 	marked	= index==new
 
@@ -357,7 +359,7 @@ where
 		| new==now
 			= (RadioMenuHandle` radioH,tb)
 		| otherwise
-			# (items,(_,tb))= stateMap (setmark menu new) mRadioItems` (1,tb)
+			# (items,(_,tb))= stateMap (setmark menu new itemNr) mRadioItems` (1,tb)
 			= (RadioMenuHandle` {radioH & mRadioIndex`=new,mRadioItems`=items},tb)
 	selectradiomenuindexitem _ _ _ itemH tb
 		= (itemH,tb)
@@ -443,7 +445,9 @@ where
 			# (changes,items,itemNr,tb)	= changeMenuItems` menu recurse change changes items itemNr tb
 			= (changes,MenuRecursiveHandle` items recKind,itemNr,tb)
 		
-		changeMenuItem` _ _ _ changes h itemNr tb
+		changeMenuItem` _ _ _ changes h=:(MenuReceiverHandle` _) itemNr tb
+			= (changes,h,itemNr,tb)
+		changeMenuItem` _ _ _ changes h=:(MenuSeparatorHandle` _) itemNr tb
 			= (changes,h,itemNr+1,tb)
 
 

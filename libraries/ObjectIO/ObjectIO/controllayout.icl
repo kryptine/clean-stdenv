@@ -346,7 +346,7 @@ where
 					| otherwise
 						# (w,h)			= toTuple outerSize
 						  visScrolls	= osScrollbarsAreVisible wMetrics (rectangleToRect domain) (w,h) hasScrolls
-						  viewSize		= rectSize (getCompoundContentRect wMetrics visScrolls (sizeToRect {w=w,h=h}))
+						  viewSize		= rectSize (osGetCompoundContentRect wMetrics visScrolls (sizeToRect {w=w,h=h}))
 						# (_,_,atts)	= remove isControlOuterSize undef atts
 						# (_,_,atts)	= remove isControlViewSize  undef atts
 						= (True,viewSize,[ControlViewSize viewSize:atts])
@@ -636,7 +636,7 @@ where
 					| otherwise
 						# (w,h)			= toTuple outerSize
 						  visScrolls	= osScrollbarsAreVisible wMetrics (rectangleToRect domain) (w,h) hasScrolls
-						  viewSize		= rectSize (getCompoundContentRect wMetrics visScrolls (sizeToRect {w=w,h=h}))
+						  viewSize		= rectSize (osGetCompoundContentRect wMetrics visScrolls (sizeToRect {w=w,h=h}))
 						# (_,_,atts)	= remove iscontroloutersize` undef atts
 						# (_,_,atts)	= remove iscontrolviewsize` undef atts
 						= (True,viewSize,[ControlViewSize` viewSize:atts])
@@ -754,8 +754,8 @@ layoutScrollbars wMetrics size info=:{compoundHScroll,compoundVScroll}
 where
 	hasScrolls	= (isJust compoundHScroll,isJust compoundVScroll)	// PA: this should actually become: (visHScroll,visVScroll)!!
 	rect		= sizeToRect size
-	hRect		= getCompoundHScrollRect wMetrics hasScrolls rect
-	vRect		= getCompoundVScrollRect wMetrics hasScrolls rect
+	hRect		= osGetCompoundHScrollRect wMetrics hasScrolls rect
+	vRect		= osGetCompoundVScrollRect wMetrics hasScrolls rect
 	
 	layoutScrollbar :: Rect !ScrollInfo -> ScrollInfo
 	layoutScrollbar r=:{rleft,rtop} scrollInfo

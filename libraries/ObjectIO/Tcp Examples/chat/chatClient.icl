@@ -137,7 +137,7 @@ inputfilter :: KeyboardState -> Bool
 inputfilter (CharKey char (KeyDown False)  )
 	= char==CR
 inputfilter (SpecialKey key _ _)
-	= key==EnterKey
+	= key==enterKey
 inputfilter _
 	= False
 	

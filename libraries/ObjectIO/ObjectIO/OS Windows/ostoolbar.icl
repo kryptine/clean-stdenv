@@ -17,7 +17,7 @@ import	clCrossCall_12, windowCCall_12
 		,	toolbarHeight	:: !Int					// The height of the toolbar       (zero if no toolbar)
 		}
 ::	OSToolbarHandle
-	:==	HWND
+	:==	OSWindowPtr
 
 OSdefaultToolbarHeight :== 16	// The default height of the toolbar
 
@@ -25,7 +25,7 @@ OSdefaultToolbarHeight :== 16	// The default height of the toolbar
 		creates a toolbar in the argument window with the given size of the bitmap images.
 		The return Int is the actual height of the toolbar. 
 */
-osCreateToolbar :: !Bool !HWND !(!Int,!Int) !*OSToolbox -> (!(!OSToolbarHandle,!Int),!*OSToolbox)
+osCreateToolbar :: !Bool !OSWindowPtr !(!Int,!Int) !*OSToolbox -> (!(!OSToolbarHandle,!Int),!*OSToolbox)
 osCreateToolbar forMDI hwnd (w,h) tb
 	# (rcci,tb)		= issueCleanRequest2 (errorCallback2 "osCreateToolbar") (Rq3Cci (if forMDI CcRqCREATEMDITOOLBAR CcRqCREATESDITOOLBAR) hwnd w h) tb
 	  tbPtr_Height	= case rcci.ccMsg of

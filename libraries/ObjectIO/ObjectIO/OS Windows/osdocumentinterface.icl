@@ -182,3 +182,9 @@ getOSDInfoOSToolbar :: !OSDInfo -> Maybe OSToolbar
 getOSDInfoOSToolbar (OSMDInfo {osmdOSInfo={osToolbar}})	= osToolbar
 getOSDInfoOSToolbar (OSSDInfo {ossdOSInfo={osToolbar}})	= osToolbar
 getOSDInfoOSToolbar _									= Nothing
+
+/*	osOSDInfoIsActive tests if the given OSDInfo represents the interactive process with the
+	active menu system. (Always True on Windows; use menu bar on Mac.)
+*/
+osOSDInfoIsActive :: !OSDInfo !*OSToolbox -> (!Bool, !*OSToolbox)
+osOSDInfoIsActive osdinfo tb = (True,tb)

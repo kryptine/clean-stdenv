@@ -8,7 +8,6 @@ import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	StdMenuElementClass, StdPSt
 import	commondef, devicesystemstate, iostate, menuaccess, menudefaccess, menuhandle, sdisize
 import	osmenu
-from	menuCrossCall_12 import winRemoveMenuShortKey
 
 
 menucreateFatalError :: String String -> .x
@@ -31,7 +30,9 @@ openMenu` menuId ls mDef pState=:{io=ioState}
 	# osMenuBar					= fromJust maybeOSMenuBar
 	# (idtable,ioState)			= ioStGetIdTable ioState
 	# (found,mDevice,ioState)	= ioStGetDevice MenuDevice ioState
-	  mHs						= menuSystemStateGetMenuHandles mDevice
+	| not found
+		= menucreateFatalError "openMenu (Menu)" "MenuDevice not found"
+	# mHs						= menuSystemStateGetMenuHandles mDevice
 	# (menus,mHs)				= menuHandlesGetMenus mHs
 	  (exists,menus)			= ucontains (isMenuWithThisId menuId) menus
 	| exists					// This condition should never hold
@@ -51,6 +52,8 @@ openMenu` menuId ls mDef pState=:{io=ioState}
  	  mHs						= menuHandlesSetKeys mKeys mHs
  	# ioState					= ioStSetReceiverTable rt pState.io
  	# ioState					= ioStSetIdTable idtable ioState
+ 	# osdInfo					= setOSDInfoOSMenuBar osMenuBar osdInfo			// DvA
+	# ioState					= ioStSetOSDInfo osdInfo ioState				// DvA
 	| not ok
 		# mHs					= menuHandlesSetMenus menus mHs
 		# ioState				= ioStSetDevice (MenuSystemState mHs) ioState
@@ -338,9 +341,9 @@ NewSubMenuHandle mH=:{mSubTitle,mSubSelect} index menu tb
 	# (osH,_,tb)		= osSubMenuInsert index osMenuNr mSubTitle menu tb
 	# mH				= {mH & mSubHandle=osH,mSubOSMenuNr=osMenuNr}
 	| mSubSelect
-		= (mH,osEnableMenuItem  menu osH tb)
+		= (mH,osEnableMenuItem  menu osH index tb)
 	| otherwise
-		= (mH,osDisableMenuItem menu osH tb)
+		= (mH,osDisableMenuItem menu osH index tb)
 
 closepopupmenu :: !(MenuHandles .pst) -> MenuHandles .pst
 closepopupmenu mHs=:{mMenus,mPopUpId}
@@ -354,7 +357,7 @@ closepopupmenu mHs=:{mMenus,mPopUpId}
 disposeMenuItemHandle :: !OSMenu !Int !(MenuItemHandle .ls .pst) !(![Char],!*IdTable,!*OSToolbox)
 								   -> (!MenuItemHandle .ls .pst, !(![Char],!*IdTable,!*OSToolbox))
 disposeMenuItemHandle menu iNr itemH=:{mItemKey,mItemId,mOSMenuItem} (keys,it,tb)
-	# tb		= snd (osMenuRemoveItem mOSMenuItem menu tb)
+	# tb		= snd (osMenuRemoveItem mOSMenuItem iNr menu tb)
 	| isJust mItemId
 		# it	= snd (removeIdFromIdTable (fromJust mItemId) it)
 		= (itemH,(keys`,it,tb))
@@ -363,26 +366,42 @@ disposeMenuItemHandle menu iNr itemH=:{mItemKey,mItemId,mOSMenuItem} (keys,it,tb
 where
 	keys`		= if (isJust mItemKey) [fromJust mItemKey:keys] keys
 
-
-disposeSubMenuHandles :: !(MenuElementHandle .ls .pst) !*OSToolbox
-					  -> (!MenuElementHandle .ls .pst, !*OSToolbox)
-disposeSubMenuHandles (MenuListLSHandle mListItems) tb
-	# (itemHs,tb)	= stateMap disposeSubMenuHandles mListItems tb
-	= (MenuListLSHandle itemHs,tb)
-disposeSubMenuHandles (MenuExtendLSHandle mExH=:{mExtendItems=itemHs}) tb
-	# (itemHs,tb)	= stateMap disposeSubMenuHandles itemHs tb
-	= (MenuExtendLSHandle {mExH & mExtendItems=itemHs},tb)
-disposeSubMenuHandles (MenuChangeLSHandle mChH=:{mChangeItems=itemHs}) tb
-	# (itemHs,tb)	= stateMap disposeSubMenuHandles itemHs tb
-	= (MenuChangeLSHandle {mChH & mChangeItems=itemHs},tb)
-disposeSubMenuHandles itemH tb
-	= (itemH,tb)
+// PA: deze functie doet niks!! Alternatief toegevoegd om daadwerkelijk SubMenu's te verwijderen.
+disposeSubMenuHandles :: !(MenuElementHandle .ls .pst) !(!OSMenu,!*OSToolbox)
+					  -> (!MenuElementHandle .ls .pst, !(!OSMenu,!*OSToolbox))
+disposeSubMenuHandles itemH (parentH,tb)
+	# (itemH,(parentH,_,tb))	= disposeSubMenuHandles` itemH (parentH,1,tb)
+	= (itemH,(parentH,tb))
+where
+	disposeSubMenuHandles` :: !(MenuElementHandle .ls .pst) !(!OSMenu,!Int,!*OSToolbox)
+						   -> (!MenuElementHandle .ls .pst, !(!OSMenu,!Int,!*OSToolbox))
+	disposeSubMenuHandles` (SubMenuHandle subH=:{mSubHandle=mSubH,mSubOSMenuNr=mSubNr,mSubItems=itemHs}) (parentH,iNr,tb)	// PA: alternative added to really dispose submenus
+		# (itemHs,(mSubH,_,tb))	= stateMap disposeSubMenuHandles` itemHs (mSubH,1,tb)
+		# (parentH,tb)			= osSubMenuRemove mSubH parentH mSubNr iNr tb
+		= (SubMenuHandle {subH & mSubHandle=mSubH,mSubItems=itemHs},(parentH,iNr+1,tb))
+	disposeSubMenuHandles` (MenuListLSHandle mListItems) parentH_tb
+		# (itemHs,parentH_tb)	= stateMap disposeSubMenuHandles` mListItems parentH_tb
+		= (MenuListLSHandle itemHs,parentH_tb)
+	disposeSubMenuHandles` (MenuExtendLSHandle mExH=:{mExtendItems=itemHs}) parentH_tb
+		# (itemHs,parentH_tb)	= stateMap disposeSubMenuHandles` itemHs parentH_tb
+		= (MenuExtendLSHandle {mExH & mExtendItems=itemHs},parentH_tb)
+	disposeSubMenuHandles` (MenuChangeLSHandle mChH=:{mChangeItems=itemHs}) parentH_tb
+		# (itemHs,parentH_tb)	= stateMap disposeSubMenuHandles` itemHs parentH_tb
+		= (MenuChangeLSHandle {mChH & mChangeItems=itemHs},parentH_tb)
+	disposeSubMenuHandles` itemH=:(MenuItemHandle _) (parentH,iNr,tb)
+		= (itemH,(parentH,iNr+1,tb))
+	disposeSubMenuHandles` itemH=:(RadioMenuHandle radioH=:{mRadioItems=itemHs}) (parentH,iNr,tb)
+		# (nrRadio,itemHs)		= ulength itemHs
+		= (RadioMenuHandle {radioH & mRadioItems=itemHs},(parentH,iNr+nrRadio,tb))
+	disposeSubMenuHandles` itemH st
+		= (itemH,st)
 
 disposeShortcutkeys :: !OSWindowPtr !(MenuElementHandle .ls .pst) !(![Char],!*OSToolbox)
 								 -> (!MenuElementHandle .ls .pst, !(![Char],!*OSToolbox))
 disposeShortcutkeys framePtr (MenuItemHandle itemH=:{mItemKey,mOSMenuItem}) (keys,tb)
+//	PA: this should still occur. osRemoveMenuShortKey has a dummy implementation on Mac, but administration should be OK.
 	| isJust mItemKey
-		= (MenuItemHandle itemH,(thd3 (remove ((==) key) key keys),winRemoveMenuShortKey framePtr mOSMenuItem tb))
+		= (MenuItemHandle itemH,(thd3 (remove ((==) key) key keys),osRemoveMenuShortKey framePtr mOSMenuItem tb))
 	with
 		key = fromJust mItemKey
 	| otherwise

@@ -94,14 +94,17 @@ getWElementKeyFocusIds` shownContext [itemH:itemHs]
 	= getWElementKeyFocusIds`` shownContext itemH++getWElementKeyFocusIds` shownContext itemHs
 where
 	getWElementKeyFocusIds`` :: !Bool !WElementHandle` -> [FocusItem]
-	getWElementKeyFocusIds`` shownContext (WItemHandle` {wItemNr`,wItemKind`,wItemShow`,wItemAtts`,wItems`})
+	getWElementKeyFocusIds`` shownContext (WItemHandle` {wItemNr`,wItemKind`,wItemShow`,wItemAtts`,wItems`,wItemInfo`})
 		| wItemKind`==IsEditControl	= focus
+		| wItemKind`==IsPopUpControl && hasKeyAtt	//isEditable
+									= focus
 		| keySensitive && hasKeyAtt	= focus
 		| otherwise					= getWElementKeyFocusIds` (shownContext && wItemShow`) wItems`
 	where
 		focus						= [{focusNr=wItemNr`,focusShow=shownContext}]
 		hasKeyAtt					= contains iscontrolkeyboard` wItemAtts`
 		keySensitive				= wItemKind`==IsCustomControl
+//		isEditable					= isJust (getWItemPopUpInfo` wItemInfo`).popUpInfoEdit`
 	getWElementKeyFocusIds`` shownContext (WRecursiveHandle` itemHs _)
 		= getWElementKeyFocusIds` shownContext itemHs
 getWElementKeyFocusIds` _ _

@@ -14,7 +14,7 @@ import	code from "cCrossCallFont_121.obj"// PA: moved to ostcp, "cCrossCallTCP_1
 OSNewToolbox :== 0
 
 // RWS ??? add success bool
-osInitToolbox :: *OSToolbox -> *OSToolbox
+osInitToolbox :: !*OSToolbox -> *OSToolbox		// PA: strictness added
 osInitToolbox toolbox
 	| toolbox<>0
 		= abort "osInitToolbox reinitialised\n"

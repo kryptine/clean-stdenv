@@ -10,7 +10,7 @@ import clipboardCrossCall_12
 ::	OSClipboardItemType
 	:==	Int
 OSClipboardText
-	:==	1	// CF_TEXT
+	:==	CF_TEXT
 
 osInitialiseClipboard :: !*OSToolbox -> *OSToolbox
 osInitialiseClipboard tb

@@ -5,12 +5,9 @@ implementation module relayout
 
 
 import	StdBool, StdFunc, StdList, StdTuple
-import	osrgn, oswindow
-from	ospicture		import packPicture, unpackPicture, defaultPen,apppicttoolbox, accpicttoolbox,
-								getpictorigin, setpictorigin, getpictpen, setpictpen,
-								pictgetcliprgn, pictsetcliprgn, pictandcliprgn
+import	ospicture, osrgn, oswindow
 import	commondef, windowhandle
-from	windowaccess	import getCompoundContentRect, getCompoundHScrollRect, getCompoundVScrollRect
+//import osutil
 
 
 ::	RelayoutItem
@@ -111,19 +108,20 @@ where
 					= ((clipRgn,validRgn,invalidRgn),picture)
 			where
 				sameSize		= oldSize==newSize
-				samePos			= OSCompoundMovesControls && oldPos-oldParentPos==newPos-newParentPos || oldPos==newPos
+				samePos			= osCompoundMovesControls && oldPos-oldParentPos==newPos-newParentPos || oldPos==newPos
 				sizeF			= if sameSize
 									id (osSetCompoundSize wPtr newParentPos` itemPtr newPos` newSize` True)
 				moveF			= if (samePos && all isEmptyRect (map (intersectRects newFrame1) newArea))
 									id (osSetCompoundPos  wPtr newParentPos` itemPtr newPos` newSize` True)
 				updScrollbars	= if (sameSize && samePos && all isEmptyRect (flatten (map (\area->[intersectRects hRect` area,intersectRects vRect` area]) newArea)))
-									id ( (setCompoundScroll (snd hasScrolls) wMetrics itemPtr False newVThumbSize oldOrigin.y newOrigin.y vRect)
-									   o (setCompoundScroll (fst hasScrolls) wMetrics itemPtr True  newHThumbSize oldOrigin.x newOrigin.x hRect)
+									id ( (setCompoundScroll wPtr (snd hasScrolls) wMetrics itemPtr False newAble newVThumbSize oldOrigin.y newOrigin.y vRect)
+									   o (setCompoundScroll wPtr (fst hasScrolls) wMetrics itemPtr True  newAble newHThumbSize oldOrigin.x newOrigin.x hRect)
 									   )
 				updF			= if (sameSize && oldPos==newPos && oldFrame1==newFrame1 || isEmptyRect newFrame1 || not new.rliItemShow)
 									id (updatecustomcontrol wPtr clipRgn newFrame1 new)
 				newParentPos`	= toTuple newParentPos;
 				itemPtr			= new.rliItemPtr
+				newAble			= new.rliItemSelect
 				newSize			= new.rliItemSize;		newSize`	= toTuple newSize;	oldSize			= old.rliItemSize;
 				newPos			= new.rliItemPos;		newPos`		= toTuple newPos;	oldPos			= old.rliItemPos;
 				newInfo			= new.rliItemInfo;										oldInfo			= old.rliItemInfo
@@ -133,22 +131,39 @@ where
 				newFrame1		= intersectRects newFrame newContentRect;				oldFrame1		= intersectRects oldFrame oldContentRect
 				newArea1		= subtractRects newFrame1 oldFrame1
 				hasScrolls		= (isJust newInfo.compoundHScroll,isJust newInfo.compoundVScroll)
+				(hScrollPtr,vScrollPtr)
+								= (mscrollptr newInfo.compoundHScroll,mscrollptr newInfo.compoundVScroll)
+				mscrollptr		= mapMaybe (\{scrollItemPtr}->scrollItemPtr)
 				newVisScrolls	= osScrollbarsAreVisible wMetrics newDomainRect newSize` hasScrolls
 				oldVisScrolls	= osScrollbarsAreVisible wMetrics oldDomainRect (toTuple oldSize) hasScrolls
 				newHThumbSize	= if (snd newVisScrolls) (newSize.w-wMetrics.osmVSliderWidth  + 1) (newSize.w+1)
 				newVThumbSize	= if (fst newVisScrolls) (newSize.h-wMetrics.osmHSliderHeight + 1) (newSize.h+1)
-				oldContentRect	= getCompoundContentRect wMetrics oldVisScrolls oldCompoundRect
-				newContentRect	= getCompoundContentRect wMetrics newVisScrolls newCompoundRect
-				hRect			= getCompoundHScrollRect wMetrics newVisScrolls (sizeToRect newSize);	hRect`	= addVector (toVector newPos) hRect
-				vRect			= getCompoundVScrollRect wMetrics newVisScrolls (sizeToRect newSize);	vRect`	= addVector (toVector newPos) vRect
+				oldContentRect	= osGetCompoundContentRect wMetrics oldVisScrolls oldCompoundRect
+				newContentRect	= osGetCompoundContentRect wMetrics newVisScrolls newCompoundRect
+				newContentSize	= rectSize newContentRect
+				hRect			= osGetCompoundHScrollRect wMetrics newVisScrolls (sizeToRect newSize);	hRect`	= addVector (toVector newPos) hRect
+				vRect			= osGetCompoundVScrollRect wMetrics newVisScrolls (sizeToRect newSize);	vRect`	= addVector (toVector newPos) vRect
 				
-				setCompoundScroll :: !Bool OSWindowMetrics OSWindowPtr Bool Int Int Int !Rect !*OSToolbox -> *OSToolbox
-				setCompoundScroll hasScroll wMetrics compoundPtr isHorizontal size old new {rright,rbottom} tb
-					| not hasScroll	= tb
-					# tb			= osSetCompoundSliderThumbSize wMetrics compoundPtr isHorizontal size (rright,rbottom) (old==new) tb
-					| old==new		= tb
-					| otherwise		= osSetCompoundSliderThumb wMetrics compoundPtr isHorizontal new (rright,rbottom) True tb
-			
+				setCompoundScroll :: !OSWindowPtr !Bool OSWindowMetrics OSWindowPtr Bool Bool Int Int Int !Rect !*OSToolbox -> *OSToolbox
+				setCompoundScroll wPtr hasScroll wMetrics compoundPtr isHorizontal able size old new {rright,rbottom} tb
+					| not hasScroll
+						= tb
+//					# tb			= osSetCompoundSliderThumbSize wMetrics compoundPtr isHorizontal size (rright,rbottom) (old==new) tb
+					# tb			= osSetCompoundSliderThumbSize wMetrics compoundPtr scrollPtr scrollMin scrollMax scrollSize scrollRect isHorizontal able (old==new) tb
+					| old==new
+						# tb		= osUpdateCompoundScroll wPtr scrollPtr scrollRect tb
+						= tb
+//					| otherwise		= osSetCompoundSliderThumb wMetrics compoundPtr isHorizontal new (rright,rbottom) True tb
+					| otherwise
+						# tb		= osSetCompoundSliderThumb wMetrics wPtr compoundPtr scrollPtr scrollRect isHorizontal new (rright,rbottom) True tb
+						# tb		= osUpdateCompoundScroll wPtr scrollPtr scrollRect tb
+						= tb
+				where
+					scrollPtr		= if isHorizontal (fromJust hScrollPtr) (fromJust vScrollPtr)
+					scrollMin		= if isHorizontal (newDomainRect.rleft) (newDomainRect.rtop)
+					scrollMax		= if isHorizontal (newDomainRect.rright-newContentSize.w) (newDomainRect.rbottom-newContentSize.h)
+					scrollRect		= if isHorizontal hRect` vRect`
+					scrollSize		= if isHorizontal newContentSize.w newContentSize.h
 			relayout wPtr wMetrics newArea IsLayoutControl (oldFrame,oldParentPos,old) (newFrame,newParentPos,new) rgnHs picture
 				= relayoutItems` wPtr wMetrics newArea (oldFrame1,oldParentPos,old.rliItems) (newFrame1,newParentPos,new.rliItems) rgnHs picture
 			where
@@ -171,7 +186,7 @@ where
 					= ((clipRgn,validRgn,invalidRgn),picture)
 			where
 				sameSize				= oldSize==newSize
-				samePos					= OSCompoundMovesControls && oldPos-oldParentPos==newPos-newParentPos || oldPos==newPos
+				samePos					= osCompoundMovesControls && oldPos-oldParentPos==newPos-newParentPos || oldPos==newPos
 				sizeF					= if sameSize id (setSize wPtr newParentPos` itemPtr newPos` newSize` (not redraw))
 				moveF					= if (samePos && all isEmptyRect (map (intersectRects newFrame1) newArea))
 											          id (setPos  wPtr newParentPos` itemPtr newPos` (toTuple oldSize) (not redraw))
@@ -184,8 +199,8 @@ where
 				oldFrame1				= intersectRects oldFrame (posSizeToRect oldPos oldSize)
 				newFrame1				= intersectRects newFrame (posSizeToRect newPos newSize)
 				(setPos,setSize,redraw)	= case controlKind of
-											IsRadioControl			-> (osSetRadioControlPos,		\_ _ _ _ _ _ tb->tb,		 False)
-											IsCheckControl			-> (osSetCheckControlPos,		\_ _ _ _ _ _ tb->tb,		 False)
+											IsRadioControl			-> (osSetRadioControlPos,		\_ _ _ _ _ _ tb->tb,		 False)		// DvA: moeten op mac elements gewijs verplaatst worden...
+											IsCheckControl			-> (osSetCheckControlPos,		\_ _ _ _ _ _ tb->tb,		 False)		// DvA: moeten op mac elements gewijs verplaatst worden...
 											IsPopUpControl			-> (osSetPopUpControlPos,		osSetPopUpControlSize,		 False)
 											IsSliderControl			-> (osSetSliderControlPos,		osSetSliderControlSize,		 False)
 											IsTextControl			-> (osSetTextControlPos,		osSetTextControlSize,		 False)
@@ -266,7 +281,7 @@ where
 		#! picture						= setpictpen lookPen picture
 		#! (clip,picture)				= accpicttoolbox (ossectrgn clipRgn clipInfo.clipRgn) picture	// PA+++
 		#! picture						= clipospicture /*clipInfo.clipRgn*/clip clipRect (lookFun selectState updState) picture
-	//	#! picture						= clipospicture clip (posSizeToRect itemPos itemSize) drawbackground picture
+	//	#! picture						= clipospicture clip (PosSizeToRect itemPos itemSize) drawbackground picture
 		#! picture						= apppicttoolbox (osdisposergn clip) picture					// PA+++
 		#! picture						= setpictpen curPen picture
 		# picture						= setpictorigin curOrigin picture
@@ -278,7 +293,7 @@ where
 		info							= itemH.rliItemInfo
 		(origin,domainRect,hasScrolls)	= (info.compoundOrigin,info.compoundDomain,(isJust info.compoundHScroll,isJust info.compoundVScroll))
 		visScrolls						= osScrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
-		cFrameRect						= getCompoundContentRect wMetrics visScrolls (posSizeToRect origin itemSize)
+		cFrameRect						= osGetCompoundContentRect wMetrics visScrolls (posSizeToRect origin itemSize)
 		cFrame							= rectToRectangle cFrameRect
 		compLookInfo					= info.compoundLookInfo
 		{lookFun,lookPen}				= compLookInfo.compoundLook
@@ -291,9 +306,20 @@ where
 	clipospicture newClipRgn rect drawf picture
 		#! (rectRgn,picture)	= accpicttoolbox (osnewrectrgn rect) picture
 		#! (curClipRgn,picture)	= pictgetcliprgn picture
+		#! (emptyCur,picture)	= accpicttoolbox (osisemptyrgn curClipRgn) picture
+		#! (emptyNew,picture)	= accpicttoolbox (osisemptyrgn newClipRgn) picture
+		#! picture				= (if emptyCur (pictsetcliprgn rectRgn) (pictandcliprgn rectRgn)) picture
+		#! picture				= (if emptyNew id (pictandcliprgn newClipRgn)) picture
+/*
 		#! picture				= (if (curClipRgn==0) (pictsetcliprgn rectRgn) (pictandcliprgn rectRgn)) picture
 		#! picture				= (if (newClipRgn==0) id (pictandcliprgn newClipRgn)) picture
+*/
 		#! picture				= drawf picture
 		#! picture				= pictsetcliprgn curClipRgn picture
-		#  picture				= apppicttoolbox (osdisposergn rectRgn o (if (curClipRgn==0) id (osdisposergn curClipRgn))) picture
+		#  picture				= apppicttoolbox
+									( osdisposergn rectRgn
+									o (if (curClipRgn==0)
+										id
+										(osdisposergn curClipRgn))
+									) picture
 		= picture

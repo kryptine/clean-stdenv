@@ -9,8 +9,7 @@ import	commondef, controlcreate, windowclipstate
 from	StdControlAttribute	import isControlPos
 from	controllayout		import layoutControls
 from	controlrelayout		import relayoutControls
-from	windowaccess		import identifyMaybeId, genWElementItemNrs, getWindowContentRect,
-									getWindowHMargins, getWindowVMargins, getWindowItemSpaces
+from	windowaccess		import identifyMaybeId, genWElementItemNrs, getWindowHMargins, getWindowVMargins, getWindowItemSpaces
 from	windowdispose		import disposeWItemHandle
 from	windowdraw			import drawwindowlook
 from	windowupdate		import updatewindowbackgrounds
@@ -34,7 +33,7 @@ opencontrols wMetrics ls newItems
 	  newItems					= [WChangeLSHandle {wChangeLS=ls,wChangeItems=newItems}]
 	  allItems					= curItems++newItems
 	  visScrolls				= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
-	  {rright=curw,rbottom=curh}= getWindowContentRect wMetrics visScrolls (sizeToRect whSize)
+	  {rright=curw,rbottom=curh}= osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize)
 	  hMargins					= getWindowHMargins   whKind wMetrics whAtts
 	  vMargins					= getWindowVMargins   whKind wMetrics whAtts
 	  spaces					= getWindowItemSpaces whKind wMetrics whAtts
@@ -328,7 +327,7 @@ setcontrolpositions wMetrics newPoss
 		  viewFrame					= posSizeToRectangle origin {w=curw,h=curh}
 		  updState					= rectangleToUpdateState viewFrame
 		  drawbackground			= if (whKind==IsDialog) (\x y->(x,y)) (drawwindowlook wMetrics wPtr id updState)
-//		# (wH,tb)					= drawbackground wH tb	// DvA: seems to be unnecessary
+		# (wH,tb)					= drawbackground wH tb	// DvA: was switched off because of clipping concerns
 		# (updRgn,newItems,tb)		= relayoutControls wMetrics whSelect whShow wFrame wFrame zero zero wPtr whDefaultId oldItems` wH.whItems tb
 		# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wshIds {wH & whItems=newItems} tb
 		# tb						= osValidateWindowRect wPtr (sizeToRect whSize) tb

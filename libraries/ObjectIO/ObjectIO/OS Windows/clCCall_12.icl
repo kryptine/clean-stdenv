@@ -2,7 +2,9 @@ implementation module clCCall_12
 
 //	Clean Object I/O library, version 1.2
 
-from ostoolbox import OSToolbox
+import	StdClass, StdInt
+from	StdIOCommon	import Modifiers
+from	ostoolbox import OSToolbox
 import code from "cCCallSystem_121.obj", 
 				 "cCCallWindows_121.obj",
 				 "cCrossCallWindows_121.obj", 
@@ -58,6 +60,21 @@ BUTTONTRIPLEDOWN	:== 3
 BUTTONDOUBLEDOWN	:== 2
 BUTTONDOWN			:== 1
 BUTTONSTILLUP		:== 0		/* PA: new constant for passing mouse move events. */
+
+
+//	PA: moved from windowevent.icl because also used by menuCrossCall_12
+toModifiers :: !Int -> Modifiers
+toModifiers i
+	=	{	shiftDown	= shifton
+		,	optionDown	= alton
+		,	commandDown	= ctrlon
+		,	controlDown	= ctrlon
+		,	altDown		= alton
+		}
+where
+	shifton	= i bitand SHIFTBIT <> 0
+	alton	= i bitand ALTBIT   <> 0
+	ctrlon	= i bitand CTRLBIT  <> 0
 
 
 winLaunchApp ::  !{#Char} !Bool !*OSToolbox -> ( !Bool, !*OSToolbox)

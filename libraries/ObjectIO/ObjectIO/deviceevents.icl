@@ -4,9 +4,7 @@ implementation module deviceevents
 //	This module contains all type definitions for OS independent events.
 
 
-from	osevent			import OSEvent, CrossCallInfo
-from	ospicture		import OSPictContext
-from	ostypes			import Rect, OSWindowPtr
+import	osevent, ospicture, ostypes
 import	receivermessage, timertable
 from	windowhandle	import WIDS
 from	receiverhandle	import InetEvent`, EndpointRef`, InetReceiverCategory` // MW11++
@@ -53,6 +51,7 @@ from	receiverhandle	import InetEvent`, EndpointRef`, InetReceiverCategory` // MW
  //	Process events:
 	|	ProcessRequestClose									// The process should be closed
 	|	ProcessRequestOpenFiles	!OpenFilesInfo				// The process should open files
+	|	ProcessRequestClipboardChanged
 ::	MenuTraceInfo
 	=	{	mtId				:: !Id						// The Id of the menu that contains the menu item
 		,	mtParents			:: ![Int]					// The submenus starting from mtId that contain the menu item (zero based index)

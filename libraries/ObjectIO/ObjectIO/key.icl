@@ -11,13 +11,13 @@ import	StdBool, StdClass, StdInt, StdOverloaded, StdString
 	=	{	virtual	:: !Int
 		}
 
-BackSpaceVirtualCode:==   8		// BackSpace
+BackSpaceVirtualCode:==  51		// BackSpace
 BeginVirtualCode	:== 115		// Begin of text
 ClearVirtualCode	:==  71		// Clear
 DeleteVirtualCode	:== 117		// Delete
 DownVirtualCode		:== 125		// Arrow down
 EndVirtualCode		:== 119		// End of text
-EnterVirtualCode	:==  13		// Enter		PA: was 76
+EnterVirtualCode	:==  76		// Enter			// PA: wat was er mis met 13?
 EscapeVirtualCode	:==  53		// Escape
 F1VirtualCode		:== 122		// Function 1
 F2VirtualCode		:== 120		// Function 2

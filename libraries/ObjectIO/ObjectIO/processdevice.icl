@@ -83,5 +83,13 @@ processIO deviceEvent=:(ProcessRequestOpenFiles openFilesInfo) pState
 	| otherwise
 		= (deviceEvent,getProcessOpenFilesFun att openFilesInfo pState)
 
+processIO deviceEvent=:(ProcessRequestClipboardChanged) pState
+	# (atts,pState)			= accPIO ioStGetProcessAttributes pState
+	  (hasClipChangeAtt,att)= cselect isProcessClipboardChanged undef atts
+	| not hasClipChangeAtt
+		= (deviceEvent,pState)
+	| otherwise
+		= (deviceEvent,getProcessClipboardChangedFun att pState)
+
 processIO _ _
 	= processdeviceFatalError "processIO" "unexpected DeviceEvent"

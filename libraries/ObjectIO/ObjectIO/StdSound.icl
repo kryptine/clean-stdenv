@@ -9,7 +9,7 @@ implementation module StdSound
 
 
 import	StdString
-from	clCCall_12	import winPlaySound
+//from	clCCall_12	import WinPlaySound
 import	ostoolbox
 
 
@@ -19,6 +19,7 @@ instance playSoundFile World where
 	playSoundFile :: !String !*World -> (!Bool,!*World)
 	playSoundFile soundFileName world
 		# (tb,world)	= worldGetToolbox world
-		# (ok,tb)		= winPlaySound soundFileName tb
+//		# (ok,tb)		= WinPlaySound soundFileName tb
+	    # ok = False
 	    # world			= worldSetToolbox tb world
 	    = (ok,world)

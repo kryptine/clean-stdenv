@@ -9,18 +9,18 @@ import code from "cCrossCallPrinter_121.obj",
 				 "cprinter_121.obj"
 
 ::	PrintSetup
-	=	{	devmode	::	!String
-		,	device	::	!String	// device, driver & output strings are null terminated
-		,	driver	::	!String
-		,	output	::	!String
+	=	{	devmode		:: !String
+		,	device		:: !String	// device, driver & output strings are null terminated
+		,	driver		:: !String
+		,	output		:: !String
 		}
 ::	JobInfo
-	=	{	range	::	!(!Int,!Int)
-		,	copies	::	!Int
+	=	{	range		:: !(!Int,!Int)
+		,	copies		:: !Int
 		}
 ::	PrintInfo
-	=	{	printSetup			::	PrintSetup
-		,	jobInfo				::	JobInfo
+	=	{	printSetup	:: PrintSetup
+		,	jobInfo		:: JobInfo
 		}
 ::	Alternative x y
 	=	Cancelled x
@@ -37,15 +37,11 @@ os_installprinter _
 	}
 
 
-os_getpagedimensions	::	!PrintSetup	!Bool 
-						->	!(!(!Int,!Int),
-							  !(!(!Int,!Int),!(!Int,!Int)),
-							  !(!Int,!Int))
-os_getpagedimensions	{ devmode, device, driver } emulateScreenRes
+os_getpagedimensions :: !PrintSetup !Bool -> (!(!Int,!Int), !(!(!Int,!Int),!(!Int,!Int)), !(!Int,!Int))
+os_getpagedimensions { devmode, device, driver } emulateScreenRes
 	= os_getpagedimensionsC devmode device driver emulateScreenRes
 
-os_defaultprintsetup	::	!*env
-						->	(!PrintSetup, !*env)
+os_defaultprintsetup :: !*env -> (!PrintSetup, !*env)
 os_defaultprintsetup env
 	#	(dmSize,printerHandle,device,driver,output,env)	= getDevmodeSizeC env
 	|	dmSize==0
@@ -57,92 +53,93 @@ os_defaultprintsetup env
 
 printSetupDialogBoth :: !PrintSetup !(Maybe *Context) -> (!PrintSetup, !Maybe *Context)
 printSetupDialogBoth print_setup=:{devmode,device,driver,output} mb_context
-	# (os, mb_context)	= EnvGetOS mb_context
-	# os				= os_installprinter os
-	  (devmodePtr,os) = winMakeCString devmode os
-	  (devicePtr,os) = winMakeCString device os
-	  (driverPtr,os) = winMakeCString driver os
-	  (outputPtr,os) = winMakeCString output os
-	  (ok, pdPtr, mb_context, os) = CCPrintSetupDialog mb_context (size devmode) devmodePtr devicePtr driverPtr outputPtr os
-	  os = winReleaseCString devmodePtr os
-	  os = winReleaseCString devicePtr os
-	  os = winReleaseCString driverPtr os
-	  os = winReleaseCString outputPtr os
+	# (os, mb_context)				= EnvGetOS mb_context
+	# os							= os_installprinter os
+	# (devmodePtr,os)				= winMakeCString devmode os
+	# (devicePtr, os)				= winMakeCString device os
+	# (driverPtr, os)				= winMakeCString driver os
+	# (outputPtr, os)				= winMakeCString output os
+	# (ok, pdPtr, mb_context, os)	= CCPrintSetupDialog mb_context (size devmode) devmodePtr devicePtr driverPtr outputPtr os
+	# os							= winReleaseCString devmodePtr os
+	# os							= winReleaseCString devicePtr os
+	# os							= winReleaseCString driverPtr os
+	# os							= winReleaseCString outputPtr os
 	| ok==0
-		# os = release_memory_handles pdPtr os
+		# os						= release_memory_handles pdPtr os
 		= (print_setup, EnvSetOS os mb_context)
-	# ((ndevmode,ndevice,ndriver,noutput),os)	= get_printSetup_with_PRINTDLG pdPtr os
-	  os = release_memory_handles pdPtr os
-	= ({devmode=ndevmode,device=ndevice,driver=ndriver,output=noutput}, EnvSetOS os mb_context)
+	| otherwise
+		# ((ndevmode,ndevice,ndriver,noutput),os)
+									= get_printSetup_with_PRINTDLG pdPtr os
+		# os						= release_memory_handles pdPtr os
+		= ({devmode=ndevmode,device=ndevice,driver=ndriver,output=noutput}, EnvSetOS os mb_context)
 
-os_printsetupvalid		::	!PrintSetup !*env
-						->	(!Bool, !*env)
+os_printsetupvalid :: !PrintSetup !*env -> (!Bool, !*env)
 os_printsetupvalid {devmode,device,driver} env
 	= os_printsetupvalidC devmode device driver env
 
-os_printsetupvalidC	::	!String !String !String!*env -> (!Bool, !*env)
+os_printsetupvalidC :: !String !String !String!*env -> (!Bool, !*env)
 os_printsetupvalidC _ _ _ _
 	= code
 		{
 			ccall os_printsetupvalidC "SSS:I:A"
 		}
 
-class PrintEnvironments printEnv
-  where
-	os_printpageperpage ::	!.Bool !Bool 
-							!.x
-							.(.x -> .(PrintInfo -> .(*Picture -> ((.Bool,Point2),(.state,*Picture)))))
-							((.state,*Picture) -> ((.Bool,Point2),(.state,*Picture)))
-							!PrintSetup !*printEnv
-						-> 	(Alternative .x .state,!*printEnv)
-	os_printsetupdialog
-		:: !PrintSetup !*printEnv
-		-> (!PrintSetup, !*printEnv)
+class PrintEnvironments printEnv where
+	os_printpageperpage :: !.Bool !Bool 
+						   !.x
+						   .(.x -> .(PrintInfo -> .(*Picture -> ((.Bool,Point2),(.state,*Picture)))))
+						   ((.state,*Picture) -> ((.Bool,Point2),(.state,*Picture)))
+						   !PrintSetup !*printEnv
+						-> (Alternative .x .state,!*printEnv)
+	os_printsetupdialog	:: !PrintSetup !*printEnv
+						-> (!PrintSetup, !*printEnv)
 
 
-instance PrintEnvironments (PSt .l)
-where
+instance PrintEnvironments (PSt .ps) where
 	os_printpageperpage doDialog emulateScreen x initFun transFun printSetup pSt=:{io}
 		#!	(windowStack, io)			= getWindowStack io
 			windowStackIds				= map fst windowStack
 			(zippedWithSelectState, io)	= seqList (map zipWithSelectState windowStackIds) io
 			activeWindowIds				= [ id \\ (mbSelectState, id) <- zippedWithSelectState | isEnabled mbSelectState]
 			io							= seq (map disableWindow activeWindowIds) io
-	 		(result, pSt)				= accContext accFun { pSt & io=io }
+			(result, pSt)				= accContext accFun { pSt & io=io }
 			pSt							= appPIO (seq (map enableWindow activeWindowIds)) pSt
-	 	= (result, pSt)
-	  where
-	  	accFun context
-			# (os, context) = EnvGetOS context
-			# os			= os_installprinter os
-	  		# (x,mb_context,os) = printPagePerPageBothSemaphor
-								doDialog emulateScreen x initFun transFun printSetup (Just context) os
+		= (result, pSt)
+	where
+		accFun context
+			# (os, context)		= EnvGetOS context
+			# os				= os_installprinter os
+			# (x,mb_context,os)	= printPagePerPageBothSemaphor
+									doDialog emulateScreen x initFun transFun printSetup (Just context) os
 			= (x,EnvSetOS os (fromJust mb_context))
+		
 		zipWithSelectState :: Id (IOSt .l) -> (v:(Maybe SelectState,Id),IOSt .l)
 		zipWithSelectState id io
 			#!	(mbSelectState, io)	= getWindowSelectState id io
 			= ((mbSelectState, id), io)
+		
 		isEnabled (Just Able)	= True
 		isEnabled _				= False
+	
 	os_printsetupdialog printSetup pSt
 		= accContext (accFun printSetup) pSt
-	  where
-	  	accFun printSetup context
-	  		# (printSetup, Just context) = printSetupDialogBoth printSetup (Just context)
+	where
+		accFun printSetup context
+			# (printSetup, Just context) = printSetupDialogBoth printSetup (Just context)
 			= (printSetup, context)
 
 
 
-instance PrintEnvironments Files
-where
+instance PrintEnvironments Files where
 	os_printpageperpage doDialog emulateScreen x initFun transFun printSetup files
 		# (os, files)	= EnvGetOS files
 		# os			= os_installprinter os
-		  (x,_,os)		= printPagePerPageBothSemaphor
+		# (x,_,os)		= printPagePerPageBothSemaphor
 		  					doDialog emulateScreen x initFun transFun printSetup Nothing os
 		= (x, EnvSetOS os files) 
+	
 	os_printsetupdialog printSetup files
-  		# (printSetup, _) = printSetupDialogBoth printSetup Nothing
+		# (printSetup, _) = printSetupDialogBoth printSetup Nothing
 		= (printSetup, files) // oh lala
 		
 

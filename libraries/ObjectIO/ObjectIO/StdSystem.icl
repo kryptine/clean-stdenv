@@ -18,7 +18,7 @@ homepath :: !String -> String
 homepath fname = osHomepath fname
 
 applicationpath :: !String -> String
-applicationpath fname = osHomepath fname
+applicationpath fname = osApplicationpath fname
 
 // MW11++
 newlineChars :: !String

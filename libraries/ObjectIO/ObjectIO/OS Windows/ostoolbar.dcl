@@ -4,16 +4,14 @@ definition module ostoolbar
 
 //	Operations to add and remove tools.
 
-from	osbitmap	import OSBitmap
-from	ostoolbox	import OSToolbox
-from	ostypes		import HWND
+import osbitmap, ostoolbox, ostypes
 
 ::	OSToolbar
 	=	{	toolbarPtr		:: !OSToolbarHandle		// The toolbar of the frame window (zero if no toolbar)
 		,	toolbarHeight	:: !Int					// The height of the toolbar       (zero if no toolbar)
 		}
 ::	OSToolbarHandle
-	:==	HWND
+	:==	OSWindowPtr
 
 OSdefaultToolbarHeight :== 16	// The default height of the toolbar
 
@@ -26,6 +24,6 @@ OSdefaultToolbarHeight :== 16	// The default height of the toolbar
 	osCreateToolbarSeparator toolbarPtr
 		adds a separator to the toolbar.
 */
-osCreateToolbar				:: !Bool !HWND !(!Int,!Int)			!*OSToolbox -> (!(!OSToolbarHandle,!Int),!*OSToolbox)
+osCreateToolbar				:: !Bool !OSWindowPtr !(!Int,!Int)	!*OSToolbox -> (!(!OSToolbarHandle,!Int),!*OSToolbox)
 osCreateBitmapToolbarItem	:: !OSToolbarHandle !OSBitmap !Int	!*OSToolbox -> *OSToolbox
 osCreateToolbarSeparator	:: !OSToolbarHandle					!*OSToolbox -> *OSToolbox

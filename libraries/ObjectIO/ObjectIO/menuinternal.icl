@@ -5,8 +5,7 @@ implementation module menuinternal
 
 
 import	StdBool, StdList, StdMisc
-import	osmenu
-from	ostypes		import OSNoWindowPtr
+import	osmenu, ostypes
 import	iostate, menuaccess, menuitems, sdisize
 from	commondef	import fatalError, stateMap, removeCheck, uremove, UCond, hdtl
 from	menucreate	import disposeMenuIds, disposeShortcutkeys, disposeSubMenuHandles
@@ -122,8 +121,8 @@ where
 
 
 closeSubMenus :: !(MenuStateHandle .pst) !*OSToolbox -> (!MenuStateHandle .pst,!*OSToolbox)
-closeSubMenus (MenuLSHandle mH=:{mlsHandle=mlsH=:{mItems=itemHs}}) tb
-	# (itemHs,tb)	= stateMap disposeSubMenuHandles itemHs tb
+closeSubMenus (MenuLSHandle mH=:{mlsHandle=mlsH=:{mHandle=mParentH,mItems=itemHs}}) tb
+	# (itemHs,(_,tb))	= stateMap disposeSubMenuHandles itemHs (mParentH,tb)
 	= (MenuLSHandle {mH & mlsHandle={mlsH & mItems=itemHs}},tb)
 
 closeMenuIds :: !SystemId !(MenuStateHandle .pst) !*(!*ReceiverTable,!*IdTable) -> (!MenuStateHandle .pst,!*(!*ReceiverTable,!*IdTable))

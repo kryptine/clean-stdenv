@@ -1,7 +1,7 @@
 implementation module pictCCall_12
 
 
-from	ostypes	import Rect
+from	ostypes	import Rect, HDC
 import	rgnCCall_12//, intrface_12
 
 
@@ -9,8 +9,6 @@ import	rgnCCall_12//, intrface_12
 	:== (	!HDC
 		,	!*OSToolbox
 		)
-::	HDC
-	:== Int
 ::	Pt
 	:== (	!Int
 		,	!Int
@@ -54,7 +52,7 @@ WINDING				:== 2
 //	PA: end of addition.
 
 
-//	PA: Win(Create/Destroy)ScreenHDC added to temporarily create a HDC of a screen.
+//	PA: win(Create/Destroy)ScreenHDC added to temporarily create a HDC of a screen.
 //		Never use these values for a window or control.
 winCreateScreenHDC :: !*OSToolbox -> PIC
 winCreateScreenHDC _

@@ -6,9 +6,9 @@ implementation module StdControlReceiver
 
 import	StdTuple
 import	StdControlClass, StdReceiverAttribute, windowhandle
+import	ostypes
 from	commondef		import cselect, Cond
 from	receiveraccess	import newReceiverHandle, newReceiverHandle2
-from	ostypes			import OSNoWindowPtr
 
 
 instance Controls (Receiver m) where

@@ -6,11 +6,9 @@ definition module windowvalidate
 //	Window validation.
 
 
-from	osdocumentinterface	import OSDInfo
-from	ostoolbox			import OSToolbox
-from	oswindow			import OSWindowMetrics
-from	iostate				import IOSt
 import	windowhandle
+import	osdocumentinterface, ossystem, ostoolbox
+from	iostate				import IOSt
 
 
 validateWindowId :: !(Maybe Id) !(IOSt .l) -> (!Maybe Id,!IOSt .l)
@@ -42,7 +40,7 @@ exactWindowSize :: OSWindowMetrics ViewDomain !Size Bool Bool !WindowKind -> Siz
 */
 
 exactWindowPos :: !OSWindowMetrics !Size !(Maybe ItemPos) !WindowKind !WindowMode !(WindowHandles .pst) !*OSToolbox
-																	  -> (!Point2, !WindowHandles .pst, !*OSToolbox)
+																	   -> (!Point2, !WindowHandles .pst, !*OSToolbox)
 /*	exactWindowPos determines the exact position of a window.
 	The size argument must be the exact size of the window.
 	The ItemPos argument must be a valid ItemPos attribute. It should not be one of (LeftOf/RightTo/Above/Below)Prev. 

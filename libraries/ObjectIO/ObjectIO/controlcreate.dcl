@@ -6,8 +6,7 @@ definition module controlcreate
 //	Creation of controls
 
 
-from	ostoolbox	import OSToolbox
-from	oswindow	import OSWindowMetrics
+import	ossystem, ostoolbox
 import	windowhandle
 
 

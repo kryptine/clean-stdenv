@@ -13,7 +13,9 @@ osnewrectrgn:: !Rect                                  !*OSToolbox -> (!OSRgnHand
 osdisposergn::                           !OSRgnHandle !*OSToolbox -> *OSToolbox
 
 //	Setting the shape of a region to a rectangle or a polygon.
+/*	PA: used nowhere.
 osrectrgn	:: !Rect                     !OSRgnHandle !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+*/
 ospolyrgn	:: !(!Int,!Int) ![(Int,Int)] !OSRgnHandle !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
 
 /*	Combining the shapes of the two argument regions into a new region.

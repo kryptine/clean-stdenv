@@ -8,18 +8,23 @@ import	StdControlDef, StdMaybe, StdWindowDef
 import	receiverhandle
 from	commondef	import Bound, Finite, Infinite
 from	keyfocus	import KeyFocus, FocusItem
-from	osrgn		import OSRgnHandle
-from	ostypes		import Rect, OSWindowPtr
-from	ospicture	import OSPictContext, Origin, Pen, Font, 
-							Colour, RGB, RGBColour, Black, White, DarkGrey, Grey, LightGrey, 
-							Red, Green, Blue, Cyan, Magenta, Yellow
+import	ospicture, osrgn, ostypes
 
+//import windowcursor
+::	CursorInfo
+	=	{	cInfoChanged	:: !Bool							// True if cLocalRgn or cMouseWasInRgn has changed
+		,	cLocalRgn		:: !OSRgnHandle					// Background region of active window
+		,	cMouseWasInRgn	:: !Bool							// Previous mouse was in background region
+		,	cLocalShape		:: !CursorShape					// Cursor shape of active window
+		,	cGlobalSet		:: !Bool							// Global cursor is set
+		,	cGlobalShape	:: !CursorShape					// Global cursor shape
+		}
 
 ::	*ControlState ls pst
 
 ::	*WindowHandles pst											// Windows currently are only dialogs
 	=	{	whsWindows		:: *[*WindowStateHandle pst]		// The windows and their controls of a process
-//		,	whsCursorInfo	:: CursorInfo						// The global cursor information
+		,	whsCursorInfo	:: !CursorInfo						// The global cursor information
 		,	whsNrWindowBound:: !Bound							// The maximum number of windows that are allowed to be opened
 		,	whsModal		:: !Bool							// Flag: the window system is modal (used in combination with modal dialogues)
 		,	whsFinalModalLS	:: ![FinalModalLS]					// The final local states of terminated modal dialogs

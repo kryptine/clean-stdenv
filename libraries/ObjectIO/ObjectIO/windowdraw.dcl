@@ -5,9 +5,8 @@ definition module windowdraw
 
 //	Drawing operations on windows.
 
-from	ostoolbox	import OSToolbox
-from	oswindow	import OSWindowMetrics
 import	windowhandle
+import	ossystem, ostoolbox
 
 
 /*	drawwindowlook	applies the Look of the given WindowHandle.

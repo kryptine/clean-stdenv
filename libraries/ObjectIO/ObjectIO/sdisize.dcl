@@ -3,10 +3,9 @@ definition module sdisize
 
 //	Clean Object I/O library, version 1.2
 
-from StdIOBasic	import Size
-from iostate	import IOSt
-from ostypes	import OSWindowPtr
-
+from	StdIOBasic	import Size
+from	iostate		import IOSt
+import	ostypes
 
 /*	getSDIWindowSize retrieves the OSWindowPtr and current Size of the WindowViewFrame of the SDI window
 	if this is a SDI process. 

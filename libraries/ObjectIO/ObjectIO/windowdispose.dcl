@@ -5,12 +5,9 @@ definition module windowdispose
 
 
 import	windowhandle
-from	iostate				import PSt, IOSt, InputTrack, InputTrackKind
+from	iostate				import PSt, IOSt, InputTrack, InputTrackKind, SliderTrackInfo
 from	windowaccess		import WID
-from	osdocumentinterface	import OSDInfo
-from	osevent				import OSEvent, CrossCallInfo
-from	ostoolbox			import OSToolbox
-from	oswindow			import DelayActivationInfo
+import	osdocumentinterface, osevent, ostoolbox, oswindow
 
 
 disposeWindow				:: !WID !(PSt .l) -> PSt .l
@@ -23,7 +20,9 @@ disposeWindow				:: !WID !(PSt .l) -> PSt .l
 */
 
 disposeWindowStateHandle	:: !OSDInfo !(Maybe InputTrack) !(OSEvent -> .s -> ([Int],.s)) !*(!*WindowStateHandle .pst,.s) !*OSToolbox
-			   -> (!(![Id],![Id],![DelayActivationInfo],![FinalModalLS],!Maybe InputTrack),!*(!*WindowStateHandle .pst,.s),!*OSToolbox)
+			   -> (!(![Id],![Id],![DelayActivationInfo],![FinalModalLS],!OSDInfo,!Maybe InputTrack),!*(!*WindowStateHandle .pst,.s),!*OSToolbox)
+//disposeWindowStateHandle :: !OSDInfo !(Maybe InputTrack) !(OSEvent -> .s -> ([Int],.s)) !*(!OSDInfo,!*WindowStateHandle .pst,.s) !*OSToolbox
+//			-> (!(![Id],![Id],![DelayActivationInfo],![FinalModalLS],!Maybe InputTrack),!*(!OSDInfo,!*WindowStateHandle .pst,.s),!*OSToolbox)
 /*	disposeWindowStateHandle disposes all system resources associated with the given WindowStateHandle.
 	It returns the freed receiver ids, control ids, delayed (de)activation event, and the final local modal dialog state.
 	(When timers are also part of windows, timer ids will also be returned.)

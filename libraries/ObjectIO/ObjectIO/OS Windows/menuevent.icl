@@ -10,8 +10,8 @@ implementation module menuevent
 
 import	StdBool, StdList, StdMisc
 import	clCrossCall_12
-from	clCCall_12			import winMakeCString, CSTR, ALTBIT, CTRLBIT, SHIFTBIT
-from	osmenu				import osMenuItemCheck
+from	clCCall_12			import winMakeCString, CSTR, toModifiers
+from	osmenu				import osMenuItemCheck, OSTrackPopUpMenu, OSTrackPopUpMenuResult, PopUpTrackedByIndex, PopUpTrackedByItemId
 import	commondef, deviceevents, iostate
 from	menuaccess			import menuStateHandleGetHandle, menuStateHandleGetMenuId
 from	processstack		import topShowProcessShowState
@@ -161,129 +161,145 @@ filterOSEvent {ccMsg=CcWmCOMMAND,p1=item,p2=mods} _ menus=:{mEnabled,mMenus=mHs}
 	| not mEnabled
 		= (False,Nothing,Nothing,menus,tb)
 	| otherwise
-		# (found,deviceEvent,mHs,tb)= getSelectedMenuStateHandlesItem item mods mHs tb
+		# (found,deviceEvent,mHs,tb)= getSelectedMenuStateHandlesItem item (toModifiers mods) mHs tb
 		= (found,Nothing,deviceEvent,{menus & mMenus=mHs},tb)
 where
-	getSelectedMenuStateHandlesItem :: !Int !Int !*[*MenuStateHandle .pst] !*OSToolbox
-					-> (!Bool,!Maybe DeviceEvent,!*[*MenuStateHandle .pst],!*OSToolbox)
-	getSelectedMenuStateHandlesItem item mods msHs tb
+	getSelectedMenuStateHandlesItem :: !Int !Modifiers !*[*MenuStateHandle .pst] !*OSToolbox
+						  -> (!Bool,!Maybe DeviceEvent,!*[*MenuStateHandle .pst],!*OSToolbox)
+	getSelectedMenuStateHandlesItem item modifiers msHs tb
 		# (empty,msHs)					= uisEmpty msHs
 		| empty
 			= (False,Nothing,msHs,tb)
 		# (msH,msHs)					= hdtl msHs
-		# (found,menuEvent,msH,tb)		= getSelectedMenuStateHandleItem item mods msH tb
+		# (found,menuEvent,msH,tb)		= getSelectedMenuStateHandleItem item modifiers msH tb
 		| found
 			= (found,menuEvent,[msH:msHs],tb)
 		| otherwise
-			# (found,menuEvent,msHs,tb)	= getSelectedMenuStateHandlesItem item mods msHs tb
+			# (found,menuEvent,msHs,tb)	= getSelectedMenuStateHandlesItem item modifiers msHs tb
 			= (found,menuEvent,[msH:msHs],tb)
-	where
-		getSelectedMenuStateHandleItem :: !Int !Int !*(MenuStateHandle .pst) !*OSToolbox
-						-> (!Bool,!Maybe DeviceEvent,!*MenuStateHandle .pst, !*OSToolbox)
-		getSelectedMenuStateHandleItem item mods msH=:(MenuLSHandle mlsH=:{mlsHandle=mH=:{mSelect,mHandle,mMenuId,mItems}}) tb
-			| not mSelect
-				= (False,Nothing,msH,tb)
-			| otherwise
-				# (found,menuEvent,_,_,itemHs,tb)	= getSelectedMenuElementHandlesItem item mHandle mMenuId mods [] 0 mItems tb
-				= (found,menuEvent,MenuLSHandle {mlsH & mlsHandle={mH & mItems=itemHs}},tb)
-		where
-			getSelectedMenuElementHandlesItem :: !Int !OSMenu !Id !Int ![Int] !Int !*[*MenuElementHandle .ls .pst] !*OSToolbox
-										  -> (!Bool,!Maybe DeviceEvent,![Int],!Int,!*[*MenuElementHandle .ls .pst],!*OSToolbox)
-			getSelectedMenuElementHandlesItem item mH menuId mods parents zIndex itemHs tb
-				# (empty,itemHs)							= uisEmpty itemHs
-				| empty
-					= (False,Nothing,parents,zIndex,itemHs,tb)
-				# (itemH,itemHs)							= hdtl itemHs
-				# (found,menuEvent,parents,zIndex,itemH,tb)	= getSelectedMenuElementHandle item mH menuId mods parents zIndex itemH tb
-				| found
-					= (found,menuEvent,parents,zIndex,[itemH:itemHs],tb)
-				| otherwise
-					# (found,menuEvent,parents,zIndex,itemHs,tb)= getSelectedMenuElementHandlesItem item mH menuId mods parents zIndex itemHs tb
-					= (found,menuEvent,parents,zIndex,[itemH:itemHs],tb)
-			where
-				getSelectedMenuElementHandle :: !Int !OSMenu !Id !Int ![Int] !Int !*(MenuElementHandle .ls .pst) !*OSToolbox
-										 -> (!Bool,!Maybe DeviceEvent,![Int],!Int, !*MenuElementHandle .ls .pst, !*OSToolbox)
-				
-				getSelectedMenuElementHandle item mH menuId mods parents zIndex itemH=:(MenuItemHandle {mOSMenuItem,mItemId}) tb
-					| item==mOSMenuItem
-						= (True,Just (MenuTraceEvent {mtId=menuId,mtParents=parents,mtItemNr=zIndex,mtModifiers=toModifiers mods}),parents,zIndex+1,itemH,tb)
-					| otherwise
-						= (False,Nothing,parents,zIndex+1,itemH,tb)
-				
-				getSelectedMenuElementHandle item mH menuId mods parents zIndex itemH=:(SubMenuHandle submenuH=:{mSubSelect,mSubHandle,mSubItems}) tb
-					| not mSubSelect
-						= (False,Nothing,parents,zIndex+1,itemH,tb)
-					| otherwise
-						# (found,menuEvent,parents1,_,itemHs,tb)
-									= getSelectedMenuElementHandlesItem item mSubHandle menuId mods (parents++[zIndex]) 0 mSubItems tb
-						  itemH		= SubMenuHandle {submenuH & mSubItems=itemHs}
-						  parents	= if found parents1 parents
-						= (found,menuEvent,parents,zIndex+1,itemH,tb)
-				
-			/*	getSelectedMenuElementHandle item mH menuId mods parents zIndex (RadioMenuHandle rH=:{mRadioSelect,mRadioItems=itemHs,mRadioIndex}) tb
-					# (nrRadios,itemHs)	= Ulength itemHs
-					| not mRadioSelect
-						= (False,Nothing,parents,zIndex+nrRadios,RadioMenuHandle {rH & mRadioItems=itemHs},tb)
-					# (found,menuEvent,parents,zIndex1,itemHs,tb)	= getSelectedMenuElementHandlesItem item mH menuId mods parents zIndex itemHs tb
-					| not found
-						= (found,menuEvent,parents,zIndex1,RadioMenuHandle {rH & mRadioItems=itemHs},tb)
-					# curIndex	= mRadioIndex
-					  newIndex	= zIndex1-zIndex
-					| curIndex==newIndex
-						= (found,menuEvent,parents,zIndex1,RadioMenuHandle {rH & mRadioItems=itemHs},tb)
-					| otherwise
-						# curH	= getMenuItemOSMenuItem (itemHs!!(curIndex-1))
-						  newH	= getMenuItemOSMenuItem (itemHs!!(newIndex-1))
-						# tb	= OSMenuItemCheck False mH curH tb
-						# tb	= OSMenuItemCheck True  mH newH tb
-						= (found,menuEvent,parents,zIndex1,RadioMenuHandle {rH & mRadioItems=itemHs,mRadioIndex=newIndex},tb)
-				where
-					getMenuItemOSMenuItem :: !(MenuElementHandle .ls .pst) -> OSMenuItem
-					getMenuItemOSMenuItem (MenuItemHandle {mOSMenuItem}) = mOSMenuItem
-			*/	
-				getSelectedMenuElementHandle item mH menuId mods parents zIndex (RadioMenuHandle rH=:{mRadioSelect,mRadioItems=itemHs,mRadioIndex}) tb
-					# (nrRadios,itemHs)	= ulength itemHs
-					| not mRadioSelect
-						= (False,Nothing,parents,zIndex+nrRadios,RadioMenuHandle {rH & mRadioItems=itemHs},tb)
-					# (found,menuEvent,parents,zIndex1,itemHs,tb)	= getSelectedMenuElementHandlesItem item mH menuId mods parents zIndex itemHs tb
-					| not found
-						= (found,menuEvent,parents,zIndex1,RadioMenuHandle {rH & mRadioItems=itemHs},tb)
-					# curIndex	= mRadioIndex
-					  newIndex	= zIndex1-zIndex
-					| curIndex==newIndex
-						= (found,menuEvent,parents,zIndex1,RadioMenuHandle {rH & mRadioItems=itemHs},tb)
-					| otherwise
-						# (before,[itemH:after])= splitAt (curIndex-1) itemHs
-						# (curH,itemH)			= getMenuItemOSMenuItem itemH
-						# (before,[itemH:after])= splitAt (newIndex-1) (before ++ [itemH:after])
-						# (newH,itemH)			= getMenuItemOSMenuItem itemH
-						# tb					= osMenuItemCheck False mH curH tb
-						# tb					= osMenuItemCheck True  mH newH tb
-						= (found,menuEvent,parents,zIndex1,RadioMenuHandle {rH & mRadioItems=before ++ [itemH:after],mRadioIndex=newIndex},tb)
-				where
-					getMenuItemOSMenuItem :: !*(MenuElementHandle .ls .pst) -> (!OSMenuItem,!MenuElementHandle .ls .pst)
-					getMenuItemOSMenuItem itemH=:(MenuItemHandle {mOSMenuItem}) = (mOSMenuItem,itemH)
-				
-				getSelectedMenuElementHandle item mH menuId mods parents zIndex (MenuListLSHandle itemHs) tb
-					# (found,menuEvent,parents,zIndex,itemHs,tb)	= getSelectedMenuElementHandlesItem item mH menuId mods parents zIndex itemHs tb
-					= (found,menuEvent,parents,zIndex,MenuListLSHandle itemHs,tb)
-				
-				getSelectedMenuElementHandle item mH menuId mods parents zIndex (MenuExtendLSHandle mExH=:{mExtendItems=itemHs}) tb
-					# (found,menuEvent,parents,zIndex,itemHs,tb)	= getSelectedMenuElementHandlesItem item mH menuId mods parents zIndex itemHs tb
-					= (found,menuEvent,parents,zIndex,MenuExtendLSHandle {mExH & mExtendItems=itemHs},tb)
-				
-				getSelectedMenuElementHandle item mH menuId mods parents itemNr (MenuChangeLSHandle mChH=:{mChangeItems=itemHs}) tb
-					# (found,menuEvent,parents,zIndex,itemHs,tb)	= getSelectedMenuElementHandlesItem item mH menuId mods parents zIndex itemHs tb
-					= (found,menuEvent,parents,zIndex,MenuChangeLSHandle {mChH & mChangeItems=itemHs},tb)
-				
-				getSelectedMenuElementHandle _ _ _ _ parents zIndex itemH tb
-					= (False,Nothing,parents,zIndex,itemH,tb)
-
 filterOSEvent _ _ _ _
 	= menueventFatalError "filterOSEvent" "unmatched OSEvent"
 
 
-//	PA: this function is also defined identically in windowevent.
+/*	popUpMenuEvent returns the proper DeviceEvent for PopUpMenu selections (determined by the OSTrackPopUpMenu result; see osmenu).
+*/
+popUpMenuEvent :: !OSTrackPopUpMenu !(MenuStateHandle .ps) !*OSToolbox -> (!Maybe DeviceEvent, !MenuStateHandle .ps, !*OSToolbox)
+popUpMenuEvent {ospupItem=PopUpTrackedByItemId item,ospupModifiers=mods} msH tb
+	# (_,menuEvent,msH,tb)	= getSelectedMenuStateHandleItem item mods msH tb
+	= (menuEvent,msH,tb)
+popUpMenuEvent _ _ _
+	= menueventFatalError "popUpMenuEvent" "PopUpTrackedByIndex not expected"
+
+
+/*	getSelectedMenuStateHandleItem item mods msH
+		determines if there is a menu item identified by item in msh. If so, the corresponding abstract device event is returned.
+	This function is used by (filterOSEvent {ccMsg=CcWmCOMMAND}) and popUpMenuEvent.
+*/
+getSelectedMenuStateHandleItem :: !Int !Modifiers !*(MenuStateHandle .pst) !*OSToolbox
+					 -> (!Bool,!Maybe DeviceEvent, !*MenuStateHandle .pst, !*OSToolbox)
+getSelectedMenuStateHandleItem item mods msH=:(MenuLSHandle mlsH=:{mlsHandle=mH=:{mSelect,mHandle,mMenuId,mItems}}) tb
+	| not mSelect
+		= (False,Nothing,msH,tb)
+	| otherwise
+		# (found,menuEvent,_,_,itemHs,tb)	= getSelectedMenuElementHandlesItem item mHandle mMenuId mods [] 0 mItems tb
+		= (found,menuEvent,MenuLSHandle {mlsH & mlsHandle={mH & mItems=itemHs}},tb)
+where
+	getSelectedMenuElementHandlesItem :: !Int !OSMenu !Id !Modifiers ![Int] !Int !*[*MenuElementHandle .ls .pst] !*OSToolbox
+										-> (!Bool,!Maybe DeviceEvent,![Int],!Int,!*[*MenuElementHandle .ls .pst],!*OSToolbox)
+	getSelectedMenuElementHandlesItem item mH menuId mods parents zIndex itemHs tb
+		# (empty,itemHs)							= uisEmpty itemHs
+		| empty
+			= (False,Nothing,parents,zIndex,itemHs,tb)
+		# (itemH,itemHs)							= hdtl itemHs
+		# (found,menuEvent,parents,zIndex,itemH,tb)	= getSelectedMenuElementHandle item mH menuId mods parents zIndex itemH tb
+		| found
+			= (found,menuEvent,parents,zIndex,[itemH:itemHs],tb)
+		| otherwise
+			# (found,menuEvent,parents,zIndex,itemHs,tb)= getSelectedMenuElementHandlesItem item mH menuId mods parents zIndex itemHs tb
+			= (found,menuEvent,parents,zIndex,[itemH:itemHs],tb)
+	where
+		getSelectedMenuElementHandle :: !Int !OSMenu !Id !Modifiers ![Int] !Int !*(MenuElementHandle .ls .pst) !*OSToolbox
+									   -> (!Bool,!Maybe DeviceEvent,![Int],!Int, !*MenuElementHandle .ls .pst, !*OSToolbox)
+		
+		getSelectedMenuElementHandle item mH menuId mods parents zIndex itemH=:(MenuItemHandle {mOSMenuItem,mItemId}) tb
+			| item==mOSMenuItem
+				= (True,Just (MenuTraceEvent {mtId=menuId,mtParents=parents,mtItemNr=zIndex,mtModifiers=mods}),parents,zIndex+1,itemH,tb)
+			| otherwise
+				= (False,Nothing,parents,zIndex+1,itemH,tb)
+		
+		getSelectedMenuElementHandle item mH menuId mods parents zIndex itemH=:(SubMenuHandle submenuH=:{mSubSelect,mSubHandle,mSubItems}) tb
+			| not mSubSelect
+				= (False,Nothing,parents,zIndex+1,itemH,tb)
+			| otherwise
+				# (found,menuEvent,parents1,_,itemHs,tb)
+							= getSelectedMenuElementHandlesItem item mSubHandle menuId mods (parents++[zIndex]) 0 mSubItems tb
+				  itemH		= SubMenuHandle {submenuH & mSubItems=itemHs}
+				  parents	= if found parents1 parents
+				= (found,menuEvent,parents,zIndex+1,itemH,tb)
+		
+	/*	getSelectedMenuElementHandle item mH menuId mods parents zIndex (RadioMenuHandle rH=:{mRadioSelect,mRadioItems=itemHs,mRadioIndex}) tb
+			# (nrRadios,itemHs)	= Ulength itemHs
+			| not mRadioSelect
+				= (False,Nothing,parents,zIndex+nrRadios,RadioMenuHandle {rH & mRadioItems=itemHs},tb)
+			# (found,menuEvent,parents,zIndex1,itemHs,tb)	= getSelectedMenuElementHandlesItem item mH menuId mods parents zIndex itemHs tb
+			| not found
+				= (found,menuEvent,parents,zIndex1,RadioMenuHandle {rH & mRadioItems=itemHs},tb)
+			# curIndex	= mRadioIndex
+			  newIndex	= zIndex1-zIndex
+			| curIndex==newIndex
+				= (found,menuEvent,parents,zIndex1,RadioMenuHandle {rH & mRadioItems=itemHs},tb)
+			| otherwise
+				# curH	= getMenuItemOSMenuItem (itemHs!!(curIndex-1))
+				  newH	= getMenuItemOSMenuItem (itemHs!!(newIndex-1))
+				# tb	= OSMenuItemCheck False mH curH tb
+				# tb	= OSMenuItemCheck True  mH newH tb
+				= (found,menuEvent,parents,zIndex1,RadioMenuHandle {rH & mRadioItems=itemHs,mRadioIndex=newIndex},tb)
+		where
+			getMenuItemOSMenuItem :: !(MenuElementHandle .ls .pst) -> OSMenuItem
+			getMenuItemOSMenuItem (MenuItemHandle {mOSMenuItem}) = mOSMenuItem
+	*/	
+		getSelectedMenuElementHandle item mH menuId mods parents zIndex (RadioMenuHandle rH=:{mRadioSelect,mRadioItems=itemHs,mRadioIndex}) tb
+			# (nrRadios,itemHs)	= ulength itemHs
+			| not mRadioSelect
+				= (False,Nothing,parents,zIndex+nrRadios,RadioMenuHandle {rH & mRadioItems=itemHs},tb)
+			# (found,menuEvent,parents,zIndex1,itemHs,tb)	= getSelectedMenuElementHandlesItem item mH menuId mods parents zIndex itemHs tb
+			| not found
+				= (found,menuEvent,parents,zIndex1,RadioMenuHandle {rH & mRadioItems=itemHs},tb)
+			# curIndex	= mRadioIndex
+			  newIndex	= zIndex1-zIndex
+			| curIndex==newIndex
+				= (found,menuEvent,parents,zIndex1,RadioMenuHandle {rH & mRadioItems=itemHs},tb)
+			| otherwise
+				# (before,[itemH:after])= splitAt (curIndex-1) itemHs
+				# (curH,itemH)			= getMenuItemOSMenuItem itemH
+				# (before,[itemH:after])= splitAt (newIndex-1) (before ++ [itemH:after])
+				# (newH,itemH)			= getMenuItemOSMenuItem itemH
+				# tb					= osMenuItemCheck False mH curH 0 0 tb	// 0 0 added: dummy on Windows
+				# tb					= osMenuItemCheck True  mH newH 0 0 tb	// 0 0 added: dummy on Windows
+				= (found,menuEvent,parents,zIndex1,RadioMenuHandle {rH & mRadioItems=before ++ [itemH:after],mRadioIndex=newIndex},tb)
+		where
+			getMenuItemOSMenuItem :: !*(MenuElementHandle .ls .pst) -> (!OSMenuItem,!MenuElementHandle .ls .pst)
+			getMenuItemOSMenuItem itemH=:(MenuItemHandle {mOSMenuItem}) = (mOSMenuItem,itemH)
+		
+		getSelectedMenuElementHandle item mH menuId mods parents zIndex itemH=:(MenuSeparatorHandle _) tb
+			= (False,Nothing,parents,zIndex+1,itemH,tb)
+		
+		getSelectedMenuElementHandle item mH menuId mods parents zIndex (MenuListLSHandle itemHs) tb
+			# (found,menuEvent,parents,zIndex,itemHs,tb)	= getSelectedMenuElementHandlesItem item mH menuId mods parents zIndex itemHs tb
+			= (found,menuEvent,parents,zIndex,MenuListLSHandle itemHs,tb)
+		
+		getSelectedMenuElementHandle item mH menuId mods parents zIndex (MenuExtendLSHandle mExH=:{mExtendItems=itemHs}) tb
+			# (found,menuEvent,parents,zIndex,itemHs,tb)	= getSelectedMenuElementHandlesItem item mH menuId mods parents zIndex itemHs tb
+			= (found,menuEvent,parents,zIndex,MenuExtendLSHandle {mExH & mExtendItems=itemHs},tb)
+		
+		getSelectedMenuElementHandle item mH menuId mods parents itemNr (MenuChangeLSHandle mChH=:{mChangeItems=itemHs}) tb
+			# (found,menuEvent,parents,zIndex,itemHs,tb)	= getSelectedMenuElementHandlesItem item mH menuId mods parents zIndex itemHs tb
+			= (found,menuEvent,parents,zIndex,MenuChangeLSHandle {mChH & mChangeItems=itemHs},tb)
+		
+		getSelectedMenuElementHandle _ _ _ _ parents zIndex itemH tb
+			= (False,Nothing,parents,zIndex,itemH,tb)
+
+/*	PA: this function is now defined in clCCall_12.
 toModifiers :: !Int -> Modifiers
 toModifiers i
 	=	{	shiftDown	= shifton
@@ -296,7 +312,7 @@ where
 	shifton	= i bitand SHIFTBIT <> 0
 	alton	= i bitand ALTBIT   <> 0
 	ctrlon	= i bitand CTRLBIT  <> 0
-
+*/
 //	isToolbarEvent checks whether the toolbar equals the OSDInfo toolbar.
 isToolbarEvent :: !OSDInfo !OSWindowPtr -> Bool
 isToolbarEvent osdInfo toolbarPtr
@@ -305,6 +321,8 @@ isToolbarEvent osdInfo toolbarPtr
 where
 	maybeToolbar				= getOSDInfoOSToolbar osdInfo
 
+/*	PA: not used. Instead use menuHandlesGetMenus/menuHandlesSetMenus.
 menuHandlesGetMenuStateHandles :: !(MenuHandles .pst) -> (![MenuStateHandle .pst],!MenuHandles .pst)
 menuHandlesGetMenuStateHandles mHs=:{mMenus}
 	= (mMenus,{mHs & mMenus=[]})
+*/

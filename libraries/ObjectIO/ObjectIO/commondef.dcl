@@ -6,12 +6,9 @@ definition module commondef
 //	Common types for the Clean Object I/O system and their access rules:
 
 
-import	StdClass
+import	StdClass, StdFunc
 import	StdIOCommon
-from	StdFunc		import St
-from	osrgn		import OSRgnHandle
-from	ostoolbox	import OSToolbox
-from	ostypes		import Rect
+import	osrgn, ostoolbox, ostypes
 
 
 k`						:: .x !.y -> .y
@@ -75,6 +72,9 @@ class fromTuple4 a :: !(!Int,!Int,!Int,!Int) -> a
 instance toTuple4 Rect;		instance fromTuple4 Rect
 instance toTuple4 Rectangle;instance fromTuple4 Rectangle
 
+/*	Tuple functions:
+*/
+swap	:: !(.a,.b) -> (.b,.a)
 
 /*	Common error generation rule:
 */
@@ -121,8 +121,9 @@ uspan					:: !(UCond .x)				!u:[.x]		-> (![.x],!u:[.x])	// Same as span (StdList
 filterMap				:: !(.x -> *(Bool,.y))		![.x]		-> [.y]
 stateMap				:: !(u:x -> v:(.s -> (.y,.s))) ![u:x] !.s -> (![.y],!.s), [v<=u]
 stateMap2				:: !(u:x -> v:(.s -> .s))	![u:x] !.s -> .s, [v<=u]
-strictSeq				:: ![.(.s -> .s)]				  !.s	-> .s				// Same as seq (StdFunc), but with strict state argument
-strictSeqList			:: !.[.St .s .x]				  !.s	-> (![.x],!.s)		// Same as seqList (StdFunc), but with strict state argument
+strictSeq				:: ![.(.s -> .s)]				   !.s -> .s				// Same as seq (StdFunc), but with strict state argument
+strictSeqList			:: !.[.St .s .x]				   !.s -> (![.x],!.s)		// Same as seqList (StdFunc), but with strict state argument
+allList					:: !(.x .s -> .(Bool,.s))   ![.x]  !.s -> (!Bool,!.s)
 
 contains				:: !(Cond    x)				![ x] -> Bool
 ucontains				:: !(UCond  .x)				!u:[.x] -> (!Bool,	!u:[.x])

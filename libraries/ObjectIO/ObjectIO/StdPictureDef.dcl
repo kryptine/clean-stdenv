@@ -72,11 +72,11 @@ MinRGB					:== 0
 MaxRGB					:== 255
 
 //	Font constants:
-SerifFontDef			:==	{fName="Times New Roman",fStyles=[],fSize=10}
-SansSerifFontDef		:==	{fName="Arial",          fStyles=[],fSize=10}
-SmallFontDef			:==	{fName="Small Fonts",    fStyles=[],fSize=7 }
-NonProportionalFontDef	:==	{fName="Courier New",    fStyles=[],fSize=10}
-SymbolFontDef			:==	{fName="Symbol",         fStyles=[],fSize=10}
+SerifFontDef			:: FontDef
+SansSerifFontDef		:: FontDef
+SmallFontDef			:: FontDef
+NonProportionalFontDef	:: FontDef
+SymbolFontDef			:: FontDef
 
 //	Font style constants:
 ItalicsStyle			:== "Italic"

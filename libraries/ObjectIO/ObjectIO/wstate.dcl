@@ -5,7 +5,7 @@ definition module wstate
 
 
 import	windowhandle
-from	ostoolbox	import OSToolbox
+import	ostoolbox
 
 
 /*	The WindowHandle` data type.

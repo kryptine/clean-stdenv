@@ -3,9 +3,9 @@ definition module windowcreate
 
 //	Clean Object I/O library, version 1.2
 
-from	oswindow	import DelayActivationInfo
 from	iostate		import PSt, IOSt
 import	windowhandle
+import	osfont, ossystem, oswindow
 
 
 /*	Open a window.
@@ -16,6 +16,16 @@ import	windowhandle
 */
 openwindow			:: !Id !(WindowLSHandle .ls (PSt .l)) !(PSt .l) -> PSt .l
 openmodalwindow		:: !Id !(WindowLSHandle .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!Maybe .ls,!PSt .l)
+
+/*	createModalDialogControls wMetrics wPtr windows
+		Replaces the OSWindowPtr of the modal dialog that is identified by a zero OSWindowPtr from windows.
+		If such a modal dialog could not be found, then a runtime error is generated.
+		Then it takes care that the controls of the indicated modal dialog are created.
+	The return OSWindowPtr is of the control that has the initial input focus.
+	NOTE: this function is also used in windowevent.icl
+*/
+createModalDialogControls :: !OSWindowMetrics !OSWindowPtr !*(WindowHandles .pst) !*OSToolbox
+										  -> (!OSWindowPtr, !*WindowHandles .pst, !*OSToolbox)
 
 /*	bufferDelayedEvents buffers the activate/deactivate events.
 */

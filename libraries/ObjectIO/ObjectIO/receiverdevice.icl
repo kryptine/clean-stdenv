@@ -7,7 +7,7 @@ implementation module receiverdevice
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	StdReceiver
 import	devicefunctions, iostate, receiveraccess, receiverevent, receiverid
-from	commondef	import fatalError, uremove, UCond, strictSeq, strictSeqList, accessList
+from	commondef	import fatalError, uremove, UCond, strictSeq, accessList
 from	StdPSt		import appPIO, accPIO
 
 
@@ -111,7 +111,7 @@ where
 					= [rsH:rsHs]
 			qMessage _ _ []
 				=	[]
-	
+
 	receiverIO deviceEvent=:(ReceiverEvent (ASyncMessage event)) rsHs pState
 		= (deviceEvent,letOneReceiverDoIO rl rsHs pState)
 	where
@@ -133,7 +133,7 @@ where
 				= ({rState=ls,rHandle={rH & rASMQ=tailQ}},pState)
 			letReceiverDoIO _ _
 				= receiverdeviceFatalError "letReceiverDoIO" "message queue of target receiver is empty"
-	
+
 	receiverIO (ReceiverEvent (SyncMessage event)) rsHs pState
 		# (lastProcess,pState)	= accPIO ioStLastInteraction pState
 		# (event,pState)		= receiverSyncIO lastProcess event rsHs pState

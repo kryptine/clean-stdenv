@@ -4,10 +4,8 @@ definition module windowcontrols
 
 //	Operations to open, close, and reposition controls in windows.
 
-from	osdocumentinterface import OSDInfo
-from	ostoolbox			import OSToolbox
-from	oswindow			import OSWindowMetrics
 import	windowhandle
+import	osdocumentinterface, ossystem, ostoolbox
 
 
 opencontrols		:: !OSWindowMetrics .ls ![WElementHandle .ls .pst] !(WindowStateHandle .pst) !*OSToolbox

@@ -253,7 +253,8 @@ void EvalCcRqDRAWMBAR (CrossCallInfo *pcci)		/* framePtr, clientPtr; no result. 
 }
 
 /*	Track pop up menu. */
-void EvalCcRqTRACKPOPMENU (CrossCallInfo *pcci)	/* popupmenu,framePtr; BOOL result. */
+/*	This version returned BOOL. New version must return number of selected item.
+void EvalCcRqTRACKPOPMENU (CrossCallInfo *pcci)	// popupmenu,framePtr; BOOL result. 
 {
 	HMENU popupmenu;
 	HWND  framePtr;
@@ -269,6 +270,24 @@ void EvalCcRqTRACKPOPMENU (CrossCallInfo *pcci)	/* popupmenu,framePtr; BOOL resu
 	ok = TrackPopupMenu (popupmenu,flags,mousePos.x,mousePos.y,0,framePtr,NULL);
 
 	MakeReturn1Cci (pcci,(int)ok);
+}
+*/
+void EvalCcRqTRACKPOPMENU (CrossCallInfo *pcci)	/* popupmenu,framePtr; return: index of selected item; modifiers. */
+{
+	HMENU popupmenu;
+	HWND  framePtr;
+	UINT  flags;
+	POINT mousePos;
+	int   menuItemID;
+
+	popupmenu = (HMENU) pcci->p1;
+	framePtr  = (HWND)  pcci->p2;
+	flags     = TPM_CENTERALIGN | TPM_RIGHTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD;
+	GetCursorPos (&mousePos);
+
+	menuItemID = (int)TrackPopupMenu (popupmenu,flags,mousePos.x,mousePos.y,0,framePtr,NULL);
+
+	MakeReturn2Cci (pcci,menuItemID, GetModifiers());
 }
 
 void EvalCcRqCREATEPOPMENU (CrossCallInfo *pcci) /* no params; MENU result.   */

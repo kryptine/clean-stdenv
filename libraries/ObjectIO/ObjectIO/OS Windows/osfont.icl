@@ -9,6 +9,7 @@ import	clCrossCall_12, pictCCall_12
 from	clCCall_12		import winMakeCString, winGetCString, CSTR, winGetVertResolution
 from	StdPictureDef	import FontName, FontSize, FontStyle, BoldStyle, ItalicsStyle, UnderlinedStyle
 from	commondef		import fatalError, isBetween, minmax, stateMap
+from	ostypes			import OSPictContext, HDC
 
 
 ::	Font
@@ -30,6 +31,13 @@ instance == OSFont where
 	(==) :: !OSFont !OSFont -> Bool
 	(==) f1 f2 = f1.osfontsize==f2.osfontsize && f1.osfontstyles==f2.osfontstyles && f1.osfontname==f2.osfontname
 
+//	Font constants:
+osSerifFontDef           :: OSFontDef;	osSerifFontDef			= ("Times New Roman",[],10)
+osSansSerifFontDef       :: OSFontDef;	osSansSerifFontDef		= ("Arial",          [],10)
+osSmallFontDef           :: OSFontDef;	osSmallFontDef			= ("Small Fonts",    [],7 )
+osNonProportionalFontDef :: OSFontDef;	osNonProportionalFontDef= ("Courier New",    [],10)
+osSymbolFontDef          :: OSFontDef;	osSymbolFontDef			= ("Symbol",         [],10)
+
 
 osSelectfont :: !OSFontDef !*OSToolbox -> (!Bool,!Font,!*OSToolbox)
 osSelectfont fdef=:(fName,fStyles,fSize) tb
@@ -43,7 +51,7 @@ osDefaultfont tb
 where
 	def		= (name,styles,size)
 	imp		= {osfontname=name,osfontstyles=sStyle2IStyle styles,osfontsize=size}
-	name	= "Times"
+	name	= "Times New Roman"
 	styles	= []
 	size	= 10
 
@@ -166,15 +174,19 @@ where
 	height	= toReal p * phfactor
 */
 
-osGetfontcharwidths :: !Bool !Int ![Char] !Font !*OSToolbox -> (![Int], !*OSToolbox)
+osGetfontcharwidths :: !Bool !OSPictContext ![Char] !Font !*OSToolbox -> (![Int], !*OSToolbox)
 osGetfontcharwidths hdcPassed maybeHdc chars {fontimp={osfontname,osfontstyles,osfontsize}} tb
 	= stateMap (\c tb->winGetCharWidth c (osfontname,osfontstyles,osfontsize) (toInt hdcPassed) maybeHdc tb) chars tb
 
-osGetfontstringwidths :: !Bool !Int ![String] !Font !*OSToolbox -> (![Int], !*OSToolbox)
+osGetfontstringwidth :: !Bool !OSPictContext !String !Font !*OSToolbox -> (!Int, !*OSToolbox)
+osGetfontstringwidth hdcPassed maybeHdc string {fontimp={osfontname,osfontstyles,osfontsize}} tb
+	= winGetStringWidth string (osfontname,osfontstyles,osfontsize) (toInt hdcPassed) maybeHdc tb
+
+osGetfontstringwidths :: !Bool !OSPictContext ![String] !Font !*OSToolbox -> (![Int], !*OSToolbox)
 osGetfontstringwidths hdcPassed maybeHdc strings {fontimp={osfontname,osfontstyles,osfontsize}} tb
 	= stateMap (\s tb->winGetStringWidth s (osfontname,osfontstyles,osfontsize) (toInt hdcPassed) maybeHdc tb) strings tb
 
-osGetfontmetrics :: !Bool !Int !Font !*OSToolbox -> (!(!Int,!Int,!Int,!Int),!*OSToolbox)
+osGetfontmetrics :: !Bool !OSPictContext !Font !*OSToolbox -> (!(!Int,!Int,!Int,!Int),!*OSToolbox)
 osGetfontmetrics hdcPassed maybeHdc {fontimp={osfontname,osfontstyles,osfontsize}} tb
 	# (ascent,descent,maxwidth,leading,tb) = winGetFontInfo (osfontname,osfontstyles,osfontsize) (toInt hdcPassed) maybeHdc tb
 	= ((ascent,descent,leading,maxwidth),tb)

@@ -10,15 +10,12 @@ from	StdControlAttribute	import isControlResize,       getControlResizeFun,
 									isControlMinimumSize, getControlMinimumSizeAtt,
 									isControlPos,         getControlPosAtt, isControlViewSize
 from	controllayout		import layoutControls
-from	windowaccess		import getWItemCompoundInfo, getWItemEditInfo, getWItemSliderInfo, getWindowInfoWindowData, getCompoundContentRect,
+from	windowaccess		import getWItemCompoundInfo, getWItemEditInfo, getWItemSliderInfo, getWindowInfoWindowData,
 									getWindowHMargins, getWindowVMargins, getWindowItemSpaces
 from	windowclipstate		import forceValidWindowClipState, invalidateCompoundClipState
 from	windowdraw			import drawwindowlook
 from	windowupdate		import updatewindowbackgrounds
-from	ossystem			import OSWindowMetrics
-from	ostypes				import Rect, OSWindowPtr
-from	ostoolbox			import OSToolbox
-from	oswindow			import osMinWindowSize, osMinCompoundSize, osScrollbarsAreVisible
+import	ossystem, ostoolbox, ostypes, oswindow
 
 
 /*	resizeControls proceeds as follows:
@@ -121,11 +118,11 @@ where
 		Similar: the result size is also the outer size. 
 */		calcNewWItemSize wMetrics originShifted resizeF itemH=:{wItemKind=IsCompoundControl}
 			# visScrolls		= osScrollbarsAreVisible wMetrics domainRect (toTuple oldSize) hasScrolls
-			  oldFrameSize		= rectSize (getCompoundContentRect wMetrics visScrolls (sizeToRect oldSize))
+			  oldFrameSize		= rectSize (osGetCompoundContentRect wMetrics visScrolls (sizeToRect oldSize))
 			  newSize			= resizeF oldSize
 			  newSize			= {w=max minSize.w newSize.w,h=max minSize.h newSize.h}
 			  visScrolls		= osScrollbarsAreVisible wMetrics domainRect (toTuple newSize) hasScrolls
-			  newFrameSize		= rectSize (getCompoundContentRect wMetrics visScrolls (sizeToRect newSize))
+			  newFrameSize		= rectSize (osGetCompoundContentRect wMetrics visScrolls (sizeToRect newSize))
 			| newFrameSize==oldFrameSize
 				= (False,itemH)
 			| otherwise

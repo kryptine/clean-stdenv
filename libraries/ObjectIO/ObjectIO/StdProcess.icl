@@ -10,9 +10,7 @@ import	devicefunctions, iostate, processdevice, scheduler
 from	commondef			import stateMap2, Cond, rectSize, strictSeq
 from	processstack		import setProcessShowState
 from	StdProcessAttribute	import isProcessOpenFiles, isProcessToolbar
-import	osdocumentinterface
-from	ostypes				import Rect
-from	ossystem			import osGetProcessWindowDimensions
+import	osdocumentinterface, ossystem, ostypes
 
 
 //	General process topology creation functions:

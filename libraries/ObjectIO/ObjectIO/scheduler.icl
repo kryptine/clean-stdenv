@@ -5,9 +5,7 @@ implementation module scheduler
 
 
 import	StdBool, StdList, StdTuple
-import	osevent, ostime
-from	ossystem			import OStickspersecond
-from	ostoolbox			import OSNewToolbox, osInitToolbox
+import	osevent, ossystem, ostime, ostoolbox
 import	commondef, devicefunctions, iostate, processstack, roundrobin, timertable, world
 from	StdProcessDef		import ProcessInit
 from	StdPSt				import accPIO, appPIO
@@ -53,8 +51,9 @@ contextGetSleepTime :: !Context -> (!Int,!Context)
 contextGetSleepTime context=:{cTimerTable=tt,cReceiverTable}
 	# (maybe_sleep,tt)		= getTimeIntervalFromTimerTable tt
 	# (maybe_receiver,rt)	= getActiveReceiverTableEntry cReceiverTable
-	  sleep					= if (isJust maybe_receiver) 0								// a receiver with a non-empty message queue exists
+	  sleep					= if (isJust maybe_receiver) OSNoSleep						// a receiver with a non-empty message queue exists
 			  				 (if (isJust maybe_sleep)	(snd (fromJust maybe_sleep))	// a timer with given interval is waiting
+			  				 							//OSNoSleep)	// DvA: need to test here wether tracking or not...
 			  				 							OSLongSleep)					// neither a receiver nor timer
 	= (sleep,{context & cTimerTable=tt,cReceiverTable=rt})
 
@@ -109,11 +108,11 @@ where
 
 initContext` :: !*World -> (!Context,!*OSToolbox)
 initContext` world
-	# w						= loadWorld world
-	# world					= storeWorld w world
-	# initEnvs				= {envsEvents=osNewEvents,envsWorld=world}
-	# tb					= osInitToolbox OSNewToolbox
-	# (ostime,tb)			= osGetTime tb
+	# w					= loadWorld world
+	# world				= storeWorld w world
+	# initEnvs			= {envsEvents=osNewEvents,envsWorld=world}
+	# tb				= osInitToolbox OSNewToolbox
+	# (ostime,tb)		= osGetTime tb
 	= (	{	cEnvs			= initEnvs
 		,	cProcessStack	= ioStack
 		,	cMaxIONr		= initSystemId
@@ -129,8 +128,8 @@ initContext` world
 	  ,	tb
 	  )
 where
-	initModalId				= Nothing
-	ioStack					= []
+	initModalId			= Nothing
+	ioStack				= []
 
 createNewIOSt :: ![ProcessAttribute (PSt .l)] !(ProcessInit (PSt .l)) String !SystemId !(Maybe SystemId) 
 					!(Maybe GUIShare) !Bool !DocumentInterface !ProcessKind
@@ -161,10 +160,9 @@ closeContext {cProcessStack,cEnvs={envsWorld}} tb
 
 //	Handling events while condition holds.
 
-chandleEvents :: !(St Context Bool) !*OSToolbox !Context -> (!*OSToolbox,!Context)
-chandleEvents cond tb context
-	# (context,tb)	= osHandleEvents terminate contextGetOSEvents contextSetOSEvents contextGetSleepTime handleContextOSEvent (context,tb)
-	= (tb,context)
+chandleEvents :: !(St Context Bool) !Context !*OSToolbox -> (!Context,!*OSToolbox)	// PA: swapped order of last 2 args and result
+chandleEvents cond context tb
+	= osHandleEvents terminate contextGetOSEvents contextSetOSEvents contextGetSleepTime handleContextOSEvent (context,tb)
 where
 	terminate :: !Context -> (!Bool,!Context)
 	terminate context
@@ -211,12 +209,17 @@ handleContextOSEvent osEvent context=:{cEnvs=envs=:{envsEvents=osEvents},cProces
 zerotimelimit :: OSTime
 zerotimelimit =: fromInt (max 1 (OStickspersecond/20))
 
+//import StdDebug,dodebug
+
 toSchedulerEvent :: !OSEvent !*ReceiverTable !*TimerTable !OSTime !*OSEvents -> (!SchedulerEvent,!*ReceiverTable,!*TimerTable,!*OSEvents)
 toSchedulerEvent osevent receivertable timertable osTime osEvents
 	| eventIsUrgent
+//		= trace_n (showEvent osevent) (schedulerEvent,receivertable,timertable,osEvents)
 		= (schedulerEvent,receivertable,timertable,osEvents)
 	# (maybe_timer,timertable)		= getTimeIntervalFromTimerTable timertable
 	  (zerotimer,interval)			= fromJust maybe_timer
+//	  (zerotimer`,interval)			= fromJust maybe_timer
+//	  zerotimer						= isJust maybe_timer && zerotimer`
 	  sure_timer					= isJust maybe_timer && interval<=0
 	  (maybe_receiver,receivertable)= getActiveReceiverTableEntry receivertable
 	  sure_receiver					= isJust maybe_receiver
@@ -225,12 +228,15 @@ toSchedulerEvent osevent receivertable timertable osTime osEvents
 	# (timerEvent,timertable`)		= toTimerEvent timertable
 	  (asyncEvent,receivertable`)	= toASyncEvent (fromJust maybe_receiver) receivertable
 	# osEvents`						= checkOSZeroTimerEvent zerotimer osTime osevent osEvents
+//	# osEvents`						= checkOSZeroTimerEvent maybe_timer osTime osevent osEvents
 	| sure_timer && sure_receiver
+//		# osEvents`						= checkOSZeroTimerEvent zerotimer osTime osevent osEvents
 		| isEven (toInt osTime)
 			= (timerEvent,receivertable,timertable`,osEvents`)
 		// otherwise
 			= (asyncEvent,receivertable`,timertable,osEvents`)
 	| sure_timer
+//		# osEvents`						= checkOSZeroTimerEvent zerotimer osTime osevent osEvents
 		= (timerEvent,receivertable,timertable`,osEvents`)
 	| otherwise
 		= (asyncEvent,receivertable`,timertable,osEvents)
@@ -243,7 +249,9 @@ where
 //	In case the original event is a non urgent event:
 //		check if an initial virtual zero timer event must be inserted to start circumventing event system calls.
 	checkOSZeroTimerEvent :: !Bool !OSTime !OSEvent !*OSEvents -> *OSEvents
+//	checkOSZeroTimerEvent :: !(Maybe (Bool,Int)) !OSTime !OSEvent !*OSEvents -> *OSEvents
 	checkOSZeroTimerEvent zerotimer osTime osevent osEvents
+//	checkOSZeroTimerEvent maybe_timer osTime osevent osEvents
 		| not zerotimer
 			= osEvents
 		| isNothing maybe_zerotimer_start
@@ -252,7 +260,21 @@ where
 			= osAppendEvents [osevent] osEvents
 		| otherwise
 			= osEvents
+/*
+		| isJust maybe_zerotimer_start && zerotimer
+			| osTime-zerotimer_start<=zerotimelimit
+				= osAppendEvents [osevent] osEvents
+			// otherwise
+				= osEvents
+		| isNothing maybe_zerotimer_start && zerotimer
+			= osAppendEvents [createOSZeroTimerEvent osTime] osEvents
+//		| osTime-zerotimer_start<=zerotimelimit
+//			= osAppendEvents [osevent] osEvents
+		| otherwise
+			= osEvents
+*/
 	where
+//		(zerotimer,_)			= fromJust maybe_timer
 		maybe_zerotimer_start	= getOSZeroTimerStartTime osevent
 		zerotimer_start			= fromJust maybe_zerotimer_start
 	
@@ -690,7 +712,7 @@ cswitchProcess processId message pState
 		= (checkSyncMessageError message1,getSyncMessageResponse message1,pState2)
 	with
 		context2						= {context1 & cProcesses=groups3}
-		(_,context3)					= chandleEvents (processIsBlocked processId) OSNewToolbox context2
+		(context3,_)					= chandleEvents (processIsBlocked processId) context2 OSNewToolbox
 		(groups4,context4)				= contextGetProcesses context3
 		context5						= {context4 & cProcesses=resetRR groups4}
 		(message1,context6)				= handleEventForContext False message context5
@@ -742,6 +764,22 @@ typeIsIOSt ioState = (Unguard,ioState)
 typeIsLocal :: !(IOSt .l) -> (UnguardType (Maybe .l),!IOSt .l)
 typeIsLocal ioState = (Unguard,ioState)
 
+//	PA: appContext added.
+appContext :: !.(IdFun Context) !(PSt .l) -> PSt .l
+appContext fun pState
+	# (returnId,pState)			= accPIO ioStGetIOId pState
+	# (local,context,ioState)	= switchFromPSt pState
+	# (groups,context)			= contextGetProcesses context
+	# (typeIOSt, ioState)		= typeIsIOSt  ioState
+	# (typeLocal,ioState)		= typeIsLocal ioState
+	# localIO					= {localState=Just local,localIOSt=ioState}
+	# groups					= adddoneRR localIO groups
+	# context					= {context & cProcesses=groups}
+	# context					= fun context
+	# (groups,context)			= contextGetProcesses context
+	# context					= {context & cProcesses=resetRR groups}
+	# pState					= switchToPSt typeIOSt typeLocal returnId context
+	= pState
 
 accContext :: !.(St Context .x) !(PSt .l) -> (!.x, !PSt .l)
 accContext fun pState
@@ -758,23 +796,23 @@ accContext fun pState
 	# context					= {context & cProcesses=resetRR groups}
 	# pState					= switchToPSt typeIOSt typeLocal returnId context
 	= (x, pState)
+
+switchToPSt :: !(UnguardType (IOSt .l)) !(UnguardType (Maybe .l)) !SystemId !Context -> PSt .l
+switchToPSt typeIOSt typeLocal returnId context=:{cProcesses}
+	| not found				= schedulerFatalError "accContext" "interactive process not found"
+	| closed				= snd (cSwitchIn (fromJust local1) {context1 & cModalProcess=Nothing} ioState2)
+	| otherwise				= snd (cSwitchIn (fromJust local1)  context1 ioState2)
 where
-	switchToPSt :: !(UnguardType (IOSt .l)) !(UnguardType (Maybe .l)) !SystemId !Context -> PSt .l
-	switchToPSt typeIOSt typeLocal returnId context=:{cProcesses}
-		| not found				= schedulerFatalError "accContext" "interactive process not found"
-		| closed				= snd (cSwitchIn (fromJust local1) {context1 & cModalProcess=Nothing} ioState2)
-		| otherwise				= snd (cSwitchIn (fromJust local1)  context1 ioState2)
-	where
-		(found,groups)			= turnRRToProcessInGroups returnId cProcesses
-		(gDone,gToDo)			= fromRR groups
-		(group,gToDo1)			= hdtl gToDo
-		{localState=local,localIOSt=ioState}
-								= group
-		ioState1				= castType typeIOSt ioState
-		local1					= castType typeLocal   local
-		groups1					= toRR gDone gToDo1
-		context1				= {context & cProcesses=groups1}
-		(closed,ioState2)		= ioStClosed ioState1
+	(found,groups)			= turnRRToProcessInGroups returnId cProcesses
+	(gDone,gToDo)			= fromRR groups
+	(group,gToDo1)			= hdtl gToDo
+	{localState=local,localIOSt=ioState}
+							= group
+	ioState1				= castType typeIOSt ioState
+	local1					= castType typeLocal   local
+	groups1					= toRR gDone gToDo1
+	context1				= {context & cProcesses=groups1}
+	(closed,ioState2)		= ioStClosed ioState1
 
 switchFromPSt :: !(PSt .l) -> (!.l,!Context,!IOSt .l)
 switchFromPSt pState

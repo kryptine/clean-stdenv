@@ -9,7 +9,7 @@ definition module ostoolbox
 OSNewToolbox :== 0
 
 // RWS ??? add success bool
-osInitToolbox :: *OSToolbox -> *OSToolbox
+osInitToolbox :: !*OSToolbox -> *OSToolbox
 
 // RWS ??? ugly
 // OSDummyToolbox :: *OSToolbox

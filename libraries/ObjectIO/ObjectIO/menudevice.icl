@@ -5,8 +5,7 @@ implementation module menudevice
 
 
 import	StdBool, StdEnum, StdList, StdMisc
-import	menuevent, osmenu
-from	ostypes				import OSNoWindowPtr
+import	menuevent, osdocumentinterface, osmenu, ostypes
 import	commondef, devicefunctions, iostate, menuaccess, menucreate, menudefaccess, receiveraccess, StdId
 from	StdProcessAttribute	import getProcessToolbarAtt, isProcessToolbar
 from	StdPSt				import accPIO
@@ -73,6 +72,8 @@ menuClose pState=:{io=ioState}
 		# (opt_guishare,ioState)	= ioStGetGUIShare ioState
 		  menus						= menuSystemStateGetMenuHandles mDevice
 		# (tb,ioState)				= getIOToolbox ioState
+		// DvA: what about sub menu's, seem to be forgetting these here...
+		// PA: this happens automatically on Windows, but you're right. The function disposeMenuHandles should take of this. Not yet done.
 		# (menus,(osMenuBar,tb))	= disposeMenuHandles (isJust opt_guishare) menus (osMenuBar,tb)
 		# ioState					= setIOToolbox tb ioState
 		  osdinfo					= setOSDInfoOSMenuBar osMenuBar osdinfo
@@ -290,6 +291,8 @@ where
 			subMenuTraceIO` parentIndex info parentsIndex zIndex (MenuChangeLSHandle {mChangeLS=ls1,mChangeItems=itemHs}) (ls,pst)
 				# (zIndex,itemHs,(ls1,pst))		= subMenuTraceIO parentIndex info parentsIndex zIndex itemHs (ls1,pst)
 				= (zIndex,MenuChangeLSHandle {mChangeLS=ls1,mChangeItems=itemHs},(ls,pst))
+			subMenuTraceIO` _ _ _ zIndex itemH=:(MenuSeparatorHandle _) (ls,pst)
+				= (zIndex+1,itemH,(ls,pst))
 			subMenuTraceIO` _ _ _ zIndex itemH (ls,pst)
 				= (zIndex,itemH,(ls,pst))
 		subMenuTraceIO _ _ _ zIndex itemHs (ls,pst)
@@ -309,8 +312,10 @@ where
 		menuElementTraceIO :: !Int !MenuTraceInfo !Int !(MenuElementHandle .ls .pst) !*(.ls,.pst)
 											  -> (!Int, !MenuElementHandle .ls .pst,  *(.ls,.pst))
 		menuElementTraceIO itemIndex info zIndex (MenuItemHandle itemH=:{mItemAtts}) (ls,ps)
-			| itemIndex<>zIndex || not hasFun	= (zIndex+1,MenuItemHandle itemH,  (ls,ps))
-			| otherwise							= (zIndex+1,MenuItemHandle itemH,f (ls,ps))
+			| itemIndex<>zIndex || not hasFun
+				= (zIndex+1,MenuItemHandle itemH,  (ls,ps))
+			| otherwise
+				= (zIndex+1,MenuItemHandle itemH,f (ls,ps))
 		where
 			(hasFun,fAtt)	= cselect isEitherFun undef mItemAtts
 			f				= if (isMenuFunction fAtt)	(getMenuFun fAtt)
@@ -335,6 +340,8 @@ where
 		menuElementTraceIO itemIndex info zIndex (MenuChangeLSHandle {mChangeLS=ls1,mChangeItems=itemHs}) (ls,pst)
 			# (zIndex,itemHs,(ls1,pst)) = menuElementsTraceIO itemIndex info zIndex itemHs (ls1,pst)
 			= (zIndex,MenuChangeLSHandle {mChangeLS=ls1,mChangeItems=itemHs},(ls,pst))
+		menuElementTraceIO _ _ zIndex itemH=:(MenuSeparatorHandle _) (ls,pst)
+			= (zIndex+1,itemH,(ls,pst))
 		menuElementTraceIO _ _ zIndex itemH (ls,pst)
 			= (zIndex,itemH,(ls,pst))
 	menuElementsTraceIO _ _ zIndex itemHs (ls,pst)
@@ -493,18 +500,12 @@ where
 			with mac menu ID AppleMenuId. This is taken care of by the creation
 			of the interactive process (see menuOpen above).
 */
+//import menus
+
 ioStIsActive :: !(IOSt .l) -> (!Bool, !IOSt .l)
 ioStIsActive ioState
-/* RWS +++
-	# (globalHandle,ioState)= accIOToolbox (GetMHandle AppleMenuId) ioState
-	  (menus,ioState)		= ioStGetDevice MenuDevice ioState
-	  (mHs,menuHs)			= MenuHandlesGetMenuStateHandles (menuSystemStateGetMenuHandles menus)
-	  (appleH,others)		= hdtl mHs
-	  (apple,appleH1)		= menuStateHandleGetHandle appleH
-	  ioState				= ioStSetDevice (MenuSystemState {menuHs & mMenus=[appleH1:others]}) ioState
-	= (apple==globalHandle,ioState)
-*/	= (True,ioState)
-
+	# (osdinfo,ioState)	= ioStGetOSDInfo ioState
+	= accIOToolbox (osOSDInfoIsActive osdinfo) ioState
 
 /*	activate the interactive process:
 */

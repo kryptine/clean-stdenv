@@ -4,8 +4,7 @@ definition module controlpos
 //	Clean Object I/O library, version 1.2
 
 
-from	ostoolbox	import OSToolbox
-from	oswindow	import OSWindowMetrics
+import	ossystem, ostoolbox
 import	windowhandle
 
 

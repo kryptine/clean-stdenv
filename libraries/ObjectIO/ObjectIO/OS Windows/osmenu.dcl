@@ -4,10 +4,10 @@ definition module osmenu
 //	Clean Object I/O library, version 1.2
 
 
+from	StdMaybe			import Maybe, Just, Nothing
+from	StdIOCommon			import Modifiers
 from	menuCrossCall_12	import HMENU, HITEM
-from	osdocumentinterface	import OSMenuBar
-from	ostoolbox			import OSToolbox
-from	ostypes				import HWND, OSWindowPtr
+import	osdocumentinterface, ostoolbox, ostypes
 
 
 //	Types for menus and menu elements:
@@ -29,13 +29,17 @@ osInitialiseMenus	:: !*OSToolbox -> *OSToolbox
 /*	Enabling and disabling of menus and menu elements:
 	os(Dis/En)ableMenu index menubar
 		(dis/en)ables the top-level menu at the zero based index position of the menubar.
-	os(Dis/En)ableMenuItem parentMenu menuitem 
+	os(Dis/En)ableMenuItem parentMenu menuitem index
 		(dis/en)ables the menuitem that is part of the parentMenu.
+	os(Dis/En)ableSubMenu parentMenu submenu index
+		(dis/en)ables the submenu that is part of the parentMenu.
 */
-osDisableMenu		:: !Int !OSMenuBar		!*OSToolbox -> *OSToolbox
-osEnableMenu		:: !Int !OSMenuBar		!*OSToolbox -> *OSToolbox
-osEnableMenuItem	:: !OSMenu !OSMenuItem	!*OSToolbox -> *OSToolbox
-osDisableMenuItem	:: !OSMenu !OSMenuItem	!*OSToolbox -> *OSToolbox
+osDisableMenu		:: !Int !OSMenuBar			!*OSToolbox -> *OSToolbox
+osEnableMenu		:: !Int !OSMenuBar			!*OSToolbox -> *OSToolbox
+osDisableMenuItem	:: !OSMenu !OSMenuItem !Int	!*OSToolbox -> *OSToolbox
+osEnableMenuItem	:: !OSMenu !OSMenuItem !Int	!*OSToolbox -> *OSToolbox
+osDisableSubMenu	:: !OSMenu !OSMenuItem !Int !*OSToolbox -> *OSToolbox
+osEnableSubMenu		:: !OSMenu !OSMenuItem !Int !*OSToolbox -> *OSToolbox
 
 
 /*	Changing and updating the menubar:
@@ -47,33 +51,46 @@ osDisableMenuItem	:: !OSMenu !OSMenuItem	!*OSToolbox -> *OSToolbox
 		dunno??
 	osMenuInsert index menuNr title menubar 
 		creates and inserts a new top-level menu at the indicated zero based index position.
-		The new menu has the given title and the menuNr as retrieved by osNewMenuNr (below).
+		The new menu has the given title and the menuNr as retrieved by OSNewMenuNr (below).
 	osSubMenuInsert index menuNr title parentMenu 
 		creates and inserts a new submenu at the indicated zero based index position.
-		The new submenu has the given title and the menuNr as retrieved by osNewSubMenuNr (below).
+		The new submenu has the given title and the menuNr as retrieved by OSNewSubMenuNr (below).
 	osMenuRemove menu menubar
 		removes the indicated menu both 'logically' and 'physically' from the menubar.
-	osSubMenuRemove submenu parentMenu
+	osSubMenuRemove submenu parentMenu ... submenuid submenuindex
 		removes the submenu both 'logically' and 'physically' from the parentMenu.
+	osRemoveMenuShortKey framePtr item
+		removes the shortcut key of the item.
 */
 osDrawMenuBar		:: !OSMenuBar							!*OSToolbox -> *OSToolbox
-osMenuBarClear		:: !*OSToolbox -> *OSToolbox
+osMenuBarClear		::										!*OSToolbox -> *OSToolbox
 osMenuBarSet		:: !OSMenuBar							!*OSToolbox -> (!OSMenuBar, !*OSToolbox)
 osMenuInsert		:: !Int !OSMenuNr !{#Char} !OSMenuBar	!*OSToolbox -> (!OSMenu,!OSMenuBar,	!*OSToolbox)
 osSubMenuInsert		:: !Int !OSMenuNr !{#Char} !OSMenu		!*OSToolbox -> (!OSMenu,!OSMenu,	!*OSToolbox)
 osMenuRemove		:: !OSMenu !OSMenuBar					!*OSToolbox -> (!OSMenuBar,			!*OSToolbox)
-osSubMenuRemove		:: !OSMenu !OSMenu						!*OSToolbox -> (!OSMenu,			!*OSToolbox)
+osSubMenuRemove		:: !OSMenu !OSMenu !Int	!Int			!*OSToolbox -> (!OSMenu,			!*OSToolbox)
+osRemoveMenuShortKey:: !OSWindowPtr !OSMenuItem				!*OSToolbox -> *OSToolbox
+
 
 /*	PopUpMenu functions:
 	osCreatePopUpMenu creates a pop up menu.
-	osTrackPopUpMenu  shows the pop up menu and handles user selection. 
-		The Bool result is False if nothing was selected; True otherwise.
+	osTrackPopUpMenu  shows the pop up menu and handles user selection: 
+		the Int       result is the menu item that has been selected (0 if none); 
+		the Modifiers result are the modifiers that have been pressed at selection.
 */
+::	OSTrackPopUpMenu									// The result of tracking an item in a PopUpMenu:
+	=	{	ospupItem		:: !OSTrackPopUpMenuResult	//	the item that has been selected
+		,	ospupModifiers	:: !Modifiers				//	the modifiers that have been pressed at selection
+		}
+::	OSTrackPopUpMenuResult								// The item of a pop up menu that has been selected is indicated by:
+	=	PopUpTrackedByIndex	 !Int !Int					//	the parent menu id and the item's index position (used on Mac)
+	|	PopUpTrackedByItemId !Int						//	its identification                               (used on Windows)
+
 osCreatePopUpMenu	:: !*OSToolbox -> (!OSMenu,!*OSToolbox)
-osTrackPopUpMenu	:: !OSMenu !OSWindowPtr !*OSToolbox -> (!Bool,!*OSToolbox)
+osTrackPopUpMenu	:: !OSMenu !OSWindowPtr !*OSToolbox -> (!Maybe OSTrackPopUpMenu,!*OSToolbox)
 
 
-/*	Changing a (sub)menus and menu elements:
+/*	Changing (sub)menus and menu elements:
 	osAppendMenuItem osmenubar index menu title able mark key
 		adds a new menuitem to the given menu at the indicated zero based index position.
 		The menuitem has the given title, selectstate, markstate, and shortcut key.
@@ -82,25 +99,24 @@ osTrackPopUpMenu	:: !OSMenu !OSWindowPtr !*OSToolbox -> (!Bool,!*OSToolbox)
 		adds a new menuseparator to the given menu at the indicated zero based index position.
 	osChangeMenuTitle menubar menu title
 		sets the new title of the indicated top-level menu in the menubar.
-	osChangeMenuItemTitle parentMenu menuitem title
+	osChangeMenuItemTitle parentMenu menuitem index title
 		sets the new title of the indicated menuitem/submenu contained in the parentMenu.
-	osMenuItemCheck check parentMenu menuitem
+	osMenuItemCheck check parentMenu menuitem prevIndex newIndex
 		marks the item iff check of the indicated menuitem contained in the parentMenu.
-	osMenuRemoveItem menuitem parentMenu
+	osMenuRemoveItem menuitem index parentMenu
 		removes the menuitem 'logically' from the indicated parentMenu. The menuitem is not destroyed. CHECK APPLICATIONS!!
 */
-osAppendMenuItem		:: !OSMenuBar !Int !OSMenu !{#Char} !Bool !Bool !Char
-														!*OSToolbox -> (!OSMenuItem,	 !OSMenu,!*OSToolbox)
-osAppendMenuSeparator	:: !Int !OSMenu					!*OSToolbox -> (!OSMenuSeparator,!OSMenu,!*OSToolbox)
-osChangeMenuTitle		:: !OSMenuBar !OSMenu  !{#Char}	!*OSToolbox -> *OSToolbox
-osChangeMenuItemTitle	:: !OSMenu !OSMenuItem !{#Char}	!*OSToolbox -> *OSToolbox
-osMenuItemCheck			:: !Bool !OSMenu !OSMenuItem	!*OSToolbox -> *OSToolbox
-osMenuRemoveItem		:: !OSMenuItem !OSMenu			!*OSToolbox -> (!OSMenu,!*OSToolbox)
+osAppendMenuItem		:: !OSMenuBar !Int !OSMenu !{#Char} !Bool !Bool !Char	!*OSToolbox -> (!OSMenuItem,	 !OSMenu,!*OSToolbox)
+osAppendMenuSeparator	:: !Int       !OSMenu									!*OSToolbox -> (!OSMenuSeparator,!OSMenu,!*OSToolbox)
+osChangeMenuTitle		:: !OSMenuBar !OSMenu                  !{#Char}			!*OSToolbox -> *OSToolbox
+osChangeMenuItemTitle	::            !OSMenu !OSMenuItem !Int !{#Char}			!*OSToolbox -> *OSToolbox
+osMenuItemCheck			:: !Bool      !OSMenu !OSMenuItem !Int !Int				!*OSToolbox -> *OSToolbox
+osMenuRemoveItem		:: !OSMenuItem !Int !OSMenu								!*OSToolbox -> (!OSMenu,!*OSToolbox)
 
 
 /*	Validation of (sub)menu (element) attributes:
 */
-osValidateMenuItemTitle :: !{#Char} -> {#Char}
+osValidateMenuItemTitle :: !(Maybe Char) !{#Char} -> {#Char}
 
 
 /*	Two functions that generate free OS ids for menus and sub menus.
