@@ -21,7 +21,8 @@ instance < Tick
 
 intPlusTick			::	!Int  !Tick	-> Tick
 tickDifference		::	!Tick !Tick	-> Int
-
+	// tickDifference arg1 arg2>0 iff arg1 is "later" than arg2
+	
 class TimeEnv env where
 	getBlinkInterval:: !*env -> (!Int,	!*env)
 	getCurrentTime	:: !*env -> (!Time,	!*env)
