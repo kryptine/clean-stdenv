@@ -2,12 +2,10 @@ definition module StdMenuDef
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.2
+//	Clean Standard Object I/O library.
 //	
 //	StdMenu contains the types to define the standard set of menus and their 
 //	elements.
-//	Author: Peter Achten
-//	Modified: 14 September 2001 for Clean 2.0
 //	********************************************************************************
 
 

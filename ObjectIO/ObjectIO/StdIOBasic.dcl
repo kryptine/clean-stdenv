@@ -2,11 +2,9 @@ definition module StdIOBasic
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.2
+//	Clean Standard Object I/O library.
 //	
 //	StdIOBasic defines basic types and access functions for the I/O library.
-//	Author: Peter Achten
-//	Modified: 14 September 2001 for Clean 2.0
 //	********************************************************************************
 
 

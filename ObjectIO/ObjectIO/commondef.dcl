@@ -1,11 +1,9 @@
 definition module commondef
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.2
+//	Clean Standard Object I/O library.
 //	
-//	Common types for the Clean Object I/O system and their access rules:
-//	Author: Peter Achten
-//	Modified: 17 March 2003
+//	Common types for the Clean Object I/O system and their access rules.
 //	********************************************************************************
 
 

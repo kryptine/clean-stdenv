@@ -2,12 +2,10 @@ definition module StdWindowDef
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.2
+//	Clean Standard Object I/O library.
 //	
 //	StdWindowDef contains the types to define the standard set of windows and 
 //	dialogues.
-//	Author: Peter Achten
-//	Modified: 14 September 2001 for Clean 2.0
 //	********************************************************************************
 
 

@@ -1,11 +1,9 @@
 definition module controlcreate
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.2
+//	Clean Standard Object I/O library.
 //	
-//	Creation of controls
-//	Author: Peter Achten
-//	Modified: 7 September 2001 for Clean 2.0
+//	Creation of controls.
 //	********************************************************************************
 
 import	ossystem, ostoolbox

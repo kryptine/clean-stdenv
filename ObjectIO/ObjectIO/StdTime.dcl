@@ -2,29 +2,15 @@ definition module StdTime
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.2
+//	Clean Standard Object I/O library.
 //	
 //	StdTime contains time related operations.
-//	Author: Peter Achten
-//	Modified: 7 September 2001 for Clean 2.0
 //	********************************************************************************
 
 from	StdOverloaded	import class <
 from	ostick			import :: Tick
 from	StdLibMisc		import :: Time(..), :: Date(..)
-/*
-::	Time
-	=	{	hours	:: !Int		// hours		(0-23)
-		,	minutes	:: !Int		// minutes		(0-59)
-		,	seconds	:: !Int		// seconds		(0-59)
-		}
-::	Date
-	=	{	year	:: !Int		// year
-		,	month	:: !Int		// month		(1-12)
-		,	day		:: !Int		// day			(1-31)
-		,	dayNr	:: !Int		// day of week	(1-7, Sunday=1, Saturday=7)
-		}
-*/
+
 
 wait				:: !Int .x -> .x
 

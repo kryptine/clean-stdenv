@@ -2,11 +2,9 @@ definition module StdControlDef
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.2
+//	Clean Standard Object I/O library.
 //	
 //	StdControl contains the types to define the standard set of controls.
-//	Author: Peter Achten
-//	Modified: 14 September 2001 for Clean 2.0
 //	********************************************************************************
 
 

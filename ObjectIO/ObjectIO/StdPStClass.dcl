@@ -2,11 +2,9 @@ definition module StdPStClass
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.2
+//	Clean Standard Object I/O library.
 //	
 //	StdPStClass collects (PSt .l) and (IOSt .l) class instances.
-//	Author: Peter Achten
-//	Modified: 14 March 2003 for Clean 2.0.3 
 //	********************************************************************************
 
 
