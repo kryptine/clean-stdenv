@@ -178,7 +178,7 @@ where
 					Nothing -> (TokenIdent "+", s)
 					Just c
 						| isDigit c
-							-> lex_number +1 (digitToInt c) s
+							-> lex_number +1 (lexUngetChar c s)
 						| otherwise
 							-> lex_ident 1 ['+'] (lexUngetChar c s)
 			Just '-'
@@ -187,14 +187,14 @@ where
 					Nothing -> (TokenIdent "-", s)
 					Just c
 						| isDigit c
-							-> lex_number -1 (digitToInt c) s
+							-> lex_number -1 (lexUngetChar c s)
 						| otherwise
 							-> lex_ident 1 ['-'] (lexUngetChar c s)
 			Just c
 				| isSpace c
 					-> lex s 
 				| isDigit c
-					-> lex_number +1 (digitToInt c) s
+					-> lex_number +1 (lexUngetChar c s)
 				| isAlpha c
 					-> lex_ident 1 [c] s
 				| isSpecialChar c
@@ -202,61 +202,73 @@ where
 				| otherwise
 					-> (TokenError ("Unknown character " +++ toString c), s)
 
-	lex_nat i s
+	lex_digits s 
+		= lex_digits_acc 0 [] s	
+	lex_digits_acc num acc s
 		# (mc, s) = lexGetChar s
 		= case mc of
-			Nothing -> (i, s)
+			Nothing 
+				-> (num, acc, s)
 			Just c
 				| isDigit c
-					-> lex_nat (10 * i + digitToInt c) s
+					-> lex_digits_acc (inc num) [digitToInt c:acc] s
 				| otherwise 
-					-> (i, lexUngetChar c s)									
+					-> (num, acc, lexUngetChar c s)									
 
-	lex_number sign i s
-		#! (int,s) = lex_nat i s
+	digits_to_int :: [Int] -> Int
+	digits_to_int [] = 0
+	digits_to_int [digit:digits] = digit + 10 * digits_to_int digits 
+
+	digits_to_real :: [Int] -> Real 
+	digits_to_real [] = 0.0
+	digits_to_real [digit:digits] = toReal digit + 10.0 * digits_to_real digits
+
+	lex_number sign s
+		#! (num_digits, digits, s) = lex_digits s
 		#! (mc, s) = lexGetChar s
-		= case mc of
-			Nothing -> (TokenInt int, s)
+		= case mc of		 
+			Nothing -> (TokenInt (sign * digits_to_int digits), s)
 			Just '.'
-				-> lex_real_with_fraction (toReal sign) (toReal int) 0 0 s
+				-> lex_real_with_fraction (toReal sign) (digits_to_real digits) s
 			Just 'E'
-				-> lex_real_with_exp (toReal (sign * int)) s
+				#! real = toReal sign * digits_to_real digits 
+				-> lex_real_with_exp real s
 			Just 'e'
-				-> lex_real_with_exp (toReal (sign * int)) s
+				#! real = toReal sign * digits_to_real digits 
+				-> lex_real_with_exp real s
 			Just c	
-				-> (TokenInt (sign * int), lexUngetChar c s)									
+				-> (TokenInt (sign * digits_to_int digits), lexUngetChar c s)									
 
-	lex_real_with_fraction sign r num_digits fraction s 
-		# (mc, s) = lexGetChar s
-		= case mc of
-			Nothing -> (TokenReal (mkreal sign r num_digits fraction), s)
+	lex_real_with_fraction sign real s
+		#! (num_digits, digits, s) = lex_digits s
+		#! fraction = digits_to_real digits  / 10.0^ toReal num_digits	
+		#! real = sign * (real + fraction)	
+		#! (mc, s) = lexGetChar s
+		= case mc of		 
+			Nothing -> (TokenReal real, s)
 			Just 'E'
-				-> lex_real_with_exp (mkreal sign r num_digits fraction) s
+				-> lex_real_with_exp real s
 			Just 'e'
-				-> lex_real_with_exp (mkreal sign r num_digits fraction) s
-			Just c
-				| isDigit c
-					-> lex_real_with_fraction sign r (inc num_digits) (10 * fraction + digitToInt c) s
-				| otherwise 
-					-> (TokenReal (mkreal sign r num_digits fraction), lexUngetChar c s)									
-	where
-		mkreal sign r num_digits fraction 
-			= sign * (r + toReal fraction  / 10.0^ toReal num_digits)
+				-> lex_real_with_exp real s
+			Just c	
+				-> (TokenReal real, lexUngetChar c s)									
 
-	
-	lex_real_with_exp r s
+	lex_real_with_exp real s
 		# (mc, s) = lexGetChar s
 		= case mc of
-			Nothing -> (TokenReal r, s)
-			Just '+' -> lex_real_with_signed_exp r +1 0 s
-			Just '-' -> lex_real_with_signed_exp r -1 0 s
+			Nothing -> (TokenReal real, s)
+			Just '+' 
+				#! (num_digits, digits, s) = lex_digits s
+				-> (TokenReal (real * 10.0 ^ digits_to_real digits), s)  
+			Just '-' 
+				#! (num_digits, digits, s) = lex_digits s
+				-> (TokenReal (real * 10.0 ^ (-1.0 * digits_to_real digits)), s)  
 			Just c 
 				| isDigit c
-					-> lex_real_with_signed_exp r +1 0 (lexUngetChar c s)
+					#! (num_digits, digits, s) = lex_digits (lexUngetChar c s)
+					-> (TokenReal (real * 10.0 ^ digits_to_real digits), s)  
+				| otherwise	
 					-> (TokenError "error in real constant", s)
-	lex_real_with_signed_exp r exp_sign n s
-		#! (int, s) = lex_nat n s
-		= (TokenReal (r * 10.0 ^ toReal (exp_sign * int)), s) 
 						
 	lex_ident num_chars acc_chars s
 		# (mc, s) = lexGetChar s
@@ -759,6 +771,8 @@ derive bimap Maybe, ParseState, []
 
 //Start :: Maybe [Tree Int Int]
 //Start = parseString "[Bin 1 (Tip (2)) (Tip 3), Tip 100, Tip 200]" 
+
+//Start = preParseString "1.23e12"
 
 /*
 Start :: *World -> (Maybe Rec, *World)
