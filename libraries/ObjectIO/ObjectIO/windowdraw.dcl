@@ -7,7 +7,7 @@ definition module windowdraw
 //	Drawing operations on windows.
 //	********************************************************************************
 
-import	windowhandle
+import	windowhandle, wstate
 import	ossystem, ostoolbox
 
 
