@@ -11,11 +11,11 @@ import	types
 
 //	The filename of the lexicon:
 
-lexiconfilename	:==	toString dirseparator+++"English"+++toString dirseparator+++"English_lexicon"
+lexiconfilename	:==	"English"+++toString dirseparator+++"English_lexicon"
 
 //	The filename of the help file:
 
-helpfilename	:==	toString dirseparator+++"English"+++toString dirseparator+++"ScrabbleHelp"
+helpfilename	:==	"English"+++toString dirseparator+++"ScrabbleHelp"
 
 
 //	The set of letters used in the scrabble game.

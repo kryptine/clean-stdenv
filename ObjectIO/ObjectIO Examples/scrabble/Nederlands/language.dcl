@@ -11,11 +11,11 @@ import	board
 
 //	The filename of the lexicon:
 
-lexiconfilename	:==	toString dirseparator+++"Nederlands"+++toString dirseparator+++"Nederlands_lexicon"
+lexiconfilename	:==	"Nederlands"+++toString dirseparator+++"Nederlands_lexicon"
 
 //	The filename of the help file:
 
-helpfilename	:==	toString dirseparator+++"Nederlands"+++toString dirseparator+++"ScrabbleHelp"
+helpfilename	:==	"Nederlands"+++toString dirseparator+++"ScrabbleHelp"
 
 
 //	The set of letters used in the scrabble game.
