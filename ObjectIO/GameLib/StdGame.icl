@@ -1,14 +1,14 @@
 implementation module StdGame
 
-import StdProcess
+
 import	StdArray, StdBool, StdClass, StdFunc, StdInt, StdList, StdMisc
-import	StdId
+import	StdId, StdProcess
 import	fixed, GameFunctions, gamehandle, gameutils, gst
 from	gameobjectutils	import toBoundMapCode, fromBoundMapCode
 from	StdPSt			import appPIO, accPIO
-from	iostate			import setIOToolbox, getIOToolbox
-import	windowcreate, windowdevice
-from	windowaccess	import initWindowHandle
+import	commondef, iostate, windowdevice
+from	windowaccess	import initWindowHandle, checkZeroWindowHandlesBound, decreaseWindowHandlesBound, addWindowHandlesWindow
+from	windowcreate	import bufferDelayedEvents
 from	windowvalidate	import validateWindowId
 from	ostypes			import OSNoWindowPtr
 
@@ -19,6 +19,10 @@ BND_STATIC_BOUNDS  :== 1 << 31
 
 /* skipmove constant */
 SK_FOREVER         :== -1
+
+
+StdGameFatalError :: String String -> .x
+StdGameFatalError function error = FatalError function "StdGame" error
 
 
 startGame :: .(Game a) a [.GameAttribute a] !*World -> .World
@@ -56,26 +60,41 @@ where
     // always full screen, game in a window not implemented yet
 	OpenGameWindow :: !Id !Size !Int !Bool !(PSt .l) -> (!ErrorReport, !PSt .l)
 	OpenGameWindow id gamewindowsize bitsperpixel fullscreen pState
-		# pState				= WindowFunctions.dOpen pState
-		# (isZero,pState)		= accPIO checkZeroWindowBound pState
-		| isZero
-			= (ErrorViolateDI,pState)
-		# maybe_id				= Just id
-		# (maybe_okId,ioState)	= validateWindowId maybe_id pState.io
+		# pState					= WindowFunctions.dOpen pState	// Install the window device
+		# maybe_id					= Just id
+		# (maybe_okId,ioState)		= validateWindowId maybe_id pState.io
 		| isNothing maybe_okId
 			= (ErrorIdsInUse,{pState & io=ioState})
+		# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+		| not found					// This condition should never occur: WindowDevice must have been 'installed'
+			= StdGameFatalError "openGame" "could not retrieve WindowSystemState from IOSt"
+		# windows					= WindowSystemStateGetWindowHandles wDevice
+		# (isZero,windows)			= checkZeroWindowHandlesBound windows
+		| isZero
+			# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+			= (ErrorViolateDI,{pState & io=ioState})
 		| otherwise
-			# pState			= {pState & io=ioState}
-			  info				= {	gamewindowDDPtr      = OSNoWindowPtr
-			  					  ,	gamewindowCDepth     = bitsperpixel
-			  					  ,	gamewindowSize       = gamewindowsize
-			  					  ,	gamewindowFullScreen = fullscreen
-			  					  }
-			  okId				= fromJust maybe_okId
-			# wH				= initWindowHandle "" Modeless IsGameWindow (GameWindowInfo info) [] [WindowId okId]
-			# pState			= openwindow okId {wlsState=undef, wlsHandle=wH} pState
-			# pState			= appPIO decreaseWindowBound pState
-			= (NoError,pState)
+			# info					= {	gamewindowDDPtr      = OSNoWindowPtr
+			  						  ,	gamewindowCDepth     = bitsperpixel
+			  						  ,	gamewindowSize       = gamewindowsize
+			  						  ,	gamewindowFullScreen = fullscreen
+			  						  }
+			  okId					= fromJust maybe_okId
+			# wH					= initWindowHandle "" Modeless IsGameWindow (GameWindowInfo info) [] [WindowId okId]
+			# wH					= {wH & whSize=gamewindowsize}
+			# (tb,ioState)			= getIOToolbox ioState
+			# tb					= OSinitialiseGame tb
+			# (delayinfo,wPtr,tb)	= OScreateGameWindow fullscreen (toTuple gamewindowsize) bitsperpixel tb
+			# ioState				= setIOToolbox tb ioState
+			  wlsH					= {wlsState=undef,wlsHandle=wH}
+			  wIds					= {wId=okId,wPtr=wPtr,wActive=False}
+			  wsH					= {wshIds=wIds,wshHandle=Just wlsH}
+			  windows				= addWindowHandlesWindow 0 wsH windows
+			  windows				= decreaseWindowHandlesBound windows
+			# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+			# ioState				= bufferDelayedEvents delayinfo ioState
+			= (NoError,{pState & io=ioState})
+
 
 PlayLevels :: !Int .gs !(Game .gs) !*OSToolbox -> (.gs, !ErrorReport, !*OSToolbox)
 PlayLevels level gs gdef tb

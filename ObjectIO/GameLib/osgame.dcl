@@ -3,7 +3,7 @@ definition module osgame
 //      Version 1.0
 
 from	StdIOBasic	import Point2
-import	gamehandle, gameintrface_12
+import	gamehandle, gameintrface_12, ostypes
 
 ::  OSGameData gs
     =   {   scroll    :: [(MAPID, Movement)]        // The layer movement functions
@@ -11,11 +11,15 @@ import	gamehandle, gameintrface_12
         ,   gamehnd   :: GameHandle gs              // Complete game definition
         }
 
+OSinitialiseGame :: !*OSToolbox -> *OSToolbox
+
 OSBinaryIntStr :: !Int -> {#Char}
 
 OSBinaryBoolStr :: !Bool -> {#Char}
 
 OSIntListArrayToString :: ![{#Int}] -> {#Char}
+
+OScreateGameWindow :: !Bool !(!Int,!Int) !Int !*OSToolbox -> (![DelayActivationInfo],!OSWindowPtr,!*OSToolbox)
 
 OSInitGameBitmap :: !BID !{#Char} !Int !Int !Int !Int !*OSToolbox -> (!GRESULT,!*OSToolbox)
 

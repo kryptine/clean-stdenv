@@ -8,11 +8,16 @@ from	ospicture	import toRGBtriple
 from	clCCall_12	import WinBeep
 import	gameCrossCall_12, gamehandle, gameobjectutils, gst
 
+
 ::  OSGameData gs
     =   {   scroll    :: [(MAPID, Movement)]        // The layer movement functions
         ,   gamest    :: gs                         // The game state
         ,   gamehnd   :: GameHandle gs              // Complete game definition
         }
+
+OSinitialiseGame :: !*OSToolbox -> *OSToolbox
+OSinitialiseGame tb
+	= WinInitialiseGame tb
 
 OSBinaryIntStr :: !Int -> {#Char}
 OSBinaryIntStr x = WinBinaryIntStr x
@@ -44,6 +49,10 @@ where
                 j   = 4*i
                 maskshift :: !Int !Int -> Int
                 maskshift nrbits x = (x>>nrbits) bitand 0xFF
+
+OScreateGameWindow :: !Bool !(!Int,!Int) !Int !*OSToolbox -> (![DelayActivationInfo],!OSWindowPtr,!*OSToolbox)
+OScreateGameWindow fullscreen size bpp tb
+	= WinCreateGameWindow fullscreen size bpp tb
 
 OSInitGameBitmap :: !BID !{#Char} !Int !Int !Int !Int !*OSToolbox -> (!GRESULT,!*OSToolbox)
 OSInitGameBitmap id filename w h blockwidth blockheight tb

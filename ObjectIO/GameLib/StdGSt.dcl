@@ -2,7 +2,7 @@ definition module StdGSt
 
 
 //	********************************************************************************
-//	Clean Standard Game library, version 1.2
+//	Clean Standard Game library, version 1.2.1
 //	
 //	StdGSt imports the GSt type and some handy access functions.
 //	********************************************************************************
