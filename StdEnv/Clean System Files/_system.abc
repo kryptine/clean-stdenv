@@ -5,8 +5,8 @@
 
 .module m__system "_system"
 
-.implab	_eaind
-.implab	_indirection
+.implab	e_system_eaind
+.implab	e_system_nind
 
 .export	_channel_code
 
@@ -18,7 +18,7 @@
 .export	_Select _select_code
 .export	_Nil _Cons
 
-.export	e_system_dAP e_system_nAP e_system_eaAP
+.export	e_system_dAP e_system_nAP e_system_eaAP e_system_dind
 .export	e_system_dif e_system_lif e_system_sif e_system_nif e_system_eaif
 .export	_HnfReducer _hnf_reducer
 .export	_Defer _defer_code
@@ -58,7 +58,11 @@
 
 .desc e_system_dAP	_hnf	e_system_lAP	2 0	"AP"
 .desc e_system_dif	e_system_nif	e_system_lif	3 0	"if"
-.desc _ind	_hnf	_hnf	0 0	"_ind"
+
+.desc e_system_dind	e_system_nind	_hnf	0 0	"_ind"
+| the next descriptor is for compatibility with older compiler, remove later
+.desc _ind	e_system_nind	_hnf	0 0	"_ind"
+
 
 .desc _Defer	_defer_code	_hnf	0 0	"_Defer"
 
@@ -200,12 +204,6 @@ ea_Conssts
 .export _Consa
 .record _Consa laa 2 0 "[#{}]"
 
-.n -2 _ind _eaind
-.o 1 0
-ind_code
-.d 1 0
-	jmp	_indirection
-
 .desc d_S.1 n_S.1 o_S.1 1 0 "_S.1"
 .pb "_S.1"
 .n -1 d_S.1 ea_S.1
@@ -230,7 +228,7 @@ ea_S.1
 	push_arg	0 1 1
 	push_a	2
 .keep 1 0
-	fill	_ind -2 ind_code 2
+	fill	e_system_dind -2 e_system_nind 2
 .keep 1 0
 	update_a	0 1
 	pop_a	1
@@ -287,7 +285,7 @@ ea_S.2
 	push_arg	0 1 1
 	push_a	2
 .keep 1 0
-	fill	_ind -2 ind_code 2
+	fill	e_system_dind -2 e_system_nind 2
 .keep 1 0
 	update_a	0 1
 	pop_a	1
@@ -342,7 +340,7 @@ ea_S.3
 	push_arg	0 1 1
 	push_a	2
 .keep 1 0
-	fill	_ind -2 ind_code 2
+	fill	e_system_dind -2 e_system_nind 2
 .keep 1 0
 	update_a	0 1
 	pop_a	1
@@ -387,7 +385,7 @@ ea_S.4
 	push_arg	0 1 1
 	push_a	2
 .keep 1 0
-	fill	_ind -2 ind_code 2
+	fill	e_system_dind -2 e_system_nind 2
 .keep 1 0
 	update_a	0 1
 	pop_a	1
@@ -431,7 +429,7 @@ ea_S.5
 	push_arg	0 1 1
 	push_a	2
 .keep 1 0
-	fill	_ind -2 ind_code 2
+	fill	e_system_dind -2 e_system_nind 2
 .keep 1 0
 	update_a	0 1
 	pop_a	1
@@ -475,7 +473,7 @@ ea_S.6
 	push_arg	0 1 1
 	push_a	2
 .keep 1 0
-	fill	_ind -2 ind_code 2
+	fill	e_system_dind -2 e_system_nind 2
 .keep 1 0
 	update_a	0 1
 	pop_a	1
@@ -526,7 +524,7 @@ ea_Sr.1
 	push_arg	0 1 1
 	push_a	2
 .keep 1 0
-	fill	_ind -2 ind_code 2
+	fill	e_system_dind -2 e_system_nind 2
 .keep 1 0
 	update_a	0 1
 	pop_a	1
@@ -604,7 +602,7 @@ ea_Sr.2
 	push_arg	0 1 1
 	push_a	2
 .keep 1 0
-	fill	_ind -2 ind_code 2
+	fill	e_system_dind -2 e_system_nind 2
 .keep 1 0
 	update_a	0 1
 	pop_a	1
@@ -695,7 +693,7 @@ ea_Sr.3
 	push_arg	0 1 1
 	push_a	2
 .keep 1 0
-	fill	_ind -2 ind_code 2
+	fill	e_system_dind -2 e_system_nind 2
 .keep 1 0
 	update_a	0 1
 	pop_a	1
@@ -764,7 +762,7 @@ ea_Sr.4
 	push_arg	0 1 1
 	push_a	2
 .keep 1 0
-	fill	_ind -2 ind_code 2
+	fill	e_system_dind -2 e_system_nind 2
 .keep 1 0
 	update_a	0 1
 	pop_a	1
@@ -820,7 +818,7 @@ ea_Sr.5
 	push_arg	0 1 1
 	push_a	2
 .keep 1 0
-	fill	_ind -2 ind_code 2
+	fill	e_system_dind -2 e_system_nind 2
 .keep 1 0
 	update_a	0 1
 	pop_a	1
@@ -876,7 +874,7 @@ ea_Sr.6
 	push_arg	0 1 1
 	push_a	2
 .keep 1 0
-	fill	_ind -2 ind_code 2
+	fill	e_system_dind -2 e_system_nind 2
 .keep 1 0
 	update_a	0 1
 	pop_a	1
