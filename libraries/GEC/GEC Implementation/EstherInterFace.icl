@@ -34,7 +34,7 @@ shell lineNr console world
 	| cmdline == "" 	= shell lineNr console world
 	# (d, world) 		= stringToDynamic cmdline world
 	  (v, t) 			= toStringDynamic d
-	  console 			= fwrites ("\n" +++ cmdline +++ "\n==>\n" +++ (hd v) +++ " :: " +++ t +++ "\n") console
+	  console 			= fwrites ("\n" +++ cmdline +++ "\n==>\n" +++ (foldr (+++) "" v) +++ " :: " +++ t +++ "\n") console
 	= shell (lineNr + 1) console world
 where
 	freadline` :: !*File -> (!String, !*File)
