@@ -5,7 +5,7 @@ import StdGEC, StdGECExt, StdAGEC
 import GecArrow, StdDebug
 
 Start :: !*World -> *World
-Start world = goGui feedbackTest6 world  
+Start world = goGui feedbackTest5 world  
 where
 	goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 
