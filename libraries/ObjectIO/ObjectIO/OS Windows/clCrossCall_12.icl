@@ -13,6 +13,11 @@ import code from library "advapi32_library",
                  library "winmm_library",
                  library "winspool_library",
                  library "wsock_library"
+/*	PA: these imports have been moved from gameCrossCall_12. */
+import code from "cGameLib_12.obj", "cOSGameLib_12.obj", "ddutil.obj", "Dsutil.obj"
+import code from library "ddraw_library"
+import code from library "dsound_library"
+/*	...PA */
 
 
   //----------------------------------------------//

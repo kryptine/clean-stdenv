@@ -3,9 +3,11 @@ implementation module gameCrossCall_12
 
 import clCrossCall_12, gameintrface_12
 import StdTuple
+/*	PA: these imports have been moved to clCrossCall_12.
 import code from "cGameLib_12.obj", "cOSGameLib_12.obj", "ddutil.obj", "Dsutil.obj"
 import code from library "ddraw_library"
 import code from library "dsound_library"
+*/
 
 
   //----------------------------------------------//
