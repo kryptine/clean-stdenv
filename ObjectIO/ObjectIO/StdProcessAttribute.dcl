@@ -18,7 +18,7 @@ import StdProcessDef
 */
 
 isProcessKindAttribute :: !DocumentInterface !(ProcessAttribute .st) -> Bool 
-/*	(y = valid, . = invalid)
+/*	(The document interface is given for which the attribute is valid)
 	ProcessActivate		NDI SDI MDI | ProcessToolbar		SDI MDI
 	ProcessClose		NDI SDI MDI | ProcessWindowPos		SDI MDI
 	ProcessDeactivate	NDI SDI MDI | ProcessWindowResize	SDI MDI
@@ -48,8 +48,10 @@ isProcessWindowSize			:: !(ProcessAttribute .st) -> Bool
 getProcessActivateFun		:: !(ProcessAttribute .st) -> IdFun .st
 getProcessCloseFun			:: !(ProcessAttribute .st) -> IdFun .st
 getProcessDeactivateFun		:: !(ProcessAttribute .st) -> IdFun .st
-getProcessOpenFilesFun		:: !(ProcessAttribute .st) -> ProcessOpenFilesFunction .st
+getProcessOpenFilesFun		:: !(ProcessAttribute .st)
+												-> ProcessOpenFilesFunction .st
 getProcessToolbarAtt		:: !(ProcessAttribute .st) -> [ToolbarItem .st]
 getProcessWindowPosAtt		:: !(ProcessAttribute .st) -> ItemPos
-getProcessWindowResizeFun	:: !(ProcessAttribute .st) -> ProcessWindowResizeFunction .st
+getProcessWindowResizeFun	:: !(ProcessAttribute .st)
+												-> ProcessWindowResizeFunction .st
 getProcessWindowSizeAtt		:: !(ProcessAttribute .st) -> Size

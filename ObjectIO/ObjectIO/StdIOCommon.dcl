@@ -125,8 +125,8 @@ viewFrameRange			:==	{	corner1 = {x = 1-(2^31),y = 1-(2^31)}
 							}
 
 
-/*	Modifiers indicates the meta keys that have been pressed (True) or not (False).	*/
-
+/*	Modifiers indicates the meta keys that have been pressed (True) or not (False).
+*/
 ::	Modifiers
 	=	{	shiftDown	:: !Bool			// True iff shift   down
 		,	optionDown	:: !Bool			// True iff option  down
@@ -337,16 +337,16 @@ stdUnfillUpdAreaLook :: SelectState !UpdateState !*Picture -> *Picture
 
 /*	Common error report types.							*/
 
-::	ErrorReport								// Usual cause:
-	=	NoError								// Everything went allright
-	|	ErrorViolateDI						// Violation against DocumentInterface
-	|	ErrorIdsInUse						// Object contains Ids that are bound
-	|	ErrorUnknownObject					// Object can not be found
-	|	ErrorNotifierOpen					// It was tried to open a second send notifier // MW11++
-	|	OtherError !String					// Other kind of error
+::	ErrorReport						// Usual cause:
+	=	NoError						// Everything went allright
+	|	ErrorViolateDI				// Violation against DocumentInterface
+	|	ErrorIdsInUse				// Object contains Ids that are bound
+	|	ErrorUnknownObject			// Object can not be found
+	|	ErrorNotifierOpen			// It was tried to open a second send notifier
+	|	OtherError !String			// Other kind of error
 
-instance	==			ErrorReport			// Constructor equality
-instance	toString	ErrorReport			// Constructor as String
+instance	==			ErrorReport	// Constructor equality
+instance	toString	ErrorReport	// Constructor as String
 
-::	OkBool									// iff True, the operation was successful
+::	OkBool							// True iff the operation was successful
 	:==	Bool

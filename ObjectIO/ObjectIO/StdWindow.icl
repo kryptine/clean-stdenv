@@ -993,10 +993,11 @@ where
 			# (wH,tb)					= updatewindow wMetrics updInfo wH tb
 			= ({wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
 	where
+		whSize							= wH.whSize
 		info							= getWindowInfoWindowData wH.whWindowInfo
 		(origin,domainRect,hasScrolls)	= (info.windowOrigin,info.windowDomain,(isJust info.windowHScroll,isJust info.windowVScroll))
-		visScrolls						= OSscrollbarsAreVisible wMetrics domainRect (toTuple wH.whSize) hasScrolls
-		contentRect						= getWindowContentRect wMetrics visScrolls (SizeToRect wH.whSize)
+		visScrolls						= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
+		contentRect						= getWindowContentRect wMetrics visScrolls (SizeToRect whSize)
 		updArea							= case maybeViewFrame of
 											Nothing		-> contentRect
 											Just rect	-> IntersectRects (RectangleToRect (subVector (toVector origin) rect)) contentRect

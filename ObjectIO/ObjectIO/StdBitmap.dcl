@@ -39,5 +39,6 @@ instance Drawables Bitmap
 	drawAt pos bitmap
 		draws the given bitmap with its left top at the given pen position.
 	undraw(At) 
-		equals unfill(At) the box {box_w=w,box_h=h} with {w,h} the size of the bitmap.
+		equals unfill(At) the box {box_w=w,box_h=h} with {w,h} the size of the 
+		bitmap.
 */

@@ -43,4 +43,5 @@ setcontrolpositions	:: !OSWindowMetrics ![(Id,ItemPos)] !(WindowStateHandle .pst
 											   -> (!Bool,!WindowStateHandle .pst, !*OSToolbox)
 /*	setcontrolpositions sets the positions of the indicated controls to their new positions.
 	The Boolean result is True iff all controls could be found and their new positions are legal. 
+	It is assumed that the argument WindowStateHandle is either a Window or a Dialog.
 */

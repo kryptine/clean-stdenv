@@ -8,7 +8,7 @@ definition module StdTimer
 //	********************************************************************************
 
 
-import	StdTimerDef, StdTimerElementClass, StdMaybe
+import	StdTimerElementClass, StdMaybe
 from	StdSystem	import ticksPerSecond
 from	iostate		import PSt, IOSt
 

@@ -23,7 +23,7 @@ windowcontrolsFatalError function error
 
 
 //	Auxiliary functions:
-
+/* PA: this function is not used anymore.
 checkNewWindowSize :: !Size !Size !OSWindowPtr !OSDInfo !*OSToolbox -> *OSToolbox
 checkNewWindowSize curSize newSize wPtr osdInfo tb
 	| curSize==newSize
@@ -41,7 +41,7 @@ checkNewWindowSize curSize newSize wPtr osdInfo tb
 		= tb
 	| otherwise
 		= OSsetWindowSize wPtr (toTuple newSize) True tb
-
+*/
 
 /*	opencontrols adds the given controls to the window. 
 	It is assumed that the new controls do not conflict with the current controls.
@@ -103,7 +103,7 @@ opencompoundcontrols osdInfo wMetrics compoundId ls newItems wsH=:{wshIds,wshHan
 		  spaces				= getWindowItemSpaces whKind wMetrics whAtts
 		  reqSize				= {w=curw-fst hMargins-snd hMargins,h=curh-fst vMargins-snd vMargins}
 		# (derSize,newItemHs,tb)= layoutControls wMetrics hMargins vMargins spaces reqSize zero [(domain,origin)] oldItemHs tb
-		# tb					= checkNewWindowSize curSize derSize wPtr osdInfo tb	// PA: curSize might be bigger than domain, then you shouldn't resize!
+	//	# tb					= checkNewWindowSize curSize derSize wPtr osdInfo tb	// PA: curSize might be bigger than domain, then you shouldn't resize!
 		# (newItemHs,tb)		= createCompoundControls wMetrics compoundId nrSkip whDefaultId whCancelId whSelect wPtr newItemHs tb
 		  wH					= {wH & whItemNrs=itemNrs,whItems=newItemHs}
 		# (wH,tb)				= forceValidWindowClipState wMetrics True wPtr wH tb
@@ -337,6 +337,7 @@ closeallcontrols _ _
 
 
 /*	setcontrolpositions changes the position of the indicated controls.
+	It is assumed that the argument WindowStateHandle is either a Window or a Dialog. 
 */
 setcontrolpositions :: !OSWindowMetrics ![(Id,ItemPos)] !(WindowStateHandle .pst) !*OSToolbox -> (!Bool,!WindowStateHandle .pst,!*OSToolbox)
 setcontrolpositions wMetrics newPoss wsH=:{wshIds,wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems=oldItems}}} tb
@@ -355,7 +356,8 @@ setcontrolpositions wMetrics newPoss wsH=:{wshIds,wshHandle=Just wlsH=:{wlsHandl
 		# (wH,tb)			= forceValidWindowClipState wMetrics True wPtr wH tb
 		  viewFrame			= PosSizeToRectangle origin {w=curw,h=curh}
 		  updState			= RectangleToUpdateState viewFrame
-		# (wH,tb)			= drawwindowlook wMetrics wPtr id updState wH tb
+		  drawbackground	= if (whKind==IsDialog) (\x y->(x,y)) (drawwindowlook wMetrics wPtr id updState)
+		# (wH,tb)			= drawbackground wH tb
 		# (updRgn,tb)		= relayoutControls wMetrics whSelect whShow wFrame wFrame zero zero wPtr whDefaultId oldItems wH.whItems tb
 		# (wH,tb)			= updatewindowbackgrounds wMetrics updRgn wshIds wH tb
 		# tb				= OSvalidateWindowRect wPtr (SizeToRect whSize) tb
