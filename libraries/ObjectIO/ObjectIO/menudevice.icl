@@ -7,7 +7,7 @@ implementation module menudevice
 import	StdBool, StdEnum, StdList, StdMisc
 import	menuevent, osmenu
 from	ostypes				import OSNoWindowPtr
-import	commondef, devicefunctions, iostate, menucreate, menudefaccess, StdId
+import	commondef, devicefunctions, iostate, menucreate, menudefaccess, receiveraccess, StdId
 from	menuaccess			import menuStateHandleGetMenuId
 from	StdProcessAttribute	import getProcessToolbarAtt, isProcessToolbar
 from	StdPSt				import accPIO
