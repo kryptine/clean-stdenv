@@ -820,17 +820,9 @@ OSgrabWindowPictContext :: !OSWindowPtr !*OSToolbox -> (!OSPictContext,!*OSToolb
 OSgrabWindowPictContext wPtr tb
 	= WinGetDC wPtr tb
 
-OSgrabControlPictContext :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> (!OSPictContext,!*OSToolbox)
-OSgrabControlPictContext wPtr cPtr tb
-	= WinGetDC cPtr tb
-
 OSreleaseWindowPictContext :: !OSWindowPtr !OSPictContext !*OSToolbox -> *OSToolbox
 OSreleaseWindowPictContext wPtr hdc tb
 	= WinReleaseDC wPtr (hdc,tb)
-
-OSreleaseControlPictContext :: !OSWindowPtr !OSPictContext !*OSToolbox -> *OSToolbox
-OSreleaseControlPictContext cPtr hdc tb
-	= WinReleaseDC cPtr (hdc,tb)
 
 
 /*	Window access operations.

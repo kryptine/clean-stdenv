@@ -267,15 +267,9 @@ OSclipCompoundControl		:: !OSWindowPtr !(!Int,!Int) !Rect !(!Int,!Int) !(!Int,!I
 		returns the graphics context that must be used to update the window.
 	OSreleaseWindowPictContext theWindow theContext
 		releases the graphics context.
-	OSgrabControlPictContext theWindow theControl
-		returns the graphics context that must be used to update the control.
-	OSreleaseControlPictContext theControl theContext
-		releases the graphics context.
 */
 OSgrabWindowPictContext		:: !OSWindowPtr					!*OSToolbox -> (!OSPictContext,!*OSToolbox)
-OSgrabControlPictContext	:: !OSWindowPtr !OSWindowPtr	!*OSToolbox -> (!OSPictContext,!*OSToolbox)
 OSreleaseWindowPictContext	:: !OSWindowPtr !OSPictContext	!*OSToolbox -> *OSToolbox
-OSreleaseControlPictContext :: !OSWindowPtr !OSPictContext	!*OSToolbox -> *OSToolbox
 
 
 /*	Scrollbar operations.
