@@ -28,6 +28,6 @@ instance ArrowCircuit GecCircuit
 
 // Other GecCircuit combinators
 
-//feedback :: !(GecCircuit a a) -> GecCircuit a a
+feedback :: !(GecCircuit a a) -> GecCircuit a a
 
 gecIO :: (A. .ps: a *(PSt .ps) -> *(b, *PSt .ps)) -> GecCircuit a b

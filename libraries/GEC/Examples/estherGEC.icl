@@ -15,7 +15,7 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	test11
+ 	test9
  	world  
 
 //testX = CGEC (gecEdit "test")  (dynamicGEC 23)
@@ -205,8 +205,8 @@ test10
    = startCircuit (feedback (guiApply @>> edit "test"))
                   (initval ((+) 1.0) 3.0)
 where
-   initval f v = { function = dynamicAGEC2 f
-                 , argument = dynamicAGEC2 v
+   initval f v = { function = dynamicAGEC f
+                 , argument = dynamicAGEC v
                  , result   = displayAGEC (f v) }
    guiApply all=:{ function = af
                  , argument = av }
@@ -221,7 +221,7 @@ test11
    = startCircuit (feedback (guiApply @>> edit "test"))
                   (initval ((+) 1.0) 3.0)
 where
-   initval f v = { function = dynamicAGEC2 f
+   initval f v = { function = dynamicAGEC f
                  , argument = counterAGEC v
                  , result   = displayAGEC (f v) }
    guiApply all=:{ function = af
