@@ -1,4 +1,4 @@
-module calculatorGEC
+module calculator2GEC
 
 import StdEnv
 import StdIO
@@ -12,7 +12,7 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	example_calc3
+ 	calcEditor
  	world  
 
 example_calc	= startCircuit (feedback (edit "Calculator" >>@ update_calc)) calculator
@@ -35,8 +35,8 @@ where
 
 :: ButtonEditor 	:== [(String,AGEC (Int Int -> Int))]
 :: MyButtonFuns 	:== ([Button],[Int Int -> Int])
-
 :: MoreOrLess = AddOneMore | DeleteOneMore | EndOfList
+:: MyCalculatorType :== ((<|> Int (<|> (AGEC Int) (AGEC [Button]))),AGEC MyButtonFuns)
 
 derive gGEC MoreOrLess
 
@@ -65,20 +65,12 @@ where
 		mybuttons :: MyButtonFuns
 		mybuttons = unzip [(Button buttonWidth string,^^ fun)\\ (string,fun) <- editbuttons]
 
-:: MyCalculatorType :== ((<|> Int (<|> (AGEC Int) (AGEC [Button]))),AGEC MyButtonFuns)
+	myCalculator :: GecCircuit MyCalculatorType MyCalculatorType
+	myCalculator =  feedback (edit "calculator" >>@ updateCalculator)
 
-initCalculator :: Int Int MyButtonFuns -> MyCalculatorType
-initCalculator mem ival (mybuttons,myfunctions) 
-	= (mem <|> 
-	   intcalcAGEC ival <|>
-	   horlistAGEC mybuttons, hidAGEC (mybuttons,myfunctions))		
 
-//myCalculator :: GecCircuit myCalculatorType myCalculatorType // BUG
-myCalculator :: GecCircuit ((<|> Int (<|> (AGEC Int) (AGEC [Button]))),AGEC MyButtonFuns) ((<|> Int (<|> (AGEC Int) (AGEC [Button]))),AGEC MyButtonFuns)
-myCalculator =  feedback (edit "calculator" >>@ updateCalculator)
 							 
-//updateCalculator :: myCalculatorType -> myCalculatorType // BUG 
-//updateCalculator :: ((<|> Int (<|> (AGEC Int) (AGEC [Button]))),AGEC MyButtonFuns) -> ((<|> Int (<|> (AGEC Int) (AGEC [Button]))),AGEC MyButtonFuns)
+updateCalculator :: MyCalculatorType -> MyCalculatorType 
 updateCalculator((mem <|> i <|> buttons),butsfun) = initCalculator nmem ni (^^ butsfun)
 where
 	(nmem,ni)	= case whichopper (^^ buttons) fun of
@@ -88,11 +80,19 @@ where
 
 	whichopper buttons operators = [x \\ (Pressed,x) <- (zip2 buttons operators)]
 
-example_calc3	= startCircuit (feedback (edit "Calculator" >>@ updateCalculator)) mybuttons
+initCalculator :: Int Int MyButtonFuns -> MyCalculatorType
+initCalculator mem ival (mybuttons,myfunctions) 
+	= (mem <|> 
+	   intcalcAGEC ival <|>
+	   horlistAGEC mybuttons, hidAGEC (mybuttons,myfunctions))		
+	
+buttonWidth	:== defCellWidth / 3	
+	
+/*
+dynCalculator	= startCircuit (feedback (edit "Calculator" >>@ updateCalculator)) mybuttons
 where
 	mybuttons = initCalculator 0 0 (buttons,operators)
 
 	buttons		= [Button buttonWidth "+", Button buttonWidth "-", Button buttonWidth "*"]
 	operators 	= [(+),(-),(*)]
-
-buttonWidth	:== defCellWidth / 3	// Place three buttons in a single cell
+*/

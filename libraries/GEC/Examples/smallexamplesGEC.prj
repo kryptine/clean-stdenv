@@ -1,7 +1,7 @@
 Version: 1.4
 Global
 	Built:	True
-	Target:	Everything + Develop Object IO
+	Target:	Really Everything
 	Exec:	{Project}\smallexamplesGEC.exe
 	CodeGen
 		CheckStacks:	False
@@ -64,11 +64,11 @@ MainModule
 	DclOpen:	False
 	Icl
 		WindowPosition
-			X:	40
-			Y:	19
-			SizeX:	1023
-			SizeY:	872
-	IclOpen:	False
+			X:	17
+			Y:	44
+			SizeX:	851
+			SizeY:	650
+	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
 	Module

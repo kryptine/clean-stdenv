@@ -39,7 +39,7 @@ dynamicAGEC dv = mkAGEC { toGEC   = toExpr
 //						 } ("dynamicGEC2")
 						 } ("dynamicGEC2" +++ ShowValueDynamic (dynamic dv))
 where
-	toExpr dv Undefined 	= display dv (prettyVal dv)
+	toExpr dv Undefined 	= display dv (hd (prettyVal dv))
 	toExpr dv (Defined vv)	= vv
 
 //	display dv ds 			= (DynStr (dynamic dv) ds,hidAGEC (DynStr (dynamic dv) ds))

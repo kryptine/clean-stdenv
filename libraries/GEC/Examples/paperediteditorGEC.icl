@@ -1,4 +1,4 @@
-module editeditorGEC
+module paperediteditorGEC
 
 // editor that can be used to design and test another editor --MJP
 
@@ -9,49 +9,15 @@ import genericgecs
 import StdGEC, StdGECExt, GecArrow, StdDynamic 
 import basicAGEC, StdAGEC, calcAGEC, dynamicAGEC, noObjectAGEC
 
-/* first example paper
-:: MyRecord = { function :: DynString
-              , argument :: DynString
-              , result   :: DynString
-              }
 
-derive gGEC MyRecord
+:: Bug = C1 | C2
 
-testje = startCircuit (feedback (dotest @>> edit "test")) (initval ((+) 1) 3)
-where
-	initval f v = { function = DynStr (dynamic f) "f"
-                  , argument = DynStr (dynamic v) (toString v)
-                  , result   = DynStr (dynamic (f v)) (ShowValueDynamic (dynamic (f v)))
-                  }
-	dotest all=:{ function = DynStr (f::a -> b) fstr
-		   		, argument = DynStr (v::a) vstr
-		   		} = {all & result = DynStr (dynamic (f v)) (ShowValueDynamic (dynamic (f v)))}
-	dotest all = all
-*/
-:: MyRecord = { function :: AGEC (Int -> Int)
-              , argument :: AGEC Int
-              , result   :: AGEC Int
-              }
+derive gGEC Bug
 
-derive gGEC MyRecord
-
-testje = startCircuit (feedback (dotest @>> edit "test")) (initval ((+) 1) 3)
-where
-	initval f v = { function = dynamicAGEC f
-                  , argument = dynamicAGEC v
-                  , result   = showAGEC (f v)
-                  }
-	dotest all=:{ function = af
-		   		, argument = av
-		   		} = {all & result = showAGEC ((^^ af) (^^ av))}
-	dotest all = all
-	
 
 Start :: *World -> *World
-//Start world = goGui testje world  
-Start world = goGui editoreditor world  
-//Start world = goGui testDynamic2 world  
-//Start world = goGui testDynamic2 world  
+Start world = goGui testDynamic world  
+//Start world = goGui testDynamic world  
 /*
 Start world = goGui mytest world
 where
@@ -67,24 +33,7 @@ where
 
 derive gGEC Maybe 
 
-testDynamic2 = startCircuit  (feedback (dotest @>> edit "test" ))  initval  
-where	
-	initval  = vertlistAGEC [show "expression " (toDynStr (dynamic 0))] 
-	 
-	dotest x = dotest` (^^ x)
-	
-	dotest` [x:xs] = vertlistAGEC ([x] ++ (check (fromDynStr x) xs))
-	where
-		check (f::a -> b) [(_,dyn=:DynStr (x::a) s):xs] = [show "argument " dyn: check (dynamic f x) xs]
-		check dyn=:(f::a -> b) else 				= [show "argument " (toDynStr (dynamic "??"))]
-		check dyn  else 							= [show "result " (toDynStr dyn)]
-
-	show s v = (showAGEC s,v)
-
-	toDynStr v 					  = DynStr v (ShowValueDynamic v)
-	fromDynStr (_,(DynStr d str)) = d
-
-testDynamic = startCircuit  (feedback (dotest @>> edit "test" ))  initval  
+testDynamic = CGEC  (%| (dotest @| gecEdit "test" ))  initval  
 where	
 	initval  = horlistAGEC [testinit] <|> showAGEC ":: String"
 	testinit = DynStr (dynamic "") "Type expression:"
@@ -113,14 +62,13 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 
 derive gGEC TypeVal, Editor, Command, ApplicationElem
 
-
-editoreditor = startCircuit (designeditor >>@ convert >>> applicationeditor) initvalue
+editoreditor = CGEC (designeditor |@ convert |>>>| applicationeditor) initvalue
 where
-	designeditor :: GecCircuit DesignEditor DesignEditor
-	designeditor 		= feedback (toDesignEditor @>> edit "design" >>@ updateDesign o fromDesignEditor)
+	designeditor :: CGEC DesignEditor DesignEditor
+	designeditor 		= %| (toDesignEditor @| gecEdit "design" |@ updateDesign o fromDesignEditor)
 
-	applicationeditor :: GecCircuit ApplicationEditor ApplicationEditor
-	applicationeditor 	= feedback (toApplicEditor o updateApplication @>> edit "application" >>@ fromApplicEditor)
+	applicationeditor :: CGEC ApplicationEditor ApplicationEditor
+	applicationeditor 	= %| (toApplicEditor o updateApplication @| gecEdit "application" |@ fromApplicEditor)
 
 	toDesignEditor   (table,clipboard) = (listAGEC True (map vertlistAGEC table),hidAGEC clipboard)
 	fromDesignEditor (table,clipboard) = (map (^^) (^^ table),^^ clipboard)
@@ -130,8 +78,7 @@ where
 	
 // Initial value of design editor
 
-initvalue	= ([fourelem,fourelem],zeroValue)
-fourelem 	= [initelem,initelem,initelem]
+initvalue	= ([[initelem,initelem,initelem],[initelem,initelem]],zeroValue)
 initelem	= (Choose,zeroValue)
 zeroValue 	= (Identity,Int_ 0)
 
@@ -210,8 +157,9 @@ where
 
 // the application editor types:
 
-:: ApplicationEditor :== [[AGEC ApplicationElem]]
-:: ApplicationElem
+:: ApplicationEditor :== [[ApplicationElem]]
+
+:: ApplicationElem											
 			= AF_I_I 	(AGEC String) (AGEC (Int->Int,	   TableIndex ))
 			| AF_R_R 	(AGEC String) (AGEC (Real->Real,   TableIndex ))
 			| AF_LI_I 	(AGEC String) (AGEC ([Int]->Int,  [TableIndex]))
@@ -226,18 +174,18 @@ where
 convert :: DesignEditor -> ApplicationEditor
 convert (table,clipboard) = map (map (toAppl o snd)) table
 where
-	toAppl (Calculator, Int_ i)				= noObjectAGEC (AInt_    (intcalcAGEC i))
-	toAppl (agec,       Int_ i)				= noObjectAGEC (AInt_    (chooseAGEC agec i))
-	toAppl (Calculator, Real_ r) 			= noObjectAGEC (AReal_   (realcalcAGEC r))
-	toAppl (agec,	    Real_ r) 			= noObjectAGEC (AReal_   (chooseAGEC agec r))
-	toAppl (Displayval, String_ s)			= noObjectAGEC (AString_ (showAGEC s))
-	toAppl (_, 			String_ s) 			= noObjectAGEC (AString_ (idAGEC s))
-	toAppl (_, F_I_I  (Just (PAIR f ix)))	= noObjectAGEC (AF_I_I   (showAGEC "") (hidAGEC (^^ f, ix)))
-	toAppl (_, F_R_R  (Just (PAIR f ix)))	= noObjectAGEC (AF_R_R   (showAGEC "") (hidAGEC (^^ f, ix)))
-	toAppl (_, F_LI_I (Just (PAIR f ix)))	= noObjectAGEC (AF_LI_I  (showAGEC "") (hidAGEC (^^ f, ^^ ix)))
-	toAppl (_, F_LR_R (Just (PAIR f ix)))	= noObjectAGEC (AF_LR_R  (showAGEC "") (hidAGEC (^^ f, ^^ ix)))
-	toAppl (_, Dyn_   (Just (PAIR d ix)))	= noObjectAGEC (AF_Dyn   (showAGEC "") (hidAGEC (   d, ^^ ix)))
-	toAppl _					 			= noObjectAGEC (AString_ (showAGEC "not implemented"))
+	toAppl (Calculator, Int_ i)				= AInt_		(intcalcAGEC i)
+	toAppl (agec,       Int_ i)				= AInt_ 	(chooseAGEC agec i)
+	toAppl (Calculator, Real_ r) 			= AReal_  	(realcalcAGEC r)
+	toAppl (agec,	    Real_ r) 			= AReal_	(chooseAGEC agec r)
+	toAppl (Displayval, String_ s)			= AString_ 	(showAGEC s)
+	toAppl (_, 			String_ s) 			= AString_ 	(idAGEC s)
+	toAppl (_, F_I_I  (Just (PAIR f ix)))	= AF_I_I  	(showAGEC "") (hidAGEC (^^ f, ix))
+	toAppl (_, F_R_R  (Just (PAIR f ix)))	= AF_R_R  	(showAGEC "") (hidAGEC (^^ f, ix))
+	toAppl (_, F_LI_I (Just (PAIR f ix)))	= AF_LI_I  	(showAGEC "") (hidAGEC (^^ f, ^^ ix))
+	toAppl (_, F_LR_R (Just (PAIR f ix)))	= AF_LR_R  	(showAGEC "") (hidAGEC (^^ f, ^^ ix))
+	toAppl (_, Dyn_   (Just (PAIR d ix)))	= AF_Dyn  	(showAGEC "") (hidAGEC (   d, ^^ ix))
+	toAppl _					 			= AString_ 	(showAGEC "not implemented")
 
 	chooseAGEC Counter 		= counterAGEC
 	chooseAGEC Displayval 	= showAGEC
@@ -247,14 +195,14 @@ where
 // the handling of the application editor boils down to applying all defined functions like in a spreadsheet ...
 
 updateApplication :: ApplicationEditor -> ApplicationEditor
-updateApplication table = map (map (noObjectAGEC o updatefun o (^^))) table
+updateApplication table = map (map updatefun) table
 where
 	updatefun (AF_I_I  _ fix) = AF_I_I  (showIFUN (applyfii  fix)) fix
 	updatefun (AF_R_R  _ fix) = AF_R_R  (showRFUN (applyfrr  fix)) fix
 	updatefun (AF_LI_I _ fix) = AF_LI_I (showIFUN (applyflii fix)) fix
 	updatefun (AF_LR_R _ fix) = AF_LR_R (showRFUN (applyflrr fix)) fix
 	updatefun (AF_Dyn  _ fix) = AF_Dyn  (showDyn  (applydyn  fix)) fix
-	updatefun x 			  = x
+	updatefun x 			 = x
 
 	showIFUN :: (Bool,Bool,Int) -> AGEC String
 	showIFUN (bix,bty,ival)
@@ -308,37 +256,37 @@ where
 	tryGetIntArg :: TableIndex -> (Bool,Bool,Int)
 	tryGetIntArg (r,c) 
 	| checkBounds (r,c) = (True,False,0)
-	= fetchIntVal (^^(table!!c!!r))
+	= fetchIntVal (table!!c!!r)
 	where
-			fetchIntVal (AInt_ i)      = (False,False,^^ i)
-			fetchIntVal (AF_I_I  _ fi) = applyfii fi
-			fetchIntVal (AF_LI_I _ fi) = applyflii fi
-			fetchIntVal _              = (False,True,0)
+			fetchIntVal (AInt_ i) 		= (False,False,^^ i)
+			fetchIntVal (AF_I_I  _ fi) 	= applyfii fi
+			fetchIntVal (AF_LI_I _ fi) 	= applyflii fi
+			fetchIntVal _ 				= (False,True,0)
 				 
 	tryGetRealArg :: TableIndex -> (Bool,Bool,Real)
 	tryGetRealArg (r,c)
 	| checkBounds (r,c) = (True,False,0.0)
-	= fetchRealVal (^^(table!!c!!r))
+	= fetchRealVal (table!!c!!r)
 	where
-			fetchRealVal (AReal_ r)     = (False,False,^^ r)
+			fetchRealVal (AReal_ r) 	= (False,False,^^ r)
 			fetchRealVal (AF_R_R  _ fi) = applyfrr fi
 			fetchRealVal (AF_LR_R _ fi) = applyflrr fi
-			fetchRealVal _              = (False,True,0.0)
+			fetchRealVal _ 				= (False,True,0.0)
 
 	tryDynArgs :: Dynamic TableIndex -> (Bool,Bool,Dynamic)
 	tryDynArgs (f::[a]->b) (r,c)
 	| checkBounds (r,c) = (True,False,dynamic "error")
-	= fetchDynVal (^^(table!!c!!r)) (dynamic undef :: a)
+	= fetchDynVal (table!!c!!r) (dynamic undef :: a)
 	where
 			fetchDynVal (AInt_ i)      (nn::Int)  = (False,False,dynamic (^^ i))
 			fetchDynVal (AF_I_I  _ fi) (nn::Int)  = mkdyn (applyfii  fi)
 			fetchDynVal (AF_LI_I _ fi) (nn::Int)  = mkdyn (applyflii fi)
-			fetchDynVal (AReal_ r)     (nn::Real) = (False,False,dynamic (^^ r))
+			fetchDynVal (AReal_ r) 	   (nn::Real) = (False,False,dynamic (^^ r))
 			fetchDynVal (AF_R_R  _ fi) (nn::Real) = mkdyn (applyfrr  fi)
 			fetchDynVal (AF_LR_R _ fi) (nn::Real) = mkdyn (applyflrr fi)
 			fetchDynVal (AString_ s)   (nn::Int)  = (False,False,dynamic (^^ s))
-			fetchDynVal (AF_Dyn  _ fi) _          = (applydyn fi)
-			fetchDynVal _              _          = (False,True,dynamic (23))
+			fetchDynVal (AF_Dyn  _ fi) _ 		  = (applydyn fi)
+			fetchDynVal _   _ 					  = (False,True,dynamic (23))
 			
 			mkdyn (b1,b2,v) = (b1,b2,dynamic v)
 
@@ -349,3 +297,5 @@ where
 showAGEC i = (modeAGEC (Display ( i)))
 
 ToString v = toString v +++ " "
+
+

@@ -12,7 +12,7 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	spreadsheet2
+ 	spreadsheet1
  	world  
 
 spreadsheet1	=	startCircuit (feedback (edit "spreadsheet" >>@ updsheet)) (mksheet inittable) 
@@ -27,7 +27,7 @@ where
 			transpose				= [[table!!i!!j \\ i <- [0..(length table)    - 1]]
 												    \\ j <- [0..length (table!!0) - 1]
 									  ]
-		inittable	  				= [map ((+) i) [1..10] \\ i <- [0,5..25]]	
+		inittable	  				= [map ((+) i) [1..5] \\ i <- [0,5..25]]	
 
 spreadsheet2	=	startCircuit (feedback (edit "spreadsheet" >>@ updsheet))	    (mksheet inittable) 
 where
