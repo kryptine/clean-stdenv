@@ -101,14 +101,10 @@ osHandleEvents isFinalState getOSEvents setOSEvents getSleepTime handleOSEvent (
 	| noDelayEvents
 		# (sleep,state)			= getSleepTime state
 		# (tracking,tb)			= loadTracking tb
-		# tracking				= case tracking of
-									0	-> OSLongSleep
-									t	-> 0
-		
-		# sleep					= min sleep tracking
-
-//		# sleep = 60;		//=>JvG: equivalent to us setting OSLongSleep/NoSleep to 1?
-
+		# (sleep,tb) = case tracking of
+							0  -> (min OSLongSleep sleep,tb)
+							-1 -> (max 1 sleep,stopTracking tb)
+							_  -> (sleep,tb)
 		# (x,y,tb)				= GetMouse tb
 		# (x,y,tb)				= QLocalToGlobal x y tb
 		# (osEvent,osEvents,tb)	= EventsWaitEvent sleep mRgn osEvents tb
