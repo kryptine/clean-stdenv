@@ -1,19 +1,15 @@
 definition module StdReceiver
 
-
 //	********************************************************************************
 //	Clean Standard Object I/O library, version 1.2
 //	
 //	StdReceiver specifies all receiver operations.
 //	********************************************************************************
 
-
 import	StdReceiverDef, StdMaybe
 from	iostate	import	PSt, IOSt
 from	id		import	RId, R2Id, RIdtoId, R2IdtoId, ==
 
-
-//	Operations on the ReceiverDevice. 
 
 //	Open uni- and bi-directional receivers:
 
@@ -31,17 +27,15 @@ instance Receivers (Receiver  msg)
 instance Receivers (Receiver2 msg resp)
 
 
-closeReceiver		:: !Id !(IOSt .l) -> IOSt .l
+closeReceiver			:: !Id !(IOSt .l) -> IOSt .l
 /*	closeReceiver closes the indicated uni- or bi-directional receiver.
 	Invalid Ids have no effect.
 */
 
-
-getReceivers		:: !(IOSt .l) -> (![(Id,ReceiverType)], !IOSt .l)
+getReceivers			:: !(IOSt .l) -> (![(Id,ReceiverType)], !IOSt .l)
 /*	getReceivers returns the Ids and ReceiverTypes of all currently open uni- or 
 	bi-directional receivers of this interactive process.
 */
-
 
 enableReceivers			:: ![Id] !(IOSt .l) ->                      IOSt .l
 disableReceivers		:: ![Id] !(IOSt .l) ->                      IOSt .l
@@ -55,7 +49,6 @@ getReceiverSelectState	:: ! Id	 !(IOSt .l) -> (!Maybe SelectState,!IOSt .l)
 		yields the current SelectState of the indicated receiver. In case the 
 		receiver does not exist, Nothing is returned.
 */
-
 
 //	Inter-process communication:
 

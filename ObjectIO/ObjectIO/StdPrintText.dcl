@@ -10,38 +10,37 @@ from	StdPictureDef	import FontDef, FontName, FontStyle, FontSize
 import	StdPrint
 from	StdString import String
 
-
-:: WrapMode :== Int
+::	WrapMode	:== Int
 
 NoWrap 			:== 0
 LeftJustify 	:== 1
 RightJustify 	:== 2
 
-class CharStreams cs
-where
+class CharStreams cs where
 	getChar		:: !*cs -> (!Bool,!Char,!*cs)
-		//	returns the charstreams next character, and whether this operation was
-		//	successful 
+				// getChar returns the next character of the stream. The Boolean
+				// result indicates whether this operation was successful.
 	savePos		:: !*cs -> *cs
-		//	saves actual position of charstream to be enable the restorePos function
-		//	to restore it then.
+				// savePos saves actual position of charstream to enable the 
+				// restorePos function to restore it.
 	restorePos	:: !*cs -> *cs
 	eos			:: !*cs -> (!Bool,!*cs)
-		//	end of stream
+				// eos checks for end of stream.
 
 instance CharStreams FileCharStream
 
-:: *FileCharStream
+::	*FileCharStream
 
 fileToCharStream :: !*File -> *FileCharStream
 charStreamToFile :: !*FileCharStream -> *File
 
 
-printText1 :: !Bool !WrapMode !FontDef !Int !*charStream !PrintSetup !*printEnv
-		 ->   (!(!*charStream,!PrintSetup),!*printEnv)
-		 | CharStreams charStream & PrintEnvironments printEnv
-
-/* 	printText1 doDialog wrapMode font spacesPerTab charStream printSetup env
+printText1 :: !Bool !WrapMode !FontDef !Int
+			  !*charStream !PrintSetup  !*env
+		-> (!(!*charStream,!PrintSetup),!*env)
+		|  CharStreams charStream & PrintEnvironments env
+/* 	printText1 doDialog wrapMode font spacesPerTab
+			   charStream printSetup env
 	prints a CharStream:
 	doDialog:
 		identical to print (StdPrint)
@@ -58,14 +57,15 @@ printText1 :: !Bool !WrapMode !FontDef !Int !*charStream !PrintSetup !*printEnv
 		identical to print (StdPrint)
 */
 
+printText2 :: !String !String
+			  !Bool !WrapMode !FontDef !Int
+			  !*charStream !PrintSetup  !*env
+		-> (!(!*charStream,!PrintSetup),!*env)
+		|  CharStreams charStream & PrintEnvironments env
 
-printText2	::	!String !String !Bool !WrapMode !FontDef !Int !*charStream !PrintSetup
-				!*printEnv
-			->  (!(!*charStream,!PrintSetup),!*printEnv)
-			|	CharStreams charStream & PrintEnvironments printEnv
-
-/*	printText2 titleStr pageStr doDialog wrapMode fontParams spacesPerTab charStream
-			   printSetup env
+/*	printText2 titleStr pageStr
+			   doDialog wrapMode fontParams spacesPerTab
+			   charStream printSetup env
 	prints a charStream with a header on each page.
 	titleStr:
 		this String will be printed on each page at the left corner of the header
@@ -75,17 +75,16 @@ printText2	::	!String !String !Bool !WrapMode !FontDef !Int !*charStream !PrintS
 	The other parameters are identical to printText1.
 */
 
-
-printText3 ::!Bool !WrapMode !FontDef !Int 
-			 .(PrintInfo *Picture -> (state, (Int,Int), *Picture))
-			 (state Int *Picture -> *Picture)
-			 !*charStream
-			 !PrintSetup !*printEnv
-		 ->  (!(!*charStream,!PrintSetup),!*printEnv)
-		 | CharStreams charStream & PrintEnvironments printEnv
-
-/*	printText3 doDialog wrapMode font spacesPerTab textRange eachPageDraw charStream
-			   printSetup env
+printText3 :: !Bool !WrapMode !FontDef !Int
+			  .(PrintInfo *Picture -> (state, (Int,Int), *Picture))
+			   (state Int *Picture -> *Picture)
+			  !*charStream !PrintSetup  !*env
+		-> (!(!*charStream,!PrintSetup),!*env)
+		|  CharStreams charStream & PrintEnvironments env
+/*	printText3 doDialog wrapMode font spacesPerTab
+			   textRange
+			   eachPageDraw
+			   charStream printSetup env
 	prints a charStream with a header and trailer on each page. 
 	textRange:
 		this function takes a PrintInfo record and the printer Picture on which the 
@@ -99,12 +98,11 @@ printText3 ::!Bool !WrapMode !FontDef !Int
 			printed for each page.
 	eachPageDraw:
 		this function draws the header and/or trailer for the current page. Its 
-		arguments are the data produced by textRange, the actual page number, and an
-		initial printer Picture. This function is applied by printText3 before each new
-		page receives its text. 
+		arguments are the data produced by textRange, the actual page number, and 
+		an initial printer Picture. This function is applied by printText3 before 
+		each new page receives its text. 
 	The other parameters are identical to printText1.
 */
-
 
 /*	If a file is openend with FReadData, then all possible newline conventions
 	(unix,mac,dos) will be recognized. All these printing functions will replace

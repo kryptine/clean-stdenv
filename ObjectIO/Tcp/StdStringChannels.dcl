@@ -3,11 +3,11 @@ definition module StdStringChannels
 //	********************************************************************************
 //	Clean Standard Object I/O library, version 1.2
 //	
-//	StdStringChannels provides channel instanciates to send and receive Strings
-//	These channels use their own protocol above TCP
+//	StdStringChannels provides channel instances to send and receive Strings.
+//	These channels use their own protocol above TCP.
 //	********************************************************************************
 
-from	StdString	import String
+from	StdString		import String
 import	StdTCPDef, StdChannels, StdEventTCP
 from	StdReceiver		import Receivers, ReceiverType, RId
 from	StdTCPChannels	import SelectSend, SelectReceive, getNrOfChannels
@@ -17,40 +17,43 @@ from	StdTCPChannels	import SelectSend, SelectReceive, getNrOfChannels
 	"3 abc\xD"
 */
 
-////////////////////// StringChannels to receive ///////////////////////////////////
+//	********************************************************************************
+//	StringChannels to receive
+//	********************************************************************************
 
 ::	*StringRChannel_ a
 ::	*StringRChannel		:== StringRChannel_ String
 ::	*StringRChannels	=	StringRChannels [StringRChannel]
-::	*StringChannelReceiver ls ps 	
-	=	StringChannelReceiver
-			(RId (ReceiveMsg String)) StringRChannel	
-			(ReceiverFunction (ReceiveMsg String)		*(ls,ps))
-			[ReceiverAttribute							*(ls,ps)]
+::	*StringChannelReceiver ls pst 	
+ =	StringChannelReceiver
+		(RId (ReceiveMsg String)) StringRChannel	
+		(ReceiverFunction (ReceiveMsg String) *(ls,pst))
+		[ReceiverAttribute                    *(ls,pst)]
 
-toStringRChannel	::	TCP_RChannel -> StringRChannel
+toStringRChannel		:: TCP_RChannel -> StringRChannel
 
-instance Receivers 			StringChannelReceiver
-instance Receive			StringRChannel_
-instance closeRChannel		StringRChannel_
-instance MaxSize			StringRChannel_
+instance Receivers 		StringChannelReceiver
+instance Receive		StringRChannel_
+instance closeRChannel	StringRChannel_
+instance MaxSize		StringRChannel_
 
-////////////////////// StringChannels to send ////////////////////////////////////
+
+//	********************************************************************************
+//	StringChannels to send
+//	********************************************************************************
 
 ::	*StringSChannel_ a
 ::	*StringSChannel		:== StringSChannel_ String
 ::	*StringSChannels	=	StringSChannels [StringSChannel]
 
-toStringSChannel	::	TCP_SChannel -> StringSChannel
+toStringSChannel		::	TCP_SChannel -> StringSChannel
 
-instance Send				StringSChannel_
+instance Send StringSChannel_
 
-/////////////////////////////////////////////////////////////////////////////////
-
-// for openSendNotifier, closeSendNotifier
+//	For openSendNotifier, closeSendNotifier
 instance accSChannel 		StringSChannel_
 
-// for selectChannel
+//	For selectChannel
 instance SelectSend			StringSChannels
 instance SelectReceive		StringRChannels
 instance getNrOfChannels 	StringRChannels

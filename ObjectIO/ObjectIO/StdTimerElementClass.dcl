@@ -19,9 +19,9 @@ class TimerElements t where
 	getTimerElementType		::	(t  .ls .pst)
 			-> TimerElementType
 
-instance TimerElements (NewLS	t)   | TimerElements t	// getTimerElementType==""
-instance TimerElements (AddLS	t)   | TimerElements t	// getTimerElementType==""
-instance TimerElements (ListLS	t)   | TimerElements t	// getTimerElementType==""
-instance TimerElements NilLS							// getTimerElementType==""
+instance TimerElements (NewLS	t)   | TimerElements t
+instance TimerElements (AddLS	t)   | TimerElements t
+instance TimerElements (ListLS	t)   | TimerElements t
+instance TimerElements NilLS
 instance TimerElements ((:+:) t1 t2) | TimerElements t1
-									 & TimerElements t2	// getTimerElementType==""
+									 & TimerElements t2

@@ -4,10 +4,6 @@ definition module StdPrint
 //	Clean Standard Object I/O library, version 1.2
 //	
 //	StdPrint specifies general printing functions.
-//	Related functions and modules:
-//	-	getResolution (StdPicture)
-//	-	resizeBitmap  (StdBitmap)
-//	-	StdPrintText to print text.
 //	********************************************************************************
  
 
@@ -21,7 +17,7 @@ from	iostate			import	IOSt, PSt
 from	StdFile			import	FileEnv, Files
 
 ::	PageDimensions
-	=	{	page		:: !Size		// size of the drawable area of the page 
+	=	{	page		:: !Size		// Size of the drawable area of the page 
 		,	margins		:: !Rectangle	// This field contains information about the
 										// size of the margins on a sheet in pixels.
 										// Drawing can't occur within these margins.
@@ -29,39 +25,42 @@ from	StdFile			import	FileEnv, Files
 										// page size. Its values are:
 										// corner1.x<=0 && corner1.y<=0 && 
 										// corner2.x>=page.w && corner2.y>=page.h
-		,	resolution	:: !(!Int,!Int)	// horizontal and vertical printer
+		,	resolution	:: !(!Int,!Int)	// Horizontal and vertical printer
 										// resolution in dpi
 		}
 
-defaultPrintSetup	::	!*env -> (!PrintSetup, !*env)
+defaultPrintSetup	:: !*env -> (!PrintSetup,!*env)
 					| FileEnv env
-		// returns a default print setup 
+/*	defaultPrintSetup returns a default print setup.
+*/
 
-printSetupDialog	::	!PrintSetup !*printEnv -> (!PrintSetup, !*printEnv)
-					|	PrintEnvironments printEnv
-		// lets the user choose a print setup via the print setup dialog
-		
-getPageDimensions	::	!PrintSetup	!Bool->	PageDimensions
+printSetupDialog	:: !PrintSetup !*env -> (!PrintSetup,!*env)
+					| PrintEnvironments env
+/*	printSetupDialog lets the user choose a print setup via the print setup dialog.
+*/
+
+getPageDimensions	:: !PrintSetup !Bool -> PageDimensions
 instance == PageDimensions
 
-fwritePrintSetup	::	!PrintSetup !*File -> *File
-//	writes PrintSetup to file (text or data)
+fwritePrintSetup	:: !PrintSetup !*File -> *File
+/*	fwritePrintSetup writes PrintSetup to file (text or data).
+*/
 
-freadPrintSetup		::	!*File !*env -> (!Bool, !PrintSetup, !*File, !*env)	
-					|	FileEnv env
-//	reads PrintSetup from File (text or data). If resulting Boolean is True:success,
-//	otherwise the default PrintSetup is returned
-
+freadPrintSetup		:: !*File !*env -> (!Bool,!PrintSetup,!*File,!*env)	
+					|  FileEnv  env
+/*	freadPrintSetup reads PrintSetup from File (text or data).
+	If the resulting Boolean is True: success, otherwise the default PrintSetup is 
+	returned.
+*/
 
 print	::	!Bool !Bool
 			.(PrintInfo !*Picture -> ([IdFun *Picture],!*Picture))
-			!PrintSetup !*printEnv
-		-> (!PrintSetup,!*printEnv)
-		|	PrintEnvironments printEnv
-
+			!PrintSetup !*env
+		-> (!PrintSetup,!*env)
+		|  PrintEnvironments env
 /*	print doDialog emulateScreen pages printSetup env
 	sends output to the printer and returns the used print setup, which can differ
-	from the input print setup
+	from the input print setup.
 	doDialog:
 		if True a dialog will pop up that lets the user choose all printing options,
 		otherwise printing will happen in the default way.
@@ -80,10 +79,9 @@ print	::	!Bool !Bool
 
 printUpdateFunction
 		:: 	!Bool (UpdateState -> *Picture -> *Picture) [Rectangle]
-			!PrintSetup !*printEnv 
-		-> (!PrintSetup,!*printEnv)
-		|  PrintEnvironments printEnv
-
+			!PrintSetup !*env 
+		-> (!PrintSetup,!*env)
+		|  PrintEnvironments env
 /*	printUpdateFunction doDialog update area printSetup env
 	sends the content of the update function of a given area to the printer:
 	doDialog:
@@ -98,14 +96,14 @@ printUpdateFunction
 		identical to print.
 */
 
-printPagePerPage ::	!Bool !Bool 
-					.x
-					.(.x -> .(PrintInfo -> .(*Picture -> ((.Bool,Point2),(.state,*Picture)))))
-					((.state,*Picture) -> ((.Bool,Point2),(.state,*Picture)))
-					!PrintSetup !*printEnv 
-				-> 	(Alternative .x .state,!*printEnv)
-		        | PrintEnvironments printEnv
-
+printPagePerPage
+		:: !Bool !Bool 
+		   .x
+		   .(.x -> .(PrintInfo -> .(*Picture -> ((.Bool,Point2),(.state,*Picture)))))
+		   ((.state,*Picture) -> ((.Bool,Point2),(.state,*Picture)))
+		   !PrintSetup            !*env 
+		-> (Alternative .x .state,!*env)
+		|  PrintEnvironments env
 /*	printPagePerPage doDialog emulateScreen x prepare pages printSetup env
 	sends output to the printer.
 	This function can be used more efficiently than print. The major difference is 
@@ -113,7 +111,6 @@ printPagePerPage ::	!Bool !Bool
 	producing function. Each page transition function generates one page for the 
 	printer. An additional feature of printPagePerPage is that it is possible to
 	set the origin of the printer Pictures.
-
 	doDialog:
 		identical to print. 
 	emulateScreen:
@@ -141,5 +138,5 @@ printPagePerPage ::	!Bool !Bool
 */
  
 instance PrintEnvironments World
-// other instances are the Files subworld and PSt (see osprint.dcl)
-
+/*	Other instances are the Files subworld and PSt.
+*/
