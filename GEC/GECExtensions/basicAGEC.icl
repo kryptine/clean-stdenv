@@ -86,7 +86,7 @@ horlistGEC  list	= mkAGEC	{	toGEC	= tohorlist
 								,	fromGEC = fromhorlist
 								,	value 	= list
 								,	updGEC	= id
-								} "horlistGEC"
+								}  ("horlistGEC" +++ toString (length list))
 where
 	tohorlist []	 _ = EmptyMode <-> hidGEC []
 	tohorlist [x:xs] _ = Edit x    <-> horlistGEC xs
@@ -102,7 +102,7 @@ vertlistGEC  list	= mkAGEC	{	toGEC	= tovertlist
 								,	fromGEC = fromvertlist
 								,	value 	= list
 								,	updGEC	= id
-								} "vertlistGEC"
+								} ("vertlistGEC" +++ toString (length list))
 where
 	tovertlist []	 _ 	= EmptyMode <|> hidGEC []
 	tovertlist [x:xs] _ = Edit x    <|> vertlistGEC xs
