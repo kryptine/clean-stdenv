@@ -9,12 +9,31 @@ import StdGEC, StdGECExt, StdGecComb, StdDynamic
 import basicAGEC, StdAGEC, calcAGEC, dynamicAGEC
 
 Start :: *World -> *World
-Start world = goGui editoreditor world  
-//Start world = goGui testval world  
+//Start world = goGui editoreditor world  
+Start world = goGui testDynamic world  
 
-testval = CGEC  (predAGEC isEven @| gecEdit "test" |>>>| gecEdit "output")  34
+derive gGEC TV, Maybe 
 
+:: TV = Fun (AGEC [DynString])
 
+testDynamic = CGEC  (%| (dotest @| gecEdit "test" ))  (Fun  (horlistAGEC [testinit])) 
+where	
+	testinit = DynStr (dynamic 0) "0"
+	 
+	dotest (Fun list) = Fun (horlistAGEC (keepone (^^ list)))
+
+	keepone [] 		= [testinit]
+	keepone [x:xs] 	= [x:check (strip x) xs] ++ applylist (strip x) xs
+
+	strip (DynStr d str) = d
+
+	check (f::a -> b) [d2=:DynStr (x::a) s:xs] = [d2: check (dynamic undef :: b) xs]
+	check (f::a -> b) else 					   = [testinit]
+	check _ _ 								   = []
+	
+	applylist (f::a -> b) [d2=:DynStr (x::a) s:xs] = applylist (dynamic (f x)) xs
+	applylist (f::a -> b) _ = []
+	applylist dyn _ 		= [DynStr dyn (ShowValueDynamic dyn)]
 
 goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
@@ -35,27 +54,28 @@ where
 	toDesignEditor   (table,clipboard) = (listAGEC True (map vertlistAGEC table),hidAGEC clipboard)
 	fromDesignEditor (table,clipboard) = (map (^^) (^^ table),^^ clipboard)
 
-	toApplicEditor		= table_hv_AGEC	
+	toApplicEditor		= table_vh_AGEC	
 	fromApplicEditor	= ^^
 	
 // Initial value of design editor
 
 initvalue	= ([[initelem,initelem,initelem],[initelem,initelem]],zeroValue)
-initelem	= (zeroValue, Choose)
-zeroValue 	= (Int_ 0, Identity)
+initelem	= (Choose,zeroValue)
+zeroValue 	= (Identity,Int_ 0)
 
 // the design editor types:
 
 :: DesignEditor :== (DesignTable,Clipboard)				// the table is displayed as col x rows
-:: DesignTable	:== [[(Element,Command)]]
+:: DesignTable	:== [[(Command,Element)]]
 :: Clipboard	:== Element
-:: Element 		:== (TypeVal,Editor)
+:: Element 		:== (Editor,TypeVal)
 :: TableIndex	:== (Int,Int)			
 
-:: TypeVal 	= F_I_I   TableIndex		  (AGEC (Int -> Int))    (AGEC Bool) // define function :: Int -> Int 
-			| F_R_R   TableIndex 		  (AGEC (Real -> Real))  (AGEC Bool) // define function :: Real -> Real
-			| F_LI_I  (AGEC [TableIndex]) (AGEC ([Int] -> Int))  (AGEC Bool) // define function :: [Int] -> Int
-			| F_LR_R  (AGEC [TableIndex]) (AGEC ([Real] -> Real))(AGEC Bool) // define function :: [Real] -> Real
+:: TypeVal 	= F_I_I   (Maybe (PAIR (AGEC (Int -> Int))      TableIndex))		 // define function :: Int -> Int 
+			| F_R_R   (Maybe (PAIR (AGEC (Real -> Real))    TableIndex)) 		 // define function :: Real -> Real
+			| F_LI_I  (Maybe (PAIR (AGEC ([Int] -> Int))   (AGEC [TableIndex]))) // define function :: [Int] -> Int
+			| F_LR_R  (Maybe (PAIR (AGEC ([Real] -> Real)) (AGEC [TableIndex]))) // define function :: [Real] -> Real
+			| Dyn_    (Maybe (PAIR DynString String)) 					// any dynamic 								
 			| String_ String										// define initial string 								
 			| Real_   Real											// define initial real value 
 			| Int_ 	  Int											// define initial int value (default)
@@ -72,6 +92,7 @@ zeroValue 	= (Int_ 0, Identity)
 			| Paste													// paste  element
 			| Choose												// noop (default)
 
+:: Maybe2 a b :== Maybe (<|> a b)
 // create default functions
 
 
@@ -83,35 +104,38 @@ where
 	keepone [] = [[initelem]]		// to ensure that there is at least one element...
 	keepone xs = xs
 
-	newclipboard = case [elem \\ col <- table, (elem,Copy) <- col] of // copy to clipboard
+	newclipboard = case [elem \\ col <- table, (Copy,elem) <- col] of // copy to clipboard
 					[elem] -> elem
 					else   -> s
 	
 	paste :: Clipboard DesignTable -> DesignTable // paste from clipboard
 	paste s table = map (map paste_elem) table 
 	where
-		paste_elem (_,Paste) = (s,Choose)
+		paste_elem (Paste,_) = (Choose,s)
 		paste_elem elem		  = elem
 		
 	update :: DesignTable -> DesignTable // all other commands ...
 	update table = map update_col table 
 	where
-		update_col [(elem,Insert):xs] = [(elem,Choose),(elem,Choose):xs]
-		update_col [(_   ,Delete):xs] = xs
-		update_col [(x,_): xs]     	  = [(x,Choose):update_col xs]
-		update_col []      			  = []
+		update_col [(Insert,elem):xs] = [(Choose,elem),(Choose,elem):xs]
+		update_col [(Delete,_   ):xs] = xs
+		update_col [x:xs]     	  	  = [x:update_col xs]
+		update_col []      		  	  = []
 
 	initfuns :: DesignTable -> DesignTable
 	initfuns table = map (map initfun) table // fill in proper default functions
 	where
-		initfun :: (Element,Command) -> (Element,Command)
-		initfun elem=:((F_I_I  ix f b, e),c) = if (^^ b) ((F_I_I  ix 			   (dynamicAGEC2 (const 0))   nb,e),c) elem
-		initfun elem=:((F_R_R  ix f b, e),c) = if (^^ b) ((F_R_R  ix 			   (dynamicAGEC2 (const 0.0)) nb,e),c) elem
-		initfun elem=:((F_LI_I ix f b, e),c) = if (^^ b) ((F_LI_I (dynamicAGEC2 []) (dynamicAGEC2 (const 0))   nb,e),c) elem
-		initfun elem=:((F_LR_R ix f b, e),c) = if (^^ b) ((F_LR_R (dynamicAGEC2 []) (dynamicAGEC2 (const 0.0)) nb,e),c) elem
-		initfun elem = elem
-	
-		nb =  hidAGEC False 
+		initfun :: (Command,Element) -> (Command,Element)
+		initfun (c,(e,typeval)) = (c,(e,init typeval))
+
+		init (F_I_I  Nothing) = (F_I_I  (Just (PAIR (dynamicAGEC2 (const 0  )) (0,0))))
+		init (F_R_R  Nothing) = (F_R_R  (Just (PAIR (dynamicAGEC2 (const 0.0)) (0,0))))
+		init (F_LI_I Nothing) = (F_LI_I (Just (PAIR (dynamicAGEC2 (const 0))   (dynamicAGEC2 []))))
+		init (F_LR_R Nothing) = (F_LR_R (Just (PAIR (dynamicAGEC2 (const 0.0)) (dynamicAGEC2 []))))
+		init (Dyn_   Nothing) = (Dyn_   (Just (PAIR (DynStr (dynamic 0) "0") ("Int")))) 
+		init (Dyn_  (Just (PAIR (DynStr d s) str))) 
+							  = (Dyn_   (Just (PAIR (DynStr d s) (ShowTypeDynamic d)))) 
+		init elem = elem
 
 // the application editor types:
 
@@ -129,19 +153,19 @@ where
 // turn design editor info in working user application editor
 
 convert :: DesignEditor -> ApplicationEditor
-convert (table,clipboard) = map (map toAppl) table
+convert (table,clipboard) = map (map (toAppl o snd)) table
 where
-	toAppl ((Int_ i,Calculator)   ,_)	= AInt_		(intcalcAGEC i)
-	toAppl ((Int_ i,agec)         ,_)	= AInt_ 	(chooseAGEC agec i)
-	toAppl ((Real_ r,Calculator)  ,_)	= AReal_  	(realcalcAGEC r)
-	toAppl ((Real_ r,agec)        ,_)	= AReal_	(chooseAGEC agec r)
-	toAppl ((String_ s,Displayval),_)	= AString_ 	(showAGEC s)
-	toAppl ((String_ s,_)         ,_)	= AString_ 	(idAGEC s)
-	toAppl ((F_I_I  ix f _,_)     ,_)	= AF_I_I  	(showAGEC "") (hidAGEC (^^ f, ix))
-	toAppl ((F_R_R  ix f _,_)     ,_)	= AF_R_R  	(showAGEC "") (hidAGEC (^^ f, ix))
-	toAppl ((F_LI_I ix f _,_)     ,_)	= AF_LI_I  	(showAGEC "") (hidAGEC (^^ f, ^^ ix))
-	toAppl ((F_LR_R ix f _,_)     ,_)	= AF_LR_R  	(showAGEC "") (hidAGEC (^^ f, ^^ ix))
-	toAppl _					 		= AString_ 	(showAGEC "not implemented")
+	toAppl (Calculator, Int_ i)				= AInt_		(intcalcAGEC i)
+	toAppl (agec,       Int_ i)				= AInt_ 	(chooseAGEC agec i)
+	toAppl (Calculator, Real_ r) 			= AReal_  	(realcalcAGEC r)
+	toAppl (agec,	    Real_ r) 			= AReal_	(chooseAGEC agec r)
+	toAppl (Displayval, String_ s)			= AString_ 	(showAGEC s)
+	toAppl (_, 			String_ s) 			= AString_ 	(idAGEC s)
+	toAppl (_, F_I_I  (Just (PAIR f ix)))	= AF_I_I  	(showAGEC "") (hidAGEC (^^ f, ix))
+	toAppl (_, F_R_R  (Just (PAIR f ix)))	= AF_R_R  	(showAGEC "") (hidAGEC (^^ f, ix))
+	toAppl (_, F_LI_I (Just (PAIR f ix)))	= AF_LI_I  	(showAGEC "") (hidAGEC (^^ f, ^^ ix))
+	toAppl (_, F_LR_R (Just (PAIR f ix)))	= AF_LR_R  	(showAGEC "") (hidAGEC (^^ f, ^^ ix))
+	toAppl _					 			= AString_ 	(showAGEC "not implemented")
 
 	chooseAGEC Counter 		= counterAGEC
 	chooseAGEC Displayval 	= showAGEC
