@@ -13,13 +13,14 @@ bimapId :: Bimap .a .a
 :: REC a = REC a 			// recursion mark
 
 // for constructor information
-:: OBJECT a = OBJECT a		// object marking (not yet used)
+:: OBJECT a = OBJECT a		// object marking
 :: CONS a = CONS a 			// constructor marking
 :: FIELD a = FIELD a 		// record field marking
 
 :: GenericInfo 	= NoGenericInfo	
 				| GenericConsInfo GenericConsDescriptor
 				| GenericFieldInfo GenericFieldDescriptor
+				| GenericTypeDefInfo GenericTypeDefDescriptor
 
 :: GenericConsDescriptor = 
 	{ gcd_name 		:: String
@@ -50,9 +51,20 @@ bimapId :: Bimap .a .a
 			| GenTypeApp GenType GenType
 			| GenTypeArrow GenType GenType
 	
+// determine the path in the generic binary-sum-tree of a constructor
+:: ConsPos = ConsLeft | ConsRight
+getConsPath :: GenericConsDescriptor -> [ConsPos]
+	
 // generic bidirectional mapping
 generic bimap a b :: Bimap .a .b
-derive bimap PAIR, (->), EITHER, CONS, FIELD, Bimap, c
+derive bimap c
+derive bimap PAIR
+derive bimap EITHER
+derive bimap OBJECT
+derive bimap CONS
+derive bimap FIELD
+derive bimap (->)
+derive bimap Bimap
 
 // HACK: dictionary for all generics.
 // It works since all generic classes have only one method and do not inherit 

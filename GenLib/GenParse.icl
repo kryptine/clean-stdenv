@@ -1,6 +1,6 @@
 implementation module GenParse
 
-import StdGeneric, StdEnv, StdMaybe
+import StdGeneric, StdEnv, StdMaybe, RWSDebug
 
 //---------------------------------------------------------------------------
 
@@ -169,7 +169,7 @@ where
 			Just '[' -> (TokenOpenList, s)
 			Just ']' -> (TokenCloseList, s)
 			Just ',' -> (TokenComma, s)
-			Just '\'' -> lex_char s
+			Just '\'' -> lex_char 0 [] s
 			Just '"'  -> lex_string 0 [] s
 			Just '_' -> lex_ident 1 ['_'] s
 			Just '+'
@@ -309,22 +309,24 @@ where
 					Just c -> lex_string (inc num_chars) [c:acc_chars] s
 			Just c	-> lex_string (inc num_chars) [c:acc_chars] s
 
-	lex_char s 
-		#! (mc, s) = lexGetChar s
+
+	lex_char num_chars acc_chars s
+		# (mc, s) = lexGetChar s
 		= case mc of
 			Nothing -> (TokenError "error in char constant", s)
-			Just '\\'
+			Just '\'' 
+				| num_chars == 1
+					-> (TokenChar (hd acc_chars), s)
+				| num_chars == 0
+					-> (TokenError "char constant contains no characters ", s)
+				| otherwise 	
+					-> (TokenError "char constant contains more than one character", s)
+			Just '\\' 
 				#! (mc, s) = lex_special_char s
 				-> case mc of
 					Nothing -> (TokenError "error in char constant", s)
-					Just c -> lex_char_end c s
-			Just c -> lex_char_end c s
-	where
-		lex_char_end c s
-			#! (mc, s) = lexGetChar s
-			= case mc of
-				Just '\'' -> (TokenChar c, s) 
-				Nothing -> (TokenError "error in char constant", s)
+					Just c -> lex_char (inc num_chars) [c:acc_chars] s
+			Just c	-> lex_char (inc num_chars) [c:acc_chars] s
 
 	lex_special_char s 
 		#! (mc, s) = lexGetChar s
@@ -696,6 +698,8 @@ gParse{|FIELD of d|} parse_arg (ExprField name value)
 	| d.gfd_name == name
 		= mapMaybe FIELD (parse_arg value)
 		= Nothing
+gParse{|OBJECT|} parse_arg expr
+	= mapMaybe OBJECT (parse_arg expr)
 
 gParse{|[]|} parse_arg (ExprList exprs) 
 	= maybeAll (map parse_arg exprs)

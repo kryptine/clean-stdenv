@@ -102,6 +102,7 @@ testParsePrint =
 	, test -123
 
 	, test 1.09
+	, test 0.123
 	, test -123.456
 	, test 1.23E-12
 	, test 1.23E+12

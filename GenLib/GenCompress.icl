@@ -148,6 +148,7 @@ gCompress{|EITHER|} cl cr (LEFT x) = cl x o compressBool False
 gCompress{|EITHER|} cl cr (RIGHT x) = cr x o compressBool True
 gCompress{|CONS|} c (CONS x) = c x
 gCompress{|FIELD|} c (FIELD x) = c x
+gCompress{|OBJECT|} c (OBJECT x) = c x
 gCompress{|{}|} c xs = compressArray c xs
 gCompress{|{!}|} c xs = compressArray c xs
 gCompress{|String|} xs = compressArray compressChar xs
@@ -165,6 +166,7 @@ gCompressedSize{|EITHER|} cl cr (LEFT x) = 1 + cl x
 gCompressedSize{|EITHER|} cl cr (RIGHT x) = 1 + cr x
 gCompressedSize{|CONS|} c (CONS x) = c x
 gCompressedSize{|FIELD|} c (FIELD x) = c x
+gCompressedSize{|OBJECT|} c (OBJECT x) = c x
 gCompressedSize{|[]|} c xs = foldSt (\x st -> c x + st) xs 32 
 gCompressedSize{|{}|} c xs = foldSt (\x st -> c x + st) [x\\x<-:xs] 32 
 gCompressedSize{|{!}|} c xs = foldSt (\x st -> c x + st) [x\\x<-:xs] 32 
@@ -185,6 +187,7 @@ where
 			= fl >>= ret o LEFT
 gUncompress{|CONS|} f = f >>= ret o CONS
 gUncompress{|FIELD|} f = f >>= ret o FIELD
+gUncompress{|OBJECT|} f = f >>= ret o OBJECT
 gUncompress{|[]|} f = uncompressList f 
 gUncompress{|{}|} f = uncompressArray f 
 gUncompress{|{!}|} f = uncompressArray f 
@@ -199,7 +202,7 @@ uncompress = fst o gUncompress{|*|} o mkCompressSt
 compress :: !a -> BitVector | gCompressedSize{|*|} a & gCompress{|*|} a
 compress x 
 	#! compressed_size = gCompressedSize{|*|} x
-	#! arr_size = compressed_size / 32 + (if (compressed_size mod 32 == 0) 0 1)
+	#! arr_size = compressed_size / 32 + (if (compressed_size rem 32 == 0) 0 1)
 	#! bits = createArray arr_size 0
 	= (gCompress{|*|} x (mkCompressSt bits)).cs_bits
  

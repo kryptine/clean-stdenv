@@ -1,5 +1,7 @@
 implementation module StdGeneric
 
+import StdInt, StdMisc, StdClass
+
 generic bimap a b :: Bimap .a .b
 
 id x = x
@@ -37,6 +39,11 @@ bimap{|FIELD|} barg = { map_to= map_to, map_from=map_from }
 where
 	map_to   (FIELD x) = FIELD (barg.map_to x)
 	map_from (FIELD x) = FIELD (barg.map_from x)
+
+bimap{|OBJECT|} barg = { map_to= map_to, map_from=map_from }
+where
+	map_to   (OBJECT x) = OBJECT (barg.map_to x)
+	map_from (OBJECT x) = OBJECT (barg.map_from x)
 	
 bimap{|Bimap|} x y = {map_to = map_to, map_from = map_from}
 where
@@ -48,4 +55,20 @@ where
 		{ map_to 	= y.map_from o map_to o x.map_to
 		, map_from 	= x.map_from o map_from o y.map_to
 		}
- 	 							 	
+
+getConsPath :: GenericConsDescriptor -> [ConsPos]
+getConsPath {gcd_index, gcd_type_def={gtd_num_conses}}
+	= doit gcd_index gtd_num_conses
+where
+	doit i n
+		| n == 0 	
+			= abort "getConsPath: zero conses\n"
+		| i >= n	
+			= abort "getConsPath: cons index >= number of conses"
+		| n == 1
+			= []
+		| i < (n/2)
+			= [ ConsLeft : doit i (n/2) ]
+		| otherwise
+			= [ ConsRight : doit (i - (n/2)) (n - (n/2)) ]
+			  	 							 	

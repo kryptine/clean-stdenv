@@ -39,6 +39,7 @@ gLexOrd{|EITHER|} fl fr (RIGHT x) (LEFT y) = GT
 gLexOrd{|EITHER|} fl fr (RIGHT x) (RIGHT y) = fr x y
 gLexOrd{|CONS|} f (CONS x) (CONS y) = f x y
 gLexOrd{|FIELD|} f (FIELD x) (FIELD y) = f x y
+gLexOrd{|OBJECT|} f (OBJECT x) (OBJECT y) = f x y
 
 // Instance on standard lists is needed because
 // standard lists have unnatural internal ordering of constructors: Cons < Nil,

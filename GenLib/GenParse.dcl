@@ -14,7 +14,7 @@ instance ParseInput File
 :: Expr
 generic gParse a :: Expr -> Maybe a
 
-derive gParse Int, Char, Bool, Real, String, UNIT, PAIR, EITHER, CONS, FIELD, [], {!}, {}
+derive gParse Int, Char, Bool, Real, String, UNIT, PAIR, EITHER, CONS, FIELD, OBJECT, [], {!}, {}
 
 parseString :: String -> Maybe a | gParse{|*|} a
 parseFile :: File -> Maybe a | gParse{|*|} a
