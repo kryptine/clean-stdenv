@@ -17,7 +17,7 @@ dynamicGEC v = mkAGEC { toGEC   = toExpr
 					  , fromGEC = fromExpr
 					  , updGEC  = updExpr
 					  , value   = v
-					  }
+					  } "dynamicGEC"
 where
 	toExpr v Undefined 		= display v (prettyVal  v)
 	toExpr v (Defined b)	= b 				
@@ -43,7 +43,8 @@ gGEC{|DynString|} gecArgs=:{gec_value=mbexpr,update=biupdate} pSt
 	= case mbexpr of 
 		Just dynexprGEC=:(DynStr dyn str) 
 					= convert dynexprGEC (gGEC{|*|} {gecArgs & gec_value=Just str,update=bupdate dynexprGEC} pSt)
-		Nothing		= abort "Cannot make up function value for Dynam"
+//		Nothing		= abort "Cannot make up function value for Dynam"
+		Nothing		= convert (DynStr (dynamic "") "") (gGEC{|*|} {gecArgs & gec_value=Just "",update=bupdate (DynStr (dynamic "") "")} pSt)
 where
 	convert dynexprGEC (ahandle,pst) 
 					= ({ahandle & gecSetValue = AGECSetValue ahandle.gecSetValue ahandle.gecGetValue

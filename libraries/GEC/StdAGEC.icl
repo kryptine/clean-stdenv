@@ -240,38 +240,53 @@ where
 
 // Abstract editors
 
-:: AGEC a = E. .b :  Hidden (BimapGEC a b) (A. .ps: InfraGEC (BimapGEC a b) (PSt ps))
+:: AGEC a = E. .b :  Hidden (BimapGEC a b) (A. .ps: InfraGEC (BimapGEC a b) (PSt ps)) String
 
-mkAGEC  :: (BimapGEC a b) -> AGEC a | gGEC{|*|} b
-mkAGEC bimapGEC =  Hidden bimapGEC (gGEC{|*->*->*|} undef gGEC{|*|})
+mkBimapGEC  :: (a (Current b) -> b) (b -> b) (b -> a) a -> (BimapGEC a b)
+mkBimapGEC toGEC updGEC fromGEC value 
+=	{ toGEC   = toGEC
+	, fromGEC = fromGEC
+	, updGEC  = updGEC
+	, value   = value
+	}
+
+mkAGEC  :: (BimapGEC a b) String -> AGEC a | gGEC{|*|} b
+mkAGEC bimapGEC descriptor =  Hidden bimapGEC (gGEC{|*->*->*|} undef gGEC{|*|}) descriptor
 
 ^^    :: (AGEC a) -> a
-^^ (Hidden bimap ggec) = bimap.value
+^^ (Hidden bimap ggec string) = bimap.value
 
 (^=) infixl  :: (AGEC a) a -> (AGEC a)
-(^=) (Hidden bimap ggec) nvalue = (Hidden {bimap & value = nvalue} ggec)
+(^=) (Hidden bimap ggec descr) nvalue = (Hidden {bimap & value = nvalue} ggec descr)
 
-gGEC{|AGEC|} _ gecArgs=:{gec_value=mbimap,update=biupdate} pSt
+gGEC{|AGEC|} gGECa gecArgs=:{gec_value=mbimap,update=biupdate} pSt
 	= case mbimap of 
-		Just abstractGEC=:(Hidden bimapGEC gGECbimapGEC) 
+		Just abstractGEC=:(Hidden bimapGEC gGECbimapGEC descr) 
 					= convert abstractGEC (gGECbimapGEC {gecArgs & gec_value=Just bimapGEC,update=bupdate abstractGEC} pSt)
-		Nothing		= abort "Cannot make up function value for AGEC"
+//		Nothing		= abort "Cannot make up function value for AGEC"
+		Nothing		= hackdefault pSt	// default is an invisable constant editor, not very useful, but no crash !!
 where
+	hackdefault pSt 
+	# (handle,pSt) 	= gGECa {gecArgs & gec_value=Nothing,update = \v r pst -> pst} pSt
+	  (aval,pSt)	= handle.gecGetValue pSt
+	= createDummyGEC OutputOnly (constGEC aval) biupdate pSt 
+	
+	
 	convert abstractGEC (ahandle,pst) 
 					= ({ahandle & gecSetValue = AGECSetValue ahandle.gecSetValue ahandle.gecGetValue
 	                            , gecGetValue = AGECGetValue abstractGEC ahandle.gecGetValue
 	                   },pst)
 
-	AGECSetValue aSetValue aGetValue upd (Hidden nval _) pst  
+	AGECSetValue aSetValue aGetValue upd (Hidden nval _ descr) pst  
 					= case aGetValue pst of
 							(bimap,pst) -> aSetValue upd {bimap & value = nval.value} pst
 							(else,pst) -> abort "cannot be"
-	AGECGetValue (Hidden bimap gGECb) aGetValue pst
+	AGECGetValue (Hidden bimap gGECb descr) aGetValue pst
 		# (nval,pst) = aGetValue pst
-		= (Hidden {bimap & value = nval.value} gGECb,pst)
+		= (Hidden {bimap & value = nval.value} gGECb descr,pst)
 	
-	bupdate (Hidden bimap gGECb) reason nbimap pst 
-	= biupdate reason (Hidden {bimap & value = nbimap.value} gGECb) pst
+	bupdate (Hidden bimap gGECb descr) reason nbimap pst 
+	= biupdate reason (Hidden {bimap & value = nbimap.value} gGECb descr) pst
 
 // Identity 
 
@@ -280,16 +295,24 @@ idGEC j 	= mkAGEC 	{	toGEC	= \i _ ->i
 						,	fromGEC = id
 						,	value	= j
 						,	updGEC	= id
-						}
+						} "idGEC"
 // Hidden Identity
+
 
 hidGEC :: a -> AGEC a | gGEC {|*|} a 
 hidGEC j 	= mkAGEC 	{	toGEC	= \i _ -> Hide i
 						,	fromGEC = \(Hide i) -> i
 						,	value	= j
 						,	updGEC	= id
-						}
+						} "hidGEC"
+// Hidden and constant, cannot be changed
 
+constGEC :: a -> AGEC a
+constGEC j 	= mkAGEC 	{	toGEC	= \i _ -> Hide 0
+						,	fromGEC = \(Hide 0) -> j
+						,	value	= j
+						,	updGEC	= id
+						} "constGEC"
 // apply GEC
 
 applyAGEC :: (b -> a) (AGEC b) -> AGEC a | gGEC {|*|} a & gGEC {|*|} b
@@ -297,7 +320,7 @@ applyAGEC fba gecb	= mkAGEC 	{	toGEC	= initgec
 								,	fromGEC = \(gecb <|> Display olda) -> fba (^^ gecb)
 								,	value	= inita
 								,	updGEC	= \(gecb <|> Display olda) -> (gecb <|> Display (fba (^^ gecb)))
-								}
+								} "applyAGEC"
 where
 	inita = fba (^^ gecb)									
 
@@ -311,7 +334,7 @@ counterGEC j = mkAGEC 	{	toGEC	= \i _ ->(i,Neutral)
 						,	fromGEC = fst
 						,	value	= j
 						,	updGEC	= updateCounter
-						}
+						} "counterGEC"
 where
 	updateCounter (n,UpPressed) 	= (n+one,Neutral)
 	updateCounter (n,DownPressed) 	= (n-one,Neutral)
@@ -324,7 +347,7 @@ calcGEC a butfun = 	mkAGEC 	{	toGEC	= \a _ -> a <|> tableGEC buts
 							,	fromGEC = \(na <|> buts) -> na
 							,	value 	= a
 							,	updGEC	= calcnewa
-							}
+							} "calcGEC"
 where
 	(buts,funs) = ([map fst list \\ list <- butfun],[map snd list \\ list <- butfun])
 
@@ -339,7 +362,7 @@ intcalcGEC i = 	mkAGEC	{	toGEC	= \ni _ -> calcGEC ni buttons
 						,	fromGEC = \b -> ^^ b
 						,	value 	= i
 						,	updGEC	= id
-						}
+						} "intcalcGEC"
 where
 	buttons	  =  [ map mkBut [7..9]
 				 , map mkBut [4..6]
@@ -354,7 +377,7 @@ realcalcGEC i = 	mkAGEC	{	toGEC	= newGEC
 							,	fromGEC = \b -> fst (^^ b)
 							,	value 	= i
 							,	updGEC	= id
-							}
+							} "realcalcGEC"
 where
 	newGEC ni Undefined 	 = calcGEC (ni ,Hide (True,1.0)) buttons
 	newGEC 0.0 (Defined oval)= calcGEC (0.0,Hide (True,1.0)) buttons
@@ -381,7 +404,7 @@ modeGEC :: (Mode a) -> AGEC a | gGEC {|*|} a
 modeGEC mode =  mkAGEC 	{ toGEC 	= mkmode mode
 						, fromGEC 	= demode
 						, updGEC 	= id
-						, value 	= demode mode}
+						, value 	= demode mode} "modeGEC"
 where
 	demode (Display a) = a
 	demode (Edit a) =  a
@@ -399,7 +422,7 @@ horlistGEC  list	= mkAGEC	{	toGEC	= tohorlist
 								,	fromGEC = fromhorlist
 								,	value 	= list
 								,	updGEC	= id
-								}
+								} "horlistGEC"
 where
 	tohorlist []	 _ = EmptyMode <-> hidGEC []
 	tohorlist [x:xs] _ = Edit x    <-> horlistGEC xs
@@ -414,7 +437,7 @@ vertlistGEC  list	= mkAGEC	{	toGEC	= tovertlist
 								,	fromGEC = fromvertlist
 								,	value 	= list
 								,	updGEC	= id
-								}
+								} "vertlistGEC"
 where
 	tovertlist []	 _ 	= EmptyMode <|> hidGEC []
 	tovertlist [x:xs] _ = Edit x    <|> vertlistGEC xs
@@ -429,7 +452,7 @@ tableGEC  list		= mkAGEC	{	toGEC	= \newlist -> mktable newlist
 								,	fromGEC = \table   -> mklist (^^ table)
 								,	value 	= list
 								,	updGEC	= id
-								}
+								} "tableGEC"
 where
 	mktable list	  _ = vertlistGEC [(horlistGEC xs) \\ xs <- list]
 	mklist  []			= []	
@@ -457,7 +480,7 @@ listGEC finite list
 				,	fromGEC = \(_,Hide (_,(list,_))) -> list
 				,	value 	= list
 				,	updGEC	= \b -> edit (parseListEditor b)
-				}
+				} "listGEC"
 where
 	mkdisplay list Undefined 							= display 0 list (list!!0)
 	mkdisplay list (Defined(_,Hide (clipboard,(_,i)))) 	= display i list clipboard

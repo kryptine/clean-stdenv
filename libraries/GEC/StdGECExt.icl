@@ -87,7 +87,7 @@ createDummyGEC outputOnly a userUpdate pSt
 	, gecSetValue = update myStore
 	, gecSwitch   = \_ -> id
 	, gecArrange  = \_ _ -> id
-	, gecOpened   = \env -> (False,env)
+	, gecOpened   = \env -> (True,env)
 	},pSt)
 where
 	update myStore YesUpdate na pst 

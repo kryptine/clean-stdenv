@@ -46,20 +46,24 @@ derive gGEC BimapGEC
 						}
 :: Current a		=	Undefined | Defined a				// Undefined for a new-editor, Defined when a new value is set in an existing editor
 
+mkBimapGEC  		:: (a (Current b) -> b) (b -> b) (b -> a) a -> (BimapGEC a b)
+
 // abstract editors
 
 derive gGEC AGEC
 
 :: AGEC a		// abstract GEC for an a-value maintained with a b-editor
 
-mkAGEC  	:: (BimapGEC a b) -> AGEC a |  gGEC{|*|} b
+mkAGEC  	:: (BimapGEC a b) String -> AGEC a |  gGEC{|*|} b
 ^^			:: (AGEC a) -> a
 (^=) infixl	:: (AGEC a) a -> (AGEC a)
+
 
 // examples of abstract editors
 
 idGEC 			:: a   					-> AGEC a 		| gGEC {|*|} a				// identity editor  
 hidGEC 			:: a 					-> AGEC a 		| gGEC {|*|} a 				// identity, no editor created
+constGEC 		:: a 					-> AGEC a 					 				// identity, no editor created, constant
 modeGEC 		:: (Mode a) 			-> AGEC a 		| gGEC {|*|} a				// convert Mode to AGEC
 applyAGEC 		:: (b -> a) (AGEC b) 	-> AGEC a 		| gGEC {|*|} a & gGEC {|*|} b // apply fba; show both b and a
 horlistGEC 		:: [a] 					-> AGEC [a]		| gGEC {|*|} a 				// all elements of a list displayed in a row

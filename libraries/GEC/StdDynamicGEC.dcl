@@ -4,4 +4,6 @@ import StdAGEC
 
 dynamicGEC :: a -> AGEC a | TC a & gGEC {|*|} a	 					
 				
-derive gGEC (->)
+derive gGEC (->), DynString
+
+:: DynString = DynStr Dynamic String
