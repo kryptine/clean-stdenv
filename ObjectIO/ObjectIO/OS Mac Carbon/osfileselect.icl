@@ -10,7 +10,7 @@ from	commondef	import fatalError
 import	/*standard_file,*/ files
 from	pointer		import	LoadWord, LoadLong, StoreLong, StoreWord
 from	quickdraw	import	QScreenRect
-import	osdirectory, navigation, memory, pointer
+import	osdirectory, navigation, memory, pointer, appleevents
 
 osInitialiseFileSelectors :: !*OSToolbox -> *OSToolbox
 osInitialiseFileSelectors tb = tb
@@ -28,6 +28,19 @@ osSelectinputfile handleOSEvent state tb
 
 osSelectoutputfile :: !(OSEvent->.s->.s) !.s !String !String !*OSToolbox -> (!Bool,!String,!.s,!*OSToolbox)
 osSelectoutputfile handleOSEvent state prompt filename tb
+	# (err,fileSpec,tb)				= FSMakeFSSpec filename tb
+	// we can ignore the filespec creation error since we also want to show the dialog
+	// if no (legal) path prefix was given...
+//	| err <> 0
+//		= (False,"",state,tb)
+	# (aedesc,err,tb)				= NewPtr SizeOfAEDesc tb
+	| err <> 0
+		= (False,"",state,tb)
+	# err
+		=  AECreateDesc KeyFssString fileSpec aedesc
+	| err <> 0
+		= (False,"",state,tb)
+
 	// Strip path for now...
 	# filename						= strip_path filename 0 0
 	// Ignores prompt for now...
@@ -40,7 +53,7 @@ osSelectoutputfile handleOSEvent state prompt filename tb
 	# flags							= flags bitor kNavNoTypePopup
 	# tb							= StoreLong (nav_dialog_options+NavDialogOptionFlagsOffset) flags tb
 	# tb							= copy_string_to_memory filename (nav_dialog_options+NavDialogOptionSavedFileNameOffset) tb
-	# (err,tb)						= NavPutFile 0 nav_reply_record nav_dialog_options 0 0 0 /*0x2a2a2a2a **** */ 0 tb
+	# (err,tb)						= NavPutFile aedesc/*0*/ nav_reply_record nav_dialog_options 0 0 0 /*0x2a2a2a2a **** */ 0 tb
 	# (ok,file_name,tb)				= get_or_put_file_selector_result err nav_reply_record tb
 	# tb							= DisposePtr nav_dialog_options tb
 	= (ok,file_name,state,tb)
