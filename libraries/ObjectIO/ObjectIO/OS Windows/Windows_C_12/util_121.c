@@ -131,15 +131,13 @@ BOOL strequal (char *s1, char *s2)
 
 BOOL nstrequal (int length, char *s1, char *s2)
 {
-	int i = 0;
-	while (s1[i] == s2[i])
-	{
-		if (i >= length)
-			return TRUE;
-		i++;
-	}
-	return FALSE;
-}	/* nstrequal */
+	int i;
+	
+	for (i=0; i<length && s1[i] == s2[i]; ++i)
+		;
+
+	return i==length ? TRUE : FALSE;
+}
 
 int rabs (int i)
 {

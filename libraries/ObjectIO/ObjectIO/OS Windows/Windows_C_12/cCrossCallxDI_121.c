@@ -36,6 +36,15 @@ char MDIFrameClassName[]  = "__CleanMDIFrame";		/* Class for MDI frames.  */
 char SDIWindowClassName[] = "__CleanSDIWindow";		/* Class for SDI windows (must have same length as MDIWindowClassName). */
 char MDIWindowClassName[] = "__CleanMDIWindow";		/* Class for MDI windows (must have same length as SDIWindowClassName). */
 
+static int string_length (char *s)
+{
+	char *p;
+	
+	for (p=s; *p!='\0'; ++p)
+		;
+	
+	return p-s;
+}
 
 /*	GetSDIClientWindow finds the first SDI client window of the argument hwnd.
 		This procedure assumes that hwnd is the handle of a SDI frame window.
@@ -48,7 +57,7 @@ static HWND OldGetSDIClientWindow (HWND hwndFrame)
 	int  classnamelength;
 
 	client = GetWindow (hwndFrame,GW_CHILD);
-	classnamelength = lstrlen (SDIWindowClassName) + 1;
+	classnamelength = string_length (SDIWindowClassName) + 1;
 	clientclassname = rmalloc (classnamelength);
 	GetClassName (client, clientclassname, classnamelength);
 
@@ -77,7 +86,7 @@ static BOOL CALLBACK EnumSDIChildProc(HWND hwndChild, LPARAM lParam)
 	int classnamelength;
 	char *childclassname;
 
-	classnamelength = lstrlen (SDIWindowClassName) + 1;
+	classnamelength = string_length (SDIWindowClassName) + 1;
 	childclassname = rmalloc (classnamelength);
 
 	GetClassName (hwndChild, childclassname, classnamelength);
