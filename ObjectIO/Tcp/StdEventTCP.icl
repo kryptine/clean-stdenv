@@ -3,7 +3,7 @@ implementation module StdEventTCP
 //	Clean Standard Object I/O library, version 1.2
 
 import StdEnv
-import StdChannelEnv, StdChannels, StdTCPDef, StdTCPChannels
+import /*StdChannelEnv,*/ StdChannels, StdTCPDef, StdTCPChannels
 import StdReceiver
 import StdPSt, StdPStClass
 import tcp, ostcp, tcp_bytestreams
