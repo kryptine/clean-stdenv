@@ -1,7 +1,7 @@
 #ifndef _COSGAMELIB_H
 #define _COSGAMELIB_H
 
-/* Clean Game Library by Mike Wiering, Nijmegen */
+/* Clean Game Library by Mike Wiering */
 
 /* DirectX implementation of the OS specific functions */
 
@@ -13,23 +13,72 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include <windowsx.h>
+
 #include <ddraw.h>
+
+/* DD functions from DDUTIL.H ... */
+
+// #include "ddutil.h"
+
+
+IDirectDrawPalette * DDLoadPalette(IDirectDraw *pdd, LPCSTR szBitmap);
+IDirectDrawSurface * DDLoadBitmap(IDirectDraw *pdd, LPCSTR szBitmap, int dx, int dy);
+HRESULT              DDReLoadBitmap(IDirectDrawSurface *pdds, LPCSTR szBitmap);
+HRESULT              DDCopyBitmap(IDirectDrawSurface *pdds, HBITMAP hbm, int x, int y, int dx, int dy);
+DWORD                DDColorMatch(IDirectDrawSurface *pdds, COLORREF rgb);
+HRESULT              DDSetColorKey(IDirectDrawSurface *pdds, COLORREF rgb);
+
+/* ... DD functions from DDUTIL.H */
+
+
+/* sound functions from DSUTIL.H ... */
+
+// #include "dsutil.h"
+
+#include <mmsystem.h>
 #include <dsound.h>
-#include "ddutil.h"
-#include "dsutil.h"
+
+typedef struct
+{
+    BYTE *pbWaveData;               // pointer into wave resource (for restore)
+    DWORD cbWaveSize;               // size of wave data (for restore)
+    int iAlloc;                     // number of buffers.
+    int iCurrent;                   // current buffer
+    IDirectSoundBuffer* Buffers[1]; // list of buffers
+} SNDOBJ, *HSNDOBJ;
+
+// SndObjCreate     Loads a SNDOBJ from a Win32 resource in
+//                  the current application.
+HSNDOBJ SndObjCreate (IDirectSound *pDS, LPCTSTR lpName, int iConcurrent);
+
+// SndObjDestroy  Frees a SNDOBJ and releases all of its buffers.
+void SndObjDestroy (HSNDOBJ hSO);
+
+// SndObjPlay   Plays a buffer in a SNDOBJ.
+BOOL SndObjPlay (HSNDOBJ hSO, DWORD dwPlayFlags);
+
+// SndObjStop   Stops one or more buffers in a SNDOBJ.
+BOOL SndObjStop (HSNDOBJ hSO);
+
+// SndObjGetFreeBuffer      returns one of the cloned buffers that is
+//                          not currently playing
+IDirectSoundBuffer *SndObjGetFreeBuffer (HSNDOBJ hSO);
+
+/* ...sound functions from DSUTIL.H */
+
 
 /* Game Result Codes */
-#define GR_OK					 0
+#define GR_OK                    0
 #define GR_FAILED               -1
-#define GR_OS_ERROR				-2	/* OS function returns an error */
-#define GR_INVALID_BITMAP_ID	-3
-#define GR_INVALID_SPRITE_ID	-4
-#define GR_INVALID_MAP_ID		-5
-#define GR_NOT_FOUND			-6	/* file or resource not found */
+#define GR_OS_ERROR         -2  /* OS function returns an error */
+#define GR_INVALID_BITMAP_ID    -3
+#define GR_INVALID_SPRITE_ID    -4
+#define GR_INVALID_MAP_ID   -5
+#define GR_NOT_FOUND            -6  /* file (or resource) not found */
 
 
 /* display option bits */
-#define DO_BLINK	     		(1 << 0)
+#define DO_BLINK            (1 << 0)
 #define DO_STRETCH              (1 << 1)
 #define DO_MIRROR_LEFT_RIGHT    (1 << 2)
 #define DO_MIRROR_UP_DOWN       (1 << 3)
@@ -68,14 +117,14 @@ extern void OSFlip (void);
 
 /* initialize a game bitmap */
 extern int OSInitGameBitmap (int id, char *name,
-							 int bitmapwidth, int bitmapheight,
-							 int blockwidth, int blockheight
-							);
+                             int bitmapwidth, int bitmapheight,
+                             int blockwidth, int blockheight
+                            );
 /* get bitmap info */
 extern BOOL OSGetGameBitmapInfo (int id, int *width, int *height,
-								 int *blockwidth, int *blockheight,
-								 int *blockcountx, int *blockcounty
-								);
+                                 int *blockwidth, int *blockheight,
+                                 int *blockcountx, int *blockcounty
+                                );
 
 /* deinit a game bitmap */
 extern int OSFreeGameBitmap (int id);
