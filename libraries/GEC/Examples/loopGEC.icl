@@ -2,10 +2,10 @@ module loopGEC
 
 import StdEnv
 import StdGEC, StdGECExt, StdAGEC
-import GecArrow
+import GecArrow, StdDebug
 
-Start :: *World -> *World
-Start world = goGui sinkTest1 world  
+Start :: !*World -> *World
+Start world = goGui choiceTest1 world  
 where
 	goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 
@@ -16,7 +16,7 @@ loopTest2 = startCircuit (edit "edit" >>> loop (first (edit "loop")) >>> display
 :: LoopTest3 = Reset | Higher | Not_Higher
 derive gGEC LoopTest3
 
-loopTest3 = startCircuit (edit "enter number (0 resets)" >>> loop (arr f) >>> display "number higher than all before?") 0
+loopTest3 = startCircuit (edit "enter number (0 resets)" >>> loop (second (delay []) >>> arr f) >>> display "number higher than all before?") 0
 where
 	f (x, xs)
 		| x == 0 = (Reset, [])
@@ -53,6 +53,24 @@ derive gGEC (,)
 
 feedbackTest4 = startCircuit (edit "input" >>> feedback (first (arr ((+) 1))) >>> display "output") (0, 0)
 
-feedbackTest5 = startCircuit (feedback ((edit "+1" >>> arr ((+) 1)) *** (edit "+100" >>> arr ((+) 100)))) (0, 0)
+//feedbackTest5 = startCircuit (feedback ((edit "+1" >>> arr ((+) 1)) *** (edit "+100" >>> arr ((+) 100)) >>> probe "result")) (0, 0)
+feedbackTest5 = startCircuit (feedback (second (edit "+1" >>> arr ((+) 1)) >>> first (edit "+100" >>> arr ((+) 100)) >>> probe "result")) (0, 0)
 
 sinkTest1 = startCircuit (edit "input" >>> sink >>> arr (\_ -> -1) >>> display "output") 0
+
+choiceTest1 = startCircuit (edit "input" >>> g >>> display "output") (RIght False)
+where
+	g :: GecCircuit (EIther Int Bool) (EIther Int Bool)
+	g = left (arr ((+) 1))
+/*
+choiceTest2 = startCircuit (edit "input" >>> g >>> display "output") (RIght False)
+where
+	g :: GecCircuit (EIther Int Bool) (EIther Int Bool)
+	g = left (initial -1 >>> edit "left" >>> arr ((+) 1))
+*/
+derive gGEC EIther
+derive generate LoopTest3, EIther
+
+instance toString (a, b) | toString a & toString b
+where
+	toString (x, y) = "(" +++ toString x +++ ", " +++ toString y +++ ")"

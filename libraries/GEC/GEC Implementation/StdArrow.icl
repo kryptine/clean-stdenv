@@ -2,7 +2,6 @@ implementation module StdArrow
 
 from StdFunc import id
 from StdTuple import fst, snd
-from StdGeneric import :: EITHER (..)
 
 instance Arrow (->)
 where
@@ -14,8 +13,8 @@ instance ArrowChoice (->)
 where
 	left f = f`
 	where
-		f` (LEFT x) = LEFT (f x)
-		f` (RIGHT x) = RIGHT x
+		f` (LEft x) = LEft (f x)
+		f` (RIght x) = RIght x
 
 instance ArrowApply (->)
 where
