@@ -1203,6 +1203,18 @@ where
 		| isHScroll		= hRect
 		| otherwise		= vRect
 
+makeMetricsInfo :: OSWindowMetrics WindowKind Size [WindowAttribute`] WindowInfo -> .MetricsInfo
+makeMetricsInfo wMetrics=:{osmHorMargin,osmVerMargin,osmHorItemSpace,osmVerItemSpace} whKind` whSize` whAtts` whWindowInfo`
+	# windowInfo = getWindowInfoWindowData whWindowInfo`
+	# (domainRect,origin,defHMargin,defVMargin)
+							= if (whKind`==IsDialog)
+								(sizeToRect whSize`,zero,osmHorMargin,osmVerMargin)
+								(windowInfo.windowDomain,windowInfo.windowOrigin,0,0)
+	# hMargins = getwindowhmargin` (snd (cselect iswindowhmargin` (WindowHMargin` defHMargin defHMargin) whAtts`))
+	# vMargins = getwindowvmargin` (snd (cselect iswindowvmargin` (WindowVMargin` defVMargin defVMargin) whAtts`))
+	# orientation				= [(rectToRectangle domainRect,origin)]
+	# spaces = getwindowitemspace` (snd (cselect iswindowitemspace` (WindowItemSpace` osmHorItemSpace osmVerItemSpace) whAtts`))
+	= {miOSMetrics=wMetrics,miHMargins=hMargins,miVMargins=vMargins,miItemSpaces=spaces,miOrientation=orientation}
 
 /*	Move the ViewFrame of a CompoundControl. (In future version also customised controls.)
 */
@@ -1210,7 +1222,8 @@ movecontrolviewframe :: !Id !Vector2 !OSWindowMetrics !WIDS !WindowHandle` !*OST
 movecontrolviewframe id v wMetrics wids=:{wPtr} wH=:{whKind`,whItems`,whSize`,whAtts`,whSelect`,whDefaultId`,whWindowInfo`} tb
 	| whKind`==IsGameWindow
 		= (wH,tb)
-	# metricsInfo			= {miOSMetrics=wMetrics,miHMargins=hMargins,miVMargins=vMargins,miItemSpaces=spaces,miOrientation=orientation}
+	# metricsInfo			= makeMetricsInfo wMetrics whKind` whSize` whAtts` whWindowInfo`
+	# clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	# (_,itemHs,(updRgn,tb))= setWElement (moveWItemFrame metricsInfo wPtr whDefaultId` False True whSelect` clipRect zero zero v)
 								id whItems` (Nothing,tb)
 	  wH					= {wH & whItems`=itemHs}
@@ -1223,18 +1236,6 @@ movecontrolviewframe id v wMetrics wids=:{wPtr} wH=:{whKind`,whItems`,whSize`,wh
 	| otherwise
 		= updatewindowbackgrounds` wMetrics updRgn wids wH tb
 where
-	windowInfo				= getWindowInfoWindowData whWindowInfo`
-	(domainRect,origin,defHMargin,defVMargin)
-							= if (whKind`==IsDialog)
-								(sizeToRect whSize`,zero,wMetrics.osmHorMargin,wMetrics.osmVerMargin)
-								(windowInfo.windowDomain,windowInfo.windowOrigin,0,0)
-	(defHSpace, defVSpace)	= (wMetrics.osmHorItemSpace,wMetrics.osmVerItemSpace)
-	hMargins				= getwindowhmargin`   (snd (cselect iswindowhmargin`   (WindowHMargin` defHMargin defHMargin) whAtts`))
-	vMargins				= getwindowvmargin`   (snd (cselect iswindowvmargin`   (WindowVMargin` defVMargin defVMargin) whAtts`))
-	spaces					= getwindowitemspace` (snd (cselect iswindowitemspace` (WindowItemSpace` defHSpace defVSpace) whAtts`))
-	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
-	orientation				= [(rectToRectangle domainRect,origin)]
-	
 	moveWItemFrame :: !MetricsInfo !OSWindowPtr !(Maybe Id) !Bool !Bool !Bool !OSRect !Point2 !Vector2 !Vector2 !Id
 	                         !WItemHandle` !(!Maybe OSRgnHandle,!*OSToolbox)
 	               -> (!Bool,!WItemHandle`,!(!Maybe OSRgnHandle,!*OSToolbox))
@@ -1325,7 +1326,8 @@ setcontrolviewdomain :: !Id !ViewDomain !OSWindowMetrics !WIDS !WindowHandle`!*O
 setcontrolviewdomain id newDomain wMetrics wids=:{wPtr} wH=:{whKind`,whItems`,whSize`,whAtts`,whSelect`,whDefaultId`,whWindowInfo`} tb
 	| whKind`==IsGameWindow
 		= (wH,tb)
-	# metricsInfo			= {miOSMetrics=wMetrics,miHMargins=hMargins,miVMargins=vMargins,miItemSpaces=spaces,miOrientation=orientation}
+	# metricsInfo			= makeMetricsInfo wMetrics whKind` whSize` whAtts` whWindowInfo`
+	# clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	# (_,itemHs,(updRgn,tb))= setWElement (setWItemDomain metricsInfo wPtr whDefaultId` False True whSelect` clipRect zero zero (validateViewDomain newDomain))
 								id whItems` (Nothing,tb)
 	  wH					= {wH & whItems`=itemHs}
@@ -1337,19 +1339,7 @@ setcontrolviewdomain id newDomain wMetrics wids=:{wPtr} wH=:{whKind`,whItems`,wh
 		= (wH,osdisposergn updRgn tb)
 	| otherwise
 		= updatewindowbackgrounds` wMetrics updRgn wids wH tb
-where
-	windowInfo				= getWindowInfoWindowData whWindowInfo`
-	(domainRect,origin,defHMargin,defVMargin)
-							= if (whKind`==IsDialog)
-								(sizeToRect whSize`,zero,wMetrics.osmHorMargin,wMetrics.osmVerMargin)
-								(windowInfo.windowDomain,windowInfo.windowOrigin,0,0)
-	(defHSpace, defVSpace)	= (wMetrics.osmHorItemSpace,wMetrics.osmVerItemSpace)
-	hMargins				= getwindowhmargin`   (snd (cselect iswindowhmargin`   (WindowHMargin` defHMargin defHMargin) whAtts`))
-	vMargins				= getwindowvmargin`   (snd (cselect iswindowvmargin`   (WindowVMargin` defVMargin defVMargin) whAtts`))
-	spaces					= getwindowitemspace` (snd (cselect iswindowitemspace` (WindowItemSpace` defHSpace defVSpace) whAtts`))
-	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
-	orientation				= [(rectToRectangle domainRect,origin)]
-	
+where	
 	setWItemDomain :: !MetricsInfo !OSWindowPtr !(Maybe Id) !Bool !Bool !Bool !OSRect !Point2 !Vector2 !ViewDomain !Id !WItemHandle` !(!Maybe OSRgnHandle,!*OSToolbox)
 	                                                                                                         -> (!Bool,!WItemHandle`,!(!Maybe OSRgnHandle,!*OSToolbox))
 	
@@ -1383,11 +1373,17 @@ where
 		  (miny,maxy,viewy)		= (newDomainRect.rtop, newDomainRect.rbottom,newContentSize.h)
 		  newOrigin				= {x=setBetween oldOrigin.x minx (max minx (maxx-viewx)),y=setBetween oldOrigin.y miny (max miny (maxy-viewy))}
 		  info					= {info & compoundOrigin=newOrigin,compoundDomain=newDomainRect}
+		  compoundInfo`			= CompoundInfo` info
 		# tb					= setcompoundsliderthumb hasHScroll ableContext1 miOSMetrics wPtr itemPtr hPtr True  (minx,newOrigin.x,maxx) viewx itemSize` (hRect,vRect) tb
 		# tb					= setcompoundsliderthumb hasVScroll ableContext1 miOSMetrics wPtr itemPtr vPtr False (miny,newOrigin.y,maxy) viewy itemSize` (hRect,vRect) tb
-		  oldItems`				= itemH.wItems`
+		| newOrigin==oldOrigin
+			&& intersectRects (addVector (toVector absolutePos) newDomainRect) clipRect ==
+			   intersectRects (addVector (toVector absolutePos) oldDomainRect) clipRect
+			&& newContentSize == rectSize oldContentRect
+			= (True,{itemH & wItemInfo`= compoundInfo`},(updRgn,tb))
+		# oldItems`				= itemH.wItems`
 		| isEmpty oldItems`		// CompoundControl has no controls
-			# itemH				= {itemH & wItemInfo`=CompoundInfo` info}
+			# itemH				= {itemH & wItemInfo`= compoundInfo`}
 			| shownContext1
 				# (itemH,tb)	= drawCompoundLook` miOSMetrics ableContext1 wPtr parentPos (intersectRects newContentRect clipRect) itemH tb
 				= (True,itemH,(updRgn,tb))
@@ -1397,7 +1393,7 @@ where
 		# orientation`			= [(newDomain,newOrigin):miOrientation]
 		# (_,newItems`,tb)		= layoutControls` miOSMetrics hMargins` vMargins` spaces` itemSize itemSize orientation` oldItems` tb
 		  newItems`				= shiftControls` itemPos newItems`
-		  itemH					= {itemH & wItems`=newItems`,wItemInfo`=CompoundInfo` info}
+		  itemH					= {itemH & wItems`=newItems`,wItemInfo`= compoundInfo`}
 		# tb					= case updRgn of
 									Just rgn -> osdisposergn rgn tb
 									nothing  -> tb
