@@ -21,29 +21,33 @@ OS WinInvalidateWindow (GtkWidget *widget, OS ios)
 OS WinInvalidateRect (GtkWidget *widget, int left, int top, int right,
                 int bottom, OS ios)
 {
-    rprintf("WinInvalidateRect\n");
-	gtk_widget_queue_draw_area(widget,left,top,right-left,bottom-top);
+    /* rprintf("WinInvalidateRect\n"); */
+	gint temp;
+	GdkRectangle* rect = g_new(GdkRectangle,1);
+	if (top > bottom) {
+		temp = top;
+		top = bottom;
+		bottom = top;
+	}
+	rect->x = (gint)left;
+	rect->y = (gint)top;
+	rect->width = (gint)(right - left);
+	rect->height = (gint)(bottom - top);
+	gdk_window_invalidate_rect(GDK_WINDOW(widget),rect, 1);
+	/* FIXME: destroy the Rectangle here? */
     return ios;
 }
 
 OS WinValidateRect (GtkWidget *widget, int left, int top, int right, int bottom,
                 OS ios)
 {
-/*	RECT rect;
-
-	rect.left   = left;
-	rect.top    = top;
-	rect.right  = right;
-	rect.bottom = bottom;
-	ValidateRect ((HWND) hwnd, &rect);*/
-	printf("WinValidateRect -> not implemented\n");
+    /* GTK Automatically calculates valid regions. */
     return ios;
 }
 
 OS WinValidateRgn (GtkWidget *widget, GdkRegion *region, OS ios)
 {
-//	ValidateRgn ((HWND) hwnd, (HRGN) rgn);
-	printf("WinValidateRgn -> not implemented\n");
+    /* GTK Automatically calculates valid regions. */
     return ios;
 }
 
