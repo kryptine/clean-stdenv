@@ -2,7 +2,7 @@ implementation module GecArrow
 
 import StdGECExt
 
-:: GecCircuit a b = GecCircuit .(A. .ps: (SetCallback b ps) (GetCallback a ps) *(PSt ps) -> *(SetCallback a ps, GetCallback b ps, *PSt ps))
+:: GecCircuit a b = GecCircuit (A. .ps: (SetCallback b ps) (GetCallback a ps) *(PSt ps) -> *(SetCallback a ps, GetCallback b ps, *PSt ps))
 
 :: SetCallback a ps :== IncludeUpdate a *(PSt ps) -> *PSt ps
 :: GetCallback a ps :== *(PSt ps) -> *(a, *PSt ps)
@@ -15,16 +15,16 @@ where
 	geta env = (a, env)
 	setb _ _ env = env
 
-gecEdit :: String -> GecCircuit a a | gGEC{|*|} a 
-gecEdit title = GecCircuit k
+edit :: String -> GecCircuit a a | gGEC{|*|} a 
+edit title = GecCircuit k
 where
 	k seta geta env
 		# (a, env1) = geta env
 		# ({gecGetValue, gecSetValue}, env2) = createNGEC title Interactive a (\r -> seta (includeUpdate r)) env1
 		= (gecSetValue, gecGetValue, env2)
 
-gecDisplay :: String -> GecCircuit a a | gGEC{|*|} a 
-gecDisplay title = GecCircuit k
+display :: String -> GecCircuit a a | gGEC{|*|} a 
+display title = GecCircuit k
 where
 	k seta geta env
 		# (a, env1) = geta env
@@ -73,32 +73,16 @@ where
 			 	# env1 = seta u a env
 				# (b, env2) = getb env1
 				= setbc u (b, c) env2
-	
-instance ArrowLoop GecCircuit
-where
-	loop g = gecLoopViaLoop` g
 
-/*
-class ArrowApply arr
-where
-	app :: arr (arr a b, a) b
-
-instance ArrowApply GecCircuit
-where
-	app = GecCircuit k
-	where
-		k setb getfa env = 
-*/
-
-gecFix :: (GecCircuit a a) -> GecCircuit a a
-gecFix (GecCircuit g) = GecCircuit k
+fix :: (GecCircuit a a) -> GecCircuit a a
+fix (GecCircuit g) = GecCircuit k
 where 
 	k seta geta env = (seta`, geta`, env1)
 	where
 		(seta`, geta`, env1) = g seta`` geta env
 
 		seta`` u a env = seta u a (seta` NoUpdate a env)
-
+/*
 gecFixViaLoop` :: (GecCircuit a a) -> GecCircuit a a
 gecFixViaLoop` g = arr double >>> loop` (arr snd >>> g >>> arr double)
 where
@@ -119,7 +103,7 @@ gecFixViaLoop`ViaLoop g = arr double >>> loop`ViaLoop (arr snd >>> g >>> arr dou
 where
 	double x = (x, x)
 
-gecLoop :: (GecCircuit (a, c) (b, c)) -> GecCircuit a b
+/*gecLoop :: (GecCircuit (a, c) (b, c)) -> GecCircuit a b
 gecLoop (GecCircuit g) = GecCircuit k
 where 
 	k setb geta env = (seta, getb, env1)
@@ -142,7 +126,7 @@ where
 		setbc u (b, c) env 
 			# env1 = setb u b env
 			# (a, env2) = geta env1
-			= setac NoUpdate (a, c) env2
+			= setac NoUpdate (a, c) env2*/
 
 gecLoopViaLoop` :: (GecCircuit (a, c) (b, c)) -> GecCircuit a b
 gecLoopViaLoop` g = arr (\a -> (a, Nothing)) >>> loop` (arr f >>> g >>> arr f`)
@@ -152,7 +136,7 @@ where
 	f` (b, c) = (b, Just c)
 
 loop`ViaGecLoop :: (GecCircuit (a, c) (b, c)) -> GecCircuit (a, c) b
-loop`ViaGecLoop g = arr just >>> gecLoop (arr maybe >>> g >>> arr nothing) >>> arr fst
+loop`ViaGecLoop g = arr just >>> loop (arr maybe >>> g >>> arr nothing) >>> arr fst
 where 
 	just (a, c) = (a, Just c)
 	nothing (b, c) = ((b, Nothing), c)
@@ -190,7 +174,7 @@ where
 			# env1 = setb u b env
 			# ((a, _), env2) = getac env1
 			= setac NoUpdate (a, c) env2
-
+*/
 gecIO :: (A. .ps: a *(PSt .ps) -> *(b, *PSt .ps)) -> GecCircuit a b
 gecIO f = GecCircuit k
 where

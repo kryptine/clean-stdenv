@@ -29,10 +29,6 @@ where
 	(<<@) infixr 9 :: (arr a b) (b -> c) -> arr a c
 	(<<@) gec f :== gec >>> arr f
 	
-class ArrowLoop arr
-where
-	loop :: !(arr (a, c) (b, c)) -> arr a b
-
 :: GecCircuit a b
 
 // Initialize GecCircuit circuit
@@ -41,21 +37,20 @@ StartCircuit :: (GecCircuit a b) a *(PSt .ps) -> *PSt .ps
 
 // Lift visual editors to GecCircuit's
 
-gecEdit :: String -> GecCircuit a a | gGEC{|*|} a 
-gecDisplay :: String -> GecCircuit a a | gGEC{|*|} a
+edit :: String -> GecCircuit a a | gGEC{|*|} a 
+display :: String -> GecCircuit a a | gGEC{|*|} a
 
 // Arrow instance for GecCircuit
 
 instance Arrow GecCircuit
-//instance ArrowLoop GecCircuit
 
 // Other GecCircuit combinators
 
-gecFix :: (GecCircuit a a) -> GecCircuit a a
-gecFixViaLoop` :: (GecCircuit a a) -> GecCircuit a a
-gecFixViaLoop`ViaGecLoop :: (GecCircuit a a) -> GecCircuit a a
-gecFixViaLoop`ViaGecLoopViaLoop` :: (GecCircuit a a) -> GecCircuit a a
-gecFixViaLoop`ViaLoop :: (GecCircuit a a) -> GecCircuit a a
-gecLoop :: (GecCircuit (a, c) (b, c)) -> GecCircuit a b
-gecLoopViaLoop` :: (GecCircuit (a, c) (b, c)) -> GecCircuit a b
+fix :: (GecCircuit a a) -> GecCircuit a a
+//gecFixViaLoop` :: (GecCircuit a a) -> GecCircuit a a
+//gecFixViaLoop`ViaGecLoop :: (GecCircuit a a) -> GecCircuit a a
+//gecFixViaLoop`ViaGecLoopViaLoop` :: (GecCircuit a a) -> GecCircuit a a
+//gecFixViaLoop`ViaLoop :: (GecCircuit a a) -> GecCircuit a a
+//gecLoop :: (GecCircuit (a, c) (b, c)) -> GecCircuit a b
+//gecLoopViaLoop` :: (GecCircuit (a, c) (b, c)) -> GecCircuit a b
 gecIO :: (A. .ps: a *(PSt .ps) -> *(b, *PSt .ps)) -> GecCircuit a b
