@@ -314,7 +314,14 @@ instance toString Modifiers where
 ::	ItemOffset
 	=	NoOffset							// Shorthand for OffsetVector zero
 	|	OffsetVector Vector2				// A constant offset vector
+	|	OffsetAlign  Alignment				// Offset depends on size of other item
 	|	OffsetFun    ParentIndex OffsetFun	// Offset depends on orientation
+::	Alignment								// Only makes sense for ItemLocs that are relative to other items:
+	=	AlignLeft							// Align left  edges below each other
+	|	AlignRight							// Align right edges below each other
+	|	AlignCenter							// Align centers below/next to each other
+	|	AlignTop							// Align top    edges next to each other
+	|	AlignBottom							// Align bottom edges next to each other
 ::	ParentIndex
 	:== Int									// The number of parents (1..)
 ::	OffsetFun

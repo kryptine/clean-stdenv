@@ -4,7 +4,7 @@ implementation module controlvalidate
 import	StdBool, StdInt, StdList
 import	ospicture, oswindow
 import	commondef, windowhandle, wstate
-from windowaccess import getWItemReceiverInfo
+from	windowaccess import getWItemReceiverInfo
 
 
 controlvalidateFatalError :: String String -> .x
@@ -184,3 +184,41 @@ controlIdsAreConsistent ioId wId itemHs rt it
 		= controlvalidateFatalError "controlIdsAreConsistent" "could not add all Ids to IdTable"
 	| otherwise
 		= (True,itemHs,rt,it)
+
+
+/*	validateItemPos checks if the OffsetAlign argument of ItemPos matches the ItemLoc argument.
+*/
+validateItemPos :: !ItemPos -> ItemPos
+validateItemPos itemPos=:(itemLoc,OffsetAlign align)
+	| itemLocHorizontal itemLoc && alignsHorizontally align || itemLocVertical itemLoc && alignsVertically align
+		= itemPos
+	| otherwise
+		= (itemLoc,zero)
+where
+	itemLocHorizontal :: !ItemLoc -> Bool
+	itemLocHorizontal (LeftOf  _)	= True
+	itemLocHorizontal (RightTo _)	= True
+	itemLocHorizontal LeftOfPrev	= True
+	itemLocHorizontal RightToPrev	= True
+	itemLocHorizontal _				= False
+	
+	itemLocVertical :: !ItemLoc -> Bool
+	itemLocVertical (Above _)		= True
+	itemLocVertical (Below _)		= True
+	itemLocVertical AbovePrev		= True
+	itemLocVertical BelowPrev		= True
+	itemLocVertical _				= False
+	
+	alignsHorizontally :: !Alignment -> Bool
+	alignsHorizontally AlignTop		= True
+	alignsHorizontally AlignCenter	= True
+	alignsHorizontally AlignBottom	= True
+	alignsHorizontally _			= False
+	
+	alignsVertically :: !Alignment -> Bool
+	alignsVertically AlignLeft		= True
+	alignsVertically AlignCenter	= True
+	alignsVertically AlignRight		= True
+	alignsVertically _				= False
+validateItemPos itemPos
+	= itemPos

@@ -1,7 +1,7 @@
 implementation module osdocumentinterface
 
 
-import	StdMaybe, StdOverloaded, StdString, StdTuple
+import	StdInt, StdMaybe, StdOverloaded, StdString, StdTuple
 import	clCrossCall_12, ostoolbar, ossystem, ostypes, windowCrossCall_12
 from	commondef	import fatalError
 from	StdIOCommon	import :: DocumentInterface(..)
@@ -189,3 +189,23 @@ getOSDInfoOSToolbar _									= Nothing
 */
 osOSDInfoIsActive :: !OSDInfo !*OSToolbox -> (!Bool, !*OSToolbox)
 osOSDInfoIsActive osdinfo tb = (True,tb)
+
+/*	getOSDInfoOffset returns the offset vector (dx,dy) that points to the left-top corner of the client area
+	of the corresponding infrastructure.
+*/
+getOSDInfoOffset :: !OSDInfo !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
+getOSDInfoOffset OSNoInfo tb
+	= ((0,0),tb)
+getOSDInfoOffset osdInfo tb
+	# ((dw,dh),tb)	= osStripOuterSize isMDI True tb
+	# (outerRect,tb)= osGetProcessWindowDimensions osdInfo tb	// Outer Rect of (M/S)DI frame in screen coordinates
+	= ((outerRect.rleft,outerRect.rtop + dh + menuBarH + toolBarH),tb)
+where
+	(isMDI,osInfo)	= case osdInfo of
+						OSMDInfo {osmdOSInfo}	= (True, osmdOSInfo)
+						OSSDInfo {ossdOSInfo}	= (False,ossdOSInfo)
+						otherwise				= osdocumentinterfaceFatalError "getOSDInfoHeight" "illegally applied to OSNoInfo argument"
+	toolBarH		= case osInfo.osToolbar of
+						Just {toolbarHeight}	= toolbarHeight
+						otherwise				= 0
+	menuBarH		= 19		// PA: this should be derived platform independently!
