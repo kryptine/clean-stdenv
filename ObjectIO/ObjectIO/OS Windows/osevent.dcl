@@ -15,7 +15,6 @@ from	StdMaybe		import Maybe, Just, Nothing
 OSnewEvents		:: OSEvents
 OScopyEvents	:: !OSEvents -> (!OSEvents,!OSEvents)
 OSappendEvents	:: !*[OSEvent] !OSEvents -> OSEvents		// OSappendEvents adds events at the end of the queue
-OSinsertEvents	:: !*[OSEvent] !OSEvents -> OSEvents		// OSinsertEvents adds events at the front of the queue
 OSisEmptyEvents	:: !OSEvents -> (!Bool,!OSEvents)
 OSremoveEvent	:: !OSEvents -> (!OSEvent,!OSEvents)
 
