@@ -26,7 +26,7 @@ where
 		= (False, line, file)
 
 	interpret input env
-		# (maybe, {env}) = compose input {builtin = [("Esther", dynamic Esther :: *World -> *World)] ++ famkeEnv ++ stdEnv, env = env}
+		# (maybe, {env}) = compose input {builtin = Builtin, env = env}
 		  (r, env) = case maybe of NoException d -> eval d env; Exception d -> raiseDynamic d
 		  (v, t) = toStringDynamic r 
 		= (v ++ [" :: ", t], env)
@@ -57,3 +57,14 @@ where
 	handler d = ["*** Error: ":take 1000 v] ++ [" :: " , t, " ***"]
 	where
 		(v, t) = toStringDynamic d
+
+Builtin =: [("Esther", dynamic Esther :: *World -> *World), ("stdEnv", dynamic writeStdEnv :: *World -> *(Bool, *World))] ++ famkeEnv ++ stdEnv
+
+writeStdEnv :: !*World -> (!Bool, !*World)
+writeStdEnv env = f stdEnv env
+where
+	f [(n, d):xs] env
+		# (ok, env) = dynamicWrite [n] d env
+		| not ok = (False, env)
+		= f xs env
+	f _ env = (True, env)
