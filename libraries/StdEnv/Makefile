@@ -129,7 +129,7 @@ cleanup:
 # Commands
 #
 
-CLM = clm
+CLM = clm -P .
 CLMFLAGS =
 
 .SUFFIXES: .abc .dcl .icl .o
@@ -219,26 +219,59 @@ Clean\ System\ Files/_SystemEnum.abc : _SystemEnum.icl _SystemEnum.dcl
 Clean\ System\ Files/StdBool.o : StdBool.dcl Clean\ System\ Files/StdBool.abc
 	$(CLM) -O StdBool
 
+Clean\ System\ Files/StdBool.abc : StdBool.icl StdBool.dcl
+	$(CLM) -ABC StdBool
+
 Clean\ System\ Files/StdChar.o : StdChar.dcl Clean\ System\ Files/StdChar.abc
 	$(CLM) -O StdChar
+
+Clean\ System\ Files/StdChar.abc : StdChar.icl StdChar.dcl
+	$(CLM) -ABC StdChar
 
 Clean\ System\ Files/StdFile.o : StdFile.dcl Clean\ System\ Files/StdFile.abc
 	$(CLM) -O StdFile
 
+Clean\ System\ Files/StdFile.abc : StdFile.icl StdFile.dcl
+	$(CLM) -ABC StdFile
+
 Clean\ System\ Files/StdInt.o : StdInt.dcl Clean\ System\ Files/StdInt.abc
 	$(CLM) -O StdInt
+
+Clean\ System\ Files/StdInt.abc : StdInt.icl StdInt.dcl
+	$(CLM) -ABC StdInt
 
 Clean\ System\ Files/StdMisc.o : StdMisc.dcl Clean\ System\ Files/StdMisc.abc
 	$(CLM) -O StdMisc
 
+Clean\ System\ Files/StdMisc.abc : StdMisc.icl StdMisc.dcl
+	$(CLM) -ABC StdMisc
+
 Clean\ System\ Files/StdReal.o : StdReal.dcl Clean\ System\ Files/StdReal.abc
 	$(CLM) -O StdReal
+
+Clean\ System\ Files/StdReal.abc : StdReal.icl StdReal.dcl
+	$(CLM) -ABC StdReal
 
 Clean\ System\ Files/StdString.o : StdString.dcl Clean\ System\ Files/StdString.abc
 	$(CLM) -O StdString
 
+Clean\ System\ Files/StdString.abc : StdString.icl StdString.dcl
+	$(CLM) -ABC StdString
+
 Clean\ System\ Files/_SystemArray.o : _SystemArray.dcl Clean\ System\ Files/_SystemArray.abc
 	$(CLM) -O _SystemArray
 
+Clean\ System\ Files/_SystemArray.abc : _SystemArray.icl _SystemArray.dcl
+	$(CLM) -ABC _SystemArray
+
 Clean\ System\ Files/_system.o : Clean\ System\ Files/_system.abc
 	$(CLM) -O _system
+
+# compile system modules twice, to make sure all inlining is done
+system_abc: $(SYSTEM_MODULES_ABC) system_abc_touch
+
+system_abc_touch:
+	touch $(SYSTEM_MODULES_ABC)
+	$(MAKE) system_abc_again
+
+system_abc_again: $(SYSTEM_MODULES_ABC)
