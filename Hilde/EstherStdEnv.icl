@@ -1,6 +1,6 @@
 implementation module EstherStdEnv
 
-import EstherScript
+import EstherBackend
 import StdEnv
 
 stdEnv :: [(String, Dynamic)]
@@ -94,8 +94,8 @@ where
 		]
 
 	stdTuple =
-		[	("fst", dynamic fst :: A.a b: (a, b) -> a)
-		,	("snd", dynamic snd :: A.a b: (a, b) -> b)
+		[	("snd", dynamic snd :: A.a b: (a, b) -> b)
+		,	("fst", dynamic fst :: A.a b: (a, b) -> a)
 		,	("fst3", dynamic fst3 :: A.a b c: (a, b, c) -> a)
 		,	("snd3", dynamic snd3 :: A.a b c: (a, b, c) -> b)
 		,	("thd3", dynamic thd3 :: A.a b c: (a, b, c) -> c)

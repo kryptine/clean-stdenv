@@ -3,6 +3,9 @@ implementation module EstherBackend
 import EstherParser, StdMaybe
 import Debug, StdInt, StdString, StdList, StdBool, StdEnum, StdArray, StdTuple
 
+(@) infixl 9
+(@) e1 e2 :== CoreApply e1 e2
+
 :: Overloaded d t o = (|||) infixr 0 !(d -> t) !o
 :: Contexts a b = (&&&) infixr 0 !a !b
 :: Context v = Class !String
@@ -17,35 +20,35 @@ overloaded3 :: !String !String !String !Dynamic -> Dynamic
 overloaded3 c1 c2 c3 ((_, _, _, e) :: (v1, v2, v3, d1 d2 d3 -> t)) = dynamic (\(dict1 &&& dict2 &&& dict3) -> e dict1 dict2 dict3) ||| Class c1 &&& Class c2 &&& Class c3 :: Overloaded (Contexts d1 (Contexts d2 d3)) t (Contexts (Context v1) (Contexts (Context v2) (Context v3)))
 
 abstract :: !String !Core -> Core
-abstract v e | notFreeVar v e = CoreApply coreK e
+abstract v e | notFreeVar v e = coreK @ e
 abstract v (CoreVariable x) = coreI
-abstract v (CoreApply (CoreApply srcf srcx) srcy)
+abstract v (srcf @ srcx @ srcy)
 	| notFreeVar v srcf
-		| notFreeVar v srcx = CoreApply (CoreApply (CoreApply coreB` srcf) srcx) (abstract v srcy)
-		| notFreeVar v srcy = CoreApply (CoreApply (CoreApply coreC` srcf) (abstract v srcx)) srcy
-		= CoreApply (CoreApply (CoreApply coreS` srcf) (abstract v srcx)) (abstract v srcy)
-abstract v (CoreApply srcf srcx)
-	| notFreeVar v srcf = CoreApply (CoreApply coreB srcf) (abstract v srcx)
-	| notFreeVar v srcx = CoreApply (CoreApply coreC (abstract v srcf)) srcx
-	= CoreApply (CoreApply coreS (abstract v srcf)) (abstract v srcx)
+		| notFreeVar v srcx = coreB` @ srcf @ srcx @ abstract v srcy
+		| notFreeVar v srcy = coreC` @ srcf @ abstract v srcx @ srcy
+		= coreS` @ srcf @ abstract v srcx @ abstract v srcy
+abstract v (srcf @ srcx)
+	| notFreeVar v srcf = coreB @ srcf @ abstract v srcx
+	| notFreeVar v srcx = coreC @ abstract v srcf @ srcx
+	= coreS @ abstract v srcf @ abstract v srcx
 
 abstract_ :: !Core -> Core
-abstract_ e = CoreApply coreK e
+abstract_ e = coreK @ e
 
 notFreeVar :: !String !Core -> Bool
-notFreeVar v (CoreApply f x) = notFreeVar v f && notFreeVar v x
+notFreeVar v (f @ x) = notFreeVar v f && notFreeVar v x
 notFreeVar v (CoreVariable x) = v <> x
 notFreeVar _ _ = True
 
 instance generateCode Dynamic
 where
 	generateCode CoreDynamic env = (dynamic I ||| Class "TC" :: A.z: Overloaded (z -> Dynamic) (z -> Dynamic) (Context z), env)
-	generateCode (CoreApply CoreDynamic e) env 
+	generateCode (CoreDynamic @ e) env 
 		# (codex, env) = generateCode e env
 		= (dynamic codex :: Dynamic, env)
 	generateCode (CoreCode d) env = (d, env)
 	generateCode (CoreVariable v) env = (raise (UnboundVariable v), env)
-	generateCode (CoreApply e1 e2) env 
+	generateCode (e1 @ e2) env 
 		# (codef, env) = generateCode e1 env
 		  (codex, env) = generateCode e2 env
 		/*= case (codex, codef) of

@@ -10,12 +10,17 @@ from StdParsComb import :: CParser, :: Parser, :: AltCont, :: XorCont, :: SucCon
 	| AmbigiousParser
 	| ParserRequired !String
 
-:: NTstatement
-	= Compound !NTexpression !Tsemicolon !NTstatement
-	| Pipe !NTexpression !Tguard !NTstatement
-	| Write !NTexpression !Twrite !String
-	| Function !NTfunction 
+:: NTstatements
+	= Compound !NTstatement !Tsemicolon !NTstatements
+	| Pipe !NTstatement !Tguard !NTstatements
+	| Statement !NTstatement
+
+::NTstatement
+	= Write !NTexpression !Twrite !NTnameDef
+	| Function !(Scope NTfunction)
 	| Expression !NTexpression
+
+:: NTfunction = NTfunction !NTnameDef ![NTpattern] !Tis !NTexpression
 
 :: NTexpression
 	= Apply !NTexpression !NTterm
@@ -38,8 +43,6 @@ from StdParsComb import :: CParser, :: Parser, :: AltCont, :: XorCont, :: SucCon
 	| NameOrValue !NTnameOrValue
 
 :: NTdynamic = NTdynamic !Tdynamic !NTexpression
-
-:: NTfunction = NTfunction !String !(+- NTpattern UNIT) !Tis !NTexpression
 
 :: NTlist
 	= ListComprehension !NTlistComprehension
@@ -77,6 +80,8 @@ from StdParsComb import :: CParser, :: Parser, :: AltCont, :: XorCont, :: SucCon
 
 :: NTnameOrValue = NTname !String | NTvalue !Dynamic !GenConsPrio
 
+:: NTnameDef = NTnameDef !String !GenConsPrio
+
 :: Scope e = Scope !e
 
 :: |-| l e r = |-| !e
@@ -108,4 +113,4 @@ from StdParsComb import :: CParser, :: Parser, :: AltCont, :: XorCont, :: SucCon
 :: Twrite = Twrite
 :: Tdynamic = Tdynamic
 
-parseStatement :: !String -> /*Src*/ NTstatement
+parseStatements :: !String -> /*Src*/ NTstatements

@@ -13,5 +13,5 @@ dynamicCons :: Dynamic
 dynamicNil :: Dynamic
 
 derive transform EITHER, CONS, FIELD, OBJECT, Core
-derive transform NTstatement, NTexpression
+derive transform NTstatements
 

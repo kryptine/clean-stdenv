@@ -8,7 +8,7 @@ compose input env = (compile input catchAllIO (\d env -> (raiseDynamic (handler 
 where
 	compile :: !String !*(Esther *env) -> (!Dynamic, !*Esther *env) | DynamicFileSystem, bimap{|*|} env
 	compile input env
-		# syntax = parseStatement input
+		# syntax = parseStatements input
 		  (syntax, fv, env`) = resolveNames{|*|} syntax [] env
 		  syntax = fixInfix{|*|} syntax
 		  core = transform{|*|} syntax
