@@ -368,6 +368,19 @@ OBJECTREC *GetObjectRec (int ID)
     return obj;
 }
 
+/* update last position if pos has been changed during an event */
+void UpdatePosition (OBJECTREC *obj)
+{
+    obj->iLastXPos = obj->iXPos;
+    obj->iLastYPos = obj->iYPos;
+
+    obj->iFixedXPos = obj->iXPos << 8;
+    obj->iFixedYPos = obj->iYPos << 8;
+    obj->iLastFixedXPos = obj->iFixedXPos;
+    obj->iLastFixedYPos = obj->iFixedYPos;
+}
+
+
 
 /* initialize a new game object */
 void InitGameObject (int mapx, int mapy)
@@ -452,18 +465,6 @@ void InitGameObject (int mapx, int mapy)
     iCCObjectID = 0;
 
     UpdatePosition (objNew);
-}
-
-/* update last position if pos has been changed during an event */
-UpdatePosition (OBJECTREC *obj)
-{
-    obj->iLastXPos = obj->iXPos;
-    obj->iLastYPos = obj->iYPos;
-
-    obj->iFixedXPos = obj->iXPos << 8;
-    obj->iFixedYPos = obj->iYPos << 8;
-    obj->iLastFixedXPos = obj->iFixedXPos;
-    obj->iLastFixedYPos = obj->iFixedYPos;
 }
 
 /* remove game object with id ID and all objects that are not active (id==0) */
@@ -871,6 +872,26 @@ void RunGame ()
     iFollowID = 0;
 
     //  MessageBeep (MB_ICONASTERISK);
+}
+
+
+/* create a new event */
+void ScheduleEvent (int event, int par1, int par2, int par3, int par4,
+                    int target, int subtarget, int time)
+{
+    struct USER_EVENT_INFO *uei;
+
+    uei = rmalloc (sizeof (USER_EVENT_INFO));
+    uei->iEventID = event;
+    uei->iEventParameter1 = par1;
+    uei->iEventParameter2 = par2;
+    uei->iEventParameter3 = par3;
+    uei->iEventParameter4 = par4;
+    uei->iDestination = target;
+    uei->iSubDestination = subtarget;
+    uei->iTimeCounter = time;
+    uei->ueiNext = ueiUserEventInfo;
+    ueiUserEventInfo = uei;
 }
 
 
@@ -2841,25 +2862,6 @@ int NextFrame (int fade)
     return resultcode;
 }
 
-
-/* create a new event */
-ScheduleEvent (int event, int par1, int par2, int par3, int par4,
-               int target, int subtarget, int time)
-{
-    struct USER_EVENT_INFO *uei;
-
-    uei = rmalloc (sizeof (USER_EVENT_INFO));
-    uei->iEventID = event;
-    uei->iEventParameter1 = par1;
-    uei->iEventParameter2 = par2;
-    uei->iEventParameter3 = par3;
-    uei->iEventParameter4 = par4;
-    uei->iDestination = target;
-    uei->iSubDestination = subtarget;
-    uei->iTimeCounter = time;
-    uei->ueiNext = ueiUserEventInfo;
-    ueiUserEventInfo = uei;
-}
 
 /* make the screen follow an object */
 extern EXPORT_TO_CLEAN void

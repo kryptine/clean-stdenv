@@ -62,6 +62,12 @@ static GAMEBITMAPINFO *gbipPrev = NULL;
 /* release DirectDraw object */
 void ReleaseDD (void)
 {
+  if (lpDDPal)
+  {
+    IDirectDrawSurface_Release (lpDDPal);
+    lpDDPal = NULL;
+  }
+
   if (clipper)
   {
      IDirectDrawClipper_Release (clipper);
@@ -219,7 +225,7 @@ BOOL OSInitGameWindow ()
                 {
                     if (!(ddrval == DD_OK))
                     {
-                        BitsPerPixel == 8;
+                        BitsPerPixel = 8;
                         ddrval = IDirectDraw_SetDisplayMode (lpDD, ScreenWidth, ScreenHeight, BitsPerPixel);
                     }
                 }
@@ -237,7 +243,7 @@ BOOL OSInitGameWindow ()
                     {
                         if (!(ddrval == DD_OK))
                         {
-                            BitsPerPixel == 8;
+                            BitsPerPixel = 8;
                             ddrval = IDirectDraw_SetDisplayMode (lpDD, ScreenWidth, ScreenHeight, BitsPerPixel);
                         }
                     }
@@ -314,7 +320,18 @@ BOOL OSInitGameWindow ()
                                     if (!(ddrval == DD_OK))
                                         ShowError ("IDirectDrawSurface_GetAttachedSurface failed");
                                     else
+                                    {
+                                        if (BitsPerPixel == 8)
+                                        {
+                                           lpDDPal = DDLoadPalette (lpDD, NULL);
+                                           if (lpDDPal == NULL)
+                                               ShowError ("DDMakeDefaultPalette failed");
+                                           else
+                                               IDirectDrawSurface_SetPalette (lpDDSFront, lpDDPal);
+                                        }
+
                                         result = TRUE;
+                                    }
                                 }
                             }
                         }
@@ -606,6 +623,7 @@ BOOL OSGetGameBitmapInfo (int id, int *width, int *height,
         *blockheight = gbip->iBlockHeight;
         *blockcountx = gbip->iBlockCountX;
         *blockcounty = gbip->iBlockCountY;
+        return TRUE;
     }
     else
         return FALSE;
