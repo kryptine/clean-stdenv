@@ -9,12 +9,20 @@ import store, GenDefault, StdDebug
 
 runCircuit (GecCircuit k) = k
 
-startCircuit :: !(GecCircuit a b) a *(PSt .ps) -> *PSt .ps
-startCircuit g a env
-	# (seta, env) = runCircuit g startCircuit_setb env
-	= seta YesUpdate a env
+startCircuit :: !(GecCircuit a b) a !*(PSt .ps) -> *PSt .ps
+startCircuit g a env = thd3 (evalCircuit (const id) g a env)
+	
+evalCircuit :: (CircuitCB b .ps) !(GecCircuit a b) a !*(PSt .ps) -> (CircuitGet b .ps, CircuitSet a .ps, *PSt .ps)
+evalCircuit cb g a env
+	# (id_b, env) = openStore` Nothing env
+	  (seta, env) = runCircuit g (startCircuit_setb cb id_b) env
+	= (readStore id_b, seta YesUpdate, seta YesUpdate a env)
 where
-	startCircuit_setb _ _ env = env
+	startCircuit_setb cb id_b u b env 
+		# env = writeStore id_b b env
+		= case u of
+			YesUpdate -> cb b env
+			_ -> env
 
 edit :: String -> GecCircuit a a | gGEC{|*|} a 
 edit title = gecEdit True title
@@ -104,12 +112,12 @@ where
 			= (loop_seta setab id_b, env)
 
 		loop_setcb setc id_b u cb env
-			# env = writeStore id_b (snd cb) env
-			= setc u (fst cb) env
+			# env = setc u (fst cb) env
+			= writeStore id_b (snd cb) env
 		
 		loop_seta setab id_b u a env = env`
 		where
-			(b, env`) = readStore id_b (setab u (a, b) env) 
+			(b, env`) = readStore id_b (setab u (a, b) env)
 
 instance ArrowCircuit GecCircuit
 where

@@ -6,7 +6,13 @@ import StdArrow, StdGECExt
 
 // Initialize GecCircuit circuit
 
-startCircuit :: !(GecCircuit a b) a *(PSt .ps) -> *PSt .ps
+startCircuit :: !(GecCircuit a b) a !*(PSt .ps) -> *PSt .ps
+
+:: CircuitCB a ps :== a -> *(PSt ps) -> *PSt ps
+:: CircuitGet a ps :== *(PSt ps) -> *(a, *PSt ps)
+:: CircuitSet a ps :== a -> *(PSt ps) -> *PSt ps
+
+evalCircuit :: (CircuitCB b .ps) !(GecCircuit a b) a !*(PSt .ps) -> (CircuitGet b .ps, CircuitSet a .ps, *PSt .ps)
 
 // Lift visual editors to GecCircuit's
 
