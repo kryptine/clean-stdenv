@@ -44,7 +44,7 @@ os_defaultprintsetup env
 	= ({devmode=devmode, device=device, driver=driver, output=output}, env)
 
 printSetupDialogBoth :: !PrintSetup !(Maybe *Context) -> (!PrintSetup, !Maybe *Context)
-printSetupDialogBoth {devmode,device,driver,output} mb_context
+printSetupDialogBoth print_setup=:{devmode,device,driver,output} mb_context
 	# (os, mb_context)	= EnvGetOS mb_context
 	  (devmodePtr,os) = WinMakeCString devmode os
 	  (devicePtr,os) = WinMakeCString device os
@@ -56,30 +56,11 @@ printSetupDialogBoth {devmode,device,driver,output} mb_context
 	  os = WinReleaseCString driverPtr os
 	  os = WinReleaseCString outputPtr os
 	| ok==0
-		= ({devmode="\0",device="\0",driver="\0",output="\0"}, EnvSetOS os mb_context)
-	# (ndevmode,ndevice,ndriver,noutput,os)	= get_printSetup_with_PRINTDLG pdPtr os
+		# os = release_memory_handles pdPtr os
+		= (print_setup, EnvSetOS os mb_context)
+	# ((ndevmode,ndevice,ndriver,noutput),os)	= get_printSetup_with_PRINTDLG pdPtr os
+	  os = release_memory_handles pdPtr os
 	= ({devmode=ndevmode,device=ndevice,driver=ndriver,output=noutput}, EnvSetOS os mb_context)
-
-/* MW was
-os_printsetupdialog		::	!Bool !PrintSetup !*env
-						->	(!PrintSetup, !*env)
-	os_printsetupdialog isWorld {devmode,device,driver,output} env
-		# (os, env)		= EnvGetOS env
-		# (devmodePtr,os) = WinMakeCString devmode os
-		  (devicePtr,os) = WinMakeCString device os
-		  (driverPtr,os) = WinMakeCString driver os
-		  (outputPtr,os) = WinMakeCString output os
-		  (ok, pdPtr, os)
-		  		= CCPrintSetupDialog isWorld (size devmode) devmodePtr devicePtr driverPtr outputPtr os
-		  os = WinReleaseCString devmodePtr os
-		  os = WinReleaseCString devicePtr os
-		  os = WinReleaseCString driverPtr os
-		  os = WinReleaseCString outputPtr os
-		| ok==0
-			= ({devmode="\0",device="\0",driver="\0",output="\0"}, EnvSetOS os env)
-		# (ndevmode,ndevice,ndriver,noutput,os)	= get_printSetup_with_PRINTDLG pdPtr os
-		= ({devmode=ndevmode,device=ndevice,driver=ndriver,output=noutput}, EnvSetOS os env)
-*/
 
 os_printsetupvalid		::	!PrintSetup !*env
 						->	(!Bool, !*env)
@@ -95,7 +76,6 @@ os_printsetupvalidC _ _ _ _
 
 class PrintEnvironments printEnv
   where
-	// MW11 changed Point into Point2
 	os_printpageperpage ::	!.Bool !Bool 
 							!.x
 							.(.x -> .(PrintInfo -> .(*Picture -> ((.Bool,Point2),(.state,*Picture)))))
@@ -256,10 +236,13 @@ getPrintInfo doDialog emulateScreen {devmode, device, driver, output} mb_context
 	  os = WinReleaseCString driverPtr os
 	  os = WinReleaseCString outputPtr os
 	| doDialog && (err==(-1))
-		= continuation err data mb_context (get_printSetup_with_PRINTDLG pdPtr os)
-	= continuation err data mb_context (devmode,device,driver,output,os)
+		# (setup_strings, os) = get_printSetup_with_PRINTDLG pdPtr os
+		  os = release_memory_handles pdPtr os
+		= continuation err data mb_context (setup_strings, os)
+	# os = release_memory_handles pdPtr os
+	= continuation err data mb_context ((devmode,device,driver,output),os)
   where
-	continuation err (first,last,copies,hdc) mb_context (devmode,device,driver,output,os)
+	continuation err (first,last,copies,hdc) mb_context ((devmode,device,driver,output),os)
 		# first` = max 1 first
 		  last` = max first` last
 		  copies` = max 1 copies
@@ -398,11 +381,18 @@ printSetup _ _ _ _ _ _ _
 			ccall printSetup "IIIIII:VII:I"
 		}
 
-get_printSetup_with_PRINTDLG	::	!Int !*OSToolbox -> (!String, !String, !String, !String, !*OSToolbox)
+get_printSetup_with_PRINTDLG	::	!Int !*OSToolbox -> (!(!String, !String, !String, !String), !*OSToolbox)
 get_printSetup_with_PRINTDLG _ _
 	= code
 		{
 			ccall get_printSetup_with_PRINTDLG "I:VSSSS:I"
+		}
+
+release_memory_handles :: !Int !*OSToolbox -> *OSToolbox
+release_memory_handles _ _
+	= code
+		{
+			ccall release_memory_handles "II-I"
 		}
 
 startPage :: !HDC !*OSToolbox -> (!OkReturn, !*OSToolbox)

@@ -36,16 +36,11 @@ os_getpagedimensions	::	!PrintSetup	!Bool
 							  !(!Int,!Int))
 os_defaultprintsetup	::	!*env
 						->	(!PrintSetup, !*env)
-/* MW was
-os_printsetupdialog		::	!Bool !PrintSetup !*env
-						->	(!PrintSetup, !*env)
-*/
 os_printsetupvalid		::	!PrintSetup !*env
 						->	(!Bool, !*env)
 						
 class PrintEnvironments printEnv
   where
-	// MW11 changed Point into Point2
 	os_printpageperpage
 		::	!.Bool !Bool 
 			!.x

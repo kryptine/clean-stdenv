@@ -111,7 +111,6 @@ printUpdateFunction doDialog updateFunc rectangles printSetup printEnv
 			clipsOfOneRectangle rectangle
 				= clipRectangles
 				where
-// MW11 was					(x1,y1,x2,y2) = RectangleToRect rectangle
 					{rleft=x1,rtop=y1,rright=x2,rbottom=y2} = RectangleToRect rectangle
 					wR = x2-x1+1
 					hR = y2-y1+1
@@ -134,7 +133,6 @@ printUpdateFunction doDialog updateFunc rectangles printSetup printEnv
 		 	((printSetup,rest), appClipPicture (toRegion clipRect) drawFunction picture)
 		  )
 
-// MW11 changed Point into Point2
 printPagePerPage ::	!Bool !Bool 
 					.x
 					.(.x -> .(PrintInfo -> .(*Picture -> ((.Bool,Point2),(.state,*Picture)))))
