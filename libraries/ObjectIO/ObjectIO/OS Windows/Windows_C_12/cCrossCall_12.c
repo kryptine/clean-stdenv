@@ -36,8 +36,9 @@ static HANDLE ghOSThreadHandle = NULL;
 HINSTANCE ghInst;
 HWND ghMainWindow = NULL;
 /* RWS ... */
-static HWND gNextClipboardViewer = NULL;
+static HWND gNextClipboardViewer = NULL;		/* PA: name was not used anymore. Now using it again for storing next clipboardviewer. */
 /* ... RWS */
+static int gClipboardCount = 0;					/* PA: keeps track of changes of clipboard. */
 static HACCEL gAcceleratorTable = NULL;			/* Refers to the accelerator table of the active frame. */
 static BOOL gAcceleratorTableIsUpToDate	= TRUE;
 static PAINTSTRUCT gPaintStruct;
@@ -1628,6 +1629,8 @@ void lookUpAndRemove(WPARAM dnsHdl,DNSInfo **listPtr,DNSInfo **elPtr)
 // ... MW
 
 /*	The callback routine for the main window.
+	PA: The WM_CREATE  message registers the main window as a clipboard viewer. 
+		The WM_DESTROY message unregisters the main window. 
 */
 static LRESULT CALLBACK
 MainWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara, LPARAM lPara)
@@ -1695,6 +1698,41 @@ MainWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara, LPARAM lPara)
 					}
 					hwin = GetWindow (hwin, GW_HWNDNEXT);
 				}
+			}
+			break;
+		/* PA: The WM_CREATE message registers the ghMainWindow (hWin) as a clipboard viewer.
+		*/
+		case WM_CREATE:
+			{
+				gNextClipboardViewer = SetClipboardViewer (hWin);
+			}
+			break;
+		/* PA: The WM_DESTROY message unregisters the ghMainWindow (hWin) as a clipboard viewer.
+		*/
+		case WM_DESTROY:
+			{
+				ChangeClipboardChain (hWin, gNextClipboardViewer);
+			}
+			break;
+		/* PA: other clipboard chain management messages:
+		*/
+		case WM_DRAWCLIPBOARD:
+			{
+				gClipboardCount += 1;
+				if (gNextClipboardViewer != NULL)
+					SendMessage (gNextClipboardViewer, uMess, wPara, lPara);
+
+				return 0;
+			}
+			break;
+		case WM_CHANGECBCHAIN:
+			{
+				if ((HWND)wPara == gNextClipboardViewer)	/* gNextClipboardViewer is no longer a clipboard viewer. */
+					gNextClipboardViewer = (HWND)lPara;		/*	then store the new viewer. */
+				else if (gNextClipboardViewer != NULL)
+					SendMessage (gNextClipboardViewer, uMess, wPara, lPara);
+
+				return 0;
 			}
 			break;
 // MW...
@@ -6526,7 +6564,7 @@ HandleCleanRequest (CrossCallInfo * pcci)
 				}
 				MakeReturn0Cci (pcci);
 			} break;
-		case CcRqGETCLIPBOARDTEXT:		/* no params; string result. */
+		case CcRqGETCLIPBOARDTEXT:			/* no params; string result. */
 			{
 				HANDLE hClipText;
 				char *pClipText;
@@ -6555,6 +6593,12 @@ HandleCleanRequest (CrossCallInfo * pcci)
 				CloseClipboard ();
 
 				MakeReturn1Cci (pcci, (int) result);
+			} break;
+		/*	CcRqGETCLIPBOARDCOUNT is used by Clean to retrieve current clipboard count.
+		*/
+		case CcRqGETCLIPBOARDCOUNT:	/* no arguments; gClipboardCount result. */
+			{
+				MakeReturn1Cci (pcci, gClipboardCount);
 			} break;
 		/*	Implement WinRestackWindow as a crosscall operation.
 		*/
