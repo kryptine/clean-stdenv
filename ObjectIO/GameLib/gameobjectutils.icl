@@ -23,10 +23,10 @@ toInt01 True  = 1
 toInt01 False = 0
 
 // store an objectrec in the game engine
-SetObjectRec :: !InstanceID !ObjectType !GameObjectRec ![SpriteID] !*OSToolbox -> (!GRESULT, !*OSToolbox)
+SetObjectRec :: !InstanceID !ObjectCode !GameObjectRec ![SpriteID] !*OSToolbox -> (!GRESULT, !*OSToolbox)
 SetObjectRec id ot or spr tb
     = WinSetObjectRec id ot
-        or.subtype
+        or.subcode
         or.active
         or.pos.x or.pos.y
         or.size.w or.size.h
@@ -97,7 +97,7 @@ findlistvalue n [x:xs]
     | otherwise = ~n
 
 // load an GameObjectRec from the game engine
-GetObjectRec :: !Int !*OSToolbox -> (!GRESULT, !ObjectType, !GameObjectRec, !*OSToolbox)
+GetObjectRec :: !Int !*OSToolbox -> (!GRESULT, !ObjectCode, !GameObjectRec, !*OSToolbox)
 GetObjectRec id tb
     #  (ot, st, act, x, y, w, h,
         xofs, yofs, spr, do,
@@ -105,7 +105,7 @@ GetObjectRec id tb
         lyr, xacc, yacc, xv, yv, xbnc, ybnc, maxxv, maxyv, xsl, ysl, md, opt,
         result, tb) = WinGetObjectRec id tb
     =  (result, ot,
-        {subtype = st, active = act, size = {w=w,h=h},
+        {subcode = st, active = act, size = {w=w,h=h},
         pos = {x=x,y=y}, offset = {x=xofs,y=yofs}, currentsprite = (spr >> 16),
 
         displayoptions =
@@ -155,8 +155,8 @@ where
         | otherwise = Value  (fxr x)
 
 // get the definition of an object by it's ObjectType
-getobject :: !ObjectType !(GameHandle .gs) -> Maybe (GameObjectHandle (GSt .gs))
-getobject objtype gamehnd
+getobject :: !ObjectCode !(GameHandle .gs) -> Maybe (GameObjectHandle (GSt .gs))
+getobject objcode gamehnd
     #   curlevel    =   hd gamehnd.levels`
     #   objectlist  =   curlevel.objects`
     #   found       =   filter cmpobjtypes objectlist
@@ -165,7 +165,7 @@ getobject objtype gamehnd
     =   Just (hd found)
 where
     cmpobjtypes :: !(GameObjectHandle .gst) -> Bool
-    cmpobjtypes ot = ot.objecttype` == objtype
+    cmpobjtypes ot = ot.objectcode` == objcode
 
 // store the definition of an object in the game definition
 putobject :: !(GameObjectHandle (GSt .gs)) !(GameHandle .gs) -> GameHandle .gs
@@ -184,7 +184,7 @@ where
 */  
 // optimization:
     replaceobj [x:xs] y l
-        | x.objecttype` == y.objecttype` = l ++ [y:xs]
+        | x.objectcode` == y.objectcode` = l ++ [y:xs]
         | otherwise                      = replaceobj xs y (l ++ [x])
 
 // find object state in tuple list

@@ -7,17 +7,14 @@ implementation module StdGameDef
 //	StdGameDef contains all the type definitions needed to specify a game.
 //	********************************************************************************
 
-
 from	StdFunc			import St
 from	StdOverloaded	import zero
 from	StdString		import String
 from	StdIOBasic		import Point2, Size, IdFun
 from	StdMaybe		import Maybe, Just, Nothing
-from	StdPictureDef	import Colour,
-								RGB, RGBColour, Black, White, 
-								DarkGrey, Grey, LightGrey, 
-								Red, Green, Blue, 
-								Cyan, Magenta, Yellow
+from	StdPictureDef	import Colour, RGB, RGBColour, Black, White, 
+                               DarkGrey, Grey, LightGrey, Red, Green,
+                               Blue, Cyan, Magenta, Yellow
 import	StdGSt
 
 :: GameAttribute gs
@@ -28,7 +25,7 @@ import	StdGSt
    = { levels        :: [Level (GSt gs)]        // levels
      , quitlevel     :: St (GSt gs) Bool        // True quits the game
      , nextlevel     :: St (GSt gs) Int         // new level if >0 (0 quits)
-     , statistics    :: St (GSt gs) [GameText]  // all text items
+     , textitems     :: St (GSt gs) [GameText]  // all text items
      }
 
 :: Level state
@@ -93,7 +90,7 @@ import	StdGSt
      }
 
 :: GameTime
-   :== Int     // time in frames
+   :== Int       // time in frames
 
 :: GameBitmap
    = { bitmapname  :: !String        // bitmap that contains smaller blocks
@@ -110,10 +107,10 @@ import	StdGSt
                  // (n = # blocks in gamebitmap; m = # sequences)
 
 :: TileSequence
-   :== (!Int, Sequence)
+   :== (!Int, Sequence)   // block sequence number, Sequence
 
 :: Sequence
-   :== [(Int, Int)]
+   :== [(Int, Int)]   // tile number, duration
 
 :: Movement
    :== Point2 GameTime -> Point2   // calculate layer's position from game position
@@ -129,31 +126,33 @@ import	StdGSt
 
 :: GameObject gs
    = E. state:
-     { objecttype :: !ObjectType    // identifier for object type (0 AutoInitObject)
+     { objectcode :: !ObjectCode    // code for object type (0 AutoInitObject)
      , sprites    :: ![Sprite]      // sprite 1..n
-     , init       :: !SubType !Point2 !GameTime !gs -> GameObjectState state gs
+     , init       :: !SubCode !Point2 !GameTime !gs -> GameObjectState state gs
      , done       :: !(GameObjectState state gs)            -> gs
      , move       :: !                                         ObjectFun state gs
      , animation  :: !                                         ObjectFun state gs
      , touchbound :: !DirectionSet MapCode                  -> ObjectFun state gs
-     , collide    :: !DirectionSet ObjectType GameObjectRec -> ObjectFun state gs
+     , collide    :: !DirectionSet ObjectCode GameObjectRec -> ObjectFun state gs
      , frametimer :: !                                         ObjectFun state gs
      , keydown    :: !KeyCode                               -> ObjectFun state gs
      , keyup      :: !KeyCode                               -> ObjectFun state gs
-     , userevent  :: !EventType !EventPar !EventPar         -> ObjectFun state gs
+     , userevent  :: !EventCode !EventPar !EventPar         -> ObjectFun state gs
      }
+     
 :: *GameObjectState state gs
-   = { objectstate:: state
-     , gamestate  :: gs
-     , objectrec  :: GameObjectRec
+   = { st :: state             // object state
+     , or :: GameObjectRec     // object record
+     , gs :: gs                // game state
      }
+
 :: ObjectFun state gs
    :== IdFun (GameObjectState state gs)
 
-:: ObjectType
+:: ObjectCode
    :== Int
 
-:: SubType
+:: SubCode
    :== Int
 
 :: MapCode
@@ -162,7 +161,7 @@ import	StdGSt
 :: KeyCode
    :== Int
 
-:: EventType
+:: EventCode
    :== Int
 
 :: EventPar
@@ -184,7 +183,7 @@ import	StdGSt
 
 :: GameObjectRec
    = { active              :: !Bool            // move and check collisions?
-     , subtype             :: !SubType         // object's sub type
+     , subcode             :: !SubCode         // object's sub code
      , size                :: !Size            // the actual size
      , pos                 :: !Point2          // current position
      , offset              :: !Point2          // relative offset for sprite

@@ -37,7 +37,7 @@ MoveScreenTo :: !Point2 !*OSToolbox -> (!GRESULT, !*OSToolbox)
 
 InitSpriteAnimation :: !BID ![(Int,Int)] !Bool !*OSToolbox -> (!GRESULT, !*OSToolbox)
 
-InitGameObject :: !ObjectType !SubType !Point2 !*OSToolbox -> (!GRESULT, !*OSToolbox)
+InitGameObject :: !ObjectCode !SubCode !Point2 !*OSToolbox -> (!GRESULT, !*OSToolbox)
 
 SetObjectFocus :: !Int !Int !Int !Int !Int !Int !*OSToolbox -> (!GRESULT, !*OSToolbox)
 

@@ -39,7 +39,7 @@ OSMoveScreenTo :: !Int !Int !*OSToolbox -> (!GRESULT, !*OSToolbox)
 
 OSInitSpriteAnimation :: !BID !{#Char} !Bool !*OSToolbox -> (!GRESULT,!*OSToolbox)
 
-OSInitGameObject :: !ObjectType !SubType !Point2 !*OSToolbox -> (!GRESULT,!*OSToolbox)
+OSInitGameObject :: !ObjectCode !SubCode !Point2 !*OSToolbox -> (!GRESULT,!*OSToolbox)
 
 OSSetObjectFocus :: !Int !Int !Int !Int !Int !Int !*OSToolbox -> (!GRESULT,!*OSToolbox)
 

@@ -25,14 +25,16 @@ BND_STATIC_BOUNDS   :== 1 << 31
 SK_FOREVER          :==  -1
 
 
+startGame           :: .(Game a) a [.GameAttribute a] !*World -> .World
+
 openGame            :: .gs !(Game .gs) ![GameAttribute .gs] !(PSt .l)
-                                            -> (!ErrorReport,!PSt .l)
+                                            -> (.gs, !ErrorReport,!PSt .l)
 
 createGameBitmap    :: !GameBitmap !(GSt .gs) -> (!GRESULT, !GSt .gs)
 
 createAnimation     :: !Sprite     !(GSt .gs) -> (!GRESULT, !GSt .gs)
 
-createNewGameObject :: !ObjectType !SubType !Point2 !(GSt .gs)
+createNewGameObject :: !ObjectCode !SubCode !Point2 !(GSt .gs)
                                        -> (!GRESULT, !GSt .gs)
 
 :: ObjectFocus
@@ -52,11 +54,11 @@ createObjectFocus :: !ObjectFocus !(GSt .gs) -> (!GRESULT, !GSt .gs)
    = Self | AllObjects | BoundType Bounds
 
 // modified 01/11/99
-createUserGameEvent :: !EventType
+createUserGameEvent :: !EventCode
                        !EventPar
                        !EventPar
                        !EventTarget
-                       !SubType
+                       !SubCode
                        !GameTime
                        !(GSt .gs) -> (!GRESULT, !GSt .gs)
 
@@ -94,10 +96,10 @@ setBoundMap       :: !Int !Int  !(!Int, !DirectionSet) !(GSt .gs)
                   -> (!GRESULT, !GSt .gs)
 
 
-defaultInitObject :: Size state SubType Point2 GameTime 
+defaultInitObject :: Size state SubCode Point2 GameTime 
                                  !*(GSt .gs) -> GameObjectState state *(GSt .gs)
-defaultGameObject :: !ObjectType !Size state -> GameObject *(GSt .gs)
-defaultObjectRec  :: SubType Point2 Size GameTime 
+defaultGameObject :: !ObjectCode !Size state -> GameObject *(GSt .gs)
+defaultObjectRec  :: SubCode Point2 Size GameTime 
                                  !*(GSt .gs) -> (!GameObjectRec,!*GSt .gs)
 
 blankScreen       :: Level (GSt .gs)
