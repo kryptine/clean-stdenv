@@ -4,7 +4,7 @@ import StdEnv
 import StdIO
 import genericgecs
 import StdGEC, StdGECExt, StdAGEC, calcAGEC
-import StdGecComb, basicAGEC
+import StdGecComb, basicAGEC//, StdDynamicGEC
 
 goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
@@ -61,21 +61,29 @@ where
 		initvat						= 0.19	
 
 
-:: T a b 	= I .(a,IGEC)
-			| R .(b,IGEC)
+:: T 	 	= I .(Int,IGEC)
+			| R .(Real,IGEC)
+			| S .(String,SGEC)
 			| Choose
 			| Less
 			
-:: T2 a b 	= INT a
+:: T2 a b c	= INT a
 			| REAL b
+			| STRING c
 
 :: IGEC  	= Counter
 			| Calculator
+			| Expression
+			| Displayval
 			| Identity
 			
+:: SGEC  	= Editable
+			| Displaying
+
+
 import GenMap
 derive gMap T
-derive gGEC T, IGEC, T2
+derive gGEC T, IGEC, T2, SGEC
 
 spreadsheet4 = CGEC ( %| 	(		mapTo
 							@|		gecEdit "design"
@@ -86,7 +94,6 @@ spreadsheet4 = CGEC ( %| 	(		mapTo
 					 ) 
 					 init
 where
-	init :: [T Int Real]
 	init = [I (3,Identity)]
 
 	mapTo list					= vertlistGEC list <|> Choose
@@ -99,16 +106,15 @@ where
 
 	mapT2 list = map toT2 list
 	where
-		toT2 (I (i,Counter)) 	= INT (counterGEC i)
-		toT2 (I (i,Identity))	= INT (idGEC i)
-		toT2 (I (i,Calculator))	= INT (intcalcGEC i)
-		toT2 (R (r,Counter)) 	= REAL (counterGEC r)
-		toT2 (R (r,Identity))	= REAL (idGEC r)
-		toT2 (R (r,Calculator))	= REAL (realcalcGEC r)
-		 
-
-	mapTo` val	 		=gMap {|* -> * |} (gMap {|* -> *  -> *|} counterGEC counterGEC) val 
-
-	mapFrom` agecs	  	= gMap {|* -> * |} (gMap {|* -> *  -> *|} (^^) (^^)) agecs
-		
+		toT2 (I (i,Counter)) 	= INT 	 (counterGEC i)
+		toT2 (I (i,Identity))	= INT 	 (idGEC i)
+		toT2 (I (i,Calculator))	= INT 	 (intcalcGEC i)
+		toT2 (I (i,Displayval))	= INT 	 (modeGEC (Display i))
+		toT2 (I (i,Expression))	= INT 	 (idGEC i)
+		toT2 (R (r,Counter)) 	= REAL 	 (counterGEC r)
+		toT2 (R (r,Identity))	= REAL 	 (idGEC r)
+		toT2 (R (r,Calculator))	= REAL 	 (realcalcGEC r)
+		toT2 (R (r,Displayval))	= REAL 	 (modeGEC (Display r))
+		toT2 (S (s,Editable))	= STRING (idGEC s)
+		toT2 (S (s,Displaying))	= STRING (modeGEC (Display s))
 		
