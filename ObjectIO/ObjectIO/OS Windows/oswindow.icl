@@ -228,12 +228,14 @@ OScreateWindow	wMetrics isResizable hInfo=:{cbiHasScroll=hasHScroll} vInfo=:{cbi
 		= (reverse delay_info,wPtr,OSNoWindowPtr,OSNoWindowPtr,osdInfo,control_info,tb)
 
 	| di==SDI
-		# styleFlags	= (if hasHScroll WS_HSCROLL 0) bitor (if hasVScroll WS_VSCROLL 0)
-		  createcci		= Rq6Cci CcRqCREATESDIDOCWINDOW 0 osFrame (x<<16+(y<<16)>>16) w h styleFlags
+		# (textPtr,tb)	= WinMakeCString title tb		// PA+++
+		  styleFlags	= (if hasHScroll WS_HSCROLL 0) bitor (if hasVScroll WS_VSCROLL 0)
+		  createcci		= Rq6Cci CcRqCREATESDIDOCWINDOW textPtr osFrame (x<<16+(y<<16)>>16) w h styleFlags
 		# (returncci,(control_info,delay_info),tb)
 						= IssueCleanRequest (OScreateWindowCallback isResizable minSize maxSize create_controls update_controls)
 											createcci
 											(control_info,[]) tb
+		# tb			= WinReleaseCString textPtr tb	// PA+++
 		  clientPtr		= case returncci.ccMsg of
 		  					CcRETURN1	-> returncci.p1
 		  					CcWASQUIT	-> OSNoWindowPtr
@@ -241,7 +243,7 @@ OScreateWindow	wMetrics isResizable hInfo=:{cbiHasScroll=hasHScroll} vInfo=:{cbi
 		  osdInfo		= setOSDInfoOSInfo {osinfo & osClient=clientPtr} osdInfo
 		# tb			= setScrollRangeAndPos hasHScroll False wMetrics SB_HORZ hInfo.cbiState (0,0) clientPtr tb
 		# tb			= setScrollRangeAndPos hasVScroll False wMetrics SB_VERT vInfo.cbiState (0,0) clientPtr tb
-		# tb			= OSsetWindowTitle osFrame title tb
+	//	# tb			= OSsetWindowTitle osFrame title tb
 		= (reverse delay_info,clientPtr,OSNoWindowPtr,OSNoWindowPtr,osdInfo,control_info,tb)
 	
 	| otherwise

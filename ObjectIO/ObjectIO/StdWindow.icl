@@ -1557,7 +1557,8 @@ setWindowTitle id title ioState
 									_         -> (OSNoWindowPtr,OSNoWindowPtr)
 		  (wids,wsH)			= getWindowStateHandleWIDS wsH
 		  wsH					= setWindowStateHandleWindowTitle title wsH
-		# ioState				= appIOToolbox (OSsetWindowTitle (if (isSDI && wids.wPtr==clientPtr) framePtr wids.wPtr) title) ioState
+	//	# ioState				= appIOToolbox (OSsetWindowTitle (if (isSDI && wids.wPtr==clientPtr) framePtr wids.wPtr) title) ioState
+		# ioState				= appIOToolbox (OSsetWindowTitle (if isSDI framePtr wids.wPtr) title) ioState
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 
 setWindowOk :: !Id Id !(IOSt .l) -> IOSt .l
