@@ -421,7 +421,7 @@ void WaitNextEventC(int eventMask,int sleep,int mouseRgn, int in_tb,
 		};
 }
 
-#ifndef KARBON
+#ifndef __MACH__
 // needed for WaitNextEventC
 asm void __ptr_glue(void)
 {
