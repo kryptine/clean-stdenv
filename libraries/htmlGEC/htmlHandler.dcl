@@ -45,10 +45,10 @@ mkEditHGEC2:: !FormID !HMode d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}
 
 // mkViewHGEC is the swiss army nife function creating an editor with a view v of data d
 
-:: HBimap d v =	{ toHGEC   	:: d -> v			// converts data to a HGEC for the view
-				, updHGEC 	:: Bool v -> v		// update function, True when the form is edited 
-				, fromHGEC 	:: v -> d			// the view (either updated or not) is converted back to data domain
-				, resetHGEC :: Maybe (v -> v)	// appearance of the view for the next time
+:: HBimap d v =	{ toHGEC   	:: d (Maybe v) -> v		// converts data to view domain, given current view
+				, updHGEC 	:: Bool v -> v			// update function, True when the form is edited 
+				, fromHGEC 	:: Bool v -> d			// converts view back to data domain, True when form is edited
+				, resetHGEC :: Maybe (v -> v)		// can be used to reset view (eg for buttons)
 				}
 
 mkViewHGEC 		:: !FormID 	!HMode !(HBimap d v) 	d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
