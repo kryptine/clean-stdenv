@@ -1196,7 +1196,7 @@ setWindowViewSize wid reqSize ioState
 								  ) tb
 		# (wsH,tb)				= windowStateSizeAction wMetrics
 									(isJust activeWIDS && (fromJust activeWIDS).wId==wid)
-									{wsWIDS=wids,wsSize=frameSize,wsUpdateAll=False} wsH tb
+									{wsWIDS=wids,wsSize=viewSize/*frameSize*/,wsUpdateAll=False} wsH tb
 		# ioState				= setIOToolbox tb ioState
 		= ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 where
