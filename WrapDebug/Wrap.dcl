@@ -19,7 +19,16 @@ instance toString WrappedDescriptorId
     |   WrappedDescriptorTuple
     |   WrappedDescriptorOther !WrappedDescriptorId
 
-::  WrappedNode
+:: UnwrappedArg
+	=	E.a: {node :: !a}
+:: ShallowlyWrappedNode
+	:==	WrappedNode UnwrappedArg
+:: DeeplyWrappedNode
+	:==	WrappedNode WrappedArg
+:: WrappedArg
+	=	{arg :: DeeplyWrappedNode}
+
+::  WrappedNode arg
 	//	basic types
     =   WrappedInt !Int
     |   WrappedChar !Char
@@ -35,52 +44,25 @@ instance toString WrappedDescriptorId
     |   WrappedFileArray !{#File}
 
 	// other arrays
-    |   WrappedArray !{WrappedNode}
+    |   WrappedArray !{arg}
 
 	// records
-    |   WrappedRecord !WrappedDescriptor !{WrappedNode}
+    |   WrappedRecord !WrappedDescriptor !{arg}
 
 	// unboxed lists
-    |   WrappedUnboxedList !WrappedDescriptor !{WrappedNode}
+    |   WrappedUnboxedList !WrappedDescriptor !{arg}
 
 	// unboxed lists of records
-    |   WrappedUnboxedRecordList !WrappedDescriptor !{WrappedNode}
+    |   WrappedUnboxedRecordList !WrappedDescriptor !{arg}
 
 	// other nodes
-    |   WrappedOther !WrappedDescriptor !{WrappedNode}
+    |   WrappedOther !WrappedDescriptor !{arg}
 
-wrapNode :: !.a -> WrappedNode
-shallowWrapNode :: !.a -> ShallowlyWrappedNode
-:: ExtNode
-	=	E.a: {node :: !a}
 
-::  ShallowlyWrappedNode
-	//	basic types
-    =   ShallowlyWrappedInt !Int
-    |   ShallowlyWrappedChar !Char
-    |   ShallowlyWrappedBool !Bool
-    |   ShallowlyWrappedReal !Real
-    |   ShallowlyWrappedFile !File
+deepWrap :: !.a -> DeeplyWrappedNode
+shallowWrap :: !.a -> ShallowlyWrappedNode
 
-	// unboxed arrays of basic types
-    |   ShallowlyWrappedString !{#Char}
-    |   ShallowlyWrappedIntArray !{#Int}
-    |   ShallowlyWrappedBoolArray !{#Bool}
-    |   ShallowlyWrappedRealArray !{#Real}
-    |   ShallowlyWrappedFileArray !{#File}
-
-	// other arrays
-    |   ShallowlyWrappedArray !{ExtNode}
-
-	// records
-    |   ShallowlyWrappedRecord !WrappedDescriptor !{ExtNode}
-
-	// unboxed lists
-    |   ShallowlyWrappedUnboxedList !WrappedDescriptor !{ExtNode}
-
-	// unboxed lists of records
-    |   ShallowlyWrappedUnboxedRecordList !WrappedDescriptor !{ExtNode}
-
-	// other nodes
-    |   ShallowlyWrappedOther !WrappedDescriptor !{ExtNode}
-
+class wrap a :: .b -> a
+instance wrap WrappedArg
+instance wrap (WrappedNode a) | wrap a
+mapWrapNode :: (a -> b) (WrappedNode a) -> WrappedNode b

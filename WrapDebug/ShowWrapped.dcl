@@ -7,6 +7,18 @@
 */
 definition module ShowWrapped
 
-from Wrap import :: WrappedNode
+from Wrap import ::DeeplyWrappedNode, ::WrappedNode, ::WrappedArg
 
-showWrapped :: WrappedNode -> [{#Char}]
+:: ShowWrappedOptions
+	=	Don`tShowParentheses | ShowParentheses
+	// in list implies don't parenthesise
+	|	ShowInList | ShowInUnboxedList | ShowInUnboxedRecordList
+
+class showWrapped a :: !ShowWrappedOptions !a -> [{#Char}]
+
+instance showWrapped (WrappedNode arg) | showWrapped arg
+instance showWrapped WrappedArg
+
+showWrappedNode :: a -> [{#Char}] | showWrapped a
+showApplication :: ShowWrappedOptions {#Char} {arg} -> [{#Char}]
+															| showWrapped arg

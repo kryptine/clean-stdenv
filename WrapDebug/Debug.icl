@@ -77,9 +77,9 @@ MaxInt
 debugShowWithOptions :: [DebugShowOption] .a -> [{#Char}]
 debugShowWithOptions debugOptions debugValue 
 	=	debugValue
-	:-	wrapNode
-	:-	pruneWrappedNode maxDepth maxBreadth
-	:-	showWrapped
+	:-	deepWrap
+	:-	prune 0 maxDepth maxBreadth
+	:-	showWrappedNode
 	:-	chop maxChars
 	:-	flip (++) [terminator]
 	where
@@ -100,62 +100,67 @@ debugShowWithOptions debugOptions debugValue
 	|	.+.
 
 MaxCharsString
-	:== ".."
+	:==	".."
 MaxBreadthString
-	:== "..."
+	:==	"..."
 MaxBreadthIndicator
-	:== wrapNode @...
+	:==	wrap @...
 MaxDepthIndicator
-	:==	wrapNode .+.
+	:==	wrap .+.
 
-pruneWrappedNode :: !Int !Int !WrappedNode -> WrappedNode
-pruneWrappedNode maxDepth maxBreadth value
-	=	prune 0 value
-	where
-		prune :: !Int WrappedNode -> WrappedNode
-		prune depth value
-			| depth == maxDepth
-				=	MaxDepthIndicator
-		prune depth (WrappedIntArray a)
-			=	pruneBasicArray depth a
-		prune depth (WrappedBoolArray a)
-			=	pruneBasicArray depth a
-		prune depth (WrappedRealArray a)
-			=	pruneBasicArray depth a
-		prune depth (WrappedFileArray a)
-			=	pruneBasicArray depth a
-		prune depth (WrappedString a)
-			| size a > maxBreadth
-				=	WrappedString ((a % (0, maxBreadth-1)) +++ MaxBreadthString)
-		prune depth (WrappedArray a)
-			=	WrappedArray (pruneArray depth a)
-		prune depth (WrappedRecord descriptor args)
-			=	WrappedRecord descriptor (pruneArray depth args)
-		prune depth (WrappedOther WrappedDescriptorCons args)
-			| size args == 2
-				=	WrappedOther WrappedDescriptorCons
-						{prune (depth+1) args.[0], prune depth args.[1]}
-		prune depth (WrappedOther WrappedDescriptorTuple args)
-			=	WrappedOther WrappedDescriptorTuple (pruneArray depth args)
-		prune depth (WrappedOther descriptor args)
-			=	WrappedOther descriptor (pruneArray depth args)
-		prune _ a
-			=	a
+class prune a | wrap a where
+	prune :: !Int !Int !Int a -> a
 
-		pruneArray :: !Int !{WrappedNode} -> {WrappedNode}
-		pruneArray depth a
-			| size a > maxBreadth
-				=	{{prune (depth+1) e \\ e <-: a & i <- [0 .. maxBreadth]}
-						& [maxBreadth] = MaxBreadthIndicator}
-			// otherwise
-				=	{prune (depth+1) e \\ e <-: a}
+instance prune (WrappedNode a) | prune a where
+	prune depth maxDepth maxBreadth value
+		| depth == maxDepth
+			=	MaxDepthIndicator
+	prune depth maxDepth maxBreadth (WrappedIntArray a)
+		=	pruneBasicArray depth maxDepth maxBreadth a
+	prune depth maxDepth maxBreadth (WrappedBoolArray a)
+		=	pruneBasicArray depth maxDepth maxBreadth a
+	prune depth maxDepth maxBreadth (WrappedRealArray a)
+		=	pruneBasicArray depth maxDepth maxBreadth a
+	prune depth maxDepth maxBreadth (WrappedFileArray a)
+		=	pruneBasicArray depth maxDepth maxBreadth a
+	prune depth maxDepth maxBreadth (WrappedString a)
+		| size a > maxBreadth
+			=	WrappedString ((a % (0, maxBreadth-1)) +++ MaxBreadthString)
+	prune depth maxDepth maxBreadth (WrappedArray a)
+		=	WrappedArray (pruneArray depth maxDepth maxBreadth a)
+	prune depth maxDepth maxBreadth (WrappedRecord descriptor args)
+		=	WrappedRecord descriptor (pruneArray depth maxDepth maxBreadth args)
+	prune depth maxDepth maxBreadth (WrappedOther WrappedDescriptorCons args)
+		| size args == 2
+			=	WrappedOther WrappedDescriptorCons
+					{	prune (depth+1) maxDepth maxBreadth args.[0]
+					,	prune depth maxDepth maxBreadth args.[1]
+					}
+	prune depth maxDepth maxBreadth (WrappedOther WrappedDescriptorTuple args)
+		=	WrappedOther WrappedDescriptorTuple (pruneArray depth maxDepth maxBreadth args)
+	prune depth maxDepth maxBreadth (WrappedOther descriptor args)
+		=	WrappedOther descriptor (pruneArray depth maxDepth maxBreadth args)
+	prune _ _ _ a
+		=	a
 
-		pruneBasicArray :: !Int !(a b) -> WrappedNode | Array a b
-		pruneBasicArray depth a
-			| size a > maxBreadth
-				=	WrappedArray (pruneArray depth {wrapNode e \\ e <-: a & i <- [0 .. maxBreadth]})
-			// otherwise
-				=	WrappedArray {wrapNode e \\ e <-: a}
+pruneArray :: !Int !Int !Int !{a} -> {a} | prune a
+pruneArray depth maxDepth maxBreadth a
+	| size a > maxBreadth
+		=	{{prune (depth+1) maxDepth maxBreadth e \\ e <-: a & i <- [0 .. maxBreadth]}
+				& [maxBreadth] = MaxBreadthIndicator}
+	// otherwise
+		=	{prune (depth+1) maxDepth maxBreadth e \\ e <-: a}
+
+pruneBasicArray :: !Int !Int !Int !(a b) -> WrappedNode c | Array a b & prune c
+pruneBasicArray depth maxDepth maxBreadth a
+	| size a > maxBreadth
+		=	WrappedArray (pruneArray depth maxDepth maxBreadth {wrap e \\ e <-: a & i <- [0 .. maxBreadth]})
+	// otherwise
+		=	WrappedArray {wrap e \\ e <-: a}
+
+instance prune WrappedArg where
+	prune depth maxDepth maxBreadth a=:{arg}
+		=	{a & arg = prune depth maxDepth maxBreadth arg}
 
 /* FIXME handle newlines in strings correctly */
 chop :: !Int [{#Char}] -> [{#Char}]

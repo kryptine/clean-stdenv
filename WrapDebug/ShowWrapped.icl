@@ -10,99 +10,140 @@ implementation module ShowWrapped
 import StdEnv
 import Wrap
 
-ShowParentheses
-	:==	True
-Don`tShowParentheses
-	:==	False
+instance == ShowWrappedOptions where
+	(==) Don`tShowParentheses Don`tShowParentheses
+		=	True
+	(==) ShowParentheses ShowParentheses
+		=	True
+	(==) ShowInList ShowInList
+		=	True
+	(==) ShowInUnboxedList ShowInUnboxedList
+		=	True
+	(==) ShowInUnboxedRecordList ShowInUnboxedRecordList
+		=	True
+	(==) _ _
+		=	False
 
-showWrapped :: WrappedNode -> [{#Char}]
-showWrapped node
-	=	show Don`tShowParentheses node
+showNil :: ShowWrappedOptions -> [{#Char}]
+showNil options
+	|  options == Don`tShowParentheses || options == ShowParentheses
+		=	["[]"]
+	// otherwise
+		=	[]
 
-show :: Bool WrappedNode -> [{#Char}]
-show _ (WrappedInt i)
-	=	[toString i]
-show _ (WrappedChar c)
-	=	["\'" +++ toString c +++ "\'"]
-show _ (WrappedBool b)
-	=	[toString b]
-show _ (WrappedReal r)
-	=	[toString r]
-show _ (WrappedFile _)
-	=	["File"]
-show _ (WrappedString s)
-	=	["\"" +++ s +++ "\""]
-show _ (WrappedIntArray a)
-	=	showBasicArray a
-show _ (WrappedBoolArray a)
-	=	showBasicArray a
-show _ (WrappedRealArray a)
-	=	showBasicArray a
-show _ (WrappedFileArray a)
-	=	showBasicArray a
-show _ (WrappedArray a)
-	=	["{" : flatten (separate [", "] [show Don`tShowParentheses el \\ el <-: a])] ++ ["}"]
-show _ (WrappedRecord descriptor args)
-	=	["{" : flatten (separate [" "] [[showDescriptor descriptor] : [show ShowParentheses arg \\ arg <-: args]])] ++ ["}"]
-show _ (WrappedUnboxedList _ args)
-	| size args == 2
-		=	["[#" : flatten [show Don`tShowParentheses args.[0] : showTail args.[1]]] ++ ["]"]
+showList :: ShowWrappedOptions ShowWrappedOptions a a -> [{#Char}]
+															| showWrapped a
+showList options listkind head tail
+	=	showList2 options listkind (showWrapped Don`tShowParentheses head) tail
+
+showList2 :: ShowWrappedOptions ShowWrappedOptions [{#Char}] a -> [{#Char}]
+															| showWrapped a
+showList2 options listkind head tail
+	|  options == Don`tShowParentheses || options == ShowParentheses
+		=	["[", indicator listkind] ++ headTail listkind head tail ++ ["]"]
+	| options == listkind
+		=	[", " : headTail listkind head tail]
+	// otherwise
+		=	[" : " : showList2 Don`tShowParentheses listkind head tail]
 	where
-		showTail :: WrappedNode -> [[{#Char}]]
-		showTail (WrappedUnboxedList _ args)
-			| size args == 2
-				=	[[", "], show Don`tShowParentheses args.[0] : showTail args.[1]]
-		showTail (WrappedOther WrappedDescriptorNil args)
-			| size args == 0
-				=	[]
-		showTail node // abnormal list
-			=	[[" : " : show Don`tShowParentheses node]]
-show _ (WrappedUnboxedRecordList descriptor args)
-	=	["[#" : flatten (showHeadTail descriptor args)] ++ ["]"]
-	where
-		showHeadTail :: WrappedDescriptor {WrappedNode} -> [[{#Char}]]
-		showHeadTail descriptor args
-			=	[show Don`tShowParentheses (WrappedRecord descriptor head) : showTail tail]
-			where
-				n
-					=	size args
-				head
-					=	{arg \\ arg <-: args & _ <- [0..n-2]}
-				tail
-					=	args.[n-1]
-			
-		showTail :: WrappedNode -> [[{#Char}]]
-		showTail (WrappedUnboxedRecordList descripctor args)
-			| size args == 2
-				=	[[", "] : showHeadTail descriptor args]
-		showTail (WrappedOther WrappedDescriptorNil args)
-			| size args == 0
-				=	[]
-		showTail node // abnormal list
-			=	[[" : " : show Don`tShowParentheses node]]
-show _ (WrappedOther WrappedDescriptorCons args)
-	| size args == 2
-		=	["[" : flatten [show Don`tShowParentheses args.[0] : showTail args.[1]]] ++ ["]"]
-	where
-		showTail :: WrappedNode -> [[{#Char}]]
-		showTail (WrappedOther WrappedDescriptorCons args)
-			| size args == 2
-				=	[[", "], show Don`tShowParentheses args.[0] : showTail args.[1]]
-		showTail (WrappedOther WrappedDescriptorNil args)
-			| size args == 0
-				=	[]
-		showTail node // abnormal list
-			=	[[" : " : show Don`tShowParentheses node]]
-show _ (WrappedOther WrappedDescriptorTuple args)
-	=	["(" : flatten (separate [", "] [show Don`tShowParentheses arg \\ arg <-: args])] ++ [")"]
-show parentheses (WrappedOther descriptor args)
-	| parentheses && size args > 0
+		indicator :: ShowWrappedOptions -> {#Char}
+		indicator ShowInList
+			=	""
+		indicator ShowInUnboxedList
+			=	"#"
+		indicator ShowInUnboxedRecordList
+			=	"#"
+
+		headTail :: ShowWrappedOptions  [{#Char}] a -> [{#Char}] | showWrapped a
+		headTail options head tail
+			=	head
+			++	showWrapped options tail
+
+showNonList :: ShowWrappedOptions (WrappedNode a) -> [{#Char}]
+															| showWrapped a
+showNonList options node
+	|  options == Don`tShowParentheses || options == ShowParentheses
+		=	showNode options node
+	// otherwise
+		=	[" : " : showNode options node]
+
+showApplication :: ShowWrappedOptions {#Char} {a} -> [{#Char}] | showWrapped a
+showApplication options symbol args
+	| options == ShowParentheses && size args > 0
 		=	["(" : application] ++ [")"]
 	// otherwise
 		=	application
 	where
 		application
-			=	flatten (separate [" "] [[showDescriptor descriptor] : [show ShowParentheses arg \\ arg <-: args]])
+			=	flatten (separate [" "]
+					[[symbol] : [showWrapped ShowParentheses arg \\ arg <-: args]])
+
+instance showWrapped WrappedArg where
+	showWrapped parentheses {arg}
+		=	showWrapped parentheses arg
+
+instance showWrapped (WrappedNode a) | showWrapped a where
+	showWrapped options (WrappedOther WrappedDescriptorNil args)
+		| size args == 0
+			=	showNil options
+		// otherwise
+			=	showApplication options "[]" args
+	showWrapped options (WrappedOther WrappedDescriptorCons args)
+		| size args == 2
+			=	showList options ShowInList args.[0] args.[1]
+		// otherwise
+			=	showApplication options "[:]" args
+	showWrapped options (WrappedUnboxedList descriptor args)
+		| size args == 2
+			=	showList options ShowInUnboxedList args.[0] args.[1]
+		// otherwise
+			=	showApplication options "[#:]" args
+	showWrapped options (WrappedUnboxedRecordList descriptor args)
+		| n >= 2
+			=	showList2 options ShowInUnboxedList head tail
+		// otherwise
+			=	showApplication options "[#:]" args
+			where
+				n
+					=	size args
+				head
+					=	showWrapped options (WrappedRecord descriptor
+										{arg \\ arg <-: args & _ <- [0..n-2]})
+				tail
+					=	args.[n-1]
+	showWrapped options node
+		=	showNonList options node
+
+showNode :: !ShowWrappedOptions !(WrappedNode a) -> [{#Char}] | showWrapped a
+showNode _ (WrappedInt i)
+	=	[toString i]
+showNode _ (WrappedChar c)
+	=	["\'" +++ toString c +++ "\'"]
+showNode _ (WrappedBool b)
+	=	[toString b]
+showNode _ (WrappedReal r)
+	=	[toString r]
+showNode _ (WrappedFile _)
+	=	["File"]
+showNode _ (WrappedString s)
+	=	["\"" +++ s +++ "\""]
+showNode _ (WrappedIntArray a)
+	=	showBasicArray a
+showNode _ (WrappedBoolArray a)
+	=	showBasicArray a
+showNode _ (WrappedRealArray a)
+	=	showBasicArray a
+showNode _ (WrappedFileArray a)
+	=	showBasicArray a
+showNode options (WrappedArray a)
+	=	["{" : flatten (separate [", "] [showWrapped options el \\ el <-: a])] ++ ["}"]
+showNode options (WrappedRecord descriptor args)
+	=	["{" : flatten (separate [" "] [[showDescriptor descriptor]
+			: [showWrapped ShowParentheses arg \\ arg <-: args]])] ++ ["}"]
+showNode _ (WrappedOther WrappedDescriptorTuple args)
+	=	["(" : flatten (separate [", "] [showWrapped Don`tShowParentheses arg \\ arg <-: args])] ++ [")"]
+showNode options (WrappedOther descriptor args)
+	= showApplication options (showDescriptor descriptor) args
 
 showDescriptor :: WrappedDescriptor -> {#Char}
 showDescriptor (WrappedDescriptorOther id)
@@ -118,9 +159,10 @@ showBasicArray :: {#a} -> [{#Char}] | toString a & Array {#} a
 showBasicArray a
 	=	["{" : separate ", " [toString el \\ el <-: a]] ++ ["}"]
 
-showWrappedArray :: {WrappedNode} -> [{#Char}]
+showWrappedArray :: {WrappedNode a} -> [{#Char}] | showWrapped a
 showWrappedArray a
-	=	["{" : flatten (separate [", "] [show Don`tShowParentheses el \\ el <-: a])] ++ ["}"]
+	=	["{" : flatten (separate [", "]
+			[showWrapped Don`tShowParentheses el \\ el <-: a])] ++ ["}"]
 
 separate :: a [a] -> [a]
 separate separator [a : t=:[b : _]]
@@ -133,3 +175,7 @@ where
 	toString :: File -> {#Char}
 	toString _
 		=	"File"
+
+showWrappedNode :: a -> [{#Char}] | showWrapped a
+showWrappedNode a
+	=	showWrapped Don`tShowParentheses a
