@@ -20,8 +20,8 @@ from	iostate		import getIOToolbox, setIOToolbox
 		In case the Maybe Id argument is Nothing, then the elements should be added to the Menu indicated by the Id component. 
 		In case the Maybe Id argument is Just id, then the elements should be added to the SubMenu indicated by id.
 */
-addMenusItems :: !(!Id,Maybe Id) !Int .ls` (m .ls` (PSt .l .p)) !SystemId !ReceiverTable !IdTable !(MenuHandles (PSt .l .p)) !OSMenuBar !(PSt .l .p)
-													   -> (!(!ErrorReport,!ReceiverTable,!IdTable),!MenuHandles (PSt .l .p), !OSMenuBar, !PSt .l .p)
+addMenusItems :: !(!Id,Maybe Id) !Int .ls` (m .ls` (PSt .l)) !SystemId !ReceiverTable !IdTable !(MenuHandles (PSt .l)) !OSMenuBar !(PSt .l)
+													   -> (!(!ErrorReport,!ReceiverTable,!IdTable),!MenuHandles (PSt .l), !OSMenuBar, !PSt .l)
 													   |  MenuElements m
 addMenusItems loc pos ls new pid rt it menus=:{mMenus,mKeys} osMenuBar pState
 	# (newItemHs,pState)				= menuElementToHandles new pState
@@ -36,9 +36,9 @@ addMenusItems loc pos ls new pid rt it menus=:{mMenus,mKeys} osMenuBar pState
 		# pState						= {pState & io=ioState}
 		= ((error,rt,it),{menus & mMenus=mHs,mKeys=keys},osMenuBar,pState)
 where
-	addMenusItems` :: !(!Id,Maybe Id) !Int .ls` [MenuElementHandle .ls` (PSt .l .p)] !SystemId 
-								!ReceiverTable !IdTable ![MenuStateHandle (PSt .l .p)] ![Char] !*OSToolbox
-		  -> (!ErrorReport,.ls`,!ReceiverTable,!IdTable,![MenuStateHandle (PSt .l .p)],![Char],!*OSToolbox)
+	addMenusItems` :: !(!Id,Maybe Id) !Int .ls` [MenuElementHandle .ls` (PSt .l)] !SystemId 
+								!ReceiverTable !IdTable ![MenuStateHandle (PSt .l)] ![Char] !*OSToolbox
+		  -> (!ErrorReport,.ls`,!ReceiverTable,!IdTable,![MenuStateHandle (PSt .l)],![Char],!*OSToolbox)
 	addMenusItems` loc pos ls new pid rt it [MenuLSHandle mlsH=:{mlsHandle}:mHs] keys tb
 		# (opened,error,ls,rt,it,mlsHandle,keys,tb)	= addMenuItems loc pos ls new pid rt it mlsHandle keys tb
 		  mH										= MenuLSHandle {mlsH & mlsHandle=mlsHandle}
@@ -48,9 +48,9 @@ where
 			# (error,ls,rt,it,    mHs, keys,tb)		= addMenusItems` loc pos ls new pid rt it mHs keys tb
 			= (error,ls,rt,it,[mH:mHs],keys,tb)
 	where
-		addMenuItems :: !(!Id,Maybe Id) !Int .ls` [MenuElementHandle .ls` (PSt .l .p)] !SystemId
-										 !ReceiverTable !IdTable !(MenuHandle .ls (PSt .l .p)) ![Char] !*OSToolbox
-			 -> (!Bool,!ErrorReport,.ls`,!ReceiverTable,!IdTable, !MenuHandle .ls (PSt .l .p), ![Char],!*OSToolbox)
+		addMenuItems :: !(!Id,Maybe Id) !Int .ls` [MenuElementHandle .ls` (PSt .l)] !SystemId
+										 !ReceiverTable !IdTable !(MenuHandle .ls (PSt .l)) ![Char] !*OSToolbox
+			 -> (!Bool,!ErrorReport,.ls`,!ReceiverTable,!IdTable, !MenuHandle .ls (PSt .l), ![Char],!*OSToolbox)
 		addMenuItems (mId,itemId) pos ls new pid rt it mH=:{mHandle,mMenuId,mItems} keys tb
 			| mId<>mMenuId
 				= (False,NoError,ls,rt,it,mH,keys,tb)
@@ -61,9 +61,9 @@ where
 				# (_,   error,ls,rt,it,itemHs,keys,_,_,tb)	= extendMenu` mId mHandle ls new pid rt it mItems keys pos 1 tb
 				= (True,error,ls,rt,it,{mH & mItems=itemHs},keys,tb)
 		where
-			addSubMenuItems` :: !Id !Id !Int !OSMenu .ls` ![MenuElementHandle .ls` (PSt .l .p)] !SystemId
-														 !ReceiverTable !IdTable ![MenuElementHandle .ls (PSt .l .p)] ![Char] !Int !*OSToolbox
-							 -> (!Bool,!ErrorReport,.ls`,!ReceiverTable,!IdTable,![MenuElementHandle .ls (PSt .l .p)],![Char],!Int,!*OSToolbox)
+			addSubMenuItems` :: !Id !Id !Int !OSMenu .ls` ![MenuElementHandle .ls` (PSt .l)] !SystemId
+														 !ReceiverTable !IdTable ![MenuElementHandle .ls (PSt .l)] ![Char] !Int !*OSToolbox
+							 -> (!Bool,!ErrorReport,.ls`,!ReceiverTable,!IdTable,![MenuElementHandle .ls (PSt .l)],![Char],!Int,!*OSToolbox)
 			addSubMenuItems` menuId itemId pos menu ls new pid rt it [item:items] keys iNr tb
 				# (opened,error,ls,rt,it,item,keys,iNr,tb)		= addSubMenuItems menuId itemId pos menu ls new pid rt it item keys iNr tb
 				| opened
@@ -74,9 +74,9 @@ where
 			addSubMenuItems` _ _ _ _ ls _ _ rt it _ keys iNr tb
 				= (False,NoError,ls,rt,it,[],keys,iNr,tb)
 			
-			addSubMenuItems :: !Id !Id !Int !OSMenu .ls` ![MenuElementHandle .ls` (PSt .l .p)] !SystemId
-														!ReceiverTable !IdTable !(MenuElementHandle .ls (PSt .l .p)) ![Char] !Int !*OSToolbox
-							-> (!Bool,!ErrorReport,.ls`,!ReceiverTable,!IdTable, !MenuElementHandle .ls (PSt .l .p), ![Char],!Int,!*OSToolbox)
+			addSubMenuItems :: !Id !Id !Int !OSMenu .ls` ![MenuElementHandle .ls` (PSt .l)] !SystemId
+														!ReceiverTable !IdTable !(MenuElementHandle .ls (PSt .l)) ![Char] !Int !*OSToolbox
+							-> (!Bool,!ErrorReport,.ls`,!ReceiverTable,!IdTable, !MenuElementHandle .ls (PSt .l), ![Char],!Int,!*OSToolbox)
 			addSubMenuItems menuId itemId pos menu ls new pid rt it (SubMenuHandle subH=:{mSubHandle,mSubMenuId,mSubItems}) keys iNr tb
 				| isNothing mSubMenuId || itemId<>fromJust mSubMenuId
 					# (opened,error,ls,rt,it,items,keys,_,tb)	= addSubMenuItems` menuId itemId pos mSubHandle ls new pid rt it mSubItems keys 1 tb
@@ -100,9 +100,9 @@ where
 			addSubMenuItems _ _ _ _ ls _ _ rt it itemH keys iNr tb
 				= (False,NoError,ls,rt,it,itemH,keys,iNr+1,tb)
 			
-			extendMenu` :: !Id !OSMenu .ls` ![MenuElementHandle .ls` (PSt .l .p)] !SystemId
-													!ReceiverTable !IdTable ![MenuElementHandle .ls (PSt .l .p)] [Char] !Int !Int !*OSToolbox
-						-> (!Bool,!ErrorReport,.ls`,!ReceiverTable,!IdTable,![MenuElementHandle .ls (PSt .l .p)],[Char],!Int,!Int,!*OSToolbox)
+			extendMenu` :: !Id !OSMenu .ls` ![MenuElementHandle .ls` (PSt .l)] !SystemId
+													!ReceiverTable !IdTable ![MenuElementHandle .ls (PSt .l)] [Char] !Int !Int !*OSToolbox
+						-> (!Bool,!ErrorReport,.ls`,!ReceiverTable,!IdTable,![MenuElementHandle .ls (PSt .l)],[Char],!Int,!Int,!*OSToolbox)
 			extendMenu` menuId menu ls new pid rt it itemHs keys 0 iNr tb
 				# newItemHs			= MenuChangeLSHandle {mChangeLS=ls,mChangeItems=new}
 				# (itemHs,keys,tb)	= extendMenu osMenuBar menu (iNr-1) [newItemHs] itemHs keys tb
@@ -160,8 +160,8 @@ where
 	The (Id,Id) argument indicates where the elements should be added. 
 		The first Id indicates the Menu, the second Id indicates the RadioMenu.
 */
-addMenuRadioItems :: !(!Id,Id) !Int [MenuRadioItem (PSt .l .p)] !OSMenuBar !(MenuHandles (PSt .l .p)) !*OSToolbox
-														  -> (!ErrorReport, !MenuHandles (PSt .l .p), !*OSToolbox)
+addMenuRadioItems :: !(!Id,Id) !Int [MenuRadioItem (PSt .l)] !OSMenuBar !(MenuHandles (PSt .l)) !*OSToolbox
+														  -> (!ErrorReport, !MenuHandles (PSt .l), !*OSToolbox)
 addMenuRadioItems loc pos new osMenuBar menus=:{mMenus,mKeys} tb
 	# (error,mHs,keys,tb)	= addMenusItems` loc pos new mMenus mKeys tb
 	= (error,{menus & mMenus=mHs,mKeys=keys}, tb)

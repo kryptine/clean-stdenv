@@ -19,10 +19,8 @@ from	id		import	RId, R2Id, RIdtoId, R2IdtoId, ==
 
 // MW11 reopenReceiver removed, made types unique
 class Receivers rdef where
-	openReceiver	:: .ls !*(*rdef .ls (PSt .l .p)) !(PSt .l .p)
-				   	-> (!ErrorReport,!PSt .l .p)
-	getReceiverType	:: *(*rdef .ls .ps)
-					-> ReceiverType
+	openReceiver   :: .ls !*(*rdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
+	getReceiverType::      *(*rdef .ls .pst)               -> ReceiverType
 /*	openReceiver
 		opens the given receiver if no receiver currently exists with the given 
 		R(2)Id. The R(2)Id has to be used to send messages to this receiver. 
@@ -34,21 +32,21 @@ instance Receivers (Receiver  msg)
 instance Receivers (Receiver2 msg resp)
 
 
-closeReceiver		:: !Id !(IOSt .l .p) -> IOSt .l .p
+closeReceiver		:: !Id !(IOSt .l) -> IOSt .l
 /*	closeReceiver closes the indicated uni- or bi-directional receiver.
 	Invalid Ids have no effect.
 */
 
 
-getReceivers		:: !(IOSt .l .p) -> (![(Id,ReceiverType)], !IOSt .l .p)
+getReceivers		:: !(IOSt .l) -> (![(Id,ReceiverType)], !IOSt .l)
 /*	getReceivers returns the Ids and ReceiverTypes of all currently open uni- or 
 	bi-directional receivers of this interactive process.
 */
 
 
-enableReceivers			:: ![Id] !(IOSt .l .p) ->                      IOSt .l .p
-disableReceivers		:: ![Id] !(IOSt .l .p) ->                      IOSt .l .p
-getReceiverSelectState	:: ! Id	 !(IOSt .l .p) -> (!Maybe SelectState,!IOSt .l .p)
+enableReceivers			:: ![Id] !(IOSt .l) ->                      IOSt .l
+disableReceivers		:: ![Id] !(IOSt .l) ->                      IOSt .l
+getReceiverSelectState	:: ! Id	 !(IOSt .l) -> (!Maybe SelectState,!IOSt .l)
 /*	(en/dis)ableReceivers
 		(en/dis)able the indicated uni- or bi-directional receivers. 
 		Note that this implies that in case of synchronous message passing messages 
@@ -73,7 +71,7 @@ getReceiverSelectState	:: ! Id	 !(IOSt .l .p) -> (!Maybe SelectState,!IOSt .l .p
 instance ==       SendReport
 instance toString SendReport
 
-asyncSend :: !(RId msg) msg !(PSt .l .p) -> (!SendReport, !PSt .l .p)
+asyncSend :: !(RId msg) msg !(PSt .l) -> (!SendReport, !PSt .l)
 /*	asyncSend posts a message to the receiver indicated by the argument RId. In case
 	the indicated receiver belongs to this process, the message is simply buffered. 
 	asyncSend is asynchronous: the message will at some point be received by the 
@@ -94,7 +92,7 @@ asyncSend :: !(RId msg) msg !(PSt .l .p) -> (!SendReport, !PSt .l .p)
 				Does not occur.
 */
 
-syncSend :: !(RId msg) msg !(PSt .l .p) -> (!SendReport, !PSt .l .p)
+syncSend :: !(RId msg) msg !(PSt .l) -> (!SendReport, !PSt .l)
 /*	syncSend posts a message to the receiver indicated by the argument RId. In case 
 	the indicated receiver belongs to the current process, the corresponding 
 	ReceiverFunction is applied directly to the message argument and current process
@@ -116,8 +114,8 @@ syncSend :: !(RId msg) msg !(PSt .l .p) -> (!SendReport, !PSt .l .p)
 				deadlock. The message is not sent.
 */
 
-syncSend2 :: !(R2Id msg resp) msg  !(PSt .l .p)
-	-> (!(!SendReport,!Maybe resp), !PSt .l .p)
+syncSend2 :: !(R2Id msg resp) msg  !(PSt .l)
+	-> (!(!SendReport,!Maybe resp), !PSt .l)
 /*	syncSend2 posts a message to the receiver indicated by the argument R2Id. In 
 	case the indicated receiver belongs to the current process, the corresponding 
 	Receiver2Function is applied directly to the message argument and current 

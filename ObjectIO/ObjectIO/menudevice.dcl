@@ -8,7 +8,7 @@ import	devicefunctions
 from	iostate	import PSt, IOSt
 
 
-MenuFunctions			:: DeviceFunctions (PSt .l .p)
+MenuFunctions			:: DeviceFunctions (PSt .l)
 
-IOStIsActive			:: !(IOSt .l .p) -> (!Bool,!IOSt .l .p)
-ActivateMenuSystem		:: !(IOSt .l .p) -> IOSt .l .p
+IOStIsActive			:: !(IOSt .l) -> (!Bool,!IOSt .l)
+ActivateMenuSystem		:: !(IOSt .l) -> IOSt .l

@@ -11,7 +11,7 @@ from	receiveraccess		import newReceiverHandle, newReceiverHandle2
 
 
 instance MenuElements (Receiver m) where
-	menuElementToHandles :: !(Receiver m .ls (PSt .l .p)) !(PSt .l .p) -> (![MenuElementState .ls (PSt .l .p)],!PSt .l .p)
+	menuElementToHandles :: !(Receiver m .ls (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
 	menuElementToHandles (Receiver rid f atts) pState
 		= (	[MenuElementHandleToMenuElementState
 // MW11 was				(MenuReceiverHandle {	mReceiverHandle	= newReceiverHandle id (getSelectState atts) f
@@ -29,7 +29,7 @@ instance MenuElements (Receiver m) where
 	getMenuElementType _ = "Receiver"
 
 instance MenuElements (Receiver2 m r) where
-	menuElementToHandles :: !(Receiver2 m r .ls  (PSt .l .p)) !(PSt .l .p) -> (![MenuElementState .ls (PSt .l .p)],!PSt .l .p)
+	menuElementToHandles :: !(Receiver2 m r .ls  (PSt .l)) !(PSt .l) -> (![MenuElementState .ls (PSt .l)],!PSt .l)
 	menuElementToHandles (Receiver2 rid f atts) pState
 		= (	[MenuElementHandleToMenuElementState
 // MW11 was				(MenuReceiverHandle {	mReceiverHandle	= newReceiverHandle2 id (getSelectState atts) f

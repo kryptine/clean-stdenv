@@ -13,7 +13,7 @@ timerdeviceFatalError :: String String -> .x
 timerdeviceFatalError function error
 	= FatalError function "timerdevice" error
 
-TimerFunctions :: DeviceFunctions (PSt .l .p)
+TimerFunctions :: DeviceFunctions (PSt .l)
 TimerFunctions
 	= {	dShow	= id
 	  ,	dHide	= id
@@ -23,7 +23,7 @@ TimerFunctions
 	  ,	dClose	= timerClose
 	  }
 
-timerOpen :: !(PSt .l .p) -> PSt .l .p
+timerOpen :: !(PSt .l) -> PSt .l
 timerOpen pState=:{io=ioState}
 	# (hasTimer,ioState)	= IOStHasDevice TimerDevice ioState
 	| hasTimer
@@ -35,7 +35,7 @@ timerOpen pState=:{io=ioState}
 		# ioState			= IOStSetDeviceFunctions [TimerFunctions:deviceFunctions] ioState
 		= {pState & io=ioState}
 
-timerClose :: !(PSt .l .p) -> PSt .l .p
+timerClose :: !(PSt .l) -> PSt .l
 timerClose pState=:{io=ioState}
 	# (found,timers,ioState)= IOStGetDevice TimerDevice ioState
 	| not found
@@ -61,7 +61,7 @@ where
 		teLoc			= {tlIOId=pid,tlDevice=TimerDevice,tlParentId=tId,tlTimerId=tId}
 
 
-timerIO	:: !DeviceEvent !(PSt .l .p) -> (!DeviceEvent,!PSt .l .p)
+timerIO	:: !DeviceEvent !(PSt .l) -> (!DeviceEvent,!PSt .l)
 timerIO deviceEvent pState
 	# (hasDevice,pState)= accPIO (IOStHasDevice TimerDevice) pState
 	| not hasDevice
@@ -69,7 +69,7 @@ timerIO deviceEvent pState
 	| otherwise
 		= timerIO deviceEvent pState
 where
-	timerIO	:: !DeviceEvent !(PSt .l .p) -> (!DeviceEvent,!PSt .l .p)
+	timerIO	:: !DeviceEvent !(PSt .l) -> (!DeviceEvent,!PSt .l)
 	timerIO deviceEvent=:(TimerEvent te=:{teLoc={tlParentId,tlTimerId},teNrInterval}) pState=:{io}
 		# (_,timer,ioState)	= IOStGetDevice TimerDevice io
 		  timers			= TimerSystemStateGetTimerHandles timer
@@ -77,7 +77,7 @@ where
 		# pState			= letOneTimerDoIO tlParentId tlTimerId teNrInterval timers pState
 		= (deviceEvent,pState)
 	where
-		letOneTimerDoIO :: !Id !Id !NrOfIntervals !(TimerHandles (PSt .l .p)) !(PSt .l .p) -> PSt .l .p
+		letOneTimerDoIO :: !Id !Id !NrOfIntervals !(TimerHandles (PSt .l)) !(PSt .l) -> PSt .l
 		letOneTimerDoIO parent timer nrOfIntervals timers=:{tTimers=tHs} pState
 			= pState2
 		where
@@ -95,7 +95,7 @@ where
 	timerIO deviceEvent=:(ReceiverEvent (QASyncMessage event)) pState
 		= (deviceEvent,timerQASync event pState)
 	where
-		timerQASync :: !QASyncMessage !(PSt .l .p) -> PSt .l .p
+		timerQASync :: !QASyncMessage !(PSt .l) -> PSt .l
 		timerQASync msg=:{qasmRecLoc={rlReceiverId=rid}} pState
 			# (_,timer,ioState)	= IOStGetDevice TimerDevice pState.io
 			  timers			= TimerSystemStateGetTimerHandles timer
@@ -147,7 +147,7 @@ where
 	timerIO deviceEvent=:(ReceiverEvent (ASyncMessage event)) pState
 		= (deviceEvent,timerASync event pState)
 	where
-		timerASync :: !ASyncMessage !(PSt .l .p) -> PSt .l .p
+		timerASync :: !ASyncMessage !(PSt .l) -> PSt .l
 		timerASync {asmRecLoc={rlReceiverId=rid}} pState
 			= pState2
 		where
@@ -216,7 +216,7 @@ where
 		# (event,pState)	= timerSync event pState
 		= (ReceiverEvent (SyncMessage event),pState)
 	where
-		timerSync :: !SyncMessage !(PSt .l .p) -> (!SyncMessage,!PSt .l .p)
+		timerSync :: !SyncMessage !(PSt .l) -> (!SyncMessage,!PSt .l)
 		timerSync msg=:{smRecLoc={rlReceiverId=rid}} pState
 			= (msg1,pState2)
 		where

@@ -12,11 +12,11 @@ import	commondef, timerhandle
 
 
 class TimerElements t where
-	timerElementToHandles	:: !(t .ls (PSt .l .p)) !(PSt .l .p)-> (![TimerElementState .ls (PSt .l .p)],!PSt .l .p)
-	getTimerElementType		::	(t .ls .pst)					-> TimerElementType
+	timerElementToHandles	:: !(t .ls (PSt .l)) !(PSt .l)	-> (![TimerElementState .ls (PSt .l)],!PSt .l)
+	getTimerElementType		::	(t .ls .pst)				-> TimerElementType
 
 instance TimerElements (AddLS t) | TimerElements t where
-	timerElementToHandles :: !(AddLS t .ls (PSt .l .p)) !(PSt .l .p)-> (![TimerElementState .ls (PSt .l .p)],!PSt .l .p) | TimerElements t
+	timerElementToHandles :: !(AddLS t .ls (PSt .l)) !(PSt .l)-> (![TimerElementState .ls (PSt .l)],!PSt .l) | TimerElements t
 	timerElementToHandles {addLS,addDef} pState
 		# (ts,pState)	= timerElementToHandles addDef pState
 		= (	[TimerElementHandleToTimerElementState 
@@ -32,7 +32,7 @@ instance TimerElements (AddLS t) | TimerElements t where
 	getTimerElementType _ = ""
 
 instance TimerElements (NewLS t) | TimerElements t where
-	timerElementToHandles :: !(NewLS t .ls (PSt .l .p)) !(PSt .l .p)-> (![TimerElementState .ls (PSt .l .p)],!PSt .l .p) | TimerElements t
+	timerElementToHandles :: !(NewLS t .ls (PSt .l)) !(PSt .l)-> (![TimerElementState .ls (PSt .l)],!PSt .l) | TimerElements t
 	timerElementToHandles {newLS,newDef} pState
 		# (ts,pState)	= timerElementToHandles newDef pState
 		= (	[TimerElementHandleToTimerElementState 
@@ -48,7 +48,7 @@ instance TimerElements (NewLS t) | TimerElements t where
 	getTimerElementType _ = ""
 
 instance TimerElements (ListLS t) | TimerElements t where
-	timerElementToHandles :: !(ListLS t .ls (PSt .l .p)) !(PSt .l .p)-> (![TimerElementState .ls (PSt .l .p)],!PSt .l .p) | TimerElements t
+	timerElementToHandles :: !(ListLS t .ls (PSt .l)) !(PSt .l)-> (![TimerElementState .ls (PSt .l)],!PSt .l) | TimerElements t
 	timerElementToHandles (ListLS tDefs) pState
 		# (tss,pState)	= StateMap timerElementToHandles tDefs pState
 		= (	[TimerElementHandleToTimerElementState 
@@ -61,7 +61,7 @@ instance TimerElements (ListLS t) | TimerElements t where
 	getTimerElementType _ = ""
 
 instance TimerElements NilLS where
-	timerElementToHandles :: !(NilLS .ls (PSt .l .p)) !(PSt .l .p)-> (![TimerElementState .ls (PSt .l .p)],!PSt .l .p)
+	timerElementToHandles :: !(NilLS .ls (PSt .l)) !(PSt .l)-> (![TimerElementState .ls (PSt .l)],!PSt .l)
 	timerElementToHandles NilLS pState
 		= ([TimerElementHandleToTimerElementState (TimerListLSHandle [])],pState)
 	
@@ -69,7 +69,7 @@ instance TimerElements NilLS where
 	getTimerElementType _ = ""
 
 instance TimerElements ((:+:) t1 t2) | TimerElements t1 & TimerElements t2 where
-	timerElementToHandles :: !((:+:) t1 t2 .ls (PSt .l .p)) !(PSt .l .p)-> (![TimerElementState .ls (PSt .l .p)],!PSt .l .p)
+	timerElementToHandles :: !((:+:) t1 t2 .ls (PSt .l)) !(PSt .l)-> (![TimerElementState .ls (PSt .l)],!PSt .l)
 						  |  TimerElements t1 & TimerElements t2
 	timerElementToHandles (t1:+:t2) pState
 		# (ts1,pState)	= timerElementToHandles t1 pState

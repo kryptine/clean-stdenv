@@ -13,11 +13,11 @@ from	ostoolbox			import OSToolbox
 from	oswindow			import DelayActivationInfo
 
 
-disposeWindow				:: !WID !(PSt .l .p) -> PSt .l .p
+disposeWindow				:: !WID !(PSt .l) -> PSt .l
 /*	disposeWindow disposes all system resources associated with the indicated window if it exists.
 */
 
-//disposeCursorInfo			:: !CursorInfo !(IOSt .l .p) -> IOSt .l .p
+//disposeCursorInfo			:: !CursorInfo !(IOSt .l) -> IOSt .l
 /*	disposeCursorInfo disposes all system resources associated with the given CursorInfo.
 	PA: not yet implemented
 */

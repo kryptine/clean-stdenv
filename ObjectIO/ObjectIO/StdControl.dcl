@@ -18,53 +18,53 @@ from	StdPSt		import PSt, IOSt
 	process are used to change the corresponding controls.
 */
 
-showControls			:: ![Id]						!(IOSt .l .p) -> IOSt .l .p
-showControl				:: ! Id							!(IOSt .l .p) -> IOSt .l .p
-hideControls			:: ![Id]						!(IOSt .l .p) -> IOSt .l .p
-hideControl				:: ! Id							!(IOSt .l .p) -> IOSt .l .p
+showControls			:: ![Id]						!(IOSt .l) -> IOSt .l
+showControl				:: ! Id							!(IOSt .l) -> IOSt .l
+hideControls			:: ![Id]						!(IOSt .l) -> IOSt .l
+hideControl				:: ! Id							!(IOSt .l) -> IOSt .l
 /*	(show/hide)Control(s) makes the indicated control(s) visible/invisible. 
 	Hiding a control overrides the visibility of its elements, which become 
 		invisible. 
 	Showing a hidden control re-establishes the visibility state of its elements.
 */
 
-enableControls			:: ![Id]						!(IOSt .l .p) -> IOSt .l .p
-enableControl			:: ! Id							!(IOSt .l .p) -> IOSt .l .p
-disableControls			:: ![Id]						!(IOSt .l .p) -> IOSt .l .p
-disableControl			:: ! Id							!(IOSt .l .p) -> IOSt .l .p
+enableControls			:: ![Id]						!(IOSt .l) -> IOSt .l
+enableControl			:: ! Id							!(IOSt .l) -> IOSt .l
+disableControls			:: ![Id]						!(IOSt .l) -> IOSt .l
+disableControl			:: ! Id							!(IOSt .l) -> IOSt .l
 /*	(en/dis)ableControl(s) (en/dis)ables the indicated control(s).
 	Disabling a control overrides the SelectStates of its elements, which become 
 		unselectable.
 	Enabling a disabled control re-establishes the SelectStates of its elements.
 */
 
-markCheckControlItems	:: !Id ![Index]					!(IOSt .l .p) -> IOSt .l .p
-unmarkCheckControlItems	:: !Id ![Index]					!(IOSt .l .p) -> IOSt .l .p
+markCheckControlItems	:: !Id ![Index]					!(IOSt .l) -> IOSt .l
+unmarkCheckControlItems	:: !Id ![Index]					!(IOSt .l) -> IOSt .l
 /*	(unm/m)arkCheckControlItems unmarks/marks the indicated check items of the given
 	CheckControl. Indices range from 1 to the number of check items. Illegal indices
 	are ignored.
 */
 
-selectRadioControlItem	:: !Id  !Index					!(IOSt .l .p) -> IOSt .l .p
+selectRadioControlItem	:: !Id  !Index					!(IOSt .l) -> IOSt .l
 /*	selectRadioControlItem marks the indicated radio item of a RadioControl, causing
 	the mark of the previously marked radio item to disappear. The item is given by 
 	the Id of the RadioControl and its index position (counted from 1). 
 */
 
-selectPopUpControlItem	:: !Id  !Index					!(IOSt .l .p) -> IOSt .l .p
+selectPopUpControlItem	:: !Id  !Index					!(IOSt .l) -> IOSt .l
 /*	selectPopUpControlItem marks the indicated popup item of a PopUpControl, causing
 	the mark of the previously marked popup item to disappear. The item is given by 
 	the Id of the PopUpControl and its index position (counted from 1).
 */
 
-moveControlViewFrame	:: !Id Vector2					!(IOSt .l .p) -> IOSt .l .p
+moveControlViewFrame	:: !Id Vector2					!(IOSt .l) -> IOSt .l
 /*	moveControlViewFrame moves the orientation of the CompoundControl over the given
 	vector, and updates the control if necessary. The control frame is not moved 
 	outside the ViewDomain of the control. MoveControlViewFrame has no effect if the
 	indicated control has no ControlDomain attribute.
 */
 
-setControlViewDomain	:: !Id ViewDomain				!(IOSt .l .p) -> IOSt .l .p
+setControlViewDomain	:: !Id ViewDomain				!(IOSt .l) -> IOSt .l
 /*	setControlViewDomain sets the view domain of the indicated CompoundControl as 
 	given. The control view frame is moved such that a maximum portion of the view 
 	domain is visible. The control is not resized.
@@ -72,21 +72,21 @@ setControlViewDomain	:: !Id ViewDomain				!(IOSt .l .p) -> IOSt .l .p
 	effect.
 */
 
-setControlScrollFunction:: !Id Direction ScrollFunction !(IOSt .l .p) -> IOSt .l .p
+setControlScrollFunction:: !Id Direction ScrollFunction !(IOSt .l) -> IOSt .l
 /*	setControlScrollFunction set the ScrollFunction of the indicated CompoundControl
 	in the given Direction if it has one.
 	In all other cases, setControlScrollFunction has no effect.
 */
 
-setControlTexts			:: ![(Id,String)]				!(IOSt .l .p) -> IOSt .l .p
-setControlText			:: !Id !String					!(IOSt .l .p) -> IOSt .l .p
+setControlTexts			:: ![(Id,String)]				!(IOSt .l) -> IOSt .l
+setControlText			:: !Id !String					!(IOSt .l) -> IOSt .l
 /*	setControlText(s) sets the text of the indicated (Text/Edit/Button)Control(s). 
 	If the indicated control is a (Text/Button)Control, then AltKey are interpreted 
 	by the system.
 	If the indicated control is an EditControl, then the text is taken as it is.
 */
 
-setEditControlCursor	:: !Id !Int						!(IOSt .l .p) -> IOSt .l .p
+setEditControlCursor	:: !Id !Int						!(IOSt .l) -> IOSt .l
 /*	setEditControlCursor sets the cursor at position @2 of the current content of 
 	the EditControl.
 	In case @2<0, then the cursor is set at the start of the current content.
@@ -94,18 +94,18 @@ setEditControlCursor	:: !Id !Int						!(IOSt .l .p) -> IOSt .l .p
 	content.
 */
 
-setControlLooks			:: ![(Id, Bool,(Bool,Look))]	!(IOSt .l .p) -> IOSt .l .p
-setControlLook			::   !Id !Bool (Bool,Look)		!(IOSt .l .p) -> IOSt .l .p
+setControlLooks			:: ![(Id, Bool,(Bool,Look))]	!(IOSt .l) -> IOSt .l
+setControlLook			::   !Id !Bool (Bool,Look)		!(IOSt .l) -> IOSt .l
 /*	setControlLook(s) sets the (render,look) attribute of the indicated 
 	(Custom(Button)/Compound)Control(s). If this concerns a transparant 
 	CompoundControl then it becomes non-transparant.
 	An indicated control is only redrawn if the first Boolean is True. 
 */
 
-setSliderStates			:: ![(Id, IdFun SliderState)]	!(IOSt .l .p) -> IOSt .l .p
-setSliderState			::   !Id (IdFun SliderState)	!(IOSt .l .p) -> IOSt .l .p
-setSliderThumbs			:: ![(Id,Int)]					!(IOSt .l .p) -> IOSt .l .p
-setSliderThumb			::   !Id Int					!(IOSt .l .p) -> IOSt .l .p
+setSliderStates			:: ![(Id, IdFun SliderState)]	!(IOSt .l) -> IOSt .l
+setSliderState			::   !Id (IdFun SliderState)	!(IOSt .l) -> IOSt .l
+setSliderThumbs			:: ![(Id,Int)]					!(IOSt .l) -> IOSt .l
+setSliderThumb			::   !Id Int					!(IOSt .l) -> IOSt .l
 /*	setSliderState(s)
 		applies the function to the current SliderState of the indicated 
 		SliderControl(s) and redraws the settings if necessary.
@@ -114,9 +114,9 @@ setSliderThumb			::   !Id Int					!(IOSt .l .p) -> IOSt .l .p
 		settings if necessary.
 */
 
-appControlPicture		:: !Id !.(IdFun *Picture)		!(IOSt .l .p) -> IOSt .l .p
-accControlPicture		:: !Id !.(St *Picture .x)		!(IOSt .l .p)
-										   -> (!Maybe .x,!IOSt .l .p)
+appControlPicture		:: !Id !.(IdFun *Picture)		!(IOSt .l) -> IOSt .l
+accControlPicture		:: !Id !.(St *Picture .x)		!(IOSt .l)
+										   -> (!Maybe .x,!IOSt .l)
 /*	(app/acc)ControlPicture applies the given drawing function to the Picture of
 	the indicated (Custom(Button)/Compound)Control. If the CompoundControl is 
 	transparant, or the indicated control could not be found then this operation 
@@ -131,8 +131,8 @@ accControlPicture		:: !Id !.(St *Picture .x)		!(IOSt .l .p)
 
 ::	WState
 
-getWindow				:: !Id !(IOSt .l .p) -> (!Maybe WState, !IOSt .l .p)
-getParentWindow			:: !Id !(IOSt .l .p) -> (!Maybe WState, !IOSt .l .p)
+getWindow				:: !Id !(IOSt .l) -> (!Maybe WState, !IOSt .l)
+getParentWindow			:: !Id !(IOSt .l) -> (!Maybe WState, !IOSt .l)
 /*	getWindow returns a read-only WState for the indicated window.
 		In case the indicated window does not exist Nothing is returned.
 	getParentWindow returns a read-only WState for the parent window/dialogue

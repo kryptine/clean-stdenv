@@ -85,8 +85,8 @@ addString (string, stringBegin) readPhase=:(ReadingString wholeString stillToRec
 */
 instance Receivers 			StringChannelReceiver
   where
-	openReceiver	:: .ls !*(*StringChannelReceiver .ls (PSt .l .p)) !(PSt .l .p)
-					-> (!ErrorReport,!PSt .l .p)
+	openReceiver	:: .ls !*(*StringChannelReceiver .ls (PSt .l)) !(PSt .l)
+					-> (!ErrorReport,!PSt .l)
 	openReceiver ls (StringChannelReceiver id {tcp_rchan, readPhase, maxSize} callback attributes) pSt
 		#!	(isEom, readPhase)	= isEOM readPhase
 			(tcpRcvId, pSt)		= accPIO openId pSt

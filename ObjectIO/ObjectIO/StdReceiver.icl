@@ -20,16 +20,13 @@ receiverStateIdentified :: !Id !(ReceiverStateHandle .pst) -> Bool
 receiverStateIdentified id {rHandle}
 	= receiverIdentified id rHandle
 
-class Receivers rdef
-where
-	openReceiver	:: .ls !*(*rdef .ls (PSt .l .p)) !(PSt .l .p)
-				   	-> (!ErrorReport,!PSt .l .p)
-	getReceiverType	:: *(*rdef .ls .pst)
-					-> ReceiverType
+class Receivers rdef where
+	openReceiver	:: .ls !*(*rdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
+	getReceiverType	::      *(*rdef .ls .pst)				-> ReceiverType
 
 instance Receivers (Receiver m) where
-// MW11 was	openReceiver :: .ls !(Receiver m .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p)
-	openReceiver :: .ls !*(*Receiver m .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p)
+// MW11 was	openReceiver :: .ls !(Receiver m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
+	openReceiver :: .ls !*(*Receiver m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
 	openReceiver ls rDef pState
 		# pState				= ReceiverFunctions.dOpen pState
 		# (idtable,pState)		= accPIO IOStGetIdTable pState
@@ -65,7 +62,7 @@ instance Receivers (Receiver m) where
 		rDefAttributes			= receiverDefAttributes rDef // MW11++
 	
 /* MW11
-	reopenReceiver :: .ls !(Receiver m .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p)
+	reopenReceiver :: .ls !(Receiver m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
 	reopenReceiver ls rDef pState
 		= openReceiver ls rDef (appPIO (closeReceiver (RIdtoId (receiverDefRId rDef))) pState)
 */	
@@ -73,8 +70,8 @@ instance Receivers (Receiver m) where
 	getReceiverType _			= "Receiver"
 
 instance Receivers (Receiver2 m r) where
-// MW11 was	openReceiver :: .ls !(Receiver2 m r .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p)
-	openReceiver :: .ls !*(*Receiver2 m r .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p)
+// MW11 was	openReceiver :: .ls !(Receiver2 m r .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
+	openReceiver :: .ls !*(*Receiver2 m r .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
 	openReceiver ls rDef pState
 		# pState				= ReceiverFunctions.dOpen pState
 		# (idtable,pState)		= accPIO IOStGetIdTable pState
@@ -110,7 +107,7 @@ instance Receivers (Receiver2 m r) where
 		rDefAttributes			= receiver2DefAttributes rDef // MW11++
 	
 /* MW11
-	reopenReceiver :: .ls !(Receiver2 m r .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p)
+	reopenReceiver :: .ls !(Receiver2 m r .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
 	reopenReceiver ls rDef pState
 		= openReceiver ls rDef (appPIO (closeReceiver (R2IdtoId (receiver2DefR2Id rDef))) pState)
 */
@@ -121,7 +118,7 @@ instance Receivers (Receiver2 m r) where
 
 //	Closing receivers.
 
-closeReceiver :: !Id !(IOSt .l .p) -> IOSt .l .p
+closeReceiver :: !Id !(IOSt .l) -> IOSt .l
 closeReceiver id ioState
 // MW11..
 	#! (closed,ioState)			= IOStClosed ioState
@@ -157,7 +154,7 @@ closeReceiver id ioState
 
 //	Get the Ids and ReceiverTypes of all current receivers:
 
-getReceivers :: !(IOSt .l .p) -> (![(Id,ReceiverType)],!IOSt .l .p)
+getReceivers :: !(IOSt .l) -> (![(Id,ReceiverType)],!IOSt .l)
 getReceivers ioState
 	# (found,rDevice,ioState)	= IOStGetDevice ReceiverDevice ioState
 	| not found
@@ -183,11 +180,11 @@ where
 
 //	Changing attributes:
 
-enableReceivers :: ![Id] !(IOSt .l .p) -> IOSt .l .p
+enableReceivers :: ![Id] !(IOSt .l) -> IOSt .l
 enableReceivers ids ioState
 	= changeReceivers (receiverSetSelectState Able) (receiverEntrySetSelectState Able) ids ioState
 
-disableReceivers :: ![Id] !(IOSt .l .p) -> IOSt .l .p
+disableReceivers :: ![Id] !(IOSt .l) -> IOSt .l
 disableReceivers ids ioState
 	# ioState = IOStSetRcvDisabled True ioState
 	= changeReceivers (receiverSetSelectState Unable) (receiverEntrySetSelectState Unable) ids ioState
@@ -196,8 +193,7 @@ receiverEntrySetSelectState :: !SelectState !ReceiverTableEntry -> ReceiverTable
 receiverEntrySetSelectState select rte
 	= {rte & rteSelectState=select}
 
-changeReceivers :: (IdFun (ReceiverStateHandle (PSt .l .p))) (IdFun ReceiverTableEntry) ![Id] !(IOSt .l .p)
-																							 -> IOSt .l .p
+changeReceivers :: (IdFun (ReceiverStateHandle (PSt .l))) (IdFun ReceiverTableEntry) ![Id] !(IOSt .l) -> IOSt .l
 changeReceivers changeReceiverState changeReceiverEntry ids ioState
 	| isEmpty okids			// There aren't any receiver ids in the list
 		= ioState
@@ -254,7 +250,7 @@ where
 
 //	Get the SelectState of a receiver:
 
-getReceiverSelectState :: !Id !(IOSt .l .p) -> (!Maybe SelectState,!IOSt .l .p)
+getReceiverSelectState :: !Id !(IOSt .l) -> (!Maybe SelectState,!IOSt .l)
 getReceiverSelectState id ioState
 // MW11 was	| not (isCustomRId id || isCustomR2Id id)
 	| not (isCustomRId id || isCustomR2Id id || isCustomId id)
@@ -323,7 +319,7 @@ instance toString SendReport where
 		Add the message to the asynchronous message queue of the 
 		receiver using the scheduler.
 */
-asyncSend :: !(RId msg) msg !(PSt .l .p) -> (!SendReport,!PSt .l .p)
+asyncSend :: !(RId msg) msg !(PSt .l) -> (!SendReport,!PSt .l)
 asyncSend rid msg pState
 	# id					= RIdtoId rid
 	# (rt,ioState)			= IOStGetReceiverTable pState.io
@@ -356,7 +352,7 @@ asyncSend rid msg pState
 	If the receiver could be found, then let the receiver handle the
 		synchronous message using the scheduler.
 */
-syncSend :: !(RId msg) msg !(PSt .l .p) -> (!SendReport, !PSt .l .p)
+syncSend :: !(RId msg) msg !(PSt .l) -> (!SendReport, !PSt .l)
 syncSend rid msg pState
 	# id						= RIdtoId rid
 	# (rt,ioState)				= IOStGetReceiverTable pState.io
@@ -380,7 +376,7 @@ syncSend rid msg pState
 		  report				= if (isJust opt_error) (toSendError (fromJust opt_error)) SendOk
 		= (report,pState)
 where
-	PStHandleSyncMessage :: !SyncMessage !(PSt .l .p) -> (!SendReport, !PSt .l .p)
+	PStHandleSyncMessage :: !SyncMessage !(PSt .l) -> (!SendReport, !PSt .l)
 	PStHandleSyncMessage sm pState
 		# (_,schedulerEvent,pState)
 								= handleOneEventForDevices (ScheduleMsgEvent (SyncMessage sm)) pState
@@ -403,7 +399,7 @@ where
 	If the receiver could be found, then let the receiver handle the
 		synchronous message using the scheduler.
 */
-syncSend2 :: !(R2Id msg resp) msg !(PSt .l .p) -> (!(!SendReport,!Maybe resp), !PSt .l .p)
+syncSend2 :: !(R2Id msg resp) msg !(PSt .l) -> (!(!SendReport,!Maybe resp), !PSt .l)
 syncSend2 r2id msg pState
 	# id						= R2IdtoId r2id
 	# (rt,pState)				= accPIO IOStGetReceiverTable pState
@@ -432,7 +428,7 @@ syncSend2 r2id msg pState
 	| otherwise
 		= ((SendOk,maybe_response),pState)
 where
-	PStHandleSync2Message :: !(DId resp) !SyncMessage !(PSt .l .p) -> (!(!SendReport,!Maybe resp), !PSt .l .p)
+	PStHandleSync2Message :: !(DId resp) !SyncMessage !(PSt .l) -> (!(!SendReport,!Maybe resp), !PSt .l)
 	PStHandleSync2Message did sm pState
 		# (_,schedulerEvent,pState)
 								= handleOneEventForDevices (ScheduleMsgEvent (SyncMessage sm)) pState

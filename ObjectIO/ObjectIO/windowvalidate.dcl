@@ -13,7 +13,7 @@ from	iostate				import IOSt
 import	windowhandle
 
 
-validateWindowId :: !(Maybe Id) !(IOSt .l .p) -> (!Maybe Id,!IOSt .l .p)
+validateWindowId :: !(Maybe Id) !(IOSt .l) -> (!Maybe Id,!IOSt .l)
 /*	validateWindowId checks whether the Id of the window/dialogue has already been bound.
 	If so, Nothing is returned; otherwise a proper Id value for the window/dialogue is returned.
 	The Id is not bound.

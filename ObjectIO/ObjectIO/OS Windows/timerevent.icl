@@ -22,7 +22,7 @@ timereventFatalError function error
 	*	ScheduleMsgEvent:   the message event belongs to this process and device
 	timerEvent assumes that it is not applied to an empty IOSt.
 */
-timerEvent :: !SchedulerEvent !(PSt .l .p) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l .p)
+timerEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
 timerEvent schedulerEvent pState
 	# (hasDevice,pState)	= accPIO (IOStHasDevice TimerDevice) pState
 	| not hasDevice			// This condition should never occur: TimerDevice must have been 'installed'
@@ -30,7 +30,7 @@ timerEvent schedulerEvent pState
 	| otherwise
 		= timerEvent schedulerEvent pState
 where
-	timerEvent :: !SchedulerEvent !(PSt .l .p) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l .p)
+	timerEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
 	timerEvent schedulerEvent=:(ScheduleTimerEvent te=:{teLoc}) pState=:{io=ioState}
 		# (ioid,ioState)	= IOStGetIOId ioState
 		| teLoc.tlIOId<>ioid || teLoc.tlDevice<>TimerDevice

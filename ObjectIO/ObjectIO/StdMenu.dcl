@@ -15,9 +15,8 @@ from	iostate	import PSt, IOSt
 //	Operations on unknown Ids are ignored.
 
 class Menus mdef where
-	openMenu	:: .ls !(mdef .ls (PSt .l .p)) !(PSt .l .p)
-							   -> (!ErrorReport,!PSt .l .p)
-	getMenuType	::      (mdef .ls .pst)	-> MenuType
+	openMenu	:: .ls !(mdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
+	getMenuType	::      (mdef .ls .pst)               -> MenuType
 /*	Open the given menu definition for this interactive process. 
 	openMenu may not be permitted to open a menu depending on its DocumentInterface 
 		(see the comments at the shareProcesses instances in module StdProcess).
@@ -47,21 +46,21 @@ instance Menus (PopUpMenu m) | PopUpMenuElements m
 */
 
 
-closeMenu :: !Id !(IOSt .l .p) -> IOSt .l .p
+closeMenu :: !Id !(IOSt .l) -> IOSt .l
 /*	closeMenu closes the indicated Menu and all of its elements.
 	The WindowMenu can not be closed by closeMenu (in case the Id argument equals 
 	WindowMenuId).
 */
 
 
-openMenuElements	:: !Id !Index .ls (m .ls (PSt .l .p))      !(PSt .l .p)
-											   -> (!ErrorReport,!PSt .l .p)
-											   |  MenuElements m
-openSubMenuElements	:: !Id !Index .ls (m .ls (PSt .l .p))      !(PSt .l .p)
-											   -> (!ErrorReport,!PSt .l .p)
-											   |  MenuElements m
-openRadioMenuItems	:: !Id !Index ![MenuRadioItem (PSt .l .p)] !(IOSt .l .p)
-											   -> (!ErrorReport,!IOSt .l .p)
+openMenuElements	:: !Id !Index .ls (m .ls (PSt .l))      !(PSt .l)
+											-> (!ErrorReport,!PSt .l)
+											|  MenuElements m
+openSubMenuElements	:: !Id !Index .ls (m .ls (PSt .l))      !(PSt .l)
+											-> (!ErrorReport,!PSt .l)
+											|  MenuElements m
+openRadioMenuItems	:: !Id !Index ![MenuRadioItem (PSt .l)] !(IOSt .l)
+											-> (!ErrorReport,!IOSt .l)
 /*	Add menu elements to the indicated Menu, SubMenu, or RadioMenu.
 	openRadioMenuItems checks the first item in the list if the RadioMenu was empty.
 	Menu elements are added after the item with the specified index. The index of a 
@@ -79,16 +78,16 @@ openRadioMenuItems	:: !Id !Index ![MenuRadioItem (PSt .l .p)] !(IOSt .l .p)
 */
 
 
-closeMenuElements :: !Id ![Id] !(IOSt .l .p) -> IOSt .l .p
+closeMenuElements :: !Id ![Id] !(IOSt .l) -> IOSt .l
 /*	closeMenuElements
 		closes menu elements of the Menu identified by the first Id argument by 
 		their Ids. The elements of (Sub/Radio)Menus will be removed first.  
 */
 
 
-closeMenuIndexElements		:: !Id ![Index] !(IOSt .l .p) -> IOSt .l .p
-closeSubMenuIndexElements	:: !Id ![Index] !(IOSt .l .p) -> IOSt .l .p
-closeRadioMenuIndexElements	:: !Id ![Index] !(IOSt .l .p) -> IOSt .l .p
+closeMenuIndexElements		:: !Id ![Index] !(IOSt .l) -> IOSt .l
+closeSubMenuIndexElements	:: !Id ![Index] !(IOSt .l) -> IOSt .l
+closeRadioMenuIndexElements	:: !Id ![Index] !(IOSt .l) -> IOSt .l
 /*	Close menu elements of the indicated Menu, SubMenu, or RadioMenu by their Index 
 	position.
 	Analogous to openMenuElements and openRadioMenuItems indices range from one to 
@@ -101,8 +100,8 @@ closeRadioMenuIndexElements	:: !Id ![Index] !(IOSt .l .p) -> IOSt .l .p
 */
 
 
-enableMenuSystem :: !(IOSt .l .p) -> IOSt .l .p
-disableMenuSystem:: !(IOSt .l .p) -> IOSt .l .p
+enableMenuSystem	:: !(IOSt .l) -> IOSt .l
+disableMenuSystem	:: !(IOSt .l) -> IOSt .l
 /*	Enable/disable the menu system of this interactive process. When the menu system
 	is re-enabled the previously selectable menus and elements will become 
 	selectable again. 
@@ -113,8 +112,8 @@ disableMenuSystem:: !(IOSt .l .p) -> IOSt .l .p
 */
 
 
-enableMenus :: ![Id] !(IOSt .l .p) -> IOSt .l .p
-disableMenus:: ![Id] !(IOSt .l .p) -> IOSt .l .p
+enableMenus			:: ![Id] !(IOSt .l) -> IOSt .l
+disableMenus		:: ![Id] !(IOSt .l) -> IOSt .l
 /*	Enable/disable individual menus. 
 	The WindowMenu can not be enabled/disabled.
 	Disabling a menu overrules the SelectStates of its elements, which become 
@@ -125,27 +124,27 @@ disableMenus:: ![Id] !(IOSt .l .p) -> IOSt .l .p
 */
 
 
-getMenuSelectState :: !Id !(IOSt .l .p) -> (!Maybe SelectState,!IOSt .l .p)
+getMenuSelectState	:: !Id !(IOSt .l) -> (!Maybe SelectState,!IOSt .l)
 /*	getMenuSelectState yields the current SelectState of the indicated menu. In case
 	the menu does not exist, Nothing is returned.
 */
 
 
-getMenus :: !(IOSt .l .p) -> (![(Id,MenuType)],!IOSt .l .p)
+getMenus			:: !(IOSt .l) -> (![(Id,MenuType)],!IOSt .l)
 /*	getMenus yields the Ids and MenuTypes of the current set of menus of this 
 	interactive process.
 */
 
 
-getMenuPos :: !Id !(IOSt .l .p) -> (!Maybe Index,!IOSt .l .p)
+getMenuPos			:: !Id !(IOSt .l) -> (!Maybe Index,!IOSt .l)
 /*	getMenuPos yields the index position of the indicated menu in the current list 
 	of menus.
 	In case the menu does not exist, Nothing is returned.
 */
 
 
-setMenuTitle :: !Id !Title !(IOSt .l .p) -> IOSt .l .p
-getMenuTitle :: !Id        !(IOSt .l .p) -> (!Maybe Title,!IOSt .l .p)
+setMenuTitle		:: !Id !Title !(IOSt .l) -> IOSt .l
+getMenuTitle		:: !Id        !(IOSt .l) -> (!Maybe Title,!IOSt .l)
 /*	setMenuTitle sets the title of the indicated menu. 
 		In case the menu does not exist or refers to the WindowMenu, nothing 
 		happens.

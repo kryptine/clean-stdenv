@@ -15,7 +15,7 @@ receiverdeviceFatalError :: String String -> .x
 receiverdeviceFatalError rule error
 	= FatalError rule "receiverdevice" error
 
-ReceiverFunctions :: DeviceFunctions (PSt .l .p)
+ReceiverFunctions :: DeviceFunctions (PSt .l)
 ReceiverFunctions
 	= {	dShow	= id
 	  ,	dHide	= id
@@ -25,7 +25,7 @@ ReceiverFunctions
 	  ,	dClose	= receiverClose
 	  }
 
-receiverOpen :: !(PSt .l .p) -> PSt .l .p
+receiverOpen :: !(PSt .l) -> PSt .l
 receiverOpen pState=:{io=ioState}
 	# (hasReceiver,ioState)	= IOStHasDevice ReceiverDevice ioState
 	| hasReceiver
@@ -37,7 +37,7 @@ receiverOpen pState=:{io=ioState}
 		# ioState			= IOStSetDeviceFunctions [ReceiverFunctions:deviceFunctions] ioState
 		= {pState & io=ioState}
 
-receiverClose :: !(PSt .l .p) -> PSt .l .p
+receiverClose :: !(PSt .l) -> PSt .l
 receiverClose pState=:{io=ioState}
 // MW11...
 	# ioState					= callReceiverCloseFunctions ioState
@@ -55,7 +55,7 @@ receiverClose pState=:{io=ioState}
 	= {pState & io=ioState}
 // MW11..
   where
-	callReceiverCloseFunctions :: !(IOSt .l .p) -> (IOSt .l .p)
+	callReceiverCloseFunctions :: !(IOSt .l) -> (IOSt .l)
 	callReceiverCloseFunctions ioState
 		# (found,rDevice,ioState)	= IOStGetDevice ReceiverDevice ioState
 		| not found
@@ -82,7 +82,7 @@ receiverClose pState=:{io=ioState}
 	- SyncMessage:
 		this is a request to handle the given synchronous message.
 */
-receiverIO :: !DeviceEvent !(PSt .l .p) -> (!DeviceEvent,!PSt .l .p)
+receiverIO :: !DeviceEvent !(PSt .l) -> (!DeviceEvent,!PSt .l)
 receiverIO deviceEvent pState=:{io=ioState}
 	# (found,rDevice,ioState)	= IOStGetDevice ReceiverDevice ioState
 	| not found					// This condition should not occur: dDoIO function should be applied only iff dEvent filters message
@@ -91,11 +91,11 @@ receiverIO deviceEvent pState=:{io=ioState}
 		# receivers				= ReceiverSystemStateGetReceiverHandles rDevice
 		= receiverIO deviceEvent receivers.rReceivers {pState & io=ioState}
 where
-	receiverIO :: !DeviceEvent ![ReceiverStateHandle (PSt .l .p)] !(PSt .l .p) -> (!DeviceEvent,!PSt .l .p)
+	receiverIO :: !DeviceEvent ![ReceiverStateHandle (PSt .l)] !(PSt .l) -> (!DeviceEvent,!PSt .l)
 	receiverIO deviceEvent=:(ReceiverEvent (QASyncMessage event)) rsHs pState
 		= (deviceEvent,receiverASyncIO event rsHs pState)
 	where
-		receiverASyncIO :: !QASyncMessage ![ReceiverStateHandle (PSt .l .p)] !(PSt .l .p) -> PSt .l .p
+		receiverASyncIO :: !QASyncMessage ![ReceiverStateHandle (PSt .l)] !(PSt .l) -> PSt .l
 		receiverASyncIO event=:{qasmRecLoc={rlReceiverId},qasmMsg} rsHs pState=:{io=ioState}
 			#! rsHs			= qMessage rlReceiverId qasmMsg rsHs
 			#  ioState		= IOStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
@@ -117,7 +117,7 @@ where
 	where
 		rl	= event.asmRecLoc
 		
-		letOneReceiverDoIO :: !RecLoc ![ReceiverStateHandle (PSt .l .p)] !(PSt .l .p) -> PSt .l .p
+		letOneReceiverDoIO :: !RecLoc ![ReceiverStateHandle (PSt .l)] !(PSt .l) -> PSt .l
 		letOneReceiverDoIO {rlParentId} rsHs pState
 			= pState2
 		where
@@ -138,7 +138,7 @@ where
 		# (event,pState)		= receiverSyncIO lastProcess event rsHs pState
 		= (ReceiverEvent (SyncMessage event),pState)
 	where
-		receiverSyncIO :: !Bool !SyncMessage ![ReceiverStateHandle (PSt .l .p)] !(PSt .l .p) -> (!SyncMessage,!PSt .l .p)
+		receiverSyncIO :: !Bool !SyncMessage ![ReceiverStateHandle (PSt .l)] !(PSt .l) -> (!SyncMessage,!PSt .l)
 		receiverSyncIO lastProcess event rsHs pState
 			| not found
 			= (event1,pState2)
@@ -205,9 +205,9 @@ letOneReceiverDoInetEvent (eventCode,endpointRef,inetReceiverCategory,misc) rsHs
 		= (Nothing,[])
 	
 
-applyInetEvent	::	!InetReceiverASMQType !.(ReceiverStateHandle *(PSt .ls .ps))
-					[ReceiverStateHandle *(PSt .ls .ps)] !*(PSt .ls .ps)
-				->	(PSt .ls .ps)
+applyInetEvent	::	!InetReceiverASMQType !.(ReceiverStateHandle *(PSt .l))
+					[ReceiverStateHandle *(PSt .l)] !*(PSt .l)
+				->	PSt .l
 applyInetEvent eventInfo rsH=:{rState,rHandle} rsHs pState
 	= pState2
 	with

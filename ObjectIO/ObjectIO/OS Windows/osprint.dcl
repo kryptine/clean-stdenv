@@ -53,7 +53,7 @@ class PrintEnvironments printEnv
 		-> 	(Alternative .x .state,!*printEnv)
 
 instance PrintEnvironments Files
-instance PrintEnvironments (PSt .l .p)
+instance PrintEnvironments (PSt .l)
 
 
 os_printsetuptostring	::	!PrintSetup -> String

@@ -16,7 +16,7 @@ sdisizeFatalError rule error = FatalError rule "sdisize" error
 
 
 //	getSDIWindowSize retrieves the current size of the WindowViewFrame if this is a SDI process
-getSDIWindowSize :: !(IOSt .l .p) -> (!Size,!OSWindowPtr,!IOSt .l .p)
+getSDIWindowSize :: !(IOSt .l) -> (!Size,!OSWindowPtr,!IOSt .l)
 getSDIWindowSize ioState
 	# (osdInfo,ioState)		= IOStGetOSDInfo ioState
 	  isSDI					= getOSDInfoDocumentInterface osdInfo==SDI
@@ -37,7 +37,7 @@ getSDIWindowSize ioState
 		Note that:
 			oldviewframesize.h <> newviewframesize.h && oldviewframesize.w == newviewframesize.w
 */
-resizeSDIWindow :: !OSWindowPtr !Size !Size !(IOSt .l .p) -> IOSt .l .p
+resizeSDIWindow :: !OSWindowPtr !Size !Size !(IOSt .l) -> IOSt .l
 resizeSDIWindow wPtr {h=oldHeight} newFrameSize=:{h=newHeight} ioState
 	# (osdInfo,ioState)			= IOStGetOSDInfo ioState
 	  isSDI						= getOSDInfoDocumentInterface osdInfo==SDI

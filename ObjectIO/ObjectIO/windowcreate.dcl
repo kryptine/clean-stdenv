@@ -14,14 +14,14 @@ import	windowhandle
 	The window/dialogue will be filled with concrete controls and a concrete window will be created. 
 	After opening the window its optional initial actions are also evaluated.
 */
-openwindow			:: !Id !(WindowLSHandle .ls (PSt .l .p)) !(PSt  .l .p) -> PSt .l .p
-openmodalwindow		:: !Id !(WindowLSHandle .ls (PSt .l .p)) !(PSt  .l .p) -> (!ErrorReport,!Maybe .ls,!PSt .l .p)
+openwindow			:: !Id !(WindowLSHandle .ls (PSt .l)) !(PSt .l) -> PSt .l
+openmodalwindow		:: !Id !(WindowLSHandle .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!Maybe .ls,!PSt .l)
 
 /*	bufferDelayedEvents buffers the activate/deactivate events.
 */
-bufferDelayedEvents	:: ![DelayActivationInfo] !(IOSt .l .p) -> IOSt .l .p
+bufferDelayedEvents	:: ![DelayActivationInfo] !(IOSt .l) -> IOSt .l
 
 /*	WindowBound-checks for normal windows.
 */
-checkZeroWindowBound:: !(IOSt .l .p) -> (!Bool,!IOSt .l .p)
-decreaseWindowBound	:: !(IOSt .l .p) -> IOSt .l .p
+checkZeroWindowBound:: !(IOSt .l) -> (!Bool,!IOSt .l)
+decreaseWindowBound	:: !(IOSt .l) -> IOSt .l

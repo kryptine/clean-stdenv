@@ -85,7 +85,7 @@ insertMenuHandle` mH` (MenuLSHandle mlsH=:{mlsHandle=mH})
 		}
 
 
-getMenu :: !Id !(IOSt .l .p) -> (!Maybe MState, !IOSt .l .p)
+getMenu :: !Id !(IOSt .l) -> (!Maybe MState, !IOSt .l)
 getMenu menuId ioState
 	# (ok,ioState)			= IOStHasDevice MenuDevice ioState
 	| not ok
@@ -103,7 +103,7 @@ getMenu menuId ioState
 		# ioState			= IOStSetDevice (MenuSystemState {mHs & mMenus=msHs}) ioState
 		= (Just {mRep=msH`,mTb=0},ioState)
 
-getParentMenu :: !Id !(IOSt .l .p) -> (!Maybe MState, !IOSt .l .p)
+getParentMenu :: !Id !(IOSt .l) -> (!Maybe MState, !IOSt .l)
 getParentMenu itemId ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	  maybeParent		= getIdParent itemId idtable
@@ -116,7 +116,7 @@ getParentMenu itemId ioState
 	| otherwise
 		= (Nothing,ioState)
 
-setMenu :: !Id !(IdFun *MState) !(IOSt .l .p) -> IOSt .l .p
+setMenu :: !Id !(IdFun *MState) !(IOSt .l) -> IOSt .l
 setMenu menuId f ioState
 	# (ok,ioState)			= IOStHasDevice MenuDevice ioState
 	| not ok
@@ -147,7 +147,7 @@ setMenu menuId f ioState
 
 //	Enabling and Disabling of menu elements:
 
-enableMenuElements :: ![Id] !(IOSt .l .p) -> IOSt .l .p
+enableMenuElements :: ![Id] !(IOSt .l) -> IOSt .l
 enableMenuElements ids ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	# (ioId,ioState)	= IOStGetIOId ioState
@@ -156,7 +156,7 @@ enableMenuElements ids ioState
 	| isEmpty ids_mIds	= ioState
 	| otherwise			= StrictSeq [setMenu mId (changeMenuItemsSelect (map (\id->(id,True)) ids)) \\ (ids,mId)<-ids_mIds] ioState
 
-disableMenuElements :: ![Id] !(IOSt .l .p) -> IOSt .l .p
+disableMenuElements :: ![Id] !(IOSt .l) -> IOSt .l
 disableMenuElements ids ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	# (ioId,ioState)	= IOStGetIOId ioState
@@ -207,7 +207,7 @@ where
 
 //	Marking and Unmarking of MenuItems only:
 
-markMenuItems :: ![Id] !(IOSt .l .p) -> IOSt .l .p
+markMenuItems :: ![Id] !(IOSt .l) -> IOSt .l
 markMenuItems ids ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	# (ioId,ioState)	= IOStGetIOId ioState
@@ -216,7 +216,7 @@ markMenuItems ids ioState
 	| isEmpty ids_mIds	= ioState
 	| otherwise			= StrictSeq [setMenu mId (changeMenuItemsMark (map (\id->(id,True)) ids)) \\ (ids,mId)<-ids_mIds] ioState
 
-unmarkMenuItems :: ![Id] !(IOSt .l .p) -> IOSt .l .p
+unmarkMenuItems :: ![Id] !(IOSt .l) -> IOSt .l
 unmarkMenuItems ids ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	# (ioId,ioState)	= IOStGetIOId ioState
@@ -238,7 +238,7 @@ where
 
 //	Changing the Title of menu elements:
 
-setMenuElementTitles :: ![(Id,Title)] !(IOSt .l .p) -> IOSt .l .p
+setMenuElementTitles :: ![(Id,Title)] !(IOSt .l) -> IOSt .l
 setMenuElementTitles id_titles ioState
 	# (idtable,ioState)			= IOStGetIdTable ioState
 	# (ioId,ioState)			= IOStGetIOId ioState
@@ -264,7 +264,7 @@ where
 
 //	Changing the selected menu item of a RadioMenu by its Id:
 
-selectRadioMenuItem :: !Id !Id !(IOSt .l .p) -> IOSt .l .p
+selectRadioMenuItem :: !Id !Id !(IOSt .l) -> IOSt .l
 selectRadioMenuItem id itemId ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	# (ioId,ioState)	= IOStGetIOId ioState
@@ -302,7 +302,7 @@ where
 
 //	Changing the selected menu item of a RadioMenu by its index:
 
-selectRadioMenuIndexItem :: !Id !Index !(IOSt .l .p) -> IOSt .l .p
+selectRadioMenuIndexItem :: !Id !Index !(IOSt .l) -> IOSt .l
 selectRadioMenuIndexItem id index ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	# (ioId,ioState)	= IOStGetIOId ioState

@@ -25,7 +25,7 @@ processeventFatalError function error
 /*	processEvent filters the scheduler events that can be handled by this process device.
 	processEvent assumes that it is not applied to an empty IOSt.
 */
-processEvent :: !SchedulerEvent !(PSt .l .p) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l .p)
+processEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
 
 processEvent schedulerEvent=:(ScheduleOSEvent osEvent=:{ccMsg} _) pState=:{io=ioState}
 	| isProcessOSEvent ccMsg

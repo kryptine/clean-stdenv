@@ -12,7 +12,7 @@ from	oswindow			import OSNoWindowPtr
 
 
 instance Controls (Receiver m) where
-	controlToHandles :: !(Receiver m .ls (PSt .l .p)) !(PSt .l .p) -> (![ControlState .ls (PSt .l .p)],!PSt .l .p)
+	controlToHandles :: !(Receiver m .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (Receiver rid f atts) pState
 		= (	[WElementHandleToControlState
 				(WItemHandle 
@@ -43,7 +43,7 @@ instance Controls (Receiver m) where
 		= "Receiver"
 
 instance Controls (Receiver2 m r) where
-	controlToHandles :: !(Receiver2 m r .ls (PSt .l .p)) !(PSt .l .p) -> (![ControlState .ls (PSt .l .p)],!PSt .l .p)
+	controlToHandles :: !(Receiver2 m r .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (Receiver2 r2id f atts) pState
 		= (	[WElementHandleToControlState
 				(WItemHandle 

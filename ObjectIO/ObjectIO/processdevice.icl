@@ -13,7 +13,7 @@ processdeviceFatalError rule error
 	= FatalError rule "processdevice" error
 
 
-ProcessFunctions :: DeviceFunctions (PSt .l .p)
+ProcessFunctions :: DeviceFunctions (PSt .l)
 ProcessFunctions
 	= {	dShow	= id//processShow
 	  ,	dHide	= id//processHide
@@ -23,7 +23,7 @@ ProcessFunctions
 	  ,	dClose	= id//processClose
 	  }
 
-processOpen :: !(PSt .l .p) -> PSt .l .p
+processOpen :: !(PSt .l) -> PSt .l
 processOpen pState=:{io=ioState}
 	# (hasProcess,ioState)			= IOStHasDevice ProcessDevice ioState
 	| hasProcess
@@ -35,7 +35,7 @@ processOpen pState=:{io=ioState}
 		# ioState					= createOSDInfo osdinfo ioState
 		= {pState & io=ioState}
 where
-	createOSDInfo :: !OSDInfo !(IOSt .l .p) -> IOSt .l .p
+	createOSDInfo :: !OSDInfo !(IOSt .l) -> IOSt .l
 	createOSDInfo emptyOSDInfo ioState
 		| di==NDI
 			= IOStSetOSDInfo emptyOSDInfo ioState
@@ -58,7 +58,7 @@ where
 	where
 		di					= getOSDInfoDocumentInterface emptyOSDInfo
 
-processIO :: !DeviceEvent !(PSt .l .p) -> (!DeviceEvent,!PSt .l .p)
+processIO :: !DeviceEvent !(PSt .l) -> (!DeviceEvent,!PSt .l)
 
 processIO deviceEvent=:ProcessRequestClose pState
 	# (atts,pState)		= accPIO IOStGetProcessAttributes pState

@@ -31,7 +31,7 @@ windoweventFatalError function error
 	For the time being no timer controls are added, so these events are ignored.
 	windowEvent assumes that it is not applied to an empty IOSt.
 */
-windowEvent :: !SchedulerEvent !(PSt .l .p) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l .p)
+windowEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
 windowEvent schedulerEvent pState
 	# (hasDevice,pState)	= accPIO (IOStHasDevice WindowDevice) pState
 	| not hasDevice			// This condition should never occur: WindowDevice must have been 'installed'
@@ -39,7 +39,7 @@ windowEvent schedulerEvent pState
 	| otherwise
 		= windowEvent schedulerEvent pState
 where
-	windowEvent :: !SchedulerEvent !(PSt .l .p) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l .p)
+	windowEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
 	windowEvent schedulerEvent=:(ScheduleOSEvent osEvent _) pState=:{io=ioState}
 		| not (isWindowOSEvent osEvent.ccMsg)
 			= (False,Nothing,schedulerEvent,pState)
@@ -96,8 +96,8 @@ where
 
 /*	filterOSEvent filters the OSEvents that can be handled by this window device.
 */
-filterOSEvent :: !OSWindowMetrics !OSEvent !(WindowHandles (PSt .l .p)) !(IOSt .l .p)
-	-> (!Bool,!Maybe [Int],!Maybe DeviceEvent,!WindowHandles (PSt .l .p),!IOSt .l .p)
+filterOSEvent :: !OSWindowMetrics !OSEvent !(WindowHandles (PSt .l)) !(IOSt .l)
+  -> (!Bool,!Maybe [Int],!Maybe DeviceEvent,!WindowHandles (PSt .l),  !IOSt .l)
 
 filterOSEvent _ {ccMsg=CcWmBUTTONCLICKED,p1=wPtr,p2=cPtr,p3=mods,p4=toolbarIndex} windows ioState
 	# (found,wsH,windows)	= getWindowHandlesWindow (toWID wPtr) windows

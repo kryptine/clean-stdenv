@@ -4,7 +4,7 @@ implementation module osprint
 
 // MW11 was import StdEnv,intrface,clCrossCall_12, iostate, scheduler
 import StdEnv,clCCall_12,clCrossCall_12, iostate, scheduler
-import ospicture, osevent, StdPicture, StdWindow, StdPSt
+import ospicture, osevent/*, StdPicture*/, StdWindow, StdPSt
 
 ::	PrintSetup
 	=	{	devmode	::	!String
@@ -85,7 +85,7 @@ class PrintEnvironments printEnv
 						-> 	(Alternative .x .state,!*printEnv)
 
 
-instance PrintEnvironments (PSt .l .p)
+instance PrintEnvironments (PSt .l)
 where
 	os_printpageperpage doDialog emulateScreen x initFun transFun printSetup pSt=:{io}
 		#!	(windowStack, io)			= getWindowStack io
@@ -102,7 +102,7 @@ where
 	  		# (x,mb_context,os) = printPagePerPageBothSemaphor
 								doDialog emulateScreen x initFun transFun printSetup (Just context) os
 			= (x,EnvSetOS os (fromJust mb_context))
-		zipWithSelectState :: .Id *(IOSt .a .b) -> *(.(Maybe SelectState,Id),*IOSt .a .b)
+		zipWithSelectState :: .Id *(IOSt .a) -> *(.(Maybe SelectState,Id),*IOSt .a)
 		zipWithSelectState id io
 			#!	(mbSelectState, io)	= getWindowSelectState id io
 			= ((mbSelectState, id), io)

@@ -50,41 +50,41 @@ instance Ids World where
 		# w = loadWorld world
 		= ([toR2Id nr \\ nr<-[w-n+1..w]],storeWorld (w-n) world)
 
-instance Ids (IOSt .l .p) where
-	openId :: !*(IOSt .l .p) -> (!Id, !*IOSt .l .p)
+instance Ids (IOSt .l) where
+	openId :: !*(IOSt .l) -> (!Id, !*IOSt .l)
 	openId ioState
 		# (idseed,ioState)	= IOStGetIdSeed ioState
 		= (toId idseed,IOStSetIdSeed (idseed-1) ioState)
 	
-	openIds :: !Int !*(IOSt .l .p) -> (![Id], !*IOSt .l .p)
+	openIds :: !Int !*(IOSt .l) -> (![Id], !*IOSt .l)
 	openIds n ioState
 		# (idseed,ioState)	= IOStGetIdSeed ioState
 		= ([toId nr \\ nr<-[idseed-n+1..idseed]],IOStSetIdSeed (idseed-n) ioState)
 	
 	
-	openRId :: !*(IOSt .l .p) -> (!RId m, !*IOSt .l .p)
+	openRId :: !*(IOSt .l) -> (!RId m, !*IOSt .l)
 	openRId ioState
 		# (idseed,ioState)	= IOStGetIdSeed ioState
 		= (toRId idseed,IOStSetIdSeed (idseed-1) ioState)
 	
-	openRIds :: !Int !*(IOSt .l .p) -> (![RId m], !*IOSt .l .p)
+	openRIds :: !Int !*(IOSt .l) -> (![RId m], !*IOSt .l)
 	openRIds n ioState
 		# (idseed,ioState)	= IOStGetIdSeed ioState
 		= ([toRId nr \\ nr<-[idseed-n+1..idseed]],IOStSetIdSeed (idseed-n) ioState)
 	
 	
-	openR2Id :: !*(IOSt .l .p) -> (!R2Id m r, !*IOSt .l .p)
+	openR2Id :: !*(IOSt .l) -> (!R2Id m r, !*IOSt .l)
 	openR2Id ioState
 		# (idseed,ioState)	= IOStGetIdSeed ioState
 		= (toR2Id idseed,IOStSetIdSeed (idseed-1) ioState)
 	
-	openR2Ids :: !Int !*(IOSt .l .p) -> (![R2Id m r], !*IOSt .l .p)
+	openR2Ids :: !Int !*(IOSt .l) -> (![R2Id m r], !*IOSt .l)
 	openR2Ids n ioState
 		# (idseed,ioState)	= IOStGetIdSeed ioState
 		= ([toR2Id nr \\ nr<-[idseed-n+1..idseed]],IOStSetIdSeed (idseed-n) ioState)
 
 
-getParentId :: !Id !(IOSt .l .p) -> (!Maybe Id,!IOSt .l .p)
+getParentId :: !Id !(IOSt .l) -> (!Maybe Id,!IOSt .l)
 getParentId id ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	  maybeParent		= getIdParent id idtable

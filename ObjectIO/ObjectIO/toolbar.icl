@@ -14,7 +14,7 @@ toolbarFatalError function error
 	= FatalError function "toolbar" error
 
 
-openToolbar :: !(IOSt .l .p) -> IOSt .l .p
+openToolbar :: !(IOSt .l) -> IOSt .l
 openToolbar ioState
 	# (osdInfo,ioState)			= IOStGetOSDInfo ioState
 	  di						= getOSDInfoDocumentInterface osdInfo
@@ -30,7 +30,7 @@ openToolbar ioState
 	| otherwise
 		= openMDIToolbar toolbar osdInfo ioState
 where
-	openSDIToolbar :: ![ToolbarItem (PSt .l .p)] !OSDInfo !(IOSt .l .p) -> IOSt .l .p
+	openSDIToolbar :: ![ToolbarItem (PSt .l)] !OSDInfo !(IOSt .l) -> IOSt .l
 	openSDIToolbar items osdInfo/*(OSSDInfo sdinfo=:{ossdOSInfo=info=:{osFrame,osToolbar}})*/ ioState
 		| isJust osToolbar
 			= toolbarFatalError "openSDIToolbar" "toolbar already present"
@@ -54,7 +54,7 @@ where
 									nothing   -> toolbarFatalError "openSDIToolbar" "could not retrieve OSInfo from OSDInfo"
 		{osFrame,osToolbar}		= osinfo
 	
-	openMDIToolbar :: ![ToolbarItem (PSt .l .p)] !OSDInfo !(IOSt .l .p) -> IOSt .l .p
+	openMDIToolbar :: ![ToolbarItem (PSt .l)] !OSDInfo !(IOSt .l) -> IOSt .l
 	openMDIToolbar items osdInfo ioState
 		| isJust osToolbar
 			= toolbarFatalError "openMDIToolbar" "toolbar already present"
@@ -76,17 +76,17 @@ where
 									nothing   -> toolbarFatalError "openMDIToolbar" "could not retrieve OSInfo from OSDInfo"
 		{osFrame,osToolbar}		= osinfo
 
-	openToolbarItem	:: !OSToolbarHandle !(ToolbarItem (PSt .l .p)) !(!Int,!*OSToolbox) -> (!Int,!*OSToolbox)
+	openToolbarItem	:: !OSToolbarHandle !(ToolbarItem (PSt .l)) !(!Int,!*OSToolbox) -> (!Int,!*OSToolbox)
 	openToolbarItem tbPtr (ToolbarItem bitmap tooltip _) (index,tb)
 		= (index+1,OScreateBitmapToolbarItem tbPtr (fromBitmap bitmap) index tb)
 	openToolbarItem tbPtr ToolbarSeparator (index,tb)
 		= (index,OScreateToolbarSeparator tbPtr tb)
 
-getBitmapsSize :: ![ToolbarItem .ps] -> Size
+getBitmapsSize :: ![ToolbarItem .pst] -> Size
 getBitmapsSize items
 	= StateMap2 maxBitmapSize items {w=OSdefaultToolbarHeight,h=OSdefaultToolbarHeight}
 where
-	maxBitmapSize :: !(ToolbarItem .ps) !Size -> Size
+	maxBitmapSize :: !(ToolbarItem .pst) !Size -> Size
 	maxBitmapSize item size
 		= {w=max itemsize.w size.w,h=max itemsize.h size.h}
 	where

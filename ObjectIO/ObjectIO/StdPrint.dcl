@@ -40,7 +40,7 @@ class PrintSetupEnvironments env
 		// lets the user choose a print setup via the print setup dialog
 		
 instance PrintSetupEnvironments World
-instance PrintSetupEnvironments (IOSt .l .p)
+instance PrintSetupEnvironments (IOSt .l)
 
 getPageDimensions	::	!PrintSetup	!Bool->	PageDimensions
 instance == PageDimensions

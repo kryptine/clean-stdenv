@@ -14,7 +14,7 @@ from	menucreate	import disposeMenuIds, disposeShortcutkeys, disposeSubMenuHandle
 
 
 ::	DeltaMenuSystem l p
-	:==	!OSMenuBar -> !(MenuHandles (PSt l p)) -> !*OSToolbox -> (!MenuHandles (PSt l p),!*OSToolbox)
+	:==	!OSMenuBar -> !(MenuHandles (PSt l)) -> !*OSToolbox -> (!MenuHandles (PSt l),!*OSToolbox)
 ::	AccessMenuSystem x pst
 	:==	!OSMenuBar -> !(MenuHandles pst) -> !*OSToolbox -> (!x,!MenuHandles pst,!*OSToolbox)
 ::	DeltaMenuHandles pst
@@ -30,7 +30,7 @@ menuinternalFatalError function error
 
 //	General rules to access MenuHandles:
 
-changeMenuSystemState :: !Bool !(DeltaMenuSystem .l .p) !(IOSt .l .p) -> IOSt .l .p
+changeMenuSystemState :: !Bool !(DeltaMenuSystem .l .p) !(IOSt .l) -> IOSt .l
 changeMenuSystemState redrawMenus f ioState
 	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
 	| not found
@@ -50,7 +50,7 @@ changeMenuSystemState redrawMenus f ioState
 		# ioState				= setIOToolbox (DrawMenuBar osMenuBar tb) ioState
 		= IOStSetDevice (MenuSystemState menus) ioState
 
-accessMenuSystemState :: !Bool !(AccessMenuSystem x (PSt .l .p)) !(IOSt .l .p) -> (!Maybe x, !IOSt .l .p)
+accessMenuSystemState :: !Bool !(AccessMenuSystem x (PSt .l)) !(IOSt .l) -> (!Maybe x, !IOSt .l)
 accessMenuSystemState redrawMenus f ioState
 	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
 	| not found
@@ -76,7 +76,7 @@ accessMenuSystemState redrawMenus f ioState
 	process window can change size.
 	In that case, the layout of the controls should be recalculated, and the window updated.
 */
-closemenu :: !Id !(IOSt .l .p) -> IOSt .l .p
+closemenu :: !Id !(IOSt .l) -> IOSt .l
 closemenu id ioState
 	# (osdInfo,ioState)			= IOStGetOSDInfo ioState
 	| getOSDInfoDocumentInterface osdInfo==NDI
@@ -144,11 +144,11 @@ where
 
 //	Enabling and Disabling of Menus:
 
-enablemenus :: ![Id] !(IOSt .l .p) -> IOSt .l .p
+enablemenus :: ![Id] !(IOSt .l) -> IOSt .l
 enablemenus ids ioState
 	= changeMenuSystemState True (setSelectMenus ids Able) ioState
 
-disablemenus :: ![Id] !(IOSt .l .p) -> IOSt .l .p
+disablemenus :: ![Id] !(IOSt .l) -> IOSt .l
 disablemenus ids ioState
 	= changeMenuSystemState True (setSelectMenus ids Unable) ioState
 
@@ -181,7 +181,7 @@ where
 
 //	Removing menu elements from (sub/radio)menus:
 
-closemenuelements :: !Id ![Id] !(IOSt .l .p) -> IOSt .l .p
+closemenuelements :: !Id ![Id] !(IOSt .l) -> IOSt .l
 closemenuelements mId ids ioState
 	# (pid,ioState)		= IOStGetIOId ioState
 	# (rt,ioState)		= IOStGetReceiverTable ioState
@@ -202,7 +202,7 @@ closemenuelements mId ids ioState
 RemoveSpecialMenuElements	:==	True		// For closemenuindexelements:        remove elements with special ids
 NotRemoveSpecialMenuElements:==	False		// For closemenuindexelements: do not remove elements with special ids
 
-closemenuindexelements :: !Bool !Bool !SystemId !(!Id,!Maybe Id) ![Index] !(IOSt .l .p) -> IOSt .l .p
+closemenuindexelements :: !Bool !Bool !SystemId !(!Id,!Maybe Id) ![Index] !(IOSt .l) -> IOSt .l
 closemenuindexelements removeSpecialElements fromRadioMenu pid loc indices ioState
 	# (rt,ioState)		= IOStGetReceiverTable ioState
 	# (it,ioState)		= IOStGetIdTable ioState
@@ -219,7 +219,7 @@ closemenuindexelements removeSpecialElements fromRadioMenu pid loc indices ioSta
 
 //	Set & Get the title of a menu.
 
-setmenutitle :: !Id !Title !(IOSt .l .p) -> IOSt .l .p
+setmenutitle :: !Id !Title !(IOSt .l) -> IOSt .l
 setmenutitle id title ioState
 	= changeMenuSystemState True (setOSMenuTitle id title) ioState
 where

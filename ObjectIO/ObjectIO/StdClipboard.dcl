@@ -31,8 +31,8 @@ instance Clipboard {#Char}
 
 //	Access to the current content of the clipboard:
 
-setClipboard :: ![ClipboardItem] !(PSt .l .p) -> PSt .l .p
-getClipboard :: !(PSt .l .p) -> (![ClipboardItem],!PSt .l .p)
+setClipboard :: ![ClipboardItem] !(PSt .l) -> PSt .l
+getClipboard :: !(PSt .l) -> (![ClipboardItem],!PSt .l)
 /*	setClipboard
 		replaces the current content of the clipboard with the argument list. 
 		Of the list only the first occurence of a ClipboardItem of the same type
@@ -43,7 +43,7 @@ getClipboard :: !(PSt .l .p) -> (![ClipboardItem],!PSt .l .p)
 */
 
 
-clipboardHasChanged	:: !(PSt .l .p) -> (!Bool,!PSt .l .p)
+clipboardHasChanged	:: !(PSt .l) -> (!Bool,!PSt .l)
 /*	clipboardHasChanged holds if the current content of the clipboard is different
 	from the last access to the clipboard.
 */

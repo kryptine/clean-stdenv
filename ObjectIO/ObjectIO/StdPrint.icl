@@ -22,7 +22,7 @@ instance PrintSetupEnvironments World
 	printSetupDialog printSetup env
 		= os_printsetupdialog True printSetup env
 
-instance PrintSetupEnvironments (IOSt .l .p)
+instance PrintSetupEnvironments (IOSt .l)
   where
 	defaultPrintSetup env
 		= os_defaultprintsetup env

@@ -25,7 +25,7 @@ windowvalidateError function error
 	If so, Nothing is returned; otherwise a proper Id value for the window/dialogue is returned.
 	The Id is not bound.
 */
-validateWindowId :: !(Maybe Id) !(IOSt .l .p) -> (!Maybe Id,!IOSt .l .p)
+validateWindowId :: !(Maybe Id) !(IOSt .l) -> (!Maybe Id,!IOSt .l)
 validateWindowId Nothing ioState
 	# (wId,ioState)				= openId ioState
 	= (Just wId,ioState)
@@ -38,7 +38,7 @@ validateWindowId (Just id) ioState
 /*	Validate the given window.
 */
 validateWindow :: !OSWindowMetrics !OSDInfo !(WindowHandle .ls .pst) !(WindowHandles .pst) !*OSToolbox
-						 -> (!Index,!Point2,!Size,!Vector2,!WindowHandle .ls .pst,  !WindowHandles .pst, !*OSToolbox)
+		   -> (!Index,!Point2,!Size,!Vector2,!WindowHandle .ls .pst,  !WindowHandles .pst, !*OSToolbox)
 
 validateWindow wMetrics _ wH=:{whMode=mode,whKind=IsDialog,whItemNrs,whItems,whAtts} windows tb
 	# atts						= filter (not o isWindowOnlyAttribute) whAtts

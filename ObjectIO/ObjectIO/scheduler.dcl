@@ -8,7 +8,7 @@ definition module scheduler
 import	deviceevents, StdMaybe
 from	StdString		import String
 from	id				import Id
-from	iostate			import PSt, IOSt, RR, Groups, GroupIO, Locals, LocalIO
+from	iostate			import PSt, IOSt, RR, Locals, LocalIO
 from	receivertable	import ReceiverTable, ReceiverTableEntry, RecLoc
 from	device			import Device
 from	processstack	import ProcessStack, ProcessShowState, ShowFlag, ProcessKind, InteractiveProcess, VirtualProcess
@@ -32,15 +32,18 @@ from	StdProcessDef	import ProcessInit, DocumentInterface, NDI, SDI, MDI
 	=	{	envsEvents		:: !*OSEvents
 		,	envsWorld		:: !*World
 		}
+/*
 ::	*GContext p
 	=	{	groupPublic		:: p
 		,	groupLocals		:: !*Locals p
 		}
+*/
 ::	*Context
 	=	{	cEnvs			:: !*Environs			// The global environments
 		,	cProcessStack	:: ProcessStack			// The global process stack
 		,	cMaxIONr		:: SystemId				// The global maximum system number
-		,	cGroups			:: *Groups				// All process groups
+//		,	cGroups			:: *Groups				// All process groups
+		,	cProcesses		:: *Locals				// All processes
 		,	cModalProcess	:: Maybe SystemId		// The SystemId of the interactive process that has a modal window
 		,	cReceiverTable	:: ReceiverTable		// The global receiver-process table
 		,	cTimerTable		:: TimerTable			// The table of all currently active timers
@@ -50,7 +53,7 @@ from	StdProcessDef	import ProcessInit, DocumentInterface, NDI, SDI, MDI
 		,	cOSToolbox		:: !*OSToolbox			// The toolbox environment
 		}
 
-initContext		:: !(ProcessInit (PSt .l .p)) !String !(!.l,!.p) !DocumentInterface !ProcessKind !*World -> (!Context,!*OSToolbox)
+initContext		:: !(ProcessInit (PSt .l)) !String !.l !DocumentInterface !ProcessKind !*World -> (!Context,!*OSToolbox)
 /*	Generate an initial Context, given the initial actions, state, and (document/process)kind of an interactive
 	process, and World.
 */
@@ -73,14 +76,14 @@ closeContext	:: !Context !*OSToolbox -> *World
 */
 
 
-handleOneEventForDevices :: !SchedulerEvent !(PSt .l .p) -> (!Bool,!SchedulerEvent,!PSt .l .p)
+handleOneEventForDevices :: !SchedulerEvent !(PSt .l) -> (!Bool,!SchedulerEvent,!PSt .l)
 /*	Apply the given event to all devices in the current interactive process.
 	The Boolean result indicates whether one of the devices actually handled the event.
 	The DeviceEvent result may contain a response of type [o], or an error indication.
 */
 
 
-addVirtualProcess		:: !(ProcessInit (PSt .l .p)) String (.l,.p) !(PSt .l` .p`) -> PSt .l` .p`
+addVirtualProcess		:: !(ProcessInit (PSt .l)) String .l !(PSt .l`) -> PSt .l`
 /*	AddVirtualProcess adds a process to the process administration as a virtual process.
 	For virtual processes no initial devices are created. If the initial actions of the
 	virtual process attempt to create a device instance this results in a runtime error.
@@ -91,8 +94,8 @@ addVirtualProcess		:: !(ProcessInit (PSt .l .p)) String (.l,.p) !(PSt .l` .p`) -
 ShareGUI			:==	True
 NotShareGUI			:==	False
 
-addInteractiveProcess	:: ![ProcessAttribute (PSt .l .p)] !(ProcessInit (PSt .l .p)) String .l 
-							!Bool !DocumentInterface !(PSt .l` .p ) -> PSt .l` .p
+addInteractiveProcess	:: ![ProcessAttribute (PSt .l)] !(ProcessInit (PSt .l)) String .l 
+							!Bool !DocumentInterface !(PSt .l`) -> PSt .l`
 /*	AddInteractiveProcess adds a process to the process administration as an interactive process.
 	For interactive processes initial devices are created. 
 	The Boolean argument determines whether the process shares (ShareGUI) or not shares 
@@ -101,7 +104,7 @@ addInteractiveProcess	:: ![ProcessAttribute (PSt .l .p)] !(ProcessInit (PSt .l .
 */
 
 
-quitProcess			:: !(PSt .l .p) -> PSt .l .p
+quitProcess			:: !(PSt .l) -> PSt .l
 /*	QuitProcess removes all abstract devices that are held in the interactive process
 	and takes care that all processes that share its GUI are also terminated recursively.
 	The resulting IOSt is a terminal value and will be removed from the process administration.
@@ -117,7 +120,7 @@ quitProcess			:: !(PSt .l .p) -> PSt .l .p
 	|	SwitchReceiverUnable
 	|	SwitchEndsUpInDeadlock
 
-cswitchProcess :: !SystemId !SchedulerEvent !(PSt .l .p) -> (!Maybe SwitchError, ![SemiDynamic], !PSt .l .p)
+cswitchProcess :: !SystemId !SchedulerEvent !(PSt .l) -> (!Maybe SwitchError, ![SemiDynamic], !PSt .l)
 /*	cswitchProcess processId msgEvent pstate switches to PSt identified by processId, lets that process 
 	handle the msgEvent, and switches back to pstate.
 	Nothing SwitchError is returned if no exceptions were detected. 
@@ -132,7 +135,7 @@ cswitchProcess :: !SystemId !SchedulerEvent !(PSt .l .p) -> (!Maybe SwitchError,
 	Observe that in case Nothing is returned, the ps PSt component may have changed value.
 */
 
-accContext :: !.(St Context .x) !(PSt .l .p) -> (!.x, !PSt .l .p)
+accContext :: !.(St Context .x) !(PSt .l) -> (!.x, !PSt .l)
 /*	accContext applies the Context access function to the switched out process state (which creates a
 	Context value), and switches back to the process state. The Context access function must not
 	remove the argument process, otherwise a run-time error will occur!
@@ -146,8 +149,7 @@ accContext :: !.(St Context .x) !(PSt .l .p) -> (!.x, !PSt .l .p)
 		,	!Maybe r		//	optional access information
 		)
 
-accessLocals:: !((LocalIO .p)->(Result r,LocalIO .p)) !*(Locals .p)	-> (!Result r,!*Locals .p)
-accessGroups:: !(GroupIO	 ->(Result r,GroupIO)   ) !*Groups		-> (!Result r,!*Groups)
+accessLocals :: !(St LocalIO (Result r)) !*Locals -> (!Result r,!*Locals)
 /*	Let f::(IOSt .l .p) -> (Result r,IOSt .l .p) be an IOSt access function. 
 	To thread f through *Locals until fst(fst(f io)), define gLocals as follows:
 	
@@ -155,11 +157,4 @@ accessGroups:: !(GroupIO	 ->(Result r,GroupIO)   ) !*Groups		-> (!Result r,!*Gro
 		gLocals locals = accessLocals f` locals
 		where	f` localIO	= (r,{localIO & localIOSt=ioState})
 				where	(r,ioState)	= f localIO.localIOSt
-
-	To thread f through *Groups until fst(fst(f io)), define gGroups as follows:
-	
-		gGroups :: *Groups -> (Result r, *Groups)
-		gGroups groups = accessGroups f` groups
-		where	f` {groupState=p, groupIO=locals} = (r, {groupState=p, groupIO=locals`})
-				where	(r,locals`) = gLocals locals
 */

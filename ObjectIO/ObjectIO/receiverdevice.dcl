@@ -8,4 +8,4 @@ import	devicefunctions
 from	iostate	import PSt, IOSt
 
 
-ReceiverFunctions :: DeviceFunctions (PSt .l .p)
+ReceiverFunctions :: DeviceFunctions (PSt .l)

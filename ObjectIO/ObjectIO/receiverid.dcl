@@ -11,12 +11,12 @@ import iostate
 		the Device kind of the parent device instance.
 	bindRId adds the receiver in the receiver table.
 */
-bindRId		:: !Id !SelectState !Id !Device !(IOSt .l .p) -> IOSt .l .p
+bindRId		:: !Id !SelectState !Id !Device !(IOSt .l) -> IOSt .l
 
 /*	unbindRId removes the receiver identified by the Id.
 */
-unbindRId	:: !Id !(IOSt .l .p) -> IOSt .l .p
+unbindRId	:: !Id !(IOSt .l) -> IOSt .l
 
 /*	unbindRIds removes the receivers identified by the Ids.
 */
-unbindRIds	:: ![Id] !(IOSt .l .p) -> IOSt .l .p
+unbindRIds	:: ![Id] !(IOSt .l) -> IOSt .l
