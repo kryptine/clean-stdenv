@@ -1,7 +1,7 @@
 Version: 1.4
 Global
 	Built:	True
-	Target:	Everything
+	Target:	Experimental
 	Exec:	{Project}\properties.exe
 	CodeGen
 		CheckStacks:	False
@@ -37,7 +37,7 @@ Global
 		ExportedNames:	
 	Paths
 		Path:	{Project}
-		Path:	{Application}\Libraries\MersenneTwister 1.0.2
+		Path:	{Application}\Libraries\MersenneTwister
 	Precompile:	
 	Postlink:	
 MainModule
