@@ -145,20 +145,20 @@ where
 self :: (GecCircuit a a) (GecCircuit a a) -> GecCircuit a a
 self g f = GecCircuit k
 where 
-	k seta env = (self_seta id_u gseta, env````)
+	k seta env = (self_seta id_B gseta, env````)
 	where
-		(id_u, env`) = openStoreId env
-		(_, env``) = openStore id_u (Just YesUpdate) env`
+		(id_B, env`) = openStoreId env
+		(_, env``) = openStore id_B (Just False) env`
 		(fseta, env```) = runCircuit f gseta env``
-		(gseta, env````) = runCircuit g (self_setrec id_u seta fseta) env```
+		(gseta, env````) = runCircuit g (self_setrec id_B seta fseta) env```
 
-	self_setrec id_u setout setrec NoUpdate a env 
-		# (u, env) = readStore id_u env
-		= setout u a env
-	self_setrec id_u setout setrec YesUpdate a env = setrec NoUpdate a env
+	self_setrec id_B setout setrec u a env 
+		# (exit, env) = readStore id_B env
+		  env = writeStore id_B (not exit) env
+		= (if exit setout setrec) u a env
 
-	self_seta id_u seta u a env 
-		# env = writeStore id_u u env
+	self_seta id_B seta u a env 
+		# env = writeStore id_B False env
 		= seta u a env
 
 	/* = arr addLEFT >>> feedback (first g >>> arr selectX >>> f >>> arr addRIGHT) >>> arr fst
@@ -169,22 +169,7 @@ where
 		addRIGHT x = (x, RIGHT x)*/
 
 feedback :: (GecCircuit a a) -> GecCircuit a a
-feedback g = GecCircuit k	// = self g (arr id)
-where 
-	k seta env = (feedback_seta id_u gseta, env```)
-	where
-		(id_u, env`) = openStoreId env
-		(_, env``) = openStore id_u (Just YesUpdate) env`
-		(gseta, env```) = runCircuit g (feedback_setrec id_u seta gseta) env``
-
-	feedback_setrec id_u  setout setrec NoUpdate a env 
-		# (u, env) = readStore id_u env
-		= setout u a env
-	feedback_setrec id_u  setout setrec YesUpdate a env = setrec NoUpdate a env
-
-	feedback_seta id_u seta u a env 
-		# env = writeStore id_u u env
-		= seta u a env
+feedback g = self g (arr id)
 
 sink :: GecCircuit a Void
 sink = GecCircuit k
