@@ -44,8 +44,8 @@ movewindowviewframe wMetrics v wids=:{wPtr} wH=:{whWindowInfo,whItems=oldItems,w
 		# (isRect,areaRect,tb)		= case whWindowInfo of
 		  								WindowInfo {windowClip={clipRgn}} -> osgetrgnbox clipRgn tb
 		  								_                                 -> controlposFatalError "movewindowviewframe" "unexpected whWindowInfo field"
-		# (updRgn,newItems,tb)		= relayoutControls wMetrics wPtr wH.whDefaultId whSelect whShow (contentRect,zero,zero,oldItems`) 
-									                                                                (contentRect,zero,zero,wH.whItems) tb
+		# (updRgn,newItems,tb)		= relayoutControls wMetrics wPtr wH.whDefaultId False whSelect whShow (contentRect,zero,zero,oldItems`) 
+									                                                                      (contentRect,zero,zero,wH.whItems) tb
 		# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wids {wH & whItems=newItems} tb
 		  (updArea,updAction)		= if (not lookInfo.lookSysUpdate || toMuch || not isRect || hasUpdate)
 		  								([newFrame],return []) (calcScrollUpdateArea oldOrigin newOrigin areaRect)

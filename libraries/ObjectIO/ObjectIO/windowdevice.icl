@@ -664,7 +664,7 @@ windowStateCompoundScrollActionIO wMetrics info=:{csaWIDS={wPtr}}
 		# (_,newItems,tb)		= layoutControls wMetrics hMargins vMargins spaces contentSize minSize [(domain,origin)] itemHs tb
 		  wH					= {wH & whItems=newItems}
 		# (wH,tb)				= forceValidWindowClipState wMetrics True wPtr wH tb
-		# (updRgn,newItems,tb)	= relayoutControls wMetrics wPtr whDefaultId whSelect whShow (wFrame,zero,zero,whItems`) (wFrame,zero,zero,wH.whItems) tb
+		# (updRgn,newItems,tb)	= relayoutControls wMetrics wPtr whDefaultId False whSelect whShow (wFrame,zero,zero,whItems`) (wFrame,zero,zero,wH.whItems) tb
 		# (wH,tb)				= updatewindowbackgrounds wMetrics updRgn info.csaWIDS {wH & whItems=newItems} tb
 		# (wH,tb)				= drawcompoundlook wMetrics whSelect wFrame info.csaItemNr wPtr wH tb	// PA: this might be redundant now because of updatewindowbackgrounds
 //		# tb					= OSvalidateWindowRect wPtr (sizeToRect whSize) tb
@@ -1427,7 +1427,7 @@ where
 			# (isRect,areaRect,tb)		= case whWindowInfo of
 			  								WindowInfo {windowClip={clipRgn}} -> osgetrgnbox clipRgn tb
 			  								_                                 -> windowdeviceFatalError "windowScrollActionIO" "unexpected whWindowInfo field"
-			# (updRgn,newItems,tb)		= relayoutControls wMetrics wPtr whDefaultId whSelect whShow (contentRect,zero,zero,oldItems`) (contentRect,zero,zero,wH.whItems) tb
+			# (updRgn,newItems,tb)		= relayoutControls wMetrics wPtr whDefaultId False whSelect whShow (contentRect,zero,zero,oldItems`) (contentRect,zero,zero,wH.whItems) tb
 			# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn info.wsaWIDS {wH & whItems=newItems} tb
 			  newFrame					= posSizeToRectangle newOrigin contentSize
 			  toMuch					= if isHorizontal

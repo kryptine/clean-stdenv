@@ -23,16 +23,17 @@ relayoutFatalError function error
 	= fatalError function "relayout" error
 
 
-/*	relayoutItems wMetrics wPtr (oldFrame,oldParent,oldCompound,oldItems) (newFrame,newParent,newCompound,newItems) 
+/*	relayoutItems wMetrics guiPtr withinCompound (oldFrame,oldParent,oldCompound,oldItems) (newFrame,newParent,newCompound,newItems) 
 	resizes and moves changed items.
-		The OSWindowPtr is the parent window/dialog.
-		The two OSRect  arguments are the window frames in which the elements reside.
-		The two Point2  arguments are the positions of the parent window/compound/layout.
-		The two Vector2 arguments are the positions of the parent window/compound.
-		The two RelayoutItem lists contain the elements at their location and size.
+		guiPtr            :: OSWindowPtr    is the parent window/compound control.
+		withinCompound    :: Bool           is True iff the elements are inside a CompoundControl.
+		(old/new)Frame    :: OSRect         are the window frames in which the elements reside.
+		(old/new)Parent   :: Point2         are the positions of the parent window/compound/layout.
+		(old/new)Compound :: Vector2        are the positions of the parent window/compound.
+		(old/new)Items    :: [RelayoutItem] contain the elements at their location and size.
 	Assumptions: 
-		* The two RelayoutItem lists contain elements that are identical except for size and position
-		* (Radio/Check)Controls are flattened and have rliItemKind Is(Radio/Check)Control
+		* (old/new)Items contain elements that are identical except for size and position.
+		* (Radio/Check)Controls are flattened and have rliItemKind Is(Radio/Check)Control.
 		* The ClipStates of CompoundControls are valid.
 	This version uses the HDC of the parent window in order to suppress calls to initpicture.
 		Regions are used to clip sibling controls.
@@ -41,12 +42,13 @@ relayoutFatalError function error
 			* initially validRegion and invalidRegion are empty.
 			* for each relayoutitem: if its oldFrame<>newFrame then it adds newFrame to validRegion, and oldFrame to invalidRegion
 			* the area to be updated equals validRegion - invalidRegion (so if its empty, then no update is required)
-	relayoutItems returns the update region. 
+	relayoutItems returns the background region that needs to be updated.
 */
-relayoutItems :: !OSWindowMetrics !OSWindowPtr !(!OSRect,!Point2,!Vector2,![RelayoutItem])
-                                               !(!OSRect,!Point2,!Vector2,![RelayoutItem]) 
-                 !*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
-relayoutItems wMetrics wPtr (oldFrame,oldParentPos,oldCompoundPos,oldHs) (newFrame,newParentPos,newCompoundPos,newHs) tb
+relayoutItems :: !OSWindowMetrics !OSWindowPtr !Bool !(!OSRect,!Point2,!Vector2,![RelayoutItem])
+                                                     !(!OSRect,!Point2,!Vector2,![RelayoutItem]) 
+                                                     !*OSToolbox
+                                    -> (!OSRgnHandle,!*OSToolbox)
+relayoutItems wMetrics wPtr withinCompound (oldFrame,oldParentPos,oldCompoundPos,oldHs) (newFrame,newParentPos,newCompoundPos,newHs) tb
 	#! (clipRgn,tb)		= osnewrectrgn newFrame tb
 	#! (validRgn,tb)	= osnewrectrgn zero tb
 	#! (invalidRgn,tb)	= osnewrectrgn zero tb
@@ -54,9 +56,9 @@ relayoutItems wMetrics wPtr (oldFrame,oldParentPos,oldCompoundPos,oldHs) (newFra
 	#! picture			= packPicture zero defaultPen True osPict tb
 	#! ((clipRgn,validRgn,invalidRgn),picture)
 						= accClipPicture (toRegion (rectToRectangle newFrame)) 
-							(relayoutItems` wPtr wMetrics newArea (oldFrame,oldParentPos,oldCompoundPos,oldHs)
-																  (newFrame,newParentPos,newCompoundPos,newHs)
-																  (clipRgn,validRgn,invalidRgn)
+							(relayoutItems` wPtr wMetrics withinCompound newArea (oldFrame,oldParentPos,oldCompoundPos,oldHs)
+																                 (newFrame,newParentPos,newCompoundPos,newHs)
+																                 (clipRgn,validRgn,invalidRgn)
 							) picture
 	#! (_,_,_,osPict,tb)= unpackPicture picture
 	#! tb				= osReleaseWindowPictContext wPtr osPict tb
@@ -66,45 +68,48 @@ relayoutItems wMetrics wPtr (oldFrame,oldParentPos,oldCompoundPos,oldHs) (newFra
 where
 	newArea				= subtractRects newFrame oldFrame
 	
-	relayoutItems` :: !OSWindowPtr !OSWindowMetrics ![OSRect] !(!OSRect,!Point2,!Vector2,![RelayoutItem]) 
-	                                                          !(!OSRect,!Point2,!Vector2,![RelayoutItem])
-	                                                          !(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle) !*Picture
-	                                                      -> (!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle),!*Picture)
-	relayoutItems` wPtr wMetrics newArea (oldFrame,oldParentPos,oldCompoundPos,[oldH:oldHs]) (newFrame,newParentPos,newCompoundPos,[newH:newHs]) rgnHs picture
-		# (rgnHs,picture)	= relayoutItem   wPtr wMetrics newArea (oldFrame,oldParentPos,oldCompoundPos,oldH)
-							                                       (newFrame,newParentPos,newCompoundPos,newH)
-							                                       rgnHs picture
-		# (rgnHs,picture)	= relayoutItems` wPtr wMetrics newArea (oldFrame,oldParentPos,oldCompoundPos,oldHs)
-							                                       (newFrame,newParentPos,newCompoundPos,newHs)
-							                                       rgnHs picture
+	relayoutItems` :: !OSWindowPtr !OSWindowMetrics !Bool ![OSRect] !(!OSRect,!Point2,!Vector2,![RelayoutItem]) 
+	                                                                !(!OSRect,!Point2,!Vector2,![RelayoutItem])
+	                                                                !(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle) !*Picture
+	                                                            -> (!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle),!*Picture)
+	relayoutItems` wPtr wMetrics withinCompound newArea (oldFrame,oldParentPos,oldCompoundPos,[oldH:oldHs])
+	                                                    (newFrame,newParentPos,newCompoundPos,[newH:newHs]) 
+	                                                    rgnHs picture
+		# (rgnHs,picture)	= relayoutItem   wPtr wMetrics withinCompound newArea (oldFrame,oldParentPos,oldCompoundPos,oldH)
+							                                                      (newFrame,newParentPos,newCompoundPos,newH)
+							                                                      rgnHs picture
+		# (rgnHs,picture)	= relayoutItems` wPtr wMetrics withinCompound newArea (oldFrame,oldParentPos,oldCompoundPos,oldHs)
+							                                                      (newFrame,newParentPos,newCompoundPos,newHs)
+							                                                      rgnHs picture
 		= (rgnHs,picture)
 	where
-		relayoutItem :: !OSWindowPtr !OSWindowMetrics ![OSRect] !(!OSRect,!Point2,!Vector2,!RelayoutItem)
-		                                                        !(!OSRect,!Point2,!Vector2,!RelayoutItem)
-		                                                        !(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle) !*Picture
-		                                                    -> (!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle),!*Picture)
-		relayoutItem wPtr wMetrics newArea old=:(_,_,_,{rliItemShow,rliItemKind=k1}) new=:(_,_,_,{rliItemKind=k2}) rgnHs picture
+		relayoutItem :: !OSWindowPtr !OSWindowMetrics !Bool ![OSRect] !(!OSRect,!Point2,!Vector2,!RelayoutItem)
+		                                                              !(!OSRect,!Point2,!Vector2,!RelayoutItem)
+		                                                              !(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle) !*Picture
+		                                                          -> (!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle),!*Picture)
+		relayoutItem wPtr wMetrics withinCompound newArea old=:(_,_,_,{rliItemShow,rliItemKind=k1}) new=:(_,_,_,{rliItemKind=k2}) rgnHs picture
 			| k1<>k2			= relayoutFatalError "relayoutItem" "mismatching RelayoutItems"
 		//	| not rliItemShow	= (rgnHs,picture)		// the items are invisible, so nothing needs to be relayn out
-			| otherwise			= relayout wPtr wMetrics newArea k1 old new rgnHs picture
+			| otherwise			= relayout wPtr wMetrics withinCompound newArea k1 old new rgnHs picture
 		where
 			/*	relayout assumes that the two RelayoutItem arguments 
 				have the same ControlKind (fourth argument) and differ only in size or position or both.
 			*/
-			relayout :: !OSWindowPtr !OSWindowMetrics ![OSRect] !ControlKind !(!OSRect,!Point2,!Vector2,!RelayoutItem) 
-			                                                                 !(!OSRect,!Point2,!Vector2,!RelayoutItem)
-			                                                                 !(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle) !*Picture
-			                                                             -> (!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle),!*Picture)
+			relayout :: !OSWindowPtr !OSWindowMetrics !Bool ![OSRect] !ControlKind !(!OSRect,!Point2,!Vector2,!RelayoutItem) 
+			                                                                       !(!OSRect,!Point2,!Vector2,!RelayoutItem)
+			                                                                       !(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle) !*Picture
+			                                                                   -> (!(!OSRgnHandle,!OSRgnHandle,!OSRgnHandle),!*Picture)
 			
-			relayout wPtr wMetrics newArea IsCompoundControl (oldFrame,oldParentPos,oldCompoundPos,old) (newFrame,newParentPos,newCompoundPos,new)
-					(clipRgn,validRgn,invalidRgn) picture
+			relayout wPtr wMetrics withinCompound newArea IsCompoundControl (oldFrame,oldParentPos,oldCompoundPos,old)
+			                                                                (newFrame,newParentPos,newCompoundPos,new)
+			                                                                (clipRgn,validRgn,invalidRgn) picture
 				#! picture				= apppicttoolbox (moveF o sizeF) picture
 				#! picture				= updF picture
 				#! picture				= apppicttoolbox updScrollbars picture		// update scrollbars AFTER moving/sizing/updating
 				#! ((clipRgn,validRgn,invalidRgn),picture)
-										= relayoutItems` wPtr wMetrics newArea1 (oldFrame1,oldAbsolutePos,oldCompoundPos1,old.rliItems)
-																				(newFrame1,newAbsolutePos,newCompoundPos1,new.rliItems)
-																				(clipRgn,validRgn,invalidRgn) picture
+										= relayoutItems` wPtr wMetrics True newArea1 (oldFrame1,oldAbsolutePos,oldCompoundPos1,old.rliItems)
+										                                             (newFrame1,newAbsolutePos,newCompoundPos1,new.rliItems)
+										                                             (clipRgn,validRgn,invalidRgn) picture
 				| new.rliItemShow
 					#! ((validRgn,invalidRgn),picture)
 										= accpicttoolbox (checkUpdateRegions oldFrame1 newFrame1 (validRgn,invalidRgn)) picture
@@ -114,7 +119,8 @@ where
 					= ((clipRgn,validRgn,invalidRgn),picture)
 			where
 				sameSize		= oldSize==newSize
-				samePos			= osCompoundMovesControls && oldPos==newPos || oldAbsolutePos==newAbsolutePos
+//				samePos			= osCompoundMovesControls && oldPos==newPos || oldAbsolutePos==newAbsolutePos
+				samePos			= if (withinCompound && osCompoundMovesControls) (oldPos==newPos) (oldAbsolutePos==newAbsolutePos)
 				sizeF			= if sameSize
 									id (osSetCompoundSize wPtr newCompoundPos` itemPtr newPos` newSize` True)
 				moveF			= if (samePos && all isEmptyRect (map (intersectRects newFrame1) newArea))
@@ -174,8 +180,12 @@ where
 					scrollMax		= if isHorizontal newDomainRect.rright newDomainRect.rbottom
 					scrollSize		= if isHorizontal newContentSize.w newContentSize.h
 			
-			relayout wPtr wMetrics newArea IsLayoutControl (oldFrame,oldParentPos,oldCompoundPos,old) (newFrame,newParentPos,newCompoundPos,new) rgnHs picture
-				= relayoutItems` wPtr wMetrics newArea (oldFrame1,oldAbsolutePos,oldCompoundPos,old.rliItems) (newFrame1,newAbsolutePos,newCompoundPos,new.rliItems) rgnHs picture
+			relayout wPtr wMetrics withinCompound newArea IsLayoutControl (oldFrame,oldParentPos,oldCompoundPos,old) 
+			                                                              (newFrame,newParentPos,newCompoundPos,new)
+			                                                              rgnHs picture
+				= relayoutItems` wPtr wMetrics withinCompound newArea (oldFrame1,oldAbsolutePos,oldCompoundPos,old.rliItems)
+				                                                      (newFrame1,newAbsolutePos,newCompoundPos,new.rliItems)
+				                                                      rgnHs picture
 			where
 				newSize					= new.rliItemSize;								oldSize			= old.rliItemSize
 				newPos					= new.rliItemPos;								oldPos			= old.rliItemPos
@@ -183,7 +193,9 @@ where
 				newLayoutRect			= posSizeToRect newAbsolutePos newSize;			oldLayoutRect	= posSizeToRect oldAbsolutePos oldSize
 				newFrame1				= intersectRects newFrame newLayoutRect;		oldFrame1		= intersectRects oldFrame oldLayoutRect
 				
-			relayout wPtr wMetrics newArea controlKind (oldFrame,oldParentPos,oldCompoundPos,old) (newFrame,newParentPos,newCompoundPos,new) (clipRgn,validRgn,invalidRgn) picture
+			relayout wPtr wMetrics withinCompound newArea controlKind (oldFrame,oldParentPos,oldCompoundPos,old)
+			                                                          (newFrame,newParentPos,newCompoundPos,new) 
+			                                                          (clipRgn,validRgn,invalidRgn) picture
 				#! picture				= apppicttoolbox (moveF o sizeF) picture
 				#! picture				= updF picture
 				| new.rliItemShow
@@ -196,10 +208,10 @@ where
 			where
 				sameSize				= oldSize==newSize
 //				samePos					= osCompoundMovesControls && oldPos==newPos || oldAbsolutePos==newAbsolutePos
-				samePos					= if osCompoundMovesControls (oldPos==newPos) (oldAbsolutePos==newAbsolutePos)
+				samePos					= if (withinCompound && osCompoundMovesControls) (oldPos==newPos) (oldAbsolutePos==newAbsolutePos)
 				sizeF					= if sameSize id (setSize wPtr newCompoundPos` itemPtr newPos` newSize` (not redraw))
-				moveF					= /*if (samePos && all isEmptyRect (map (intersectRects newFrame1) newArea))
-											          id*/ (setPos  wPtr newCompoundPos` itemPtr newPos` (toTuple oldSize) (not redraw))
+				moveF					= if (samePos && all isEmptyRect (map (intersectRects newFrame1) newArea))
+											          id (setPos  wPtr newCompoundPos` itemPtr newPos` (toTuple oldSize) (not redraw))
 				updF					= if (not redraw || sameSize && oldAbsolutePos==newAbsolutePos && newFrame1==oldFrame1 || isEmptyRect newFrame1 || not new.rliItemShow)
 													  id (updatecustomcontrol wPtr newParentPos clipRgn newFrame1 new)
 				newParentPos`			= toTuple newParentPos
@@ -225,9 +237,9 @@ where
 											(IsOtherControl _)		-> (\_ _ _ _ _ _ tb->tb,		\_ _ _ _ _ _ tb->tb,		 False)
 											_						-> relayoutFatalError "relayout" "unexpected ControlKind alternative"
 			
-	relayoutItems` _ _ _ (_,_,_,[]) (_,_,_,[]) rgnHs picture
+	relayoutItems` _ _ _ _ (_,_,_,[]) (_,_,_,[]) rgnHs picture
 		= (rgnHs,picture)
-	relayoutItems` _ _ _ _ _ _ _
+	relayoutItems` _ _ _ _ _ _ _ _
 		= relayoutFatalError "relayoutItems`" "mismatching RelayoutItems"
 	
 	checkUpdateRegions :: !OSRect !OSRect !(!OSRgnHandle,!OSRgnHandle) !*OSToolbox -> (!(!OSRgnHandle,!OSRgnHandle),!*OSToolbox)

@@ -5,32 +5,35 @@ import StdBool, StdList, StdMisc
 import relayout, windowaccess, windowclipstate, wstateaccess
 
 
-/*	relayoutControls(`) wMetrics parentPtr defaultId isAble isVisible (oldFrame,oldParentPos,oldCompoundPos,old) (newFrame,newParentPos,newCompoundPos,new)
+/*	relayoutControls(`) wMetrics guiPtr defaultId withinCompound isAble isVisible (oldFrame,oldParentPos,oldCompoundPos,old) 
+	                                                                              (newFrame,newParentPos,newCompoundPos,new)
 	resizes, moves, and updates changed WElementHandle(`)s. 
-		parentPtr							is the parent window/dialog.
-		defaultId							is the optional Id of the default control.
-		isAble								is True iff the parent window/compound is Able.
-		oldFrame							is the clipping rect of the parent window/compound at the original location and size.
-		newFrame							is the clipping rect of the parent window/compound at the new location and size.
-		oldParentPos   and newParentPos		are the positions of the respective parent window/compound/layout of the elements.
-		oldCompoundPos and newCompoundPos	are the positions of the respective parent window/compound        of the elements.
-		old									contains the elements at their original location and size.
-		new									contains the elements at their new location and size.
-	relayoutControls(`) assumes that the two lists contain elements that are identical except for size and position.
+		guiPtr               :: OSWindowPtr             is the parent window/compound.
+		defaultId            :: Maybe Id                is the optional Id of the default control.
+		withinCompound       :: Bool                    is True iff the elements are inside a CompoundControl.
+		isAble               :: Bool                    is True iff the parent window/compound is Able.
+		isVisible            :: Bool                    is True iff the the elements are in a visible window/compound/layout.
+		oldFrame             :: OSRect                  is the clipping rect of the parent window/compound at the original location and size.
+		newFrame             :: OSRect                  is the clipping rect of the parent window/compound at the new location and size.
+		(old/new)ParentPos   :: Point2                  are the positions of the respective parent window/compound/layout of the elements.
+		(old/new)CompoundPos :: Vector2                 are the positions of the respective parent window/compound        of the elements.
+		old                  :: [WElementHandle`]       contains the elements at their original location and size.
+		new                  :: [WElementHandle ls pst] contains the elements at their new location and size.
+	relayoutControls(`) assumes that old and new contain elements that are identical except for size and position.
 		If this is not the case, a runtime error will occur.
 	relayoutControls(`) assumes that the ClipStates of all compound elements are valid.
 	The return OSRgnHandle is the area of the window that requires to be updated (use updatewindowbackgrounds [windowupdate] for this purpose).
 */
-relayoutControls :: !OSWindowMetrics !OSWindowPtr !(Maybe Id) !Bool !Bool !(!OSRect,!Point2,!Vector2,![WElementHandle`])
-                                                                          !(!OSRect,!Point2,!Vector2,!*[WElementHandle .ls .pst]) 
-                                                                          !*OSToolbox
-                             -> (!OSRgnHandle,!*[WElementHandle .ls .pst],!*OSToolbox)
-relayoutControls wMetrics wPtr defaultId isAble isVisible (oldFrame,oldParentPos,oldCompoundPos,oldHs) 
-                                                          (newFrame,newParentPos,newCompoundPos,newHs) tb
+relayoutControls :: !OSWindowMetrics !OSWindowPtr !(Maybe Id) !Bool !Bool !Bool !(!OSRect,!Point2,!Vector2,![WElementHandle`])
+                                                                                !(!OSRect,!Point2,!Vector2,!*[WElementHandle .ls .pst]) 
+                                                                                !*OSToolbox
+                                   -> (!OSRgnHandle,!*[WElementHandle .ls .pst],!*OSToolbox)
+relayoutControls wMetrics wPtr defaultId withinCompound isAble isVisible (oldFrame,oldParentPos,oldCompoundPos,oldHs) 
+                                                                         (newFrame,newParentPos,newCompoundPos,newHs) tb
 	# oldRelayoutItems			= wElementHandles`ToRelayoutItems isAble isVisible oldHs []
 	# (newHs,newRelayoutItems)	= wElementHandlesToRelayoutItems  isAble isVisible newHs []
-	# (updRgn,tb)				= relayoutItems wMetrics wPtr (oldFrame,oldParentPos,oldCompoundPos,oldRelayoutItems) 
-								                              (newFrame,newParentPos,newCompoundPos,newRelayoutItems) tb
+	# (updRgn,tb)				= relayoutItems wMetrics wPtr withinCompound (oldFrame,oldParentPos,oldCompoundPos,oldRelayoutItems) 
+								                                             (newFrame,newParentPos,newCompoundPos,newRelayoutItems) tb
 	= (updRgn,newHs,tb)
 where
 	wElementHandlesToRelayoutItems :: !Bool !Bool ![WElementHandle .ls .pst] ![RelayoutItem] -> (![WElementHandle .ls .pst],![RelayoutItem])
@@ -140,15 +143,15 @@ where
 		= ([],items)
 
 
-relayoutControls` :: !OSWindowMetrics !OSWindowPtr !(Maybe Id) !Bool !Bool !(!OSRect,!Point2,!Vector2,![WElementHandle`])
-                                                                           !(!OSRect,!Point2,!Vector2,![WElementHandle`]) 
-                                                                           !*OSToolbox
-                                                          -> (!OSRgnHandle,!*OSToolbox)
-relayoutControls` wMetrics wPtr defaultId isAble isVisible (oldFrame,oldParentPos,oldCompoundPos,oldHs) 
-                                                           (newFrame,newParentPos,newCompoundPos,newHs) tb
-	= relayoutItems wMetrics wPtr (oldFrame,oldParentPos,oldCompoundPos,wElementHandles`ToRelayoutItems isAble isVisible oldHs [])
-	                              (newFrame,newParentPos,newCompoundPos,wElementHandles`ToRelayoutItems isAble isVisible newHs [])
-					tb
+relayoutControls` :: !OSWindowMetrics !OSWindowPtr !(Maybe Id) !Bool !Bool !Bool !(!OSRect,!Point2,!Vector2,![WElementHandle`])
+                                                                                 !(!OSRect,!Point2,!Vector2,![WElementHandle`]) 
+                                                                                 !*OSToolbox
+                                                                -> (!OSRgnHandle,!*OSToolbox)
+relayoutControls` wMetrics wPtr defaultId withinCompound isAble isVisible (oldFrame,oldParentPos,oldCompoundPos,oldHs) 
+                                                                          (newFrame,newParentPos,newCompoundPos,newHs) tb
+	= relayoutItems wMetrics wPtr withinCompound (oldFrame,oldParentPos,oldCompoundPos,wElementHandles`ToRelayoutItems isAble isVisible oldHs [])
+	                                             (newFrame,newParentPos,newCompoundPos,wElementHandles`ToRelayoutItems isAble isVisible newHs [])
+	                                             tb
 
 wElementHandles`ToRelayoutItems :: !Bool !Bool ![WElementHandle`] ![RelayoutItem] -> [RelayoutItem]
 wElementHandles`ToRelayoutItems isAble isVisible [itemH:itemHs] items

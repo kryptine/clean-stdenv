@@ -1199,7 +1199,7 @@ movecontrolviewframe id v wMetrics wids=:{wPtr} wH=:{whKind`,whItems`,whSize`,wh
 	| whKind`==IsGameWindow
 		= (wH,tb)
 	# metricsInfo			= {miOSMetrics=wMetrics,miHMargins=hMargins,miVMargins=vMargins,miItemSpaces=spaces,miOrientation=orientation}
-	# (_,itemHs,(updRgn,tb))= setWElement (moveWItemFrame metricsInfo wPtr whDefaultId` True whSelect` clipRect zero zero v)
+	# (_,itemHs,(updRgn,tb))= setWElement (moveWItemFrame metricsInfo wPtr whDefaultId` False True whSelect` clipRect zero zero v)
 								id whItems` (Nothing,tb)
 	  wH					= {wH & whItems`=itemHs}
 	| isNothing updRgn
@@ -1223,11 +1223,12 @@ where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	orientation				= [(rectToRectangle domainRect,origin)]
 	
-	moveWItemFrame :: !MetricsInfo !OSWindowPtr !(Maybe Id) !Bool !Bool !OSRect !Point2 !Vector2 !Vector2 !Id
-							!WItemHandle` !(!Maybe OSRgnHandle,!*OSToolbox)
-				  -> (!Bool,!WItemHandle`,!(!Maybe OSRgnHandle,!*OSToolbox))
+	moveWItemFrame :: !MetricsInfo !OSWindowPtr !(Maybe Id) !Bool !Bool !Bool !OSRect !Point2 !Vector2 !Vector2 !Id
+	                         !WItemHandle` !(!Maybe OSRgnHandle,!*OSToolbox)
+	               -> (!Bool,!WItemHandle`,!(!Maybe OSRgnHandle,!*OSToolbox))
 	
-	moveWItemFrame metricsInfo=:{miOSMetrics,miHMargins,miVMargins,miItemSpaces,miOrientation} wPtr defaultId shownContext ableContext clipRect parentPos compoundPos v id
+	moveWItemFrame metricsInfo=:{miOSMetrics,miHMargins,miVMargins,miItemSpaces,miOrientation} 
+	               wPtr defaultId withinCompound shownContext ableContext clipRect parentPos compoundPos v id
 				   itemH=:{wItemId`,wItemKind`} updRgn_tb
 		| not (isRecursiveControl wItemKind`)
 			= (identifyMaybeId id wItemId`,itemH,updRgn_tb)
@@ -1238,14 +1239,15 @@ where
 				# metricsInfo`	= {metricsInfo & miHMargins=hMargins`,miVMargins=vMargins`,miItemSpaces=spaces`}
 				  clipRect1		= intersectRects clipRect (posSizeToRect absolutePos itemSize)
 				# (done,itemHs,updRgn_tb)
-								= setWElement (moveWItemFrame metricsInfo` wPtr defaultId shownContext1 ableContext1 clipRect1 absolutePos compoundPos v) id itemH.wItems` updRgn_tb
+								= setWElement (moveWItemFrame metricsInfo` wPtr defaultId withinCompound shownContext1 ableContext1 clipRect1 absolutePos compoundPos v) 
+								              id itemH.wItems` updRgn_tb
 				= (done,{itemH & wItems`=itemHs},updRgn_tb)
 		| not (identifyMaybeId id itemH.wItemId`)
 			# orientation`		= [(domain,oldOrigin):miOrientation]
 			  clipRect1			= intersectRects contentRect clipRect
 			  metricsInfo`		= {metricsInfo & miHMargins=hMargins`,miVMargins=vMargins`,miItemSpaces=spaces`,miOrientation=orientation`}
 			# (done,itemHs,updRgn_tb)
-								= setWElement (moveWItemFrame metricsInfo` wPtr defaultId shownContext1 ableContext1 clipRect1 absolutePos compoundPos1 v) id itemH.wItems` updRgn_tb
+								= setWElement (moveWItemFrame metricsInfo` wPtr defaultId True shownContext1 ableContext1 clipRect1 absolutePos compoundPos1 v) id itemH.wItems` updRgn_tb
 			= (done,{itemH & wItems`=itemHs},updRgn_tb)
 		| newOrigin==oldOrigin
 			= (True,itemH,updRgn_tb)
@@ -1270,8 +1272,8 @@ where
 									Just rgn -> osdisposergn rgn tb
 									nothing  -> tb
 			# (itemH, tb)		= forceValidCompoundClipState` miOSMetrics True wPtr parentPos defaultId shownContext itemH tb
-			# (updRgn,tb)		= relayoutControls` miOSMetrics itemPtr defaultId ableContext1 shownContext1 (contentRect,absolutePos,compoundPos,oldItems`) 
-								                                                                             (contentRect,absolutePos,compoundPos,itemH.wItems`) tb
+			# (updRgn,tb)		= relayoutControls` miOSMetrics itemPtr defaultId True ableContext1 shownContext1 (contentRect,absolutePos,compoundPos,oldItems`) 
+								                                                                                  (contentRect,absolutePos,compoundPos,itemH.wItems`) tb
 			# (itemH, tb)		= drawCompoundLook` miOSMetrics ableContext1 wPtr parentPos clipRect1 itemH tb
 			= (True,itemH,(Just updRgn,tb))
 	where
@@ -1312,7 +1314,7 @@ setcontrolviewdomain id newDomain wMetrics wids=:{wPtr} wH=:{whKind`,whItems`,wh
 	| whKind`==IsGameWindow
 		= (wH,tb)
 	# metricsInfo			= {miOSMetrics=wMetrics,miHMargins=hMargins,miVMargins=vMargins,miItemSpaces=spaces,miOrientation=orientation}
-	# (_,itemHs,(updRgn,tb))= setWElement (setWItemDomain metricsInfo wPtr whDefaultId` True whSelect` clipRect zero zero (validateViewDomain newDomain))
+	# (_,itemHs,(updRgn,tb))= setWElement (setWItemDomain metricsInfo wPtr whDefaultId` False True whSelect` clipRect zero zero (validateViewDomain newDomain))
 								id whItems` (Nothing,tb)
 	  wH					= {wH & whItems`=itemHs}
 	| isNothing updRgn
@@ -1336,11 +1338,11 @@ where
 	clipRect				= getContentRect wMetrics whWindowInfo` whSize`
 	orientation				= [(rectToRectangle domainRect,origin)]
 	
-	setWItemDomain :: !MetricsInfo !OSWindowPtr !(Maybe Id) !Bool !Bool !OSRect !Point2 !Vector2 !ViewDomain !Id !WItemHandle` !(!Maybe OSRgnHandle,!*OSToolbox)
-	                                                                                                   -> (!Bool,!WItemHandle`,!(!Maybe OSRgnHandle,!*OSToolbox))
+	setWItemDomain :: !MetricsInfo !OSWindowPtr !(Maybe Id) !Bool !Bool !Bool !OSRect !Point2 !Vector2 !ViewDomain !Id !WItemHandle` !(!Maybe OSRgnHandle,!*OSToolbox)
+	                                                                                                         -> (!Bool,!WItemHandle`,!(!Maybe OSRgnHandle,!*OSToolbox))
 	
 	setWItemDomain metricsInfo=:{miOSMetrics,miHMargins,miVMargins,miItemSpaces,miOrientation} 
-	               wPtr defaultId shownContext ableContext clipRect parentPos compoundPos newDomain id
+	               wPtr defaultId withinCompound shownContext ableContext clipRect parentPos compoundPos newDomain id
 				   itemH=:{wItemId`,wItemKind`} updRgn_tb=:(updRgn,tb)
 		| not (isRecursiveControl wItemKind`)
 			= (identifyMaybeId id wItemId`,itemH,updRgn_tb)
@@ -1351,7 +1353,7 @@ where
 				# metricsInfo`	= {metricsInfo & miHMargins=hMargins`,miVMargins=vMargins`,miItemSpaces=spaces`}
 				  clipRect1		= intersectRects clipRect (posSizeToRect absolutePos itemSize)
 				# (done,itemHs,updRgn_tb)
-								= setWElement (setWItemDomain metricsInfo` wPtr defaultId shownContext1 ableContext1 clipRect1 absolutePos compoundPos newDomain)
+								= setWElement (setWItemDomain metricsInfo` wPtr defaultId withinCompound shownContext1 ableContext1 clipRect1 absolutePos compoundPos newDomain)
 										id itemH.wItems` updRgn_tb
 				= (done,{itemH & wItems`=itemHs},updRgn_tb)
 		| not (identifyMaybeId id itemH.wItemId`)
@@ -1359,8 +1361,8 @@ where
 			  clipRect1			= intersectRects oldContentRect clipRect
 			  metricsInfo`		= {metricsInfo & miHMargins=hMargins`,miVMargins=vMargins`,miItemSpaces=spaces`,miOrientation=orientation`}
 			# (done,itemHs,updRgn_tb)
-								= setWElement (setWItemDomain metricsInfo` wPtr defaultId shownContext1 ableContext1 clipRect1 absolutePos compoundPos1 newDomain)
-									id itemH.wItems` updRgn_tb
+								= setWElement (setWItemDomain metricsInfo` wPtr defaultId True shownContext1 ableContext1 clipRect1 absolutePos compoundPos1 newDomain)
+									    id itemH.wItems` updRgn_tb
 			= (done,{itemH & wItems`=itemHs},updRgn_tb)
 		| newDomain==oldDomain
 			= (True,itemH,updRgn_tb)
@@ -1389,8 +1391,8 @@ where
 									nothing  -> tb
 		# (itemH, tb)			= forceValidCompoundClipState` miOSMetrics True wPtr parentPos defaultId shownContext itemH tb
 		# itemH					= {itemH & wItemAtts` = replaceControlSizeAtt newContentSize itemH.wItemAtts`}		// PA: update required because controllayout.icl relies on info
-		# (updRgn,tb)			= relayoutControls` miOSMetrics itemPtr defaultId ableContext1 shownContext1 (newContentRect,absolutePos,compoundPos,oldItems`) 
-								                                                                             (newContentRect,absolutePos,compoundPos,itemH.wItems`) tb
+		# (updRgn,tb)			= relayoutControls` miOSMetrics itemPtr defaultId True ableContext1 shownContext1 (newContentRect,absolutePos,compoundPos,oldItems`) 
+								                                                                                  (newContentRect,absolutePos,compoundPos,itemH.wItems`) tb
 		| shownContext1
 			# (itemH,tb)		= drawCompoundLook` miOSMetrics ableContext1 wPtr parentPos (intersectRects newContentRect clipRect) itemH tb
 			= (True,itemH,(Just updRgn,tb))
