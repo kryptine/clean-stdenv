@@ -1,7 +1,7 @@
 /*
 	Show Wrapped Node
 
-	Version 1.0.2
+	Version 1.0.3
 	Ronny Wichers Schreur
 	ronny@cs.kun.nl
 */
