@@ -16,11 +16,24 @@ doHtml :: (HSt -> (Html,HSt)) *World -> *World
 
 // mkHGEC converts any Clean type into a Html GEC
 
-:: FormID	 	:== String					// unique id identifying the form
-:: HMode a		= Edit (a -> a)
-				| Set 
+:: FormID	 	:== String				// unique id identifying the form
 
-mkHGEC :: FormID (HMode a) a HSt -> (a,(Body,HSt)) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a 
+:: HBimap d v =	{ toHGEC   	:: d -> v	// converts data to a HGEC for the view
+				, updHGEC 	:: v -> v	// update function will only be applied if the View form is changed 
+				, fromHGEC 	:: v -> d	// the view (either updated or not) is converted back to data domain
+				, resetHGEC :: v -> v	// appearance of the view for the next time
+				}
+
+:: HMode		= HEdit					// indicates an editor
+				| HDisplay				// indicates that one just wants to display something
+
+mkEditHGEC 		:: FormID 	HMode 			d HSt -> (d,(Body,HSt)) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSelfHGEC 		:: FormID 	(d -> d)		d HSt -> (d,(Body,HSt)) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+
+mkViewHGEC 		:: FormID 	(HBimap d v) 	d HSt -> (d,(Body,HSt)) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
+
+
+//mkHGEC :: FormID (HMode a) a HSt -> (a,(Body,HSt)) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a 
 
 // generic functions that do the real work,
 // end user just has to derive them for mkHGEC ...
@@ -39,12 +52,13 @@ derive gUpd  Int, Real, String, UNIT, PAIR, EITHER, OBJECT, CONS, (,)
 // Clean types with a special representation
 
 defsize :== 10															// size of inputfield
-:: CHButton = CHPressed | CHButton Int String
+:: CHButton 	= CHPressed | CHButton Int String						// button with text
+:: CHHidden a 	= CHHidden a 											// hidden state
 
-derive gHGEC 	(,,), CHButton
-derive gUpd  	(,,), CHButton
-derive gPrint 	(,,), CHButton
-derive gParse 	(,,), CHButton
+derive gHGEC 	(,,), CHButton, CHHidden  
+derive gUpd  	(,,), CHButton, CHHidden
+derive gPrint 	(,,), CHButton, CHHidden
+derive gParse 	(,,), CHButton, CHHidden
 
 
 

@@ -1,7 +1,7 @@
 implementation module htmlHandler
 
 import StdEnv, ArgEnv, StdMaybe
-import StdHtml
+import htmlDataDef, htmlTrivial
 import StdGeneric
 import htmlEncodeDecode
 import GenParse, GenPrint
@@ -39,25 +39,52 @@ where
 	(html,(_,lhst,_))  // the collection of local states is saved in the global state: easy thanks to lazy evaluation !
 		= pagehandler (mkHSt (urlEncodeState (reverse lhst))) 
 
-mkHGEC :: FormID (HMode a)  a HSt -> (a,(Body,HSt)) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
-mkHGEC uniqueid mode v (inidx,lhsts,ghst) 
-= (nv,gHGEC{|*|} nv (0,[(uniqueid,lhst):lhsts],ghst))
-where
-	lhst 	= encodeInfo  nv
-	
-	nv = updClean uniqueid mode v	 
+// simple editor for either editing or showing a simple value
 
-	updClean :: FormID (HMode a) a -> a | gUpd{|*|} a & gParse{|*|} a
-	updClean uniqueid mode v 
-		= case (decodeInput1 uniqueid,mode) of
+mkEditHGEC:: FormID HMode d HSt -> (d,(Body,HSt)) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkEditHGEC uniqueid  HEdit data hst
+= mkViewHGEC uniqueid {toHGEC = id , updHGEC = id , fromHGEC = id , resetHGEC = id} data hst
+mkEditHGEC uniqueid  HDisplay data hst
+= mkViewHGEC uniqueid {toHGEC = id , updHGEC = id , fromHGEC = id , resetHGEC = \_ -> data} data hst
+
+// editor with feedback to its self
+
+mkSelfHGEC 		:: FormID 	(d -> d)		d HSt -> (d,(Body,HSt)) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSelfHGEC uniqueid cbf data hst
+= mkViewHGEC uniqueid {toHGEC = id , updHGEC = cbf , fromHGEC = id , resetHGEC = id} data hst
+
+// swiss army nife editor that makes coffee too ...
+
+mkViewHGEC :: FormID (HBimap d v) d HSt -> (d,(Body,HSt)) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
+mkViewHGEC uniqueid {toHGEC, updHGEC, fromHGEC, resetHGEC} data (inidx,lhsts,ghst) 
+= (newdata,gHGEC{|*|} nextview (inputcounter,[(uniqueid,viewtostore):lhsts],ghst))
+where
+	inputcounter		= 0
+	initview 			= toHGEC data
+	(isupdated,newview) = updClean uniqueid initview	 
+	updateview			= if isupdated (updHGEC newview) newview
+	newdata				= fromHGEC updateview	 
+	nextview			= resetHGEC updateview
+	viewtostore			= encodeInfo  nextview
+	
+
+	updClean :: FormID a -> (Bool,a) | gUpd{|*|} a & gParse{|*|} a
+	updClean uniqueid v 
+		= case (decodeInput1 uniqueid) of
+
 			// an update is for this form is detected
-			((Just (pos,updval), Just oldstate),Edit update) -> (update (snd (gUpd{|*|} (UpdSearch updval pos) oldstate)))
-			// no update, look for it previous state
-			((Nothing, Just oldstate),Edit update)			-> oldstate
-			// no update, look for it previous state
-			((Nothing, Just oldstate),Set)					-> v
-			// no update, no previous state, so take the initial value as state
-			else											-> v	
+
+			((Just (pos,updval), Just oldstate)) 
+					-> (True, snd (gUpd{|*|} (UpdSearch updval pos) oldstate))
+
+			// no update found, determine the current stored state
+
+			((_, Just oldstate))	
+					-> (False, oldstate)
+
+			// no update, no state stored, the current value is taken as (new) state
+
+			else	-> (False, v)	
 	where
 		decodeInput1 :: String -> (Maybe FormUpdate, Maybe a) | gParse{|*|} a
 		decodeInput1 uniqueid
@@ -83,13 +110,6 @@ where
 			(Just (thisid,a),input) -> if (thisid == formid) (Just a) (find formid input)
 			(Nothing, input)		-> find formid input
 
-
-	
-//			find formid  [(stateid,state):states]
-//			| True	= abort "id gevonden" //parseString state
-//			| formid == stateid	= abort "id gevonden" //parseString state
-//			| otherwise			= abort "formstate gevonden" //find formid (Just states)
-//			find formid  else = Nothing
 
 // automatic tranformation of any Clean type to html body
 // the lhst on the head of the hst is the lhst for the form we create here
@@ -230,7 +250,9 @@ where
 		 							
 					]
 
-gHGEC{|CHButton|} CHPressed hst = gHGEC {|*|} CHPressed hst
+gHGEC{|CHButton|} CHPressed hst = gHGEC {|*|} (CHButton defsize "??") hst // end user should reset button
+
+
 
 gUpd{|CHButton|} (UpdSearch (UpdS name) 0) 	_ = (UpdDone,CHPressed)					// update integer value
 gUpd{|CHButton|} (UpdSearch val cnt)      	b = (UpdSearch val (cnt - 1),b)			// continue search, don't change
@@ -254,6 +276,18 @@ gHGEC{|(,,)|} gHa gHb gHc (a,b,c) (inidx,lhsts,ghst)
 # (bb,hst) = gHb b hst
 # (bc,hst) = gHc c hst
 = (Table [Tbl_CellPadding 0, Tbl_CellSpacing 0] [[ba, bb, bc]],hst)
+
+// to hide a state ::
+
+:: CHHidden a = CHHidden a 
+derive gParse CHHidden
+derive gPrint CHHidden
+gHGEC{|CHHidden|} gHa (CHHidden a) hst = (EmptyBody,hst)
+
+gUpd{|CHHidden|} gHa (UpdSearch any cnt) val	= ((UpdSearch any cnt),val)	// skip hidden stuf, never updated
+gUpd{|CHHidden|} gHa (UpdCreate l)		 _ 		= (UpdCreate l,abort "creation of new hidden values not implemeneted")					// create default value
+gUpd{|CHHidden|} gHa mode 			  	 any	= (mode,any)				// don't change
+
 
 
 // generic function to update any type, great miracle function
