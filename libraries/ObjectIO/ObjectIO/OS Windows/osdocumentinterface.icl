@@ -8,6 +8,7 @@ import	StdMaybe, StdOverloaded, StdString, StdTuple
 import	clCrossCall_12, ostoolbar, ossystem, ostypes, windowCrossCall_12
 from	commondef	import FatalError
 from	StdIOCommon	import DocumentInterface, MDI, SDI, NDI
+import	code from "cCrossCallxDI_121.obj"
 
 
 ::	OSDInfo
@@ -38,6 +39,14 @@ osdocumentinterfaceFatalError :: String String -> .x
 osdocumentinterfaceFatalError function error
 	= FatalError function "osdocumentinterface" error
 
+OSinitialiseDI :: !*OSToolbox -> *OSToolbox
+OSinitialiseDI _
+	= code
+	{
+		.inline InstallCrossCallxDI
+			ccall InstallCrossCallxDI "I-I"
+		.end
+	}
 
 /*	emptyOSDInfo creates a OSDInfo with dummy values for the argument document interface.
 */

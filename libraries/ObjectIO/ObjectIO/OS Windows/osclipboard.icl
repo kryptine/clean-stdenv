@@ -12,6 +12,10 @@ import clipboardCrossCall_12
 OSClipboardText
 	:==	1	// CF_TEXT
 
+OSinitialiseClipboard :: !*OSToolbox -> *OSToolbox
+OSinitialiseClipboard tb
+	= WinInitialiseClipboard tb
+
 OShasClipboardText :: !*OSToolbox -> (!Bool,!*OSToolbox)
 OShasClipboardText tb
 	= WinHasClipboardText tb

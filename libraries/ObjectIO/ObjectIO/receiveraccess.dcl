@@ -18,7 +18,7 @@ onewaytotriple			:: !(ReceiverFunction  m   *(.ls,.pst)) m !*(.ls,.pst) -> *(.ls
 twowaytotriple			:: !(Receiver2Function m r *(.ls,.pst)) m !*(.ls,.pst) -> *(.ls,[r],.pst)
 
 
-//	Functions that have moved from receiverhandle:
+//	Functions moved from receiverhandle
 
 receiverIdentified			:: !Id				!(ReceiverHandle .ls .pst)	-> Bool
 // MW11..

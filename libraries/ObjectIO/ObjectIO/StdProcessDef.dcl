@@ -2,7 +2,7 @@ definition module StdProcessDef
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2
+//	Clean Standard Object I/O library, version 1.2.1
 //	
 //	StdProcessDef contains the types to define interactive processes.
 //	********************************************************************************

@@ -135,6 +135,7 @@ menuOpen pState=:{io=ioState}
 							  }
 		# ioState			= IOStSetDevice (MenuSystemState mHs) ioState
 		# ioState			= IOStSetDeviceFunctions MenuFunctions ioState
+		# ioState			= appIOToolbox OSinitialiseMenus ioState
 		= {pState & io=ioState}
 where
 	getPopUpId :: !DocumentInterface !(IOSt .l) -> (!Maybe Id,!IOSt .l)

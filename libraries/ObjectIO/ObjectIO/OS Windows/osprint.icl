@@ -2,8 +2,11 @@ implementation module osprint
 
 //	Clean Standard Object I/O library, version 1.2
 
-import StdEnv,clCCall_12,clCrossCall_12, iostate, scheduler
+import StdArray, StdBool, StdEnum, StdFile, StdFunc, StdInt, StdList, StdMisc, StdTuple
+import clCCall_12,clCrossCall_12, iostate, scheduler
 import ospicture, osevent, StdWindow, StdPSt
+import code from "cCrossCallPrinter_121.obj",
+				 "cprinter_121.obj"
 
 ::	PrintSetup
 	=	{	devmode	::	!String
@@ -22,6 +25,16 @@ import ospicture, osevent, StdWindow, StdPSt
 ::	Alternative x y
 	=	Cancelled x
 	|	StartedPrinting y
+
+
+os_installprinter :: !*OSToolbox -> *OSToolbox
+os_installprinter _
+	= code
+	{
+		.inline InstallCrossCallPrinter
+			ccall InstallCrossCallPrinter "I-I"
+		.end
+	}
 
 
 os_getpagedimensions	::	!PrintSetup	!Bool 
@@ -45,6 +58,7 @@ os_defaultprintsetup env
 printSetupDialogBoth :: !PrintSetup !(Maybe *Context) -> (!PrintSetup, !Maybe *Context)
 printSetupDialogBoth print_setup=:{devmode,device,driver,output} mb_context
 	# (os, mb_context)	= EnvGetOS mb_context
+	# os				= os_installprinter os
 	  (devmodePtr,os) = WinMakeCString devmode os
 	  (devicePtr,os) = WinMakeCString device os
 	  (driverPtr,os) = WinMakeCString driver os
@@ -100,6 +114,7 @@ where
 	  where
 	  	accFun context
 			# (os, context) = EnvGetOS context
+			# os			= os_installprinter os
 	  		# (x,mb_context,os) = printPagePerPageBothSemaphor
 								doDialog emulateScreen x initFun transFun printSetup (Just context) os
 			= (x,EnvSetOS os (fromJust mb_context))
@@ -121,8 +136,9 @@ where
 instance PrintEnvironments Files
 where
 	os_printpageperpage doDialog emulateScreen x initFun transFun printSetup files
-		# (os, files) = EnvGetOS files
-		  (x,_,os) = printPagePerPageBothSemaphor
+		# (os, files)	= EnvGetOS files
+		# os			= os_installprinter os
+		  (x,_,os)		= printPagePerPageBothSemaphor
 		  					doDialog emulateScreen x initFun transFun printSetup Nothing os
 		= (x, EnvSetOS os files) 
 	os_printsetupdialog printSetup files
@@ -279,8 +295,8 @@ CCPrintSetupDialog nothing=:Nothing devmodeSize devmodePtr devicePtr driverPtr o
 	# (ok, pdPtr, os) = printSetup 1 devmodeSize devmodePtr devicePtr driverPtr outputPtr os
 	= (ok, pdPtr, nothing, os)
 CCPrintSetupDialog (Just context) devmodeSize devmodePtr devicePtr driverPtr outputPtr os
-	# createcci = Rq5Cci CcRqDO_PRINT_SETUP devmodeSize devmodePtr devicePtr driverPtr outputPtr
-	  (rcci, context, os)  = IssueCleanRequest handleContextOSEvent` createcci context os
+	# createcci				= Rq5Cci CcRqDO_PRINT_SETUP devmodeSize devmodePtr devicePtr driverPtr outputPtr
+	  (rcci, context, os)	= IssueCleanRequest handleContextOSEvent` createcci context os
 	= (rcci.p1, rcci.p2, Just context, os)
 /* MW was
 CCPrintSetupDialog :: !.Bool .Int .Int .Int .Int .Int !*OSToolbox -> (OkReturn,Int,!.OSToolbox);

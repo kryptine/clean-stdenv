@@ -1,7 +1,7 @@
 implementation module StdProcess
 
 
-//	Clean object I/O library, version 1.2
+//	Clean object I/O library, version 1.2.1
 
 
 import	StdFunc, StdList
@@ -40,12 +40,8 @@ instance Processes Process  where
 		= closeContext finalContext tb
 	
 	openProcesses :: !Process !(PSt .l) -> PSt .l
-	openProcesses (Process NDI local init atts) pState
-		= addInteractiveProcess atts (init o ProcessFunctions.dOpen) "" local NotShareGUI NDI pState
-	openProcesses (Process SDI local init atts) pState
-		= addInteractiveProcess atts (init o ProcessFunctions.dOpen) "" local NotShareGUI SDI pState		// PA: openSDIwindow added before init
-	openProcesses (Process MDI local init atts) pState
-		= addInteractiveProcess atts (init o ProcessFunctions.dOpen) "" local NotShareGUI MDI pState		// PA: openMDIwindow added before init
+	openProcesses (Process xDI local init atts) pState
+		= addInteractiveProcess atts (init o ProcessFunctions.dOpen) "" local NotShareGUI xDI pState
 
 
 //	Specialised process creation functions:

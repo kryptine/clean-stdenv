@@ -21,6 +21,11 @@ OSNoMenuItem		:== 0
 OSNoMenuSeparator	:== 0
 
 
+/*	Initialisation:
+*/
+OSinitialiseMenus	:: !*OSToolbox -> *OSToolbox
+
+
 /*	Enabling and disabling of menus and menu elements:
 	OS(Dis/En)ableMenu index menubar
 		(dis/en)ables the top-level menu at the zero based index position of the menubar.

@@ -2,7 +2,7 @@ definition module StdFileSelect
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2
+//	Clean Standard Object I/O library, version 1.2.1
 //	
 //	StdFileSelect defines the standard file selector dialogue.
 //	********************************************************************************

@@ -38,8 +38,6 @@ OSscreenrect			:: !*OSToolbox -> (!Rect,!*OSToolbox)
 
 OSprintSetupTypical		:: Bool // MW11++
 
-OSrefreshDesktop		:: !*OSToolbox -> *OSToolbox
-
 // OSGetProcessWindowDimensions returns Rect of process window in terms of screen coordinates
 OSGetProcessWindowDimensions :: !OSDInfo !*OSToolbox -> (!Rect,!*OSToolbox)
 

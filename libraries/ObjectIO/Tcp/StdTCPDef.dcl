@@ -1,7 +1,7 @@
 definition module StdTCPDef
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2
+//	Clean Standard Object I/O library, version 1.2.1
 //	
 //	StdTCPDef provides basic definitions for using TCP.
 //	********************************************************************************

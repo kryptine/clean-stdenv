@@ -8,11 +8,22 @@ import	StdBool, StdInt
 import	clCrossCall_12, osevent
 from	clCCall_12	import WinMakeCString, WinGetCStringAndFree, WinReleaseCString, CSTR
 from	commondef	import FatalError
+import code from "cCrossCallFileSelectors_121.obj"
 
 
 osfileselectFatalError :: String String -> .x
 osfileselectFatalError function error
 	= FatalError function "osfileselect" error
+
+
+OSinitialiseFileSelectors :: !*OSToolbox -> *OSToolbox
+OSinitialiseFileSelectors _
+	= code
+	{
+		.inline InstallCrossCallFileSelectors
+			ccall InstallCrossCallFileSelectors "I-I"
+		.end
+	}
 
 OSselectinputfile :: !(OSEvent->.s->.s) !.s !*OSToolbox -> (!Bool,!String,!.s,!*OSToolbox)
 OSselectinputfile handleOSEvent state tb

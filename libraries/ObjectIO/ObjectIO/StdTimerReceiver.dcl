@@ -2,7 +2,7 @@ definition module StdTimerReceiver
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2
+//	Clean Standard Object I/O library, version 1.2.1
 //	
 //	StdTimerReceiver defines Receiver(2) timer element instances.
 //	********************************************************************************

@@ -4,9 +4,8 @@ implementation module receiverhandle
 //	Clean Object I/O library, version 1.2
 
 
-//import	StdBool, StdInt, StdList
-import	receivermessage//, cast, semidynamic
-from	ostoolbox	import OSToolbox // MW11++
+import	receivermessage
+from	ostoolbox import OSToolbox
 
 
 ::	ReceiverHandles pst

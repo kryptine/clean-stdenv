@@ -65,7 +65,6 @@ WinStartOsThread		:: !*OSToolbox -> *OSToolbox
 
 WinCloseOs				:: !*OSToolbox -> Bool
 WinInitOs				:: (!Bool,!*OSToolbox)
-WinRefreshDesktop		:: !*OSToolbox -> *OSToolbox
 
 
   //------------------------------------------------------------------------//
@@ -89,6 +88,8 @@ CcRqDISPATCH_MESSAGES_WHILE_PRINTING
 CcRqENDDOC					:== 1822
 CcRqSTARTDOC				:== 1821
 // ... MW
+CcRqCREATETCPWINDOW			:==	1820		/* create TCP window */
+
 CcRqDESTROYMDIDOCWINDOW 	:== 1817		// PA: added to destroy MDI document window
 CcRqCREATESDIDOCWINDOW		:==	1816		// PA: added to create SDI document window
 CcRqCREATEMDIDOCWINDOW		:== 1815		// PA: added to create MDI document window
@@ -102,8 +103,6 @@ CcRqGETCLIPBOARDCOUNT		:== 1809		/* PA: added to retrieve clipboard count. */
 CcRqDIRECTORYDIALOG			:==	1802		/* PA: added to create directory selector dialog. */
 CcRqFILESAVEDIALOG			:== 1801
 CcRqFILEOPENDIALOG			:== 1800
-
-CcRqUPDATEDESKTOP			:== 1790		/* PA: added to force refresh of desktop. */
 
 CcRqSHOWCONTROL				:== 1755		/* PA: added */
 CcRqSELECTPOPUPITEM			:== 1754

@@ -2,7 +2,7 @@ definition module StdPSt
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2
+//	Clean Standard Object I/O library, version 1.2.1
 //	
 //	StdPSt defines operations on PSt and IOSt that are not abstract device related.
 //	********************************************************************************

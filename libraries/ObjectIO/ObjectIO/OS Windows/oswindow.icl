@@ -33,6 +33,13 @@ OSMinCompoundSize :: (!Int,!Int)
 OSMinCompoundSize = (0,0)	// PA: (0,0)<--WinMinimumWinSize (Check if this safe)
 
 
+/*	Initialisation:
+*/
+OSinitialiseWindows :: !*OSToolbox -> *OSToolbox
+OSinitialiseWindows tb
+	= WinInitialiseWindows tb
+
+
 /*	Determine the size of controls.
 */
 OSgetButtonControlSize :: !OSWindowMetrics !String !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
@@ -126,12 +133,6 @@ OSgetSliderControlMinWidth _ = 0
 
 /*	Window creation functions.
 */
-::	DelayActivationInfo
-	=	DelayActivatedWindow	OSWindowPtr				// the window has become active
-	|	DelayDeactivatedWindow	OSWindowPtr				// the window has become inactive
-	|	DelayActivatedControl	OSWindowPtr OSWindowPtr	// the control (@2) in window (@1) has become active
-	|	DelayDeactivatedControl	OSWindowPtr OSWindowPtr	// the control (@2) in window (@1) has become inactive
-
 OScreateDialog :: !Bool !Bool !String !(!Int,!Int) !(!Int,!Int) !OSWindowPtr
 				  !(u:s->*(OSWindowPtr,u:s))
 				  !(OSWindowPtr->u:s->u:(*OSToolbox->*(u:s,*OSToolbox)))
@@ -260,16 +261,6 @@ OScreateWindowCallback :: !Bool !(!Int,!Int) !(!Int,!Int)
 						  !(OSWindowPtr->OSWindowPtr->OSPictContext->u:s->u:(*OSToolbox->*(u:s,*OSToolbox)))
 						  !CrossCallInfo !*(u:s,[DelayActivationInfo]) !*OSToolbox
 					  -> (!CrossCallInfo,!*(u:s,[DelayActivationInfo]),!*OSToolbox)
-/*	PA: This alternative replaced by WinFakePaint function.
-OScreateWindowCallback _ _ _ _ _ {ccMsg=CcWmPAINT,p1=hwnd} s tb
-	= //trace "OScreateWindowCallback CcWmPAINT" 
-	  (Return0Cci, s, OSdummyWindowUpdate hwnd tb)
-where
-	OSdummyWindowUpdate :: !OSWindowPtr !*OSToolbox -> *OSToolbox
-	OSdummyWindowUpdate wPtr tb
-		# (hdc,tb) = WinBeginPaint wPtr tb
-		= WinEndPaint wPtr (hdc,tb)
-*/
 OScreateWindowCallback _ _ _ _ _ {ccMsg=CcWmPAINT,p1=hwnd} s tb
 	= //trace "OScreateWindowCallback CcWmPAINT"
 	  (Return0Cci, s, WinFakePaint hwnd tb)
@@ -345,51 +336,6 @@ where
 			# s						= setOSEvents (osEvents,s)
 			= OScreateModalDialogCallback getOSEvents setOSEvents handleOSEvents osEvent s tb
 
-// Mike //
-OScreateGameWindow :: !Bool !(!Int,!Int) !Int !*OSToolbox -> (![DelayActivationInfo],!OSWindowPtr,!*OSToolbox)
-OScreateGameWindow fullscreen size bpp tb
-	# createcci		= {ccMsg=CcRqCREATEGAMEWINDOW,p1=w,p2=h,p3=bpp,p4=toInt fullscreen,p5=0,p6=0}
-	# (returncci,delay_info,tb)
-					= IssueCleanRequest OScreateGameWindowCallback createcci [] tb
-	  wPtr			= case returncci.ccMsg of
-						CcRETURN1   -> returncci.p1
-						CcWASQUIT   -> OSNoWindowPtr
-						_           -> oswindowCreateError 1 "OScreateGameWindow"
-	= (reverse delay_info,wPtr,tb)
-	/* ddPtr removed !!!     PA: check if ddPtr is still required!!
-	  (wPtr,ddPtr)  = case returncci.ccMsg of
-	                    CcRETURN2   -> (returncci.p1,returncci.p2)
-	                    CcWASQUIT   -> (OSNoWindowPtr,OSNoWindowPtr)
-	                    _           -> oswindowCreateError 1 "OScreateGameWindow"
-	= (reverse delay_info,wPtr,ddPtr,tb)
-	*/
-where
-    (w,h)           = size
-
-    OScreateGameWindowCallback :: !CrossCallInfo ![DelayActivationInfo] !*OSToolbox
-                              -> (!CrossCallInfo,![DelayActivationInfo],!*OSToolbox)
-    OScreateGameWindowCallback {ccMsg=CcWmPAINT,p1=hwnd} s tb
-        = //trace "OScreateGameWindowCallback CcWmPAINT"
-          (Return0Cci, s, WinFakePaint hwnd tb)//OSdummyWindowUpdate hwnd tb)
-/*    where
-        OSdummyWindowUpdate :: !OSWindowPtr !*OSToolbox -> *OSToolbox
-        OSdummyWindowUpdate wPtr tb
-            # (hdc,tb) = WinBeginPaint wPtr tb
-            = WinEndPaint wPtr (hdc,tb) */
-    OScreateGameWindowCallback {ccMsg=CcWmACTIVATE,p1=hwnd} delay_info tb
-        = //trace "OScreateGameWindowCallback CcWmACTIVATE"
-          (Return0Cci, [DelayActivatedWindow hwnd:delay_info], tb)
-    OScreateGameWindowCallback {ccMsg=CcWmDEACTIVATE,p1=hwnd} delay_info tb
-        = //trace "OScreateGameWindowCallback CcWmDEACTIVATE"
-          (Return0Cci, [DelayDeactivatedWindow hwnd:delay_info], tb)
-    OScreateGameWindowCallback {ccMsg=CcWmCREATE,p1=hwnd} delay_info tb
-        = (Return0Cci, delay_info, tb)
-    OScreateGameWindowCallback {ccMsg=CcWmSIZE,p1=hwnd,p2=width,p3=height} s tb
-        = //trace ("OScreateGameWindowCallback CcWmSize "+++toString (width,height))
-          (Return0Cci, s, tb)
-    OScreateGameWindowCallback {ccMsg} s tb
-        = oswindowFatalError "OScreateGameWindowCallback" ("unknown message type ("+++toString ccMsg+++")")
-//
 
 /*	Control creation functions.
 */

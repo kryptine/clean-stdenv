@@ -3,6 +3,13 @@ implementation module clCCall_12
 //	Clean Object I/O library, version 1.2
 
 from ostoolbox import OSToolbox
+import code from "cCCallSystem_121.obj", 
+				 "cCCallWindows_121.obj",
+				 "cCrossCallWindows_121.obj", 
+				 "cCrossCall_121.obj", 
+				 "cdebug_121.obj", 
+				 "cpicture_121.obj",
+				 "util_121.obj"
 
 
 ::	CSTR	:==  Int

@@ -59,10 +59,6 @@ OSscreenrect tb
 OSprintSetupTypical		:: Bool // MW11++
 OSprintSetupTypical = False
 
-OSrefreshDesktop :: !*OSToolbox -> *OSToolbox
-OSrefreshDesktop tb
-	= WinRefreshDesktop tb
-
 OSGetProcessWindowDimensions :: !OSDInfo !*OSToolbox -> (!Rect,!*OSToolbox)
 OSGetProcessWindowDimensions osdinfo tb
 	# maybeOSInfo		= getOSDInfoOSInfo osdinfo

@@ -1,7 +1,7 @@
 implementation module StdMenuElementClass
 
 
-//	Clean Object I/O library, version 1.2
+//	Clean Object I/O library, version 1.2.1
 
 //	Definition of the MenuElements class for menu elements.
 

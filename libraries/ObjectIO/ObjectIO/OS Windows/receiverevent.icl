@@ -25,8 +25,8 @@ receiverEvent schedulerEvent=:(ScheduleMsgEvent msgEvent) pState
 	| otherwise
 		= (False,Nothing,schedulerEvent,pState)
 // MW11..
-receiverEvent schedulerEvent=:(ScheduleOSEvent {ccMsg=CcWmINETEVENT,p1,p2,p3,p4} _) ioState
-	= (True, Just (InternetEvent (p1,p2,p3,p4)), schedulerEvent, ioState)
+receiverEvent schedulerEvent=:(ScheduleOSEvent {ccMsg=CcWmINETEVENT,p1,p2,p3,p4} _) pState
+	= (True, Just (InternetEvent (p1,p2,p3,p4)), schedulerEvent, pState)
 // ..MW11
 receiverEvent schedulerEvent pState
 	= (False,Nothing,schedulerEvent,pState)

@@ -32,6 +32,7 @@ openmodalwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
 		= windowcreateFatalError "openmodalwindow" "could not retrieve WindowSystemState from IOSt"
 	# windows					= WindowSystemStateGetWindowHandles wDevice
 	# (tb,ioState)				= getIOToolbox ioState
+	# tb						= OSinitialiseWindows tb					// initialise windows toolbox
 	# (osdinfo,ioState)			= IOStGetOSDInfo ioState
 	# (wMetrics,ioState)		= IOStGetOSWindowMetrics ioState
 	# (_,_,_,_,wlsHandle,windows,tb)
@@ -135,6 +136,7 @@ openwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
 			-> (![DelayActivationInfo],!OSWindowPtr,!Index,!WindowHandle .ls (PSt .l),!WindowHandles (PSt .l),!IOSt .l)
 		openAnyWindow wId wH windows ioState
 			# (tb,ioState)			= getIOToolbox ioState
+			# tb					= OSinitialiseWindows tb					// initialise windows toolbox
 			# (osdinfo,ioState)		= IOStGetOSDInfo ioState
 			# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
 			# (index,pos,size,originv,wH,windows,tb)
@@ -199,17 +201,6 @@ createAnyWindow wMetrics behindPtr wId {x,y} {w,h} originv osdinfo wH=:{whMode,w
 		= (delay_info,wPtr,osdinfo,wH,tb)
 	with
 		isModal		= whMode==Modal
-// Mike ... //
-	| whKind==IsGameWindow
-		# (delay_info,wPtr,tb)		= OScreateGameWindow fullscreen (w,h) colordepth tb		// par 3, ddPtr removed
-		//gwdata					= {gwindowData & gamewindowDDPtr=ddPtr}
-																							//  PA: wordt gamewindowDDPtr nog wel gebruikt?? 
-		= (delay_info,wPtr,osdinfo,{wH & whWindowInfo=GameWindowInfo gwdata},tb)
-	with
-		gwdata		= getWindowInfoGameWindowData whWindowInfo
-		colordepth	= gwdata.gamewindowCDepth
-		fullscreen	= gwdata.gamewindowFullScreen
-// ... Mike //
 where
 	isClosable		= Contains isWindowClose whAtts
 	pos				= (x,y)

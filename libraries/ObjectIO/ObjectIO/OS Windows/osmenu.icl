@@ -5,7 +5,7 @@ implementation module osmenu
 
 
 import	StdBool, StdChar, StdClass, StdInt, StdString
-import	menuCrossCall_12
+import	menuCCall_12, menuCrossCall_12
 from	osdocumentinterface	import OSMenuBar
 from	ostypes				import OSWindowPtr, OSNoWindowPtr
 
@@ -20,6 +20,13 @@ from	ostypes				import OSWindowPtr, OSNoWindowPtr
 OSNoMenu :== 0
 OSNoMenuItem :== 0
 OSNoMenuSeparator :== 0
+
+
+/*	Initialisation:
+*/
+OSinitialiseMenus :: !*OSToolbox -> *OSToolbox
+OSinitialiseMenus tb
+	= WinInitialiseMenus tb
 
 
 //	Enabling and disabling menus and menu elements:

@@ -4,6 +4,7 @@ implementation module clipboardCrossCall_12
 import	StdClass, StdInt, StdMisc
 import	clCrossCall_12
 from	clCCall_12	import WinMakeCString, WinGetCStringAndFree, WinReleaseCString, CSTR
+import	code from "cCrossCallClipboard_121.obj"
 
 
 //	PA: Predefined Clipboard Formats.
@@ -24,6 +25,15 @@ CF_ENHMETAFILE      :==	14
 //	PA: end of addition.
 
 
+WinInitialiseClipboard :: !*OSToolbox -> *OSToolbox
+WinInitialiseClipboard _
+	= code
+	{
+		.inline InstallCrossCallClipboard
+			ccall InstallCrossCallClipboard "I-I"
+		.end
+	}
+		
 WinGetClipboardText :: !*OSToolbox -> (!String,!*OSToolbox)
 WinGetClipboardText tb
 	# (rcci,tb)	= IssueCleanRequest2 (ErrorCallback2 "WinGetClipboardText") (Rq0Cci CcRqGETCLIPBOARDTEXT) tb
