@@ -47,22 +47,22 @@ transform{|NTstatement|} (Expression e) = transform{|*|} e
 transform{|NTstatement|} (Write e _ (NTnameDef n p)) = write @ transform{|*|} (NTdynamic Tdynamic e)
 where
 	write = CoreCode (dynamic dynamicWrite [f p] :: Dynamic *World -> *(Bool, *World))
+
+//	writeFile n p d env
+//		# (maybe, world) = resolveFilename n env
+
 	f (GenConsPrio GenConsAssocRight i) = "(" +++ n +++ ") infixr " +++ toString i
 	f (GenConsPrio GenConsAssocLeft i) = "(" +++ n +++ ") infixl " +++ toString i
 	f (GenConsPrio GenConsAssocNone i) = "(" +++ n +++ ") infix " +++ toString i
 	f _ = n
-	
 transform{|NTstatement|} (Function f) = transform{|*|} f
 
 transform {|NTfunction|} (NTfunction n=:(NTnameDef v p) vs _ e) = transform{|*|} (Write f Twrite n)
 where
-	f = case vs of
-		[] -> e
-		_ -> LET [VAR v p LETDEF LAMBDA vs e] (NAME v p)
-	
+	f = LET [VAR v p LETDEF (case vs of [] -> e; vs -> LAMBDA vs e)] (NAME v p)
+
 transform{|NTexpression|} (Term e) = transform{|*|} e
 transform{|NTexpression|} (Apply f x) = transform{|*|} f @ transform{|*|} x
-
 transform{|NTterm|} (Plain e) = transform{|*|} e
 transform{|NTterm|} (Sugar e) = transform{|*|} (desugar e)
 
@@ -95,7 +95,7 @@ where
 
 transform{|(|-|)|} _ ge _ (|-| e) = ge e
 
-transform{|c|} _ = raise "default transfrom{|*|}: internal error"
+transform{|c|} _ = raise "default transform{|*|}: internal error"
 
 derive transform NTplain, Scope
 
@@ -186,7 +186,7 @@ dynamicNil = dynamic [] :: A.a: [a]
 codeMismatch :: Core
 codeMismatch = CoreCode (dynamic mismatch :: A.a: a) 
 where 
-	mismatch = raise "pattern mismatch"
+	mismatch = raise PatternMismatch
 
 codeY :: Core
 codeY = CoreCode (dynamic Y :: A.a: (a -> a) -> a) 

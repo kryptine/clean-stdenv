@@ -40,66 +40,45 @@ notFreeVar v (f @ x) = notFreeVar v f && notFreeVar v x
 notFreeVar v (CoreVariable x) = v <> x
 notFreeVar _ _ = True
 
-instance generateCode Dynamic
+generateCode :: !Core !*env -> (!Dynamic, !*env) | resolveFilename env
+generateCode CoreDynamic env = (dynamic I ||| Class "TC" :: A.z: Overloaded (z -> Dynamic) (z -> Dynamic) (Context z), env)
+generateCode (CoreDynamic @ e) env 
+	# (codex, env) = generateCode e env
+	= (dynamic codex :: Dynamic, env)
+generateCode (CoreCode d) env = (d, env)
+generateCode (CoreVariable v) env = (raise (UnboundVariable v), env)
+generateCode (e1 @ e2) env 
+	# (codef, env) = generateCode e1 env
+	  (codex, env) = generateCode e2 env
+	/*= case (codex, codef) of
+		(x :: b, f ||| (Class "TC") :: Overloaded (b -> Dynamic) (b -> c) (Context b)) 
+		  = case dynamicToDynamic x of (tc :: b -> Dynamic) -> (dynamic f tc x :: c, env) 
+		_*/
+	# d = case codex of
+				(x :: A.a: a) -> case codef of
+					(f :: A.b: b) -> dynamic f x :: A.c: c
+					(f ||| c_f :: Overloaded d_f (d -> e) o_f) -> dynamic C f x ||| c_f :: Overloaded d_f e o_f
+					(f :: f -> g) -> dynamic f x :: g
+					_ -> raise (ApplyTypeError codef codex)
+				(x ||| c_x :: Overloaded d_x h o_x) -> case codef of
+					(f :: A.i: i) -> dynamic B f x ||| c_x :: A.j: Overloaded d_x j o_x
+					(f ||| c_f :: Overloaded d_f (h -> k) o_f) -> dynamic P f x ||| c_f &&& c_x :: Overloaded (Contexts d_f d_x) k (Contexts o_f o_x)
+					(f :: h -> l) -> dynamic B f x ||| c_x :: Overloaded d_x l o_x
+					_ -> raise (ApplyTypeError codef codex)
+				(x :: m) -> case codef of
+					(f :: A.n: n) -> dynamic f x :: A.o: o
+					(f ||| c_f :: Overloaded d_f (m -> p) o_f) -> dynamic C f x ||| c_f :: Overloaded d_f p o_f
+					(f :: m -> q) -> dynamic f x :: q
+					_ -> raise (ApplyTypeError codef codex)
+	= solveOverloading d env
 where
-	generateCode CoreDynamic env = (dynamic I ||| Class "TC" :: A.z: Overloaded (z -> Dynamic) (z -> Dynamic) (Context z), env)
-	generateCode (CoreDynamic @ e) env 
-		# (codex, env) = generateCode e env
-		= (dynamic codex :: Dynamic, env)
-	generateCode (CoreCode d) env = (d, env)
-	generateCode (CoreVariable v) env = (raise (UnboundVariable v), env)
-	generateCode (e1 @ e2) env 
-		# (codef, env) = generateCode e1 env
-		  (codex, env) = generateCode e2 env
-		/*= case (codex, codef) of
-			(x :: b, f ||| (Class "TC") :: Overloaded (b -> Dynamic) (b -> c) (Context b)) 
-			  = case dynamicToDynamic x of (tc :: b -> Dynamic) -> (dynamic f tc x :: c, env) 
-			_*/
-		# d = case codex of
-					(x :: A.a: a) -> case codef of
-						(f :: A.b: b) -> dynamic f x :: A.c: c
-						(f ||| c_f :: Overloaded d_f (d -> e) o_f) -> dynamic C f x ||| c_f :: Overloaded d_f e o_f
-						(f :: f -> g) -> dynamic f x :: g
-						_ -> raise (ApplyTypeError codef codex)
-					(x ||| c_x :: Overloaded d_x h o_x) -> case codef of
-						(f :: A.i: i) -> dynamic B f x ||| c_x :: A.j: Overloaded d_x j o_x
-						(f ||| c_f :: Overloaded d_f (h -> k) o_f) -> dynamic P f x ||| c_f &&& c_x :: Overloaded (Contexts d_f d_x) k (Contexts o_f o_x)
-						(f :: h -> l) -> dynamic B f x ||| c_x :: Overloaded d_x l o_x
-						_ -> raise (ApplyTypeError codef codex)
-					(x :: m) -> case codef of
-						(f :: A.n: n) -> dynamic f x :: A.o: o
-						(f ||| c_f :: Overloaded d_f (m -> p) o_f) -> dynamic C f x ||| c_f :: Overloaded d_f p o_f
-						(f :: m -> q) -> dynamic f x :: q
-						_ -> raise (ApplyTypeError codef codex)
-		= solveOverloading d env
+	dynamicToDynamic :: a -> Dynamic | TC a
+	dynamicToDynamic _ = dynamic toDynamic :: a^ -> Dynamic
 	where
-		dynamicToDynamic :: a -> Dynamic | TC a
-		dynamicToDynamic _ = dynamic toDynamic :: a^ -> Dynamic
-		where
-			toDynamic :: b -> Dynamic | TC b
-			toDynamic x = dynamic x :: b^
-/*
-applyDynamics :: !Dynamic !Dynamic -> Maybe Dynamic
-applyDynamics codef codex 
-	# codefx = case codex of
-		(x :: A.a: a) -> case codef of
-			(f :: A.b: b) -> Just (dynamic f x :: A.c: c)
-			(f ||| c_f :: Overloaded d_f (d -> e) o_f) -> Just (dynamic C f x ||| c_f :: Overloaded d_f e o_f)
-			(f :: f -> g) -> Just (dynamic f x :: g)
-			_ -> Nothing
-		(x ||| c_x :: Overloaded d_x h o_x) -> case codef of
-			(f :: A.i: i) -> Just (dynamic B f x ||| c_x :: A.j: Overloaded d_x j o_x)
-			(f ||| c_f :: Overloaded d_f (h -> k) o_f) -> Just (dynamic P f x ||| c_f &&& c_x :: Overloaded (Contexts d_f d_x) k (Contexts o_f o_x))
-			(f :: h -> l) -> Just (dynamic B f x ||| c_x :: Overloaded d_x l o_x)
-			_ -> Nothing
-		(x :: m) -> case codef of
-			(f :: A.n: n) -> Just (dynamic f x :: A.o: o)
-			(f ||| c_f :: Overloaded d_f (m -> p) o_f) -> Just (dynamic C f x ||| c_f :: Overloaded d_f p o_f)
-			(f :: m -> q) -> Just (dynamic f x :: q)
-			_ -> Nothing
-	= codefx
-*/
-solveOverloading :: !Dynamic !*env -> (!Dynamic, !*env) | resolveInstance env
+		toDynamic :: b -> Dynamic | TC b
+		toDynamic x = dynamic x :: b^
+
+solveOverloading :: !Dynamic !*env -> (!Dynamic, !*env) | resolveFilename env
 solveOverloading d=:(_ :: A.a: a) env = (d, env)
 solveOverloading d=:(_ :: Overloaded a b c) env
 	# (maybe, env) = solve d env
@@ -139,7 +118,20 @@ where
 			where
 				toDynamic :: b -> Dynamic | TC b
 				toDynamic x = dynamic x :: b^
-		resolveInstance` c type env = resolveInstance c type env
+		resolveInstance` n t env = case resolveFilename ("instance " +++ n +++ " " +++ (outermostType t)) env of
+			(Just (inst, _), env) -> (Just inst, env)
+			(_, env) -> (Nothing, env)
+		where
+			outermostType :: !Dynamic -> String
+			outermostType d = toString (snd (f (typeCodeOfDynamic d)))
+			where
+				f (TypeScheme _ type) = f type
+				f (TypeUnique type) = f type
+				f type=:(TypeCons cons) = (0, type)
+				f (TypeApp t1 t2)
+					# (n, t1) = f t1
+					= (n + 1, TypeApp t1 (TypeVar n))
+				f type = (0, type)
 				
 /*		countTypeVar :: !Dynamic -> Int
 		countTypeVar d = f (typeCodeOfDynamic d)
@@ -241,11 +233,7 @@ toStringDynamic d = prettyDynamic d
 prettyDynamic :: !Dynamic -> ([String], String)
 prettyDynamic d = (v, t)
 where
-	v = case d of 
-		(x :: A.a: a) -> debugShowWithOptions [DebugTerminator ""] x
-		(x :: a -> b) -> ["<function>"]
-//		(x :: a -> b) -> debugShowWithOptions [DebugTerminator "", DebugMaxDepth 3, DebugMaxBreadth 2, DebugClosures False] x
-		(x :: a) -> debugShowWithOptions [DebugTerminator ""] x
+	v = case d of (x :: a) -> debugShowWithOptions [DebugTerminator "", DebugMaxChars (80 * 22)] x
 
 	t = removeForAll (typeCodeOfDynamic d)
 	where

@@ -1,18 +1,14 @@
 definition module EstherScript
 
-import EstherPostParser, EstherTransform, DynamicFileSystem
+import EstherPostParser, EstherTransform
 
-:: Esther env =
-	{	searchPath	:: ![DynamicPath]
-	,	builtin		:: ![(String, Dynamic)]
-	,	env			:: !env
-	}
+:: EstherBuiltin env = {builtin :: ![(String, Dynamic)], env :: !env}
 
 :: EstherError = EstherError !String
 
-compose :: !String !*(Esther *env) -> (!Dynamic, !*Esther *env) | DynamicFileSystem, bimap{|*|}, ExceptionEnv env
-evaluate :: !Bool a !Dynamic !*(Esther *env) -> (!a, !*Esther *env) | TC a & TC, DynamicFileSystem, ExceptionEnv, bimap{|*|} env
+compose :: !String !*env -> (!MaybeException Dynamic, !*env) | resolveFilename, ExceptionEnv, bimap{|*|} env
 
-instance resolveFilename (Esther *env) | DynamicFileSystem env
-instance resolveInstance (Esther *env) | DynamicFileSystem env
-instance ExceptionEnv (Esther *env) | ExceptionEnv env
+instance resolveFilename World
+
+instance resolveFilename (EstherBuiltin *env) | resolveFilename env
+instance ExceptionEnv (EstherBuiltin *env) | ExceptionEnv env
