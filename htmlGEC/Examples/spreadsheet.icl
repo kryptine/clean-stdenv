@@ -8,12 +8,12 @@ module spreadsheet
 import StdEnv
 import StdHtml
 
-Start world  = doHtml arrowsspreadsheet world
+Start world  = doHtml spreadsheet world
 
 spreadsheet hst
-# ((table, tableB), hst) = table_hv_HGEC "table" HEdit 	 inittable    	hst
-# ((_,     rowsumB),hst) = vertlistHGEC  "rsum"  HDisplay (rowsum table)  hst
-# ((_,     colsumB),hst) = horlistHGEC   "csum"  HDisplay (colsum table)  hst
+# ((table, tableB), hst) = table_hv_HGEC "table" HEdit 	  inittable    	       hst
+# ((_,     rowsumB),hst) = vertlistHGEC  "rsum"  HDisplay (rowsum table)       hst
+# ((_,     colsumB),hst) = horlistHGEC   "csum"  HDisplay (colsum table)       hst
 # ((_,     tsumB),  hst) = mkEditHGEC    "tsum"  HDisplay (sum (rowsum table)) hst
 = (Head 
 		[ Hd_Title "Spreadsheet"
@@ -24,6 +24,7 @@ spreadsheet hst
 		, (colsumB <=> tsumB)
 		,Br, Br
 		, T "so the result of the spreadsheet is :", tsumB
+		,Br ,Br
 		],hst)
 where
 	rowsum table	= map sum table

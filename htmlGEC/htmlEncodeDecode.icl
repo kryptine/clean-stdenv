@@ -69,13 +69,19 @@ traceHtmlInput
 			, 	T "my php script        : " , B MyPhP, Br 
 			, 	T "update				: " , B update, Br 
 			, 	T "new value		  	: " , B new, Br 
-			, 	T "state			  	: " , B state, Br 
+			, 	T "state			  	: " , Body (showstate (mkList state)), Br 
 			,	T "decoded input  		: " , B (convert GetArgs), Br
 			,	T "encoded input        : " , B GetArgs, Br 
 			]
 where
 	(executable,update,new,state) = UpdateInfo
 	convert s = mkString (urlDecode (mkList s))
+
+	showstate :: [Char] -> [Body]
+	showstate [] 			= []
+	showstate listofchar	= [Br, B (mkString first)] ++ showstate (tl second)
+	where
+		(first,second) = span ((<>) '$') listofchar
 
 CheckUpdateId :: String
 CheckUpdateId 		
@@ -85,6 +91,11 @@ CheckUpdateId
 	Just (id,_,_)   = id 
 	else = ""
 derive gParse UpdValue
+
+AnyInput :: String
+AnyInput
+# (_,_,new,_) = UpdateInfo
+= new
 
 CheckUpdate :: (Maybe a, Maybe b) | gParse{|*|} a & gParse{|*|} b 
 CheckUpdate 
@@ -175,7 +186,8 @@ addScript globalstate
 	, globalstateform globalFormName updateInpName globalInpName (SV encodedglobalstate) 
 	]
 where
-	encodedglobalstate = urlEncodeState (reverse globalstate) 
+	encodedglobalstate = urlEncodeState ( globalstate) 
+//	encodedglobalstate = urlEncodeState (reverse globalstate) 
 
 submitscript :: String String -> Body
 submitscript formname updatename

@@ -6,7 +6,8 @@ module calculator
 import StdEnv
 import StdHtml
 
-Start world  = doHtml arrowcalculator world
+//Start world  = doHtml arrowcalculator world
+Start world  = doHtml calculator world
 
 calculator hst
 # ((fun,calcb),hst) 	= assignTableFuncBut calcbuttons hst		// shows buttons
@@ -31,7 +32,7 @@ where
 		clear 		(t <|> b) = (t 		 <|> 0)
 		app		fun (t <|> b) = (fun t b <|> 0)
 
-	but i = CHButton 10 i
+	but i = CHButton (defpixel / 3) i
 	
 arrowcalculator hst
 # ((fun,calcb),hst) 	= assignTableFuncBut calcbuttons hst		// shows buttons
