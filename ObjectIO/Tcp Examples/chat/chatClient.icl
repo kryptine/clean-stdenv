@@ -4,7 +4,7 @@ module chatClient
 //
 //	This chat program runs together with the "chatServer" program
 //
-//	The program has been written in Clean 1.3.1 and uses the Clean Standard Object I/O library 1.1
+//	The program has been written in Clean 1.3.2 and uses the Clean Standard Object I/O library 1.2
 //
 //	**************************************************************************************************
 
