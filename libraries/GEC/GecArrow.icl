@@ -2,117 +2,124 @@ implementation module GecArrow
 
 import StdGECExt
 
-:: GecArr a b = GecArr !.(A. .ps: a (GecSet b ps) (GecGet a ps) *(PSt ps) -> *(b, GecSet a ps, GecGet b ps, *PSt ps))
+:: GecArr a b = GecArr !.(A. .ps: (GecSet b ps) (GecGet a ps) *(PSt ps) -> *(GecSet a ps, GecGet b ps, *PSt ps))
 
 :: GecSet a ps :== IncludeUpdate a *(PSt ps) -> *PSt ps
 :: GecGet a ps :== *(PSt ps) -> *(a, *PSt ps)
 
-gecCreate :: !(GecArr a b) a !*(PSt .ps) -> (b, !*PSt .ps)
-gecCreate (GecArr g) a pst = (b, pst1)
+gecCreate :: !(GecArr a b) a !*(PSt .ps) -> *PSt .ps
+gecCreate (GecArr g) a env = env1
 where
-        (b, seta, getb, pst1) = g a setb geta pst
+	(seta, getb, env1) = g setb geta env
 
-        geta pst = (a, pst)
+	geta env = (a, env)
 
-        setb _ _ pst = pst
+	setb _ _ env = env
 
 gecEdit :: String -> GecArr a a | gGEC{|*|} a 
 gecEdit title = GecArr k
 where
-        k a seta _ pst = (a, gecSetValue, gecGetValue, pst1)
-        where
-                ({gecGetValue, gecSetValue}, pst1) = createNGEC title Interactive a (\r -> seta (includeUpdate r)) pst
+	k seta geta env = (gecSetValue, gecGetValue, env2)
+	where
+		(a, env1) = geta env
+		({gecGetValue, gecSetValue}, env2) = createNGEC title Interactive a (\r -> seta (includeUpdate r)) env1
 
 gecDisplay :: String -> GecArr a a | gGEC{|*|} a 
 gecDisplay title = GecArr k
 where
-        k a seta _ pst = (a, gecSetValue, gecGetValue, pst1)
-        where
-                ({gecGetValue, gecSetValue}, pst1) = createNGEC title OutputOnly a (\r -> seta (includeUpdate r)) pst
+	k seta geta env = (gecSetValue, gecGetValue, env2)
+	where
+		(a, env1) = geta env
+		({gecGetValue, gecSetValue}, env2) = createNGEC title OutputOnly a (\r -> seta (includeUpdate r)) env1
 
 instance Arrow GecArr
 where
 	arr f = GecArr k
 	where
-	        k a setb geta pst = (f a, seta, getb, pst)
-	        where
-	                getb pst = (f a, pst1)
-	                where
-	                        (a, pst1) = geta pst
-	                
-	                seta u a pst = setb u (f a) pst
-
+		k setb geta env = (seta, getb, env)
+		where
+			getb env = (f a, env1)
+			where
+				(a, env1) = geta env
+			
+			seta u a env = setb u (f a) env
+	
 	(>>>) (GecArr l) (GecArr r) = GecArr k
 	where 
-	        k a setc geta pst = (c, seta, getc, pst2)
-	        where
-	                (c, setb, getc, pst1) = r b setc getb pst
-	                (b, seta, getb, pst2) = l a setb geta pst1
-
+		k setc geta env = (seta, getc, env2)
+		where
+			(seta, getb, env1) = l setb geta env
+			(setb, getc, env2) = r setc getb env1
+	
 	first (GecArr g) = GecArr k
 	where
-	        k (a, c) setbc getac pst = ((b, c), setac, getbc, pst1)
-	        where
-	                (b, seta, getb, pst1) = g a setb geta pst
-	                
-	                geta pst = (a, pst1)
-	                where
-	                        ((a, _), pst1) = getac pst
+		k setbc getac env = (setac, getbc, env1)
+		where
+			(seta, getb, env1) = g setb geta env
+			
+			geta env = (a, env1)
+			where
+				((a, _), env1) = getac env
 	
-	                getbc pst = ((b, c), pst2)
-	                where
-	                        (b, pst1) = getb pst
-	                        ((_, c), pst2) = getac pst1
-	                
-	                setb u b pst = setbc u (b, c) pst1
-	                where
-	                        ((_, c), pst1) = getac pst
+			getbc env = ((b, c), env2)
+			where
+				(b, env1) = getb env
+				((_, c), env2) = getac env1
+			
+			setb u b env = setbc u (b, c) env1
+			where
+				((_, c), env1) = getac env
 	
-	                setac u (a, c) pst = setbc u (b, c) (seta u a pst1)
-	                where
-	                        (b, pst1) = getb pst
-
+			setac u (a, c) env = setbc u (b, c) (seta u a env1)
+			where
+				(b, env1) = getb env
+	
 instance ArrowLoop GecArr
 where
 	loop (GecArr g) = GecArr k
 	where 
-	        k a setb geta pst = (b, seta, getb, pst1)
-	        where
-	                ((b, c), setac, getbc, pst1) = g (a, c) setbc getac pst
-	                
-	                getb pst = (b, pst1)
-	                where
-	                        ((b, _), pst1) = getbc pst
+		k setb geta env = (seta, getb, env1)
+		where
+			(setac, getbc, env1) = g setbc getac env
+			
+			getb env = (b, env1)
+			where
+				((b, _), env1) = getbc env
 	
-	                getac pst = ((a, c), pst2)
-	                where
-	                        (a, pst1) = geta pst
-	                        ((_, c), pst2) = getbc pst1
+			getac env = ((a, c), env2)
+			where
+				(a, env1) = geta env
+				((_, c), env2) = getbc env1
 	
-	                seta u a pst = setac u (a, c) pst1
-	                where
-	                        ((_, c), pst1) = getbc pst
+			seta u a env = setac u (a, c) env1
+			where
+				((_, c), env1) = getbc env
 	
-	                setbc u (b, c) pst = setb u b (setac NoUpdate (a, c) pst1)
-	                where
-	                        (a, pst1) = geta pst
-	                
-
-
-(@>>) infixl 6 :: (a -> b) !(GecArr b c) -> GecArr a c
-(@>>) f gec = gecArr f >>> gec
- 
-(<<@) infixl 6 :: !(GecArr a b) (b -> c) -> GecArr a c
-(<<@) gec f = gec >>> gecArr f
-
+			setbc u (b, c) env = setb u b (setac NoUpdate (a, c) env1)
+			where
+				(a, env1) = geta env
+			
 gecFix :: !(GecArr a a) -> GecArr a a
 gecFix (GecArr g) = GecArr k
 where 
-        k a seta geta pst = (a`, seta`, geta`, pst1)
-        where
-                (a`, seta`, geta`, pst1) = g a seta`` geta pst
-                
-                seta`` r a pst = seta r a (seta` NoUpdate a pst)
+	k seta geta env = (seta`, geta`, env1)
+	where
+		(seta`, geta`, env1) = g seta`` geta env
+		
+		seta`` r a env = seta r a (seta` NoUpdate a env)
+
+gecIO :: (A. .ps: a *(PSt .ps) -> *(b, *PSt .ps)) -> GecArr a b
+gecIO f = GecArr k
+where
+	k setb geta env = (seta, getb, env)
+	where
+		getb env = f a env1
+		where
+			(a, env1) = geta env
+
+		seta u a env = setb u b env1
+		where
+			(b, env1) = f a env
 
 includeUpdate :: !UpdateReason -> *IncludeUpdate
 includeUpdate Changed = YesUpdate
