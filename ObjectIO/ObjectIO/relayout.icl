@@ -195,10 +195,11 @@ where
 					= ((clipRgn,validRgn,invalidRgn),picture)
 			where
 				sameSize				= oldSize==newSize
-				samePos					= osCompoundMovesControls && oldPos==newPos || oldAbsolutePos==newAbsolutePos
+//				samePos					= osCompoundMovesControls && oldPos==newPos || oldAbsolutePos==newAbsolutePos
+				samePos					= if osCompoundMovesControls (oldPos==newPos) (oldAbsolutePos==newAbsolutePos)
 				sizeF					= if sameSize id (setSize wPtr newCompoundPos` itemPtr newPos` newSize` (not redraw))
-				moveF					= if (samePos && all isEmptyRect (map (intersectRects newFrame1) newArea))
-											          id (setPos  wPtr newCompoundPos` itemPtr newPos` (toTuple oldSize) (not redraw))
+				moveF					= /*if (samePos && all isEmptyRect (map (intersectRects newFrame1) newArea))
+											          id*/ (setPos  wPtr newCompoundPos` itemPtr newPos` (toTuple oldSize) (not redraw))
 				updF					= if (not redraw || sameSize && oldAbsolutePos==newAbsolutePos && newFrame1==oldFrame1 || isEmptyRect newFrame1 || not new.rliItemShow)
 													  id (updatecustomcontrol wPtr newParentPos clipRgn newFrame1 new)
 				newParentPos`			= toTuple newParentPos
