@@ -7,8 +7,7 @@ implementation module menudevice
 import	StdBool, StdEnum, StdList, StdMisc
 import	menuevent, osmenu
 from	ostypes				import OSNoWindowPtr
-import	commondef, devicefunctions, iostate, menucreate, menudefaccess, receiveraccess, StdId
-from	menuaccess			import menuStateHandleGetMenuId
+import	commondef, devicefunctions, iostate, menuaccess, menucreate, menudefaccess, receiveraccess, StdId
 from	StdProcessAttribute	import getProcessToolbarAtt, isProcessToolbar
 from	StdPSt				import accPIO
 
@@ -62,33 +61,38 @@ menuShow pState=:{io=ioState}
 
 menuClose :: !(PSt .l) -> PSt .l
 menuClose pState=:{io=ioState}
-	# (osdinfo,ioState)			= IOStGetOSDInfo ioState
-	  maybeOSMenuBar			= getOSDInfoOSMenuBar osdinfo
+	# (osdinfo,ioState)				= IOStGetOSDInfo ioState
+	  maybeOSMenuBar				= getOSDInfoOSMenuBar osdinfo
 	| isNothing maybeOSMenuBar
 		= menudeviceFatalError "MenuFunctions.dClose" "OSMenuBar could not be retrieved from OSDInfo"
-	# (found,menus,ioState)		= IOStGetDevice MenuDevice ioState
+	# (found,mDevice,ioState)		= IOStGetDevice MenuDevice ioState
 	| not found
 		= menudeviceFatalError "MenuFunctions.dClose" "could not retrieve MenuSystemState from IOSt"
 	| otherwise
-		# osMenuBar				= fromJust maybeOSMenuBar
-		# (opt_guishare,ioState)= IOStGetGUIShare ioState
-		  mHs					= MenuSystemStateGetMenuHandles menus
-		# (osMenuBar,ioState)	= accIOToolbox (disposeMenuHandles (isJust opt_guishare) mHs osMenuBar) ioState
-		  osdinfo				= setOSDInfoOSMenuBar osMenuBar osdinfo
-		# ioState				= IOStSetOSDInfo osdinfo ioState
-		# (ioid,ioState)		= IOStGetIOId ioState
-		# (rt,ioState)			= IOStGetReceiverTable ioState
-		# (it,ioState)			= IOStGetIdTable ioState
-		  (rt,it)				= StateMap2 (disposeIds ioid) mHs.mMenus (rt,it)
-		# ioState				= IOStSetIdTable it ioState
-		# ioState				= IOStSetReceiverTable rt ioState
-		# ioState				= IOStRemoveDevice MenuDevice ioState
-		# ioState				= IOStRemoveDeviceFunctions MenuDevice ioState
+		# osMenuBar					= fromJust maybeOSMenuBar
+		# (opt_guishare,ioState)	= IOStGetGUIShare ioState
+		  menus						= MenuSystemStateGetMenuHandles mDevice
+		# (tb,ioState)				= getIOToolbox ioState
+		# (menus,(osMenuBar,tb))	= disposeMenuHandles (isJust opt_guishare) menus (osMenuBar,tb)
+		# ioState					= setIOToolbox tb ioState
+		  osdinfo					= setOSDInfoOSMenuBar osMenuBar osdinfo
+		# ioState					= IOStSetOSDInfo osdinfo ioState
+		# (ioid,ioState)			= IOStGetIOId ioState
+		# (rt,ioState)				= IOStGetReceiverTable ioState
+		# (it,ioState)				= IOStGetIdTable ioState
+		# (mHs,_)					= menuHandlesGetMenus menus
+		  (_,(rt,it))				= StateMap (disposeIds ioid) mHs (rt,it)
+		# ioState					= IOStSetIdTable it ioState
+		# ioState					= IOStSetReceiverTable rt ioState
+		# ioState					= IOStRemoveDevice MenuDevice ioState
+		# ioState					= IOStRemoveDeviceFunctions MenuDevice ioState
 		= {pState & io=ioState}
 where
-	disposeIds :: !SystemId !(MenuStateHandle .pst) !(!ReceiverTable,!IdTable) -> (!ReceiverTable,!IdTable)
-	disposeIds ioid (MenuLSHandle {mlsHandle={mItems}}) ts
-		= StateMap2 (disposeMenuIds ioid) mItems ts
+	disposeIds :: !SystemId !(MenuStateHandle .pst) !*(!*ReceiverTable,!*IdTable)
+						 -> (!MenuStateHandle .pst, !*(!*ReceiverTable,!*IdTable))
+	disposeIds ioid (MenuLSHandle menuH=:{mlsHandle=mH=:{mItems}}) ts
+		# (itemHs,ts)	= StateMap (disposeMenuIds ioid) mItems ts
+		= (MenuLSHandle {menuH & mlsHandle={mH & mItems=itemHs}},ts)
 
 menuHide :: !(PSt .l) -> PSt .l
 menuHide pState=:{io=ioState}
@@ -173,7 +177,8 @@ where
 			menusMsgIO :: !Id !MsgEvent ![MenuStateHandle (PSt .l)] (PSt .l)
 						  -> (!MsgEvent,![MenuStateHandle (PSt .l)], PSt .l)
 			menusMsgIO menuId msgEvent msHs pState
-				| isEmpty msHs
+				# (empty,msHs)				= u_isEmpty msHs
+				| empty
 					= menudeviceFatalError "menuIO (ReceiverEvent _) _" "menu could not be found"
 				# (msH,msHs)				= HdTl msHs
 				  (id,msH)					= menuStateHandleGetMenuId msH
@@ -200,7 +205,8 @@ where
 		where
 			menusTraceIO :: !Id !MenuTraceInfo ![MenuStateHandle (PSt .l)] (PSt .l) -> (![MenuStateHandle (PSt .l)],PSt .l)
 			menusTraceIO menuId info msHs pState
-				| isEmpty msHs
+				# (empty,msHs)		= u_isEmpty msHs
+				| empty
 					= menudeviceFatalError "menuIO (MenuTraceEvent _) _" "menu could not be found"
 				# (msH,msHs)		= HdTl msHs
 				  (id, msH)			= menuStateHandleGetMenuId msH
@@ -303,9 +309,9 @@ where
 	where
 		menuElementTraceIO :: !Int !MenuTraceInfo !Int !(MenuElementHandle .ls .pst) !*(.ls,.pst)
 											  -> (!Int, !MenuElementHandle .ls .pst,  *(.ls,.pst))
-		menuElementTraceIO itemIndex info zIndex itemH=:(MenuItemHandle {mItemAtts}) (ls,ps)
-			| itemIndex<>zIndex || not hasFun	= (zIndex+1,itemH,  (ls,ps))
-			| otherwise							= (zIndex+1,itemH,f (ls,ps))
+		menuElementTraceIO itemIndex info zIndex (MenuItemHandle itemH=:{mItemAtts}) (ls,ps)
+			| itemIndex<>zIndex || not hasFun	= (zIndex+1,MenuItemHandle itemH,  (ls,ps))
+			| otherwise							= (zIndex+1,MenuItemHandle itemH,f (ls,ps))
 		where
 			(hasFun,fAtt)	= Select isEitherFun undef mItemAtts
 			f				= if (isMenuFunction fAtt)	(getMenuFun fAtt)
@@ -315,7 +321,7 @@ where
 			# (nrRadios,itemHs)		= Ulength mRadioItems
 			| itemIndex>zIndex+nrRadios
 				// Selected item is not one of these radio items
-				= (zIndex+nrRadios,RadioMenuHandle radioH,(ls,pst))
+				= (zIndex+nrRadios,RadioMenuHandle {radioH & mRadioItems=itemHs},(ls,pst))
 			| otherwise
 				# (_,itemHs,(ls,pst))	= menuElementsTraceIO itemIndex info zIndex itemHs (ls,pst)
 				= (zIndex+nrRadios,RadioMenuHandle {radioH & mRadioItems=itemHs},(ls,pst))		// It is assumed that the mRadioIndex is correctly set by the menu EventFunction

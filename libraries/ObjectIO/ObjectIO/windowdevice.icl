@@ -75,8 +75,9 @@ windowClose pState=:{io=ioState}
 		# (inputTrack,ioState)	= IOStGetInputTrack ioState
 		# (tb,ioState)			= getIOToolbox ioState
 		# pState				= {pState & io=ioState}
+		  (wsHs,windows)		= (\windows=:{whsWindows}->(whsWindows,{windows & whsWindows=[]})) windows
 		# (disposeInfo,(inputTrack,pState,tb))
-								= StateMap (disposeWindowStateHandle` osdinfo) windows.whsWindows (inputTrack,pState,tb)
+								= StateMap (disposeWindowStateHandle` osdinfo) wsHs (inputTrack,pState,tb)
 		# ioState				= setIOToolbox tb pState.io
 		# ioState				= IOStSetInputTrack inputTrack ioState
 		  (freeRIdss,freeIdss,_,finalLSs)
@@ -88,17 +89,17 @@ windowClose pState=:{io=ioState}
 		# (idtable,ioState)		= IOStGetIdTable ioState
 		  (_,idtable)			= removeIdsFromIdTable (freeRIds++freeIds) idtable
 		# ioState				= IOStSetIdTable idtable ioState
-		  windows				= (\windows=:{whsFinalModalLS=finalLS}->{windows & whsWindows=[],whsFinalModalLS=finalLS++finalLSs}) windows
+		  windows				= (\windows=:{whsFinalModalLS=finalLS}->{windows & whsFinalModalLS=finalLS++finalLSs}) windows
 		# ioState				= IOStSetDevice (WindowSystemState windows) ioState
 	//	# ioState				= IOStRemoveDeviceFunction WindowDevice ioState		PA: it is not clear whether this should be done
 		# pState				= {pState & io=ioState}
 		= pState
 where
-	disposeWindowStateHandle` :: !OSDInfo !(WindowStateHandle (PSt .l)) !(!Maybe InputTrack,PSt .l,!*OSToolbox)
-			   -> ((![Id],![Id],![DelayActivationInfo],![FinalModalLS]),!(!Maybe InputTrack,PSt .l,!*OSToolbox))
+	disposeWindowStateHandle` :: !OSDInfo !*(WindowStateHandle (PSt .l)) !*(!Maybe InputTrack,PSt .l,!*OSToolbox)
+			   -> (!(![Id],![Id],![DelayActivationInfo],![FinalModalLS]),!*(!Maybe InputTrack,PSt .l,!*OSToolbox))
 	disposeWindowStateHandle` osdinfo wsH (inputTrack,state,tb)
-		# ((a,b,c,d,inputTrack),state,tb) = disposeWindowStateHandle osdinfo inputTrack wsH handleOSEvent state tb
-		= ((a,b,c,d),(inputTrack,state,tb))
+		# ((freeRIds,freeIds,delayInfo,finalLS,inputTrack),(_,state),tb) = disposeWindowStateHandle osdinfo inputTrack handleOSEvent (wsH,state) tb
+		= ((freeRIds,freeIds,delayInfo,finalLS),(inputTrack,state,tb))
 	
 	handleOSEvent :: !OSEvent !(PSt .l) -> (![Int],!PSt .l)
 	handleOSEvent osEvent pState = accContext (handleContextOSEvent osEvent) pState
@@ -462,13 +463,13 @@ where
 
 	//	windowControlQASyncIO queues an asynchronous message in the message queue of the indicated receiver control.
 	windowControlQASyncIO :: !Id !QASyncMessage !(WindowHandle .ls .pst) *(.ls,.pst)
-								   -> (!MsgEvent,!WindowHandle .ls .pst, *(.ls,.pst))
-	windowControlQASyncIO rId msg wH=:{whItems} ls_ps
-		= (QASyncMessage msg,{wH & whItems=itemHs},ls_ps)
+								   -> (!MsgEvent, WindowHandle .ls .pst, *(.ls,.pst))
+	windowControlQASyncIO rId msg wH=:{whItems} (ls,pst)
+		= (QASyncMessage msg,{wH & whItems=itemHs},(ls,pst))
 	where
 		(_,itemHs)	= elementsControlQASyncIO rId msg.qasmMsg whItems
 		
-		elementsControlQASyncIO :: !Id !SemiDynamic ![WElementHandle .ls .pst] -> (!Bool,![WElementHandle .ls .pst])
+		elementsControlQASyncIO :: !Id !SemiDynamic ![WElementHandle .ls .pst] -> (!Bool,[WElementHandle .ls .pst])
 		elementsControlQASyncIO rId msg [itemH:itemHs]
 			# (done,itemH)		= elementControlQASyncIO rId msg itemH
 			| done
@@ -477,23 +478,21 @@ where
 				# (done,itemHs)	= elementsControlQASyncIO rId msg itemHs
 				= (done,[itemH:itemHs])
 		where
-			elementControlQASyncIO :: !Id !SemiDynamic !(WElementHandle .ls .pst) -> (!Bool,!WElementHandle .ls .pst)
-			elementControlQASyncIO rId msg (WItemHandle itemH)
-				| not (identifyMaybeId rId itemH.wItemId)
-					| not (isRecursiveControl itemKind)
+			elementControlQASyncIO :: !Id !SemiDynamic !(WElementHandle .ls .pst) -> (!Bool,WElementHandle .ls .pst)
+			elementControlQASyncIO rId msg (WItemHandle itemH=:{wItemId,wItems,wItemInfo,wItemKind})
+				| not (identifyMaybeId rId wItemId)
+					| not (isRecursiveControl wItemKind)
 						= (False,WItemHandle itemH)
 					// otherwise
-						# (done,itemHs)	= elementsControlQASyncIO rId msg itemH.wItems
+						# (done,itemHs)	= elementsControlQASyncIO rId msg wItems
 						= (done,WItemHandle {itemH & wItems=itemHs})
-				| itemKind<>IsOtherControl "Receiver" && itemKind<>IsOtherControl "Receiver2"
+				| wItemKind<>IsOtherControl "Receiver" && wItemKind<>IsOtherControl "Receiver2"
 					= (True,WItemHandle itemH)
 				| otherwise
-					# rH	= getWItemReceiverInfo itemH.wItemInfo
+					# rH	= getWItemReceiverInfo wItemInfo
 					# rH	= receiverAddASyncMessage rId msg rH
 					# itemH	= {itemH & wItemInfo=ReceiverInfo rH}
 					= (True,WItemHandle itemH)
-			where
-				itemKind	= itemH.wItemKind
 			
 			elementControlQASyncIO rId msg (WListLSHandle itemHs)
 				# (done,itemHs)			= elementsControlQASyncIO rId msg itemHs
@@ -507,57 +506,56 @@ where
 				# (done,itemHs)		= elementsControlQASyncIO rId msg itemHs
 				= (done,WChangeLSHandle {wChH & wChangeItems=itemHs})
 		
-		elementsControlQASyncIO _ _ _
+		elementsControlQASyncIO _ _ []
 			= (False,[])
 
 	//	windowControlASyncIO handles the first asynchronous message in the message queue of the indicated receiver control.
 	windowControlASyncIO :: !Id !ASyncMessage !(WindowHandle .ls .pst) *(.ls,.pst)
-								 -> (!MsgEvent,!WindowHandle .ls .pst, *(.ls,.pst))
-	windowControlASyncIO rId msg wH=:{whItems} ls_ps
-		= (ASyncMessage msg,{wH & whItems=itemHs},ls_ps1)
+								 -> (!MsgEvent, WindowHandle .ls .pst, *(.ls,.pst))
+	windowControlASyncIO rId msg wH=:{whItems} (ls,pst)
+		= (ASyncMessage msg,{wH & whItems=itemHs},(ls1,pst1))
 	where
-		(_,itemHs,ls_ps1)	= elementsControlASyncIO rId whItems ls_ps
+		(_,itemHs,ls_ps1)	= elementsControlASyncIO rId whItems (ls,pst)
+		(ls1,pst1)			= ls_ps1
 		
 		elementsControlASyncIO :: !Id ![WElementHandle .ls .pst] *(.ls,.pst)
-							-> (!Bool,![WElementHandle .ls .pst],*(.ls,.pst))
-		elementsControlASyncIO rId [itemH:itemHs] ls_ps
-			# (done,itemH,ls_ps)		= elementControlASyncIO rId itemH ls_ps
+							-> (!Bool, [WElementHandle .ls .pst],*(.ls,.pst))
+		elementsControlASyncIO rId [itemH:itemHs] (ls,pst)
+			# (done,itemH,(ls,pst))		= elementControlASyncIO rId itemH (ls,pst)
 			| done
-				= (done,[itemH:itemHs],ls_ps)
+				= (done,[itemH:itemHs],(ls,pst))
 			| otherwise
-				# (done,itemHs,ls_ps)	= elementsControlASyncIO rId itemHs ls_ps
-				= (done,[itemH:itemHs],ls_ps)
+				# (done,itemHs,(ls,pst))= elementsControlASyncIO rId itemHs (ls,pst)
+				= (done,[itemH:itemHs],(ls,pst))
 		where
 			elementControlASyncIO :: !Id !(WElementHandle .ls .pst) *(.ls,.pst)
-								-> (!Bool,!WElementHandle .ls .pst, *(.ls,.pst))
-			elementControlASyncIO rId (WItemHandle itemH) ls_ps
-				| not (identifyMaybeId rId itemH.wItemId)
-					| not (isRecursiveControl itemKind)
-						= (False,WItemHandle itemH,ls_ps)
+								-> (!Bool, WElementHandle .ls .pst, *(.ls,.pst))
+			elementControlASyncIO rId (WItemHandle itemH=:{wItemId,wItems,wItemInfo,wItemKind}) (ls,pst)
+				| not (identifyMaybeId rId wItemId)
+					| not (isRecursiveControl wItemKind)
+						= (False,WItemHandle itemH,(ls,pst))
 					// otherwise
-						# (done,itemHs,ls_ps)	= elementsControlASyncIO rId itemH.wItems ls_ps
-						= (done,WItemHandle {itemH & wItems=itemHs},ls_ps)
-				| itemKind<>IsOtherControl "Receiver" && itemKind<>IsOtherControl "Receiver2"
-					= (True,WItemHandle itemH,ls_ps)
+						# (done,itemHs,(ls,pst))	= elementsControlASyncIO rId wItems (ls,pst)
+						= (done,WItemHandle {itemH & wItems=itemHs},(ls,pst))
+				| wItemKind<>IsOtherControl "Receiver" && wItemKind<>IsOtherControl "Receiver2"
+					= (True,WItemHandle itemH,(ls,pst))
 				| otherwise
-					# rH		= getWItemReceiverInfo itemH.wItemInfo
-					# (rH,ls_ps)= receiverASyncIO rH ls_ps
-					# itemH		= {itemH & wItemInfo=ReceiverInfo rH}
-					= (True,WItemHandle itemH,ls_ps)
+					# rH			= getWItemReceiverInfo wItemInfo
+					# (rH,(ls,pst))	= receiverASyncIO rH (ls,pst)
+					# itemH			= {itemH & wItemInfo=ReceiverInfo rH}
+					= (True,WItemHandle itemH,(ls,pst))
 			where
-				itemKind	= itemH.wItemKind
-				
 				receiverASyncIO :: !(ReceiverHandle .ls .pst) *(.ls,.pst)
-								-> (!ReceiverHandle .ls .pst, *(.ls,.pst))
-				receiverASyncIO rH=:{rASMQ=[msg:msgs],rFun} ls_ps
-					# (ls,_,ps)	= rFun msg ls_ps
-					= ({rH & rASMQ=msgs},(ls,ps))
+								-> ( ReceiverHandle .ls .pst, *(.ls,.pst))
+				receiverASyncIO rH=:{rASMQ=[msg:msgs],rFun} (ls,pst)
+					# (ls,_,pst)	= rFun msg (ls,pst)
+					= ({rH & rASMQ=msgs},(ls,pst))
 				receiverASyncIO _ _
 					= windowdeviceFatalError "receiverASyncIO" "unexpected empty asynchronous message queue"
 			
-			elementControlASyncIO rId (WListLSHandle itemHs) ls_ps
-				# (done,itemHs,ls_ps)			= elementsControlASyncIO rId itemHs ls_ps
-				= (done,WListLSHandle itemHs,ls_ps)
+			elementControlASyncIO rId (WListLSHandle itemHs) (ls,pst)
+				# (done,itemHs,(ls,pst))		= elementsControlASyncIO rId itemHs (ls,pst)
+				= (done,WListLSHandle itemHs,(ls,pst))
 			
 			elementControlASyncIO rId (WExtendLSHandle {wExtendLS=extLS,wExtendItems=itemHs}) (ls,pst)
 				# (done,itemHs,((extLS,ls),pst))= elementsControlASyncIO rId itemHs ((extLS,ls),pst)
@@ -567,8 +565,8 @@ where
 				# (done,itemHs,(chLS,pst))		= elementsControlASyncIO rId itemHs (chLS,pst)
 				= (done,WChangeLSHandle {wChangeLS=chLS,wChangeItems=itemHs},(ls,pst))
 		
-		elementsControlASyncIO _ _ ls_ps
-			= (False,[],ls_ps)
+		elementsControlASyncIO _ [] (ls,pst)
+			= (False,[],(ls,pst))
 
 	//	windowControlSyncIO lets the indicated receiver control handle the synchronous message.
 	windowControlSyncIO :: !Id !SyncMessage !(WindowHandle .ls .pst) *(.ls,.pst)
@@ -590,23 +588,21 @@ where
 		where
 			elementControlSyncIO :: !Id !SyncMessage !(WElementHandle .ls .pst) *(.ls,.pst)
 							  -> (!Bool,!SyncMessage,  WElementHandle .ls .pst, *(.ls,.pst))
-			elementControlSyncIO r2Id msg (WItemHandle itemH) ls_ps
-				| not (identifyMaybeId r2Id itemH.wItemId)
-					| not (isRecursiveControl itemKind)
+			elementControlSyncIO r2Id msg (WItemHandle itemH=:{wItemId,wItemKind,wItems,wItemInfo}) ls_ps
+				| not (identifyMaybeId r2Id wItemId)
+					| not (isRecursiveControl wItemKind)
 						= (False,msg,WItemHandle itemH,ls_ps)
 					// otherwise
-						# (done,msg,itemHs,ls_ps)	= elementsControlSyncIO r2Id msg itemH.wItems ls_ps
+						# (done,msg,itemHs,ls_ps)	= elementsControlSyncIO r2Id msg wItems ls_ps
 						= (done,msg,WItemHandle {itemH & wItems=itemHs},ls_ps)
-				| itemKind<>IsOtherControl "Receiver" && itemKind<>IsOtherControl "Receiver2"
+				| wItemKind<>IsOtherControl "Receiver" && wItemKind<>IsOtherControl "Receiver2"
 					= (True,msg,WItemHandle itemH,ls_ps)
 				| otherwise
-					# rH			= getWItemReceiverInfo itemH.wItemInfo
+					# rH			= getWItemReceiverInfo wItemInfo
 					# (msg,rH,ls_ps)= receiverSyncIO msg rH ls_ps
 					# itemH			= {itemH & wItemInfo=ReceiverInfo rH}
 					= (True,msg,WItemHandle itemH,ls_ps)
 			where
-				itemKind	= itemH.wItemKind
-				
 				receiverSyncIO :: !SyncMessage !(ReceiverHandle .ls .pst) *(.ls,.pst)
 							  -> (!SyncMessage,  ReceiverHandle .ls .pst, *(.ls,.pst))
 				receiverSyncIO msg rH ls_ps
@@ -636,38 +632,39 @@ windowStateMsgIO  _ _ _
 windowStateCompoundScrollActionIO :: !OSWindowMetrics !CompoundScrollActionInfo !(WindowStateHandle .pst) !*OSToolbox
 																			 -> (!WindowStateHandle .pst, !*OSToolbox)
 windowStateCompoundScrollActionIO wMetrics info=:{csaWIDS={wPtr}}
-								  wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whKind,whWindowInfo,whItems,whSize,whAtts,whSelect,whShow}}} tb
+								  wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whKind,whWindowInfo,whItems,whSize,whAtts,whSelect,whShow,whDefaultId}}} 
+								  tb
+	# (whItems`,whItems,tb)		= getWElementHandles` wPtr whItems tb
 	# (done,originChanged,itemHs,tb)
-							= calcNewCompoundOrigin wMetrics info whItems tb
+								= calcNewCompoundOrigin wMetrics info whItems tb
 	| not done
 		= windowdeviceFatalError "windowStateCompoundScrollActionIO" "could not locate CompoundControl"
-	# wH					= {wH & whItems=itemHs}
 	| not originChanged
-		= ({wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
+		= ({wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}},tb)
 	| otherwise
-		# (_,newItems,tb)	= layoutControls wMetrics hMargins vMargins spaces contentSize minSize [(domain,origin)] itemHs tb
-		  wH				= {wH & whItems=newItems}
-		# (wH,tb)			= forceValidWindowClipState wMetrics True wPtr wH tb
-		# (updRgn,tb)		= relayoutControls wMetrics whSelect whShow wFrame wFrame zero zero wPtr wH.whDefaultId whItems wH.whItems tb
-		# (wH,tb)			= updatewindowbackgrounds wMetrics updRgn info.csaWIDS wH tb
-		# (wH,tb)			= drawcompoundlook wMetrics whSelect wFrame info.csaItemNr wPtr wH tb	// PA: this might be redundant now because of updatewindowbackgrounds
-//		# tb				= OSvalidateWindowRect wPtr (SizeToRect whSize) tb
+		# (_,newItems,tb)		= layoutControls wMetrics hMargins vMargins spaces contentSize minSize [(domain,origin)] itemHs tb
+		  wH					= {wH & whItems=newItems}
+		# (wH,tb)				= forceValidWindowClipState wMetrics True wPtr wH tb
+		# (updRgn,newItems,tb)	= relayoutControls wMetrics whSelect whShow wFrame wFrame zero zero wPtr whDefaultId whItems` wH.whItems tb
+		# (wH,tb)				= updatewindowbackgrounds wMetrics updRgn info.csaWIDS {wH & whItems=newItems} tb
+		# (wH,tb)				= drawcompoundlook wMetrics whSelect wFrame info.csaItemNr wPtr wH tb	// PA: this might be redundant now because of updatewindowbackgrounds
+//		# tb					= OSvalidateWindowRect wPtr (SizeToRect whSize) tb
 		= ({wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
 where
-	windowInfo				= getWindowInfoWindowData whWindowInfo
+	windowInfo					= getWindowInfoWindowData whWindowInfo
 	(origin,domainRect,hasHScroll,hasVScroll)
-							= if (whKind==IsWindow)
-								(windowInfo.windowOrigin,windowInfo.windowDomain,isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll)
-								(zero,SizeToRect whSize,False,False)
-	domain					= RectToRectangle domainRect
-	visScrolls				= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
-	wFrame					= getWindowContentRect wMetrics visScrolls (SizeToRect whSize)
-	contentSize				= RectSize wFrame
-	(defMinW,  defMinH)		= OSMinWindowSize
-	minSize					= {w=defMinW,h=defMinH}
-	hMargins				= getWindowHMargins   whKind wMetrics whAtts
-	vMargins				= getWindowVMargins   whKind wMetrics whAtts
-	spaces					= getWindowItemSpaces whKind wMetrics whAtts
+								= if (whKind==IsWindow)
+									(windowInfo.windowOrigin,windowInfo.windowDomain,isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll)
+									(zero,SizeToRect whSize,False,False)
+	domain						= RectToRectangle domainRect
+	visScrolls					= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
+	wFrame						= getWindowContentRect wMetrics visScrolls (SizeToRect whSize)
+	contentSize					= RectSize wFrame
+	(defMinW,defMinH)			= OSMinWindowSize
+	minSize						= {w=defMinW,h=defMinH}
+	hMargins					= getWindowHMargins   whKind wMetrics whAtts
+	vMargins					= getWindowVMargins   whKind wMetrics whAtts
+	spaces						= getWindowItemSpaces whKind wMetrics whAtts
 	
 	drawcompoundlook :: !OSWindowMetrics !Bool !Rect !Int !OSWindowPtr !(WindowHandle .ls .pst) !*OSToolbox -> (!WindowHandle .ls .pst,!*OSToolbox)
 	drawcompoundlook wMetrics ableContext clipRect itemNr wPtr wH=:{whItems} tb
@@ -686,36 +683,34 @@ where
 		where
 			drawWElementLook :: !OSWindowMetrics !Bool !Rect !Int !OSWindowPtr !(WElementHandle .ls .pst) !*OSToolbox
 																	  -> (!Bool,!WElementHandle .ls .pst, !*OSToolbox)
-			drawWElementLook wMetrics ableContext clipRect itemNr wPtr (WItemHandle itemH=:{wItemKind,wItemSelect}) tb
-				| info.csaItemNr<>itemH.wItemNr
+			drawWElementLook wMetrics ableContext clipRect itemNr wPtr (WItemHandle itemH=:{wItemKind,wItemSelect,wItemNr,wItemInfo,wItemPos,wItemSize,wItems}) tb
+				| info.csaItemNr<>wItemNr
 					| not (isRecursiveControl wItemKind)
 						= (False,WItemHandle itemH,tb)
 					| wItemKind==IsLayoutControl
-						# (done,itemHs,tb)	= drawcompoundlook` wMetrics isAble (IntersectRects clipRect itemRect) itemNr wPtr itemH.wItems tb
+						# (done,itemHs,tb)	= drawcompoundlook` wMetrics isAble (IntersectRects clipRect itemRect) itemNr wPtr wItems tb
 						  itemH				= {itemH & wItems=itemHs}
 						= (done,WItemHandle itemH,tb)
 					// otherwise
-						# (done,itemHs,tb)	= drawcompoundlook` wMetrics isAble clipRect1 itemNr wPtr itemH.wItems tb
+						# (done,itemHs,tb)	= drawcompoundlook` wMetrics isAble clipRect1 itemNr wPtr wItems tb
 						  itemH				= {itemH & wItems=itemHs}
 						= (done,WItemHandle itemH,tb)
 				| wItemKind<>IsCompoundControl
 					= windowdeviceFatalError "drawWElementLook (windowStateCompoundScrollActionIO)" "argument control is not a CompoundControl"
 				| otherwise
 					# (itemH,tb)			= drawCompoundLook wMetrics isAble wPtr clipRect1 itemH tb
-				//	# tb					= OSvalidateWindowRect itemH.wItemPtr clipRect1 tb//(SizeToRect itemSize) tb	// PA: validation of (SizeToRect itemSize) is to much
+				//	# tb					= OSvalidateWindowRect itemH.wItemPtr clipRect1 tb//(SizeToRect wItemSize) tb	// PA: validation of (SizeToRect wItemSize) is to much
 					= (True,WItemHandle itemH,tb)
 			where
 				isAble						= ableContext && wItemSelect
-				itemPos						= itemH.wItemPos
-				itemSize					= itemH.wItemSize
-				itemInfo					= getWItemCompoundInfo itemH.wItemInfo
+				itemInfo					= getWItemCompoundInfo wItemInfo
 				domainRect					= itemInfo.compoundDomain
 				hasScrolls					= (isJust itemInfo.compoundHScroll,isJust itemInfo.compoundVScroll)
-				visScrolls					= OSscrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
-				itemRect					= PosSizeToRect itemPos itemSize
+				visScrolls					= OSscrollbarsAreVisible wMetrics domainRect (toTuple wItemSize) hasScrolls
+				itemRect					= PosSizeToRect wItemPos wItemSize
 				contentRect					= getCompoundContentRect wMetrics visScrolls itemRect 
 				clipRect1					= IntersectRects clipRect contentRect
-		
+			
 			drawWElementLook wMetrics ableContext clipRect itemNr wPtr (WListLSHandle itemHs) tb
 				# (done,itemHs,tb)	= drawcompoundlook` wMetrics ableContext clipRect itemNr wPtr itemHs tb
 				= (done,WListLSHandle itemHs,tb)
@@ -728,8 +723,8 @@ where
 				# (done,itemHs,tb)	= drawcompoundlook` wMetrics ableContext clipRect itemNr wPtr itemHs tb
 				= (done,WChangeLSHandle {wChH & wChangeItems=itemHs},tb)
 		
-		drawcompoundlook` _ _ _ _ _ itemHs tb
-			= (False,itemHs,tb)
+		drawcompoundlook` _ _ _ _ _ [] tb
+			= (False,[],tb)
 	
 	calcNewCompoundOrigin :: !OSWindowMetrics !CompoundScrollActionInfo ![WElementHandle .ls .pst] !*OSToolbox
 														-> (!Bool,!Bool,![WElementHandle .ls .pst],!*OSToolbox)
@@ -743,12 +738,12 @@ where
 	where
 		calcNewWElementOrigin :: !OSWindowMetrics !CompoundScrollActionInfo !(WElementHandle .ls .pst) !*OSToolbox
 															 -> (!Bool,!Bool,!WElementHandle .ls .pst, !*OSToolbox)
-		calcNewWElementOrigin wMetrics info (WItemHandle itemH=:{wItemKind,wItemAtts}) tb
-			| info.csaItemNr<>itemH.wItemNr
+		calcNewWElementOrigin wMetrics info (WItemHandle itemH=:{wItemNr,wItemKind,wItemAtts,wItems,wItemSize=compoundSize,wItemInfo}) tb
+			| info.csaItemNr<>wItemNr
 				| not (isRecursiveControl wItemKind)
 					= (False,False,WItemHandle itemH,tb)
 				// otherwise
-					# (done,changed,itemHs,tb)	= calcNewCompoundOrigin wMetrics info itemH.wItems tb
+					# (done,changed,itemHs,tb)	= calcNewCompoundOrigin wMetrics info wItems tb
 					  itemH						= {itemH & wItems=itemHs}
 					= (done,changed,WItemHandle itemH,tb)
 			| wItemKind<>IsCompoundControl		// This alternative should never occur
@@ -763,8 +758,7 @@ where
 				= (True,True,WItemHandle itemH,tb)
 		where
 			itemPtr								= info.csaItemPtr
-			compoundSize						= itemH.wItemSize
-			compoundInfo						= getWItemCompoundInfo itemH.wItemInfo
+			compoundInfo						= getWItemCompoundInfo wItemInfo
 			(domainRect,origin,hScroll,vScroll)	= (compoundInfo.compoundDomain,compoundInfo.compoundOrigin,compoundInfo.compoundHScroll,compoundInfo.compoundVScroll)
 			visScrolls							= OSscrollbarsAreVisible wMetrics domainRect (toTuple compoundSize) (isJust hScroll,isJust vScroll)
 			{w,h}								= RectSize (getCompoundContentRect wMetrics visScrolls (SizeToRect compoundSize))
@@ -811,9 +805,11 @@ where
 	
 	windowControlKeyFocusActionIO :: !Bool !ControlKeyFocusInfo !(WindowHandle .ls .pst) *(.ls,.pst) -> (!WindowHandle .ls .pst,*(.ls,.pst))
 	windowControlKeyFocusActionIO activated info wH=:{whItems,whKeyFocus} ls_ps
-		= ({wH & whItems=itemHs,whKeyFocus=keyfocus},ls_ps1)
+		| activated
+			= ({wH & whItems=itemHs,whKeyFocus=setNewFocusItem info.ckfItemNr whKeyFocus},ls_ps1)
+		| otherwise
+			= ({wH & whItems=itemHs,whKeyFocus=setNoFocusItem whKeyFocus},ls_ps1)
 	where
-		keyfocus			= if activated (setNewFocusItem info.ckfItemNr whKeyFocus) (setNoFocusItem whKeyFocus)
 		(_,itemHs,ls_ps1)	= elementsControlKeyFocusActionIO activated info whItems ls_ps
 		
 		elementsControlKeyFocusActionIO :: !Bool !ControlKeyFocusInfo ![WElementHandle .ls .pst] *(.ls,.pst)
@@ -828,12 +824,12 @@ where
 		where
 			elementControlKeyFocusActionIO :: !Bool !ControlKeyFocusInfo !(WElementHandle .ls .pst) *(.ls,.pst)
 																-> (!Bool,!WElementHandle .ls .pst, *(.ls,.pst))
-			elementControlKeyFocusActionIO activated info (WItemHandle itemH) ls_ps
-				| info.ckfItemNr<>itemH.wItemNr
-					| not (isRecursiveControl itemH.wItemKind)
+			elementControlKeyFocusActionIO activated info (WItemHandle itemH=:{wItemNr,wItemKind,wItems}) ls_ps
+				| info.ckfItemNr<>wItemNr
+					| not (isRecursiveControl wItemKind)
 						= (False,WItemHandle itemH,ls_ps)
 					// otherwise
-						# (done,itemHs,ls_ps)	= elementsControlKeyFocusActionIO activated info itemH.wItems ls_ps
+						# (done,itemHs,ls_ps)	= elementsControlKeyFocusActionIO activated info wItems ls_ps
 						= (done,WItemHandle {itemH & wItems=itemHs},ls_ps)
 				| otherwise
 					# (itemH,ls_ps)	= itemControlKeyFocusActionIO activated itemH ls_ps
@@ -894,12 +890,12 @@ where
 		where
 			elementControlKeyboardActionIO :: !ControlKeyboardActionInfo !(WElementHandle .ls .pst) *(.ls,.pst)
 																-> (!Bool,!WElementHandle .ls .pst, *(.ls,.pst))
-			elementControlKeyboardActionIO info (WItemHandle itemH) ls_ps
-				| info.ckItemNr<>itemH.wItemNr
-					| not (isRecursiveControl itemH.wItemKind)
+			elementControlKeyboardActionIO info (WItemHandle itemH=:{wItemNr,wItemKind,wItems}) ls_ps
+				| info.ckItemNr<>wItemNr
+					| not (isRecursiveControl wItemKind)
 						= (False,WItemHandle itemH,ls_ps)
 					// otherwise
-						# (done,itemHs,ls_ps)	= elementsControlKeyboardActionIO info itemH.wItems ls_ps
+						# (done,itemHs,ls_ps)	= elementsControlKeyboardActionIO info wItems ls_ps
 						= (done,WItemHandle {itemH & wItems=itemHs},ls_ps)
 				| otherwise
 					# (itemH,ls_ps)	= itemControlKeyboardActionIO info itemH ls_ps
@@ -958,12 +954,12 @@ where
 		where
 			elementControlMouseActionIO :: !ControlMouseActionInfo !(WElementHandle .ls .pst) *(.ls,.pst)
 														  -> (!Bool,!WElementHandle .ls .pst, *(.ls,.pst))
-			elementControlMouseActionIO info (WItemHandle itemH) ls_ps
-				| info.cmItemNr<>itemH.wItemNr
-					| not (isRecursiveControl itemH.wItemKind)
+			elementControlMouseActionIO info (WItemHandle itemH=:{wItemNr,wItemKind,wItems}) ls_ps
+				| info.cmItemNr<>wItemNr
+					| not (isRecursiveControl wItemKind)
 						= (False,WItemHandle itemH,ls_ps)
 					// otherwise
-						# (done,itemHs,ls_ps)	= elementsControlMouseActionIO info itemH.wItems ls_ps
+						# (done,itemHs,ls_ps)	= elementsControlMouseActionIO info wItems ls_ps
 						= (done,WItemHandle {itemH & wItems=itemHs},ls_ps)
 				| otherwise
 					# (itemH,ls_ps)	= itemControlMouseActionIO info itemH ls_ps
@@ -1021,12 +1017,12 @@ where
 		where
 			elementControlSelectionIO :: !ControlSelectInfo !(WElementHandle .ls .pst) *(.ls,.pst)
 												   -> (!Bool,!WElementHandle .ls .pst, *(.ls,.pst))
-			elementControlSelectionIO info (WItemHandle itemH) ls_ps
-				| info.csItemNr<>itemH.wItemNr
-					| not (isRecursiveControl itemH.wItemKind)
+			elementControlSelectionIO info (WItemHandle itemH=:{wItemNr,wItemKind,wItems}) ls_ps
+				| info.csItemNr<>wItemNr
+					| not (isRecursiveControl wItemKind)
 						= (False,WItemHandle itemH,ls_ps)
 					// otherwise
-						# (done,itemHs,ls_ps)	= elementsControlSelectionIO info itemH.wItems ls_ps
+						# (done,itemHs,ls_ps)	= elementsControlSelectionIO info wItems ls_ps
 						= (done,WItemHandle {itemH & wItems=itemHs},ls_ps)
 				| otherwise
 					# (itemH,ls_ps)	= itemControlSelectionIO info itemH ls_ps
@@ -1044,13 +1040,13 @@ where
 					error			= windowdeviceFatalError "windowIO _ (ControlSelection _) _" "RadioControlItem could not be found"
 					(index,radio)	= SelectedAtIndex (\{radioItemPtr}->radioItemPtr==itemPtr) error radioInfo.radioItems
 					f				= thd3 radio.radioItem
-				itemControlSelectionIO info itemH=:{wItemKind=IsCheckControl} (ls,pst)
+				itemControlSelectionIO info itemH=:{wItemKind=IsCheckControl,wItemInfo} (ls,pst)
 					# checkInfo		= CheckInfo {checkInfo & checkItems=checks}
 					  itemH			= {itemH & wItemInfo=checkInfo}
 					= (itemH,f (ls,pst))
 				where
 					itemPtr			= info.csItemPtr
-					checkInfo		= getWItemCheckInfo itemH.wItemInfo
+					checkInfo		= getWItemCheckInfo wItemInfo
 					error			= windowdeviceFatalError "windowIO _ (ControlSelection _) _" "CheckControlItem could not be found"
 					(_,f,checks)	= Access (isCheckItem itemPtr) error checkInfo.checkItems
 					
@@ -1060,15 +1056,15 @@ where
 							= ((True,f),{check & checkItem=(title,width,~mark,f)})
 						| otherwise
 							= ((False,id),check)
-				itemControlSelectionIO info itemH=:{wItemKind=IsPopUpControl} (ls,pst)
+				itemControlSelectionIO info itemH=:{wItemKind=IsPopUpControl,wItemInfo} (ls,pst)
 					# popUpInfo		= PopUpInfo {popUpInfo & popUpInfoIndex=index}
 					  itemH			= {itemH & wItemInfo=popUpInfo}
 					= (itemH,f (ls,pst))
 				where
-					popUpInfo		= getWItemPopUpInfo itemH.wItemInfo
+					popUpInfo		= getWItemPopUpInfo wItemInfo
 					index			= info.csMoreData
 					f				= snd (popUpInfo.popUpInfoItems!!(index-1))
-				itemControlSelectionIO info itemH=:{wItemKind} (ls,pst)
+				itemControlSelectionIO info itemH=:{wItemKind,wItemAtts} (ls,pst)
 					| wItemKind==IsButtonControl || wItemKind==IsCustomButtonControl
 						| hasAtt
 							= (itemH,f (ls,pst))
@@ -1077,8 +1073,7 @@ where
 					| otherwise
 						= (itemH,(ls,pst))
 				where
-					atts			= itemH.wItemAtts
-					(hasAtt,fAtt)	= Select (\att->isControlFunction att || isControlModsFunction att) undef atts
+					(hasAtt,fAtt)	= Select (\att->isControlFunction att || isControlModsFunction att) undef wItemAtts
 					f				= case fAtt of
 										(ControlFunction     f) -> f
 										(ControlModsFunction f) -> f info.csModifiers
@@ -1105,7 +1100,7 @@ windowStateControlSelectionIO _ _ _
 /*	windowStateControlSliderActionIO handles the slider of windows/dialogs.
 */
 windowStateControlSliderActionIO :: !ControlSliderInfo !(WindowStateHandle (PSt .l)) (PSt .l)
-													-> (!WindowStateHandle (PSt .l),PSt .l)
+													-> (!WindowStateHandle (PSt .l),  PSt .l)
 windowStateControlSliderActionIO info wsH=:{wshHandle=Just wlsH=:{wlsState=ls,wlsHandle=wH}} pState
 	= ({wsH & wshHandle=Just {wlsH & wlsState=ls1,wlsHandle=wH1}},pState1)
 where
@@ -1129,12 +1124,12 @@ where
 		where
 			elementControlSliderActionIO :: !ControlSliderInfo !(WElementHandle .ls .pst) *(.ls,.pst)
 													  -> (!Bool,!WElementHandle .ls .pst, *(.ls,.pst))
-			elementControlSliderActionIO info (WItemHandle itemH) ls_ps
-				| info.cslItemNr<>itemH.wItemNr
-					| not (isRecursiveControl itemH.wItemKind)
+			elementControlSliderActionIO info (WItemHandle itemH=:{wItemNr,wItemKind,wItems}) ls_ps
+				| info.cslItemNr<>wItemNr
+					| not (isRecursiveControl wItemKind)
 						= (False,WItemHandle itemH,ls_ps)
 					// otherwise
-						# (done,itemHs,ls_ps)	= elementsControlSliderActionIO info itemH.wItems ls_ps
+						# (done,itemHs,ls_ps)	= elementsControlSliderActionIO info wItems ls_ps
 						= (done,WItemHandle {itemH & wItems=itemHs},ls_ps)
 				| otherwise
 					# (itemH,ls_ps)	= itemControlSliderActionIO info itemH ls_ps
@@ -1142,10 +1137,10 @@ where
 			where
 				itemControlSliderActionIO :: !ControlSliderInfo !(WItemHandle .ls .pst) *(.ls,.pst)
 															 -> (!WItemHandle .ls .pst, *(.ls,.pst))
-				itemControlSliderActionIO info itemH=:{wItemKind=IsSliderControl} ls_ps
+				itemControlSliderActionIO info itemH=:{wItemKind=IsSliderControl,wItemInfo} ls_ps
 					= (itemH,f info.cslSliderMove ls_ps)
 				where
-					f	= (getWItemSliderInfo itemH.wItemInfo).sliderInfoAction
+					f	= (getWItemSliderInfo wItemInfo).sliderInfoAction
 				itemControlSliderActionIO _ itemH ls_ps
 					= (itemH,ls_ps)
 			
@@ -1286,12 +1281,12 @@ where
 	where
 		elementButtonActionIO :: !Id !(WElementHandle .ls .pst) *(.ls,.pst)
 							-> (!Bool,!WElementHandle .ls .pst, *(.ls,.pst))
-		elementButtonActionIO id (WItemHandle itemH=:{wItemId}) ls_ps
+		elementButtonActionIO id (WItemHandle itemH=:{wItemId,wItemKind,wItems}) ls_ps
 			| isNothing wItemId || fromJust wItemId<>id
-				| not (isRecursiveControl itemH.wItemKind)
+				| not (isRecursiveControl wItemKind)
 					= (False,WItemHandle itemH,ls_ps)
 				// otherwise
-					# (done,itemHs,ls_ps)	= elementsButtonActionIO id itemH.wItems ls_ps
+					# (done,itemHs,ls_ps)	= elementsButtonActionIO id wItems ls_ps
 					= (done,WItemHandle {itemH & wItems=itemHs},ls_ps)
 			| otherwise
 				# (itemH,ls_ps)	= itemButtonActionIO id itemH ls_ps
@@ -1386,56 +1381,57 @@ windowStateScrollActionIO wMetrics info wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH
 where
 	windowScrollActionIO :: !OSWindowMetrics !WindowScrollActionInfo !(WindowHandle .ls .pst) !*OSToolbox
 																  -> (!WindowHandle .ls .pst, !*OSToolbox)
-	windowScrollActionIO wMetrics info=:{wsaWIDS={wPtr}} wH=:{whWindowInfo,whItems=oldItems,whSize,whAtts,whSelect,whShow} tb
+	windowScrollActionIO wMetrics info=:{wsaWIDS={wPtr}} wH=:{whWindowInfo,whItems=oldItems,whSize,whAtts,whSelect,whShow,whDefaultId} tb
 		| newThumb==oldThumb
 			= (wH,tb)
 		| otherwise
-			# (_,newOSThumb,_,_)	= toOSscrollbarRange (min`,newThumb,max`) viewSize
-			  newOrigin				= if isHorizontal {oldOrigin & x=newThumb} {oldOrigin & y=newThumb}
-			# tb					= OSsetWindowSliderThumb wMetrics wPtr isHorizontal newOSThumb (toTuple whSize) True tb
-			# (_,newItems,tb)		= layoutControls wMetrics hMargins vMargins spaces contentSize minSize [(domain,newOrigin)] oldItems tb
-			  wH					= {	wH & whWindowInfo	= WindowInfo {windowInfo & windowOrigin=newOrigin}
-						  				   , whItems		= newItems
-							  		  }
-			# (wH,tb)				= forceValidWindowClipState wMetrics True wPtr wH tb
-			# (isRect,areaRect,tb)	= case wH.whWindowInfo of
-			  							WindowInfo {windowClip={clipRgn}} -> osgetrgnbox clipRgn tb
-			  							_                                 -> windowdeviceFatalError "windowScrollActionIO" "unexpected whWindowInfo field"
-			# (updRgn,tb)			= relayoutControls wMetrics whSelect whShow contentRect contentRect zero zero wPtr wH.whDefaultId oldItems wH.whItems tb
-			# (wH,tb)				= updatewindowbackgrounds wMetrics updRgn info.wsaWIDS wH tb
-			  newFrame				= PosSizeToRectangle newOrigin contentSize
-			  toMuch				= if isHorizontal (abs (newOrigin.x-oldOrigin.x)>=w`) (abs (newOrigin.y-oldOrigin.y)>=h`)
-			  (updArea,updAction)	= if (not lookInfo.lookSysUpdate || toMuch || not isRect)
-			  							(newFrame,return []) (calcScrollUpdateArea oldOrigin newOrigin areaRect)
-			  updState				= {oldFrame=oldFrame,newFrame=newFrame,updArea=[updArea]}
-			# (wH,tb)				= drawwindowlook` wMetrics wPtr updAction updState wH tb
-		//	# tb					= OSvalidateWindowRect wPtr (SizeToRect whSize) tb
+			# (_,newOSThumb,_,_)		= toOSscrollbarRange (min`,newThumb,max`) viewSize
+			  newOrigin					= if isHorizontal {oldOrigin & x=newThumb} {oldOrigin & y=newThumb}
+			# tb						= OSsetWindowSliderThumb wMetrics wPtr isHorizontal newOSThumb (toTuple whSize) True tb
+			# (oldItems`,oldItems,tb)	= getWElementHandles` wPtr oldItems tb
+			# (_,newItems,tb)			= layoutControls wMetrics hMargins vMargins spaces contentSize minSize [(domain,newOrigin)] oldItems tb
+			  wH						= {	wH & whWindowInfo	= WindowInfo {windowInfo & windowOrigin=newOrigin}
+						  					   , whItems		= newItems
+										  }
+			# (wH,tb)					= forceValidWindowClipState wMetrics True wPtr wH tb
+			  (whWindowInfo,wH)			= (\wH=:{whWindowInfo}->(whWindowInfo,wH)) wH
+			# (isRect,areaRect,tb)		= case whWindowInfo of
+			  								WindowInfo {windowClip={clipRgn}} -> osgetrgnbox clipRgn tb
+			  								_                                 -> windowdeviceFatalError "windowScrollActionIO" "unexpected whWindowInfo field"
+			# (updRgn,newItems,tb)		= relayoutControls wMetrics whSelect whShow contentRect contentRect zero zero wPtr whDefaultId oldItems` wH.whItems tb
+			# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn info.wsaWIDS {wH & whItems=newItems} tb
+			  newFrame					= PosSizeToRectangle newOrigin contentSize
+			  toMuch					= if isHorizontal (abs (newOrigin.x-oldOrigin.x)>=w`) (abs (newOrigin.y-oldOrigin.y)>=h`)
+			  (updArea,updAction)		= if (not lookInfo.lookSysUpdate || toMuch || not isRect)
+			  								(newFrame,return []) (calcScrollUpdateArea oldOrigin newOrigin areaRect)
+			  updState					= {oldFrame=oldFrame,newFrame=newFrame,updArea=[updArea]}
+			# (wH,tb)					= drawwindowlook` wMetrics wPtr updAction updState wH tb
+		//	# tb						= OSvalidateWindowRect wPtr (SizeToRect whSize) tb
 			= (wH,tb)
 	where
-		windowInfo					= getWindowInfoWindowData whWindowInfo
+		windowInfo						= getWindowInfoWindowData whWindowInfo
 		(oldOrigin,domainRect,hasHScroll,hasVScroll,lookInfo)
-									= (windowInfo.windowOrigin,windowInfo.windowDomain,isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll,windowInfo.windowLook)
-		isHorizontal				= info.wsaDirection==Horizontal
-		domain						= RectToRectangle domainRect
-		visScrolls					= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
-		contentRect					= getWindowContentRect wMetrics visScrolls (SizeToRect whSize)
-		contentSize					= RectSize contentRect
-		{w=w`,h=h`}					= contentSize
-		oldFrame					= PosSizeToRectangle oldOrigin contentSize
-		(min`,oldThumb,max`,viewSize)
-									= if isHorizontal
-										(domain.corner1.x,oldOrigin.x,domain.corner2.x,w`)
-										(domain.corner1.y,oldOrigin.y,domain.corner2.y,h`)
-		sliderState					= {sliderMin=min`,sliderThumb=oldThumb,sliderMax=max`-viewSize}
-		scrollInfo					= fromJust (if isHorizontal windowInfo.windowHScroll windowInfo.windowVScroll)
-		scrollFun					= scrollInfo.scrollFunction
-		newThumb`					= scrollFun oldFrame sliderState info.wsaSliderMove
-		newThumb					= SetBetween newThumb` min` (max`-viewSize)
-		(defMinW,  defMinH)			= OSMinWindowSize
-		minSize						= {w=defMinW,h=defMinH}
-		hMargins					= getWindowHMargins   IsWindow wMetrics whAtts
-		vMargins					= getWindowVMargins   IsWindow wMetrics whAtts
-		spaces						= getWindowItemSpaces IsWindow wMetrics whAtts
+										= (windowInfo.windowOrigin,windowInfo.windowDomain,isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll,windowInfo.windowLook)
+		isHorizontal					= info.wsaDirection==Horizontal
+		domain							= RectToRectangle domainRect
+		visScrolls						= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
+		contentRect						= getWindowContentRect wMetrics visScrolls (SizeToRect whSize)
+		contentSize						= RectSize contentRect
+		{w=w`,h=h`}						= contentSize
+		oldFrame						= PosSizeToRectangle oldOrigin contentSize
+		(min`,oldThumb,max`,viewSize)	= if isHorizontal
+											(domain.corner1.x,oldOrigin.x,domain.corner2.x,w`)
+											(domain.corner1.y,oldOrigin.y,domain.corner2.y,h`)
+		sliderState						= {sliderMin=min`,sliderThumb=oldThumb,sliderMax=max`-viewSize}
+		scrollInfo						= fromJust (if isHorizontal windowInfo.windowHScroll windowInfo.windowVScroll)
+		scrollFun						= scrollInfo.scrollFunction
+		newThumb`						= scrollFun oldFrame sliderState info.wsaSliderMove
+		newThumb						= SetBetween newThumb` min` (max`-viewSize)
+		(defMinW,defMinH)				= OSMinWindowSize
+		minSize							= {w=defMinW,h=defMinH}
+		hMargins						= getWindowHMargins   IsWindow wMetrics whAtts
+		vMargins						= getWindowVMargins   IsWindow wMetrics whAtts
+		spaces							= getWindowItemSpaces IsWindow wMetrics whAtts
 		
 	/*	calcScrollUpdateArea p1 p2 area calculates the new Rectangle that has to be updated. 
 		Assumptions: p1 is the origin before scrolling,

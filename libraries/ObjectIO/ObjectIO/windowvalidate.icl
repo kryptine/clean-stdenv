@@ -12,7 +12,7 @@ import	osdocumentinterface, ostypes, oswindow
 from	ospicture		import defaultPen, setPenAttribute
 from	ossystem		import OSscreenrect, OSstripOuterSize
 import	commondef, controllayout, keyfocus, StdControlAttribute, StdId, StdWindowAttribute, windowaccess
-from	iostate			import IOSt, IOStGetIdTable
+from	iostate			import IOSt, IOStGetIdTable, IOStSetIdTable
 
 
 windowvalidateError :: String String -> .x
@@ -34,8 +34,8 @@ validateWindowId Nothing ioState
 	= (Just wId,ioState)
 validateWindowId (Just id) ioState
 	# (idtable,ioState)			= IOStGetIdTable ioState
-	| memberIdTable id idtable	= (Nothing,ioState)
-	| otherwise					= (Just id,ioState)
+	| memberIdTable id idtable	= (Nothing,IOStSetIdTable idtable ioState)
+	| otherwise					= (Just id,IOStSetIdTable idtable ioState)
 
 
 /*	Validate the given window.

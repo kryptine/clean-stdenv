@@ -27,9 +27,12 @@ import StdTimerDef
 		,	teNrInterval:: !NrOfIntervals		// The nr of timer intervals that have elapsed
 		}
 
-initialTimerTable :: TimerTable					// initialTimerTable yields an empty TimerTable
+initialTimerTable :: *TimerTable				// initialTimerTable yields an empty TimerTable
 initialTimerTable
 	= []
+
+identifyTimerTableEntry :: !TimerLoc !TimerTableEntry -> Bool
+identifyTimerTableEntry loc tte=:{tteLoc} = loc==tteLoc
 
 instance == TimerLoc where
 	(==) :: !TimerLoc !TimerLoc -> Bool
@@ -45,13 +48,13 @@ instance == TimerLoc where
 	The Boolean result is True iff no duplicate timer entry was found, otherwise it is False.
 	The TimerInterval argument is set to zero if it less than zero. 
 */
-addTimerToTimerTable :: !TimerLoc !TimerInterval !TimerTable -> (!Bool,!TimerTable)
+addTimerToTimerTable :: !TimerLoc !TimerInterval !*TimerTable -> (!Bool,!*TimerTable)
 addTimerToTimerTable loc interval timers
 	= add loc (max 0 interval) timers
 where
-	add :: !TimerLoc !TimerInterval ![TimerTableEntry] -> (!Bool,![TimerTableEntry])
+	add :: !TimerLoc !TimerInterval !*[TimerTableEntry] -> (!Bool,!*[TimerTableEntry])
 	add loc interval [tte:ttes]
-		| loc==tte.tteLoc
+		| identifyTimerTableEntry loc tte
 			= (False,[tte:ttes])
 		| otherwise
 			# (isnew,ttes)	= add loc interval ttes
@@ -62,41 +65,41 @@ where
 /*	removeTimerFromTimerTable removes a timer from the TimerTable.
 	The Boolean result is True iff an entry was actually removed, otherwise it is False.
 */
-removeTimerFromTimerTable :: !TimerLoc !TimerTable -> (!Bool,!TimerTable)
+removeTimerFromTimerTable :: !TimerLoc !*TimerTable -> (!Bool,!*TimerTable)
 removeTimerFromTimerTable loc timers
 	= (found,timers`)
 where
-	(found,_,timers`) = Remove (\{tteLoc}->tteLoc==loc) undef timers
+	(found,_,timers`) = Remove (identifyTimerTableEntry loc) undef timers
 
 /*	setIntervalInTimerTable changes the timerinterval of the given timer in the TimerTable.
 	If the timer was not present in the table, then nothing happens (the Boolean result is False).
 	If the timer was present, its entry has been changed (the Boolean result is True).
 */
-setIntervalInTimerTable :: !TimerLoc !TimerInterval !TimerTable -> (!Bool,!TimerTable)
+setIntervalInTimerTable :: !TimerLoc !TimerInterval !*TimerTable -> (!Bool,!*TimerTable)
 setIntervalInTimerTable loc interval timers
 	= set loc (max 0 interval) timers
 where
-	set :: !TimerLoc !TimerInterval ![TimerTableEntry] -> (!Bool,![TimerTableEntry])
+	set :: !TimerLoc !TimerInterval !*[TimerTableEntry] -> (!Bool,!*[TimerTableEntry])
 	set loc interval [tte:ttes]
-		| loc==tte.tteLoc
+		| identifyTimerTableEntry loc tte
 			# tte = if (interval==0) {tte & tteInterval=interval,tteElapse=0} {tte & tteInterval=interval}
 			= (True,[tte:ttes])
 		| otherwise
 			# (found,ttes)	= set loc interval ttes
 			= (found,[tte:ttes])
-	set _ _ ttes
-		= (False,ttes)
+	set _ _ []
+		= (False,[])
 
 /*	shiftTimeInTimerTable dt shifts the TimerTable dt (>0) ticks forward in time. 
 */
-shiftTimeInTimerTable :: !Int !TimerTable -> TimerTable
+shiftTimeInTimerTable :: !Int !*TimerTable -> *TimerTable
 shiftTimeInTimerTable dt timers
 	| dt<=0
 		= timers
 	| otherwise
 		= shiftTimes dt timers
 where
-	shiftTimes :: !Int ![TimerTableEntry] -> [TimerTableEntry]
+	shiftTimes :: !Int !*[TimerTableEntry] -> *[TimerTableEntry]
 	shiftTimes dt [tte=:{tteInterval,tteElapse}:ttes]
 		| tteInterval==0
 			#! ttes	= shiftTimes dt ttes
@@ -105,8 +108,8 @@ where
 			#! tte	= {tte & tteElapse=tteElapse-dt}
 			#! ttes	= shiftTimes dt ttes
 			= [tte:ttes]
-	shiftTimes _ ttes
-		= ttes
+	shiftTimes _ []
+		= []
 
 /*	getActiveTimerInTimerTable determines the next timer that should be evaluated given the current
 	TimerTable. Such a timer is any timer with a negative or zero elapsed time. 
@@ -115,7 +118,7 @@ where
 		timers, creating a round-robin evaluation order.
 	If such a timer could not be found, then Nothing is returned. 
 */
-getActiveTimerInTimerTable :: !TimerTable -> (!Maybe TimerEvent,!TimerTable)
+getActiveTimerInTimerTable :: !*TimerTable -> (!Maybe TimerEvent,!*TimerTable)
 getActiveTimerInTimerTable [tte=:{tteElapse,tteInterval,tteLoc}:ttes]
 	| tteElapse<=0
 		#! nrTimeInterval	= if (tteInterval==0) 1 ((abs tteElapse)/tteInterval+1)
@@ -133,18 +136,19 @@ getActiveTimerInTimerTable _
 	returned belongs to a zero timer.
 	If there are no timers, then Nothing is returned.
 */
-getTimeIntervalFromTimerTable :: !TimerTable -> Maybe (Bool,Int)
-getTimeIntervalFromTimerTable timers=:[]
-	= Nothing
+getTimeIntervalFromTimerTable :: !*TimerTable -> (!Maybe (Bool,Int),!*TimerTable)
+getTimeIntervalFromTimerTable []
+	= (Nothing,[])
 getTimeIntervalFromTimerTable timers
-	#! wait	= getSleepTime (2^31-1) timers
-	= Just wait
+	#! (isZero,sleep,timers)	= getSleepTime (2^31-1) timers
+	= (Just (isZero,sleep),timers)
 where
-	getSleepTime :: !Int ![TimerTableEntry] -> (Bool,Int)
+	getSleepTime :: !Int !*[TimerTableEntry] -> (!Bool,!Int,!*[TimerTableEntry])
 	getSleepTime sleep [tte=:{tteElapse,tteInterval}:ttes]
 		| tteElapse<=0
-			= (tteInterval==0,0)
+			= (tteInterval==0,0,[tte:ttes])
 		| otherwise
-			= getSleepTime (min sleep tteElapse) ttes
-	getSleepTime sleep _
-		= (False,sleep)
+			# (isZero,sleep,ttes)	= getSleepTime (min sleep tteElapse) ttes
+			= (isZero,sleep,[tte:ttes])
+	getSleepTime sleep []
+		= (False,sleep,[])

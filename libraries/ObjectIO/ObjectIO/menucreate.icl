@@ -7,7 +7,6 @@ implementation module menucreate
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	StdMenuElementClass, StdPSt
 import	commondef, devicesystemstate, iostate, menuaccess, menudefaccess, menuhandle, sdisize
-from	menuevent	import MenuSystemStateGetMenuHandles, MenuHandlesGetMenuStateHandles
 import	osmenu
 from	menuCrossCall_12 import WinRemoveMenuShortKey
 
@@ -33,23 +32,27 @@ OpenMenu` menuId ls mDef pState=:{io=ioState}
 	# (idtable,ioState)			= IOStGetIdTable ioState
 	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
 	  mHs						= MenuSystemStateGetMenuHandles mDevice
-	| Contains (isMenuWithThisId menuId) mHs.mMenus	// This condition should never hold
+	# (menus,mHs)				= menuHandlesGetMenus mHs
+	  (exists,menus)			= UContains (isMenuWithThisId menuId) menus
+	| exists					// This condition should never hold
 		= menucreateFatalError "openMenu (Menu)" "inconsistency detected between IdTable and ReceiverTable"
-	# (menus,mHs)				= MenuHandlesGetMenuStateHandles mHs
-	  (nrmenus,menus)			= Ulength menus
+	# (nrmenus,menus)			= Ulength menus
 	  (optIndex,mDef)			= menuDefGetIndex mDef
 	  index						= if (isJust optIndex) (fromJust optIndex) nrmenus
-	  hasMenuWindowMenu			= Contains (isMenuWithThisId WindowMenuId) menus
+	  (hasMenuWindowMenu,menus)	= UContains (isMenuWithThisId WindowMenuId) menus
 	  index`					= SetBetween index 0 (max 0 (if hasMenuWindowMenu (nrmenus-1) nrmenus))
 	# (rt,ioState)				= IOStGetReceiverTable ioState
 	# (ioid,ioState)			= IOStGetIOId ioState
 	# (sdiSize1,sdiPtr,ioState)	= getSDIWindowSize ioState
 	# pState					= {pState & io=ioState}
-	# (ok,mH,mHs,rt,idtable,osMenuBar,pState)
-								= createMenu index` ioid menuId mDef mHs rt idtable osMenuBar pState
+	  (mKeys,mHs)				= menuHandlesGetKeys mHs
+	# (ok,mH,mKeys,rt,idtable,osMenuBar,pState)
+								= createMenu index` ioid menuId mDef mKeys rt idtable osMenuBar pState
+ 	  mHs						= menuHandlesSetKeys mKeys mHs
  	# ioState					= IOStSetReceiverTable rt pState.io
  	# ioState					= IOStSetIdTable idtable ioState
 	| not ok
+		# mHs					= menuHandlesSetMenus menus mHs
 		# ioState				= IOStSetDevice (MenuSystemState mHs) ioState
 		= (ErrorIdsInUse,{pState & io=ioState})
 	| otherwise
@@ -76,36 +79,36 @@ where
 	getMenuDefInit (Menu _ _ atts)
 		= getMenuInitFun (snd (Select isMenuInit (MenuInit id) atts))
 
-	createMenu :: !Int !SystemId !Id !(Menu m .ls (PSt .l)) !(MenuHandles (PSt .l)) !ReceiverTable !IdTable !OSMenuBar !(PSt .l)
-						 -> (!Bool,MenuHandle .ls (PSt .l),  !MenuHandles (PSt .l), !ReceiverTable,!IdTable,!OSMenuBar, !PSt .l)
+	createMenu :: !Int !SystemId !Id !(Menu m .ls (PSt .l)) ![Char] !*ReceiverTable !*IdTable !OSMenuBar !(PSt .l)
+						 -> (!Bool,MenuHandle .ls (PSt .l), ![Char],!*ReceiverTable,!*IdTable,!OSMenuBar, !PSt .l)
 						 |  MenuElements m
-	createMenu index ioId menuId mDef mHs=:{mKeys=keys} rt it osMenuBar pState
+	createMenu index ioId menuId mDef keys rt it osMenuBar pState
 		# (ms,pState)				= menuElementToHandles (menuDefGetElements mDef) pState
 		  itemHs					= map MenuElementStateToMenuElementHandle ms
 		  (ok,itemHs,rt,it)			= menuIdsAreConsistent ioId menuId itemHs rt it
 		| not ok
-			= (False,undef,mHs,rt,it,osMenuBar,pState)
+			= (False,undef,keys,rt,it,osMenuBar,pState)
 		| otherwise
 			# (tb,ioState)			= getIOToolbox pState.io
 			# (menu,mH,osMenuBar,tb)= NewMenuHandle mDef index menuId osMenuBar tb
 			# (_,itemHs,keys,tb)	= createMenuElements osMenuBar menu 1 itemHs keys tb
 			  mH					= {mH & mItems=itemHs}
-			  mHs					= {mHs & mKeys=keys}
 			# ioState				= setIOToolbox tb ioState
 			# pState				= {pState & io=ioState}
 			  (_,it)				= addIdToIdTable menuId {idpIOId=ioId,idpDevice=MenuDevice,idpId=menuId} it
-			= (True,mH,mHs,rt,it,osMenuBar,pState)
+			= (True,mH,keys,rt,it,osMenuBar,pState)
 
-isMenuWithThisId :: !Id !(MenuStateHandle .pst) -> Bool
+isMenuWithThisId :: !Id !*(MenuStateHandle .pst) -> (!Bool,!*MenuStateHandle .pst)
 isMenuWithThisId id msH
-	= id==fst (menuStateHandleGetMenuId msH)
+	# (id`,msH)	= menuStateHandleGetMenuId msH
+	= (id==id`,msH)
 
-/*	creating pop up menus.
+/*	Creating pop up menus.
 	It is assumed that MenuHandles contains no pop up menu in mMenus and that mPopUpId contains an Id.
 */
-createPopUpMenu :: !SystemId .ls !(PopUpMenu m .ls (PSt .l)) !(MenuHandles (PSt .l)) !ReceiverTable !IdTable !OSMenuBar !(PSt .l)
-													   -> (!Bool,!MenuHandles (PSt .l), !ReceiverTable,!IdTable,!OSMenuBar, !PSt .l)
-													   |  PopUpMenuElements m
+createPopUpMenu :: !SystemId .ls !(PopUpMenu m .ls (PSt .l)) !(MenuHandles (PSt .l)) !*ReceiverTable !*IdTable !OSMenuBar !(PSt .l)
+													-> (!Bool,!MenuHandles (PSt .l), !*ReceiverTable,!*IdTable,!OSMenuBar, !PSt .l)
+													|  PopUpMenuElements m
 createPopUpMenu ioId ls (PopUpMenu items) mHs=:{mMenus, mKeys=keys, mPopUpId} rt it osMenuBar pState
 	# (ms,pState)			= popUpMenuElementToHandles items pState
 	  itemHs				= map MenuElementStateToMenuElementHandle ms
@@ -190,7 +193,8 @@ where
 createMenuElements :: !OSMenuBar !OSMenu !Int ![MenuElementHandle .ls .pst] ![Char] !*OSToolbox
 									 -> (!Int,![MenuElementHandle .ls .pst],![Char],!*OSToolbox)
 createMenuElements osmenubar menu iNr itemHs keys tb
-	| isEmpty itemHs
+	# (empty,itemHs)			= u_isEmpty itemHs
+	| empty
 		= (iNr,itemHs,keys,tb)
 	| otherwise
 		# (itemH,itemHs)		= HdTl itemHs
@@ -210,7 +214,7 @@ where
 		= (iNr,RadioMenuHandle {itemH & mRadioItems=itemHs},keys,tb)
 	createMenuElement osmenubar menu iNr (MenuItemHandle itemH) keys tb
 		# (itemH,keys)			= checkshortcutkey itemH keys
-		# (osMenuItem,tb)		= insertMenu osmenubar menu iNr itemH tb
+		# (osMenuItem,itemH,tb)	= insertMenu osmenubar menu iNr itemH tb
 		  itemH					= {itemH & mOSMenuItem=osMenuItem}
 		= (iNr+1,MenuItemHandle itemH,keys,tb)
 	createMenuElement osmenubar menu iNr (MenuSeparatorHandle itemH) keys tb
@@ -237,7 +241,8 @@ where
 extendMenu :: !OSMenuBar !OSMenu !Int ![MenuElementHandle .ls .pst] ![MenuElementHandle .ls .pst] ![Char] !*OSToolbox
 															    -> (![MenuElementHandle .ls .pst],![Char],!*OSToolbox)
 extendMenu osmenubar menu iNr itemHs items keys tb
-	| isEmpty itemHs
+	# (empty,itemHs)		= u_isEmpty itemHs
+	| empty
 		= (items,keys,tb)
 	| otherwise
 		# (itemH,itemHs)	= HdTl itemHs
@@ -257,7 +262,7 @@ where
 		= (RadioMenuHandle {itemH & mRadioItems=itemHs},keys,tb)
 	extendMenu` osmenubar menu iNr (MenuItemHandle itemH) keys tb
 		# (itemH,keys)					= checkshortcutkey itemH keys
-		# (osMenuItem,tb)				= insertMenu osmenubar menu iNr itemH tb
+		# (osMenuItem,itemH,tb)			= insertMenu osmenubar menu iNr itemH tb
 		= (MenuItemHandle {itemH & mOSMenuItem=osMenuItem},keys,tb)
 	extendMenu` osmenubar menu iNr (MenuSeparatorHandle itemH) keys tb
 		# (osMenuItem,_,tb)				= OSAppendMenuSeparator iNr menu tb
@@ -277,10 +282,10 @@ where
 		= menucreateFatalError "extendMenu" "unmatched MenuElementHandle"
 
 
-insertMenu :: !OSMenuBar !OSMenu !Int !(MenuItemHandle .ls .pst) !*OSToolbox -> (!OSMenuItem,!*OSToolbox)
-insertMenu osmenubar menu iNr {mItemKey,mItemTitle,mItemSelect,mItemMark,mItemAtts} tb
+insertMenu :: !OSMenuBar !OSMenu !Int !*(MenuItemHandle .ls .pst) !*OSToolbox -> (!OSMenuItem,!*MenuItemHandle .ls .pst,!*OSToolbox)
+insertMenu osmenubar menu iNr itemH=:{mItemKey,mItemTitle,mItemSelect,mItemMark,mItemAtts} tb
 	# (osMenuItem,_,tb)	= OSAppendMenuItem osmenubar iNr menu mItemTitle mItemSelect mItemMark shortcut tb
-	= (osMenuItem,tb)
+	= (osMenuItem,itemH,tb)
 where
 	shortcut			= case mItemKey of
 							(Just key)	-> key
@@ -345,61 +350,101 @@ closepopupmenu mHs=:{mMenus,mPopUpId}
 		  (id,_)		= menuStateHandleGetMenuId msH
 		= {mHs & mMenus=msHs,mPopUpId=Just id}
 
-disposeMenuItemHandle :: !OSMenu !Int !(MenuItemHandle .ls .pst) !(![Char],!IdTable,!*OSToolbox) -> (![Char],!IdTable,!*OSToolbox)
-disposeMenuItemHandle menu iNr {mItemKey,mItemId,mOSMenuItem} (keys,it,tb)
-	= (keys`,it`,snd (OSMenuRemoveItem mOSMenuItem menu tb))
+disposeMenuItemHandle :: !OSMenu !Int !(MenuItemHandle .ls .pst) !(![Char],!*IdTable,!*OSToolbox)
+								   -> (!MenuItemHandle .ls .pst, !(![Char],!*IdTable,!*OSToolbox))
+disposeMenuItemHandle menu iNr itemH=:{mItemKey,mItemId,mOSMenuItem} (keys,it,tb)
+	# tb		= snd (OSMenuRemoveItem mOSMenuItem menu tb)
+	| isJust mItemId
+		# it	= snd (removeIdFromIdTable (fromJust mItemId) it)
+		= (itemH,(keys`,it,tb))
+	| otherwise
+		= (itemH,(keys`,it,tb))
 where
-	keys`	= if (isJust mItemKey) [fromJust mItemKey:keys] keys
-	it`		= if (isJust mItemId)  (snd (removeIdFromIdTable (fromJust mItemId) it)) it
+	keys`		= if (isJust mItemKey) [fromJust mItemKey:keys] keys
 
 
-disposeSubMenuHandles :: !(MenuElementHandle .ls .pst) !*OSToolbox -> *OSToolbox
-disposeSubMenuHandles (MenuListLSHandle		 mListItems)	tb = StateMap2 disposeSubMenuHandles mListItems   tb
-disposeSubMenuHandles (MenuExtendLSHandle	{mExtendItems})	tb = StateMap2 disposeSubMenuHandles mExtendItems tb
-disposeSubMenuHandles (MenuChangeLSHandle	{mChangeItems})	tb = StateMap2 disposeSubMenuHandles mChangeItems tb
-disposeSubMenuHandles _										tb = tb
+disposeSubMenuHandles :: !(MenuElementHandle .ls .pst) !*OSToolbox
+					  -> (!MenuElementHandle .ls .pst, !*OSToolbox)
+disposeSubMenuHandles (MenuListLSHandle mListItems) tb
+	# (itemHs,tb)	= StateMap disposeSubMenuHandles mListItems tb
+	= (MenuListLSHandle itemHs,tb)
+disposeSubMenuHandles (MenuExtendLSHandle mExH=:{mExtendItems=itemHs}) tb
+	# (itemHs,tb)	= StateMap disposeSubMenuHandles itemHs tb
+	= (MenuExtendLSHandle {mExH & mExtendItems=itemHs},tb)
+disposeSubMenuHandles (MenuChangeLSHandle mChH=:{mChangeItems=itemHs}) tb
+	# (itemHs,tb)	= StateMap disposeSubMenuHandles itemHs tb
+	= (MenuChangeLSHandle {mChH & mChangeItems=itemHs},tb)
+disposeSubMenuHandles itemH tb
+	= (itemH,tb)
 
-disposeShortcutkeys :: !OSWindowPtr !(MenuElementHandle .ls .pst) !(![Char],!*OSToolbox) -> (![Char],!*OSToolbox)
-disposeShortcutkeys framePtr (MenuItemHandle {mItemKey,mOSMenuItem}) (keys,tb)
+disposeShortcutkeys :: !OSWindowPtr !(MenuElementHandle .ls .pst) !(![Char],!*OSToolbox)
+								 -> (!MenuElementHandle .ls .pst, !(![Char],!*OSToolbox))
+disposeShortcutkeys framePtr (MenuItemHandle itemH=:{mItemKey,mOSMenuItem}) (keys,tb)
 	| isJust mItemKey
-		= (thd3 (Remove ((==) key) key keys),WinRemoveMenuShortKey framePtr mOSMenuItem tb)
+		= (MenuItemHandle itemH,(thd3 (Remove ((==) key) key keys),WinRemoveMenuShortKey framePtr mOSMenuItem tb))
 	with
 		key = fromJust mItemKey
 	| otherwise
-		= (keys,tb)
-disposeShortcutkeys framePtr (SubMenuHandle   {mSubItems})       keys_tb = StateMap2 (disposeShortcutkeys framePtr) mSubItems    keys_tb
-disposeShortcutkeys framePtr (RadioMenuHandle {mRadioItems})     keys_tb = StateMap2 (disposeShortcutkeys framePtr) mRadioItems  keys_tb
-disposeShortcutkeys framePtr (MenuListLSHandle	 mListItems)     keys_tb = StateMap2 (disposeShortcutkeys framePtr) mListItems   keys_tb
-disposeShortcutkeys framePtr (MenuExtendLSHandle {mExtendItems}) keys_tb = StateMap2 (disposeShortcutkeys framePtr) mExtendItems keys_tb
-disposeShortcutkeys framePtr (MenuChangeLSHandle {mChangeItems}) keys_tb = StateMap2 (disposeShortcutkeys framePtr) mChangeItems keys_tb
-disposeShortcutkeys _ _                                          keys_tb = keys_tb
+		= (MenuItemHandle itemH,(keys,tb))
+disposeShortcutkeys framePtr (SubMenuHandle itemH=:{mSubItems=itemHs}) keys_tb
+	# (itemHs,keys_tb)	= StateMap (disposeShortcutkeys framePtr) itemHs keys_tb
+	= (SubMenuHandle {itemH & mSubItems=itemHs},keys_tb)
+disposeShortcutkeys framePtr (RadioMenuHandle itemH=:{mRadioItems=itemHs}) keys_tb
+	# (itemHs,keys_tb)	= StateMap (disposeShortcutkeys framePtr) itemHs keys_tb
+	= (RadioMenuHandle {itemH & mRadioItems=itemHs},keys_tb)
+disposeShortcutkeys framePtr (MenuListLSHandle itemHs) keys_tb
+	# (itemHs,keys_tb)	= StateMap (disposeShortcutkeys framePtr) itemHs keys_tb
+	= (MenuListLSHandle itemHs,keys_tb)
+disposeShortcutkeys framePtr (MenuExtendLSHandle mExH=:{mExtendItems=itemHs}) keys_tb
+	# (itemHs,keys_tb)	= StateMap (disposeShortcutkeys framePtr) itemHs keys_tb
+	= (MenuExtendLSHandle {mExH & mExtendItems=itemHs},keys_tb)
+disposeShortcutkeys framePtr (MenuChangeLSHandle mChH=:{mChangeItems=itemHs}) keys_tb
+	# (itemHs,keys_tb)	= StateMap (disposeShortcutkeys framePtr) itemHs keys_tb
+	= (MenuChangeLSHandle {mChH & mChangeItems=itemHs},keys_tb)
+disposeShortcutkeys _ itemH keys_tb
+	= (itemH,keys_tb)
 
-disposeMenuIds :: !SystemId !(MenuElementHandle .ls .pst) !(!ReceiverTable,!IdTable) -> (!ReceiverTable,!IdTable)
-disposeMenuIds pid (MenuItemHandle {mItemId}) (rt,it)
-	| isNothing mItemId		= (rt,it)
-	| otherwise				= (rt,snd (removeIdFromIdTable (fromJust mItemId) it))
-disposeMenuIds pid (MenuReceiverHandle {mReceiverHandle={rId}}) (rt,it)
-	= (snd (removeReceiverFromReceiverTable rId rt),snd (removeIdFromIdTable rId it))
-disposeMenuIds pid (SubMenuHandle {mSubItems}) ts
-	= StateMap2 (disposeMenuIds pid) mSubItems ts
-disposeMenuIds pid (RadioMenuHandle {mRadioId,mRadioItems}) ts
-	# (rt,it)				= StateMap2 (disposeMenuIds pid) mRadioItems ts
-	| isNothing mRadioId	= (rt,it)
-	| otherwise				= (rt,snd (removeIdFromIdTable (fromJust mRadioId) it))
-disposeMenuIds pid (MenuSeparatorHandle {mSepId}) (rt,it)
-	| isNothing mSepId		= (rt,it)
-	| otherwise				= (rt,snd (removeIdFromIdTable (fromJust mSepId) it))
-disposeMenuIds pid (MenuListLSHandle mListItems) ts
-	= StateMap2 (disposeMenuIds pid) mListItems ts
-disposeMenuIds pid (MenuExtendLSHandle {mExtendItems}) ts
-	= StateMap2 (disposeMenuIds pid) mExtendItems ts
-disposeMenuIds pid (MenuChangeLSHandle {mChangeItems}) ts
-	= StateMap2 (disposeMenuIds pid) mChangeItems ts
+disposeMenuIds :: !SystemId !(MenuElementHandle .ls .pst) !(!*ReceiverTable,!*IdTable)
+						 -> (!MenuElementHandle .ls .pst, !(!*ReceiverTable,!*IdTable))
+disposeMenuIds pid (MenuItemHandle itemH=:{mItemId}) (rt,it)
+	| isNothing mItemId
+		= (MenuItemHandle itemH,(rt,it))
+	| otherwise
+		= (MenuItemHandle itemH,(rt,snd (removeIdFromIdTable (fromJust mItemId) it)))
+disposeMenuIds pid (MenuReceiverHandle itemH=:{mReceiverHandle={rId}}) (rt,it)
+	= (MenuReceiverHandle itemH,(snd (removeReceiverFromReceiverTable rId rt),snd (removeIdFromIdTable rId it)))
+disposeMenuIds pid (SubMenuHandle itemH=:{mSubItems=itemHs}) ts
+	# (itemHs,ts)		= StateMap (disposeMenuIds pid) itemHs ts
+	= (SubMenuHandle {itemH & mSubItems=itemHs},ts)
+disposeMenuIds pid (RadioMenuHandle itemH=:{mRadioId,mRadioItems=itemHs}) ts
+	# (itemHs,(rt,it))	= StateMap (disposeMenuIds pid) itemHs ts
+	# radioH			= RadioMenuHandle {itemH & mRadioItems=itemHs}
+	| isNothing mRadioId
+		= (radioH,(rt,it))
+	| otherwise
+		= (radioH,(rt,snd (removeIdFromIdTable (fromJust mRadioId) it)))
+disposeMenuIds pid (MenuSeparatorHandle itemH=:{mSepId}) (rt,it)
+	| isNothing mSepId
+		= (MenuSeparatorHandle itemH,(rt,it))
+	| otherwise
+		= (MenuSeparatorHandle itemH,(rt,snd (removeIdFromIdTable (fromJust mSepId) it)))
+disposeMenuIds pid (MenuListLSHandle itemHs) ts
+	# (itemHs,ts)	= StateMap (disposeMenuIds pid) itemHs ts
+	= (MenuListLSHandle itemHs,ts)
+disposeMenuIds pid (MenuExtendLSHandle itemH=:{mExtendItems=itemHs}) ts
+	# (itemHs,ts)	= StateMap (disposeMenuIds pid) itemHs ts
+	= (MenuExtendLSHandle {itemH & mExtendItems=itemHs},ts)
+disposeMenuIds pid (MenuChangeLSHandle itemH=:{mChangeItems=itemHs}) ts
+	# (itemHs,ts)	= StateMap (disposeMenuIds pid) itemHs ts
+	= (MenuChangeLSHandle {itemH & mChangeItems=itemHs},ts)
 
-disposeMenuHandles :: !Bool !(MenuHandles .pst) !OSMenuBar !*OSToolbox -> (!OSMenuBar,!*OSToolbox)
-disposeMenuHandles _ menus=:{mMenus} osMenuBar tb
-	= StateMap2 dispose mMenus (osMenuBar,tb)
+disposeMenuHandles :: !Bool !(MenuHandles .pst) !(!OSMenuBar,!*OSToolbox)
+						 -> (!MenuHandles .pst, !(!OSMenuBar,!*OSToolbox))
+disposeMenuHandles _ menus=:{mMenus} (osMenuBar,tb)
+	# (mHs,(osMenuBar,tb))	= StateMap dispose mMenus (osMenuBar,tb)
+	= ({menus & mMenus=mHs},(osMenuBar,tb))
 where
-	dispose :: !(MenuStateHandle .pst) !(!OSMenuBar,!*OSToolbox) -> (!OSMenuBar,!*OSToolbox)
-	dispose mH (menuBar,tb)
-		= OSMenuRemove (fst (menuStateHandleGetHandle mH)) menuBar tb
+	dispose :: !(MenuStateHandle .pst) !(!OSMenuBar,!*OSToolbox) -> (!MenuStateHandle .pst,(!OSMenuBar,!*OSToolbox))
+	dispose msH (osMenuBar,tb)
+		# (menuH,msH)	= menuStateHandleGetHandle msH
+		= (msH,OSMenuRemove menuH osMenuBar tb)

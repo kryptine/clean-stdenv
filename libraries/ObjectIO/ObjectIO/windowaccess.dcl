@@ -11,23 +11,15 @@ from	ossystem	import OSWindowMetrics
 from	ostoolbox	import OSToolbox
 
 
-/*	Dummy values for window handles.
-	These are values of which all non-strict values are undef! and dummies for others
-*/
-dummyWindowHandles		:: WindowHandles      .pst
-dummyWindowStateHandle	:: WindowStateHandle  .pst
-dummyWindowLSHandle		:: WindowLSHandle .ls .pst
-dummyWindowHandle		:: WindowHandle   .ls .pst
-
 /*	Initial window handle. The following arguments are passed:
 */
 initWindowHandle :: !Title								// the window title
 					!WindowMode							// the window mode
 					!WindowKind							// the window kind
 					!WindowInfo							// the window info
-					![WElementHandle .ls .pst]			// the controls
+					!*[WElementHandle .ls .pst]			// the controls
 					![WindowAttribute *(.ls,.pst)]		// the attributes
-				 -> WindowHandle .ls .pst
+				 -> *WindowHandle .ls .pst
 
 
 // Mike //
@@ -108,7 +100,7 @@ getWindowStateHandleWindowMode	:: !(WindowStateHandle .pst) -> *(!WindowMode,	!W
 getWindowStateHandleWindowKind	:: !(WindowStateHandle .pst) -> *(!WindowKind,	!WindowStateHandle .pst)
 getWindowStateHandleWindowTitle	:: !(WindowStateHandle .pst) -> *(!Title,		!WindowStateHandle .pst)
 getWindowStateHandleItemNrs		:: !(WindowStateHandle .pst) -> *(![Int],		!WindowStateHandle .pst)
-getWindowStateHandleKeyFocus	:: !(WindowStateHandle .pst) -> *(!KeyFocus,	!WindowStateHandle .pst)
+getWindowStateHandleKeyFocus	:: !(WindowStateHandle .pst) -> *(!*KeyFocus,	!WindowStateHandle .pst)
 getWindowStateHandleWindowInfo	:: !(WindowStateHandle .pst) -> *(!WindowInfo,	!WindowStateHandle .pst)
 getWindowStateHandleShow		:: !(WindowStateHandle .pst) -> *(!Bool,		!WindowStateHandle .pst)
 getWindowStateHandleSelect		:: !(WindowStateHandle .pst) -> *(!Bool,		!WindowStateHandle .pst)
@@ -122,7 +114,7 @@ identifyWindowStateHandle :: !WID  !(WindowStateHandle .pst) -> *(!Bool,		!Windo
 
 setWindowStateHandleWindowTitle	:: !Title		!(WindowStateHandle .pst) -> WindowStateHandle .pst
 setWindowStateHandleItemNrs		:: ![Int]		!(WindowStateHandle .pst) -> WindowStateHandle .pst
-setWindowStateHandleKeyFocus	:: !KeyFocus	!(WindowStateHandle .pst) -> WindowStateHandle .pst
+setWindowStateHandleKeyFocus	:: !*KeyFocus	!(WindowStateHandle .pst) -> WindowStateHandle .pst
 setWindowStateHandleWindowInfo	:: !WindowInfo	!(WindowStateHandle .pst) -> WindowStateHandle .pst
 setWindowStateHandleShow		:: !Bool		!(WindowStateHandle .pst) -> WindowStateHandle .pst
 setWindowStateHandleSelect		:: !Bool		!(WindowStateHandle .pst) -> WindowStateHandle .pst
@@ -187,8 +179,8 @@ setWindowHandlesWindows				:: ![WindowStateHandle .pst]		!(WindowHandles .pst) -
 getWindowHandlesActiveWindow		::									!(WindowHandles .pst) -> *(!Maybe WIDS,!WindowHandles .pst)
 getWindowHandlesActiveModalDialog	::									!(WindowHandles .pst) -> *(!Maybe WIDS,!WindowHandles .pst)
 hasWindowHandlesWindow				:: !WID								!(WindowHandles .pst) -> *(!Bool,!WindowHandles .pst)
-getWindowHandlesWindow				:: !WID								!(WindowHandles .pst) -> *(!Bool,!WindowStateHandle .pst,!WindowHandles .pst)
-removeWindowHandlesWindow			:: !WID								!(WindowHandles .pst) -> *(!Bool,!WindowStateHandle .pst,!WindowHandles .pst)
+getWindowHandlesWindow				:: !WID								!(WindowHandles .pst) -> *(!Bool,WindowStateHandle .pst,!WindowHandles .pst)
+removeWindowHandlesWindow			:: !WID								!(WindowHandles .pst) -> *(!Bool,WindowStateHandle .pst,!WindowHandles .pst)
 setWindowHandlesWindow				::        !(WindowStateHandle .pst)	!(WindowHandles .pst) -> WindowHandles .pst
 addBehindWindowHandlesWindow		:: !WID   !(WindowStateHandle .pst)	!(WindowHandles .pst) -> *(!WIDS,!WindowHandles .pst)
 addWindowHandlesWindow				:: !Index !(WindowStateHandle .pst)	!(WindowHandles .pst) -> WindowHandles .pst
@@ -208,7 +200,7 @@ checkZeroWindowHandlesBound	:: !(WindowHandles .pst) -> *(!Bool,!WindowHandles .
 decreaseWindowHandlesBound	:: !(WindowHandles .pst) ->          WindowHandles .pst
 
 //	Retrieve the FocusItems of the elements that can obtain the keyboard input focus.
-getWElementKeyFocusIds		:: !Bool ![WElementHandle .ls .pst] -> (![FocusItem],![WElementHandle .ls .pst])
+getWElementKeyFocusIds		:: !Bool ![WElementHandle .ls .pst] -> (!*[FocusItem],![WElementHandle .ls .pst])
 
 //	Retrieve the OSWindowPtr of the control that has the initial input focus.
 getInitActiveControl :: !(WindowHandle .ls .pst) -> *(!OSWindowPtr,!WindowHandle .ls .pst)

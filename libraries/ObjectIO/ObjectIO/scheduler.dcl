@@ -38,9 +38,9 @@ from	StdProcessDef	import ProcessInit, DocumentInterface, NDI, SDI, MDI
 		,	cMaxIONr		:: !SystemId			// The global maximum system number
 		,	cProcesses		:: !*CProcesses			// All processes
 		,	cModalProcess	:: !Maybe SystemId		// The SystemId of the interactive process that has a modal window
-		,	cReceiverTable	:: !ReceiverTable		// The global receiver-process table
-		,	cTimerTable		:: !TimerTable			// The table of all currently active timers
-		,	cIdTable		:: !IdTable				// The table of all bound Ids
+		,	cReceiverTable	:: !*ReceiverTable		// The global receiver-process table
+		,	cTimerTable		:: !*TimerTable			// The table of all currently active timers
+		,	cIdTable		:: !*IdTable			// The table of all bound Ids
 		,	cOSTime			:: !OSTime				// The current OSTime
 		,	cIdSeed			:: !Int					// The global id generating number (actually the World)
 		,	cOSToolbox		:: !*OSToolbox			// The toolbox environment

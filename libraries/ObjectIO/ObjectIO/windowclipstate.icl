@@ -80,8 +80,8 @@ where
 					# tb			= osdisposergn checkRgn tb
 					= (diffRgn,tb)
 			
-			createWItemClipState wMetrics allClipStates validate wPtr clipRect defId itemH=:{wItemKind=IsCompoundControl,wItems} clipRgn tb
-				# (rectRgn,tb)			= OSclipCompoundControl wPtr (0,0) clipRect (toTuple itemPos) (toTuple itemSize) tb
+			createWItemClipState wMetrics allClipStates validate wPtr clipRect defId itemH=:{wItemKind=IsCompoundControl,wItems,wItemPos,wItemSize} clipRgn tb
+				# (rectRgn,tb)			= OSclipCompoundControl wPtr (0,0) clipRect (toTuple wItemPos) (toTuple wItemSize) tb
 				# (diffRgn,tb)			= osdiffrgn clipRgn rectRgn tb
 				# tb					= osdisposergn clipRgn tb
 				# tb					= osdisposergn rectRgn tb
@@ -94,15 +94,12 @@ where
 						= (itemH,diffRgn,tb)
 				| otherwise
 					= (itemH,diffRgn,tb)
-			where
-				itemPos					= itemH.wItemPos
-				itemSize				= itemH.wItemSize
 			
-			createWItemClipState wMetrics allClipStates validate wPtr clipRect defId itemH=:{wItemKind=IsLayoutControl,wItems} clipRgn tb
+			createWItemClipState wMetrics allClipStates validate wPtr clipRect defId itemH=:{wItemKind=IsLayoutControl,wItems,wItemPos,wItemSize} clipRgn tb
 				# (itemHs,clipRgn,tb)	= createWElementsClipState wMetrics allClipStates validate wPtr clipRect1 defId True wItems clipRgn tb
 				= ({itemH & wItems=itemHs},clipRgn,tb)
 			where
-				clipRect1				= IntersectRects (PosSizeToRect itemH.wItemPos itemH.wItemSize) clipRect
+				clipRect1				= IntersectRects (PosSizeToRect wItemPos wItemSize) clipRect
 			
 			createWItemClipState _ _ _ wPtr clipRect defId itemH=:{wItemKind,wItemPos,wItemSize} clipRgn tb
 				| okItem
@@ -137,8 +134,8 @@ where
 			# (itemHs,clipRgn,tb)	= createWElementsClipState wMetrics allClipStates validate wPtr clipRect defId isVisible itemHs clipRgn tb
 			= (WChangeLSHandle {wChH & wChangeItems=itemHs},clipRgn,tb)
 	
-	createWElementsClipState _ _ _ _ _ _ _ itemHs clipRgn tb
-		= (itemHs,clipRgn,tb)
+	createWElementsClipState _ _ _ _ _ _ _ [] clipRgn tb
+		= ([],clipRgn,tb)
 
 
 createClipState` :: !OSWindowMetrics !Bool !Bool !OSWindowPtr !Rect !(Maybe Id) !Bool ![WElementHandle`] !*OSToolbox
@@ -205,22 +202,22 @@ where
 					= (diffRgn,tb)
 			
 			createWItemClipState` wMetrics allClipStates validate wPtr clipRect defId itemH=:{wItemKind`=IsCompoundControl,wItems`} clipRgn tb
-				# (rectRgn,tb)				= OSclipCompoundControl wPtr (0,0) clipRect (toTuple itemPos) (toTuple itemSize) tb
-				# (diffRgn,tb)				= osdiffrgn clipRgn rectRgn tb
-				# tb						= osdisposergn clipRgn tb
-				# tb						= osdisposergn rectRgn tb
+				# (rectRgn,tb)			= OSclipCompoundControl wPtr (0,0) clipRect (toTuple itemPos) (toTuple itemSize) tb
+				# (diffRgn,tb)			= osdiffrgn clipRgn rectRgn tb
+				# tb					= osdisposergn clipRgn tb
+				# tb					= osdisposergn rectRgn tb
 				| allClipStates
 					| validate
-						# (itemH,tb)		= validateCompoundClipState` wMetrics allClipStates wPtr defId True itemH tb
+						# (itemH,tb)	= validateCompoundClipState` wMetrics allClipStates wPtr defId True itemH tb
 						= (itemH,diffRgn,tb)
 					// otherwise
-						# (itemH,tb)		= forceValidCompoundClipState` wMetrics allClipStates wPtr defId True itemH tb
+						# (itemH,tb)	= forceValidCompoundClipState` wMetrics allClipStates wPtr defId True itemH tb
 						= (itemH,diffRgn,tb)
 				| otherwise
 					= (itemH,diffRgn,tb)
 			where
-				itemPos						= itemH.wItemPos`
-				itemSize					= itemH.wItemSize`
+				itemPos					= itemH.wItemPos`
+				itemSize				= itemH.wItemSize`
 			
 			createWItemClipState` wMetrics allClipStates validate wPtr clipRect defId itemH=:{wItemKind`=IsLayoutControl,wItems`} clipRgn tb
 				# (itemHs,clipRgn,tb)	= createWElementsClipState` wMetrics allClipStates validate wPtr clipRect1 defId True wItems` clipRgn tb
@@ -253,8 +250,8 @@ where
 			# (itemHs,clipRgn,tb)	= createWElementsClipState` wMetrics allClipStates validate wPtr clipRect defId isVisible itemHs clipRgn tb
 			= (WRecursiveHandle` itemHs wKind,clipRgn,tb)
 	
-	createWElementsClipState` _ _ _ _ _ _ _ itemH clipRgn tb
-		= (itemH,clipRgn,tb)
+	createWElementsClipState` _ _ _ _ _ _ _ [] clipRgn tb
+		= ([],clipRgn,tb)
 
 disposeClipState:: !ClipState !*OSToolbox -> *OSToolbox
 disposeClipState {clipRgn} tb
@@ -271,10 +268,10 @@ validateAllClipStates wMetrics validate wPtr defaultId isVisible itemHs tb
 	= StateMap (validateclipstate wMetrics validate wPtr defaultId isVisible) itemHs tb
 where
 	validateclipstate :: !OSWindowMetrics !Bool !OSWindowPtr !(Maybe Id) !Bool !(WElementHandle .ls.pst) !*OSToolbox -> (!WElementHandle .ls .pst,!*OSToolbox)
-	validateclipstate wMetrics validate wPtr defaultId isVisible (WItemHandle itemH=:{wItemKind}) tb
+	validateclipstate wMetrics validate wPtr defaultId isVisible (WItemHandle itemH=:{wItemKind,wItemShow,wItems}) tb
 		| wItemKind<>IsCompoundControl
 			| isRecursiveControl wItemKind	// PA: added for LayoutControls
-				# (itemHs,tb)	= StateMap (validateclipstate wMetrics validate wPtr defaultId itemVisible) itemH.wItems tb
+				# (itemHs,tb)	= StateMap (validateclipstate wMetrics validate wPtr defaultId itemVisible) wItems tb
 				= (WItemHandle {itemH & wItems=itemHs},tb)
 			// otherwise
 				= (WItemHandle itemH,tb)
@@ -285,7 +282,7 @@ where
 			# (itemH,tb)	= forceValidCompoundClipState wMetrics True wPtr defaultId itemVisible itemH tb
 			= (WItemHandle itemH,tb)
 	where
-		itemVisible			= isVisible && itemH.wItemShow
+		itemVisible			= isVisible && wItemShow
 	
 	validateclipstate wMetrics validate wPtr defaultId isVisible (WListLSHandle itemHs) tb
 		# (itemHs,tb)	= StateMap (validateclipstate wMetrics validate wPtr defaultId isVisible) itemHs tb

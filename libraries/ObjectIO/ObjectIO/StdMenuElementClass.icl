@@ -8,7 +8,7 @@ implementation module StdMenuElementClass
 
 import	StdBool, StdList, StdMisc, StdTuple
 import	StdMenuDef, StdPSt
-import	commondef, menudefaccess, menuhandle
+import	commondef, menuaccess, menudefaccess
 import	osmenu
 
 

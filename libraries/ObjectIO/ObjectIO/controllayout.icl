@@ -54,11 +54,10 @@ calcControlsSize wMetrics hMargins vMargins spaces reqSize minSize orientations 
 	-	obtains the (Left,zero) layout attribute if not preceded by a fix or corner WItemHandle.
 */
 validateFirstWElementsPos :: !Bool ![WElementHandle .ls .pst] -> (!Bool,!Bool,![WElementHandle .ls .pst])
-validateFirstWElementsPos fix_corner_item_found itemHs
-	| isEmpty itemHs
-		= (False,fix_corner_item_found,itemHs)
-	# (itemH,itemHs)							= HdTl itemHs
-	  (done,fix_corner_item_found,itemH)		= validateFirstWElementPos fix_corner_item_found itemH
+validateFirstWElementsPos fix_corner_item_found []
+	= (False,fix_corner_item_found,[])
+validateFirstWElementsPos fix_corner_item_found [itemH:itemHs]
+	# (done,fix_corner_item_found,itemH)		= validateFirstWElementPos fix_corner_item_found itemH
 	| done
 		= (done,fix_corner_item_found,[itemH:itemHs])
 	| otherwise
@@ -747,45 +746,6 @@ validateDerivedLayoutSize wMetrics derSize reqSize
 	| reqSize==zero		= derSize
 	| otherwise			= reqSize
 
-/*	PA: this version was used for WElementHandles (IsCompoundControl)
-validateDerivedCompoundSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) Size !Size -> Size
-validateDerivedCompoundSize wMetrics domain hasScrolls derSize reqSize
-	| reqSize==zero		= validateScrollbarSize wMetrics domain hasScrolls derSize
-	| otherwise			= validateScrollbarSize wMetrics domain hasScrolls reqSize
-where
-	validateScrollbarSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) !Size -> Size
-	validateScrollbarSize wMetrics domainRect (hasHScroll,hasVScroll) size=:{w,h}
-		| domainSize==zero			= size
-		| visHScroll && visVScroll	= {w=w`,h=h`}
-		| visHScroll				= {size & h=h`}
-		| visVScroll				= {size & w=w`}
-		| otherwise					= size
-	where
-		domainSize					= RectSize domainRect
-		visHScroll					= hasHScroll && OSscrollbarIsVisible (domainRect.rleft,domainRect.rright)  w
-		visVScroll					= hasVScroll && OSscrollbarIsVisible (domainRect.rtop, domainRect.rbottom) h
-		(w`,h`)						= (w+wMetrics.osmVSliderWidth,h+wMetrics.osmHSliderHeight)
-
-And this version was used for WElementHandle`s (IsCompoundControl). This one is ok, since it uses OSscrollbarsAreVisible.
-
-validateDerivedCompoundSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) Size !Size -> Size
-validateDerivedCompoundSize wMetrics domain hasScrolls derSize reqSize
-	| reqSize==zero		= validateScrollbarSize wMetrics domain hasScrolls derSize
-	| otherwise			= validateScrollbarSize wMetrics domain hasScrolls reqSize
-where
-	validateScrollbarSize :: !OSWindowMetrics !Rect !(!Bool,!Bool) !Size -> Size
-	validateScrollbarSize wMetrics domainRect (hasHScroll,hasVScroll) size=:{w,h}
-		| domainSize==zero			= size
-		| visHScroll && visVScroll	= {w=w`,h=h`}
-		| visHScroll				= {size & h=h`}
-		| visVScroll				= {size & w=w`}
-		| otherwise					= size
-	where
-		domainSize					= RectSize domainRect
-		(visHScroll,visVScroll)		= OSscrollbarsAreVisible wMetrics domainRect (w,h) (hasHScroll,hasVScroll)
-		w`							= w+wMetrics.osmVSliderWidth
-		h`							= h+wMetrics.osmHSliderHeight
-*/
 layoutScrollbars :: !OSWindowMetrics !Size !CompoundInfo -> CompoundInfo
 layoutScrollbars wMetrics size info=:{compoundHScroll,compoundVScroll}
 	= {	info & compoundHScroll=mapMaybe (layoutScrollbar hRect) compoundHScroll
@@ -922,7 +882,7 @@ where
 		setLayoutWItem :: ![Root] !(WItemHandle .ls .pst) -> (![Root],!WItemHandle .ls .pst)
 		setLayoutWItem roots itemH=:{wItemKind,wItemInfo,wItems,wItemAtts=[ControlId id:atts]}
 			#! (layoutInfo,corner,size,roots)	= getLayoutItem id roots
-			#! itemHs							= if (isRecursiveControl wItemKind) (map (shiftCompounds layoutInfo corner) wItems) wItems
+			#! itemHs							= map (shiftCompounds layoutInfo corner) wItems
 			#! info								= shiftWItemInfo corner wItemInfo
 			= (	roots
 			  ,	{	itemH	& wItemAtts			= atts
@@ -942,7 +902,7 @@ where
 				shiftCompound :: !LayoutInfo !Vector2 !(WItemHandle .ls .pst) -> WItemHandle .ls .pst
 				shiftCompound layoutInfo offset itemH=:{wItemKind,wItemInfo,wItemPos,wItems,wItemLayoutInfo}
 					#! layoutInfo				= if (layoutInfo==LayoutFix) layoutInfo wItemLayoutInfo
-					#! itemHs					= if (isRecursiveControl wItemKind) (map (shiftCompounds layoutInfo offset) wItems) wItems
+					#! itemHs					= map (shiftCompounds layoutInfo offset) wItems
 					#! info						= shiftWItemInfo offset wItemInfo
 					= {	itemH &	wItemPos		= movePoint offset wItemPos
 							  ,	wItems			= itemHs

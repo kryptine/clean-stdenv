@@ -36,25 +36,24 @@ instance ChannelEnv (IOSt .l)
 		| not found			// PA: guard added
 			= ioState
 		# rsHs						= (ReceiverSystemStateGetReceiverHandles receivers).rReceivers
-		  (found,rsH,rsHs)			= Remove (inetReceiverStateIdentified1 id_pair) undef rsHs
+		  (found,rsH,rsHs)			= URemove (inetReceiverStateIdentified1 id_pair) undef rsHs
 		# ioState					= IOStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
 		| not found
 			= ioState
 		| otherwise
-			# id					= rsH.rHandle.rId
-			  (idtable,ioState)		= IOStGetIdTable ioState
-			  ioState				= IOStSetIdTable (snd (removeIdFromIdTable id idtable)) ioState
-			  ioState				= unbindRId id ioState
-			  ioState				= IOStSetRcvDisabled True ioState // MW11++
-			  connectedIds			= rsH.rHandle.rConnected
-			  ioState				= seq (map closeReceiver connectedIds) ioState
-			  inetInfo				= rsH.rHandle.rInetInfo
+			# {rId=id,rConnected=connectedIds,rInetInfo=inetInfo}
+									= rsH.rHandle
+			# (idtable,ioState)		= IOStGetIdTable ioState
+			# ioState				= IOStSetIdTable (snd (removeIdFromIdTable id idtable)) ioState
+			# ioState				= unbindRId id ioState
+			# ioState				= IOStSetRcvDisabled True ioState // MW11++
+			# ioState				= seq (map closeReceiver connectedIds) ioState
 			  (_,_,_,closeFun)		= fromJust inetInfo
-			  ioState				= appIOToolbox closeFun ioState
+			# ioState				= appIOToolbox closeFun ioState
 			= ioState
-
-inetReceiverStateIdentified1 :: !(!EndpointRef`, !InetReceiverCategory`) !(ReceiverStateHandle .ps) -> Bool
-inetReceiverStateIdentified1 x {rHandle} = inetReceiverIdentified x rHandle
+	where
+		inetReceiverStateIdentified1 :: !(!EndpointRef`, !InetReceiverCategory`) !(ReceiverStateHandle .ps) -> (!Bool,!ReceiverStateHandle .ps)
+		inetReceiverStateIdentified1 x rsH=:{rHandle} = (inetReceiverIdentified x rHandle,rsH)
 
 openSendNotifier		::	.ls !(SendNotifier *(*ch .a) .ls (PSt .l))
 							!(PSt .l)
@@ -357,7 +356,8 @@ openReceiverGeneral ::	.(Id -> .(SelectState -> .([Id] -> .(.a -> .(.b -> Receiv
 openReceiverGeneral createStateHandleFunc id rAttributes endpointRef isReceiver pState
 	# (pState=:{io=ioState})	= ReceiverFunctions.dOpen pState // MW11++
 	# (rt,ioState)				= IOStGetReceiverTable ioState
-	  maybe_parent				= getReceiverTableEntry id rt
+	  (maybe_parent,rt)			= getReceiverTableEntry id rt
+	# ioState					= IOStSetReceiverTable rt ioState	// PA++
 	| isJust maybe_parent
 	= (ErrorIdsInUse, { pState & io=ioState })
 	# (found,receivers,ioState)	= IOStGetDevice ReceiverDevice ioState

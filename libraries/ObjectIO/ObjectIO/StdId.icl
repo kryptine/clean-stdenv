@@ -94,8 +94,9 @@ instance Ids (PSt .l) where
 
 getParentId :: !Id !(IOSt .l) -> (!Maybe Id,!IOSt .l)
 getParentId id ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	  maybeParent		= getIdParent id idtable
+	# (idTable,ioState)		= IOStGetIdTable ioState
+	  (maybeParent,idTable)	= getIdParent id idTable
+	# ioState				= IOStSetIdTable idTable ioState
 	| isNothing maybeParent
 		= (Nothing,ioState)
 	| otherwise

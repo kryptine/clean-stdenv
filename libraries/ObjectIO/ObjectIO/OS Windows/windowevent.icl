@@ -121,39 +121,46 @@ filterOSEvent _ {ccMsg=CcWmBUTTONCLICKED,p1=wPtr,p2=cPtr,p3=mods,p4=toolbarIndex
 		= (True,Nothing,controlSelectInfo,setWindowHandlesWindow wsH windows,ioState)
 where
 	getControlsItemNr :: !OSWindowPtr !(WindowStateHandle .pst) -> (!Int,!WindowStateHandle .pst)
-	getControlsItemNr cPtr wsH=:{wshHandle=Just {wlsHandle={whItems}}}
-		= (snd (getControlsItemNr cPtr whItems),wsH)
+	getControlsItemNr cPtr wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems}}}
+		# (_,itemNr,itemHs)	= getControlsItemNr cPtr whItems
+		= (itemNr,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}})
 	where
-		getControlsItemNr :: !OSWindowPtr ![WElementHandle .ls .pst] -> (!Bool,!Int)
+		getControlsItemNr :: !OSWindowPtr ![WElementHandle .ls .pst] -> (!Bool,!Int,![WElementHandle .ls .pst])
 		getControlsItemNr cPtr [itemH:itemHs]
-			# (found,itemNr)					= getControlItemNr cPtr itemH
-			| found								= (found,itemNr)
-			| otherwise							= getControlsItemNr cPtr itemHs
+			# (found,itemNr,itemH)				= getControlItemNr cPtr itemH
+			| found
+				= (found,itemNr,[itemH:itemHs])
+			| otherwise
+				# (found,itemNr,itemHs)			= getControlsItemNr cPtr itemHs
+				= (found,itemNr,[itemH:itemHs])
 		where
-			getControlItemNr :: !OSWindowPtr !(WElementHandle .ls .pst) -> (!Bool,!Int)
-			getControlItemNr cPtr (WItemHandle itemH=:{wItemPtr})
-				| cPtr==wItemPtr				= (True,itemNr)
-				| itemKind==IsRadioControl		= (Contains (\{radioItemPtr}->radioItemPtr==cPtr) (getWItemRadioInfo info).radioItems,itemNr)
-				| itemKind==IsCheckControl		= (Contains (\{checkItemPtr}->checkItemPtr==cPtr) (getWItemCheckInfo info).checkItems,itemNr)
-				| itemSelect && itemH.wItemShow	= getControlsItemNr cPtr itemH.wItems
-				| otherwise						= (False,0)
+			getControlItemNr :: !OSWindowPtr !(WElementHandle .ls .pst) -> (!Bool,!Int,!WElementHandle .ls .pst)
+			getControlItemNr cPtr (WItemHandle itemH=:{wItemPtr,wItemNr,wItemInfo,wItemKind,wItemSelect,wItemShow,wItems})
+				| cPtr==wItemPtr			= (True,itemNr,WItemHandle itemH)
+				| wItemKind==IsRadioControl	= (Contains (\{radioItemPtr}->radioItemPtr==cPtr) (getWItemRadioInfo wItemInfo).radioItems,itemNr,WItemHandle itemH)
+				| wItemKind==IsCheckControl	= (Contains (\{checkItemPtr}->checkItemPtr==cPtr) (getWItemCheckInfo wItemInfo).checkItems,itemNr,WItemHandle itemH)
+				| wItemSelect && wItemShow
+					# (found,itemNr,itemHs)	= getControlsItemNr cPtr wItems
+					= (found,itemNr,WItemHandle {itemH & wItems=itemHs})
+				| otherwise
+					= (False,0,WItemHandle itemH)
 			where
-				info							= itemH.wItemInfo
-				itemKind						= itemH.wItemKind
-				itemSelect						= itemH.wItemSelect
-				itemNr							= if itemSelect itemH.wItemNr 0
+				itemNr						= if wItemSelect wItemNr 0
 			
 			getControlItemNr cPtr (WListLSHandle itemHs)
-				= getControlsItemNr cPtr itemHs
+				# (found,itemNr,itemHs)		= getControlsItemNr cPtr itemHs
+				= (found,itemNr,WListLSHandle itemHs)
 			
 			getControlItemNr cPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs})
-				= getControlsItemNr cPtr itemHs
+				# (found,itemNr,itemHs)		= getControlsItemNr cPtr itemHs
+				= (found,itemNr,WExtendLSHandle {wExH & wExtendItems=itemHs})
 			
-			getControlItemNr cPtr (WChangeLSHandle wExH=:{wChangeItems=itemHs})
-				= getControlsItemNr cPtr itemHs
+			getControlItemNr cPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs})
+				# (found,itemNr,itemHs)		= getControlsItemNr cPtr itemHs
+				= (found,itemNr,WChangeLSHandle {wChH & wChangeItems=itemHs})
 		
-		getControlsItemNr _ _
-			= (False,0)
+		getControlsItemNr _ []
+			= (False,0,[])
 	
 	getControlsItemNr _ _
 		= windoweventFatalError "getControlsItemNr" "window placeholder not expected"
@@ -180,37 +187,43 @@ filterOSEvent _ {ccMsg=CcWmCOMBOSELECT,p1=wPtr,p2=cPtr,p3=index} windows ioState
 		= (True,Nothing,controlSelectInfo,setWindowHandlesWindow wsH windows,ioState)
 where
 	getPopUpControlItemNr :: !OSWindowPtr !(WindowStateHandle .pst) -> (!Int,!WindowStateHandle .pst)
-	getPopUpControlItemNr cPtr wsH=:{wshHandle=Just {wlsHandle={whItems}}}
-		= (snd (getPopUpControlsItemNr cPtr whItems),wsH)
+	getPopUpControlItemNr cPtr wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems}}}
+		# (_,itemNr,itemHs)				= getPopUpControlsItemNr cPtr whItems
+		= (itemNr,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}})
 	where
-		getPopUpControlsItemNr :: !OSWindowPtr ![WElementHandle .ls .pst] -> (!Bool,!Int)
+		getPopUpControlsItemNr :: !OSWindowPtr ![WElementHandle .ls .pst] -> (!Bool,!Int,![WElementHandle .ls .pst])
 		getPopUpControlsItemNr cPtr [itemH:itemHs]
-			# (found,itemNr)	= getPopUpControlItemNr cPtr itemH
-			| found				= (found,itemNr)
-			| otherwise			= getPopUpControlsItemNr cPtr itemHs
+			# (found,itemNr,itemH)		= getPopUpControlItemNr cPtr itemH
+			| found
+				= (found,itemNr,[itemH:itemHs])
+			| otherwise
+				# (found,itemNr,itemHs)	= getPopUpControlsItemNr cPtr itemHs
+				= (found,itemNr,[itemH:itemHs])
 		where
-			getPopUpControlItemNr :: !OSWindowPtr !(WElementHandle .ls .pst) -> (!Bool,!Int)
-			getPopUpControlItemNr cPtr (WItemHandle itemH=:{wItemPtr})
-				| cPtr==wItemPtr= (True,if (itemKind==IsPopUpControl && itemSelect && itemShow) itemNr 0)
-				| itemShow		= getPopUpControlsItemNr cPtr itemH.wItems
-				| otherwise		= (False,0)
-			where
-				itemNr			= itemH.wItemNr
-				itemKind		= itemH.wItemKind
-				itemSelect		= itemH.wItemSelect
-				itemShow		= itemH.wItemShow
+			getPopUpControlItemNr :: !OSWindowPtr !(WElementHandle .ls .pst) -> (!Bool,!Int,!WElementHandle .ls .pst)
+			getPopUpControlItemNr cPtr (WItemHandle itemH=:{wItemPtr,wItemNr,wItemKind,wItemSelect,wItemShow,wItems})
+				| cPtr==wItemPtr
+					= (True,if (wItemKind==IsPopUpControl && wItemSelect && wItemShow) wItemNr 0,WItemHandle itemH)
+				| wItemShow
+					# (found,itemNr,itemHs)	= getPopUpControlsItemNr cPtr wItems
+					= (found,itemNr,WItemHandle {itemH & wItems=itemHs})
+				| otherwise
+					= (False,0,WItemHandle itemH)
 			
 			getPopUpControlItemNr cPtr (WListLSHandle itemHs)
-				= getPopUpControlsItemNr cPtr itemHs
+				# (found,itemNr,itemHs)	= getPopUpControlsItemNr cPtr itemHs
+				= (found,itemNr,WListLSHandle itemHs)
 			
 			getPopUpControlItemNr cPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs})
-				= getPopUpControlsItemNr cPtr itemHs
+				# (found,itemNr,itemHs)	= getPopUpControlsItemNr cPtr itemHs
+				= (found,itemNr,WExtendLSHandle {wExH & wExtendItems=itemHs})
 			
-			getPopUpControlItemNr cPtr (WChangeLSHandle wExH=:{wChangeItems=itemHs})
-				= getPopUpControlsItemNr cPtr itemHs
+			getPopUpControlItemNr cPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs})
+				# (found,itemNr,itemHs)	= getPopUpControlsItemNr cPtr itemHs
+				= (found,itemNr,WChangeLSHandle {wChH & wChangeItems=itemHs})
 		
-		getPopUpControlsItemNr _ _
-			= (False,0)
+		getPopUpControlsItemNr _ []
+			= (False,0,[])
 	
 	getPopUpControlItemNr _ _
 		= windoweventFatalError "getPopUpControlItemNr" "window placeholder not expected"
@@ -228,34 +241,45 @@ filterOSEvent _ {ccMsg=CcWmDRAWCONTROL,p1=wPtr,p2=cPtr,p3=gc} windows ioState
 		= (True,Nothing,updateInfo,setWindowHandlesWindow wsH windows,ioState)
 where
 	getUpdateControls :: !OSWindowPtr !(WindowStateHandle .pst) -> (![ControlUpdateInfo],!WindowStateHandle .pst)
-	getUpdateControls cPtr wsH=:{wshHandle=Just {wlsHandle={whItems,whSize}}}
-		= (snd (getUpdateControls cPtr (SizeToRect whSize) whItems),wsH)
+	getUpdateControls cPtr wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems,whSize}}}
+		# (_,controls,itemHs)				= getUpdateControls cPtr (SizeToRect whSize) whItems
+		= (controls,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}})
 	where
-		getUpdateControls :: !OSWindowPtr !Rect ![WElementHandle .ls .pst] -> (!Bool,![ControlUpdateInfo])
+		getUpdateControls :: !OSWindowPtr !Rect ![WElementHandle .ls .pst] -> (!Bool,![ControlUpdateInfo],![WElementHandle .ls .pst])
 		getUpdateControls cPtr clipRect [itemH:itemHs]
-			# (found,controls)		= getUpdateControl cPtr clipRect itemH
-			| found					= (found,controls)
-			| otherwise				= getUpdateControls cPtr clipRect itemHs
+			# (found,controls,itemH)		= getUpdateControl cPtr clipRect itemH
+			| found
+				= (found,controls,[itemH:itemHs])
+			| otherwise
+				# (found,controls,itemHs)	= getUpdateControls cPtr clipRect itemHs
+				= (found,controls,[itemH:itemHs])
 		where
-			getUpdateControl :: !OSWindowPtr !Rect !(WElementHandle .ls .pst) -> (!Bool,![ControlUpdateInfo])
-			getUpdateControl cPtr clipRect (WItemHandle itemH=:{wItemPtr})
-				| cPtr==wItemPtr	= (True,[{cuItemNr=itemH.wItemNr,cuItemPtr=wItemPtr,cuArea=clipRect1}])
-				| itemH.wItemShow	= getUpdateControls cPtr clipRect1 itemH.wItems
-				| otherwise			= (False,[])
+			getUpdateControl :: !OSWindowPtr !Rect !(WElementHandle .ls .pst) -> (!Bool,![ControlUpdateInfo],!WElementHandle .ls .pst)
+			getUpdateControl cPtr clipRect (WItemHandle itemH=:{wItemPtr,wItemNr,wItemShow,wItemPos,wItemSize,wItems})
+				| cPtr==wItemPtr
+					= (True,[{cuItemNr=wItemNr,cuItemPtr=wItemPtr,cuArea=clipRect1}],WItemHandle itemH)
+				| wItemShow
+					# (found,controls,itemHs)	= getUpdateControls cPtr clipRect1 wItems
+					= (found,controls,WItemHandle {itemH & wItems=itemHs})
+				| otherwise
+					= (False,[],WItemHandle itemH)
 			where
-				clipRect1			= IntersectRects clipRect (PosSizeToRect itemH.wItemPos itemH.wItemSize)
+				clipRect1						= IntersectRects clipRect (PosSizeToRect wItemPos wItemSize)
 			
 			getUpdateControl cPtr clipRect (WListLSHandle itemHs)
-				= getUpdateControls cPtr clipRect itemHs
+				# (found,controls,itemHs)		= getUpdateControls cPtr clipRect itemHs
+				= (found,controls,WListLSHandle itemHs)
 			
 			getUpdateControl cPtr clipRect (WExtendLSHandle wExH=:{wExtendItems=itemHs})
-				= getUpdateControls cPtr clipRect itemHs
+				# (found,controls,itemHs)		= getUpdateControls cPtr clipRect itemHs
+				= (found,controls,WExtendLSHandle {wExH & wExtendItems=itemHs})
 			
-			getUpdateControl cPtr clipRect (WChangeLSHandle wExH=:{wChangeItems=itemHs})
-				= getUpdateControls cPtr clipRect itemHs
+			getUpdateControl cPtr clipRect (WChangeLSHandle wChH=:{wChangeItems=itemHs})
+				# (found,controls,itemHs)		= getUpdateControls cPtr clipRect itemHs
+				= (found,controls,WChangeLSHandle {wChH & wChangeItems=itemHs})
 		
-		getUpdateControls _ _ _
-			= (False,[])
+		getUpdateControls _ _ []
+			= (False,[],[])
 	
 	getUpdateControls _ _
 		= windoweventFatalError "getUpdateControls" "placeholder not expected"
@@ -322,7 +346,7 @@ filterOSEvent _ {ccMsg=CcWmSCROLLBARACTION,p1=wPtr,p2=cPtr,p3=iBar,p4=action,p5=
 		= (True,Nothing,Just sliderEvent,setWindowHandlesWindow wsH windows,ioState)
 where
 	getSlidersEvent :: !WIDS !Int !Int !OSWindowPtr !(WindowStateHandle .pst) -> (!DeviceEvent,!WindowStateHandle .pst)
-	getSlidersEvent wids iBar osThumb itemPtr wsH=:{wshHandle=Just {wlsHandle={whWindowInfo,whItems,whSize={w,h}}}}
+	getSlidersEvent wids iBar osThumb itemPtr wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whWindowInfo,whItems,whSize={w,h}}}}
 		| wids.wPtr==itemPtr
 			= (WindowScrollAction info,wsH)
 		with
@@ -336,63 +360,69 @@ where
 			(min,max,view)		= if isHorizontal
 									(domainRect.rleft,domainRect.rright, w)
 									(domainRect.rtop, domainRect.rbottom,h)
-		# (found,sliderEvent)	= getSlidersEvent wids iBar osThumb itemPtr whItems
+		# (found,sliderEvent,itemHs)= getSlidersEvent wids iBar osThumb itemPtr whItems
 		| found
-			= (sliderEvent,wsH)
+			= (sliderEvent,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}})
 		| otherwise
 			= windoweventFatalError "getSlidersEvent" "SliderControl could not be located"
 	where
-		getSlidersEvent :: !WIDS !Int !Int !OSWindowPtr ![WElementHandle .ls .pst] -> (!Bool,!DeviceEvent)
+		getSlidersEvent :: !WIDS !Int !Int !OSWindowPtr ![WElementHandle .ls .pst] -> (!Bool,!DeviceEvent,![WElementHandle .ls .pst])
 		getSlidersEvent wids iBar osThumb itemPtr [itemH:itemHs]
-			# (found,sliderEvent)	= getSliderEvent wids iBar osThumb itemPtr itemH
-			| found					= (found,sliderEvent)
-			| otherwise				= getSlidersEvent wids iBar osThumb itemPtr itemHs
+			# (found,sliderEvent,itemH)		= getSliderEvent wids iBar osThumb itemPtr itemH
+			| found
+				= (found,sliderEvent,[itemH:itemHs])
+			| otherwise
+				# (found,sliderEvent,itemHs)= getSlidersEvent wids iBar osThumb itemPtr itemHs
+				= (found,sliderEvent,[itemH:itemHs])
 		where
-			getSliderEvent :: !WIDS !Int !Int !OSWindowPtr !(WElementHandle .ls .pst) -> (!Bool,!DeviceEvent)
-			getSliderEvent wids iBar osThumb itemPtr (WItemHandle itemH=:{wItemPtr,wItemKind})
-				| itemPtr<>itemH.wItemPtr
-					| itemH.wItemShow
-						= getSlidersEvent wids iBar osThumb itemPtr itemH.wItems
+			getSliderEvent :: !WIDS !Int !Int !OSWindowPtr !(WElementHandle .ls .pst) -> (!Bool,!DeviceEvent,!WElementHandle .ls .pst)
+			getSliderEvent wids iBar osThumb itemPtr (WItemHandle itemH=:{wItemPtr,wItemNr,wItemKind,wItemShow,wItems,wItemInfo,wItemSize})
+				| itemPtr<>wItemPtr
+					| wItemShow
+						# (found,sliderEvent,itemHs)	= getSlidersEvent wids iBar osThumb itemPtr wItems
+						= (found,sliderEvent,WItemHandle {itemH & wItems=itemHs})
 					// otherwise
-						= (False,ControlSliderAction dummySlidersEvent)
+						= (False,ControlSliderAction dummySlidersEvent,WItemHandle itemH)
 				| wItemKind==IsCompoundControl
-					= (True,CompoundScrollAction info)
+					= (True,CompoundScrollAction info,WItemHandle itemH)
 				with
 					info			= {	csaWIDS			= wids
-									  ,	csaItemNr		= itemH.wItemNr
+									  ,	csaItemNr		= wItemNr
 									  ,	csaItemPtr		= itemPtr
 									  ,	csaSliderMove	= move min max view osThumb
 									  ,	csaDirection	= if isHorizontal Horizontal Vertical
 									  }
-					compoundSize	= itemH.wItemSize
-					compoundInfo	= getWItemCompoundInfo itemH.wItemInfo
+					compoundInfo	= getWItemCompoundInfo wItemInfo
 					domainRect		= compoundInfo.compoundDomain
 					isHorizontal	= iBar==SB_HORZ
 					(min,max,view)	= if isHorizontal
-										(domainRect.rleft,domainRect.rright, compoundSize.w)
-										(domainRect.rtop, domainRect.rbottom,compoundSize.h)
+										(domainRect.rleft,domainRect.rright, wItemSize.w)
+										(domainRect.rtop, domainRect.rbottom,wItemSize.h)
 				| otherwise
-					= (True,ControlSliderAction info)
+					= (True,ControlSliderAction info,WItemHandle itemH)
 				with
 					info			= {	cslWIDS			= wids
-									  ,	cslItemNr		= itemH.wItemNr
+									  ,	cslItemNr		= wItemNr
 									  ,	cslItemPtr		= itemPtr
 									  ,	cslSliderMove	= move sliderState.sliderMin sliderState.sliderMax 0 osThumb
 									  }
-					sliderInfo		= getWItemSliderInfo itemH.wItemInfo
+					sliderInfo		= getWItemSliderInfo wItemInfo
 					sliderState		= sliderInfo.sliderInfoState
 			
 			getSliderEvent wids iBar osThumb itemPtr (WListLSHandle itemHs)
-				= getSlidersEvent wids iBar osThumb itemPtr itemHs
+				# (found,sliderEvent,itemHs)	= getSlidersEvent wids iBar osThumb itemPtr itemHs
+				= (found,sliderEvent,WListLSHandle itemHs)
 			
-			getSliderEvent wids iBar osThumb itemPtr (WExtendLSHandle {wExtendItems=itemHs})
-				= getSlidersEvent wids iBar osThumb itemPtr itemHs
+			getSliderEvent wids iBar osThumb itemPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs})
+				# (found,sliderEvent,itemHs)	= getSlidersEvent wids iBar osThumb itemPtr itemHs
+				= (found,sliderEvent,WExtendLSHandle {wExH & wExtendItems=itemHs})
 			
-			getSliderEvent wids iBar osThumb itemPtr (WChangeLSHandle {wChangeItems=itemHs})
-				= getSlidersEvent wids iBar osThumb itemPtr itemHs
+			getSliderEvent wids iBar osThumb itemPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs})
+				# (found,sliderEvent,itemHs)	= getSlidersEvent wids iBar osThumb itemPtr itemHs
+				= (found,sliderEvent,WChangeLSHandle {wChH & wChangeItems=itemHs})
 		
-		getSlidersEvent _ _ _ _ _
-			= (False,ControlSliderAction dummySlidersEvent)
+		getSlidersEvent _ _ _ _ []
+			= (False,ControlSliderAction dummySlidersEvent,[])
 		
 		dummySlidersEvent	= { cslWIDS=wids,cslItemNr=0,cslItemPtr=0,cslSliderMove=SliderIncSmall }
 	
@@ -513,9 +543,11 @@ filterOSEvent _ {ccMsg=CcWmKEYBOARD,p1=wPtr,p2=cPtr,p3=keycode,p4=state,p5=mods}
 			where
 				okControlItemNrKeyboardState :: !OSWindowPtr !OSWindowPtr !Bool !Int !Int !Int !(WElementHandle .ls .pst) !(Maybe InputTrack)
 															 -> (!Bool,!Bool,!Int,KeyboardState,!WElementHandle .ls .pst, ! Maybe InputTrack)
-				okControlItemNrKeyboardState wPtr itemPtr contextAble keycode state mods (WItemHandle itemH=:{wItemPtr,wItemKind,wItemSelect,wItemAtts}) inputTrack
+				okControlItemNrKeyboardState wPtr itemPtr contextAble keycode state mods 
+											(WItemHandle itemH=:{wItemPtr,wItemNr,wItemKind,wItemSelect,wItemShow,wItemAtts}) 
+											inputTrack
 					| itemPtr<>wItemPtr
-						| not itemH.wItemShow
+						| not wItemShow
 							= (False,False,0,undef,WItemHandle itemH,inputTrack)
 						// otherwise
 							# (found,ok,itemNr,itemPos,itemHs,inputTrack)	= okControlsItemNrKeyboardState wPtr itemPtr contextAble1 keycode state mods itemH.wItems inputTrack
@@ -524,11 +556,11 @@ filterOSEvent _ {ccMsg=CcWmKEYBOARD,p1=wPtr,p2=cPtr,p3=keycode,p4=state,p5=mods}
 						| isDownKey									// Ignore all key down events
 							= (True,False,0,undef,WItemHandle itemH,inputTrack)
 						| pressState==KeyUp							// Clear keyboard tracking
-							= (True,okKeyboardAtt,itemNr,keystate,WItemHandle itemH,untrackKeyboard inputTrack)
+							= (True,okKeyboardAtt,wItemNr,keystate,WItemHandle itemH,untrackKeyboard inputTrack)
 						// otherwise
-							= (True,okKeyboardAtt,itemNr,keystate,WItemHandle itemH,inputTrack)
+							= (True,okKeyboardAtt,wItemNr,keystate,WItemHandle itemH,inputTrack)
 					| isDownKey										// Key down sets input track
-						= (True,okKeyboardAtt,itemNr,keystate,WItemHandle itemH,trackKeyboard wPtr itemPtr inputTrack)
+						= (True,okKeyboardAtt,wItemNr,keystate,WItemHandle itemH,trackKeyboard wPtr itemPtr inputTrack)
 					| otherwise
 						= (True,False,0,undef,WItemHandle itemH,inputTrack)
 				where
@@ -539,7 +571,6 @@ filterOSEvent _ {ccMsg=CcWmKEYBOARD,p1=wPtr,p2=cPtr,p3=keycode,p4=state,p5=mods}
 					keystate				= keyState keycode state mods
 					pressState				= getKeyboardStateKeyState keystate
 					isDownKey				= pressState==KeyDown False
-					itemNr					= itemH.wItemNr
 				
 				okControlItemNrKeyboardState wPtr itemPtr contextAble keycode state mods (WListLSHandle itemHs) inputTrack
 					# (found,ok,itemNr,itemPos,itemHs,inputTrack)	= okControlsItemNrKeyboardState wPtr itemPtr contextAble keycode state mods itemHs inputTrack
@@ -642,43 +673,49 @@ filterOSEvent _ {ccMsg=CcWmLOSTKEY,p1=wPtr,p2=cPtr} windows ioState
 		= (True,Nothing,deviceEvent,setWindowHandlesWindow wsH windows,ioState)
 	with
 		okControlItemNrsKeyLost :: !OSWindowPtr !(WindowStateHandle .pst) -> (!Bool,!Int,!WindowStateHandle .pst)
-		okControlItemNrsKeyLost itemPtr wsH=:{wshHandle=Just {wlsHandle={whItems}}}
-			# (_,ok,itemNr)			= okControlsItemNrKeyLost True itemPtr whItems
-			= (ok,itemNr,wsH)
+		okControlItemNrsKeyLost itemPtr wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems}}}
+			# (_,ok,itemNr,itemHs)	= okControlsItemNrKeyLost True itemPtr whItems
+			= (ok,itemNr,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}})
 		where
-			okControlsItemNrKeyLost :: !Bool !OSWindowPtr ![WElementHandle .ls .pst] -> (!Bool,!Bool,!Int)
+			okControlsItemNrKeyLost :: !Bool !OSWindowPtr ![WElementHandle .ls .pst] -> (!Bool,!Bool,!Int,![WElementHandle .ls .pst])
 			okControlsItemNrKeyLost contextAble itemPtr [itemH:itemHs]
-				# (found,ok,itemNr)	= okControlItemNrKeyLost contextAble itemPtr itemH
-				| found				= (found,ok,itemNr)
-				| otherwise			= okControlsItemNrKeyLost contextAble itemPtr itemHs
+				# (found,ok,itemNr,itemH)		= okControlItemNrKeyLost contextAble itemPtr itemH
+				| found
+					= (found,ok,itemNr,[itemH:itemHs])
+				| otherwise
+					# (found,ok,itemNr,itemHs)	= okControlsItemNrKeyLost contextAble itemPtr itemHs
+					= (found,ok,itemNr,[itemH:itemHs])
 			where
-				okControlItemNrKeyLost :: !Bool !OSWindowPtr !(WElementHandle .ls .pst) -> (!Bool,!Bool,!Int)
-				okControlItemNrKeyLost contextAble itemPtr (WItemHandle itemH=:{wItemPtr,wItemSelect,wItemAtts})
+				okControlItemNrKeyLost :: !Bool !OSWindowPtr !(WElementHandle .ls .pst) -> (!Bool,!Bool,!Int,!WElementHandle .ls .pst)
+				okControlItemNrKeyLost contextAble itemPtr (WItemHandle itemH=:{wItemPtr,wItemNr,wItemSelect,wItemShow,wItemAtts,wItems})
 					| itemPtr<>wItemPtr
-						| itemH.wItemShow
-							= okControlsItemNrKeyLost contextAble1 itemPtr itemH.wItems
+						| wItemShow
+							# (found,okKey,itemNr,itemHs)	= okControlsItemNrKeyLost contextAble1 itemPtr wItems
+							= (found,okKey,itemNr,WItemHandle {itemH & wItems=itemHs})
 						// otherwise
-							= (False,False,0)
+							= (False,False,0,WItemHandle itemH)
 					| otherwise
-						= (True,okKeyAtt,itemNr)
+						= (True,okKeyAtt,wItemNr,WItemHandle itemH)
 				where
 					contextAble1= contextAble && wItemSelect
 					(filter,selectState,_)
 								= getControlKeyboardAtt (snd (Select isControlKeyboard (ControlKeyboard (const False) Unable undef) wItemAtts))
 					okKeyAtt	= contextAble1 && enabled selectState && filter KeyLost
-					itemNr		= itemH.wItemNr
 									
 				okControlItemNrKeyLost contextAble itemPtr (WListLSHandle itemHs)
-					= okControlsItemNrKeyLost contextAble itemPtr itemHs
+					# (found,okKey,itemNr,itemHs)	= okControlsItemNrKeyLost contextAble itemPtr itemHs
+					= (found,okKey,itemNr,WListLSHandle itemHs)
 				
-				okControlItemNrKeyLost contextAble itemPtr (WExtendLSHandle {wExtendItems=itemHs})
-					= okControlsItemNrKeyLost contextAble itemPtr itemHs
+				okControlItemNrKeyLost contextAble itemPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs})
+					# (found,okKey,itemNr,itemHs)	= okControlsItemNrKeyLost contextAble itemPtr itemHs
+					= (found,okKey,itemNr,WExtendLSHandle {wExH & wExtendItems=itemHs})
 				
-				okControlItemNrKeyLost contextAble itemPtr (WChangeLSHandle {wChangeItems=itemHs})
-					= okControlsItemNrKeyLost contextAble itemPtr itemHs
+				okControlItemNrKeyLost contextAble itemPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs})
+					# (found,okKey,itemNr,itemHs)	= okControlsItemNrKeyLost contextAble itemPtr itemHs
+					= (found,okKey,itemNr,WChangeLSHandle {wChH & wChangeItems=itemHs})
 			
-			okControlsItemNrKeyLost _ _ _
-				= (False,False,0)
+			okControlsItemNrKeyLost _ _ []
+				= (False,False,0,[])
 		
 		okControlItemNrsKeyLost _ _
 			= windoweventFatalError "okControlItemNrsKeyLost" "placeholder not expected"
@@ -718,43 +755,49 @@ filterOSEvent _ {ccMsg=CcWmLOSTMOUSE,p1=wPtr,p2=cPtr} windows ioState
 		= (True,Nothing,deviceEvent,setWindowHandlesWindow wsH windows,ioState)
 	with
 		okControlItemNrsMouseLost :: !OSWindowPtr !(WindowStateHandle .pst) -> (!Bool,!Int,!WindowStateHandle .pst)
-		okControlItemNrsMouseLost itemPtr wsH=:{wshHandle=Just {wlsHandle={whItems}}}
-			# (_,ok,itemNr)			= okControlsItemNrMouseLost True itemPtr whItems
-			= (ok,itemNr,wsH)
+		okControlItemNrsMouseLost itemPtr wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems}}}
+			# (_,ok,itemNr,itemHs)	= okControlsItemNrMouseLost True itemPtr whItems
+			= (ok,itemNr,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}})
 		where
-			okControlsItemNrMouseLost :: !Bool !OSWindowPtr ![WElementHandle .ls .pst] -> (!Bool,!Bool,!Int)
+			okControlsItemNrMouseLost :: !Bool !OSWindowPtr ![WElementHandle .ls .pst] -> (!Bool,!Bool,!Int,![WElementHandle .ls .pst])
 			okControlsItemNrMouseLost contextAble itemPtr [itemH:itemHs]
-				# (found,ok,itemNr)	= okControlItemNrMouseLost contextAble itemPtr itemH
-				| found				= (found,ok,itemNr)
-				| otherwise			= okControlsItemNrMouseLost contextAble itemPtr itemHs
+				# (found,ok,itemNr,itemH)		= okControlItemNrMouseLost contextAble itemPtr itemH
+				| found
+					= (found,ok,itemNr,[itemH:itemHs])
+				| otherwise
+					# (found,ok,itemNr,itemHs)	= okControlsItemNrMouseLost contextAble itemPtr itemHs
+					= (found,ok,itemNr,[itemH:itemHs])
 			where
-				okControlItemNrMouseLost :: !Bool !OSWindowPtr !(WElementHandle .ls .pst) -> (!Bool,!Bool,!Int)
-				okControlItemNrMouseLost contextAble itemPtr (WItemHandle itemH=:{wItemPtr,wItemSelect,wItemAtts})
+				okControlItemNrMouseLost :: !Bool !OSWindowPtr !(WElementHandle .ls .pst) -> (!Bool,!Bool,!Int,!WElementHandle .ls .pst)
+				okControlItemNrMouseLost contextAble itemPtr (WItemHandle itemH=:{wItemPtr,wItemNr,wItemSelect,wItemShow,wItemAtts,wItems})
 					| itemPtr<>wItemPtr
-						| itemH.wItemShow
-							= okControlsItemNrMouseLost contextAble1 itemPtr itemH.wItems
+						| wItemShow
+							# (found,ok,itemNr,itemHs)	= okControlsItemNrMouseLost contextAble1 itemPtr wItems
+							= (found,ok,itemNr,WItemHandle {itemH & wItems=itemHs})
 						// otherwise
-							= (False,False,0)
+							= (False,False,0,WItemHandle itemH)
 					| otherwise
-						= (True,okMouseAtt,itemNr)
+						= (True,okMouseAtt,wItemNr,WItemHandle itemH)
 				where
 					contextAble1= contextAble && wItemSelect
 					(filter,selectState,_)
 								= getControlMouseAtt (snd (Select isControlMouse (ControlMouse (const False) Unable undef) wItemAtts))
 					okMouseAtt	= contextAble1 && enabled selectState && filter MouseLost
-					itemNr		= itemH.wItemNr
 									
 				okControlItemNrMouseLost contextAble itemPtr (WListLSHandle itemHs)
-					= okControlsItemNrMouseLost contextAble itemPtr itemHs
+					# (found,ok,itemNr,itemHs)	= okControlsItemNrMouseLost contextAble itemPtr itemHs
+					= (found,ok,itemNr,WListLSHandle itemHs)
 				
-				okControlItemNrMouseLost contextAble itemPtr (WExtendLSHandle {wExtendItems=itemHs})
-					= okControlsItemNrMouseLost contextAble itemPtr itemHs
+				okControlItemNrMouseLost contextAble itemPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs})
+					# (found,ok,itemNr,itemHs)	= okControlsItemNrMouseLost contextAble itemPtr itemHs
+					= (found,ok,itemNr,WExtendLSHandle {wExH & wExtendItems=itemHs})
 				
-				okControlItemNrMouseLost contextAble itemPtr (WChangeLSHandle {wChangeItems=itemHs})
-					= okControlsItemNrMouseLost contextAble itemPtr itemHs
+				okControlItemNrMouseLost contextAble itemPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs})
+					# (found,ok,itemNr,itemHs)	= okControlsItemNrMouseLost contextAble itemPtr itemHs
+					= (found,ok,itemNr,WChangeLSHandle {wChH & wChangeItems=itemHs})
 			
-			okControlsItemNrMouseLost _ _ _
-				= (False,False,0)
+			okControlsItemNrMouseLost _ _ []
+				= (False,False,0,[])
 		
 		okControlItemNrsMouseLost _ _
 			= windoweventFatalError "okControlItemNrsMouseLost" "placeholder not expected"
@@ -816,40 +859,46 @@ filterOSEvent _ {ccMsg=CcWmMOUSE,p1=wPtr,p2=cPtr,p3=action,p4=x,p5=y,p6=mods} wi
 	with
 		okControlItemsNrMouseState :: !OSWindowPtr !OSWindowPtr !Int !Point2 !(WindowStateHandle .pst) !(Maybe InputTrack)
 												   -> (!Bool,!Int,MouseState,!WindowStateHandle .pst, ! Maybe InputTrack)
-		okControlItemsNrMouseState wPtr itemPtr action eventPos wsH=:{wshHandle=Just {wlsHandle={whItems}}} inputTrack
-			# (_,ok,itemNr,itemPos,inputTrack)
+		okControlItemsNrMouseState wPtr itemPtr action eventPos wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems}}} inputTrack
+			# (_,ok,itemNr,itemPos,itemHs,inputTrack)
 									= okControlsItemNrMouseState True wPtr itemPtr action eventPos whItems inputTrack
-			= (ok,itemNr,itemPos,wsH,inputTrack)
+			= (ok,itemNr,itemPos,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}},inputTrack)
 		where
 			okControlsItemNrMouseState :: !Bool !OSWindowPtr !OSWindowPtr !Int !Point2 ![WElementHandle .ls .pst] !(Maybe InputTrack)
-																				  -> (!Bool,!Bool,!Int,MouseState,!Maybe InputTrack)
+													   -> (!Bool,!Bool,!Int,MouseState,![WElementHandle .ls .pst], !Maybe InputTrack)
 			okControlsItemNrMouseState contextAble wPtr itemPtr action eventPos [itemH:itemHs] inputTrack
-				# (found,ok,itemNr,itemPos,inputTrack)
+				# (found,ok,itemNr,itemPos,itemH,inputTrack)
 										= okControlItemNrMouseState contextAble wPtr itemPtr action eventPos itemH   inputTrack
-				| found					= (found,ok,itemNr,itemPos,inputTrack)
-				| otherwise				= okControlsItemNrMouseState contextAble wPtr itemPtr action eventPos itemHs inputTrack
+				| found
+					= (found,ok,itemNr,itemPos,[itemH:itemHs],inputTrack)
+				| otherwise
+					# (found,ok,itemNr,itemPos,itemHs,inputTrack)	= okControlsItemNrMouseState contextAble wPtr itemPtr action eventPos itemHs inputTrack
+					= (found,ok,itemNr,itemPos,[itemH:itemHs],inputTrack)
 			where
 				okControlItemNrMouseState :: !Bool !OSWindowPtr !OSWindowPtr !Int !Point2 !(WElementHandle .ls .pst) !(Maybe InputTrack)
-																					 -> (!Bool,!Bool,!Int,MouseState,!Maybe InputTrack)
-				okControlItemNrMouseState contextAble wPtr itemPtr action eventPos (WItemHandle itemH=:{wItemPtr,wItemSelect,wItemAtts}) inputTrack
+														   -> (!Bool,!Bool,!Int,MouseState,!WElementHandle .ls .pst,  !Maybe InputTrack)
+				okControlItemNrMouseState contextAble wPtr itemPtr action eventPos 
+										  (WItemHandle itemH=:{wItemPtr,wItemSelect,wItemKind,wItemNr,wItemShow,wItemAtts,wItems,wItemInfo})
+										  inputTrack
 					| itemPtr<>wItemPtr
-						| itemH.wItemShow
-							= okControlsItemNrMouseState contextAble1 wPtr itemPtr action eventPos itemH.wItems inputTrack
+						| wItemShow
+							# (found,ok,itemNr,mousestate,itemHs,inputTrack)	= okControlsItemNrMouseState contextAble1 wPtr itemPtr action eventPos wItems inputTrack
+							= (found,ok,itemNr,mousestate,WItemHandle {itemH & wItems=itemHs},inputTrack)
 						// otherwise
-							= (False,False,0,undef,inputTrack)
+							= (False,False,0,undef,WItemHandle itemH,inputTrack)
 					| trackingMouse wPtr itemPtr inputTrack				// Control is already handling Mouse(Drag/Up)
 						| isDownButton || buttonstate==ButtonStillUp	// Ignore all mouse down and mouse move events
-							= (True,False,0,undef,inputTrack)
+							= (True,False,0,undef,WItemHandle itemH,inputTrack)
 						| buttonstate==ButtonUp							// Clear mouse tracking
-							= (True,okMouseAtt,itemNr,mousestate,untrackMouse inputTrack)
+							= (True,okMouseAtt,wItemNr,mousestate,WItemHandle itemH,untrackMouse inputTrack)
 						// otherwise
-							= (True,okMouseAtt,itemNr,mousestate,inputTrack)
+							= (True,okMouseAtt,wItemNr,mousestate,WItemHandle itemH,inputTrack)
 					| isDownButton										// Mouse down event sets input track
-						= (True,okMouseAtt,itemNr,mousestate,trackMouse wPtr itemPtr inputTrack)
+						= (True,okMouseAtt,wItemNr,mousestate,WItemHandle itemH,trackMouse wPtr itemPtr inputTrack)
 					| isMember buttonstate [ButtonStillDown,ButtonUp]	// Ignore all mouse drag and up events when not tracking
-						= (True,False,0,undef,inputTrack)
+						= (True,False,0,undef,WItemHandle itemH,inputTrack)
 					| otherwise
-						= (True,okMouseAtt,itemNr,mousestate,inputTrack)
+						= (True,okMouseAtt,wItemNr,mousestate,WItemHandle itemH,inputTrack)
 				where
 					contextAble1= contextAble && wItemSelect
 					(filter,selectState,_)
@@ -858,25 +907,26 @@ filterOSEvent _ {ccMsg=CcWmMOUSE,p1=wPtr,p2=cPtr,p3=action,p4=x,p5=y,p6=mods} wi
 					mousestate	= mouseState action (origin+eventPos)
 					buttonstate	= getMouseStateButtonState mousestate
 					isDownButton= isMember buttonstate [ButtonDown,ButtonDoubleDown,ButtonTripleDown]
-					itemKind	= itemH.wItemKind
-					itemNr		= itemH.wItemNr
-					origin		= case itemKind of
+					origin		= case wItemKind of
 									IsCustomButtonControl	-> zero
 									IsCustomControl			-> zero
-									IsCompoundControl		-> (getWItemCompoundInfo itemH.wItemInfo).compoundOrigin
+									IsCompoundControl		-> (getWItemCompoundInfo wItemInfo).compoundOrigin
 									_						-> windoweventFatalError "okControlItemsNrMouseState" "mouse event generated for unexpected control"
 									
 				okControlItemNrMouseState contextAble wPtr itemPtr action eventPos (WListLSHandle itemHs) inputTrack
-					= okControlsItemNrMouseState contextAble wPtr itemPtr action eventPos itemHs inputTrack
+					# (found,ok,itemNr,mousestate,itemHs,inputTrack)	= okControlsItemNrMouseState contextAble wPtr itemPtr action eventPos itemHs inputTrack
+					= (found,ok,itemNr,mousestate,WListLSHandle itemHs,inputTrack)
 				
-				okControlItemNrMouseState contextAble wPtr itemPtr action eventPos (WExtendLSHandle {wExtendItems=itemHs}) inputTrack
-					= okControlsItemNrMouseState contextAble wPtr itemPtr action eventPos itemHs inputTrack
+				okControlItemNrMouseState contextAble wPtr itemPtr action eventPos (WExtendLSHandle wExH=:{wExtendItems=itemHs}) inputTrack
+					# (found,ok,itemNr,mousestate,itemHs,inputTrack)	= okControlsItemNrMouseState contextAble wPtr itemPtr action eventPos itemHs inputTrack
+					= (found,ok,itemNr,mousestate,WExtendLSHandle {wExH & wExtendItems=itemHs},inputTrack)
 				
-				okControlItemNrMouseState contextAble wPtr itemPtr action eventPos (WChangeLSHandle {wChangeItems=itemHs}) inputTrack
-					= okControlsItemNrMouseState contextAble wPtr itemPtr action eventPos itemHs inputTrack
+				okControlItemNrMouseState contextAble wPtr itemPtr action eventPos (WChangeLSHandle wChH=:{wChangeItems=itemHs}) inputTrack
+					# (found,ok,itemNr,mousestate,itemHs,inputTrack)	= okControlsItemNrMouseState contextAble wPtr itemPtr action eventPos itemHs inputTrack
+					= (found,ok,itemNr,mousestate,WChangeLSHandle {wChH & wChangeItems=itemHs},inputTrack)
 			
-			okControlsItemNrMouseState _ _ _ _ _ _ inputTrack
-				= (False,False,0,undef,inputTrack)
+			okControlsItemNrMouseState _ _ _ _ _ [] inputTrack
+				= (False,False,0,undef,[],inputTrack)
 		
 		okControlItemsNrMouseState _ _ _ _ _ _
 			= windoweventFatalError "okControlItemsNrMouseState" "placeholder not expected"
@@ -917,14 +967,15 @@ filterOSEvent wMetrics {ccMsg=CcWmSIZE,p1=wPtr,p2=w,p3=h,p4=usersizing} windows 
 		  windows			= setWindowHandlesWindow wsH windows
 		= (True,Nothing,Just (WindowSizeAction info),windows,ioState)
 where
-	getWindowStateHandleSize :: !WIDS !Int !Int !Bool !(WindowStateHandle .pst) !*OSToolbox -> (!WindowSizeActionInfo,!WindowStateHandle .pst,!*OSToolbox)
-	getWindowStateHandleSize wids newW newH usersizing wsH=:{wshHandle=Just {wlsHandle=wH}} tb
+	getWindowStateHandleSize :: !WIDS !Int !Int !Bool !(WindowStateHandle .pst) !*OSToolbox
+							 -> (!WindowSizeActionInfo,!WindowStateHandle .pst, !*OSToolbox)
+	getWindowStateHandleSize wids newW newH usersizing wsH=:{wshHandle=Just {wlsHandle=wH=:{whSize,whWindowInfo}}} tb
 		= ({wsWIDS=wids,wsSize={w=newW`,h=newH`},wsUpdateAll=not usersizing},wsH,tb)
 	where
-		windowInfo				= getWindowInfoWindowData wH.whWindowInfo
+		windowInfo				= getWindowInfoWindowData whWindowInfo
 		domainRect				= windowInfo.windowDomain
 		hasScrolls				= (isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll)
-		(visHScroll,visVScroll)	= OSscrollbarsAreVisible wMetrics domainRect (toTuple wH.whSize) hasScrolls
+		(visHScroll,visVScroll)	= OSscrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
 		newW`					= if visVScroll (newW+wMetrics.osmVSliderWidth)  newW	// Correct newW in case of visible vertical   scrollbar
 		newH`					= if visHScroll (newH+wMetrics.osmHSliderHeight) newH	// Correct newH in case of visible horizontal scrollbar
 	getWindowStateHandleSize _ _ _ _ _ _
@@ -979,11 +1030,10 @@ getControlKeyFocusItemNr activated cPtr wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH
 	= (itemNr,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}})
 where
 	getControlsKeyFocusItemNr` :: !Bool !OSWindowPtr ![WElementHandle .ls .pst] -> (!Int,![WElementHandle .ls .pst])
-	getControlsKeyFocusItemNr` activated cPtr itemHs
-		| isEmpty itemHs
-			= (0,itemHs)
-		# (itemH,itemHs)		= HdTl itemHs
-		  (itemNr,itemH)		= getControlKeyFocusItemNr` activated cPtr itemH
+	getControlsKeyFocusItemNr` activated cPtr []
+		= (0,[])
+	getControlsKeyFocusItemNr` activated cPtr [itemH:itemHs]
+		# (itemNr,itemH)		= getControlKeyFocusItemNr` activated cPtr itemH
 		| itemNr<>0
 			= (itemNr,[itemH:itemHs])
 		| otherwise
@@ -991,23 +1041,22 @@ where
 			= (itemNr,[itemH:itemHs])
 	where
 		getControlKeyFocusItemNr` :: !Bool !OSWindowPtr !(WElementHandle .ls .pst) -> (!Int,!WElementHandle .ls .pst)
-		getControlKeyFocusItemNr` activated cPtr (WItemHandle itemH)
-			| cPtr==itemH.wItemPtr
-				| not (isMember kind [IsCompoundControl,IsCustomControl,IsEditControl,IsPopUpControl])
+		getControlKeyFocusItemNr` activated cPtr (WItemHandle itemH=:{wItemPtr,wItemNr,wItemKind,wItemSelect,wItemAtts,wItems})
+			| cPtr==wItemPtr
+				| not (isMember wItemKind [IsCompoundControl,IsCustomControl,IsEditControl,IsPopUpControl])
 					= (0,WItemHandle itemH)
-				| not itemH.wItemSelect
+				| not wItemSelect
 					= (0,WItemHandle itemH)
-				| Contains reqAttribute itemH.wItemAtts
-					= (itemH.wItemNr,WItemHandle itemH)
+				| Contains reqAttribute wItemAtts
+					= (wItemNr,WItemHandle itemH)
 				// otherwise
 					= (0,WItemHandle itemH)
-			| not (isRecursiveControl kind)
+			| not (isRecursiveControl wItemKind)
 				= (0,WItemHandle itemH)
 			| otherwise
-				# (itemNr,itemHs)	= getControlsKeyFocusItemNr` activated cPtr itemH.wItems
+				# (itemNr,itemHs)	= getControlsKeyFocusItemNr` activated cPtr wItems
 				= (itemNr,WItemHandle {itemH & wItems=itemHs})
 		where
-			kind			= itemH.wItemKind
 			reqAttribute	= if activated isControlActivate isControlDeactivate
 		
 		getControlKeyFocusItemNr` activated cPtr (WListLSHandle itemHs)

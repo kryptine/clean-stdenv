@@ -79,7 +79,7 @@ inetReceiverIdentifiedWithId (id,category) {rId, rInetInfo=Just (_,rCategory,_,_
 	= id==rId && category==rCategory
 // ..MW11
 
-receiverSetSelectState :: !SelectState !(ReceiverStateHandle .pst) -> ReceiverStateHandle .pst
+receiverSetSelectState :: !SelectState !*(ReceiverStateHandle .pst) -> *ReceiverStateHandle .pst
 receiverSetSelectState select rsH=:{rHandle=rH}
 	= {rsH & rHandle={rH & rSelect=select}}
 

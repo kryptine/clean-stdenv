@@ -69,9 +69,9 @@ IOStGetInitIO				:: !(IOSt .l) -> (!IdFun (PSt .l),				!IOSt .l)
 IOStClosed					:: !(IOSt .l) -> (!Bool,						!IOSt .l)
 IOStGetRuntimeState			:: !(IOSt .l) -> (!RuntimeState,				!IOSt .l)
 IOStGetIOIsModal			:: !(IOSt .l) -> (!Maybe SystemId,				!IOSt .l)
-IOStGetIdTable				:: !(IOSt .l) -> (!IdTable,						!IOSt .l)
-IOStGetReceiverTable		:: !(IOSt .l) -> (!ReceiverTable,				!IOSt .l)
-IOStGetTimerTable			:: !(IOSt .l) -> (!TimerTable,					!IOSt .l)
+IOStGetIdTable				:: !(IOSt .l) -> (!*IdTable,					!IOSt .l)
+IOStGetReceiverTable		:: !(IOSt .l) -> (!*ReceiverTable,				!IOSt .l)
+IOStGetTimerTable			:: !(IOSt .l) -> (!*TimerTable,					!IOSt .l)
 IOStGetOSTime				:: !(IOSt .l) -> (!OSTime,						!IOSt .l)
 IOStGetActivateRequests		:: !(IOSt .l) -> (!ActivateRequests,			!IOSt .l)
 IOStGetEvents				:: !(IOSt .l) -> (!*OSEvents,					!IOSt .l)
@@ -98,9 +98,9 @@ IOStSetProcessAttributes	:: ![ProcessAttribute (PSt .l)]		!(IOSt .l) -> IOSt .l
 IOStSetInitIO				:: !(IdFun (PSt .l))				!(IOSt .l) -> IOSt .l
 IOStSetRuntimeState			:: !RuntimeState					!(IOSt .l) -> IOSt .l
 IOStSetIOIsModal			:: !(Maybe SystemId)	 			!(IOSt .l) -> IOSt .l
-IOStSetIdTable				:: !IdTable							!(IOSt .l) -> IOSt .l
-IOStSetReceiverTable		:: !ReceiverTable					!(IOSt .l) -> IOSt .l
-IOStSetTimerTable			:: !TimerTable						!(IOSt .l) -> IOSt .l
+IOStSetIdTable				:: !*IdTable						!(IOSt .l) -> IOSt .l
+IOStSetReceiverTable		:: !*ReceiverTable					!(IOSt .l) -> IOSt .l
+IOStSetTimerTable			:: !*TimerTable						!(IOSt .l) -> IOSt .l
 IOStSetOSTime				:: !OSTime							!(IOSt .l) -> IOSt .l
 IOStSetActivateRequests		:: !ActivateRequests				!(IOSt .l) -> IOSt .l
 IOStSetEvents				:: !*OSEvents						!(IOSt .l) -> IOSt .l

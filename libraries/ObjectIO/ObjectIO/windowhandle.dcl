@@ -15,50 +15,49 @@ from	ospicture	import OSPictContext, Origin, Pen, Font,
 							Red, Green, Blue, Cyan, Magenta, Yellow
 
 
-::	ControlState ls pst
+::	*ControlState ls pst
 
-::	WindowHandles pst											// Windows currently are only dialogs
-	=	{	whsWindows		:: [WindowStateHandle pst]			// The windows and their controls of a process
+::	*WindowHandles pst											// Windows currently are only dialogs
+	=	{	whsWindows		:: *[*WindowStateHandle pst]		// The windows and their controls of a process
 //		,	whsCursorInfo	:: CursorInfo						// The global cursor information
-		,	whsNrWindowBound:: Bound							// The maximum number of windows that are allowed to be opened
-		,	whsModal		:: Bool								// Flag: the window system is modal (used in combination with modal dialogues)
-		,	whsFinalModalLS	:: [FinalModalLS]					// The final local states of terminated modal dialogs
+		,	whsNrWindowBound:: !Bound							// The maximum number of windows that are allowed to be opened
+		,	whsModal		:: !Bool							// Flag: the window system is modal (used in combination with modal dialogues)
+		,	whsFinalModalLS	:: ![FinalModalLS]					// The final local states of terminated modal dialogs
 		}
 ::	FinalModalLS
 	=	E. .ls:
-		{	fmWIDS			:: WIDS								// Its identification
+		{	fmWIDS			:: !WIDS							// Its identification
 		,	fmLS			:: ls								// The final local state
 		}
-::	WindowStateHandle pst
+::	*WindowStateHandle pst
 	=	E. .ls:
-		{	wshIds			:: WIDS								// A window is identified by an Id and an OSWindowPtr
-		,	wshHandle		:: Maybe (WindowLSHandle ls pst)	// If used as placeholder, Nothing; otherwise window with local state
+		{	wshIds			:: !WIDS							// A window is identified by an Id and an OSWindowPtr
+		,	wshHandle		:: *Maybe *(WindowLSHandle ls pst)	// If used as placeholder, Nothing; otherwise window with local state
 		}
 ::	WIDS
 	=	{	wId				:: Id								// Id  of window
 		,	wPtr			:: !OSWindowPtr						// Ptr of window
 		,	wActive			:: !Bool							// The window is the active window (True) or not (False)
 		}
-::	WindowLSHandle ls pst
+::	*WindowLSHandle ls pst
 	=	{	wlsState		:: ls								// The local state of this window
-		,	wlsHandle		:: WindowHandle ls pst				// The window implementation
+		,	wlsHandle		:: *WindowHandle ls pst				// The window implementation
 		}
-::	WindowHandle ls pst
-	=	{	whMode			:: WindowMode						// The window mode (Modal or Modeless)
-		,	whKind			:: WindowKind						// The window kind (Window or Dialog)
-		,	whTitle			:: Title							// The window title
+::	*WindowHandle ls pst
+	=	{	whMode			:: !WindowMode						// The window mode (Modal or Modeless)
+		,	whKind			:: !WindowKind						// The window kind (Window or Dialog)
+		,	whTitle			:: !Title							// The window title
 		,	whItemNrs		:: [Int]							// The list of free system item numbers for all controls
-		,	whKeyFocus		:: KeyFocus							// The item that has the keyboard input focus
-	//	,	whWindowInfo	:: Maybe WindowInfo					// Additional information about the Window (Nothing for Dialogs)
-		,	whWindowInfo	:: WindowInfo						// Additional information about the window
-		,	whItems			:: [WElementHandle ls pst]			// The window controls
-		,	whShow			:: Bool								// The visibility of the window (True iff visible)
-		,	whSelect		:: Bool								// The WindowSelectState==Able (by default True)
-		,	whAtts			:: [WindowAttribute *(ls,pst)]		// The window attributes
-		,	whDefaultId		:: Maybe Id							// The Id of the optional default button
-		,	whCancelId		:: Maybe Id							// The Id of the optional cancel  button
-		,	whSize			:: Size								// The exact size of the window
-		,	whClosing		:: Bool								// Flag: the window is being closed (True)
+		,	whKeyFocus		:: !*KeyFocus						// The item that has the keyboard input focus
+		,	whWindowInfo	:: !WindowInfo						// Additional information about the window
+		,	whItems			:: *[*WElementHandle ls pst]		// The window controls
+		,	whShow			:: !Bool							// The visibility of the window (True iff visible)
+		,	whSelect		:: !Bool							// The WindowSelectState==Able (by default True)
+		,	whAtts			:: ![WindowAttribute *(ls,pst)]		// The window attributes
+		,	whDefaultId		:: !Maybe Id						// The Id of the optional default button
+		,	whCancelId		:: !Maybe Id						// The Id of the optional cancel  button
+		,	whSize			:: !Size							// The exact size of the window
+		,	whClosing		:: !Bool							// Flag: the window is being closed (True)
 		}
 ::	WindowMode													// Modality of the window
 	=	Modal													// Modal window (only for dialogs)
@@ -66,63 +65,59 @@ from	ospicture	import OSPictContext, Origin, Pen, Font,
 ::	WindowKind
 	=	IsWindow												// Window kind
 	|	IsDialog												// Dialog kind
-// Mike
 	|	IsGameWindow											// Game window kind
-//
 ::	LookInfo
-	=	{	lookFun			:: Look								// The Look function
-		,	lookPen			:: Pen								// The settings of the Pen
-		,	lookSysUpdate	:: Bool								// The system handles updates as much as possible
+	=	{	lookFun			:: !Look							// The Look function
+		,	lookPen			:: !Pen								// The settings of the Pen
+		,	lookSysUpdate	:: !Bool							// The system handles updates as much as possible
 		}
-// Mike
 ::	WindowInfo
-	=	WindowInfo		WindowData
-	|	GameWindowInfo	GameWindowData
+	=	WindowInfo			!WindowData
+	|	GameWindowInfo		!GameWindowData
 	|	NoWindowInfo
 ::	WindowData
-	=	{	windowDomain	:: Rect								// The optional view domain of the window
-		,	windowOrigin	:: Point2							// The Origin of the view domain
-		,	windowHScroll	:: Maybe ScrollInfo					// The scroll data of the WindowHScroll attribute
-		,	windowVScroll	:: Maybe ScrollInfo					// The scroll data of the WindowVScroll attribute
-		,	windowLook		:: LookInfo							// The look and pen of the window
-		,	windowClip		:: ClipState						// The clipped elements of the window
+	=	{	windowDomain	:: !Rect							// The optional view domain of the window
+		,	windowOrigin	:: !Point2							// The Origin of the view domain
+		,	windowHScroll	:: !Maybe ScrollInfo				// The scroll data of the WindowHScroll attribute
+		,	windowVScroll	:: !Maybe ScrollInfo				// The scroll data of the WindowVScroll attribute
+		,	windowLook		:: !LookInfo						// The look and pen of the window
+		,	windowClip		:: !ClipState						// The clipped elements of the window
 		}
 ::  GameWindowData
-    =   {   gamewindowDDPtr :: DDPtr							// The handle to the game window
-    	,	gamewindowSize	:: Size								// The size of the game window
-    	,	gamewindowCDepth:: Int								// The colour depth
+    =   {   gamewindowDDPtr :: !DDPtr							// The handle to the game window
+    	,	gamewindowSize	:: !Size							// The size of the game window
+    	,	gamewindowCDepth:: !Int								// The colour depth
     	,	gamewindowFullScreen
-    						:: Bool								// Flag: the game is played full screen (True)
+    						:: !Bool							// Flag: the game is played full screen (True)
         }
 ::  DDPtr
     :== OSWindowPtr
-//
 ::	ScrollInfo
-	=	{	scrollFunction	:: ScrollFunction					// The ScrollFunction of the (horizontal/vertical) scroll attribute
-		,	scrollItemPos	:: Point2							// The exact position of the scrollbar
-		,	scrollItemSize	:: Size								// The exact size of the scrollbar
-		,	scrollItemPtr	:: OSWindowPtr						// The OSWindowPtr of the scrollbar
+	=	{	scrollFunction	:: !ScrollFunction					// The ScrollFunction of the (horizontal/vertical) scroll attribute
+		,	scrollItemPos	:: !Point2							// The exact position of the scrollbar
+		,	scrollItemSize	:: !Size							// The exact size of the scrollbar
+		,	scrollItemPtr	:: !OSWindowPtr						// The OSWindowPtr of the scrollbar
 		}
 ::	ClipState
 	=	{	clipRgn			:: !OSRgnHandle						// The clipping region
 		,	clipOk			:: !Bool							// Flag: the clipping region is valid
 		}
-::	WElementHandle	ls	pst
-	=	WItemHandle			(WItemHandle		ls pst)
-	|	WListLSHandle		[WElementHandle		ls pst]
-	|	WExtendLSHandle		(WExtendLSHandle	ls pst)
-	|	WChangeLSHandle		(WChangeLSHandle	ls pst)
-::	WExtendLSHandle	ls pst
-	=	E..ls1:
+::	*WElementHandle	ls	pst
+	=	WItemHandle			*(WItemHandle		ls pst)
+	|	WListLSHandle		*[WElementHandle	ls pst]
+	|	WExtendLSHandle		*(WExtendLSHandle	ls pst)
+	|	WChangeLSHandle		*(WChangeLSHandle	ls pst)
+::	*WExtendLSHandle ls pst
+	=	E. .ls1:
 		{	wExtendLS		:: ls1
-		,	wExtendItems	:: [WElementHandle *(ls1,ls) pst]
+		,	wExtendItems	:: *[WElementHandle *(ls1,ls) pst]
 		}
-::	WChangeLSHandle	ls pst
-	=	E..ls1:
+::	*WChangeLSHandle ls pst
+	=	E. .ls1:
 		{	wChangeLS		:: ls1
-		,	wChangeItems	:: [WElementHandle ls1 pst]
+		,	wChangeItems	:: *[WElementHandle ls1 pst]
 		}
-::	WItemHandle		ls pst
+::	*WItemHandle ls pst
 	=	{	wItemId			:: Maybe Id							// If the control has a (ControlId id) attribute, then Just id; Nothing
 		,	wItemNr			:: Int								// The internal nr of this control  (generated from whItemNrs)
 		,	wItemKind		:: ControlKind						// The sort of control
@@ -130,7 +125,7 @@ from	ospicture	import OSPictContext, Origin, Pen, Font,
 		,	wItemSelect		:: Bool								// The ControlSelectState==Able  (by default True)
 		,	wItemInfo		:: WItemInfo ls pst					// Additional information of the control
 		,	wItemAtts		:: [ControlAttribute *(ls,pst)]		// The control attributes
-		,	wItems			:: [WElementHandle ls pst]			// In case of	CompoundControl	: its control elements
+		,	wItems			:: *[WElementHandle ls pst]			// In case of	CompoundControl	: its control elements
 																//				Otherwise		: []
 		,	wItemVirtual	:: Bool								// The control is virtual (True) and should not be layn out
 		,	wItemPos		:: Point2							// The exact position of the item
@@ -244,5 +239,5 @@ isRecursiveControl	:: !ControlKind -> Bool
 
 
 //	Conversion functions from ControlState to WElementHandle, and vice versa:
-WElementHandleToControlState:: !(WElementHandle .ls .pst) -> ControlState   .ls .pst
-ControlStateToWElementHandle:: !(ControlState   .ls .pst) -> WElementHandle .ls .pst
+WElementHandleToControlState:: !*(WElementHandle .ls .pst) -> *ControlState   .ls .pst
+ControlStateToWElementHandle:: !*(ControlState   .ls .pst) -> *WElementHandle .ls .pst

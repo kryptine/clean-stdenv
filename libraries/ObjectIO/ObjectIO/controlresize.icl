@@ -5,12 +5,11 @@ implementation module controlresize
 
 
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
-import	commondef, windowhandle
+import	commondef, controlrelayout, windowhandle
 from	StdControlAttribute	import isControlResize,       getControlResizeFun,
 									isControlMinimumSize, getControlMinimumSizeAtt,
 									isControlPos,         getControlPosAtt, isControlViewSize
 from	controllayout		import layoutControls
-from	controlrelayout		import relayoutControls
 from	windowaccess		import getWItemCompoundInfo, getWItemEditInfo, getWItemSliderInfo, getWindowInfoWindowData, getCompoundContentRect,
 									getWindowHMargins, getWindowVMargins, getWindowItemSpaces
 from	windowclipstate		import forceValidWindowClipState, invalidateCompoundClipState
@@ -30,7 +29,9 @@ from	oswindow			import OSMinWindowSize, OSMinCompoundSize, OSscrollbarsAreVisibl
 */
 resizeControls :: !OSWindowMetrics !Bool !Bool !WIDS !Origin !Size !Size !(WindowHandle .ls .pst) !*OSToolbox
 																	  -> (!WindowHandle .ls .pst, !*OSToolbox)
-resizeControls wMetrics isActive updateAll wids=:{wPtr} oldOrigin oldWSize newWSize wH=:{whWindowInfo,whItems=oldItems,whAtts,whDefaultId} tb
+resizeControls wMetrics isActive updateAll wids=:{wPtr} oldOrigin oldWSize newWSize 
+			   wH=:{whWindowInfo,whItems=oldItems,whAtts,whDefaultId,whSelect,whShow} tb
+	# (oldItems`,oldItems,tb)	= getWElementHandles` wPtr oldItems tb
 	# (layoutChanged,newItems)	= calcNewControlsSize wMetrics originShifted oldWSize newWSize oldItems
 	| not layoutChanged && newWSize.w<=oldWSize.w && newWSize.h<=oldWSize.h
 		# wH					= {wH & whItems=newItems}
@@ -44,8 +45,8 @@ resizeControls wMetrics isActive updateAll wids=:{wPtr} oldOrigin oldWSize newWS
 		# (_,newItems,tb)		= layoutControls wMetrics hMargins vMargins spaces newWSize minSize [(domain,newOrigin)] newItems tb
 		  wH					= {wH & whItems=newItems}
 		# (wH,tb)				= forceValidWindowClipState wMetrics True wPtr wH tb
-		# (updRgn,tb)			= relayoutControls wMetrics wH.whSelect wH.whShow (SizeToRect oldWSize) (SizeToRect newWSize) zero zero wPtr whDefaultId oldItems wH.whItems tb
-		# (wH,tb)				= updatewindowbackgrounds wMetrics updRgn wids wH tb
+		# (updRgn,newItems,tb)	= relayoutControls wMetrics whSelect whShow (SizeToRect oldWSize) (SizeToRect newWSize) zero zero wPtr whDefaultId oldItems` wH.whItems tb
+		# (wH,tb)				= updatewindowbackgrounds wMetrics updRgn wids {wH & whItems=newItems} tb
 		  {x,y}					= oldOrigin
 		  (oldw,oldh)			= toTuple oldWSize
 		  (neww,newh)			= toTuple newWSize
@@ -77,26 +78,23 @@ where
 	The Boolean result holds iff some Control has changed its size or may cause change of layout.
 */
 calcNewControlsSize :: !OSWindowMetrics !Bool !Size !Size ![WElementHandle .ls .pst]  -> (!Bool,![WElementHandle .ls .pst])
-calcNewControlsSize wMetrics originShifted oldWSize newWSize itemHs
-	| isEmpty itemHs
-		= (False,itemHs)
-	| otherwise
-		# (itemH,itemHs)			= HdTl itemHs
-		# (layoutChanged1,itemH)	= calcNewControlSize  wMetrics originShifted oldWSize newWSize itemH
-		# (layoutChanged2,itemHs)	= calcNewControlsSize wMetrics originShifted oldWSize newWSize itemHs
-		= (layoutChanged1 || layoutChanged2,[itemH:itemHs])
+calcNewControlsSize wMetrics originShifted oldWSize newWSize []
+	= (False,[])
+calcNewControlsSize wMetrics originShifted oldWSize newWSize [itemH:itemHs]
+	# (layoutChanged1,itemH)	= calcNewControlSize  wMetrics originShifted oldWSize newWSize itemH
+	# (layoutChanged2,itemHs)	= calcNewControlsSize wMetrics originShifted oldWSize newWSize itemHs
+	= (layoutChanged1 || layoutChanged2,[itemH:itemHs])
 where
 	calcNewControlSize :: !OSWindowMetrics !Bool !Size !Size !(WElementHandle .ls .pst) -> (!Bool,!WElementHandle .ls .pst)
-	calcNewControlSize wMetrics originShifted oldWSize newWSize (WItemHandle itemH)
+	calcNewControlSize wMetrics originShifted oldWSize newWSize (WItemHandle itemH=:{wItemAtts})
 		| not resizable
 			= (isViewFrameSensitive || isOriginSensitive,WItemHandle itemH)
 		| otherwise
 			# (layoutChanged,itemH)	= calcNewWItemSize wMetrics originShifted (\oldCSize -> resizeF oldCSize oldWSize newWSize) itemH
 			= (isViewFrameSensitive || isOriginSensitive || layoutChanged,WItemHandle itemH)
 	where
-		atts					= itemH.wItemAtts
-		(resizable,resizeAtt)	= Select isControlResize undef atts
-		(hasPos,posAtt)			= Select isControlPos undef atts
+		(resizable,resizeAtt)	= Select isControlResize undef wItemAtts
+		(hasPos,posAtt)			= Select isControlPos undef wItemAtts
 		itemPos					= getControlPosAtt posAtt
 		resizeF					= getControlResizeFun resizeAtt
 		isViewFrameSensitive	= if hasPos
