@@ -1,14 +1,12 @@
 definition module EstherPostParser
 
-import EstherParser
+import EstherParser, EstherBackend
 
 :: PostParseException
 	= InfixRightArgumentMissing
 	| InfixLeftArgumentMissing
 	| UnsolvableInfixOrder
 	| NameNotFound !String
-
-class resolveFilename env :: !String !*env -> (!Maybe (Dynamic, GenConsPrio), !*env)
 
 generic resolveNames e :: !e ![(String, GenConsPrio)] !*env -> (!e, ![(String, GenConsPrio)], !*env) | resolveFilename env
 derive resolveNames NTstatements

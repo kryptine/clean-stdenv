@@ -100,9 +100,13 @@ where
 
 functionIdentifier = constructorIdentifier <!> variableIdentifier
 
-constructorIdentifier = (uppercaseIdentifier <!> funnyIdentifier) <&> (\n -> if (isMember n keywords) fail (yield n))
+constructorIdentifier 
+	= (uppercaseIdentifier <!> funnyIdentifier) <&> (\n -> if (isMember n keywords) fail (yield n)) 
+	<!> fileIdentifier
 
 variableIdentifier = lowercaseIdentifier <&> (\n -> if (isMember n keywords) fail (yield n))
+
+fileIdentifier = symbol '`' &> <*> (character ['`']) <& symbol '`' <@ toString
 
 parser{|(|-|)|} ga ge gb t = ga t &> sp (ge t) <& sp (gb t) <@ |-|
 
@@ -199,10 +203,10 @@ uppercaseIdentifier = satisfy (\c -> isMember c upperchars) <:&> <*> (satisfy (\
 funnyIdentifier = <+> (satisfy (\c -> isMember c funnychars)) <@ toString
 
 keywords =: ["=", "->", "let", "in", "case", "of", "\\", "_", ":", "..", "\\\\", "<-", "|", "&", ">>>", "dynamic", "infix", "infixl", "infixr"]
-symbolchars =: ['\',();[]{}"']
-spacechars =: ['\t\n\r\v ']
+//symbolchars =: ['\',();[]{}"']
+//spacechars =: ['\t\n\r\v ']
 funnychars =: ['\\?.=:$!@#%^&*+-<>/|~']
-lowerchars =: ['a'..'z'] ++ ['_', '`']
+lowerchars =: ['a'..'z'] ++ ['_']
 upperchars =: ['A'..'Z']
 digitchars =: ['0'..'9']
 numberchars =: digitchars ++ upperchars

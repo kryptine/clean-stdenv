@@ -9,15 +9,20 @@ import EstherParser, StdMaybe
 	| InvalidInstance !String !Dynamic
 	| UnsolvableOverloading
 
+:: EstherRuntimeException
+	= PatternMismatch
+	| UndefEvaluated
+	| AbortEvaluated !String
+
 :: Core
 	= CoreApply !Core !Core
 	| CoreCode !Dynamic 
 	| CoreVariable !String
 	| CoreDynamic
 
-class resolveInstance env :: !String !Dynamic !*env -> (!Maybe Dynamic, !*env)
+class resolveFilename env :: !String !*env -> (!Maybe (Dynamic, GenConsPrio), !*env)
 
-class generateCode t :: !Core !*env -> (!t, !*env) | resolveInstance env
+generateCode :: !Core !*env -> (!Dynamic, !*env) | resolveFilename env
 
 overloaded :: !String !Dynamic -> Dynamic
 overloaded2 :: !String !String !Dynamic -> Dynamic
@@ -25,8 +30,6 @@ overloaded3 :: !String !String !String !Dynamic -> Dynamic
 
 abstract :: !String !Core -> Core
 abstract_ :: !Core -> Core
-
-instance generateCode Dynamic
 
 toStringDynamic :: !Dynamic -> ([String], String)
 
