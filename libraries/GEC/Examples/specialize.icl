@@ -19,10 +19,11 @@ derive defval Tree
 
 myeditor = startCircuit mycircuit defaultv
 where
-	mycircuit =  edit "Family Tree Editor"
+	mycircuit =  edit "Family Tree Editor" 
+										>>> edit "bla"
 
-	defaultv :: Family
-	defaultv =  defval`
+//	defaultv :: Checkbox
+	defaultv =  vertlistAGEC (map (\i -> (NotChecked,i)) [1..10])
 
 :: Family	=	Family  Person Status (Maybe Partner)
 :: Status	=	Married			
@@ -107,7 +108,7 @@ gGEC{|Maybe|} geca gecArgs pSt
 = Specialize Nothing (MaybeAGEC (gGEC{|*->*|} (gGEC{|*->*|} (gGEC{|*->*|} geca)))) gecArgs pSt
 where
 	MaybeAGEC :: (TgGEC (NoObject [YesObject a]) (PSt .ps)) (Maybe a) -> AGEC (Maybe a)
-	MaybeAGEC geca n = mkxAGEC geca (to_BimapGEC bimapMaybe Nothing) "Maybe"
+	MaybeAGEC gecspec n = mkxAGEC gecspec (to_BimapGEC bimapMaybe Nothing) "Maybe"
 	where
 		bimapMaybe = {map_to = map_to, map_from = map_from}
 		where
