@@ -6,7 +6,8 @@ import EstherScript, EstherStdEnv
 
 MyEstherState world = 
 	{	searchPath	= [["."]]
-	,	builtin		= stdEnv
+	,	searchCache	= []
+	,	buildin		= stdEnv
 	,	env			= world
 	}
 
@@ -32,9 +33,8 @@ shell lineNr console world
 	| cmdline == "exit" = (console,world)
 	| cmdline == "" 	= shell lineNr console world
 	# (d, world) 		= stringToDynamic cmdline world
-	  (vs, t) 			= toStringDynamic d
-	  v = foldr (+++) "" vs
-	  console 			= fwrites ("\n" +++ cmdline +++ "\n==>\n" +++ v +++ " :: " +++ t +++ "\n") console
+	  (v, t) 			= toStringDynamic d
+	  console 			= fwrites ("\n" +++ cmdline +++ "\n==>\n" +++ (hd v) +++ " :: " +++ t +++ "\n") console
 	= shell (lineNr + 1) console world
 where
 	freadline` :: !*File -> (!String, !*File)

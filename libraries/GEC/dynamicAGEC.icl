@@ -54,7 +54,7 @@ where
 							= (newd, hidAGEC newd)
 	updExpr _ (_, oldd)		= (^^oldd, oldd)
 
-	prettyVal x				=  foldr (+++) "" (fst (toStringDynamic (dynamic x)))
+	prettyVal x				= hd (fst (toStringDynamic (dynamic x)))
 
 /*dynamicAGEC :: a -> AGEC a | TC a & gGEC {|*|} a	 					
 dynamicAGEC v = mkAGEC { toGEC   = toExpr
@@ -121,7 +121,7 @@ gGEC{|(->)|} gGECa gGECb args=:{gec_value = Nothing, update = modeupdate} pSt
 = createDummyGEC OutputOnly (undef) modeupdate pSt
 
 ShowValueDynamic :: Dynamic -> String
-ShowValueDynamic d = strip (foldr (+++) "" (fst (toStringDynamic d)) +++ " ")
+ShowValueDynamic d = strip (hd (fst (toStringDynamic d)) +++ " ")
 
 ShowTypeDynamic :: Dynamic -> String
 ShowTypeDynamic d = strip (snd (toStringDynamic d) +++ " ")
