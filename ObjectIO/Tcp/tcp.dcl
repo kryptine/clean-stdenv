@@ -1,5 +1,12 @@
 definition module tcp
 
+//	********************************************************************************
+//	Clean Standard TCP library, version 1.2.2
+//	
+//	Author: Martin Wierich
+//	Modified: 7 September 2001 for Clean 2.0 (Peter Achten)
+//	********************************************************************************
+
 import	StdString
 from	id			import Id
 from	StdFile 	import FileEnv, Files
@@ -52,7 +59,7 @@ LISTENER				:==	1
 			,	bId				::	!Id
 			}
 ::	Buffer
-		=	{	bPackets		::	![!{#Char}]
+		=	{	bPackets		::	![{#Char}]
 			,	bBegin			::	!Int
 			}		
 
@@ -66,15 +73,15 @@ SChanReceiver		:== 2
 DNSReceiver			:== 3
 ConnectReceiver		:== 4
 
-pack_tcplistener	::	!EndpointRef			->	(TCP_Listener_ .a)
-pack_tcpschan		::	!Buffered_SChan 		->	(TCP_SChannel_ .a)
-pack_tcprchan		::	!(!EndpointRef,!Int) 	->	(TCP_RChannel_ .a)
-pack_ipaddr			::	!Int					->	IPAddress
+pack_tcplistener	::	!EndpointRef			-> TCP_Listener_ .a
+pack_tcpschan		::	!Buffered_SChan 		-> TCP_SChannel_ .a
+pack_tcprchan		::	!(!EndpointRef,!Int) 	-> TCP_RChannel_ .a
+pack_ipaddr			::	!Int					-> IPAddress
 
-unpack_tcplistener	::	!.(TCP_Listener_ .a)	->	EndpointRef
-unpack_tcpschan 	::	!.(TCP_SChannel_ .a) 		->	Buffered_SChan
-unpack_tcprchan		::	!.(TCP_RChannel_ .a)		-> (!EndpointRef, !Int)
-unpack_ipaddr		::	!IPAddress				->	Int
+unpack_tcplistener	::	!.(TCP_Listener_ .a)	-> EndpointRef
+unpack_tcpschan 	::	!.(TCP_SChannel_ .a) 	-> Buffered_SChan
+unpack_tcprchan		::	!.(TCP_RChannel_ .a)	-> (!EndpointRef, !Int)
+unpack_ipaddr		::	!IPAddress				-> Int
 
 toDottedDecimal	::	!Int	->	String
 

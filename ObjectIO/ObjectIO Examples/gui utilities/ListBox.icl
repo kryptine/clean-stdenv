@@ -2,7 +2,7 @@ implementation module ListBox
 
 
 /*	Definition of the list box control.
-	This definition uses the Object I/O library, version 1.2
+	This definition has been written in Clean 2.0 and uses the Object I/O library, version 1.2.2
 	The list box control is constructed out of predefined control elements, and is therefore platform independent.
 	In future versions it will be added as a standard library component.
 */
@@ -48,7 +48,7 @@ import StdControl, StdControlReceiver, StdId, StdPicture, StdPSt, StdReceiver, S
 		}
 
 ListBoxControl :: Int [String] [Index] ListBoxId [ControlAttribute *(.ls,.ps)] !*env
-				-> (!ListBoxControl .ls .ps,!*env) | accScreenPicture env
+				-> (!.ListBoxControl .ls .ps,!*env) | accScreenPicture env
 ListBoxControl maxNrItems items selection listboxid atts env
 	# (dialogFont,env)	= accScreenPicture openDialogFont env
 	# (metrics,   env)	= accScreenPicture (getFontMetrics dialogFont) env
@@ -87,11 +87,10 @@ where
 	isListBoxControlAttribute _							= False
 
 instance Controls ListBoxControl where
-	controlToHandles :: !(ListBoxControl .ls (PSt .l)) (PSt .l) -> ([ControlState .ls (PSt .l)],PSt .l)
 	controlToHandles {listboxState=listboxState=:{items,size,listboxId,fontInfo},listboxAtts} pst
 		= controlToHandles imp pst
 	where
-		imp = {	addLS	= listboxState
+		imp = {	addLS	= newListBoxState listboxState
 			  ,	addDef	= CompoundControl
 			  				(	CompoundControl 
 							(	CustomControl size (customlook listboxState)	[	ControlId		listboxId.customId
@@ -198,29 +197,29 @@ instance Controls ListBoxControl where
 		mouseFilter _						= False
 		
 		//	The mouse either sets, adds, or removes items to the selection:
-		mouse :: (IdFun *(.x,PSt .l)) MouseState *(*(ListBoxState,.x),PSt .l) -> *(*(ListBoxState,.x),PSt .l)
+		mouse :: (IdFun *(.x,PSt .l)) MouseState *(*(.ListBoxState,.x),PSt .l) -> *(*(*ListBoxState,.x),PSt .l)
 		mouse f (MouseDown pos {shiftDown} _) ((listboxState,ls),pState)
 			# listboxState	= {listboxState & selection=okSelection}
 			# newLook		= customlook listboxState
 			# pState		= appPIO (setControlLooks [(customId,True,(True,newLook))]) pState
 			# (ls,pState)	= f (ls,pState)
-			= ((listboxState,ls),pState)
+			= ((newListBoxState listboxState,ls),pState)
 		where
-			items		= listboxState.items
-			nrItems		= length items
-			selection	= listboxState.selection
-			metrics		= listboxState.fontInfo.metrics
-			lineHeight	= fontLineHeight metrics
-			newIndex	= pos.y/lineHeight+1
-			newSelection= if (not shiftDown)				[newIndex]
-						 (if (isMember newIndex selection)	(removeMembers selection [newIndex])
-															(merge [newIndex] selection))
-			okSelection	= filter (isBetween 1 nrItems) newSelection
-			customId	= listboxState.listboxId.customId
+			items			= listboxState.items
+			nrItems			= length items
+			selection		= listboxState.selection
+			metrics			= listboxState.fontInfo.metrics
+			lineHeight		= fontLineHeight metrics
+			newIndex		= pos.y/lineHeight+1
+			newSelection	= if (not shiftDown)				[newIndex]
+							 (if (isMember newIndex selection)	(removeMembers selection [newIndex])
+																(merge [newIndex] selection))
+			okSelection		= filter (isBetween 1 nrItems) newSelection
+			customId		= listboxState.listboxId.customId
 		
 		
 		//	The receiver function:
-		receiver :: MessageIn *(*(ListBoxState,.x),PSt .l) -> (MessageOut,*(*(ListBoxState,.x),PSt .l))
+		receiver :: MessageIn *(*(*ListBoxState,.x),PSt .l) -> (MessageOut,*(*(*ListBoxState,.x),PSt .l))
 		
 		//	Return the current selection:
 		receiver InGetSelection ((listboxState=:{items,selection},ls),pState)
@@ -231,7 +230,7 @@ instance Controls ListBoxControl where
 			# listboxState	= {listboxState & selection=newSelection}
 			# newLook		= customlook listboxState
 			# pState		= appPIO (setControlLooks [(customId,True,(True,newLook))]) pState
-			= (OutSetSelection,((listboxState,ls),pState))
+			= (OutSetSelection,((newListBoxState listboxState,ls),pState))
 		where
 			customId		= listboxState.listboxId.customId
 		
@@ -247,7 +246,7 @@ instance Controls ListBoxControl where
 			# newLook		= customlook listboxState
 			# pState		= appPIO (setControlLooks [(customId,True,(True,newLook))]) pState
 			| otherwise
-				= (OutOpenItems,((listboxState,ls),pState))
+				= (OutOpenItems,((newListBoxState listboxState,ls),pState))
 		where
 			customId				= listboxState.listboxId.customId
 			nrCurItems				= length items
@@ -270,7 +269,7 @@ instance Controls ListBoxControl where
 			# newLook		= customlook listboxState
 			# pState		= appPIO (setControlLooks [(customId,True,(True,newLook))]) pState
 			| otherwise
-				= (OutCloseItems,((listboxState,ls),pState))
+				= (OutCloseItems,((newListBoxState listboxState,ls),pState))
 		where
 			customId				= listboxState.listboxId.customId
 			nrCloseItems			= length closeItems
@@ -290,7 +289,7 @@ openListBoxId env
 
 //	The functions below take care of the proper communication with the receiver that
 //	belongs to the listbox control.
-getListBoxSelection :: !ListBoxId !(PSt .l) -> (!(!Bool,![(String,!Index)]),!PSt .l)
+getListBoxSelection :: !ListBoxId !(PSt *l) -> (!(!Bool,![(String,!Index)]),!PSt *l)
 getListBoxSelection {r2Id} pState
 	# ((_,maybe_out),pState)	= syncSend2 r2Id InGetSelection pState
 	| isNothing maybe_out
@@ -301,11 +300,11 @@ getListBoxSelection {r2Id} pState
 	| otherwise
 		= (result,pState)
 
-setListBoxSelection :: !ListBoxId ![Index] !(PSt .l) -> PSt .l
+setListBoxSelection :: !ListBoxId ![Index] !(PSt *l) -> PSt *l
 setListBoxSelection {r2Id} selection pState
 	= snd (syncSend2 r2Id (InSetSelection selection) pState)
 
-getListBoxItems :: !ListBoxId !(PSt .l) -> (!(!Bool,![String]),!PSt .l)
+getListBoxItems :: !ListBoxId !(PSt *l) -> (!(!Bool,![String]),!PSt *l)
 getListBoxItems {r2Id} pState
 	# ((_,maybe_out),pState)	= syncSend2 r2Id InGetItems pState
 	| isNothing maybe_out
@@ -316,11 +315,11 @@ getListBoxItems {r2Id} pState
 	| otherwise
 		= (result,pState)
 
-openListBoxItems :: !ListBoxId !Index ![String] !(PSt .l) -> PSt .l
+openListBoxItems :: !ListBoxId !Index ![String] !(PSt *l) -> PSt *l
 openListBoxItems {r2Id} index items pState
 	= snd (syncSend2 r2Id (InOpenItems index items) pState)
 
-closeListBoxItems :: !ListBoxId ![Index] !(PSt .l) -> PSt .l
+closeListBoxItems :: !ListBoxId ![Index] !(PSt *l) -> PSt *l
 closeListBoxItems {r2Id} items pState
 	= snd (syncSend2 r2Id (InCloseItems items) pState)
 
@@ -365,3 +364,7 @@ setBetween low up x
 	| x<low		= low
 	| x<up		= x
 	| otherwise	= up
+
+newListBoxState :: !ListBoxState -> *ListBoxState
+newListBoxState {maxNrItems,items,selection,size,listboxId,fontInfo}
+	= {maxNrItems=maxNrItems,items=items,selection=selection,size=size,listboxId=listboxId,fontInfo=fontInfo}

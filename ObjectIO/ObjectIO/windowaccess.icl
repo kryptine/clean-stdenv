@@ -1,11 +1,6 @@
 implementation module windowaccess
 
 
-//	Object I/O library, version 1.2
-
-//	Access operations to Window(State)Handle(s).
-
-
 import	StdBool, StdEnum, StdInt, StdList, StdMisc, StdTuple
 import	ossystem, ostypes, oswindow
 import	commondef, keyfocus, windowhandle

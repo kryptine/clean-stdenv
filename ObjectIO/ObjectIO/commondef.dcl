@@ -1,9 +1,12 @@
 definition module commondef
 
-
-//	Clean Object I/O library, version 1.2
-
+//	********************************************************************************
+//	Clean Standard Object I/O library, version 1.2.2
+//	
 //	Common types for the Clean Object I/O system and their access rules:
+//	Author: Peter Achten
+//	Modified: 7 September 2001 for Clean 2.0
+//	********************************************************************************
 
 
 import	StdClass, StdFunc
@@ -120,7 +123,7 @@ condMap					:: (Cond x) !(IdFun x)		![x]		-> (!Bool, ![x])
 uspan					:: !(UCond .x)				!u:[.x]		-> (![.x],!u:[.x])	// Same as span (StdList), but preserving uniqueness
 filterMap				:: !(.x -> *(Bool,.y))		![.x]		-> [.y]
 stateMap				:: !(u:x -> v:(.s -> (.y,.s))) ![u:x] !.s -> (![.y],!.s), [v<=u]
-stateMap2				:: !(u:x -> v:(.s -> .s))	![u:x] !.s -> .s, [v<=u]
+stateMap2				:: !(u:x -> .(.s -> .s)) !v:[u:x] !.s -> .s, [v <= u]
 strictSeq				:: ![.(.s -> .s)]				   !.s -> .s				// Same as seq (StdFunc), but with strict state argument
 strictSeqList			:: !.[.St .s .x]				   !.s -> (![.x],!.s)		// Same as seqList (StdFunc), but with strict state argument
 allList					:: !(.x .s -> .(Bool,.s))   ![.x]  !.s -> (!Bool,!.s)

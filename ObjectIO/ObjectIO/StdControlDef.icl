@@ -1,11 +1,6 @@
 implementation module StdControlDef
 
 
-//	Clean Object I/O library, version 1.2.1
-
-//	Definition of controls.
-
-
 import	StdIOCommon, StdPictureDef
 
 

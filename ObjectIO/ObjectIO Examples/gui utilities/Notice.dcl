@@ -4,7 +4,7 @@ definition module Notice
 //
 //	A new instance of the Dialogs type constructor class to easily create simple notice dialogues.
 //
-//	This module has been written in Clean 1.3.2 and uses the Clean Standard Object I/O library 1.2
+//	This module has been written in Clean 2.0 and uses the Clean Standard Object I/O library 1.2.2
 //	
 //	**************************************************************************************************
 

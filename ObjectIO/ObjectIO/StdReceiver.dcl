@@ -1,9 +1,11 @@
 definition module StdReceiver
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard Object I/O library, version 1.2.2
 //	
 //	StdReceiver specifies all receiver operations.
+//	Author: Peter Achten
+//	Modified: 15 October 2001 for Clean 2.0
 //	********************************************************************************
 
 import	StdReceiverDef, StdMaybe
@@ -14,8 +16,8 @@ from	id		import	RId, R2Id, rIdtoId, r2IdtoId, ==
 //	Open uni- and bi-directional receivers:
 
 class Receivers rdef where
-	openReceiver   :: .ls !*(*rdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
-	getReceiverType::      *(*rdef .ls .pst)               -> ReceiverType
+	openReceiver   :: .ls !*(rdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
+	getReceiverType::      *(rdef .ls .pst)               -> ReceiverType
 /*	openReceiver
 		opens the given receiver if no receiver currently exists with the given 
 		R(2)Id. The R(2)Id has to be used to send messages to this receiver. 

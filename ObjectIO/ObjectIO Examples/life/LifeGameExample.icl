@@ -4,7 +4,7 @@ module LifeGameExample
 //
 //	This is the LifeGame program.
 //
-//	The program has been written in Clean 1.3.2 and uses the Clean Standard Object I/O library 1.2
+//	The program has been written in Clean 2.0 and uses the Clean Standard Object I/O library 1.2.2
 //	
 //	**************************************************************************************************
 
@@ -191,7 +191,6 @@ where
 		= {corner1={x=size*left,y=size*top},corner2={x=size*right,y=size*bottom}}
 	where
 		{corner1={x=left,y=top},corner2={x=right,y=bottom}}	= Universe
-
 
 //	Program constants.
 

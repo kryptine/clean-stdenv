@@ -1,9 +1,5 @@
 implementation module StdTime
 
-//	Clean Object I/O library, version 1.2.1
-
-//	Time related operations
-
 import	StdBool, StdClass, StdFunc, StdInt, StdReal
 import	ostime, ossystem, /*MW11++*/ ostick
 

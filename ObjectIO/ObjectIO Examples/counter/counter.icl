@@ -4,11 +4,15 @@ module counter
 //
 //	Open a dialog that displays a number that can be incremented and decremented using two buttons.
 //
-//	The program has been written in Clean 1.3.2 and uses the Clean Standard Object I/O library 1.2
+//	The program has been written in Clean 2.0 and uses the Clean Standard Object I/O library 1.2.2
 //	
 //	**************************************************************************************************
 
 import StdEnv, StdIO
+
+::	CounterSt
+	=	{	count	:: !Int
+		}
 
 Start :: *World -> *World
 Start world
@@ -22,7 +26,7 @@ initIO pst
 where
 	dialog dialogId displayId
 		= Dialog "Counter" 
-			{	newLS	= init
+			{	newLS	= { count=init }
 			,	newDef	=	EditControl (toString init)	displaywidth displayheight 
 								[	ControlPos			(Center,NoOffset)
 								,	ControlId			displayId
@@ -47,7 +51,7 @@ where
 		displayheight	= 1
 		init			= 0
 		
-		upd :: Int (Int,PSt .l) -> (Int,PSt .l)
-		upd dx (count,pst)
+		upd :: Int (CounterSt,PSt .l) -> (CounterSt,PSt .l)
+		upd dx ({count},pst)
 			# count	= count+dx
-			= (count,appPIO (setControlText displayId (toString count)) pst)
+			= ({count=count},appPIO (setControlText displayId (toString count)) pst)

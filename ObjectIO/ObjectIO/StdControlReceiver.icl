@@ -1,9 +1,6 @@
 implementation module StdControlReceiver
 
 
-//	Clean Object I/O library, version 1.2.1
-
-
 import	StdTuple
 import	StdControlClass, StdReceiverAttribute, windowhandle
 import	ostypes
@@ -12,7 +9,6 @@ from	receiveraccess	import newReceiverHandle, newReceiverHandle2
 
 
 instance Controls (Receiver m) where
-	controlToHandles :: !(Receiver m .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (Receiver rid f atts) pState
 		= (	[wElementHandleToControlState
 				(WItemHandle 
@@ -38,12 +34,10 @@ instance Controls (Receiver m) where
 		id		= rIdtoId rid
 		select	= getSelectState atts
 	
-	getControlType :: (Receiver m .ls .pst) -> ControlType
 	getControlType _
 		= "Receiver"
 
 instance Controls (Receiver2 m r) where
-	controlToHandles :: !(Receiver2 m r .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (Receiver2 r2id f atts) pState
 		= (	[wElementHandleToControlState
 				(WItemHandle 
@@ -69,7 +63,6 @@ instance Controls (Receiver2 m r) where
 		id		= r2IdtoId r2id
 		select	= getSelectState atts
 	
-	getControlType :: (Receiver2 m r .ls .pst) -> ControlType
 	getControlType _
 		= "Receiver2"
 

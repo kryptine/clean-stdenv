@@ -1,12 +1,7 @@
 implementation module ostoolbar
 
-
-//	Clean object I/O library, version 1.2
-
-//	Operations to add and remove tools.
-
 import	StdMisc, StdTuple
-from	osbitmap		import OSBitmap, osGetBitmapSize, osGetBitmapContent
+from	osbitmap		import OSBitmap, osGetBitmapHandle
 from	ostypes			import HWND, OSWindowPtr, OSNoWindowPtr
 from	pictCCall_12	import winCreateBitmap
 import	clCrossCall_12, windowCCall_12
@@ -36,14 +31,9 @@ osCreateToolbar forMDI hwnd (w,h) tb
 
 osCreateBitmapToolbarItem :: !OSToolbarHandle !OSBitmap !Int !*OSToolbox -> *OSToolbox
 osCreateBitmapToolbarItem tbPtr osBitmap index tb
-	# (hdc, tb)	= winGetDC tbPtr tb
-	# (hbmp,tb)	= winCreateBitmap w contents hdc tb
-	# (_,tb)	= issueCleanRequest2 (errorCallback2 "osCreateBitmapToolbarItem") (Rq3Cci CcRqCREATETOOLBARITEM tbPtr hbmp index) tb
-	# tb		= winReleaseDC tbPtr (hdc,tb)
-	= tb
+	= snd (issueCleanRequest2 (errorCallback2 "osCreateBitmapToolbarItem") (Rq3Cci CcRqCREATETOOLBARITEM tbPtr hbmp index) tb)
 where
-	(w,_)		= osGetBitmapSize    osBitmap
-	contents	= osGetBitmapContent osBitmap
+	hbmp	= osGetBitmapHandle  osBitmap
 
 osCreateToolbarSeparator :: !OSToolbarHandle !*OSToolbox -> *OSToolbox
 osCreateToolbarSeparator tbPtr tb

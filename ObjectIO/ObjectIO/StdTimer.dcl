@@ -2,9 +2,11 @@ definition module StdTimer
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard Object I/O library, version 1.2.2
 //	
 //	StdTimer specifies all timer operations.
+//	Author: Peter Achten
+//	Modified: 15 October 2001 for Clean 2.0
 //	********************************************************************************
 
 
@@ -14,8 +16,8 @@ from	iostate		import PSt, IOSt
 
 
 class Timers tdef where
-	openTimer	:: .ls !(tdef .ls (PSt .l)) !(PSt .l)	-> (!ErrorReport,!PSt .l)
-	getTimerType::      (tdef .ls .pst)					-> TimerType
+	openTimer	:: .ls !.(tdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
+	getTimerType::      .(tdef .ls .pst)               -> TimerType
 /*	Open a new timer.
 	This function has no effect in case the interactive process already contains a 
 	timer with the same Id. In case TimerElements are opened with duplicate Ids, the

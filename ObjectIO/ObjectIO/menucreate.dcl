@@ -1,6 +1,11 @@
 definition module menucreate
 
-//	Clean Object I/O library, version 1.2
+//	********************************************************************************
+//	Clean Standard Object I/O library, version 1.2.2
+//	
+//	Author: Peter Achten
+//	Modified: 7 September 2001 for Clean 2.0
+//	********************************************************************************
 
 import	StdMenuElementClass
 import	menuhandle
@@ -10,10 +15,10 @@ from	iostate		import PSt, IOSt
 /*	Creating menus:
 	In case the Boolean result is False nothing has been created due to duplicate Ids.
 */
-openMenu`		:: !Id       .ls !(Menu      m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | MenuElements m
-createPopUpMenu :: !SystemId .ls !(PopUpMenu m .ls (PSt .l)) !(MenuHandles (PSt .l)) !*ReceiverTable !*IdTable !OSMenuBar !(PSt .l)
-													-> (!Bool,!MenuHandles (PSt .l), !*ReceiverTable,!*IdTable,!OSMenuBar, !PSt .l)
-													|  PopUpMenuElements m
+openMenu`		:: !Id       .ls !.(Menu      m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | MenuElements m
+createPopUpMenu :: !SystemId .ls !.(PopUpMenu m .ls (PSt .l)) !(MenuHandles (PSt .l)) !*ReceiverTable !*IdTable !OSMenuBar !(PSt .l)
+													 -> (!Bool,!MenuHandles (PSt .l), !*ReceiverTable,!*IdTable,!OSMenuBar, !PSt .l)
+													 |  PopUpMenuElements m
 
 //	Build a new menu (createMenuElements), and extend an existing menu (extendMenu):
 

@@ -1,11 +1,6 @@
 implementation module controllayout
 
 
-//	Clean Object I/O library, version 1.2
-
-//	Control layout calculations
-
-
 import	StdBool, StdList, StdTuple, StdMisc
 import	oswindow
 import	commondef, layout, StdControlAttribute, windowaccess, wstateaccess

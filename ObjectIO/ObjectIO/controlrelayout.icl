@@ -1,9 +1,6 @@
 implementation module controlrelayout
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import StdBool, StdList, StdMisc
 import relayout, windowaccess, windowclipstate, wstateaccess
 

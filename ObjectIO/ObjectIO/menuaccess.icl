@@ -1,9 +1,6 @@
 implementation module menuaccess
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import StdBool, StdList, StdTuple
 import commondef, menuhandle, receivertable
 import osmenu

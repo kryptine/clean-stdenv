@@ -1,7 +1,5 @@
 implementation module clCrossCall_12
 
-//	Clean Object I/O library, version 1.2
-
 import StdBool, StdClass, StdInt, StdMisc, StdString, StdTuple
 import ostoolbox
 import code from "cAcceleratorTable_121.obj",

@@ -1,7 +1,5 @@
 implementation module ostime
 
-//	Clean Object I/O library, version 1.2
-
 import	StdBool, StdClass, StdInt, StdOverloaded
 import	ostoolbox
 

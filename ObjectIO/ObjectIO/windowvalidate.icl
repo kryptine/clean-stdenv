@@ -1,11 +1,6 @@
 implementation module windowvalidate
 
 
-//	Clean Object I/O library, version 1.2
-
-//	Window validation.
-
-
 import	StdBool, StdList, StdFunc, StdTuple, StdMisc
 import	osdocumentinterface, ospicture, ossystem, ostypes, oswindow
 import	commondef, controllayout, keyfocus, StdControlAttribute, StdId, StdWindowAttribute, windowaccess

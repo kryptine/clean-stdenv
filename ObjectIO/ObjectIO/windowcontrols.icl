@@ -1,9 +1,6 @@
 implementation module windowcontrols
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	commondef, controlcreate, windowclipstate
 from	StdControlAttribute	import isControlPos

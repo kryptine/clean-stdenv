@@ -1,8 +1,5 @@
 implementation module wstateaccess
 
-
-//	Clean Object I/O library, version 1.2
-
 import	StdInt, StdBool, StdList
 import	commondef, wstate
 

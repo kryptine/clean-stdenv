@@ -9,7 +9,7 @@ module typist
 //	Communication is done by means of message passing.
 //	In a future distributed version the two processes can be run on different processors.
 //
-//	The program has been written in Clean 1.3.2 and uses the Clean Standard Object I/O library 1.2
+//	The program has been written in Clean 2.0 and uses the Clean Standard Object I/O library 1.2.2
 //	
 //	**************************************************************************************************
 
@@ -54,87 +54,87 @@ where
 			# (Just pos,typist)	= accPIO (getWindowPos wId) typist
 			  monitorpos		= (LeftTop,OffsetVector {pos & vy=pos.vy+wSize.h})
 			= openMonitor monitorpos rId typist
-
-//	window is the single document of the typist process. 
-//	Keyboard information is sent to the monitor process.
-	window	= Window "Typist window" 
-				(	EditControl "" (PixelWidth (wSize.w-2*metrics.fMaxWidth)) NrOfLines
-				[	ControlKeyboard		keyFilter Able (noLS1 sendKeys)
-				,	ControlId			editId
-				,	ControlSelectState	Unable
-				,	ControlPos			(Center,zero)
-				,	ControlTip			"Type your text in here"
-				,	ControlResize		(\_ _ newWindowSize->newWindowSize)
-				]
-				)
-				[	WindowId			wId
-				,	WindowViewSize		wSize
-				]
 	where
-//		Filter only non-repeating character keys to the monitor process.
-		keyFilter (CharKey _ (KeyDown repeat))
-			= not repeat
-		keyFilter (SpecialKey key (KeyDown repeat) _)
-			= isMember key [backSpaceKey,deleteKey] && not repeat
-		keyFilter _
-			= False
-		
-//		Key messages start with BeginSession so that monitoring will start after the first key hit.
-//		Only after the first key hit the timer stopwatch is activated.
-		sendKeys :: KeyboardState (PSt Typist) -> PSt Typist
-		sendKeys keyboard typist=:{ls=local=:{firstKeyTyped}}
-			| firstKeyTyped
-				# (_,typist)	= asyncSend rId (KeyHit char) typist
-				= typist
-			| otherwise
-				# local			= {local & firstKeyTyped=True}
-				# typist		= {typist & ls=local}
-				# (_,typist)	= asyncSend rId BeginSession typist
-				# typist		= appPIO (enableTimer tId) typist
-				# (_,typist)	= asyncSend rId (KeyHit char) typist
-				= typist
+	//	window is the single document of the typist process. 
+	//	Keyboard information is sent to the monitor process.
+		window	= Window "Typist window" 
+					(	EditControl "" (PixelWidth (wSize.w-2*metrics.fMaxWidth)) NrOfLines
+					[	ControlKeyboard		keyFilter Able (noLS1 sendKeys)
+					,	ControlId			editId
+					,	ControlSelectState	Unable
+					,	ControlPos			(Center,zero)
+					,	ControlTip			"Type your text in here"
+					,	ControlResize		(\_ _ newWindowSize->newWindowSize)
+					]
+					)
+					[	WindowId			wId
+					,	WindowViewSize		wSize
+					]
 		where
-			char				= case (fromJust (getKeyboardStateKey keyboard)) of
-									IsCharKey    c -> c
-									IsSpecialKey c -> '\b'
+	//		Filter only non-repeating character keys to the monitor process.
+			keyFilter (CharKey _ (KeyDown repeat))
+				= not repeat
+			keyFilter (SpecialKey key (KeyDown repeat) _)
+				= isMember key [backSpaceKey,deleteKey] && not repeat
+			keyFilter _
+				= False
+			
+	//		Key messages start with BeginSession so that monitoring will start after the first key hit.
+	//		Only after the first key hit the timer stopwatch is activated.
+			sendKeys :: KeyboardState (PSt Typist) -> PSt Typist
+			sendKeys keyboard typist=:{ls=local=:{firstKeyTyped}}
+				| firstKeyTyped
+					# (_,typist)	= asyncSend rId (KeyHit char) typist
+					= typist
+				| otherwise
+					# local			= {local & firstKeyTyped=True}
+					# typist		= {typist & ls=local}
+					# (_,typist)	= asyncSend rId BeginSession typist
+					# typist		= appPIO (enableTimer tId) typist
+					# (_,typist)	= asyncSend rId (KeyHit char) typist
+					= typist
+			where
+				char				= case (fromJust (getKeyboardStateKey keyboard)) of
+										IsCharKey    c -> c
+										IsSpecialKey c -> '\b'
+		
+		wSize	= {	w	= (NrOfMaxCharsPerLine+2)*metrics.fMaxWidth
+				  ,	h	= (NrOfLines+2)*(fontLineHeight metrics)
+				  }
+		
+	//	menu defines the commands of the typist process. 
+		menu	= Menu "File"
+					(	MenuItem "Run"  [MenuShortKey 'r', MenuFunction (noLS run), MenuId runId]
+					:+:	MenuSeparator	[]
+					:+:	MenuItem "Quit" [MenuShortKey 'q', MenuFunction (noLS quit)]
+					)
+					[	MenuId	mId
+					]
+		where
+	//		run starts a session by enabling the edit control that receives the keyboard input.
+			run :: (PSt Typist) -> PSt Typist
+			run typist=:{ls,io}
+				# io	= setControlText editId "" io
+				# io	= enableControl  editId io
+				# io	= disableMenuElements [runId] io
+				= {typist & ls={ls & firstKeyTyped=False},io=io}
 	
-	wSize	= {	w	= (NrOfMaxCharsPerLine+2)*metrics.fMaxWidth
-			  ,	h	= (NrOfLines+2)*(fontLineHeight metrics)
-			  }
+	//	timer will end a typing session after 60 seconds. The timer is enabled by sendKeys.	
+		timer	= Timer (60*ticksPerSecond) NilLS
+					[	TimerId				tId
+					,	TimerSelectState	Unable
+					,	TimerFunction		(noLS1 endOfSession)
+					]
+		where
+	//		The monitor process is notified of the end of the session by receiving the EndSession message.
+			endOfSession :: NrOfIntervals (PSt Typist) -> PSt Typist
+			endOfSession _ typist=:{io}
+				# io		= disableTimer tId io
+				# io		= disableControl editId io
+				# io		= enableMenuElements [runId] io
+				# (_,typist)= asyncSend rId EndSession {typist & io=io}
+				= typist
 	
-//	menu defines the commands of the typist process. 
-	menu	= Menu "File"
-				(	MenuItem "Run"  [MenuShortKey 'r', MenuFunction (noLS run), MenuId runId]
-				:+:	MenuSeparator	[]
-				:+:	MenuItem "Quit" [MenuShortKey 'q', MenuFunction (noLS quit)]
-				)
-				[	MenuId	mId
-				]
-	where
-//		run starts a session by enabling the edit control that receives the keyboard input.
-		run :: (PSt Typist) -> PSt Typist
-		run typist=:{ls,io}
-			# io	= setControlText editId "" io
-			# io	= enableControl  editId io
-			# io	= disableMenuElements [runId] io
-			= {typist & ls={ls & firstKeyTyped=False},io=io}
-
-//	timer will end a typing session after 60 seconds. The timer is enabled by sendKeys.	
-	timer	= Timer (60*ticksPerSecond) NilLS
-				[	TimerId				tId
-				,	TimerSelectState	Unable
-				,	TimerFunction		(noLS1 endOfSession)
-				]
-	where
-//		The monitor process is notified of the end of the session by receiving the EndSession message.
-		endOfSession :: NrOfIntervals (PSt Typist) -> PSt Typist
-		endOfSession _ typist=:{io}
-			# io		= disableTimer tId io
-			# io		= disableControl editId io
-			# io		= enableMenuElements [runId] io
-			# (_,typist)= asyncSend rId EndSession {typist & io=io}
-			= typist
-
 //	quit closes boths processes. 
 	quit :: (PSt Typist) -> PSt Typist
 	quit typist

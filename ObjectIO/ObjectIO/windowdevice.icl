@@ -1,9 +1,6 @@
 implementation module windowdevice
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	osevent, ospicture, osrgn, oswindow
 import	commondef, controldraw, controllayout, controlrelayout, controlresize, iostate, processstack, receiveraccess, receiverid, scheduler
@@ -1518,8 +1515,9 @@ windowStateScrollActionIO _ _ _ _
 */
 windowStateSizeAction :: !OSWindowMetrics !Bool !WindowSizeActionInfo !(WindowStateHandle .pst) !*OSToolbox
 																   -> (!WindowStateHandle .pst, !*OSToolbox)
+/*	PA: previous version.
 windowStateSizeAction wMetrics isActive info=:{wsWIDS={wPtr},wsSize,wsUpdateAll} wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH}} tb
-// DvA: vergelijk met setWIndowViewDomain in StdWindow...
+// DvA: vergelijk met setWindowViewDomain in StdWindow...
 	#  visScrolls		= osScrollbarsAreVisible wMetrics domainRect oldSize` (hasHScroll,hasVScroll)
 	   oldContent		= osGetWindowContentRect wMetrics visScrolls (sizeToRect oldSize)
 	   oldContentSize	= rectSize oldContent
@@ -1593,7 +1591,95 @@ where
 		min				= if isHorizontal domainRect.rleft domainRect.rtop
 		max				= if isHorizontal (domainRect.rright - size) (domainRect.rbottom - size)
 		scrollInfo		= fromJust newScroll
+*/
+/*	PA: new version.
+*/
+windowStateSizeAction wMetrics isActive info=:{wsWIDS={wPtr},wsSize,wsUpdateAll} wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whSelect}}} tb
+	#  oldVisScrolls	= osScrollbarsAreVisible wMetrics domainRect oldSize` (hasHScroll,hasVScroll)
+	   oldContent		= osGetWindowContentRect wMetrics oldVisScrolls (sizeToRect oldSize)
+	   oldContentSize	= rectSize oldContent
+
+	   oldHRect			= osGetWindowHScrollRect wMetrics oldVisScrolls (sizeToRect oldSize)
+	   oldVRect			= osGetWindowVScrollRect wMetrics oldVisScrolls (sizeToRect oldSize)
+	   domainSize		= rectSize domainRect
+	   newOrigin		= {	x = if (w>=domainSize.w) domainRect.rleft (setBetween oldOrigin.x domainRect.rleft (domainRect.rright -w))
+	  					  ,	y = if (h>=domainSize.h) domainRect.rtop  (setBetween oldOrigin.y domainRect.rtop  (domainRect.rbottom-h))
+	  					  }
+	   newVisScrolls	= osScrollbarsAreVisible wMetrics domainRect newSize` (hasHScroll,hasVScroll)
+	   newContent		= osGetWindowContentRect wMetrics newVisScrolls (sizeToRect wsSize)
+	   newContentSize	= rectSize newContent
+	   newHRect			= osGetWindowHScrollRect wMetrics newVisScrolls (sizeToRect wsSize)
+	   newVRect			= osGetWindowVScrollRect wMetrics newVisScrolls (sizeToRect wsSize)
+	   newHScroll		= newScroll oldHScroll newHRect
+	   newVScroll		= newScroll oldVScroll newVRect
+	#! winfo			= {windowInfo & windowOrigin=newOrigin
+							, windowHScroll = newHScroll
+							, windowVScroll = newVScroll
+							}
+	   newWindowInfo	= WindowInfo winfo
+	   resizedAtt		= WindowViewSize newContentSize
+	   (replaced,atts)	= creplace isWindowViewSize resizedAtt wH.whAtts
+	   resizedAtts		= if replaced atts [resizedAtt:atts]
+	#! wH				= {wH & whSize=wsSize,whWindowInfo=newWindowInfo,whAtts=resizedAtts}
+	#  {rright=w`,rbottom=h`}		= newContent
+	#  osHState			= toOSscrollbarRange (domainRect.rleft,newOrigin.x,domainRect.rright)  w`
+	#  osVState			= toOSscrollbarRange (domainRect.rtop, newOrigin.y,domainRect.rbottom) h`
+	#  tb				= setwindowslider hasHScroll wMetrics wPtr True  osHState newHRect newVRect newSize` tb
+	#  tb				= setwindowslider hasVScroll wMetrics wPtr False osVState newHRect newVRect newSize` tb
+	#  (wH,tb)			= resizeControls wMetrics isActive wsUpdateAll info.wsWIDS oldOrigin oldContentSize newContentSize wH tb
+	#! wlsH				= {wlsH & wlsHandle=wH}
+	   wsH				= {wsH & wshHandle=Just wlsH}
+	=  (wsH,tb)
+where
+	oldSize				= wH.whSize
+	oldSize`			= toTuple oldSize
+	newSize`			= toTuple wsSize
+	(w,h)				= newSize`
+
+	windowInfo			= getWindowInfoWindowData wH.whWindowInfo
+	(oldOrigin,domainRect,hasHScroll,hasVScroll)
+						= (windowInfo.windowOrigin,windowInfo.windowDomain,isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll)
+	hScroll				= if hasHScroll (Just (fromJust windowInfo.windowHScroll).scrollItemPtr) Nothing
+	vScroll				= if hasVScroll (Just (fromJust windowInfo.windowVScroll).scrollItemPtr) Nothing
+	(oldHScroll,oldVScroll)
+						= ( windowInfo.windowHScroll, windowInfo.windowVScroll)
 	
+	newScroll Nothing _ = Nothing
+	newScroll (Just scroll_inf=:{scrollItemPtr}) {rleft,rtop,rright,rbottom}
+		= Just {scroll_inf & scrollItemPos = {x=rleft,y=rtop},scrollItemSize = {w = rright - rleft, h = rbottom - rtop}}
+
+	newOrigin :: !Point2 !OSRect !Size -> Point2
+	newOrigin {x,y} {rleft,rtop,rright,rbottom} {w,h}
+		= {x=x`,y=y`}
+	where
+		x`	= if (x+w>rright)  (max (rright -w) rleft) x
+		y`	= if (y+h>rbottom) (max (rbottom-h) rtop ) y
+	
+	setwindowslider :: !Bool OSWindowMetrics OSWindowPtr Bool (Int,Int,Int,Int) OSRect OSRect (Int,Int) !*OSToolbox -> *OSToolbox
+	setwindowslider hasScroll wMetrics wPtr isHorizontal state=:(osMin,osThumb,osMax,osSize) hrect vrect maxcoords=:(min,max) tb
+		| hasScroll
+			# tb			= osSetWindowSliderThumbSize wMetrics wPtr sPtr isHorizontal osMin osMax osSize (osMin,osMax) (if isHorizontal hrect vrect) whSelect True tb
+			= osSetWindowSliderThumb wMetrics wPtr isHorizontal osThumb hScroll vScroll hrect vrect maxcoords True tb
+		| otherwise			= tb
+	where
+		sPtr = case isHorizontal of
+				True	-> fromJust hScroll
+				_		-> fromJust vScroll
+	setWindowScrollThumbValues :: !(Maybe ScrollInfo) !OSRect !OSRect !Bool !OSWindowMetrics !OSWindowPtr !Bool !Int !Int !Int !(!Int,!Int) !*OSToolbox -> *OSToolbox
+	setWindowScrollThumbValues newScroll hRect vRect hasScroll wMetrics wPtr isHorizontal size old new maxcoords tb
+		| not hasScroll	= tb
+		# tb = osUpdateWindowScroll wPtr scrollInfo.scrollItemPtr (toTuple scrollInfo.scrollItemPos) (toTuple scrollInfo.scrollItemSize) newRect tb	// PA: updateWindowScroll --> osUpdateWindowScroll and moved from osutil --> oswindow
+		# tb			= osSetWindowSliderThumbSize wMetrics wPtr sPtr isHorizontal min max size maxcoords newRect whSelect (old==new)tb
+		| old==new		= tb
+		| otherwise	
+			= osSetWindowSliderThumb wMetrics wPtr isHorizontal new hScroll vScroll hRect vRect maxcoords True tb
+	where
+		newRect			= if isHorizontal hRect vRect
+		sPtr			= (fromJust newScroll).scrollItemPtr
+		min				= if isHorizontal domainRect.rleft domainRect.rtop
+		max				= if isHorizontal (domainRect.rright - size) (domainRect.rbottom - size)
+		scrollInfo		= fromJust newScroll
+
 windowStateSizeAction _ _ _ _ _
 	= windowdeviceFatalError "windowIO _ (WindowSizeAction _) _" "unexpected placeholder argument"
 

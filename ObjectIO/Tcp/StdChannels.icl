@@ -1,8 +1,5 @@
 implementation module StdChannels
 
-//	Clean Standard Object I/O library, version 1.2.1
-
-
 import	StdEnv
 import  StdMaybe
 import	StdIOCommon, StdTime
@@ -18,53 +15,52 @@ instance ChannelEnv World
 
 ///////////////////////////////// receive channels /////////////////////////////////
 
-class Receive ch
-where
-	receive_MT		::	!(Maybe !Timeout)			!*(*ch .a)  !*env	
-					->	(!TimeoutReport, !Maybe !.a,!*(*ch .a), !*env)	
+class Receive ch where
+	receive_MT		::	!(Maybe Timeout)			!*(ch .a)   !*env	
+					->	(!TimeoutReport, !Maybe .a, !*(ch .a),  !*env)	
 													| ChannelEnv  env
-	receiveUpTo		::	!Int						!*(*ch .a)  !*env	
-					->	(![.a],						!*(*ch .a), !*env)	
+	receiveUpTo		::	!Int						!*(ch .a)   !*env	
+					->	(![.a],						!*(ch .a),  !*env)	
 													| ChannelEnv  env
-	available		:: 								!*(*ch .a)  !*env
-					->	(!Bool,						!*(*ch .a), !*env)
+	available		:: 								!*(ch .a)   !*env
+					->	(!Bool,						!*(ch .a),  !*env)
 													| ChannelEnv  env
-	eom				:: 								!*(*ch .a)  !*env
-					->	(!Bool,						!*(*ch .a), !*env)
+	eom				:: 								!*(ch .a)   !*env
+					->	(!Bool,						!*(ch .a),  !*env)
 													| ChannelEnv  env
         
-class closeRChannel	ch	:: !*(*ch .a) !*env -> !*env	| ChannelEnv  env
+class closeRChannel	ch	:: !*(ch .a) !*env -> *env	| ChannelEnv env
 
 //////////////////////////////// send channels /////////////////////////////////////
 	
 class Send ch
 where
-	send_MT			::	!(Maybe !Timeout) !.a		!*(*ch .a)  !*env
-					->	(!TimeoutReport, !Int,		!*(*ch .a), !*env)
+	send_MT			::	!(Maybe !Timeout) !.a		!*(ch .a)  !*env
+					->	(!TimeoutReport, !Int,		!*(ch .a), !*env)
 													| ChannelEnv  env
-	nsend_MT		:: 	!(Maybe !Timeout) ![.a]		!*(*ch .a)	!*env
-					->	(!TimeoutReport, !Int,		!*(*ch .a), !*env)
+	nsend_MT		:: 	!(Maybe !Timeout) ![.a]		!*(ch .a)	!*env
+					->	(!TimeoutReport, !Int,		!*(ch .a), !*env)
 													| ChannelEnv  env
-	flushBuffer_MT	::	!(Maybe !Timeout) 			!*(*ch .a)  !*env
-					->	(!TimeoutReport, !Int,		!*(*ch .a), !*env)
+	flushBuffer_MT	::	!(Maybe !Timeout) 			!*(ch .a)  !*env
+					->	(!TimeoutReport, !Int,		!*(ch .a), !*env)
 													| ChannelEnv  env
-	closeChannel_MT	::	!(Maybe !Timeout) 			!*(*ch .a)  !*env
+	closeChannel_MT	::	!(Maybe !Timeout) 			!*(ch .a)  !*env
 					->	(!TimeoutReport, !Int,					!*env)
 													| ChannelEnv  env
-	abortConnection	::								!*(*ch .a)	!*env
+	abortConnection	::								!*(ch .a)	!*env
 					->											!*env
 													| ChannelEnv  env
-	disconnected	::								!*(*ch .a)	!*env
-					->	(!Bool,						!*(*ch .a), !*env)
+	disconnected	::								!*(ch .a)	!*env
+					->	(!Bool,						!*(ch .a), !*env)
 													| ChannelEnv  env
-	bufferSize		::								!*(*ch .a)
-					->	(!Int, 						!*(*ch .a))	
+	bufferSize		::								!*(ch .a)
+					->	(!Int, 						!*(ch .a))	
 
 class MaxSize ch
   where
-	setMaxSize		::	!Int !*(*ch .a)	-> *(*ch .a)
-	getMaxSize		::		 !*(*ch .a)	-> (!Int, !*(*ch .a))
-	clearMaxSize	::		 !*(*ch .a)	-> *(*ch .a)
+	setMaxSize		::	!Int !*(ch .a)	-> *(ch .a)
+	getMaxSize		::		 !*(ch .a)	-> (!Int, !*(ch .a))
+	clearMaxSize	::		 !*(ch .a)	-> *(ch .a)
 
 :: DuplexChannel sChannel rChannel a
 	=	{	sChannel	::	sChannel a
@@ -84,12 +80,12 @@ class MaxSize ch
 						|	Disconnected	// receiving "Disconnected" will automatically close the receiver
 instance == TimeoutReport
   where
-	(==) TR_Expired	x	= case x of TR_Expired	 		-> True
-										_				-> False
-	(==) TR_Success	x	= case x of TR_Success			-> True
-										_				-> False
-	(==) TR_NoSuccess	x	= case x of TR_NoSuccess	-> True
-										_				-> False
+	(==) TR_Expired	x	= case x of TR_Expired	 	-> True
+									_				-> False
+	(==) TR_Success	x	= case x of TR_Success		-> True
+									_				-> False
+	(==) TR_NoSuccess x	= case x of TR_NoSuccess	-> True
+									_				-> False
 
 instance toString TimeoutReport
   where
@@ -99,8 +95,8 @@ instance toString TimeoutReport
 	
 /////////////////// derived functions ////////////////////////////////////////////////////
 
-nreceive_MT			::	!(Maybe !Timeout) !Int		!*(*ch .a)  !*env	
-					->	(!TimeoutReport, ![.a],		!*(*ch .a), !*env)	
+nreceive_MT			::	!(Maybe !Timeout) !Int		!*(ch .a)  !*env	
+					->	(!TimeoutReport, ![.a],		!*(ch .a), !*env)	
 													| Receive ch & ChannelEnv  env
 nreceive_MT mbTimeout n ch env
 	#!	(before, env)	= getCurrentTick env
@@ -135,7 +131,7 @@ u_length l
 	
 
 
-receive	:: 	!*(*ch .a)  !*env -> (!.a, !*(*ch .a), !*env)
+receive	:: 	!*(ch .a)  !*env -> (!.a, !*(ch .a), !*env)
 			| 	ChannelEnv env & Receive ch
 receive ch env
 	#!	(timeoutReport, mbMessage, ch, env)	= receive_MT Nothing ch env
@@ -146,7 +142,7 @@ receive ch env
 		= receive ch env
 	= (fromJust mbMessage, ch, env)
 
-nreceive		::	!Int !*(*ch .a)  !*env -> (![.a], !*(*ch .a), !*env)
+nreceive		::	!Int !*(ch .a)  !*env -> (![.a], !*(ch .a), !*env)
 				|	ChannelEnv env & Receive ch
 nreceive n ch env
 	#!	(timeoutReport, l, ch, env)	= nreceive_MT Nothing n ch env
@@ -157,32 +153,32 @@ nreceive n ch env
 		= nreceive n ch env
 	= (l, ch, env)
 
-send	 	:: !.a	!*(*ch .a) !*env -> (!*(*ch .a), !*env)
+send	 	:: !.a	!*(ch .a) !*env -> (!*(ch .a), !*env)
 			| 	ChannelEnv env & Send ch
 send msg ch env
 	#!	(_,_,ch,env)	= send_MT Nothing msg ch env
 	= (ch, env)
 
-closeChannel:: 			!*(*ch .a) !*env
+closeChannel:: 			!*(ch .a) !*env
 			->			  			   !*env	| 	ChannelEnv env & Send ch
 closeChannel ch env
 	#!	(_,_,env)	= closeChannel_MT Nothing ch env
 	= env
 
-nsend 	:: ![.a]		!*(*ch .a) !*env
-			->			   (!*(*ch .a), !*env)	| 	ChannelEnv env & nsend_MT ch
+nsend 	:: ![.a]		!*(ch .a) !*env
+			->			   (!*(ch .a), !*env)	| 	ChannelEnv env & Send ch
 nsend msg ch env
 	#!	(_,_,ch,env)	= nsend_MT Nothing msg ch env
 	= (ch, env)
 
-send_NB  	:: !.a	!*(*ch .a) !*env -> (!*(*ch .a), !*env)
+send_NB  	:: !.a	!*(ch .a) !*env -> (!*(ch .a), !*env)
 			| 	ChannelEnv env & Send ch
 send_NB msg ch env
 	#!	(_,_,ch,env)	= send_MT (Just 0) msg ch env
 	= (ch, env)
 
-flushBuffer_NB	::				!*(*ch .a)  !*env
-				->			   (!*(*ch .a), !*env)
+flushBuffer_NB	::				!*(ch .a)  !*env
+				->			   (!*(ch .a), !*env)
 				| 	ChannelEnv env & Send ch
 flushBuffer_NB ch env
 	#!	(_,_,ch,env)	= flushBuffer_MT (Just 0) ch env

@@ -2,9 +2,11 @@ definition module StdControlDef
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard Object I/O library, version 1.2.2
 //	
 //	StdControl contains the types to define the standard set of controls.
+//	Author: Peter Achten
+//	Modified: 14 September 2001 for Clean 2.0
 //	********************************************************************************
 
 
@@ -16,7 +18,7 @@ import	StdIOCommon, StdPictureDef
 ::	CheckControl        ls pst
  =	CheckControl        [CheckControlItem *(ls,pst)] RowsOrColumns
 	                                                   [ControlAttribute *(ls,pst)]
-::	CompoundControl      c ls pst
+::	CompoundControl     c ls pst
  =	CompoundControl     (c ls pst)                     [ControlAttribute *(ls,pst)]
 ::	CustomButtonControl ls pst
  =	CustomButtonControl Size Look                      [ControlAttribute *(ls,pst)]
@@ -24,7 +26,7 @@ import	StdIOCommon, StdPictureDef
  =	CustomControl       Size Look                      [ControlAttribute *(ls,pst)]
 ::	EditControl         ls pst
  =	EditControl         String ControlWidth NrLines    [ControlAttribute *(ls,pst)]
-::	LayoutControl        c ls pst
+::	LayoutControl       c ls pst
  =	LayoutControl       (c ls pst)                     [ControlAttribute *(ls,pst)]
 ::	PopUpControl        ls pst
  =	PopUpControl        [PopUpControlItem *(ls,pst)] Index

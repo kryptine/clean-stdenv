@@ -1,9 +1,6 @@
 implementation module devicesystemstate
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import commondef, device
 import timerhandle
 import menuhandle

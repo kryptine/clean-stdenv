@@ -1,9 +1,6 @@
 implementation module controlaccess
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdFunc, StdInt, StdList, StdMisc, StdTuple
 import	commondef, id, windowaccess, wstateaccess
 import	oswindow

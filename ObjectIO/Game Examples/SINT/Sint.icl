@@ -271,14 +271,14 @@ SintGame =
 
 /* if the quit function returns true, the game engine quits the level */
 
-QuitFunction :: GameState -> (Bool, GameState)
+QuitFunction :: GameState -> *(Bool, GameState)
 QuitFunction gst
     = (gst.quit, {gst & quit = False})
 
 
 /* function that returns the next level to run, 0 = end game */
 
-NextLevelFunction :: GameState -> (Int, GameState)
+NextLevelFunction :: GameState -> *(Int, GameState)
 NextLevelFunction gst =: {curlevel, maxlevel, exitcode, lives, gameover, bonus}
     | exitcode == EC_QUIT
         = (0, gst)
@@ -350,7 +350,7 @@ where
 
 /* function that returns text to be displayed */
 
-GameTexts :: GameState -> ([GameText], GameState)
+GameTexts :: GameState -> *([GameText], GameState)
 GameTexts gst
     | gst.statusline
         # (msg, gst) = if (gst.morningmsg > STOP_MSG) 
@@ -496,41 +496,41 @@ ITEM_SIZE  :== {w = W, h = 16}
 
 NEVER_FORGET :== {x = 10000, y = 10000}
 
-GameObjectList = [ AutoInitObject
-                 , StatHeartObject
+GameObjectList = [ GameObjectLS AutoInitObject
+                 , GameObjectLS StatHeartObject
 
-                 , StaticPepernoot
-                 , FallingPepernoot
-                 , FallingLetter
-                 , HeartObject
-                 , LifeObject
+                 , GameObjectLS StaticPepernoot
+                 , GameObjectLS FallingPepernoot
+                 , GameObjectLS FallingLetter
+                 , GameObjectLS HeartObject
+                 , GameObjectLS LifeObject
                  
-                 , Kado1, Kado2, Kado3, Kado4, Kado5
+                 , GameObjectLS Kado1, GameObjectLS Kado2, GameObjectLS Kado3, GameObjectLS Kado4, GameObjectLS Kado5
+                 ] ++
 
-                 , KadoObject 1, KadoObject 2, KadoObject 3, KadoObject 4, KadoObject 5
+                 [ GameObjectLS (KadoObject i) \\ i<-[1..5] ] ++
 
-                 , ChimneyObject 1, ChimneyObject 2, ChimneyObject 3, ChimneyObject 4
-                 , ChimneyObject 5
+                 [ GameObjectLS (ChimneyObject i) \\ i<-[1..5] ] ++
 
-                 , BounceBlockObject
-                 , TrampObject
+                 [ GameObjectLS BounceBlockObject
+                 , GameObjectLS TrampObject
 
-                 , BirdObject
+                 , GameObjectLS BirdObject
+                 ] ++
 
-                 , FadeObject 0, FadeObject 1, FadeObject 2, FadeObject 3, FadeObject 4
-                 , FadeObject 5, FadeObject 6, FadeObject 7, FadeObject 8, FadeObject 9
+                 [ GameObjectLS (FadeObject i) \\ i<-[0..9] ] ++
                  
-                 , AntenneObject
+                 [ GameObjectLS AntenneObject
                  
-                 , FlitsObject
+                 , GameObjectLS FlitsObject
 
-                 , SunObject
+                 , GameObjectLS SunObject
                  
-                 , EndingObject
+                 , GameObjectLS EndingObject
 
-                 , CarObject
+                 , GameObjectLS CarObject
                  
-                 , MainCharObject
+                 , GameObjectLS MainCharObject
                  ] 
 
 
@@ -665,12 +665,7 @@ where
 
 /* ---------- in front ---------- */
 
-Level1FrontObj = [ L1FrontObject 1
-                 , L1FrontObject 2
-                 , L1FrontObject 3
-                 , L1FrontObject 4
-                 ]
-
+Level1FrontObj = [GameObjectLS (L1FrontObject i) \\ i<-[1..4]]
 
 L1FrontObject n
     # obj = defaultGameObject (OBJ_FRONT - n + 1) BLOCK_SIZE Void
@@ -1290,7 +1285,7 @@ TRAILTURNSPEED :==   2
      , lasthdir    :: !HDirection
      , turning     :: !Bool
      , traildelta  :: !Int
-     , trail       :: [!Int]
+     , trail       :: [Int]
      , lastypos    :: !Int
      , readytodrop :: !Bool
      , pepernoten  :: !Int
@@ -1402,7 +1397,7 @@ where
             = {st = {st & turning = False}, or = {or & currentsprite = MC_TURN}, gs=gs}
         = {st=st, or=or, gs=gs}
     where
-        broadcastposition :: !Int !Int !Int [!Int] !(GSt gs) -> (GSt gs)
+        broadcastposition :: !Int !Int !Int [Int] !(GSt gs) -> (GSt gs)
         broadcastposition n x y [] gs = gs
         broadcastposition n x y [l:ls] gs
             # (_, gs) = createUserGameEvent (EV_POS + n)
@@ -1785,7 +1780,7 @@ where
 /* get exitcode */
 getexitcode gs = accGSt getgstexitcode gs
 where
-    getgstexitcode :: GameState -> (Int, GameState)
+    getgstexitcode :: GameState -> *(Int, GameState)
     getgstexitcode gst = (gst.exitcode, gst)
 
 /* bonus functions */
@@ -1796,7 +1791,7 @@ setgstbonus b gst = {gst & bonus = b}
 /* get bonus */
 getbonus gs = accGSt getgstbonus gs
 where
-    getgstbonus :: GameState -> (Bool, GameState)
+    getgstbonus :: GameState -> *(Bool, GameState)
     getgstbonus gst = (gst.bonus, gst)
 
 
@@ -1809,20 +1804,20 @@ where
 /* get number of lives */
 getlives gs = accGSt getgstlives gs
 where
-    getgstlives :: GameState -> (Int, GameState)
+    getgstlives :: GameState -> *(Int, GameState)
     getgstlives gst = (gst.lives, gst)
 
 /* get number of lives */
 GetTime gs = accGSt getgsttime gs
 where
-    getgsttime :: GameState -> (Int, GameState)
+    getgsttime :: GameState -> *(Int, GameState)
     getgsttime gst = (gst.time, gst)
 
 
 /* get current level number */
 getlevel gs = accGSt getgstlevel gs
 where
-    getgstlevel :: GameState -> (Int, GameState)
+    getgstlevel :: GameState -> *(Int, GameState)
     getgstlevel gst = (gst.curlevel, gst)
 
 
@@ -1879,7 +1874,7 @@ dectime gs
         = (time, gs)
     = (time, gs)
 where
-    decgsttime :: Int GameState -> (Int, GameState)
+    decgsttime :: Int GameState -> *(Int, GameState)
     decgsttime n gst
         # gst = {gst & time = gst.time - n}
         = (gst.time, gst)
@@ -1892,7 +1887,7 @@ where
 
 getppn gs = accGSt getgstppn gs
 where
-    getgstppn :: GameState -> (Int, GameState)
+    getgstppn :: GameState -> *(Int, GameState)
     getgstppn gst = (gst.ppn, gst)
 
 
@@ -1903,7 +1898,7 @@ where
 
 getplayer gs = accGSt getgstplayer gs
 where
-    getgstplayer :: GameState -> (String, GameState)
+    getgstplayer :: GameState -> *(String, GameState)
     getgstplayer gst = (gst.player, gst)
 
 
@@ -1957,7 +1952,7 @@ crgb n
 
 TitleScreen
   = { blankScreen & layers = [TitleLayer]
-                  , objects = [AutoMenuObject]
+                  , objects = [GameObjectLS AutoMenuObject]
                   , soundsamples = MenuSoundSampleList
                   , leveloptions.escquit = False
                   , leveloptions.fillbackground = Nothing
@@ -2371,7 +2366,7 @@ RRnd n gs
 where
     max = (toReal MAX_RAND)
 
-gsrand :: GameState -> (Int, GameState)
+gsrand :: GameState -> *(Int, GameState)
 gsrand gs=:{randseed}
     # (x, newrandseed) = random randseed
     = (x, {gs & randseed=newrandseed})

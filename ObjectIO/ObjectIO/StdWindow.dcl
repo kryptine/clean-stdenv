@@ -2,9 +2,11 @@ definition module StdWindow
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard Object I/O library, version 1.2.2
 //	
 //	StdWindow defines functions on windows and dialogues.
+//	Author: Peter Achten
+//	Modified: 7 September 2001 for Clean 2.0
 //	********************************************************************************
 
 
@@ -15,16 +17,16 @@ from	StdPSt			import PSt, IOSt
 
 //	Functions applied to non-existent windows or unknown ids have no effect.
 class Windows wdef where
-	openWindow		:: .ls !(wdef .ls (PSt .l)) !(PSt .l)
-								-> (!ErrorReport,!PSt .l)
-	getWindowType	::      (wdef .ls .pst)	-> WindowType
+	openWindow		:: .ls !.(wdef .ls (PSt .l)) !(PSt .l)
+								 -> (!ErrorReport,!PSt .l)
+	getWindowType	::      .(wdef .ls .pst) -> WindowType
 
 class Dialogs wdef where
-	openDialog		:: .ls !(wdef .ls (PSt .l))    !(PSt .l)
+	openDialog		:: .ls !.(wdef .ls (PSt .l))   !(PSt .l)
 					->  (  !ErrorReport,            !PSt .l)
-	openModalDialog	:: .ls !(wdef .ls (PSt .l))    !(PSt .l)
+	openModalDialog	:: .ls !.(wdef .ls (PSt .l))   !(PSt .l)
 					->  (!(!ErrorReport,!Maybe .ls),!PSt .l)
-	getDialogType	::      (wdef .ls .pst)	-> WindowType
+	getDialogType	::      .(wdef .ls .pst) -> WindowType
 
 /*	open(Window/Dialog) opens the given window(dialog).
 	If the Window(Dialog) has no WindowIndex attribute (see StdWindowDef), then the 

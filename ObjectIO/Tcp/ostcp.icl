@@ -24,8 +24,7 @@ osInstallTCP _
 	}
 // ...PA
 
-os_eom					::	!EndpointRef !*env
-						->	(!Bool, !*env)
+os_eom :: !EndpointRef !*env -> (!Bool, !*env)
 os_eom _ _
 // check for eom
 	= code
@@ -33,8 +32,7 @@ os_eom _ _
 			ccall os_eom "I:I:A"
 		}
 		
-os_disconnected			::	!EndpointRef !*env
-						->	(!Bool, !*env)
+os_disconnected :: !EndpointRef !*env -> (!Bool, !*env)
 os_disconnected _ _
 // check for disconnected
 	= code
@@ -42,24 +40,21 @@ os_disconnected _ _
 			ccall os_disconnected "I:I:A"
 		}
 
-os_connectrequestavailable	::	!EndpointRef !*env
-							->	(!Bool, !*env)
+os_connectrequestavailable :: !EndpointRef !*env -> (!Bool, !*env)
 os_connectrequestavailable _ _
 	= code
 		{
 			ccall os_connectrequestavailable "I:I:A"
 		}
 
-os_connectTCP			::	!Int !Bool !(!Bool, !Int) !(!Int,!Int) !*env
-						->	(!(!InetErrCode,!Bool,!EndpointRef), !*env)
+os_connectTCP :: !Int !Bool !(!Bool, !Int) !(!Int,!Int) !*env -> (!(!InetErrCode,!Bool,!EndpointRef), !*env)
 os_connectTCP _ _ _ _ _
 	= code
 		{
 			ccall os_connectTCPC "IIIIII:VIII:A"
 		}
 
-os_select_inetevents	::	!EndpointRef !InetReceiverCategory !Int !Bool !Bool !Bool !*env
-						->	!*env
+os_select_inetevents :: !EndpointRef !InetReceiverCategory !Int !Bool !Bool !Bool !*env -> *env
 os_select_inetevents endpointRef receiverType referenceCount get_receive_events get_sendable_events 
 					alreadyEom env
 	= code
@@ -67,8 +62,7 @@ os_select_inetevents endpointRef receiverType referenceCount get_receive_events 
 			ccall os_select_inetevents "IIIIII:V:A"
 		}
 
-getMbStopTime	::	!(Maybe !Timeout) !*env	-> (!(!Bool, !Int), !*env)
-				|	ChannelEnv env
+getMbStopTime :: !(Maybe !Timeout) !*env -> (!(!Bool, !Int), !*env) | ChannelEnv env
 getMbStopTime Nothing env
 	=((False,0), env)
 getMbStopTime (Just timeout) env

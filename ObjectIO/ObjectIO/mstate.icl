@@ -1,9 +1,6 @@
 implementation module mstate
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdClass, StdInt
 import	menuhandle
 from	commondef	import fatalError

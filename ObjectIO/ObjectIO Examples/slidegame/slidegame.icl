@@ -7,11 +7,11 @@ module slidegame
 //	On Macintosh: 
 //		* Make sure the application has sufficient 'Extra memory' (Application options)
 //		* Select a PICT file;
-//	On Windows(95/NT):
+//	On Windows(9x/NT):
 //		* Make sure the application has sufficient 'Heap' (Application options)
 //		* Select a BMP file.
 //
-//	The program has been written in Clean 1.3.2 and uses the Clean Standard Object I/O library 1.2
+//	The program has been written in Clean 2.0 and uses the Clean Standard Object I/O library 1.2.2
 //	
 //	**************************************************************************************************
 
@@ -53,10 +53,11 @@ Start world
 		# (windowId,world)	= openId world
 		# (allcids, world)	= openIds   15 world
 		# (allr2ids,world)	= openR2Ids 15 world
-		  wdef				= window bitmap blocksize windowId allcids allr2ids coords
-		= startIO SDI Void (snd o openWindow {curHole=hole} wdef) [ProcessClose closeProcess] world
+		= startIO SDI Void (openSlideWindow hole bitmap blocksize windowId allcids allr2ids coords) [ProcessClose closeProcess] world
 where
 	nr_shuffle				= 200
+	openSlideWindow hole bitmap blocksize windowId allcids allr2ids coords pState
+		= snd (openWindow {curHole=hole} (window bitmap blocksize windowId allcids allr2ids coords) pState)
 	
 	ok_blocksize {w,h}
 		= isbetween minblocksize.w w maxblocksize.w && isbetween minblocksize.h h maxblocksize.h
@@ -140,7 +141,7 @@ where
 		| otherwise			= picture
 	offset {col,row}= {vx=size.w*col,vy=size.h*row}
 	
-	slideMove :: (.(SlideState,WindowState),PSt .l) -> (.(SlideState,WindowState),PSt .l)
+	slideMove :: (*(SlideState,WindowState),PSt .l) -> (*(SlideState,WindowState),PSt .l)
 	slideMove ((slide=:{curCoord},ls=:{curHole}),pst)
 		| distCoord curCoord curHole<>1
 			= ((slide,ls),pst)
@@ -163,7 +164,7 @@ where
 	
 	receiver2	= Receiver2 r2id receive2 []
 	
-	receive2 :: SlideMsgIn ((SlideState,.ls),PSt .l) -> (SlideMsgOut,((SlideState,.ls),PSt .l))
+	receive2 :: SlideMsgIn *(*(SlideState,.ls),PSt .l) -> (SlideMsgOut,*(*(SlideState,.ls),PSt .l))
 	receive2 AreYouOk (slide=:({curCoord},_),pst)
 		= (okCoord==curCoord,(slide,pst))
 

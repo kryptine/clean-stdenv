@@ -4,7 +4,7 @@ module Turing
 //
 //	This program is a Turing machine interpreter and programming environment.
 //
-//	The program has been written in Clean 1.3.2 and uses the Clean Standard Object I/O library 1.2
+//	The program has been written in Clean 2.0 and uses the Clean Standard Object I/O library 1.2.2
 //	
 //	**************************************************************************************************
 
@@ -51,7 +51,7 @@ where
 				  ,	tmids	= tmids
 				  }
 	
-	initialise :: (PSt Tm) -> PSt Tm
+	initialise :: (PSt *Tm) -> PSt *Tm
 	initialise pst=:{ls={tmstate=tm=:{turing={tape}}}}
 		# (error,pst)	= openMenu undef file pst
 		| error<>NoError
@@ -125,12 +125,12 @@ where
 		timer	= Timer Speed3 NilLS [TimerId timerID,TimerSelectState Unable,TimerFunction (noLS1 TimerStep)]
 	
 	//	Open a new empty Turing machine.
-	DoNew :: (PSt Tm) -> PSt Tm
+	DoNew :: (PSt *Tm) -> PSt *Tm
 	DoNew pst=:{ls={saved}}
 		| saved		= MakeNewTuring pst
 		| otherwise	= SaveBeforeClose "opening a new Turing machine" MakeNewTuring pst
 	
-	MakeNewTuring :: (PSt Tm) -> PSt Tm
+	MakeNewTuring :: (PSt *Tm) -> PSt *Tm
 	MakeNewTuring pst=:{ls=tm=:{delay},io}
 		# io	= setWindowLook  tapeWdID True (True,tpLook inittape)							io
 		# io	= setWindowLook  windowID True (True,tmLook inittmstate)						io
@@ -153,7 +153,7 @@ where
 					  }
 	
 	//	Save the Turing machine.
-	DoSave :: (PSt Tm) -> PSt Tm
+	DoSave :: (PSt *Tm) -> PSt *Tm
 	DoSave pst=:{ls=tm=:{tmstate={turing},name}}
 		# (success,pst)	= WriteTuringToFile turing name pst
 		| success
@@ -164,7 +164,7 @@ where
 			= Alert "The Turing machine has not been saved." "The file could not be opened." pst
 	
 	//	Save the Turing machine in a new file.
-	DoSaveAs :: (PSt Tm) -> PSt Tm
+	DoSaveAs :: (PSt *Tm) -> PSt *Tm
 	DoSaveAs pst=:{ls=tm=:{name,tmstate={turing}},io}
 		# (fname,pst)					= selectOutputFile "Save T.M. As:" (RemovePath name) pst
 		| isNothing fname
@@ -181,25 +181,25 @@ where
 			= {pst & ls={tm & name=fname,saved=True}}
 	
 	//	Load a Turing machine from a file.
-	DoOpen :: (PSt Tm) -> PSt Tm
+	DoOpen :: (PSt *Tm) -> PSt *Tm
 	DoOpen pst=:{ls={saved}}
 		| saved		= EvtOpenTuring pst
 		| otherwise	= SaveBeforeClose "opening an other Turing machine" EvtOpenTuring pst
 	where
-		EvtOpenTuring :: (PSt Tm) -> PSt Tm
+		EvtOpenTuring :: (PSt *Tm) -> PSt *Tm
 		EvtOpenTuring pst
 			# (filename,pst)		= selectInputFile pst
 			| isNothing filename	= pst
 			| otherwise				= OpenTuringFile (fromJust filename) pst
 	
 	//	DoOpenFiles opens the first file of the argument list.
-	DoOpenFiles :: [String] (PSt Tm) -> PSt Tm
+	DoOpenFiles :: [String] (PSt *Tm) -> PSt *Tm
 	DoOpenFiles names pst=:{ls={saved}}
 		| saved		= OpenTuringFile (hd names) pst
 		| otherwise	= SaveBeforeClose "opening an other Turing machine" (OpenTuringFile (hd names)) pst
 	
 	//	OpenTuringFile parses the file found at the path argument and if successful opens it.
-	OpenTuringFile :: String (PSt Tm) -> PSt Tm
+	OpenTuringFile :: String (PSt *Tm) -> PSt *Tm
 	OpenTuringFile name pst=:{ls=tm}
 		# fname					= RemovePath name
 		  fstring				= " \'"+++fname+++"\'"
@@ -224,12 +224,12 @@ where
 	
 	
 	//	The Help command.
-	Help :: (PSt Tm) -> PSt Tm
+	Help :: (PSt *Tm) -> PSt *Tm
 	Help pst = showHelp HelpFile pst
 	
 	
 	//	Let the Turing machine do one step (transition).
-	DoStep :: (PSt Tm) -> PSt Tm
+	DoStep :: (PSt *Tm) -> PSt *Tm
 	DoStep pst=:{ls=tm=:{tmstate=tmstate=:{turing={tape={head},state},transition}},io}
 		| state=="halt" || state=="error"
 			= pst
@@ -251,7 +251,7 @@ where
 	
 	
 	//	Let the T.M. run until the haltstate is reached.
-	DoRun :: (PSt Tm) -> PSt Tm
+	DoRun :: (PSt *Tm) -> PSt *Tm
 	DoRun pst=:{ls=tm=:{tmstate={turing}},io}
 		# io	= disableWindowMouse	tapeWdID				io
 		# io	= disableWindowMouse	windowID				io
@@ -264,7 +264,7 @@ where
 	
 	
 	//	Halt a running T.M.
-	DoHalt :: (PSt Tm) -> PSt Tm
+	DoHalt :: (PSt *Tm) -> PSt *Tm
 	DoHalt pst=:{io}
 		# io	= enableWindowMouse		tapeWdID							io
 		# io	= enableWindowMouse		windowID							io
@@ -275,7 +275,7 @@ where
 	
 	
 	//	Continue a halted T.M.
-	DoContinue :: (PSt Tm) -> PSt Tm
+	DoContinue :: (PSt *Tm) -> PSt *Tm
 	DoContinue pst=:{io}
 		# io	= disableWindowMouse	tapeWdID				io
 		# io	= disableWindowMouse	windowID				io
@@ -286,13 +286,13 @@ where
 	
 	
 	//	Set the speed (delay) of a (possibly running) T.M.
-	SetDelay :: Int (PSt Tm) -> PSt Tm
+	SetDelay :: Int (PSt *Tm) -> PSt *Tm
 	SetDelay delay pst=:{ls=tm,io}
 		= {pst & ls={tm & delay=delay},io=setTimerInterval timerID delay io}
 	
 	
 	//	Quit the program.
-	DoQuit :: (PSt Tm) -> PSt Tm
+	DoQuit :: (PSt *Tm) -> PSt *Tm
 	DoQuit pst=:{ls={saved}}
 		| saved		= closeProcess pst
 		| otherwise	= SaveBeforeClose "quitting" closeProcess pst
@@ -303,7 +303,7 @@ where
 	tmMouseFilter (MouseDown _ _ _)	= True
 	tmMouseFilter _					= False
 	
-	EditTransitions :: MouseState (PSt Tm) -> PSt Tm
+	EditTransitions :: MouseState (PSt *Tm) -> PSt *Tm
 	EditTransitions (MouseDown mpos _ _) pst=:{ls=tm=:{tmstate={turing={transitions}}},io}
 		| ontrans			= AlterTransition transnr pst
 		| onstate			= AlterState pst
@@ -319,8 +319,8 @@ where
 	tpMouseFilter (MouseDown _ _ _)	= True
 	tpMouseFilter _					= False
 	
-	EditTape :: MouseState (PSt Tm) -> PSt Tm
-	EditTape (MouseDown mpos {commandDown} _) pst=:{ls=tm=:{tmstate={turing}},io}
+	EditTape :: MouseState (PSt *Tm) -> PSt *Tm
+	EditTape (MouseDown mpos {commandDown} _) pst=:{ls=tm=:{tmstate=tmst=:{turing}},io}
 		| not ontape
 			= pst
 		| commandDown
@@ -328,7 +328,7 @@ where
 			# (frame,io)= getWindowViewFrame tapeWdID io
 			# io		= setWindowLook tapeWdID False (True,tpLook tape) io
 			# io		= appWindowPicture tapeWdID (ShowHeadMove {tape & head=oldpos} newpos frame.corner1.x frame.corner2.x) io
-			= {pst & ls={tm & tmstate={tm.tmstate & turing={turing & tape=tape}}},io=io}
+			= {pst & ls={tm & tmstate={tmst & turing={turing & tape=tape}}},io=io}
 		| otherwise
 			= AlterCell (min newpos (NrOfCells turing.tape.content)) pst
 	where
@@ -352,7 +352,7 @@ where
 	
 	
 	//	The step function for the Timer device (used by the Run command).
-	TimerStep :: NrOfIntervals (PSt Tm) -> PSt Tm
+	TimerStep :: NrOfIntervals (PSt *Tm) -> PSt *Tm
 	TimerStep _ pst=:{ls=tm=:{tmstate={turing={state}}},io}
 		| state<>"halt" && state<>"error"
 			= DoStep pst

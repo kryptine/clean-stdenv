@@ -28,9 +28,9 @@ HelpFile
 
 openTmIds		:: !*env -> (!TmIds,!*env)	| Ids env
 
-AlterCell		:: Int						(PSt Tm) -> PSt Tm
-AlterTransition	:: Int						(PSt Tm) -> PSt Tm
-AlterState		::							(PSt Tm) -> PSt Tm
-ReDraw			::							(PSt Tm) -> PSt Tm
-Alert			:: String String			(PSt Tm) -> PSt Tm
-SaveBeforeClose	:: String (IdFun (PSt Tm))	(PSt Tm) -> PSt Tm
+AlterCell		:: Int						(PSt *Tm) -> PSt *Tm
+AlterTransition	:: Int						(PSt *Tm) -> PSt *Tm
+AlterState		::							(PSt *Tm) -> PSt *Tm
+ReDraw			::							(PSt *Tm) -> PSt *Tm
+Alert			:: String String			(PSt *Tm) -> PSt *Tm
+SaveBeforeClose	:: String (IdFun (PSt *Tm))	(PSt *Tm) -> PSt *Tm

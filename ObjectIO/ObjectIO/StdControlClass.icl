@@ -1,11 +1,6 @@
 implementation module StdControlClass
 
 
-//	Clean Object I/O library, version 1.2.1
-
-//	Definition of the Controls class for controls.
-
-
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	commondef, iostate, StdControlAttribute, windowhandle
 from	controlvalidate	import validateSliderState
@@ -15,8 +10,8 @@ import	ospicture, ostypes, oswindow
 
 
 class Controls cdef where
-	controlToHandles:: !(cdef .ls (PSt .l)) !(PSt .l)	-> (![ControlState .ls (PSt .l)],!PSt .l)
-	getControlType	::  (cdef .ls .pst)					-> ControlType
+	controlToHandles:: !.(cdef .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
+	getControlType	::  .(cdef .ls .pst)               -> ControlType
 
 
 /*	Translating control elements with local state into the internal representation.
@@ -32,7 +27,6 @@ class Controls cdef where
 */
 
 instance Controls (AddLS c) | Controls c where
-	controlToHandles :: !(AddLS c .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)	| Controls c
 	controlToHandles {addLS,addDef} pState
 		# (cs,pState)	= controlToHandles addDef pState
 		= (	[wElementHandleToControlState
@@ -47,7 +41,6 @@ instance Controls (AddLS c) | Controls c where
 		= ""
 
 instance Controls (NewLS c) | Controls c where
-	controlToHandles :: !(NewLS c .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)	| Controls c
 	controlToHandles {newLS,newDef} pState
 		# (cs,pState)	= controlToHandles newDef pState
 		= (	[wElementHandleToControlState
@@ -62,7 +55,6 @@ instance Controls (NewLS c) | Controls c where
 		= ""
 
 instance Controls (ListLS c) | Controls c where
-	controlToHandles :: !(ListLS c .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)	| Controls c
 	controlToHandles (ListLS cDefs) pState
 		# (css,pState)	= stateMap controlToHandles cDefs pState
 		= ([wElementHandleToControlState (WListLSHandle (map controlStateToWElementHandle (flatten css)))],pState)
@@ -70,14 +62,12 @@ instance Controls (ListLS c) | Controls c where
 		= ""
 
 instance Controls NilLS where
-	controlToHandles :: !(NilLS .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles NilLS pState
 		= ([wElementHandleToControlState (WListLSHandle [])],pState)
 	getControlType _
 		= ""
 
 instance Controls ((:+:) c1 c2)	| Controls c1 & Controls c2 where
-	controlToHandles :: !((:+:) c1 c2 .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)	| Controls c1 & Controls c2
 	controlToHandles (c1:+:c2) pState
 		# (cs1,pState)	= controlToHandles c1 pState
 		# (cs2,pState)	= controlToHandles c2 pState
@@ -86,7 +76,6 @@ instance Controls ((:+:) c1 c2)	| Controls c1 & Controls c2 where
 		= ""
 
 instance Controls ButtonControl where
-	controlToHandles :: !(ButtonControl .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (ButtonControl textLine atts) pState
 		# (wMetrics,ioState)		= ioStGetOSWindowMetrics pState.io
 		# (size,ioState)			= getButtonSize wMetrics textLine cWidth ioState
@@ -134,7 +123,6 @@ instance Controls ButtonControl where
 		= "ButtonControl"
 
 instance Controls CheckControl where
-	controlToHandles :: !(CheckControl .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (CheckControl items layout atts) pState
 		# (wMetrics,ioState)		= ioStGetOSWindowMetrics pState.io
 		  (nrItems,items)			= ulength items
@@ -185,7 +173,6 @@ instance Controls CheckControl where
 		= "CheckControl"
 
 instance Controls (CompoundControl c)	| Controls c where
-	controlToHandles :: !(CompoundControl c .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)	| Controls c
 	controlToHandles (CompoundControl controls atts) pState
 		# (cs,pState)	= controlToHandles controls pState
 		= (	[wElementHandleToControlState
@@ -243,7 +230,6 @@ instance Controls (CompoundControl c)	| Controls c where
 		= "CompoundControl"
 
 instance Controls CustomButtonControl where
-	controlToHandles :: !(CustomButtonControl .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (CustomButtonControl {w,h} controlLook atts) pState
 		# size	= {w=max 0 w,h=max 0 h}
 		= (	[wElementHandleToControlState
@@ -269,7 +255,6 @@ instance Controls CustomButtonControl where
 		= "CustomButtonControl"
 
 instance Controls CustomControl where
-	controlToHandles :: !(CustomControl .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (CustomControl {w,h} controlLook atts) pState
 		# size	= {w=max 0 w,h=max 0 h}
 		= (	[wElementHandleToControlState
@@ -295,7 +280,6 @@ instance Controls CustomControl where
 		= "CustomControl"
 
 instance Controls EditControl where
-	controlToHandles :: !(EditControl .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (EditControl textLine cWidth nrLines atts) pState
 		# (wMetrics,ioState)		= ioStGetOSWindowMetrics pState.io
 		# (size,ioState)			= getEditSize wMetrics nrLines cWidth ioState
@@ -342,7 +326,6 @@ instance Controls EditControl where
 		= "EditControl"
 
 instance Controls (LayoutControl c)	| Controls c where
-	controlToHandles :: !(LayoutControl c .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)	| Controls c
 	controlToHandles (LayoutControl controls atts) pState
 		# (cs,pState)	= controlToHandles controls pState
 		= (	[wElementHandleToControlState
@@ -368,7 +351,6 @@ instance Controls (LayoutControl c)	| Controls c where
 		= "LayoutControl"
 
 instance Controls PopUpControl where
-	controlToHandles :: !(PopUpControl .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (PopUpControl popUpItems index atts) pState
 		# (wMetrics,ioState)		= ioStGetOSWindowMetrics pState.io
 		# (size,ioState)			= getPopUpSize wMetrics (map fst popUpItems) cWidth ioState
@@ -421,7 +403,6 @@ instance Controls PopUpControl where
 		= "PopUpControl"
 
 instance Controls RadioControl where
-	controlToHandles :: !(RadioControl .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (RadioControl items layout index atts) pState
 		# (wMetrics, ioState)		= ioStGetOSWindowMetrics pState.io
 		  (nrItems,items)			= ulength items
@@ -473,7 +454,6 @@ instance Controls RadioControl where
 		= "RadioControl"
 
 instance Controls SliderControl where
-	controlToHandles :: !(SliderControl .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (SliderControl direction cWidth sliderState action atts) pState
 		# (wMetrics,ioState)		= ioStGetOSWindowMetrics pState.io
 		# (size,ioState)			= getSliderSize wMetrics isHorizontal cWidth ioState
@@ -520,7 +500,6 @@ instance Controls SliderControl where
 		= "SliderControl"
 
 instance Controls TextControl where
-	controlToHandles :: !(TextControl .ls (PSt .l)) !(PSt .l) -> (![ControlState .ls (PSt .l)],!PSt .l)
 	controlToHandles (TextControl textLine atts) pState
 		# (wMetrics,ioState)		= ioStGetOSWindowMetrics pState.io
 		# (size,ioState)			= getTextSize wMetrics textLine cWidth ioState

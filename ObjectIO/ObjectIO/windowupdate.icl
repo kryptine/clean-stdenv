@@ -1,9 +1,6 @@
 implementation module windowupdate
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	ospicture, osrgn, oswindow
 import	commondef, deviceevents, windowhandle, wstate

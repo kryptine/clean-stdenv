@@ -1,7 +1,12 @@
 definition module deviceevents
 
-//	Clean Object I/O library, version 1.2
+//	********************************************************************************
+//	Clean Standard Object I/O library, version 1.2.2
+//	
 //	This module contains all type definitions for OS independent events.
+//	Author: Peter Achten
+//	Modified: 7 September 2001 for Clean 2.0
+//	********************************************************************************
 
 import	osevent, ostypes
 import	receivermessage, timertable

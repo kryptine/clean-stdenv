@@ -5,7 +5,7 @@ implementation module monitor
 //
 //	This module defines a process creation function that tracks the number of typed keys in a typing
 //	session. 
-//	This module has been written in Clean 1.3.2 and uses the Clean Standard Object I/O library 1.2
+//	This module has been written in Clean 2.0 and uses the Clean Standard Object I/O library 1.2.2
 //	
 //	**************************************************************************************************
 
@@ -29,7 +29,6 @@ import StdEnv, StdIO
 	|	EndSession					// End a typist session
 	|	Quit						// Close the monitor process
 
-
 openMonitor :: ItemPos (RId MonitorMessage) (PSt .l) -> PSt .l
 openMonitor pos monitorId pst
 	# (font,   pst) = accPIO (accScreenPicture openDialogFont) pst
@@ -51,7 +50,7 @@ where
 		| error<>NoError	= abort "monitor could not open window."
 		# (error,pst)		= openTimer undef timer pst
 		| error<>NoError	= abort "monitor could not open timer."
-		# (error,pst)		= openReceiver False receiver pst
+		# (error,pst)		= openReceiver undef receiver pst
 		| error<>NoError	= abort "monitor could not open receiver."
 		| otherwise			= pst
 	where
@@ -75,8 +74,8 @@ where
 					]
 		
 	//	The receiver is the interface of the monitor process to the typist process.
-		receiver :: *Receiver MonitorMessage Bool (PSt Monitor)
-		receiver= Receiver monitorId receive []
+		receiver :: *Receiver MonitorMessage .ls (PSt Monitor)
+		receiver= Receiver monitorId (noLS1 receive) []
 	
 //	monitorlook defines the look of the monitor window. 
 	monitorlook :: Monitor SelectState UpdateState *Picture -> *Picture
@@ -99,18 +98,18 @@ where
 		newlocal	= {local & count=initcount,counts=counts++newcounts,time=time+dt}
 		drawfs		= snd (smap drawKeyHitColumn (time,newcounts))
 	
-	receive :: MonitorMessage (Bool,PSt Monitor) -> (Bool,PSt Monitor)
+	receive :: MonitorMessage (PSt Monitor) -> PSt Monitor
 
 //	Starting a tracking session enables the timer and clears all previous tracking information.
-	receive BeginSession (_,monitor)
+	receive BeginSession monitor
 		# local	= {initLocal & tracking=True}
 		# io	= enableTimer  tId monitor.io
 		# io	= setWindowLook wId True (True,monitorlook local) io
-		= (False,{monitor & ls=local,io=io})
+		= {monitor & ls=local,io=io}
 
 //	For each key hit, only administrate whether it is a good or bad key hit.
-	receive (KeyHit char) (_,monitor)
-		= (True,appPLoc (incCount char) monitor)
+	receive (KeyHit char) monitor
+		= appPLoc (incCount char) monitor
 	where
 		incCount :: Char Monitor -> Monitor
 		incCount c local=:{count}
@@ -118,15 +117,15 @@ where
 			| otherwise	= {local & count={count & oks =count.oks  + 1}}
 
 //	Ending a session disables the timer and presents the number and average of key hits. 
-	receive EndSession (firstkeyreceived,monitor=:{ls=local=:{time}})
+	receive EndSession monitor=:{ls=local=:{time}}
 		# monitor	= {monitor & ls={local & tracking=False}}
 		# monitor	= showKeyHits True (60-time) monitor
 		# monitor	= appPIO (disableTimer tId) monitor
-		= (firstkeyreceived,monitor)
+		= monitor
 
 //	Quit closes the monitor process.
-	receive Quit (ls,monitor)
-		= (ls,closeProcess monitor)
+	receive Quit monitor
+		= closeProcess monitor
 
 
 //	The drawing functions:

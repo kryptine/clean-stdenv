@@ -1,9 +1,6 @@
 implementation module controldefaccess
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdInt, StdMisc
 import	commondef, StdControlAttribute
 

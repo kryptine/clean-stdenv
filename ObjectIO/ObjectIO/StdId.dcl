@@ -2,9 +2,11 @@ definition module StdId
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard Object I/O library, version 1.2.2
 //	
 //	StdId specifies the generation functions for identification values.
+//	Author: Peter Achten
+//	Modified: 7 September 2001 for Clean 2.0
 //	********************************************************************************
 
 
@@ -13,14 +15,14 @@ from	id			import Id, RId, R2Id, rIdtoId, r2IdtoId, toString, ==
 from	iostate		import PSt, IOSt
 
 class Ids env where
-	openId		::      !*env -> (!Id,			!*env)
-	openIds		:: !Int !*env -> (![Id],		!*env)
+	openId		::      !*env -> (!Id,         !*env)
+	openIds		:: !Int !*env -> (![Id],       !*env)
 	
-	openRId		::		!*env -> (!RId  m,		!*env)
-	openRIds	:: !Int	!*env -> (![RId m],		!*env)
+	openRId		::		!*env -> (!RId  m,     !*env)
+	openRIds	:: !Int	!*env -> (![RId m],    !*env)
 	
-	openR2Id	:: 		!*env -> (!R2Id  m r,	!*env)
-	openR2Ids	:: !Int	!*env -> (![R2Id m r],	!*env)
+	openR2Id	:: 		!*env -> (!R2Id  m r,  !*env)
+	openR2Ids	:: !Int	!*env -> (![R2Id m r], !*env)
 /*	There are three types of identification values:
 	-	RId  m:		for uni-directional message passing (see StdReceiver)
 	-	R2Id m r:	for bi-directional  message passing (see StdReceiver)

@@ -1,11 +1,6 @@
 implementation module StdPicture
 
 
-//	Clean Object I/O library, version 1.2.1
-
-//	Drawing functions and other operations on Picture
-
-
 import	StdBool, StdFunc, StdInt, StdList, StdMisc, StdReal, StdTuple
 import	ospicture, osfont, osrgn, ostoolbox
 import	commondef, StdPictureDef

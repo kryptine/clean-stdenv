@@ -4,7 +4,7 @@ definition module Highscore
 //
 //	General utility for reading/writing high scores to Files and displaying current high scores.
 //
-//	This module has been written in Clean 1.3.1 and uses the Clean Standard Object I/O library 1.0.2
+//	This module has been written in Clean 2.0 and uses the Clean Standard Object I/O library 1.2.2
 //	
 //	**************************************************************************************************
 
@@ -32,5 +32,5 @@ itsAHighScore	:: !Int !Int !HiScores			-> Bool
 addScore		:: !Int !HiScore !HiScores		-> HiScores
 //	Add, given the number of high scores, a HiScore to the current list of high scores.
 
-showHiScores	:: String !HiScores !(PSt .l)	-> PSt .l
+showHiScores	:: String !HiScores !(PSt *l)	-> PSt *l
 //	Display current high scores to user in a modal dialog with given Id.

@@ -1,9 +1,6 @@
 implementation module StdWindow
 
 
-//	Clean Object I/O library, version 1.2.1
-
-
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	ossystem, ostypes, oswindow
 import	StdControlClass
@@ -41,16 +38,15 @@ windowtype	:==	"Window"
 dialogtype	:== "Dialog"
 
 class Windows wdef where
-	openWindow		:: .ls !(wdef .ls (PSt .l)) !(PSt .l)	-> (!ErrorReport,!PSt .l)
-	getWindowType	::      (wdef .ls .pst)					-> WindowType
+	openWindow      :: .ls !.(wdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)
+	getWindowType   ::      .(wdef .ls .pst)               -> WindowType
 
 class Dialogs wdef where
-	openDialog		:: .ls !(wdef .ls (PSt .l)) !(PSt .l)	-> (  !ErrorReport,            !PSt .l)
-	openModalDialog	:: .ls !(wdef .ls (PSt .l)) !(PSt .l)	-> (!(!ErrorReport,!Maybe .ls),!PSt .l)
-	getDialogType	::      (wdef .ls .pst)					-> WindowType
+	openDialog      :: .ls !.(wdef .ls (PSt .l)) !(PSt .l) -> (  !ErrorReport,            !PSt .l)
+	openModalDialog :: .ls !.(wdef .ls (PSt .l)) !(PSt .l) -> (!(!ErrorReport,!Maybe .ls),!PSt .l)
+	getDialogType   ::      .(wdef .ls .pst)               -> WindowType
 
 instance Windows (Window c) | Controls c where
-	openWindow :: .ls !(Window c .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | Controls c
 	openWindow ls (Window title controls atts) pState
 		# pState				= windowFunctions.dOpen pState
 		# (isZero,pState)		= accPIO checkZeroWindowBound pState
@@ -80,12 +76,10 @@ instance Windows (Window c) | Controls c where
 			# pState			= addWindowToWindowMenu okId title pState
 			= (NoError,pState)
 	
-	getWindowType :: (Window c .ls .pst) -> WindowType | Controls c
 	getWindowType _
 		= windowtype
 
 instance Dialogs (Dialog c) | Controls c where
-	openDialog :: .ls !(Dialog c .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | Controls c
 	openDialog ls (Dialog title controls atts) pState
 		# pState				= windowFunctions.dOpen pState
 		# maybe_id				= getWindowIdAttribute atts
@@ -109,7 +103,6 @@ instance Dialogs (Dialog c) | Controls c where
 			# wH				= initWindowHandle title Modeless IsDialog NoWindowInfo itemHs atts
 			= (NoError,openwindow okId {wlsState=ls,wlsHandle=wH} pState)
 	
-	openModalDialog :: .ls !(Dialog c .ls (PSt .l)) !(PSt .l) -> (!(!ErrorReport,!Maybe .ls),!PSt .l) | Controls c
 	openModalDialog ls (Dialog title controls atts) pState
 		# pState				= windowFunctions.dOpen pState
 		# maybe_id				= getWindowIdAttribute atts
@@ -135,7 +128,6 @@ instance Dialogs (Dialog c) | Controls c where
 								= openmodalwindow okId {wlsState=ls,wlsHandle=wH} pState
 			= ((errorReport,finalLS),pState)
 	
-	getDialogType :: (Dialog c .ls .pst) -> WindowType | Controls c
 	getDialogType _
 		= dialogtype
 

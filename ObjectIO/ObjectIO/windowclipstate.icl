@@ -1,9 +1,6 @@
 implementation module windowclipstate
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdList, StdMisc
 import	osrgn, oswindow
 import	commondef, wstate

@@ -1,9 +1,6 @@
 implementation module oskey
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdClass, StdInt, StdOverloaded, StdString
 
 

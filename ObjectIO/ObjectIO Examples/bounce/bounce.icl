@@ -5,7 +5,7 @@ module bounce
 //
 //	A program that creates two interactive processes that bounce balls in an open-ended barrel.
 //
-//	The program has been written in Clean 1.3.2 and uses the Clean Standard Object I/O library 1.2
+//	The program has been written in Clean 2.0 and uses the Clean Standard Object I/O library 1.2.2
 //	
 //	**************************************************************************************************
 
@@ -45,12 +45,12 @@ bounce :: Id Id (RId Message) (RId Message) Title ItemLoc (Barrel,[Ball]) -> Pro
 bounce wId tId me you name itemLoc (barrel,balls)
 	= Process SDI initLocal initIO [ProcessClose quit]
 where
-	barrelDomain		= barrel.bDomain
-	barrelSize			= rectangleSize barrelDomain
-	maxSize				= maxFixedWindowSize
-	windowSize			= {w=min barrelSize.w (maxSize.w/2),h=min barrelSize.h (maxSize.h/2)}
-	splitWalls			= splitWallsInBarrel barrel
-	initLocal			= {talkTo=you,barrel=barrel,balls=balls}
+	barrelDomain			= barrel.bDomain
+	barrelSize				= rectangleSize barrelDomain
+	maxSize					= maxFixedWindowSize
+	windowSize				= {w=min barrelSize.w (maxSize.w/2),h=min barrelSize.h (maxSize.h/2)}
+	splitWalls				= splitWallsInBarrel barrel
+	(initLocal`,initLocal)	= shareLocal {talkTo=you,barrel=barrel,balls=balls}
 	
 	initIO :: Bounce -> Bounce
 	initIO pst
@@ -72,7 +72,7 @@ where
 	//	window defines the window that displays the barrel and the current balls.
 		window	= Window name NilLS
 						[	WindowId		wId
-						,	WindowLook		False (updateBalls initLocal)
+						,	WindowLook		False (updateBalls initLocal`)
 						,	WindowViewSize	windowSize
 						,	WindowPos		(itemLoc,NoOffset)
 						]
@@ -85,7 +85,7 @@ where
 					)	[]
 		
 	//	timer defines the timer that calculates the movements of the current balls.
-		timer	= Timer /*ticksPerSecond*/0 NilLS 
+		timer	= Timer 0 NilLS 
 					[	TimerId			tId
 					,	TimerFunction	(noLS1 (bounceBalls splitWalls))
 					]
@@ -97,8 +97,9 @@ where
 				  eraseOld			= map (eraseBall scale base) balls
 				  drawNew			= map (drawBall  scale base) ins
 				  local				= {local & balls=ins}
+				# (local`,local)	= shareLocal local
 				# io				= appWindowPicture wId (seq (eraseOld++drawNew)) io
-				# io				= setWindowLook wId False (False,updateBalls local) io
+				# io				= setWindowLook wId False (False,updateBalls local`) io
 				# bounce			= {bounce & ls=local,io=io}
 				| isEmpty outs		= bounce
 				| otherwise			= snd (syncSend talkTo (BallsArrive outs) bounce)
@@ -254,3 +255,7 @@ checkVerticalWalls _ ball		= ball
 moveBall :: !Ball -> Ball
 moveBall ball=:{bCenter,bSpeed}
 	= {ball & bCenter=movePoint bSpeed bCenter}
+
+shareLocal :: !Local -> (!Local,!*Local)
+shareLocal local=:{talkTo,barrel,balls}
+	= (local, {talkTo=talkTo,barrel=barrel,balls=balls})

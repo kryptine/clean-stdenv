@@ -4,7 +4,7 @@ implementation module Help
 //
 //	General utility for handling information about the application and present help.
 //
-//	This module has been written in Clean 1.3.2 and uses the Clean Standard Object I/O library 1.2
+//	This module has been written in Clean 2.0 and uses the Clean Standard Object I/O library 1.2.2
 //	
 //	**************************************************************************************************
 
@@ -46,7 +46,7 @@ Help			:== True
 	-	it has an Ok button that closes this window, 
 	-	it has a Help button that displays the help information (see showHelp).
 */
-showAbout :: String String (PSt .l) -> PSt .l
+showAbout :: String String (PSt *l) -> PSt *l
 showAbout appname helpfile pState
 	# (okId, pState)		= accPIO openId pState
 	# (fonts,pState)		= accPIO (accScreenPicture infoFonts) pState
@@ -67,36 +67,24 @@ showAbout appname helpfile pState
 
 /*	showHelp opens a SDI process that displays the help information found in the helpfile.
 */
-showHelp :: String (PSt .l) -> PSt .l
+showHelp :: String (PSt *l) -> PSt *l
 showHelp helpfile pState
 	# (fonts,pState)		= accPIO (accScreenPicture infoFonts) pState
 	# ((size,text),pState)	= readInfo Help fonts HelpBegin HelpEnd helpfile pState
-	  window				= Window "Help" 
-	  							NilLS
-	  							[	WindowViewSize		size
-	  							,	WindowLook			True (look fonts.normal text)
-	  							,	WindowHScroll		hscroll
-	  							,	WindowVScroll		vscroll
-	  							,	WindowClose			(noLS closeProcess)
-	  							,	WindowViewDomain	{zero & corner2={x=size.w,y=size.h}}
-	  							]
-	= openProcesses (Process SDI NoState (snd o openWindow undef window) [ProcessClose closeProcess]) pState
+	= openProcesses (Process SDI NoState (initHelp fonts size text) [ProcessClose closeProcess]) pState
 where
-	hscroll curViewFrame {sliderThumb} move
-		= case move of
-			SliderIncSmall -> sliderThumb+10
-			SliderDecSmall -> sliderThumb-10
-			SliderIncLarge -> sliderThumb+(rectangleSize curViewFrame).w*4/5
-			SliderDecLarge -> sliderThumb-(rectangleSize curViewFrame).w*4/5
-			SliderThumb x  -> x
-				
-	vscroll curViewFrame {sliderThumb} move
-		= case move of
-			SliderIncSmall -> sliderThumb+10
-			SliderDecSmall -> sliderThumb-10
-			SliderIncLarge -> sliderThumb+(rectangleSize curViewFrame).h*4/5
-			SliderDecLarge -> sliderThumb-(rectangleSize curViewFrame).h*4/5
-			SliderThumb x  -> x
+	initHelp :: !Fonts !Size ![InfoLine] (PSt *l) -> PSt *l
+	initHelp fonts size text pState
+		= snd (openWindow undef window pState)
+	where
+		window				= Window "Help" NilLS
+								[	WindowViewSize		size
+								,	WindowLook			True (look fonts.normal text)
+								,	WindowHScroll		(stdScrollFunction Horizontal 10)
+								,	WindowVScroll		(stdScrollFunction Vertical   10)
+								,	WindowClose			(noLS closeProcess)
+								,	WindowViewDomain	{zero & corner2={x=size.w,y=size.h}}
+								]
 
 look :: Font [InfoLine] SelectState UpdateState *Picture -> *Picture
 look font lines _ {updArea} picture

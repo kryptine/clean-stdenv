@@ -1,9 +1,6 @@
 implementation module menuitems
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdList, StdMisc, StdTuple
 import	commondef, menuaccess, menucreate, receivertable
 import	osdocumentinterface, osmenu, ostypes
@@ -19,9 +16,9 @@ from	iostate	import getIOToolbox, setIOToolbox
 		In case the Maybe Id argument is Nothing, then the elements should be added to the Menu indicated by the Id component. 
 		In case the Maybe Id argument is Just id, then the elements should be added to the SubMenu indicated by id.
 */
-addMenusItems :: !(!Id,Maybe Id) !Int .ls` (m .ls` (PSt .l)) !SystemId !*ReceiverTable !*IdTable !(MenuHandles (PSt .l)) !OSMenuBar !(PSt .l)
-												   -> (!*(!ErrorReport,!*ReceiverTable,!*IdTable),!MenuHandles (PSt .l), !OSMenuBar, !PSt .l)
-												   |  MenuElements m
+addMenusItems :: !(!Id,Maybe Id) !Int .ls` .(m .ls` (PSt .l)) !SystemId !*ReceiverTable !*IdTable !(MenuHandles (PSt .l)) !OSMenuBar !(PSt .l)
+													-> (!*(!ErrorReport,!*ReceiverTable,!*IdTable),!MenuHandles (PSt .l), !OSMenuBar, !PSt .l)
+													|  MenuElements m
 addMenusItems loc pos ls new pid rt it menus=:{mMenus,mKeys} osMenuBar pState
 	# (newItemHs,pState)				= menuElementToHandles new pState
 	  newItemHs							= map menuElementStateToMenuElementHandle newItemHs
@@ -107,8 +104,10 @@ where
 				# newItemHs			= MenuChangeLSHandle {mChangeLS=ls,mChangeItems=new}
 				# (itemHs,keys,tb)	= extendMenu osMenuBar menu (iNr-1) [newItemHs] itemHs keys tb
 				= (True,NoError,undef,[],rt,it,itemHs,keys,pos,iNr,tb)
-			extendMenu` _ _ _ ls new rt it [] keys pos iNr tb
-				= (False,NoError,ls,new,rt,it,[],keys,pos,iNr,tb)
+			extendMenu` menuId menu pid ls new rt it itemHs=:[] keys pos iNr tb
+				# newItemHs			= MenuChangeLSHandle {mChangeLS=ls,mChangeItems=new}
+				# (itemHs,keys,tb)	= extendMenu osMenuBar menu (iNr-1) [newItemHs] itemHs keys tb
+				= (True,NoError,undef,[],rt,it,itemHs,keys,pos,iNr,tb)
 			extendMenu` menuId menu pid ls new rt it [itemH=:(MenuItemHandle _):itemHs] keys pos iNr tb
 				# (opened,error,ls,new,rt,it,itemHs,keys,pos,iNr,tb)	= extendMenu` menuId menu pid ls new rt it itemHs keys (pos-1) (iNr+1) tb
 				= (opened,error,ls,new,rt,it,[itemH:itemHs],keys,pos,iNr,tb)

@@ -1,9 +1,6 @@
 implementation module timerdevice
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdInt, StdBool, StdFunc, StdEnum, StdList, StdTuple
 from	StdPSt	import	accPIO, appPIO
 import	commondef, devicefunctions, iostate, receiveraccess, timeraccess, timerdefaccess, timerevent

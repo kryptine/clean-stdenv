@@ -1,11 +1,6 @@
 implementation module commondef
 
 
-//	Version 1.2
-
-//	Common types for the I/O system and their access-rules.
-
-
 import	StdArray, StdBool, StdChar, StdClass, StdEnum, StdFunc, StdInt, StdList, StdMisc, StdReal, StdString
 import	osrgn
 import	StdIOCommon
@@ -319,7 +314,7 @@ stateMap f [x:xs] s
 stateMap _ _ s
 	= ([],s)
 
-stateMap2 :: !(u:x -> v:(.s -> .s)) ![u:x] !.s -> .s, [v<=u]
+stateMap2 :: !(u:x -> .(.s -> .s)) !v:[u:x] !.s -> .s, [v <= u]
 stateMap2 f [x:xs] s
 	= stateMap2 f xs (f x s)
 stateMap2 _ _ s

@@ -1,8 +1,5 @@
 implementation module processdevice
 
-
-//	Clean object I/O library, version 1.2
-
 import StdBool, StdFunc, StdMisc
 import StdPSt
 import commondef, devicefunctions, processevent, StdProcessAttribute, toolbar

@@ -1,7 +1,5 @@
 implementation module osclipboard
 
-//	Clean Object I/O library, version 1.2
-
 //	Clipboard operations.
 
 import StdInt

@@ -1,13 +1,6 @@
 implementation module menuevent
 
 
-//	Clean Object I/O library, version 1.2
-
-/*	menuevent defines the DeviceEventFunction for the menu device.
-	This function is placed in a separate module because it is platform dependent.
-*/
-
-
 import	StdBool, StdList, StdMisc
 import	clCrossCall_12
 from	clCCall_12			import winMakeCString, CSTR, toModifiers

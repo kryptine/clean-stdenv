@@ -1,14 +1,6 @@
 implementation module StdWindowAttribute
 
 
-//	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
-//	
-//	StdWindowAttribute specifies which WindowAttributes are valid for Windows
-//	and Dialogs.
-//	********************************************************************************
-
-
 import StdBool
 import StdWindowDef
 

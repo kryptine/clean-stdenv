@@ -1,7 +1,12 @@
 definition module menuitems
 
 
-//	Clean Object I/O library, version 1.2
+//	********************************************************************************
+//	Clean Standard Object I/O library, version 1.2.2
+//	
+//	Author: Peter Achten
+//	Modified: 7 September 2001 for Clean 2.0
+//	********************************************************************************
 
 
 import	StdMenuElementClass
@@ -15,7 +20,7 @@ from	systemid			import SystemId
 
 //	Adding and removing menu elements to and from existing menus.
 
-addMenusItems		:: !(!Id,Maybe Id) !Int .ls` (m .ls` (PSt .l)) !SystemId
+addMenusItems		:: !(!Id,Maybe Id) !Int .ls` .(m .ls` (PSt .l)) !SystemId
 										!*ReceiverTable !*IdTable !(MenuHandles (PSt .l)) !OSMenuBar !(PSt .l)
 					-> (!*(!ErrorReport,!*ReceiverTable,!*IdTable),!MenuHandles (PSt .l), !OSMenuBar, !PSt .l)
 					|  MenuElements m

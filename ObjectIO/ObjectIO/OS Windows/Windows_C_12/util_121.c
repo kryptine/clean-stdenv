@@ -12,6 +12,7 @@
 #include <stdarg.h>
 
 
+
 //	Convenience procedure to fill in LOGFONT struct.
 void SetLogFontData (LOGFONT * plf, char *fname, int style, int size)
 {

@@ -1,7 +1,5 @@
 implementation module osprint
 
-//	Clean Standard Object I/O library, version 1.2
-
 import StdArray, StdBool, StdEnum, StdFile, StdFunc, StdInt, StdList, StdMisc, StdTuple
 import clCCall_12,clCrossCall_12, iostate, scheduler
 import ospicture, osevent, StdWindow, StdPSt
@@ -85,17 +83,17 @@ os_printsetupvalidC _ _ _ _
 		}
 
 class PrintEnvironments printEnv where
-	os_printpageperpage :: !.Bool !Bool 
+	os_printpageperpage :: !Bool !Bool 
 						   !.x
-						   .(.x -> .(PrintInfo -> .(*Picture -> ((.Bool,Point2),(.state,*Picture)))))
-						   ((.state,*Picture) -> ((.Bool,Point2),(.state,*Picture)))
+						   .(.x -> .(PrintInfo -> .(*Picture -> *((.Bool,Point2),*(.state,*Picture)))))
+						   (*(.state,*Picture) -> *((.Bool,Point2),*(.state,*Picture)))
 						   !PrintSetup !*printEnv
 						-> (Alternative .x .state,!*printEnv)
-	os_printsetupdialog	:: !PrintSetup !*printEnv
-						-> (!PrintSetup, !*printEnv)
+	os_printsetupdialog	::  !PrintSetup !*printEnv
+						-> (!PrintSetup,!*printEnv)
 
 
-instance PrintEnvironments (PSt .ps) where
+instance PrintEnvironments (PSt .l) where
 	os_printpageperpage doDialog emulateScreen x initFun transFun printSetup pSt=:{io}
 		#!	(windowStack, io)			= getWindowStack io
 			windowStackIds				= map fst windowStack

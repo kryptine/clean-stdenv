@@ -1,10 +1,5 @@
 implementation module semidynamic
 
-
-/*	This module implements a heavily degraded kind of dynamics. In a version of Clean
-	with proper dynamics, this module will disappear.
-*/
-
 import	StdBool
 import	cast, commondef, id
 

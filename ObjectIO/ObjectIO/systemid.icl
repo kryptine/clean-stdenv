@@ -1,9 +1,6 @@
 implementation module systemid
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdInt, StdBool, StdOverloaded
 
 

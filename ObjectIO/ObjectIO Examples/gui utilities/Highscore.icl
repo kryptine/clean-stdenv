@@ -2,7 +2,7 @@ implementation module Highscore
 
 
 /*	General utility for reading/writing high scores to Files and displaying current high scores.
-	This module uses the Object I/O library, version 1.0.2.
+	This module has been written in Clean 2.0 and uses the Object I/O library, version 1.2.2.
 */
 
 
@@ -92,7 +92,7 @@ where
 
 
 //	Display high scores in a modal dialog to the user:
-showHiScores :: String !HiScores !(PSt .l) -> PSt .l
+showHiScores :: String !HiScores !(PSt *l) -> PSt *l
 showHiScores header highs pState=:{io}
 	# (okId,io)	= openId io
 	# (wId, io)	= openId io

@@ -64,13 +64,13 @@ WormsDemo =
 
 /* if the quit function returns true, the game engine quit the level */
 
-WormsQuitFunction :: GameState -> (Bool, GameState)
+WormsQuitFunction :: GameState -> *(Bool, GameState)
 WormsQuitFunction gst
     = (gst.quit, gst)
 
 /* function that returns the next level to run, 0 = end game */
 
-WormsNextLevelFunction :: GameState -> (Int, GameState)
+WormsNextLevelFunction :: GameState -> *(Int, GameState)
 WormsNextLevelFunction gst =: {curlevel, maxlevel, gameover}
     = (nextLevel, {gst & curlevel = nextLevel
                        , quit = False
@@ -82,7 +82,7 @@ where
 
 /* function that returns text to be displayed */
 
-WormsTextItems :: GameState -> ([GameText], GameState)
+WormsTextItems :: GameState -> *([GameText], GameState)
 WormsTextItems gst =: {curlevel, gameover, timecounter, maxlevel}
     #   gst = {gst & timecounter = timecounter - 1}
     |   gst.timecounter == 0
@@ -165,7 +165,7 @@ SPR_WH_LEFT  :== 2
 SPR_WH_DOWN  :== 3
 SPR_WH_RIGHT :== 4
 
-ObjectList = [WormHead, WormSegment, Food, Wall]
+ObjectList = [GameObjectLS WormHead, GameObjectLS WormSegment, GameObjectLS Food, GameObjectLS Wall]
 
 /* bounds */
 BND_WORMHEAD     :==   0x0001
@@ -262,7 +262,7 @@ where
         #   gs = setwormlist (take st.count [nextspeed:wormlist]) gs
         #   or = {or & speed = nextspeed
                      , currentsprite = st.next
-                     , skipmove = (24 / (toInt V)) -1
+                     , skipmove = (24 / (toInt V)) - 1
                      }
         |   st.more == 0
             # last = wormlist!!((length wormlist) - 1)
@@ -351,7 +351,7 @@ where
 
     newMove objst=:{st, or, gs}
         #   (wormlist, gs)  = getwormlist gs
-        #   or = { or & skipmove = (24 / (toInt V)) -1 }
+        #   or = { or & skipmove = (24 / (toInt V)) - 1 }
         |   or.subcode + 1 > length wormlist
             = {st=st, or=or, gs=gs}
         #   or = {or & speed = wormlist!!(or.subcode)}
@@ -474,7 +474,7 @@ setgstwormlist :: [RealXY] GameState -> GameState
 setgstwormlist l gst = {gst & wormlist = l}
 
 getwormlist gs = accGSt getgstwormlist gs
-getgstwormlist :: GameState -> ([RealXY], GameState)
+getgstwormlist :: GameState -> *([RealXY], GameState)
 getgstwormlist gst = (gst.wormlist, gst)
 
 /* gameover functions */
@@ -483,7 +483,7 @@ setgstgameover :: Bool GameState -> GameState
 setgstgameover b gst = {gst & gameover = b}
 
 getgameover gs = accGSt getgstgameover gs
-getgstgameover :: GameState -> (Bool, GameState)
+getgstgameover :: GameState -> *(Bool, GameState)
 getgstgameover gst = (gst.gameover, gst)
 
 
@@ -569,4 +569,3 @@ SoundSampleList =
   [ { soundid = SND_FOOD, soundfile = "sounds\\FOOD.WAV", soundbuffers = 3 } 
   , { soundid = SND_HIT,  soundfile = "sounds\\HIT.WAV",  soundbuffers = 5 } 
   ]
-

@@ -1,9 +1,6 @@
 implementation module StdProcess
 
 
-//	Clean object I/O library, version 1.2.1
-
-
 import	StdFunc, StdList
 import	StdProcessDef
 import	devicefunctions, iostate, processdevice, scheduler
@@ -16,35 +13,32 @@ import	osdocumentinterface, ossystem, ostypes
 //	General process topology creation functions:
 
 class Processes pdef where
-	startProcesses :: !pdef !*World   -> *World
-	openProcesses  :: !pdef !(PSt .l) -> PSt .l
+	startProcesses :: !.pdef !*World   -> *World
+	openProcesses  :: !.pdef !(PSt .l) -> PSt .l
 
-instance Processes [pdef]	| Processes pdef where
-	startProcesses :: ![pdef] !*World -> *World | Processes pdef
+instance Processes [.pdef]	| Processes pdef where
 	startProcesses pDefs world
 		# (initContext, tb)	= initContext (stateMap2 openProcesses (reverse pDefs)) "" 0 NDI VirtualProcess world
 		# (finalContext,tb)	= handleEvents initContext tb
 		= closeContext finalContext tb
 	
-	openProcesses :: ![pdef] !(PSt .l) -> PSt .l | Processes pdef
 	openProcesses pDefs pState
 		= addVirtualProcess (stateMap2 openProcesses (reverse pDefs)) "" (0,0) pState
 
+
 instance Processes Process  where
-	startProcesses :: !Process !*World -> *World
 	startProcesses pDef world
 		# (initContext, tb)	= initContext (openProcesses pDef) "" 0 NDI VirtualProcess world
 		# (finalContext,tb)	= handleEvents initContext tb
 		= closeContext finalContext tb
 	
-	openProcesses :: !Process !(PSt .l) -> PSt .l
 	openProcesses (Process xDI local init atts) pState
 		= addInteractiveProcess atts (init o processFunctions.dOpen) "" local NotShareGUI xDI pState
 
 
 //	Specialised process creation functions:
 
-startIO :: !DocumentInterface !.l !(ProcessInit (PSt .l)) ![ProcessAttribute (PSt .l)] !*World -> *World
+startIO :: !DocumentInterface !.l !.(ProcessInit (PSt .l)) ![ProcessAttribute (PSt .l)] !*World -> *World
 startIO documentInterface local init atts world
 	= startProcesses
 		(Process documentInterface local init (if (documentInterface==MDI) [ProcessNoWindowMenu:atts] atts)) world

@@ -1,6 +1,4 @@
-implementation module ossystem			// for Windows
-
-//	Clean Object I/O library, version 1.2
+implementation module ossystem
 
 import	StdBool, StdInt, StdReal, StdString
 import	StdMaybe

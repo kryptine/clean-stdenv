@@ -1,9 +1,6 @@
 implementation module timerdefaccess
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdMisc
 import	StdMaybe, StdTimerAttribute
 import	commondef
@@ -12,10 +9,6 @@ import	commondef
 timerDefGetAttributes :: !(Timer t .ls .pst) -> [TimerAttribute *(.ls,.pst)]
 timerDefGetAttributes (Timer _ _ atts)
 	= atts
-
-timerDefGetElements :: !(Timer t .ls .pst) -> t .ls .pst
-timerDefGetElements (Timer _ items _)
-	= items
 
 timerDefSetAbility	:: !SelectState !(Timer t .ls .pst) -> Timer t .ls .pst
 timerDefSetAbility select (Timer interval items atts)

@@ -1,7 +1,5 @@
 implementation module world
 
-//	Clean Object I/O library, version 1.2
-
 loadWorld :: !World -> Int
 loadWorld w
 	= code {

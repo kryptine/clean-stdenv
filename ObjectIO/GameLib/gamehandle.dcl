@@ -1,6 +1,12 @@
 definition module gamehandle
 
-//  this module defines the internal representation of a game
+//	********************************************************************************
+//	Clean Standard Game library, version 1.2.2
+//
+//  This module defines the internal representation of a game	
+//	Author:   Mike Wiering
+//	Modified: 7 Sept 2001 for Clean 2.0 (Peter Achten)
+//	********************************************************************************
 
 import StdGameDef
 
@@ -15,15 +21,17 @@ import StdGameDef
    = { boundmap`      :: !BoundMap                   // map of all static bounds in a level
      , initpos`       :: !Point2                     // center of screen in boundmap
      , layers`        :: ![Layer]                    // all layers [back..front]
-     , objects`       :: ![GameObjectHandle state]   // all other objects in the level
+     , objects`       :: ![GameObjectHandleLS state] // all other objects in the level
      , music`         :: !Maybe Music                // background music
      , soundsamples`  :: ![SoundSample]
      , leveloptions`  :: !LevelOptions
      }
 
-:: GameObjectHandle gs
-   = E. state:
-     { objectcode` :: !ObjectCode
+:: GameObjectHandleLS gs
+   = E. state: GameObjectHandleLS (GameObjectHandle state gs)
+:: GameObjectHandle state gs
+// = E. state:
+   = { objectcode` :: !ObjectCode
      , sprites`    :: ![Sprite]
      , spriteids`  :: ![SpriteID]
      , instances`  :: ![(InstanceID, state)]
@@ -42,8 +50,13 @@ import StdGameDef
 :: InstanceID
    :== Int
 
-createObjectHandle :: !(GameObject .gs) -> GameObjectHandle .gs
+createObjectHandle :: !(GameObject state .gs) -> GameObjectHandle state .gs
 
 createLevelHandle  :: !(Level .gs)      -> LevelHandle .gs
 
 createGameHandle   :: !(Game .gs)       -> GameHandle .gs
+
+//	PA: Newly added access functions due to additional type constructor.
+getGameObjectHandleLS_objectcode` :: !(GameObjectHandleLS .gs) -> ObjectCode
+getGameObjectHandleLS_sprites`    :: !(GameObjectHandleLS .gs) -> [Sprite]
+getGameObjectHandleLS_spriteids`  :: !(GameObjectHandleLS .gs) -> [SpriteID]

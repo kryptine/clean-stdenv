@@ -1,15 +1,5 @@
 implementation module ostooltip
 
-//	Clean Object I/O library, version 1.2
-
-//	Operations to add and remove tooltip controls and areas.
-
-/*	Tooltip controls are added and removed by OSaddControlTooltip and OSremoveControlTooltip.
-	The first  OSWindowPtr argument identifies the parent window.
-	The second OSWindowPtr argument identifies the control.
-	The String argument is the tooltip text.
-*/
-
 import	StdTuple
 import	clCrossCall_12
 from	clCCall_12	import winMakeCString, winReleaseCString, CSTR

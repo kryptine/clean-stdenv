@@ -1,15 +1,11 @@
 implementation module StdTimerReceiver
 
 
-//	Clean Object I/O library, version 1.2.1
-
-
 import	StdTuple, StdList
 import	commondef, id, receiveraccess, receiverdefaccess, StdReceiverAttribute, StdTimerElementClass, timerhandle
 
 
 instance TimerElements (Receiver m) where
-	timerElementToHandles :: !(Receiver m .ls (PSt .l)) !(PSt .l) -> (![TimerElementState .ls (PSt .l)],!PSt .l)
 	timerElementToHandles (Receiver rid f atts) pState
 		= (	[timerElementHandleToTimerElementState
 // MW11 was				(TimerReceiverHandle {	tReceiverHandle	= newReceiverHandle id (getSelectState atts) f
@@ -22,11 +18,9 @@ instance TimerElements (Receiver m) where
 	where
 		id	= rIdtoId rid
 	
-	getTimerElementType :: (Receiver m .ls .ps) -> TimerElementType
 	getTimerElementType _ = "Receiver"
 
 instance TimerElements (Receiver2 m r) where
-	timerElementToHandles :: !(Receiver2 m r .ls (PSt .l)) !(PSt .l) -> (![TimerElementState .ls (PSt .l)],!PSt .l)
 	timerElementToHandles (Receiver2 rid f atts) pState
 		= (	[timerElementHandleToTimerElementState
 // MW11 was				(TimerReceiverHandle {	tReceiverHandle	= newReceiverHandle2 id (getSelectState atts) f
@@ -39,7 +33,6 @@ instance TimerElements (Receiver2 m r) where
 	where
 		id	= r2IdtoId rid
 	
-	getTimerElementType :: (Receiver2 m r .ls .ps) -> TimerElementType
 	getTimerElementType _ = "Receiver2"
 
 /* MW11

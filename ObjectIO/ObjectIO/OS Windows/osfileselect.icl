@@ -1,9 +1,6 @@
 implementation module osfileselect
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdInt
 import	clCrossCall_12, osevent
 from	clCCall_12	import winMakeCString, winGetCStringAndFree, winReleaseCString, CSTR

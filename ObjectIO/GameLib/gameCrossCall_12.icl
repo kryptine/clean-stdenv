@@ -1,6 +1,5 @@
 implementation module gameCrossCall_12
 
-
 import	StdList, StdTuple
 from	commondef			import fatalError
 from	windowCrossCall_12	import winFakePaint

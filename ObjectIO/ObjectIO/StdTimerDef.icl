@@ -1,11 +1,6 @@
 implementation module StdTimerDef
 
 
-//	Clean Object I/O library, version 1.2.1
-
-//	TimerDefinitions:
-
-
 import	StdIOCommon
 
 

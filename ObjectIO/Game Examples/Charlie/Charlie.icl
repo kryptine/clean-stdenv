@@ -73,14 +73,14 @@ DuckGame =
 
 /* if the quit function returns true, the game engine quit the level */
 
-QuitFunction :: GameState -> (Bool, GameState)
+QuitFunction :: GameState -> *(Bool, GameState)
 QuitFunction gst
     = (gst.quit, {gst & quit = False})
 
 
 /* function that returns the next level to run, 0 = end game */
 
-NextLevelFunction :: GameState -> (Int, GameState)
+NextLevelFunction :: GameState -> *(Int, GameState)
 NextLevelFunction gst =: {curlevel, maxlevel, titlescreen, exitcode, lives, gameover}
     | exitcode == EC_QUIT
         = (0, gst)
@@ -114,7 +114,7 @@ where
 
 /* function that returns text to be displayed */
 
-TextItems :: GameState -> ([GameText], GameState)
+TextItems :: GameState -> *([GameText], GameState)
 TextItems gst
     | gst.titlescreen
         = ([ TitleTextShadow, TitleText
@@ -221,32 +221,32 @@ OBJ_FLASH            :== 0x102
 OBJ_STAT             :== 0x110
 
 
-GameObjectList = [ AutoInitObject
-                 , MainCharObject
-                 , StaticCoinObject
-                 , FallingCoinObject
-                 , StaticDiamondObject
-                 , FallingDiamondObject
-                 , HeartObject
-                 , LifeObject
-                 , CrateObject
-                 , InvisibleCrateObject
-                 , CratePartObject
-                 , EnemyObject
-                 , BeeObject
-                 , FrogObject
-                 , CloudObject
-                 , PalmFrontObject
-                 , WaterObject
-                 , SplashObject
-                 , BounceBlockObject
-                 , FlashObject
-                 , EndingObject
-                 , StatHeartObject
-                 , BlockInFrontObject OBJ_GROUND1 (InFrontSprite1)
-                 , BlockInFrontObject OBJ_GROUND2 (InFrontSprite2)
-                 , BlockInFrontObject OBJ_GROUND3 (InFrontSprite3)
-                 , PinObject
+GameObjectList = [ GameObjectLS AutoInitObject
+                 , GameObjectLS MainCharObject
+                 , GameObjectLS StaticCoinObject
+                 , GameObjectLS FallingCoinObject
+                 , GameObjectLS StaticDiamondObject
+                 , GameObjectLS FallingDiamondObject
+                 , GameObjectLS HeartObject
+                 , GameObjectLS LifeObject
+                 , GameObjectLS CrateObject
+                 , GameObjectLS InvisibleCrateObject
+                 , GameObjectLS CratePartObject
+                 , GameObjectLS EnemyObject
+                 , GameObjectLS BeeObject
+                 , GameObjectLS FrogObject
+                 , GameObjectLS CloudObject
+                 , GameObjectLS PalmFrontObject
+                 , GameObjectLS WaterObject
+                 , GameObjectLS SplashObject
+                 , GameObjectLS BounceBlockObject
+                 , GameObjectLS FlashObject
+                 , GameObjectLS EndingObject
+                 , GameObjectLS StatHeartObject
+                 , GameObjectLS (BlockInFrontObject OBJ_GROUND1 (InFrontSprite1))
+                 , GameObjectLS (BlockInFrontObject OBJ_GROUND2 (InFrontSprite2))
+                 , GameObjectLS (BlockInFrontObject OBJ_GROUND3 (InFrontSprite3))
+                 , GameObjectLS PinObject
                  ]
 
 
@@ -1268,7 +1268,7 @@ TitleScreen
   = { boundmap     = ChTitleBoundMap
     , initpos      = {x = 0, y = 13 * H + H / 2}
     , layers       = [BackGr3Map1Layer, ChTitleLayer]
-    , objects      = [{MainCharObject & keydown = nop, keyup = nop}, AutoMenuObject]
+    , objects      = [GameObjectLS {MainCharObject & keydown = nop, keyup = nop}, GameObjectLS AutoMenuObject]
     , music        = Just BackgroundMusic
     , soundsamples = []
     , leveloptions = { fillbackground = Nothing
@@ -1341,7 +1341,7 @@ where
 /* get number of lives */
 getlives gs = accGSt getgstlives gs
 where
-    getgstlives :: GameState -> (Int, GameState)
+    getgstlives :: GameState -> *(Int, GameState)
     getgstlives gst = (gst.lives, gst)
 
 /* increment the number of diamonds */
@@ -1389,7 +1389,7 @@ RRnd n gs
 where
     max = (toReal MAX_RAND)
 
-gsrand :: GameState -> (Int, GameState)
+gsrand :: GameState -> *(Int, GameState)
 gsrand gs=:{randseed}
     # (x, newrandseed) = random randseed
     = (x, {gs & randseed=newrandseed})

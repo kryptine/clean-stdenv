@@ -2,16 +2,18 @@ definition module StdControl
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard Object I/O library, version 1.2.2
 //	
 //	StdControl specifies all control operations.
+//	Author: Peter Achten
+//	Modified: 15 October 2001 for Clean 2.0
 //	********************************************************************************
 
 
 import	StdControlClass
 
 
-controlSize				:: !(cdef .ls (PSt .l)) !Bool
+controlSize				:: !.(cdef .ls (PSt .l)) !Bool
 						   !(Maybe (Int,Int)) !(Maybe (Int,Int)) !(Maybe (Int,Int))
 						   !(PSt .l)
 				  -> (!Size,!PSt .l) | Controls cdef
@@ -29,14 +31,14 @@ controlSize				:: !(cdef .ls (PSt .l)) !Bool
 /*	Functions that change the set of controls in windows/dialogues.
 */
 
-openControls			:: !Id .ls (cdef .ls (PSt .l)) !(PSt .l)
-									   -> (!ErrorReport,!PSt .l)
-									   |  Controls cdef
-openCompoundControls	:: !Id .ls (cdef .ls (PSt .l)) !(PSt .l)
-									   -> (!ErrorReport,!PSt .l)
-									   |  Controls cdef
+openControls			:: !Id .ls .(cdef .ls (PSt .l)) !(PSt .l)
+									    -> (!ErrorReport,!PSt .l)
+									    |  Controls cdef
+openCompoundControls	:: !Id .ls .(cdef .ls (PSt .l)) !(PSt .l)
+									    -> (!ErrorReport,!PSt .l)
+									    |  Controls cdef
 openPopUpControlItems	:: !Id !Index ![PopUpControlItem (PSt .l)]
-									   !(IOSt .l) -> IOSt .l
+									    !(IOSt .l) -> IOSt .l
 /*	openControls
 		adds the given controls argument to the indicated window or dialog. 
 	openCompoundControls

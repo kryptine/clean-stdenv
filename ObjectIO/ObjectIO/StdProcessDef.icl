@@ -1,9 +1,6 @@
 implementation module StdProcessDef
 
 
-//	Clean Object I/O library, version 1.2.1
-
-
 import	StdIOCommon
 from	iostate	import PSt, IOSt
 

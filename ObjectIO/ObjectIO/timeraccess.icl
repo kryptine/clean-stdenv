@@ -1,9 +1,6 @@
 implementation module timeraccess
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdTuple
 import	devicesystemstate, timerhandle, timertable
 from	commondef	import fatalError, stateMap2

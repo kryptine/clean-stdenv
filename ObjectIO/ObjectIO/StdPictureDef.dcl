@@ -2,9 +2,11 @@ definition module StdPictureDef
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard Object I/O library, version 1.2.2
 //	
 //	StdPictureDef contains the predefined figures that can be drawn.
+//	Author: Peter Achten
+//	Modified: 7 September 2001 for Clean 2.0
 //	********************************************************************************
 
 

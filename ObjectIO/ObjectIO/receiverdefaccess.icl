@@ -1,9 +1,6 @@
 implementation module receiverdefaccess
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdTuple
 import	StdReceiverAttribute, commondef
 

@@ -1,9 +1,13 @@
 definition module scheduler
 
 
-//	Clean Object I/O library, version 1.2
-
+//	********************************************************************************
+//	Clean Standard Object I/O library, version 1.2.2
+//	
 //	Process creation, termination, and handling functions.
+//	Author: Peter Achten
+//	Modified: 8 October 2001 for Clean 2.0
+//	********************************************************************************
 
 import	StdString
 import	deviceevents, StdMaybe
@@ -44,7 +48,7 @@ from	StdProcessDef	import ProcessInit, DocumentInterface, NDI, SDI, MDI
 		,	cOSToolbox		:: !*OSToolbox			// The toolbox environment
 		}
 
-initContext		:: !(ProcessInit (PSt .l)) !String !.l !DocumentInterface !ProcessKind !*World -> (!Context,!*OSToolbox)
+initContext		:: !.(ProcessInit (PSt .l)) !String !.l !DocumentInterface !ProcessKind !*World -> (!Context,!*OSToolbox)
 /*	Generate an initial Context, given the initial actions, state, and (document/process)kind of an interactive
 	process, and World.
 */
@@ -74,8 +78,8 @@ handleOneEventForDevices :: !SchedulerEvent !(PSt .l) -> (!Bool,!SchedulerEvent,
 */
 
 
-addVirtualProcess		:: !(ProcessInit (PSt .l)) String .l !(PSt .l`) -> PSt .l`
-/*	AddVirtualProcess adds a process to the process administration as a virtual process.
+addVirtualProcess		:: !.(ProcessInit (PSt .l)) String .l !(PSt .l`) -> PSt .l`
+/*	addVirtualProcess adds a process to the process administration as a virtual process.
 	For virtual processes no initial devices are created. If the initial actions of the
 	virtual process attempt to create a device instance this results in a runtime error.
 	Virtual processes always share the GUI of their parent process. Termination is
@@ -87,7 +91,7 @@ NotShareGUI			:==	False
 
 addInteractiveProcess	:: ![ProcessAttribute (PSt .l)] !(ProcessInit (PSt .l)) String .l 
 							!Bool !DocumentInterface !(PSt .l`) -> PSt .l`
-/*	AddInteractiveProcess adds a process to the process administration as an interactive process.
+/*	addInteractiveProcess adds a process to the process administration as an interactive process.
 	For interactive processes initial devices are created. 
 	The Boolean argument determines whether the process shares (ShareGUI) or not shares 
 	(NotShareGUI) the GUI of the current process. If it does, then the current process

@@ -1,8 +1,6 @@
 implementation module StdId
 
 
-//	Clean Object I/O library, version 1.2.1
-
 import	StdBool, StdInt, StdEnum
 import	id, iostate, StdPSt, world
 

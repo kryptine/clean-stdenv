@@ -1,8 +1,5 @@
 implementation module menudefaccess
 
-
-//	Clean Object I/O library, version 1.2
-
 import StdBool, StdMisc, StdTuple
 import StdMenuAttribute, commondef
 
@@ -31,12 +28,6 @@ where
 
 menuDefGetTitle :: !(Menu m .ls .pst) -> (!Title, !Menu m .ls .pst)
 menuDefGetTitle menu=:(Menu name _ _) = (name, menu)
-
-menuDefGetElements :: !(Menu m .ls .pst) -> m .ls .pst
-menuDefGetElements (Menu _ items _) = items
-
-menuDefSetElements :: !(Menu m .ls .pst) !(m .ls .pst) -> Menu m .ls .pst
-menuDefSetElements (Menu name _ atts) items = Menu name items atts
 
 menuDefGetIndex :: !(Menu m .ls .pst) -> (!Maybe Index,!Menu m .ls .pst)
 menuDefGetIndex menu=:(Menu _ _ atts)

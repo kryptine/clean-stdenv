@@ -1,9 +1,6 @@
 implementation module osfont
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdClass, StdEnum, StdReal
 import	clCrossCall_12, pictCCall_12
 from	clCCall_12		import winMakeCString, winGetCString, CSTR, winGetVertResolution

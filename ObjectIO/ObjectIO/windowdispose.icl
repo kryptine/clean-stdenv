@@ -1,9 +1,6 @@
 implementation module windowdispose
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	menuevent, osmenu, ostypes, oswindow
 import	commondef, iostate, receiverid, scheduler, StdPSt, windowaccess, windowclipstate

@@ -1,11 +1,6 @@
 implementation module controlcreate
 
 
-//	Clean Object I/O library, version 1.2
-
-//	Control creation.
-
-
 import	StdBool, StdInt, StdList, StdMisc
 import	ostooltip, oswindow
 import	commondef, controllayout, controlvalidate, StdControlAttribute, windowaccess

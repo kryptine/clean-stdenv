@@ -1,9 +1,6 @@
 implementation module menuinternal
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdList, StdMisc
 import	osmenu, ostypes
 import	iostate, menuaccess, menuitems, sdisize

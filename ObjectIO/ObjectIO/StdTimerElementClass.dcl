@@ -2,9 +2,11 @@ definition module StdTimerElementClass
 
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard Object I/O library, version 1.2.2
 //	
 //	StdTimerElementClass define the standard set of timer element instances.
+//	Author: Peter Achten
+//	Modified: 8 October 2001 for Clean 2.0
 //	********************************************************************************
 
 
@@ -14,10 +16,10 @@ from	timerhandle	import TimerElementState
 
 
 class TimerElements t where
-	timerElementToHandles	:: !(t  .ls (PSt .l)) !(PSt .l)
-			-> (![TimerElementState .ls (PSt .l)], !PSt .l)
-	getTimerElementType		::	(t  .ls .pst)
-			-> TimerElementType
+	timerElementToHandles	:: !.(t  .ls (PSt .l)) !(PSt .l)
+			 -> (![TimerElementState .ls (PSt .l)], !PSt .l)
+	getTimerElementType		::	.(t  .ls .pst)
+			 -> TimerElementType
 
 instance TimerElements (NewLS	t)   | TimerElements t
 instance TimerElements (AddLS	t)   | TimerElements t

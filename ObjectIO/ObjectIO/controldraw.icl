@@ -1,10 +1,6 @@
 implementation module controldraw
 
 
-//	Clean Object I/O library, version 1.2
-
-//	Drawing in customised controls
-
 import	commondef, wstate
 import	ospicture, osrgn, ossystem, oswindow
 from	windowaccess	import getWItemCompoundInfo,  getWItemCustomButtonInfo,  getWItemCustomInfo

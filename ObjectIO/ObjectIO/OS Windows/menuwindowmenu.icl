@@ -1,8 +1,5 @@
 implementation module menuwindowmenu
 
-
-//	Version 1.2
-
 //	The definition and implementation of the WindowMenu. 
 //	PA: implementation not required on Windows platform.
 

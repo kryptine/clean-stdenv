@@ -1,6 +1,12 @@
 definition module gameobjectutils
 
-//	Utilities for working with game objects
+//	********************************************************************************
+//	Clean Standard Game library, version 1.2.2
+//
+//	Utilities for working with game objects	
+//	Author:   Mike Wiering
+//	Modified: 7 Sept 2001 for Clean 2.0 (Peter Achten)
+//	********************************************************************************
 
 import	StdOverloaded
 import	gameintrface_12
@@ -19,10 +25,10 @@ SetObjectRec :: !InstanceID !ObjectCode !GameObjectRec ![SpriteID] !*OSToolbox -
 GetObjectRec :: !Int !*OSToolbox -> (!GRESULT, !ObjectCode, !GameObjectRec, !*OSToolbox)
 
 // get the definition of an object by it's ObjectType
-getobject :: !ObjectCode !(GameHandle .gs) -> Maybe (GameObjectHandle (GSt .gs))
+getobject :: !ObjectCode !(GameHandle .gs) -> Maybe (GameObjectHandleLS (GSt .gs))
 
 // store the definition of an object in the game definition
-putobject :: !(GameObjectHandle (GSt .gs)) !(GameHandle .gs) -> GameHandle .gs
+putobject :: !(GameObjectHandleLS (GSt .gs)) !(GameHandle .gs) -> GameHandle .gs
 
 // find object in tuple list
 findinstance :: ![(a,b)] a -> Maybe b  | ==a

@@ -1,9 +1,6 @@
 implementation module osmenu
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdChar, StdClass, StdInt, StdString
 import	StdMaybe
 from	StdIOCommon			import Modifiers

@@ -1,9 +1,6 @@
 implementation module scheduler
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdList, StdTuple
 import	osevent, ossystem, ostime, ostoolbox
 import	commondef, devicefunctions, iostate, processstack, roundrobin, timertable, world
@@ -79,7 +76,7 @@ rsIsClosed _				= False
 
 //	Starting an interactive process.
 
-initContext :: !(ProcessInit (PSt .l)) !String !.l !DocumentInterface !ProcessKind !*World -> (!Context,!*OSToolbox)
+initContext :: !.(ProcessInit (PSt .l)) !String !.l !DocumentInterface !ProcessKind !*World -> (!Context,!*OSToolbox)
 initContext ioDefInit ioDefAbout local documentInterface ioKind world
 	# w						= loadWorld world
 	# world					= storeWorld w world
@@ -131,7 +128,7 @@ where
 	initModalId			= Nothing
 	ioStack				= []
 
-createNewIOSt :: ![ProcessAttribute (PSt .l)] !(ProcessInit (PSt .l)) String !SystemId !(Maybe SystemId) 
+createNewIOSt :: ![ProcessAttribute (PSt .l)] !.(ProcessInit (PSt .l)) String !SystemId !(Maybe SystemId) 
 					!(Maybe GUIShare) !Bool !DocumentInterface !ProcessKind
 	-> IOSt .l
 createNewIOSt pAtts ioDefInit ioDefAbout nr parentId guishare isSubProcess documentInterface ioKind
@@ -414,8 +411,8 @@ cSwitchOut ioContext {ls,io}
 	Before handing over the event to the device DoIOFunction, the device first maps the event to a
 	device event if possible using its EventFunction. 
 */	
-handleEventForDevices :: ![!(!EventFunction (PSt .l),!DoIOFunction (PSt .l))] !Bool !SchedulerEvent (PSt .l)
-																		  -> (!Bool,!SchedulerEvent, PSt .l)
+handleEventForDevices :: ![(!EventFunction (PSt .l),!DoIOFunction (PSt .l))] !Bool !SchedulerEvent (PSt .l)
+																		 -> (!Bool,!SchedulerEvent, PSt .l)
 handleEventForDevices [(mapDeviceEvent,doDeviceIO):doIOs] eventDone schedulerEvent pState
 	| eventDone
 		= (eventDone,schedulerEvent,pState)
@@ -463,7 +460,7 @@ NotShareGUI			:==	False
 
 //	Create a virtual process that will create other interactive processes.
 
-addVirtualProcess :: !(ProcessInit (PSt .l)) String .l !(PSt .l`) -> PSt .l`
+addVirtualProcess :: !.(ProcessInit (PSt .l)) String .l !(PSt .l`) -> PSt .l`
 addVirtualProcess ioDefInit ioDefAbout local pState
 	# (nr,ioState)			= ioStNewMaxIONr pState.io
 	# (parentId,ioState)	= ioStGetIOId					ioState

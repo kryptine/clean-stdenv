@@ -1,9 +1,11 @@
 definition module StdGameDef
 
 //	********************************************************************************
-//	Clean Standard Game library, version 1.2.1
+//	Clean Standard Game library, version 1.2.2
 //	
 //	StdGameDef contains all the type definitions needed to specify a game.
+//	Author:   Mike Wiering
+//	Modified: 7 Sept 2001 for Clean 2.0 (Peter Achten)
 //	********************************************************************************
 
 import	StdString
@@ -32,7 +34,7 @@ import	StdGSt
    = { boundmap      :: !BoundMap               // static bounds map in a level
      , initpos       :: !Point2                 // center of screen in boundmap
      , layers        :: ![Layer]                // all layers [back..front]
-     , objects       :: ![GameObject state]     // all other objects in the level
+     , objects       :: ![GameObjectLS state]   // all other objects in the level
      , music         :: !Maybe Music            // background music
      , soundsamples  :: ![SoundSample]          // list of sound samples
      , leveloptions  :: !LevelOptions           // level options
@@ -124,9 +126,11 @@ import	StdGSt
      , loop     :: !Bool            // if FALSE, callback animation function
      }
 
-:: GameObject gs
-   = E. state:
-     { objectcode :: !ObjectCode    // code for object type (0 AutoInitObject)
+:: GameObjectLS gs
+   = E. state: GameObjectLS (GameObject state gs)
+:: GameObject state gs
+// = E. state:
+   = { objectcode :: !ObjectCode    // code for object type (0 AutoInitObject)
      , sprites    :: ![Sprite]      // sprite 1..n
      , init       :: !SubCode !Point2 !GameTime !gs -> GameObjectState state gs
      , done       :: !(GameObjectState state gs)    -> gs

@@ -1,8 +1,5 @@
 implementation module sdisize
 
-
-//	Clean Object I/O library, version 1.2
-
 import	StdBool, StdClass, StdInt
 import	ostypes, oswindow
 import	commondef, iostate, windowaccess, windowupdate

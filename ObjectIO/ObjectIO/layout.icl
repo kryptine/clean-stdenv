@@ -1,9 +1,6 @@
 implementation module layout
 
 
-//	Clean Object I/O library, version 1.2
-
-
 import	StdBool, StdInt, StdList, StdMisc, StdTuple
 import	commondef, id
 from	windowhandle	import LayoutInfo, LayoutFix, LayoutFun, LayoutFrame, Origin

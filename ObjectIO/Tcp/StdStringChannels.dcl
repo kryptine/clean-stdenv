@@ -1,10 +1,12 @@
 definition module StdStringChannels
 
 //	********************************************************************************
-//	Clean Standard Object I/O library, version 1.2.1
+//	Clean Standard TCP library, version 1.2.2
 //	
 //	StdStringChannels provides channel instances to send and receive Strings.
 //	These channels use their own protocol above TCP.
+//	Author: Martin Wierich
+//	Modified: 7 September 2001 for Clean 2.0 (Peter Achten)
 //	********************************************************************************
 
 import	StdString
@@ -25,7 +27,7 @@ from	StdTCPChannels	import SelectSend, SelectReceive, getNrOfChannels,
 
 ::	*StringRChannel_ a
 ::	*StringRChannel		:== StringRChannel_ String
-::	*StringRChannels	=	StringRChannels [StringRChannel]
+::	*StringRChannels	=	StringRChannels *[StringRChannel]
 ::	*StringChannelReceiver ls pst 	
  =	StringChannelReceiver
 		(RId (ReceiveMsg String)) StringRChannel	
@@ -46,7 +48,7 @@ instance MaxSize		StringRChannel_
 
 ::	*StringSChannel_ a
 ::	*StringSChannel		:== StringSChannel_ String
-::	*StringSChannels	=	StringSChannels [StringSChannel]
+::	*StringSChannels	=	StringSChannels *[StringSChannel]
 
 toStringSChannel		::	TCP_SChannel -> StringSChannel
 
