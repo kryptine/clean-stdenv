@@ -767,7 +767,7 @@ where
 	accavg n nelem [|x:xs] = accavg (n + x) (inc nelem) xs
 	accavg n nelem [|]     = n / nelem
 
-AvgM l :== avg_
+AvgM l :== avg_ l
 	where
 	avg_ [|] = abort "avg called with empty list"
 	avg_ x  = accavg zero zero x
