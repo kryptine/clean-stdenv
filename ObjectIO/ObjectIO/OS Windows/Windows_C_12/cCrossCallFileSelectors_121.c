@@ -9,6 +9,7 @@
 	Routines related to standard file selector dialogues.
 ********************************************************************************************/
 #define WINVER 0x0500
+#define _WIN32_WINNT 0x0500
 
 #include "cCrossCallFileSelectors_121.h"
 #include "util_121.h"
