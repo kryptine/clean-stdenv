@@ -5,7 +5,7 @@ implementation module toolbar
 
 
 import StdBool, StdInt, StdMisc
-import osbitmap, ostoolbar, oswindow
+import osbitmap, osdocumentinterface, ostoolbar, oswindow
 import commondef, iostate, sdisize, StdProcessAttribute
 
 
@@ -17,10 +17,7 @@ toolbarFatalError function error
 openToolbar :: !(IOSt .l .p) -> IOSt .l .p
 openToolbar ioState
 	# (osdInfo,ioState)			= IOStGetOSDInfo ioState
-	  di						= case osdInfo of
-	  								OSMDInfo _	-> MDI
-	  								OSSDInfo _	-> SDI
-	  								OSNoInfo	-> NDI
+	  di						= getOSDInfoDocumentInterface osdInfo
 	| di==NDI
 		= ioState
 	# (atts,ioState)			= IOStGetProcessAttributes ioState
@@ -34,46 +31,50 @@ openToolbar ioState
 		= openMDIToolbar toolbar osdInfo ioState
 where
 	openSDIToolbar :: ![ToolbarItem (PSt .l .p)] !OSDInfo !(IOSt .l .p) -> IOSt .l .p
-	openSDIToolbar items (OSSDInfo info=:{ossdFrame,ossdToolbar}) ioState
-		| isJust ossdToolbar
+	openSDIToolbar items osdInfo/*(OSSDInfo sdinfo=:{ossdOSInfo=info=:{osFrame,osToolbar}})*/ ioState
+		| isJust osToolbar
 			= toolbarFatalError "openSDIToolbar" "toolbar already present"
 		# (oldSize,_,ioState)	= getSDIWindowSize ioState
 		# (tb,ioState)			= getIOToolbox ioState
-		# ((tbPtr,tbHeight),tb)	= OScreateToolbar False ossdFrame (toTuple reqSize) tb
+		# ((tbPtr,tbHeight),tb)	= OScreateToolbar False osFrame (toTuple reqSize) tb
 		| tbPtr==OSNoWindowPtr
 			= toolbarFatalError "openSDIToolbar" "toolbar could not be created"
 		| otherwise
 			# (_,tb)			= StateMap2 (openToolbarItem tbPtr) items (1,tb)
 			  ostoolbar			= {toolbarPtr=tbPtr,toolbarHeight=tbHeight}
-			  info				= {info & ossdToolbar=Just ostoolbar}
+			  osinfo			= {osinfo & osToolbar=Just ostoolbar}
 			# ioState			= setIOToolbox tb ioState
-			# ioState			= IOStSetOSDInfo (OSSDInfo info) ioState
-			# ioState			= resizeSDIWindow ossdFrame oldSize {oldSize & h=oldSize.h-tbHeight} ioState
+			# ioState			= IOStSetOSDInfo (setOSDInfoOSInfo osinfo osdInfo) ioState
+			# ioState			= resizeSDIWindow osFrame oldSize {oldSize & h=oldSize.h-tbHeight} ioState
 			= ioState
 	where
 		reqSize					= getBitmapsSize items
-	openSDIToolbar _ _ _
-		= toolbarFatalError "openSDIToolbar" "OSSDInfo alternative expected"
+		osinfo					= case (getOSDInfoOSInfo osdInfo) of
+									Just info -> info
+									nothing   -> toolbarFatalError "openSDIToolbar" "could not retrieve OSInfo from OSDInfo"
+		{osFrame,osToolbar}		= osinfo
 	
 	openMDIToolbar :: ![ToolbarItem (PSt .l .p)] !OSDInfo !(IOSt .l .p) -> IOSt .l .p
-	openMDIToolbar items (OSMDInfo info=:{osmdFrame,osmdClient,osmdToolbar}) ioState
-		| isJust osmdToolbar
+	openMDIToolbar items osdInfo ioState
+		| isJust osToolbar
 			= toolbarFatalError "openMDIToolbar" "toolbar already present"
 		# (tb,ioState)			= getIOToolbox ioState
-		# ((tbPtr,tbHeight),tb)	= OScreateToolbar True osmdFrame (toTuple reqSize) tb
+		# ((tbPtr,tbHeight),tb)	= OScreateToolbar True osFrame (toTuple reqSize) tb
 		| tbPtr==OSNoWindowPtr
 			= toolbarFatalError "openMDIToolbar" "toolbar could not be created"
 		| otherwise
 			# (_,tb)			= StateMap2 (openToolbarItem tbPtr) items (1,tb)
 			  ostoolbar			= {toolbarPtr=tbPtr,toolbarHeight=tbHeight}
-			  info				= {info & osmdToolbar=Just ostoolbar}
+			  osinfo			= {osinfo & osToolbar=Just ostoolbar}
 			# ioState			= setIOToolbox tb ioState
-			# ioState			= IOStSetOSDInfo (OSMDInfo info) ioState
+			# ioState			= IOStSetOSDInfo (setOSDInfoOSInfo osinfo osdInfo) ioState
 			= ioState
 	where
 		reqSize					= getBitmapsSize items
-	openMDIToolbar _ _ _
-		= toolbarFatalError "openMDIToolbar" "OSMDInfo alternative expected"
+		osinfo					= case (getOSDInfoOSInfo osdInfo) of
+									Just info -> info
+									nothing   -> toolbarFatalError "openMDIToolbar" "could not retrieve OSInfo from OSDInfo"
+		{osFrame,osToolbar}		= osinfo
 
 	openToolbarItem	:: !OSToolbarHandle !(ToolbarItem (PSt .l .p)) !(!Int,!*OSToolbox) -> (!Int,!*OSToolbox)
 	openToolbarItem tbPtr (ToolbarItem bitmap tooltip _) (index,tb)

@@ -11,6 +11,7 @@ import	commondef, controldefaccess, controldraw, controllayout, controlrelayout,
 from	keyfocus		import setNoFocusItem, setNewFocusItem
 from	menuevent		import MenuSystemStateGetMenuHandles
 from	processstack	import selectProcessShowState
+from	StdPSt			import accPIO
 
 
 windowdeviceFatalError :: String String -> .x
@@ -66,29 +67,32 @@ windowOpen pState=:{io=ioState}
 	a modal dialog which final state has to be retrieved. 
 */
 windowClose :: !(PSt .l .p) -> PSt .l .p
-windowClose pState
-	# (osdinfo,ioState)					= IOStGetOSDInfo pState.io
-	# (wDevice,ioState)					= IOStGetDevice WindowDevice ioState
-	  windows							= WindowSystemStateGetWindowHandles wDevice
-	# (inputTrack,ioState)				= IOStGetInputTrack ioState
-	# (tb,ioState)						= getIOToolbox ioState
-	# pState							= {pState & io=ioState}
-	# (disposeInfo,(inputTrack,pState,tb))
-										= StateMap (disposeWindowStateHandle` osdinfo) windows.whsWindows (inputTrack,pState,tb)
-	# ioState							= setIOToolbox tb pState.io
-	# ioState							= IOStSetInputTrack inputTrack ioState
-	  (freeRIdss,freeIdss,_,finalLSs)	= unzip4 disposeInfo
-	  freeRIds							= flatten freeRIdss
-	  freeIds							= flatten freeIdss
-	  finalLSs							= flatten finalLSs
-	# ioState							= unbindRIds freeRIds ioState
-	# (idtable,ioState)					= IOStGetIdTable ioState
-	  (_,idtable)						= removeIdsFromIdTable (freeRIds++freeIds) idtable
-	# ioState							= IOStSetIdTable idtable ioState
-	  windows							= (\windows=:{whsFinalModalLS=finalLS}->{windows & whsWindows=[],whsFinalModalLS=finalLS++finalLSs}) windows
-	# ioState							= IOStSetDevice (WindowSystemState windows) ioState
-	# pState							= {pState & io=ioState}
-	= pState
+windowClose pState=:{io=ioState}
+	# (found,wDevice,ioState)				= IOStGetDevice WindowDevice ioState
+	| not found
+		= {pState & io=ioState}
+	| otherwise
+		# (osdinfo,ioState)					= IOStGetOSDInfo ioState
+		  windows							= WindowSystemStateGetWindowHandles wDevice
+		# (inputTrack,ioState)				= IOStGetInputTrack ioState
+		# (tb,ioState)						= getIOToolbox ioState
+		# pState							= {pState & io=ioState}
+		# (disposeInfo,(inputTrack,pState,tb))
+											= StateMap (disposeWindowStateHandle` osdinfo) windows.whsWindows (inputTrack,pState,tb)
+		# ioState							= setIOToolbox tb pState.io
+		# ioState							= IOStSetInputTrack inputTrack ioState
+		  (freeRIdss,freeIdss,_,finalLSs)	= unzip4 disposeInfo
+		  freeRIds							= flatten freeRIdss
+		  freeIds							= flatten freeIdss
+		  finalLSs							= flatten finalLSs
+		# ioState							= unbindRIds freeRIds ioState
+		# (idtable,ioState)					= IOStGetIdTable ioState
+		  (_,idtable)						= removeIdsFromIdTable (freeRIds++freeIds) idtable
+		# ioState							= IOStSetIdTable idtable ioState
+		  windows							= (\windows=:{whsFinalModalLS=finalLS}->{windows & whsWindows=[],whsFinalModalLS=finalLS++finalLSs}) windows
+		# ioState							= IOStSetDevice (WindowSystemState windows) ioState
+		# pState							= {pState & io=ioState}
+		= pState
 where
 	disposeWindowStateHandle` :: !OSDInfo !(WindowStateHandle (PSt .l .p)) !(!Maybe InputTrack,PSt .l .p,!*OSToolbox)
 				  -> ((![Id],![Id],![DelayActivationInfo],![FinalModalLS]),!(!Maybe InputTrack,PSt .l .p,!*OSToolbox))
@@ -100,339 +104,345 @@ where
 	handleOSEvent osEvent pState = accContext (handleContextOSEvent osEvent) pState
 
 
-
 /*	windowIO handles the DeviceEvents that have been filtered by windowEvent.
 */
 windowIO :: !DeviceEvent !(PSt .l .p) -> (!DeviceEvent,!PSt .l .p)
-
-windowIO receiverEvent=:(ReceiverEvent msgEvent) pState
-	# (wDevice,ioState)			= IOStGetDevice WindowDevice pState.io
-	  windows					= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)		= getWindowHandlesWindow (toWID wId) windows
-	| not found
-		= windowdeviceFatalError "windowIO (ReceiverEvent _) _" "window could not be found"
+windowIO deviceEvent pState
+	# (hasDevice,pState)	= accPIO (IOStHasDevice WindowDevice) pState
+	| not hasDevice
+		= windowdeviceFatalError "WindowFunctions.dDoIO" "could not retrieve WindowSystemState from IOSt"
 	| otherwise
-		= (ReceiverEvent msgEvent1,pState2)
-	with
-		windows1				= setWindowHandlesWindow wsH1 windows
-		ioState1				= IOStSetDevice (WindowSystemState windows1) ioState
-		pState1					= {pState & io=ioState1}
-		(msgEvent1,wsH1,pState2)= windowStateMsgIO msgEvent wsH pState1
+		= windowIO deviceEvent pState
 where
-	recLoc						= getMsgEventRecLoc msgEvent
-	wId							= recLoc.rlParentId
-
-windowIO deviceEvent=:(CompoundScrollAction info) pState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID info.csaWIDS.wId) windows
-	| not found
-		= windowdeviceFatalError "windowIO (CompoundScrollAction _) _" "window could not be found"
-	| otherwise
-		# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
-		# (wsH,ioState)		= accIOToolbox (windowStateCompoundScrollActionIO wMetrics info wsH) ioState
-		  windows			= setWindowHandlesWindow wsH windows
-		# ioState			= IOStSetDevice (WindowSystemState windows) ioState
-		# pState			= {pState & io=ioState}
-		= (deviceEvent,pState)
-
-windowIO deviceEvent=:(ControlGetKeyFocus info) pState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID info.ckfWIDS.wId) windows
-	| not found
-		= windowdeviceFatalError "windowIO (ControlGetKeyFocus _) _" "window could not be found"
-	| otherwise
-		= (deviceEvent,pState2)
-	with
-		windows1			= setWindowHandlesWindow wsH1 windows
-		ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
-		pState1				= {pState & io=ioState1}
-		(wsH1,pState2)		= windowStateControlKeyFocusActionIO True info wsH pState1
-
-windowIO deviceEvent=:(ControlKeyboardAction info) pState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID info.ckWIDS.wId) windows
-	| not found
-		= windowdeviceFatalError "windowIO (ControlKeyboardAction _) _" "window could not be found"
-	| otherwise
-		= (deviceEvent,pState2)
-	with
-		windows1			= setWindowHandlesWindow wsH1 windows
-		ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
-		pState1				= {pState & io=ioState1}
-		(wsH1,pState2)		= windowStateControlKeyboardActionIO info wsH pState1
-
-windowIO deviceEvent=:(ControlLooseKeyFocus info) pState
-	# (wDevice,ioState)			= IOStGetDevice WindowDevice pState.io
-	  windows					= WindowSystemStateGetWindowHandles wDevice
-	  wids						= info.ckfWIDS
-	  (found,wsH,windows)		= getWindowHandlesWindow (toWID wids.wId) windows
-	| not found
-		= windowdeviceFatalError "windowIO (ControlLooseKeyFocus _) _" "window could not be found"
-	# (oldInputTrack,ioState)	= IOStGetInputTrack ioState
-	  (newInputTrack,lostMouse,lostKey)
-	  							= case oldInputTrack of
+	windowIO :: !DeviceEvent !(PSt .l .p) -> (!DeviceEvent,!PSt .l .p)
+	windowIO receiverEvent=:(ReceiverEvent msgEvent) pState
+		# (_,wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
+		  windows					= WindowSystemStateGetWindowHandles wDevice
+		  (found,wsH,windows)		= getWindowHandlesWindow (toWID wId) windows
+		| not found
+			= windowdeviceFatalError "windowIO (ReceiverEvent _) _" "window could not be found"
+		| otherwise
+			= (ReceiverEvent msgEvent1,pState2)
+		with
+			windows1				= setWindowHandlesWindow wsH1 windows
+			ioState1				= IOStSetDevice (WindowSystemState windows1) ioState
+			pState1					= {pState & io=ioState1}
+			(msgEvent1,wsH1,pState2)= windowStateMsgIO msgEvent wsH pState1
+	where
+		recLoc						= getMsgEventRecLoc msgEvent
+		wId							= recLoc.rlParentId
+	
+	windowIO deviceEvent=:(CompoundScrollAction info) pState
+		# (_,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+		  windows				= WindowSystemStateGetWindowHandles wDevice
+		  (found,wsH,windows)	= getWindowHandlesWindow (toWID info.csaWIDS.wId) windows
+		| not found
+			= windowdeviceFatalError "windowIO (CompoundScrollAction _) _" "window could not be found"
+		| otherwise
+			# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
+			# (wsH,ioState)		= accIOToolbox (windowStateCompoundScrollActionIO wMetrics info wsH) ioState
+			  windows			= setWindowHandlesWindow wsH windows
+			# ioState			= IOStSetDevice (WindowSystemState windows) ioState
+			# pState			= {pState & io=ioState}
+			= (deviceEvent,pState)
+	
+	windowIO deviceEvent=:(ControlGetKeyFocus info) pState
+		# (_,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+		  windows				= WindowSystemStateGetWindowHandles wDevice
+		  (found,wsH,windows)	= getWindowHandlesWindow (toWID info.ckfWIDS.wId) windows
+		| not found
+			= windowdeviceFatalError "windowIO (ControlGetKeyFocus _) _" "window could not be found"
+		| otherwise
+			= (deviceEvent,pState2)
+		with
+			windows1			= setWindowHandlesWindow wsH1 windows
+			ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
+			pState1				= {pState & io=ioState1}
+			(wsH1,pState2)		= windowStateControlKeyFocusActionIO True info wsH pState1
+	
+	windowIO deviceEvent=:(ControlKeyboardAction info) pState
+		# (_,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+		  windows				= WindowSystemStateGetWindowHandles wDevice
+		  (found,wsH,windows)	= getWindowHandlesWindow (toWID info.ckWIDS.wId) windows
+		| not found
+			= windowdeviceFatalError "windowIO (ControlKeyboardAction _) _" "window could not be found"
+		| otherwise
+			= (deviceEvent,pState2)
+		with
+			windows1			= setWindowHandlesWindow wsH1 windows
+			ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
+			pState1				= {pState & io=ioState1}
+			(wsH1,pState2)		= windowStateControlKeyboardActionIO info wsH pState1
+	
+	windowIO deviceEvent=:(ControlLooseKeyFocus info) pState
+		# (_,wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
+		  windows					= WindowSystemStateGetWindowHandles wDevice
+		  wids						= info.ckfWIDS
+		  (found,wsH,windows)		= getWindowHandlesWindow (toWID wids.wId) windows
+		| not found
+			= windowdeviceFatalError "windowIO (ControlLooseKeyFocus _) _" "window could not be found"
+		# (oldInputTrack,ioState)	= IOStGetInputTrack ioState
+		  (newInputTrack,lostMouse,lostKey)
+		  							= case oldInputTrack of
+		  								Just it=:{itWindow,itControl,itKind}
+		  										-> if (itWindow==wids.wPtr && itControl==info.ckfItemNr)
+		  												(	Nothing
+		  												,	if itKind.itkMouse    [createOSLooseMouseEvent itWindow itControl] []
+		  												,	if itKind.itkKeyboard [createOSLooseKeyEvent   itWindow itControl] []
+		  												)
+		  												(oldInputTrack,[],[])
+		  								nothing	-> (nothing,[],[])
+		# ioState					= IOStSetInputTrack newInputTrack ioState
+		  lostInputEvents			= lostMouse ++ lostKey
+		| isEmpty lostInputEvents										// no input was being tracked: simply evaluate control deactivate function
+			= (deviceEvent,pState2)
+		with
+			windows1				= setWindowHandlesWindow wsH1 windows
+			ioState1				= IOStSetDevice (WindowSystemState windows1) ioState
+			pState1					= {pState & io=ioState1}
+			(wsH1,pState2)			= windowStateControlKeyFocusActionIO False info wsH pState1
+		| otherwise														// handle control deactivate function AFTER lost input events
+			# (osDelayEvents,ioState)= accIOToolbox (StrictSeqList (lostInputEvents ++ [createOSDeactivateControlEvent wids.wPtr info.ckfItemPtr])) ioState
+			# (osEvents,ioState)	= IOStGetEvents ioState
+			# ioState				= IOStSetEvents (OSinsertEvents osDelayEvents osEvents) ioState
+			# pState				= {pState & io=ioState}
+			= (deviceEvent,pState)
+	
+	windowIO deviceEvent=:(ControlMouseAction info) pState
+		# (_,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+		  windows				= WindowSystemStateGetWindowHandles wDevice
+		  (found,wsH,windows)	= getWindowHandlesWindow (toWID info.cmWIDS.wId) windows
+		| not found
+			= windowdeviceFatalError "windowIO (ControlMouseAction _) _" "window could not be found"
+		| otherwise
+			= (deviceEvent,pState2)
+		with
+			windows1			= setWindowHandlesWindow wsH1 windows
+			ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
+			pState1				= {pState & io=ioState1}
+			(wsH1,pState2)		= windowStateControlMouseActionIO info wsH pState1
+	
+	windowIO deviceEvent=:(ControlSelection info) pState
+		# (_,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+		  windows				= WindowSystemStateGetWindowHandles wDevice
+		  (found,wsH,windows)	= getWindowHandlesWindow (toWID info.csWIDS.wId) windows
+		| not found
+			= windowdeviceFatalError "windowIO (ControlSelection _) _" "window could not be found"
+		| otherwise
+			= (deviceEvent,pState2)
+		with
+			windows1			= setWindowHandlesWindow wsH1 windows
+			ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
+			pState1				= {pState & io=ioState1}
+			(wsH1,pState2)		= windowStateControlSelectionIO info wsH pState1
+	
+	windowIO deviceEvent=:(ControlSliderAction info) pState
+		# (_,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+		  windows				= WindowSystemStateGetWindowHandles wDevice
+		  (found,wsH,windows)	= getWindowHandlesWindow (toWID info.cslWIDS.wId) windows
+		| not found
+			= windowdeviceFatalError "windowIO (ControlSliderAction _) _" "window could not be found"
+		| otherwise
+			= (deviceEvent,pState2)
+		with
+			windows1			= setWindowHandlesWindow wsH1 windows
+			ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
+			pState1				= {pState & io=ioState1}
+			(wsH1,pState2)		= windowStateControlSliderActionIO info wsH pState1
+	
+	windowIO deviceEvent=:(WindowActivation wids) pState
+		# (processStack,ioState)= IOStGetProcessStack pState.io
+		# (ioId,ioState)		= IOStGetIOId ioState
+		  processStack			= selectProcessShowState ioId processStack
+		# ioState				= IOStSetProcessStack processStack ioState
+		# (_,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+		  windows				= WindowSystemStateGetWindowHandles wDevice
+		  wid					= toWID wids.wId
+		  (found,wsH,windows)	= getWindowHandlesWindow wid windows
+		| not found
+			= windowdeviceFatalError "windowIO (WindowActivation _)" "window could not be found"
+		| otherwise
+			= (deviceEvent,pState2)
+		with
+			(_,_,windows1)		= removeWindowHandlesWindow wid windows		// Remove the placeholder from windows
+		//	windows2			= addWindowHandlesWindow 0 wsH1 windows1	// Place  the change window in front of all windows
+			windows2			= addWindowHandlesActiveWindow wsH1 windows1	// Place the change window in front of all (modal/modeless) windows
+			ioState1			= IOStSetDevice (WindowSystemState windows2) ioState
+			pState1				= {pState & io=ioState1}
+			(wsH1,pState2)		= windowStateActivationIO wsH pState1
+	
+	windowIO deviceEvent=:(WindowDeactivation wids) pState
+		# (_,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+		  windows				= WindowSystemStateGetWindowHandles wDevice
+		  (found,wsH,windows)	= getWindowHandlesWindow (toWID wids.wId) windows
+		| not found
+			= windowdeviceFatalError "windowIO (WindowDeactivation _)" "window could not be found"
+		# (inputTrack,ioState)	= IOStGetInputTrack ioState
+		# ioState				= IOStSetInputTrack Nothing ioState		// clear input track information
+		  (lostMouse,lostKey)	= case inputTrack of					// check for (Mouse/Key)Lost events
+	  								Nothing	-> ([],[])
 	  								Just it=:{itWindow,itControl,itKind}
-	  										-> if (itWindow==wids.wPtr && itControl==info.ckfItemNr)
-	  												(	Nothing
-	  												,	if itKind.itkMouse    [createOSLooseMouseEvent itWindow itControl] []
-	  												,	if itKind.itkKeyboard [createOSLooseKeyEvent   itWindow itControl] []
-	  												)
-	  												(oldInputTrack,[],[])
-	  								nothing	-> (nothing,[],[])
-	# ioState					= IOStSetInputTrack newInputTrack ioState
-	  lostInputEvents			= lostMouse ++ lostKey
-	| isEmpty lostInputEvents										// no input was being tracked: simply evaluate control deactivate function
-		= (deviceEvent,pState2)
-	with
-		windows1				= setWindowHandlesWindow wsH1 windows
-		ioState1				= IOStSetDevice (WindowSystemState windows1) ioState
-		pState1					= {pState & io=ioState1}
-		(wsH1,pState2)			= windowStateControlKeyFocusActionIO False info wsH pState1
-	| otherwise														// handle control deactivate function AFTER lost input events
-		# (osDelayEvents,ioState)= accIOToolbox (StrictSeqList (lostInputEvents ++ [createOSDeactivateControlEvent wids.wPtr info.ckfItemPtr])) ioState
-		# (osEvents,ioState)	= IOStGetEvents ioState
-		# ioState				= IOStSetEvents (OSinsertEvents osDelayEvents osEvents) ioState
-		# pState				= {pState & io=ioState}
-		= (deviceEvent,pState)
-
-windowIO deviceEvent=:(ControlMouseAction info) pState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID info.cmWIDS.wId) windows
-	| not found
-		= windowdeviceFatalError "windowIO (ControlMouseAction _) _" "window could not be found"
-	| otherwise
-		= (deviceEvent,pState2)
-	with
-		windows1			= setWindowHandlesWindow wsH1 windows
-		ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
-		pState1				= {pState & io=ioState1}
-		(wsH1,pState2)		= windowStateControlMouseActionIO info wsH pState1
-
-windowIO deviceEvent=:(ControlSelection info) pState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID info.csWIDS.wId) windows
-	| not found
-		= windowdeviceFatalError "windowIO (ControlSelection _) _" "window could not be found"
-	| otherwise
-		= (deviceEvent,pState2)
-	with
-		windows1			= setWindowHandlesWindow wsH1 windows
-		ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
-		pState1				= {pState & io=ioState1}
-		(wsH1,pState2)		= windowStateControlSelectionIO info wsH pState1
-
-windowIO deviceEvent=:(ControlSliderAction info) pState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID info.cslWIDS.wId) windows
-	| not found
-		= windowdeviceFatalError "windowIO (ControlSliderAction _) _" "window could not be found"
-	| otherwise
-		= (deviceEvent,pState2)
-	with
-		windows1			= setWindowHandlesWindow wsH1 windows
-		ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
-		pState1				= {pState & io=ioState1}
-		(wsH1,pState2)		= windowStateControlSliderActionIO info wsH pState1
-
-windowIO deviceEvent=:(WindowActivation wids) pState
-	# (processStack,ioState)= IOStGetProcessStack pState.io
-	# (ioId,ioState)		= IOStGetIOId ioState
-	  processStack			= selectProcessShowState ioId processStack
-	# ioState				= IOStSetProcessStack processStack ioState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice ioState
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  wid					= toWID wids.wId
-	  (found,wsH,windows)	= getWindowHandlesWindow wid windows
-	| not found
-		= windowdeviceFatalError "windowIO (WindowActivation _)" "window could not be found"
-	| otherwise
-		= (deviceEvent,pState2)
-	with
-		(_,_,windows1)		= removeWindowHandlesWindow wid windows		// Remove the placeholder from windows
-	//	windows2			= addWindowHandlesWindow 0 wsH1 windows1	// Place  the change window in front of all windows
-		windows2			= addWindowHandlesActiveWindow wsH1 windows1	// Place the change window in front of all (modal/modeless) windows
-		ioState1			= IOStSetDevice (WindowSystemState windows2) ioState
-		pState1				= {pState & io=ioState1}
-		(wsH1,pState2)		= windowStateActivationIO wsH pState1
-
-windowIO deviceEvent=:(WindowDeactivation wids) pState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID wids.wId) windows
-	| not found
-		= windowdeviceFatalError "windowIO (WindowDeactivation _)" "window could not be found"
-	# (inputTrack,ioState)	= IOStGetInputTrack ioState
-	# ioState				= IOStSetInputTrack Nothing ioState		// clear input track information
-	  (lostMouse,lostKey)	= case inputTrack of					// check for (Mouse/Key)Lost events
-  								Nothing	-> ([],[])
-  								Just it=:{itWindow,itControl,itKind}
-  										-> (if itKind.itkMouse    [createOSLooseMouseEvent itWindow (if (itControl==0) itWindow itControl)] []
-  										   ,if itKind.itkKeyboard [createOSLooseKeyEvent   itWindow (if (itControl==0) itWindow itControl)] []
-  										   )
-	# lostInputEvents		= lostMouse ++ lostKey
-	| isEmpty lostInputEvents										// no input was being tracked: simply evaluate deactivate function
-		= (deviceEvent,pState2)
-	with
-		windows1			= setWindowHandlesWindow wsH1 windows
-		ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
-		pState1				= {pState & io=ioState1}
-		(wsH1,pState2)		= windowStateDeactivationIO wsH pState1
-	| otherwise														// handle deactivate function AFTER lost input events
-		# (osDelayEvents,ioState)
-							= accIOToolbox (StrictSeqList (lostInputEvents ++ [createOSDeactivateWindowEvent wids.wPtr])) ioState
-		# (osEvents,ioState)= IOStGetEvents ioState
-		# ioState			= IOStSetEvents (OSinsertEvents osDelayEvents osEvents) ioState
-		# pState			= {pState & io=ioState}
-		= (deviceEvent,pState)
-
-windowIO deviceEvent=:(WindowInitialise wids) pState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID wids.wId) windows
-	| not found
-		= windowdeviceFatalError "windowIO (WindowInitialise _)" "window could not be found"
-	| otherwise
-		= (deviceEvent,pState2)
-	with
-		windows1			= setWindowHandlesWindow wsH1 windows
-		ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
-		pState1				= {pState & io=ioState1}
-		(wsH1,pState2)		= windowStateInitialiseIO wsH pState1
-
-windowIO deviceEvent=:(WindowKeyboardAction action) pState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID action.wkWIDS.wId) windows
-	| not found
-		= windowdeviceFatalError "windowIO (WindowKeyboardAction _)" "window could not be found"
-	| otherwise
-		= (deviceEvent,pState2)
-	with
-		windows1			= setWindowHandlesWindow wsH1 windows
-		ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
-		pState1				= {pState & io=ioState1}
-		(wsH1,pState2)		= windowStateWindowKeyboardActionIO action wsH pState1
-
-windowIO deviceEvent=:(WindowMouseAction action) pState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID action.wmWIDS.wId) windows
-	| not found
-		= windowdeviceFatalError "windowIO (WindowMouseAction _)" "window could not be found"
-	| otherwise
-		= (deviceEvent,pState2)
-	with
-		windows1			= setWindowHandlesWindow wsH1 windows
-		ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
-		pState1				= {pState & io=ioState1}
-		(wsH1,pState2)		= windowStateWindowMouseActionIO action wsH pState1
-
-windowIO deviceEvent=:(WindowCANCEL wids) pState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID wids.wId) windows
-	| not found
-		= windowdeviceFatalError "windowIO (WindowCANCEL _)" "window could not be found"
-	| otherwise
-		= (deviceEvent,pState2)
-	with
-		windows1			= setWindowHandlesWindow wsH1 windows
-		ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
-		pState1				= {pState & io=ioState1}
-		(wsH1,pState2)		= windowStateCANCELIO wsH pState1
-
-windowIO deviceEvent=:(WindowOK wids) pState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID wids.wId) windows
-	| not found
-		= windowdeviceFatalError "windowIO (WindowOK _)" "window could not be found"
-	| otherwise
-		= (deviceEvent,pState2)
-	with
-		windows1			= setWindowHandlesWindow wsH1 windows
-		ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
-		pState1				= {pState & io=ioState1}
-		(wsH1,pState2)		= windowStateOKIO wsH pState1
-
-windowIO deviceEvent=:(WindowRequestClose wids) pState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID wids.wId) windows
-	| not found
-		= windowdeviceFatalError "windowIO (WindowRequestClose _)" "window could not be found"
-	| otherwise
-		= (deviceEvent,pState2)
-	with
-		windows1			= setWindowHandlesWindow wsH1 windows
-		ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
-		pState1				= {pState & io=ioState1}
-		(wsH1,pState2)		= windowStateRequestCloseIO wsH pState1
-
-windowIO deviceEvent=:(WindowScrollAction info) pState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID info.wsaWIDS.wId) windows
-	| not found
-		= windowdeviceFatalError "windowIO (WindowScrollAction _)" "window could not be found"
-	| otherwise
-		# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
-		# (wsH,ioState)		= accIOToolbox (windowStateScrollActionIO wMetrics info wsH) ioState
-		  windows			= setWindowHandlesWindow wsH windows
-		# ioState			= IOStSetDevice (WindowSystemState windows) ioState
-		# pState			= {pState & io=ioState}
-		= (deviceEvent,pState)
-
-windowIO deviceEvent=:(WindowSizeAction info) pState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  wId					= info.wsWIDS.wId
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID wId) windows
-	| not found
-		= windowdeviceFatalError "windowIO (WindowSizeAction _)" "window could not be found"
-	| otherwise
-		# (activeWIDS,windows)
-							= getWindowHandlesActiveWindow windows
-		# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
-		# (tb,ioState)		= getIOToolbox ioState
-		# (wsH,tb)			= windowStateSizeAction wMetrics (isJust activeWIDS && (fromJust activeWIDS).wId==wId) info wsH tb
-		# ioState			= setIOToolbox tb ioState
-		  windows			= setWindowHandlesWindow wsH windows
-		# ioState			= IOStSetDevice (WindowSystemState windows) ioState
-		# pState			= {pState & io=ioState}
-		= (deviceEvent,pState)
-
-windowIO deviceEvent=:(WindowUpdate info) pState
-	# (wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
-	  windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID info.updWIDS.wId) windows
-	| not found
-		= windowdeviceFatalError "windowIO (WindowUpdate _)" "window could not be found"
-	| otherwise
-		# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
-		# (wsH,ioState)		= accIOToolbox (windowStateUpdateIO wMetrics info wsH) ioState
-		  windows			= setWindowHandlesWindow wsH windows
-		# ioState			= IOStSetDevice (WindowSystemState windows) ioState
-		# pState			= {pState & io=ioState}
-		= (deviceEvent,pState)
-where
-	windowStateUpdateIO :: !OSWindowMetrics !UpdateInfo !(WindowStateHandle .pst) !*OSToolbox
-													 -> (!WindowStateHandle .pst, !*OSToolbox)
-	windowStateUpdateIO wMetrics info wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH}} tb
-		# (wH,tb)			= updatewindow wMetrics info wH tb
-		  wsH				= {wsH & wshHandle=Just {wlsH & wlsHandle=wH}}
-		= (wsH,tb)
-	windowStateUpdateIO _ _ _ _
-		= windowdeviceFatalError "windowIO (WindowUpdate _) _" "unexpected placeholder argument"
-
-windowIO _ _
-	= windowdeviceFatalError "windowIO" "unexpected DeviceEvent"
+	  										-> (if itKind.itkMouse    [createOSLooseMouseEvent itWindow (if (itControl==0) itWindow itControl)] []
+	  										   ,if itKind.itkKeyboard [createOSLooseKeyEvent   itWindow (if (itControl==0) itWindow itControl)] []
+	  										   )
+		# lostInputEvents		= lostMouse ++ lostKey
+		| isEmpty lostInputEvents										// no input was being tracked: simply evaluate deactivate function
+			= (deviceEvent,pState2)
+		with
+			windows1			= setWindowHandlesWindow wsH1 windows
+			ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
+			pState1				= {pState & io=ioState1}
+			(wsH1,pState2)		= windowStateDeactivationIO wsH pState1
+		| otherwise														// handle deactivate function AFTER lost input events
+			# (osDelayEvents,ioState)
+								= accIOToolbox (StrictSeqList (lostInputEvents ++ [createOSDeactivateWindowEvent wids.wPtr])) ioState
+			# (osEvents,ioState)= IOStGetEvents ioState
+			# ioState			= IOStSetEvents (OSinsertEvents osDelayEvents osEvents) ioState
+			# pState			= {pState & io=ioState}
+			= (deviceEvent,pState)
+	
+	windowIO deviceEvent=:(WindowInitialise wids) pState
+		# (_,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+		  windows				= WindowSystemStateGetWindowHandles wDevice
+		  (found,wsH,windows)	= getWindowHandlesWindow (toWID wids.wId) windows
+		| not found
+			= windowdeviceFatalError "windowIO (WindowInitialise _)" "window could not be found"
+		| otherwise
+			= (deviceEvent,pState2)
+		with
+			windows1			= setWindowHandlesWindow wsH1 windows
+			ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
+			pState1				= {pState & io=ioState1}
+			(wsH1,pState2)		= windowStateInitialiseIO wsH pState1
+	
+	windowIO deviceEvent=:(WindowKeyboardAction action) pState
+		# (_,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+		  windows				= WindowSystemStateGetWindowHandles wDevice
+		  (found,wsH,windows)	= getWindowHandlesWindow (toWID action.wkWIDS.wId) windows
+		| not found
+			= windowdeviceFatalError "windowIO (WindowKeyboardAction _)" "window could not be found"
+		| otherwise
+			= (deviceEvent,pState2)
+		with
+			windows1			= setWindowHandlesWindow wsH1 windows
+			ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
+			pState1				= {pState & io=ioState1}
+			(wsH1,pState2)		= windowStateWindowKeyboardActionIO action wsH pState1
+	
+	windowIO deviceEvent=:(WindowMouseAction action) pState
+		# (_,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+		  windows				= WindowSystemStateGetWindowHandles wDevice
+		  (found,wsH,windows)	= getWindowHandlesWindow (toWID action.wmWIDS.wId) windows
+		| not found
+			= windowdeviceFatalError "windowIO (WindowMouseAction _)" "window could not be found"
+		| otherwise
+			= (deviceEvent,pState2)
+		with
+			windows1			= setWindowHandlesWindow wsH1 windows
+			ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
+			pState1				= {pState & io=ioState1}
+			(wsH1,pState2)		= windowStateWindowMouseActionIO action wsH pState1
+	
+	windowIO deviceEvent=:(WindowCANCEL wids) pState
+		# (_,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+		  windows				= WindowSystemStateGetWindowHandles wDevice
+		  (found,wsH,windows)	= getWindowHandlesWindow (toWID wids.wId) windows
+		| not found
+			= windowdeviceFatalError "windowIO (WindowCANCEL _)" "window could not be found"
+		| otherwise
+			= (deviceEvent,pState2)
+		with
+			windows1			= setWindowHandlesWindow wsH1 windows
+			ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
+			pState1				= {pState & io=ioState1}
+			(wsH1,pState2)		= windowStateCANCELIO wsH pState1
+	
+	windowIO deviceEvent=:(WindowOK wids) pState
+		# (_,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+		  windows				= WindowSystemStateGetWindowHandles wDevice
+		  (found,wsH,windows)	= getWindowHandlesWindow (toWID wids.wId) windows
+		| not found
+			= windowdeviceFatalError "windowIO (WindowOK _)" "window could not be found"
+		| otherwise
+			= (deviceEvent,pState2)
+		with
+			windows1			= setWindowHandlesWindow wsH1 windows
+			ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
+			pState1				= {pState & io=ioState1}
+			(wsH1,pState2)		= windowStateOKIO wsH pState1
+	
+	windowIO deviceEvent=:(WindowRequestClose wids) pState
+		# (_,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+		  windows				= WindowSystemStateGetWindowHandles wDevice
+		  (found,wsH,windows)	= getWindowHandlesWindow (toWID wids.wId) windows
+		| not found
+			= windowdeviceFatalError "windowIO (WindowRequestClose _)" "window could not be found"
+		| otherwise
+			= (deviceEvent,pState2)
+		with
+			windows1			= setWindowHandlesWindow wsH1 windows
+			ioState1			= IOStSetDevice (WindowSystemState windows1) ioState
+			pState1				= {pState & io=ioState1}
+			(wsH1,pState2)		= windowStateRequestCloseIO wsH pState1
+	
+	windowIO deviceEvent=:(WindowScrollAction info) pState
+		# (_,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+		  windows				= WindowSystemStateGetWindowHandles wDevice
+		  (found,wsH,windows)	= getWindowHandlesWindow (toWID info.wsaWIDS.wId) windows
+		| not found
+			= windowdeviceFatalError "windowIO (WindowScrollAction _)" "window could not be found"
+		| otherwise
+			# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
+			# (wsH,ioState)		= accIOToolbox (windowStateScrollActionIO wMetrics info wsH) ioState
+			  windows			= setWindowHandlesWindow wsH windows
+			# ioState			= IOStSetDevice (WindowSystemState windows) ioState
+			# pState			= {pState & io=ioState}
+			= (deviceEvent,pState)
+	
+	windowIO deviceEvent=:(WindowSizeAction info) pState
+		# (_,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+		  windows				= WindowSystemStateGetWindowHandles wDevice
+		  wId					= info.wsWIDS.wId
+		  (found,wsH,windows)	= getWindowHandlesWindow (toWID wId) windows
+		| not found
+			= windowdeviceFatalError "windowIO (WindowSizeAction _)" "window could not be found"
+		| otherwise
+			# (activeWIDS,windows)
+								= getWindowHandlesActiveWindow windows
+			# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
+			# (tb,ioState)		= getIOToolbox ioState
+			# (wsH,tb)			= windowStateSizeAction wMetrics (isJust activeWIDS && (fromJust activeWIDS).wId==wId) info wsH tb
+			# ioState			= setIOToolbox tb ioState
+			  windows			= setWindowHandlesWindow wsH windows
+			# ioState			= IOStSetDevice (WindowSystemState windows) ioState
+			# pState			= {pState & io=ioState}
+			= (deviceEvent,pState)
+	
+	windowIO deviceEvent=:(WindowUpdate info) pState
+		# (_,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+		  windows				= WindowSystemStateGetWindowHandles wDevice
+		  (found,wsH,windows)	= getWindowHandlesWindow (toWID info.updWIDS.wId) windows
+		| not found
+			= windowdeviceFatalError "windowIO (WindowUpdate _)" "window could not be found"
+		| otherwise
+			# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
+			# (wsH,ioState)		= accIOToolbox (windowStateUpdateIO wMetrics info wsH) ioState
+			  windows			= setWindowHandlesWindow wsH windows
+			# ioState			= IOStSetDevice (WindowSystemState windows) ioState
+			# pState			= {pState & io=ioState}
+			= (deviceEvent,pState)
+	where
+		windowStateUpdateIO :: !OSWindowMetrics !UpdateInfo !(WindowStateHandle .pst) !*OSToolbox
+														 -> (!WindowStateHandle .pst, !*OSToolbox)
+		windowStateUpdateIO wMetrics info wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH}} tb
+			# (wH,tb)			= updatewindow wMetrics info wH tb
+			  wsH				= {wsH & wshHandle=Just {wlsH & wlsHandle=wH}}
+			= (wsH,tb)
+		windowStateUpdateIO _ _ _ _
+			= windowdeviceFatalError "windowIO (WindowUpdate _) _" "unexpected placeholder argument"
+	
+	windowIO _ _
+		= windowdeviceFatalError "windowIO" "unexpected DeviceEvent"
 
 
 /*	windowStateMsgIO handles all message events.

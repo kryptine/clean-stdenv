@@ -9,7 +9,6 @@ import	osevent
 from	ostime				import OSGetTime, OSTime
 from	ostoolbox			import OSNewToolbox, OSInitToolbox
 import	commondef, devicefunctions, iostate, processstack, roundrobin, timertable, world
-from	documentinterface	import closeOSDInfo
 from	StdProcessDef		import ProcessInit
 from	StdPSt				import accPIO, appPIO
 from	StdProcessAttribute	import isProcessKindAttribute
@@ -600,15 +599,16 @@ quitProcess pState
 	| otherwise
 		# (deviceFunctions,pState)	= accPIO IOStGetDeviceFunctions pState
 		# pState					= StrictSeq [df.dClose \\ df<-deviceFunctions] pState
-		# ioState					= IOStSetRuntimeState Closed	 pState.io
-		# (nr,ioState)				= IOStGetIOId					 ioState
-		# (subids,ioState)			= IOStGetSubProcessIds			 ioState
-		# ioState					= quitSubProcesses subids		 ioState
+		# ioState					= IOStSetRuntimeState Closed     pState.io
+		# (nr,ioState)				= IOStGetIOId                    ioState
+		# (subids,ioState)			= IOStGetSubProcessIds           ioState
+		# ioState					= quitSubProcesses subids        ioState
 		# ioState					= removeIOIdFromParentProcess nr ioState
-		# (ioStack,ioState)			= IOStGetProcessStack			 ioState
-		  (_,ioStack)				= removeProcessShowState nr		 ioStack
-		# ioState					= IOStSetProcessStack ioStack	 ioState
-		# ioState					= closeOSDInfo ioState
+		# (ioStack,ioState)			= IOStGetProcessStack            ioState
+		  (_,ioStack)				= removeProcessShowState nr      ioStack
+		# ioState					= IOStSetProcessStack ioStack    ioState
+		# (osdinfo,ioState)			= IOStGetOSDInfo                 ioState
+		# ioState					= appIOToolbox (OScloseOSDInfo osdinfo) ioState
 		= {pState & io=ioState}
 
 

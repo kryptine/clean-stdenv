@@ -16,6 +16,7 @@ import	commondef, deviceevents, iostate
 from	menuaccess			import menuStateHandleGetHandle, menuStateHandleGetMenuId
 from	processstack		import topShowProcessShowState
 from	StdProcessAttribute	import getProcessToolbarAtt, isProcessToolbar
+from	StdPSt				import accPIO
 
 
 menueventFatalError :: String String -> .x
@@ -25,69 +26,78 @@ menueventFatalError function error
 
 /*	menuEvent filters the scheduler events that can be handled by this menu device.
 	For the time being no timer menu elements are added, so these events are ignored.
-	menuEvent assumes that it is not applied to an empty IOSt.
+	menuEvent assumes that it is not applied to an empty IOSt and that its device is
+	present.
 */
 menuEvent :: !SchedulerEvent !(PSt .l .p) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l .p)
-menuEvent schedulerEvent=:(ScheduleOSEvent osEvent=:{ccMsg} _) pState=:{io=ioState}
-	| isToolbarOSEvent ccMsg
-		# (osdInfo,ioState)				= IOStGetOSDInfo ioState
-		# (myEvent,replyToOS,deviceEvent,ioState)
-										= filterToolbarEvent osdInfo osEvent ioState
-		# pState						= {pState & io=ioState}
-		  schedulerEvent				= if (isJust replyToOS) (ScheduleOSEvent osEvent (fromJust replyToOS)) schedulerEvent
-		= (myEvent,deviceEvent,schedulerEvent,pState)
-	| isMenuOSEvent ccMsg
-		# (processStack,ioState)		= IOStGetProcessStack ioState
-		  (found,systemId)				= topShowProcessShowState processStack
-		# (ioId,ioState)				= IOStGetIOId ioState
-		# (tb,ioState)					= getIOToolbox ioState
-		# (mDevice,ioState)				= IOStGetDevice MenuDevice ioState
-		  menus							= MenuSystemStateGetMenuHandles mDevice
-		# (myEvent,replyToOS,deviceEvent,menus,tb)
-		  								= filterOSEvent osEvent (found && systemId==ioId) menus tb
-		# ioState						= IOStSetDevice (MenuSystemState menus) ioState
-		# ioState						= setIOToolbox tb ioState
-		# pState						= {pState & io=ioState}
-		  schedulerEvent				= if (isJust replyToOS) (ScheduleOSEvent osEvent (fromJust replyToOS)) schedulerEvent
-		= (myEvent,deviceEvent,schedulerEvent,pState)
-	| otherwise
-		= (False,Nothing,schedulerEvent,pState)
-where
-	isMenuOSEvent :: !Int -> Bool
-	isMenuOSEvent CcWmCOMMAND				= True
-	isMenuOSEvent _							= False
-	
-	isToolbarOSEvent :: !Int -> Bool
-	isToolbarOSEvent CcWmBUTTONCLICKED		= True
-	isToolbarOSEvent CcWmGETTOOLBARTIPTEXT	= True
-	isToolbarOSEvent _						= False
-
-menuEvent schedulerEvent=:(ScheduleMsgEvent msgEvent) pState=:{io=ioState}
-	# (ioId,ioState)		= IOStGetIOId ioState
-	| ioId<>recLoc.rlIOId || recLoc.rlDevice<>MenuDevice
-		= (False,Nothing,schedulerEvent,{pState & io=ioState})
-	| otherwise
-		# (mDevice,ioState)	= IOStGetDevice MenuDevice ioState
-		  menus				= MenuSystemStateGetMenuHandles mDevice
-		  (found,menus)		= hasMenuHandlesMenu recLoc.rlParentId menus
-		  deviceEvent		= if found (Just (ReceiverEvent msgEvent)) Nothing
-		# ioState			= IOStSetDevice (MenuSystemState menus) ioState
-		= (found,deviceEvent,schedulerEvent,{pState & io=ioState})
-where
-	recLoc					= getMsgEventRecLoc msgEvent
-	
-	hasMenuHandlesMenu :: !Id !(MenuHandles .pst) -> (!Bool,!MenuHandles .pst)
-	hasMenuHandlesMenu menuId mHs=:{mMenus}
-		# (found,mMenus)= UContains (eqMenuId menuId) mMenus
-		= (found,{mHs & mMenus=mMenus})
-	where
-		eqMenuId :: !Id !(MenuStateHandle .pst) -> (!Bool,!MenuStateHandle .pst)
-		eqMenuId theId msH
-			# (mId,msH)	= menuStateHandleGetMenuId msH
-			= (theId==mId,msH)
-
 menuEvent schedulerEvent pState
-	= (False,Nothing,schedulerEvent,pState)
+	# (hasMenuDevice,pState)	= accPIO (IOStHasDevice MenuDevice) pState
+	| not hasMenuDevice			// This condition should never hold
+		= menueventFatalError "menuEvent" "MenuDevice.dEvent applied while MenuDevice not present in IOSt"
+	| otherwise
+		= menuEvent schedulerEvent pState
+where
+	menuEvent :: !SchedulerEvent !(PSt .l .p) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l .p)
+	menuEvent schedulerEvent=:(ScheduleOSEvent osEvent=:{ccMsg} _) pState=:{io=ioState}
+		| isToolbarOSEvent ccMsg
+			# (osdInfo,ioState)				= IOStGetOSDInfo ioState
+			# (myEvent,replyToOS,deviceEvent,ioState)
+											= filterToolbarEvent osdInfo osEvent ioState
+			# pState						= {pState & io=ioState}
+			  schedulerEvent				= if (isJust replyToOS) (ScheduleOSEvent osEvent (fromJust replyToOS)) schedulerEvent
+			= (myEvent,deviceEvent,schedulerEvent,pState)
+		| isMenuOSEvent ccMsg
+			# (processStack,ioState)		= IOStGetProcessStack ioState
+			  (found,systemId)				= topShowProcessShowState processStack
+			# (ioId,ioState)				= IOStGetIOId ioState
+			# (tb,ioState)					= getIOToolbox ioState
+			# (found,mDevice,ioState)		= IOStGetDevice MenuDevice ioState
+			# menus							= MenuSystemStateGetMenuHandles mDevice
+			# (myEvent,replyToOS,deviceEvent,menus,tb)
+			  								= filterOSEvent osEvent (found && systemId==ioId) menus tb
+			# ioState						= IOStSetDevice (MenuSystemState menus) ioState
+			# ioState						= setIOToolbox tb ioState
+			# pState						= {pState & io=ioState}
+			  schedulerEvent				= if (isJust replyToOS) (ScheduleOSEvent osEvent (fromJust replyToOS)) schedulerEvent
+			= (myEvent,deviceEvent,schedulerEvent,pState)
+		| otherwise
+			= (False,Nothing,schedulerEvent,pState)
+	where
+		isMenuOSEvent :: !Int -> Bool
+		isMenuOSEvent CcWmCOMMAND				= True
+		isMenuOSEvent _							= False
+		
+		isToolbarOSEvent :: !Int -> Bool
+		isToolbarOSEvent CcWmBUTTONCLICKED		= True
+		isToolbarOSEvent CcWmGETTOOLBARTIPTEXT	= True
+		isToolbarOSEvent _						= False
+	
+	menuEvent schedulerEvent=:(ScheduleMsgEvent msgEvent) pState=:{io=ioState}
+		# (ioId,ioState)		= IOStGetIOId ioState
+		| ioId<>recLoc.rlIOId || recLoc.rlDevice<>MenuDevice
+			= (False,Nothing,schedulerEvent,{pState & io=ioState})
+		| otherwise
+			# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
+			  menus						= MenuSystemStateGetMenuHandles mDevice
+			  (found,menus)				= hasMenuHandlesMenu recLoc.rlParentId menus
+			  deviceEvent				= if found (Just (ReceiverEvent msgEvent)) Nothing
+			# ioState					= IOStSetDevice (MenuSystemState menus) ioState
+			= (found,deviceEvent,schedulerEvent,{pState & io=ioState})
+	where
+		recLoc							= getMsgEventRecLoc msgEvent
+		
+		hasMenuHandlesMenu :: !Id !(MenuHandles .pst) -> (!Bool,!MenuHandles .pst)
+		hasMenuHandlesMenu menuId mHs=:{mMenus}
+			# (found,mMenus)= UContains (eqMenuId menuId) mMenus
+			= (found,{mHs & mMenus=mMenus})
+		where
+			eqMenuId :: !Id !(MenuStateHandle .pst) -> (!Bool,!MenuStateHandle .pst)
+			eqMenuId theId msH
+				# (mId,msH)	= menuStateHandleGetMenuId msH
+				= (theId==mId,msH)
+	
+	menuEvent schedulerEvent pState
+		= (False,Nothing,schedulerEvent,pState)
 
 
 /*	filterToolbarEvent filters the OSEvents that can be handled by this menu device.

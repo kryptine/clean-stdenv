@@ -16,7 +16,7 @@ import	osmenu
 ::	MenuHandles pst
 	=	{	mMenus			:: ![MenuStateHandle pst]		// The menus and their elements of a process
 		,	mKeys			:: ![Char]						// All shortcut keys of the menus
-		,	mOSMenuBar		:: !OSMenuBar					// The handle to the toolbox menu bar
+//PA---	,	mOSMenuBar		:: !OSMenuBar					// The handle to the toolbox menu bar
 		,	mEnabled		:: !Bool						// Flag: the whole menusystem is enabled
 		,	mNrMenuBound	:: !Bound						// The maximum number of menus that are allowed to be opened
 		,	mPopUpId		:: !Maybe Id					// The Id of the PopUpMenu (Nothing if open; (Just id) if available)

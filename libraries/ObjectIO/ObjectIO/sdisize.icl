@@ -18,10 +18,11 @@ sdisizeFatalError rule error = FatalError rule "sdisize" error
 //	getSDIWindowSize retrieves the current size of the WindowViewFrame if this is a SDI process
 getSDIWindowSize :: !(IOSt .l .p) -> (!Size,!OSWindowPtr,!IOSt .l .p)
 getSDIWindowSize ioState
-	# (info,ioState)		= IOStGetOSDInfo ioState
-	  (isSDI,wPtr)			= case info of
-		  						OSSDInfo {ossdFrame} -> (True,ossdFrame)
-		  						_					 -> (False,OSNoWindowPtr)
+	# (osdInfo,ioState)		= IOStGetOSDInfo ioState
+	  isSDI					= getOSDInfoDocumentInterface osdInfo==SDI
+	  wPtr					= case (getOSDInfoOSInfo osdInfo) of
+		  						Just info -> info.osFrame
+		  						_         -> OSNoWindowPtr
 	| not isSDI
 		= (zero,wPtr,ioState)
 	| otherwise
@@ -39,11 +40,12 @@ getSDIWindowSize ioState
 resizeSDIWindow :: !OSWindowPtr !Size !Size !(IOSt .l .p) -> IOSt .l .p
 resizeSDIWindow wPtr {h=oldHeight} newFrameSize=:{h=newHeight} ioState
 	# (osdInfo,ioState)			= IOStGetOSDInfo ioState
-	  (isSDI,framePtr,clientPtr)= case osdInfo of
-	  								OSSDInfo {ossdFrame,ossdClient}	-> (True,ossdFrame,ossdClient)
-	  								_								-> (False,OSNoWindowPtr,OSNoWindowPtr)
+	  isSDI						= getOSDInfoDocumentInterface osdInfo==SDI
 	| not isSDI
 		= sdisizeFatalError "resizeSDIWindow" "not an SDI process"
+	# (framePtr,clientPtr)		= case (getOSDInfoOSInfo osdInfo) of
+	  								Just {osFrame,osClient} -> (osFrame,osClient)
+	  								_                       -> (OSNoWindowPtr,OSNoWindowPtr)
 	| wPtr<>framePtr
 		= sdisizeFatalError "resizeSDIWindow" "SDIWindow frame could not be located"
 	# (tb,ioState)				= getIOToolbox ioState
@@ -51,8 +53,10 @@ resizeSDIWindow wPtr {h=oldHeight} newFrameSize=:{h=newHeight} ioState
 	# tb						= OSsetWindowSize framePtr (oldw,oldh+oldHeight-newHeight) True tb
 	| newHeight>oldHeight	// menus take up less space
 		= setIOToolbox tb ioState
-	# (wDevice,ioState)			= IOStGetDevice WindowDevice ioState
-	  windows					= WindowSystemStateGetWindowHandles wDevice
+	# (ok,wDevice,ioState)		= IOStGetDevice WindowDevice ioState
+	| not ok
+		= ioState
+	# windows					= WindowSystemStateGetWindowHandles wDevice
 	  (found,wsH,windows)		= getWindowHandlesWindow (toWID clientPtr) windows
 	| not found
 		= IOStSetDevice (WindowSystemState windows) ioState

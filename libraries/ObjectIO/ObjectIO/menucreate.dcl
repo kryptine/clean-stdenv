@@ -12,8 +12,8 @@ from	oswindow	import OSWindowPtr
 	In case the Boolean result is False nothing has been created due to duplicate Ids.
 */
 OpenMenu`		:: !Id       .ls !(Menu      m .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p) | MenuElements m
-createPopUpMenu :: !SystemId .ls !(PopUpMenu m .ls (PSt .l .p)) !(MenuHandles (PSt .l .p)) !ReceiverTable !IdTable !(PSt .l .p)
-													   -> (!Bool,!MenuHandles (PSt .l .p), !ReceiverTable,!IdTable, !PSt .l .p)
+createPopUpMenu :: !SystemId .ls !(PopUpMenu m .ls (PSt .l .p)) !(MenuHandles (PSt .l .p)) !ReceiverTable !IdTable !OSMenuBar !(PSt .l .p)
+													   -> (!Bool,!MenuHandles (PSt .l .p), !ReceiverTable,!IdTable,!OSMenuBar, !PSt .l .p)
 													   |  PopUpMenuElements m
 
 // checkCurrentMenuSystem		::				  !Bool !*OSToolbox -> (!OSMenu,!*OSToolbox)
@@ -34,7 +34,7 @@ SystemUnable			:== False
 closepopupmenu			:: !(MenuHandles .pst) -> MenuHandles .pst
 disposeMenuItemHandle	:: !OSMenu !Int	!(MenuItemHandle    .ls .pst) !(![Char],!IdTable,!*OSToolbox) -> (![Char],!IdTable,!*OSToolbox)
 disposeSubMenuHandles	::				!(MenuElementHandle .ls .pst)                    !*OSToolbox  -> *OSToolbox
-disposeMenuHandles		:: !Bool		!(MenuHandles			.pst)                    !*OSToolbox  -> (!OSMenuBar,!*OSToolbox)
+disposeMenuHandles		:: !Bool		!(MenuHandles			.pst) !OSMenuBar         !*OSToolbox  -> (!OSMenuBar,!*OSToolbox)
 disposeShortcutkeys		:: !OSWindowPtr !(MenuElementHandle .ls .pst) !(![Char],         !*OSToolbox) -> (![Char],   !*OSToolbox)
 disposeMenuIds			:: !SystemId	!(MenuElementHandle .ls .pst) !(!ReceiverTable,  !IdTable)    -> (!ReceiverTable,!IdTable)
 

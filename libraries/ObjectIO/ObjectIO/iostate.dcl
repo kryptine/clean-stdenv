@@ -135,7 +135,8 @@ IOStLastInteraction		::										!(IOSt .l .p) -> (!Bool,	!IOSt .l .p)
 IOStHasDevice			:: !Device								!(IOSt .l .p) -> (!Bool,	!IOSt .l .p)
 IOStGetDevices			::										!(IOSt .l .p) -> (![Device],!IOSt .l .p)
 
-IOStGetDevice			:: !Device								!(IOSt .l .p) -> (!DeviceSystemState (PSt .l .p),!IOSt .l .p)
+IOStGetDevice			:: !Device								!(IOSt .l .p) -> (!Bool,DeviceSystemState (PSt .l .p),!IOSt .l .p)
+//	IOStGetDevice retrieves the indicated device and returns True if found. If not found the device is undefined!
 IOStRemoveDevice		:: !Device								!(IOSt .l .p) -> IOSt .l .p
 IOStSetDevice			:: !(DeviceSystemState (PSt .l .p))		!(IOSt .l .p) -> IOSt .l .p
 

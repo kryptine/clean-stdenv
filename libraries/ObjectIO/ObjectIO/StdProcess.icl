@@ -8,7 +8,6 @@ import	StdFunc, StdList
 import	StdProcessDef
 import	devicefunctions, iostate, processdevice, scheduler
 from	commondef			import StateMap2, Contains, Cond, RectSize, StrictSeq
-from	documentinterface	import setOSDInfoInMenuDevice
 from	processstack		import setProcessShowState
 from	StdProcessAttribute	import isProcessOpenFiles, isProcessToolbar
 import	osdocumentinterface
@@ -64,36 +63,9 @@ instance shareProcesses Process where
 	shareProcesses (Process NDI local init atts) pState
 		= addInteractiveProcess atts (init o ProcessFunctions.dOpen) "" local NotShareGUI NDI pState
 	shareProcesses (Process SDI local init atts) pState
-		= addInteractiveProcess atts (init o openSDIwindow o ProcessFunctions.dOpen) "" local NotShareGUI SDI pState		// PA: openSDIwindow added before init
-	where
-		openSDIwindow :: !(PSt .l .p) -> PSt .l .p
-		openSDIwindow pState=:{io}
-			# (atts,ioState)	= IOStGetProcessAttributes io
-			  acceptOpenFiles	= Contains isProcessOpenFiles atts
-			# (osSDInfo,ioState)= accIOToolbox (OSopenSDI acceptOpenFiles) ioState
-			# osdinfo			= OSSDInfo osSDInfo
-			# ioState			= IOStSetOSDInfo osdinfo ioState
-			# ioState			= openToolbar ioState
-			# pState			= {pState & io=ioState}
-			# pState			= setOSDInfoInMenuDevice osdinfo pState
-			= pState
+		= addInteractiveProcess atts (init o ProcessFunctions.dOpen) "" local NotShareGUI SDI pState		// PA: openSDIwindow added before init
 	shareProcesses (Process MDI local init atts) pState
-		= addInteractiveProcess atts (init o openMDIwindow o ProcessFunctions.dOpen) "" local NotShareGUI MDI pState		// PA: openMDIwindow added before init
-	where
-		openMDIwindow :: !(PSt .l .p) -> PSt .l .p
-		openMDIwindow pState=:{io}
-			# (atts,ioState)	= IOStGetProcessAttributes io
-			  acceptOpenFiles	= Contains isProcessOpenFiles atts
-			  hasToolbarAtt		= Contains isProcessToolbar atts
-			# (tb,ioState)		= getIOToolbox ioState
-			# (osMDInfo,tb)		= OSopenMDI (not hasToolbarAtt) acceptOpenFiles tb
-			# ioState			= setIOToolbox tb ioState
-			  osdinfo			= OSMDInfo osMDInfo
-			# ioState			= IOStSetOSDInfo osdinfo ioState
-			# ioState			= openToolbar ioState
-			# pState			= {pState & io=ioState}
-			# pState			= setOSDInfoInMenuDevice osdinfo pState
-			= pState
+		= addInteractiveProcess atts (init o ProcessFunctions.dOpen) "" local NotShareGUI MDI pState		// PA: openMDIwindow added before init
 
 instance shareProcesses	(ListCS pdef)	| shareProcesses pdef where
 	shareProcesses :: !(ListCS pdef .p) !(PSt .l .p) -> PSt .l .p	| shareProcesses pdef

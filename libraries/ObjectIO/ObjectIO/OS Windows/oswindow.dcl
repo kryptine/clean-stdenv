@@ -14,7 +14,7 @@ from osrgn					import OSRgnHandle
 from ostoolbox				import OSToolbox
 from ostypes				import Rect, OSWindowPtr, HWND
 from ospicture				import OSPictContext
-from osdocumentinterface	import OSDInfo, OSMDInfo, OSSDInfo, OSToolbar, OSToolbarHandle
+from osdocumentinterface	import OSDInfo, OSMDInfo, OSSDInfo, OSInfo, OSToolbar, OSToolbarHandle
 
 
 OSNoWindowPtr	:== -1

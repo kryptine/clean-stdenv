@@ -28,8 +28,10 @@ windowcreateFatalError function error
 */
 openmodalwindow :: !Id !(WindowLSHandle .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!Maybe .ls,!PSt .l .p)
 openmodalwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
-	# (wDevice,ioState)			= IOStGetDevice WindowDevice ioState
-	  windows					= WindowSystemStateGetWindowHandles wDevice
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found					// This condition should never occur: WindowDevice must have been 'installed'
+		= windowcreateFatalError "openmodalwindow" "could not retrieve WindowSystemState from IOSt"
+	# windows					= WindowSystemStateGetWindowHandles wDevice
 	# (tb,ioState)				= getIOToolbox ioState
 	# (osdinfo,ioState)			= IOStGetOSDInfo ioState
 	# (wMetrics,ioState)		= IOStGetOSWindowMetrics ioState
@@ -71,16 +73,18 @@ where
 */
 	getFinalModalDialogLS :: !Bool !WID !(IOSt .l .p) -> (!Maybe .ls,!IOSt .l .p)
 	getFinalModalDialogLS noError wid ioState
-		| noError
-			# (wDevice,ioState)	= IOStGetDevice WindowDevice ioState
-			  windows			= WindowSystemStateGetWindowHandles wDevice
-			  (final,windows)	= getFinalLS wid windows
-			# ioState			= IOStSetDevice (WindowSystemState windows) ioState
-			= case final of
-				Nothing			-> windowcreateFatalError "getFinalModalDialogLS" "final local modal dialog state not found"
-				Just final		-> (getFinalModalLS wid final,ioState)
-		| otherwise
+		| not noError
 			= (Nothing,ioState)
+		# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+		| not found
+			= windowcreateFatalError "getFinalModalDialogLS" "could not retrieve WindowSystemState from IOSt"
+		| otherwise
+			# windows				= WindowSystemStateGetWindowHandles wDevice
+			  (final,windows)		= getFinalLS wid windows
+			# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+			= case final of
+				Nothing    -> windowcreateFatalError "getFinalModalDialogLS" "final local modal dialog state not found"
+				Just final -> (getFinalModalLS wid final,ioState)
 	where
 		getFinalLS :: !WID !(WindowHandles .pst) -> (!Maybe FinalModalLS,!WindowHandles .pst)
 		getFinalLS wid windows=:{whsFinalModalLS}
@@ -93,46 +97,49 @@ where
 */
 openwindow :: !Id !(WindowLSHandle .ls (PSt .l .p)) !(PSt .l .p) -> PSt .l .p
 openwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
-	= pState2
-where
-	(wDevice,ioState1)		= IOStGetDevice WindowDevice ioState
-	windows					= WindowSystemStateGetWindowHandles wDevice
-	(delayinfo,wPtr,index,wlsHandle1,windows1,ioState2)
-							= openAnyWindow wId wlsHandle windows ioState1
-	(windowInit,wlsHandle2)	= getWindowHandleInit wlsHandle1
-	wlsH					= {wlsState=ls1,wlsHandle=wlsHandle2}
-	wIds					= {wId=wId,wPtr=wPtr,wActive=False}
-	wsH						= {wshIds=wIds,wshHandle=Just wlsH}
-	windows2				= addWindowHandlesWindow index wsH windows1
-	ioState3				= IOStSetDevice (WindowSystemState windows2) ioState2
-	ioState4				= bufferDelayedEvents delayinfo ioState3
-	pState1					= {pState & io=ioState4}
-	(ls1,pState2)			= windowInit (wlsState,pState1)
-	
-	getWindowHandleInit :: !(WindowHandle .ls .pst) -> (!IdFun *(.ls,.pst),!WindowHandle .ls .pst)
-	getWindowHandleInit wH=:{whAtts}
-		= (getWindowInitFun (snd (Select isWindowInit (WindowInit id) whAtts)),wH)
-	
-/*	openAnyWindow creates a window.
-		After validating the window and its controls, the window and its controls are created.
-		The return OSWindowPtr is the OSWindowPtr of the newly created window.
-		The return Index is the proper insert position in the WindowHandles list.
-*/
-	openAnyWindow :: !Id !(WindowHandle .ls (PSt .l .p)) !(WindowHandles (PSt .l .p)) !(IOSt .l .p)
-		-> (![DelayActivationInfo],!OSWindowPtr,!Index,!WindowHandle .ls (PSt .l .p),!WindowHandles (PSt .l .p),!IOSt .l .p)
-	openAnyWindow wId wH windows ioState
-		# (tb,ioState)			= getIOToolbox ioState
-		# (osdinfo,ioState)		= IOStGetOSDInfo ioState
-		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
-		# (index,pos,size,originv,wH,windows,tb)
-								= validateWindow wMetrics osdinfo wH windows tb
-		  (behindPtr,windows)	= getStackBehindWindow index windows
-		# (delayinfo,wPtr,osdinfo,wH,tb)
-								= createAnyWindow wMetrics behindPtr wId pos size originv osdinfo wH tb
-		# (wH,tb)				= validateWindowClipState wMetrics True wPtr wH tb
-		# ioState				= IOStSetOSDInfo osdinfo ioState
-		# ioState				= setIOToolbox (OSinvalidateWindow wPtr tb) ioState
-		= (delayinfo,wPtr,index,wH,windows,ioState)
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found					// This condition should never occur: WindowDevice must have 'installed'
+		= windowcreateFatalError "openwindow" "could not retrieve WindowSystemState from IOSt"
+	| otherwise
+		= pState2
+	with
+		windows					= WindowSystemStateGetWindowHandles wDevice
+		(delayinfo,wPtr,index,wlsHandle1,windows1,ioState2)
+								= openAnyWindow wId wlsHandle windows ioState
+		(windowInit,wlsHandle2)	= getWindowHandleInit wlsHandle1
+		wlsH					= {wlsState=ls1,wlsHandle=wlsHandle2}
+		wIds					= {wId=wId,wPtr=wPtr,wActive=False}
+		wsH						= {wshIds=wIds,wshHandle=Just wlsH}
+		windows2				= addWindowHandlesWindow index wsH windows1
+		ioState3				= IOStSetDevice (WindowSystemState windows2) ioState2
+		ioState4				= bufferDelayedEvents delayinfo ioState3
+		pState1					= {pState & io=ioState4}
+		(ls1,pState2)			= windowInit (wlsState,pState1)
+		
+		getWindowHandleInit :: !(WindowHandle .ls .pst) -> (!IdFun *(.ls,.pst),!WindowHandle .ls .pst)
+		getWindowHandleInit wH=:{whAtts}
+			= (getWindowInitFun (snd (Select isWindowInit (WindowInit id) whAtts)),wH)
+		
+	/*	openAnyWindow creates a window.
+			After validating the window and its controls, the window and its controls are created.
+			The return OSWindowPtr is the OSWindowPtr of the newly created window.
+			The return Index is the proper insert position in the WindowHandles list.
+	*/
+		openAnyWindow :: !Id !(WindowHandle .ls (PSt .l .p)) !(WindowHandles (PSt .l .p)) !(IOSt .l .p)
+			-> (![DelayActivationInfo],!OSWindowPtr,!Index,!WindowHandle .ls (PSt .l .p),!WindowHandles (PSt .l .p),!IOSt .l .p)
+		openAnyWindow wId wH windows ioState
+			# (tb,ioState)			= getIOToolbox ioState
+			# (osdinfo,ioState)		= IOStGetOSDInfo ioState
+			# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+			# (index,pos,size,originv,wH,windows,tb)
+									= validateWindow wMetrics osdinfo wH windows tb
+			  (behindPtr,windows)	= getStackBehindWindow index windows
+			# (delayinfo,wPtr,osdinfo,wH,tb)
+									= createAnyWindow wMetrics behindPtr wId pos size originv osdinfo wH tb
+			# (wH,tb)				= validateWindowClipState wMetrics True wPtr wH tb
+			# ioState				= IOStSetOSDInfo osdinfo ioState
+			# ioState				= setIOToolbox (OSinvalidateWindow wPtr tb) ioState
+			= (delayinfo,wPtr,index,wH,windows,ioState)
 
 createAnyWindow :: !OSWindowMetrics !OSWindowPtr !Id !Point2 !Size !Vector2 !OSDInfo !(WindowHandle .ls (PSt .l .p)) !*OSToolbox
 								  -> (![DelayActivationInfo],!OSWindowPtr,!OSDInfo, !WindowHandle .ls (PSt .l .p), !*OSToolbox)
@@ -278,16 +285,22 @@ where
 */
 checkZeroWindowBound :: !(IOSt .l .p) -> (!Bool,!IOSt .l .p)
 checkZeroWindowBound ioState
-	# (wDevice,ioState)	= IOStGetDevice WindowDevice ioState
-	  wHs				= WindowSystemStateGetWindowHandles wDevice
-	  (isZero,wHs)		= checkZeroWindowHandlesBound wHs
-	# ioState			= IOStSetDevice (WindowSystemState wHs) ioState
-	= (isZero,ioState)
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (False,ioState)
+	| otherwise
+		# wHs					= WindowSystemStateGetWindowHandles wDevice
+		  (isZero,wHs)			= checkZeroWindowHandlesBound wHs
+		# ioState				= IOStSetDevice (WindowSystemState wHs) ioState
+		= (isZero,ioState)
 
 decreaseWindowBound :: !(IOSt .l .p) -> IOSt .l .p
 decreaseWindowBound ioState
-	# (wDevice,ioState)	= IOStGetDevice WindowDevice ioState
-	  wHs				= WindowSystemStateGetWindowHandles wDevice
-	  wHs				= decreaseWindowHandlesBound wHs
-	# ioState			= IOStSetDevice (WindowSystemState wHs) ioState
-	= ioState
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	| otherwise
+		# wHs					= WindowSystemStateGetWindowHandles wDevice
+		  wHs					= decreaseWindowHandlesBound wHs
+		# ioState				= IOStSetDevice (WindowSystemState wHs) ioState
+		= ioState

@@ -21,74 +21,80 @@ menucreateFatalError rule error
 		Because in a SDI process menus might be added to the process window, the ViewFrame of the
 		process window can change size.
 		In that case, the layout of the controls should be recalculated, and the window updated.
-	OpenMenu` assumes that the Id argument has been verified.
+	OpenMenu` assumes that the Id argument has been verified and that the MenuDevice exists.
 */
 OpenMenu` :: !Id .ls !(Menu m .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p) | MenuElements m
-OpenMenu` menuId ls mDef pState
-	# (idtable,ioState)					= IOStGetIdTable pState.io
-	# (mDevice,ioState)					= IOStGetDevice MenuDevice ioState
-	  mHs								= MenuSystemStateGetMenuHandles mDevice
+OpenMenu` menuId ls mDef pState=:{io=ioState}
+	# (osdInfo,ioState)			= IOStGetOSDInfo ioState
+	  maybeOSMenuBar			= getOSDInfoOSMenuBar osdInfo
+	| isNothing maybeOSMenuBar	// This condition should never hold
+		= menucreateFatalError "openMenu (Menu)" "could not retrieve OSMenuBar from IOSt"
+	# osMenuBar					= fromJust maybeOSMenuBar
+	# (idtable,ioState)			= IOStGetIdTable ioState
+	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
+	  mHs						= MenuSystemStateGetMenuHandles mDevice
 	| Contains (isMenuWithThisId menuId) mHs.mMenus	// This condition should never hold
 		= menucreateFatalError "openMenu (Menu)" "inconsistency detected between IdTable and ReceiverTable"
-	# (menus,mHs)						= MenuHandlesGetMenuStateHandles mHs
-	  (nrmenus,menus)					= Ulength menus
-	  (optIndex,mDef)					= menuDefGetIndex mDef
-	  index								= if (isJust optIndex) (fromJust optIndex) nrmenus
-	  hasMenuWindowMenu					= Contains (isMenuWithThisId WindowMenuId) menus
-	  index`							= SetBetween index 0 (max 0 (if hasMenuWindowMenu (nrmenus-1) nrmenus))
-	# (rt,ioState)						= IOStGetReceiverTable ioState
-	# (ioid,ioState)					= IOStGetIOId ioState
-	# (sdiSize1,sdiPtr,ioState)			= getSDIWindowSize ioState
-	# pState							= {pState & io=ioState}
-	# (ok,mH,mHs,rt,idtable,pState)		= createMenu index` ioid menuId mDef mHs rt idtable pState
- 	# ioState							= IOStSetReceiverTable rt pState.io
- 	# ioState							= IOStSetIdTable idtable ioState
+	# (menus,mHs)				= MenuHandlesGetMenuStateHandles mHs
+	  (nrmenus,menus)			= Ulength menus
+	  (optIndex,mDef)			= menuDefGetIndex mDef
+	  index						= if (isJust optIndex) (fromJust optIndex) nrmenus
+	  hasMenuWindowMenu			= Contains (isMenuWithThisId WindowMenuId) menus
+	  index`					= SetBetween index 0 (max 0 (if hasMenuWindowMenu (nrmenus-1) nrmenus))
+	# (rt,ioState)				= IOStGetReceiverTable ioState
+	# (ioid,ioState)			= IOStGetIOId ioState
+	# (sdiSize1,sdiPtr,ioState)	= getSDIWindowSize ioState
+	# pState					= {pState & io=ioState}
+	# (ok,mH,mHs,rt,idtable,osMenuBar,pState)
+								= createMenu index` ioid menuId mDef mHs rt idtable osMenuBar pState
+ 	# ioState					= IOStSetReceiverTable rt pState.io
+ 	# ioState					= IOStSetIdTable idtable ioState
 	| not ok
-		# ioState						= IOStSetDevice (MenuSystemState mHs) ioState
+		# ioState				= IOStSetDevice (MenuSystemState mHs) ioState
 		= (ErrorIdsInUse,{pState & io=ioState})
 	| otherwise
 		= (NoError,pState2)
 	with
-		(before,after)					= splitAt index` menus
-		msH								= MenuLSHandle {mlsState=ls1,mlsHandle=mH}
-		mHs1							= {mHs & mMenus=before++[msH:after]}
-		ioState1						= appIOToolbox (DrawMenuBar mHs.mOSMenuBar) ioState
-		ioState2						= IOStSetDevice (MenuSystemState mHs1) ioState1
-		ioState3						= checkSDISize sdiPtr sdiSize1 ioState2
-		pState1							= {pState & io=ioState3}
-		(ls1,pState2)					= menuInit (ls,pState1)
+		(before,after)			= splitAt index` menus
+		msH						= MenuLSHandle {mlsState=ls1,mlsHandle=mH}
+		mHs1					= {mHs & mMenus=before++[msH:after]}
+		ioState1				= appIOToolbox (DrawMenuBar osMenuBar) ioState
+		ioState2				= IOStSetDevice (MenuSystemState mHs1) ioState1
+		ioState3				= checkSDISize sdiPtr sdiSize1 ioState2
+		pState1					= {pState & io=ioState3}
+		(ls1,pState2)			= menuInit (ls,pState1)
 where
-	menuInit							= getMenuDefInit mDef
+	menuInit					= getMenuDefInit mDef
 	
 	checkSDISize :: !OSWindowPtr !Size !(IOSt .l .p) -> IOSt .l .p
 	checkSDISize sdiPtr sdiSize1 ioState
-		# (sdiSize2,_,ioState)			= getSDIWindowSize ioState
-		| sdiSize1==sdiSize2			= ioState
-		| otherwise						= resizeSDIWindow sdiPtr sdiSize1 sdiSize2 ioState
+		# (sdiSize2,_,ioState)	= getSDIWindowSize ioState
+		| sdiSize1==sdiSize2	= ioState
+		| otherwise				= resizeSDIWindow sdiPtr sdiSize1 sdiSize2 ioState
 	
 	getMenuDefInit :: !(Menu m .ls .pst) -> IdFun *(.ls,.pst)
 	getMenuDefInit (Menu _ _ atts)
 		= getMenuInitFun (snd (Select isMenuInit (MenuInit id) atts))
 
-	createMenu :: !Int !SystemId !Id !(Menu m .ls (PSt .l .p)) !(MenuHandles (PSt .l .p)) !ReceiverTable !IdTable !(PSt .l .p)
-						 -> (!Bool,MenuHandle .ls (PSt .l .p),  !MenuHandles (PSt .l .p), !ReceiverTable,!IdTable, !PSt .l .p)
+	createMenu :: !Int !SystemId !Id !(Menu m .ls (PSt .l .p)) !(MenuHandles (PSt .l .p)) !ReceiverTable !IdTable !OSMenuBar !(PSt .l .p)
+						 -> (!Bool,MenuHandle .ls (PSt .l .p),  !MenuHandles (PSt .l .p), !ReceiverTable,!IdTable,!OSMenuBar, !PSt .l .p)
 						 |  MenuElements m
-	createMenu index ioId menuId mDef mHs=:{mOSMenuBar=menuBar, mKeys=keys} rt it pState
+	createMenu index ioId menuId mDef mHs=:{mKeys=keys} rt it osMenuBar pState
 		# (ms,pState)				= menuElementToHandles (menuDefGetElements mDef) pState
 		  itemHs					= map MenuElementStateToMenuElementHandle ms
 		  (ok,itemHs,rt,it)			= menuIdsAreConsistent ioId menuId itemHs rt it
 		| not ok
-			= (False,undef,mHs,rt,it,pState)
+			= (False,undef,mHs,rt,it,osMenuBar,pState)
 		| otherwise
 			# (tb,ioState)			= getIOToolbox pState.io
-			# (menu,mH,menuBar,tb)	= NewMenuHandle mDef index menuId menuBar tb
-			# (_,itemHs,keys,tb)	= createMenuElements menuBar menu 1 itemHs keys tb
+			# (menu,mH,osMenuBar,tb)= NewMenuHandle mDef index menuId osMenuBar tb
+			# (_,itemHs,keys,tb)	= createMenuElements osMenuBar menu 1 itemHs keys tb
 			  mH					= {mH & mItems=itemHs}
-			  mHs					= {mHs & mOSMenuBar=menuBar, mKeys=keys}
+			  mHs					= {mHs & mKeys=keys}
 			# ioState				= setIOToolbox tb ioState
 			# pState				= {pState & io=ioState}
 			  (_,it)				= addIdToIdTable menuId {idpIOId=ioId,idpDevice=MenuDevice,idpId=menuId} it
-			= (True,mH,mHs,rt,it,pState)
+			= (True,mH,mHs,rt,it,osMenuBar,pState)
 
 isMenuWithThisId :: !Id !(MenuStateHandle .pst) -> Bool
 isMenuWithThisId id msH
@@ -97,20 +103,20 @@ isMenuWithThisId id msH
 /*	creating pop up menus.
 	It is assumed that MenuHandles contains no pop up menu in mMenus and that mPopUpId contains an Id.
 */
-createPopUpMenu :: !SystemId .ls !(PopUpMenu m .ls (PSt .l .p)) !(MenuHandles (PSt .l .p)) !ReceiverTable !IdTable !(PSt .l .p)
-													   -> (!Bool,!MenuHandles (PSt .l .p), !ReceiverTable,!IdTable, !PSt .l .p)
+createPopUpMenu :: !SystemId .ls !(PopUpMenu m .ls (PSt .l .p)) !(MenuHandles (PSt .l .p)) !ReceiverTable !IdTable !OSMenuBar !(PSt .l .p)
+													   -> (!Bool,!MenuHandles (PSt .l .p), !ReceiverTable,!IdTable,!OSMenuBar, !PSt .l .p)
 													   |  PopUpMenuElements m
-createPopUpMenu ioId ls (PopUpMenu items) mHs=:{mMenus, mOSMenuBar=menuBar, mKeys=keys, mPopUpId} rt it pState
+createPopUpMenu ioId ls (PopUpMenu items) mHs=:{mMenus, mKeys=keys, mPopUpId} rt it osMenuBar pState
 	# (ms,pState)			= popUpMenuElementToHandles items pState
 	  itemHs				= map MenuElementStateToMenuElementHandle ms
 	  menuId				= fromJust mPopUpId
 	  (ok,itemHs,rt,it)		= menuIdsAreConsistent ioId menuId itemHs rt it
 	| not ok
-		= (False,mHs,rt,it,pState)
+		= (False,mHs,rt,it,osMenuBar,pState)
 	| otherwise
 		# (tb,ioState)		= getIOToolbox pState.io
 		# (menu,tb)			= OScreatePopUpMenu tb
-		# (_,itemHs,keys,tb)= createMenuElements menuBar menu 1 itemHs keys tb
+		# (_,itemHs,keys,tb)= createMenuElements osMenuBar menu 1 itemHs keys tb
 		  itemHs			= map validatePopUpMenuFunction itemHs
 		  mlsH				= {	mHandle		= menu
 							  , mMenuId		= menuId
@@ -120,10 +126,10 @@ createPopUpMenu ioId ls (PopUpMenu items) mHs=:{mMenus, mOSMenuBar=menuBar, mKey
 							  ,	mItems		= itemHs
 							  }
 		  msH				= MenuLSHandle {mlsState=ls,mlsHandle=mlsH}
-		  mHs				= {mHs & mMenus=[msH:mMenus], mOSMenuBar=menuBar, mKeys=keys, mPopUpId=Nothing}
+		  mHs				= {mHs & mMenus=[msH:mMenus], mKeys=keys, mPopUpId=Nothing}
 		# ioState			= setIOToolbox tb ioState
 		# pState			= {pState & io=ioState}
-		= (True,mHs,rt,it,pState)
+		= (True,mHs,rt,it,osMenuBar,pState)
 where
 /*	validatePopUpMenuFunction takes care that all Menu(Mods)Function arguments of the elements
 	apply closePopUpMenu after their own action.
@@ -169,11 +175,14 @@ where
 */
 	closePopUpMenu :: !(PSt .l .p) -> PSt .l .p
 	closePopUpMenu pState=:{io}
-		# (mDevice,ioState)	= IOStGetDevice MenuDevice io
-		  mHs				= MenuSystemStateGetMenuHandles mDevice
-		  mHs				= closepopupmenu mHs
-		# ioState			= IOStSetDevice (MenuSystemState mHs) ioState
-		= {pState & io=ioState}
+		# (found,mDevice,ioState)	= IOStGetDevice MenuDevice io
+		| not found
+			= menucreateFatalError "closePopUpMenu" "could not retrieve MenuSystemState from IOSt"
+		| otherwise
+			# mHs					= MenuSystemStateGetMenuHandles mDevice
+			  mHs					= closepopupmenu mHs
+			# ioState				= IOStSetDevice (MenuSystemState mHs) ioState
+			= {pState & io=ioState}
 
 
 /*	Creating menu elements: retrieving toolbox handles and ids for elements, and building the menu gui.
@@ -387,9 +396,9 @@ disposeMenuIds pid (MenuExtendLSHandle {mExtendItems}) ts
 disposeMenuIds pid (MenuChangeLSHandle {mChangeItems}) ts
 	= StateMap2 (disposeMenuIds pid) mChangeItems ts
 
-disposeMenuHandles :: !Bool !(MenuHandles .pst) !*OSToolbox -> (!OSMenuBar,!*OSToolbox)
-disposeMenuHandles _ menus=:{mOSMenuBar,mMenus} tb
-	= StateMap2 dispose mMenus (mOSMenuBar,tb)
+disposeMenuHandles :: !Bool !(MenuHandles .pst) !OSMenuBar !*OSToolbox -> (!OSMenuBar,!*OSToolbox)
+disposeMenuHandles _ menus=:{mMenus} osMenuBar tb
+	= StateMap2 dispose mMenus (osMenuBar,tb)
 where
 	dispose :: !(MenuStateHandle .pst) !(!OSMenuBar,!*OSToolbox) -> (!OSMenuBar,!*OSToolbox)
 	dispose mH (menuBar,tb)

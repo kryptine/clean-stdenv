@@ -35,20 +35,22 @@ getItemSpaceValue :: !(Int,Int) ![WindowAttribute .pst] -> (Int,Int)
 getItemSpaceValue (hor,vert) atts = getWindowItemSpaceAtt (snd (Select isWindowItemSpace (WindowItemSpace hor vert) atts))
 
 checkNewWindowSize :: !Size !Size !OSWindowPtr !OSDInfo !*OSToolbox -> *OSToolbox
-checkNewWindowSize curSize newSize=:{w,h} wPtr (OSSDInfo {ossdFrame,ossdToolbar}) tb
+checkNewWindowSize curSize newSize wPtr osdInfo tb
 	| curSize==newSize
 		= tb
-	| otherwise
-		# tb	= OSsetWindowSize wPtr (w,h) True tb
-		# tb	= OSsetWindowSize ossdFrame (w,h+tbHeight) True tb
+	| getOSDInfoDocumentInterface osdInfo==SDI
+		# (osFrame,osToolbar)	= case (getOSDInfoOSInfo osdInfo) of
+									Just info -> (info.osFrame,info.osToolbar)
+									nothing   -> windowcontrolsFatalError "checkNewWindowSize" "could not retrieve OSInfo from OSDInfo"
+		# tbHeight				= case osToolbar of
+									Just {toolbarHeight} -> toolbarHeight
+									_                    -> 0
+		# {w,h}					= newSize
+		# tb					= OSsetWindowSize wPtr (w,h) True tb
+		# tb					= OSsetWindowSize osFrame (w,h+tbHeight) True tb
 		= tb
-where
-	tbHeight	= case ossdToolbar of
-					Just {toolbarHeight}	-> toolbarHeight
-					_						-> 0
-checkNewWindowSize curSize newSize wPtr _ tb
-	| curSize==newSize	= tb
-	| otherwise			= OSsetWindowSize wPtr (toTuple newSize) True tb
+	| otherwise
+		= OSsetWindowSize wPtr (toTuple newSize) True tb
 
 
 /*	opencontrols adds the given controls to the window. 

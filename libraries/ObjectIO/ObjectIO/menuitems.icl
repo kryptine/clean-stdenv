@@ -20,21 +20,21 @@ from	iostate		import getIOToolbox, setIOToolbox
 		In case the Maybe Id argument is Nothing, then the elements should be added to the Menu indicated by the Id component. 
 		In case the Maybe Id argument is Just id, then the elements should be added to the SubMenu indicated by id.
 */
-addMenusItems :: !(!Id,Maybe Id) !Int .ls` (m .ls` (PSt .l .p)) !SystemId !ReceiverTable !IdTable !(MenuHandles (PSt .l .p)) !(PSt .l .p)
-													   -> (!(!ErrorReport,!ReceiverTable,!IdTable),!MenuHandles (PSt .l .p),  !PSt .l .p)
+addMenusItems :: !(!Id,Maybe Id) !Int .ls` (m .ls` (PSt .l .p)) !SystemId !ReceiverTable !IdTable !(MenuHandles (PSt .l .p)) !OSMenuBar !(PSt .l .p)
+													   -> (!(!ErrorReport,!ReceiverTable,!IdTable),!MenuHandles (PSt .l .p), !OSMenuBar, !PSt .l .p)
 													   |  MenuElements m
-addMenusItems loc pos ls new pid rt it menus=:{mMenus,mKeys,mOSMenuBar} pState
+addMenusItems loc pos ls new pid rt it menus=:{mMenus,mKeys} osMenuBar pState
 	# (newItemHs,pState)				= menuElementToHandles new pState
 	  newItemHs							= map MenuElementStateToMenuElementHandle newItemHs
 	  (ok,newItemHs,rt,it)				= menuIdsAreConsistent pid (fst loc) newItemHs rt it
 	| not ok
-		= ((ErrorIdsInUse,rt,it),menus,pState)
+		= ((ErrorIdsInUse,rt,it),menus,osMenuBar,pState)
 	| otherwise
 		# (tb,ioState)					= getIOToolbox pState.io
 		# (error,_,rt,it,mHs,keys,tb)	= addMenusItems` loc pos ls newItemHs pid rt it mMenus mKeys tb
 		# ioState						= setIOToolbox tb ioState
 		# pState						= {pState & io=ioState}
-		= ((error,rt,it),{menus & mMenus=mHs,mKeys=keys},pState)
+		= ((error,rt,it),{menus & mMenus=mHs,mKeys=keys},osMenuBar,pState)
 where
 	addMenusItems` :: !(!Id,Maybe Id) !Int .ls` [MenuElementHandle .ls` (PSt .l .p)] !SystemId 
 								!ReceiverTable !IdTable ![MenuStateHandle (PSt .l .p)] ![Char] !*OSToolbox
@@ -105,7 +105,7 @@ where
 						-> (!Bool,!ErrorReport,.ls`,!ReceiverTable,!IdTable,![MenuElementHandle .ls (PSt .l .p)],[Char],!Int,!Int,!*OSToolbox)
 			extendMenu` menuId menu ls new pid rt it itemHs keys 0 iNr tb
 				# newItemHs			= MenuChangeLSHandle {mChangeLS=ls,mChangeItems=new}
-				# (itemHs,keys,tb)	= extendMenu mOSMenuBar menu (iNr-1) [newItemHs] itemHs keys tb
+				# (itemHs,keys,tb)	= extendMenu osMenuBar menu (iNr-1) [newItemHs] itemHs keys tb
 				= (True,NoError,undef,rt,it,itemHs,keys,pos,iNr,tb)
 			extendMenu` _ _ ls _ _ rt it [] keys pos iNr tb
 				= (False,NoError,ls,rt,it,[],keys,pos,iNr,tb)
@@ -160,9 +160,9 @@ where
 	The (Id,Id) argument indicates where the elements should be added. 
 		The first Id indicates the Menu, the second Id indicates the RadioMenu.
 */
-addMenuRadioItems :: !(!Id,Id) !Int [MenuRadioItem (PSt .l .p)] !(MenuHandles (PSt .l .p)) !*OSToolbox
-												-> (!ErrorReport,!MenuHandles (PSt .l .p), !*OSToolbox)
-addMenuRadioItems loc pos new menus=:{mMenus,mKeys,mOSMenuBar} tb
+addMenuRadioItems :: !(!Id,Id) !Int [MenuRadioItem (PSt .l .p)] !OSMenuBar !(MenuHandles (PSt .l .p)) !*OSToolbox
+														  -> (!ErrorReport, !MenuHandles (PSt .l .p), !*OSToolbox)
+addMenuRadioItems loc pos new osMenuBar menus=:{mMenus,mKeys} tb
 	# (error,mHs,keys,tb)	= addMenusItems` loc pos new mMenus mKeys tb
 	= (error,{menus & mMenus=mHs,mKeys=keys}, tb)
 where
@@ -238,28 +238,27 @@ where
 						![MenuElementHandle .ls .ps] ![Char] !*OSToolbox
 					-> (![MenuElementHandle .ls .ps],![Char],!*OSToolbox)
 			extendMenu` iNr 0 menu new items keys tb
-				= extendMenu mOSMenuBar menu (iNr-1) new items keys tb
+				= extendMenu osMenuBar menu (iNr-1) new items keys tb
 			extendMenu` iNr position menu new [item:items] keys tb
 				# (items,keys,tb) = extendMenu` (iNr+1) (position-1) menu new items keys tb
 				= ([item:items],keys,tb)
 			extendMenu` iNr position menu new items keys tb
-				= extendMenu mOSMenuBar menu (iNr-1) new items keys tb
+				= extendMenu osMenuBar menu (iNr-1) new items keys tb
 	addMenusItems` _ _ _ mHs keys tb
 		= (ErrorUnknownObject,mHs,keys,tb)
 
 
 //	Removing menu elements from (sub/radio)menus:
 
-removeMenusItems :: !OSDInfo !Id ![Id] !SystemId !ReceiverTable !IdTable !(MenuHandles .ps) !*OSToolbox
-										   -> (!(!ReceiverTable,!IdTable),!MenuHandles .ps, !*OSToolbox)
-removeMenusItems osdInfo mId ids pid rt it menus=:{mMenus,mKeys} tb
+removeMenusItems :: !OSDInfo !Id ![Id] !SystemId !ReceiverTable !IdTable !OSMenuBar !(MenuHandles .pst) !*OSToolbox
+										   -> (!(!ReceiverTable,!IdTable),           !MenuHandles .pst, !*OSToolbox)
+removeMenusItems osdInfo mId ids pid rt it _ menus=:{mMenus,mKeys} tb
 	# (rt,it,mHs,keys,tb)	= removeMenusItems` framePtr mId ids pid rt it mMenus mKeys tb
 	= ((rt,it),{menus & mMenus=mHs,mKeys=keys},tb)
 where
-	framePtr	= case osdInfo of
-					OSMDInfo info	-> info.osmdFrame
-					OSSDInfo info	-> info.ossdFrame
-					_				-> OSNoWindowPtr
+	framePtr	= case (getOSDInfoOSInfo osdInfo) of
+					Just info -> info.osFrame
+					_         -> OSNoWindowPtr
 	
 	removeMenusItems` :: !OSWindowPtr !Id ![Id] !SystemId !ReceiverTable !IdTable ![MenuStateHandle .ps] ![Char] !*OSToolbox
 													  -> (!ReceiverTable,!IdTable,![MenuStateHandle .ps],![Char],!*OSToolbox)
@@ -363,16 +362,15 @@ where
 		In case the Maybe Id argument is Just id, then the elements should be removed from
 		either a SubMenu or a RadioMenu identified by the Id component.
 */
-removeMenusIndexItems :: !OSDInfo !Bool !Bool !(!Id,!Maybe Id) ![Int] !SystemId !ReceiverTable !IdTable !(MenuHandles .ps) !*OSToolbox
-																		  -> (!(!ReceiverTable,!IdTable),!MenuHandles .ps, !*OSToolbox)
-removeMenusIndexItems osdInfo alsoSpecials fromRadioMenu loc indices pid rt it menus=:{mMenus,mKeys} tb
+removeMenusIndexItems :: !OSDInfo !Bool !Bool !(!Id,!Maybe Id) ![Int] !SystemId !ReceiverTable !IdTable !OSMenuBar !(MenuHandles .pst) !*OSToolbox
+																		  -> (!(!ReceiverTable,!IdTable),           !MenuHandles .pst, !*OSToolbox)
+removeMenusIndexItems osdInfo alsoSpecials fromRadioMenu loc indices pid rt it _ menus=:{mMenus,mKeys} tb
 	# (rt,it,mHs,keys,tb)	= removeMenusIndexItems` framePtr alsoSpecials fromRadioMenu loc indices pid rt it mMenus mKeys tb
 	= ((rt,it),{menus & mMenus=mHs,mKeys=keys},tb)
 where
-	framePtr	= case osdInfo of
-					OSMDInfo info	-> info.osmdFrame
-					OSSDInfo info	-> info.ossdFrame
-					_				-> OSNoWindowPtr
+	framePtr	= case (getOSDInfoOSInfo osdInfo) of
+					Just info -> info.osFrame
+					_         -> OSNoWindowPtr
 	
 	removeMenusIndexItems` :: !OSWindowPtr !Bool !Bool !(!Id,!Maybe Id) ![Int] !SystemId
 								!ReceiverTable !IdTable ![MenuStateHandle .ps] ![Char] !*OSToolbox

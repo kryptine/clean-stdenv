@@ -16,7 +16,7 @@ StdReceiverFatalError rule error
 
 //	Open one-way receiver:
 
-receiverStateIdentified :: !Id !(ReceiverStateHandle .ps) -> Bool
+receiverStateIdentified :: !Id !(ReceiverStateHandle .pst) -> Bool
 receiverStateIdentified id {rHandle}
 	= receiverIdentified id rHandle
 
@@ -24,7 +24,7 @@ class Receivers rdef
 where
 	openReceiver	:: .ls !*(*rdef .ls (PSt .l .p)) !(PSt .l .p)
 				   	-> (!ErrorReport,!PSt .l .p)
-	getReceiverType	:: *(*rdef .ls .ps)
+	getReceiverType	:: *(*rdef .ls .pst)
 					-> ReceiverType
 
 instance Receivers (Receiver m) where
@@ -39,14 +39,16 @@ instance Receivers (Receiver m) where
 		  maybe_parent			= getReceiverTableEntry id rt
 		| isJust maybe_parent	// This condition should not occur: IdTable didn't contain Id while ReceiverTable does.
 			= StdReceiverFatalError "openReceiver (Receiver)" "inconsistency detected between IdTable and ReceiverTable"
+		# (found,rDevice,ioState)	= IOStGetDevice ReceiverDevice pState.io
+		| not found				// This condition should not occur: ReceiverDevice has just been 'installed'
+			= StdReceiverFatalError "openReceiver (Receiver)" "could not retrieve ReceiverSystemState from IOSt"
 		| otherwise
 			= (NoError,pState2)
 		with
-			(receivers,ioState1)= IOStGetDevice ReceiverDevice pState.io
-			rsHs				= (ReceiverSystemStateGetReceiverHandles receivers).rReceivers
+			rsHs				= (ReceiverSystemStateGetReceiverHandles rDevice).rReceivers
 // MW11 was			rsH					= newReceiverStateHandle id ls1 select f
 			rsH					= newReceiverStateHandle id ls1 select connectedIds f
-			ioState2			= IOStSetDevice (ReceiverSystemState {rReceivers=[rsH:rsHs]}) ioState1
+			ioState2			= IOStSetDevice (ReceiverSystemState {rReceivers=[rsH:rsHs]}) ioState
 			ioState3			= bindRId id select id ReceiverDevice ioState2
 			(ioId,ioState4)		= IOStGetIOId ioState3
 			ioState5			= IOStSetIdTable (snd (addIdToIdTable id {idpIOId=ioId,idpDevice=ReceiverDevice,idpId=id} idtable)) ioState4
@@ -82,14 +84,16 @@ instance Receivers (Receiver2 m r) where
 		  maybe_parent			= getReceiverTableEntry id rt
 		| isJust maybe_parent	// This condition should not occur: IdTable didn't contain Id while ReceiverTable does.
 			= StdReceiverFatalError "openReceiver (Receiver2)" "inconsistency detected between IdTable and ReceiverTable"
+		# (found,rDevice,ioState)	= IOStGetDevice ReceiverDevice pState.io
+		| not found
+			= StdReceiverFatalError "openReceiver (Receiver2)" "could not retrieve ReceiverSystemState from IOSt"
 		| otherwise
 			= (NoError,pState2)
 		with
-			(receivers,ioState1)= IOStGetDevice ReceiverDevice pState.io
-			rsHs				= (ReceiverSystemStateGetReceiverHandles receivers).rReceivers
+			rsHs				= (ReceiverSystemStateGetReceiverHandles rDevice).rReceivers
 // MW11 was			rsH					= newReceiverStateHandle2 id ls1 select f
 			rsH					= newReceiverStateHandle2 id ls1 select connectedIds f
-			ioState2			= IOStSetDevice (ReceiverSystemState {rReceivers=[rsH:rsHs]}) ioState1
+			ioState2			= IOStSetDevice (ReceiverSystemState {rReceivers=[rsH:rsHs]}) ioState
 			ioState3			= bindRId id select id ReceiverDevice ioState2
 			(ioId,ioState4)		= IOStGetIOId ioState3
 			ioState5			= IOStSetIdTable (snd (addIdToIdTable id {idpIOId=ioId,idpDevice=ReceiverDevice,idpId=id} idtable)) ioState4
@@ -120,32 +124,34 @@ instance Receivers (Receiver2 m r) where
 closeReceiver :: !Id !(IOSt .l .p) -> IOSt .l .p
 closeReceiver id ioState
 // MW11..
-	#! (closed, ioState)	= IOStClosed ioState
+	#! (closed,ioState)			= IOStClosed ioState
 	| closed
 		= ioState
 // ...MW11
 // MW11 was	| not (isCustomRId id || isCustomR2Id id)
 	| not (isCustomRId id || isCustomR2Id id || isCustomId id)
 		= ioState
-	# (receivers,ioState)	= IOStGetDevice ReceiverDevice ioState
-	  rsHs					= (ReceiverSystemStateGetReceiverHandles receivers).rReceivers
-	  (found,rsH,rsHs)		= Remove (receiverStateIdentified id) (dummy "closeReceiver") rsHs
-	# ioState				= IOStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
+	# (found,rDevice,ioState)	= IOStGetDevice ReceiverDevice ioState
+	| not found
+		= ioState
+	# rsHs						= (ReceiverSystemStateGetReceiverHandles rDevice).rReceivers
+	  (found,rsH,rsHs)			= Remove (receiverStateIdentified id) (dummy "closeReceiver") rsHs
+	# ioState					= IOStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
 	| not found
 		= ioState
 	| otherwise
-		# (idtable,ioState)	= IOStGetIdTable ioState
-		  ioState			= IOStSetIdTable (snd (removeIdFromIdTable id idtable)) ioState
-		  ioState			= unbindRId id ioState
+		# (idtable,ioState)		= IOStGetIdTable ioState
+		  ioState				= IOStSetIdTable (snd (removeIdFromIdTable id idtable)) ioState
+		  ioState				= unbindRId id ioState
 // MW11..
-		  ioState			= IOStSetRcvDisabled True ioState
-		  connectedIds		= rsH.rHandle.rConnected
-		  ioState			= seq (map closeReceiver connectedIds) ioState
-		  inetInfo			= rsH.rHandle.rInetInfo
+		  ioState				= IOStSetRcvDisabled True ioState
+		  connectedIds			= rsH.rHandle.rConnected
+		  ioState				= seq (map closeReceiver connectedIds) ioState
+		  inetInfo				= rsH.rHandle.rInetInfo
 		| isNothing inetInfo
 			= ioState
-		# (_,_,_,closeFun)	= fromJust inetInfo
-		  ioState			= appIOToolbox closeFun ioState
+		# (_,_,_,closeFun)		= fromJust inetInfo
+		  ioState				= appIOToolbox closeFun ioState
 // ..MW11
 		= ioState
 
@@ -153,18 +159,20 @@ closeReceiver id ioState
 
 getReceivers :: !(IOSt .l .p) -> (![(Id,ReceiverType)],!IOSt .l .p)
 getReceivers ioState
-	# (receivers,ioState)	= IOStGetDevice ReceiverDevice ioState
-	  (idstypes,rsHs)		= getreceivers (ReceiverSystemStateGetReceiverHandles receivers).rReceivers
-	# ioState				= IOStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
+	# (found,rDevice,ioState)	= IOStGetDevice ReceiverDevice ioState
+	| not found
+		= ([],ioState)
+	# (idstypes,rsHs)			= getreceivers (ReceiverSystemStateGetReceiverHandles rDevice).rReceivers
+	# ioState					= IOStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
 	= (idstypes,ioState)
 where
-	getreceivers :: ![ReceiverStateHandle .ps] -> ([(Id,ReceiverType)],![ReceiverStateHandle .ps])
+	getreceivers :: ![ReceiverStateHandle .pst] -> ([(Id,ReceiverType)],![ReceiverStateHandle .pst])
 	getreceivers [rsH:rsHs]
 		# (idtype, rsH)		= getreceiver  rsH
 		  (idtypes,rsHs)	= getreceivers rsHs
 		= ([idtype:idtypes],[rsH:rsHs])
 	where
-		getreceiver :: !(ReceiverStateHandle .ps) -> ((Id,ReceiverType),!ReceiverStateHandle .ps)
+		getreceiver :: !(ReceiverStateHandle .pst) -> ((Id,ReceiverType),!ReceiverStateHandle .pst)
 		getreceiver rsH=:{rHandle={rId,rOneWay}}
 			= ((rId,rType),rsH)
 		where
@@ -193,27 +201,29 @@ changeReceivers :: (IdFun (ReceiverStateHandle (PSt .l .p))) (IdFun ReceiverTabl
 changeReceivers changeReceiverState changeReceiverEntry ids ioState
 	| isEmpty okids			// There aren't any receiver ids in the list
 		= ioState
-	# (receivers,ioState)	= IOStGetDevice ReceiverDevice ioState
-	  rsHs					= (ReceiverSystemStateGetReceiverHandles receivers).rReceivers
+	# (found,rDevice,ioState)	= IOStGetDevice ReceiverDevice ioState
+	| not found
+		= ioState
+	# rsHs						= (ReceiverSystemStateGetReceiverHandles rDevice).rReceivers
 // MW11..
-	  allIds				= getConnectedIds okids [] rsHs rsHs
+	  allIds					= getConnectedIds okids [] rsHs rsHs
 // ..MW11
 // MW11 was	  (myids,rsHs)			= changereceiverstates changeReceiverState okids rsHs
-	  (myids,rsHs)			= changereceiverstates changeReceiverState allIds rsHs
-	# ioState				= IOStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
+	  (myids,rsHs)				= changereceiverstates changeReceiverState allIds rsHs
+	# ioState					= IOStSetDevice (ReceiverSystemState {rReceivers=rsHs}) ioState
 	| isEmpty myids			// No receivers were changed
 		= ioState
 	| otherwise
-		# (rt,ioState)		= IOStGetReceiverTable ioState
-		  rt				= changereceiverentries changeReceiverEntry myids rt
-		# ioState			= IOStSetReceiverTable rt ioState
+		# (rt,ioState)			= IOStGetReceiverTable ioState
+		  rt					= changereceiverentries changeReceiverEntry myids rt
+		# ioState				= IOStSetReceiverTable rt ioState
 		= ioState
 where
 // MW11 was	okids					= filter (\id->isCustomRId id || isCustomR2Id id) ids
-	okids					= filter (\id->isCustomRId id || isCustomR2Id id || isCustomId id) ids
+	okids						= filter (\id->isCustomRId id || isCustomR2Id id || isCustomId id) ids
 	
 // MW11..
-	getConnectedIds	::	![Id] ![Id] ![ReceiverStateHandle .ps] ![ReceiverStateHandle .ps] -> [Id]
+	getConnectedIds	::	![Id] ![Id] ![ReceiverStateHandle .pst] ![ReceiverStateHandle .pst] -> [Id]
 	getConnectedIds ids _ [] _
 		= ids
 	getConnectedIds ids alreadyHandled [rsH=:{rHandle={rId,rConnected}}:rsHs] allStateHandles
@@ -223,8 +233,8 @@ where
 		// search again in the whole set of receivers
 // ..MW11
 
-	changereceiverstates :: !(IdFun (ReceiverStateHandle .ps)) ![Id] ![ReceiverStateHandle .ps]
-														   -> (![Id],![ReceiverStateHandle .ps])
+	changereceiverstates :: !(IdFun (ReceiverStateHandle .pst)) ![Id] ![ReceiverStateHandle .pst]
+															-> (![Id],![ReceiverStateHandle .pst])
 	changereceiverstates f ids rsHs
 		| isEmpty ids || isEmpty rsHs	= ([],[])
 	changereceiverstates f ids [rsH=:{rHandle={rId}}:rsHs]
@@ -249,14 +259,16 @@ getReceiverSelectState id ioState
 // MW11 was	| not (isCustomRId id || isCustomR2Id id)
 	| not (isCustomRId id || isCustomR2Id id || isCustomId id)
 		= (Nothing,ioState)
+	# (found,rDevice,ioState)	= IOStGetDevice ReceiverDevice ioState
+	| not found
+		= (Nothing,ioState)
 	| otherwise
-		# (receivers,ioState)	= IOStGetDevice ReceiverDevice ioState
-		  rsHs					= (ReceiverSystemStateGetReceiverHandles receivers).rReceivers
+		# rsHs					= (ReceiverSystemStateGetReceiverHandles rDevice).rReceivers
 		  (select,rsHs1)		= getselectstate id rsHs
 		# ioState				= IOStSetDevice (ReceiverSystemState {rReceivers=rsHs1}) ioState
 		= (select,ioState)
 where
-	getselectstate :: !Id ![ReceiverStateHandle .ps] -> (!Maybe SelectState,![ReceiverStateHandle .ps])
+	getselectstate :: !Id ![ReceiverStateHandle .pst] -> (!Maybe SelectState,![ReceiverStateHandle .pst])
 	getselectstate id [rsH=:{rHandle=rH=:{rSelect}}:rsHs]
 		| receiverIdentified id rH	= (Just rSelect,[rsH:rsHs])
 		| otherwise					= (select,[rsH:rsHs1])

@@ -5,7 +5,7 @@ implementation module processdevice
 
 import StdBool, StdFunc, StdMisc
 import StdPSt
-import commondef, devicefunctions, iostate, processevent, StdProcessAttribute
+import commondef, devicefunctions, processevent, StdProcessAttribute, toolbar
 
 
 processdeviceFatalError :: String String -> .x
@@ -31,7 +31,32 @@ processOpen pState=:{io=ioState}
 	| otherwise
 		# (deviceFunctions,ioState)	= IOStGetDeviceFunctions ioState
 		# ioState					= IOStSetDeviceFunctions [ProcessFunctions:deviceFunctions] ioState
+		# (osdinfo,ioState)			= IOStGetOSDInfo ioState
+		# ioState					= createOSDInfo osdinfo ioState
 		= {pState & io=ioState}
+where
+	createOSDInfo :: !OSDInfo !(IOSt .l .p) -> IOSt .l .p
+	createOSDInfo emptyOSDInfo ioState
+		| di==NDI
+			= IOStSetOSDInfo emptyOSDInfo ioState
+		# (atts,ioState)	= IOStGetProcessAttributes ioState
+		  acceptOpenFiles	= Contains isProcessOpenFiles atts
+		# (tb,ioState)		= getIOToolbox ioState
+		| di==MDI
+			# hasToolbarAtt	= Contains isProcessToolbar   atts
+			# (osdinfo,tb)	= OSopenMDI (not hasToolbarAtt) acceptOpenFiles tb
+			# ioState		= setIOToolbox tb ioState
+			# ioState		= IOStSetOSDInfo osdinfo ioState
+			# ioState		= openToolbar ioState
+			= ioState
+		| di==SDI
+			# (osdinfo,tb)	= OSopenSDI acceptOpenFiles tb
+			# ioState		= setIOToolbox tb ioState
+			# ioState		= IOStSetOSDInfo osdinfo ioState
+			# ioState		= openToolbar ioState
+			= ioState
+	where
+		di					= getOSDInfoDocumentInterface emptyOSDInfo
 
 processIO :: !DeviceEvent !(PSt .l .p) -> (!DeviceEvent,!PSt .l .p)
 

@@ -15,6 +15,7 @@ import	commondef, controlcreate, deviceevents, iostate, windowaccess
 from	StdControlAttribute	import	isControlKeyboard, getControlKeyboardAtt, 
 									isControlMouse,    getControlMouseAtt, 
 									isControlActivate, isControlDeactivate
+from	StdPSt				import	accPIO
 from	StdWindowAttribute	import	isWindowKeyboard,  getWindowKeyboardAtt,
 									isWindowMouse,     getWindowMouseAtt,
 									isWindowCursor,    getWindowCursorAtt
@@ -31,59 +32,66 @@ windoweventFatalError function error
 	windowEvent assumes that it is not applied to an empty IOSt.
 */
 windowEvent :: !SchedulerEvent !(PSt .l .p) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l .p)
-
-windowEvent schedulerEvent=:(ScheduleOSEvent osEvent _) pState=:{io=ioState}
-	| not (isWindowOSEvent osEvent.ccMsg)
-		= (False,Nothing,schedulerEvent,pState)
-	| otherwise
-		# (wDevice,ioState)	= IOStGetDevice WindowDevice ioState
-		# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
-		  windows			= WindowSystemStateGetWindowHandles wDevice
-		  (myEvent,replyToOS,deviceEvent,windows,ioState)
-		  					= filterOSEvent wMetrics osEvent windows ioState
-		# ioState			= IOStSetDevice (WindowSystemState windows) ioState
-		# pState			= {pState & io=ioState}
-		  schedulerEvent	= if (isJust replyToOS) (ScheduleOSEvent osEvent (fromJust replyToOS)) schedulerEvent
-		= (myEvent,deviceEvent,schedulerEvent,pState)
-where
-	isWindowOSEvent :: !Int -> Bool
-	isWindowOSEvent CcWmACTIVATE		= True
-	isWindowOSEvent CcWmBUTTONCLICKED	= True
-	isWindowOSEvent CcWmCLOSE			= True
-	isWindowOSEvent CcWmCOMBOSELECT		= True
-	isWindowOSEvent CcWmDEACTIVATE		= True
-	isWindowOSEvent CcWmDRAWCONTROL		= True
-	isWindowOSEvent CcWmIDLEDIALOG		= True
-	isWindowOSEvent CcWmINITDIALOG		= True
-	isWindowOSEvent CcWmKEYBOARD		= True
-	isWindowOSEvent CcWmKILLFOCUS		= True
-	isWindowOSEvent CcWmLOSTKEY			= True
-	isWindowOSEvent CcWmLOSTMOUSE		= True
-	isWindowOSEvent CcWmMOUSE			= True
-	isWindowOSEvent CcWmPAINT			= True
-	isWindowOSEvent CcWmSCROLLBARACTION	= True
-	isWindowOSEvent CcWmSETFOCUS		= True
-	isWindowOSEvent CcWmSIZE			= True
-	isWindowOSEvent CcWmSPECIALBUTTON	= True
-	isWindowOSEvent _					= False
-
-windowEvent schedulerEvent=:(ScheduleMsgEvent msgEvent) pState=:{io=ioState}
-	# (ioId,ioState)		= IOStGetIOId ioState
-	| ioId<>recLoc.rlIOId || recLoc.rlDevice<>WindowDevice
-		= (False,Nothing,schedulerEvent,{pState & io=ioState})
-	| otherwise
-		# (wDevice,ioState)	= IOStGetDevice WindowDevice ioState
-		  windows			= WindowSystemStateGetWindowHandles wDevice
-		  (found,windows)	= hasWindowHandlesWindow (toWID recLoc.rlParentId) windows
-		  deviceEvent		= if found (Just (ReceiverEvent msgEvent)) Nothing
-		# ioState			= IOStSetDevice (WindowSystemState windows) ioState
-		# pState			= {pState & io=ioState}
-		= (found,deviceEvent,schedulerEvent,pState)
-where
-	recLoc					= getMsgEventRecLoc msgEvent
-
 windowEvent schedulerEvent pState
-	= (False,Nothing,schedulerEvent,pState)
+	# (hasDevice,pState)	= accPIO (IOStHasDevice WindowDevice) pState
+	| not hasDevice			// This condition should never occur: WindowDevice must have been 'installed'
+		= windoweventFatalError "WindowFunctions.dEvent" "could not retrieve WindowSystemState from IOSt"
+	| otherwise
+		= windowEvent schedulerEvent pState
+where
+	windowEvent :: !SchedulerEvent !(PSt .l .p) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l .p)
+	windowEvent schedulerEvent=:(ScheduleOSEvent osEvent _) pState=:{io=ioState}
+		| not (isWindowOSEvent osEvent.ccMsg)
+			= (False,Nothing,schedulerEvent,pState)
+		| otherwise
+			# (_,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+			# (wMetrics, ioState)	= IOStGetOSWindowMetrics ioState
+			  windows				= WindowSystemStateGetWindowHandles wDevice
+			  (myEvent,replyToOS,deviceEvent,windows,ioState)
+			  						= filterOSEvent wMetrics osEvent windows ioState
+			# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+			# pState				= {pState & io=ioState}
+			  schedulerEvent		= if (isJust replyToOS) (ScheduleOSEvent osEvent (fromJust replyToOS)) schedulerEvent
+			= (myEvent,deviceEvent,schedulerEvent,pState)
+	where
+		isWindowOSEvent :: !Int -> Bool
+		isWindowOSEvent CcWmACTIVATE		= True
+		isWindowOSEvent CcWmBUTTONCLICKED	= True
+		isWindowOSEvent CcWmCLOSE			= True
+		isWindowOSEvent CcWmCOMBOSELECT		= True
+		isWindowOSEvent CcWmDEACTIVATE		= True
+		isWindowOSEvent CcWmDRAWCONTROL		= True
+		isWindowOSEvent CcWmIDLEDIALOG		= True
+		isWindowOSEvent CcWmINITDIALOG		= True
+		isWindowOSEvent CcWmKEYBOARD		= True
+		isWindowOSEvent CcWmKILLFOCUS		= True
+		isWindowOSEvent CcWmLOSTKEY			= True
+		isWindowOSEvent CcWmLOSTMOUSE		= True
+		isWindowOSEvent CcWmMOUSE			= True
+		isWindowOSEvent CcWmPAINT			= True
+		isWindowOSEvent CcWmSCROLLBARACTION	= True
+		isWindowOSEvent CcWmSETFOCUS		= True
+		isWindowOSEvent CcWmSIZE			= True
+		isWindowOSEvent CcWmSPECIALBUTTON	= True
+		isWindowOSEvent _					= False
+	
+	windowEvent schedulerEvent=:(ScheduleMsgEvent msgEvent) pState=:{io=ioState}
+		# (ioId,ioState)		= IOStGetIOId ioState
+		| ioId<>recLoc.rlIOId || recLoc.rlDevice<>WindowDevice
+			= (False,Nothing,schedulerEvent,{pState & io=ioState})
+		| otherwise
+			# (_,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+			  windows				= WindowSystemStateGetWindowHandles wDevice
+			  (found,windows)		= hasWindowHandlesWindow (toWID recLoc.rlParentId) windows
+			  deviceEvent			= if found (Just (ReceiverEvent msgEvent)) Nothing
+			# ioState				= IOStSetDevice (WindowSystemState windows) ioState
+			# pState				= {pState & io=ioState}
+			= (found,deviceEvent,schedulerEvent,pState)
+	where
+		recLoc						= getMsgEventRecLoc msgEvent
+	
+	windowEvent schedulerEvent pState
+		= (False,Nothing,schedulerEvent,pState)
 
 
 /*	filterOSEvent filters the OSEvents that can be handled by this window device.

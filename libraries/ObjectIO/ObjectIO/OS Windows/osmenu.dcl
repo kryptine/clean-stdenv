@@ -4,14 +4,15 @@ definition module osmenu
 //	Clean Object I/O library, version 1.2
 
 
+from	menuCrossCall_12	import HMENU, HITEM
+from	osdocumentinterface	import OSMenuBar
 from	ostoolbox			import OSToolbox
 from	ostypes				import HWND
 from	oswindow			import OSWindowPtr
-from	menuCrossCall_12	import HMENU, HITEM
 
 
 //	Types for menus and menu elements:
-::	MenuBar
+/*::	MenuBar
 	=	NoMenuBar
 	|	MenuBar OSMenuBar
 ::	OSMenuBar
@@ -19,6 +20,7 @@ from	menuCrossCall_12	import HMENU, HITEM
 		,	menuWindow	:: !HWND
 		,	menuClient	:: !HWND		// If MDI: client window; otherwise: OSNoWindowPtr
 		}
+*/
 ::	OSMenu			:== HMENU
 ::	OSMenuItem		:== HITEM
 ::	OSMenuSeparator	:== HITEM
@@ -32,9 +34,9 @@ OSNoMenuSeparator	:== 0
 /*	Creation of a OSMenuBar:
 	OSMenuBarNew frameWindow clientWindow menu
 		creates an OSMenuBar instance that can be used to manipulate menus.
-*/
+PA---
 OSMenuBarNew		:: !HWND !HWND !HMENU -> OSMenuBar
-
+*/
 
 /*	Enabling and disabling of menus and menu elements:
 	OS(Dis/En)ableMenu index menubar
