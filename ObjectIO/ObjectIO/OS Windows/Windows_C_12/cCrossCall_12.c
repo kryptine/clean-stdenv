@@ -5041,7 +5041,7 @@ HandleCleanRequest (CrossCallInfo * pcci)
 					styleFlags |= WS_MINIMIZE;
 
 				hwndFrame = CreateWindow (	MDIFrameClassName			// Class name
-										 ,	NULL						// No title yet
+										 ,	(LPCTSTR) gAppName			// Title is the application name
 										 ,	styleFlags					// Style parameters
 										 ,	0,0							// Default position (x,y)
 										 ,	CW_USEDEFAULT,CW_USEDEFAULT	// Default size (w,h)
