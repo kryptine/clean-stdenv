@@ -105,8 +105,7 @@ where
  ~ :: !Int -> Int
  ~ x
 	= code inline {
-			pushI 0
-			subI
+			negI
 	}
 
 instance ==	Int
