@@ -91,10 +91,10 @@ where
 		k setc geta env = (seta, getc, env3)
 		where
 			(id, env1) = openStoreId env
-			(_, env2) = openStore id (Just abortLoop) env1
+			(_, env2) = openStore id (Just b) env1
 			(setab, getcb, env3) = g setcb getab env2
 	
-			abortLoop => abort "Run-time error: cycle in loop detected"
+			b => abort "Run-time error: cycle in loop detected"
 			
 			setcb u cb env
 				# env = writeStore id (snd cb) env
@@ -106,12 +106,29 @@ where
 				= ((a, b), env)
 			
 			seta u a env
-				# (b, env) = readStore id env
+				# (cb, env) = getcb env
+				  b = snd cb
 				= setab u (a, b) env
 	
 			getc env
 				# (cb, env) = getcb env
 				= (fst cb, env)
+
+instance ArrowCircuit GecCircuit
+where
+	delay a = GecCircuit k
+	where
+		k seta geta env = (seta`, geta`, env2)
+		where
+			(id, env1) = openStoreId env
+			(_, env2) = openStore id (Just a) env1
+				
+			geta` env = readStore id env
+
+			seta` u a` env
+				# (a, env) = readStore id env
+				  env = writeStore id a` env
+				= seta u a env
 
 feedback :: !(GecCircuit a a) -> GecCircuit a a
 feedback (GecCircuit g) = GecCircuit k
