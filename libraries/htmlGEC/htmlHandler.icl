@@ -34,7 +34,7 @@ incHSt (inidx,lhst) = (inidx+1,lhst)
 // top level function given to end user
 // it collects the html page to display, and returns the contents of all Clean GEC's / Forms created
 
-doHtml :: (*HSt -> (Html,*HSt)) *World -> *World
+doHtml :: (*HSt -> (Html,!*HSt)) *World -> *World
 doHtml pagehandler world 
 = print_to_stdout (Head head [addScript lhst:body]) world
 where
@@ -42,7 +42,7 @@ where
 
 // experimental function:
 
-mkEditHGEC2:: FormID HMode d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkEditHGEC2:: !FormID !HMode d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkEditHGEC2 uniqueid  mode data (inidx,lhst)
 =	case findInLocalStore uniqueid lhst 0 lhst of
 		(Just id, Just state,lhst)	-> mkSetHGEC uniqueid mode state (inidx,lhst)
@@ -56,21 +56,21 @@ where
 
 // simple editor for either editing or showing a simple value
 
-mkEditHGEC:: FormID HMode d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkEditHGEC:: !FormID !HMode d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkEditHGEC uniqueid  HEdit data hst
 = mkViewHGEC uniqueid HEdit 
 	{toHGEC = id , updHGEC = \_ v -> v , fromHGEC = id , resetHGEC = Nothing} data hst
 mkEditHGEC uniqueid  mode data hst
 = mkSetHGEC uniqueid mode data hst
 
-mkSetHGEC:: FormID HMode d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSetHGEC:: !FormID !HMode d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkSetHGEC uniqueid  mode data hst
 = mkViewHGEC uniqueid mode 
 	{toHGEC = id , updHGEC = \_ _ -> data , fromHGEC = id , resetHGEC = Nothing} data hst
 
 // editor with feedback to its self
 
-mkSelfHGEC  :: FormID 	(d -> d) d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSelfHGEC  :: !FormID 	!(d -> d) d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkSelfHGEC uniqueid cbf initdata hst
 = mkViewHGEC uniqueid HEdit 
 	{toHGEC = id , updHGEC = update , fromHGEC = id , resetHGEC = Nothing} initdata hst
@@ -80,19 +80,19 @@ where
 	
 // editor which applies the function to its argument
 
-mkApplyHGEC :: FormID (d -> d) d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyHGEC :: !FormID !(d -> d) d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkApplyHGEC uniqueid cbf data hst
 = mkViewHGEC uniqueid HDisplay 
 	{toHGEC = id , updHGEC = \_ v = cbf data , fromHGEC = id, resetHGEC = Nothing} data hst
 
 // editor which applies the function to its argument
 
-mkStoreHGEC :: FormID 	(d -> d) d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkStoreHGEC :: !FormID 	!(d -> d) d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkStoreHGEC uniqueid cbf data hst
 = mkViewHGEC uniqueid HDisplay 
 	{toHGEC = id , updHGEC = \_ v = cbf v , fromHGEC = id, resetHGEC = Nothing} data hst
 
-mkApplyEditHGEC	:: FormID d d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyEditHGEC	:: !FormID !d d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkApplyEditHGEC uniqueid inputval initval hst
 = mkViewHGEC uniqueid HEdit 
 	{toHGEC = id , updHGEC = update , fromHGEC = id, resetHGEC = Nothing} initval hst
@@ -100,7 +100,7 @@ where
 	update True  newval = newval
 	update False val    = inputval
 
-mkSpecialEditor :: FormID HMode (Bimap d v) d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
+mkSpecialEditor :: !FormID !HMode !(Bimap d v) d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
 mkSpecialEditor fid mode {map_to,map_from} d hst
 = mkViewHGEC fid mode 	{ toHGEC = map_to
 						, updHGEC = \b v -> map_to (map_from v)
@@ -112,7 +112,7 @@ mkSpecialEditor fid mode {map_to,map_from} d hst
 
 // swiss army nife editor that makes coffee too ...
 
-mkViewHGEC :: FormID HMode (HBimap d v) d *HSt -> ((d,Body),*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
+mkViewHGEC :: !FormID !HMode !(HBimap d v) d !*HSt -> ((d,Body),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
 mkViewHGEC uniqueid mode {toHGEC, updHGEC, fromHGEC, resetHGEC} data (inidx,lhsts) 
 # ((updview,body),(nr,[(uniqueid,mystore):lhsts])) = gHGEC{|*|} mode nextview (0,[(uniqueid,viewtostore):lhsts])
 = ((fromHGEC2 updview,body),(0,[(uniqueid,encodeInfo2 updview):lhsts]))
@@ -128,11 +128,11 @@ where
 
 	fromHGEC2 updview 	= case resetHGEC of
 							Nothing -> fromHGEC updview
-							else	-> newdata
+							(Just reset)	-> newdata
 							
 	encodeInfo2 updview = case resetHGEC of
 							Nothing -> encodeInfo updview
-							else	-> viewtostore
+							(Just reset)	-> viewtostore
 
 	updateFormInfo :: FormID a -> (Bool,a) | gUpd{|*|} a & gParse{|*|} a
 	updateFormInfo uniqueid v 
