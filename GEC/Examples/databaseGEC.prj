@@ -1,6 +1,6 @@
 Version: 1.4
 Global
-	Built:	True
+	Built:	False
 	Target:	Everything Editor
 	Exec:	{Project}\databaseGEC.exe
 	CodeGen
@@ -37,6 +37,8 @@ Global
 		ExportedNames:	
 	Paths
 		Path:	{Project}
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions
 	Precompile:	
 	Postlink:	
 MainModule
@@ -68,6 +70,146 @@ MainModule
 	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
+	Module
+		Name:	updownGEC
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	tupleGEC
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	buttonGEC
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	modeGEC
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	basicAGEC
+		Dir:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdEnv
 		Dir:	{Application}\Libraries\StdEnv 2.1.0
@@ -5462,6 +5604,11 @@ OtherModules
 Static
 	Mods
 		Path:	{Project}\databaseGEC.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\updownGEC.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\tupleGEC.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\buttonGEC.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\modeGEC.icl
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\basicAGEC.icl
 		Path:	{Application}\Libraries\StdEnv 2.1.0\StdEnv.icl
 		Path:	{Application}\Libraries\StdEnv 2.1.0\StdBool.icl
 		Path:	{Application}\Libraries\StdEnv 2.1.0\StdOverloaded.icl
@@ -5684,6 +5831,7 @@ Static
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\id.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\device.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\systemid.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\commondef.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdIOCommon.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdBitmap.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osbitmap.o
@@ -5695,13 +5843,12 @@ Static
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\pictCCall_12.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\rgnCCall_12.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osfont.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\clCCall_12.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdPictureDef.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdIOBasic.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdPicture.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdKey.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\oskey.o
-		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\commondef.o
-		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\clCCall_12.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\iostate.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osactivaterequests.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osdocumentinterface.o
@@ -5737,14 +5884,14 @@ Static
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\roundrobin.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osmouse.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdPSt.o
-		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdProcessDef.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdProcessAttribute.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdProcessDef.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osbeep.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\world.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdPStClass.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdFileSelect.o
-		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\scheduler.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osfileselect.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\scheduler.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdTime.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\ostick.o
 		Path:	{Application}\Libraries\StdLib 2.0\Clean System Files\StdLibMisc.o
@@ -5752,13 +5899,12 @@ Static
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdProcess.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\processdevice.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\menudevice.o
-		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdReceiverDef.o
-		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdMenuAttribute.o
-		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdMenuElementClass.o
-		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\menuaccess.o
-		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\menudefaccess.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\menuevent.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\menuaccess.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\menucreate.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdMenuElementClass.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\menudefaccess.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdMenuAttribute.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\sdisize.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\oswindow.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\windowaccess.o
@@ -5769,8 +5915,9 @@ Static
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\windowclipstate.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\wstateaccess.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\receiveraccess.o
-		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdReceiverAttribute.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdReceiverDef.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\receiverdefaccess.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdReceiverAttribute.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\menuwindowmenu.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\processevent.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\toolbar.o
@@ -5779,12 +5926,12 @@ Static
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\clipboardCrossCall_12.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdPrint.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\osprint.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdWindow.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdControlClass.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controlvalidate.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\windowvalidate.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controllayout.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\layout.o
-		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdWindow.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controlpos.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controlrelayout.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\relayout.o
@@ -5793,14 +5940,14 @@ Static
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdMenu.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\menuinternal.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\menuitems.o
-		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\windowdevice.o
-		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\windowdispose.o
-		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\receiverid.o
-		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controldraw.o
-		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controlresize.o
-		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\windowevent.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controlcreate.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\ostooltip.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\windowdevice.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controldraw.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controlresize.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\receiverid.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\windowdispose.o
+		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\windowevent.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\controlinternal.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdPrintText.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\Clean System Files\StdControlReceiver.o
@@ -5828,13 +5975,13 @@ Static
 		Path:	{Application}\Libraries\Generics 0.2\Clean System Files\GenEq.o
 		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdGeneric.o
 		Path:	{Application}\Libraries\Generics 0.2\Clean System Files\GenPrint.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\parseprint.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\guigecs.o
 		Path:	{Application}\Libraries\Generics 0.2\Clean System Files\GenParse.o
 		Path:	{Application}\Libraries\WrapDebug 1.0.4\Clean System Files\Debug.o
 		Path:	{Application}\Libraries\WrapDebug 1.0.4\Clean System Files\Wrap.o
 		Path:	{Application}\Libraries\WrapDebug 1.0.4\Clean System Files\ShowWrapped.o
 		Path:	{Application}\Libraries\StdEnv 2.1.0\Clean System Files\StdDebug.o
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\guigecs.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\parseprint.o
 		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\StdObjectIOExt.o
 		Path:	{Application}\Dynamic Applications\Gen Visual Editor\objectioextensions\Clean System Files\ColourTextControl.o
 		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\StdBimap.o
@@ -5848,6 +5995,11 @@ Static
 		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\StdGEC.o
 		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\StdGECExt.o
 		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\StdAGEC.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\Clean System Files\basicAGEC.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\Clean System Files\modeGEC.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\Clean System Files\buttonGEC.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\Clean System Files\tupleGEC.o
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions\Clean System Files\updownGEC.o
 		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\store.o
 		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\Clean System Files\StdGecComb.o
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\cCrossCallClipboard_121.obj
@@ -5890,6 +6042,8 @@ Static
 		Path:	{Application}\Libraries\ObjectIO 1.2.4\OS Windows\Clean System Files\advapi32_library
 	Pths
 		Path:	{Project}
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
+		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC\GECExtensions
 		Path:	{Application}\Libraries\StdEnv 2.1.0
 		Path:	{Application}\Libraries\StdLib 2.0
 		Path:	{Application}\Libraries\ObjectIO 1.2.4
@@ -5909,7 +6063,6 @@ Static
 		Path:	{Application}\Libraries\ExtendedArith 1.0.2\ExtendedArith 1.0.2
 		Path:	{Application}\Libraries\GameLib 1.2.4
 		Path:	{Application}\Dynamic Applications\Gen Visual Editor\objectioextensions
-		Path:	{Application}\Dynamic Applications\Gen Visual Editor\StdGEC
 		Path:	{Application}\Dynamic Applications\Gen Visual Editor\GAST_02
 	AppP:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.0
 	PrjP:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.0\Dynamic Applications\Gen Visual Editor\StdGEC\Examples

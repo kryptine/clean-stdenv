@@ -4,7 +4,7 @@ import StdEnv
 import StdIO
 import genericgecs
 import StdGEC, StdGECExt, StdAGEC
-import StdGecComb
+import StdGecComb, basicAGEC, buttonGEC, calcAGEC
 
 goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
