@@ -27,21 +27,21 @@ derive bimap GECArgs
 	The (GECGUIFun t env) argument of each function defines the GECGUI of this particular component (see guigecs.dcl).
 */
 
-::	InfraGEC a env
+::	TgGEC a env
 	:== ((GECArgs a env)
      -> .(env 
      -> *(!GECVALUE a env,!env)))
 ::	MakeUpValue	:== Bool
 
-unitGEC   ::                         !(GECGUIFun UNIT         (PSt .ps))                         -> InfraGEC UNIT         (PSt .ps)
-pairGEC   ::                         !(GECGUIFun (PAIR a b)   (PSt .ps)) !(InfraGEC a (PSt .ps)) 
-                                                                         !(InfraGEC b (PSt .ps)) -> InfraGEC (PAIR   a b) (PSt .ps)
+unitGEC   ::                         !(GECGUIFun UNIT         (PSt .ps))                      -> TgGEC UNIT         (PSt .ps)
+pairGEC   ::                         !(GECGUIFun (PAIR a b)   (PSt .ps)) !(TgGEC a (PSt .ps)) 
+                                                                         !(TgGEC b (PSt .ps)) -> TgGEC (PAIR   a b) (PSt .ps)
 objectGEC :: !GenericTypeDefDescriptor 
-             !(GECId (OBJECT a))     !(GECGUIFun (OBJECT a)   (PSt .ps)) !(InfraGEC a (PSt .ps)) -> InfraGEC (OBJECT a)   (PSt .ps)
-consGEC   :: !GenericConsDescriptor  !(GECGUIFun (CONS   a)   (PSt .ps)) !(InfraGEC a (PSt .ps)) -> InfraGEC (CONS   a)   (PSt .ps)
-fieldGEC  :: !GenericFieldDescriptor !(GECGUIFun (FIELD  a)   (PSt .ps)) !(InfraGEC a (PSt .ps)) -> InfraGEC (FIELD  a)   (PSt .ps)
-eitherGEC ::                         !(GECGUIFun (EITHER a b) (PSt .ps)) !(InfraGEC a (PSt .ps))
-                                                                         !(InfraGEC b (PSt .ps)) -> InfraGEC (EITHER a b) (PSt .ps)
-basicGEC  :: !String !(GECId t)      !(GECGUIFun t            (PSt .ps))                         -> InfraGEC t            (PSt .ps)
+             !(GECId (OBJECT a))     !(GECGUIFun (OBJECT a)   (PSt .ps)) !(TgGEC a (PSt .ps)) -> TgGEC (OBJECT a)   (PSt .ps)
+consGEC   :: !GenericConsDescriptor  !(GECGUIFun (CONS   a)   (PSt .ps)) !(TgGEC a (PSt .ps)) -> TgGEC (CONS   a)   (PSt .ps)
+fieldGEC  :: !GenericFieldDescriptor !(GECGUIFun (FIELD  a)   (PSt .ps)) !(TgGEC a (PSt .ps)) -> TgGEC (FIELD  a)   (PSt .ps)
+eitherGEC ::                         !(GECGUIFun (EITHER a b) (PSt .ps)) !(TgGEC a (PSt .ps))
+                                                                         !(TgGEC b (PSt .ps)) -> TgGEC (EITHER a b) (PSt .ps)
+basicGEC  :: !String !(GECId t)      !(GECGUIFun t            (PSt .ps))                      -> TgGEC t            (PSt .ps)
           |  parseprint    t 
           &  generate{|*|} t

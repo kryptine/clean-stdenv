@@ -54,7 +54,7 @@ derive bimap GECArgs
 		,	eitherGoLeft     :: !Bool
 		}
 
-unitGEC :: !(GECGUIFun UNIT (PSt .ps)) -> InfraGEC UNIT (PSt .ps)
+unitGEC :: !(GECGUIFun UNIT (PSt .ps)) -> TgGEC UNIT (PSt .ps)
 unitGEC gecguiFun = unitGEC` gecguiFun
 where
 	unitGEC` gecguiFun gecArgs=:{location=(guiLoc,objLoc),makeUpValue,outputOnly,update} pSt
@@ -104,9 +104,9 @@ where
 			= TRACE (gGECtraceDefault "UNIT") (OutDone,st)
 
 pairGEC :: !(GECGUIFun (PAIR a b) (PSt .ps)) 
-           !(InfraGEC        a    (PSt .ps))
-           !(InfraGEC          b  (PSt .ps)) 
-        -> InfraGEC    (PAIR a b) (PSt .ps)
+           !(TgGEC        a    (PSt .ps))
+           !(TgGEC          b  (PSt .ps)) 
+        -> TgGEC    (PAIR a b) (PSt .ps)
 pairGEC gecguiFun gGECa gGECb = pairGEC` gecguiFun gGECa gGECb
 where
 	pairGEC` gecguiFun gGECa gGECb gecArgs=:{location=(guiLoc,objLoc),outputOnly,gec_value=mpair,update} pSt
@@ -191,8 +191,8 @@ where
 objectGEC :: !GenericTypeDefDescriptor 
              !(GECId     (OBJECT a)) 
              !(GECGUIFun (OBJECT a) (PSt .ps)) 
-             !(InfraGEC  a          (PSt .ps))
-           -> InfraGEC   (OBJECT a) (PSt .ps)
+             !(TgGEC  a          (PSt .ps))
+           -> TgGEC   (OBJECT a) (PSt .ps)
 objectGEC t tGEC gecguiFun gGECa = objectGEC` t tGEC gecguiFun gGECa
 where
 	objectGEC` t tGEC gecguiFun gGECa gecArgs=:{location=(guiLoc,objLoc),outputOnly,gec_value=mcv,update} pSt
@@ -277,8 +277,8 @@ where
 
 consGEC :: !GenericConsDescriptor
            !(GECGUIFun (CONS a) (PSt .ps)) 
-           !(InfraGEC  a        (PSt .ps))
-        -> InfraGEC    (CONS a) (PSt .ps)
+           !(TgGEC  a        (PSt .ps))
+        -> TgGEC    (CONS a) (PSt .ps)
 consGEC d gecguiFun gGECa = consGEC` d gecguiFun gGECa
 where
 	consGEC` d gecguiFun gGECa gecArgs=:{location=(guiLoc,objLoc),makeUpValue,outputOnly,gec_value=mcv,update} pSt
@@ -397,8 +397,8 @@ where
 
 fieldGEC :: !GenericFieldDescriptor
             !(GECGUIFun (FIELD a) (PSt .ps)) 
-            !(InfraGEC  a         (PSt .ps)) 
-         -> InfraGEC    (FIELD a) (PSt .ps)
+            !(TgGEC  a         (PSt .ps)) 
+         -> TgGEC    (FIELD a) (PSt .ps)
 fieldGEC t gecguiFun gGECa = fieldGEC` t gecguiFun gGECa 
 where
 	fieldGEC` t gecguiFun gGECa gecArgs=:{location=(guiLoc,objLoc),makeUpValue,outputOnly,gec_value=mcv,update} pSt
@@ -482,9 +482,9 @@ where
 			= TRACE (gGECtraceDefault field_trace_name) (OutDone,st)
 
 eitherGEC :: !(GECGUIFun (EITHER a b) (PSt .ps))
-             !(InfraGEC          a    (PSt .ps))
-             !(InfraGEC            b  (PSt .ps)) 
-          ->   InfraGEC  (EITHER a b) (PSt .ps)
+             !(TgGEC          a    (PSt .ps))
+             !(TgGEC            b  (PSt .ps)) 
+          ->   TgGEC  (EITHER a b) (PSt .ps)
 eitherGEC gecguiFun gGECa gGECb = eitherGEC` gecguiFun gGECa gGECb 
 where
 	eitherGEC` gecguiFun gGECa gGECb gecArgs=:{location=(guiLoc,objLoc),makeUpValue,outputOnly,gec_value=me,update} pSt
@@ -615,7 +615,7 @@ where
 basicGEC :: !String 
             !(GECId t) 
             !(GECGUIFun t (PSt .ps)) 
-         -> InfraGEC    t (PSt .ps) 
+         -> TgGEC    t (PSt .ps) 
          |  parseprint t & generate{|*|} t
 basicGEC type_name tGEC gecguiFun = basicGEC` type_name tGEC gecguiFun 
 where

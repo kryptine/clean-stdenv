@@ -1,4 +1,4 @@
-definition module modeAGEC
+definition module modeGEC
 
 import genericgecs
 

@@ -2,7 +2,7 @@ implementation module StdGECExt
 
 import StdEnv
 import StdIO
-import genericgecs, StdGEC, StdAGEC
+import genericgecs, GECValue, StdAGEC
 import store, TRACE
 
 nothing _ _ pSt = pSt

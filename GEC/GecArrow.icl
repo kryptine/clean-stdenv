@@ -7,6 +7,10 @@ import store, GenDefault, StdDebug
 
 :: GecSet a ps :== a *(PSt ps) -> *PSt ps
 
+startGEC :: ((PSt Void) -> (PSt Void)) *World -> *World
+startGEC editor world = startIO MDI Void editor [ProcessClose closeProcess] world
+
+
 runCircuit (GecCircuit k) = k
 
 startCircuit :: !(GecCircuit a b) a !*(PSt .ps) -> *PSt .ps

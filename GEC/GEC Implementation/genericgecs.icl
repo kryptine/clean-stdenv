@@ -25,6 +25,8 @@ gGEC{|OBJECT of t|}                                                             
 	= let (tGEC,pSt1) = openGECId pSt
 	  in  objectGEC t tGEC (objectGECGUI t (switchGEC tGEC YesUpdate) (arrangeGEC tGEC) gecArgs.hasOBJECT)
 	                                                                                       gGECa       gecArgs pSt1
+gGEC{|OBJECT |}                                                                        gGECa       gecArgs pSt
+	= abort "zou niet mogen"
 gGEC{|UNIT|}                                                                                           gecArgs pSt
 	= unitGEC unitGECGUI                                                                               gecArgs pSt
 gGEC{|PAIR|}                                                                               gGECa gGECb gecArgs pSt
