@@ -891,10 +891,9 @@ openpopupitems id index newItems wPtr wH=:{whItems} tb
 where
 	openWElementsPopUpItems :: !OSWindowPtr !Index ![PopUpControlItem .pst] !Id ![WElementHandle .ls .pst] !*OSToolbox
 																	  -> (!Bool,![WElementHandle .ls .pst],!*OSToolbox)
-	openWElementsPopUpItems wPtr index newItems id itemHs tb
-		| isEmpty itemHs
-			= (False,itemHs,tb)
-		# (itemH,itemHs)		= HdTl itemHs
+	openWElementsPopUpItems _ _ _ _ [] tb
+		= (False,[],tb)
+	openWElementsPopUpItems wPtr index newItems id [itemH:itemHs] tb
 		# (done,itemH,tb)		= openWElementPopUpItems wPtr index newItems id itemH tb
 		| done
 			= (done,[itemH:itemHs],tb)
@@ -978,10 +977,9 @@ closepopupitems id indexs wPtr wH=:{whItems} tb
 where
 	closeWElementsPopUpItems :: !OSWindowPtr ![Index] !Id ![WElementHandle .ls .pst] !*OSToolbox
 												-> (!Bool,![WElementHandle .ls .pst],!*OSToolbox)
-	closeWElementsPopUpItems wPtr indexs id itemHs tb
-		| isEmpty itemHs
-			= (False,itemHs,tb)
-		# (itemH,itemHs)		= HdTl itemHs
+	closeWElementsPopUpItems _ _ _ [] tb
+		= (False,[],tb)
+	closeWElementsPopUpItems wPtr indexs id [itemH:itemHs] tb
 		# (done,itemH,tb)		= closeWElementPopUpItems wPtr indexs id itemH tb
 		| done
 			= (done,[itemH:itemHs],tb)

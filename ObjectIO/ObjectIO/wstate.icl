@@ -6,7 +6,7 @@ implementation module wstate
 
 import	StdInt, StdList, StdTuple, StdFunc
 import	oswindow
-import	commondef, windowhandle
+import	commondef, keyfocus, windowhandle
 
 
 wstateFatalError :: String String -> .x
@@ -155,25 +155,26 @@ wstateFatalError rule error
 	|	ControlWidth`		ControlWidth
 
 
-retrieveWindowHandle` :: !u:(WindowStateHandle .pst) !*OSToolbox -> (!WindowHandle`,!u:WindowStateHandle .pst,!*OSToolbox)
-retrieveWindowHandle` wsH=:{wshIds={wPtr},wshHandle=Just wlsH=:{wlsHandle}} tb
-	# (wH`,wH,tb)	= getWindowHandle` wPtr wlsHandle tb
+retrieveWindowHandle` :: !*(WindowStateHandle .pst) !*OSToolbox -> (!WindowHandle`,!*WindowStateHandle .pst,!*OSToolbox)
+retrieveWindowHandle` wsH=:{wshIds={wPtr},wshHandle=Just wlsH=:{wlsHandle=wH}} tb
+	# (wH`,wH,tb)	= getWindowHandle` wPtr wH tb
 	= (wH`,{wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
 retrieveWindowHandle` _ _
 	= wstateFatalError "retrieveWindowHandle`" "unexpected window placeholder argument"
 
-insertWindowHandle` :: !WindowHandle` !u:(WindowStateHandle .pst) -> u:WindowStateHandle .pst
-insertWindowHandle` wH` wsH=:{wshHandle=Just wlsH=:{wlsHandle}}
-	= {wsH & wshHandle=Just {wlsH & wlsHandle=setWindowHandle` wH` wlsHandle}}
+insertWindowHandle` :: !WindowHandle` !*(WindowStateHandle .pst) -> *WindowStateHandle .pst
+insertWindowHandle` wH` wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH}}
+	#! wH	= setWindowHandle` wH` wH
+	= {wsH & wshHandle=Just {wlsH & wlsHandle=wH}}
 insertWindowHandle` _ _
 	= wstateFatalError "insertWindowHandle`" "unexpected window placeholder argument"
 
-getWindowHandle` :: !OSWindowPtr !u:(WindowHandle .ls .pst) !*OSToolbox -> (!WindowHandle`,!u:WindowHandle .ls .pst,!*OSToolbox)
+getWindowHandle` :: !OSWindowPtr !*(WindowHandle .ls .pst) !*OSToolbox -> (!WindowHandle`,!*WindowHandle .ls .pst,!*OSToolbox)
 getWindowHandle` wPtr wH=:{	whMode
 						  ,	whKind
 						  ,	whTitle
 						  ,	whItemNrs
-						  ,	whKeyFocus
+						  ,	whKeyFocus=kf
 						  ,	whWindowInfo
 						  ,	whItems=items
 						  ,	whShow
@@ -185,11 +186,12 @@ getWindowHandle` wPtr wH=:{	whMode
 						  ,	whClosing
 						  } tb
 	#! (items`,items,tb)	= getWElementHandles` wPtr items tb
+	#! (kf`,kf)				= copyKeyFocus kf
 	= (	{	whMode`			= whMode
 		,	whKind`			= whKind
 		,	whTitle`		= whTitle
 		,	whItemNrs`		= whItemNrs
-		,	whKeyFocus`		= whKeyFocus
+		,	whKeyFocus`		= kf`
 		,	whWindowInfo`	= whWindowInfo
 		,	whItems`		= items`
 		,	whShow`			= whShow
@@ -200,7 +202,7 @@ getWindowHandle` wPtr wH=:{	whMode
 		,	whSize`			= whSize
 		,	whClosing`		= whClosing
 		}
-	  ,	{wH & whItems=items}
+	  ,	{wH & whKeyFocus=kf,whItems=items}
 	  ,	tb
 	  )
 where
@@ -231,13 +233,13 @@ where
 	getWAtt (WindowVMargin     t b)			= WindowVMargin`     t b
 	getWAtt (WindowVScroll     f)			= WindowVScroll`     f
 
-getWElementHandles` :: !OSWindowPtr ![WElementHandle .ls .pst] !*OSToolbox -> (![WElementHandle`],![WElementHandle .ls .pst],!*OSToolbox)
+getWElementHandles` :: !OSWindowPtr !*[WElementHandle .ls .pst] !*OSToolbox -> (![WElementHandle`],!*[WElementHandle .ls .pst],!*OSToolbox)
 getWElementHandles` wPtr [itemH:itemHs] tb
 	#! (itemH`, itemH, tb)	= getWElementHandle`  wPtr itemH  tb
 	#! (itemHs`,itemHs,tb)	= getWElementHandles` wPtr itemHs tb
 	= ([itemH`:itemHs`],[itemH:itemHs],tb)
 where
-	getWElementHandle` :: !OSWindowPtr !(WElementHandle .ls .pst) !*OSToolbox -> (!WElementHandle`,!WElementHandle .ls .pst,!*OSToolbox)
+	getWElementHandle` :: !OSWindowPtr !*(WElementHandle .ls .pst) !*OSToolbox -> (!WElementHandle`,!*WElementHandle .ls .pst,!*OSToolbox)
 	getWElementHandle` wPtr (WItemHandle itemH) tb
 		#! (itemH`,itemH,tb)	= getWItemHandle` wPtr itemH tb
 		= (WItemHandle` itemH`,WItemHandle itemH,tb)
@@ -253,7 +255,7 @@ where
 getWElementHandles` _ _ tb
 	= ([],[],tb)
 
-getWItemHandle` :: !OSWindowPtr !(WItemHandle .ls .pst) !*OSToolbox -> (!WItemHandle`,!WItemHandle .ls .pst,!*OSToolbox)
+getWItemHandle` :: !OSWindowPtr !*(WItemHandle .ls .pst) !*OSToolbox -> (!WItemHandle`,!*WItemHandle .ls .pst,!*OSToolbox)
 getWItemHandle` wPtr itemH=:{	wItemId
 							,	wItemNr
 							,	wItemKind
@@ -390,14 +392,14 @@ where
 	getWItemInfo` wPtr itemPtr info=:NoWItemInfo tb
 		= (NoWItemInfo`,info,tb)
 
-setWindowHandle` :: !WindowHandle` !u:(WindowHandle .ls .pst) -> u:WindowHandle .ls .pst
+setWindowHandle` :: !WindowHandle` !*(WindowHandle .ls .pst) -> *WindowHandle .ls .pst
 setWindowHandle` wH`=:{whTitle`,whItemNrs`,whKeyFocus`,whWindowInfo`,whItems`,whShow`,whSelect`,whAtts`,whSize`,whClosing`}
 				 wH =:{whItems,whAtts}
 	#! itemHs	= setWElementHandles` whItems` whItems
 	#! atts		= setWAtts whAtts` whAtts
 	= {	wH	& whTitle		= whTitle`
 			, whItemNrs		= whItemNrs`
-			, whKeyFocus	= whKeyFocus`
+			, whKeyFocus	= newFocusItems (setFocusItems whKeyFocus`.kfItems)
 			, whWindowInfo	= whWindowInfo`
 			, whItems		= itemHs
 			, whShow		= whShow`
@@ -407,6 +409,10 @@ setWindowHandle` wH`=:{whTitle`,whItemNrs`,whKeyFocus`,whWindowInfo`,whItems`,wh
 			, whClosing		= whClosing`
 	  }
 where
+	setFocusItems :: ![FocusItem] -> *[FocusItem]
+	setFocusItems [item:items] = [item:setFocusItems items]
+	setFocusItems _            = []
+	
 	setWAtts :: ![WindowAttribute`] ![WindowAttribute .st] -> [WindowAttribute .st]
 	setWAtts [att`:atts`] [att:atts]
 		#! att	= setWAtt att` att
@@ -446,13 +452,13 @@ where
 	setWAtt _ _
 		= wstateFatalError "setWindowHandle`" "WindowAttributes do not match pairwise"
 	
-setWElementHandles` :: ![WElementHandle`] ![WElementHandle .ls .pst] -> [WElementHandle .ls .pst]
+setWElementHandles` :: ![WElementHandle`] !*[WElementHandle .ls .pst] -> *[WElementHandle .ls .pst]
 setWElementHandles` [itemH`:itemHs`] [itemH:itemHs]
 	#! itemH	= setWElement`  itemH`  itemH
 	#! itemHs	= setWElementHandles` itemHs` itemHs
 	= [itemH:itemHs]
 where
-	setWElement` :: !WElementHandle` !(WElementHandle .ls .pst) -> WElementHandle .ls .pst
+	setWElement` :: !WElementHandle` !*(WElementHandle .ls .pst) -> *WElementHandle .ls .pst
 	setWElement` (WItemHandle` itemH`) (WItemHandle itemH)
 		#! itemH	= setWItemHandle` itemH` itemH
 		=  WItemHandle itemH
@@ -472,7 +478,7 @@ setWElementHandles` [] []
 setWElementHandles` _ _
 	= wstateFatalError "setWElementHandles`" "incompatible number of WElementHandles"
 
-setWItemHandle` :: !WItemHandle` !(WItemHandle .ls .pst) -> WItemHandle .ls .pst
+setWItemHandle` :: !WItemHandle` !*(WItemHandle .ls .pst) -> *WItemHandle .ls .pst
 setWItemHandle` itemH`=:{	wItemNr`
 						,	wItemShow`
 						,	wItemSelect`

@@ -5,9 +5,7 @@ implementation module StdMenuElement
 
 
 import	StdBool, StdChar, StdFunc, StdList, StdMisc, StdTuple
-import	commondef, iostate, mstate
-from	menuaccess	import menuStateHandleGetMenuId
-from	menuevent	import MenuSystemStateGetMenuHandles
+import	commondef, iostate, menuaccess, mstate
 from	osmenu		import DrawMenuBar, OSEnableMenuItem, OSDisableMenuItem, OSChangeMenuItemTitle, OSValidateMenuItemTitle, OSMenuItemCheck
 
 
@@ -23,6 +21,20 @@ isOkMenuElementId ioId (x,Just {idpIOId,idpDevice,idpId})
 	= (ioId==idpIOId && idpDevice==MenuDevice,(x,idpId))
 isOkMenuElementId _ _
 	= (False,undef)
+
+/*	The following functions conveniently retrieve IdParents from the IOSt.
+*/
+IOStGetIdParent :: !Id !(IOSt .l) -> (!Maybe IdParent,!IOSt .l)
+IOStGetIdParent id ioState
+	# (idtable,ioState)		= IOStGetIdTable ioState
+	# (maybeParent,idtable)	= getIdParent id idtable
+	= (maybeParent,IOStSetIdTable idtable ioState)
+
+IOStGetIdParents :: ![Id] !(IOSt .l) -> (![Maybe IdParent],!IOSt .l)
+IOStGetIdParents ids ioState
+	# (idtable,ioState)		= IOStGetIdTable ioState
+	# (maybeParents,idtable)= getIdParents ids idtable
+	= (maybeParents,IOStSetIdTable idtable ioState)
 
 /*	gatherMenuIds collects all first Ids (menu element Ids) that belong to the same second Id (MenuId).
 	gatherMenuIds` does the same, except that not only menu element Ids are collected, but also their data item.
@@ -63,16 +75,17 @@ where
 gatherMenuIds` []
 	= []
 
-eqMenuLSHandleId :: !Id !(MenuStateHandle .ps) -> Bool
+eqMenuLSHandleId :: !Id !*(MenuStateHandle .pst) -> (!Bool,!*MenuStateHandle .pst)
 eqMenuLSHandleId id msH
-	= id==fst (menuStateHandleGetMenuId msH)
+	# (id`,msH)	= menuStateHandleGetMenuId msH
+	= (id==id`,msH)
 
-retrieveMenuHandle` :: !(MenuStateHandle .ps) -> (!MenuHandle`,!MenuStateHandle .ps)
+retrieveMenuHandle` :: !*(MenuStateHandle .pst) -> (!MenuHandle`,!*MenuStateHandle .pst)
 retrieveMenuHandle` (MenuLSHandle mlsH=:{mlsHandle=mH})
 	# (mH`,mH)	= getMenuHandle` mH
 	= (mH`,MenuLSHandle {mlsH & mlsHandle=mH})
 
-insertMenuHandle` :: !MenuHandle` !(MenuStateHandle .ps) -> MenuStateHandle .ps
+insertMenuHandle` :: !MenuHandle` !*(MenuStateHandle .pst) -> *MenuStateHandle .pst
 insertMenuHandle` mH` (MenuLSHandle mlsH=:{mlsHandle=mH})
 	= MenuLSHandle {mlsH & mlsHandle=setMenuHandle` mH` mH}
 
@@ -87,30 +100,41 @@ insertMenuHandle` mH` (MenuLSHandle mlsH=:{mlsHandle=mH})
 
 getMenu :: !Id !(IOSt .l) -> (!Maybe MState, !IOSt .l)
 getMenu menuId ioState
-	# (ok,ioState)			= IOStHasDevice MenuDevice ioState
+	# (ok,ioState)				= IOStHasDevice MenuDevice ioState
 	| not ok
 		= (Nothing,ioState)
-	# (found,menus,ioState)	= IOStGetDevice MenuDevice ioState
+	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
 	| not found
 		= (Nothing,ioState)
-	# mHs					= MenuSystemStateGetMenuHandles menus
-	  (found,msH)			= Select (eqMenuLSHandleId  menuId) (dummy "GetMenu") mHs.mMenus
-	| not found
-		= (Nothing,ioState)
+	# menus						= MenuSystemStateGetMenuHandles mDevice
+	# (mHs,menus)				= menuHandlesGetMenus menus
+	# (found,mState,mHs)		= getMState menuId mHs
+	# menus						= menuHandlesSetMenus mHs menus
+	# ioState					= IOStSetDevice (MenuSystemState menus) ioState
+	| found
+		= (Just {mRep=mState,mTb=0},ioState)
 	| otherwise
-		# (msH`,msH)		= retrieveMenuHandle` msH
-		  (_,msHs)			= Replace (eqMenuLSHandleId menuId) msH mHs.mMenus
-		# ioState			= IOStSetDevice (MenuSystemState {mHs & mMenus=msHs}) ioState
-		= (Just {mRep=msH`,mTb=0},ioState)
+		= (Nothing,ioState)
+where
+	getMState :: !Id !*[MenuStateHandle .pst] -> (!Bool,MenuHandle`,!*[MenuStateHandle .pst])
+	getMState menuId [msH:msHs]
+		# (yes,msH)					= eqMenuLSHandleId menuId msH
+		| yes
+			# (msH`,msH)			= retrieveMenuHandle` msH
+			= (yes,msH`,[msH:msHs])
+		| otherwise
+			# (found,mstate,msHs)	= getMState menuId msHs
+			= (found,mstate,[msH:msHs])
+	getMState _ []
+		= (False,undef,[])
 
 getParentMenu :: !Id !(IOSt .l) -> (!Maybe MState, !IOSt .l)
 getParentMenu itemId ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	  maybeParent		= getIdParent itemId idtable
+	# (maybeParent,ioState)	= IOStGetIdParent itemId ioState
 	| isNothing maybeParent
 		= (Nothing,ioState)
-	# parent			= fromJust maybeParent
-	# (ioId,ioState)	= IOStGetIOId ioState
+	# parent				= fromJust maybeParent
+	# (ioId,ioState)		= IOStGetIOId ioState
 	| ioId==parent.idpIOId && parent.idpDevice==MenuDevice
 		= getMenu parent.idpId ioState
 	| otherwise
@@ -118,52 +142,64 @@ getParentMenu itemId ioState
 
 setMenu :: !Id !(IdFun *MState) !(IOSt .l) -> IOSt .l
 setMenu menuId f ioState
-	# (ok,ioState)			= IOStHasDevice MenuDevice ioState
+	# (ok,ioState)				= IOStHasDevice MenuDevice ioState
 	| not ok
 		= ioState
-	# (osdinfo,ioState)		= IOStGetOSDInfo ioState
-	  maybeOSMenuBar		= getOSDInfoOSMenuBar osdinfo
+	# (osdinfo,ioState)			= IOStGetOSDInfo ioState
+	  maybeOSMenuBar			= getOSDInfoOSMenuBar osdinfo
 	| isNothing maybeOSMenuBar	// This condition should never occur
 		= StdMenuElementFatalError "setMenu" "OSMenuBar could not be retrieved from OSDInfo"
-	# osMenuBar				= fromJust maybeOSMenuBar
-	# (found,menus,ioState)	= IOStGetDevice MenuDevice ioState
+	# osMenuBar					= fromJust maybeOSMenuBar
+	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
 	| not found					// This condition should never occur
 		= StdMenuElementFatalError "setMenu" "MenuSystemState could not be retrieved from IOSt"
-	# mHs					= MenuSystemStateGetMenuHandles menus
-	  (found,msH)			= Select (eqMenuLSHandleId menuId) (dummy "SetMenu") mHs.mMenus
-	| not found
-		= ioState
 	| otherwise
-		# (tb,ioState)		= getIOToolbox ioState
-		  (msH`,msH)		= retrieveMenuHandle` msH
-		# (msH`,tb)			= (\{mRep,mTb}->(mRep,mTb)) (f {mRep=msH`,mTb=tb})
-		  msH				= insertMenuHandle` msH` msH
-		# tb				= DrawMenuBar osMenuBar tb
-		# ioState			= setIOToolbox tb ioState
-		  (_,msHs)			= Replace (eqMenuLSHandleId menuId) msH mHs.mMenus
-		# ioState			= IOStSetDevice (MenuSystemState {mHs & mMenus=msHs}) ioState
+		# menus					= MenuSystemStateGetMenuHandles mDevice
+		# (mHs,menus)			= menuHandlesGetMenus menus
+		# (mHs,ioState)			= accIOToolbox (setMState osMenuBar menuId f mHs) ioState
+		# menus					= menuHandlesSetMenus mHs menus
+		# ioState				= IOStSetDevice (MenuSystemState menus) ioState
 		= ioState
+where
+	setMState :: !OSMenuBar !Id !(IdFun *MState) !*[MenuStateHandle .pst] !*OSToolbox -> (!*[MenuStateHandle .pst],!*OSToolbox)
+	setMState osMenuBar menuId f [msH:msHs] tb
+		# (yes,msH)				= eqMenuLSHandleId menuId msH
+		| yes
+			# (msH`,msH)		= retrieveMenuHandle` msH
+			# {mRep=msH`,mTb=tb}= f {mRep=msH`,mTb=tb}
+			# msH				= insertMenuHandle` msH` msH
+			# tb				= DrawMenuBar osMenuBar tb
+			= ([msH:msHs],tb)
+		| otherwise
+			# (msHs,tb)			= setMState osMenuBar menuId f msHs tb
+			= ([msH:msHs],tb)
+	setMState _ _ _ [] tb
+		= ([],tb)
 
 
 //	Enabling and Disabling of menu elements:
 
 enableMenuElements :: ![Id] !(IOSt .l) -> IOSt .l
 enableMenuElements ids ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
-	  ids_mIds			= FilterMap (isOkMenuElementId ioId) (zip2 ids (getIdParents ids idtable))
-	  ids_mIds			= gatherMenuIds ids_mIds
-	| isEmpty ids_mIds	= ioState
-	| otherwise			= StrictSeq [setMenu mId (changeMenuItemsSelect (map (\id->(id,True)) ids)) \\ (ids,mId)<-ids_mIds] ioState
+	# (ioId,ioState)		= IOStGetIOId ioState
+	# (idparents,ioState)	= IOStGetIdParents ids ioState
+	  ids_mIds				= FilterMap (isOkMenuElementId ioId) (zip2 ids idparents)
+	  ids_mIds				= gatherMenuIds ids_mIds
+	| isEmpty ids_mIds
+		= ioState
+	| otherwise
+		= StrictSeq [setMenu mId (changeMenuItemsSelect (map (\id->(id,True)) ids)) \\ (ids,mId)<-ids_mIds] ioState
 
 disableMenuElements :: ![Id] !(IOSt .l) -> IOSt .l
 disableMenuElements ids ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
-	  ids_mIds			= FilterMap (isOkMenuElementId ioId) (zip2 ids (getIdParents ids idtable))
-	  ids_mIds			= gatherMenuIds ids_mIds
-	| isEmpty ids_mIds	= ioState
-	| otherwise			= StrictSeq [setMenu mId (changeMenuItemsSelect (map (\id->(id,False)) ids)) \\ (ids,mId)<-ids_mIds] ioState
+	# (ioId,ioState)		= IOStGetIOId ioState
+	# (idparents,ioState)	= IOStGetIdParents ids ioState
+	  ids_mIds				= FilterMap (isOkMenuElementId ioId) (zip2 ids idparents)
+	  ids_mIds				= gatherMenuIds ids_mIds
+	| isEmpty ids_mIds
+		= ioState
+	| otherwise
+		= StrictSeq [setMenu mId (changeMenuItemsSelect (map (\id->(id,False)) ids)) \\ (ids,mId)<-ids_mIds] ioState
 
 changeMenuItemsSelect :: ![(Id,Bool)] !*MState -> *MState
 changeMenuItemsSelect idSelects mState
@@ -209,21 +245,23 @@ where
 
 markMenuItems :: ![Id] !(IOSt .l) -> IOSt .l
 markMenuItems ids ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
-	  ids_mIds			= FilterMap (isOkMenuElementId ioId) (zip2 ids (getIdParents ids idtable))
-	  ids_mIds			= gatherMenuIds ids_mIds
-	| isEmpty ids_mIds	= ioState
-	| otherwise			= StrictSeq [setMenu mId (changeMenuItemsMark (map (\id->(id,True)) ids)) \\ (ids,mId)<-ids_mIds] ioState
+	# (ioId,ioState)		= IOStGetIOId ioState
+	# (idparents,ioState)	= IOStGetIdParents ids ioState
+	  ids_mIds				= FilterMap (isOkMenuElementId ioId) (zip2 ids idparents)
+	  ids_mIds				= gatherMenuIds ids_mIds
+	| isEmpty ids_mIds		= ioState
+	| otherwise				= StrictSeq [setMenu mId (changeMenuItemsMark (map (\id->(id,True)) ids)) \\ (ids,mId)<-ids_mIds] ioState
 
 unmarkMenuItems :: ![Id] !(IOSt .l) -> IOSt .l
 unmarkMenuItems ids ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
-	  ids_mIds			= FilterMap (isOkMenuElementId ioId) (zip2 ids (getIdParents ids idtable))
-	  ids_mIds			= gatherMenuIds ids_mIds
-	| isEmpty ids_mIds	= ioState
-	| otherwise			= StrictSeq [setMenu mId (changeMenuItemsMark (map (\id->(id,False)) ids)) \\ (ids,mId)<-ids_mIds] ioState
+	# (ioId,ioState)		= IOStGetIOId ioState
+	# (idparents,ioState)	= IOStGetIdParents ids ioState
+	  ids_mIds				= FilterMap (isOkMenuElementId ioId) (zip2 ids idparents)
+	  ids_mIds				= gatherMenuIds ids_mIds
+	| isEmpty ids_mIds
+		= ioState
+	| otherwise
+		= StrictSeq [setMenu mId (changeMenuItemsMark (map (\id->(id,False)) ids)) \\ (ids,mId)<-ids_mIds] ioState
 
 changeMenuItemsMark :: ![(Id,Bool)] !*MState -> *MState
 changeMenuItemsMark idMarks mState
@@ -240,10 +278,10 @@ where
 
 setMenuElementTitles :: ![(Id,Title)] !(IOSt .l) -> IOSt .l
 setMenuElementTitles id_titles ioState
-	# (idtable,ioState)			= IOStGetIdTable ioState
 	# (ioId,ioState)			= IOStGetIOId ioState
 	  (ids,_)					= unzip id_titles
-	  id_titles_mIds			= FilterMap (isOkMenuElementId ioId) (zip2 id_titles (getIdParents ids idtable))
+	# (idparents,ioState)		= IOStGetIdParents ids ioState
+	  id_titles_mIds			= FilterMap (isOkMenuElementId ioId) (zip2 id_titles idparents)
 	  id_titles_mIds			= gatherMenuIds` id_titles_mIds
 	| isEmpty id_titles_mIds	= ioState
 	| otherwise					= StrictSeq [setMenu mId (changeMenuItems RecurseAll setItemTitle id_titles) \\ (id_titles,mId)<-id_titles_mIds] ioState
@@ -266,12 +304,12 @@ where
 
 selectRadioMenuItem :: !Id !Id !(IOSt .l) -> IOSt .l
 selectRadioMenuItem id itemId ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
-	  maybeParent		= getIdParent id idtable
+	# (ioId,ioState)		= IOStGetIOId ioState
+	# (maybeParent,ioState)	= IOStGetIdParent id ioState
 	| not (fst (isOkMenuElementId ioId (id,maybeParent)))
-						= ioState
-	| otherwise			= setMenu (fromJust maybeParent).idpId (changeMenuItems RecurseAll selectradiomenuitem [(id,itemId)]) ioState
+		= ioState
+	| otherwise
+		= setMenu (fromJust maybeParent).idpId (changeMenuItems RecurseAll selectradiomenuitem [(id,itemId)]) ioState
 where
 	selectradiomenuitem :: !Id !OSMenu !Int !MenuElementHandle` !*OSToolbox -> (!MenuElementHandle`,!*OSToolbox)
 	selectradiomenuitem itemId menu itemNr (RadioMenuHandle` radioH=:{mRadioIndex`=now,mRadioItems`}) tb
@@ -304,12 +342,12 @@ where
 
 selectRadioMenuIndexItem :: !Id !Index !(IOSt .l) -> IOSt .l
 selectRadioMenuIndexItem id index ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
-	  maybeParent		= getIdParent id idtable
+	# (ioId,ioState)		= IOStGetIOId ioState
+	# (maybeParent,ioState)	= IOStGetIdParent id ioState
 	| not (fst (isOkMenuElementId ioId (id,maybeParent)))
-						= ioState
-	| otherwise			= setMenu (fromJust maybeParent).idpId (changeMenuItems RecurseAll selectradiomenuindexitem [(id,index)]) ioState
+		= ioState
+	| otherwise
+		= setMenu (fromJust maybeParent).idpId (changeMenuItems RecurseAll selectradiomenuindexitem [(id,index)]) ioState
 where
 	selectradiomenuindexitem :: !Index !OSMenu !Int !MenuElementHandle` !*OSToolbox -> (!MenuElementHandle`,!*OSToolbox)
 	selectradiomenuindexitem new menu itemNr (RadioMenuHandle` radioH=:{mRadioIndex`=now,mRadioItems`}) tb

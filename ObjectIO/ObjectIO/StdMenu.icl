@@ -6,9 +6,8 @@ implementation module StdMenu
 
 import	StdBool, StdList, StdTuple
 import	osmenu
-import	commondef, iostate, menucreate, menudevice, menuinternal, menuitems, StdId
+import	commondef, iostate, menuaccess, menucreate, menudevice, menuinternal, menuitems, StdId
 from	devicesystemstate	import WindowSystemStateGetWindowHandles
-from	menuaccess			import menuStateHandleGetMenuId, menuStateHandleGetSelect, menuStateHandleGetTitle, menuStateHandleGetHandle
 from	menudefaccess		import menuDefGetMenuId
 from	menuevent			import MenuSystemStateGetMenuHandles, MenuHandlesGetMenuStateHandles
 from	StdPSt				import accPIO
@@ -45,7 +44,7 @@ where
 		= (Nothing,[])
 
 changeMenuSystemState :: !Bool
-						 !(OSMenuBar -> (MenuHandles (PSt .l)) -> *OSToolbox -> *(MenuHandles (PSt .l),*OSToolbox))
+						 !(OSMenuBar -> (MenuHandles (PSt .l)) -> *(*OSToolbox -> *(MenuHandles (PSt .l),*OSToolbox)))
 						 !(IOSt .l)
 						-> IOSt .l
 changeMenuSystemState redrawMenus f ioState
@@ -71,7 +70,7 @@ changeMenuSystemState redrawMenus f ioState
 		= IOStSetDevice (MenuSystemState menus) ioState
 
 accessMenuSystemState :: !Bool
-						 !(OSMenuBar -> (MenuHandles (PSt .l)) -> *OSToolbox -> *(.x,MenuHandles (PSt .l),*OSToolbox))
+						 !(OSMenuBar -> (MenuHandles (PSt .l)) -> *(*OSToolbox -> *(.x,MenuHandles (PSt .l),*OSToolbox)))
 						 !(IOSt .l)
 					-> (!Maybe .x,!IOSt .l)
 accessMenuSystemState redrawMenus f ioState
@@ -139,8 +138,8 @@ validateMenuId Nothing ioState
 	= (Just mId,ioState)
 validateMenuId (Just id) ioState
 	# (idtable,ioState)			= IOStGetIdTable ioState
-	| memberIdTable id idtable	= (Nothing,ioState)
-	| otherwise					= (Just id,ioState)
+	| memberIdTable id idtable	= (Nothing,IOStSetIdTable idtable ioState)
+	| otherwise					= (Just id,IOStSetIdTable idtable ioState)
 
 instance Menus (PopUpMenu m) | PopUpMenuElements m where
 	openMenu :: .ls !(PopUpMenu m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | PopUpMenuElements m
@@ -185,7 +184,7 @@ instance Menus (PopUpMenu m) | PopUpMenuElements m where
 			| not found					// This condition should never occur
 				= StdMenuFatalError "openMenu (PopUpMenu)" "could not retrieve MenuSystemState from IOSt"
 			# mHs						= MenuSystemStateGetMenuHandles mDevice
-			  (menus,mHs)				= MenuHandlesGetMenuStateHandles mHs
+			  (menus,mHs)				= menuHandlesGetMenus mHs
 			  (popUpMenu,menus)			= HdTl menus
 			  (popUpId,popUpMenu)		= menuStateHandleGetMenuId popUpMenu
 			  (mPtr,popUpMenu)			= menuStateHandleGetHandle popUpMenu
@@ -309,23 +308,23 @@ getMenuSelectState id ioState
 openMenuElements :: !Id !Index .ls (m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | MenuElements m
 openMenuElements mId pos ls new pState
 	# (it,ioState)					= IOStGetIdTable pState.io
-	  maybeParent					= getIdParent mId it
+	# (maybeParent,it)				= getIdParent mId it
 	| isNothing maybeParent
-		= (ErrorUnknownObject,{pState & io=ioState})
+		= (ErrorUnknownObject,{pState & io=IOStSetIdTable it ioState})
 	# parent						= fromJust maybeParent
 	| parent.idpDevice<>MenuDevice
-		= (ErrorUnknownObject,{pState & io=ioState})
+		= (ErrorUnknownObject,{pState & io=IOStSetIdTable it ioState})
 	# (pid,ioState)					= IOStGetIOId ioState
 	| parent.idpIOId<>pid
-		= (ErrorUnknownObject,{pState & io=ioState})
+		= (ErrorUnknownObject,{pState & io=IOStSetIdTable it ioState})
 	| parent.idpId<>mId
-		= (ErrorUnknownObject,{pState & io=ioState})
+		= (ErrorUnknownObject,{pState & io=IOStSetIdTable it ioState})
 	# (found,mDevice,ioState)		= IOStGetDevice MenuDevice ioState
 	| not found
-		= (ErrorUnknownObject,{pState & io=ioState})
+		= (ErrorUnknownObject,{pState & io=IOStSetIdTable it ioState})
 	# (osdInfo,ioState)				= IOStGetOSDInfo ioState
 	  maybeOSMenuBar				= getOSDInfoOSMenuBar osdInfo
-	| isNothing maybeOSMenuBar			// This condition should not occur
+	| isNothing maybeOSMenuBar		// This condition should not occur
 		= StdMenuFatalError "openMenuElements" "OSMenuBar could not be retrieved from OSDInfo"
 	| otherwise
 		# osMenuBar					= fromJust maybeOSMenuBar
@@ -348,21 +347,21 @@ openMenuElements mId pos ls new pState
 openSubMenuElements :: !Id !Index .ls (m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)	| MenuElements m
 openSubMenuElements sId pos ls new pState
 	# (it,ioState)				= IOStGetIdTable pState.io
-	  maybeParent				= getIdParent sId it
+	# (maybeParent,it)			= getIdParent sId it
 	| isNothing maybeParent
-		= (ErrorUnknownObject,{pState & io=ioState})
+		= (ErrorUnknownObject,{pState & io=IOStSetIdTable it ioState})
 	# parent					= fromJust maybeParent
 	| parent.idpDevice<>MenuDevice
-		= (ErrorUnknownObject,{pState & io=ioState})
+		= (ErrorUnknownObject,{pState & io=IOStSetIdTable it ioState})
 	# (pid,ioState)				= IOStGetIOId ioState
 	| parent.idpIOId<>pid
-		= (ErrorUnknownObject,{pState & io=ioState})
+		= (ErrorUnknownObject,{pState & io=IOStSetIdTable it ioState})
 	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
 	| not found
-		= (ErrorUnknownObject,{pState & io=ioState})
+		= (ErrorUnknownObject,{pState & io=IOStSetIdTable it ioState})
 	# (osdInfo,ioState)			= IOStGetOSDInfo ioState
 	  maybeOSMenuBar			= getOSDInfoOSMenuBar osdInfo
-	| isNothing maybeOSMenuBar			// This condition should not occur
+	| isNothing maybeOSMenuBar	// This condition should not occur
 		= StdMenuFatalError "openSubMenuElements" "OSMenuBar could not be retrieved from OSDInfo"
 	| otherwise
 		# osMenuBar				= fromJust maybeOSMenuBar
@@ -385,20 +384,20 @@ openSubMenuElements sId pos ls new pState
 openRadioMenuItems :: !Id !Index ![MenuRadioItem (PSt .l)] !(IOSt .l) -> (!ErrorReport,!IOSt .l)
 openRadioMenuItems rId pos radioItems ioState
 	# (idtable,ioState)		= IOStGetIdTable ioState
-	  maybeParent			= getIdParent rId idtable
+	# (maybeParent,idtable)	= getIdParent rId idtable
 	| isNothing maybeParent
-		= (ErrorUnknownObject,ioState)
+		= (ErrorUnknownObject,IOStSetIdTable idtable ioState)
 	# parent				= fromJust maybeParent
 	| parent.idpDevice<>MenuDevice
-		= (ErrorUnknownObject,ioState)
+		= (ErrorUnknownObject,IOStSetIdTable idtable ioState)
 	# (ioId,ioState)		= IOStGetIOId ioState
 	| parent.idpIOId<>ioId
-		= (ErrorUnknownObject,ioState)
+		= (ErrorUnknownObject,IOStSetIdTable idtable ioState)
 	| isEmpty radioItems
-		= (NoError,ioState)
+		= (NoError,IOStSetIdTable idtable ioState)
 	# radioIds				= FilterMap (\(_,maybeId,_,_)->(isJust maybeId,fromJust maybeId)) radioItems
 	| not (okMembersIdTable radioIds idtable)
-		= (ErrorIdsInUse,ioState)
+		= (ErrorIdsInUse,IOStSetIdTable idtable ioState)
 	| otherwise
 		# mId				= parent.idpId
 		# (error,ioState)	= accessMenuSystemState True (addMenuRadioItems (mId,rId) (max 0 pos) radioItems) ioState
@@ -422,14 +421,15 @@ closeMenuElements mId ids ioState
 
 closeMenuIndexElements :: !Id ![Index] !(IOSt .l) -> IOSt .l
 closeMenuIndexElements mId indices ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	  maybeParent		= getIdParent mId idtable
+	# (idtable,ioState)		= IOStGetIdTable ioState
+	# (maybeParent,idtable)	= getIdParent mId idtable
+	# ioState				= IOStSetIdTable idtable ioState
 	| isNothing maybeParent
 		= ioState
-	# parent			= fromJust maybeParent
+	# parent				= fromJust maybeParent
 	| parent.idpDevice<>MenuDevice
 		= ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
+	# (ioId,ioState)		= IOStGetIOId ioState
 	| parent.idpIOId<>ioId || parent.idpId<>mId
 		= ioState
 	| otherwise
@@ -437,14 +437,15 @@ closeMenuIndexElements mId indices ioState
 
 closeSubMenuIndexElements :: !Id ![Index] !(IOSt .l) -> IOSt .l
 closeSubMenuIndexElements sId indices ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	  maybeParent		= getIdParent sId idtable
+	# (idtable,ioState)		= IOStGetIdTable ioState
+	# (maybeParent,idtable)	= getIdParent sId idtable
+	# ioState				= IOStSetIdTable idtable ioState
 	| isNothing maybeParent
 		= ioState
-	# parent			= fromJust maybeParent
+	# parent				= fromJust maybeParent
 	| parent.idpDevice<>MenuDevice
 		= ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
+	# (ioId,ioState)		= IOStGetIOId ioState
 	| parent.idpIOId<>ioId
 		= ioState
 	| otherwise
@@ -452,14 +453,15 @@ closeSubMenuIndexElements sId indices ioState
 
 closeRadioMenuIndexElements :: !Id ![Index] !(IOSt .l) -> IOSt .l
 closeRadioMenuIndexElements rId indices ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	  maybeParent		= getIdParent rId idtable
+	# (idtable,ioState)		= IOStGetIdTable ioState
+	# (maybeParent,idtable)	= getIdParent rId idtable
+	# ioState				= IOStSetIdTable idtable ioState
 	| isNothing maybeParent
 		= ioState
-	# parent			= fromJust maybeParent
+	# parent				= fromJust maybeParent
 	| parent.idpDevice<>MenuDevice
 		= ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
+	# (ioId,ioState)		= IOStGetIOId ioState
 	| parent.idpIOId<>ioId
 		= ioState
 	| otherwise

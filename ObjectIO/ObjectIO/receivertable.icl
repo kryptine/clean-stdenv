@@ -23,7 +23,7 @@ import StdMaybe, commondef, id, systemid, device
 		}
 
 
-initialReceiverTable :: ReceiverTable			// initialReceiverTable yields an empty ReceiverTable
+initialReceiverTable :: *ReceiverTable			// initialReceiverTable yields an empty ReceiverTable
 initialReceiverTable
 	= []
 
@@ -35,11 +35,11 @@ eqReceiverId id {rlReceiverId}
 /*	addReceiverToReceiverTable adds a new receiver entry to the ReceiverTable.
 	The Boolean result is True iff no duplicate receiver entry was found, otherwise it is False.
 */
-addReceiverToReceiverTable :: !ReceiverTableEntry !ReceiverTable -> (!Bool,!ReceiverTable)
+addReceiverToReceiverTable :: !ReceiverTableEntry !*ReceiverTable -> (!Bool,!*ReceiverTable)
 addReceiverToReceiverTable rte=:{rteLoc={rlReceiverId}} receivers
 	= add rlReceiverId rte receivers
 where
-	add :: !Id !ReceiverTableEntry ![ReceiverTableEntry] -> (!Bool,![ReceiverTableEntry])
+	add :: !Id !ReceiverTableEntry !*[ReceiverTableEntry] -> (!Bool,!*[ReceiverTableEntry])
 	add rid entry [rte=:{rteLoc}:rtes]
 		| eqReceiverId rid rteLoc
 			= (False,[rte:rtes])
@@ -53,7 +53,7 @@ where
 /*	removeReceiverFromReceiverTable removes a receiver identified by Id from the ReceiverTable.
 	The Boolean result is True iff an entry was actually removed, otherwise it is False.
 */
-removeReceiverFromReceiverTable :: !Id !ReceiverTable -> (!Bool,!ReceiverTable)
+removeReceiverFromReceiverTable :: !Id !*ReceiverTable -> (!Bool,!*ReceiverTable)
 removeReceiverFromReceiverTable rid receivers
 	= (found,receivers`)
 where
@@ -63,22 +63,25 @@ where
 /*	getReceiverTableEntry returns the receiver identified by Id from the ReceiverTable.
 	If such a receiver could be found, then (Just ReceiverTableEntry) is returned, otherwise Nothing.
 */
-getReceiverTableEntry :: !Id !ReceiverTable -> Maybe ReceiverTableEntry
+getReceiverTableEntry :: !Id !*ReceiverTable -> (!Maybe ReceiverTableEntry,!*ReceiverTable)
 getReceiverTableEntry rid [rte=:{rteLoc}:rtes]
-	| eqReceiverId rid rteLoc	= Just rte
-	| otherwise					= getReceiverTableEntry rid rtes
-getReceiverTableEntry _ _
-	= Nothing
+	| eqReceiverId rid rteLoc
+		= (Just rte,[rte:rtes])
+	| otherwise
+		# (maybeRTE,rtes)	= getReceiverTableEntry rid rtes
+		= (maybeRTE,[rte:rtes])
+getReceiverTableEntry _ []
+	= (Nothing,[])
 
 
 /*	setReceiverTableEntry replaces the current ReceiverTableEntry that has an identical Id. 
 	If such an entry could not be found, then the new entry is added behind all other entries.
 */
-setReceiverTableEntry :: !ReceiverTableEntry !ReceiverTable -> ReceiverTable
+setReceiverTableEntry :: !ReceiverTableEntry !*ReceiverTable -> *ReceiverTable
 setReceiverTableEntry rte=:{rteLoc={rlReceiverId}} receivers
 	= set rlReceiverId rte receivers
 where
-	set :: !Id !ReceiverTableEntry ![ReceiverTableEntry] -> [ReceiverTableEntry]
+	set :: !Id !ReceiverTableEntry !*[ReceiverTableEntry] -> *[ReceiverTableEntry]
 	set rid new [rte=:{rteLoc}:rtes]
 		| eqReceiverId rid rteLoc
 			= [new:rtes]
@@ -93,12 +96,13 @@ where
 	rteSelectState==Able and rteASMCount>0. 
 	If such an entry could not be found, then Nothing is returned.
 */
-getActiveReceiverTableEntry :: !ReceiverTable -> Maybe Id
-getActiveReceiverTableEntry [rte:rtes]
-	| enabled rte.rteSelectState && rte.rteASMCount>0
-		#! id = rte.rteLoc.rlReceiverId
-		=  Just id
+getActiveReceiverTableEntry :: !*ReceiverTable -> (!Maybe Id,!*ReceiverTable)
+getActiveReceiverTableEntry [rte=:{rteSelectState,rteASMCount,rteLoc}:rtes]
+	| enabled rteSelectState && rteASMCount>0
+		#! id = rteLoc.rlReceiverId
+		=  (Just id,[rte:rtes])
 	| otherwise
-		= getActiveReceiverTableEntry rtes
-getActiveReceiverTableEntry _
-	= Nothing
+		# (maybeId,rtes)	= getActiveReceiverTableEntry rtes
+		= (maybeId,[rte:rtes])
+getActiveReceiverTableEntry []
+	= (Nothing,[])

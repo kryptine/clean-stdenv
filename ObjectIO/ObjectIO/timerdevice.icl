@@ -53,7 +53,7 @@ timerClose pState=:{io=ioState}
 		# ioState			= IOStRemoveDeviceFunctions TimerDevice ioState
 		= {pState & io=ioState}
 where
-	closeTimerIds :: !SystemId !(TimerStateHandle .ps) !(!TimerTable,!ReceiverTable,!IdTable) -> (!TimerTable,!ReceiverTable,!IdTable)
+	closeTimerIds :: !SystemId !(TimerStateHandle .pst) !*(!*TimerTable,!*ReceiverTable,!*IdTable) -> *(!*TimerTable,!*ReceiverTable,!*IdTable)
 	closeTimerIds pid (TimerLSHandle {tHandle={tId,tItems}}) tables
 		# (tt,rt,it)	= unbindTimerElementIds pid tItems tables
 		= (snd (removeTimerFromTimerTable teLoc tt),rt,snd (removeIdFromIdTable tId it))
@@ -199,8 +199,8 @@ where
 						| receiverIdentified rid rH	= (True, TimerReceiverHandle trH1,(ls1,ps1))
 						| otherwise					= (False,TimerReceiverHandle trH, (ls, ps ))
 					where
-						(rH1,(ls1,ps1))	= aSyncReceiverHandle rH (ls,ps)
-						trH1			= {trH & tReceiverHandle=rH1}
+						(rH1,(ls1,ps1))				= aSyncReceiverHandle rH (ls,ps)
+						trH1						= {trH & tReceiverHandle=rH1}
 						
 						aSyncReceiverHandle :: !(ReceiverHandle .ls .pst) *(.ls,.pst) -> *(!ReceiverHandle .ls .pst,*(.ls,.pst))
 						aSyncReceiverHandle rH=:{rFun,rASMQ=[m:tailQ]} (ls,ps)

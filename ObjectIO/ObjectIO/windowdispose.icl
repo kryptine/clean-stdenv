@@ -67,7 +67,7 @@ disposeWindow wid pState=:{io=ioState}
 		= dispose wids wsH windows {pState & io=ioState}
 where
 	dispose :: !WIDS !(WindowStateHandle (PSt .l)) !(WindowHandles (PSt .l)) !(PSt .l) -> PSt .l
-	dispose wids=:{wId} wsH windows=:{whsFinalModalLS} pState
+	dispose wids=:{wId} wsH windows pState
 		# (disposeFun,pState)	= accPIO IOStGetInitIO pState
 		# pState				= disposeFun pState
 		# (osdinfo,ioState)		= IOStGetOSDInfo pState.io
@@ -76,15 +76,15 @@ where
 		# (windows,ioState)		= enableProperWindows windows ioState	// PA: before disposing last modal window, the window and menu system should be enabled
 		# (tb,ioState)			= getIOToolbox ioState
 		# pState				= {pState & io=ioState}
-		# ((rids,ids,delayinfo,finalLS,inputTrack),pState,tb)
-								= disposeWindowStateHandle osdinfo inputTrack wsH handleOSEvent pState tb
+		# ((rids,ids,delayinfo,finalLS,inputTrack),(_,pState),tb)
+								= disposeWindowStateHandle osdinfo inputTrack handleOSEvent (wsH,pState) tb
 		# ioState				= setIOToolbox tb pState.io
 		# ioState				= IOStSetInputTrack inputTrack ioState
 		# ioState				= unbindRIds rids ioState				// When timers are part of windows, also unbind timers
 		# (idtable,ioState)		= IOStGetIdTable ioState
 		  (_,idtable)			= removeIdsFromIdTable (rids++ids) idtable
 		# ioState				= IOStSetIdTable idtable ioState
-		# windows				= {windows & whsFinalModalLS=finalLS++whsFinalModalLS}
+		# windows				= {windows & whsFinalModalLS=finalLS++windows.whsFinalModalLS}
 		# ioState				= IOStSetDevice (WindowSystemState windows) ioState
 		# ioState				= bufferDelayedEvents delayinfo ioState
 		= {pState & io=ioState}
@@ -113,55 +113,64 @@ disposeCursorInfo :: !CursorInfo !(IOSt .l) -> IOSt .l
 	The [FinalModalLS] is the final local state if the WindowStateHandle is a modal dialog.
 	When timers are part of windows, also timer ids should be returned.
 */
-disposeWindowStateHandle :: !OSDInfo !(Maybe InputTrack) !(WindowStateHandle .pst) !(OSEvent -> .s -> ([Int],.s)) .s !*OSToolbox
-									  -> (!(![Id],![Id],![DelayActivationInfo],![FinalModalLS],!Maybe InputTrack),.s,!*OSToolbox)
-disposeWindowStateHandle osdinfo inputTrack {wshIds=wids=:{wPtr,wId},wshHandle=Just {wlsState,wlsHandle=wH}} handleOSEvent state tb
+disposeWindowStateHandle :: !OSDInfo !(Maybe InputTrack) !(OSEvent -> .s -> ([Int],.s)) !*(!*WindowStateHandle .pst,.s) !*OSToolbox
+			-> (!(![Id],![Id],![DelayActivationInfo],![FinalModalLS],!Maybe InputTrack),!*(!*WindowStateHandle .pst,.s),!*OSToolbox)
+disposeWindowStateHandle osdinfo inputTrack handleOSEvent 
+						 (wsH=:{wshIds=wids=:{wPtr,wId},wshHandle=Just wlsH=:{wlsState,wlsHandle=wH=:{whWindowInfo,whItems,whKind,whMode}}},state)
+						 tb
 	# isModalDialog				= whKind==IsDialog && whMode==Modal
-	  (isWindowInfo,info)		= case wH.whWindowInfo of
+	  (isWindowInfo,info)		= case whWindowInfo of
 									WindowInfo info	-> (True, info)
 									_				-> (False,windowdisposeFatalError "disposeWindowStateHandle" "info unexpectedly evaluated")
-	# (ids_dispose,tb)			= StateMap (disposeWElementHandle wPtr) wH.whItems tb
-	  (rIdss,idss,disposeFuns)	= unzip3 ids_dispose
-	# tb						= StrictSeq disposeFuns tb
+//	# (ids_dispose,tb)			= StateMap (disposeWElementHandle wPtr) wH.whItems tb
+//	  (rIdss,idss,disposeFuns)	= unzip3 ids_dispose
+	# (rids,ids,fs,itemHs,tb)	= disposeWElementHandles wPtr whItems tb
+	# tb						= fs tb//StrictSeq disposeFuns tb
 	# (delayinfo,state,tb)		= OSdestroyWindow osdinfo (whMode==Modal) (whKind==IsWindow) wPtr handleOSEvent state tb
-	  rids						= flatten rIdss
-	  ids						= [wId:flatten idss]
+//	  rids						= flatten rIdss
+	  ids						= [wId:ids]//flatten idss]
 	  finalModalLS				= if isModalDialog [{fmWIDS=wids,fmLS=wlsState}] []
 	  inputTrack				= case inputTrack of
 	  								Just {itWindow}
 	  										-> if (itWindow==wPtr) Nothing inputTrack
 	  								nothing -> nothing
 	  result					= (rids,ids,delayinfo,finalModalLS,inputTrack)
-	| isWindowInfo				= (result,state,disposeClipState info.windowClip tb)
-	| otherwise					= (result,state,tb)
-where
-	whKind						= wH.whKind
-	whMode						= wH.whMode
-disposeWindowStateHandle _ _ _ _ _ _
+	  wsH						= {wsH & wshHandle=Just {wlsH & wlsState=undef,wlsHandle={wH & whItems=itemHs}}}
+	| isWindowInfo				= (result,(wsH,state),disposeClipState info.windowClip tb)
+	| otherwise					= (result,(wsH,state),tb)
+disposeWindowStateHandle _ _ _ _ _
 	= windowdisposeFatalError "disposeWindowStateHandle" "window expected instead of placeholder"
 
 
-/*	disposeWElementHandle (recursively) hides all system resources associated with the given 
-	WElementHandle. The argument OSWindowPtr must be the parent window.
+/*	disposeWElementHandle(s) (recursively) hides all system resources associated with the given 
+	WElementHandle(s). The argument OSWindowPtr must be the parent window.
 	The (IdFun *OSToolbox) function must be used to actually dispose the controls.
 	It returns all freed receiver and control ids.
 	When timers are part of windows, also timer ids should be returned.
 */
-disposeWElementHandle :: !OSWindowPtr !(WElementHandle .ls .pst) !*OSToolbox -> (!(![Id],![Id],!IdFun *OSToolbox),!*OSToolbox)
+disposeWElementHandles :: !OSWindowPtr !*[WElementHandle .ls .pst] !*OSToolbox 
+	 -> (![Id],![Id],!IdFun *OSToolbox,!*[WElementHandle .ls .pst],!*OSToolbox)
+disposeWElementHandles wPtr [itemH:itemHs] tb
+	# (rids, ids, fs, itemH, tb)	= disposeWElementHandle  wPtr itemH  tb
+	# (ridss,idss,fss,itemHs,tb)	= disposeWElementHandles wPtr itemHs tb
+	= (rids++ridss,ids++idss,fss o fs,[itemH:itemHs],tb)
+disposeWElementHandles _ [] tb
+	= ([],[],id,[],tb)
+
+disposeWElementHandle :: !OSWindowPtr !(WElementHandle .ls .pst) !*OSToolbox
+	-> (![Id],![Id],!IdFun *OSToolbox, !WElementHandle .ls .pst, !*OSToolbox)
 disposeWElementHandle wPtr (WItemHandle itemH) tb
-	= disposeWItemHandle wPtr itemH tb
+	# (rids,ids,f,itemH,tb)	= disposeWItemHandle wPtr itemH tb
+	= (rids,ids,f,WItemHandle itemH,tb)
 disposeWElementHandle wPtr (WListLSHandle itemHs) tb
-	# (ids_dispose,tb)	= StateMap (disposeWElementHandle wPtr) itemHs tb
-	  (ridss,idss,fs)	= unzip3 ids_dispose
-	= ((flatten ridss,flatten idss,StrictSeq fs),tb)
-disposeWElementHandle wPtr (WExtendLSHandle {wExtendItems=itemHs}) tb
-	# (ids_dispose,tb)	= StateMap (disposeWElementHandle wPtr) itemHs tb
-	  (ridss,idss,fs)	= unzip3 ids_dispose
-	= ((flatten ridss,flatten idss,StrictSeq fs),tb)
-disposeWElementHandle wPtr (WChangeLSHandle {wChangeItems=itemHs}) tb
-	# (ids_dispose,tb)	= StateMap (disposeWElementHandle wPtr) itemHs tb
-	  (ridss,idss,fs)	= unzip3 ids_dispose
-	= ((flatten ridss,flatten idss,StrictSeq fs),tb)
+	# (rids,ids,fs,itemHs,tb)	= disposeWElementHandles wPtr itemHs tb
+	= (rids,ids,fs,WListLSHandle itemHs,tb)
+disposeWElementHandle wPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs}) tb
+	# (rids,ids,fs,itemHs,tb)	= disposeWElementHandles wPtr itemHs tb
+	= (rids,ids,fs,WExtendLSHandle {wExH & wExtendItems=itemHs},tb)
+disposeWElementHandle wPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs}) tb
+	# (rids,ids,fs,itemHs,tb)	= disposeWElementHandles wPtr itemHs tb
+	= (rids,ids,fs,WChangeLSHandle {wChH & wChangeItems=itemHs},tb)
 
 
 /*	disposeWItemHandle (recursively) hides all system resources associated with the given WItemHandle. 
@@ -170,56 +179,53 @@ disposeWElementHandle wPtr (WChangeLSHandle {wChangeItems=itemHs}) tb
 	It returns all freed receiver ids.
 	When timers are part of windows, also timer ids should be returned.
 */
-disposeWItemHandle :: !OSWindowPtr !(WItemHandle .ls .pst) !*OSToolbox -> (!(![Id],![Id],!IdFun *OSToolbox),!*OSToolbox)
+disposeWItemHandle :: !OSWindowPtr !(WItemHandle .ls .pst) !*OSToolbox
+  -> (![Id],![Id],!IdFun *OSToolbox,!WItemHandle .ls .pst, !*OSToolbox)
 
-disposeWItemHandle wPtr itemH=:{wItemKind=IsCheckControl} tb
-	# checkInfo			= getWItemCheckInfo itemH.wItemInfo
+disposeWItemHandle wPtr itemH=:{wItemKind=IsCheckControl,wItemInfo,wItemId} tb
+	# checkInfo			= getWItemCheckInfo wItemInfo
 	  items				= checkInfo.checkItems
 	# tb				= StateMap2 (\{checkItemPtr,checkItemPos,checkItemSize}
 										->OSsetCheckControlShow wPtr checkItemPtr (PosSizeToRect checkItemPos checkItemSize) False
 									) items tb
-	= (([],maybeToList itemH.wItemId,StateMap2 (\{checkItemPtr}->OSdestroyCheckControl checkItemPtr) items),tb)
+	= ([],maybeToList wItemId,StateMap2 (\{checkItemPtr}->OSdestroyCheckControl checkItemPtr) items,itemH,tb)
 
-disposeWItemHandle wPtr itemH=:{wItemKind=IsCompoundControl} tb
-	# (ids_dispose,tb)	= StateMap (disposeWElementHandle wPtr) itemH.wItems tb
-	  (rIdss,idss,fs)	= unzip3 ids_dispose
-	  f					= OSdestroyCompoundControl itemPtr
-	  rids				= flatten rIdss
-	  ids				= maybeToList itemH.wItemId ++ flatten idss
-	  info				= getWItemCompoundInfo itemH.wItemInfo
-	# tb				= OSsetCompoundShow wPtr itemPtr (PosSizeToRect itemH.wItemPos itemH.wItemSize) False tb
-	= ((rids,ids,f o disposeClipState info.compoundLookInfo.compoundClip o StrictSeq fs),tb)
-where
-	itemPtr				= itemH.wItemPtr
+disposeWItemHandle wPtr itemH=:{wItemKind=IsCompoundControl,wItemInfo,wItems,wItemId,wItemPos,wItemSize,wItemPtr} tb
+	# (rids,ids,fs,itemHs,tb)	= disposeWElementHandles wPtr wItems tb
+	  f							= OSdestroyCompoundControl wItemPtr
+	  ids						= maybeToList wItemId ++ ids
+	  info						= getWItemCompoundInfo wItemInfo
+	# tb						= OSsetCompoundShow wPtr wItemPtr (PosSizeToRect wItemPos wItemSize) False tb
+	  itemH						= {itemH & wItems=itemHs}
+	= (rids,ids,f o disposeClipState info.compoundLookInfo.compoundClip o fs,itemH,tb)
 
-disposeWItemHandle wPtr itemH=:{wItemKind=IsLayoutControl} tb
-	# (ids_dispose,tb)	= StateMap (disposeWElementHandle wPtr) itemH.wItems tb
-	  (rIdss,idss,fs)	= unzip3 ids_dispose
-	  rids				= flatten rIdss
-	  ids				= maybeToList itemH.wItemId ++ flatten idss
-	= ((rids,ids,StrictSeq fs),tb)
+disposeWItemHandle wPtr itemH=:{wItemKind=IsLayoutControl,wItems,wItemId} tb
+	# (rids,ids,fs,itemHs,tb)	= disposeWElementHandles wPtr wItems tb
+	  ids						= maybeToList wItemId ++ ids
+	  itemH						= {itemH & wItems=itemHs}
+	= (rids,ids,fs,itemH,tb)
 
-disposeWItemHandle wPtr itemH=:{wItemKind=IsOtherControl controltype} tb
+disposeWItemHandle wPtr itemH=:{wItemKind=IsOtherControl controltype,wItemId} tb
 //	The control is a receiver:
 	| controltype=="Receiver" || controltype=="Receiver2"
-		= ((maybeToList itemH.wItemId,[],id),tb)
+		= (maybeToList wItemId,[],id,itemH,tb)
 /*	The control is a timer:
 	| controltype=="TimerControl"
-		= (([],getTimerLoc itemH,id),tb)
+		= ([],getTimerLoc itemH,id,itemH,tb)
 */	| otherwise
 		= windowdisposeFatalError "disposeWItemHandle" ("unknown control type: "+++controltype)
 
-disposeWItemHandle wPtr itemH=:{wItemKind=IsRadioControl} tb
-	# radioInfo			= getWItemRadioInfo itemH.wItemInfo
+disposeWItemHandle wPtr itemH=:{wItemKind=IsRadioControl,wItemId,wItemInfo} tb
+	# radioInfo			= getWItemRadioInfo wItemInfo
 	  items				= radioInfo.radioItems
 	# tb				= StateMap2 (\{radioItemPtr,radioItemPos,radioItemSize}
 										->OSsetRadioControlShow wPtr radioItemPtr (PosSizeToRect radioItemPos radioItemSize) False
 									) items tb
-	= (([],maybeToList itemH.wItemId,StateMap2 (\{radioItemPtr}->OSdestroyRadioControl radioItemPtr) items),tb)
+	= ([],maybeToList wItemId,StateMap2 (\{radioItemPtr}->OSdestroyRadioControl radioItemPtr) items,itemH,tb)
 
-disposeWItemHandle wPtr itemH=:{wItemKind} tb
-	# tb				= hide wPtr itemPtr (PosSizeToRect itemH.wItemPos itemH.wItemSize) False tb
-	= (([],maybeToList itemH.wItemId,dispose itemPtr),tb)
+disposeWItemHandle wPtr itemH=:{wItemKind,wItemId,wItemPtr,wItemPos,wItemSize} tb
+	# tb				= hide wPtr wItemPtr (PosSizeToRect wItemPos wItemSize) False tb
+	= ([],maybeToList wItemId,dispose wItemPtr,itemH,tb)
 where
 	(hide,dispose)		= case wItemKind of
 							IsPopUpControl			-> (OSsetPopUpControlShow,			OSdestroyPopUpControl)
@@ -230,7 +236,6 @@ where
 							IsCustomButtonControl	-> (OSsetCustomButtonControlShow,	OSdestroyCustomButtonControl)
 							IsCustomControl			-> (OSsetCustomControlShow,			OSdestroyCustomControl)
 							_						-> windowdisposeFatalError "disposeWItemHandle" ("unmatched ControlKind: "+++toString wItemKind)
-	itemPtr				= itemH.wItemPtr
 
 maybeToList :: !(Maybe .x) -> [.x]
 maybeToList (Just x)	= [x]

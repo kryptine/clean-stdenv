@@ -24,9 +24,9 @@ from	StdProcessAttribute	import isProcessKindAttribute
 		,	cMaxIONr		:: !SystemId			// The global maximum system number
 		,	cProcesses		:: !*CProcesses			// All processes
 		,	cModalProcess	:: !Maybe SystemId		// The SystemId of the interactive process that has a modal window
-		,	cReceiverTable	:: !ReceiverTable		// The global receiver-process table
-		,	cTimerTable		:: !TimerTable			// The table of all currently active timers
-		,	cIdTable		:: !IdTable				// The table of all bound Ids
+		,	cReceiverTable	:: !*ReceiverTable		// The global receiver-process table
+		,	cTimerTable		:: !*TimerTable			// The table of all currently active timers
+		,	cIdTable		:: !*IdTable			// The table of all bound Ids
 		,	cOSTime			:: !OSTime				// The current OSTime
 		,	cIdSeed			:: !Int					// The global id generating number (actually the World)
 		,	cOSToolbox		:: !*OSToolbox			// The toolbox environment
@@ -50,13 +50,13 @@ ContextGetProcesses context=:{cProcesses}
 	= (cProcesses,{context & cProcesses=emptyRR})
 
 ContextGetSleepTime :: !Context -> (!Int,!Context)
-ContextGetSleepTime context=:{cTimerTable,cReceiverTable}
-	# maybe_sleep	= getTimeIntervalFromTimerTable cTimerTable
-	# maybe_receiver= getActiveReceiverTableEntry cReceiverTable
-	  sleep			= if (isJust maybe_receiver) 0								// a receiver with a non-empty message queue exists
-	  				 (if (isJust maybe_sleep)	(snd (fromJust maybe_sleep))	// a timer with given interval is waiting
-	  				 							OSLongSleep)					// neither a receiver nor timer
-	= (sleep,context)
+ContextGetSleepTime context=:{cTimerTable=tt,cReceiverTable}
+	# (maybe_sleep,tt)		= getTimeIntervalFromTimerTable tt
+	# (maybe_receiver,rt)	= getActiveReceiverTableEntry cReceiverTable
+	  sleep					= if (isJust maybe_receiver) 0								// a receiver with a non-empty message queue exists
+			  				 (if (isJust maybe_sleep)	(snd (fromJust maybe_sleep))	// a timer with given interval is waiting
+			  				 							OSLongSleep)					// neither a receiver nor timer
+	= (sleep,{context & cTimerTable=tt,cReceiverTable=rt})
 
 ContextGetOSEvents :: !Context -> (!OSEvents,!Context)
 ContextGetOSEvents context=:{cEnvs=envs=:{envsEvents=es}}
@@ -182,6 +182,7 @@ handleContextOSEvent osEvent context=:{cEnvs=envs=:{envsEvents=osEvents},cProces
 	  (schedulerEvent,receivertable,timertable,osEvents)
 	  							= toSchedulerEvent osEvent cReceiverTable timertable cOSTime osEvents
 	  processes					= resetRR cProcesses
+	  (_,oldTopIO)				= topShowProcessShowState cProcessStack
 	# context					= {context & cEnvs			= {envs & envsEvents=osEvents}
 										   , cProcesses		= processes
 										   , cReceiverTable	= receivertable
@@ -193,15 +194,14 @@ handleContextOSEvent osEvent context=:{cEnvs=envs=:{envsEvents=osEvents},cProces
 	  replyToOS					= case schedulerEvent of
 	  								(ScheduleOSEvent _ reply)	-> reply
 	  								_							-> []
-	# (ioStack,context)			= ContextGetProcessStack context
-	  (_,oldTopIO)				= topShowProcessShowState cProcessStack
-	  (newTopIOVis,newTopIO)	= topShowProcessShowState ioStack
+	# (newStack,context)		= ContextGetProcessStack context
+	  (newTopIOVis,newTopIO)	= topShowProcessShowState newStack
 	| oldTopIO==newTopIO || not newTopIOVis
 		= (replyToOS,context)
 	| otherwise
 		# (processes,context)	= ContextGetProcesses context
-		# (ioStack,processes)	= activateTopOfGroups newTopIO ioStack (resetRR processes)
-		= (replyToOS,{context & cProcessStack=ioStack,cProcesses=processes})
+		# (newStack,processes)	= activateTopOfGroups newTopIO newStack (resetRR processes)
+		= (replyToOS,{context & cProcessStack=newStack,cProcesses=processes})
 
 
 /*	PA: new function:
@@ -212,12 +212,21 @@ handleContextOSEvent osEvent context=:{cEnvs=envs=:{envsEvents=osEvents},cProces
 zerotimelimit :: OSTime
 zerotimelimit =: fromInt (max 1 (OStickspersecond/20))
 
-toSchedulerEvent :: !OSEvent !ReceiverTable !TimerTable !OSTime !*OSEvents -> (!SchedulerEvent,!ReceiverTable,!TimerTable,!*OSEvents)
+toSchedulerEvent :: !OSEvent !*ReceiverTable !*TimerTable !OSTime !*OSEvents -> (!SchedulerEvent,!*ReceiverTable,!*TimerTable,!*OSEvents)
 toSchedulerEvent osevent receivertable timertable osTime osEvents
 	| eventIsUrgent
 		= (schedulerEvent,receivertable,timertable,osEvents)
-	| (not sure_timer) && not sure_receiver
+	# (maybe_timer,timertable)		= getTimeIntervalFromTimerTable timertable
+	  (zerotimer,interval)			= fromJust maybe_timer
+	  sure_timer					= isJust maybe_timer && interval<=0
+	  (maybe_receiver,receivertable)= getActiveReceiverTableEntry receivertable
+	  sure_receiver					= isJust maybe_receiver
+	| not sure_timer && not sure_receiver
 		= (schedulerEvent,receivertable,timertable,osEvents)
+	# (timerEvent,timertable`)		= toTimerEvent timertable
+	  (asyncEvent,receivertable`)	= toASyncEvent (fromJust maybe_receiver) receivertable
+//	# osEvents`						= checkOSZeroTimerEvent zerotimer osTime osevent osEvents
+	# osEvents`						= checkOSZeroTimerEvent maybe_timer osTime osevent osEvents
 	| sure_timer && sure_receiver
 		| isEven (toInt osTime)
 			= (timerEvent,receivertable,timertable`,osEvents`)
@@ -228,17 +237,8 @@ toSchedulerEvent osevent receivertable timertable osTime osEvents
 	| otherwise
 		= (asyncEvent,receivertable`,timertable,osEvents)
 where
-	eventIsUrgent				= OSEventIsUrgent osevent
-	maybe_timer					= getTimeIntervalFromTimerTable timertable
-	(zerotimer,interval)		= fromJust maybe_timer
-	maybe_receiver				= getActiveReceiverTableEntry receivertable
-	sure_timer					= isJust maybe_timer && interval<=0
-	sure_receiver				= isJust maybe_receiver
-	schedulerEvent				= ScheduleOSEvent osevent []
-	(asyncEvent,receivertable`)	= toASyncEvent (fromJust maybe_receiver) receivertable
-	(timerEvent,timertable`)	= toTimerEvent timertable
-//	osEvents`					= checkOSZeroTimerEvent zerotimer osTime osevent osEvents
-	osEvents`					= checkOSZeroTimerEvent maybe_timer osTime osevent osEvents
+	eventIsUrgent					= OSEventIsUrgent osevent
+	schedulerEvent					= ScheduleOSEvent osevent []
 
 //	In case the original event is a virtual zero timer event:
 //		check if another should be inserted in the OSEvents to circumvent the event system call. 
@@ -264,16 +264,17 @@ where
 	
 //	The receiver for which an ASyncMessage is generated is placed behind all other receivers, 
 //	creating a round-robin order. Its asynchronous message queue length field is decreased.
-	toASyncEvent :: !Id !ReceiverTable -> (!SchedulerEvent,!ReceiverTable)
+	toASyncEvent :: !Id !*ReceiverTable -> (!SchedulerEvent,!*ReceiverTable)
 	toASyncEvent rid receivertable
-		#! rte					= fromJust (getReceiverTableEntry rid receivertable)
-		#! rte					= {rte & rteASMCount=rte.rteASMCount-1}
-		#! receivertable		= setReceiverTableEntry rte (snd (removeReceiverFromReceiverTable rid receivertable))
+		#! (maybeRTE,receivertable)	= getReceiverTableEntry rid receivertable
+		#! rte						= fromJust maybeRTE
+		#! rte						= {rte & rteASMCount=rte.rteASMCount-1}
+		#! receivertable			= setReceiverTableEntry rte (snd (removeReceiverFromReceiverTable rid receivertable))
 		= (ScheduleMsgEvent (ASyncMessage {asmRecLoc=rte.rteLoc}),receivertable)
 	
 //	The timer for which a TimerEvent is generated is determined by getActiveTimerInTable.
 //	This function already takes care of fairness using a round robin scheme.
-	toTimerEvent :: !TimerTable -> (!SchedulerEvent,!TimerTable)
+	toTimerEvent :: !*TimerTable -> (!SchedulerEvent,!*TimerTable)
 	toTimerEvent timertable
 		# (maybeTimerEvent,timertable)	= getActiveTimerInTimerTable timertable
 		= (ScheduleTimerEvent (fromJust maybeTimerEvent),timertable)
@@ -587,11 +588,11 @@ where
 			  (ids,todo)	= quitLocalSubProcesses` ids todo
 			= (ids,toRR done todo)
 	where
-		quitLocalSubProcesses` :: ![SystemId] ![CProcess] -> (![SystemId],![CProcess])
-		quitLocalSubProcesses` ids=:[] processes
-			= (ids,processes)
-		quitLocalSubProcesses` ids processes=:[]
-			= (ids,processes)
+		quitLocalSubProcesses` :: ![SystemId] !*[CProcess] -> (![SystemId],!*[CProcess])
+		quitLocalSubProcesses` [] processes
+			= ([],processes)
+		quitLocalSubProcesses` ids []
+			= (ids,[])
 		quitLocalSubProcesses` ids [process=:{localState,localIOSt=ioState}:processes]
 			# (ioid,ioState)		= IOStGetIOId ioState
 			  (hadId,_,ids)			= Remove ((==) ioid) NullSystemId ids
@@ -635,7 +636,7 @@ where
 			# (removed, todo)	= removeIOIdFromLocals` me parent todo
 			= (removed,toRR done todo)
 	where
-		removeIOIdFromLocals` :: !SystemId !SystemId ![CProcess] -> (!Bool,![CProcess])
+		removeIOIdFromLocals` :: !SystemId !SystemId !*[CProcess] -> (!Bool,!*[CProcess])
 		removeIOIdFromLocals` me parent [process=:{localState,localIOSt=ioState}:processes]
 			# (ioid,ioState)			= IOStGetIOId ioState
 			| parent==ioid

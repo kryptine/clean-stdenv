@@ -9,7 +9,7 @@ implementation module windowaccess
 import	StdBool, StdEnum, StdInt, StdList, StdMisc, StdTuple
 import	ossystem, ostypes, oswindow
 from	windowCrossCall_12	import CURSARROW, CURSBUSY, CURSCROSS, CURSFATCROSS, CURSHIDDEN, CURSIBEAM
-import	commondef, windowhandle
+import	commondef, keyfocus, windowhandle
 from	StdControlAttribute	import isControlKeyboard
 from	StdWindowAttribute	import isWindowInitActive, getWindowInitActiveAtt,
 									isWindowHMargin,   getWindowHMarginAtt,
@@ -23,55 +23,13 @@ windowaccessFatalError function error
 	= FatalError function "windowaccess" error
 
 
-//	Dummy values for window handles.
-
-dummyWindowHandles :: WindowHandles .pst
-dummyWindowHandles
-	= {	whsWindows		= undef
-//	  ,	whsCursorInfo	= undef
-	  ,	whsNrWindowBound= undef
-	  ,	whsModal		= undef
-	  ,	whsFinalModalLS	= undef
-	  }
-
-dummyWindowStateHandle :: WindowStateHandle .pst
-dummyWindowStateHandle
-	= {	wshIds			= undef
-	  ,	wshHandle		= undef
-	  }
-
-dummyWindowLSHandle :: WindowLSHandle .ls .pst
-dummyWindowLSHandle
-	= {	wlsState		= undef
-	  ,	wlsHandle		= undef
-	  }
-
-dummyWindowHandle :: WindowHandle .ls .pst
-dummyWindowHandle
-	= {	whMode			= undef
-	  ,	whKind			= undef
-	  ,	whTitle			= undef
-	  ,	whItemNrs		= undef
-	  ,	whKeyFocus		= undef
-	  ,	whWindowInfo	= undef
-	  ,	whItems			= undef
-	  ,	whShow			= undef
-	  ,	whSelect		= undef
-	  ,	whAtts			= undef
-	  ,	whDefaultId		= undef
-	  ,	whCancelId		= undef
-	  ,	whSize			= undef
-	  ,	whClosing		= undef
-	  }
-
-initWindowHandle :: !Title !WindowMode !WindowKind !WindowInfo ![WElementHandle .ls .pst] ![WindowAttribute *(.ls,.pst)] -> WindowHandle .ls .pst
+initWindowHandle :: !Title !WindowMode !WindowKind !WindowInfo !*[WElementHandle .ls .pst] ![WindowAttribute *(.ls,.pst)] -> *WindowHandle .ls .pst
 initWindowHandle title mode kind info itemHs atts
 	= {	whMode		= mode
 	  ,	whKind		= kind
 	  ,	whTitle		= title
 	  ,	whItemNrs	= [1..]
 	  ,	whKeyFocus	= {kfItem=Nothing,kfItems=[]}
-//	  , whWindowInfo= Nothing	Mike: changed Nothing into argument
       , whWindowInfo= info
 	  ,	whItems		= itemHs
 	  ,	whShow		= True
@@ -260,9 +218,9 @@ getWindowStateHandleItemNrs :: !(WindowStateHandle .pst) -> *(![Int],!WindowStat
 getWindowStateHandleItemNrs wsH=:{wshHandle=Just {wlsHandle={whItemNrs}}}
 	= (whItemNrs,wsH)
 
-getWindowStateHandleKeyFocus :: !(WindowStateHandle .pst) -> *(!KeyFocus,!WindowStateHandle .pst)
-getWindowStateHandleKeyFocus wsH=:{wshHandle=Just {wlsHandle={whKeyFocus}}}
-	= (whKeyFocus,wsH)
+getWindowStateHandleKeyFocus :: !(WindowStateHandle .pst) -> *(!*KeyFocus,!WindowStateHandle .pst)
+getWindowStateHandleKeyFocus wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whKeyFocus}}}
+	= (whKeyFocus,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & whKeyFocus=newFocusItems []}}})
 
 getWindowStateHandleWindowInfo :: !(WindowStateHandle .pst) -> *(!WindowInfo,!WindowStateHandle .pst)
 getWindowStateHandleWindowInfo wsH=:{wshHandle=Just {wlsHandle={whWindowInfo}}}
@@ -315,7 +273,7 @@ setWindowStateHandleItemNrs :: ![Int] !(WindowStateHandle .pst) -> WindowStateHa
 setWindowStateHandleItemNrs itemNrs wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH}}
 	= {wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItemNrs=itemNrs}}}
 
-setWindowStateHandleKeyFocus :: !KeyFocus !(WindowStateHandle .pst) -> WindowStateHandle .pst
+setWindowStateHandleKeyFocus :: !*KeyFocus !(WindowStateHandle .pst) -> WindowStateHandle .pst
 setWindowStateHandleKeyFocus keyFocus wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH}}
 	= {wsH & wshHandle=Just {wlsH & wlsHandle={wH & whKeyFocus=keyFocus}}}
 
@@ -405,10 +363,9 @@ where
 
 //	getWindowHandlesActiveModalDialog assumes that all modal dialogues are at the front of the list
 getWindowHandlesActiveModalDialog :: !(WindowHandles .pst) -> *(!Maybe WIDS,!WindowHandles .pst)
-getWindowHandlesActiveModalDialog wHs=:{whsWindows=wsHs}
-	| isEmpty wsHs
-		= (Nothing,wHs)
-	# (wsH,wsHs)	= HdTl wsHs
+getWindowHandlesActiveModalDialog wHs=:{whsWindows=[]}
+	= (Nothing,wHs)
+getWindowHandlesActiveModalDialog wHs=:{whsWindows=[wsH:wsHs]}
 	# (mode,wsH)	= getWindowStateHandleWindowMode wsH
 	| mode<>Modal
 		= (Nothing,{wHs & whsWindows=[wsH:wsHs]})
@@ -432,12 +389,12 @@ where
 	haswindow _ _
 		= (False,[])
 
-getWindowHandlesWindow :: !WID !(WindowHandles .pst) -> *(!Bool,!WindowStateHandle .pst,!WindowHandles .pst)
+getWindowHandlesWindow :: !WID !(WindowHandles .pst) -> *(!Bool,WindowStateHandle .pst,!WindowHandles .pst)
 getWindowHandlesWindow wid wHs=:{whsWindows}
 	# (ok,wsH,wsHs)	= getwindow wid whsWindows
 	= (ok,wsH,{wHs & whsWindows=wsHs})
 where
-	getwindow :: !WID ![WindowStateHandle .pst] -> *(!Bool,!WindowStateHandle .pst,![WindowStateHandle .pst])
+	getwindow :: !WID ![WindowStateHandle .pst] -> *(!Bool,WindowStateHandle .pst,![WindowStateHandle .pst])
 	getwindow wid [wsH:wsHs]
 		# (wIds,wsH)	= getWindowStateHandleWIDS wsH
 		| identifyWIDS wid wIds
@@ -446,11 +403,11 @@ where
 			# (found,wsH`,wsHs) = getwindow wid wsHs
 			= (found,wsH`,[wsH:wsHs])
 	getwindow _ _
-		= (False,dummyWindowStateHandle,[])
+		= (False,undef,[])
 
-removeWindowHandlesWindow :: !WID !(WindowHandles .pst) -> *(!Bool,!WindowStateHandle .pst,!WindowHandles .pst)
+removeWindowHandlesWindow :: !WID !(WindowHandles .pst) -> *(!Bool,WindowStateHandle .pst,!WindowHandles .pst)
 removeWindowHandlesWindow wid wHs=:{whsWindows}
-	# (ok,wsH,wsHs)	= URemove (identifyWindowStateHandle wid) dummyWindowStateHandle whsWindows
+	# (ok,wsH,wsHs)	= URemove (identifyWindowStateHandle wid) undef whsWindows
 	= (ok,wsH,{wHs & whsWindows=wsHs})
 where
 	identifyWindowStateHandle :: !WID !(WindowStateHandle .pst) -> *(!Bool,!WindowStateHandle .pst)
@@ -655,18 +612,18 @@ where
 
 /*	Determine the list of window items that can obtain the keyboard input focus.
 */
-getWElementKeyFocusIds :: !Bool ![WElementHandle .ls .pst] -> (![FocusItem],![WElementHandle .ls .pst])
+getWElementKeyFocusIds :: !Bool ![WElementHandle .ls .pst] -> (!*[FocusItem],![WElementHandle .ls .pst])
 getWElementKeyFocusIds shownContext [itemH:itemHs]
 	# (ids1,itemH)	= getWElementKeyFocusIds` shownContext itemH
 	  (ids2,itemHs)	= getWElementKeyFocusIds  shownContext itemHs
 	= (ids1++ids2,[itemH:itemHs])
 where
-	getWElementKeyFocusIds` :: !Bool !(WElementHandle .ls .pst) -> (![FocusItem],!WElementHandle .ls .pst)
+	getWElementKeyFocusIds` :: !Bool !(WElementHandle .ls .pst) -> (!*[FocusItem],!WElementHandle .ls .pst)
 	getWElementKeyFocusIds` shownContext (WItemHandle itemH)
 		# (ids,itemH)	= getWItemKeyFocusIds itemH
 		= (ids,WItemHandle itemH)
 	where
-		getWItemKeyFocusIds :: !(WItemHandle .ls .pst) -> (![FocusItem],!WItemHandle .ls .pst)
+		getWItemKeyFocusIds :: !(WItemHandle .ls .pst) -> (!*[FocusItem],!WItemHandle .ls .pst)
 		getWItemKeyFocusIds itemH=:{wItemNr,wItemKind,wItemShow,wItemAtts,wItems}
 			| wItemKind==IsEditControl
 				= (focus,itemH)

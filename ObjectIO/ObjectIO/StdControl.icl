@@ -32,6 +32,22 @@ isOkControlId ioId (x,Just {idpIOId,idpDevice,idpId})
 isOkControlId _ _
 	= (False,undef)
 
+// PA: two locally used functions that retrieve the parent Id(s).
+IOStGetIdParent :: !Id !(IOSt .l) -> (!Maybe IdParent,!IOSt .l)
+IOStGetIdParent id ioState
+	# (idtable,ioState)		= IOStGetIdTable ioState
+	# (idparent,idtable)	= getIdParent id idtable
+	# ioState				= IOStSetIdTable idtable ioState
+	= (idparent,ioState)
+
+IOStGetIdParents:: ![Id] !(IOSt .l) -> (![Maybe IdParent],!IOSt .l)
+IOStGetIdParents ids ioState
+	# (idtable,ioState)		= IOStGetIdTable ioState
+	# (idparents,idtable)	= getIdParents ids idtable
+	# ioState				= IOStSetIdTable idtable ioState
+	= (idparents,ioState)
+
+
 /*	gatherWindowIds collects all first Ids (ControlId) that belong to the same second Id (WindowId).
 	gatherWindowIds` does the same, except that not only ControlIds are collected, but also their data item.
 */
@@ -103,12 +119,11 @@ getWindow windowId ioState
 
 getParentWindow :: !Id !(IOSt .l) -> (!Maybe WState, !IOSt .l)
 getParentWindow controlId ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	  maybeParent		= getIdParent controlId idtable
+	# (maybeParent,ioState)		= IOStGetIdParent controlId ioState
 	| isNothing maybeParent
 		= (Nothing,ioState)
-	# parent			= fromJust maybeParent
-	# (ioId,ioState)	= IOStGetIOId ioState
+	# parent					= fromJust maybeParent
+	# (ioId,ioState)			= IOStGetIOId ioState
 	| ioId==parent.idpIOId && parent.idpDevice==WindowDevice
 		= getWindow parent.idpId ioState
 	| otherwise
@@ -218,14 +233,13 @@ getWindowStateHandleIds _
 */
 getParentWindowId :: !Id !(IOSt .l) -> (!Maybe Id,!IOSt .l)
 getParentWindowId controlId ioState
-	# (it,ioState)		= IOStGetIdTable ioState
-	  maybeParent		= getIdParent controlId it
+	# (maybeParent,ioState)	= IOStGetIdParent controlId ioState
 	| isNothing maybeParent
 		= (Nothing,ioState)
-	# parent			= fromJust maybeParent
+	# parent				= fromJust maybeParent
 	| parent.idpDevice<>WindowDevice
 		= (Nothing,ioState)
-	# (pid,ioState)		= IOStGetIOId ioState
+	# (pid,ioState)			= IOStGetIOId ioState
 	| parent.idpIOId<>pid
 		= (Nothing,ioState)
 	| otherwise
@@ -429,24 +443,24 @@ setControlPos wId newPoss ioState
 
 showControls :: ![Id] !(IOSt .l) -> IOSt .l
 showControls ids ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
-	  cIds_wIds			= FilterMap (isOkControlId ioId) (zip2 ids (getIdParents ids idtable))
-	  cIds_wIds			= gatherWindowIds cIds_wIds
-	| isEmpty cIds_wIds	= ioState
-	| otherwise			= StrictSeq [setWindow wId (setControlsShowState` True cIds) \\ (cIds,wId)<-cIds_wIds] ioState
+	# (ioId,ioState)		= IOStGetIOId ioState
+	# (idparents,ioState)	= IOStGetIdParents ids ioState
+	  cIds_wIds				= FilterMap (isOkControlId ioId) (zip2 ids idparents)
+	  cIds_wIds				= gatherWindowIds cIds_wIds
+	| isEmpty cIds_wIds		= ioState
+	| otherwise				= StrictSeq [setWindow wId (setControlsShowState` True cIds) \\ (cIds,wId)<-cIds_wIds] ioState
 
 showControl :: !Id !(IOSt .l) -> IOSt .l
 showControl id ioState = showControls [id] ioState
 
 hideControls :: ![Id] !(IOSt .l) -> IOSt .l
 hideControls ids ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
-	  cIds_wIds			= FilterMap (isOkControlId ioId) (zip2 ids (getIdParents ids idtable))
-	  cIds_wIds			= gatherWindowIds cIds_wIds
-	| isEmpty cIds_wIds	= ioState
-	| otherwise			= StrictSeq [setWindow wId (setControlsShowState` False cIds) \\ (cIds,wId)<-cIds_wIds] ioState
+	# (ioId,ioState)		= IOStGetIOId ioState
+	# (idparents,ioState)	= IOStGetIdParents ids ioState
+	  cIds_wIds				= FilterMap (isOkControlId ioId) (zip2 ids idparents)
+	  cIds_wIds				= gatherWindowIds cIds_wIds
+	| isEmpty cIds_wIds		= ioState
+	| otherwise				= StrictSeq [setWindow wId (setControlsShowState` False cIds) \\ (cIds,wId)<-cIds_wIds] ioState
 
 hideControl :: !Id !(IOSt .l) -> IOSt .l
 hideControl id ioState = hideControls [id] ioState
@@ -463,12 +477,12 @@ setControlsShowState` show ids wState=:{wIds,wRep,wTb,wMetrics}
 */
 enableControls :: ![Id] !(IOSt .l) -> IOSt .l
 enableControls ids ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
-	  cIds_wIds			= FilterMap (isOkControlId ioId) (zip2 ids (getIdParents ids idtable))
-	  cIds_wIds			= gatherWindowIds cIds_wIds
-	| isEmpty cIds_wIds	= ioState
-	| otherwise			= StrictSeq [setWindow wId (enableControls` cIds) \\ (cIds,wId)<-cIds_wIds] ioState
+	# (ioId,ioState)		= IOStGetIOId ioState
+	# (idparents,ioState)	= IOStGetIdParents ids ioState
+	  cIds_wIds				= FilterMap (isOkControlId ioId) (zip2 ids idparents)
+	  cIds_wIds				= gatherWindowIds cIds_wIds
+	| isEmpty cIds_wIds		= ioState
+	| otherwise				= StrictSeq [setWindow wId (enableControls` cIds) \\ (cIds,wId)<-cIds_wIds] ioState
 where
 	enableControls` :: ![Id] !*WState -> *WState
 	enableControls` ids wState=:{wIds={wPtr},wRep,wTb,wMetrics}
@@ -480,16 +494,16 @@ enableControl id ioState = enableControls [id] ioState
 
 disableControls :: ![Id] !(IOSt .l) -> IOSt .l
 disableControls ids ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
-	  cIds_wIds			= FilterMap (isOkControlId ioId) (zip2 ids (getIdParents ids idtable))
-	  cIds_wIds			= gatherWindowIds cIds_wIds
-	| isEmpty cIds_wIds	= ioState
-	| otherwise			= StrictSeq [setWindow wId (disableControls` cIds) \\ (cIds,wId)<-cIds_wIds] ioState
+	# (ioId,ioState)		= IOStGetIOId ioState
+	# (idparents,ioState)	= IOStGetIdParents ids ioState
+	  cIds_wIds				= FilterMap (isOkControlId ioId) (zip2 ids idparents)
+	  cIds_wIds				= gatherWindowIds cIds_wIds
+	| isEmpty cIds_wIds		= ioState
+	| otherwise				= StrictSeq [setWindow wId (disableControls` cIds) \\ (cIds,wId)<-cIds_wIds] ioState
 where
 	disableControls` :: ![Id] !*WState -> *WState
 	disableControls` ids wState=:{wIds={wPtr},wRep,wTb,wMetrics}
-		# (wH,tb)		= disablecontrols ids False wMetrics wPtr wRep wTb
+		# (wH,tb)			= disablecontrols ids False wMetrics wPtr wRep wTb
 		= {wState & wRep=wH,wTb=tb}
 
 disableControl :: !Id !(IOSt .l) -> IOSt .l
@@ -508,13 +522,14 @@ unmarkCheckControlItems cId indexs ioState
 
 setControlsMarkState :: !MarkState !Id ![Index] !(IOSt .l) -> IOSt .l
 setControlsMarkState mark cId indexs ioState
-	| isEmpty indexs	= ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
-	  maybeParent		= getIdParent cId idtable
+	| isEmpty indexs
+		= ioState
+	# (ioId,ioState)		= IOStGetIOId ioState
+	# (maybeParent,ioState)	= IOStGetIdParent cId ioState
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
-						= ioState
-	| otherwise			= setWindow (fromJust maybeParent).idpId (setControlsMarkState` mark cId indexs) ioState
+		= ioState
+	| otherwise
+		= setWindow (fromJust maybeParent).idpId (setControlsMarkState` mark cId indexs) ioState
 where
 	setControlsMarkState` :: !MarkState !Id ![Index] !*WState -> *WState
 	setControlsMarkState` mark id indexs wState=:{wIds={wPtr},wRep,wTb,wMetrics}
@@ -526,16 +541,16 @@ where
 
 selectRadioControlItem :: !Id !Index !(IOSt .l) -> IOSt .l
 selectRadioControlItem cId index ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
-	  maybeParent		= getIdParent cId idtable
+	# (ioId,ioState)		= IOStGetIOId ioState
+	# (maybeParent,ioState)	= IOStGetIdParent cId ioState
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
-						= ioState
-	| otherwise			= setWindow (fromJust maybeParent).idpId (selectRadioControlItem` cId index) ioState
+		= ioState
+	| otherwise
+		= setWindow (fromJust maybeParent).idpId (selectRadioControlItem` cId index) ioState
 where
 	selectRadioControlItem` :: !Id !Index !*WState -> *WState
 	selectRadioControlItem` id index wState=:{wIds={wPtr},wRep,wTb,wMetrics}
-		# (wH,tb)	= selectradiocontrol id index wMetrics wPtr wRep wTb
+		# (wH,tb)			= selectradiocontrol id index wMetrics wPtr wRep wTb
 		= {wState & wRep=wH,wTb=tb}
 
 
@@ -543,12 +558,12 @@ where
 
 selectPopUpControlItem :: !Id !Index !(IOSt .l) -> IOSt .l
 selectPopUpControlItem cId index ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
-	  maybeParent		= getIdParent cId idtable
+	# (ioId,ioState)		= IOStGetIOId ioState
+	# (maybeParent,ioState)	= IOStGetIdParent cId ioState
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
-						= ioState
-	| otherwise			= setWindow (fromJust maybeParent).idpId (selectPopUpControlItem` cId index) ioState
+		= ioState
+	| otherwise
+		= setWindow (fromJust maybeParent).idpId (selectPopUpControlItem` cId index) ioState
 where
 	selectPopUpControlItem` :: !Id !Index !*WState -> *WState
 	selectPopUpControlItem` id index wState=:{wIds={wPtr},wRep,wTb,wMetrics}
@@ -560,12 +575,12 @@ where
 
 moveControlViewFrame :: !Id Vector2 !(IOSt .l) -> IOSt .l
 moveControlViewFrame cId v ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
-	  maybeParent		= getIdParent cId idtable
+	# (ioId,ioState)		= IOStGetIOId ioState
+	# (maybeParent,ioState)	= IOStGetIdParent cId ioState
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
-						= ioState
-	| otherwise			= setWindow (fromJust maybeParent).idpId (moveControlViewFrame` cId v) ioState
+		= ioState
+	| otherwise
+		= setWindow (fromJust maybeParent).idpId (moveControlViewFrame` cId v) ioState
 where
 	moveControlViewFrame` :: !Id Vector2 !*WState -> *WState
 	moveControlViewFrame` id v wState=:{wIds,wRep,wTb,wMetrics}
@@ -578,12 +593,12 @@ where
 
 setControlViewDomain :: !Id ViewDomain !(IOSt .l) -> IOSt .l
 setControlViewDomain cId newDomain ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
-	  maybeParent		= getIdParent cId idtable
+	# (ioId,ioState)		= IOStGetIOId ioState
+	# (maybeParent,ioState)	= IOStGetIdParent cId ioState
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
-						= ioState
-	| otherwise			= setWindow (fromJust maybeParent).idpId (setControlViewDomain` cId newDomain) ioState
+		= ioState
+	| otherwise
+		= setWindow (fromJust maybeParent).idpId (setControlViewDomain` cId newDomain) ioState
 where
 	setControlViewDomain` :: !Id !ViewDomain !*WState -> *WState
 	setControlViewDomain` id newDomain wState=:{wIds,wRep,wTb,wMetrics}
@@ -595,9 +610,8 @@ where
 
 setControlScrollFunction :: !Id Direction ScrollFunction !(IOSt .l) -> IOSt .l
 setControlScrollFunction cId direction scrollFun ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
-	  maybeParent		= getIdParent cId idtable
+	# (ioId,ioState)		= IOStGetIOId ioState
+	# (maybeParent,ioState)	= IOStGetIdParent cId ioState
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
 		= ioState
 	| otherwise
@@ -613,14 +627,17 @@ where
 
 setControlTexts :: ![(Id,String)] !(IOSt .l) -> IOSt .l
 setControlTexts cid_texts ioState
-	# (idtable,ioState)			= IOStGetIdTable ioState
 	# (ioId,ioState)			= IOStGetIOId ioState
-	  (cids,_)					= unzip cid_texts
-	  cid_texts_wIds			= FilterMap (isOkControlId ioId) (zip2 cid_texts (getIdParents cids idtable))
+	# (idparents,ioState)		= IOStGetIdParents cids ioState
+	  cid_texts_wIds			= FilterMap (isOkControlId ioId) (zip2 cid_texts idparents)
 	  cid_texts_wIds			= gatherWindowIds` cid_texts_wIds
-	| isEmpty cid_texts_wIds	= ioState
-	| otherwise					= StrictSeq [setWindow wId (setControlTexts` cid_texts) \\ (cid_texts,wId)<-cid_texts_wIds] ioState
+	| isEmpty cid_texts_wIds
+		= ioState
+	| otherwise
+		= StrictSeq [setWindow wId (setControlTexts` cid_texts) \\ (cid_texts,wId)<-cid_texts_wIds] ioState
 where
+	(cids,_)					= unzip cid_texts
+	
 	setControlTexts` :: ![(Id,String)] !*WState -> *WState
 	setControlTexts` texts wState=:{wIds={wPtr},wRep,wTb,wMetrics}
 		# (wH,tb)	= setcontroltexts texts wMetrics wPtr wRep wTb
@@ -634,12 +651,12 @@ setControlText id text ioState = setControlTexts [(id,text)] ioState
 
 setEditControlCursor :: !Id !Int !(IOSt .l) -> IOSt .l
 setEditControlCursor cId pos ioState
-	# (idtable,ioState)	= IOStGetIdTable ioState
-	# (ioId,ioState)	= IOStGetIOId ioState
-	  maybeParent		= getIdParent cId idtable
+	# (ioId,ioState)		= IOStGetIOId ioState
+	# (maybeParent,ioState)	= IOStGetIdParent cId ioState
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
-						= ioState
-	| otherwise			= setWindow (fromJust maybeParent).idpId (setEditControlCursor` cId pos) ioState
+		= ioState
+	| otherwise
+		= setWindow (fromJust maybeParent).idpId (setEditControlCursor` cId pos) ioState
 where
 	setEditControlCursor` :: !Id !Int !*WState -> *WState
 	setEditControlCursor` id pos wState=:{wIds={wPtr},wRep,wTb,wMetrics}
@@ -652,16 +669,18 @@ where
 */
 setControlLooks :: ![(Id,Bool,(Bool,Look))] !(IOSt .l) -> IOSt .l
 setControlLooks cid_looks ioState
-	# (idtable,ioState)			= IOStGetIdTable ioState
 	# (ioId,ioState)			= IOStGetIOId ioState
 	  cid_looks					= [(cid,(redraw,look)) \\ (cid,redraw,look)<-cid_looks]
 	  (cids,_)					= unzip cid_looks
-	  cid_looks_wIds			= FilterMap (isOkControlId ioId) (zip2 cid_looks (getIdParents cids idtable))
+	# (idparents,ioState)		= IOStGetIdParents cids ioState
+	  cid_looks_wIds			= FilterMap (isOkControlId ioId) (zip2 cid_looks idparents)
 	  cid_looks_wIds			= gatherWindowIds` cid_looks_wIds
-	| isEmpty cid_looks_wIds	= ioState
-	| otherwise					= StrictSeq [	setWindow wId (setControlLooks` [(cid,redraw,look) \\ (cid,(redraw,look))<-cid_looks])
-											\\	(cid_looks,wId)<-cid_looks_wIds
-											]	ioState
+	| isEmpty cid_looks_wIds
+		= ioState
+	| otherwise
+		= StrictSeq [	setWindow wId (setControlLooks` [(cid,redraw,look) \\ (cid,(redraw,look))<-cid_looks])
+					\\	(cid_looks,wId)<-cid_looks_wIds
+					]	ioState
 where
 	setControlLooks` :: ![(Id,Bool,(Bool,Look))] !*WState -> *WState
 	setControlLooks` looks wState=:{wIds={wPtr},wRep,wTb,wMetrics}
@@ -676,14 +695,17 @@ setControlLook id redraw newlook ioState = setControlLooks [(id,redraw,newlook)]
 
 setSliderStates :: ![(Id,IdFun SliderState)] !(IOSt .l) -> IOSt .l
 setSliderStates cid_fs ioState
-	# (idtable,ioState)		= IOStGetIdTable ioState
 	# (ioId,ioState)		= IOStGetIOId ioState
-	  (cids,_)				= unzip cid_fs
-	  cid_funs_wIds			= FilterMap (isOkControlId ioId) (zip2 cid_fs (getIdParents cids idtable))
+	# (idparents,ioState)	= IOStGetIdParents cids ioState
+	  cid_funs_wIds			= FilterMap (isOkControlId ioId) (zip2 cid_fs idparents)
 	  cid_funs_wIds			= gatherWindowIds` cid_funs_wIds
-	| isEmpty cid_funs_wIds	= ioState
-	| otherwise				= StrictSeq [setWindow wId (setSliderStates` cid_funs) \\ (cid_funs,wId)<-cid_funs_wIds] ioState
+	| isEmpty cid_funs_wIds
+		= ioState
+	| otherwise
+		= StrictSeq [setWindow wId (setSliderStates` cid_funs) \\ (cid_funs,wId)<-cid_funs_wIds] ioState
 where
+	(cids,_)				= unzip cid_fs
+	
 	setSliderStates` :: ![(Id,IdFun SliderState)] !*WState -> *WState
 	setSliderStates` id_fs wState=:{wIds={wPtr},wRep,wTb,wMetrics}
 		# (wH,tb)	= setsliderstates id_fs wMetrics wPtr wRep wTb
@@ -711,9 +733,8 @@ appControlPicture cId drawfun ioState
 
 accControlPicture :: !Id !.(St *Picture .x) !(IOSt .l) -> (!Maybe .x,!IOSt .l)
 accControlPicture cId drawfun ioState
-	# (idtable,ioState)			= IOStGetIdTable ioState
 	# (ioId,ioState)			= IOStGetIOId ioState
-	  maybeParent				= getIdParent cId idtable
+	# (maybeParent,ioState)		= IOStGetIdParent cId ioState
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
 		= (Nothing,ioState)
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
@@ -737,9 +758,8 @@ accControlPicture cId drawfun ioState
 //	Update a selection of a (Compound/Custom(Button))Control:
 updateControl :: !Id !(Maybe ViewFrame) !(IOSt .l) -> IOSt .l
 updateControl cId maybeViewFrame ioState
-	# (idtable,ioState)			= IOStGetIdTable ioState
 	# (ioId,ioState)			= IOStGetIOId ioState
-	  maybeParent				= getIdParent cId idtable
+	# (maybeParent,ioState)		= IOStGetIdParent cId ioState
 	| not (fst (isOkControlId ioId (cId,maybeParent)))
 		= ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
@@ -772,10 +792,9 @@ where
 		contentRect						= getWindowContentRect wMetrics visScrolls (SizeToRect whSize)
 		
 		getWElementHandlesUpdateInfo :: !OSWindowMetrics !Id !Rect ![WElementHandle .ls .pst] -> (!Bool,UpdateInfo,![WElementHandle .ls .pst])
-		getWElementHandlesUpdateInfo wMetrics cId clipRect itemHs
-			| isEmpty itemHs
-				= (False,undef,itemHs)
-			# (itemH,itemHs)			= HdTl itemHs
+		getWElementHandlesUpdateInfo _ _ _ []
+			= (False,undef,[])
+		getWElementHandlesUpdateInfo wMetrics cId clipRect [itemH:itemHs]
 			# (found,updInfo,itemH)		= getWElementHandleUpdateInfo wMetrics cId clipRect itemH
 			| found
 				= (found,updInfo,[itemH:itemHs])
@@ -784,7 +803,7 @@ where
 				= (found,updInfo,[itemH:itemHs])
 		where
 			getWElementHandleUpdateInfo :: !OSWindowMetrics !Id !Rect !(WElementHandle .ls .pst) -> (!Bool,UpdateInfo,!WElementHandle .ls .pst)
-			getWElementHandleUpdateInfo wMetrics cId clipRect (WItemHandle itemH=:{wItemId,wItemKind,wItemPos,wItemSize,wItems})
+			getWElementHandleUpdateInfo wMetrics cId clipRect (WItemHandle itemH=:{wItemId,wItemNr,wItemPtr,wItemKind,wItemPos,wItemSize,wItems,wItemInfo})
 				| isNothing wItemId || cId<>fromJust wItemId
 					| not (isRecursiveControl wItemKind)
 						= (False,undef,WItemHandle itemH)
@@ -797,7 +816,6 @@ where
 					= (False,undef,WItemHandle itemH)
 			where
 				itemRect				= PosSizeToRect wItemPos wItemSize
-				wItemInfo				= itemH.wItemInfo
 				compoundInfo			= getWItemCompoundInfo wItemInfo
 				origin					= if (wItemKind==IsCompoundControl)
 											compoundInfo.compoundOrigin
@@ -817,8 +835,8 @@ where
 																				  ) visRect
 				updInfo							= {	updWIDS			= wshIds
 												  ,	updWindowArea	= zero
-												  ,	updControls		= [	{	cuItemNr	= itemH.wItemNr
-																		,	cuItemPtr	= itemH.wItemPtr
+												  ,	updControls		= [	{	cuItemNr	= wItemNr
+																		,	cuItemPtr	= wItemPtr
 																		,	cuArea		= updArea
 																		}]
 												  ,	updGContext		= Nothing

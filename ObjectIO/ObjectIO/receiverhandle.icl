@@ -8,10 +8,10 @@ import	receivermessage
 from	ostoolbox import OSToolbox
 
 
-::	ReceiverHandles pst
-	=	{	rReceivers	:: [ReceiverStateHandle pst]
+::	*ReceiverHandles pst
+	=	{	rReceivers	:: *[*ReceiverStateHandle pst]
 		}
-::	ReceiverStateHandle pst
+::	*ReceiverStateHandle pst
 	=	E. .ls:
 		{	rState		:: ls							// The local state of the receiver
 		,	rHandle		:: ReceiverHandle ls pst		// The receiver handle

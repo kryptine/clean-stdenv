@@ -4,9 +4,8 @@ implementation module controlpos
 //	Clean Object I/O library version 1.2
 
 import	StdBool, StdFunc, StdInt, StdList, StdMisc, StdTuple
-import	commondef, windowaccess
+import	commondef, controlrelayout, windowaccess
 from	controllayout	import layoutControls
-from	controlrelayout	import relayoutControls
 from	windowclipstate	import forceValidWindowClipState
 from	windowdraw		import drawwindowlook`
 from	windowupdate	import updatewindowbackgrounds
@@ -30,29 +29,32 @@ movewindowviewframe wMetrics v wids=:{wPtr} wH=:{whWindowInfo,whItems=oldItems,w
 		= (wH,tb)
 	# tb						= setsliderthumb (hasHScroll && newOrigin.x<>oldOrigin.x) wMetrics wPtr True  (minx,newOrigin.x,maxx) vieww (toTuple whSize) tb
 	# tb						= setsliderthumb (hasVScroll && newOrigin.y<>oldOrigin.y) wMetrics wPtr False (miny,newOrigin.y,maxy) viewh (toTuple whSize) tb
-	| isEmpty oldItems			// there are no controls: do only visual updates
+	# (noControls,oldItems)		= u_isEmpty oldItems
+	| noControls				// there are no controls: do only visual updates
 		# windowInfo			= {windowInfo & windowOrigin=newOrigin}
-		  wH					= {wH & whWindowInfo=WindowInfo windowInfo}
+		  wH					= {wH & whWindowInfo=WindowInfo windowInfo,whItems=oldItems}
 		  (updArea,updAction)	= if (not lookInfo.lookSysUpdate || toMuch)
 		  							([newFrame],return []) (calcScrollUpdateArea oldOrigin newOrigin contentRect)
 		  updState				= {oldFrame=PosSizeToRectangle oldOrigin contentSize,newFrame=newFrame,updArea=updArea}
 		# (wH,tb)				= drawwindowlook` wMetrics wPtr updAction updState wH tb
 		= (wH,tb)
-	| otherwise					// there are controls: recalculate layout and do visual updates
-		# reqSize				= {w=contentSize.w-fst hMargins-snd hMargins,h=contentSize.h-fst vMargins-snd vMargins}
-		# (_,newItems,tb)		= layoutControls wMetrics hMargins vMargins spaces reqSize minSize [(domain,newOrigin)] oldItems tb
-		  windowInfo			= {windowInfo & windowOrigin=newOrigin}
-		  wH					= {wH & whItems=newItems,whWindowInfo=WindowInfo windowInfo}
-		# (wH,tb)				= forceValidWindowClipState wMetrics True wPtr wH tb
-		# (isRect,areaRect,tb)	= case wH.whWindowInfo of
-		  							WindowInfo {windowClip={clipRgn}} -> osgetrgnbox clipRgn tb
-		  							_                                 -> controlposFatalError "movewindowviewframe" "unexpected whWindowInfo field"
-		# (updRgn,tb)			= relayoutControls wMetrics whSelect whShow contentRect contentRect zero zero wPtr wH.whDefaultId oldItems wH.whItems tb
-		# (wH,tb)				= updatewindowbackgrounds wMetrics updRgn wids wH tb
-		  (updArea,updAction)	= if (not lookInfo.lookSysUpdate || toMuch || not isRect)
-		  							([newFrame],return []) (calcScrollUpdateArea oldOrigin newOrigin areaRect)
-		  updState				= {oldFrame=PosSizeToRectangle oldOrigin contentSize,newFrame=newFrame,updArea=updArea}
-		# (wH,tb)				= drawwindowlook` wMetrics wPtr updAction updState wH tb
+	| otherwise						// there are controls: recalculate layout and do visual updates
+		# reqSize					= {w=contentSize.w-fst hMargins-snd hMargins,h=contentSize.h-fst vMargins-snd vMargins}
+		# (oldItems`,oldItems,tb)	= getWElementHandles` wPtr oldItems tb
+		# (_,newItems,tb)			= layoutControls wMetrics hMargins vMargins spaces reqSize minSize [(domain,newOrigin)] oldItems tb
+		  windowInfo				= {windowInfo & windowOrigin=newOrigin}
+		  wH						= {wH & whItems=newItems,whWindowInfo=WindowInfo windowInfo}
+		# (wH,tb)					= forceValidWindowClipState wMetrics True wPtr wH tb
+		  (whWindowInfo,wH)			= (\wH=:{whWindowInfo}->(whWindowInfo,wH)) wH
+		# (isRect,areaRect,tb)		= case whWindowInfo of
+		  								WindowInfo {windowClip={clipRgn}} -> osgetrgnbox clipRgn tb
+		  								_                                 -> controlposFatalError "movewindowviewframe" "unexpected whWindowInfo field"
+		# (updRgn,newItems,tb)		= relayoutControls wMetrics whSelect whShow contentRect contentRect zero zero wPtr wH.whDefaultId oldItems` wH.whItems tb
+		# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wids {wH & whItems=newItems} tb
+		  (updArea,updAction)		= if (not lookInfo.lookSysUpdate || toMuch || not isRect)
+		  								([newFrame],return []) (calcScrollUpdateArea oldOrigin newOrigin areaRect)
+		  updState					= {oldFrame=PosSizeToRectangle oldOrigin contentSize,newFrame=newFrame,updArea=updArea}
+		# (wH,tb)					= drawwindowlook` wMetrics wPtr updAction updState wH tb
 		= (wH,tb)
 where
 	windowInfo					= getWindowInfoWindowData whWindowInfo

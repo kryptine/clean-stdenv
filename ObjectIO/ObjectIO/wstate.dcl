@@ -149,12 +149,12 @@ from	ostoolbox	import OSToolbox
 
 
 //	Retrieving the projection type from several arguments.
-retrieveWindowHandle`		::              !u:(WindowStateHandle  .pst)	!*OSToolbox -> (!WindowHandle`,	   !u:WindowStateHandle .pst, !*OSToolbox)
-getWindowHandle`			:: !OSWindowPtr !u:(WindowHandle   .ls .pst)	!*OSToolbox -> (!WindowHandle`,	   !u:WindowHandle  .ls .pst, !*OSToolbox)
-getWElementHandles`			:: !OSWindowPtr ![WElementHandle   .ls .pst]	!*OSToolbox -> (![WElementHandle`],![WElementHandle .ls .pst],!*OSToolbox)
-getWItemHandle`				:: !OSWindowPtr !(WItemHandle      .ls .pst)	!*OSToolbox -> (! WItemHandle`,    ! WItemHandle    .ls .pst, !*OSToolbox)
+retrieveWindowHandle`		::              !*(WindowStateHandle  .pst)	!*OSToolbox -> (!WindowHandle`,	   !*WindowStateHandle   .pst, !*OSToolbox)
+getWindowHandle`			:: !OSWindowPtr !*(WindowHandle   .ls .pst)	!*OSToolbox -> (!WindowHandle`,	   !*WindowHandle    .ls .pst, !*OSToolbox)
+getWElementHandles`			:: !OSWindowPtr !*[WElementHandle .ls .pst]	!*OSToolbox -> (![WElementHandle`],!*[WElementHandle .ls .pst],!*OSToolbox)
+getWItemHandle`				:: !OSWindowPtr !*(WItemHandle    .ls .pst)	!*OSToolbox -> (! WItemHandle`,    ! *WItemHandle    .ls .pst, !*OSToolbox)
 
 //	Replacing the projection type to several arguments.
-insertWindowHandle`			:: !WindowHandle`		!u:(WindowStateHandle .pst)	-> u:WindowStateHandle .pst
-setWindowHandle`			:: !WindowHandle`		!u:(WindowHandle  .ls .pst)	-> u:WindowHandle  .ls .pst
-setWElementHandles`			:: ![WElementHandle`]	![WElementHandle  .ls .pst]	-> [WElementHandle .ls .pst]
+insertWindowHandle`			:: !WindowHandle`		!*(WindowStateHandle  .pst) -> *WindowStateHandle   .pst
+setWindowHandle`			:: !WindowHandle`		!*(WindowHandle   .ls .pst) -> *WindowHandle    .ls .pst
+setWElementHandles`			:: ![WElementHandle`]	!*[WElementHandle .ls .pst] -> *[WElementHandle .ls .pst]

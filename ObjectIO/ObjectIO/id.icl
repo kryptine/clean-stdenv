@@ -151,7 +151,7 @@ instance toString Id where
 
 //	IdTable operations:
 
-initialIdTable :: IdTable
+initialIdTable :: *IdTable
 initialIdTable
 	= {	customIds	= []
 	  ,	customRIds	= []
@@ -185,12 +185,12 @@ okMembersIdTable :: ![Id] !IdTable -> Bool
 okMembersIdTable ids idTable
 	= noDuplicates ids && all (\id->not (memberIdTable id idTable)) ids
 
-getIdParent :: !Id !IdTable -> Maybe IdParent
-getIdParent (CustomId   nr) {customIds}		= getparentsortlist nr customIds
-getIdParent (CustomRId  nr) {customRIds}	= getparentsortlist nr customRIds
-getIdParent (CustomR2Id nr) {customR2Ids}	= getparentsortlist nr customR2Ids
-getIdParent (SysId      nr) {sysIds}		= getparentsortlist nr sysIds
-getIdParent (SpecialId  _)  _				= Nothing
+getIdParent :: !Id !*IdTable -> (!Maybe IdParent,!*IdTable)
+getIdParent (CustomId   nr) idTable=:{customIds}	= (getparentsortlist nr customIds,  idTable)
+getIdParent (CustomRId  nr) idTable=:{customRIds}	= (getparentsortlist nr customRIds, idTable)
+getIdParent (CustomR2Id nr) idTable=:{customR2Ids}	= (getparentsortlist nr customR2Ids,idTable)
+getIdParent (SysId      nr) idTable=:{sysIds}		= (getparentsortlist nr sysIds,     idTable)
+getIdParent (SpecialId  _)  idTable					= (Nothing,idTable)
 
 // getparentsortlist retrieves (Just parent) in a < sorted list. If not found, Nothing is returned
 getparentsortlist :: !Int ![(Int,x)] -> Maybe x
@@ -201,11 +201,10 @@ getparentsortlist x [(y,py):ys]
 getparentsortlist _ _
 	= Nothing
 
-getIdParents :: ![Id] !IdTable -> [Maybe IdParent]
-getIdParents ids idTable
-	= [getIdParent id idTable \\ id<-ids]
+getIdParents :: ![Id] !*IdTable -> (![Maybe IdParent],!*IdTable)
+getIdParents ids idTable = seqList (map getIdParent ids) idTable
 
-addIdToIdTable :: !Id !IdParent !IdTable -> *(!Bool,!IdTable)
+addIdToIdTable :: !Id !IdParent !*IdTable -> *(!Bool,!*IdTable)
 addIdToIdTable (CustomId nr) idParent idTable=:{customIds}		= (not found,{idTable & customIds=ids})
 where	(found,ids)	= addtosortlist nr idParent customIds
 addIdToIdTable (CustomRId nr) idParent idTable=:{customRIds}	= (not found,{idTable & customRIds=ids})
@@ -221,25 +220,25 @@ addIdToIdTable (SpecialId nr) idParent idTable
 
 // addtosortlist adds an element in a < sorted list. True iff element is already member.
 addtosortlist :: !Int !IdParent ![(Int,IdParent)] -> (!Bool,![(Int,IdParent)])
-addtosortlist x px [(y,py):ys]
-	| x==y			= (True, [(y,py):ys])
-	| x>y			= (False,[(x,px),(y,py):ys])
-	| otherwise		= (found,[(y,py):ys`])
+addtosortlist x px list=:[entry=:(y,py):ys]
+	| x==y			= (True, list)
+	| x>y			= (False,[(x,px):list])
+	| otherwise		= (found,[entry:ys`])
 	with
 		(found,ys`)	= addtosortlist x px ys
 addtosortlist x px _
 	= (False,[(x,px)])
 
-addIdsToIdTable :: ![(Id,IdParent)] !IdTable -> *(!Bool,!IdTable)
+addIdsToIdTable :: ![(Id,IdParent)] !*IdTable -> *(!Bool,!*IdTable)
 addIdsToIdTable idparents idTable
 //	# (oks,idTable)	= seqList (map (\(id,parent)->addIdToIdTable id parent) idparents) idTable
 	# (oks,idTable)	= StrictSeqList (map add idparents) idTable
 	= (and oks,idTable)
 where
-	add :: !(!Id,!IdParent) !IdTable -> *(!Bool,!IdTable)
+	add :: !(!Id,!IdParent) !*IdTable -> *(!Bool,!*IdTable)
 	add (id,parent) idTable = addIdToIdTable id parent idTable
 
-removeIdFromIdTable :: !Id !IdTable -> (!Bool,!IdTable)
+removeIdFromIdTable :: !Id !*IdTable -> (!Bool,!*IdTable)
 removeIdFromIdTable (CustomId nr) idTable=:{customIds}		= (not found,{idTable & customIds=ids})
 where	(found,ids)	= removefromsortlist nr customIds
 removeIdFromIdTable (CustomRId nr) idTable=:{customRIds}	= (not found,{idTable & customRIds=ids})
@@ -261,7 +260,7 @@ removefromsortlist x [(y,py):ys]
 removefromsortlist _ _
 	= (False,[])
 
-removeIdsFromIdTable :: ![Id] !IdTable -> (!Bool,!IdTable)
+removeIdsFromIdTable :: ![Id] !*IdTable -> (!Bool,!*IdTable)
 removeIdsFromIdTable [id:ids] idTable
 	# (removed1,idTable)	= removeIdFromIdTable  id  idTable
 	# (removed2,idTable)	= removeIdsFromIdTable ids idTable

@@ -32,17 +32,18 @@ instance Timers (Timer t) | TimerElements t where
 		| not ok				// This condition should never hold: TimerDevice has just been 'installed'
 			= StdTimerFatalError "openTimer (Timer)" "could not retrieve TimerSystemState from IOSt"
 		# (pid,ioState)			= IOStGetIOId ioState
-		# (it,ioState)			= IOStGetIdTable ioState
-		# (rt,ioState)			= IOStGetReceiverTable ioState
-		# (tt,ioState)			= IOStGetTimerTable ioState
 		# pState				= {pState & io=ioState}
 		  id					= fromJust maybe_okId
 		# (ts,pState)			= timerElementToHandles items pState
 		  itemHs				= map TimerElementStateToTimerElementHandle ts
+		# (it,ioState)			= IOStGetIdTable pState.io
+		# (rt,ioState)			= IOStGetReceiverTable ioState
 		  (ok,itemHs,rt,it)		= bindTimerElementIds pid id itemHs rt it
 		| not ok
-			# pState			= appPIO (IOStSetDevice (TimerSystemState timers)) pState
-			= (ErrorIdsInUse,pState)
+			# ioState			= IOStSetDevice (TimerSystemState timers) ioState
+			# ioState			= IOStSetIdTable it ioState
+			# ioState			= IOStSetReceiverTable rt ioState
+			= (ErrorIdsInUse,{pState & io=ioState})
 		| otherwise
 			= (NoError,pState2)
 		with
@@ -58,9 +59,8 @@ instance Timers (Timer t) | TimerElements t where
 								  ,	tlParentId	= id
 								  ,	tlTimerId	= id
 								  }
-			tt1					= if ableTimer (snd (addTimerToTimerTable tLoc period tt)) tt
 			it1					= snd (addIdToIdTable id {idpIOId=pid,idpDevice=TimerDevice,idpId=id} it)
-			ioState1			= IOStSetTimerTable tt1 pState.io
+			ioState1			= addAbleTimerToTimerTable ableTimer tLoc period ioState
 			ioState2			= IOStSetReceiverTable rt ioState1
 			ioState3			= IOStSetIdTable it1 ioState2
 			ioState4			= IOStSetDevice (TimerSystemState {timers & tTimers=[tsH:timers.tTimers]}) ioState3
@@ -79,8 +79,16 @@ instance Timers (Timer t) | TimerElements t where
 			= (Just tId,ioState)
 		validateTimerId (Just id) ioState
 			# (it,ioState)			= IOStGetIdTable ioState
-			| memberIdTable id it	= (Nothing,ioState)
-			| otherwise				= (Just id,ioState)
+			| memberIdTable id it	= (Nothing,IOStSetIdTable it ioState)
+			| otherwise				= (Just id,IOStSetIdTable it ioState)
+		
+		addAbleTimerToTimerTable :: !Bool !TimerLoc !TimerInterval !(IOSt .l) -> IOSt .l
+		addAbleTimerToTimerTable True tLoc period ioState
+			# (tt,ioState)			= IOStGetTimerTable ioState
+			# (_,tt)				= addTimerToTimerTable tLoc period tt
+			= IOStSetTimerTable tt ioState
+		addAbleTimerToTimerTable _ _ _ ioState
+			= ioState
 	
 	getTimerType :: (Timer t .ls .pst) -> TimerType	| TimerElements t
 	getTimerType _
@@ -110,8 +118,8 @@ closeTimer id ioState
 	# ioState			= IOStSetDevice (TimerSystemState tHs) ioState
 	= ioState
 where
-	closetimer :: !Id !SystemId !ReceiverTable !TimerTable !IdTable ![TimerStateHandle .pst]
-							-> (!ReceiverTable,!TimerTable,!IdTable,![TimerStateHandle .pst])
+	closetimer :: !Id !SystemId !*ReceiverTable !*TimerTable !*IdTable ![TimerStateHandle .pst]
+							-> (!*ReceiverTable,!*TimerTable,!*IdTable,![TimerStateHandle .pst])
 	closetimer id pid rt tt it [tsH:tsHs]
 		# (eqid,tsH)		= eqTimerStateHandleId id tsH
 		| eqid
@@ -121,7 +129,8 @@ where
 			# (rt,tt,it,tsHs)	= closetimer id pid rt tt it tsHs
 			= (rt,tt,it,[tsH:tsHs])
 	where
-		disposeElementIds :: !SystemId !(TimerStateHandle .pst) !TimerTable !ReceiverTable !IdTable -> (!TimerTable,!ReceiverTable,!IdTable)
+		disposeElementIds :: !SystemId !(TimerStateHandle .pst) !*TimerTable !*ReceiverTable !*IdTable
+															-> (!*TimerTable,!*ReceiverTable,!*IdTable)
 		disposeElementIds pid (TimerLSHandle {tHandle={tId,tItems}}) tt rt it
 			# (tt,rt,it)	= unbindTimerElementIds pid tItems (tt,rt,it)
 			= (snd (removeTimerFromTimerTable teLoc tt),rt,snd (removeIdFromIdTable tId it))
@@ -162,7 +171,7 @@ enableTimer :: !Id !(IOSt .l) -> IOSt .l
 enableTimer id ioState
 	= changeTimer id enabletimer ioState
 where
-	enabletimer :: TimerLoc !TimerTable !(TimerStateHandle .pst) -> (!TimerTable, !TimerStateHandle .pst)
+	enabletimer :: TimerLoc !*TimerTable !(TimerStateHandle .pst) -> (!*TimerTable, !TimerStateHandle .pst)
 	enabletimer teLoc tt tlsH=:(TimerLSHandle tsH=:{tHandle=tH=:{tSelect,tPeriod}})
 		| tSelect
 			= (tt,tlsH)
@@ -174,7 +183,7 @@ disableTimer :: !Id !(IOSt .l) -> IOSt .l
 disableTimer id ioState
 	= changeTimer id disabletimer ioState
 where
-	disabletimer :: TimerLoc !TimerTable !(TimerStateHandle .pst) -> (!TimerTable, !TimerStateHandle .pst)
+	disabletimer :: TimerLoc !*TimerTable !(TimerStateHandle .pst) -> (!*TimerTable, !TimerStateHandle .pst)
 	disabletimer teLoc tt tlsH=:(TimerLSHandle tsH=:{tHandle=tH=:{tSelect}})
 		| not tSelect
 			= (tt,tlsH)
@@ -213,7 +222,7 @@ setTimerInterval :: !Id !TimerInterval !(IOSt .l) -> IOSt .l
 setTimerInterval id interval ioState
 	= changeTimer id (settimerinterval interval) ioState
 where
-	settimerinterval :: !TimerInterval !TimerLoc !TimerTable !(TimerStateHandle .pst) -> (!TimerTable, !TimerStateHandle .pst)
+	settimerinterval :: !TimerInterval !TimerLoc !*TimerTable !(TimerStateHandle .pst) -> (!*TimerTable, !TimerStateHandle .pst)
 	settimerinterval period teLoc tt tlsH=:(TimerLSHandle tsH=:{tHandle=tH=:{tSelect,tPeriod}})
 		# period		= max 0 period
 		| period==tPeriod
@@ -261,7 +270,7 @@ IOStGetTimerHandles ioState
 //	General TimerHandle changing function:
 
 ::	DeltaTimerStateHandle pst
-	:== TimerLoc TimerTable (TimerStateHandle pst) -> (TimerTable,TimerStateHandle pst)
+	:== TimerLoc -> *TimerTable -> *((TimerStateHandle pst) -> (*TimerTable,TimerStateHandle pst))
 
 changeTimer :: !Id !(DeltaTimerStateHandle (PSt .l)) !(IOSt .l) -> IOSt .l
 changeTimer id f ioState
@@ -276,14 +285,14 @@ changeTimer id f ioState
 		# ioState		= IOStSetTimerTable tt ioState
 		= ioState
 where
-	changetimerdevice :: SystemId !Id (DeltaTimerStateHandle .pst) !TimerTable !(TimerHandles .pst)
-															   -> (!TimerTable, !TimerHandles .pst)
+	changetimerdevice :: SystemId !Id (DeltaTimerStateHandle .pst) !*TimerTable !(TimerHandles .pst)
+															   -> (!*TimerTable, !TimerHandles .pst)
 	changetimerdevice ioid id f tt timers=:{tTimers=tsHs}
 		# (tt,tsHs)		= changetimerstatehandles ioid id f tt tsHs
 		= (tt,{timers & tTimers=tsHs})
 	where
-		changetimerstatehandles :: SystemId !Id (DeltaTimerStateHandle .pst) !TimerTable ![TimerStateHandle .pst]
-																		 -> (!TimerTable,![TimerStateHandle .pst])
+		changetimerstatehandles :: SystemId !Id (DeltaTimerStateHandle .pst) !*TimerTable ![TimerStateHandle .pst]
+																		 -> (!*TimerTable,![TimerStateHandle .pst])
 		changetimerstatehandles ioid id f tt [tsH=:(TimerLSHandle {tHandle={tId}}):tsHs]
 			| id==tId
 				= (tt1,[tsH1:tsHs])
@@ -294,5 +303,5 @@ where
 				= (tt1,[tsH:tsHs1])
 			with
 				(tt1,tsHs1)	= changetimerstatehandles ioid id f tt tsHs
-		changetimerstatehandles _ _ _ tt tsHs
-			= (tt,tsHs)
+		changetimerstatehandles _ _ _ tt []
+			= (tt,[])

@@ -76,12 +76,13 @@ where
 	where
 		updatebackgrounds :: !OSWindowMetrics !Rect !Bool !OSRgnHandle ![WElementHandle .ls .pst] !OSPictContext !*OSToolbox
 													  -> (!OSRgnHandle,![WElementHandle .ls .pst],!OSPictContext,!*OSToolbox)
-		updatebackgrounds wMetrics wFrame ableContext backgrRgn itemHs osPict tb
+		updatebackgrounds _ _ _ backgrRgn [] osPict tb
+			= (backgrRgn,[],osPict,tb)
+		updatebackgrounds wMetrics wFrame ableContext backgrRgn [itemH:itemHs] osPict tb
 			# (empty,tb)						= osisemptyrgn backgrRgn tb
-			| empty || isEmpty itemHs
-				= (backgrRgn,itemHs,osPict,tb)
+			| empty
+				= (backgrRgn,[itemH:itemHs],osPict,tb)
 			| otherwise
-				# (itemH,itemHs)				= HdTl itemHs
 				# (backgrRgn,itemH, osPict,tb)	= updatebackground  wMetrics wFrame ableContext backgrRgn itemH  osPict tb
 				# (backgrRgn,itemHs,osPict,tb)	= updatebackgrounds wMetrics wFrame ableContext backgrRgn itemHs osPict tb
 				= (backgrRgn,[itemH:itemHs],osPict,tb)
@@ -322,13 +323,14 @@ updaterectcontrols wMetrics area wPtr wH=:{whItems,whSelect} tb
 where
 	updatecontrolsinrect :: !OSWindowMetrics !OSWindowPtr !Bool !Rect ![WElementHandle .ls .pst] !*OSToolbox
 																  -> (![WElementHandle .ls .pst],!*OSToolbox)
-	updatecontrolsinrect wMetrics parentPtr ableContext area itemHs tb
-		| IsEmptyRect area || isEmpty itemHs
-			= (itemHs,tb)
+	updatecontrolsinrect _ _ _ _ [] tb
+		= ([],tb)
+	updatecontrolsinrect wMetrics parentPtr ableContext area [itemH:itemHs] tb
+		| IsEmptyRect area
+			= ([itemH:itemHs],tb)
 		| otherwise
-			# (itemH,itemHs)	= HdTl itemHs
-			# (itemH, tb)		= updatecontrolinrect  wMetrics parentPtr ableContext area itemH  tb
-			# (itemHs,tb)		= updatecontrolsinrect wMetrics parentPtr ableContext area itemHs tb
+			# (itemH, tb)	= updatecontrolinrect  wMetrics parentPtr ableContext area itemH  tb
+			# (itemHs,tb)	= updatecontrolsinrect wMetrics parentPtr ableContext area itemHs tb
 			= ([itemH:itemHs],tb)
 	where
 		updatecontrolinrect :: !OSWindowMetrics !OSWindowPtr !Bool !Rect !(WElementHandle .ls .pst) !*OSToolbox
@@ -563,11 +565,12 @@ updatecontrols wMetrics info=:{updWIDS,updControls} wH=:{whSelect,whItems} osPic
 where
 	updateControls :: !OSWindowMetrics !WIDS !Bool ![ControlUpdateInfo] ![WElementHandle .ls .pst] !OSPictContext !*OSToolbox
 											   -> (![ControlUpdateInfo],![WElementHandle .ls .pst],!OSPictContext,!*OSToolbox)
-	updateControls wMetrics wids contextAble updControls itemHs osPict tb
-		| isEmpty updControls || isEmpty itemHs
-			= (updControls,itemHs,osPict,tb)
+	updateControls _ _ _ updControls [] osPict tb
+		= (updControls,[],osPict,tb)
+	updateControls wMetrics wids contextAble updControls [itemH:itemHs] osPict tb
+		| isEmpty updControls
+			= (updControls,[itemH:itemHs],osPict,tb)
 		| otherwise
-			# (itemH,itemHs)				= HdTl itemHs
 			# (updControls,itemH, osPict,tb)= updateControl  wMetrics wids contextAble updControls itemH  osPict tb
 			# (updControls,itemHs,osPict,tb)= updateControls wMetrics wids contextAble updControls itemHs osPict tb
 			= (updControls,[itemH:itemHs],osPict,tb)
@@ -642,26 +645,26 @@ where
 					updArea					= RectToRectangle (IntersectRects (RectangleToRect cFrame) (addVector (toVector (origin-itemPos)) area))
 					updState				= {oldFrame=cFrame,newFrame=cFrame,updArea=[updArea]}
 				
-				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsRadioControl} osPict tb
-					= (itemH,osPict,OSupdateRadioControl area wids.wPtr itemH.wItemPtr tb)
+				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsRadioControl,wItemPtr} osPict tb
+					= (itemH,osPict,OSupdateRadioControl area wids.wPtr wItemPtr tb)
 				
-				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsCheckControl} osPict tb
-					= (itemH,osPict,OSupdateCheckControl area wids.wPtr itemH.wItemPtr tb)
+				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsCheckControl,wItemPtr} osPict tb
+					= (itemH,osPict,OSupdateCheckControl area wids.wPtr wItemPtr tb)
 				
-				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsPopUpControl} osPict tb
-					= (itemH,osPict,OSupdatePopUpControl area wids.wPtr itemH.wItemPtr tb)
+				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsPopUpControl,wItemPtr} osPict tb
+					= (itemH,osPict,OSupdatePopUpControl area wids.wPtr wItemPtr tb)
 				
-				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsSliderControl} osPict tb
-					= (itemH,osPict,OSupdateSliderControl area wids.wPtr itemH.wItemPtr tb)
+				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsSliderControl,wItemPtr} osPict tb
+					= (itemH,osPict,OSupdateSliderControl area wids.wPtr wItemPtr tb)
 				
-				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsTextControl} osPict tb
-					= (itemH,osPict,OSupdateTextControl area wids.wPtr itemH.wItemPtr tb)
+				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsTextControl,wItemPtr} osPict tb
+					= (itemH,osPict,OSupdateTextControl area wids.wPtr wItemPtr tb)
 				
-				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsEditControl} osPict tb
-					= (itemH,osPict,OSupdateEditControl area wids.wPtr itemH.wItemPtr tb)
+				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsEditControl,wItemPtr} osPict tb
+					= (itemH,osPict,OSupdateEditControl area wids.wPtr wItemPtr tb)
 				
-				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsButtonControl} osPict tb
-					= (itemH,osPict,OSupdateButtonControl area wids.wPtr itemH.wItemPtr tb)
+				updateControl`` _ wids contextAble area itemH=:{wItemKind=IsButtonControl,wItemPtr} osPict tb
+					= (itemH,osPict,OSupdateButtonControl area wids.wPtr wItemPtr tb)
 				
 				updateControl`` _ _ _ _ itemH=:{wItemKind=IsOtherControl _} osPict tb
 					= (itemH,osPict,tb)

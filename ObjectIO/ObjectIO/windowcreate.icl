@@ -216,48 +216,53 @@ where
 	updateWindowControl :: !OSWindowMetrics !Id !(!Int,!Int) !OSWindowPtr !OSWindowPtr !OSPictContext !(WindowHandle .ls (PSt .l)) !*OSToolbox
 																								   -> (!WindowHandle .ls (PSt .l), !*OSToolbox)
 	updateWindowControl wMetrics wId (w,h) wPtr cPtr osPict wH=:{whItems=itemHs} tb
-		#! (_,controls)	= getUpdateControls cPtr (SizeToRect {w=w,h=h}) itemHs
-		#! wH			= {wH & whItems=itemHs}
-		# updateInfo	= {	updWIDS			= {wPtr=wPtr,wId=wId,wActive=False}	// PA: check WIDS value
-						  ,	updWindowArea	= zero
-						  ,	updControls		= controls
-						  ,	updGContext		= Just osPict
-						  }
+		#! (_,controls,itemHs)	= getUpdateControls cPtr (SizeToRect {w=w,h=h}) itemHs
+		#! wH					= {wH & whItems=itemHs}
+		# updateInfo			= {	updWIDS			= {wPtr=wPtr,wId=wId,wActive=False}	// PA: check WIDS value
+								  ,	updWindowArea	= zero
+								  ,	updControls		= controls
+								  ,	updGContext		= Just osPict
+								  }
 		= updatewindow wMetrics updateInfo wH tb
 	where
-		getUpdateControls :: !OSWindowPtr !Rect ![WElementHandle .ls .pst] -> (!Bool,![ControlUpdateInfo])
+		getUpdateControls :: !OSWindowPtr !Rect ![WElementHandle .ls .pst] -> (!Bool,![ControlUpdateInfo],![WElementHandle .ls .pst])
 		getUpdateControls cPtr clipRect [itemH:itemHs]
-			# (found,controls)	= getUpdateControl cPtr clipRect itemH
-			| found				= (found,controls)
-			| otherwise			= getUpdateControls cPtr clipRect itemHs
+			# (found,controls,itemH)		= getUpdateControl cPtr clipRect itemH
+			| found
+				= (found,controls,[itemH:itemHs])
+			| otherwise
+				# (found,controls,itemHs)	= getUpdateControls cPtr clipRect itemHs
+				= (found,controls,[itemH:itemHs])
 		where
-			getUpdateControl :: !OSWindowPtr !Rect !(WElementHandle .ls .pst) -> (!Bool,![ControlUpdateInfo])
-			getUpdateControl cPtr clipRect (WItemHandle itemH=:{wItemPtr})
-				| cPtr==wItemPtr= (True, [{cuItemNr=itemH.wItemNr,cuItemPtr=wItemPtr,cuArea=clipRect1}])
-				| otherwise		= getUpdateControls cPtr clipRect1 itemH.wItems
+			getUpdateControl :: !OSWindowPtr !Rect !(WElementHandle .ls .pst) -> (!Bool,![ControlUpdateInfo],!WElementHandle .ls .pst)
+			getUpdateControl cPtr clipRect (WItemHandle itemH=:{wItemPtr,wItemNr,wItemPos,wItemSize,wItems})
+				| cPtr==wItemPtr
+					= (True, [{cuItemNr=wItemNr,cuItemPtr=wItemPtr,cuArea=clipRect1}],WItemHandle itemH)
+				| otherwise
+					# (found,controls,itemHs)	= getUpdateControls cPtr clipRect1 wItems
+					= (found,controls,WItemHandle {itemH & wItems=itemHs})
 			where
-				clipRect1		= IntersectRects clipRect (PosSizeToRect itemH.wItemPos itemH.wItemSize)
+				clipRect1						= IntersectRects clipRect (PosSizeToRect wItemPos wItemSize)
 			getUpdateControl cPtr clipRect (WListLSHandle itemHs)
-				= getUpdateControls cPtr clipRect itemHs
+				# (found,controls,itemHs)		= getUpdateControls cPtr clipRect itemHs
+				= (found,controls,WListLSHandle itemHs)
 			getUpdateControl cPtr clipRect (WExtendLSHandle wExH=:{wExtendItems=itemHs})
-				= getUpdateControls cPtr clipRect itemHs
-			getUpdateControl cPtr clipRect (WChangeLSHandle wExH=:{wChangeItems=itemHs})
-				= getUpdateControls cPtr clipRect itemHs
-		getUpdateControls _ _ _
-			= (False,[])
+				# (found,controls,itemHs)		= getUpdateControls cPtr clipRect itemHs
+				= (found,controls,WExtendLSHandle {wExH & wExtendItems=itemHs})
+			getUpdateControl cPtr clipRect (WChangeLSHandle wChH=:{wChangeItems=itemHs})
+				# (found,controls,itemHs)		= getUpdateControls cPtr clipRect itemHs
+				= (found,controls,WChangeLSHandle {wChH & wChangeItems=itemHs})
+		getUpdateControls _ _ []
+			= (False,[],[])
 
 getStackBehindWindow :: !Index !(WindowHandles .pst) -> (!OSWindowPtr,!WindowHandles .pst)
 getStackBehindWindow 0 wsHs
 	= (OSNoWindowPtr,wsHs)
 getStackBehindWindow index wsHs=:{whsWindows}
-	# (before,[wlsH=:{wshIds={wPtr}}:wlsHs])	= splitAt (index-1) whsWindows
-	= (wPtr,{wsHs & whsWindows=before++[wlsH:wlsHs]})
+	# (before,[wsH:after])	= splitAt (index-1) whsWindows
+	# ({wPtr},wsH)			= getWindowStateHandleWIDS wsH
+	= (wPtr,{wsHs & whsWindows=before++[wsH:after]})
 
-/*	PA: not used anymore.
-stackWindow :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> *OSToolbox
-stackWindow wPtr OSNoWindowPtr tb = tb
-stackWindow wPtr behindPtr     tb = OSstackWindow wPtr behindPtr tb
-*/
 
 /*	bufferDelayedEvents buffers the events in the OSEvents environment.
 */

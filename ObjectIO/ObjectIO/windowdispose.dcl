@@ -22,14 +22,15 @@ disposeWindow				:: !WID !(PSt .l) -> PSt .l
 	PA: not yet implemented
 */
 
-disposeWindowStateHandle	:: !OSDInfo !(Maybe InputTrack) !(WindowStateHandle .pst) !(OSEvent -> .s -> ([Int],.s)) .s !*OSToolbox
-									     -> (!(![Id],![Id],![DelayActivationInfo],![FinalModalLS],!Maybe InputTrack),.s,!*OSToolbox)
+disposeWindowStateHandle	:: !OSDInfo !(Maybe InputTrack) !(OSEvent -> .s -> ([Int],.s)) !*(!*WindowStateHandle .pst,.s) !*OSToolbox
+			   -> (!(![Id],![Id],![DelayActivationInfo],![FinalModalLS],!Maybe InputTrack),!*(!*WindowStateHandle .pst,.s),!*OSToolbox)
 /*	disposeWindowStateHandle disposes all system resources associated with the given WindowStateHandle.
 	It returns the freed receiver ids, control ids, delayed (de)activation event, and the final local modal dialog state.
 	(When timers are also part of windows, timer ids will also be returned.)
 */
 
-disposeWItemHandle			::  !OSWindowPtr !(WItemHandle .ls .pst) !*OSToolbox -> (!(![Id],![Id],!IdFun *OSToolbox),!*OSToolbox)
+disposeWItemHandle			::  !OSWindowPtr !(WItemHandle .ls .pst) !*OSToolbox
+			-> (![Id],![Id],!IdFun *OSToolbox,!WItemHandle .ls .pst, !*OSToolbox)
 /*	disposeWItemHandle returns all freed receiver ids and a function that (recursively) disposes all system 
 	resources associated with the given WItemHandle. 
 	(When timers are also part of windows, timer ids will also be returned.)

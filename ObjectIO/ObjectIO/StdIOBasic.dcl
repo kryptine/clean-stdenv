@@ -29,8 +29,8 @@ import	StdOverloaded, StdString
 ::	:+:		t1 t2	ls	cs	= (:+:) infixr 9 (t1 ls cs) (t2 ls cs)
 ::	ListLS		t	ls	cs	= ListLS [t ls cs]
 ::	NilLS			ls	cs	= NilLS
-::	NewLS		t	ls	cs	= E..new: {newLS::new, newDef:: t   new		cs}
-::	AddLS		t	ls	cs	= E..add: {addLS::add, addDef:: t *(add,ls)	cs}
+::	NewLS		t	ls	cs	= E. .new: {newLS::new, newDef:: t   new		cs}
+::	AddLS		t	ls	cs	= E. .add: {addLS::add, addDef:: t *(add,ls)	cs}
 
 noLS ::     (.a->.b)    (.c,.a) -> (.c,.b)	// Lift function    a  ->  b
 											// to             (c,a)->(c,b)

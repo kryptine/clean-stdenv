@@ -34,6 +34,6 @@ unbindRIds ids ioState
 	# ioState			= IOStSetReceiverTable rt ioState
 	= ioState
 where
-	unbindRIds` :: ![Id] !ReceiverTable -> ReceiverTable
+	unbindRIds` :: ![Id] !*ReceiverTable -> *ReceiverTable
 	unbindRIds` [rid:rids] rt	= unbindRIds` rids (snd (removeReceiverFromReceiverTable rid rt))
 	unbindRIds` _          rt	= rt

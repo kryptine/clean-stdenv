@@ -20,19 +20,16 @@ twowaytotriple			:: !(Receiver2Function m r *(.ls,.pst)) m !*(.ls,.pst) -> *(.ls
 
 //	Functions moved from receiverhandle
 
-receiverIdentified			:: !Id				!(ReceiverHandle .ls .pst)	-> Bool
+receiverIdentified			:: !Id										!(ReceiverHandle .ls .pst)	-> Bool
 // MW11..
-inetReceiverIdentified		::	!(!EndpointRef`, !InetReceiverCategory`)
-								!(ReceiverHandle .ls .pst)	-> Bool
-inetReceiverIdentifiedWithId::	!(!Id, !InetReceiverCategory`)
-								!(ReceiverHandle .ls .pst)	-> Bool
+inetReceiverIdentified		:: !(!EndpointRef`, !InetReceiverCategory`)	!(ReceiverHandle .ls .pst)	-> Bool
+inetReceiverIdentifiedWithId:: !(!Id, !InetReceiverCategory`)			!(ReceiverHandle .ls .pst)	-> Bool
 // .. MW11
-receiverSetSelectState		:: !SelectState		!(ReceiverStateHandle .pst)	-> ReceiverStateHandle .pst
+receiverSetSelectState		:: !SelectState								!*(ReceiverStateHandle .pst)-> *ReceiverStateHandle .pst
 receiverHandleSyncMessage	:: !SyncMessage		!(ReceiverHandle .ls .pst) *(.ls,.pst)
 								-> ([SemiDynamic],ReceiverHandle .ls .pst, *(.ls,.pst))
-receiverAddASyncMessage		:: !Id !SemiDynamic	!(ReceiverHandle .ls .pst)	-> ReceiverHandle .ls .pst
+receiverAddASyncMessage		:: !Id !SemiDynamic	!(ReceiverHandle .ls .pst) -> ReceiverHandle .ls .pst
 // MW11..
-receiverApplyInetEvent		::	!InetReceiverASMQType !(ReceiverHandle .ls .pst) *(.ls,.pst)
-							->	*(.ls,.pst)
-getInetReceiverRId			::	!(ReceiverHandle .ls .pst)	-> (RId InetReceiverASMQType)
+receiverApplyInetEvent		:: !InetReceiverASMQType !(ReceiverHandle .ls .pst) *(.ls,.pst) -> *(.ls,.pst)
+getInetReceiverRId			:: !(ReceiverHandle .ls .pst) -> RId InetReceiverASMQType
 // ..MW11

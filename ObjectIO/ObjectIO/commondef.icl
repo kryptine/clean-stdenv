@@ -271,38 +271,14 @@ incBound (Finite i)
 incBound bound	= bound
 
 
-/*	PA: code changed and moved to oswindow.
-/*	Standard Scroll Bar settings:
-	Internally, scrollbars always have the following internal range:
-	*	if the SliderState is not empty (sliderMin<>sliderMax): (StdSliderMin,StdSliderMax)
-	*	if the SliderState is empty     (sliderMin==sliderMax): (StdSliderMin,StdSliderMin).
-	The thumb is always set proportionally (see toSliderRange).
-	Its value can be recalculated by fromSliderRange given the actual SliderState range.
-*/
-StdSliderMin		:== 0			// 0
-StdSliderMax		:== 32767		// MaxSigned2ByteInt
-StdSliderRange		:== 32767		// StdSliderMax-StdSliderMin
-
-fromSliderRange :: !Int !Int !Int -> Int
-fromSliderRange min max x
-	| min==max	= min
-	| otherwise	= toInt ((toReal (x-StdSliderMin))*k)+min
-where
-	k = toReal (max-min) / toReal StdSliderRange
-
-toSliderRange :: !Int !Int !Int -> Int
-toSliderRange min max x
-	| min==max	= StdSliderMin
-	| otherwise	= toInt ((toReal (x-min))/k)+StdSliderMin
-where
-	k = toReal (max-min) / toReal StdSliderRange
-*/
-
-
 /*	List operations:
 */
 ::	Cond  x :== x -> Bool
 ::	UCond x :== x -> *(Bool,x)
+
+u_isEmpty :: !v:[u:x] -> (!Bool,!v:[u:x]), [v<=u]
+u_isEmpty []	= (True,[])
+u_isEmpty full	= (False,full)
 
 IsSingleton :: ![.x] -> Bool
 IsSingleton [x]	= True
@@ -324,9 +300,10 @@ Split _ []
 Split n xs
 	| n<=0
 		= ([],xs)
-	# (x, xs)	= HdTl xs
-	# (ys,zs)	= Split (n-1) xs
-	= ([x:ys],zs)
+	| otherwise
+		# (x, xs)	= HdTl xs
+		# (ys,zs)	= Split (n-1) xs
+		= ([x:ys],zs)
 
 CondMap :: (Cond x) !(IdFun x) ![x] -> (!Bool,![x])
 CondMap c f [x:xs]
@@ -334,7 +311,7 @@ CondMap c f [x:xs]
 	| c x		= (True,[f x:xs])
 	| otherwise	= (b,   [x:xs])
 CondMap _ _ _
-	= (False, [])
+	= (False,[])
 
 Uspan :: !(UCond .a) !u:[.a] -> (![.a],!u:[.a])		// Same as span (StdList), but preserving uniqueness
 Uspan c [x:xs]
@@ -357,7 +334,7 @@ FilterMap f [x:xs]
 FilterMap _ _
 	= []
 
-StateMap :: !(.x -> .s -> *(.y,.s)) ![.x] !.s -> (![.y],!.s)
+StateMap :: !(u:x -> v:(.s -> (.y,.s))) ![u:x] !.s -> (![.y],!.s), [v<=u]
 StateMap f [x:xs] s
 	#! (y, s)	= f x s
 	#! (ys,s)	= StateMap f xs s
@@ -365,7 +342,7 @@ StateMap f [x:xs] s
 StateMap _ _ s
 	= ([],s)
 
-StateMap2 :: !(.x -> .s -> .s) ![.x] !.s -> .s
+StateMap2 :: !(u:x -> v:(.s -> .s)) ![u:x] !.s -> .s, [v<=u]
 StateMap2 f [x:xs] s
 	= StateMap2 f xs (f x s)
 StateMap2 _ _ s
@@ -397,14 +374,24 @@ UContains c [x:xs]
 	| otherwise
 		# (b,xs) = UContains c xs
 		= (b,[x:xs])
-UContains _ nil
-	= (False,nil)
+UContains _ []
+	= (False,[])
 
 Select :: !(Cond x) x ![x] -> (!Bool, x)
 Select c n [x:xs]
 	| c x		= (True,x)
 	| otherwise	= Select c n xs
 Select _ n _	= (False,n)
+
+USelect :: !(Cond x) x !u:[ x] -> (!Bool, x,!u:[x])
+USelect c n [x:xs]
+	| c x
+		= (True,x,[x:xs])
+	| otherwise
+		# (found,y,xs)	= USelect c n xs
+		= (found,y,[x:xs])
+USelect _ n []
+	= (False,n,[])
 
 Access :: !(St .x *(Bool,.y)) .y !u:[.x] -> (!Bool,.y,!u:[.x])
 Access acc n [x:xs]
@@ -414,8 +401,8 @@ Access acc n [x:xs]
 	| otherwise
 		# (b,y,xs) = Access acc n xs
 		= (b,y,[x:xs])
-Access _ n nil
-	= (False,n,nil)
+Access _ n []
+	= (False,n,[])
 
 AccessList :: !(St .x .y) ![.x] -> (![.y],![.x])
 AccessList acc [x:xs]
@@ -425,7 +412,7 @@ AccessList acc [x:xs]
 AccessList _ _
 	= ([],[])
 
-Remove :: !(Cond x) x ![x] -> (!Bool,x,![x])
+Remove :: !(Cond x) x !u:[x] -> (!Bool,x,!u:[x])
 Remove c n [x:xs]
 	| c x
 		= (True,x,xs)
@@ -443,8 +430,8 @@ URemove c n [x:xs]
 	| otherwise
 		# (b,y,xs)	= URemove c n xs
 		= (b,y,[x:xs])
-URemove _ n nil
-	= (False,n,nil)
+URemove _ n []
+	= (False,n,[])
 
 Replace :: !(Cond x) x ![x] -> (!Bool,![x])
 Replace c y [x:xs]
@@ -464,8 +451,8 @@ UReplace c y [x:xs]
 	| otherwise
 		# (b,xs)	= UReplace c y xs
 		= (b,[x:xs])
-UReplace _ _ nil
-	= (False,nil)
+UReplace _ _ []
+	= (False,[])
 
 ReplaceOrAppend :: !(Cond x) x ![x] -> [x]
 ReplaceOrAppend c y [x:xs]

@@ -110,6 +110,7 @@ incBound :: !Bound -> Bound										// Finite i -> Finite (max 1 (i+1)); Infini
 ::	Cond  x :== x -> Bool
 ::	UCond x :== x -> *(Bool,x)
 
+u_isEmpty				:: !v:[u:x] -> (!Bool,!v:[u:x]), [v<=u]
 IsSingleton				:: ![.x] -> Bool
 HdTl					:: !u:[.x] -> (!.x, !u:[.x])
 InitLast				:: ![.x] -> (![.x],!.x)
@@ -118,17 +119,18 @@ Split					:: !Int !u:[.x] -> (![.x],!u:[.x])
 CondMap					:: (Cond x) !(IdFun x)		![x]		-> (!Bool, ![x])
 Uspan					:: !(UCond .x)				!u:[.x]		-> (![.x],!u:[.x])	// Same as span (StdList), but preserving uniqueness
 FilterMap				:: !(.x -> *(Bool,.y))		![.x]		-> [.y]
-StateMap				:: !(.x -> .s -> *(.y,.s))	![.x] !.s	-> (![.y], !.s)
-StateMap2				:: !(.x -> .s -> .s)		![.x] !.s	-> .s
+StateMap				:: !(u:x -> v:(.s -> (.y,.s))) ![u:x] !.s -> (![.y],!.s), [v<=u]
+StateMap2				:: !(u:x -> v:(.s -> .s))	![u:x] !.s -> .s, [v<=u]
 StrictSeq				:: ![.(.s -> .s)]				  !.s	-> .s				// Same as seq (StdFunc), but with strict state argument
 StrictSeqList			:: !.[.St .s .x]				  !.s	-> (![.x],!.s)		// Same as seqList (StdFunc), but with strict state argument
 
 Contains				:: !(Cond    x)				![ x] -> Bool
 UContains				:: !(UCond  .x)				!u:[.x] -> (!Bool,	!u:[.x])
 Select					:: !(Cond    x)		 x		![ x] -> (!Bool, x)
+USelect					:: !(Cond    x)		 x		!u:[ x] -> (!Bool, x,!u:[x])
 Access					:: !(St .x *(Bool,.y)) .y	!u:[.x] -> (!Bool,.y,!u:[.x])
 AccessList				:: !(St .x .y)				![.x] -> (![.y],	![.x])
-Remove					:: !(Cond    x)		 x		![ x] -> (!Bool, x,	![ x])
+Remove					:: !(Cond    x)		 x		!u:[x] -> (!Bool, x,	!u:[x])
 URemove					:: !(UCond  .x)		.x		!u:[.x] -> (!Bool,.x,	!u:[.x])
 Replace					:: !(Cond    x)		 x		![ x] -> (!Bool,	![ x])
 UReplace				:: !(UCond  .x)		.x		!u:[.x] -> (!Bool,	!u:[.x])

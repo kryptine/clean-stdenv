@@ -7,10 +7,12 @@ definition module controlrelayout
 import	relayout, wstate
 
 
-relayoutControls :: !OSWindowMetrics !Bool !Bool !Rect !Rect !Point2 !Point2 !OSWindowPtr !(Maybe Id) ![WElementHandle .ls .pst] ![WElementHandle .ls .pst]
-					!*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
-relayoutControls`:: !OSWindowMetrics !Bool !Bool !Rect !Rect !Point2 !Point2 !OSWindowPtr !(Maybe Id) ![WElementHandle`]         ![WElementHandle`]
-					!*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
+relayoutControls :: !OSWindowMetrics !Bool !Bool !Rect !Rect !Point2 !Point2 !OSWindowPtr !(Maybe Id) ![WElementHandle`] 
+					 !*[WElementHandle .ls .pst] !*OSToolbox
+	-> (!OSRgnHandle,!*[WElementHandle .ls .pst],!*OSToolbox)
+relayoutControls`:: !OSWindowMetrics !Bool !Bool !Rect !Rect !Point2 !Point2 !OSWindowPtr !(Maybe Id) ![WElementHandle`]
+					 ![WElementHandle`] !*OSToolbox
+	-> (!OSRgnHandle,!*OSToolbox)
 /*	relayoutControls(`) wMetrics isAble isVisible oldFrame newFrame oldParentPos newParentPos parentPtr defaultId old new
 	resizes, moves, and updates changed WElementHandle(`)s. 
 		isAble							is True iff the parent window/compound is Able.

@@ -37,6 +37,10 @@ from	roundrobin			import RR, emptyRR, notodoRR
 	=	{	ioevents		:: !*OSEvents						// The event stream environment
 		,	ioworld			:: !*[*World]						// The world environment
 		,	ioprocesses		:: !*CProcesses						// All other processes
+		,	iodevices		:: !*[DeviceSystemState (PSt l)]	// The GUI device states of the process
+		,	ioreceivertable	:: !*ReceiverTable					// The table of the current whereabouts of receivers
+		,	iotimertable	:: !*TimerTable						// The table of all currently active timers
+		,	ioidtable		:: !*IdTable						// The table of all bound Ids
 		,	ioinit			:: !IdFun (PSt l)					// The initialisation functions of the process
 		,	iotoolbox		:: !*OSToolbox						// The Mac continuation value
 		}
@@ -48,18 +52,14 @@ from	roundrobin			import RR, emptyRR, notodoRR
 		,	iosubids		:: ![SystemId]						// The ids of the subprocesses of the process
 		,	ioidseed		:: !Int								// The global id generating number (actually the World)
 		,	iodevicefuncs	:: ![DeviceFunctions  (PSt l)]		// The currently active device functions
-		,	iodevices		:: [DeviceSystemState (PSt l)]		// The GUI device states of the process
 		,	ioatts			:: ![ProcessAttribute (PSt l)]		// The attributes of the process
 		,	ioruntime		:: !RuntimeState					// The runtime state of the process
+		,	iostack			:: !ProcessStack					// The stacking order of all processes
 		,	ioosdinfo		:: !OSDInfo							// The OS document interface information of the process
 		,	iokind			:: !ProcessKind						// The kind of the process (interactive or virtual)
 		,	ioismodal		:: !Maybe SystemId					// If a process has some modal windows, then Just id, otherwise Nothing
-		,	ioidtable		:: !IdTable							// The table of all bound Ids
-		,	ioreceivertable	:: !ReceiverTable					// The table of the current whereabouts of receivers
-		,	iotimertable	:: !TimerTable						// The table of all currently active timers
 		,	ioostime		:: !OSTime							// The current OSTime
 		,	ioactrequest	:: !ActivateRequests				// The issued activation requests
-		,	iostack			:: !ProcessStack					// The stacking order of all processes
 		,	iobutton		:: !ButtonFreqState					// The state of double MouseDowns
 //PA---	,	iokeytrack		:: !Maybe KeyTrack					// If the process is handling Key(Repeat/Up), then Just _, otherwise Nothing
 		,	ioinputtrack	:: !Maybe InputTrack				// The process is handling mouse/key input flags
@@ -98,11 +98,6 @@ from	roundrobin			import RR, emptyRR, notodoRR
 	=	{	cbsCount	:: !Int									// ScrapCount of last access
 		}
 
-/*
-iostateError :: String String -> .x
-iostateError rule error = Error rule "iostate" error
-*/
-
 //	Access rules to the IOSt:
 
 //	Creation of an initial, empty IOSt:
@@ -120,18 +115,14 @@ emptyIOSt ioId parentId guishare documentInterface processKind processAtts initI
   				  ,	iosubids		= []
   				  ,	ioidseed		= 0
   				  ,	iodevicefuncs	= []
-  				  ,	iodevices		= []
   				  ,	ioatts			= processAtts
   				  ,	ioruntime		= Running
+				  ,	iostack			= emptyProcessStack
 		 		  ,	ioosdinfo		= emptyOSDInfo documentInterface
   				  ,	iokind			= processKind
   				  ,	ioismodal		= modalId
-  				  ,	ioidtable		= initialIdTable
-				  ,	ioreceivertable	= initialReceiverTable
-				  ,	iotimertable	= initialTimerTable
 				  ,	ioostime		= fromInt 0
   				  ,	ioactrequest	= []
-  				  ,	iostack			= emptyProcessStack
   				  ,	iobutton		= InitButtonFreqState
   		//		  ,	iokeytrack		= Nothing
   				  ,	ioinputtrack	= Nothing
@@ -143,14 +134,18 @@ emptyIOSt ioId parentId guishare documentInterface processKind processAtts initI
 
 emptyIOUnique :: !(IdFun (PSt .l)) -> (!OSWindowMetrics,!*IOUnique .l)
 emptyIOUnique initIO
-	# tb				= OSNewToolbox
-	# (wMetrics,tb)		= OSDefaultWindowMetrics tb
+	# tb					= OSNewToolbox
+	# (wMetrics,tb)			= OSDefaultWindowMetrics tb
 	= (	wMetrics
-	  ,	{	ioevents	= OSnewEvents
-		,	ioworld		= []
-		,	ioprocesses	= emptyRR
-		,	ioinit		= initIO
-		,	iotoolbox	= tb
+	  ,	{	ioevents		= OSnewEvents
+		,	ioworld			= []
+		,	ioprocesses		= emptyRR
+		,	iodevices		= []
+		,	iotimertable	= initialTimerTable
+		,	ioreceivertable	= initialReceiverTable
+		,	ioidtable		= initialIdTable
+		,	ioinit			= initIO
+		,	iotoolbox		= tb
 		}
 	  )
 
@@ -245,29 +240,35 @@ IOStSetIOIsModal optId ioState=:{ioshare} = {ioState & ioshare={ioshare & ioismo
 
 //	Access rules to IdTable:
 
-IOStGetIdTable :: !(IOSt .l) -> (!IdTable,!IOSt .l)
-IOStGetIdTable ioState=:{ioshare} = (ioshare.ioidtable, ioState)
+IOStGetIdTable :: !(IOSt .l) -> (!*IdTable,!IOSt .l)
+IOStGetIdTable ioState=:{iounique=iounique=:{ioidtable=idTable}}
+	= (idTable, {ioState & iounique={iounique & ioidtable=initialIdTable}})
 
-IOStSetIdTable :: !IdTable !(IOSt .l) -> IOSt .l
-IOStSetIdTable idTable ioState=:{ioshare} = {ioState & ioshare={ioshare & ioidtable=idTable}}
+IOStSetIdTable :: !*IdTable !(IOSt .l) -> IOSt .l
+IOStSetIdTable idTable ioState=:{iounique}
+	= {ioState & iounique={iounique & ioidtable=idTable}}
 
 
 //	Access rules to ReceiverTable:
 
-IOStGetReceiverTable :: !(IOSt .l) -> (!ReceiverTable,!IOSt .l)
-IOStGetReceiverTable ioState=:{ioshare} = (ioshare.ioreceivertable, ioState)
+IOStGetReceiverTable :: !(IOSt .l) -> (!*ReceiverTable,!IOSt .l)
+IOStGetReceiverTable ioState=:{iounique=iounique=:{ioreceivertable=receiverTable}}
+	= (receiverTable, {ioState & iounique={iounique & ioreceivertable=initialReceiverTable}})
 
-IOStSetReceiverTable :: !ReceiverTable !(IOSt .l) -> IOSt .l
-IOStSetReceiverTable ioreceivertable ioState=:{ioshare} = {ioState & ioshare={ioshare & ioreceivertable=ioreceivertable}}
+IOStSetReceiverTable :: !*ReceiverTable !(IOSt .l) -> IOSt .l
+IOStSetReceiverTable ioreceivertable ioState=:{iounique}
+	= {ioState & iounique={iounique & ioreceivertable=ioreceivertable}}
 
 
 //	Access rules to TimerTable:
 
-IOStGetTimerTable :: !(IOSt .l) -> (!TimerTable,!IOSt .l)
-IOStGetTimerTable ioState=:{ioshare} = (ioshare.iotimertable, ioState)
+IOStGetTimerTable :: !(IOSt .l) -> (!*TimerTable,!IOSt .l)
+IOStGetTimerTable ioState=:{iounique=iounique=:{iotimertable=tt}}
+	= (tt, {ioState & iounique={iounique & iotimertable=initialTimerTable}})
 
-IOStSetTimerTable :: !TimerTable !(IOSt .l) -> IOSt .l
-IOStSetTimerTable tt ioState=:{ioshare} = {ioState & ioshare={ioshare & iotimertable=tt}}
+IOStSetTimerTable :: !*TimerTable !(IOSt .l) -> IOSt .l
+IOStSetTimerTable tt ioState=:{iounique}
+	= {ioState & iounique={iounique & iotimertable=tt}}
 
 
 //	Access rules to OSTime:
@@ -321,13 +322,19 @@ IOStSetCProcesses processes ioState = {ioState & iounique={ioState.iounique & io
 //	Access to the ProcessStack of the IOSt:
 
 IOStGetProcessStack :: !(IOSt .l) -> (!ProcessStack, !IOSt .l)
-IOStGetProcessStack ioState=:{ioshare} = (ioshare.iostack, ioState)
+IOStGetProcessStack ioState=:{ioshare} = (ioshare.iostack,ioState) /*
+IOStGetProcessStack ioState=:{ioshare={iostack}}
+	= (iostack, ioState) */
 
 IOStSetProcessStack :: !ProcessStack !(IOSt .l) -> IOSt .l
-IOStSetProcessStack ioStack ioState=:{ioshare} = {ioState & ioshare={ioshare & iostack=ioStack}}
+IOStSetProcessStack ioStack ioState=:{ioshare} = {ioState & ioshare={ioshare & iostack=ioStack}} /*
+IOStSetProcessStack ioStack ioState=:{ioshare}
+	= {ioState & ioshare={ioshare & iostack=ioStack}} */
 
 SelectIOSt :: !(IOSt .l) -> IOSt .l
-SelectIOSt ioState=:{ioshare} = {ioState & ioshare={ioshare & iostack=selectProcessShowState ioshare.ioid ioshare.iostack}}
+SelectIOSt ioState=:{ioshare} = {ioState & ioshare={ioshare & iostack=selectProcessShowState ioshare.ioid ioshare.iostack}} /*
+SelectIOSt ioState=:{ioshare=ioshare=:{ioid,iostack}}
+	= {ioState & ioshare={ioshare & iostack=selectProcessShowState ioid iostack}} */
 
 
 //	Access rules to DocumentInterface:
@@ -473,68 +480,77 @@ IOStLastInteraction ioState
 	= (not empty,ioState)
 
 IOStHasDevice :: !Device !(IOSt .l) -> (!Bool,!IOSt .l)
-IOStHasDevice d ioState=:{ioshare={iodevices=ds}}
-	= (devicesHaveDevice d ds, ioState)
+IOStHasDevice d ioState=:{iounique=iounique=:{iodevices=ds}}
+	# (ok,ds)	= devicesHaveDevice d ds
+	= (ok, {ioState & iounique={iounique & iodevices=ds}})
 where
-	devicesHaveDevice :: !Device ![DeviceSystemState .ps] -> Bool
-	devicesHaveDevice d [dState:dStates]	= toDevice dState==d || devicesHaveDevice d dStates
-	devicesHaveDevice _ _					= False
+	devicesHaveDevice :: !Device !*[DeviceSystemState .pst] -> (!Bool,!*[DeviceSystemState .pst])
+	devicesHaveDevice d [dState:dStates]
+		# (d`,dState)		= toDevice dState
+		| d`==d
+			= (True,[dState:dStates])
+		| otherwise
+			# (ok,dStates)	= devicesHaveDevice d dStates
+			= (ok,[dState:dStates])
+	devicesHaveDevice _ []
+		= (False,[])
 
 IOStGetDevices :: !(IOSt .l) -> (![Device],!IOSt .l)
-IOStGetDevices ioState=:{ioshare={iodevices=ds}} = (map toDevice ds,ioState)
+IOStGetDevices ioState=:{iounique=iounique=:{iodevices=ds}}
+	# (devices,ds)	= AccessList toDevice ds
+	= (devices,{ioState & iounique={iounique & iodevices=ds}})
 
 IOStGetDevice :: !Device !(IOSt .l) -> (!Bool,DeviceSystemState (PSt .l),!IOSt .l)
-/*
-IOStGetDevice device {ioshare={iodevices=[]}}
-	= iostateError ("IOStGetDevice ["+++toString device+++"]") "I/O operations on empty IOSt not allowed"
-*/
-IOStGetDevice d ioState=:{ioshare=ioshare=:{iodevices=ds}}
+IOStGetDevice d ioState=:{iounique=iounique=:{iodevices=ds}}
 	# (found,device,ds)	= devicesGetDevice d ds
-	= (found,device,{ioState & ioshare={ioshare & iodevices=ds}})
+	= (found,device,{ioState & iounique={iounique & iodevices=ds}})
 where
-	devicesGetDevice :: !Device ![DeviceSystemState .pst] -> (!Bool,DeviceSystemState .pst,![DeviceSystemState .pst])
+	devicesGetDevice :: !Device !*[DeviceSystemState .pst] -> (!Bool,DeviceSystemState .pst,!*[DeviceSystemState .pst])
 	devicesGetDevice d [dState:dStates]
-		| toDevice dState==d
-			= (True,dState,[dState:dStates])
+		# (d`,dState)				= toDevice dState
+		| d`==d
+			= (True,dState,dStates)
 		| otherwise
-			# (found,device,dStates)	= devicesGetDevice d dStates
+			# (found,device,dStates)= devicesGetDevice d dStates
 			= (found,device,[dState:dStates])
-	devicesGetDevice d empty
-	//	= iostateError "IOStGetDevice" (toString d+++" not present in IOSt")
-		= (False,undef,empty)
+	devicesGetDevice d []
+		= (False,undef,[])
 
 IOStRemoveDevice :: !Device !(IOSt .l) -> IOSt .l
-IOStRemoveDevice d ioState=:{ioshare}
-	= {ioState & ioshare={ioshare & iodevices=devicesRemoveDevice d ioshare.iodevices}}
+IOStRemoveDevice d ioState=:{iounique=iounique=:{iodevices=ds}}
+	# ds	= devicesRemoveDevice d ds
+	= {ioState & iounique={iounique & iodevices=ds}}
 where
-	devicesRemoveDevice :: !Device ![DeviceSystemState .ps] -> [DeviceSystemState .ps]
+	devicesRemoveDevice :: !Device !*[DeviceSystemState .pst] -> *[DeviceSystemState .pst]
 	devicesRemoveDevice d [dState:dStates]
-		| toDevice dState==d		= dStates
-		| otherwise					= [dState:devicesRemoveDevice d dStates]
-	devicesRemoveDevice _ dStates	= dStates
+		# (d`,dState)	= toDevice dState
+		| d`==d			= dStates
+		| otherwise		= [dState:devicesRemoveDevice d dStates]
+	devicesRemoveDevice _ []
+		= []
 
 IOStSetDevice :: !(DeviceSystemState (PSt .l)) !(IOSt .l) -> IOSt .l
-IOStSetDevice d ioState=:{ioshare=ioshare=:{iodevices}}
-	#! device	= toDevice d
-	#! ds 		= devicesSetDevice (priorityDevice device) device d iodevices
-	#! ioshare	= {ioshare & iodevices=ds}
-	= {ioState & ioshare=ioshare}
+IOStSetDevice d ioState=:{iounique=iounique=:{iodevices=ds}}
+	#! (device,d)	= toDevice d
+	#! ds	 		= devicesSetDevice (priorityDevice device) device d ds
+	#! iounique		= {iounique & iodevices=ds}
+	= {ioState & iounique=iounique}
 where
-	devicesSetDevice :: !Int !Device !(DeviceSystemState .ps) ![DeviceSystemState .ps] -> [DeviceSystemState .ps]
-	devicesSetDevice p device dState2 ds=:[dState1:dStates]
-		# device1	= toDevice dState1
+	devicesSetDevice :: !Int !Device !(DeviceSystemState .pst) !*[DeviceSystemState .pst] -> *[DeviceSystemState .pst]
+	devicesSetDevice p device dState2 [dState1:dStates]
+		# (device1,dState1)	= toDevice dState1
 		| device1==device
 			= [dState2:dStates]
 		| p>priorityDevice device1
-			= [dState2:ds]
+			= [dState2,dState1:dStates]
 		| otherwise
-			#! ds	= devicesSetDevice p device dState2 dStates
-			= [dState1:ds]
+			#! dStates	= devicesSetDevice p device dState2 dStates
+			= [dState1:dStates]
 	devicesSetDevice _ _ dState _
 		= [dState]
 
 // MW11..
-IOStGetRcvDisabled	:: !(IOSt .l) -> (!Bool, !(IOSt .l))
+IOStGetRcvDisabled	:: !(IOSt .l) -> (!Bool, !IOSt .l)
 IOStGetRcvDisabled io=:{ioshare={iorcvdisabled}}
 	= (iorcvdisabled, io)
 

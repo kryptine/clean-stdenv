@@ -121,22 +121,22 @@ disjointControlIds` ids itemHs
 /*	Bind all free R(2)Ids that are contained in the WElementHandles.
 	It assumes that it has already been checked that no R(2)Id is already bound in the ReceiverTable.
 */
-bindReceiverControlIds :: !SystemId !Id ![WElementHandle .ls .pst] !ReceiverTable -> (![WElementHandle .ls .pst],!ReceiverTable)
+bindReceiverControlIds :: !SystemId !Id ![WElementHandle .ls .pst] !*ReceiverTable -> (![WElementHandle .ls .pst],!*ReceiverTable)
 bindReceiverControlIds ioId wId [itemH:itemHs] rt
 	# (itemH, rt) = bindReceiverControlIds` ioId wId itemH  rt
 	# (itemHs,rt) = bindReceiverControlIds  ioId wId itemHs rt
 	= ([itemH:itemHs],rt)
 where
-	bindReceiverControlIds` :: !SystemId !Id !(WElementHandle .ls .pst) !ReceiverTable
-										  -> (!WElementHandle .ls .pst, !ReceiverTable)
-	bindReceiverControlIds` ioId wId (WItemHandle itemH=:{wItemKind,wItemInfo}) rt
+	bindReceiverControlIds` :: !SystemId !Id !(WElementHandle .ls .pst) !*ReceiverTable
+										  -> (!WElementHandle .ls .pst, !*ReceiverTable)
+	bindReceiverControlIds` ioId wId (WItemHandle itemH=:{wItemKind,wItemInfo,wItems,wItemSelect}) rt
 		| not (isReceiverControl wItemKind)
-			# (itemHs,rt1)	= bindReceiverControlIds ioId wId itemH.wItems rt
+			# (itemHs,rt1)	= bindReceiverControlIds ioId wId wItems rt
 			  itemH1		= {itemH & wItems=itemHs}
 			= (WItemHandle itemH1,rt1)
 		| otherwise
 			# recLoc		= {rlIOId=ioId,rlDevice=WindowDevice,rlParentId=wId,rlReceiverId=id}
-			# rte			= {rteLoc=recLoc,rteSelectState=if itemH.wItemSelect Able Unable,rteASMCount=0}
+			# rte			= {rteLoc=recLoc,rteSelectState=if wItemSelect Able Unable,rteASMCount=0}
 			# (_,rt)		= addReceiverToReceiverTable rte rt
 			= (WItemHandle itemH,rt)
 	where
@@ -159,16 +159,16 @@ where
 		# (itemHs,rt)	= bindReceiverControlIds ioId wId wChangeItems rt
 		= (WChangeLSHandle {wChH & wChangeItems=itemHs},rt)
 
-bindReceiverControlIds _ _ itemHs rt
-	= (itemHs,rt)
+bindReceiverControlIds _ _ [] rt
+	= ([],rt)
 
 
 /*	controlIdsAreConsistent checks whether the WElementHandles contain (R(2))Ids that have already been
 	associated with open receivers or other I/O objects and if there are no duplicate Ids. 
 	The ReceiverTable is not changed if there are duplicate (R(2))Ids; otherwise all (R(2))Ids have been bound.
 */
-controlIdsAreConsistent :: !SystemId !Id ![WElementHandle .ls .pst] !ReceiverTable !IdTable
-							   -> (!Bool,![WElementHandle .ls .pst],!ReceiverTable,!IdTable)
+controlIdsAreConsistent :: !SystemId !Id ![WElementHandle .ls .pst] !*ReceiverTable !*IdTable
+							   -> (!Bool,![WElementHandle .ls .pst],!*ReceiverTable,!*IdTable)
 controlIdsAreConsistent ioId wId itemHs rt it
 	# (ids,itemHs)	= getWElementControlIds itemHs
 	| not (okMembersIdTable ids it)
