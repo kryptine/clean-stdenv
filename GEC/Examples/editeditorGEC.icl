@@ -9,103 +9,157 @@ import StdGecComb, basicAGEC, StdDynamicGEC, StdDynamic//, StdGeneric
 goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 
+// editor that can be used to design and test another editor MJP
+
+
 Start :: *World -> *World
 Start world 
-= 	goGui 
- 	editoreditor
- 	world  
+= 	goGui editoreditor world  
 
-:: T 	 	:== (Type,Editors,Commands)
+:: DesignElem 	:== (Type,Editors,Commands)
+:: ListIndex	:== Int			
+
+// options of design editor
+
+:: Type 	=	F_I_I  	Int (AGEC (Int -> Int))						// define function :: Int -> Int 
+			|	F_R_R  	Int (AGEC (Real -> Real)) 					// define function :: Real -> Real
+			|	F_LI_I 	(AGEC [ListIndex]) (AGEC ([Int] -> Int))  	// define function :: [Int] -> Int
+			|	F_LR_R 	(AGEC [ListIndex]) (AGEC ([Real] -> Real))  // define function :: [Real] -> Real
+			|	String_ String										// define initial string 								
+			|	Real_ 	Real										// define initial real value 
+			|	Int_ 	Int											// define initial int value (default)
 			
-:: Type 	=	FI  Int (AGEC (Int -> Int)) 
-			|	FR  Int (AGEC (Real -> Real)) 
-			|	FLI (AGEC [Int]) (AGEC ([Int] -> Int)) 
-			|	S String 
-			|	R Real 
-			|	I Int 
-			
-:: Editors 	= Calculator
-			| Expression
-			| Counter
-			| Displayval
-			| Identity
+:: Editors 	= Calculator											// ad calculator
+			| Expression											// allow expressions /function definitions
+			| Counter												// ad counter
+			| Displayval											// display non editable value
+			| Identity												// identity editor (default)
 
-:: Commands	= Insert
-			| Delete
-			| Apply
-			| Choose
+:: Commands	= Insert												// insert element
+			| Delete												// delete element
+			| Apply													// function can be applied, hack to avoid evaluation of undefined function
+			| Choose												// noop (default)
 
-:: T2  a b c d e f
-			= FII a
-			| FRR b
-			| FLII c
-			| INT d
-			| REAL e
-			| STRING f
+// The Editors and Circuits:
 
-derive gGEC Editors, T2, Type, Commands
+derive gGEC Type, Editors, Commands, ApplicationElem
 
 editoreditor = CGEC (designeditor |@ convert |>>>| applicationeditor) 
 			   [myinit,myinit,myinit,myinit]
 where
-	designeditor 		= %| (vertlistGEC	@|	gecEdit "design" |@	updateDesign o (^^))
+	designeditor 		= %| (vertlistGEC o	updateDesign @|	gecEdit "design" |@	(^^))
 
-	applicationeditor 	= %| (vertlistGEC o updateApplication @| gecEdit "spreadsheet" |@ (^^))
+	applicationeditor 	= %| (vertlistGEC o updateApplication @| gecEdit "user" |@ (^^))
 
-myinit = (I 0, Identity, Choose)
+// Initial value of design editor
+
+myinit = (Int_ 0, Identity, Choose)
+
+// Update of design editor
 
 updateDesign xs = keepone (update xs)
 where
 	keepone [] = [myinit]
 	keepone xs = xs
 
-	update [(x,e,Insert):xs] 		= [(x,e,Choose),(x,e,Choose):xs] 
-	update [(x,e,Delete):xs] 		= xs
-	update [(FI i f,e,Choose):xs] 	= [(FI i (dynamicGEC2 (const 0)),e,Choose): xs]
-	update [(FR i f,e,Choose):xs]	= [(FR i (dynamicGEC2 (const 0.0)),e,Choose): xs]
-	update [(FLI i f,e,Choose):xs]	= [(FLI (dynamicGEC2 []) (dynamicGEC2 (const 0)),e,Choose): xs]
-	update [xo:xs]  				= [xo:update xs]
-	update []		  				= []
+	update [(x,e,Insert):xs] 			= [(x,e,Choose),(x,e,Choose):xs] 
+	update [(x,e,Delete):xs] 			= xs
+
+	update [(F_I_I  ix f,e,Choose):xs] 	= [(F_I_I 	ix 				 (dynamicGEC2 (const 0))  ,e,Choose): xs]
+	update [(F_R_R  ix f,e,Choose):xs]	= [(F_R_R 	ix 				 (dynamicGEC2 (const 0.0)),e,Choose): xs]
+	update [(F_LI_I ix f,e,Choose):xs]	= [(F_LI_I  (dynamicGEC2 []) (dynamicGEC2 (const 0))  ,e,Choose): xs]
+	update [(F_LR_R ix f,e,Choose):xs]	= [(F_LR_R  (dynamicGEC2 []) (dynamicGEC2 (const 0.0)),e,Choose): xs]
+
+	update [xo:xs]  					= [xo:update xs]
+	update []		  					= []
+
+// type of application editor element
+
+:: ApplicationElem											
+			= AF_I_I 	(AGEC String, AGEC (Int->Int,	  ListIndex ))
+			| AF_R_R 	(AGEC String, AGEC (Real->Real,	  ListIndex ))
+			| AF_LI_I 	(AGEC String, AGEC ([Int]->Int,	 [ListIndex]))
+			| AF_LR_R 	(AGEC String, AGEC ([Real]->Real,[ListIndex]))
+			| AInt_		(AGEC Int)
+			| AReal_	(AGEC Real)
+			| AString_ 	(AGEC String)
+
+// turn design editor info in working user application editor
 
 convert list = map toT2 list
 where
-	toT2 (I i,Counter,_)  	 = INT		(counterGEC i)
-	toT2 (I i,Calculator,_)	 = INT 	 	(intcalcGEC i)
-	toT2 (I i,Displayval,_)	 = INT 	 	(showGEC i)
-	toT2 (I i,Expression,_)	 = INT 	 	(dynamicGEC2 i)
-	toT2 (I i,_,_)			 = INT 	 	(idGEC i)
-	toT2 (R r,Counter,_)	 = REAL  	(counterGEC r)
-	toT2 (R r,Calculator,_)	 = REAL  	(realcalcGEC r)
-	toT2 (R r,Displayval,_)	 = REAL  	(showGEC r)
-	toT2 (R r,Expression,_)	 = REAL  	(dynamicGEC2 r)
-	toT2 (R r,_,_)			 = REAL  	(idGEC r)
-	toT2 (S s,Displayval,_)	 = STRING 	(showGEC s)
-	toT2 (S s,_,_)			 = STRING 	(idGEC s)
-	toT2 (FR i f,_,Apply)	 = FRR  	((showGEC ""), hidGEC (^^ f, i))
-	toT2 (FI i f,_,Apply)	 = FII  	((showGEC ""), hidGEC (^^ f, i))
-	toT2 (FLI i f,_,Apply)	 = FLII  	((showGEC ""), hidGEC (^^ f, ^^ i))
-	toT2 _					 = FII 	  	((showGEC "Not implemented! "), hidGEC (id, 0))
+	toT2 (Int_ i,Calculator,_)  	= AInt_		(intcalcGEC i)
+	toT2 (Int_ i,agec,_)	 	 	= AInt_ 	(chooseAGEC agec i)
+	toT2 (Real_ r,Calculator,_)	 	= AReal_  	(realcalcGEC r)
+	toT2 (Real_ r,agec,_)	 	 	= AReal_	(chooseAGEC agec r)
+	toT2 (String_ s,Displayval,_)	= AString_ 	(showGEC s)
+	toT2 (String_ s,_,_)			= AString_ 	(idGEC s)
+	toT2 (F_I_I i f,_,Apply)	 	= AF_I_I  	(showGEC "", hidGEC (^^ f, i))
+	toT2 (F_R_R r f,_,Apply)	 	= AF_R_R  	(showGEC "", hidGEC (^^ f, r))
+	toT2 (F_LI_I i f,_,Apply)	 	= AF_LI_I  	(showGEC "", hidGEC (^^ f, ^^ i))
+	toT2 (F_LR_R r f,_,Apply)	 	= AF_LR_R  	(showGEC "", hidGEC (^^ f, ^^ r))
+	toT2 _					 		= AString_ 	(showGEC "not implemented")
+
+	chooseAGEC Counter 		= counterGEC
+	chooseAGEC Displayval 	= showGEC
+	chooseAGEC Expression 	= dynamicGEC2
+	chooseAGEC _ 			= idGEC
+
+// the handling of the application editor boils down to applying all defined functions like in a spreadsheet ...
 
 updateApplication list = map doT2 list
 where
-	doT2 (FII (_, fi)) = FII 	((showGEC  (calcfi f (list!!i))), hidGEC (f,i)) where (f,i) = ^^ fi
-	doT2 (FRR (_, fi)) = FRR 	((showGEC  (calcfr f (list!!i))), hidGEC (f,i)) where (f,i) = ^^ fi
-	doT2 (FLII (_, fi)) = FLII 	((showGEC  (calcfli f i)), hidGEC (f,i)) where (f,i) = ^^ fi
-	doT2 x 				= x
+	doT2 (AF_I_I  (_, fi)) 	= AF_I_I 	((showGEC  (calcfi f i)),  hidGEC (f,i)) where (f,i) = ^^ fi
+	doT2 (AF_R_R  (_, fi)) 	= AF_R_R 	((showGEC  (calcfr f i)),  hidGEC (f,i)) where (f,i) = ^^ fi
+	doT2 (AF_LI_I (_, fi)) 	= AF_LI_I 	((showGEC  (calcfli f i)), hidGEC (f,i)) where (f,i) = ^^ fi
+	doT2 (AF_LR_R (_, fi)) 	= AF_LR_R 	((showGEC  (calcflr f i)), hidGEC (f,i)) where (f,i) = ^^ fi
+	doT2 x 					= x
 
-	calcfi f (INT i)  = toString (f (^^i)) +++ " "
-	calcfi f _		 = "Type error "
+	calcfi :: (Int -> Int) ListIndex -> String
+	calcfi f i
+	# (bix,bty,ni) = CheckBoundsIntVal i
+	| bix	= "Index out of range "
+	| bty	= ":: Int Expected "
+	= ToString (f ni)
 
-	calcfr f (REAL r)  = toString (f (^^r)) +++ " "
-	calcfr f _		 = "Type error "
+	calcfr :: (Real -> Real) ListIndex -> String
+	calcfr f i
+	# (bix,bty,nr) = CheckBoundsRealVal i
+	| bix	= "Index out of range "
+	| bty	= ":: Real Expected "
+	= ToString (f nr)
 
-	calcfli f indexlist  
-	| typeerror listelem  = "Type error "
-	= toString (f [^^ i \\ (INT i) <- listelem]) +++ " "
+	calcfli :: ([Int] -> Int) [ListIndex] -> String
+	calcfli f indexlist
+	# res				= map CheckBoundsIntVal indexlist
+	# (bix,bty,lval)	= (or (map fst3 res),or (map snd3 res),map thd3 res) 
+	| bix	= "Index out of range "
+	| bty	= ":: [Int] Expected "
+	= ToString (f lval)
+	
+	calcflr :: ([Real] -> Real) [ListIndex] -> String
+	calcflr f indexlist
+	# res				= map CheckBoundsRealVal indexlist
+	# (bix,bty,lval)	= (or (map fst3 res),or (map snd3 res),map thd3 res) 
+	| bix	= "Index out of range "
+	| bty	= ":: [Real] Expected "
+	= ToString (f lval)
+
+	CheckBoundsIntVal i 
+	| checkBounds i = (True,False,0)
+	= fetchIntVal (list!!i)
 	where
-		listelem = [list!!idx\\ idx <- indexlist]
-		typeerror [INT i:xs] = typeerror xs 
-		typeerror [x:xs] = True
-		typeerror [] = False
+			fetchIntVal (AInt_ i) 	= (False,False,^^ i)
+			fetchIntVal _ 			= (False,True,0)
+				 
+	CheckBoundsRealVal i 
+	| checkBounds i = (True,False,0.0)
+	= fetchRealVal (list!!i)
+	where
+			fetchRealVal (AReal_ j) = (False,False,^^ j)
+			fetchRealVal _ 			= (False,True,0.0)
+				 
+	checkBounds i = i < 0 || i > (length list) - 1
 
-showGEC i = (modeGEC (Display i)) 
+showGEC i = (modeGEC (Display i))
+ToString s = toString s +++ " " 
