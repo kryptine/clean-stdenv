@@ -76,7 +76,7 @@ where
 		isWindowOSEvent _					= False
 	
 	windowEvent schedulerEvent=:(ScheduleMsgEvent msgEvent) pState=:{io=ioState}
-		# (ioId,ioState)		= IOStGetIOId ioState
+		# (ioId,ioState)			= IOStGetIOId ioState
 		| ioId<>recLoc.rlIOId || recLoc.rlDevice<>WindowDevice
 			= (False,Nothing,schedulerEvent,{pState & io=ioState})
 		| otherwise

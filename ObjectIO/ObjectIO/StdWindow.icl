@@ -1576,12 +1576,12 @@ getWindowCancel id ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
 		= (Nothing,ioState)
-	# windows				= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,windows)	= getWindowHandlesWindow (toWID id) windows
+	# windows					= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID id) windows
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
 	| otherwise
-		# (cancelId,wsH)	= getWindowStateHandleCancelId wsH
+		# (cancelId,wsH)		= getWindowStateHandleCancelId wsH
 		= (cancelId,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 
 getWindowCursor :: !Id !(IOSt .l) -> (!Maybe CursorShape,!IOSt .l)

@@ -467,8 +467,8 @@ where
 		| otherwise
 			#! dfuncs	= removedevicefunctions device dfuncs
 			= [dfunc:dfuncs]
-	removedevicefunctions _ empty
-		= empty
+	removedevicefunctions _ _
+		= []
 
 //	Access to the DeviceSystemStates:
 
@@ -477,7 +477,7 @@ IOStLastInteraction ioState
 	# (processes,ioState)	= IOStGetCProcesses ioState
 	  (empty,processes)		= notodoRR processes
 	# ioState				= IOStSetCProcesses processes ioState
-	= (not empty,ioState)
+	= (empty,ioState)
 
 IOStHasDevice :: !Device !(IOSt .l) -> (!Bool,!IOSt .l)
 IOStHasDevice d ioState=:{iounique=iounique=:{iodevices=ds}}
@@ -518,7 +518,7 @@ where
 
 IOStRemoveDevice :: !Device !(IOSt .l) -> IOSt .l
 IOStRemoveDevice d ioState=:{iounique=iounique=:{iodevices=ds}}
-	# ds	= devicesRemoveDevice d ds
+	# ds				= devicesRemoveDevice d ds
 	= {ioState & iounique={iounique & iodevices=ds}}
 where
 	devicesRemoveDevice :: !Device !*[DeviceSystemState .pst] -> *[DeviceSystemState .pst]

@@ -7,7 +7,7 @@ implementation module receiverdevice
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	StdReceiver
 import	devicefunctions, iostate, receiveraccess, receiverevent, receiverid
-from	commondef	import FatalError, URemove, UCond
+from	commondef	import FatalError, URemove, UCond, StrictSeq, StrictSeqList, AccessList
 from	StdPSt		import appPIO, accPIO
 
 
@@ -45,16 +45,17 @@ receiverClose pState=:{io=ioState}
 	# (found,rDevice,ioState)	= IOStGetDevice ReceiverDevice ioState
 	| not found
 		= {pState & io=ioState}
-	# rHs						= (ReceiverSystemStateGetReceiverHandles rDevice).rReceivers
-	  rIds						= map (\{rHandle={rId}}->rId) rHs
-	# (idtable,ioState)			= IOStGetIdTable ioState
-	# ioState					= IOStSetIdTable (snd (removeIdsFromIdTable rIds idtable)) ioState
-	# ioState					= unbindRIds rIds ioState
-	# ioState					= IOStRemoveDevice ReceiverDevice ioState
-	# ioState					= IOStRemoveDeviceFunctions ReceiverDevice ioState
-	= {pState & io=ioState}
+	| otherwise
+		# rHs					= (ReceiverSystemStateGetReceiverHandles rDevice).rReceivers
+		  rIds					= map (\{rHandle={rId}}->rId) rHs
+		# (idtable,ioState)		= IOStGetIdTable ioState
+		# ioState				= IOStSetIdTable (snd (removeIdsFromIdTable rIds idtable)) ioState
+		# ioState				= unbindRIds rIds ioState
+		# ioState				= IOStRemoveDevice ReceiverDevice ioState		// PA: this is redundant, because IOStGetDevice already removed it
+		# ioState				= IOStRemoveDeviceFunctions ReceiverDevice ioState
+		= {pState & io=ioState}
 // MW11..
-  where
+where
 	callReceiverCloseFunctions :: !(IOSt .l) -> (IOSt .l)
 	callReceiverCloseFunctions ioState
 		# (found,rDevice,ioState)	= IOStGetDevice ReceiverDevice ioState
@@ -62,12 +63,21 @@ receiverClose pState=:{io=ioState}
 			= ioState
 		| otherwise
 			# rHs					= (ReceiverSystemStateGetReceiverHandles rDevice).rReceivers
-			= seq (map callCloseFunc rHs) ioState
-	  where
+			# (funcs,rHs)			= AccessList getCloseFunc rHs
+			# ioState				= IOStSetDevice (ReceiverSystemState {rReceivers=rHs}) ioState
+// PA		= seq (map callCloseFunc rHs) ioState
+			= StrictSeq funcs ioState
+	where
 		callCloseFunc {rHandle={rInetInfo=Nothing, rConnected}} ioState
 			= seq (map closeReceiver rConnected) ioState
 		callCloseFunc {rHandle={rInetInfo=Just (_,_,_,closeFun), rConnected}} ioState
 			= appIOToolbox closeFun (seq (map closeReceiver rConnected) ioState)
+
+		getCloseFunc :: !(ReceiverStateHandle (PSt .l)) -> (!IdFun (IOSt .l),!ReceiverStateHandle (PSt .l))
+		getCloseFunc rsH=:{rHandle={rInetInfo=Nothing, rConnected}}
+			= (StrictSeq (map closeReceiver rConnected),rsH)
+		getCloseFunc rsH=:{rHandle={rInetInfo=Just (_,_,_,closeFun),rConnected}}
+			= (appIOToolbox closeFun o StrictSeq (map closeReceiver rConnected),rsH)
 // .. MW11
 
 /*	The receiver handles three cases of message events (for the time being timers are not included in receivers):
@@ -112,6 +122,7 @@ where
 					= [rsH:rsHs]
 			qMessage _ _ []
 				=	[]
+	
 	receiverIO deviceEvent=:(ReceiverEvent (ASyncMessage event)) rsHs pState
 		= (deviceEvent,letOneReceiverDoIO rl rsHs pState)
 	where
@@ -133,6 +144,7 @@ where
 				= ({rState=ls,rHandle={rH & rASMQ=tailQ}},pState)
 			letReceiverDoIO _ _
 				= receiverdeviceFatalError "letReceiverDoIO" "message queue of target receiver is empty"
+	
 	receiverIO (ReceiverEvent (SyncMessage event)) rsHs pState
 		# (lastProcess,pState)	= accPIO IOStLastInteraction pState
 		# (event,pState)		= receiverSyncIO lastProcess event rsHs pState

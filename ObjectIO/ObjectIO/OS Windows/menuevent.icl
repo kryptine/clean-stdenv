@@ -73,7 +73,7 @@ where
 		isToolbarOSEvent _						= False
 	
 	menuEvent schedulerEvent=:(ScheduleMsgEvent msgEvent) pState=:{io=ioState}
-		# (ioId,ioState)		= IOStGetIOId ioState
+		# (ioId,ioState)				= IOStGetIOId ioState
 		| ioId<>recLoc.rlIOId || recLoc.rlDevice<>MenuDevice
 			= (False,Nothing,schedulerEvent,{pState & io=ioState})
 		| otherwise
