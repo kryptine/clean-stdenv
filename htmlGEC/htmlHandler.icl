@@ -3,18 +3,18 @@ implementation module htmlHandler
 import StdEnv, ArgEnv, StdMaybe
 import StdHtml
 import StdGeneric
-
+import htmlEncodeDecode
 import GenParse, htmlPrint
 
 derive gPrint (,), UpdValue
 derive gParse (,), UpdValue
-derive bimap Maybe
 
 // some constants
 
 defsize = 10															// size of inputfield
 
 // gUpd can update any type with indicated value 
+
 
 :: UpdMode	= UpdSearch UpdValue Int
 			| UpdCreate [ConsPos]
@@ -24,6 +24,11 @@ defsize = 10															// size of inputfield
 			| UpdR Real			// new real value
 			| UpdC String		// choose indicated constructor 
 			| UpdS String		// new piece of text
+
+
+doHtml ::  (a -> Html) a *World -> *World | gHpr{|*|} a & gUpd{|*|}  a  & gParse{|*|} a 
+doHtml pagehandler initval world = print_to_stdout (pagehandler (updClean (initval))) world
+
 
 showClean :: a -> Body | gHGEC{|*|} a & gPrint{|*|} a
 showClean v = fst (gHGEC{|*|} (id,state) v mkHSt)
@@ -215,5 +220,5 @@ gUpd{|CONS|} gUpdo mode (CONS c) 			// other cases
 # (mode,c) = gUpdo mode c
 = (mode,CONS c)
 
-
+derive gUpd (,)
 
