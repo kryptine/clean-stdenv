@@ -185,13 +185,6 @@ where
 
 // Additional functions for integer arithmetic: 
 
-instance mod Int
-where
-	(mod) a b
-	= code inline {
-			modI
-	  }
-
 instance rem Int
 where
 	(rem) a b
