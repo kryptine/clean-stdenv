@@ -48,10 +48,6 @@ instance toString WrappedDescriptorId where
 
 wrapNode :: !.a -> WrappedNode
 wrapNode node
-/*2.0
-	= abort "WrapDebug still does not work whith Clean 2.0"
-0.2*/
-//1.3
 	=	code
 	{
 					| A: <node> <result>
