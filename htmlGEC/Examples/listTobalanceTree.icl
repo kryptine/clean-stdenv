@@ -23,6 +23,7 @@ MyPage hst
 	, listGEC
 	, Br , T "This is the resulting balanced Tree: ", Br, Br
 	, treeGEC
+//	, traceHtmlInput
 	],hst)
 
 

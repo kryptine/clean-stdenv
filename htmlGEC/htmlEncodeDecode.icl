@@ -12,48 +12,45 @@ import GenParse
 				| UpdC String						// choose indicated constructor 
 				| UpdS String						// new piece of text
 
-
-// encoding 
+// encoding and decoding of Clean values 
 
 encodeInfo :: a -> String | gPrint{|*|} a
 encodeInfo inp = encoding  
 where
 	encoding = mkString (urlEncode (mkList (printToString inp)))
 
-encodeUpdate :: a -> String | gPrint{|*|} a
-encodeUpdate inp = "\"?" +++  encodeInfo inp +++ ";\""  
 
-encodeHidden :: (String, String) -> String // | gPrint{|*|} a
-encodeHidden (id,state) = ";i;" +++  encodeInfo id +++  ";s;" +++ state 
+decodeInfo :: String -> Maybe a | gParse{|*|} a
+decodeInfo s = parseString (mkString (urlDecode (mkList s)))
 
-// decoding
-
-// all input information is obtained via the arguments given to the executable
+// all input information from the browser is obtained once via the arguments passed to this executable
 // defined as CAFs such that they are calculated only once
 
 GetArgs :: String 
 GetArgs =: foldl (+++) "" [strings \\ strings <-: getCommandLine]
 
 ThisExe :: String
-ThisExe =: mkString (urlDecode (takeWhile ((<>) '#') (mkList GetArgs)))
+ThisExe 
+# (thisexe,_,_,_) = UpdateInfo
+=: thisexe
 
 MyPhP :: String
 MyPhP =: (mkString (takeWhile ((<>) '.') (mkList ThisExe))) +++ ".php"
 
-UpdateInfo :: (String,String,String) // id + update , new , state
+UpdateInfo :: (String,String,String,String) // executable, id + update , new , state
 UpdateInfo
 # input 			= mkList GetArgs
-# (garbage,input) 	= scan '?' input 		// get rid of garbage
-# (update, input)	= scan ';' input
-# (new,    input)	= scan ';'  input
-# (notused,input)	= scan '='  input
-# input				= skipping [';i;']  input
+# (thisexe,input) 	= scan '#' input 		// get rid of garbage
+# input				= skipping ['#UD=']  input
+# (update, input)	= scan '=' input
+# (new,    input)	= scan ';' input
+# input				= skipping ['GS=']  input
 # (state, input)	= scan ';' input
-=: ( decode update
-	, decode (Tl new)			// skip '='
-	, decode state)
+=: case (decode thisexe, decode update, decode new, decode state) of
+		(thisexe,"CS",new,state) -> (thisexe,new,"",state)
+	    else		    -> else
 where
-	scan c list = case (span ((<>) c) list) of
+	scan c list = case (span ((<>) c) list) of  // scan like span but it removes character
 					(x,[])	= (x,[])
 					(x,y)	= (x,tl y)
 	Tl [] = []
@@ -68,22 +65,22 @@ where
 
 traceHtmlInput :: Body
 traceHtmlInput
-=	Body 	[	T "this executable      : " , B ThisExe, Br 
+=:	Body 	[	T "this executable      : " , B ThisExe, Br 
 			, 	T "my php script        : " , B MyPhP, Br 
 			, 	T "update				: " , B update, Br 
 			, 	T "new value		  	: " , B new, Br 
 			, 	T "state			  	: " , B state, Br 
-			,	T "input received       : " , B GetArgs, Br 
-			,	T "input plain decoded  : " , B (convert GetArgs), Br
+			,	T "decoded input  		: " , B (convert GetArgs), Br
+			,	T "encoded input        : " , B GetArgs, Br 
 			]
 where
-	(update,new,state) = UpdateInfo
+	(executable,update,new,state) = UpdateInfo
 	convert s = mkString (urlDecode (mkList s))
 
 CheckUpdateId :: String
 CheckUpdateId 		
-# (upd,new,state) = UpdateInfo
-= case parseString upd of
+# (_,upd,_,_) = UpdateInfo
+=: case parseString upd of
 	Just ("",0,UpdI 0) = ""
 	Just (id,_,_)   = id 
 	else = ""
@@ -91,13 +88,13 @@ derive gParse UpdValue
 
 CheckUpdate :: (Maybe a, Maybe b) | gParse{|*|} a & gParse{|*|} b 
 CheckUpdate 
-# (upd,new,state) = UpdateInfo
+# (_,upd,new,_) = UpdateInfo
 = (parseString upd, parseString new)
 
 CheckGlobalState :: String
 CheckGlobalState 
-# (upd,new,state) = UpdateInfo
-= state
+# (_,_,_,state) = UpdateInfo
+=: state
 
 ShiftState :: String -> (Maybe (String,a),String) | gParse{|*|} a 
 ShiftState input
@@ -114,10 +111,8 @@ where
 
 derive gParse (,), (,,)
 
-decodeInfo :: String -> Maybe a | gParse{|*|} a // parsing input parameters submitted to applications
-decodeInfo s = parseString (mkString (urlDecode (mkList s)))
 
-// url encoding decoding
+// low level url encoding decoding
 
 mkString :: [Char] -> String
 mkString listofchar = {elem \\ elem <- listofchar}
@@ -156,11 +151,56 @@ urlEncodeState [] = urlEncodeS "$"
 urlEncodeState [(x,y):xsys] = urlEncodeS "(\"" +++ x +++ urlEncodeS "\"," +++
 							  y +++ urlEncodeS ")$" +++ urlEncodeState xsys 
 
-/*
-urlEncodeState :: [(String,String)] -> String
-urlEncodeState [] = urlEncodeS "[]"
-urlEncodeState [(x,y):xsys] = urlEncodeS "[(\"" +++ x +++ urlEncodeS "\"," +++
-							  y +++ urlEncodeS "):" +++ urlEncodeState xsys +++ 
-							  	urlEncodeS "]"
+// script for transmitting name and value of changed input 
 
-*/
+callClean :: String
+callClean =: "toclean(this)"
+
+globalFormName :: String
+globalFormName =: "CleanForm"
+
+updateInpName :: String
+updateInpName =: "UD"
+
+globalInpName :: String
+globalInpName =: "GS"
+
+selectorInpName :: String
+selectorInpName =: "CS"
+
+addScript :: GlobalState -> Body
+addScript globalstate
+=	Body
+	[ submitscript    globalFormName updateInpName
+	, globalstateform globalFormName updateInpName globalInpName (SV encodedglobalstate) 
+	]
+where
+	encodedglobalstate = urlEncodeState (reverse globalstate) 
+
+submitscript :: String String -> Body
+submitscript formname updatename
+=	Script []
+	(	" function toclean(inp)" +++
+		" { document." +++
+			formname  +++ "." +++
+			updatename +++ ".value=inp.name+\"=\"+inp.value;" +++
+			"document." +++ formname +++ ".submit(); }"
+	)
+
+// form that contains global state and empty input form for storing updated input
+	
+globalstateform :: String String String Value -> Body
+globalstateform formname updatename globalname globalstate
+=	Form 	[ Frm_Name formname
+			, Frm_Action MyPhP
+			, Frm_Method Post
+			]
+			[ Input [ Inp_Name updatename
+					, Inp_Type Hidden
+					]
+			, Input [ Inp_Name globalname
+					, Inp_Type Hidden
+					, Inp_Value globalstate
+					]
+			]		 
+

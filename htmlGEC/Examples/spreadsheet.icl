@@ -20,6 +20,7 @@ spreadsheet hst
 		, Br
 		, (tableB  <=> rowsumB)
 		, (colsumB <=> tsumB)
+		,Br, Br
 		, T "so the result of the spreadsheet is :", tsumB
 		],hst)
 where
