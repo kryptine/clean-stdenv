@@ -2,6 +2,8 @@
 	Wrap Clean nodes (for debugging purposes).
 
 	Version 1.0.4
+	Arjen van Weelden
+	arjenw@cs.kun.nl
 	Ronny Wichers Schreur
 	ronny@cs.kun.nl
 */
