@@ -206,7 +206,6 @@ freads f l
 		.o 1 2 f
 	}
 
-/*
 freadsubstring :: !Int !Int !*{#Char} !*File -> (!Int,!*{#Char},!*File)
 	/*
 	Reads n characters from a text or data file, which are returned in the string s
@@ -223,7 +222,7 @@ freadsubstring i n s f
 		.o 1 3 i f
 		.end
 	}
-*/
+
 freadline::!*File -> (!*{#Char},!*File)
 /*	Reads a line from a textfile. (including a newline character, except for the last
 	line) freadline cannot be used on data files. */
@@ -275,7 +274,6 @@ fwrites s f
 		.o 0 2 f
 	}
 
-/*
 fwritesubstring :: !Int !Int !{#Char} !*File -> *File
 /*	Writes the characters at positions i..i+n-1 of string s to a text or data file. */
 fwritesubstring i n s f 
@@ -286,7 +284,6 @@ fwritesubstring i n s f
 		.o 0 2 f
 		.end
 	}
-*/
 
 //	Tests
 
