@@ -23,7 +23,6 @@ None			:== [NoAttr]
 			| Hd_Meta
 			| Hd_Script
 			| Hd_Title String
-			| `Hd_Script Script
 										
 :: Body 	= A 			[Link_Attr] 	Body	// link ancor
 			| B  			String					// bold
@@ -39,6 +38,7 @@ None			:== [NoAttr]
 			| P  			[Body]					// paragraph
 			| PA 			Align [Body]			// paragraph aligned
 			| Pre 			[Body] 					// literal
+			| Script		[Script_Attr] String	// scripts
 			| Select 		[Select_Attr] [Option]	// inputs
 			| Small 		String 					// smaller
 			| T  			String 					// plain text
@@ -51,7 +51,7 @@ None			:== [NoAttr]
 			| EmptyBody								// same 
 
 
-:: Script	= Script		[Script_Attr] String	// script
+//:: Script	= Script		[Script_Attr] String	// script
 
 :: Script_Attr
 			= Scr_Type		Scr_Text
@@ -106,9 +106,9 @@ None			:== [NoAttr]
 :: Checked	= Checked			
 
 :: ColorOption
-			= Col_RGB Int Int Int
+			= `Col_RGB Int Int Int
 			| `Col_XXX HexNum
-			| Col_Name ColorName
+			| `Col_Name ColorName
 
 :: ColorName = Red
 
@@ -237,6 +237,6 @@ None			:== [NoAttr]
 
 :: HexNum = HexNum HN HN HN HN HN HN
 
-:: HN = H_0 | H_1 | H_2 | H_3 | H_4 | H_5 | H_6 | H_F
+:: HN = H_0 | H_1 | H_2 | H_3 | H_4 | H_5 | H_6 | H_7 | H_8 | H_9 | H_A | H_B | H_C | H_D | H_E | H_F
 
 
