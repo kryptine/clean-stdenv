@@ -44,7 +44,7 @@ isValidCheckControlAttribute :: !(ControlAttribute .st) -> Bool
 
 isValidCompoundControlAttribute :: !(ControlAttribute .st) -> Bool
 /*	CompoundControl		(y = valid, . = invalid)
-	ControlActivate		y |	ControlKeyboard		y |	ControlPos			y
+	ControlActivate		y |	ControlKeyboard		y |	ControlPos			y |
 	ControlDeactivate	y |	ControlLook			y |	ControlResize		y |
 	ControlFunction		. |	ControlMinimumSize	y |	ControlSelectState	y |
 	ControlHide			y |	ControlModsFunction	. |	ControlTip			y |
@@ -70,12 +70,12 @@ isValidCustomButtonControlAttribute :: !(ControlAttribute .st) -> Bool
 
 isValidCustomControlAttribute :: !(ControlAttribute .st) -> Bool
 /*	CustomControl		(y = valid, . = invalid)
-	ControlActivate		y |	ControlKeyboard		. |	ControlPos			y |
+	ControlActivate		y |	ControlKeyboard		y |	ControlPos			y |
 	ControlDeactivate	y |	ControlLook			. |	ControlResize		y |
 	ControlFunction		. |	ControlMinimumSize	y |	ControlSelectState	y |
 	ControlHide			y |	ControlModsFunction	. |	ControlTip			y |
 	ControlHMargin		. |	ControlMouse		y |	ControlViewDomain	. |
-	ControlHScroll		. |	ControlOrigin		y |	ControlViewSize		. |
+	ControlHScroll		. |	ControlOrigin		. |	ControlViewSize		. |
 	ControlId			y | ControlOuterSize	. |	ControlVMargin		. |
 	ControlItemSpace	. |	ControlPen			y |	ControlVScroll		. |
 												  | ControlWidth		. |

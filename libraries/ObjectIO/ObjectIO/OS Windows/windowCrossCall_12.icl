@@ -109,6 +109,7 @@ WinGetWindowText hwnd tb
 					other		-> abort "[WinGetWindowText] expected CcRETURN1 value."
 	= (text,tb)
 
+/* PA: the following four functions are now implemented as C-calls.
 WinInvalidateWindow :: !HWND !*OSToolbox -> *OSToolbox
 WinInvalidateWindow hwnd tb
 	= snd (IssueCleanRequest2 (ErrorCallback2 "WinInvalidateWindow") (Rq1Cci CcRqINVALIDATEWINDOW hwnd) tb)
@@ -124,6 +125,7 @@ WinValidateRect hwnd (left,top, right,bottom) tb
 WinValidateRgn :: !HWND !HRGN !*OSToolbox -> *OSToolbox
 WinValidateRgn hwnd rgn tb
 	= snd (IssueCleanRequest2 (ErrorCallback2 "ValidateRgn") (Rq2Cci CcRqVALIDATERGN hwnd rgn) tb)
+*/
 
 WinUpdateWindowRect :: !HWND !(!Int,!Int,!Int,!Int) !*OSToolbox -> *OSToolbox
 WinUpdateWindowRect hwnd (left,top,right,bottom) tb
@@ -146,24 +148,6 @@ WinBeginPaint hwnd tb
 WinEndPaint :: !HWND !(!HDC, !*OSToolbox) -> *OSToolbox
 WinEndPaint hwnd (hdc,tb)
 	= snd (IssueCleanRequest2 (ErrorCallback2 "EndPaint") (Rq2Cci CcRqENDPAINT hwnd hdc) tb)
-
-WinGetDC :: !HWND !*OSToolbox -> (!HDC,!*OSToolbox)
-WinGetDC _ _
-	= code
-	{
-		.inline WinGetDC
-			ccall WinGetDC "II-II"
-		.end
-	}
-
-WinReleaseDC :: !HWND !(!HDC,!*OSToolbox) -> *OSToolbox
-WinReleaseDC hwnd (hdc,tb)
-	= code
-	{
-		.inline WinReleaseDC
-			ccall WinReleaseDC "III-I"
-		.end
-	}
 
 WinGetClientSize :: !HWND !*OSToolbox -> (!(!Int,!Int), !*OSToolbox)
 WinGetClientSize hwnd tb

@@ -244,6 +244,15 @@ instance Drawables	{#Char}
 */
 
 
+//	Line2 drawing operations:
+instance Drawables Line2
+/*	draw     l:
+		is equal to drawLine l.line_end1 l.line_end2.
+	drawAt p l:
+		draw l
+	None of these functions change the pen position.
+*/
+
 //	Vector2 drawing operations:
 instance Drawables Vector2
 /*	draw     v:

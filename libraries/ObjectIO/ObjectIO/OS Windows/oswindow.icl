@@ -5,7 +5,7 @@ implementation module oswindow
 
 
 import	StdBool, StdInt, StdReal, StdClass, StdOverloaded, StdList, StdMisc, StdTuple
-import	clCrossCall_12, clCCall_12, windowCrossCall_12
+import	clCrossCall_12, clCCall_12, windowCCall_12, windowCrossCall_12
 import	osdocumentinterface, osevent, osfont, ospicture, osrgn, ossystem, ostypes
 from	menuCrossCall_12	import HMENU
 from	commondef			import FatalError,IntersectRects,RectSize,fromTuple,toTuple4,subVector,HdTl

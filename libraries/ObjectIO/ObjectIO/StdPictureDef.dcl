@@ -12,6 +12,10 @@ import	StdIOBasic
 from	osfont		import	Font
 
 
+::	Line2									// A line connects two points
+	=	{	line_end1		:: !Point2		// The first  point
+		,	line_end2		:: !Point2		// The second point
+		}
 ::	Box										// A box is a rectangle
 	=	{	box_w			:: !Int			// The width  of the box
 		,	box_h			:: !Int			// The height of the box

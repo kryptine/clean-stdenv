@@ -21,6 +21,7 @@ import code from "cGameLib_12.obj", "cOSGameLib_12.obj", "ddutil.obj", "Dsutil.o
 import code from library "ddraw_library"
 import code from library "dsound_library"
 /*	...PA */
+//import	StdDebug, tracetypes
 
   //----------------------------------------------//
  //    Crosscall infrastructure                  //
@@ -44,6 +45,7 @@ import code from library "dsound_library"
 IssueCleanRequest :: !(CrossCallInfo -> .(.s -> .(*OSToolbox -> *(.CrossCallInfo,.s,*OSToolbox))))
                      !.CrossCallInfo !.s !*OSToolbox -> (!CrossCallInfo,!.s,!*OSToolbox)
 IssueCleanRequest callback cci s tb
+//	# tb			= trace_n ("IssueCleanRequest :"+++toOSCrossCallInfoString cci) tb
 	# (reply,tb)	= WinKickOsThread cci tb
 	= HandleCallBacks callback reply s tb
 where
@@ -52,10 +54,12 @@ where
 	HandleCallBacks callback cci=:{ccMsg} s tb
 		| ccMsg>2000
 			= abort ("HandleCallBacks "+++toString ccMsg)
+	//	# tb					= trace_n ("IssueCleanRequest <-- "+++toCleanCrossCallInfoString cci) tb
 		| IsReturnOrQuitCci ccMsg
 			= (cci,s,tb)
 		| otherwise
 			# (returnCci,s,tb)	= callback cci s tb
+		//	# tb				= trace_n ("IssueCleanRequest --> "+++toOSCrossCallInfoString returnCci) tb
 			# (replyCci,tb)		= WinKickOsThread returnCci tb
 			= HandleCallBacks callback replyCci s tb
 
@@ -64,6 +68,7 @@ where
 IssueCleanRequest2 :: !(CrossCallInfo -> .(*OSToolbox -> *(.CrossCallInfo,*OSToolbox))) !.CrossCallInfo !*OSToolbox
 																					 -> (!CrossCallInfo,!*OSToolbox)
 IssueCleanRequest2 callback cci tb
+//	# tb			= trace_n ("IssueCleanRequest2 :"+++toOSCrossCallInfoString cci) tb
 	# (reply,tb)	= WinKickOsThread cci tb
 	= HandleCallBacks callback reply tb
 where
@@ -72,11 +77,13 @@ where
 	HandleCallBacks callback cci=:{ccMsg} tb
 		| ccMsg>2000
 			= abort ("HandleCallBacks "+++toString ccMsg)
+	//	# tb					= trace_n ("IssueCleanRequest2 <-- "+++toCleanCrossCallInfoString cci) tb
 		| IsReturnOrQuitCci ccMsg
 			= (cci,tb)
-		# (returnCci,tb) = callback cci tb
-		# (replyCci, tb) = WinKickOsThread returnCci tb
 		| otherwise
+			# (returnCci,tb) 	= callback cci tb
+		//	# tb				= trace_n ("IssueCleanRequest2 --> "+++toOSCrossCallInfoString returnCci) tb
+			# (replyCci, tb) 	= WinKickOsThread returnCci tb
 			= HandleCallBacks callback replyCci tb
 
 //	PA: macros for returning proper number of arguments within a CrossCallInfo.
@@ -290,7 +297,7 @@ CcRqSHOWWINDOW				:==	1433		/* PA: added to (hide/show) windows. */
 CcRqSETWINDOWSIZE			:==	1432		/* PA: added to resize windows/controls. */
 CcRqSETSELECTWINDOW			:== 1431		/* PA: added to (en/dis)able windows. */
 CcRqSETWINDOWPOS			:== 1430		/* PA: added to move windows/controls. */
-CcRqINVALIDATERECT			:== 1429		/* PA: added for invalidating parts of a window/control. */
+
 CcRqSETEDITSELECTION		:== 1428		/* PA: added for handling edit control selections. */
 CcRqSETSCROLLSIZE			:==	1427		/* PA: added for setting thumb size of scrollbar. */
 CcRqSETSCROLLPOS			:== 1426		/* PA: added for setting thumb of scrollbar. */
@@ -308,9 +315,7 @@ CcRqGETCLIENTSIZE			:== 1415
 CcRqUPDATEWINDOWRECT		:== 1412		/* PA: added for updating rect part of a window/control. */
 CcRqGETWINDOWTEXT			:== 1411
 CcRqSETWINDOWTITLE			:== 1410
-CcRqVALIDATERGN				:==	1409		/* PA: added for validating region part of a window/control. */
-CcRqVALIDATERECT			:==	1408		/* PA: added for validating rect part of a window/control. */
-CcRqINVALIDATEWINDOW		:== 1407
+
 CcRqENDPAINT				:== 1404
 CcRqBEGINPAINT				:== 1403
 CcRqDESTROYWINDOW			:== 1402
@@ -420,90 +425,3 @@ CcRETURN0					:== 10
 CcRETURNmin					:== 10
 
 CcWASQUIT					:== 1
-
-
-/* PA: used for debugging purposes. 
-instance toString CrossCallInfo where
-	toString {ccMsg,p1,p2,p3,p4,p5,p6}
-		= toString (ccMsgString ccMsg,p1,p2,p3,p4,p5,p6)
-	where
-		ccMsgString CcRqGET_PRINTER_DC		= "CcRqGET_PRINTER_DC"
-		ccMsgString CcRqDISPATCH_MESSAGES_WHILE_PRINTING
-											= "CcRqDISPATCH_MESSAGES_WHILE_PRINTING"
-		ccMsgString CcRqENDDOC				= "CcRqENDDOC"
-		ccMsgString CcRqSTARTDOC			= "CcRqSTARTDOC"
-		ccMsgString CcRqDESTROYMDIDOCWINDOW = "CcRqDESTROYMDIDOCWINDOW"
-		ccMsgString CcRqCREATEMDIDOCWINDOW	= "CcRqCREATEMDIDOCWINDOW"
-		ccMsgString CcRqCREATEMDIWINDOW		= "CcRqCREATEMDIWINDOW"
-		ccMsgString CcRqCREATESDIWINDOW		= "CcRqCREATESDIWINDOW"
-		ccMsgString CcRqCLIPBOARDHASTEXT	= "CcRqCLIPBOARDHASTEXT"
-		ccMsgString CcRqGETCLIPBOARDTEXT	= "CcRqGETCLIPBOARDTEXT"
-		ccMsgString CcRqSETCLIPBOARDTEXT	= "CcRqSETCLIPBOARDTEXT"
-		ccMsgString CcRqDIRECTORYDIALOG		= "CcRqDIRECTORYDIALOG"
-		ccMsgString CcRqFILESAVEDIALOG		= "CcRqFILESAVEDIALOG"
-		ccMsgString CcRqFILEOPENDIALOG		= "CcRqFILEOPENDIALOG"
-		ccMsgString CcRqSHOWCONTROL			= "CcRqSHOWCONTROL"
-		ccMsgString CcRqSELECTPOPUPITEM		= "CcRqSELECTPOPUPITEM"
-		ccMsgString CcRqENABLEPOPUPITEM		= "CcRqENABLEPOPUPITEM"
-		ccMsgString CcRqADDTOPOPUP			= "CcRqADDTOPOPUP"
-		ccMsgString CcRqSETITEMCHECK		= "CcRqSETITEMCHECK"
-		ccMsgString CcRqENABLECONTROL		= "CcRqENABLECONTROL"
-		ccMsgString CcRqCREATECOMPOUND		= "CcRqCREATECOMPOUND"
-		ccMsgString CcRqCREATESCROLLBAR		= "CcRqCREATESCROLLBAR"
-		ccMsgString CcRqCREATECUSTOM		= "CcRqCREATECUSTOM"
-		ccMsgString CcRqCREATEICONBUT		= "CcRqCREATEICONBUT"
-		ccMsgString CcRqCREATEPOPUP			= "CcRqCREATEPOPUP"
-		ccMsgString CcRqCREATECHECKBOX		= "CcRqCREATECHECKBOX"
-		ccMsgString CcRqCREATERADIOBUT		= "CcRqCREATERADIOBUT"
-		ccMsgString CcRqCREATEEDITTXT		= "CcRqCREATEEDITTXT"
-		ccMsgString CcRqCREATESTATICTXT		= "CcRqCREATESTATICTXT"
-		ccMsgString CcRqCREATEBUTTON		= "CcRqCREATEBUTTON"
-		ccMsgString CcRqCREATEDIALOG		= "CcRqCREATEDIALOG"
-		ccMsgString CcRqGETFONTSIZES		= "CcRqGETFONTSIZES"
-		ccMsgString CcRqGETFONTNAMES		= "CcRqGETFONTNAMES"
-		ccMsgString CcRqSETCLIENTSIZE		= "CcRqSETCLIENTSIZE"
-		ccMsgString CcRqDELCONTROLTIP		= "CcRqDELCONTROLTIP"
-		ccMsgString CcRqADDCONTROLTIP		= "CcRqADDCONTROLTIP"
-		ccMsgString CcRqGETWINDOWSIZE		= "CcRqGETWINDOWSIZE"
-		ccMsgString CcRqRESTACKWINDOW		= "CcRqRESTACKWINDOW"
-		ccMsgString CcRqSHOWWINDOW			= "CcRqSHOWWINDOW"
-		ccMsgString CcRqSETWINDOWSIZE		= "CcRqSETWINDOWSIZE"
-		ccMsgString CcRqSETSELECTWINDOW		= "CcRqSETSELECTWINDOW"
-		ccMsgString CcRqSETWINDOWPOS		= "CcRqSETWINDOWPOS"
-		ccMsgString CcRqINVALIDATERECT		= "CcRqINVALIDATERECT"
-		ccMsgString CcRqSETEDITSELECTION	= "CcRqSETEDITSELECTION"
-		ccMsgString CcRqSETSCROLLSIZE		= "CcRqSETSCROLLSIZE"
-		ccMsgString CcRqSETSCROLLPOS		= "CcRqSETSCROLLPOS"
-		ccMsgString CcRqSETSCROLLRANGE		= "CcRqSETSCROLLRANGE"
-		ccMsgString CcRqRESETCURSOR			= "CcRqRESETCURSOR"
-		ccMsgString CcRqSETGLOBALCURSOR		= "CcRqSETGLOBALCURSOR"
-		ccMsgString CcRqOBSCURECURSOR		= "CcRqOBSCURECURSOR"
-		ccMsgString CcRqCHANGEWINDOWCURSOR	= "CcRqCHANGEWINDOWCURSOR"
-		ccMsgString CcRqGETWINDOWPOS		= "CcRqGETWINDOWPOS"
-		ccMsgString CcRqGETCLIENTSIZE		= "CcRqGETCLIENTSIZE"
-		ccMsgString CcRqGETWINDOWTEXT		= "CcRqGETWINDOWTEXT"
-		ccMsgString CcRqSETWINDOWTITLE		= "CcRqSETWINDOWTITLE"
-		ccMsgString CcRqVALIDATERGN			= "CcRqVALIDATERGN"
-		ccMsgString CcRqVALIDATERECT		= "CcRqVALIDATERECT"
-		ccMsgString CcRqINVALIDATEWINDOW	= "CcRqINVALIDATEWINDOW"
-		ccMsgString CcRqENDPAINT			= "CcRqENDPAINT"
-		ccMsgString CcRqBEGINPAINT			= "CcRqBEGINPAINT"
-		ccMsgString CcRqDESTROYWINDOW		= "CcRqDESTROYWINDOW"
-		ccMsgString CcRqDRAWMBAR			= "CcRqDRAWMBAR"
-		ccMsgString CcRqCREATEPOPMENU		= "CcRqCREATEPOPMENU"
-		ccMsgString CcRqINSERTSEPARATOR		= "CcRqINSERTSEPARATOR"
-		ccMsgString CcRqMENUENABLE			= "CcRqMENUENABLE"
-		ccMsgString CcRqMODIFYMENU			= "CcRqMODIFYMENU"
-		ccMsgString CcRqINSERTMENU			= "CcRqINSERTMENU"
-		ccMsgString CcRqITEMENABLE			= "CcRqITEMENABLE"
-		ccMsgString CcRqREMOVEMENUSHORTKEY	= "CcRqREMOVEMENUSHORTKEY"
-		ccMsgString CcRqADDMENUSHORTKEY		= "CcRqADDMENUSHORTKEY"
-		ccMsgString CcRqMODIFYMENUITEM		= "CcRqMODIFYMENUITEM"
-		ccMsgString CcRqDESTROYMENU			= "CcRqDESTROYMENU"
-		ccMsgString CcRqDELETEMENU			= "CcRqDELETEMENU"
-		ccMsgString CcRqREMOVEMENUITEM		= "CcRqREMOVEMENUITEM"
-		ccMsgString CcRqCHECKMENUITEM		= "CcRqCHECKMENUITEM"
-		ccMsgString CcRqINSERTMENUITEM		= "CcRqINSERTMENUITEM"
-		ccMsgString CcRqDOMESSAGE			= "CcRqDOMESSAGE"
-		ccMsgString msg						= "(Other message: "+++toString msg+++")"
-*/
