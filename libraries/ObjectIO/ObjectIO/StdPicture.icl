@@ -38,12 +38,10 @@ class movePenPos figure	:: !figure !*Picture -> *Picture
 //	Move the pen position as much as when drawing the figure.
 
 instance movePenPos Vector2 where
-	movePenPos :: !Vector2 !*Picture -> *Picture
 	movePenPos v picture
 		= movepictpenpos v picture
 
 instance movePenPos Curve where
-	movePenPos :: !Curve !*Picture -> *Picture
 	movePenPos curve picture
 		# (curpos,picture)	= getpictpenpos picture
 		  (_,_,endpos)		= getcurve_rect_begin_end curpos curve
@@ -275,7 +273,6 @@ class toRegion area :: !area -> Region
 		}
 
 instance toRegion Rectangle where
-	toRegion :: !Rectangle -> Region
 	toRegion rectangle
 		| isEmptyRect rect	= zero
 		| otherwise			= {region_shape=[RegionRect rect],region_bound=rect}
@@ -283,7 +280,6 @@ instance toRegion Rectangle where
 		rect				= rectangleToRect rectangle
 
 instance toRegion PolygonAt where
-	toRegion :: !PolygonAt -> Region
 	toRegion {polygon_pos=p=:{x,y},polygon={polygon_shape}}
 		| isEmptyRect bound	= zero
 		| otherwise			= {region_shape=[RegionPolygon p shape],region_bound=bound}
@@ -310,19 +306,16 @@ instance toRegion PolygonAt where
 			| otherwise	= [{vx=0-v.vx,vy=0-v.vy}]
 
 instance toRegion [area] | toRegion area where
-	toRegion :: ![area] -> Region	| toRegion area
 	toRegion [area:areas]	= toRegion area + toRegion areas
 	toRegion _				= zero
 
 instance toRegion (:^: area1 area2)	| toRegion area1 & toRegion area2 where
-	toRegion :: !(:^: area1 area2) -> Region | toRegion area1 & toRegion area2
 	toRegion (r1 :^: r2) = toRegion r1 + toRegion r2
 
 instance zero Region where
-	zero :: Region
 	zero = {region_shape=[],region_bound=zero}
+
 instance + Region where
-	(+) :: !Region !Region -> Region
 	(+) r1 r2
 	| isEmptyRect r1.region_bound
 		= r2
@@ -411,7 +404,6 @@ accXorPicture drawf picture
 /*	Hiliting figures:
 */
 instance Hilites Box where
-	hilite :: !Box !*Picture -> *Picture
 	hilite box picture
 		# picture			= setpicthilitemode picture
 		# (curpos,picture)	= getpictpenpos picture
@@ -419,7 +411,6 @@ instance Hilites Box where
 		# picture			= setpictnormalmode picture
 		= picture
 	
-	hiliteAt :: !Point2 !Box !*Picture -> *Picture
 	hiliteAt base box picture
 		# picture	= setpicthilitemode picture
 		# picture	= pictfillrect (boxtorect base box) picture
@@ -427,14 +418,12 @@ instance Hilites Box where
 		= picture
 
 instance Hilites Rectangle where
-	hilite :: !Rectangle !*Picture -> *Picture
 	hilite rectangle picture
 		# picture	= setpicthilitemode picture
 		# picture	= pictfillrect (rectangleToRect rectangle) picture
 		# picture	= setpictnormalmode picture
 		= picture
 	
-	hiliteAt :: !Point2 !Rectangle !*Picture -> *Picture
 	hiliteAt _ rectangle picture
 		# picture	= setpicthilitemode picture
 		# picture	= pictfillrect (rectangleToRect rectangle) picture
@@ -471,11 +460,9 @@ drawLine pos1 pos2 picture
 /*	Text drawing operations:
 */
 instance Drawables Char where
-	draw :: !Char !*Picture -> *Picture
 	draw char picture
 		= pictdrawchar char picture
 	
-	drawAt :: !Point2 !Char !*Picture -> *Picture
 	drawAt pos char picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= setpictpenpos pos picture
@@ -483,11 +470,9 @@ instance Drawables Char where
 		# picture			= setpictpenpos curpos picture
 		= picture
 	
-	undraw :: !Char !*Picture -> *Picture
 	undraw char picture
 		= pictundrawchar char picture
 	
-	undrawAt :: !Point2 !Char !*Picture -> *Picture
 	undrawAt pos char picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= setpictpenpos pos picture
@@ -496,11 +481,9 @@ instance Drawables Char where
 		= picture
 
 instance Drawables {#Char} where
-	draw :: !{#Char} !*Picture -> *Picture
 	draw string picture
 		= pictdrawstring string picture
 	
-	drawAt :: !Point2 !{#Char} !*Picture -> *Picture
 	drawAt pos string picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= setpictpenpos pos picture
@@ -508,11 +491,9 @@ instance Drawables {#Char} where
 		# picture			= setpictpenpos curpos picture
 		= picture
 	
-	undraw :: !{#Char} !*Picture -> *Picture
 	undraw string picture
 		= pictundrawstring string picture
 	
-	undrawAt :: !Point2 !{#Char} !*Picture -> *Picture
 	undrawAt pos string picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= setpictpenpos pos picture
@@ -524,19 +505,15 @@ instance Drawables {#Char} where
 /*	Line2 drawing operations:
 */
 instance Drawables Line2 where
-	draw :: !Line2 !*Picture -> *Picture
 	draw {line_end1,line_end2} picture
 		= pictdrawline line_end1 line_end2 picture
 	
-	drawAt :: !Point2 !Line2 !*Picture -> *Picture
 	drawAt _ {line_end1,line_end2} picture
 		= pictdrawline line_end1 line_end2 picture
 	
-	undraw :: !Line2 !*Picture -> *Picture
 	undraw {line_end1,line_end2} picture
 		= pictundrawline line_end1 line_end2 picture
 	
-	undrawAt :: !Point2 !Line2 !*Picture -> *Picture
 	undrawAt _ {line_end1,line_end2} picture
 		= pictundrawline line_end1 line_end2 picture
 
@@ -544,25 +521,21 @@ instance Drawables Line2 where
 /*	Vector2 drawing operations:
 */
 instance Drawables Vector2 where
-	draw :: !Vector2 !*Picture -> *Picture
 	draw {vx,vy} picture
 		# (curpos,picture)	= getpictpenpos picture
 		  endpos			= {x=curpos.x+vx,y=curpos.y+vy}
 		# picture			= pictdrawlineto endpos picture
 		= picture
 	
-	drawAt :: !Point2 !Vector2 !*Picture -> *Picture
 	drawAt pos=:{x,y} {vx,vy} picture
 		= pictdrawline pos {x=x+vx,y=y+vy} picture
 	
-	undraw :: !Vector2 !*Picture -> *Picture
 	undraw {vx,vy} picture
 		# (curpos,picture)	= getpictpenpos picture
 		  endpos			= {x=curpos.x+vx,y=curpos.y+vy}
 		# picture			= pictundrawlineto endpos picture
 		= picture
 	
-	undrawAt :: !Point2 !Vector2 !*Picture -> *Picture
 	undrawAt pos=:{x,y} {vx,vy} picture
 		= pictundrawline pos {x=x+vx,y=y+vy} picture
 
@@ -570,44 +543,36 @@ instance Drawables Vector2 where
 /*	Oval drawing operations:
 */
 instance Drawables Oval where
-	draw :: !Oval !*Picture -> *Picture
 	draw oval picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= pictdrawoval curpos oval picture
 		= picture
 	
-	drawAt :: !Point2 !Oval !*Picture -> *Picture
 	drawAt pos oval picture
 		= pictdrawoval pos oval picture
 	
-	undraw :: !Oval !*Picture -> *Picture
 	undraw oval picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= pictundrawoval curpos oval picture
 		= picture
 	
-	undrawAt :: !Point2 !Oval !*Picture -> *Picture
 	undrawAt pos oval picture
 		= pictundrawoval pos oval picture
 
 instance Fillables Oval where
-	fill :: !Oval !*Picture -> *Picture
 	fill oval picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= pictfilloval curpos oval picture
 		= picture
 	
-	fillAt :: !Point2 !Oval !*Picture -> *Picture
 	fillAt pos oval picture
 		= pictfilloval pos oval picture
 	
-	unfill :: !Oval !*Picture -> *Picture
 	unfill oval picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= pictunfilloval curpos oval picture
 		= picture
 	
-	unfillAt :: !Point2 !Oval !*Picture -> *Picture
 	unfillAt pos oval picture
 		= pictunfilloval pos oval picture
 
@@ -615,44 +580,36 @@ instance Fillables Oval where
 /*	Curve drawing operations:
 */
 instance Drawables Curve where
-	draw :: !Curve !*Picture -> *Picture
 	draw curve picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= pictdrawcurve True curpos curve picture
 		= picture
 	
-	drawAt :: !Point2 !Curve !*Picture -> *Picture
 	drawAt point curve picture
 		= pictdrawcurve False point curve picture
 	
-	undraw :: !Curve !*Picture -> *Picture
 	undraw curve picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= pictundrawcurve True curpos curve picture
 		= picture
 	
-	undrawAt :: !Point2 !Curve !*Picture -> *Picture
 	undrawAt point curve picture
 		= pictundrawcurve False point curve picture
 
 instance Fillables Curve where
-	fill :: !Curve !*Picture -> *Picture
 	fill curve picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= pictfillcurve True curpos curve picture
 		= picture
 	
-	fillAt :: !Point2 !Curve !*Picture -> *Picture
 	fillAt point curve picture
 		= pictfillcurve False point curve picture
 
-	unfill :: !Curve !*Picture -> *Picture
 	unfill curve picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= pictunfillcurve True curpos curve picture
 		= picture
 	
-	unfillAt :: !Point2 !Curve !*Picture -> *Picture
 	unfillAt point curve picture
 		= pictunfillcurve False point curve picture
 
@@ -660,44 +617,36 @@ instance Fillables Curve where
 /*	Box drawing operations:
 */
 instance Drawables Box where
-	draw :: !Box !*Picture -> *Picture
 	draw box picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= pictdrawrect (boxtorect curpos box) picture
 		= picture
 	
-	drawAt :: !Point2 !Box !*Picture -> *Picture
 	drawAt point box picture
 		= pictdrawrect (boxtorect point box) picture
 	
-	undraw :: !Box !*Picture -> *Picture
 	undraw box picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= pictundrawrect (boxtorect curpos box) picture
 		= picture
 	
-	undrawAt :: !Point2 !Box !*Picture -> *Picture
 	undrawAt point box picture
 		= pictundrawrect (boxtorect point box) picture
 
 instance Fillables Box where
-	fill :: !Box !*Picture -> *Picture
 	fill box picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= pictfillrect (boxtorect curpos box) picture
 		= picture
 	
-	fillAt :: !Point2 !Box !*Picture -> *Picture
 	fillAt pos box picture
 		= pictfillrect (boxtorect pos box) picture
 
-	unfill :: !Box !*Picture -> *Picture
 	unfill box picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= pictunfillrect (boxtorect curpos box) picture
 		= picture
 	
-	unfillAt :: !Point2 !Box !*Picture -> *Picture
 	unfillAt pos box picture
 		= pictunfillrect (boxtorect pos box) picture
 
@@ -712,36 +661,28 @@ where
 /*	Rectangle drawing operations:
 */
 instance Drawables Rectangle where
-	draw :: !Rectangle !*Picture -> *Picture
 	draw rectangle picture
 		= pictdrawrect (rectangleToRect rectangle) picture
 	
-	drawAt :: !Point2 !Rectangle !*Picture -> *Picture
 	drawAt _ rectangle picture
 		= pictdrawrect (rectangleToRect rectangle) picture
 
-	undraw :: !Rectangle !*Picture -> *Picture
 	undraw rectangle picture
 		= pictundrawrect (rectangleToRect rectangle) picture
 	
-	undrawAt :: !Point2 !Rectangle !*Picture -> *Picture
 	undrawAt _ rectangle picture
 		= pictundrawrect (rectangleToRect rectangle) picture
 
 instance Fillables Rectangle where
-	fill :: !Rectangle !*Picture -> *Picture
 	fill rectangle picture
 		= pictfillrect (rectangleToRect rectangle) picture
 	
-	fillAt :: !Point2 !Rectangle !*Picture -> *Picture
 	fillAt _ rectangle picture
 		= pictfillrect (rectangleToRect rectangle) picture
 
-	unfill :: !Rectangle !*Picture -> *Picture
 	unfill rectangle picture
 		= pictunfillrect (rectangleToRect rectangle) picture
 	
-	unfillAt :: !Point2 !Rectangle !*Picture -> *Picture
 	unfillAt _ rectangle picture
 		= pictunfillrect (rectangleToRect rectangle) picture
 
@@ -749,52 +690,42 @@ instance Fillables Rectangle where
 /*	Polygon drawing operations:
 */
 instance Drawables Polygon where
-	draw :: !Polygon !*Picture -> *Picture
 	draw polygon picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= pictdrawpolygon curpos polygon picture
 		= picture
 	
-	drawAt :: !Point2 !Polygon !*Picture -> *Picture
 	drawAt base polygon picture
 		= pictdrawpolygon base polygon picture
 
-	undraw :: !Polygon !*Picture -> *Picture
 	undraw polygon picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= pictundrawpolygon curpos polygon picture
 		= picture
 	
-	undrawAt :: !Point2 !Polygon !*Picture -> *Picture
 	undrawAt base polygon picture
 		= pictundrawpolygon base polygon picture
 
 instance Fillables Polygon where
-	fill :: !Polygon !*Picture -> *Picture
 	fill polygon picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= pictfillpolygon curpos polygon picture
 		= picture
 	
-	fillAt :: !Point2 !Polygon !*Picture -> *Picture
 	fillAt base polygon picture
 		= pictfillpolygon base polygon picture
 	
-	unfill :: !Polygon !*Picture -> *Picture
 	unfill polygon picture
 		# (curpos,picture)	= getpictpenpos picture
 		# picture			= pictunfillpolygon curpos polygon picture
 		= picture
 	
-	unfillAt :: !Point2 !Polygon !*Picture -> *Picture
 	unfillAt base polygon picture
 		= pictunfillpolygon base polygon picture
 
 
-// MW...
 getResolution :: !*Picture -> (!(!Int,!Int),!*Picture)
 getResolution picture
 	# (origin,pen,toScreen,context,tb)	= peekPicture picture
 	# (res,tb)							= getResolutionC context tb
 	= (res,unpeekPicture origin pen toScreen context tb)
-// ... MW

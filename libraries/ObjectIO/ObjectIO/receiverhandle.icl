@@ -27,10 +27,8 @@ import	ostoolbox
 ::	RHandleFunction ls m r pst
 	:==	m -> *(ls,pst) -> *(ls,[r],pst)
 
-// MW11..
 ::	InetReceiverASMQType	:== (!InetEvent`,!EndpointRef`,!Int)
 
 ::	InetEvent`				:== Int
 ::	EndpointRef`			:==	Int
 ::	InetReceiverCategory`	:==	Int
-// ..MW11

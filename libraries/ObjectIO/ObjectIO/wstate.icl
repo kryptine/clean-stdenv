@@ -314,7 +314,7 @@ where
 	getWItemAtt` (ControlVScroll      f)			= ControlVScroll`     f
 	getWItemAtt` (ControlWidth        width)		= ControlWidth`       width
 	
-	getWItemInfo` :: !OSWindowPtr !OSWindowPtr !(WItemInfo .ls .pst) !*OSToolbox -> (WItemInfo`,!WItemInfo .ls .pst,!*OSToolbox)
+	getWItemInfo` :: !OSWindowPtr !OSWindowPtr !(WItemInfo .ls .pst) !*OSToolbox -> (!WItemInfo`,!WItemInfo .ls .pst,!*OSToolbox)
 	getWItemInfo` wPtr itemPtr info=:(RadioInfo {radioItems,radioLayout,radioIndex}) tb
 		= (	RadioInfo` { radioItems`  = map getRadioInfo` radioItems
 					   , radioLayout` = radioLayout
@@ -658,4 +658,3 @@ instance toString (ControlAttribute .st) where
 	toString (ControlVMargin	  _ _) = "ControlVMargin"
 	toString (ControlVScroll		_) = "ControlVScroll"
 	toString (ControlWidth			_) = "ControlWidth"
-
