@@ -1282,7 +1282,7 @@ SetControlFontProc (HWND hchild,		/* handle to child window */
 
 /*	The callback routine for a modal/modeless dialog box.
 */
-static LRESULT CALLBACK
+static BOOL CALLBACK
 DialogProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	printMessage ("Dialog procedure", hwnd, message, wParam, lParam);
@@ -6325,7 +6325,7 @@ HandleCleanRequest (CrossCallInfo * pcci)
 				MakeReturn0Cci (pcci);
 			}
 			break;
-		case CcRqSHOWCONTROL:	/* hwnd, bool; no result. */
+		case CcRqSHOWCONTROL:	// hwnd, bool; no result. 
 			{
 				int nCmdShow;
 
