@@ -118,10 +118,10 @@ derive gGEC TypeVal, Editor, Command, ApplicationElem
 editoreditor = startCircuit (designeditor >>> arr convert >>> applicationeditor) initvalue
 where
 	designeditor :: GecCircuit DesignEditor DesignEditor
-	designeditor 		= feedback (arr toDesignEditor >>> edit "design" >>> arr updateDesign o fromDesignEditor)
+	designeditor 		= feedback (arr toDesignEditor >>> edit "design" >>> arr (updateDesign o fromDesignEditor))
 
 	applicationeditor :: GecCircuit ApplicationEditor ApplicationEditor
-	applicationeditor 	= feedback (arr (toApplicEditor o updateApplication) >> edit "application" >>> arr fromApplicEditor)
+	applicationeditor 	= feedback (arr (toApplicEditor o updateApplication) >>> edit "application" >>> arr fromApplicEditor)
 
 	toDesignEditor   (table,clipboard) = (listAGEC True (map vertlistAGEC table),hidAGEC clipboard)
 	fromDesignEditor (table,clipboard) = (map (^^) (^^ table),^^ clipboard)

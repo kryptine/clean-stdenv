@@ -53,20 +53,20 @@ where
 derive generate Tree, GecComb, MyCounter, Up_Down, UpDown, DoubleCounter, BalancedTree, Rose, Euros, Pounds, BalancedNode
 
 example_l1		= 	startCircuit (edit		"Simple List Editor")					[1]
-example_l2  	=	startCircuit (edit	"list" >>@ sum >>> edit "sum") 				[1..5]  									
-example_l4  	=	startCircuit (edit	"list" >>@ (\(a,b) ->  a + b) >>> edit "Sum List Elements") ([1..5],[5,4..1])			
-example_l6  	=	startCircuit (feedback (edit "Sorted List" >>@ sort))			[5,4..1] 									
+example_l2  	=	startCircuit (edit	"list" >>> arr sum >>> edit "sum") 				[1..5]  									
+example_l4  	=	startCircuit (edit	"list" >>> arr (\(a,b) ->  a + b) >>> edit "Sum List Elements") ([1..5],[5,4..1])			
+example_l6  	=	startCircuit (feedback (edit "Sorted List" >>> arr  sort))			[5,4..1] 									
 example_t1		=	startCircuit (edit		"Tree")									(Node Leaf 1 Leaf)									
 example_t2		=	startCircuit (edit 	"Tree")									(toBalancedTree	 [1,5,2,8,3,9])
 example_t3		=	startCircuit (edit 	"Tree")			         				(toTree [8,34,2,-4,0,31]) 					
-example_t4		=	startCircuit (edit "Tree" >>@ toBalancedTree >>> edit "balanced tree") 		[1,5,2,8,3,9]
-example_t7		=	startCircuit (feedback (edit "self Balancing Tree" >>@ toBalancedTree o toList))			(toBalancedTree [1,5,2,8,3,9])
-example_tr1		=	startCircuit (feedback (edit "Balanced Tree with Records" >>@ toBalTree o BalTreetoList))	(toBalTree [1,5,2,8,3,9])
+example_t4		=	startCircuit (edit "Tree" >>> arr toBalancedTree >>> edit "balanced tree") 		[1,5,2,8,3,9]
+example_t7		=	startCircuit (feedback (edit "self Balancing Tree" >>> arr (toBalancedTree o toList)))			(toBalancedTree [1,5,2,8,3,9])
+example_tr1		=	startCircuit (feedback (edit "Balanced Tree with Records" >>> arr (toBalTree o BalTreetoList)))	(toBalTree [1,5,2,8,3,9])
 example_rose	=	startCircuit (edit "Rose") (Rose 1 []) 
 example_rec1	=	startCircuit (feedback (	edit "Exchange Pounds to Euros"  
-											>>@ toEuro 
+											>>> arr toEuro 
 											>>> edit  "Exchange Euros to Pounds" 
-											>>@ toPounds
+											>>> arr toPounds
 											)
 								 ) {pounds=0.0}   
 where
@@ -74,13 +74,13 @@ where
 	toEuro {pounds} 	= {euros = pounds * exchangerate}
 	exchangerate 		= 1.4
 example_cnt1 	= startCircuit (edit "Counter") (counterAGEC 0)
-example_cnt2 	= startCircuit (feedback (edit "Counter" >>@ updateDoubleCounters)) {cntr1=counterAGEC 0,cntr2=intcalcAGEC 0,sum=0}
+example_cnt2 	= startCircuit (feedback (edit "Counter" >>> arr updateDoubleCounters)) {cntr1=counterAGEC 0,cntr2=intcalcAGEC 0,sum=0}
 where
 	updateDoubleCounters cntrs = {cntrs & sum = ^^ cntrs.cntr1 + ^^ cntrs.cntr2}
-example_cnt3 	= startCircuit (feedback (edit "Counter" >>@ updateTwoIntCounters)) (intcalcAGEC 0 <|> counterAGEC 0 <|> 0)
+example_cnt3 	= startCircuit (feedback (edit "Counter" >>> arr updateTwoIntCounters)) (intcalcAGEC 0 <|> counterAGEC 0 <|> 0)
 where
 	updateTwoIntCounters (i1 <|> i2 <|> sum) = (i1 <|> i2 <|> ^^ i1 + ^^ i2)
-example_cnt4 	= startCircuit (feedback (edit "Counter" >>@ updateTwoIntCounters)) (idAGEC 0 <|> idAGEC 0 <|> counterAGEC 0)
+example_cnt4 	= startCircuit (feedback (edit "Counter" >>> arr updateTwoIntCounters)) (idAGEC 0 <|> idAGEC 0 <|> counterAGEC 0)
 where
 	updateTwoIntCounters (i1 <|> i2 <|> sum) = (i1 <|> i2 <|> sum ^= (^^ i1 + ^^ i2))
 example_cnt5 	= startCircuit mycounter 0
@@ -91,8 +91,8 @@ where
 example_cnt9	= startCircuit (edit "counter") initcounter 
 where
 	initcounter = {gec = mydoublecounter, inout = (0,0)}
-example_cnt10 	= startCircuit (feedback (edit "Counter" >>@ updateCounter)) (Tuple2 0 Neutraal)
-//example_const 	= startCircuit (feedback ( (\x -> 4 &&& edit "constant") >>@ (\(x,y) -> x + y) )) 23 
+example_cnt10 	= startCircuit (feedback (edit "Counter" >>> arr updateCounter)) (Tuple2 0 Neutraal)
+//example_const 	= startCircuit (feedback ( (\x -> 4 &&& edit "constant") >>> arr (\(x,y) -> x + y) )) 23 
 
 :: Tree a  	= Node (Tree a) a (Tree a) 
 				| Leaf
@@ -168,9 +168,9 @@ where
 	updateCounter (n,DownPressed) 	= (n-one,Neutral)
 	updateCounter any 		 	 	= any
 
-	Mybimap fab fba fbb gecbb = fab @>> feedback (gecbb >>@ fbb) >>@ fba
+	Mybimap fab fba fbb gecbb = arr fab >>> feedback (gecbb >>> arr fbb) >>> arr fba
 
-mydoublecounter = ((mycounter &&& mycounter) >>@ (\(x, y) -> x + y) >>> display "tcounter" )
+mydoublecounter = ((mycounter &&& mycounter) >>> arr (\(x, y) -> x + y) >>> display "tcounter" )
 
 updateCounter (Tuple2 n GoUp) 	= Tuple2 (n+1) Neutraal
 updateCounter (Tuple2 n GoDown) = Tuple2 (n-1) Neutraal

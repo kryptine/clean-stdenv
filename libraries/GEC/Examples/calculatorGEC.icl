@@ -15,7 +15,7 @@ Start world
  	example_calc3
  	world  
 
-example_calc	= startCircuit (feedback (edit "Calculator" >>@ update_calc)) calculator
+example_calc	= startCircuit (feedback (edit "Calculator" >>> arr update_calc)) calculator
 where
 	calculator	= 	zero  	   <|> 
 					calc zero  <|> 
@@ -42,15 +42,15 @@ derive gGEC MoreOrLess
 
 derive generate MoreOrLess
 
-calcEditor	= startCircuit (designButtons >>@ convert >>> myCalculator) init
+calcEditor	= startCircuit (designButtons >>> arr convert >>> myCalculator) init
 where
 	init:: ButtonEditor
 	init = [("+",dynamicAGEC (+))]
 
 	designButtons ::  GecCircuit ButtonEditor ButtonEditor
-	designButtons =  feedback (toDesignButtons
-								 @>> edit "design buttons" 
-								 >>@ fromDesignButtons)
+	designButtons =  feedback (		 arr toDesignButtons
+								 >>> edit "design buttons" 
+								 >>> arr fromDesignButtons)
 	
 	toDesignButtons :: ButtonEditor -> (<|> (AGEC ButtonEditor) MoreOrLess)							 
 	toDesignButtons list = vertlistAGEC list <|> EndOfList 							 
@@ -77,7 +77,7 @@ initCalculator mem ival (mybuttons,myfunctions)
 
 //myCalculator :: GecCircuit myCalculatorType myCalculatorType // BUG
 myCalculator :: GecCircuit ((<|> Int (<|> (AGEC Int) (AGEC [Button]))),AGEC MyButtonFuns) ((<|> Int (<|> (AGEC Int) (AGEC [Button]))),AGEC MyButtonFuns)
-myCalculator =  feedback (edit "calculator" >>@ updateCalculator)
+myCalculator =  feedback (edit "calculator" >>> arr updateCalculator)
 							 
 //updateCalculator :: myCalculatorType -> myCalculatorType // BUG 
 //updateCalculator :: ((<|> Int (<|> (AGEC Int) (AGEC [Button]))),AGEC MyButtonFuns) -> ((<|> Int (<|> (AGEC Int) (AGEC [Button]))),AGEC MyButtonFuns)
@@ -90,7 +90,7 @@ where
 
 	whichopper buttons operators = [x \\ (Pressed,x) <- (zip2 buttons operators)]
 
-example_calc3	= startCircuit (feedback (edit "Calculator" >>@ updateCalculator)) mybuttons
+example_calc3	= startCircuit (feedback (edit "Calculator" >>> arr updateCalculator)) mybuttons
 where
 	mybuttons = initCalculator 0 0 (buttons,operators)
 
