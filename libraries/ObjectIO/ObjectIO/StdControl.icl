@@ -91,6 +91,12 @@ gatherWindowIds` []
 		,	wMetrics:: !OSWindowMetrics
 		}
 
+::	WState2
+	=	{	wIds2	:: !WIDS
+		,	wRep2	:: !WindowHandle2
+		,	wTb2		:: !.OSToolbox
+		,	wMetrics2:: !OSWindowMetrics
+		}
 
 getWindow :: !Id !(IOSt .l) -> (!Maybe WState, !IOSt .l)
 getWindow windowId ioState
@@ -139,6 +145,27 @@ setWindow windowId f ioState
 		# (wids,wsH)			= getWindowStateHandleWIDS wsH
 		# {wRep=wsH`,wTb=tb}	= f {wIds=wids,wRep=wsH`,wTb=tb,wMetrics=wMetrics}
 		  wsH					= insertWindowHandle` wsH` wsH
+		  windows				= setWindowHandlesWindow wsH windows
+		# ioState				= setIOToolbox tb ioState
+		# ioState				= ioStSetDevice (WindowSystemState windows) ioState
+		= ioState
+
+setWindow2 :: !Id !(IdFun *WState2) !(IOSt .l) -> IOSt .l
+setWindow2 windowId f ioState
+	# (found,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# windows					= windowSystemStateGetWindowHandles wDevice
+	  (found,wsH,windows)		= getWindowHandlesWindow (toWID windowId) windows
+	| not found
+		= ioStSetDevice (WindowSystemState windows) ioState
+	| otherwise
+		# (wMetrics,ioState)	= ioStGetOSWindowMetrics ioState
+		# (tb,ioState)			= getIOToolbox ioState
+		# (wsH`,wsH,tb)			= retrieveWindowHandle2 wsH tb
+		# (wids,wsH)			= getWindowStateHandleWIDS wsH
+		# {wRep2=wsH`,wTb2=tb}	= f {wIds2=wids,wRep2=wsH`,wTb2=tb,wMetrics2=wMetrics}
+		  wsH					= insertWindowHandle2 wsH` wsH
 		  windows				= setWindowHandlesWindow wsH windows
 		# ioState				= setIOToolbox tb ioState
 		# ioState				= ioStSetDevice (WindowSystemState windows) ioState
@@ -712,14 +739,14 @@ setControlTexts cid_texts ioState
 	| isEmpty cid_texts_wIds
 		= ioState
 	| otherwise
-		= strictSeq [setWindow wId (setControlTexts` cid_texts) \\ (cid_texts,wId)<-cid_texts_wIds] ioState
+		= strictSeq [setWindow2 wId (setControlTexts` cid_texts) \\ (cid_texts,wId)<-cid_texts_wIds] ioState
 where
 	(cids,_)					= unzip cid_texts
 	
-	setControlTexts` :: ![(Id,String)] !*WState -> *WState
-	setControlTexts` texts wState=:{wIds={wPtr},wRep,wTb,wMetrics}
-		# (wH,tb)	= setcontroltexts texts wMetrics wPtr wRep wTb
-		= {wState & wRep=wH,wTb=tb}
+	setControlTexts` :: ![(Id,String)] !*WState2 -> *WState2
+	setControlTexts` texts wState=:{wIds2={wPtr},wRep2,wTb2,wMetrics2}
+		# (wH,tb)	= setcontroltexts texts wMetrics2 wPtr wRep2 wTb2
+		= {wState & wRep2=wH,wTb2=tb}
 
 setControlText :: !Id !String !(IOSt .l) -> IOSt .l
 setControlText id text ioState = setControlTexts [(id,text)] ioState
