@@ -10,7 +10,7 @@ where
 		# (ys, famke) = ``P`` (\f -> ([TRACE n n \\ n <- [0..99]], f)) famke
 		= foldr TRACE famke ys
 
-map``P`` :: (a -> b) ![a] !*Famke -> ([b], !*Famke) | SendGraph{|*|}, ReceiveGraph{|*|}, TC b
+map``P`` :: (a -> b) ![a] !*World -> ([b], !*World) | SendGraph{|*|}, ReceiveGraph{|*|}, TC b
 map``P`` _ [] famke = ([], famke)
 map``P`` f [x:xs] famke 
 	# (y, famke) = ``P`` (\famke -> (f x, famke)) famke
@@ -64,7 +64,7 @@ where
 	nProcess 1 famke = TRACE "nProcess 1" famke
 	nProcess n famke = TRACE ("nProcess " +++ toString n) (snd (newProcess (nProcess (n - 1)) famke))
 	
-	famkeFib :: !Int !*Famke -> *Famke
+	famkeFib :: !Int !*World -> *World
 	famkeFib n famke
 		| n < 2 = TRACE ("famkeFib " +++ toString n) famke
 		# (id, famke) = newProcess (famkeFib (n - 1)) famke
@@ -75,7 +75,7 @@ where
 		  famke = TRACE ("famkeFib " +++ toString n +++ ": joinProcess " +++ toString id) famke
 		= famke
 /*
-	famkeFib` :: !Int !*Famke -> (!Int, !*Famke)
+	famkeFib` :: !Int !*World -> (!Int, !*World)
 	famkeFib` n famke
 		| n < 2 = (1, TRACE ("famkeFib " +++ toString n +++ " == 1") famke)
 		# (x, famke) = ``P`` (famkeFib` (n - 2)) famke

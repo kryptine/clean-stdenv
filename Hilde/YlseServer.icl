@@ -29,35 +29,35 @@ import FamkeRpc, StdEnv
 	| OperationNotSupported
 
 
-existFileAt :: !YlseId !Path` !*Famke -> (!Bool, !*Famke)
+existFileAt :: !YlseId !Path` !*World -> (!Bool, !*World)
 existFileAt server path famke
 	# (reply, famke) = rpc server (ExistFile path) famke
 	= case reply of
 		FileExists -> (True, famke)
 		_ -> (False, famke)
 
-readFileAt :: !YlseId !Path` !*Famke -> (!Maybe Dynamic, !*Famke)
+readFileAt :: !YlseId !Path` !*World -> (!Maybe Dynamic, !*World)
 readFileAt server path famke
 	# (reply, famke) = rpc server (ReadFile path) famke
 	= case reply of
 		FileRead d -> (Just d, famke)
 		_ -> (Nothing, famke)
 
-writeFileAt :: !YlseId !Path` Dynamic !*Famke -> (!Bool, !*Famke)
+writeFileAt :: !YlseId !Path` Dynamic !*World -> (!Bool, !*World)
 writeFileAt server path d famke
 	# (reply, famke) = rpc server (WriteFile path d) famke
 	= case reply of
 		FileWritten -> (True, famke)
 		_ -> (False, famke)
 
-removeFileAt :: !YlseId !Path` !*Famke -> (!Bool, !*Famke)
+removeFileAt :: !YlseId !Path` !*World -> (!Bool, !*World)
 removeFileAt server path famke
 	# (reply, famke) = rpc server (RemoveFile path) famke
 	= case reply of
 		FileRemoved -> (True, famke)
 		_ -> (False, famke)
 
-makePathAt :: !YlseId !Path` !*Famke -> (!Bool, !*Famke)
+makePathAt :: !YlseId !Path` !*World -> (!Bool, !*World)
 makePathAt server path famke
 	# (reply, famke) = rpc server (MakeFolder path) famke
 	= case reply of
@@ -68,14 +68,14 @@ makePathAt server path famke
 			-> makePathAt server path famke
 		_ -> (False, famke)
 
-listFolderAt :: !YlseId !Path` !*Famke -> (!Maybe [String], !*Famke)
+listFolderAt :: !YlseId !Path` !*World -> (!Maybe [String], !*World)
 listFolderAt server path famke
 	# (reply, famke) = rpc server (ListFolder path) famke
 	= case reply of
 		FolderListed xs -> (Just (sort xs), famke)
 		_ -> (Nothing, famke)
 
-removePathAt :: !YlseId !Path` !*Famke -> (!Bool, !*Famke)
+removePathAt :: !YlseId !Path` !*World -> (!Bool, !*World)
 removePathAt server path famke
 	# (reply, famke) = rpc server (RemoveFolder path) famke
 	= case reply of
@@ -96,7 +96,7 @@ where
 		| ok = (True, famke)
 		= removePathAt server (path ++ [name]) famke
 
-StartYlseServer :: !YlseId !*env !*Famke -> *Famke | YlseServer env
+StartYlseServer :: !YlseId !*env !*World -> *World | YlseServer env
 StartYlseServer rpcid env famke
 	# (_, server, famke) = rpcOpen rpcid famke
 	  (env, server, famke) = ylseServer env server famke

@@ -16,12 +16,13 @@ where
 		  console = fwrites "Esther>" console
 		  (continue, input, console) = freadline` console
 	  	  (_, env) = fclose console env
-		| not continue || input == "" = {st & env = env}
+		| input == "" = {st & env = env}
 		# (result, st=:{env}) = (interpret input catchAllIO (\d env -> (handler d, env))) {st & env = env}
 		  (console, env) = stdio env
 		  console = foldl (\f x -> fwrites x f) console result
 		  console = fwrites "\n" console
 	  	  (_, env) = fclose console env
+		| not continue = {st & env = env}
 		= shell {st & env = env}
 	where
 		freadline` :: !*File -> (!Bool, !String, !*File)
@@ -40,12 +41,12 @@ where
 		eval :: !Dynamic !*env -> (!Dynamic, !*env) | TC env
 		eval d=:(_ :: A.a: *a -> *a) env = (d, env)
 		eval (f :: *env^ -> *env^) env 
-			#!env = trace_n " < *World -> *World > " env
+			# env = trace_n " < *World -> *World > " env
 			= (dynamic UNIT, f env)
 		eval d=:(_ :: A.a b: *a -> *(b, *a)) env = (d, env)
 		eval (f :: *env^ -> *(a, *env^)) env 
-			#!env = trace_n " < *World -> *(a, *World) > " env
-			# (x, env) = f env
+			# env = trace_n " < *World -> *(a, *World) > " env
+			  (x, env) = f env
 			= (dynamic x :: a, env)
 		eval d env = (d, env)
 

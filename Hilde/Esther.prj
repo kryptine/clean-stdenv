@@ -72,7 +72,7 @@ MainModule
 			Y:	20
 			SizeX:	759
 			SizeY:	461
-	IclOpen:	True
+	IclOpen:	False
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
 	Module
@@ -1990,7 +1990,7 @@ OtherModules
 				Y:	37
 				SizeX:	750
 				SizeY:	502
-		DclOpen:	True
+		DclOpen:	False
 		Icl
 			WindowPosition
 				X:	2
@@ -2279,6 +2279,22 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup2.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_system.o
 		Path:	{Project}\Clean System Files\Esther.o
+		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
+		Path:	{Project}\Loes 0.2\Clean System Files\LoesColl.o
+		Path:	{Project}\Loes 0.2\Clean System Files\LoesListColl.o
+		Path:	{Project}\Loes 0.2\Clean System Files\LoesAssoc.o
+		Path:	{Project}\Loes 0.2\Clean System Files\LoesKeyList.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloadedList.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnumStrict.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemStrictLists.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdStrictLists.o
+		Path:	{Project}\Loes 0.2\Clean System Files\LoesCommon.o
+		Path:	{Project}\Loes 0.2\Clean System Files\LoesSeq.o
+		Path:	{Project}\Loes 0.2\Clean System Files\LoesListSeq.o
+		Path:	{Project}\Clean System Files\FamkeRpc.o
+		Path:	{Project}\Clean System Files\TcpIp.o
+		Path:	{Project}\Clean System Files\FamkeKernel.o
+		Path:	{Project}\Clean System Files\FamkeProcess.o
 		Path:	{Project}\Clean System Files\EstherStdEnv.o
 		Path:	{Project}\Clean System Files\CleanTricks.o
 		Path:	{Project}\Clean System Files\Marshall.o
@@ -2286,31 +2302,7 @@ Static
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
 		Path:	{Application}\Libraries\Directory\Clean System Files\Directory.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamicFileIO.o
-		Path:	{Project}\Clean System Files\DynamicFileSystem.o
-		Path:	{Project}\WrapDebugClosures\Clean System Files\ShowWrapped.o
-		Path:	{Project}\WrapDebugClosures\Clean System Files\Wrap.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
-		Path:	{Project}\WrapDebugClosures\Clean System Files\Debug.o
-		Path:	{Project}\Clean System Files\EstherTransform.o
-		Path:	{Project}\Parser combinators 2002\Clean System Files\StdParsComb.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
-		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\md5.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynID.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory_mapped_files.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicVersion.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\shared_buffer.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicLinkerInterface.o
-		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\BitSet.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicLowLevelInterface.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynamicUtilities.o
-		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\EnDecode.o
-		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\DefaultElem.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicTypes.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicGraphConversion.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
-		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
+		Path:	{Project}\Clean System Files\EstherBackend.o
 		Path:	{Application}\Libraries\ExceptionsWindows\Clean System Files\StdException.o
 		Path:	{Project}\Clean System Files\EstherPostParser.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
@@ -2336,24 +2328,32 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
 		Path:	{Project}\Clean System Files\EstherScript.o
 		Path:	{Project}\Clean System Files\EstherParser.o
-		Path:	{Project}\Clean System Files\EstherBackend.o
+		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicGraphConversion.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicTypes.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\DefaultElem.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\EnDecode.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynamicUtilities.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicLowLevelInterface.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\BitSet.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicLinkerInterface.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\shared_buffer.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicVersion.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory_mapped_files.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynID.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\md5.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
+		Path:	{Project}\Parser combinators 2002\Clean System Files\StdParsComb.o
+		Path:	{Project}\Clean System Files\EstherTransform.o
+		Path:	{Project}\WrapDebugClosures\Clean System Files\Debug.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
+		Path:	{Project}\WrapDebugClosures\Clean System Files\Wrap.o
+		Path:	{Project}\WrapDebugClosures\Clean System Files\ShowWrapped.o
+		Path:	{Project}\Clean System Files\DynamicFileSystem.o
 		Path:	{Project}\Clean System Files\EstherFamkeEnv.o
-		Path:	{Project}\Clean System Files\FamkeProcess.o
-		Path:	{Project}\Clean System Files\FamkeKernel.o
-		Path:	{Project}\Clean System Files\TcpIp.o
-		Path:	{Project}\Clean System Files\FamkeRpc.o
-		Path:	{Project}\Loes 0.2\Clean System Files\LoesListSeq.o
-		Path:	{Project}\Loes 0.2\Clean System Files\LoesSeq.o
-		Path:	{Project}\Loes 0.2\Clean System Files\LoesCommon.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdStrictLists.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemStrictLists.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnumStrict.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloadedList.o
-		Path:	{Project}\Loes 0.2\Clean System Files\LoesKeyList.o
-		Path:	{Project}\Loes 0.2\Clean System Files\LoesAssoc.o
-		Path:	{Project}\Loes 0.2\Clean System Files\LoesListColl.o
-		Path:	{Project}\Loes 0.2\Clean System Files\LoesColl.o
-		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
 		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.obj
 		Path:	{Application}\Libraries\Directory\Clean System Files\cDirectory.obj
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\low.obj

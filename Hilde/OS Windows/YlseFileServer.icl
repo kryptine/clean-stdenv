@@ -96,5 +96,5 @@ where
 	f [x:xs] = [x:f xs]
 	f _ = []
 
-StartFileServer :: !YlseId !String !*Famke -> *Famke
+StartFileServer :: !YlseId !String !*World -> *World
 StartFileServer rpcid root famke = StartYlseServer rpcid {root = root} famke
