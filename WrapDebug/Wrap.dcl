@@ -7,7 +7,12 @@
 */
 definition module Wrap
 
+//1.3
 from StdOverloaded import toString 
+//3.1
+/*2.0
+from StdOverloaded import class toString 
+0.2*/
 
 ::	WrappedDescriptorId
 

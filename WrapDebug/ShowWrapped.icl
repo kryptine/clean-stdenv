@@ -1,3 +1,10 @@
+/*
+	Show Wrapped Node
+
+	Version 1.0.2
+	Ronny Wichers Schreur
+	ronny@cs.kun.nl
+*/
 implementation module ShowWrapped
 
 import StdEnv
@@ -71,10 +78,12 @@ showDescriptor WrappedDescriptorCons
 showDescriptor WrappedDescriptorTuple
 	=	"(..)"
 
-// MW
 //1.3
 showBasicArray :: {#a} -> [{#Char}] | toString, ArrayElem a
 //3.1
+/*2.0
+showBasicArray :: {#a} -> [{#Char}] | toString a & Array {#} a
+0.2*/
 showBasicArray a
 	=	["{" : separate ", " [toString el \\ el <-: a]] ++ ["}"]
 
