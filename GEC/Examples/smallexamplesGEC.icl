@@ -15,7 +15,7 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	example_l1
+ 	example_cnt6
  	world  
 
 example_l1		= 	CGEC (mkGEC		"Simple List Editor")					[1] 
