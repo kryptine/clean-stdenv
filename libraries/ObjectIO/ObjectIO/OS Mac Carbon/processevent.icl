@@ -155,7 +155,7 @@ where
 //import dodebug,StdDebug
 //--
 
-import code from "cae.obj"
+import code from "cae."
 
 install_apple_event_handlers :: Int
 install_apple_event_handlers

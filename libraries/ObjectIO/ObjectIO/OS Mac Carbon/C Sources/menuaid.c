@@ -1,4 +1,8 @@
+#ifdef __MACH__
+#include <Carbon/Carbon.h>
+#else
 #include <Script.h>
+#endif
 
 /* vgl Inside Mac: Text p C-24 */
 

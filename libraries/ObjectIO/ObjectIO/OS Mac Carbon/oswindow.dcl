@@ -196,6 +196,7 @@ osCreateCheckControl		:: !OSWindowPtr !(!Int,!Int) !String !Bool !Bool !(!Int,!I
 																					 -> (!OSWindowPtr,!*OSToolbox)
 osCreateEmptyPopUpControl	:: !OSWindowPtr !(!Int,!Int) !Bool !Bool !(!Int,!Int) !(!Int,!Int) !Int !Bool !*OSToolbox
 																			-> (!OSWindowPtr,!OSWindowPtr,!*OSToolbox)
+osCreatePopUpControlItems :: !OSWindowPtr !(Maybe OSWindowPtr) !Bool ![String] !Int !*OSToolbox -> *OSToolbox
 osCreatePopUpControlItem	:: !OSWindowPtr !(Maybe OSWindowPtr) !Int !Bool !String !Bool !Int !*OSToolbox -> (!Int,!*OSToolbox)
 osCreateSliderControl		:: !OSWindowPtr !(!Int,!Int) !Bool !Bool !Bool !(!Int,!Int) !(!Int,!Int) !(!Int,!Int,!Int,!Int) !*OSToolbox
 																										   -> (!OSWindowPtr,!*OSToolbox)

@@ -7,7 +7,7 @@ implementation module osfileselect
 import	StdBool, StdInt, StdString, StdMisc, StdArray, StdClass, StdChar
 import	osevent
 from	commondef	import fatalError
-import	standard_file, files
+import	/*standard_file,*/ files
 from	pointer		import	LoadWord, LoadLong, StoreLong, StoreWord
 from	quickdraw	import	QScreenRect
 import	osdirectory, navigation, memory, pointer

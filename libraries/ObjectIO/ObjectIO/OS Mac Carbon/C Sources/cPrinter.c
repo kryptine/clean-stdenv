@@ -1,7 +1,11 @@
+#ifndef __MACH__
 #include <PMApplication.h>
 #include <PMDefinitions.h>
 #include <PMCore.h>
 #include <Carbon.h>
+#else
+#include <Carbon/Carbon.h>
+#endif
 #include "Clean.h"
 
 typedef struct pass_object *PassObject;
@@ -22,7 +26,7 @@ static PMPrintSession	gPrintSession	= NULL;
 static PMPrintSettings	gPrintSettings	= NULL;
 
 static int	prGrafPortOK = 0;
-static int	prGrafPort;
+static GrafPtr	prGrafPort;
 static int	prXRes;
 static int	prYRes;
 	// prGrafPortOK indicates, that printing is in progress. prOpenDoc sets this
@@ -105,6 +109,9 @@ void getDefaultPrintSetupC(int *pErr, CleanString *pCleanString)
 		PMFlattenPageFormat(pageFormat, &flattenFormat);
 		*pCleanString = PassMacHandle(&passObj1,flattenFormat,GetHandleSize(flattenFormat),pErr);
 		DisposeHandle(flattenFormat);
+		flattenFormat = NULL;
+		PMRelease(pageFormat);
+		pageFormat = kPMNoPageFormat;
 	}
 	else
 	{
@@ -122,14 +129,44 @@ void getDefaultPrintSetupC(int *pErr, CleanString *pCleanString)
 	return;
 }
 
+static GrafPtr gSavePort;
+
 void prOpenPage(PMPageFormat pageFormat, int os, int *okReturn, int *osReturn)
 {
 	OSStatus err;
+	GrafPtr printingContext = NULL;
 	
 	*osReturn = os;
+	*okReturn = 0;
+
 	err = PMSessionBeginPage(gPrintSession,pageFormat,kDontScaleOutput);
+	if (err!=noErr)
+		{
+//		sprintf
+		DebugStr("\pError in PMSessionBeginPage");
+		*okReturn = err;
+		return;
+		}
 	err = PMSessionError(gPrintSession);
-	*okReturn = err==noErr;
+	if (err!=noErr)
+		{
+//		sprintf
+		DebugStr("\pError in PMSessionError");
+		*okReturn = err;
+		return;
+		}
+
+	GetPort(&gSavePort);
+	err = PMSessionGetGraphicsContext(gPrintSession,kPMGraphicsContextQuickdraw,(void**)&printingContext);
+	if (err!=noErr)
+		{
+//		sprintf
+		DebugStr("\pError in PMSessionGetGraphicsContext");
+		*okReturn = err;
+		return;
+		}
+	SetPort(printingContext);
+	prGrafPort = printingContext;
 }
 
 void prClosePage(PMPageFormat pageFormat, int os, int *okReturn, int *osReturn)
@@ -140,6 +177,8 @@ void prClosePage(PMPageFormat pageFormat, int os, int *okReturn, int *osReturn)
 	err = PMSessionEndPage(gPrintSession);
 	err = PMSessionError(gPrintSession);
 	*okReturn = err==noErr;
+	
+	SetPort(gSavePort);
 }
 
 void prOpenDoc(PMPageFormat pageFormat, int os, int *err, int *grPortReturn, int *osReturn)
@@ -148,16 +187,35 @@ void prOpenDoc(PMPageFormat pageFormat, int os, int *err, int *grPortReturn, int
 {
 	*osReturn = os;
 	*err = PMSessionBeginDocument(gPrintSession,gPrintSettings,pageFormat);
-	*err = PMSessionGetGraphicsContext(gPrintSession,NULL,(void**)grPortReturn);
+	if (*err!=noErr)
+		{
+		DebugStr("\pError in PMSessionBeginDocument");
+		return;
+		}
+//	*err = PMSessionGetGraphicsContext(gPrintSession,NULL,(void**)grPortReturn);
+//	*err = PMSessionGetGraphicsContext(gPrintSession,kPMGraphicsContextQuickdraw,(void**)grPortReturn);
+//	if (*err!=noErr)
+//		{
+//		sprintf
+//		DebugStr("\pError in PMSessionGetGraphicsContext");
+//		return;
+//		}
+	*grPortReturn = (int)pageFormat;
+	
 	*err = PMSessionError(gPrintSession);
+	if (*err!=noErr)
+		{
+		DebugStr("\pError in PMSessionError");
+		return;
+		}
 	
 	if (*err==noErr) 
 		  {	*err=0;
 			prGrafPortOK = 1;
-			prGrafPort = *grPortReturn;
+//			prGrafPort = *grPortReturn;
 		  }
-		else if (*err==iMemFullErr) *err=1;
-			else *err=2;
+	else if (*err==iMemFullErr) *err=1;
+	else *err=2;
 }
 
 int prCloseDoc(PMPageFormat pageFormat, int os, int pRecHandle)
@@ -171,7 +229,7 @@ int prCloseDoc(PMPageFormat pageFormat, int os, int pRecHandle)
 	return os;
 }
 
-void setMaxResolution(PMPageFormat handle)
+void setMaxResolution(PMPageFormat *handle)
 {
 }
 
@@ -196,6 +254,12 @@ void allocPrintRecord(CleanString printSetup,PMPageFormat *pageFormat,int *pErr)
 		to[i]	= from[i];
 
 //	PMBegin();
+	err = PMCreatePageFormat(pageFormat);
+	if (err != noErr)
+		{	*pErr = 1;
+			DebugStr("\pCreatePF failed");
+			return;
+		};
 	err = PMUnflattenPageFormat(handle,pageFormat);
 	if (err != noErr)
 		{	*pErr = 1;
@@ -236,7 +300,7 @@ void getPageDimensionsC(	CleanString printSetup, int emulateScreen,
 		return;
 	if (!emulateScreen)
 		{
-		setMaxResolution(sPageFormat);
+		setMaxResolution(&sPageFormat);
 		};
 
 	err				= PMGetAdjustedPageRect(sPageFormat,&rect);
@@ -264,7 +328,7 @@ void getPageDimensionsC(	CleanString printSetup, int emulateScreen,
 	*xRes			= (int)res.hRes;
     *yRes			= (int)res.vRes;
 //    PMDisposePageFormat(sPageFormat);
-	DebugStr("\pOK to here");
+//	DebugStr("\pOK to here");
 
 	return;
 	
@@ -310,31 +374,97 @@ void printSetupDialogC(CleanString inSetup, int *pErr, CleanString *pOutSetup)
 	PMPageFormat	pageFormat;
 	Boolean			changed, accepted;
 	OSStatus		err;
-
-	PMBegin();
+/*
+	err = PMBegin();
+	if (err != noErr) {
+		*pErr = err;
+		*pOutSetup	= inSetup;
+		DebugStr("\pprintSetupDialog:PMBegin failed");
+		return;
+		}
 
 	allocPrintRecord(inSetup,&pageFormat,pErr);
-	if (*pErr)
+	if (*pErr) {
+		*pOutSetup	= inSetup;
+		DebugStr("\pprintSetupDialog:allocPrintRecord failed");
 		return;
+		}
 
-	PMValidatePageFormat(pageFormat, &changed);
+	err = PMValidatePageFormat(pageFormat, &changed);
+	if (err != noErr) {
+		*pErr = err;
+		*pOutSetup	= inSetup;
+		DebugStr("\pprintSetupDialog:PMValidatePageFormat failed");
+		return;
+		}
 
-	PMEnd();
-	
+	err = PMEnd();
+	if (err != noErr) {
+		*pErr = err;
+		*pOutSetup	= inSetup;
+		DebugStr("\pprintSetupDialog:PMEnd failed");
+		return;
+		}
+*/	
 	err = PMCreateSession(&printSession);
-	if (err) return;
+	if (err != noErr) {
+		*pErr = err;
+		*pOutSetup	= inSetup;
+		DebugStr("\pprintSetupDialog:PMCreateSession failed");
+		return;
+		}
+	allocPrintRecord(inSetup,&pageFormat,pErr);
+	if (*pErr) {
+		*pOutSetup	= inSetup;
+		DebugStr("\pprintSetupDialog:allocPrintRecord failed");
+		return;
+		}
+
+	err = PMValidatePageFormat(pageFormat, &changed);
+	if (err != noErr) {
+		*pErr = err;
+		*pOutSetup	= inSetup;
+		DebugStr("\pprintSetupDialog:PMValidatePageFormat failed");
+		return;
+		}
+
 	err = PMSessionPageSetupDialog(printSession,pageFormat,&accepted);
+	if (err != noErr) {
+		*pErr = err;
+		*pOutSetup	= inSetup;
+		DebugStr("\pprintSetupDialog:PMSessionPageSetupDialog failed");
+		PMRelease(printSession);
+		return;
+		}
 	if (err == noErr && accepted)
 	{
 		Handle			flattenFormat	= NULL;
 		
-		PMFlattenPageFormat(pageFormat, &flattenFormat);
+		err = PMFlattenPageFormat(pageFormat, &flattenFormat);
 		*pOutSetup = PassMacHandle(&passObj1,flattenFormat,GetHandleSize(flattenFormat),pErr);
 		DisposeHandle(flattenFormat);
 	}
 	  else
 		*pOutSetup	= inSetup;
-	PMRelease(printSession);
+
+	if (err != noErr) {
+		*pErr = err;
+		DebugStr("\pprintSetupDialog:PMFlattenPageFormat failed");
+		return;
+		}
+	err = PMRelease(printSession);
+	if (err != noErr) {
+		*pErr = err;
+		DebugStr("\pprintSetupDialog:PMRelease(printSession) failed");
+		return;
+		}
+	err = PMRelease(pageFormat);
+	if (err != noErr) {
+		*pErr = err;
+		DebugStr("\pprintSetupDialog:PMRelease(pageFormat) failed");
+		return;
+		}
+	*pErr		= err;
 }
 
 void getPrintInfoC( int doDialog, int emulateScreen, CleanString inSetup, int unq,
@@ -347,7 +477,7 @@ void getPrintInfoC( int doDialog, int emulateScreen, CleanString inSetup, int un
 				  )
 // error code: 0==ok, 1=out of memory, 2==user cancelled
 {
-	PMPageFormat	pageFormat;
+	PMPageFormat	pageFormat = kPMNoPageFormat;
 	PMResolution	res;
 	Boolean			changed, accepted;
 	OSStatus		err;
@@ -374,16 +504,31 @@ void getPrintInfoC( int doDialog, int emulateScreen, CleanString inSetup, int un
 	*pRecHandleP = (int) pageFormat;
 
 	err = PMCreateSession(&gPrintSession);
+	if (err != noErr) {
+		*pErr	= err;
+		DebugStr("\pgetPrintInfoC:PMCreateSession failed");
+		return;
+		};
 	
 	if (!emulateScreen)
-		setMaxResolution(pageFormat);
+		setMaxResolution(&pageFormat);
 
 	err = PMSessionValidatePageFormat(gPrintSession,pageFormat,&changed);
+	if (err != noErr) {
+		*pErr	= err;
+		DebugStr("\pgetPrintInfoC:PMSessionValidatePageFormat failed");
+		return;
+		};
 	if (changed)
 		{
 		Handle			flattenFormat	= NULL;
 		
-		PMFlattenPageFormat(pageFormat, &flattenFormat);
+		err = PMFlattenPageFormat(pageFormat, &flattenFormat);
+		if (err != noErr) {
+			*pErr	= err;
+			DebugStr("\pgetPrintInfoC:PMFlattenPageFormat failed");
+			return;
+			};
 		*pOutSetup = PassMacHandle(&passObj1,flattenFormat,GetHandleSize(flattenFormat),pErr);
 		DisposeHandle(flattenFormat);
 		if (*pErr)
@@ -391,7 +536,17 @@ void getPrintInfoC( int doDialog, int emulateScreen, CleanString inSetup, int un
 		};
 		
 	err = PMCreatePrintSettings(&gPrintSettings);
+	if (err != noErr) {
+		*pErr	= err;
+		DebugStr("\pgetPrintInfoC:PMCreatePrintSettings failed");
+		return;
+		};
 	err = PMSessionDefaultPrintSettings(gPrintSession,gPrintSettings);
+	if (err != noErr) {
+		*pErr	= err;
+		DebugStr("\pgetPrintInfoC:PMSessionDefaultPrintSettings failed");
+		return;
+		};
 	
 	if (doDialog)
 	  {	
@@ -402,7 +557,9 @@ void getPrintInfoC( int doDialog, int emulateScreen, CleanString inSetup, int un
 		  	PMRelease(gPrintSettings);
 		  	gPrintSession = NULL;
 		  	gPrintSettings = NULL;
-		    *pErr = 2;
+//		    *pErr = 2;
+			*pErr	= err;
+			DebugStr("\pgetPrintInfoC:PMSessionPrintDialog failed");
 		  	return;
 		  };
 	  };
@@ -410,8 +567,23 @@ void getPrintInfoC( int doDialog, int emulateScreen, CleanString inSetup, int un
 	*pErr = 0;
 
    	err = PMGetFirstPage(gPrintSettings,(UInt32 *)first);
+	if (err != noErr) {
+		*pErr	= err;
+		DebugStr("\pgetPrintInfoC:PMGetFirstPage failed");
+		return;
+		};
     err = PMGetLastPage(gPrintSettings,(UInt32 *)last);
+	if (err != noErr) {
+		*pErr	= err;
+		DebugStr("\pgetPrintInfoC:PMGetLastPage failed");
+		return;
+		};
     err = PMGetCopies(gPrintSettings,(UInt32 *)copies);
+	if (err != noErr) {
+		*pErr	= err;
+		DebugStr("\pgetPrintInfoC:PMGetCopies failed");
+		return;
+		};
 
 	// reset the values for first and last page. This is also done in the 
 	// "imaging with quickdraw" example. (otherwise the following could
@@ -419,13 +591,29 @@ void getPrintInfoC( int doDialog, int emulateScreen, CleanString inSetup, int un
 	// print manager leaves out two of them, only page nr. 5 is printed
 	
 	err = PMSetFirstPage(gPrintSettings,1,false);
+	if (err != noErr) {
+		*pErr	= err;
+		DebugStr("\pgetPrintInfoC:PMSetFirstPage failed");
+		return;
+		};
 	err = PMSetLastPage(gPrintSettings,kPMPrintAllPages,false);
+	if (err != noErr) {
+		*pErr	= err;
+		DebugStr("\pgetPrintInfoC:PMSetLastPage failed");
+		return;
+		};
 	
 	// store printer resolution in globals for later use in getResolutionC and adjustToPrinterRes
 	err			= PMGetResolution(pageFormat,&res);
+	if (err != noErr) {
+		*pErr	= err;
+		DebugStr("\pgetPrintInfoC:PMGetResolution failed");
+		return;
+		};
 	prXRes		= (int)res.hRes;
     prYRes		= (int)res.vRes;
-	
+
+   	DebugStr("\pgetPrintInfoC:succeeded");
 }
 
 int prClose(int os)
@@ -438,7 +626,7 @@ int prClose(int os)
 }
 
 int	adjustToPrinterRes(int scrnSize)
-// if the current grafport is the printer grafport, then strech the size accordingly
+// if the current grafport is the printer grafport, then stretch the size accordingly
 // This function is called in quickdraw.icl
 {
 	short scrnXRes,scrnYRes;
@@ -488,9 +676,6 @@ int os_printsetupvalid(CleanString inSetup)
 	OSStatus		status;
 	int			err, handleChanged;
 	
-	if (CleanStringLength(inSetup)!=sizeof(TPrint))
-		return false;
-
 	if (!prGrafPortOK) PMBegin();
 
 	allocPrintRecord(inSetup,&pageFormat,&err);
@@ -504,6 +689,24 @@ int os_printsetupvalid(CleanString inSetup)
 		{
 		status = PMSessionValidatePageFormat(gPrintSession,pageFormat,&changed);
 		}
+	PMRelease(pageFormat);
 	if (!prGrafPortOK) PMEnd();
 	return !changed;
 }
+/*
+OSStatus printSetupToString(PMPageFormat pageFormat, CleanString *pCleanString)
+{
+	OSStatus	status			= noErr;
+	Handle		flattenFormat	= NULL;
+	
+	status = PMFlattenPageFormat(pageFormat, &flattenFormat);
+	if (status != noErr)
+	{
+		*pCleanString = PassMacHandle(&passObj1,flattenFormat,GetHandleSize(flattenFormat),&status);
+		DisposeHandle(flattenFormat);
+		flattenFormat = NULL;
+	}
+	return status;
+}
+int stringToPrintSetup(CleanString printSetup)
+*/

@@ -187,7 +187,8 @@ osGetfontcharwidths _ _ chars {fontimp=fontimp=:{osfontexists=exists}} tb
 	with
 		getcharwidths :: ![Char] !*OSToolbox -> (![Int],!*OSToolbox)
 		getcharwidths [c:cs] tb
-			# (cWidth, tb) = QStringWidth (toString c) tb
+//			# (cWidth, tb) = QStringWidth (toString c) tb
+			# (cWidth, tb) = QCharWidth c tb
 			  (cWidths,tb) = getcharwidths cs tb
 			= ([cWidth:cWidths],tb)
 		getcharwidths _ tb
@@ -416,3 +417,20 @@ String256
 where
 	string128 = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 
+/*
+:: ScriptCode	:== Int
+
+GetApplicationScript :: !*OSToolbox -> (!*ScriptCode,!*OSToolbox)
+GetApplicationScript _ = code {
+	ccall "P:I:I"
+	}
+
+GetThemeFont :: !ThemeFontID !ScriptCode !
+extern OSStatus 
+GetThemeFont(
+  ThemeFontID   inFontID,
+  ScriptCode    inScript,
+  Str255        outFontName,       /* can be NULL */
+  SInt16 *      outFontSize,
+  Style *       outStyle)                                     AVAILABLE_MAC_OS_X_VERSION_10_0_AND_LATER;
+*/

@@ -9,18 +9,20 @@ import keyfocus, inputtracking
 //import events,windows
 //import memoryaccess,textedit,texteditaccess
 from mouseevent import changeFocus
-from textedit import TEKey, :: TEHandle
-import events
+//from textedit import TEKey, :: TEHandle
+import events, controls
 
 //import StdDebug, dodebug
 trace_n _ f :== f
 //from dodebug import trace_n`, toString
 //import dodebug
+trace_n` _ s :== s
+//trace_n :== trace_n`
 
 windowKeyboardIO :: !*(WindowStateHandle *(PSt .l)) !OSEvent !*(WindowHandles *(PSt .l)) !*(PSt .l)
 	-> *(!Bool,!Maybe [Int],!Maybe DeviceEvent,!*(PSt .l))
 windowKeyboardIO wsH=:{wshIds={wPtr},wshHandle= Just wshH=:{wlsHandle=wlsH}} event=:(_,what,message,i,h,v,mods) windows pState
-	| False
+	| /*trace_n ("windowKeyboardIO",return,isDialog)*/ False
 		# windows			= setWindowHandlesWindow wsH windows
 		# pState			= appPIO (ioStSetDevice (WindowSystemState windows)) pState
 		= (True, Nothing, Nothing, pState)
@@ -32,7 +34,7 @@ windowKeyboardIO wsH=:{wshIds={wPtr},wshHandle= Just wshH=:{wlsHandle=wlsH}} eve
 		= (True, Nothing,deviceEvent,pState)
 	| isDialog && tabCharacter && what <> KeyUpEvent
 		= nextKeyInputFocus wPtr wsH windows pState
-	# (cNr,(cPtr,cKind),wsH)= getControlFocusPtr wsH
+	# (cNr,(cPtr,cKind),wsH)= getControlFocusPtr wPtr wsH
 	# wsH = trace_n ("keyinfo",cNr,cPtr,cKind) wsH
 	# (pressed,deviceevent,wsH)
 							// shouldn't we check for edit control first?
@@ -53,7 +55,7 @@ windowKeyboardIO wsH=:{wshIds={wPtr},wshHandle= Just wshH=:{wlsHandle=wlsH}} eve
 //*/
 //	# (wPtr,pState)			= accPIO (accIOToolbox FrontWindow) pState
 	# (isValid,mustBuffer,keyState,theChar,theCode,pState)
-							= validateKeyTracking wPtr cNr event pState
+							= validateKeyTracking wPtr cPtr cNr event pState
 	#! pState = trace_n ("valid",isValid,mustBuffer,keyState,theCode) pState
 	| not isValid
 		#! pState = trace_n ("keyboardevent","invalid") pState
@@ -169,6 +171,7 @@ where
 			# editInfo		= {editInfo & popUpEditText = string}
 			# popupInfo		= {popupInfo & popUpInfoEdit = Just editInfo}
 			# itemH			= {itemH & wItemInfo = PopUpInfo popupInfo}
+			# tb				= SetCtlValue wItemPtr 0 tb	// set popup menu to entry 0...
 			# tb = trace_n ("okControlKeyboard",string,okControlKeyboardAtt,keyCode) tb
 			= (True,okControlKeyboardAtt,WItemHandle itemH,tb)
 		| wItemShow && wItemSelect && isEditable
@@ -207,8 +210,14 @@ where
 			| key == '\177'  = True // del
 			= False
 		comboControlKeyboardFunction wPtr clipRect hTE keyCode tb
-			# tb			= appClipport wPtr clipRect (TEKey keyCode hTE) tb
+//			# tb			= appClipport wPtr clipRect (TEKey keyCode hTE) tb
+			# tb			= appClipport wPtr clipRect handleKey tb
 			= osGetPopUpControlText wPtr hTE tb
+		where
+			(mess,mods)  = info
+			handleKey tb
+				# (part,tb) = HandleControlKey hTE (getMacCode mess) (mess bitand 255) mods tb
+				= trace_n` ("HandlePopupKey",hTE,part,mods) tb
 		editControlKeyboardFunction wPtr clipRect hTE keyCode tb
 //			# tb			= appClipport wPtr clipRect (TEKey keyCode hTE) tb
 			# tb			= appClipport wPtr clipRect handleKey tb
@@ -217,7 +226,7 @@ where
 			(mess,mods)  = info
 			handleKey tb
 				# (part,tb) = HandleControlKey hTE (getMacCode mess) (mess bitand 255) mods tb
-				= trace_n ("HandleControlKey",hTE,part) tb
+				= trace_n` ("HandleEditKey",hTE,part,mods) tb
 	
 	okControlKeyboard focusNr wPtr key keyCode (WListLSHandle itemHs) tb
 		# (found,ok,itemHs,tb)	= okControlsKeyboard focusNr wPtr key keyCode info itemHs tb
@@ -230,9 +239,14 @@ where
 		= (found,ok,WExtendLSHandle {wExH & wExtendItems = wExtendItems},tb)
 
 //wil InputTrack tiepe uit iostate halen en in os-laag stoppen...lastig wordt op veel meer plaatsen gebruikt...
-validateKeyTracking :: !OSWindowPtr !Int !OSEvent !*(PSt .l) -> (!Bool,!Bool,!KeyState,!Char,!Int,!*(PSt .l))
-validateKeyTracking wPtr cNr event=:(ok,keyEvent,newKeyMessage,i,h,v,mods) pState
+validateKeyTracking :: !OSWindowPtr !OSWindowPtr !Int !OSEvent !*(PSt .l) -> (!Bool,!Bool,!KeyState,!Char,!Int,!*(PSt .l))
+validateKeyTracking wPtr cPtr cNr event=:(ok,keyEvent,newKeyMessage,i,h,v,mods) pState
 	#! pState = trace_n ("validateKeyTracking: 0: "+++showEvent event) pState
+/* help niet...
+	# (vis,pState) = accPIO (accIOToolbox (IsControlVisible cPtr)) pState
+	| vis == 0
+		= (False,False,KeyDown False,newASCII,newCode,pState)
+*/
 	# (inputTrack,pState)	= accPIO ioStGetInputTrack pState
 	| keyEvent == KeyDownEvent
 		| not (trackingKeyboard wPtr cNr inputTrack)
@@ -287,29 +301,7 @@ pressDefaultButton return mods wsH=:{wshHandle= Nothing} // pState
 	= abort "pressDefaultButton: unexpected placeholder"
 
 //--
-
-getControlFocusPtr :: !*(WindowStateHandle .a) -> *(!Int,!(!Int,!ControlKind),!*(WindowStateHandle .a));
-getControlFocusPtr wsH
-	# (keyFocus,wsH)	= getWindowStateHandleKeyFocus wsH
-	# (focusItem,keyFocus)
-						= getCurrentFocusItem keyFocus
-	# wsH				= setWindowStateHandleKeyFocus keyFocus wsH
-	| isNothing focusItem
-		= (0,(OSNoWindowPtr,IsButtonControl),wsH)
-	# itemNr			= fromJust focusItem
-//	# {wshHandle = Just wlsH=:{wlsHandle=wH}}
-//						= wsH
-	# wlsH = case wsH.wshHandle of
-				(Just wlsH) -> wlsH
-				_ -> abort "getControlFocusPtr unexpected placeholder"
-	# wH = wlsH.wlsHandle
-	# (found,result,itemHs)
-						= getControlsItemPtr itemNr wH.whItems
-	# wsH				= {wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}}
-	= (itemNr,result,wsH)
-
-//--
-
+/*
 getControlsItemPtr :: !Int !*[*WElementHandle .ls .pst] -> (!Bool,!(!OSWindowPtr,!ControlKind),!*[*WElementHandle .ls .pst])
 getControlsItemPtr itemNr [itemH:itemHs]
 	# (found,result,itemH)				= getControlItemPtr itemNr itemH
@@ -347,6 +339,46 @@ where
 
 getControlsItemPtr _ _
 	= (False,(0,IsButtonControl),[])
+*/
+///
+
+getControlsItemNr :: !OSWindowPtr !*[*WElementHandle .ls .pst] -> (!Bool,!(!Int,!ControlKind),!*[*WElementHandle .ls .pst])
+getControlsItemNr itemPtr [itemH:itemHs]
+	# (found,result,itemH)				= getControlItemNr itemPtr itemH
+	| found
+		= (found,result,[itemH:itemHs])
+	| otherwise
+		# (found,result,itemHs)			= getControlsItemNr itemPtr itemHs
+		= (found,result,[itemH:itemHs])
+where
+	getControlItemNrFromwItems itemPtr (WItemHandle itemH=:{wItems})
+		# (found,result,items)			= getControlsItemNr itemPtr wItems
+		= (found,result,WItemHandle {itemH & wItems = items})
+	getControlItemNrFromwItems itemPtr _ = abort "getControlItemNrFromwItems: called with non-item handle"
+
+	getControlItemNr :: !Int !(WElementHandle .ls .pst) -> (!Bool,!(!OSWindowPtr,!ControlKind),!(WElementHandle .ls .pst))
+	getControlItemNr itemPtr (WItemHandle itemH=:{wItems,wItemNr,wItemKind,wItemPtr})
+		| itemPtr == wItemPtr
+			= (True,(wItemNr,wItemKind),WItemHandle itemH)
+		= case wItemKind of
+			IsCompoundControl			-> getControlItemNrFromwItems itemPtr (WItemHandle itemH)
+			IsLayoutControl				-> getControlItemNrFromwItems itemPtr (WItemHandle itemH)
+			_							-> (False,(0,IsButtonControl),WItemHandle itemH)
+				
+	getControlItemNr cPtr (WListLSHandle itemHs)
+		# (found,result,itemHs)		= getControlsItemNr cPtr itemHs
+		= (found,result,WListLSHandle itemHs)
+	
+	getControlItemNr cPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs})
+		# (found,result,itemHs)		= getControlsItemNr cPtr itemHs
+		= (found,result,WExtendLSHandle {wExH & wExtendItems=itemHs})
+	
+	getControlItemNr cPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs})
+		# (found,result,itemHs)		= getControlsItemNr cPtr itemHs
+		= (found,result,WChangeLSHandle {wChH & wChangeItems=itemHs})
+
+getControlsItemNr _ _
+	= (False,(0,IsButtonControl),[])
 
 //--
 import osevent
@@ -360,9 +392,67 @@ bufferKeyboardEvents event ioState
 	= ioStSetEvents osEvents ioState
 
 
+//--
+
+getControlFocusPtr :: !OSWindowPtr !*(WindowStateHandle .a) -> *(!Int,!(!Int,!ControlKind),!*(WindowStateHandle .a));
+getControlFocusPtr wPtr wsH
+/*
+	# (keyFocus,wsH)	= getWindowStateHandleKeyFocus wsH
+	# (focusItem,keyFocus)
+						= getCurrentFocusItem keyFocus
+	# wsH				= setWindowStateHandleKeyFocus keyFocus wsH
+	| isNothing focusItem
+		= (0,(OSNoWindowPtr,IsButtonControl),wsH)
+	# itemNr			= fromJust focusItem
+//	# {wshHandle = Just wlsH=:{wlsHandle=wH}}
+//						= wsH
+	# wlsH = case wsH.wshHandle of
+				(Just wlsH) -> wlsH
+				_ -> abort "getControlFocusPtr unexpected placeholder"
+	# wH = wlsH.wlsHandle
+	# (found,result,itemHs)
+						= getControlsItemPtr itemNr wH.whItems
+	# wsH				= {wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}}
+	= (itemNr,result,wsH)
+*/
+	# ((err,itemPtr),_)	= GetKeyboardFocus wPtr OSNewToolbox
+	| itemPtr == 0
+		= (0,(OSNoWindowPtr,IsButtonControl),wsH)
+	# wlsH = case wsH.wshHandle of
+				(Just wlsH) -> wlsH
+				_ -> abort "getControlFocusPtr unexpected placeholder"
+	# wH = wlsH.wlsHandle
+	# (found,(itemNr,itemKind),itemHs)
+						= getControlsItemNr itemPtr wH.whItems
+	# wsH				= {wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}}
+	= (itemNr,(itemPtr,itemKind),wsH)
 //===
 
 nextKeyInputFocus wPtr wsH windows pState
+	# (err1,pState)	= accPIO (accIOToolbox (AdvanceKeyboardFocus wPtr)) pState
+	# ((err2,itemPtr),pState)	= accPIO (accIOToolbox (GetKeyboardFocus wPtr)) pState
+	# pState = trace_n` ("nextKeyInputFocus",wPtr,err1,err2) pState
+	| itemPtr == 0
+ 		= (True, Nothing,Nothing,pState)
+	# (wids,wsH)		= getWindowStateHandleWIDS wsH
+	# wlsH = case wsH.wshHandle of
+				(Just wlsH) -> wlsH
+				_ -> abort "nextKeyInputFocus unexpected placeholder"
+	# wH = wlsH.wlsHandle
+	# (found,(itemNr,_),itemHs)
+						= getControlsItemNr itemPtr wH.whItems
+	# wsH				= {wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}}
+	# windows			= setWindowHandlesWindow wsH windows
+	# pState			= appPIO (ioStSetDevice (WindowSystemState windows)) pState
+	# deviceevent		= ControlGetKeyFocus
+							{ ckfWIDS		= wids
+							, ckfItemNr		= itemNr
+							, ckfItemPtr	= itemPtr
+							}
+	= (True, Nothing,Just deviceevent,pState)
+
+
+/*
 	# pState = trace_n ("keyboardevent","tabevent") pState
 	# (keyFocus,wsH)	= getWindowStateHandleKeyFocus wsH
 	# (focusItem,keyFocus)
@@ -401,7 +491,7 @@ nextKeyInputFocus wPtr wsH windows pState
 	# deviceevent		= ControlGetKeyFocus {ckfWIDS=wids,ckfItemNr=fromJust nextFocus,ckfItemPtr=itemPtr}
 	#! pState = trace_n ("keyboardevent","controlgetkeyfocus") pState
 	= (True, Nothing,Just deviceevent,pState)
-
+*/
 
 /*
 ControlPartCode HandleControlKey (
@@ -414,4 +504,19 @@ ControlPartCode HandleControlKey (
 HandleControlKey :: !OSWindowPtr !Int !Int !Int !*OSToolbox -> (!Int,!*OSToolbox)
 HandleControlKey _ _ _ _ _ = code {
 	ccall HandleControlKey "PIIII:I:I"
+	}
+
+AdvanceKeyboardFocus :: !OSWindowPtr !*OSToolbox -> (!Int,!*OSToolbox)
+AdvanceKeyboardFocus _ _ = code {
+	ccall AdvanceKeyboardFocus "PI:I:I"
+	}
+
+GetKeyboardFocus :: !OSWindowPtr !*OSToolbox -> (!(!Int,!OSWindowPtr),!*OSToolbox)
+GetKeyboardFocus _ _ = code {
+	ccall GetKeyboardFocus "PI:II:I"
+	}
+
+IsControlVisible :: !OSWindowPtr !*OSToolbox -> (!Int,!*OSToolbox)
+IsControlVisible _ _ = code {
+	ccall IsControlVisible "PI:I:I"
 	}

@@ -13,9 +13,11 @@ import osutil
 import inputtracking,keyfocus
 from controls import InButton, InCheckBox, InUpButton, InDownButton, InPageUp, InPageDown, InThumb
 from controls import GetCtlValue, TestControl
-from textedit import TEClick, :: TEHandle
+//from textedit import TEClick, :: TEHandle
 import events
 //import StdDebug, dodebug
+//import dodebug
+//trace_n msg f :== trace_n` msg f
 trace_n _ f :== f
 //from dodebug import trace_n`
 
@@ -364,7 +366,7 @@ where
 				= (True,Nothing,wsH,ps)
 			
 			| isEditTextState itemType
-				# shift				= (toModifiers mods).shiftDown
+//				# shift				= (toModifiers mods).shiftDown
 				# editHandle		= itemPtr
 				// get current keyfocus control...
 				# (kf,wsH)			= getWindowStateHandleKeyFocus wsH
@@ -397,7 +399,7 @@ where
 				= (True,Nothing,wsH,ps)
 */			
 			| isPopUpEditState itemType
-				# shift				= (toModifiers mods).shiftDown
+//				# shift				= (toModifiers mods).shiftDown
 				# (puIndex,puTexts,wItemPos,wItemSize,editHandle,editTxt)
 									= fromPopUpEditState itemType
 				# editHandle		= fromJust editHandle
@@ -406,7 +408,8 @@ where
 				# (kfIt,kf)			= getCurrentFocusItem kf
 				# (wsH,ps)			= changeFocus False kfIt (Just itemNr) wPtr clipRect wsH ps
 				# wsH				= setWindowStateHandleKeyFocus kf wsH
-				# ps				= appPIO (appIOToolbox (appClipport wPtr clipRect (TEClick (toTuple pos) shift editHandle /* o TEActivate editHandle*/))) ps
+//				# ps				= appPIO (appIOToolbox (appClipport wPtr clipRect (TEClick (toTuple pos) shift editHandle /* o TEActivate editHandle*/))) ps
+				# ps				= appPIO (appIOToolbox (snd o HandleControlClick wPtr editHandle (toTuple pos) mods)) ps
 				# (wids,wsH)		= getWindowStateHandleWIDS wsH
 				# controlInfo		= Just (ControlGetKeyFocus {ckfWIDS=wids,ckfItemNr=itemNr,ckfItemPtr=itemPtr})
 				// en mousedown...etc

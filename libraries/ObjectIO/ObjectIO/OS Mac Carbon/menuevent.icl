@@ -157,7 +157,7 @@ where
 filterOSEvent _ _ _ _ _
 	= menueventFatalError "filterOSEvent" "unmatched OSEvent"
 
-import code from "menuaid.c.o"
+import code from "menuaid."
 import code from library "menuaid_library"
 //import code from library "me_library"
 

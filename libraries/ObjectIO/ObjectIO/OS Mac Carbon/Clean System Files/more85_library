@@ -6,3 +6,4 @@ SetControl32BitMaximum
 GetControl32BitMaximum
 SetControl32BitValue
 GetControl32BitValue
+GetWindowStructureWidths
