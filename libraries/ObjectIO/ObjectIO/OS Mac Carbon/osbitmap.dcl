@@ -10,6 +10,9 @@ import ospicture
 toBitmap	:: !OSBitmap -> Bitmap
 fromBitmap	:: !Bitmap -> OSBitmap
 
+//	osOpenBitmap loads a bitmap from a PICT resource
+osOpenBitmap :: !Int !*OSToolbox -> (!Bool,!OSBitmap,!*OSToolbox)
+
 //	osReadBitmap reads a bitmap from a file.
 osReadBitmap :: !*File -> (!Bool,!OSBitmap,!*File)
 

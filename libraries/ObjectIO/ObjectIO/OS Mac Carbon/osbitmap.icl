@@ -5,6 +5,7 @@ implementation module osbitmap
 import StdClass, StdFile, StdInt, StdString
 import ostypes, ostoolbox, osrgn
 import memory, quickdraw, memoryaccess
+import resources, structure
 
 //import dodebug
 trace_n _ f :== f
@@ -24,6 +25,21 @@ toBitmap b = OSBitmap b
 
 fromBitmap	:: !Bitmap -> OSBitmap
 fromBitmap (OSBitmap b) = b
+
+osOpenBitmap :: !Int !*OSToolbox -> (!Bool,!OSBitmap,!*OSToolbox)
+osOpenBitmap pictID  tb
+	# (pictHandle,tb)	= Get1Resource "PICT" pictID tb
+	| pictHandle == 0
+		= (False,noBitmap,tb)
+	# (pictPtr,tb)		= DereferenceHandle pictHandle tb
+	# (top,tb)			= LoadWord (pictPtr + 2) tb
+	# (left,tb)			= LoadWord (pictPtr + 4) tb
+	# (bottom,tb)		= LoadWord (pictPtr + 6) tb
+	# (right,tb)		= LoadWord (pictPtr + 8) tb
+	# bitmap			= {bitmapSize=(right-left,bottom-top),bitmapContents=pictHandle}
+	= (True, bitmap, tb)
+where
+	noBitmap = {bitmapSize=(0,0),bitmapContents=0}
 
 //	OSreadBitmap reads a bitmap from a file.
 osReadBitmap :: !*File -> (!Bool,!OSBitmap,!*File)
