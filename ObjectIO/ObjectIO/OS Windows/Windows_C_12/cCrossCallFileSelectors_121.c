@@ -199,9 +199,11 @@ void EvalCcRqFILEOPENDIALOG (CrossCallInfo *pcci)		/* no params;  bool, textptr 
 void EvalCcRqFILESAVEDIALOG (CrossCallInfo *pcci)		/* promptptr, nameptr; bool, textptr result; */
 {
 	OPENFILENAME ofn;
-	BOOL success;
+	BOOL recent, success;
 	char *promptptr;
 	char *nameptr;
+
+	recent = IsModernPlatform();
 
 	promptptr = (char *) pcci->p1;
 	nameptr   = (char *) pcci->p2;
@@ -211,7 +213,14 @@ void EvalCcRqFILESAVEDIALOG (CrossCallInfo *pcci)		/* promptptr, nameptr; bool, 
 							   deallocate the memory allocated
 							   for this empty string */
 
-	ofn.lStructSize       = sizeof (OPENFILENAME);
+	if (recent)
+	{
+	   ofn.lStructSize       = sizeof (OPENFILENAME);
+	} 
+	else
+	{
+	   ofn.lStructSize       = OPENFILENAME_SIZE_VERSION_400;
+	} 
 	ofn.hwndOwner         = GetActiveWindow ();
 	ofn.lpstrFilter       = NULL;
 	ofn.lpstrCustomFilter = NULL;
@@ -240,9 +249,11 @@ void EvalCcRqFILESAVEDIALOG (CrossCallInfo *pcci)		/* promptptr, nameptr; bool, 
 	ofn.lCustData       = 0;
 	ofn.lpfnHook        = &FileSelectorHook;		// PA: &FileSelectorHook instead of NULL from Ronny
 	ofn.lpTemplateName  = NULL;
+#if (_WIN32_WINNT >= 0x0500)
 	ofn.pvReserved		  = NULL;
 	ofn.dwReserved		  = 0;
 	ofn.FlagsEx			  = 0;
+#endif
 
 	success = GetSaveFileName (&ofn);
 
