@@ -1,9 +1,9 @@
 /*
 	Debug functions.
 
-	Version 1.0.4
+	Version 1.0.5
 	Ronny Wichers Schreur
-	ronny@cs.kun.nl
+	ronny@cs.ru.nl
 */
 implementation module ClosureDebug
 
