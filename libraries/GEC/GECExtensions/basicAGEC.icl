@@ -56,7 +56,7 @@ where
 	demode (Display a) = a
 	demode (Edit a) =  a
 	demode (Hide a) =  a
-	demode EmptyMode =  undef
+	demode EmptyMode =  abort "EmptyMode inspected"
 
 	mkmode (Display om) nm Undefined = Display nm
 	mkmode (Edit om)    nm Undefined = Edit nm
