@@ -18,15 +18,9 @@ from	quickdraw import QGetPort,QSetPort, :: GrafPtr
 	|	StartedPrinting y
 
 
-//import dodebug
-DebugStr` _ s :== s
-trace_n` _ s :== s
-
-eval :: !Bool !String !.a -> .a
-eval a s p
-	= p
-//	| a = abort s
-//		= DebugStr s p
+//import nodebug	//dodebug
+DebugStr` _ f :== f
+trace_n` _ f :== f
 
 os_getpagedimensions	::	!PrintSetup	!Bool
 						->	(!(!Int,!Int), !(!(!Int,!Int),!(!Int,!Int)), !(!Int,!Int))
@@ -108,6 +102,9 @@ printPagePerPageBoth doDialog emulateScreen x initFun transFun printSetup env
 		  os = prClose os								// will balance call of PrOpen via getPrintInfo
 //		  (_, os) = DisposHandle pRecHdl os
 		= (Cancelled x, envSetToolbox os env)  
+	| err == -30872										// not fatal error (no default printer)
+		// FIXME: want to provide more truthful reporting than 'Cancelled'
+		= (Cancelled x, envSetToolbox os env)
     | err <> 0	= abort ("Unexpected error (osprint:printPagePerPageBoth:prOpenDoc): "+++toString err)
   	# ((pRecHdl,os),finalState) = printPages transFun (False,initFun x printInfo) (False,undef) undef (pRecHdl,os)
       os = prCloseDoc (grPort,os) pRecHdl 					// do the balancing functions
