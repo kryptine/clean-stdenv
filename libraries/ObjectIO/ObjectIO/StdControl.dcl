@@ -8,9 +8,73 @@ definition module StdControl
 //	********************************************************************************
 
 
-from	StdFunc		import St
-import	StdControlDef, StdMaybe
-from	StdPSt		import PSt, IOSt
+import	StdControlClass
+
+
+controlSize				:: !(cdef .ls (PSt .l)) !Bool
+						   !(Maybe (Int,Int)) !(Maybe (Int,Int)) !(Maybe (Int,Int))
+						   !(PSt .l)
+						-> (!Size,!PSt .l) | Controls cdef
+/*	controlSize calculates the size of the given control definition as it would be 
+		opened as an element of a window/dialog.
+	The Boolean argument determines whether a window (True) or a dialog (False) is
+		intended.
+	The Maybe arguments are the prefered horizontal margins, vertical margins, and 
+		item spaces (see also the (Window/Control)(H/V)Margin and 
+		(Window/Control)ItemSpace attributes). If Nothing is specified, their 
+		default values with respect to the window/dialog are used.
+*/
+
+
+/*	Functions that change the set of controls in windows/dialogues.
+*/
+
+openControls			:: !Id .ls (cdef .ls (PSt .l)) !(PSt .l)
+									   -> (!ErrorReport,!PSt .l)
+									   |  Controls cdef
+openCompoundControls	:: !Id .ls (cdef .ls (PSt .l)) !(PSt .l)
+									   -> (!ErrorReport,!PSt .l)
+									   |  Controls cdef
+openPopUpControlItems	:: !Id !Index ![PopUpControlItem (PSt .l)]
+									   !(IOSt .l) -> IOSt .l
+/*	openControls
+		adds the given controls argument to the indicated window or dialog. 
+	openCompoundControls
+		adds the given controls argument to the indicated compound control.
+	openPopUpControlItems
+		adds the PopUpControlItems to the indicated PopUpControl behind the item at
+		the given index position (counted from 1). 
+	The window/dialog is not resized.
+	These functions have no effect in case the indicated window/dialog/compound 
+	control could not be found (ErrorUnknownObject) or if controls are opened with 
+	duplicate Ids (ErrorIdsInUse).
+*/
+
+closeControls			:: !Id [Id] !Bool	!(IOSt .l) -> IOSt .l
+/*	closeControls removes the indicated controls (second argument) from the 
+	indicated window (first argument) and recalculates the layout iff the Boolean 
+	argument is True.
+*/
+
+closeAllControls		:: !Id !(IOSt .l) -> IOSt .l
+/*	closeAllControls removes all controls from the indicated window.
+*/
+
+closePopUpControlItems	:: !Id ![Index] !(IOSt .l) -> IOSt .l
+/*	closePopUpControlItems closes PopUpControlItems by their Index position of the 
+	indicated PopUpControl. 
+	If the currently checked element of a PopUpControl is closed, the first 
+	remaining element of that PopUpControl will be checked. 
+*/
+
+
+setControlPos			:: !Id ![(Id,ItemPos)]	!(IOSt .l) -> (!Bool,!IOSt .l)
+/*	setControlPos changes the current layout position of the indicated controls to 
+	their new positions. 
+	If there are relatively laynout controls, then their layout also changes. The 
+	window is not resized.
+	The Boolean result is False iff the window is unknown. 
+*/
 
 
 /*	Functions that change the state of controls.
@@ -304,13 +368,13 @@ getControlScrollFunction:: ! Id  !WState
 getControlItemSpaces	:: ![Id] !WState -> [(Bool,Maybe (Int,Int))]
 getControlItemSpace		:: ! Id  !WState ->  (Bool,Maybe (Int,Int))
 /*	getControlItemSpace(s) yields (Just (horizontal space,vertical space)) of the 
-	indicated CompoundControl. If the control is not such a control, then Nothing 
-	is yielded. 
+	indicated (Compound/Layout)Control. If the control is not such a control, then 
+	Nothing is yielded. 
 */
 
 getControlMargins		:: ![Id] !WState -> [(Bool,Maybe ((Int,Int),(Int,Int)))]
 getControlMargin		:: ! Id  !WState ->  (Bool,Maybe ((Int,Int),(Int,Int)))
 /*	getControlMargins yields (Just (ControlHMargin,ControlVMargin)) of the 
-	indicated CompoundControl. If the control is not such a control, then Nothing 
-	is yielded.
+	indicated (Compound/Layout)Control. If the control is not such a control, then 
+	Nothing is yielded.
 */

@@ -6,13 +6,16 @@ implementation module windowaccess
 //	Access operations to Window(State)Handle(s).
 
 
-import	StdBool, StdEnum, StdInt, StdList, StdMisc
+import	StdBool, StdEnum, StdInt, StdList, StdMisc, StdTuple
 import	ossystem, ostypes, oswindow
 from	windowCrossCall_12	import CURSARROW, CURSBUSY, CURSCROSS, CURSFATCROSS, CURSHIDDEN, CURSIBEAM
-import	commondef, devicesystemstate, windowhandle
+import	commondef, windowhandle
 from	StdControlAttribute	import isControlKeyboard
-from	StdWindowAttribute	import isWindowInitActive, getWindowInitActiveAtt
-import cast // PA+++
+from	StdWindowAttribute	import isWindowInitActive, getWindowInitActiveAtt,
+									isWindowHMargin,   getWindowHMarginAtt,
+									isWindowVMargin,   getWindowVMarginAtt,
+									isWindowItemSpace, getWindowItemSpaceAtt
+import	cast
 
 
 windowaccessFatalError :: String String -> .x
@@ -355,6 +358,35 @@ setWindowStateHandleClosing closing wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH}}
 	= {wsH & wshHandle=Just {wlsH & wlsHandle={wH & whClosing=closing}}}
 
 
+/*	Access operations on the margins and item space attributes of the window attributes.
+	getWindow((H/V)Margin/ItemSpace)s type metrics atts
+		retrieves the indicated attribute if present from the attribute list. If the attribute
+		could not be found, the appropriate default value is returned. 
+*/
+getWindowHMargins :: !WindowKind !OSWindowMetrics ![WindowAttribute .st] -> (!Int,!Int)
+getWindowHMargins type wMetrics atts
+	= getWindowHMarginAtt (snd (Select isWindowHMargin (WindowHMargin defaultLeft defaultRight) atts))
+where
+	(defaultLeft,defaultRight)	= case type of
+									IsDialog -> (wMetrics.osmHorMargin,wMetrics.osmHorMargin)
+									other    -> (0,0)
+
+getWindowVMargins :: !WindowKind !OSWindowMetrics ![WindowAttribute .st] -> (!Int,!Int)
+getWindowVMargins type wMetrics atts
+	= getWindowVMarginAtt (snd (Select isWindowVMargin (WindowVMargin defaultTop defaultBottom) atts))
+where
+	(defaultTop,defaultBottom)	= case type of
+									IsDialog -> (wMetrics.osmVerMargin,wMetrics.osmVerMargin)
+									other    -> (0,0)
+
+getWindowItemSpaces :: !WindowKind !OSWindowMetrics ![WindowAttribute .st] -> (!Int,!Int)
+getWindowItemSpaces type wMetrics atts
+	= getWindowItemSpaceAtt (snd (Select isWindowItemSpace (WindowItemSpace defaultHor defaultVer) atts))
+where
+	(defaultHor,defaultVer)		= case type of
+									IsDialog -> (wMetrics.osmHorItemSpace,wMetrics.osmVerItemSpace)
+									other    -> (0,0)
+
 //	Search, get, and set WindowStateHandles.
 
 getWindowHandlesActiveWindow :: !(WindowHandles .pst) -> (!Maybe WIDS,!WindowHandles .pst)
@@ -498,15 +530,6 @@ disableWindowSystem windows=:{whsModal,whsWindows} tb
 		= ((activeWIDS,windows),OSdisableWindow (fromJust activeWIDS).wPtr (False,False) True tb)
 where
 	disablewindow :: !(WindowStateHandle .pst) !*OSToolbox -> (!WindowStateHandle .pst,!*OSToolbox)
-	/* Mike
-	disablewindow wsH tb
-		# (wids,wsH)			= getWindowStateHandleWIDS wsH
-		# (maybeWindowInfo,wsH)	= getWindowStateHandleWindowInfo wsH
-		# scrollInfo			= case maybeWindowInfo of
-									Nothing		-> (False,False)
-									Just info	-> (isJust info.windowHScroll,isJust info.windowVScroll)
-		= (wsH,OSdisableWindow wids.wPtr scrollInfo True tb)
-	*/
 	disablewindow wsH tb
 		# (wids,wsH)		= getWindowStateHandleWIDS wsH
 		# (windowInfo,wsH)	= getWindowStateHandleWindowInfo wsH
@@ -530,12 +553,6 @@ where
 			= (wsH,tb)
 		| otherwise
 			# (wids,wsH)		= getWindowStateHandleWIDS wsH
-			/* Mike
-			# (maybeWindowInfo,wsH)	= getWindowStateHandleWindowInfo wsH
-			  scrollInfo			= case maybeWindowInfo of
-			  							Nothing		-> (False,False)
-			  							Just info	-> (isJust info.windowHScroll,isJust info.windowVScroll)
-			*/
 			# (windowInfo,wsH)	= getWindowStateHandleWindowInfo wsH
 			  scrollInfo		= case windowInfo of
 			  						WindowInfo info	-> (isJust info.windowHScroll,isJust info.windowVScroll)
@@ -554,51 +571,6 @@ checkZeroWindowHandlesBound wHs=:{whsNrWindowBound}
 decreaseWindowHandlesBound :: !(WindowHandles .pst) -> WindowHandles .pst
 decreaseWindowHandlesBound wHs=:{whsNrWindowBound}
 	= {wHs & whsNrWindowBound=decBound whsNrWindowBound}
-
-
-/*	Bind all free R(2)Ids that are contained in the WElementHandles.
-	It assumes that it has already been checked that no R(2)Id is already bound in the ReceiverTable.
-*/
-bindReceiverControlIds :: !SystemId !Id ![WElementHandle .ls .pst] !ReceiverTable -> (![WElementHandle .ls .pst],!ReceiverTable)
-bindReceiverControlIds ioId wId [itemH:itemHs] rt
-	# (itemH, rt) = bindReceiverControlIds` ioId wId itemH rt
-	# (itemHs,rt) = bindReceiverControlIds ioId wId itemHs rt
-	= ([itemH:itemHs],rt)
-where
-	bindReceiverControlIds` :: !SystemId !Id !(WElementHandle .ls .pst) !ReceiverTable
-										  -> (!WElementHandle .ls .pst, !ReceiverTable)
-	bindReceiverControlIds` ioId wId (WItemHandle itemH=:{wItemKind,wItemInfo}) rt
-		| not (isReceiverControl wItemKind)
-			# (itemHs,rt1)	= bindReceiverControlIds ioId wId itemH.wItems rt
-			  itemH1		= {itemH & wItems=itemHs}
-			= (WItemHandle itemH1,rt1)
-		| otherwise
-			# recLoc		= {rlIOId=ioId,rlDevice=WindowDevice,rlParentId=wId,rlReceiverId=id}
-			# rte			= {rteLoc=recLoc,rteSelectState=if itemH.wItemSelect Able Unable,rteASMCount=0}
-			# (_,rt)		= addReceiverToReceiverTable rte rt
-			= (WItemHandle itemH,rt)
-	where
-		rH					= getWItemReceiverInfo wItemInfo
-		id					= rH.rId
-		
-		isReceiverControl :: !ControlKind -> Bool
-		isReceiverControl (IsOtherControl type)	= type=="Receiver" || type=="Receiver2"
-		isReceiverControl _						= False
-	
-	bindReceiverControlIds` ioId wId (WListLSHandle itemHs) rt
-		# (itemHs,rt)	= bindReceiverControlIds ioId wId itemHs rt
-		= (WListLSHandle itemHs,rt)
-	
-	bindReceiverControlIds` ioId wId (WExtendLSHandle wExH=:{wExtendItems}) rt
-		# (itemHs,rt)	= bindReceiverControlIds ioId wId wExtendItems rt
-		= (WExtendLSHandle {wExH & wExtendItems=itemHs},rt)
-	
-	bindReceiverControlIds` ioId wId (WChangeLSHandle wChH=:{wChangeItems}) rt
-		# (itemHs,rt)	= bindReceiverControlIds ioId wId wChangeItems rt
-		= (WChangeLSHandle {wChH & wChangeItems=itemHs},rt)
-
-bindReceiverControlIds _ _ itemHs rt
-	= (itemHs,rt)
 
 
 /*	getInitActiveControl retrieves the OSWindowPtr of the control that has the initial input focus.

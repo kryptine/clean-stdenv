@@ -38,7 +38,7 @@ instance Controls (Receiver m) where
 		id		= RIdtoId rid
 		select	= getSelectState atts
 	
-	getControlType :: (Receiver m .ls .ps) -> ControlType
+	getControlType :: (Receiver m .ls .pst) -> ControlType
 	getControlType _
 		= "Receiver"
 
@@ -69,10 +69,10 @@ instance Controls (Receiver2 m r) where
 		id		= R2IdtoId r2id
 		select	= getSelectState atts
 	
-	getControlType :: (Receiver2 m r .ls .ps) -> ControlType
+	getControlType :: (Receiver2 m r .ls .pst) -> ControlType
 	getControlType _
 		= "Receiver2"
 
-getSelectState :: ![ReceiverAttribute .ps] -> SelectState
+getSelectState :: ![ReceiverAttribute .pst] -> SelectState
 getSelectState rAtts
 	= getReceiverSelectStateAtt (snd (Select isReceiverSelectState (ReceiverSelectState Able) rAtts))

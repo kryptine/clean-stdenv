@@ -8,7 +8,7 @@ definition module StdControlClass
 //	********************************************************************************
 
 
-import	StdIOCommon, StdControlDef
+import	StdControlDef
 from	windowhandle	import ControlState
 from	StdPSt			import PSt, IOSt
 
@@ -24,13 +24,15 @@ instance Controls (NewLS  c)			| Controls c
 instance Controls (ListLS c)			| Controls c
 instance Controls NilLS
 instance Controls ((:+:) c1 c2)			| Controls c1 & Controls c2
-instance Controls RadioControl
-instance Controls CheckControl
-instance Controls PopUpControl
-instance Controls SliderControl
-instance Controls TextControl
-instance Controls EditControl
+
 instance Controls ButtonControl
+instance Controls CheckControl
+instance Controls (CompoundControl c)	| Controls c
 instance Controls CustomButtonControl
 instance Controls CustomControl
-instance Controls (CompoundControl c)	| Controls c
+instance Controls EditControl
+instance Controls (LayoutControl   c)	| Controls c
+instance Controls PopUpControl
+instance Controls RadioControl
+instance Controls SliderControl
+instance Controls TextControl

@@ -4,11 +4,11 @@ definition module keyfocus
 //	Clean Object I/O library, version 1.2
 
 
-import	StdIOCommon, StdMaybe
+import	StdMaybe
 
 
 ::	KeyFocus
-	=	{	kfItem		:: !Maybe Int	// Case (Just nr): the item with (dItemNr nr) has the keyboard input focus; Nothing: no item has focus
+	=	{	kfItem		:: !Maybe Int	// Case (Just nr): the item with (wItemNr nr) has the keyboard input focus; Nothing: no item has focus
 		,	kfItems		:: ![FocusItem]	// The items of the window that can have the keyboard input focus
 		}
 ::	FocusItem

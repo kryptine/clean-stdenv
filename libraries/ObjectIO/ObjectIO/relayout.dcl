@@ -17,7 +17,7 @@ from	oswindow	import OSWindowMetrics, Font
 		,	rliItemShow		:: !Bool				// The item is visible (True) or invisible (False)
 		,	rliItemInfo		:: CompoundInfo			// If the control kind is IsCompoundControl: its CompoundInfo; otherwise undefined
 		,	rliItemLook		:: LookInfo				// If the control kind is IsCustom(Button)Control: its LookInfo; otherwise undefined
-		,	rliItems		:: ![RelayoutItem]		// If the control kind is IsCompoundControl: its elements; otherwise: []
+		,	rliItems		:: ![RelayoutItem]		// If the control kind is Is(Compound/Layout)Control: its elements; otherwise: []
 		}
 
 relayoutItems :: !OSWindowMetrics !Bool !Rect !Rect !Point2 !Point2 !OSWindowPtr ![RelayoutItem] ![RelayoutItem] !*OSToolbox

@@ -12,62 +12,6 @@ implementation module StdControlAttribute
 import StdControlDef
 
 
-isValidRadioControlAttribute :: !(ControlAttribute .st) -> Bool
-isValidRadioControlAttribute (ControlId          _)	= True
-isValidRadioControlAttribute (ControlPos         _)	= True
-isValidRadioControlAttribute (ControlSelectState _)	= True
-isValidRadioControlAttribute  ControlHide			= True
-isValidRadioControlAttribute (ControlTip         _)	= True
-isValidRadioControlAttribute _						= False
-
-isValidCheckControlAttribute :: !(ControlAttribute .st) -> Bool
-isValidCheckControlAttribute (ControlId          _)	= True
-isValidCheckControlAttribute (ControlPos         _)	= True
-isValidCheckControlAttribute (ControlSelectState _)	= True
-isValidCheckControlAttribute  ControlHide			= True
-isValidCheckControlAttribute (ControlTip         _)	= True
-isValidCheckControlAttribute _						= False
-
-isValidPopUpControlAttribute :: !(ControlAttribute .st) -> Bool
-isValidPopUpControlAttribute (ControlId          _)	= True
-isValidPopUpControlAttribute (ControlPos         _)	= True
-isValidPopUpControlAttribute (ControlSelectState _)	= True
-isValidPopUpControlAttribute  ControlHide			= True
-isValidPopUpControlAttribute (ControlActivate    _)	= True
-isValidPopUpControlAttribute (ControlDeactivate  _)	= True
-isValidPopUpControlAttribute (ControlTip         _)	= True
-isValidPopUpControlAttribute (ControlWidth		 _)	= True
-isValidPopUpControlAttribute _						= False
-
-isValidSliderControlAttribute :: !(ControlAttribute .st) -> Bool
-isValidSliderControlAttribute (ControlId          _)= True
-isValidSliderControlAttribute (ControlPos         _)= True
-isValidSliderControlAttribute (ControlResize      _)= True
-isValidSliderControlAttribute (ControlSelectState _)= True
-isValidSliderControlAttribute  ControlHide			= True
-isValidSliderControlAttribute (ControlTip         _)= True
-isValidSliderControlAttribute _						= False
-
-isValidTextControlAttribute :: !(ControlAttribute .st) -> Bool
-isValidTextControlAttribute (ControlId          _)	= True
-isValidTextControlAttribute (ControlPos         _)	= True
-isValidTextControlAttribute  ControlHide			= True
-isValidTextControlAttribute (ControlTip         _)	= True
-isValidTextControlAttribute (ControlWidth		_)	= True
-isValidTextControlAttribute _						= False
-
-isValidEditControlAttribute :: !(ControlAttribute .st) -> Bool
-isValidEditControlAttribute (ControlId          _)	= True
-isValidEditControlAttribute (ControlPos         _)	= True
-isValidEditControlAttribute (ControlResize      _)	= True
-isValidEditControlAttribute (ControlSelectState _)	= True
-isValidEditControlAttribute  ControlHide			= True
-isValidEditControlAttribute (ControlTip         _)	= True
-isValidEditControlAttribute (ControlActivate    _)	= True
-isValidEditControlAttribute (ControlDeactivate  _)	= True
-isValidEditControlAttribute (ControlKeyboard _ _ _)	= True
-isValidEditControlAttribute _						= False
-
 isValidButtonControlAttribute :: !(ControlAttribute .st) -> Bool
 isValidButtonControlAttribute (ControlId           _)	= True
 isValidButtonControlAttribute (ControlPos          _)	= True
@@ -78,6 +22,19 @@ isValidButtonControlAttribute (ControlModsFunction _)	= True
 isValidButtonControlAttribute (ControlTip          _)	= True
 isValidButtonControlAttribute (ControlWidth        _)	= True
 isValidButtonControlAttribute _							= False
+
+isValidCheckControlAttribute :: !(ControlAttribute .st) -> Bool
+isValidCheckControlAttribute (ControlId          _)	= True
+isValidCheckControlAttribute (ControlPos         _)	= True
+isValidCheckControlAttribute (ControlSelectState _)	= True
+isValidCheckControlAttribute  ControlHide			= True
+isValidCheckControlAttribute (ControlTip         _)	= True
+isValidCheckControlAttribute _						= False
+
+isValidCompoundControlAttribute :: !(ControlAttribute .st) -> Bool
+isValidCompoundControlAttribute (ControlFunction     _)	= False
+isValidCompoundControlAttribute (ControlModsFunction _)	= False
+isValidCompoundControlAttribute _						= True
 
 isValidCustomButtonControlAttribute :: !(ControlAttribute .st) -> Bool
 isValidCustomButtonControlAttribute (ControlId           _)	= True
@@ -107,10 +64,67 @@ isValidCustomControlAttribute (ControlKeyboard _ _ _)	= True
 isValidCustomControlAttribute (ControlTip          _)	= True
 isValidCustomControlAttribute _							= False
 
-isValidCompoundControlAttribute :: !(ControlAttribute .st) -> Bool
-isValidCompoundControlAttribute (ControlFunction     _)	= False
-isValidCompoundControlAttribute (ControlModsFunction _)	= False
-isValidCompoundControlAttribute _						= True
+isValidEditControlAttribute :: !(ControlAttribute .st) -> Bool
+isValidEditControlAttribute (ControlId          _)	= True
+isValidEditControlAttribute (ControlPos         _)	= True
+isValidEditControlAttribute (ControlResize      _)	= True
+isValidEditControlAttribute (ControlSelectState _)	= True
+isValidEditControlAttribute  ControlHide			= True
+isValidEditControlAttribute (ControlTip         _)	= True
+isValidEditControlAttribute (ControlActivate    _)	= True
+isValidEditControlAttribute (ControlDeactivate  _)	= True
+isValidEditControlAttribute (ControlKeyboard _ _ _)	= True
+isValidEditControlAttribute _						= False
+
+isValidLayoutControlAttribute :: !(ControlAttribute .st) -> Bool
+isValidLayoutControlAttribute  ControlHide			= True
+isValidLayoutControlAttribute (ControlHMargin _ _)	= True
+isValidLayoutControlAttribute (ControlId      _)	= True
+isValidLayoutControlAttribute (ControlItemSpace _ _)= True
+isValidLayoutControlAttribute (ControlMinimumSize _)= True
+isValidLayoutControlAttribute (ControlOuterSize   _)= True
+isValidLayoutControlAttribute (ControlPos       _)	= True
+isValidLayoutControlAttribute (ControlResize    _)	= True
+isValidLayoutControlAttribute (ControlSelectState _)= True
+isValidLayoutControlAttribute (ControlViewSize  _)	= True
+isValidLayoutControlAttribute (ControlVMargin   _ _)= True
+isValidLayoutControlAttribute _						= False
+
+isValidPopUpControlAttribute :: !(ControlAttribute .st) -> Bool
+isValidPopUpControlAttribute (ControlId          _)	= True
+isValidPopUpControlAttribute (ControlPos         _)	= True
+isValidPopUpControlAttribute (ControlSelectState _)	= True
+isValidPopUpControlAttribute  ControlHide			= True
+isValidPopUpControlAttribute (ControlActivate    _)	= True
+isValidPopUpControlAttribute (ControlDeactivate  _)	= True
+isValidPopUpControlAttribute (ControlTip         _)	= True
+isValidPopUpControlAttribute (ControlWidth		 _)	= True
+isValidPopUpControlAttribute _						= False
+
+isValidRadioControlAttribute :: !(ControlAttribute .st) -> Bool
+isValidRadioControlAttribute (ControlId          _)	= True
+isValidRadioControlAttribute (ControlPos         _)	= True
+isValidRadioControlAttribute (ControlSelectState _)	= True
+isValidRadioControlAttribute  ControlHide			= True
+isValidRadioControlAttribute (ControlTip         _)	= True
+isValidRadioControlAttribute _						= False
+
+isValidSliderControlAttribute :: !(ControlAttribute .st) -> Bool
+isValidSliderControlAttribute (ControlId          _)= True
+isValidSliderControlAttribute (ControlPos         _)= True
+isValidSliderControlAttribute (ControlResize      _)= True
+isValidSliderControlAttribute (ControlSelectState _)= True
+isValidSliderControlAttribute  ControlHide			= True
+isValidSliderControlAttribute (ControlTip         _)= True
+isValidSliderControlAttribute _						= False
+
+isValidTextControlAttribute :: !(ControlAttribute .st) -> Bool
+isValidTextControlAttribute (ControlId          _)	= True
+isValidTextControlAttribute (ControlPos         _)	= True
+isValidTextControlAttribute  ControlHide			= True
+isValidTextControlAttribute (ControlTip         _)	= True
+isValidTextControlAttribute (ControlWidth		_)	= True
+isValidTextControlAttribute _						= False
 
 
 isControlActivate		:: !(ControlAttribute .st) -> Bool

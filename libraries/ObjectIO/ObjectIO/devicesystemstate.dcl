@@ -10,8 +10,8 @@ import	timerhandle
 import	windowhandle
 
 ::	DeviceSystemState pst
-	=	ProcessSystemState	(ProcessHandles		pst)
-	|	MenuSystemState		(MenuHandles		pst)
+	=	MenuSystemState		(MenuHandles		pst)
+	|	ProcessSystemState	(ProcessHandles		pst)
 	|	ReceiverSystemState	(ReceiverHandles	pst)
 	| 	TimerSystemState	(TimerHandles		pst)
 	|	WindowSystemState	(WindowHandles		pst)

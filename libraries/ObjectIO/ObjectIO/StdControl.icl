@@ -3,17 +3,24 @@ implementation module StdControl
 
 //	Clean Object I/O library, version 1.2
 
-//	Operations to change controls using their Ids only.
+//	Operations to change controls.
 
 
-import	StdBool, StdList, StdMisc, StdTuple
-import	commondef, controlaccess, controlinternal, id, iostate, windowaccess, wstate
+import	StdBool, StdFunc, StdList, StdMisc, StdTuple
+import	commondef, controlaccess, controlinternal, controlvalidate, id, iostate, StdControlClass, windowaccess, windowcontrols, wstate
+from	controllayout	import layoutControls
+from	receiverid		import unbindRIds
+from	StdPSt			import appPIO
 from	windowclipstate	import invalidateWindowClipState`
 from	wstateaccess	import iswindowitemspace`, getwindowitemspace`,
 								iswindowhmargin`,  getwindowhmargin`,
 								iswindowvmargin`,  getwindowvmargin`
-from	ostoolbox	import OSNewToolbox
+from	ostoolbox		import OSNewToolbox
 
+
+StdControlFatalError :: String String -> .x
+StdControlFatalError function error
+	= FatalError function "StdControl" error
 
 /*	The function isOkControlId can be used to filter out the proper IdParent records.
 */
@@ -125,6 +132,294 @@ setWindow windowId f ioState
 		# ioState				= setIOToolbox tb ioState
 		# ioState				= IOStSetDevice (WindowSystemState windows) ioState
 		= ioState
+
+
+/*	controlSize calculates the size of the given control.
+*/
+controlSize :: !(cdef .ls (PSt .l)) !Bool !(Maybe (Int,Int)) !(Maybe (Int,Int)) !(Maybe (Int,Int)) !(PSt .l)
+			-> (!Size,!PSt .l) | Controls cdef
+controlSize cdef isWindow hMargins vMargins itemSpaces pState
+	# (cs,pState)		= controlToHandles cdef pState
+	  itemHs			= map ControlStateToWElementHandle cs
+	# (tb,ioState)		= getIOToolbox pState.io
+	# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
+	  hMargins			= case hMargins of
+		  					(Just (left,right))	-> (max 0 left,max 0 right)
+		  					_					-> if isWindow (0,0) (wMetrics.osmHorMargin,wMetrics.osmHorMargin)
+	  vMargins			= case vMargins of
+		  					(Just (top,bottom))	-> (max 0 top,max 0 bottom)
+		  					_					-> if isWindow (0,0) (wMetrics.osmVerMargin,wMetrics.osmVerMargin)
+	  itemSpaces		= case itemSpaces of
+		  					(Just (hor,vert))	-> (max 0 hor,max 0 vert)
+		  					_					-> (wMetrics.osmHorItemSpace,wMetrics.osmVerItemSpace)
+	  domain			= {viewDomainRange & corner1=zero}
+	# (derSize,_,tb)	= layoutControls wMetrics hMargins vMargins itemSpaces zero zero [(domain,zero)] itemHs tb
+	# ioState			= setIOToolbox tb ioState
+	# pState			= {pState & io=ioState}
+	= (derSize,pState)
+
+
+/*	openControls adds controls to the indicated window.
+*/
+openControls :: !Id .ls (cdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | Controls cdef
+openControls wId ls newControls pState
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
+	| not found
+		= (ErrorUnknownObject,{pState & io=ioState})
+	# wHs						= WindowSystemStateGetWindowHandles wDevice
+	# (found,wsH,wHs)			= getWindowHandlesWindow (toWID wId) wHs
+	| not found
+		= (ErrorUnknownObject,{pState & io=IOStSetDevice (WindowSystemState wHs) ioState})
+    // Mike //
+    # (wKind,wsH)				= getWindowStateHandleWindowKind wsH
+    | wKind==IsGameWindow
+    	= (OtherError "WrongObject",{pState & io=IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState})
+    ///
+	# (cs,pState)				= controlToHandles newControls {pState & io=ioState}
+	# newItemHs					= map ControlStateToWElementHandle cs
+	  (currentIds,wsH)			= getWindowStateHandleIds wsH
+	  (disjoint,newItemHs)		= disjointControlIds currentIds newItemHs
+	| not disjoint
+		= (ErrorIdsInUse,appPIO (IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs))) pState)
+	# (rt,ioState)				= IOStGetReceiverTable pState.io
+	# (it,ioState)				= IOStGetIdTable ioState
+	# (ioId,ioState)			= IOStGetIOId ioState
+	  (ok,newItemHs,rt,it)		= controlIdsAreConsistent ioId wId newItemHs rt it
+	# ioState					= IOStSetIdTable it ioState
+	# ioState					= IOStSetReceiverTable rt ioState
+	| not ok
+		# ioState				= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+		# pState				= {pState & io=ioState}
+		= (ErrorIdsInUse,pState)
+	| otherwise
+		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# (wsH,ioState)			= accIOToolbox (opencontrols wMetrics ls newItemHs wsH) ioState
+		# ioState				= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+		# pState				= {pState & io=ioState}
+		= (NoError,pState)
+
+
+/*	getWindowStateHandleIds returns all Ids of the controls in this window.
+	This function is used by open(Compound)Controls.
+*/
+getWindowStateHandleIds :: !(WindowStateHandle .pst) -> (![Id],!WindowStateHandle .pst)
+getWindowStateHandleIds wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems}}}
+	# (ids,itemHs)	= getWElementControlIds whItems
+	= (ids,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}})
+getWindowStateHandleIds _
+	= StdControlFatalError "getWindowStateHandleIds" "unexpected window placeholder argument"
+
+/*	getParentWindowId controlId returns the Id of the parent window/dialog if this
+	exists and belongs to the same interactive process. 
+	This function is used by openCompoundControls, openPopUpControlItems, closePopUpControlItems.
+*/
+getParentWindowId :: !Id !(IOSt .l) -> (!Maybe Id,!IOSt .l)
+getParentWindowId controlId ioState
+	# (it,ioState)		= IOStGetIdTable ioState
+	  maybeParent		= getIdParent controlId it
+	| isNothing maybeParent
+		= (Nothing,ioState)
+	# parent			= fromJust maybeParent
+	| parent.idpDevice<>WindowDevice
+		= (Nothing,ioState)
+	# (pid,ioState)		= IOStGetIOId ioState
+	| parent.idpIOId<>pid
+		= (Nothing,ioState)
+	| otherwise
+		= (Just parent.idpId,ioState)
+
+/*	openCompoundControls adds controls to the indicated CompoundControl of the indicated window.
+*/
+openCompoundControls :: !Id .ls (cdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | Controls cdef
+openCompoundControls cId ls newControls pState=:{io=ioState}
+	# (maybeId,ioState)			= getParentWindowId cId ioState
+	| isNothing maybeId
+		= (ErrorUnknownObject,{pState & io=ioState})
+	# wId						= fromJust maybeId
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (ErrorUnknownObject,{pState & io=ioState})
+	# wHs						= WindowSystemStateGetWindowHandles wDevice
+	# (found,wsH,wHs)			= getWindowHandlesWindow (toWID wId) wHs
+	| not found
+		= (ErrorUnknownObject,{pState & io=IOStSetDevice (WindowSystemState wHs) ioState})
+    // Mike //
+    # (wKind,wsH)				= getWindowStateHandleWindowKind wsH
+    | wKind==IsGameWindow
+		= (OtherError "WrongObject",{pState & io=IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState})
+    ///
+	# (cs,pState)				= controlToHandles newControls {pState & io=ioState}
+	# newItemHs					= map ControlStateToWElementHandle cs
+	  (currentIds,wsH)			= getWindowStateHandleIds wsH
+	  (disjoint,newItemHs)		= disjointControlIds currentIds newItemHs
+	| not disjoint
+		= (ErrorIdsInUse,appPIO (IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs))) pState)
+	# (rt,ioState)				= IOStGetReceiverTable pState.io
+	# (it,ioState)				= IOStGetIdTable ioState
+	# (ioId,ioState)			= IOStGetIOId ioState
+	  (ok,newItemHs,rt,it)		= controlIdsAreConsistent ioId wId newItemHs rt it
+	# ioState					= IOStSetIdTable it ioState
+	# ioState					= IOStSetReceiverTable rt ioState
+	| not ok
+		# ioState				= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+		# pState				= {pState & io=ioState}
+		= (ErrorIdsInUse,pState)
+	| otherwise
+		# (osdInfo, ioState)	= IOStGetOSDInfo ioState
+		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# (tb,ioState)			= getIOToolbox ioState
+		# (ok,wsH,tb)			= opencompoundcontrols osdInfo wMetrics cId ls newItemHs wsH tb
+		# ioState				= setIOToolbox tb ioState
+		# ioState				= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+		# pState				= {pState & io=ioState}
+		= (if ok NoError ErrorUnknownObject,pState)
+
+
+/*	openPopUpControlItems opens items to the PopUpControl of the indicated window/dialogue.
+*/
+openPopUpControlItems :: !Id !Index ![PopUpControlItem (PSt .l)] !(IOSt .l) -> IOSt .l
+openPopUpControlItems popUpId index items ioState
+	| isEmpty items
+		= ioState
+	# (maybeId,ioState)			= getParentWindowId popUpId ioState
+	| isNothing maybeId
+		= ioState
+	# wId						= fromJust maybeId
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# wHs						= WindowSystemStateGetWindowHandles wDevice
+	# (found,wsH,wHs)			= getWindowHandlesWindow (toWID wId) wHs
+	| not found
+		= IOStSetDevice (WindowSystemState wHs) ioState
+    // Mike //
+	# (wKind,wsH)				= getWindowStateHandleWindowKind wsH
+	| wKind==IsGameWindow
+		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+    ///
+	| otherwise
+		# (tb,ioState)			= getIOToolbox ioState
+		# (wsH,tb)				= openpopupcontrolitems popUpId index items wsH tb
+		# ioState				= setIOToolbox tb ioState
+		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+where
+	openpopupcontrolitems :: !Id !Index ![PopUpControlItem (PSt .l)] !(WindowStateHandle (PSt .l)) !*OSToolbox
+																	 -> (!WindowStateHandle (PSt .l), !*OSToolbox)
+	openpopupcontrolitems popUpId index items wsH=:{wshIds={wPtr},wshHandle=Just wlsH=:{wlsHandle=wH}} tb
+		# (wH,tb)		= openpopupitems popUpId index items wPtr wH tb
+		= ({wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
+	openpopupcontrolitems _ _ _ _ _
+		= StdControlFatalError "openPopUpControlItems" "unexpected window placeholder argument"
+
+
+/*	closeControls closes the controls in the indicated window.
+*/
+closeControls :: !Id [Id] !Bool !(IOSt .l) -> IOSt .l
+closeControls wId ids relayout ioState
+	# (found,wDevice,ioState)					= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# wHs										= WindowSystemStateGetWindowHandles wDevice
+	# (found,wsH,wHs)							= getWindowHandlesWindow (toWID wId) wHs
+	| not found
+		= IOStSetDevice (WindowSystemState wHs) ioState
+    // Mike //
+    # (wKind,wsH)								= getWindowStateHandleWindowKind wsH
+    | wKind==IsGameWindow
+    	= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+    ///
+	| otherwise
+		# (wMetrics,ioState)					= IOStGetOSWindowMetrics ioState
+		# (tb,ioState)							= getIOToolbox ioState
+		# (freeRIds,freeIds,disposeFun,wsH,tb)	= closecontrols wMetrics ids relayout wsH tb
+		# ioState								= setIOToolbox tb ioState
+		# ioState								= unbindRIds freeRIds ioState
+		# (idtable,ioState)						= IOStGetIdTable ioState
+		  (_,idtable)							= removeIdsFromIdTable (freeRIds++freeIds) idtable
+		# ioState								= IOStSetIdTable idtable ioState
+		# (f,ioState)							= IOStGetInitIO ioState
+		# ioState								= IOStSetInitIO ((appPIO (appIOToolbox disposeFun)) o f) ioState
+		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+
+
+/*	closeAllControls closes all controls from the indicated window.
+*/
+closeAllControls :: !Id !(IOSt .l) -> IOSt .l
+closeAllControls wId ioState
+	# (found,wDevice,ioState)					= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# wHs										= WindowSystemStateGetWindowHandles wDevice
+	# (found,wsH,wHs)							= getWindowHandlesWindow (toWID wId) wHs
+	| not found
+		= IOStSetDevice (WindowSystemState wHs) ioState
+	| otherwise
+		# (tb,ioState)							= getIOToolbox ioState
+		# (freeRIds,freeIds,disposeFun,wsH,tb)	= closeallcontrols wsH tb
+		# ioState								= setIOToolbox tb ioState
+		# ioState								= unbindRIds freeRIds ioState
+		# (idtable,ioState)						= IOStGetIdTable ioState
+		  (_,idtable)							= removeIdsFromIdTable (freeRIds++freeIds) idtable
+		# ioState								= IOStSetIdTable idtable ioState
+		# (f,ioState)							= IOStGetInitIO ioState
+		# ioState								= IOStSetInitIO ((appPIO (appIOToolbox disposeFun)) o f) ioState
+		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+
+
+/*	closePopUpControlItems closes items from the indicated PopUpControl in the indicated window/dialogue.
+*/
+closePopUpControlItems :: !Id ![Index] !(IOSt .l) -> IOSt .l
+closePopUpControlItems popUpId indexs ioState
+	| isEmpty indexs
+		= ioState
+	# (maybeId,ioState)			= getParentWindowId popUpId ioState
+	| isNothing maybeId
+		= ioState
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= ioState
+	# wHs						= WindowSystemStateGetWindowHandles wDevice
+	  (found,wsH,wHs)			= getWindowHandlesWindow (toWID (fromJust maybeId)) wHs
+	| not found
+		= IOStSetDevice (WindowSystemState wHs) ioState
+	| otherwise
+		# (tb,ioState)			= getIOToolbox ioState
+		# (wsH,tb)				= closepopupcontrolitems popUpId indexs wsH tb
+		# ioState				= setIOToolbox tb ioState
+		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
+where
+	closepopupcontrolitems :: !Id ![Index] !(WindowStateHandle (PSt .l)) !*OSToolbox
+										-> (!WindowStateHandle (PSt .l), !*OSToolbox)
+	closepopupcontrolitems popUpId indexs wsH=:{wshIds={wPtr},wshHandle=Just wlsH=:{wlsHandle=wH}} tb
+		# (wH,tb)		= closepopupitems popUpId indexs wPtr wH tb
+		= ({wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
+	closepopupcontrolitems _ _ _ _
+		= StdControlFatalError "closepopupcontrolitems" "unexpected window placeholder argument"
+
+
+/*	setControlPos changes the position of the indicated control.
+*/
+setControlPos :: !Id ![(Id,ItemPos)] !(IOSt .l) -> (!Bool,!IOSt .l)
+setControlPos wId newPoss ioState
+	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
+	| not found
+		= (False,ioState)
+	# wHs						= WindowSystemStateGetWindowHandles wDevice
+	# (found,wsH,wHs)			= getWindowHandlesWindow (toWID wId) wHs
+	| not found
+		= (False,IOStSetDevice (WindowSystemState wHs) ioState)
+	// Mike //
+	# (wKind,wsH)				= getWindowStateHandleWindowKind wsH
+	| wKind==IsGameWindow
+		= (False,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState)
+	///
+	| otherwise
+		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
+		# (tb,ioState)			= getIOToolbox ioState
+		# (ok,wsH,tb)			= setcontrolpositions wMetrics newPoss wsH tb
+		# ioState				= setIOToolbox tb ioState
+		  wHs					= setWindowHandlesWindow wsH wHs
+		= (ok,IOStSetDevice (WindowSystemState wHs) ioState)
 
 
 //	Show/Hide controls.
@@ -456,7 +751,7 @@ snd3thd3 tuple :== (t2,t3) where (_,t2,t3) = tuple
 
 getControlLayouts :: ![Id] !WState -> [(Bool,(Maybe ItemPos,Vector2))]
 getControlLayouts ids wstate
-	= map snd3thd3 (snd (getcontrolslayouts (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getcontrolslayouts (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= (Nothing,zero)
@@ -466,7 +761,7 @@ getControlLayout id wstate = hd (getControlLayouts [id] wstate)
 
 getControlViewSizes :: ![Id] !WState -> [(Bool,Size)]
 getControlViewSizes ids wstate=:{wMetrics}
-	= map snd3thd3 (snd (getcontrolsviewsizes wMetrics (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getcontrolsviewsizes wMetrics (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= zero
@@ -476,7 +771,7 @@ getControlViewSize id wstate = hd (getControlViewSizes [id] wstate)
 
 getControlOuterSizes :: ![Id] !WState -> [(Bool,Size)]
 getControlOuterSizes ids wstate=:{wMetrics}
-	= map snd3thd3 (snd (getcontrolsoutersizes wMetrics (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getcontrolsoutersizes wMetrics (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= zero
@@ -486,7 +781,7 @@ getControlOuterSize id wstate = hd (getControlOuterSizes [id] wstate)
 
 getControlSelectStates :: ![Id] !WState -> [(Bool,SelectState)]
 getControlSelectStates ids wstate
-	= map snd3thd3 (snd (getcontrolsselects (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getcontrolsselects (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Able
@@ -496,7 +791,7 @@ getControlSelectState id wstate = hd (getControlSelectStates [id] wstate)
 
 getControlShowStates :: ![Id] !WState -> [(Bool,Bool)]
 getControlShowStates ids wstate
-	= map snd3thd3 (snd (getcontrolsshowstates (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getcontrolsshowstates (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= False
@@ -506,7 +801,7 @@ getControlShowState id wstate = hd (getControlShowStates [id] wstate)
 
 getControlTexts :: ![Id] !WState -> [(Bool,Maybe String)]
 getControlTexts ids wstate
-	= map snd3thd3 (snd (getcontrolstexts (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getcontrolstexts (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Nothing
@@ -516,7 +811,7 @@ getControlText id wstate = hd (getControlTexts [id] wstate)
 
 getControlNrLines :: ![Id] !WState -> [(Bool,Maybe NrLines)]
 getControlNrLines ids wstate
-	= map snd3thd3 (snd (getcontrolsnrlines (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getcontrolsnrlines (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Nothing
@@ -526,7 +821,7 @@ getControlNrLine id wstate = hd (getControlNrLines [id] wstate)
 
 getControlLooks :: ![Id] !WState -> [(Bool,Maybe (Bool,Look))]
 getControlLooks ids wstate
-	= map snd3thd3 (snd (getcontrolslooks (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getcontrolslooks (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Nothing
@@ -536,7 +831,7 @@ getControlLook id wstate = hd (getControlLooks [id] wstate)
 
 getControlMinimumSizes :: ![Id] !WState -> [(Bool,Maybe Size)]
 getControlMinimumSizes ids wstate
-	= map snd3thd3 (snd (getcontrolsminsizes (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getcontrolsminsizes (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Nothing
@@ -546,7 +841,7 @@ getControlMinimumSize id wstate = hd (getControlMinimumSizes [id] wstate)
 
 getControlResizes :: ![Id] !WState -> [(Bool,Maybe ControlResizeFunction)]
 getControlResizes ids wstate
-	= map snd3thd3 (snd (getcontrolsresizes (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getcontrolsresizes (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Nothing
@@ -556,7 +851,7 @@ getControlResize id wstate = hd (getControlResizes [id] wstate)
 
 getRadioControlItems :: ![Id] !WState -> [(Bool,Maybe [String])]
 getRadioControlItems ids wstate
-	= map snd3thd3 (snd (getradioitems (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getradioitems (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Nothing
@@ -566,7 +861,7 @@ getRadioControlItem id wstate = hd (getRadioControlItems [id] wstate)
 
 getRadioControlSelections :: ![Id] !WState -> [(Bool,Maybe Index)]
 getRadioControlSelections ids wstate
-	= map snd3thd3 (snd (getradiocontrolsmarks (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getradiocontrolsmarks (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Nothing
@@ -576,7 +871,7 @@ getRadioControlSelection id wstate = hd (getRadioControlSelections [id] wstate)
 
 getCheckControlItems :: ![Id] !WState -> [(Bool,Maybe [String])]
 getCheckControlItems ids wstate
-	= map snd3thd3 (snd (getcheckitems (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getcheckitems (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Nothing
@@ -586,7 +881,7 @@ getCheckControlItem id wstate = hd (getCheckControlItems [id] wstate)
 
 getCheckControlSelections :: ![Id] !WState -> [(Bool,Maybe [Index])]
 getCheckControlSelections ids wstate
-	= map snd3thd3 (snd (getcheckcontrolsmarks (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getcheckcontrolsmarks (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Nothing
@@ -596,7 +891,7 @@ getCheckControlSelection id wstate = hd (getCheckControlSelections [id] wstate)
 
 getPopUpControlItems :: ![Id] !WState -> [(Bool,Maybe [String])]
 getPopUpControlItems ids wstate
-	= map snd3thd3 (snd (getpopupitems (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getpopupitems (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Nothing
@@ -606,7 +901,7 @@ getPopUpControlItem id wstate = hd (getPopUpControlItems [id] wstate)
 
 getPopUpControlSelections :: ![Id] !WState -> [(Bool,Maybe Index)]
 getPopUpControlSelections ids wstate
-	= map snd3thd3 (snd (getselectedpopupitems (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getselectedpopupitems (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Nothing
@@ -616,7 +911,7 @@ getPopUpControlSelection id wstate = hd (getPopUpControlSelections [id] wstate)
 
 getSliderDirections :: ![Id] !WState -> [(Bool,Maybe Direction)]
 getSliderDirections ids wstate
-	= map snd3thd3 (snd (getslidersdirections (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getslidersdirections (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Nothing
@@ -626,7 +921,7 @@ getSliderDirection id wstate = hd (getSliderDirections [id] wstate)
 
 getSliderStates :: ![Id] !WState -> [(Bool,Maybe SliderState)]
 getSliderStates ids wstate
-	= map snd3thd3 (snd (getslidersstates (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getslidersstates (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Nothing
@@ -636,7 +931,7 @@ getSliderState id wstate = hd (getSliderStates [id] wstate)
 
 getControlViewFrames :: ![Id] !WState -> [(Bool,Maybe ViewFrame)]
 getControlViewFrames ids wstate=:{wMetrics}
-	= map snd3thd3 (snd (getcontrolsframes wMetrics (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getcontrolsframes wMetrics (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Nothing
@@ -646,7 +941,7 @@ getControlViewFrame id wstate = hd (getControlViewFrames [id] wstate)
 
 getControlViewDomains :: ![Id] !WState -> [(Bool,Maybe ViewDomain)]
 getControlViewDomains ids wstate
-	= map snd3thd3 (snd (getcontrolsdomains (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getcontrolsdomains (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Nothing
@@ -656,7 +951,7 @@ getControlViewDomain id wstate = hd (getControlViewDomains [id] wstate)
 
 getControlScrollFunctions :: ![Id] !WState -> [(Bool,Maybe ((Direction,Maybe ScrollFunction),(Direction,Maybe ScrollFunction)))]
 getControlScrollFunctions ids wstate
-	= map snd3thd3 (snd (getscrollfunctions (getWStateControls wstate) (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getscrollfunctions (getWStateControls wstate) (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Nothing
@@ -666,7 +961,7 @@ getControlScrollFunction id wstate = hd (getControlScrollFunctions [id] wstate)
 
 getControlItemSpaces :: ![Id] !WState -> [(Bool,Maybe (Int,Int))]
 getControlItemSpaces ids {wRep={whItems`,whAtts`},wMetrics={osmHorItemSpace,osmVerItemSpace}}
-	= map snd3thd3 (snd (getcontrolsspaces spaces whItems` (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getcontrolsspaces spaces whItems` (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Nothing
@@ -677,7 +972,7 @@ getControlItemSpace id wstate = hd (getControlItemSpaces [id] wstate)
 
 getControlMargins :: ![Id] !WState -> [(Bool,Maybe ((Int,Int),(Int,Int)))]
 getControlMargins ids {wRep={whKind`,whItems`,whAtts`},wMetrics={osmHorMargin,osmVerMargin}}
-	= map snd3thd3 (snd (getcontrolsmargins (hMargins,vMargins) whItems` (ids,map (\id->(id,defaultBool,defaultValue)) ids)))
+	= map snd3thd3 (snd (getcontrolsmargins (hMargins,vMargins) whItems` (ids,[(id,defaultBool,defaultValue) \\ id<-ids])))
 where
 	defaultBool	= False
 	defaultValue= Nothing

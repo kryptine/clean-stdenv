@@ -8,7 +8,7 @@ implementation module controlcreate
 
 import	StdBool, StdInt, StdList, StdMisc
 import	ostooltip, oswindow
-import	commondef, controldefaccess, controllayout, controlvalidate, windowaccess
+import	commondef, controllayout, controlvalidate, StdControlAttribute, windowaccess
 from	StdPSt	import PSt, IOSt
 
 
@@ -33,7 +33,11 @@ where
 								 -> (!WElementHandle .ls .pst, !*OSToolbox)
 	createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext ableContext parentPos wPtr (WItemHandle itemH=:{wItemKind,wItemId}) tb
 		| wItemKind<>IsCompoundControl
-			= (WItemHandle itemH,tb)
+			| isRecursiveControl wItemKind
+				# (itemHs,tb)		= StateMap (createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext1 ableContext parentPos wPtr) itemH.wItems tb
+				= (WItemHandle {itemH & wItems=itemHs},tb)
+			// otherwise
+				= (WItemHandle itemH,tb)
 		| not (identifyMaybeId compoundId wItemId)
 			# (itemHs,tb)			= StateMap (createCompoundWElementHandle wMetrics compoundId nrSkip okId cancelId showContext1 ableContext1 itemPos itemPtr) itemH.wItems tb
 			= (WItemHandle {itemH & wItems=itemHs},tb)
@@ -251,7 +255,7 @@ where
 	
 	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos wPtr itemH=:{wItemKind=IsCompoundControl} tb
 		# (compoundPtr,hPtr,vPtr,tb)
-								= OScreateCompoundControl wMetrics wPtr (toTuple parentPos) show able (toTuple pos) (toTuple size) hScroll vScroll tb
+								= OScreateCompoundControl wMetrics wPtr (toTuple parentPos) show able False (toTuple pos) (toTuple size) hScroll vScroll tb
 		  compoundInfo			= {info & compoundHScroll=setScrollbarPtr hPtr info.compoundHScroll
 		  								, compoundVScroll=setScrollbarPtr vPtr info.compoundVScroll
 		  						  }
@@ -294,6 +298,13 @@ where
 		setScrollbarPtr :: OSWindowPtr !(Maybe ScrollInfo) -> Maybe ScrollInfo
 		setScrollbarPtr scrollPtr (Just info)	= Just {info & scrollItemPtr=scrollPtr}
 		setScrollbarPtr _ nothing				= nothing
+
+	createWItemHandle wMetrics okId cancelId showContext ableContext parentPos wPtr itemH=:{wItemKind=IsLayoutControl,wItems} tb
+		# (itemHs,tb)			= StateMap (createWElementHandle wMetrics okId cancelId show able parentPos wPtr) wItems tb
+		= ({itemH & wItems=itemHs},tb)
+	where
+		show					= showContext && itemH.wItemShow
+		able					= ableContext && itemH.wItemSelect
 
 	createWItemHandle _ _ _ _ _ _ _ itemH tb
 		= (itemH,tb)

@@ -6,9 +6,9 @@ definition module windowaccess
 /*	Access operations to Window(State)Handle(s).
 */
 
-import	devicesystemstate, windowhandle
+import	windowhandle
+from	ossystem	import OSWindowMetrics
 from	ostoolbox	import OSToolbox
-from	oswindow	import OSWindowMetrics
 
 
 /*	Dummy values for window handles.
@@ -139,6 +139,15 @@ setWindowStateHandleSize		:: !Size			!(WindowStateHandle .pst) -> WindowStateHan
 setWindowStateHandleClosing		:: !Bool			!(WindowStateHandle .pst) -> WindowStateHandle .pst
 
 
+/*	Access operations on the margins and item space attributes of the window attributes.
+	getWindow((H/V)Margin/ItemSpace)s type metrics atts
+		retrieves the indicated attribute if present from the attribute list. If the attribute
+		could not be found, the appropriate default value is returned. 
+*/
+getWindowHMargins				:: !WindowKind !OSWindowMetrics ![WindowAttribute .st] -> (!Int,!Int)
+getWindowVMargins				:: !WindowKind !OSWindowMetrics ![WindowAttribute .st] -> (!Int,!Int)
+getWindowItemSpaces				:: !WindowKind !OSWindowMetrics ![WindowAttribute .st] -> (!Int,!Int)
+
 /*	getWindowHandlesActiveWindow
 		returns (Just WIDS) of the active window/dialogue if found, otherwise Nothing.
 	getWindowHandlesActiveModalDialog
@@ -185,15 +194,10 @@ disableWindowSystem			::					!(WindowHandles .pst) !*OSToolbox -> (!(!Maybe WIDS
 enableWindowSystem			:: !(Maybe WIDS)	!(WindowHandles .pst) !*OSToolbox -> (              !WindowHandles .pst, !*OSToolbox)
 
 
-
 /*	Checking WindowBounds:
 */
 checkZeroWindowHandlesBound	:: !(WindowHandles .pst) -> (!Bool,!WindowHandles .pst)
 decreaseWindowHandlesBound	:: !(WindowHandles .pst) ->         WindowHandles .pst
-
-//	Bind all free R(2)Ids that are contained in the WElementHandles.
-//	It assumes that it has already been checked that no R(2)Id is already bound in the ReceiverTable.
-bindReceiverControlIds		:: !SystemId !Id ![WElementHandle .ls .pst] !ReceiverTable -> (![WElementHandle .ls .pst],!ReceiverTable)
 
 //	Retrieve the FocusItems of the elements that can obtain the keyboard input focus.
 getWElementKeyFocusIds		:: !Bool ![WElementHandle .ls .pst] -> (![FocusItem],![WElementHandle .ls .pst])

@@ -7,13 +7,14 @@ definition module controlrelayout
 import	relayout, wstate
 
 
-relayoutControls :: !OSWindowMetrics !Bool !Rect !Rect !Point2 !Point2 !OSWindowPtr !(Maybe Id) ![WElementHandle .ls .pst] ![WElementHandle .ls .pst]
+relayoutControls :: !OSWindowMetrics !Bool !Bool !Rect !Rect !Point2 !Point2 !OSWindowPtr !(Maybe Id) ![WElementHandle .ls .pst] ![WElementHandle .ls .pst]
 					!*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
-relayoutControls`:: !OSWindowMetrics !Bool !Rect !Rect !Point2 !Point2 !OSWindowPtr !(Maybe Id) ![WElementHandle`]         ![WElementHandle`]
+relayoutControls`:: !OSWindowMetrics !Bool !Bool !Rect !Rect !Point2 !Point2 !OSWindowPtr !(Maybe Id) ![WElementHandle`]         ![WElementHandle`]
 					!*OSToolbox -> (!OSRgnHandle,!*OSToolbox)
-/*	relayoutControls(`) wMetrics isAble oldFrame newFrame oldParentPos newParentPos parentPtr defaultId old new
+/*	relayoutControls(`) wMetrics isAble isVisible oldFrame newFrame oldParentPos newParentPos parentPtr defaultId old new
 	resizes, moves, and updates changed WElementHandle(`)s. 
 		isAble							is True iff the parent window/compound is Able.
+		isVisible						is True iff the parent window/compound is shown.
 		oldFrame						is the clipping rect of the parent window/compound at the original location and size.
 		newFrame						is the clipping rect of the parent window/compound at the new location and size.
 		oldParentPos and newParentPos	are the positions of the respective parent window/compound of the elements.

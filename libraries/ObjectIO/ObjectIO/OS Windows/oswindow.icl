@@ -580,17 +580,17 @@ OScreateCustomControl parentWindow parentPos show able (x,y) (w,h) tb
 		,	cbiState		:: (Int,Int,Int,Int)	// Its (min,thumb,max,thumbsize) settings
 		}
 
-OScreateCompoundControl ::  !OSWindowMetrics !OSWindowPtr !(!Int,!Int) !Bool !Bool !(!Int,!Int) !(!Int,!Int)
+OScreateCompoundControl ::  !OSWindowMetrics !OSWindowPtr !(!Int,!Int) !Bool !Bool !Bool !(!Int,!Int) !(!Int,!Int)
 							!ScrollbarInfo
 							!ScrollbarInfo
 							!*OSToolbox
 						 -> (!OSWindowPtr,!OSWindowPtr,!OSWindowPtr,!*OSToolbox)
-OScreateCompoundControl wMetrics parentWindow parentPos show able (x,y) (w,h)
+OScreateCompoundControl wMetrics parentWindow parentPos show able isTransparent (x,y) (w,h)
 						hInfo=:{cbiHasScroll=hasHScroll}
 						vInfo=:{cbiHasScroll=hasVScroll} tb
 	# (x,y)			= (x-fst parentPos,y-snd parentPos)
 	  scrollFlags	= (if hasHScroll WS_HSCROLL 0) bitor (if hasVScroll WS_VSCROLL 0)
-	  createcci		= Rq6Cci CcRqCREATECOMPOUND parentWindow x y w h scrollFlags
+	  createcci		= Rq6Cci CcRqCREATECOMPOUND parentWindow (x<<16+(y<<16)>>16) w h scrollFlags (toInt isTransparent)
 	# (returncci,tb)= IssueCleanRequest2 osIgnoreCallback createcci tb
 	  compoundPtr	= case returncci.ccMsg of
 						CcRETURN1	-> returncci.p1

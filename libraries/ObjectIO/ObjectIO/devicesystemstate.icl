@@ -18,15 +18,15 @@ devicesystemstateFatalError rule error
 
 
 ::	DeviceSystemState pst
-	=	ProcessSystemState	(ProcessHandles		pst)
-	|	MenuSystemState		(MenuHandles		pst)
+	=	MenuSystemState		(MenuHandles		pst)
+	|	ProcessSystemState	(ProcessHandles		pst)
 	|	ReceiverSystemState	(ReceiverHandles	pst)
 	| 	TimerSystemState	(TimerHandles		pst)
 	|	WindowSystemState	(WindowHandles		pst)
 
 toDevice :: !(DeviceSystemState .ps) -> Device
-toDevice (ProcessSystemState	_) = ProcessDevice
 toDevice (MenuSystemState		_) = MenuDevice
+toDevice (ProcessSystemState	_) = ProcessDevice
 toDevice (ReceiverSystemState	_) = ReceiverDevice
 toDevice (TimerSystemState		_) = TimerDevice
 toDevice (WindowSystemState		_) = WindowDevice

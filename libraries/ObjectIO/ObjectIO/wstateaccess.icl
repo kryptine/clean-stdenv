@@ -9,25 +9,25 @@ import	commondef, wstate
 
 //	Higher order access functions on [WElementHandle`]
 
-setWElements :: ([arg] WItemHandle` .s -> ([arg],WItemHandle`,.s)) ![arg] ![WElementHandle`] !.s
-															   -> (![arg],![WElementHandle`],!.s)
-setWElements f args itemHs s
+setWElements :: (WItemHandle` ([arg],.s) -> (WItemHandle`,([arg],.s))) ![WElementHandle`] !(![arg],!.s)
+																   -> (![WElementHandle`],!(![arg],!.s))
+setWElements f itemHs (args,s)
 	| isEmpty args || isEmpty itemHs
-		= (args,itemHs,s)
+		= (itemHs,(args,s))
 	| otherwise
 		# (itemH,itemHs)	= HdTl itemHs
-		# (args,itemH, s)	= setWElements` f args itemH  s
-		# (args,itemHs,s)	= setWElements  f args itemHs s
-		= (args,[itemH:itemHs],s)
+		# (itemH, args_s)	= setWElements` f itemH  (args,s)
+		# (itemHs,args_s)	= setWElements  f itemHs args_s
+		= ([itemH:itemHs],args_s)
 where
-	setWElements` :: ([arg] WItemHandle` .s -> ([arg],WItemHandle`,.s)) ![arg] !WElementHandle` !.s
-																	-> (![arg],!WElementHandle`,!.s)
-	setWElements` f args (WItemHandle` itemH) s
-		# (args,itemH,s)	= f args itemH s
-		= (args,WItemHandle` itemH,s)
-	setWElements` f args (WRecursiveHandle` itemHs dRecKind) s
-		# (args,itemHs,s)	= setWElements f args itemHs s
-		= (args,WRecursiveHandle` itemHs dRecKind,s)
+	setWElements` :: (WItemHandle` ([arg],.s) -> (WItemHandle`,([arg],.s))) !WElementHandle` !(![arg],!.s)
+																		-> (!WElementHandle`,!(![arg],!.s))
+	setWElements` f (WItemHandle` itemH) args_s
+		# (itemH,args_s)	= f itemH args_s
+		= (WItemHandle` itemH,args_s)
+	setWElements` f (WRecursiveHandle` itemHs dRecKind) args_s
+		# (itemHs,args_s)	= setWElements f itemHs args_s
+		= (WRecursiveHandle` itemHs dRecKind,args_s)
 
 setAllWElements :: (WItemHandle` .s -> (WItemHandle`,.s)) ![WElementHandle`] !.s
 													  -> (![WElementHandle`],!.s)

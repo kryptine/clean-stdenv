@@ -8,9 +8,6 @@ import	commondef, windowaccess
 from	controllayout	import layoutControls
 from	controlrelayout	import relayoutControls
 from	windowclipstate	import forceValidWindowClipState
-from	windowdefaccess	import isWindowItemSpace,    getWindowItemSpaceAtt,
-								isWindowHMargin,     getWindowHMarginAtt,
-								isWindowVMargin,     getWindowVMarginAtt
 from	windowdraw		import drawwindowlook`
 from	windowupdate	import updatewindowbackgrounds
 from	ospicture		import pictscroll
@@ -28,7 +25,7 @@ controlposFatalError function error
 	movewindowviewframe assumes that the argument WindowHandle is a Window.
 */
 movewindowviewframe :: !OSWindowMetrics !Vector2 !WIDS !(WindowHandle .ls .pst) !*OSToolbox -> (!WindowHandle .ls .pst,!*OSToolbox)
-movewindowviewframe wMetrics v wids=:{wPtr} wH=:{whWindowInfo,whItems=oldItems,whSize,whAtts,whSelect} tb
+movewindowviewframe wMetrics v wids=:{wPtr} wH=:{whWindowInfo,whItems=oldItems,whSize,whAtts,whSelect,whShow} tb
 	| newOrigin==oldOrigin
 		= (wH,tb)
 	| otherwise
@@ -42,7 +39,7 @@ movewindowviewframe wMetrics v wids=:{wPtr} wH=:{whWindowInfo,whItems=oldItems,w
 		# (isRect,areaRect,tb)	= case wH.whWindowInfo of
 		  							WindowInfo {windowClip={clipRgn}} -> osgetrgnbox clipRgn tb
 		  							_                                 -> controlposFatalError "movewindowviewframe" "unexpected whWindowInfo field"
-		# (updRgn,tb)			= relayoutControls wMetrics whSelect contentRect contentRect zero zero wPtr wH.whDefaultId oldItems wH.whItems tb
+		# (updRgn,tb)			= relayoutControls wMetrics whSelect whShow contentRect contentRect zero zero wPtr wH.whDefaultId oldItems wH.whItems tb
 		# (wH,tb)				= updatewindowbackgrounds wMetrics updRgn wids wH tb
 		  newFrame				= PosSizeToRectangle newOrigin contentSize
 		  toMuch				= (abs (newOrigin.x-oldOrigin.x)>=w`) || (abs (newOrigin.y-oldOrigin.y)>=h`)
@@ -67,10 +64,9 @@ where
 								  }
 	(defMinW,defMinH)			= OSMinWindowSize
 	minSize						= {w=defMinW,h=defMinH}
-	(defHSpace,defVSpace)		= (wMetrics.osmHorItemSpace,wMetrics.osmVerItemSpace)
-	hMargins					= getWindowHMarginAtt   (snd (Select isWindowHMargin   (WindowHMargin 0 0) whAtts))
-	vMargins					= getWindowVMarginAtt   (snd (Select isWindowVMargin   (WindowVMargin 0 0) whAtts))
-	spaces						= getWindowItemSpaceAtt (snd (Select isWindowItemSpace (WindowItemSpace defHSpace defVSpace) whAtts))
+	hMargins					= getWindowHMargins   IsWindow wMetrics whAtts
+	vMargins					= getWindowVMargins   IsWindow wMetrics whAtts
+	spaces						= getWindowItemSpaces IsWindow wMetrics whAtts
 	
 	setsliderthumb :: !Bool !OSWindowMetrics !OSWindowPtr !Bool !(!Int,!Int,!Int) !Int !(!Int,!Int) !*OSToolbox -> *OSToolbox
 	setsliderthumb hasScroll wMetrics wPtr isHScroll scrollValues viewSize maxcoords tb

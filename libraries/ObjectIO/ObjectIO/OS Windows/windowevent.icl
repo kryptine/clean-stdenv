@@ -1001,7 +1001,7 @@ where
 					= (itemH.wItemNr,WItemHandle itemH)
 				// otherwise
 					= (0,WItemHandle itemH)
-			| kind<>IsCompoundControl
+			| not (isRecursiveControl kind)
 				= (0,WItemHandle itemH)
 			| otherwise
 				# (itemNr,itemHs)	= getControlsKeyFocusItemNr` activated cPtr itemH.wItems

@@ -4,24 +4,28 @@ implementation module StdWindow
 //	Clean Object I/O library, version 1.2
 
 
-import	StdBool, StdEnum, StdFunc, StdList, StdMisc, StdTuple
-import	ostypes, ossystem, oswindow
-from	ostoolbox		import WorldGetToolbox, WorldSetToolbox
-import	StdControlClass, StdMaybe
-from	StdId			import getParentId
-from	StdPSt			import appPIO, accPIO
-from	StdSystem		import maxScrollWindowSize
-import	commondef, controlpos, deviceevents, iostate, windowaccess, windowcontrols, windowcreate, windowdefaccess, windowdevice, wstate
-from	controlinternal	import openpopupitems, closepopupitems, enablecontrols, disablecontrols
-from	controllayout	import layoutControls
-from	controlrelayout	import relayoutControls
-from	controlvalidate	import getWElementControlIds, disjointControlIds
-from	keyfocus		import getCurrentFocusItem, setNewFocusItem
-from	receiverid		import unbindRIds
+import	StdBool, StdFunc, StdList, StdMisc, StdTuple
+import	ossystem, ostypes, oswindow
+import	StdControlClass
+from	StdId				import getParentId
+from	StdPSt				import appPIO, accPIO
+from	StdSystem			import maxScrollWindowSize
+import	commondef, controlpos, iostate, windowaccess, windowcreate, windowdevice, windowhandle, windowupdate, wstate
+from	controlinternal		import enablecontrols, disablecontrols
+from	controllayout		import layoutControls
+from	controlrelayout		import relayoutControls
+from	controlvalidate		import controlIdsAreConsistent
+from	keyfocus			import getCurrentFocusItem
+from	StdWindowAttribute	import	isWindowCursor,   getWindowCursorAtt,
+									isWindowId,       getWindowIdAtt, 
+									isWindowHMargin,  getWindowHMarginAtt,
+									isWindowItemSpace,getWindowItemSpaceAtt,
+									isWindowKeyboard, getWindowKeyboardAtt,
+									isWindowMouse,    getWindowMouseAtt,
+									isWindowVMargin,  getWindowVMarginAtt
 from	windowclipstate	import validateWindowClipState, forceValidWindowClipState
 from	windowdispose	import disposeWindow
 from	windowdraw		import drawinwindow, drawwindowlook
-from	windowupdate	import updatewindow, updatewindowbackgrounds
 from	windowvalidate	import validateWindowId, validateViewDomain, exactWindowPos, exactWindowSize
 
 
@@ -30,24 +34,6 @@ from	windowvalidate	import validateWindowId, validateViewDomain, exactWindowPos,
 StdWindowFatalError :: String String -> .x
 StdWindowFatalError function error
 	= FatalError function "StdWindow" error
-
-/*	getParentWindowId controlId returns the Id of the parent window/dialog if this
-	exists and belongs to the same interactive process. 
-*/
-getParentWindowId :: !Id !(IOSt .l) -> (!Maybe Id,!IOSt .l)
-getParentWindowId controlId ioState
-	# (it,ioState)		= IOStGetIdTable ioState
-	  maybeParent		= getIdParent controlId it
-	| isNothing maybeParent
-		= (Nothing,ioState)
-	# parent			= fromJust maybeParent
-	| parent.idpDevice<>WindowDevice
-		= (Nothing,ioState)
-	# (pid,ioState)		= IOStGetIOId ioState
-	| parent.idpIOId<>pid
-		= (Nothing,ioState)
-	| otherwise
-		= (Just parent.idpId,ioState)
 
 //	Use these two macros to identify windows and dialogues.
 windowtype	:==	"Window"
@@ -159,24 +145,6 @@ getWindowIdAttribute atts
 	| otherwise			= Nothing
 
 
-/*	controlIdsAreConsistent checks whether the WElementHandles contain (R(2))Ids that have already been
-	associated with open receivers or other I/O objects and if there are no duplicate Ids. 
-	The ReceiverTable is not changed if there are duplicate (R(2))Ids; otherwise all (R(2))Ids have been bound.
-*/
-controlIdsAreConsistent :: !SystemId !Id ![WElementHandle .ls .pst] !ReceiverTable !IdTable
-							   -> (!Bool,![WElementHandle .ls .pst],!ReceiverTable,!IdTable)
-controlIdsAreConsistent ioId wId itemHs rt it
-	# (ids,itemHs)	= getWElementControlIds itemHs
-	| not (okMembersIdTable ids it)
-		= (False,itemHs,rt,it)
-	# (ok,it)		= addIdsToIdTable (map (\id->(id,{idpIOId=ioId,idpDevice=WindowDevice,idpId=wId})) ids) it
-	  (itemHs,rt)	= bindReceiverControlIds ioId wId itemHs rt
-	| not ok
-		= StdWindowFatalError "controlIdsAreConsistent" "could not add all Ids to IdTable"
-	| otherwise
-		= (True,itemHs,rt,it)
-
-
 /*	closeWindow closes the indicated window.
 */
 closeWindow :: !Id !(PSt .l) -> PSt .l
@@ -190,274 +158,6 @@ closeActiveWindow pState
 		= pState
 	| otherwise
 		= closeWindow (fromJust maybeId) pState
-
-
-/*	closeControls closes the controls in the indicated window.
-*/
-closeControls :: !Id [Id] !Bool !(IOSt .l) -> IOSt .l
-closeControls wId ids relayout ioState
-	# (found,wDevice,ioState)					= IOStGetDevice WindowDevice ioState
-	| not found
-		= ioState
-	# wHs										= WindowSystemStateGetWindowHandles wDevice
-	# (found,wsH,wHs)							= getWindowHandlesWindow (toWID wId) wHs
-	| not found
-		= IOStSetDevice (WindowSystemState wHs) ioState
-    // Mike //
-    # (wKind,wsH)								= getWindowStateHandleWindowKind wsH
-    | wKind==IsGameWindow
-    	= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
-    ///
-	| otherwise
-		# (wMetrics,ioState)					= IOStGetOSWindowMetrics ioState
-		# (tb,ioState)							= getIOToolbox ioState
-		# (freeRIds,freeIds,disposeFun,wsH,tb)	= closecontrols wMetrics ids relayout wsH tb
-		# ioState								= setIOToolbox tb ioState
-		# ioState								= unbindRIds freeRIds ioState
-		# (idtable,ioState)						= IOStGetIdTable ioState
-		  (_,idtable)							= removeIdsFromIdTable (freeRIds++freeIds) idtable
-		# ioState								= IOStSetIdTable idtable ioState
-		# (f,ioState)							= IOStGetInitIO ioState
-		# ioState								= IOStSetInitIO ((appPIO (appIOToolbox disposeFun)) o f) ioState
-		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
-
-
-/*	closeAllControls closes all controls from the indicated window.
-*/
-closeAllControls :: !Id !(IOSt .l) -> IOSt .l
-closeAllControls wId ioState
-	# (found,wDevice,ioState)					= IOStGetDevice WindowDevice ioState
-	| not found
-		= ioState
-	# wHs										= WindowSystemStateGetWindowHandles wDevice
-	# (found,wsH,wHs)							= getWindowHandlesWindow (toWID wId) wHs
-	| not found
-		= IOStSetDevice (WindowSystemState wHs) ioState
-	| otherwise
-		# (tb,ioState)							= getIOToolbox ioState
-		# (freeRIds,freeIds,disposeFun,wsH,tb)	= closeallcontrols wsH tb
-		# ioState								= setIOToolbox tb ioState
-		# ioState								= unbindRIds freeRIds ioState
-		# (idtable,ioState)						= IOStGetIdTable ioState
-		  (_,idtable)							= removeIdsFromIdTable (freeRIds++freeIds) idtable
-		# ioState								= IOStSetIdTable idtable ioState
-		# (f,ioState)							= IOStGetInitIO ioState
-		# ioState								= IOStSetInitIO ((appPIO (appIOToolbox disposeFun)) o f) ioState
-		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
-
-
-/*	closePopUpControlItems closes items from the indicated PopUpControl in the indicated window/dialogue.
-*/
-closePopUpControlItems :: !Id ![Index] !(IOSt .l) -> IOSt .l
-closePopUpControlItems popUpId indexs ioState
-	| isEmpty indexs
-		= ioState
-	# (maybeId,ioState)			= getParentWindowId popUpId ioState
-	| isNothing maybeId
-		= ioState
-	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
-	| not found
-		= ioState
-	# wHs						= WindowSystemStateGetWindowHandles wDevice
-	  (found,wsH,wHs)			= getWindowHandlesWindow (toWID (fromJust maybeId)) wHs
-	| not found
-		= IOStSetDevice (WindowSystemState wHs) ioState
-	| otherwise
-		# (tb,ioState)			= getIOToolbox ioState
-		# (wsH,tb)				= closepopupcontrolitems popUpId indexs wsH tb
-		# ioState				= setIOToolbox tb ioState
-		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
-where
-	closepopupcontrolitems :: !Id ![Index] !(WindowStateHandle (PSt .l)) !*OSToolbox
-										-> (!WindowStateHandle (PSt .l), !*OSToolbox)
-	closepopupcontrolitems popUpId indexs wsH=:{wshIds={wPtr},wshHandle=Just wlsH=:{wlsHandle=wH}} tb
-		# (wH,tb)		= closepopupitems popUpId indexs wPtr wH tb
-		= ({wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
-	closepopupcontrolitems _ _ _ _
-		= StdWindowFatalError "closepopupcontrolitems" "unexpected window placeholder argument"
-
-
-/*	getWindowStateHandleIds returns all Ids of the controls in this window.
-	This function is used by open(Compound)Controls.
-*/
-getWindowStateHandleIds :: !(WindowStateHandle .pst) -> (![Id],!WindowStateHandle .pst)
-getWindowStateHandleIds wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems}}}
-	# (ids,itemHs)	= getWElementControlIds whItems
-	= (ids,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}})
-getWindowStateHandleIds _
-	= StdWindowFatalError "getWindowStateHandleIds" "unexpected window placeholder argument"
-
-/*	openControls adds controls to the indicated window.
-*/
-openControls :: !Id .ls (cdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | Controls cdef
-openControls wId ls newControls pState
-	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
-	| not found
-		= (ErrorUnknownObject,{pState & io=ioState})
-	# wHs						= WindowSystemStateGetWindowHandles wDevice
-	# (found,wsH,wHs)			= getWindowHandlesWindow (toWID wId) wHs
-	| not found
-		= (ErrorUnknownObject,{pState & io=IOStSetDevice (WindowSystemState wHs) ioState})
-    // Mike //
-    # (wKind,wsH)				= getWindowStateHandleWindowKind wsH
-    | wKind==IsGameWindow
-    	= (OtherError "WrongObject",{pState & io=IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState})
-    ///
-	# (cs,pState)				= controlToHandles newControls {pState & io=ioState}
-	# newItemHs					= map ControlStateToWElementHandle cs
-	  (currentIds,wsH)			= getWindowStateHandleIds wsH
-	  (disjoint,newItemHs)		= disjointControlIds currentIds newItemHs
-	| not disjoint
-		= (ErrorIdsInUse,appPIO (IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs))) pState)
-	# (rt,ioState)				= IOStGetReceiverTable pState.io
-	# (it,ioState)				= IOStGetIdTable ioState
-	# (ioId,ioState)			= IOStGetIOId ioState
-	  (ok,newItemHs,rt,it)		= controlIdsAreConsistent ioId wId newItemHs rt it
-	# ioState					= IOStSetIdTable it ioState
-	# ioState					= IOStSetReceiverTable rt ioState
-	| not ok
-		# ioState				= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
-		# pState				= {pState & io=ioState}
-		= (ErrorIdsInUse,pState)
-	| otherwise
-		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
-		# (wsH,ioState)			= accIOToolbox (opencontrols wMetrics ls newItemHs wsH) ioState
-		# ioState				= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
-		# pState				= {pState & io=ioState}
-		= (NoError,pState)
-
-/*	openCompoundControls adds controls to the indicated CompoundControl of the indicated window.
-*/
-openCompoundControls :: !Id .ls (cdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | Controls cdef
-openCompoundControls cId ls newControls pState=:{io=ioState}
-	# (maybeId,ioState)			= getParentWindowId cId ioState
-	| isNothing maybeId
-		= (ErrorUnknownObject,{pState & io=ioState})
-	# wId						= fromJust maybeId
-	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
-	| not found
-		= (ErrorUnknownObject,{pState & io=ioState})
-	# wHs						= WindowSystemStateGetWindowHandles wDevice
-	# (found,wsH,wHs)			= getWindowHandlesWindow (toWID wId) wHs
-	| not found
-		= (ErrorUnknownObject,{pState & io=IOStSetDevice (WindowSystemState wHs) ioState})
-    // Mike //
-    # (wKind,wsH)				= getWindowStateHandleWindowKind wsH
-    | wKind==IsGameWindow
-		= (OtherError "WrongObject",{pState & io=IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState})
-    ///
-	# (cs,pState)				= controlToHandles newControls {pState & io=ioState}
-	# newItemHs					= map ControlStateToWElementHandle cs
-	  (currentIds,wsH)			= getWindowStateHandleIds wsH
-	  (disjoint,newItemHs)		= disjointControlIds currentIds newItemHs
-	| not disjoint
-		= (ErrorIdsInUse,appPIO (IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs))) pState)
-	# (rt,ioState)				= IOStGetReceiverTable pState.io
-	# (it,ioState)				= IOStGetIdTable ioState
-	# (ioId,ioState)			= IOStGetIOId ioState
-	  (ok,newItemHs,rt,it)		= controlIdsAreConsistent ioId wId newItemHs rt it
-	# ioState					= IOStSetIdTable it ioState
-	# ioState					= IOStSetReceiverTable rt ioState
-	| not ok
-		# ioState				= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
-		# pState				= {pState & io=ioState}
-		= (ErrorIdsInUse,pState)
-	| otherwise
-		# (osdInfo, ioState)	= IOStGetOSDInfo ioState
-		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
-		# (tb,ioState)			= getIOToolbox ioState
-		# (ok,wsH,tb)			= opencompoundcontrols osdInfo wMetrics cId ls newItemHs wsH tb
-		# ioState				= setIOToolbox tb ioState
-		# ioState				= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
-		# pState				= {pState & io=ioState}
-		= (if ok NoError ErrorUnknownObject,pState)
-
-
-/*	openPopUpControlItems opens items to the PopUpControl of the indicated window/dialogue.
-*/
-openPopUpControlItems :: !Id !Index ![PopUpControlItem (PSt .l)] !(IOSt .l) -> IOSt .l
-openPopUpControlItems popUpId index items ioState
-	| isEmpty items
-		= ioState
-	# (maybeId,ioState)			= getParentWindowId popUpId ioState
-	| isNothing maybeId
-		= ioState
-	# wId						= fromJust maybeId
-	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
-	| not found
-		= ioState
-	# wHs						= WindowSystemStateGetWindowHandles wDevice
-	# (found,wsH,wHs)			= getWindowHandlesWindow (toWID wId) wHs
-	| not found
-		= IOStSetDevice (WindowSystemState wHs) ioState
-    // Mike //
-	# (wKind,wsH)				= getWindowStateHandleWindowKind wsH
-	| wKind==IsGameWindow
-		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
-    ///
-	| otherwise
-		# (tb,ioState)			= getIOToolbox ioState
-		# (wsH,tb)				= openpopupcontrolitems popUpId index items wsH tb
-		# ioState				= setIOToolbox tb ioState
-		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
-where
-	openpopupcontrolitems :: !Id !Index ![PopUpControlItem (PSt .l)] !(WindowStateHandle (PSt .l)) !*OSToolbox
-																	 -> (!WindowStateHandle (PSt .l), !*OSToolbox)
-	openpopupcontrolitems popUpId index items wsH=:{wshIds={wPtr},wshHandle=Just wlsH=:{wlsHandle=wH}} tb
-		# (wH,tb)		= openpopupitems popUpId index items wPtr wH tb
-		= ({wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
-	openpopupcontrolitems _ _ _ _ _
-		= StdWindowFatalError "openPopUpControlItems" "unexpected window placeholder argument"
-
-
-/*	setControlPos changes the position of the indicated control.
-*/
-setControlPos :: !Id ![(Id,ItemPos)] !(IOSt .l) -> (!Bool,!IOSt .l)
-setControlPos wId newPoss ioState
-	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
-	| not found
-		= (False,ioState)
-	# wHs						= WindowSystemStateGetWindowHandles wDevice
-	# (found,wsH,wHs)			= getWindowHandlesWindow (toWID wId) wHs
-	| not found
-		= (False,IOStSetDevice (WindowSystemState wHs) ioState)
-	// Mike //
-	# (wKind,wsH)				= getWindowStateHandleWindowKind wsH
-	| wKind==IsGameWindow
-		= (False,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState)
-	///
-	| otherwise
-		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
-		# (tb,ioState)			= getIOToolbox ioState
-		# (ok,wsH,tb)			= setcontrolpositions wMetrics newPoss wsH tb
-		# ioState				= setIOToolbox tb ioState
-		  wHs					= setWindowHandlesWindow wsH wHs
-		= (ok,IOStSetDevice (WindowSystemState wHs) ioState)
-
-
-/*	controlSize calculates the size of the given control.
-*/
-controlSize :: !(cdef .ls (PSt .l)) !Bool !(Maybe (Int,Int)) !(Maybe (Int,Int)) !(Maybe (Int,Int)) !(PSt .l)
-			-> (!Size,!PSt .l) | Controls cdef
-controlSize cdef isWindow hMargins vMargins itemSpaces pState
-	# (cs,pState)		= controlToHandles cdef pState
-	  itemHs			= map ControlStateToWElementHandle cs
-	# (tb,ioState)		= getIOToolbox pState.io
-	# (wMetrics,ioState)= IOStGetOSWindowMetrics ioState
-	  hMargins			= case hMargins of
-		  					(Just (left,right))	-> (max 0 left,max 0 right)
-		  					_					-> if isWindow (0,0) (wMetrics.osmHorMargin,wMetrics.osmHorMargin)
-	  vMargins			= case vMargins of
-		  					(Just (top,bottom))	-> (max 0 top,max 0 bottom)
-		  					_					-> if isWindow (0,0) (wMetrics.osmVerMargin,wMetrics.osmVerMargin)
-	  itemSpaces		= case itemSpaces of
-		  					(Just (hor,vert))	-> (max 0 hor,max 0 vert)
-		  					_					-> (wMetrics.osmHorItemSpace,wMetrics.osmVerItemSpace)
-	  domain			= {viewDomainRange & corner1=zero}
-	# (derSize,_,tb)	= layoutControls wMetrics hMargins vMargins itemSpaces zero zero [(domain,zero)] itemHs tb
-	# ioState			= setIOToolbox tb ioState
-	# pState			= {pState & io=ioState}
-	= (derSize,pState)
 
 
 /*	setActiveWindow activates the given window.
@@ -794,13 +494,13 @@ getWindowHMargin id ioState
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
 	| otherwise
-		# ({osmHorMargin},ioState)	= IOStGetOSWindowMetrics ioState
-		# (marginAtt,wsH)			= gethmargin osmHorMargin wsH
+		# (wMetrics,ioState)		= IOStGetOSWindowMetrics ioState
+		# (marginAtt,wsH)			= gethmargin wMetrics wsH
 		= (Just marginAtt,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 where
-	gethmargin :: Int !(WindowStateHandle .pst) -> ((Int,Int),!WindowStateHandle .pst)
-	gethmargin defHMargin wsH=:{wshHandle=Just {wlsHandle={whAtts}}}
-		= (getWindowHMarginAtt (snd (Select isWindowHMargin (WindowHMargin defHMargin defHMargin) whAtts)),wsH)
+	gethmargin :: !OSWindowMetrics !(WindowStateHandle .pst) -> ((Int,Int),!WindowStateHandle .pst)
+	gethmargin wMetrics wsH=:{wshHandle=Just {wlsHandle={whKind,whAtts}}}
+		= (getWindowHMargins whKind wMetrics whAtts,wsH)
 	gethmargin _ _
 		= StdWindowFatalError "getWindowHMargin" "unexpected window placeholder argument"
 
@@ -814,13 +514,13 @@ getWindowVMargin id ioState
 	| not found
 		= (Nothing,IOStSetDevice (WindowSystemState windows) ioState)
 	| otherwise
-		# ({osmVerMargin},ioState)	= IOStGetOSWindowMetrics ioState
-		# (marginAtt,wsH)			= getvmargin osmVerMargin wsH
+		# (wMetrics,ioState)		= IOStGetOSWindowMetrics ioState
+		# (marginAtt,wsH)			= getvmargin wMetrics wsH
 		= (Just marginAtt,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 where
-	getvmargin :: Int !(WindowStateHandle .pst) -> ((Int,Int),!WindowStateHandle .pst)
-	getvmargin defVMargin wsH=:{wshHandle=Just {wlsHandle={whAtts}}}
-		= (getWindowVMarginAtt (snd (Select isWindowVMargin (WindowVMargin defVMargin defVMargin) whAtts)),wsH)
+	getvmargin :: !OSWindowMetrics !(WindowStateHandle .pst) -> ((Int,Int),!WindowStateHandle .pst)
+	getvmargin wMetrics wsH=:{wshHandle=Just {wlsHandle={whKind,whAtts}}}
+		= (getWindowVMargins whKind wMetrics whAtts,wsH)
 	getvmargin _ _
 		= StdWindowFatalError "getWindowVMargin" "unexpected window placeholder argument"
 
@@ -1619,17 +1319,15 @@ where
 		  osVState				= toOSscrollbarRange (domain.corner1.y,newOrigin.y,domain.corner2.y) h`
 		# tb					= setwindowslider hasHScroll wMetrics wPtr True  osHState (toTuple wSize) tb
 		# tb					= setwindowslider hasVScroll wMetrics wPtr False osVState (toTuple wSize) tb
-	//	  windowInfo			= Just {windowInfo & windowDomain=domainRect,windowOrigin=newOrigin}	Mike: Just changed to WindowInfo
 		  windowInfo			= WindowInfo {windowInfo & windowDomain=domainRect,windowOrigin=newOrigin}
-		  (defHSpace,defVSpace)	= (wMetrics.osmHorItemSpace,wMetrics.osmVerItemSpace)
-		  hMargins				= getWindowHMarginAtt   (snd (Select isWindowHMargin   (WindowHMargin 0 0) atts))
-		  vMargins				= getWindowVMarginAtt   (snd (Select isWindowVMargin   (WindowVMargin 0 0) atts))
-		  spaces				= getWindowItemSpaceAtt (snd (Select isWindowItemSpace (WindowItemSpace defHSpace defVSpace) atts))
+		  hMargins				= getWindowHMargins   IsWindow wMetrics atts
+		  vMargins				= getWindowVMargins   IsWindow wMetrics atts
+		  spaces				= getWindowItemSpaces IsWindow wMetrics atts
 		  reqSize				= {w=w`-fst hMargins-snd hMargins,h=h`-fst vMargins-snd vMargins}
 		# (_,newItems,tb)		= layoutControls wMetrics hMargins vMargins spaces reqSize minSize [(domain,newOrigin)] oldItems tb
 		  wH					= {wH & whWindowInfo=windowInfo,whItems=newItems}
 		# (wH,tb)				= forceValidWindowClipState wMetrics True wPtr wH tb
-		# (updRgn,tb)			= relayoutControls wMetrics whSelect wFrame wFrame zero zero wPtr whDefaultId oldItems wH.whItems tb
+		# (updRgn,tb)			= relayoutControls wMetrics whSelect whShow wFrame wFrame zero zero wPtr whDefaultId oldItems wH.whItems tb
 		  viewFrame				= PosSizeToRectangle newOrigin {w=w`,h=h`}
 		  updState				= RectangleToUpdateState viewFrame
 		# (wH,tb)				= drawwindowlook wMetrics wPtr id updState wH tb
@@ -1642,6 +1340,7 @@ where
 		wSize					= wH.whSize
 		(w,h)					= toTuple wSize
 		whSelect				= wH.whSelect
+		whShow					= wH.whShow
 		whDefaultId				= wH.whDefaultId
 	//	windowInfo				= fromJust wH.whWindowInfo	Mike: fromJust changed to getWindowInfoWindowData
 		windowInfo				= getWindowInfoWindowData wH.whWindowInfo

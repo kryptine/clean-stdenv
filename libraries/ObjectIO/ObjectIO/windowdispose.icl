@@ -116,14 +116,14 @@ disposeCursorInfo :: !CursorInfo !(IOSt .l) -> IOSt .l
 disposeWindowStateHandle :: !OSDInfo !(Maybe InputTrack) !(WindowStateHandle .pst) !(OSEvent -> .s -> ([Int],.s)) .s !*OSToolbox
 									  -> (!(![Id],![Id],![DelayActivationInfo],![FinalModalLS],!Maybe InputTrack),.s,!*OSToolbox)
 disposeWindowStateHandle osdinfo inputTrack {wshIds=wids=:{wPtr,wId},wshHandle=Just {wlsState,wlsHandle=wH}} handleOSEvent state tb
-	# isModalDialog				= wH.whKind==IsDialog && wH.whMode==Modal
+	# isModalDialog				= whKind==IsDialog && whMode==Modal
 	  (isWindowInfo,info)		= case wH.whWindowInfo of
 									WindowInfo info	-> (True, info)
 									_				-> (False,windowdisposeFatalError "disposeWindowStateHandle" "info unexpectedly evaluated")
 	# (ids_dispose,tb)			= StateMap (disposeWElementHandle wPtr) wH.whItems tb
 	  (rIdss,idss,disposeFuns)	= unzip3 ids_dispose
 	# tb						= StrictSeq disposeFuns tb
-	# (delayinfo,state,tb)		= OSdestroyWindow osdinfo (wH.whMode==Modal) (wH.whKind==IsWindow) wPtr handleOSEvent state tb
+	# (delayinfo,state,tb)		= OSdestroyWindow osdinfo (whMode==Modal) (whKind==IsWindow) wPtr handleOSEvent state tb
 	  rids						= flatten rIdss
 	  ids						= [wId:flatten idss]
 	  finalModalLS				= if isModalDialog [{fmWIDS=wids,fmLS=wlsState}] []
@@ -134,6 +134,9 @@ disposeWindowStateHandle osdinfo inputTrack {wshIds=wids=:{wPtr,wId},wshHandle=J
 	  result					= (rids,ids,delayinfo,finalModalLS,inputTrack)
 	| isWindowInfo				= (result,state,disposeClipState info.windowClip tb)
 	| otherwise					= (result,state,tb)
+where
+	whKind						= wH.whKind
+	whMode						= wH.whMode
 disposeWindowStateHandle _ _ _ _ _ _
 	= windowdisposeFatalError "disposeWindowStateHandle" "window expected instead of placeholder"
 
@@ -169,14 +172,6 @@ disposeWElementHandle wPtr (WChangeLSHandle {wChangeItems=itemHs}) tb
 */
 disposeWItemHandle :: !OSWindowPtr !(WItemHandle .ls .pst) !*OSToolbox -> (!(![Id],![Id],!IdFun *OSToolbox),!*OSToolbox)
 
-disposeWItemHandle wPtr itemH=:{wItemKind=IsRadioControl} tb
-	# radioInfo			= getWItemRadioInfo itemH.wItemInfo
-	  items				= radioInfo.radioItems
-	# tb				= StateMap2 (\{radioItemPtr,radioItemPos,radioItemSize}
-										->OSsetRadioControlShow wPtr radioItemPtr (PosSizeToRect radioItemPos radioItemSize) False
-									) items tb
-	= (([],maybeToList itemH.wItemId,StateMap2 (\{radioItemPtr}->OSdestroyRadioControl radioItemPtr) items),tb)
-
 disposeWItemHandle wPtr itemH=:{wItemKind=IsCheckControl} tb
 	# checkInfo			= getWItemCheckInfo itemH.wItemInfo
 	  items				= checkInfo.checkItems
@@ -193,22 +188,34 @@ disposeWItemHandle wPtr itemH=:{wItemKind=IsCompoundControl} tb
 	  ids				= maybeToList itemH.wItemId ++ flatten idss
 	  info				= getWItemCompoundInfo itemH.wItemInfo
 	# tb				= OSsetCompoundShow wPtr itemPtr (PosSizeToRect itemH.wItemPos itemH.wItemSize) False tb
-	| isNothing info.compoundLookInfo
-		= ((rids,ids,f o StrictSeq fs),tb)
-	| otherwise
-		= ((rids,ids,f o disposeClipState (fromJust info.compoundLookInfo).compoundClip o StrictSeq fs),tb)
+	= ((rids,ids,f o disposeClipState info.compoundLookInfo.compoundClip o StrictSeq fs),tb)
 where
 	itemPtr				= itemH.wItemPtr
+
+disposeWItemHandle wPtr itemH=:{wItemKind=IsLayoutControl} tb
+	# (ids_dispose,tb)	= StateMap (disposeWElementHandle wPtr) itemH.wItems tb
+	  (rIdss,idss,fs)	= unzip3 ids_dispose
+	  rids				= flatten rIdss
+	  ids				= maybeToList itemH.wItemId ++ flatten idss
+	= ((rids,ids,StrictSeq fs),tb)
 
 disposeWItemHandle wPtr itemH=:{wItemKind=IsOtherControl controltype} tb
 //	The control is a receiver:
 	| controltype=="Receiver" || controltype=="Receiver2"
 		= ((maybeToList itemH.wItemId,[],id),tb)
-//	The control is a timer:
-//	| controltype=="TimerControl"
-//		= (([],getTimerLoc itemH,id),tb)
-	| otherwise
+/*	The control is a timer:
+	| controltype=="TimerControl"
+		= (([],getTimerLoc itemH,id),tb)
+*/	| otherwise
 		= windowdisposeFatalError "disposeWItemHandle" ("unknown control type: "+++controltype)
+
+disposeWItemHandle wPtr itemH=:{wItemKind=IsRadioControl} tb
+	# radioInfo			= getWItemRadioInfo itemH.wItemInfo
+	  items				= radioInfo.radioItems
+	# tb				= StateMap2 (\{radioItemPtr,radioItemPos,radioItemSize}
+										->OSsetRadioControlShow wPtr radioItemPtr (PosSizeToRect radioItemPos radioItemSize) False
+									) items tb
+	= (([],maybeToList itemH.wItemId,StateMap2 (\{radioItemPtr}->OSdestroyRadioControl radioItemPtr) items),tb)
 
 disposeWItemHandle wPtr itemH=:{wItemKind} tb
 	# tb				= hide wPtr itemPtr (PosSizeToRect itemH.wItemPos itemH.wItemSize) False tb

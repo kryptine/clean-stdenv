@@ -89,7 +89,8 @@ where
 			updatebackground :: !OSWindowMetrics !Rect !Bool !OSRgnHandle !(WElementHandle .ls .pst) !OSPictContext !*OSToolbox
 														 -> (!OSRgnHandle, !WElementHandle .ls .pst, !OSPictContext,!*OSToolbox)
 			updatebackground wMetrics wFrame ableContext backgrRgn (WItemHandle itemH=:{wItemShow,wItemVirtual,wItemKind,wItemPos,wItemSize}) osPict tb
-				| not wItemShow || wItemVirtual || wItemKind<>IsCompoundControl
+			//	| not wItemShow || wItemVirtual || wItemKind<>IsCompoundControl
+				| not wItemShow || wItemVirtual || not (isRecursiveControl wItemKind)	// PA: isRecursive includes also LayoutControls
 					= (backgrRgn,WItemHandle itemH,osPict,tb)
 				# (_,backgrRect,tb)					= osgetrgnbox backgrRgn tb
 				# compoundRect						= PosSizeToRect wItemPos wItemSize
@@ -101,11 +102,17 @@ where
 			where
 				updatecompoundbackground :: !OSWindowMetrics !Rect !Rect !Bool !OSRgnHandle !(WItemHandle .ls .pst) !OSPictContext !*OSToolbox
 														 				   -> (!OSRgnHandle, !WItemHandle .ls .pst, !OSPictContext,!*OSToolbox)
-				updatecompoundbackground wMetrics wFrame compoundRect ableContext backgrRgn itemH=:{wItems} osPict tb
-					| isTransparant
-						# (backgrRgn,itemHs,osPict,tb)
+				updatecompoundbackground wMetrics wFrame compoundRect ableContext backgrRgn itemH=:{wItemKind=IsLayoutControl,wItems} osPict tb
+					# (backgrRgn,itemHs,osPict,tb)
 											= updatebackgrounds wMetrics cFrame cAble backgrRgn wItems osPict tb
-						= (backgrRgn,{itemH & wItems=itemHs},osPict,tb)
+					# (rectRgn,tb)			= osnewrectrgn cFrame tb
+					# (diffRgn,tb)			= osdiffrgn backgrRgn rectRgn tb
+					# tb					= StateMap2 osdisposergn [rectRgn,backgrRgn] tb
+					= (diffRgn,{itemH & wItems=itemHs},osPict,tb)
+				where
+					cFrame					= IntersectRects wFrame compoundRect
+					cAble					= ableContext && itemH.wItemSelect
+				updatecompoundbackground wMetrics wFrame compoundRect ableContext backgrRgn itemH=:{wItemKind=IsCompoundControl,wItems} osPict tb
 					# (updRgn,tb)			= ossectrgn backgrRgn clipInfo.clipRgn tb
 					# (empty,tb)			= osisemptyrgn updRgn tb
 					| empty
@@ -133,8 +140,7 @@ where
 					itemPos					= itemH.wItemPos
 					itemSize				= itemH.wItemSize
 					info					= getWItemCompoundInfo itemH.wItemInfo
-					isTransparant			= isNothing info.compoundLookInfo
-					compLookInfo			= fromJust info.compoundLookInfo
+					compLookInfo			= info.compoundLookInfo
 					{lookFun,lookPen}		= compLookInfo.compoundLook
 					clipInfo				= compLookInfo.compoundClip
 					origin					= info.compoundOrigin
@@ -157,6 +163,9 @@ where
 						#! picture				= pictsetcliprgn curClipRgn picture
 						#  picture				= apppicttoolbox (osdisposergn rectRgn o (if (curClipRgn==0) id (osdisposergn curClipRgn))) picture
 						= picture
+				
+				updatecompoundbackground _ _ _ _ _ {wItemKind} _ _
+					= windowupdateFatalError "updatecompoundbackground (updatewindowbackgrounds)" ("unexpected control kind: "+++toString wItemKind)
 			
 			updatebackground wMetrics wFrame ableContext backgrRgn (WListLSHandle itemHs) osPict tb
 				# (backgrRgn,itemHs,osPict,tb)	= updatebackgrounds wMetrics wFrame ableContext backgrRgn itemHs osPict tb
@@ -217,7 +226,8 @@ where
 			updatebackground :: !OSWindowMetrics !Rect !Bool !OSRgnHandle !WElementHandle` !OSPictContext !*OSToolbox
 														 -> (!OSRgnHandle,!WElementHandle`,!OSPictContext,!*OSToolbox)
 			updatebackground wMetrics wFrame ableContext backgrRgn (WItemHandle` itemH=:{wItemShow`,wItemVirtual`,wItemKind`,wItemPos`,wItemSize`}) osPict tb
-				| not wItemShow` || wItemVirtual` || wItemKind`<>IsCompoundControl
+			//	| not wItemShow` || wItemVirtual` || wItemKind`<>IsCompoundControl
+				| not wItemShow` || wItemVirtual` || not (isRecursiveControl wItemKind`)	// PA: isRecursive includes also LayoutControls
 					= (backgrRgn,WItemHandle` itemH,osPict,tb)
 				# (_,backgrRect,tb)					= osgetrgnbox backgrRgn tb
 				  compoundRect						= PosSizeToRect wItemPos` wItemSize`
@@ -229,11 +239,17 @@ where
 			where
 				updatecompoundbackground :: !OSWindowMetrics !Rect !Rect !Bool !OSRgnHandle !WItemHandle` !OSPictContext !*OSToolbox
 														 				   -> (!OSRgnHandle,!WItemHandle`,!OSPictContext,!*OSToolbox)
-				updatecompoundbackground wMetrics wFrame compoundRect ableContext backgrRgn itemH=:{wItems`} osPict tb
-					| isTransparant
-						# (backgrRgn,itemHs,osPict,tb)
+				updatecompoundbackground wMetrics wFrame compoundRect ableContext backgrRgn itemH=:{wItemKind`=IsLayoutControl,wItems`} osPict tb
+					# (backgrRgn,itemHs,osPict,tb)
 											= updatebackgrounds wMetrics cFrame cAble backgrRgn wItems` osPict tb
-						= (backgrRgn,{itemH & wItems`=itemHs},osPict,tb)
+					# (rectRgn,tb)			= osnewrectrgn cFrame tb
+					# (diffRgn,tb)			= osdiffrgn backgrRgn rectRgn tb
+					# tb					= StateMap2 osdisposergn [rectRgn,backgrRgn] tb
+					= (diffRgn,{itemH & wItems`=itemHs},osPict,tb)
+				where
+					cFrame					= IntersectRects wFrame compoundRect
+					cAble					= ableContext && itemH.wItemSelect`
+				updatecompoundbackground wMetrics wFrame compoundRect ableContext backgrRgn itemH=:{wItemKind`=IsCompoundControl,wItems`} osPict tb
 					# (updRgn,tb)			= ossectrgn backgrRgn clipInfo.clipRgn tb
 					# (empty,tb)			= osisemptyrgn updRgn tb
 					| empty
@@ -261,8 +277,7 @@ where
 					itemPos					= itemH.wItemPos`
 					itemSize				= itemH.wItemSize`
 					info					= getWItemCompoundInfo` itemH.wItemInfo`
-					isTransparant			= isNothing info.compoundLookInfo
-					compLookInfo			= fromJust info.compoundLookInfo
+					compLookInfo			= info.compoundLookInfo
 					{lookFun,lookPen}		= compLookInfo.compoundLook
 					clipInfo				= compLookInfo.compoundClip
 					origin					= info.compoundOrigin
@@ -285,6 +300,9 @@ where
 						#! picture				= pictsetcliprgn curClipRgn picture
 						#  picture				= apppicttoolbox (osdisposergn rectRgn o (if (curClipRgn==0) id (osdisposergn curClipRgn))) picture
 						= picture
+				
+				updatecompoundbackground _ _ _ _ _ {wItemKind`} _ _
+					= windowupdateFatalError "updatecompoundbackground (updatewindowbackgrounds`)" ("unexpected control kind: "+++toString wItemKind`)
 			
 			updatebackground wMetrics wFrame ableContext backgrRgn (WRecursiveHandle` itemHs wKind) osPict tb
 				# (backgrRgn,itemHs,osPict,tb)	= updatebackgrounds wMetrics wFrame ableContext backgrRgn itemHs osPict tb
@@ -325,6 +343,10 @@ where
 			| isoscontrol
 				# tb			= updateoscontrol (subVector (toVector wItemPos) intersectRect) parentPtr wItemPtr tb
 				= (wItemH,tb)
+			| isRecursiveControl wItemKind	// This includes LayoutControl and excludes CompoundControl which is already guarded as iscustomcontrol
+				# ableContext1	= ableContext && itemH.wItemSelect
+				# (itemHs,tb)	= updatecontrolsinrect wMetrics parentPtr ableContext1 area itemH.wItems tb	// PA: shouldn't area be clipped (also below at updatecustomcontrol?)
+				= (WItemHandle {itemH & wItems=itemHs},tb)
 			| otherwise			// This alternative should never be reached
 				= windowupdateFatalError "updatecontrolinrect" "unexpected ControlKind"
 		where
@@ -391,20 +413,16 @@ where
 				updState				= {oldFrame=cFrame,newFrame=cFrame,updArea=[updArea]}
 			
 			updatecustomcontrol wMetrics parentPtr contextAble area itemH=:{wItemKind=IsCompoundControl,wItems} tb
-				| isNothing info.compoundLookInfo
-					# (itemHs,tb)		= updatecontrolsinrect wMetrics parentPtr compoundAble area wItems tb
-					= ({itemH & wItems=itemHs},tb)
-				| otherwise
-					#! (osPict,tb)			= OSgrabControlPictContext parentPtr itemPtr tb
-					#! picture				= packPicture origin (copyPen lookInfo.lookPen) True osPict tb
-					#! picture				= appClipPicture (toRegion updArea) (lookInfo.lookFun selectState updState) picture
-					#! (_,pen,_,osPict,tb)	= unpackPicture picture
-					   info					= {info & compoundLookInfo=Just {compLookInfo & compoundLook={lookInfo & lookPen=pen}}}
-					#! tb					= OSreleaseControlPictContext itemPtr osPict tb
-					#! tb					= updatescrollareas tb
-					#! (itemHs,tb)			= updatecontrolsinrect wMetrics parentPtr compoundAble area wItems tb
-					#! tb					= OSvalidateWindowRect itemPtr areaLocal tb
-					= ({itemH & wItemInfo=CompoundInfo info,wItems=itemHs},tb)
+				#! (osPict,tb)			= OSgrabControlPictContext parentPtr itemPtr tb
+				#! picture				= packPicture origin (copyPen lookInfo.lookPen) True osPict tb
+				#! picture				= appClipPicture (toRegion updArea) (lookInfo.lookFun selectState updState) picture
+				#! (_,pen,_,osPict,tb)	= unpackPicture picture
+				   info					= {info & compoundLookInfo={compLookInfo & compoundLook={lookInfo & lookPen=pen}}}
+				#! tb					= OSreleaseControlPictContext itemPtr osPict tb
+				#! tb					= updatescrollareas tb
+				#! (itemHs,tb)			= updatecontrolsinrect wMetrics parentPtr compoundAble area wItems tb
+				#! tb					= OSvalidateWindowRect itemPtr areaLocal tb
+				= ({itemH & wItemInfo=CompoundInfo info,wItems=itemHs},tb)
 			where
 				itemPtr						= itemH.wItemPtr
 				itemPos						= itemH.wItemPos		// PA+++
@@ -412,7 +430,7 @@ where
 				compoundAble				= contextAble && itemH.wItemSelect
 				selectState					= if compoundAble Able Unable
 				info						= getWItemCompoundInfo itemH.wItemInfo
-				compLookInfo				= fromJust info.compoundLookInfo
+				compLookInfo				= info.compoundLookInfo
 				lookInfo					= compLookInfo.compoundLook
 				(origin,domainRect,hasScrolls)
 											= (info.compoundOrigin,info.compoundDomain,(isJust info.compoundHScroll,isJust info.compoundVScroll))
@@ -604,14 +622,11 @@ where
 					updState				= {oldFrame=cFrame,newFrame=cFrame,updArea=[updArea]}
 				
 				updateControl`` wMetrics wids contextAble area itemH=:{wItemKind=IsCompoundControl} osPict tb
-					| isNothing info.compoundLookInfo
-						= (itemH,osPict,tb)
-					| otherwise
-						#! picture				= packPicture origin (copyPen lookInfo.lookPen) True osPict tb
-						#! picture				= appClipPicture (toRegion cFrame) (lookInfo.lookFun selectState updState) picture
-						#! (_,pen,_,osPict,tb)	= unpackPicture picture
-						   info					= {info & compoundLookInfo=Just {compLookInfo & compoundLook={lookInfo & lookPen=pen}}}
-						= ({itemH & wItemInfo=CompoundInfo info},osPict,tb)
+					#! picture				= packPicture origin (copyPen lookInfo.lookPen) True osPict tb
+					#! picture				= appClipPicture (toRegion cFrame) (lookInfo.lookFun selectState updState) picture
+					#! (_,pen,_,osPict,tb)	= unpackPicture picture
+					   info					= {info & compoundLookInfo={compLookInfo & compoundLook={lookInfo & lookPen=pen}}}
+					= ({itemH & wItemInfo=CompoundInfo info},osPict,tb)
 				where
 					selectState				= if (contextAble && itemH.wItemSelect) Able Unable
 					itemSize				= itemH.wItemSize
@@ -620,7 +635,7 @@ where
 					domainRect				= info.compoundDomain
 					hasScrolls				= (isJust info.compoundHScroll,isJust info.compoundVScroll)
 					visScrolls				= OSscrollbarsAreVisible wMetrics domainRect (toTuple itemSize) hasScrolls
-					compLookInfo			= fromJust info.compoundLookInfo
+					compLookInfo			= info.compoundLookInfo
 					lookInfo				= compLookInfo.compoundLook
 					origin					= info.compoundOrigin
 					cFrame					= PosSizeToRectangle origin (RectSize (getCompoundContentRect wMetrics visScrolls (SizeToRect itemSize)))
@@ -650,6 +665,9 @@ where
 				
 				updateControl`` _ _ _ _ itemH=:{wItemKind=IsOtherControl _} osPict tb
 					= (itemH,osPict,tb)
+				
+				updateControl`` _ _ _ _ itemH=:{wItemKind=IsLayoutControl} _ _
+					= windowupdateFatalError "updatecontrols (updateControl``)" "LayoutControl should never be updated"
 		
 		updateControl wMetrics wids contextAble updControls (WListLSHandle itemHs) osPict tb
 			# (updControls,itemHs,osPict,tb)	= updateControls wMetrics wids contextAble updControls itemHs osPict tb

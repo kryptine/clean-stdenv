@@ -6,9 +6,9 @@ implementation module controllayout
 //	Control layout calculations
 
 
-import	StdInt, StdBool, StdList, StdTuple, StdMisc
-import	osfont, oswindow
-import	commondef, controldefaccess, id, layout, windowaccess, windowhandle, windowvalidate, wstateaccess
+import	StdBool, StdList, StdTuple, StdMisc
+import	oswindow
+import	commondef, layout, StdControlAttribute, windowaccess, wstateaccess
 
 
 controllayoutError :: String String -> .x
@@ -24,7 +24,7 @@ controllayoutFatalError rule error
 //	Calculate the precise position (in pixels) of each Control.
 
 layoutControls :: !OSWindowMetrics !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) !Size !Size ![(ViewDomain,Point2)] ![WElementHandle .ls .pst] !*OSToolbox
-																								  -> (!Size,![WElementHandle .ls .pst],!*OSToolbox)
+																								  -> (!Size, ![WElementHandle .ls .pst],!*OSToolbox)
 layoutControls wMetrics hMargins vMargins spaces reqSize minSize orientations itemHs tb
 	# (_,_,itemHs)				= validateFirstWElementsPos False itemHs
 	# (layouts,_,_,_,itemHs,tb)	= getLayoutItems wMetrics hMargins vMargins spaces orientations [] (sysId (-1)) (-2) itemHs tb
@@ -33,7 +33,7 @@ layoutControls wMetrics hMargins vMargins spaces reqSize minSize orientations it
 	= (size,itemHs,tb)
 
 layoutControls` :: !OSWindowMetrics !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) !Size !Size ![(ViewDomain,Point2)] ![WElementHandle`] !*OSToolbox
-																								   -> (!Size,![WElementHandle`],!*OSToolbox)
+																								   -> (!Size, ![WElementHandle`],!*OSToolbox)
 layoutControls` wMetrics hMargins vMargins spaces reqSize minSize orientations itemHs tb
 	# (_,_,itemHs)				= validateFirstWElementsPos` False itemHs
 	# (layouts,_,_,_,itemHs,tb)	= getLayoutItems` wMetrics hMargins vMargins spaces orientations [] (sysId (-1)) (-2) itemHs tb
@@ -418,6 +418,68 @@ where
 						= Nothing
 					layoutScrollbar r=:{rleft,rtop} (Just scrollInfo)
 						= Just {scrollInfo & scrollItemPos={x=rleft,y=rtop},scrollItemSize=RectSize r}
+		
+		getLayoutWItem wMetrics hMargins vMargins spaces orientations prevIds prevId cId itemH=:{wItemKind=IsLayoutControl,wItemAtts,wItems} tb
+			= (itPos,prevIds1,id,cId1,{itemH & wItemAtts=[ControlId id:atts1],wItems=items},tb1)
+		where
+			(size,items,atts1,tb1)	= calcLayoutSize wMetrics hMargins vMargins spaces orientations wItems wItemAtts tb
+			(id,cId1,prevIds1)		= getLayoutItemId cId itemH.wItemId prevIds
+			pos						= getLayoutItemPos prevId wItemAtts
+			itPos					= newLayoutItem id pos size
+			
+			calcLayoutSize :: !OSWindowMetrics !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) ![(ViewDomain,Origin)]
+									  ![WElementHandle .ls .pst] ![ControlAttribute *(.ls,.pst)] !*OSToolbox
+							-> (!Size,![WElementHandle .ls .pst],![ControlAttribute *(.ls,.pst)],!*OSToolbox)
+			calcLayoutSize wMetrics hMargins=:(lMargin,rMargin) vMargins=:(tMargin,bMargin) spaces orientations itemHs atts tb
+				= (okDerivedSize,itemHs1,if hadSize atts2 [ControlViewSize okDerivedSize:atts2],tb1)
+			where
+				(minSize,atts1)			= validateMinSize atts
+				(hadSize,reqSize,atts2)	= validateLayoutSize wMetrics atts1
+				(_,hMarginAtt)			= Select isControlHMargin (ControlHMargin lMargin rMargin) atts2
+				newHMargins				= validateControlMargin (getControlHMarginAtt hMarginAtt)
+				(_,vMarginAtt)			= Select isControlVMargin (ControlVMargin tMargin bMargin) atts2
+				newVMargins				= validateControlMargin (getControlVMarginAtt vMarginAtt)
+				(_,spaceAtt)			= Select isControlItemSpace (ControlItemSpace (fst spaces) (snd spaces)) atts2
+				newItemSpaces			= validateControlItemSpace (getControlItemSpaceAtt spaceAtt)
+				(derSize,itemHs1,tb1)	= layoutControls wMetrics newHMargins newVMargins newItemSpaces reqSize minSize orientations itemHs tb
+				okDerivedSize			= validateDerivedSize wMetrics derSize reqSize
+
+				validateMinSize :: ![ControlAttribute .st] -> (!Size,![ControlAttribute .st])
+				validateMinSize atts
+					= (okMinSize,if hadMinSize [ControlMinimumSize okMinSize:atts1] atts1)
+				where
+					(hadMinSize,minAtt,atts1)	= Remove isControlMinimumSize (ControlMinimumSize zero) atts
+					minSize						= getControlMinimumSizeAtt minAtt
+					okMinSize					= {w=max 0 minSize.w,h=max 0 minSize.h}
+
+			/*	validateLayoutSize wMetrics atts
+					validates the Control(View/Outer)Size attribute. The Boolean result is True iff the attribute list contains
+					the Control(View/Outer)Size attribute.
+					In addition, the ControlOuterSize attribute is mapped to ControlViewSize attribute (identical value).
+			*/
+				validateLayoutSize :: !OSWindowMetrics ![ControlAttribute .st] -> (!Bool,!Size,![ControlAttribute .st])
+				validateLayoutSize wMetrics atts
+					| not hasSize
+						= (False,zero,atts)
+					| otherwise
+						# size1			= {w=max size.w 0,h=max size.h 0}
+						# (_,_,atts)	= Remove isControlOuterSize undef atts
+						# (_,_,atts)	= Remove isControlViewSize  undef atts
+						= (True,size1,[ControlViewSize size1:atts])
+				where
+					(hasSize,sizeAtt)	= Select (\att->isControlViewSize att || isControlOuterSize att) undef atts
+					size				= if (isControlViewSize sizeAtt) (getControlViewSizeAtt sizeAtt) (getControlOuterSizeAtt sizeAtt)
+				
+				validateDerivedSize :: !OSWindowMetrics Size !Size -> Size
+				validateDerivedSize wMetrics derSize reqSize
+					| reqSize==zero		= derSize
+					| otherwise			= reqSize
+				
+				validateControlMargin :: !(!Int,!Int) -> (!Int,!Int)
+				validateControlMargin (a,b) = (max 0 a,max 0 b)
+				
+				validateControlItemSpace :: !(!Int,!Int) -> (!Int,!Int)
+				validateControlItemSpace (hspace,vspace) = (max 0 hspace,max 0 vspace)
 
 		getLayoutWItem _ _ _ _ _ _ _ _ _ _
 			= controllayoutFatalError "getLayoutWItem" "unmatched control implementation alternative"
@@ -708,6 +770,68 @@ where
 						= Nothing
 					layoutScrollbar r=:{rleft,rtop} (Just scrollInfo)
 						= Just {scrollInfo & scrollItemPos={x=rleft,y=rtop},scrollItemSize=RectSize r}
+		
+		getLayoutWItem` wMetrics hMargins vMargins spaces orientations prevIds prevId cId itemH=:{wItemKind`=IsLayoutControl,wItemAtts`,wItems`} tb
+			= (itPos,prevIds1,id,cId1,{itemH & wItemAtts`=[ControlId` id:atts1],wItems`=items},tb1)
+		where
+			(size,items,atts1,tb1)	= calcLayoutSize wMetrics hMargins vMargins spaces orientations wItems` wItemAtts` tb
+			(id,cId1,prevIds1)		= getLayoutItemId cId itemH.wItemId` prevIds
+			pos						= getLayoutItemPos prevId wItemAtts`
+			itPos					= newLayoutItem id pos size
+			
+			calcLayoutSize :: !OSWindowMetrics !(!Int,!Int) !(!Int,!Int) !(!Int,!Int) ![(ViewDomain,Origin)]
+									  ![WElementHandle`] ![ControlAttribute`] !*OSToolbox
+							-> (!Size,![WElementHandle`],![ControlAttribute`],!*OSToolbox)
+			calcLayoutSize wMetrics hMargins=:(lMargin,rMargin) vMargins=:(tMargin,bMargin) spaces orientations itemHs atts tb
+				= (okDerivedSize,itemHs1,if hadSize atts2 [ControlViewSize` okDerivedSize:atts2],tb1)
+			where
+				(minSize,atts1)			= validateMinSize atts
+				(hadSize,reqSize,atts2)	= validateLayoutSize wMetrics atts1
+				(_,hMarginAtt)			= Select iscontrolhmargin` (ControlHMargin` lMargin rMargin) atts2
+				newHMargins				= validateControlMargin (getcontrolhmargin` hMarginAtt)
+				(_,vMarginAtt)			= Select iscontrolvmargin` (ControlVMargin` tMargin bMargin) atts2
+				newVMargins				= validateControlMargin (getcontrolvmargin` vMarginAtt)
+				(_,spaceAtt)			= Select iscontrolitemspace` (ControlItemSpace` (fst spaces) (snd spaces)) atts2
+				newItemSpaces			= validateControlItemSpace (getcontrolitemspace` spaceAtt)
+				(derSize,itemHs1,tb1)	= layoutControls` wMetrics newHMargins newVMargins newItemSpaces reqSize minSize orientations itemHs tb
+				okDerivedSize			= validateDerivedSize wMetrics derSize reqSize
+
+				validateMinSize :: ![ControlAttribute`] -> (!Size,![ControlAttribute`])
+				validateMinSize atts
+					= (okMinSize,if hadMinSize [ControlMinimumSize` okMinSize:atts1] atts1)
+				where
+					(hadMinSize,minAtt,atts1)	= Remove iscontrolminimumsize` (ControlMinimumSize` zero) atts
+					minSize						= getcontrolminimumsize` minAtt
+					okMinSize					= {w=max 0 minSize.w,h=max 0 minSize.h}
+
+			/*	validateLayoutSize wMetrics atts
+					validates the Control(View/Outer)Size attribute. The Boolean result is True iff the attribute list contains
+					the Control(View/Outer)Size attribute.
+					In addition, the ControlOuterSize attribute is mapped to ControlViewSize attribute (identical value).
+			*/
+				validateLayoutSize :: !OSWindowMetrics ![ControlAttribute`] -> (!Bool,!Size,![ControlAttribute`])
+				validateLayoutSize wMetrics atts
+					| not hasSize
+						= (False,zero,atts)
+					| otherwise
+						# size1			= {w=max size.w 0,h=max size.h 0}
+						# (_,_,atts)	= Remove iscontroloutersize` undef atts
+						# (_,_,atts)	= Remove iscontrolviewsize`  undef atts
+						= (True,size1,[ControlViewSize` size1:atts])
+				where
+					(hasSize,sizeAtt)	= Select (\att->iscontrolviewsize` att || iscontroloutersize` att) undef atts
+					size				= if (iscontrolviewsize` sizeAtt) (getcontrolviewsize` sizeAtt) (getcontroloutersize` sizeAtt)
+				
+				validateDerivedSize :: !OSWindowMetrics Size !Size -> Size
+				validateDerivedSize wMetrics derSize reqSize
+					| reqSize==zero		= derSize
+					| otherwise			= reqSize
+				
+				validateControlMargin :: !(!Int,!Int) -> (!Int,!Int)
+				validateControlMargin (a,b) = (max 0 a,max 0 b)
+				
+				validateControlItemSpace :: !(!Int,!Int) -> (!Int,!Int)
+				validateControlItemSpace (hspace,vspace) = (max 0 hspace,max 0 vspace)
 
 		getLayoutWItem` _ _ _ _ _ _ _ _ _ _
 			= controllayoutFatalError "getLayoutWItem`" "unmatched control implementation alternative"
@@ -807,7 +931,7 @@ setRelativeTo id BelowPrev		= Below		id
 
 /*	After calculating the layout of the elements, the calculated control positions and sizes must be added 
 	to the original WElementHandle(`) list. 
-	In case of recursive WElementHandles (WList/WElim/WIntro/WExtend/WChange(LSHandle), and CompoundControls) 
+	In case of recursive WElementHandles (WList/WElim/WIntro/WExtend/WChange(LSHandle), and (Compound/Layout)Controls) 
 	the recursively calculated positions must also be added.
 	In case of (Radio/Check)Controls the already calculated (radio/check) control positions that are
 	oriented at base zero need to be shifted to the calculated base position of the (Radio/Check)Control. 
@@ -833,7 +957,7 @@ where
 		setLayoutWItem :: ![Root] !(WItemHandle .ls .pst) -> (![Root],!WItemHandle .ls .pst)
 		setLayoutWItem roots itemH=:{wItemKind,wItemInfo,wItems,wItemAtts=[ControlId id:atts]}
 			#! (layoutInfo,corner,size,roots)	= getLayoutItem id roots
-			#! itemHs							= if (wItemKind==IsCompoundControl) (map (shiftCompounds layoutInfo corner) wItems) wItems
+			#! itemHs							= if (isRecursiveControl wItemKind) (map (shiftCompounds layoutInfo corner) wItems) wItems
 			#! info								= shiftWItemInfo corner wItemInfo
 			= (	roots
 			  ,	{	itemH	& wItemAtts			= atts
@@ -853,7 +977,7 @@ where
 				shiftCompound :: !LayoutInfo !Vector2 !(WItemHandle .ls .pst) -> WItemHandle .ls .pst
 				shiftCompound layoutInfo offset itemH=:{wItemKind,wItemInfo,wItemPos,wItems,wItemLayoutInfo}
 					#! layoutInfo				= if (layoutInfo==LayoutFix) layoutInfo wItemLayoutInfo
-					#! itemHs					= if (wItemKind==IsCompoundControl) (map (shiftCompounds layoutInfo offset) wItems) wItems
+					#! itemHs					= if (isRecursiveControl wItemKind) (map (shiftCompounds layoutInfo offset) wItems) wItems
 					#! info						= shiftWItemInfo offset wItemInfo
 					= {	itemH &	wItemPos		= movePoint offset wItemPos
 							  ,	wItems			= itemHs
@@ -923,7 +1047,7 @@ where
 		setLayoutWItem` :: ![Root] !WItemHandle` -> (![Root],!WItemHandle`)
 		setLayoutWItem` roots itemH=:{wItemKind`,wItemInfo`,wItems`,wItemAtts`=[ControlId` id:atts]}
 			# (layoutInfo,corner,size,roots)	= getLayoutItem id roots
-			  itemHs							= if (wItemKind`==IsCompoundControl) (map (shiftCompounds layoutInfo corner) wItems`) wItems`
+			  itemHs							= if (isRecursiveControl wItemKind`) (map (shiftCompounds layoutInfo corner) wItems`) wItems`
 			  info								= shiftWItemInfo corner wItemInfo`
 			= (	roots
 			  ,	{	itemH	& wItemAtts`		= atts
@@ -943,7 +1067,7 @@ where
 				shiftCompound layoutInfo offset itemH=:{wItemKind`,wItemInfo`,wItemPos`,wItems`,wItemLayoutInfo`}
 					# layoutInfo				= if (layoutInfo==LayoutFix) layoutInfo wItemLayoutInfo`
 					= {	itemH &	wItemPos`		= movePoint offset wItemPos`
-							  ,	wItems`			= if (wItemKind`==IsCompoundControl) (map (shiftCompounds layoutInfo offset) wItems`) wItems`
+							  ,	wItems`			= if (isRecursiveControl wItemKind`) (map (shiftCompounds layoutInfo offset) wItems`) wItems`
 							  ,	wItemInfo`		= shiftWItemInfo offset wItemInfo`
 							  , wItemLayoutInfo`= layoutInfo
 					  }

@@ -24,6 +24,8 @@ import	StdIOCommon, StdPictureDef
  =	CustomControl       Size Look                      [ControlAttribute *(ls,pst)]
 ::	EditControl         ls pst
  =	EditControl         String ControlWidth NrLines    [ControlAttribute *(ls,pst)]
+::	LayoutControl        c ls pst
+ =	LayoutControl       (c ls pst)                     [ControlAttribute *(ls,pst)]
 ::	PopUpControl        ls pst
  =	PopUpControl        [PopUpControlItem *(ls,pst)] Index
 	                                                   [ControlAttribute *(ls,pst)]
@@ -80,9 +82,9 @@ import	StdIOCommon, StdPictureDef
 	|	ControlVScroll      ScrollFunction          // no vertical   scrolling
 
 ::	ControlResizeFunction
-	:==	Size ->                                     // current control size
-		Size ->                                     // old     window  size
-		Size ->                                     // new     window  size
-		Size                                        // new     control size
+	:==	Size ->                                     // current control outer size
+		Size ->                                     // old     parent  view  size
+		Size ->                                     // new     parent  view  size
+		Size                                        // new     control outer size
 ::	ControlType
 	:==	String

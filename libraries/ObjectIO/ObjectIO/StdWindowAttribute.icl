@@ -10,7 +10,7 @@ implementation module StdWindowAttribute
 
 
 import StdBool
-import windowdefaccess
+import StdWindowDef
 
 
 isValidWindowAttribute :: !(WindowAttribute .st) -> Bool
@@ -18,6 +18,40 @@ isValidWindowAttribute att = isAllWindowsAttribute att || isWindowOnlyAttribute 
 
 isValidDialogAttribute :: !(WindowAttribute .st) -> Bool
 isValidDialogAttribute att = isAllWindowsAttribute att || isDialogOnlyAttribute att
+
+isAllWindowsAttribute :: !(WindowAttribute .st) -> Bool
+isAllWindowsAttribute (WindowActivate	_)		= True
+isAllWindowsAttribute (WindowClose		_)		= True
+isAllWindowsAttribute (WindowDeactivate	_)		= True
+isAllWindowsAttribute (WindowHMargin   _ _)		= True
+isAllWindowsAttribute (WindowId			_)		= True
+isAllWindowsAttribute (WindowIndex		_)		= True
+isAllWindowsAttribute (WindowInit		_)		= True
+isAllWindowsAttribute (WindowInitActive _)		= True
+isAllWindowsAttribute (WindowItemSpace _ _)		= True
+isAllWindowsAttribute (WindowOuterSize	_)		= True
+isAllWindowsAttribute (WindowPos		_)		= True
+isAllWindowsAttribute (WindowViewSize	_)		= True
+isAllWindowsAttribute (WindowVMargin   _ _)		= True
+isAllWindowsAttribute _							= False
+
+isWindowOnlyAttribute :: !(WindowAttribute .st) -> Bool
+isWindowOnlyAttribute (WindowCursor		_)		= True
+isWindowOnlyAttribute (WindowHScroll	_)		= True
+isWindowOnlyAttribute (WindowKeyboard	_ _ _)	= True
+isWindowOnlyAttribute (WindowLook		_ _)	= True
+isWindowOnlyAttribute (WindowMouse		_ _ _)	= True
+isWindowOnlyAttribute (WindowOrigin		_)		= True
+isWindowOnlyAttribute (WindowPen        _)		= True
+isWindowOnlyAttribute (WindowSelectState _)		= True
+isWindowOnlyAttribute (WindowViewDomain	_)		= True
+isWindowOnlyAttribute (WindowVScroll	_)		= True
+isWindowOnlyAttribute _							= False
+
+isDialogOnlyAttribute :: !(WindowAttribute .st) -> Bool
+isDialogOnlyAttribute (WindowCancel		_)		= True
+isDialogOnlyAttribute (WindowOk			_)		= True
+isDialogOnlyAttribute _							= False
 
 
 isWindowActivate	:: !(WindowAttribute .st) -> Bool

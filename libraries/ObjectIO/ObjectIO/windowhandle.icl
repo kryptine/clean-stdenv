@@ -27,7 +27,7 @@ import	commondef, keyfocus, receiverhandle
 		,	fmLS			:: ls								// The final local state
 		}
 ::	WindowStateHandle pst
-	=	E..ls:
+	=	E. .ls:
 		{	wshIds			:: WIDS								// A window is identified by an Id and an OSWindowPtr
 		,	wshHandle		:: Maybe (WindowLSHandle ls pst)	// If used as placeholder, Nothing; otherwise window with local state
 		}
@@ -110,12 +110,12 @@ import	commondef, keyfocus, receiverhandle
 	|	WExtendLSHandle		(WExtendLSHandle	ls pst)
 	|	WChangeLSHandle		(WChangeLSHandle	ls pst)
 ::	WExtendLSHandle	ls pst
-	=	E..ls1:
+	=	E. .ls1:
 		{	wExtendLS		:: ls1
 		,	wExtendItems	:: [WElementHandle *(ls1,ls) pst]
 		}
 ::	WChangeLSHandle	ls pst
-	=	E..ls1:
+	=	E. .ls1:
 		{	wChangeLS		:: ls1
 		,	wChangeItems	:: [WElementHandle ls1 pst]
 		}
@@ -140,17 +140,17 @@ import	commondef, keyfocus, receiverhandle
 	|	LayoutFun ParentIndex OffsetFun							// ItemOffset = OffsetFun
 	|	LayoutFrame												// any other attribute
 ::	WItemInfo		ls pst
-	=	RadioInfo			(RadioInfo	  *(ls,pst))			// In case of	RadioControl	: the radio items information
+	=	ButtonInfo			ButtonInfo							// In case of	ButtonControl	: the button information
 	|	CheckInfo			(CheckInfo	  *(ls,pst))			// In case of	CheckControl	: the check items information
-	|	PopUpInfo			(PopUpInfo	  *(ls,pst))			// In case of	PopUpControl	: the pop up information
-	|	SliderInfo			(SliderInfo	  *(ls,pst))			// In case of	SliderControl	: the slider information
-	|	TextInfo			TextInfo							// In case of	TextControl		: the text information
-	|	EditInfo			EditInfo							// In case of	EditControl		: the edit text information
-	|	ButtonInfo			ButtonInfo							// In case of	ButtonControl	: the button information
+	|	CompoundInfo		CompoundInfo						// In case of	CompoundControl	: the compound control information
 	|	CustomButtonInfo	CustomButtonInfo					// In case of	CustomButtonControl	: the custom button information
 	|	CustomInfo			CustomInfo							// In case of	CustomControl		: the custom information
-	|	CompoundInfo		CompoundInfo						// In case of	CompoundControl	: the compound control information
+	|	EditInfo			EditInfo							// In case of	EditControl		: the edit text information
+	|	PopUpInfo			(PopUpInfo	  *(ls,pst))			// In case of	PopUpControl	: the pop up information
+	|	RadioInfo			(RadioInfo	  *(ls,pst))			// In case of	RadioControl	: the radio items information
 	|	ReceiverInfo		(ReceiverHandle	ls pst)				// In case of	ReceiverControl	: the receiver information
+	|	SliderInfo			(SliderInfo	  *(ls,pst))			// In case of	SliderControl	: the slider information
+	|	TextInfo			TextInfo							// In case of	TextControl		: the text information
 	|	NoWItemInfo												// No additional information
 ::	RadioInfo		st
 	=	{	radioItems		:: [RadioItemInfo st]				// The radio items and their exact position (initially zero)
@@ -210,23 +210,24 @@ import	commondef, keyfocus, receiverhandle
 		,	compoundOrigin	:: Point2							// The Origin of the view domain
 		,	compoundHScroll	:: Maybe ScrollInfo					// The scroll data of the ControlHScroll attribute
 		,	compoundVScroll	:: Maybe ScrollInfo					// The scroll data of the ControlVScroll attribute
-		,	compoundLookInfo:: Maybe CompoundLookInfo			// The look information of the compound control
+		,	compoundLookInfo:: CompoundLookInfo					// The look information of the compound control
 		}
 ::	CompoundLookInfo
 	=	{	compoundLook	:: LookInfo							// The look of the compound control
 		,	compoundClip	:: ClipState						// The clipped elements of the compound control
 		}
 ::	ControlKind
-	=	IsRadioControl
+	=	IsButtonControl
 	|	IsCheckControl
-	|	IsPopUpControl
-	|	IsSliderControl
-	|	IsTextControl
-	|	IsEditControl
-	|	IsButtonControl
+	|	IsCompoundControl
 	|	IsCustomButtonControl
 	|	IsCustomControl
-	|	IsCompoundControl
+	|	IsEditControl
+	|	IsLayoutControl
+	|	IsPopUpControl
+	|	IsRadioControl
+	|	IsSliderControl
+	|	IsTextControl
 	|	IsOtherControl ControlType								// Of other controls the ControlType
 
 
@@ -269,26 +270,14 @@ instance == LayoutInfo where
 								_				-> False
 instance == ControlKind where
 	(==) :: !ControlKind !ControlKind -> Bool
-	(==) IsRadioControl			kind = case kind of
-											IsRadioControl			-> True
+	(==) IsButtonControl		kind = case kind of
+											IsButtonControl			-> True
 											_						-> False
 	(==) IsCheckControl			kind = case kind of
 											IsCheckControl			-> True
 											_						-> False
-	(==) IsPopUpControl			kind = case kind of
-											IsPopUpControl			-> True
-											_						-> False
-	(==) IsSliderControl		kind = case kind of
-											IsSliderControl			-> True
-											_						-> False
-	(==) IsTextControl			kind = case kind of
-											IsTextControl			-> True
-											_						-> False
-	(==) IsEditControl			kind = case kind of
-											IsEditControl			-> True
-											_						-> False
-	(==) IsButtonControl		kind = case kind of
-											IsButtonControl			-> True
+	(==) IsCompoundControl		kind = case kind of
+											IsCompoundControl		-> True
 											_						-> False
 	(==) IsCustomButtonControl	kind = case kind of
 											IsCustomButtonControl	-> True
@@ -296,24 +285,40 @@ instance == ControlKind where
 	(==) IsCustomControl		kind = case kind of
 											IsCustomControl			-> True
 											_						-> False
-	(==) IsCompoundControl		kind = case kind of
-											IsCompoundControl		-> True
+	(==) IsEditControl			kind = case kind of
+											IsEditControl			-> True
+											_						-> False
+	(==) IsLayoutControl			kind = case kind of
+											IsLayoutControl			-> True
+											_						-> False
+	(==) IsPopUpControl			kind = case kind of
+											IsPopUpControl			-> True
+											_						-> False
+	(==) IsRadioControl			kind = case kind of
+											IsRadioControl			-> True
+											_						-> False
+	(==) IsSliderControl		kind = case kind of
+											IsSliderControl			-> True
+											_						-> False
+	(==) IsTextControl			kind = case kind of
+											IsTextControl			-> True
 											_						-> False
 	(==) (IsOtherControl type1)	kind = case kind of
 											IsOtherControl type2	-> type1==type2
 											_						-> False
 instance toString ControlKind where
 	toString :: !ControlKind -> {#Char}
-	toString IsRadioControl				= "IsRadioControl"
-	toString IsCheckControl				= "IsCheckControl"
-	toString IsPopUpControl				= "IsPopUpControl"
-	toString IsSliderControl			= "IsSliderControl"
-	toString IsTextControl				= "IsTextControl"
-	toString IsEditControl				= "IsEditControl"
 	toString IsButtonControl			= "IsButtonControl"
+	toString IsCheckControl				= "IsCheckControl"
+	toString IsCompoundControl			= "IsCompoundControl"
 	toString IsCustomButtonControl		= "IsCustomButtonControl"
 	toString IsCustomControl			= "IsCustomControl"
-	toString IsCompoundControl			= "IsCompoundControl"
+	toString IsEditControl				= "IsEditControl"
+	toString IsLayoutControl			= "IsLayoutControl"
+	toString IsPopUpControl				= "IsPopUpControl"
+	toString IsRadioControl				= "IsRadioControl"
+	toString IsSliderControl			= "IsSliderControl"
+	toString IsTextControl				= "IsTextControl"
 	toString (IsOtherControl type)		= "(IsOtherControl "+++type+++")"
 
 /*	The given ControlKind corresponds with a custom-drawn control.
@@ -327,6 +332,7 @@ isCustomisedControl _						= False
 */
 isRecursiveControl :: !ControlKind -> Bool
 isRecursiveControl IsCompoundControl	= True
+isRecursiveControl IsLayoutControl		= True
 isRecursiveControl _					= False
 
 

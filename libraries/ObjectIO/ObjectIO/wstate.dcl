@@ -52,16 +52,16 @@ from	ostoolbox	import OSToolbox
 		,	wItemLayoutInfo`	:: LayoutInfo					// Additional information on layout
 		}
 ::	WItemInfo`
-	=	RadioInfo`				RadioInfo`						// In case of	RadioControl		: the radio items information
+	=	ButtonInfo`				ButtonInfo						// In case of	ButtonControl		: the button information
 	|	CheckInfo`				CheckInfo`						// In case of	CheckControl		: the check items information
-	|	PopUpInfo`				PopUpInfo`						// In case of	PopUpControl		: the pop up information
-	|	SliderInfo`				SliderInfo`						// In case of	SliderControl		: the slider information
-	|	TextInfo`				TextInfo						// In case of	TextControl			: the text information
-	|	EditInfo`				EditInfo						// In case of	EditControl			: the edit text information
-	|	ButtonInfo`				ButtonInfo						// In case of	ButtonControl		: the button information
+	|	CompoundInfo`			CompoundInfo					// In case of	CompoundControl		: the compound control information
 	|	CustomButtonInfo`		CustomButtonInfo				// In case of	CustomButtonControl	: the custom button information
 	|	CustomInfo`				CustomInfo						// In case of	CustomControl		: the custom information
-	|	CompoundInfo`			CompoundInfo					// In case of	CompoundControl		: the compound control information
+	|	EditInfo`				EditInfo						// In case of	EditControl			: the edit text information
+	|	PopUpInfo`				PopUpInfo`						// In case of	PopUpControl		: the pop up information
+	|	RadioInfo`				RadioInfo`						// In case of	RadioControl		: the radio items information
+	|	SliderInfo`				SliderInfo`						// In case of	SliderControl		: the slider information
+	|	TextInfo`				TextInfo						// In case of	TextControl			: the text information
 	|	NoWItemInfo`											// No additional information
 ::	RadioInfo`
 	=	{	radioItems`			:: [RadioItemInfo`]				// The radio items and their exact position (initially zero)
@@ -112,6 +112,7 @@ from	ostoolbox	import OSToolbox
 	|	WindowMouse`		SelectState
 	|	WindowOk`			Id
 	|	WindowOrigin`		Point2
+	|	WindowOuterSize`	Size
 	|	WindowPen`			[PenAttribute]
 	|	WindowPos`			ItemPos
 	|	WindowSelectState`	SelectState
