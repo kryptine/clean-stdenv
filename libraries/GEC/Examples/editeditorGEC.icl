@@ -2,38 +2,39 @@ module editeditorGEC
 
 // editor that can be used to design and test another editor --MJP
 
+import tupleAGEC
 import StdEnv
 import StdIO
 import genericgecs
-import StdGEC, StdGECExt, StdGecComb, StdDynamic
+import StdGEC, StdGECExt, StdGecComb, StdDynamic 
 import basicAGEC, StdAGEC, calcAGEC, dynamicAGEC
 
 Start :: *World -> *World
 //Start world = goGui editoreditor world  
 Start world = goGui testDynamic world  
 
-derive gGEC TV, Maybe 
+derive gGEC Maybe 
 
-:: TV = Fun (AGEC [DynString])
-
-testDynamic = CGEC  (%| (dotest @| gecEdit "test" ))  (Fun  (horlistAGEC [testinit])) 
+testDynamic = CGEC  (%| (dotest @| gecEdit "test" ))  initval  
 where	
-	testinit = DynStr (dynamic 0) "0"
+	initval  = horlistAGEC [testinit] <|> showAGEC ":: String"
+	testinit = DynStr (dynamic "") "Type expression:"
 	 
-	dotest (Fun list) = Fun (horlistAGEC (keepone (^^ list)))
+	dotest (list <|> _) = horlistAGEC (checkdyn (^^ list)) <|>  showAGEC (showdyn (^^ list))
+	where
+		checkdyn [x:xs] 	= [x:check (strip x) xs]
+		where
+			check (f::a -> b) [d2=:DynStr (x::a) s:xs] 	= [d2: check (dynamic undef :: b) xs]
+			check dyn=:(f::a -> b) else 				= [testinit]
+			check dyn _ 								= []
 
-	keepone [] 		= [testinit]
-	keepone [x:xs] 	= [x:check (strip x) xs] ++ applylist (strip x) xs
+		showdyn [x:xs] 	= show (strip x) xs
+		where
+			show (f::a -> b) [d2=:DynStr (x::a) s:xs] 	= show (dynamic (f x)) xs
+			show dyn=:(f::a -> b) else 					= ShowTypeDynamic  dyn
+			show dyn _ 									= ShowValueDynamic dyn
 
-	strip (DynStr d str) = d
-
-	check (f::a -> b) [d2=:DynStr (x::a) s:xs] = [d2: check (dynamic undef :: b) xs]
-	check (f::a -> b) else 					   = [testinit]
-	check _ _ 								   = []
-	
-	applylist (f::a -> b) [d2=:DynStr (x::a) s:xs] = applylist (dynamic (f x)) xs
-	applylist (f::a -> b) _ = []
-	applylist dyn _ 		= [DynStr dyn (ShowValueDynamic dyn)]
+		strip (DynStr d str) = d
 
 goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
