@@ -4,7 +4,7 @@
 /* Clean Game Library by Mike Wiering, Nijmegen */
 
 
-#include "cOSGameLib_12.h"  /* OS specific functions */
+#include "cOSGameLib.h"  /* OS specific functions */
 
 
 /* Nothing value for integer, used with Maybe values */
@@ -49,6 +49,7 @@
 /* game keys */
 #define GK_UNKNOWN	  0
 
+#define GK_BACKSPACE  8
 #define GK_RETURN    10
 #define GK_ESCAPE	 11
 #define GK_LEFT		 12
@@ -76,7 +77,7 @@
 #define GK_MAX_KEY  255
 
 
-/* functions called from cCrossCall_12 */
+/* functions called from cCrossCall */
 void InitGameGlobals ();
 void RunGame ();
 void PlaySoundSample (int, int, int, int, int);
