@@ -1,7 +1,7 @@
 /*
 	Debug functions.
 
-	Version 1.0.2
+	Version 1.0.3
 	Ronny Wichers Schreur
 	ronny@cs.kun.nl
 */
@@ -96,7 +96,8 @@ debugShowWithOptions debugOptions debugValue
 					=	{options & terminator=terminator}
 
 :: Indicators
-	=	...
+// MW 2.0 was:	=	...
+	=	@...
 	|	.+.
 
 MaxCharsString
@@ -104,7 +105,8 @@ MaxCharsString
 MaxBreadthString
 	:== "..."
 MaxBreadthIndicator
-	:== wrapNode ...
+// MW 2.0 was:	:== wrapNode ...
+	:== wrapNode @...
 MaxDepthIndicator
 	:==	wrapNode .+.
 

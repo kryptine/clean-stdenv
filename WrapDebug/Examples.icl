@@ -1,7 +1,7 @@
 /*
 	Examples of Debug behaviour
 
-	Version 1.0.2
+	Version 1.0.3
 	Ronny Wichers Schreur
 	ronny@cs.kun.nl
 */
@@ -115,3 +115,32 @@ example11
 	get [h:t]
 		=	(h, t)
 
+/* the following examples only work with Clean 2.0.2 or better */
+
+/*
+import StdStrictLists
+
+/*
+	debugging with strict lists, the strictness (head strict, tail
+	strict) doesn't appear in the output (strict list use the same
+	consructors as ordinary list
+*/
+example12
+	=	"example12" <<- [! 1 .. 10 !]
+
+/*
+	debugging with unboxed lists, the output is ugly: this should
+	be improved
+*/
+example13
+	=	"example13" <<- [# 1 .. 10 ]
+
+/*
+	debugging with unboxed lists of records, the output is ugly:
+	this should be improved
+*/
+:: R2 = {f :: Int}
+example14
+	=	"example14" <<- [# {f = 1}, {f = 2} !]
+
+*/

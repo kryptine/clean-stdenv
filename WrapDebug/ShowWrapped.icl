@@ -1,7 +1,7 @@
 /*
 	Show Wrapped Node
 
-	Version 1.0.2
+	Version 1.0.3
 	Ronny Wichers Schreur
 	ronny@cs.kun.nl
 */
@@ -44,6 +44,10 @@ show _ (WrappedArray a)
 	=	["{" : flatten (separate [", "] [show Don`tShowParentheses el \\ el <-: a])] ++ ["}"]
 show _ (WrappedRecord descriptor args)
 	=	["{" : flatten (separate [" "] [[showDescriptor descriptor] : [show ShowParentheses arg \\ arg <-: args]])] ++ ["}"]
+show _ (WrappedUnboxedList descriptor args)
+	=	["(" : flatten (separate [", "] [show Don`tShowParentheses arg \\ arg <-: args])] ++ [")"]
+show _ (WrappedUnboxedRecordList descriptor args)
+	=	["(" : flatten (separate [", "] [show Don`tShowParentheses arg \\ arg <-: args])] ++ [")"]
 show _ (WrappedOther WrappedDescriptorCons args)
 	| size args == 2
 		=	["[" : flatten [show Don`tShowParentheses args.[0] : showTail args.[1]]] ++ ["]"]

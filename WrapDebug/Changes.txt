@@ -1,3 +1,6 @@
+1.0.3
+    - changed output for records (for example "{R | 1}" instead of "{R 1}")
+    - added support for wrapping unboxed lists, output for this could still be improved
 1.0.2
     - Made Clean 2.0 compatible 
 1.0.1

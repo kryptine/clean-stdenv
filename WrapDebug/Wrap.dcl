@@ -1,7 +1,7 @@
 /*
 	Wrap Clean nodes (for debugging purposes).
 
-	Version 1.0.2
+	Version 1.0.3
 	Ronny Wichers Schreur
 	ronny@cs.kun.nl
 */
@@ -11,7 +11,7 @@ definition module Wrap
 from StdOverloaded import toString 
 //3.1
 /*2.0
-from StdOverloaded import class toString 
+from StdOverloaded import class toString(..);
 0.2*/
 
 ::	WrappedDescriptorId
@@ -44,6 +44,12 @@ instance toString WrappedDescriptorId
 
 	// records
     |   WrappedRecord !WrappedDescriptor !{WrappedNode}
+
+	// unboxed lists
+    |   WrappedUnboxedList !WrappedDescriptor !{WrappedNode}
+
+	// unboxed lists of records
+    |   WrappedUnboxedRecordList !WrappedDescriptor !{WrappedNode}
 
 	// other nodes
     |   WrappedOther !WrappedDescriptor !{WrappedNode}

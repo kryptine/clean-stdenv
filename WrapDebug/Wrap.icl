@@ -1,13 +1,13 @@
 /*
 	Wrap Clean nodes (for debugging purposes).
 
-	Version 1.0.2
+	Version 1.0.3
 	Ronny Wichers Schreur
 	ronny@cs.kun.nl
 */
 implementation module Wrap
 
-import	StdOverloaded
+import	StdOverloaded, StdMisc
 
 ::	WrappedDescriptorId = {descriptorId :: !Int}
 
@@ -30,6 +30,8 @@ import	StdOverloaded
     |   WrappedFileArray !{#File}
     |   WrappedArray !{WrappedNode}
     |   WrappedRecord !WrappedDescriptor !{WrappedNode}
+    |   WrappedUnboxedList !WrappedDescriptor !{WrappedNode}
+    |   WrappedUnboxedRecordList !WrappedDescriptor !{WrappedNode}
     |   WrappedOther !WrappedDescriptor !{WrappedNode}
 
 instance toString WrappedDescriptorId where
@@ -230,28 +232,60 @@ wrapNode node
 					|	desc: record descriptor
 					|	return: return selector)
 
-		| determine if it's a record or a constructor with strict arguments
+		| determine record  kind
 		push_b	0
 		push_r_arg_t
+
+		| test if it's a constructor with strict arguments
 		eqC_b	'd' 0
-		jmp_false	is_record
+		jmp_true	is_constructor
+
+		| test if it's a unboxed list
+		eqC_b	'l' 0
+		jmp_true	is_unboxed_list
+
+		jmp	is_record
+
+	:is_constructor
+		pop_b	1
+		| increment <l> past the 'c'
+		incI
+		pushC	'c'
+		jmp	count_fields
+
+	:is_unboxed_list
+		pop_b	1
+		| increment <l> past the 'l'
+		incI
+
+		| test if it's an unboxed list of records
+		push_b	0
+		push_r_arg_t
+		eqC_b	'R' 0
+		jmp_true	is_unboxed_list_records
 
 		pop_b	1
-		| increment <l> if it's not a record
+		pushC	'l'
+		jmp	count_fields
+
+	:is_unboxed_list_records
+		pop_b	1
+		| increment <l> past the 'R'
 		incI
-		pushB	FALSE
+		pushC	'u'
 		jmp	count_fields
 
 	:is_record
 		pop_b	1
-		pushB	TRUE
+		pushC	'r'
+		jmp	count_fields
 
 	:count_fields
 		push_b	1
 
 	:count_fields_loop
 					| A: <afield_1 .. afield_m> <result>
-					| B: <p> <is_record> <l> <bfield_1 .. bfield_n> <desc> <return> 
+					| B: <p> <record_kind> <l> <bfield_1 .. bfield_n> <desc> <return> 
 					| (p=l+offset)
 		push_b	0
 		push_r_arg_t
@@ -270,7 +304,7 @@ wrapNode node
 		update_b	3 1
 		subI
 					| A: <afield_1 .. afield_m> <result>
-					| B: <n+m> <is_record> <l> <bfield_1 .. bfield_n> <desc> <return>
+					| B: <n+m> <record_kind> <l> <bfield_1 .. bfield_n> <desc> <return>
 		create_array_	_ 1 0
 		pushI	0
 		push_b	2
@@ -281,7 +315,7 @@ wrapNode node
 
 	:wrap_fields_loop
 					| A: <_{fields}> <afield_ .. afield_m> <result>
-					| B: <p> <i> <is_record> <bfield_ .. bfield_n> <desc> <return>
+					| B: <p> <i> <record_kind> <bfield_ .. bfield_n> <desc> <return>
 		push_b	0
 		push_r_arg_t
 		eqI_b	0 0
@@ -408,7 +442,7 @@ wrapNode node
 		push_b	1
 		update _ 1 0
 					| A: <_{fields}> <afield_ .. afield_m> <result>
-					| B: <p> <i> <is_record> <bfield_ .. bfield_n> <desc> <return>
+					| B: <p> <i> <record_kind> <bfield_ .. bfield_n> <desc> <return>
 
 		| increment index
 		push_b	1
@@ -423,16 +457,16 @@ wrapNode node
 
 	:end_wrap_record_fields
 					| A: <_{fields}> <result>
-					| B: <i=0> <p> <i> <is_record> <desc> <return>
+					| B: <i=0> <p> <i> <record_kind> <desc> <return>
 		pop_b	3
 					| A: <_{fields}> <result>
-					| B: <is_record> <desc> <return>
+					| B: <record_kind> <desc> <return>
 
 		push_b	1
 		update_b	1 2
 		update_b	0 1
 		pop_b	1
-					| B: <desc> <is_record> <return>
+					| B: <desc> <record_kind> <return>
 
 		| create WrappedDescriptorOther node
 		build_r	e_Wrap_rWrappedDescriptorId 0 1 0 0
@@ -441,20 +475,50 @@ wrapNode node
 		update_a	0 1
 		pop_a 1
 					| A: <descriptor> <{fields}> <result>
-					| B: <is_record> <return>
+					| B: <record_kind> <return>
 
-		jmp_false fill_constructor_result
+		eqC_b	'r' 0
+		jmp_true fill_record_result
+		eqC_b	'c' 0
+		jmp_true fill_constructor_result
+		eqC_b	'l' 0
+		jmp_true fill_unboxed_list_result
+		eqC_b	'u' 0
+		jmp_true fill_unboxed_list_records_result
 
+		print_sc	"Wrap.wrapNode: (record fields) unknown record kind\n"
+		halt
+
+	:fill_record_result
+		pop_b	1
 		| fill result node for record
 		fill_r	e_Wrap_kWrappedRecord 2 0 2 0 0
 		pop_a	2
 		jmp	wrapped_record_return_to_caller
 
 	:fill_constructor_result
+		pop_b	1
 		| fill result node for constructor
 
 		fill_r	e_Wrap_kWrappedOther 2 0 2 0 0
 		pop_a	2
+		jmp	wrapped_record_return_to_caller
+
+	:fill_unboxed_list_result
+		pop_b	1
+		| fill result node for constructor
+
+		fill_r	e_Wrap_kWrappedUnboxedList 2 0 2 0 0
+		pop_a	2
+		jmp	wrapped_record_return_to_caller
+
+	:fill_unboxed_list_records_result
+		pop_b	1
+		| fill result node for constructor
+
+		fill_r	e_Wrap_kWrappedUnboxedRecordList 2 0 2 0 0
+		pop_a	2
+		jmp	wrapped_record_return_to_caller
 
 	:wrapped_record_return_to_caller
 					| A: <result>
