@@ -42,7 +42,6 @@ instance fromInt		{#Char}
 
 // Additional functions for integer arithmetic: 
 
-instance mod Int 	//	arg1 modulo arg2
 instance rem Int 	//	remainder after integer division
 instance gcd Int	//	Greatest common divider
 instance lcm Int	//	Least common multiple
