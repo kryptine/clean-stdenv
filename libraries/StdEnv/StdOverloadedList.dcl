@@ -78,7 +78,7 @@ instance fromString [#x!] | fromChar x & UTSList x
 	(!!|) list i
 		= index list i
 		where
-			index ::!.(l .e) !Int -> .e | List l e
+			index ::!u:(l v:e) !Int -> v:e | List l e,[u<=v]
 			index [|hd:tl] 0
 				= hd
 			index [|hd:tl] n
