@@ -154,28 +154,32 @@ void InitialiseCrossCallTCP (void)
 */
 void EvalCcRqCREATETCPWINDOW (CrossCallInfo *pcci)		/* No cross call args; no result. */
 {
-	ghTCPWindow	= CreateWindow (TCPWindowClassName,		/* Class name					 */
-								"",					 	/* Window title 				 */
-								WS_POPUP,				/* style flags					 */
-								0, 0,					/* x, y 						 */
-								0, 0,					/* width, height 				 */
-								NULL,					/* Parent window				 */
-								(HMENU) NULL,			/* menu handle					 */
-								(HANDLE) ghInst,		/* Instance that owns the window */
-								0
-							   );
+	if (!ghTCPWindow)
+		ghTCPWindow	= CreateWindow (TCPWindowClassName,		/* Class name					 */
+									"",					 	/* Window title 				 */
+									WS_POPUP,				/* style flags					 */
+									0, 0,					/* x, y 						 */
+									0, 0,					/* width, height 				 */
+									NULL,					/* Parent window				 */
+									(HMENU) NULL,			/* menu handle					 */
+									(HANDLE) ghInst,		/* Instance that owns the window */
+									0
+								);
 	MakeReturn0Cci (pcci);
 }
 
 int InstallCrossCallTCP (int ios)
 {
-	CrossCallProcedureTable newTable;
+	if (!ghTCPWindow)
+	{
+		CrossCallProcedureTable newTable;
 
-	InitialiseCrossCallTCP ();
+		InitialiseCrossCallTCP ();
 
-	newTable = EmptyCrossCallProcedureTable ();
-	AddCrossCallEntry (newTable, CcRqCREATETCPWINDOW,EvalCcRqCREATETCPWINDOW);
-	AddCrossCallEntries (gCrossCallProcedureTable, newTable);
+		newTable = EmptyCrossCallProcedureTable ();
+		AddCrossCallEntry (newTable, CcRqCREATETCPWINDOW,EvalCcRqCREATETCPWINDOW);
+		AddCrossCallEntries (gCrossCallProcedureTable, newTable);
 
-	return ios;
+		return ios;
+	}
 }

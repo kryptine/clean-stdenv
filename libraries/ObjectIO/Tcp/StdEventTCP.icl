@@ -65,7 +65,6 @@ openSendNotifier ls (SendNotifier sChan f rAttributes) pSt
 	  					= getEndpointDataC chan.bEndpointRef pSt
 	|	hasSendableNotifier
 		=	(ErrorNotifierOpen, sChan, pSt)
-	#	pSt				= appPIO (appIOToolbox OSinstallTCP) pSt		// PA: added
 	#	(errReport,pSt)	= openReceiverGeneral
 							(	newInetStateHandle ls (handleSendableEvent chan.bId f) 0
 									(close_tcpschan_receiver chan.bEndpointRef)
@@ -354,6 +353,7 @@ openReceiverGeneral ::	.(Id -> .(SelectState -> .([Id] -> .(.a -> .(.b -> Receiv
 						!.Id [.ReceiverAttribute .e] .a .b !*(PSt .c)
 					->	*(.ErrorReport,!*PSt .c);
 openReceiverGeneral createStateHandleFunc id rAttributes endpointRef isReceiver pState
+	# pState					= appPIO (appIOToolbox OSinstallTCP) pState
 	# (pState=:{io=ioState})	= receiverFunctions.dOpen pState // MW11++
 	# (rt,ioState)				= ioStGetReceiverTable ioState
 	  (maybe_parent,rt)			= getReceiverTableEntry id rt
