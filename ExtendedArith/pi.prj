@@ -37,7 +37,7 @@ Global
 		ExportedNames:	
 	Paths
 		Path:	{Project}
-		Path:	{Project}\ExtendedArith 1.0.2
+		Path:	{Project}\ExtendedArith
 	Precompile:	
 	Postlink:	
 MainModule
