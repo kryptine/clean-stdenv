@@ -5,7 +5,7 @@ implementation module mouseevent
 ***/
 
 import StdEnv//, StdIO
-import StdPSt,StdControlAttribute
+import StdPSt,StdControlAttribute,StdWindowAttribute
 import windowaccess,windowhandle,deviceevents,iostate
 import commondef
 import ostypes, oswindow, ospicture
@@ -211,11 +211,14 @@ where
 		clipRect = if (direction == Horizontal) hScrollRect vScrollRect
 		itemPtr = if (direction == Horizontal) hScroll vScroll
 			
-	controlMouseDownIO` pos wsH=:{wshHandle=Just wlsH=:{wlsState=ls,wlsHandle=wH=:{whKind,whItems,whWindowInfo}}} ps
+	controlMouseDownIO` pos wsH=:{wshHandle=Just wlsH=:{wlsState=ls,wlsHandle=wH=:{whAtts,whKind,whItems,whWindowInfo}}} ps
 		# windowPen = case whKind of
 						IsWindow	-> (getWindowInfoWindowData whWindowInfo).windowLook.lookPen
 						IsDialog	-> fst (sharePen dialogPen)
 						_			-> abort "window kind not supported"
+		# (_,winselect,_)
+				= getWindowKeyboardAtt (snd (cselect isWindowKeyboard (WindowKeyboard (const False) Unable undef) whAtts))
+		# hasWindowKeyboard = Able == winselect
 		# (_,(itemNr,itemPtr,itemContextPen,itemType),itemHs,(ls,ps))	= getControlsItemNr (when,mods,wPtr,wMetrics) windowPen pos whItems (ls,ps)
 		# wsH = {wsH & wshHandle=Just {wlsState = ls,  wlsHandle={wH & whItems=itemHs}}}
 
@@ -341,6 +344,12 @@ where
 //				# (selected,ps)						= accPIO (accIOToolbox (trackRectArea wPtr clipRect itemRect)) ps
 //				| selected
 				| filtered
+					// get current keyfocus control...
+					# (kf,wsH)			= getWindowStateHandleKeyFocus wsH
+					# (kfIt,kf)			= getCurrentFocusItem kf
+					# (wsH,ps)			= changeFocus False kfIt (Just itemNr) wPtr clipRect wsH ps
+					# wsH				= setWindowStateHandleKeyFocus kf wsH
+					
 					# (wids,wsH)			= getWindowStateHandleWIDS wsH
 					// hmmm, moeten we in modifiers niet de modifiers bij mouse-up zetten ipv die bij mouse-down?
 //					# controlInfo	= Just (ControlSelection {csWIDS=wids,csItemNr=itemNr,csItemPtr=itemPtr,csMoreData=0,csModifiers=toModifiers mods})
@@ -460,7 +469,14 @@ where
 				# controlInfo = Just (ControlSelection {csWIDS=wids,csItemNr=itemNr,csItemPtr=itemPtr,csMoreData=0,csModifiers=toModifiers mods})
 				= (True,controlInfo,wsH,ps)
 			= (True,Nothing,wsH,ps)
-
+		| hasWindowKeyboard
+			// get current keyfocus control...
+			# (kf,wsH)			= getWindowStateHandleKeyFocus wsH
+			# (kfIt,kf)			= getCurrentFocusItem kf
+			# (wsH,ps)			= changeFocus False kfIt Nothing wPtr zero wsH ps
+			# kf				= setNoFocusItem kf
+			# wsH				= setWindowStateHandleKeyFocus kf wsH
+			= (False,Nothing,wsH,ps)
 		= (False,Nothing,wsH,ps)
 
 getControlsItemNr
@@ -627,110 +643,10 @@ where
 getControlsItemNr _ pen _ _ ps
 	= (False,(0,0,pen,NothingState),[],ps)
 
-//---
-/*
-from quickdraw import WhiteColor, HasColorQD, BlackColor, RedColor
-from quickdraw import GreenColor, BlueColor, CyanColor, MagentaColor
-from quickdraw import YellowColor, QRGBForeColor, QRGBBackColor
-from quickdraw import QForeColor, QBackColor, QInvertRect, RGBColor
-
-settbpen wPtr {penForeColour,penBackColour} tb
-	= appGrafport wPtr set tb
-where
-	set tb
-		# tb = settbcolour True penForeColour tb
-		# tb = settbcolour False penBackColour tb
-		= tb
-
-settbcolour fore colour tb
-	| asRGB
-	= setRGBColour rgbColour tb
-	with
-//		setRGBColour :: !RGBColour !*Picture -> *Picture
-		setRGBColour rgb tb
-			# (hasColorQD,tb)	= HasColorQD tb
-			| hasColorQD
-			= setrgb (toMacRGB rgb) tb
-			= setpln WhiteColor tb
-		where
-			toMacRGB :: !RGBColour -> (!Int,!Int,!Int)
-			toMacRGB {r,g,b}
-				= (macRGB r,macRGB g,macRGB b)
-			where
-				macRGB :: !Int -> Int
-				macRGB x
-					| x>=MaxRGB	= 65535
-					| x<=0		= 0
-								= toInt (65535.0*((toReal x)/(toReal MaxRGB)))
-	= setMacColour colour tb
-	with
-//		setMacColour :: !Colour !*Picture -> *Picture
-		setMacColour colour tb
-			= setpln color tb
-		where
-			color		= case colour of
-							Black	-> BlackColor
-							White	-> WhiteColor
-							Red		-> RedColor
-							Green	-> GreenColor
-							Blue	-> BlueColor
-							Cyan	-> CyanColor
-							Magenta	-> MagentaColor
-							Yellow	-> YellowColor
-where
-	(asRGB,rgbColour)	= case colour of
-							RGB rgb		-> (True, rgb)
-							DarkGrey	-> (True, {r=dark,  g=dark,  b=dark})
-							Grey		-> (True, {r=medium,g=medium,b=medium})
-							LightGrey	-> (True, {r=light, g=light, b=light})
-							_			-> (False,WhiteRGB)
-	dark	= MaxRGB/4
-	medium	= MaxRGB/2
-	light	= MaxRGB*3/4
-	setrgb | fore = QRGBForeColor; = QRGBBackColor;
-	setpln | fore = QForeColor; = QBackColor;
-*/	 
-
-/*
-GetMouse` tb
-	# (x,y,tb) = GetMouse tb
-	= ({x=x,y=y},tb)
-
-//
-
-compoundMouseIO mfilter mfunction mstate=:(MouseDown pos mod num) (ls,ps)
-	# (ls,ps)			= case mfilter mstate of
-							True	-> trace_n "D" mfunction mstate (ls,ps)
-							_		-> trace_n "d" (ls,ps)
-	# (still_down,ps)	= accPIO (accIOToolbox WaitMouseUp) ps
-	# (pos,ps)			= accPIO (accIOToolbox GetMouse`) ps
-	| still_down
-		= compoundMouseIO mfilter mfunction (MouseDrag pos mod) (ls,ps)
-	= compoundMouseIO mfilter mfunction (MouseUp pos mod) (ls,ps)
-		
-compoundMouseIO mfilter mfunction mstate=:(MouseDrag pos mod) (ls,ps)
-	# (ls,ps)			= case mfilter mstate of
-							True	-> mfunction mstate (ls,ps)
-							_		-> (ls,ps)
-	# (still_down,ps)	= accPIO (accIOToolbox WaitMouseUp) ps
-	# (pos,ps)			= accPIO (accIOToolbox GetMouse`) ps
-	| still_down
-		= compoundMouseIO mfilter mfunction (MouseDrag pos mod) (ls,ps)
-	= compoundMouseIO mfilter mfunction (MouseUp pos mod) (ls,ps)
-
-compoundMouseIO mfilter mfunction mstate=:(MouseUp pos mod) (ls,ps)
-	# (ls,ps)			= case mfilter mstate of
-							True	-> trace_n "U" mfunction mstate (ls,ps)
-							_		-> trace_n "u" (ls,ps)
-	= (ls,ps)
-*/
-
 //--
 
 startTrack wPtr time itemNr itemPtr upPart direction isControl ps
 	# (hilite,ps) = case upPart of
-//				InUpButton		-> (True,appPIO (appIOToolbox (HiliteControl itemPtr upPart)) ps)
-//				InDownButton	-> (True,appPIO (appIOToolbox (HiliteControl itemPtr upPart)) ps)
 				InUpButton		-> (True,appPIO (appIOToolbox (appClipped wPtr (HiliteControl itemPtr upPart))) ps)
 				InDownButton	-> (True,appPIO (appIOToolbox (appClipped wPtr (HiliteControl itemPtr upPart))) ps)
 				_				-> (False,ps)
@@ -793,11 +709,6 @@ where
 		= appPIO (appIOToolbox set) ps
 		where
 			set tb
-/*
-				# tb = case tabbing && focus of
-						True	-> osSetEditControlSelection wPtr itemPtr clipRect clipRect 0 32767 tb 
-						_		-> tb
-*/
 				# tb = osSetEditControlFocus wPtr itemPtr clipRect focus tb
 				= tb
 	setFocus IsCompoundControl wPtr clipRect itemPtr focus ps

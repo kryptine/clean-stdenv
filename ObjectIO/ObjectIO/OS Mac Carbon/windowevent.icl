@@ -1,8 +1,5 @@
 implementation module windowevent
 
-
-//	Clean Object I/O library, version 1.2
-
 /*	windowevent defines the DeviceEventFunction for the window device.
 	This function is placed in a separate module because it is platform dependent.
 */
@@ -38,27 +35,6 @@ windoweventFatalError :: String String -> .x
 windoweventFatalError function error
 	= fatalError function "windowevent" error
 
-/*
-ioStGetActiveWindow ioState
-	# (_,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
-	# windows				= windowSystemStateGetWindowHandles wDevice
-	# (wids,windows)		= getWindowHandlesActiveWindow windows
-	| isNothing wids
-		# ioState			= ioStSetDevice (WindowSystemState windows) ioState
-		= (False,undef,ioState)
-	# (found,wsH,windows)	= getWindowHandlesWindow (toWID (fromJust wids)) windows
-	# ioState				= ioStSetDevice (WindowSystemState windows) ioState
-	= (found,wsH,ioState)
-
-ioStReplaceDialog wsH=:{wshIds={wPtr}} ioState
-	# (_,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
-	# windows				= windowSystemStateGetWindowHandles wDevice
-	# (found,wsH,windows)	= getWindowHandlesWindow (toWID wPtr) windows
-	# windows				= setWindowHandlesWindow wsH windows
-	# ioState				= ioStSetDevice (WindowSystemState windows) ioState
-	= ioState
-*/
-
 /*	windowEvent filters the scheduler events that can be handled by this window device.
 	For the time being no timer controls are added, so these events are ignored.
 	windowEvent assumes that it is not applied to an empty IOSt.
@@ -66,10 +42,8 @@ ioStReplaceDialog wsH=:{wshIds={wPtr}} ioState
 
 windowEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
 windowEvent schedulerEvent pState
-//	#! pState				= trace_n "windowEvent" pState
 	# (hasDevice,pState)	= accPIO (ioStHasDevice WindowDevice) pState
 	| not hasDevice			// This condition should never occur: WindowDevice must have been 'installed'
-//		= windoweventFatalError "WindowFunctions.dEvent" ("could not retrieve WindowSystemState from IOSt " +++ toString schedulerEvent)
 		= windoweventFatalError "WindowFunctions.dEvent" "could not retrieve WindowSystemState from IOSt"
 	| otherwise
 		= windowEvent schedulerEvent pState
@@ -77,26 +51,14 @@ where
 	windowEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
 	windowEvent schedulerEvent=:(ScheduleOSEvent osEvent=:(_,what,mess,_,_,_,_) _) pState=:{io=ioState}
 		| not (isWindowOSEvent what)
-//			# pState				= trace_n ("not window event "+++showEvent osEvent) pState
-//			# pState = case what of
-//						OsEvent		-> case (mess >> 24 ) of
-//										MouseMovedMessage		-> trace_n "mouse moved" pState
-//										SuspendResumeMessage	-> trace_n "suspend resume" pState
-//										_						-> trace_n "other" pState
-//						_			-> pState
 			= (False,Nothing,schedulerEvent,pState)
 		| otherwise
-//			# ioState				= case what <> OsEvent of
-//										True	-> ioState
-//										_		-> trace_n ("\nwindow event "+++toString (mess >> 24)) ioState
 			# (_,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
 			# (wMetrics, ioState)	= ioStGetOSWindowMetrics ioState
 			  windows				= windowSystemStateGetWindowHandles wDevice
 			# pState				= {pState & io=ioState}
-//			  (myEvent,replyToOS,deviceEvent,windows,pState)
 			  (myEvent,replyToOS,deviceEvent,pState)
 			  						= filterOSEvent wMetrics osEvent windows pState
-//			# pState				= appPIO (IOStSetDevice (WindowSystemState windows)) pState
 			  schedulerEvent		= case replyToOS of
 			  							(Just rosEvent) -> ScheduleOSEvent osEvent rosEvent
 			  							_				-> schedulerEvent
@@ -115,10 +77,8 @@ where
 		isWindowOSEvent _				= False
 
 	windowEvent schedulerEvent=:(ScheduleMsgEvent msgEvent) pState=:{io=ioState}
-//		#! ioState = trace_n ("windowEvent ScheduleMsgEvent",msgEvent) ioState
 		# (ioId,ioState)		= ioStGetIOId ioState
 		| ioId<>recLoc.rlIOId || recLoc.rlDevice<>WindowDevice
-//			#! ioState = trace_n ("windowEvent not my message",ioId<>recLoc.rlIOId,recLoc.rlDevice<>WindowDevice) ioState
 			= (False,Nothing,schedulerEvent,{pState & io=ioState})
 		| otherwise
 			# (_,wDevice,ioState)	= ioStGetDevice WindowDevice ioState
@@ -126,20 +86,18 @@ where
 			  (found,windows)		= hasWindowHandlesWindow (toWID recLoc.rlParentId) windows
 			  deviceEvent			= if found (Just (ReceiverEvent msgEvent)) Nothing
 			# ioState				= ioStSetDevice (WindowSystemState windows) ioState
-//			#! ioState = trace_n ("windowEvent was my message",found,recLoc.rlParentId) ioState
 			# pState				= {pState & io=ioState}
 			= (found,deviceEvent,schedulerEvent,pState)
 	where
 		recLoc						= getMsgEventRecLoc msgEvent
 	
 	windowEvent schedulerEvent pState
-//		# pState = trace_n ("windowEvent ScheduleTimerEvent") pState
 		= (False,Nothing,schedulerEvent,pState)
 
 /*	filterOSEvent filters the OSEvents that can be handled by this window device.
 */
 filterOSEvent :: !OSWindowMetrics !OSEvent !(WindowHandles (PSt .l)) !(PSt .l)
-  -> (!Bool,!Maybe [Int],!Maybe DeviceEvent /*,!WindowHandles (PSt .l)*/ ,  !(PSt .l))
+  -> (!Bool,!Maybe [Int],!Maybe DeviceEvent,  !(PSt .l))
 
 filterOSEvent wMetrics event=:(_,what,mess,when,h,v,mods) windows pState
 	# (wPtr,pState)			= accPIO(accIOToolbox (\tb -> case what of
@@ -358,6 +316,7 @@ initialFocus wids windows pState
 	# windows				= setWindowHandlesWindow wsH windows
 	= (windows, pState)
 */
+
 bufferOSEvent :: !OSEvent !(IOSt .l) -> IOSt .l
 bufferOSEvent event ioState
 	# (osEvents,ioState)	= ioStGetEvents ioState
