@@ -18,8 +18,8 @@ spreadsheet hst
 		] 
 		[ H1 "Spreadsheet Example: "
 		, Br
-		, (tableB  <-> rowsumB)
-		, (colsumB <-> tsumB)
+		, (tableB  <=> rowsumB)
+		, (colsumB <=> tsumB)
 		, T "so the result of the spreadsheet is :", tsumB
 		],hst)
 where

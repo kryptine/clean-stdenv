@@ -60,6 +60,7 @@ derive gHpr Inputs
 derive gHpr Link_Attr
 derive gHpr NoWrap
 derive gHpr Option_Attr
+derive gHpr ReadOnly
 derive gHpr RuleOption
 derive gHpr Selected
 derive gHpr Select_Attr
@@ -114,4 +115,11 @@ gHpr{|ColorName|} prev Red	= prev <+ "red"
 
 
 gHpr{|NoAttr|} prev _ = prev 
+
+//derive gHpr HN, HexNum
+
+gHpr{|HN|} prev _ = prev  <+ "0"
+
+gHpr{|HexNum|} prev (HexNum h0 h1 h2 h3 h4 h5) = prev  <+ "#" <+ h0 <+ h1 <+ h5 
+
 
