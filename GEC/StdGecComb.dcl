@@ -16,6 +16,7 @@ gecEdit 		:: String 	-> CGEC a a | gGEC{|*|} a				// Create a GEC editor  for ty
 gecDisplay 		:: String 	-> CGEC a a | gGEC{|*|} a 				// Create a GEC display for type a
 gecFun 			:: (a -> b) -> CGEC a b 							// Promote function to invisible GEC
 gecConst 		:: b 		-> CGEC a b 							// Promote constant value to invisible GEC ignoring any input
+gecMouse		:: String 	-> CGEC a MouseState					// Assign a mouse to a fresh window
 
 // Combinators to combine GEC circuits
 
@@ -43,12 +44,13 @@ gecIO 				:: (A. .ps: a *(PSt .ps) -> *PSt .ps) -> CGEC a a	// For doing special
 
 derive gGEC GecComb
 
+
 :: GecComb a b =	{ inout :: (a,b)
 					, gec	 :: CGEC a b
 					}
 
-AGECtoCGEC :: String (AGEC a) 	-> (CGEC a a) 	| gGEC{|*|} a
-CGECtoAGEC :: (CGEC a a ) a 	-> (AGEC a) 	| gGEC{|*|} a
+AGECtoCGEC :: String	(AGEC a) 		-> (CGEC a a) 	| gGEC{|*|} a		// Create CGEC in indicated window 
+CGECtoAGEC :: 			(CGEC a a ) a 	-> (AGEC a) 	| gGEC{|*|} a		// Use CGEC as AGEC 
 
 // Simple functions for frequently occuring combinations of circuits 						
 
@@ -59,5 +61,5 @@ applyGEC2 		:: String (a b -> c)			-> CGEC (a,b) c		| gGEC{|*|} a & gGEC{|*|} b 
 selfGEC 		:: String (a -> a) 				-> CGEC a a			| gGEC{|*|} a 
 mutualGEC 		:: String (b -> a)(a -> b) 		-> CGEC a a 		| gGEC{|*|} a & gGEC{|*|} b 
 predGEC 		:: String (a -> Bool) 			-> CGEC a a 		| gGEC{|*|} a
-//selfState_GECps :: (A..ps : a -> .(s -> .(*(PSt .ps) -> *(a,s,*(PSt .ps))))) !(!String,!a) s 
-//																		-> CGEC (a,(Mode s)) (a,(Mode s)) | gGEC{|*|} a & gGEC{|*|} s 
+selfState_GECps :: String (A..ps : .(a,s) -> .(*(PSt .ps) -> *(.(a,s),*(PSt .ps)))) 
+												-> CGEC (a,s) (a,s) | gGEC{|*|} a & gGEC{|*|} s 

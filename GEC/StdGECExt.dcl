@@ -13,3 +13,7 @@ createNGEC 	   :: String OutputOnly a (Update a (PSt .ps)) *(PSt .ps) -> *((GECV
 
 // createDummyGEC stores *any* value, no editor is made, no gGEC instance needed
 createDummyGEC :: OutputOnly a (Update a (PSt .ps)) *(PSt .ps) -> *((GECVALUE a *(PSt .ps)),*(PSt .ps))
+
+createMouseGEC :: String OutputOnly (Update MouseState (PSt .ps)) *(PSt .ps) -> *((GECVALUE MouseState *(PSt .ps)),*(PSt .ps)) 
+
+searchWindowIdWithTitle :: String (IOSt .ps) -> (Maybe Id,IOSt .ps)

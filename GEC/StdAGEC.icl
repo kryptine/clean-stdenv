@@ -165,15 +165,14 @@ where
 
 gGEC{|Mode|} gGECa args=:{gec_value = Just (Hide a), update = modeupdate} pSt
 = createDummyGEC OutputOnly (Hide a) modeupdate pSt
-	
-		
-gGEC{|Mode|} gGECa args pSt
-= abort "cannot display Mode for Nothing"
+
+gGEC{|Mode|} gGECa args=:{gec_value = Just (EmptyMode), update = modeupdate} pSt
+= createDummyGEC OutputOnly (EmptyMode) modeupdate pSt
 
 // Timer driven GEC
 
-
 :: Timed = Timed (Int ->Int) Int						
+
 //	{location,makeUpValue,outputOnly,gec_value,update}
 
 gGEC{|Timed|} args=:{gec_value=Just (Timed updfun i),update=tiupdate} pSt
@@ -203,14 +202,12 @@ where
 		# ni = updfun i
 		# pSt = appPIO (setTimerInterval tid ni) pSt
 		= (lSt,ahandle.gecSetValue YesUpdate (Hide ni) pSt)
-
-
 			
 // bimap GEC a b to use a b-editor for constructing an a-value
 
-gGEC{|BimapGEC|} gGECa gGECb gecArgs pSt
-	= f gGECa gGECb gecArgs pSt
-f gGECa gGECb gecArgs=:{gec_value=mbimap,update=biupdate} pSt
+gGEC{|BimapGEC|} _ gGECb gecArgs pSt
+	= bimapgec gGECb gecArgs pSt
+bimapgec gGECb gecArgs=:{gec_value=mbimap,update=biupdate} pSt
 	= convert (bhandle,pst1)
 where
 	(bhandle,pst1) = gGECb {gecArgs & gec_value=mb,update=bupdate bhandle} pSt
@@ -244,8 +241,8 @@ where
 
 :: AGEC a = E. .b :  Hidden (BimapGEC a b) (A. .ps: InfraGEC (BimapGEC a b) (PSt ps))
 
-mkAGEC  :: (BimapGEC a b) -> AGEC a | gGEC{|*|} b & gGEC{|*|} a
-mkAGEC bimapGEC =  Hidden bimapGEC gGEC{|*|}
+mkAGEC  :: (BimapGEC a b) -> AGEC a | gGEC{|*|} b
+mkAGEC bimapGEC =  Hidden bimapGEC (gGEC{|*->*->*|} undef gGEC{|*|})
 
 ^^    :: (AGEC a) -> a
 ^^ (Hidden bimap ggec) = bimap.value
@@ -253,7 +250,7 @@ mkAGEC bimapGEC =  Hidden bimapGEC gGEC{|*|}
 (^=) infixl  :: (AGEC a) a -> (AGEC a)
 (^=) (Hidden bimap ggec) nvalue = (Hidden {bimap & value = nvalue} ggec)
 
-gGEC{|AGEC|} gGECa gecArgs=:{gec_value=mbimap,update=biupdate} pSt
+gGEC{|AGEC|} _ gecArgs=:{gec_value=mbimap,update=biupdate} pSt
 	= case mbimap of 
 		Just abstractGEC=:(Hidden bimapGEC gGECbimapGEC) 
 					= convert abstractGEC (gGECbimapGEC {gecArgs & gec_value=Just bimapGEC,update=bupdate abstractGEC} pSt)
@@ -377,30 +374,47 @@ where
 											     (v+(toReal i/(base*10.0)),Hide(cond,(base*10.0)))
 				)
 
+// convert mode to agec
+
+modeGEC :: (Mode a) -> AGEC a | gGEC {|*|} a
+modeGEC mode =  mkAGEC 	{ toGEC = \a _ -> mode
+						, fromGEC = demode
+						, updGEC = id
+						, value = demode mode}
+where
+	demode (Display a) = a
+	demode (Edit a) =  a
+	demode (Hide a) =  a
 
 // All elements of a list shown in a row
 
 horlistGEC :: [a] -> AGEC [a] | gGEC {|*|} a  
-horlistGEC  list	= mkAGEC	{	toGEC	= \newlist -> mkhorlist newlist
-								,	fromGEC = \(x <-> abs_xs) -> [x: ^^ abs_xs]
+horlistGEC  list	= mkAGEC	{	toGEC	= tohorlist
+								,	fromGEC = fromhorlist
 								,	value 	= list
 								,	updGEC	= id
 								}
 where
-	mkhorlist [x]	 _ = x <-> hidGEC []
-	mkhorlist [x:xs] _ = x <-> horlistGEC xs
+	tohorlist []	 _ = EmptyMode <-> hidGEC []
+	tohorlist [x:xs] _ = Edit x    <-> horlistGEC xs
+
+	fromhorlist (EmptyMode <-> xs) = []  
+	fromhorlist (Edit x <-> xs)    = [x: ^^ xs]  
 
 // All elements of a list shown in a column
 
 vertlistGEC :: [a] -> AGEC [a] | gGEC {|*|} a  
-vertlistGEC  list	= mkAGEC	{	toGEC	= \newlist -> mkvertlist newlist
-								,	fromGEC = \(x <|> abs_xs) -> [x: ^^ abs_xs]
+vertlistGEC  list	= mkAGEC	{	toGEC	= tovertlist
+								,	fromGEC = fromvertlist
 								,	value 	= list
 								,	updGEC	= id
 								}
 where
-	mkvertlist [x]	  _ = x <|> hidGEC []
-	mkvertlist [x:xs] _ = x <|> vertlistGEC xs
+	tovertlist []	 _ 	= EmptyMode <|> hidGEC []
+	tovertlist [x:xs] _ = Edit x    <|> vertlistGEC xs
+
+	fromvertlist (EmptyMode <|> xs)	= []  
+	fromvertlist (Edit x <|> xs)	= [x: ^^ xs]  
 
 // All elements of a list shown in a column
 

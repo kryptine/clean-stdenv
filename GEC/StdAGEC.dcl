@@ -2,7 +2,7 @@ definition module StdAGEC
 
 import genericgecs
 
-// lay out macro's
+// simple lay out macro's
 
 derive gGEC (,) 							// A tuple-editor is used to place things next to each other
 											// A PAIR-editor by default places things below each other
@@ -26,6 +26,7 @@ derive gGEC Mode
 :: Mode a 	= Display a
 			| Hide a
 			| Edit a
+			| EmptyMode
 
 // Timer editor: will cause an automatic update when it is part of any datastructure displayed in a gGEC
 
@@ -51,7 +52,7 @@ derive gGEC AGEC
 
 :: AGEC a		// abstract GEC for an a-value maintained with a b-editor
 
-mkAGEC		:: (BimapGEC a b) -> AGEC a | gGEC{|*|} b & gGEC{|*|} a
+mkAGEC  	:: (BimapGEC a b) -> AGEC a |  gGEC{|*|} b
 ^^			:: (AGEC a) -> a
 (^=) infixl	:: (AGEC a) a -> (AGEC a)
 
@@ -59,6 +60,7 @@ mkAGEC		:: (BimapGEC a b) -> AGEC a | gGEC{|*|} b & gGEC{|*|} a
 
 idGEC 			:: a   					-> AGEC a 		| gGEC {|*|} a				// identity editor  
 hidGEC 			:: a 					-> AGEC a 		| gGEC {|*|} a 				// identity, no editor created
+modeGEC 		:: (Mode a) 			-> AGEC a 		| gGEC {|*|} a				// convert Mode to AGEC
 applyAGEC 		:: (b -> a) (AGEC b) 	-> AGEC a 		| gGEC {|*|} a & gGEC {|*|} b // apply fba; show both b and a
 horlistGEC 		:: [a] 					-> AGEC [a]		| gGEC {|*|} a 				// all elements of a list displayed in a row
 vertlistGEC 	:: [a] 					-> AGEC [a] 	| gGEC {|*|} a 				// all elements of a list displayed in a column
