@@ -8,3 +8,5 @@ dynamicGEC2 :: a -> AGEC a | TC a & gGEC {|*|} a  // only shows typed in express
 derive gGEC (->), DynString
 
 :: DynString = DynStr Dynamic String
+
+derive generate Dynamic

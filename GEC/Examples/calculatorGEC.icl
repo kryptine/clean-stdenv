@@ -40,10 +40,12 @@ where
 
 derive gGEC MoreOrLess
 
+derive generate Button, MoreOrLess
+
 calcEditor	= startCircuit (designButtons >>@ convert >>> myCalculator) init
 where
 	init:: ButtonEditor
-	init = [("+",dynamicAGEC2 (+))]
+	init = [("+",dynamicAGEC (+))]
 
 	designButtons ::  GecCircuit ButtonEditor ButtonEditor
 	designButtons =  feedback (toDesignButtons

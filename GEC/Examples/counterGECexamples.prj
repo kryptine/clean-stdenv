@@ -65,7 +65,7 @@ MainModule
 			Y:	20
 			SizeX:	804
 			SizeY:	525
-	IclOpen:	True
+	IclOpen:	False
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
 	Module
@@ -5685,479 +5685,479 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 Static
 	Mods
-		Path:	{Project}\counterGECexamples.icl
-		Path:	{Project}\basicEditors.icl
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\store.icl
-		Path:	{Application}\Libraries\StdGEC\buttonAGEC.icl
-		Path:	{Application}\Libraries\StdGEC\modeAGEC.icl
-		Path:	{Application}\Libraries\StdGEC\basicAGEC.icl
-		Path:	{Application}\Libraries\StdGEC\GecArrow.icl
-		Path:	{Application}\Libraries\StdGEC\tupleAGEC.icl
-		Path:	{Application}\Libraries\StdGEC\updownAGEC.icl
-		Path:	{Application}\Libraries\StdGEC\StdAGEC.icl
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\StdGECExt.icl
-		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\ShowWrapped.icl
-		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Wrap.icl
-		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Debug.icl
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\TRACE.icl
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\GenDefault.icl
-		Path:	{Application}\Libraries\StdEnv\StdDebug.icl
-		Path:	{Application}\Libraries\MersenneTwister\MersenneTwister.icl
-		Path:	{Application}\Libraries\Gast\stdProperty.icl
-		Path:	{Application}\Libraries\Gast\genLibTest.icl
-		Path:	{Application}\Libraries\Gast\testable.icl
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\infragecs.icl
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\StdBimap.icl
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\StdObjectIOExt.icl
-		Path:	{Application}\Libraries\ObjectIOExtensions\ColourTextControl.icl
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\parseprint.icl
-		Path:	{Application}\Libraries\Generics\GenParse.icl
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\guigecs.icl
-		Path:	{Application}\Libraries\Generics\GenPrint.icl
-		Path:	{Application}\Libraries\StdEnv\StdGeneric.icl
-		Path:	{Application}\Libraries\Generics\GenEq.icl
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\objectloc.icl
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\guiloc.icl
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\gec.icl
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\genericgecs.icl
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\StdGEC.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\timerevent.icl
-		Path:	{Application}\Libraries\ObjectIO\timerdevice.icl
-		Path:	{Application}\Libraries\ObjectIO\timerdefaccess.icl
-		Path:	{Application}\Libraries\ObjectIO\timeraccess.icl
-		Path:	{Application}\Libraries\ObjectIO\StdTimer.icl
-		Path:	{Application}\Libraries\ObjectIO\StdTimerReceiver.icl
-		Path:	{Application}\Libraries\ObjectIO\StdTimerElementClass.icl
-		Path:	{Application}\Libraries\ObjectIO\StdTimerAttribute.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\receiverevent.icl
-		Path:	{Application}\Libraries\ObjectIO\receiverdevice.icl
-		Path:	{Application}\Libraries\ObjectIO\StdReceiver.icl
-		Path:	{Application}\Libraries\ObjectIO\mstate.icl
-		Path:	{Application}\Libraries\ObjectIO\StdMenuElement.icl
-		Path:	{Application}\Libraries\ObjectIO\StdMenuReceiver.icl
-		Path:	{Application}\Libraries\ObjectIO\windowcontrols.icl
-		Path:	{Application}\Libraries\ObjectIO\controlaccess.icl
-		Path:	{Application}\Libraries\ObjectIO\StdControl.icl
-		Path:	{Application}\Libraries\ObjectIO\StdControlReceiver.icl
-		Path:	{Application}\Libraries\ObjectIO\StdPrintText.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\windowevent.icl
-		Path:	{Application}\Libraries\ObjectIO\windowdevice.icl
-		Path:	{Application}\Libraries\ObjectIO\controlpos.icl
-		Path:	{Application}\Libraries\ObjectIO\controlcreate.icl
-		Path:	{Application}\Libraries\ObjectIO\windowcreate.icl
-		Path:	{Application}\Libraries\ObjectIO\receiverid.icl
-		Path:	{Application}\Libraries\ObjectIO\menuitems.icl
-		Path:	{Application}\Libraries\ObjectIO\menuinternal.icl
-		Path:	{Application}\Libraries\ObjectIO\StdMenu.icl
-		Path:	{Application}\Libraries\ObjectIO\windowdispose.icl
-		Path:	{Application}\Libraries\ObjectIO\controldraw.icl
-		Path:	{Application}\Libraries\ObjectIO\windowdraw.icl
-		Path:	{Application}\Libraries\ObjectIO\relayout.icl
-		Path:	{Application}\Libraries\ObjectIO\controlrelayout.icl
-		Path:	{Application}\Libraries\ObjectIO\controlresize.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\ostooltip.icl
-		Path:	{Application}\Libraries\ObjectIO\controlinternal.icl
-		Path:	{Application}\Libraries\ObjectIO\StdWindow.icl
-		Path:	{Application}\Libraries\ObjectIO\layout.icl
-		Path:	{Application}\Libraries\ObjectIO\controllayout.icl
-		Path:	{Application}\Libraries\ObjectIO\windowvalidate.icl
-		Path:	{Application}\Libraries\ObjectIO\controlvalidate.icl
-		Path:	{Application}\Libraries\ObjectIO\StdControlClass.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osprint.icl
-		Path:	{Application}\Libraries\ObjectIO\StdPrint.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\clipboardCrossCall_12.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osclipboard.icl
-		Path:	{Application}\Libraries\ObjectIO\StdClipboard.icl
-		Path:	{Application}\Libraries\ObjectIO\toolbar.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\processevent.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\menuwindowmenu.icl
-		Path:	{Application}\Libraries\ObjectIO\receiverdefaccess.icl
-		Path:	{Application}\Libraries\ObjectIO\StdReceiverAttribute.icl
-		Path:	{Application}\Libraries\ObjectIO\receiveraccess.icl
-		Path:	{Application}\Libraries\ObjectIO\wstateaccess.icl
-		Path:	{Application}\Libraries\ObjectIO\windowclipstate.icl
-		Path:	{Application}\Libraries\ObjectIO\windowupdate.icl
-		Path:	{Application}\Libraries\ObjectIO\StdWindowAttribute.icl
-		Path:	{Application}\Libraries\ObjectIO\StdControlAttribute.icl
-		Path:	{Application}\Libraries\ObjectIO\windowaccess.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\oswindow.icl
-		Path:	{Application}\Libraries\ObjectIO\wstate.icl
-		Path:	{Application}\Libraries\ObjectIO\sdisize.icl
-		Path:	{Application}\Libraries\ObjectIO\menucreate.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\menuevent.icl
-		Path:	{Application}\Libraries\ObjectIO\menudefaccess.icl
-		Path:	{Application}\Libraries\ObjectIO\menuaccess.icl
-		Path:	{Application}\Libraries\ObjectIO\StdMenuElementClass.icl
-		Path:	{Application}\Libraries\ObjectIO\StdMenuAttribute.icl
-		Path:	{Application}\Libraries\ObjectIO\StdReceiverDef.icl
-		Path:	{Application}\Libraries\ObjectIO\menudevice.icl
-		Path:	{Application}\Libraries\ObjectIO\processdevice.icl
-		Path:	{Application}\Libraries\ObjectIO\StdProcess.icl
-		Path:	{Application}\Libraries\ObjectIO\StdSystem.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osfileselect.icl
-		Path:	{Application}\Libraries\ObjectIO\scheduler.icl
-		Path:	{Application}\Libraries\ObjectIO\StdFileSelect.icl
-		Path:	{Application}\Libraries\StdLib\StdLibMisc.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\ostick.icl
-		Path:	{Application}\Libraries\ObjectIO\StdTime.icl
-		Path:	{Application}\Libraries\ObjectIO\StdPStClass.icl
-		Path:	{Application}\Libraries\ObjectIO\world.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osbeep.icl
-		Path:	{Application}\Libraries\ObjectIO\StdProcessAttribute.icl
-		Path:	{Application}\Libraries\ObjectIO\StdProcessDef.icl
-		Path:	{Application}\Libraries\ObjectIO\StdPSt.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osmouse.icl
-		Path:	{Application}\Libraries\ObjectIO\roundrobin.icl
-		Path:	{Application}\Libraries\ObjectIO\processstack.icl
-		Path:	{Application}\Libraries\ObjectIO\timerhandle.icl
-		Path:	{Application}\Libraries\ObjectIO\processhandle.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\menuCCall_12.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osmenu.icl
-		Path:	{Application}\Libraries\ObjectIO\StdMenuDef.icl
-		Path:	{Application}\Libraries\ObjectIO\menuhandle.icl
-		Path:	{Application}\Libraries\ObjectIO\devicesystemstate.icl
-		Path:	{Application}\Libraries\ObjectIO\StdTimerDef.icl
-		Path:	{Application}\Libraries\ObjectIO\timertable.icl
-		Path:	{Application}\Libraries\ObjectIO\deviceevents.icl
-		Path:	{Application}\Libraries\ObjectIO\devicefunctions.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osguishare.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\ostime.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osevent.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\windowCrossCall_12.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\ossystem.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\windowCCall_12.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\ostoolbar.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\menuCrossCall_12.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osdocumentinterface.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osactivaterequests.icl
-		Path:	{Application}\Libraries\ObjectIO\keyfocus.icl
-		Path:	{Application}\Libraries\ObjectIO\cast.icl
-		Path:	{Application}\Libraries\ObjectIO\semidynamic.icl
-		Path:	{Application}\Libraries\ObjectIO\receivertable.icl
-		Path:	{Application}\Libraries\ObjectIO\receivermessage.icl
-		Path:	{Application}\Libraries\ObjectIO\receiverhandle.icl
-		Path:	{Application}\Libraries\ObjectIO\StdWindowDef.icl
-		Path:	{Application}\Libraries\ObjectIO\windowhandle.icl
-		Path:	{Application}\Libraries\ObjectIO\StdControlDef.icl
-		Path:	{Application}\Libraries\ObjectIO\iostate.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\clCCall_12.icl
-		Path:	{Application}\Libraries\ObjectIO\commondef.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\oskey.icl
-		Path:	{Application}\Libraries\ObjectIO\StdKey.icl
-		Path:	{Application}\Libraries\ObjectIO\StdPicture.icl
-		Path:	{Application}\Libraries\ObjectIO\StdIOBasic.icl
-		Path:	{Application}\Libraries\ObjectIO\StdPictureDef.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osfont.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\rgnCCall_12.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\pictCCall_12.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\ostypes.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\clCrossCall_12.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\ostoolbox.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osrgn.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\ospicture.icl
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\osbitmap.icl
-		Path:	{Application}\Libraries\ObjectIO\StdBitmap.icl
-		Path:	{Application}\Libraries\ObjectIO\StdIOCommon.icl
-		Path:	{Application}\Libraries\ObjectIO\systemid.icl
-		Path:	{Application}\Libraries\ObjectIO\device.icl
-		Path:	{Application}\Libraries\ObjectIO\id.icl
-		Path:	{Application}\Libraries\StdLib\StdMaybe.icl
-		Path:	{Application}\Libraries\ObjectIO\StdId.icl
-		Path:	{Application}\Libraries\ObjectIO\StdIO.icl
-		Path:	{Application}\Libraries\StdEnv\StdFunc.icl
-		Path:	{Application}\Libraries\StdEnv\StdCharList.icl
-		Path:	{Application}\Libraries\StdEnv\StdTuple.icl
-		Path:	{Application}\Libraries\StdEnv\StdOrdList.icl
-		Path:	{Application}\Libraries\StdEnv\_SystemEnum.icl
-		Path:	{Application}\Libraries\StdEnv\StdEnum.icl
-		Path:	{Application}\Libraries\StdEnv\StdList.icl
-		Path:	{Application}\Libraries\StdEnv\StdFile.icl
-		Path:	{Application}\Libraries\StdEnv\StdString.icl
-		Path:	{Application}\Libraries\StdEnv\StdReal.icl
-		Path:	{Application}\Libraries\StdEnv\_SystemArray.icl
-		Path:	{Application}\Libraries\StdEnv\StdArray.icl
-		Path:	{Application}\Libraries\StdEnv\StdClass.icl
-		Path:	{Application}\Libraries\StdEnv\StdChar.icl
-		Path:	{Application}\Libraries\StdEnv\StdMisc.icl
-		Path:	{Application}\Libraries\StdEnv\StdInt.icl
-		Path:	{Application}\Libraries\StdEnv\StdBool.icl
-		Path:	{Application}\Libraries\StdEnv\StdEnv.icl
-		Path:	{Application}\Libraries\StdEnv\StdOverloaded.icl
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\_SystemDynamic.icl
-		Path:	{Application}\Libraries\Dynamics\extension\StdCleanTypes.icl
+		Path:	D:\My Documents\GEC\Examples\counterGECexamples.icl
+		Path:	D:\My Documents\GEC\Examples\basicEditors.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\store.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\buttonAGEC.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\modeAGEC.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\basicAGEC.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GecArrow.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\tupleAGEC.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\updownAGEC.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\StdAGEC.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\StdGECExt.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\Hilde\WrapDebugClosures\ShowWrapped.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\Hilde\WrapDebugClosures\Wrap.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\Hilde\WrapDebugClosures\Debug.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\TRACE.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\GenDefault.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdDebug.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\MersenneTwister\MersenneTwister.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\Gast\stdProperty.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\Gast\genLibTest.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\Gast\testable.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\infragecs.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\StdBimap.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\StdObjectIOExt.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIOExtensions\ColourTextControl.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\parseprint.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\Generics\GenParse.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\guigecs.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\Generics\GenPrint.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdGeneric.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\Generics\GenEq.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\objectloc.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\guiloc.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\gec.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\genericgecs.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\StdGEC.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\timerevent.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\timerdevice.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\timerdefaccess.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\timeraccess.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdTimer.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdTimerReceiver.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdTimerElementClass.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdTimerAttribute.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\receiverevent.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\receiverdevice.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdReceiver.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\mstate.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdMenuElement.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdMenuReceiver.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\windowcontrols.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\controlaccess.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdControl.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdControlReceiver.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdPrintText.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\windowevent.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\windowdevice.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\controlpos.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\controlcreate.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\windowcreate.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\receiverid.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\menuitems.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\menuinternal.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdMenu.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\windowdispose.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\controldraw.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\windowdraw.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\relayout.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\controlrelayout.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\controlresize.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\ostooltip.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\controlinternal.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdWindow.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\layout.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\controllayout.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\windowvalidate.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\controlvalidate.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdControlClass.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\osprint.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdPrint.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\clipboardCrossCall_12.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\osclipboard.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdClipboard.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\toolbar.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\processevent.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\menuwindowmenu.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\receiverdefaccess.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdReceiverAttribute.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\receiveraccess.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\wstateaccess.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\windowclipstate.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\windowupdate.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdWindowAttribute.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdControlAttribute.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\windowaccess.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\oswindow.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\wstate.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\sdisize.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\menucreate.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\menuevent.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\menudefaccess.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\menuaccess.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdMenuElementClass.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdMenuAttribute.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdReceiverDef.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\menudevice.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\processdevice.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdProcess.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdSystem.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\osfileselect.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\scheduler.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdFileSelect.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdLib\StdLibMisc.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\ostick.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdTime.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdPStClass.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\world.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\osbeep.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdProcessAttribute.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdProcessDef.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdPSt.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\osmouse.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\roundrobin.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\processstack.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\timerhandle.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\processhandle.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\menuCCall_12.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\osmenu.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdMenuDef.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\menuhandle.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\devicesystemstate.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdTimerDef.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\timertable.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\deviceevents.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\devicefunctions.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\osguishare.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\ostime.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\osevent.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\windowCrossCall_12.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\ossystem.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\windowCCall_12.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\ostoolbar.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\menuCrossCall_12.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\osdocumentinterface.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\osactivaterequests.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\keyfocus.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\cast.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\semidynamic.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\receivertable.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\receivermessage.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\receiverhandle.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdWindowDef.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\windowhandle.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdControlDef.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\iostate.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\clCCall_12.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\commondef.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\oskey.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdKey.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdPicture.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdIOBasic.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdPictureDef.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\osfont.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\rgnCCall_12.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\pictCCall_12.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\ostypes.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\clCrossCall_12.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\ostoolbox.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\osrgn.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\ospicture.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\osbitmap.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdBitmap.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdIOCommon.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\systemid.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\device.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\id.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdLib\StdMaybe.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdId.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\StdIO.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdFunc.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdCharList.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdTuple.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdOrdList.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\_SystemEnum.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdEnum.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdList.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdFile.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdString.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdReal.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\_SystemArray.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdArray.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdClass.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdChar.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdMisc.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdInt.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdBool.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdEnv.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\StdOverloaded.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\Dynamics\implementation\windows\_SystemDynamic.icl
+		Path:	C:\Clean 2.1.1a3\Libraries\Dynamics\extension\StdCleanTypes.icl
 	Objs
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup0.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup1Trace.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup2.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_system.o
-		Path:	{Project}\Clean System Files\counterGECexamples.o
-		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnv.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdBool.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdInt.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdMisc.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdChar.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdClass.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdArray.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemArray.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdReal.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdString.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFile.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdList.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnum.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnum.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOrdList.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdTuple.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdCharList.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdIO.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdId.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\id.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\device.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\systemid.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdIOCommon.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdBitmap.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osbitmap.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ospicture.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osrgn.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostoolbox.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\clCrossCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostypes.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\pictCCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\rgnCCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osfont.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPictureDef.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdIOBasic.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPicture.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdKey.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\oskey.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\commondef.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\clCCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\iostate.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osactivaterequests.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osdocumentinterface.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\menuCrossCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostoolbar.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\windowCCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ossystem.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\windowCrossCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osevent.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostime.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osguishare.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\devicefunctions.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\deviceevents.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receivermessage.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receivertable.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\semidynamic.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\cast.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\timertable.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTimerDef.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowhandle.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControlDef.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdWindowDef.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverhandle.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\keyfocus.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\devicesystemstate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuhandle.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuDef.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osmenu.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\menuCCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\processhandle.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\timerhandle.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\processstack.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\roundrobin.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osmouse.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPSt.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdProcessDef.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdProcessAttribute.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osbeep.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\world.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPStClass.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdFileSelect.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\scheduler.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osfileselect.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTime.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostick.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdSystem.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdProcess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\processdevice.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menudevice.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiverDef.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuAttribute.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuElementClass.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menudefaccess.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\menuevent.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menucreate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\sdisize.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\oswindow.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControlAttribute.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdWindowAttribute.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowupdate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\wstate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowclipstate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\wstateaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiveraccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiverAttribute.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverdefaccess.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\menuwindowmenu.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\processevent.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\toolbar.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdClipboard.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osclipboard.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\clipboardCrossCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPrint.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osprint.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControlClass.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlvalidate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowvalidate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controllayout.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\layout.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdWindow.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlpos.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlrelayout.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\relayout.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowdraw.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowcreate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenu.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuinternal.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuitems.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowdevice.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowdispose.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverid.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controldraw.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlresize.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\windowevent.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlcreate.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostooltip.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlinternal.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPrintText.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControlReceiver.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControl.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\controlaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowcontrols.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuReceiver.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuElement.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\mstate.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiver.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverdevice.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\receiverevent.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTimerAttribute.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTimerElementClass.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTimerReceiver.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTimer.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\timeraccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\timerdefaccess.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\timerdevice.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\timerevent.o
-		Path:	{Project}\Clean System Files\basicEditors.o
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\StdGEC.o
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\genericgecs.o
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\gec.o
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\guiloc.o
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\objectloc.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\GenEq.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\GenPrint.o
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\parseprint.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\GenParse.o
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\guigecs.o
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\StdObjectIOExt.o
-		Path:	{Application}\Libraries\ObjectIOExtensions\Clean System Files\ColourTextControl.o
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\StdBimap.o
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\infragecs.o
-		Path:	{Application}\Libraries\Gast\Clean System Files\testable.o
-		Path:	{Application}\Libraries\Gast\Clean System Files\genLibTest.o
-		Path:	{Application}\Libraries\Gast\Clean System Files\stdProperty.o
-		Path:	{Application}\Libraries\MersenneTwister\Clean System Files\MersenneTwister.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\GenDefault.o
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\TRACE.o
-		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Clean System Files\Debug.o
-		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Clean System Files\Wrap.o
-		Path:	{Application}\Libraries\Hilde\WrapDebugClosures\Clean System Files\ShowWrapped.o
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\StdGECExt.o
-		Path:	{Application}\Libraries\StdGEC\Clean System Files\StdAGEC.o
-		Path:	{Application}\Libraries\StdGEC\Clean System Files\GecArrow.o
-		Path:	{Application}\Libraries\StdGEC\Clean System Files\modeAGEC.o
-		Path:	{Application}\Libraries\StdGEC\Clean System Files\basicAGEC.o
-		Path:	{Application}\Libraries\StdGEC\Clean System Files\buttonAGEC.o
-		Path:	{Application}\Libraries\StdGEC\Clean System Files\tupleAGEC.o
-		Path:	{Application}\Libraries\StdGEC\Clean System Files\updownAGEC.o
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\store.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallClipboard_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFileSelectors_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFont_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallMenus_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallWindows_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallProcedureTable_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallCursor_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCall_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallSystem_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cAcceleratorTable_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallxDI_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cpicture_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cprinter_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallPrinter_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\util_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cpicture_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cdebug_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCall_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallWindows_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallSystem_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\_startup0.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\_startup1Trace.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\_startup2.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\_system.o
+		Path:	D:\My Documents\GEC\Examples\Clean System Files\counterGECexamples.o
+		Path:	C:\Clean 2.1.1a3\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
+		Path:	C:\Clean 2.1.1a3\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdOverloaded.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdEnv.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdBool.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdInt.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdMisc.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdChar.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdClass.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdArray.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\_SystemArray.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdReal.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdString.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdFile.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdList.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdEnum.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\_SystemEnum.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdOrdList.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdTuple.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdCharList.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdFunc.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdIO.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdId.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdLib\Clean System Files\StdMaybe.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\id.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\device.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\systemid.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdIOCommon.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdBitmap.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\osbitmap.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\ospicture.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\osrgn.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\ostoolbox.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\clCrossCall_12.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\ostypes.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\pictCCall_12.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\rgnCCall_12.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\osfont.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdPictureDef.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdIOBasic.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdPicture.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdKey.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\oskey.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\commondef.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\clCCall_12.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\iostate.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\osactivaterequests.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\osdocumentinterface.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\menuCrossCall_12.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\ostoolbar.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\windowCCall_12.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\ossystem.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\windowCrossCall_12.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\osevent.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\ostime.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\osguishare.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\devicefunctions.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\deviceevents.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\receivermessage.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\receivertable.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\semidynamic.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\cast.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\timertable.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdTimerDef.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\windowhandle.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdControlDef.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdWindowDef.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\receiverhandle.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\keyfocus.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\devicesystemstate.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\menuhandle.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdMenuDef.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\osmenu.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\menuCCall_12.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\processhandle.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\timerhandle.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\processstack.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\roundrobin.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\osmouse.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdPSt.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdProcessDef.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdProcessAttribute.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\osbeep.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\world.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdPStClass.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdFileSelect.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\scheduler.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\osfileselect.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdTime.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\ostick.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdLib\Clean System Files\StdLibMisc.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdSystem.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdProcess.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\processdevice.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\menudevice.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdReceiverDef.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdMenuAttribute.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdMenuElementClass.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\menuaccess.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\menudefaccess.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\menuevent.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\menucreate.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\sdisize.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\oswindow.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\windowaccess.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdControlAttribute.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdWindowAttribute.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\windowupdate.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\wstate.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\windowclipstate.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\wstateaccess.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\receiveraccess.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdReceiverAttribute.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\receiverdefaccess.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\menuwindowmenu.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\processevent.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\toolbar.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdClipboard.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\osclipboard.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\clipboardCrossCall_12.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdPrint.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\osprint.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdControlClass.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\controlvalidate.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\windowvalidate.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\controllayout.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\layout.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdWindow.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\controlpos.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\controlrelayout.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\relayout.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\windowdraw.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\windowcreate.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdMenu.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\menuinternal.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\menuitems.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\windowdevice.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\windowdispose.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\receiverid.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\controldraw.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\controlresize.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\windowevent.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\controlcreate.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\ostooltip.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\controlinternal.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdPrintText.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdControlReceiver.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdControl.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\controlaccess.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\windowcontrols.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdMenuReceiver.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdMenuElement.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\mstate.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdReceiver.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\receiverdevice.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\receiverevent.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdTimerAttribute.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdTimerElementClass.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdTimerReceiver.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\StdTimer.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\timeraccess.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\timerdefaccess.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\Clean System Files\timerdevice.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\timerevent.o
+		Path:	D:\My Documents\GEC\Examples\Clean System Files\basicEditors.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\Clean System Files\StdGEC.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\Clean System Files\genericgecs.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\Clean System Files\gec.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\Clean System Files\guiloc.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\Clean System Files\objectloc.o
+		Path:	C:\Clean 2.1.1a3\Libraries\Generics\Clean System Files\GenEq.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdGeneric.o
+		Path:	C:\Clean 2.1.1a3\Libraries\Generics\Clean System Files\GenPrint.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\Clean System Files\parseprint.o
+		Path:	C:\Clean 2.1.1a3\Libraries\Generics\Clean System Files\GenParse.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\Clean System Files\guigecs.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\Clean System Files\StdObjectIOExt.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIOExtensions\Clean System Files\ColourTextControl.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\Clean System Files\StdBimap.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\Clean System Files\infragecs.o
+		Path:	C:\Clean 2.1.1a3\Libraries\Gast\Clean System Files\testable.o
+		Path:	C:\Clean 2.1.1a3\Libraries\Gast\Clean System Files\genLibTest.o
+		Path:	C:\Clean 2.1.1a3\Libraries\Gast\Clean System Files\stdProperty.o
+		Path:	C:\Clean 2.1.1a3\Libraries\MersenneTwister\Clean System Files\MersenneTwister.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\StdDebug.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\Clean System Files\GenDefault.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\Clean System Files\TRACE.o
+		Path:	C:\Clean 2.1.1a3\Libraries\Hilde\WrapDebugClosures\Clean System Files\Debug.o
+		Path:	C:\Clean 2.1.1a3\Libraries\Hilde\WrapDebugClosures\Clean System Files\Wrap.o
+		Path:	C:\Clean 2.1.1a3\Libraries\Hilde\WrapDebugClosures\Clean System Files\ShowWrapped.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\Clean System Files\StdGECExt.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\Clean System Files\StdAGEC.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\Clean System Files\GecArrow.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\Clean System Files\modeAGEC.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\Clean System Files\basicAGEC.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\Clean System Files\buttonAGEC.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\Clean System Files\tupleAGEC.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\Clean System Files\updownAGEC.o
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation\Clean System Files\store.o
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallClipboard_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFileSelectors_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFont_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallMenus_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallWindows_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallProcedureTable_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallCursor_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCall_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallSystem_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cAcceleratorTable_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallxDI_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cpicture_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cprinter_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallPrinter_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\util_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cpicture_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cdebug_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCall_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallWindows_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.obj
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallSystem_121.obj
 	Dlib
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\kernel_library
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\user_library
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\gdi_library
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\comdlg_library
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\userExt_library
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\gdiExt_library
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\kernelExt_library
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\winspool_library
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\winmm_library
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\shell32_library
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ole32_library
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\kernel32_library
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\comctl32_library
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\advapi32_library
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\kernel_library
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\user_library
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\gdi_library
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\comdlg_library
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\userExt_library
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\gdiExt_library
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\kernelExt_library
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv\Clean System Files\winspool_library
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\winmm_library
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\shell32_library
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\ole32_library
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\kernel32_library
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\comctl32_library
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows\Clean System Files\advapi32_library
 	Pths
-		Path:	{Project}
-		Path:	{Application}\Libraries\StdEnv
-		Path:	{Application}\Libraries\StdLib
-		Path:	{Application}\Libraries\ObjectIO
-		Path:	{Application}\Libraries\ObjectIOExtensions
-		Path:	{Application}\Libraries\Generics
-		Path:	{Application}\Libraries\Dynamics
-		Path:	{Application}\Libraries\Dynamics\implementation\windows
-		Path:	{Application}\Libraries\Gast
-		Path:	{Application}\Libraries\StdGEC
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation
-		Path:	{Application}\Libraries\Hilde
-		Path:	{Application}\Libraries\Hilde\OS Windows
-		Path:	{Application}\Libraries\Hilde\OS Windows\NoDynamicFileSystem
-		Path:	{Application}\Libraries\Hilde\OS Windows\Foreign
-		Path:	{Application}\Libraries\Hilde\Parser combinators 2002
-		Path:	{Application}\Libraries\Hilde\WrapDebugClosures
-		Path:	{Application}\Libraries\ArgEnvWindows
-		Path:	{Application}\Libraries\Directory
-		Path:	{Application}\Libraries\ExceptionsWindows
-		Path:	{Application}\Libraries\ExtendedArith
-		Path:	{Application}\Libraries\MersenneTwister
-		Path:	{Application}\Libraries\Tcp
-		Path:	{Application}\Libraries\WrapDebug
-		Path:	{Application}\Libraries\ObjectIO\OS Windows
-		Path:	{Application}\Libraries\Dynamics\extension
-		Path:	{Application}\Libraries\Dynamics\general
-		Path:	{Application}\Libraries\Dynamics\implementation
-		Path:	{Application}\Examples\ObjectIO Examples\gui utilities
-		Path:	{Application}\Libraries\GameLib
+		Path:	D:\My Documents\GEC\Examples
+		Path:	C:\Clean 2.1.1a3\Libraries\StdEnv
+		Path:	C:\Clean 2.1.1a3\Libraries\StdLib
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIOExtensions
+		Path:	C:\Clean 2.1.1a3\Libraries\Generics
+		Path:	C:\Clean 2.1.1a3\Libraries\Dynamics
+		Path:	C:\Clean 2.1.1a3\Libraries\Dynamics\implementation\windows
+		Path:	C:\Clean 2.1.1a3\Libraries\Gast
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC
+		Path:	C:\Clean 2.1.1a3\Libraries\StdGEC\GEC Implementation
+		Path:	C:\Clean 2.1.1a3\Libraries\Hilde
+		Path:	C:\Clean 2.1.1a3\Libraries\Hilde\OS Windows
+		Path:	C:\Clean 2.1.1a3\Libraries\Hilde\OS Windows\NoDynamicFileSystem
+		Path:	C:\Clean 2.1.1a3\Libraries\Hilde\OS Windows\Foreign
+		Path:	C:\Clean 2.1.1a3\Libraries\Hilde\Parser combinators 2002
+		Path:	C:\Clean 2.1.1a3\Libraries\Hilde\WrapDebugClosures
+		Path:	C:\Clean 2.1.1a3\Libraries\ArgEnvWindows
+		Path:	C:\Clean 2.1.1a3\Libraries\Directory
+		Path:	C:\Clean 2.1.1a3\Libraries\ExceptionsWindows
+		Path:	C:\Clean 2.1.1a3\Libraries\ExtendedArith
+		Path:	C:\Clean 2.1.1a3\Libraries\MersenneTwister
+		Path:	C:\Clean 2.1.1a3\Libraries\Tcp
+		Path:	C:\Clean 2.1.1a3\Libraries\WrapDebug
+		Path:	C:\Clean 2.1.1a3\Libraries\ObjectIO\OS Windows
+		Path:	C:\Clean 2.1.1a3\Libraries\Dynamics\extension
+		Path:	C:\Clean 2.1.1a3\Libraries\Dynamics\general
+		Path:	C:\Clean 2.1.1a3\Libraries\Dynamics\implementation
+		Path:	C:\Clean 2.1.1a3\Examples\ObjectIO Examples\gui utilities
+		Path:	C:\Clean 2.1.1a3\Libraries\GameLib
 	AppP:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0
 	PrjP:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\AFP Examples\GEC Examples

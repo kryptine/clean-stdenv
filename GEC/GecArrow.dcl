@@ -39,3 +39,5 @@ source :: (GecCircuit a b) -> GecCircuit Void b
 flowControl :: (IncludeUpdate -> a -> Maybe (IncludeUpdate, b)) -> GecCircuit a b
 
 gecIO :: (A. .ps: a *(PSt .ps) -> *(b, *PSt .ps)) -> GecCircuit a b
+
+derive generate GecCircuit

@@ -175,7 +175,7 @@ where
 */
 mkDynStr x = let dx = dynamic x in DynStr dx (ShowValueDynamic dx)
 
-
+derive generate Mode, DynString, MyRecord3, T, X, MyRecord10
 
 /*	Section 4.1. Example 2
 */

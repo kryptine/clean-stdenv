@@ -38,6 +38,7 @@ derive gGEC Fundef, Expression, LastDef, MoreArgs
 
 testje = startCircuit (edit "test") (FLtoGEC [Fun "Factorial" ["n"] [D "Factorial",I 3]])
 	
+derive generate MoreArgs, Expression, LastDef
 
 goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world

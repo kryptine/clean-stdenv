@@ -95,3 +95,6 @@ gGEC{|(->)|} gGECa gGECb args=:{gec_value = Just (id), update = modeupdate} pSt
 gGEC{|(->)|} gGECa gGECb args=:{gec_value = Nothing, update = modeupdate} pSt
 = createDummyGEC OutputOnly (undef) modeupdate pSt
 
+
+generate{|Dynamic|} trace stream = (dynamic 1 :: Int, trace, \_ -> 0, stream)
+

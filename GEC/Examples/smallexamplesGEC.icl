@@ -24,7 +24,7 @@ Start world
 	 
 derive gGEC T
 
-testX` pst = let (cGEC,pst`) = createNGEC "self" Interactive (C1 (P -10 (counterAGEC 0))) (\_ t -> cGEC.gecSetValue NoUpdate (test t)) pst
+testX` pst = let (cGEC,pst`) = createNGEC "self" Interactive True (C1 (P -10 (counterAGEC 0))) (\_ t -> cGEC.gecSetValue NoUpdate (test t)) pst
              in  pst`
 where
 	 test (C1 (P x igec))
@@ -43,13 +43,18 @@ where
 :: P a b = P a b
 derive gGEC T`,P
 
-testXX` pst = let (cGEC,pst`) = createNGEC "self" Interactive (C1` (P 0 False)) (\_ t -> cGEC.gecSetValue NoUpdate (test t)) pst
+testXX` pst = let (cGEC,pst`) = createNGEC "self" Interactive True (C1` (P 0 False)) (\_ t -> cGEC.gecSetValue NoUpdate (test t)) pst
              in  pst`
 //testX` = CGEC (selfGEC "self" test) (C1` 0)
 where
 	 test (C1` (P i b)) = C2` (P (toReal i) b)
 	 test (C2` (P r b)) = C1` (P (toInt  r) b)
 
+derive generate Tree, GecComb, MyCounter, Up_Down, UpDown, DoubleCounter, BalancedTree, Rose, Euros, Pounds, BalancedNode
+
+generate{|GecCircuit|} ga gb trace stream 
+	# (b, trace, _, stream) = gb trace stream
+	= (arr \_ -> b, trace, \_ -> 0, stream)
 
 example_l1		= 	startCircuit (edit		"Simple List Editor")					[1]
 example_l2  	=	startCircuit (edit	"list" >>@ sum >>> edit "sum") 				[1..5]  									
