@@ -1,7 +1,7 @@
 definition module StdGameDef
 
 //	********************************************************************************
-//	Clean Standard Game library, version 1.2
+//	Clean Standard Game library, version 1.2.1
 //	
 //	StdGameDef contains all the type definitions needed to specify a game.
 //	********************************************************************************

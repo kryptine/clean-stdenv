@@ -2,7 +2,7 @@ definition module StdGame
 
 
 //	********************************************************************************
-//	Clean Standard Game library, version 1.2
+//	Clean Standard Game library, version 1.2.1
 //	
 //	StdGame contains the functions one needs during a game.
 //	********************************************************************************

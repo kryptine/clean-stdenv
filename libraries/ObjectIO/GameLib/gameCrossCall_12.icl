@@ -1,18 +1,65 @@
 implementation module gameCrossCall_12
 
 
-import clCrossCall_12, gameintrface_12
-import StdTuple
-/*	PA: these imports have been moved to clCrossCall_12.
-import code from "cGameLib_12.obj", "cOSGameLib_12.obj", "ddutil.obj", "Dsutil.obj"
+import	StdList, StdTuple
+from	commondef			import FatalError
+from	windowCrossCall_12	import WinFakePaint
+import	clCrossCall_12, gameintrface_12
+import	ostypes
+import code from "cCrossCallGame_121.obj",
+				 "cGameLib_121.obj",
+				 "cOSGameLib_121.obj",
+				 "ddutil.obj",
+				 "Dsutil.obj"
 import code from library "ddraw_library"
 import code from library "dsound_library"
-*/
 
+
+gameCrossCall_12FatalError :: String String -> .x
+gameCrossCall_12FatalError function error
+	= FatalError function "gameCrossCall_12" error
+
+//	Initialisation of game. This function must be called before any game cross call can be done!
+WinInitialiseGame :: !*OSToolbox -> *OSToolbox
+WinInitialiseGame tb
+	= code
+	{
+		.inline InstallCrossCallGame
+			ccall InstallCrossCallGame "I-I"
+		.end
+	}
 
   //----------------------------------------------//
  //    Game related crosscalls                   //
 //----------------------------------------------//
+
+WinCreateGameWindow :: !Bool !(!Int,!Int) !Int !*OSToolbox -> (![DelayActivationInfo],!OSWindowPtr,!*OSToolbox)
+WinCreateGameWindow fullscreen size bpp tb
+	# createcci		= {ccMsg=CcRqCREATEGAMEWINDOW,p1=w,p2=h,p3=bpp,p4=toInt fullscreen,p5=0,p6=0}
+	# (returncci,delay_info,tb)
+					= IssueCleanRequest OScreateGameWindowCallback createcci [] tb
+	  wPtr			= case returncci.ccMsg of
+						CcRETURN1   -> returncci.p1
+						CcWASQUIT   -> OSNoWindowPtr
+						_           -> gameCrossCall_12FatalError "WinCreateGameWindow" "Expected CcRETURN1 value."
+	= (reverse delay_info,wPtr,tb)
+where
+    (w,h)           = size
+
+    OScreateGameWindowCallback :: !CrossCallInfo ![DelayActivationInfo] !*OSToolbox
+                              -> (!CrossCallInfo,![DelayActivationInfo],!*OSToolbox)
+    OScreateGameWindowCallback {ccMsg=CcWmPAINT,p1=hwnd} s tb
+        = (Return0Cci, s, WinFakePaint hwnd tb)
+    OScreateGameWindowCallback {ccMsg=CcWmACTIVATE,p1=hwnd} delay_info tb
+        = (Return0Cci, [DelayActivatedWindow hwnd:delay_info], tb)
+    OScreateGameWindowCallback {ccMsg=CcWmDEACTIVATE,p1=hwnd} delay_info tb
+        = (Return0Cci, [DelayDeactivatedWindow hwnd:delay_info], tb)
+    OScreateGameWindowCallback {ccMsg=CcWmCREATE,p1=hwnd} delay_info tb
+        = (Return0Cci, delay_info, tb)
+    OScreateGameWindowCallback {ccMsg=CcWmSIZE,p1=hwnd,p2=width,p3=height} s tb
+        = (Return0Cci, s, tb)
+    OScreateGameWindowCallback {ccMsg} s tb
+        = gameCrossCall_12FatalError "WinCreateGameWindowCallback" ("unknown message type ("+++toString ccMsg+++")")
 
 WinRunGameEngine :: !(CrossCallInfo -> .(.s -> .(*OSToolbox -> *(.CrossCallInfo,.s,*OSToolbox)))) !.s !Int !Int !Int !*OSToolbox
                  -> (!.s,!*OSToolbox)
