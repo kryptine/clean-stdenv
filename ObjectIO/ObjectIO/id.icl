@@ -128,10 +128,10 @@ instance == (RId mess) where
 instance == (R2Id mess resp) where
 	(==) (R2Id i) (R2Id j) = i==j
 
-rIdtoId :: (RId mess) -> Id
+rIdtoId :: !(RId mess) -> Id
 rIdtoId (RId i) = CustomRId i
 
-r2IdtoId :: (R2Id mess resp) -> Id
+r2IdtoId :: !(R2Id mess resp) -> Id
 r2IdtoId (R2Id i) = CustomR2Id i
 
 instance toString Id where		// PA: dit zijn abstracte waardes, zou je niet moeten kunnen afdrukken.

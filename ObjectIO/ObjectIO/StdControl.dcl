@@ -37,19 +37,26 @@ openControls			:: !Id .ls .(cdef .ls (PSt .l)) !(PSt .l)
 openCompoundControls	:: !Id .ls .(cdef .ls (PSt .l)) !(PSt .l)
 									    -> (!ErrorReport,!PSt .l)
 									    |  Controls cdef
+openRecursiveControls	:: !Id .ls .(cdef .ls (PSt .l)) !(PSt .l)
+									    -> (!ErrorReport,!PSt .l)
+									    |  Controls cdef
 openPopUpControlItems	:: !Id !Index ![PopUpControlItem (PSt .l)]
 									    !(IOSt .l) -> IOSt .l
 /*	openControls
 		adds the given controls argument to the indicated window or dialog. 
 	openCompoundControls
 		adds the given controls argument to the indicated compound control.
+		THIS FUNCTION IS DEPRECATED. USE openRecursiveControls INSTEAD WITH
+		EXACTLY THE SAME ARGUMENTS.
+	openRecursiveControls
+		adds the given controls argument to the indicated (Compound/Layout)Control.
 	openPopUpControlItems
 		adds the PopUpControlItems to the indicated PopUpControl behind the item at
 		the given index position (counted from 1). 
 	The window/dialog is not resized.
-	These functions have no effect in case the indicated window/dialog/compound 
-	control could not be found (ErrorUnknownObject) or if controls are opened with 
-	duplicate Ids (ErrorIdsInUse).
+	These functions have no effect in case the indicated window, dialog, compound,
+	or layout control could not be found (ErrorUnknownObject) or if controls are 
+	opened with duplicate Ids (ErrorIdsInUse).
 */
 
 closeControls			:: !Id [Id] !Bool	!(IOSt .l) -> IOSt .l
@@ -139,9 +146,20 @@ setControlViewDomain	:: !Id ViewDomain				!(IOSt .l) -> IOSt .l
 */
 
 setControlScrollFunction:: !Id Direction ScrollFunction !(IOSt .l) -> IOSt .l
-/*	setControlScrollFunction set the ScrollFunction of the indicated CompoundControl
+/*	setControlScrollFunction sets the ScrollFunction of the indicated CompoundControl
 	in the given Direction if it has one.
 	In all other cases, setControlScrollFunction has no effect.
+*/
+
+setControlOuterSize		:: !Id Size			Bool		!(IOSt .l) -> IOSt .l
+setControlWidth			:: !Id ControlWidth	Bool		!(IOSt .l) -> IOSt .l
+/*	setControlOuterSize sets the outer size of the indicated 
+	(Compound/Custom(Button)/Layout)Control.
+	setControlWidth sets the width of the indicated (Button/Edit/PopUp/Text)Control.
+	For both functions the Boolean argument indicates if the layout needs to be
+	recalculated after setting the size (True) or not (False).
+	In case of unknown Ids, or non-matching control types, these functions have no
+	effect.
 */
 
 setControlTexts			:: ![(Id,String)]				!(IOSt .l) -> IOSt .l

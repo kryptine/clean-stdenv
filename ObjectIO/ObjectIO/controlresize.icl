@@ -2,16 +2,16 @@ implementation module controlresize
 
 
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
-import	commondef, controlrelayout, windowhandle
+import	commondef, controlrelayout, windowhandle, wstateaccess
 from	StdControlAttribute	import isControlResize,       getControlResizeFun,
 									isControlMinimumSize, getControlMinimumSizeAtt,
 									isControlPos,         getControlPosAtt, isControlViewSize
-from	controllayout		import layoutControls
+from	controllayout		import layoutControls, layoutControls`
 from	windowaccess		import getWItemCompoundInfo, getWItemEditInfo, getWItemSliderInfo, getWindowInfoWindowData,
-									getWindowHMargins, getWindowVMargins, getWindowItemSpaces
-from	windowclipstate		import forceValidWindowClipState, invalidateCompoundClipState
-from	windowdraw			import drawwindowlook
-from	windowupdate		import updatewindowbackgrounds
+									getWindowHMargins, getWindowVMargins, getWindowItemSpaces, identifyMaybeId
+from	windowclipstate		import forceValidWindowClipState, forceValidWindowClipState`, invalidateCompoundClipState
+from	windowdraw			import drawwindowlook, drawwindow`look
+from	windowupdate		import updatewindowbackgrounds, updatewindowbackgrounds`
 import	ossystem, ostoolbox, ostypes, oswindow
 
 
@@ -214,12 +214,89 @@ where
 	calcNewControlSize wMetrics originShifted oldWSize newWSize (WChangeLSHandle wChH=:{wChangeItems=itemHs})
 		# (layoutChanged,itemHs)	= calcNewControlsSize wMetrics originShifted oldWSize newWSize itemHs
 		= (layoutChanged,WChangeLSHandle {wChH & wChangeItems=itemHs})
-	
-	replaceSizeAtt :: !Size ![ControlAttribute .pst] -> [ControlAttribute .pst]
-	replaceSizeAtt size atts
+
+replaceSizeAtt :: !Size ![ControlAttribute .pst] -> [ControlAttribute .pst]
+replaceSizeAtt size atts
 //		= snd (creplace isControlSize sizeAtt atts)
-		# (replaced,atts)	= creplace isControlViewSize sizeAtt atts
-		| replaced			= atts
-		| otherwise			= atts++[sizeAtt]
+	# (replaced,atts)	= creplace isControlViewSize sizeAtt atts
+	| replaced			= atts
+	| otherwise			= atts++[sizeAtt]
+where
+	sizeAtt				= ControlViewSize size
+
+replaceSizeAtt` :: !Size ![ControlAttribute`] -> [ControlAttribute`]
+replaceSizeAtt` size atts
+	# (replaced,atts)	= creplace (\cAtt` -> case cAtt` of ControlViewSize` _ -> True; _ -> False) sizeAtt atts
+	| replaced			= atts
+	| otherwise			= atts++[sizeAtt]
+where
+	sizeAtt				= ControlViewSize` size
+
+resizeControl :: !OSWindowMetrics !Bool !WIDS !Id !Size !WindowHandle` !*OSToolbox -> (!WindowHandle`, !*OSToolbox)
+resizeControl wMetrics updateAll wids=:{wPtr} controlId newCSize wH=:{whWindowInfo`,whItems`=oldItems`,whAtts`,whDefaultId`,whSelect`,whShow`} tb
+	#  oldVisScrolls			= osScrollbarsAreVisible wMetrics domainRect wSize` (hasHScroll,hasVScroll)
+	   oldContent				= osGetWindowContentRect wMetrics oldVisScrolls (sizeToRect wSize)
+	   oldContentSize			= rectSize oldContent
+	# (layoutChanged,newItems`)	= replaceControlSize wMetrics controlId newCSize oldItems`
+	| not layoutChanged
+		= ({wH & whItems`=newItems`},tb)
+	| otherwise
+		# (_,newItems`,tb)		= layoutControls` wMetrics hMargins vMargins spaces wSize minSize [(domain,origin)] newItems` tb
+		  wH					= {wH & whItems`=newItems`}
+		# (wH,tb)				= forceValidWindowClipState` wMetrics True wPtr wH tb
+		# (updRgn,tb)			= relayoutControls` wMetrics whSelect` whShow` (sizeToRect wSize) (sizeToRect wSize) zero zero wPtr whDefaultId` oldItems` wH.whItems` tb
+		# (wH,tb)				= updatewindowbackgrounds` wMetrics updRgn wids wH tb
+		  {x,y}					= origin
+		  (oldw,oldh)			= wSize`
+		  updState				= {oldFrame=wFrame,newFrame=wFrame,updArea=[wFrame]}
+		= drawwindow`look wMetrics wPtr id updState wH tb
+where
+	wSize						= wH.whSize`
+	wSize`						= toTuple wSize
+	windowInfo					= getWindowInfoWindowData whWindowInfo`
+	(origin,domainRect,lookInfo,hasHScroll,hasVScroll)
+								= (windowInfo.windowOrigin,windowInfo.windowDomain,windowInfo.windowLook,isJust windowInfo.windowHScroll,isJust windowInfo.windowVScroll)
+	domain						= rectToRectangle domainRect
+	lookSysUpdate				= lookInfo.lookSysUpdate
+	(defMinW,defMinH)			= osMinWindowSize
+	wKind						= wH.whKind`
+	hMargins					= getWindowHMargins`   wKind wMetrics whAtts`
+	vMargins					= getWindowVMargins`   wKind wMetrics whAtts`
+	spaces						= getWindowItemSpaces` wKind wMetrics whAtts`
+	minSize						= {w=defMinW,h=defMinH}
+	wFrame						= posSizeToRectangle origin wSize
+
+/*	replaceControlSize updates the size of the indicated control.
+	The Boolean result holds iff this control has been found.
+*/
+	replaceControlSize :: !OSWindowMetrics !Id !Size ![WElementHandle`] -> (!Bool,![WElementHandle`])
+	replaceControlSize wMetrics controlId newCSize []
+		= (False,[])
+	replaceControlSize wMetrics controlId newCSize [itemH:itemHs]
+		# (done,itemH)		= replaceControlSize` wMetrics controlId newCSize itemH
+		| done				= (done,[itemH:itemHs])
+		| otherwise
+			# (done,itemHs)	= replaceControlSize wMetrics controlId newCSize itemHs
+			= (done,[itemH:itemHs])
 	where
-		sizeAtt				= ControlViewSize size
+		replaceControlSize` :: !OSWindowMetrics !Id !Size !WElementHandle` -> (!Bool,!WElementHandle`)
+		replaceControlSize`  wMetrics controlId newCSize (WItemHandle` itemH=:{wItemKind`,wItemId`,wItemAtts`})
+			| not (identifyMaybeId controlId wItemId`) || not okControl
+				| not (isRecursiveControl wItemKind`)
+					= (False,WItemHandle` itemH)
+				| otherwise
+					# (found,itemHs)	= replaceControlSize wMetrics controlId newCSize itemH.wItems`
+					= (found,WItemHandle` {itemH & wItems`=itemHs})
+			| otherwise
+				= (True,WItemHandle` {itemH & wItemSize`=newCSize,wItemAtts`=replaceSizeAtt` newCSize wItemAtts`})
+		where
+			okControl		= case wItemKind` of
+								IsCompoundControl     -> True
+								IsCustomButtonControl -> True
+								IsCustomControl       -> True
+								IsLayoutControl       -> True
+								_                     -> False
+		
+		replaceControlSize` wMetrics controlId newCSize (WRecursiveHandle` itemHs wKind)
+			# (done,itemHs)	= replaceControlSize wMetrics controlId newCSize itemHs
+			= (done,WRecursiveHandle` itemHs wKind)

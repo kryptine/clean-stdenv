@@ -10,6 +10,7 @@ definition module wstateaccess
 //	********************************************************************************
 
 
+from	ossystem import :: OSWindowMetrics{..}
 import	wstate
 //from	keyfocus	import :: FocusItem
 
@@ -76,3 +77,12 @@ getcontrolhmargin`			:: !ControlAttribute`	-> (Int,Int)
 getcontrolvmargin`			:: !ControlAttribute`	-> (Int,Int)
 getcontrolhscrollfunction`	:: !ControlAttribute`	-> ScrollFunction
 getcontrolvscrollfunction`	:: !ControlAttribute`	-> ScrollFunction
+
+/*	Access operations on the margins and item space attributes of the window attributes.
+	getWindow((H/V)Margin/ItemSpace)s type metrics atts
+		retrieves the indicated attribute if present from the attribute list. If the attribute
+		could not be found, the appropriate default value is returned. 
+*/
+getWindowHMargins`			:: !WindowKind !OSWindowMetrics ![WindowAttribute`] -> (!Int,!Int)
+getWindowVMargins`			:: !WindowKind !OSWindowMetrics ![WindowAttribute`] -> (!Int,!Int)
+getWindowItemSpaces`		:: !WindowKind !OSWindowMetrics ![WindowAttribute`] -> (!Int,!Int)

@@ -208,11 +208,10 @@ setWindowHandlesCursorInfo	:: !CursorInfo	!(WindowHandles .pst) -> WindowHandles
 getWElementKeyFocusIds		:: !Bool ![WElementHandle .ls .pst] -> (!*[FocusItem],![WElementHandle .ls .pst])
 
 //	Retrieve the OSWindowPtr of the control that has the initial input focus.
-getInitActiveControl :: !(WindowHandle .ls .pst) -> *(!OSWindowPtr,!WindowHandle .ls .pst)
+getInitActiveControl		:: !(WindowHandle .ls .pst) -> *(!OSWindowPtr,!WindowHandle .ls .pst)
 
 //	Generate internal item numbers for those WElementHandles that have none (wItemNr==0).
 genWElementItemNrs			:: ![Int] ![WElementHandle .ls .pst] -> (![Int],![WElementHandle .ls .pst])
 
 //	Dangerous!! Handle with extreme care!!
-getFinalModalLS :: !WID FinalModalLS -> Maybe .ls
-
+getFinalModalLS				:: !WID !FinalModalLS -> Maybe .ls

@@ -30,3 +30,5 @@ closepopupitems			:: !Id ![Index]                               !OSWindowPtr !(W
 movecontrolviewframe	:: !Id !Vector2              !OSWindowMetrics !WIDS        !WindowHandle`           !*OSToolbox -> (!WindowHandle`,           !*OSToolbox)
 setcontrolviewdomain	:: !Id !ViewDomain           !OSWindowMetrics !WIDS        !WindowHandle`           !*OSToolbox -> (!WindowHandle`,           !*OSToolbox)
 setcontrolscrollfun		:: !Id !Direction ScrollFunction                           !WindowHandle`                       ->   WindowHandle`
+setcontroloutersize		:: !Id !Size !Bool           !OSWindowMetrics !WIDS        !WindowHandle`           !*OSToolbox -> (!WindowHandle`,           !*OSToolbox)
+setcontrolwidth			:: !Id !ControlWidth !Bool   !OSWindowMetrics !WIDS        !WindowHandle`           !*OSToolbox -> (!WindowHandle`,           !*OSToolbox)

@@ -2,7 +2,7 @@ implementation module windowdraw
 
 import	StdBool, StdFunc, StdInt, StdList
 import	ospicture, osrgn, oswindow
-import	commondef, controllayout, StdPicture, windowaccess
+import	commondef, controllayout, StdPicture, windowaccess, wstate
 
 //import StdDebug,dodebug,memory
 
@@ -37,6 +37,33 @@ where
 	hasScrolls				= (isJust info.windowHScroll,isJust info.windowVScroll)
 	visScrolls				= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) hasScrolls
 	{w,h}					= rectSize (osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize))
+	wFrame					= {corner1=origin,corner2={x=origin.x+w,y=origin.y+h}}
+
+drawwindow`look :: !OSWindowMetrics !OSWindowPtr !(IdFun *Picture) !UpdateState !WindowHandle` !*OSToolbox
+																			-> (!WindowHandle`,!*OSToolbox)
+drawwindow`look wMetrics wPtr drawFirst updState wH=:{whSelect`,whSize`,whWindowInfo`} tb
+	#! (osPict,tb)			= osGrabWindowPictContext wPtr tb
+	#! picture				= packPicture origin (copyPen look.lookPen) True osPict tb
+	#! picture				= pictsetcliprgn clipRgn picture
+	#! picture				= drawFirst picture
+	#! picture				= appClipPicture (toRegion (if look.lookSysUpdate updState.updArea [wFrame])) (look.lookFun select updState) picture
+	#! (_,pen,_,osPict,tb)	= unpackPicture picture
+	#! tb					= osReleaseWindowPictContext wPtr osPict tb
+	#! tb					= osValidateWindowRgn wPtr clipRgn tb		// PA: added to eliminate update of window (in drawing part)
+	#! look					= {look & lookPen=pen}
+	#! info					= {info & windowLook=look}
+	= ({wH & whWindowInfo`=WindowInfo info},tb)
+where
+	select					= if whSelect` Able Unable
+	info					= getWindowInfoWindowData whWindowInfo`
+	domainRect				= info.windowDomain
+	origin					= info.windowOrigin
+	look					= info.windowLook
+	clip					= info.windowClip
+	clipRgn					= clip.clipRgn
+	hasScrolls				= (isJust info.windowHScroll,isJust info.windowVScroll)
+	visScrolls				= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize`) hasScrolls
+	{w,h}					= rectSize (osGetWindowContentRect wMetrics visScrolls (sizeToRect whSize`))
 	wFrame					= {corner1=origin,corner2={x=origin.x+w,y=origin.y+h}}
 
 drawwindowlook` :: !OSWindowMetrics !OSWindowPtr !(St *Picture [OSRect]) !UpdateState !(WindowHandle .ls .pst) !*OSToolbox

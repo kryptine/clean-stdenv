@@ -189,7 +189,7 @@ import	ospicture, ostypes
 		,	sliderInfoAction:: SliderAction st					// The action of the slider
 		}
 ::	TextInfo
-	=	{	textInfoText	:: String							// The content of the text control
+	=	{	textInfoText	:: !String							// The content of the text control
 		}
 ::	EditInfo
 	=	{	editInfoText	:: !String							// The content of the edit control
@@ -197,7 +197,7 @@ import	ospicture, ostypes
 		,	editInfoNrLines	:: NrLines							// The nr of complete visible lines of the edit item
 		}
 ::	ButtonInfo
-	=	{	buttonInfoText	:: String							// The title of the button control
+	=	{	buttonInfoText	:: !String							// The title of the button control
 		}
 ::	CustomButtonInfo
 	=	{	cButtonInfoLook	:: LookInfo							// The look of the custom button control

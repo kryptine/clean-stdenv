@@ -148,6 +148,99 @@ opencompoundcontrols _ _ _ _ _ _ _
 	= windowcontrolsFatalError "opencompoundcontrols" "unexpected window placeholder argument"
 
 
+/*	openrecursivecontrols adds the given controls to the (Compound/Layout)Control of the given window. 
+	It is assumed that the new controls do not conflict with the current controls.
+*/
+openrecursivecontrols :: !OSDInfo !OSWindowMetrics !Id .ls ![WElementHandle .ls .pst] !(WindowStateHandle .pst) !*OSToolbox
+																			 -> (!Bool,!WindowStateHandle .pst, !*OSToolbox)
+openrecursivecontrols osdInfo wMetrics controlId ls newItems 
+					  wsH=:{wshIds,wshHandle=Just wlsH=:{wlsHandle=wH=:{whItems,whAtts,whDefaultId,whCancelId,whSelect,whShow,whItemNrs,whKind,whSize,whWindowInfo}}} 
+					  tb
+	# (found,nrSkip,_,_,itemNrs,oldItemHs)
+									= addControlsToRecursiveControl controlId ls newItems whItemNrs whItems
+	| not found
+		= (False,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=oldItemHs}}},tb)
+	| otherwise
+		# (curw,curh)				= (whSize.w-(if visVScroll wMetrics.osmVSliderWidth 0),whSize.h-(if visHScroll wMetrics.osmHSliderHeight 0))
+		  curSize					= {w=curw,h=curh}
+		  wFrame					= sizeToRect curSize
+		  hMargins					= getWindowHMargins   whKind wMetrics whAtts
+		  vMargins					= getWindowVMargins   whKind wMetrics whAtts
+		  spaces					= getWindowItemSpaces whKind wMetrics whAtts
+		  reqSize					= {w=curw-fst hMargins-snd hMargins,h=curh-fst vMargins-snd vMargins}
+		# (oldItemHs`,oldItemHs,tb)	= getWElementHandles` wPtr oldItemHs tb
+		# (derSize,newItemHs,tb)	= layoutControls wMetrics hMargins vMargins spaces reqSize zero [(domain,origin)] oldItemHs tb
+	//	# tb						= checkNewWindowSize curSize derSize wPtr osdInfo tb	// PA: curSize might be bigger than domain, then you shouldn't resize!
+		# (newItemHs,tb)			= createRecursiveControls wMetrics controlId nrSkip whDefaultId whCancelId whSelect wPtr newItemHs tb
+		  wH						= {wH & whItemNrs=itemNrs,whItems=newItemHs}
+		# (wH,tb)					= forceValidWindowClipState wMetrics True wPtr wH tb
+		# (updRgn,newItemHs,tb)		= relayoutControls wMetrics whSelect whShow wFrame wFrame zero zero wPtr whDefaultId oldItemHs` wH.whItems tb
+		# (wH,tb)					= updatewindowbackgrounds wMetrics updRgn wshIds {wH & whItems=newItemHs} tb
+		= (True,{wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
+where
+	wPtr							= wshIds.wPtr
+	domain							= rectToRectangle domainRect
+	(origin,domainRect,hasHScroll,hasVScroll)
+									= case whWindowInfo of
+										WindowInfo info	-> (info.windowOrigin,info.windowDomain,isJust info.windowHScroll,isJust info.windowVScroll)
+										other			-> (zero,             sizeToRect whSize,False,False)
+	(visHScroll,visVScroll)			= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
+	
+	addControlsToRecursiveControl :: !Id .ls` ![WElementHandle .ls` .pst] [Int] ![WElementHandle .ls .pst]
+						  -> (!Bool,!Int,.ls`,![WElementHandle .ls` .pst],[Int],![WElementHandle .ls .pst])
+	addControlsToRecursiveControl _ ls newItems itemNrs []
+		= (False,0,ls,newItems,itemNrs,[])
+	addControlsToRecursiveControl controlId ls newItems itemNrs [itemH:itemHs]
+		# (found,nrSkip,ls,newItems,itemNrs,itemH)		= addControlsToRecursiveControl` controlId ls newItems itemNrs itemH
+		| found
+			= (found,nrSkip,ls,newItems,itemNrs,[itemH:itemHs])
+		| otherwise
+			# (found,nrSkip,ls,newItems,itemNrs,itemHs)	= addControlsToRecursiveControl controlId ls newItems itemNrs itemHs
+			= (found,nrSkip,ls,newItems,itemNrs,[itemH:itemHs])
+	where
+		addControlsToRecursiveControl` :: !Id .ls` ![WElementHandle .ls` .pst] [Int] !(WElementHandle .ls .pst)
+							   -> (!Bool,!Int,.ls`,![WElementHandle .ls` .pst],[Int], !WElementHandle .ls .pst)
+		addControlsToRecursiveControl` controlId ls newItems itemNrs (WItemHandle itemH)
+			# (found,nrSkip,ls,newItems,itemNrs,itemH) = addControlsToRecursiveControl`` controlId ls newItems itemNrs itemH
+			= (found,nrSkip,ls,newItems,itemNrs,WItemHandle itemH)
+		where
+			addControlsToRecursiveControl`` :: !Id .ls` ![WElementHandle .ls` .pst] [Int] !(WItemHandle .ls .pst)
+									-> (!Bool,!Int,.ls`,![WElementHandle .ls` .pst],[Int], !WItemHandle .ls .pst)
+			addControlsToRecursiveControl`` controlId ls newItems itemNrs itemH=:{wItemKind,wItemId}
+				| not (isRecursiveControl wItemKind)
+					= (False,0,ls,newItems,itemNrs,itemH)
+				| not (identifyMaybeId controlId wItemId)
+					# (found,nrSkip,ls,newItems,itemNrs,itemHs)	= addControlsToRecursiveControl controlId ls newItems itemNrs itemH.wItems
+					# itemH										= {itemH & wItems=itemHs}
+					| found && wItemKind==IsCompoundControl
+						= (found,nrSkip,ls,newItems,itemNrs,invalidateCompoundClipState itemH)
+					| otherwise
+						= (found,nrSkip,ls,newItems,itemNrs,itemH)
+				| otherwise
+					# (nrSkip, curItems)						= ulength itemH.wItems
+					  (itemNrs,newItems)						= genWElementItemNrs itemNrs newItems
+					  newItems									= [WChangeLSHandle {wChangeLS=ls,wChangeItems=newItems}]
+					  itemH										= {itemH & wItems=curItems++newItems}
+					| wItemKind==IsCompoundControl
+						= (True,nrSkip,undef,[],itemNrs,invalidateCompoundClipState itemH)
+					| otherwise
+						= (True,nrSkip,undef,[],itemNrs,itemH)
+		
+		addControlsToRecursiveControl` controlId ls newItems itemNrs (WListLSHandle itemHs)
+			# (found,nrSkip,ls,newItems,itemNrs,itemHs)	= addControlsToRecursiveControl controlId ls newItems itemNrs itemHs
+			= (found,nrSkip,ls,newItems,itemNrs,WListLSHandle itemHs)
+		
+		addControlsToRecursiveControl` controlId ls newItems itemNrs (WExtendLSHandle wExH=:{wExtendItems=itemHs})
+			# (found,nrSkip,ls,newItems,itemNrs,itemHs)	= addControlsToRecursiveControl controlId ls newItems itemNrs itemHs
+			= (found,nrSkip,ls,newItems,itemNrs,WExtendLSHandle {wExH & wExtendItems=itemHs})
+		
+		addControlsToRecursiveControl` controlId ls newItems itemNrs (WChangeLSHandle wChH=:{wChangeItems=itemHs})
+			# (found,nrSkip,ls,newItems,itemNrs,itemHs)	= addControlsToRecursiveControl controlId ls newItems itemNrs itemHs
+			= (found,nrSkip,ls,newItems,itemNrs,WChangeLSHandle {wChH & wChangeItems=itemHs})
+openrecursivecontrols _ _ _ _ _ _ _
+	= windowcontrolsFatalError "openrecursivecontrols" "unexpected window placeholder argument"
+
+
 /*	closecontrols closes the indicated controls and returns their R(2)Ids (first result [Id]) and
 	Ids (second result [Id]) if appropriate.
 	When closecontrols returns, the indicated controls will have been hidden. To actually dispose of them,

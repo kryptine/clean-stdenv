@@ -3,7 +3,7 @@ implementation module controlinternal
 
 import	StdBool, StdEnum, StdList, StdMisc, StdTuple
 import	ospicture, osrgn, ostooltip, oswindow, ossystem
-import	commondef, wstateaccess
+import	commondef, controlresize, wstateaccess
 from	StdControlAttribute	import isControlTip, getControlTipAtt, isControlKeyboard
 from	controldraw			import drawCustomButtonLook`, drawCustomLook`, drawCompoundLook`,
 									drawInCustomButton`,  drawInCustom`,   drawInCompound`
@@ -1440,3 +1440,12 @@ where
 		| otherwise
 			# (found,itemHs,s)	= setWElement (setCompoundScrollFun direction scrollFun) id wItems` s
 			= (found,{itemH & wItems`=itemHs},s)
+
+
+setcontroloutersize :: !Id !Size !Bool !OSWindowMetrics !WIDS !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
+setcontroloutersize id newCSize relayout wMetrics wids wH tb
+	= resizeControl wMetrics relayout wids id newCSize wH tb
+
+setcontrolwidth :: !Id !ControlWidth !Bool !OSWindowMetrics !WIDS !WindowHandle` !*OSToolbox -> (!WindowHandle`,!*OSToolbox)
+setcontrolwidth id newWidth relayout wMetrics wids wH tb
+	= abort "setcontrolwidth not yet implemented."

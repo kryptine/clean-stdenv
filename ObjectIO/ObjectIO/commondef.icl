@@ -208,7 +208,7 @@ fatalError rule moduleName error
 
 /*	Universal dummy value (!!evaluation causes termination with the message: "Fatal error: dummy evaluated!"!!)
 */
-dummy :: String -> .x
+dummy :: !String -> .x
 dummy error = abort ("Fatal error: dummy evaluated! "+++error+++".\n")
 
 

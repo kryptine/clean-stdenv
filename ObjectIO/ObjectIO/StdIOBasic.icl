@@ -25,10 +25,10 @@ import	StdBool, StdInt, StdList, StdOverloaded, StdString
 ::	NewLS		t	ls	cs	= E. .new: {newLS :: new, newDef :: t   new		cs}
 ::	AddLS		t	ls	cs	= E. .add: {addLS :: add, addDef :: t *(add,ls)	cs}
 
-noLS :: (.a->.b) (.c,.a) -> (.c,.b)
+noLS :: (.a->.b) !(.c,.a) -> (.c,.b)
 noLS f (c,a) = (c,f a)
 
-noLS1:: (.x->.a->.b) .x (.c,.a) -> (.c,.b)
+noLS1:: (.x->.a->.b) .x !(.c,.a) -> (.c,.b)
 noLS1 f x (c,a) = (c,f x a)
 
 
