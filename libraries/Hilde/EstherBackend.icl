@@ -40,7 +40,10 @@ notFreeVar _ _ = True
 instance generateCode Dynamic
 where
 	generateCode (CoreCode d) env = (d, env)
-	generateCode (CoreVariable x) env = raise (UnboundVariable x)
+	generateCode (CoreVariable v) env = raise (UnboundVariable v)
+	generateCode (CoreApply (CoreVariable "_dynamic_") e) env 
+		# (codex, env) = generateCode e env
+		= (dynamic codex :: Dynamic, env)
 	generateCode (CoreApply e1 e2) env 
 		# (codef, env) = generateCode e1 env
 		  (codex, env) = generateCode e2 env
