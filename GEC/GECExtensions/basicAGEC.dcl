@@ -15,5 +15,6 @@ counterGEC		:: a					-> AGEC a		| gGEC {|*|} a & IncDec a
 horlistGEC 		:: [a] 					-> AGEC [a]		| gGEC {|*|} a 				// all elements of a list displayed in a row
 vertlistGEC 	:: [a] 					-> AGEC [a] 	| gGEC {|*|} a 				// all elements of a list displayed in a column
 listGEC 		:: Bool [a] 			-> AGEC [a] 	| gGEC {|*|} a				// list editor, set True for finite lists  
-tableGEC 		:: [[a]] 				-> AGEC [[a]] 	| gGEC {|*|} a  			// a vertical list of horizontal lists
+tableGEC 		:: [[a]] 				-> AGEC [[a]] 	| gGEC {|*|} a  			// horizontal lists placed below each other
+tableGEC2 		:: [[a]] 				-> AGEC [[a]] 	| gGEC {|*|} a  			// vertical lists placed next to each other
 
