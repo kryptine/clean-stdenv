@@ -33,6 +33,8 @@ getFileInfo :: !Path !*env -> (!(!DirError, FileInfo), !*env)  | FileSystem env
 		error codes: NoDirError, DoesntExist, BadName, NoPermission, OtherDirError
 		The returned FileInfo is only valid, if the error code is NoDirError */
 
+getFileName			::	!Path !*env	-> (!(!DirError, String), !*env)	| FileSystem env
+
 createDirectory :: !Path !*env -> (!DirError, !*env)  | FileSystem env
 
 	/*	error codes: NoDirError, DoesntExist, BadName, NotEnoughSpace, AlreadyExists, NoPermission,

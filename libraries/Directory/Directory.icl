@@ -9,6 +9,7 @@ implementation module Directory
 
 import	StdEnv
 import code from "cDirectory.obj",  library "directory_library" // this is the only platform dependent line in this module
+//import code from "cDirectory." // for the Macintosh
 import StdMaybe
 //1.3
 from StdLibMisc		import Date, Time
@@ -177,6 +178,27 @@ getFileInfo path files
 	= (result, files)
   where
 	self = "getFileInfo"
+
+getFileName			::	!Path !*env	-> (!(!DirError, String), !*env)	| FileSystem env
+getFileName (AbsolutePath _ []) files
+		= ((BadName, fail "getFileName"), files)
+getFileName path files
+	#	(platformId, files)	= getPlatformIdC dummy files
+	|	isBadPath path platformId
+		= ((BadName, fail self), files)
+	#	(path_string, files)= pathToPD_String path files
+		(errCode, files)	= findSingleFileC (path_string+++"\0") files
+		(result, files)
+			= case errCode of
+				M_NoDirError#	(entry, files)	= getDirEntry True platformId files
+							-> ((NoDirError, entry.fileName), files)
+				_			-> ((toDirError [M_DoesntExist, M_BadName, M_NoPermission, M_OtherDirError]
+											errCode, fail self)
+							   , files)
+		files				= closeSingleSearchC files
+	= (result, files)
+  where
+	self = "getFileName"
 
 fmove				::	!MoveMode !Path !Path !*env -> (!DirError, !*env)			| FileSystem env
 fmove moveMode p_fromm p_to env
