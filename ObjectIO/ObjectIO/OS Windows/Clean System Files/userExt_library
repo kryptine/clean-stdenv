@@ -1,4 +1,5 @@
 user32.dll
+ChangeClipboardChain@8
 GetNextDlgTabItem@12
 IsWindowVisible@4
 LoadImageA@24
