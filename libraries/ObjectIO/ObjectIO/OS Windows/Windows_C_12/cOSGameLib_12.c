@@ -3,7 +3,7 @@
 
 /* DirectX implementation of the OS specific functions */
 
-#include "cOSGameLib.h"
+#include "cOSGameLib_12.h"
 
 extern HWND ghMainWindow;
 
