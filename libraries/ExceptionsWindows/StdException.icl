@@ -1,7 +1,7 @@
 implementation module StdException
 
 /* 
-	StdException -- version 1.0
+	StdException -- version 1.1
 
 	Written by Arjen van Weelden (with the help of John van Groningen), University of Nijmegen
 	Send comments and bug reports to arjenw@cs.kun.nl.
@@ -98,9 +98,9 @@ catch_ f e = code {					|A| !f | e
 		pop_b		1				|B|
 		pushD_a		0				|B| Psp
 		pop_a		1				|A| !f | e
-		pushI		4				|B| 4 | Psp
+		pushI		0				|B| 4 | Psp
 		addI						|B| Psp + 4
-		buildI_b	0				|A| !p=(Int (Psp - 4)) | !f | e
+		buildI_b	0				|A| !p=(Int (Psp + 4)) | !f | e
 		pop_b		1				|B|
 		push_a		1				|A| !f | !p | !f | e
 		update_a	1 2				|A| !f | !p | !p | e
@@ -125,11 +125,12 @@ catch_ f e = code {					|A| !f | e
 		update_a	1 2				|A| e | !c | !c
 		updatepop_a	0 1				|A| e | !c
 		jsr_eval	0				|A| !e | ?
+	:arjen_12
 	.keep 1 0
 		updatepop_a 0 1				|A| !e
 	}
 
-raise_ :: !.(Catch .a) b Dynamic -> .c
+raise_ :: !(Catch .a) b Dynamic -> .c
 raise_ c t x = code {				|A| !c=(Catch ? ? ?) | t | x | ?
 		pushL 		stack_p			|B| stack_p
 		push_b_a	0				|A| stack_p | !c | t | x | ?
@@ -142,7 +143,6 @@ raise_ c t x = code {				|A| !c=(Catch ? ? ?) | t | x | ?
 		push_node _cycle_in_spine 0 |A| BH | t | x | ?
 		pushD_a		0				|B| BH-desc | c-desc | Astart
 		pop_a		1				|A| t | x | ?
-	.o 2 0
 	:arjen_3
 		push_b		1				|B| c-desc | BH-desc | c-desc | Astart
 		pushD_a		2				|B| ?-desc | c-desc | BH-desc | c-desc | Astart
@@ -197,4 +197,5 @@ raise_ c t x = code {				|A| !c=(Catch ? ? ?) | t | x | ?
 	.d 2 0
 		jsr			e_system_sAP	|A| !(h x) | t
 	.o 1 0
+		jmp			arjen_12
 	}

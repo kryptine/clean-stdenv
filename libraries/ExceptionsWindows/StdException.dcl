@@ -1,15 +1,16 @@
 definition module StdException
 
 /* 
-	StdException -- version 1.0
+	StdException -- version 1.1
 
 	Written by Arjen van Weelden (with the help of John van Groningen), University of Nijmegen
 	Send comments and bug reports to arjenw@cs.kun.nl.
 
 	Imprecise user-defined exception handling for Clean 2.1
-	Warning: all unsafe* functions are non-deterministic.
+	Warning: all unsafe* functions are `non-deterministic between compilations'.
 
 	Version history:
+		1.1:	Bug fix: Profile stack overflow fixed.
 		1.0:	Bug fix: Profile stack reset was off by 8?
 		0.9:	Polished for first public release
 		0.8:	Added evalToNF to force evaluation to normal form;
