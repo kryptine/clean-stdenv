@@ -7,11 +7,14 @@ import StdTuple
 
 :: MyException = CannotSum Tree
 
-// Start :: World -> Int
 Start world 
-	= fst (checkException world)
+//	= throwException world
+	= checkException world
 //	= catchAnyException world
 //	= catchSumException world
+
+throwException :: *World -> (Int, *World)
+throwException world = (sumOfTree, world)
 
 checkException :: *World -> (MaybeException Int, *World)
 checkException world = getException sumOfTree world

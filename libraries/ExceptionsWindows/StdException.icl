@@ -1,7 +1,7 @@
 implementation module StdException
 
 /* 
-	StdException -- version 1.1
+	StdException -- version 1.2
 
 	Written by Arjen van Weelden (with the help of John van Groningen), University of Nijmegen
 	Send comments and bug reports to arjenw@cs.kun.nl.
@@ -125,7 +125,6 @@ catch_ f e = code {					|A| !f | e
 		update_a	1 2				|A| e | !c | !c
 		updatepop_a	0 1				|A| e | !c
 		jsr_eval	0				|A| !e | ?
-	:arjen_12
 	.keep 1 0
 		updatepop_a 0 1				|A| !e
 	}
@@ -197,5 +196,4 @@ raise_ c t x = code {				|A| !c=(Catch ? ? ?) | t | x | ?
 	.d 2 0
 		jsr			e_system_sAP	|A| !(h x) | t
 	.o 1 0
-		jmp			arjen_12
 	}
