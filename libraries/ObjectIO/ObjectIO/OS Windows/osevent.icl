@@ -19,10 +19,13 @@ oseventFatalError function error
 ::	*OSEvents
 	:== [OSEvent]
 
-
 osAppendEvents :: !*[OSEvent] !OSEvents -> OSEvents
 osAppendEvents newEvents osEvents
 	= osEvents ++ newEvents
+
+osInsertEvents :: !*[OSEvent] !OSEvents -> OSEvents
+osInsertEvents newEvents osEvents
+	= newEvents ++ osEvents
 
 osIsEmptyEvents :: !OSEvents -> (!Bool,!OSEvents)
 osIsEmptyEvents []
@@ -35,14 +38,6 @@ osRemoveEvent [osEvent:osEvents]
 	= (osEvent,osEvents)
 osRemoveEvent []
 	= oseventFatalError "osRemoveEvent" "OSEvents argument is empty"
-
-osCopyEvents :: !OSEvents -> (!OSEvents,!OSEvents)
-osCopyEvents []
-	= ([],[])
-osCopyEvents [e:es]
-	= ([e:es1],[e:es2])
-where
-	(es1,es2)	= osCopyEvents es
 
 osNewEvents :: OSEvents
 osNewEvents = []

@@ -56,7 +56,7 @@ InitState best
 	  ,	foodsupply	= []
 	  ,	grow		= 0
 	  ,	points		= 0
-	  ,	dir			= RightKey
+	  ,	dir			= rightKey
 	  ,	worm		= initworm
 	  ,	best		= best
 	  ,	lives		= NrOfWorms

@@ -119,8 +119,9 @@ ioStSetRcvDisabled			:: !Bool							!(IOSt .l) -> IOSt .l /* MW11++*/
 
 ioStSwapIO					:: !(![*World],!CProcesses)	!(IOSt .l) -> (!(![*World],!CProcesses),!IOSt .l)
 
-ioStLastInteraction			::									!(IOSt .l) -> (!Bool,	!IOSt .l)
-ioStHasDevice				:: !Device							!(IOSt .l) -> (!Bool,	!IOSt .l)
+ioStLastInteraction			::									!(IOSt .l) -> (!Bool,    !IOSt .l)
+ioStHasDevice				:: !Device							!(IOSt .l) -> (!Bool,    !IOSt .l)
+ioStHasDevices				::									!(IOSt .l) -> (!Bool,    !IOSt .l)
 ioStGetDevices				::									!(IOSt .l) -> (![Device],!IOSt .l)
 
 ioStGetDevice				:: !Device							!(IOSt .l) -> (!Bool,DeviceSystemState (PSt .l),!IOSt .l)

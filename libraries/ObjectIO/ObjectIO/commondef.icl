@@ -378,10 +378,10 @@ access _ n []
 
 accessList :: !(St .x .y) ![.x] -> (![.y],![.x])
 accessList acc [x:xs]
-	# (y, x)	= acc x
-	# (ys,xs)	= accessList acc xs
-	= ([y:ys],[x:xs])
-accessList _ _
+	#! (y, x)	= acc x
+	#! (ys,xs)	= accessList acc xs
+	=  ([y:ys],[x:xs])
+accessList _ []
 	= ([],[])
 
 remove :: !(Cond x) x !u:[x] -> (!Bool,x,!u:[x])

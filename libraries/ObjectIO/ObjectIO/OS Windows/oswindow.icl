@@ -934,16 +934,21 @@ where
 	
 /*	osCallback delays activate and deactivate events.
 	All other events are passed to the callback function.
-	PA: is now identical to osStackWindow!!
 */	osCallback :: !(OSEvent->(.s,*OSToolbox)->(.s,*OSToolbox)) !CrossCallInfo !(![DelayActivationInfo],!.s) !*OSToolbox
 		-> (!CrossCallInfo,!(![DelayActivationInfo],!.s),!*OSToolbox)
-	osCallback handleOSEvent {ccMsg=CcWmACTIVATE,p1=hwnd} (delayinfo,s) tb
-		= (return0Cci,([DelayActivatedWindow hwnd:delayinfo],s),tb)
-	osCallback handleOSEvent {ccMsg=CcWmDEACTIVATE,p1=hwnd} (delayinfo,s) tb
-		= (return0Cci,([DelayDeactivatedWindow hwnd:delayinfo],s),tb)
-	osCallback handleOSEvent osEvent (delayinfo,s) tb
-		# (s,tb)	= handleOSEvent osEvent (s,tb)
-		= (return0Cci,(delayinfo,s),tb)
+	osCallback handleOSEvent osEvent=:{ccMsg,p1,p2} (delayinfo,s) tb
+		| isDelayEvent
+			= (return0Cci,([delayEvent:delayinfo],s),tb)
+		| otherwise
+			# (s,tb)	= handleOSEvent osEvent (s,tb)
+			= (return0Cci,(delayinfo,s),tb)
+	where
+		(isDelayEvent,delayEvent)	= case ccMsg of
+										CcWmACTIVATE   -> (True,DelayActivatedWindow    p1)
+										CcWmDEACTIVATE -> (True,DelayDeactivatedWindow  p1)
+										CcWmKILLFOCUS  -> (True,DelayDeactivatedControl p1 p2)
+										CcWmSETFOCUS   -> (True,DelayActivatedControl   p1 p2)
+										_              -> (False,undef)
 
 
 osActivateControl :: !OSWindowPtr !OSWindowPtr !*OSToolbox -> (![DelayActivationInfo],!*OSToolbox)

@@ -489,24 +489,32 @@ where
 		= [x]
 
 addWindowHandlesActiveWindow :: !(WindowStateHandle .pst) !(WindowHandles .pst) -> WindowHandles .pst
-addWindowHandlesActiveWindow wsH wHs=:{whsWindows}
+addWindowHandlesActiveWindow wsH=:{wshIds=wids} wHs=:{whsWindows}
 	# (mode,wsH)	= getWindowStateHandleWindowMode wsH
 	| mode==Modal
-		= {wHs & whsWindows=[wsH:whsWindows]}
+		= {wHs & whsWindows=[{wsH & wshIds=widsActive}:whsWindows]}
 	| otherwise
-		#! wsHs		= addBehindLastModal wsH whsWindows
+		#! wsHs		= addBehindLastModal False wsH whsWindows
 		= {wHs & whsWindows=wsHs}
-	with
-		addBehindLastModal :: !(WindowStateHandle .pst) ![WindowStateHandle .pst] -> [WindowStateHandle .pst]
-		addBehindLastModal wsH [wsH`:wsHs]
-			# (mode`,wsH`)	= getWindowStateHandleWindowMode wsH`
-			| mode`==Modal
-				#! wsHs		= addBehindLastModal wsH wsHs
-				= [wsH`:wsHs]
-			| otherwise
-				= [wsH,wsH`:wsHs]
-		addBehindLastModal wsH _
+where
+	widsActive	= {wids & wActive=True}
+	
+	addBehindLastModal :: !Bool !(WindowStateHandle .pst) ![WindowStateHandle .pst] -> [WindowStateHandle .pst]
+	addBehindLastModal modalsExist wsH [wsH`:wsHs]
+		# (mode`,wsH`)	= getWindowStateHandleWindowMode wsH`
+		  isModal		= mode`==Modal
+		| isModal
+			#! wsHs		= addBehindLastModal (isModal || modalsExist) wsH wsHs
+			= [wsH`:wsHs]
+		| modalsExist
+			= [wsH,wsH`:wsHs]
+		| otherwise
+			= [{wsH & wshIds=widsActive},wsH`:wsHs]
+	addBehindLastModal modalsExist wsH _
+		| modalsExist
 			= [wsH]
+		| otherwise
+			= [{wsH & wshIds=widsActive}]
 
 
 /*	disableWindowSystem disables all current windows.

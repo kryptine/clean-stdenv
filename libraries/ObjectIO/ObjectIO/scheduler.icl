@@ -60,8 +60,7 @@ contextGetSleepTime context=:{cTimerTable=tt,cReceiverTable}
 
 contextGetOSEvents :: !Context -> (!OSEvents,!Context)
 contextGetOSEvents context=:{cEnvs=envs=:{envsEvents=es}}
-	# (es1,es2)		= osCopyEvents es
-	= (es1,{context & cEnvs={envs & envsEvents=es2}})
+	= (es,{context & cEnvs={envs & envsEvents=osNewEvents}})
 
 contextSetOSEvents :: !(!OSEvents,!Context) -> Context
 contextSetOSEvents (osEvents,context=:{cEnvs=envs})
@@ -298,10 +297,13 @@ where
 		= (closed,{localIO & localIOSt=ioState})
 	
 	processModal :: !CProcess -> (!Bool,!CProcess)
-	processModal localIO=:{localIOSt}
+/*	processModal localIO=:{localIOSt}
 		# (optModal,ioState)= ioStGetIOIsModal localIOSt
 		# (myId,ioState)	= ioStGetIOId ioState
 		= (isJust optModal && myId==fromJust optModal,{localIO & localIOSt=ioState})
+*/	processModal localIO=:{localIOSt}
+		# (notEmpty,ioState)	= ioStHasDevices localIOSt
+		= (notEmpty,{localIO & localIOSt=ioState})
 
 handleEventForLocalIO :: !Bool !SchedulerEvent !CProcess !Context
 					 -> (!Bool,!SchedulerEvent,!CProcess,!Context)

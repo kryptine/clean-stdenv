@@ -70,7 +70,7 @@ where
 			= pst
 	where
 	//	window defines the window that displays the barrel and the current balls.
-		window	=	Window name NilLS
+		window	= Window name NilLS
 						[	WindowId		wId
 						,	WindowLook		False (updateBalls initLocal)
 						,	WindowViewSize	windowSize
@@ -85,7 +85,7 @@ where
 					)	[]
 		
 	//	timer defines the timer that calculates the movements of the current balls.
-		timer	= Timer 0 NilLS 
+		timer	= Timer /*ticksPerSecond*/0 NilLS 
 					[	TimerId			tId
 					,	TimerFunction	(noLS1 (bounceBalls splitWalls))
 					]

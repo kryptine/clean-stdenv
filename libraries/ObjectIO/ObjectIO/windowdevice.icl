@@ -185,39 +185,39 @@ where
 			(wsH1,pState2)		= windowStateControlKeyboardActionIO info wsH pState1
 	
 	windowIO deviceEvent=:(ControlLooseKeyFocus info) pState
-		# (_,wDevice,ioState)		= ioStGetDevice WindowDevice pState.io
-		  windows					= windowSystemStateGetWindowHandles wDevice
-		  wids						= info.ckfWIDS
-		  (found,wsH,windows)		= getWindowHandlesWindow (toWID wids.wId) windows
+		# (_,wDevice,ioState)			= ioStGetDevice WindowDevice pState.io
+		  windows						= windowSystemStateGetWindowHandles wDevice
+		  wids							= info.ckfWIDS
+		  (found,wsH,windows)			= getWindowHandlesWindow (toWID wids.wId) windows
 		| not found
 			= windowdeviceFatalError "windowIO (ControlLooseKeyFocus _) _" "window could not be found"
-		# (oldInputTrack,ioState)	= ioStGetInputTrack ioState
+		# (oldInputTrack,ioState)		= ioStGetInputTrack ioState
 		  (newInputTrack,lostMouse,lostKey)
-		  							= case oldInputTrack of
-		  								Just it=:{itWindow,itControl,itKind}
-		  										-> if (itWindow==wids.wPtr && itControl==info.ckfItemNr)
-		  												(	Nothing
-		  												,	if itKind.itkMouse    [createOSLooseMouseEvent itWindow itControl] []
-		  												,	if itKind.itkKeyboard [createOSLooseKeyEvent   itWindow itControl] []
-		  												)
-		  												(oldInputTrack,[],[])
-		  								nothing	-> (nothing,[],[])
-		# ioState					= ioStSetInputTrack newInputTrack ioState
-		  lostInputEvents			= lostMouse ++ lostKey
-		| isEmpty lostInputEvents										// no input was being tracked: simply evaluate control deactivate function
+			  							= case oldInputTrack of
+			  								Just it=:{itWindow,itControl,itKind}
+			  										-> if (itWindow==wids.wPtr && itControl==info.ckfItemNr)
+			  												(	Nothing
+			  												,	if itKind.itkMouse    [createOSLooseMouseEvent itWindow itControl] []
+			  												,	if itKind.itkKeyboard [createOSLooseKeyEvent   itWindow itControl] []
+			  												)
+			  												(oldInputTrack,[],[])
+			  								nothing	-> (nothing,[],[])
+		# ioState						= ioStSetInputTrack newInputTrack ioState
+		  lostInputEvents				= lostMouse ++ lostKey
+		| isEmpty lostInputEvents		// no input was being tracked: simply evaluate control deactivate function
 			= (deviceEvent,pState2)
 		with
-			windows1				= setWindowHandlesWindow wsH1 windows
-			ioState1				= ioStSetDevice (WindowSystemState windows1) ioState
-			pState1					= {pState & io=ioState1}
-			(wsH1,pState2)			= windowStateControlKeyFocusActionIO False info wsH pState1
-		| otherwise														// handle control deactivate function AFTER lost input events
-			# (osDelayEvents,ioState)= accIOToolbox (strictSeqList (lostInputEvents ++ [createOSDeactivateControlEvent wids.wPtr info.ckfItemPtr])) ioState
-			# (osEvents,ioState)	= ioStGetEvents ioState
-			# ioState				= ioStSetEvents (osAppendEvents osDelayEvents osEvents) ioState
-			# windows				= setWindowHandlesWindow wsH windows
-			# ioState				= ioStSetDevice (WindowSystemState windows) ioState
-			# pState				= {pState & io=ioState}
+			windows1					= setWindowHandlesWindow wsH1 windows
+			ioState1					= ioStSetDevice (WindowSystemState windows1) ioState
+			pState1						= {pState & io=ioState1}
+			(wsH1,pState2)				= windowStateControlKeyFocusActionIO False info wsH pState1
+		| otherwise						// handle control deactivate function AFTER lost input events, but BEFORE other delayed events
+			# (osDelayEvents,ioState)	= accIOToolbox (strictSeqList (lostInputEvents ++ [createOSDeactivateControlEvent wids.wPtr info.ckfItemPtr])) ioState
+			# (osEvents,ioState)		= ioStGetEvents ioState
+			# ioState					= ioStSetEvents (osInsertEvents osDelayEvents osEvents) ioState
+			# windows					= setWindowHandlesWindow wsH windows
+			# ioState					= ioStSetDevice (WindowSystemState windows) ioState
+			# pState					= {pState & io=ioState}
 			= (deviceEvent,pState)
 	
 	windowIO deviceEvent=:(ControlMouseAction info) pState
@@ -276,11 +276,12 @@ where
 		| otherwise
 			= (deviceEvent,pState2)
 		with
-			(_,_,windows1)		= removeWindowHandlesWindow wid windows		// Remove the placeholder from windows
-			windows2			= addWindowHandlesActiveWindow wsH1 windows1	// Place the change window in front of all (modal/modeless) windows
+			(_,_,windows1)		= removeWindowHandlesWindow wid windows			// Remove the placeholder from windows
+			windows2			= addWindowHandlesActiveWindow wsH2 windows1	// Place the change window in front of all (modal/modeless) windows
 			ioState1			= ioStSetDevice (WindowSystemState windows2) ioState
 			pState1				= {pState & io=ioState1}
-			(wsH1,pState2)		= windowStateActivationIO wsH pState1
+			wsH1				= {wsH & wshIds={wids & wActive=True}}			// PA: Set active flag
+			(wsH2,pState2)		= windowStateActivationIO wsH1 pState1
 	
 	windowIO deviceEvent=:(WindowDeactivation wids) pState
 		# (_,wDevice,ioState)	= ioStGetDevice WindowDevice pState.io
@@ -288,6 +289,7 @@ where
 		  (found,wsH,windows)	= getWindowHandlesWindow (toWID wids.wId) windows
 		| not found
 			= windowdeviceFatalError "windowIO (WindowDeactivation _)" "window could not be found"
+		# wsH					= {wsH & wshIds={wids & wActive=False}}	// PA: clear isActive flag
 		# (inputTrack,ioState)	= ioStGetInputTrack ioState
 		# ioState				= ioStSetInputTrack Nothing ioState		// clear input track information
 		  (lostMouse,lostKey)	= case inputTrack of					// check for (Mouse/Key)Lost events
@@ -304,11 +306,11 @@ where
 			ioState1			= ioStSetDevice (WindowSystemState windows1) ioState
 			pState1				= {pState & io=ioState1}
 			(wsH1,pState2)		= windowStateDeactivationIO wsH pState1
-		| otherwise														// handle deactivate function AFTER lost input events
+		| otherwise														// handle deactivate function AFTER lost input events, but BEFORE other delayed events
 			# (osDelayEvents,ioState)
 								= accIOToolbox (strictSeqList (lostInputEvents ++ [createOSDeactivateWindowEvent wids.wPtr])) ioState
 			# (osEvents,ioState)= ioStGetEvents ioState
-			# ioState			= ioStSetEvents (osAppendEvents osDelayEvents osEvents) ioState
+			# ioState			= ioStSetEvents (osInsertEvents osDelayEvents osEvents) ioState
 			# windows			= setWindowHandlesWindow wsH windows
 			# ioState			= ioStSetDevice (WindowSystemState windows) ioState
 			# pState			= {pState & io=ioState}
@@ -848,13 +850,14 @@ where
 					= (True,WItemHandle itemH,ls_ps)
 			where
 				itemControlKeyFocusActionIO :: !Bool !(WItemHandle .ls .pst) *(.ls,.pst) -> (!WItemHandle .ls .pst,*(.ls,.pst))
-				itemControlKeyFocusActionIO activated itemH=:{wItemAtts} ls_ps
-					= (itemH,f ls_ps)
+				itemControlKeyFocusActionIO activated itemH=:{wItemAtts} ls_pst
+					| found			= (itemH,getAtt att ls_pst)
+					| otherwise		= (itemH,ls_pst)
 				where
 					(reqAtt,getAtt)	= if activated
 										(isControlActivate,  getControlActivateFun  )
 										(isControlDeactivate,getControlDeactivateFun)
-					f				= getAtt (snd (cselect reqAtt undef wItemAtts))
+					(found,att)		= cselect reqAtt undef wItemAtts
 			
 			elementControlKeyFocusActionIO activated info (WListLSHandle itemHs) ls_ps
 				# (done,itemHs,ls_ps)			= elementsControlKeyFocusActionIO activated info itemHs ls_ps
