@@ -5,7 +5,7 @@
 	Ronny Wichers Schreur
 	ronny@cs.kun.nl
 */
-implementation module ShowDebug
+implementation module Debug
 
 import StdEnv
 import Wrap, ShowWrapped
@@ -62,8 +62,8 @@ MaxInt
 (:-) a f
 	:== f a
 
-debugShow :: [DebugShowOption] .a -> [{#Char}]
-debugShow debugOptions debugValue 
+debugShowWithOptions :: [DebugShowOption] .a -> [{#Char}]
+debugShowWithOptions debugOptions debugValue 
 	=	debugValue
 	:-	wrapNode
 	:-	pruneWrappedNode maxDepth maxBreadth
