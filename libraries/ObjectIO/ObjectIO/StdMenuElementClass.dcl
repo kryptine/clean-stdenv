@@ -16,8 +16,8 @@ from	menuhandle	import MenuElementState
 /*	Menu elements for Menus:
 */
 class MenuElements m where
-	menuElementToHandles	:: !(m .ls (PSt .l .p)) !(PSt .l .p)
-			-> (![MenuElementState .ls (PSt .l .p)], !PSt .l .p)
+	menuElementToHandles	:: !(m .ls (PSt .l)) !(PSt .l)
+			-> (![MenuElementState .ls (PSt .l)], !PSt .l)
 	getMenuElementType		::  (m .ls .pst)
 			-> MenuElementType
 
@@ -35,8 +35,8 @@ instance MenuElements MenuSeparator
 /*	Menu elements for PopUpMenus:
 */
 class PopUpMenuElements m where
-	popUpMenuElementToHandles	:: !(m .ls (PSt .l .p)) !(PSt .l .p)
-				-> (![MenuElementState .ls (PSt .l .p)], !PSt .l .p)
+	popUpMenuElementToHandles	:: !(m .ls (PSt .l)) !(PSt .l)
+				-> (![MenuElementState .ls (PSt .l)], !PSt .l)
 	getPopUpMenuElementType		::  (m .ls .pst)
 				-> MenuElementType
 

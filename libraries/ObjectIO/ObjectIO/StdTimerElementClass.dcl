@@ -14,8 +14,8 @@ from	timerhandle	import TimerElementState
 
 
 class TimerElements t where
-	timerElementToHandles	:: !(t  .ls (PSt .l .p)) !(PSt .l .p)
-			-> (![TimerElementState .ls (PSt .l .p)],!PSt .l .p)
+	timerElementToHandles	:: !(t  .ls (PSt .l)) !(PSt .l)
+			-> (![TimerElementState .ls (PSt .l)], !PSt .l)
 	getTimerElementType		::	(t  .ls .pst)
 			-> TimerElementType
 

@@ -73,7 +73,7 @@ gatherWindowIds` []
 		}
 
 
-getWindow :: !Id !(IOSt .l .p) -> (!Maybe WState, !IOSt .l .p)
+getWindow :: !Id !(IOSt .l) -> (!Maybe WState, !IOSt .l)
 getWindow windowId ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -92,7 +92,7 @@ getWindow windowId ioState
 		# (wMetrics,ioState)	= IOStGetOSWindowMetrics ioState
 		= (Just {wIds=wids,wRep=wsH`,wTb=OSNewToolbox,wMetrics=wMetrics},ioState)
 
-getParentWindow :: !Id !(IOSt .l .p) -> (!Maybe WState, !IOSt .l .p)
+getParentWindow :: !Id !(IOSt .l) -> (!Maybe WState, !IOSt .l)
 getParentWindow controlId ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	  maybeParent		= getIdParent controlId idtable
@@ -105,7 +105,7 @@ getParentWindow controlId ioState
 	| otherwise
 		= (Nothing,ioState)
 
-setWindow :: !Id !(IdFun *WState) !(IOSt .l .p) -> IOSt .l .p
+setWindow :: !Id !(IdFun *WState) !(IOSt .l) -> IOSt .l
 setWindow windowId f ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -129,7 +129,7 @@ setWindow windowId f ioState
 
 //	Show/Hide controls.
 
-showControls :: ![Id] !(IOSt .l .p) -> IOSt .l .p
+showControls :: ![Id] !(IOSt .l) -> IOSt .l
 showControls ids ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	# (ioId,ioState)	= IOStGetIOId ioState
@@ -138,10 +138,10 @@ showControls ids ioState
 	| isEmpty cIds_wIds	= ioState
 	| otherwise			= StrictSeq [setWindow wId (setControlsShowState` True cIds) \\ (cIds,wId)<-cIds_wIds] ioState
 
-showControl :: !Id !(IOSt .l .p) -> IOSt .l .p
+showControl :: !Id !(IOSt .l) -> IOSt .l
 showControl id ioState = showControls [id] ioState
 
-hideControls :: ![Id] !(IOSt .l .p) -> IOSt .l .p
+hideControls :: ![Id] !(IOSt .l) -> IOSt .l
 hideControls ids ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	# (ioId,ioState)	= IOStGetIOId ioState
@@ -150,7 +150,7 @@ hideControls ids ioState
 	| isEmpty cIds_wIds	= ioState
 	| otherwise			= StrictSeq [setWindow wId (setControlsShowState` False cIds) \\ (cIds,wId)<-cIds_wIds] ioState
 
-hideControl :: !Id !(IOSt .l .p) -> IOSt .l .p
+hideControl :: !Id !(IOSt .l) -> IOSt .l
 hideControl id ioState = hideControls [id] ioState
 
 setControlsShowState` :: !Bool ![Id] !*WState -> *WState
@@ -162,7 +162,7 @@ setControlsShowState` show ids wState=:{wIds={wPtr},wRep,wTb,wMetrics}
 
 /*	Enabling/Disabling of controls.
 */
-enableControls :: ![Id] !(IOSt .l .p) -> IOSt .l .p
+enableControls :: ![Id] !(IOSt .l) -> IOSt .l
 enableControls ids ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	# (ioId,ioState)	= IOStGetIOId ioState
@@ -176,10 +176,10 @@ where
 		# (wH,tb)		= enablecontrols ids False wMetrics wPtr wRep wTb
 		= {wState & wRep=wH,wTb=tb}
 
-enableControl :: !Id !(IOSt .l .p) -> IOSt .l .p
+enableControl :: !Id !(IOSt .l) -> IOSt .l
 enableControl id ioState = enableControls [id] ioState
 
-disableControls :: ![Id] !(IOSt .l .p) -> IOSt .l .p
+disableControls :: ![Id] !(IOSt .l) -> IOSt .l
 disableControls ids ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	# (ioId,ioState)	= IOStGetIOId ioState
@@ -193,21 +193,21 @@ where
 		# (wH,tb)		= disablecontrols ids False wMetrics wPtr wRep wTb
 		= {wState & wRep=wH,wTb=tb}
 
-disableControl :: !Id !(IOSt .l .p) -> IOSt .l .p
+disableControl :: !Id !(IOSt .l) -> IOSt .l
 disableControl id ioState = disableControls [id] ioState
 
 
 //	Marking/Unmarking of check controls.
 
-markCheckControlItems :: !Id ![Index] !(IOSt .l .p) -> IOSt .l .p
+markCheckControlItems :: !Id ![Index] !(IOSt .l) -> IOSt .l
 markCheckControlItems cId indexs ioState
 	= setControlsMarkState Mark cId indexs ioState
 
-unmarkCheckControlItems :: !Id ![Index] !(IOSt .l .p) -> IOSt .l .p
+unmarkCheckControlItems :: !Id ![Index] !(IOSt .l) -> IOSt .l
 unmarkCheckControlItems cId indexs ioState
 	= setControlsMarkState NoMark cId indexs ioState
 
-setControlsMarkState :: !MarkState !Id ![Index] !(IOSt .l .p) -> IOSt .l .p
+setControlsMarkState :: !MarkState !Id ![Index] !(IOSt .l) -> IOSt .l
 setControlsMarkState mark cId indexs ioState
 	| isEmpty indexs	= ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
@@ -225,7 +225,7 @@ where
 
 //	Selecting/Unselecting a radio control.
 
-selectRadioControlItem :: !Id !Index !(IOSt .l .p) -> IOSt .l .p
+selectRadioControlItem :: !Id !Index !(IOSt .l) -> IOSt .l
 selectRadioControlItem cId index ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	# (ioId,ioState)	= IOStGetIOId ioState
@@ -242,7 +242,7 @@ where
 
 //	Select a pop up menu item.
 
-selectPopUpControlItem :: !Id !Index !(IOSt .l .p) -> IOSt .l .p
+selectPopUpControlItem :: !Id !Index !(IOSt .l) -> IOSt .l
 selectPopUpControlItem cId index ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	# (ioId,ioState)	= IOStGetIOId ioState
@@ -259,7 +259,7 @@ where
 
 //	Move the orientation of a CompoundControl.
 
-moveControlViewFrame :: !Id Vector2 !(IOSt .l .p) -> IOSt .l .p
+moveControlViewFrame :: !Id Vector2 !(IOSt .l) -> IOSt .l
 moveControlViewFrame cId v ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	# (ioId,ioState)	= IOStGetIOId ioState
@@ -277,7 +277,7 @@ where
 
 //	Set a new view domain of a CompoundControl.
 
-setControlViewDomain :: !Id ViewDomain !(IOSt .l .p) -> IOSt .l .p
+setControlViewDomain :: !Id ViewDomain !(IOSt .l) -> IOSt .l
 setControlViewDomain cId newDomain ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	# (ioId,ioState)	= IOStGetIOId ioState
@@ -294,7 +294,7 @@ where
 
 //	Set the ScrollFunction of a CompoundControl.
 
-setControlScrollFunction :: !Id Direction ScrollFunction !(IOSt .l .p) -> IOSt .l .p
+setControlScrollFunction :: !Id Direction ScrollFunction !(IOSt .l) -> IOSt .l
 setControlScrollFunction cId direction scrollFun ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	# (ioId,ioState)	= IOStGetIOId ioState
@@ -312,7 +312,7 @@ where
 
 //	Change the text of (Text/Edit/Button)Control.
 
-setControlTexts :: ![(Id,String)] !(IOSt .l .p) -> IOSt .l .p
+setControlTexts :: ![(Id,String)] !(IOSt .l) -> IOSt .l
 setControlTexts cid_texts ioState
 	# (idtable,ioState)			= IOStGetIdTable ioState
 	# (ioId,ioState)			= IOStGetIOId ioState
@@ -327,13 +327,13 @@ where
 		# (wH,tb)	= setcontroltexts texts wMetrics wPtr wRep wTb
 		= {wState & wRep=wH,wTb=tb}
 
-setControlText :: !Id !String !(IOSt .l .p) -> IOSt .l .p
+setControlText :: !Id !String !(IOSt .l) -> IOSt .l
 setControlText id text ioState = setControlTexts [(id,text)] ioState
 
 
 //	Set the cursor position of an EditControl.
 
-setEditControlCursor :: !Id !Int !(IOSt .l .p) -> IOSt .l .p
+setEditControlCursor :: !Id !Int !(IOSt .l) -> IOSt .l
 setEditControlCursor cId pos ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	# (ioId,ioState)	= IOStGetIOId ioState
@@ -351,7 +351,7 @@ where
 /*	Change the Look of the corresponding (Custom(Button)/Compound)Controls and redraw
 	only if the first Boolean is True.
 */
-setControlLooks :: ![(Id,Bool,(Bool,Look))] !(IOSt .l .p) -> IOSt .l .p
+setControlLooks :: ![(Id,Bool,(Bool,Look))] !(IOSt .l) -> IOSt .l
 setControlLooks cid_looks ioState
 	# (idtable,ioState)			= IOStGetIdTable ioState
 	# (ioId,ioState)			= IOStGetIOId ioState
@@ -369,13 +369,13 @@ where
 		# (wH,tb)	= setcontrolslook looks wMetrics wPtr wRep wTb
 		= {wState & wRep=wH,wTb=tb}
 
-setControlLook :: !Id !Bool (Bool,Look) !(IOSt .l .p) -> IOSt .l .p
+setControlLook :: !Id !Bool (Bool,Look) !(IOSt .l) -> IOSt .l
 setControlLook id redraw newlook ioState = setControlLooks [(id,redraw,newlook)] ioState
 
 
 //	Change the SliderState and redraw the settings of the SliderControls.
 
-setSliderStates :: ![(Id,IdFun SliderState)] !(IOSt .l .p) -> IOSt .l .p
+setSliderStates :: ![(Id,IdFun SliderState)] !(IOSt .l) -> IOSt .l
 setSliderStates cid_fs ioState
 	# (idtable,ioState)		= IOStGetIdTable ioState
 	# (ioId,ioState)		= IOStGetIOId ioState
@@ -390,27 +390,27 @@ where
 		# (wH,tb)	= setsliderstates id_fs wMetrics wPtr wRep wTb
 		= {wState & wRep=wH,wTb=tb}
 
-setSliderState :: !Id (IdFun SliderState) !(IOSt .l .p) -> IOSt .l .p
+setSliderState :: !Id (IdFun SliderState) !(IOSt .l) -> IOSt .l
 setSliderState id fun ioState = setSliderStates [(id,fun)] ioState
 
 
 //	Change the thumb value of the SliderState of a SliderControl. 
 
-setSliderThumbs :: ![(Id,Int)] !(IOSt .l .p) -> IOSt .l .p
+setSliderThumbs :: ![(Id,Int)] !(IOSt .l) -> IOSt .l
 setSliderThumbs cid_thumbs ioState
 	= setSliderStates (map (\(cid,thumb)->(cid,\state->{state & sliderThumb=thumb})) cid_thumbs) ioState
 
-setSliderThumb :: !Id Int !(IOSt .l .p) -> IOSt .l .p
+setSliderThumb :: !Id Int !(IOSt .l) -> IOSt .l
 setSliderThumb id thumb ioState = setSliderThumbs [(id,thumb)] ioState
 
 
 //	Draw in a (Custom(Button)/Compound)Control.
 
-appControlPicture :: !Id !.(IdFun *Picture) !(IOSt .l .p) -> IOSt .l .p
+appControlPicture :: !Id !.(IdFun *Picture) !(IOSt .l) -> IOSt .l
 appControlPicture cId drawfun ioState
 	= snd (accControlPicture cId (\p->(undef,drawfun p)) ioState)
 
-accControlPicture :: !Id !.(St *Picture .x) !(IOSt .l .p) -> (!Maybe .x,!IOSt .l .p)
+accControlPicture :: !Id !.(St *Picture .x) !(IOSt .l) -> (!Maybe .x,!IOSt .l)
 accControlPicture cId drawfun ioState
 	# (idtable,ioState)			= IOStGetIdTable ioState
 	# (ioId,ioState)			= IOStGetIOId ioState

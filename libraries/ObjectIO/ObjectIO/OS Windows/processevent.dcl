@@ -11,4 +11,4 @@ import	deviceevents
 from	iostate	import PSt, IOSt
 
 
-processEvent :: !SchedulerEvent !(PSt .l .p) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l .p)
+processEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)

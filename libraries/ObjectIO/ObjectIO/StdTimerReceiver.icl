@@ -9,7 +9,7 @@ import	commondef, id, receiveraccess, receiverdefaccess, StdReceiverAttribute, S
 
 
 instance TimerElements (Receiver m) where
-	timerElementToHandles :: !(Receiver m .ls (PSt .l .p)) !(PSt .l .p) -> (![TimerElementState .ls (PSt .l .p)],!PSt .l .p)
+	timerElementToHandles :: !(Receiver m .ls (PSt .l)) !(PSt .l) -> (![TimerElementState .ls (PSt .l)],!PSt .l)
 	timerElementToHandles (Receiver rid f atts) pState
 		= (	[TimerElementHandleToTimerElementState
 // MW11 was				(TimerReceiverHandle {	tReceiverHandle	= newReceiverHandle id (getSelectState atts) f
@@ -26,7 +26,7 @@ instance TimerElements (Receiver m) where
 	getTimerElementType _ = "Receiver"
 
 instance TimerElements (Receiver2 m r) where
-	timerElementToHandles :: !(Receiver2 m r .ls (PSt .l .p)) !(PSt .l .p) -> (![TimerElementState .ls (PSt .l .p)],!PSt .l .p)
+	timerElementToHandles :: !(Receiver2 m r .ls (PSt .l)) !(PSt .l) -> (![TimerElementState .ls (PSt .l)],!PSt .l)
 	timerElementToHandles (Receiver2 rid f atts) pState
 		= (	[TimerElementHandleToTimerElementState
 // MW11 was				(TimerReceiverHandle {	tReceiverHandle	= newReceiverHandle2 id (getSelectState atts) f

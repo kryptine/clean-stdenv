@@ -29,7 +29,7 @@ menueventFatalError function error
 	menuEvent assumes that it is not applied to an empty IOSt and that its device is
 	present.
 */
-menuEvent :: !SchedulerEvent !(PSt .l .p) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l .p)
+menuEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
 menuEvent schedulerEvent pState
 	# (hasMenuDevice,pState)	= accPIO (IOStHasDevice MenuDevice) pState
 	| not hasMenuDevice			// This condition should never hold
@@ -37,7 +37,7 @@ menuEvent schedulerEvent pState
 	| otherwise
 		= menuEvent schedulerEvent pState
 where
-	menuEvent :: !SchedulerEvent !(PSt .l .p) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l .p)
+	menuEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
 	menuEvent schedulerEvent=:(ScheduleOSEvent osEvent=:{ccMsg} _) pState=:{io=ioState}
 		| isToolbarOSEvent ccMsg
 			# (osdInfo,ioState)				= IOStGetOSDInfo ioState
@@ -102,7 +102,7 @@ where
 
 /*	filterToolbarEvent filters the OSEvents that can be handled by this menu device.
 */
-filterToolbarEvent :: !OSDInfo !OSEvent !(IOSt .l .p) -> (!Bool,!Maybe [Int],!Maybe DeviceEvent,!IOSt .l .p)
+filterToolbarEvent :: !OSDInfo !OSEvent !(IOSt .l) -> (!Bool,!Maybe [Int],!Maybe DeviceEvent,!IOSt .l)
 
 /*	CcWmBUTTONCLICKED is a menu event in case of a toolbar selection. 
 */

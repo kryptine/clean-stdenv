@@ -19,7 +19,7 @@ windowdeviceFatalError function error
 	= FatalError function "windowdevice" error
 
 
-WindowFunctions :: DeviceFunctions (PSt .l .p)
+WindowFunctions :: DeviceFunctions (PSt .l)
 WindowFunctions
 	= {	dShow	= id //windowShow not yet implemented
 	  ,	dHide	= id //windowHide not yet implemented
@@ -32,7 +32,7 @@ WindowFunctions
 
 /*	windowOpen initialises the window device for this interactive process.
 */
-windowOpen :: !(PSt .l .p) -> PSt .l .p
+windowOpen :: !(PSt .l) -> PSt .l
 windowOpen pState=:{io=ioState}
 	# (hasWindow,ioState)			= IOStHasDevice WindowDevice ioState
 	| hasWindow
@@ -66,7 +66,7 @@ windowOpen pState=:{io=ioState}
 	Note that the window device is not removed from the IOSt because there still might be
 	a modal dialog which final state has to be retrieved. 
 */
-windowClose :: !(PSt .l .p) -> PSt .l .p
+windowClose :: !(PSt .l) -> PSt .l
 windowClose pState=:{io=ioState}
 	# (found,wDevice,ioState)				= IOStGetDevice WindowDevice ioState
 	| not found
@@ -94,19 +94,19 @@ windowClose pState=:{io=ioState}
 		# pState							= {pState & io=ioState}
 		= pState
 where
-	disposeWindowStateHandle` :: !OSDInfo !(WindowStateHandle (PSt .l .p)) !(!Maybe InputTrack,PSt .l .p,!*OSToolbox)
-				  -> ((![Id],![Id],![DelayActivationInfo],![FinalModalLS]),!(!Maybe InputTrack,PSt .l .p,!*OSToolbox))
+	disposeWindowStateHandle` :: !OSDInfo !(WindowStateHandle (PSt .l)) !(!Maybe InputTrack,PSt .l,!*OSToolbox)
+				  -> ((![Id],![Id],![DelayActivationInfo],![FinalModalLS]),!(!Maybe InputTrack,PSt .l,!*OSToolbox))
 	disposeWindowStateHandle` osdinfo wsH (inputTrack,state,tb)
 		# ((a,b,c,d,inputTrack),state,tb) = disposeWindowStateHandle osdinfo inputTrack wsH handleOSEvent state tb
 		= ((a,b,c,d),(inputTrack,state,tb))
 	
-	handleOSEvent :: !OSEvent !(PSt .l .p) -> (![Int],!PSt .l .p)
+	handleOSEvent :: !OSEvent !(PSt .l) -> (![Int],!PSt .l)
 	handleOSEvent osEvent pState = accContext (handleContextOSEvent osEvent) pState
 
 
 /*	windowIO handles the DeviceEvents that have been filtered by windowEvent.
 */
-windowIO :: !DeviceEvent !(PSt .l .p) -> (!DeviceEvent,!PSt .l .p)
+windowIO :: !DeviceEvent !(PSt .l) -> (!DeviceEvent,!PSt .l)
 windowIO deviceEvent pState
 	# (hasDevice,pState)	= accPIO (IOStHasDevice WindowDevice) pState
 	| not hasDevice
@@ -114,7 +114,7 @@ windowIO deviceEvent pState
 	| otherwise
 		= windowIO deviceEvent pState
 where
-	windowIO :: !DeviceEvent !(PSt .l .p) -> (!DeviceEvent,!PSt .l .p)
+	windowIO :: !DeviceEvent !(PSt .l) -> (!DeviceEvent,!PSt .l)
 	windowIO receiverEvent=:(ReceiverEvent msgEvent) pState
 		# (_,wDevice,ioState)		= IOStGetDevice WindowDevice pState.io
 		  windows					= WindowSystemStateGetWindowHandles wDevice
@@ -447,8 +447,8 @@ where
 
 /*	windowStateMsgIO handles all message events.
 */
-windowStateMsgIO :: !MsgEvent !(WindowStateHandle (PSt .l .p)) (PSt .l .p)
-				-> (!MsgEvent, !WindowStateHandle (PSt .l .p),  PSt .l .p)
+windowStateMsgIO :: !MsgEvent !(WindowStateHandle (PSt .l)) (PSt .l)
+				-> (!MsgEvent, !WindowStateHandle (PSt .l),  PSt .l)
 windowStateMsgIO msgEvent wsH=:{wshHandle=Just wlsH=:{wlsState=ls,wlsHandle=wH}} pState
 	= (msgEvent1,{wsH & wshHandle=Just {wlsH & wlsState=ls1,wlsHandle=wH1}},pState1)
 where
@@ -798,8 +798,8 @@ windowStateCompoundScrollActionIO _ _ _ _
 /*	windowStateControlKeyFocusActionIO handles the keyboard focus actions of (Compound/Custom/Edit/PopUp)Controls.
 	The Bool argument indicates whether the control has obtained key focus (True) or lost key focus (False).
 */
-windowStateControlKeyFocusActionIO :: !Bool !ControlKeyFocusInfo !(WindowStateHandle (PSt .l .p)) !(PSt .l .p)
-															  -> (!WindowStateHandle (PSt .l .p), PSt .l .p)
+windowStateControlKeyFocusActionIO :: !Bool !ControlKeyFocusInfo !(WindowStateHandle (PSt .l)) !(PSt .l)
+															  -> (!WindowStateHandle (PSt .l), PSt .l)
 windowStateControlKeyFocusActionIO activated info wsH=:{wshHandle=Just wlsH=:{wlsState=ls,wlsHandle=wH}} pState
 	= ({wsH & wshHandle=Just {wlsH & wlsState=ls1,wlsHandle=wH1}},pState1)
 where
@@ -864,8 +864,8 @@ windowStateControlKeyFocusActionIO _ _ _ _
 
 /*	windowStateControlKeyboardActionIO handles the keyboard actions of (PopUp/Custom)Controls and CompoundControls (not yet).
 */
-windowStateControlKeyboardActionIO :: !ControlKeyboardActionInfo !(WindowStateHandle (PSt .l .p)) !(PSt .l .p)
-															  -> (!WindowStateHandle (PSt .l .p),PSt .l .p)
+windowStateControlKeyboardActionIO :: !ControlKeyboardActionInfo !(WindowStateHandle (PSt .l)) !(PSt .l)
+															  -> (!WindowStateHandle (PSt .l),PSt .l)
 windowStateControlKeyboardActionIO info wsH=:{wshHandle=Just wlsH=:{wlsState=ls,wlsHandle=wH}} pState
 	= ({wsH & wshHandle=Just {wlsH & wlsState=ls1,wlsHandle=wH1}},pState1)
 where
@@ -928,8 +928,8 @@ windowStateControlKeyboardActionIO _ _ _
 
 /*	windowStateControlMouseActionIO handles the mouse actions of CustomControls and CompoundControls (not yet).
 */
-windowStateControlMouseActionIO :: !ControlMouseActionInfo !(WindowStateHandle (PSt .l .p)) (PSt .l .p)
-														-> (!WindowStateHandle (PSt .l .p),PSt .l .p)
+windowStateControlMouseActionIO :: !ControlMouseActionInfo !(WindowStateHandle (PSt .l)) (PSt .l)
+														-> (!WindowStateHandle (PSt .l),PSt .l)
 windowStateControlMouseActionIO info wsH=:{wshHandle=Just wlsH=:{wlsState=ls,wlsHandle=wH}} pState
 	= ({wsH & wshHandle=Just {wlsH & wlsState=ls1,wlsHandle=wH1}},pState1)
 where
@@ -992,8 +992,8 @@ windowStateControlMouseActionIO _ _ _
 
 /*	windowStateControlSelectionIO handles the selection of the control.
 */
-windowStateControlSelectionIO :: !ControlSelectInfo !(WindowStateHandle (PSt .l .p)) (PSt .l .p)
-												 -> (!WindowStateHandle (PSt .l .p),PSt .l .p)
+windowStateControlSelectionIO :: !ControlSelectInfo !(WindowStateHandle (PSt .l)) (PSt .l)
+												 -> (!WindowStateHandle (PSt .l),PSt .l)
 windowStateControlSelectionIO info wsH=:{wshHandle=Just wlsH=:{wlsState=ls,wlsHandle=wH}} pState
 	= ({wsH & wshHandle=Just {wlsH & wlsState=ls1,wlsHandle=wH1}},pState1)
 where
@@ -1100,8 +1100,8 @@ windowStateControlSelectionIO _ _ _
 
 /*	windowStateControlSliderActionIO handles the slider of windows/dialogs.
 */
-windowStateControlSliderActionIO :: !ControlSliderInfo !(WindowStateHandle (PSt .l .p)) (PSt .l .p)
-													-> (!WindowStateHandle (PSt .l .p),PSt .l .p)
+windowStateControlSliderActionIO :: !ControlSliderInfo !(WindowStateHandle (PSt .l)) (PSt .l)
+													-> (!WindowStateHandle (PSt .l),PSt .l)
 windowStateControlSliderActionIO info wsH=:{wshHandle=Just wlsH=:{wlsState=ls,wlsHandle=wH}} pState
 	= ({wsH & wshHandle=Just {wlsH & wlsState=ls1,wlsHandle=wH1}},pState1)
 where
@@ -1165,8 +1165,8 @@ windowStateControlSliderActionIO _ _ _
 
 /*	windowStateActivationIO handles the activation of the window/dialog.
 */
-windowStateActivationIO :: !(WindowStateHandle (PSt .l .p)) (PSt .l .p)
-						-> (!WindowStateHandle (PSt .l .p),  PSt .l .p)
+windowStateActivationIO :: !(WindowStateHandle (PSt .l)) (PSt .l)
+						-> (!WindowStateHandle (PSt .l),  PSt .l)
 windowStateActivationIO wsH=:{wshIds=wids,wshHandle=Just wlsH=:{wlsState=ls,wlsHandle=wH}} pState
 	= ({wsH & wshIds={wids & wActive=True},wshHandle=Just {wlsH & wlsState=ls1,wlsHandle=wH1}},pState1)
 where
@@ -1185,8 +1185,8 @@ windowStateActivationIO _ _
 
 /*	windowStateDeactivationIO handles the deactivation of the window/dialog.
 */
-windowStateDeactivationIO :: !(WindowStateHandle (PSt .l .p)) (PSt .l .p)
-						  -> (!WindowStateHandle (PSt .l .p),  PSt .l .p)
+windowStateDeactivationIO :: !(WindowStateHandle (PSt .l)) (PSt .l)
+						  -> (!WindowStateHandle (PSt .l),  PSt .l)
 windowStateDeactivationIO wsH=:{wshIds=wids,wshHandle=Just wlsH=:{wlsState=ls,wlsHandle=wH}} pState
 	= ({wsH & wshIds={wids & wActive=False},wshHandle=Just {wlsH & wlsState=ls1,wlsHandle=wH1}},pState1)
 where
@@ -1205,8 +1205,8 @@ windowStateDeactivationIO _ _
 
 /*	windowStateInitialiseIO handles the initialisation of the window/dialog.
 */
-windowStateInitialiseIO :: !(WindowStateHandle (PSt .l .p)) (PSt .l .p)
-						-> (!WindowStateHandle (PSt .l .p),  PSt .l .p)
+windowStateInitialiseIO :: !(WindowStateHandle (PSt .l)) (PSt .l)
+						-> (!WindowStateHandle (PSt .l),  PSt .l)
 windowStateInitialiseIO wsH=:{wshHandle=Just wlsH=:{wlsState=ls,wlsHandle=wH}} pState
 	= ({wsH & wshHandle=Just {wlsH & wlsState=ls1,wlsHandle=wH1}},pState1)
 where
@@ -1226,8 +1226,8 @@ windowStateInitialiseIO _ _
 
 /*	windowStateWindowKeyboardActionIO handles the keyboard for the window.
 */
-windowStateWindowKeyboardActionIO :: !WindowKeyboardActionInfo !(WindowStateHandle (PSt .l .p)) (PSt .l .p)
-															-> (!WindowStateHandle (PSt .l .p),PSt .l .p)
+windowStateWindowKeyboardActionIO :: !WindowKeyboardActionInfo !(WindowStateHandle (PSt .l)) (PSt .l)
+															-> (!WindowStateHandle (PSt .l),PSt .l)
 windowStateWindowKeyboardActionIO info wsH=:{wshHandle=Just wlsH=:{wlsState=ls,wlsHandle=wH}} pState
 	= ({wsH & wshHandle=Just {wlsH & wlsState=ls1,wlsHandle=wH1}},pState1)
 where
@@ -1244,8 +1244,8 @@ windowStateWindowKeyboardActionIO _ _ _
 
 /*	windowStateWindowMouseActionIO handles the mouse for the window.
 */
-windowStateWindowMouseActionIO :: !WindowMouseActionInfo !(WindowStateHandle (PSt .l .p)) (PSt .l .p)
-													  -> (!WindowStateHandle (PSt .l .p),  PSt .l .p)
+windowStateWindowMouseActionIO :: !WindowMouseActionInfo !(WindowStateHandle (PSt .l)) (PSt .l)
+													  -> (!WindowStateHandle (PSt .l),  PSt .l)
 windowStateWindowMouseActionIO info wsH=:{wshHandle=Just wlsH=:{wlsState=ls,wlsHandle=wH}} pState
 	= ({wsH & wshHandle=Just {wlsH & wlsState=ls1,wlsHandle=wH1}},pState1)
 where
@@ -1323,8 +1323,8 @@ where
 
 /*	windowStateCANCELIO handles the evaluation of the Cancel button.
 */
-windowStateCANCELIO :: !(WindowStateHandle (PSt .l .p)) (PSt .l .p)
-					-> (!WindowStateHandle (PSt .l .p),  PSt .l .p)
+windowStateCANCELIO :: !(WindowStateHandle (PSt .l)) (PSt .l)
+					-> (!WindowStateHandle (PSt .l),  PSt .l)
 windowStateCANCELIO wsH=:{wshHandle=Just wlsH=:{wlsState=ls,wlsHandle=wH=:{whCancelId=maybeId}}} pState
 	| isNothing maybeId
 		= windowdeviceFatalError "windowStateCANCELIO" "no Cancel button administrated"
@@ -1338,8 +1338,8 @@ windowStateCANCELIO _ _
 
 /*	windowStateOKIO handles the evaluation of the Ok button.
 */
-windowStateOKIO :: !(WindowStateHandle (PSt .l .p)) (PSt .l .p)
-				-> (!WindowStateHandle (PSt .l .p),  PSt .l .p)
+windowStateOKIO :: !(WindowStateHandle (PSt .l)) (PSt .l)
+				-> (!WindowStateHandle (PSt .l),  PSt .l)
 windowStateOKIO wsH=:{wshHandle=Just wlsH=:{wlsState=ls,wlsHandle=wH=:{whDefaultId=maybeId}}} pState
 	| isNothing maybeId
 		= windowdeviceFatalError "windowStateOKIO" "no Ok button administrated"
@@ -1353,8 +1353,8 @@ windowStateOKIO _ _
 
 /*	windowStateRequestCloseIO handles the request to close the window/dialog.
 */
-windowStateRequestCloseIO :: !(WindowStateHandle (PSt .l .p)) (PSt .l .p)
-						  -> (!WindowStateHandle (PSt .l .p),  PSt .l .p)
+windowStateRequestCloseIO :: !(WindowStateHandle (PSt .l)) (PSt .l)
+						  -> (!WindowStateHandle (PSt .l),  PSt .l)
 windowStateRequestCloseIO wsH=:{wshHandle=Just wlsH=:{wlsState=ls,wlsHandle=wH}} pState
 	= ({wsH & wshHandle=Just {wlsH & wlsState=ls1,wlsHandle=wH1}},pState1)
 where

@@ -34,7 +34,7 @@ StdWindowFatalError function error
 /*	getParentWindowId controlId returns the Id of the parent window/dialog if this
 	exists and belongs to the same interactive process. 
 */
-getParentWindowId :: !Id !(IOSt .l .p) -> (!Maybe Id,!IOSt .l .p)
+getParentWindowId :: !Id !(IOSt .l) -> (!Maybe Id,!IOSt .l)
 getParentWindowId controlId ioState
 	# (it,ioState)		= IOStGetIdTable ioState
 	  maybeParent		= getIdParent controlId it
@@ -54,16 +54,16 @@ windowtype	:==	"Window"
 dialogtype	:== "Dialog"
 
 class Windows wdef where
-	openWindow		:: .ls !(wdef .ls (PSt .l .p)) !(PSt .l .p)	-> (!ErrorReport,!PSt .l .p)
-	getWindowType	::      (wdef .ls .pst)						-> WindowType
+	openWindow		:: .ls !(wdef .ls (PSt .l)) !(PSt .l)	-> (!ErrorReport,!PSt .l)
+	getWindowType	::      (wdef .ls .pst)					-> WindowType
 
 class Dialogs wdef where
-	openDialog		:: .ls !(wdef .ls (PSt .l .p)) !(PSt .l .p)	-> (  !ErrorReport,            !PSt .l .p)
-	openModalDialog	:: .ls !(wdef .ls (PSt .l .p)) !(PSt .l .p)	-> (!(!ErrorReport,!Maybe .ls),!PSt .l .p)
-	getDialogType	::      (wdef .ls .pst)						-> WindowType
+	openDialog		:: .ls !(wdef .ls (PSt .l)) !(PSt .l)	-> (  !ErrorReport,            !PSt .l)
+	openModalDialog	:: .ls !(wdef .ls (PSt .l)) !(PSt .l)	-> (!(!ErrorReport,!Maybe .ls),!PSt .l)
+	getDialogType	::      (wdef .ls .pst)					-> WindowType
 
 instance Windows (Window c) | Controls c where
-	openWindow :: .ls !(Window c .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p) | Controls c
+	openWindow :: .ls !(Window c .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | Controls c
 	openWindow ls (Window title controls atts) pState
 		# pState				= WindowFunctions.dOpen pState
 		# (isZero,pState)		= accPIO checkZeroWindowBound pState
@@ -97,7 +97,7 @@ instance Windows (Window c) | Controls c where
 		= windowtype
 
 instance Dialogs (Dialog c) | Controls c where
-	openDialog :: .ls !(Dialog c .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p) | Controls c
+	openDialog :: .ls !(Dialog c .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | Controls c
 	openDialog ls (Dialog title controls atts) pState
 		# pState				= WindowFunctions.dOpen pState
 		# maybe_id				= getWindowIdAttribute atts
@@ -121,7 +121,7 @@ instance Dialogs (Dialog c) | Controls c where
 			# wH				= initWindowHandle title Modeless IsDialog NoWindowInfo itemHs atts
 			= (NoError,openwindow okId {wlsState=ls,wlsHandle=wH} pState)
 	
-	openModalDialog :: .ls !(Dialog c .ls (PSt .l .p)) !(PSt .l .p) -> (!(!ErrorReport,!Maybe .ls),!PSt .l .p) | Controls c
+	openModalDialog :: .ls !(Dialog c .ls (PSt .l)) !(PSt .l) -> (!(!ErrorReport,!Maybe .ls),!PSt .l) | Controls c
 	openModalDialog ls (Dialog title controls atts) pState
 		# pState				= WindowFunctions.dOpen pState
 		# maybe_id				= getWindowIdAttribute atts
@@ -179,11 +179,11 @@ controlIdsAreConsistent ioId wId itemHs rt it
 
 /*	closeWindow closes the indicated window.
 */
-closeWindow :: !Id !(PSt .l .p) -> PSt .l .p
+closeWindow :: !Id !(PSt .l) -> PSt .l
 closeWindow id pState
 	= disposeWindow (toWID id) pState
 
-closeActiveWindow :: !(PSt .l .p) -> PSt .l .p
+closeActiveWindow :: !(PSt .l) -> PSt .l
 closeActiveWindow pState
 	# (maybeId,pState)	= accPIO getActiveWindow pState
 	| isNothing maybeId
@@ -194,7 +194,7 @@ closeActiveWindow pState
 
 /*	closeControls closes the controls in the indicated window.
 */
-closeControls :: !Id [Id] !Bool !(IOSt .l .p) -> IOSt .l .p
+closeControls :: !Id [Id] !Bool !(IOSt .l) -> IOSt .l
 closeControls wId ids relayout ioState
 	# (found,wDevice,ioState)					= IOStGetDevice WindowDevice ioState
 	| not found
@@ -224,7 +224,7 @@ closeControls wId ids relayout ioState
 
 /*	closeAllControls closes all controls from the indicated window.
 */
-closeAllControls :: !Id !(IOSt .l .p) -> IOSt .l .p
+closeAllControls :: !Id !(IOSt .l) -> IOSt .l
 closeAllControls wId ioState
 	# (found,wDevice,ioState)					= IOStGetDevice WindowDevice ioState
 	| not found
@@ -248,7 +248,7 @@ closeAllControls wId ioState
 
 /*	closePopUpControlItems closes items from the indicated PopUpControl in the indicated window/dialogue.
 */
-closePopUpControlItems :: !Id ![Index] !(IOSt .l .p) -> IOSt .l .p
+closePopUpControlItems :: !Id ![Index] !(IOSt .l) -> IOSt .l
 closePopUpControlItems popUpId indexs ioState
 	| isEmpty indexs
 		= ioState
@@ -268,8 +268,8 @@ closePopUpControlItems popUpId indexs ioState
 		# ioState				= setIOToolbox tb ioState
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
 where
-	closepopupcontrolitems :: !Id ![Index] !(WindowStateHandle (PSt .l .p)) !*OSToolbox
-										-> (!WindowStateHandle (PSt .l .p), !*OSToolbox)
+	closepopupcontrolitems :: !Id ![Index] !(WindowStateHandle (PSt .l)) !*OSToolbox
+										-> (!WindowStateHandle (PSt .l), !*OSToolbox)
 	closepopupcontrolitems popUpId indexs wsH=:{wshIds={wPtr},wshHandle=Just wlsH=:{wlsHandle=wH}} tb
 		# (wH,tb)		= closepopupitems popUpId indexs wPtr wH tb
 		= ({wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
@@ -289,7 +289,7 @@ getWindowStateHandleIds _
 
 /*	openControls adds controls to the indicated window.
 */
-openControls :: !Id .ls (cdef .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p) | Controls cdef
+openControls :: !Id .ls (cdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | Controls cdef
 openControls wId ls newControls pState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
 	| not found
@@ -328,7 +328,7 @@ openControls wId ls newControls pState
 
 /*	openCompoundControls adds controls to the indicated CompoundControl of the indicated window.
 */
-openCompoundControls :: !Id .ls (cdef .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p) | Controls cdef
+openCompoundControls :: !Id .ls (cdef .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | Controls cdef
 openCompoundControls cId ls newControls pState=:{io=ioState}
 	# (maybeId,ioState)			= getParentWindowId cId ioState
 	| isNothing maybeId
@@ -375,7 +375,7 @@ openCompoundControls cId ls newControls pState=:{io=ioState}
 
 /*	openPopUpControlItems opens items to the PopUpControl of the indicated window/dialogue.
 */
-openPopUpControlItems :: !Id !Index ![PopUpControlItem (PSt .l .p)] !(IOSt .l .p) -> IOSt .l .p
+openPopUpControlItems :: !Id !Index ![PopUpControlItem (PSt .l)] !(IOSt .l) -> IOSt .l
 openPopUpControlItems popUpId index items ioState
 	| isEmpty items
 		= ioState
@@ -401,8 +401,8 @@ openPopUpControlItems popUpId index items ioState
 		# ioState				= setIOToolbox tb ioState
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH wHs)) ioState
 where
-	openpopupcontrolitems :: !Id !Index ![PopUpControlItem (PSt .l .p)] !(WindowStateHandle (PSt .l .p)) !*OSToolbox
-																	 -> (!WindowStateHandle (PSt .l .p), !*OSToolbox)
+	openpopupcontrolitems :: !Id !Index ![PopUpControlItem (PSt .l)] !(WindowStateHandle (PSt .l)) !*OSToolbox
+																	 -> (!WindowStateHandle (PSt .l), !*OSToolbox)
 	openpopupcontrolitems popUpId index items wsH=:{wshIds={wPtr},wshHandle=Just wlsH=:{wlsHandle=wH}} tb
 		# (wH,tb)		= openpopupitems popUpId index items wPtr wH tb
 		= ({wsH & wshHandle=Just {wlsH & wlsHandle=wH}},tb)
@@ -412,7 +412,7 @@ where
 
 /*	setControlPos changes the position of the indicated control.
 */
-setControlPos :: !Id ![(Id,ItemPos)] !(IOSt .l .p) -> (!Bool,!IOSt .l .p)
+setControlPos :: !Id ![(Id,ItemPos)] !(IOSt .l) -> (!Bool,!IOSt .l)
 setControlPos wId newPoss ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -437,8 +437,8 @@ setControlPos wId newPoss ioState
 
 /*	controlSize calculates the size of the given control.
 */
-controlSize :: !(cdef .ls (PSt .l .p)) !Bool !(Maybe (Int,Int)) !(Maybe (Int,Int)) !(Maybe (Int,Int)) !(PSt .l .p)
-			-> (!Size,!PSt .l .p) | Controls cdef
+controlSize :: !(cdef .ls (PSt .l)) !Bool !(Maybe (Int,Int)) !(Maybe (Int,Int)) !(Maybe (Int,Int)) !(PSt .l)
+			-> (!Size,!PSt .l) | Controls cdef
 controlSize cdef isWindow hMargins vMargins itemSpaces pState
 	# (cs,pState)		= controlToHandles cdef pState
 	  itemHs			= map ControlStateToWElementHandle cs
@@ -462,7 +462,7 @@ controlSize cdef isWindow hMargins vMargins itemSpaces pState
 
 /*	setActiveWindow activates the given window.
 */
-setActiveWindow :: !Id !(PSt .l .p) -> PSt .l .p
+setActiveWindow :: !Id !(PSt .l) -> PSt .l
 setActiveWindow wId pState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice pState.io
 	| not found
@@ -518,7 +518,7 @@ where
 
 /*	getActiveWindow returns the Id of the currently active window.
 */
-getActiveWindow :: !(IOSt .l .p) -> (!Maybe Id, !IOSt .l .p)
+getActiveWindow :: !(IOSt .l) -> (!Maybe Id, !IOSt .l)
 getActiveWindow ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -531,7 +531,7 @@ getActiveWindow ioState
 
 /*	setActiveControl makes the indicated control active only if its parent window is already active.
 */
-setActiveControl :: !Id !(PSt .l .p) -> PSt .l .p
+setActiveControl :: !Id !(PSt .l) -> PSt .l
 setActiveControl controlId pState=:{io}
 	# (parentId,ioState)		= getParentId controlId io
 	| isNothing parentId
@@ -603,7 +603,7 @@ where
 	control could be found. In that case, if the control had an Id attribute, then (Just id) is returned,
 	Nothing otherwise.
 */
-getActiveControl :: !(IOSt .l .p) -> (!(!Bool,!Maybe Id),!IOSt .l .p)
+getActiveControl :: !(IOSt .l) -> (!(!Bool,!Maybe Id),!IOSt .l)
 getActiveControl ioState
 	# (activeId,ioState)		= getActiveWindow ioState
 	| isNothing activeId
@@ -665,7 +665,7 @@ where
 
 /*	stackWindow changes the stacking order of the current windows.
 */
-stackWindow :: !Id !Id !(IOSt .l .p) -> IOSt .l .p
+stackWindow :: !Id !Id !(IOSt .l) -> IOSt .l
 stackWindow windowId behindId ioState
 	| windowId==behindId	// Don't stack a window behind itself
 		= ioState
@@ -734,7 +734,7 @@ where
 		stackBehind _ _ _ _ _
 			= StdWindowFatalError "stackBehind" "this alternative should not be reached"
 
-getWindowStack :: !(IOSt .l .p) -> (![(Id,WindowType)],!IOSt .l .p)
+getWindowStack :: !(IOSt .l) -> (![(Id,WindowType)],!IOSt .l)
 getWindowStack ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -750,12 +750,12 @@ where
 		# (kind,wsH)	= getWindowStateHandleWindowKind wsH
 		= ((wids.wId,if (kind==IsWindow) windowtype dialogtype),wsH)
 
-getWindowsStack :: !(IOSt .l .p) -> (![Id],!IOSt .l .p)
+getWindowsStack :: !(IOSt .l) -> (![Id],!IOSt .l)
 getWindowsStack ioState
 	# (id_types,ioState)	= getWindowStack ioState
 	= (FilterMap (\(id,wtype)->(wtype==windowtype,id)) id_types,ioState)
 
-getDialogsStack :: !(IOSt .l .p) -> (![Id],!IOSt .l .p)
+getDialogsStack :: !(IOSt .l) -> (![Id],!IOSt .l)
 getDialogsStack ioState
 	# (id_types,ioState)	= getWindowStack ioState
 	= (FilterMap (\(id,wtype)->(wtype==dialogtype,id)) id_types,ioState)
@@ -763,7 +763,7 @@ getDialogsStack ioState
 
 /*	Return layout attributes and default values.
 */
-getDefaultHMargin :: !Bool !(IOSt .l .p) -> ((Int,Int),!IOSt .l .p)
+getDefaultHMargin :: !Bool !(IOSt .l) -> ((Int,Int),!IOSt .l)
 getDefaultHMargin isWindow ioState
 	| isWindow
 		= ((0,0),ioState)
@@ -771,7 +771,7 @@ getDefaultHMargin isWindow ioState
 		# ({osmHorMargin},ioState)	= IOStGetOSWindowMetrics ioState
 		= ((osmHorMargin,osmHorMargin),ioState)
 
-getDefaultVMargin :: !Bool !(IOSt .l .p) -> ((Int,Int),!IOSt .l .p)
+getDefaultVMargin :: !Bool !(IOSt .l) -> ((Int,Int),!IOSt .l)
 getDefaultVMargin isWindow ioState
 	| isWindow
 		= ((0,0),ioState)
@@ -779,12 +779,12 @@ getDefaultVMargin isWindow ioState
 		# ({osmVerMargin},ioState)	= IOStGetOSWindowMetrics ioState
 		= ((osmVerMargin,osmVerMargin),ioState)
 
-getDefaultItemSpace :: !Bool !(IOSt .l .p) -> ((Int,Int),!IOSt .l .p)
+getDefaultItemSpace :: !Bool !(IOSt .l) -> ((Int,Int),!IOSt .l)
 getDefaultItemSpace _ ioState
 	# ({osmHorItemSpace,osmVerItemSpace},ioState)	= IOStGetOSWindowMetrics ioState
 	= ((osmHorItemSpace,osmVerItemSpace),ioState)
 
-getWindowHMargin :: !Id	!(IOSt .l .p) -> (!Maybe (Int,Int),!IOSt .l .p)
+getWindowHMargin :: !Id	!(IOSt .l) -> (!Maybe (Int,Int),!IOSt .l)
 getWindowHMargin id ioState
 	# (found,wDevice,ioState)		= IOStGetDevice WindowDevice ioState
 	| not found
@@ -804,7 +804,7 @@ where
 	gethmargin _ _
 		= StdWindowFatalError "getWindowHMargin" "unexpected window placeholder argument"
 
-getWindowVMargin :: !Id	!(IOSt .l .p) -> (!Maybe (Int,Int),!IOSt .l .p)
+getWindowVMargin :: !Id	!(IOSt .l) -> (!Maybe (Int,Int),!IOSt .l)
 getWindowVMargin id ioState
 	# (found,wDevice,ioState)		= IOStGetDevice WindowDevice ioState
 	| not found
@@ -824,7 +824,7 @@ where
 	getvmargin _ _
 		= StdWindowFatalError "getWindowVMargin" "unexpected window placeholder argument"
 
-getWindowItemSpace :: !Id !(IOSt .l .p) -> (!Maybe (Int,Int),!IOSt .l .p)
+getWindowItemSpace :: !Id !(IOSt .l) -> (!Maybe (Int,Int),!IOSt .l)
 getWindowItemSpace id ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -848,7 +848,7 @@ where
 
 /*	Setting the SelectState of windows.
 */
-enableWindow :: !Id !(IOSt .l .p) -> IOSt .l .p
+enableWindow :: !Id !(IOSt .l) -> IOSt .l
 enableWindow id ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -886,7 +886,7 @@ enableWindow id ioState
 		# ioState				= setIOToolbox tb ioState
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 
-disableWindow :: !Id !(IOSt .l .p) -> IOSt .l .p
+disableWindow :: !Id !(IOSt .l) -> IOSt .l
 disableWindow id ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -930,15 +930,15 @@ disableWindow id ioState
 		# ioState				= setIOToolbox tb ioState
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 
-enableWindowMouse :: !Id !(IOSt .l .p) -> IOSt .l .p
+enableWindowMouse :: !Id !(IOSt .l) -> IOSt .l
 enableWindowMouse id ioState
 	= setWindowMouseSelectState Able id ioState
 
-disableWindowMouse :: !Id !(IOSt .l .p) -> IOSt .l .p
+disableWindowMouse :: !Id !(IOSt .l) -> IOSt .l
 disableWindowMouse id ioState
 	= setWindowMouseSelectState Unable id ioState
 
-setWindowMouseSelectState :: !SelectState !Id !(IOSt .l .p) -> IOSt .l .p
+setWindowMouseSelectState :: !SelectState !Id !(IOSt .l) -> IOSt .l
 setWindowMouseSelectState selectState id ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -969,15 +969,15 @@ where
 	setMouseSelectState _ _
 		= StdWindowFatalError "setWindowMouseSelectState" "unexpected window placeholder argument"
 
-enableWindowKeyboard :: !Id !(IOSt .l .p) -> IOSt .l .p
+enableWindowKeyboard :: !Id !(IOSt .l) -> IOSt .l
 enableWindowKeyboard id ioState
 	= setWindowKeyboardSelectState Able id ioState
 
-disableWindowKeyboard :: !Id !(IOSt .l .p) -> IOSt .l .p
+disableWindowKeyboard :: !Id !(IOSt .l) -> IOSt .l
 disableWindowKeyboard id ioState
 	= setWindowKeyboardSelectState Unable id ioState
 
-setWindowKeyboardSelectState :: !SelectState !Id !(IOSt .l .p) -> IOSt .l .p
+setWindowKeyboardSelectState :: !SelectState !Id !(IOSt .l) -> IOSt .l
 setWindowKeyboardSelectState selectState id ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1008,7 +1008,7 @@ where
 	setKeyboardSelectState _ _
 		= StdWindowFatalError "setWindowKeyboardSelectState" "unexpected window placeholder argument"
 
-getWindowSelectState :: !Id !(IOSt .l .p) -> (!Maybe SelectState,!IOSt .l .p)
+getWindowSelectState :: !Id !(IOSt .l) -> (!Maybe SelectState,!IOSt .l)
 getWindowSelectState id ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1024,7 +1024,7 @@ getWindowSelectState id ioState
 		# (wSelect,wsH)			= getWindowStateHandleSelect wsH
 		= (Just (if wSelect Able Unable),IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 
-getWindowMouseSelectState :: !Id !(IOSt .l .p) -> (!Maybe SelectState,!IOSt .l .p)
+getWindowMouseSelectState :: !Id !(IOSt .l) -> (!Maybe SelectState,!IOSt .l)
 getWindowMouseSelectState id ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1051,7 +1051,7 @@ getWindowMouseAttInfo wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whAtts}}}
 getWindowMouseAttInfo _
 	= StdWindowFatalError "getWindowMouseAttInfo" "unexpected window placeholder argument"
 
-getWindowKeyboardSelectState :: !Id !(IOSt .l .p) -> (!Maybe SelectState,!IOSt .l .p)
+getWindowKeyboardSelectState :: !Id !(IOSt .l) -> (!Maybe SelectState,!IOSt .l)
 getWindowKeyboardSelectState id ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1078,7 +1078,7 @@ getWindowKeyboardAttInfo wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whAtts}}}
 getWindowKeyboardAttInfo _
 	= StdWindowFatalError "getWindowKeyboardAttInfo" "unexpected window placeholder argument"
 
-getWindowMouseStateFilter :: !Id !(IOSt .l .p) -> (!Maybe MouseStateFilter,!IOSt .l .p)
+getWindowMouseStateFilter :: !Id !(IOSt .l) -> (!Maybe MouseStateFilter,!IOSt .l)
 getWindowMouseStateFilter id ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1094,7 +1094,7 @@ getWindowMouseStateFilter id ioState
 		# (found,filter,_,wsH)	= getWindowMouseAttInfo wsH
 		= (if found (Just filter) Nothing,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 
-getWindowKeyboardStateFilter :: !Id !(IOSt .l .p) -> (!Maybe KeyboardStateFilter,!IOSt .l .p)
+getWindowKeyboardStateFilter :: !Id !(IOSt .l) -> (!Maybe KeyboardStateFilter,!IOSt .l)
 getWindowKeyboardStateFilter id ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1110,7 +1110,7 @@ getWindowKeyboardStateFilter id ioState
 		# (found,filter,_,wsH)	= getWindowKeyboardAttInfo wsH
 		= (if found (Just filter) Nothing,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 
-setWindowMouseStateFilter :: !Id !MouseStateFilter !(IOSt .l .p) -> IOSt .l .p
+setWindowMouseStateFilter :: !Id !MouseStateFilter !(IOSt .l) -> IOSt .l
 setWindowMouseStateFilter id filter ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1141,7 +1141,7 @@ where
 	setMouseFilter _ _
 		= StdWindowFatalError "setWindowMouseStateFilter" "unexpected window placeholder argument"
 
-setWindowKeyboardStateFilter :: !Id !KeyboardStateFilter !(IOSt .l .p) -> IOSt .l .p
+setWindowKeyboardStateFilter :: !Id !KeyboardStateFilter !(IOSt .l) -> IOSt .l
 setWindowKeyboardStateFilter id filter ioState
 	# (found,wDevice,ioState)		= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1175,15 +1175,15 @@ where
 
 //	Operations that are concerned with the background/look of a window. 
 
-appWindowPicture:: !Id !.(IdFun *Picture) !(IOSt .l .p) -> IOSt .l .p
+appWindowPicture:: !Id !.(IdFun *Picture) !(IOSt .l) -> IOSt .l
 appWindowPicture id drawf ioState
 	= snd (drawInWindow "appWindowPicture" id (\p->(undef,drawf p)) ioState)
 
-accWindowPicture:: !Id !.(St *Picture .x) !(IOSt .l .p) -> (!Maybe .x,!IOSt .l .p)
+accWindowPicture:: !Id !.(St *Picture .x) !(IOSt .l) -> (!Maybe .x,!IOSt .l)
 accWindowPicture id drawf ioState
 	= drawInWindow "accWindowPicture" id drawf ioState
 
-drawInWindow :: String !Id !.(St *Picture .x) !(IOSt .l .p) -> (!Maybe .x,!IOSt .l .p)
+drawInWindow :: String !Id !.(St *Picture .x) !(IOSt .l) -> (!Maybe .x,!IOSt .l)
 drawInWindow functionname id drawf ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1209,7 +1209,7 @@ where
 	drawinwindow` _ _ _ _
 		= StdWindowFatalError functionname "unexpected window placeholder argument"
 
-updateWindow :: !Id !(Maybe ViewFrame) !(IOSt .l .p) -> IOSt .l .p
+updateWindow :: !Id !(Maybe ViewFrame) !(IOSt .l) -> IOSt .l
 updateWindow id maybeViewFrame ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1250,7 +1250,7 @@ where
 	updateWindowBackground _ _ _ _
 		= StdWindowFatalError "updateWindow" "unexpected window placeholder argument"
 
-setWindowLook :: !Id !Bool !(!Bool,!Look) !(IOSt .l .p) -> IOSt .l .p
+setWindowLook :: !Id !Bool !(!Bool,!Look) !(IOSt .l) -> IOSt .l
 setWindowLook wId redraw (sysLook,lookFun) ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1293,7 +1293,7 @@ where
 	setwindowlook _ _ _ _ _
 		= StdWindowFatalError "setWindowLook" "unexpected window placeholder argument"
 
-getWindowLook :: !Id !(IOSt .l .p) -> (!Maybe (Bool,Look),!IOSt .l .p)
+getWindowLook :: !Id !(IOSt .l) -> (!Maybe (Bool,Look),!IOSt .l)
 getWindowLook id ioState
 	# (found,wDevice,ioState)		= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1314,7 +1314,7 @@ getWindowLook id ioState
 
 //	Operations that are concerned with the position of windows/dialogues.
 
-setWindowPos :: !Id !ItemPos !(IOSt .l .p) -> IOSt .l .p
+setWindowPos :: !Id !ItemPos !(IOSt .l) -> IOSt .l
 setWindowPos id pos ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1389,7 +1389,7 @@ where
 									BelowPrev   -> True
 									_           -> False
 
-getWindowPos :: !Id !(IOSt .l .p) -> (!Maybe Vector2,!IOSt .l .p)
+getWindowPos :: !Id !(IOSt .l) -> (!Maybe Vector2,!IOSt .l)
 getWindowPos id ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1418,7 +1418,7 @@ getWindowPos id ioState
 
 //	Operations that are concerned with the ViewFrame of a window.
 
-moveWindowViewFrame :: !Id Vector2 !(IOSt .l .p) -> IOSt .l .p
+moveWindowViewFrame :: !Id Vector2 !(IOSt .l) -> IOSt .l
 moveWindowViewFrame id v ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1442,7 +1442,7 @@ where
 	movewindowviewframe` _ _ _ _
 		= StdWindowFatalError "moveWindowViewFrame" "unexpected window placeholder argument"
 
-getWindowViewFrame :: !Id !(IOSt .l .p) -> (!ViewFrame,!IOSt .l .p)
+getWindowViewFrame :: !Id !(IOSt .l) -> (!ViewFrame,!IOSt .l)
 getWindowViewFrame id ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1475,7 +1475,7 @@ where
 getwindowviewframe _ _
 	= StdWindowFatalError "getWindowViewFrame" "unexpected window placeholder argument"
 
-setWindowViewSize :: !Id !Size !(IOSt .l .p) -> IOSt .l .p
+setWindowViewSize :: !Id !Size !(IOSt .l) -> IOSt .l
 setWindowViewSize wid reqSize ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1538,19 +1538,19 @@ where
 	validateSize _ _ _
 		= StdWindowFatalError "setWindowViewSize" "unexpected window placeholder argument"
 
-getWindowViewSize :: !Id !(IOSt .l .p) -> (!Size,!IOSt .l .p)
+getWindowViewSize :: !Id !(IOSt .l) -> (!Size,!IOSt .l)
 getWindowViewSize id ioState
 	# (viewFrame,ioState)	= getWindowViewFrame id ioState
 	= (rectangleSize viewFrame,ioState)
 
-setWindowOuterSize :: !Id !Size !(IOSt .l .p) -> IOSt .l .p
+setWindowOuterSize :: !Id !Size !(IOSt .l) -> IOSt .l
 setWindowOuterSize id {w,h} ioState
 	# (osdInfo,ioState)	= IOStGetOSDInfo ioState
 	  isMDI				= getOSDInfoDocumentInterface osdInfo == MDI
 	# ((dw,dh),ioState)	= accIOToolbox (OSstripOuterSize isMDI True) ioState
 	= setWindowViewSize id {w=w-dw,h=h-dh} ioState
 
-getWindowOuterSize :: !Id !(IOSt .l .p) -> (!Size,!IOSt .l .p)
+getWindowOuterSize :: !Id !(IOSt .l) -> (!Size,!IOSt .l)
 getWindowOuterSize id ioState
 	# (found,wDevice,ioState)		= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1587,7 +1587,7 @@ getWindowOuterSize id ioState
 		  windows					= setWindowHandlesWindow wsH windows
 		= (addOSOuterSize,IOStSetDevice (WindowSystemState windows) ioState)
 
-setWindowViewDomain :: !Id ViewDomain !(IOSt .l .p) -> IOSt .l .p
+setWindowViewDomain :: !Id ViewDomain !(IOSt .l) -> IOSt .l
 setWindowViewDomain wId newDomain ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1658,7 +1658,7 @@ where
 	setwindowviewdomain _ _ _ _
 		= StdWindowFatalError "setWindowViewDomain" "unexpected window placeholder argument"
 
-getWindowViewDomain :: !Id !(IOSt .l .p) -> (!Maybe ViewDomain,!IOSt .l .p)
+getWindowViewDomain :: !Id !(IOSt .l) -> (!Maybe ViewDomain,!IOSt .l)
 getWindowViewDomain id ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1679,7 +1679,7 @@ getWindowViewDomain id ioState
 
 //	Set and get ScrollFunctions:
 
-setWindowScrollFunction :: !Id Direction ScrollFunction !(IOSt .l .p) -> IOSt .l .p
+setWindowScrollFunction :: !Id Direction ScrollFunction !(IOSt .l) -> IOSt .l
 setWindowScrollFunction wId direction scrollFun ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1718,7 +1718,7 @@ where
 	setwindowscrollfunction _ _ _
 		= StdWindowFatalError "setWindowScrollFunction" "unexpected window placeholder argument"
 
-getWindowScrollFunction :: !Id Direction !(IOSt .l .p) -> (!Maybe ScrollFunction,!IOSt .l .p)
+getWindowScrollFunction :: !Id Direction !(IOSt .l) -> (!Maybe ScrollFunction,!IOSt .l)
 getWindowScrollFunction wId direction ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1756,7 +1756,7 @@ where
 
 //	Operations that are concerned with remaining attributes of windows.
 
-setWindowTitle :: !Id Title !(IOSt .l .p) -> IOSt .l .p
+setWindowTitle :: !Id Title !(IOSt .l) -> IOSt .l
 setWindowTitle id title ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1776,7 +1776,7 @@ setWindowTitle id title ioState
 		# ioState				= appIOToolbox (OSsetWindowTitle (if (isSDI && wids.wPtr==clientPtr) framePtr wids.wPtr) title) ioState
 		= IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 
-setWindowOk :: !Id Id !(IOSt .l .p) -> IOSt .l .p
+setWindowOk :: !Id Id !(IOSt .l) -> IOSt .l
 setWindowOk id okId ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1795,7 +1795,7 @@ where
 	setwindowok _ _ _
 		= StdWindowFatalError "setWindowOk" "unexpected window placeholder argument"
 
-setWindowCancel :: !Id Id !(IOSt .l .p) -> IOSt .l .p
+setWindowCancel :: !Id Id !(IOSt .l) -> IOSt .l
 setWindowCancel id cancelId ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1814,7 +1814,7 @@ where
 	setwindowcancel _ _ _
 		= StdWindowFatalError "setWindowCancel" "unexpected window placeholder argument"
 
-setWindowCursor :: !Id CursorShape !(IOSt .l .p) -> IOSt .l .p
+setWindowCursor :: !Id CursorShape !(IOSt .l) -> IOSt .l
 setWindowCursor id shape ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1837,7 +1837,7 @@ where
 	setwindowcursor _ _ _
 		= StdWindowFatalError "setWindowCursor" "unexpected window placeholder argument"
 
-getWindowTitle :: !Id !(IOSt .l .p) -> (!Maybe Title,!IOSt .l .p)
+getWindowTitle :: !Id !(IOSt .l) -> (!Maybe Title,!IOSt .l)
 getWindowTitle id ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1850,7 +1850,7 @@ getWindowTitle id ioState
 		# (title,wsH)			= getWindowStateHandleWindowTitle wsH
 		= (Just title,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 
-getWindowOk :: !Id !(IOSt .l .p) -> (!Maybe Id,!IOSt .l .p)
+getWindowOk :: !Id !(IOSt .l) -> (!Maybe Id,!IOSt .l)
 getWindowOk id ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1863,7 +1863,7 @@ getWindowOk id ioState
 		# (okId,wsH)			= getWindowStateHandleDefaultId wsH
 		= (okId,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 
-getWindowCancel :: !Id !(IOSt .l .p) -> (!Maybe Id,!IOSt .l .p)
+getWindowCancel :: !Id !(IOSt .l) -> (!Maybe Id,!IOSt .l)
 getWindowCancel id ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -1876,7 +1876,7 @@ getWindowCancel id ioState
 		# (cancelId,wsH)	= getWindowStateHandleCancelId wsH
 		= (cancelId,IOStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState)
 
-getWindowCursor :: !Id !(IOSt .l .p) -> (!Maybe CursorShape,!IOSt .l .p)
+getWindowCursor :: !Id !(IOSt .l) -> (!Maybe CursorShape,!IOSt .l)
 getWindowCursor id ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found

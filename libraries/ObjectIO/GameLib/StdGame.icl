@@ -23,7 +23,7 @@ SK_FOREVER  :==  (~1)
    = NoState
 
 
-OpenGame :: gs (Game gs) [GameAttribute gs] !(PSt .l .p) -> (ErrorReport, !(PSt .l .p))
+OpenGame :: gs (Game gs) [GameAttribute gs] !(PSt .l) -> (ErrorReport, !(PSt .l))
 OpenGame gs gdef attr ps
     #   (wId, ps)       =   accPIO openId ps
     #   size            =   findSize attr {w=320,h=240}
@@ -47,7 +47,7 @@ where
     findBPP [x:xs] s = findBPP xs s
 
     // always full screen, game in a window not implemented yet
-	OpenGameWindow :: !Id !Size !Int !Bool !(PSt .l .p) -> (!ErrorReport, !PSt .l .p)
+	OpenGameWindow :: !Id !Size !Int !Bool !(PSt .l) -> (!ErrorReport, !PSt .l)
 	OpenGameWindow id gamewindowsize bitsperpixel fullscreen pState
 		# pState				= WindowFunctions.dOpen pState
 		# (isZero,pState)		= accPIO checkZeroWindowBound pState

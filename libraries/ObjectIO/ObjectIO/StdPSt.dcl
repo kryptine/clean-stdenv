@@ -28,13 +28,13 @@ from	channelenv	import  ChannelEnv // MW11++
 	
 	IOSt is also an environment instance of the classes FileEnv, TimeEnv & ChannelEnv
 */
-instance FileSystem		(PSt .l .p)
-instance FileEnv		(PSt .l .p), (IOSt .l .p) // MW11 added IOSt
-instance FileSelectEnv	(PSt .l .p)
-instance TimeEnv		(PSt .l .p), (IOSt .l .p) // MW11 added IOSt
-instance playSoundFile	(PSt .l .p)
-instance ChannelEnv 	(PSt .l .p), (IOSt .l .p) // MW11 added IOSt
-instance Ids		 	(PSt .l .p)
+instance FileSystem		(PSt .l)
+instance FileEnv		(PSt .l), (IOSt .l) // MW11 added IOSt
+instance FileSelectEnv	(PSt .l)
+instance TimeEnv		(PSt .l), (IOSt .l) // MW11 added IOSt
+instance playSoundFile	(PSt .l)
+instance ChannelEnv 	(PSt .l), (IOSt .l) // MW11 added IOSt
+instance Ids		 	(PSt .l)
 
 
 /*	accScreenPicture provides access to an initial Picture as it would be created in
@@ -43,10 +43,10 @@ instance Ids		 	(PSt .l .p)
 class accScreenPicture env :: !.(St *Picture .x) !*env -> (!.x,!*env)
 
 instance accScreenPicture World
-instance accScreenPicture (IOSt .l .p)
+instance accScreenPicture (IOSt .l)
 
 
-beep :: !(IOSt .l .p) -> IOSt .l .p
+beep :: !(IOSt .l) -> IOSt .l
 /*	beep emits the alert sound.
 */
 
@@ -54,9 +54,9 @@ beep :: !(IOSt .l .p) -> IOSt .l .p
 //	Operations on the global cursor:
 
 /* RWS ---
-setCursor		:: !CursorShape !(IOSt .l .p) -> IOSt .l .p
-resetCursor		::              !(IOSt .l .p) -> IOSt .l .p
-obscureCursor	::              !(IOSt .l .p) -> IOSt .l .p
+setCursor		:: !CursorShape !(IOSt .l) -> IOSt .l
+resetCursor		::              !(IOSt .l) -> IOSt .l
+obscureCursor	::              !(IOSt .l) -> IOSt .l
 /*	setCursor		overrules the shape of the cursor of all windows. 
 	resetCursor		removes the overruled cursor shape of all windows.
 	obscureCursor	hides the cursor until the mouse is moved.
@@ -65,7 +65,7 @@ obscureCursor	::              !(IOSt .l .p) -> IOSt .l .p
 
 //	Operations on the DoubleDownDistance:
 
-setDoubleDownDistance :: !Int !(IOSt .l .p) -> IOSt .l .p
+setDoubleDownDistance :: !Int !(IOSt .l) -> IOSt .l
 /*	setDoubleDownDistance sets the maximum distance the mouse is allowed to move to 
 	generate a ButtonDouble(Triple)Down button state. Negative values are set to 
 	zero.
@@ -74,15 +74,15 @@ setDoubleDownDistance :: !Int !(IOSt .l .p) -> IOSt .l .p
 
 //	Operations on the DocumentInterface of an interactive process:
 
-getDocumentInterface :: !(IOSt .l .p) -> (!DocumentInterface, !IOSt .l .p)
+getDocumentInterface :: !(IOSt .l) -> (!DocumentInterface, !IOSt .l)
 /*	getDocumentInterface returns the DocumentInterface of the interactive process.
 */
 
 
 //	Operations on the attributes of an interactive process:
 
-setProcessActivate	:: !(IdFun (PSt .l .p)) !(IOSt .l .p) -> IOSt .l .p
-setProcessDeactivate:: !(IdFun (PSt .l .p)) !(IOSt .l .p) -> IOSt .l .p
+setProcessActivate	:: !(IdFun (PSt .l)) !(IOSt .l) -> IOSt .l
+setProcessDeactivate:: !(IdFun (PSt .l)) !(IOSt .l) -> IOSt .l
 /*	These functions set the ProcessActivate and ProcessDeactivate attribute of the 
 	interactive process respectively.
 */
@@ -90,20 +90,16 @@ setProcessDeactivate:: !(IdFun (PSt .l .p)) !(IOSt .l .p) -> IOSt .l .p
 
 //	Coercing PSt component operations to PSt operations.
 
-appListPIO	:: ![.IdFun (IOSt .l .p)]	!(PSt .l .p) ->			 PSt .l .p
-appListPLoc	:: ![.IdFun .l]				!(PSt .l .p) ->			 PSt .l .p
-appListPPub	:: ![.IdFun .p]				!(PSt .l .p) ->			 PSt .l .p
+appListPIO	:: ![.IdFun (IOSt .l)]	!(PSt .l) ->		 PSt .l
+appListPLoc	:: ![.IdFun .l]			!(PSt .l) ->		 PSt .l
 
-appPIO		:: !.(IdFun (IOSt .l .p))	!(PSt .l .p) ->			 PSt .l .p
-appPLoc		:: !.(IdFun .l)				!(PSt .l .p) ->			 PSt .l .p
-appPPub		:: !.(IdFun .p)				!(PSt .l .p) ->			 PSt .l .p
+appPIO		:: !.(IdFun (IOSt .l))	!(PSt .l) ->		 PSt .l
+appPLoc		:: !.(IdFun .l)			!(PSt .l) ->		 PSt .l
 
 //	Accessing PSt component operations.
 
-accListPIO	:: ![.St (IOSt .l .p) .x]	!(PSt .l .p) -> (![.x],	!PSt .l .p)
-accListPLoc	:: ![.St .l           .x]	!(PSt .l .p) -> (![.x],	!PSt .l .p)
-accListPPub	:: ![.St .p           .x]	!(PSt .l .p) -> (![.x],	!PSt .l .p)
+accListPIO	:: ![.St (IOSt .l) .x]	!(PSt .l) -> (![.x],!PSt .l)
+accListPLoc	:: ![.St .l        .x]	!(PSt .l) -> (![.x],!PSt .l)
 
-accPIO		:: !.(St (IOSt .l .p) .x)	!(PSt .l .p) -> (!.x,	!PSt .l .p)
-accPLoc		:: !.(St .l           .x)	!(PSt .l .p) -> (!.x,	!PSt .l .p)
-accPPub		:: !.(St .p           .x)	!(PSt .l .p) -> (!.x,	!PSt .l .p)
+accPIO		:: !.(St (IOSt .l) .x)	!(PSt .l) -> (! .x,	!PSt .l)
+accPLoc		:: !.(St .l        .x)	!(PSt .l) -> (! .x,	!PSt .l)

@@ -33,9 +33,9 @@ class Ids env where
 */
 
 instance Ids World
-instance Ids (IOSt .l .p)
+instance Ids (IOSt .l)
 
-getParentId :: !Id !(IOSt .l .p) -> (!Maybe Id,!IOSt .l .p)
+getParentId :: !Id !(IOSt .l) -> (!Maybe Id,!IOSt .l)
 /*	getParentId returns the Id of the parent top-level GUI object 
 	of the GUI component identified by the argument Id.
 	If the GUI component could not be found then Nothing is returned.

@@ -26,7 +26,7 @@ windowcreateFatalError function error
 
 /*	Open a modal dialogue.
 */
-openmodalwindow :: !Id !(WindowLSHandle .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!Maybe .ls,!PSt .l .p)
+openmodalwindow :: !Id !(WindowLSHandle .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!Maybe .ls,!PSt .l)
 openmodalwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found					// This condition should never occur: WindowDevice must have been 'installed'
@@ -65,13 +65,13 @@ openmodalwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
 	# pState					= {pState & io=ioState}
 	= (if noError NoError (OtherError "could not create modal dialog"),finalLS,pState)
 where
-	handleOSEvent :: !OSEvent !(PSt .l .p) -> (![Int],!PSt .l .p)
+	handleOSEvent :: !OSEvent !(PSt .l) -> (![Int],!PSt .l)
 	handleOSEvent osEvent pState = accContext (handleContextOSEvent osEvent) pState
 	
 /*	getFinalModalDialogLS retrieves the final local state of the modal dialog. This value has been stored in the window handles.
 	This MUST have been done by disposeWindow (windowdispose). 
 */
-	getFinalModalDialogLS :: !Bool !WID !(IOSt .l .p) -> (!Maybe .ls,!IOSt .l .p)
+	getFinalModalDialogLS :: !Bool !WID !(IOSt .l) -> (!Maybe .ls,!IOSt .l)
 	getFinalModalDialogLS noError wid ioState
 		| not noError
 			= (Nothing,ioState)
@@ -95,7 +95,7 @@ where
 
 /*	Open a modeless window/dialogue.
 */
-openwindow :: !Id !(WindowLSHandle .ls (PSt .l .p)) !(PSt .l .p) -> PSt .l .p
+openwindow :: !Id !(WindowLSHandle .ls (PSt .l)) !(PSt .l) -> PSt .l
 openwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found					// This condition should never occur: WindowDevice must have 'installed'
@@ -125,8 +125,8 @@ openwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
 			The return OSWindowPtr is the OSWindowPtr of the newly created window.
 			The return Index is the proper insert position in the WindowHandles list.
 	*/
-		openAnyWindow :: !Id !(WindowHandle .ls (PSt .l .p)) !(WindowHandles (PSt .l .p)) !(IOSt .l .p)
-			-> (![DelayActivationInfo],!OSWindowPtr,!Index,!WindowHandle .ls (PSt .l .p),!WindowHandles (PSt .l .p),!IOSt .l .p)
+		openAnyWindow :: !Id !(WindowHandle .ls (PSt .l)) !(WindowHandles (PSt .l)) !(IOSt .l)
+			-> (![DelayActivationInfo],!OSWindowPtr,!Index,!WindowHandle .ls (PSt .l),!WindowHandles (PSt .l),!IOSt .l)
 		openAnyWindow wId wH windows ioState
 			# (tb,ioState)			= getIOToolbox ioState
 			# (osdinfo,ioState)		= IOStGetOSDInfo ioState
@@ -141,8 +141,8 @@ openwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
 			# ioState				= setIOToolbox (OSinvalidateWindow wPtr tb) ioState
 			= (delayinfo,wPtr,index,wH,windows,ioState)
 
-createAnyWindow :: !OSWindowMetrics !OSWindowPtr !Id !Point2 !Size !Vector2 !OSDInfo !(WindowHandle .ls (PSt .l .p)) !*OSToolbox
-								  -> (![DelayActivationInfo],!OSWindowPtr,!OSDInfo, !WindowHandle .ls (PSt .l .p), !*OSToolbox)
+createAnyWindow :: !OSWindowMetrics !OSWindowPtr !Id !Point2 !Size !Vector2 !OSDInfo !(WindowHandle .ls (PSt .l)) !*OSToolbox
+								    -> (![DelayActivationInfo],!OSWindowPtr,!OSDInfo, !WindowHandle .ls (PSt .l), !*OSToolbox)
 createAnyWindow wMetrics behindPtr wId {x,y} {w,h} originv osdinfo wH=:{whMode,whKind,whTitle,whWindowInfo,whAtts} tb
 	| whKind==IsWindow
 		# (delay_info,wPtr,hPtr,vPtr,osdinfo,wH,tb)
@@ -210,14 +210,14 @@ where
 	size			= (w,h)
 	
 	// createWindowControls creates the controls.
-	createWindowControls :: !OSWindowMetrics !OSWindowPtr !(WindowHandle .ls (PSt .l .p)) !*OSToolbox -> (!WindowHandle .ls (PSt .l .p),!*OSToolbox)
+	createWindowControls :: !OSWindowMetrics !OSWindowPtr !(WindowHandle .ls (PSt .l)) !*OSToolbox -> (!WindowHandle .ls (PSt .l),!*OSToolbox)
 	createWindowControls wMetrics wPtr wH=:{whDefaultId,whCancelId,whSelect,whItems=itemHs} tb
 		# (itemHs,tb)	= createControls wMetrics whDefaultId whCancelId whSelect wPtr itemHs tb
 		= ({wH & whItems=itemHs},tb)
 	
 	// updateWindowControl updates customised controls.
-	updateWindowControl :: !OSWindowMetrics !Id !(!Int,!Int) !OSWindowPtr !OSWindowPtr !OSPictContext !(WindowHandle .ls (PSt .l .p)) !*OSToolbox
-																								   -> (!WindowHandle .ls (PSt .l .p), !*OSToolbox)
+	updateWindowControl :: !OSWindowMetrics !Id !(!Int,!Int) !OSWindowPtr !OSWindowPtr !OSPictContext !(WindowHandle .ls (PSt .l)) !*OSToolbox
+																								   -> (!WindowHandle .ls (PSt .l), !*OSToolbox)
 	updateWindowControl wMetrics wId (w,h) wPtr cPtr osPict wH=:{whItems=itemHs} tb
 		#! (_,controls)	= getUpdateControls cPtr (SizeToRect {w=w,h=h}) itemHs
 		#! wH			= {wH & whItems=itemHs}
@@ -263,7 +263,7 @@ stackWindow wPtr behindPtr     tb = OSstackWindow wPtr behindPtr tb
 
 /*	bufferDelayedEvents buffers the events in the OSEvents environment.
 */
-bufferDelayedEvents :: ![DelayActivationInfo] !(IOSt .l .p) -> IOSt .l .p
+bufferDelayedEvents :: ![DelayActivationInfo] !(IOSt .l) -> IOSt .l
 bufferDelayedEvents delayinfo ioState
 	# (osEvents,ioState)	= IOStGetEvents ioState
 	# (delayEvents,ioState)	= accIOToolbox (StrictSeqList (map toOSEvent delayinfo)) ioState
@@ -283,7 +283,7 @@ where
 
 /*	WindowBound-checks for normal windows.
 */
-checkZeroWindowBound :: !(IOSt .l .p) -> (!Bool,!IOSt .l .p)
+checkZeroWindowBound :: !(IOSt .l) -> (!Bool,!IOSt .l)
 checkZeroWindowBound ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found
@@ -294,7 +294,7 @@ checkZeroWindowBound ioState
 		# ioState				= IOStSetDevice (WindowSystemState wHs) ioState
 		= (isZero,ioState)
 
-decreaseWindowBound :: !(IOSt .l .p) -> IOSt .l .p
+decreaseWindowBound :: !(IOSt .l) -> IOSt .l
 decreaseWindowBound ioState
 	# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 	| not found

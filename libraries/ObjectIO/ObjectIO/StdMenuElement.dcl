@@ -17,8 +17,8 @@ from	iostate	import IOSt
 	process are used to change the corresponding menu elements.
 */
 
-enableMenuElements		:: ![Id] !(IOSt .l .p) -> IOSt .l .p
-disableMenuElements		:: ![Id] !(IOSt .l .p) -> IOSt .l .p
+enableMenuElements		:: ![Id] !(IOSt .l) -> IOSt .l
+disableMenuElements		:: ![Id] !(IOSt .l) -> IOSt .l
 /*	(en/dis)ableMenuElements set the SelectState of the indicated menu elements.
 	Disabling a (Sub/Radio)Menu overrules the SelectStates of its elements, which 
 		become unselectable.
@@ -28,17 +28,17 @@ disableMenuElements		:: ![Id] !(IOSt .l .p) -> IOSt .l .p
 		effect when the (Sub/Radio)Menu is re-enabled.
 */
 
-setMenuElementTitles	:: ![(Id,Title)] !(IOSt .l .p) -> IOSt .l .p
+setMenuElementTitles	:: ![(Id,Title)] !(IOSt .l) -> IOSt .l
 /*	setMenuElementTitles sets the titles of the indicated menu elements.
 */
 
-markMenuItems			:: ![Id] !(IOSt .l .p) -> IOSt .l .p
-unmarkMenuItems			:: ![Id] !(IOSt .l .p) -> IOSt .l .p
+markMenuItems			:: ![Id] !(IOSt .l) -> IOSt .l
+unmarkMenuItems			:: ![Id] !(IOSt .l) -> IOSt .l
 /*	(un)markMenuItems sets the MarkState of the indicated MenuItems. 
 */
 
-selectRadioMenuItem		:: !Id !Id    !(IOSt .l .p) -> IOSt .l .p
-selectRadioMenuIndexItem:: !Id !Index !(IOSt .l .p) -> IOSt .l .p
+selectRadioMenuItem		:: !Id !Id    !(IOSt .l) -> IOSt .l
+selectRadioMenuIndexItem:: !Id !Index !(IOSt .l) -> IOSt .l
 /*	selectRadioMenu(Index)Item
 		selects the indicated MenuRadioItem of a RadioMenu, causing the mark of the 
 		previously marked MenuRadioItem to disappear. 
@@ -57,8 +57,8 @@ selectRadioMenuIndexItem:: !Id !Index !(IOSt .l .p) -> IOSt .l .p
 
 ::	MState
 
-getMenu			:: !Id !(IOSt .l .p) -> (!Maybe MState, !IOSt .l .p)
-getParentMenu	:: !Id !(IOSt .l .p) -> (!Maybe MState, !IOSt .l .p)
+getMenu			:: !Id !(IOSt .l) -> (!Maybe MState, !IOSt .l)
+getParentMenu	:: !Id !(IOSt .l) -> (!Maybe MState, !IOSt .l)
 /*	getMenu returns a read-only MState for the indicated menu.
 		In case the indicated menu does not exist Nothing is returned.
 	getParentMenu returns a read-only MState for the indicated menu element.

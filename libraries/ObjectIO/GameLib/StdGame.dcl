@@ -18,7 +18,7 @@ SK_FOREVER  :==  (~1)
 :: NoState
    = NoState
 
-OpenGame :: gs (Game gs) [GameAttribute gs] !(PSt .l .p) -> (ErrorReport, !PSt .l .p)
+OpenGame :: gs (Game gs) [GameAttribute gs] !(PSt .l) -> (ErrorReport, !PSt .l)
 
 CreateGameBitmap :: !GameBitmap !(GSt .gs) -> (!GRESULT, !GSt .gs)
 

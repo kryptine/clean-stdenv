@@ -11,10 +11,10 @@ from	oswindow	import OSWindowPtr
 /*	Creating menus:
 	In case the Boolean result is False nothing has been created due to duplicate Ids.
 */
-OpenMenu`		:: !Id       .ls !(Menu      m .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p) | MenuElements m
-createPopUpMenu :: !SystemId .ls !(PopUpMenu m .ls (PSt .l .p)) !(MenuHandles (PSt .l .p)) !ReceiverTable !IdTable !OSMenuBar !(PSt .l .p)
-													   -> (!Bool,!MenuHandles (PSt .l .p), !ReceiverTable,!IdTable,!OSMenuBar, !PSt .l .p)
-													   |  PopUpMenuElements m
+OpenMenu`		:: !Id       .ls !(Menu      m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | MenuElements m
+createPopUpMenu :: !SystemId .ls !(PopUpMenu m .ls (PSt .l)) !(MenuHandles (PSt .l)) !ReceiverTable !IdTable !OSMenuBar !(PSt .l)
+													-> (!Bool,!MenuHandles (PSt .l), !ReceiverTable,!IdTable,!OSMenuBar, !PSt .l)
+													|  PopUpMenuElements m
 
 // checkCurrentMenuSystem		::				  !Bool !*OSToolbox -> (!OSMenu,!*OSToolbox)
 // redrawOnlyActiveMenuSystem	:: !OSMenu !Bool !*OSToolbox -> *OSToolbox

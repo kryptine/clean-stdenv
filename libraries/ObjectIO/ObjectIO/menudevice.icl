@@ -18,7 +18,7 @@ menudeviceFatalError rule error
 	= FatalError rule "menudevice" error
 
 
-MenuFunctions :: DeviceFunctions (PSt .l .p)
+MenuFunctions :: DeviceFunctions (PSt .l)
 MenuFunctions
 	= {	dShow	= menuShow
 	  ,	dHide	= menuHide
@@ -28,7 +28,7 @@ MenuFunctions
 	  ,	dClose	= menuClose
 	  }
 
-menuShow :: !(PSt .l .p) -> PSt .l .p
+menuShow :: !(PSt .l) -> PSt .l
 /* PA: mOSMenuBar information is stored in IOSt:OSDInfo.
 menuShow pState=:{io=ioState}
 	# (activeIO,ioState)	= IOStIsActive ioState
@@ -59,7 +59,7 @@ menuShow pState=:{io=ioState}
 		# ioState				= IOStSetOSDInfo osdinfo ioState
 		= {pState & io=ioState}
 
-menuClose :: !(PSt .l .p) -> PSt .l .p
+menuClose :: !(PSt .l) -> PSt .l
 menuClose pState=:{io=ioState}
 	# (osdinfo,ioState)			= IOStGetOSDInfo ioState
 	  maybeOSMenuBar			= getOSDInfoOSMenuBar osdinfo
@@ -88,7 +88,7 @@ where
 	disposeIds ioid (MenuLSHandle {mlsHandle={mItems}}) ts
 		= StateMap2 (disposeMenuIds ioid) mItems ts
 
-menuHide :: !(PSt .l .p) -> PSt .l .p
+menuHide :: !(PSt .l) -> PSt .l
 menuHide pState=:{io=ioState}
 	# (activeIO,ioState)	= IOStIsActive ioState
 	| not activeIO
@@ -112,7 +112,7 @@ menuHide pState=:{io=ioState}
 			If the process is a subprocess, then the ioguishare of its IOSt
 			contains the list to the Mac toolbox menu system.
 */
-menuOpen :: !(PSt .l .p) -> PSt .l .p
+menuOpen :: !(PSt .l) -> PSt .l
 menuOpen pState=:{io=ioState}
 	# (hasMenu,ioState)		= IOStHasDevice MenuDevice ioState
 	| hasMenu
@@ -137,7 +137,7 @@ menuOpen pState=:{io=ioState}
 		# ioState			= IOStSetDeviceFunctions [MenuFunctions:deviceFunctions] ioState
 		= {pState & io=ioState}
 where
-	getPopUpId :: !DocumentInterface !(IOSt .l .p) -> (!Maybe Id,!IOSt .l .p)
+	getPopUpId :: !DocumentInterface !(IOSt .l) -> (!Maybe Id,!IOSt .l)
 	getPopUpId NDI ioState
 		= (Nothing,ioState)
 	getPopUpId _ ioState
@@ -145,7 +145,7 @@ where
 		= (Just id,ioState)
 
 
-menuIO :: !DeviceEvent !(PSt .l .p) -> (!DeviceEvent,!PSt .l .p)
+menuIO :: !DeviceEvent !(PSt .l) -> (!DeviceEvent,!PSt .l)
 menuIO deviceEvent pState
 	# (ok,pState)	= accPIO (IOStHasDevice MenuDevice) pState
 	| not ok		// This condition should never occur
@@ -153,7 +153,7 @@ menuIO deviceEvent pState
 	| otherwise
 		= menuIO deviceEvent pState
 where
-	menuIO :: !DeviceEvent !(PSt .l .p) -> (!DeviceEvent,!PSt .l .p)
+	menuIO :: !DeviceEvent !(PSt .l) -> (!DeviceEvent,!PSt .l)
 	
 	menuIO receiverEvent=:(ReceiverEvent msgEvent) pState
 		= (ReceiverEvent msgEvent1,pState2)
@@ -164,13 +164,13 @@ where
 		pState1						= {pState & io=ioState1}
 		(msgEvent1,menus1,pState2)	= menuMsgIO msgEvent menus pState1
 		
-		menuMsgIO :: !MsgEvent !(MenuHandles (PSt .l .p)) (PSt .l .p) -> (!MsgEvent,!MenuHandles (PSt .l .p),PSt .l .p)
+		menuMsgIO :: !MsgEvent !(MenuHandles (PSt .l)) (PSt .l) -> (!MsgEvent,!MenuHandles (PSt .l),PSt .l)
 		menuMsgIO msgEvent menus=:{mMenus=mHs} pState
 			# (msgEvent,mHs,pState)	= menusMsgIO (getMsgEventRecLoc msgEvent).rlParentId msgEvent mHs pState
 			= (msgEvent,{menus & mMenus=mHs},pState)
 		where
-			menusMsgIO :: !Id !MsgEvent ![MenuStateHandle (PSt .l .p)] (PSt .l .p)
-						  -> (!MsgEvent,![MenuStateHandle (PSt .l .p)], PSt .l .p)
+			menusMsgIO :: !Id !MsgEvent ![MenuStateHandle (PSt .l)] (PSt .l)
+						  -> (!MsgEvent,![MenuStateHandle (PSt .l)], PSt .l)
 			menusMsgIO menuId msgEvent msHs pState
 				| isEmpty msHs
 					= menudeviceFatalError "menuIO (ReceiverEvent _) _" "menu could not be found"
@@ -192,12 +192,12 @@ where
 		pState1				= {pState & io=ioState1}
 		(menus1,pState2)	= menuTraceIO info menus pState1
 		
-		menuTraceIO :: !MenuTraceInfo !(MenuHandles (PSt .l .p)) (PSt .l .p) -> (!MenuHandles (PSt .l .p),PSt .l .p)
+		menuTraceIO :: !MenuTraceInfo !(MenuHandles (PSt .l)) (PSt .l) -> (!MenuHandles (PSt .l),PSt .l)
 		menuTraceIO info=:{mtId} menus=:{mMenus=mHs} pState
 			# (mHs,pState)	= menusTraceIO mtId info mHs pState
 			= ({menus & mMenus=mHs},pState)
 		where
-			menusTraceIO :: !Id !MenuTraceInfo ![MenuStateHandle (PSt .l .p)] (PSt .l .p) -> (![MenuStateHandle (PSt .l .p)],PSt .l .p)
+			menusTraceIO :: !Id !MenuTraceInfo ![MenuStateHandle (PSt .l)] (PSt .l) -> (![MenuStateHandle (PSt .l)],PSt .l)
 			menusTraceIO menuId info msHs pState
 				| isEmpty msHs
 					= menudeviceFatalError "menuIO (MenuTraceEvent _) _" "menu could not be found"
@@ -237,7 +237,7 @@ where
 
 /*	Apply the Menu(Mods)Function of a selected menu item.
 */
-menuStateTraceIO :: !MenuTraceInfo !(MenuStateHandle (PSt .l .p)) (PSt .l .p) -> (!MenuStateHandle (PSt .l .p),PSt .l .p)
+menuStateTraceIO :: !MenuTraceInfo !(MenuStateHandle (PSt .l)) (PSt .l) -> (!MenuStateHandle (PSt .l),PSt .l)
 menuStateTraceIO info=:{mtParents} (MenuLSHandle {mlsState=ls,mlsHandle=mH=:{mItems}}) pState
 	# (mItems,(ls,pState)) = subMenusTraceIO info mtParents mItems (ls,pState)
 	= (MenuLSHandle {mlsState=ls,mlsHandle={mH & mItems=mItems}},pState)
@@ -337,7 +337,7 @@ where
 
 /*	menuStateMsgIO handles all message events.
 */
-menuStateMsgIO :: !MsgEvent !(MenuStateHandle (PSt .l .p)) (PSt .l .p) -> (!MsgEvent,!MenuStateHandle (PSt .l .p),PSt .l .p)
+menuStateMsgIO :: !MsgEvent !(MenuStateHandle (PSt .l)) (PSt .l) -> (!MsgEvent,!MenuStateHandle (PSt .l),PSt .l)
 menuStateMsgIO msgEvent msH=:(MenuLSHandle mlsH=:{mlsState=ls,mlsHandle=mH}) pState
 	= (msgEvent1,MenuLSHandle {mlsH & mlsState=ls1,mlsHandle=mH1},pState1)
 where
@@ -487,7 +487,7 @@ where
 			with mac menu ID AppleMenuId. This is taken care of by the creation
 			of the interactive process (see menuOpen above).
 */
-IOStIsActive :: !(IOSt .l .p) -> (!Bool, !IOSt .l .p)
+IOStIsActive :: !(IOSt .l) -> (!Bool, !IOSt .l)
 IOStIsActive ioState
 /* RWS +++
 	# (globalHandle,ioState)= accIOToolbox (GetMHandle AppleMenuId) ioState
@@ -502,7 +502,7 @@ IOStIsActive ioState
 
 /*	Activate the interactive process:
 */
-ActivateMenuSystem :: !(IOSt .l .p) -> IOSt .l .p
+ActivateMenuSystem :: !(IOSt .l) -> IOSt .l
 ActivateMenuSystem ioState
 	# ioState					= SelectIOSt ioState
 	# (osdinfo,ioState)			= IOStGetOSDInfo ioState

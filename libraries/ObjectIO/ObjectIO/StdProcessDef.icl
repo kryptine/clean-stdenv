@@ -8,21 +8,17 @@ import	StdIOCommon
 from	iostate	import PSt, IOSt
 
 
-::  ProcessGroup pdef
-	=	E. .p: ProcessGroup
-					p								// The processgroup public state
-					(pdef p)						// The processgroup members
-::  Process p						
+::  Process
 	=	E. .l: Process
-					DocumentInterface				// The process DocumentInterface
-					l								// The process local state
-					(ProcessInit      (PSt l p))	// The process initialisation
-					[ProcessAttribute (PSt l p)]	// The process attributes
+					DocumentInterface			// The process DocumentInterface
+					l							// The process private state
+					(ProcessInit      (PSt l))	// The process initialisation
+					[ProcessAttribute (PSt l)]	// The process attributes
 
 /*	NDI processes can't open windows and menus.
 	SDI processes can have at most one window open.
 	MDI processes can open an arbitrary number of device instances. 
 */
 
-::	ProcessInit ps
-	:==	IdFun ps
+::	ProcessInit pst
+	:==	IdFun pst

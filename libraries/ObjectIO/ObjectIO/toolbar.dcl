@@ -9,4 +9,4 @@ import iostate
 		openToolbar has no effect in case IOSt belongs to a NDI process. 
 		openToolbar causes a run-time error if a toolbar already exists.
 */
-openToolbar		:: !(IOSt .l .p) -> IOSt .l .p
+openToolbar		:: !(IOSt .l) -> IOSt .l

@@ -36,7 +36,7 @@ instance Clipboard {#Char} where
 
 //	Reading and writing the value of the selection to the clipboard:
 
-setClipboard :: ![ClipboardItem] !(PSt .l .p) -> PSt .l .p
+setClipboard :: ![ClipboardItem] !(PSt .l) -> PSt .l
 setClipboard clipItems pState=:{io}
 	# (tb,ioState)	= getIOToolbox io
 	# tb			= StrictSeq (map clipboardItemToScrap singleItems) tb
@@ -61,7 +61,7 @@ where
 	clipboardItemToScrap (ClipboardString text) tb
 		= OSsetClipboardText text tb
 
-getClipboard :: !(PSt .l .p) -> (![ClipboardItem],!PSt .l .p)
+getClipboard :: !(PSt .l) -> (![ClipboardItem],!PSt .l)
 getClipboard pState
 	# (tb,ioState)		= getIOToolbox pState.io
 	# (contents,tb)		= OSgetClipboardContent tb
@@ -80,7 +80,7 @@ where
 	scrapToClipboardItem type tb
 		= StdClipboardFatalError "getClipboard" ("unimplemented clipboard content of type: "+++toString type)
 
-clipboardHasChanged :: !(PSt .l .p) -> (!Bool,!PSt .l .p)
+clipboardHasChanged :: !(PSt .l) -> (!Bool,!PSt .l)
 clipboardHasChanged pState
 	# (cbs,ioState)		= IOStGetClipboardState pState.io
 	  oldCount			= cbs.cbsCount

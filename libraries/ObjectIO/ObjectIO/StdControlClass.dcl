@@ -14,8 +14,8 @@ from	StdPSt			import PSt, IOSt
 
 
 class Controls cdef where
-	controlToHandles	:: !(cdef      .ls (PSt .l .p)) !(PSt .l .p)
-					-> (![ControlState .ls (PSt .l .p)], !PSt .l .p)
+	controlToHandles	:: !(cdef      .ls (PSt .l)) !(PSt .l)
+					-> (![ControlState .ls (PSt .l)], !PSt .l)
 	getControlType		::  (cdef      .ls .pst)
 					-> ControlType
 

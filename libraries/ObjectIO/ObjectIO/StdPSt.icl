@@ -20,8 +20,8 @@ import	StdReceiver, receiverid, receiverhandle, receiverdevice, channelenv // MW
 
 /*	PSt is an environment instance of the class FileEnv (see StdFile).
 */
-instance FileSystem (PSt .l .p) where
-	fopen :: !{#Char} !Int !(PSt .l .p) -> (!Bool,!*File,!PSt .l .p)
+instance FileSystem (PSt .l) where
+	fopen :: !{#Char} !Int !(PSt .l) -> (!Bool,!*File,!PSt .l)
 	fopen fName fMode pState
 		# ((ok,file),pState)	= accFiles (fopen` fName fMode) pState
 		= (ok,file,pState)
@@ -31,15 +31,15 @@ instance FileSystem (PSt .l .p) where
 			# (ok,file,files)	= fopen fName fMode files
 			= ((ok,file),files)
 	
-	fclose :: !*File !(PSt .l .p) -> (!Bool,!PSt .l .p)
+	fclose :: !*File !(PSt .l) -> (!Bool,!PSt .l)
 	fclose file pState
 		= accFiles (fclose file) pState
 	
-	stdio :: !(PSt .l .p) -> (!*File,!PSt .l .p)
+	stdio :: !(PSt .l) -> (!*File,!PSt .l)
 	stdio pState
 		= accFiles stdio pState
 	
-	sfopen :: !{#Char} !Int !(PSt .l .p) -> (!Bool,!File,!PSt .l .p)
+	sfopen :: !{#Char} !Int !(PSt .l) -> (!Bool,!File,!PSt .l)
 	sfopen fName fMode pState
 		# ((ok,sfile),pState)	= accFiles (sfopen` fName fMode) pState
 		= (ok,sfile,pState)
@@ -51,15 +51,15 @@ instance FileSystem (PSt .l .p) where
 
 /*	PSt is an environment instance of the class FileEnv (see StdFile).
 */
-instance FileEnv (PSt .l .p) where
-	accFiles :: !.(*Files -> (.x,*Files)) !*(PSt .l .p) -> (!.x,!*PSt .l .p)
+instance FileEnv (PSt .l) where
+	accFiles :: !.(*Files -> (.x,*Files)) !*(PSt .l) -> (!.x,!*PSt .l)
 	accFiles accfun pState=:{io}
 		# (world,io)		= IOStGetWorld io
 		  (x,world)			= accFiles accfun world
 		  pState			= {pState & io=IOStSetWorld world io}
 		= (x,pState)
 	
-	appFiles :: !.(*Files -> *Files) !*(PSt .l .p) -> *PSt .l .p
+	appFiles :: !.(*Files -> *Files) !*(PSt .l) -> *PSt .l
 	appFiles appfun pState=:{io}
 		# (world,io)		= IOStGetWorld io
 		  world				= appFiles appfun world
@@ -67,7 +67,7 @@ instance FileEnv (PSt .l .p) where
 		= pState
 
 // MW11..
-instance FileEnv	(IOSt .l .p)
+instance FileEnv	(IOSt .l)
   where
 	accFiles accfun io
 		# (world,io)		= IOStGetWorld io
@@ -83,25 +83,25 @@ instance FileEnv	(IOSt .l .p)
 
 /*	PSt is an environment instance of the class FileSelectEnv (see StdFileSelect).
 */
-instance FileSelectEnv (PSt .l .p) where
-	selectInputFile :: !(PSt .l .p) -> (!Maybe String,!PSt .l .p)
+instance FileSelectEnv (PSt .l) where
+	selectInputFile :: !(PSt .l) -> (!Maybe String,!PSt .l)
 	selectInputFile pState
 		# (ok,name,pState,_)	= OSselectinputfile handleOSEvent pState OSNewToolbox
 		= (if ok (Just name) Nothing,pState)
 	
-	selectOutputFile:: !String !String !(PSt .l .p) -> (!Maybe String,!PSt .l .p)
+	selectOutputFile:: !String !String !(PSt .l) -> (!Maybe String,!PSt .l)
 	selectOutputFile prompt originalName pState
 		# (ok,name,pState,_)	= OSselectoutputfile handleOSEvent pState prompt originalName OSNewToolbox
 		= (if ok (Just name) Nothing,pState)
 	
-	selectDirectory :: !(PSt .l .p) -> (!Maybe String,!PSt .l .p)
+	selectDirectory :: !(PSt .l) -> (!Maybe String,!PSt .l)
 	selectDirectory pState
 		# (ok,name,pState,_)	= OSselectdirectory handleOSEvent pState OSNewToolbox
 		= (if ok (Just name) Nothing,pState)
 
 
 //	handleOSEvent turns handleOneEventForDevices into the form required by OSselect(in/out)putfile.
-handleOSEvent :: !OSEvent !(PSt .l .p) -> PSt .l .p
+handleOSEvent :: !OSEvent !(PSt .l) -> PSt .l
 handleOSEvent osEvent pState
 	= thd3 (handleOneEventForDevices (ScheduleOSEvent osEvent []) pState)
 
@@ -109,22 +109,22 @@ handleOSEvent osEvent pState
 /*	PSt is an environment instance of the class TimeEnv (see StdTime).
 */
 /* MW11 was
-instance TimeEnv (PSt .l .p) where
-	getBlinkInterval :: !(PSt .l .p) -> (!Int,!PSt .l .p)
+instance TimeEnv (PSt .l) where
+	getBlinkInterval :: !(PSt .l) -> (!Int,!PSt .l)
 	getBlinkInterval pState=:{io}
 		# (world,io)		= IOStGetWorld io
 		# (blink,world)		= getBlinkInterval world
 		# pState			= {pState & io=IOStSetWorld world io}
 		= (blink,pState)
 	
-	getCurrentTime :: !(PSt .l .p) -> (!Time,!PSt .l .p)
+	getCurrentTime :: !(PSt .l) -> (!Time,!PSt .l)
 	getCurrentTime pState=:{io}
 		# (world,io)		= IOStGetWorld io
 		# (time,world)		= getCurrentTime world
 		# pState			= {pState & io=IOStSetWorld world io}
 		= (time,pState)
 	
-	getCurrentDate :: !(PSt .l .p) -> (!Date,!PSt .l .p)
+	getCurrentDate :: !(PSt .l) -> (!Date,!PSt .l)
 	getCurrentDate pState=:{io}
 		# (world,io)		= IOStGetWorld io
 		# (date,world)		= getCurrentDate world
@@ -132,57 +132,57 @@ instance TimeEnv (PSt .l .p) where
 		= (date,pState)
 */
 
-instance TimeEnv (PSt .l .p) where
-	getBlinkInterval :: !(PSt .l .p) -> (!Int,!PSt .l .p)
+instance TimeEnv (PSt .l) where
+	getBlinkInterval :: !(PSt .l) -> (!Int,!PSt .l)
 	getBlinkInterval pState
 		= accPIO getBlinkInterval pState
 	
-	getCurrentTime :: !(PSt .l .p) -> (!Time,!PSt .l .p)
+	getCurrentTime :: !(PSt .l) -> (!Time,!PSt .l)
 	getCurrentTime pState
 		= accPIO getCurrentTime pState
 	
-	getCurrentDate :: !(PSt .l .p) -> (!Date,!PSt .l .p)
+	getCurrentDate :: !(PSt .l) -> (!Date,!PSt .l)
 	getCurrentDate pState
 		= accPIO getCurrentDate pState
 
-	getCurrentTick :: !(PSt .l .p) -> (!Tick,!PSt .l .p)
+	getCurrentTick :: !(PSt .l) -> (!Tick,!PSt .l)
 	getCurrentTick pState
 		= accPIO getCurrentTick pState
 
 // MW11..
-instance TimeEnv (IOSt .l .p) where
-	getBlinkInterval :: !(IOSt .l .p) -> (!Int,!IOSt .l .p)
+instance TimeEnv (IOSt .l) where
+	getBlinkInterval :: !(IOSt .l) -> (!Int,!IOSt .l)
 	getBlinkInterval io
 		# (world,io)		= IOStGetWorld io
 		  (blink,world)		= getBlinkInterval world
 		= (blink,IOStSetWorld world io)
 	
-	getCurrentTime :: !(IOSt .l .p) -> (!Time,!IOSt .l .p)
+	getCurrentTime :: !(IOSt .l) -> (!Time,!IOSt .l)
 	getCurrentTime io
 		# (world,io)		= IOStGetWorld io
 		  (time,world)		= getCurrentTime world
 		= (time,IOStSetWorld world io)
 	
-	getCurrentDate :: !(IOSt .l .p) -> (!Date,!IOSt .l .p)
+	getCurrentDate :: !(IOSt .l) -> (!Date,!IOSt .l)
 	getCurrentDate io
 		# (world,io)		= IOStGetWorld io
 		  (date,world)		= getCurrentDate world
 		= (date, IOStSetWorld world io)
 
-	getCurrentTick :: !(IOSt .l .p) -> (!Tick,!IOSt .l .p)
+	getCurrentTick :: !(IOSt .l) -> (!Tick,!IOSt .l)
 	getCurrentTick io
 		# (world,io)		= IOStGetWorld io
 		  (tick,world)		= getCurrentTick world
 		= (tick, IOStSetWorld world io)
 
-instance ChannelEnv (PSt .l .p)
+instance ChannelEnv (PSt .l)
   where
 	channelEnvKind env
 		= (PST, env)
 	mb_close_inet_receiver_without_id reallyDoIt id_pair pSt=:{io}
 		= { pSt & io = mb_close_inet_receiver_without_id True id_pair io }
 
-instance Ids (PSt .l .p)
+instance Ids (PSt .l)
   where
 	openId pSt
 		= accPIO openId pSt
@@ -200,7 +200,7 @@ instance Ids (PSt .l .p)
 	
 /*	IOSt is also an environment instance of the class ChannelEnv	*/
 
-instance ChannelEnv (IOSt .l .p)
+instance ChannelEnv (IOSt .l)
   where
 	channelEnvKind env
 		= (IOST, env)
@@ -247,20 +247,20 @@ instance accScreenPicture World where
 		# (x,tb)		= peekScreen fun tb
 		# world			= WorldSetToolbox tb world
 		= (x,world)
-instance accScreenPicture (IOSt .l .p) where
-	accScreenPicture :: !.(St *Picture .x) !(IOSt .l .p) -> (!.x,!IOSt .l .p)
+instance accScreenPicture (IOSt .l) where
+	accScreenPicture :: !.(St *Picture .x) !(IOSt .l) -> (!.x,!IOSt .l)
 	accScreenPicture fun ioState
 		= accIOToolbox (peekScreen fun) ioState
 
 
 /*	Emit the alert sound.
 */
-beep :: !(IOSt .l .p) -> IOSt .l .p
+beep :: !(IOSt .l) -> IOSt .l
 beep ioState = appIOToolbox OSBeep ioState
 
 
-instance playSoundFile (PSt .l .p) where
-	playSoundFile :: !String !(PSt .l .p) -> (!Bool,!PSt .l .p)
+instance playSoundFile (PSt .l) where
+	playSoundFile :: !String !(PSt .l) -> (!Bool,!PSt .l)
 	playSoundFile soundFileName pState=:{io}
 		# (ok,io)	= accIOToolbox (WinPlaySound soundFileName) io
 		= (ok,{pState & io=io})
@@ -269,7 +269,7 @@ instance playSoundFile (PSt .l .p) where
 /* RWS ---
 /*	Set the shape of the cursor globally. This shape overrules the local cursor shapes of windows.
 */
-setCursor :: !CursorShape !(IOSt .l .p) -> IOSt .l .p
+setCursor :: !CursorShape !(IOSt .l) -> IOSt .l
 setCursor shape ioState
 #	(cInfo,ioState)	= IOStGetDialogCursorInfo ioState
 	(cInfo,ioState)	= accIOToolbox (cursorinfoSetGlobalCursor shape cInfo) ioState
@@ -279,7 +279,7 @@ setCursor shape ioState
 
 /*	resetCursor undoes the effect of SetCursor.
 */
-resetCursor :: !(IOSt .l .p) -> IOSt .l .p
+resetCursor :: !(IOSt .l) -> IOSt .l
 resetCursor ioState
 #	(cInfo,ioState)	= IOStGetDialogCursorInfo ioState
 	(cInfo,ioState)	= accIOToolbox (cursorinfoResetGlobalCursor cInfo) ioState
@@ -289,31 +289,31 @@ resetCursor ioState
 
 /*	obscureCursor hides the cursor until the mouse is moved.
 */
-obscureCursor :: !(IOSt .l .p) -> IOSt .l .p
+obscureCursor :: !(IOSt .l) -> IOSt .l
 obscureCursor ioState = appIOToolbox QObscureCursor ioState
 
 
 /*	setDoubleDownDistance sets the double down distance of the mouse. Negative values are set to zero.
 */
-setDoubleDownDistance :: !Int !(IOSt .l .p) -> IOSt .l .p
+setDoubleDownDistance :: !Int !(IOSt .l) -> IOSt .l
 setDoubleDownDistance newDDDist ioState = IOStSetDoubleDownDist newDDDist ioState
 
 --- RWS */
 
 /*	getDocumentInterface retrieves the DocumentInterface of an interactive process.
 */
-getDocumentInterface :: !(IOSt .l .p) -> (!DocumentInterface, !IOSt .l .p)
+getDocumentInterface :: !(IOSt .l) -> (!DocumentInterface, !IOSt .l)
 getDocumentInterface ioState = IOStGetDocumentInterface ioState
 
 
 /*	Operations on the attributes of an interactive process:
 */
-setProcessActivate :: !(IdFun (PSt .l .p)) !(IOSt .l .p) -> IOSt .l .p
+setProcessActivate :: !(IdFun (PSt .l)) !(IOSt .l) -> IOSt .l
 setProcessActivate activateF ioState
 	# (pAtts,ioState)	= IOStGetProcessAttributes ioState
 	= IOStSetProcessAttributes (setProcessAttribute isProcessActivate (ProcessActivate activateF) pAtts) ioState
 
-setProcessDeactivate :: !(IdFun (PSt .l .p)) !(IOSt .l .p) -> IOSt .l .p
+setProcessDeactivate :: !(IdFun (PSt .l)) !(IOSt .l) -> IOSt .l
 setProcessDeactivate deactivateF ioState
 	# (pAtts,ioState)	= IOStGetProcessAttributes ioState
 	= IOStSetProcessAttributes (setProcessAttribute isProcessDeactivate (ProcessDeactivate deactivateF) pAtts) ioState
@@ -328,53 +328,37 @@ setProcessAttribute _ pAtt` _
 
 //	Coercing PSt component operations to PSt operations.
 
-appListPIO :: ![.IdFun (IOSt .l .p)] !(PSt .l .p) -> PSt .l .p
+appListPIO :: ![.IdFun (IOSt .l)] !(PSt .l) -> PSt .l
 appListPIO fs pState=:{io} = {pState & io=StrictSeq fs io}
 
-appListPLoc :: ![.IdFun .l] !(PSt .l .p) -> PSt .l .p
+appListPLoc :: ![.IdFun .l] !(PSt .l) -> PSt .l
 appListPLoc fs pState=:{ls} = {pState & ls=StrictSeq fs ls}
 
-appListPPub :: ![.IdFun .p] !(PSt .l .p) -> PSt .l .p
-appListPPub fs pState=:{ps} = {pState & ps=StrictSeq fs ps}
-
-appPIO :: !.(IdFun (IOSt .l .p)) !(PSt .l .p) -> PSt .l .p
+appPIO :: !.(IdFun (IOSt .l)) !(PSt .l) -> PSt .l
 appPIO f pState=:{io} = {pState & io=f io}
 
-appPLoc :: !.(IdFun .l) !(PSt .l .p) -> PSt .l .p
+appPLoc :: !.(IdFun .l) !(PSt .l) -> PSt .l
 appPLoc f pState=:{ls} = {pState & ls=f ls}
-
-appPPub :: !.(IdFun .p) !(PSt .l .p) -> PSt .l .p
-appPPub f pState=:{ps} = {pState & ps=f ps}
 
 
 //	Accessing PSt component operations.
 
-accListPIO :: ![.St (IOSt .l .p) .x] !(PSt .l .p) -> (![.x],!PSt .l .p)
+accListPIO :: ![.St (IOSt .l) .x] !(PSt .l) -> (![.x],!PSt .l)
 accListPIO fs pState=:{io}
 	# (xs,io) = StrictSeqList fs io
 	= (xs,{pState & io=io})
 
-accListPLoc :: ![.St .l .x] !(PSt .l .p) -> (![.x],!PSt .l .p)
+accListPLoc :: ![.St .l .x] !(PSt .l) -> (![.x],!PSt .l)
 accListPLoc fs pState=:{ls}
 	# (xs,ls) = StrictSeqList fs ls
 	= (xs,{pState & ls=ls})
 
-accListPPub :: ![.St .p .x] !(PSt .l .p) -> (![.x],!PSt .l .p)
-accListPPub fs pState=:{ps}
-	# (xs,ps) = StrictSeqList fs ps
-	= (xs,{pState & ps=ps})
-
-accPIO :: !.(St (IOSt .l .p) .x) !(PSt .l .p) -> (!.x,!PSt .l .p)
+accPIO :: !.(St (IOSt .l) .x) !(PSt .l) -> (!.x,!PSt .l)
 accPIO f pState=:{io}
 	# (x,io) = f io
 	= (x,{pState & io=io})
 
-accPLoc :: !.(St .l .x) !(PSt .l .p) -> (!.x,!PSt .l .p)
+accPLoc :: !.(St .l .x) !(PSt .l) -> (!.x,!PSt .l)
 accPLoc f pState=:{ls}
 	# (x,ls) = f ls
 	= (x,{pState & ls=ls})
-
-accPPub :: !.(St .p .x) !(PSt .l .p) -> (!.x,!PSt .l .p)
-accPPub f pState=:{ps}
-	# (x,ps) = f ps
-	= (x,{pState & ps=ps})

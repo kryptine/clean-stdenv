@@ -13,7 +13,7 @@ from	StdPSt	import accPIO
 	These are only the message events (as long as receivers do not contain timers).
 	receiverEvent assumes that it is not applied to an empty IOSt.
 */
-receiverEvent :: !SchedulerEvent !(PSt .l .p) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l .p)
+receiverEvent :: !SchedulerEvent !(PSt .l) -> (!Bool,!Maybe DeviceEvent,!SchedulerEvent,!PSt .l)
 receiverEvent schedulerEvent=:(ScheduleMsgEvent msgEvent) pState
 	# (ioid,pState)	= accPIO IOStGetIOId pState
 	  recloc		= case msgEvent of

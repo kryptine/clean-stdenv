@@ -23,7 +23,7 @@ menucreateFatalError rule error
 		In that case, the layout of the controls should be recalculated, and the window updated.
 	OpenMenu` assumes that the Id argument has been verified and that the MenuDevice exists.
 */
-OpenMenu` :: !Id .ls !(Menu m .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p) | MenuElements m
+OpenMenu` :: !Id .ls !(Menu m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | MenuElements m
 OpenMenu` menuId ls mDef pState=:{io=ioState}
 	# (osdInfo,ioState)			= IOStGetOSDInfo ioState
 	  maybeOSMenuBar			= getOSDInfoOSMenuBar osdInfo
@@ -66,7 +66,7 @@ OpenMenu` menuId ls mDef pState=:{io=ioState}
 where
 	menuInit					= getMenuDefInit mDef
 	
-	checkSDISize :: !OSWindowPtr !Size !(IOSt .l .p) -> IOSt .l .p
+	checkSDISize :: !OSWindowPtr !Size !(IOSt .l) -> IOSt .l
 	checkSDISize sdiPtr sdiSize1 ioState
 		# (sdiSize2,_,ioState)	= getSDIWindowSize ioState
 		| sdiSize1==sdiSize2	= ioState
@@ -76,8 +76,8 @@ where
 	getMenuDefInit (Menu _ _ atts)
 		= getMenuInitFun (snd (Select isMenuInit (MenuInit id) atts))
 
-	createMenu :: !Int !SystemId !Id !(Menu m .ls (PSt .l .p)) !(MenuHandles (PSt .l .p)) !ReceiverTable !IdTable !OSMenuBar !(PSt .l .p)
-						 -> (!Bool,MenuHandle .ls (PSt .l .p),  !MenuHandles (PSt .l .p), !ReceiverTable,!IdTable,!OSMenuBar, !PSt .l .p)
+	createMenu :: !Int !SystemId !Id !(Menu m .ls (PSt .l)) !(MenuHandles (PSt .l)) !ReceiverTable !IdTable !OSMenuBar !(PSt .l)
+						 -> (!Bool,MenuHandle .ls (PSt .l),  !MenuHandles (PSt .l), !ReceiverTable,!IdTable,!OSMenuBar, !PSt .l)
 						 |  MenuElements m
 	createMenu index ioId menuId mDef mHs=:{mKeys=keys} rt it osMenuBar pState
 		# (ms,pState)				= menuElementToHandles (menuDefGetElements mDef) pState
@@ -103,8 +103,8 @@ isMenuWithThisId id msH
 /*	creating pop up menus.
 	It is assumed that MenuHandles contains no pop up menu in mMenus and that mPopUpId contains an Id.
 */
-createPopUpMenu :: !SystemId .ls !(PopUpMenu m .ls (PSt .l .p)) !(MenuHandles (PSt .l .p)) !ReceiverTable !IdTable !OSMenuBar !(PSt .l .p)
-													   -> (!Bool,!MenuHandles (PSt .l .p), !ReceiverTable,!IdTable,!OSMenuBar, !PSt .l .p)
+createPopUpMenu :: !SystemId .ls !(PopUpMenu m .ls (PSt .l)) !(MenuHandles (PSt .l)) !ReceiverTable !IdTable !OSMenuBar !(PSt .l)
+													   -> (!Bool,!MenuHandles (PSt .l), !ReceiverTable,!IdTable,!OSMenuBar, !PSt .l)
 													   |  PopUpMenuElements m
 createPopUpMenu ioId ls (PopUpMenu items) mHs=:{mMenus, mKeys=keys, mPopUpId} rt it osMenuBar pState
 	# (ms,pState)			= popUpMenuElementToHandles items pState
@@ -134,22 +134,22 @@ where
 /*	validatePopUpMenuFunction takes care that all Menu(Mods)Function arguments of the elements
 	apply closePopUpMenu after their own action.
 */
-	validatePopUpMenuFunction :: !(MenuElementHandle .ls (PSt .l .p)) -> MenuElementHandle .ls (PSt .l .p)
+	validatePopUpMenuFunction :: !(MenuElementHandle .ls (PSt .l)) -> MenuElementHandle .ls (PSt .l)
 	validatePopUpMenuFunction (MenuItemHandle itemH=:{mItemAtts})
 		= MenuItemHandle {itemH & mItemAtts=map validateMenuFunction mItemAtts}
 	where
-		validateMenuFunction :: !(MenuAttribute *(.ls,PSt .l .p)) -> MenuAttribute *(.ls,PSt .l .p)
+		validateMenuFunction :: !(MenuAttribute *(.ls,PSt .l)) -> MenuAttribute *(.ls,PSt .l)
 		validateMenuFunction (MenuFunction f)
 			= MenuFunction (f` f)
 		where
-			f` :: (IdFun *(.ls,PSt .l .p)) !*(.ls,PSt .l .p) -> *(.ls,PSt .l .p)
+			f` :: (IdFun *(.ls,PSt .l)) !*(.ls,PSt .l) -> *(.ls,PSt .l)
 			f` f (ls,pst)
 				# (ls,pst)	= f (ls,pst)
 				= (ls,closePopUpMenu pst)
 		validateMenuFunction (MenuModsFunction f)
 			= MenuModsFunction (f` f)
 		where
-			f` :: (ModifiersFunction *(.ls,PSt .l .p)) !Modifiers !*(.ls,PSt .l .p) -> *(.ls,PSt .l .p)
+			f` :: (ModifiersFunction *(.ls,PSt .l)) !Modifiers !*(.ls,PSt .l) -> *(.ls,PSt .l)
 			f` f modifiers (ls,pst)
 				# (ls,pst)	= f modifiers (ls,pst)
 				= (ls,closePopUpMenu pst)
@@ -173,7 +173,7 @@ where
 /*	closePopUpMenu takes care that the internal administration of the menus is restored again to
 	no open pop up menu. It is assumed that all resources have been freed.
 */
-	closePopUpMenu :: !(PSt .l .p) -> PSt .l .p
+	closePopUpMenu :: !(PSt .l) -> PSt .l
 	closePopUpMenu pState=:{io}
 		# (found,mDevice,ioState)	= IOStGetDevice MenuDevice io
 		| not found

@@ -20,7 +20,7 @@ StdMenuFatalError function error
 
 
 ::	DeltaMenuSystem l p
-	:==	!OSMenuBar -> !(MenuHandles (PSt l p)) -> !*OSToolbox -> (!MenuHandles (PSt l p),!*OSToolbox)
+	:==	!OSMenuBar -> !(MenuHandles (PSt l)) -> !*OSToolbox -> (!MenuHandles (PSt l),!*OSToolbox)
 ::	AccessMenuSystem x pst
 	:==	!OSMenuBar -> !(MenuHandles pst) -> !*OSToolbox -> (!x,!MenuHandles pst,!*OSToolbox)
 ::	DeltaMenuHandle pst
@@ -31,7 +31,7 @@ StdMenuFatalError function error
 
 //	General rules to access MenuHandles:
 
-accessMenuHandles :: !Id !(AccessMenuHandle x (PSt .l .p)) !(IOSt .l .p) -> (!Maybe x, !IOSt .l .p)
+accessMenuHandles :: !Id !(AccessMenuHandle x (PSt .l)) !(IOSt .l) -> (!Maybe x, !IOSt .l)
 accessMenuHandles id f ioState
 	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
 	| not found
@@ -53,7 +53,7 @@ where
 	accessmenuhandles _ _ _
 		= (Nothing,[])
 
-changeMenuSystemState :: !Bool !(DeltaMenuSystem .l .p) !(IOSt .l .p) -> IOSt .l .p
+changeMenuSystemState :: !Bool !(DeltaMenuSystem .l .p) !(IOSt .l) -> IOSt .l
 changeMenuSystemState redrawMenus f ioState
 	# (osdInfo,ioState)			= IOStGetOSDInfo ioState
 	  maybeOSMenuBar			= getOSDInfoOSMenuBar osdInfo
@@ -76,7 +76,7 @@ changeMenuSystemState redrawMenus f ioState
 		# ioState				= setIOToolbox tb ioState
 		= IOStSetDevice (MenuSystemState menus) ioState
 
-accessMenuSystemState :: !Bool !(AccessMenuSystem .x (PSt .l .p)) !(IOSt .l .p) -> (!Maybe .x,!IOSt .l .p)
+accessMenuSystemState :: !Bool !(AccessMenuSystem .x (PSt .l)) !(IOSt .l) -> (!Maybe .x,!IOSt .l)
 accessMenuSystemState redrawMenus f ioState
 	# (osdInfo,ioState)			= IOStGetOSDInfo ioState
 	  maybeOSMenuBar			= getOSDInfoOSMenuBar osdInfo
@@ -103,11 +103,11 @@ accessMenuSystemState redrawMenus f ioState
 //	Opening a menu for an interactive process.
 
 class Menus mdef where
-	openMenu	:: .ls !(mdef .ls (PSt .l .p)) !(PSt .l .p)	-> (!ErrorReport,!PSt .l .p)
-	getMenuType	::      (mdef .ls .pst)						-> MenuType
+	openMenu	:: .ls !(mdef .ls (PSt .l)) !(PSt .l)	-> (!ErrorReport,!PSt .l)
+	getMenuType	::      (mdef .ls .pst)					-> MenuType
 
 instance Menus (Menu m)	| MenuElements m where
-	openMenu :: .ls !(Menu m .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p)	| MenuElements m
+	openMenu :: .ls !(Menu m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)	| MenuElements m
 	openMenu ls mDef pState
 		# pState			= MenuFunctions.dOpen pState
 		# (isZero,pState)	= accPIO checkZeroMenuBound pState
@@ -123,7 +123,7 @@ instance Menus (Menu m)	| MenuElements m where
 		| otherwise
 			= OpenMenu` menuId ls mDef pState
 	where
-		checkZeroMenuBound :: !(IOSt .l .p) -> (!Bool,!IOSt .l .p)
+		checkZeroMenuBound :: !(IOSt .l) -> (!Bool,!IOSt .l)
 		checkZeroMenuBound ioState
 			# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
 			| not found					// This condition should never occur
@@ -136,7 +136,7 @@ instance Menus (Menu m)	| MenuElements m where
 	getMenuType :: (Menu m .ls .pst) -> MenuType | MenuElements m
 	getMenuType _ = "Menu"
 
-validateMenuId :: !(Maybe Id) !(IOSt .l .p) -> (!Maybe Id,!IOSt .l .p)
+validateMenuId :: !(Maybe Id) !(IOSt .l) -> (!Maybe Id,!IOSt .l)
 validateMenuId Nothing ioState
 	# (mId,ioState)				= openId ioState
 	= (Just mId,ioState)
@@ -146,7 +146,7 @@ validateMenuId (Just id) ioState
 	| otherwise					= (Just id,ioState)
 
 instance Menus (PopUpMenu m) | PopUpMenuElements m where
-	openMenu :: .ls !(PopUpMenu m .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p) | PopUpMenuElements m
+	openMenu :: .ls !(PopUpMenu m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | PopUpMenuElements m
 	openMenu ls mDef pState
 		# (osdInfo,pState)			= accPIO IOStGetOSDInfo pState
 		| getOSDInfoDocumentInterface osdInfo==NDI
@@ -178,7 +178,7 @@ instance Menus (PopUpMenu m) | PopUpMenuElements m where
 			= (ErrorIdsInUse,pState)
 	where
 	//	handlePopUpMenu opens the pop up menu.
-		handlePopUpMenu :: !(PSt .l .p) -> (!ErrorReport,!PSt .l .p)
+		handlePopUpMenu :: !(PSt .l) -> (!ErrorReport,!PSt .l)
 		handlePopUpMenu pState
 			# (osdInfo,ioState)			= IOStGetOSDInfo pState.io
 			  framePtr					= case (getOSDInfoOSInfo osdInfo) of
@@ -208,7 +208,7 @@ instance Menus (PopUpMenu m) | PopUpMenuElements m where
 
 //	Closing a menu.
 
-closeMenu :: !Id !(IOSt .l .p) -> IOSt .l .p
+closeMenu :: !Id !(IOSt .l) -> IOSt .l
 closeMenu id ioState
 	| id==WindowMenuId	= ioState
 	| otherwise			= closemenu id ioState
@@ -216,7 +216,7 @@ closeMenu id ioState
 
 //	Enabling and Disabling of the MenuSystem:
 
-enableMenuSystem :: !(IOSt .l .p) -> IOSt .l .p
+enableMenuSystem :: !(IOSt .l) -> IOSt .l
 enableMenuSystem ioState
 /*	# (optModal,ioState)	= IOStGetIOIsModal ioState
 	# (ioId,    ioState)	= IOStGetIOId ioState
@@ -232,7 +232,7 @@ enableMenuSystem ioState
 	| otherwise
 		= changeMenuSystemState True (enablemenusystem di) ioState
 where
-	hasModalDialog :: !(IOSt .l .p) -> (!Bool,!IOSt .l .p)
+	hasModalDialog :: !(IOSt .l) -> (!Bool,!IOSt .l)
 	hasModalDialog ioState
 		# (found,wDevice,ioState)	= IOStGetDevice WindowDevice ioState
 		| not found
@@ -256,7 +256,7 @@ where
 			| i<0			= tb
 			| otherwise		= enablemenus (i-1) osMenuBar (OSEnableMenu i osMenuBar tb)
 
-disableMenuSystem :: !(IOSt .l .p) -> IOSt .l .p
+disableMenuSystem :: !(IOSt .l) -> IOSt .l
 disableMenuSystem ioState
 	# (di,ioState)	= IOStGetDocumentInterface ioState
 	| di==NDI		= ioState
@@ -279,13 +279,13 @@ where
 
 //	Enabling and Disabling of Menus:
 
-enableMenus :: ![Id] !(IOSt .l .p) -> IOSt .l .p
+enableMenus :: ![Id] !(IOSt .l) -> IOSt .l
 enableMenus ids ioState
 	# ids			= filter ((<>) WindowMenuId) ids
 	| isEmpty ids	= ioState
 	| otherwise		= enablemenus ids ioState
 
-disableMenus :: ![Id] !(IOSt .l .p) -> IOSt .l .p
+disableMenus :: ![Id] !(IOSt .l) -> IOSt .l
 disableMenus ids ioState
 	# ids			= filter ((<>) WindowMenuId) ids
 	| isEmpty ids	= ioState
@@ -294,7 +294,7 @@ disableMenus ids ioState
 
 //	Get the SelectState of a menu: 
 
-getMenuSelectState :: !Id !(IOSt .l .p) -> (!Maybe SelectState,!IOSt .l .p)
+getMenuSelectState :: !Id !(IOSt .l) -> (!Maybe SelectState,!IOSt .l)
 getMenuSelectState id ioState
 	# (optSelect,ioState)	= accessMenuHandles id menuStateHandleGetSelect ioState
 	| isNothing optSelect	= (Nothing,		ioState)
@@ -309,7 +309,7 @@ getMenuSelectState id ioState
 		the end.
 		Open an item on a position adds the item AFTER the item on that position.
 */
-openMenuElements :: !Id !Index .ls (m .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p) | MenuElements m
+openMenuElements :: !Id !Index .ls (m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l) | MenuElements m
 openMenuElements mId pos ls new pState
 	# (it,ioState)					= IOStGetIdTable pState.io
 	  maybeParent					= getIdParent mId it
@@ -348,7 +348,7 @@ openMenuElements mId pos ls new pState
 		# pState					= {pState & io=ioState}
 		= (error,pState)
 
-openSubMenuElements :: !Id !Index .ls (m .ls (PSt .l .p)) !(PSt .l .p) -> (!ErrorReport,!PSt .l .p)	| MenuElements m
+openSubMenuElements :: !Id !Index .ls (m .ls (PSt .l)) !(PSt .l) -> (!ErrorReport,!PSt .l)	| MenuElements m
 openSubMenuElements sId pos ls new pState
 	# (it,ioState)				= IOStGetIdTable pState.io
 	  maybeParent				= getIdParent sId it
@@ -385,7 +385,7 @@ openSubMenuElements sId pos ls new pState
 		# pState				= {pState & io=ioState}
 		= (error,pState)
 
-openRadioMenuItems :: !Id !Index ![MenuRadioItem (PSt .l .p)] !(IOSt .l .p) -> (!ErrorReport,!IOSt .l .p)
+openRadioMenuItems :: !Id !Index ![MenuRadioItem (PSt .l)] !(IOSt .l) -> (!ErrorReport,!IOSt .l)
 openRadioMenuItems rId pos radioItems ioState
 	# (idtable,ioState)		= IOStGetIdTable ioState
 	  maybeParent			= getIdParent rId idtable
@@ -414,7 +414,7 @@ openRadioMenuItems rId pos radioItems ioState
 
 //	Removing menu elements from (sub/radio)menus:
 
-closeMenuElements :: !Id ![Id] !(IOSt .l .p) -> IOSt .l .p
+closeMenuElements :: !Id ![Id] !(IOSt .l) -> IOSt .l
 closeMenuElements mId ids ioState
 	# ids			= filter (\id->not (isSpecialId id)) ids
 	| isEmpty ids	= ioState
@@ -423,7 +423,7 @@ closeMenuElements mId ids ioState
 
 //	Removing menu elements from (sub/radio)menus by index (counting from 1):
 
-closeMenuIndexElements :: !Id ![Index] !(IOSt .l .p) -> IOSt .l .p
+closeMenuIndexElements :: !Id ![Index] !(IOSt .l) -> IOSt .l
 closeMenuIndexElements mId indices ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	  maybeParent		= getIdParent mId idtable
@@ -438,7 +438,7 @@ closeMenuIndexElements mId indices ioState
 	| otherwise
 		= closemenuindexelements NotRemoveSpecialMenuElements False ioId (mId,Nothing) indices ioState
 
-closeSubMenuIndexElements :: !Id ![Index] !(IOSt .l .p) -> IOSt .l .p
+closeSubMenuIndexElements :: !Id ![Index] !(IOSt .l) -> IOSt .l
 closeSubMenuIndexElements sId indices ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	  maybeParent		= getIdParent sId idtable
@@ -453,7 +453,7 @@ closeSubMenuIndexElements sId indices ioState
 	| otherwise
 		= closemenuindexelements NotRemoveSpecialMenuElements False ioId (parent.idpId,Just sId) indices ioState
 
-closeRadioMenuIndexElements :: !Id ![Index] !(IOSt .l .p) -> IOSt .l .p
+closeRadioMenuIndexElements :: !Id ![Index] !(IOSt .l) -> IOSt .l
 closeRadioMenuIndexElements rId indices ioState
 	# (idtable,ioState)	= IOStGetIdTable ioState
 	  maybeParent		= getIdParent rId idtable
@@ -471,7 +471,7 @@ closeRadioMenuIndexElements rId indices ioState
 
 //	Determine the Ids and MenuTypes of all menus.
 
-getMenus :: !(IOSt .l .p) -> (![(Id,MenuType)],!IOSt .l .p)
+getMenus :: !(IOSt .l) -> (![(Id,MenuType)],!IOSt .l)
 getMenus ioState
 	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
 	| not found
@@ -489,7 +489,7 @@ where
 
 //	Determine the index position of a menu.
 
-getMenuPos :: !Id !(IOSt .l .p) -> (!Maybe Index,!IOSt .l .p)
+getMenuPos :: !Id !(IOSt .l) -> (!Maybe Index,!IOSt .l)
 getMenuPos id ioState
 	# (found,mDevice,ioState)	= IOStGetDevice MenuDevice ioState
 	| not found
@@ -513,11 +513,11 @@ where
 
 //	Set & Get the title of a menu.
 
-setMenuTitle :: !Id !Title !(IOSt .l .p) -> IOSt .l .p
+setMenuTitle :: !Id !Title !(IOSt .l) -> IOSt .l
 setMenuTitle id title ioState
 	| id==WindowMenuId	= ioState
 	| otherwise			= setmenutitle id title ioState
 
-getMenuTitle :: !Id !(IOSt .l .p) -> (!Maybe Title,!IOSt .l .p)
+getMenuTitle :: !Id !(IOSt .l) -> (!Maybe Title,!IOSt .l)
 getMenuTitle id ioState
 	= accessMenuHandles id menuStateHandleGetTitle ioState

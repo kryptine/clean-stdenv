@@ -24,7 +24,7 @@ windowdisposeFatalError function error
 	Because the window may contain controls that are 'logically' disposed, but not 'physically' 
 	disposeWindow also applies the init function contained in the IOSt.
 */
-disposeWindow :: !WID !(PSt .l .p) -> PSt .l .p
+disposeWindow :: !WID !(PSt .l) -> PSt .l
 disposeWindow wid pState=:{io=ioState}
 	# (found,wDevice,ioState)		= IOStGetDevice WindowDevice ioState
 	| not found
@@ -66,7 +66,7 @@ disposeWindow wid pState=:{io=ioState}
 	| otherwise
 		= dispose wids wsH windows {pState & io=ioState}
 where
-	dispose :: !WIDS !(WindowStateHandle (PSt .l .p)) !(WindowHandles (PSt .l .p)) !(PSt .l .p) -> PSt .l .p
+	dispose :: !WIDS !(WindowStateHandle (PSt .l)) !(WindowHandles (PSt .l)) !(PSt .l) -> PSt .l
 	dispose wids=:{wId} wsH windows=:{whsFinalModalLS} pState
 		# (disposeFun,pState)	= accPIO IOStGetInitIO pState
 		# pState				= disposeFun pState
@@ -89,10 +89,10 @@ where
 		# ioState				= bufferDelayedEvents delayinfo ioState
 		= {pState & io=ioState}
 	
-	handleOSEvent :: !OSEvent !(PSt .l .p) -> (![Int],!PSt .l .p)
+	handleOSEvent :: !OSEvent !(PSt .l) -> (![Int],!PSt .l)
 	handleOSEvent osEvent pState = accContext (handleContextOSEvent osEvent) pState
 	
-	enableProperWindows :: !(WindowHandles (PSt .l .p)) !(IOSt .l .p) -> (!WindowHandles (PSt .l .p),!IOSt .l .p)
+	enableProperWindows :: !(WindowHandles (PSt .l)) !(IOSt .l) -> (!WindowHandles (PSt .l),!IOSt .l)
 	enableProperWindows windows ioState
 		# (modalWIDS,windows)	= getWindowHandlesActiveModalDialog windows
 		| isJust modalWIDS		= (windows,ioState)
@@ -102,7 +102,7 @@ where
 /*	disposeCursorInfo disposes all system resources associated with the given CursorInfo.
 	PA: not yet implemented
 
-disposeCursorInfo :: !CursorInfo !(IOSt .l .p) -> IOSt .l .p
+disposeCursorInfo :: !CursorInfo !(IOSt .l) -> IOSt .l
 */
 
 
