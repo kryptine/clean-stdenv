@@ -44,6 +44,11 @@ instance - OSTime where
 			= OSTime (new-old)
 			= OSTime (OSMaxTickCount-old+new)
 
+instance < OSTime where
+	(<) :: !OSTime !OSTime -> Bool
+	(<) (OSTime t1) (OSTime t2)
+		= t1<t2
+
 instance toInt OSTime where
 	toInt :: !OSTime -> Int
 	toInt (OSTime t) = t

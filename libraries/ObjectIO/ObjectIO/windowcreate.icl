@@ -10,7 +10,7 @@ import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	osevent, ostypes, oswindow
 from	ostoolbox			import OSNewToolbox
 from	StdMenu				import enableMenuSystem, disableMenuSystem
-from	StdPSt				import accPIO
+from	StdPSt				import accPIO, appPIO
 from	StdWindowAttribute	import isWindowInit, getWindowInitFun, isWindowClose, isWindowCursor, getWindowCursorAtt
 import	commondef, controlpos, iostate, scheduler, windowaccess
 from	controlcreate		import createControls
@@ -50,7 +50,8 @@ openmodalwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
 	# (inputTrack,ioState)		= IOStGetInputTrack ioState
 	# ioState					= IOStSetInputTrack Nothing ioState			// clear input track information
 	# pState					= {pState & io=ioState}
-	# (noError,pState,_)		= OScreateModalDialog closable title osdinfo (mapMaybe (\{wPtr}->wPtr) modalWIDS) handleOSEvent pState OSNewToolbox
+	# (noError,pState,_)		= OScreateModalDialog closable title osdinfo (mapMaybe (\{wPtr}->wPtr) modalWIDS)
+									getOSEvent setOSEvent handleOSEvent pState OSNewToolbox
 	  (delayMouse,delayKey)		= case inputTrack of						// after handling modal dialog, generate proper (Mouse/Key)Lost events
 	  								Nothing	-> ([],[])
 	  								Just it=:{itWindow,itControl,itKind}
@@ -66,6 +67,12 @@ openmodalwindow wId {wlsState,wlsHandle} pState=:{io=ioState}
 where
 	handleOSEvent :: !OSEvent !(PSt .l) -> (![Int],!PSt .l)
 	handleOSEvent osEvent pState = accContext (handleContextOSEvent osEvent) pState
+	
+	getOSEvent :: !(PSt .l) -> (!OSEvents,!PSt .l)
+	getOSEvent pState = accPIO IOStGetEvents pState
+	
+	setOSEvent :: !(!OSEvents,!PSt .l) -> PSt .l
+	setOSEvent (osEvents,pState) = appPIO (IOStSetEvents osEvents) pState
 	
 /*	getFinalModalDialogLS retrieves the final local state of the modal dialog. This value has been stored in the window handles.
 	This MUST have been done by disposeWindow (windowdispose). 

@@ -8,7 +8,7 @@ import	StdBool, StdFunc, StdList, StdMisc
 import	commondef, devicefunctions, devicesystemstate, processstack, receivertable, timertable
 import	osdocumentinterface, ostime
 from	osactivaterequests	import OSActivateRequest
-from	osevent				import OSEvents, OSnewEvents
+from	osevent				import OSEvents, OScopyEvents, OSnewEvents
 from	osguishare			import OSGUIShare
 from	osmouse				import OSGetDoubleClickTime
 from	ossystem			import OSWindowMetrics, OSDefaultWindowMetrics
@@ -36,7 +36,7 @@ from	roundrobin			import RR, emptyRR, notodoRR
 ::	*IOUnique l
 	=	{	ioevents		:: !*OSEvents						// The event stream environment
 		,	ioworld			:: !*[*World]						// The world environment
-		,	ioprocesses		:: *CProcesses						// All other processes
+		,	ioprocesses		:: !*CProcesses						// All other processes
 		,	ioinit			:: !IdFun (PSt l)					// The initialisation functions of the process
 		,	iotoolbox		:: !*OSToolbox						// The Mac continuation value
 		}
@@ -291,7 +291,10 @@ IOStSetActivateRequests ioReqs ioState=:{ioshare} = {ioState & ioshare={ioshare 
 //	Access rules to the OSEvents environment:
 
 IOStGetEvents :: !(IOSt .l) -> (!*OSEvents, !IOSt .l)
-IOStGetEvents ioState=:{iounique=unique=:{ioevents}} = (ioevents,{ioState & iounique={unique & ioevents=OSnewEvents}})
+//IOStGetEvents ioState=:{iounique=unique=:{ioevents}} = (ioevents,{ioState & iounique={unique & ioevents=OSnewEvents}})
+IOStGetEvents ioState=:{iounique=unique=:{ioevents=es}}
+	# (es1,es2)	= OScopyEvents es
+	= (es1,{ioState & iounique={unique & ioevents=es2}})
 
 IOStSetEvents :: !*OSEvents !(IOSt .l) -> IOSt .l
 IOStSetEvents es ioState = {ioState & iounique={ioState.iounique & ioevents=es}}

@@ -52,8 +52,9 @@ shiftTimeInTimerTable :: !Int !TimerTable -> TimerTable
 */
 getActiveTimerInTimerTable :: !TimerTable -> (!Maybe TimerEvent,!TimerTable)
 
-/*	getTimeIntervalFromTimerTable returns the (Just time) interval that can be waited for the next timer to
-	become active.
+/*	getTimeIntervalFromTimerTable returns the (Just (zerotimer,time)) interval that can be 
+	waited for the next timer to become active. The Boolean zerotimer holds iff the time
+	returned belongs to a zero timer.
 	If there are no timers, then Nothing is returned.
 */
-getTimeIntervalFromTimerTable :: !TimerTable -> Maybe Int
+getTimeIntervalFromTimerTable :: !TimerTable -> Maybe (Bool,Int)

@@ -224,6 +224,7 @@ CcWmGAMEKEYBOARD			:== 500     /* Mike: keyboard input for game */
 ///
 CcWmINETEVENT				:==	140		/* MW11 */
 
+CcWmZEROTIMER				:==	136		/* PA: new constant for sequence of zero timer events (generated only by Clean). */
 CcWmLOSTKEY					:== 135		/* PA: new constant for loosing keyboard input (generated only by Clean). */
 CcWmLOSTMOUSE				:== 134		/* PA: new constant for loosing mouse input    (generated only by Clean). */
 CcWmSPECIALBUTTON			:==	133		/* PA: new constant for info about OK/CANCEL button selected. */

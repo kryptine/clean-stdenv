@@ -6,7 +6,7 @@ definition module oswindow
 
 import StdMaybe, StdOverloaded, StdString
 from osdocumentinterface	import OSDInfo, OSMDInfo, OSSDInfo, OSInfo, OSToolbar, OSToolbarHandle, HMENU, HWND
-from osevent				import OSEvent, CrossCallInfo
+from osevent				import OSEvents, OSEvent, CrossCallInfo
 from osfont					import Font
 from osrgn					import OSRgnHandle
 from ossystem				import OSWindowMetrics
@@ -122,9 +122,11 @@ OScreateWindow :: !OSWindowMetrics !Bool !ScrollbarInfo !ScrollbarInfo !(!Int,!I
 				  !(OSWindowPtr->OSWindowPtr->OSPictContext->u:s->u:(*OSToolbox->*(u:s,*OSToolbox)))
 				  !OSDInfo !OSWindowPtr !u:s !*OSToolbox
 			   -> (![DelayActivationInfo],!OSWindowPtr,!OSWindowPtr,!OSWindowPtr,!OSDInfo,!u:s,!*OSToolbox)
-OScreateModalDialog :: !Bool !String !OSDInfo !(Maybe OSWindowPtr) !(OSEvent -> u:s -> *([Int],u:s)) !u:s !*OSToolbox
-																						   -> (!Bool,!u:s,!*OSToolbox)
-
+OScreateModalDialog :: !Bool !String !OSDInfo !(Maybe OSWindowPtr) !(u:s -> (OSEvents,u:s))
+																   !((OSEvents,u:s)-> u:s)
+																   !(OSEvent -> u:s -> *([Int],u:s))
+						!u:s !*OSToolbox
+			  -> (!Bool,!u:s,!*OSToolbox)
 
 // Mike //
 OScreateGameWindow :: !Bool !(!Int,!Int) !Int !*OSToolbox -> (![DelayActivationInfo],!OSWindowPtr,!*OSToolbox)

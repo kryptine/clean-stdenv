@@ -306,12 +306,13 @@ OScreateWindowCallback _ _ _ _ _ {ccMsg} s tb
 /*	PA: new function that creates modal dialog and handles events until termination. 
 		The Bool result is True iff no error occurred. 
 */
-OScreateModalDialog :: !Bool !String !OSDInfo !(Maybe OSWindowPtr) !(OSEvent -> u:s -> *([Int],u:s)) !u:s !*OSToolbox
-																						   -> (!Bool,!u:s,!*OSToolbox)
-OScreateModalDialog isClosable title osdinfo currentActiveModal handleOSEvents s tb
+OScreateModalDialog :: !Bool !String !OSDInfo !(Maybe OSWindowPtr) !(u:s -> (OSEvents,u:s)) !((OSEvents,u:s)-> u:s) !(OSEvent -> u:s -> *([Int],u:s))
+						!u:s !*OSToolbox
+			  -> (!Bool,!u:s,!*OSToolbox)
+OScreateModalDialog isClosable title osdinfo currentActiveModal getOSEvents setOSEvents handleOSEvents s tb
 	# (textPtr,tb)		= WinMakeCString title tb
 	  createcci			= Rq2Cci CcRqCREATEMODALDIALOG textPtr parentptr
-	# (returncci,s,tb)	= IssueCleanRequest (OScreateModalDialogCallback handleOSEvents) createcci s tb
+	# (returncci,s,tb)	= IssueCleanRequest (OScreateModalDialogCallback getOSEvents setOSEvents handleOSEvents) createcci s tb
 	# tb				= WinReleaseCString textPtr tb
 	  ok				= case returncci.ccMsg of
 	  						CcRETURN1	-> returncci.p1==0
@@ -326,11 +327,19 @@ where
 							)
 							(fromJust currentActiveModal)
 	
-	OScreateModalDialogCallback :: !(OSEvent -> u:s -> *([Int],u:s)) !CrossCallInfo !u:s !*OSToolbox -> (!CrossCallInfo,!u:s,!*OSToolbox)
-	OScreateModalDialogCallback handleOSEvents osEvent s tb
-	//	# (replyToOS,s)	= handleOSEvents (if (osEvent.ccMsg==CcWmIDLETIMER) osEvent (trace_n ("OScreateModalDialogCallback-->"+++toString osEvent) osEvent)) s
-		# (replyToOS,s)	= handleOSEvents osEvent s
-		= (setReplyInOSEvent replyToOS,s,tb)
+	OScreateModalDialogCallback :: !(u:s -> (OSEvents,u:s)) !((OSEvents,u:s)-> u:s) !(OSEvent -> u:s -> *([Int],u:s)) 
+									!CrossCallInfo !u:s !*OSToolbox
+								-> (!CrossCallInfo,!u:s,!*OSToolbox)
+	OScreateModalDialogCallback getOSEvents setOSEvents handleOSEvents osEvent s tb
+		# (replyToOS,s)				= handleOSEvents osEvent s
+		# (osEvents, s)				= getOSEvents s
+		# (noDelayEvents,osEvents)	= OSisEmptyEvents osEvents
+		| noDelayEvents
+			= (setReplyInOSEvent replyToOS,setOSEvents (osEvents,s),tb)
+		| otherwise
+			# (osEvent,osEvents)	= OSremoveEvent osEvents
+			# s						= setOSEvents (osEvents,s)
+			= OScreateModalDialogCallback getOSEvents setOSEvents handleOSEvents osEvent s tb
 
 // Mike //
 OScreateGameWindow :: !Bool !(!Int,!Int) !Int !*OSToolbox -> (![DelayActivationInfo],!OSWindowPtr,!*OSToolbox)
