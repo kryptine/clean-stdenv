@@ -17,7 +17,7 @@ Start world
  	spreadsheet1
  	world  
 
-spreadsheet1	=	startCircuit (feedback (edit "spreadsheet" >>@ updsheet)) (mksheet inittable) 
+spreadsheet1	=	startCircuit (feedback (edit "spreadsheet" >>> arr updsheet)) (mksheet inittable) 
 where
 		updsheet (table <-> _ <|>
 		          _ <-> _ )			= mksheet (^^ table)
@@ -31,7 +31,7 @@ where
 									  ]
 		inittable	  				= [map ((+) i) [1..5] \\ i <- [0,5..25]]	
 
-spreadsheet2	=	startCircuit (feedback (edit "spreadsheet" >>@ updsheet))	    (mksheet inittable) 
+spreadsheet2	=	startCircuit (feedback (edit "spreadsheet" >>> arr updsheet))	    (mksheet inittable) 
 where
 		updsheet (table <-> _ <|>
 		          _ <-> _ )			= mksheet (^^ table)
@@ -45,7 +45,7 @@ where
 									  ]
 		inittable	  				= [map ((+) i) [1..5] \\ i <- [0,5..25]]	
 
-spreadsheet3	=	startCircuit (feedback (edit "spreadsheet" >>@ updsheet)) (mksheet initcosts initvat) 
+spreadsheet3	=	startCircuit (feedback (edit "spreadsheet" >>> arr updsheet)) (mksheet initcosts initvat) 
 where
 		updsheet (_ <-> _ <-> _ <-> _ <|>
 				  costs <-> _ <-> _ <-> vat <|>
