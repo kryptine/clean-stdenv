@@ -16,7 +16,7 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	example_rose
+ 	example_l1
  	world  
 
 :: T = C1 (P Int (AGEC Int))
@@ -50,7 +50,8 @@ where
 	 test (C1` (P i b)) = C2` (P (toReal i) b)
 	 test (C2` (P r b)) = C1` (P (toInt  r) b)
 
-example_l1		= 	startCircuit (edit		"Simple List Editor")					[1] 
+
+example_l1		= 	startCircuit (edit		"Simple List Editor")					[1]
 example_l2  	=	startCircuit (edit	"list" >>@ sum >>> edit "sum") 				[1..5]  									
 example_l4  	=	startCircuit (edit	"list" >>@ (\(a,b) ->  a + b) >>> edit "Sum List Elements") ([1..5],[5,4..1])			
 example_l6  	=	startCircuit (feedback (edit "Sorted List" >>@ sort))			[5,4..1] 									

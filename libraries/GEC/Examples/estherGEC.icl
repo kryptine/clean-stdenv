@@ -15,7 +15,7 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	test4
+ 	test11
  	world  
 
 //testX = CGEC (gecEdit "test")  (dynamicGEC 23)
@@ -150,3 +150,80 @@ where
 
 	mapFrom agec  	= gMap {|* -> * |} (^^) agec
 	mapTo val 		= gMap {|* -> * |} horlistAGEC val
+
+/*	PA: voorbeelden uit APLAS 2004 artikel:
+*/
+/*	Section 4.1. Example 1
+	Problem with this definition is that it does not recover previous input when guiApply fails.
+
+:: MyRecord8 = { function :: DynString
+               , argument :: DynString
+               , result   :: DynString }
+derive gGEC MyRecord8
+
+test8
+   = startCircuit (feedback (guiApply @>> edit "test"))
+                  (initval ((+) 1) 3)
+where
+   initval f v = { function = mkDynStr f
+                 , argument = mkDynStr v
+                 , result   = mkDynStr (f v) }
+   guiApply all=:{ function = DynStr (f::a -> b) _
+                 , argument = DynStr (v::a) _}
+                 = {all & result = mkDynStr (f v)}
+   guiApply else = else
+*/
+mkDynStr x = let dx = dynamic x in DynStr dx (ShowValueDynamic dx)
+
+
+
+/*	Section 4.1. Example 2
+*/
+test9
+   = startCircuit (feedback (guiApply o (^^) @>> edit "test" ))
+                  (vertlistAGEC [show "expression " 0])
+where
+   guiApply [f:args]
+      = vertlistAGEC [f : check (fromDynStr f) args]
+   where
+      check (f::a -> b) [(_,DynStr (x::a) _):xs]
+         = [show "argument " x : check (dynamic f x) xs]
+      check (f::a -> b) _ = [show "argument " "??"]
+      check (x::a)      _ = [show "result "   x]
+
+   show s v = (Display s,mkDynStr v)
+   fromDynStr (_,(DynStr d _)) = d
+
+/*	Section 4.2. Example 1
+*/
+:: MyRecord10 a b = { function :: AGEC (a -> b)
+                    , argument :: AGEC a
+                    , result   :: AGEC b }
+derive gGEC MyRecord10
+
+test10
+   = startCircuit (feedback (guiApply @>> edit "test"))
+                  (initval ((+) 1.0) 3.0)
+where
+   initval f v = { function = dynamicAGEC2 f
+                 , argument = dynamicAGEC2 v
+                 , result   = displayAGEC (f v) }
+   guiApply all=:{ function = af
+                 , argument = av }
+      = {all & result = displayAGEC ((^^af)(^^av))}
+
+displayAGEC x = modeAGEC (Display x)
+
+
+/*	Section 4.2. Example 2
+*/
+test11
+   = startCircuit (feedback (guiApply @>> edit "test"))
+                  (initval ((+) 1.0) 3.0)
+where
+   initval f v = { function = dynamicAGEC2 f
+                 , argument = counterAGEC v
+                 , result   = displayAGEC (f v) }
+   guiApply all=:{ function = af
+                 , argument = av }
+      = {all & result = displayAGEC ((^^af)(^^av))}
