@@ -297,7 +297,9 @@ openFilePrintState name fs
 			= (Nothing, fs)
 
 printToString :: a -> String | gPrint{|*|} a
-printToString x = (mkStringPrintState <<- x).ps_output.so_str
+printToString x
+	# string_output = (mkStringPrintState <<- x).ps_output
+	= string_output.so_str % (0,string_output.so_pos-1)
 
 //-------------------------------------------------------------------------------------
 
