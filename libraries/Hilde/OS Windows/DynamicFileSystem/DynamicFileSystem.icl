@@ -14,6 +14,7 @@ instance DynamicFileSystem World
 where
 	dynamicExists path world
 		# (ok, h, _, world) = FindFirstFile (toDirectory path +++ FILENAME_DYNAMIC_EXTENSION) world
+		  (ok, h, _, world) = if ok (True, h, undef, world) (FindFirstFile (toDirectory path +++ "\\.") world)
 		| not ok = (False, world)
 		# (ok, world) = FindClose h world
 		= (ok, world)
