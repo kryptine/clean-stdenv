@@ -6,7 +6,10 @@ module Sint
     Written by Mike Wiering (mike.wiering@cs.kun.nl)
     Katholieke Universiteit Nijmegen
     
-    For more information, see: http://www.cs.kun.nl/is/sint
+    For more information, see: http://www.cs.kun.nl/is/sint/
+    
+    
+    Compile with 3200K heap space (Project, Application options)
 */
 
 import StdEnv, StdIO
