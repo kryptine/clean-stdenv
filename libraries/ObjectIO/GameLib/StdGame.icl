@@ -9,7 +9,7 @@ from	iostate			import setIOToolbox, getIOToolbox
 import	windowcreate, windowdevice
 from	windowaccess	import initWindowHandle
 from	windowvalidate	import validateWindowId
-from	oswindow		import OSNoWindowPtr
+from	ostypes			import OSNoWindowPtr
 
 
 /* predefined bounds */
