@@ -1,9 +1,14 @@
 module	scrabble
 
 
-/*	Original program written by Paul de Mast in the functional programming language Amanda.
-	This program is the translated and adapted version to Clean 1.3.2, using the 1.2 object I/O library.
-*/
+//	**************************************************************************************************
+//
+//	This program implements the Scrabble game (without blank letters).
+//	Original program written by Paul de Mast in the functional programming language Amanda.
+//	This program is the translated and adapted version to Clean 1.3.2.
+//	It uses the Clean Standard Object I/O library 1.2.
+//	
+//	**************************************************************************************************
 
 
 import	StdEnv, StdIO

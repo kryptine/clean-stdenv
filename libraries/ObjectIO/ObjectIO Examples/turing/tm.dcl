@@ -1,6 +1,6 @@
 definition module tm
 
-from StdString import String
+import StdString
 
 ::	TmState
 	=	{	turing		:: !Turing

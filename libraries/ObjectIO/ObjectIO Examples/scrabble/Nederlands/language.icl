@@ -1,7 +1,7 @@
 implementation module language
 
 
-import	StdBool, StdList, StdArray, _SystemArray, StdEnum
+import	StdBool, StdList, StdArray, /*_SystemArray,*/ StdEnum
 import	StdIOCommon, StdSystem, StdTime
 import	types
 

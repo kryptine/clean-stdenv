@@ -52,6 +52,7 @@ where
 	splitWalls			= splitWallsInBarrel barrel
 	initLocal			= {talkTo=you,barrel=barrel,balls=balls}
 	
+	initIO :: Bounce -> Bounce
 	initIO pst
 		# (error,pst)	= openWindow undef window pst
 		| error<>NoError
@@ -67,14 +68,68 @@ where
 			= abort "bounce could not open receiver."
 		| otherwise
 			= pst
-	
-//	window defines the window that displays the barrel and the current balls.
-	window	=	Window name NilLS
-					[	WindowId		wId
-					,	WindowLook		False (updateBalls initLocal)
-					,	WindowViewSize	windowSize
-					,	WindowPos		(itemLoc,NoOffset)
+	where
+	//	window defines the window that displays the barrel and the current balls.
+		window	=	Window name NilLS
+						[	WindowId		wId
+						,	WindowLook		False (updateBalls initLocal)
+						,	WindowViewSize	windowSize
+						,	WindowPos		(itemLoc,NoOffset)
+						]
+		
+	//	menu defines the bounce menu. It contains only the quit command to terminate the application.
+		menu	= Menu name
+					(	MenuItem "About Bounce..."	[MenuFunction (noLS bounceHelp)]
+					:+:	MenuSeparator				[]
+					:+:	MenuItem "Quit"				[MenuFunction (noLS quit),MenuShortKey 'q']
+					)	[]
+		
+	//	timer defines the timer that will calculate the movements of the current balls as often as possible.
+		timer	= Timer 0 NilLS 
+					[	TimerId			tId
+					,	TimerFunction	(noLS1 (bounceBalls splitWalls))
 					]
+		where
+			bounceBalls :: !(![SingleWall],![SingleWall]) NrOfIntervals Bounce -> Bounce
+			bounceBalls splitWalls _ bounce=:{ls=local=:{talkTo,balls,barrel},io}
+				# (windowSize,io)	= getWindowViewSize wId io
+				  scale				= scaleSize windowSize barrelSize
+				  eraseOld			= map (eraseBall scale base) balls
+				  drawNew			= map (drawBall  scale base) ins
+				  local				= {local & balls=ins}
+				# io				= appWindowPicture wId (seq (eraseOld++drawNew)) io
+				# io				= setWindowLook wId False (False,updateBalls local) io
+				# bounce			= {bounce & ls=local,io=io}
+				| isEmpty outs		= bounce
+				| otherwise			= snd (syncSend talkTo (BallsArrive outs) bounce)
+			where
+				nextBallPos			= nextBallPositions splitWalls balls
+				ballsMoved			= map moveBall nextBallPos
+				domain				= barrel.bDomain
+				base				= domain.corner1
+				barrelSize			= rectangleSize domain
+				(ins,outs)			= splitBallsInBarrel domain ballsMoved
+		
+	//	receiver defines the receiver that will receive new balls and termination requests.
+		receiver :: *Receiver Message .ls Bounce
+		receiver = Receiver me (noLS1 (receive splitWalls)) []
+		where
+			receive :: !(![SingleWall],![SingleWall]) !Message !Bounce -> Bounce
+			receive (horizontal,vertical) (BallsArrive newBalls) bounce=:{ls}
+				#!	newBalls = map correctBall newBalls
+				=	{bounce & ls={ls & balls=newBalls++ls.balls}}
+			where
+				correctBall :: !Ball -> Ball
+				correctBall ball=:{bCenter,bSpeed}
+					# ball = {ball & bCenter=movePoint (~bSpeed) bCenter}
+					# ball = checkVerticalWalls   vertical   ball
+					# ball = checkHorizontalWalls horizontal ball
+					# ball = moveBall ball
+					= ball
+			receive _ BounceOpened bounce
+				= appPIO (enableTimer tId) bounce
+			receive _ QuitBounce bounce
+				= closeProcess bounce
 	
 	updateBalls :: Local SelectState UpdateState *Picture -> *Picture
 	updateBalls {balls,barrel} _ {oldFrame,newFrame,updArea} picture
@@ -88,63 +143,9 @@ where
 		scale		= scaleSize windowSize barrelSize
 		area		= if (oldFrame==newFrame) updArea [newFrame]
 	
-//	menu defines the bounce menu. It contains only the quit command to terminate the application.
-	menu	= Menu name
-				(	MenuItem "About Bounce..."	[MenuFunction (noLS bounceHelp)]
-				:+:	MenuSeparator				[]
-				:+:	MenuItem "Quit"				[MenuFunction (noLS quit),MenuShortKey 'q']
-				)	[]
-	
 	quit :: Bounce -> Bounce
 	quit bounce=:{ls={talkTo}}
 		= closeProcess (snd (syncSend talkTo QuitBounce bounce))
-	
-//	timer defines the timer that will calculate the movements of the current balls as often as possible.
-	timer	= Timer 0 NilLS 
-				[	TimerId			tId
-				,	TimerFunction	(noLS1 (bounceBalls splitWalls))
-				]
-	where
-		bounceBalls :: !(![SingleWall],![SingleWall]) NrOfIntervals Bounce -> Bounce
-		bounceBalls splitWalls _ bounce=:{ls=local=:{talkTo,balls,barrel},io}
-			# (windowSize,io)	= getWindowViewSize wId io
-			  scale				= scaleSize windowSize barrelSize
-			  eraseOld			= map (eraseBall scale base) balls
-			  drawNew			= map (drawBall  scale base) ins
-			  local				= {local & balls=ins}
-			# io				= appWindowPicture wId (seq (eraseOld++drawNew)) io
-			# io				= setWindowLook wId False (False,updateBalls local) io
-			# bounce			= {bounce & ls=local,io=io}
-			| isEmpty outs		= bounce
-			| otherwise			= snd (syncSend talkTo (BallsArrive outs) bounce)
-		where
-			nextBallPos			= nextBallPositions splitWalls balls
-			ballsMoved			= map moveBall nextBallPos
-			domain				= barrel.bDomain
-			base				= domain.corner1
-			barrelSize			= rectangleSize domain
-			(ins,outs)			= splitBallsInBarrel domain ballsMoved
-	
-//	receiver defines the receiver that will receive new balls and termination requests.
-	receiver :: *Receiver Message .ls Bounce
-	receiver = Receiver me (noLS1 (receive splitWalls)) []
-	where
-		receive :: !(![SingleWall],![SingleWall]) !Message !Bounce -> Bounce
-		receive (horizontal,vertical) (BallsArrive newBalls) bounce=:{ls}
-			#!	newBalls = map correctBall newBalls
-			=	{bounce & ls={ls & balls=newBalls++ls.balls}}
-		where
-			correctBall :: !Ball -> Ball
-			correctBall ball=:{bCenter,bSpeed}
-				# ball = {ball & bCenter=movePoint (~bSpeed) bCenter}
-				# ball = checkVerticalWalls   vertical   ball
-				# ball = checkHorizontalWalls horizontal ball
-				# ball = moveBall ball
-				= ball
-		receive _ BounceOpened bounce
-			= appPIO (enableTimer tId) bounce
-		receive _ QuitBounce bounce
-			= closeProcess bounce
 	
 //	bounceHelp opens a dialog that tells something about this application.
 	bounceHelp :: Bounce -> Bounce

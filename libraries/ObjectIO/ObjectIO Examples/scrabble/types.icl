@@ -125,7 +125,7 @@ where
 			# (lines,f)	= readlines f
 			  length	= size line
 			| length>1
-				= ([fromString (line%(0,length-2)):lines],f)	// remove '\n'
+				= ([line%(0,length-2):lines],f)	// remove '\n'
 			| otherwise
 				= (lines,f)
 

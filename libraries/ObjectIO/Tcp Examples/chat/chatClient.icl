@@ -20,9 +20,6 @@ CR			:== '\xD'					// carriage return
 		}
 ::	*PState	:==	PSt LS
 
-::	NoState
-	=	NoState							// The singleton data type
-
 Start :: *World -> *World
 Start world
 	= startIO SDI { sndChan=undef, nickname=""} initialize [ProcessWindowSize zero] world
@@ -49,10 +46,10 @@ initialize ps
 				 				   ControlFunction (noLS1 ok (dialogId, nicknameId, rmtsiteId)),
 				 				   ControlPos (Right, zero)]
 				) [WindowId dialogId, WindowOk buttonId]
-	# ((errReport, _), ps) = openModalDialog NoState dDef ps
+	# ((errReport, _), ps) = openModalDialog Void dDef ps
 	| errReport<>NoError
 		= abort "can't open modal dialog"
-	# (_, ps) = openWindow NoState (Window "dummy" NilLS [WindowViewSize {w=100,h=30}]) ps
+	# (_, ps) = openWindow Void (Window "dummy" NilLS [WindowViewSize {w=100,h=30}]) ps
 	= ps
   where
 	ok (dialogId, nicknameId, rmtsiteId) ps
@@ -97,7 +94,7 @@ initialize ps
 												,	MenuFunction (noLS quit)
 												]
 							)	[]
-		# (errReport,ps)	= openMenu NoState menu ps
+		# (errReport,ps)	= openMenu Void menu ps
 		| errReport<>NoError
 			=	abort "chat could not open menu."
 
@@ -106,7 +103,7 @@ initialize ps
 
 		// open send notifier to eventually flush the send channels buffer 
 		# (errReport, sChannel, ps)
-		  				= openSendNotifier NoState
+		  				= openSendNotifier Void
 		  							(SendNotifier sChannel (noLS1 sReceiver) []) ps
 		| errReport<>NoError
 			=	abort "chat could not open receiver."

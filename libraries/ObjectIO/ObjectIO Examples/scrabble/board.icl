@@ -206,7 +206,7 @@ where
 		# (ls,possible,lwrds,wwrds)	= tryaddtoline ls word p (n-1)
 		= ([l:ls],possible,lwrds,wwrds)
 	
-	hdtl :: ![.x] -> (.x,[.x])
+	hdtl :: !v:[u:x] -> v:(u:x,v:[u:x]), [v<=u]
 	hdtl [x:xs] = (x,xs)
 tryaddtolines [r:rs] w p j
 	# (rs,possible,scorenewletters,worddoubling) = tryaddtolines rs w p (j-1)
