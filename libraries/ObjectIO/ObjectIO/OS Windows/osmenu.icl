@@ -7,7 +7,7 @@ implementation module osmenu
 import	StdBool, StdChar, StdClass, StdInt, StdString
 import	menuCrossCall_12
 from	osdocumentinterface	import OSMenuBar
-from	oswindow			import OSWindowPtr, OSNoWindowPtr
+from	ostypes				import OSWindowPtr, OSNoWindowPtr
 
 
 //	Types for menus and menu elements:

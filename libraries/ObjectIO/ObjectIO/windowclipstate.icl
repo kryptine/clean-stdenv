@@ -7,8 +7,8 @@ implementation module windowclipstate
 import	StdBool, StdList, StdMisc
 import	osrgn, oswindow
 import	commondef, wstate
-from	controllayout	import getCompoundContentRect, getCompoundHScrollRect, getCompoundVScrollRect, getWindowContentRect
-from	windowaccess	import getWItemRadioInfo,  getWItemCheckInfo,  getWItemCompoundInfo, getWindowInfoWindowData
+from	windowaccess	import getWItemRadioInfo,  getWItemCheckInfo,  getWItemCompoundInfo, getWindowInfoWindowData,
+								getCompoundContentRect, getCompoundHScrollRect, getCompoundVScrollRect, getWindowContentRect
 from	wstateaccess	import getWItemRadioInfo`, getWItemCheckInfo`, getWItemCompoundInfo`
 
 

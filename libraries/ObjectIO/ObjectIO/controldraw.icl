@@ -10,8 +10,7 @@ from	ospicture		import packPicture, unpackPicture, pictsetcliprgn, copyPen
 from	osrgn			import osnewrectrgn, osdisposergn, ossectrgn
 from	oswindow		import OSWindowMetrics, OSgrabWindowPictContext, OSreleaseWindowPictContext, OSscrollbarsAreVisible
 import	commondef, wstate
-from	controllayout	import getCompoundContentRect
-from	windowaccess	import getWItemCompoundInfo,  getWItemCustomButtonInfo,  getWItemCustomInfo
+from	windowaccess	import getWItemCompoundInfo,  getWItemCustomButtonInfo,  getWItemCustomInfo, getCompoundContentRect
 from	wstateaccess	import getWItemCompoundInfo`, getWItemCustomButtonInfo`, getWItemCustomInfo`
 
 

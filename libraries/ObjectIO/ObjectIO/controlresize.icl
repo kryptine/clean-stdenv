@@ -12,15 +12,16 @@ from	StdControlAttribute	import isControlResize,       getControlResizeFun,
 from	StdWindowAttribute	import isWindowHMargin,      getWindowHMarginAtt, 
 									isWindowVMargin,     getWindowVMarginAtt,
 									isWindowItemSpace,   getWindowItemSpaceAtt
-from	controllayout		import layoutControls, getCompoundContentRect
+from	controllayout		import layoutControls
 from	controlrelayout		import relayoutControls
-from	windowaccess		import getWItemCompoundInfo, getWItemEditInfo, getWItemSliderInfo, getWindowInfoWindowData
+from	windowaccess		import getWItemCompoundInfo, getWItemEditInfo, getWItemSliderInfo, getWindowInfoWindowData, getCompoundContentRect
 from	windowclipstate		import forceValidWindowClipState, invalidateCompoundClipState
 from	windowdraw			import drawwindowlook
 from	windowupdate		import updatewindowbackgrounds
-from	ostypes				import Rect
+from	ossystem			import OSWindowMetrics
+from	ostypes				import Rect, OSWindowPtr
 from	ostoolbox			import OSToolbox
-from	oswindow			import OSWindowMetrics, OSWindowPtr, OSMinWindowSize, OSMinCompoundSize, OSscrollbarsAreVisible
+from	oswindow			import OSMinWindowSize, OSMinCompoundSize, OSscrollbarsAreVisible
 
 
 /*	resizeControls proceeds as follows:

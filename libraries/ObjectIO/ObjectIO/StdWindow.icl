@@ -5,7 +5,7 @@ implementation module StdWindow
 
 
 import	StdBool, StdEnum, StdFunc, StdList, StdMisc, StdTuple
-import	oswindow
+import	ostypes, ossystem, oswindow
 from	ostoolbox		import WorldGetToolbox, WorldSetToolbox
 import	StdControlClass, StdMaybe
 from	StdId			import getParentId
@@ -13,7 +13,7 @@ from	StdPSt			import appPIO, accPIO
 from	StdSystem		import maxScrollWindowSize
 import	commondef, controlpos, deviceevents, iostate, windowaccess, windowcontrols, windowcreate, windowdefaccess, windowdevice, wstate
 from	controlinternal	import openpopupitems, closepopupitems, enablecontrols, disablecontrols
-from	controllayout	import layoutControls, getWindowContentRect
+from	controllayout	import layoutControls
 from	controlrelayout	import relayoutControls
 from	controlvalidate	import getWElementControlIds, disjointControlIds
 from	keyfocus		import getCurrentFocusItem, setNewFocusItem

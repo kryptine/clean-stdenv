@@ -5,9 +5,9 @@ implementation module windowhandle
 
 
 import	StdBool, StdInt
-import	StdMaybe, StdWindowDef
-from	ospicture			import Pen
-from	oswindow			import OSWindowPtr
+import	StdControlDef, StdMaybe, StdWindowDef
+from	ospicture	import Pen
+from	ostypes		import OSWindowPtr
 import	commondef, keyfocus, receiverhandle
 
 

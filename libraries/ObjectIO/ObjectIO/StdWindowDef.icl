@@ -6,7 +6,7 @@ implementation module StdWindowDef
 //	Window definitions.
 
 
-import	StdControlDef
+import	StdIOCommon
 
 
 ::	Dialog c ls pst = Dialog Title (c ls pst) [WindowAttribute *(ls,pst)]

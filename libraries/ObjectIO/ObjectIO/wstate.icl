@@ -6,7 +6,7 @@ implementation module wstate
 
 import	StdInt, StdList, StdTuple, StdFunc
 import	oswindow
-import	commondef, windowhandle, windowdefaccess, controldefaccess
+import	commondef, windowhandle
 
 
 wstateFatalError :: String String -> .x

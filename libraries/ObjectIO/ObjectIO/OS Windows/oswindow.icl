@@ -17,21 +17,6 @@ oswindowFatalError function error
 	= FatalError function "oswindow" error
 
 
-OSGetProcessWindowDimensions :: !OSDInfo !*OSToolbox -> (!Rect,!*OSToolbox)
-OSGetProcessWindowDimensions osdinfo tb
-	# maybeOSInfo		= getOSDInfoOSInfo osdinfo
-	| isNothing maybeOSInfo
-		= OSscreenrect tb
-	| otherwise
-		# osinfo		= fromJust maybeOSInfo
-		# ((x,y),tb)	= OSgetWindowPos osinfo.osFrame tb
-		# ((w,h),tb)	= OSgetWindowViewFrameSize osinfo.osClient tb
-		= ({rleft=x,rtop=y,rright=x+w,rbottom=y+h},tb)
-
-OSNoWindowPtr
-	:== -1
-
-
 /*	System dependent constants:
 */
 OSControlTitleSpecialChars
@@ -40,60 +25,12 @@ OSControlTitleSpecialChars
 
 /*	System dependent metrics:
 */
-::	OSWindowMetrics
-	=	{	osmFont				:: Font				// The internal Font used in Windows for controls
-		,	osmFontMetrics		:: (Int,Int,Int)	// The ascent, descent, leading of osmFont
-		,	osmHeight			:: Int				// The height of the internal Font
-		,	osmHorMargin		:: Int				// The default horizontal margin
-		,	osmVerMargin		:: Int				// The default vertical   margin
-		,	osmHorItemSpace		:: Int				// The default horizontal item space
-		,	osmVerItemSpace		:: Int				// The default vertical   item space
-		,	osmHSliderHeight	:: Int				// The default height of a horizontal slider control
-		,	osmVSliderWidth		:: Int				// The default width  of a vertical   slider control
-		}
-
-OSDefaultWindowMetrics :: !*OSToolbox -> (!OSWindowMetrics,!*OSToolbox)
-OSDefaultWindowMetrics tb
-	# (font,tb)							= OSdialogfont tb
-	# ((ascent,descent,leading,_),tb)	= OSgetfontmetrics False 0 font tb
-	  height							= ascent+descent+leading
-	  unit								= (toReal height)/8.0
-	  margin							= toInt (unit*7.0)
-	  itemspace							= toInt (unit*4.0)
-	# (scrollWidth,scrollHeight,tb)		= WinScrollbarSize tb
-	= (	{	osmFont				= font
-		,	osmFontMetrics		= (ascent,descent,leading)
-		,	osmHeight			= height
-		,	osmHorMargin		= margin
-		,	osmVerMargin		= margin
-		,	osmHorItemSpace		= itemspace
-		,	osmVerItemSpace		= itemspace
-		,	osmHSliderHeight	= scrollHeight
-		,	osmVSliderWidth		= scrollWidth
-		}
-	  ,	tb
-	  )
 
 OSMinWindowSize :: (!Int,!Int)
 OSMinWindowSize = WinMinimumWinSize
 
 OSMinCompoundSize :: (!Int,!Int)
 OSMinCompoundSize = (0,0)	// PA: (0,0)<--WinMinimumWinSize (Check if this safe)
-
-/*	OSstripOuterSize isMDI isResizable (width,height)
-		returns (dw,dh) required to add/subtract to view size/outer size in order to obtain
-		outer size/view size.
-*/
-OSstripOuterSize :: !Bool !Bool !*OSToolbox -> (!(!Int,!Int),!*OSToolbox)
-OSstripOuterSize isMDI isResizable tb
-	| isMDI
-		# (dw,dh,tb)	= WinMDIClientToOuterSizeDims styleFlags tb
-		= ((dw,dh),tb)
-	| otherwise
-		# (dw,dh,tb)	= WinSDIClientToOuterSizeDims styleFlags tb
-		= ((dw,dh),tb)
-where
-	styleFlags			= if isResizable WS_THICKFRAME 0
 
 
 /*	Determine the size of controls.

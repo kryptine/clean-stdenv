@@ -9,9 +9,9 @@ implementation module windowvalidate
 import	StdBool, StdList, StdFunc, StdTuple, StdMisc
 from	StdId			import openId
 from	StdSystem		import maxScrollWindowSize
-import	osdocumentinterface, oswindow
+import	osdocumentinterface, ostypes, oswindow
 from	ospicture		import defaultPen, setPenAttribute
-from	ossystem		import OSscreenrect
+from	ossystem		import OSscreenrect, OSstripOuterSize
 import	commondef, controllayout, keyfocus, StdControlAttribute, StdWindowAttribute, windowaccess, windowdefaccess
 from	iostate			import IOSt, IOStGetIdTable
 

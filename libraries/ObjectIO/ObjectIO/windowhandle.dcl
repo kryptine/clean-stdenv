@@ -4,13 +4,12 @@ definition module windowhandle
 //	Clean Object I/O library, version 1.2
 
 
-import	StdMaybe, StdWindowDef
+import	StdControlDef, StdMaybe, StdWindowDef
 import	receiverhandle
 from	commondef	import Bound, Finite, Infinite
 from	keyfocus	import KeyFocus, FocusItem
 from	osrgn		import OSRgnHandle
-from	ostypes		import Rect
-from	oswindow	import OSWindowPtr
+from	ostypes		import Rect, OSWindowPtr
 from	ospicture	import OSPictContext, Origin, Pen, Font, 
 							Colour, RGB, RGBColour, Black, White, DarkGrey, Grey, LightGrey, 
 							Red, Green, Blue, Cyan, Magenta, Yellow

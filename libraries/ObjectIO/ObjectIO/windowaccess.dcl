@@ -8,6 +8,7 @@ definition module windowaccess
 
 import	devicesystemstate, windowhandle
 from	ostoolbox	import OSToolbox
+from	oswindow	import OSWindowMetrics
 
 
 /*	Dummy values for window handles.
@@ -74,6 +75,21 @@ identifyMaybeId			:: !Id !(Maybe Id) -> Bool	// identifyMaybeId id (Just id`) = 
 
 //	Transforming CursorShape to OS cursor code:
 toCursorCode :: !CursorShape -> Int
+
+
+/*	Given whether a CompoundControl/Window has a visible (Control/Window)HScroll (first Bool), (Control/Window)VScroll (second Bool),
+	and the surrounding rectangle of the control/window:
+	get(Compound/Window)ContentRect yields the Rect of the content part;
+	get(Compound/Window)(H/V)ScrollRect yields the Rect of the horizontal/vertical scroll component.
+*/
+getCompoundContentRect	:: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
+getCompoundHScrollRect	:: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
+getCompoundVScrollRect	:: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
+
+getWindowContentRect	:: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
+getWindowHScrollRect	:: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
+getWindowVScrollRect	:: !OSWindowMetrics !(!Bool,!Bool) !Rect -> Rect
+
 
 /*	Access operations on WindowStateHandles:
 	getWindowStateHandleWIDS

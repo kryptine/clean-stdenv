@@ -10,7 +10,8 @@ implementation module windowevent
 
 import	StdBool, StdFunc, StdList, StdMisc, StdTuple
 import	clCCall_12, clCrossCall_12, windowCrossCall_12
-from	oswindow			import OSNoWindowPtr, fromOSscrollbarRange, OSscrollbarsAreVisible
+from	ostypes				import	OSNoWindowPtr
+from	oswindow			import	fromOSscrollbarRange, OSscrollbarsAreVisible
 import	commondef, controlcreate, deviceevents, iostate, windowaccess
 from	StdControlAttribute	import	isControlKeyboard, getControlKeyboardAtt, 
 									isControlMouse,    getControlMouseAtt, 
@@ -19,7 +20,6 @@ from	StdPSt				import	accPIO
 from	StdWindowAttribute	import	isWindowKeyboard,  getWindowKeyboardAtt,
 									isWindowMouse,     getWindowMouseAtt,
 									isWindowCursor,    getWindowCursorAtt
-from	windowupdate		import	updatewindow
 
 
 windoweventFatalError :: String String -> .x

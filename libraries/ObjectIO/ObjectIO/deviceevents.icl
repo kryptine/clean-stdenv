@@ -6,10 +6,9 @@ implementation module deviceevents
 
 from	osevent			import OSEvent, CrossCallInfo
 from	ospicture		import OSPictContext
-from	ostypes			import Rect
-from	oswindow		import OSWindowPtr
+from	ostypes			import Rect, OSWindowPtr
 import	receivermessage, timertable
-from	windowaccess	import WIDS
+from	windowhandle	import WIDS
 from	receiverhandle	import InetEvent`, EndpointRef`, InetReceiverCategory` // MW11++
 
 

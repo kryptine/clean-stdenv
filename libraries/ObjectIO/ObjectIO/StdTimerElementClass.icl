@@ -7,8 +7,8 @@ implementation module StdTimerElementClass
 
 
 import	StdList
-import	StdIOCommon, StdPSt, StdTimerDef
-import	commondef, timerhandle
+import	StdTimerDef
+import	commondef, iostate, timerhandle
 
 
 class TimerElements t where

@@ -11,7 +11,7 @@ implementation module processevent
 import	StdArray, StdBool, StdList
 from	clCrossCall_12	import CcWmDDEEXECUTE, CcWmPROCESSCLOSE, CcWmPROCESSDROPFILES
 from	clCCall_12		import WinGetCStringAndFree, CSTR
-from	oswindow		import OSNoWindowPtr, OSWindowPtr
+from	ostypes			import OSNoWindowPtr, OSWindowPtr
 import	deviceevents, iostate
 from	commondef		import FatalError
 from	processstack	import topShowProcessShowState

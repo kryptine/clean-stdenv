@@ -14,3 +14,5 @@ definition module ostypes
 	:== HWND
 ::	HWND
 	:==	Int
+
+OSNoWindowPtr	:== -1

@@ -5,7 +5,7 @@ implementation module toolbar
 
 
 import StdBool, StdInt, StdMisc
-import osbitmap, osdocumentinterface, ostoolbar, oswindow
+import osbitmap, osdocumentinterface, ostoolbar, ostypes
 import commondef, iostate, sdisize, StdProcessAttribute
 
 

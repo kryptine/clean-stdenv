@@ -8,7 +8,8 @@ import	osdocumentinterface
 from	osevent				import OSEvents
 from	osguishare			import OSGUIShare
 from	osactivaterequests	import OSActivateRequest
-from	oswindow			import OSWindowPtr, OSWindowMetrics
+from	ossystem			import OSWindowMetrics
+from	ostypes				import OSWindowPtr
 from	ostime				import OSTime
 import	devicefunctions, devicesystemstate
 from	processstack		import ProcessStack, ProcessShowState, ShowFlag, ProcessKind
