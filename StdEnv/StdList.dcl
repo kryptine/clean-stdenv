@@ -18,7 +18,9 @@ instance length	[]
 instance %		[a]
 
 instance toString 	[x] | toChar x	 // Convert [x]    via [Char] into String
+									special x=Char
 instance fromString [x] | fromChar x // Convert String via [Char] into [x]
+									special x=Char
 
 //	List Operators:
 
@@ -87,43 +89,48 @@ all			:: (.a -> .Bool) ![.a] -> Bool			//	True, if ei is True for all i
 //	When equality is defined on list elements
 
 isMember		::    a	 !.[a]	-> Bool 	| Eq a	//	Is element in list
+													special a=Int
+															a=Char
+															a=Real
 isAnyMember		:: !.[a]  !.[a] -> Bool 	| Eq a	//	Is one of arg1 an element arg2
+													special a=Int
+															a=Char
+															a=Real
 removeMember	:: a !u:[a] -> u:[a] 		| Eq a	//	Remove first occurrence of arg1 from list arg2
+													special a=Int
+															a=Char
+															a=Real
 removeMembers	:: !u:[a] !.[a]	-> u:[a] 	| Eq a	//	Remove first occurrences in arg2 from list arg1
+													special a=Int
+															a=Char
+															a=Real
 removeDup		:: !.[a] 		-> .[a] 	| Eq a	//	Remove all duplicates from list
+													special a=Int
+															a=Char
+															a=Real
 removeIndex 	:: a  !u:[a] -> (Int,u:[a])	| Eq a	//	"removeMember" returning index of removed element
+													special a=Int
+															a=Char
+															a=Real
 limit			:: !.[a] 		-> a 		| Eq a	//	find two succeeding elements that are equal
 													//	e.g. limit [1,3,2,2,1] == 2
+													special a=Int
+															a=Char
+															a=Real
 
 //	When addition is defined on list elements
 
 sum :: !.[a] -> a |  + , zero  a					//	sum of list elements, sum [] = zero
+									special	a=Int
+											a=Real
 
 //	When multiplication and addition is defined on list elements
 
 prod :: !.[a] -> a | * , one  a 					//	product of list elements, prod [] = one
+									special	a=Int
+											a=Real
 avg :: !.[a] -> a | / , IncDec a					//	average of list elements, avg [] gives error!
+									special	a=Int
+											a=Real
+														
 
-/*
-// exports to generate specialized versions
-
-export Eq Int
-export Eq Real
-export Eq Char
-
-export + Int
-export + Real
-export * Int
-export * Real
-export / Int
-export / Real
-export zero Int
-export zero Real
-export one Int
-export one Real
-export IncDec Int
-export IncDec Real
-
-export toChar Char
-export fromChar Char
-*/
