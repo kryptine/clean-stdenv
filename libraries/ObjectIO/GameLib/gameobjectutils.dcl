@@ -13,13 +13,13 @@ CompressBools :: !(!Bool, !Bool, !Bool, !Bool, !Bool, !Bool, !Bool, !Bool) -> In
 toInt01 :: !Bool -> Int
 
 // store an GameObjectRec in the game engine
-SetObjectRec :: !InstanceID !ObjectType !GameObjectRec ![SpriteID] !*OSToolbox -> (!GRESULT, !*OSToolbox)
+SetObjectRec :: !InstanceID !ObjectCode !GameObjectRec ![SpriteID] !*OSToolbox -> (!GRESULT, !*OSToolbox)
 
 // load an GameObjectRec from the game engine
-GetObjectRec :: !Int !*OSToolbox -> (!GRESULT, !ObjectType, !GameObjectRec, !*OSToolbox)
+GetObjectRec :: !Int !*OSToolbox -> (!GRESULT, !ObjectCode, !GameObjectRec, !*OSToolbox)
 
 // get the definition of an object by it's ObjectType
-getobject :: !ObjectType !(GameHandle .gs) -> Maybe (GameObjectHandle (GSt .gs))
+getobject :: !ObjectCode !(GameHandle .gs) -> Maybe (GameObjectHandle (GSt .gs))
 
 // store the definition of an object in the game definition
 putobject :: !(GameObjectHandle (GSt .gs)) !(GameHandle .gs) -> GameHandle .gs
@@ -35,6 +35,8 @@ removeinstance :: a ![(a,b)] -> [(a,b)]  | ==a
 
 // create a DirectionSet from an integer value (0-15)
 makeDirectionSet :: !Int -> DirectionSet
+
+fromDirectionSet :: !DirectionSet -> Int
 
 toBoundMapCode :: !(!Int,!DirectionSet) -> !Int
 

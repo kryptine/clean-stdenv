@@ -5,10 +5,10 @@ definition module gamehandle
 import StdGameDef
 
 :: GameHandle gs
-   = { levels`     :: ![LevelHandle (GSt gs)]       // levels
-     , quitlevel`  :: !St (GSt gs) Bool             // when true, the game engine quits
-     , nextlevel`  :: !St (GSt gs) Int              // 1,2,... level in list, 0 = exit
-     , statistics` :: !St (GSt gs) [GameText]       // all text items
+   = { levels`    :: ![LevelHandle (GSt gs)]       // levels
+     , quitlevel` :: !St (GSt gs) Bool             // when true, the game engine quits
+     , nextlevel` :: !St (GSt gs) Int              // 1,2,... level in list, 0 = exit
+     , textitems` :: !St (GSt gs) [GameText]       // all text items
      }
 
 :: LevelHandle state
@@ -23,20 +23,20 @@ import StdGameDef
 
 :: GameObjectHandle gs
    = E. state:
-     { objecttype` :: !ObjectType
+     { objectcode` :: !ObjectCode
      , sprites`    :: ![Sprite]
      , spriteids`  :: ![SpriteID]
      , instances`  :: ![(InstanceID, state)]
-     , init`       :: !SubType !Point2 !GameTime !gs         -> GameObjectState state gs
+     , init`       :: !SubCode !Point2 !GameTime !gs         -> GameObjectState state gs
      , done`       :: !(GameObjectState state gs)            -> gs
      , move`       :: !                                         ObjectFun state gs
      , animation`  :: !                                         ObjectFun state gs
      , touchbound` :: !DirectionSet MapCode                  -> ObjectFun state gs
-     , collide`    :: !DirectionSet ObjectType GameObjectRec -> ObjectFun state gs
+     , collide`    :: !DirectionSet ObjectCode GameObjectRec -> ObjectFun state gs
      , frametimer` :: !                                         ObjectFun state gs
      , keydown`    :: !KeyCode                               -> ObjectFun state gs
      , keyup`      :: !KeyCode                               -> ObjectFun state gs
-     , userevent`  :: !EventType !EventPar !EventPar         -> ObjectFun state gs
+     , userevent`  :: !EventCode !EventPar !EventPar         -> ObjectFun state gs
      }
 
 :: InstanceID

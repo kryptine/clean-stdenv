@@ -1,5 +1,6 @@
 implementation module StdGame
 
+import StdProcess
 import	StdArray, StdBool, StdClass, StdFunc, StdInt, StdList, StdMisc
 import	StdId
 import	fixed, GameFunctions, gamehandle, gameutils, gst
@@ -20,7 +21,16 @@ BND_STATIC_BOUNDS  :== 1 << 31
 SK_FOREVER         :== -1
 
 
-openGame :: .gs !(Game .gs) ![GameAttribute .gs] !(PSt .l) -> (!ErrorReport, !PSt .l)
+startGame :: .(Game a) a [.GameAttribute a] !*World -> .World
+startGame gamedef initialstate options world
+    = startIO SDI 0 init [ProcessClose closeProcess] world
+where
+    init ps
+        #   (finalstate, _, ps) = openGame initialstate gamedef options ps
+        =   closeProcess ps
+
+
+openGame :: .gs !(Game .gs) ![GameAttribute .gs] !(PSt .l) -> (.gs, !ErrorReport, !PSt .l)
 openGame gs gdef attr ps
     #   (wId, ps)       =   accPIO openId ps
     #   size            =   findSize attr {w=320,h=240}
@@ -30,9 +40,9 @@ openGame gs gdef attr ps
     #   gst             =   toGSt gs tb
     #   (initLevel,gst) =   gdef.nextlevel gst
     #   (gs,tb)         =   fromGSt gst
-    #   (_, tb)         =   PlayLevels initLevel gs gdef tb
+    #   (gs, _, tb)     =   PlayLevels initLevel gs gdef tb
     #   ps              =   appPIO (setIOToolbox tb) ps
-    =   (NoError, ps)
+    =   (gs, NoError, ps)
 where
     findSize :: ![GameAttribute .gs] !Size -> Size
     findSize [] s = s
@@ -67,10 +77,10 @@ where
 			# pState			= appPIO decreaseWindowBound pState
 			= (NoError,pState)
 
-PlayLevels :: !Int .gs !(Game .gs) !*OSToolbox -> (!ErrorReport, !*OSToolbox)
+PlayLevels :: !Int .gs !(Game .gs) !*OSToolbox -> (.gs, !ErrorReport, !*OSToolbox)
 PlayLevels level gs gdef tb
     |   level == 0
-    =   (NoError, tb)
+    =   (gs, NoError, tb)
     #   ghnd             =  createGameHandle gdef
     #   (_, gs, tb)      =  PlayLevel level gs ghnd tb
     #   gst              =  toGSt gs tb
@@ -227,7 +237,7 @@ createAnimation sprite=:{bitmap, sequence, loop} gst
     #   (sprid, gst) = accGStTb (InitSpriteAnimation bid sequence loop) gst
     = (0-sprid, gst)
 
-createNewGameObject :: !ObjectType !SubType !Point2 !(GSt .gs) -> (!GRESULT, !GSt .gs)
+createNewGameObject :: !ObjectCode !SubCode !Point2 !(GSt .gs) -> (!GRESULT, !GSt .gs)
 createNewGameObject ot st p gst
     =   accGStTb (InitGameObject ot st p) gst
 
@@ -286,7 +296,7 @@ EventTargetToInt AllObjects    = -1
 EventTargetToInt (BoundType b) = b
 
 // modified 01/11/99
-createUserGameEvent :: !EventType !EventPar !EventPar !EventTarget !SubType !GameTime !(GSt .gs) -> (!GRESULT, !GSt .gs)
+createUserGameEvent :: !EventCode !EventPar !EventPar !EventTarget !SubCode !GameTime !(GSt .gs) -> (!GRESULT, !GSt .gs)
 createUserGameEvent ev evpar1 evpar2 dest subdest time gst
     =   accGStTb (CreateUserEvent ev evpar1 evpar2 (EventTargetToInt dest) subdest time) gst
 
@@ -324,10 +334,10 @@ defaultObjectOptions
    , removemapcode       = False
    }
 
-defaultObjectRec :: SubType Point2 Size GameTime !*(GSt .gs) -> (!GameObjectRec,!*GSt .gs)
-defaultObjectRec objsubtype position size time gs
+defaultObjectRec :: SubCode Point2 Size GameTime !*(GSt .gs) -> (!GameObjectRec,!*GSt .gs)
+defaultObjectRec objsubcode position size time gs
   = ( { active          = True
-      , subtype         = objsubtype
+      , subcode         = objsubcode
       , size            = size
       , pos             = position
       , offset          = zero
@@ -353,17 +363,17 @@ defaultObjectRec objsubtype position size time gs
       }
     , gs)
 
-defaultInitObject :: Size state SubType Point2 GameTime !*(GSt .gs) -> GameObjectState state *(GSt .gs)
+defaultInitObject :: Size state SubCode Point2 GameTime !*(GSt .gs) -> GameObjectState state *(GSt .gs)
 defaultInitObject size state subtype pos time gs
     # (newobjrec, gs) = defaultObjectRec subtype pos size time gs
-    = {objectstate=state,gamestate=gs,objectrec=newobjrec}
+    = {st=state,gs=gs,or=newobjrec}
 
-defaultGameObject :: !ObjectType !Size state -> GameObject *(GSt .gs)
-defaultGameObject objtype size state
-  = { objecttype = objtype
+defaultGameObject :: !ObjectCode !Size state -> GameObject *(GSt .gs)
+defaultGameObject objcode size state
+  = { objectcode = objcode
     , sprites    = []
     , init       = defaultInitObject size state
-    , done       = \{gamestate} -> gamestate
+    , done       = \{gs} -> gs
     , move       = id
     , animation  = id
     , touchbound = \_ _   -> id

@@ -85,7 +85,7 @@ InitSpriteAnimation :: !BID ![(Int,Int)] !Bool !*OSToolbox -> (!GRESULT, !*OSToo
 InitSpriteAnimation bid seq loop tb
     = OSInitSpriteAnimation bid (TupleListStr seq) loop tb
 
-InitGameObject :: !ObjectType !SubType !Point2 !*OSToolbox -> (!GRESULT, !*OSToolbox)
+InitGameObject :: !ObjectCode !SubCode !Point2 !*OSToolbox -> (!GRESULT, !*OSToolbox)
 InitGameObject ot st p tb
     = OSInitGameObject ot st p tb
 

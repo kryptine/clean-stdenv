@@ -6,10 +6,10 @@ from	StdList	import map
 import	StdGameDef
 
 :: GameHandle gs
-   = { levels`     :: ![LevelHandle (GSt gs)]       // levels
-     , quitlevel`  :: !St (GSt gs) Bool             // when true, the game engine quits
-     , nextlevel`  :: !St (GSt gs) Int              // 1,2,... level in list, 0 = exit
-     , statistics` :: !St (GSt gs) [GameText]       // all text items
+   = { levels`    :: ![LevelHandle (GSt gs)]       // levels
+     , quitlevel` :: !St (GSt gs) Bool             // when true, the game engine quits
+     , nextlevel` :: !St (GSt gs) Int              // 1,2,... level in list, 0 = exit
+     , textitems` :: !St (GSt gs) [GameText]       // all text items
      }
 
 :: LevelHandle state
@@ -24,20 +24,20 @@ import	StdGameDef
 
 :: GameObjectHandle gs
    = E. state:
-     { objecttype` :: !ObjectType
+     { objectcode` :: !ObjectCode
      , sprites`    :: ![Sprite]
      , spriteids`  :: ![SpriteID]
      , instances`  :: ![(InstanceID, state)]
-     , init`       :: !SubType !Point2 !GameTime !gs         -> GameObjectState state gs
+     , init`       :: !SubCode !Point2 !GameTime !gs         -> GameObjectState state gs
      , done`       :: !(GameObjectState state gs)            -> gs
      , move`       :: !                                         ObjectFun state gs
      , animation`  :: !                                         ObjectFun state gs
      , touchbound` :: !DirectionSet MapCode                  -> ObjectFun state gs
-     , collide`    :: !DirectionSet ObjectType GameObjectRec -> ObjectFun state gs
+     , collide`    :: !DirectionSet ObjectCode GameObjectRec -> ObjectFun state gs
      , frametimer` :: !                                         ObjectFun state gs
      , keydown`    :: !KeyCode                               -> ObjectFun state gs
      , keyup`      :: !KeyCode                               -> ObjectFun state gs
-     , userevent`  :: !EventType !EventPar !EventPar         -> ObjectFun state gs
+     , userevent`  :: !EventCode !EventPar !EventPar         -> ObjectFun state gs
      }
 
 :: InstanceID
@@ -46,9 +46,9 @@ import	StdGameDef
 
 
 createObjectHandle :: !(GameObject .gs) -> GameObjectHandle .gs
-createObjectHandle {objecttype, sprites, init, done, move, animation, touchbound,
+createObjectHandle {objectcode, sprites, init, done, move, animation, touchbound,
                     collide, frametimer, keydown, keyup, userevent}
-    = { objecttype` = objecttype
+    = { objectcode` = objectcode
       , sprites`    = sprites
       , spriteids`  = []
       , instances`  = []
@@ -76,9 +76,9 @@ createLevelHandle {boundmap, initpos, layers, objects, music, soundsamples, leve
       }
 
 createGameHandle :: !(Game .gs) -> GameHandle .gs
-createGameHandle {levels, quitlevel, nextlevel, statistics}
+createGameHandle {levels, quitlevel, nextlevel, textitems}
     = { levels`     = map createLevelHandle levels
       , quitlevel`  = quitlevel
       , nextlevel`  = nextlevel
-      , statistics` = statistics
+      , textitems`  = textitems
       }

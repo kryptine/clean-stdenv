@@ -90,7 +90,7 @@ OSInitSpriteAnimation :: !BID !{#Char} !Bool !*OSToolbox -> (!GRESULT,!*OSToolbo
 OSInitSpriteAnimation bid seq loop tb
     = WinInitSpriteAnimation bid seq loop tb
 
-OSInitGameObject :: !ObjectType !SubType !Point2 !*OSToolbox -> (!GRESULT, !*OSToolbox)
+OSInitGameObject :: !ObjectCode !SubCode !Point2 !*OSToolbox -> (!GRESULT, !*OSToolbox)
 OSInitGameObject ot st p tb
     = WinInitGameObject ot st p.x p.y tb
 
@@ -208,7 +208,7 @@ handleGameEvents fromOSCci=:{ccMsg=CcWmOBJECTKEYUP, p1=objtype, p2=id, p3=key} s
     # (state,tb)        =   handleKeyUp objtype id key state tb
     = (Return0Cci, state, tb)
 
-handleGameEvents fromOSCci=:{ccMsg=CcWmSTATISTICS} state=:{gamest,gamehnd={statistics`=stats}} tb
+handleGameEvents fromOSCci=:{ccMsg=CcWmSTATISTICS} state=:{gamest,gamehnd={textitems`=stats}} tb
     #   gst             =   toGSt gamest tb
     #   (statlist, gst) =   stats gst
     #   (newstate, tb)  =   fromGSt gst
@@ -273,8 +273,8 @@ where
         |   isNothing maybestate
             =   (obj,objrec,gst)
         #   state               =   fromJust maybestate
-        #   {objectstate=s,objectrec=objrec,gamestate=gst}
-                                =   userevent` ev par1 par2 {objectstate=state,objectrec=objrec,gamestate=gst}
+        #   {st=s,or=objrec,gs=gst}
+                                =   userevent` ev par1 par2 {st=state,or=objrec,gs=gst}
         #   newinstances        =   updateinstance id s instances`
         #   obj                 =   {obj & instances`=newinstances}
         =   (obj,objrec,gst)
@@ -303,8 +303,8 @@ where
         |   isNothing maybestate
             =   (obj,objrec,gst)
         #   state               =   fromJust maybestate
-        #   {objectstate=s,objectrec=objrec,gamestate=gst}
-                                =   animation` {objectstate=state,objectrec=objrec,gamestate=gst}
+        #   {st=s,or=objrec,gs=gst}
+                                =   animation` {st=state,or=objrec,gs=gst}
         #   newinstances        =   updateinstance id s instances`
         #   obj                 =   {obj & instances`=newinstances}
         =   (obj,objrec,gst)
@@ -333,8 +333,8 @@ where
         |   isNothing maybestate
             =   (obj,objrec,gst)
         #   state               =   fromJust maybestate
-        #   {objectstate=s,objectrec=objrec,gamestate=gst}
-                                =   frametimer` {objectstate=state,objectrec=objrec,gamestate=gst}
+        #   {st=s,or=objrec,gs=gst}
+                                =   frametimer` {st=state,or=objrec,gs=gst}
         #   newinstances        =   updateinstance id s instances`
         #   obj                 =   {obj & instances`=newinstances}
         =   (obj,objrec,gst)
@@ -363,8 +363,8 @@ where
         |   isNothing maybestate
             =   (obj,objrec,gst)
         #   state               =   fromJust maybestate
-        #   {objectstate=s,objectrec=objrec,gamestate=gst}
-                                =   move` {objectstate=state,objectrec=objrec,gamestate=gst}
+        #   {st=s,or=objrec,gs=gst}
+                                =   move` {st=state,or=objrec,gs=gst}
         #   newinstances        =   updateinstance id s instances`
         #   obj                 =   {obj & instances`=newinstances}
         =   (obj,objrec,gst)
@@ -393,8 +393,8 @@ where
         |   isNothing maybestate
             =   (obj,objrec,gst)
         #   state               =   fromJust maybestate
-        #   {objectstate=s,objectrec=objrec,gamestate=gst}
-                                =   touchbound` bounds mapcode {objectstate=state,objectrec=objrec,gamestate=gst}
+        #   {st=s,or=objrec,gs=gst}
+                                =   touchbound` bounds mapcode {st=state,or=objrec,gs=gst}
         #   newinstances        =   updateinstance id s instances`
         #   obj                 =   {obj & instances`=newinstances}
         =   (obj,objrec,gst)
@@ -418,7 +418,7 @@ where
     doInit :: !InstanceID !Int !Point2 !GameTime !(GameObjectHandle .a) !.a -> (!GameObjectHandle .a,!GameObjectRec,.a)
     doInit id subtype p time obj=:{instances`,init`} gst
     //  #   ((state,objrec), gst)       =   init` subtype p time gst
-        #   {objectstate=state,objectrec=objrec,gamestate=gst}
+        #   {st=state,or=objrec,gs=gst}
                                         =   init` subtype p time gst
         #   newinstances                =   [(id,state):instances`]
         =   ({obj & instances`=newinstances},objrec,gst)
@@ -445,7 +445,7 @@ where
         |   isNothing maybestate
             =   (obj, gst)
         #   state               =   fromJust maybestate
-        #   gst                 =   done` {objectstate=state,objectrec=objrec,gamestate=gst}
+        #   gst                 =   done` {st=state,or=objrec,gs=gst}
         #   newinstances        =   removeinstance id instances`
         #   obj                 =   {obj & instances`=newinstances}
         =   (obj, gst)
@@ -476,8 +476,8 @@ where
         |   isNothing maybestate
             =   (obj,objrec1,gst)
         #   state               =   fromJust maybestate
-        #   {objectstate=s,objectrec=objrec1,gamestate=gst}
-                                =   collide` bounds ot2 objrec2 {objectstate=state,objectrec=objrec1,gamestate=gst}
+        #   {st=s,or=objrec1,gs=gst}
+                                =   collide` bounds ot2 objrec2 {st=state,or=objrec1,gs=gst}
         #   newinstances        =   updateinstance id s instances`
         #   obj                 =   {obj & instances`=newinstances}
         =   (obj,objrec1,gst)
@@ -506,8 +506,8 @@ where
         |   isNothing maybestate
             =   (obj,objrec,gst)
         #   state               =   fromJust maybestate
-        #   {objectstate=s,objectrec=objrec,gamestate=gst}
-                                =   keydown` key {objectstate=state,objectrec=objrec,gamestate=gst}
+        #   {st=s,or=objrec,gs=gst}
+                                =   keydown` key {st=state,or=objrec,gs=gst}
         #   newinstances        =   updateinstance id s instances`
         #   obj                 =   {obj & instances`=newinstances}
         =   (obj,objrec,gst)
@@ -535,8 +535,8 @@ where
         |   isNothing maybestate
             =   (obj,objrec,gst)
         #   state               =   fromJust maybestate
-        #   {objectstate=s,objectrec=objrec,gamestate=gst}
-                                =   keyup` key {objectstate=state,objectrec=objrec,gamestate=gst}
+        #   {st=s,or=objrec,gs=gst}
+                                =   keyup` key {st=state,or=objrec,gs=gst}
         #   newinstances        =   updateinstance id s instances`
         #   obj                 =   {obj & instances`=newinstances}
         =   (obj,objrec,gst)
