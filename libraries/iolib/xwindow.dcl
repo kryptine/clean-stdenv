@@ -1,0 +1,22 @@
+system module xwindow;
+
+XCreateWindow :: !Int !Int !Int !Int !Int !{#Char} !Int !Int !Int !Int !Int !Int !Int !Int !Int !Int -> !(!Int,!Int);
+GetMouseInfo :: !Int -> !(!Int,!Int,!Int,!Int,!Int,!Int,!Int);
+GetXExposeArea :: !Int -> !(!Int,!Int,!Int,!Int,!Int);
+StartXUpdate :: !Int -> Int;
+EndXUpdate :: !Int -> Int;
+GetKeyboardInfo :: !Int -> !(!Int,!Int,!Int,!Int,!Int,!Int);
+XScreenSize :: !Int -> !(!Int,!Int);
+GetXWindowEvent :: !Int -> Int;
+XSetScrollBar :: !Int !Int !Int !Int !Int !Int !Int -> !(!Int,!Int);
+XGetCurrentWindowSize :: !Int -> !(!Int,!Int);
+XGetCurrentWindowThumbs :: !Int -> !(!Int,!Int);
+ChangeXWindow :: !Int !Int !Int !Int !Int !Int !Int !Int !Int !Int !Int !Int !Int !Int -> Int;
+GetFirstUpdateX :: !Int -> !(!Int,!Int);
+DiscardXUpdates :: !Int -> Int;
+XActivateWindow :: !Int -> Int;
+XSetWindowTitle :: !Int !{#Char} -> Int;
+XPopDown :: !Int -> Int;
+XPopup :: !Int -> Int;
+XSetDoubleDownDistance :: !Int -> Int;
+XGetWindowPosition :: !Int -> !(!Int,!Int);
