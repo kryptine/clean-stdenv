@@ -11,9 +11,9 @@ import EstherParser
 class resolveFilename env :: !String !*env -> (!Maybe (Dynamic, GenConsPrio), !*env)
 
 generic resolveNames e :: !e ![String] !*env -> (!e, ![String], !*env) | resolveFilename env
-derive resolveNames NTexpression, NTstatement
+derive resolveNames NTstatements
 
 desugar :: !NTsugar -> NTexpression
 
 generic fixInfix e :: !e -> e
-derive fixInfix NTexpression, NTstatement
+derive fixInfix NTstatements

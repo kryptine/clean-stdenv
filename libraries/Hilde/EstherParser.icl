@@ -5,8 +5,8 @@ import StdParsComb, StdBool, StdList, StdEnum, StdFunc
 
 :: TryWant = Try | Want
 
-parseStatement :: !String -> /*Src*/ NTstatement
-parseStatement input 
+parseStatements :: !String -> /*Src*/ NTstatements
+parseStatements input 
 	= case begin (sp (parser{|*|} Want) <& sp eof) (fromString input) of
 		[([], syntax)] -> syntax
 		[] -> raise SyntaxError
@@ -84,8 +84,21 @@ parser{|NTnameOrValue|} Try
 	<!> parser{|*|} Try <@ (\x -> NTvalue (dynamic x :: Int) GenConsNoPrio)
 	<!> parser{|*|} Try <@ (\x -> NTvalue (dynamic x :: Char) GenConsNoPrio)
 	<!> parser{|*|} Try <@ (\x -> NTvalue (dynamic x :: Bool) GenConsNoPrio)
-	<!> (lowercaseIdentifier <!> uppercaseIdentifier <!> funnyIdentifier) <&> (\n -> if (isMember n keywords) fail (yield (NTname n)))
+	<!> clean <@ NTname
 parser{|NTnameOrValue|} Want = parser{|*|} Try <!> raise (ParserRequired "NTnameOrValue")
+
+parser{|NTnameDef|} t
+	= (symbol '(' &> sp clean <&> \n -> spsymbol ')' &> sp fixity <@ NTnameDef n)
+	<!> (clean <@ \n -> NTnameDef n GenConsNoPrio)
+where
+	fixity = (fix <&> \f -> sp (number 1 10 <!> yield 9) <@ GenConsPrio f)
+			<!> yield (GenConsPrio GenConsAssocLeft 9)
+	where
+		fix = keyword "infixr" &> yield GenConsAssocRight
+			<!> keyword "infixl" &> yield GenConsAssocLeft
+			<!> keyword "infix" &> yield GenConsAssocNone
+
+clean = (lowercaseIdentifier <!> uppercaseIdentifier <!> funnyIdentifier) <&> (\n -> if (isMember n keywords) fail (yield n))
 
 parser{|(|-|)|} ga ge gb t = ga t &> sp (ge t) <& sp (gb t) <@ |-|
 
@@ -96,6 +109,13 @@ where
 		= (ge t <&> \x -> sp (gs t) &> sp (p t) <@ \(+- xs) -> +- [x:xs])
 		<!> (ge t <@ \x -> +- [x])
 		<!> (case t of Want -> raise (ParserRequired "+-"); _ -> fail)
+
+parser{|[]|} ge t = p t
+where
+	p t
+		= (ge t <&> \x -> sp (p t) <@ \xs -> [x:xs])
+		<!> (ge t <@ \x -> [x])
+		<!> yield []
 
 parser{|Maybe|} ge t
 	= ge Try <@ Just
@@ -128,8 +148,7 @@ parser{|Tand|} b = keyword "&" &> yield Tand
 parser{|Twrite|} b = keyword ">>>" &> yield Twrite
 parser{|Tdynamic|} b = keyword "dynamic" &> yield Tdynamic
 
-derive parser NTstatement, NTplain, NTterm, NTsugar, NTlist, NTlistComprehension, NTqualifier, NTgenerator, NTdynamic
-derive parser NTfunction, NTlambda, NTpattern, NTlet, NTletDef, NTcase, NTcaseAlt
+derive parser NTstatements, NTstatement, NTfunction, NTplain, NTterm, NTsugar, NTlist, NTlistComprehension, NTqualifier, NTgenerator, NTdynamic, NTlambda, NTpattern, NTlet, NTletDef, NTcase, NTcaseAlt
 derive parser Scope, (,)
 
 character :: ![Char] -> CParser Char Char t
@@ -175,7 +194,7 @@ lowercaseIdentifier = satisfy (\c -> isMember c lowerchars) <:&> <*> (satisfy (\
 uppercaseIdentifier = satisfy (\c -> isMember c upperchars) <:&> <*> (satisfy (\c -> isMember c alphachars)) <@ toString
 funnyIdentifier = <+> (satisfy (\c -> isMember c funnychars)) <@ toString
 
-keywords =: ["=", "->", "let", "in", "case", "of", "\\", "_", ":", "..", "\\\\", "<-", "|", "&", ">>>", "dynamic"]
+keywords =: ["=", "->", "let", "in", "case", "of", "\\", "_", ":", "..", "\\\\", "<-", "|", "&", ">>>", "dynamic", "infix", "infixl", "infixr"]
 symbolchars =: ['\',();[]{}"']
 spacechars =: ['\t\n\r\v ']
 funnychars =: ['\\?.=:$!@#%^&*+-<>/|~']
