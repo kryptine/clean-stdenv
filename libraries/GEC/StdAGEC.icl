@@ -3,13 +3,6 @@ implementation module StdAGEC
 import genericgecs, guigecs, infragecs
 import StdGECExt, basicAGEC
 
-:: BimapGEC a b 	= 	{ toGEC   :: a (Current b) -> b		// specify how to convert a into b, possibly using previous b settings
-						, fromGEC :: b -> a					// specify how to convert b back to a
-						, updGEC  :: b -> b					// will be called each time a b-value has been changed
-						, value   :: a						// store initial a-value, will automatically always contain latest a-value made with b-editor
-						, pred    :: a -> (Bool,a)			// only pass through new value if its satisfies this predicate, display new value
-						}
-
 :: GECaGECb a ps 	= E.va : {bimapto :: va -> a, bimapfrom :: a -> va ,gGEC :: (TgGEC va *(PSt ps))}
 
 :: AGEC a 			= E. .b : 	{ bimapGEC 	:: !(BimapGEC a b)
@@ -19,7 +12,7 @@ import StdGECExt, basicAGEC
 		
 // BimapGEC:: a b to use a b-editor for constructing an a-value
 
-mkBimapGEC  :: (a (Current b) -> b) (b -> b) (b -> a) (a -> (Bool,a)) a -> (BimapGEC a b)
+mkBimapGEC  :: (a (Current b) -> b) (b -> (Bool,b)) (b -> a) (a -> (UpdateA,a)) a -> (BimapGEC a b)
 mkBimapGEC toGEC updGEC fromGEC pred value 
 =	{ toGEC   = toGEC
 	, fromGEC = fromGEC
@@ -30,7 +23,7 @@ mkBimapGEC toGEC updGEC fromGEC pred value
 
 to_BimapGEC :: (Bimap a b) a -> (BimapGEC a b)
 to_BimapGEC {map_to,map_from} a 
-= {toGEC = \a _ -> map_to a, fromGEC = map_from, updGEC = id, value = a, pred = \t -> (True,t)}
+= {toGEC = \a _ -> map_to a, fromGEC = map_from, updGEC = \b -> (False,b), value = a, pred = \t -> (TestStoreUpd,t)}
 
 Bimap_BimapGEC :: (Bimap a b) (BimapGEC a va) -> (BimapGEC b va)
 Bimap_BimapGEC bimapab bimapGava = {toGEC=toGEC,fromGEC=fromGEC,updGEC=updGEC,value=value,pred=pred}
@@ -40,7 +33,7 @@ where
 	fromGEC va 	= bimapab.map_to (bimapGava.fromGEC va)
 	updGEC va 	= bimapGava.updGEC va
 	value		= bimapab.map_to bimapGava.value
-	pred nb 	= (True,nb)
+	pred nb 	= (DontTest,nb)
 	
 // and the editor specialized for BimapGEC:
 
@@ -50,7 +43,7 @@ gGEC{|BimapGEC|} _ gecb gecArgs=:{gec_value=Just bimapG} pSt
 // mkBimapGECeditor is a handy general conversion function
 
 mkBimapGECeditor :: (BimapGEC a b) (TgGEC b *(PSt .ps)) -> (TgGEC (BimapGEC a b) *(PSt .ps)) 
-mkBimapGECeditor bimapG gecb = bimapgec
+mkBimapGECeditor bimapG gecb = bimapgec // this will be the b editor which will mimic a (BimapGEC a b) editor
 where
 	bimapgec gecArgs=:{gec_value=Just initbimapG,update=bimapupdate} pSt
 	= (convert bhandle,pSt1)
@@ -62,21 +55,26 @@ where
 	
 		initb = bimapG.toGEC initbimapG.value Undefined
 	
-		updateb bimapupdate bhandle reason b pst 
-		# nb	= bimapG.updGEC  b
-		# na	= bimapG.fromGEC nb
+		updateb bimapupdate bhandle reason b pst	// new value made with b editor
+		# (storeb,nb)	= bimapG.updGEC  b			// calculate new b value
+		# na			= bimapG.fromGEC nb			// convert to a 
 		= case  (bimapG.pred na) of
-			(True,na) 	# pst	= bhandle.gecSetValue NoUpdate (bimapG.toGEC na (Defined  nb)) pst
-						= bimapupdate reason {initbimapG & value = na} pst 
-			(False,na) 	= bhandle.gecSetValue NoUpdate (bimapG.toGEC na (Defined  b)) pst 
+			// test if predicate should be applied, store new b value if required, and raise update 
+			(DontTest,_) 		# pst = if storeb (bhandle.gecSetValue NoUpdate nb pst) pst
+								= bimapupdate reason {initbimapG & value = na} pst 
+			// result of predicate is passed, store new value and raise update
+			(TestStoreUpd,tna) 	# pst	= bhandle.gecSetValue NoUpdate (bimapG.toGEC tna (Defined  nb)) pst
+								= bimapupdate reason {initbimapG & value = tna} pst 
+			// result of predicate is not passed, store new value and but no update is raisen
+			(TestStore,tna) 	= bhandle.gecSetValue NoUpdate (bimapG.toGEC tna (Defined  b)) pst 
 	
-		bimapSetValue bhandle upd bimap pst
-		# (b,pst) = bhandle.gecGetValue pst
-	 	= bhandle.gecSetValue upd (bimap.toGEC bimap.value (Defined b)) pst
+		bimapSetValue bhandle upd nbimap pst				// new bimapGEC nbimap to set 
+		# (b,pst) = bhandle.gecGetValue pst					// fetch latest b value from b editor			
+	 	= bhandle.gecSetValue upd (nbimap.toGEC nbimap.value (Defined b)) pst // and set the new value in the b-editor
 	
-		bimapGetValue bGetValue pst
-		# (b,pst) = bhandle.gecGetValue pst
-		= ({bimapG & value = initbimapG.fromGEC b},pst)
+		bimapGetValue bGetValue pst							// request for most recent bimapGEC
+		# (b,pst) = bhandle.gecGetValue pst					// fetch latest b value from b editor				
+		= ({bimapG & value = initbimapG.fromGEC b},pst)		// and update initial (!) bimapGEC with latest value
 
 // AGEC:: Abstract version of BimapGEC
 
@@ -241,6 +239,11 @@ where
 	      , gecOpened   = accPIO (isGECIdBound tGEC)
 	      }
 
+mkDynamicAgec gecx gecArgs=:{gec_value=Nothing} pSt
+# (geca,pSt)	= gecx {gecArgs & gec_value=Nothing, update = \v r env -> env} pSt
+# (a,   pSt)	= geca.gecGetValue pSt
+# pSt			= geca.gecClose    pSt
+= mkDynamicAgec gecx {gecArgs & gec_value=Just (hidAGEC a)} pSt
 /*
 // generic function combining AGEC's
 // it will only show the invokations made, all other types are by default not shown !
@@ -347,9 +350,9 @@ CGECtoAGEC :: 			(GecCircuit a a ) a 	-> (AGEC a) 	| gGEC{|*|} a		// Use CGEC as
 CGECtoAGEC cgec a 
 = mkAGEC { toGEC   = \a _ -> {inout = (Hide a,Hide a), gec = arr (\(Hide a) -> a) >>> cgec >>> arr (\a -> Hide a)}
 		 , fromGEC = \{inout = (a,Hide b)} = b
-		 , updGEC  = id
+		 , updGEC  = \b -> (False,b)
 		 , value   = a
-		 , pred	   = \na -> (True,na)
+		 , pred	   = \na -> (DontTest,na)
 		 } "CGECtoAGEC"
 
 

@@ -2,7 +2,7 @@ implementation module noObjectGEC
 
 import StdAGEC
 
-okpred n = (True,n)
+okpred n = (DontTest,n)
 
 gGEC{|NoObject|} gGECa {location,makeUpValue,outputOnly,gec_value=valueNoObj,update=updateNoObj} pSt
 	# (aGECVALUE,pSt)	= gGECa {location=location,makeUpValue=makeUpValue,outputOnly=outputOnly,gec_value=ma,update=updateA updateNoObj,hasOBJECT=False} pSt
@@ -33,7 +33,7 @@ noObjectAGEC :: a -> AGEC a	| gGEC{|*|} a	// identity, no OBJ pulldown menu cons
 noObjectAGEC j = mkAGEC {	toGEC	= \i _ -> NoObject i
 						,	fromGEC = \(NoObject i) -> i
 						,	value	= j
-						,	updGEC	= id
+						,	updGEC	= \j -> (False,j)
 						,	pred	= okpred
 						} "noObjectAGEC"
 
@@ -66,6 +66,6 @@ yesObjectAGEC :: a -> AGEC a	| gGEC{|*|} a	// identity, OBJ pulldown menu constr
 yesObjectAGEC j = mkAGEC {	toGEC	= \i _ -> YesObject i
 						,	fromGEC = \(YesObject i) -> i
 						,	value	= j
-						,	updGEC	= id
+						,	updGEC	= \j -> (False,j)
 						,	pred	= okpred
 						} "yesObjectAGEC"

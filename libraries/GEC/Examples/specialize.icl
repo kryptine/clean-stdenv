@@ -13,17 +13,12 @@ derive gGEC Status
 Start:: *World -> *World
 Start world = startGEC myeditor world
 
-import tree
-derive gGEC Tree
-derive defval Tree
-
 myeditor = startCircuit mycircuit defaultv
 where
 	mycircuit =  edit "Family Tree Editor" 
-								
 
 	defaultv :: Family
-	defaultv = defval`
+	defaultv =  defval`
 
 :: Family	=	Family  Person Status (Maybe Partner)
 :: Status	=	Married			

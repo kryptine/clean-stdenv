@@ -8,16 +8,16 @@ derive gGEC BimapGEC
 
 :: BimapGEC a b 	= 	{ toGEC   :: a (Current b) -> b		// specify how to convert a into b, possibly using previous b settings
 						, fromGEC :: b -> a					// specify how to convert b back to a
-						, updGEC  :: b -> b					// will be called each time a b-value has been changed
+						, updGEC  :: b -> (Bool,b)			// if true apply and store the new b-value
 						, value   :: a						// store initial a-value, will automatically always contain latest a-value made with b-editor
-						, pred    :: a -> (Bool,a)			// only pass through new value if its satisfies this predicate, display new value
+						, pred    :: a -> (UpdateA,a)		// only pass through new value if its satisfies this predicate, display new value
 						}
-:: Current a		=	Undefined | Defined a				// Undefined for a new-editor, Defined when a new value is set in an existing editor
+:: Current a		=	Undefined 	| Defined a				// Undefined for a new-editor, Defined when a new value is set in an existing editor
+:: UpdateA			=	DontTest	| TestStore | TestStoreUpd	// resp dont apply predicate, store new value in editor, store and raise update 		
 
+mkBimapGEC  		:: (a (Current b) -> b) (b -> (Bool,b)) (b -> a) (a -> (UpdateA,a)) a -> (BimapGEC a b)
 
-mkBimapGEC  		:: (a (Current b) -> b) (b -> b) (b -> a) (a -> (Bool,a)) a -> (BimapGEC a b)
-
-to_BimapGEC 		:: (Bimap a b) a  				-> (BimapGEC a b)
+to_BimapGEC 		:: (Bimap a b) a -> (BimapGEC a b)		// will TestStoreUpd
 
 // abstract editors
 
