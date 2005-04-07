@@ -435,7 +435,7 @@ defaultScrollMovement :: !Int -> Movement
 defaultScrollMovement n = \p _ -> {x = p.x / n, y = p.y / n}
 
 
-alignCentered :: Alignment
+alignCentered :: TextAlignment
 alignCentered = { xyfromscreencenter = (True, True)
                 , xycentered         = (True, True)
                 }
