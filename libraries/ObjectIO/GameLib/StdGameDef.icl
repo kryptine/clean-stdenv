@@ -237,10 +237,10 @@ import	StdGSt
      , style     :: !Style         // style to write the text in
      , color     :: Colour         // color for the text
      , shadow    :: Maybe Shadow   // shadow
-     , alignment :: Alignment      // text alignment
+     , alignment :: TextAlignment  // text alignment
      }
 
-:: Alignment
+:: TextAlignment
    = { xyfromscreencenter :: !(!Bool,!Bool)   // center position on the screen
      , xycentered         :: !(!Bool,!Bool)   // center text around position
      }
@@ -262,7 +262,7 @@ instance zero RealXY
 where
    zero = {rx = 0.0, ry = 0.0}
 
-instance zero Alignment
+instance zero TextAlignment
 where
    zero = { xyfromscreencenter = (False, False)
           , xycentered = (False, False)

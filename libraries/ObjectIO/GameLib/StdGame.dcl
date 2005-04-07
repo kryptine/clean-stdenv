@@ -109,4 +109,4 @@ defaultShadow			:: !Int -> Shadow
 defaultMovement			:: Movement
 defaultScrollMovement	:: !Int -> Movement
 
-alignCentered			:: Alignment
+alignCentered			:: TextAlignment

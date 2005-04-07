@@ -245,7 +245,8 @@ where
             mi Nothing  = NOTHING
             mi (Just x) = x
             sh = fromJust s.shadow
-            alint :: Alignment -> Int
+
+            alint :: TextAlignment -> Int
             alint al = CompressBools (False, False, False, False, sy, sx, cy, cx)
               where
                 (cx,cy) = al.xycentered
