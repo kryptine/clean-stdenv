@@ -42,6 +42,9 @@ mkSpecialEditor :: !FormId 	!HMode !(Bimap d v) d !*HSt -> ((d,BodyTag),!*HSt) |
 
 mkEditHGEC2:: !FormId !HMode d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 
+/** For GPCE 2005 paper, the following pedagogical function has been introduced:
+*/
+generatePage :: !FormId !HMode d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 
 // mkViewHGEC is the swiss army nife function creating an editor with a view v of data d
 

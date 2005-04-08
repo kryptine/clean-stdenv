@@ -112,6 +112,21 @@ mkSpecialEditor fid mode {map_to,map_from} d hst
 toHGECid d Nothing = d
 toHGECid d (Just v) = v
 
+/** For GPCE 2005 paper, the following pedagogical function has been introduced:
+*/
+generatePage :: !FormId !HMode d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+generatePage formid mode initdata (inidx,lhsts)
+   # ((updview,body),(nr,[(formid,mystore):lhsts]))
+                = gHGEC{|*|} /*formid*/ mode newview (0,[(formid,viewtostore):lhsts])
+   = ((updview,body),(0, [(formid,encodeInfo updview):lhsts]))
+where
+    newview     = case updateFormInfo formid of
+                     (True, Just newview) = newview
+                     (False,Just oldview) = oldview
+                     (False,Nothing)      = initdata
+    viewtostore = encodeInfo newview
+
+
 
 // swiss army nife editor that makes coffee too ...
 
@@ -143,47 +158,47 @@ where
 							Nothing -> encodeInfo updview
 							(Just reset)	-> viewtostore
 
-	updateFormInfo :: FormId -> (Bool,Maybe a) | gUpd{|*|} a & gParse{|*|} a
-	updateFormInfo uniqueid
-		= case (decodeInput1 uniqueid) of
+updateFormInfo :: FormId -> (Bool,Maybe a) | gUpd{|*|} a & gParse{|*|} a
+updateFormInfo uniqueid
+	= case (decodeInput1 uniqueid) of
 
-			// an update for this form is detected
+		// an update for this form is detected
 
-			((Just (pos,updval), Just oldstate)) 
-					-> (True, Just (snd (gUpd{|*|} (UpdSearch updval pos) oldstate)))
+		((Just (pos,updval), Just oldstate)) 
+				-> (True, Just (snd (gUpd{|*|} (UpdSearch updval pos) oldstate)))
 
-			// no update found, determine the current stored state
+		// no update found, determine the current stored state
 
-			((_, Just oldstate))	
-					-> (False, Just oldstate)
+		((_, Just oldstate))	
+				-> (False, Just oldstate)
 
-			// no update, no state stored, the current value is taken as (new) state
+		// no update, no state stored, the current value is taken as (new) state
 
-			else	-> (False, Nothing)	
-	where
-		decodeInput1 :: String -> (Maybe FormUpdate, Maybe a) | gParse{|*|} a
-		decodeInput1 uniqueid
-		| CheckUpdateId == uniqueid// this state is updated
-		= case CheckUpdate of
-			(Just (sid,pos,UpdC s), Just "") 						= (Just (pos,UpdC s)  ,find sid CheckGlobalState)
-			(Just (sid,pos,UpdC s), _) 								= (Just (pos,UpdC s)  ,find sid CheckGlobalState)
-			else = case CheckUpdate of
-					(Just (sid,pos,UpdI i), Just ni) 				= (Just (pos,UpdI ni) ,find sid CheckGlobalState) 
-					else = case CheckUpdate of
-							(Just (sid,pos,UpdR r), Just nr) 		= (Just (pos,UpdR nr) ,find sid CheckGlobalState) 
-							else = case CheckUpdate of
-								(Just (sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns) ,find sid CheckGlobalState) 
-								(Just (sid,pos,UpdS s),	_)			= (Just (pos,UpdS AnyInput)  ,find sid CheckGlobalState) 
-								(upd,new) 							= (Nothing, find uniqueid CheckGlobalState)
-		| otherwise = (Nothing, find uniqueid CheckGlobalState)
+		else	-> (False, Nothing)	
+where
+	decodeInput1 :: String -> (Maybe FormUpdate, Maybe a) | gParse{|*|} a
+	decodeInput1 uniqueid
+	| CheckUpdateId == uniqueid// this state is updated
+	= case CheckUpdate of
+		(Just (sid,pos,UpdC s), Just "") 						= (Just (pos,UpdC s)  ,find sid CheckGlobalState)
+		(Just (sid,pos,UpdC s), _) 								= (Just (pos,UpdC s)  ,find sid CheckGlobalState)
+		else = case CheckUpdate of
+				(Just (sid,pos,UpdI i), Just ni) 				= (Just (pos,UpdI ni) ,find sid CheckGlobalState) 
+				else = case CheckUpdate of
+						(Just (sid,pos,UpdR r), Just nr) 		= (Just (pos,UpdR nr) ,find sid CheckGlobalState) 
+						else = case CheckUpdate of
+							(Just (sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns) ,find sid CheckGlobalState) 
+							(Just (sid,pos,UpdS s),	_)			= (Just (pos,UpdS AnyInput)  ,find sid CheckGlobalState) 
+							(upd,new) 							= (Nothing, find uniqueid CheckGlobalState)
+	| otherwise = (Nothing, find uniqueid CheckGlobalState)
 
-		find :: FormId  String -> (Maybe a) | gParse{|*|} a
-		find formid   ""	= Nothing
-		find formid   input
-		# (result,input) = ShiftState input
-		= case (result,input) of
-			(Just (thisid,a),input) -> if (thisid == formid) (Just a) (find formid input)
-			(Nothing, input)		-> find formid input
+	find :: FormId  String -> (Maybe a) | gParse{|*|} a
+	find formid   ""	= Nothing
+	find formid   input
+	# (result,input) = ShiftState input
+	= case (result,input) of
+		(Just (thisid,a),input) -> if (thisid == formid) (Just a) (find formid input)
+		(Nothing, input)		-> find formid input
 
 
 // automatic tranformation of any Clean type to html body
