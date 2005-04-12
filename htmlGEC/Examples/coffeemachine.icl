@@ -11,8 +11,8 @@ derive gParse Machine, Output, Product
 Start world  = doHtml coffeemachine world
 
 coffeemachine hst
-# ((command,combody),hst)	= assignTableFuncBut "cb" HEdit commandbuttons hst	
-# ((option, optbody),hst)	= assignTableFuncBut "ob" HEdit optionbuttons  hst	
+# ((command,combody),hst)	= TableFuncBut "cb" HEdit commandbuttons hst	
+# ((option, optbody),hst)	= TableFuncBut "ob" HEdit optionbuttons  hst	
 # ((machine,_)      ,hst)	= mkStoreHGEC "hidden"  (option o command) initmachine hst
 # ((_,contbody)		,hst)	= mkEditHGEC "cont" HDisplay (displaycontents  machine) hst	
 = mkHtml "Coffee Machine"
@@ -24,10 +24,6 @@ coffeemachine hst
 		, Br,Br,Br
 		] hst
 where
-	mkHtml s tags hst 	= (Html (header s) (body tags),hst)
-	header s 			= Head [`Hd_Std [Std_Title s]] [] 
-	body tags 			= Body [] tags
-
 	commandbuttons  = 
 		[	[(but "Insert_Coins",	\m -> CoffeeMachine (InsertCoin,	m))]
 		,	[(but "Add_beans",   	\m -> CoffeeMachine (AddBeans,		m))]
@@ -51,6 +47,11 @@ where
 		= ("money ",money) <|> 
 		  ("beans ",beans) <|> 
 		  ("trash ",trash) 
+
+	mkHtml s tags hst 	= (Html (header s) (body tags),hst)
+	header s 			= Head [`Hd_Std [Std_Title s]] [] 
+	body tags 			= Body [] tags
+
 	
 
 // The defintion below is copied from the GEC coffeemachine, and slightly improved...

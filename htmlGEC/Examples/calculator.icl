@@ -10,7 +10,7 @@ import StdHtml
 Start world  = doHtml calculator world
 
 calculator hst
-# ((fun,calcb),hst) 	= assignTableFuncBut "calcbut" HEdit calcbuttons hst		// shows buttons
+# ((fun,calcb),hst) 	= TableFuncBut "calcbut" HEdit calcbuttons hst		// shows buttons
 # ((_,display),hst) 	= mkStoreHGEC "display" fun initcalc hst	// calculates new values	
 = mkHtml "Calculator"
 	[ H1 [] "Calculator Example: "
@@ -24,7 +24,7 @@ where
 
 	
 arrowcalculator hst
-# ((fun,calcb),hst) 	= assignTableFuncBut "calcfun" HEdit calcbuttons hst		// shows buttons
+# ((fun,calcb),hst) 	= TableFuncBut "calcfun" HEdit calcbuttons hst		// shows buttons
 # ((_,display),hst) 	= startCircuit circuit fun  hst	// calculates new values	
 = mkHtml "Calculator" 
 	[ H1 [] "Calculator Example: "

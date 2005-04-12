@@ -268,6 +268,8 @@ None			:== [NoAttr]
 				| `Cap_Std		[Standard_Attr]
 				| `Cap_Events	[ElementEvents]
 
+:: Checked	= Checked
+
 :: Col_Attr = Col_Aling		AlignTxt 		//horizontal alignment of the content in the table cell
 			| Col_Char		Char			//character to use to align text on
 			| Col_Charoff	Int				//alignment offset to the first character to align on
@@ -419,8 +421,8 @@ None			:== [NoAttr]
 :: Input_Attr 	= Inp_Accept		String			//comma-separated list of MIME types that indicates the MIME type of the file transfer (Only type="file")
 				| Inp_Align 		AlignObj		//alignment of text following the image (only type="image")
 				| Inp_Alt			String			//alternate text for the image (only type="image")
-				| Inp_Checked						//checked when it first loads (only type="radio" or type="checkbox")
-				| Inp_Disabled						//disables the input element when it first loads (not used for type="hidden")
+				| Inp_Checked		Checked			//checked when it first loads (only type="radio" or type="checkbox")
+				| Inp_Disabled		Disabled		//disables the input element when it first loads (not used for type="hidden")
 				| Inp_Maxlength 	Int				//maximum number of characters allowed (only for type="text")
 				| Inp_Name 			UniqueName		//unique name for the input element
 				| Inp_ReadOnly		ReadOnly		//the value of this field cannot be modified (only for type="text")

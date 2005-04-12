@@ -21,9 +21,9 @@ derive gUpd		   (,,)
 
 :: UpdValue 	= UpdI Int					// new integer value
 				| UpdR Real					// new real value
+				| UpdB Bool					// new boolean value
 				| UpdC String				// choose indicated constructor 
 				| UpdS String				// new piece of text
-
 
 mkHSt ::  *HSt
 mkHSt = (0,[])
@@ -112,21 +112,6 @@ mkSpecialEditor fid mode {map_to,map_from} d hst
 toHGECid d Nothing = d
 toHGECid d (Just v) = v
 
-/** For GPCE 2005 paper, the following pedagogical function has been introduced:
-*/
-generatePage :: !FormId !HMode d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-generatePage formid mode initdata (inidx,lhsts)
-   # ((updview,body),(nr,[(formid,mystore):lhsts]))
-                = gHGEC{|*|} /*formid*/ mode newview (0,[(formid,viewtostore):lhsts])
-   = ((updview,body),(0, [(formid,encodeInfo updview):lhsts]))
-where
-    newview     = case updateFormInfo formid of
-                     (True, Just newview) = newview
-                     (False,Just oldview) = oldview
-                     (False,Nothing)      = initdata
-    viewtostore = encodeInfo newview
-
-
 
 // swiss army nife editor that makes coffee too ...
 
@@ -158,47 +143,47 @@ where
 							Nothing -> encodeInfo updview
 							(Just reset)	-> viewtostore
 
-updateFormInfo :: FormId -> (Bool,Maybe a) | gUpd{|*|} a & gParse{|*|} a
-updateFormInfo uniqueid
-	= case (decodeInput1 uniqueid) of
+	updateFormInfo :: FormId -> (Bool,Maybe a) | gUpd{|*|} a & gParse{|*|} a
+	updateFormInfo uniqueid
+		= case (decodeInput1 uniqueid) of
 
-		// an update for this form is detected
+			// an update for this form is detected
 
-		((Just (pos,updval), Just oldstate)) 
-				-> (True, Just (snd (gUpd{|*|} (UpdSearch updval pos) oldstate)))
+			((Just (pos,updval), Just oldstate)) 
+					-> (True, Just (snd (gUpd{|*|} (UpdSearch updval pos) oldstate)))
 
-		// no update found, determine the current stored state
+			// no update found, determine the current stored state
 
-		((_, Just oldstate))	
-				-> (False, Just oldstate)
+			((_, Just oldstate))	
+					-> (False, Just oldstate)
 
-		// no update, no state stored, the current value is taken as (new) state
+			// no update, no state stored, the current value is taken as (new) state
 
-		else	-> (False, Nothing)	
-where
-	decodeInput1 :: String -> (Maybe FormUpdate, Maybe a) | gParse{|*|} a
-	decodeInput1 uniqueid
-	| CheckUpdateId == uniqueid// this state is updated
-	= case CheckUpdate of
-		(Just (sid,pos,UpdC s), Just "") 						= (Just (pos,UpdC s)  ,find sid CheckGlobalState)
-		(Just (sid,pos,UpdC s), _) 								= (Just (pos,UpdC s)  ,find sid CheckGlobalState)
-		else = case CheckUpdate of
-				(Just (sid,pos,UpdI i), Just ni) 				= (Just (pos,UpdI ni) ,find sid CheckGlobalState) 
-				else = case CheckUpdate of
-						(Just (sid,pos,UpdR r), Just nr) 		= (Just (pos,UpdR nr) ,find sid CheckGlobalState) 
-						else = case CheckUpdate of
-							(Just (sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns) ,find sid CheckGlobalState) 
-							(Just (sid,pos,UpdS s),	_)			= (Just (pos,UpdS AnyInput)  ,find sid CheckGlobalState) 
-							(upd,new) 							= (Nothing, find uniqueid CheckGlobalState)
-	| otherwise = (Nothing, find uniqueid CheckGlobalState)
+			else	-> (False, Nothing)	
+	where
+		decodeInput1 :: String -> (Maybe FormUpdate, Maybe a) | gParse{|*|} a
+		decodeInput1 uniqueid
+		| CheckUpdateId == uniqueid// this state is updated
+		= case CheckUpdate of
+			(Just (sid,pos,UpdC s), Just "") 						= (Just (pos,UpdC s)  ,find sid CheckGlobalState)
+			(Just (sid,pos,UpdC s), _) 								= (Just (pos,UpdC s)  ,find sid CheckGlobalState)
+			else = case CheckUpdate of
+					(Just (sid,pos,UpdI i), Just ni) 				= (Just (pos,UpdI ni) ,find sid CheckGlobalState) 
+					else = case CheckUpdate of
+							(Just (sid,pos,UpdR r), Just nr) 		= (Just (pos,UpdR nr) ,find sid CheckGlobalState) 
+							else = case CheckUpdate of
+								(Just (sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns) ,find sid CheckGlobalState) 
+								(Just (sid,pos,UpdS s),	_)			= (Just (pos,UpdS AnyInput)  ,find sid CheckGlobalState) 
+								(upd,new) 							= (Nothing, find uniqueid CheckGlobalState)
+		| otherwise = (Nothing, find uniqueid CheckGlobalState)
 
-	find :: FormId  String -> (Maybe a) | gParse{|*|} a
-	find formid   ""	= Nothing
-	find formid   input
-	# (result,input) = ShiftState input
-	= case (result,input) of
-		(Just (thisid,a),input) -> if (thisid == formid) (Just a) (find formid input)
-		(Nothing, input)		-> find formid input
+		find :: FormId  String -> (Maybe a) | gParse{|*|} a
+		find formid   ""	= Nothing
+		find formid   input
+		# (result,input) = ShiftState input
+		= case (result,input) of
+			(Just (thisid,a),input) -> if (thisid == formid) (Just a) (find formid input)
+			(Nothing, input)		-> find formid input
 
 
 // automatic tranformation of any Clean type to html body
@@ -213,9 +198,34 @@ gHGEC{|Real|}   mode r hst
 # (body,hst) = mkInput mode (RV r) (UpdR r) hst
 = ((r,body),hst)
 
+gHGEC{|Bool|} mode b hst 	
+# (body,hst) = mkInput mode (BV b) (UpdB b) hst
+= ((b,body),hst)
+
+
 gHGEC{|String|} mode s hst 	
 # (body,hst) = mkInput mode (SV s) (UpdS s) hst
 = ((s,body),hst)
+
+mkInput :: HMode Value UpdValue *HSt -> (BodyTag,*HSt) 
+mkInput HEdit val updval (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+	= ( Input 	[	Inp_Type Inp_Text
+				, 	Inp_Value val
+				,	Inp_Name (encodeInfo (uniqueid,inidx,updval))
+				,	Inp_Size defsize
+				,	`Inp_Events	[OnChange callClean]
+				] ""
+		,(inidx+1,lhsts))
+mkInput HDisplay val _ (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+	= ( Input 	[	Inp_Type Inp_Text
+				, 	Inp_Value val
+				,	Inp_ReadOnly ReadOnly
+				, 	`Inp_Std [Std_Style color]
+				,	Inp_Size defsize
+				] ""
+		,(inidx+1,lhsts))
+where
+	color = "background-color:" +++ backcolor
 
 gHGEC{|UNIT|}   _ _ hst 	= ((UNIT,EmptyBody),hst)
 
@@ -288,25 +298,9 @@ where
 			width = "width:" +++ (toString defpixel) +++ "px"
 			color = "background-color:" +++ backcolor
 
-mkInput :: HMode Value UpdValue *HSt -> (BodyTag,*HSt) 
-mkInput HEdit val updval (inidx,lhsts=:[(uniqueid,lst):lsts]) 
-	= ( Input 	[	Inp_Type Inp_Text
-				, 	Inp_Value val
-				,	Inp_Name (encodeInfo (uniqueid,inidx,updval))
-				,	Inp_Size defsize
-				,	`Inp_Events	[OnChange callClean]
-				] ""
-		,(inidx+1,lhsts))
-mkInput HDisplay val _ (inidx,lhsts=:[(uniqueid,lst):lsts]) 
-	= ( Input 	[	Inp_Type Inp_Text
-				, 	Inp_Value val
-				,	Inp_ReadOnly ReadOnly
-				, 	`Inp_Std [Std_Style color]
-				,	Inp_Size defsize
-				] ""
-		,(inidx+1,lhsts))
-where
-	color = "background-color:" +++ backcolor
+
+
+
 
 gHGEC{|FIELD of d |} gHx mode (FIELD x) hst 
 # ((nx,bx),hst) = gHx mode x hst
@@ -341,12 +335,17 @@ gUpd{|Int|} (UpdSearch val cnt)     	i = (UpdSearch val (dec cnt),i)		// continu
 gUpd{|Int|} (UpdCreate l)				_ = (UpdCreate l,0)					// create default value
 gUpd{|Int|} mode 			  	    	i = (mode,i)						// don't change
 
-gUpd{|Real|} (UpdSearch (UpdR nr) 0) 	_ = (UpdDone,nr)					// update integer value
+gUpd{|Real|} (UpdSearch (UpdR nr) 0) 	_ = (UpdDone,nr)					// update real value
 gUpd{|Real|} (UpdSearch val cnt)     	r = (UpdSearch val (dec cnt),r)		// continue search, don't change
 gUpd{|Real|} (UpdCreate l)			 	_ = (UpdCreate l,0.0)				// create default value
 gUpd{|Real|} mode 			  	     	r = (mode,r)						// don't change
 
-gUpd{|String|} (UpdSearch (UpdS ns) 0) 	_ = (UpdDone,ns)					// update integer value
+gUpd{|Bool|} (UpdSearch (UpdB nb) 0) 	_ = (UpdDone,nb)					// update boolean value
+gUpd{|Bool|} (UpdSearch val cnt)     	b = (UpdSearch val (dec cnt),b)		// continue search, don't change
+gUpd{|Bool|} (UpdCreate l)			 	_ = (UpdCreate l,False)				// create default value
+gUpd{|Bool|} mode 			  	     	b = (mode,b)						// don't change
+
+gUpd{|String|} (UpdSearch (UpdS ns) 0) 	_ = (UpdDone,ns)					// update string value
 gUpd{|String|} (UpdSearch val cnt)     	s = (UpdSearch val (dec cnt),s)		// continue search, don't change
 gUpd{|String|} (UpdCreate l)		   	_ = (UpdCreate l,"")				// create default value
 gUpd{|String|} mode 			  	 	s = (mode,s)						// don't change
@@ -447,7 +446,7 @@ derive gParse <|>
 derive gPrint <|>
 
 
-// to hide a state ::
+// to switch between modes within a type ...
 
 
 gHGEC{|Mode|} gHa mode (Hide a) (inidx,lhsts) 	
@@ -466,29 +465,25 @@ derive gUpd Mode
 derive gParse Mode
 derive gPrint Mode
 
+// Buttons to press
 
-// Button to press
-
-gHGEC{|CHButton|} mode (CHButton size bname) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
-= ((CHButton size bname
-			, Input [	Inp_Type Inp_Button
-					, 	Inp_Value (SV bname)
-					,	Inp_Name (encodeInfo (uniqueid,inidx,UpdS bname))
-					,	`Inp_Std [Std_Style ("width:" +++ toString size)]
-					, 	`Inp_Events [OnClick callClean]
-					] "")
+gHGEC{|CHButton|} mode v=:(CHButton size bname) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+= ((v	, Input [ Inp_Type Inp_Button
+				, Inp_Value (SV bname)
+				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS bname))
+				, `Inp_Std [Std_Style ("width:" +++ toString size)]
+				, `Inp_Events [OnClick callClean]
+				] "")
 	, (inidx+1,lhsts))
 gHGEC{|CHButton|} mode v=:(ChButtonPict (height,width) ref) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
-= ((v
-			, Input	[ Inp_Type Inp_Image
-					, Inp_Value (SV ref)
-					, Inp_Src ref
-//					, Inp_Value (NQV ref)
-					, Inp_Name (encodeInfo (uniqueid,inidx,UpdS ref))
-					, `Inp_Std [Std_Style ("width:" +++ toString width +++ " height:" +++ toString height)]
-					, `Inp_Events [OnClick callClean]
-					] "")
-	, (incrIndex inidx v,lhsts))
+= ((v	, Input	[ Inp_Type Inp_Image
+				, Inp_Value (SV ref)
+				, Inp_Src ref
+				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS ref))
+				, `Inp_Std [Std_Style ("width:" +++ toString width +++ " height:" +++ toString height)]
+				, `Inp_Events [OnClick callClean]
+				] "")
+	, (inidx+1,lhsts))
 gHGEC{|CHButton|} mode CHPressed hst = gHGEC {|*|} mode (CHButton defsize "??") hst // end user should reset button
 
 gUpd{|CHButton|} (UpdSearch (UpdS name) 0) 	_ = (UpdDone,CHPressed)					// update integer value
@@ -498,7 +493,38 @@ gUpd{|CHButton|} mode 			  	    	b = (mode,b)							// don't change
 derive gParse CHButton
 derive gPrint CHButton
 
-// specialize attempt ...
+gHGEC{|CheckBox|} mode v=:(CHChecked name) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+= ((v	, Input [ Inp_Type Inp_Checkbox
+				, Inp_Value (SV name)
+				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS name))
+				, Inp_Checked Checked
+//					,	`Inp_Std [Std_Style ("width:" +++ toString size)]
+				, `Inp_Events [OnClick callClean]
+				] "")
+	, (inidx+1,lhsts))
+gHGEC{|CheckBox|} mode v=:(CHNotChecked name) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+= ((v	, Input [ Inp_Type Inp_Checkbox
+				, Inp_Value (SV name)
+				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS name))
+//				, Inp_Checked
+//					,	`Inp_Std [Std_Style ("width:" +++ toString size)]
+				, `Inp_Events [OnClick callClean]
+				] "")
+	, (inidx+1,lhsts))
+
+derive gUpd CheckBox
+derive gParse CheckBox
+derive gPrint CheckBox
+
+instance toBool CheckBox
+where	toBool (CHChecked _)= True
+		toBool _ 		 = False
+
+instance toBool CHButton
+where	toBool CHPressed = True
+		toBool _ 		 = False
+
+// specialization
 
 specialize :: (FormId HMode a *HSt -> ((a,BodyTag),*HSt)) FormId HMode a *HSt -> ((a,BodyTag),*HSt) | gUpd {|*|} a
 specialize editor name mode v hst=:(inidx,[(myid,mylst):lsts])
