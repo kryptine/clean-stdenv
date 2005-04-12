@@ -11,30 +11,34 @@ derive gParse MachineState, Output, Product
 Start world  = doHtml coffeemachine world
 
 coffeemachine hst
-# ((input,buttons),hst)	= assignListFuncBut "cb" HEdit allbuttons hst	
-# ((machine,_)	  ,hst)	= mkStoreHGEC "hidden"  input initmachine hst
-# ((_,prizebody)  ,hst)	= listHGEC "prize" HDisplay prizes hst	
-# ((_,statebody)  ,hst)	= listHGEC "cont"  HDisplay (mstate machine) hst	
+# ((input,buttons)		,hst) = ListFuncBut "cb" HEdit allbuttons hst	
+# (((option,options),_)	,hst) = ListFuncCheckBox False "op" HEdit (optionbuttons False False) hst	
+# ((machine,_)	  		,hst) = mkStoreHGEC "hidden" (option o input) initmachine hst
+# ((_,checkbox)			,hst) = ListFuncCheckBox True "op" HEdit (optionbuttons machine.milk machine.sugar) hst	
+# ((_,prizebody)  		,hst) = listHGEC "prize" HDisplay prizes hst	
+# ((_,statebody)  		,hst) = listHGEC "cont" HDisplay (mstate machine) hst	
 = mkHtml "Coffee Machine"
 		[ H1 [] "Fancy Coffee Machine ..."
 		, Br
-		, mkCTable [[B [] "Content:", B [] "Value:",B [] "Input:"]]
-		, statebody!!StateMoney <=> mkrow (buttons%MoneyButtons)
-		, statebody!!StateBeans <=> buttons!!BeansButton
-		, statebody!!StateTrash <=> buttons!!TrashButton
-		, mkCTable [[B [] "Choose:", B [] "Prize:"]]
-		, mkcol (buttons%ProductButtons) <=> mkcol prizebody
-		, Br
-		, B [] (toString machine.out)
-		, Br
-		, displayMachineImage machine.out 
+		, BodyTag
+			[ mkSTable [[bTxt "Content:", bTxt "Value:",bTxt "Input:"]]
+			, statebody!!StateMoney <=> mkrow (buttons%MoneyButtons)
+			, statebody!!StateBeans <=> buttons!!BeansButton
+			, statebody!!StateTrash <=> buttons!!TrashButton
+			, Br
+			, bTxt "Options: "
+			, Br
+			, checkbox!!MilkOption  <=> bTxt "Milk"
+			, checkbox!!SugarOption <=> bTxt "Sugar"
+			, Br
+			, mkSTable [[bTxt "Product:", bTxt "Prize:"]]
+			, mkcol (buttons%ProductButtons) <=> mkcol prizebody
+			, Br
+			, bTxt "Message: ", bTxt (print machine.out options)
+			] <=> displayMachineImage machine.out 
 		, Br
 		] hst
 where
-	prizes = [cost Coffee,cost Capuccino, cost Espresso]
-	
-	mstate machine = [("money ",machine.money),("beans ",machine.beans),("trash ",machine.trash) ]
-
 	allbuttons  = 
 		[ (butp "CoffeeBeans.jpg",  \m -> CoffeeMachine (AddBeans,		m))
 		, (but "Empty_Trash", 		\m -> CoffeeMachine (EmptyTrash,	m))
@@ -50,13 +54,20 @@ where
 			but s	= CHButton defpixel s
 			butp s	= ChButtonPict (defpixel/2,defpixel/2) ("images/" +++ s)
 
-	StateMoney 		= 0
-	StateBeans 		= 1
-	StateTrash 		= 2
-	BeansButton		= 0
-	TrashButton		= 1
-	ProductButtons	= (2,4)
-	MoneyButtons 	= (5,9)
+	optionbuttons milk sugar= 
+		[ (check milk  "Milk",  \b _ m -> CoffeeMachine (AskMilk b,  m))
+		, (check sugar "Sugar", \b _ m -> CoffeeMachine (AskSugar b, m))
+		]
+	where
+		check True = CHChecked
+		check False = CHNotChecked
+		
+	prizes = [cost Coffee,cost Capuccino, cost Espresso]
+	
+	mstate machine = 	[ ("money ",machine.money)
+						, ("beans ",machine.beans)
+						, ("trash ",machine.trash)
+						]
 
 	displayMachineImage (Prod x) 	= machineImage 4
 	displayMachineImage (Message s) = machineImage 0
@@ -69,27 +80,50 @@ where
 	mkHtml s tags hst 	= (Html (header s) (body tags),hst)
 	header s 			= Head [`Hd_Std [Std_Title s]] [] 
 	body tags 			= Body [] tags
+	bTxt				= B []
+
+	print output [milkoption,sugaroption] 
+	= printoutput output
+	where
+		printoutput (Message s)      = s
+		printoutput (Prod Coffee)    = "Enjoy your coffee" 		+++ printoptions milkoption sugaroption
+		printoutput (Prod Capuccino) = "Enjoy your capuccino"	+++ printoptions milkoption sugaroption
+		printoutput (Prod Espresso)  = "Enjoy your espresso"	+++ printoptions milkoption sugaroption
+
+		printoptions milk sugar 
+		| milk && sugar = " with milk and sugar"
+		| milk  		= " with milk"
+		| sugar 		= " with sugar"
+		printoptions _ _  = ""
+	
+	StateMoney 		= 0
+	StateBeans 		= 1
+	StateTrash 		= 2
+	BeansButton		= 0
+	TrashButton		= 1
+	ProductButtons	= (2,4)
+	MoneyButtons 	= (5,9)
+	MilkOption		= 0
+	SugarOption		= 1
 
 
-instance toString Output where
-	toString (Message s)      = s
-	toString (Prod Coffee)    = "Enjoy your coffee"
-	toString (Prod Capuccino) = "Enjoy your capuccino"
-	toString (Prod Espresso)  = "Enjoy your espresso"
-
-// The defintion below is copied from the GEC coffeemachine, and slightly improved...
+// Coffee machine with standard options ...
 
 ::	Client					// Client actions:
 	=	InsertCoin Int		// insert a coin of int cents
 	|	Ask Product			// ask for product
 	|	AddBeans			// add beans in machine
 	|	EmptyTrash			// empty bean trash of machine
+	|	AskMilk Bool		// milk yes or no
+	|	AskSugar Bool		// sugar yes or no
 	|	Idle				// does nothing
 
 ::	MachineState			// CoffeeMachine:
 	=	{ money	:: Int		// nr of coins (maxCoins)
 		, beans	:: Int		// amount of beans (maxBeans)
 		, trash	:: Int		// amount of bean-trash (maxTrash)
+		, milk	:: Bool		// milk wanted
+		, sugar :: Bool		// sugar wanted
 		, out	:: Output	// output of machine
 		}
 
@@ -100,6 +134,8 @@ instance toString Output where
 initmachine = 	{ money = 0
 				, beans = 6
 				, trash = 0
+				, milk  = False
+				, sugar = False
 				, out 	= Message "Welcome."
 				} 
 
@@ -113,6 +149,8 @@ CoffeeMachine (EmptyTrash, m)		= { m & trash = 0,             out = Message "Tra
 CoffeeMachine (AddBeans, m=:{beans})                
 	| beans > maxBeans-beanBag		= { m &                        out = Message "Too many beans." }
 	| otherwise						= { m & beans = beans+beanBag, out = Message "Beans refilled." }
+CoffeeMachine (AskMilk b, m)		= { m & milk = b,              out = Message (if b "Milk will be added" "No Milk")}
+CoffeeMachine (AskSugar b, m)		= { m & sugar = b,             out = Message (if b "Sugar will be added" "No Sugar")}
 CoffeeMachine (Ask p,m=:{money,beans,trash})
 	| beans < beancost p			= { m &                        out = Message "Not enough Beans." }
 	| money < cost p				= { m &                        out = Message "Not enough money inserted." }
@@ -121,6 +159,8 @@ CoffeeMachine (Ask p,m=:{money,beans,trash})
 									      , beans = beans - beancost p
 									      , money = money - cost p
 									      , trash = trash + ptrash p
+									      , milk  = False
+									      , sugar = False
 									  }
 CoffeeMachine (_,m)					= m
 

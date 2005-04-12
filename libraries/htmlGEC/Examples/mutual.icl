@@ -11,7 +11,21 @@ derive gParse Pounds, Euros
 :: Pounds = {pounds :: Real}                        
 :: Euros  = {euros  :: Real}                        
 
-Start world  = doHtml mutual world
+Start world  = doHtml helloWorld world
+
+
+helloWorld hst
+= (Html (Head [] []) (Body [] [mybody]),hst)
+where
+	mybody = Txt "Hello World"
+
+/*
+	mkHtml s tags hst 	= (Html (header s) (body tags),hst)
+	header s 			= Head [`Hd_Std [Std_Title s]] [] 
+	body tags 			= Body [] tags
+
+*/
+
 
 mutual hst
 # ((_,body),hst) = startCircuit circuit initEuros hst

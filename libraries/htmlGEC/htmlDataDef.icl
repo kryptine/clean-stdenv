@@ -131,6 +131,7 @@ derive gHpr BoolValue
 derive gHpr Button_Attr
 derive gHpr Button_Type
 derive gHpr Caption_Attr
+derive gHpr Checked
 derive gHpr Col_Attr
 derive gHpr Colorname
 derive gHpr ColorOption
