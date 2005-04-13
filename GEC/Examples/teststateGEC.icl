@@ -1,7 +1,7 @@
 module teststateGEC
 
-import StdEnv, StdIO, StdCircuits
-import GecArrow, basicArrowEditors, StdAGEC, basicAGEC, StdArrow, noObjectAGEC
+import StdEnv, StdIO
+import StdGEC
 
 Start :: *World -> *World
 Start world = startGEC testcoffee world
