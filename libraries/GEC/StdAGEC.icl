@@ -9,10 +9,8 @@ import StdGECExt, basicAGEC
 								, bGEC 		:: !(A. .ps: TgGEC b (PSt ps))
 								, descr 	:: !String
 								}
-		
-// BimapGEC:: a b to use a b-editor for constructing an a-value
 
-//mkBimapGEC  :: (a (Current b) -> b) (b *(PSt .ps) -> *(Bool,b,*(PSt .ps))) (b -> a) (a -> (UpdateA,a)) a -> (BimapGEC a b)
+mkBimapGEC  :: (a (Current b) -> b) (A. ps: b *(PSt ps) -> *(Bool,b,*(PSt ps))) (b -> a) (a -> (.UpdateA,a)) a -> .(BimapGEC a b)
 mkBimapGEC toGEC updGEC fromGEC pred value 
 =	{ toGEC   = toGEC
 	, fromGEC = fromGEC
