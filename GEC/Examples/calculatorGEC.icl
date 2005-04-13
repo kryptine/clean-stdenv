@@ -7,6 +7,8 @@ import StdGEC
 goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 
+// change comment line to switch between calculator for Reals to Int 
+
 Start :: *World -> *World
 Start world 
 = 	goGui 
