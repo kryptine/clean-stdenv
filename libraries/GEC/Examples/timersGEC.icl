@@ -2,9 +2,7 @@ module timersGEC
 
 import StdEnv
 import StdIO
-import genericgecs
-import StdGEC, StdGECExt, StdAGEC
-import GecArrow, basicAGEC, timedAGEC
+import StdGEC
 
 // TO TEST JUST REPLACE THE EXAMPLE NAME IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
 // ALL EXAMPLES HAVE TO BE OF FORM pst -> pst
@@ -15,10 +13,10 @@ goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 Start :: *World -> *World
 Start world 
 = 	goGui 
- 	example_timer2
+ 	example_timer1
  	world  
 
-example_timer1 = startCircuit (feedback (edit "TickTack" >>@ clock)) (myclock,0<->0<->0)
+example_timer1 = startCircuit (feedback (edit "TickTack" >>> arr clock)) (myclock,0<->0<->0)
 where
 	clock (tick,min<->59<->9) 		= clock (tick,min+1<->0<->0)
 	clock (tick,min<->secs<->9) 	= clock (tick,min<->secs+1<->0)

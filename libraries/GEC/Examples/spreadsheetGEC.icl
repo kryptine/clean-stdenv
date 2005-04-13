@@ -3,8 +3,7 @@ module spreadsheetGEC
 import StdEnv
 import StdIO
 import genericgecs
-import StdGEC, StdGECExt, StdAGEC, calcAGEC
-import GecArrow, basicAGEC//, StdDynamicGEC, StdDynamic//, StdGeneric
+import StdGEC
 
 goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
