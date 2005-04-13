@@ -4,6 +4,8 @@ import StdEnv
 import StdIO
 import StdGEC
 
+// change comment line to switch between calculator for Reals to Int 
+
 goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 
@@ -88,11 +90,3 @@ initCalculator mem ival (mybuttons,myfunctions)
 	
 buttonWidth	:== defCellWidth / 3	
 	
-/*
-dynCalculator	= startCircuit (feedback (edit "Calculator" >>@ updateCalculator)) mybuttons
-where
-	mybuttons = initCalculator 0 0 (buttons,operators)
-
-	buttons		= [Button buttonWidth "+", Button buttonWidth "-", Button buttonWidth "*"]
-	operators 	= [(+),(-),(*)]
-*/
