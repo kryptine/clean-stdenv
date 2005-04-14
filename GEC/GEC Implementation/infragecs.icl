@@ -2,7 +2,7 @@ implementation module infragecs
 
 import StdBool, StdFunc, StdList, StdMisc, StdTuple
 import StdPSt, StdPStClass
-import GenDefault, guiloc, guigecs, TRACE
+import GenDefaultVal, guiloc, guigecs, TRACE
 
 import StdBimap
 derive bimap GECArgs
