@@ -1,4 +1,4 @@
-definition module GenDefault
+definition module GenDefaultVal
 
 import testable, StdMaybe
 from   iostate import :: PSt{..}, :: IOSt
