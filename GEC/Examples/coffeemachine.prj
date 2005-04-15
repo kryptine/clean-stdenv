@@ -20,8 +20,8 @@ Global
 		Profile
 			Memory:	False
 			MemoryMinimumHeapSize:	0
-			Time:	True
-			Stack:	True
+			Time:	False
+			Stack:	False
 		Output
 			Output:	NoConsole
 			Font:	Courier
@@ -37,6 +37,13 @@ Global
 		ExportedNames:	
 	Paths
 		Path:	{Project}
+		Path:	{Application}\Libraries\GEC
+		Path:	{Application}\Libraries\GEC\GEC Implementation
+		Path:	{Application}\Libraries\GEC\ObjectIOExtensions
+		Path:	{Application}\Libraries\Hilde
+		Path:	{Application}\Libraries\Hilde\Parser combinators 2002
+		Path:	{Application}\Libraries\Hilde\OS Windows
+		Path:	{Application}\Libraries\Hilde\OS Windows\NoDynamicFileSystem
 	Precompile:	
 	Postlink:	
 MainModule
