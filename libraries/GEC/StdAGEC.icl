@@ -10,7 +10,7 @@ import StdGECExt, basicAGEC
 								, descr 	:: !String
 								}
 
-mkBimapGEC  :: (a (Current b) -> b) (A. ps: b *(PSt ps) -> *(Bool,b,*(PSt ps))) (b -> a) (a -> (.UpdateA,a)) a -> .(BimapGEC a b)
+mkBimapGEC  :: (a (Current b) -> b) (A. .ps: b *(PSt .ps) -> *(Bool,b,*(PSt .ps))) (b -> a) (a -> (.UpdateA,a)) a -> .(BimapGEC a b)
 mkBimapGEC toGEC updGEC fromGEC pred value 
 =	{ toGEC   = toGEC
 	, fromGEC = fromGEC
