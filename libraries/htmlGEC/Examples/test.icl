@@ -65,17 +65,19 @@ SimplePage = Html (Head [] [Hd_Title "Simple page test"])
 		, Input [Inp_Type Inp_Text, Inp_Size 40, Inp_Value (SV "Prueba"), Inp_ReadOnly ReadOnly] ""
 		, Input [Inp_Type Inp_Reset, Inp_Size 400, Inp_Value (SV "Prueba")] ""
 		, Br
-		, Input [Inp_Type Inp_Checkbox, Inp_Name "Check1", Inp_Value (SV "Check1"), `Inp_Std [Std_Id "Check1"], Inp_Checked] ""
+		, Input [Inp_Type Inp_Checkbox, Inp_Name "Check1", Inp_Value (SV "Check1"), `Inp_Std [Std_Id "Check1"], Inp_Checked Checked] ""
 		, Label [Lbl_For "Check1"] "LabelCheck1"
 		, Input [Inp_Type Inp_Checkbox, Inp_Name "Check2", Inp_Value (SV "Check2"), `Inp_Std [Std_Id "Check2"]] ""
 		, Label [Lbl_For "Check2"] "LabelCheck2"
 		, Hr []
-		, Btn [Btn_Value "Value", Btn_Name "Name", Btn_Type Btn_Button, Btn_Disabled] "Click"
+		, Button [Btn_Value "Value", Btn_Name "Name", Btn_Type Btn_Button, Btn_Disabled] "Click"
 		, Div [Div_Align Alo_Right] [Pre [Pre_Width 6] [Txt " Probando     q de verdad lo ha   ce"]
 		, P [] [Txt "Prueba     de ", B [`Std_Attr [Std_Id "TagB"]] "escritura", Big [] " en el HTML", I [] "y italica"]]
 		, Br
 		, Font [Fnt_Size 7, Fnt_Face "Arial", Fnt_Color (`RGBColor 	(RGBColor 0 121 59))] [Bdo [] "Texto Rtl"]]]
 		, P [Pat_Align Aln_Right] [Txt "Prueba de escritura en el HTML2"]
+		, Input [Inp_Type Inp_Radio, Inp_Name "RadioName1", Inp_Value (SV "RadioVal1"), `Inp_Std [Std_Id "Check1"], Inp_Checked Checked] ""
+		, Input [Inp_Type Inp_Radio, Inp_Name "RadioName1", Inp_Value (SV "RadioVal2"), `Inp_Std [Std_Id "Check1"]] ""
 		])
 
 /*MyPage  = Head 

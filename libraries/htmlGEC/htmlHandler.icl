@@ -467,7 +467,7 @@ derive gPrint Mode
 
 // Buttons to press
 
-gHGEC{|CHButton|} mode v=:(CHButton size bname) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+gHGEC{|Button|} mode v=:(LButton size bname) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
 = ((v	, Input [ Inp_Type Inp_Button
 				, Inp_Value (SV bname)
 				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS bname))
@@ -475,7 +475,7 @@ gHGEC{|CHButton|} mode v=:(CHButton size bname) (inidx,lhsts=:[(uniqueid,lst):ls
 				, `Inp_Events [OnClick callClean]
 				] "")
 	, (inidx+1,lhsts))
-gHGEC{|CHButton|} mode v=:(ChButtonPict (height,width) ref) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+gHGEC{|Button|} mode v=:(PButton (height,width) ref) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
 = ((v	, Input	[ Inp_Type Inp_Image
 				, Inp_Value (SV ref)
 				, Inp_Src ref
@@ -484,30 +484,27 @@ gHGEC{|CHButton|} mode v=:(ChButtonPict (height,width) ref) (inidx,lhsts=:[(uniq
 				, `Inp_Events [OnClick callClean]
 				] "")
 	, (inidx+1,lhsts))
-gHGEC{|CHButton|} mode CHPressed hst = gHGEC {|*|} mode (CHButton defsize "??") hst // end user should reset button
+gHGEC{|Button|} mode Pressed hst = gHGEC {|*|} mode (LButton defsize "??") hst // end user should reset button
 
-gUpd{|CHButton|} (UpdSearch (UpdS name) 0) 	_ = (UpdDone,CHPressed)					// update integer value
-gUpd{|CHButton|} (UpdSearch val cnt)      	b = (UpdSearch val (cnt - 1),b)			// continue search, don't change
-gUpd{|CHButton|} (UpdCreate l)				_ = (UpdCreate l,(CHButton defsize "Press"))					// create default value
-gUpd{|CHButton|} mode 			  	    	b = (mode,b)							// don't change
-derive gParse CHButton
-derive gPrint CHButton
+gUpd{|Button|} (UpdSearch (UpdS name) 0) 	_ = (UpdDone,Pressed)					// update integer value
+gUpd{|Button|} (UpdSearch val cnt)      	b = (UpdSearch val (cnt - 1),b)			// continue search, don't change
+gUpd{|Button|} (UpdCreate l)				_ = (UpdCreate l,(LButton defsize "Press"))					// create default value
+gUpd{|Button|} mode 			  	    	b = (mode,b)							// don't change
+derive gParse Button
+derive gPrint Button
 
-gHGEC{|CheckBox|} mode v=:(CHChecked name) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+gHGEC{|CheckBox|} mode v=:(CBChecked name) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
 = ((v	, Input [ Inp_Type Inp_Checkbox
 				, Inp_Value (SV name)
 				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS name))
 				, Inp_Checked Checked
-//					,	`Inp_Std [Std_Style ("width:" +++ toString size)]
 				, `Inp_Events [OnClick callClean]
 				] "")
 	, (inidx+1,lhsts))
-gHGEC{|CheckBox|} mode v=:(CHNotChecked name) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+gHGEC{|CheckBox|} mode v=:(CBNotChecked name) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
 = ((v	, Input [ Inp_Type Inp_Checkbox
 				, Inp_Value (SV name)
 				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS name))
-//				, Inp_Checked
-//					,	`Inp_Std [Std_Style ("width:" +++ toString size)]
 				, `Inp_Events [OnClick callClean]
 				] "")
 	, (inidx+1,lhsts))
@@ -516,12 +513,36 @@ derive gUpd CheckBox
 derive gParse CheckBox
 derive gPrint CheckBox
 
-instance toBool CheckBox
-where	toBool (CHChecked _)= True
+gHGEC{|RadioButton|} mode v=:(RBChecked name) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+= ((v	, Input [ Inp_Type Inp_Radio
+				, Inp_Value (SV name)
+				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS name))
+				, Inp_Checked Checked
+				, `Inp_Events [OnClick callClean]
+				] "")
+	, (inidx+1,lhsts))
+gHGEC{|RadioButton|} mode v=:(RBNotChecked name) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+= ((v	, Input [ Inp_Type Inp_Radio
+				, Inp_Value (SV name)
+				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS name))
+				, `Inp_Events [OnClick callClean]
+				] "")
+	, (inidx+1,lhsts))
+
+derive gUpd RadioButton
+derive gParse RadioButton
+derive gPrint RadioButton
+
+instance toBool RadioButton
+where	toBool (RBChecked _)= True
 		toBool _ 		 = False
 
-instance toBool CHButton
-where	toBool CHPressed = True
+instance toBool CheckBox
+where	toBool (CBChecked _)= True
+		toBool _ 		 = False
+
+instance toBool Button
+where	toBool Pressed = True
 		toBool _ 		 = False
 
 // specialization

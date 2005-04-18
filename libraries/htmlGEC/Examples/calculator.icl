@@ -51,4 +51,4 @@ where
 	clear 		(t <|> b) = (t 		 <|> 0)
 	app		fun (t <|> b) = (fun t b <|> 0)
 
-but i = CHButton (defpixel / 3) i
+but i = LButton (defpixel / 3) i

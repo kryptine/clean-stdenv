@@ -37,7 +37,7 @@ where
 			]
 		]
 
-	but s = CHButton defpixel s
+	but s = LButton defpixel s
 
 	initmachine = {money=0,beans=6,trash=0,out=Message "Welcome."} 
 

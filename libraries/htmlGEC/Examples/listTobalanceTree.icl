@@ -12,14 +12,12 @@ Start world  = doHtml MyPage world
 
 
 MyPage hst
-# ((_,[list,tree:_]),hst) = startCircuit mycircuit [1] hst
-= mkHtml "List to Balance Tree"
-	[ H1 [] "List to Balance Tree"
-	, Txt "This is the list :", Br
+# ((_,[list,tree:_]),hst) = startCircuit mycircuit [1,5,2] hst
+= mkHtml "Balancing Tree From List"
+	[ Txt "List :", Br
 	, list
-	, Txt "This is the resulting balanced tree :", Br
+	, Txt "Balanced Tree :", Br
 	, tree
-	, traceHtmlInput
 	] hst
 where
 	mycircuit :: GecCircuit [Int] (Tree Int)
