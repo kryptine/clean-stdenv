@@ -18,7 +18,7 @@ derive gGEC BimapGEC
 :: Current a		=	Undefined 	| Defined a				// Undefined for a new-editor, Defined when a new value is set in an existing editor
 :: UpdateA			=	DontTest	| TestStore | TestStoreUpd	// resp dont apply predicate, store new value in editor, store and raise update 		
 
-//mkBimapGEC  :: (a (Current b) -> b) (A. ps: b *(PSt ps) -> *(Bool,b,*(PSt ps))) (b -> a) (a -> (.UpdateA,a)) a -> .(BimapGEC a b)
+mkBimapGEC  :: (a (Current b) -> b) (A. .ps: b *(PSt .ps) -> *(Bool,b,*(PSt .ps))) (b -> a) (a -> (.UpdateA,a)) a -> .(BimapGEC a b)
 
 to_BimapGEC 		:: (Bimap a b) a -> (BimapGEC a b)		// will TestStoreUpd
 
