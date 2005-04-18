@@ -19,7 +19,7 @@ where
 	toGec` nval (Defined oval) =  oval //toGec nval //oval
 	toGec` nval _ = toGec nval
 
-	nupdGec n = (True,updGec n)
+	nupdGec n ps = (True,updGec n,ps)
 
 :: Counter :== (Int,UpDown)
 
