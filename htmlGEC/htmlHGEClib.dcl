@@ -29,23 +29,29 @@ horlist2HGEC 		:: !String !HMode a ![a] 	!*HSt -> (([a]	,!BodyTag),!*HSt) 	| gHG
 vertlistHGEC 		:: !String !HMode ![a] 		!*HSt -> (([a]	,!BodyTag),!*HSt) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 table_hv_HGEC 		:: !String !HMode ![[a]] 	!*HSt -> (([[a]],!BodyTag),!*HSt) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 
-TableFuncBut 		:: !String !HMode ![[(CHButton, a -> a)]] !*HSt 
+TableFuncBut 		:: !String !HMode ![[(Button, a -> a)]] !*HSt 
 													  -> ((a -> a,!BodyTag) ,!*HSt)
 
 listHGEC 			:: !String !HMode ![a] 		!*HSt -> (([a],![BodyTag]),!*HSt) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 
 // ListFuncBut		: assign functions to buttons, returns function corresponding to the button pressed, and the buttons body
 
-ListFuncBut 		:: !String !HMode [(CHButton, a -> a)] !*HSt 
+ListFuncBut 		:: !String !HMode [(Button, a -> a)] !*HSt 
 													 -> ((a -> a,![BodyTag]),!*HSt)
-// ListFuncCheckBox	: assign functions to checkboxes, returns function corresponding to the button pressed, and the checkbox body
+// ListFuncCheckBox	: assign functions to checkboxes, returns function corresponding to the checkbox pressed, and the checkbox body
 //					: the current setting of the checkboxes is remembered, first argument indicates that the new settings have to be taken over
 //					: arguments of callback function: - Bool indicates corresponding box is checked or not
 //													  - [Bool] indicates the settings of all (other) checkboxes 
 
-ListFuncCheckBox 	:: !Bool !String !HMode [(CheckBox, Bool -> [Bool] -> a -> a)] !*HSt 
+ListFuncCheckBox 	:: !Bool !String !HMode [(CheckBox, Bool [Bool] a -> a)] !*HSt 
 													 -> (((a -> a,[Bool]),![BodyTag]),!*HSt)
 
+// ListFuncRadio	: assign functions to radiobuttons, returns function corresponding to the radiobutton chosen, and the radiobuttons body
+//					: the current setting of the radiobutoons is remembered, non-negative integer indicates which radiobuttons should be set
+//					: arguments of callback function: - Int indicates which button is set
+
+ListFuncRadio 		:: !Int !String !HMode [Int -> a -> a] !*HSt 
+													 -> (((a -> a,Int),![BodyTag]),!*HSt)
 
 
 

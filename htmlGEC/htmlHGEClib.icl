@@ -45,12 +45,12 @@ where
 	updCounter` True val = updCounter val
 	updCounter` _ val = val
 
-	updCounter (n,CHPressed,_)  = (n - one,down,up)
-	updCounter (n,_,CHPressed) 	= (n + one,down,up)
+	updCounter (n,Pressed,_)  = (n - one,down,up)
+	updCounter (n,_,Pressed) 	= (n + one,down,up)
 	updCounter else 			= else
 
-	up 		= CHButton (defpixel / 6) "+"
-	down	= CHButton (defpixel / 6) "-"
+	up 		= LButton (defpixel / 6) "+"
+	down	= LButton (defpixel / 6) "-"
 
 
 horlist2HGEC :: !String !HMode a ![a] !*HSt -> (([a],!BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
@@ -59,7 +59,7 @@ horlist2HGEC s mode defaultval list hst
 # ((nlist,nbody),hst) 	= horlistHGEC s mode (fun list) hst  
 = ((nlist,butbody <||> nbody),hst)
 where
-	but s =  CHButton (defpixel / 6) s
+	but s =  LButton (defpixel / 6) s
 
 	more []   = [defaultval]
 	more list = list ++ [last list]
@@ -88,56 +88,56 @@ table_hv_HGEC s mode [x:xs] hst
 # ((x, xbody), hst)	= horlistHGEC (s +++ toString (length xs)) mode x hst
 = (([x:xs],xbody <||> xsbody),hst)
 
-TableFuncBut :: !String !HMode ![[(CHButton, a -> a)]] !*HSt -> ((a -> a,!BodyTag),!*HSt)
+TableFuncBut :: !String !HMode ![[(Button, a -> a)]] !*HSt -> ((a -> a,!BodyTag),!*HSt)
 TableFuncBut s mode [] hst = ((id,EmptyBody),hst)
 TableFuncBut s mode [row:rows] hst 
 # ((rowsfun,rowsb),hst) = TableFuncBut s mode rows hst
 # ((rowfun,rowb),  hst)	= RowFuncBut s mode row hst
 = ((rowfun o rowsfun,rowb <||> rowsb),hst)
 where
-	RowFuncBut :: !String !HMode [(CHButton, a -> a)] !*HSt -> ((a -> a,!BodyTag),!*HSt)
+	RowFuncBut :: !String !HMode [(Button, a -> a)] !*HSt -> ((a -> a,!BodyTag),!*HSt)
 	RowFuncBut s mode [] hst = ((id,EmptyBody),hst)
 	RowFuncBut s mode [x:xs] hst 
 	# ((rowfun,rowb),hst) 	= RowFuncBut s mode xs hst
 	# ((fun,oneb)   ,hst)	= FuncBut s mode x hst
 	= ((fun o rowfun,oneb <=> rowb),hst)
 
-FuncBut :: !String !HMode !(CHButton, a -> a) !*HSt -> ((a -> a,!BodyTag),!*HSt)
-FuncBut s mode (button=:CHButton _ name ,cbf) hst = mkViewHGEC (s +++ name) mode bimap id hst
+FuncBut :: !String !HMode !(Button, a -> a) !*HSt -> ((a -> a,!BodyTag),!*HSt)
+FuncBut s mode (button=:LButton _ name ,cbf) hst = mkViewHGEC (s +++ name) mode bimap id hst
 where
 	bimap =	{ toHGEC 	= \_ _	-> button
 			, updHGEC	= \_ v -> v
 			, fromHGEC	= \_ but -> case but of 
-									CHPressed -> cbf
+									Pressed -> cbf
 									_		  -> id
 			, resetHGEC	= Just (\_ 	-> button)
 			}
-FuncBut s mode (button=:ChButtonPict _ ref ,cbf) hst = mkViewHGEC (s +++ ref) mode bimap id hst
+FuncBut s mode (button=:PButton _ ref ,cbf) hst = mkViewHGEC (s +++ ref) mode bimap id hst
 where
 	bimap =	{ toHGEC 	= \_ _	-> button
 			, updHGEC	= \_ v -> v
 			, fromHGEC	= \_ but -> case but of 
-									CHPressed -> cbf
+									Pressed -> cbf
 									_		  -> id
 			, resetHGEC	= Just (\_ 	-> button)
 			}
-FuncBut s mode (CHPressed,cbf) hst = FuncBut s mode (CHButton 10 "??",cbf) hst
+FuncBut s mode (Pressed,cbf) hst = FuncBut s mode (LButton 10 "??",cbf) hst
 
-ListFuncBut :: !String !HMode [(CHButton, a -> a)] !*HSt -> ((a -> a,![BodyTag]),!*HSt)
+ListFuncBut :: !String !HMode [(Button, a -> a)] !*HSt -> ((a -> a,![BodyTag]),!*HSt)
 ListFuncBut s mode [] hst = ((id,[]),hst)
 ListFuncBut s mode [x:xs] hst 
 # ((rowfun,rowb),hst) 	= ListFuncBut s mode xs hst
 # ((fun,oneb)   ,hst)	= FuncBut s mode x hst
 = ((fun o rowfun,[oneb:rowb]),hst)
 
-ListFuncCheckBox :: !Bool !String !HMode [(CheckBox, Bool -> [Bool] -> a -> a)] !*HSt 
+ListFuncCheckBox :: !Bool !String !HMode [(CheckBox, Bool [Bool] a -> a)] !*HSt 
 									-> (((a -> a,[Bool]),![BodyTag]),!*HSt)
 ListFuncCheckBox init s mode defs hst 
 # (((f,bools),body),hst) = ListFuncCheckBox` init s mode defs hst
 = (((f bools,bools),body),hst)
 where
-	ListFuncCheckBox` :: !Bool !String !HMode [(CheckBox, Bool -> [Bool] -> a -> a)] !*HSt 
-										-> ((([Bool] -> a -> a,[Bool]),![BodyTag]),!*HSt)
+	ListFuncCheckBox` :: !Bool !String !HMode [(CheckBox, Bool [Bool] a -> a)] !*HSt 
+										-> ((([Bool] a -> a,[Bool]),![BodyTag]),!*HSt)
 	ListFuncCheckBox` init s mode [] hst = (((\_ a -> a,[]),[]),hst)
 	ListFuncCheckBox` init s mode [x:xs] hst 
 	# (((rowfun,bools),rowb),hst) 	= ListFuncCheckBox` init s mode xs hst
@@ -156,16 +156,48 @@ where
 					, resetHGEC	= Nothing
 					}
 		
-			docbf (CHChecked name) 		= cbf True
-			docbf (CHNotChecked name) 	= cbf False
+			docbf (CBChecked name) 		= cbf True
+			docbf (CBNotChecked name) 	= cbf False
 		
-			toggle (CHChecked name) 	= CHNotChecked name
-			toggle (CHNotChecked name) 	= CHChecked name
+			toggle (CBChecked name) 	= CBNotChecked name
+			toggle (CBNotChecked name) 	= CBChecked name
 	
 		
 			s` = s +++ case checkbox of 
-							(CHChecked name) = name
-							(CHNotChecked name) = name
+							(CBChecked name) = name
+							(CBNotChecked name) = name
+
+ListFuncRadio :: !Int !String !HMode [Int a -> a] !*HSt 
+									-> (((a -> a,Int),![BodyTag]),!*HSt)
+ListFuncRadio i s mode defs hst 
+# (((f,i),body),hst) = ListFuncRadio` i 0 s mode defs hst
+= (((f i,i),body),hst)
+where
+	radio i j 
+	| i == j 	= RBChecked s
+	| otherwise = RBNotChecked s
+
+	ListFuncRadio` :: !Int !Int !String !HMode [Int a -> a] !*HSt 
+										-> (((Int a -> a,Int),![BodyTag]),!*HSt)
+	ListFuncRadio` i j s mode [] hst = (((\_ a -> a,-1),[]),hst)
+	ListFuncRadio` i j s mode [f:fs] hst 
+	# (((rowfun,rri),listr),hst) 	= ListFuncRadio` i (j+1) s mode fs hst
+	# (((fun,ri),oner)   ,hst)		= FuncRadio i j s mode f hst
+	= (((funcomp fun rowfun,max ri rri),[oner:listr]),hst)
+	where
+		funcomp f g = \i a = f i (g i a)
+	
+		FuncRadio i j s mode cbf hst = mkViewHGEC s` mode bimap (\_ a -> a,0) hst
+		where
+			bimap =	{ toHGEC 	= \_ v -> case v of
+											Nothing 	= radio i j
+											(Just v) 	= if (i>=0) (radio i j) v
+					, updHGEC	= \b v -> if (RBChecked s) v
+					, fromHGEC	= \b v -> if b (cbf,j) (\_ a -> a,-1)
+					, resetHGEC	= Nothing
+
+					}
+			s` = s +++ toString j
 
 listHGEC 	:: !String !HMode ![a] 	!*HSt -> (([a],![BodyTag]),!*HSt) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 listHGEC s mode [] hst  = (([],[]),hst)

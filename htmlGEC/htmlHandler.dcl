@@ -82,18 +82,20 @@ derive gUpd  Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (
 
 // buttons
 
-:: CHButton 	= CHPressed 
-				| CHButton Int String				// button, size in pixels, text of button
-				| ChButtonPict (Int,Int) String		// button, (height,width), reference to picture
-:: CheckBox		= CHChecked String 					// checkbox checked
-				| CHNotChecked String				// checkbox notchecked		
+:: Button 		= Pressed 							// button pressed
+				| LButton Int String				// label   button, size in pixels, label of button
+				| PButton (Int,Int) String			// picture button, (height,width), reference to picture
+:: CheckBox		= CBChecked FormId 					// checkbox 	checked
+				| CBNotChecked FormId				// checkbox 	not checked
+:: RadioButton	= RBChecked FormId					// radiobutton 	checked
+				| RBNotChecked FormId				// radiobutton	not checked		
 	
-instance toBool CheckBox, CHButton							// True if checkbox checked, button pressed
+instance toBool CheckBox, Button, RadioButton		// True if checkbox checked, button pressed
 
-derive gHGEC 		 (,,), (<->), <|>, Mode, CHButton, CheckBox  
-derive gUpd  		 (,,), (<->), <|>, Mode, CHButton, CheckBox
-derive gPrint 	(,), (,,), (<->), <|>, Mode, CHButton, CheckBox
-derive gParse 	(,), (,,), (<->), <|>, Mode, CHButton, CheckBox
+derive gHGEC 		 (,,), (<->), <|>, Mode, Button, CheckBox, RadioButton  
+derive gUpd  		 (,,), (<->), <|>, Mode, Button, CheckBox, RadioButton
+derive gPrint 	(,), (,,), (<->), <|>, Mode, Button, CheckBox, RadioButton
+derive gParse 	(,), (,,), (<->), <|>, Mode, Button, CheckBox, RadioButton
 
 // Some default constants used for the length of input boxes
 
