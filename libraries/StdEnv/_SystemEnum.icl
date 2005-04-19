@@ -5,8 +5,8 @@ implementation module _SystemEnum
 //	Copyright 1998 University of Nijmegen
 // ****************************************************************************************
 
-import StdEnv
-
+import StdClass,StdInt,StdChar
+from StdBool import not 
 
 _from :: a -> .[a] | IncDec, Ord a
 _from n
