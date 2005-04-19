@@ -23,8 +23,9 @@ addScript 		:: GlobalState -> BodyTag		// the corresponding script, stores globa
 
 // decoding of information
 
-CheckUpdateId 	:: String						// id of updated form
-CheckUpdate 	:: (Maybe a, Maybe b) | gParse{|*|} a & gParse{|*|} b // updated form, updated value
-CheckGlobalState :: String						// the whole state
-ShiftState 		:: String -> (Maybe (String,a),String) | gParse{|*|} a // to check whether a form has a state 
-AnyInput 		:: String						// any input is accepted if a string is required
+CheckUpdateId 			:: String						// id of updated form
+StrippedCheckUpdateId 	:: String						// used to determine related id's e.g. for radio buttons
+CheckUpdate 			:: (Maybe a, Maybe b) | gParse{|*|} a & gParse{|*|} b // updated form, updated value
+CheckGlobalState 		:: String						// the whole state
+ShiftState 				:: String -> (Maybe (String,a),String) | gParse{|*|} a // to check whether a form has a state 
+AnyInput 				:: String						// any input is accepted if a string is required

@@ -92,6 +92,10 @@ CheckUpdateId
 	else = ""
 derive gParse UpdValue
 
+StrippedCheckUpdateId :: String
+StrippedCheckUpdateId
+=: mkString (takeWhile ((<>) '_') (mkList CheckUpdateId))
+
 AnyInput :: String
 AnyInput
 # (_,_,new,_) = UpdateInfo
@@ -186,8 +190,10 @@ addScript globalstate
 	, globalstateform globalFormName updateInpName globalInpName (SV encodedglobalstate) 
 	]
 where
-	encodedglobalstate = urlEncodeState ( globalstate) 
-//	encodedglobalstate = urlEncodeState (reverse globalstate) 
+	encodedglobalstate = urlEncodeState (removedup globalstate)
+	
+	removedup []  = []
+	removedup [(id,body):rest] = [(id,body):[(nid,nbody) \\ (nid,nbody) <- rest | nid <> id]]
 
 submitscript :: String String -> BodyTag
 submitscript formname updatename
