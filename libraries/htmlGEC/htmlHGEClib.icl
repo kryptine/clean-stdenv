@@ -167,15 +167,29 @@ where
 							(CBChecked name) = name
 							(CBNotChecked name) = name
 
+
+// the radio buttons implementation is currently more complicated than strictly necessary
+// browsers demand the same name to be used for every member in the radio group
+// the current implementation requires different names
+// we therefore ourselves have to determine and remember which radio button in the family is set
+
+
 ListFuncRadio :: !Int !String !HMode [Int a -> a] !*HSt 
 									-> (((a -> a,Int),![BodyTag]),!*HSt)
 ListFuncRadio i s mode defs hst 
-# (((f,i),body),hst) = ListFuncRadio` i 0 s mode defs hst
-= (((f i,i),body),hst)
+# ((ni,_),hst)			= mkStoreHGEC s (set i) (set (abs i) 0) hst	// determine which radio to select
+# (((f,nni),body),hst) 	= ListFuncRadio` ni 0 s mode defs hst	// determine if radio changed by user
+# (f,i) 				= if (nni>=0) (f nni, nni) (id,ni)		// if so, select function, otherwise set to old radio
+# ((i,_),hst)			= mkStoreHGEC s (set i) (set i i) hst	// store current selected radio for next round
+= (((f,i),body),hst)
 where
 	radio i j 
 	| i == j 	= RBChecked s
 	| otherwise = RBNotChecked s
+
+	set i j 
+	| i >= 0 && i < length defs = i		// set to new radio buttun 
+	| otherwise = j						// set to old radio button
 
 	ListFuncRadio` :: !Int !Int !String !HMode [Int a -> a] !*HSt 
 										-> (((Int a -> a,Int),![BodyTag]),!*HSt)
@@ -187,17 +201,20 @@ where
 	where
 		funcomp f g = \i a = f i (g i a)
 	
-		FuncRadio i j s mode cbf hst = mkViewHGEC s` mode bimap (\_ a -> a,0) hst
+		FuncRadio i j s mode cbf hst = mkViewHGEC s` mode bimap (\_ a -> a,-1) hst
 		where
-			bimap =	{ toHGEC 	= \_ v -> case v of
-											Nothing 	= radio i j
-											(Just v) 	= if (i>=0) (radio i j) v
-					, updHGEC	= \b v -> if (RBChecked s) v
+			bimap =	{ toHGEC 	= \_ v -> radio i j
+					, updHGEC	= \b v -> if b (RBChecked s) (otherradio v)
 					, fromHGEC	= \b v -> if b (cbf,j) (\_ a -> a,-1)
 					, resetHGEC	= Nothing
 
 					}
-			s` = s +++ toString j
+			s` = s +++ "_" +++ toString j
+
+			otherradio v
+			| StrippedCheckUpdateId == s = RBNotChecked s
+			| otherwise = v
+
 
 listHGEC 	:: !String !HMode ![a] 	!*HSt -> (([a],![BodyTag]),!*HSt) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 listHGEC s mode [] hst  = (([],[]),hst)

@@ -120,12 +120,11 @@ mkViewHGEC uniqueid mode {toHGEC, updHGEC, fromHGEC, resetHGEC} initdata (inidx,
 # ((updview,body),(nr,[(uniqueid,mystore):lhsts])) = gHGEC{|*|} mode nextview (0,[(uniqueid,viewtostore):lhsts])
 = ((fromHGEC2 updview,body),(0,[(uniqueid,encodeInfo2 updview):lhsts]))
 where
-//	initview 			= toHGEC initdata Nothing				// convert init data to view domain
-	
+
 	(isupdated,newview) = case updateFormInfo uniqueid of
 							(False,Nothing) 		= (False,toHGEC initdata Nothing)
 							(False,Just oldview) 	= (False,toHGEC initdata (Just oldview))
-							(True, Just newview)	= (True,newview)  
+							(True, Just newview)	= (True, newview)  
 
 	updateview			= updHGEC  isupdated newview		// apply update function telling user if an update has taken place
 	newdata				= fromHGEC isupdated updateview		// convert back to data domain telling if an update has taken place	 

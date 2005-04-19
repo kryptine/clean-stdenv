@@ -18,8 +18,6 @@ where
 // Bool is used for feedback loop
 // True for second round (take argument, not current (updated) value stored in global state)
 
-//:: GecCircuit a b = GecCircuit !.(A. .ps: (GecSet b ps) *(PSt ps) -> *(GecSet a ps, *PSt ps))
-
 :: GecCircuit a b 	
 	= HGC !(*((a, [(String,BodyTag)]), Bool, *HSt )  -> *((b,[(String,BodyTag)]),Bool,*HSt))
 
