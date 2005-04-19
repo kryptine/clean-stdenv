@@ -1,8 +1,8 @@
 Version: 1.4
 Global
-	Built:	True
+	Built:	False
 	Target:	Everything
-	Exec:	{Project}\balanceTree.exe
+	Exec:	{Project}\coffeemachine.exe
 	CodeGen
 		CheckStacks:	False
 		CheckIndexes:	True
@@ -41,13 +41,13 @@ Global
 	Precompile:	
 	Postlink:	
 MainModule
-	Name:	balanceTree
+	Name:	coffeemachine
 	Dir:	{Project}
 	Compiler
 		NeverMemoryProfile:	False
 		NeverTimeProfile:	False
 		StrictnessAnalysis:	True
-		ListTypes:	StrictExportTypes
+		ListTypes:	NoTypes
 		ListAttributes:	True
 		Warnings:	True
 		Verbose:	True
@@ -62,69 +62,13 @@ MainModule
 	DclOpen:	False
 	Icl
 		WindowPosition
-			X:	121
-			Y:	21
-			SizeX:	756
-			SizeY:	496
+			X:	40
+			Y:	22
+			SizeX:	830
+			SizeY:	594
 	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
-	Module
-		Name:	StdArrow
-		Dir:	{Application}\Libraries\StdGEC\GEC Implementation
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	htmlHGECarrow
-		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	792
-				SizeY:	417
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	48
-				Y:	21
-				SizeX:	834
-				SizeY:	436
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdCleanTypes
 		Dir:	{Application}\Libraries\Dynamics\extension
@@ -534,8 +478,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	743
-				SizeY:	585
+				SizeX:	733
+				SizeY:	357
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -618,8 +562,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	843
+				SizeY:	549
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -714,6 +658,118 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
+		Name:	StdHtml
+		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlDataDef
+		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	3
+				Y:	14
+				SizeX:	912
+				SizeY:	559
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	875
+				SizeY:	561
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlPrintUtil
+		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdGeneric
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	21
+				Y:	35
+				SizeX:	736
+				SizeY:	578
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
 		Name:	ArgEnv
 		Dir:	{Application}\Libraries\ArgEnvWindows
 		Compiler
@@ -744,6 +800,62 @@ OtherModules
 		NeededObjFiles
 			ObjectFile:	ArgEnvC.obj
 	Module
+		Name:	htmlHandler
+		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	30
+				Y:	-5
+				SizeX:	896
+				SizeY:	563
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	24
+				Y:	72
+				SizeX:	862
+				SizeY:	505
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	GenPrint
+		Dir:	{Application}\Libraries\Generics
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	41
+				Y:	52
+				SizeX:	812
+				SizeY:	586
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
 		Name:	StdMaybe
 		Dir:	{Application}\Libraries\StdLib
 		Compiler
@@ -772,148 +884,36 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
-		Name:	StdHtml
-		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	47
-				Y:	87
-				SizeX:	719
-				SizeY:	409
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	htmlDataDef
-		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	84
-				Y:	214
-				SizeX:	816
-				SizeY:	548
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	807
-				SizeY:	561
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	htmlPrintUtil
-		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	871
-				SizeY:	601
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	802
-				SizeY:	582
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdGeneric
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	htmlHandler
-		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	57
-				Y:	16
-				SizeX:	846
-				SizeY:	478
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	70
-				Y:	28
-				SizeX:	812
-				SizeY:	539
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
 		Name:	GenParse
 		Dir:	{Application}\Libraries\Generics
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlTrivial
+		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -954,94 +954,10 @@ OtherModules
 			ReuseUniqueNodes:	True
 		Dcl
 			WindowPosition
-				X:	85
-				Y:	12
-				SizeX:	810
-				SizeY:	598
-		DclOpen:	False
-		Icl
-			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	735
-				SizeY:	552
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	tree
-		Dir:	{Project}
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	689
-				SizeY:	417
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	129
-				Y:	37
-				SizeX:	770
-				SizeY:	492
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	htmlTrivial
-		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	10
-				Y:	10
-				SizeX:	643
-				SizeY:	386
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	16
-				Y:	84
-				SizeX:	604
-				SizeY:	354
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	GenPrint
-		Dir:	{Application}\Libraries\Generics
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	715
+				SizeY:	513
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -1068,22 +984,76 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	971
-				SizeY:	484
+				SizeX:	872
+				SizeY:	587
 		DclOpen:	False
 		Icl
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	940
-				SizeY:	443
+				SizeX:	907
+				SizeY:	627
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlHGECarrow
+		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	297
+				Y:	2
+				SizeX:	800
+				SizeY:	640
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	71
+				Y:	8
+				SizeX:	851
+				SizeY:	469
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdArrow
+		Dir:	{Application}\Libraries\StdGEC\GEC Implementation
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 Static
 	Mods
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Examples\balanceTree.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\StdGEC\GEC Implementation\StdArrow.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlHGECarrow.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Examples\coffeemachine.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\Dynamics\extension\StdCleanTypes.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\Dynamics\implementation\windows\_SystemDynamic.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\StdEnv\StdOverloaded.icl
@@ -1105,25 +1075,26 @@ Static
 		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\StdEnv\StdTuple.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\StdEnv\StdCharList.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\StdEnv\StdFunc.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\ArgEnvWindows\ArgEnv.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\StdLib\StdMaybe.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\StdHtml.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlDataDef.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlPrintUtil.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\StdEnv\StdGeneric.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\ArgEnvWindows\ArgEnv.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlHandler.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\Generics\GenParse.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlEncodeDecode.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Examples\tree.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlTrivial.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\Generics\GenPrint.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\StdLib\StdMaybe.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\Generics\GenParse.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlTrivial.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlEncodeDecode.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlHGEClib.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlHGECarrow.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\StdGEC\GEC Implementation\StdArrow.icl
 	Objs
 		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\StdEnv\Clean System Files\_startup0.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\StdEnv\Clean System Files\_startup1Trace.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\StdEnv\Clean System Files\_startup2.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\StdEnv\Clean System Files\_system.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Examples\Clean System Files\balanceTree.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Examples\Clean System Files\coffeemachine.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\StdEnv\Clean System Files\StdOverloaded.o
@@ -1159,7 +1130,6 @@ Static
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlHGEClib.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlHGECarrow.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\StdGEC\GEC Implementation\Clean System Files\StdArrow.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Examples\Clean System Files\tree.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.obj
 	Dlib
 		Path:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0\Libraries\StdEnv\Clean System Files\kernel_library
