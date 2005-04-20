@@ -6,7 +6,7 @@ import StdHtml
 Start world  = doHtml MyPage world
 
 MyPage hst
-# ((_,counterGEC),hst) = counterHGEC "counter" Edit 0 hst
+# ((_,counterGEC),hst) = counterForm "counter" Edit 0 hst
 = mkHtml "Counter Example"
 	[ H1 [] "Counter Example"
 	, Br  

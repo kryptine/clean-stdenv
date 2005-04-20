@@ -11,10 +11,10 @@ import StdHtml
 Start world  = doHtml spreadsheet world
 
 spreadsheet hst
-# ((table, tableB), hst) = table_hv_HGEC "table" Edit 	  inittable    	       hst
-# ((_,     rowsumB),hst) = vertlistHGEC  "rsum"  Display (rowsum table)       hst
-# ((_,     colsumB),hst) = horlistHGEC   "csum"  Display (colsum table)       hst
-# ((_,     tsumB),  hst) = mkEditHGEC    "tsum"  Display (sum (rowsum table)) hst
+# ((table, tableB), hst) = table_hv_Form "table" Edit 	  inittable    	       hst
+# ((_,     rowsumB),hst) = vertlistForm  "rsum"  Display (rowsum table)       hst
+# ((_,     colsumB),hst) = horlistForm   "csum"  Display (colsum table)       hst
+# ((_,     tsumB),  hst) = mkEditForm    "tsum"  Display (sum (rowsum table)) hst
 = mkHtml "Spreadsheet"
 	[ H1 [] "Spreadsheet Example: "
 	, Br
@@ -35,9 +35,9 @@ arrowsspreadsheet hst
 	,Br, Br
 	] hst
 where
-	mycircuit =	lift "table" Edit table_hv_HGEC
-				>>>	(	(arr rowsum >>> lift "rsum" Display vertlistHGEC)	&&&
-			    		(arr colsum >>> lift "csum" Display horlistHGEC) 
+	mycircuit =	lift "table" Edit table_hv_Form
+				>>>	(	(arr rowsum >>> lift "rsum" Display vertlistForm)	&&&
+			    		(arr colsum >>> lift "csum" Display horlistForm) 
 			 		)
 			 	>>> arr (sum o fst)
 			 	>>> display "tsum" 		

@@ -9,8 +9,8 @@ import
 
 	 		htmlDataDef			// Clean's ADT representation of Html including generic function to generate Html 
 		,	htmlHandler			// generic stuf to convert any Clean type to Html		
-		,	htmlHGEClib			// HGEC library similar to the AGEC lib
-		,	htmlHGECarrow		// HGEC arrow instantiations
+		,	htmlFormlib			// library with handy predfined forms, similar to the AGEC lib
+		,	htmlArrow			// arrow instantiations for html forms
 
 		,	GenParse			// Standard Generic Parse module from generic library
 		,	GenPrint			// Standard Generic Print module from generic library

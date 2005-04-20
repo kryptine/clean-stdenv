@@ -14,7 +14,7 @@ derive gHpr 	Tree
 Start world  = doHtml MyPage world
 
 MyPage  hst
-# ((_,treeGEC),hst) = mkEditHGEC "tree" Edit [Node Leaf 1 Leaf] hst
+# ((_,treeGEC),hst) = mkEditForm "tree" Edit [Node Leaf 1 Leaf] hst
 = mkHtml "Main Test Program"
 	[ H1 [] "My Test"
 	, Br, Txt "Here we show an editor for a tree data structure :", Br, Br
