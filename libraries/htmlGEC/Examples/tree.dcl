@@ -4,7 +4,7 @@ import StdHtml
 
 :: Tree a = Node (Tree a) a (Tree a) | Leaf    
 
-derive gHGEC  	Tree
+derive gForm  	Tree
 derive gPrint 	Tree
 derive gParse 	Tree
 derive gUpd 	Tree

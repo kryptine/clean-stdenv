@@ -4,7 +4,7 @@ import StdEnv, StdHtml
 
 // balance tree
 
-derive gHGEC  	Tree
+derive gForm  	Tree
 derive gPrint 	Tree
 derive gParse 	Tree
 derive gUpd 	Tree

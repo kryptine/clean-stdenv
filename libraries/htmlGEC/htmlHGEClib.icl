@@ -29,7 +29,7 @@ where
 
 // HGEC collection:
 
-counterHGEC 	:: !String !HMode a !*HSt -> ((a,!BodyTag),!*HSt) | +, -, one,  gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+counterHGEC 	:: !FormId !Mode a !*HSt -> ((a,!BodyTag),!*HSt) | +, -, one,  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 counterHGEC name mode i hst = mkViewHGEC name mode bimap i hst
 where
 	bimap =	{ toHGEC 	= toCounter
@@ -53,7 +53,7 @@ where
 	down	= LButton (defpixel / 6) "-"
 
 
-horlist2HGEC :: !String !HMode a ![a] !*HSt -> (([a],!BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+horlist2HGEC :: !FormId !Mode a ![a] !*HSt -> (([a],!BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 horlist2HGEC s mode defaultval list hst 
 # ((fun,butbody),hst) 	= TableFuncBut  s mode [[(but "-", less),(but "+", more)]] hst
 # ((nlist,nbody),hst) 	= horlistHGEC s mode (fun list) hst  
@@ -67,42 +67,42 @@ where
 	less [x:xs] = xs
 	less [] = []
 	
-horlistHGEC 	:: !String !HMode ![a] 	!*HSt -> (([a],!BodyTag),!*HSt) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+horlistHGEC 	:: !FormId !Mode ![a] 	!*HSt -> (([a],!BodyTag),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 horlistHGEC s mode [] hst  = (([],EmptyBody),hst)
 horlistHGEC s mode [x:xs] hst
 # ((xs,xsbody),hst) = horlistHGEC s mode xs hst
 # ((x, xbody), hst) = mkEditHGEC (s +++ toString (length xs)) mode x hst
 = (([x:xs],xbody <=> xsbody),hst)
 	
-vertlistHGEC :: !String !HMode ![a] !*HSt -> (([a],!BodyTag),!*HSt) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
+vertlistHGEC :: !FormId !Mode ![a] !*HSt -> (([a],!BodyTag),!*HSt) | gForm{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
 vertlistHGEC s mode [] hst  = (([],EmptyBody),hst)
 vertlistHGEC s mode [x:xs] hst
 # ((xs,xsbody),hst)	= vertlistHGEC s mode xs hst
 # ((x, xbody), hst)	= mkEditHGEC (s +++ toString (length xs)) mode x hst
 = (([x:xs],xbody <||> xsbody),hst)
 
-table_hv_HGEC :: !String !HMode ![[a]] !*HSt -> (([[a]],!BodyTag),!*HSt) | gHGEC{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
+table_hv_HGEC :: !FormId !Mode ![[a]] !*HSt -> (([[a]],!BodyTag),!*HSt) | gForm{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
 table_hv_HGEC s mode [] hst = (([],EmptyBody),hst)
 table_hv_HGEC s mode [x:xs] hst
 # ((xs,xsbody),hst)	= table_hv_HGEC s mode xs hst
 # ((x, xbody), hst)	= horlistHGEC (s +++ toString (length xs)) mode x hst
 = (([x:xs],xbody <||> xsbody),hst)
 
-TableFuncBut :: !String !HMode ![[(Button, a -> a)]] !*HSt -> ((a -> a,!BodyTag),!*HSt)
+TableFuncBut :: !FormId !Mode ![[(Button, a -> a)]] !*HSt -> ((a -> a,!BodyTag),!*HSt)
 TableFuncBut s mode [] hst = ((id,EmptyBody),hst)
 TableFuncBut s mode [row:rows] hst 
 # ((rowsfun,rowsb),hst) = TableFuncBut s mode rows hst
 # ((rowfun,rowb),  hst)	= RowFuncBut s mode row hst
 = ((rowfun o rowsfun,rowb <||> rowsb),hst)
 where
-	RowFuncBut :: !String !HMode [(Button, a -> a)] !*HSt -> ((a -> a,!BodyTag),!*HSt)
+	RowFuncBut :: !FormId !Mode [(Button, a -> a)] !*HSt -> ((a -> a,!BodyTag),!*HSt)
 	RowFuncBut s mode [] hst = ((id,EmptyBody),hst)
 	RowFuncBut s mode [x:xs] hst 
 	# ((rowfun,rowb),hst) 	= RowFuncBut s mode xs hst
 	# ((fun,oneb)   ,hst)	= FuncBut s mode x hst
 	= ((fun o rowfun,oneb <=> rowb),hst)
 
-FuncBut :: !String !HMode !(Button, a -> a) !*HSt -> ((a -> a,!BodyTag),!*HSt)
+FuncBut :: !FormId !Mode !(Button, a -> a) !*HSt -> ((a -> a,!BodyTag),!*HSt)
 FuncBut s mode (button=:LButton _ name ,cbf) hst = mkViewHGEC (s +++ name) mode bimap id hst
 where
 	bimap =	{ toHGEC 	= \_ _	-> button
@@ -123,20 +123,20 @@ where
 			}
 FuncBut s mode (Pressed,cbf) hst = FuncBut s mode (LButton 10 "??",cbf) hst
 
-ListFuncBut :: !String !HMode [(Button, a -> a)] !*HSt -> ((a -> a,![BodyTag]),!*HSt)
+ListFuncBut :: !FormId !Mode [(Button, a -> a)] !*HSt -> ((a -> a,![BodyTag]),!*HSt)
 ListFuncBut s mode [] hst = ((id,[]),hst)
 ListFuncBut s mode [x:xs] hst 
 # ((rowfun,rowb),hst) 	= ListFuncBut s mode xs hst
 # ((fun,oneb)   ,hst)	= FuncBut s mode x hst
 = ((fun o rowfun,[oneb:rowb]),hst)
 
-ListFuncCheckBox :: !Bool !String !HMode [(CheckBox, Bool [Bool] a -> a)] !*HSt 
+ListFuncCheckBox :: !Bool !FormId !Mode [(CheckBox, Bool [Bool] a -> a)] !*HSt 
 									-> (((a -> a,[Bool]),![BodyTag]),!*HSt)
 ListFuncCheckBox init s mode defs hst 
 # (((f,bools),body),hst) = ListFuncCheckBox` init s mode defs hst
 = (((f bools,bools),body),hst)
 where
-	ListFuncCheckBox` :: !Bool !String !HMode [(CheckBox, Bool [Bool] a -> a)] !*HSt 
+	ListFuncCheckBox` :: !Bool !FormId !Mode [(CheckBox, Bool [Bool] a -> a)] !*HSt 
 										-> ((([Bool] a -> a,[Bool]),![BodyTag]),!*HSt)
 	ListFuncCheckBox` init s mode [] hst = (((\_ a -> a,[]),[]),hst)
 	ListFuncCheckBox` init s mode [x:xs] hst 
@@ -174,7 +174,7 @@ where
 // we therefore ourselves have to determine and remember which radio button in the family is set
 
 
-ListFuncRadio :: !Int !String !HMode [Int a -> a] !*HSt 
+ListFuncRadio :: !Int !FormId !Mode [Int a -> a] !*HSt 
 									-> (((a -> a,Int),![BodyTag]),!*HSt)
 ListFuncRadio i s mode defs hst 
 # ((ni,_),hst)			= mkStoreHGEC s (set i) (set (abs i) 0) hst	// determine which radio to select
@@ -191,7 +191,7 @@ where
 	| i >= 0 && i < length defs = i		// set to new radio buttun 
 	| otherwise = j						// set to old radio button
 
-	ListFuncRadio` :: !Int !Int !String !HMode [Int a -> a] !*HSt 
+	ListFuncRadio` :: !Int !Int !FormId !Mode [Int a -> a] !*HSt 
 										-> (((Int a -> a,Int),![BodyTag]),!*HSt)
 	ListFuncRadio` i j s mode [] hst = (((\_ a -> a,-1),[]),hst)
 	ListFuncRadio` i j s mode [f:fs] hst 
@@ -207,7 +207,6 @@ where
 					, updHGEC	= \b v -> if b (RBChecked s) (otherradio v)
 					, fromHGEC	= \b v -> if b (cbf,j) (\_ a -> a,-1)
 					, resetHGEC	= Nothing
-
 					}
 			s` = s +++ "_" +++ toString j
 
@@ -215,8 +214,26 @@ where
 			| StrippedCheckUpdateId == s = RBNotChecked s
 			| otherwise = v
 
+FuncMenu :: !Int !FormId !Mode [(String, a -> a)] !*HSt 
+													 -> (((a -> a,Int),BodyTag),!*HSt)
+FuncMenu index s mode defs hst = mkViewHGEC s mode bimap (id,init index) hst
+where
+	menulist = PullDown (1,defpixel) (init index,map fst defs) 
 
-listHGEC 	:: !String !HMode ![a] 	!*HSt -> (([a],![BodyTag]),!*HSt) 	| gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+	bimap =	{ toHGEC 	= toHGEC
+			, updHGEC	= \b v -> v
+			, fromHGEC	= \b v=:(PullDown _ (nindex,_)) -> if b (snd (defs!!nindex),nindex) (id,nindex)
+			, resetHGEC	= Nothing
+			}
+	toHGEC _ Nothing 		= menulist
+	toHGEC _ (Just oldlist) = if (index >= 0) menulist oldlist
+
+	init index
+	| abs index >= 0 && abs index < length defs = abs index
+	| otherwise = 0
+
+
+listHGEC 	:: !FormId !Mode ![a] 	!*HSt -> (([a],![BodyTag]),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 listHGEC s mode [] hst  = (([],[]),hst)
 listHGEC s mode [x:xs] hst
 # ((xs,xsbody),hst) = listHGEC s mode xs hst

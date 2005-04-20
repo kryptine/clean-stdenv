@@ -3,7 +3,7 @@ module mutual
 import StdEnv
 import StdHtml
 
-derive gHGEC  Pounds, Euros
+derive gForm  Pounds, Euros
 derive gUpd   Pounds, Euros
 derive gPrint Pounds, Euros
 derive gParse Pounds, Euros
@@ -11,7 +11,7 @@ derive gParse Pounds, Euros
 :: Pounds = {pounds :: Real}                        
 :: Euros  = {euros  :: Real}                        
 
-Start world  = doHtml helloWorld world
+Start world  = doHtml mutual world
 
 
 helloWorld hst

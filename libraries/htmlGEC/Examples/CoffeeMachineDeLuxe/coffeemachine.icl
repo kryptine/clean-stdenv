@@ -3,7 +3,7 @@ module coffeemachine
 import StdEnv
 import StdHtml
 
-derive gHGEC  MachineState, Output, Product
+derive gForm  MachineState, Output, Product
 derive gUpd   MachineState, Output, Product
 derive gPrint MachineState, Output, Product
 derive gParse MachineState, Output, Product
@@ -11,12 +11,12 @@ derive gParse MachineState, Output, Product
 Start world  = doHtml coffeemachine world
 
 coffeemachine hst
-# ((input,buttons)		,hst) = ListFuncBut "cb" HEdit allbuttons hst	
-# (((option,options),_)	,hst) = ListFuncCheckBox False "op" HEdit (optionbuttons False False) hst	
+# ((input,buttons)		,hst) = ListFuncBut "cb" Edit allbuttons hst	
+# (((option,options),_)	,hst) = ListFuncCheckBox False "op" Edit (optionbuttons False False) hst	
 # ((machine,_)	  		,hst) = mkStoreHGEC "hidden" (option o input) initmachine hst
-# ((_,checkbox)			,hst) = ListFuncCheckBox True "op" HEdit (optionbuttons machine.milk machine.sugar) hst	
-# ((_,prizebody)  		,hst) = listHGEC "prize" HDisplay prizes hst	
-# ((_,statebody)  		,hst) = listHGEC "cont" HDisplay (mstate machine) hst	
+# ((_,checkbox)			,hst) = ListFuncCheckBox True "op" Edit (optionbuttons machine.milk machine.sugar) hst	
+# ((_,prizebody)  		,hst) = listHGEC "prize" Display prizes hst	
+# ((_,statebody)  		,hst) = listHGEC "cont" Display (mstate machine) hst	
 = mkHtml "Coffee Machine"
 		[ H1 [] "Fancy Coffee Machine ..."
 		, Br
@@ -51,16 +51,16 @@ where
 		where
 			moneybuttons n = (butp (toString n +++ ".gif"), \m -> CoffeeMachine (InsertCoin n, m))
 
-			but s	= CHButton defpixel s
-			butp s	= ChButtonPict (defpixel/2,defpixel/2) ("images/" +++ s)
+			but s	= LButton defpixel s
+			butp s	= PButton (defpixel/2,defpixel/2) ("images/" +++ s)
 
 	optionbuttons milk sugar= 
 		[ (check milk  "Milk",  \b _ m -> CoffeeMachine (AskMilk b,  m))
 		, (check sugar "Sugar", \b _ m -> CoffeeMachine (AskSugar b, m))
 		]
 	where
-		check True = CHChecked
-		check False = CHNotChecked
+		check True = CBChecked
+		check False = CBNotChecked
 		
 	prizes = [cost Coffee,cost Capuccino, cost Espresso]
 	
