@@ -3,7 +3,7 @@ module coffeemachine
 import StdEnv
 import StdHtml
 
-derive gHGEC  Machine, Output, Product
+derive gForm  Machine, Output, Product
 derive gUpd   Machine, Output, Product
 derive gPrint Machine, Output, Product
 derive gParse Machine, Output, Product
@@ -11,10 +11,10 @@ derive gParse Machine, Output, Product
 Start world  = doHtml coffeemachine world
 
 coffeemachine hst
-# ((command,combody),hst)	= TableFuncBut "cb" HEdit commandbuttons hst	
-# ((option, optbody),hst)	= TableFuncBut "ob" HEdit optionbuttons  hst	
+# ((command,combody),hst)	= TableFuncBut "cb" Edit commandbuttons hst	
+# ((option, optbody),hst)	= TableFuncBut "ob" Edit optionbuttons  hst	
 # ((machine,_)      ,hst)	= mkStoreHGEC "hidden"  (option o command) initmachine hst
-# ((_,contbody)		,hst)	= mkEditHGEC "cont" HDisplay (displaycontents  machine) hst	
+# ((_,contbody)		,hst)	= mkEditHGEC "cont" Display (displaycontents  machine) hst	
 = mkHtml "Coffee Machine"
 		[ H1 [] "Coffee Machine: "
 		, contbody <=> combody

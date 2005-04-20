@@ -30,18 +30,18 @@ doHtml :: (*HSt -> (Html,!*HSt)) *World -> *World
 // mkApplyEdit		: editor, displays its first argument, if not updated, second argument is initial state
 // mkSpecial		: editor, applies bimaps when evaluated
 
-:: HMode		= HEdit					// indicates an editor
-				| HDisplay				// indicates that one just wants to display something
+:: Mode			= Edit					// indicates an editor
+				| Display				// indicates that one just wants to display something
 
-mkEditHGEC 		:: !FormId 	!HMode				d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSetHGEC 		:: !FormId 	!HMode				d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSelfHGEC 		:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkApplyHGEC 	:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkStoreHGEC 	:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkApplyEditHGEC	:: !FormId 	!d					d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSpecialEditor :: !FormId 	!HMode !(Bimap d v) d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
+mkEditHGEC 		:: !FormId 	!Mode				d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSetHGEC 		:: !FormId 	!Mode				d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSelfHGEC 		:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyHGEC 	:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkStoreHGEC 	:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyEditHGEC	:: !FormId 	!d					d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSpecialEditor :: !FormId 	!Mode !(Bimap d v)  d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
 
-mkEditHGEC2:: !FormId !HMode d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkEditHGEC2:: !FormId !Mode d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 
 
 // mkViewHGEC is the swiss army nife function creating an editor with a view v of data d
@@ -52,20 +52,20 @@ mkEditHGEC2:: !FormId !HMode d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|
 				, resetHGEC :: Maybe (v -> v)		// can be used to reset view (eg for buttons)
 				}
 
-mkViewHGEC 		:: !FormId 	!HMode !(HBimap d v) 	d !*HSt -> ((d,BodyTag),!*HSt) | gHGEC{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
+mkViewHGEC 		:: !FormId 	!Mode !(HBimap d v) 	d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
 
 // generic functions that do the real work,
 // end user just has to derive them for mkHGEC ...
 
-// gHGEC converts any Clean type to html code (form) to be used in a body
+// gForm converts any Clean type to html code (form) to be used in a body
 // gUpd updates a value of type t given any user input in the html form
 
 :: UpdMode
 
-generic gHGEC a :: HMode a *HSt -> *((a,BodyTag), *HSt)	
+generic gForm a :: Mode a *HSt -> *((a,BodyTag), *HSt)	
 generic gUpd a 	:: UpdMode a -> (UpdMode,a)
 
-derive gHGEC Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (,) 
+derive gForm Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (,) 
 derive gUpd  Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (,) 
 
 // Clean types that have a special representation
@@ -75,9 +75,10 @@ derive gUpd  Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (
 :: <-> a b		= (<->) infixl 5 a b				// place b to the left of a
 :: <|> a b		= (<|>) infixl 4 a b				// place b below a
 
-:: Mode a 		= Display a							// non-editable display of a
-				| Edit a							// editable
-				| Hide a							// hiding a
+:: DisplayMode a 
+				= DisplayMode a						// non-editable display of a
+				| EditMode    a						// editable
+				| HideMode    a						// hiding a
 				| EmptyMode							// nothing to display or hide
 
 // buttons
@@ -88,14 +89,15 @@ derive gUpd  Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (
 :: CheckBox		= CBChecked FormId 					// checkbox 	checked
 				| CBNotChecked FormId				// checkbox 	not checked
 :: RadioButton	= RBChecked FormId					// radiobutton 	checked
-				| RBNotChecked FormId				// radiobutton	not checked		
+				| RBNotChecked FormId				// radiobutton	not checked
+:: PullDownMenu	= PullDown (Int,Int) (Int,[String]) // pulldownmenu (number visible,width) (item chosen,menulist)		
 	
 instance toBool CheckBox, Button, RadioButton		// True if checkbox checked, button pressed
 
-derive gHGEC 		 (,,), (<->), <|>, Mode, Button, CheckBox, RadioButton  
-derive gUpd  		 (,,), (<->), <|>, Mode, Button, CheckBox, RadioButton
-derive gPrint 	(,), (,,), (<->), <|>, Mode, Button, CheckBox, RadioButton
-derive gParse 	(,), (,,), (<->), <|>, Mode, Button, CheckBox, RadioButton
+derive gForm 		 (,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu 
+derive gUpd  		 (,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu
+derive gPrint 	(,), (,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu
+derive gParse 	(,), (,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu
 
 // Some default constants used for the length of input boxes
 
@@ -103,5 +105,5 @@ defsize  :== 10										// size of inputfield
 defpixel :== 83										// size in pixels for buttons, pull-down buttons
 backcolor :== "#6699CC"								// background color of non-editable fields
 
-specialize :: (FormId HMode a *HSt -> ((a,BodyTag),*HSt)) FormId HMode a *HSt -> ((a,BodyTag),*HSt) | gUpd {|*|} a
+specialize :: (FormId Mode a *HSt -> ((a,BodyTag),*HSt)) FormId Mode a *HSt -> ((a,BodyTag),*HSt) | gUpd {|*|} a
 

@@ -3,7 +3,7 @@ module familytree
 import StdEnv
 import StdHtml
 
-derive gHGEC  Status, Partner, [], Gender, Maybe, Maybe`
+derive gForm  Status, Partner, [], Gender, Maybe, Maybe`
 derive gUpd   Family, Status, Partner, Person, Kids, Maybe, [], Gender, Maybe`
 derive gPrint Family, Status, Partner, Person, Kids, Maybe, Gender, Maybe`
 derive gParse Family, Status, Partner, Person, Kids, Maybe, Gender, Maybe`
@@ -20,7 +20,7 @@ derive gParse Family, Status, Partner, Person, Kids, Maybe, Gender, Maybe`
 Start world  = doHtml familytree world
 
 familytree hst
-# ((tree,  treeb),hst)= mkEditHGEC "famtree" HEdit inittree hst	
+# ((tree,  treeb),hst)= mkEditHGEC "famtree" Edit inittree hst	
 = mkHtml "Family Tree Example"
 		[ H1 [] "family Tree Example: "
 		, treeb
@@ -35,9 +35,9 @@ where
 	body tags 			= Body [] tags
 
 
-//derive gHGEC Family
-//derive gHGEC Person
-//derive gHGEC Kids
+//derive gForm Family
+//derive gForm Person
+//derive gForm Kids
 
 
 
@@ -46,7 +46,7 @@ where
 
 :: Gender = Male | Female
 
-gHGEC{|Person|} mode person hst = specialize editor "person" mode person hst
+gForm{|Person|} mode person hst = specialize editor "person" mode person hst
 where
 	editor id mode d hst = mkSpecialEditor id mode {map_to = map_to, map_from = map_from} d hst
  
@@ -56,7 +56,7 @@ where
 	map_from (m <|> Male)	= (Man m)
 	map_from (w <|> Female)	= (Woman w)
 
-gHGEC{|Family|} mode family hst = specialize editor "family" mode family hst
+gForm{|Family|} mode family hst = specialize editor "family" mode family hst
 where
 	editor id mode d hst
 	# ((val,body),hst) = mkSpecialEditor id mode {map_to = map_to, map_from = map_from} d hst
@@ -84,21 +84,21 @@ where
 	woman 	= Woman ""   
 	notmaried = Nothing_
 
-gHGEC{|Kids|} mode kids hst = specialize editor "kids" mode kids hst 
+gForm{|Kids|} mode kids hst = specialize editor "kids" mode kids hst 
 where
 	editor id mode d hst 
 	# ((list,hlbody),hst) = horlist2HGEC (mkid "hlist") mode     defaultfam (fromKids kids) hst
 //	# ((list,hlbody),hst) = horlistHGEC (mkid "hlist") mode      (fromKids (Kids [defaultfam])) hst
-	# ((_,  display),hst) = mkEditHGEC   (mkid "displ") HDisplay (displaykids (length list)) hst
+	# ((_,  display),hst) = mkEditHGEC   (mkid "displ") Display (displaykids (length list)) hst
 	= ((toKids list,display <||> hlbody),hst)
 
 	mkid s = toString (length (fromKids kids)) +++ s
 
 	defaultfam = Family (Man "") Single (Nothing_)
 
-	displaykids 0 = Display "No Children "
-	displaykids 1 = Display "1 Child "
-	displaykids n = Display (toString n +++ " Children ")
+	displaykids 0 = DisplayMode "No Children "
+	displaykids 1 = DisplayMode "1 Child "
+	displaykids n = DisplayMode (toString n +++ " Children ")
 
 	fromKids (Kids kids) 	= kids
 	fromKids NoKids			= []

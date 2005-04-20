@@ -21,11 +21,11 @@ mkHtml title body hst
      , hst
      )
 
-//	Running example, using gHGEC:
+//	Running example, using gForm:
 
 mypage1 hst
-   # ((list,body_list),hst) = gHGEC{|*|} /*"List"         */ HEdit    [1,5,2]              hst
-     ((tree,body_tree),hst) = gHGEC{|*|} /*"Balanced Tree"*/ HDisplay (toBalanceTree list) hst
+   # ((list,body_list),hst) = gForm{|*|} /*"List"         */ Edit    [1,5,2]              hst
+     ((tree,body_tree),hst) = gForm{|*|} /*"Balanced Tree"*/ Display (toBalanceTree list) hst
    = mkHtml "Balancing Tree From List"
             [ Br, Big [] "List:",          body_list
             , Hr []
@@ -35,8 +35,8 @@ mypage1 hst
 //	Running example, using generatePage:
 
 mypage2 hst
-   # ((list,body_list),hst) = generatePage "List"          HEdit    [1,5,2]              hst
-     ((tree,body_tree),hst) = generatePage "Balanced Tree" HDisplay (toBalanceTree list) hst
+   # ((list,body_list),hst) = generatePage "List"          Edit    [1,5,2]              hst
+     ((tree,body_tree),hst) = generatePage "Balanced Tree" Display (toBalanceTree list) hst
    = mkHtml "Balancing Tree From List"
             [ Br, Big [] "List:",          body_list
             , Hr []
@@ -56,5 +56,5 @@ where
 
 toBalanceTree = fromListToBalTree
 
-derive gHGEC []
+derive gForm []
 derive gUpd  []

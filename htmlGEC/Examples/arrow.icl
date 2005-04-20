@@ -4,7 +4,7 @@ import StdEnv
 import StdHtml
 
 derive gUpd   []
-derive gHGEC  []
+derive gForm  []
 
 import tree
 
