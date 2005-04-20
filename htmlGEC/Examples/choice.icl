@@ -9,7 +9,7 @@ Start world  = doHtml choice world
 
 choice hst
 # (((_,sel),menubody),hst) = FuncMenu -2 "rinus" Edit functions hst
-//# ((nmenu,menubody),hst) = mkEditHGEC "test" HEdit (PullDown (2,defpixel) (1,menu)) hst
+//# ((nmenu,menubody),hst) = mkEditForm "test" HEdit (PullDown (2,defpixel) (1,menu)) hst
 # (((cbf,j),body),hst) = ListFuncRadio sel "aap" Edit mycbfs hst
 = mkHtml "Choosing is difficult"
 	[ H1 [] "testing radio buttons"

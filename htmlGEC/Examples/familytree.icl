@@ -20,7 +20,7 @@ derive gParse Family, Status, Partner, Person, Kids, Maybe, Gender, Maybe`
 Start world  = doHtml familytree world
 
 familytree hst
-# ((tree,  treeb),hst)= mkEditHGEC "famtree" Edit inittree hst	
+# ((tree,  treeb),hst)= mkEditForm "famtree" Edit inittree hst	
 = mkHtml "Family Tree Example"
 		[ H1 [] "family Tree Example: "
 		, treeb
@@ -87,9 +87,9 @@ where
 gForm{|Kids|} mode kids hst = specialize editor "kids" mode kids hst 
 where
 	editor id mode d hst 
-	# ((list,hlbody),hst) = horlist2HGEC (mkid "hlist") mode     defaultfam (fromKids kids) hst
-//	# ((list,hlbody),hst) = horlistHGEC (mkid "hlist") mode      (fromKids (Kids [defaultfam])) hst
-	# ((_,  display),hst) = mkEditHGEC   (mkid "displ") Display (displaykids (length list)) hst
+	# ((list,hlbody),hst) = horlist2Form (mkid "hlist") mode     defaultfam (fromKids kids) hst
+//	# ((list,hlbody),hst) = horlistForm (mkid "hlist") mode      (fromKids (Kids [defaultfam])) hst
+	# ((_,  display),hst) = mkEditForm   (mkid "displ") Display (displaykids (length list)) hst
 	= ((toKids list,display <||> hlbody),hst)
 
 	mkid s = toString (length (fromKids kids)) +++ s

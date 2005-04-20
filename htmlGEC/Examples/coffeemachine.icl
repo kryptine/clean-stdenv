@@ -13,8 +13,8 @@ Start world  = doHtml coffeemachine world
 coffeemachine hst
 # ((command,combody),hst)	= TableFuncBut "cb" Edit commandbuttons hst	
 # ((option, optbody),hst)	= TableFuncBut "ob" Edit optionbuttons  hst	
-# ((machine,_)      ,hst)	= mkStoreHGEC "hidden"  (option o command) initmachine hst
-# ((_,contbody)		,hst)	= mkEditHGEC "cont" Display (displaycontents  machine) hst	
+# ((machine,_)      ,hst)	= mkStoreForm "hidden"  (option o command) initmachine hst
+# ((_,contbody)		,hst)	= mkEditForm "cont" Display (displaycontents  machine) hst	
 = mkHtml "Coffee Machine"
 		[ H1 [] "Coffee Machine: "
 		, contbody <=> combody

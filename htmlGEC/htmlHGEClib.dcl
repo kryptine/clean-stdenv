@@ -1,7 +1,7 @@
-definition module htmlHGEClib
+definition module htmlFormlib
 
-// Handy collection of HGEC's
-// HGEC library similar to the AGEC lib
+// Handy collection of Form's
+// Form library similar to the AGEC lib
 // (c) MJP 2005
 
 import StdEnv
@@ -20,19 +20,19 @@ import StdHtml
 mkSTable :: [[BodyTag]] -> BodyTag
 
 
-// handy HGEC's
+// handy Form's
 
-counterHGEC 		:: !FormId !Mode a 		!*HSt -> ((a	,!BodyTag),!*HSt) 	| +, -, one
+counterForm 		:: !FormId !Mode a 		!*HSt -> ((a	,!BodyTag),!*HSt) 	| +, -, one
 																			, gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-horlistHGEC 		:: !FormId !Mode ![a] 		!*HSt -> (([a]	,!BodyTag),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-horlist2HGEC 		:: !FormId !Mode a ![a] 	!*HSt -> (([a]	,!BodyTag),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-vertlistHGEC 		:: !FormId !Mode ![a] 		!*HSt -> (([a]	,!BodyTag),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-table_hv_HGEC 		:: !FormId !Mode ![[a]] 	!*HSt -> (([[a]],!BodyTag),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+horlistForm 		:: !FormId !Mode ![a] 		!*HSt -> (([a]	,!BodyTag),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+horlist2Form 		:: !FormId !Mode a ![a] 	!*HSt -> (([a]	,!BodyTag),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+vertlistForm 		:: !FormId !Mode ![a] 		!*HSt -> (([a]	,!BodyTag),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+table_hv_Form 		:: !FormId !Mode ![[a]] 	!*HSt -> (([[a]],!BodyTag),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 
 TableFuncBut 		:: !FormId !Mode ![[(Button, a -> a)]] !*HSt 
 													  -> ((a -> a,!BodyTag) ,!*HSt)
 
-listHGEC 			:: !FormId !Mode ![a] 		!*HSt -> (([a],![BodyTag]),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+listForm 			:: !FormId !Mode ![a] 		!*HSt -> (([a],![BodyTag]),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 
 // ListFuncBut		: assign functions to buttons, returns function corresponding to the button pressed, and the buttons body
 

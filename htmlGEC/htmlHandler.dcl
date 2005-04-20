@@ -15,15 +15,16 @@ import StdBool
 
 doHtml :: (*HSt -> (Html,!*HSt)) *World -> *World 
 
-// mkHGEC converts any Clean type into a Html GEC
+// mkForm converts any Clean type into a Html GEC
 
 :: FormId	 	:== String				// unique id identifying the form
 
-// the editors below are just versiosn of "mkViewHGEC".
+// the editors below are just versiosn of "mkViewForm".
 // make shure that all editors have a unique identifier !
 
-// mkEdit  HEdit 	: editor, argument is initial value, delivers contents of (updated) form ("source")
-// mkEdit  HDisplay : same as mkSet
+// mkEdit  Edit 	: editor, argument is initial value, delivers contents of (updated) form ("source")
+// mkEdit  Display  : same as mkSet
+// mkEdit2    		: same as mkEdit, used for feedback loop in html arrows
 // mkSet			: displays its arguments
 // mkApply 			: displays application of function to the argument
 // mkStore			: displays application of function to the internal state, second argument is initial state
@@ -33,36 +34,36 @@ doHtml :: (*HSt -> (Html,!*HSt)) *World -> *World
 :: Mode			= Edit					// indicates an editor
 				| Display				// indicates that one just wants to display something
 
-mkEditHGEC 		:: !FormId 	!Mode				d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSetHGEC 		:: !FormId 	!Mode				d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSelfHGEC 		:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkApplyHGEC 	:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkStoreHGEC 	:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkApplyEditHGEC	:: !FormId 	!d					d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkEditForm 		:: !FormId 	!Mode				d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSetForm 		:: !FormId 	!Mode				d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSelfForm 		:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyForm 	:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkStoreForm 	:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyEditForm	:: !FormId 	!d					d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkSpecialEditor :: !FormId 	!Mode !(Bimap d v)  d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
 
-mkEditHGEC2:: !FormId !Mode d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkEditForm2:: !FormId !Mode d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 
 
-// mkViewHGEC is the swiss army nife function creating an editor with a view v of data d
+// mkViewForm is the swiss army nife function creating an editor with a view v of data d
 
-:: HBimap d v =	{ toHGEC   	:: d (Maybe v) -> v		// converts data to view domain, given current view
-				, updHGEC 	:: Bool v -> v			// update function, True when the form is edited 
-				, fromHGEC 	:: Bool v -> d			// converts view back to data domain, True when form is edited
-				, resetHGEC :: Maybe (v -> v)		// can be used to reset view (eg for buttons)
+:: HBimap d v =	{ toForm   	:: d (Maybe v) -> v		// converts data to view domain, given current view
+				, updForm 	:: Bool v -> v			// update function, True when the form is edited 
+				, fromForm 	:: Bool v -> d			// converts view back to data domain, True when form is edited
+				, resetForm :: Maybe (v -> v)		// can be used to reset view (eg for buttons)
 				}
 
-mkViewHGEC 		:: !FormId 	!Mode !(HBimap d v) 	d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
+mkViewForm 		:: !FormId 	!Mode !(HBimap d v) 	d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
 
 // generic functions that do the real work,
-// end user just has to derive them for mkHGEC ...
+// end user just has to derive them for mkForm ...
 
 // gForm converts any Clean type to html code (form) to be used in a body
 // gUpd updates a value of type t given any user input in the html form
 
 :: UpdMode
 
-generic gForm a :: Mode a *HSt -> *((a,BodyTag), *HSt)	
+generic gForm a :: !FormId !Mode a !*HSt -> *((a,BodyTag), !*HSt)	
 generic gUpd a 	:: UpdMode a -> (UpdMode,a)
 
 derive gForm Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (,) 
