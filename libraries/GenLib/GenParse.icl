@@ -706,12 +706,10 @@ gParse{|[]|} parse_arg (ExprList exprs)
 gParse{|[]|} parse_arg _ = Nothing
 
 gParse{|{}|} parse_arg (ExprArray exprs)
-	#! maybe_values = map parse_arg exprs
 	= mapMaybe (\xs -> {x\\x<-xs}) (maybeAll (map parse_arg exprs)) 
 gParse{|{}|} parse_arg _ = Nothing
 		
 gParse{|{!}|} parse_arg (ExprArray exprs)
-	#! maybe_values = map parse_arg exprs
 	= mapMaybe (\xs -> {x\\x<-xs}) (maybeAll (map parse_arg exprs))
 gParse{|{!}|} parse_arg _ = Nothing
 
