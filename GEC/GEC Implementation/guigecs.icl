@@ -76,8 +76,8 @@ where
 						]
 		= customGECGUIFun Nothing [] undef basicGUI (update cId) outputOnly pSt
 	where
-		update cId v pSt		// PA: note that if printVEC would work properly (no appended zeroes), then slicing would not be necessary!
-			= setColourTextControlText cId (txt%(0,seek0 txt-1)) pSt
+		update cId v pSt
+			= setColourTextControlText cId txt pSt
 		where
 			txt	= printGEC v
 	basicGECGUI` typeName setValue outputOnly=:Interactive pSt
@@ -186,15 +186,3 @@ where
 			# (font,  picture)	= openDialogFont picture
 			# (widths,picture)	= getFontStringWidths font allFieldNames picture
 			= ((getFontDef font,maxList [defTextWidths : widths]),picture)
-
-//	PA: local hack to make printVEC return decent non-zero terminated string.
-seek0 :: !String -> Int
-seek0 str = seek 0
-where
-	maxIndex	= size str - 1
-	
-	seek :: !Int -> Int
-	seek i
-		| i>maxIndex	= maxIndex
-		| str.[i]=='\0'	= i
-		| otherwise		= seek (i+1)
