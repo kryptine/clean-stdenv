@@ -274,7 +274,7 @@ where
 	newfoundplacings1
 		= [ {word=nw,pos=p,dir=r,/*endscore*/score=if (length gl==7) (s+50) s}
 								\\	nw	<- startwith
-								,	(firstmissingletter,position) <- [difference nw uniquecomputerletters 0]
+								,	let (firstmissingletter,position) = difference nw uniquecomputerletters 0
 								,	r <- [Horizontal,Vertical]
 								,	p <- if (position<>7) (if (r==Horizontal)
 															(seekfreehorpositions board firstmissingletter position)
@@ -286,7 +286,7 @@ where
 															[(i,j) \\ i <- [max 0 (minx-1)       .. min 14 (maxx+1)]
 																	, j <- [max 0 (miny-size nw) .. min (14-size nw) maxy]]
 														  )
-								,	(_,m,gl,s,nws) <- [tryaddword board nw p r]
+								,	let (_,m,gl,s,nws) = tryaddword board nw p r
 								|	ok_solution m gl nws nw
 		  ]
 	ok_solution m gl nws nw
@@ -329,7 +329,7 @@ addatpositions board wordlist computerletters (poshor,posver) (Letter l _) first
 							|	wordcontainsletters nw uniquecomputerletters
 							,	r <- [Horizontal,Vertical]
 							,	p <- if (r==Horizontal) poshor posver
-							,	(_,m,gl,s,nws) <- [tryaddword board nw p r]
+							,	let (_,m,gl,s,nws) = tryaddword board nw p r
 							|	ok_solution m gl nws nw
 	]
 where
