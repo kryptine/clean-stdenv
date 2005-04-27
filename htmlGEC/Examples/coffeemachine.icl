@@ -14,10 +14,9 @@ coffeemachine hst
 # ((command,combody),hst)	= TableFuncBut "cb" Edit commandbuttons hst	
 # ((option, optbody),hst)	= TableFuncBut "ob" Edit optionbuttons  hst	
 # ((machine,_)      ,hst)	= mkStoreForm "hidden"  (option o command) initmachine hst
-# ((_,contbody)		,hst)	= mkEditForm "cont" Display (displaycontents  machine) hst	
 = mkHtml "Coffee Machine"
 		[ H1 [] "Coffee Machine: "
-		, contbody <=> combody
+		, toHtml (displaycontents  machine) <=> combody
 		, optbody
 		, Br
 		, B [] (displayoutput machine)
