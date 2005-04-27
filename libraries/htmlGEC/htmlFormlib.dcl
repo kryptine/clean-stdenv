@@ -36,7 +36,7 @@ listForm 			:: !FormId !Mode ![a] 		!*HSt -> (([a],![BodyTag]),!*HSt) 	| gForm{|
 
 // ListFuncBut		: assign functions to buttons, returns function corresponding to the button pressed, and the buttons body
 
-ListFuncBut 		:: !FormId !Mode [(Button, a -> a)] !*HSt 
+ListFuncBut 		:: !Bool !FormId !Mode [(Button, a -> a)] !*HSt 
 													 -> ((a -> a,![BodyTag]),!*HSt)
 // ListFuncCheckBox	: assign functions to checkboxes, returns function corresponding to the checkbox pressed, and the checkbox body
 //					: the current setting of the checkboxes is remembered, first argument indicates that the new settings have to be taken over
@@ -57,6 +57,6 @@ ListFuncRadio 		:: !Int !FormId !Mode [Int -> a -> a] !*HSt
 //					: the current setting of the menu is remembered, pos integer: set menu, otherwise it just indicates the initial setting
 //					: arguments of callback function: - Int indicates which button is set
 
-FuncMenu :: !Int !FormId !Mode [(String, a -> a)] !*HSt 
+FuncMenu 			:: !Int !FormId !Mode [(String, a -> a)] !*HSt 
 													 -> (((a -> a,Int),BodyTag),!*HSt)
 

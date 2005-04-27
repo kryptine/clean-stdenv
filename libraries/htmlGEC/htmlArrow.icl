@@ -38,7 +38,7 @@ where
 		# ((b,bodya),bool,hst) = gec_ab ((a,prevbody),bool,hst)
 		= (((b,c),bodya),bool,hst)
 
-edit :: String -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+edit :: FormId -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 edit title = HGC mkApplyEdit`
 where
 	mkApplyEdit` :: ((a,[(String,BodyTag)]),Bool,*HSt ) -> ((a,[(String,BodyTag)]),Bool,*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
@@ -49,14 +49,14 @@ where
 	# ((a,bodya),hst) = mkEditForm2 title Edit initval hst //to be implemented
 	= ((a,[(title,bodya):prevbody]),True,hst)
 
-display :: String -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+display :: FormId -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 display title = HGC mkEditForm`
 where
 	mkEditForm` ((val,prevbody),bool,hst) 
 	# ((a,bodya),hst) = mkEditForm title Display val hst
 	= ((a,[(title,bodya):prevbody]),bool,hst)
 
-store :: String s -> GecCircuit (s -> s) s |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} s
+store :: FormId s -> GecCircuit (s -> s) s |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} s
 store title initstore = HGC mkStoreForm`
 where
 	mkStoreForm` ((fun,prevbody),bool,hst) 
@@ -74,7 +74,7 @@ where
 	# (res,bool,hst) = gec_ab (res,True,hst)
 	= (res,False,hst)							// indicates that we loop from here 
 
-lift :: String Mode (String Mode a *HSt -> ((b,BodyTag),*HSt)) -> (GecCircuit a b)
+lift :: FormId Mode (FormId Mode a *HSt -> ((b,BodyTag),*HSt)) -> (GecCircuit a b)
 lift name mode fun = HGC fun`
 where
 	fun` ((a,body),bool,hst)

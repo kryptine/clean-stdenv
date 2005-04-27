@@ -46,7 +46,7 @@ where
 
 :: Gender = Male | Female
 
-gForm{|Person|} mode person hst = specialize editor "person" mode person hst
+gForm{|Person|} formid mode person hst = specialize editor "person" mode person hst
 where
 	editor id mode d hst = mkSpecialEditor id mode {map_to = map_to, map_from = map_from} d hst
  
@@ -56,7 +56,7 @@ where
 	map_from (m <|> Male)	= (Man m)
 	map_from (w <|> Female)	= (Woman w)
 
-gForm{|Family|} mode family hst = specialize editor "family" mode family hst
+gForm{|Family|} formid mode family hst = specialize editor "family" mode family hst
 where
 	editor id mode d hst
 	# ((val,body),hst) = mkSpecialEditor id mode {map_to = map_to, map_from = map_from} d hst
@@ -84,7 +84,7 @@ where
 	woman 	= Woman ""   
 	notmaried = Nothing_
 
-gForm{|Kids|} mode kids hst = specialize editor "kids" mode kids hst 
+gForm{|Kids|} formid mode kids hst = specialize editor "kids" mode kids hst 
 where
 	editor id mode d hst 
 	# ((list,hlbody),hst) = horlist2Form (mkid "hlist") mode     defaultfam (fromKids kids) hst

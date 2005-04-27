@@ -21,9 +21,9 @@ startCircuit 	:: (GecCircuit a b) a *HSt -> ((b,[BodyTag]),*HSt)
 // a display just shows the value
 // a store applies the function to the stored value
 
-edit 			:: String 	-> GecCircuit a a 			|  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-display 		:: String 	-> GecCircuit a a 			|  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-store 			:: String a -> GecCircuit (a -> a) a 	|  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+edit 			:: FormId 	-> GecCircuit a a 			|  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+display 		:: FormId 	-> GecCircuit a a 			|  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+store 			:: FormId a -> GecCircuit (a -> a) a 	|  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 	
 feedback 		:: (GecCircuit a b) (GecCircuit b a) -> (GecCircuit a b)
 
@@ -31,4 +31,4 @@ self 			:: (a -> a) (GecCircuit a a) -> GecCircuit a a
 
 // to lift library functions to the circuit domain
 
-lift :: String Mode (String Mode a *HSt -> ((b,BodyTag),*HSt)) -> (GecCircuit a b)
+lift :: FormId Mode (FormId Mode a *HSt -> ((b,BodyTag),*HSt)) -> (GecCircuit a b)
