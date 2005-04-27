@@ -11,7 +11,7 @@ derive gParse MachineState, Output, Product
 Start world  = doHtml coffeemachine world
 
 coffeemachine hst
-# ((input,buttons)		,hst) = ListFuncBut "cb" Edit allbuttons hst	
+# ((input,buttons)		,hst) = ListFuncBut False "cb" Edit allbuttons hst	
 # (((option,options),_)	,hst) = ListFuncCheckBox False "op" Edit (optionbuttons False False) hst	
 # ((machine,_)	  		,hst) = mkStoreForm "hidden" (option o input) initmachine hst
 # ((_,checkbox)			,hst) = ListFuncCheckBox True "op" Edit (optionbuttons machine.milk machine.sugar) hst	
