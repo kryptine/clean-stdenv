@@ -51,4 +51,4 @@ colsum table	= map sum (transpose table)
 transpose table	= [[table!!i!!j \\ i <- [0..(length table)    - 1]]
 						    	\\ j <- [0..length (table!!0) - 1]
 			  	  ]
-inittable	= [map ((+) i) [1..5] \\ i <- [0,5..15]]	
+inittable	= [ [i..i+5] \\ i <- [0,5..20]]	

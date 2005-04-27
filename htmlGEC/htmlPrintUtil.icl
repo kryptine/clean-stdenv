@@ -80,7 +80,7 @@ openCmnd :: !a !b -> FtoF | gHpr{|*|} a & gHpr{|*|} b
 openCmnd  hdr attr =  print "<"  <+ hdr <+ attr <+ ">"
 
 closeCmnd :: !a -> FtoF | gHpr{|*|} a
-closeCmnd hdr =  print "</" <+ hdr <+ ">"
+closeCmnd hdr =  print "\r</" <+ hdr <+ ">\r"
 
 htmlAttrCmnd 	:: !hdr !attr !body  	-> FtoF | gHpr{|*|} hdr & gHpr{|*|} attr & gHpr{|*|} body
 htmlAttrCmnd hdr attr txt 

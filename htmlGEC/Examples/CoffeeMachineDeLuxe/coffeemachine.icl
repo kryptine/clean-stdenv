@@ -13,10 +13,10 @@ Start world  = doHtml coffeemachine world
 coffeemachine hst
 # ((input,buttons)		,hst) = ListFuncBut "cb" Edit allbuttons hst	
 # (((option,options),_)	,hst) = ListFuncCheckBox False "op" Edit (optionbuttons False False) hst	
-# ((machine,_)	  		,hst) = mkStoreHGEC "hidden" (option o input) initmachine hst
+# ((machine,_)	  		,hst) = mkStoreForm "hidden" (option o input) initmachine hst
 # ((_,checkbox)			,hst) = ListFuncCheckBox True "op" Edit (optionbuttons machine.milk machine.sugar) hst	
-# ((_,prizebody)  		,hst) = listHGEC "prize" Display prizes hst	
-# ((_,statebody)  		,hst) = listHGEC "cont" Display (mstate machine) hst	
+# ((_,prizebody)  		,hst) = listForm "prize" Display prizes hst	
+# ((_,statebody)  		,hst) = listForm "cont" Display (mstate machine) hst	
 = mkHtml "Coffee Machine"
 		[ H1 [] "Fancy Coffee Machine ..."
 		, Br

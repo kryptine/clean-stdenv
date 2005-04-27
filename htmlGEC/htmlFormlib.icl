@@ -32,15 +32,11 @@ where
 counterForm 	:: !FormId !Mode a !*HSt -> ((a,!BodyTag),!*HSt) | +, -, one,  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 counterForm name mode i hst = mkViewForm name mode bimap i hst
 where
-	bimap =	{ toForm 	= toCounter
+	bimap =	{ toForm 	= \n _ -> (n,down,up)
 			, updForm	= updCounter`
-			, fromForm	= fromCounter
+			, fromForm	= \_ (n,_,_) -> n
 			, resetForm = Nothing
 			}
-
-	toCounter n _ = (n,down,up)
-
-	fromCounter _ (n,_,_) = n
 
 	updCounter` True val = updCounter val
 	updCounter` _ val = val
@@ -99,35 +95,39 @@ where
 	RowFuncBut s mode [] hst = ((id,EmptyBody),hst)
 	RowFuncBut s mode [x:xs] hst 
 	# ((rowfun,rowb),hst) 	= RowFuncBut s mode xs hst
-	# ((fun,oneb)   ,hst)	= FuncBut s mode x hst
+	# ((fun,oneb)   ,hst)	= FuncBut False s mode x hst
 	= ((fun o rowfun,oneb <=> rowb),hst)
 
-FuncBut :: !FormId !Mode !(Button, a -> a) !*HSt -> ((a -> a,!BodyTag),!*HSt)
-FuncBut s mode (button=:LButton _ name ,cbf) hst = mkViewForm (s +++ name) mode bimap id hst
+FuncBut :: !Bool !FormId !Mode !(Button, a -> a) !*HSt -> ((a -> a,!BodyTag),!*HSt)
+FuncBut init s mode (button=:LButton _ name ,cbf) hst = mkViewForm (s +++ name) mode bimap id hst
 where
-	bimap =	{ toForm 	= \_ _	-> button
+	bimap =	{ toForm 	= \_ v -> case v of
+									Nothing = button
+									(Just v) = if init button v
+			, updForm	= \_ v -> v
+			, fromForm	= \_ but -> case but of 
+									Pressed  -> cbf
+									_		 -> id
+			, resetForm	= Just (\_ 	-> button)
+			}
+FuncBut init s mode (button=:PButton _ ref ,cbf) hst = mkViewForm (s +++ ref) mode bimap id hst
+where
+	bimap =	{ toForm 	= \_ v -> case v of
+									Nothing = button
+									(Just v) = if init button v
 			, updForm	= \_ v -> v
 			, fromForm	= \_ but -> case but of 
 									Pressed -> cbf
 									_		  -> id
 			, resetForm	= Just (\_ 	-> button)
 			}
-FuncBut s mode (button=:PButton _ ref ,cbf) hst = mkViewForm (s +++ ref) mode bimap id hst
-where
-	bimap =	{ toForm 	= \_ _	-> button
-			, updForm	= \_ v -> v
-			, fromForm	= \_ but -> case but of 
-									Pressed -> cbf
-									_		  -> id
-			, resetForm	= Just (\_ 	-> button)
-			}
-FuncBut s mode (Pressed,cbf) hst = FuncBut s mode (LButton 10 "??",cbf) hst
+FuncBut init s mode (Pressed,cbf) hst = FuncBut init s mode (LButton 10 "??",cbf) hst
 
-ListFuncBut :: !FormId !Mode [(Button, a -> a)] !*HSt -> ((a -> a,![BodyTag]),!*HSt)
-ListFuncBut s mode [] hst = ((id,[]),hst)
-ListFuncBut s mode [x:xs] hst 
-# ((rowfun,rowb),hst) 	= ListFuncBut s mode xs hst
-# ((fun,oneb)   ,hst)	= FuncBut s mode x hst
+ListFuncBut :: !Bool !FormId !Mode [(Button, a -> a)] !*HSt -> ((a -> a,![BodyTag]),!*HSt)
+ListFuncBut b s mode [] hst = ((id,[]),hst)
+ListFuncBut b s mode [x:xs] hst 
+# ((rowfun,rowb),hst) 	= ListFuncBut b s mode xs hst
+# ((fun,oneb)   ,hst)	= FuncBut b s mode x hst
 = ((fun o rowfun,[oneb:rowb]),hst)
 
 ListFuncCheckBox :: !Bool !FormId !Mode [(CheckBox, Bool [Bool] a -> a)] !*HSt 
