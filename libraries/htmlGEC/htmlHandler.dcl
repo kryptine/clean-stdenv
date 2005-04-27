@@ -9,44 +9,22 @@ import GenPrint
 import GenParse
 import StdBool
 
-// doHtml main routine for generating & handling of a Html form
-
 :: HSt 	// unique state to pass around
+
+// doHtml main wrapper for generating & handling of a Html form
 
 doHtml :: (*HSt -> (Html,!*HSt)) *World -> *World 
 
-// mkForm converts any Clean type into a Html GEC
+// toHtml displays any type into a non-editable form
 
-:: FormId	 	:== String				// unique id identifying the form
+toHtml :: a -> BodyTag | gForm {|*|} a
 
-// the editors below are just versiosn of "mkViewForm".
+// mkViewForm is the swiss army nife function creating stateful interactive forms with a view v of data d
 // make shure that all editors have a unique identifier !
 
-// mkEdit  Edit 	: editor, argument is initial value, delivers contents of (updated) form ("source")
-// mkEdit  Display  : same as mkSet
-// mkEdit2    		: same as mkEdit, used for feedback loop in html arrows
-// mkSet			: displays its arguments
-// mkApply 			: displays application of function to the argument
-// mkStore			: displays application of function to the internal state, second argument is initial state
-// mkApplyEdit		: editor, displays its first argument, if not updated, second argument is initial state
-// mkSpecial		: editor, applies bimaps when evaluated
-
-:: Mode			= Edit					// indicates an editor
-				| Display				// indicates that one just wants to display something
-
-mkEditForm 		:: !FormId 	!Mode				d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSetForm 		:: !FormId 	!Mode				d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSelfForm 		:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkApplyForm 	:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkStoreForm 	:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkApplyEditForm	:: !FormId 	!d					d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSpecialEditor :: !FormId 	!Mode !(Bimap d v)  d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
-
-mkEditForm2:: !FormId !Mode d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-
-
-// mkViewForm is the swiss army nife function creating an editor with a view v of data d
-
+:: FormId	 	:== String				// unique id identifying the form
+:: Mode			= Edit					// indicates an editable form
+				| Display				// indicates a non-editable form
 :: HBimap d v =	{ toForm   	:: d (Maybe v) -> v		// converts data to view domain, given current view
 				, updForm 	:: Bool v -> v			// update function, True when the form is edited 
 				, fromForm 	:: Bool v -> d			// converts view back to data domain, True when form is edited
@@ -55,19 +33,25 @@ mkEditForm2:: !FormId !Mode d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*
 
 mkViewForm 		:: !FormId 	!Mode !(HBimap d v) 	d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
 
-// generic functions that do the real work,
-// end user just has to derive them for mkForm ...
+// For convenience all kinds of variants of "mkViewForm" are predefined, simply by chosing certain defaults for the HBimap.
 
-// gForm converts any Clean type to html code (form) to be used in a body
-// gUpd updates a value of type t given any user input in the html form
+// mkBimap			: editor, using Bimaps instead of HBimaps
+// mkEdit  		 	: editor, remembers its state, argument is taken as initial state 
+// mkEdit2    		: used for feedback loop in html arrows
+// mkSet			: editor, always displays argument regardless of current state of the editor
+// mkSelf			: editor, state is updated with function; second argument is taken as initial state   
+// mkApply 			: displays application of function to the argument
+// mkStore			: applies function to the internal state; second argument is initial state
+// mkApplyEdit		: editor, displays its first argument if it is not updated; second argument is initial state
 
-:: UpdMode
-
-generic gForm a :: !FormId !Mode a !*HSt -> *((a,BodyTag), !*HSt)	
-generic gUpd a 	:: UpdMode a -> (UpdMode,a)
-
-derive gForm Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (,) 
-derive gUpd  Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (,) 
+mkBimapEditor 	:: !FormId 	!Mode !(Bimap d v)  d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
+mkEditForm 		:: !FormId 	!Mode				d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkEditForm2		:: !FormId  !Mode 				d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSetForm 		:: !FormId 	!Mode				d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSelfForm 		:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyForm 	:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkStoreForm 	:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyEditForm	:: !FormId 	!d					d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 
 // Clean types that have a special representation
 
@@ -95,16 +79,33 @@ derive gUpd  Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (
 	
 instance toBool CheckBox, Button, RadioButton		// True if checkbox checked, button pressed
 
-derive gForm 		 (,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu 
-derive gUpd  		 (,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu
-derive gPrint 	(,), (,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu
-derive gParse 	(,), (,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu
-
 // Some default constants used for the length of input boxes
 
 defsize  :== 10										// size of inputfield
 defpixel :== 83										// size in pixels for buttons, pull-down buttons
 backcolor :== "#6699CC"								// background color of non-editable fields
+
+// generic functions that do the real work,
+// end user only has to derive them when using the functions above
+
+// gForm converts any Clean type to html code (form) to be used in a body
+// gUpd updates a value of type t given any user input in the html form
+
+:: UpdMode
+
+generic gForm a :: !FormId !Mode a !*HSt -> *((a,BodyTag), !*HSt)	
+generic gUpd a 	:: UpdMode a -> (UpdMode,a)
+
+derive gForm Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (,) 
+derive gUpd  Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (,) 
+
+derive gForm 		 (,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu 
+derive gUpd  		 (,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu
+derive gPrint 	(,), (,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu
+derive gParse 	(,), (,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu
+
+// specialize should be used if one want to make specialized instantiations of gForm
+// it ensures that update positions remain counted correctly
 
 specialize :: (FormId Mode a *HSt -> ((a,BodyTag),*HSt)) FormId Mode a *HSt -> ((a,BodyTag),*HSt) | gUpd {|*|} a
 

@@ -25,11 +25,19 @@ derive gUpd		   (,,)
 				| UpdC String				// choose indicated constructor 
 				| UpdS String				// new piece of text
 
+
+toHtml :: a -> BodyTag | gForm {|*|} a
+toHtml a 
+# ((_,body),_) = (gForm{|*|} "__toHtml" Display a mkHSt)
+= body
+
 mkHSt ::  *HSt
 mkHSt = (0,[])
 
-incHSt :: HSt -> HSt
-incHSt (inidx,lhst) = (inidx+1,lhst)
+ifMode :: Mode a a -> a
+ifMode Edit 	then else = then
+ifMode Display  then else = else 
+
 
 // top level function given to end user
 // it collects the html page to display, and returns the contents of all Clean GEC's / Forms created
@@ -84,7 +92,7 @@ where
 mkApplyForm :: !FormId !(d -> d) d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkApplyForm formid cbf data hst
 = mkViewForm formid Display 
-	{toForm = toFormid , updForm = \_ v = cbf data , fromForm = \_ v -> v, resetForm = Nothing} data hst
+	{toForm = toFormid , updForm = \_ _ = cbf data , fromForm = \_ v -> v, resetForm = Nothing} data hst
 
 // editor which applies the function to its argument
 
@@ -101,8 +109,8 @@ where
 	update True  newval = newval
 	update False val    = inputval
 
-mkSpecialEditor :: !FormId !Mode !(Bimap d v) d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
-mkSpecialEditor formid mode {map_to,map_from} d hst
+mkBimapEditor :: !FormId !Mode !(Bimap d v) d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
+mkBimapEditor formid mode {map_to,map_from} d hst
 = mkViewForm formid mode 	{ toForm = \d _ -> map_to d
 						, updForm = \b v -> map_to (map_from v)
 						, fromForm = \b v -> map_from v
@@ -254,11 +262,11 @@ gForm{|CONS of t|} gHc formid mode (CONS c) hst=:(inidx,lhst)
 | t.gcd_name.[(size t.gcd_name) - 1] == '_' // don't display constructor names which end with an underscore
 # ((c,body),hst) = gHc formid mode c (inidx+1,lhst) 
 = ((CONS c, body),hst)
-# (selector,hst)= mkConsSelector t hst
+# (selector,hst)= mkConsSelector formid t hst
 # ((c,body),hst) = gHc formid mode c hst
 = ((CONS c,STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[selector,body]]),hst)
 where
-	mkConsSelector thiscons (inidx,lhst=:[(formid,mystate):states]) 
+	mkConsSelector formid thiscons (inidx,lhst) 
 						= (mkConsSel inidx allnames myindex formid, (inidx+1,lhst))
 	where
 		myname   = thiscons.gcd_name
@@ -302,7 +310,6 @@ gForm{|FIELD of d |} gHx formid mode (FIELD x) hst
 # ((nx,bx),hst) = gHx formid mode x hst
 = ((FIELD nx, STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[fieldname,bx]]),hst)
 where
-//	fieldname = T (d.gfd_name +++ ": ")
 	fieldname =Input 	[	Inp_Type Inp_Text
 						, 	Inp_Value (SV (d.gfd_name +++ ": "))
 						,	Inp_ReadOnly ReadOnly
@@ -441,9 +448,7 @@ derive gUpd   <|>
 derive gParse <|>
 derive gPrint <|>
 
-
 // to switch between modes within a type ...
-
 
 gForm{|DisplayMode|} gHa formid mode (HideMode a) (inidx,lhsts) 	
 # ((na,nba),hst) = gHa formid Display a (inidx+1,lhsts)
@@ -464,23 +469,25 @@ derive gPrint DisplayMode
 // Buttons to press
 
 gForm{|Button|} formid mode v=:(LButton size bname) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
-= ((v	, Input [ Inp_Type Inp_Button
+= ((v	, Input (ifMode mode [] [Inp_Disabled Disabled] ++
+				[ Inp_Type Inp_Button
 				, Inp_Value (SV bname)
 				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS bname))
 				, `Inp_Std [Std_Style ("width:" +++ toString size)]
 				, `Inp_Events [OnClick callClean]
-				] "")
+				]) "")
 	, (inidx+1,lhsts))
 gForm{|Button|} formid mode v=:(PButton (height,width) ref) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
-= ((v	, Input	[ Inp_Type Inp_Image
+= ((v	, Input	(ifMode mode [] [Inp_Disabled Disabled] ++
+				[ Inp_Type Inp_Image
 				, Inp_Value (SV ref)
 				, Inp_Src ref
 				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS ref))
 				, `Inp_Std [Std_Style ("width:" +++ toString width +++ " height:" +++ toString height)]
 				, `Inp_Events [OnClick callClean]
-				] "")
+				]) "")
 	, (inidx+1,lhsts))
-gForm{|Button|} formid mode Pressed hst = gForm {|*|} formid mode (LButton defsize "??") hst // end user should reset button
+gForm{|Button|} formid mode Pressed hst = gForm {|*|} formid mode (LButton defpixel "??") hst // end user should reset button
 
 gUpd{|Button|} (UpdSearch (UpdS name) 0) 	_ = (UpdDone,Pressed)					// update integer value
 gUpd{|Button|} (UpdSearch val cnt)      	b = (UpdSearch val (cnt - 1),b)			// continue search, don't change
@@ -490,19 +497,21 @@ derive gParse Button
 derive gPrint Button
 
 gForm{|CheckBox|} formid mode v=:(CBChecked name) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
-= ((v	, Input [ Inp_Type Inp_Checkbox
+= ((v	, Input (ifMode mode [] [Inp_Disabled Disabled] ++
+				[ Inp_Type Inp_Checkbox
 				, Inp_Value (SV name)
 				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS name))
 				, Inp_Checked Checked
 				, `Inp_Events [OnClick callClean]
-				] "")
+				]) "")
 	, (inidx+1,lhsts))
 gForm{|CheckBox|} formid mode v=:(CBNotChecked name) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
-= ((v	, Input [ Inp_Type Inp_Checkbox
+= ((v	, Input (ifMode mode [] [Inp_Disabled Disabled] ++
+				[ Inp_Type Inp_Checkbox
 				, Inp_Value (SV name)
 				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS name))
 				, `Inp_Events [OnClick callClean]
-				] "")
+				]) "")
 	, (inidx+1,lhsts))
 
 derive gUpd CheckBox
@@ -510,19 +519,21 @@ derive gParse CheckBox
 derive gPrint CheckBox
 
 gForm{|RadioButton|} formid mode v=:(RBChecked name) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
-= ((v	, Input [ Inp_Type Inp_Radio
+= ((v	, Input (ifMode mode [] [Inp_Disabled Disabled] ++
+				[ Inp_Type Inp_Radio
 				, Inp_Value (SV name)
 				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS name))
 				, Inp_Checked Checked
 				, `Inp_Events [OnClick callClean]
-				] "")
+				]) "")
 	, (inidx+1,lhsts))
 gForm{|RadioButton|} formid mode v=:(RBNotChecked name) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
-= ((v	, Input [ Inp_Type Inp_Radio
+= ((v	, Input (ifMode mode [] [Inp_Disabled Disabled] ++
+				[ Inp_Type Inp_Radio
 				, Inp_Value (SV name)
 				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS name))
 				, `Inp_Events [OnClick callClean]
-				] "")
+				]) "")
 	, (inidx+1,lhsts))
 
 derive gUpd	  RadioButton
@@ -530,11 +541,12 @@ derive gParse RadioButton
 derive gPrint RadioButton
 
 gForm{|PullDownMenu|} formid mode v=:(PullDown (size,width) (menuindex,itemlist)) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
-= ((v	, Select 	[ Sel_Name ("CS")
+= ((v	, Select 	(ifMode mode [] [Sel_Disabled Disabled] ++
+					[ Sel_Name ("CS")
 					, Sel_Size size
 					, `Sel_Std [Std_Style ("width:" +++ (toString width) +++ "px")]
 					, `Sel_Events [OnChange callClean]
-					]
+					])
 					[ Option  
 						[ Opt_Value (encodeInfo (uniqueid,inidx,UpdC (itemlist!!j)))
 						: if (j == menuindex) [Opt_Selected Selected] [] 

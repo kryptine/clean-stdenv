@@ -48,7 +48,7 @@ where
 
 gForm{|Person|} formid mode person hst = specialize editor "person" mode person hst
 where
-	editor id mode d hst = mkSpecialEditor id mode {map_to = map_to, map_from = map_from} d hst
+	editor id mode d hst = mkBimapEditor id mode {map_to = map_to, map_from = map_from} d hst
  
  	map_to (Man m) 		= (m <|> Male)
 	map_to (Woman w) 	= (w <|> Female)
@@ -59,7 +59,7 @@ where
 gForm{|Family|} formid mode family hst = specialize editor "family" mode family hst
 where
 	editor id mode d hst
-	# ((val,body),hst) = mkSpecialEditor id mode {map_to = map_to, map_from = map_from} d hst
+	# ((val,body),hst) = mkBimapEditor id mode {map_to = map_to, map_from = map_from} d hst
 	= ((val,tab (nrkids val) body),hst)
 	
 	nrkids (Family  p s (Just_ (p2,Kids kids))) = length kids

@@ -18,12 +18,12 @@ Global
 		MarkingCollector:	False
 		StandardRuntimeEnv:	True
 		Profile
-			Memory:	True
+			Memory:	False
 			MemoryMinimumHeapSize:	0
 			Time:	True
-			Stack:	False
+			Stack:	True
 		Output
-			Output:	BasicValuesOnly
+			Output:	NoReturnType
 			Font:	Courier
 			FontSize:	9
 			WriteStdErr:	False
@@ -1091,7 +1091,7 @@ Static
 		Path:	{Application}\Libraries\Generics\GenPrint.icl
 	Objs
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup0.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup1Profile.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup1Trace.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup2.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_system.o
 		Path:	{Project}\Clean System Files\spreadsheet.o
