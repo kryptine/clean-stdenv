@@ -3,32 +3,30 @@ implementation module htmlPrintUtil
 import StdEnv, ArgEnv
 import StdGeneric
 
-:: FtoF :== (*File -> *File)
 :: Url 	:== String
 
-generic gHpr a :: !FtoF !a -> FtoF
+generic gHpr a :: !*File !a -> *File
 
-gHpr{|String|} prev s = prev <+> print s	// the only entry that actualy prints something
+gHpr{|String|} file s = file <<< s	// the only entry that actualy prints something
 											// all others eventually come here converted to string
 
-gHpr{|Int|}    prev i = prev <+ toString i
-gHpr{|Real|}   prev r = prev <+ toString r
-gHpr{|Bool|}   prev b = prev <+ toString b
-gHpr{|Char|}   prev c = prev <+ toString c
-gHpr{|UNIT|}   				prev _ 				= prev
-gHpr{|PAIR|}   gHpra gHprb 	prev (PAIR a b) 	= gHprb (gHpra prev a) b
-gHpr{|EITHER|} gHprl gHprr 	prev (LEFT left) 	= gHprl prev left
-gHpr{|EITHER|} gHprl gHprr 	prev (RIGHT right) 	= gHprr prev right
-gHpr{|OBJECT|} gHpro 		prev (OBJECT object)= gHpro prev object 
+gHpr{|Int|}    file i = file <<< i
+gHpr{|Real|}   file r = file <<< r
+gHpr{|Bool|}   file b = file <<< toString b
+gHpr{|Char|}   file c = file <<< c
+gHpr{|UNIT|}   				file _ 				= file
+gHpr{|PAIR|}   gHpra gHprb 	file (PAIR a b) 	= gHprb (gHpra file a) b
+gHpr{|EITHER|} gHprl gHprr 	file (LEFT left) 	= gHprl file left
+gHpr{|EITHER|} gHprl gHprr 	file (RIGHT right) 	= gHprr file right
+gHpr{|OBJECT|} gHpro 		file (OBJECT object)= gHpro file object 
 
-gHpr{|CONS of t|} gPrHtmlc prev (CONS c) // constructor names are printed, prefix Foo_ is stripped
+gHpr{|CONS of t|} gPrHtmlc file (CONS c) // constructor names are printed, prefix Foo_ is stripped
 = case t.gcd_name.[0] of
-	'`' 	= 	gPrHtmlc prev c	// just skip this constructor name
+	'`' 	= 	gPrHtmlc file c	// just skip this constructor name
 	else	=	case t.gcd_arity of
-//					0 = prev <+ " \"" <+ myprint t.gcd_name	<+ "\""
-					0 = prev <+   myprint t.gcd_name	 
-					1 = gPrHtmlc (prev <+ " " <+ myprint t.gcd_name <+ " = ") c	
-					n = gPrHtmlc (prev <+ " " <+ myprint t.gcd_name         ) c
+					0 = file <+   myprint t.gcd_name	 
+					1 = gPrHtmlc (file <+ " " <+ myprint t.gcd_name <+ " = ") c	
+					n = gPrHtmlc (file <+ " " <+ myprint t.gcd_name         ) c
 where
 	myprint :: String -> String
 	myprint string = {toLower char \\ char <-: stripprefix string } 
@@ -39,54 +37,54 @@ where
 	| otherwise 		= string  
 
 
-gHpr{|[]|} gHlist prev list = myfold prev list 
+gHpr{|[]|} gHlist file list = myfold file list 
 where
-	myfold prev [x:xs] = myfold (gHlist prev x) xs
-	myfold prev [] = prev
+	myfold file [x:xs] = myfold (gHlist file x) xs
+	myfold file [] = file
 
 
 // outility print functions based on gHpr
 
-print :: !String -> FtoF
+print :: !String -> *FoF
 print a = \f -> fwrites a f
 
-(<+) infixl :: !FtoF !a -> FtoF | gHpr{|*|} a
-(<+) prev new = gHpr{|*|} prev new
+(<+) infixl :: !*File !a -> *File | gHpr{|*|} a
+(<+) file new = gHpr{|*|} file new
 
-(<+>) infixl :: !FtoF !FtoF -> FtoF
-(<+>) prev new = new o prev
+(<+>) infixl :: !*File *FoF -> *File
+(<+>) file new = new file
 
 :: Ouotes a = Ouotes a // for putting " around a term
 
-gHpr{|Quotes|} gHpra prev (Quotes a) = print "\"" <+> gHpra prev a <+ "\""
+gHpr{|Quotes|} gHpra file (Quotes a) = (file <<< "\"" <+> \file -> gHpra file a) <<< "\""
 
 :: Spaces a = Spaces a // for putting spaces around a term
 
-gHpr{|Spaces|} gHpra prev (Spaces a) = print " " <+> gHpra prev a <+ " "
+gHpr{|Spaces|} gHpra file (Spaces a) = (file <<< " " <+> \file -> gHpra file a) <<< " " 
 
 print_to_stdout :: a *World -> *World | gHpr{|*|} a
 print_to_stdout value world
-# (out,world) = stdio world
-# out = (print "" <+ value) out
-= force_IO out world
+# (file,world) = stdio world
+# file = file <+ value
+= force_IO file world
 where
 	force_IO:: !x *World -> *World
 	force_IO x w = w
 
-htmlCmnd :: !a !b -> FtoF | gHpr{|*|} a & gHpr{|*|} b
-htmlCmnd hdr txt =  (openCmnd hdr "" <+ txt) <+> closeCmnd hdr			
+htmlCmnd :: !a !b -> *FoF | gHpr{|*|} a & gHpr{|*|} b
+htmlCmnd hdr txt =  \file -> closeCmnd hdr (openCmnd hdr "" file <+ txt) 			
 
-openCmnd :: !a !b -> FtoF | gHpr{|*|} a & gHpr{|*|} b
-openCmnd  hdr attr =  print "<"  <+ hdr <+ attr <+ ">"
+openCmnd :: !a !b -> *FoF | gHpr{|*|} a & gHpr{|*|} b
+openCmnd  hdr attr =  \file -> file <<< "<"  <+ hdr <+ attr <+ ">"
 
-closeCmnd :: !a -> FtoF | gHpr{|*|} a
-closeCmnd hdr =  print "\r</" <+ hdr <+ ">\r"
+closeCmnd :: !a -> *FoF | gHpr{|*|} a
+closeCmnd hdr =  \file -> print "\r</" file <+ hdr <+ ">\r"
 
-htmlAttrCmnd 	:: !hdr !attr !body  	-> FtoF | gHpr{|*|} hdr & gHpr{|*|} attr & gHpr{|*|} body
+htmlAttrCmnd 	:: !hdr !attr !body -> *FoF | gHpr{|*|} hdr & gHpr{|*|} attr & gHpr{|*|} body
 htmlAttrCmnd hdr attr txt 
-= openCmnd hdr attr <+ txt <+> closeCmnd hdr
+= \file -> closeCmnd hdr (openCmnd hdr attr file <+ txt)
 
-htmlAttr :: !String !a -> Spaces FtoF | gHpr{|*|} a
-htmlAttr attrname attrvalue = (Spaces (print attrname <+ " = " <+ Quotes attrvalue))
+//htmlAttr :: !String !a -> Spaces *File | gHpr{|*|} a
+//htmlAttr attrname attrvalue = (Spaces (print attrname <+ " = " <+ Quotes attrvalue))
 
 
