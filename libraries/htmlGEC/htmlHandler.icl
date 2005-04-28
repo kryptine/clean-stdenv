@@ -132,6 +132,7 @@ where
 	(isupdated,newview) = case updateFormInfo formid of
 							(False,Nothing) 		= (False,toForm initdata Nothing)
 							(False,Just oldview) 	= (False,toForm initdata (Just oldview))
+//							(True, Just newview)	= (True, newview) //??  
 							(True, Just newview)	= (True, toForm initdata (Just newview)) //??  
 
 	updateview			= updForm  isupdated newview		// apply update function telling user if an update has taken place

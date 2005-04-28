@@ -151,7 +151,7 @@ where
 			bimap =	{ toForm 	= \_ v -> case v of
 											Nothing = checkbox
 											(Just v) = if init checkbox v
-					, updForm	= \b v -> if b (toggle v) v
+					, updForm	= \b v -> if (not init && b) (toggle v) v
 					, fromForm	= \b v -> if b ((docbf  v),toBool v) (\_ a -> a,toBool v)
 					, resetForm	= Nothing
 					}
@@ -161,7 +161,6 @@ where
 		
 			toggle (CBChecked name) 	= CBNotChecked name
 			toggle (CBNotChecked name) 	= CBChecked name
-	
 		
 			s` = s +++ case checkbox of 
 							(CBChecked name) = name

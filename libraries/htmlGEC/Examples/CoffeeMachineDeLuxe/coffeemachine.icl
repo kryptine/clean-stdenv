@@ -8,6 +8,7 @@ derive gUpd   MachineState, Output, Product
 derive gPrint MachineState, Output, Product
 derive gParse MachineState, Output, Product
 
+
 Start world  = doHtml coffeemachine world
 
 coffeemachine hst
@@ -15,16 +16,14 @@ coffeemachine hst
 # (((option,options),_)	,hst) = ListFuncCheckBox False "op" Edit (optionbuttons False False) hst	
 # ((machine,_)	  		,hst) = mkStoreForm "hidden" (option o input) initmachine hst
 # ((_,checkbox)			,hst) = ListFuncCheckBox True "op" Edit (optionbuttons machine.milk machine.sugar) hst	
-# ((_,prizebody)  		,hst) = listForm "prize" Display prizes hst	
-# ((_,statebody)  		,hst) = listForm "cont" Display (mstate machine) hst	
 = mkHtml "Coffee Machine"
 		[ H1 [] "Fancy Coffee Machine ..."
 		, Br
 		, BodyTag
 			[ mkSTable [[bTxt "Content:", bTxt "Value:",bTxt "Input:"]]
-			, statebody!!StateMoney <=> mkrow (buttons%MoneyButtons)
-			, statebody!!StateBeans <=> buttons!!BeansButton
-			, statebody!!StateTrash <=> buttons!!TrashButton
+			, toHtml ("money ",machine.money) <=> mkrow (buttons%MoneyButtons)
+			, toHtml ("beans ",machine.beans) <=> buttons!!BeansButton
+			, toHtml ("trash ",machine.trash) <=> buttons!!TrashButton
 			, Br
 			, bTxt "Options: "
 			, Br
@@ -32,11 +31,12 @@ coffeemachine hst
 			, checkbox!!SugarOption <=> bTxt "Sugar"
 			, Br
 			, mkSTable [[bTxt "Product:", bTxt "Prize:"]]
-			, mkcol (buttons%ProductButtons) <=> mkcol prizebody
+			, mkcol (buttons%ProductButtons) <=> mkcol (map toHtml prizes)
 			, Br
 			, bTxt "Message: ", bTxt (print machine.out options)
 			] <=> displayMachineImage machine.out 
 		, Br
+		, traceHtmlInput
 		] hst
 where
 	allbuttons  = 
@@ -64,11 +64,6 @@ where
 		
 	prizes = [cost Coffee,cost Capuccino, cost Espresso]
 	
-	mstate machine = 	[ ("money ",machine.money)
-						, ("beans ",machine.beans)
-						, ("trash ",machine.trash)
-						]
-
 	displayMachineImage (Prod x) 	= machineImage 4
 	displayMachineImage (Message s) = machineImage 0
 
@@ -96,9 +91,6 @@ where
 		| sugar 		= " with sugar"
 		printoptions _ _  = ""
 	
-	StateMoney 		= 0
-	StateBeans 		= 1
-	StateTrash 		= 2
 	BeansButton		= 0
 	TrashButton		= 1
 	ProductButtons	= (2,4)
