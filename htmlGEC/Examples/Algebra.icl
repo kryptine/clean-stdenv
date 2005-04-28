@@ -4,7 +4,6 @@ import StdEnv, StdHtml
 
 Start world  = doHtml MyPage2  world
 
-
 // representation of a simple process algebra:
 
 :: PA 	= (.+.) infixl 6 PA PA			// equivalent of process algebra +
@@ -25,7 +24,7 @@ MyPage2 hst
 = mkHtml "Process Algebra Experiment"
 	[ H1 [] "Process Algebra Experiment"
 	, Br, Br
-	, exprbody
+	, if bool (toHtml expr) exprbody
 	, Br
 	, BodyTag donebutton
 	, Br , Br
@@ -47,14 +46,6 @@ mkHtml s tags hst 	= (Html (header s) (body tags),hst)
 header s 			= Head [`Hd_Std [Std_Title s]] [] 
 body tags 			= Body [] tags
 
-// the program is still quite complicated:
-
-// first the current set of buttons is read from store "butstore"
-// this is used to re-create these "buttons"; funchosen is the function corresponding to the button pressed 
-// in "store" the process algebra expression is stored: the new expression is calculated depending on the button pressed and stored 
-// from the new expression the new set of buttons is calculated (nbutset); and stored in "butstore" for the next time
-// this is used to calculate the new "buttons" to display
-// the next time we start from the beginning
 
 // internal representation: a unique number is added to each possible next event that can occur 
 
@@ -66,6 +57,14 @@ derive gForm  PAE, PA, []
 derive gUpd   PAE, PA, []
 derive gPrint PAE, PA
 derive gParse PAE, PA
+
+
+// first the current set of buttons is read from store "butstore"
+// this is used to re-create these "buttons"; funchosen is the function corresponding to the button pressed 
+// in "store" the process algebra expression is stored: the new expression is calculated depending on the button pressed and stored 
+// from the new expression the new set of buttons is calculated (nbutset); and stored in "butstore" for the next time
+// this is used to calculate the new "buttons" to display
+// the next time we start from the beginning
 	
 calcprocess :: PA *HSt -> *([BodyTag],*HSt)
 calcprocess expr hst 
@@ -95,7 +94,6 @@ where
 		= done
 	
 		done = (PAE "Done!" 0,[])
-	
 	
 	calcnext :: PA -> (PAE,[PAE])			// numbers all possible events with a unique number (>= 0)
 											// returns these events in a list to make buttons generating easier

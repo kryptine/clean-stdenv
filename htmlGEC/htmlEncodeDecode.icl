@@ -190,10 +190,10 @@ addScript globalstate
 	, globalstateform globalFormName updateInpName globalInpName (SV encodedglobalstate) 
 	]
 where
-	encodedglobalstate = urlEncodeState (removedup globalstate)
+	encodedglobalstate = urlEncodeState (globalstate)
 	
 	removedup []  = []
-	removedup [(id,body):rest] = [(id,body):[(nid,nbody) \\ (nid,nbody) <- rest | nid <> id]]
+	removedup [(id,body):rest] = [(id,body):[(nid,nbody) \\ (nid,nbody) <- removedup rest | nid <> id]]
 
 submitscript :: String String -> BodyTag
 submitscript formname updatename

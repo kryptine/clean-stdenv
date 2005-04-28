@@ -36,12 +36,10 @@ where
 	| isMember '_' list = toString (tl (dropWhile ((<>) '_') list))
 	| otherwise 		= string  
 
-
 gHpr{|[]|} gHlist file list = myfold file list 
 where
 	myfold file [x:xs] = myfold (gHlist file x) xs
 	myfold file [] = file
-
 
 // outility print functions based on gHpr
 
@@ -83,8 +81,3 @@ closeCmnd hdr =  \file -> print "\r</" file <+ hdr <+ ">\r"
 htmlAttrCmnd 	:: !hdr !attr !body -> *FoF | gHpr{|*|} hdr & gHpr{|*|} attr & gHpr{|*|} body
 htmlAttrCmnd hdr attr txt 
 = \file -> closeCmnd hdr (openCmnd hdr attr file <+ txt)
-
-//htmlAttr :: !String !a -> Spaces *File | gHpr{|*|} a
-//htmlAttr attrname attrvalue = (Spaces (print attrname <+ " = " <+ Quotes attrvalue))
-
-
