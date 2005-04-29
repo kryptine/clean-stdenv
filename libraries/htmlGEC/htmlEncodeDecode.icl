@@ -99,7 +99,7 @@ StrippedCheckUpdateId
 AnyInput :: String
 AnyInput
 # (_,_,new,_) = UpdateInfo
-= new
+=: new
 
 CheckUpdate :: (Maybe a, Maybe b) | gParse{|*|} a & gParse{|*|} b 
 CheckUpdate 
@@ -141,19 +141,31 @@ urlEncode [x:xs]
 | isAlphanum x = [x  : urlEncode xs]
 | otherwise    = urlEncodeChar x ++ urlEncode xs
 
-urlEncodeChar x = ['%', toHex (toInt x/16) , toHex (toInt x rem 16)]
-where
-	toHex i = HexNumber !! i
-
-HexNumber = ['0123456789ABCDEF']
+urlEncodeChar x 
+# (c1,c2) = charToHex x
+= ['%', c1 ,c2]
 
 urlDecode :: [Char] -> [Char]
 urlDecode [] 				= []
-urlDecode ['%',hex1,hex2:xs]= [hexchar hex1 hex2:urlDecode xs]
-where
-	hexchar hex1 hex2 = toChar (fromHex hex1 * 16 + fromHex hex2)
-	fromHex c = hd [i \\ h <- HexNumber & i <- [0..15] | h == c]
+urlDecode ['%',hex1,hex2:xs]= [hexToChar(hex1, hex2):urlDecode xs]
 urlDecode [x:xs] 			= [x:urlDecode xs]
+
+charToHex :: !Char -> (!Char, !Char)
+charToHex c = (toChar (digitToHex (i >> 4)), toChar (digitToHex (i bitand 15)))
+where
+        i = toInt c
+        digitToHex :: !Int -> Int
+        digitToHex d
+                | d <= 9 = d + toInt '0'
+                = d + (toInt 'A' - 10)
+
+hexToChar :: !(!Char, !Char) -> Char
+hexToChar (a, b) = toChar (hexToDigit (toInt a) << 4 + hexToDigit (toInt b))
+where
+        hexToDigit :: !Int -> Int
+        hexToDigit i
+                | i <= toInt '9' = i - toInt '0'
+                = i - (toInt 'A' - 10)
 
 urlEncodeS :: String -> String
 urlEncodeS s = (mkString o urlEncode o mkList) s

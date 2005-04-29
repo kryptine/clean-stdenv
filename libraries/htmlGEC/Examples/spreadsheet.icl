@@ -23,6 +23,7 @@ spreadsheet hst
 	,Br, Br
 	, Txt "so the result of the spreadsheet is :", tsumB
 	,Br ,Br
+//	, traceHtmlInput
 	] hst
 
 arrowsspreadsheet hst

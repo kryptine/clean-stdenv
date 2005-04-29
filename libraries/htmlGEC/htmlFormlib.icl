@@ -29,7 +29,7 @@ where
 
 // Form collection:
 
-counterForm 	:: !FormId !Mode a !*HSt -> ((a,!BodyTag),!*HSt) | +, -, one,  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+counterForm 	:: !FormId !Mode a !*HSt -> ((a,BodyTag),!*HSt) | +, -, one,  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 counterForm name mode i hst = mkViewForm name mode bimap i hst
 where
 	bimap =	{ toForm 	= \n _ -> (n,down,up)
@@ -49,7 +49,7 @@ where
 	down	= LButton (defpixel / 6) "-"
 
 
-horlist2Form :: !FormId !Mode a ![a] !*HSt -> (([a],!BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+horlist2Form :: !FormId !Mode a ![a] !*HSt -> (([a],BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 horlist2Form s mode defaultval list hst 
 # ((fun,butbody),hst) 	= TableFuncBut  s mode [[(but "-", less),(but "+", more)]] hst
 # ((nlist,nbody),hst) 	= horlistForm s mode (fun list) hst  
@@ -63,42 +63,42 @@ where
 	less [x:xs] = xs
 	less [] = []
 	
-horlistForm 	:: !FormId !Mode ![a] 	!*HSt -> (([a],!BodyTag),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+horlistForm 	:: !FormId !Mode ![a] 	!*HSt -> (([a],BodyTag),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 horlistForm s mode [] hst  = (([],EmptyBody),hst)
 horlistForm s mode [x:xs] hst
 # ((xs,xsbody),hst) = horlistForm s mode xs hst
 # ((x, xbody), hst) = mkEditForm (s +++ toString (length xs)) mode x hst
 = (([x:xs],xbody <=> xsbody),hst)
 	
-vertlistForm :: !FormId !Mode ![a] !*HSt -> (([a],!BodyTag),!*HSt) | gForm{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
+vertlistForm :: !FormId !Mode ![a] !*HSt -> (([a],BodyTag),!*HSt) | gForm{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
 vertlistForm s mode [] hst  = (([],EmptyBody),hst)
 vertlistForm s mode [x:xs] hst
 # ((xs,xsbody),hst)	= vertlistForm s mode xs hst
 # ((x, xbody), hst)	= mkEditForm (s +++ toString (length xs)) mode x hst
 = (([x:xs],xbody <||> xsbody),hst)
 
-table_hv_Form :: !FormId !Mode ![[a]] !*HSt -> (([[a]],!BodyTag),!*HSt) | gForm{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
+table_hv_Form :: !FormId !Mode ![[a]] !*HSt -> (([[a]],BodyTag),!*HSt) | gForm{|*|} a & gUpd{|*|}  a & gPrint{|*|} a & gParse{|*|} a 
 table_hv_Form s mode [] hst = (([],EmptyBody),hst)
 table_hv_Form s mode [x:xs] hst
 # ((xs,xsbody),hst)	= table_hv_Form s mode xs hst
 # ((x, xbody), hst)	= horlistForm (s +++ toString (length xs)) mode x hst
 = (([x:xs],xbody <||> xsbody),hst)
 
-TableFuncBut :: !FormId !Mode ![[(Button, a -> a)]] !*HSt -> ((a -> a,!BodyTag),!*HSt)
+TableFuncBut :: !FormId !Mode ![[(Button, a -> a)]] !*HSt -> ((a -> a,BodyTag),!*HSt)
 TableFuncBut s mode [] hst = ((id,EmptyBody),hst)
 TableFuncBut s mode [row:rows] hst 
 # ((rowsfun,rowsb),hst) = TableFuncBut s mode rows hst
 # ((rowfun,rowb),  hst)	= RowFuncBut s mode row hst
 = ((rowfun o rowsfun,rowb <||> rowsb),hst)
 where
-	RowFuncBut :: !FormId !Mode [(Button, a -> a)] !*HSt -> ((a -> a,!BodyTag),!*HSt)
+	RowFuncBut :: !FormId !Mode [(Button, a -> a)] !*HSt -> ((a -> a,BodyTag),!*HSt)
 	RowFuncBut s mode [] hst = ((id,EmptyBody),hst)
 	RowFuncBut s mode [x:xs] hst 
 	# ((rowfun,rowb),hst) 	= RowFuncBut s mode xs hst
 	# ((fun,oneb)   ,hst)	= FuncBut False s mode x hst
 	= ((fun o rowfun,oneb <=> rowb),hst)
 
-FuncBut :: !Bool !FormId !Mode !(Button, a -> a) !*HSt -> ((a -> a,!BodyTag),!*HSt)
+FuncBut :: !Bool !FormId !Mode !(Button, a -> a) !*HSt -> ((a -> a,BodyTag),!*HSt)
 FuncBut init s mode (button=:LButton _ name ,cbf) hst = mkViewForm (s +++ name) mode bimap id hst
 where
 	bimap =	{ toForm 	= \_ v -> case v of
@@ -123,7 +123,7 @@ where
 			}
 FuncBut init s mode (Pressed,cbf) hst = FuncBut init s mode (LButton 10 "??",cbf) hst
 
-ListFuncBut :: !Bool !FormId !Mode [(Button, a -> a)] !*HSt -> ((a -> a,![BodyTag]),!*HSt)
+ListFuncBut :: !Bool !FormId !Mode [(Button, a -> a)] !*HSt -> ((a -> a,[BodyTag]),!*HSt)
 ListFuncBut b s mode [] hst = ((id,[]),hst)
 ListFuncBut b s mode [x:xs] hst 
 # ((rowfun,rowb),hst) 	= ListFuncBut b s mode xs hst
@@ -131,13 +131,13 @@ ListFuncBut b s mode [x:xs] hst
 = ((fun o rowfun,[oneb:rowb]),hst)
 
 ListFuncCheckBox :: !Bool !FormId !Mode [(CheckBox, Bool [Bool] a -> a)] !*HSt 
-									-> (((a -> a,[Bool]),![BodyTag]),!*HSt)
+									-> (((a -> a,[Bool]),[BodyTag]),!*HSt)
 ListFuncCheckBox init s mode defs hst 
 # (((f,bools),body),hst) = ListFuncCheckBox` init s mode defs hst
 = (((f bools,bools),body),hst)
 where
 	ListFuncCheckBox` :: !Bool !FormId !Mode [(CheckBox, Bool [Bool] a -> a)] !*HSt 
-										-> ((([Bool] a -> a,[Bool]),![BodyTag]),!*HSt)
+										-> ((([Bool] a -> a,[Bool]),[BodyTag]),!*HSt)
 	ListFuncCheckBox` init s mode [] hst = (((\_ a -> a,[]),[]),hst)
 	ListFuncCheckBox` init s mode [x:xs] hst 
 	# (((rowfun,bools),rowb),hst) 	= ListFuncCheckBox` init s mode xs hst
@@ -174,7 +174,7 @@ where
 
 
 ListFuncRadio :: !Int !FormId !Mode [Int a -> a] !*HSt 
-									-> (((a -> a,Int),![BodyTag]),!*HSt)
+									-> (((a -> a,Int),[BodyTag]),!*HSt)
 ListFuncRadio i s mode defs hst 
 # ((ni,_),hst)			= mkStoreForm s (set i) (set (abs i) 0) hst	// determine which radio to select
 # (((f,nni),body),hst) 	= ListFuncRadio` ni 0 s mode defs hst	// determine if radio changed by user
@@ -191,7 +191,7 @@ where
 	| otherwise = j						// set to old radio button
 
 	ListFuncRadio` :: !Int !Int !FormId !Mode [Int a -> a] !*HSt 
-										-> (((Int a -> a,Int),![BodyTag]),!*HSt)
+										-> (((Int a -> a,Int),[BodyTag]),!*HSt)
 	ListFuncRadio` i j s mode [] hst = (((\_ a -> a,-1),[]),hst)
 	ListFuncRadio` i j s mode [f:fs] hst 
 	# (((rowfun,rri),listr),hst) 	= ListFuncRadio` i (j+1) s mode fs hst
@@ -232,7 +232,7 @@ where
 	| otherwise = 0
 
 
-listForm 	:: !FormId !Mode ![a] 	!*HSt -> (([a],![BodyTag]),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+listForm 	:: !FormId !Mode ![a] 	!*HSt -> (([a],[BodyTag]),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 listForm s mode [] hst  = (([],[]),hst)
 listForm s mode [x:xs] hst
 # ((xs,xsbody),hst) = listForm s mode xs hst
