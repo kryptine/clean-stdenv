@@ -19,7 +19,7 @@ expr = E "koffie" .+. E "thee" .+. E "chocmelk" .>. E "melk" .+. E "suiker" .>. 
 MyPage2 hst
 # ((expr,exprbody),hst) 	 = mkEditForm  "expr" Edit (E "Init") hst
 # ((pressed,donebutton),hst) = ListFuncBut False "but" Edit [(LButton defpixel "Done!",\b -> not b)] hst
-# ((bool,_),hst)			 = mkStoreForm "store" pressed False hst
+# ((bool,_),hst)			 = mkStoreForm "boolstore" pressed False hst
 # (buttons,hst)				 = if bool (calcprocess expr hst) ([EmptyBody],hst)
 = mkHtml "Process Algebra Experiment"
 	[ H1 [] "Process Algebra Experiment"
