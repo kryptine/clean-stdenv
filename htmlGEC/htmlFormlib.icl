@@ -26,7 +26,6 @@ where
 	mktable table 	= [Tr [] (mkrow rows) \\ rows <- table]	
 	mkrow rows 		= [Td [Td_VAlign Alo_Top, Td_Width (Pixels defpixel)] [row] \\ row <- rows] 
 
-
 // Form collection:
 
 counterForm 	:: !FormId !Mode a !*HSt -> ((a,BodyTag),!*HSt) | +, -, one,  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
@@ -85,21 +84,24 @@ table_hv_Form s mode [x:xs] hst
 = (([x:xs],xbody <||> xsbody),hst)
 
 TableFuncBut :: !FormId !Mode ![[(Button, a -> a)]] !*HSt -> ((a -> a,BodyTag),!*HSt)
-TableFuncBut s mode [] hst = ((id,EmptyBody),hst)
-TableFuncBut s mode [row:rows] hst 
-# ((rowsfun,rowsb),hst) = TableFuncBut s mode rows hst
-# ((rowfun,rowb),  hst)	= RowFuncBut s mode row hst
-= ((rowfun o rowsfun,rowb <||> rowsb),hst)
+TableFuncBut s mode list hst = TableFuncBut` 0 s mode list hst
 where
-	RowFuncBut :: !FormId !Mode [(Button, a -> a)] !*HSt -> ((a -> a,BodyTag),!*HSt)
-	RowFuncBut s mode [] hst = ((id,EmptyBody),hst)
-	RowFuncBut s mode [x:xs] hst 
-	# ((rowfun,rowb),hst) 	= RowFuncBut s mode xs hst
-	# ((fun,oneb)   ,hst)	= FuncBut False s mode x hst
-	= ((fun o rowfun,oneb <=> rowb),hst)
+	TableFuncBut` n s mode [] hst = ((id,EmptyBody),hst)
+	TableFuncBut` n s mode [row:rows] hst 
+	# ((rowsfun,rowsb),hst) = TableFuncBut` n s mode rows hst
+	# ((rowfun,rowb),  hst)	= RowFuncBut` n s mode row hst
+	= ((rowfun o rowsfun,rowb <||> rowsb),hst)
+	where
+		RowFuncBut` :: !Int !FormId !Mode [(Button, a -> a)] !*HSt -> ((a -> a,BodyTag),!*HSt)
+		RowFuncBut` n s mode [] hst = ((id,EmptyBody),hst)
+		RowFuncBut` n s mode [x:xs] hst 
+		# ((rowfun,rowb),hst) 	= RowFuncBut` n s mode xs hst
+		# ((fun,oneb)   ,hst)	= FuncBut False n s mode x hst
+		= ((fun o rowfun,oneb <=> rowb),hst)
 
-FuncBut :: !Bool !FormId !Mode !(Button, a -> a) !*HSt -> ((a -> a,BodyTag),!*HSt)
-FuncBut init s mode (button=:LButton _ name ,cbf) hst = mkViewForm (s +++ name) mode bimap id hst
+
+FuncBut :: !Bool !Int !FormId !Mode !(Button, a -> a) !*HSt -> ((a -> a,BodyTag),!*HSt)
+FuncBut init i s mode (button=:LButton _ name ,cbf) hst = mkViewForm (s +++ name +++ toString i) mode bimap id hst
 where
 	bimap =	{ toForm 	= \_ v -> case v of
 									Nothing = button
@@ -110,7 +112,7 @@ where
 									_		 -> id
 			, resetForm	= Just (\_ 	-> button)
 			}
-FuncBut init s mode (button=:PButton _ ref ,cbf) hst = mkViewForm (s +++ ref) mode bimap id hst
+FuncBut init i s mode (button=:PButton _ ref ,cbf) hst = mkViewForm (s +++ toString i +++ ref) mode bimap id hst
 where
 	bimap =	{ toForm 	= \_ v -> case v of
 									Nothing = button
@@ -121,14 +123,17 @@ where
 									_		  -> id
 			, resetForm	= Just (\_ 	-> button)
 			}
-FuncBut init s mode (Pressed,cbf) hst = FuncBut init s mode (LButton 10 "??",cbf) hst
+FuncBut init i s mode (Pressed,cbf) hst = FuncBut init i s mode (LButton 10 "??",cbf) hst
 
 ListFuncBut :: !Bool !FormId !Mode [(Button, a -> a)] !*HSt -> ((a -> a,[BodyTag]),!*HSt)
-ListFuncBut b s mode [] hst = ((id,[]),hst)
-ListFuncBut b s mode [x:xs] hst 
-# ((rowfun,rowb),hst) 	= ListFuncBut b s mode xs hst
-# ((fun,oneb)   ,hst)	= FuncBut b s mode x hst
-= ((fun o rowfun,[oneb:rowb]),hst)
+ListFuncBut b s mode list hst = ListFuncBut` b 0 s mode list hst 
+where
+	ListFuncBut` b n s mode [] hst = ((id,[]),hst)
+	ListFuncBut` b n s mode [x:xs] hst 
+	# ((rowfun,rowb),hst) 	= ListFuncBut` b (n+1) s mode xs hst
+	# ((fun,oneb)   ,hst)	= FuncBut b n s mode x hst
+	= ((fun o rowfun,[oneb:rowb]),hst)
+
 
 ListFuncCheckBox :: !Bool !FormId !Mode [(CheckBox, Bool [Bool] a -> a)] !*HSt 
 									-> (((a -> a,[Bool]),[BodyTag]),!*HSt)
@@ -238,3 +243,39 @@ listForm s mode [x:xs] hst
 # ((xs,xsbody),hst) = listForm s mode xs hst
 # ((x, xbody), hst) = mkEditForm (s +++ toString (length xs)) mode x hst
 = (([x:xs],[xbody:xsbody]),hst)
+
+
+/*
+FuncBut :: !Bool !FormId !Mode !(Button, a -> a) !*HSt -> ((a -> a,BodyTag),!*HSt)
+FuncBut init s mode (button=:LButton _ name ,cbf) hst = mkViewForm (s +++ name) mode bimap id hst
+where
+	bimap =	{ toForm 	= \_ v -> case v of
+									Nothing = button
+									(Just v) = if init button v
+			, updForm	= \_ v -> v
+			, fromForm	= \_ but -> case but of 
+									Pressed  -> cbf
+									_		 -> id
+			, resetForm	= Just (\_ 	-> button)
+			}
+FuncBut init s mode (button=:PButton _ ref ,cbf) hst = mkViewForm (s +++ ref) mode bimap id hst
+where
+	bimap =	{ toForm 	= \_ v -> case v of
+									Nothing = button
+									(Just v) = if init button v
+			, updForm	= \_ v -> v
+			, fromForm	= \_ but -> case but of 
+									Pressed -> cbf
+									_		  -> id
+			, resetForm	= Just (\_ 	-> button)
+			}
+FuncBut init s mode (Pressed,cbf) hst = FuncBut init s mode (LButton 10 "??",cbf) hst
+
+ListFuncBut :: !Bool !FormId !Mode [(Button, a -> a)] !*HSt -> ((a -> a,[BodyTag]),!*HSt)
+ListFuncBut b s mode [] hst = ((id,[]),hst)
+ListFuncBut b s mode [x:xs] hst 
+# ((rowfun,rowb),hst) 	= ListFuncBut b s mode xs hst
+# ((fun,oneb)   ,hst)	= FuncBut b s mode x hst
+= ((fun o rowfun,[oneb:rowb]),hst)
+
+*/

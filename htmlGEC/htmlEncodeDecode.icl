@@ -4,13 +4,16 @@ implementation module htmlEncodeDecode
 
 import StdEnv, ArgEnv, StdMaybe
 import htmlDataDef, htmlTrivial
-import GenPrint
-import GenParse
+import GenPrint, GenParse
 
 :: UpdValue 	= UpdI Int							// new integer value
 				| UpdR Real							// new real value
 				| UpdC String						// choose indicated constructor 
 				| UpdS String						// new piece of text
+
+mscan c list = case (span ((<>) c) list) of  // scan like span but it removes character
+				(x,[])	= (x,[])
+				(x,y)	= (x,tl y)
 
 // encoding and decoding of Clean values 
 
@@ -37,22 +40,19 @@ ThisExe
 MyPhP :: String
 MyPhP =: (mkString (takeWhile ((<>) '.') (mkList ThisExe))) +++ ".php"
 
-UpdateInfo :: (String,String,String,String) // executable, id + update , new , state
+UpdateInfo :: (!String,!String,!String,!String) // executable, id + update , new , state
 UpdateInfo
 # input 			= mkList GetArgs
-# (thisexe,input) 	= scan '#' input 		// get rid of garbage
+# (thisexe,input) 	= mscan '#' input 		// get rid of garbage
 # input				= skipping ['#UD=']  input
-# (update, input)	= scan '=' input
-# (new,    input)	= scan ';' input
+# (update, input)	= mscan '=' input
+# (new,    input)	= mscan ';' input
 # input				= skipping ['GS=']  input
-# (state, input)	= scan ';' input
+# (state, input)	= mscan ';' input
 =: case (decode thisexe, decode update, decode new, decode state) of
 		(thisexe,"CS",new,state) -> (thisexe,new,"",state)
 	    else		    -> else
 where
-	scan c list = case (span ((<>) c) list) of  // scan like span but it removes character
-					(x,[])	= (x,[])
-					(x,y)	= (x,tl y)
 	Tl [] = []
 	Tl list = tl list
 
@@ -71,7 +71,7 @@ traceHtmlInput
 			, 	Txt "new value		  	: " , B [] new, Br 
 			, 	Txt "state			  	: " , BodyTag (showstate (mkList state)), Br 
 			,	Txt "decoded input  	: " , B [] (convert GetArgs), Br
-			,	Txt "encoded input       : " , B [] GetArgs, Br 
+			,	Txt "encoded input      : " , B [] GetArgs, Br 
 			]
 where
 	(executable,update,new,state) = UpdateInfo
@@ -101,27 +101,35 @@ AnyInput
 # (_,_,new,_) = UpdateInfo
 =: new
 
-CheckUpdate :: (Maybe a, Maybe b) | gParse{|*|} a & gParse{|*|} b 
+CheckUpdate :: (!Maybe a, !Maybe b) | gParse{|*|} a & gParse{|*|} b 
 CheckUpdate 
 # (_,upd,new,_) = UpdateInfo
 = (parseString upd, parseString new)
 
-CheckGlobalState :: String
+
+CheckGlobalState :: GlobalState
 CheckGlobalState 
 # (_,_,_,state) = UpdateInfo
-=: state
-
-ShiftState :: String -> (Maybe (String,a),String) | gParse{|*|} a 
-ShiftState input
-# input 			= mkList input
-# (result,input) 	= scan '$' input 		// get rid of garbage
-= 	(parseString (mkString result), mkString input)
+=: splitString (mkList state)
 where
-	scan c list = case (span ((<>) c) list) of
-					(x,[])	= (x,[])
-					(x,y)	= (x,tl y)
-	Tl [] = []
-	Tl list = tl list
+	splitString [] 			= []
+	splitString listofchar	= [mktuple first : splitString second]
+	where
+		(first,second) = mscan '$' listofchar
+
+		mktuple :: [Char] -> (!String,!String)
+		mktuple	elem = (mkString formid,mkString (stl (reverse (stl (reverse formvalue)))))
+		where
+			(formid,formvalue) = mscan '"' (stl (stl elem)) // skip '("'
+			stl [] = []
+			stl [x:xs] = xs 
+
+findState :: String GlobalState -> (Maybe a) | gParse{|*|} a 
+findState curformid []	= Nothing
+findState curformid [(formid,formstate):nextstate]
+| curformid == formid		= parseString formstate
+| otherwise					= findState curformid nextstate
+
 	
 
 derive gParse (,), (,,)

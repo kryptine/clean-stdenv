@@ -173,26 +173,17 @@ where
 		decodeInput1 formid
 		| CheckUpdateId == formid// this state is updated
 		= case CheckUpdate of
-			(Just (sid,pos,UpdC s), Just "") 						= (Just (pos,UpdC s)  ,find sid CheckGlobalState)
-			(Just (sid,pos,UpdC s), _) 								= (Just (pos,UpdC s)  ,find sid CheckGlobalState)
+			(Just (sid,pos,UpdC s), Just "") 						= (Just (pos,UpdC s)  ,findState sid CheckGlobalState)
+			(Just (sid,pos,UpdC s), _) 								= (Just (pos,UpdC s)  ,findState sid CheckGlobalState)
 			else = case CheckUpdate of
-					(Just (sid,pos,UpdI i), Just ni) 				= (Just (pos,UpdI ni) ,find sid CheckGlobalState) 
+					(Just (sid,pos,UpdI i), Just ni) 				= (Just (pos,UpdI ni) ,findState sid CheckGlobalState) 
 					else = case CheckUpdate of
-							(Just (sid,pos,UpdR r), Just nr) 		= (Just (pos,UpdR nr) ,find sid CheckGlobalState) 
+							(Just (sid,pos,UpdR r), Just nr) 		= (Just (pos,UpdR nr) ,findState sid CheckGlobalState) 
 							else = case CheckUpdate of
-								(Just (sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns) ,find sid CheckGlobalState) 
-								(Just (sid,pos,UpdS s),	_)			= (Just (pos,UpdS AnyInput)  ,find sid CheckGlobalState) 
-								(upd,new) 							= (Nothing, find formid CheckGlobalState)
-		| otherwise = (Nothing, find formid CheckGlobalState)
-
-		find :: FormId  String -> (Maybe a) | gParse{|*|} a
-		find formid   ""	= Nothing
-		find formid   input
-		# (result,input) = ShiftState input
-		= case (result,input) of
-			(Just (thisid,a),input) -> if (thisid == formid) (Just a) (find formid input)
-			(Nothing, input)		-> find formid input
-
+								(Just (sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns) ,findState sid CheckGlobalState) 
+								(Just (sid,pos,UpdS s),	_)			= (Just (pos,UpdS AnyInput)  ,findState sid CheckGlobalState) 
+								(upd,new) 							= (Nothing, findState formid CheckGlobalState)
+		| otherwise = (Nothing, findState formid CheckGlobalState)
 
 // automatic tranformation of any Clean type to html body
 // the lhst on the head of the hst is the lhst for the form we create here
