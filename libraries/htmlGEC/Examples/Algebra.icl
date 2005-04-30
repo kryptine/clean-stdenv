@@ -81,7 +81,7 @@ where
 	// calculate buttons out of the set of next event that can occur
 	
 	calcbuttons :: [PAE] -> [(Button, (PAE,[PAE]) -> (PAE,[PAE]))]
-	calcbuttons paes = reverse [(LButton size (label +++ toString number),\pae -> nextstate number pae) \\ (PAE label number) <- paes]
+	calcbuttons paes = reverse [(LButton size label,\pae -> nextstate number pae) \\ (PAE label number) <- paes]
 	where
 		size = defpixel
 	
