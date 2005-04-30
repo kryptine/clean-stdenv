@@ -35,8 +35,6 @@ coffeemachine hst
 			, Br
 			, bTxt "Message: ", bTxt (print machine.out options)
 			] <=> displayMachineImage machine.out 
-		, Br
-		, traceHtmlInput
 		] hst
 where
 	allbuttons  = 
