@@ -73,7 +73,7 @@ htmlCmnd :: !a !b -> *FoF | gHpr{|*|} a & gHpr{|*|} b
 htmlCmnd hdr txt =  \file -> closeCmnd hdr (openCmnd hdr "" file <+ txt) 			
 
 openCmnd :: !a !b -> *FoF | gHpr{|*|} a & gHpr{|*|} b
-openCmnd  hdr attr =  \file -> file <<< "<"  <+ hdr <+ attr <+ ">"
+openCmnd  hdr attr =  \file -> file <<< "\r<"  <+ hdr <+ attr <+ ">"
 
 closeCmnd :: !a -> *FoF | gHpr{|*|} a
 closeCmnd hdr =  \file -> print "\r</" file <+ hdr <+ ">\r"

@@ -124,13 +124,13 @@ where
 			stl [] = []
 			stl [x:xs] = xs 
 
-findState :: String GlobalState -> (Maybe a) | gParse{|*|} a 
-findState curformid []	= Nothing
-findState curformid [(formid,formstate):nextstate]
-| curformid == formid		= parseString formstate
-| otherwise					= findState curformid nextstate
-
-	
+findState :: String -> (Maybe a) | gParse{|*|} a 
+findState curformid = findState` curformid CheckGlobalState
+where
+	findState` curformid []	= Nothing
+	findState` curformid [(formid,formstate):nextstate]
+	| curformid == formid		= parseString formstate
+	| otherwise					= findState` curformid nextstate
 
 derive gParse (,), (,,)
 

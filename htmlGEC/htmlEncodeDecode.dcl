@@ -23,8 +23,7 @@ addScript 		:: GlobalState -> BodyTag		// the corresponding script, stores globa
 
 // decoding of information
 
-CheckGlobalState 		:: GlobalState					// all states of all forms
-findState 				:: String GlobalState -> (Maybe a) 
+findState 				:: String -> (Maybe a) 
 									| gParse{|*|} a  	// returns value of state with indicated FormId 
 CheckUpdateId 			:: String						// FormId of previously updated form
 CheckUpdate 			:: (!Maybe a, !Maybe b) | gParse{|*|} a & gParse{|*|} b // updated form, updated value
