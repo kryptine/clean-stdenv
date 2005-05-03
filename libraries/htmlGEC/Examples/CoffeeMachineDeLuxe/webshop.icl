@@ -2,31 +2,36 @@ module webshop
 
 import StdEnv, StdHtml
 
+import CDdatabaseHandler
+
 // demo application showing a web shop programmed in Clean using the iData - HtmlGec library
 // MJP 2005
 
-derive gForm  PageMode, CD, []
-derive gUpd   PageMode, CD, []
-derive gPrint PageMode, CD
-derive gParse PageMode, CD
+derive gForm  PageMode, Item, CD, Track, Duration, []
+derive gUpd   PageMode, Item, CD, Track, Duration, []
+derive gPrint PageMode, Item, CD, Track, Duration
+derive gParse PageMode, Item, CD, Track, Duration
 
 :: PageMode 	= HomePage | ShopPage | BasketPage | OrderInfoPage
 
-Start world  = doHtml webshopentry world
+Start world 
+#  (world,items) = readCDdatabase world
+= doHtml (webshopentry items) world
 
-webshopentry hst
+webshopentry database hst
 # ((setpage,pagebutbody),hst) 	= ListFuncBut False "pagebut" Edit pagebuttons hst	
 # ((curpage,_)	  		,hst) 	= mkStoreForm "curpage" setpage HomePage hst
 # (page,hst) 					= case curpage of
-									HomePage 		-> doHomePage hst
-									ShopPage 		-> doShopPage hst
-									BasketPage 		-> doBasketPage hst
-									OrderInfoPage 	-> doInfoPage hst
+									HomePage 		-> doHomePage database hst
+									ShopPage 		-> doShopPage database hst
+									BasketPage 		-> doBasketPage database hst
+									OrderInfoPage 	-> doInfoPage database hst
 = mkHtml "My Web Shop"
 		[ STable [] [[H1 [] "Welcome to Clean's Web Shop":pagebutbody]]
 		, Hr []
 		, Br
 		, BodyTag page
+//		, traceHtmlInput
 		] hst
 where
 	pagebuttons  = 
@@ -36,22 +41,30 @@ where
 		, (but "OrderInfo", \page -> OrderInfoPage)
 		]
 
-doHomePage hst
+doHomePage database hst
 # (_,hst)						= basketstore id hst	
+# (_,hst) 						= browsestore id hst
 = (	[ bTxt "HomePage"
 	], hst)
 
-doShopPage hst
-# ((addCD,addbuttons)	,hst)	= ListFuncBut False "items" Edit (addToBasketButtons database) hst
+doShopPage database hst
+# ((next,browsebuttons)	,hst)	= ListFuncBut False "br" Edit (browseButtons (length database)) hst
+# ((i,_)	,hst) 				= browsestore next hst
+# ((addCD,addbuttons)	,hst)	= ListFuncBut False "items" Edit (addToBasketButtons [i..i+step-1]) hst
 # ((basket,_)	  		,hst) 	= basketstore addCD hst
 = (	[ bTxt "ShopPage"
 	, Br, Br
-	, showCDs (zip2 database addbuttons)
+	, mkTable (database%(i,i+step-1)) addbuttons
 	, Br
-	, showBasketTop basket
+	, mkrow browsebuttons
+	, Br
+	, bTxt ("number of items found: " +++ (toString (length database)))
+	, Br
+	, showBasketTop database basket
 	], hst)
 
-doBasketPage hst
+doBasketPage database hst
+# (_,hst) 					= browsestore id hst
 # ((basket,_),hst)			= basketstore id hst	
 # ((delCD,delbuttons),hst)	= ListFuncBut False "items" Edit (removeFromBasketButtons basket) hst
 # ((basket,_),hst)			= basketstore delCD hst	
@@ -59,95 +72,120 @@ doBasketPage hst
 	, Br
 	, bTxt "Current contents of your basket:"
 	, Br, Br
-	, showCDs (zip2 basket delbuttons)
+	, mkTable [database!!itemnr \\ itemnr <- basket] delbuttons
 	], hst)
 
-doInfoPage hst
+doInfoPage database hst
 # (_,hst)						= basketstore id hst	
 = (	[ bTxt "Order Information"
 	], hst)
 
-// CD test database
 
-database =	[ CD 12 "pink floyd"   1998 "atom heart mother" 750
-			, CD 15 "roger waters" 1998 "in the flesh"      195
-			]
+// stores
 
-// basket store related
-
-:: Basket		:== [CD]
-:: DataBase		:== [CD]
-
-:: CD			= CD ItemNumber Artist Year Title Prize
-:: ItemNumber	:== Int
-:: Artist		:== String
-:: Year			:== Int
-:: Title		:== String
-:: Prize		:== Int  // In Eurocents
+:: DataBase		:== [(Item,CD)]
+:: Basket		:== [Int]			// item nrs selected
+:: Selection	:== [(Item,CD)]		// selection of database items
 
 basketstore :: (Basket -> Basket) *HSt -> ((Basket,BodyTag),!*HSt)
 basketstore f hst = mkStoreForm "basket" f [] hst
 
-addToBasketButtons :: DataBase -> [(Button,Basket -> Basket)]
-addToBasketButtons database = [addToBasketButton item \\ item <- database]
-where
-	addToBasketButton :: CD -> (Button,Basket -> Basket)
-	addToBasketButton (CD j a y t p) = (butp "basket.gif" , addToBasket database j)
+browsestore :: (Int -> Int) *HSt -> ((Int,BodyTag),!*HSt)
+browsestore f hst = mkStoreForm "browse" f 0 hst
 
-	addToBasket :: DataBase Int Basket -> Basket
-	addToBasket [] i basket = basket
-	addToBasket [cd=:(CD j a y t p):cds] i basket
-	| i == j 	= [cd:basket]
-	| otherwise = addToBasket cds i basket
+browseButtons :: Int -> [(Button,Int -> Int)]
+browseButtons length = [(but ("-" +++ toString step),prev),(but ("+" +++ toString step),next)]
+where
+	next i = if (length > i+ step ) (i+step) i
+	prev i = if (i >= step ) (i - step) i
+
+step = 5	
+
+// buttons
+
+addToBasketButtons :: [Int] -> [(Button,Basket -> Basket)]
+addToBasketButtons basket = [(butp "basket.gif" ,\basket -> [itemnr:basket]) \\ itemnr <- basket]
 
 removeFromBasketButtons :: Basket -> [(Button,Basket -> Basket)]
-removeFromBasketButtons database = [removeFromBasketButton item \\ item <- database]
+removeFromBasketButtons basket = [(butp "trash.gif" , removeFromBasket itemnr) \\ itemnr <- basket]
 where
-	removeFromBasketButton :: CD -> (Button,Basket -> Basket)
-	removeFromBasketButton (CD j a y t p) = (butp "trash.gif" , removeFromBasket database j)
+	removeFromBasket :: Int Basket -> Basket
+	removeFromBasket itemnr [] = []
+	removeFromBasket itemnr [bitemnr:items]
+	| itemnr == bitemnr 	= items
+	| otherwise = [bitemnr: removeFromBasket itemnr items]
 
-	removeFromBasket :: Basket Int Basket -> Basket
-	removeFromBasket [] i basket = basket
-	removeFromBasket [cd=:(CD j a y t p):cds] i basket
-	| i == j 	= cds
-	| otherwise = [cd: removeFromBasket cds i basket]
 
-showBasketTop :: Basket -> BodyTag
-showBasketTop [] 		= bTxt "Basket is empty"
-showBasketTop [x:xs] 	= BodyTag
+// making the tables
+
+showBasketTop :: DataBase Basket -> BodyTag
+showBasketTop database [] 			= bTxt "Basket is empty"
+showBasketTop database [itemnr:_] 	= BodyTag
 							[ bTxt ("Latest item put into basket was: ")
-							, CDRow (x,EmptyBody)
+							: ItemRow item ++ CDRow cd
 							]
-
-showCDs :: [(CD,BodyTag)] -> BodyTag
-showCDs items = 
-	BodyTag [ mkCDRow "ITEM" "ARTIST" "YEAR" "ALBUM" "PRICE" EmptyBody
-			: map CDRow items
-			]
-
-CDRow :: (CD,BodyTag) -> BodyTag
-CDRow (CD itemNumber artist year title prize,body)
-	= mkCDRow (toString itemNumber) artist (toString year) title (toString prize) body
-
-mkCDRow itemNumber artist year title prize body
-=	Table [Tbl_Width tableWidth, Tbl_Bgcolor (`HexColor bgcolor), Tbl_Border 1]
-		[ Td [Td_Width itemWidth] 	[bTxt itemNumber]
-		, Td [Td_Width artistWidth] [bTxt artist]
-		, Td [Td_Width titleWidth] [bTxt title]
-		, Td [Td_Width yearWidth] [bTxt year]
-		, Td [Td_Width prizeWidth] [bTxt prize]
-		, Td [Td_Width basketWidth] [body]
-		]
 where
-	bgcolor 	=	(Hexnum H_6 H_6 H_9 H_9 H_C H_C)
-	tableWidth 	= Pixels 750
-	itemWidth 	= Pixels 55
-	artistWidth = Pixels 140
-	yearWidth 	= Pixels 50
-	titleWidth 	= Pixels 400
-	prizeWidth 	= Pixels 55
-	basketWidth = Pixels 50
+	(item,cd) = database!!itemnr
 
+mkTable :: [(Item,CD)] [BodyTag] -> BodyTag
+mkTable items buttons
+	= table
+		[ ItemHeader ++ CDHeader ++ mkButtonRow EmptyBody 
+		: [ItemRow item ++ CDRow cd ++ mkButtonRow button \\ (item,cd) <- items & button <- buttons ]
+		]				
+where
+	table rows 	= Table [Tbl_Width tableWidth, Tbl_Bgcolor (`HexColor bgcolor), Tbl_Border 1] 
+					[Tr [] row \\ row <- rows]
+	tableWidth	= Percent 100
+	bgcolor 	= (Hexnum H_6 H_6 H_9 H_9 H_C H_C)
+
+mkButtonRow :: BodyTag -> [BodyTag]
+mkButtonRow button
+=	[ Td [Td_Width buttonWidth] [button]
+	]
+where
+	buttonWidth 	= Pixels 50
+
+
+ItemHeader :: [BodyTag]
+ItemHeader = 
+	mkItemRow "Item" "Prize" "Stock" 
+
+ItemRow :: Item -> [BodyTag] 
+ItemRow item
+	= mkItemRow (toString item.itemnr) (toString item.prize) (toString item.instock)
+
+mkItemRow :: String String String -> [BodyTag]
+mkItemRow itemnr prize instock
+=	[ Td [Td_Width itemnrWidth] 	[bTxt itemnr]
+	, Td [Td_Width prizeWidth] 		[bTxt prize]
+	, Td [Td_Width instockWidth] 	[bTxt instock]
+	]
+where
+	itemnrWidth 	= Pixels 50
+	prizeWidth 		= Pixels 50
+	instockWidth 	= Pixels 50
+
+CDHeader :: [BodyTag]
+CDHeader = 
+	mkCDRow "Artist" "Album" "Year" "Duration" 
+
+CDRow :: CD -> [BodyTag]
+CDRow cd
+	= mkCDRow cd.group cd.album (toString cd.year) (toString cd.totaltime) 
+
+mkCDRow :: String String String String -> [BodyTag]
+mkCDRow group album year duration
+=	[ Td [Td_Width groupWidth] 		[abTxt group]
+	, Td [Td_Width albumWidth] 		[abTxt album]
+	, Td [Td_Width yearWidth] 		[abTxt year]
+	, Td [Td_Width durationWidth] 	[abTxt duration]
+	]
+where
+	groupWidth 		= Pixels 140
+	albumWidth 		= Pixels 400
+	yearWidth 		= Pixels 50
+	durationWidth 	= Pixels 50
 
 // small utility stuf ...
 
@@ -155,6 +193,8 @@ mkHtml s tags hst 	= (Html (header s) (body tags),hst)
 header s 			= Head [`Hd_Std [Std_Title s]] [] 
 body tags 			= Body [] tags
 bTxt				= B []
+abTxt s				= B [] (allAphaNum s)
+allAphaNum string 	= string //{if (isControl s) ' ' s \\ s <-: string }		
 
 but s				= LButton defpixel s
 butp s				= PButton (defpixel/2,defpixel/2) ("images/" +++ s)
@@ -162,3 +202,6 @@ butp s				= PButton (defpixel/2,defpixel/2) ("images/" +++ s)
 mkcol bodies 		= foldr (<||>) EmptyBody bodies 
 mkrow bodies 		= foldr (<=>)  EmptyBody bodies 
 ziprow body1 body2	= [b1 <=> b2 \\ b1 <- body1 & b2 <- body2]
+
+
+

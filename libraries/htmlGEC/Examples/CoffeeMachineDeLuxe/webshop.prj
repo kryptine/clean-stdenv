@@ -7,10 +7,10 @@ Global
 		CheckStacks:	False
 		CheckIndexes:	True
 	Application
-		HeapSize:	5242880
-		StackSize:	1048576
+		HeapSize:	41943040
+		StackSize:	4194304
 		ExtraMemory:	81920
-		IntialHeapSize:	204800
+		IntialHeapSize:	1048576
 		HeapSizeMultiplier:	4096
 		ShowExecutionTime:	False
 		ShowGC:	False
@@ -61,13 +61,41 @@ MainModule
 	DclOpen:	False
 	Icl
 		WindowPosition
-			X:	48
-			Y:	0
-			SizeX:	826
-			SizeY:	572
+			X:	42
+			Y:	34
+			SizeX:	849
+			SizeY:	477
 	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
+	Module
+		Name:	CDdatabaseHandler
+		Dir:	{Project}
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	46
+				Y:	14
+				SizeX:	832
+				SizeY:	475
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	16
+				Y:	78
+				SizeX:	867
+				SizeY:	512
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdCleanTypes
 		Dir:	{Application}\Libraries\Dynamics\extension
@@ -187,7 +215,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -215,7 +243,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -243,7 +271,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -271,7 +299,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -281,8 +309,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	735
+				SizeY:	392
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -383,7 +411,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -411,7 +439,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -439,7 +467,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -484,8 +512,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	792
+				SizeY:	475
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -736,8 +764,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	891
+				SizeY:	588
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1024,7 +1052,7 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdArrow
-		Dir:	{Application}\Libraries\StdGEC\GEC Implementation
+		Dir:	{Application}\Libraries\GEC\GEC Implementation
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1053,6 +1081,7 @@ OtherModules
 Static
 	Mods
 		Path:	{Project}\webshop.icl
+		Path:	{Project}\CDdatabaseHandler.icl
 		Path:	{Application}\Libraries\Dynamics\extension\StdCleanTypes.icl
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\_SystemDynamic.icl
 		Path:	{Application}\Libraries\StdEnv\StdOverloaded.icl
@@ -1087,7 +1116,7 @@ Static
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlEncodeDecode.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlFormlib.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlArrow.icl
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\StdArrow.icl
+		Path:	{Application}\Libraries\GEC\GEC Implementation\StdArrow.icl
 	Objs
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup0.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup1Trace.o
@@ -1124,11 +1153,12 @@ Static
 		Path:	{Application}\Libraries\Generics\Clean System Files\GenPrint.o
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
 		Path:	{Application}\Libraries\Generics\Clean System Files\GenParse.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlTrivial.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlEncodeDecode.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlTrivial.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlFormlib.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlArrow.o
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation\Clean System Files\StdArrow.o
+		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
+		Path:	{Project}\Clean System Files\CDdatabaseHandler.o
 		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.obj
 	Dlib
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\kernel_library
@@ -1137,35 +1167,27 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\comdlg_library
 	Pths
 		Path:	{Project}
-		Path:	{Application}\Libraries\StdGEC\GEC Implementation
 		Path:	{Application}\Libraries\StdEnv
 		Path:	{Application}\Libraries\StdLib
 		Path:	{Application}\Libraries\ObjectIO
-		Path:	{Application}\Libraries\ObjectIOExtensions
-		Path:	{Application}\Libraries\Generics
-		Path:	{Application}\Libraries\Dynamics
-		Path:	{Application}\Libraries\Dynamics\implementation\windows
-		Path:	{Application}\Libraries\Gast
-		Path:	{Application}\Libraries\StdGEC
-		Path:	{Application}\Libraries\Hilde
-		Path:	{Application}\Libraries\Hilde\OS Windows
-		Path:	{Application}\Libraries\Hilde\OS Windows\NoDynamicFileSystem
-		Path:	{Application}\Libraries\Hilde\OS Windows\Foreign
-		Path:	{Application}\Libraries\Hilde\Parser combinators 2002
-		Path:	{Application}\Libraries\Hilde\WrapDebugClosures
-		Path:	{Application}\Libraries\ArgEnvWindows
-		Path:	{Application}\Libraries\Directory
-		Path:	{Application}\Libraries\ExceptionsWindows
-		Path:	{Application}\Libraries\ExtendedArith
-		Path:	{Application}\Libraries\MersenneTwister
-		Path:	{Application}\Libraries\Tcp
-		Path:	{Application}\Libraries\WrapDebug
 		Path:	{Application}\Libraries\ObjectIO\OS Windows
+		Path:	{Application}\Libraries\Directory
 		Path:	{Application}\Libraries\Dynamics\extension
 		Path:	{Application}\Libraries\Dynamics\general
 		Path:	{Application}\Libraries\Dynamics\implementation
-		Path:	{Application}\Examples\ObjectIO Examples\gui utilities
+		Path:	{Application}\Libraries\Dynamics\implementation\windows
+		Path:	{Application}\Libraries\Generics
+		Path:	{Application}\Libraries\ArgEnvWindows
+		Path:	{Application}\Libraries\Gast
+		Path:	{Application}\Libraries\Directory
+		Path:	{Application}\Libraries\Tcp
+		Path:	{Application}\Libraries\ExceptionsWindows
+		Path:	{Application}\Libraries\MersenneTwister
+		Path:	{Application}\Libraries\ExtendedArith\ExtendedArith
 		Path:	{Application}\Libraries\GameLib
+		Path:	{Application}\Libraries\GEC
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
-	AppP:	C:\Documents and Settings\Administrator\Desktop\AFP Clean\Clean 2.1.0
+		Path:	{Application}\Libraries\GEC\GEC Implementation
+		Path:	{Application}\Libraries\WrapDebug
+	AppP:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1
 	PrjP:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Examples\WebShopDeLuxe

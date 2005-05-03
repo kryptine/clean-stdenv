@@ -173,17 +173,17 @@ where
 		decodeInput1 formid
 		| CheckUpdateId == formid// this state is updated
 		= case CheckUpdate of
-			(Just (sid,pos,UpdC s), Just "") 						= (Just (pos,UpdC s)  ,findState sid CheckGlobalState)
-			(Just (sid,pos,UpdC s), _) 								= (Just (pos,UpdC s)  ,findState sid CheckGlobalState)
+			(Just (sid,pos,UpdC s), Just "") 						= (Just (pos,UpdC s)  ,findState sid)
+			(Just (sid,pos,UpdC s), _) 								= (Just (pos,UpdC s)  ,findState sid)
 			else = case CheckUpdate of
-					(Just (sid,pos,UpdI i), Just ni) 				= (Just (pos,UpdI ni) ,findState sid CheckGlobalState) 
+					(Just (sid,pos,UpdI i), Just ni) 				= (Just (pos,UpdI ni) ,findState sid) 
 					else = case CheckUpdate of
-							(Just (sid,pos,UpdR r), Just nr) 		= (Just (pos,UpdR nr) ,findState sid CheckGlobalState) 
+							(Just (sid,pos,UpdR r), Just nr) 		= (Just (pos,UpdR nr) ,findState sid) 
 							else = case CheckUpdate of
-								(Just (sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns) ,findState sid CheckGlobalState) 
-								(Just (sid,pos,UpdS s),	_)			= (Just (pos,UpdS AnyInput)  ,findState sid CheckGlobalState) 
-								(upd,new) 							= (Nothing, findState formid CheckGlobalState)
-		| otherwise = (Nothing, findState formid CheckGlobalState)
+								(Just (sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns) ,findState sid) 
+								(Just (sid,pos,UpdS s),	_)			= (Just (pos,UpdS AnyInput)  ,findState sid) 
+								(upd,new) 							= (Nothing, findState formid)
+		| otherwise = (Nothing, findState formid)
 
 // automatic tranformation of any Clean type to html body
 // the lhst on the head of the hst is the lhst for the form we create here
