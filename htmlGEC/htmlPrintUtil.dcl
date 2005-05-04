@@ -26,12 +26,5 @@ print 			:: !String 				-> *FoF
 (<+) infixl 	:: !*File !a 			-> *File | gHpr{|*|} a
 (<+>) infixl 	:: !*File *FoF 			-> *File
 htmlAttrCmnd 	:: !hdr !tag !body  	-> *FoF | gHpr{|*|} hdr & gHpr{|*|} tag & gHpr{|*|} body
-//htmlAttr 		:: !String !a 			-> Spaces *File 	| gHpr{|*|} a
 openCmnd 		:: !a !b 				-> *FoF | gHpr{|*|} a & gHpr{|*|} b
 
-// special types for creating small effects
-
-:: Quotes a 	= Quotes a 			// for putting " " around a term
-:: Spaces a 	= Spaces a 			// for putting spaces around a term
-
-derive gHpr Quotes, Spaces

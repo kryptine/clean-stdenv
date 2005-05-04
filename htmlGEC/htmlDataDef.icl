@@ -25,9 +25,11 @@ gHpr{|Rest|} prev (Frameset attr frames)		= prev <+> htmlAttrCmnd "frameset"	att
 gHpr{|Frame|} prev (Frame attr)					= prev <+> openCmnd 	"frame"		attr
 gHpr{|Frame|} prev (NoFrames attr body)			= prev <+> htmlAttrCmnd "noframes"	attr	body
 
+derive gHpr BodyAttr
+/*
 gHpr{|BodyAttr|} prev (Batt_background file)	= prev <+ " background=" <+ file
 gHpr{|BodyAttr|} prev (Batt_bgcolor color) 		= prev <+ " bgcolor=" <+ color
-
+*/
 gHpr{|BodyTag|} prev (A attr body)  			= prev <+> htmlAttrCmnd "a" 		attr 		body
 gHpr{|BodyTag|} prev (Abbr attr text)  			= prev <+> htmlAttrCmnd "abbr" 		attr		text
 gHpr{|BodyTag|} prev (Acronym attr text)		= prev <+> htmlAttrCmnd "acronym"	attr		text

@@ -20,7 +20,7 @@ Start world
 
 webshopentry database hst
 # ((setpage,pagebutbody),hst) 	= ListFuncBut False "pagebut" Edit pagebuttons hst	
-# ((curpage,_)	  		,hst) 	= mkStoreForm "curpage" setpage HomePage hst
+# ((curpage,_)	  		,hst) 	= mkStoreForm "curpage" setpage ShopPage hst
 # (page,hst) 					= case curpage of
 									HomePage 		-> doHomePage database hst
 									ShopPage 		-> doShopPage database hst
@@ -52,15 +52,19 @@ doShopPage database hst
 # ((i,_)	,hst) 				= browsestore next hst
 # ((addCD,addbuttons)	,hst)	= ListFuncBut False "items" Edit (addToBasketButtons [i..i+step-1]) hst
 # ((basket,_)	  		,hst) 	= basketstore addCD hst
+# ((infonr,infobuttons)	,hst)	= ListFuncBut False "info" Edit (informationButtons [i..i+step-1]) hst
 = (	[ bTxt "ShopPage"
-	, Br, Br
-	, mkTable (database%(i,i+step-1)) addbuttons
+	, Br
+	, Br
+	, mkTable (database%(i,i+step-1)) infobuttons addbuttons 
 	, Br
 	, mkrow browsebuttons
 	, Br
 	, bTxt ("number of items found: " +++ (toString (length database)))
 	, Br
 	, showBasketTop database basket
+	, Br
+	, if (infonr -1  >= 0) (bTxt ("information requested of item " +++ toString (infonr -1))) (bTxt "?")
 	], hst)
 
 doBasketPage database hst
@@ -68,15 +72,18 @@ doBasketPage database hst
 # ((basket,_),hst)			= basketstore id hst	
 # ((delCD,delbuttons),hst)	= ListFuncBut False "items" Edit (removeFromBasketButtons basket) hst
 # ((basket,_),hst)			= basketstore delCD hst	
+# ((infonr,infobuttons)	,hst)	= ListFuncBut False "binfo" Edit (informationButtons basket) hst
 = (	[ bTxt "BasketPage"
 	, Br
 	, bTxt "Current contents of your basket:"
 	, Br, Br
-	, mkTable [database!!itemnr \\ itemnr <- basket] delbuttons
+	, mkTable [database!!itemnr \\ itemnr <- basket] infobuttons delbuttons
+	, if (infonr -1  >= 0) (bTxt ("information requested of item " +++ toString (infonr -1))) (bTxt "?")
 	], hst)
 
 doInfoPage database hst
 # (_,hst)						= basketstore id hst	
+# (_,hst) 						= browsestore id hst
 = (	[ bTxt "Order Information"
 	], hst)
 
@@ -93,14 +100,6 @@ basketstore f hst = mkStoreForm "basket" f [] hst
 browsestore :: (Int -> Int) *HSt -> ((Int,BodyTag),!*HSt)
 browsestore f hst = mkStoreForm "browse" f 0 hst
 
-browseButtons :: Int -> [(Button,Int -> Int)]
-browseButtons length = [(but ("-" +++ toString step),prev),(but ("+" +++ toString step),next)]
-where
-	next i = if (length > i+ step ) (i+step) i
-	prev i = if (i >= step ) (i - step) i
-
-step = 5	
-
 // buttons
 
 addToBasketButtons :: [Int] -> [(Button,Basket -> Basket)]
@@ -115,6 +114,17 @@ where
 	| itemnr == bitemnr 	= items
 	| otherwise = [bitemnr: removeFromBasket itemnr items]
 
+informationButtons :: [Int] -> [(Button,Int -> Int)]
+informationButtons basket = [(butp "info.gif" ,\_ -> itemnr ) \\ itemnr <- basket]
+
+browseButtons :: Int -> [(Button,Int -> Int)]
+browseButtons length = [(but ("-" +++ toString step),prev),(but ("+" +++ toString step),next)]
+where
+	next i = if (length > i+ step ) (i+step) i
+	prev i = if (i >= step ) (i - step) i
+
+step = 5	
+
 
 // making the tables
 
@@ -127,14 +137,19 @@ showBasketTop database [itemnr:_] 	= BodyTag
 where
 	(item,cd) = database!!itemnr
 
-mkTable :: [(Item,CD)] [BodyTag] -> BodyTag
-mkTable items buttons
+mkTable :: [(Item,CD)] [BodyTag] [BodyTag] -> BodyTag
+mkTable items infobuttons deladdbuttons
 	= table
-		[ ItemHeader ++ CDHeader ++ mkButtonRow EmptyBody 
-		: [ItemRow item ++ CDRow cd ++ mkButtonRow button \\ (item,cd) <- items & button <- buttons ]
+		[ ItemHeader ++ CDHeader ++ mkButtonRow EmptyBody ++ mkButtonRow EmptyBody
+		: [ItemRow item ++ CDRow cd ++ mkButtonRow infobutton ++ mkButtonRow deladdbutton
+			\\ (item,cd) <- items 
+			& infobutton <- infobuttons
+			& deladdbutton <- deladdbuttons ]
 		]				
 where
-	table rows 	= Table [Tbl_Width tableWidth, Tbl_Bgcolor (`HexColor bgcolor), Tbl_Border 1] 
+	table rows 	= Table [Tbl_Width tableWidth, Tbl_Bgcolor (`HexColor bgcolor), Tbl_Border 1
+						, `Tbl_Events [OnLoad "openwindow()"]
+						] 
 					[Tr [] row \\ row <- rows]
 	tableWidth	= Percent 100
 	bgcolor 	= (Hexnum H_6 H_6 H_9 H_9 H_C H_C)
@@ -190,8 +205,8 @@ where
 // small utility stuf ...
 
 mkHtml s tags hst 	= (Html (header s) (body tags),hst)
-header s 			= Head [`Hd_Std [Std_Title s]] [] 
-body tags 			= Body [] tags
+header s 			= Head [`Hd_Std [Std_Title s]] [Hd_Script [] newWindowScript2]
+body tags 			= Body [`Batt_Events	 [OnLoad "openwindow()"]] tags
 bTxt				= B []
 abTxt s				= B [] (allAphaNum s)
 allAphaNum string 	= string //{if (isControl s) ' ' s \\ s <-: string }		
@@ -203,5 +218,46 @@ mkcol bodies 		= foldr (<||>) EmptyBody bodies
 mkrow bodies 		= foldr (<=>)  EmptyBody bodies 
 ziprow body1 body2	= [b1 <=> b2 \\ b1 <- body1 & b2 <- body2]
 
+/*
+<SCRIPT LANGUAGE="JavaScript">
+function openindex()
+      { 
+OpenWindow=window.open("", "newwin", "height=250, width=250,toolbar=no,scrollbars="+scroll+",menubar=no");
+OpenWindow.document.write("<TITLE>Title Goes Here</TITLE>")
+OpenWindow.document.write("<BODY BGCOLOR=pink>")
+OpenWindow.document.write("<h1>Hello!</h1>")
+OpenWindow.document.write("This text will appear in the window!")
+OpenWindow.document.write("</BODY>")
+OpenWindow.document.write("</HTML>")
 
+OpenWindow.document.close()
+self.name="main"
+     }
+</SCRIPT>
 
+*/
+newWindowScript ::  !Html !*File -> *File
+newWindowScript html file
+=		file <+
+		"function openwindow()\r" <+
+		"{ OpenWindow=window.open(\"\", \"newwin\", \"height=250, width=250,toolbar=no,menubar=no\");\r" <+
+		"OpenWindow.document.write(\"" <+ html <+ "\");\r" <+
+		"  OpenWindow.document.close();\r" <+
+		"  self.name=\"webshop.php\";\r }"
+
+newWindowScript2 ::  String
+newWindowScript2
+=		"function openwindow()\r" +++
+		"{ OpenWindow=window.open(\"\", \"newwin\", \"height=250, width=250,toolbar=no,menubar=no\");\r" +++
+		source2 +++
+		"  OpenWindow.document.close();\r" +++
+		"  self.name=\"webshop.php\";\r }"
+where
+	source = foldr (+++) "" ["OpenWindow.document.write(\"" +++ s +++ "\");\r" \\ s <- elem]
+	source2 = "OpenWindow.document.write(\"" +++ (foldr (+++) "" elem) +++ "\");\r"
+	elem = 	[ "<HTML>"
+			, "<TITLE>Title Goes Here</TITLE>"
+			, "<BODY BGCOLOR=pink>"
+			, "<h1>Everybody should use Clean</h1>"
+			, "</BODY>" 
+			, "</HTML>"]
