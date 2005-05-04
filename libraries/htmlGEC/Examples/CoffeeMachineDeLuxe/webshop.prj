@@ -1,6 +1,6 @@
 Version: 1.4
 Global
-	Built:	True
+	Built:	False
 	Target:	Everything
 	Exec:	{Project}\webshop.exe
 	CodeGen
@@ -63,8 +63,8 @@ MainModule
 		WindowPosition
 			X:	42
 			Y:	34
-			SizeX:	849
-			SizeY:	477
+			SizeX:	847
+			SizeY:	531
 	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
@@ -727,11 +727,11 @@ OtherModules
 			ReuseUniqueNodes:	True
 		Dcl
 			WindowPosition
-				X:	84
-				Y:	1
-				SizeX:	828
-				SizeY:	619
-		DclOpen:	False
+				X:	43
+				Y:	19
+				SizeX:	767
+				SizeY:	561
+		DclOpen:	True
 		Icl
 			WindowPosition
 				X:	0
@@ -755,15 +755,15 @@ OtherModules
 			ReuseUniqueNodes:	True
 		Dcl
 			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	831
+				X:	62
+				Y:	11
+				SizeX:	847
 				SizeY:	578
-		DclOpen:	False
+		DclOpen:	True
 		Icl
 			WindowPosition
-				X:	0
-				Y:	0
+				X:	18
+				Y:	9
 				SizeX:	891
 				SizeY:	588
 		IclOpen:	False
@@ -1123,6 +1123,18 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup2.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_system.o
 		Path:	{Project}\Clean System Files\webshop.o
+		Path:	{Project}\Clean System Files\CDdatabaseHandler.o
+		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlArrow.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlFormlib.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlTrivial.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlEncodeDecode.o
+		Path:	{Application}\Libraries\Generics\Clean System Files\GenParse.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
+		Path:	{Application}\Libraries\Generics\Clean System Files\GenPrint.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlHandler.o
+		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
@@ -1147,18 +1159,6 @@ Static
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\StdHtml.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlDataDef.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlPrintUtil.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
-		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlHandler.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\GenPrint.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\GenParse.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlEncodeDecode.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlTrivial.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlFormlib.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlArrow.o
-		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
-		Path:	{Project}\Clean System Files\CDdatabaseHandler.o
 		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.obj
 	Dlib
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\kernel_library

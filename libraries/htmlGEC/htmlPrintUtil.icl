@@ -52,14 +52,6 @@ print a = \f -> fwrites a f
 (<+>) infixl :: !*File *FoF -> *File
 (<+>) file new = new file
 
-:: Ouotes a = Ouotes a // for putting " around a term
-
-gHpr{|Quotes|} gHpra file (Quotes a) = (file <<< "\"" <+> \file -> gHpra file a) <<< "\""
-
-:: Spaces a = Spaces a // for putting spaces around a term
-
-gHpr{|Spaces|} gHpra file (Spaces a) = (file <<< " " <+> \file -> gHpra file a) <<< " " 
-
 print_to_stdout :: a *World -> *World | gHpr{|*|} a
 print_to_stdout value world
 # (file,world) = stdio world
