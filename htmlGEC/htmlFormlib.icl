@@ -244,38 +244,29 @@ listForm s mode [x:xs] hst
 # ((x, xbody), hst) = mkEditForm (s +++ toString (length xs)) mode x hst
 = (([x:xs],[xbody:xsbody]),hst)
 
+// scripts
 
-/*
-FuncBut :: !Bool !FormId !Mode !(Button, a -> a) !*HSt -> ((a -> a,BodyTag),!*HSt)
-FuncBut init s mode (button=:LButton _ name ,cbf) hst = mkViewForm (s +++ name) mode bimap id hst
+openWindowScript ::  !String !Int !Int !Bool !Bool !Bool !Bool !Bool !Bool !Html -> Script
+openWindowScript scriptname height width toolbar menubar scrollbars resizable location status html
+= FScript( \file -> file <+
+			"function " <+ scriptname <+ "\r" <+
+			"{ OpenWindow=window.open(\"\", \"newwin\", \"" <+
+					"height=" <+ height <+
+					",width=" <+ width <+
+					",toolbar=" <+ yn toolbar <+
+					",menubar=" <+ yn menubar <+
+					",scrollbars=" <+ yn scrollbars <+
+					",resizable=" <+ yn resizable <+
+					",location=" <+ yn location <+
+					",status=" <+ yn status <+ "\");\r" <+
+				"OpenWindow.document.write(\"" <+ html <+ "</HTML>\");\r" <+
+				"OpenWindow.document.close();\r" <+
+	//			"self.name=\"webshop.php\";\r" <+     // don't know whther is needed ???
+			"}")
 where
-	bimap =	{ toForm 	= \_ v -> case v of
-									Nothing = button
-									(Just v) = if init button v
-			, updForm	= \_ v -> v
-			, fromForm	= \_ but -> case but of 
-									Pressed  -> cbf
-									_		 -> id
-			, resetForm	= Just (\_ 	-> button)
-			}
-FuncBut init s mode (button=:PButton _ ref ,cbf) hst = mkViewForm (s +++ ref) mode bimap id hst
-where
-	bimap =	{ toForm 	= \_ v -> case v of
-									Nothing = button
-									(Just v) = if init button v
-			, updForm	= \_ v -> v
-			, fromForm	= \_ but -> case but of 
-									Pressed -> cbf
-									_		  -> id
-			, resetForm	= Just (\_ 	-> button)
-			}
-FuncBut init s mode (Pressed,cbf) hst = FuncBut init s mode (LButton 10 "??",cbf) hst
+	yn bool = if bool "yes" "no" 
 
-ListFuncBut :: !Bool !FormId !Mode [(Button, a -> a)] !*HSt -> ((a -> a,[BodyTag]),!*HSt)
-ListFuncBut b s mode [] hst = ((id,[]),hst)
-ListFuncBut b s mode [x:xs] hst 
-# ((rowfun,rowb),hst) 	= ListFuncBut b s mode xs hst
-# ((fun,oneb)   ,hst)	= FuncBut b s mode x hst
-= ((fun o rowfun,[oneb:rowb]),hst)
-
-*/
+openNoticeScript ::  !String !Int !Int !Html -> Script
+openNoticeScript scriptname height width html 
+	= openWindowScript scriptname height width False False False False False False html
+	

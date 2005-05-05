@@ -217,13 +217,13 @@ where
 
 submitscript :: String String -> BodyTag
 submitscript formname updatename
-=	Script []
+=	Script [] (SScript
 	(	" function toclean(inp)" +++
 		" { document." +++
 			formname  +++ "." +++
 			updatename +++ ".value=inp.name+\"=\"+inp.value;" +++
 			"document." +++ formname +++ ".submit(); }"
-	)
+	))
 
 // form that contains global state and empty input form for storing updated input
 	

@@ -43,13 +43,13 @@ where
 
 // outility print functions based on gHpr
 
-print :: !String -> *FoF
+print :: !String -> FoF
 print a = \f -> fwrites a f
 
 (<+) infixl :: !*File !a -> *File | gHpr{|*|} a
 (<+) file new = gHpr{|*|} file new
 
-(<+>) infixl :: !*File *FoF -> *File
+(<+>) infixl :: !*File FoF -> *File
 (<+>) file new = new file
 
 print_to_stdout :: a *World -> *World | gHpr{|*|} a
@@ -61,15 +61,15 @@ where
 	force_IO:: !x *World -> *World
 	force_IO x w = w
 
-htmlCmnd :: !a !b -> *FoF | gHpr{|*|} a & gHpr{|*|} b
+htmlCmnd :: !a !b -> FoF | gHpr{|*|} a & gHpr{|*|} b
 htmlCmnd hdr txt =  \file -> closeCmnd hdr (openCmnd hdr "" file <+ txt) 			
 
-openCmnd :: !a !b -> *FoF | gHpr{|*|} a & gHpr{|*|} b
-openCmnd  hdr attr =  \file -> file <<< "\r<"  <+ hdr <+ attr <+ ">"
+openCmnd :: !a !b -> FoF | gHpr{|*|} a & gHpr{|*|} b
+openCmnd  hdr attr =  \file -> file <<< "<"  <+ hdr <+ attr <+ ">"
 
-closeCmnd :: !a -> *FoF | gHpr{|*|} a
-closeCmnd hdr =  \file -> print "\r</" file <+ hdr <+ ">\r"
+closeCmnd :: !a -> FoF | gHpr{|*|} a
+closeCmnd hdr =  \file -> print "</" file <+ hdr <+ ">"
 
-htmlAttrCmnd 	:: !hdr !attr !body -> *FoF | gHpr{|*|} hdr & gHpr{|*|} attr & gHpr{|*|} body
+htmlAttrCmnd 	:: !hdr !attr !body -> FoF | gHpr{|*|} hdr & gHpr{|*|} attr & gHpr{|*|} body
 htmlAttrCmnd hdr attr txt 
 = \file -> closeCmnd hdr (openCmnd hdr attr file <+ txt)

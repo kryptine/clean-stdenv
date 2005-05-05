@@ -20,7 +20,7 @@ None			:== [NoAttr]
 			| Hd_Link 		[LinkAttr]				//link <link>
 			| Hd_Meta 		[MetaOption]			//meta <meta>
 			| Hd_Object 	[Object_Attr] [Param]	//object <object></object> 
-			| Hd_Script 	[Script_Attr] String	//script <script></script>
+			| Hd_Script 	[Script_Attr] Script	//script <script></script>
 			| Hd_Style 		[StyleAttr] String		//<style></style>
 			| Hd_Title		String					//title <title></title>
 			
@@ -164,7 +164,7 @@ None			:== [NoAttr]
 			| Q				[Q_Attr] String				// short quotation <q></q>
 			| S	 			[Std_Attr] String			// strikethrough text <s></s>
 			| Samp	 		[Std_Attr] String			// Sample computer code <samp></samp>
-			| Script		[Script_Attr] String		// script <script></script>
+			| Script		[Script_Attr] Script		// script <script></script>
 			| Select 		[Select_Attr] [Option]		// select <select></select>
 			| Small 		[Std_Attr] String 			// smaller <small></small>
 			| Span			[Std_Attr] [BodyTag]		// section in a document <span></span>
@@ -329,24 +329,24 @@ None			:== [NoAttr]
 			| Docr_Bookmark
 		
 :: ElementEvents
-			= OnChange		String		// FormElementEvents - run when element changes
-			| OnSubmit		String		// FormElementEvents - run when form submitted
-			| OnReset		String		// FormElementEvents - run when form is reset
-			| OnSelect		String		// FormElementEvents - run when selected
-			| OnBlur		String		// FormElementEvents - run when element loses focus
-			| OnFocus		String		// FormElementEvents - run when element gets focus
-			| OnKeyDown		String		// KeyboardEvents - run when key pressed
-			| OnKeyPress	String		// KeyboardEvents - run when key pressed and released
-			| OnKeyUp		String		// KeyboardEvents - run when key released
-			| OnClick		String		// MouseEvents - run when mouse clicked
-			| OnDClick		String		// MouseEvents - run when mouse doubleclicked
-			| OnMouseDown	String		// MouseEvents - run when mouse button pressed
-			| OnMouseMove	String		// MouseEvents - run when mouse pointer moves
-			| OnMouseOver	String		// MouseEvents - run when mouse pointer moves over an element
-			| OnMouseOut	String		// MouseEvents - run when mouse pointer moves out of an element
-			| OnMouseUp		String		// MouseEvents - run when mouse button is released
-			| OnLoad		String		// WindowEvents - run when the window is loaded
-			| OnUnload		String		// WindowEvents - run when the window is unloaded
+			= OnChange		Script		// FormElementEvents - run when element changes
+			| OnSubmit		Script		// FormElementEvents - run when form submitted
+			| OnReset		Script		// FormElementEvents - run when form is reset
+			| OnSelect		Script		// FormElementEvents - run when selected
+			| OnBlur		Script		// FormElementEvents - run when element loses focus
+			| OnFocus		Script		// FormElementEvents - run when element gets focus
+			| OnKeyDown		Script		// KeyboardEvents - run when key pressed
+			| OnKeyPress	Script		// KeyboardEvents - run when key pressed and released
+			| OnKeyUp		Script		// KeyboardEvents - run when key released
+			| OnClick		Script		// MouseEvents - run when mouse clicked
+			| OnDClick		Script		// MouseEvents - run when mouse doubleclicked
+			| OnMouseDown	Script		// MouseEvents - run when mouse button pressed
+			| OnMouseMove	Script		// MouseEvents - run when mouse pointer moves
+			| OnMouseOver	Script		// MouseEvents - run when mouse pointer moves over an element
+			| OnMouseOut	Script		// MouseEvents - run when mouse pointer moves out of an element
+			| OnMouseUp		Script		// MouseEvents - run when mouse button is released
+			| OnLoad		Script		// WindowEvents - run when the window is loaded
+			| OnUnload		Script		// WindowEvents - run when the window is unloaded
 
 :: Font_Attr = Fnt_Size		Int				//size of the text 
 			| Fnt_Face		String			//font of the text 
@@ -553,6 +553,10 @@ None			:== [NoAttr]
 				| Scp_ColGroup
 				| Scp_Row
 				| Scp_RowGroup
+
+
+:: Script 	= SScript String
+			| FScript .FoF
 
 :: Script_Attr	= Scr_Type		ScriptType		//MIME type of the script
 				| Scr_CharSet	String			//character encoding used in script
