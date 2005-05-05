@@ -119,6 +119,8 @@ gHpr{|BodyTag|} prev (STable tabtags table)
 gHpr{|BodyTag|} prev EmptyBody					= prev
 gHpr{|BodyTag|} prev (BodyTag listofbodies)		= prev <+ listofbodies
 
+gHpr{|Script|} prev (SScript string)			= prev <+ string
+gHpr{|Script|} prev (FScript fof)				= prev <+> fof
 
 derive gHpr AlignTxt
 derive gHpr AlignObj

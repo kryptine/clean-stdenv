@@ -22,9 +22,9 @@ print_to_stdout 	:: a *World -> *World | gHpr{|*|} a
 
 // handy utility print routines	
 
-print 			:: !String 				-> *FoF
+print 			:: !String 				-> FoF
 (<+) infixl 	:: !*File !a 			-> *File | gHpr{|*|} a
-(<+>) infixl 	:: !*File *FoF 			-> *File
-htmlAttrCmnd 	:: !hdr !tag !body  	-> *FoF | gHpr{|*|} hdr & gHpr{|*|} tag & gHpr{|*|} body
-openCmnd 		:: !a !b 				-> *FoF | gHpr{|*|} a & gHpr{|*|} b
+(<+>) infixl 	:: !*File FoF 			-> *File
+htmlAttrCmnd 	:: !hdr !tag !body  	-> FoF | gHpr{|*|} hdr & gHpr{|*|} tag & gHpr{|*|} body
+openCmnd 		:: !a !b 				-> FoF | gHpr{|*|} a & gHpr{|*|} b
 

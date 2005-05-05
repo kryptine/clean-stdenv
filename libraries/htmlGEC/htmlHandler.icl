@@ -213,7 +213,7 @@ mkInput formid Edit val updval (inidx,hst)
 				, 	Inp_Value val
 				,	Inp_Name (encodeInfo (formid,inidx,updval))
 				,	Inp_Size defsize
-				,	`Inp_Events	[OnChange callClean]
+				,	`Inp_Events	[OnChange (SScript callClean)]
 				] ""
 		,(inidx+1,hst))
 mkInput formid Display val _ (inidx,hst) 
@@ -289,7 +289,7 @@ where
 							Edit 		-> `Sel_Std	[Std_Style width]
 							Display 	-> `Sel_Std	[Std_Style (width +++ ";" +++ color)]
 			changeable = case mode of
-							Edit 		-> `Sel_Events [OnChange callClean]
+							Edit 		-> `Sel_Events [OnChange (SScript callClean)]
 							Display 	-> Sel_Disabled Disabled
 			optionstyle	= case mode of
 							Edit 		-> []
@@ -466,7 +466,7 @@ gForm{|Button|} formid mode v=:(LButton size bname) (inidx,lhsts=:[(uniqueid,lst
 				, Inp_Value (SV bname)
 				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS bname))
 				, `Inp_Std [Std_Style ("width:" +++ toString size)]
-				, `Inp_Events [OnClick callClean]
+				, `Inp_Events [OnClick (SScript callClean)]
 				]) "")
 	, (inidx+1,lhsts))
 gForm{|Button|} formid mode v=:(PButton (height,width) ref) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
@@ -476,7 +476,7 @@ gForm{|Button|} formid mode v=:(PButton (height,width) ref) (inidx,lhsts=:[(uniq
 				, Inp_Src ref
 				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS ref))
 				, `Inp_Std [Std_Style ("width:" +++ toString width +++ " height:" +++ toString height)]
-				, `Inp_Events [OnClick callClean]
+				, `Inp_Events [OnClick (SScript callClean)]
 				]) "")
 	, (inidx+1,lhsts))
 gForm{|Button|} formid mode Pressed hst = gForm {|*|} formid mode (LButton defpixel "??") hst // end user should reset button
@@ -494,7 +494,7 @@ gForm{|CheckBox|} formid mode v=:(CBChecked name) (inidx,lhsts=:[(uniqueid,lst):
 				, Inp_Value (SV name)
 				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS name))
 				, Inp_Checked Checked
-				, `Inp_Events [OnClick callClean]
+				, `Inp_Events [OnClick (SScript callClean)]
 				]) "")
 	, (inidx+1,lhsts))
 gForm{|CheckBox|} formid mode v=:(CBNotChecked name) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
@@ -502,7 +502,7 @@ gForm{|CheckBox|} formid mode v=:(CBNotChecked name) (inidx,lhsts=:[(uniqueid,ls
 				[ Inp_Type Inp_Checkbox
 				, Inp_Value (SV name)
 				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS name))
-				, `Inp_Events [OnClick callClean]
+				, `Inp_Events [OnClick (SScript callClean)]
 				]) "")
 	, (inidx+1,lhsts))
 
@@ -516,7 +516,7 @@ gForm{|RadioButton|} formid mode v=:(RBChecked name) (inidx,lhsts=:[(uniqueid,ls
 				, Inp_Value (SV name)
 				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS name))
 				, Inp_Checked Checked
-				, `Inp_Events [OnClick callClean]
+				, `Inp_Events [OnClick (SScript callClean)]
 				]) "")
 	, (inidx+1,lhsts))
 gForm{|RadioButton|} formid mode v=:(RBNotChecked name) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
@@ -524,7 +524,7 @@ gForm{|RadioButton|} formid mode v=:(RBNotChecked name) (inidx,lhsts=:[(uniqueid
 				[ Inp_Type Inp_Radio
 				, Inp_Value (SV name)
 				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS name))
-				, `Inp_Events [OnClick callClean]
+				, `Inp_Events [OnClick (SScript callClean)]
 				]) "")
 	, (inidx+1,lhsts))
 
@@ -537,7 +537,7 @@ gForm{|PullDownMenu|} formid mode v=:(PullDown (size,width) (menuindex,itemlist)
 					[ Sel_Name ("CS")
 					, Sel_Size size
 					, `Sel_Std [Std_Style ("width:" +++ (toString width) +++ "px")]
-					, `Sel_Events [OnChange callClean]
+					, `Sel_Events [OnChange (SScript callClean)]
 					])
 					[ Option  
 						[ Opt_Value (encodeInfo (uniqueid,inidx,UpdC (itemlist!!j)))

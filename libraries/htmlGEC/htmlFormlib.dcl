@@ -60,3 +60,11 @@ ListFuncRadio 		:: !Int !FormId !Mode [Int -> a -> a] !*HSt
 FuncMenu 			:: !Int !FormId !Mode [(String, a -> a)] !*HSt 
 													 -> (((a -> a,Int),BodyTag),!*HSt)
 
+// scripts
+// openWindowScript will open a new browser window displaying the html code
+// parameters resp: scriptname() height width toolbar menubar scrollbars resizable location status html
+openWindowScript ::  !String     !Int   !Int  !Bool   !Bool   !Bool      !Bool     !Bool    !Bool  !Html -> Script
+
+// openNoticeScript simplified version of openWindowScript
+// parameters are resp: scriptname() height width html
+openNoticeScript ::  !String !Int !Int !Html -> Script
