@@ -33,3 +33,5 @@ readCD 			:: *World -> (*World,[CD])
 readCDdatabase	:: *World -> (*World,CDdatabase)
 
 instance toString Duration
+showPrize :: Int -> String
+

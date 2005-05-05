@@ -9,10 +9,11 @@ import StdMaybe     // For the Maybe type:           komt uit {Application}\Libr
 readCDdatabase	:: *World -> (*World,CDdatabase)
 readCDdatabase world
 # (world,cds) = readCD world
-= (world,[ ( {itemnr = i, instock = 1, prize = 4005 - cd.year}, cd)
+= (world,[ ( {itemnr = i, instock = 1, prize = max 500 (2000 - (100 * (2005 - cd.year)))}, cd)
 		    \\ cd <- cds & i <- [0..]
 		 ])
-
+where
+	max i j = if (i>j) i j
 
 readCD :: *World -> (*World,[CD])
 readCD world
@@ -134,4 +135,10 @@ initstr txt = txt%(0,size txt-2)
 instance fromString Int where fromString txt = toInt txt
 concat strs = foldr (+++) "" strs
 
-noControl string 	= {if (isControl s) ' ' s \\ s <-: string }		
+noControl string 	= {if (isControl s) ' ' s \\ s <-: string }	
+
+showPrize :: Int -> String
+showPrize val = "Euro " +++ sval%(0,s-3) +++ "." +++ sval%(s-2,s-1)
+where
+	sval = toString val
+	s = size sval
