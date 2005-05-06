@@ -1,6 +1,6 @@
 Version: 1.4
 Global
-	Built:	True
+	Built:	False
 	Target:	Everything
 	Exec:	{Project}\webshop.exe
 	CodeGen
@@ -61,10 +61,10 @@ MainModule
 	DclOpen:	False
 	Icl
 		WindowPosition
-			X:	42
-			Y:	34
-			SizeX:	847
-			SizeY:	515
+			X:	34
+			Y:	49
+			SizeX:	874
+			SizeY:	508
 	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
@@ -167,8 +167,8 @@ OtherModules
 			ReuseUniqueNodes:	True
 		Dcl
 			WindowPosition
-				X:	0
-				Y:	0
+				X:	41
+				Y:	23
 				SizeX:	854
 				SizeY:	569
 		DclOpen:	False
@@ -307,18 +307,18 @@ OtherModules
 			ReuseUniqueNodes:	True
 		Dcl
 			WindowPosition
-				X:	0
-				Y:	0
+				X:	50
+				Y:	47
 				SizeX:	797
 				SizeY:	523
-		DclOpen:	False
+		DclOpen:	True
 		Icl
 			WindowPosition
 				X:	0
 				Y:	0
 				SizeX:	924
 				SizeY:	542
-		IclOpen:	False
+		IclOpen:	True
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ArgEnv
@@ -507,8 +507,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	786
+				SizeY:	343
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -703,8 +703,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	719
+				SizeY:	508
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -1072,11 +1072,11 @@ OtherModules
 		DclOpen:	False
 		Icl
 			WindowPosition
-				X:	16
-				Y:	78
-				SizeX:	867
-				SizeY:	466
-		IclOpen:	True
+				X:	19
+				Y:	26
+				SizeX:	873
+				SizeY:	491
+		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 Static
 	Mods
@@ -1153,8 +1153,8 @@ Static
 		Path:	{Application}\Libraries\Generics\Clean System Files\GenPrint.o
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
 		Path:	{Application}\Libraries\Generics\Clean System Files\GenParse.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlEncodeDecode.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlTrivial.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlEncodeDecode.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlFormlib.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlArrow.o
 		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o

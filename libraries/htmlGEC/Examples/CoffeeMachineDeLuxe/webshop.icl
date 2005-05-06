@@ -14,15 +14,20 @@ derive gParse PageMode, Item, CD, Track, Duration
 
 :: PageMode 	= HomePage | ShopPage | BasketPage | OrderPage
 
+:: Basket		:== [Int]			// item nrs selected
+:: CD_Selection	:== CD_Database		// selection of database items
+
+
+
 Start world 
-#  (world,items) = readCDdatabase world
+#  (world,items) = readCD_Database world
 = doHtml (webshopentry items) world
 
 // main entry shop
 
 webshopentry database hst
 # ((setpage,pagebutbody),hst) 	= ListFuncBut False "pagebut" Edit pagebuttons hst	
-# ((curpage,_)	  		,hst) 	= mkStoreForm "curpage" setpage ShopPage hst
+# ((curpage,_)	  		,hst) 	= mkStoreForm "curpage" setpage HomePage hst
 # (page,hst) 					= case curpage of
 									HomePage 	-> doHomePage database hst
 									ShopPage 	-> doShopPage database hst
@@ -33,6 +38,7 @@ webshopentry database hst
 		, Hr []
 		, Br
 		, BodyTag page
+		, Br
 //		, traceHtmlInput
 		], hst)
 where
@@ -42,6 +48,14 @@ where
 		, (but "Basket", 	\page -> BasketPage)
 		, (but "OrderInfo", \page -> OrderPage)
 		]
+
+// stores that are shared between the pages
+
+basketstore :: (Basket -> Basket) *HSt -> ((Basket,BodyTag),!*HSt)
+basketstore f hst = mkStoreForm "basket" f [] hst
+
+browsestore :: (Int -> Int) *HSt -> ((Int,BodyTag),!*HSt)
+browsestore f hst = mkStoreForm "browse" f 0 hst
 
 // home page
 
@@ -54,23 +68,52 @@ doHomePage database hst
 // shop page
 
 doShopPage database hst
-# ((next,browsebuttons)	,hst)	= ListFuncBut False "br" Edit (browseButtons (length database)) hst
-# ((i,_)	,hst) 				= browsestore next hst
-# ((addCD,addbuttons)	,hst)	= ListFuncBut False "items" Edit (addToBasketButtons [i..i+step-1]) hst
+# ((step,stepF),hst)			= mkEditForm "stepsize" Edit 5 hst
+# ((searchS,searchB),hst)		= mkEditForm "searchstring" Edit "" hst
+# (((_,kind),searchOB),hst)		= FuncMenu -1 "searchoption" Edit optionbuttons hst
+# (found,selection)				= searchDatabase ([AnyAlbum,AnyArtist,AnySong]!!kind) searchS database
+# ((next,browsebutton)	,hst)	= ListFuncBut False  "browsebuttons" Edit (browseButtons step (length selection)) hst
+# ((i,_)	,hst) 				= browsestore (next o \i -> if found 0 i) hst
+# ((addCD,addbuttons)	,hst)	= ListFuncBut False "items" Edit (addToBasketButtons i step selection) hst
 # ((basket,_)	  		,hst) 	= basketstore addCD hst
-# ((infonr,infobuttons)	,hst)	= ListFuncBut False "info" Edit (informationButtons [i..i+step-1]) hst
-= (	[ bTxt "ShopPage"
-	, Br
-	, mkTable (database%(i,i+step-1)) infobuttons addbuttons 
-	, Br
-	, mkrow browsebuttons
-	, Br
-	, bTxt ("number of items found : " +++ (toString (length database)))
+# ((infonr,infobuttons)	,hst)	= ListFuncBut False "info" Edit (informationButtons [item.itemnr \\ (item,cd) <- selection]%(i,i+step-1)) hst
+= (	[ STable [] [[bTxt "Search:",searchOB]
+				,[bTxt "Name:",searchB, if found (bTxt "Items Found:")
+												 (bTxt "No Items Found"),bTxt (toString (length selection))]
+				,[bTxt "Browse Step:",stepF]
+				,[browsebutton!!0,browsebutton!!1]
+				]
 	, Br, Br
+	, mkTable (selection%(i,i+step-1)) infobuttons addbuttons 
+	, Br, Br
+	, toHtml (i,step,found)
 	, showBasketTop database basket
 	, doScript database (infonr -1)
 	], hst)
+where
+	optionbuttons :: [(String,SearchOption -> SearchOption)]
+	optionbuttons = [("Album", 	\_ 		-> AnyAlbum)
+					,("Artist", \_ 		-> AnyArtist)
+					,("Song", 	\_ 		-> AnySong)]
+	
+	browseButtons :: Int Int -> [(Button,Int -> Int)]
+	browseButtons step length = [(but ("-" +++ toString step),prev),(but ("+" +++ toString step),next)]
+	where
+		next i = if (length > i+ step ) (i+step) i
+		prev i = if (i >= step ) (i - step) i
 
+	addToBasketButtons :: Int Int CD_Selection -> [(Button,Basket -> Basket)]
+	addToBasketButtons i step selection 
+		= [(butp "basket.gif" ,\basket -> [item.itemnr:basket]) \\ (item,cd) <- selection]%(i,i+step-1)
+
+	showBasketTop :: CD_Database Basket -> BodyTag
+	showBasketTop database [] 			= bTxt "Basket is empty"
+	showBasketTop database [itemnr:_] 	= BodyTag
+								[ bTxt ("Latest item put into basket was: ")
+								: ItemRow item ++ CDRow cd
+								]
+	where
+		(item,cd) = database!!itemnr
 // basket page
 
 doBasketPage database hst
@@ -123,29 +166,16 @@ where
 
 
 myScript :: [BodyTag] -> Script
-myScript body = openWindowScript scriptName 250 800 False False True True False False 
+myScript body = openWindowScript scriptName 800 400 False False True True False False 
 					(mkHtml "CD information window" body)
 
 onloadBody = `Batt_Events [OnLoad (SScript scriptName)]
 
 scriptName = "openwindow()"
 
-// stores
-
-:: DataBase		:== [(Item,CD)]
-:: Basket		:== [Int]			// item nrs selected
-:: Selection	:== [(Item,CD)]		// selection of database items
-
-basketstore :: (Basket -> Basket) *HSt -> ((Basket,BodyTag),!*HSt)
-basketstore f hst = mkStoreForm "basket" f [] hst
-
-browsestore :: (Int -> Int) *HSt -> ((Int,BodyTag),!*HSt)
-browsestore f hst = mkStoreForm "browse" f 0 hst
 
 // buttons
 
-addToBasketButtons :: [Int] -> [(Button,Basket -> Basket)]
-addToBasketButtons basket = [(butp "basket.gif" ,\basket -> [itemnr:basket]) \\ itemnr <- basket]
 
 removeFromBasketButtons :: Basket -> [(Button,Basket -> Basket)]
 removeFromBasketButtons basket = [(butp "trash.gif" , removeFromBasket itemnr) \\ itemnr <- basket]
@@ -159,24 +189,10 @@ where
 informationButtons :: [Int] -> [(Button,Int -> Int)]
 informationButtons basket = [(butp "info.gif" ,\_ -> itemnr ) \\ itemnr <- basket]
 
-browseButtons :: Int -> [(Button,Int -> Int)]
-browseButtons length = [(but ("-" +++ toString step),prev),(but ("+" +++ toString step),next)]
-where
-	next i = if (length > i+ step ) (i+step) i
-	prev i = if (i >= step ) (i - step) i
 
-step = 5	
 
 // Table making functions
 
-showBasketTop :: DataBase Basket -> BodyTag
-showBasketTop database [] 			= bTxt "Basket is empty"
-showBasketTop database [itemnr:_] 	= BodyTag
-							[ bTxt ("Latest item put into basket was: ")
-							: ItemRow item ++ CDRow cd
-							]
-where
-	(item,cd) = database!!itemnr
 
 mkTable :: [(Item,CD)] [BodyTag] [BodyTag] -> BodyTag
 mkTable items infobuttons deladdbuttons

@@ -1,13 +1,9 @@
 implementation module CDdatabaseHandler
 
-/** Voorgegeven functies voor opdracht 6 P4 2005.
-*/
-import StdEnv
-import StdMaybe     // For the Maybe type:           komt uit {Application}\Libraries\StdLib
+import StdEnv, StdMaybe   
 
-
-readCDdatabase	:: *World -> (*World,CDdatabase)
-readCDdatabase world
+readCD_Database	:: *World -> (*World,CD_Database)
+readCD_Database world
 # (world,cds) = readCD world
 = (world,[ ( {itemnr = i, instock = 1, prize = max 500 (2000 - (100 * (2005 - cd.year)))}, cd)
 		    \\ cd <- cds & i <- [0..]
@@ -142,3 +138,29 @@ showPrize val = "Euro " +++ sval%(0,s-3) +++ "." +++ sval%(s-2,s-1)
 where
 	sval = toString val
 	s = size sval
+
+searchDatabase :: SearchOption String CD_Database -> (Bool,CD_Database)
+searchDatabase _ "" database = (False,database) 
+searchDatabase AnyAlbum string database 
+= check database [(item,cd) \\ (item,cd) <- database | isSubstring string cd.album]
+searchDatabase AnyArtist string database 
+= check database [(item,cd) \\ (item,cd) <- database | isSubstring string cd.group]
+searchDatabase AnySong string database 
+= check database [(item,cd) \\ (item,cd) <- database | or [isSubstring string title \\ {title} <- cd.tracks]]
+searchDatabase _ string database = (False,database)
+
+check database [] 		 = (False,database)
+check database ndatabase = (True,ndatabase)
+
+isSubstring :: String String -> Bool
+isSubstring searchstring item = compare` [toLower c1 \\ c1 <-: searchstring | isAlphanum c1] [toLower c2 \\ c2 <-: item | isAlphanum c2]
+where
+	compare` [] _ = True
+	compare` ss is
+	| length ss > length is = False
+	compare` search=:[s:ss] [is:iss]
+	| s == is = if (ss == iss%(0,length ss - 1)) True (compare` search iss)
+	| otherwise = compare` search iss 
+	comapre` _ _ = False
+
+
