@@ -188,8 +188,8 @@ urlEncodeState [(x,y):xsys] = urlEncodeS "(\"" +++ x +++ urlEncodeS "\"," +++
 
 // script for transmitting name and value of changed input 
 
-callClean :: String
-callClean =: "toclean(this)"
+callClean :: Script
+callClean =: SScript "toclean(this)"
 
 globalFormName :: String
 globalFormName =: "CleanForm"

@@ -18,7 +18,7 @@ traceHtmlInput	:: BodyTag		// for debugging to show which information is receive
 :: GlobalState :== [(String,String)]
 
 encodeInfo 		:: a -> String | gPrint{|*|} a	// format required for storing stuf in html
-callClean 		:: String						// call script that will transmit input info to this executable
+callClean 		:: Script						// call script that will transmit input info to this executable
 addScript 		:: GlobalState -> BodyTag		// the corresponding script, stores global state as well					
 
 // decoding of information

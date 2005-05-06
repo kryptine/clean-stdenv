@@ -1,6 +1,6 @@
 definition module CDdatabaseHandler
 
-::	CDdatabase		:== [(Item,CD)]
+::	CD_Database		:== [(Item,CD)]
 
 :: Item
  =	{	itemnr		:: !Int
@@ -30,7 +30,11 @@ definition module CDdatabaseHandler
 
 
 readCD 			:: *World -> (*World,[CD])
-readCDdatabase	:: *World -> (*World,CDdatabase)
+readCD_Database	:: *World -> (*World,CD_Database)
+
+:: SearchOption = AnyAlbum | AnyArtist | AnySong
+
+searchDatabase :: SearchOption String CD_Database -> (Bool,CD_Database)
 
 instance toString Duration
 showPrize :: Int -> String

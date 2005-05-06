@@ -31,6 +31,11 @@ toHtml :: a -> BodyTag | gForm {|*|} a
 				, resetForm :: Maybe (v -> v)		// can be used to reset view (eg for buttons)
 				}
 
+:: Form a =		{ changed 	:: Bool
+				, value		:: a
+				, body		:: BodyTag
+				}
+
 mkViewForm 		:: !FormId 	!Mode !(HBimap d v) 	d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
 
 // For convenience all kinds of variants of "mkViewForm" are predefined, simply by chosing certain defaults for the HBimap.
