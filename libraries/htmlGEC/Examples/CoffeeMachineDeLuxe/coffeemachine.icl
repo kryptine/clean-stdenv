@@ -12,29 +12,29 @@ derive gParse MachineState, Output, Product
 Start world  = doHtml coffeemachine world
 
 coffeemachine hst
-# ((input,buttons)		,hst) = ListFuncBut False "cb" Edit allbuttons hst	
-# (((option,options),_)	,hst) = ListFuncCheckBox False "op" Edit (optionbuttons False False) hst	
-# ((machine,_)	  		,hst) = mkStoreForm "hidden" (option o input) initmachine hst
-# ((_,checkbox)			,hst) = ListFuncCheckBox True "op" Edit (optionbuttons machine.milk machine.sugar) hst	
+# (input	,hst) = ListFuncBut False "cb" Edit allbuttons hst	
+# (options	,hst) = ListFuncCheckBox False "op" Edit (optionbuttons False False) hst	
+# (optionfun,optionbool)	  = options.value
+# (machine	,hst) = mkStoreForm "hidden" (optionfun o input.value) initmachine hst
+# (checkboxf,hst) = ListFuncCheckBox True "op" Edit (optionbuttons machine.value.milk machine.value.sugar) hst	
 = mkHtml "Coffee Machine"
 		[ H1 [] "Fancy Coffee Machine ..."
 		, Br
-		, BodyTag
-			[ mkSTable [[bTxt "Content:", bTxt "Value:",bTxt "Input:"]]
-			, toHtml ("money ",machine.money) <=> mkrow (buttons%MoneyButtons)
-			, toHtml ("beans ",machine.beans) <=> buttons!!BeansButton
-			, toHtml ("trash ",machine.trash) <=> buttons!!TrashButton
+		, 	[ mkSTable [[bTxt "Content:", bTxt "Value:",bTxt "Input:"]]
+			, toHtml ("money ",machine.value.money) <.=.> mkRowF (input.body%MoneyButtons)
+			, toHtml ("beans ",machine.value.beans) <.=.> input.body!!BeansButton
+			, toHtml ("trash ",machine.value.trash) <.=.> input.body!!TrashButton
 			, Br
 			, bTxt "Options: "
 			, Br
-			, checkbox!!MilkOption  <=> bTxt "Milk"
-			, checkbox!!SugarOption <=> bTxt "Sugar"
+			, checkboxf.body!!MilkOption  <.=.> bTxt "Milk"
+			, checkboxf.body!!SugarOption <.=.> bTxt "Sugar"
 			, Br
 			, mkSTable [[bTxt "Product:", bTxt "Prize:"]]
-			, mkcol (buttons%ProductButtons) <=> mkcol (map toHtml prizes)
+			, mkColF (input.body%ProductButtons) <.=.> mkColF (map toHtml prizes)
 			, Br
-			, bTxt "Message: ", bTxt (print machine.out options)
-			] <=> displayMachineImage machine.out 
+			, bTxt "Message: ", bTxt (print machine.value.out optionbool)
+			] <=> [displayMachineImage machine.value.out] 
 		] hst
 where
 	allbuttons  = 
@@ -67,8 +67,6 @@ where
 
 	machineImage i	= Img [Img_Src ("images/coffeemachine0" +++ toString i +++ ".jpg"), Img_Width (RelLength 560) ,Img_Height (RelLength 445)]
 
-	mkcol bodies 	= foldr (<||>) EmptyBody bodies 
-	mkrow bodies 	= foldr (<=>)  EmptyBody bodies 
 
 	mkHtml s tags hst 	= (Html (header s) (body tags),hst)
 	header s 			= Head [`Hd_Std [Std_Title s]] [] 
