@@ -37,7 +37,7 @@ SimplePage = Html (Head [] [Hd_Title "Simple page test"])
 		[Area [Are_Shape Sopt_Rect, Are_Coords "0,0,82,126", Are_Href "sun.htm", Are_Target Trg__Blank]
 		, Area [Are_Shape Sopt_Circle, Are_Coords "90,58,3", Are_Href "mercury.htm", Are_Target Trg__Blank]]
 		, Hr []
-		, Dl [] [Dt [] [Txt "Prueba1", B [`Std_Attr [Std_Title "Prueba"],`Std_Events [OnClick "ScriptPrueba"]] "negrita"],Dt [] [Txt "Prueba2", I [] "Italic"], Dd [] [Txt "Desc2"],Dt [] [Txt "Prueba3"]]
+		, Dl [] [Dt [] [Txt "Prueba1", B [`Std_Attr [Std_Title "Prueba"],`Std_Events [OnClick (Script [] (SScript "ScriptPrueba"))]] "negrita"],Dt [] [Txt "Prueba2", I [] "Italic"], Dd [] [Txt "Desc2"],Dt [] [Txt "Prueba3"]]
 		, Form [Frm_Action "prueba.php", Frm_Method Post, Frm_Name "FormPrueba", Frm_Target Trg__Blank] [Fieldset [] [Legend [Leg_Align Aln_Right] "Legend of Fieldset"
 		, Select [Sel_Size 3] [Optgroup [Opg_Label "Opg1"],Option [] "Option 1"
 		, Option [] "Option 2"

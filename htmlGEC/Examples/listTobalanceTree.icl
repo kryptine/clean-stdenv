@@ -12,7 +12,8 @@ Start world  = doHtml MyPage world
 
 
 MyPage hst
-# ((_,[list,tree:_]),hst) = startCircuit mycircuit [1,5,2] hst
+# (mycircuitf,hst) = startCircuit mycircuit [1,5,2] hst
+# [list,tree:_] = mycircuitf.body
 = mkHtml "Balancing Tree From List"
 	[ Txt "List :", Br
 	, list

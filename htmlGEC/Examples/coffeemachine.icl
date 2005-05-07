@@ -11,15 +11,15 @@ derive gParse Machine, Output, Product
 Start world  = doHtml coffeemachine world
 
 coffeemachine hst
-# ((command,combody),hst)	= TableFuncBut "cb" Edit commandbuttons hst	
-# ((option, optbody),hst)	= TableFuncBut "ob" Edit optionbuttons  hst	
-# ((machine,_)      ,hst)	= mkStoreForm "hidden"  (option o command) initmachine hst
+# (command,hst)	= TableFuncBut "cb" Edit commandbuttons hst	
+# (option,hst)	= TableFuncBut "ob" Edit optionbuttons  hst	
+# (machine,hst)	= mkStoreForm "hidden"  (option.value o command.value) initmachine hst
 = mkHtml "Coffee Machine"
 		[ H1 [] "Coffee Machine: "
-		, toHtml (displaycontents  machine) <=> combody
-		, optbody
+		, [toHtml (displaycontents  machine.value)] <=> command.body
+		, BodyTag option.body
 		, Br
-		, B [] (displayoutput machine)
+		, B [] (displayoutput machine.value)
 		, Br,Br,Br
 		] hst
 where

@@ -8,31 +8,33 @@ module spreadsheet
 import StdEnv
 import StdHtml
 
-Start world  = doHtml spreadsheet world
+//Start world  = doHtml spreadsheet world
+Start world  = doHtml arrowsspreadsheet world
 
 spreadsheet hst
-# ((table, tableB), hst) = table_hv_Form "table" Edit 	 (inittable 8 12)     hst
-# ((_,     rowsumB),hst) = vertlistForm  "rsum"  Display (rowsum table)       hst
-# ((_,     colsumB),hst) = horlistForm   "csum"  Display (colsum table)       hst
-# ((_,     tsumB),  hst) = mkEditForm    "tsum"  Display (sum (rowsum table)) hst
+# (tablef, hst) = table_hv_Form "table" Edit 	(inittable 4 8)     	    hst
+# (rowsumf,hst) = vertlistForm  "rsum"  Display (rowsum tablef.value)       hst
+# (colsumf,hst) = horlistForm   "csum"  Display (colsum tablef.value)       hst
+# (totsumf,hst) = mkEditForm    "tsum"  Display (sum (rowsum tablef.value)) hst
 = mkHtml "Spreadsheet"
 	[ H1 [] "Spreadsheet Example: "
 	, Br
-	, (tableB  <=> rowsumB)
-	, (colsumB <=> tsumB)
+	, tablef.body  <=> rowsumf.body
+	, colsumf.body <=> totsumf.body
 	,Br, Br
-	, Txt "so the result of the spreadsheet is :", tsumB
+	, Txt "so the result of the spreadsheet is :", toHtml totsumf.value
 	,Br ,Br
 //	, traceHtmlInput
 	] hst
 
 arrowsspreadsheet hst
-# ((_, [tableB,rowsumB,colsumB,tsumB:_]), hst) = startCircuit mycircuit (inittable 8 10) hst
+# (circuitf, hst) = startCircuit mycircuit (inittable 8 10) hst
+# [tablefbody,rowsumfbody,colsumfbody,totsumfbody:_] = circuitf.body
 = mkHtml "Spreadsheet"
 	[ H1 [] "Spreadsheet Example: "
 	, Br
-	, (tableB  <=> rowsumB)
-	, (colsumB <=> tsumB)
+	, [tablefbody]  <=> [rowsumfbody]
+	, [colsumfbody] <=> [totsumfbody]
 	,Br, Br
 	] hst
 where
