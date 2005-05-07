@@ -18,8 +18,8 @@ derive gParse PageMode, Item, CD, Track, Duration
 :: CD_Selection	:== CD_Database		// selection of database items
 
 Start world 
-#  (world,items) = readCD_Database world
-= doHtml (webshopentry items) world
+#  (world,database) = readCD_Database world
+= doHtml (webshopentry database) world
 
 // main entry shop
 
@@ -98,7 +98,7 @@ doShopPage database hst
 # (i,hst) 			= browsestore (nextprev.value o \i -> if (searchstring.changed || option.changed) 0 i) hst
 # (add,hst)			= ListFuncBut False "items" Edit (addToBasketButtons i.value step.value selection) hst
 # (basket,hst) 		= basketstore add.value hst
-# (info,hst)		= ListFuncBut False "info" Edit (informationButtons [item.itemnr \\ (item,cd) <- selection]%(i.value,i.value+step.value-1)) hst
+# (info,hst)		= ListFuncBut False "info" Edit (informationButtons [item.itemnr \\ {item} <- selection]%(i.value,i.value+step.value-1)) hst
 = (	[ STable [] [[bTxt "Search:",toBody option, Img [Img_Src "images/loep.gif"]]
 				,[bTxt "Name:",  toBody searchstring, if found (bTxt (toString (length selection) +++ " Items Found"))
 											     			   (bTxt "No Items Found")]
@@ -109,8 +109,8 @@ doShopPage database hst
 	, mkTable (i.value+1,length selection) (selection%(i.value,i.value+step.value-1)) info.body add.body 
 	, Br, Br
 	, if (isEmpty basket.value)
-			(bTxt "Basket is empty")
-			(BodyTag [ bTxt ("Latest item put into basket was: ")
+			(bTxt "Your Basket is empty")
+			(BodyTag [ bTxt ("Last item put into basket was: ")
 					 , mkTable (1,length basket.value) [database!!(hd basket.value)] info.body [EmptyBody]
 					 ])
 	, doScript database (info.value -1)
@@ -122,9 +122,9 @@ where
 		next i = if (length > i+ step ) (i+step) i
 		prev i = if (i >= step ) (i - step) i
 
-	addToBasketButtons :: Int Int CD_Selection -> [(Button,Basket -> Basket)]
+	addToBasketButtons :: Int Int [CD_Selection] -> [(Button,Basket -> Basket)]
 	addToBasketButtons i step selection 
-		= [(butp "basket.gif" ,\basket -> [item.itemnr:basket]) \\ (item,cd) <- selection]%(i,i+step-1)
+		= [(butp "basket.gif" ,\basket -> [data.item.itemnr:basket]) \\ data <- selection]%(i,i+step-1)
 
 informationButtons :: [Int] -> [(Button,Int -> Int)]
 informationButtons basket = [(butp "info.gif" ,\_ -> itemnr ) \\ itemnr <- basket]
@@ -138,9 +138,12 @@ doBasketPage database hst
 # (info,hst)	= ListFuncBut False "binfo" Edit (informationButtons nbasket.value) hst
 = (	[ bTxt "BasketPage"
 	, Br
-	, bTxt "Current contents of your basket:"
-	, Br, Br
-	, mkTable (1,length nbasket.value) [database!!itemnr \\ itemnr <- nbasket.value] info.body delete.body
+	, if (isEmpty nbasket.value)
+			(bTxt "Your Basket is empty")
+			(BodyTag [ bTxt ("Current contents of your basket:")
+					, Br, Br
+					, mkTable (1,length nbasket.value) [database!!itemnr \\ itemnr <- nbasket.value] info.body delete.body
+					])
 	, doScript database (info.value -1)
 	], hst)
 where
@@ -184,7 +187,7 @@ where
 			, Br
 			, STable tableAttr	[ [bTxt ("Buy it now for only " +++ showPrize item.prize)] ]
 			]
-	(item,cd) = database!!itemnr
+	{item,cd} = database!!itemnr
 	tableAttr = [Tbl_Border 1, Tbl_Bgcolor (`Colorname Yellow)]
 
 
@@ -198,13 +201,13 @@ scriptName = "openwindow()"
 
 // Function to display contents of selected items, database, basket
 
-mkTable :: (Int,Int) [(Item,CD)] [BodyTag] [BodyTag] -> BodyTag
+mkTable :: (Int,Int) [CD_Selection] [BodyTag] [BodyTag] -> BodyTag
 mkTable (cnt,max) items infobuttons deladdbuttons
 	= table
 		[ empty ++ ItemHeader ++ CDHeader ++ empty ++ empty
 		: [CntRow i max ++ ItemRow item ++ CDRow cd ++ mkButtonRow infobutton ++ mkButtonRow deladdbutton
 			\\ i <- [cnt..]
-			& (item,cd) <- items 
+			& {item,cd} <- items 
 			& infobutton <- infobuttons
 			& deladdbutton <- deladdbuttons ]
 		]				
@@ -212,7 +215,7 @@ where
 	table rows 	= Table [Tbl_Width tableWidth, Tbl_Bgcolor (`HexColor bgcolor), Tbl_Border 1] 
 					[Tr [] row \\ row <- rows]
 	tableWidth	= Percent 100
-	ItemHeader 	= mkItemRow "Item" "Prize" "Stock" 
+	ItemHeader 	= mkItemRow "Item" "Prize"
 	CDHeader 	= mkCDRow "Artist" "Album" "Year" "Duration" 
 
 	CntRow i max = [Td [Td_Width indexWidth] [bTxt (toString i +++ "/" +++ toString max)]] 
@@ -220,18 +223,16 @@ where
 
 	ItemRow :: Item -> [BodyTag] 
 	ItemRow item
-		= mkItemRow (toString item.itemnr) (showPrize item.prize) (toString item.instock)
+		= mkItemRow (toString item.itemnr) (showPrize item.prize)
 
-	mkItemRow :: String String String -> [BodyTag]
-	mkItemRow itemnr prize instock
+	mkItemRow :: String String -> [BodyTag]
+	mkItemRow itemnr prize
 	=	[ Td [Td_Width itemnrWidth] 	[bTxt itemnr]
 		, Td [Td_Width prizeWidth] 		[bTxt prize]
-		, Td [Td_Width instockWidth] 	[bTxt instock]
 		]
 	where
 		itemnrWidth 	= Pixels 40
 		prizeWidth 		= Pixels 100
-		instockWidth 	= Pixels 50
 
 	CDRow :: CD -> [BodyTag]
 	CDRow cd
