@@ -79,7 +79,7 @@ where
 					,("Song", 	\_ 		-> AnySong)]
 
 stepstore :: *HSt -> (Form Int,!*HSt)
-stepstore hst = mkEditForm "stepsize" Edit 5 hst
+stepstore hst = mkSelfForm "stepsize" (\step -> if (step > 1) step 5) 5 hst
 
 // home page
 
@@ -92,21 +92,26 @@ doHomePage database hst
 doShopPage database hst
 # (searchstring,hst)= searchstore hst
 # (option,hst)		= optionstore hst
-# (found,selection)	= searchDatabase ([AnyAlbum,AnyArtist,AnySong]!!(snd (option.value))) (searchstring.value) database
 # (step,hst)		= stepstore hst
-# (nextprev	,hst)	= ListFuncBut False  "browsebuttons" Edit (browseButtons step.value (length selection)) hst
-# (i,hst) 			= browsestore (nextprev.value o \i -> if (searchstring.changed || option.changed) 0 i) hst
+# (i,hst)			= browsestore id hst
+
+# (found,selection)	= searchDatabase ([AnyAlbum,AnyArtist,AnySong]!!(snd (option.value))) (searchstring.value) database
+# (shownext, hst)	= ListFuncBut False  "browsebuttons" Edit (browseButtons i.value step.value (length selection)) hst
+# (i,hst) 			= browsestore (shownext.value o \i -> if (searchstring.changed || option.changed) 0 i) hst
+# (shownext, hst)	= ListFuncBut False  "browsebuttons" Edit (browseButtons i.value step.value (length selection)) hst
+
 # (add,hst)			= ListFuncBut False "items" Edit (addToBasketButtons i.value step.value selection) hst
 # (basket,hst) 		= basketstore add.value hst
-# (info,hst)		= ListFuncBut False "info" Edit (informationButtons [item.itemnr \\ {item} <- selection]%(i.value,i.value+step.value-1)) hst
+# (info,hst)		= ListFuncBut False "info" Edit (informationButtons [item.itemnr \\ {item} <- selection]%(i.value,i.value+step.value)) hst
 = (	[ STable [] [[bTxt "Search:",toBody option, Img [Img_Src "images/loep.gif"]]
 				,[bTxt "Name:",  toBody searchstring, if found (bTxt (toString (length selection) +++ " Items Found"))
 											     			   (bTxt "No Items Found")]
-				,[nextprev.body!!0,nextprev.body!!1,bTxt "Browse Step:",toBody step]
+				,[bTxt "#Items:",toBody step]
 				]
 	, Br
-	, Br
-	, mkTable (i.value+1,length selection) (selection%(i.value,i.value+step.value-1)) info.body add.body 
+	, STable [] [shownext.body]
+	, Br, Br 
+	, mkTable (i.value+1,length selection) (selection%(i.value,i.value+step.value)) info.body add.body 
 	, Br, Br
 	, if (isEmpty basket.value)
 			(bTxt "Your Basket is empty")
@@ -116,15 +121,25 @@ doShopPage database hst
 	, doScript database (info.value -1)
 	], hst)
 where
-	browseButtons :: Int Int -> [(Button,Int -> Int)]
-	browseButtons step length = [(but ("-" +++ toString step),prev),(but ("+" +++ toString step),next)]
+	browseButtons :: Int Int Int -> [(Button,Int -> Int)]
+	browseButtons init step length = 
+		if (init - range >= 0) 	   [(sbut "--", set (init - range))] [] 
+		++
+		take nbuttuns [(sbut (toString (i+1)),set i) \\ i <- [start init 0,(start init 0)+step .. length-1]] 
+		++ 
+		if (init + range <= length + 1) [(sbut "++", set (init + range))] []
 	where
-		next i = if (length > i+ step ) (i+step) i
-		prev i = if (i >= step ) (i - step) i
+		set j i = j
+		range = nbuttuns * step
+		start i j= if (i < range) j (start (i-range) (j+range))
+		nbuttuns = 10
+		 
 
 	addToBasketButtons :: Int Int [CD_Selection] -> [(Button,Basket -> Basket)]
 	addToBasketButtons i step selection 
 		= [(butp "basket.gif" ,\basket -> [data.item.itemnr:basket]) \\ data <- selection]%(i,i+step-1)
+
+
 
 informationButtons :: [Int] -> [(Button,Int -> Int)]
 informationButtons basket = [(butp "info.gif" ,\_ -> itemnr ) \\ itemnr <- basket]
@@ -267,6 +282,7 @@ allAphaNum string 	= string
 
 but s				= LButton defpixel s
 butp s				= PButton (defpixel/2,defpixel/2) ("images/" +++ s)
+sbut s				= LButton (defpixel/3) s
 
 bgcolor 			= (Hexnum H_6 H_6 H_9 H_9 H_C H_C)
 
