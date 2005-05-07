@@ -49,8 +49,8 @@ where
 		]
 
 // stores which are shared between the pages
-// wil keep information persistent when switching between pages
-// each store can be addressed as wanted in any page as desired as well
+// and keep information persistent when switching between pages
+// each store can be re-addressed again in any page to get access to the contents
 
 instalGlobalStores :: *HSt -> *HSt
 instalGlobalStores hst
@@ -99,20 +99,23 @@ doShopPage database hst
 # (add,hst)			= ListFuncBut False "items" Edit (addToBasketButtons i.value step.value selection) hst
 # (basket,hst) 		= basketstore add.value hst
 # (info,hst)		= ListFuncBut False "info" Edit (informationButtons [item.itemnr \\ (item,cd) <- selection]%(i.value,i.value+step.value-1)) hst
-= (	[ STable [] [[bTxt "Search:",toBody option]
+= (	[ STable [] [[bTxt "Search:",toBody option, Img [Img_Src "images/loep.gif"]]
 				,[bTxt "Name:",  toBody searchstring, if found (bTxt (toString (length selection) +++ " Items Found"))
 											     			   (bTxt "No Items Found")]
-				,[bTxt "Browse Step:",toBody step]
-				,[nextprev.body!!0,nextprev.body!!1]
+				,[nextprev.body!!0,nextprev.body!!1,bTxt "Browse Step:",toBody step]
 				]
+	, Br
+	, Br
+	, mkTable (i.value+1,length selection) (selection%(i.value,i.value+step.value-1)) info.body add.body 
 	, Br, Br
-	, mkTable (selection%(i.value,i.value+step.value-1)) info.body add.body 
-	, Br, Br
-	, showBasketTop database basket.value
+	, if (isEmpty basket.value)
+			(bTxt "Basket is empty")
+			(BodyTag [ bTxt ("Latest item put into basket was: ")
+					 , mkTable (1,length basket.value) [database!!(hd basket.value)] info.body [EmptyBody]
+					 ])
 	, doScript database (info.value -1)
 	], hst)
 where
-	
 	browseButtons :: Int Int -> [(Button,Int -> Int)]
 	browseButtons step length = [(but ("-" +++ toString step),prev),(but ("+" +++ toString step),next)]
 	where
@@ -122,16 +125,6 @@ where
 	addToBasketButtons :: Int Int CD_Selection -> [(Button,Basket -> Basket)]
 	addToBasketButtons i step selection 
 		= [(butp "basket.gif" ,\basket -> [item.itemnr:basket]) \\ (item,cd) <- selection]%(i,i+step-1)
-
-	showBasketTop :: CD_Database Basket -> BodyTag
-	showBasketTop database [] 			= bTxt "Basket is empty"
-	showBasketTop database [itemnr:_] 	= BodyTag
-								[ bTxt ("Latest item put into basket was: ")
-								, Br
-								: ItemRow item ++ CDRow cd
-								]
-	where
-		(item,cd) = database!!itemnr
 
 informationButtons :: [Int] -> [(Button,Int -> Int)]
 informationButtons basket = [(butp "info.gif" ,\_ -> itemnr ) \\ itemnr <- basket]
@@ -147,7 +140,7 @@ doBasketPage database hst
 	, Br
 	, bTxt "Current contents of your basket:"
 	, Br, Br
-	, mkTable [database!!itemnr \\ itemnr <- nbasket.value] info.body delete.body
+	, mkTable (1,length nbasket.value) [database!!itemnr \\ itemnr <- nbasket.value] info.body delete.body
 	, doScript database (info.value -1)
 	], hst)
 where
@@ -196,21 +189,22 @@ where
 
 
 myScript :: [BodyTag] -> Script
-myScript body = openWindowScript scriptName 800 400 False False True True False False 
+myScript body = openWindowScript scriptName 700 400 False False True True False False 
 					(mkHtml "CD information window" body)
 
 onloadBody = `Batt_Events [OnLoad (SScript scriptName)]
 
 scriptName = "openwindow()"
 
-// Table making functions
+// Function to display contents of selected items, database, basket
 
-mkTable :: [(Item,CD)] [BodyTag] [BodyTag] -> BodyTag
-mkTable items infobuttons deladdbuttons
+mkTable :: (Int,Int) [(Item,CD)] [BodyTag] [BodyTag] -> BodyTag
+mkTable (cnt,max) items infobuttons deladdbuttons
 	= table
-		[ ItemHeader ++ CDHeader ++ mkButtonRow EmptyBody ++ mkButtonRow EmptyBody
-		: [ItemRow item ++ CDRow cd ++ mkButtonRow infobutton ++ mkButtonRow deladdbutton
-			\\ (item,cd) <- items 
+		[ empty ++ ItemHeader ++ CDHeader ++ empty ++ empty
+		: [CntRow i max ++ ItemRow item ++ CDRow cd ++ mkButtonRow infobutton ++ mkButtonRow deladdbutton
+			\\ i <- [cnt..]
+			& (item,cd) <- items 
 			& infobutton <- infobuttons
 			& deladdbutton <- deladdbuttons ]
 		]				
@@ -218,53 +212,48 @@ where
 	table rows 	= Table [Tbl_Width tableWidth, Tbl_Bgcolor (`HexColor bgcolor), Tbl_Border 1] 
 					[Tr [] row \\ row <- rows]
 	tableWidth	= Percent 100
+	ItemHeader 	= mkItemRow "Item" "Prize" "Stock" 
+	CDHeader 	= mkCDRow "Artist" "Album" "Year" "Duration" 
 
-	ItemHeader :: [BodyTag]
-	ItemHeader = 
-		mkItemRow "Item" "Prize" "Stock" 
+	CntRow i max = [Td [Td_Width indexWidth] [bTxt (toString i +++ "/" +++ toString max)]] 
+	where indexWidth = Pixels 50
 
-	CDHeader :: [BodyTag]
-	CDHeader = 
-		mkCDRow "Artist" "Album" "Year" "Duration" 
+	ItemRow :: Item -> [BodyTag] 
+	ItemRow item
+		= mkItemRow (toString item.itemnr) (showPrize item.prize) (toString item.instock)
 
-	mkButtonRow :: BodyTag -> [BodyTag]
-	mkButtonRow button
-	=	[ Td [Td_Width buttonWidth] [button]
+	mkItemRow :: String String String -> [BodyTag]
+	mkItemRow itemnr prize instock
+	=	[ Td [Td_Width itemnrWidth] 	[bTxt itemnr]
+		, Td [Td_Width prizeWidth] 		[bTxt prize]
+		, Td [Td_Width instockWidth] 	[bTxt instock]
 		]
 	where
-		buttonWidth 	= Pixels 50
+		itemnrWidth 	= Pixels 40
+		prizeWidth 		= Pixels 100
+		instockWidth 	= Pixels 50
 
-ItemRow :: Item -> [BodyTag] 
-ItemRow item
-	= mkItemRow (toString item.itemnr) (showPrize item.prize) (toString item.instock)
+	CDRow :: CD -> [BodyTag]
+	CDRow cd
+		= mkCDRow cd.group cd.album (toString cd.year) (toString cd.totaltime) 
 
-mkItemRow :: String String String -> [BodyTag]
-mkItemRow itemnr prize instock
-=	[ Td [Td_Width itemnrWidth] 	[bTxt itemnr]
-	, Td [Td_Width prizeWidth] 		[bTxt prize]
-	, Td [Td_Width instockWidth] 	[bTxt instock]
-	]
-where
-	itemnrWidth 	= Pixels 40
-	prizeWidth 		= Pixels 100
-	instockWidth 	= Pixels 50
+	mkCDRow :: String String String String -> [BodyTag]
+	mkCDRow group album year duration
+	=	[ Td [Td_Width groupWidth] 		[abTxt group]
+		, Td [Td_Width albumWidth] 		[abTxt album]
+		, Td [Td_Width yearWidth] 		[abTxt year]
+		, Td [Td_Width durationWidth] 	[abTxt duration]
+		]
+	where
+		groupWidth 		= Pixels 140
+		albumWidth 		= Pixels 400
+		yearWidth 		= Pixels 50
+		durationWidth 	= Pixels 50
 
-CDRow :: CD -> [BodyTag]
-CDRow cd
-	= mkCDRow cd.group cd.album (toString cd.year) (toString cd.totaltime) 
-
-mkCDRow :: String String String String -> [BodyTag]
-mkCDRow group album year duration
-=	[ Td [Td_Width groupWidth] 		[abTxt group]
-	, Td [Td_Width albumWidth] 		[abTxt album]
-	, Td [Td_Width yearWidth] 		[abTxt year]
-	, Td [Td_Width durationWidth] 	[abTxt duration]
-	]
-where
-	groupWidth 		= Pixels 140
-	albumWidth 		= Pixels 400
-	yearWidth 		= Pixels 50
-	durationWidth 	= Pixels 50
+	mkButtonRow button
+	=	[Td [Td_Width buttonWidth] [button]] where buttonWidth = Pixels 50
+	
+	empty = mkButtonRow EmptyBody
 
 // small utility stuf ...
 
