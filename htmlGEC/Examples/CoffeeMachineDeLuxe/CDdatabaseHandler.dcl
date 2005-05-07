@@ -1,6 +1,7 @@
 definition module CDdatabaseHandler
 
-::	CD_Database		:== [(Item,CD)]
+::	CD_Database		
+	= [(Item,CD)]
 
 :: Item
  =	{	itemnr		:: !Int
