@@ -14,10 +14,27 @@ import StdHtml
 (<=>) infixl 5 :: [BodyTag] [BodyTag] -> BodyTag
 (<=>) b1 b2 =  STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[BodyTag b1,BodyTag b2]]
 
+(<.=.>) infixl 5 :: BodyTag BodyTag -> BodyTag
+(<.=.>) b1 b2 =  STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[b1,b2]]
+
+
 // Place second body below first
 
 (<||>) infixl 4	:: [BodyTag] [BodyTag] -> BodyTag	// Place a above b
 (<||>) b1 b2 =  STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[BodyTag b1],[BodyTag b2]]
+
+(<.||.>) infixl 4	:: BodyTag BodyTag -> BodyTag	// Place a above b
+(<.||.>) b1 b2 =  STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[b1],[b2]]
+
+
+// row and column making
+
+mkColF :: [BodyTag] -> BodyTag
+mkColF xs 	= foldr (<.||.>) EmptyBody xs
+
+mkRowF :: [BodyTag] -> BodyTag
+mkRowF xs 	= foldr (<.=.>) EmptyBody xs
+
 
 mkSTable :: [[BodyTag]] -> BodyTag
 mkSTable table

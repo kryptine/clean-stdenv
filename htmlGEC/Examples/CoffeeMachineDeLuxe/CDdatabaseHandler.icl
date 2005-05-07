@@ -140,16 +140,16 @@ where
 	s = size sval
 
 searchDatabase :: SearchOption String CD_Database -> (Bool,CD_Database)
-searchDatabase _ "" database = (False,database) 
+searchDatabase _ "" database = (True,database) 
 searchDatabase AnyAlbum string database 
 = check database [(item,cd) \\ (item,cd) <- database | isSubstring string cd.album]
 searchDatabase AnyArtist string database 
 = check database [(item,cd) \\ (item,cd) <- database | isSubstring string cd.group]
 searchDatabase AnySong string database 
 = check database [(item,cd) \\ (item,cd) <- database | or [isSubstring string title \\ {title} <- cd.tracks]]
-searchDatabase _ string database = (False,database)
+searchDatabase _ string database = (False,[])
 
-check database [] 		 = (False,database)
+check database [] 		 = (False,[])
 check database ndatabase = (True,ndatabase)
 
 isSubstring :: String String -> Bool

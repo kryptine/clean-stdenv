@@ -17,8 +17,6 @@ derive gParse PageMode, Item, CD, Track, Duration
 :: Basket		:== [Int]			// item nrs selected
 :: CD_Selection	:== CD_Database		// selection of database items
 
-
-
 Start world 
 #  (world,items) = readCD_Database world
 = doHtml (webshopentry items) world
@@ -26,15 +24,16 @@ Start world
 // main entry shop
 
 webshopentry database hst
-# ((setpage,pagebutbody),hst) 	= ListFuncBut False "pagebut" Edit pagebuttons hst	
-# ((curpage,_)	  		,hst) 	= mkStoreForm "curpage" setpage HomePage hst
-# (page,hst) 					= case curpage of
-									HomePage 	-> doHomePage database hst
-									ShopPage 	-> doShopPage database hst
-									BasketPage 	-> doBasketPage database hst
-									OrderPage 	-> doOrderPage database hst
+# hst 			= instalGlobalStores hst
+# (dopage,hst) 	= ListFuncBut False "pagebut" Edit pagebuttons hst	
+# (curpage,hst) = mkStoreForm "curpage" dopage.value HomePage hst
+# (page,hst) 	= case curpage.value of
+					HomePage 	-> doHomePage database hst
+					ShopPage 	-> doShopPage database hst
+					BasketPage 	-> doBasketPage database hst
+					OrderPage 	-> doOrderPage database hst
 = (mkHtml "My Web Shop"
-		[ STable [] [[H1 [] "Welcome to Clean's Web Shop":pagebutbody]]
+		[ STable [] [[H1 [] "Welcome to Clean's Web Shop":dopage.body]]
 		, Hr []
 		, Br
 		, BodyTag page
@@ -49,52 +48,70 @@ where
 		, (but "OrderInfo", \page -> OrderPage)
 		]
 
-// stores that are shared between the pages
+// stores which are shared between the pages
+// wil keep information persistent when switching between pages
+// each store can be addressed as wanted in any page as desired as well
 
-basketstore :: (Basket -> Basket) *HSt -> ((Basket,BodyTag),!*HSt)
+instalGlobalStores :: *HSt -> *HSt
+instalGlobalStores hst
+# (_,hst) 		= browsestore id hst
+# (_,hst)		= searchstore hst
+# (_,hst)		= basketstore id hst	
+# (_,hst)		= optionstore hst
+# (_,hst)		= stepstore hst
+= hst
+
+basketstore :: (Basket -> Basket) *HSt -> (Form Basket,!*HSt)
 basketstore f hst = mkStoreForm "basket" f [] hst
 
-browsestore :: (Int -> Int) *HSt -> ((Int,BodyTag),!*HSt)
+browsestore :: (Int -> Int) *HSt -> (Form Int,!*HSt)
 browsestore f hst = mkStoreForm "browse" f 0 hst
+
+searchstore :: *HSt -> (Form String,!*HSt)
+searchstore hst = mkEditForm "searchstring" Edit "" hst
+
+optionstore :: *HSt -> (Form (SearchOption -> SearchOption,Int),!*HSt)
+optionstore hst = FuncMenu -1 "searchoption" Edit optionbuttons hst
+where
+	optionbuttons :: [(String,SearchOption -> SearchOption)]
+	optionbuttons = [("Album", 	\_ 		-> AnyAlbum)
+					,("Artist", \_ 		-> AnyArtist)
+					,("Song", 	\_ 		-> AnySong)]
+
+stepstore :: *HSt -> (Form Int,!*HSt)
+stepstore hst = mkEditForm "stepsize" Edit 5 hst
 
 // home page
 
 doHomePage database hst
-# (_,hst)						= basketstore id hst	
-# (_,hst) 						= browsestore id hst
 = (	[ bTxt "HomePage"
 	], hst)
 
 // shop page
 
 doShopPage database hst
-# ((step,stepF),hst)			= mkEditForm "stepsize" Edit 5 hst
-# ((searchS,searchB),hst)		= mkEditForm "searchstring" Edit "" hst
-# (((_,kind),searchOB),hst)		= FuncMenu -1 "searchoption" Edit optionbuttons hst
-# (found,selection)				= searchDatabase ([AnyAlbum,AnyArtist,AnySong]!!kind) searchS database
-# ((next,browsebutton)	,hst)	= ListFuncBut False  "browsebuttons" Edit (browseButtons step (length selection)) hst
-# ((i,_)	,hst) 				= browsestore (next o \i -> if found 0 i) hst
-# ((addCD,addbuttons)	,hst)	= ListFuncBut False "items" Edit (addToBasketButtons i step selection) hst
-# ((basket,_)	  		,hst) 	= basketstore addCD hst
-# ((infonr,infobuttons)	,hst)	= ListFuncBut False "info" Edit (informationButtons [item.itemnr \\ (item,cd) <- selection]%(i,i+step-1)) hst
-= (	[ STable [] [[bTxt "Search:",searchOB]
-				,[bTxt "Name:",searchB, if found (bTxt "Items Found:")
-												 (bTxt "No Items Found"),bTxt (toString (length selection))]
-				,[bTxt "Browse Step:",stepF]
-				,[browsebutton!!0,browsebutton!!1]
+# (searchstring,hst)= searchstore hst
+# (option,hst)		= optionstore hst
+# (found,selection)	= searchDatabase ([AnyAlbum,AnyArtist,AnySong]!!(snd (option.value))) (searchstring.value) database
+# (step,hst)		= stepstore hst
+# (nextprev	,hst)	= ListFuncBut False  "browsebuttons" Edit (browseButtons step.value (length selection)) hst
+# (i,hst) 			= browsestore (nextprev.value o \i -> if (searchstring.changed || option.changed) 0 i) hst
+# (add,hst)			= ListFuncBut False "items" Edit (addToBasketButtons i.value step.value selection) hst
+# (basket,hst) 		= basketstore add.value hst
+# (info,hst)		= ListFuncBut False "info" Edit (informationButtons [item.itemnr \\ (item,cd) <- selection]%(i.value,i.value+step.value-1)) hst
+= (	[ STable [] [[bTxt "Search:",toBody option]
+				,[bTxt "Name:",  toBody searchstring, if found (bTxt (toString (length selection) +++ " Items Found"))
+											     			   (bTxt "No Items Found")]
+				,[bTxt "Browse Step:",toBody step]
+				,[nextprev.body!!0,nextprev.body!!1]
 				]
 	, Br, Br
-	, mkTable (selection%(i,i+step-1)) infobuttons addbuttons 
+	, mkTable (selection%(i.value,i.value+step.value-1)) info.body add.body 
 	, Br, Br
-	, toHtml (i,step,found)
-	, showBasketTop database basket
-	, doScript database (infonr -1)
+	, showBasketTop database basket.value
+	, doScript database (info.value -1)
 	], hst)
 where
-	optionbuttons :: [(String,SearchOption -> SearchOption)]
-	optionbuttons = [("Album", 	\_ 		-> AnyAlbum)
-					,("Artist", \_ 		-> AnyArtist)
-					,("Song", 	\_ 		-> AnySong)]
 	
 	browseButtons :: Int Int -> [(Button,Int -> Int)]
 	browseButtons step length = [(but ("-" +++ toString step),prev),(but ("+" +++ toString step),next)]
@@ -110,25 +127,38 @@ where
 	showBasketTop database [] 			= bTxt "Basket is empty"
 	showBasketTop database [itemnr:_] 	= BodyTag
 								[ bTxt ("Latest item put into basket was: ")
+								, Br
 								: ItemRow item ++ CDRow cd
 								]
 	where
 		(item,cd) = database!!itemnr
+
+informationButtons :: [Int] -> [(Button,Int -> Int)]
+informationButtons basket = [(butp "info.gif" ,\_ -> itemnr ) \\ itemnr <- basket]
+
 // basket page
 
 doBasketPage database hst
-# (_,hst) 					= browsestore id hst
-# ((basket,_),hst)			= basketstore id hst	
-# ((delCD,delbuttons),hst)	= ListFuncBut False "items" Edit (removeFromBasketButtons basket) hst
-# ((basket,_),hst)			= basketstore delCD hst	
-# ((infonr,infobuttons)	,hst)	= ListFuncBut False "binfo" Edit (informationButtons basket) hst
+# (basket,hst)	= basketstore id hst	
+# (delete,hst)	= ListFuncBut False "items" Edit (removeFromBasketButtons basket.value) hst
+# (nbasket,hst)	= basketstore delete.value hst	
+# (info,hst)	= ListFuncBut False "binfo" Edit (informationButtons nbasket.value) hst
 = (	[ bTxt "BasketPage"
 	, Br
 	, bTxt "Current contents of your basket:"
 	, Br, Br
-	, mkTable [database!!itemnr \\ itemnr <- basket] infobuttons delbuttons
-	, doScript database (infonr -1)
+	, mkTable [database!!itemnr \\ itemnr <- nbasket.value] info.body delete.body
+	, doScript database (info.value -1)
 	], hst)
+where
+	removeFromBasketButtons :: Basket -> [(Button,Basket -> Basket)]
+	removeFromBasketButtons basket = [(butp "trash.gif" , removeFromBasket itemnr) \\ itemnr <- basket]
+	where
+		removeFromBasket :: Int Basket -> Basket
+		removeFromBasket itemnr [] = []
+		removeFromBasket itemnr [bitemnr:items]
+		| itemnr == bitemnr 	= items
+		| otherwise = [bitemnr: removeFromBasket itemnr items]
 
 // order page
 
@@ -144,7 +174,9 @@ doScript database itemnr
 | itemnr < 0 = EmptyBody
 | otherwise  = Script [] (myScript body)
 where
-	body = [ STable tableAttr	[ [bTxt "Group:", bTxt cd.group]
+	body = [ STable tableAttr 	[ [bTxt "Item number:", bTxt (toString item.itemnr)] ]
+			, Br
+			, STable tableAttr	[ [bTxt "Group:", bTxt cd.group]
 								, [bTxt "Album:", bTxt cd.album]
 								, [bTxt "Year:",  bTxt (toString cd.year)]
 								]
@@ -156,8 +188,6 @@ where
 								] ++
 								[ [bTxt "Total Time",EmptyBody, bTxt (toString cd.totaltime)]
 								])
-			, Br
-			, STable tableAttr 	[ [bTxt "Item number:", bTxt (toString item.itemnr)] ]
 			, Br
 			, STable tableAttr	[ [bTxt ("Buy it now for only " +++ showPrize item.prize)] ]
 			]
@@ -173,26 +203,7 @@ onloadBody = `Batt_Events [OnLoad (SScript scriptName)]
 
 scriptName = "openwindow()"
 
-
-// buttons
-
-
-removeFromBasketButtons :: Basket -> [(Button,Basket -> Basket)]
-removeFromBasketButtons basket = [(butp "trash.gif" , removeFromBasket itemnr) \\ itemnr <- basket]
-where
-	removeFromBasket :: Int Basket -> Basket
-	removeFromBasket itemnr [] = []
-	removeFromBasket itemnr [bitemnr:items]
-	| itemnr == bitemnr 	= items
-	| otherwise = [bitemnr: removeFromBasket itemnr items]
-
-informationButtons :: [Int] -> [(Button,Int -> Int)]
-informationButtons basket = [(butp "info.gif" ,\_ -> itemnr ) \\ itemnr <- basket]
-
-
-
 // Table making functions
-
 
 mkTable :: [(Item,CD)] [BodyTag] [BodyTag] -> BodyTag
 mkTable items infobuttons deladdbuttons
@@ -269,8 +280,6 @@ butp s				= PButton (defpixel/2,defpixel/2) ("images/" +++ s)
 
 bgcolor 			= (Hexnum H_6 H_6 H_9 H_9 H_C H_C)
 
-mkcol bodies 		= foldr (<||>) EmptyBody bodies 
-mkrow bodies 		= foldr (<=>)  EmptyBody bodies 
 ziprow body1 body2	= [b1 <=> b2 \\ b1 <- body1 & b2 <- body2]
 
 
