@@ -2,12 +2,14 @@ implementation module CDdatabaseHandler
 
 import StdEnv, StdMaybe   
 
-readCD_Database	:: *World -> (*World,CD_Database)
+readCD_Database	:: *World -> (*World,[CD_Database])
 readCD_Database world
 # (world,cds) = readCD world
-= (world,[ ( {itemnr = i, instock = 1, prize = max 500 (2000 - (100 * (2005 - cd.year)))}, cd)
+= (world,	[ 	{ item 	= {itemnr = i, instock = 1, prize = max 500 (2000 - (100 * (2005 - cd.year)))}
+				, cd 	= cd
+				}
 		    \\ cd <- cds & i <- [0..]
-		 ])
+		 	])
 where
 	max i j = if (i>j) i j
 
@@ -139,14 +141,14 @@ where
 	sval = toString val
 	s = size sval
 
-searchDatabase :: SearchOption String CD_Database -> (Bool,CD_Database)
+searchDatabase :: SearchOption String [CD_Database] -> (Bool,[CD_Database])
 searchDatabase _ "" database = (True,database) 
 searchDatabase AnyAlbum string database 
-= check database [(item,cd) \\ (item,cd) <- database | isSubstring string cd.album]
+= check database [items \\ items <- database | isSubstring string items.cd.album]
 searchDatabase AnyArtist string database 
-= check database [(item,cd) \\ (item,cd) <- database | isSubstring string cd.group]
+= check database [items \\ items <- database | isSubstring string items.cd.group]
 searchDatabase AnySong string database 
-= check database [(item,cd) \\ (item,cd) <- database | or [isSubstring string title \\ {title} <- cd.tracks]]
+= check database [items \\ items <- database | or [isSubstring string title \\ {title} <- items.cd.tracks]]
 searchDatabase _ string database = (False,[])
 
 check database [] 		 = (False,[])
