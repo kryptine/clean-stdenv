@@ -9,16 +9,19 @@ import StdHtml
 
 // Place two bodies next to each other
 
-(<=>) infixl 5 :: [BodyTag] [BodyTag] -> BodyTag
+(<=>)   infixl 5 :: [BodyTag] [BodyTag] -> BodyTag
+(<.=.>) infixl 5 ::  BodyTag   BodyTag  -> BodyTag
+mkRowF 			 :: [BodyTag] 			-> BodyTag
 
 // Place second body below first
 
-(<||>) infixl 4	:: [BodyTag] [BodyTag] -> BodyTag	// Place a above b
+(<||>)   infixl 4 :: [BodyTag] [BodyTag] -> BodyTag	// Place a above b
+(<.||.>) infixl 4 ::  BodyTag   BodyTag  -> BodyTag	// Place a above b
+mkColF 			  :: [BodyTag] 			 -> BodyTag
 
 // Simple table of standard cell size
 
 mkSTable :: [[BodyTag]] -> BodyTag
-
 
 // handy Form's
 
