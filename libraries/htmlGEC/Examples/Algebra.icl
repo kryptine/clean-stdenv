@@ -17,16 +17,16 @@ Start world  = doHtml MyPage2  world
 expr = E "koffie" .+. E "thee" .+. E "chocmelk" .>. E "melk" .+. E "suiker" .>. E "klaar"
 
 MyPage2 hst
-# ((expr,exprbody),hst) 	 = mkEditForm  "expr" Edit (E "Init") hst
-# ((pressed,donebutton),hst) = ListFuncBut False "but" Edit [(LButton defpixel "Done!",\b -> not b)] hst
-# ((bool,_),hst)			 = mkStoreForm "boolstore" pressed False hst
-# (buttons,hst)				 = if bool (calcprocess expr hst) ([EmptyBody],hst)
+# (exprf,hst) 	 	= mkEditForm  "expr" Edit (E "Init") hst
+# (donebut,hst) 	= ListFuncBut False "but" Edit [(LButton defpixel "Done!",\b -> not b)] hst
+# (boolstore,hst)	= mkStoreForm "boolstore" donebut.value False hst
+# (buttons,hst)		= if boolstore.value (calcprocess exprf.value hst) ([EmptyBody],hst)
 = mkHtml "Process Algebra Experiment"
 	[ H1 [] "Process Algebra Experiment"
 	, Br, Br
-	, if bool (toHtml expr) exprbody
+	, if boolstore.value (toHtml exprf.value) (toBody exprf)
 	, Br
-	, BodyTag donebutton
+	, toBody donebut
 	, Br , Br
 	, BodyTag buttons
 	] hst
@@ -68,12 +68,12 @@ derive gParse PAE, PA
 	
 calcprocess :: PA *HSt -> *([BodyTag],*HSt)
 calcprocess expr hst 
-# ((butset,_),hst)		= mkStoreForm 		"butstore"  id initbuttonset hst
-# ((funchosen,_),hst) 	= ListFuncBut False  "buttons"  Edit (calcbuttons butset) hst
-# (((_,nbutset),_),hst)	= mkStoreForm 		"store"     funchosen initstore hst
-# (_,hst)				= mkSetForm 		"butstore"  Display nbutset hst
-# ((_,buttons),hst) 	= ListFuncBut True	"buttons"   Edit (calcbuttons nbutset) hst
-= 	(buttons,hst)
+# (butset,hst)		= mkStoreForm 		"butstore"  id initbuttonset hst
+# (funchosen,hst) 	= ListFuncBut False  "buttons"  Edit (calcbuttons butset.value) hst
+# (nbutset,hst)		= mkStoreForm 		"store"     funchosen.value initstore hst
+# (_,hst)			= mkSetForm 		"butstore"  Display (snd nbutset.value) hst
+# (buttons,hst) 	= ListFuncBut True	"buttons"   Edit (calcbuttons (snd nbutset.value)) hst
+= 	(buttons.body,hst)
 where
 	initstore 		= calcnext expr
 	initbuttonset 	= snd initstore

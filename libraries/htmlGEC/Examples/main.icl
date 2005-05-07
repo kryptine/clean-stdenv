@@ -14,16 +14,15 @@ derive gHpr 	Tree
 Start world  = doHtml MyPage world
 
 MyPage  hst
-# ((tree,treeGEC),hst) 	= mkEditForm "tree" Edit (Node Leaf 1 Leaf) hst
-# ((_,button),hst) 		= mkEditForm "button" Display (LButton defpixel "oeps") hst
+# (treef,hst) 	= mkEditForm "tree" Edit (Node Leaf 1 Leaf) hst
+# (buttonf,hst) = mkEditForm "button" Display (LButton defpixel "oeps") hst
 = mkHtml "Main Test Program"
 	[ H1 [] "My Test"
 	, Br, Txt "Here we show an editor for a tree data structure :", Br, Br
-	, treeGEC
+	, toBody treef
 	, Br
-//	, toHtml tree
 	, Br
-	, button
+	, toBody buttonf
 	] hst
 where
 	mkHtml s tags hst 	= (Html (header s) (body tags),hst)

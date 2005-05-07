@@ -4,10 +4,13 @@ import StdEnv
 import htmlDataDef, htmlHandler
 import StdArrow
 
-startCircuit :: (GecCircuit a b) a *HSt -> ((b,[BodyTag]),*HSt) 
+startCircuit :: (GecCircuit a b) a *HSt -> (Form b,*HSt) 
 startCircuit (HGC circuit) initval hst 
 # ((val,body),bool,hst) = circuit ((initval,[]),False,hst)
-= ((val,reverse (removedup body [])),hst)
+= (	{changed= True			// should be fixed
+	,value	= val
+	,body	= reverse (removedup body [])
+	},hst)
 where
 	removedup [] _ = []
 	removedup [(id,body):rest] ids
@@ -43,25 +46,25 @@ edit title = HGC mkApplyEdit`
 where
 	mkApplyEdit` :: ((a,[(String,BodyTag)]),Bool,*HSt ) -> ((a,[(String,BodyTag)]),Bool,*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 	mkApplyEdit` ((initval,prevbody),False,hst) 
-	# ((a,bodya),hst) = mkApplyEditForm title initval initval hst
-	= ((a,[(title,bodya):prevbody]),False,hst)
+	# (na,hst) = mkApplyEditForm title initval initval hst
+	= ((na.value,[(title,BodyTag na.body):prevbody]),False,hst)
 	mkApplyEdit` ((initval,prevbody),True,hst) // second time I come here: don't use the old state, but the new one ! 
-	# ((a,bodya),hst) = mkEditForm2 title Edit initval hst //to be implemented
-	= ((a,[(title,bodya):prevbody]),True,hst)
+	# (na,hst) = mkEditForm2 title Edit initval hst //to be implemented
+	= ((na.value,[(title,BodyTag na.body):prevbody]),True,hst)
 
 display :: FormId -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 display title = HGC mkEditForm`
 where
 	mkEditForm` ((val,prevbody),bool,hst) 
-	# ((a,bodya),hst) = mkEditForm title Display val hst
-	= ((a,[(title,bodya):prevbody]),bool,hst)
+	# (na,hst) = mkEditForm title Display val hst
+	= ((na.value,[(title,BodyTag na.body):prevbody]),bool,hst)
 
 store :: FormId s -> GecCircuit (s -> s) s |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} s
 store title initstore = HGC mkStoreForm`
 where
 	mkStoreForm` ((fun,prevbody),bool,hst) 
-	# ((store,bodystore),hst) = mkStoreForm title fun initstore hst
-	= ((store,[(title,bodystore):prevbody]),bool,hst)
+	# (store,hst) = mkStoreForm title fun initstore hst
+	= ((store.value,[(title,BodyTag store.body):prevbody]),bool,hst)
 
 self :: (a -> a) (GecCircuit a a) -> GecCircuit a a
 self fun gecaa = gecaa >>> arr fun
@@ -74,10 +77,10 @@ where
 	# (res,bool,hst) = gec_ab (res,True,hst)
 	= (res,False,hst)							// indicates that we loop from here 
 
-lift :: FormId Mode (FormId Mode a *HSt -> ((b,BodyTag),*HSt)) -> (GecCircuit a b)
+lift :: FormId Mode (FormId Mode a *HSt -> (Form b,*HSt)) -> (GecCircuit a b)
 lift name mode fun = HGC fun`
 where
 	fun` ((a,body),bool,hst)
-	# ((b,nbody),hst) =  fun name mode a hst
-	= ((b,[(name,nbody):body]),bool,hst) 
+	# (nb,hst) =  fun name mode a hst
+	= ((nb.value,[(name,BodyTag nb.body):body]),bool,hst) 
 

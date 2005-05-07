@@ -3,25 +3,25 @@ module choice
 import StdEnv
 import StdHtml
 
-
 Start world  = doHtml choice world
 
-
 choice hst
-# (((_,sel),menubody),hst) = FuncMenu -2 "rinus" Edit functions hst
-//# ((nmenu,menubody),hst) = mkEditForm "test" HEdit (PullDown (2,defpixel) (1,menu)) hst
-# (((cbf,j),body),hst) = ListFuncRadio sel "aap" Display mycbfs hst
+# (selection,hst) 	= FuncMenu -2 "rinus" Edit functions hst
+# (fun,selected) 	= selection.value
+# (radio,hst) 		= ListFuncRadio selected "aap" Edit mycbfs hst
+# (rfun,j) 			= radio.value
 = mkHtml "Choosing is difficult"
 	[ H1 [] "testing radio buttons"
 	, Br
-	, menubody
+	, BodyTag selection.body
 	, Br
-	, BodyTag body
+	, BodyTag radio.body
 	, Br
-	, Txt ("Current value is :" +++ toString sel)
+	, Txt ("Current value is :" +++ toString selected)
 	, Br
-	, Txt ("Function returns :" +++ (cbf (toString j)))
+	, Txt ("Function returns :" +++ (rfun (toString j)))
 	, Br
+	, toHtml (selection.changed,radio.changed)
 //	, traceHtmlInput
 	,Br
 	]  hst

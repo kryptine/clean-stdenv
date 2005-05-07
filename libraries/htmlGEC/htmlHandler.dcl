@@ -18,6 +18,7 @@ doHtml :: (*HSt -> (Html,!*HSt)) *World -> *World
 // toHtml displays any type into a non-editable form
 
 toHtml :: a -> BodyTag | gForm {|*|} a
+toBody :: (Form a) -> BodyTag
 
 // mkViewForm is the swiss army nife function creating stateful interactive forms with a view v of data d
 // make shure that all editors have a unique identifier !
@@ -33,10 +34,10 @@ toHtml :: a -> BodyTag | gForm {|*|} a
 
 :: Form a =		{ changed 	:: Bool
 				, value		:: a
-				, body		:: BodyTag
+				, body		:: [BodyTag]
 				}
 
-mkViewForm 		:: !FormId 	!Mode !(HBimap d v) 	d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
+mkViewForm 		:: !FormId 	!Mode !(HBimap d v) 	d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
 
 // For convenience all kinds of variants of "mkViewForm" are predefined, simply by chosing certain defaults for the HBimap.
 
@@ -49,14 +50,14 @@ mkViewForm 		:: !FormId 	!Mode !(HBimap d v) 	d !*HSt -> ((d,BodyTag),!*HSt) | g
 // mkStore			: applies function to the internal state; second argument is initial state
 // mkApplyEdit		: editor, displays its first argument if it is not updated; second argument is initial state
 
-mkBimapEditor 	:: !FormId 	!Mode !(Bimap d v)  d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
-mkEditForm 		:: !FormId 	!Mode				d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkEditForm2		:: !FormId  !Mode 				d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSetForm 		:: !FormId 	!Mode				d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSelfForm 		:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkApplyForm 	:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkStoreForm 	:: !FormId 	!(d -> d)			d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkApplyEditForm	:: !FormId 	!d					d !*HSt -> ((d,BodyTag),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkBimapEditor 	:: !FormId 	!Mode !(Bimap d v)  d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
+mkEditForm 		:: !FormId 	!Mode				d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkEditForm2		:: !FormId  !Mode 				d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSetForm 		:: !FormId 	!Mode				d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSelfForm 		:: !FormId 	!(d -> d)			d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyForm 	:: !FormId 	!(d -> d)			d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkStoreForm 	:: !FormId 	!(d -> d)			d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyEditForm	:: !FormId 	!d					d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 
 // Clean types that have a special representation
 
@@ -98,8 +99,10 @@ backcolor :== "#6699CC"								// background color of non-editable fields
 
 :: UpdMode
 
-generic gForm a :: !FormId !Mode a !*HSt -> *((a,BodyTag), !*HSt)	
+generic gForm a :: !FormId !Mode a !*HSt -> *(Form a, !*HSt)	
 generic gUpd a 	:: UpdMode a -> (UpdMode,a)
+
+derive bimap Form
 
 derive gForm Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (,) 
 derive gUpd  Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (,) 
@@ -112,5 +115,5 @@ derive gParse 	(,), (,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton
 // specialize should be used if one want to make specialized instantiations of gForm
 // it ensures that update positions remain counted correctly
 
-specialize :: (FormId Mode a *HSt -> ((a,BodyTag),*HSt)) FormId Mode a *HSt -> ((a,BodyTag),*HSt) | gUpd {|*|} a
+specialize :: (FormId Mode a *HSt -> (Form a,*HSt)) FormId Mode a *HSt -> (Form a,*HSt) | gUpd {|*|} a
 

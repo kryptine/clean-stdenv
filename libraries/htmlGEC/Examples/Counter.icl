@@ -6,11 +6,11 @@ import StdHtml
 Start world  = doHtml MyPage world
 
 MyPage hst
-# ((_,counterGEC),hst) = counterForm "counter" Edit 0 hst
+# (counterf,hst) = counterForm "counter" Edit 0 hst
 = mkHtml "Counter Example"
 	[ H1 [] "Counter Example"
 	, Br  
-	, counterGEC
+	, toBody counterf
 	] hst
 where
 	mkHtml s tags hst 	= (Html (header s) (body tags),hst)

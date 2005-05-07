@@ -11,7 +11,8 @@ import tree
 Start world  = doHtml MyPage world
 
 MyPage hst
-# ((res,[list,tree:_]),hst) = startCircuit mycircuit [1] hst
+# (mycircuitf,hst) = startCircuit mycircuit [1] hst
+# [list,tree:_] = mycircuitf.body
 = mkHtml "List to Balance Tree"
 	[ H1 [] "List to Balance Tree"
 	, Txt "This is the list :", Br
