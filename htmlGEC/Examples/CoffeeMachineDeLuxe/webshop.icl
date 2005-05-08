@@ -79,7 +79,7 @@ where
 					,("Song", 	\_ 		-> AnySong)]
 
 stepstore :: *HSt -> (Form Int,!*HSt)
-stepstore hst = mkSelfForm "stepsize" (\step -> if (step > 1) step 5) 5 hst
+stepstore hst = mkSelfForm "stepsize" (\step -> if (step > 0) step 5) 5 hst
 
 // home page
 
@@ -93,13 +93,13 @@ doShopPage database hst
 # (searchstring,hst)= searchstore hst
 # (option,hst)		= optionstore hst
 # (step,hst)		= stepstore hst
-# (i,hst)			= browsestore id hst
-
 # (found,selection)	= searchDatabase ([AnyAlbum,AnyArtist,AnySong]!!(snd (option.value))) (searchstring.value) database
+
+# (i,hst)			= browsestore id hst
 # (shownext, hst)	= ListFuncBut False  "browsebuttons" Edit (browseButtons i.value step.value (length selection)) hst
+
 # (i,hst) 			= browsestore (shownext.value o \i -> if (searchstring.changed || option.changed) 0 i) hst
 # (shownext, hst)	= ListFuncBut False  "browsebuttons" Edit (browseButtons i.value step.value (length selection)) hst
-
 # (add,hst)			= ListFuncBut False "items" Edit (addToBasketButtons i.value step.value selection) hst
 # (basket,hst) 		= basketstore add.value hst
 # (info,hst)		= ListFuncBut False "info" Edit (informationButtons [item.itemnr \\ {item} <- selection]%(i.value,i.value+step.value)) hst
@@ -125,21 +125,19 @@ where
 	browseButtons init step length = 
 		if (init - range >= 0) 	   [(sbut "--", set (init - range))] [] 
 		++
-		take nbuttuns [(sbut (toString (i+1)),set i) \\ i <- [start init 0,(start init 0)+step .. length-1]] 
+		take nbuttuns [(sbut (toString (i+1)),set i) \\ i <- [startval,startval+step .. length-1]] 
 		++ 
-		if (init + range <= length + 1) [(sbut "++", set (init + range))] []
+		if (startval + range < length) [(sbut "++", set (init + range))] []
 	where
 		set j i = j
 		range = nbuttuns * step
 		start i j= if (i < range) j (start (i-range) (j+range))
 		nbuttuns = 10
-		 
+		startval = start init 0
 
 	addToBasketButtons :: Int Int [CD_Selection] -> [(Button,Basket -> Basket)]
 	addToBasketButtons i step selection 
 		= [(butp "basket.gif" ,\basket -> [data.item.itemnr:basket]) \\ data <- selection]%(i,i+step-1)
-
-
 
 informationButtons :: [Int] -> [(Button,Int -> Int)]
 informationButtons basket = [(butp "info.gif" ,\_ -> itemnr ) \\ itemnr <- basket]
