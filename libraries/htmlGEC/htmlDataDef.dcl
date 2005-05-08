@@ -682,5 +682,5 @@ None			:== [NoAttr]
 
 import htmlPrintUtil
 
-derive gHpr Html	
-derive gHpr BodyTag	
+derive gHpr Html, BodyTag
+derive gHpr ColorOption, TxtDir	

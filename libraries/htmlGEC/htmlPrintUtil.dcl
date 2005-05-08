@@ -27,4 +27,6 @@ print 			:: !String 				-> FoF
 (<+>) infixl 	:: !*File FoF 			-> *File
 htmlAttrCmnd 	:: !hdr !tag !body  	-> FoF | gHpr{|*|} hdr & gHpr{|*|} tag & gHpr{|*|} body
 openCmnd 		:: !a !b 				-> FoF | gHpr{|*|} a & gHpr{|*|} b
+styleCmnd 		:: !a !b 				-> FoF | gHpr{|*|} a & gHpr{|*|} b
+styleAttrCmnd 	:: !a !b 				-> FoF | gHpr{|*|} a & gHpr{|*|} b
 

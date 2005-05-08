@@ -28,11 +28,11 @@ where
 
 
 mutual hst
-# ((_,body),hst) = startCircuit circuit initEuros hst
+# (mutual,hst) = startCircuit circuit initEuros hst
 = mkHtml "Mutual Recursive Form"
 	[ H1 [] "Example of a Mutual recursive form"
 	, Br
-	, BodyTag body
+	, toBody mutual
 	, Br,Br,Br
 	]  hst
 where
