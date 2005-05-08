@@ -19,7 +19,7 @@ gHpr{|PAIR|}   gHpra gHprb 	file (PAIR a b) 	= gHprb (gHpra file a) b
 gHpr{|EITHER|} gHprl gHprr 	file (LEFT left) 	= gHprl file left
 gHpr{|EITHER|} gHprl gHprr 	file (RIGHT right) 	= gHprr file right
 gHpr{|OBJECT|} gHpro 		file (OBJECT object)= gHpro file object 
-
+/*
 gHpr{|CONS of t|} gPrHtmlc file (CONS c) // constructor names are printed, prefix Foo_ is stripped
 = case t.gcd_name.[0] of
 	'`' 	= 	gPrHtmlc file c	// just skip this constructor name
@@ -35,6 +35,29 @@ where
 	# list = fromString string
 	| isMember '_' list = toString (tl (dropWhile ((<>) '_') list))
 	| otherwise 		= string  
+
+*/
+gHpr{|CONS of t|} gPrHtmlc prev (CONS c) // constructor names are printed, prefix Foo_ is stripped
+= case t.gcd_name.[0] of
+	'`' 	= 	gPrHtmlc prev c	// just skip this constructor name
+	else	=	case t.gcd_arity of
+//					0 = prev <+ " \"" <+ myprint t.gcd_name	<+ "\""
+					0 = prev <+ " " <+ myprint t.gcd_name	 
+					1 = gPrHtmlc (prev <+ " " <+ myprint t.gcd_name <+ " = ") c	
+					n = gPrHtmlc (prev <+ " " <+ myprint t.gcd_name         ) c
+where
+	myprint :: String -> String
+	myprint string = {toLower` char \\ char <-: stripprefix string }
+	
+	toLower` '_' = '-'
+	toLower` c = toLower c 
+
+	stripprefix string 
+	# list = fromString string
+	| isMember '_' list = toString (tl (dropWhile ((<>) '_') list))
+	| otherwise 		= string  
+
+
 
 gHpr{|[]|} gHlist file list = myfold file list 
 where
@@ -73,3 +96,12 @@ closeCmnd hdr =  \file -> print "</" file <+ hdr <+ ">"
 htmlAttrCmnd 	:: !hdr !attr !body -> FoF | gHpr{|*|} hdr & gHpr{|*|} attr & gHpr{|*|} body
 htmlAttrCmnd hdr attr txt 
 = \file -> closeCmnd hdr (openCmnd hdr attr file <+ txt)
+
+
+styleCmnd :: !a !b -> FoF | gHpr{|*|} a & gHpr{|*|} b
+styleCmnd stylename attr = \file -> print "." file <+ stylename <+ " { \r" <+ attr <+ " }\r"
+
+styleAttrCmnd :: !a !b -> FoF | gHpr{|*|} a & gHpr{|*|} b
+styleAttrCmnd name value = \file -> print "\t" file <+ name <+ ": " <+ value <+ ";\r"
+
+
