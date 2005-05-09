@@ -7,12 +7,12 @@ import CDdatabaseHandler
 // demo application showing a web shop programmed in Clean using the iData - HtmlGec library
 // MJP 2005
 
-derive gForm  PageMode, Item, CD, Track, Duration, []
-derive gUpd   PageMode, Item, CD, Track, Duration, []
-derive gPrint PageMode, Item, CD, Track, Duration
-derive gParse PageMode, Item, CD, Track, Duration
+derive gForm  CurrentPage, Item, CD, Track, Duration, []
+derive gUpd   CurrentPage, Item, CD, Track, Duration, []
+derive gPrint CurrentPage, Item, CD, Track, Duration
+derive gParse CurrentPage, Item, CD, Track, Duration
 
-:: PageMode 	= HomePage | ShopPage | BasketPage | OrderPage
+:: CurrentPage 	= HomePage | ShopPage | BasketPage | OrderPage
 
 :: Basket		:== [Int]			// item nrs selected
 :: CD_Selection	:== CD_Database		// selection of database items
@@ -24,16 +24,20 @@ Start world
 // main entry shop
 
 webshopentry database hst
-# hst 			= instalGlobalStores hst
+# (index,hst) 	= indexStore id hst
+# (step,hst)	= stepStore hst
+# (search,hst)	= searchStore hst
+# (option,hst)	= optionStore hst
+# (basket,hst)	= basketStore id hst	
 # (dopage,hst) 	= ListFuncBut False "pagebut" Edit pagebuttons hst	
-# (curpage,hst) = mkStoreForm "curpage" dopage.value HomePage hst
+# (curpage,hst) = currentpageStore dopage.value hst
 # (page,hst) 	= case curpage.value of
-					HomePage 	-> doHomePage database hst
-					ShopPage 	-> doShopPage database hst
-					BasketPage 	-> doBasketPage database hst
-					OrderPage 	-> doOrderPage database hst
+					HomePage 	-> doHomePage   curpage (database,basket) (index,step) (search,option) hst
+					ShopPage 	-> doShopPage   curpage (database,basket) (index,step) (search,option) hst
+					BasketPage 	-> doBasketPage curpage (database,basket) (index,step) (search,option) hst
+					OrderPage 	-> doOrderPage  curpage (database,basket) (index,step) (search,option) hst
 = (mkHtml "My Web Shop"
-		[ STable [] [[H1 [] "Welcome to Clean's Web Shop":dopage.body]]
+		[ STable [] [[Img [Img_Src "images/cdshoptitle.gif"]:dopage.body]]
 		, Hr []
 		, Br
 		, BodyTag page
@@ -48,77 +52,79 @@ where
 		, (but "OrderInfo", \page -> OrderPage)
 		]
 
-// stores which are shared between the pages
-// and keep information persistent when switching between pages
-// each store can be re-addressed again in any page to get access to the contents
+// storages which are shared between the pages
+// and in this way keep information persistent when the user is switching between pages
+// each store can be examined again in any page to get access to its contents
 
-instalGlobalStores :: *HSt -> *HSt
-instalGlobalStores hst
-# (_,hst) 		= browsestore id hst
-# (_,hst)		= searchstore hst
-# (_,hst)		= basketstore id hst	
-# (_,hst)		= optionstore hst
-# (_,hst)		= stepstore hst
-= hst
+currentpageStore :: (CurrentPage -> CurrentPage) *HSt -> (Form CurrentPage,!*HSt)
+currentpageStore f hst = mkStoreForm "curpage" f HomePage hst
 
-basketstore :: (Basket -> Basket) *HSt -> (Form Basket,!*HSt)
-basketstore f hst = mkStoreForm "basket" f [] hst
+basketStore :: (Basket -> Basket) *HSt -> (Form Basket,!*HSt)
+basketStore f hst = mkStoreForm "basket" f [] hst
 
-browsestore :: (Int -> Int) *HSt -> (Form Int,!*HSt)
-browsestore f hst = mkStoreForm "browse" f 0 hst
+indexStore :: (Int -> Int) *HSt -> (Form Int,!*HSt)
+indexStore f hst = mkStoreForm "index" f 0 hst
 
-searchstore :: *HSt -> (Form String,!*HSt)
-searchstore hst = mkEditForm "searchstring" Edit "" hst
+searchStore :: *HSt -> (Form String,!*HSt)
+searchStore hst = mkEditForm "searchstring" Edit "" hst
 
-optionstore :: *HSt -> (Form (SearchOption -> SearchOption,Int),!*HSt)
-optionstore hst = FuncMenu -1 "searchoption" Edit optionbuttons hst
+optionStore :: *HSt -> (Form (SearchOption -> SearchOption,Int),!*HSt)
+optionStore hst = FuncMenu -1 "searchoption" Edit optionbuttons hst
 where
 	optionbuttons :: [(String,SearchOption -> SearchOption)]
 	optionbuttons = [("Album", 	\_ 		-> AnyAlbum)
 					,("Artist", \_ 		-> AnyArtist)
 					,("Song", 	\_ 		-> AnySong)]
 
-stepstore :: *HSt -> (Form Int,!*HSt)
-stepstore hst = mkSelfForm "stepsize" (\step -> if (step > 0) step 5) 5 hst
+stepStore :: *HSt -> (Form Int,!*HSt)
+stepStore hst = mkSelfForm "stepsize" (\step -> if (step > 0) step 5) 5 hst
 
 // home page
 
-doHomePage database hst
-= (	[ bTxt "HomePage"
+doHomePage curpage (database,basket) (index,step) (search,option) hst
+= (	[ maptext 	[ "Welkom to the Clean CD shop!"
+				, ""
+				, "Our Dean wants that we make more money with Clean, otherwise we will be killed."
+				, "We have therefore decided to sell Peter's CD collection for bargain prices."
+				, ""
+				, "By the way, this application also gives a nice demo what you can do with Clean..."
+				, "Have fun."
+				]
 	], hst)
 
 // shop page
 
-doShopPage database hst
-# (searchstring,hst)= searchstore hst
-# (option,hst)		= optionstore hst
-# (step,hst)		= stepstore hst
-# (found,selection)	= searchDatabase ([AnyAlbum,AnyArtist,AnySong]!!(snd (option.value))) (searchstring.value) database
+doShopPage curpage (database,basket) (index,step) (search,option) hst
 
-# (i,hst)			= browsestore id hst
-# (shownext, hst)	= ListFuncBut False  "browsebuttons" Edit (browseButtons i.value step.value (length selection)) hst
+# (found,selection)	= searchDatabase ([AnyAlbum,AnyArtist,AnySong]!!(snd (option.value))) (search.value) database
 
-# (i,hst) 			= browsestore (shownext.value o \i -> if (searchstring.changed || option.changed) 0 i) hst
-# (shownext, hst)	= ListFuncBut False  "browsebuttons" Edit (browseButtons i.value step.value (length selection)) hst
-# (add,hst)			= ListFuncBut False "items" Edit (addToBasketButtons i.value step.value selection) hst
-# (basket,hst) 		= basketstore add.value hst
-# (info,hst)		= ListFuncBut False "info" Edit (informationButtons [item.itemnr \\ {item} <- selection]%(i.value,i.value+step.value)) hst
-= (	[ STable [] [[bTxt "Search:",toBody option, Img [Img_Src "images/loep.gif"]]
-				,[bTxt "Name:",  toBody searchstring, if found (bTxt (toString (length selection) +++ " Items Found"))
+# (shownext, hst)	= ListFuncBut False  "browsebuttons" Edit (browseButtons index.value step.value (length selection)) hst
+
+# (nindex,hst) 		= indexStore (shownext.value o \i -> if (search.changed || option.changed) 0 index.value) hst
+# (shownext, hst)	= ListFuncBut False  "browsebuttons" Edit (browseButtons nindex.value step.value (length selection)) hst
+
+# (add,hst)			= ListFuncBut False "additems" Edit (addToBasketButtons nindex.value step.value selection) hst
+# (info,hst)		= ListFuncBut False "info" Edit (informationButtons [item.itemnr \\ {item} <- selection]%(nindex.value,nindex.value+step.value)) hst
+
+# (basket,hst) 		= basketStore add.value hst
+# (binfo,hst)		= ListFuncBut False "basketinfo" Edit (informationButtons basket.value) hst
+= (	[([ STable [] [[bTxt "Search:",toBody option, Img [Img_Src "images/loep.gif"]]
+				,[bTxt "Name:",  toBody search, if found (bTxt (toString (length selection) +++ " Items Found"))
 											     			   (bTxt "No Items Found")]
 				,[bTxt "#Items:",toBody step]
-				]
-	, Br
-	, STable [] [shownext.body]
+				]]
+	  <=>
+		 [STable [] [shownext.body]])
 	, Br, Br 
-	, mkTable (i.value+1,length selection) (selection%(i.value,i.value+step.value)) info.body add.body 
+	, mkTable (nindex.value+1,length selection) (selection%(nindex.value,nindex.value+step.value)) info.body add.body 
 	, Br, Br
 	, if (isEmpty basket.value)
 			(bTxt "Your Basket is empty")
 			(BodyTag [ bTxt ("Last item put into basket was: ")
-					 , mkTable (1,length basket.value) [database!!(hd basket.value)] info.body [EmptyBody]
+					 , mkTable (1,length basket.value) [database!!(hd basket.value)] binfo.body [EmptyBody]
 					 ])
 	, doScript database (info.value -1)
+	, doScript database (binfo.value -1)
 	], hst)
 where
 	browseButtons :: Int Int Int -> [(Button,Int -> Int)]
@@ -144,18 +150,25 @@ informationButtons basket = [(butp "info.gif" ,\_ -> itemnr ) \\ itemnr <- baske
 
 // basket page
 
-doBasketPage database hst
-# (basket,hst)	= basketstore id hst	
-# (delete,hst)	= ListFuncBut False "items" Edit (removeFromBasketButtons basket.value) hst
-# (nbasket,hst)	= basketstore delete.value hst	
+doBasketPage curpage (database,basket) (index,step) (search,option) hst
+# (delete,hst)	= ListFuncBut False "delitems" Edit (removeFromBasketButtons basket.value) hst
+# (nbasket,hst)	= basketStore delete.value hst	
 # (info,hst)	= ListFuncBut False "binfo" Edit (informationButtons nbasket.value) hst
-= (	[ bTxt "BasketPage"
-	, Br
-	, if (isEmpty nbasket.value)
+
+# (order,hst) 	= ListFuncBut False "buybut" Edit [(but "order",\_ -> OrderPage)] hst	
+//# (_,hst) 		= currentpageStore order.value hst
+
+
+= (	[ if (isEmpty nbasket.value)
 			(bTxt "Your Basket is empty")
 			(BodyTag [ bTxt ("Current contents of your basket:")
 					, Br, Br
 					, mkTable (1,length nbasket.value) [database!!itemnr \\ itemnr <- nbasket.value] info.body delete.body
+					, Br
+					, STable [] [[ bTxt "Total Prize:"
+								, toHtml (showPrize (sum [(database!!itemnr).item.prize \\ itemnr <- nbasket.value]))
+								, EmptyBody, toBody order
+								]]
 					])
 	, doScript database (info.value -1)
 	], hst)
@@ -171,9 +184,7 @@ where
 
 // order page
 
-doOrderPage database hst
-# (_,hst)						= basketstore id hst	
-# (_,hst) 						= browsestore id hst
+doOrderPage curpage (database,basket) (index,step) (search,option) hst
 = (	[ bTxt "Order Information"
 	], hst)
 
@@ -285,7 +296,7 @@ sbut s				= LButton (defpixel/3) s
 bgcolor 			= (Hexnum H_6 H_6 H_9 H_9 H_C H_C)
 
 ziprow body1 body2	= [b1 <=> b2 \\ b1 <- body1 & b2 <- body2]
-
+maptext	texts		= BodyTag (flatten [[bTxt text, Br] \\ text <- texts])
 
 
 
