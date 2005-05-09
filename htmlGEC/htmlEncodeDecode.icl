@@ -210,7 +210,7 @@ addScript globalstate
 	, globalstateform globalFormName updateInpName globalInpName (SV encodedglobalstate) 
 	]
 where
-	encodedglobalstate = urlEncodeState (globalstate)
+	encodedglobalstate = urlEncodeState (removedup globalstate)
 	
 	removedup []  = []
 	removedup [(id,body):rest] = [(id,body):[(nid,nbody) \\ (nid,nbody) <- removedup rest | nid <> id]]
