@@ -82,6 +82,9 @@ mkApplyEditForm	:: !FormId 	!d					d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{
 :: RadioButton	= RBChecked FormId					// radiobutton 	checked
 				| RBNotChecked FormId				// radiobutton	not checked
 :: PullDownMenu	= PullDown (Int,Int) (Int,[String]) // pulldownmenu (number visible,width) (item chosen,menulist)		
+:: TextInput	= TI Int Int						// Input box of size Size for Integers
+				| TR Int Real						// Input box of size Size for Reals
+				| TS Int String						// Input box of size Size for Strings
 	
 instance toBool CheckBox, Button, RadioButton		// True if checkbox checked, button pressed
 
@@ -107,10 +110,10 @@ derive bimap Form
 derive gForm Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (,) 
 derive gUpd  Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (,) 
 
-derive gForm 		 (,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu 
-derive gUpd  		 (,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu
-derive gPrint 	(,), (,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu
-derive gParse 	(,), (,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu
+derive gForm 		 (,,), (,,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput 
+derive gUpd  		 (,,), (,,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput
+derive gPrint 	(,), (,,), (,,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput
+derive gParse 	(,), (,,), (,,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput
 
 // specialize should be used if one want to make specialized instantiations of gForm
 // it ensures that update positions remain counted correctly

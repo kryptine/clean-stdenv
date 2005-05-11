@@ -125,7 +125,35 @@ table_hv_Form s mode [x:xs] hst
    ,value	= [nx.value:nxs.value]
    ,body	= [nx.body <||> nxs.body]
    },hst)
+   
+t2EditForm  :: !FormId !Mode !(a,b) !*HSt -> ((Form a,Form b),!*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+																	 &  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} b
+t2EditForm formid mode (a,b) hst
+# (forma,hst) = mkEditForm (formid +++ "t21") mode a hst 
+# (formb,hst) = mkEditForm (formid +++ "t22") mode b hst
+= ((forma,formb),hst) 
 
+t3EditForm  :: !FormId !Mode !(a,b,c) !*HSt -> ((Form a,Form b,Form c),!*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+																	   &  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} b
+																	   &  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} c
+t3EditForm formid mode (a,b,c) hst
+# (forma,hst) = mkEditForm (formid +++ "t31") mode a hst 
+# (formb,hst) = mkEditForm (formid +++ "t32") mode b hst
+# (formc,hst) = mkEditForm (formid +++ "t33") mode c hst
+= ((forma,formb,formc),hst) 
+
+t4EditForm  :: !FormId !Mode !(a,b,c,d) !*HSt -> ((Form a,Form b,Form c,Form d),!*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+																	   &  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} b
+																	   &  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} c
+																	   &  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+t4EditForm formid mode (a,b,c,d) hst
+# (forma,hst) = mkEditForm (formid +++ "t41") mode a hst 
+# (formb,hst) = mkEditForm (formid +++ "t42") mode b hst
+# (formc,hst) = mkEditForm (formid +++ "t43") mode c hst
+# (formd,hst) = mkEditForm (formid +++ "t44") mode d hst
+= ((forma,formb,formc,formd),hst) 
+
+   
 TableFuncBut 		:: !FormId !Mode ![[(Button, a -> a)]] !*HSt 
 													  -> (Form (a -> a) ,!*HSt)
 TableFuncBut s mode list hst = TableFuncBut` 0 s mode list hst

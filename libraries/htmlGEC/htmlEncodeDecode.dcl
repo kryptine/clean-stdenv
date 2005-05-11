@@ -30,3 +30,7 @@ CheckUpdate 			:: (!Maybe a, !Maybe b) | gParse{|*|} a & gParse{|*|} b // update
 StrippedCheckUpdateId 	:: String						// used to determine related id's e.g. for radio buttons
 AnyInput 				:: String						// any input is accepted if a string is required
 
+// utility 
+
+mkString 	:: [Char] -> String
+mkList 		:: String -> [Char]
