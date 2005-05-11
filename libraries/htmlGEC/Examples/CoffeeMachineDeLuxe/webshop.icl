@@ -7,10 +7,10 @@ import CDdatabaseHandler
 // demo application showing a web shop programmed in Clean using the iData - HtmlGec library
 // MJP 2005
 
-derive gForm  CurrentPage, Item, CD, Track, Duration, []
-derive gUpd   CurrentPage, Item, CD, Track, Duration, []
-derive gPrint CurrentPage, Item, CD, Track, Duration
-derive gParse CurrentPage, Item, CD, Track, Duration
+derive gForm  CurrentPage, Item, CD, Track, Duration, PersonalInformation, []
+derive gUpd   CurrentPage, Item, CD, Track, Duration, PersonalInformation, []
+derive gPrint CurrentPage, Item, CD, Track, Duration, PersonalInformation
+derive gParse CurrentPage, Item, CD, Track, Duration, PersonalInformation
 
 :: CurrentPage 	= HomePage | ShopPage | BasketPage | OrderPage
 
@@ -38,7 +38,7 @@ webshopentry database hst
 		, Br
 		, BodyTag page
 		, Br
-		, traceHtmlInput
+//		, traceHtmlInput
 		], hst)
 where
 	pageSelectionForm hst = ListFuncBut False "pagebut" Edit pagebuttons hst
@@ -86,7 +86,7 @@ indexForm :: (Int -> Int) *HSt -> (Form Int,!*HSt)
 indexForm f hst = mkStoreForm "index" f 0 hst
 
 stepForm :: *HSt -> (Form Int,!*HSt)
-stepForm hst = mkSelfForm "stepsize" (\step -> if (step > 0) step 5) 5 hst
+stepForm hst = mkSelfForm "stepsize" (\step -> if (step > 0 && step < 10) step 5) 5 hst
 
 searchForm :: *HSt -> (Form String,!*HSt)
 searchForm hst = mkEditForm "searchstring" Edit "" hst
@@ -185,8 +185,8 @@ doBasketPage database sf hst
 # (info,hst)	= InformationForm "basketinfo2" nbasket.value hst
 
 
-# (order,hst) 	= ListFuncBut False "buybut" Edit [(but "toorder",\_ -> OrderPage)] hst	
-# (_,hst) 		= currentpageForm order.value hst
+# (order,hst) 	= ListFuncBut False "buybut" Edit [(but "toOrder",\_ -> OrderPage)] hst	
+# (_,hst) 		= currentpageForm order.value hst   // this is too much ????
 = (	[ if (isEmpty nbasket.value)
 			(bTxt "Your Basket is empty")
 			(BodyTag [ bTxt ("Current contents of your basket:")
@@ -213,9 +213,39 @@ where
 // order page
 
 doOrderPage database sform hst
-= (	[ bTxt "Order Information"
+# (persInfo,hst) = mkEditForm "personal" Edit initPersInfo hst
+= (	[ toBody persInfo
 	], hst)
 
+:: PersonalInformation =
+	{ name 				:: TextInput
+	, address			:: TextInput
+	, city				:: TextInput
+	, state				:: String
+	, zipCode			:: (TextInput,TextInput)
+	, country			:: String
+	, ccCompagny		:: PullDownMenu
+	, ccNumber			:: (TextInput,TextInput,TextInput,TextInput)
+	, ccExpiringDate	:: (PullDownMenu,PullDownMenu)
+	, cardholdersName	:: TextInput
+	}	
+
+initPersInfo =	
+	{ name 				= TS 30 ""
+	, address			= TS 30 ""
+	, city				= TS 30 ""
+	, state				= ""
+	, zipCode			= (TI 2 1234,TS 1 "")
+	, country			= ""
+	, ccCompagny		= PullDown (1,100) (0,["MasterCard", "VisaCard"])
+	, ccNumber			= (TI 2 1234, TI 2 1234, TI 2 1234,TI 2 1234)
+	, ccExpiringDate	= ( PullDown (1,40) (0,[toString m \\ m <- [1 .. 12]])
+						  , PullDown (1,60) (0,[toString y \\ y <- [2005 .. 2014]])
+						  )
+	, cardholdersName	= TS 30 ""
+	}	
+
+	
 // page showing CD information will appear in extra window
 
 doScript database itemnr
