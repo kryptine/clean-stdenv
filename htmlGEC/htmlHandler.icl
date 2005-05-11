@@ -6,10 +6,10 @@ import StdGeneric
 import htmlEncodeDecode
 import GenParse, GenPrint
 
-derive gPrint (,), (,,), UpdValue
-derive gParse (,), (,,), UpdValue
-derive gHpr   (,), (,,)
-derive gUpd		   (,,)
+derive gPrint (,), (,,), (,,,), UpdValue
+derive gParse (,), (,,), (,,,), UpdValue
+derive gHpr   (,), (,,), (,,,)
+derive gUpd		   (,,), (,,,)
  
 :: HSt 			:== (InputId,[FormState])	// all form states are collected here ... 	
 :: FormState 	:== (FormId,FormValue)		// state of a form to remember
@@ -198,36 +198,36 @@ where
 generic gForm a :: !FormId !Mode a !*HSt -> *(Form a, !*HSt)	
 
 gForm{|Int|} formid mode i hst 	
-# (body,hst) = mkInput formid mode (IV i) (UpdI i) hst
+# (body,hst) = mkInput defsize formid mode (IV i) (UpdI i) hst
 = ({changed=False, value=i, body=[body]},hst)
 
 gForm{|Real|} formid mode r hst 	
-# (body,hst) = mkInput formid mode (RV r) (UpdR r) hst
+# (body,hst) = mkInput defsize formid mode (RV r) (UpdR r) hst
 = ({changed=False, value=r, body=[body]},hst)
 
 gForm{|Bool|} formid mode b hst 	
-# (body,hst) = mkInput formid mode (BV b) (UpdB b) hst
+# (body,hst) = mkInput defsize formid mode (BV b) (UpdB b) hst
 = ({changed=False, value=b, body=[body]},hst)
 
 gForm{|String|} formid mode s hst 	
-# (body,hst) = mkInput formid mode (SV s) (UpdS s) hst
+# (body,hst) = mkInput defsize formid mode (SV s) (UpdS s) hst
 = ({changed=False, value=s, body=[body]},hst)
 
-mkInput :: !FormId !Mode Value UpdValue *HSt -> (BodyTag,*HSt) 
-mkInput formid Edit val updval (inidx,hst) 
+mkInput :: !Int !FormId !Mode Value UpdValue *HSt -> (BodyTag,*HSt) 
+mkInput size formid Edit val updval (inidx,hst) 
 	= ( Input 	[	Inp_Type Inp_Text
 				, 	Inp_Value val
 				,	Inp_Name (encodeInfo (formid,inidx,updval))
-				,	Inp_Size defsize
+				,	Inp_Size size
 				,	`Inp_Events	[OnChange callClean]
 				] ""
 		,(inidx+1,hst))
-mkInput formid Display val _ (inidx,hst) 
+mkInput size formid Display val _ (inidx,hst) 
 	= ( Input 	[	Inp_Type Inp_Text
 				, 	Inp_Value val
 				,	Inp_ReadOnly ReadOnly
 				, 	`Inp_Std [Std_Style color]
-				,	Inp_Size defsize
+				,	Inp_Size size
 				] ""
 		,(inidx+1,hst))
 where
@@ -321,13 +321,28 @@ gForm{|FIELD of d |} gHx formid mode (FIELD x) hst
 	},hst)
 where
 	fieldname =Input 	[	Inp_Type Inp_Text
-						, 	Inp_Value (SV (d.gfd_name +++ ": "))
+						, 	Inp_Value (SV (prettyfy d.gfd_name +++ ": "))
 						,	Inp_ReadOnly ReadOnly
 						, 	`Inp_Std [Std_Style color]
-						,	Inp_Size defsize
+						,	Inp_Size maxsize
 						] ""
 
 	color = "background-color:" +++ backcolor
+
+	prettyfy name = mkString [toUpper lname : addspace lnames]
+	where
+		[lname:lnames] = mkList name
+		addspace [] = []
+		addspace [c:cs]
+		| isUpper c	= [' ',toLower c:addspace cs]
+		| otherwise = [c:addspace cs]
+		
+	maxsize = takemax defsize [size (prettyfy gfd_name)  \\ {gfd_name} <- d.gfd_cons.gcd_fields]
+	
+	takemax i [] = i
+	takemax i [j:js] 
+	| i > j = takemax i js
+	| otherwise = takemax j js
 
 // generic function to update any type, great miracle function
 // will look for an input object with a certain id, updates it
@@ -440,6 +455,17 @@ gForm{|(,,)|} gHa gHb gHc formid mode (a,b,c) (inidx,lhsts)
 = (	{changed= False
 	,value	= (na.value,nb.value,nc.value)
 	,body	= [STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[BodyTag na.body,BodyTag nb.body,BodyTag nc.body]]]
+	},hst)
+
+gForm{|(,,,)|} gHa gHb gHc gHd formid mode (a,b,c,d) (inidx,lhsts)
+# (na,hst) = gHa formid mode a (inidx+1,lhsts)   // one more for the now invisable (,,) constructor 
+# (nb,hst) = gHb formid mode b hst
+# (nc,hst) = gHc formid mode c hst
+# (nd,hst) = gHd formid mode d hst
+= (	{changed= False
+	,value	= (na.value,nb.value,nc.value,nd.value)
+	,body	= [STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] 
+				[[BodyTag na.body,BodyTag nb.body,BodyTag nc.body, BodyTag nd.body]]]
 	},hst)
 
 // <-> works exactly the same as (,) and places its arguments next to each other, for compatibility with GEC's
@@ -602,7 +628,8 @@ gForm{|PullDownMenu|} formid mode v=:(PullDown (size,width) (menuindex,itemlist)
 						elem
 						\\ elem <- itemlist & j <- [0..]
 					 ]] 	
-	},(incrIndex inidx v,lhsts))
+//	},(incrIndex inidx v,lhsts))
+	},(inidx + 1,lhsts))
 
 gUpd{|PullDownMenu|} (UpdSearch (UpdC cname) 0) (PullDown (size,width) (menuindex,itemlist)) 
 			= (UpdDone,PullDown (size,width) (nmenuindex 0 cname itemlist,itemlist))					// update integer value
@@ -612,12 +639,39 @@ where
 	| otherwise		   = nmenuindex (cnt+1) name items
 	nmenuindex _ _ [] = -1
 	
-gUpd{|PullDownMenu|} (UpdSearch val cnt) v = (UpdSearch val (cnt - (incrIndex cnt v)),v)			// continue search, don't change
+//gUpd{|PullDownMenu|} (UpdSearch val cnt) v = (UpdSearch val (cnt - (incrIndex cnt v)),v)			// continue search, don't change
+gUpd{|PullDownMenu|} (UpdSearch val cnt) v = (UpdSearch val (cnt - 1),v)			// continue search, don't change
 gUpd{|PullDownMenu|} (UpdCreate l)		_ = (UpdCreate l,PullDown (1,defpixel) (0,["error"]))					// create default value
 gUpd{|PullDownMenu|} mode 			  	v = (mode,v)							// don't change
 derive gParse PullDownMenu
 derive gPrint PullDownMenu
 
+
+:: TextInput	= TI Int Int						// Input box of size Size for Integers
+				| TR Int Real						// Input box of size Size for Reals
+				| TS Int String						// Input box of size Size for Strings
+
+gForm{|TextInput|} formid mode (TI size i) hst=:(inidx,lhst) 	
+# (body,hst) = mkInput size formid mode (IV i) (UpdI i) hst
+= ({changed=False, value=TI size i, body=[body]},(inidx+3,lhst))
+gForm{|TextInput|} formid mode (TR size r) hst=:(inidx,lhst)  	
+# (body,hst) = mkInput size formid mode (RV r) (UpdR r) hst
+= ({changed=False, value=TR size r, body=[body]},(inidx+3,lhst))
+gForm{|TextInput|} formid mode (TS size s) hst=:(inidx,lhst) 	
+# (body,hst) = mkInput size formid mode (SV s) (UpdS s) hst 
+= ({changed=False, value=TS size s, body=[body]},(inidx+3,lhst))
+
+gUpd{|TextInput|} (UpdSearch (UpdI ni) 0) 	(TI size i)  = (UpdDone,TI size ni)					// update integer value
+gUpd{|TextInput|} (UpdSearch (UpdR nr) 0) 	(TR size r)  = (UpdDone,TR size nr)					// update integer value
+gUpd{|TextInput|} (UpdSearch (UpdS ns) 0) 	(TS size s)  = (UpdDone,TS size ns)					// update integer value
+gUpd{|TextInput|} (UpdSearch val cnt)     	i = (UpdSearch val (cnt - 3),i)		// continue search, don't change
+gUpd{|TextInput|} (UpdCreate l)				_ = (UpdCreate l,TI defsize 0)					// create default value
+gUpd{|TextInput|} mode 			  	    	i = (mode,i)						// don't change
+
+
+
+derive gParse TextInput
+derive gPrint TextInput
 
 instance toBool RadioButton
 where	toBool (RBChecked _)= True
