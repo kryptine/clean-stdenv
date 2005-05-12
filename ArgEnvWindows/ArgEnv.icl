@@ -78,7 +78,6 @@ getArg i
 		(size, cString)
 			=	getCommandLineArgument i
 
-// Clean 1.1: getCommandLine :: {{#Char}}
 getCommandLine :: {.{#Char}}
 getCommandLine
 	=	{getArg i \\ i <- [0 .. getCommandLineCount-1]}
