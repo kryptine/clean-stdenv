@@ -7,48 +7,22 @@ import CDdatabaseHandler
 // demo application showing a web shop programmed in Clean using the iData - HtmlGec library
 // MJP 2005
 
-derive gForm  CurrentPage, Item, CD, Track, Duration, PersonalInformation, []
-derive gUpd   CurrentPage, Item, CD, Track, Duration, PersonalInformation, []
-derive gPrint CurrentPage, Item, CD, Track, Duration, PersonalInformation
-derive gParse CurrentPage, Item, CD, Track, Duration, PersonalInformation
+Start world 
+#  (world,database) = readCD_Database world		// read the database (lazily)
+= doHtml (webshopentry database) world			// goto the main page
 
-:: CurrentPage 	= HomePage | ShopPage | BasketPage | OrderPage
+// globally used definitions
+
+derive gForm  CurrentPage, Item, CD, Track, Duration, PersonalData, []
+derive gUpd   CurrentPage, Item, CD, Track, Duration, PersonalData, []
+derive gPrint CurrentPage, Item, CD, Track, Duration, PersonalData
+derive gParse CurrentPage, Item, CD, Track, Duration, PersonalData
+
+:: CurrentPage 	= HomePage | ShopPage | BasketPage | OrderPage | ThanksPage
 
 :: Basket		:== [Int]			// item nrs selected
 :: CD_Selection	:== CD_Database		// selection of database items
 
-Start world 
-#  (world,database) = readCD_Database world
-= doHtml (webshopentry database) world
-
-// main entry shop
-
-webshopentry database hst
-# (sharedForms,hst) = sharedForms hst
-# (dopage,hst) 		= pageSelectionForm hst	
-# (curpage,hst) 	= currentpageForm dopage.value hst
-# (page,hst) 		= case curpage.value of
-						HomePage 	-> doHomePage   database sharedForms hst
-						ShopPage 	-> doShopPage   database sharedForms hst
-						BasketPage 	-> doBasketPage database sharedForms hst
-						OrderPage 	-> doOrderPage  database sharedForms hst
-= (mkHtml "My Web Shop"
-		[ STable [] [[Img [Img_Src "images/cdshoptitle.gif"]:dopage.body]]
-		, Hr []
-		, Br
-		, BodyTag page
-		, Br
-//		, traceHtmlInput
-		], hst)
-where
-	pageSelectionForm hst = ListFuncBut False "pagebut" Edit pagebuttons hst
-	where
-		pagebuttons  = 
-			[ (but "Home", 		\page -> HomePage)
-			, (but "Shop",		\page -> ShopPage)
-			, (but "Basket", 	\page -> BasketPage)
-			, (but "OrderInfo", \page -> OrderPage)
-			]
 
 // storages which are shared between the pages
 // and in this way keep information persistent when the user is switching between pages
@@ -61,6 +35,7 @@ where
 	, searchString	:: Form String			// current search string 
 	, searchOption	:: Form (SearchOption -> SearchOption,Int) // current option
  	, basket 		:: Form [Int]			// items stored in basket 
+	, personalData	:: Form PersonalData	// all data of the costumer
  	} 
 
 sharedForms :: *HSt -> (SharedForms,!*HSt)
@@ -70,6 +45,7 @@ sharedForms hst
 # (step,hst)			= stepForm hst
 # (searchString,hst)	= searchForm hst
 # (searchOption,hst)	= optionForm hst
+# (personalData,hst)	= personalDataForm hst
 # (basket,hst)	= basketForm id hst	
 = ( { currentPage	= curpage
 	, index			= index
@@ -77,6 +53,7 @@ sharedForms hst
 	, searchString	= searchString
 	, searchOption	= searchOption
  	, basket 		= basket 
+	, personalData	= personalData
  	},hst) 
 
 currentpageForm :: (CurrentPage -> CurrentPage) *HSt -> (Form CurrentPage,!*HSt)
@@ -101,6 +78,81 @@ where
 
 basketForm :: (Basket -> Basket) *HSt -> (Form Basket,!*HSt)
 basketForm f hst = mkStoreForm "basket" f [] hst
+
+personalDataForm hst = mkEditForm "personal" Edit initPersInfo hst
+
+:: PersonalData =
+	{ name 				:: TextInput
+	, address			:: TextInput
+	, city				:: TextInput
+	, state				:: TextInput
+	, zipCode			:: (TextInput,TextInput)
+	, country			:: PullDownMenu
+	, ccCompagny		:: PullDownMenu
+	, ccNumber			:: (TextInput,TextInput,TextInput,TextInput)
+	, ccExpiringDate	:: (PullDownMenu,PullDownMenu)
+	, cardholdersName	:: TextInput
+	}	
+
+initPersInfo =	
+	{ name 				= TS 30 ""
+	, address			= TS 30 ""
+	, city				= TS 30 ""
+	, state				= TS 30 ""
+	, zipCode			= (TI 2 1234,TS 1 "")
+	, country			= PullDown (1,100) (0,["Belgium", "Netherlands","United Kingdom"])
+	, ccCompagny		= PullDown (1,100) (0,["MasterCard", "VisaCard"])
+	, ccNumber			= (TI 2 1234, TI 2 1234, TI 2 1234,TI 2 1234)
+	, ccExpiringDate	= ( PullDown (1,40) (0,[toString m \\ m <- [1 .. 12]])
+						  , PullDown (1,60) (0,[toString y \\ y <- [2005 .. 2014]])
+						  )
+	, cardholdersName	= TS 30 ""
+	}	
+
+showBasket :: Bool [Int] [CD_Database] [BodyTag] [BodyTag] -> BodyTag
+showBasket onlytop basket database infobuts deletebuts
+| isEmpty basket = 	bTxt "Your Basket is empty"
+| onlytop = 		BodyTag
+				  	[ bTxt "Last Item put into basket:"
+					, mkTable (1,length basket) [database!!(hd basket)] infobuts deletebuts
+					]
+| otherwise			= BodyTag
+				  	[ bTxt "Contents of your basket:"
+					, mkTable (1,length basket) [database!!itemnr \\ itemnr <- basket] infobuts deletebuts
+					, Br
+					, STable [] [[ bTxt "Total Prize:"
+								, toHtml (showPrize (sum [(database!!itemnr).item.prize \\ itemnr <- basket]))
+								]]
+					]
+
+// main entry of the shop
+
+webshopentry database hst
+# (sharedForms,hst) = sharedForms hst					// include all shared forms
+# (selPage,hst) 	= pageSelectionForm hst				// is a new page selected
+# (curPage,hst) 	= currentpageForm selPage.value hst // determine current page
+# (page,hst) 		= case curPage.value of				// include this page
+						HomePage 	-> doHomePage   database sharedForms hst
+						ShopPage 	-> doShopPage   database sharedForms hst
+						BasketPage 	-> doBasketPage database sharedForms hst
+						OrderPage 	-> doOrderPage  database sharedForms hst
+= (mkHtml "My Web Shop"
+		[ STable [] [[Img [Img_Src "images/cdshoptitle.gif"]:selPage.body]]
+		, Hr []
+		, Br
+		, BodyTag page		// code of selected page
+		, Br
+//		, traceHtmlInput
+		], hst)
+where
+	pageSelectionForm hst = ListFuncBut False "pagebut" Edit pagebuttons hst
+	where
+		pagebuttons  = 
+			[ (but "Home", 		\page -> HomePage)
+			, (but "Shop",		\page -> ShopPage)
+			, (but "Basket", 	\page -> BasketPage)
+			, (but "OrderInfo", \page -> OrderPage)
+			]
 
 // home page
 
@@ -136,11 +188,7 @@ doShopPage database sf hst
 	, Br, Br 
 	, mkTable (nindex.value+1,length selection) (selection%(nindex.value,nindex.value+sf.step.value)) info.body add.body 
 	, Br, Br
-	, if (isEmpty basket.value)
-			(bTxt "Your Basket is empty")
-			(BodyTag [ bTxt ("Last item put into basket was: ")
-					 , mkTable (1,length basket.value) [database!!(hd basket.value)] binfo.body [EmptyBody]
-					 ])
+	, showBasket True basket.value database info.body [EmptyBody]
 	, doScript database (info.value -1)
 	, doScript database (binfo.value -1)
 	], hst)
@@ -187,18 +235,9 @@ doBasketPage database sf hst
 
 # (order,hst) 	= ListFuncBut False "buybut" Edit [(but "toOrder",\_ -> OrderPage)] hst	
 # (_,hst) 		= currentpageForm order.value hst   // this is too much ????
-= (	[ if (isEmpty nbasket.value)
-			(bTxt "Your Basket is empty")
-			(BodyTag [ bTxt ("Current contents of your basket:")
-					, Br, Br
-					, mkTable (1,length nbasket.value) [database!!itemnr \\ itemnr <- nbasket.value] info.body delete.body
-					, Br
-					, STable [] [[ bTxt "Total Prize:"
-								, toHtml (showPrize (sum [(database!!itemnr).item.prize \\ itemnr <- nbasket.value]))
-								, EmptyBody, toBody order
-								]]
-					])
+= ( [ showBasket False nbasket.value database info.body delete.body
 	, doScript database (info.value -1)
+	, toBody order
 	], hst)
 where
 	removeFromBasketButtons :: Basket -> [(Button,Basket -> Basket)]
@@ -212,39 +251,27 @@ where
 
 // order page
 
-doOrderPage database sform hst
-# (persInfo,hst) = mkEditForm "personal" Edit initPersInfo hst
-= (	[ toBody persInfo
+doOrderPage database sf hst
+# persData = sf.personalData
+# (confirm,hst) 	= ListFuncBut False "confirm" Edit [(but "confirm",\_ -> ThanksPage)] hst	
+# (_,hst)			= currentpageForm confirm.value hst
+= (	[ showBasket False sf.basket.value database (repeat EmptyBody) (repeat EmptyBody)
+	, Br
+	, bTxt "All fields must be filled with your data:"
+	, toBody persData
+	, Br
+	, bTxt "Confirm your order:\t\t", toBody confirm
 	], hst)
+	
+// thanks page
 
-:: PersonalInformation =
-	{ name 				:: TextInput
-	, address			:: TextInput
-	, city				:: TextInput
-	, state				:: String
-	, zipCode			:: (TextInput,TextInput)
-	, country			:: String
-	, ccCompagny		:: PullDownMenu
-	, ccNumber			:: (TextInput,TextInput,TextInput,TextInput)
-	, ccExpiringDate	:: (PullDownMenu,PullDownMenu)
-	, cardholdersName	:: TextInput
-	}	
-
-initPersInfo =	
-	{ name 				= TS 30 ""
-	, address			= TS 30 ""
-	, city				= TS 30 ""
-	, state				= ""
-	, zipCode			= (TI 2 1234,TS 1 "")
-	, country			= ""
-	, ccCompagny		= PullDown (1,100) (0,["MasterCard", "VisaCard"])
-	, ccNumber			= (TI 2 1234, TI 2 1234, TI 2 1234,TI 2 1234)
-	, ccExpiringDate	= ( PullDown (1,40) (0,[toString m \\ m <- [1 .. 12]])
-						  , PullDown (1,60) (0,[toString y \\ y <- [2005 .. 2014]])
-						  )
-	, cardholdersName	= TS 30 ""
-	}	
-
+thanksPage hst
+= ( [ maptext 	[ "Your order has been processed!"
+				, "Thanks for playing with our demo shop."
+				, ""
+				, "Probably we have to find another way to earn money."
+				]
+	],hst)
 	
 // page showing CD information will appear in extra window
 
