@@ -121,8 +121,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	887
+				SizeY:	485
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -188,7 +188,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -196,15 +196,15 @@ OtherModules
 			ReuseUniqueNodes:	True
 		Dcl
 			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+				X:	171
+				Y:	6
+				SizeX:	725
+				SizeY:	631
 		DclOpen:	False
 		Icl
 			WindowPosition
-				X:	0
-				Y:	0
+				X:	37
+				Y:	10
 				SizeX:	871
 				SizeY:	528
 		IclOpen:	False
@@ -226,8 +226,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	741
+				SizeY:	299
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -256,14 +256,14 @@ OtherModules
 				Y:	28
 				SizeX:	889
 				SizeY:	572
-		DclOpen:	True
+		DclOpen:	False
 		Icl
 			WindowPosition
-				X:	21
-				Y:	4
-				SizeX:	888
+				X:	1
+				Y:	31
+				SizeX:	884
 				SizeY:	539
-		IclOpen:	False
+		IclOpen:	True
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdGeneric
@@ -366,8 +366,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	803
+				SizeY:	455
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -620,8 +620,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	811
+				SizeY:	514
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -676,8 +676,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	572
+				SizeY:	514
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -1151,14 +1151,14 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
 		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlStyleDef.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlHandler.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\GenPrint.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\GenParse.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlTrivial.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlEncodeDecode.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlFormlib.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlArrow.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlHandler.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlEncodeDecode.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
+		Path:	{Application}\Libraries\Generics\Clean System Files\GenParse.o
+		Path:	{Application}\Libraries\Generics\Clean System Files\GenPrint.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlTrivial.o
 		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
 		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.obj
 	Dlib

@@ -4,7 +4,7 @@ definition module htmlHandler
 // Generating HTML code, converting Clean types to GEC's, automatic dealing with form's ..
 // (c) MJP 2005 *** under construction
 
-import htmlDataDef
+import htmlDataDef, htmlEncodeDecode
 import GenPrint
 import GenParse
 import StdBool
@@ -52,7 +52,7 @@ mkViewForm 		:: !FormId 	!Mode !(HBimap d v) 	d !*HSt -> (Form d,!*HSt) | gForm{
 
 mkBimapEditor 	:: !FormId 	!Mode !(Bimap d v)  d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
 mkEditForm 		:: !FormId 	!Mode				d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkEditForm2		:: !FormId  !Mode 				d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+//mkEditForm2		:: !FormId  !Mode 				d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkSetForm 		:: !FormId 	!Mode				d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkSelfForm 		:: !FormId 	!(d -> d)			d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkApplyForm 	:: !FormId 	!(d -> d)			d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d

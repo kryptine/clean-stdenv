@@ -77,7 +77,7 @@ where
 					,("Song", 	\_ 		-> AnySong)]
 
 basketForm :: (Basket -> Basket) *HSt -> (Form Basket,!*HSt)
-basketForm f hst = mkStoreForm "basket" f [] hst
+basketForm f hst = mkStoreForm "zbasket" f [] hst
 
 personalDataForm hst = mkEditForm "personal" Edit initPersInfo hst
 
