@@ -63,8 +63,8 @@ MainModule
 		WindowPosition
 			X:	27
 			Y:	11
-			SizeX:	814
-			SizeY:	508
+			SizeX:	889
+			SizeY:	531
 	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
@@ -1108,116 +1108,116 @@ OtherModules
 		LastModified:	No 0 0 0 0 0 0
 Static
 	Mods
-		Path:	{Project}\webshop.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Examples\WebShopDeLuxe\webshop.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlStyleDef.icl
-		Path:	{Project}\CDdatabaseHandler.icl
-		Path:	{Application}\Libraries\Dynamics\extension\StdCleanTypes.icl
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\_SystemDynamic.icl
-		Path:	{Application}\Libraries\StdEnv\StdOverloaded.icl
-		Path:	{Application}\Libraries\StdEnv\StdEnv.icl
-		Path:	{Application}\Libraries\StdEnv\StdBool.icl
-		Path:	{Application}\Libraries\StdEnv\StdInt.icl
-		Path:	{Application}\Libraries\StdEnv\StdMisc.icl
-		Path:	{Application}\Libraries\StdEnv\StdChar.icl
-		Path:	{Application}\Libraries\StdEnv\StdClass.icl
-		Path:	{Application}\Libraries\StdEnv\StdArray.icl
-		Path:	{Application}\Libraries\StdEnv\_SystemArray.icl
-		Path:	{Application}\Libraries\StdEnv\StdReal.icl
-		Path:	{Application}\Libraries\StdEnv\StdString.icl
-		Path:	{Application}\Libraries\StdEnv\StdFile.icl
-		Path:	{Application}\Libraries\StdEnv\StdList.icl
-		Path:	{Application}\Libraries\StdEnv\StdEnum.icl
-		Path:	{Application}\Libraries\StdEnv\_SystemEnum.icl
-		Path:	{Application}\Libraries\StdEnv\StdOrdList.icl
-		Path:	{Application}\Libraries\StdEnv\StdTuple.icl
-		Path:	{Application}\Libraries\StdEnv\StdCharList.icl
-		Path:	{Application}\Libraries\StdEnv\StdFunc.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Examples\WebShopDeLuxe\CDdatabaseHandler.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Dynamics\extension\StdCleanTypes.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Dynamics\implementation\windows\_SystemDynamic.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdOverloaded.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdEnv.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdBool.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdInt.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdMisc.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdChar.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdClass.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdArray.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\_SystemArray.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdReal.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdString.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdFile.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdList.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdEnum.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\_SystemEnum.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdOrdList.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdTuple.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdCharList.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdFunc.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\StdHtml.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlDataDef.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlPrintUtil.icl
-		Path:	{Application}\Libraries\StdEnv\StdGeneric.icl
-		Path:	{Application}\Libraries\ArgEnvWindows\ArgEnv.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdGeneric.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\ArgEnvWindows\ArgEnv.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlHandler.icl
-		Path:	{Application}\Libraries\Generics\GenPrint.icl
-		Path:	{Application}\Libraries\StdLib\StdMaybe.icl
-		Path:	{Application}\Libraries\Generics\GenParse.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Generics\GenPrint.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdLib\StdMaybe.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Generics\GenParse.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlTrivial.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlEncodeDecode.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlFormlib.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlArrow.icl
-		Path:	{Application}\Libraries\GEC\GEC Implementation\StdArrow.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\GEC\GEC Implementation\StdArrow.icl
 	Objs
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup0.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup1Trace.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup2.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_system.o
-		Path:	{Project}\Clean System Files\webshop.o
-		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnv.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdBool.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdInt.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdMisc.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdChar.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdClass.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdArray.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemArray.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdReal.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdString.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFile.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdList.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnum.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnum.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOrdList.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdTuple.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdCharList.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_startup0.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_startup1Trace.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_startup2.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_system.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Examples\WebShopDeLuxe\Clean System Files\webshop.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdOverloaded.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdEnv.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdBool.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdInt.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdMisc.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdChar.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdClass.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdArray.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_SystemArray.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdReal.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdString.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdFile.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdList.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdEnum.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_SystemEnum.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdOrdList.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdTuple.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdCharList.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdFunc.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\StdHtml.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlDataDef.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlPrintUtil.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
-		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdGeneric.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlStyleDef.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlHandler.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\GenPrint.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\GenParse.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Generics\Clean System Files\GenPrint.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdMaybe.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Generics\Clean System Files\GenParse.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlEncodeDecode.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlTrivial.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlFormlib.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlArrow.o
-		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
-		Path:	{Project}\Clean System Files\CDdatabaseHandler.o
-		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.obj
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Examples\WebShopDeLuxe\Clean System Files\CDdatabaseHandler.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.obj
 	Dlib
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\kernel_library
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\user_library
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\gdi_library
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\comdlg_library
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\kernel_library
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\user_library
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\gdi_library
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\comdlg_library
 	Pths
-		Path:	{Project}
-		Path:	{Application}\Libraries\StdEnv
-		Path:	{Application}\Libraries\StdLib
-		Path:	{Application}\Libraries\ObjectIO
-		Path:	{Application}\Libraries\ObjectIO\OS Windows
-		Path:	{Application}\Libraries\Directory
-		Path:	{Application}\Libraries\Dynamics\extension
-		Path:	{Application}\Libraries\Dynamics\general
-		Path:	{Application}\Libraries\Dynamics\implementation
-		Path:	{Application}\Libraries\Dynamics\implementation\windows
-		Path:	{Application}\Libraries\Generics
-		Path:	{Application}\Libraries\ArgEnvWindows
-		Path:	{Application}\Libraries\Gast
-		Path:	{Application}\Libraries\Directory
-		Path:	{Application}\Libraries\Tcp
-		Path:	{Application}\Libraries\ExceptionsWindows
-		Path:	{Application}\Libraries\MersenneTwister
-		Path:	{Application}\Libraries\ExtendedArith\ExtendedArith
-		Path:	{Application}\Libraries\GameLib
-		Path:	{Application}\Libraries\GEC
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Examples\WebShopDeLuxe
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdLib
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\ObjectIO
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\ObjectIO\OS Windows
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Directory
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Dynamics\extension
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Dynamics\general
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Dynamics\implementation
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Dynamics\implementation\windows
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Generics
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\ArgEnvWindows
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Gast
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Directory
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Tcp
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\ExceptionsWindows
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\MersenneTwister
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\ExtendedArith\ExtendedArith
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\GameLib
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\GEC
 		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
-		Path:	{Application}\Libraries\GEC\GEC Implementation
-		Path:	{Application}\Libraries\WrapDebug
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\GEC\GEC Implementation
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\WrapDebug
 	AppP:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1
 	PrjP:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Examples\WebShopDeLuxe
