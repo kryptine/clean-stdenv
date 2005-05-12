@@ -1376,10 +1376,14 @@ where
 		  compoundInfo`			= CompoundInfo` info
 		# tb					= setcompoundsliderthumb hasHScroll ableContext1 miOSMetrics wPtr itemPtr hPtr True  (minx,newOrigin.x,maxx) viewx itemSize` (hRect,vRect) tb
 		# tb					= setcompoundsliderthumb hasVScroll ableContext1 miOSMetrics wPtr itemPtr vPtr False (miny,newOrigin.y,maxy) viewy itemSize` (hRect,vRect) tb
-		| newOrigin==oldOrigin
-			&& intersectRects (addVector (toVector absolutePos) newDomainRect) clipRect ==
-			   intersectRects (addVector (toVector absolutePos) oldDomainRect) clipRect
-			&& newContentSize == rectSize oldContentRect
+		#! no_update_necessary	=  newOrigin==oldOrigin
+								&& intersectRects (addVector (toVector absolutePos) newDomainRect) clipRect ==
+								   intersectRects (addVector (toVector absolutePos) oldDomainRect) clipRect
+								&& newContentSize == rectSize oldContentRect;
+		# (update_necessary,tb) = if no_update_necessary
+									(osWindowHasUpdateRect wPtr tb)
+									(True,tb);
+		| not update_necessary
 			= (True,{itemH & wItemInfo`= compoundInfo`},(updRgn,tb))
 		# oldItems`				= itemH.wItems`
 		| isEmpty oldItems`		// CompoundControl has no controls
