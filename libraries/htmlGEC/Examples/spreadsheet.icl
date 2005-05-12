@@ -12,7 +12,7 @@ import StdHtml
 Start world  = doHtml arrowsspreadsheet world
 
 spreadsheet hst
-# (tablef, hst) = table_hv_Form "table" Edit 	(inittable 4 8)     	    hst
+# (tablef, hst) = table_hv_Form "table" Edit 	(inittable 8 10)     	    hst
 # (rowsumf,hst) = vertlistForm  "rsum"  Display (rowsum tablef.value)       hst
 # (colsumf,hst) = horlistForm   "csum"  Display (colsum tablef.value)       hst
 # (totsumf,hst) = mkEditForm    "tsum"  Display (sum (rowsum tablef.value)) hst

@@ -6,14 +6,119 @@ import StdEnv, ArgEnv, StdMaybe
 import htmlDataDef, htmlTrivial
 import GenPrint, GenParse
 
+// state preparation
+
+:: FormStates 	:== Tree (String,FormState)		// State of forms is internally stored in a tree
+:: Tree a 		= Node (Tree a) a (Tree a) | Leaf
+:: FormState 	= OldState String					// old states are turned into garbage in the end 
+				| NewState String
+:: HtmlState :== [(String,String)]				// The state is stored in html as list and not as a tree
+:: FormId 		= String
+
+instance < FormState
+where
+	(<) _ _ = True
+
+initFormStates :: FormStates
+initFormStates = Balance (sort [(formid,OldState state) \\ (formid,state) <- CheckHtmlState | formid <> ""])
+where
+	Balance [] = Leaf
+	Balance [x] = Node Leaf x Leaf
+	Balance xs
+		= case splitAt (length xs/2) xs of
+			(a,[b:bs]) = Node (Balance a) b (Balance bs)
+			(as,[]) = Node   (Balance (init as)) (last as) Leaf
+
+CheckHtmlState :: HtmlState
+CheckHtmlState 
+# (_,_,_,state) = UpdateInfo
+=: splitString (mkList state)
+where
+	splitString [] 			= []
+	splitString listofchar	= [mktuple first : splitString second]
+	where
+		(first,second) = mscan '$' listofchar
+
+		mktuple :: [Char] -> (!String,!String)
+		mktuple	elem = (mkString formid,mkString (stl (reverse (stl (reverse formvalue)))))
+		where
+			(formid,formvalue) = mscan '"' (stl (stl elem)) // skip '("'
+			stl [] = []
+			stl [x:xs] = xs 
+
+toHtmlState :: FormStates -> HtmlState
+toHtmlState Leaf = []
+toHtmlState (Node left (formid,OldState s) right) = toHtmlState left ++ toHtmlState right // old states are garbage
+toHtmlState (Node left (formid,NewState s) right) = toHtmlState left ++ [(formid,s)] ++ toHtmlState right // only remember new states for next round
+
+findNState :: !String FormStates -> (Bool,Maybe a, FormStates)	| gParse{|*|} a 
+findNState sid states 
+# (isOld,mval) = (findNState` sid states)
+= (isOld,mval,states) 
+where
+	findNState` sid Leaf = (False,Nothing)
+	findNState` sid (Node left (id,info) right)
+	| sid == id = case info of
+					(OldState state) = (True,parseString state)
+					(NewState state) = (False,parseString state)
+	| sid < id 	= findNState` sid left
+	| otherwise = findNState` sid right
+
+replaceNState :: !String a FormStates -> FormStates	| gPrint{|*|} a 
+replaceNState sid val Leaf = Node Leaf (sid,NewState (encodeInfo val)) Leaf
+replaceNState sid val (Node left a=:(id,_) right)
+| sid == id = Node left (id,NewState (encodeInfo val)) right
+| sid < id 	= Node (replaceNState sid val left) a right
+| otherwise = Node left a (replaceNState sid val right)
+
+addScriptN :: FormStates -> BodyTag
+addScriptN allFormStates
+=	BodyTag
+	[ submitscript    globalFormName updateInpName
+	, globalstateform globalFormName updateInpName globalInpName (SV encodedglobalstate) 
+	]
+where
+	encodedglobalstate = urlEncodeState (toHtmlState allFormStates)
+
+// determining the update information
+
 :: UpdValue 	= UpdI Int							// new integer value
 				| UpdR Real							// new real value
 				| UpdC String						// choose indicated constructor 
 				| UpdS String						// new piece of text
 
-mscan c list = case (span ((<>) c) list) of  // scan like span but it removes character
-				(x,[])	= (x,[])
-				(x,y)	= (x,tl y)
+CheckUpdateId :: String
+CheckUpdateId 		
+# (_,upd,_,_) = UpdateInfo
+=: case parseString upd of
+	Just ("",0,UpdI 0) = ""
+	Just (id,_,_)   = id 
+	else = ""
+derive gParse UpdValue
+
+StrippedCheckUpdateId :: String
+StrippedCheckUpdateId
+=: mkString (takeWhile ((<>) '_') (mkList CheckUpdateId))
+
+AnyInput :: String
+AnyInput
+# (_,_,new,_) = UpdateInfo
+=: new
+
+CheckUpdate :: (!Maybe a, !Maybe b) | gParse{|*|} a & gParse{|*|} b 
+CheckUpdate 
+# (_,upd,new,_) = UpdateInfo
+= (parseString upd, parseString new)
+
+derive gParse (,), (,,)
+
+
+
+
+
+
+
+
 
 // encoding and decoding of Clean values 
 
@@ -21,7 +126,6 @@ encodeInfo :: a -> String | gPrint{|*|} a
 encodeInfo inp = encoding  
 where
 	encoding = mkString (urlEncode (mkList (printToString inp)))
-
 
 decodeInfo :: String -> Maybe a | gParse{|*|} a
 decodeInfo s = parseString (mkString (urlDecode (mkList s)))
@@ -83,58 +187,6 @@ where
 	where
 		(first,second) = span ((<>) '$') listofchar
 
-CheckUpdateId :: String
-CheckUpdateId 		
-# (_,upd,_,_) = UpdateInfo
-=: case parseString upd of
-	Just ("",0,UpdI 0) = ""
-	Just (id,_,_)   = id 
-	else = ""
-derive gParse UpdValue
-
-StrippedCheckUpdateId :: String
-StrippedCheckUpdateId
-=: mkString (takeWhile ((<>) '_') (mkList CheckUpdateId))
-
-AnyInput :: String
-AnyInput
-# (_,_,new,_) = UpdateInfo
-=: new
-
-CheckUpdate :: (!Maybe a, !Maybe b) | gParse{|*|} a & gParse{|*|} b 
-CheckUpdate 
-# (_,upd,new,_) = UpdateInfo
-= (parseString upd, parseString new)
-
-
-CheckGlobalState :: GlobalState
-CheckGlobalState 
-# (_,_,_,state) = UpdateInfo
-=: splitString (mkList state)
-where
-	splitString [] 			= []
-	splitString listofchar	= [mktuple first : splitString second]
-	where
-		(first,second) = mscan '$' listofchar
-
-		mktuple :: [Char] -> (!String,!String)
-		mktuple	elem = (mkString formid,mkString (stl (reverse (stl (reverse formvalue)))))
-		where
-			(formid,formvalue) = mscan '"' (stl (stl elem)) // skip '("'
-			stl [] = []
-			stl [x:xs] = xs 
-
-findState :: String -> (Maybe a) | gParse{|*|} a 
-findState curformid = findState` curformid CheckGlobalState
-where
-	findState` curformid []	= Nothing
-	findState` curformid [(formid,formstate):nextstate]
-	| curformid == formid		= parseString formstate
-	| otherwise					= findState` curformid nextstate
-
-derive gParse (,), (,,)
-
-
 // low level url encoding decoding
 
 mkString :: [Char] -> String
@@ -142,6 +194,10 @@ mkString listofchar = {elem \\ elem <- listofchar}
 
 mkList :: String -> [Char]
 mkList string = [e \\ e <-: string]
+
+mscan c list = case (span ((<>) c) list) of  // scan like span but it removes character
+				(x,[])	= (x,[])
+				(x,y)	= (x,tl y)
 
 urlEncode :: [Char] -> [Char]
 urlEncode [] = []
@@ -202,18 +258,6 @@ globalInpName =: "GS"
 
 selectorInpName :: String
 selectorInpName =: "CS"
-
-addScript :: GlobalState -> BodyTag
-addScript globalstate
-=	BodyTag
-	[ submitscript    globalFormName updateInpName
-	, globalstateform globalFormName updateInpName globalInpName (SV encodedglobalstate) 
-	]
-where
-	encodedglobalstate = urlEncodeState (removedup globalstate)
-	
-	removedup []  = []
-	removedup [(id,body):rest] = [(id,body):[(nid,nbody) \\ (nid,nbody) <- removedup rest | nid <> id]]
 
 submitscript :: String String -> BodyTag
 submitscript formname updatename

@@ -15,16 +15,20 @@ traceHtmlInput	:: BodyTag		// for debugging to show which information is receive
 
 // encoding of information
 
-:: GlobalState :== [(String,String)]
-
 encodeInfo 		:: a -> String | gPrint{|*|} a	// format required for storing stuf in html
 callClean 		:: Script						// call script that will transmit input info to this executable
-addScript 		:: GlobalState -> BodyTag		// the corresponding script, stores global state as well					
+
+// Decoding of information New Approach
+
+:: FormStates 
+
+initFormStates :: FormStates 											// initial global as received from browser
+findNState 		:: !String FormStates -> (Bool, Maybe a,FormStates)		| gParse{|*|} a // true if form has not yet been updated 	:: !String a FormStates -> FormStates	| gPrint{|*|} a // replace state given FormId
+replaceNState 	:: !String a FormStates -> FormStates	| gPrint{|*|} a 
+addScriptN 		:: FormStates -> BodyTag		// the corresponding script, stores global state as well
 
 // decoding of information
 
-findState 				:: String -> (Maybe a) 
-									| gParse{|*|} a  	// returns value of state with indicated FormId 
 CheckUpdateId 			:: String						// FormId of previously updated form
 CheckUpdate 			:: (!Maybe a, !Maybe b) | gParse{|*|} a & gParse{|*|} b // updated form, updated value
 StrippedCheckUpdateId 	:: String						// used to determine related id's e.g. for radio buttons

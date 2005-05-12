@@ -11,8 +11,7 @@ derive gParse (,), (,,), (,,,), UpdValue
 derive gHpr   (,), (,,), (,,,)
 derive gUpd		   (,,), (,,,)
  
-:: HSt 			:== (InputId,[FormState])	// all form states are collected here ... 	
-:: FormState 	:== (FormId,FormValue)		// state of a form to remember
+:: HSt 			:== (InputId,FormStates)	// all form states are collected here ... 	
 :: FormId	 	:== String					// unique id identifying the form
 :: FormValue 	:== String					// current Clean value to remember encoded in a String
 :: InputId	 	:== Int						// unique id for every constructor and basic value appearing in the state
@@ -35,9 +34,8 @@ toHtml a
 toBody :: (Form a) -> BodyTag
 toBody form = BodyTag form.body
 
-
 mkHSt ::  *HSt
-mkHSt = (0,[])
+mkHSt = (0,initFormStates)
 
 ifMode :: Mode a a -> a
 ifMode Edit 	then else = then
@@ -47,15 +45,18 @@ ifMode Display  then else = else
 // top level function given to end user
 // it collects the html page to display, and returns the contents of all Clean GEC's / Forms created
 
+//derive gForm NFormState, Tree
+
 doHtml :: (*HSt -> (Html,!*HSt)) *World -> *World
 doHtml pagehandler world 
-= print_to_stdout (Html header (Body [extra_att:attr] [addScript lhst:bodytags])) world
+= print_to_stdout (Html header (Body [extra_att:attr] [addScriptN lhst:bodytags])) world
 where
 	(Html header (Body attr bodytags),(_,lhst)) = pagehandler mkHSt
 	extra_att = Batt_background "back35.jpg "
+	debug = if False (toHtml lhst) EmptyBody
 
 // experimental function:
-
+/*
 mkEditForm2:: !FormId !Mode d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkEditForm2 formid  mode data (inidx,lhst)
 =	case findInLocalStore formid lhst 0 lhst of
@@ -67,7 +68,7 @@ where
 	findInLocalStore s [(id,st):lst] n lhst
 	| formid == id = (Just n, parseString st, removeAt n lhst) 
 	| otherwise 	 = findInLocalStore s lst (n+1) lhst
-
+*/
 // simple editor for either editing or showing a simple value
 
 mkEditForm:: !FormId !Mode d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
@@ -129,68 +130,70 @@ toFormid d (Just v) = v
 
 mkViewForm :: !FormId !Mode !(HBimap d v) d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
 mkViewForm formid mode {toForm, updForm, fromForm, resetForm} initdata (inidx,lhsts) 
-# (nnextview,(nr,[(uniqueid,mystore):lhsts])) = gForm{|*|} formid mode nextview (0,[(formid,viewtostore):lhsts])
+# (isupdated,newview,lhsts) 
+		= case updateFormInfo formid lhsts of
+			(False,Nothing,lhsts) 		= (False,toForm initdata Nothing,lhsts)
+			(False,Just oldview,lhsts) 	= (False,toForm initdata (Just oldview),lhsts)
+			(True, Just newview,lhsts)	= (True, toForm initdata (Just newview),lhsts) 
+# updateview	= updForm  isupdated newview		// apply update function telling user if an update has taken place
+# newdata		= fromForm isupdated updateview		// convert back to data domain telling if an update has taken place	 
+# nextview		= case resetForm of
+					Nothing -> updateview		// adjust view 
+					Just upd -> upd updateview
+//# viewtostore	= encodeInfo  nextview				// in this terrible format
+# viewtostore	= nextview				// in this terrible format
+//# (nnextview,(nr,[(uniqueid,mystore):lhsts])) = gForm{|*|} formid mode nextview (0,[(formid,viewtostore):lhsts])
+# (nnextview,(nr,lhsts)) = gForm{|*|} formid mode nextview (0,replaceNState formid viewtostore lhsts)
 = (	{changed= nnextview.changed || isupdated
-	,value	= fromForm2 nnextview.value
+	,value	= fromForm2 isupdated newdata nnextview.value
 	,body	= nnextview.body
-	},(0,[(formid,encodeInfo2 nnextview.value):lhsts]))
+//	},(0,replaceNState formid (nnextview.value) lhsts))
+	},(0,replaceNState formid (encodeInfo2 viewtostore nnextview.value) lhsts))
+//	},(0,[(formid,encodeInfo2 viewtostore nnextview.value):lhsts]))
 where
+	fromForm2 isupdated newdata updview 
+		= case resetForm of
+			Nothing 	-> fromForm isupdated updview 
+			(Just reset)-> newdata
 
-	(isupdated,newview) = case updateFormInfo formid of
-							(False,Nothing) 		= (False,toForm initdata Nothing)
-							(False,Just oldview) 	= (False,toForm initdata (Just oldview))
-//							(True, Just newview)	= (True, newview) //??  
-							(True, Just newview)	= (True, toForm initdata (Just newview)) //??  
+	encodeInfo2 viewtostore updview 
+		= case resetForm of
+			Nothing 	-> updview
+			(Just reset)-> viewtostore
 
-	updateview			= updForm  isupdated newview		// apply update function telling user if an update has taken place
-	newdata				= fromForm isupdated updateview		// convert back to data domain telling if an update has taken place	 
-
-	nextview			= case resetForm of
-								Nothing -> updateview		// adjust view 
-								Just upd -> upd updateview
-	viewtostore			= encodeInfo  nextview				// in this terrible format
-
-	fromForm2 updview 	= case resetForm of
-							Nothing -> fromForm isupdated updview 
-							(Just reset)	-> newdata
-							
-	encodeInfo2 updview = case resetForm of
-							Nothing -> encodeInfo updview
-							(Just reset)	-> viewtostore
-
-	updateFormInfo :: FormId -> (Bool,Maybe a) | gUpd{|*|} a & gParse{|*|} a
-	updateFormInfo formid
-		= case (decodeInput1 formid) of
+	updateFormInfo :: FormId FormStates -> (Bool,Maybe a,FormStates) | gUpd{|*|} a & gParse{|*|} a
+	updateFormInfo formid lhst
+		= case (decodeInput1 formid lhst) of
 
 			// an update for this form is detected
 
-			((Just (pos,updval), Just oldstate)) 
-					-> (True, Just (snd (gUpd{|*|} (UpdSearch updval pos) oldstate)))
+			(Just (pos,updval), (isUpdated,Just oldstate,lhst)) 
+					-> (isUpdated, Just (snd (gUpd{|*|} (UpdSearch updval pos) oldstate)),lhst)
 
 			// no update found, determine the current stored state
 
-			((_, Just oldstate))	
-					-> (False, Just oldstate)
+			(_, (_,Just oldstate, lhst))	
+					-> (False, Just oldstate, lhst)
 
 			// no update, no state stored, the current value is taken as (new) state
 
-			else	-> (False, Nothing)	
+			(_,(_,_,lhst))	-> (False, Nothing,lhst)	
 	where
-		decodeInput1 :: FormId -> (Maybe FormUpdate, Maybe a) | gParse{|*|} a
-		decodeInput1 formid
+		decodeInput1 :: FormId FormStates -> (Maybe FormUpdate, (Bool,Maybe a, FormStates)) | gParse{|*|} a
+		decodeInput1 formid lhst
 		| CheckUpdateId == formid// this state is updated
 		= case CheckUpdate of
-			(Just (sid,pos,UpdC s), Just "") 						= (Just (pos,UpdC s)  ,findState sid)
-			(Just (sid,pos,UpdC s), _) 								= (Just (pos,UpdC s)  ,findState sid)
+			(Just (sid,pos,UpdC s), Just "") 						= (Just (pos,UpdC s)  ,findNState sid lhst)
+			(Just (sid,pos,UpdC s), _) 								= (Just (pos,UpdC s)  ,findNState sid lhst)
 			else = case CheckUpdate of
-					(Just (sid,pos,UpdI i), Just ni) 				= (Just (pos,UpdI ni) ,findState sid) 
+					(Just (sid,pos,UpdI i), Just ni) 				= (Just (pos,UpdI ni) ,findNState sid lhst) 
 					else = case CheckUpdate of
-							(Just (sid,pos,UpdR r), Just nr) 		= (Just (pos,UpdR nr) ,findState sid) 
+							(Just (sid,pos,UpdR r), Just nr) 		= (Just (pos,UpdR nr) ,findNState sid lhst) 
 							else = case CheckUpdate of
-								(Just (sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns) ,findState sid) 
-								(Just (sid,pos,UpdS s),	_)			= (Just (pos,UpdS AnyInput)  ,findState sid) 
-								(upd,new) 							= (Nothing, findState formid)
-		| otherwise = (Nothing, findState formid)
+								(Just (sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns) ,findNState sid lhst) 
+								(Just (sid,pos,UpdS s),	_)			= (Just (pos,UpdS AnyInput)  ,findNState sid lhst) 
+								(upd,new) 							= (Nothing, findNState formid lhst)
+		| otherwise = (Nothing, findNState formid lhst)
 
 // automatic tranformation of any Clean type to html body
 // the lhst on the head of the hst is the lhst for the form we create here
@@ -537,14 +540,14 @@ gForm{|Button|} formid mode v=:(LButton size bname) (inidx,lhsts)
 				, `Inp_Events [OnClick callClean]
 				]) ""]
 	},(inidx+1,lhsts))
-gForm{|Button|} formid mode v=:(PButton (height,width) ref) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+gForm{|Button|} formid mode v=:(PButton (height,width) ref) (inidx,lhsts) 
 = (	{changed= False
 	,value	= v
 	,body	= [Input	(ifMode mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Image
 				, Inp_Value (SV ref)
 				, Inp_Src ref
-				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS ref))
+				, Inp_Name (encodeInfo (formid,inidx,UpdS ref))
 				, `Inp_Std [Std_Style ("width:" +++ toString width +++ " height:" +++ toString height)]
 				, `Inp_Events [OnClick callClean]
 				]) ""]
@@ -558,26 +561,26 @@ gUpd{|Button|} mode 			  	    	b = (mode,b)							// don't change
 derive gParse Button
 derive gPrint Button
 
-gForm{|CheckBox|} formid mode v=:(CBChecked name) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+gForm{|CheckBox|} formid mode v=:(CBChecked name) (inidx,lhsts) 
 = (	{changed= False
 	,value	= v
 	,body	= [Input (ifMode mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Checkbox
 				, Inp_Value (SV name)
-				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS name))
+				, Inp_Name (encodeInfo (formid,inidx,UpdS name))
 				, Inp_Checked Checked
 				, `Inp_Events [OnClick callClean]
 				]) ""]
 	},(inidx+1,lhsts))
 
 
-gForm{|CheckBox|} formid mode v=:(CBNotChecked name) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+gForm{|CheckBox|} formid mode v=:(CBNotChecked name) (inidx,lhsts) 
 = (	{changed= False
 	,value	= v
 	,body	= [Input (ifMode mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Checkbox
 				, Inp_Value (SV name)
-				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS name))
+				, Inp_Name (encodeInfo (formid,inidx,UpdS name))
 				, `Inp_Events [OnClick callClean]
 				]) ""]
 	},(inidx+1,lhsts))
@@ -586,24 +589,24 @@ derive gUpd CheckBox
 derive gParse CheckBox
 derive gPrint CheckBox
 
-gForm{|RadioButton|} formid mode v=:(RBChecked name) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+gForm{|RadioButton|} formid mode v=:(RBChecked name) (inidx,lhsts) 
 = (	{changed= False
 	,value	= v
 	,body	= [Input (ifMode mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Radio
 				, Inp_Value (SV name)
-				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS name))
+				, Inp_Name (encodeInfo (formid,inidx,UpdS name))
 				, Inp_Checked Checked
 				, `Inp_Events [OnClick callClean]
 				]) ""]
 	},(inidx+1,lhsts))
-gForm{|RadioButton|} formid mode v=:(RBNotChecked name) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+gForm{|RadioButton|} formid mode v=:(RBNotChecked name) (inidx,lhsts) 
 = (	{changed= False
 	,value	= v
 	,body	= [Input (ifMode mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Radio
 				, Inp_Value (SV name)
-				, Inp_Name (encodeInfo (uniqueid,inidx,UpdS name))
+				, Inp_Name (encodeInfo (formid,inidx,UpdS name))
 				, `Inp_Events [OnClick callClean]
 				]) ""]
 	},(inidx+1,lhsts))
@@ -612,7 +615,7 @@ derive gUpd	  RadioButton
 derive gParse RadioButton
 derive gPrint RadioButton
 
-gForm{|PullDownMenu|} formid mode v=:(PullDown (size,width) (menuindex,itemlist)) (inidx,lhsts=:[(uniqueid,lst):lsts]) 
+gForm{|PullDownMenu|} formid mode v=:(PullDown (size,width) (menuindex,itemlist)) (inidx,lhsts) 
 = (	{changed= False
 	,value	= v
 	,body	= [Select 	(ifMode mode [] [Sel_Disabled Disabled] ++
@@ -622,13 +625,12 @@ gForm{|PullDownMenu|} formid mode v=:(PullDown (size,width) (menuindex,itemlist)
 					, `Sel_Events [OnChange callClean]
 					])
 					[ Option  
-						[ Opt_Value (encodeInfo (uniqueid,inidx,UpdC (itemlist!!j)))
+						[ Opt_Value (encodeInfo (formid,inidx,UpdC (itemlist!!j)))
 						: if (j == menuindex) [Opt_Selected Selected] [] 
 						]
 						elem
 						\\ elem <- itemlist & j <- [0..]
 					 ]] 	
-//	},(incrIndex inidx v,lhsts))
 	},(inidx + 1,lhsts))
 
 gUpd{|PullDownMenu|} (UpdSearch (UpdC cname) 0) (PullDown (size,width) (menuindex,itemlist)) 
@@ -639,7 +641,6 @@ where
 	| otherwise		   = nmenuindex (cnt+1) name items
 	nmenuindex _ _ [] = -1
 	
-//gUpd{|PullDownMenu|} (UpdSearch val cnt) v = (UpdSearch val (cnt - (incrIndex cnt v)),v)			// continue search, don't change
 gUpd{|PullDownMenu|} (UpdSearch val cnt) v = (UpdSearch val (cnt - 1),v)			// continue search, don't change
 gUpd{|PullDownMenu|} (UpdCreate l)		_ = (UpdCreate l,PullDown (1,defpixel) (0,["error"]))					// create default value
 gUpd{|PullDownMenu|} mode 			  	v = (mode,v)							// don't change
@@ -661,14 +662,12 @@ gForm{|TextInput|} formid mode (TS size s) hst=:(inidx,lhst)
 # (body,hst) = mkInput size formid mode (SV s) (UpdS s) hst 
 = ({changed=False, value=TS size s, body=[body]},(inidx+3,lhst))
 
-gUpd{|TextInput|} (UpdSearch (UpdI ni) 0) 	(TI size i)  = (UpdDone,TI size ni)					// update integer value
-gUpd{|TextInput|} (UpdSearch (UpdR nr) 0) 	(TR size r)  = (UpdDone,TR size nr)					// update integer value
-gUpd{|TextInput|} (UpdSearch (UpdS ns) 0) 	(TS size s)  = (UpdDone,TS size ns)					// update integer value
-gUpd{|TextInput|} (UpdSearch val cnt)     	i = (UpdSearch val (cnt - 3),i)		// continue search, don't change
-gUpd{|TextInput|} (UpdCreate l)				_ = (UpdCreate l,TI defsize 0)					// create default value
-gUpd{|TextInput|} mode 			  	    	i = (mode,i)						// don't change
-
-
+gUpd{|TextInput|} (UpdSearch (UpdI ni) 0) 	(TI size i)  = (UpdDone,TI size ni)		// update integer value
+gUpd{|TextInput|} (UpdSearch (UpdR nr) 0) 	(TR size r)  = (UpdDone,TR size nr)		// update integer value
+gUpd{|TextInput|} (UpdSearch (UpdS ns) 0) 	(TS size s)  = (UpdDone,TS size ns)		// update integer value
+gUpd{|TextInput|} (UpdSearch val cnt)     	i = (UpdSearch val (cnt - 3),i)			// continue search, don't change
+gUpd{|TextInput|} (UpdCreate l)				_ = (UpdCreate l,TI defsize 0)			// create default value
+gUpd{|TextInput|} mode 			  	    	i = (mode,i)							// don't change
 
 derive gParse TextInput
 derive gPrint TextInput
@@ -688,15 +687,15 @@ where	toBool Pressed = True
 // specialization
 
 specialize :: (FormId Mode a *HSt -> (Form a,*HSt)) FormId Mode a *HSt -> (Form a,*HSt) | gUpd {|*|} a
-specialize editor name mode v hst=:(inidx,[(myid,mylst):lsts])
+specialize editor name mode v hst=:(inidx,lhst)
 # nextidx = incrIndex inidx v
-# (nv,(_,lsts)) = editor codedname mode v (0,lsts)
+# (nv,(_,lsts)) = editor codedname mode v (0,lhst)
 = (	{changed= nv.changed
 	,value	= nv.value
 	,body	= nv.body	
-	},(nextidx,[(myid,mylst):lsts]))
+	},(nextidx,lhst))
 where
-	codedname = myid +++ "_" +++ toString inidx
+	codedname = name +++ "_" +++ toString inidx
 
 incrIndex :: Int v -> Int | gUpd {|*|} v
 incrIndex i v

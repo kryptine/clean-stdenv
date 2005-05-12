@@ -6,8 +6,8 @@ module calculator
 import StdEnv
 import StdHtml
 
-Start world  = doHtml arrowcalculator world
-//Start world  = doHtml calculator world
+//Start world  = doHtml arrowcalculator world
+Start world  = doHtml calculator world
 
 calculator hst
 # (calcfun,hst) 	= TableFuncBut "calcbut" Edit calcbuttons hst		// shows buttons
