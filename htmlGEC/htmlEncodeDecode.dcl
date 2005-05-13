@@ -11,28 +11,38 @@ import GenParse, GenPrint, htmlDataDef
 ThisExe			:: String		// name of this executable
 MyPhP 			:: String		// name of php script interface between server and this executable
 
-traceHtmlInput	:: BodyTag		// for debugging to show which information is received from browser
+traceHtmlInput	:: BodyTag		// for debugging showing the information received from browser
 
-// encoding of information
+// Decoding of information
 
-encodeInfo 		:: a -> String | gPrint{|*|} a	// format required for storing stuf in html
-callClean 		:: Script						// call script that will transmit input info to this executable
+//:: FormStates 									// collection of all states of all forms
 
-// Decoding of information New Approach
+:: FormStates 	:== Tree_ (String,FormState)		// State of forms is internally stored in a tree
+:: Tree_ a 		= Node_ (Tree_ a) a (Tree_ a) | Leaf_
+:: FormState 	= OldState String					// old states are turned into garbage in the end 
+				| NewState String
+:: HtmlState :== [(String,String)]				// The state is stored in html as list and not as a tree
+//:: FormId 		= String
 
-:: FormStates 
 
-initFormStates :: FormStates 											// initial global as received from browser
-findNState 		:: !String FormStates -> (Bool, Maybe a,FormStates)		| gParse{|*|} a // true if form has not yet been updated 	:: !String a FormStates -> FormStates	| gPrint{|*|} a // replace state given FormId
-replaceNState 	:: !String a FormStates -> FormStates	| gPrint{|*|} a 
-addScriptN 		:: FormStates -> BodyTag		// the corresponding script, stores global state as well
 
-// decoding of information
+initFormStates 	:: FormStates 					// initial state as received from browser
+findState 		:: !String FormStates -> (Bool, Maybe a,FormStates)		| gParse{|*|} a // true if form has not yet been updated 	
+replaceState 	:: !String a FormStates -> FormStates	| gPrint{|*|} a // replace state given FormId
+addScript 		:: FormStates -> BodyTag		// script which stores the global state for the next round
 
-CheckUpdateId 			:: String						// FormId of previously updated form
-CheckUpdate 			:: (!Maybe a, !Maybe b) | gParse{|*|} a & gParse{|*|} b // updated form, updated value
-StrippedCheckUpdateId 	:: String						// used to determine related id's e.g. for radio buttons
-AnyInput 				:: String						// any input is accepted if a string is required
+
+// low level encoding of information
+
+encodeInfo 		:: a -> String | gPrint{|*|} a	// serialization to a Mime format 
+callClean 		:: Script						// script that will take care of sending the required input to this application
+
+// low level decoding of information
+
+CheckUpdateId 			:: String				// FormId of form previously changed by user
+CheckUpdate 			:: (!Maybe a, !Maybe b) | gParse{|*|} a & gParse{|*|} b // value of updated form, value of changed part
+StrippedCheckUpdateId 	:: String				// used to determine related formid's e.g. for radio buttons
+AnyInput 				:: String				// any input is accepted if a string is required
 
 // utility 
 

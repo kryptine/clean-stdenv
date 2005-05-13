@@ -1,6 +1,6 @@
 Version: 1.4
 Global
-	Built:	False
+	Built:	True
 	Target:	Everything
 	Exec:	{Project}\webshop.exe
 	CodeGen
@@ -65,7 +65,7 @@ MainModule
 			Y:	11
 			SizeX:	889
 			SizeY:	531
-	IclOpen:	False
+	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
 	Module

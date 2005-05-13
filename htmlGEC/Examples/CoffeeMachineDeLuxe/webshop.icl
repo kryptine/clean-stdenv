@@ -136,13 +136,14 @@ webshopentry database hst
 						ShopPage 	-> doShopPage   database sharedForms hst
 						BasketPage 	-> doBasketPage database sharedForms hst
 						OrderPage 	-> doOrderPage  database sharedForms hst
+						ThanksPage	-> doThanksPage	database sharedForms hst
 = (mkHtml "My Web Shop"
 		[ STable [] [[Img [Img_Src "images/cdshoptitle.gif"]:selPage.body]]
 		, Hr []
 		, Br
 		, BodyTag page		// code of selected page
 		, Br
-//		, traceHtmlInput
+		, traceHtmlInput
 		], hst)
 where
 	pageSelectionForm hst = ListFuncBut False "pagebut" Edit pagebuttons hst
@@ -265,7 +266,7 @@ doOrderPage database sf hst
 	
 // thanks page
 
-thanksPage hst
+doThanksPage database sf hst
 = ( [ maptext 	[ "Your order has been processed!"
 				, "Thanks for playing with our demo shop."
 				, ""

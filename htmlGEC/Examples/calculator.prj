@@ -1014,14 +1014,14 @@ OtherModules
 				Y:	0
 				SizeX:	830
 				SizeY:	521
-		DclOpen:	False
+		DclOpen:	True
 		Icl
 			WindowPosition
 				X:	47
 				Y:	20
 				SizeX:	775
 				SizeY:	596
-		IclOpen:	False
+		IclOpen:	True
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	htmlTrivial
