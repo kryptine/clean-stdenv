@@ -9,43 +9,34 @@ derive gPrint 	Tree
 derive gParse 	Tree
 derive gHpr 	Tree
 
-derive gForm NFormState//, NState
-
-//:: Tree a = Node (Tree a) a (Tree a) | Leaf
-
+:: Tree a = Node (Tree a) a (Tree a) | Leaf
 
 
 Start world  = doHtml MyPage2 world
 
 MyPage2  hst
-# (j,hst) 		= mkEditForm "i1" Edit 0 hst
-# (i,hst) = mkStoreForm "store" (\s -> s + j.value) 0 hst
-# (i1,hst) = mkStoreForm "store" (\s -> i.value + 1) 0 hst
-# (i2,hst) = mkStoreForm "store" (\s -> i1.value + 1) 0 hst
-# (i3,hst) = mkStoreForm "store" (\s -> i2.value + 1) 0 hst
-# (i4,hst) = mkStoreForm "store" (\s -> i3.value + 1) 0 hst
+# (next,hst)	= mkEditForm "next" Edit 0 hst
+# (add,hst) 	= ListFuncBut False "add" Edit [(LButton 80 "add", \xs -> next.value + xs)] hst
+# (basket,hst) 	= mkStoreForm "basket" add.value 0 hst
+# (basket1,hst) = mkStoreForm "basket" add.value 0 hst
+# (basket2,hst) = mkStoreForm "basket" add.value 0 hst
+# (basket3,hst) = mkStoreForm "basket" add.value 0 hst
 = mkHtml "Main Test Program"
 	[ H1 [] "My Test"
-
-	, traceHtmlInput
+	, toBody basket, toHtml basket.changed
+	, Br
+	, toBody basket1
+	, Br
+	, toBody basket2
+	, Br
+	, toBody basket3
+	, Br
+	, toBody next, toHtml next.changed, toHtml add.changed
+	, Br
+	, toBody add
+//	, traceHtmlInput
 	, Br
 
-	, toBody j,toBody i
-	, Br
-	, toHtml (i.value,i.changed)
-	, toHtml (j.value,j.changed)
-
-	, toBody i1
-	, toHtml (i1.value,i1.changed)
-	, Br
-	, toBody i2
-	, toHtml (i2.value,i2.changed)
-	, Br
-	, toBody i3
-	, toHtml (i3.value,i3.changed)
-	, Br
-	, toBody i4
-	, toHtml (i4.value,i4.changed)
 	] hst
 where
 	mkHtml s tags hst 	= (Html (header s) (body tags),hst)

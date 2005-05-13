@@ -37,7 +37,7 @@ toBody :: (Form a) -> BodyTag
 				, body		:: [BodyTag]
 				}
 
-mkViewForm 		:: !FormId 	!Mode !(HBimap d v) 	d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v 
+mkViewForm 		:: !FormId 	!Mode !(HBimap d v) 	d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
 
 // For convenience all kinds of variants of "mkViewForm" are predefined, simply by chosing certain defaults for the HBimap.
 

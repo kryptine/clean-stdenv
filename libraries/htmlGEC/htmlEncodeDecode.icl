@@ -8,8 +8,8 @@ import GenPrint, GenParse
 
 // state preparation
 
-:: FormStates 	:== Tree (String,FormState)		// State of forms is internally stored in a tree
-:: Tree a 		= Node (Tree a) a (Tree a) | Leaf
+:: FormStates 	:== Tree_ (String,FormState)		// State of forms is internally stored in a tree
+:: Tree_ a 		= Node_ (Tree_ a) a (Tree_ a) | Leaf_
 :: FormState 	= OldState String					// old states are turned into garbage in the end 
 				| NewState String
 :: HtmlState :== [(String,String)]				// The state is stored in html as list and not as a tree
@@ -22,16 +22,16 @@ where
 initFormStates :: FormStates
 initFormStates = Balance (sort [(formid,OldState state) \\ (formid,state) <- CheckHtmlState | formid <> ""])
 where
-	Balance [] = Leaf
-	Balance [x] = Node Leaf x Leaf
+	Balance [] = Leaf_
+	Balance [x] = Node_ Leaf_ x Leaf_
 	Balance xs
 		= case splitAt (length xs/2) xs of
-			(a,[b:bs]) = Node (Balance a) b (Balance bs)
-			(as,[]) = Node   (Balance (init as)) (last as) Leaf
+			(a,[b:bs]) = Node_ (Balance a) b (Balance bs)
+			(as,[]) = Node_   (Balance (init as)) (last as) Leaf_
 
-CheckHtmlState :: HtmlState
+//	CheckHtmlState :: HtmlState
 CheckHtmlState 
-# (_,_,_,state) = UpdateInfo
+# (_,_,_,state) = DecodedStateFormBrowser
 =: splitString (mkList state)
 where
 	splitString [] 			= []
@@ -46,39 +46,47 @@ where
 			stl [] = []
 			stl [x:xs] = xs 
 
-toHtmlState :: FormStates -> HtmlState
-toHtmlState Leaf = []
-toHtmlState (Node left (formid,OldState s) right) = toHtmlState left ++ toHtmlState right // old states are garbage
-toHtmlState (Node left (formid,NewState s) right) = toHtmlState left ++ [(formid,s)] ++ toHtmlState right // only remember new states for next round
-
-findNState :: !String FormStates -> (Bool,Maybe a, FormStates)	| gParse{|*|} a 
-findNState sid states 
-# (isOld,mval) = (findNState` sid states)
+findState :: !String FormStates -> (Bool,Maybe a, FormStates)	| gParse{|*|} a 
+findState sid states 
+# (isOld,mval) = (findState` sid states)
 = (isOld,mval,states) 
 where
-	findNState` sid Leaf = (False,Nothing)
-	findNState` sid (Node left (id,info) right)
+	findState` sid Leaf_ = (False,Nothing)
+	findState` sid (Node_ left (id,info) right)
 	| sid == id = case info of
-					(OldState state) = (True,parseString state)
+					(OldState state) = (True, parseString state)
 					(NewState state) = (False,parseString state)
-	| sid < id 	= findNState` sid left
-	| otherwise = findNState` sid right
+	| sid < id 	= findState` sid left
+	| otherwise = findState` sid right
 
-replaceNState :: !String a FormStates -> FormStates	| gPrint{|*|} a 
-replaceNState sid val Leaf = Node Leaf (sid,NewState (encodeInfo val)) Leaf
-replaceNState sid val (Node left a=:(id,_) right)
-| sid == id = Node left (id,NewState (encodeInfo val)) right
-| sid < id 	= Node (replaceNState sid val left) a right
-| otherwise = Node left a (replaceNState sid val right)
+replaceState :: !String a FormStates -> FormStates	| gPrint{|*|} a 
+replaceState sid val Leaf_ = Node_ Leaf_ (sid,NewState (printToString val)) Leaf_
+replaceState sid val (Node_ left a=:(id,_) right)
+| sid == id = Node_ left (id,NewState (printToString val)) right
+| sid < id 	= Node_ (replaceState sid val left) a right
+| otherwise = Node_ left a (replaceState sid val right)
 
-addScriptN :: FormStates -> BodyTag
-addScriptN allFormStates
+addScript :: FormStates -> BodyTag
+addScript allFormStates
 =	BodyTag
 	[ submitscript    globalFormName updateInpName
 	, globalstateform globalFormName updateInpName globalInpName (SV encodedglobalstate) 
 	]
 where
 	encodedglobalstate = urlEncodeState (toHtmlState allFormStates)
+
+	toHtmlState :: FormStates -> HtmlState
+	toHtmlState Leaf_ = []
+	toHtmlState (Node_ left (formid,OldState s) right) = toHtmlState left ++ toHtmlState right // old states are garbage
+	toHtmlState (Node_ left (formid,NewState s) right) = toHtmlState left ++ [(formid,s)] ++ toHtmlState right // only remember new states for next round
+
+	urlEncodeState :: [(String,String)] -> String
+	urlEncodeState [] = urlEncodeS "$"
+	urlEncodeState [(x,y):xsys] = urlEncodeS "(\"" +++ urlEncodeS x +++ 
+								  urlEncodeS "\"," +++ urlEncodeS y +++ 
+								  urlEncodeS ")$" +++ urlEncodeState xsys 
+	urlEncodeS :: String -> String
+	urlEncodeS s = (mkString o urlEncode o mkList) s
 
 // determining the update information
 
@@ -89,7 +97,7 @@ where
 
 CheckUpdateId :: String
 CheckUpdateId 		
-# (_,upd,_,_) = UpdateInfo
+# (_,upd,_,_) = DecodedStateFormBrowser
 =: case parseString upd of
 	Just ("",0,UpdI 0) = ""
 	Just (id,_,_)   = id 
@@ -102,23 +110,15 @@ StrippedCheckUpdateId
 
 AnyInput :: String
 AnyInput
-# (_,_,new,_) = UpdateInfo
+# (_,_,new,_) = DecodedStateFormBrowser
 =: new
 
 CheckUpdate :: (!Maybe a, !Maybe b) | gParse{|*|} a & gParse{|*|} b 
 CheckUpdate 
-# (_,upd,new,_) = UpdateInfo
+# (_,upd,new,_) = DecodedStateFormBrowser
 = (parseString upd, parseString new)
 
 derive gParse (,), (,,)
-
-
-
-
-
-
-
-
 
 // encoding and decoding of Clean values 
 
@@ -138,14 +138,14 @@ GetArgs =: foldl (+++) "" [strings \\ strings <-: getCommandLine]
 
 ThisExe :: String
 ThisExe 
-# (thisexe,_,_,_) = UpdateInfo
+# (thisexe,_,_,_) = DecodedStateFormBrowser
 =: thisexe
 
 MyPhP :: String
 MyPhP =: (mkString (takeWhile ((<>) '.') (mkList ThisExe))) +++ ".php"
 
-UpdateInfo :: (!String,!String,!String,!String) // executable, id + update , new , state
-UpdateInfo
+DecodedStateFormBrowser :: (!String,!String,!String,!String) // executable, id + update , new , state
+DecodedStateFormBrowser
 # input 			= mkList GetArgs
 # (thisexe,input) 	= mscan '#' input 		// get rid of garbage
 # input				= skipping ['#UD=']  input
@@ -174,11 +174,11 @@ traceHtmlInput
 			, 	Txt "update				: " , B [] update, Br 
 			, 	Txt "new value		  	: " , B [] new, Br 
 			, 	Txt "state			  	: " , BodyTag (showstate (mkList state)), Br 
-			,	Txt "decoded input  	: " , B [] (convert GetArgs), Br
-			,	Txt "encoded input      : " , B [] GetArgs, Br 
+//			,	Txt "decoded input  	: " , B [] (convert GetArgs), Br
+//			,	Txt "encoded input      : " , B [] GetArgs, Br 
 			]
 where
-	(executable,update,new,state) = UpdateInfo
+	(executable,update,new,state) = DecodedStateFormBrowser
 	convert s = mkString (urlDecode (mkList s))
 
 	showstate :: [Char] -> [BodyTag]
@@ -231,16 +231,10 @@ where
                 | i <= toInt '9' = i - toInt '0'
                 = i - (toInt 'A' - 10)
 
-urlEncodeS :: String -> String
-urlEncodeS s = (mkString o urlEncode o mkList) s
 
 urlDecodeS :: String -> String
 urlDecodeS s = (mkString o urlDecode o mkList) s
 
-urlEncodeState :: [(String,String)] -> String
-urlEncodeState [] = urlEncodeS "$"
-urlEncodeState [(x,y):xsys] = urlEncodeS "(\"" +++ x +++ urlEncodeS "\"," +++
-							  y +++ urlEncodeS ")$" +++ urlEncodeState xsys 
 
 // script for transmitting name and value of changed input 
 
