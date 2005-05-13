@@ -57,22 +57,6 @@ where
 derive gForm FormState, Tree_
 */
 
-// experimental function:
-/*
-mkEditForm2:: !FormId !Mode d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkEditForm2 formid  mode data (inidx,formStates)
-=	case findInLocalStore formid formStates 0 formStates of
-		(Just id, Just state,formStates)	-> mkSetForm formid mode state (inidx,formStates)
-		(_,_,				 formStates)	-> mkSetForm formid mode data (inidx,formStates)
-where
-	findInLocalStore :: String [(FormId,FormValue)] Int [(FormId,FormValue)] -> (Maybe Int, Maybe d,[(FormId,FormValue)]) | gParse{|*|} d
-	findInLocalStore s [] 			 _ formStates	 = (Nothing,Nothing,formStates)
-	findInLocalStore s [(id,st):lst] n formStates
-	| formid == id = (Just n, parseString st, removeAt n formStates) 
-	| otherwise 	 = findInLocalStore s lst (n+1) formStates
-*/
-// simple editor for either editing or showing a simple value
-
 mkEditForm:: !FormId !Mode d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkEditForm formid  Edit data hst
 = mkViewForm formid Edit 

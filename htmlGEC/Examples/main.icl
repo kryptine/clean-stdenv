@@ -12,7 +12,25 @@ derive gHpr 	Tree
 :: Tree a = Node (Tree a) a (Tree a) | Leaf
 
 
-Start world  = doHtml MyPage2 world
+Start world  = doHtml MyPage3 world
+
+MyPage3  hst
+# (next,hst)	= mkEditForm "next" Edit 0 hst
+# (next1,hst)	= mkEditForm "next" Edit 5 hst
+= mkHtml "Main Test Program"
+	[ H1 [] "My Test"
+	, toBody next, toHtml next.changed
+	, Br
+	, toBody next1, toHtml next1.changed
+//	, traceHtmlInput
+	, Br
+
+	] hst
+where
+	mkHtml s tags hst 	= (Html (header s) (body tags),hst)
+	header s 			= Head [`Hd_Std [Std_Title s]] [] 
+	body tags 			= Body [] tags
+
 
 MyPage2  hst
 # (next,hst)	= mkEditForm "next" Edit 0 hst

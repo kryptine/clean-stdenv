@@ -43,20 +43,18 @@ mkViewForm 		:: !FormId 	!Mode !(HBimap d v) 	d !*HSt -> (Form d,!*HSt) | gForm{
 
 // mkBimap			: editor, using Bimaps instead of HBimaps
 // mkEdit  		 	: editor, remembers its state, argument is taken as initial state 
-// mkEdit2    		: used for feedback loop in html arrows
 // mkSet			: editor, always displays argument regardless of current state of the editor
+// mkStore			: applies function to the internal state; second argument is initial state
 // mkSelf			: editor, state is updated with function; second argument is taken as initial state   
 // mkApply 			: displays application of function to the argument
-// mkStore			: applies function to the internal state; second argument is initial state
 // mkApplyEdit		: editor, displays its first argument if it is not updated; second argument is initial state
 
 mkBimapEditor 	:: !FormId 	!Mode !(Bimap d v)  d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
 mkEditForm 		:: !FormId 	!Mode				d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-//mkEditForm2		:: !FormId  !Mode 				d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkSetForm 		:: !FormId 	!Mode				d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkStoreForm 	:: !FormId 	!(d -> d)			d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkSelfForm 		:: !FormId 	!(d -> d)			d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkApplyForm 	:: !FormId 	!(d -> d)			d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkStoreForm 	:: !FormId 	!(d -> d)			d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkApplyEditForm	:: !FormId 	!d					d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 
 // Clean types that have a special representation

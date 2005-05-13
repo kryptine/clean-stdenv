@@ -49,7 +49,7 @@ where
 	# (na,hst) = mkApplyEditForm title initval initval hst
 	= ((na.value,[(title,BodyTag na.body):prevbody]),False,hst)
 	mkApplyEdit` ((initval,prevbody),True,hst) // second time I come here: don't use the old state, but the new one ! 
-	# (na,hst) = mkEditForm/*2*/ title Edit initval hst //to be implemented
+	# (na,hst) = mkSetForm title Edit initval hst 
 	= ((na.value,[(title,BodyTag na.body):prevbody]),True,hst)
 
 display :: FormId -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
