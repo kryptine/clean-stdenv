@@ -12,7 +12,7 @@ derive gHpr 	Tree
 :: Tree a = Node (Tree a) a (Tree a) | Leaf
 
 
-Start world  = doHtml MyPage3 world
+Start world  = doHtml MyPage2 world
 
 MyPage3  hst
 # (next,hst)	= mkEditForm "next" Edit 0 hst
@@ -31,27 +31,23 @@ where
 	header s 			= Head [`Hd_Std [Std_Title s]] [] 
 	body tags 			= Body [] tags
 
+stroref f hst = mkStoreForm "basket" f 0 hst
 
 MyPage2  hst
 # (next,hst)	= mkEditForm "next" Edit 0 hst
 # (add,hst) 	= ListFuncBut False "add" Edit [(LButton 80 "add", \xs -> next.value + xs)] hst
-# (basket,hst) 	= mkStoreForm "basket" add.value 0 hst
-# (basket1,hst) = mkStoreForm "basket" add.value 0 hst
-# (basket2,hst) = mkStoreForm "basket" add.value 0 hst
-# (basket3,hst) = mkStoreForm "basket" add.value 0 hst
+# (basket,hst) 	= stroref add.value hst
+# (dec,hst) 	= ListFuncBut False "less" Edit [(LButton 80 "decr", \xs -> xs - next.value)] hst
+# (basket1,hst) = stroref dec.value hst
 = mkHtml "Main Test Program"
 	[ H1 [] "My Test"
 	, toBody basket, toHtml basket.changed
 	, Br
 	, toBody basket1
 	, Br
-	, toBody basket2
-	, Br
-	, toBody basket3
-	, Br
 	, toBody next, toHtml next.changed, toHtml add.changed
 	, Br
-	, toBody add
+	, toBody add, toBody dec
 //	, traceHtmlInput
 	, Br
 

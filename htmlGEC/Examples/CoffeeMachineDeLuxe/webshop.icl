@@ -1,6 +1,6 @@
 module webshop
 
-import StdEnv, StdHtml
+import StdEnv, StdHtml, GenEq
 
 import CDdatabaseHandler
 
@@ -20,9 +20,10 @@ derive gParse CurrentPage, Item, CD, Track, Duration, PersonalData
 
 :: CurrentPage 	= HomePage | ShopPage | BasketPage | OrderPage | ThanksPage
 
+derive gEq CurrentPage
+
 :: Basket		:== [Int]			// item nrs selected
 :: CD_Selection	:== CD_Database		// selection of database items
-
 
 // storages which are shared between the pages
 // and in this way keep information persistent when the user is switching between pages
@@ -57,7 +58,7 @@ sharedForms hst
  	},hst) 
 
 currentpageForm :: (CurrentPage -> CurrentPage) *HSt -> (Form CurrentPage,!*HSt)
-currentpageForm f hst = mkStoreForm "curpageswirch" f HomePage hst
+currentpageForm f hst = mkStoreForm "curpageswitch" f HomePage hst
 
 indexForm :: (Int -> Int) *HSt -> (Form Int,!*HSt)
 indexForm f hst = mkStoreForm "index" f 0 hst
@@ -111,7 +112,10 @@ initPersInfo =
 
 showBasket :: Bool [Int] [CD_Database] [BodyTag] [BodyTag] -> BodyTag
 showBasket onlytop basket database infobuts deletebuts
-| isEmpty basket = 	bTxt "Your Basket is empty"
+| isEmpty basket = 	BodyTag
+					[ bTxt "Your Basket is empty."
+					, Br
+					]
 | onlytop = 		BodyTag
 				  	[ bTxt "Last Item put into basket:"
 					, mkTable (1,length basket) [database!!(hd basket)] infobuts deletebuts
@@ -128,10 +132,10 @@ showBasket onlytop basket database infobuts deletebuts
 // main entry of the shop
 
 webshopentry database hst
-# (sharedForms,hst) = sharedForms hst					// include all shared forms
 # (selPage,hst) 	= pageSelectionForm hst				// is a new page selected
 # (curPage,hst) 	= currentpageForm selPage.value hst // determine current page
-# (page,hst) 		= case curPage.value of				// include this page
+# (sharedForms,hst) = sharedForms hst					// include all shared forms
+# (page,hst) 		= case curPage.value of				// include the selected page
 						HomePage 	-> doHomePage   database sharedForms hst
 						ShopPage 	-> doShopPage   database sharedForms hst
 						BasketPage 	-> doBasketPage database sharedForms hst
@@ -143,7 +147,7 @@ webshopentry database hst
 		, Br
 		, BodyTag page		// code of selected page
 		, Br
-		, traceHtmlInput
+//		, traceHtmlInput
 		], hst)
 where
 	pageSelectionForm hst = ListFuncBut False "pagebut" Edit pagebuttons hst
@@ -189,7 +193,7 @@ doShopPage database sf hst
 	, Br, Br 
 	, mkTable (nindex.value+1,length selection) (selection%(nindex.value,nindex.value+sf.step.value)) info.body add.body 
 	, Br, Br
-	, showBasket True basket.value database info.body [EmptyBody]
+	, showBasket True basket.value database binfo.body [EmptyBody]
 	, doScript database (info.value -1)
 	, doScript database (binfo.value -1)
 	], hst)
@@ -232,13 +236,12 @@ doBasketPage database sf hst
 # (delete,hst)	= ListFuncBut False "delitems" Edit (removeFromBasketButtons sf.basket.value) hst
 # (nbasket,hst)	= basketForm delete.value hst	
 # (info,hst)	= InformationForm "basketinfo2" nbasket.value hst
-
-
 # (order,hst) 	= ListFuncBut False "buybut" Edit [(but "toOrder",\_ -> OrderPage)] hst	
-# (_,hst) 		= currentpageForm order.value hst   // this is too much ????
+# (curpage,hst) = currentpageForm order.value hst
+| curpage.value ===  OrderPage = doOrderPage database sf hst
 = ( [ showBasket False nbasket.value database info.body delete.body
 	, doScript database (info.value -1)
-	, toBody order
+	, if (isEmpty nbasket.value) EmptyBody (BodyTag [bTxt "Go to order page:\t\t", toBody order])
 	], hst)
 where
 	removeFromBasketButtons :: Basket -> [(Button,Basket -> Basket)]
@@ -254,19 +257,21 @@ where
 
 doOrderPage database sf hst
 # persData = sf.personalData
-# (confirm,hst) 	= ListFuncBut False "confirm" Edit [(but "confirm",\_ -> ThanksPage)] hst	
-# (_,hst)			= currentpageForm confirm.value hst
+# (confirm,hst)	= ListFuncBut False "confirm" Edit [(but "confirm",\_ -> ThanksPage)] hst	
+# (curpage,hst)	= currentpageForm confirm.value hst
+| curpage.value ===  ThanksPage = doThanksPage database sf hst
 = (	[ showBasket False sf.basket.value database (repeat EmptyBody) (repeat EmptyBody)
 	, Br
 	, bTxt "All fields must be filled with your data:"
 	, toBody persData
 	, Br
-	, bTxt "Confirm your order:\t\t", toBody confirm
+	, if (isEmpty sf.basket.value) EmptyBody (BodyTag [bTxt "Confirm your order:\t\t", toBody confirm])
 	], hst)
 	
 // thanks page
 
 doThanksPage database sf hst
+# (_,hst)	= basketForm (\_ -> []) hst				// empty basket
 = ( [ maptext 	[ "Your order has been processed!"
 				, "Thanks for playing with our demo shop."
 				, ""

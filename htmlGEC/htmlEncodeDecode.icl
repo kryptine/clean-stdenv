@@ -48,9 +48,10 @@ where
 
 findState :: !String FormStates -> (Bool,Maybe a, FormStates)	| gParse{|*|} a 
 findState sid states 
-# (isOld,mval) = (findState` sid states)
-= (isOld,mval,states) 
+# (bool,maybea) = findState` sid states
+= (bool,maybea,states)
 where
+	findState` :: !String FormStates -> (Bool,Maybe a)| gParse{|*|} a 
 	findState` sid Leaf_ = (False,Nothing)
 	findState` sid (Node_ left (id,info) right)
 	| sid == id = case info of
@@ -90,10 +91,11 @@ where
 
 // determining the update information
 
-:: UpdValue 	= UpdI Int							// new integer value
-				| UpdR Real							// new real value
-				| UpdC String						// choose indicated constructor 
-				| UpdS String						// new piece of text
+:: UpdValue 	= UpdI Int					// new integer value
+				| UpdR Real					// new real value
+				| UpdB Bool					// new boolean value
+				| UpdC String				// choose indicated constructor 
+				| UpdS String				// new piece of text
 
 CheckUpdateId :: String
 CheckUpdateId 		

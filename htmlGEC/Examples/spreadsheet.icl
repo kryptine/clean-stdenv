@@ -8,8 +8,8 @@ module spreadsheet
 import StdEnv
 import StdHtml
 
-//Start world  = doHtml spreadsheet world
-Start world  = doHtml arrowsspreadsheet world
+Start world  = doHtml spreadsheet world
+//Start world  = doHtml arrowsspreadsheet world
 
 spreadsheet hst
 # (tablef, hst) = table_hv_Form "table" Edit 	(inittable 8 10)     	    hst
