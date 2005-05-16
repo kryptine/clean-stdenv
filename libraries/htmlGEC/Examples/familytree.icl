@@ -20,11 +20,12 @@ derive gParse Family, Status, Partner, Person, Kids, Maybe, Gender, Maybe`
 Start world  = doHtml familytree world
 
 familytree hst
-# ((tree,  treeb),hst)= mkEditForm "famtree" Edit inittree hst	
+# (tree,hst)= mkEditForm "famtree" Edit inittree hst	
 = mkHtml "Family Tree Example"
 		[ H1 [] "family Tree Example: "
-		, treeb
+		, toBody tree
 		, Br
+		, toHtml tree.changed
 		, traceHtmlInput
 		] hst
 where
@@ -59,13 +60,14 @@ where
 gForm{|Family|} formid mode family hst = specialize editor "family" mode family hst
 where
 	editor id mode d hst
-	# ((val,body),hst) = mkBimapEditor id mode {map_to = map_to, map_from = map_from} d hst
-	= ((val,tab (nrkids val) body),hst)
+	# (family,hst) = mkBimapEditor id mode {map_to = map_to, map_from = map_from} d hst
+	= ({ changed = family.changed, value = family.value, body = tab (nrkids family.value) family.body},hst)
+	
 	
 	nrkids (Family  p s (Just_ (p2,Kids kids))) = length kids
 	nrkids else = 0
 
-	tab n body = BodyTag [Pre [] [Txt (mktab n)] <=> body]
+	tab n body = [[Pre [] [Txt (mktab n)]] <=> body]
 	
 	mktab 0 = ""
 	mktab n = "          " +++ mktab (n-1)
@@ -87,10 +89,11 @@ where
 gForm{|Kids|} formid mode kids hst = specialize editor "kids" mode kids hst 
 where
 	editor id mode d hst 
-	# ((list,hlbody),hst) = horlist2Form (mkid "hlist") mode     defaultfam (fromKids kids) hst
+	# (list,hst) = horlist2Form (mkid "hlist") mode     defaultfam (fromKids kids) hst
 //	# ((list,hlbody),hst) = horlistForm (mkid "hlist") mode      (fromKids (Kids [defaultfam])) hst
-	# ((_,  display),hst) = mkEditForm   (mkid "displ") Display (displaykids (length list)) hst
-	= ((toKids list,display <||> hlbody),hst)
+	# (display,hst) = mkEditForm   (mkid "displ") Display (displaykids (length list.body)) hst
+	= ({ changed = list.changed, value = toKids list.value, body = [display.body <||> list.body]},hst)
+
 
 	mkid s = toString (length (fromKids kids)) +++ s
 
