@@ -9,7 +9,7 @@ import GenPrint
 import GenParse
 import StdBool
 
-:: HSt 	// unique state to pass around
+:: *HSt 	// unique state to pass around
 
 // doHtml main wrapper for generating & handling of a Html form
 

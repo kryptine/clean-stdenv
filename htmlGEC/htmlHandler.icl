@@ -11,7 +11,7 @@ derive gParse (,), (,,), (,,,), UpdValue
 derive gHpr   (,), (,,), (,,,)
 derive gUpd		   (,,), (,,,)
  
-:: HSt 			:== (InputId,FormStates)	// all form states are collected here ... 	
+:: *HSt 			:== (InputId,*FormStates)	// all form states are collected here ... 	
 :: FormId	 	:== String					// unique id identifying the form
 :: FormValue 	:== String					// current Clean value to remember encoded in a String
 :: InputId	 	:== Int						// unique id for every constructor and basic value appearing in the state
@@ -46,16 +46,17 @@ ifEdit Display  then else = else
 
 doHtml :: (*HSt -> (Html,!*HSt)) *World -> *World
 doHtml pagehandler world 
-= print_to_stdout (Html header (Body [extra_att:attr] [/*debugstate, */addScript formStates:bodytags])) world
+= print_to_stdout (Html header (Body [extra_att:attr] [/*debugstate,*/ addScript formStates:bodytags])) world
 where
 	(Html header (Body attr bodytags),(_,formStates)) = pagehandler mkHSt
 	extra_att = Batt_background "back35.jpg "
 
-/* for debugging
-	debugstate = toHtml formStates
+// for debugging only
+/*	debugstate = toHtml formStates
 
 derive gForm FormState, Tree_
 */
+
 
 mkEditForm:: !FormId !Mode d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkEditForm formid  Edit data hst
@@ -69,8 +70,6 @@ mkSetForm formid  mode data hst
 = mkViewForm formid mode 
 	{toForm = toFormid , updForm = \_ _ -> data , fromForm = \_ v -> v , resetForm = Nothing} data hst
 
-// editor with feedback to its self
-
 mkSelfForm  :: !FormId 	!(d -> d) d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkSelfForm formid cbf initdata hst
 = mkViewForm formid Edit 
@@ -79,14 +78,10 @@ where
 	update True newval = cbf newval
 	update _ val = val
 	
-// editor which applies the function to its argument
-
 mkApplyForm :: !FormId !(d -> d) d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkApplyForm formid cbf data hst
 = mkViewForm formid Display 
 	{toForm = toFormid , updForm = \_ _ = cbf data , fromForm = \_ v -> v, resetForm = Nothing} data hst
-
-// editor which applies the function to its argument
 
 mkStoreForm :: !FormId 	!(d -> d) d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 mkStoreForm formid cbf data hst
@@ -103,68 +98,53 @@ where
 
 mkBimapEditor :: !FormId !Mode !(Bimap d v) d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
 mkBimapEditor formid mode {map_to,map_from} d hst
-= mkViewForm formid mode 	{ toForm = \d _ -> map_to d
-						, updForm = \b v -> v //map_to (map_from v)
-						, fromForm = \b v -> map_from v
-						, resetForm = Nothing
-						} d hst 
+= mkViewForm formid mode	{ toForm 	= \d v -> case v of 
+													Nothing -> map_to d
+													Just v -> v
+							, updForm 	= \b v -> v
+							, fromForm 	= \b v -> map_from v
+							, resetForm = Nothing
+							} d hst 
 
 toFormid d Nothing = d
 toFormid d (Just v) = v
 
 // swiss army nife editor that makes coffee too ...
 
-//# (nnextview,(nr,[(uniqueid,mystore):formStates])) = gForm{|*|} formid mode nextview (0,[(formid,nextview):formStates])
-
-updateall {toForm, updForm, fromForm, resetForm} isupdated data view
-# view 	= toForm   data view		// map value to view domain, given previous view value
-# view	= updForm  isupdated view		// apply update function telling user if an update has taken place
-# data	= fromForm isupdated view		// convert back to data domain	 
-# view	= case resetForm of					// optionally reset the view
-		Nothing 	-> view		 
-		Just reset 	-> reset view
-= (data,view)
-
 mkViewForm :: !FormId !Mode !(HBimap d v) d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
-mkViewForm formid mode bm=:{toForm, updForm, fromForm, resetForm} initdata (inidx,formStates) 
+mkViewForm formid mode bm=:{toForm, updForm, fromForm, resetForm} initdata (_,formStates) 
 # (isupdated,prevview,formStates) = findFormInfo formid formStates // determine current value in the state store
 = calcnextView isupdated prevview formStates
 where
 	calcnextView isupdated prevview formStates
-	# newview 		= toForm   initdata prevview		// map value to view domain, given previous view value
+	# newview 		= toForm   initdata  prevview		// map value to view domain, given previous view value
 	# updateview	= updForm  isupdated newview		// apply update function telling user if an update has taken place
 	# newval		= fromForm isupdated updateview		// convert back to data domain	 
-	# nextview		= case resetForm of					// optionally reset the view
+	# nextview		= case resetForm of					// optionally reset the view herafter for next time
 						Nothing 	-> updateview		 
 						Just reset 	-> reset updateview
-	# formStates	= replaceState formid nextview formStates	// store new view into the store of states
-	# (viewform,(nr,formStates))								// and make a form for it
+//	# formStates	= replaceState formid nextview formStates	// store new view into the store of states
+	# (viewform,(_,formStates))							// make a form for it
 					= gForm{|*|} formid mode nextview (0,formStates)
-
-
-//	| viewform.changed && not isupdated  = calcnextView True (Just viewform.value) formStates
+	| viewform.changed && not isupdated 				// only true when a user defined specialisation is updated, recalculate the form
+		= calcnextView True (Just viewform.value) formStates
 
 	# formStates	= replaceState formid (viewform.value) formStates	// store new value into the store of states
 
-	= (	{changed	= viewform.changed || isupdated
-		, value		= newval //fromForm isupdated viewform.value
+	= (	{changed	= isupdated
+		, value		= newval
 		, body		= viewform.body
 		},(0,formStates))
 
-	fromForm2 isupdated nnextview nextview 
-		= case resetForm of
-			Nothing 	-> nnextview 
-			(Just reset)-> nextview
-
-	findFormInfo :: FormId FormStates -> (Bool,Maybe a,FormStates) | gUpd{|*|} a & gParse{|*|} a
+	findFormInfo :: FormId *FormStates -> (Bool,Maybe a,*FormStates) | gUpd{|*|} a & gParse{|*|} a
 	findFormInfo formid formStates
 		= case (decodeInput1 formid formStates) of
 
 			// an update for this form is detected
 
-			(Just (pos,updval), (True,Just currentState,formStates)) //state as received from browser 
+			(Just (pos,updval), (True,Just currentState,formStates)) 	//state as received from browser 
 					-> (True, Just (snd (gUpd{|*|} (UpdSearch updval pos) currentState)),formStates)
-			(Just (pos,updval), (False,Just currentState,formStates)) // state has been updated already
+			(Just (pos,updval), (False,Just currentState,formStates)) 	// state has been updated already
 					-> (True, Just currentState,formStates)
 
 			// no update found, determine the current stored state
@@ -176,7 +156,7 @@ where
 
 			(_,(_,_,formStates))	-> (False, Nothing,formStates)	
 	where
-		decodeInput1 :: FormId FormStates -> (Maybe FormUpdate, (Bool,Maybe a, FormStates)) | gParse{|*|} a
+		decodeInput1 :: FormId *FormStates -> (Maybe FormUpdate, (Bool,Maybe a, *FormStates)) | gParse{|*|} a
 		decodeInput1 formid formStates
 		| CheckUpdateId == formid	// this state is updated
 		= case CheckUpdate of
@@ -192,13 +172,14 @@ where
 								(upd,new) 							= (Nothing, findState formid formStates)
 		| otherwise = (Nothing, findState formid formStates)
 
-
-// specialization
+// specialize has to be used if a programmer want to specialize gForm
+// it remembers the current value of the index in the expression and creates an editor to show this value
+// the value might have been changed with this editor, so the value returned might differ form the value you started with !
 
 specialize :: (FormId Mode a *HSt -> (Form a,*HSt)) FormId Mode a *HSt -> (Form a,*HSt) | gUpd {|*|} a
 specialize editor name mode v hst=:(inidx,formStates)
 # nextidx = incrIndex inidx v			// this value will be repesented differently, so increment counter 
-# (nv,(_,formStates)) = editor codedname mode v (0,formStates)
+# (nv,(_,formStates)) 	= editor codedname mode v (0,formStates)
 = (nv,(nextidx,formStates))
 where
 	codedname = name +++ "_" +++ toString inidx
@@ -208,9 +189,7 @@ where
 	# (UpdSearch _ cnt,v) = gUpd {|*|} (UpdSearch (UpdI 0) -1) v
 	= i + (-1 - cnt)
 
-
-// automatic tranformation of any Clean type to html body
-// the formStates on the head of the hst is the formStates for the form we create here
+// gForm: automatic derives an Html Form for any Clean type
 
 generic gForm a :: !FormId !Mode a !*HSt -> *(Form a, !*HSt)	
 
@@ -287,8 +266,6 @@ gForm{|CONS of t|} gHc formid mode (CONS c) hst=:(inidx,formStates)
 	,value=CONS nc.value
 	,body=[STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[selector,BodyTag nc.body]]]
 	},hst)
-
-
 where
 	mkConsSelector formid thiscons (inidx,formStates) 
 						= (mkConsSel inidx allnames myindex formid, (inidx+1,formStates))
@@ -361,11 +338,9 @@ where
 	| i > j = takemax i js
 	| otherwise = takemax j js
 
-// generic function to update any type, great miracle function
-// will look for an input object with a certain id, updates it
-// if required it invents new default value (e.g. when switching from Nil to Cons ...
+// gUpd calculates a new value given the current value and a change in the value
+// if necessary it invents new default value (e.g. when switching from Nil to Cons ...
 // and leaves the rest untouched
-// gUpd can update any type with indicated value 
 
 :: UpdMode	= UpdSearch UpdValue Int		// search for indicated postion and update it
 			| UpdCreate [ConsPos]			// create new values if necessary
@@ -447,7 +422,6 @@ gUpd{|FIELD|} gUpdx mode (FIELD x)  // to be done !!!
 # (mode,x) = gUpdx mode x
 = (mode,FIELD x)
 
-
 derive gUpd (,)
 
 
@@ -518,19 +492,19 @@ gForm{|DisplayMode|} gHa formid mode (HideMode a) (inidx,formStates)
 = (	{changed= na.changed 
 	,value	= HideMode na.value
 	,body	= [EmptyBody]
-	},(inidx+1,formStates))
+	},hst)
 gForm{|DisplayMode|} gHa formid mode (DisplayMode a) (inidx,formStates)  
 # (na,hst) = gHa formid Display a (inidx+1,formStates)
 = (	{changed= False
 	,value	= DisplayMode na.value
 	,body	= na.body
-	},(inidx+1,formStates))
+	},hst)
 gForm{|DisplayMode|} gHa formid mode (EditMode a) (inidx,formStates)  
 # (na,hst) = gHa formid Edit a (inidx+1,formStates)
 = (	{changed= na.changed
 	,value	= EditMode na.value
 	,body	= na.body
-	},(inidx+1,formStates))
+	},hst)
 gForm{|DisplayMode|} gHa formid mode EmptyMode (inidx,formStates)
 = (	{changed= False
 	,value	= EmptyMode
@@ -666,15 +640,15 @@ derive gPrint PullDownMenu
 				| TR Int Real						// Input box of size Size for Reals
 				| TS Int String						// Input box of size Size for Strings
 
-gForm{|TextInput|} formid mode (TI size i) hst=:(inidx,formStates) 	
-# (body,hst) = mkInput size formid mode (IV i) (UpdI i) hst
-= ({changed=False, value=TI size i, body=[body]},(inidx+3,formStates))
-gForm{|TextInput|} formid mode (TR size r) hst=:(inidx,formStates)  	
-# (body,hst) = mkInput size formid mode (RV r) (UpdR r) hst
-= ({changed=False, value=TR size r, body=[body]},(inidx+3,formStates))
-gForm{|TextInput|} formid mode (TS size s) hst=:(inidx,formStates) 	
-# (body,hst) = mkInput size formid mode (SV s) (UpdS s) hst 
-= ({changed=False, value=TS size s, body=[body]},(inidx+3,formStates))
+gForm{|TextInput|} formid mode (TI size i) hst 	
+# (body,(inidx,formStates)) = mkInput size formid mode (IV i) (UpdI i) hst
+= ({changed=False, value=TI size i, body=[body]},(inidx+2,formStates))
+gForm{|TextInput|} formid mode (TR size r) hst	
+# (body,(inidx,formStates)) = mkInput size formid mode (RV r) (UpdR r) hst
+= ({changed=False, value=TR size r, body=[body]},(inidx+2,formStates))
+gForm{|TextInput|} formid mode (TS size s) hst
+# (body,(inidx,formStates)) = mkInput size formid mode (SV s) (UpdS s) hst 
+= ({changed=False, value=TS size s, body=[body]},(inidx+2,formStates))
 
 gUpd{|TextInput|} (UpdSearch (UpdI ni) 0) 	(TI size i)  = (UpdDone,TI size ni)		// update integer value
 gUpd{|TextInput|} (UpdSearch (UpdR nr) 0) 	(TR size r)  = (UpdDone,TR size nr)		// update integer value
