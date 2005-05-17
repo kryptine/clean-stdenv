@@ -19,7 +19,7 @@ instance < FormState
 where
 	(<) _ _ = True
 
-initFormStates :: FormStates
+initFormStates :: *FormStates
 initFormStates = Balance (sort [(formid,OldState state) \\ (formid,state) <- CheckHtmlState | formid <> ""])
 where
 	Balance [] = Leaf_
@@ -46,21 +46,23 @@ where
 			stl [] = []
 			stl [x:xs] = xs 
 
-findState :: !String FormStates -> (Bool,Maybe a, FormStates)	| gParse{|*|} a 
-findState sid states 
-# (bool,maybea) = findState` sid states
-= (bool,maybea,states)
+findState :: !String *FormStates -> (Bool,Maybe a,*FormStates)	| gParse{|*|} a 
+findState sid states = findState` sid states
 where
-	findState` :: !String FormStates -> (Bool,Maybe a)| gParse{|*|} a 
-	findState` sid Leaf_ = (False,Nothing)
-	findState` sid (Node_ left (id,info) right)
+	findState` :: !String *FormStates -> (Bool,Maybe a,*FormStates)| gParse{|*|} a 
+	findState` sid Leaf_ = (False,Nothing,Leaf_)
+	findState` sid formstate=:(Node_ left (id,info) right)
 	| sid == id = case info of
-					(OldState state) = (True, parseString state)
-					(NewState state) = (False,parseString state)
-	| sid < id 	= findState` sid left
-	| otherwise = findState` sid right
+					(OldState state) = (True, parseString state,formstate)
+					(NewState state) = (False,parseString state,formstate)
+	| sid < id 	= (bool,parsed, Node_ leftformstates (id,info) right)
+					with
+						(bool,parsed,leftformstates) = findState` sid left
+	| otherwise	= (bool,parsed, Node_  left (id,info) rightformstates)
+					with
+						(bool,parsed,rightformstates) = findState` sid right
 
-replaceState :: !String a FormStates -> FormStates	| gPrint{|*|} a 
+replaceState :: !String a *FormStates -> *FormStates	| gPrint{|*|} a 
 replaceState sid val Leaf_ = Node_ Leaf_ (sid,NewState (printToString val)) Leaf_
 replaceState sid val (Node_ left a=:(id,_) right)
 | sid == id = Node_ left (id,NewState (printToString val)) right

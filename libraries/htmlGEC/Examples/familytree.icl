@@ -20,16 +20,21 @@ derive gParse Family, Status, Partner, Person, Kids, Maybe, Gender, Maybe`
 Start world  = doHtml familytree world
 
 familytree hst
+# (p,hst) = personeditor "xx" Edit inittree2 hst
+//# (p,hst) = mkEditForm "xx" Edit inittree3 hst
 # (tree,hst)= mkEditForm "famtree" Edit inittree hst	
 = mkHtml "Family Tree Example"
 		[ H1 [] "family Tree Example: "
 		, toBody tree
 		, Br
 		, toHtml tree.changed
+		, Br, toBody p
 		, traceHtmlInput
 		] hst
 where
 	inittree = Family (Man "Rinus") Married (Just_ (Woman "Marie-Jose", NoKids))
+	inittree2 = Man "Rinus"
+	inittree3 = "Rinus" <|> Male
 
 	mkHtml s tags hst 	= (Html (header s) (body tags),hst)
 	header s 			= Head [`Hd_Std [Std_Title s]] [] 
@@ -40,24 +45,22 @@ where
 //derive gForm Person
 //derive gForm Kids
 
-
-
 // specialization of the family tree to give it a user defined look and feel
-
 
 :: Gender = Male | Female
 
-gForm{|Person|} formid mode person hst = specialize editor "person" mode person hst
-where
-	editor id mode d hst = mkBimapEditor id mode {map_to = map_to, map_from = map_from} d hst
- 
- 	map_to (Man m) 		= (m <|> Male)
-	map_to (Woman w) 	= (w <|> Female)
+gForm{|Person|} formid mode person hst = specialize personeditor formid mode person hst
 
+
+personeditor id mode d hst = mkBimapEditor id mode {map_to = map_to, map_from = map_from} d hst
+where
+	map_to (Man m) 		= (m <|> Male)
+	map_to (Woman w) 	= (w <|> Female)
+	
 	map_from (m <|> Male)	= (Man m)
 	map_from (w <|> Female)	= (Woman w)
 
-gForm{|Family|} formid mode family hst = specialize editor "family" mode family hst
+gForm{|Family|} formid mode family hst = specialize editor formid mode family hst
 where
 	editor id mode d hst
 	# (family,hst) = mkBimapEditor id mode {map_to = map_to, map_from = map_from} d hst
@@ -86,7 +89,7 @@ where
 	woman 	= Woman ""   
 	notmaried = Nothing_
 
-gForm{|Kids|} formid mode kids hst = specialize editor "kids" mode kids hst 
+gForm{|Kids|} formid mode kids hst = specialize editor formid mode kids hst 
 where
 	editor id mode d hst 
 	# (list,hst) = horlist2Form (mkid "hlist") mode     defaultfam (fromKids kids) hst
