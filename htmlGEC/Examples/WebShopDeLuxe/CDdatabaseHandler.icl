@@ -1,23 +1,53 @@
 implementation module CDdatabaseHandler
 
-import StdEnv, StdMaybe   
+import StdEnv, StdMaybe
+import databaseHandler
+import StdHtml
 
-readCD_Database	:: *World -> (*World,[CD_Database])
+instance readDB CD where
+	readDB env = readCD_Database env
+instance searchDB CDSearch CD where
+	searchDB option txt items = searchDatabase option txt items
+instance searchOptions CDSearch where
+	searchOptions = {options=[("Album",AnyAlbum),("Artist",AnyArtist),("Song",AnySong)]}
+instance headersDB CD where
+	headersDB
+		= { headers = [(Just 140,"Artist"),(Just 400,"Album"),(Just 50,"Year"),(Just 50,"Duration")]
+		  , fields  = \cd -> [cd.group,cd.album,toString cd.year,toString cd.totaltime]
+		  }
+instance extendedInfoDB CD where
+	extendedInfoDB
+		= { extKey	= \cd -> [["Group:",cd.group],["Album:",cd.album],["Year:",toString cd.year]]
+		  , extVal	= \cd -> [["Track "+++toString nr,title,toString playtime] \\ {nr,title,playtime}<-cd.tracks]
+		  									++
+		  					 [["Total Time","",toString cd.totaltime]]
+		  }
+
+derive gForm  CD, Track, Duration, []
+derive gUpd   CD, Track, Duration, []
+derive gPrint CD, Track, Duration
+derive gParse CD, Track, Duration
+
+::	CD_Database :== ItemData CD
+
+readCD_Database	:: !*env -> (![CD_Database],!*env) | FileSystem env
 readCD_Database world
-# (world,cds) = readCD world
-= (world,	[ 	{ item 	= {itemnr = i, instock = 1, prize = max 500 (2000 - (100 * (2005 - cd.year)))}
-				, cd 	= cd
-				}
-		    \\ cd <- cds & i <- [0..]
-		 	])
+	# (cds,world)	= readCD world
+	= ([ { item 	= {itemnr = i, instock = 1, prize = max 500 (2000 - (100 * (2005 - cd.year)))}
+		 , data 	= cd
+		 }
+	   \\ cd <- cds & i <- [0..]
+	   ]
+	  ,world
+	  )
 where
 	max i j = if (i>j) i j
 
-readCD :: *World -> (*World,[CD])
+readCD :: !*env -> (![CD],!*env) | FileSystem env
 readCD world
-    = case readFile "Nummers.dbs" world of                          // read Nummers.dbs
-        (Nothing,world) 		= abort "Could not read 'Nummers.dbs'.\n"   // failure: report
-        (Just inlines,world)	= (world, convertDB inlines)                        // read all cds
+    = case readFile "Nummers.dbs" world of									// read Nummers.dbs
+        (Nothing,world) 		= abort "Could not read 'Nummers.dbs'.\n"	// failure: report
+        (Just inlines,world)	= (convertDB inlines,world)					// read all cds
 
 /*********************************************************************
     Basic operations on Duration:
@@ -93,9 +123,7 @@ where
     (first_n,rest)  = splitAt n as
 
 
-//  Lezen van bestand naar lijst van newline-terminated strings:
-
-
+//  Read from file to list of newline-terminated strings:
 readFile :: String !*env -> (!Maybe [String],!*env) | FileSystem env
 readFile fileName env
     # (ok,file,env) = sfopen fileName FReadText env
@@ -124,7 +152,7 @@ writeToStdOut lines env
     # (_,env)   = fclose io env
     = env
 
-// small utility stuf
+// small utility stuff
 
 initstr :: !String -> String
 initstr ""  = ""
@@ -135,27 +163,24 @@ concat strs = foldr (+++) "" strs
 
 noControl string 	= {if (isControl s) ' ' s \\ s <-: string }	
 
-showPrize :: Int -> String
-showPrize val = "Euro " +++ sval%(0,s-3) +++ "." +++ sval%(s-2,s-1)
-where
-	sval = toString val
-	s = size sval
-
-searchDatabase :: SearchOption String [CD_Database] -> (Bool,[CD_Database])
-searchDatabase _ "" database = (True,database) 
+searchDatabase :: CDSearch String [CD_Database] -> (Bool,[CD_Database])
+searchDatabase _ "" database
+	= (True,database) 
 searchDatabase AnyAlbum string database 
-= check database [items \\ items <- database | isSubstring string items.cd.album]
+	= check database [items \\ items <- database | isSubstring string items.data.album]
 searchDatabase AnyArtist string database 
-= check database [items \\ items <- database | isSubstring string items.cd.group]
+	= check database [items \\ items <- database | isSubstring string items.data.group]
 searchDatabase AnySong string database 
-= check database [items \\ items <- database | or [isSubstring string title \\ {title} <- items.cd.tracks]]
-searchDatabase _ string database = (False,[])
+	= check database [items \\ items <- database | or [isSubstring string title \\ {title} <- items.data.tracks]]
+searchDatabase _ string database
+	= (False,[])
 
 check database [] 		 = (False,[])
 check database ndatabase = (True,ndatabase)
 
 isSubstring :: String String -> Bool
-isSubstring searchstring item = compare` [toLower c1 \\ c1 <-: searchstring | isAlphanum c1] [toLower c2 \\ c2 <-: item | isAlphanum c2]
+isSubstring searchstring item
+	= compare` [toLower c1 \\ c1 <-: searchstring | isAlphanum c1] [toLower c2 \\ c2 <-: item | isAlphanum c2]
 where
 	compare` [] _ = True
 	compare` ss is
@@ -163,6 +188,4 @@ where
 	compare` search=:[s:ss] [is:iss]
 	| s == is = if (ss == iss%(0,length ss - 1)) True (compare` search iss)
 	| otherwise = compare` search iss 
-	comapre` _ _ = False
-
-
+	compare` _ _ = False
