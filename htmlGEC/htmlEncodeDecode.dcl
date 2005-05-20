@@ -15,19 +15,12 @@ traceHtmlInput	:: BodyTag		// for debugging showing the information received fro
 
 // Decoding of information
 
-//:: FormStates 									// collection of all states of all forms
-
-:: FormStates 	:== Tree_ (String,FormState)		// State of forms is internally stored in a tree
-:: Tree_ a 		= Node_ (Tree_ a) a (Tree_ a) | Leaf_
-:: FormState 	= OldState String					// old states are turned into garbage in the end 
-				| NewState String
-:: HtmlState :== [(String,String)]				// The state is stored in html as list and not as a tree
-//:: FormId 		= String
+:: *FormStates 									// collection of all states of all forms
 
 initFormStates 	:: *FormStates 					// initial state as received from browser
 findState 		:: !String *FormStates -> (Bool, Maybe a,*FormStates)		| gParse{|*|} a // true if form has not yet been updated 	
 replaceState 	:: !String a *FormStates -> *FormStates	| gPrint{|*|} a // replace state given FormId
-addScript 		:: FormStates -> BodyTag		// script which stores the global state for the next round
+addScript 		:: *FormStates -> BodyTag		// script which stores the global state for the next round
 
 
 // low level encoding of information
