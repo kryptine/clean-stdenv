@@ -8,7 +8,7 @@ import GenPrint, GenParse
 
 // state preparation
 
-:: FormStates 	:== Tree_ (String,FormState)		// State of forms is internally stored in a tree
+:: *FormStates 	:== Tree_ (String,FormState)		// State of forms is internally stored in a tree
 :: Tree_ a 		= Node_ (Tree_ a) a (Tree_ a) | Leaf_
 :: FormState 	= OldState String					// old states are turned into garbage in the end 
 				| NewState String
@@ -69,7 +69,7 @@ replaceState sid val (Node_ left a=:(id,_) right)
 | sid < id 	= Node_ (replaceState sid val left) a right
 | otherwise = Node_ left a (replaceState sid val right)
 
-addScript :: FormStates -> BodyTag
+addScript :: *FormStates -> BodyTag
 addScript allFormStates
 =	BodyTag
 	[ submitscript    globalFormName updateInpName
