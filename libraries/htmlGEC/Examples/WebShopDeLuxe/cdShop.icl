@@ -1,7 +1,7 @@
 module cdShop
 
 import CDdatabaseHandler
-import webshop
+import StdWebshop
 
 // demo application showing a web shop programmed in Clean using the iData - HtmlGec library
 // MJP 2005

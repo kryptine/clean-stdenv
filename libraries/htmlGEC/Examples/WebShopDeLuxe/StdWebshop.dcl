@@ -1,4 +1,4 @@
-definition module webshop
+definition module StdWebshop
 
 import databaseHandler
 import StdHtml
