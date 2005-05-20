@@ -28,6 +28,10 @@ mkSTable :: [[BodyTag]] -> BodyTag
 counterForm 		:: !FormId !Mode a 		!*HSt -> (Form a,!*HSt) 			| +, -, one
 																				, gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 
+// browseButtons reset curindex step length numberofbuttuns formid mode 
+// returns buttons to step through numbers from 1 to length
+browseButtons 		:: !Bool !Int !Int !Int !Int !FormId !Mode !*HSt -> (Form Int,!*HSt)
+
 // simple forms for lists and tuples:
 
 horlistForm 		:: !FormId !Mode ![a] 		!*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
@@ -57,6 +61,8 @@ listForm 			:: !FormId !Mode ![a] 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUp
 // ListFuncBut		: assign functions to buttons, returns function corresponding to the button pressed, and the buttons body
 
 ListFuncBut 		:: !Bool !FormId !Mode [(Button, a -> a)] !*HSt 
+													 -> (Form (a -> a),!*HSt)
+ListFuncBut2 		:: !Bool !FormId [(Mode,Button, a -> a)] !*HSt  //fine grain, mode of each buttons can be set 
 													 -> (Form (a -> a),!*HSt)
 // ListFuncCheckBox	: assign functions to checkboxes, returns function corresponding to the checkbox pressed, and the checkbox body
 //					: the current setting of the checkboxes is remembered, first argument indicates that the new settings have to be taken over

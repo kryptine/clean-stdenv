@@ -1,5 +1,7 @@
 definition module htmlDataDef
 
+import htmlStyleDef
+
 :: Url			:== String
 :: UniqueName 	:== String
 
@@ -21,6 +23,7 @@ None			:== [NoAttr]
 			| Hd_Meta 		[MetaOption]			//meta <meta>
 			| Hd_Object 	[Object_Attr] [Param]	//object <object></object> 
 			| Hd_Script 	[Script_Attr] Script	//script <script></script>
+//			| Hd_Style 		[StyleAttr] Style		//<style></style>
 			| Hd_Style 		[StyleAttr] String		//<style></style>
 			| Hd_Title		String					//title <title></title>
 			
