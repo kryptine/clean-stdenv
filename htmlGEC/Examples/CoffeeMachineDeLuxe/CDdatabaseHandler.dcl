@@ -1,22 +1,20 @@
 definition module CDdatabaseHandler
 
-::	CD_Database		
- = 	{	item		:: Item
- 	,	cd			:: CD
- 	}
+import databaseHandler
+import StdHtml
 
-:: Item
- =	{	itemnr		:: !Int
- 	,	instock		:: !Int
- 	,	prize		:: !Int
- 	}
+instance readDB                 CD
+instance searchDB      CDSearch CD
+instance searchOptions CDSearch
+instance headersDB              CD
+instance extendedInfoDB         CD
 
 ::  CD
  =  {   group       :: !Group
     ,   album       :: !Album
     ,   year        :: !Year
 	,   totaltime   :: !Duration
-   ,   tracks      :: ![Track]
+   	,   tracks      :: ![Track]
     }
 ::  Track
  =  {   nr          :: !Int
@@ -31,14 +29,10 @@ definition module CDdatabaseHandler
 ::  Album           :== String
 ::  Year            :== Int
 
-
-readCD 			:: *World -> (*World,[CD])
-readCD_Database	:: *World -> (*World,[CD_Database])
-
-:: SearchOption = AnyAlbum | AnyArtist | AnySong
-
-searchDatabase :: SearchOption String [CD_Database] -> (Bool,[CD_Database])
-
 instance toString Duration
-showPrize :: Int -> String
+::	CDSearch = AnyAlbum | AnyArtist | AnySong
 
+derive gForm  CD, Track, Duration, []
+derive gUpd   CD, Track, Duration, []
+derive gPrint CD, Track, Duration
+derive gParse CD, Track, Duration
