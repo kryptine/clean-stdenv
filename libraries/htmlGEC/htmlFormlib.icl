@@ -67,6 +67,37 @@ where
 	down	= LButton (defpixel / 6) "-"
 
 
+browseButtons :: !Bool !Int !Int !Int !Int !FormId !Mode !*HSt -> (Form Int,!*HSt)
+browseButtons reset curindex step length nbuttuns formid mode hst
+# (nindex, hst)		= mkStoreForm formid (\v -> if reset curindex v)curindex hst
+# (calcnext, hst)	= browserForm nindex.value hst
+# (nindex, hst)		= mkStoreForm formid calcnext.value curindex hst
+# (shownext, hst)	= browserForm nindex.value hst
+= ({changed = calcnext.changed
+   ,value	= nindex.value
+   ,body	= shownext.body},hst)
+where
+	browserForm :: !Int *HSt -> (Form (Int -> Int),!*HSt) 
+	browserForm index hst
+		= ListFuncBut2 False formid (browserButtons index step length) hst
+	where
+		browserButtons :: !Int !Int !Int -> [(Mode,Button,Int -> Int)]
+		browserButtons init step length = 
+			if (init - range >= 0) 	   [(mode,sbut "--", set (init - range))] [] 
+			++
+			take nbuttuns [(setmode i index,sbut (toString (i)),set i) \\ i <- [startval,startval+step .. length-1]] 
+			++ 
+			if (startval + range < length - 1) [(mode,sbut "++", set (startval + range))] []
+		where
+			set j i 	= j
+			range 		= nbuttuns * step
+			start i j	= if (i < range) j (start (i-range) (j+range))
+			startval 	= start init 0
+			sbut s		= LButton (defpixel/3) s
+			setmode i index
+			| index <= i && i < index + step = Display
+			| otherwise = mode
+
 horlist2Form 		:: !FormId !Mode a ![a] 	!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 horlist2Form s mode defaultval list hst 
 # (fun,hst) 	= TableFuncBut  s mode [[(but "-", less),(but "+", more)]] hst
@@ -227,6 +258,23 @@ where
 	   ,value	= fun.value o rowfun.value
 	   ,body	= [BodyTag fun.body:rowfun.body]
 	   },hst)
+
+ListFuncBut2 :: !Bool !FormId [(Mode,Button, a -> a)] !*HSt -> (Form (a -> a),!*HSt)
+ListFuncBut2 b s list hst = ListFuncBut` b 0 s list hst 
+where
+	ListFuncBut` b n s [] hst
+	= ({changed	= False
+	   ,value	= id
+	   ,body	= []
+	   },hst)
+	ListFuncBut` b n s [(mode,but,func):xs] hst 
+	# (rowfun,hst) 	= ListFuncBut` b (n+1) s xs hst
+	# (fun   ,hst)	= FuncBut b n s mode (but,func) hst
+	= ({changed	= rowfun.changed || fun.changed
+	   ,value	= fun.value o rowfun.value
+	   ,body	= [BodyTag fun.body:rowfun.body]
+	   },hst)
+
 
 ListFuncCheckBox :: !Bool !FormId !Mode [(CheckBox, Bool [Bool] a -> a)] !*HSt 
 									-> (Form (a -> a,[Bool]),!*HSt)

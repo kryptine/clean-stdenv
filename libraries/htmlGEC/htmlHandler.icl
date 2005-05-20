@@ -123,7 +123,6 @@ where
 	# nextview		= case resetForm of					// optionally reset the view herafter for next time
 						Nothing 	-> updateview		 
 						Just reset 	-> reset updateview
-//	# formStates	= replaceState formid nextview formStates	// store new view into the store of states
 	# (viewform,(_,formStates))							// make a form for it
 					= gForm{|*|} formid mode nextview (0,formStates)
 	| viewform.changed && not isupdated 				// only true when a user defined specialisation is updated, recalculate the form
