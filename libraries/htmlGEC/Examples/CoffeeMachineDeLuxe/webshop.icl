@@ -1,61 +1,54 @@
-module webshop
+implementation module webshop
 
 import StdEnv, StdHtml, GenEq
-
 import CDdatabaseHandler
-
-// demo application showing a web shop programmed in Clean using the iData - HtmlGec library
-// MJP 2005
-
-Start world 
-#  (world,database) = readCD_Database world		// read the database (lazily)
-= doHtml (webshopentry database) world			// goto the main page
 
 // globally used definitions
 
-derive gForm  CurrentPage, Item, CD, Track, Duration, PersonalData, []
-derive gUpd   CurrentPage, Item, CD, Track, Duration, PersonalData, []
-derive gPrint CurrentPage, Item, CD, Track, Duration, PersonalData
-derive gParse CurrentPage, Item, CD, Track, Duration, PersonalData
+derive gForm  CurrentPage, Item, PersonalData
+derive gUpd   CurrentPage, Item, PersonalData
+derive gPrint CurrentPage, Item, PersonalData
+derive gParse CurrentPage, Item, PersonalData
 
 :: CurrentPage 	= HomePage | ShopPage | BasketPage | OrderPage | ThanksPage
 
 derive gEq CurrentPage
 
 :: Basket		:== [Int]			// item nrs selected
-:: CD_Selection	:== CD_Database		// selection of database items
 
 // storages which are shared between the pages
 // and in this way keep information persistent when the user is switching between pages
 // each store can be examined again in any page to get access to its contents
 
-:: SharedForms
- =	{ currentPage	:: Form CurrentPage		// page to display
-	, index			:: Form Int				// current item number to show
-	, step			:: Form Int				// numbers of items to display on a page
-	, searchString	:: Form String			// current search string 
-	, searchOption	:: Form (SearchOption -> SearchOption,Int) // current option
- 	, basket 		:: Form [Int]			// items stored in basket 
-	, personalData	:: Form PersonalData	// all data of the costumer
- 	} 
+:: SharedForms option
+ =	{ currentPage	:: Form CurrentPage				// page to display
+	, index			:: Form Int						// current item number to show
+	, step			:: Form Int						// numbers of items to display on a page
+	, searchString	:: Form String					// current search string 
+	, searchOption	:: Form (option -> option,Int)	// current option
+ 	, basket 		:: Form [Int]					// items stored in basket 
+	, personalData	:: Form PersonalData			// all data of the costumer
+ 	}
 
-sharedForms :: *HSt -> (SharedForms,!*HSt)
-sharedForms hst
-# (curpage,hst) 		= currentpageForm id hst
-# (index,hst) 			= indexForm id hst
-# (step,hst)			= stepForm hst
-# (searchString,hst)	= searchForm hst
-# (searchOption,hst)	= optionForm hst
-# (personalData,hst)	= personalDataForm hst
-# (basket,hst)	= basketForm id hst	
-= ( { currentPage	= curpage
-	, index			= index
-	, step			= step
-	, searchString	= searchString
-	, searchOption	= searchOption
- 	, basket 		= basket 
-	, personalData	= personalData
- 	},hst) 
+sharedForms :: (SearchOptions option) *HSt -> (SharedForms option,!*HSt)
+sharedForms options hst
+	# (curpage,      hst)	= currentpageForm id hst
+	# (index,        hst)	= indexForm id hst
+	# (step,         hst)	= stepForm hst
+	# (searchString, hst)	= searchForm hst
+	# (searchOption, hst)	= optionForm options hst
+	# (personalData, hst)	= personalDataForm hst
+	# (basket,       hst)	= basketForm id hst	
+	= ( { currentPage		= curpage
+		, index				= index
+		, step				= step
+		, searchString		= searchString
+		, searchOption		= searchOption
+	 	, basket 			= basket 
+		, personalData		= personalData
+	 	}
+	  , hst
+	  )
 
 currentpageForm :: (CurrentPage -> CurrentPage) *HSt -> (Form CurrentPage,!*HSt)
 currentpageForm f hst = mkStoreForm "curpageswitch" f HomePage hst
@@ -69,21 +62,17 @@ stepForm hst = mkSelfForm "stepsize" (\step -> if (step > 0 && step < 10) step 5
 searchForm :: *HSt -> (Form String,!*HSt)
 searchForm hst = mkEditForm "searchstring" Edit "" hst
 
-optionForm :: *HSt -> (Form (SearchOption -> SearchOption,Int),!*HSt)
-optionForm hst = FuncMenu -1 "searchoption" Edit optionbuttons hst
-where
-	optionbuttons :: [(String,SearchOption -> SearchOption)]
-	optionbuttons = [("Album", 	\_ 		-> AnyAlbum)
-					,("Artist", \_ 		-> AnyArtist)
-					,("Song", 	\_ 		-> AnySong)]
+optionForm :: (SearchOptions option) *HSt -> (Form (option -> option,Int),!*HSt)
+optionForm {options} hst = FuncMenu -1 "searchoption" Edit [(label,const option) \\ (label,option) <- options] hst
 
 basketForm :: (Basket -> Basket) *HSt -> (Form Basket,!*HSt)
 basketForm f hst = mkStoreForm "zbasket" f [] hst
 
+personalDataForm :: *HSt -> (Form PersonalData,*HSt)
 personalDataForm hst = mkEditForm "personal" Edit initPersInfo hst
 
-:: PersonalData =
-	{ name 				:: TextInput
+:: PersonalData
+ =	{ name 				:: TextInput
 	, address			:: TextInput
 	, city				:: TextInput
 	, state				:: TextInput
@@ -95,8 +84,8 @@ personalDataForm hst = mkEditForm "personal" Edit initPersInfo hst
 	, cardholdersName	:: TextInput
 	}	
 
-initPersInfo =	
-	{ name 				= TS 30 ""
+initPersInfo
+ =	{ name 				= TS 30 ""
 	, address			= TS 30 ""
 	, city				= TS 30 ""
 	, state				= TS 30 ""
@@ -110,19 +99,19 @@ initPersInfo =
 	, cardholdersName	= TS 30 ""
 	}	
 
-showBasket :: Bool [Int] [CD_Database] [BodyTag] [BodyTag] -> BodyTag
-showBasket onlytop basket database infobuts deletebuts
+showBasket :: Bool [Int] (Headers d) [ItemData d] [BodyTag] [BodyTag] -> BodyTag
+showBasket onlytop basket headers database infobuts deletebuts
 | isEmpty basket = 	BodyTag
 					[ bTxt "Your Basket is empty."
 					, Br
 					]
 | onlytop = 		BodyTag
 				  	[ bTxt "Last Item put into basket:"
-					, mkTable (1,length basket) [database!!(hd basket)] infobuts deletebuts
+					, mkTable (1,length basket) headers [database!!(hd basket)] infobuts deletebuts
 					]
 | otherwise			= BodyTag
 				  	[ bTxt "Contents of your basket:"
-					, mkTable (1,length basket) [database!!itemnr \\ itemnr <- basket] infobuts deletebuts
+					, mkTable (1,length basket) headers [database!!itemnr \\ itemnr <- basket] infobuts deletebuts
 					, Br
 					, STable [] [[ bTxt "Total Prize:"
 								, toHtml (showPrize (sum [(database!!itemnr).item.prize \\ itemnr <- basket]))
@@ -131,16 +120,17 @@ showBasket onlytop basket database infobuts deletebuts
 
 // main entry of the shop
 
-webshopentry database hst
-# (selPage,hst) 	= pageSelectionForm hst				// is a new page selected
-# (curPage,hst) 	= currentpageForm selPage.value hst // determine current page
-# (sharedForms,hst) = sharedForms hst					// include all shared forms
-# (page,hst) 		= case curPage.value of				// include the selected page
-						HomePage 	-> doHomePage   database sharedForms hst
-						ShopPage 	-> doShopPage   database sharedForms hst
-						BasketPage 	-> doBasketPage database sharedForms hst
-						OrderPage 	-> doOrderPage  database sharedForms hst
-						ThanksPage	-> doThanksPage	database sharedForms hst
+webshopentry :: (SearchOptions option) (ExtendedInfo d) (Headers d) [ItemData d] *HSt -> (Html,*HSt) | searchDB option d
+webshopentry options extendedInfo headers database hst
+# (selPage,    hst) = pageSelectionForm hst				// is a new page selected
+# (curPage,    hst) = currentpageForm selPage.value hst // determine current page
+# (sharedForms,hst)	= sharedForms options hst			// include all shared forms
+# (page,       hst) = case curPage.value of				// include the selected page
+						HomePage 	-> doHomePage                                database sharedForms hst
+						ShopPage 	-> doShopPage   options extendedInfo headers database sharedForms hst
+						BasketPage 	-> doBasketPage         extendedInfo headers database sharedForms hst
+						OrderPage 	-> doOrderPage                       headers database sharedForms hst
+						ThanksPage	-> doThanksPage	                             database sharedForms hst
 = (mkHtml "My Web Shop"
 		[ STable [] [[Img [Img_Src "images/cdshoptitle.gif"]:selPage.body]]
 		, Hr []
@@ -153,19 +143,20 @@ where
 	pageSelectionForm hst = ListFuncBut False "pagebut" Edit pagebuttons hst
 	where
 		pagebuttons  = 
-			[ (but "Home", 		\page -> HomePage)
-			, (but "Shop",		\page -> ShopPage)
-			, (but "Basket", 	\page -> BasketPage)
-			, (but "OrderInfo", \page -> OrderPage)
+			[ (but "Home", 		const HomePage)
+			, (but "Shop",		const ShopPage)
+			, (but "Basket", 	const BasketPage)
+			, (but "OrderInfo", const OrderPage)
 			]
 
 // home page
 
+doHomePage :: [ItemData d] (SharedForms option) *HSt -> ([BodyTag],*HSt)
 doHomePage database sf hst
-= (	[ maptext 	[ "Welkom to the Clean CD shop!"
+= (	[ maptext 	[ "Welcome to the Clean CD shop!"
 				, ""
 				, "Our Dean wants that we make more money with Clean, otherwise we will be killed."
-				, "We have therefore decided to sell Peter's CD collection for bargain prices."
+				, "We have therefore decided to sell Peter's exquisite CD collection for exquisite prices."
 				, ""
 				, "By the way, this application also gives a nice demo what you can do with Clean..."
 				, "Have fun."
@@ -174,28 +165,29 @@ doHomePage database sf hst
 
 // shop page
 
-doShopPage database sf hst
-# (found,selection)	= searchDatabase ([AnyAlbum,AnyArtist,AnySong]!!(snd (sf.searchOption.value))) (sf.searchString.value) database
+doShopPage :: (SearchOptions option) (ExtendedInfo d) (Headers d) [ItemData d] (SharedForms option) *HSt -> ([BodyTag],*HSt) | searchDB option d
+doShopPage {options} extendedInfo headers database sf hst
+# (found,selection)	= searchDB ((map snd options)!!(snd (sf.searchOption.value))) (sf.searchString.value) database
 # (shownext, hst)	= browserForm sf.index.value sf.step.value (length selection) hst
-# (nindex,hst) 		= indexForm (shownext.value o \i -> if (sf.searchString.changed || sf.searchOption.changed) 0 sf.index.value) hst
+# (nindex,   hst) 	= indexForm (shownext.value o \i -> if (sf.searchString.changed || sf.searchOption.changed) 0 sf.index.value) hst
 # (shownext, hst)	= browserForm nindex.value sf.step.value (length selection) hst
-# (add,hst)			= addToBasketForm nindex.value sf.step.value selection hst
-# (info,hst)		= InformationForm "listinfo" ([item.itemnr \\ {item} <- selection]%(nindex.value,nindex.value+sf.step.value)) hst
-# (basket,hst) 		= basketForm add.value hst
-# (binfo,hst)		= InformationForm "basketinfo" basket.value hst
+# (add,      hst)	= addToBasketForm nindex.value sf.step.value selection hst
+# (info,     hst)	= InformationForm "listinfo" ([item.itemnr \\ {item} <- selection]%(nindex.value,nindex.value+sf.step.value)) hst
+# (basket,   hst) 	= basketForm add.value hst
+# (binfo,    hst)	= InformationForm "basketinfo" basket.value hst
 = (	[([ STable [] [[bTxt "Search:",toBody sf.searchOption, Img [Img_Src "images/loep.gif"]]
-				,[bTxt "Name:",  toBody sf.searchString, if found (bTxt (toString (length selection) +++ " Items Found"))
-											     			   (bTxt "No Items Found")]
-				,[bTxt "#Items:",toBody sf.step]
-				]]
+				  ,[bTxt "Name:",  toBody sf.searchString, if found (bTxt (toString (length selection) +++ " Items Found"))
+				                                                    (bTxt "No Items Found")]
+				  ,[bTxt "#Items:",toBody sf.step]
+				  ]]
 	  <=>
 		 [STable [] [shownext.body]])
 	, Br, Br 
-	, mkTable (nindex.value+1,length selection) (selection%(nindex.value,nindex.value+sf.step.value)) info.body add.body 
+	, mkTable (nindex.value+1,length selection) headers (selection%(nindex.value,nindex.value+sf.step.value)) info.body add.body 
 	, Br, Br
-	, showBasket True basket.value database binfo.body [EmptyBody]
-	, doScript database (info.value -1)
-	, doScript database (binfo.value -1)
+	, showBasket True basket.value headers database binfo.body [EmptyBody]
+	, doScript extendedInfo (database!!(info.value -1))
+	, doScript extendedInfo (database!!(binfo.value -1))
 	], hst)
 where
 	browserForm :: !Int !Int !Int *HSt -> (Form (Int -> Int),!*HSt) 
@@ -203,75 +195,67 @@ where
 		= ListFuncBut False  "browserbuttons" Edit (browserButtons index step length) hst
 	where
 		browserButtons :: !Int !Int !Int -> [(Button,Int -> Int)]
-		browserButtons init step length = 
-			if (init - range >= 0) 	   [(sbut "--", set (init - range))] [] 
-			++
-			take nbuttuns [(sbut (toString (i+1)),set i) \\ i <- [startval,startval+step .. length-1]] 
-			++ 
-			if (startval + range < length - 1) [(sbut "++", set (startval + range))] []
+		browserButtons init step length
+			= if (init - range >= 0) [(sbut "--", set (init - range))] [] 
+			  	++
+			  take nbuttuns [(sbut (toString (i+1)),set i) \\ i <- [startval,startval+step .. length-1]] 
+			  	++ 
+			  if (startval + range < length - 1) [(sbut "++", set (startval + range))] []
 		where
-			set j i = j
-			range = nbuttuns * step
-			start i j= if (i < range) j (start (i-range) (j+range))
-			nbuttuns = 10
-			startval = start init 0
+			set j i		= j
+			range		= nbuttuns * step
+			start i j	= if (i < range) j (start (i-range) (j+range))
+			nbuttuns	= 10
+			startval	= start init 0
 
-	addToBasketForm :: !Int !Int [CD_Selection] *HSt -> (Form (Basket -> Basket),!*HSt)
+	addToBasketForm :: !Int !Int [ItemData d] *HSt -> (Form (Basket -> Basket),!*HSt)
 	addToBasketForm index step selection hst
-		= ListFuncBut False "additems" Edit (addToBasketButtons index step selection) hst
-	where
-		addToBasketButtons :: Int Int [CD_Selection] -> [(Button,Basket -> Basket)]
-		addToBasketButtons i step selection 
-			= [(butp "basket.gif" ,\basket -> [data.item.itemnr:basket]) \\ data <- selection]%(i,i+step-1)
+		= ListFuncBut False "additems" Edit ([(butp "basket.gif" ,\basket -> [data.item.itemnr:basket]) \\ data <- selection]%(index,index+step-1)) hst
 
 InformationForm :: String [Int] *HSt -> (Form (Int -> Int),!*HSt)
-InformationForm formid itemlist hst = ListFuncBut False formid Edit (informationButtons itemlist) hst
-where
-	informationButtons :: [Int] -> [(Button,Int -> Int)]
-	informationButtons itemlist = [(butp "info.gif" ,\_ -> itemnr ) \\ itemnr <- itemlist]
+InformationForm formid itemlist hst
+	= ListFuncBut False formid Edit [(butp "info.gif",const itemnr) \\ itemnr <- itemlist] hst
 
 // basket page
 
-doBasketPage database sf hst
-# (delete,hst)	= ListFuncBut False "delitems" Edit (removeFromBasketButtons sf.basket.value) hst
-# (nbasket,hst)	= basketForm delete.value hst	
-# (info,hst)	= InformationForm "basketinfo2" nbasket.value hst
-# (order,hst) 	= ListFuncBut False "buybut" Edit [(but "toOrder",\_ -> OrderPage)] hst	
-# (curpage,hst) = currentpageForm order.value hst
-| curpage.value ===  OrderPage = doOrderPage database sf hst
-= ( [ showBasket False nbasket.value database info.body delete.body
-	, doScript database (info.value -1)
+doBasketPage :: (ExtendedInfo d) (Headers d) [ItemData d] (SharedForms option) *HSt -> ([BodyTag],*HSt)
+doBasketPage extendedInfo headers database sf hst
+# (delete,  hst)	= ListFuncBut False "delitems" Edit [(butp "trash.gif",removeMember itemnr) \\ itemnr <- sf.basket.value] hst
+# (nbasket, hst)	= basketForm delete.value hst	
+# (info,    hst)	= InformationForm "basketinfo2" nbasket.value hst
+# (order,   hst)	= ListFuncBut False "buybut" Edit [(but "toOrder",const OrderPage)] hst	
+# (curpage, hst)	= currentpageForm order.value hst
+| curpage.value ===  OrderPage = doOrderPage headers database sf hst
+= ( [ showBasket False nbasket.value headers database info.body delete.body
+	, doScript extendedInfo (database!!(info.value -1))
 	, if (isEmpty nbasket.value) EmptyBody (BodyTag [bTxt "Go to order page:\t\t", toBody order])
-	], hst)
-where
-	removeFromBasketButtons :: Basket -> [(Button,Basket -> Basket)]
-	removeFromBasketButtons basket = [(butp "trash.gif" , removeFromBasket itemnr) \\ itemnr <- basket]
-	where
-		removeFromBasket :: Int Basket -> Basket
-		removeFromBasket itemnr [] = []
-		removeFromBasket itemnr [bitemnr:items]
-		| itemnr == bitemnr 	= items
-		| otherwise = [bitemnr: removeFromBasket itemnr items]
+	]
+  , hst
+  )
 
 // order page
 
-doOrderPage database sf hst
-# persData = sf.personalData
-# (confirm,hst)	= ListFuncBut False "confirm" Edit [(but "confirm",\_ -> ThanksPage)] hst	
+doOrderPage :: (Headers d) [ItemData d] (SharedForms option) *HSt -> ([BodyTag],*HSt)
+doOrderPage headers database sf hst
+# persData		= sf.personalData
+# (confirm,hst)	= ListFuncBut False "confirm" Edit [(but "confirm",const ThanksPage)] hst	
 # (curpage,hst)	= currentpageForm confirm.value hst
-| curpage.value ===  ThanksPage = doThanksPage database sf hst
-= (	[ showBasket False sf.basket.value database (repeat EmptyBody) (repeat EmptyBody)
-	, Br
-	, bTxt "All fields must be filled with your data:"
-	, toBody persData
-	, Br
-	, if (isEmpty sf.basket.value) EmptyBody (BodyTag [bTxt "Confirm your order:\t\t", toBody confirm])
-	], hst)
+| curpage.value ===  ThanksPage
+	= doThanksPage database sf hst
+| otherwise
+	= (	[ showBasket False sf.basket.value headers database (repeat EmptyBody) (repeat EmptyBody)
+		, Br
+		, bTxt "All fields must be filled with your data:"
+		, toBody persData
+		, Br
+		, if (isEmpty sf.basket.value) EmptyBody (BodyTag [bTxt "Confirm your order:\t\t", toBody confirm])
+		], hst)
 	
 // thanks page
 
+doThanksPage :: [ItemData d] (SharedForms option) *HSt -> ([BodyTag],*HSt)
 doThanksPage database sf hst
-# (_,hst)	= basketForm (\_ -> []) hst				// empty basket
+# (_,hst)	= basketForm (const []) hst				// empty basket
 = ( [ maptext 	[ "Your order has been processed!"
 				, "Thanks for playing with our demo shop."
 				, ""
@@ -281,29 +265,19 @@ doThanksPage database sf hst
 	
 // page showing CD information will appear in extra window
 
-doScript database itemnr
-| itemnr < 0 = EmptyBody
-| otherwise  = Script [] (myScript body)
+doScript :: (ExtendedInfo d) (ItemData d) -> BodyTag
+doScript {extKey,extVal} {item,data}
+	= Script [] (myScript body)
 where
-	body = [ STable tableAttr 	[ [bTxt "Item number:", bTxt (toString item.itemnr)] ]
-			, Br
-			, STable tableAttr	[ [bTxt "Group:", bTxt cd.group]
-								, [bTxt "Album:", bTxt cd.album]
-								, [bTxt "Year:",  bTxt (toString cd.year)]
-								]
-			, Br
-			, STable tableAttr 	([ [bTxt ("Track " +++ toString nr)
-								  ,bTxt title
-								  ,bTxt (toString playtime)
-								  ] \\ {nr,title,playtime} <- cd.tracks 
-								] ++
-								[ [bTxt "Total Time",EmptyBody, bTxt (toString cd.totaltime)]
-								])
-			, Br
-			, STable tableAttr	[ [bTxt ("Buy it now for only " +++ showPrize item.prize)] ]
-			]
-	{item,cd} = database!!itemnr
-	tableAttr = [Tbl_Border 1, Tbl_Bgcolor (`Colorname Yellow)]
+	body		= [ STable tableAttr [ [bTxt "Item number:", bTxt (toString item.itemnr)] ]
+				  , Br
+				  , STable tableAttr (map (map bTxt) (extKey data))
+				  , Br
+				  , STable tableAttr (map (map bTxt) (extVal data))
+				  , Br
+				  , STable tableAttr [ [bTxt ("Buy it now for only " +++ showPrize item.prize)] ]
+				  ]
+	tableAttr	= [Tbl_Border 1, Tbl_Bgcolor (`Colorname Yellow)]
 
 
 myScript :: [BodyTag] -> Script
@@ -316,60 +290,42 @@ scriptName = "openwindow()"
 
 // Function to display contents of selected items, database, basket
 
-mkTable :: (Int,Int) [CD_Selection] [BodyTag] [BodyTag] -> BodyTag
-mkTable (cnt,max) items infobuttons deladdbuttons
+mkTable :: (Int,Int) (Headers d) [ItemData d] [BodyTag] [BodyTag] -> BodyTag
+mkTable (cnt,max) headers items infobuttons deladdbuttons
 	= table
-		[ empty ++ ItemHeader ++ CDHeader ++ empty ++ empty
-		: [CntRow i max ++ ItemRow item ++ CDRow cd ++ mkButtonRow infobutton ++ mkButtonRow deladdbutton
-			\\ i <- [cnt..]
-			& {item,cd} <- items 
-			& infobutton <- infobuttons
-			& deladdbutton <- deladdbuttons ]
+		[ empty ++ itemHeader ++ dataHeader ++ empty ++ empty
+		: [	CntRow i max ++ itemRow item ++ dataRow headers data ++ mkButtonRow infobutton ++ mkButtonRow deladdbutton
+			\\ i           <- [cnt..]
+			& {item,data}  <- items 
+			& infobutton   <- infobuttons
+			& deladdbutton <- deladdbuttons
+		  ]
 		]				
 where
-	table rows 	= Table [Tbl_Width tableWidth, Tbl_Bgcolor (`HexColor bgcolor), Tbl_Border 1] 
-					[Tr [] row \\ row <- rows]
-	tableWidth	= Percent 100
-	ItemHeader 	= mkItemRow "Item" "Prize"
-	CDHeader 	= mkCDRow "Artist" "Album" "Year" "Duration" 
+	table rows	 	= Table [Tbl_Width tableWidth, Tbl_Bgcolor (`HexColor bgcolor), Tbl_Border 1] 
+						[Tr [] row \\ row <- rows]
+	tableWidth		= Percent 100
+	(itemW,prizeW)	= (40,100)
+	itemHeader	 	= mkRow [(Just itemW,"Item"),(Just prizeW,"Prize")]
+	dataHeader 		= mkRow headers.headers
 
-	CntRow i max = [Td [Td_Width indexWidth] [bTxt (toString i +++ "/" +++ toString max)]] 
-	where indexWidth = Pixels 50
+	CntRow i max	= [Td [Td_Width indexW] [bTxt (toString i +++ "/" +++ toString max)]] 
+	where indexW	= Pixels 50
 
-	ItemRow :: Item -> [BodyTag] 
-	ItemRow item
-		= mkItemRow (toString item.itemnr) (showPrize item.prize)
+	itemRow :: Item -> [BodyTag] 
+	itemRow item				= mkRow [(Just itemW,toString item.itemnr),(Just prizeW,showPrize item.prize)]
 
-	mkItemRow :: String String -> [BodyTag]
-	mkItemRow itemnr prize
-	=	[ Td [Td_Width itemnrWidth] 	[bTxt itemnr]
-		, Td [Td_Width prizeWidth] 		[bTxt prize]
-		]
-	where
-		itemnrWidth 	= Pixels 40
-		prizeWidth 		= Pixels 100
+	dataRow :: (Headers d) d -> [BodyTag]
+	dataRow {headers,fields} d	= mkRow [(w,f) \\ f <- fields d & (w,_) <- headers]
 
-	CDRow :: CD -> [BodyTag]
-	CDRow cd
-		= mkCDRow cd.group cd.album (toString cd.year) (toString cd.totaltime) 
+	mkRow :: [(Maybe Int,String)] -> [BodyTag]
+	mkRow items					= [  Td (if (isNothing width) [] [Td_Width (Pixels (fromJust width))]) [bTxt item] 
+								  \\ (width,item) <- items 
+								  ]
 
-	mkCDRow :: String String String String -> [BodyTag]
-	mkCDRow group album year duration
-	=	[ Td [Td_Width groupWidth] 		[abTxt group]
-		, Td [Td_Width albumWidth] 		[abTxt album]
-		, Td [Td_Width yearWidth] 		[abTxt year]
-		, Td [Td_Width durationWidth] 	[abTxt duration]
-		]
-	where
-		groupWidth 		= Pixels 140
-		albumWidth 		= Pixels 400
-		yearWidth 		= Pixels 50
-		durationWidth 	= Pixels 50
-
-	mkButtonRow button
-	=	[Td [Td_Width buttonWidth] [button]] where buttonWidth = Pixels 50
+	mkButtonRow button			= let buttonW = Pixels 50 in [ Td [Td_Width buttonW] [button] ]
 	
-	empty = mkButtonRow EmptyBody
+	empty						= mkButtonRow EmptyBody
 
 // small utility stuf ...
 
@@ -377,8 +333,6 @@ mkHtml s tags 	 	= Html (header s) (body tags)
 header s 			= Head [`Hd_Std [Std_Title s]] []
 body tags 			= Body [onloadBody] tags
 bTxt				= B []
-abTxt s				= B [] (allAphaNum s)
-allAphaNum string 	= string		
 
 but s				= LButton defpixel s
 butp s				= PButton (defpixel/2,defpixel/2) ("images/" +++ s)
@@ -388,6 +342,3 @@ bgcolor 			= (Hexnum H_6 H_6 H_9 H_9 H_C H_C)
 
 ziprow body1 body2	= [b1 <=> b2 \\ b1 <- body1 & b2 <- body2]
 maptext	texts		= BodyTag (flatten [[bTxt text, Br] \\ text <- texts])
-
-
-
