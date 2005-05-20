@@ -1,4 +1,4 @@
-implementation module webshop
+implementation module StdWebshop
 
 import StdEnv, StdHtml, GenEq
 import CDdatabaseHandler
@@ -78,6 +78,7 @@ personalDataForm hst = mkEditForm "personal" Edit initPersInfo hst
 	, state				:: TextInput
 	, zipCode			:: (TextInput,TextInput)
 	, country			:: PullDownMenu
+	, email				:: TextInput
 	, ccCompagny		:: PullDownMenu
 	, ccNumber			:: (TextInput,TextInput,TextInput,TextInput)
 	, ccExpiringDate	:: (PullDownMenu,PullDownMenu)
@@ -91,6 +92,7 @@ initPersInfo
 	, state				= TS 30 ""
 	, zipCode			= (TI 2 1234,TS 1 "")
 	, country			= PullDown (1,100) (0,["Belgium", "Netherlands","United Kingdom"])
+	, email				= TS 30 ""
 	, ccCompagny		= PullDown (1,100) (0,["MasterCard", "VisaCard"])
 	, ccNumber			= (TI 2 1234, TI 2 1234, TI 2 1234,TI 2 1234)
 	, ccExpiringDate	= ( PullDown (1,40) (0,[toString m \\ m <- [1 .. 12]])
@@ -122,9 +124,9 @@ showBasket onlytop basket headers database infobuts deletebuts
 
 webshopentry :: (SearchOptions option) (ExtendedInfo d) (Headers d) [ItemData d] *HSt -> (Html,*HSt) | searchDB option d
 webshopentry options extendedInfo headers database hst
+# (sharedForms,hst)	= sharedForms options hst			// include all shared forms
 # (selPage,    hst) = pageSelectionForm hst				// is a new page selected
 # (curPage,    hst) = currentpageForm selPage.value hst // determine current page
-# (sharedForms,hst)	= sharedForms options hst			// include all shared forms
 # (page,       hst) = case curPage.value of				// include the selected page
 						HomePage 	-> doHomePage                                database sharedForms hst
 						ShopPage 	-> doShopPage   options extendedInfo headers database sharedForms hst
@@ -168,12 +170,12 @@ doHomePage database sf hst
 doShopPage :: (SearchOptions option) (ExtendedInfo d) (Headers d) [ItemData d] (SharedForms option) *HSt -> ([BodyTag],*HSt) | searchDB option d
 doShopPage {options} extendedInfo headers database sf hst
 # (found,selection)	= searchDB ((map snd options)!!(snd (sf.searchOption.value))) (sf.searchString.value) database
-# (shownext, hst)	= browserForm sf.index.value sf.step.value (length selection) hst
-# (nindex,   hst) 	= indexForm (shownext.value o \i -> if (sf.searchString.changed || sf.searchOption.changed) 0 sf.index.value) hst
-# (shownext, hst)	= browserForm nindex.value sf.step.value (length selection) hst
+# (reset,index)		= if (sf.searchString.changed || sf.searchOption.changed) (True,0) (False,sf.index.value)
+# (shownext, hst)	= browseButtons reset index sf.step.value (length selection) nbuttuns "browsebuts" Edit hst
+# (nindex,hst) 		= indexForm (\_ -> shownext.value) hst
 # (add,      hst)	= addToBasketForm nindex.value sf.step.value selection hst
-# (info,     hst)	= InformationForm "listinfo" ([item.itemnr \\ {item} <- selection]%(nindex.value,nindex.value+sf.step.value)) hst
 # (basket,   hst) 	= basketForm add.value hst
+# (info,     hst)	= InformationForm "listinfo" ([item.itemnr \\ {item} <- selection]%(nindex.value,nindex.value+sf.step.value)) hst
 # (binfo,    hst)	= InformationForm "basketinfo" basket.value hst
 = (	[([ STable [] [[bTxt "Search:",toBody sf.searchOption, Img [Img_Src "images/loep.gif"]]
 				  ,[bTxt "Name:",  toBody sf.searchString, if found (bTxt (toString (length selection) +++ " Items Found"))
@@ -190,23 +192,7 @@ doShopPage {options} extendedInfo headers database sf hst
 	, doScript extendedInfo (database!!(binfo.value -1))
 	], hst)
 where
-	browserForm :: !Int !Int !Int *HSt -> (Form (Int -> Int),!*HSt) 
-	browserForm index step length hst
-		= ListFuncBut False  "browserbuttons" Edit (browserButtons index step length) hst
-	where
-		browserButtons :: !Int !Int !Int -> [(Button,Int -> Int)]
-		browserButtons init step length
-			= if (init - range >= 0) [(sbut "--", set (init - range))] [] 
-			  	++
-			  take nbuttuns [(sbut (toString (i+1)),set i) \\ i <- [startval,startval+step .. length-1]] 
-			  	++ 
-			  if (startval + range < length - 1) [(sbut "++", set (startval + range))] []
-		where
-			set j i		= j
-			range		= nbuttuns * step
-			start i j	= if (i < range) j (start (i-range) (j+range))
-			nbuttuns	= 10
-			startval	= start init 0
+	nbuttuns = 10
 
 	addToBasketForm :: !Int !Int [ItemData d] *HSt -> (Form (Basket -> Basket),!*HSt)
 	addToBasketForm index step selection hst
@@ -282,7 +268,7 @@ where
 
 myScript :: [BodyTag] -> Script
 myScript body = openWindowScript scriptName 700 400 False False True True False False 
-					(mkHtml "CD information window" body)
+					(mkHtml "Information window" body)
 
 onloadBody = `Batt_Events [OnLoad (SScript scriptName)]
 
