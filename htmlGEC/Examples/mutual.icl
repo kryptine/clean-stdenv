@@ -19,14 +19,6 @@ helloWorld hst
 where
 	mybody = Txt "Hello World"
 
-/*
-	mkHtml s tags hst 	= (Html (header s) (body tags),hst)
-	header s 			= Head [`Hd_Std [Std_Title s]] [] 
-	body tags 			= Body [] tags
-
-*/
-
-
 mutual hst
 # (mutual,hst) = startCircuit circuit initEuros hst
 = mkHtml "Mutual Recursive Form"

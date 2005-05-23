@@ -49,21 +49,21 @@ where
 	# (na,hst) = mkApplyEditForm title initval initval hst
 	= ((na.value,[(title,BodyTag na.body):prevbody]),False,hst)
 	mkApplyEdit` ((initval,prevbody),True,hst) // second time I come here: don't use the old state, but the new one ! 
-	# (na,hst) = mkSetForm title Edit initval hst 
+	# (na,hst) = mkSetForm title initval Edit  hst 
 	= ((na.value,[(title,BodyTag na.body):prevbody]),True,hst)
 
 display :: FormId -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 display title = HGC mkEditForm`
 where
 	mkEditForm` ((val,prevbody),bool,hst) 
-	# (na,hst) = mkEditForm title Display val hst
+	# (na,hst) = mkEditForm title val Display hst
 	= ((na.value,[(title,BodyTag na.body):prevbody]),bool,hst)
 
 store :: FormId s -> GecCircuit (s -> s) s |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} s
 store title initstore = HGC mkStoreForm`
 where
 	mkStoreForm` ((fun,prevbody),bool,hst) 
-	# (store,hst) = mkStoreForm title fun initstore hst
+	# (store,hst) = mkStoreForm title initstore fun  hst
 	= ((store.value,[(title,BodyTag store.body):prevbody]),bool,hst)
 
 self :: (a -> a) (GecCircuit a a) -> GecCircuit a a

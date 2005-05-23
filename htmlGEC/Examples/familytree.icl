@@ -20,16 +20,15 @@ derive gParse Family, Status, Partner, Person, Kids, Maybe, Gender, Maybe`
 Start world  = doHtml familytree world
 
 familytree hst
-# (p,hst) = personeditor "xx" Edit inittree2 hst
-//# (p,hst) = mkEditForm "xx" Edit inittree3 hst
-# (tree,hst)= mkEditForm "famtree" Edit inittree hst	
+# (p,hst) = personeditor "xx" inittree2 Edit hst
+# (tree,hst)= mkEditForm "famtree" inittree Edit hst	
 = mkHtml "Family Tree Example"
 		[ H1 [] "family Tree Example: "
 		, toBody tree
 		, Br
 		, toHtml tree.changed
 		, Br, toBody p
-		, traceHtmlInput
+//		, traceHtmlInput
 		] hst
 where
 	inittree = Family (Man "Rinus") Married (Just_ (Woman "Marie-Jose", NoKids))
@@ -49,10 +48,9 @@ where
 
 :: Gender = Male | Female
 
-gForm{|Person|} formid mode person hst = specialize personeditor formid mode person hst
+gForm{|Person|} formid person mode hst = specialize personeditor formid person mode hst
 
-
-personeditor id mode d hst = mkBimapEditor id mode {map_to = map_to, map_from = map_from} d hst
+personeditor formid d mode hst = mkBimapEditor formid d mode {map_to = map_to, map_from = map_from} hst
 where
 	map_to (Man m) 		= (m <|> Male)
 	map_to (Woman w) 	= (w <|> Female)
@@ -60,10 +58,10 @@ where
 	map_from (m <|> Male)	= (Man m)
 	map_from (w <|> Female)	= (Woman w)
 
-gForm{|Family|} formid mode family hst = specialize editor formid mode family hst
+gForm{|Family|} formid family mode hst = specialize editor formid family mode hst
 where
-	editor id mode d hst
-	# (family,hst) = mkBimapEditor id mode {map_to = map_to, map_from = map_from} d hst
+	editor formid d mode hst
+	# (family,hst) = mkBimapEditor formid d mode {map_to = map_to, map_from = map_from} hst
 	= ({ changed = family.changed, value = family.value, body = tab (nrkids family.value) family.body},hst)
 	
 	
@@ -89,14 +87,12 @@ where
 	woman 	= Woman ""   
 	notmaried = Nothing_
 
-gForm{|Kids|} formid mode kids hst = specialize editor formid mode kids hst 
+gForm{|Kids|} formid kids mode hst = specialize editor formid kids mode hst 
 where
-	editor id mode d hst 
-	# (list,hst) = horlist2Form (mkid "hlist") mode     defaultfam (fromKids kids) hst
-//	# ((list,hlbody),hst) = horlistForm (mkid "hlist") mode      (fromKids (Kids [defaultfam])) hst
-	# (display,hst) = mkEditForm   (mkid "displ") Display (displaykids (length list.body)) hst
+	editor formid d mode hst 
+	# (list,hst) 	= horlist2Form (mkid "hlist") defaultfam mode (fromKids kids) hst
+	# (display,hst) = mkEditForm   (mkid "displ") (displaykids (length list.body)) Display  hst
 	= ({ changed = list.changed, value = toKids list.value, body = [display.body <||> list.body]},hst)
-
 
 	mkid s = toString (length (fromKids kids)) +++ s
 

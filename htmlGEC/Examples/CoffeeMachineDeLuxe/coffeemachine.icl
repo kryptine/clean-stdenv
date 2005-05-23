@@ -12,16 +12,16 @@ derive gParse MachineState, Output, Product
 Start world  = doHtml coffeemachine world
 
 coffeemachine hst
-# (input	,hst) = ListFuncBut False "cb" Edit allbuttons hst	
-# (options	,hst) = ListFuncCheckBox False "op" Edit (optionbuttons False False) hst	
-# (optionfun,optionbool)	  = options.value
-# (machine	,hst) = mkStoreForm "hidden" (optionfun o input.value) initmachine hst
-# (checkboxf,hst) = ListFuncCheckBox True "op" Edit (optionbuttons machine.value.milk machine.value.sugar) hst	
+# (input	,hst) 		= ListFuncBut False "cb" Edit allbuttons hst	
+# (options	,hst) 		= ListFuncCheckBox False "op" Edit (optionbuttons False False) hst	
+# (optionfun,optionbool)= options.value
+# (machine	,hst) 		= mkStoreForm "hidden" initmachine (optionfun o input.value) hst
+# (checkboxf,hst) 		= ListFuncCheckBox True "op" Edit (optionbuttons machine.value.milk machine.value.sugar) hst	
 = mkHtml "Coffee Machine"
 		[ H1 [] "Fancy Coffee Machine ..."
 		, Br
 		, 	[ mkSTable [[bTxt "Content:", bTxt "Value:",bTxt "Input:"]]
-			, toHtml ("money ",machine.value.money) <.=.> mkRowF (input.body%MoneyButtons)
+			, toHtml ("money ",machine.value.money) <.=.> mkRowForm (input.body%MoneyButtons)
 			, toHtml ("beans ",machine.value.beans) <.=.> input.body!!BeansButton
 			, toHtml ("trash ",machine.value.trash) <.=.> input.body!!TrashButton
 			, Br
@@ -31,7 +31,7 @@ coffeemachine hst
 			, checkboxf.body!!SugarOption <.=.> bTxt "Sugar"
 			, Br
 			, mkSTable [[bTxt "Product:", bTxt "Prize:"]]
-			, mkColF (input.body%ProductButtons) <.=.> mkColF (map toHtml prizes)
+			, mkColForm (input.body%ProductButtons) <.=.> mkColForm (map toHtml prizes)
 			, Br
 			, bTxt "Message: ", bTxt (print machine.value.out optionbool)
 			] <=> [displayMachineImage machine.value.out] 
