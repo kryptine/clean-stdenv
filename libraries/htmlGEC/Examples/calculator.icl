@@ -11,7 +11,7 @@ Start world  = doHtml calculator world
 
 calculator hst
 # (calcfun,hst) 	= TableFuncBut "calcbut" Edit calcbuttons hst		// shows buttons
-# (display,hst) 	= mkStoreForm "display" calcfun.value initcalc hst	// calculates new values	
+# (display,hst) 	= mkStoreForm "display" initcalc calcfun.value  hst	// calculates new values	
 = mkHtml "Calculator"
 	[ H1 [] "Calculator Example: "
 	, toBody display 

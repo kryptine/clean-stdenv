@@ -37,7 +37,7 @@ toBody :: (Form a) -> BodyTag
 				, body		:: [BodyTag]
 				}
 
-mkViewForm 		:: !FormId 	!Mode !(HBimap d v) 	d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
+mkViewForm 		:: !FormId 	d !Mode !(HBimap d v) 	 !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
 
 // For convenience all kinds of variants of "mkViewForm" are predefined, simply by chosing certain defaults for the HBimap.
 
@@ -49,13 +49,13 @@ mkViewForm 		:: !FormId 	!Mode !(HBimap d v) 	d !*HSt -> (Form d,!*HSt) | gForm{
 // mkApply 			: displays application of function to the argument
 // mkApplyEdit		: editor, displays its first argument if it is not updated; second argument is initial state
 
-mkBimapEditor 	:: !FormId 	!Mode !(Bimap d v)  d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
-mkEditForm 		:: !FormId 	!Mode				d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSetForm 		:: !FormId 	!Mode				d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkStoreForm 	:: !FormId 	!(d -> d)			d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkSelfForm 		:: !FormId 	!(d -> d)			d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkApplyForm 	:: !FormId 	!(d -> d)			d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
-mkApplyEditForm	:: !FormId 	!d					d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkBimapEditor 	:: !FormId 	d !Mode !(Bimap d v)	!*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
+mkEditForm 		:: !FormId 	d !Mode					!*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSetForm 		:: !FormId 	d !Mode					!*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkStoreForm 	:: !FormId 	d !(d -> d)				!*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSelfForm 		:: !FormId 	d !(d -> d)				!*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyForm 	:: !FormId 	d !(d -> d)				!*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyEditForm	:: !FormId 	d !d					!*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
 
 // Clean types that have a special representation
 
@@ -100,7 +100,7 @@ backcolor :== "#6699CC"								// background color of non-editable fields
 
 :: UpdMode
 
-generic gForm a :: !FormId !Mode a !*HSt -> *(Form a, !*HSt)	
+generic gForm a :: !FormId a !Mode !*HSt -> *(Form a, !*HSt)	
 generic gUpd a 	:: UpdMode a -> (UpdMode,a)
 
 derive bimap Form
@@ -116,5 +116,5 @@ derive gParse 	(,), (,,), (,,,), (<->), <|>, DisplayMode, Button, CheckBox, Radi
 // specialize should be used if one want to make specialized instantiations of gForm
 // it ensures that update positions remain counted correctly
 
-specialize :: (FormId Mode a *HSt -> (Form a,*HSt)) FormId Mode a *HSt -> (Form a,*HSt) | gUpd {|*|} a
+specialize :: (FormId a Mode *HSt -> (Form a,*HSt)) FormId a Mode *HSt -> (Form a,*HSt) | gUpd {|*|} a
 

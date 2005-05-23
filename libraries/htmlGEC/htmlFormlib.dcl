@@ -11,13 +11,13 @@ import StdHtml
 
 (<=>)   infixl 5 :: [BodyTag] [BodyTag] -> BodyTag
 (<.=.>) infixl 5 ::  BodyTag   BodyTag  -> BodyTag
-mkRowF 			 :: [BodyTag] 			-> BodyTag
+mkRowForm 		 :: [BodyTag] 			-> BodyTag
 
 // Place second body below first
 
 (<||>)   infixl 4 :: [BodyTag] [BodyTag] -> BodyTag	// Place a above b
 (<.||.>) infixl 4 ::  BodyTag   BodyTag  -> BodyTag	// Place a above b
-mkColF 			  :: [BodyTag] 			 -> BodyTag
+mkColForm		  :: [BodyTag] 			 -> BodyTag
 
 // Simple table of standard cell size
 
@@ -34,18 +34,18 @@ browseButtons 		:: !Bool !Int !Int !Int !Int !FormId !Mode !*HSt -> (Form Int,!*
 
 // simple forms for lists and tuples:
 
-horlistForm 		:: !FormId !Mode ![a] 		!*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-horlist2Form 		:: !FormId !Mode a ![a] 	!*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-vertlistForm 		:: !FormId !Mode ![a] 		!*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-table_hv_Form 		:: !FormId !Mode ![[a]] 	!*HSt -> (Form [[a]],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-t2EditForm  		:: !FormId !Mode !(a,b) 	!*HSt -> ((Form a,Form b),!*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+horlistForm 		:: !FormId 	 !Mode ![a] 	!*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+horlist2Form 		:: !FormId a !Mode ![a] 	!*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+vertlistForm 		:: !FormId   !Mode ![a] 	!*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+table_hv_Form 		:: !FormId   !Mode ![[a]] 	!*HSt -> (Form [[a]],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+t2EditForm  		:: !FormId   !Mode !(a,b) 	!*HSt -> ((Form a,Form b),!*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 																				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} b
 
-t3EditForm  		:: !FormId !Mode !(a,b,c) 	!*HSt -> ((Form a,Form b,Form c),!*HSt) 
+t3EditForm  		:: !FormId 	!Mode !(a,b,c) 	!*HSt -> ((Form a,Form b,Form c),!*HSt) 
 																				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} b
 																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} c
-t4EditForm  	:: !FormId !Mode !(a,b,c,d) 	!*HSt -> ((Form a,Form b,Form c,Form d),!*HSt)
+t4EditForm  		:: !FormId !Mode !(a,b,c,d) !*HSt -> ((Form a,Form b,Form c,Form d),!*HSt)
 																				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
 																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} b
 																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} c
@@ -90,7 +90,7 @@ FuncMenu 			:: !Int !FormId !Mode [(String, a -> a)] !*HSt
 
 // openWindowScript will open a new browser window displaying the html code
 // parameters resp: scriptname() height width toolbar menubar scrollbars resizable location status html
-openWindowScript ::  !String     !Int   !Int  !Bool   !Bool   !Bool      !Bool     !Bool    !Bool  !Html -> Script
+openWindowScript ::  !String !Int !Int !Bool !Bool !Bool !Bool !Bool !Bool !Html -> Script
 
 // openNoticeScript simplified version of openWindowScript
 // parameters are resp: scriptname() height width html

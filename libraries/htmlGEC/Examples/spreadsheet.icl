@@ -15,7 +15,7 @@ spreadsheet hst
 # (tablef, hst) = table_hv_Form "table" Edit 	(inittable 8 10)     	    hst
 # (rowsumf,hst) = vertlistForm  "rsum"  Display (rowsum tablef.value)       hst
 # (colsumf,hst) = horlistForm   "csum"  Display (colsum tablef.value)       hst
-# (totsumf,hst) = mkEditForm    "tsum"  Display (sum (rowsum tablef.value)) hst
+# (totsumf,hst) = mkEditForm    "tsum"  (sum (rowsum tablef.value)) Display  hst
 = mkHtml "Spreadsheet"
 	[ H1 [] "Spreadsheet Example: "
 	, Br

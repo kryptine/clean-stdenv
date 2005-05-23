@@ -27,8 +27,10 @@ derive gParse PAI, PAExpr
 
 myprogram 
 	= PAProgr 
-		["products" 	.=. But "koffie" .+. But "thee" .+. But "chocmelk"
-		,"ingrediants" 	.=. But "milk" .+. But "sugar"
+		["products" 	.=. But "coffee" .+. But "thee" .+. But "chocmilk"
+		,"ingrediants" 	.=. Do "wantmilk" .>. Do "wantsugar" 
+		,"wantmilk" 	.=. But "milk" .+. But "nomilk"
+		,"wantsugar" 	.=. But "sugar" .+. But "nosugar"
 		,"start" 		.=. Do "products" .>. Do "ingrediants" .>. Do "start"] (Do "start")
 
 MyPage3 hst
@@ -74,7 +76,7 @@ where
 	createButtons butdef hst = ListFuncBut False "PAbuttons" Edit butdef hst
 
 	expressionStore :: ((PAI,[PAI]) -> (PAI,[PAI])) *HSt -> (Form (PAI,[PAI]),*HSt)
-	expressionStore f hst = mkStoreForm "PAexprstore" f initstore hst
+	expressionStore f hst = mkStoreForm "PAexprstore" initstore f hst
 
 	// calculate buttons out of the set of next event that can occur
 	
@@ -128,22 +130,12 @@ where
 		| b = (b,moreleft)
 		= search right i
 
-
-
-/*
-# (curexpr,hst)		= myButtonStore id hst								// fetch current list of buttons to generate from store
-# (funchosen,hst) 	= createButtons (calcbuttons curexpr.value) hst		// recreate buttons and determine which is pressed
-# (nbutset,hst)		= expressionStore funchosen.value hst				// calculate the new expression and the new set of buttons to generate 
-# (_,hst)			= myButtonStore (\s -> snd nbutset.value) hst		// store list of buttons of the new expressions
-# (buttons,hst) 	= createButtons (calcbuttons (snd nbutset.value)) hst // and recreate
-*/
-
 expr = But "koffie" .+. But "thee" .+. But "chocmelk" .>. But "melk" .+. But "suiker" .>. But "klaar"
 
 MyPage2 hst
-# (exprf,hst) 	 	= mkEditForm  "expr" Edit (But "Init") hst
+# (exprf,hst) 	 	= mkEditForm  "expr" (But "Init") Edit hst
 # (donebut,hst) 	= ListFuncBut False "but" Edit [(LButton defpixel "Done!",\b -> not b)] hst
-# (boolstore,hst)	= mkStoreForm "boolstore" donebut.value False hst
+# (boolstore,hst)	= mkStoreForm "boolstore" False donebut.value  hst
 # (buttons,hst)		= if boolstore.value (calcExpression [] exprf.value hst) ([EmptyBody],hst)
 = mkHtml "Process Algebra Experiment"
 	[ H1 [] "Process Algebra Experiment"
