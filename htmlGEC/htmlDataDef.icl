@@ -3,6 +3,7 @@ implementation module htmlDataDef
 import StdEnv, ArgEnv
 
 import htmlPrintUtil
+import htmlStyleDef
 
 import StdGeneric
 

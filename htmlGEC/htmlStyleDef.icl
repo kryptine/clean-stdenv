@@ -4,7 +4,7 @@ import StdEnv, ArgEnv
 import htmlPrintUtil, htmlDataDef
 import StdGeneric
 
-gHpr{|HtmlStyle|} prev (CSS styles)	= prev <+ styles 
+//gHpr{|HtmlStyle|} prev (CSS styles)	= prev <+ styles 
 
 gHpr{|Style|} prev (Style name attr) = prev <+> styleCmnd name attr
 

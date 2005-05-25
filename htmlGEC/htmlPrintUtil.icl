@@ -99,9 +99,9 @@ htmlAttrCmnd hdr attr txt
 
 
 styleCmnd :: !a !b -> FoF | gHpr{|*|} a & gHpr{|*|} b
-styleCmnd stylename attr = \file -> print "." file <+ stylename <+ " { \r" <+ attr <+ " }\r"
+styleCmnd stylename attr = \file -> print "." file <+ stylename <+ "{" <+ attr <+ "}"
 
 styleAttrCmnd :: !a !b -> FoF | gHpr{|*|} a & gHpr{|*|} b
-styleAttrCmnd name value = \file -> print "\t" file <+ name <+ ": " <+ value <+ ";\r"
+styleAttrCmnd name value = \file -> print "" file <+ name <+ ": " <+ value <+ ";"
 
 
