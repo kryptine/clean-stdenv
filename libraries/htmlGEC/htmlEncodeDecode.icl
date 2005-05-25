@@ -19,6 +19,9 @@ instance < FormState
 where
 	(<) _ _ = True
 
+emptyFormStates :: *FormStates
+emptyFormStates = Leaf_
+
 initFormStates :: *FormStates
 initFormStates = Balance (sort [(formid,OldState state) \\ (formid,state) <- CheckHtmlState | formid <> ""])
 where

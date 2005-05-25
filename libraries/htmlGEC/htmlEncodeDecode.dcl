@@ -17,6 +17,7 @@ traceHtmlInput	:: BodyTag		// for debugging showing the information received fro
 
 :: *FormStates 									// collection of all states of all forms
 
+emptyFormStates :: *FormStates
 initFormStates 	:: *FormStates 					// initial state as received from browser
 findState 		:: !String *FormStates -> (Bool, Maybe a,*FormStates)		| gParse{|*|} a // true if form has not yet been updated 	
 replaceState 	:: !String a *FormStates -> *FormStates	| gPrint{|*|} a // replace state given FormId
