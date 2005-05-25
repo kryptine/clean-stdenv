@@ -3,7 +3,7 @@ definition module htmlStyleDef
 import htmlPrintUtil, htmlDataDef
 // a Clean data structure representing a subset of html Style
 
-:: HtmlStyle = CSS [Style]
+//:: HtmlStyle = CSS [Style]
 
 :: Style = Style String [StyleOpt]
 
@@ -440,5 +440,5 @@ import htmlPrintUtil, htmlDataDef
 :: ZIndexOpt = Zio_Auto				// stack order is equal to its parents 
 			| `Zio_Number	Int		// sets the stack order of the element
 			
-derive gHpr HtmlStyle	
+//derive gHpr HtmlStyle	
 derive gHpr Style	

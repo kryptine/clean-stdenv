@@ -7,6 +7,33 @@ import StdHtml
 Start world  = print_to_stdout SimplePage world
 
 
+StylePage = CSS [Style "style01" [BgColor (`Color (`Colorname Red))
+		,BdBottomStyle Bds_Dotted
+		,BgRepeat Rop_Repeat_X
+		,ClassClear Clo_Both
+		,ClassCursor Cuo_Se_Resize
+		,ClassDisplay Dio_Inline_Table
+		,DimMaxWidth (Mas_Percent 45)
+		,DimWidth (Szo_Length 33)
+		,FntFamily "Arial, Times New Roman"
+		,FntVariant Vro_Small_Caps
+		,FntFont [Fto_Icon,`Fto_Size Fso_XX_Small,`Fto_Style Fst_Italic]
+		,GenQuotes (Qto_Quotes "«" "»" "'" "'")
+		,GenCounterIncr (Cto_IdentInt "value" 2)
+		,LstStylePos Lpo_Inside
+		,LstStyleType Lto_Decimal_Leading_Zero
+		,MrgMargin [`Mg_Bottom Szo_Auto, `Mg_Top (Szo_Percent 24)]
+		,MrgLeft (Szo_Length 42)
+		,PadBottom (Lgt_Pixel 41)
+		,PadPadding [Lgt_Pixel 41,Lgt_Percent 12]
+		,PosVertAlign Vao_Bottom
+		,TblCaptSide Sdo_Bottom
+		,TblLayout Lyo_Fixed		
+		]
+		,Style "style02" [ClassCursor (`Cuo_Url "prueba/prueba.cur")
+		,Background [`Bg_Color (`Colorname Blue), `Bg_Attach Ato_Fixed, `Bg_Repeat Rop_No_Repeat]]
+		]
+
 FramesPage = Html (Head [] [Hd_Title "Simple Frames page test"])
 		(Frameset []
 		[Frame [Fra_Src "http://www.upv.es", Fra_Scrolling No]
@@ -14,13 +41,30 @@ FramesPage = Html (Head [] [Hd_Title "Simple Frames page test"])
 		, Frame [Fra_Src "prueba.html"]
 		])
 
-SimplePage = Html (Head [] [Hd_Title "Simple page test"])
+SimplePage = Html (Head [] [Hd_Title "Simple page test", Hd_Style [] 
+				[ Style "style01" 
+					[BgColor (`Color (`Colorname Red))
+					,BdBottomStyle Bds_Dotted
+					,BgRepeat Rop_Repeat_X
+					,ClassClear Clo_Both
+					,ClassCursor Cuo_Se_Resize
+					,ClassDisplay Dio_Inline_Table
+			//		,GenContent (Con_CountersNameType "test01" "secondstring" Lto_Hiragana)
+					,DimMaxWidth (Mas_Percent 45)
+					,DimWidth (Szo_Length 133)
+					,FntFamily "Arial, Times New Roman"		
+					]
+				, Style "style02" 
+					[ClassCursor (`Cuo_Url "prueba/prueba.cur")
+					,Background [`Bg_Color (`Colorname Blue), `Bg_Attach Ato_Fixed, `Bg_Repeat Rop_No_Repeat]]
+					]
+				])
 		(Body [Batt_background "./back35.jpg"]
 		[Center [] "PRUEBA DE HTML"
 		, Br
-		, A [Lnk_Href "http://www.google.com", Lnk_Target Trg__Blank] [Txt "Enlace a Google"]
+		, A [`Lnk_Std [Std_Class "style01"],Lnk_Href "http://www.google.com", Lnk_Target Trg__Blank] [Txt "Enlace a Google"]
 		, Ins [Ins_Datetime "20041123"] "Insertado"
-		, Script [Scr_Type TypeJavascript, Scr_Language JavaScript] "document.write('Hello World!')"
+//		, Script [Scr_Type TypeJavascript, Scr_Language JavaScript] "document.write('Hello World!')"
 		, Br
 		, Body_Object [Oba_ClassId "clsid:F08DF954-8592-11D1-B16A-00C0F0283628", `Oba_Std [Std_Id "Slider1"], Oba_Width 100, Oba_Height 50] [
 		Param [Pam_Name "BorderStyle", Pam_Value (IV 1)],
@@ -37,7 +81,7 @@ SimplePage = Html (Head [] [Hd_Title "Simple page test"])
 		[Area [Are_Shape Sopt_Rect, Are_Coords "0,0,82,126", Are_Href "sun.htm", Are_Target Trg__Blank]
 		, Area [Are_Shape Sopt_Circle, Are_Coords "90,58,3", Are_Href "mercury.htm", Are_Target Trg__Blank]]
 		, Hr []
-		, Dl [] [Dt [] [Txt "Prueba1", B [`Std_Attr [Std_Title "Prueba"],`Std_Events [OnClick (Script [] (SScript "ScriptPrueba"))]] "negrita"],Dt [] [Txt "Prueba2", I [] "Italic"], Dd [] [Txt "Desc2"],Dt [] [Txt "Prueba3"]]
+//		, Dl [] [Dt [] [Txt "Prueba1", B [`Std_Attr [Std_Title "Prueba"],`Std_Events [OnClick (SScript "ScriptPrueba")]] "negrita"],Dt [] [Txt "Prueba2", I [] "Italic"], Dd [] [Txt "Desc2"],Dt [] [Txt "Prueba3"]]
 		, Form [Frm_Action "prueba.php", Frm_Method Post, Frm_Name "FormPrueba", Frm_Target Trg__Blank] [Fieldset [] [Legend [Leg_Align Aln_Right] "Legend of Fieldset"
 		, Select [Sel_Size 3] [Optgroup [Opg_Label "Opg1"],Option [] "Option 1"
 		, Option [] "Option 2"
@@ -76,8 +120,6 @@ SimplePage = Html (Head [] [Hd_Title "Simple page test"])
 		, Br
 		, Font [Fnt_Size 7, Fnt_Face "Arial", Fnt_Color (`RGBColor 	(RGBColor 0 121 59))] [Bdo [] "Texto Rtl"]]]
 		, P [Pat_Align Aln_Right] [Txt "Prueba de escritura en el HTML2"]
-		, Input [Inp_Type Inp_Radio, Inp_Name "RadioName1", Inp_Value (SV "RadioVal1"), `Inp_Std [Std_Id "Check1"], Inp_Checked Checked] ""
-		, Input [Inp_Type Inp_Radio, Inp_Name "RadioName1", Inp_Value (SV "RadioVal2"), `Inp_Std [Std_Id "Check1"]] ""
 		])
 
 /*MyPage  = Head 

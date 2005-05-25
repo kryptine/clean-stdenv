@@ -274,6 +274,7 @@ globalstateform formname updatename globalname globalstate
 =	Form 	[ Frm_Name formname
 			, Frm_Action MyPhP
 			, Frm_Method Post
+			, Frm_Enctype "multipart/form-data"			// what to do to enable large data ??
 			]
 			[ Input [ Inp_Name updatename
 					, Inp_Type Inp_Hidden
