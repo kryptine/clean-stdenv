@@ -447,4 +447,17 @@ where
 openNoticeScript ::  !String !Int !Int !Html -> Script
 openNoticeScript scriptname height width html 
 	= openWindowScript scriptname height width False False False False False False html
+
+// special objects ...
+
+mediaPlayer:: (Int,Int) Bool String -> BodyTag
+mediaPlayer (height,width) autostart filename
+	= Body_Object 
+		[ Oba_ClassId "CLSID:05589FA1-C356-11CE-BF01-00AA0055595A"
+		, Oba_Height height
+		, Oba_Width width
+		] 
+		[ Param [ Pam_Name "FileName", Pam_Value (SV filename) ]
+		, Param [ Pam_Name "autostart", Pam_Value (SV (toString autostart)) ]
+		]
 	

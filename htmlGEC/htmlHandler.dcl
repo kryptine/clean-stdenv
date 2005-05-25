@@ -86,12 +86,6 @@ mkApplyEditForm	:: !FormId 	d !d					!*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{
 	
 instance toBool CheckBox, Button, RadioButton		// True if checkbox checked, button pressed
 
-// Some default constants used for the length of input boxes
-
-defsize  :== 10										// size of inputfield
-defpixel :== 83										// size in pixels for buttons, pull-down buttons
-backcolor :== "#6699CC"								// background color of non-editable fields
-
 // generic functions that do the real work,
 // end user only has to derive them when using the functions above
 

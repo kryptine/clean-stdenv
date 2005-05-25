@@ -31,6 +31,7 @@ It should display a page in the same way as the original application you copied.
 
 5. Now modify the application as desired. Test the page using a browser.
 
+
 Have fun,
 
 Rinus.
@@ -39,17 +40,17 @@ Rinus.
 
 To do list:
 
-solve some known bugs:
+Known bugs:
 - don't use html command symbols or control characters in button or form names
 - buttons don't work if their names contains spaces
 - if states are getting very large, nothing is displayed: have to sort out whom is to blame
  
-conceptual:
+Conceptual:
 
 - make storage of higher order function possible (involves dynamics)
+- incorporate reading / writing to files
 
-applications:
+Applications:
 
-- web shop demo
-- process algebra demo
-- family tree demo
+- The following applications are under development: web shop, process algebra, family tree
+

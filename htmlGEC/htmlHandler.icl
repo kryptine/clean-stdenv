@@ -3,7 +3,7 @@ implementation module htmlHandler
 import StdEnv, ArgEnv, StdMaybe
 import htmlDataDef, htmlTrivial
 import StdGeneric
-import htmlEncodeDecode
+import htmlEncodeDecode, htmlStylelib
 import GenParse, GenPrint
 
 derive gPrint (,), (,,), (,,,), UpdValue
@@ -13,11 +13,10 @@ derive gUpd		   (,,), (,,,)
  
 :: *HSt 		= 	{ cntr 		:: InputId		// counts position in expression
 					, states 	:: *FormStates  // all form states are collected here ... 	
+					, world		:: *World		// to enable all other kinds of I/O
 					}	
-//:: *HSt 		:== (InputId,*FormStates)	// all form states are collected here ... 	
 
 :: FormId	 	:== String					// unique id identifying the form
-//:: FormValue 	:== String					// current Clean value to remember encoded in a String
 :: InputId	 	:== Int						// unique id for every constructor and basic value appearing in the state
 
 :: FormUpdate	:== (InputId,UpdValue)		// info obtained when form is updated
@@ -32,14 +31,11 @@ derive bimap Form, []
 
 toHtml :: a -> BodyTag | gForm {|*|} a
 toHtml a 
-# (na,_) = gForm{|*|} "__toHtml" a Display mkHSt
+# (na,_) = gForm{|*|} "__toHtml" a Display {cntr = 0, states = emptyFormStates, world = undef}
 = BodyTag na.body
 
 toBody :: (Form a) -> BodyTag
 toBody form = BodyTag form.body
-
-mkHSt ::  *HSt
-mkHSt = {cntr = 0, states = initFormStates}
 
 setCntr :: InputId *HSt -> *HSt
 setCntr i hst = {hst & cntr = i}
@@ -53,16 +49,13 @@ ifEdit Display  then else = else
 
 doHtml :: (*HSt -> (Html,!*HSt)) *World -> *World
 doHtml pagehandler world 
-= print_to_stdout (Html header (Body [extra_att:attr] [/*debugstate,*/ addScript states:bodytags])) world
+# (Html (Head headattr headtags) (Body attr bodytags),{states,world}) = pagehandler {cntr = 0, states = initFormStates, world = world}
+//= print_to_stdout (Html header (Body attr [addScript states:bodytags])) world
+
+= print_to_stdout (Html (Head headattr [extra_style:headtags]) (Body (extra_body_attr ++ attr) [addScript states:bodytags])) world
 where
-	(Html header (Body attr bodytags),{states}) = pagehandler mkHSt
-	extra_att = Batt_background "back35.jpg "
-
-// for debugging only
-/*	debugstate = toHtml formStates
-
-derive gForm FormState, Tree_
-*/
+	extra_body_attr = [Batt_background "back35.jpg",`Batt_Std [CleanStyle]]
+	extra_style = Hd_Style [] CleanStyles	
 
 
 mkEditForm:: !FormId d !Mode !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
@@ -119,28 +112,28 @@ toFormid d (Just v) = v
 // swiss army nife editor that makes coffee too ...
 
 mkViewForm :: !FormId d !Mode !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
-mkViewForm formid initdata mode bm=:{toForm, updForm, fromForm, resetForm}  {states = formStates} 
-# (isupdated,prevview,formStates) = findFormInfo formid formStates // determine current value in the state store
-= calcnextView isupdated prevview formStates
+mkViewForm formid initdata mode bm=:{toForm, updForm, fromForm, resetForm}  {states,world} 
+# (isupdated,view,states) = findFormInfo formid states // determine current value in the state store
+= calcnextView isupdated view states
 where
-	calcnextView isupdated prevview formStates
-	# newview 		= toForm   initdata  prevview		// map value to view domain, given previous view value
-	# updateview	= updForm  isupdated newview		// apply update function telling user if an update has taken place
-	# newval		= fromForm isupdated updateview		// convert back to data domain	 
-	# nextview		= case resetForm of					// optionally reset the view herafter for next time
-						Nothing 	-> updateview		 
-						Just reset 	-> reset updateview
-	# (viewform,{states = formStates})							// make a form for it
-					= gForm{|*|} formid nextview mode {cntr = 0,states = formStates}
+	calcnextView isupdated view states
+	# view 		= toForm   initdata  view		// map value to view domain, given previous view value
+	# view		= updForm  isupdated view		// apply update function telling user if an update has taken place
+	# newval	= fromForm isupdated view		// convert back to data domain	 
+	# view		= case resetForm of					// optionally reset the view herafter for next time
+						Nothing 	-> view		 
+						Just reset 	-> reset view
+	# (viewform,{states,world})							// make a form for it
+					= gForm{|*|} formid view mode {cntr = 0,states = states, world = world}
 	| viewform.changed && not isupdated 				// only true when a user defined specialisation is updated, recalculate the form
-		= calcnextView True (Just viewform.value) formStates
+		= calcnextView True (Just viewform.value) states
 
-	# formStates	= replaceState formid (viewform.value) formStates	// store new value into the store of states
+	# states	= replaceState formid (viewform.value) states	// store new value into the store of states
 
 	= (	{changed	= isupdated
 		, value		= newval
 		, body		= viewform.body
-		},{cntr = 0,states = formStates})
+		},{cntr = 0, states = states, world = world})
 
 	findFormInfo :: FormId *FormStates -> (Bool,Maybe a,*FormStates) | gUpd{|*|} a & gParse{|*|} a
 	findFormInfo formid formStates
@@ -183,10 +176,10 @@ where
 // the value might have been changed with this editor, so the value returned might differ form the value you started with !
 
 specialize :: (FormId a Mode *HSt -> (Form a,*HSt)) FormId a Mode *HSt -> (Form a,*HSt) | gUpd {|*|} a
-specialize editor name v  mode hst=:{cntr = inidx,states = formStates}
+specialize editor name v  mode hst=:{cntr = inidx,states = formStates,world}
 # nextidx = incrIndex inidx v			// this value will be repesented differently, so increment counter 
-# (nv,{states}) 	= editor codedname v mode {cntr = 0,states = formStates}
-= (nv,{cntr=nextidx,states = states})
+# (nv,{states,world}) 	= editor codedname v mode {cntr = 0,states = formStates,world = world}
+= (nv,{cntr=nextidx,states = states,world = world})
 where
 	codedname = name +++ "_" +++ toString inidx
 
@@ -221,6 +214,7 @@ mkInput size formid Edit val updval hst=:{cntr}
 				, 	Inp_Value val
 				,	Inp_Name (encodeInfo (formid,cntr,updval))
 				,	Inp_Size size
+				, 	`Inp_Std [EditBoxStyle]
 				,	`Inp_Events	[OnChange callClean]
 				] ""
 		,setCntr (cntr+1) hst)
@@ -228,12 +222,10 @@ mkInput size formid Display val _ hst=:{cntr}
 	= ( Input 	[	Inp_Type Inp_Text
 				, 	Inp_Value val
 				,	Inp_ReadOnly ReadOnly
-				, 	`Inp_Std [Std_Style color]
+				, 	`Inp_Std [DisplayBoxStyle]
 				,	Inp_Size size
 				] ""
 		,setCntr (cntr+1) hst)
-where
-	color = "background-color:" +++ backcolor
 
 gForm{|UNIT|}  _ _ _ hst 
 = ({changed=False, value=UNIT, body=[EmptyBody]},hst)
@@ -289,8 +281,7 @@ where
 	mkConsSel:: Int [String] Int String -> BodyTag
 	mkConsSel cntr list nr formid
 		= Select 	[ Sel_Name ("CS")
-					, setstyle
-					, changeable
+					: styles
 					]
 					[Option  
 						[Opt_Value (encodeInfo (formid,cntr,UpdC elem))
@@ -300,18 +291,18 @@ where
 						\\ elem <- list & j <- [0..]
 					] 
 		where
-			setstyle	= case mode of
-							Edit 		-> `Sel_Std	[Std_Style width]
-							Display 	-> `Sel_Std	[Std_Style (width +++ ";" +++ color)]
-			changeable = case mode of
-							Edit 		-> `Sel_Events [OnChange callClean]
-							Display 	-> Sel_Disabled Disabled
+			styles = case mode of
+						Edit	-> 	[ `Sel_Std	[Std_Style width, EditBoxStyle]
+									, `Sel_Events [OnChange callClean]
+									]
+						Display ->	[ `Sel_Std	[Std_Style width, DisplayBoxStyle]
+									,	Sel_Disabled Disabled
+									]
 			optionstyle	= case mode of
 							Edit 		-> []
-							Display 	-> [`Opt_Std [Std_Style color]]
+							Display 	-> [`Opt_Std [DisplayBoxStyle]]
 
 			width = "width:" +++ (toString defpixel) +++ "px"
-			color = "background-color:" +++ backcolor
 
 gForm{|FIELD of d |} gHx formid (FIELD x) mode hst 
 # (nx,hst) = gHx formid x mode hst
@@ -323,11 +314,9 @@ where
 	fieldname =Input 	[	Inp_Type Inp_Text
 						, 	Inp_Value (SV (prettyfy d.gfd_name +++ ": "))
 						,	Inp_ReadOnly ReadOnly
-						, 	`Inp_Std [Std_Style color]
+						, 	`Inp_Std [DisplayBoxStyle]
 						,	Inp_Size maxsize
 						] ""
-
-	color = "background-color:" +++ backcolor
 
 	prettyfy name = mkString [toUpper lname : addspace lnames]
 	where
@@ -646,14 +635,14 @@ derive gPrint PullDownMenu
 				| TS Int String						// Input box of size Size for Strings
 
 gForm{|TextInput|} formid (TI size i) mode hst 	
-# (body,{cntr,states}) = mkInput size formid mode (IV i) (UpdI i) hst
-= ({changed=False, value=TI size i, body=[body]},{cntr = cntr+2, states = states})
+# (body,{cntr,states,world}) = mkInput size formid mode (IV i) (UpdI i) hst
+= ({changed=False, value=TI size i, body=[body]},{cntr = cntr+2, states = states,world=world})
 gForm{|TextInput|} formid (TR size r) mode hst	
-# (body,{cntr,states}) = mkInput size formid mode (RV r) (UpdR r) hst
-= ({changed=False, value=TR size r, body=[body]},{cntr = cntr+2, states = states})
+# (body,{cntr,states,world}) = mkInput size formid mode (RV r) (UpdR r) hst
+= ({changed=False, value=TR size r, body=[body]},{cntr = cntr+2, states = states,world=world})
 gForm{|TextInput|} formid (TS size s) mode hst
-# (body,{cntr,states}) = mkInput size formid mode (SV s) (UpdS s) hst 
-= ({changed=False, value=TS size s, body=[body]},{cntr = cntr+2, states = states})
+# (body,{cntr,states,world}) = mkInput size formid mode (SV s) (UpdS s) hst 
+= ({changed=False, value=TS size s, body=[body]},{cntr = cntr+2, states = states,world=world})
 
 gUpd{|TextInput|} (UpdSearch (UpdI ni) 0) 	(TI size i)  = (UpdDone,TI size ni)		// update integer value
 gUpd{|TextInput|} (UpdSearch (UpdR nr) 0) 	(TR size r)  = (UpdDone,TR size nr)		// update integer value

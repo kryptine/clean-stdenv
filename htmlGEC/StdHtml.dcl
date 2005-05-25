@@ -7,18 +7,21 @@ import
 
 // intended for end user:
 
-	 		htmlDataDef			// Clean's ADT representation of Html including generic function to generate Html 
+	 		htmlDataDef			// Clean's ADT representation of Html
 		,	htmlStyleDef		// Clean's ADT representation of Style sheets
 		
-		,	htmlHandler			// generic stuf to convert any Clean type to Html		
-		,	htmlFormlib			// library with handy predfined forms, similar to the AGEC lib
+		,	htmlHandler			// all kinds of basic functions to generate forms 
+		,	htmlFormlib			// a library of more sophisticated form functions 
 		,	htmlArrow			// arrow instantiations for html forms
 
-		,	GenParse			// Standard Generic Parse module from generic library
-		,	GenPrint			// Standard Generic Print module from generic library
+// free to use
+
+		,	htmlStylelib		// style definitions   
 
 // internal stuf
 		
 		,	htmlEncodeDecode	// low level communication between client browser and the clean executable
 		,	htmlTrivial			// some trivial generic bimap derives
+		,	GenParse			// Standard Generic Parse module from generic library
+		,	GenPrint			// Standard Generic Print module from generic library
 		

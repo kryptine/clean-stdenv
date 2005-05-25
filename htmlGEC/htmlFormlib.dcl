@@ -95,3 +95,8 @@ openWindowScript ::  !String !Int !Int !Bool !Bool !Bool !Bool !Bool !Bool !Html
 // openNoticeScript simplified version of openWindowScript
 // parameters are resp: scriptname() height width html
 openNoticeScript ::  !String !Int !Int !Html -> Script
+
+// special objects ...
+
+mediaPlayer:: (Int,Int) Bool String -> BodyTag	// plays movies, music etc
+
