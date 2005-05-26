@@ -13,11 +13,8 @@ TableRowStyle 		:: Standard_Attr	// for tables
 
 // Some related default constants used for the length of input boxes
 
-defsize  :== 8										// size of inputfield
-defpixel :== 83										// size in pixels for buttons, pull-down buttons
-//backcolor :== "#6699CC"								// background color of non-editable fields
-
-
+defsize  :== 8							// size of inputfield
+defpixel :== 83							// size in pixels for buttons, pull-down buttons
 
 // definition of clean styles
 

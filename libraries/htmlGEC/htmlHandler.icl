@@ -52,7 +52,7 @@ doHtml pagehandler world
 # (Html (Head headattr headtags) (Body attr bodytags),{states,world}) = pagehandler {cntr = 0, states = initFormStates, world = world}
 //= print_to_stdout (Html header (Body attr [addScript states:bodytags])) world
 
-= print_to_stdout (Html (Head headattr [extra_style:headtags]) (Body (extra_body_attr ++ attr) [addScript states:bodytags])) world
+= print_to_stdout (Html (Head headattr [extra_style:headtags]) (Body (extra_body_attr ++ attr) [convStates states:bodytags])) world
 where
 	extra_body_attr = [Batt_background "back35.jpg",`Batt_Std [CleanStyle]]
 	extra_style = Hd_Style [] CleanStyles	
@@ -163,12 +163,17 @@ where
 			(Just (sid,pos,UpdC s), _) 								= (Just (pos,UpdC s)  ,findState sid formStates)
 			else = case CheckUpdate of
 					(Just (sid,pos,UpdI i), Just ni) 				= (Just (pos,UpdI ni) ,findState sid formStates) 
+					(Just (sid,pos,UpdI i), _) 						= (Just (pos,UpdI i)  ,findState sid formStates) 
 					else = case CheckUpdate of
 							(Just (sid,pos,UpdR r), Just nr) 		= (Just (pos,UpdR nr) ,findState sid formStates) 
+							(Just (sid,pos,UpdR r), _) 				= (Just (pos,UpdR r) ,findState sid formStates) 
 							else = case CheckUpdate of
-								(Just (sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns) ,findState sid formStates) 
-								(Just (sid,pos,UpdS s),	_)			= (Just (pos,UpdS AnyInput)  ,findState sid formStates) 
-								(upd,new) 							= (Nothing, findState formid formStates)
+									(Just (sid,pos,UpdB b), Just nb) 		= (Just (pos,UpdB nb) ,findState sid formStates) 
+									(Just (sid,pos,UpdB b), _) 				= (Just (pos,UpdB b) ,findState sid formStates) 
+									else = case CheckUpdate of
+										(Just (sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns) ,findState sid formStates) 
+										(Just (sid,pos,UpdS s),	_)			= (Just (pos,UpdS AnyInput)  ,findState sid formStates) 
+										(upd,new) 							= (Nothing, findState formid formStates)
 		| otherwise = (Nothing, findState formid formStates)
 
 // specialize has to be used if a programmer want to specialize gForm
@@ -296,7 +301,7 @@ where
 									, `Sel_Events [OnChange callClean]
 									]
 						Display ->	[ `Sel_Std	[Std_Style width, DisplayBoxStyle]
-									,	Sel_Disabled Disabled
+									,  Sel_Disabled Disabled
 									]
 			optionstyle	= case mode of
 							Edit 		-> []
@@ -308,9 +313,11 @@ gForm{|FIELD of d |} gHx formid (FIELD x) mode hst
 # (nx,hst) = gHx formid x mode hst
 = ({changed=nx.changed
 	,value=FIELD nx.value
-	,body=[STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[fieldname,BodyTag nx.body]]]
+	,body=[STable [Tbl_CellPadding (Pixels 1), Tbl_CellSpacing (Pixels 1)] [[fieldname,BodyTag nx.body]]]
 	},hst)
 where
+//	fieldname2 = Txt [`Std_Attr [DisplayBoxStyle]] (prettyfy d.gfd_name +++ ": ")
+						
 	fieldname =Input 	[	Inp_Type Inp_Text
 						, 	Inp_Value (SV (prettyfy d.gfd_name +++ ": "))
 						,	Inp_ReadOnly ReadOnly

@@ -12,6 +12,7 @@ derive gHpr 	Tree
 :: Tree a = Node (Tree a) a (Tree a) | Leaf
 
 
+Start world  = myTest
 Start world  = doHtml MyPage4 world
 
 MyPage4  hst
@@ -96,3 +97,26 @@ where
 	mkHtml s tags hst 	= (Html (header s) (body tags),hst)
 	header s 			= Head [`Hd_Std [Std_Title s]] [] 
 	body tags 			= Body [] tags
+
+:: Test = E.a: {dyn::Dynamic,v::a,p::a->String}
+
+printTest :: Test -> String
+printTest {v,p} = p v
+
+initTest :: a  -> Test | TC a &  gPrint{|*|} a 
+initTest nv = {dyn = dynamic nv,v = nv,p = printToString}
+
+storeTest :: a Test -> Test | TC a &  gPrint{|*|} a 
+storeTest nv {dyn = (v::a^)} = {dyn = dynamic nv,v = nv,p = printToString}
+storeTest nv old = old
+
+fetchTest :: Test -> Maybe a | TC a
+fetchTest {dyn = (v::a^)} = Just v
+fetchTest _ = Nothing
+
+myTest
+# test = initTest [1]
+# test = storeTest [1..10] test
+# mylist = fetchTest test
+# test = storeTest (map (\x -> x * x * 1) (fromJust mylist)) test
+= printTest test
