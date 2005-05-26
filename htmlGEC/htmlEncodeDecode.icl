@@ -6,34 +6,19 @@ import StdEnv, ArgEnv, StdMaybe
 import htmlDataDef, htmlTrivial
 import GenPrint, GenParse
 
-// state preparation
+// State Handling
 
 :: *FormStates 	:== Tree_ (String,FormState)		// State of forms is internally stored in a tree
 :: Tree_ a 		= Node_ (Tree_ a) a (Tree_ a) | Leaf_
-:: FormState 	= OldState String					// old states are turned into garbage in the end 
+:: FormState 	= OldState String					// Old states will become garbage when the final states are reached
 				| NewState String
-:: HtmlState :== [(String,String)]				// The state is stored in html as list and not as a tree
-:: FormId 		= String
 
-instance < FormState
-where
-	(<) _ _ = True
+:: HtmlState :== [(String,String)]					// For convenience, the state is stored in html as a list and not as a tree
 
-emptyFormStates :: *FormStates
-emptyFormStates = Leaf_
+// reconstruct HtmlState out of the information obtained from browser
 
-initFormStates :: *FormStates
-initFormStates = Balance (sort [(formid,OldState state) \\ (formid,state) <- CheckHtmlState | formid <> ""])
-where
-	Balance [] = Leaf_
-	Balance [x] = Node_ Leaf_ x Leaf_
-	Balance xs
-		= case splitAt (length xs/2) xs of
-			(a,[b:bs]) = Node_ (Balance a) b (Balance bs)
-			(as,[]) = Node_   (Balance (init as)) (last as) Leaf_
-
-//	CheckHtmlState :: HtmlState
-CheckHtmlState 
+retrieveHtmlState :: HtmlState
+retrieveHtmlState 
 # (_,_,_,state) = DecodedStateFormBrowser
 =: splitString (mkList state)
 where
@@ -48,6 +33,27 @@ where
 			(formid,formvalue) = mscan '"' (stl (stl elem)) // skip '("'
 			stl [] = []
 			stl [x:xs] = xs 
+
+// convert this HtmlState into FormStates used internally
+
+initFormStates :: *FormStates
+initFormStates = Balance (sort [(formid,OldState state) \\ (formid,state) <- retrieveHtmlState | formid <> ""])
+where
+	Balance [] = Leaf_
+	Balance [x] = Node_ Leaf_ x Leaf_
+	Balance xs
+		= case splitAt (length xs/2) xs of
+			(a,[b:bs]) = Node_ (Balance a) b (Balance bs)
+			(as,[]) = Node_   (Balance (init as)) (last as) Leaf_
+
+// FormStates abstract data handling routines
+
+emptyFormStates :: *FormStates
+emptyFormStates = Leaf_
+
+instance < FormState
+where
+	(<) _ _ = True
 
 findState :: !String *FormStates -> (Bool,Maybe a,*FormStates)	| gParse{|*|} a 
 findState sid states = findState` sid states
@@ -72,8 +78,25 @@ replaceState sid val (Node_ left a=:(id,_) right)
 | sid < id 	= Node_ (replaceState sid val left) a right
 | otherwise = Node_ left a (replaceState sid val right)
 
-addScript :: *FormStates -> BodyTag
-addScript allFormStates
+// NewState Handling routines 
+
+:: NewState = E.a: {dynval::Dynamic,val::a,print::a->String}
+
+initNewState :: a -> NewState | TC a &  gPrint{|*|} a 
+initNewState nv = {dynval = dynamic nv,val = nv,print = printToString}
+
+storeNewState :: a NewState -> NewState | TC a &  gPrint{|*|} a 
+storeNewState nv {dynval = (val::a^)} = {dynval = dynamic nv,val = nv,print = printToString}
+storeNewState nv old = old
+
+retrieveNewState :: NewState -> Maybe a | TC a
+retrieveNewState {dynval = (v::a^)} = Just v
+retrieveNewState _ = Nothing
+
+// Convert newly created FormStates to Html Code
+
+convStates :: *FormStates -> BodyTag
+convStates allFormStates
 =	BodyTag
 	[ submitscript    globalFormName updateInpName
 	, globalstateform globalFormName updateInpName globalInpName (SV encodedglobalstate) 
@@ -93,6 +116,61 @@ where
 								  urlEncodeS ")$" +++ urlEncodeState xsys 
 	urlEncodeS :: String -> String
 	urlEncodeS s = (mkString o urlEncode o mkList) s
+	
+	submitscript :: String String -> BodyTag
+	submitscript formname updatename
+	=	Script [] (SScript
+		(	" function toclean(inp)" +++
+			" { document." +++
+				formname  +++ "." +++
+				updatename +++ ".value=inp.name+\"=\"+inp.value;" +++
+				"document." +++ formname +++ ".submit(); }"
+		))
+
+	// form that contains global state and empty input form for storing updated input
+		
+	globalstateform :: String String String Value -> BodyTag
+	globalstateform formname updatename globalname globalstate
+	=	Form 	[ Frm_Name formname
+				, Frm_Action MyPhP
+				, Frm_Method Post
+				, Frm_Enctype "multipart/form-data"			// what to do to enable large data ??
+				]
+				[ Input [ Inp_Name updatename
+						, Inp_Type Inp_Hidden
+						] ""
+				, Input [ Inp_Name globalname
+						, Inp_Type Inp_Hidden
+						, Inp_Value globalstate
+						] ""
+				]		 
+
+	globalFormName :: String
+	globalFormName =: "CleanForm"
+	
+	updateInpName :: String
+	updateInpName =: "UD"
+	
+	globalInpName :: String
+	globalInpName =: "GS"
+	
+	selectorInpName :: String
+	selectorInpName =: "CS"
+
+// script for transmitting name and value of changed input 
+
+callClean :: Script
+callClean =: SScript "toclean(this)"
+
+// encoding and decoding of Clean values 
+
+encodeInfo :: a -> String | gPrint{|*|} a
+encodeInfo inp = encoding  
+where
+	encoding = mkString (urlEncode (mkList (printToString inp)))
+
+decodeInfo :: String -> Maybe a | gParse{|*|} a
+decodeInfo s = parseString (mkString (urlDecode (mkList s)))
 
 // determining the update information
 
@@ -127,15 +205,7 @@ CheckUpdate
 
 derive gParse (,), (,,)
 
-// encoding and decoding of Clean values 
 
-encodeInfo :: a -> String | gPrint{|*|} a
-encodeInfo inp = encoding  
-where
-	encoding = mkString (urlEncode (mkList (printToString inp)))
-
-decodeInfo :: String -> Maybe a | gParse{|*|} a
-decodeInfo s = parseString (mkString (urlDecode (mkList s)))
 
 // all input information from the browser is obtained once via the arguments passed to this executable
 // defined as CAFs such that they are calculated only once
@@ -196,12 +266,6 @@ where
 
 // low level url encoding decoding
 
-mkString :: [Char] -> String
-mkString listofchar = {elem \\ elem <- listofchar}
-
-mkList :: String -> [Char]
-mkList string = [e \\ e <-: string]
-
 mscan c list = case (span ((<>) c) list) of  // scan like span but it removes character
 				(x,[])	= (x,[])
 				(x,y)	= (x,tl y)
@@ -238,53 +302,18 @@ where
                 | i <= toInt '9' = i - toInt '0'
                 = i - (toInt 'A' - 10)
 
-
 urlDecodeS :: String -> String
 urlDecodeS s = (mkString o urlDecode o mkList) s
 
+// converting strings to lists and backwards
 
-// script for transmitting name and value of changed input 
+mkString :: [Char] -> String
+mkString listofchar = {elem \\ elem <- listofchar}
 
-callClean :: Script
-callClean =: SScript "toclean(this)"
+mkList :: String -> [Char]
+mkList string = [e \\ e <-: string]
 
-globalFormName :: String
-globalFormName =: "CleanForm"
 
-updateInpName :: String
-updateInpName =: "UD"
 
-globalInpName :: String
-globalInpName =: "GS"
 
-selectorInpName :: String
-selectorInpName =: "CS"
-
-submitscript :: String String -> BodyTag
-submitscript formname updatename
-=	Script [] (SScript
-	(	" function toclean(inp)" +++
-		" { document." +++
-			formname  +++ "." +++
-			updatename +++ ".value=inp.name+\"=\"+inp.value;" +++
-			"document." +++ formname +++ ".submit(); }"
-	))
-
-// form that contains global state and empty input form for storing updated input
-	
-globalstateform :: String String String Value -> BodyTag
-globalstateform formname updatename globalname globalstate
-=	Form 	[ Frm_Name formname
-			, Frm_Action MyPhP
-			, Frm_Method Post
-			, Frm_Enctype "multipart/form-data"			// what to do to enable large data ??
-			]
-			[ Input [ Inp_Name updatename
-					, Inp_Type Inp_Hidden
-					] ""
-			, Input [ Inp_Name globalname
-					, Inp_Type Inp_Hidden
-					, Inp_Value globalstate
-					] ""
-			]		 
 

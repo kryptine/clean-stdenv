@@ -3,7 +3,7 @@ implementation module htmlDataDef
 import StdEnv, ArgEnv
 
 import htmlPrintUtil
-import htmlStyleDef
+import htmlStyleDef, htmlStylelib
 
 import StdGeneric
 
@@ -105,6 +105,8 @@ gHpr{|BodyTag|} prev (Textarea attr text)	 	= prev <+> htmlAttrCmnd "textarea"	a
 gHpr{|BodyTag|} prev (Tr attr body)				= prev <+> htmlAttrCmnd "tr"		attr		body
 gHpr{|BodyTag|} prev (Tt attr text)				= prev <+> htmlAttrCmnd "tt" 		attr		text
 gHpr{|BodyTag|} prev (Txt text)  				= prev <+ text
+
+//gHpr{|BodyTag|} prev (Txt attr text)  				= prev <+> htmlAttrCmnd "b" 		attr		text
 gHpr{|BodyTag|} prev (U attr text)	 			= prev <+> htmlAttrCmnd "u" 		attr		text
 gHpr{|BodyTag|} prev (Ul attr body)	 			= prev <+> htmlAttrCmnd "ul" 		attr		body
 gHpr{|BodyTag|} prev (Var attr text) 			= prev <+> htmlAttrCmnd "var" 		attr		text

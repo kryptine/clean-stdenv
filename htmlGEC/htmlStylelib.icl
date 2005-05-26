@@ -23,6 +23,7 @@ CleanStyles
 			[ 	BgImage (`Img_URL "images/back35.jpg")
 			,  	FntFamily "Arial, Helvetica, sans-serif"
 			, 	FntStyle Fst_Normal
+			,	FntWeight Fwo_Normal
 			, 	FntSize (Fso_Length 14)
 			, 	TxtColor (`Colorname White)
 			, 	BdColor (`Color (`HexColor (Hexnum H_9 H_C H_A H_2 H_A H_D)))	
@@ -31,13 +32,16 @@ CleanStyles
 		, Style "TableHeader"
 			[	FntFamily "Arial, Helvetica, sans-serif"
 			, 	TxtColor (`HexColor (Hexnum H_F H_E H_D H_B H_1 H_8))
-			,	BgColor (`Color (`HexColor (Hexnum H_3 H_2 H_7 H_2 H_9 H_8)))
-			,	FntWeight Fwo_Bold
+//			,	BgColor (`Color (`HexColor (Hexnum H_3 H_2 H_7 H_2 H_9 H_D)))
+			,	BgColor (`Color (`Colorname Black))
+//			,	FntWeight Fwo_Bold
+			,	FntWeight Fwo_Normal
 			,	FntSize (Fso_Length	18)
 			]
 		, Style "TableRow"
 			[	FntFamily "Arial, Helvetica, sans-serif"
-			,	BgColor (`Color (`HexColor (Hexnum H_3 H_2 H_7 H_2 H_9 H_8)))
+			,	BgColor (`Color (`HexColor (Hexnum H_3 H_2 H_7 H_2 H_9 H_D)))
+			,	FntWeight Fwo_Normal
 			,	FntSize (Fso_Length	18)
 			]
 		, Style "EditBox"
@@ -48,7 +52,7 @@ CleanStyles
 			[	FntFamily "Arial, Helvetica, sans-serif"
 			,	FntSize (Fso_Length	18)
 			, 	TxtColor (`Colorname White)
-			,	BgColor (`Color (`HexColor (Hexnum H_3 H_2 H_7 H_2 H_9 H_8)))
+			,	BgColor (`Color (`HexColor (Hexnum H_3 H_2 H_7 H_2 H_9 H_D)))
 			]
 		, Style "SectionTitle"
 			[	FntFamily "Arial, Helvetica, sans-serif"

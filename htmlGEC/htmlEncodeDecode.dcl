@@ -21,7 +21,7 @@ emptyFormStates :: *FormStates
 initFormStates 	:: *FormStates 					// initial state as received from browser
 findState 		:: !String *FormStates -> (Bool, Maybe a,*FormStates)		| gParse{|*|} a // true if form has not yet been updated 	
 replaceState 	:: !String a *FormStates -> *FormStates	| gPrint{|*|} a // replace state given FormId
-addScript 		:: *FormStates -> BodyTag		// script which stores the global state for the next round
+convStates 		:: *FormStates -> BodyTag		// script which stores the global state for the next round
 
 
 // low level encoding of information
