@@ -6,8 +6,8 @@ import StdGeneric
 import htmlEncodeDecode, htmlStylelib
 import GenParse, GenPrint
 
-derive gPrint (,), (,,), (,,,), UpdValue
-derive gParse (,), (,,), (,,,), UpdValue
+derive gPrint (,), (,,), (,,,), FormId, Livetime, UpdValue
+derive gParse (,), (,,), (,,,), FormId, Livetime, UpdValue
 derive gHpr   (,), (,,), (,,,)
 derive gUpd		   (,,), (,,,)
  
@@ -16,7 +16,6 @@ derive gUpd		   (,,), (,,,)
 					, world		:: *World		// to enable all other kinds of I/O
 					}	
 
-:: FormId	 	:== String					// unique id identifying the form
 :: InputId	 	:== Int						// unique id for every constructor and basic value appearing in the state
 
 :: FormUpdate	:== (InputId,UpdValue)		// info obtained when form is updated
@@ -31,7 +30,7 @@ derive bimap Form, []
 
 toHtml :: a -> BodyTag | gForm {|*|} a
 toHtml a 
-# (na,_) = gForm{|*|} "__toHtml" a Display {cntr = 0, states = emptyFormStates, world = undef}
+# (na,_) = gForm{|*|} {id = "__toHtml", livetime = Page} a Display {cntr = 0, states = emptyFormStates, world = undef}
 = BodyTag na.body
 
 toBody :: (Form a) -> BodyTag
@@ -44,33 +43,109 @@ ifEdit :: Mode a a -> a
 ifEdit Edit 	then else = then
 ifEdit Display  then else = else 
 
+pFormId :: String -> FormId					// persitent formid
+pFormId s = {id = s, livetime = Persistent}
+
+sFormId :: String -> FormId					// session formid
+sFormId s = {id = s, livetime = Session}
+
+nFormId :: String -> FormId					// page formid
+nFormId s = {id = s, livetime = Page}
+
 // top level function given to end user
-// it collects the html page to display, and returns the contents of all Clean GEC's / Forms created
+// it collects all the html forms to display, adds clean styles and hidden forms, ands prints the html code to stdout
 
 doHtml :: (*HSt -> (Html,!*HSt)) *World -> *World
 doHtml pagehandler world 
 # (Html (Head headattr headtags) (Body attr bodytags),{states,world}) = pagehandler {cntr = 0, states = initFormStates, world = world}
-//= print_to_stdout (Html header (Body attr [addScript states:bodytags])) world
-
-= print_to_stdout (Html (Head headattr [extra_style:headtags]) (Body (extra_body_attr ++ attr) [convStates states:bodytags])) world
+# (allformbodies,world) = convStates states world
+= print_to_stdout (Html (Head headattr [extra_style:headtags]) (Body (extra_body_attr ++ attr) [allformbodies:bodytags])) world
 where
 	extra_body_attr = [Batt_background "back35.jpg",`Batt_Std [CleanStyle]]
 	extra_style = Hd_Style [] CleanStyles	
 
+// swiss army nife editor that makes coffee too ...
 
-mkEditForm:: !FormId d !Mode !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkViewForm :: !FormId d !Mode !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
+mkViewForm formid initdata mode bm=:{toForm, updForm, fromForm, resetForm}  {states,world} 
+# (isupdated,view,states,world) = findFormInfo formid states world // determine current value in the state store
+= calcnextView isupdated view states world
+where
+	calcnextView isupdated view states world
+	# view 		= toForm   initdata  view			// map value to view domain, given previous view value
+	# view		= updForm  isupdated view			// apply update function telling user if an update has taken place
+	# newval	= fromForm isupdated view			// convert back to data domain	 
+	# view		= case resetForm of					// optionally reset the view herafter for next time
+						Nothing 	-> view		 
+						Just reset 	-> reset view
+	# (viewform,{states,world})						// make a form for it
+					= gForm{|*|} formid view mode {cntr = 0,states = states, world = world}
+	| viewform.changed && not isupdated 			// only true when a user defined specialisation is updated, recalculate the form
+		= calcnextView True (Just viewform.value) states world
+
+	# (states,world) = replaceState formid (viewform.value) states world	// store new value into the store of states
+
+	= (	{changed	= isupdated
+		, value		= newval
+		, body		= viewform.body
+		},{cntr = 0, states = states, world = world})
+
+	findFormInfo :: FormId *FormStates *World -> (Bool,Maybe a,*FormStates,*World) | gUpd{|*|} a & gParse{|*|} a & TC a
+	findFormInfo formid formStates world
+		= case (decodeInput1 formid formStates world) of
+
+			// an update for this form is detected
+
+			(Just (pos,updval), (True,Just currentState,formStates,world)) 	//state as received from browser 
+					-> (True, Just (snd (gUpd{|*|} (UpdSearch updval pos) currentState)),formStates,world)
+			(Just (pos,updval), (False,Just currentState,formStates,world)) 	// state has been updated already
+					-> (True, Just currentState,formStates,world)
+
+			// no update found, determine the current stored state
+
+			(_, (_,Just currentState, formStates,world))	
+					-> (False, Just currentState,formStates,world)
+
+			// no update, no state stored, the current value is taken as (new) state
+
+			(_,(_,_,formStates,world))	-> (False, Nothing,formStates,world)	
+	where
+		decodeInput1 :: FormId *FormStates *World-> (Maybe FormUpdate, (Bool,Maybe a, *FormStates,*World)) | gParse{|*|} a & TC a
+		decodeInput1 formid formStates world
+		| CheckUpdateId == formid.id	// this state is updated
+		= case CheckUpdate of
+			(Just (sid,pos,UpdC s), Just "") 						= (Just (pos,UpdC s)  ,findState (nformid sid) formStates world)
+			(Just (sid,pos,UpdC s), _) 								= (Just (pos,UpdC s)  ,findState (nformid sid) formStates world)
+			else = case CheckUpdate of
+					(Just (sid,pos,UpdI i), Just ni) 				= (Just (pos,UpdI ni) ,findState (nformid sid) formStates world) 
+					(Just (sid,pos,UpdI i), _) 						= (Just (pos,UpdI i)  ,findState (nformid sid) formStates world) 
+					else = case CheckUpdate of
+							(Just (sid,pos,UpdR r), Just nr) 		= (Just (pos,UpdR nr) ,findState (nformid sid) formStates world) 
+							(Just (sid,pos,UpdR r), _) 				= (Just (pos,UpdR r) ,findState (nformid sid) formStates world) 
+							else = case CheckUpdate of
+									(Just (sid,pos,UpdB b), Just nb) 		= (Just (pos,UpdB nb) ,findState (nformid sid) formStates world) 
+									(Just (sid,pos,UpdB b), _) 				= (Just (pos,UpdB b) ,findState (nformid sid) formStates world) 
+									else = case CheckUpdate of
+										(Just (sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns) ,findState (nformid sid) formStates world) 
+										(Just (sid,pos,UpdS s),	_)			= (Just (pos,UpdS AnyInput)  ,findState (nformid sid) formStates world) 
+										(upd,new) 							= (Nothing, findState formid formStates world)
+		| otherwise = (Nothing, findState formid formStates world)
+
+		nformid sid = {formid & id = sid}
+
+mkEditForm:: !FormId d !Mode !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkEditForm formid data Edit  hst
 = mkViewForm formid data Edit 
 	{toForm = toFormid , updForm = \_ v -> v , fromForm = \_ v -> v , resetForm = Nothing}  hst
 mkEditForm formid  mode data hst
 = mkSetForm formid mode data hst
 
-mkSetForm:: !FormId d !Mode !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSetForm:: !FormId d !Mode !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkSetForm formid data mode  hst
 = mkViewForm formid data mode 
 	{toForm = toFormid , updForm = \_ _ -> data , fromForm = \_ v -> v , resetForm = Nothing}  hst
 
-mkSelfForm  :: !FormId 	d !(d -> d) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkSelfForm  :: !FormId 	d !(d -> d) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkSelfForm formid initdata cbf  hst
 = mkViewForm formid initdata Edit 
 	{toForm = toFormid , updForm = update , fromForm = \_ v -> v , resetForm = Nothing}  hst
@@ -78,17 +153,17 @@ where
 	update True newval = cbf newval
 	update _ val = val
 	
-mkApplyForm :: !FormId d !(d -> d) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyForm :: !FormId d !(d -> d) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkApplyForm formid data cbf  hst
 = mkViewForm formid data Display 
 	{toForm = toFormid , updForm = \_ _ = cbf data , fromForm = \_ v -> v, resetForm = Nothing}  hst
 
-mkStoreForm :: !FormId d !(d -> d) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkStoreForm :: !FormId d !(d -> d) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkStoreForm formid data cbf  hst
 = mkViewForm formid data Display 
 	{toForm = toFormid , updForm = \_ v = cbf v , fromForm = \_ v -> v, resetForm = Nothing}  hst
 
-mkApplyEditForm	:: !FormId d !d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+mkApplyEditForm	:: !FormId d !d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkApplyEditForm formid initval inputval  hst
 = mkViewForm formid initval Edit 
 	{toForm =  toFormid , updForm = update , fromForm = \_ v -> v, resetForm = Nothing}  hst
@@ -96,7 +171,7 @@ where
 	update True  newval = newval
 	update False val    = inputval
 
-mkBimapEditor :: !FormId d !Mode !(Bimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
+mkBimapEditor :: !FormId d !Mode !(Bimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
 mkBimapEditor formid d mode {map_to,map_from} hst
 = mkViewForm formid d mode	{ toForm 	= \d v -> case v of 
 													Nothing -> map_to d
@@ -109,84 +184,17 @@ mkBimapEditor formid d mode {map_to,map_from} hst
 toFormid d Nothing = d
 toFormid d (Just v) = v
 
-// swiss army nife editor that makes coffee too ...
-
-mkViewForm :: !FormId d !Mode !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} v
-mkViewForm formid initdata mode bm=:{toForm, updForm, fromForm, resetForm}  {states,world} 
-# (isupdated,view,states) = findFormInfo formid states // determine current value in the state store
-= calcnextView isupdated view states
-where
-	calcnextView isupdated view states
-	# view 		= toForm   initdata  view		// map value to view domain, given previous view value
-	# view		= updForm  isupdated view		// apply update function telling user if an update has taken place
-	# newval	= fromForm isupdated view		// convert back to data domain	 
-	# view		= case resetForm of					// optionally reset the view herafter for next time
-						Nothing 	-> view		 
-						Just reset 	-> reset view
-	# (viewform,{states,world})							// make a form for it
-					= gForm{|*|} formid view mode {cntr = 0,states = states, world = world}
-	| viewform.changed && not isupdated 				// only true when a user defined specialisation is updated, recalculate the form
-		= calcnextView True (Just viewform.value) states
-
-	# states	= replaceState formid (viewform.value) states	// store new value into the store of states
-
-	= (	{changed	= isupdated
-		, value		= newval
-		, body		= viewform.body
-		},{cntr = 0, states = states, world = world})
-
-	findFormInfo :: FormId *FormStates -> (Bool,Maybe a,*FormStates) | gUpd{|*|} a & gParse{|*|} a
-	findFormInfo formid formStates
-		= case (decodeInput1 formid formStates) of
-
-			// an update for this form is detected
-
-			(Just (pos,updval), (True,Just currentState,formStates)) 	//state as received from browser 
-					-> (True, Just (snd (gUpd{|*|} (UpdSearch updval pos) currentState)),formStates)
-			(Just (pos,updval), (False,Just currentState,formStates)) 	// state has been updated already
-					-> (True, Just currentState,formStates)
-
-			// no update found, determine the current stored state
-
-			(_, (_,Just currentState, formStates))	
-					-> (False, Just currentState,formStates)
-
-			// no update, no state stored, the current value is taken as (new) state
-
-			(_,(_,_,formStates))	-> (False, Nothing,formStates)	
-	where
-		decodeInput1 :: FormId *FormStates -> (Maybe FormUpdate, (Bool,Maybe a, *FormStates)) | gParse{|*|} a
-		decodeInput1 formid formStates
-		| CheckUpdateId == formid	// this state is updated
-		= case CheckUpdate of
-			(Just (sid,pos,UpdC s), Just "") 						= (Just (pos,UpdC s)  ,findState sid formStates)
-			(Just (sid,pos,UpdC s), _) 								= (Just (pos,UpdC s)  ,findState sid formStates)
-			else = case CheckUpdate of
-					(Just (sid,pos,UpdI i), Just ni) 				= (Just (pos,UpdI ni) ,findState sid formStates) 
-					(Just (sid,pos,UpdI i), _) 						= (Just (pos,UpdI i)  ,findState sid formStates) 
-					else = case CheckUpdate of
-							(Just (sid,pos,UpdR r), Just nr) 		= (Just (pos,UpdR nr) ,findState sid formStates) 
-							(Just (sid,pos,UpdR r), _) 				= (Just (pos,UpdR r) ,findState sid formStates) 
-							else = case CheckUpdate of
-									(Just (sid,pos,UpdB b), Just nb) 		= (Just (pos,UpdB nb) ,findState sid formStates) 
-									(Just (sid,pos,UpdB b), _) 				= (Just (pos,UpdB b) ,findState sid formStates) 
-									else = case CheckUpdate of
-										(Just (sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns) ,findState sid formStates) 
-										(Just (sid,pos,UpdS s),	_)			= (Just (pos,UpdS AnyInput)  ,findState sid formStates) 
-										(upd,new) 							= (Nothing, findState formid formStates)
-		| otherwise = (Nothing, findState formid formStates)
-
 // specialize has to be used if a programmer want to specialize gForm
 // it remembers the current value of the index in the expression and creates an editor to show this value
 // the value might have been changed with this editor, so the value returned might differ form the value you started with !
 
 specialize :: (FormId a Mode *HSt -> (Form a,*HSt)) FormId a Mode *HSt -> (Form a,*HSt) | gUpd {|*|} a
-specialize editor name v  mode hst=:{cntr = inidx,states = formStates,world}
+specialize editor formid v  mode hst=:{cntr = inidx,states = formStates,world}
 # nextidx = incrIndex inidx v			// this value will be repesented differently, so increment counter 
-# (nv,{states,world}) 	= editor codedname v mode {cntr = 0,states = formStates,world = world}
+# (nv,{states,world}) 	= editor nformid v mode {cntr = 0,states = formStates,world = world}
 = (nv,{cntr=nextidx,states = states,world = world})
 where
-	codedname = name +++ "_" +++ toString inidx
+	nformid = {formid & id = formid.id +++ "_" +++ toString inidx}
 
 	incrIndex :: Int v -> Int | gUpd {|*|} v
 	incrIndex i v
@@ -217,13 +225,13 @@ mkInput :: !Int !FormId !Mode Value UpdValue *HSt -> (BodyTag,*HSt)
 mkInput size formid Edit val updval hst=:{cntr} 
 	= ( Input 	[	Inp_Type Inp_Text
 				, 	Inp_Value val
-				,	Inp_Name (encodeInfo (formid,cntr,updval))
+				,	Inp_Name (encodeInfo (formid.id,cntr,updval))
 				,	Inp_Size size
 				, 	`Inp_Std [EditBoxStyle]
 				,	`Inp_Events	[OnChange callClean]
 				] ""
 		,setCntr (cntr+1) hst)
-mkInput size formid Display val _ hst=:{cntr} 
+mkInput size _ Display val _ hst=:{cntr} 
 	= ( Input 	[	Inp_Type Inp_Text
 				, 	Inp_Value val
 				,	Inp_ReadOnly ReadOnly
@@ -283,13 +291,13 @@ where
 			| otherwise = find x ys (idx+1)
 			find x [] idx = abort ("cannot find index " +++ x )
 
-	mkConsSel:: Int [String] Int String -> BodyTag
+	mkConsSel:: Int [String] Int FormId -> BodyTag
 	mkConsSel cntr list nr formid
 		= Select 	[ Sel_Name ("CS")
 					: styles
 					]
 					[Option  
-						[Opt_Value (encodeInfo (formid,cntr,UpdC elem))
+						[Opt_Value (encodeInfo (formid.id,cntr,UpdC elem))
 						: if (j == nr) [Opt_Selected Selected:optionstyle] optionstyle 
 						]
 						elem
@@ -525,7 +533,7 @@ gForm{|Button|} formid  v=:(LButton size bname) mode hst=:{cntr}
 	,body	= [Input (ifEdit mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Button
 				, Inp_Value (SV bname)
-				, Inp_Name (encodeInfo (formid,cntr,UpdS bname))
+				, Inp_Name (encodeInfo (formid.id,cntr,UpdS bname))
 				, `Inp_Std [Std_Style ("width:" +++ toString size)]
 				, `Inp_Events [OnClick callClean]
 				]) ""]
@@ -537,7 +545,7 @@ gForm{|Button|} formid v=:(PButton (height,width) ref) mode hst=:{cntr}
 				[ Inp_Type Inp_Image
 				, Inp_Value (SV ref)
 				, Inp_Src ref
-				, Inp_Name (encodeInfo (formid,cntr,UpdS ref))
+				, Inp_Name (encodeInfo (formid.id,cntr,UpdS ref))
 				, `Inp_Std [Std_Style ("width:" +++ toString width +++ " height:" +++ toString height)]
 				, `Inp_Events [OnClick callClean]
 				]) ""]
@@ -557,7 +565,7 @@ gForm{|CheckBox|} formid v=:(CBChecked name) mode hst=:{cntr}
 	,body	= [Input (ifEdit mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Checkbox
 				, Inp_Value (SV name)
-				, Inp_Name (encodeInfo (formid,cntr,UpdS name))
+				, Inp_Name (encodeInfo (formid.id,cntr,UpdS name))
 				, Inp_Checked Checked
 				, `Inp_Events [OnClick callClean]
 				]) ""]
@@ -569,7 +577,7 @@ gForm{|CheckBox|} formid v=:(CBNotChecked name) mode hst=:{cntr}
 	,body	= [Input (ifEdit mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Checkbox
 				, Inp_Value (SV name)
-				, Inp_Name (encodeInfo (formid,cntr,UpdS name))
+				, Inp_Name (encodeInfo (formid.id,cntr,UpdS name))
 				, `Inp_Events [OnClick callClean]
 				]) ""]
 	},(setCntr (cntr+1) hst))
@@ -584,7 +592,7 @@ gForm{|RadioButton|} formid v=:(RBChecked name) mode hst=:{cntr}
 	,body	= [Input (ifEdit mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Radio
 				, Inp_Value (SV name)
-				, Inp_Name (encodeInfo (formid,cntr,UpdS name))
+				, Inp_Name (encodeInfo (formid.id,cntr,UpdS name))
 				, Inp_Checked Checked
 				, `Inp_Events [OnClick callClean]
 				]) ""]
@@ -595,7 +603,7 @@ gForm{|RadioButton|} formid v=:(RBNotChecked name) mode hst=:{cntr}
 	,body	= [Input (ifEdit mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Radio
 				, Inp_Value (SV name)
-				, Inp_Name (encodeInfo (formid,cntr,UpdS name))
+				, Inp_Name (encodeInfo (formid.id,cntr,UpdS name))
 				, `Inp_Events [OnClick callClean]
 				]) ""]
 	},(setCntr (cntr+1) hst))
@@ -614,7 +622,7 @@ gForm{|PullDownMenu|} formid v=:(PullDown (size,width) (menuindex,itemlist)) mod
 					, `Sel_Events [OnChange callClean]
 					])
 					[ Option  
-						[ Opt_Value (encodeInfo (formid,cntr,UpdC (itemlist!!j)))
+						[ Opt_Value (encodeInfo (formid.id,cntr,UpdC (itemlist!!j)))
 						: if (j == menuindex) [Opt_Selected Selected] [] 
 						]
 						elem
@@ -673,5 +681,28 @@ instance toBool Button
 where	toBool Pressed = True
 		toBool _ 		 = False
 
+// Enabling file IO on HSt
+
+instance FileSystem HSt
+where
+	fopen :: !{#Char} !Int !*HSt -> (!Bool,!*File,!*HSt)
+	fopen string int hst=:{world}
+		# (bool,file,world) = fopen string int world
+		= (bool,file,{hst & world = world})
+
+	fclose :: !*File !*HSt -> (!Bool,!*HSt)
+	fclose file hst=:{world}
+		# (bool,world) = fclose file world
+		= (bool,{hst & world = world})
+
+	stdio :: !*HSt -> (!*File,!*HSt)
+	stdio hst=:{world}
+		# (file,world) = stdio world
+		= (file,{hst & world = world})
+
+	sfopen :: !{#Char} !Int !*HSt -> (!Bool,!File,!*HSt)
+	sfopen string int hst=:{world}
+		# (bool,file,world) = sfopen string int world
+		= (bool,file,{hst & world = world})
 
 

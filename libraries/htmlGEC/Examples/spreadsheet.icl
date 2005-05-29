@@ -12,10 +12,10 @@ Start world  = doHtml spreadsheet world
 //Start world  = doHtml arrowsspreadsheet world
 
 spreadsheet hst
-# (tablef, hst) = table_hv_Form "table" Edit 	(inittable 8 10)     	    hst
-# (rowsumf,hst) = vertlistForm  "rsum"  Display (rowsum tablef.value)       hst
-# (colsumf,hst) = horlistForm   "csum"  Display (colsum tablef.value)       hst
-# (totsumf,hst) = mkEditForm    "tsum"  (sum (rowsum tablef.value)) Display  hst
+# (tablef, hst) = table_hv_Form (nFormId "table") Edit 	(inittable 8 10)     	    hst
+# (rowsumf,hst) = vertlistForm  (nFormId "rsum")  Display (rowsum tablef.value)       hst
+# (colsumf,hst) = horlistForm   (nFormId "csum")  Display (colsum tablef.value)       hst
+# (totsumf,hst) = mkEditForm    (nFormId "tsum")  (sum (rowsum tablef.value)) Display  hst
 = mkHtml "Spreadsheet"
 	[ H1 [] "Spreadsheet Example: "
 	, Br
@@ -38,12 +38,12 @@ arrowsspreadsheet hst
 	,Br, Br
 	] hst
 where
-	mycircuit =	lift "table" Edit table_hv_Form
-				>>>	(	(arr rowsum >>> lift "rsum" Display vertlistForm)	&&&
-			    		(arr colsum >>> lift "csum" Display horlistForm) 
+	mycircuit =	lift (nFormId "table") Edit table_hv_Form
+				>>>	(	(arr rowsum >>> lift (nFormId "rsum") Display vertlistForm)	&&&
+			    		(arr colsum >>> lift (nFormId "csum") Display horlistForm) 
 			 		)
 			 	>>> arr (sum o fst)
-			 	>>> display "tsum" 		
+			 	>>> display (nFormId "tsum") 		
 
 mkHtml s tags hst 	= (Html (header s) (body tags),hst)
 header s 			= Head [`Hd_Std [Std_Title s]] [] 

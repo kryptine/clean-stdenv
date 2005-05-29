@@ -21,9 +21,9 @@ startCircuit 	:: (GecCircuit a b) a *HSt -> (Form b,*HSt)
 // a display just shows the value
 // a store applies the function to the stored value
 
-edit 			:: FormId 	-> GecCircuit a a 			|  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-display 		:: FormId 	-> GecCircuit a a 			|  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-store 			:: FormId a -> GecCircuit (a -> a) a 	|  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+edit 			:: FormId 	-> GecCircuit a a 			|  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+display 		:: FormId 	-> GecCircuit a a 			|  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+store 			:: FormId a -> GecCircuit (a -> a) a 	|  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 	
 feedback 		:: (GecCircuit a b) (GecCircuit b a) -> (GecCircuit a b)
 

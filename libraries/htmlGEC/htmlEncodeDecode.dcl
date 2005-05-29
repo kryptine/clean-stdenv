@@ -1,15 +1,20 @@
 definition module htmlEncodeDecode
 
-// encoding and decoding of information between browser and myprogram.exe via myprogram.php
+// maintains the state of forms
+// internally (in a tree containing the state of all forms),
+// and externally, either in a html form or in files on disk.
+// provides the encoding and decoding of information between browser and myprogram.exe via myprogram.php
 // (c) 2005 - MJP
 
 import StdMaybe
-import GenParse, GenPrint, htmlDataDef
+import GenParse, GenPrint
+import htmlDataDef, htmlFormData
 
 // constants that maybe useful
 
 ThisExe			:: String		// name of this executable
 MyPhP 			:: String		// name of php script interface between server and this executable
+MyDir 			:: String		// name of directory in which persistent form info is stored
 
 traceHtmlInput	:: BodyTag		// for debugging showing the information received from browser
 
@@ -17,11 +22,13 @@ traceHtmlInput	:: BodyTag		// for debugging showing the information received fro
 
 :: *FormStates 									// collection of all states of all forms
 
-emptyFormStates :: *FormStates
-initFormStates 	:: *FormStates 					// initial state as received from browser
-findState 		:: !String *FormStates -> (Bool, Maybe a,*FormStates)		| gParse{|*|} a // true if form has not yet been updated 	
-replaceState 	:: !String a *FormStates -> *FormStates	| gPrint{|*|} a // replace state given FormId
-convStates 		:: *FormStates -> BodyTag		// script which stores the global state for the next round
+emptyFormStates :: *FormStates					// creates emtpy states
+initFormStates 	:: *FormStates 					// retrieves all form states hidden in the html page
+
+findState 		:: !FormId *FormStates *World -> (Bool, Maybe a,*FormStates,*World)		| gParse{|*|} a & TC a// true if form has not yet been updated 	
+replaceState 	:: !FormId a *FormStates *World -> (*FormStates,*World)	| gPrint{|*|} a & TC a// replace state given FormId
+
+convStates 		:: !FormStates *World -> (BodyTag,*World) 	// script which stores the global state for the next round
 
 
 // low level encoding of information
@@ -36,7 +43,3 @@ CheckUpdate 			:: (!Maybe a, !Maybe b) | gParse{|*|} a & gParse{|*|} b // value 
 StrippedCheckUpdateId 	:: String				// used to determine related formid's e.g. for radio buttons
 AnyInput 				:: String				// any input is accepted if a string is required
 
-// utility 
-
-mkString 	:: [Char] -> String
-mkList 		:: String -> [Char]

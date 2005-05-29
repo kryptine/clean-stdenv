@@ -22,7 +22,7 @@ MyPage hst
 	] hst
 where
 	mycircuit :: GecCircuit [Int] (Tree Int)
-	mycircuit = edit "list" >>> arr fromListToBalTree >>> display "tree"
+	mycircuit = edit (nFormId "list") >>> arr fromListToBalTree >>> display (nFormId "tree")
 
 	mkHtml s tags hst 	= (Html (header s) (body tags),hst)
 	header s 			= Head [`Hd_Std [Std_Title s]] [] 

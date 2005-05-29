@@ -41,30 +41,30 @@ where
 		# ((b,bodya),bool,hst) = gec_ab ((a,prevbody),bool,hst)
 		= (((b,c),bodya),bool,hst)
 
-edit :: FormId -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-edit title = HGC mkApplyEdit`
+edit :: FormId -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+edit formid = HGC mkApplyEdit`
 where
-	mkApplyEdit` :: ((a,[(String,BodyTag)]),Bool,*HSt ) -> ((a,[(String,BodyTag)]),Bool,*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+	mkApplyEdit` :: ((a,[(String,BodyTag)]),Bool,*HSt ) -> ((a,[(String,BodyTag)]),Bool,*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 	mkApplyEdit` ((initval,prevbody),False,hst) 
-	# (na,hst) = mkApplyEditForm title initval initval hst
-	= ((na.value,[(title,BodyTag na.body):prevbody]),False,hst)
+	# (na,hst) = mkApplyEditForm formid initval initval hst
+	= ((na.value,[(formid.id,BodyTag na.body):prevbody]),False,hst)
 	mkApplyEdit` ((initval,prevbody),True,hst) // second time I come here: don't use the old state, but the new one ! 
-	# (na,hst) = mkSetForm title initval Edit  hst 
-	= ((na.value,[(title,BodyTag na.body):prevbody]),True,hst)
+	# (na,hst) = mkSetForm formid initval Edit  hst 
+	= ((na.value,[(formid.id,BodyTag na.body):prevbody]),True,hst)
 
-display :: FormId -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-display title = HGC mkEditForm`
+display :: FormId -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+display formid = HGC mkEditForm`
 where
 	mkEditForm` ((val,prevbody),bool,hst) 
-	# (na,hst) = mkEditForm title val Display hst
-	= ((na.value,[(title,BodyTag na.body):prevbody]),bool,hst)
+	# (na,hst) = mkEditForm formid val Display hst
+	= ((na.value,[(formid.id,BodyTag na.body):prevbody]),bool,hst)
 
-store :: FormId s -> GecCircuit (s -> s) s |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} s
-store title initstore = HGC mkStoreForm`
+store :: FormId s -> GecCircuit (s -> s) s |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC s
+store formid initstore = HGC mkStoreForm`
 where
 	mkStoreForm` ((fun,prevbody),bool,hst) 
-	# (store,hst) = mkStoreForm title initstore fun  hst
-	= ((store.value,[(title,BodyTag store.body):prevbody]),bool,hst)
+	# (store,hst) = mkStoreForm formid initstore fun  hst
+	= ((store.value,[(formid.id,BodyTag store.body):prevbody]),bool,hst)
 
 self :: (a -> a) (GecCircuit a a) -> GecCircuit a a
 self fun gecaa = gecaa >>> arr fun
@@ -78,9 +78,9 @@ where
 	= (res,False,hst)							// indicates that we loop from here 
 
 lift :: FormId Mode (FormId Mode a *HSt -> (Form b,*HSt)) -> (GecCircuit a b)
-lift name mode fun = HGC fun`
+lift formid mode fun = HGC fun`
 where
 	fun` ((a,body),bool,hst)
-	# (nb,hst) =  fun name mode a hst
-	= ((nb.value,[(name,BodyTag nb.body):body]),bool,hst) 
+	# (nb,hst) =  fun formid mode a hst
+	= ((nb.value,[(formid.id,BodyTag nb.body):body]),bool,hst) 
 

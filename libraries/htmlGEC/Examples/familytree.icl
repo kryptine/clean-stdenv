@@ -20,8 +20,8 @@ derive gParse Family, Status, Partner, Person, Kids, Maybe, Gender, Maybe`
 Start world  = doHtml familytree world
 
 familytree hst
-# (p,hst) = personeditor "xx" inittree2 Edit hst
-# (tree,hst)= mkEditForm "famtree" inittree Edit hst	
+# (p,hst) = personeditor (nFormId "xx") inittree2 Edit hst
+# (tree,hst)= mkEditForm (nFormId "famtree") inittree Edit hst	
 = mkHtml "Family Tree Example"
 		[ H1 [] "family Tree Example: "
 		, toBody tree
@@ -94,7 +94,7 @@ where
 	# (display,hst) = mkEditForm   (mkid "displ") (displaykids (length list.body)) Display  hst
 	= ({ changed = list.changed, value = toKids list.value, body = [display.body <||> list.body]},hst)
 
-	mkid s = toString (length (fromKids kids)) +++ s
+	mkid s = nFormId (toString (length (fromKids kids)) +++ s)
 
 	defaultfam = Family (Man "") Single (Nothing_)
 
