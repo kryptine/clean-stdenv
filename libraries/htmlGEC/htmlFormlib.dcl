@@ -8,9 +8,14 @@ import StdEnv, htmlHandler
 
 // **** easy creation of FormId's ****
 
-pFormId			:: String -> FormId					// persitent formid
-sFormId			:: String -> FormId					// session formid
-nFormId			:: String -> FormId					// page formid
+nFormId		:: String -> FormId					// page 	  livetime, editable
+sFormId		:: String -> FormId					// session 	  livetime, editable
+pFormId		:: String -> FormId					// persistent livetime, editable
+
+ndFormId	:: String -> FormId					// page 	  livetime, displayed non-editable
+sdFormId	:: String -> FormId					// session 	  livetime, displayed non-editable
+pdFormId	:: String -> FormId					// persistent livetime, displayed non-editable 
+
 
 // **** frquently used "mkViewForm" variants ****
 
@@ -22,57 +27,57 @@ nFormId			:: String -> FormId					// page formid
 // mkApply 			: displays application of function to the argument
 // mkApplyEdit		: editor, displays its first argument if it is not updated; second argument is initial state
 
-mkBimapEditor 	:: !FormId 	d !Mode !(Bimap d v)	!*HSt -> (Form d,!*HSt)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
-mkEditForm 		:: !FormId 	d !Mode					!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkSetForm 		:: !FormId 	d !Mode					!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkStoreForm 	:: !FormId 	d !(d -> d)				!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkSelfForm 		:: !FormId 	d !(d -> d)				!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkApplyForm 	:: !FormId 	d !(d -> d)				!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkApplyEditForm	:: !FormId 	d !d					!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+mkBimapEditor 	:: !FormId 	d !(Bimap d v) 	!*HSt -> (Form d,!*HSt)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
+mkEditForm 		:: !FormId 	d 				!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+mkSetForm 		:: !FormId 	d 				!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+mkStoreForm 	:: !FormId 	d !(d -> d)		!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+mkSelfForm 		:: !FormId 	d !(d -> d)		!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+mkApplyForm 	:: !FormId 	d !(d -> d)		!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+mkApplyEditForm	:: !FormId 	d !d			!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 
 // **** forms for lists ****
 
-listForm 			:: !FormId 	 !Mode ![a] 	!*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-horlistForm 		:: !FormId 	 !Mode ![a] 	!*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-horlist2Form 		:: !FormId a !Mode ![a] 	!*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-vertlistForm 		:: !FormId   !Mode ![a] 	!*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-table_hv_Form 		:: !FormId   !Mode ![[a]] 	!*HSt -> (Form [[a]],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+listForm 			:: !FormId 	  ![a] 	 !*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+horlistForm 		:: !FormId 	  ![a] 	 !*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+horlist2Form 		:: !FormId a  ![a] 	 !*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+vertlistForm 		:: !FormId    ![a] 	 !*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+table_hv_Form 		:: !FormId    ![[a]] !*HSt -> (Form [[a]],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
 // **** forms for tuples ****
 
-t2EditForm  		:: !FormId   !Mode !(a,b) 	!*HSt -> ((Form a,Form b),!*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-																				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
+t2EditForm  		:: !FormId !(a,b)	  !*HSt -> ((Form a,Form b),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+																			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
 
-t3EditForm  		:: !FormId 	!Mode !(a,b,c) 	!*HSt -> ((Form a,Form b,Form c),!*HSt) 
-																				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
-																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC c
-t4EditForm  		:: !FormId !Mode !(a,b,c,d) !*HSt -> ((Form a,Form b,Form c,Form d),!*HSt)
-																				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
-																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC c
-																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+t3EditForm  		:: !FormId !(a,b,c)   !*HSt -> ((Form a,Form b,Form c),!*HSt) 
+																			| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+																   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
+																   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC c
+t4EditForm  		:: !FormId !(a,b,c,d) !*HSt -> ((Form a,Form b,Form c,Form d),!*HSt)
+																			| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+																   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
+																   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC c
+																   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 // **** special buttons ****
 
-counterForm 		:: !FormId !Mode a 		!*HSt -> (Form a,!*HSt) 			| +, -, one
-																				,  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+counterForm 		:: !FormId !a 		  !*HSt -> (Form a,!*HSt) 			| +, -, one
+																			,  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 // browseButtons reset curindex step length numberofbuttuns formid mode 
 // returns buttons to step through numbers from 1 to length
 
-browseButtons 		:: !Bool !Int !Int !Int !Int !FormId !Mode !*HSt -> (Form Int,!*HSt)
+browseButtons 		:: !Bool !Int !Int !Int !Int !FormId !*HSt -> (Form Int,!*HSt)
 
 // **** assigning functions to buttons **** yield identity function when nothing pressed
 
 // ordinary buttons with labels 
 
-ListFuncBut 		:: !Bool !FormId !Mode [(Button, a -> a)] !*HSt 
+ListFuncBut 		:: !Bool !FormId [(Button, a -> a)] !*HSt 
 													 -> (Form (a -> a),!*HSt)
 ListFuncBut2 		:: !Bool !FormId [(Mode,Button, a -> a)] !*HSt  //fine grain, mode of each buttons can be set 
 													 -> (Form (a -> a),!*HSt)
 
 // ordinary buttons with labels displayed in table form
 
-TableFuncBut 		:: !FormId !Mode ![[(Button, a -> a)]] !*HSt 
+TableFuncBut 		:: !FormId ![[(Button, a -> a)]] !*HSt 
 													  -> (Form (a -> a) ,!*HSt)
 
 
@@ -81,21 +86,21 @@ TableFuncBut 		:: !FormId !Mode ![[(Button, a -> a)]] !*HSt
 //					: arguments of callback function: - Bool indicates corresponding box is checked or not
 //													  - [Bool] indicates the settings of all (other) checkboxes 
 
-ListFuncCheckBox 	:: !Bool !FormId !Mode [(CheckBox, Bool [Bool] a -> a)] !*HSt 
+ListFuncCheckBox 	:: !Bool !FormId [(CheckBox, Bool [Bool] a -> a)] !*HSt 
 													 -> (Form (a -> a,[Bool]),!*HSt)
 
 // radiobuttons		: assign functions to radiobuttons, returns function corresponding to the radiobutton chosen, and the radiobuttons body
 //					: the current setting of the radiobutoons is remembered, pos integer: set radio, otherwise it just indicates the initial setting
 //					: arguments of callback function: - Int indicates which button is set
 
-ListFuncRadio 		:: !Int !FormId !Mode [Int -> a -> a] !*HSt 
+ListFuncRadio 		:: !Int !FormId [Int -> a -> a] !*HSt 
 													 -> (Form(a -> a,Int),!*HSt)
 
 // pull down menu	: assign functions to a pull down menu, returns function corresponding to the menu item chosen, and the pull down menu body
 //					: the current setting of the menu is remembered, pos integer: set menu, otherwise it just indicates the initial setting
 //					: arguments of callback function: - Int indicates which button is set
 
-FuncMenu 			:: !Int !FormId !Mode [(String, a -> a)] !*HSt 
+FuncMenu 			:: !Int !FormId [(String, a -> a)] !*HSt 
 													 -> (Form(a -> a,Int),!*HSt)
 
 // **** LayOut support ****

@@ -11,8 +11,8 @@ derive gParse Machine, Output, Product
 Start world  = doHtml coffeemachine world
 
 coffeemachine hst
-# (command,hst)	= TableFuncBut (nFormId "cb") Edit commandbuttons hst	
-# (option,hst)	= TableFuncBut (nFormId "ob") Edit optionbuttons  hst	
+# (command,hst)	= TableFuncBut (nFormId "cb") commandbuttons hst	
+# (option,hst)	= TableFuncBut (nFormId "ob") optionbuttons  hst	
 # (machine,hst)	= mkStoreForm (nFormId "hidden") initmachine (option.value o command.value)  hst
 = mkHtml "Coffee Machine"
 		[ H1 [] "Coffee Machine: "

@@ -16,7 +16,7 @@ doHtml :: (*HSt -> (Html,!*HSt)) *World -> *World
 :: *HSt 								// unique state required for creating Html forms
 instance FileSystem HSt					// enabling file IO on HSt
 
-mkViewForm 		:: !FormId 	d !Mode !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
+mkViewForm 		:: !FormId 	d !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
 
 // mkViewForm is the swiss army nife function creating stateful interactive forms with a view v of data d
 // make shure that all editors have a unique identifier !
@@ -64,7 +64,7 @@ instance toBool CheckBox, Button, RadioButton		// True if checkbox checked, butt
 
 :: UpdMode
 
-generic gForm a :: !FormId a !Mode !*HSt -> *(Form a, !*HSt)	
+generic gForm a :: !FormId a !*HSt -> *(Form a, !*HSt)	
 generic gUpd a 	:: UpdMode a -> (UpdMode,a)
 
 derive bimap Form
@@ -79,5 +79,5 @@ derive gParse 	(,), (,,), (,,,), (<->), <|>, DisplayMode, Button, CheckBox, Radi
 
 // specialize has to be used if one wants to specialize gForm for a user-defined type
 
-specialize :: (FormId a Mode *HSt -> (Form a,*HSt)) FormId a Mode *HSt -> (Form a,*HSt) | gUpd {|*|} a
+specialize :: (FormId a *HSt -> (Form a,*HSt)) FormId a *HSt -> (Form a,*HSt) | gUpd {|*|} a
 

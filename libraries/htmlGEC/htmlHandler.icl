@@ -6,8 +6,8 @@ import StdGeneric
 import htmlEncodeDecode, htmlStylelib
 import GenParse, GenPrint
 
-derive gPrint (,), (,,), (,,,), FormId, Livetime, UpdValue
-derive gParse (,), (,,), (,,,), FormId, Livetime, UpdValue
+derive gPrint (,), (,,), (,,,), UpdValue
+derive gParse (,), (,,), (,,,), UpdValue
 derive gHpr   (,), (,,), (,,,)
 derive gUpd		   (,,), (,,,)
  
@@ -30,7 +30,7 @@ derive bimap Form, []
 
 toHtml :: a -> BodyTag | gForm {|*|} a
 toHtml a 
-# (na,_) = gForm{|*|} {id = "__toHtml", livetime = Page} a Display {cntr = 0, states = emptyFormStates, world = undef}
+# (na,_) = gForm{|*|} {id = "__toHtml", livetime = Page, mode = Display} a  {cntr = 0, states = emptyFormStates, world = undef}
 = BodyTag na.body
 
 toBody :: (Form a) -> BodyTag
@@ -58,8 +58,8 @@ where
 
 // swiss army nife editor that makes coffee too ...
 
-mkViewForm :: !FormId d !Mode !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
-mkViewForm formid initdata mode bm=:{toForm, updForm, fromForm, resetForm}  {states,world} 
+mkViewForm :: !FormId d !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
+mkViewForm formid initdata bm=:{toForm, updForm, fromForm, resetForm}  {states,world} 
 # (isupdated,view,states,world) = findFormInfo formid states world // determine current value in the state store
 = calcnextView isupdated view states world
 where
@@ -71,7 +71,7 @@ where
 						Nothing 	-> view		 
 						Just reset 	-> reset view
 	# (viewform,{states,world})						// make a form for it
-					= gForm{|*|} formid view mode {cntr = 0,states = states, world = world}
+					= gForm{|*|} formid view {cntr = 0,states = states, world = world}
 	| viewform.changed && not isupdated 			// only true when a user defined specialisation is updated, recalculate the form
 		= calcnextView True (Just viewform.value) states world
 
@@ -129,10 +129,10 @@ where
 // it remembers the current value of the index in the expression and creates an editor to show this value
 // the value might have been changed with this editor, so the value returned might differ form the value you started with !
 
-specialize :: (FormId a Mode *HSt -> (Form a,*HSt)) FormId a Mode *HSt -> (Form a,*HSt) | gUpd {|*|} a
-specialize editor formid v  mode hst=:{cntr = inidx,states = formStates,world}
+specialize :: (FormId a *HSt -> (Form a,*HSt)) FormId a *HSt -> (Form a,*HSt) | gUpd {|*|} a
+specialize editor formid v hst=:{cntr = inidx,states = formStates,world}
 # nextidx = incrIndex inidx v			// this value will be repesented differently, so increment counter 
-# (nv,{states,world}) 	= editor nformid v mode {cntr = 0,states = formStates,world = world}
+# (nv,{states,world}) 	= editor nformid v {cntr = 0,states = formStates,world = world}
 = (nv,{cntr=nextidx,states = states,world = world})
 where
 	nformid = {formid & id = formid.id +++ "_" +++ toString inidx}
@@ -144,26 +144,26 @@ where
 
 // gForm: automatic derives an Html Form for any Clean type
 
-generic gForm a :: !FormId a !Mode !*HSt -> *(Form a, !*HSt)	
+generic gForm a :: !FormId a !*HSt -> *(Form a, !*HSt)	
 
-gForm{|Int|} formid i mode hst 	
-# (body,hst) = mkInput defsize formid mode (IV i) (UpdI i) hst
+gForm{|Int|} formid i hst 	
+# (body,hst) = mkInput defsize formid (IV i) (UpdI i) hst
 = ({changed=False, value=i, body=[body]},hst)
 
-gForm{|Real|} formid r mode hst 	
-# (body,hst) = mkInput defsize formid mode (RV r) (UpdR r) hst
+gForm{|Real|} formid r hst 	
+# (body,hst) = mkInput defsize formid (RV r) (UpdR r) hst
 = ({changed=False, value=r, body=[body]},hst)
 
-gForm{|Bool|} formid b mode hst 	
-# (body,hst) = mkInput defsize formid mode (BV b) (UpdB b) hst
+gForm{|Bool|} formid b hst 	
+# (body,hst) = mkInput defsize formid (BV b) (UpdB b) hst
 = ({changed=False, value=b, body=[body]},hst)
 
-gForm{|String|} formid s mode hst 	
-# (body,hst) = mkInput defsize formid mode (SV s) (UpdS s) hst
+gForm{|String|} formid s hst 	
+# (body,hst) = mkInput defsize formid (SV s) (UpdS s) hst
 = ({changed=False, value=s, body=[body]},hst)
 
-mkInput :: !Int !FormId !Mode Value UpdValue *HSt -> (BodyTag,*HSt) 
-mkInput size formid Edit val updval hst=:{cntr} 
+mkInput :: !Int !FormId Value UpdValue *HSt -> (BodyTag,*HSt) 
+mkInput size formid=:{mode = Edit} val updval hst=:{cntr} 
 	= ( Input 	[	Inp_Type Inp_Text
 				, 	Inp_Value val
 				,	Inp_Name (encodeInfo (formid.id,cntr,updval))
@@ -172,7 +172,7 @@ mkInput size formid Edit val updval hst=:{cntr}
 				,	`Inp_Events	[OnChange callClean]
 				] ""
 		,setCntr (cntr+1) hst)
-mkInput size _ Display val _ hst=:{cntr} 
+mkInput size {mode = Display} val _ hst=:{cntr} 
 	= ( Input 	[	Inp_Type Inp_Text
 				, 	Inp_Value val
 				,	Inp_ReadOnly ReadOnly
@@ -181,39 +181,39 @@ mkInput size _ Display val _ hst=:{cntr}
 				] ""
 		,setCntr (cntr+1) hst)
 
-gForm{|UNIT|}  _ _ _ hst 
+gForm{|UNIT|}  _ _ hst 
 = ({changed=False, value=UNIT, body=[EmptyBody]},hst)
 
-gForm{|PAIR|} gHa gHb formid (PAIR a b)mode  hst 
-# (na,hst) = gHa formid a mode hst
-# (nb,hst) = gHb formid b mode  hst
+gForm{|PAIR|} gHa gHb formid (PAIR a b) hst 
+# (na,hst) = gHa formid a hst
+# (nb,hst) = gHb formid b hst
 = (	{changed=na.changed || nb.changed
 	,value	=PAIR na.value nb.value
 	,body	=[STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [na.body,nb.body]]
 	},hst)
 
-gForm{|EITHER|} gHa gHb formid (LEFT a) mode hst 
-# (na,hst) = gHa formid a mode hst
+gForm{|EITHER|} gHa gHb formid (LEFT a) hst 
+# (na,hst) = gHa formid a hst
 = ({changed=na.changed, value=LEFT na.value, body=na.body},hst)
-gForm{|EITHER|} gHa gHb formid (RIGHT b) mode hst
-# (nb,hst) = gHb formid b mode hst
+gForm{|EITHER|} gHa gHb formid (RIGHT b) hst
+# (nb,hst) = gHb formid b hst
 = ({changed=nb.changed, value=RIGHT nb.value, body=nb.body},hst)
-gForm{|OBJECT|} gHo formid (OBJECT o) mode hst
-# (no,hst) = gHo formid o mode hst
+gForm{|OBJECT|} gHo formid (OBJECT o) hst
+# (no,hst) = gHo formid o hst
 = ({changed=no.changed, value=OBJECT no.value, body=no.body},hst)
 
-gForm{|CONS of t|} gHc formid (CONS c) mode hst=:{cntr}
+gForm{|CONS of t|} gHc formid (CONS c) hst=:{cntr}
 | not (isEmpty t.gcd_fields) 		 
-# (nc,hst) = gHc formid c mode (setCntr (cntr+1) hst) // don't display record constructor
+# (nc,hst) = gHc formid c (setCntr (cntr+1) hst) // don't display record constructor
 = ({changed=nc.changed, value=CONS nc.value, body=nc.body},hst)
 | t.gcd_type_def.gtd_num_conses == 1 
-# (nc,hst) = gHc formid c mode (setCntr (cntr+1) hst) // don't display constructors that have no alternative
+# (nc,hst) = gHc formid c (setCntr (cntr+1) hst) // don't display constructors that have no alternative
 = ({changed=nc.changed, value=CONS nc.value, body=nc.body},hst)
 | t.gcd_name.[(size t.gcd_name) - 1] == '_' // don't display constructor names which end with an underscore
-# (nc,hst) = gHc formid c mode (setCntr (cntr+1) hst) 
+# (nc,hst) = gHc formid c (setCntr (cntr+1) hst) 
 = ({changed=nc.changed, value=CONS nc.value, body=nc.body},hst)
 # (selector,hst)= mkConsSelector formid t hst
-# (nc,hst) = gHc formid c mode hst
+# (nc,hst) = gHc formid c hst
 = ({changed=nc.changed
 	,value=CONS nc.value
 	,body=[STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[selector,BodyTag nc.body]]]
@@ -245,21 +245,21 @@ where
 						\\ elem <- list & j <- [0..]
 					] 
 		where
-			styles = case mode of
+			styles = case formid.mode of
 						Edit	-> 	[ `Sel_Std	[Std_Style width, EditBoxStyle]
 									, `Sel_Events [OnChange callClean]
 									]
 						Display ->	[ `Sel_Std	[Std_Style width, DisplayBoxStyle]
 									,  Sel_Disabled Disabled
 									]
-			optionstyle	= case mode of
+			optionstyle	= case formid.mode of
 							Edit 		-> []
 							Display 	-> [`Opt_Std [DisplayBoxStyle]]
 
 			width = "width:" +++ (toString defpixel) +++ "px"
 
-gForm{|FIELD of d |} gHx formid (FIELD x) mode hst 
-# (nx,hst) = gHx formid x mode hst
+gForm{|FIELD of d |} gHx formid (FIELD x) hst 
+# (nx,hst) = gHx formid x hst
 = ({changed=nx.changed
 	,value=FIELD nx.value
 	,body=[STable [Tbl_CellPadding (Pixels 1), Tbl_CellSpacing (Pixels 1)] [[fieldname,BodyTag nx.body]]]
@@ -382,28 +382,28 @@ derive gUpd (,)
 
 // tuples are placed next to each other, pairs below each other ...
 
-gForm{|(,)|} gHa gHb formid (a,b) mode hst=:{cntr}
-# (na,hst) = gHa formid a mode (setCntr (cntr+1) hst)   // one more for the now invisable (,) constructor 
-# (nb,hst) = gHb formid b mode hst
+gForm{|(,)|} gHa gHb formid (a,b) hst=:{cntr}
+# (na,hst) = gHa formid a (setCntr (cntr+1) hst)   // one more for the now invisable (,) constructor 
+# (nb,hst) = gHb formid b hst
 = (	{changed= na.changed || nb.changed
 	,value	= (na.value,nb.value)
 	,body	= [STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[BodyTag na.body, BodyTag nb.body]]]
 	},hst)
 
-gForm{|(,,)|} gHa gHb gHc formid (a,b,c) mode hst=:{cntr}
-# (na,hst) = gHa formid a mode (setCntr (cntr+1) hst)   // one more for the now invisable (,,) constructor 
-# (nb,hst) = gHb formid b mode hst
-# (nc,hst) = gHc formid c mode hst
+gForm{|(,,)|} gHa gHb gHc formid (a,b,c) hst=:{cntr}
+# (na,hst) = gHa formid a (setCntr (cntr+1) hst)   // one more for the now invisable (,,) constructor 
+# (nb,hst) = gHb formid b hst
+# (nc,hst) = gHc formid c hst
 = (	{changed= na.changed || nb.changed || nc.changed
 	,value	= (na.value,nb.value,nc.value)
 	,body	= [STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[BodyTag na.body,BodyTag nb.body,BodyTag nc.body]]]
 	},hst)
 
-gForm{|(,,,)|} gHa gHb gHc gHd formid (a,b,c,d) mode hst=:{cntr}
-# (na,hst) = gHa formid a mode (setCntr (cntr+1) hst)   // one more for the now invisable (,,) constructor 
-# (nb,hst) = gHb formid b mode hst
-# (nc,hst) = gHc formid c mode hst
-# (nd,hst) = gHd formid d mode hst
+gForm{|(,,,)|} gHa gHb gHc gHd formid (a,b,c,d) hst=:{cntr}
+# (na,hst) = gHa formid a (setCntr (cntr+1) hst)   // one more for the now invisable (,,) constructor 
+# (nb,hst) = gHb formid b hst
+# (nc,hst) = gHc formid c hst
+# (nd,hst) = gHd formid d hst
 = (	{changed= na.changed || nb.changed || nc.changed || nd.changed
 	,value	= (na.value,nb.value,nc.value,nd.value)
 	,body	= [STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] 
@@ -412,9 +412,9 @@ gForm{|(,,,)|} gHa gHb gHc gHd formid (a,b,c,d) mode hst=:{cntr}
 
 // <-> works exactly the same as (,) and places its arguments next to each other, for compatibility with GEC's
 
-gForm{|(<->)|} gHa gHb formid (a <-> b) mode hst=:{cntr}
-# (na,hst) = gHa formid a mode (setCntr (cntr+1) hst)   // one more for the now invisable <-> constructor 
-# (nb,hst) = gHb formid b mode hst
+gForm{|(<->)|} gHa gHb formid (a <-> b) hst=:{cntr}
+# (na,hst) = gHa formid a (setCntr (cntr+1) hst)   // one more for the now invisable <-> constructor 
+# (nb,hst) = gHb formid b hst
 = (	{changed= na.changed || nb.changed 
 	,value	= na.value <-> nb.value
 	,body	= [STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[BodyTag na.body, BodyTag nb.body]]]
@@ -425,9 +425,9 @@ derive gPrint <->
 
 // <|> works exactly the same as PAIR and places its arguments below each other, for compatibility with GEC's
 
-gForm{|(<|>)|} gHa gHb formid (a <|> b) mode hst=:{cntr} 
-# (na,hst) = gHa formid a mode (setCntr (cntr+1) hst) // one more for the now invisable <|> constructor
-# (nb,hst) = gHb formid b mode hst
+gForm{|(<|>)|} gHa gHb formid (a <|> b) hst=:{cntr} 
+# (na,hst) = gHa formid a (setCntr (cntr+1) hst) // one more for the now invisable <|> constructor
+# (nb,hst) = gHb formid b hst
 = (	{changed= na.changed || nb.changed 
 	,value	= na.value <|> nb.value
 	,body	= [STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [na.body, nb.body]]
@@ -438,25 +438,25 @@ derive gPrint <|>
 
 // to switch between modes within a type ...
 
-gForm{|DisplayMode|} gHa formid (HideMode a) mode hst=:{cntr} 	
-# (na,hst) = gHa formid a Display (setCntr (cntr+1) hst)
+gForm{|DisplayMode|} gHa formid (HideMode a) hst=:{cntr} 	
+# (na,hst) = gHa {formid & mode = Display} a (setCntr (cntr+1) hst)
 = (	{changed= na.changed 
 	,value	= HideMode na.value
 	,body	= [EmptyBody]
 	},hst)
-gForm{|DisplayMode|} gHa formid (DisplayMode a) mode hst=:{cntr}  
-# (na,hst) = gHa formid a Display(setCntr (cntr+1) hst)
+gForm{|DisplayMode|} gHa formid (DisplayMode a) hst=:{cntr}  
+# (na,hst) = gHa {formid & mode = Display} a (setCntr (cntr+1) hst)
 = (	{changed= False
 	,value	= DisplayMode na.value
 	,body	= na.body
 	},hst)
-gForm{|DisplayMode|} gHa formid (EditMode a) mode hst=:{cntr}  
-# (na,hst) = gHa formid a Edit (setCntr (cntr+1) hst)
+gForm{|DisplayMode|} gHa formid (EditMode a) hst=:{cntr}  
+# (na,hst) = gHa {formid & mode = Edit} a (setCntr (cntr+1) hst)
 = (	{changed= na.changed
 	,value	= EditMode na.value
 	,body	= na.body
 	},hst)
-gForm{|DisplayMode|} gHa formid EmptyMode mode hst=:{cntr}
+gForm{|DisplayMode|} gHa formid EmptyMode hst=:{cntr}
 = (	{changed= False
 	,value	= EmptyMode
 	,body	= [EmptyBody]
@@ -468,10 +468,10 @@ derive gPrint DisplayMode
 
 // Buttons to press
 
-gForm{|Button|} formid  v=:(LButton size bname) mode hst=:{cntr} 
+gForm{|Button|} formid  v=:(LButton size bname) hst=:{cntr} 
 = (	{changed= False
 	,value	= v
-	,body	= [Input (ifEdit mode [] [Inp_Disabled Disabled] ++
+	,body	= [Input (ifEdit formid.mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Button
 				, Inp_Value (SV bname)
 				, Inp_Name (encodeInfo (formid.id,cntr,UpdS bname))
@@ -479,10 +479,10 @@ gForm{|Button|} formid  v=:(LButton size bname) mode hst=:{cntr}
 				, `Inp_Events [OnClick callClean]
 				]) ""]
 	},(setCntr (cntr+1) hst))
-gForm{|Button|} formid v=:(PButton (height,width) ref) mode hst=:{cntr} 
+gForm{|Button|} formid v=:(PButton (height,width) ref) hst=:{cntr} 
 = (	{changed= False
 	,value	= v
-	,body	= [Input (ifEdit mode [] [Inp_Disabled Disabled] ++
+	,body	= [Input (ifEdit formid.mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Image
 				, Inp_Value (SV ref)
 				, Inp_Src ref
@@ -491,7 +491,7 @@ gForm{|Button|} formid v=:(PButton (height,width) ref) mode hst=:{cntr}
 				, `Inp_Events [OnClick callClean]
 				]) ""]
 	},(setCntr (cntr+1) hst))
-gForm{|Button|} formid Pressed mode hst = gForm {|*|} formid (LButton defpixel "??") mode hst // end user should reset button
+gForm{|Button|} formid Pressed hst = gForm {|*|} formid (LButton defpixel "??") hst // end user should reset button
 
 gUpd{|Button|} (UpdSearch (UpdS name) 0) 	_ = (UpdDone,Pressed)					// update integer value
 gUpd{|Button|} (UpdSearch val cnt)      	b = (UpdSearch val (cnt - 1),b)			// continue search, don't change
@@ -500,10 +500,10 @@ gUpd{|Button|} mode 			  	    	b = (mode,b)							// don't change
 derive gParse Button
 derive gPrint Button
 
-gForm{|CheckBox|} formid v=:(CBChecked name) mode hst=:{cntr} 
+gForm{|CheckBox|} formid v=:(CBChecked name) hst=:{cntr} 
 = (	{changed= False
 	,value	= v
-	,body	= [Input (ifEdit mode [] [Inp_Disabled Disabled] ++
+	,body	= [Input (ifEdit formid.mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Checkbox
 				, Inp_Value (SV name)
 				, Inp_Name (encodeInfo (formid.id,cntr,UpdS name))
@@ -512,10 +512,10 @@ gForm{|CheckBox|} formid v=:(CBChecked name) mode hst=:{cntr}
 				]) ""]
 	},(setCntr (cntr+1) hst))
 
-gForm{|CheckBox|} formid v=:(CBNotChecked name) mode hst=:{cntr} 
+gForm{|CheckBox|} formid v=:(CBNotChecked name) hst=:{cntr} 
 = (	{changed= False
 	,value	= v
-	,body	= [Input (ifEdit mode [] [Inp_Disabled Disabled] ++
+	,body	= [Input (ifEdit formid.mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Checkbox
 				, Inp_Value (SV name)
 				, Inp_Name (encodeInfo (formid.id,cntr,UpdS name))
@@ -527,10 +527,10 @@ derive gUpd CheckBox
 derive gParse CheckBox
 derive gPrint CheckBox
 
-gForm{|RadioButton|} formid v=:(RBChecked name) mode hst=:{cntr} 
+gForm{|RadioButton|} formid v=:(RBChecked name) hst=:{cntr} 
 = (	{changed= False
 	,value	= v
-	,body	= [Input (ifEdit mode [] [Inp_Disabled Disabled] ++
+	,body	= [Input (ifEdit formid.mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Radio
 				, Inp_Value (SV name)
 				, Inp_Name (encodeInfo (formid.id,cntr,UpdS name))
@@ -538,10 +538,10 @@ gForm{|RadioButton|} formid v=:(RBChecked name) mode hst=:{cntr}
 				, `Inp_Events [OnClick callClean]
 				]) ""]
 	},(setCntr (cntr+1) hst))
-gForm{|RadioButton|} formid v=:(RBNotChecked name) mode hst=:{cntr} 
+gForm{|RadioButton|} formid v=:(RBNotChecked name) hst=:{cntr} 
 = (	{changed= False
 	,value	= v
-	,body	= [Input (ifEdit mode [] [Inp_Disabled Disabled] ++
+	,body	= [Input (ifEdit formid.mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Radio
 				, Inp_Value (SV name)
 				, Inp_Name (encodeInfo (formid.id,cntr,UpdS name))
@@ -553,10 +553,10 @@ derive gUpd	  RadioButton
 derive gParse RadioButton
 derive gPrint RadioButton
 
-gForm{|PullDownMenu|} formid v=:(PullDown (size,width) (menuindex,itemlist)) mode hst=:{cntr} 
+gForm{|PullDownMenu|} formid v=:(PullDown (size,width) (menuindex,itemlist)) hst=:{cntr} 
 = (	{changed= False
 	,value	= v
-	,body	= [Select 	(ifEdit mode [] [Sel_Disabled Disabled] ++
+	,body	= [Select 	(ifEdit formid.mode [] [Sel_Disabled Disabled] ++
 					[ Sel_Name ("CS")
 					, Sel_Size size
 					, `Sel_Std [Std_Style ("width:" +++ (toString width) +++ "px")]
@@ -590,14 +590,14 @@ derive gPrint PullDownMenu
 				| TR Int Real						// Input box of size Size for Reals
 				| TS Int String						// Input box of size Size for Strings
 
-gForm{|TextInput|} formid (TI size i) mode hst 	
-# (body,{cntr,states,world}) = mkInput size formid mode (IV i) (UpdI i) hst
+gForm{|TextInput|} formid (TI size i) hst 	
+# (body,{cntr,states,world}) = mkInput size formid (IV i) (UpdI i) hst
 = ({changed=False, value=TI size i, body=[body]},{cntr = cntr+2, states = states,world=world})
-gForm{|TextInput|} formid (TR size r) mode hst	
-# (body,{cntr,states,world}) = mkInput size formid mode (RV r) (UpdR r) hst
+gForm{|TextInput|} formid (TR size r) hst	
+# (body,{cntr,states,world}) = mkInput size formid (RV r) (UpdR r) hst
 = ({changed=False, value=TR size r, body=[body]},{cntr = cntr+2, states = states,world=world})
-gForm{|TextInput|} formid (TS size s) mode hst
-# (body,{cntr,states,world}) = mkInput size formid mode (SV s) (UpdS s) hst 
+gForm{|TextInput|} formid (TS size s) hst
+# (body,{cntr,states,world}) = mkInput size formid (SV s) (UpdS s) hst 
 = ({changed=False, value=TS size s, body=[body]},{cntr = cntr+2, states = states,world=world})
 
 gUpd{|TextInput|} (UpdSearch (UpdI ni) 0) 	(TI size i)  = (UpdDone,TI size ni)		// update integer value
