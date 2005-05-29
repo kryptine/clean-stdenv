@@ -21,33 +21,12 @@ mkViewForm 		:: !FormId 	d !Mode !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|
 // mkViewForm is the swiss army nife function creating stateful interactive forms with a view v of data d
 // make shure that all editors have a unique identifier !
 
-// For convenience all kinds of variants of "mkViewForm" are predefined, simply by chosing certain defaults for the HBimap.
-
-// mkBimap			: editor, using Bimaps instead of HBimaps
-// mkEdit  		 	: editor, remembers its state, argument is taken as initial state 
-// mkSet			: editor, always displays argument regardless of current state of the editor
-// mkStore			: applies function to the internal state; second argument is initial state
-// mkSelf			: editor, state is updated with function; second argument is taken as initial state   
-// mkApply 			: displays application of function to the argument
-// mkApplyEdit		: editor, displays its first argument if it is not updated; second argument is initial state
-
-mkBimapEditor 	:: !FormId 	d !Mode !(Bimap d v)	!*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
-mkEditForm 		:: !FormId 	d !Mode					!*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkSetForm 		:: !FormId 	d !Mode					!*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkStoreForm 	:: !FormId 	d !(d -> d)				!*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkSelfForm 		:: !FormId 	d !(d -> d)				!*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkApplyForm 	:: !FormId 	d !(d -> d)				!*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkApplyEditForm	:: !FormId 	d !d					!*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 
 // utility functions
 
 toHtml 			:: a -> BodyTag | gForm {|*|} a		// toHtml displays any type into a non-editable form
 toBody 			:: (Form a) -> BodyTag				// just (BodyTag form.body)
 
-pFormId			:: String -> FormId					// persitent formid
-sFormId			:: String -> FormId					// session formid
-nFormId			:: String -> FormId					// page formid
-	
 // Clean types that have a special representation
 
 // lay out

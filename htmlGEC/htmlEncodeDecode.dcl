@@ -25,15 +25,16 @@ traceHtmlInput	:: BodyTag		// for debugging showing the information received fro
 emptyFormStates :: *FormStates					// creates emtpy states
 initFormStates 	:: *FormStates 					// retrieves all form states hidden in the html page
 
-findState 		:: !FormId *FormStates *World -> (Bool, Maybe a,*FormStates,*World)		| gParse{|*|} a & TC a// true if form has not yet been updated 	
-replaceState 	:: !FormId a *FormStates *World -> (*FormStates,*World)	| gPrint{|*|} a & TC a// replace state given FormId
+findState 		:: !FormId *FormStates *World -> (Bool, Maybe a,*FormStates,*World)	// true if form has not yet been previously inspected 	
+												| gParse{|*|} a & TC a		
+replaceState 	:: !FormId a *FormStates *World -> (*FormStates,*World)				// replace state given FormId
+												| gPrint{|*|} a & TC a
 
 convStates 		:: !FormStates *World -> (BodyTag,*World) 	// script which stores the global state for the next round
 
-
 // low level encoding of information
 
-encodeInfo 		:: a -> String | gPrint{|*|} a	// serialization to a Mime format 
+encodeInfo 		:: a -> String | gPrint{|*|} a	// serialization to a Mime format, used to encode input forms 
 callClean 		:: Script						// script that will take care of sending the required input to this application
 
 // low level decoding of information

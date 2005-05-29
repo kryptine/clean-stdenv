@@ -10,19 +10,20 @@ import
 	 		htmlDataDef			// Clean's ADT representation of Html
 		,	htmlStyleDef		// Clean's ADT representation of Style sheets
 
-		,	htmlFormData		// some common data definitions used for creating forms		
-		,	htmlHandler			// kernel module with all kinds of basic functions to generate forms 
-		,	htmlFormlib			// a library of more sophisticated form functions 
+		,	htmlFormlib			// illustrative collection of form creating functions defined on top of htmlHandler  
+		,	htmlFormData		// some common data definitions needed for creating forms		
+
+		,	htmlHandler			// the kernel module for form creation
+
 		,	htmlArrow			// arrow instantiations for html forms
 
-// free to use
+// free to change when the default style is not appealing
 
 		,	htmlStylelib		// style definitions   
+		,	htmlTrivial			// some trivial generic bimap derives
 
-// internal stuf
+// internally used:
 		
 		,	htmlEncodeDecode	// low level communication between client browser and the clean executable
-		,	htmlTrivial			// some trivial generic bimap derives
 		,	GenParse			// Standard Generic Parse module from generic library
 		,	GenPrint			// Standard Generic Print module from generic library
-		
