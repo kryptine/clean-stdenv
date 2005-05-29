@@ -26,7 +26,7 @@ mkSTable :: [[BodyTag]] -> BodyTag
 // special forms:
 
 counterForm 		:: !FormId !Mode a 		!*HSt -> (Form a,!*HSt) 			| +, -, one
-																				, gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+																				, gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
 // browseButtons reset curindex step length numberofbuttuns formid mode 
 // returns buttons to step through numbers from 1 to length
@@ -34,29 +34,29 @@ browseButtons 		:: !Bool !Int !Int !Int !Int !FormId !Mode !*HSt -> (Form Int,!*
 
 // simple forms for lists and tuples:
 
-horlistForm 		:: !FormId 	 !Mode ![a] 	!*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-horlist2Form 		:: !FormId a !Mode ![a] 	!*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-vertlistForm 		:: !FormId   !Mode ![a] 	!*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-table_hv_Form 		:: !FormId   !Mode ![[a]] 	!*HSt -> (Form [[a]],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-t2EditForm  		:: !FormId   !Mode !(a,b) 	!*HSt -> ((Form a,Form b),!*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-																				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} b
+horlistForm 		:: !FormId 	 !Mode ![a] 	!*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+horlist2Form 		:: !FormId a !Mode ![a] 	!*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+vertlistForm 		:: !FormId   !Mode ![a] 	!*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+table_hv_Form 		:: !FormId   !Mode ![[a]] 	!*HSt -> (Form [[a]],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+t2EditForm  		:: !FormId   !Mode !(a,b) 	!*HSt -> ((Form a,Form b),!*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+																				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
 
 t3EditForm  		:: !FormId 	!Mode !(a,b,c) 	!*HSt -> ((Form a,Form b,Form c),!*HSt) 
-																				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} b
-																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} c
+																				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
+																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC c
 t4EditForm  		:: !FormId !Mode !(a,b,c,d) !*HSt -> ((Form a,Form b,Form c,Form d),!*HSt)
-																				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
-																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} b
-																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} c
-																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} d
+																				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
+																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC c
+																	   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 
 // forms that assign functions to buttons:
 
 TableFuncBut 		:: !FormId !Mode ![[(Button, a -> a)]] !*HSt 
 													  -> (Form (a -> a) ,!*HSt)
 
-listForm 			:: !FormId !Mode ![a] 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|} a
+listForm 			:: !FormId !Mode ![a] 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
 // ListFuncBut		: assign functions to buttons, returns function corresponding to the button pressed, and the buttons body
 

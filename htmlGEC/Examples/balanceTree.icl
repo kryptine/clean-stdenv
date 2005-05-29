@@ -16,7 +16,7 @@ MyPage hst
 	, Br
 	] hst
 where
-	mycircuit = feedback (edit "tree") (arr  balanceTree)
+	mycircuit = feedback (edit (nFormId "tree")) (arr  balanceTree)
 
 	mkHtml s tags hst 	= (Html (header s) (body tags),hst)
 	header s 			= Head [`Hd_Std [Std_Title s]] [] 

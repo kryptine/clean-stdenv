@@ -9,8 +9,9 @@ import
 
 	 		htmlDataDef			// Clean's ADT representation of Html
 		,	htmlStyleDef		// Clean's ADT representation of Style sheets
-		
-		,	htmlHandler			// all kinds of basic functions to generate forms 
+
+		,	htmlFormData		// some common data definitions used for creating forms		
+		,	htmlHandler			// kernel module with all kinds of basic functions to generate forms 
 		,	htmlFormlib			// a library of more sophisticated form functions 
 		,	htmlArrow			// arrow instantiations for html forms
 

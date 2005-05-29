@@ -1,18 +1,26 @@
-implementation module htmlEncodeDecode
+ implementation module htmlEncodeDecode
 
 // encoding and decoding of information
+// (c) 2005 MJP
 
-import StdEnv, ArgEnv, StdMaybe
-import htmlDataDef, htmlTrivial
+import StdEnv, ArgEnv, StdMaybe, Directory
+import htmlDataDef, htmlTrivial, htmlFormData
 import GenPrint, GenParse
 
-// State Handling
+// This module controls the handling of state forms and the communication with the browser
+// Internally, a Tree is used to store the form states
+// Externaly, these states are stored in the Html form in a list
+// A distinction is made between old states (states retrieved from the html form)
+// and new states (states of newly created forms and updated forms)
 
 :: *FormStates 	:== Tree_ (String,FormState)		// State of forms is internally stored in a tree
 :: Tree_ a 		= Node_ (Tree_ a) a (Tree_ a) | Leaf_
-:: FormState 	= OldState String					// Old states will become garbage when the final states are reached
-				| NewState String
-
+:: FormState 	= OldState !String					// Old states will become garbage when the final states are reached
+				| NewState !NewState				// New states that will be saved in the html form
+:: NewState 	= { dynval 	::!Dynamic				// A new state is stored in a dynamic
+				  , strval 	:: String				// together with its string representation
+				  , live	:: !Livetime
+				  }
 :: HtmlState :== [(String,String)]					// For convenience, the state is stored in html as a list and not as a tree
 
 // reconstruct HtmlState out of the information obtained from browser
@@ -34,7 +42,7 @@ where
 			stl [] = []
 			stl [x:xs] = xs 
 
-// convert this HtmlState into FormStates used internally
+// convert this HtmlState into FormStates which are used internally
 
 initFormStates :: *FormStates
 initFormStates = Balance (sort [(formid,OldState state) \\ (formid,state) <- retrieveHtmlState | formid <> ""])
@@ -55,69 +63,107 @@ instance < FormState
 where
 	(<) _ _ = True
 
-findState :: !String *FormStates -> (Bool,Maybe a,*FormStates)	| gParse{|*|} a 
-findState sid states = findState` sid states
-where
-	findState` :: !String *FormStates -> (Bool,Maybe a,*FormStates)| gParse{|*|} a 
-	findState` sid Leaf_ = (False,Nothing,Leaf_)
-	findState` sid formstate=:(Node_ left (id,info) right)
-	| sid == id = case info of
-					(OldState state) = (True, parseString state,formstate)
-					(NewState state) = (False,parseString state,formstate)
-	| sid < id 	= (bool,parsed, Node_ leftformstates (id,info) right)
-					with
-						(bool,parsed,leftformstates) = findState` sid left
-	| otherwise	= (bool,parsed, Node_  left (id,info) rightformstates)
-					with
-						(bool,parsed,rightformstates) = findState` sid right
+force :: !a *b -> *b
+force a b = b
 
-replaceState :: !String a *FormStates -> *FormStates	| gPrint{|*|} a 
-replaceState sid val Leaf_ = Node_ Leaf_ (sid,NewState (printToString val)) Leaf_
-replaceState sid val (Node_ left a=:(id,_) right)
-| sid == id = Node_ left (id,NewState (printToString val)) right
-| sid < id 	= Node_ (replaceState sid val left) a right
-| otherwise = Node_ left a (replaceState sid val right)
+findState :: !FormId *FormStates *World -> (Bool,Maybe a,*FormStates,*World)	| gParse{|*|} a & TC a
+findState formid states world = findState` formid states world
+where
+	findState` :: !FormId *FormStates *World -> (Bool,Maybe a,*FormStates,*World)| gParse{|*|} a & TC a
+	findState` formid formstate=:(Node_ left (fid,info) right) world
+	| formid.id == fid = case info of
+					(OldState state) = (True, parseString state,formstate,world)
+					(NewState state) = (False,retrieveNewState state,formstate,world)
+	| formid.id  < fid 	= (bool,parsed, Node_ leftformstates (fid,info) right,nworld)
+					with
+						(bool,parsed,leftformstates,nworld) = findState` formid left world
+	| otherwise	= (bool,parsed, Node_  left (fid,info) rightformstates,nworld)
+					with
+						(bool,parsed,rightformstates,nworld) = findState` formid right world
+	findState` {id,livetime = Persistent} Leaf_ world 
+	# (ma,string,world) = readState id world
+	= case ma of
+		Just a 	-> (True,ma,Node_ Leaf_ (id,NewState {dynval = dynamic a, strval = string, live = Persistent}) Leaf_,world)
+		Nothing	-> (False,Nothing,Leaf_,world)
+	findState` _ Leaf_ world = (False,Nothing,Leaf_,world)
+
+	readState :: String *World -> (Maybe a,String,*World) | gParse {|*|} a 
+	readState filename env
+	#(_,env) = case getFileInfo mydir env of
+				((DoesntExist,fileinfo),env) -> createDirectory mydir env
+				(_,env) -> (NoDirError,env)
+	# (ok,file,env)	= fopen (MyDir +++ "/" +++ filename) FReadData env
+	| not ok 		= (Nothing,"",env)
+	# (string,file)	= freads file big
+	| not ok 		= (Nothing,"",env)
+	# (ok,env)		= fclose file env
+	# string 		= string%(1,size string - 2)
+	# string		= mkString (removeBackslashQuote (mkList string))
+	= (parseString  string,string,env) 
+	where
+		big = 100000
+		mydir = RelativePath [PathDown MyDir]
+
+		removeBackslashQuote [] 			= []
+		removeBackslashQuote ['\\\"':xs] 	= ['\"':removeBackslashQuote xs]
+		removeBackslashQuote [x:xs] 		= [x:removeBackslashQuote xs]
+
+replaceState :: !FormId a *FormStates *World -> (*FormStates,*World)	| gPrint{|*|} a & TC a
+replaceState formid val Leaf_ world = (Node_ Leaf_ (formid.id,NewState (initNewState formid.livetime val)) Leaf_,world)
+replaceState formid val (Node_ left a=:(fid,_) right) world
+| formid.id == fid 	= (Node_ left (fid,NewState (initNewState formid.livetime val)) right,world)
+| formid.id < fid 	= (Node_ nleft a right,nworld)
+						with
+							(nleft,nworld) = replaceState formid val left world
+| otherwise			 = (Node_ left a nright,nworld)
+						with
+							(nright,nworld) = replaceState formid val right world
 
 // NewState Handling routines 
 
-:: NewState = E.a: {dynval::Dynamic,val::a,print::a->String}
+initNewState :: !Livetime !a  -> NewState | TC a &  gPrint{|*|} a 
+initNewState livetime nv = {dynval = dynamic nv,strval = printToString nv, live = livetime}
 
-initNewState :: a -> NewState | TC a &  gPrint{|*|} a 
-initNewState nv = {dynval = dynamic nv,val = nv,print = printToString}
-
+/*
 storeNewState :: a NewState -> NewState | TC a &  gPrint{|*|} a 
-storeNewState nv {dynval = (val::a^)} = {dynval = dynamic nv,val = nv,print = printToString}
+storeNewState nv {dynval = (val::a^)} = {dynval = dynamic nv, strval = printToString nv}
 storeNewState nv old = old
+*/
 
-retrieveNewState :: NewState -> Maybe a | TC a
-retrieveNewState {dynval = (v::a^)} = Just v
+retrieveNewState :: NewState -> Maybe a | TC a & gParse{|*|} a
+retrieveNewState {strval} = parseString strval
+//retrieveNewState {dynval = (v::a^)} = Just v    // causes a run-time crash sometimes ??????? bug ????
 retrieveNewState _ = Nothing
 
 // Convert newly created FormStates to Html Code
 
-convStates :: *FormStates -> BodyTag
-convStates allFormStates
-=	BodyTag
+convStates :: !FormStates *World -> (BodyTag,*World)
+convStates allFormStates world
+#	world = writeAllPersistentStates allFormStates world 
+=	(BodyTag
 	[ submitscript    globalFormName updateInpName
 	, globalstateform globalFormName updateInpName globalInpName (SV encodedglobalstate) 
-	]
+	],world)
 where
 	encodedglobalstate = urlEncodeState (toHtmlState allFormStates)
 
-	toHtmlState :: FormStates -> HtmlState
-	toHtmlState Leaf_ = []
-	toHtmlState (Node_ left (formid,OldState s) right) = toHtmlState left ++ toHtmlState right // old states are garbage
-	toHtmlState (Node_ left (formid,NewState s) right) = toHtmlState left ++ [(formid,s)] ++ toHtmlState right // only remember new states for next round
+//	toHtmlState :: !FormStates -> HtmlState
+	toHtmlState formstates = toHtmlState` formstates []
+	where
+		toHtmlState` Leaf_ tl = tl
+		toHtmlState` (Node_ left (formid,OldState s) right) tl = toHtmlState` left (toHtmlState` right tl) // old states are garbage
+		toHtmlState` (Node_ left (formid,NewState {strval,live=Persistent}) right) tl = toHtmlState` left (toHtmlState` right tl) // persistent stores are stored in files
+		toHtmlState` (Node_ left (formid,NewState {strval}) right) tl = toHtmlState` left [(formid,strval): toHtmlState` right tl] // only remember new states for next round
 
-	urlEncodeState :: [(String,String)] -> String
+	urlEncodeState :: !HtmlState -> String
 	urlEncodeState [] = urlEncodeS "$"
 	urlEncodeState [(x,y):xsys] = urlEncodeS "(\"" +++ urlEncodeS x +++ 
 								  urlEncodeS "\"," +++ urlEncodeS y +++ 
 								  urlEncodeS ")$" +++ urlEncodeState xsys 
-	urlEncodeS :: String -> String
+	urlEncodeS :: !String -> String
 	urlEncodeS s = (mkString o urlEncode o mkList) s
 	
-	submitscript :: String String -> BodyTag
+	submitscript :: !String !String -> BodyTag
 	submitscript formname updatename
 	=	Script [] (SScript
 		(	" function toclean(inp)" +++
@@ -129,7 +175,7 @@ where
 
 	// form that contains global state and empty input form for storing updated input
 		
-	globalstateform :: String String String Value -> BodyTag
+	globalstateform :: !String !String !String !Value -> BodyTag
 	globalstateform formname updatename globalname globalstate
 	=	Form 	[ Frm_Name formname
 				, Frm_Action MyPhP
@@ -156,6 +202,32 @@ where
 	
 	selectorInpName :: String
 	selectorInpName =: "CS"
+
+//	writeAllPersistentStates:: FormStates *World -> *World 
+	writeAllPersistentStates Leaf_ world = world
+	writeAllPersistentStates (Node_ left (sid,NewState {strval,live = Persistent}) right) world
+	# world = writeState sid strval world 
+	# world = writeAllPersistentStates left world
+	= writeAllPersistentStates right world
+	writeAllPersistentStates (Node_ left (sid,NewState _) right) world
+	# world = writeAllPersistentStates left world
+	= writeAllPersistentStates right world
+	writeAllPersistentStates (Node_ left (sid,OldState s) right) world
+	# world = writeAllPersistentStates left world
+	= writeAllPersistentStates right world
+
+writeState :: String a *World -> *World | gPrint {|*|} a 
+writeState filename val env
+#(_,env) = case getFileInfo mydir env of
+			((DoesntExist,fileinfo),env) -> createDirectory mydir env
+			(_,env) -> (NoDirError,env)
+# (ok,file,env)	= fopen (MyDir +++ "/" +++ filename) FWriteData env
+| not ok 		= env
+# file			= fwrites (printToString val) file
+# (ok,env)		= fclose file env
+= env
+where
+	mydir = RelativePath [PathDown MyDir]
 
 // script for transmitting name and value of changed input 
 
@@ -205,8 +277,6 @@ CheckUpdate
 
 derive gParse (,), (,,)
 
-
-
 // all input information from the browser is obtained once via the arguments passed to this executable
 // defined as CAFs such that they are calculated only once
 
@@ -220,6 +290,9 @@ ThisExe
 
 MyPhP :: String
 MyPhP =: (mkString (takeWhile ((<>) '.') (mkList ThisExe))) +++ ".php"
+
+MyDir :: String
+MyDir =: (mkString (takeWhile ((<>) '.') (mkList ThisExe)))
 
 DecodedStateFormBrowser :: (!String,!String,!String,!String) // executable, id + update , new , state
 DecodedStateFormBrowser
@@ -305,15 +378,18 @@ where
 urlDecodeS :: String -> String
 urlDecodeS s = (mkString o urlDecode o mkList) s
 
-// converting strings to lists and backwards
 
-mkString :: [Char] -> String
-mkString listofchar = {elem \\ elem <- listofchar}
+// storing and retrieving forms from files
+// all form data is stored in a directory with the same name as the application
 
-mkList :: String -> [Char]
-mkList string = [e \\ e <-: string]
+/*
+readInitState :: String a *env -> (a,*World) | gParse {|*|} a 
+readInitState filename init env
+= case readState filename env of
+	(Nothing,s,env) -> (init,env)
+	(Just a,s,env) -> (a,env)
 
-
+*/
 
 
 

@@ -10,8 +10,8 @@ import StdHtml
 Start world  = doHtml calculator world
 
 calculator hst
-# (calcfun,hst) 	= TableFuncBut "calcbut" Edit calcbuttons hst		// shows buttons
-# (display,hst) 	= mkStoreForm "display" initcalc calcfun.value  hst	// calculates new values	
+# (calcfun,hst) 	= TableFuncBut (nFormId "calcbut") Edit calcbuttons hst		// shows buttons
+# (display,hst) 	= mkStoreForm (nFormId "display") initcalc calcfun.value  hst	// calculates new values	
 = mkHtml "Calculator"
 	[ H1 [] "Calculator Example: "
 	, toBody display 
@@ -24,7 +24,7 @@ where
 
 
 arrowcalculator hst
-# (calcfun,hst) 	= TableFuncBut "calcfun" Edit calcbuttons hst		// shows buttons
+# (calcfun,hst) 	= TableFuncBut (nFormId "calcfun") Edit calcbuttons hst		// shows buttons
 # (display,hst) 	= startCircuit circuit calcfun.value  hst	// calculates new values	
 = mkHtml "Calculator" 
 	[ H1 [] "Calculator Example: "
@@ -32,7 +32,7 @@ arrowcalculator hst
 	, toBody calcfun
 	] hst
 where
-	circuit  =  store "display" initcalc 
+	circuit  =  store (nFormId "display") initcalc 
 	
 	mkHtml s tags hst 	= (Html (header s) (body tags),hst)
 	header s 			= Head [`Hd_Std [Std_Title s]] [] 

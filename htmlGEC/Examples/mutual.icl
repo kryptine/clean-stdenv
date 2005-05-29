@@ -29,7 +29,7 @@ mutual hst
 	]  hst
 where
 	circuit :: GecCircuit Euros Euros
-	circuit = feedback (edit "euros") (arr toPounds >>> edit "pounds" >>> arr toEuros)
+	circuit = feedback (edit (nFormId "euros")) (arr toPounds >>> edit (nFormId "pounds") >>> arr toEuros)
 
 	toPounds :: Euros -> Pounds                         
 	toPounds {euros} = {pounds = euros / exchangerate}  

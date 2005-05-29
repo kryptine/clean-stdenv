@@ -73,10 +73,10 @@ where
 	initbuttonset 	= snd initstore
 
 	createButtons :: [(Button, (PAI,[PAI]) -> (PAI,[PAI]))] *HSt -> (Form ((PAI,[PAI]) -> (PAI,[PAI])),*HSt)
-	createButtons butdef hst = ListFuncBut False "PAbuttons" Edit butdef hst
+	createButtons butdef hst = ListFuncBut False (nFormId "PAbuttons") Edit butdef hst
 
 	expressionStore :: ((PAI,[PAI]) -> (PAI,[PAI])) *HSt -> (Form (PAI,[PAI]),*HSt)
-	expressionStore f hst = mkStoreForm "PAexprstore" initstore f hst
+	expressionStore f hst = mkStoreForm (nFormId "PAexprstore") initstore f hst
 
 	// calculate buttons out of the set of next event that can occur
 	
@@ -133,9 +133,9 @@ where
 expr = But "koffie" .+. But "thee" .+. But "chocmelk" .>. But "melk" .+. But "suiker" .>. But "klaar"
 
 MyPage2 hst
-# (exprf,hst) 	 	= mkEditForm  "expr" (But "Init") Edit hst
-# (donebut,hst) 	= ListFuncBut False "but" Edit [(LButton defpixel "Done!",\b -> not b)] hst
-# (boolstore,hst)	= mkStoreForm "boolstore" False donebut.value  hst
+# (exprf,hst) 	 	= mkEditForm  (nFormId "expr") (But "Init") Edit hst
+# (donebut,hst) 	= ListFuncBut False (nFormId "but") Edit [(LButton defpixel "Done!",\b -> not b)] hst
+# (boolstore,hst)	= mkStoreForm (nFormId "boolstore") False donebut.value  hst
 # (buttons,hst)		= if boolstore.value (calcExpression [] exprf.value hst) ([EmptyBody],hst)
 = mkHtml "Process Algebra Experiment"
 	[ H1 [] "Process Algebra Experiment"
