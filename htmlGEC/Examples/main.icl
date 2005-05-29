@@ -15,8 +15,8 @@ derive gHpr 	Tree
 Start world  = doHtml MyPage3 world
 
 MyPage3  hst
-# (nval,hst)	= mkEditForm (pFormId "edit") "marie" Edit hst
-# (nval2,hst)	= mkEditForm (pFormId "edit2") 8 Edit hst
+# (nval,hst)	= mkEditForm (pFormId "edit") "marie" hst
+# (nval2,hst)	= mkEditForm (pFormId "edit2") 8 hst
 # (nval3,str,hst) = readState "edit" hst
 = mkHtml "Main Test Program"
 	[ H1 [] "My Test"
@@ -63,10 +63,10 @@ where
 stroref f hst = mkStoreForm (nFormId "basket") 0 f hst
 
 MyPage2  hst
-# (next,hst)	= mkEditForm (nFormId "next") 0 Edit hst
-# (add,hst) 	= ListFuncBut False (nFormId "add") Edit [(LButton 80 "add", \xs -> next.value + xs)] hst
+# (next,hst)	= mkEditForm (nFormId "next") 0 hst
+# (add,hst) 	= ListFuncBut False (nFormId "add") [(LButton 80 "add", \xs -> next.value + xs)] hst
 # (basket,hst) 	= stroref add.value hst
-# (dec,hst) 	= ListFuncBut False (nFormId "less") Edit [(LButton 80 "decr", \xs -> xs - next.value)] hst
+# (dec,hst) 	= ListFuncBut False (nFormId "less") [(LButton 80 "decr", \xs -> xs - next.value)] hst
 # (basket1,hst) = stroref dec.value hst
 = mkHtml "Main Test Program"
 	[ H1 [] "My Test"
@@ -88,9 +88,9 @@ where
 
 
 MyPage  hst
-# (treef,hst) 	= mkEditForm (nFormId "tree") (Node Leaf 1 Leaf) Edit  hst
-# (buttonf,hst) = mkEditForm (nFormId "button") (LButton defpixel "oeps") Display  hst
-# (inp,hst)		= mkEditForm (nFormId "xxx") (TI 10 23, TR 10 4.5, TS 30 "hallo, hoe is het") Edit hst
+# (treef,hst) 	= mkEditForm (nFormId "tree") (Node Leaf 1 Leaf) hst
+# (buttonf,hst) = mkEditForm (ndFormId "button") (LButton defpixel "oeps") hst
+# (inp,hst)		= mkEditForm (nFormId "xxx") (TI 10 23, TR 10 4.5, TS 30 "hallo, hoe is het") hst
 = mkHtml "Main Test Program"
 	[ H1 [] "My Test"
 	, Br, Txt "Here we show an editor for a tree data structure :", Br, Br

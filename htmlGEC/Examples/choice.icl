@@ -6,9 +6,9 @@ import StdHtml
 Start world  = doHtml choice world
 
 choice hst
-# (selection,hst) 	= FuncMenu -2 (nFormId "rinus") Edit functions hst
+# (selection,hst) 	= FuncMenu -2 (nFormId "rinus") functions hst
 # (fun,selected) 	= selection.value
-# (radio,hst) 		= ListFuncRadio selected (nFormId "aap") Edit mycbfs hst
+# (radio,hst) 		= ListFuncRadio selected (nFormId "aap") mycbfs hst
 # (rfun,j) 			= radio.value
 = mkHtml "Choosing is difficult"
 	[ H1 [] "testing radio buttons"

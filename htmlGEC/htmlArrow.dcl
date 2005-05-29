@@ -31,4 +31,4 @@ self 			:: (a -> a) (GecCircuit a a) -> GecCircuit a a
 
 // to lift library functions to the circuit domain
 
-lift :: FormId Mode (FormId Mode a *HSt -> (Form b,*HSt)) -> (GecCircuit a b)
+lift :: FormId (FormId a *HSt -> (Form b,*HSt)) -> (GecCircuit a b)

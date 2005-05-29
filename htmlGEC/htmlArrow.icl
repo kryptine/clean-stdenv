@@ -49,14 +49,14 @@ where
 	# (na,hst) = mkApplyEditForm formid initval initval hst
 	= ((na.value,[(formid.id,BodyTag na.body):prevbody]),False,hst)
 	mkApplyEdit` ((initval,prevbody),True,hst) // second time I come here: don't use the old state, but the new one ! 
-	# (na,hst) = mkSetForm formid initval Edit  hst 
+	# (na,hst) = mkSetForm {formid & mode = Edit} initval  hst 
 	= ((na.value,[(formid.id,BodyTag na.body):prevbody]),True,hst)
 
 display :: FormId -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 display formid = HGC mkEditForm`
 where
 	mkEditForm` ((val,prevbody),bool,hst) 
-	# (na,hst) = mkEditForm formid val Display hst
+	# (na,hst) = mkEditForm {formid & mode = Display} val hst
 	= ((na.value,[(formid.id,BodyTag na.body):prevbody]),bool,hst)
 
 store :: FormId s -> GecCircuit (s -> s) s |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC s
@@ -77,10 +77,10 @@ where
 	# (res,bool,hst) = gec_ab (res,True,hst)
 	= (res,False,hst)							// indicates that we loop from here 
 
-lift :: FormId Mode (FormId Mode a *HSt -> (Form b,*HSt)) -> (GecCircuit a b)
-lift formid mode fun = HGC fun`
+lift :: FormId (FormId a *HSt -> (Form b,*HSt)) -> (GecCircuit a b)
+lift formid fun = HGC fun`
 where
 	fun` ((a,body),bool,hst)
-	# (nb,hst) =  fun formid mode a hst
+	# (nb,hst) =  fun formid a hst
 	= ((nb.value,[(formid.id,BodyTag nb.body):body]),bool,hst) 
 

@@ -8,34 +8,43 @@ import StdEnv, StdHtml
 // utility for creating FormId's
 
 pFormId :: String -> FormId					// persitent formid
-pFormId s = {id = s, livetime = Persistent}
+pFormId s = {id = s, livetime = Persistent, mode = Edit}
 
 sFormId :: String -> FormId					// session formid
-sFormId s = {id = s, livetime = Session}
+sFormId s = {id = s, livetime = Session, mode = Edit}
 
 nFormId :: String -> FormId					// page formid
-nFormId s = {id = s, livetime = Page}
+nFormId s = {id = s, livetime = Page, mode = Edit}
+
+pdFormId :: String -> FormId					// persitent formid
+pdFormId s = {id = s, livetime = Persistent, mode = Display}
+
+sdFormId :: String -> FormId					// session formid
+sdFormId s = {id = s, livetime = Session, mode = Display}
+
+ndFormId :: String -> FormId					// page formid
+ndFormId s = {id = s, livetime = Page, mode = Display}
 
 // frequently used variants of mkViewForm
 
 toFormid d Nothing = d
 toFormid d (Just v) = v
 
-mkEditForm:: !FormId d !Mode !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkEditForm formid data Edit  hst
-= mkViewForm formid data Edit 
+mkEditForm:: !FormId d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+mkEditForm formid=:{mode = Edit} data hst
+= mkViewForm formid data
 	{toForm = toFormid , updForm = \_ v -> v , fromForm = \_ v -> v , resetForm = Nothing}  hst
-mkEditForm formid  mode data hst
-= mkSetForm formid mode data hst
+mkEditForm formid  data hst
+= mkSetForm formid data hst
 
-mkSetForm:: !FormId d !Mode !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkSetForm formid data mode  hst
-= mkViewForm formid data mode 
+mkSetForm:: !FormId d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+mkSetForm formid data hst
+= mkViewForm formid data 
 	{toForm = toFormid , updForm = \_ _ -> data , fromForm = \_ v -> v , resetForm = Nothing}  hst
 
 mkSelfForm  :: !FormId 	d !(d -> d) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkSelfForm formid initdata cbf  hst
-= mkViewForm formid initdata Edit 
+= mkViewForm formid initdata 
 	{toForm = toFormid , updForm = update , fromForm = \_ v -> v , resetForm = Nothing}  hst
 where
 	update True newval = cbf newval
@@ -43,31 +52,31 @@ where
 	
 mkApplyForm :: !FormId d !(d -> d) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkApplyForm formid data cbf  hst
-= mkViewForm formid data Display 
+= mkViewForm formid data 
 	{toForm = toFormid , updForm = \_ _ = cbf data , fromForm = \_ v -> v, resetForm = Nothing}  hst
 
 mkStoreForm :: !FormId d !(d -> d) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkStoreForm formid data cbf  hst
-= mkViewForm formid data Display 
+= mkViewForm formid data 
 	{toForm = toFormid , updForm = \_ v = cbf v , fromForm = \_ v -> v, resetForm = Nothing}  hst
 
 mkApplyEditForm	:: !FormId d !d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkApplyEditForm formid initval inputval  hst
-= mkViewForm formid initval Edit 
+= mkViewForm formid initval 
 	{toForm =  toFormid , updForm = update , fromForm = \_ v -> v, resetForm = Nothing}  hst
 where
 	update True  newval = newval
 	update False val    = inputval
 
-mkBimapEditor :: !FormId d !Mode !(Bimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
-mkBimapEditor formid d mode {map_to,map_from} hst
-= mkViewForm formid d mode	{ toForm 	= \d v -> case v of 
-													Nothing -> map_to d
-													Just v -> v
-							, updForm 	= \b v -> v
-							, fromForm 	= \b v -> map_from v
-							, resetForm = Nothing
-							} hst 
+mkBimapEditor :: !FormId d !(Bimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
+mkBimapEditor formid d {map_to,map_from} hst
+= mkViewForm formid d 	{ toForm 	= \d v -> case v of 
+												Nothing -> map_to d
+												Just v -> v
+						, updForm 	= \b v -> v
+						, fromForm 	= \b v -> map_from v
+						, resetForm = Nothing
+						} hst 
 
 // operators for lay-out of html bodys ...
 
@@ -107,8 +116,8 @@ where
 
 // Form collection:
 
-counterForm 	:: !FormId !Mode a !*HSt -> (Form a,!*HSt) | +, -, one,  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-counterForm name mode i hst = mkViewForm name i mode bimap hst
+counterForm 	:: !FormId !a !*HSt -> (Form a,!*HSt) | +, -, one,  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+counterForm name i hst = mkViewForm name i bimap hst
 where
 	bimap =	{ toForm 	= \n v -> case v of
 									Nothing -> (n,down,up)
@@ -129,8 +138,8 @@ where
 	down	= LButton (defpixel / 6) "-"
 
 
-browseButtons :: !Bool !Int !Int !Int !Int !FormId !Mode !*HSt -> (Form Int,!*HSt)
-browseButtons reset curindex step length nbuttuns formid mode hst
+browseButtons :: !Bool !Int !Int !Int !Int !FormId !*HSt -> (Form Int,!*HSt)
+browseButtons reset curindex step length nbuttuns formid hst
 # (nindex, hst)		= mkStoreForm formid curindex (\v -> if reset curindex v)  hst
 # (calcnext, hst)	= browserForm nindex.value hst
 # (nindex, hst)		= mkStoreForm formid curindex calcnext.value  hst
@@ -145,11 +154,11 @@ where
 	where
 		browserButtons :: !Int !Int !Int -> [(Mode,Button,Int -> Int)]
 		browserButtons init step length = 
-			if (init - range >= 0) 	   [(mode,sbut "--", set (init - range))] [] 
+			if (init - range >= 0) 	   [(formid.mode,sbut "--", set (init - range))] [] 
 			++
 			take nbuttuns [(setmode i index,sbut (toString (i)),set i) \\ i <- [startval,startval+step .. length-1]] 
 			++ 
-			if (startval + range < length - 1) [(mode,sbut "++", set (startval + range))] []
+			if (startval + range < length - 1) [(formid.mode,sbut "++", set (startval + range))] []
 		where
 			set j i 	= j
 			range 		= nbuttuns * step
@@ -158,12 +167,12 @@ where
 			sbut s		= LButton (defpixel/3) s
 			setmode i index
 			| index <= i && i < index + step = Display
-			| otherwise = mode
+			| otherwise = formid.mode
 
-horlist2Form 		:: !FormId a !Mode ![a] 	!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-horlist2Form s defaultval mode  list hst 
-# (fun,hst) 	= TableFuncBut  s mode [[(but "-", less),(but "+", more)]] hst
-# (nlist,hst) 	= horlistForm s mode (fun.value list) hst  
+horlist2Form 		:: !FormId a ![a] 	!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+horlist2Form s defaultval list hst 
+# (fun,hst) 	= TableFuncBut  s [[(but "-", less),(but "+", more)]] hst
+# (nlist,hst) 	= horlistForm s (fun.value list) hst  
 = ({changed	= fun.changed || nlist.changed
    ,value	= nlist.value
    ,body	= [fun.body <||> nlist.body]
@@ -177,15 +186,15 @@ where
 	less [x:xs] = xs
 	less [] = []
 
-horlistForm 		:: !FormId !Mode ![a] 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-horlistForm _ mode [] hst  
+horlistForm 		:: !FormId ![a] 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+horlistForm _  [] hst  
 = ({changed	= False
    ,value	= []
    ,body	= []
    },hst)
-horlistForm formid mode [x:xs] hst
-# (nxs,hst) = horlistForm formid mode xs hst
-# (nx, hst) = mkEditForm nformid x mode hst
+horlistForm formid [x:xs] hst
+# (nxs,hst) = horlistForm formid xs hst
+# (nx, hst) = mkEditForm nformid x hst
 = ({changed	= nxs.changed || nx.changed 
    ,value	= [nx.value:nxs.value]
    ,body	= [nx.body <=> nxs.body]
@@ -193,15 +202,15 @@ horlistForm formid mode [x:xs] hst
 where
 	nformid = {formid & id = formid.id +++ toString (length xs)}
 			
-vertlistForm 		:: !FormId !Mode ![a] 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-vertlistForm _ mode [] hst  
+vertlistForm 		:: !FormId ![a] 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+vertlistForm _ [] hst  
 = ({changed	= False
    ,value	= []
    ,body	= []
    },hst)
-vertlistForm formid mode [x:xs] hst
-# (nxs,hst) = vertlistForm formid mode xs hst
-# (nx, hst) = mkEditForm nformid x mode hst
+vertlistForm formid [x:xs] hst
+# (nxs,hst) = vertlistForm formid xs hst
+# (nx, hst) = mkEditForm nformid x hst
 = ({changed	= nxs.changed || nx.changed 
    ,value	= [nx.value:nxs.value]
    ,body	= [nx.body <||> nxs.body]
@@ -209,15 +218,15 @@ vertlistForm formid mode [x:xs] hst
 where
 	nformid = {formid & id = formid.id +++ toString (length xs)}
 
-table_hv_Form 		:: !FormId !Mode ![[a]] 	!*HSt -> (Form [[a]],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-table_hv_Form _ mode [] hst
+table_hv_Form 		:: !FormId ![[a]] 	!*HSt -> (Form [[a]],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+table_hv_Form _ [] hst
 = ({changed	= False
    ,value	= []
    ,body	= []
    },hst)
-table_hv_Form formid mode [x:xs] hst
-# (nxs,hst)	= table_hv_Form formid mode xs hst
-# (nx, hst)	= horlistForm nformid mode x hst
+table_hv_Form formid [x:xs] hst
+# (nxs,hst)	= table_hv_Form formid xs hst
+# (nx, hst)	= horlistForm nformid x hst
 = ({changed	= nxs.changed || nx.changed 
    ,value	= [nx.value:nxs.value]
    ,body	= [nx.body <||> nxs.body]
@@ -225,38 +234,38 @@ table_hv_Form formid mode [x:xs] hst
 where
 	nformid = {formid & id = formid.id +++ toString (length xs)}
    
-t2EditForm  :: !FormId !Mode !(a,b) !*HSt -> ((Form a,Form b),!*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+t2EditForm  :: !FormId !(a,b) !*HSt -> ((Form a,Form b),!*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 																	 &  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
-t2EditForm formid mode (a,b) hst
-# (forma,hst) = mkEditForm nformida a mode hst 
-# (formb,hst) = mkEditForm nformidb b mode hst
+t2EditForm formid (a,b) hst
+# (forma,hst) = mkEditForm nformida a hst 
+# (formb,hst) = mkEditForm nformidb b hst
 = ((forma,formb),hst) 
 where
 	nformida = {formid & id = formid.id +++ "t21"}
 	nformidb = {formid & id = formid.id +++ "t22"}
 
-t3EditForm  :: !FormId !Mode !(a,b,c) !*HSt -> ((Form a,Form b,Form c),!*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+t3EditForm  :: !FormId !(a,b,c) !*HSt -> ((Form a,Form b,Form c),!*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 																	   &  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
 																	   &  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC c
-t3EditForm formid mode (a,b,c) hst
-# (forma,hst) = mkEditForm nformida a mode hst 
-# (formb,hst) = mkEditForm nformidb b mode hst
-# (formc,hst) = mkEditForm nformidc c mode hst
+t3EditForm formid (a,b,c) hst
+# (forma,hst) = mkEditForm nformida a hst 
+# (formb,hst) = mkEditForm nformidb b hst
+# (formc,hst) = mkEditForm nformidc c hst
 = ((forma,formb,formc),hst) 
 where
 	nformida = {formid & id = formid.id +++ "t31"}
 	nformidb = {formid & id = formid.id +++ "t32"}
 	nformidc = {formid & id = formid.id +++ "t33"}
 
-t4EditForm  :: !FormId !Mode !(a,b,c,d) !*HSt -> ((Form a,Form b,Form c,Form d),!*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+t4EditForm  :: !FormId !(a,b,c,d) !*HSt -> ((Form a,Form b,Form c,Form d),!*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 																	   &  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
 																	   &  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC c
 																	   &  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-t4EditForm formid mode (a,b,c,d) hst
-# (forma,hst) = mkEditForm nformida a mode hst 
-# (formb,hst) = mkEditForm nformidb b mode hst
-# (formc,hst) = mkEditForm nformidc c mode hst
-# (formd,hst) = mkEditForm nformidd d mode hst
+t4EditForm formid (a,b,c,d) hst
+# (forma,hst) = mkEditForm nformida a hst 
+# (formb,hst) = mkEditForm nformidb b hst
+# (formc,hst) = mkEditForm nformidc c hst
+# (formd,hst) = mkEditForm nformidd d hst
 = ((forma,formb,formc,formd),hst) 
 where
 	nformida = {formid & id = formid.id +++ "t41"}
@@ -264,41 +273,41 @@ where
 	nformidc = {formid & id = formid.id +++ "t43"}
 	nformidd = {formid & id = formid.id +++ "t44"}
    
-TableFuncBut 		:: !FormId !Mode ![[(Button, a -> a)]] !*HSt 
+TableFuncBut 		:: !FormId ![[(Button, a -> a)]] !*HSt 
 													  -> (Form (a -> a) ,!*HSt)
-TableFuncBut formid mode list hst = TableFuncBut` 0 formid mode list hst
+TableFuncBut formid list hst = TableFuncBut` 0 formid list hst
 where
-	TableFuncBut` n _ mode [] hst
+	TableFuncBut` n _ [] hst
 	= ({changed	= False
 	   ,value	= id
 	   ,body	= []
 	   },hst)
 
-	TableFuncBut` n formid mode [row:rows] hst 
-	# (rows,hst)	= TableFuncBut` n formid mode rows hst
-	# (row,  hst)	= RowFuncBut` n formid mode row hst
+	TableFuncBut` n formid [row:rows] hst 
+	# (rows,hst)	= TableFuncBut` n formid rows hst
+	# (row,  hst)	= RowFuncBut` n formid row hst
 	= ({changed		= rows.changed || row.changed 
 	   ,value		= rows.value o row.value
 	   ,body		= [row.body <||> rows.body]
 	   },hst)
 	where
-		RowFuncBut` :: !Int !FormId !Mode [(Button, a -> a)] !*HSt -> (Form (a -> a),!*HSt)
-		RowFuncBut` n _ mode [] hst 
+		RowFuncBut` :: !Int !FormId [(Button, a -> a)] !*HSt -> (Form (a -> a),!*HSt)
+		RowFuncBut` n _ [] hst 
 		= ({changed	= False
 		   ,value	= id
 		   ,body	= []
 		   },hst)
-		RowFuncBut` n formid mode [x:xs] hst 
-		# (rowfun,hst) 	= RowFuncBut` n formid mode xs hst
-		# (fun   ,hst)	= FuncBut False n formid mode x hst
+		RowFuncBut` n formid [x:xs] hst 
+		# (rowfun,hst) 	= RowFuncBut` n formid xs hst
+		# (fun   ,hst)	= FuncBut False n formid x hst
 		= ({changed		= rowfun.changed || fun.changed 
 		   ,value		= rowfun.value o fun.value
 		   ,body		= [fun.body <=> rowfun.body]
 		   },hst)
 
 
-FuncBut :: !Bool !Int !FormId !Mode !(Button, a -> a) !*HSt -> (Form (a -> a),!*HSt)
-FuncBut init i formid mode (button=:LButton _ name ,cbf) hst = mkViewForm nformid id mode bimap hst
+FuncBut :: !Bool !Int !FormId !(Button, a -> a) !*HSt -> (Form (a -> a),!*HSt)
+FuncBut init i formid (button=:LButton _ name ,cbf) hst = mkViewForm nformid id bimap hst
 where
 	bimap =	{ toForm 	= \_ v -> case v of
 									Nothing = button
@@ -310,7 +319,7 @@ where
 			, resetForm	= Just (\_ 	-> button)
 			}
 	nformid = {formid & id = formid.id +++ name +++ toString i}
-FuncBut init i formid mode (button=:PButton _ ref ,cbf) hst = mkViewForm nformid id mode bimap hst
+FuncBut init i formid (button=:PButton _ ref ,cbf) hst = mkViewForm nformid id bimap hst
 where
 	bimap =	{ toForm 	= \_ v -> case v of
 									Nothing = button
@@ -322,19 +331,19 @@ where
 			, resetForm	= Just (\_ 	-> button)
 			}
 	nformid = {formid & id = formid.id +++ toString i +++ ref}
-FuncBut init i s mode (Pressed,cbf) hst = FuncBut init i s mode (LButton 10 "??",cbf) hst
+FuncBut init i s (Pressed,cbf) hst = FuncBut init i s (LButton 10 "??",cbf) hst
 
-ListFuncBut :: !Bool !FormId !Mode [(Button, a -> a)] !*HSt -> (Form (a -> a),!*HSt)
-ListFuncBut b s mode list hst = ListFuncBut` b 0 s mode list hst 
+ListFuncBut :: !Bool !FormId [(Button, a -> a)] !*HSt -> (Form (a -> a),!*HSt)
+ListFuncBut b s list hst = ListFuncBut` b 0 s list hst 
 where
-	ListFuncBut` b n s mode [] hst
+	ListFuncBut` b n s [] hst
 	= ({changed	= False
 	   ,value	= id
 	   ,body	= []
 	   },hst)
-	ListFuncBut` b n s mode [x:xs] hst 
-	# (rowfun,hst) 	= ListFuncBut` b (n+1) s mode xs hst
-	# (fun   ,hst)	= FuncBut b n s mode x hst
+	ListFuncBut` b n s [x:xs] hst 
+	# (rowfun,hst) 	= ListFuncBut` b (n+1) s xs hst
+	# (fun   ,hst)	= FuncBut b n s x hst
 	= ({changed	= rowfun.changed || fun.changed
 	   ,value	= fun.value o rowfun.value
 	   ,body	= [BodyTag fun.body:rowfun.body]
@@ -348,34 +357,34 @@ where
 	   ,value	= id
 	   ,body	= []
 	   },hst)
-	ListFuncBut` b n s [(mode,but,func):xs] hst 
+	ListFuncBut` b n s [(bmode,but,func):xs] hst 
 	# (rowfun,hst) 	= ListFuncBut` b (n+1) s xs hst
-	# (fun   ,hst)	= FuncBut b n s mode (but,func) hst
+	# (fun   ,hst)	= FuncBut b n {s & mode = bmode} (but,func) hst
 	= ({changed	= rowfun.changed || fun.changed
 	   ,value	= fun.value o rowfun.value
 	   ,body	= [BodyTag fun.body:rowfun.body]
 	   },hst)
 
-ListFuncCheckBox :: !Bool !FormId !Mode [(CheckBox, Bool [Bool] a -> a)] !*HSt 
+ListFuncCheckBox :: !Bool !FormId [(CheckBox, Bool [Bool] a -> a)] !*HSt 
 									-> (Form (a -> a,[Bool]),!*HSt)
-ListFuncCheckBox init s mode defs hst 
-# (check,hst) = ListFuncCheckBox` init s mode defs hst
+ListFuncCheckBox init s defs hst 
+# (check,hst) = ListFuncCheckBox` init s defs hst
 # (f,bools) = check.value
 = ({changed	= False
    ,value	= (f bools,bools)
    ,body	= check.body
    },hst)
 where
-	ListFuncCheckBox` :: !Bool !FormId !Mode [(CheckBox, Bool [Bool] a -> a)] !*HSt 
+	ListFuncCheckBox` :: !Bool !FormId [(CheckBox, Bool [Bool] a -> a)] !*HSt 
 										-> (Form ([Bool] a -> a,[Bool]),!*HSt)
-	ListFuncCheckBox` init s mode [] hst
+	ListFuncCheckBox` init s [] hst
 	= ({changed	= False
 	   ,value	= (\_ a -> a,[])
 	   ,body	= []
 	   },hst)
-	ListFuncCheckBox` init s mode [x:xs] hst 
-	# (rowfun,hst) 	= ListFuncCheckBox` init s mode xs hst
-	# (fun   ,hst)	= FuncCheckBox init s mode x hst
+	ListFuncCheckBox` init s [x:xs] hst 
+	# (rowfun,hst) 	= ListFuncCheckBox` init s xs hst
+	# (fun   ,hst)	= FuncCheckBox init s x hst
 	# (rowfunv,boolsv) = rowfun.value
 	# (funv,nboolv) = fun.value
 	= ({changed	= rowfun.changed || fun.changed
@@ -385,7 +394,7 @@ where
 	where
 		funcomp f g = \bools a = f bools (g bools a)
 	
-		FuncCheckBox init formid mode (checkbox,cbf) hst = mkViewForm nformid (\_ a -> a,False) mode bimap hst
+		FuncCheckBox init formid (checkbox,cbf) hst = mkViewForm nformid (\_ a -> a,False) bimap hst
 		where
 			bimap =	{ toForm 	= \_ v -> case v of
 											Nothing = checkbox
@@ -411,12 +420,12 @@ where
 // we therefore ourselves have to determine and remember which radio button in the family is set
 
 
-ListFuncRadio :: !Int !FormId !Mode [Int a -> a] !*HSt 
+ListFuncRadio :: !Int !FormId [Int a -> a] !*HSt 
 									-> (Form (a -> a,Int),!*HSt)
-ListFuncRadio i formid mode defs hst 
+ListFuncRadio i formid defs hst 
 # (ni,hst)		= mkStoreForm formid (set (abs i) 0) (set i)  hst	// determine which radio to select
 
-# (radio,hst) 	= ListFuncRadio` ni.value 0 formid mode defs hst	// determine if radio changed by user
+# (radio,hst) 	= ListFuncRadio` ni.value 0 formid defs hst	// determine if radio changed by user
 # (f,nni)		= radio.value
 # (f,i) 		= if (nni>=0) (f nni, nni) (id,ni.value)		// if so, select function, otherwise set to old radio
 # (i,hst)		= mkStoreForm formid (set i i) (set i)  hst	// store current selected radio for next round
@@ -433,16 +442,16 @@ where
 	| i >= 0 && i < length defs = i		// set to new radio buttun 
 	| otherwise = j						// set to old radio button
 
-	ListFuncRadio` :: !Int !Int !FormId !Mode [Int a -> a] !*HSt 
+	ListFuncRadio` :: !Int !Int !FormId [Int a -> a] !*HSt 
 										-> (Form (Int a -> a,Int),!*HSt)
-	ListFuncRadio` i j _ mode [] hst
+	ListFuncRadio` i j _ [] hst
 	= ({changed	= False
 	   ,value	= (\_ a -> a,-1)
 	   ,body	= []
 	   },hst)
-	ListFuncRadio` i j formid mode [f:fs] hst 
-	# (listradio,hst) 	= ListFuncRadio` i (j+1) formid mode fs hst
-	# (funcradio,hst)	= FuncRadio i j formid mode f hst
+	ListFuncRadio` i j formid [f:fs] hst 
+	# (listradio,hst) 	= ListFuncRadio` i (j+1) formid fs hst
+	# (funcradio,hst)	= FuncRadio i j formid f hst
 	# (rowfun,rri) 		= listradio.value
 	# (fun,ri) 			= funcradio.value
 	= ({changed	= listradio.changed || funcradio.changed
@@ -454,7 +463,7 @@ where
 	where
 		funcomp f g = \i a = f i (g i a)
 	
-		FuncRadio i j formid mode cbf hst = mkViewForm nformid (\_ a -> a,-1) mode bimap  hst
+		FuncRadio i j formid cbf hst = mkViewForm nformid (\_ a -> a,-1) bimap  hst
 		where
 			bimap =	{ toForm 	= \_ v -> radio i j
 					, updForm	= \b v -> if b (RBChecked formid.id) (otherradio v)
@@ -467,9 +476,9 @@ where
 			
 			nformid = {formid & id = formid.id +++ "_" +++ toString j}
 
-FuncMenu :: !Int !FormId !Mode [(String, a -> a)] !*HSt 
+FuncMenu :: !Int !FormId [(String, a -> a)] !*HSt 
 													 -> (Form (a -> a,Int),!*HSt)
-FuncMenu index s mode defs hst = mkViewForm s (id,init index) mode bimap  hst
+FuncMenu index s defs hst = mkViewForm s (id,init index) bimap  hst
 where
 	menulist = PullDown (1,defpixel) (init index,map fst defs) 
 
@@ -486,15 +495,15 @@ where
 	| otherwise = 0
 
 
-listForm 			:: !FormId !Mode ![a] 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-listForm _ mode [] hst
+listForm 			:: !FormId ![a] 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+listForm _  [] hst
 = ({changed	= False
    ,value	= []
    ,body	= []
    },hst)
-listForm formid mode [x:xs] hst
-# (nxs,hst) = listForm formid mode xs hst
-# (nx, hst) = mkEditForm nformid x mode hst
+listForm formid [x:xs] hst
+# (nxs,hst) = listForm formid xs hst
+# (nx, hst) = mkEditForm nformid x hst
 = ({changed	= nx.changed || nxs.changed
    ,value	= [nx.value:nxs.value]
    ,body	= [BodyTag nx.body:nxs.body]
