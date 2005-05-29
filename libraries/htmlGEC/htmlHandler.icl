@@ -43,14 +43,6 @@ ifEdit :: Mode a a -> a
 ifEdit Edit 	then else = then
 ifEdit Display  then else = else 
 
-pFormId :: String -> FormId					// persitent formid
-pFormId s = {id = s, livetime = Persistent}
-
-sFormId :: String -> FormId					// session formid
-sFormId s = {id = s, livetime = Session}
-
-nFormId :: String -> FormId					// page formid
-nFormId s = {id = s, livetime = Page}
 
 // top level function given to end user
 // it collects all the html forms to display, adds clean styles and hidden forms, ands prints the html code to stdout
@@ -132,57 +124,6 @@ where
 		| otherwise = (Nothing, findState formid formStates world)
 
 		nformid sid = {formid & id = sid}
-
-mkEditForm:: !FormId d !Mode !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkEditForm formid data Edit  hst
-= mkViewForm formid data Edit 
-	{toForm = toFormid , updForm = \_ v -> v , fromForm = \_ v -> v , resetForm = Nothing}  hst
-mkEditForm formid  mode data hst
-= mkSetForm formid mode data hst
-
-mkSetForm:: !FormId d !Mode !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkSetForm formid data mode  hst
-= mkViewForm formid data mode 
-	{toForm = toFormid , updForm = \_ _ -> data , fromForm = \_ v -> v , resetForm = Nothing}  hst
-
-mkSelfForm  :: !FormId 	d !(d -> d) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkSelfForm formid initdata cbf  hst
-= mkViewForm formid initdata Edit 
-	{toForm = toFormid , updForm = update , fromForm = \_ v -> v , resetForm = Nothing}  hst
-where
-	update True newval = cbf newval
-	update _ val = val
-	
-mkApplyForm :: !FormId d !(d -> d) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkApplyForm formid data cbf  hst
-= mkViewForm formid data Display 
-	{toForm = toFormid , updForm = \_ _ = cbf data , fromForm = \_ v -> v, resetForm = Nothing}  hst
-
-mkStoreForm :: !FormId d !(d -> d) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkStoreForm formid data cbf  hst
-= mkViewForm formid data Display 
-	{toForm = toFormid , updForm = \_ v = cbf v , fromForm = \_ v -> v, resetForm = Nothing}  hst
-
-mkApplyEditForm	:: !FormId d !d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkApplyEditForm formid initval inputval  hst
-= mkViewForm formid initval Edit 
-	{toForm =  toFormid , updForm = update , fromForm = \_ v -> v, resetForm = Nothing}  hst
-where
-	update True  newval = newval
-	update False val    = inputval
-
-mkBimapEditor :: !FormId d !Mode !(Bimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
-mkBimapEditor formid d mode {map_to,map_from} hst
-= mkViewForm formid d mode	{ toForm 	= \d v -> case v of 
-													Nothing -> map_to d
-													Just v -> v
-							, updForm 	= \b v -> v
-							, fromForm 	= \b v -> map_from v
-							, resetForm = Nothing
-							} hst 
-
-toFormid d Nothing = d
-toFormid d (Just v) = v
 
 // specialize has to be used if a programmer want to specialize gForm
 // it remembers the current value of the index in the expression and creates an editor to show this value
