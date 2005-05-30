@@ -15,37 +15,47 @@ import GenPrint, GenParse
 
 :: *FormStates 	:== Tree_ (String,FormState)		// State of forms is internally stored in a tree
 :: Tree_ a 		= Node_ (Tree_ a) a (Tree_ a) | Leaf_
-:: FormState 	= OldState !String					// Old states will become garbage when the final states are reached
+:: FormState 	= OldState !OldState				// Old states will become garbage when the final states are reached
 				| NewState !NewState				// New states that will be saved in the html form
+:: OldState		= { ostrval :: !String				// String representation of the view value
+				  , olive	:: !Livetime			// Its livetime
+				  }
 :: NewState 	= { dynval 	::!Dynamic				// A new state is stored in a dynamic
 				  , strval 	:: String				// together with its string representation
-				  , live	:: !Livetime
+				  , live	:: !Livetime			// Its livetime
 				  }
-:: HtmlState :== [(String,String)]					// For convenience, the state is stored in html as a list and not as a tree
+:: HtmlStates :== [HtmlState]						// For convenience, the state is stored in html as a list and not as a tree
+:: HtmlState  :== (!String,!Livetime,!String)		// Format just before writing to the page format
 
 // reconstruct HtmlState out of the information obtained from browser
 
-retrieveHtmlState :: HtmlState
+retrieveHtmlState :: HtmlStates
 retrieveHtmlState 
-# (_,_,_,state) = DecodedStateFormBrowser
+# (_,_,_,state) = DecodedStateFromBrowser
 =: splitString (mkList state)
 where
 	splitString [] 			= []
-	splitString listofchar	= [mktuple first : splitString second]
+	splitString listofchar	= [mkHtmlState first : splitString second]
 	where
 		(first,second) = mscan '$' listofchar
 
-		mktuple :: [Char] -> (!String,!String)
-		mktuple	elem = (mkString formid,mkString (stl (reverse (stl (reverse formvalue)))))
+		mkHtmlState :: [Char] -> HtmlState
+		mkHtmlState	elem = (mkString (stl fid),toLivetime fid,mkString (stl (reverse (stl (reverse formvalue)))))
 		where
-			(formid,formvalue) = mscan '"' (stl (stl elem)) // skip '("'
+			(fid,formvalue) = mscan '"' (stl (stl elem)) // skip '("'
 			stl [] = []
 			stl [x:xs] = xs 
+			
+			toLivetime ['N':_] = Page
+			toLivetime ['S':_] = Session
+			toLivetime ['P':_] = Persistent
+			toLivetime _   		= Page
+
 
 // convert this HtmlState into FormStates which are used internally
 
 initFormStates :: *FormStates
-initFormStates = Balance (sort [(formid,OldState state) \\ (formid,state) <- retrieveHtmlState | formid <> ""])
+initFormStates = Balance (sort [(sid,OldState {ostrval = state, olive = livetime}) \\ (sid,livetime,state) <- retrieveHtmlState | sid <> ""])
 where
 	Balance [] = Leaf_
 	Balance [x] = Node_ Leaf_ x Leaf_
@@ -72,7 +82,7 @@ where
 	findState` :: !FormId *FormStates *World -> (Bool,Maybe a,*FormStates,*World)| gParse{|*|} a & TC a
 	findState` formid formstate=:(Node_ left (fid,info) right) world
 	| formid.id == fid = case info of
-					(OldState state) = (True, parseString state,formstate,world)
+					(OldState state) = (True, parseString state.ostrval,formstate,world)
 					(NewState state) = (False,retrieveNewState state,formstate,world)
 	| formid.id  < fid 	= (bool,parsed, Node_ leftformstates (fid,info) right,nworld)
 					with
@@ -151,15 +161,34 @@ where
 	toHtmlState formstates = toHtmlState` formstates []
 	where
 		toHtmlState` Leaf_ tl = tl
-		toHtmlState` (Node_ left (formid,OldState s) right) tl = toHtmlState` left (toHtmlState` right tl) // old states are garbage
-		toHtmlState` (Node_ left (formid,NewState {strval,live=Persistent}) right) tl = toHtmlState` left (toHtmlState` right tl) // persistent stores are stored in files
-		toHtmlState` (Node_ left (formid,NewState {strval}) right) tl = toHtmlState` left [(formid,strval): toHtmlState` right tl] // only remember new states for next round
 
-	urlEncodeState :: !HtmlState -> String
+		// old states have not been used this time, with livetime session they are stored again in the page
+
+		toHtmlState` (Node_ left (fid,OldState {olive,ostrval}) right) tl = toHtmlState` left [(fid,olive,ostrval):toHtmlState` right tl]
+
+		// other old states will ahve livetime page; they become garbage and are no longer stored in the page
+
+		toHtmlState` (Node_ left (fid,OldState s) right) tl = toHtmlState` left (toHtmlState` right tl)
+
+		// persistent stores have already been stored in files
+
+		toHtmlState` (Node_ left (fid,NewState {strval,live=Persistent}) right) tl = toHtmlState` left (toHtmlState` right tl)
+
+		// the state of all other new forms created will be stored in the page 
+
+		toHtmlState` (Node_ left (fid,NewState {strval,live}) right) tl = toHtmlState` left [(fid,live,strval): toHtmlState` right tl]
+
+	urlEncodeState :: !HtmlStates -> String
 	urlEncodeState [] = urlEncodeS "$"
-	urlEncodeState [(x,y):xsys] = urlEncodeS "(\"" +++ urlEncodeS x +++ 
-								  urlEncodeS "\"," +++ urlEncodeS y +++ 
-								  urlEncodeS ")$" +++ urlEncodeState xsys 
+	urlEncodeState [(id,livetime,state):xsys] 
+		= urlEncodeS "(\"" +++ fromLivetime livetime +++ urlEncodeS id +++ 
+		  urlEncodeS "\"," +++ urlEncodeS state +++ 
+		  urlEncodeS ")$" +++ urlEncodeState xsys
+	where
+		fromLivetime Page 			= "N"
+		fromLivetime Session 		= "S"
+		fromLivetime Persistent 	= "P"
+	 
 	urlEncodeS :: !String -> String
 	urlEncodeS s = (mkString o urlEncode o mkList) s
 	
@@ -203,6 +232,8 @@ where
 	selectorInpName :: String
 	selectorInpName =: "CS"
 
+	// all persistent stores are stored in files
+
 //	writeAllPersistentStates:: FormStates *World -> *World 
 	writeAllPersistentStates Leaf_ world = world
 	writeAllPersistentStates (Node_ left (sid,NewState {strval,live = Persistent}) right) world
@@ -216,18 +247,18 @@ where
 	# world = writeAllPersistentStates left world
 	= writeAllPersistentStates right world
 
-writeState :: String a *World -> *World | gPrint {|*|} a 
-writeState filename val env
-#(_,env) = case getFileInfo mydir env of
-			((DoesntExist,fileinfo),env) -> createDirectory mydir env
-			(_,env) -> (NoDirError,env)
-# (ok,file,env)	= fopen (MyDir +++ "/" +++ filename) FWriteData env
-| not ok 		= env
-# file			= fwrites (printToString val) file
-# (ok,env)		= fclose file env
-= env
-where
-	mydir = RelativePath [PathDown MyDir]
+	writeState :: String a *World -> *World | gPrint {|*|} a 
+	writeState filename val env
+	#(_,env) = case getFileInfo mydir env of
+				((DoesntExist,fileinfo),env) -> createDirectory mydir env
+				(_,env) -> (NoDirError,env)
+	# (ok,file,env)	= fopen (MyDir +++ "/" +++ filename) FWriteData env
+	| not ok 		= env
+	# file			= fwrites (printToString val) file
+	# (ok,env)		= fclose file env
+	= env
+	where
+		mydir = RelativePath [PathDown MyDir]
 
 // script for transmitting name and value of changed input 
 
@@ -254,7 +285,7 @@ decodeInfo s = parseString (mkString (urlDecode (mkList s)))
 
 CheckUpdateId :: String
 CheckUpdateId 		
-# (_,upd,_,_) = DecodedStateFormBrowser
+# (_,upd,_,_) = DecodedStateFromBrowser
 =: case parseString upd of
 	Just ("",0,UpdI 0) = ""
 	Just (id,_,_)   = id 
@@ -267,12 +298,12 @@ StrippedCheckUpdateId
 
 AnyInput :: String
 AnyInput
-# (_,_,new,_) = DecodedStateFormBrowser
+# (_,_,new,_) = DecodedStateFromBrowser
 =: new
 
 CheckUpdate :: (!Maybe a, !Maybe b) | gParse{|*|} a & gParse{|*|} b 
 CheckUpdate 
-# (_,upd,new,_) = DecodedStateFormBrowser
+# (_,upd,new,_) = DecodedStateFromBrowser
 = (parseString upd, parseString new)
 
 derive gParse (,), (,,)
@@ -285,7 +316,7 @@ GetArgs =: foldl (+++) "" [strings \\ strings <-: getCommandLine]
 
 ThisExe :: String
 ThisExe 
-# (thisexe,_,_,_) = DecodedStateFormBrowser
+# (thisexe,_,_,_) = DecodedStateFromBrowser
 =: thisexe
 
 MyPhP :: String
@@ -294,8 +325,8 @@ MyPhP =: (mkString (takeWhile ((<>) '.') (mkList ThisExe))) +++ ".php"
 MyDir :: String
 MyDir =: (mkString (takeWhile ((<>) '.') (mkList ThisExe)))
 
-DecodedStateFormBrowser :: (!String,!String,!String,!String) // executable, id + update , new , state
-DecodedStateFormBrowser
+DecodedStateFromBrowser :: (!String,!String,!String,!String) // executable, id + update , new , state
+DecodedStateFromBrowser
 # input 			= mkList GetArgs
 # (thisexe,input) 	= mscan '#' input 		// get rid of garbage
 # input				= skipping ['#UD=']  input
@@ -328,7 +359,7 @@ traceHtmlInput
 //			,	Txt "encoded input      : " , B [] GetArgs, Br 
 			]
 where
-	(executable,update,new,state) = DecodedStateFormBrowser
+	(executable,update,new,state) = DecodedStateFromBrowser
 	convert s = mkString (urlDecode (mkList s))
 
 	showstate :: [Char] -> [BodyTag]
@@ -377,19 +408,6 @@ where
 
 urlDecodeS :: String -> String
 urlDecodeS s = (mkString o urlDecode o mkList) s
-
-
-// storing and retrieving forms from files
-// all form data is stored in a directory with the same name as the application
-
-/*
-readInitState :: String a *env -> (a,*World) | gParse {|*|} a 
-readInitState filename init env
-= case readState filename env of
-	(Nothing,s,env) -> (init,env)
-	(Just a,s,env) -> (a,env)
-
-*/
 
 
 

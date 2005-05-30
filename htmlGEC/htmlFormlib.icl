@@ -25,6 +25,14 @@ sdFormId s = {id = s, livetime = Session, mode = Display}
 ndFormId :: String -> FormId					// page formid
 ndFormId s = {id = s, livetime = Page, mode = Display}
 
+// easy creation of an html page
+
+mkHtml:: String [BodyTag] *HSt ->  (Html,*HSt)
+mkHtml s tags hst 	= (Html (header s) (body tags),hst)
+where
+	header s 			= Head [`Hd_Std [Std_Title s]] [] 
+	body tags 			= Body [] tags
+
 // frequently used variants of mkViewForm
 
 toFormid d Nothing = d

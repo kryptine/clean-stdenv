@@ -6,6 +6,10 @@ definition module htmlFormlib
 
 import StdEnv, htmlHandler
 
+// **** easy creation of a simple html page ****
+
+mkHtml:: String [BodyTag] *HSt ->  (Html,*HSt)	// string is used for the title of the page
+
 // **** easy creation of FormId's ****
 
 nFormId		:: String -> FormId					// page 	  livetime, editable
