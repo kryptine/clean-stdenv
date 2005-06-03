@@ -8,22 +8,22 @@ import StdEnv, StdHtml
 // utility for creating FormId's
 
 pFormId :: String -> FormId					// persitent formid
-pFormId s = {id = s, livetime = Persistent, mode = Edit}
+pFormId s = {id = s, lifespan = Persistent, mode = Edit}
 
 sFormId :: String -> FormId					// session formid
-sFormId s = {id = s, livetime = Session, mode = Edit}
+sFormId s = {id = s, lifespan = Session, mode = Edit}
 
 nFormId :: String -> FormId					// page formid
-nFormId s = {id = s, livetime = Page, mode = Edit}
+nFormId s = {id = s, lifespan = Page, mode = Edit}
 
 pdFormId :: String -> FormId					// persitent formid
-pdFormId s = {id = s, livetime = Persistent, mode = Display}
+pdFormId s = {id = s, lifespan = Persistent, mode = Display}
 
 sdFormId :: String -> FormId					// session formid
-sdFormId s = {id = s, livetime = Session, mode = Display}
+sdFormId s = {id = s, lifespan = Session, mode = Display}
 
 ndFormId :: String -> FormId					// page formid
-ndFormId s = {id = s, livetime = Page, mode = Display}
+ndFormId s = {id = s, lifespan = Page, mode = Display}
 
 // easy creation of an html page
 
@@ -154,7 +154,7 @@ browseButtons reset curindex step length nbuttuns formid hst
 # (shownext, hst)	= browserForm nindex.value hst
 = ({changed = calcnext.changed
    ,value	= nindex.value
-   ,body	= shownext.body},hst)
+   ,form	= shownext.form},hst)
 where
 	browserForm :: !Int *HSt -> (Form (Int -> Int),!*HSt) 
 	browserForm index hst
@@ -183,7 +183,7 @@ horlist2Form s defaultval list hst
 # (nlist,hst) 	= horlistForm s (fun.value list) hst  
 = ({changed	= fun.changed || nlist.changed
    ,value	= nlist.value
-   ,body	= [fun.body <||> nlist.body]
+   ,form	= [fun.form <||> nlist.form]
    },hst)
 where
 	but s =  LButton (defpixel / 6) s
@@ -198,14 +198,14 @@ horlistForm 		:: !FormId ![a] 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*
 horlistForm _  [] hst  
 = ({changed	= False
    ,value	= []
-   ,body	= []
+   ,form	= []
    },hst)
 horlistForm formid [x:xs] hst
 # (nxs,hst) = horlistForm formid xs hst
 # (nx, hst) = mkEditForm nformid x hst
 = ({changed	= nxs.changed || nx.changed 
    ,value	= [nx.value:nxs.value]
-   ,body	= [nx.body <=> nxs.body]
+   ,form	= [nx.form <=> nxs.form]
    },hst)
 where
 	nformid = {formid & id = formid.id +++ toString (length xs)}
@@ -214,14 +214,14 @@ vertlistForm 		:: !FormId ![a] 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|
 vertlistForm _ [] hst  
 = ({changed	= False
    ,value	= []
-   ,body	= []
+   ,form	= []
    },hst)
 vertlistForm formid [x:xs] hst
 # (nxs,hst) = vertlistForm formid xs hst
 # (nx, hst) = mkEditForm nformid x hst
 = ({changed	= nxs.changed || nx.changed 
    ,value	= [nx.value:nxs.value]
-   ,body	= [nx.body <||> nxs.body]
+   ,form	= [nx.form <||> nxs.form]
    },hst)
 where
 	nformid = {formid & id = formid.id +++ toString (length xs)}
@@ -230,14 +230,14 @@ table_hv_Form 		:: !FormId ![[a]] 	!*HSt -> (Form [[a]],!*HSt) 	| gForm{|*|}, gU
 table_hv_Form _ [] hst
 = ({changed	= False
    ,value	= []
-   ,body	= []
+   ,form	= []
    },hst)
 table_hv_Form formid [x:xs] hst
 # (nxs,hst)	= table_hv_Form formid xs hst
 # (nx, hst)	= horlistForm nformid x hst
 = ({changed	= nxs.changed || nx.changed 
    ,value	= [nx.value:nxs.value]
-   ,body	= [nx.body <||> nxs.body]
+   ,form	= [nx.form <||> nxs.form]
    },hst)
 where
 	nformid = {formid & id = formid.id +++ toString (length xs)}
@@ -288,7 +288,7 @@ where
 	TableFuncBut` n _ [] hst
 	= ({changed	= False
 	   ,value	= id
-	   ,body	= []
+	   ,form	= []
 	   },hst)
 
 	TableFuncBut` n formid [row:rows] hst 
@@ -296,21 +296,21 @@ where
 	# (row,  hst)	= RowFuncBut` n formid row hst
 	= ({changed		= rows.changed || row.changed 
 	   ,value		= rows.value o row.value
-	   ,body		= [row.body <||> rows.body]
+	   ,form		= [row.form <||> rows.form]
 	   },hst)
 	where
 		RowFuncBut` :: !Int !FormId [(Button, a -> a)] !*HSt -> (Form (a -> a),!*HSt)
 		RowFuncBut` n _ [] hst 
 		= ({changed	= False
 		   ,value	= id
-		   ,body	= []
+		   ,form	= []
 		   },hst)
 		RowFuncBut` n formid [x:xs] hst 
 		# (rowfun,hst) 	= RowFuncBut` n formid xs hst
 		# (fun   ,hst)	= FuncBut False n formid x hst
 		= ({changed		= rowfun.changed || fun.changed 
 		   ,value		= rowfun.value o fun.value
-		   ,body		= [fun.body <=> rowfun.body]
+		   ,form		= [fun.form <=> rowfun.form]
 		   },hst)
 
 
@@ -347,14 +347,14 @@ where
 	ListFuncBut` b n s [] hst
 	= ({changed	= False
 	   ,value	= id
-	   ,body	= []
+	   ,form	= []
 	   },hst)
 	ListFuncBut` b n s [x:xs] hst 
 	# (rowfun,hst) 	= ListFuncBut` b (n+1) s xs hst
 	# (fun   ,hst)	= FuncBut b n s x hst
 	= ({changed	= rowfun.changed || fun.changed
 	   ,value	= fun.value o rowfun.value
-	   ,body	= [BodyTag fun.body:rowfun.body]
+	   ,form	= [BodyTag fun.form:rowfun.form]
 	   },hst)
 
 ListFuncBut2 :: !Bool !FormId [(Mode,Button, a -> a)] !*HSt -> (Form (a -> a),!*HSt)
@@ -363,14 +363,14 @@ where
 	ListFuncBut` b n s [] hst
 	= ({changed	= False
 	   ,value	= id
-	   ,body	= []
+	   ,form	= []
 	   },hst)
 	ListFuncBut` b n s [(bmode,but,func):xs] hst 
 	# (rowfun,hst) 	= ListFuncBut` b (n+1) s xs hst
 	# (fun   ,hst)	= FuncBut b n {s & mode = bmode} (but,func) hst
 	= ({changed	= rowfun.changed || fun.changed
 	   ,value	= fun.value o rowfun.value
-	   ,body	= [BodyTag fun.body:rowfun.body]
+	   ,form	= [BodyTag fun.form:rowfun.form]
 	   },hst)
 
 ListFuncCheckBox :: !Bool !FormId [(CheckBox, Bool [Bool] a -> a)] !*HSt 
@@ -380,7 +380,7 @@ ListFuncCheckBox init s defs hst
 # (f,bools) = check.value
 = ({changed	= False
    ,value	= (f bools,bools)
-   ,body	= check.body
+   ,form	= check.form
    },hst)
 where
 	ListFuncCheckBox` :: !Bool !FormId [(CheckBox, Bool [Bool] a -> a)] !*HSt 
@@ -388,7 +388,7 @@ where
 	ListFuncCheckBox` init s [] hst
 	= ({changed	= False
 	   ,value	= (\_ a -> a,[])
-	   ,body	= []
+	   ,form	= []
 	   },hst)
 	ListFuncCheckBox` init s [x:xs] hst 
 	# (rowfun,hst) 	= ListFuncCheckBox` init s xs hst
@@ -397,7 +397,7 @@ where
 	# (funv,nboolv) = fun.value
 	= ({changed	= rowfun.changed || fun.changed
 	   ,value	= (funcomp funv rowfunv,[nboolv:boolsv])
-	   ,body	= [BodyTag fun.body:rowfun.body]
+	   ,form	= [BodyTag fun.form:rowfun.form]
 	   },hst)
 	where
 		funcomp f g = \bools a = f bools (g bools a)
@@ -439,7 +439,7 @@ ListFuncRadio i formid defs hst
 # (i,hst)		= mkStoreForm formid (set i i) (set i)  hst	// store current selected radio for next round
 = ({changed	= ni.changed || radio.changed
    ,value	= (f,i.value)
-   ,body	= radio.body
+   ,form	= radio.form
    },hst)
 where
 	radio i j 
@@ -455,7 +455,7 @@ where
 	ListFuncRadio` i j _ [] hst
 	= ({changed	= False
 	   ,value	= (\_ a -> a,-1)
-	   ,body	= []
+	   ,form	= []
 	   },hst)
 	ListFuncRadio` i j formid [f:fs] hst 
 	# (listradio,hst) 	= ListFuncRadio` i (j+1) formid fs hst
@@ -464,7 +464,7 @@ where
 	# (fun,ri) 			= funcradio.value
 	= ({changed	= listradio.changed || funcradio.changed
 	   ,value	= (funcomp fun rowfun,max ri rri)
-	   ,body	= [BodyTag funcradio.body:listradio.body]
+	   ,form	= [BodyTag funcradio.form:listradio.form]
 	   },hst)
 
 
@@ -507,14 +507,14 @@ listForm 			:: !FormId ![a] 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}
 listForm _  [] hst
 = ({changed	= False
    ,value	= []
-   ,body	= []
+   ,form	= []
    },hst)
 listForm formid [x:xs] hst
 # (nxs,hst) = listForm formid xs hst
 # (nx, hst) = mkEditForm nformid x hst
 = ({changed	= nx.changed || nxs.changed
    ,value	= [nx.value:nxs.value]
-   ,body	= [BodyTag nx.body:nxs.body]
+   ,form	= [BodyTag nx.form:nxs.form]
    },hst)
 where
 	nformid = {formid & id = formid.id +++ toString (length xs)}

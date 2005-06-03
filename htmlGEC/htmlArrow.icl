@@ -9,7 +9,7 @@ startCircuit (HGC circuit) initval hst
 # ((val,body),bool,hst) = circuit ((initval,[]),False,hst)
 = (	{changed= True			// should be fixed
 	,value	= val
-	,body	= reverse (removedup body [])
+	,form	= reverse (removedup body [])
 	},hst)
 where
 	removedup [] _ = []
@@ -47,24 +47,24 @@ where
 	mkApplyEdit` :: ((a,[(String,BodyTag)]),Bool,*HSt ) -> ((a,[(String,BodyTag)]),Bool,*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 	mkApplyEdit` ((initval,prevbody),False,hst) 
 	# (na,hst) = mkApplyEditForm formid initval initval hst
-	= ((na.value,[(formid.id,BodyTag na.body):prevbody]),False,hst)
+	= ((na.value,[(formid.id,BodyTag na.form):prevbody]),False,hst)
 	mkApplyEdit` ((initval,prevbody),True,hst) // second time I come here: don't use the old state, but the new one ! 
 	# (na,hst) = mkSetForm {formid & mode = Edit} initval  hst 
-	= ((na.value,[(formid.id,BodyTag na.body):prevbody]),True,hst)
+	= ((na.value,[(formid.id,BodyTag na.form):prevbody]),True,hst)
 
 display :: FormId -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 display formid = HGC mkEditForm`
 where
 	mkEditForm` ((val,prevbody),bool,hst) 
 	# (na,hst) = mkEditForm {formid & mode = Display} val hst
-	= ((na.value,[(formid.id,BodyTag na.body):prevbody]),bool,hst)
+	= ((na.value,[(formid.id,BodyTag na.form):prevbody]),bool,hst)
 
 store :: FormId s -> GecCircuit (s -> s) s |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC s
 store formid initstore = HGC mkStoreForm`
 where
 	mkStoreForm` ((fun,prevbody),bool,hst) 
 	# (store,hst) = mkStoreForm formid initstore fun  hst
-	= ((store.value,[(formid.id,BodyTag store.body):prevbody]),bool,hst)
+	= ((store.value,[(formid.id,BodyTag store.form):prevbody]),bool,hst)
 
 self :: (a -> a) (GecCircuit a a) -> GecCircuit a a
 self fun gecaa = gecaa >>> arr fun
@@ -82,5 +82,5 @@ lift formid fun = HGC fun`
 where
 	fun` ((a,body),bool,hst)
 	# (nb,hst) =  fun formid a hst
-	= ((nb.value,[(formid.id,BodyTag nb.body):body]),bool,hst) 
+	= ((nb.value,[(formid.id,BodyTag nb.form):body]),bool,hst) 
 
