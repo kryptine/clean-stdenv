@@ -18,14 +18,14 @@ import GenPrint, GenParse
 :: FormState 	= OldState !OldState				// Old states will become garbage when the final states are reached
 				| NewState !NewState				// New states that will be saved in the html form
 :: OldState		= { ostrval :: !String				// String representation of the view value
-				  , olive	:: !Livetime			// Its livetime
+				  , olive	:: !Lifespan			// Its life span
 				  }
 :: NewState 	= { dynval 	::!Dynamic				// A new state is stored in a dynamic
 				  , strval 	:: String				// together with its string representation
-				  , live	:: !Livetime			// Its livetime
+				  , live	:: !Lifespan			// Its life span
 				  }
 :: HtmlStates :== [HtmlState]						// For convenience, the state is stored in html as a list and not as a tree
-:: HtmlState  :== (!String,!Livetime,!String)		// Format just before writing to the page format
+:: HtmlState  :== (!String,!Lifespan,!String)		// Format just before writing to the page format
 
 // reconstruct HtmlState out of the information obtained from browser
 
@@ -55,7 +55,7 @@ where
 // convert this HtmlState into FormStates which are used internally
 
 initFormStates :: *FormStates
-initFormStates = Balance (sort [(sid,OldState {ostrval = state, olive = livetime}) \\ (sid,livetime,state) <- retrieveHtmlState | sid <> ""])
+initFormStates = Balance (sort [(sid,OldState {ostrval = state, olive = lifespan}) \\ (sid,lifespan,state) <- retrieveHtmlState | sid <> ""])
 where
 	Balance [] = Leaf_
 	Balance [x] = Node_ Leaf_ x Leaf_
@@ -90,7 +90,7 @@ where
 	| otherwise	= (bool,parsed, Node_  left (fid,info) rightformstates,nworld)
 					with
 						(bool,parsed,rightformstates,nworld) = findState` formid right world
-	findState` {id,livetime = Persistent} Leaf_ world 
+	findState` {id,lifespan = Persistent} Leaf_ world 
 	# (ma,string,world) = readState id world
 	= case ma of
 		Just a 	-> (True,ma,Node_ Leaf_ (id,NewState {dynval = dynamic a, strval = string, live = Persistent}) Leaf_,world)
@@ -119,9 +119,9 @@ where
 		removeBackslashQuote [x:xs] 		= [x:removeBackslashQuote xs]
 
 replaceState :: !FormId a *FormStates *World -> (*FormStates,*World)	| gPrint{|*|} a & TC a
-replaceState formid val Leaf_ world = (Node_ Leaf_ (formid.id,NewState (initNewState formid.livetime val)) Leaf_,world)
+replaceState formid val Leaf_ world = (Node_ Leaf_ (formid.id,NewState (initNewState formid.lifespan val)) Leaf_,world)
 replaceState formid val (Node_ left a=:(fid,_) right) world
-| formid.id == fid 	= (Node_ left (fid,NewState (initNewState formid.livetime val)) right,world)
+| formid.id == fid 	= (Node_ left (fid,NewState (initNewState formid.lifespan val)) right,world)
 | formid.id < fid 	= (Node_ nleft a right,nworld)
 						with
 							(nleft,nworld) = replaceState formid val left world
@@ -131,8 +131,8 @@ replaceState formid val (Node_ left a=:(fid,_) right) world
 
 // NewState Handling routines 
 
-initNewState :: !Livetime !a  -> NewState | TC a &  gPrint{|*|} a 
-initNewState livetime nv = {dynval = dynamic nv,strval = printToString nv, live = livetime}
+initNewState :: !Lifespan !a  -> NewState | TC a &  gPrint{|*|} a 
+initNewState lifespan nv = {dynval = dynamic nv,strval = printToString nv, live = lifespan}
 
 /*
 storeNewState :: a NewState -> NewState | TC a &  gPrint{|*|} a 
@@ -162,11 +162,11 @@ where
 	where
 		toHtmlState` Leaf_ tl = tl
 
-		// old states have not been used this time, with livetime session they are stored again in the page
+		// old states have not been used this time, with lifespan session they are stored again in the page
 
 		toHtmlState` (Node_ left (fid,OldState {olive,ostrval}) right) tl = toHtmlState` left [(fid,olive,ostrval):toHtmlState` right tl]
 
-		// other old states will ahve livetime page; they become garbage and are no longer stored in the page
+		// other old states will ahve lifespan page; they become garbage and are no longer stored in the page
 
 		toHtmlState` (Node_ left (fid,OldState s) right) tl = toHtmlState` left (toHtmlState` right tl)
 
@@ -180,8 +180,8 @@ where
 
 	urlEncodeState :: !HtmlStates -> String
 	urlEncodeState [] = urlEncodeS "$"
-	urlEncodeState [(id,livetime,state):xsys] 
-		= urlEncodeS "(\"" +++ fromLivetime livetime +++ urlEncodeS id +++ 
+	urlEncodeState [(id,lifespan,state):xsys] 
+		= urlEncodeS "(\"" +++ fromLivetime lifespan +++ urlEncodeS id +++ 
 		  urlEncodeS "\"," +++ urlEncodeS state +++ 
 		  urlEncodeS ")$" +++ urlEncodeState xsys
 	where
@@ -408,6 +408,3 @@ where
 
 urlDecodeS :: String -> String
 urlDecodeS s = (mkString o urlDecode o mkList) s
-
-
-

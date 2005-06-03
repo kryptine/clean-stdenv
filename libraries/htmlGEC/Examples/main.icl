@@ -18,4 +18,4 @@ MyPage  hst
 	, Br
 	] hst
 	
-emptyForm = {changed = False, value = [], body = [EmptyBody] }
+emptyForm = {changed = False, value = [], form = [EmptyBody] }
