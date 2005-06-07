@@ -16,8 +16,8 @@ coffeemachine hst
 # (machine,hst)	= mkStoreForm (nFormId "hidden") initmachine (option.value o command.value)  hst
 = mkHtml "Coffee Machine"
 		[ H1 [] "Coffee Machine: "
-		, [toHtml (displaycontents  machine.value)] <=> command.body
-		, BodyTag option.body
+		, [toHtml (displaycontents  machine.value)] <=> command.form
+		, BodyTag option.form
 		, Br
 		, B [] (displayoutput machine.value)
 		, Br,Br,Br
@@ -46,10 +46,6 @@ where
 		= ("money ",money) <|> 
 		  ("beans ",beans) <|> 
 		  ("trash ",trash) 
-
-	mkHtml s tags hst 	= (Html (header s) (body tags),hst)
-	header s 			= Head [`Hd_Std [Std_Title s]] [] 
-	body tags 			= Body [] tags
 
 	
 

@@ -35,10 +35,6 @@ where
 	inittree2 = Man "Rinus"
 	inittree3 = "Rinus" <|> Male
 
-	mkHtml s tags hst 	= (Html (header s) (body tags),hst)
-	header s 			= Head [`Hd_Std [Std_Title s]] [] 
-	body tags 			= Body [] tags
-
 
 //derive gForm Family
 //derive gForm Person
@@ -62,7 +58,7 @@ gForm{|Family|} formid family hst = specialize editor formid family hst
 where
 	editor formid d hst
 	# (family,hst) = mkBimapEditor formid d {map_to = map_to, map_from = map_from} hst
-	= ({ changed = family.changed, value = family.value, body = tab (nrkids family.value) family.body},hst)
+	= ({ changed = family.changed, value = family.value, form = tab (nrkids family.value) family.form},hst)
 	
 	
 	nrkids (Family  p s (Just_ (p2,Kids kids))) = length kids
@@ -91,8 +87,8 @@ gForm{|Kids|} formid kids hst = specialize editor formid kids hst
 where
 	editor formid d hst 
 	# (list,hst) 	= horlist2Form (nFormId (mkid "hlist")) defaultfam (fromKids kids) hst
-	# (display,hst) = mkEditForm   (ndFormId (mkid "displ")) (displaykids (length list.body)) hst
-	= ({ changed = list.changed, value = toKids list.value, body = [display.body <||> list.body]},hst)
+	# (display,hst) = mkEditForm   (ndFormId (mkid "displ")) (displaykids (length list.form)) hst
+	= ({ changed = list.changed, value = toKids list.value, form = [display.form <||> list.form]},hst)
 
 	mkid s = toString (length (fromKids kids)) +++ s
 

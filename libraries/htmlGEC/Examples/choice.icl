@@ -13,9 +13,9 @@ choice hst
 = mkHtml "Choosing is difficult"
 	[ H1 [] "testing radio buttons"
 	, Br
-	, BodyTag selection.body
+	, BodyTag selection.form
 	, Br
-	, BodyTag radio.body
+	, BodyTag radio.form
 	, Br
 	, Txt ("Current value is :" +++ toString selected)
 	, Br

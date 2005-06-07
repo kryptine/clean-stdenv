@@ -43,12 +43,6 @@ MyPage3 hst
 	] hst
 
 
-// small utility stuf
-
-mkHtml s tags hst 	= (Html (header s) (body tags),hst)
-header s 			= Head [`Hd_Std [Std_Title s]] [] 
-body tags 			= Body [] tags
-
 		
 // internal representation: a unique number is added to each possible next event that can occur 
 
@@ -67,7 +61,7 @@ calcExpression exprstore initialExpr hst
 # (funchosen,hst) 	= createButtons (calcbuttons (snd nbutset.value)) hst 	// create the buttons to see which is pressed
 # (nbutset,hst)		= expressionStore funchosen.value hst					// calculate the new expressions and the new set of buttons 
 # (buttons,hst) 	= createButtons (calcbuttons (snd nbutset.value)) hst 	// create the buttons for the next round
-= 	(buttons.body,hst)
+= 	(buttons.form,hst)
 where
 	initstore		= calcnext initialExpr
 	initbuttonset 	= snd initstore

@@ -5,7 +5,5 @@ import StdEnv, StdHtml
 Start world  = doHtml helloWorld world
 
 helloWorld hst
-= (Html (Head [] []) (Body [] [mybody]),hst)
-where
-	mybody = Txt "Hello World!"
+= mkHtml "Hello World Example" [Txt "Hello World!"] hst
  

@@ -58,6 +58,14 @@ where
 	update True newval = cbf newval
 	update _ val = val
 	
+mkSelf2Form :: !FormId d !(d -> d) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+mkSelf2Form formid data cbf  hst
+= mkViewForm formid data 
+	{toForm = toFormid , updForm = \b v = cbf v , fromForm = \_ v -> v, resetForm = Nothing}  hst
+where
+	toFormid d Nothing = d
+	toFormid d (Just v) = v
+
 mkApplyForm :: !FormId d !(d -> d) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkApplyForm formid data cbf  hst
 = mkViewForm formid data 

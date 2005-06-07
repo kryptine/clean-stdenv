@@ -41,8 +41,4 @@ where
 	
 	exchangerate = 1.4                                  
 
-	mkHtml s tags hst 	= (Html (header s) (body tags),hst)
-	header s 			= Head [`Hd_Std [Std_Title s]] [] 
-	body tags 			= Body [] tags
-
  
