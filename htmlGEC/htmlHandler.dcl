@@ -54,7 +54,9 @@ toBody 			:: (Form a) -> BodyTag				// just (BodyTag form.body)
 				| TR Int Real						// Input box of size Size for Reals
 				| TS Int String						// Input box of size Size for Strings
 	
-instance toBool CheckBox, Button, RadioButton		// True if checkbox checked, button pressed
+instance toBool   CheckBox, Button, RadioButton		// True if checkbox checked, button pressed
+instance toInt    PullDownMenu						// Current index in pull down list
+instance toString PullDownMenu						// Corresponding element in pull down list
 
 // generic functions that do the real work,
 // end user only has to derive them when using the functions above

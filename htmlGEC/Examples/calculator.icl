@@ -29,10 +29,6 @@ arrowcalculator hst
 where
 	circuit  =  store (nFormId "display") initcalc 
 	
-mkHtml s tags hst 	= (Html (header s) (body tags),hst)
-header s 			= Head [`Hd_Std [Std_Title s]] [] 
-body tags 			= Body [] tags
-
 initcalc = (0 <|> 0)
 
 calcbuttons = 	[	[(but "7",set 7),	(but "8",set 8),	(but "9",set 9)	]

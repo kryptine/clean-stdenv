@@ -622,6 +622,14 @@ instance toBool Button
 where	toBool Pressed = True
 		toBool _ 		 = False
 
+instance toInt PullDownMenu
+where
+	toInt:: PullDownMenu -> Int
+	toInt (PullDown _ (i,_)) = i
+
+instance toString PullDownMenu
+where
+	toString (PullDown _ (i,s)) = if (i>=0 && i <length s) (s!!i) ""
 // Enabling file IO on HSt
 
 instance FileSystem HSt

@@ -28,6 +28,7 @@ pdFormId	:: String -> FormId					// persistent livetime, displayed non-editable
 // mkSet			: editor, always displays argument regardless of current state of the editor
 // mkStore			: applies function to the internal state; second argument is initial state
 // mkSelf			: editor, state is updated with function; second argument is taken as initial state   
+// mkSelf2			: same as mkSelf, but the function will always be applied, whether the form is updated or not
 // mkApply 			: displays application of function to the argument
 // mkApplyEdit		: editor, displays its first argument if it is not updated; second argument is initial state
 
@@ -36,6 +37,7 @@ mkEditForm 		:: !FormId 	d 				!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|},
 mkSetForm 		:: !FormId 	d 				!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkStoreForm 	:: !FormId 	d !(d -> d)		!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkSelfForm 		:: !FormId 	d !(d -> d)		!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+mkSelf2Form 	:: !FormId  d !(d -> d) 	!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkApplyForm 	:: !FormId 	d !(d -> d)		!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkApplyEditForm	:: !FormId 	d !d			!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 

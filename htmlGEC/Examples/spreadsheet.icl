@@ -19,8 +19,8 @@ spreadsheet hst
 = mkHtml "Spreadsheet"
 	[ H1 [] "Spreadsheet Example: "
 	, Br
-	, tablef.body  <=> rowsumf.body
-	, colsumf.body <=> totsumf.body
+	, tablef.form  <=> rowsumf.form
+	, colsumf.form <=> totsumf.form
 	,Br, Br
 	, Txt "so the result of the spreadsheet is :", toHtml totsumf.value
 	,Br ,Br
@@ -29,7 +29,7 @@ spreadsheet hst
 
 arrowsspreadsheet hst
 # (circuitf, hst) = startCircuit mycircuit (inittable 8 10) hst
-# [tablefbody,rowsumfbody,colsumfbody,totsumfbody:_] = circuitf.body
+# [tablefbody,rowsumfbody,colsumfbody,totsumfbody:_] = circuitf.form
 = mkHtml "Spreadsheet"
 	[ H1 [] "Spreadsheet Example: "
 	, Br
@@ -44,10 +44,6 @@ where
 			 		)
 			 	>>> arr (sum o fst)
 			 	>>> display (nFormId "tsum") 		
-
-mkHtml s tags hst 	= (Html (header s) (body tags),hst)
-header s 			= Head [`Hd_Std [Std_Title s]] [] 
-body tags 			= Body [] tags
 
 rowsum table	= map sum table
 colsum table	= map sum (transpose table)
