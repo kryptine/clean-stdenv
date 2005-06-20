@@ -25,7 +25,6 @@ mkViewForm 		:: !FormId 	d !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, g
 // utility functions
 
 toHtml 			:: a -> BodyTag | gForm {|*|} a		// toHtml displays any type into a non-editable form
-toHtmlForm 		:: (*HSt -> *(Form a,*HSt)) -> [BodyTag] | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 toBody 			:: (Form a) -> BodyTag				// just (BodyTag form.body)
 
 // Clean types that have a special representation
