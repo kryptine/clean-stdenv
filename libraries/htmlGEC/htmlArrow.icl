@@ -9,7 +9,7 @@ startCircuit (HGC circuit) initval hst
 # ((val,body),ch,hst) = circuit ((initval,[]),False,hst)
 = (	{changed= ch
 	,value	= val
-	,body	= reverse (removedup body [])
+	,form	= reverse (removedup body [])
 	},hst)
 where
 	removedup [] _ = []
@@ -46,21 +46,21 @@ where
 	mkApplyEdit` :: (GecCircuitState a)  -> GecCircuitState a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 	mkApplyEdit` ((initval,prevbody),ch,hst) 
 	# (na,hst) = mkApplyEditForm formid initval initval hst
-	= ((na.value,[(formid.id,BodyTag na.body):prevbody]),ch||na.changed,hst) // propagate change
+	= ((na.value,[(formid.id,BodyTag na.form):prevbody]),ch||na.changed,hst) // propagate change
 
 display :: FormId -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 display formid = HGC mkEditForm`
 where
 	mkEditForm` ((val,prevbody),ch,hst) 
 	# (na,hst) = mkEditForm {formid & mode = Display} val hst
-	= ((na.value,[(formid.id,BodyTag na.body):prevbody]),ch||na.changed,hst)
+	= ((na.value,[(formid.id,BodyTag na.form):prevbody]),ch||na.changed,hst)
 
 store :: FormId s -> GecCircuit (s -> s) s |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC s
 store formid initstore = HGC mkStoreForm`
 where
 	mkStoreForm` ((fun,prevbody),ch,hst) 
 	# (store,hst) = mkStoreForm formid initstore fun  hst
-	= ((store.value,[(formid.id,BodyTag store.body):prevbody]),ch||store.changed,hst)
+	= ((store.value,[(formid.id,BodyTag store.form):prevbody]),ch||store.changed,hst)
 
 self :: (a -> a) (GecCircuit a a) -> GecCircuit a a
 self fun gecaa = feedback gecaa (arr fun)
@@ -73,5 +73,5 @@ lift formid fun = HGC fun`
 where
 	fun` ((a,body),ch,hst)
 	# (nb,hst) =  fun formid a hst
-	= ((nb.value,[(formid.id,BodyTag nb.body):body]),ch||nb.changed,hst) 
+	= ((nb.value,[(formid.id,BodyTag nb.form):body]),ch||nb.changed,hst) 
 

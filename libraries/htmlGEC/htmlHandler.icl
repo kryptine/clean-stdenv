@@ -33,6 +33,11 @@ toHtml a
 # (na,_) = gForm{|*|} {id = "__toHtml", lifespan = Page, mode = Display} a  {cntr = 0, states = emptyFormStates, world = undef}
 = BodyTag na.form
 
+toHtmlForm :: (*HSt -> *(Form a,*HSt)) -> [BodyTag] | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+toHtmlForm anyform 
+# (na,hst) = anyform {cntr = 0, states = emptyFormStates, world = undef}
+=  na.form
+
 toBody :: (Form a) -> BodyTag
 toBody form = BodyTag form.form
 
@@ -271,7 +276,7 @@ where
 						, 	Inp_Value (SV (prettyfy d.gfd_name +++ ": "))
 						,	Inp_ReadOnly ReadOnly
 						, 	`Inp_Std [DisplayBoxStyle]
-						,	Inp_Size maxsize
+						,	Inp_Size maxsize`
 						] ""
 
 	prettyfy name = mkString [toUpper lname : addspace lnames]
@@ -282,12 +287,19 @@ where
 		| isUpper c	= [' ',toLower c:addspace cs]
 		| otherwise = [c:addspace cs]
 		
-	maxsize = takemax defsize [size (prettyfy gfd_name)  \\ {gfd_name} <- d.gfd_cons.gcd_fields]
+	maxsize` = ndefsize maxsize defsize
+	maxsize = takemax defsize [toInt (toReal (size (prettyfy gfd_name)) * 0.8)  \\ {gfd_name} <- d.gfd_cons.gcd_fields]
 	
 	takemax i [] = i
 	takemax i [j:js] 
 	| i > j = takemax i js
 	| otherwise = takemax j js
+
+	ndefsize max def
+	| max - def <= 0 = def
+	| otherwise = ndefsize max (def + defsize)
+
+
 
 // gUpd calculates a new value given the current value and a change in the value
 // if necessary it invents new default value (e.g. when switching from Nil to Cons ...
