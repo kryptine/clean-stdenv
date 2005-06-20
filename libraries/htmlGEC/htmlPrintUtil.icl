@@ -19,29 +19,11 @@ gHpr{|PAIR|}   gHpra gHprb 	file (PAIR a b) 	= gHprb (gHpra file a) b
 gHpr{|EITHER|} gHprl gHprr 	file (LEFT left) 	= gHprl file left
 gHpr{|EITHER|} gHprl gHprr 	file (RIGHT right) 	= gHprr file right
 gHpr{|OBJECT|} gHpro 		file (OBJECT object)= gHpro file object 
-/*
-gHpr{|CONS of t|} gPrHtmlc file (CONS c) // constructor names are printed, prefix Foo_ is stripped
-= case t.gcd_name.[0] of
-	'`' 	= 	gPrHtmlc file c	// just skip this constructor name
-	else	=	case t.gcd_arity of
-					0 = file <+   myprint t.gcd_name	 
-					1 = gPrHtmlc (file <+ " " <+ myprint t.gcd_name <+ " = ") c	
-					n = gPrHtmlc (file <+ " " <+ myprint t.gcd_name         ) c
-where
-	myprint :: String -> String
-	myprint string = {toLower char \\ char <-: stripprefix string } 
 
-	stripprefix string 
-	# list = fromString string
-	| isMember '_' list = toString (tl (dropWhile ((<>) '_') list))
-	| otherwise 		= string  
-
-*/
 gHpr{|CONS of t|} gPrHtmlc prev (CONS c) // constructor names are printed, prefix Foo_ is stripped
 = case t.gcd_name.[0] of
 	'`' 	= 	gPrHtmlc prev c	// just skip this constructor name
 	else	=	case t.gcd_arity of
-//					0 = prev <+ " \"" <+ myprint t.gcd_name	<+ "\""
 					0 = prev <+ " " <+ myprint t.gcd_name	 
 					1 = gPrHtmlc (prev <+ " " <+ myprint t.gcd_name <+ " = ") c	
 					n = gPrHtmlc (prev <+ " " <+ myprint t.gcd_name         ) c

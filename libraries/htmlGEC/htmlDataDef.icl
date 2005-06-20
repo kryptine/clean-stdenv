@@ -7,7 +7,14 @@ import htmlStyleDef, htmlStylelib
 
 import StdGeneric
 
-gHpr{|Html|} prev (Html head rest)	= prev <+ head <+ rest 
+gHpr{|Html|} prev (Html head rest)	= prev <+ httpheader1 <+ htmlbegin <+ head <+ rest <+ htmlend
+where
+	httpheader1 =	"HTTP/1.1 200 OK\n" +++ 
+					"Content-Type: text/plain\n" +++ 
+					"Transfer-Encoding: chunked\n\n"
+//	httpheader	=  	"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional\/\/EN\">"
+	htmlbegin	= 	"<html>"
+	htmlend 	= 	"</html>/n/n"
 
 gHpr{|Head|} prev (Head attr tags) = prev <+> htmlAttrCmnd "head" attr tags
 

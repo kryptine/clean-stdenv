@@ -33,11 +33,6 @@ toHtml a
 # (na,_) = gForm{|*|} {id = "__toHtml", lifespan = Page, mode = Display} a  {cntr = 0, states = emptyFormStates, world = undef}
 = BodyTag na.form
 
-toHtmlForm :: (*HSt -> *(Form a,*HSt)) -> [BodyTag] | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-toHtmlForm anyform 
-# (na,hst) = anyform {cntr = 0, states = emptyFormStates, world = undef}
-=  na.form
-
 toBody :: (Form a) -> BodyTag
 toBody form = BodyTag form.form
 
