@@ -2,10 +2,12 @@ module main
 
 import StdEnv, StdHtml
 
-derive gForm  	Login, ProjectWorker,Project,DailyWork, ProjectPlan, Status, WorkerPlan
-derive gUpd 	[], Login, ProjectWorker,Project,DailyWork, ProjectPlan, Date, Status, WorkerPlan
-derive gPrint	Login, ProjectWorker,Project,DailyWork,ProjectPlan, Date, Status, WorkerPlan
-derive gParse	Login, ProjectWorker,Project,DailyWork,ProjectPlan, Date, Status, WorkerPlan
+derive gForm  	Login, ProjectWorker,Project,DaylyWork, ProjectPlan, Status, WorkerPlan
+derive gUpd 	[], Login, ProjectWorker,Project,DaylyWork, ProjectPlan, Date, Status, WorkerPlan
+derive gPrint	Login, ProjectWorker,Project,DaylyWork,ProjectPlan, Date, Status, WorkerPlan
+derive gParse	Login, ProjectWorker,Project,DaylyWork,ProjectPlan, Date, Status, WorkerPlan
+
+
 
 gForm {|[]|} gHa formid [] hst = ({changed = False, value = [], form =[EmptyBody]},hst)
 gForm {|[]|} gHa formid [x:xs] hst 
@@ -24,13 +26,14 @@ where
 			where
 				pddays 		= PullDown (1,defpixel/2) (day-1,[toString i \\ i <- [1..31]])
 				pdmonths 	= PullDown (1,defpixel/2) (month-1,[toString i \\ i <- [1..12]])
-				pdyears 	= PullDown (1,60) (year-1,[toString i \\ i <- [2005..2010]])
+				pdyears 	= PullDown (1,2*defpixel/3) (year-1,[toString i \\ i <- [2005..2010]])
 		
 			fromPullDown (pddays,pdmonths,pdyears) = Date (convert pddays) (convert pdmonths) (convert pdyears)
 			where
 				convert x = toInt (toString x)
 
-Start world  = doHtml page world
+
+Start world  = doHtml MyPage2 world
 
 :: ProjectAdmin	:== [Project]
 :: Project
@@ -60,7 +63,7 @@ Start world  = doHtml page world
 		,	workerName		:: String
 		, 	hoursToWork		:: Int
 		}
-:: DailyWork
+:: DaylyWork
 	=	{ 	projectId 		:: ProjectList
 		, 	myName			:: WorkersList
 		, 	date			:: Date
@@ -70,64 +73,73 @@ Start world  = doHtml page world
 :: WorkersList	:== PullDownMenu
 
 workAdminStore :: (ProjectAdmin -> ProjectAdmin) *HSt -> (Form ProjectAdmin, *HSt)
-workAdminStore update hst = mkStoreForm (pdFormId "workadmin") initProjectAdmin update hst
+workAdminStore update hst = mkStoreForm (pdFormId "workadmin") myProjects update hst
 
 addProjectForm :: *HSt -> (Form ProjectPlan, *HSt)
 addProjectForm hst = mkEditForm  (nFormId "addproject") (initProjectPlan "" 0) hst
 
 addWorkerForm :: (WorkerPlan -> WorkerPlan) *HSt -> (Form WorkerPlan, *HSt)
-addWorkerForm update hst = mkSelf2Form  (nFormId "addworker") (initWorkerPlan "" 0 0 initProjectAdmin) update hst
+addWorkerForm update hst = mkSelf2Form  (nFormId "addworker") (initWorkerPlan "" 0 0 myProjects) update hst
 
-dailyWorkForm :: (DailyWork -> DailyWork) *HSt -> (Form DailyWork, *HSt)
-dailyWorkForm update hst = mkSelf2Form  (pFormId "daylog") (initDailyWork 0 0 initProjectAdmin) update hst
+daylyWorkForm :: (DaylyWork -> DaylyWork) *HSt -> (Form DaylyWork, *HSt)
+daylyWorkForm update hst = mkSelf2Form  (pFormId "daylog") (initDaylyWork 0 0 myProjects) update hst
 
-buttonsForm :: DailyWork WorkerPlan ProjectPlan *HSt -> (Form (ProjectAdmin -> ProjectAdmin), *HSt)
-buttonsForm daylog workplan project hst = ListFuncBut False (nFormId "mybuttons") myButtons hst
+myButtonsForm :: DaylyWork WorkerPlan ProjectPlan *HSt -> (Form (ProjectAdmin -> ProjectAdmin), *HSt)
+myButtonsForm daylog workplan project hst = ListFuncBut False (nFormId "mybuttons") myButtons hst
 where
-	myButtons = [ (LButton defpixel "addProject", addNewProject  project)
-				, (LButton defpixel "addWorker",  addNewWorkplan workplan)
-				, (LButton defpixel "addHours",   addDailyWork   daylog)
+	myButtons = [ (LButton defpixel "addProject", addNewProject  project )
+				, (LButton defpixel "addWorker",  addNewWorkplan  workplan )
+				, (LButton defpixel "addHours",   addDaylyWork   daylog )
 				]
 
-page :: *HSt -> (Html,*HSt)
-page hst = let (forms,hst1) = updateForms hst in (updatePage forms,hst1)
-where
-	updateForms :: *HSt -> ((Form ProjectAdmin,Form ProjectPlan,Form WorkerPlan,Form DailyWork,Form (ProjectAdmin -> ProjectAdmin)),*HSt)
-	updateForms hst
-	# (projects,hst) = workAdminStore id hst
-	# (project, hst) = addProjectForm    hst
-	# (worker,  hst) = addWorkerForm  id hst
-	# (daylog,  hst) = dailyWorkForm  id hst
-	# (update,  hst) = buttonsForm  daylog.value worker.value project.value hst
-	# (projects,hst) = workAdminStore update.value hst
-	# (daylog,  hst) = dailyWorkForm (adjDailyWork projects.value) hst
-	# (worker,  hst) = addWorkerForm (adjWorkers   projects.value) hst
-	= ((projects,project,worker,daylog,update),hst)
-	
-	updatePage (projects,project,worker,daylog,update)
-	= simpleHtml "Work Table"
-		[ H1 [] "Work Table"
-		, Hr []
-		, STable [] 
-			[ [ lTxt "Add New Project:", toBody project, lTxt "Add New Worker:", toBody worker]
-			, [ EmptyBody, update.form!!0, EmptyBody, update.form!!1]
-			]
-		, Hr []
-		, if (isEmpty projects.value) 
-		     EmptyBody
-		     (BodyTag [	STable []
-						[ [ lTxt "Administrate Worked Hours:", toBody daylog]
-						, [ EmptyBody, update.form!!2]
-						]
-					  , Hr []
-					  , lTxt "Project Status:" <.=.> toHtml (projects.value!!(toInt daylog.value.projectId))
-					  ])
-		]
-	where
-		lTxt s	= Txt s <.||.> (Hr [Hr_Size (Pixels 4)])
+MyPage2  hst
+# (projects,hst)	= workAdminStore id hst
+# (project,hst)		= addProjectForm hst
+# (worker,hst)		= addWorkerForm id hst
+# (daylog,hst)		= daylyWorkForm id hst
+# (update,hst)		= myButtonsForm daylog.value worker.value project.value hst
 
-initProjectAdmin :: ProjectAdmin
-initProjectAdmin = []
+# (projects,hst)	= workAdminStore update.value hst
+# (daylog,hst)		= daylyWorkForm (adjDaylyWork projects.value) hst
+# (worker,hst)		= addWorkerForm (adjWorkers projects.value) hst
+= mkHtml "table test"
+	[ H1 [] "Work Table Example"
+	, Br
+	, traceHtmlInput
+	, Br
+	, STable [] 
+	  (	[ [ lTxt "Add New Project:", toBody project, lTxt "Add New Worker:", toBody worker]
+		, [ EmptyBody, update.form!!0, EmptyBody, update.form!!1]
+		, [ Br ]
+		] ++
+		if (isEmpty projects.value) 
+		[ [ EmptyBody ] ]
+		[ [ lTxt "Administrate Worked Hours:", toBody daylog]
+		, [ EmptyBody, update.form!!2]
+		] )
+	, Br , Br
+	, if (isEmpty projects.value) EmptyBody
+		 (BodyTag [ lTxt "Current Status of Project: \t\t"
+		 		    <.=.>
+		 		    toHtml (projects.value!!(toInt daylog.value.projectId))
+		 		  ])
+
+	] hst
+where
+	line = Hr [Hr_Size (Pixels 4)]
+	lTxt s = Txt s 
+//	lTxt s = Txt s <.||.> line
+
+	block s b u = STable [] [[lTxt s, toBody b],[EmptyBody,u]]
+
+/*
+
+*/
+
+
+
+myProjects :: [Project]
+myProjects = []
 
 initProject :: String Int -> Project
 initProject name hours
@@ -157,8 +169,8 @@ initProjectWorker name hours
 		, 	statusWorker	= initStatus hours 0
 		, 	investedHours	= []
 		}
-initDailyWork :: Int Int ProjectAdmin -> DailyWork
-initDailyWork i j projects
+initDaylyWork :: Int Int ProjectAdmin -> DaylyWork
+initDaylyWork i j projects
 	=	{ myName 				= initWorkersList i j projects
 		, projectId 			= initProjectList i projects
 		, date					= initDate
@@ -168,28 +180,28 @@ where
 	initDate :: Date	
 	initDate = Date 1 1 2005
 
-initProjectList :: Int ProjectAdmin -> ProjectList
+initProjectList :: Int ProjectAdmin -> PullDownMenu
 initProjectList i projects = PullDown (1,defpixel) (i,[projectPlan.projectName \\ {projectPlan} <- projects])
 
-initWorkersList :: Int Int ProjectAdmin -> WorkersList
+initWorkersList :: Int Int ProjectAdmin -> PullDownMenu
 initWorkersList i j [] = PullDown (1,defpixel) (0,[])
 initWorkersList i j projects = PullDown (1,defpixel) (i,[nameWorker \\ {nameWorker} <- (projects!!j).workers])
 
-adjDailyWork :: ProjectAdmin DailyWork  -> DailyWork
-adjDailyWork projects daylog=:{projectId} = {	daylog 
-											& 	projectId = addProjectList projects projectId
+adjDaylyWork :: ProjectAdmin DaylyWork  -> DaylyWork
+adjDaylyWork projects daylog=:{projectId} = {	daylog 
+											& 	projectId = addProjectList projectId projects
 											,	myName = initWorkersList (toInt daylog.myName) (toInt projectId) projects
 											}
 
-addProjectList :: ProjectAdmin ProjectList -> ProjectList
-addProjectList projects (PullDown pxls (i,_)) = (PullDown pxls (i,[projectPlan.projectName \\ {projectPlan} <- projects]))
+addProjectList :: PullDownMenu ProjectAdmin -> PullDownMenu
+addProjectList (PullDown pxls (i,_)) projects = (PullDown pxls (i,[projectPlan.projectName \\ {projectPlan} <- projects]))
 
 addNewProject :: ProjectPlan ProjectAdmin -> ProjectAdmin
 addNewProject {projectName,hoursPlanned} projects = projects ++ [initProject projectName hoursPlanned]
 
-addDailyWork :: DailyWork ProjectAdmin -> ProjectAdmin
-addDailyWork daylog [] = []
-addDailyWork daylog projects
+addDaylyWork :: DaylyWork [Project] -> [Project]
+addDaylyWork daylog [] = []
+addDaylyWork daylog projects
 | daylog.hoursWorked == 0 || toString daylog.myName == "" = projects
 | otherwise = updateAt (toInt daylog.projectId) updatedProject projects
 where
@@ -204,7 +216,7 @@ where
 				, statusWorker = initStatus 0 0
 				}
 
-	addDay :: DailyWork [ProjectWorker] -> [ProjectWorker]
+	addDay :: DaylyWork [ProjectWorker] -> [ProjectWorker]
 	addDay {myName,date,hoursWorked} [] = []
 	addDay nwork=:{myName,date,hoursWorked} [owork=:{nameWorker,statusWorker,investedHours}:worklogs]
 	| toString myName == nameWorker  = [{owork & investedHours = investedHours ++ [(date,hoursWorked)]
@@ -213,7 +225,7 @@ where
 									  }:worklogs]
 	| otherwise 			= [owork: addDay nwork worklogs]
 
-addNewWorkplan :: WorkerPlan ProjectAdmin -> ProjectAdmin
+addNewWorkplan :: WorkerPlan [Project] -> [Project]
 addNewWorkplan {project,workerName,hoursToWork} [] = []
 addNewWorkplan worker=:{project,workerName,hoursToWork} [p:ps]
 | p.projectPlan.projectName == toString project 
@@ -221,8 +233,8 @@ addNewWorkplan worker=:{project,workerName,hoursToWork} [p:ps]
 | otherwise = [p: addNewWorkplan worker ps]
 
 
-adjWorkers :: ProjectAdmin WorkerPlan -> WorkerPlan
-adjWorkers projects worker = {worker & project = addProjectList projects worker.project}
+adjWorkers :: [Project] WorkerPlan -> WorkerPlan
+adjWorkers projects worker = {worker & project = addProjectList worker.project projects}
 
 :: Login 
 	= 	{ loginName :: String

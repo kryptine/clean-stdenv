@@ -76,7 +76,7 @@ mkStoreForm formid data cbf  hst
 = mkViewForm formid data 
 	{toForm = toFormid , updForm = \_ v = cbf v , fromForm = \_ v -> v, resetForm = Nothing}  hst
 
-mkApplyEditForm	:: !FormId d !d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+mkApplyEditForm	:: !FormId d d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkApplyEditForm formid initval inputval  hst
 = mkViewForm formid initval 
 	{toForm =  toFormid , updForm = update , fromForm = \_ v -> v, resetForm = Nothing}  hst
@@ -135,9 +135,7 @@ where
 counterForm 	:: !FormId !a !*HSt -> (Form a,!*HSt) | +, -, one,  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 counterForm name i hst = mkViewForm name i bimap hst
 where
-	bimap =	{ toForm 	= \n v -> case v of
-									Nothing -> (n,down,up)
-									Just v -> v
+	bimap =	{ toForm 	= \n-> toFormid (n,down,up)
 			, updForm	= updCounter`
 			, fromForm	= \_ (n,_,_) -> n
 			, resetForm = Nothing
