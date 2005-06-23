@@ -6,10 +6,45 @@ module spreadsheet
 // two versions, with and without arrows
 
 import StdEnv
-import StdHtml
+import StdHtml, htmlMonad
 
-Start world  = doHtml spreadsheet world
+Start = 0
+//Start world  = doHtml spreadsheetMH world
+Start world  = doHtml spreadsheetM world
+//Start world  = doHtml spreadsheet world
 //Start world  = doHtml arrowsspreadsheet world
+
+spreadsheetMH :: (Form [.[b]]) -> 
+                 (.(*HSt -> *((Form [[Int]]),!*HSt)),.((Form u:c) -> (.(*HSt -> *((Form [b]),!*HSt)),v:((Form w:d) -> (.(*HSt -> *((Form [b]),!*HSt)),x:(.(Form a) -> (.(*HSt -> *((Form b),!*HSt)),y:(.e -> *(*HSt -> *(Html,*HSt)))))))))) | TC b & + b & zero b, [y x v <= u,y x <= w]
+spreadsheetMH
+  = \tablef  -> (table_hv_Form (nFormId "table") (inittable 8 10),
+	\rowsumf -> (vertlistForm  (ndFormId "rsum") (rowsum tablef.value),
+	\colsumf -> (horlistForm   (ndFormId "csum") (colsum tablef.value),
+	\totsumf -> (mkEditForm    (ndFormId "tsum") (sum (rowsum tablef.value)),
+	\_ -> (mkHtmlM "Spreadsheet"
+	[ H1 [] "Spreadsheet Example: "
+	, Br
+	, tablef.form  <=> rowsumf.form
+	, colsumf.form <=> totsumf.form
+	,Br, Br
+	, Txt "so the result of the spreadsheet is :", toHtml totsumf.value
+	,Br ,Br
+	])))))
+
+spreadsheetM
+  = table_hv_Form (nFormId "table") (inittable 8 10)            >>= \tablef  ->
+	vertlistForm  (ndFormId "rsum") (rowsum tablef.value)       >>= \rowsumf -> 
+	horlistForm   (ndFormId "csum") (colsum tablef.value)       >>= \colsumf ->
+	mkEditForm    (ndFormId "tsum") (sum (rowsum tablef.value)) >>= \totsumf ->
+	mkHtmlM "Spreadsheet"
+	[ H1 [] "Spreadsheet Example: "
+	, Br
+	, tablef.form  <=> rowsumf.form
+	, colsumf.form <=> totsumf.form
+	,Br, Br
+	, Txt "so the result of the spreadsheet is :", toHtml totsumf.value
+	,Br ,Br
+	]
 
 spreadsheet hst
 # (tablef, hst) = table_hv_Form (nFormId "table") (inittable 8 10)     	    hst
