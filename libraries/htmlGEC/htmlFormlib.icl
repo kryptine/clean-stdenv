@@ -55,8 +55,9 @@ mkSelfForm formid initdata cbf  hst
 = mkViewForm formid initdata 
 	{toForm = toFormid , updForm = update , fromForm = \_ v -> v , resetForm = Nothing}  hst
 where
-	update True newval = cbf newval
-	update _ val = val
+	update b val
+	| b.isChanged 	= cbf val
+	| otherwise 	= val
 	
 mkSelf2Form :: !FormId d !(d -> d) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkSelf2Form formid data cbf  hst
@@ -81,8 +82,10 @@ mkApplyEditForm formid initval inputval  hst
 = mkViewForm formid initval 
 	{toForm =  toFormid , updForm = update , fromForm = \_ v -> v, resetForm = Nothing}  hst
 where
-	update True  newval = newval
-	update False val    = inputval
+	update b val
+	| b.isChanged 	= val
+	| otherwise 	= inputval
+
 
 mkBimapEditor :: !FormId d !(Bimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
 mkBimapEditor formid d {map_to,map_from} hst
@@ -143,8 +146,9 @@ where
 			, resetForm = Nothing
 			}
 
-	updCounter` True val = updCounter val
-	updCounter` _ val = val
+	updCounter` b val
+	| b.isChanged 	= updCounter val
+	| otherwise 	= val
 
 	updCounter (n,Pressed,_)  = (n - one,down,up)
 	updCounter (n,_,Pressed) 	= (n + one,down,up)
@@ -415,8 +419,8 @@ where
 			bimap =	{ toForm 	= \_ v -> case v of
 											Nothing = checkbox
 											(Just v) = if init checkbox v
-					, updForm	= \b v -> if (not init && b) (toggle v) v
-					, fromForm	= \b v -> if b ((docbf  v),toBool v) (\_ a -> a,toBool v)
+					, updForm	= \b v -> if (not init && b.isChanged) (toggle v) v
+					, fromForm	= \b v -> if b.isChanged ((docbf  v),toBool v) (\_ a -> a,toBool v)
 					, resetForm	= Nothing
 					}
 		
@@ -482,15 +486,19 @@ where
 		FuncRadio i j formid cbf hst = mkViewForm nformid (\_ a -> a,-1) bimap  hst
 		where
 			bimap =	{ toForm 	= \_ v -> radio i j
-					, updForm	= \b v -> if b (RBChecked formid.id) (otherradio v)
-					, fromForm	= \b v -> if b (cbf,j) (\_ a -> a,-1)
+					, updForm	= \b v -> if b.isChanged (RBChecked formid.id) (otherradio b v)
+					, fromForm	= \b v -> if b.isChanged (cbf,j) (\_ a -> a,-1)
 					, resetForm	= Nothing
 					}
-			otherradio v
-			| StrippedCheckUpdateId == formid.id = RBNotChecked formid.id
+			otherradio b v
+			| stripname b.changedId == formid.id = RBNotChecked formid.id
 			| otherwise = v
 			
 			nformid = {formid & id = formid.id +++ "_" +++ toString j}
+
+			stripname name = mkString (takeWhile ((<>) '_') (mkList name))
+
+
 
 FuncMenu :: !Int !FormId [(String, a -> a)] !*HSt 
 													 -> (Form (a -> a,Int),!*HSt)
@@ -500,7 +508,7 @@ where
 
 	bimap =	{ toForm 	= toForm
 			, updForm	= \b v -> v
-			, fromForm	= \b v=:(PullDown _ (nindex,_)) -> if b (snd (defs!!nindex),nindex) (id,nindex)
+			, fromForm	= \b v=:(PullDown _ (nindex,_)) -> if b.isChanged (snd (defs!!nindex),nindex) (id,nindex)
 			, resetForm	= Nothing
 			}
 	toForm _ Nothing 		= menulist

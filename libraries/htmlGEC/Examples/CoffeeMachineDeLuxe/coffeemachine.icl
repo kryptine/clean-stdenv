@@ -21,17 +21,17 @@ coffeemachine hst
 		[ H1 [] "Fancy Coffee Machine ..."
 		, Br
 		, 	[ mkSTable [[bTxt "Content:", bTxt "Value:",bTxt "Input:"]]
-			, toHtml ("money ",machine.value.money) <.=.> mkRowForm (input.body%MoneyButtons)
-			, toHtml ("beans ",machine.value.beans) <.=.> input.body!!BeansButton
-			, toHtml ("trash ",machine.value.trash) <.=.> input.body!!TrashButton
+			, toHtml ("money ",machine.value.money) <.=.> mkRowForm (input.form%MoneyButtons)
+			, toHtml ("beans ",machine.value.beans) <.=.> input.form!!BeansButton
+			, toHtml ("trash ",machine.value.trash) <.=.> input.form!!TrashButton
 			, Br
 			, bTxt "Options: "
 			, Br
-			, checkboxf.body!!MilkOption  <.=.> bTxt "Milk"
-			, checkboxf.body!!SugarOption <.=.> bTxt "Sugar"
+			, checkboxf.form!!MilkOption  <.=.> bTxt "Milk"
+			, checkboxf.form!!SugarOption <.=.> bTxt "Sugar"
 			, Br
 			, mkSTable [[bTxt "Product:", bTxt "Prize:"]]
-			, mkColForm (input.body%ProductButtons) <.=.> mkColForm (map toHtml prizes)
+			, mkColForm (input.form%ProductButtons) <.=.> mkColForm (map toHtml prizes)
 			, Br
 			, bTxt "Message: ", bTxt (print machine.value.out optionbool)
 			] <=> [displayMachineImage machine.value.out] 
@@ -68,9 +68,6 @@ where
 	machineImage i	= Img [Img_Src ("images/coffeemachine0" +++ toString i +++ ".jpg"), Img_Width (RelLength 560) ,Img_Height (RelLength 445)]
 
 
-	mkHtml s tags hst 	= (Html (header s) (body tags),hst)
-	header s 			= Head [`Hd_Std [Std_Title s]] [] 
-	body tags 			= Body [] tags
 	bTxt				= B []
 
 	print output [milkoption,sugaroption] 

@@ -20,27 +20,26 @@ traceHtmlInput	:: BodyTag		// for debugging showing the information received fro
 
 // Decoding of information
 
-:: *FormStates 									// collection of all states of all forms
+:: *FormStates 					// collection of all states of all forms
 
-emptyFormStates :: *FormStates					// creates emtpy states
-initFormStates 	:: *FormStates 					// retrieves all form states hidden in the html page
+emptyFormStates :: *FormStates								// creates emtpy states
+initFormStates 	:: *NWorld -> (*FormStates,*NWorld) 		// retrieves all form states wherever they are stored
 
-findState 		:: !FormId *FormStates *World -> (Bool, Maybe a,*FormStates,*World)	// true if form has not yet been previously inspected 	
+findState 		:: !FormId *FormStates *NWorld 				// find the state value given FormId and a correct type
+					-> (Bool, Maybe a,*FormStates,*NWorld)	// true if form has not yet been previously inspected 	
 												| gParse{|*|} a & TC a		
-replaceState 	:: !FormId a *FormStates *World -> (*FormStates,*World)				// replace state given FormId
-												| gPrint{|*|} a & TC a
+replaceState 	:: !FormId a *FormStates *NWorld 			// replace state given FormId
+					-> (*FormStates,*NWorld)	| gPrint{|*|} a & TC a
 
-convStates 		:: !FormStates *World -> (BodyTag,*World) 	// script which stores the global state for the next round
+getTriplet  	:: *FormStates -> (!Maybe a, !Maybe b,*FormStates) // triplet, value of changed part
+												| gParse{|*|} a & gParse{|*|} b 
+getUpdateId 	:: *FormStates -> (String,*FormStates)		// id of previously changed form
+getUpdate 		:: *FormStates -> (String,*FormStates)		// value typed in by user as string
+
+convStates 		:: !FormStates *NWorld -> (BodyTag,*NWorld) // script which stores the global state for the next round
+
 
 // low level encoding of information
 
 encodeInfo 		:: a -> String | gPrint{|*|} a	// serialization to a Mime format, used to encode input forms 
 callClean 		:: Script						// script that will take care of sending the required input to this application
-
-// low level decoding of information
-
-CheckUpdateId 			:: String				// FormId of form previously changed by user
-CheckUpdate 			:: (!Maybe a, !Maybe b) | gParse{|*|} a & gParse{|*|} b // value of updated form, value of changed part
-StrippedCheckUpdateId 	:: String				// used to determine related formid's e.g. for radio buttons
-AnyInput 				:: String				// any input is accepted if a string is required
-

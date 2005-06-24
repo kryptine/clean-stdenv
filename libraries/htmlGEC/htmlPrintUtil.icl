@@ -57,11 +57,11 @@ print a = \f -> fwrites a f
 (<+>) infixl :: !*File FoF -> *File
 (<+>) file new = new file
 
-print_to_stdout :: a *World -> *World | gHpr{|*|} a
-print_to_stdout value world
-# (file,world) = stdio world
-# file = file <+ value
-= force_IO file world
+print_to_stdout :: a *NWorld -> *World | gHpr{|*|} a
+print_to_stdout value {worldC,inout}
+//# (file,worldC) = stdio worldC
+# inout = inout <+ value
+= force_IO inout worldC
 where
 	force_IO:: !x *World -> *World
 	force_IO x w = w
@@ -86,4 +86,25 @@ styleCmnd stylename attr = \file -> print "." file <+ stylename <+ "{" <+ attr <
 styleAttrCmnd :: !a !b -> FoF | gHpr{|*|} a & gHpr{|*|} b
 styleAttrCmnd name value = \file -> print "" file <+ name <+ ": " <+ value <+ ";"
 
+instance FileSystem NWorld
+where
+	fopen :: !{#Char} !Int !*NWorld -> (!Bool,!*File,!*NWorld)
+	fopen string int nworld=:{worldC}
+		# (bool,file,worldC) = fopen string int worldC
+		= (bool,file,{nworld & worldC = worldC})
+
+	fclose :: !*File !*NWorld -> (!Bool,!*NWorld)
+	fclose file nworld=:{worldC}
+		# (bool,worldC) = fclose file worldC
+		= (bool,{nworld & worldC = worldC})
+
+	stdio :: !*NWorld -> (!*File,!*NWorld)
+	stdio nworld=:{worldC}
+		# (file,worldC) = stdio worldC
+		= (file,{nworld & worldC = worldC})
+
+	sfopen :: !{#Char} !Int !*NWorld -> (!Bool,!File,!*NWorld)
+	sfopen string int nworld=:{worldC}
+		# (bool,file,worldC) = sfopen string int worldC
+		= (bool,file,{nworld & worldC = worldC})
 

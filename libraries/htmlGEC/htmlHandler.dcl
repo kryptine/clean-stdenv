@@ -18,14 +18,18 @@ instance FileSystem HSt					// enabling file IO on HSt
 
 mkViewForm 		:: !FormId 	d !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
 
+getChangedId	:: !*HSt -> (String,!*HSt)	// id of form that has been changed by user
+
 // mkViewForm is the swiss army nife function creating stateful interactive forms with a view v of data d
 // make shure that all editors have a unique identifier !
 
 
 // utility functions
 
-toHtml 			:: a -> BodyTag | gForm {|*|} a		// toHtml displays any type into a non-editable form
-toBody 			:: (Form a) -> BodyTag				// just (BodyTag form.body)
+toHtml 			:: a -> BodyTag | gForm {|*|} a				// toHtml displays any type into a non-editable form
+toHtmlForm 		:: (*HSt -> *(Form a,*HSt)) -> [BodyTag] 	// toHtmlForm displays any form one can make with a form function
+												| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+toBody 			:: (Form a) -> BodyTag						// just (BodyTag form.body)
 
 // Clean types that have a special representation
 
