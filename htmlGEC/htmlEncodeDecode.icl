@@ -7,13 +7,24 @@ import StdEnv, ArgEnv, StdMaybe, Directory
 import htmlDataDef, htmlTrivial, htmlFormData
 import GenPrint, GenParse
 
+derive gParse UpdValue
+derive gParse (,), (,,)
+
 // This module controls the handling of state forms and the communication with the browser
 // Internally, a Tree is used to store the form states
 // Externaly, these states are stored in the Html form in a list
 // A distinction is made between old states (states retrieved from the html form)
 // and new states (states of newly created forms and updated forms)
 
-:: *FormStates 	:== Tree_ (String,FormState)		// State of forms is internally stored in a tree
+:: *FormStates 										// State of forms is internally stored in a tree
+	= 	{ fstates 	:: *FStates
+		, triplet	:: String
+		, update	:: String
+		, updateid	:: String
+		}		
+
+:: FStates		:== Tree_ (String,FormState)
+
 :: Tree_ a 		= Node_ (Tree_ a) a (Tree_ a) | Leaf_
 :: FormState 	= OldState !OldState				// Old states will become garbage when the final states are reached
 				| NewState !NewState				// New states that will be saved in the html form
@@ -54,9 +65,14 @@ where
 
 // convert this HtmlState into FormStates which are used internally
 
-initFormStates :: *FormStates
-initFormStates = Balance (sort [(sid,OldState {ostrval = state, olive = lifespan}) \\ (sid,lifespan,state) <- retrieveHtmlState | sid <> ""])
+initFormStates 	:: *NWorld -> (*FormStates,*NWorld) 					// retrieves all form states hidden in the html page
+initFormStates world 
+	= ({ fstates = readStatesFromArgs, triplet = triplet, update = update, updateid = updateid },world)
 where
+	readStatesFromArgs = Balance (sort [(sid,OldState {ostrval = state, olive = lifespan}) 
+										\\ (sid,lifespan,state) <- retrieveHtmlState | sid <> ""
+										])
+
 	Balance [] = Leaf_
 	Balance [x] = Node_ Leaf_ x Leaf_
 	Balance xs
@@ -64,10 +80,21 @@ where
 			(a,[b:bs]) = Node_ (Balance a) b (Balance bs)
 			(as,[]) = Node_   (Balance (init as)) (last as) Leaf_
 
+	(_,triplet,update,_) = DecodedStateFromBrowser
+	
+	updateid 		
+	# (_,upd,_,_) = DecodedStateFromBrowser
+	=: case parseString upd of
+		Just ("",0,UpdI 0) = ""
+		Just (id,_,_)   = id 
+		else = ""
+
+
+
 // FormStates abstract data handling routines
 
 emptyFormStates :: *FormStates
-emptyFormStates = Leaf_
+emptyFormStates = { fstates = Leaf_ , triplet = "", update = "", updateid = ""}
 
 instance < FormState
 where
@@ -76,10 +103,24 @@ where
 force :: !a *b -> *b
 force a b = b
 
-findState :: !FormId *FormStates *World -> (Bool,Maybe a,*FormStates,*World)	| gParse{|*|} a & TC a
-findState formid states world = findState` formid states world
+
+getTriplet :: *FormStates -> (!Maybe a, !Maybe b,*FormStates) | gParse{|*|} a & gParse{|*|} b 
+getTriplet formstates=:{triplet,update}
+= (parseString triplet, parseString update, formstates)
+
+
+getUpdateId ::  *FormStates -> (String,*FormStates)
+getUpdateId formStates=:{updateid} = (updateid,formStates)
+
+getUpdate ::  *FormStates -> (String,*FormStates)
+getUpdate formStates=:{update} = (update,formStates)
+
+findState :: !FormId *FormStates *NWorld -> (Bool,Maybe a,*FormStates,*NWorld)	| gParse{|*|} a & TC a
+findState formid formstates=:{fstates} world
+# (bool,ma,fstates,world) = findState` formid fstates world
+= (bool,ma,{formstates & fstates = fstates},world)
 where
-	findState` :: !FormId *FormStates *World -> (Bool,Maybe a,*FormStates,*World)| gParse{|*|} a & TC a
+	findState` :: !FormId *FStates *NWorld -> (Bool,Maybe a,*FStates,*NWorld)| gParse{|*|} a & TC a
 	findState` formid formstate=:(Node_ left (fid,info) right) world
 	| formid.id == fid = case info of
 					(OldState state) = (True, parseString state.ostrval,formstate,world)
@@ -97,7 +138,7 @@ where
 		Nothing	-> (False,Nothing,Leaf_,world)
 	findState` _ Leaf_ world = (False,Nothing,Leaf_,world)
 
-	readState :: String *World -> (Maybe a,String,*World) | gParse {|*|} a 
+	readState :: String *NWorld -> (Maybe a,String,*NWorld) | gParse {|*|} a 
 	readState filename env
 	#(_,env) = case getFileInfo mydir env of
 				((DoesntExist,fileinfo),env) -> createDirectory mydir env
@@ -118,16 +159,21 @@ where
 		removeBackslashQuote ['\\\"':xs] 	= ['\"':removeBackslashQuote xs]
 		removeBackslashQuote [x:xs] 		= [x:removeBackslashQuote xs]
 
-replaceState :: !FormId a *FormStates *World -> (*FormStates,*World)	| gPrint{|*|} a & TC a
-replaceState formid val Leaf_ world = (Node_ Leaf_ (formid.id,NewState (initNewState formid.lifespan val)) Leaf_,world)
-replaceState formid val (Node_ left a=:(fid,_) right) world
-| formid.id == fid 	= (Node_ left (fid,NewState (initNewState formid.lifespan val)) right,world)
-| formid.id < fid 	= (Node_ nleft a right,nworld)
-						with
-							(nleft,nworld) = replaceState formid val left world
-| otherwise			 = (Node_ left a nright,nworld)
-						with
-							(nright,nworld) = replaceState formid val right world
+replaceState :: !FormId a *FormStates *NWorld -> (*FormStates,*NWorld)	| gPrint{|*|} a & TC a
+replaceState formid val formstates=:{fstates} world
+# (fstates,world) = replaceState` formid val fstates world
+= ({formstates & fstates = fstates},world)
+where
+	replaceState` :: !FormId a *FStates *NWorld -> (*FStates,*NWorld)	| gPrint{|*|} a & TC a
+	replaceState` formid val Leaf_ world = (Node_ Leaf_ (formid.id,NewState (initNewState formid.lifespan val)) Leaf_,world)
+	replaceState` formid val (Node_ left a=:(fid,_) right) world
+	| formid.id == fid 	= (Node_ left (fid,NewState (initNewState formid.lifespan val)) right,world)
+	| formid.id < fid 	= (Node_ nleft a right,nworld)
+							with
+								(nleft,nworld) = replaceState` formid val left world
+	| otherwise			 = (Node_ left a nright,nworld)
+							with
+								(nright,nworld) = replaceState` formid val right world
 
 // NewState Handling routines 
 
@@ -147,8 +193,8 @@ retrieveNewState _ = Nothing
 
 // Convert newly created FormStates to Html Code
 
-convStates :: !FormStates *World -> (BodyTag,*World)
-convStates allFormStates world
+convStates :: !FormStates *NWorld -> (BodyTag,*NWorld)
+convStates {fstates = allFormStates} world
 #	world = writeAllPersistentStates allFormStates world 
 =	(BodyTag
 	[ submitscript    globalFormName updateInpName
@@ -234,7 +280,7 @@ where
 
 	// all persistent stores are stored in files
 
-//	writeAllPersistentStates:: FormStates *World -> *World 
+//	writeAllPersistentStates:: FormStates *NWorld -> *NWorld 
 	writeAllPersistentStates Leaf_ world = world
 	writeAllPersistentStates (Node_ left (sid,NewState {strval,live = Persistent}) right) world
 	# world = writeState sid strval world 
@@ -247,7 +293,7 @@ where
 	# world = writeAllPersistentStates left world
 	= writeAllPersistentStates right world
 
-	writeState :: String a *World -> *World | gPrint {|*|} a 
+	writeState :: String a *NWorld -> *NWorld | gPrint {|*|} a 
 	writeState filename val env
 	#(_,env) = case getFileInfo mydir env of
 				((DoesntExist,fileinfo),env) -> createDirectory mydir env
@@ -275,38 +321,7 @@ where
 decodeInfo :: String -> Maybe a | gParse{|*|} a
 decodeInfo s = parseString (mkString (urlDecode (mkList s)))
 
-// determining the update information
 
-:: UpdValue 	= UpdI Int					// new integer value
-				| UpdR Real					// new real value
-				| UpdB Bool					// new boolean value
-				| UpdC String				// choose indicated constructor 
-				| UpdS String				// new piece of text
-
-CheckUpdateId :: String
-CheckUpdateId 		
-# (_,upd,_,_) = DecodedStateFromBrowser
-=: case parseString upd of
-	Just ("",0,UpdI 0) = ""
-	Just (id,_,_)   = id 
-	else = ""
-derive gParse UpdValue
-
-StrippedCheckUpdateId :: String
-StrippedCheckUpdateId
-=: mkString (takeWhile ((<>) '_') (mkList CheckUpdateId))
-
-AnyInput :: String
-AnyInput
-# (_,_,new,_) = DecodedStateFromBrowser
-=: new
-
-CheckUpdate :: (!Maybe a, !Maybe b) | gParse{|*|} a & gParse{|*|} b 
-CheckUpdate 
-# (_,upd,new,_) = DecodedStateFromBrowser
-= (parseString upd, parseString new)
-
-derive gParse (,), (,,)
 
 // all input information from the browser is obtained once via the arguments passed to this executable
 // defined as CAFs such that they are calculated only once

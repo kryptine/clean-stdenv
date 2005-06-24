@@ -13,18 +13,13 @@ derive gUpd		   (,,), (,,,)
  
 :: *HSt 		= 	{ cntr 		:: InputId		// counts position in expression
 					, states 	:: *FormStates  // all form states are collected here ... 	
-					, world		:: *World		// to enable all other kinds of I/O
+					, world		:: *NWorld		// to enable all other kinds of I/O
 					}	
 
 :: InputId	 	:== Int						// unique id for every constructor and basic value appearing in the state
 
 :: FormUpdate	:== (InputId,UpdValue)		// info obtained when form is updated
 
-:: UpdValue 	= UpdI Int					// new integer value
-				| UpdR Real					// new real value
-				| UpdB Bool					// new boolean value
-				| UpdC String				// choose indicated constructor 
-				| UpdS String				// new piece of text
 
 derive bimap Form, []
 
@@ -32,6 +27,11 @@ toHtml :: a -> BodyTag | gForm {|*|} a
 toHtml a 
 # (na,_) = gForm{|*|} {id = "__toHtml", lifespan = Page, mode = Display} a  {cntr = 0, states = emptyFormStates, world = undef}
 = BodyTag na.form
+
+toHtmlForm :: (*HSt -> *(Form a,*HSt)) -> [BodyTag] | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+toHtmlForm anyform 
+# (na,hst) = anyform {cntr = 0, states = emptyFormStates, world = undef}
+=  na.form
 
 toBody :: (Form a) -> BodyTag
 toBody form = BodyTag form.form
@@ -49,12 +49,24 @@ ifEdit Display  then else = else
 
 doHtml :: (*HSt -> (Html,!*HSt)) *World -> *World
 doHtml pagehandler world 
-# (Html (Head headattr headtags) (Body attr bodytags),{states,world}) = pagehandler {cntr = 0, states = initFormStates, world = world}
+# (inout,world) 		= stdio world						// open stdin and stdout channels
+# nworld 				= { worldC = world, inout = inout }	
+# (initforms,nworld) 	= initFormStates nworld
+# (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
+						= pagehandler {cntr = 0, states = initforms, world = nworld}
 # (allformbodies,world) = convStates states world
 = print_to_stdout (Html (Head headattr [extra_style:headtags]) (Body (extra_body_attr ++ attr) [allformbodies:bodytags])) world
 where
 	extra_body_attr = [Batt_background "back35.jpg",`Batt_Std [CleanStyle]]
 	extra_style = Hd_Style [] CleanStyles	
+
+// some small utility functions
+
+getChangedId	:: !*HSt -> (String,!*HSt)	// id of form that has been changed by user
+getChangedId hst=:{states}
+# (id,states) = getUpdateId states
+= (id,{hst & states = states })
+
 
 // swiss army nife editor that makes coffee too ...
 
@@ -64,9 +76,10 @@ mkViewForm formid initdata bm=:{toForm, updForm, fromForm, resetForm}  {states,w
 = calcnextView isupdated view states world
 where
 	calcnextView isupdated view states world
+	# (changedid,states) = getUpdateId states
 	# view 		= toForm   initdata  view			// map value to view domain, given previous view value
-	# view		= updForm  isupdated view			// apply update function telling user if an update has taken place
-	# newval	= fromForm isupdated view			// convert back to data domain	 
+	# view		= updForm  {isChanged = isupdated, changedId = changedid} view			// apply update function telling user if an update has taken place
+	# newval	= fromForm {isChanged = isupdated, changedId = changedid} view			// convert back to data domain	 
 	# view		= case resetForm of					// optionally reset the view herafter for next time
 						Nothing 	-> view		 
 						Just reset 	-> reset view
@@ -82,7 +95,7 @@ where
 		, form		= viewform.form
 		},{cntr = 0, states = states, world = world})
 
-	findFormInfo :: FormId *FormStates *World -> (Bool,Maybe a,*FormStates,*World) | gUpd{|*|} a & gParse{|*|} a & TC a
+	findFormInfo :: FormId *FormStates *NWorld -> (Bool,Maybe a,*FormStates,*NWorld) | gUpd{|*|} a & gParse{|*|} a & TC a
 	findFormInfo formid formStates world
 		= case (decodeInput1 formid formStates world) of
 
@@ -102,26 +115,28 @@ where
 
 			(_,(_,_,formStates,world))	-> (False, Nothing,formStates,world)	
 	where
-		decodeInput1 :: FormId *FormStates *World-> (Maybe FormUpdate, (Bool,Maybe a, *FormStates,*World)) | gParse{|*|} a & TC a
-		decodeInput1 formid formStates world
-		| CheckUpdateId == formid.id	// this state is updated
-		= case CheckUpdate of
-			(Just (sid,pos,UpdC s), Just "") 						= (Just (pos,UpdC s)  ,findState (nformid sid) formStates world)
-			(Just (sid,pos,UpdC s), _) 								= (Just (pos,UpdC s)  ,findState (nformid sid) formStates world)
-			else = case CheckUpdate of
-					(Just (sid,pos,UpdI i), Just ni) 				= (Just (pos,UpdI ni) ,findState (nformid sid) formStates world) 
-					(Just (sid,pos,UpdI i), _) 						= (Just (pos,UpdI i)  ,findState (nformid sid) formStates world) 
-					else = case CheckUpdate of
-							(Just (sid,pos,UpdR r), Just nr) 		= (Just (pos,UpdR nr) ,findState (nformid sid) formStates world) 
-							(Just (sid,pos,UpdR r), _) 				= (Just (pos,UpdR r) ,findState (nformid sid) formStates world) 
-							else = case CheckUpdate of
-									(Just (sid,pos,UpdB b), Just nb) 		= (Just (pos,UpdB nb) ,findState (nformid sid) formStates world) 
-									(Just (sid,pos,UpdB b), _) 				= (Just (pos,UpdB b) ,findState (nformid sid) formStates world) 
-									else = case CheckUpdate of
-										(Just (sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns) ,findState (nformid sid) formStates world) 
-										(Just (sid,pos,UpdS s),	_)			= (Just (pos,UpdS AnyInput)  ,findState (nformid sid) formStates world) 
-										(upd,new) 							= (Nothing, findState formid formStates world)
-		| otherwise = (Nothing, findState formid formStates world)
+		decodeInput1 :: FormId *FormStates *NWorld-> (Maybe FormUpdate, (Bool,Maybe a, *FormStates,*NWorld)) | gParse{|*|} a & TC a
+		decodeInput1 formid fs world
+		# (updateid,fs) = getUpdateId fs
+		# (anyInput,fs) = getUpdate fs 
+		| updateid == formid.id	// this state is updated
+		= case getTriplet fs of
+			(Just (sid,pos,UpdC s), Just "",fs) 							= (Just (pos,UpdC s)  ,findState (nformid sid) fs world)
+			(Just (sid,pos,UpdC s), _,fs) 									= (Just (pos,UpdC s)  ,findState (nformid sid) fs world)
+			(_,_,fs)= case getTriplet fs of
+					(Just (sid,pos,UpdI i), Just ni,fs) 					= (Just (pos,UpdI ni) ,findState (nformid sid) fs world) 
+					(Just (sid,pos,UpdI i), _,fs) 							= (Just (pos,UpdI i)  ,findState (nformid sid) fs world) 
+					(_,_,fs) = case getTriplet fs of
+							(Just (sid,pos,UpdR r), Just nr,fs) 			= (Just (pos,UpdR nr) ,findState (nformid sid) fs world) 
+							(Just (sid,pos,UpdR r), _,fs) 					= (Just (pos,UpdR r) ,findState (nformid sid) fs world) 
+							(_,_,fs) = case getTriplet fs of
+									(Just (sid,pos,UpdB b), Just nb,fs) 	= (Just (pos,UpdB nb) ,findState (nformid sid) fs world) 
+									(Just (sid,pos,UpdB b), _,fs) 			= (Just (pos,UpdB b) ,findState (nformid sid) fs world) 
+									(_,_,fs) = case getTriplet fs of
+										(Just (sid,pos,UpdS s),	Just ns,fs)	= (Just (pos,UpdS ns) ,findState (nformid sid) fs world) 
+										(Just (sid,pos,UpdS s),	_,fs)		= (Just (pos,UpdS anyInput)  ,findState (nformid sid) fs world) 
+										(upd,new,fs) 						= (Nothing, findState formid fs world)
+		| otherwise = (Nothing, findState formid fs world)
 
 		nformid sid = {formid & id = sid}
 

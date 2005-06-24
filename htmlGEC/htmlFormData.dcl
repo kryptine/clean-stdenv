@@ -23,9 +23,13 @@ import StdMaybe
 
 :: HBimap d v 								// swiss army nife allowing to make a distinction between data and view domain
 	=	{ toForm   	:: d (Maybe v) -> v		// converts data to view domain, given current view
-		, updForm 	:: Bool v -> v			// update function, True when the form is edited 
-		, fromForm 	:: Bool v -> d			// converts view back to data domain, True when form is edited
+		, updForm 	:: Changed v -> v		// update function, True when the form is edited 
+		, fromForm 	:: Changed v -> d		// converts view back to data domain, True when form is edited
 		, resetForm :: Maybe (v -> v)		// can be used to reset view (eg for buttons)
+		}
+:: Changed
+	=	{ isChanged	:: Bool					// is this form changed
+		, changedId	:: String				// id of changed form
 		}
 
 :: Form a 									// result of any form

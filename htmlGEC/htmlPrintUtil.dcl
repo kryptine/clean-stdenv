@@ -4,8 +4,24 @@ definition module htmlPrintUtil
 // (c) MJP 2005
 
 import StdGeneric
+import StdFile
 
 :: FoF :== (*File -> *File)
+
+:: *NWorld							// io interface
+	= 	{ worldC	:: *World		// world for any io
+		, inout		:: *File		// to read from stdin and write to srdout
+		}				
+
+:: UpdValue 					// the updates that can take place	
+	= UpdI Int					// new integer value
+	| UpdR Real					// new real value
+	| UpdB Bool					// new boolean value
+	| UpdC String				// choose indicated constructor 
+	| UpdS String				// new piece of text
+
+instance FileSystem NWorld
+
 
 // generic function for printing tags
 // Constructors are converted to html tag strings
@@ -18,7 +34,7 @@ derive gHpr Int, Real, Bool, String, Char, []
 
 // the main print routine
 
-print_to_stdout 	:: a *World -> *World | gHpr{|*|} a
+print_to_stdout 	:: a *NWorld -> *World | gHpr{|*|} a
 
 // handy utility print routines	
 

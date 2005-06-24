@@ -8,12 +8,14 @@ module spreadsheet
 import StdEnv
 import StdHtml, htmlMonad
 
-Start = 0
 //Start world  = doHtml spreadsheetMH world
-Start world  = doHtml spreadsheetM world
+//Start world  = doHtml spreadsheetM world
 //Start world  = doHtml spreadsheet world
 //Start world  = doHtml arrowsspreadsheet world
+Start world  = doHtml toHtmlFormspreadsheet world
 
+
+/*
 spreadsheetMH :: (Form [.[b]]) -> 
                  (.(*HSt -> *((Form [[Int]]),!*HSt)),.((Form u:c) -> (.(*HSt -> *((Form [b]),!*HSt)),v:((Form w:d) -> (.(*HSt -> *((Form [b]),!*HSt)),x:(.(Form a) -> (.(*HSt -> *((Form b),!*HSt)),y:(.e -> *(*HSt -> *(Html,*HSt)))))))))) | TC b & + b & zero b, [y x v <= u,y x <= w]
 spreadsheetMH
@@ -29,7 +31,7 @@ spreadsheetMH
 	,Br, Br
 	, Txt "so the result of the spreadsheet is :", toHtml totsumf.value
 	,Br ,Br
-	])))))
+	])))))*/
 
 spreadsheetM
   = table_hv_Form (nFormId "table") (inittable 8 10)            >>= \tablef  ->
@@ -79,6 +81,24 @@ where
 			 		)
 			 	>>> arr (sum o fst)
 			 	>>> display (nFormId "tsum") 		
+
+derive gUpd []
+derive gForm []
+
+toHtmlFormspreadsheet hst
+# (table, hst) = table_hv_Form (nFormId "table") (inittable 8 10) hst
+= mkHtml "Spreadsheet"
+	[ H1 [] "Simple Spreadsheet Example: "
+	, table.form  <=> rowsumF table.value
+	, colsumF table.value <=> totsumF table.value
+	] hst
+where
+	rowsumF table = toHtmlForm (vertlistForm  (ndFormId "rsum") (rowsum table))       
+	colsumF table = toHtmlForm (horlistForm   (ndFormId "csum") (colsum table))       
+	totsumF table = toHtmlForm (mkEditForm    (ndFormId "tsum") (sum (rowsum table)))
+
+
+
 
 rowsum table	= map sum table
 colsum table	= map sum (transpose table)
