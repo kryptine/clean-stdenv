@@ -8,7 +8,8 @@ import StdEnv, htmlHandler
 
 // **** easy creation of a simple html page ****
 
-mkHtml:: String [BodyTag] *HSt ->  (Html,*HSt)	// string is used for the title of the page
+mkHtml		:: String [BodyTag] *HSt -> (Html,*HSt)	// string is used for the title of the page
+simpleHtml	:: String [BodyTag]      -> Html		// as above, without HSt
 
 // **** easy creation of FormId's ****
 
@@ -48,6 +49,9 @@ horlistForm 		:: !FormId 	  ![a] 	 !*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUp
 horlist2Form 		:: !FormId a  ![a] 	 !*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 vertlistForm 		:: !FormId    ![a] 	 !*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 table_hv_Form 		:: !FormId    ![[a]] !*HSt -> (Form [[a]],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+layoutListForm		:: !([BodyTag] [BodyTag] -> [BodyTag]) 
+                       !(FormId a *HSt -> (Form a,*HSt))
+                       !FormId    ![a]   !*HSt -> (Form [a],!*HSt)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
 // **** forms for tuples ****
 
