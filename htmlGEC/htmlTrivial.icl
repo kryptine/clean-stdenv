@@ -11,3 +11,7 @@ mkString listofchar = {elem \\ elem <- listofchar}
 
 mkList :: String -> [Char]
 mkList string = [e \\ e <-: string]
+
+//	Useful string concatenation function
+(<$) infixl :: !String !a -> String | toString a
+(<$) str x = str +++ toString x
