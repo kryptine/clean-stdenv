@@ -293,7 +293,10 @@ where
 
 
 FuncBut :: !Bool !Int !FormId !(Button, a -> a) !*HSt -> (Form (a -> a),!*HSt)
-FuncBut init i formid (button=:LButton _ name ,cbf) hst = mkViewForm nformid id bimap hst
+FuncBut init i s (Pressed,cbf) hst
+	= FuncBut init i s (LButton 10 "??",cbf) hst
+FuncBut init i formid (button,cbf) hst
+	= mkViewForm nformid id bimap hst
 where
 	bimap =	{ toForm 	= \_ v -> case v of
 									Nothing = button
@@ -304,20 +307,9 @@ where
 									_		 -> id
 			, resetForm	= Just (\_ 	-> button)
 			}
-	nformid = {formid & id = formid.id +++ name +++ toString i}
-FuncBut init i formid (button=:PButton _ ref ,cbf) hst = mkViewForm nformid id bimap hst
-where
-	bimap =	{ toForm 	= \_ v -> case v of
-									Nothing = button
-									(Just v) = if init button v
-			, updForm	= \_ v -> v
-			, fromForm	= \_ but -> case but of 
-									Pressed -> cbf
-									_		  -> id
-			, resetForm	= Just (\_ 	-> button)
-			}
-	nformid = {formid & id = formid.id +++ toString i +++ ref}
-FuncBut init i s (Pressed,cbf) hst = FuncBut init i s (LButton 10 "??",cbf) hst
+	nformid = case button of
+				LButton _ name -> {formid & id = formid.id <$ name <$ i}
+				PButton _ ref  -> {formid & id = formid.id <$ i <$ ref}
 
 ListFuncBut :: !Bool !FormId [(Button, a -> a)] !*HSt -> (Form (a -> a),!*HSt)
 ListFuncBut b s list hst = ListFuncBut` b 0 s list hst 
