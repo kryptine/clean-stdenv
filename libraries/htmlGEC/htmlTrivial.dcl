@@ -8,3 +8,6 @@ derive bimap Maybe, (,)
 
 mkString 	:: [Char] -> String
 mkList 		:: String -> [Char]
+
+//	Useful string concatenation function
+(<$) infixl :: !String !a -> String | toString a
