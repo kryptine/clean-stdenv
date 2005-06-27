@@ -27,11 +27,14 @@ ndFormId s = {id = s, lifespan = Page, mode = Display}
 
 // easy creation of an html page
 
-mkHtml:: String [BodyTag] *HSt ->  (Html,*HSt)
-mkHtml s tags hst 	= (Html (header s) (body tags),hst)
+mkHtml:: String [BodyTag] *HSt -> (Html,*HSt)
+mkHtml s tags hst 	= (simpleHtml s tags,hst)
+
+simpleHtml:: String [BodyTag] -> Html
+simpleHtml s tags 	= Html (header s) (body tags)
 where
-	header s 			= Head [`Hd_Std [Std_Title s]] [] 
-	body tags 			= Body [] tags
+	header s		= Head [`Hd_Std [Std_Title s]] [] 
+	body tags		= Body [] tags
 
 // frequently used variants of mkViewForm
 
@@ -102,7 +105,7 @@ mkBimapEditor formid d {map_to,map_from} hst
 // Place two bodies next to each other
 
 (<=>) infixl 5 :: [BodyTag] [BodyTag] -> BodyTag
-(<=>) b1 b2 =  STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[BodyTag b1,BodyTag b2]]
+(<=>) b1 b2 = (BodyTag b1) <.=.> (BodyTag b2)
 
 (<.=.>) infixl 5 :: BodyTag BodyTag -> BodyTag
 (<.=.>) b1 b2 =  STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[b1,b2]]
@@ -111,7 +114,7 @@ mkBimapEditor formid d {map_to,map_from} hst
 // Place second body below first
 
 (<||>) infixl 4	:: [BodyTag] [BodyTag] -> BodyTag	// Place a above b
-(<||>) b1 b2 =  STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[BodyTag b1],[BodyTag b2]]
+(<||>) b1 b2 = (BodyTag b1) <.||.> (BodyTag b2)
 
 (<.||.>) infixl 4	:: BodyTag BodyTag -> BodyTag	// Place a above b
 (<.||.>) b1 b2 =  STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[b1],[b2]]
@@ -135,7 +138,7 @@ where
 
 // Form collection:
 
-counterForm 	:: !FormId !a !*HSt -> (Form a,!*HSt) | +, -, one,  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+counterForm 	:: !FormId !a !*HSt -> (Form a,!*HSt) | +, -, one, gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 counterForm name i hst = mkViewForm name i bimap hst
 where
 	bimap =	{ toForm 	= \n v -> case v of
@@ -206,54 +209,17 @@ where
 	less [x:xs] = xs
 	less [] = []
 
-horlistForm 		:: !FormId ![a] 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-horlistForm _  [] hst  
-= ({changed	= False
-   ,value	= []
-   ,form	= []
-   },hst)
-horlistForm formid [x:xs] hst
-# (nxs,hst) = horlistForm formid xs hst
-# (nx, hst) = mkEditForm nformid x hst
-= ({changed	= nxs.changed || nx.changed 
-   ,value	= [nx.value:nxs.value]
-   ,form	= [nx.form <=> nxs.form]
-   },hst)
-where
-	nformid = {formid & id = formid.id +++ toString (length xs)}
+horlistForm :: !FormId ![a] !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+horlistForm formid xs hSt = layoutListForm (\f1 f2 -> [f1 <=> f2]) mkEditForm formid xs hSt
 			
-vertlistForm 		:: !FormId ![a] 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-vertlistForm _ [] hst  
-= ({changed	= False
-   ,value	= []
-   ,form	= []
-   },hst)
-vertlistForm formid [x:xs] hst
-# (nxs,hst) = vertlistForm formid xs hst
-# (nx, hst) = mkEditForm nformid x hst
-= ({changed	= nxs.changed || nx.changed 
-   ,value	= [nx.value:nxs.value]
-   ,form	= [nx.form <||> nxs.form]
-   },hst)
-where
-	nformid = {formid & id = formid.id +++ toString (length xs)}
+vertlistForm :: !FormId ![a] !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+vertlistForm formid xs hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) mkEditForm formid xs hSt
 
-table_hv_Form 		:: !FormId ![[a]] 	!*HSt -> (Form [[a]],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-table_hv_Form _ [] hst
-= ({changed	= False
-   ,value	= []
-   ,form	= []
-   },hst)
-table_hv_Form formid [x:xs] hst
-# (nxs,hst)	= table_hv_Form formid xs hst
-# (nx, hst)	= horlistForm nformid x hst
-= ({changed	= nxs.changed || nx.changed 
-   ,value	= [nx.value:nxs.value]
-   ,form	= [nx.form <||> nxs.form]
-   },hst)
-where
-	nformid = {formid & id = formid.id +++ toString (length xs)}
-   
+table_hv_Form :: !FormId ![[a]] !*HSt -> (Form [[a]],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+table_hv_Form formid xs hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) horlistForm formid xs hSt
+
+derive gForm []; derive gUpd []
+
 t2EditForm  :: !FormId !(a,b) !*HSt -> ((Form a,Form b),!*HSt) |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 																	 &  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
 t2EditForm formid (a,b) hst
@@ -519,21 +485,27 @@ where
 	| otherwise = 0
 
 
-listForm 			:: !FormId ![a] 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-listForm _  [] hst
+listForm :: !FormId ![a] !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+listForm formid xs hSt = layoutListForm (\f1 f2 -> [BodyTag f1:f2]) mkEditForm formid xs hSt
+
+layoutListForm :: !([BodyTag] [BodyTag] -> [BodyTag]) 
+                  !(FormId a *HSt -> (Form a,*HSt))
+                  !FormId ![a] !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+layoutListForm _ _ _ [] hst
 = ({changed	= False
    ,value	= []
    ,form	= []
    },hst)
-listForm formid [x:xs] hst
-# (nxs,hst) = listForm formid xs hst
-# (nx, hst) = mkEditForm nformid x hst
+layoutListForm layoutF formF formid [x:xs] hst
+# (nxs,hst) = layoutListForm layoutF formF formid xs hst
+# (nx, hst) = formF nformid x hst
 = ({changed	= nx.changed || nxs.changed
    ,value	= [nx.value:nxs.value]
-   ,form	= [BodyTag nx.form:nxs.form]
+   ,form	= layoutF nx.form nxs.form
    },hst)
 where
-	nformid = {formid & id = formid.id +++ toString (length xs)}
+	nformid = {formid & id = formid.id <$ length xs}
+
 
 // scripts
 
@@ -573,4 +545,3 @@ mediaPlayer (height,width) autostart filename
 		[ Param [ Pam_Name "FileName", Pam_Value (SV filename) ]
 		, Param [ Pam_Name "autostart", Pam_Value (SV (toString autostart)) ]
 		]
-	
