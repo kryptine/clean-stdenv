@@ -25,10 +25,8 @@ familytree hst
 = mkHtml "Family Tree Example"
 		[ H1 [] "family Tree Example: "
 		, toBody tree
-		, Br
 		, toHtml tree.changed
-		, Br, toBody p
-//		, traceHtmlInput
+		, toBody p
 		] hst
 where
 	inittree = Family (Man "Rinus") Married (Just_ (Woman "Marie-Jose", NoKids))

@@ -20,7 +20,6 @@ coffeemachine hst
 		, BodyTag option.form
 		, Br
 		, B [] (displayoutput machine.value)
-		, Br,Br,Br
 		] hst
 where
 	commandbuttons  = 

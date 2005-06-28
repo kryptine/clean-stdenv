@@ -22,7 +22,6 @@ choice hst
 	, Txt ("Function returns :" +++ (rfun (toString j)))
 	, Br
 	, toHtml (selection.changed,radio.changed)
-//	, traceHtmlInput
 	,Br
 	]  hst
 where
