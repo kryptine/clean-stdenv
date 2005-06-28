@@ -47,7 +47,7 @@ ifEdit Display  then else = else
 // top level function given to end user
 // it collects all the html forms to display, adds clean styles and hidden forms, ands prints the html code to stdout
 
-doHtml :: (*HSt -> (Html,!*HSt)) *World -> *World
+doHtml :: .(*HSt -> (Html,!*HSt)) *World -> *World
 doHtml pagehandler world 
 # (inout,world) 		= stdio world						// open stdin and stdout channels
 # nworld 				= { worldC = world, inout = inout }	
