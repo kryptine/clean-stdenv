@@ -13,12 +13,6 @@ derive gParse Pounds, Euros
 
 Start world  = doHtml mutual world
 
-
-helloWorld hst
-= (Html (Head [] []) (Body [] [mybody]),hst)
-where
-	mybody = Txt "Hello World"
-
 mutual hst
 # (mutual,hst) = startCircuit circuit initEuros hst
 = mkHtml "Mutual Recursive Form"

@@ -15,8 +15,8 @@ derive gForm []
 
 //Start world  = doHtml spreadsheet world
 //Start world  = doHtml toHtmlFormspreadsheet world
-Start world  = doHtml arrowsspreadsheet world
-//Start world  = doHtml spreadsheetM world
+//Start world  = doHtml arrowsspreadsheet world
+Start world  = doHtml spreadsheetM world
 
 
 // Classical way using Cleans # notation
@@ -53,10 +53,8 @@ arrowsspreadsheet hst
 # [tablefbody,rowsumfbody,colsumfbody,totsumfbody:_] = circuitf.form
 = mkHtml "Spreadsheet"
 	[ H1 [] "Spreadsheet Example: "
-	, Br
 	, [tablefbody]  <=> [rowsumfbody]
 	, [colsumfbody] <=> [totsumfbody]
-	,Br, Br
 	] hst
 where
 	mycircuit =	lift (nFormId "table") table_hv_Form
@@ -78,9 +76,6 @@ spreadsheetM
 	, Br
 	, tablef.form  <=> rowsumf.form
 	, colsumf.form <=> totsumf.form
-	,Br, Br
-	, Txt "so the result of the spreadsheet is :", toHtml totsumf.value
-	,Br ,Br
 	]
 
 
