@@ -1,6 +1,6 @@
 Version: 1.4
 Global
-	Built:	False
+	Built:	True
 	Target:	Everything
 	Exec:	{Project}\cdShop.exe
 	CodeGen
@@ -65,599 +65,11 @@ MainModule
 			Y:	0
 			SizeX:	865
 			SizeY:	496
-	IclOpen:	True
+	IclOpen:	False
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
 	Module
-		Name:	StdCleanTypes
-		Dir:	{Application}\Libraries\Dynamics\extension
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	_SystemDynamic
-		Dir:	{Application}\Libraries\Dynamics\implementation\windows
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdOverloaded
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdEnv
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdBool
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdInt
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdMisc
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdChar
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdClass
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdArray
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	_SystemArray
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdReal
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdString
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdFile
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdList
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdEnum
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	_SystemEnum
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdOrdList
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdTuple
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdCharList
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdFunc
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	CDdatabaseHandler
+		Name:	StdWebshop
 		Dir:	{Project}
 		Compiler
 			NeverMemoryProfile:	False
@@ -673,36 +85,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	837
-				SizeY:	566
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	833
-				SizeY:	620
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	databaseHandler
-		Dir:	{Project}
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	828
-				SizeY:	554
+				SizeX:	500
+				SizeY:	300
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -713,514 +97,8 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
-		Name:	StdMaybe
+		Name:	StdLibMisc
 		Dir:	{Application}\Libraries\StdLib
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdHtml
-		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	htmlDataDef
-		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	htmlPrintUtil
-		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdGeneric
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	ArgEnv
-		Dir:	{Application}\Libraries\ArgEnvWindows
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-		NeededObjFiles
-			ObjectFile:	ArgEnvC.obj
-	Module
-		Name:	htmlStyleDef
-		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	htmlHandler
-		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	htmlEncodeDecode
-		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	GenParse
-		Dir:	{Application}\Libraries\Generics
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	GenPrint
-		Dir:	{Application}\Libraries\Generics
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	htmlTrivial
-		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	htmlFormlib
-		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	htmlArrow
-		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdArrow
-		Dir:	{Application}\Libraries\GEC\GEC Implementation
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	webshop
-		Dir:	{Project}
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	907
-				SizeY:	405
-		DclOpen:	True
-		Icl
-			WindowPosition
-				X:	9
-				Y:	47
-				SizeX:	905
-				SizeY:	552
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	GenEq
-		Dir:	{Application}\Libraries\Generics
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	htmlStylelib
-		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	htmlFormData
-		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1279,8 +157,1130 @@ OtherModules
 		NeededLibraries
 			Library:	directory_library
 	Module
-		Name:	StdLibMisc
+		Name:	htmlFormData
+		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlStylelib
+		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	GenEq
+		Dir:	{Application}\Libraries\Generics
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdArrow
+		Dir:	{Application}\Libraries\GEC\GEC Implementation
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlArrow
+		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlFormlib
+		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlTrivial
+		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	GenPrint
+		Dir:	{Application}\Libraries\Generics
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	GenParse
+		Dir:	{Application}\Libraries\Generics
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlEncodeDecode
+		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlHandler
+		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlStyleDef
+		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	ArgEnv
+		Dir:	{Application}\Libraries\ArgEnvWindows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	ArgEnvC.obj
+	Module
+		Name:	StdGeneric
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlPrintUtil
+		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlDataDef
+		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdHtml
+		Dir:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdMaybe
 		Dir:	{Application}\Libraries\StdLib
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	databaseHandler
+		Dir:	{Project}
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	828
+				SizeY:	554
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	CDdatabaseHandler
+		Dir:	{Project}
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	837
+				SizeY:	566
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	833
+				SizeY:	620
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdFunc
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdCharList
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdTuple
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdOrdList
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	_SystemEnum
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdEnum
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdList
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdFile
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdString
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdReal
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	_SystemArray
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdArray
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdClass
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdChar
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdMisc
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdInt
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdBool
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdEnv
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdOverloaded
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	_SystemDynamic
+		Dir:	{Application}\Libraries\Dynamics\implementation\windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdCleanTypes
+		Dir:	{Application}\Libraries\Dynamics\extension
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -1309,98 +1309,108 @@ OtherModules
 Static
 	Mods
 		Path:	C:\Documents and Settings\Administrator\Desktop\libraries\htmlGEC\Examples\WebShopDeLuxe\cdShop.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Dynamics\extension\StdCleanTypes.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Dynamics\implementation\windows\_SystemDynamic.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdOverloaded.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdEnv.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdBool.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdInt.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdMisc.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdChar.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdClass.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdArray.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\_SystemArray.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdReal.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdString.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdFile.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdList.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdEnum.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\_SystemEnum.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdOrdList.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdTuple.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdCharList.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdFunc.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\libraries\htmlGEC\Examples\WebShopDeLuxe\CDdatabaseHandler.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\libraries\htmlGEC\Examples\WebShopDeLuxe\databaseHandler.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdLib\StdMaybe.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\StdHtml.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlDataDef.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlPrintUtil.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdGeneric.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\ArgEnvWindows\ArgEnv.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlStyleDef.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlHandler.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlEncodeDecode.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Generics\GenParse.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Generics\GenPrint.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlTrivial.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlFormlib.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlArrow.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\GEC\GEC Implementation\StdArrow.icl
-		Path:	C:\Documents and Settings\Administrator\Desktop\libraries\htmlGEC\Examples\WebShopDeLuxe\webshop.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\libraries\htmlGEC\Examples\WebShopDeLuxe\StdWebshop.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdLib\StdLibMisc.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Directory\Directory.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlFormData.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlStylelib.icl
 		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Generics\GenEq.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\GEC\GEC Implementation\StdArrow.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlArrow.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlFormlib.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlTrivial.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Generics\GenPrint.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Generics\GenParse.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlEncodeDecode.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlHandler.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlStyleDef.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\ArgEnvWindows\ArgEnv.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdGeneric.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlPrintUtil.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\htmlDataDef.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\StdHtml.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdLib\StdMaybe.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\libraries\htmlGEC\Examples\WebShopDeLuxe\databaseHandler.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\libraries\htmlGEC\Examples\WebShopDeLuxe\CDdatabaseHandler.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdFunc.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdCharList.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdTuple.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdOrdList.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\_SystemEnum.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdEnum.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdList.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdFile.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdString.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdReal.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\_SystemArray.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdArray.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdClass.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdChar.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdMisc.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdInt.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdBool.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdEnv.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\StdOverloaded.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Dynamics\implementation\windows\_SystemDynamic.icl
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Dynamics\extension\StdCleanTypes.icl
 	Objs
 		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_startup0.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_startup1Trace.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_startup2.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_system.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\libraries\htmlGEC\Examples\WebShopDeLuxe\Clean System Files\cdShop.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\libraries\htmlGEC\Examples\WebShopDeLuxe\Clean System Files\webshop.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlArrow.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlFormlib.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlTrivial.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Generics\Clean System Files\GenPrint.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Generics\Clean System Files\GenParse.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlEncodeDecode.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlHandler.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdGeneric.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlPrintUtil.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlStyleDef.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlDataDef.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\StdHtml.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdMaybe.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\libraries\htmlGEC\Examples\WebShopDeLuxe\Clean System Files\databaseHandler.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\libraries\htmlGEC\Examples\WebShopDeLuxe\Clean System Files\CDdatabaseHandler.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdFunc.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdCharList.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdTuple.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdOrdList.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_SystemEnum.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdEnum.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdList.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdFile.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdString.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdReal.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_SystemArray.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdArray.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdClass.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdChar.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdMisc.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdInt.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdBool.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdEnv.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdOverloaded.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
-		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Generics\Clean System Files\GenEq.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\libraries\htmlGEC\Examples\WebShopDeLuxe\Clean System Files\databaseHandler.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdOverloaded.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdEnv.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdBool.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdInt.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdMisc.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdChar.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdClass.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdArray.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_SystemArray.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdReal.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdString.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdFile.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdList.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdEnum.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_SystemEnum.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdOrdList.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdTuple.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdCharList.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdFunc.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\libraries\htmlGEC\Examples\WebShopDeLuxe\Clean System Files\CDdatabaseHandler.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdMaybe.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\StdHtml.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlDataDef.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlStyleDef.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlPrintUtil.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdGeneric.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlStylelib.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlFormlib.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlHandler.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlEncodeDecode.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Generics\Clean System Files\GenParse.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Generics\Clean System Files\GenPrint.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlFormData.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlTrivial.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Directory\Clean System Files\Directory.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdLibMisc.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\MyWebServer\htmlGEC\Clean System Files\htmlArrow.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
+		Path:	C:\Documents and Settings\Administrator\Desktop\libraries\htmlGEC\Examples\WebShopDeLuxe\Clean System Files\StdWebshop.o
 		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.obj
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Directory\Clean System Files\cDirectory.obj
 	Dlib
 		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\kernel_library
 		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\user_library
 		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\gdi_library
 		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\comdlg_library
+		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\Directory\Clean System Files\directory_library
 	Pths
 		Path:	C:\Documents and Settings\Administrator\Desktop\libraries\htmlGEC\Examples\WebShopDeLuxe
 		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\StdEnv
@@ -1426,4 +1436,4 @@ Static
 		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\GEC\GEC Implementation
 		Path:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1\Libraries\WrapDebug
 	AppP:	C:\Documents and Settings\Administrator\Desktop\Clean 2.1.1
-	PrjP:	C:\Documents and Settings\Administrator\Desktop\libraries\htmlGEC\Examples\CoffeeMachineDeLuxe
+	PrjP:	C:\Documents and Settings\Administrator\Desktop\libraries\htmlGEC\Examples\WebShopDeLuxe
