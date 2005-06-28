@@ -80,7 +80,7 @@ browseButtons 		:: !Bool !Int !Int !Int !Int !FormId !*HSt -> (Form Int,!*HSt)
 
 // ordinary buttons with labels 
 
-ListFuncBut 		:: !Bool !FormId [(Button, a -> a)] !*HSt 
+ListFuncBut 		:: !Bool Int !FormId [(Button, a -> a)] !*HSt 
 													 -> (Form (a -> a),!*HSt)
 ListFuncBut2 		:: !Bool !FormId [(Mode,Button, a -> a)] !*HSt  //fine grain, mode of each buttons can be set 
 													 -> (Form (a -> a),!*HSt)
