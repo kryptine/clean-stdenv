@@ -11,7 +11,7 @@ import StdBool, StdFile
 
 // doHtml main wrapper for generating & handling of a Html form
 
-doHtml :: (*HSt -> (Html,!*HSt)) *World -> *World 
+doHtml :: .(*HSt -> (Html,!*HSt)) *World -> *World 
 
 :: *HSt 								// unique state required for creating Html forms
 instance FileSystem HSt					// enabling file IO on HSt
