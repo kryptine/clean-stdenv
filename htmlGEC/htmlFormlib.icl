@@ -259,10 +259,10 @@ where
 	nformidc = {formid & id = formid.id +++ "t43"}
 	nformidd = {formid & id = formid.id +++ "t44"}
 
-FuncBut :: !Bool !Int !FormId !(Button, a -> a) !*HSt -> (Form (a -> a),!*HSt)
-FuncBut init i formid (Pressed,cbf) hst
-	= FuncBut init i formid (LButton 10 "??",cbf) hst
-FuncBut init i formid (button,cbf) hst
+FuncBut :: !Int !Bool !FormId !(Button, a -> a) !*HSt -> (Form (a -> a),!*HSt)
+FuncBut i init formid (Pressed,cbf) hst
+	= FuncBut i init formid (LButton 10 "??",cbf) hst
+FuncBut i init formid (button,cbf) hst
 	= mkViewForm nformid id bimap hst
 where
 	bimap =	{ toForm 	= \_ v -> case v of
@@ -279,27 +279,27 @@ where
 				PButton _ ref  -> {formid & id = formid.id <$ i <$ ref}
    
 TableFuncBut :: !FormId ![[(Button, a -> a)]] !*HSt -> (Form (a -> a) ,!*HSt)
-TableFuncBut formid xs hSt = layoutFuncBut (\f1 f2 -> [f1 <||> f2]) ListFuncBut False 0 formid xs hSt
+TableFuncBut formid xs hSt
+	= layoutIndexForm (\f1 f2 -> [f1 <||> f2]) (layoutIndexForm (\f1 f2 -> [BodyTag f1:f2]) FuncBut id (o)) id (o) 0 False formid xs hSt
 
-ListFuncBut :: !Bool Int !FormId [(Button, a -> a)] !*HSt -> (Form (a -> a),!*HSt)
-ListFuncBut b _ formid xs hSt = layoutFuncBut (\f1 f2 -> [BodyTag f1:f2]) FuncBut b 0 formid xs hSt
+ListFuncBut :: !Bool !FormId [(Button, a -> a)] !*HSt -> (Form (a -> a),!*HSt)
+ListFuncBut b formid xs hSt
+	= layoutIndexForm (\f1 f2 -> [BodyTag f1:f2]) FuncBut id (o) 0 b formid xs hSt
 
 //	Generalized form of ListFuncBut:
-layoutFuncBut :: !([BodyTag] [BodyTag] -> [BodyTag]) 
-                 !(Bool Int FormId x *HSt -> (Form (a -> a),*HSt))
-                 !Bool !Int !FormId [x] !*HSt -> (Form (a -> a),!*HSt)
-layoutFuncBut layoutF formF b n formid xs hSt
-	= layoutFuncBut` n xs hSt
-where
-	layoutFuncBut` _ [] hSt
-		= ({changed=False, value=id, form=[]},hSt)
-	layoutFuncBut` n [x:xs] hSt
-		# (rowfun,hSt)	= layoutFuncBut` (n+1) xs hSt
-		# (fun,   hSt)	= formF b n formid x hSt
-		= ({changed = rowfun.changed || fun.changed
-		   ,value   = rowfun.value o fun.value
-		   ,form    = layoutF fun.form rowfun.form
-		   },hSt)
+layoutIndexForm :: !([BodyTag] [BodyTag] -> [BodyTag]) 
+                   !(Int Bool FormId x *HSt -> (Form y,*HSt))
+                   y (y y -> y)
+                   !Int !Bool !FormId [x] !*HSt -> (Form y,!*HSt)
+layoutIndexForm _ _ r _ _ _ _ [] hSt
+	= ({changed=False, value=r, form=[]},hSt)
+layoutIndexForm layoutF formF r combineF n b formid [x:xs] hSt
+	# (xsF,hSt)	= layoutIndexForm layoutF formF r combineF (n+1) b formid xs hSt
+	# (xF, hSt)	= formF n b formid x hSt
+	= ({changed = xsF.changed || xF.changed
+	   ,value   = combineF xsF.value xF.value
+	   ,form    = layoutF xF.form xsF.form
+	   },hSt)
 
 ListFuncBut2 :: !Bool !FormId [(Mode,Button, a -> a)] !*HSt -> (Form (a -> a),!*HSt)
 ListFuncBut2 b s list hst = ListFuncBut` b 0 s list hst 
@@ -311,7 +311,7 @@ where
 	   },hst)
 	ListFuncBut` b n s [(bmode,but,func):xs] hst 
 	# (rowfun,hst) 	= ListFuncBut` b (n+1) s xs hst
-	# (fun   ,hst)	= FuncBut b n {s & mode = bmode} (but,func) hst
+	# (fun   ,hst)	= FuncBut n b {s & mode = bmode} (but,func) hst
 	= ({changed	= rowfun.changed || fun.changed
 	   ,value	= fun.value o rowfun.value
 	   ,form	= [BodyTag fun.form:rowfun.form]
