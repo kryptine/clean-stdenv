@@ -1,6 +1,6 @@
 module loginAdmin
 
-import StdEnv, StdHtml, GenEq
+import StdEnv, StdHtml
 
 derive gForm  	Login, ProjectWorker,Project,DaylyWork, ProjectPlan, Status, WorkerPlan
 derive gUpd 	[], Login, ProjectWorker,Project,DaylyWork, ProjectPlan, Date, Status, WorkerPlan
@@ -243,49 +243,51 @@ adjWorkers projects worker = {worker & project = addProjectList worker.project p
 		, password	:: String
 		}
 		
-mkLogin name password
+mklogin name password
 	= 	{ loginName = name
 		, password	= password
 		}
 
-MyPage hSt
-# (loginF,  hSt)	= mkEditForm (sFormId "login") (mkLogin "" "") hSt
-# (loginDBF,hSt)	= loginStore id hSt
-# (page,hSt)		= if (isMember loginF.value loginDBF.value)
-								(memberPage loginF hSt)
-								(loginPage  loginF hSt)
+MyPage  hst
+# (login,hst)			= mkEditForm (sFormId "login") (mklogin "" "") hst
+# (loginDatabase,hst)	= loginStore id hst
+# (page,hst)			= if (isMember login.value loginDatabase.value)
+								(memberPage login hst)
+								(loginPage  login hst)
 = mkHtml "login test"
-	[BodyTag page] hSt
+	[BodyTag page] hst
 where
-	loginStore			= mkStoreForm (pFormId "logindatabase") []
+	loginStore upd hst = mkStoreForm (pFormId "logindatabase") [] upd hst
 
-	memberPage loginF	= return [Txt ("Welcome "<$ loginF.value.loginName)]
+	memberPage member hst
+	= (	[ Txt ("Welcome " +++ member.value.loginName)
+		], hst)
 	
-	loginPage loginF hSt
-	# (addloginF,hSt)	= addLoginButton loginF.value hSt
-	# (loginDBF, hSt)	= loginStore (addLogin loginF.value addloginF.changed) hSt
-	| isMember loginF.value loginDBF.value 
-		= memberPage loginF hSt
-	| otherwise
-		= (	[ Txt "Please log in ..."
-			, Br, Br
-			, BodyTag loginF.form
-			, Br
-			, BodyTag addloginF.form
-			], hSt)
+	loginPage login hst
+	# (addlogin,hst)		= addLoginButton login.value hst
+	# (loginDatabase,hst)	= loginStore (addLogin login.value addlogin.changed) hst
+	| isMember login.value loginDatabase.value = memberPage login hst
+	= (	[ Txt "Please log in ..."
+		, Br, Br
+		, BodyTag login.form
+		, Br
+		, BodyTag addlogin.form
+		], hst)
 
-	addLoginButton value hSt = ListFuncBut False (formid "addlogin") pagebuttons hSt
+	addLoginButton value hst = ListFuncBut False (formid "addlogin") pagebuttons hst
 	where
-		pagebuttons = [ (LButton defpixel "addLogin", const True) ]
-		formid      = if (value.loginName <> "" && value.password <> "") nFormId ndFormId
+		pagebuttons  = 
+			[ (LButton defpixel "addLogin", \b -> True)
+			]
+		formid = if (value.loginName <> "" && value.password <> "") nFormId ndFormId
 	
-	addLogin newname False loginDB
-		= loginDB
-	addLogin newname True  loginDB
-		| newname.loginName <> "" && newname.password <> "" && not (isMember newname loginDB)
-			= [newname:loginDB]
-		| otherwise
-			= loginDB
+	addLogin newname False logindb = logindb
+	addLogin newname True  logindb 
+		= if (newname.loginName <> "" && newname.password <> "" && not (isMember newname logindb))
+			[newname:logindb]
+			logindb
 
-derive gEq Login
-instance == Login where (==) login1 login2 = login1 === login2
+
+instance == Login
+where
+	(==) login1 login2 = login1.loginName == login2.loginName && login1.password == login2.password

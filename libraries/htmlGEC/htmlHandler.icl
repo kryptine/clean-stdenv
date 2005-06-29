@@ -5,6 +5,7 @@ import htmlDataDef, htmlTrivial
 import StdGeneric
 import htmlEncodeDecode, htmlStylelib
 import GenParse, GenPrint
+import httpServer
 
 derive gPrint (,), (,,), (,,,), UpdValue
 derive gParse (,), (,,), (,,,), UpdValue
@@ -43,22 +44,66 @@ ifEdit :: Mode a a -> a
 ifEdit Edit 	then else = then
 ifEdit Display  then else = else 
 
-
 // top level function given to end user
 // it collects all the html forms to display, adds clean styles and hidden forms, ands prints the html code to stdout
 
 doHtml :: .(*HSt -> (Html,!*HSt)) *World -> *World
-doHtml pagehandler world 
+doHtml userpage world 
 # (inout,world) 		= stdio world						// open stdin and stdout channels
 # nworld 				= { worldC = world, inout = inout }	
-# (initforms,nworld) 	= initFormStates nworld
+# (initforms,nworld) 	= initFormStates External Nothing nworld
 # (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
-						= pagehandler {cntr = 0, states = initforms, world = nworld}
+						= userpage {cntr = 0, states = initforms, world = nworld}
 # (allformbodies,world) = convStates states world
-= print_to_stdout (Html (Head headattr [extra_style:headtags]) (Body (extra_body_attr ++ attr) [allformbodies:bodytags])) world
+# {worldC}				= print_to_stdout 
+								(Html (Head headattr [extra_style:headtags]) 
+								(Body (extra_body_attr ++ attr) [debugInput,allformbodies:bodytags])) 
+								world
+= worldC
 where
 	extra_body_attr = [Batt_background "back35.jpg",`Batt_Std [CleanStyle]]
 	extra_style = Hd_Style [] CleanStyles	
+
+	debugInput = if TraceInput (traceHtmlInput External Nothing) EmptyBody
+
+//doHtmlServer :: .(*HSt -> (Html,!*HSt)) *World -> *World   // this one is rejected !!
+doHtmlServer :: (*HSt -> (Html,!*HSt)) *World -> *World
+doHtmlServer userpage world
+	= StartServer 80 (map (\(id,_,f) -> (id,f)) pages) world
+where
+//	pages :: [(String,String, String String Arguments *World -> ([String],String,*World))]
+	pages
+		=	[("clean", "CleanExample", \_ _ a  -> doHtmlServer2 (conv a) userpage)
+			]
+	conv args = mkString [input \\ input <- (urlDecode (mkList (foldl (+++) "" (map (\(x,y) -> y) args)))) 
+								| not (isControl input) ]
+
+doHtmlServer2 :: String .(*HSt -> (Html,!*HSt)) *World -> ([String],String,*World)
+doHtmlServer2 args userpage world 
+# (ok,temp,world) 		= fopen "temp" FWriteText world						// open stdin and stdout channels
+# nworld 				= { worldC = world, inout = temp }	
+# (initforms,nworld) 	= initFormStates Internal (Just args) nworld
+# (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
+						= userpage {cntr = 0, states = initforms, world = nworld}
+# (allformbodies,world) = convStates states world
+# {worldC,inout}		= print_to_stdout 
+									(Html (Head headattr [extra_style:headtags]) 
+									(Body (extra_body_attr ++ attr) [debugInput,allformbodies:bodytags])) 
+									world
+# (ok,world)			= fclose inout worldC
+# (allhtmlcode,world)	= readoutcompletefile "temp" world	
+= ([],allhtmlcode,world)
+where
+	extra_body_attr = [Batt_background "back35.jpg",`Batt_Std [CleanStyle]]
+	extra_style = Hd_Style [] CleanStyles	
+
+	readoutcompletefile name env
+	# (ok,file,env) = fopen name FReadText env
+	# (text,file)	= freads file 1000000
+	# (ok,env)		= fclose file env
+	= (text,env)
+
+	debugInput = if TraceInput (traceHtmlInput Internal (Just args)) EmptyBody
 
 // some small utility functions
 

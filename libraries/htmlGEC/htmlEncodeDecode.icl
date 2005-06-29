@@ -21,6 +21,7 @@ derive gParse (,), (,,)
 		, triplet	:: String
 		, update	:: String
 		, updateid	:: String
+		, server	:: ServerKind
 		}		
 
 :: FStates		:== Tree_ (String,FormState)
@@ -40,10 +41,10 @@ derive gParse (,), (,,)
 
 // reconstruct HtmlState out of the information obtained from browser
 
-retrieveHtmlState :: HtmlStates
-retrieveHtmlState 
-# (_,_,_,state) = DecodedStateFromBrowser
-=: splitString (mkList state)
+retrieveHtmlState :: ServerKind (Maybe String) -> HtmlStates
+retrieveHtmlState serverkind args
+# (_,_,_,state) = DecodeArguments serverkind args
+= splitString (mkList state)
 where
 	splitString [] 			= []
 	splitString listofchar	= [mkHtmlState first : splitString second]
@@ -65,13 +66,14 @@ where
 
 // convert this HtmlState into FormStates which are used internally
 
-initFormStates 	:: *NWorld -> (*FormStates,*NWorld) 					// retrieves all form states hidden in the html page
-initFormStates world 
-	= ({ fstates = readStatesFromArgs, triplet = triplet, update = update, updateid = updateid },world)
+initFormStates 	:: ServerKind (Maybe String) *NWorld -> (*FormStates,*NWorld) 					// retrieves all form states hidden in the html page
+initFormStates serverkind args world 
+	= ({ fstates = readStatesFromArgs, triplet = triplet, update = update, updateid = updateid , server = serverkind},world)
 where
 	readStatesFromArgs = Balance (sort [(sid,OldState {ostrval = state, olive = lifespan}) 
-										\\ (sid,lifespan,state) <- retrieveHtmlState | sid <> ""
+										\\ (sid,lifespan,state) <- retrieveHtmlState serverkind args| sid <> ""
 										])
+	(_,triplet,update,_) = DecodeArguments serverkind args
 
 	Balance [] = Leaf_
 	Balance [x] = Node_ Leaf_ x Leaf_
@@ -79,22 +81,81 @@ where
 		= case splitAt (length xs/2) xs of
 			(a,[b:bs]) = Node_ (Balance a) b (Balance bs)
 			(as,[]) = Node_   (Balance (init as)) (last as) Leaf_
-
-	(_,triplet,update,_) = DecodedStateFromBrowser
 	
 	updateid 		
-	# (_,upd,_,_) = DecodedStateFromBrowser
-	=: case parseString upd of
+//	# (_,upd,_,_) = DecodeArguments serverkind args
+	= case parseString triplet of
 		Just ("",0,UpdI 0) = ""
 		Just (id,_,_)   = id 
 		else = ""
 
+DecodeArguments External _ = DecodePhpArguments
+DecodeArguments Internal (Just args) = DecodeCleanServerArguments args
 
+DecodePhpArguments :: (!String,!String,!String,!String) // executable, id + update , new , state
+DecodePhpArguments
+# input 			= mkList GetArgs
+# (thisexe,input) 	= mscan '#' input 		// get rid of garbage
+# input				= skipping ['#UD=']  input
+# (update, input)	= mscan '=' input
+# (new,    input)	= mscan ';' input
+# input				= skipping ['GS=']  input
+# (state, input)	= mscan ';' input
+=: case (decode thisexe, decode update, decode new, decode state) of
+		(thisexe,"CS",new,state) -> (thisexe,new,"",state)
+	    else		    -> else
+
+DecodeCleanServerArguments :: String -> (!String,!String,!String,!String) // executable, id + update , new , state
+DecodeCleanServerArguments args
+# input 			= mkList args
+# (thisexe,input) 	= mscan '\"' input 				// get rid of garbage
+# input				= skipping ['UD\"']  input
+# (update, input)	= mscan '=' input // should give triplet
+# (new,    input)	= mscan '-' input // should give update value
+# (_,input)			= mscan '=' input
+# input				= skipping ['\"GS\"']  input
+//# (state, input)	= mscan '-' input
+# (found,index) 	= FindSubstr ['---'] input
+# state				= if found (take index input) ['']
+= case decode update of
+		"CS" -> ("clean", decode new, "", decode state)
+		else -> ("clean", decode update, decode new, decode state)
+
+Tl [] = []
+Tl list = tl list
+
+skipping [c:cs] list=:[x:xs]
+| c == x 		= skipping cs xs
+| otherwise 	= list
+skipping any    list = list
+
+decode n = mkString (urlDecode n)
+
+traceHtmlInput :: ServerKind (Maybe String) -> BodyTag
+traceHtmlInput serverkind args
+=	BodyTag	[	Txt "this executable    : " , B [] (ThisExe serverkind), Txt ";", Br 
+			, 	Txt "my php script      : " , B [] (MyPhP serverkind), Txt ";", Br 
+			, 	Txt "update				: " , B [] update, Txt ";", Br 
+			, 	Txt "new value		  	: " , B [] new, Txt ";", Br 
+			, 	Txt "state			  	: " , BodyTag (showstate (mkList state)), Txt ";", Br 
+			, 	Txt "input			  	: " , case args of 
+													(Just x) -> Txt x
+													_ -> Br 
+			]
+where
+	(executable,update,new,state) = DecodeArguments serverkind args
+
+	showstate :: [Char] -> [BodyTag]
+	showstate [] 			= []
+	showstate listofchar	= [Br, B [] (mkString first)] ++ showstate second
+	where
+//		(first,second) = span ((<>) '$') listofchar
+		(first,second) = mscan '$' listofchar
 
 // FormStates abstract data handling routines
 
 emptyFormStates :: *FormStates
-emptyFormStates = { fstates = Leaf_ , triplet = "", update = "", updateid = ""}
+emptyFormStates = { fstates = Leaf_ , triplet = "", update = "", updateid = "", server = Internal}
 
 instance < FormState
 where
@@ -103,11 +164,9 @@ where
 force :: !a *b -> *b
 force a b = b
 
-
 getTriplet :: *FormStates -> (!Maybe a, !Maybe b,*FormStates) | gParse{|*|} a & gParse{|*|} b 
 getTriplet formstates=:{triplet,update}
 = (parseString triplet, parseString update, formstates)
-
 
 getUpdateId ::  *FormStates -> (String,*FormStates)
 getUpdateId formStates=:{updateid} = (updateid,formStates)
@@ -116,7 +175,7 @@ getUpdate ::  *FormStates -> (String,*FormStates)
 getUpdate formStates=:{update} = (update,formStates)
 
 findState :: !FormId *FormStates *NWorld -> (Bool,Maybe a,*FormStates,*NWorld)	| gParse{|*|} a & TC a
-findState formid formstates=:{fstates} world
+findState formid formstates=:{fstates,server} world
 # (bool,ma,fstates,world) = findState` formid fstates world
 = (bool,ma,{formstates & fstates = fstates},world)
 where
@@ -143,7 +202,7 @@ where
 	#(_,env) = case getFileInfo mydir env of
 				((DoesntExist,fileinfo),env) -> createDirectory mydir env
 				(_,env) -> (NoDirError,env)
-	# (ok,file,env)	= fopen (MyDir +++ "/" +++ filename) FReadData env
+	# (ok,file,env)	= fopen (MyDir server +++ "/" +++ filename) FReadData env
 	| not ok 		= (Nothing,"",env)
 	# (string,file)	= freads file big
 	| not ok 		= (Nothing,"",env)
@@ -153,7 +212,7 @@ where
 	= (parseString  string,string,env) 
 	where
 		big = 100000
-		mydir = RelativePath [PathDown MyDir]
+		mydir = RelativePath [PathDown (MyDir server)]
 
 		removeBackslashQuote [] 			= []
 		removeBackslashQuote ['\\\"':xs] 	= ['\"':removeBackslashQuote xs]
@@ -194,7 +253,7 @@ retrieveNewState _ = Nothing
 // Convert newly created FormStates to Html Code
 
 convStates :: !FormStates *NWorld -> (BodyTag,*NWorld)
-convStates {fstates = allFormStates} world
+convStates {fstates = allFormStates,server} world
 #	world = writeAllPersistentStates allFormStates world 
 =	(BodyTag
 	[ submitscript    globalFormName updateInpName
@@ -253,7 +312,7 @@ where
 	globalstateform :: !String !String !String !Value -> BodyTag
 	globalstateform formname updatename globalname globalstate
 	=	Form 	[ Frm_Name formname
-				, Frm_Action MyPhP
+				, Frm_Action (MyPhP server)
 				, Frm_Method Post
 				, Frm_Enctype "multipart/form-data"			// what to do to enable large data ??
 				]
@@ -298,13 +357,13 @@ where
 	#(_,env) = case getFileInfo mydir env of
 				((DoesntExist,fileinfo),env) -> createDirectory mydir env
 				(_,env) -> (NoDirError,env)
-	# (ok,file,env)	= fopen (MyDir +++ "/" +++ filename) FWriteData env
+	# (ok,file,env)	= fopen (MyDir server +++ "/" +++ filename) FWriteData env
 	| not ok 		= env
 	# file			= fwrites (printToString val) file
 	# (ok,env)		= fclose file env
 	= env
 	where
-		mydir = RelativePath [PathDown MyDir]
+		mydir = RelativePath [PathDown (MyDir server)]
 
 // script for transmitting name and value of changed input 
 
@@ -321,73 +380,41 @@ where
 decodeInfo :: String -> Maybe a | gParse{|*|} a
 decodeInfo s = parseString (mkString (urlDecode (mkList s)))
 
-
-
 // all input information from the browser is obtained once via the arguments passed to this executable
 // defined as CAFs such that they are calculated only once
 
 GetArgs :: String 
 GetArgs =: foldl (+++) "" [strings \\ strings <-: getCommandLine]
 
-ThisExe :: String
-ThisExe 
-# (thisexe,_,_,_) = DecodedStateFromBrowser
-=: thisexe
+ThisExe :: ServerKind -> String
+ThisExe External 
+# (thisexe,_,_,_) = DecodeArguments External Nothing 
+= thisexe
+ThisExe Internal 
+= "clean"
 
-MyPhP :: String
-MyPhP =: (mkString (takeWhile ((<>) '.') (mkList ThisExe))) +++ ".php"
+MyPhP :: ServerKind -> String
+MyPhP External = (mkString (takeWhile ((<>) '.') (mkList (ThisExe External)))) +++ ".php"
+MyPhP Internal = "clean"
 
-MyDir :: String
-MyDir =: (mkString (takeWhile ((<>) '.') (mkList ThisExe)))
+MyDir :: ServerKind -> String
+MyDir serverkind = (mkString (takeWhile ((<>) '.') (mkList (ThisExe serverkind))))
 
-DecodedStateFromBrowser :: (!String,!String,!String,!String) // executable, id + update , new , state
-DecodedStateFromBrowser
-# input 			= mkList GetArgs
-# (thisexe,input) 	= mscan '#' input 		// get rid of garbage
-# input				= skipping ['#UD=']  input
-# (update, input)	= mscan '=' input
-# (new,    input)	= mscan ';' input
-# input				= skipping ['GS=']  input
-# (state, input)	= mscan ';' input
-=: case (decode thisexe, decode update, decode new, decode state) of
-		(thisexe,"CS",new,state) -> (thisexe,new,"",state)
-	    else		    -> else
-where
-	Tl [] = []
-	Tl list = tl list
-
-	skipping [c:cs] list=:[x:xs]
-	| c == x 		= skipping cs xs
-	| otherwise 	= list
-	skipping any    list = list
-	
-	decode n = mkString (urlDecode n)
-
-traceHtmlInput :: BodyTag
-traceHtmlInput
-=:	BodyTag	[	Txt "this executable    : " , B [] ThisExe, Br 
-			, 	Txt "my php script      : " , B [] MyPhP, Br 
-			, 	Txt "update				: " , B [] update, Br 
-			, 	Txt "new value		  	: " , B [] new, Br 
-			, 	Txt "state			  	: " , BodyTag (showstate (mkList state)), Br 
-//			,	Txt "decoded input  	: " , B [] (convert GetArgs), Br
-//			,	Txt "encoded input      : " , B [] GetArgs, Br 
-			]
-where
-	(executable,update,new,state) = DecodedStateFromBrowser
-	convert s = mkString (urlDecode (mkList s))
-
-	showstate :: [Char] -> [BodyTag]
-	showstate [] 			= []
-	showstate listofchar	= [Br, B [] (mkString first)] ++ showstate (tl second)
-	where
-		(first,second) = span ((<>) '$') listofchar
 
 // low level url encoding decoding
 
 mscan c list = case (span ((<>) c) list) of  // scan like span but it removes character
 				(x,[])	= (x,[])
 				(x,y)	= (x,tl y)
+
+FindSubstr substr list = FindSubstr` list 0 
+where
+	FindSubstr` list=:[] index = (False,0)
+	FindSubstr` list=:[x:xs] index
+	| substr == take lsubstr list = (True,index)
+	| otherwise = FindSubstr` xs (index + 1)
+
+	lsubstr = length substr
 
 urlEncode :: [Char] -> [Char]
 urlEncode [] = []

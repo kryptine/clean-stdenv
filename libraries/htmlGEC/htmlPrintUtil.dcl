@@ -9,8 +9,8 @@ import StdFile
 :: FoF :== (*File -> *File)
 
 :: *NWorld							// io interface
-	= 	{ worldC	:: *World		// world for any io
-		, inout		:: *File		// to read from stdin and write to srdout
+	= 	{ worldC	:: !*World		// world for any io
+		, inout		:: !*File		// to read from stdin and write to srdout
 		}				
 
 :: UpdValue 					// the updates that can take place	
@@ -34,7 +34,7 @@ derive gHpr Int, Real, Bool, String, Char, []
 
 // the main print routine
 
-print_to_stdout 	:: a *NWorld -> *World | gHpr{|*|} a
+print_to_stdout 	:: a *NWorld -> *NWorld | gHpr{|*|} a
 
 // handy utility print routines	
 

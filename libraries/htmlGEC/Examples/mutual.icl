@@ -11,7 +11,8 @@ derive gParse Pounds, Euros
 :: Pounds = {pounds :: Real}                        
 :: Euros  = {euros  :: Real}                        
 
-Start world  = doHtml mutual world
+//Start world  = doHtml mutual world
+Start world  = doHtmlServer mutual world
 
 mutual hst
 # (mutual,hst) = startCircuit circuit initEuros hst

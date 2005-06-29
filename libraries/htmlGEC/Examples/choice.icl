@@ -3,7 +3,8 @@ module choice
 import StdEnv
 import StdHtml
 
-Start world  = doHtml choice world
+//Start world  = doHtml choice world
+Start world  = doHtmlServer choice world
 
 choice hst
 # (selection,hst) 	= FuncMenu -2 (nFormId "rinus") functions hst

@@ -9,7 +9,8 @@ derive gPrint MachineState, Output, Product
 derive gParse MachineState, Output, Product
 
 
-Start world  = doHtml coffeemachine world
+//Start world  = doHtml coffeemachine world
+Start world  = doHtmlServer coffeemachine world
 
 coffeemachine hst
 # (input	,hst) 		= ListFuncBut False (nFormId "cb") allbuttons hst	

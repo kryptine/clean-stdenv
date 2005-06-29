@@ -110,8 +110,6 @@ webshopentry options extendedInfo headers database hst
 		, Hr []
 		, Br
 		, BodyTag page		// code of selected page
-		, Br
-		, traceHtmlInput
 		], hst)
 where
 	pageSelectionForm hst = ListFuncBut False (nFormId "pagebut") pagebuttons hst

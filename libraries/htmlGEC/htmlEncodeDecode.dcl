@@ -12,18 +12,22 @@ import htmlDataDef, htmlFormData
 
 // constants that maybe useful
 
-ThisExe			:: String		// name of this executable
-MyPhP 			:: String		// name of php script interface between server and this executable
-MyDir 			:: String		// name of directory in which persistent form info is stored
+:: ServerKind
+	= External		// An external Server has call to this executable (currently via a PhP script)
+	| Internal		// No external server needed: a Clean Server will be atached to this executable
 
-traceHtmlInput	:: BodyTag		// for debugging showing the information received from browser
+ThisExe			:: ServerKind -> String		// name of this executable
+MyPhP 			:: ServerKind -> String		// name of php script interface between server and this executable
+MyDir 			:: ServerKind -> String		// name of directory in which persistent form info is stored
+
+traceHtmlInput	:: ServerKind (Maybe String) -> BodyTag	// for debugging showing the information received from browser
 
 // Decoding of information
 
 :: *FormStates 					// collection of all states of all forms
 
 emptyFormStates :: *FormStates								// creates emtpy states
-initFormStates 	:: *NWorld -> (*FormStates,*NWorld) 		// retrieves all form states wherever they are stored
+initFormStates 	:: ServerKind (Maybe String) *NWorld -> (*FormStates,*NWorld) 		// retrieves all form states wherever they are stored
 
 findState 		:: !FormId *FormStates *NWorld 				// find the state value given FormId and a correct type
 					-> (Bool, Maybe a,*FormStates,*NWorld)	// true if form has not yet been previously inspected 	
@@ -43,3 +47,6 @@ convStates 		:: !FormStates *NWorld -> (BodyTag,*NWorld) // script which stores 
 
 encodeInfo 		:: a -> String | gPrint{|*|} a	// serialization to a Mime format, used to encode input forms 
 callClean 		:: Script						// script that will take care of sending the required input to this application
+
+
+urlDecode :: [Char] -> [Char]

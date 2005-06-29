@@ -16,7 +16,8 @@ derive gForm []
 //Start world  = doHtml spreadsheet world
 //Start world  = doHtml toHtmlFormspreadsheet world
 //Start world  = doHtml arrowsspreadsheet world
-Start world  = doHtml spreadsheetM world
+//Start world  = doHtml spreadsheetM world
+Start world  = doHtmlServer spreadsheet world
 
 
 // Classical way using Cleans # notation
