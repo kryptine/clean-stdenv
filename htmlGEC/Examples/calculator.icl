@@ -7,7 +7,7 @@ import StdEnv
 import StdHtml
 
 //Start world  = doHtml arrowcalculator world
-Start world  = doHtml calculator world
+Start world  = doHtmlServer calculator world
 
 calculator hst
 # (calcfun,hst) 	= TableFuncBut (nFormId "calcbut") calcbuttons hst		// shows buttons

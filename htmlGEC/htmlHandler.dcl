@@ -9,9 +9,12 @@ import GenPrint
 import GenParse
 import StdBool, StdFile
 
+TraceInput :== False
+
 // doHtml main wrapper for generating & handling of a Html form
 
-doHtml :: .(*HSt -> (Html,!*HSt)) *World -> *World 
+doHtml 			:: .(*HSt -> (Html,!*HSt)) *World -> *World  	// use this application with some external server and php
+doHtmlServer 	:: (*HSt -> (Html,!*HSt)) *World -> *World 	// use this application with the build-in Clean server
 
 :: *HSt 								// unique state required for creating Html forms
 instance FileSystem HSt					// enabling file IO on HSt

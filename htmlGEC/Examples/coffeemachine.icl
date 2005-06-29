@@ -8,7 +8,8 @@ derive gUpd   Machine, Output, Product
 derive gPrint Machine, Output, Product
 derive gParse Machine, Output, Product
 
-Start world  = doHtml coffeemachine world
+//Start world  = doHtml coffeemachine world
+Start world  = doHtmlServer coffeemachine world
 
 coffeemachine hst
 # (command,hst)	= TableFuncBut (nFormId "cb") commandbuttons hst	

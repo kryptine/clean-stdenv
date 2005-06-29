@@ -39,8 +39,6 @@ where
 	| isMember '_' list = toString (tl (dropWhile ((<>) '_') list))
 	| otherwise 		= string  
 
-
-
 gHpr{|[]|} gHlist file list = myfold file list 
 where
 	myfold file [x:xs] = myfold (gHlist file x) xs
@@ -57,14 +55,10 @@ print a = \f -> fwrites a f
 (<+>) infixl :: !*File FoF -> *File
 (<+>) file new = new file
 
-print_to_stdout :: a *NWorld -> *World | gHpr{|*|} a
-print_to_stdout value {worldC,inout}
-//# (file,worldC) = stdio worldC
+print_to_stdout :: a *NWorld -> *NWorld | gHpr{|*|} a
+print_to_stdout value nw=:{worldC,inout}
 # inout = inout <+ value
-= force_IO inout worldC
-where
-	force_IO:: !x *World -> *World
-	force_IO x w = w
+= {nw & inout = inout}
 
 htmlCmnd :: !a !b -> FoF | gHpr{|*|} a & gHpr{|*|} b
 htmlCmnd hdr txt =  \file -> closeCmnd hdr (openCmnd hdr "" file <+ txt) 			

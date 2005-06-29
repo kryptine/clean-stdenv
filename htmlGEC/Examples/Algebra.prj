@@ -1125,8 +1125,8 @@ OtherModules
 			ReuseUniqueNodes:	True
 		Dcl
 			WindowPosition
-				X:	0
-				Y:	0
+				X:	6
+				Y:	-13
 				SizeX:	885
 				SizeY:	581
 		DclOpen:	False
