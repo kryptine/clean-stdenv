@@ -1,20 +1,20 @@
 This is the Clean Html GEC - iData library.
 
 This library is under development.
-Is has only be tested under windows.
+Is has only been tested under windows.
 
-I. *** Install as folllows:
+I. *** Install as follows:
 
 1. You need the latest Clean system (version 2.1.1) for windows which can be downloaded
-from our site (www.cs.kun.nl/~clean).
+from our site (www.cs.ru.nl/~clean).
 Install this system. It will generate a Clean 2.1.1 folder.
 Put it anywhere, e.g. on your desktop.
-Read the readMe that comes with the installation.
+Read the ReadMe that comes with the installation.
 In particular, you have to launch the Clean IDE once. 
-It will attach files with Clean extensions to the clean IDE. That is all.
+It will associate files with Clean extensions to the Clean IDE. That is all.
 
 You can work with Clean, but the html library is not yet included in the latest version,
-so you have to add this library by yourself (points 3 - 5)
+so you have to add this library yourself (points 3 - 5)
 
 2. Move the htmlGEC library into the folder Clean 2.1.1/Libraries.
 
@@ -24,14 +24,14 @@ so you have to add this library by yourself (points 3 - 5)
 This option is now marked.
 
 5. Select Environment/Edit Current ...
-Now properties of the Everyting environment can be set.
+Now properties of the Everything environment can be set.
 Click the path tab.
 
 Append the following libraries:
 {Application}\Libraries\GEC\GEC Implementation
 {Application}\Libraries\htmlGEC
 
-Now these libaries are part of the Everyting environment. Projects which select this environment
+Now these libaries are part of the Everything environment. Projects which select this environment
 will find the software modules automatically.
 
 Installation is now complete.
@@ -54,7 +54,7 @@ The server software has been written by Paul de Mast from the Polytechnical Univ
 Breda, The Netherlands. Thank you very much Paul!
 
 1. Open one of the html examples in the htmlExample folder,
-just by clicking on the .prj file, take e.g. spreadsheet.prj
+just by clicking on the .prj file, take e.g. spreadsheet.prj.
 The Clean IDE will be launched. 
 
 Make sure that the project Start rule looks like:
@@ -101,7 +101,7 @@ The server has to understand php scripts (they normally do).
 In the future I will make a version that does not need php anymore... 
 
 1. Open one of the html examples in the htmlExample folder,
-just by clicking on the .prj file, take e.g. spreadsheet.prj
+just by clicking on the .prj file, take e.g. spreadsheet.prj.
 The Clean IDE will be launched. 
 
 Make sure that the project start rule looks like:
@@ -129,8 +129,8 @@ The php script foo.php will launch foo.exe.
 Choose the php file and click.
 The bowser will have to understand php.
 The script will launch the Clean application.
-The Clean application will produce a page afterwhich it stops with execution.
-Each change made in a page will restart the Clean application (via the php script)
+The Clean application will produce a page after which it stops with execution.
+Each change made in a page will restart the Clean application (via the php script).
 
 
 *** making your own aplication from scratch.
@@ -143,8 +143,8 @@ e.g. spreadsheet.icl.
 2. Open the file yourname.icl, the Clean IDE should start automatically.
 Rename the module spreadsheet to module yourname (first line in the file).
 Create a project (File/New Project...) and store the indicated project file as yourname.prj
-Choose as environment (Environment/Everything) "Everything"
-Your Clean application has to be compiled (Project/Project Options...) with "No Retun Type" option selected.
+Choose as environment (Environment/Everything) "Everything".
+Your Clean application has to be compiled (Project/Project Options...) with "No Return Type" option selected.
 
 Follow the steps for compilation described above.
 
@@ -166,17 +166,14 @@ Rinus.
 To do list:
 
 Known bugs:
-- don't use html command symbols or control characters in button or form names
-- buttons don't work if their names contains spaces
+- don't use html command symbols or control characters in button or form names.
+- buttons don't work if their names contains spaces.
 - if states are getting very large, sometimes nothing is displayed. 
 php has a limit of 4k for passing arguments to Clean.
 I therefore want to kick out php.
- 
-Conceptual:
 
-- make storage of higher order function possible (involves dynamics)
+Conceptual:
+- make storage of higher order function possible (involves dynamics).
 
 Examples:
-
-Not all examples are completely worked out yet.
-
+- Not all examples are completely worked out yet.
