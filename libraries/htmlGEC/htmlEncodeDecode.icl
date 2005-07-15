@@ -246,8 +246,8 @@ storeNewState nv old = old
 */
 
 retrieveNewState :: NewState -> Maybe a | TC a & gParse{|*|} a
-retrieveNewState {strval} = parseString strval
-//retrieveNewState {dynval = (v::a^)} = Just v    // causes a run-time crash sometimes ??????? bug ????
+//retrieveNewState {strval} = parseString strval	// this will work
+retrieveNewState {dynval = (v::a^)} = Just v    	// this will work as well
 retrieveNewState _ = Nothing
 
 // Convert newly created FormStates to Html Code

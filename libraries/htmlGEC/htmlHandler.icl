@@ -149,7 +149,7 @@ where
 			(Just (pos,updval), (True,Just currentState,formStates,world)) 	//state as received from browser 
 					-> (True, Just (snd (gUpd{|*|} (UpdSearch updval pos) currentState)),formStates,world)
 			(Just (pos,updval), (False,Just currentState,formStates,world)) 	// state has been updated already
-					-> (True, Just currentState,formStates,world)
+					-> (False, Just currentState,formStates,world)   // to indicate the update already has taken place, used in arrows
 
 			// no update found, determine the current stored state
 
