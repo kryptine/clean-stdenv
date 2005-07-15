@@ -89,6 +89,8 @@ ListFuncBut2 		:: !Bool !FormId [(Mode,Button, a -> a)] !*HSt  //fine grain, mod
 
 TableFuncBut 		:: !FormId ![[(Button, a -> a)]] !*HSt 
 													  -> (Form (a -> a) ,!*HSt)
+TableFuncBut2 		:: !Bool !FormId ![[(Mode,Button, a -> a)]] !*HSt // fine grain mode
+													  -> (Form (a -> a) ,!*HSt)
 
 
 // checkboxes		:returns function corresponding to the checkbox pressed, and the checkbox body
