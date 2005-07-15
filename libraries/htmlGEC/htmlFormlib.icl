@@ -282,22 +282,6 @@ TableFuncBut :: !FormId ![[(Button, a -> a)]] !*HSt -> (Form (a -> a) ,!*HSt)
 TableFuncBut formid xs hSt
 	= layoutIndexForm (\f1 f2 -> [f1 <||> f2]) (layoutIndexForm (\f1 f2 -> [BodyTag f1:f2]) FuncBut id (o)) id (o) 0 False formid xs hSt
 
-TableFuncBut2 :: !Bool !FormId ![[(Mode,Button, a -> a)]] !*HSt -> (Form (a -> a) ,!*HSt)
-TableFuncBut2 reset formid xs hSt = TableFuncBut2` 0 reset formid xs hSt
-where
-	TableFuncBut2` n reset formid [] hSt 	
-		= ({changed	= False
-		   ,value	= id
-		   ,form	= []
-		   },hSt)
-	TableFuncBut2` n reset formid [x:xs] hSt 
-	# (nx,hSt)	=	ListFuncBut2 reset {formid & id = formid.id +++ toString n} x hSt
-	# (nxs,hSt)	=	TableFuncBut2` (n+1) reset formid xs hSt
-	= ({changed = nx.changed || nxs.changed
-	   ,value   = nx.value o nxs.value
-	   ,form    = [ nx.form <||> nxs.form ]
-	   },hSt)
-
 ListFuncBut :: !Bool !FormId [(Button, a -> a)] !*HSt -> (Form (a -> a),!*HSt)
 ListFuncBut b formid xs hSt
 	= layoutIndexForm (\f1 f2 -> [BodyTag f1:f2]) FuncBut id (o) 0 b formid xs hSt

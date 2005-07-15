@@ -2,7 +2,7 @@ implementation module httpServer
 
 import StdEnv,StdTCP
 
-from httpUtil import unlines, cSplit, endWith, splitAfter, wordsWith, unwords, readFile
+from httpUtil import unlines, cSplit, endWith, splitAfter, wordsWith, unwords
 
 DEBUGSERVER
 	:== True
@@ -216,7 +216,6 @@ where
 			# (location, getHeader)		= cSplit '?' locationName
 			# (replyheaders,data,world)	= function method location (makeArguments getHeader) world
 			= (makeHttpReply (replyheaders,data) method,world)
-			
 		| otherwise
 			= activatedFunction (link,locationName) bs
 	where
@@ -229,31 +228,13 @@ where
 			getAndPost			=	wordsWith '&' getHeader 
 								++	wordsWith '&' postHeader
 								
-			makeArg s			= (f, v) //(f, withWhiteSpace v)
+			makeArg s			= (f, withWhiteSpace v)
 						where
 								(f,v) = cSplit '=' s
 
 	activatedFunction (link,locationName) _
-		# (location, getHeader)		= cSplit '?' locationName
-		# (replyheaders,data,world)	= readLocalFile (link+++location) world
-		//= abort ("\n\nniet herkent:\n\t" +++ link +++ "\n\t" +++ location) 
-		= (makeHttpReply (replyheaders,data) method,world)
-	where
-		readLocalFile localFile world	
-		//probeer bestand te openen:		
-		# (ok,file,world) = fopen localFile FReadData world
-	
-		//indien openen niet lukt: 404-fout:
-		| not ok = (["HTTP/1.0 404 Not Found"],localFile,world)
-		
-		//indien openen wel lukt, lees alle gegevens uit bestand:
-		# (data,file) = readFile file
-		
-		//sluit bestand:
-		# (_,world) = fclose file world
-		
-		//stuur bestand terug naar gebruiker met juiste Content-Type:
-		= (["HTTP/1.0 200 OK","Content-Type: " +++ getContentType localFile],data,world)
+		= (makeHttpReply (["HTTP/1.0 404 Not Found"],"") method,world)
+
 
 
 // Functie die Content-Type genereert aan de hand van de extensie:
@@ -272,8 +253,6 @@ getContentType str = getContentType (str % (1,size str))
 
 
 // functies die naar MyUtil moeten:
-
-/*
 // witruimte in parameters bestaande uit losse woorden zal worden omgezet in andere karakters
 // en kan m.b.v. onderstaande functie weer achterhaald worden.
 withWhiteSpace :: String -> String
@@ -294,7 +273,6 @@ fromWhiteSpace :: Char -> Char
 fromWhiteSpace '\n'	= '\030'	// record separator
 fromWhiteSpace ' '	= '\031'	// unit separator
 fromWhiteSpace c 	= c
-*/
 
 //deze functie splits het adres, 1e helft geeft de link waarop functie luisterd terug, 2e helft is de link data
 splitLink :: String -> (String, String)
