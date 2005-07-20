@@ -10,6 +10,7 @@ import StdMaybe
 	=	{ id 		:: !String				// id *uniquely* identifying the form
 		, lifespan	:: !Lifespan			// lifespan of form
 		, mode		:: !Mode				// editable or not
+		, storage	:: !StorageFormat		// serialization method
 		}
 
 :: Lifespan									// defines how long a form will be maintained		
@@ -31,6 +32,9 @@ import StdMaybe
 	=	{ isChanged	:: Bool					// is this form changed
 		, changedId	:: String				// id of changed form
 		}
+:: StorageFormat							// Serialization method:
+	=	StaticDynamic						// + higher order types, fast, NO dynamic linker needed; - works only for a specific application !
+	| 	PlainString							// - first order types only, slow (requires generic parser); + can be used by anyone who knows the type
 
 :: Form a 									// result of any form
 	=	{ changed 	:: Bool					// the user has edited the form

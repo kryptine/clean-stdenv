@@ -26,7 +26,7 @@ derive bimap Form, []
 
 toHtml :: a -> BodyTag | gForm {|*|} a
 toHtml a 
-# (na,_) = gForm{|*|} {id = "__toHtml", lifespan = Page, mode = Display} a  {cntr = 0, states = emptyFormStates, world = undef}
+# (na,_) = gForm{|*|} {id = "__toHtml", lifespan = Page, mode = Display, storage = PlainString} a  {cntr = 0, states = emptyFormStates, world = undef}
 = BodyTag na.form
 
 toHtmlForm :: (*HSt -> *(Form a,*HSt)) -> [BodyTag] | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a

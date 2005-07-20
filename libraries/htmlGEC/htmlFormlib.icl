@@ -7,23 +7,45 @@ import StdEnv, StdHtml
 
 // utility for creating FormId's
 
+// store info as a string
+
 pFormId :: String -> FormId					// persitent formid
-pFormId s = {id = s, lifespan = Persistent, mode = Edit}
+pFormId s = {id = s, lifespan = Persistent, mode = Edit, storage = PlainString}
 
 sFormId :: String -> FormId					// session formid
-sFormId s = {id = s, lifespan = Session, mode = Edit}
+sFormId s = {id = s, lifespan = Session, mode = Edit, storage = PlainString}
 
 nFormId :: String -> FormId					// page formid
-nFormId s = {id = s, lifespan = Page, mode = Edit}
+nFormId s = {id = s, lifespan = Page, mode = Edit, storage = PlainString}
 
 pdFormId :: String -> FormId					// persitent formid
-pdFormId s = {id = s, lifespan = Persistent, mode = Display}
+pdFormId s = {id = s, lifespan = Persistent, mode = Display, storage = PlainString}
 
 sdFormId :: String -> FormId					// session formid
-sdFormId s = {id = s, lifespan = Session, mode = Display}
+sdFormId s = {id = s, lifespan = Session, mode = Display, storage = PlainString}
 
 ndFormId :: String -> FormId					// page formid
-ndFormId s = {id = s, lifespan = Page, mode = Display}
+ndFormId s = {id = s, lifespan = Page, mode = Display, storage = PlainString}
+
+// store info as a dynamic
+
+pDFormId :: String -> FormId					// persitent formid
+pDFormId s = {id = s, lifespan = Persistent, mode = Edit, storage = StaticDynamic}
+
+sDFormId :: String -> FormId					// session formid
+sDFormId s = {id = s, lifespan = Session, mode = Edit, storage = StaticDynamic}
+
+nDFormId :: String -> FormId					// page formid
+nDFormId s = {id = s, lifespan = Page, mode = Edit, storage = StaticDynamic}
+
+pdDFormId :: String -> FormId					// persitent formid
+pdDFormId s = {id = s, lifespan = Persistent, mode = Display, storage = StaticDynamic}
+
+sdDFormId :: String -> FormId					// session formid
+sdDFormId s = {id = s, lifespan = Session, mode = Display, storage = StaticDynamic}
+
+ndDFormId :: String -> FormId					// page formid
+ndDFormId s = {id = s, lifespan = Page, mode = Display, storage = StaticDynamic}
 
 // easy creation of an html page
 

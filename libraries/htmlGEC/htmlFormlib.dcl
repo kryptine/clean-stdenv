@@ -13,14 +13,21 @@ simpleHtml	:: String [BodyTag]      -> Html		// as above, without HSt
 
 // **** easy creation of FormId's ****
 
-nFormId		:: String -> FormId					// page 	  livetime, editable
-sFormId		:: String -> FormId					// session 	  livetime, editable
-pFormId		:: String -> FormId					// persistent livetime, editable
+nFormId		:: String -> FormId					// page 	  livetime, editable, string format
+sFormId		:: String -> FormId					// session 	  livetime, editable, string format
+pFormId		:: String -> FormId					// persistent livetime, editable, string format
 
-ndFormId	:: String -> FormId					// page 	  livetime, displayed non-editable
-sdFormId	:: String -> FormId					// session 	  livetime, displayed non-editable
-pdFormId	:: String -> FormId					// persistent livetime, displayed non-editable 
+ndFormId	:: String -> FormId					// page 	  livetime, displayed non-editable, string format
+sdFormId	:: String -> FormId					// session 	  livetime, displayed non-editable, string format
+pdFormId	:: String -> FormId					// persistent livetime, displayed non-editable, string format 
 
+nDFormId		:: String -> FormId				// page 	  livetime, editable, static dynamic format
+sDFormId		:: String -> FormId				// session 	  livetime, editable, static dynamic format
+pDFormId		:: String -> FormId				// persistent livetime, editable, static dynamic format
+
+ndDFormId	:: String -> FormId					// page 	  livetime, displayed non-editable, static dynamic format
+sdDFormId	:: String -> FormId					// session 	  livetime, displayed non-editable, static dynamic format
+pdDFormId	:: String -> FormId					// persistent livetime, displayed non-editable, static dynamic format 
 
 // **** frquently used "mkViewForm" variants ****
 
