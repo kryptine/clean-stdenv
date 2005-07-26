@@ -78,32 +78,48 @@ where
 	conv args = mkString [input \\ input <- (urlDecode (mkList (foldl (+++) "" (map (\(x,y) -> y) args)))) 
 								| not (isControl input) ]
 
-doHtmlServer2 :: String .(*HSt -> (Html,!*HSt)) *World -> ([String],String,*World)
-doHtmlServer2 args userpage world 
-# (ok,temp,world) 		= fopen "temp" FWriteText world						// open stdin and stdout channels
-# nworld 				= { worldC = world, inout = temp }	
-# (initforms,nworld) 	= initFormStates Internal (Just args) nworld
-# (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
-						= userpage {cntr = 0, states = initforms, world = nworld}
-# (allformbodies,world) = convStates states world
-# {worldC,inout}		= print_to_stdout 
-									(Html (Head headattr [extra_style:headtags]) 
-									(Body (extra_body_attr ++ attr) [debugInput,allformbodies:bodytags])) 
-									world
-# (ok,world)			= fclose inout worldC
-# (allhtmlcode,world)	= readoutcompletefile "temp" world	
-= ([],allhtmlcode,world)
+	doHtmlServer2 :: String .(*HSt -> (Html,!*HSt)) *World -> ([String],String,*World)
+	doHtmlServer2 args userpage world 
+	# (ok,temp,world) 		= fopen "temp" FWriteText world						// open stdin and stdout channels
+	# nworld 				= { worldC = world, inout = temp }	
+	# (initforms,nworld) 	= initFormStates Internal (Just args) nworld
+	# (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
+							= userpage {cntr = 0, states = initforms, world = nworld}
+	# (allformbodies,world) = convStates states world
+	# {worldC,inout}		= print_to_stdout 
+										(Html (Head headattr [extra_style:headtags]) 
+										(Body (extra_body_attr ++ attr) [debugInput,allformbodies:bodytags])) 
+										world
+	# (ok,world)			= fclose inout worldC
+	# (allhtmlcode,world)	= readoutcompletefile "temp" world	
+	= ([],allhtmlcode,world)
+	where
+		extra_body_attr = [Batt_background "back35.jpg",`Batt_Std [CleanStyle]]
+		extra_style = Hd_Style [] CleanStyles	
+	
+		readoutcompletefile name env
+		# (ok,file,env) = fopen name FReadText env
+		# (text,file)	= freads file 1000000
+		# (ok,env)		= fclose file env
+		= (text,env)
+	
+		debugInput = if TraceInput (traceHtmlInput Internal (Just args)) EmptyBody
+
+// just for testing
+
+doHtmlTest :: (*HSt -> (Html,!*HSt)) *World -> (*World)
+doHtmlTest userpage world 
+# (inout,world) 		= stdio world						// open stdin and stdout channels
+# nworld 				= {worldC = world, inout = inout}	
+# (initstates,nworld) 	= initTestFormStates nworld
+= repeatTest userpage initstates nworld []
 where
-	extra_body_attr = [Batt_background "back35.jpg",`Batt_Std [CleanStyle]]
-	extra_style = Hd_Style [] CleanStyles	
+	repeatTest userpage states nworld [] = nworld.worldC
+	repeatTest userpage states nworld [input:inputs]
+	# (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
+						= userpage {cntr = 0, states = states, world = nworld}
+	= repeatTest userpage states world inputs
 
-	readoutcompletefile name env
-	# (ok,file,env) = fopen name FReadText env
-	# (text,file)	= freads file 1000000
-	# (ok,env)		= fclose file env
-	= (text,env)
-
-	debugInput = if TraceInput (traceHtmlInput Internal (Just args)) EmptyBody
 
 // some small utility functions
 

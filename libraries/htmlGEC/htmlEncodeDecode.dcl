@@ -14,7 +14,9 @@ import htmlDataDef, htmlFormData
 
 :: ServerKind
 	= External		// An external Server has call to this executable (currently via a PhP script)
+	| JustTesting	// No Server attached at all, intended for testing (in collaboration with Gast)
 	| Internal		// No external server needed: a Clean Server will be atached to this executable
+	
 
 ThisExe			:: ServerKind -> String		// name of this executable
 MyPhP 			:: ServerKind -> String		// name of php script interface between server and this executable
@@ -50,3 +52,8 @@ callClean 		:: Script						// script that will take care of sending the required
 
 
 urlDecode :: [Char] -> [Char]
+
+// for testing
+
+initTestFormStates 	::  *NWorld -> (*FormStates,*NWorld) // creates initial empty form states
+

@@ -83,6 +83,10 @@ where
 
 // convert this HtmlState into FormStates which are used internally
 
+initTestFormStates 	::  *NWorld -> (*FormStates,*NWorld) 					// retrieves all form states hidden in the html page
+initTestFormStates world 
+	= ({ fstates = Leaf_, triplet = "", update = "", updateid = "" , server = JustTesting},world)
+
 initFormStates 	:: ServerKind (Maybe String) *NWorld -> (*FormStates,*NWorld) 					// retrieves all form states hidden in the html page
 initFormStates serverkind args world 
 	= ({ fstates = readStatesFromArgs, triplet = triplet, update = update, updateid = updateid , server = serverkind},world)
