@@ -211,7 +211,7 @@ gHpr{|Value|} prev (SV string)	= prev <+ "\"" <+ string <+ "\""
 gHpr{|Value|} prev (IV int)  	= prev <+ toString int  		
 gHpr{|Value|} prev (RV real) 	= prev <+ toString real		
 gHpr{|Value|} prev (BV bool) 	= prev <+ toString bool		
-gHpr{|Value|} prev (NQV string)	= prev <+ string 			
+//gHpr{|Value|} prev (NQV string)	= prev <+ string 			
 
 gHpr{|ScriptType|} prev (TypeEcmascript) 	= prev <+ "\"text/Emacscript\""		
 gHpr{|ScriptType|} prev (TypeJavascript) 	= prev <+ "\"text/Javascript\""		

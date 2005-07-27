@@ -53,7 +53,8 @@ callClean 		:: Script						// script that will take care of sending the required
 
 urlDecode :: [Char] -> [Char]
 
-// for testing
+// for testing in collaboration with GAST
 
-initTestFormStates 	::  *NWorld -> (*FormStates,*NWorld) // creates initial empty form states
+emptyTestFormStates	::  *FormStates											// creates initial empty form states
+setTestFormStates 	::  String String String *FormStates -> *FormStates 	// set input events in formstates (triplet,update,updateid)
 

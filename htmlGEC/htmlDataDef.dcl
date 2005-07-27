@@ -677,7 +677,7 @@ None			:== [NoAttr]
 			| `Ula_Events	[ElementEvents]
 
 :: Value	= SV String
-			| NQV String
+//			| NQV String
 			| IV Int
 			| RV Real
 			| BV Bool
