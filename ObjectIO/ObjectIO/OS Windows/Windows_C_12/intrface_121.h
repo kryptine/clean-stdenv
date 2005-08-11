@@ -199,6 +199,7 @@
 #define CcWmGETSCROLLBARINFO					125			/* info about scrollbars. */
 #define CcWmSCROLLBARACTION						124			/* scrollbar handling. */
 #define CcWmDDEEXECUTE							123
+#define CcWmMOUSEWHEEL							122			/* mouse wheel event. */
 #define CcWmIDLEDIALOG							121			/* initialising modal dialogues. */
 #define CcWmDRAWCONTROL							120
 #define CcWmCOMBOSELECT							119

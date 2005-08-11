@@ -8,6 +8,9 @@
 	About this module:
 	Routines related to window/dialog handling. 
 ********************************************************************************************/
+#define WINVER 0x0500
+#define _WIN32_WINNT 0x0500
+
 #include "cCrossCallWindows_121.h"
 #include "cCCallWindows_121.h"
 #include "cCCallSystem_121.h"
@@ -401,6 +404,18 @@ static BOOL CALLBACK DialogProcedure (HWND hwnd, UINT message, WPARAM wParam, LP
 					SendMessage5ToClean (CcWmSCROLLBARACTION, hwnd, hwndScrollBar, SB_CTL, nScrollCode, nPos);
 				}
 				return TRUE;
+			}
+			break;
+		case WM_MOUSEWHEEL:		/* New: react on mouse wheel events. */
+			{
+				int direction;
+				int zDelta = (int)HIWORD(wParam);
+				if ((int)wParam > 0)
+					direction = 0;			// Wheel moved away from the user.
+				else
+					direction = 1;			// Wheel moved towards the user. 
+				SendMessage3ToClean (CcWmMOUSEWHEEL, hwnd, hwnd, direction);
+				return FALSE;
 			}
 			break;
 		case WM_DRAWITEM:
@@ -803,6 +818,19 @@ static LRESULT CALLBACK CompoundControlProcedure (HWND hwnd, UINT uMess, WPARAM 
 					SendMessage5ToClean (CcWmSCROLLBARACTION, parentwindow, hwndScrollBar, controlkind, nScrollCode, nPos);
 				}
 				return 0;
+			}
+			break;
+		case WM_MOUSEWHEEL:		/* New: react on mouse wheel events. */
+			{
+				HWND parentWindow = GetControlParent (hwnd);
+				int direction;
+				int zDelta = (int)HIWORD(wParam);
+				if ((int)wParam > 0)
+					direction = 0;			// Wheel moved away from the user.
+				else
+					direction = 1;			// Wheel moved towards the user. 
+				SendMessage3ToClean (CcWmMOUSEWHEEL, parentWindow, hwnd, direction);
+				return FALSE;
 			}
 			break;
 		/*	The following cases concerning mouse events 
@@ -1791,6 +1819,18 @@ static LRESULT CALLBACK SDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 				}
 			}
 			break;
+		case WM_MOUSEWHEEL:		/* New: react on mouse wheel events. */
+			{
+				int direction;
+				int zDelta = (int)HIWORD(wPara);
+				if ((int)wPara > 0)
+					direction = 0;			// Wheel moved away from the user.
+				else
+					direction = 1;			// Wheel moved towards the user. 
+				SendMessage3ToClean (CcWmMOUSEWHEEL, hWin, hWin, direction);
+				return FALSE;
+			}
+			break;
 		case WM_DRAWITEM:
 			{
 				LPDRAWITEMSTRUCT lpdis;
@@ -2257,6 +2297,18 @@ static LRESULT CALLBACK MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 					}
 					SendMessage5ToClean (CcWmSCROLLBARACTION, hWin, hwndScrollBar, controlkind, nScrollCode, nPos);
 				}
+			}
+			break;
+		case WM_MOUSEWHEEL:		/* New: react on mouse wheel events. */
+			{	
+				int direction;
+				int zDelta = (int)HIWORD(wPara);
+				if ((int)wPara > 0)
+					direction = 0;			// Wheel moved away from the user.
+				else
+					direction = 1;			// Wheel moved towards the user. 
+				SendMessage3ToClean (CcWmMOUSEWHEEL, hWin, hWin, direction);
+				return FALSE;
 			}
 			break;
 		case WM_DRAWITEM:
