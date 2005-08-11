@@ -238,7 +238,7 @@ CcWmDRAWCLIPBOARD			:==	126		/* PA: new constant for clipboard handling. Copied 
 CcWmGETSCROLLBARINFO		:==	125		/* PA: new constant for info about scrollbars. */
 CcWmSCROLLBARACTION			:== 124		/* PA: new constant for scrollbar handling. */
 CcWmDDEEXECUTE				:== 123
-
+CcWmMOUSEWHEEL				:== 122		/* PA: new constant for mouse wheel event. */
 CcWmIDLEDIALOG				:== 121		/* PA: old constant reused for initialising modal dialogues. */
 CcWmDRAWCONTROL				:== 120
 CcWmCOMBOSELECT				:== 119

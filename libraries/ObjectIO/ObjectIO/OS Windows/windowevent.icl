@@ -13,7 +13,7 @@ from	StdPSt				import	accPIO
 from	StdWindowAttribute	import	isWindowKeyboard,  getWindowKeyboardAtt,
 									isWindowMouse,     getWindowMouseAtt,
 									isWindowCursor,    getWindowCursorAtt
-from windowcreate		import	createModalDialogControls
+from	windowcreate		import	createModalDialogControls
 
 
 windoweventFatalError :: String String -> .x
@@ -62,6 +62,7 @@ where
 		isWindowOSEvent CcWmLOSTKEY			= True
 		isWindowOSEvent CcWmLOSTMOUSE		= True
 		isWindowOSEvent CcWmMOUSE			= True
+		isWindowOSEvent CcWmMOUSEWHEEL		= True
 		isWindowOSEvent CcWmPAINT			= True
 		isWindowOSEvent CcWmSCROLLBARACTION	= True
 		isWindowOSEvent CcWmSETFOCUS		= True
@@ -456,6 +457,95 @@ where
 			SB_TOP			-> SliderThumb min
 			SB_BOTTOM		-> SliderThumb (max-view)
 			SB_ENDSCROLL	-> SliderThumb (fromOSscrollbarRange (min,max) osThumb)
+
+//	PA: new alternative to handle mouse wheel events.
+filterOSEvent _ {ccMsg=CcWmMOUSEWHEEL,p1=wPtr,p2=cPtr,p3=dir} windows ioState
+	# (found,wsH,windows)	= getWindowHandlesWindow (toWID wPtr) windows
+	| not found
+		= (False,Nothing,Nothing,windows,ioState)
+	# (able,wsH)			= getWindowStateHandleSelect wsH
+	| not able
+		= (True,Nothing,Nothing,setWindowHandlesWindow wsH windows,ioState)
+	| otherwise
+		# (wids,wsH)		= getWindowStateHandleWIDS wsH
+		  (sliderEvent,wsH)	= getScrollEvent` wids cPtr dir wsH
+		= (True,Nothing,sliderEvent,setWindowHandlesWindow wsH windows,ioState)
+where
+	getScrollEvent` :: !WIDS !Int !Int !(WindowStateHandle .pst) -> (!Maybe DeviceEvent,!WindowStateHandle .pst)
+	getScrollEvent` wids itemPtr dir wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH=:{whWindowInfo,whItems,whSize={w,h}}}}
+		| wids.wPtr==itemPtr
+			# windowInfo	= getWindowInfoWindowData whWindowInfo
+			| isNothing windowInfo.windowVScroll		// There is no vertical scroll bar
+				= (Nothing,wsH)
+			| otherwise
+				= (Just (WindowScrollAction info),wsH)	// There is a vertical scroll bar
+		with
+			info			= {	wsaWIDS			= wids
+							  ,	wsaSliderMove	= if (dir==0) SliderDecSmall SliderIncSmall
+							  ,	wsaDirection	= Vertical
+							  }
+		# (found,sliderEvent,itemHs)= getScrollEvent wids dir itemPtr whItems
+		| found
+			= (sliderEvent,{wsH & wshHandle=Just {wlsH & wlsHandle={wH & whItems=itemHs}}})
+		| otherwise
+			= windoweventFatalError "getScrollEvent" "SliderControl could not be located"
+	where
+		getScrollEvent :: !WIDS !Int !OSWindowPtr ![WElementHandle .ls .pst] -> (!Bool,!Maybe DeviceEvent,![WElementHandle .ls .pst])
+		getScrollEvent wids dir itemPtr [itemH:itemHs]
+			# (found,sliderEvent,itemH)		= getSliderEvent wids dir itemPtr itemH
+			| found
+				= (found,sliderEvent,[itemH:itemHs])
+			| otherwise
+				# (found,sliderEvent,itemHs)= getScrollEvent wids dir itemPtr itemHs
+				= (found,sliderEvent,[itemH:itemHs])
+		where
+			getSliderEvent :: !WIDS !Int !OSWindowPtr !(WElementHandle .ls .pst) -> (!Bool,!Maybe DeviceEvent,!WElementHandle .ls .pst)
+			getSliderEvent wids dir itemPtr (WItemHandle itemH=:{wItemPtr,wItemNr,wItemKind,wItemShow,wItems,wItemInfo,wItemSize})
+				| itemPtr<>wItemPtr
+					| wItemShow
+						# (found,sliderEvent,itemHs)	= getScrollEvent wids dir itemPtr wItems
+						= (found,sliderEvent,WItemHandle {itemH & wItems=itemHs})
+					| otherwise
+						= (False,Nothing,WItemHandle itemH)
+				| wItemKind==IsCompoundControl
+					# compoundInfo	= getWItemCompoundInfo wItemInfo
+					| isNothing compoundInfo.compoundVScroll	// There is no vertical scroll bar
+						= (True,Nothing,WItemHandle itemH)
+					| otherwise
+						= (True,Just (CompoundScrollAction info),WItemHandle itemH)
+				with
+					info			= {	csaWIDS			= wids
+									  ,	csaItemNr		= wItemNr
+									  ,	csaItemPtr		= itemPtr
+									  ,	csaSliderMove	= if (dir==0) SliderDecSmall SliderIncSmall
+									  ,	csaDirection	= Vertical
+									  }
+				| otherwise
+					= (True,Just (ControlSliderAction info),WItemHandle itemH)
+				with
+					info			= {	cslWIDS			= wids
+									  ,	cslItemNr		= wItemNr
+									  ,	cslItemPtr		= itemPtr
+									  ,	cslSliderMove	= if (dir==0) SliderDecSmall SliderIncSmall
+									  }
+			
+			getSliderEvent wids dir itemPtr (WListLSHandle itemHs)
+				# (found,sliderEvent,itemHs)	= getScrollEvent wids dir itemPtr itemHs
+				= (found,sliderEvent,WListLSHandle itemHs)
+			
+			getSliderEvent wids dir itemPtr (WExtendLSHandle wExH=:{wExtendItems=itemHs})
+				# (found,sliderEvent,itemHs)	= getScrollEvent wids dir itemPtr itemHs
+				= (found,sliderEvent,WExtendLSHandle {wExH & wExtendItems=itemHs})
+			
+			getSliderEvent wids dir itemPtr (WChangeLSHandle wChH=:{wChangeItems=itemHs})
+				# (found,sliderEvent,itemHs)	= getScrollEvent wids dir itemPtr itemHs
+				= (found,sliderEvent,WChangeLSHandle {wChH & wChangeItems=itemHs})
+		
+		getScrollEvent _ _ _ []
+			= (False,Nothing,[])
+	
+	getScrollEvent` _ _ _ _
+		= windoweventFatalError "getScrollEvent`" "placeholder not expected"
 
 filterOSEvent _ {ccMsg=CcWmACTIVATE,p1=wPtr} windows ioState
 	# (found,wsH,windows)		= getWindowHandlesWindow (toWID wPtr) windows
