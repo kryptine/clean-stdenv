@@ -105,7 +105,7 @@ static LRESULT CALLBACK TCPWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara,
 
 			  SendMessage4ToClean(	CcWmINETEVENT,
 									errCode ?	IE_IPADDRESSNOTFOUND :
-												IE_IPADDRESSFOUND,							,
+												IE_IPADDRESSFOUND,							
 									elPtr->dnsHdl,
 									DNSReceiver,
 									errCode ?
