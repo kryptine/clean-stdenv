@@ -2,16 +2,16 @@ module projectAdmin
 
 import StdEnv, StdHtml
 
-derive gForm  	ProjectWorker,Project,DailyWork, ProjectPlan, Status, WorkerPlan
-derive gUpd 	ProjectWorker,Project,DailyWork, ProjectPlan, Status, WorkerPlan, Date, []
-derive gPrint	ProjectWorker,Project,DailyWork, ProjectPlan, Status, WorkerPlan, Date
-derive gParse	ProjectWorker,Project,DailyWork, ProjectPlan, Status, WorkerPlan, Date
+derive gForm  	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan
+derive gUpd 	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan, Date, []
+derive gPrint	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan, Date
+derive gParse	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan, Date
 
 //	List elements need to be displayed below each other, left aligned:
 gForm {|[]|} gHa formid [] hst
 	= ({changed = False, value = [], form =[EmptyBody]},hst)
 gForm {|[]|} gHa formid [x:xs] hst 
-	# (formx,hst)  = gHa formid x hst
+	# (formx, hst) = gHa formid x hst
 	# (formxs,hst) = gForm {|*->*|} gHa formid xs hst
 	= ({changed = False, value = [x:xs], form = [formx.form <||> formxs.form]},hst)
 //	Date should be displayed as a triplet of pull down menus, displaying (day, month, year) selections:
@@ -32,72 +32,100 @@ where
 			where
 				convert x	= toInt (toString x)
 
-
 Start world  = doHtmlServer MyPage world
 //Start world  = doHtml MyPage world
 
-:: ProjectAdmin	:== [Project]
-:: Project
-	= 	{ 	projectPlan		:: ProjectPlan
-		, 	projectStatus	:: Status
-		,	workers			:: [ProjectWorker]
-		}	
-:: ProjectPlan
-	= 	{ 	projectName		:: String
-		, 	hoursPlanned	:: Int
-		}
-:: Status
-	=	{ 	totalHoursWorked:: Int
-		, 	remainingHours	:: Int
-		}
-:: ProjectWorker
-	=	{ 	nameWorker		:: String
-		, 	statusWorker	:: Status
-		, 	investedHours	:: [WorkingTable]
-		}
-:: WorkingTable	:== (Date,Int)
-:: Date 		
-	= 	Date Int Int Int
-:: WorkerPlan
-	= 	{ 	project			:: ProjectList
-		,	workerName		:: String
-		, 	hoursToWork		:: Int
-		}
-:: DailyWork
-	=	{ 	projectId 		:: ProjectList
-		, 	myName			:: WorkersList
-		, 	date			:: Date
-		, 	hoursWorked		:: Int
-		}
+:: Project		= 	{ 	plan		:: ProjectPlan
+					, 	status		:: Status
+					,	members		:: [Worker]
+					}	
+:: ProjectPlan	= 	{ 	name		:: String
+					, 	hours		:: Int
+					}
+:: Status		=	{ 	total		:: Int
+					, 	left		:: Int
+					}
+:: Worker		=	{ 	name		:: String
+					, 	status		:: Status
+					, 	work		:: [Work]
+					}
+:: Work			:== (Date,Int)
+:: Date 		= 	Date Int Int Int
+:: WorkerPlan	= 	{ 	project		:: ProjectList
+					,	name		:: String
+					, 	hours		:: Int
+					}
+:: DailyWork	=	{ 	projectId 	:: ProjectList
+					, 	myName		:: WorkersList
+					, 	date		:: Date
+					, 	hoursWorked	:: Int
+					}
 :: ProjectList	:== PullDownMenu
 :: WorkersList	:== PullDownMenu
 
-workAdminStore :: (ProjectAdmin -> ProjectAdmin) *HSt -> (Form ProjectAdmin, *HSt)
-workAdminStore update hst = mkStoreForm (pdFormId "workadmin") myProjects update hst
+//	Form creation/update functions:
+workAdminStore :: ([Project] -> [Project]) *HSt -> (Form [Project], *HSt)
+workAdminStore update hst = mkStoreForm (pdFormId "workadmin") initProjects update hst
 
 addProjectForm :: *HSt -> (Form ProjectPlan, *HSt)
 addProjectForm hst = mkEditForm (nFormId "addproject") (initProjectPlan "" 0) hst
 
 addWorkerForm :: (WorkerPlan -> WorkerPlan) *HSt -> (Form WorkerPlan, *HSt)
-addWorkerForm update hst = mkSelf2Form  (nFormId "addworker") (initWorkerPlan "" 0 0 myProjects) update hst
+addWorkerForm update hst = mkSelf2Form  (nFormId "addworker") (initWorkerPlan "" 0 0 initProjects) update hst
 
 dailyWorkForm :: (DailyWork -> DailyWork) *HSt -> (Form DailyWork, *HSt)
-dailyWorkForm update hst = mkSelf2Form  (pFormId "daylog") (initDailyWork 0 0 myProjects) update hst
+dailyWorkForm update hst = mkSelf2Form  (pFormId "daylog") (initDailyWork 0 0 initProjects) update hst
 
-myButtonsForm :: DailyWork WorkerPlan ProjectPlan *HSt -> (Form (ProjectAdmin -> ProjectAdmin), *HSt)
+myButtonsForm :: DailyWork WorkerPlan ProjectPlan *HSt -> (Form ([Project] -> [Project]), *HSt)
 myButtonsForm daylog workplan project hst = ListFuncBut False (nFormId "mybuttons") myButtons hst
 where
 	myButtons = [ (LButton defpixel "addProject", addNewProject  project )
 				, (LButton defpixel "addWorker",  addNewWorkplan workplan)
 				, (LButton defpixel "addHours",   addDailyWork   daylog  )
 				]
+	
+	addNewProject :: ProjectPlan -> [Project] -> [Project]
+	addNewProject {ProjectPlan|name,hours} = flip (:^) (initProject name hours)
+	
+	addNewWorkplan :: WorkerPlan -> [Project] -> [Project]
+	addNewWorkplan worker=:{project,name,hours}
+		= updateElt (\{plan={ProjectPlan|name,hours}} -> name == toString project)
+		            (\p -> {p & members = [initWorker name hours:p.members]})
+	
+	addDailyWork :: DailyWork [Project] -> [Project]
+	addDailyWork daylog projects
+		| daylog.hoursWorked == 0 || toString daylog.myName == "" || isEmpty projects
+						= projects
+		| otherwise 	= updateAt (toInt daylog.projectId) updatedProject projects
+	where
+		{status,plan=plan=:{ProjectPlan|hours},members}
+					 	= projects!!(toInt daylog.projectId)
+		totalHoursSpent = status.total + daylog.hoursWorked
+		remainingHours	= hours - totalHoursSpent
+		updatedProject 	= { status  = initStatus remainingHours totalHoursSpent
+						  , members = addDay daylog members
+						  , plan    = plan
+						  }
+		nworklog		= { name    = daylog.myName
+						  , work    = [(daylog.date,daylog.hoursWorked)]
+						  , status  = initStatus 0 0
+						  }
+	
+		addDay :: DailyWork -> [Worker] -> [Worker]
+		addDay nwork=:{myName,date,hoursWorked}
+			= updateElt (\owork=:{Worker|name} -> name == toString myName)
+			            (\owork=:{Worker|status,work}
+			                  -> {owork & work   = work ++ [(date,hoursWorked)]
+			                            , status = {status & total=status.total+hoursWorked
+			                                               , left =status.left -hoursWorked
+			                     }                 })
 
 MyPage hst
 	# (projects,hst) = workAdminStore id hst
 	# (project, hst) = addProjectForm    hst
 	# (worker,  hst) = addWorkerForm  id hst
 	# (daylog,  hst) = dailyWorkForm  id hst
-	# (update,  hst) = myButtonsForm daylog.value worker.value project.value hst
+	# (update,  hst) = myButtonsForm  daylog.value worker.value project.value hst
 	# (projects,hst) = workAdminStore update.value hst
 	# (daylog,  hst) = dailyWorkForm (adjDailyWork projects.value) hst
 	# (worker,  hst) = addWorkerForm (adjWorkers   projects.value) hst
@@ -105,122 +133,111 @@ MyPage hst
 	= mkHtml "table test"
 		[ H1 [] "Project Administration"
 		, Br
-		, STable [] 
-		  [ [ lTxt "Add New Project:",lTxt "Add New Worker:": if no_projects [] [lTxt "Administrate Worked Hours:"]]
-		  , [ toBody project,         toBody worker         : if no_projects [] [toBody daylog                    ]]
-		  , [ update.form!!0,         update.form!!1        : if no_projects [] [update.form!!2                   ]]
-		  ]
-		, Br, Br
-		: if no_projects []
-		[ Br, Br, BodyTag [ lTxt "Current Status of Project: \t\t"
-		                               <.||.>
-		                    toHtml (projects.value!!(toInt daylog.value.projectId))
-		]                 ]
+		, STable []
+			[ [ STable [] 
+					[ [ lTxt "Add New Project:"]
+					, [ toBody project ]
+					, [ update.form!!0 ]
+					, [ lTxt "Add New Worker:"]
+					, [ toBody worker  ]
+					, [ update.form!!1 ]
+					: if no_projects [] 
+					[ [lTxt "Administrate Worked Hours:"]
+					, [ toBody daylog  ]
+					, [ update.form!!2 ]
+					]
+					]
+			  : if no_projects []
+			  [ STable []
+					[ [ lTxt "Current Status of Project: \t\t" ]
+					, [ toHtml (projects.value!!(toInt daylog.value.projectId)) ]
+					]
+			  ]]
+			]
 		] hst
 where
 	lTxt s = B [] s
+	
+	adjDailyWork :: [Project] DailyWork  -> DailyWork
+	adjDailyWork projects daylog=:{projectId}
+		= {	daylog & projectId = addProjectList projectId projects
+		           , myName    = initWorkersList (toInt daylog.myName) (toInt projectId) projects
+		  }
+	
+	adjWorkers :: [Project] WorkerPlan -> WorkerPlan
+	adjWorkers projects worker = {worker & project = addProjectList worker.project projects}
+	
+	addProjectList :: PullDownMenu [Project] -> PullDownMenu
+	addProjectList (PullDown pxls (i,_)) projects = PullDown pxls (i,[name \\ {plan={ProjectPlan|name}} <- projects])
 
-myProjects :: [Project]
-myProjects = []
+//	Initial values of the work administration's data structures:
+initProjects :: [Project]
+initProjects = []
 
 initProject :: String Int -> Project
 initProject name hours
-	= 	{ projectPlan		= initProjectPlan name hours
-		, projectStatus		= initStatus hours 0
-		, workers			= []
-		}	
+	= 	{ plan			= initProjectPlan name hours
+		, status		= initStatus hours 0
+		, members		= [] }
+	
 initProjectPlan :: String Int -> ProjectPlan
 initProjectPlan name hours
-	= 	{ projectName	= name
-		, hoursPlanned	= hours
-		}
+	= 	{ProjectPlan
+		| name			= name
+		, hours			= hours }
+
 initStatus :: Int Int -> Status
 initStatus todo done
-	=	{ totalHoursWorked	= done
-		, remainingHours	= todo
-		}
-initWorkerPlan :: String Int Int ProjectAdmin -> WorkerPlan
+	=	{ total			= done
+		, left			= todo }
+
+initWorkerPlan :: String Int Int [Project] -> WorkerPlan
 initWorkerPlan name hours i projects
-	= 	{ 	project			= initProjectList i projects
-		,	workerName		= name
-		, 	hoursToWork		= hours
-		}
-initProjectWorker :: String Int -> ProjectWorker
-initProjectWorker name hours
-	=	{ 	nameWorker		= name
-		, 	statusWorker	= initStatus hours 0
-		, 	investedHours	= []
-		}
-initDailyWork :: Int Int ProjectAdmin -> DailyWork
+	= 	{ project		= initProjectList i projects
+		, name			= name
+		, hours			= hours }
+
+initWorker :: String Int -> Worker
+initWorker name hours
+	=	{ name			= name
+		, status		= initStatus hours 0
+		, work			= [] }
+
+initDailyWork :: Int Int [Project] -> DailyWork
 initDailyWork i j projects
-	=	{ myName 				= initWorkersList i j projects
-		, projectId 			= initProjectList i projects
-		, date					= initDate
-		, hoursWorked			= 0
-		}
-where
-	initDate :: Date	
-	initDate = Date 1 1 2005
+	=	{ myName 		= initWorkersList i j projects
+		, projectId 	= initProjectList i projects
+		, date			= initDate
+		, hoursWorked	= 0 }
 
-initProjectList :: Int ProjectAdmin -> PullDownMenu
-initProjectList i projects = PullDown (1,defpixel) (i,[projectPlan.projectName \\ {projectPlan} <- projects])
+initDate :: Date	
+initDate = Date 1 1 2005
 
-initWorkersList :: Int Int ProjectAdmin -> PullDownMenu
-initWorkersList i j [] = PullDown (1,defpixel) (0,[])
-initWorkersList i j projects = PullDown (1,defpixel) (i,[nameWorker \\ {nameWorker} <- (projects!!j).workers])
+initWorkersList :: Int Int [Project] -> PullDownMenu
+initWorkersList i j []			= PullDown (1,defpixel) (0,[])
+initWorkersList i j projects	= PullDown (1,defpixel) (i,[name \\ {Worker|name} <- (projects!!j).members])
 
-adjDailyWork :: ProjectAdmin DailyWork  -> DailyWork
-adjDailyWork projects daylog=:{projectId} = {	daylog 
-											& 	projectId = addProjectList projectId projects
-											,	myName = initWorkersList (toInt daylog.myName) (toInt projectId) projects
-											}
+initProjectList :: Int [Project] -> PullDownMenu
+initProjectList i projects		= PullDown (1,defpixel) (i,[name \\ {plan={ProjectPlan|name}} <- projects])
 
-addProjectList :: PullDownMenu ProjectAdmin -> PullDownMenu
-addProjectList (PullDown pxls (i,_)) projects = (PullDown pxls (i,[projectPlan.projectName \\ {projectPlan} <- projects]))
+//	Useful list operations:
+updateElt :: (a -> Bool) (a -> a) [a] -> [a]
+updateElt c f [] = []
+updateElt c f [a:as]
+	| c a		= [f a:as]
+	| otherwise	= [a:updateElt c f as]
 
-addNewProject :: ProjectPlan ProjectAdmin -> ProjectAdmin
-addNewProject {projectName,hoursPlanned} projects = projects ++ [initProject projectName hoursPlanned]
+updateElts :: (a -> Bool) (a -> a) [a] -> [a]
+updateElts c f [] = []
+updateElts c f [a:as]
+	| c a		= [f a:updateElts c f as]
+	| otherwise	= [  a:updateElts c f as]
 
-addDailyWork :: DailyWork [Project] -> [Project]
-addDailyWork daylog [] = []
-addDailyWork daylog projects
-	| daylog.hoursWorked == 0 || toString daylog.myName == "" = projects
-	| otherwise = updateAt (toInt daylog.projectId) updatedProject projects
-where
-	thisProject 		= projects!!(toInt daylog.projectId)
-	totalHoursSpended 	= thisProject.projectStatus.totalHoursWorked + daylog.hoursWorked
-	remainingHours		= thisProject.projectPlan.hoursPlanned - totalHoursSpended
-	updatedProject 		= {thisProject	
-							& projectStatus = initStatus remainingHours totalHoursSpended
-							, workers 		= addDay daylog thisProject.workers}
-	nworklog = { nameWorker = daylog.myName
-				, investedHours = [(daylog.date,daylog.hoursWorked)]
-				, statusWorker = initStatus 0 0
-				}
+(^:) infixr 5 :: a [a] -> [a]
+(^:) a as = [a:as]
 
-	addDay :: DailyWork [ProjectWorker] -> [ProjectWorker]
-	addDay {myName,date,hoursWorked} [] = []
-	addDay nwork=:{myName,date,hoursWorked} [owork=:{nameWorker,statusWorker,investedHours}:worklogs]
-		| toString myName == nameWorker
-			= [{owork & investedHours = investedHours ++ [(date,hoursWorked)]
-			          , statusWorker.totalHoursWorked = statusWorker.totalHoursWorked + hoursWorked
-			          , statusWorker.remainingHours = statusWorker.remainingHours - hoursWorked
-			   }
-			  :worklogs
-			  ]
-		| otherwise
-			= [owork: addDay nwork worklogs]
-
-addNewWorkplan :: WorkerPlan [Project] -> [Project]
-addNewWorkplan {project,workerName,hoursToWork} [] = []
-addNewWorkplan worker=:{project,workerName,hoursToWork} [p:ps]
-	| p.projectPlan.projectName == toString project 
-				= [{p & workers = [initProjectWorker workerName hoursToWork:p.workers]}:ps]
-	| otherwise = [p: addNewWorkplan worker ps]
-
-adjWorkers :: [Project] WorkerPlan -> WorkerPlan
-adjWorkers projects worker = {worker & project = addProjectList worker.project projects}
-
+(:^) infixl 5 :: [a] a -> [a]
+(:^) as a = as ++ [a]
 
 //	Monadic digression:
 ::	StM st a :== st -> .(!a,!st)
