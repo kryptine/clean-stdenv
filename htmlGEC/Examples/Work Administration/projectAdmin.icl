@@ -64,20 +64,20 @@ Start world  = doHtmlServer MyPage world
 :: WorkersList	:== PullDownMenu
 
 //	Form creation/update functions:
-workAdminForm :: ([Project] -> [Project]) *HSt -> (Form [Project], *HSt)
-workAdminForm update hst = mkStoreForm (pdFormId "workadmin") initProjects update hst
+adminForm :: ([Project] -> [Project]) *HSt -> (Form [Project], *HSt)
+adminForm update hst = mkStoreForm (pdFormId "admin") initProjects update hst
 
-addProjectForm :: *HSt -> (Form ProjectPlan, *HSt)
-addProjectForm hst = mkEditForm (nFormId "addproject") (initProjectPlan "" 0) hst
+projectForm :: *HSt -> (Form ProjectPlan, *HSt)
+projectForm hst = mkEditForm (nFormId "project") (initProjectPlan "" 0) hst
 
-addWorkerForm :: (WorkerPlan -> WorkerPlan) *HSt -> (Form WorkerPlan, *HSt)
-addWorkerForm update hst = mkSelf2Form  (nFormId "addworker") (initWorkerPlan "" 0 0 initProjects) update hst
+workerForm :: (WorkerPlan -> WorkerPlan) *HSt -> (Form WorkerPlan, *HSt)
+workerForm update hst = mkSelf2Form  (nFormId "worker") (initWorkerPlan "" 0 0 initProjects) update hst
 
-dailyWorkForm :: (DailyWork -> DailyWork) *HSt -> (Form DailyWork, *HSt)
-dailyWorkForm update hst = mkSelf2Form  (pFormId "daylog") (initDailyWork 0 0 initProjects) update hst
+hoursForm :: (DailyWork -> DailyWork) *HSt -> (Form DailyWork, *HSt)
+hoursForm update hst = mkSelf2Form  (pFormId "hours") (initDailyWork 0 0 initProjects) update hst
 
 buttonsForm :: DailyWork WorkerPlan ProjectPlan *HSt -> (Form ([Project] -> [Project]), *HSt)
-buttonsForm daylog workplan project hst = ListFuncBut False (nFormId "mybuttons") myButtons hst
+buttonsForm daylog workplan project hst = ListFuncBut False (nFormId "buttons") myButtons hst
 where
 	myButtons = [ (LButton defpixel "addProject", addNewProject  project )
 				, (LButton defpixel "addWorker",  addNewWorkplan workplan)
@@ -125,14 +125,14 @@ MyPage hst
 where
 	updateForms :: *HSt -> ((Form [Project],Form ProjectPlan,Form WorkerPlan,Form DailyWork,Form ([Project] -> [Project])),*HSt)
 	updateForms hst
-		# (projects,hst) = workAdminForm id hst
-		# (project, hst) = addProjectForm    hst
-		# (worker,  hst) = addWorkerForm  id hst
-		# (daylog,  hst) = dailyWorkForm  id hst
-		# (update,  hst) = buttonsForm  daylog.value worker.value project.value hst
-		# (projects,hst) = workAdminForm update.value hst
-		# (daylog,  hst) = dailyWorkForm (adjDailyWork projects.value) hst
-		# (worker,  hst) = addWorkerForm (adjWorkers   projects.value) hst
+		# (projects,hst) = adminForm   id hst
+		# (project, hst) = projectForm    hst
+		# (worker,  hst) = workerForm  id hst
+		# (daylog,  hst) = hoursForm   id hst
+		# (update,  hst) = buttonsForm daylog.value worker.value project.value hst
+		# (projects,hst) = adminForm   update.value hst
+		# (daylog,  hst) = hoursForm  (adjDailyWork projects.value) hst
+		# (worker,  hst) = workerForm (adjWorkers   projects.value) hst
 		= ((projects,project,worker,daylog,update),hst)
 	where
 		adjDailyWork :: [Project] DailyWork -> DailyWork
