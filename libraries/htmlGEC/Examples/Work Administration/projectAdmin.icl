@@ -64,8 +64,8 @@ Start world  = doHtmlServer MyPage world
 :: WorkersList	:== PullDownMenu
 
 //	Form creation/update functions:
-workAdminStore :: ([Project] -> [Project]) *HSt -> (Form [Project], *HSt)
-workAdminStore update hst = mkStoreForm (pdFormId "workadmin") initProjects update hst
+workAdminForm :: ([Project] -> [Project]) *HSt -> (Form [Project], *HSt)
+workAdminForm update hst = mkStoreForm (pdFormId "workadmin") initProjects update hst
 
 addProjectForm :: *HSt -> (Form ProjectPlan, *HSt)
 addProjectForm hst = mkEditForm (nFormId "addproject") (initProjectPlan "" 0) hst
@@ -76,8 +76,8 @@ addWorkerForm update hst = mkSelf2Form  (nFormId "addworker") (initWorkerPlan ""
 dailyWorkForm :: (DailyWork -> DailyWork) *HSt -> (Form DailyWork, *HSt)
 dailyWorkForm update hst = mkSelf2Form  (pFormId "daylog") (initDailyWork 0 0 initProjects) update hst
 
-myButtonsForm :: DailyWork WorkerPlan ProjectPlan *HSt -> (Form ([Project] -> [Project]), *HSt)
-myButtonsForm daylog workplan project hst = ListFuncBut False (nFormId "mybuttons") myButtons hst
+buttonsForm :: DailyWork WorkerPlan ProjectPlan *HSt -> (Form ([Project] -> [Project]), *HSt)
+buttonsForm daylog workplan project hst = ListFuncBut False (nFormId "mybuttons") myButtons hst
 where
 	myButtons = [ (LButton defpixel "addProject", addNewProject  project )
 				, (LButton defpixel "addWorker",  addNewWorkplan workplan)
@@ -121,54 +121,54 @@ where
 			                     }                 })
 
 MyPage hst
-	# (projects,hst) = workAdminStore id hst
-	# (project, hst) = addProjectForm    hst
-	# (worker,  hst) = addWorkerForm  id hst
-	# (daylog,  hst) = dailyWorkForm  id hst
-	# (update,  hst) = myButtonsForm  daylog.value worker.value project.value hst
-	# (projects,hst) = workAdminStore update.value hst
-	# (daylog,  hst) = dailyWorkForm (adjDailyWork projects.value) hst
-	# (worker,  hst) = addWorkerForm (adjWorkers   projects.value) hst
-	# no_projects    = isEmpty projects.value
-	= mkHtml "table test"
-		[ H1 [] "Project Administration"
-		, Br
-		, STable []
-			[ [ STable [] 
-					[ [ lTxt "Add New Project:"]
-					, [ toBody project ]
-					, [ update.form!!0 ]
-					, [ lTxt "Add New Worker:"]
-					, [ toBody worker  ]
-					, [ update.form!!1 ]
-					: if no_projects [] 
-					[ [lTxt "Administrate Worked Hours:"]
-					, [ toBody daylog  ]
-					, [ update.form!!2 ]
-					]
-					]
-			  : if no_projects []
-			  [ STable []
-					[ [ lTxt "Current Status of Project: \t\t" ]
-					, [ toHtml (projects.value!!(toInt daylog.value.projectId)) ]
-					]
-			  ]]
-			]
-		] hst
+	= updatePage (updateForms hst)
 where
-	lTxt s = B [] s
+	updateForms :: *HSt -> ((Form [Project],Form ProjectPlan,Form WorkerPlan,Form DailyWork,Form ([Project] -> [Project])),*HSt)
+	updateForms hst
+		# (projects,hst) = workAdminForm id hst
+		# (project, hst) = addProjectForm    hst
+		# (worker,  hst) = addWorkerForm  id hst
+		# (daylog,  hst) = dailyWorkForm  id hst
+		# (update,  hst) = buttonsForm  daylog.value worker.value project.value hst
+		# (projects,hst) = workAdminForm update.value hst
+		# (daylog,  hst) = dailyWorkForm (adjDailyWork projects.value) hst
+		# (worker,  hst) = addWorkerForm (adjWorkers   projects.value) hst
+		= ((projects,project,worker,daylog,update),hst)
+	where
+		adjDailyWork :: [Project] DailyWork -> DailyWork
+		adjDailyWork projects daylog=:{projectId}
+			= {	daylog & projectId = addProjectList projects projectId
+			           , myName    = initWorkersList (toInt daylog.myName) (toInt projectId) projects
+			  }
+		
+		adjWorkers :: [Project] WorkerPlan -> WorkerPlan
+		adjWorkers projects worker = {worker & project = addProjectList projects worker.project}
+		
+		addProjectList :: [Project] PullDownMenu -> PullDownMenu
+		addProjectList projects (PullDown dim (i,_)) = PullDown dim (i,[name \\ {plan={ProjectPlan|name}} <- projects])
 	
-	adjDailyWork :: [Project] DailyWork  -> DailyWork
-	adjDailyWork projects daylog=:{projectId}
-		= {	daylog & projectId = addProjectList projectId projects
-		           , myName    = initWorkersList (toInt daylog.myName) (toInt projectId) projects
-		  }
-	
-	adjWorkers :: [Project] WorkerPlan -> WorkerPlan
-	adjWorkers projects worker = {worker & project = addProjectList worker.project projects}
-	
-	addProjectList :: PullDownMenu [Project] -> PullDownMenu
-	addProjectList (PullDown pxls (i,_)) projects = PullDown pxls (i,[name \\ {plan={ProjectPlan|name}} <- projects])
+	updatePage :: ((Form [Project],Form ProjectPlan,Form WorkerPlan,Form DailyWork,Form ([Project] -> [Project])),*HSt) -> (Html,*HSt)
+	updatePage ((projects,project,worker,daylog,update),hst)
+		= mkHtml "table test"
+			[ H1 [] "Project Administration"
+			, STable []
+				[ [ STable [] 
+						[ [lTxt "Add New Project:"],           project.form,[update.form!!0]
+						, [lTxt "Add New Worker:"],            worker.form, [update.form!!1]
+						: if no_projects [] 
+						[ [lTxt "Administrate Worked Hours:"], daylog.form, [update.form!!2]]
+						]
+				  : if no_projects []
+				  [ STable []
+						[ [ lTxt "Current Status of Project:" ]
+						, [ toHtml (projects.value!!(toInt daylog.value.projectId)) ]
+						]
+				  ]]
+				]
+			] hst
+	where
+		no_projects	= isEmpty projects.value
+		lTxt s		= B [] s
 
 //	Initial values of the work administration's data structures:
 initProjects :: [Project]
