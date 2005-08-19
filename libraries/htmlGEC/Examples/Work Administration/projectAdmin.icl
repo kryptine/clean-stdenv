@@ -32,8 +32,8 @@ where
 			where
 				convert x	= toInt (toString x)
 
-Start world  = doHtmlServer MyPage world
-//Start world  = doHtml MyPage world
+Start world  = doHtmlServer ProjectAdminPage world
+//Start world  = doHtml ProjectAdminPage world
 
 :: Project		= 	{ 	plan		:: ProjectPlan
 					, 	status		:: Status
@@ -120,20 +120,21 @@ where
 			                                               , left =status.left -hoursWorked
 			                     }                 })
 
-MyPage hst
+ProjectAdminPage :: *HSt -> (Html,*HSt)
+ProjectAdminPage hst
 	= updatePage (updateForms hst)
 where
 	updateForms :: *HSt -> ((Form [Project],Form ProjectPlan,Form WorkerPlan,Form DailyWork,Form ([Project] -> [Project])),*HSt)
 	updateForms hst
-		# (projects,hst) = adminForm   id hst
-		# (project, hst) = projectForm    hst
-		# (worker,  hst) = workerForm  id hst
-		# (daylog,  hst) = hoursForm   id hst
-		# (update,  hst) = buttonsForm daylog.value worker.value project.value hst
-		# (projects,hst) = adminForm   update.value hst
-		# (daylog,  hst) = hoursForm  (adjDailyWork projects.value) hst
-		# (worker,  hst) = workerForm (adjWorkers   projects.value) hst
-		= ((projects,project,worker,daylog,update),hst)
+		# (adminF,  hst) = adminForm   id hst
+		# (projectF,hst) = projectForm    hst
+		# (workerF, hst) = workerForm  id hst
+		# (hoursF,  hst) = hoursForm   id hst
+		# (buttonsF,hst) = buttonsForm hoursF.value workerF.value projectF.value hst
+		# (adminF,  hst) = adminForm   buttonsF.value hst
+		# (hoursF,  hst) = hoursForm  (adjDailyWork adminF.value) hst
+		# (workerF, hst) = workerForm (adjWorkers   adminF.value) hst
+		= ((adminF,projectF,workerF,hoursF,buttonsF),hst)
 	where
 		adjDailyWork :: [Project] DailyWork -> DailyWork
 		adjDailyWork projects daylog=:{projectId}
@@ -148,27 +149,28 @@ where
 		addProjectList projects (PullDown dim (i,_)) = PullDown dim (i,[name \\ {plan={ProjectPlan|name}} <- projects])
 	
 	updatePage :: ((Form [Project],Form ProjectPlan,Form WorkerPlan,Form DailyWork,Form ([Project] -> [Project])),*HSt) -> (Html,*HSt)
-	updatePage ((projects,project,worker,daylog,update),hst)
+	updatePage ((adminF,projectF,workerF,hoursF,buttonsF),hst)
 		= mkHtml "table test"
 			[ H1 [] "Project Administration"
 			, STable []
 				[ [ STable [] 
-						[ [lTxt "Add New Project:"],           project.form,[update.form!!0]
-						, [lTxt "Add New Worker:"],            worker.form, [update.form!!1]
+						[ [lTxt "Add New Project:"],          projectF.form,[projectButton]
+						, [lTxt "Add New Worker:"],           workerF.form, [workerButton]
 						: if no_projects [] 
-						[ [lTxt "Administrate Worked Hours:"], daylog.form, [update.form!!2]]
+						[ [lTxt "Administrate Worked Hours:"],hoursF.form,  [hoursButton]]
 						]
 				  : if no_projects []
 				  [ STable []
 						[ [ lTxt "Current Status of Project:" ]
-						, [ toHtml (projects.value!!(toInt daylog.value.projectId)) ]
+						, [ toHtml (adminF.value!!(toInt hoursF.value.projectId)) ]
 						]
 				  ]]
 				]
 			] hst
 	where
-		no_projects	= isEmpty projects.value
+		no_projects	= isEmpty adminF.value
 		lTxt s		= B [] s
+		[projectButton,workerButton,hoursButton:_] = buttonsF.form
 
 //	Initial values of the work administration's data structures:
 initProjects :: [Project]
