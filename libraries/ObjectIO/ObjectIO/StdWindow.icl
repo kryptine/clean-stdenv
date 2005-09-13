@@ -1141,20 +1141,18 @@ getWindowViewFrame id ioState
 
 //	getwindowviewframe is also used by getWindowOuterSize.
 getwindowviewframe :: !OSWindowMetrics !(WindowStateHandle .pst) -> (!ViewFrame,!WindowStateHandle .pst)
-getwindowviewframe wMetrics wsH=:{wshIds={wPtr},wshHandle=Just wlsH=:{wlsHandle=wH}}
-	| wKind==IsWindow
+getwindowviewframe wMetrics wsH=:{wshIds={wPtr},wshHandle=Just wlsH=:{wlsHandle={whSize,whKind,whWindowInfo}}}
+	| whKind==IsWindow
 		= (rectToRectangle contentRect,wsH)
 	| otherwise
-		= (sizeToRectangle wSize,wsH)
+		= (sizeToRectangle whSize,wsH)
 where
-	wSize		= wH.whSize
-	wKind		= wH.whKind
 	(origin,domainRect,hasHScroll,hasVScroll)
-				= case wH.whWindowInfo of
+				= case whWindowInfo of
 					WindowInfo info	-> (info.windowOrigin,info.windowDomain,isJust info.windowHScroll,isJust info.windowVScroll)
 					other			-> stdWindowFatalError "getWindowViewFrame" "Window has no WindowInfo"
-	visScrolls	= osScrollbarsAreVisible wMetrics domainRect (toTuple wSize) (hasHScroll,hasVScroll)
-	contentRect	= osGetWindowContentRect wMetrics visScrolls (posSizeToRect origin wSize)
+	visScrolls	= osScrollbarsAreVisible wMetrics domainRect (toTuple whSize) (hasHScroll,hasVScroll)
+	contentRect	= osGetWindowContentRect wMetrics visScrolls (posSizeToRect origin whSize)
 getwindowviewframe _ _
 	= stdWindowFatalError "getWindowViewFrame" "unexpected window placeholder argument"
 
@@ -1201,7 +1199,7 @@ setWindowViewSize wid reqSize ioState
 		= ioStSetDevice (WindowSystemState (setWindowHandlesWindow wsH windows)) ioState
 where
 	validateSize :: !OSWindowMetrics !Size !(WindowStateHandle .pst) -> (!Bool,!Size,!Size,!WindowStateHandle .pst)
-	validateSize wMetrics reqSize wsH=:{wshHandle=Just wlsH=:{wlsHandle=wH}}
+	validateSize wMetrics reqSize wsH=:{wshHandle=Just wlsH=:{wlsHandle={whSize=curSize,whWindowInfo}}}
 		# (visHScroll,visVScroll)
 							= osScrollbarsAreVisible wMetrics domainRect (toTuple curSize) (hasHScroll,hasVScroll)
 		  newW				= if visVScroll (okSize.w+wMetrics.osmVSliderWidth)  okSize.w	// Correct newW in case of visible vertical   scrollbar
@@ -1212,9 +1210,8 @@ where
 		minSize				= {w=minWidth,h=minHeight}
 		maxSize				= maxScrollWindowSize
 		okSize				= {w=setBetween reqSize.w minSize.w maxSize.w,h=setBetween reqSize.h minSize.h maxSize.h}
-		curSize				= wH.whSize
 	//	windowInfo			= fromJust wH.whWindowInfo	Mike: fromJust changed into getWindowInfoWindowData
-		windowInfo			= getWindowInfoWindowData wH.whWindowInfo
+		windowInfo			= getWindowInfoWindowData whWindowInfo
 		domainRect			= windowInfo.windowDomain
 		hasHScroll			= isJust windowInfo.windowHScroll
 		hasVScroll			= isJust windowInfo.windowVScroll
