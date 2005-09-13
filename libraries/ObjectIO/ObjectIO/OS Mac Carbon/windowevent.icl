@@ -385,6 +385,7 @@ where
 			# (found,(itemPtr,itemKind),whItems)
 				= getItemPtrAndKind itControl whItems
 			| trace_n ("controlMouseUpEvent",itControl,itemPtr) False = undef
+			# wsH={wsH & wshHandle=Just {dlsH & wlsHandle={wlsH & whItems = whItems}}}
 			# controlInfo
 				= Just (ControlMouseAction {cmWIDS=wshIds,cmItemNr=itControl,cmItemPtr=itemPtr,cmMouseState=mouseState})
 //			= (Nothing,wsH,pState)
@@ -657,6 +658,7 @@ where
 		# (found,(itemPtr,itemKind),whItems)
 			= getItemPtrAndKind itControl whItems
 		| trace_n ("controlMouseDragEvent",itControl,itemPtr) False = undef
+		# wsH={wsH & wshHandle=Just {dlsH & wlsHandle={wlsH & whItems = whItems}}}
 		# controlInfo
 			= Just (ControlMouseAction {cmWIDS=wshIds,cmItemNr=itControl,cmItemPtr=itemPtr,cmMouseState=mouseState})
 //			= (Nothing,wsH,pState)
@@ -1015,25 +1017,29 @@ windowUpdateIO :: !(WindowStateHandle (PSt .l)) !OSEvent !(WindowHandles (PSt .l
   -> (!Bool,!Maybe [Int],!Maybe DeviceEvent,!(PSt .l))
 windowUpdateIO {wshHandle = Nothing} _ _ _
 	= windoweventFatalError "windowUpdateIO" "window placeholder not expected"
-windowUpdateIO
-	wsH=:{wshHandle = Just wlsH=:{wlsState = ls, wlsHandle = wH=:{whItems,whSize,whKind,whWindowInfo = info}}}
-	(_,_,wPtr,_,_,_,_) windows pState
-
-	# (wids,wsH)			= getWindowStateHandleWIDS wsH
-	# (updRect,pState)		//= ({rleft=0,rtop=0,rright=400,rbottom=400},pState)
-							= accPIO (accIOToolbox (loadUpdateBBox wPtr)) pState
-	# clipRect				= intersectRects updRect (sizeToRect whSize)
-	# (controls,whItems)	= getUpdateControls whItems clipRect zero
-	# (info,pState) = case info of 
-						NoWindowInfo			-> (NoWindowInfo,pState)
-						(GameWindowInfo inf)	-> (GameWindowInfo inf,pState)
-						(WindowInfo inf)		-> accPIO (accIOToolbox (doWindowScrollers wPtr inf whSize)) pState
-	# wsH					= {wsH & wshHandle = Just {wlsState = ls, wlsHandle = {wH & whItems = whItems, whWindowInfo = info}}}
-	# updateInfo			= {updWIDS=wids,updWindowArea=clipRect,updControls=controls,updGContext=Nothing}
-	# windows				= setWindowHandlesWindow wsH windows
-	# pState				= appPIO (ioStSetDevice (WindowSystemState windows)) pState
-	= (True,Nothing,Just (WindowUpdate updateInfo),pState)
+windowUpdateIO wsH (_,_,wPtr,_,_,_,_) windows pState
+	# (wids,wsH) = getWindowStateHandleWIDS wsH
+	= windowUpdateIO wsH wids wPtr windows pState
 where
+	windowUpdateIO :: !(WindowStateHandle (PSt .l)) !WIDS !Int !(WindowHandles (PSt .l)) !(PSt .l)
+	  -> (!Bool,!Maybe [Int],!Maybe DeviceEvent,!(PSt .l))
+	windowUpdateIO
+		wsH=:{wshHandle = Just wlsH=:{wlsState = ls, wlsHandle = wH=:{whItems,whSize,whKind,whWindowInfo = info}}}
+		wids wPtr windows pState
+		# (updRect,pState)		//= ({rleft=0,rtop=0,rright=400,rbottom=400},pState)
+								= accPIO (accIOToolbox (loadUpdateBBox wPtr)) pState
+		# clipRect				= intersectRects updRect (sizeToRect whSize)
+		# (controls,whItems)	= getUpdateControls whItems clipRect zero
+		# (info,pState) = case info of 
+							NoWindowInfo			-> (NoWindowInfo,pState)
+							(GameWindowInfo inf)	-> (GameWindowInfo inf,pState)
+							(WindowInfo inf)		-> accPIO (accIOToolbox (doWindowScrollers wPtr inf whSize)) pState
+		# wsH					= {wsH & wshHandle = Just {wlsState = ls, wlsHandle = {wH & whItems = whItems, whWindowInfo = info}}}
+		# updateInfo			= {updWIDS=wids,updWindowArea=clipRect,updControls=controls,updGContext=Nothing}
+		# windows				= setWindowHandlesWindow wsH windows
+		# pState				= appPIO (ioStSetDevice (WindowSystemState windows)) pState
+		= (True,Nothing,Just (WindowUpdate updateInfo),pState)
+
 	getUpdateControls :: ![WElementHandle .ls .pst] !OSRect !Point2 -> ([ControlUpdateInfo],[WElementHandle .ls .pst])
 	getUpdateControls [] _ parent_pos
 		= ([],[])
