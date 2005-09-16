@@ -15,6 +15,7 @@ TraceInput :== False
 
 doHtml 			:: .(*HSt -> (Html,!*HSt)) *World -> *World  	// use this application with some external server and php
 doHtmlServer 	:: (*HSt -> (Html,!*HSt))  *World -> *World 	// use this application with the build-in Clean server
+doHtmlTest 		:: (*HSt -> (Html,!*HSt))  *World -> ([(InputType,Value,String)],*World) // use this for testing
 
 :: *HSt 								// unique state required for creating Html forms
 instance FileSystem HSt					// enabling file IO on HSt
@@ -90,12 +91,3 @@ derive gParse 	(,), (,,), (,,,), (<->), <|>, DisplayMode, Button, CheckBox, Radi
 
 specialize :: (FormId a *HSt -> (Form a,*HSt)) FormId a *HSt -> (Form a,*HSt) | gUpd {|*|} a
 
-// for tesing in collaboration with GAST
-
-emptyState 			:: *World 	-> *HSt			// create empty HSt
-resetState 			:: *HSt 	-> *HSt			// create empty HSt
-calcPossibleInputs 	:: (*HSt -> (Html,!*HSt)) *HSt -> ([(InputType,Value,String)],*HSt) // set of all possible inputs
-setInput 			:: (InputType,Value,String) *HSt -> *HSt // sets this input in the state **** not ok yet
-doHtmlTest 			:: .(*HSt -> (Html,!*HSt)) *HSt -> (Html,*HSt) // determines new state
-printHtmlTest 		:: Html !*HSt -> *World // print html to view in browser
-doHtmlServer2 		:: (*HSt -> (Html,!*HSt)) *World -> *World
