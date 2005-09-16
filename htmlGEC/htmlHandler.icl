@@ -105,6 +105,36 @@ where
 	
 		debugInput = if TraceInput (traceHtmlInput Internal (Just args)) EmptyBody
 
+// just for testing
+
+doHtmlTest :: (*HSt -> (Html,!*HSt)) *World -> ([(InputType,Value,String)],*World)
+doHtmlTest userpage world 
+# (inout,world) 		= stdio world						// open stdin and stdout channels
+# nworld 				= {worldC = world, inout = inout}	
+# (initstates,nworld) 	= initTestFormStates nworld			// initial empty states
+= repeatTest userpage initstates nworld
+where
+//	repeatTest userpage states nworld [] = nworld.worldC
+	repeatTest userpage states nworld
+	# (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
+						= userpage {cntr = 0, states = states, world = nworld}
+	# options = fetchInputOptions bodytags
+	= (options,world.worldC)
+	
+	fetchInputOptions :: [BodyTag] -> [(InputType,Value,String)]
+	fetchInputOptions [] 						= []
+	fetchInputOptions [Input info _  :inputs]	= fetchInputOption info   ++ fetchInputOptions inputs
+	fetchInputOptions [BodyTag bdtag :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Table _ bdtag :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Td _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Tr _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [STable _ bdtags :inputs] = flatten (map fetchInputOptions bdtags) ++ fetchInputOptions inputs
+	fetchInputOptions [_			 :inputs] 	= fetchInputOptions inputs
+	
+	fetchInputOption [Inp_Type Inp_Text, Inp_Value val,	Inp_Name triplet:_] = [(Inp_Text,val,triplet)]
+	fetchInputOption _ = []
+	
+
 
 // some small utility functions
 
@@ -721,101 +751,3 @@ where
 	sfopen string int hst=:{world}
 		# (bool,file,world) = sfopen string int world
 		= (bool,file,{hst & world = world})
-		
-// testing section, for testing in combination with the GAST system
-
-emptyState :: *World -> *HSt
-emptyState world 
-# (inout,world) 		= stdio world						
-# nworld 				= {worldC = world, inout = inout}	
-= {cntr = 0, states = emptyTestFormStates, world = nworld}
-
-resetState 			:: *HSt -> *HSt
-resetState hst = {hst & cntr = 0, states = emptyTestFormStates}
-
-calcPossibleInputs :: (*HSt -> (Html,!*HSt)) *HSt -> ([(InputType,Value,String)],*HSt)
-calcPossibleInputs userpage {states,world} 
-# (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
-					= userpage {cntr = 0, states = states, world = world}
-# inputoptions = fetchInputOptions bodytags
-= (inputoptions,{cntr = 0, states = states, world = world})
-where
-	fetchInputOptions :: [BodyTag] -> [(InputType,Value,String)]
-	fetchInputOptions [] 						= []
-	fetchInputOptions [Input info _  :inputs]	= fetchInputOption info   ++ fetchInputOptions inputs
-	fetchInputOptions [BodyTag bdtag :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
-	fetchInputOptions [Table _ bdtag :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
-	fetchInputOptions [Td _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
-	fetchInputOptions [Tr _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
-	fetchInputOptions [STable _ bdtags :inputs] = flatten (map fetchInputOptions bdtags) ++ fetchInputOptions inputs
-	fetchInputOptions [_			 :inputs] 	= fetchInputOptions inputs
-	
-	fetchInputOption [Inp_Type type, Inp_Value val,	Inp_Name triplet:_] = [(type,val,decode triplet)]
-	fetchInputOption [_:next] = fetchInputOption next
-	fetchInputOption _ = []
-	
-	decode triplet = mkString (urlDecode (mkList triplet))
-	
-setInput :: (InputType,Value,String) *HSt -> *HSt
-setInput option hst=:{states} =  {hst & states = setInput` option states}
-where
-	setInput` (Inp_Text,	SV string,	triplet) hst = setTestFormStates triplet (toString string) (determineUpdateid triplet) hst
-	setInput` (Inp_Text,	RV real,	triplet) hst = setTestFormStates triplet (toString real) (determineUpdateid triplet) hst 
-	setInput` (Inp_Text,	IV int,		triplet) hst = setTestFormStates triplet (toString int) (determineUpdateid triplet) hst 
-	setInput` (Inp_Text,	BV bool,	triplet) hst = setTestFormStates triplet (toString bool) (determineUpdateid triplet) hst 
-	setInput` (Inp_Button,	SV name,	triplet) hst = setTestFormStates triplet (toString name) (determineUpdateid triplet) hst 
-	setInput` (Inp_Image,	SV ref,		triplet) hst = setTestFormStates triplet (toString ref) (determineUpdateid triplet) hst 
-	setInput` (Inp_Checkbox,SV name,	triplet) hst = setTestFormStates triplet (toString name) (determineUpdateid triplet) hst 
-	setInput` (Inp_Radio,	SV name,	triplet) hst = setTestFormStates triplet (toString name) (determineUpdateid triplet) hst
-
-determineUpdateid :: String -> String // given a triplet
-determineUpdateid "" = ""
-determineUpdateid s
-# charlist = tl (tl (mkList s)) 		// skip "("
-= mkString (takeWhile ((<>) '\"') charlist)  
-
-doHtmlTest :: .(*HSt -> (Html,!*HSt)) *HSt -> (Html,*HSt)
-doHtmlTest userpage hst = userpage {hst & cntr = 0}
-
-printHtmlTest :: Html !*HSt -> *World 
-printHtmlTest html hst=:{world}
-# nworld = print_to_stdout html world
-= nworld.worldC
-
-doHtmlServer2 :: (*HSt -> (Html,!*HSt)) *World -> *World
-doHtmlServer2 userpage world
-	= StartServer 80 (map (\(id,_,f) -> (id,f)) pages) world
-where
-//	pages :: [(String,String, String String Arguments *World -> ([String],String,*World))]
-	pages
-		=	[("clean", "CleanExample", \_ _ a  -> doHtmlServer2 (conv a) userpage)
-			]
-	conv args = mkString [input \\ input <- (urlDecode (mkList (foldl (+++) "" (map (\(x,y) -> y) args)))) 
-								| not (isControl input) ]
-
-	doHtmlServer2 :: String .(*HSt -> (Html,!*HSt)) *World -> ([String],String,*World)
-	doHtmlServer2 args userpage world 
-	# (ok,temp,world) 		= fopen "temp" FWriteText world						// open stdin and stdout channels
-	# nworld 				= { worldC = world, inout = temp }	
-	# (initforms,nworld) 	= initFormStates Internal (Just args) nworld
-	# (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
-							= userpage (resetState {cntr = 0, states = initforms, world = nworld})
-	# (allformbodies,world) = convStates states world
-	# {worldC,inout}		= print_to_stdout 
-										(Html (Head headattr [extra_style:headtags]) 
-										(Body (extra_body_attr ++ attr) [debugInput,allformbodies:bodytags])) 
-										world
-	# (ok,world)			= fclose inout worldC
-	# (allhtmlcode,world)	= readoutcompletefile "temp" world	
-	= ([],allhtmlcode,world)
-	where
-		extra_body_attr = [Batt_background "back35.jpg",`Batt_Std [CleanStyle]]
-		extra_style = Hd_Style [] CleanStyles	
-	
-		readoutcompletefile name env
-		# (ok,file,env) = fopen name FReadText env
-		# (text,file)	= freads file 1000000
-		# (ok,env)		= fclose file env
-		= (text,env)
-	
-		debugInput = if TraceInput (traceHtmlInput Internal (Just args)) EmptyBody

@@ -83,6 +83,9 @@ where
 
 // convert this HtmlState into FormStates which are used internally
 
+initTestFormStates 	::  *NWorld -> (*FormStates,*NWorld) 					// retrieves all form states hidden in the html page
+initTestFormStates world 
+	= ({ fstates = Leaf_, triplet = "", update = "", updateid = "" , server = JustTesting},world)
 
 initFormStates 	:: ServerKind (Maybe String) *NWorld -> (*FormStates,*NWorld) 					// retrieves all form states hidden in the html page
 initFormStates serverkind args world 
@@ -109,7 +112,7 @@ where
 		Just (id,_,_)   = id 
 		else = ""
 
-DecodeArguments External _ 			 = DecodePhpArguments
+DecodeArguments External _ = DecodePhpArguments
 DecodeArguments Internal (Just args) = DecodeCleanServerArguments args
 
 DecodePhpArguments :: (!String,!String,!String,!String) // executable, id + update , new , state
@@ -222,6 +225,7 @@ where
 		dyn=:(dynval::a^) 	-> (True,Just dynval,Node_ Leaf_ (id,NewState {nstrval = StatDyn dyn, live = Persistent}) Leaf_,world)
 		else				-> (False,Nothing,Leaf_,world)
 	findState` _ Leaf_ world = (False,Nothing,Leaf_,world)
+	findState` _ _ world = (False,Nothing,Leaf_,world)
 
 	readState :: String *NWorld -> (String,*NWorld) 
 	readState filename env
@@ -427,8 +431,6 @@ ThisExe External
 = thisexe
 ThisExe Internal 
 = "clean"
-ThisExe JustTesting 
-= "clean"
 
 MyPhP :: ServerKind -> String
 MyPhP External = (mkString (takeWhile ((<>) '.') (mkList (ThisExe External)))) +++ ".php"
@@ -490,13 +492,3 @@ urlDecodeS s = (mkString o urlDecode o mkList) s
 
 string_to_dynamic` :: {#Char} -> Dynamic
 string_to_dynamic` s = string_to_dynamic {s` \\ s` <-: s}
-
-// added for testing
-
-emptyTestFormStates 	::  *FormStates 	// creates empty formstates made for testing
-emptyTestFormStates  
-	= { fstates = Leaf_, triplet = "", update = "", updateid = "" , server = JustTesting}
-
-setTestFormStates 	::  String String String *FormStates -> *FormStates 	// set input event in formstates
-setTestFormStates triplet update updateid fstates
-	= { fstates & triplet = triplet, update = update, updateid = updateid}
