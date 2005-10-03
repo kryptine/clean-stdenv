@@ -96,7 +96,7 @@ loop linktofunctionlist listen rchannels schannels httpheaders console world
 				# contentlength = getContentLength currenthttpheader
 				# console = console <<? ("content-length:"+++toString contentlength+++"\nreceived data:"+++toString (size (last currenthttpheader)))//TESTING ONLY
 				// client heeft alles goed gestuurd en wacht op antwoord:
-				| contentlength==0 || contentlength<size (last currenthttpheader)
+				| contentlength==0 || contentlength<=size (last currenthttpheader) // bug repaired 3/12/2005 MJP
 					// vraag methode en opgevraagde locatie op:
 					# (method,location) = getMethodAndLocation (hd currenthttpheader)
 					
