@@ -127,7 +127,7 @@ doHomePage :: [ItemData d] *HSt -> ([BodyTag],*HSt)
 doHomePage database hst
 = (	[ maptext 	[ "Welcome to the Clean CD shop!"
 				, ""
-				, "Our Dean wants that we make more money with Clean, otherwise we will be killed."
+				, "The time has come to become rich in a Clean way."
 				, "We have therefore decided to sell Peter's exquisite CD collection for exquisite prices."
 				, ""
 				, "By the way, this application also gives a nice demo what you can do with Clean..."
@@ -135,7 +135,7 @@ doHomePage database hst
 				, "Have fun."
 				]
 	, Br
-	,mediaPlayer (50,200) False "images/pennylan.wav"
+	, mediaPlayer (50,200) True "images/06 - Tea.mp3"
 	, Br
 	], hst)
 
