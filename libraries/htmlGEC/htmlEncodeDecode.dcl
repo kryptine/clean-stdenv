@@ -48,6 +48,7 @@ convStates 		:: !FormStates *NWorld -> (BodyTag,*NWorld) // script which stores 
 // low level encoding of information
 
 encodeInfo 		:: a -> String | gPrint{|*|} a	// serialization to a Mime format, used to encode input forms 
+decodeInfo 		:: String -> Maybe a | gParse{|*|} a
 callClean 		:: Script						// script that will take care of sending the required input to this application
 
 
@@ -55,5 +56,6 @@ urlDecode :: [Char] -> [Char]
 
 // for testing
 
-initTestFormStates 	::  *NWorld -> (*FormStates,*NWorld) // creates initial empty form states
+initTestFormStates 	::  *NWorld -> (*FormStates,*NWorld) 									// creates initial empty form states
+setTestFormStates 	::  String String String *FormStates *NWorld -> (*FormStates,*NWorld) 	// stores triplet updateid update in state 
 
