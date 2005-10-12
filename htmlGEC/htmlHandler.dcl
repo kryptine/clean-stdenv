@@ -11,11 +11,11 @@ import StdBool, StdFile
 
 TraceInput :== False
 
+
 // doHtml main wrapper for generating & handling of a Html form
 
 doHtml 			:: .(*HSt -> (Html,!*HSt)) *World -> *World  	// use this application with some external server and php
 doHtmlServer 	:: (*HSt -> (Html,!*HSt))  *World -> *World 	// use this application with the build-in Clean server
-doHtmlTest 		:: (*HSt -> (Html,!*HSt))  *World -> ([(InputType,Value,String)],*World) // use this for testing
 
 :: *HSt 								// unique state required for creating Html forms
 instance FileSystem HSt					// enabling file IO on HSt
@@ -91,3 +91,11 @@ derive gParse 	(,), (,,), (,,,), (<->), <|>, DisplayMode, Button, CheckBox, Radi
 
 specialize :: (FormId a *HSt -> (Form a,*HSt)) FormId a *HSt -> (Form a,*HSt) | gUpd {|*|} a
 
+// for testing pages:
+
+:: Triplet 		:== (String,Int,UpdValue)
+:: *TestEvent	:== (Triplet,UpdValue,*FormStates) // chosen triplet, its new value 
+
+doHtmlTest :: (Maybe *TestEvent) (*HSt -> (Html,!*HSt)) *World -> ([(InputType,Value,Maybe Triplet)],*FormStates,*World) // use this for testing
+randomTest :: !Int !(*HSt -> (Html,!*HSt)) *World -> ([(Triplet,UpdValue)],*World)
+doHtmlTest2 :: (Maybe *TestEvent) (*HSt -> (Html,!*HSt)) *NWorld -> ([(InputType,Value,Maybe Triplet)],*FormStates,*NWorld)

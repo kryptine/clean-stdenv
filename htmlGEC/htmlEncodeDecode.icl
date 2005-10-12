@@ -33,18 +33,16 @@ derive gParse (,), (,,)
 :: FStates		:== Tree_ (String,FormState)		// each form needs a different string id
 
 :: Tree_ a 		= Node_ (Tree_ a) a (Tree_ a) | Leaf_
-:: FormState 	= OldState !OldState				// Old states will become garbage when the final states are reached
-				| NewState !NewState				// New states that will be saved
-:: OldState		= { ostrval :: !ExistVal			// Internal encoding
-				  , olive	:: !Lifespan			// Its life span
-				  }
-:: NewState 	= { nstrval :: !ExistVal			// A new state is stored in a dynamic
-				  , live	:: !Lifespan			// Its life span
+:: FormState 	= OldState !FState					// Old states are the states from the previous calculation
+				| NewState !FState					// New states are newly created states or old states that have been inspected and updated
+:: FState		= { encoding :: !EncodingMethod		// Encoding method used for serialization
+				  , life	 :: !Lifespan			// Its life span
 				  }
 :: HtmlStates :== [HtmlState]						// For convenience, the state is stored in html as a list and not as a tree
 :: HtmlState  :== (!String,!Lifespan,!StorageFormat,!String)		// Format just before writing to the page format
-:: ExistVal		= PlainStr 	!String					// Internal encoding: either a string
-				| StatDyn	!Dynamic				// or a dynamic
+:: EncodingMethod
+				= PlainStr 	!String					// Either a string is used for serialization
+				| StatDyn	!Dynamic				// Or a dynamic which enables serialization of functions defined in the application (no plug ins yet)
 
 // reconstruct HtmlState out of the information obtained from browser
 
@@ -71,7 +69,7 @@ where
 			toLivetime ['s':_] = Session
 			toLivetime ['P':_] = Persistent
 			toLivetime ['p':_] = Persistent
-			toLivetime _   		= Page
+			toLivetime _   	   = Page
 
 			toStorageFormat ['N':_] = PlainString
 			toStorageFormat ['n':_] = StaticDynamic
@@ -83,15 +81,11 @@ where
 
 // convert this HtmlState into FormStates which are used internally
 
-initTestFormStates 	::  *NWorld -> (*FormStates,*NWorld) 					// retrieves all form states hidden in the html page
-initTestFormStates world 
-	= ({ fstates = Leaf_, triplet = "", update = "", updateid = "" , server = JustTesting},world)
-
 initFormStates 	:: ServerKind (Maybe String) *NWorld -> (*FormStates,*NWorld) 					// retrieves all form states hidden in the html page
 initFormStates serverkind args world 
 	= ({ fstates = readStatesFromArgs, triplet = triplet, update = update, updateid = updateid , server = serverkind},world)
 where
-	readStatesFromArgs = Balance (sort [(sid,OldState {ostrval = toExistval storageformat state, olive = lifespan}) 
+	readStatesFromArgs = Balance (sort [(sid,OldState {encoding = toExistval storageformat state, life = lifespan}) 
 										\\ (sid,lifespan,storageformat,state) <- retrieveHtmlState serverkind args| sid <> ""
 										])
 	(_,triplet,update,_) = DecodeArguments serverkind args
@@ -187,6 +181,7 @@ force a b = b
 
 getTriplet :: *FormStates -> (!Maybe a, !Maybe b,*FormStates) | gParse{|*|} a & gParse{|*|} b 
 getTriplet formstates=:{triplet,update}
+//= abort (triplet +++ update)
 = (parseString triplet, parseString update, formstates)
 
 getUpdateId ::  *FormStates -> (String,*FormStates)
@@ -203,7 +198,7 @@ where
 	findState` :: !FormId *FStates *NWorld -> (Bool,Maybe a,*FStates,*NWorld)| gParse{|*|} a & TC a
 	findState` formid formstate=:(Node_ left (fid,info) right) world
 	| formid.id == fid = case info of
-					(OldState state) = case state.ostrval of
+					(OldState state) = case state.encoding of
 										PlainStr stringstate = (True, parseString stringstate,formstate,world)
 										StatDyn (dynval::a^) = (True, Just dynval,formstate,world)
 										StatDyn (dynval::b)  = (True, Nothing,formstate,world)
@@ -217,12 +212,12 @@ where
 	findState` {id,lifespan = Persistent,storage = PlainString} Leaf_ world 
 	# (string,world) = readState id world
 	= case parseString string of
-		Just a 	-> (True,Just a,Node_ Leaf_ (id,NewState {nstrval = PlainStr string, live = Persistent}) Leaf_,world)
+		Just a 	-> (True,Just a,Node_ Leaf_ (id,NewState {encoding = PlainStr string, life = Persistent}) Leaf_,world)
 		Nothing	-> (False,Nothing,Leaf_,world)
 	findState` {id,lifespan = Persistent,storage = StaticDynamic} Leaf_ world 
 	# (string,world) = readState id world
 	= case string_to_dynamic` string of
-		dyn=:(dynval::a^) 	-> (True,Just dynval,Node_ Leaf_ (id,NewState {nstrval = StatDyn dyn, live = Persistent}) Leaf_,world)
+		dyn=:(dynval::a^) 	-> (True,Just dynval,Node_ Leaf_ (id,NewState {encoding = StatDyn dyn, life = Persistent}) Leaf_,world)
 		else				-> (False,Nothing,Leaf_,world)
 	findState` _ Leaf_ world = (False,Nothing,Leaf_,world)
 	findState` _ _ world = (False,Nothing,Leaf_,world)
@@ -264,15 +259,15 @@ where
 							with
 								(nright,nworld) = replaceState` formid val right world
 
-// NewState Handling routines 
+	// NewState Handling routines 
 
-initNewState :: !Lifespan !StorageFormat !a  -> NewState | TC a &  gPrint{|*|} a 
-initNewState lifespan PlainString   nv = {nstrval = PlainStr (printToString nv), live = lifespan}
-initNewState lifespan StaticDynamic nv = {nstrval = StatDyn  (dynamic nv), live = lifespan}
+	initNewState :: !Lifespan !StorageFormat !a  -> FState | TC a &  gPrint{|*|} a 
+	initNewState lifespan PlainString   nv = {encoding = PlainStr (printToString nv), life = lifespan}
+	initNewState lifespan StaticDynamic nv = {encoding = StatDyn  (dynamic nv), life = lifespan}
 
-retrieveNewState :: NewState -> Maybe a | TC a & gParse{|*|} a
-retrieveNewState {nstrval = PlainStr string} = parseString string
-retrieveNewState {nstrval = StatDyn (v::a^)} = Just v    
+retrieveNewState :: FState -> Maybe a | TC a & gParse{|*|} a
+retrieveNewState {encoding = PlainStr string} = parseString string
+retrieveNewState {encoding = StatDyn (v::a^)} = Just v    
 retrieveNewState _ = Nothing
 
 // Convert newly created FormStates to Html Code
@@ -294,10 +289,10 @@ where
 
 		// old states have not been used this time, with lifespan session are stored again in the page
 
-		toHtmlState` (Node_ left (fid,OldState {olive,ostrval=PlainStr stringval}) right) tl 
-			= toHtmlState` left [(fid,olive,PlainString,stringval):toHtmlState` right tl]
-		toHtmlState` (Node_ left (fid,OldState {olive,ostrval=StatDyn dynval}) right) tl 
-			= toHtmlState` left [(fid,olive,StaticDynamic,dynamic_to_string dynval):toHtmlState` right tl]
+		toHtmlState` (Node_ left (fid,OldState {life,encoding=PlainStr stringval}) right) tl 
+			= toHtmlState` left [(fid,life,PlainString,stringval):toHtmlState` right tl]
+		toHtmlState` (Node_ left (fid,OldState {life,encoding=StatDyn dynval}) right) tl 
+			= toHtmlState` left [(fid,life,StaticDynamic,dynamic_to_string dynval):toHtmlState` right tl]
 
 		// other old states will ahve lifespan page; they become garbage and are no longer stored in the page
 
@@ -306,15 +301,15 @@ where
 
 		// persistent stores have already been stored in files
 
-		toHtmlState` (Node_ left (fid,NewState {live=Persistent}) right) tl 
+		toHtmlState` (Node_ left (fid,NewState {life=Persistent}) right) tl 
 			= toHtmlState` left (toHtmlState` right tl)
 
 		// the state of all other new forms created will be stored in the page 
 
-		toHtmlState` (Node_ left (fid,NewState {nstrval = PlainStr string,live}) right) tl 
-			= toHtmlState` left [(fid,live,PlainString,string): toHtmlState` right tl]
-		toHtmlState` (Node_ left (fid,NewState {nstrval = StatDyn dynval,live}) right) tl 
-			= toHtmlState` left [(fid,live,StaticDynamic,dynamic_to_string dynval): toHtmlState` right tl]
+		toHtmlState` (Node_ left (fid,NewState {encoding = PlainStr string,life}) right) tl 
+			= toHtmlState` left [(fid,life,PlainString,string): toHtmlState` right tl]
+		toHtmlState` (Node_ left (fid,NewState {encoding = StatDyn dynval,life}) right) tl 
+			= toHtmlState` left [(fid,life,StaticDynamic,dynamic_to_string dynval): toHtmlState` right tl]
 
 	urlEncodeState :: !HtmlStates -> String
 	urlEncodeState [] = urlEncodeS "$"
@@ -377,8 +372,8 @@ where
 
 //	writeAllPersistentStates:: FormStates *NWorld -> *NWorld 
 	writeAllPersistentStates Leaf_ world = world
-	writeAllPersistentStates (Node_ left (sid,NewState {nstrval,live = Persistent}) right) world
-	# stringToWrite = case nstrval of
+	writeAllPersistentStates (Node_ left (sid,NewState {encoding,life = Persistent}) right) world
+	# stringToWrite = case encoding of
 							PlainStr string -> string
 							StatDyn dynval	-> dynamic_to_string dynval
 	# world = writeState sid stringToWrite world 
@@ -490,5 +485,22 @@ where
 urlDecodeS :: String -> String
 urlDecodeS s = (mkString o urlDecode o mkList) s
 
-string_to_dynamic` :: {#Char} -> Dynamic
+string_to_dynamic` :: {#Char} -> Dynamic	// just to make a unique copy as requested by string_to_dynamic
 string_to_dynamic` s = string_to_dynamic {s` \\ s` <-: s}
+
+// for testing:
+
+initTestFormStates 	::  *NWorld -> (*FormStates,*NWorld) 					// retrieves all form states hidden in the html page
+initTestFormStates world 
+	= ({ fstates = Leaf_, triplet = "", update = "", updateid = "" , server = JustTesting},world)
+
+setTestFormStates 	::  String String String *FormStates *NWorld -> (*FormStates,*NWorld) 					// retrieves all form states hidden in the html page
+setTestFormStates triplet updateid update states world 
+	= ({ fstates = makeoldstates , triplet = triplet, update = update, updateid = updateid, server = JustTesting},world)
+	where
+		makeoldstates = toOldStates states.fstates 
+		where
+			toOldStates Leaf_ 	= Leaf_
+			toOldStates (Node_ left (s,NewState fstate) right)  
+								= Node_ (toOldStates left) (s,OldState fstate) (toOldStates right)
+			toOldStates else	= else
