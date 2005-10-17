@@ -51,7 +51,7 @@ doHtml :: .(*HSt -> (Html,!*HSt)) *World -> *World
 doHtml userpage world 
 # (inout,world) 		= stdio world						// open stdin and stdout channels
 # nworld 				= { worldC = world, inout = inout }	
-# (initforms,nworld) 	= initFormStates External Nothing nworld
+# (initforms,nworld) 	= initialFormStates External Nothing nworld
 # (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
 						= userpage {cntr = 0, states = initforms, world = nworld}
 # (allformbodies,world) = convStates states world
@@ -82,7 +82,7 @@ where
 	doHtmlServer2 args userpage world 
 	# (ok,temp,world) 		= fopen "temp" FWriteText world						// open stdin and stdout channels
 	# nworld 				= { worldC = world, inout = temp }	
-	# (initforms,nworld) 	= initFormStates Internal (Just args) nworld
+	# (initforms,nworld) 	= initialFormStates Internal (Just args) nworld
 	# (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
 							= userpage {cntr = 0, states = initforms, world = nworld}
 	# (allformbodies,world) = convStates states world
