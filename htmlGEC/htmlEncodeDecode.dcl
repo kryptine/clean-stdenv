@@ -29,7 +29,7 @@ traceHtmlInput	:: ServerKind (Maybe String) -> BodyTag	// for debugging showing 
 :: *FormStates 					// collection of all states of all forms
 
 emptyFormStates :: *FormStates								// creates emtpy states
-initFormStates 	:: ServerKind (Maybe String) *NWorld -> (*FormStates,*NWorld) 		// retrieves all form states wherever they are stored
+initialFormStates 	:: ServerKind (Maybe String) *NWorld -> (*FormStates,*NWorld) 		// retrieves all initial form states wherever they are stored
 
 findState 		:: !FormId *FormStates *NWorld 				// find the state value given FormId and a correct type
 					-> (Bool, Maybe a,*FormStates,*NWorld)	// true if form has not yet been previously inspected 	
@@ -47,8 +47,10 @@ convStates 		:: !FormStates *NWorld -> (BodyTag,*NWorld) // script which stores 
 
 // low level encoding of information
 
-encodeInfo 		:: a -> String | gPrint{|*|} a	// serialization to a Mime format, used to encode input forms 
-decodeInfo 		:: String -> Maybe a | gParse{|*|} a
+encodeInfo 		:: a -> String | gPrint{|*|} a			// serialization to a Mime format, used to encode input forms 
+decodeInfo 		:: String -> Maybe a | gParse{|*|} a	// de-serialization from Mime format to a Clean value
+encodeString	:: String -> String						// ordinary String to String in Mime format
+decodeString 	:: String -> *String						// fString in Mime format to ordinary String
 callClean 		:: Script						// script that will take care of sending the required input to this application
 
 
