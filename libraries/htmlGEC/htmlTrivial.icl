@@ -6,7 +6,7 @@ derive bimap Maybe, (,)
 
 // converting strings to lists and backwards
 
-mkString :: [Char] -> String
+mkString :: [Char] -> *String
 mkString listofchar = {elem \\ elem <- listofchar}
 
 mkList :: String -> [Char]

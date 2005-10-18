@@ -6,7 +6,7 @@ derive bimap Maybe, (,)
 
 // utility 
 
-mkString 	:: [Char] -> String
+mkString 	:: [Char] -> *String
 mkList 		:: String -> [Char]
 
 //	Useful string concatenation function
