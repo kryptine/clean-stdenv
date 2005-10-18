@@ -16,6 +16,3 @@ MyPage hst
 	, toBody counter1
 	, toHtml (counter0.value + counter1.value)
 	] hst
-
-
-
