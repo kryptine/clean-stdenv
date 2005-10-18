@@ -45,26 +45,106 @@ derive gParse (,), (,,)
 
 // used for reading and writing of states in html format
 
-:: HtmlStates :== [HtmlState]						// For convenience, the state is stored in html as a list and not as a tree
-:: HtmlState  :== (!String,!Lifespan,!StorageFormat,!String)		// Format just before writing to the page format
+:: HtmlState  :== (!String,!Lifespan,!StorageFormat,!String)	// Format just before writing to the page format
 
-// low level conversion from and to external HtmlState into internally used FormStates
+// functions defined on the FormStates abstract data type
 
 instance < FormState
 where
 	(<) _ _ = True
 
-initialFormStates 	:: ServerKind (Maybe String) *NWorld -> (*FormStates,*NWorld) 					// retrieves all form states hidden in the html page
-initialFormStates serverkind args world 
-	= ({ fstates = readStatesFromArgs, triplet = triplet, update = update, updateid = calc_updateid , server = serverkind},world)
-where
-	readStatesFromArgs = Balance (sort [(sid,OldState {encoding = toExistval storageformat state, life = lifespan}) 
-										\\ (sid,lifespan,storageformat,state) <- retrieveHtmlState serverkind args| sid <> ""
-										])
-	(_,triplet,update,_) = DecodeArguments serverkind args
+emptyFormStates :: *FormStates
+emptyFormStates = { fstates = Leaf_ , triplet = "", update = "", updateid = "", server = Internal}
 
-	toExistval PlainString state 	= PlainStr state	// string that has to be parsed in the context where the type is known
-	toExistval StaticDynamic state 	= StatDyn (string_to_dynamic` state) // turn string into dynamic
+getTriplet :: *FormStates -> (!Maybe a, !Maybe b,*FormStates) | gParse{|*|} a & gParse{|*|} b 
+getTriplet formstates=:{triplet,update}
+= (parseString triplet, parseString update, formstates)
+
+getUpdateId ::  *FormStates -> (String,*FormStates)
+getUpdateId formStates=:{updateid} = (updateid,formStates)
+
+getUpdate ::  *FormStates -> (String,*FormStates)
+getUpdate formStates=:{update} = (update,formStates)
+
+findState :: !FormId *FormStates *NWorld -> (Bool,Maybe a,*FormStates,*NWorld)	| gParse{|*|} a & TC a
+findState formid formstates=:{fstates,server} world
+# (bool,ma,fstates,world) = findState` formid fstates world
+= (bool,ma,{formstates & fstates = fstates},world)
+where
+	findState` :: !FormId *FStates *NWorld -> (Bool,Maybe a,*FStates,*NWorld)| gParse{|*|} a & TC a
+	findState` formid formstate=:(Node_ left (fid,info) right) world
+	| formid.id == fid = case info of
+					(OldState state) = (True, fetchFState state,formstate,world)
+					(NewState state) = (False,fetchFState state,formstate,world)
+	with
+		fetchFState :: FState -> Maybe a | TC a & gParse{|*|} a
+		fetchFState {encoding = PlainStr string} = parseString string
+		fetchFState {encoding = StatDyn (v::a^)} = Just v    
+		fetchFState _ = Nothing
+	| formid.id  < fid 	= (bool,parsed, Node_ leftformstates (fid,info) right,nworld)
+					with
+						(bool,parsed,leftformstates,nworld) = findState` formid left world
+	| otherwise	= (bool,parsed, Node_  left (fid,info) rightformstates,nworld)
+					with
+						(bool,parsed,rightformstates,nworld) = findState` formid right world
+
+	findState` {id,lifespan = Persistent,storage = PlainString} Leaf_ world 
+	# (string,world) = readStringState (MyDir server) id world
+	= case parseString string of
+		Just a 	-> (True,Just a,Node_ Leaf_ (id,NewState {encoding = PlainStr string, life = Persistent}) Leaf_,world)
+		Nothing	-> (False,Nothing,Leaf_,world)
+
+	findState` {id,lifespan = Persistent,storage = StaticDynamic} Leaf_ world 
+	# (string,world) = readDynamicState (MyDir server) id world
+	= case string of 
+		"" = (False,Nothing,Leaf_,world)
+		_  = case string_to_dynamic` string of
+				dyn=:(dynval::a^) 	-> (True,Just dynval,Node_ Leaf_ (id,NewState {encoding = StatDyn dyn, life = Persistent}) Leaf_,world)
+				else				-> (False,Nothing,Leaf_,world)
+	findState` _ Leaf_ world = (False,Nothing,Leaf_,world)
+	findState` _ _ world = (False,Nothing,Leaf_,world)
+
+replaceState :: !FormId a *FormStates *NWorld -> (*FormStates,*NWorld)	| gPrint{|*|} a & TC a
+replaceState formid val formstates=:{fstates} world
+# (fstates,world) = replaceState` formid val fstates world
+= ({formstates & fstates = fstates},world)
+where
+	replaceState` :: !FormId a *FStates *NWorld -> (*FStates,*NWorld)	| gPrint{|*|} a & TC a
+	replaceState` formid val Leaf_ world = (Node_ Leaf_ (formid.id,NewState (initNewState formid.lifespan formid.storage val)) Leaf_,world)
+	replaceState` formid val (Node_ left a=:(fid,_) right) world
+	| formid.id == fid 	= (Node_ left (fid,NewState (initNewState formid.lifespan formid.storage val)) right,world)
+	| formid.id < fid 	= (Node_ nleft a right,nworld)
+							with
+								(nleft,nworld) = replaceState` formid val left world
+	| otherwise			 = (Node_ left a nright,nworld)
+							with
+								(nright,nworld) = replaceState` formid val right world
+
+	// NewState Handling routines 
+
+	initNewState :: !Lifespan !StorageFormat !a  -> FState | TC a &  gPrint{|*|} a 
+	initNewState lifespan PlainString   nv = {encoding = PlainStr (printToString nv), life = lifespan}
+	initNewState lifespan StaticDynamic nv = {encoding = StatDyn  (dynamic nv), life = lifespan}// convert the hidden state information stored in the html page
+
+// Serialization and De-Serialization of states
+//
+// De-serialize information from server to the internally used form states
+
+retrieveFormStates 	:: ServerKind (Maybe String) *NWorld -> (*FormStates,*NWorld) 					// retrieves all form states hidden in the html page
+retrieveFormStates serverkind args world 
+	= ({ fstates = retrieveFStates, triplet = triplet, update = update, 
+		updateid = calc_updateid , server = serverkind},world)
+where
+	retrieveFStates 
+		= Balance (sort [(sid,OldState {encoding = toExistval storageformat state, life = lifespan}) 
+						\\ (sid,lifespan,storageformat,state) <- retrieveHtmlState serverkind args
+						|  sid <> ""
+						])
+	where
+		toExistval PlainString state 	= PlainStr state	// string that has to be parsed in the context where the type is known
+		toExistval StaticDynamic state 	= StatDyn (string_to_dynamic` state) // turn string into dynamic
+
+	(_,triplet,update,_) = DecodeArguments serverkind args
 
 	Balance [] = Leaf_
 	Balance [x] = Node_ Leaf_ x Leaf_
@@ -81,40 +161,13 @@ where
 
 	// reconstruct HtmlState out of the information obtained from browser
 
-	retrieveHtmlState :: ServerKind (Maybe String) -> HtmlStates
+	retrieveHtmlState :: ServerKind (Maybe String) -> [HtmlState]
 	retrieveHtmlState serverkind args
 	# (_,_,_,state) = DecodeArguments serverkind args
-	= splitString (mkList state)
-	where
-		splitString [] 			= []
-		splitString listofchar	= [mkHtmlState first : splitString second]
-		where
-			(first,second) = mscan '$' listofchar
-	
-			mkHtmlState :: [Char] -> HtmlState
-			mkHtmlState	elem = (mkString (stl fid),toLivetime fid,toStorageFormat fid,mkString (stl (reverse (stl (reverse formvalue)))))
-			where
-				(fid,formvalue) = mscan '"' (stl (stl elem)) // skip '("'
-				stl [] = []
-				stl [x:xs] = xs 
-				
-				toLivetime ['N':_] = Page
-				toLivetime ['n':_] = Page
-				toLivetime ['S':_] = Session
-				toLivetime ['s':_] = Session
-				toLivetime ['P':_] = Persistent
-				toLivetime ['p':_] = Persistent
-				toLivetime _   	   = Page
-	
-				toStorageFormat ['N':_] = PlainString
-				toStorageFormat ['S':_] = PlainString
-				toStorageFormat ['P':_] = PlainString
-				toStorageFormat ['n':_] = StaticDynamic
-				toStorageFormat ['p':_] = StaticDynamic
-				toStorageFormat ['s':_] = StaticDynamic
-				toStorageFormat _   	= PlainString
+	= toHtmlState state
 
 // Parse and decode low level information obtained from server 
+// In case of using a php script and external server:
 
 DecodeArguments External _ = DecodePhpArguments
 where
@@ -133,6 +186,8 @@ where
 
 	GetArgs :: String 
 	GetArgs =: foldl (+++) "" [strings \\ strings <-: getCommandLine]
+
+// In case of using the internal server written in Clean:
 
 DecodeArguments Internal (Just args) = DecodeCleanServerArguments args
 where
@@ -160,6 +215,8 @@ where
 	
 		lsubstr = length substr
 
+// traceHtmlInput utility used to see what kind of rubbish is received
+
 traceHtmlInput :: ServerKind (Maybe String) -> BodyTag
 traceHtmlInput serverkind args
 =	BodyTag	[	Txt "this executable    : " , B [] (ThisExe serverkind), Txt ";", Br 
@@ -180,159 +237,48 @@ where
 	where
 		(first,second) = mscan '$' listofchar
 
-// functions defined on the FormStates abstract data type
-
-emptyFormStates :: *FormStates
-emptyFormStates = { fstates = Leaf_ , triplet = "", update = "", updateid = "", server = Internal}
-
-getTriplet :: *FormStates -> (!Maybe a, !Maybe b,*FormStates) | gParse{|*|} a & gParse{|*|} b 
-getTriplet formstates=:{triplet,update}
-= (parseString triplet, parseString update, formstates)
-
-getUpdateId ::  *FormStates -> (String,*FormStates)
-getUpdateId formStates=:{updateid} = (updateid,formStates)
-
-getUpdate ::  *FormStates -> (String,*FormStates)
-getUpdate formStates=:{update} = (update,formStates)
-
-findState :: !FormId *FormStates *NWorld -> (Bool,Maybe a,*FormStates,*NWorld)	| gParse{|*|} a & TC a
-findState formid formstates=:{fstates,server} world
-# (bool,ma,fstates,world) = findState` formid fstates world
-= (bool,ma,{formstates & fstates = fstates},world)
-where
-	findState` :: !FormId *FStates *NWorld -> (Bool,Maybe a,*FStates,*NWorld)| gParse{|*|} a & TC a
-	findState` formid formstate=:(Node_ left (fid,info) right) world
-	| formid.id == fid = case info of
-					(OldState state) = case state.encoding of
-										PlainStr stringstate = (True, parseString stringstate,formstate,world)
-										StatDyn (dynval::a^) = (True, Just dynval,formstate,world)
-										StatDyn (dynval::b)  = (True, Nothing,formstate,world)
-					(NewState state) = (False,retrieveNewState state,formstate,world)
-	| formid.id  < fid 	= (bool,parsed, Node_ leftformstates (fid,info) right,nworld)
-					with
-						(bool,parsed,leftformstates,nworld) = findState` formid left world
-	| otherwise	= (bool,parsed, Node_  left (fid,info) rightformstates,nworld)
-					with
-						(bool,parsed,rightformstates,nworld) = findState` formid right world
-
-	findState` {id,lifespan = Persistent,storage = PlainString} Leaf_ world 
-	# (string,world) = readState id world
-	= case parseString string of
-		Just a 	-> (True,Just a,Node_ Leaf_ (id,NewState {encoding = PlainStr string, life = Persistent}) Leaf_,world)
-		Nothing	-> (False,Nothing,Leaf_,world)
-
-	findState` {id,lifespan = Persistent,storage = StaticDynamic} Leaf_ world 
-	# (string,world) = readState id world
-	= case string_to_dynamic` string of
-		dyn=:(dynval::a^) 	-> (True,Just dynval,Node_ Leaf_ (id,NewState {encoding = StatDyn dyn, life = Persistent}) Leaf_,world)
-		else				-> (False,Nothing,Leaf_,world)
-	findState` _ Leaf_ world = (False,Nothing,Leaf_,world)
-	findState` _ _ world = (False,Nothing,Leaf_,world)
-
-	retrieveNewState :: FState -> Maybe a | TC a & gParse{|*|} a
-	retrieveNewState {encoding = PlainStr string} = parseString string
-	retrieveNewState {encoding = StatDyn (v::a^)} = Just v    
-	retrieveNewState _ = Nothing
-
-	readState :: String *NWorld -> (String,*NWorld) 
-	readState filename env
-	#(_,env) = case getFileInfo mydir env of
-				((DoesntExist,fileinfo),env) -> createDirectory mydir env
-				(_,env) -> (NoDirError,env)
-	# (ok,file,env)	= fopen (MyDir server +++ "/" +++ filename) FReadData env
-	| not ok 		= ("",env)
-	# (string,file)	= freads file big
-	| not ok 		= ("",env)
-	# (ok,env)		= fclose file env
-	# string 		= string%(1,size string - 2)
-	# string		= mkString (removeBackslashQuote (mkList string))
-	= (string,env) 
-	where
-		big = 100000
-		mydir = RelativePath [PathDown (MyDir server)]
-
-		removeBackslashQuote [] 			= []
-		removeBackslashQuote ['\\\"':xs] 	= ['\"':removeBackslashQuote xs]
-		removeBackslashQuote [x:xs] 		= [x:removeBackslashQuote xs]
-
-replaceState :: !FormId a *FormStates *NWorld -> (*FormStates,*NWorld)	| gPrint{|*|} a & TC a
-replaceState formid val formstates=:{fstates} world
-# (fstates,world) = replaceState` formid val fstates world
-= ({formstates & fstates = fstates},world)
-where
-	replaceState` :: !FormId a *FStates *NWorld -> (*FStates,*NWorld)	| gPrint{|*|} a & TC a
-	replaceState` formid val Leaf_ world = (Node_ Leaf_ (formid.id,NewState (initNewState formid.lifespan formid.storage val)) Leaf_,world)
-	replaceState` formid val (Node_ left a=:(fid,_) right) world
-	| formid.id == fid 	= (Node_ left (fid,NewState (initNewState formid.lifespan formid.storage val)) right,world)
-	| formid.id < fid 	= (Node_ nleft a right,nworld)
-							with
-								(nleft,nworld) = replaceState` formid val left world
-	| otherwise			 = (Node_ left a nright,nworld)
-							with
-								(nright,nworld) = replaceState` formid val right world
-
-	// NewState Handling routines 
-
-	initNewState :: !Lifespan !StorageFormat !a  -> FState | TC a &  gPrint{|*|} a 
-	initNewState lifespan PlainString   nv = {encoding = PlainStr (printToString nv), life = lifespan}
-	initNewState lifespan StaticDynamic nv = {encoding = StatDyn  (dynamic nv), life = lifespan}
-
-// Convert all states in FormStates that have to be remembered to either hidden encoded Html Code
+// Serialize all states in FormStates that have to be remembered to either hidden encoded Html Code
 // or store them in a persistent file, all depending on the kind of states
 
-convStates :: !FormStates *NWorld -> (BodyTag,*NWorld)
-convStates {fstates = allFormStates,server} world
-#	world = writeAllPersistentStates allFormStates world // first write persistens states
+storeFormStates :: !FormStates *NWorld -> (BodyTag,*NWorld)
+storeFormStates {fstates = allFormStates,server} world
+#	world = writeAllPersistentStates allFormStates world // first write all persistens states
 =	(BodyTag
 	[ submitscript    globalFormName updateInpName
 	, globalstateform globalFormName updateInpName globalInpName (SV encodedglobalstate) 
 	],world)
 where
-	encodedglobalstate = urlEncodeState (toHtmlState allFormStates)
+	encodedglobalstate = fromHtmlState (toHtmlState allFormStates)
 
 //	toHtmlState :: !FormStates -> HtmlState	// remaining states as hidden encoded html
 	toHtmlState formstates = toHtmlState` formstates []
 	where
-		toHtmlState` Leaf_ tl = tl
+		toHtmlState` Leaf_ accu = accu
 
-		// old states which have not been used this time, with lifespan session are stored again in the page
+		// old states which have not been used this time, but with lifespan session, are stored again in the page
 
-		toHtmlState` (Node_ left (fid,OldState {life,encoding=PlainStr stringval}) right) tl 
-			= toHtmlState` left [(fid,life,PlainString,stringval):toHtmlState` right tl]
-		toHtmlState` (Node_ left (fid,OldState {life,encoding=StatDyn dynval}) right) tl 
-			= toHtmlState` left [(fid,life,StaticDynamic,dynamic_to_string dynval):toHtmlState` right tl]
+		toHtmlState` (Node_ left (fid,OldState {life=Session,encoding=PlainStr stringval}) right) accu 
+			= toHtmlState` left [(fid,Session,PlainString,stringval):toHtmlState` right accu]
+		toHtmlState` (Node_ left (fid,OldState {life=Session,encoding=StatDyn dynval}) right) accu 
+			= toHtmlState` left [(fid,Session,StaticDynamic,dynamic_to_string dynval):toHtmlState` right accu]
 
-		// other old states will ahve lifespan page; they become garbage and are no longer stored in the page
+		// other old states will have lifespan page; they become garbage and are no longer stored in the page
 
-		toHtmlState` (Node_ left (fid,OldState s) right) tl 
-			= toHtmlState` left (toHtmlState` right tl)
+		toHtmlState` (Node_ left (fid,OldState s) right) accu 
+			= toHtmlState` left (toHtmlState` right accu)
 
-		// persistent stores have already been stored in files
+		// persistent stores have already been stored in files and can be skipped here
 
-		toHtmlState` (Node_ left (fid,NewState {life=Persistent}) right) tl 
-			= toHtmlState` left (toHtmlState` right tl)
+		toHtmlState` (Node_ left (fid,NewState {life=Persistent}) right) accu 
+			= toHtmlState` left (toHtmlState` right accu)
 
 		// the state of all other new forms created will be stored in the page 
 
-		toHtmlState` (Node_ left (fid,NewState {encoding = PlainStr string,life}) right) tl 
-			= toHtmlState` left [(fid,life,PlainString,string): toHtmlState` right tl]
-		toHtmlState` (Node_ left (fid,NewState {encoding = StatDyn dynval,life}) right) tl 
-			= toHtmlState` left [(fid,life,StaticDynamic,dynamic_to_string dynval): toHtmlState` right tl]
-
-	urlEncodeState :: !HtmlStates -> String
-	urlEncodeState [] = encodeString "$"
-	urlEncodeState [(id,lifespan,storageformat,state):xsys] 
-		= encodeString "(\"" +++ fromLivetime lifespan storageformat +++ encodeString id +++ 
-		  encodeString "\"," +++ encodeString state +++ 
-		  encodeString ")$" +++ urlEncodeState xsys
-	where
-		fromLivetime Page 		PlainString		= "N"	// encode Lifespan & StorageFormat in first character
-		fromLivetime Session 	PlainString		= "S"
-		fromLivetime Persistent PlainString		= "P"
-		fromLivetime Page 		StaticDynamic	= "n"
-		fromLivetime Session 	StaticDynamic	= "s"
-		fromLivetime Persistent StaticDynamic	= "p"
-	 
+		toHtmlState` (Node_ left (fid,NewState {encoding = PlainStr string,life}) right) accu 
+			= toHtmlState` left [(fid,life,PlainString,string): toHtmlState` right accu]
+		toHtmlState` (Node_ left (fid,NewState {encoding = StatDyn dynval,life}) right) accu 
+			= toHtmlState` left [(fid,life,StaticDynamic,dynamic_to_string dynval): toHtmlState` right accu]
+ 
 	submitscript :: !String !String -> BodyTag
 	submitscript formname updatename
 	=	Script [] (SScript
@@ -373,36 +319,19 @@ where
 	selectorInpName :: String
 	selectorInpName =: "CS"
 
-	// all persistent stores are stored in files
-
 //	writeAllPersistentStates:: FormStates *NWorld -> *NWorld 
 	writeAllPersistentStates Leaf_ world = world
 	writeAllPersistentStates (Node_ left (sid,NewState {encoding,life = Persistent}) right) world
-	# stringToWrite = case encoding of
-							PlainStr string -> string
-							StatDyn dynval	-> dynamic_to_string dynval
-	# world = writeState sid stringToWrite world 
-	# world = writeAllPersistentStates left world
-	= writeAllPersistentStates right world
-	writeAllPersistentStates (Node_ left (sid,NewState _) right) world
-	# world = writeAllPersistentStates left world
-	= writeAllPersistentStates right world
-	writeAllPersistentStates (Node_ left (sid,OldState s) right) world
-	# world = writeAllPersistentStates left world
-	= writeAllPersistentStates right world
+	= writeAllPersistentStates right (writeAllPersistentStates left (serializeAndStoreState sid encoding world))
+	writeAllPersistentStates (Node_ left (sid,OldState {encoding,life = Persistent}) right) world
+	= writeAllPersistentStates right (writeAllPersistentStates left (serializeAndStoreState sid encoding world))
+	writeAllPersistentStates (Node_ left _ right) world
+	= writeAllPersistentStates right (writeAllPersistentStates left world)
 
-	writeState :: String a *NWorld -> *NWorld | gPrint {|*|} a 
-	writeState filename val env
-	#(_,env) = case getFileInfo mydir env of
-				((DoesntExist,fileinfo),env) -> createDirectory mydir env
-				(_,env) -> (NoDirError,env)
-	# (ok,file,env)	= fopen (MyDir server +++ "/" +++ filename) FWriteData env
-	| not ok 		= env
-	# file			= fwrites (printToString val) file
-	# (ok,env)		= fclose file env
-	= env
-	where
-		mydir = RelativePath [PathDown (MyDir server)]
+	serializeAndStoreState sid (PlainStr string) world 
+		= writeState (MyDir server) sid string world
+	serializeAndStoreState sid (StatDyn dynval) world 
+		= writeState (MyDir server) sid (dynamic_to_string dynval) world
 
 // script for transmitting name and value of changed input 
 
@@ -424,6 +353,104 @@ MyPhP Internal = "clean"
 
 MyDir :: ServerKind -> String
 MyDir serverkind = (mkString (takeWhile ((<>) '.') (mkList (ThisExe serverkind))))
+
+// writing and reading of persistent states to a file
+
+writeState :: !String !String !String !*NWorld -> *NWorld 
+writeState directory filename serializedstate env
+#(_,env) = case getFileInfo mydir env of
+			((DoesntExist,fileinfo),env) -> createDirectory mydir env
+			(_,env) -> (NoDirError,env)
+# (ok,file,env)	= fopen (directory +++ "/" +++ filename) FWriteData env
+| not ok 		= env
+# file			= fwrites serializedstate file
+# (ok,env)		= fclose file env
+= env
+where
+	mydir = RelativePath [PathDown directory]
+
+readStringState :: !String !String !*NWorld -> (!String,!*NWorld) 
+readStringState directory filename env
+#(_,env) = case getFileInfo mydir env of
+			((DoesntExist,fileinfo),env) -> createDirectory mydir env
+			(_,env) -> (NoDirError,env)
+# (ok,file,env)	= fopen (directory +++ "/" +++ filename) FReadData env
+| not ok 		= ("",env)
+# (string,file)	= freads file big
+| not ok 		= ("",env)
+# (ok,env)		= fclose file env
+# string		= mkString (removeBackslashQuote (mkList string))
+= (string,env) 
+where
+	big = 100000
+	mydir = RelativePath [PathDown directory]
+
+	removeBackslashQuote [] 			= []
+	removeBackslashQuote ['\\\"':xs] 	= ['\"':removeBackslashQuote xs]
+	removeBackslashQuote [x:xs] 		= [x:removeBackslashQuote xs]
+
+readDynamicState :: !String !String !*NWorld -> (!String,!*NWorld) 
+readDynamicState directory filename env
+#(_,env) = case getFileInfo mydir env of
+			((DoesntExist,fileinfo),env) -> createDirectory mydir env
+			(_,env) -> (NoDirError,env)
+# (ok,file,env)	= fopen (directory +++ "/" +++ filename) FReadData env
+| not ok 		= ("",env)
+# (string,file)	= freads file big
+| not ok 		= ("",env)
+# (ok,env)		= fclose file env
+= (string,env) 
+where
+	big = 100000
+	mydir = RelativePath [PathDown directory]
+
+// serializing and de-serializing of html states
+
+fromHtmlState :: ![HtmlState] -> String
+fromHtmlState [] = encodeString "$"
+fromHtmlState [(id,lifespan,storageformat,state):xsys] 
+	= encodeString "(\"" +++ fromLivetime lifespan storageformat +++ encodeString id +++ 
+	  encodeString "\"," +++ encodeString state +++ 
+	  encodeString ")$" +++ fromHtmlState xsys
+where
+	fromLivetime Page 		PlainString		= "N"	// encode Lifespan & StorageFormat in first character
+	fromLivetime Session 	PlainString		= "S"
+	fromLivetime Persistent PlainString		= "P"
+	fromLivetime Page 		StaticDynamic	= "n"
+	fromLivetime Session 	StaticDynamic	= "s"
+	fromLivetime Persistent StaticDynamic	= "p"
+
+toHtmlState :: String -> [HtmlState]
+toHtmlState state = toHtmlState` (mkList state)
+where
+	toHtmlState` :: [Char] -> [HtmlState]
+	toHtmlState` [] 			= []
+	toHtmlState` listofchar	= [mkHtmlState first : toHtmlState` second]
+	where
+		(first,second) = mscan '$' listofchar
+
+		mkHtmlState :: [Char] -> HtmlState
+		mkHtmlState	elem = (mkString (stl fid),toLivetime fid,toStorageFormat fid,mkString (stl (reverse (stl (reverse formvalue)))))
+		where
+			(fid,formvalue) = mscan '"' (stl (stl elem)) // skip '("'
+			stl [] = []
+			stl [x:xs] = xs 
+			
+			toLivetime ['N':_] = Page
+			toLivetime ['n':_] = Page
+			toLivetime ['S':_] = Session
+			toLivetime ['s':_] = Session
+			toLivetime ['P':_] = Persistent
+			toLivetime ['p':_] = Persistent
+			toLivetime _   	   = Page
+
+			toStorageFormat ['N':_] = PlainString
+			toStorageFormat ['S':_] = PlainString
+			toStorageFormat ['P':_] = PlainString
+			toStorageFormat ['n':_] = StaticDynamic
+			toStorageFormat ['p':_] = StaticDynamic
+			toStorageFormat ['s':_] = StaticDynamic
+			toStorageFormat _   	= PlainString
 
 // low level url encoding decoding
 
@@ -490,7 +517,7 @@ skipping [c:cs] list=:[x:xs]
 | otherwise 	= list
 skipping any    list = list
 
-// for testing:
+// interfaces added for testing:
 
 initTestFormStates 	::  *NWorld -> (*FormStates,*NWorld) 					// retrieves all form states hidden in the html page
 initTestFormStates world 
