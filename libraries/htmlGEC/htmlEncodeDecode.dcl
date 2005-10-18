@@ -24,12 +24,11 @@ MyDir 			:: ServerKind -> String		// name of directory in which persistent form 
 
 traceHtmlInput	:: ServerKind (Maybe String) -> BodyTag	// for debugging showing the information received from browser
 
-// Decoding of information
+// Maintaining the internal state of all forms
 
-:: *FormStates 					// collection of all states of all forms
+:: *FormStates 												// collection of all states of all forms
 
 emptyFormStates :: *FormStates								// creates emtpy states
-initialFormStates 	:: ServerKind (Maybe String) *NWorld -> (*FormStates,*NWorld) 		// retrieves all initial form states wherever they are stored
 
 findState 		:: !FormId *FormStates *NWorld 				// find the state value given FormId and a correct type
 					-> (Bool, Maybe a,*FormStates,*NWorld)	// true if form has not yet been previously inspected 	
@@ -42,8 +41,10 @@ getTriplet  	:: *FormStates -> (!Maybe a, !Maybe b,*FormStates) // triplet, valu
 getUpdateId 	:: *FormStates -> (String,*FormStates)		// id of previously changed form
 getUpdate 		:: *FormStates -> (String,*FormStates)		// value typed in by user as string
 
-convStates 		:: !FormStates *NWorld -> (BodyTag,*NWorld) // script which stores the global state for the next round
+// serializing, de-serializing, storage and retrieval of form states
 
+retrieveFormStates 	:: ServerKind (Maybe String) *NWorld -> (*FormStates,*NWorld) 		// retrieves all initial form states wherever they are stored
+storeFormStates 	:: !FormStates *NWorld -> (BodyTag,*NWorld) // script which stores the global state for the next round
 
 // low level encoding of information
 
