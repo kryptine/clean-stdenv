@@ -9,7 +9,7 @@ import GenPrint
 import GenParse
 import StdBool, StdFile
 
-TraceInput :== False
+TraceInput :== True
 
 
 // doHtml main wrapper for generating & handling of a Html form
@@ -82,10 +82,10 @@ derive bimap Form
 derive gForm Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (,) 
 derive gUpd  Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, (,) 
 
-derive gForm 		 (,,), (,,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput 
-derive gUpd  		 (,,), (,,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput
-derive gPrint 	(,), (,,), (,,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput
-derive gParse 	(,), (,,), (,,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput
+derive gForm 		 (,,), (,,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, (->) 
+derive gUpd  		 (,,), (,,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, (->)
+derive gPrint 	(,), (,,), (,,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, (->)
+derive gParse 	(,), (,,), (,,,), (<->), <|>, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, (->)
 
 // specialize has to be used if one wants to specialize gForm for a user-defined type
 
