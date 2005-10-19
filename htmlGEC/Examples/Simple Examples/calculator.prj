@@ -1,6 +1,6 @@
 Version: 1.4
 Global
-	Built:	True
+	Built:	False
 	Target:	Everything
 	Exec:	{Project}\calculator.exe
 	CodeGen
@@ -66,7 +66,7 @@ MainModule
 			Y:	0
 			SizeX:	932
 			SizeY:	680
-	IclOpen:	True
+	IclOpen:	False
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
 	Module
@@ -3222,9 +3222,9 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	830
-				SizeY:	521
-		DclOpen:	False
+				SizeX:	1132
+				SizeY:	516
+		DclOpen:	True
 		Icl
 			WindowPosition
 				X:	47
@@ -4403,6 +4403,15 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup2.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_system.o
 		Path:	{Project}\Clean System Files\calculator.o
+		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlEncodeDecode.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlFormlib.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlStylelib.o
+		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlPrintUtil.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlStyleDef.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlDataDef.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
@@ -4425,22 +4434,14 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdCharList.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\StdHtml.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlDataDef.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlStyleDef.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlPrintUtil.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
-		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlStylelib.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlFormlib.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlHandler.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlEncodeDecode.o
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
 		Path:	{Application}\Libraries\Generics\Clean System Files\GenParse.o
 		Path:	{Application}\Libraries\Generics\Clean System Files\GenPrint.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlFormData.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlTrivial.o
 		Path:	{Application}\Libraries\Directory\Clean System Files\Directory.o
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlTrivial.o
 		Path:	{Application}\Libraries\htmlGEC\graph_copy\Clean System Files\dynamic_string.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicGraphConversion.o
@@ -4459,42 +4460,46 @@ Static
 		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\md5.o
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\httpServer.o
-		Path:	{Application}\Libraries\Tcp\Clean System Files\StdTCP.o
-		Path:	{Application}\Libraries\Tcp\Clean System Files\StdChannels.o
-		Path:	{Application}\Libraries\Tcp\Clean System Files\tcp.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTime.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostick.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostoolbox.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\clCrossCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\id.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostypes.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\device.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\systemid.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostime.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ossystem.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osdocumentinterface.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdIOCommon.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdBitmap.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osbitmap.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ospicture.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osrgn.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\pictCCall_12.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostypes.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\rgnCCall_12.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\pictCCall_12.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osfont.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPictureDef.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdIOBasic.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPicture.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdKey.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\oskey.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\id.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\device.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\systemid.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\commondef.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\clCCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osdocumentinterface.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\menuCrossCall_12.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostoolbar.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\windowCCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ossystem.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\windowCrossCall_12.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostime.o
+		Path:	{Application}\Libraries\Tcp\Clean System Files\StdTCP.o
+		Path:	{Application}\Libraries\Tcp\Clean System Files\StdChannels.o
+		Path:	{Application}\Libraries\Tcp\Clean System Files\tcp.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdId.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\deviceevents.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\iostate.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osactivaterequests.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osevent.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osguishare.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\devicefunctions.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\deviceevents.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receivermessage.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receivertable.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\semidynamic.o
@@ -4506,10 +4511,6 @@ Static
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdWindowDef.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverhandle.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\keyfocus.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\iostate.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osactivaterequests.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osguishare.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\devicefunctions.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\devicesystemstate.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuhandle.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuDef.o
@@ -4520,20 +4521,20 @@ Static
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\processstack.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\roundrobin.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osmouse.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\world.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPSt.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdProcessDef.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdProcessAttribute.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdProcessDef.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osbeep.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\world.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiverDef.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiver.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\scheduler.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverid.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiveraccess.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverdefaccess.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiverAttribute.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverid.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverdevice.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\receiverevent.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\scheduler.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPStClass.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdFileSelect.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osfileselect.o
@@ -4549,7 +4550,6 @@ Static
 		Path:	{Application}\Libraries\MersenneTwister\Clean System Files\MersenneTwister.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlArrow.o
-		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
 		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.obj
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFileSelectors_121.obj
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFont_121.obj
@@ -4624,5 +4624,5 @@ Static
 		Path:	{Application}\Libraries\GEC\GEC Implementation
 		Path:	{Application}\Libraries\htmlGEC
 		Path:	{Application}\Libraries\htmlGEC\graph_copy
-	AppP:	C:\Clean\Clean 2.1.1
-	PrjP:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Examples\Simple Examples
+	AppP:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1
+	PrjP:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Examples\Simple Examples

@@ -91,11 +91,6 @@ derive gParse 	(,), (,,), (,,,), (<->), <|>, DisplayMode, Button, CheckBox, Radi
 
 specialize :: (FormId a *HSt -> (Form a,*HSt)) FormId a *HSt -> (Form a,*HSt) | gUpd {|*|} a
 
-// for testing pages:
+// for testing
 
-:: Triplet 		:== (String,Int,UpdValue)
-:: *TestEvent	:== (Triplet,UpdValue,*FormStates) // chosen triplet, its new value 
-
-doHtmlTest :: (Maybe *TestEvent) (*HSt -> (Html,!*HSt)) *World -> ([(InputType,Value,Maybe Triplet)],*FormStates,*World) // use this for testing
-randomTest :: !Int !(*HSt -> (Html,!*HSt)) *World -> ([(Triplet,UpdValue)],*World)
-doHtmlTest2 :: (Maybe *TestEvent) (*HSt -> (Html,!*HSt)) *NWorld -> ([(InputType,Value,Maybe Triplet)],*FormStates,*NWorld)
+runUserApplication :: .(*HSt -> *(.a,*HSt)) *FormStates *NWorld -> *(.a,*FormStates,*NWorld)

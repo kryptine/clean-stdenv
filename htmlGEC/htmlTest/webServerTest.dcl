@@ -1,0 +1,25 @@
+definition module webServerTest
+
+/*
+	Special library to test Webservers.
+	Pieter Koopman 2005
+*/
+
+import StdEnv, gast, htmlTestHandler, htmlPrintUtil
+
+derive bimap []
+
+:: HtmlInput
+	= HtmlButton String
+	| HtmlIntTextBox String Int
+
+
+// --------- Utilities --------- //
+
+htmlPageTitle :: Html -> [String]
+htmlEditBoxValues :: Html String -> [Int]
+
+// --------- The main function --------- //
+
+testHtml :: [TestSMOption s i Html] (Spec s i Html) s (i->HtmlInput) (*HSt -> (Html,*HSt)) *World -> *World
+			| ggen{|*|} i & gEq{|*|} s & genShow{|*|} s & genShow{|*|} i
