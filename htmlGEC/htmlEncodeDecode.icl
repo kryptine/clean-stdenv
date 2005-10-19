@@ -143,12 +143,15 @@ where
 						|  sid <> ""
 						])
 	where
-		toExistval PlainString string 	= PlainStr string	// string that has to be parsed in the context where the type is known
-		toExistval StaticDynamic string 	= abort ("dynamic read in:\n" +++ (encodeString string) +++ 
+		toExistval PlainString string 		= PlainStr string	// string that has to be parsed in the context where the type is known
+//		toExistval StaticDynamic string 	= StatDyn (string_to_dynamic` string) // crash
+		toExistval StaticDynamic string 	= StatDyn (dynamic 1) // no crash
+/*
+abort ("dynamic read in:\n" +++ (encodeString string) +++ 
 													 "\ncompare this with\n" +++ (encodeString (dynamic_to_string (dynamic 1)))
 													 +++ "\n")
-//		toExistval StaticDynamic string 	= StatDyn (string_to_dynamic` string) // crash
-//		toExistval StaticDynamic string 	= StatDyn (dynamic 1) // no crash
+													 */
+
 
 	(_,triplet,update,_) = DecodeArguments serverkind args
 
@@ -416,7 +419,7 @@ HtmlStateToString :: ![HtmlState] -> String
 HtmlStateToString [] = encodeString "$"
 HtmlStateToString [(id,lifespan,storageformat,state):xsys] 
 	= encodeString "(\"" +++ fromLivetime lifespan storageformat +++ encodeString id +++ 
-	  encodeString "\"," +++ encodeString state +++ 
+	  encodeString "\"," +++ encodeString  state +++ 
 	  encodeString ")$" +++ HtmlStateToString xsys
 where
 	fromLivetime Page 		PlainString		= "N"	// encode Lifespan & StorageFormat in first character
