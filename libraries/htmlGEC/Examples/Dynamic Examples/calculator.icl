@@ -6,16 +6,22 @@ module calculator
 import StdEnv
 import StdHtml
 
+
 //Start world  = doHtmlServer arrowcalculator world
 Start world  = doHtmlServer simple world
 //Start world  = doHtmlServer temp world
 
 simple hst
 //# (fun,hst)		= mkEditForm (pDFormId "fun") ((+) 1) hst	// calculates new values	
-# (display,hst)	= mkEditForm (pDFormId "xdisplay") 44 hst	// calculates new values	
+# (display,hst)		= mkEditForm (nDFormId "display")  1 hst	// calculates new values	
+# (display2,hst)	= mkEditForm (nDFormId "display2") 2 hst	// calculates new values	
+
+//# (fun,hst)		= mkStoreForm (pdDFormId "store") ((+) 4) id hst	// calculates new values	
 = mkHtml "Calculator"
 	[ H1 [] "Calculator Example: "
 	, toBody display 
+	, toBody display2 
+//	, toHtml (fun.value display.value) 
 	] hst
 
 import dynamic_string
