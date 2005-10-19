@@ -3,6 +3,8 @@
 // encoding and decoding of information
 // (c) 2005 MJP
 
+//R=QN,Qr@QþTQNÀ™Kíÿÿÿx‹KNN’=Q
+
 import StdEnv, ArgEnv, StdMaybe, Directory
 import htmlDataDef, htmlTrivial, htmlFormData
 import GenPrint, GenParse
@@ -141,8 +143,12 @@ where
 						|  sid <> ""
 						])
 	where
-		toExistval PlainString state 	= PlainStr state	// string that has to be parsed in the context where the type is known
-		toExistval StaticDynamic state 	= StatDyn (string_to_dynamic` state) // turn string into dynamic
+		toExistval PlainString string 	= PlainStr string	// string that has to be parsed in the context where the type is known
+		toExistval StaticDynamic string 	= abort ("dynamic read in:\n" +++ (encodeString string) +++ 
+													 "\ncompare this with\n" +++ (encodeString (dynamic_to_string (dynamic 1)))
+													 +++ "\n")
+//		toExistval StaticDynamic string 	= StatDyn (string_to_dynamic` string) // crash
+//		toExistval StaticDynamic string 	= StatDyn (dynamic 1) // no crash
 
 	(_,triplet,update,_) = DecodeArguments serverkind args
 
@@ -164,7 +170,7 @@ where
 	retrieveHtmlState :: ServerKind (Maybe String) -> [HtmlState]
 	retrieveHtmlState serverkind args
 	# (_,_,_,state) = DecodeArguments serverkind args
-	= toHtmlState state
+	= [states \\states=:(id,_,_,nstate) <- StringToHtmlState state | id <> "" || nstate <> ""] // to be sure that no rubisch is passed on
 
 // Parse and decode low level information obtained from server 
 // In case of using a php script and external server:
@@ -248,10 +254,10 @@ storeFormStates {fstates = allFormStates,server} world
 	, globalstateform globalFormName updateInpName globalInpName (SV encodedglobalstate) 
 	],world)
 where
-	encodedglobalstate = fromHtmlState (toHtmlState allFormStates)
+	encodedglobalstate = HtmlStateToString (FStateToHtmlState allFormStates)
 
-//	toHtmlState :: !FormStates -> HtmlState	// remaining states as hidden encoded html
-	toHtmlState formstates = toHtmlState` formstates []
+//	FStateToHtmlState :: !FormStates -> HtmlState	// remaining states as hidden encoded html
+	FStateToHtmlState formstates = toHtmlState` formstates []
 	where
 		toHtmlState` Leaf_ accu = accu
 
@@ -262,12 +268,12 @@ where
 		toHtmlState` (Node_ left (fid,OldState {life=Session,encoding=StatDyn dynval}) right) accu 
 			= toHtmlState` left [(fid,Session,StaticDynamic,dynamic_to_string dynval):toHtmlState` right accu]
 
-		// other old states will have lifespan page; they become garbage and are no longer stored in the page
+		// other old states will have lifespan page or persistent; they need not to be stored in the page
 
 		toHtmlState` (Node_ left (fid,OldState s) right) accu 
 			= toHtmlState` left (toHtmlState` right accu)
 
-		// persistent stores have already been stored in files and can be skipped here
+		// persistent stores (either old or new) have already been stored in files and can be skipped here
 
 		toHtmlState` (Node_ left (fid,NewState {life=Persistent}) right) accu 
 			= toHtmlState` left (toHtmlState` right accu)
@@ -406,12 +412,12 @@ where
 
 // serializing and de-serializing of html states
 
-fromHtmlState :: ![HtmlState] -> String
-fromHtmlState [] = encodeString "$"
-fromHtmlState [(id,lifespan,storageformat,state):xsys] 
+HtmlStateToString :: ![HtmlState] -> String
+HtmlStateToString [] = encodeString "$"
+HtmlStateToString [(id,lifespan,storageformat,state):xsys] 
 	= encodeString "(\"" +++ fromLivetime lifespan storageformat +++ encodeString id +++ 
 	  encodeString "\"," +++ encodeString state +++ 
-	  encodeString ")$" +++ fromHtmlState xsys
+	  encodeString ")$" +++ HtmlStateToString xsys
 where
 	fromLivetime Page 		PlainString		= "N"	// encode Lifespan & StorageFormat in first character
 	fromLivetime Session 	PlainString		= "S"
@@ -420,8 +426,8 @@ where
 	fromLivetime Session 	StaticDynamic	= "s"
 	fromLivetime Persistent StaticDynamic	= "p"
 
-toHtmlState :: String -> [HtmlState]
-toHtmlState state = toHtmlState` (mkList state)
+StringToHtmlState :: String -> [HtmlState]
+StringToHtmlState state = toHtmlState` (mkList state)
 where
 	toHtmlState` :: [Char] -> [HtmlState]
 	toHtmlState` [] 			= []

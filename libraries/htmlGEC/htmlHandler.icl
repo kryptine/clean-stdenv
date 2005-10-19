@@ -12,6 +12,10 @@ derive gParse (,), (,,), (,,,), UpdValue
 derive gHpr   (,), (,,), (,,,)
 derive gUpd		   (,,), (,,,)
  
+gParse {|(->)|} gArg gRes _ 	= Nothing 
+gPrint{|(->)|} gArg gRes  _ _	= abort "functions can only be used with dynamic storage option!\n" 
+
+
 :: *HSt 		= 	{ cntr 		:: InputId		// counts position in expression
 					, states 	:: *FormStates  // all form states are collected here ... 	
 					, world		:: *NWorld		// to enable all other kinds of I/O
@@ -146,10 +150,10 @@ where
 
 			// an update for this form is detected
 
-			(Just (pos,updval), (True,Just currentState,formStates,world)) 	//state as received from browser 
+			(Just (pos,updval), (True,Just currentState,formStates,world)) 		//state as received from browser 
 					-> (True, Just (snd (gUpd{|*|} (UpdSearch updval pos) currentState)),formStates,world)
 			(Just (pos,updval), (False,Just currentState,formStates,world)) 	// state has been updated already
-					-> (False, Just currentState,formStates,world)   // to indicate the update already has taken place, used in arrows
+					-> (False, Just currentState,formStates,world)   			// to indicate the update already has taken place, used in arrows
 
 			// no update found, determine the current stored state
 
@@ -354,6 +358,8 @@ where
 	| max - def <= 0 = def
 	| otherwise = ndefsize max (def + defsize)
 
+gForm{|(->)|} garg gres formid f hst 	
+= ({changed=False, value=f, form=[]},hst)
 
 
 // gUpd calculates a new value given the current value and a change in the value
@@ -439,6 +445,8 @@ gUpd{|CONS|} gUpdo mode (CONS c) 			// other cases
 gUpd{|FIELD|} gUpdx mode (FIELD x)  // to be done !!!
 # (mode,x) = gUpdx mode x
 = (mode,FIELD x)
+
+gUpd{|(->)|} gUpdArg gUpdRes mode f = (mode,f)	
 
 derive gUpd (,)
 
