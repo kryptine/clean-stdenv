@@ -102,3 +102,11 @@ where
 		# (bool,file,worldC) = sfopen string int worldC
 		= (bool,file,{nworld & worldC = worldC})
 
+appWorldNWorld :: !.(*World -> *World) !*NWorld -> *NWorld
+appWorldNWorld f nw=:{worldC}
+	= {nw & worldC=f worldC}
+
+accWorldNWorld :: !.(*World -> *(.a,*World)) !*NWorld -> (.a,!*NWorld)
+accWorldNWorld f nw=:{worldC}
+	# (a,worldC)	= f worldC
+	= (a,{nw & worldC=worldC})

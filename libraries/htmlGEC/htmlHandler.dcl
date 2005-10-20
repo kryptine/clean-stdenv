@@ -9,7 +9,7 @@ import GenPrint
 import GenParse
 import StdBool, StdFile
 
-TraceInput :== True
+TraceInput :== False
 
 
 // doHtml main wrapper for generating & handling of a Html form
@@ -19,6 +19,8 @@ doHtmlServer 	:: (*HSt -> (Html,!*HSt))  *World -> *World 	// use this applicati
 
 :: *HSt 								// unique state required for creating Html forms
 instance FileSystem HSt					// enabling file IO on HSt
+appWorldHSt		:: !.(*World -> *World)       !*HSt -> *HSt
+accWorldHSt		:: !.(*World -> *(.a,*World)) !*HSt -> (.a,!*HSt)
 
 mkViewForm 		:: !FormId 	d !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
 

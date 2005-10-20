@@ -729,6 +729,16 @@ where
 		# (bool,file,world) = sfopen string int world
 		= (bool,file,{hst & world = world})
 
+// General access to the World environment on HSt:
+appWorldHSt :: !.(*World -> *World) !*HSt -> *HSt
+appWorldHSt f hst=:{world}
+	= {hst & world=appWorldNWorld f world}
+
+accWorldHSt :: !.(*World -> *(.a,*World)) !*HSt -> (.a,!*HSt)
+accWorldHSt f hst=:{world}
+	# (a,world)	= accWorldNWorld f world
+	= (a,{hst & world=world})
+
 // test interface
 
 runUserApplication :: .(*HSt -> *(.a,*HSt)) *FormStates *NWorld -> *(.a,*FormStates,*NWorld)

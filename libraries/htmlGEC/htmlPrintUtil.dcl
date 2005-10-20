@@ -21,6 +21,8 @@ import StdFile
 	| UpdS String				// new piece of text
 
 instance FileSystem NWorld
+appWorldNWorld :: !.(*World -> *World)       !*NWorld -> *NWorld
+accWorldNWorld :: !.(*World -> *(.a,*World)) !*NWorld -> (.a,!*NWorld)
 
 
 // generic function for printing tags
@@ -45,4 +47,3 @@ htmlAttrCmnd 	:: !hdr !tag !body  	-> FoF | gHpr{|*|} hdr & gHpr{|*|} tag & gHpr
 openCmnd 		:: !a !b 				-> FoF | gHpr{|*|} a & gHpr{|*|} b
 styleCmnd 		:: !a !b 				-> FoF | gHpr{|*|} a & gHpr{|*|} b
 styleAttrCmnd 	:: !a !b 				-> FoF | gHpr{|*|} a & gHpr{|*|} b
-
