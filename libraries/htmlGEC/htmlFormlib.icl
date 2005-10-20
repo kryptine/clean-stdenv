@@ -232,10 +232,10 @@ where
 	less [] = []
 
 horlistForm :: !FormId ![a] !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-horlistForm formid xs hSt = layoutListForm (\f1 f2 -> [f1 <=> f2]) mkEditForm formid xs hSt
+horlistForm formid xs hSt = layoutListForm (\f1 f2 -> [f1 <=> f2]) mkSetForm formid xs hSt
 			
 vertlistForm :: !FormId ![a] !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-vertlistForm formid xs hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) mkEditForm formid xs hSt
+vertlistForm formid xs hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) mkSetForm formid xs hSt
 
 table_hv_Form :: !FormId ![[a]] !*HSt -> (Form [[a]],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 table_hv_Form formid xs hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) horlistForm formid xs hSt
