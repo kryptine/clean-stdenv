@@ -12,7 +12,7 @@ Start :: *World -> *World
 Start world
 	= doHtmlServer numberGuessingGame world
 
-bounds = (1,100)
+bounds = (1,10)
 
 numberGuessingGame :: *HSt -> (Html, *HSt)
 numberGuessingGame hst
@@ -22,18 +22,27 @@ numberGuessingGame hst
 	# (countF, hst)		= mkStoreForm countFormId 0 id hst
 	# curCount			= countF.value
 	# (guessF, hst)		= mkStoreForm guessFormId r id hst
+	# (highF,  hst)		= mkStoreForm highFormId [("Peter",1),("Pieter",1),("Rinus",1)] id hst
 	# (playerF,hst)		= mkEditForm playerFormId (low-1) hst
-	# (funF,   hst)		= ListFuncBut False backFormId [(LButton defpixel "Guess", inc)] hst
+	# (funF,   hst)		= ListFuncBut False guessButtonFormId [(LButton defpixel "Guess", inc)] hst
 	# (countF, hst)		= mkStoreForm countFormId curCount funF.value hst
 	# newCount			= countF.value
-	| newCount > curCount && playerF.value == guessF.value
-		= hallOfFamePage countF guessF hst
+//
+	# (nameF,  hst)		= mkEditForm nameFormId "" hst
+	# (okF,    hst)		= ListFuncBut False nameButtonFormId [(LButton defpixel "Ok", insert insertHigh (nameF.value,countF.value))] hst
+	# (highF,  hst)		= mkStoreForm highFormId highF.value okF.value hst
+	# (displF, hst)		= vertlistForm dispFormId highF.value hst
+//
+	| newCount > curCount && playerF.value == guessF.value || nameF.value<>""
+		= hallOfFamePage countF guessF highF displF nameF okF hst
 	| otherwise
 		= guessPage (newCount > curCount) playerF guessF funF hst
 where
-	hallOfFamePage countF guessF hst
+	hallOfFamePage countF guessF highF displF nameF okF hst
 		= mkHtml "Number Guessing Game" 
 			[ Txt ("Congratulations. You won in "<$countF.value<$" turns.")
+			, Txt "Please enter your name:", BodyTag nameF.form, BodyTag okF.form
+			, BodyTag displF.form
 			] hst
 	
 	guessPage nextNr playerF guessF funF hst
@@ -47,9 +56,19 @@ where
 	
 	(low,up) = bounds
 
-guessFormId  = nFormId "guess nr"
-countFormId  = sFormId "count"
-playerFormId = nFormId "player"
-backFormId   = nFormId "back"
+guessFormId			= nFormId "guess nr"
+countFormId			= sFormId "count"
+playerFormId		= nFormId "player"
+guessButtonFormId	= nFormId "back"
+nameFormId			= nFormId "name"
+highFormId			= pFormId "high"
+nameButtonFormId	= nFormId "nameOk"
+dispFormId			= nFormId "display"
 
 instance mod Int where mod a b = a - (a/b)*b
+
+insertHigh (newPl,newHi) (elemPl,elemHi)
+	= newHi < elemHi || newHi == elemHi && newPl <= elemPl
+
+derive gForm []
+derive gUpd  []
