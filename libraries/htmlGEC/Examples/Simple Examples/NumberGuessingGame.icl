@@ -9,66 +9,72 @@ module NumberGuessingGame
 import StdEnv, StdHtml, Random
 
 Start :: *World -> *World
-Start world
-	= doHtmlServer numberGuessingGame world
+Start world	= doHtmlServer numberGuessingGame world
 
-bounds = (1,10)
+bounds		= (low,up)
+low			= 1
+up			= 100
 
-numberGuessingGame :: *HSt -> (Html, *HSt)
-numberGuessingGame hst
-	# (randomSeed,hst)	= accWorldHSt getNewRandomSeed hst
-	# (r,randomSeed)	= random randomSeed
-	# r					= low + (r mod (up-low))
-	# (countF, hst)		= mkStoreForm countFormId 0 id hst
-	# curCount			= countF.value
-	# (guessF, hst)		= mkStoreForm guessFormId r id hst
-	# (highF,  hst)		= mkStoreForm highFormId [("Peter",1),("Pieter",1),("Rinus",1)] id hst
-	# (playerF,hst)		= mkEditForm playerFormId (low-1) hst
-	# (funF,   hst)		= ListFuncBut False guessButtonFormId [(LButton defpixel "Guess", inc)] hst
-	# (countF, hst)		= mkStoreForm countFormId curCount funF.value hst
-	# newCount			= countF.value
-//
-	# (nameF,  hst)		= mkEditForm nameFormId "" hst
-	# (okF,    hst)		= ListFuncBut False nameButtonFormId [(LButton defpixel "Ok", insert insertHigh (nameF.value,countF.value))] hst
-	# (highF,  hst)		= mkStoreForm highFormId highF.value okF.value hst
-	# (displF, hst)		= vertlistForm dispFormId highF.value hst
-//
-	| newCount > curCount && playerF.value == guessF.value || nameF.value<>""
-		= hallOfFamePage countF guessF highF displF nameF okF hst
-	| otherwise
-		= guessPage (newCount > curCount) playerF guessF funF hst
-where
-	hallOfFamePage countF guessF highF displF nameF okF hst
-		= mkHtml "Number Guessing Game" 
-			[ Txt ("Congratulations. You won in "<$countF.value<$" turns.")
-			, Txt "Please enter your name:", BodyTag nameF.form, BodyTag okF.form
-			, BodyTag displF.form
-			] hst
-	
-	guessPage nextNr playerF guessF funF hst
-		= mkHtml "Number Guessing Game"
-			[ if nextNr (Txt ("The number to guess is "<$if (playerF.value < guessF.value) "larger." "smaller.")) 
-			            (Txt ("Guess a number between "<$low<$" and "<$up<$"."))
-			, Br
-			, BodyTag playerF.form
-			, BodyTag funF.form
-			] hst
-	
-	(low,up) = bounds
+::	State	= { count	:: !Int
+			  , guess	:: !Int
+			  , seed	:: !RandomSeed
+			  , high	:: ![(String,Int)]
+			  }
+derive gUpd   State
+derive gForm  State
+derive gParse State
+derive gPrint State
 
-guessFormId			= nFormId "guess nr"
-countFormId			= sFormId "count"
-playerFormId		= nFormId "player"
-guessButtonFormId	= nFormId "back"
-nameFormId			= nFormId "name"
-highFormId			= pFormId "high"
-nameButtonFormId	= nFormId "nameOk"
-dispFormId			= nFormId "display"
-
-instance mod Int where mod a b = a - (a/b)*b
-
-insertHigh (newPl,newHi) (elemPl,elemHi)
-	= newHi < elemHi || newHi == elemHi && newPl <= elemPl
+mkState seed = {count=0,guess=low,seed=seed,high=[]}
+incCount   st=:{count} = {st & count=count+1}
+nextRandom st=:{seed}  = let (r,s) = random seed in {st & count=0,guess=low + (r mod (up-low)),seed=s}
+addHigh pc st=:{high}  = nextRandom {st & high=insert insertHigh pc high}
+where	insertHigh (newPl,newHi) (elemPl,elemHi) = newHi < elemHi || newHi == elemHi && newPl <= elemPl
 
 derive gForm []
 derive gUpd  []
+
+numberGuessingGame :: *HSt -> (Html, *HSt)
+numberGuessingGame hst
+	# (nameF,     hst)	= nameForm "" hst
+	# (playerF,   hst)	= playerForm  hst
+	# (randomSeed,hst)	= accWorldHSt getNewRandomSeed hst
+	# (stateF,    hst)	= stateForm (nextRandom (mkState randomSeed)) id hst
+	# curCount			= stateF.value.count
+	# (guessF,    hst)	= guessButtonForm hst
+	# (newF,      hst)	= newButtonForm hst
+	# (stateF,    hst)	= stateForm (mkState randomSeed) (guessF.value o newF.value) hst
+	# newCount			= stateF.value.count
+	# guessNr			= stateF.value.guess
+	# (addHighF,  hst)	= highButtonsForm (nameF.value,newCount) hst
+	# (stateF,    hst)	= stateForm (mkState randomSeed) addHighF.value hst
+	# (displF,    hst)	= highForm stateF.value.high hst
+	# pageTitle			= "Number Guessing Game"
+	# header			= BodyTag [Txt "Your name is: ", BodyTag nameF.form, Br, Br]
+	| playerF.value == guessNr && newCount > curCount
+		= mkHtml pageTitle
+			[ header
+			, Txt ("Congratulations "<$nameF.value<$". You won in "<$newCount<$" turn"<$if (newCount>1) "s." ".")
+			, Br, Br
+			: map BodyTag [displF.form, addHighF.form, newF.form]
+			] hst
+	| otherwise
+		= mkHtml pageTitle
+			[ header
+			, if (newCount > curCount)
+				 (Txt ("The number to guess is "<$if (playerF.value < guessNr) "larger." "smaller.")) 
+			     (Txt (if (nameF.value=="") "Please" (nameF.value<$", please")<$" guess a number between "<$low<$" and "<$up<$"."))
+			, Br, Br
+			: map BodyTag [playerF.form, guessF.form, [Br], newF.form]
+			] hst
+	
+//	Form initializer functions:
+playerForm			= mkEditForm   (nFormId "player")  (low-1)		// The form in which the player enters guesses
+stateForm st f		= mkStoreForm  (pFormId "state")    st f		// The store form that keeps track of the state of the application
+nameForm name		= mkEditForm   (nFormId "name")     name		// The form in which the player can enter his/her name
+highForm high		= vertlistForm (ndFormId "display") high		// The form that displays the high-score list
+highButtonsForm pc	= ListFuncBut False (nFormId "highButtons") [(LButton (3*defpixel/2) "Add To High",addHigh pc)]	// Button to add result to high-score
+guessButtonForm		= ListFuncBut False (nFormId "guessbutton") [(LButton defpixel "Guess",      incCount  )]		// Button to confirm number to guess
+newButtonForm		= ListFuncBut False (nFormId "newbutton")   [(LButton defpixel "New Game",   nextRandom)]		// Button to start new game
+
+instance mod Int where mod a b = a - (a/b)*b
