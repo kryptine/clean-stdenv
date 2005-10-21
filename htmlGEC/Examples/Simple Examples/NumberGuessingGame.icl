@@ -13,7 +13,7 @@ Start world	= doHtmlServer numberGuessingGame world
 
 bounds		= (low,up)
 low			= 1
-up			= 100
+up			= 10
 
 ::	State	= { count	:: !Int
 			  , guess	:: !Int
@@ -39,15 +39,15 @@ numberGuessingGame hst
 	# (nameF,     hst)	= nameForm "" hst
 	# (playerF,   hst)	= playerForm  hst
 	# (randomSeed,hst)	= accWorldHSt getNewRandomSeed hst
-	# (stateF,    hst)	= stateForm (nextRandom (mkState randomSeed)) id hst
+	# (stateF,    hst)	= stateForm randomSeed (\st -> if (low<=st.guess && st.guess<=up) st (nextRandom st)) hst
 	# curCount			= stateF.value.count
 	# (guessF,    hst)	= guessButtonForm hst
 	# (newF,      hst)	= newButtonForm hst
-	# (stateF,    hst)	= stateForm (mkState randomSeed) (guessF.value o newF.value) hst
+	# (stateF,    hst)	= stateForm randomSeed (guessF.value o newF.value) hst
 	# newCount			= stateF.value.count
 	# guessNr			= stateF.value.guess
 	# (addHighF,  hst)	= highButtonsForm (nameF.value,newCount) hst
-	# (stateF,    hst)	= stateForm (mkState randomSeed) addHighF.value hst
+	# (stateF,    hst)	= stateForm randomSeed addHighF.value hst
 	# (displF,    hst)	= highForm stateF.value.high hst
 	# pageTitle			= "Number Guessing Game"
 	# header			= BodyTag [Txt "Your name is: ", BodyTag nameF.form, Br, Br]
@@ -70,7 +70,7 @@ numberGuessingGame hst
 	
 //	Form initializer functions:
 playerForm			= mkEditForm   (nFormId "player")  (low-1)		// The form in which the player enters guesses
-stateForm st f		= mkStoreForm  (pFormId "state")    st f		// The store form that keeps track of the state of the application
+stateForm r f		= mkStoreForm  (pFormId "state") (mkState r) f	// The store form that keeps track of the state of the application
 nameForm name		= mkEditForm   (nFormId "name")     name		// The form in which the player can enter his/her name
 highForm high		= vertlistForm (ndFormId "display") high		// The form that displays the high-score list
 highButtonsForm pc	= ListFuncBut False (nFormId "highButtons") [(LButton (3*defpixel/2) "Add To High",addHigh pc)]	// Button to add result to high-score
