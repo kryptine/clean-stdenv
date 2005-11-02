@@ -67,6 +67,11 @@ mkEditForm:: !FormId d !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|
 mkEditForm formid=:{mode = Edit} data hst
 = mkViewForm formid data
 	{toForm = toFormid , updForm = \_ v -> v , fromForm = \_ v -> v , resetForm = Nothing}  hst
+/*
+mkEditForm formid=:{mode = Display} data hst // debug test ????
+= mkViewForm formid data
+	{toForm = toFormid , updForm = \_ v -> v , fromForm = \_ v -> v , resetForm = Nothing}  hst
+*/
 mkEditForm formid  data hst
 = mkSetForm formid data hst
 
@@ -230,6 +235,13 @@ where
 
 	less [x:xs] = xs
 	less [] = []
+
+horlistForm2 :: !Bool !FormId ![a] !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+horlistForm2 b formid xs hSt = layoutListForm (\f1 f2 -> [f1 <=> f2]) (if b mkSetForm mkEditForm) formid xs hSt
+
+vertlistForm2 :: !Bool !FormId ![a] !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+vertlistForm2 b formid xs hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) (if b mkSetForm mkEditForm) formid xs hSt
+
 
 horlistForm :: !FormId ![a] !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 horlistForm formid xs hSt = layoutListForm (\f1 f2 -> [f1 <=> f2]) mkEditForm formid xs hSt

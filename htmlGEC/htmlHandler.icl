@@ -521,7 +521,7 @@ gForm{|DisplayMode|} gHa formid (HideMode a) hst=:{cntr}
 	},hst)
 gForm{|DisplayMode|} gHa formid (DisplayMode a) hst=:{cntr}  
 # (na,hst) = gHa {formid & mode = Display} a (setCntr (cntr+1) hst)
-= (	{changed= False
+= (	{changed= na.changed 
 	,value	= DisplayMode na.value
 	,form	= na.form
 	},hst)
