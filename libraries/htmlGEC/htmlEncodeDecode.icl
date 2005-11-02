@@ -226,16 +226,16 @@ traceHtmlInput serverkind args
 			, 	Txt "update				: " , B [] update, Txt ";", Br 
 			, 	Txt "new value		  	: " , B [] new, Txt ";", Br 
 			, 	Txt "state			  	: " , BodyTag (showstate (mkList state)), Txt ";", Br 
-			, 	Txt "input			  	: " , case args of 
-													(Just x) -> Txt x
-													_ -> Br 
+//			, 	Txt "input			  	: " , case args of 
+//													(Just x) -> Txt x
+//													_ -> Br 
 			]
 where
 	(executable,update,new,state) = DecodeArguments serverkind args
 
 	showstate :: [Char] -> [BodyTag]
 	showstate [] 			= []
-	showstate listofchar	= [Br, B [] (encodeString (mkString first))] ++ showstate second // temp fix
+	showstate listofchar	= [Br, B [] (mkString first)] ++ showstate second // temp fix
 	where
 		(first,second) = mscan '$' listofchar
 
