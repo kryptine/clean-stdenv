@@ -25,7 +25,7 @@ iostateFatalError function error
 		,	localIOSt		:: !*IOSt l							//	its context-free IOSt
 		}
 ::	*IOSt l
-	=	{	ioevents		:: !*OSEvents						// The event stream environment
+	= !	{	ioevents		:: !*OSEvents						// The event stream environment
 		,	ioworld			:: !*[*World]						// The world environment
 		,	ioprocesses		:: !*CProcesses						// All other processes
 		,	iodevices		:: !*[DeviceSystemState (PSt l)]	// The GUI device states of the process
