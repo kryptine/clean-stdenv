@@ -4,15 +4,9 @@ definition module StdLibMisc
 //	Clean StdLib library module, version 1.0
 //	********************************************************************************
 
-//1.3
-from StdInt import bitand, -, +, ~
-from StdArray	import size, size_u
-//3.1
-/*2.0
 from StdInt import class +(..), instance + Int, class ~(..), instance ~ Int, 
  	instance - Int, class -(..), bitand;
 from StdArray	import class Array (size, usize, select)
-0.2*/
 import StdInt
 
 /* a generic map function. Any instance of gMap should apply it's function argument

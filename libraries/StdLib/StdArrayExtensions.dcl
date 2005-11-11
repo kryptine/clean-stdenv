@@ -6,20 +6,11 @@ definition module StdArrayExtensions
 
 // extensions for StdArray
 
-//1.3
-from StdInt		import +, -,<
-from StdArray	import size, size_u
-from StdString	import String
-from StdClass	import Ord
-from StdBool	import ||
-//3.1
-/*2.0
 from StdInt import class -(..), instance - Int, class <(..), instance < Int, 
  	instance + Int, class +(..)
 from StdArray	import class Array(..)
 from StdClass import class Ord, >=
 from StdBool	import ||, not
-0.2*/
 
 //------ creating arrays ---------------------------------
 

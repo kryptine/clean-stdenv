@@ -6,18 +6,10 @@ definition module StdListExtensions
 
 // extensions for StdList
 
-//1.3
-from StdOverloaded import ==, +, -, one, <
-from StdClass import inc, dec, >=, >,Ord
-from StdBool import not
-from StdMaybe import Maybe
-//3.1
-/*2.0
 from StdOverloaded import class <(..), class one(..), class -(..), class +(..), class ==(..);
 from StdClass import class Ord(..), >, >=, dec, inc;
 from StdBool import not;
 from StdMaybe import :: Maybe;
-0.2*/
 
 // support for state handling
 
