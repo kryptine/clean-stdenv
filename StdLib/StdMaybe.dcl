@@ -4,14 +4,8 @@ definition module StdMaybe
 //	Clean StdLib library module, version 1.0
 //	********************************************************************************
 
-//1.3
-from	StdFunc			import St
-from	StdOverloaded	import ==
-//3.1
-/*2.0
 from StdFunc import :: St;
 from StdOverloaded import class ==(..);
-0.2*/
 
 ::	Maybe x
 	=	Just x
