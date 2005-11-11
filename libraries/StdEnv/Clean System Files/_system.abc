@@ -1,4 +1,4 @@
-.comp 919 010111011
+.comp 920 010111011
 .code 0 0 0
 .start _nostart_
 .endinfo
@@ -203,7 +203,7 @@ ea_Conssts
 .export _Consa
 .record _Consa laa 2 0 "[#{}]"
 
-.desc d_S.1 n_S.1 o_S.1 1 0 "_S.1"
+.descs d_S.1 n_S.1 _ 1 0 "_S.1"
 .pb "_S.1"
 .n -1 d_S.1 ea_S.1
 .o 1 0
@@ -250,7 +250,7 @@ o_S.1
 .d 1 0
 	rtn
 
-.desc d_S.2 n_S.2 o_S.2 1 0 "_S.2"
+.descs d_S.2 n_S.2 _ 2 0 "_S.2"
 .pb "_S.2"
 .n -1 d_S.2 ea_S.2
 .o 1 0
@@ -316,7 +316,7 @@ o_S.2_
 .d 1 0
 	rtn
 
-.desc d_S.3 n_S.3 o_S.3 1 0 "_S.3"
+.descs d_S.3 n_S.3 _ 4 0 "_S.3"
 .pb "_S.3"
 .n -1 d_S.3 ea_S.3
 .o 1 0
@@ -362,7 +362,7 @@ o_S.3
 .d 1 0
 	rtn
 
-.desc d_S.4 n_S.4 o_S.4 1 0 "_S.4"
+.descs d_S.4 n_S.4 _ 5 0 "_S.4"
 .n -1 d_S.4 ea_S.4
 .o 1 0
 n_S.4
@@ -406,7 +406,7 @@ o_S.4
 .d 1 0
 	rtn
 
-.desc d_S.5 n_S.5 o_S.5 1 0 "_S.5"
+.descs d_S.5 n_S.5 _ 6 0 "_S.5"
 .n -1 d_S.5 ea_S.5
 .o 1 0
 n_S.5
@@ -450,7 +450,7 @@ o_S.5
 .d 1 0
 	rtn
 
-.desc d_S.6 n_S.6 o_S.6 1 0 "_S.6"
+.descs d_S.6 n_S.6 _ 7 0 "_S.6"
 .n -1 d_S.6 ea_S.6
 .o 1 0
 n_S.6
