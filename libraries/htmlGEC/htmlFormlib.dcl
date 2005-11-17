@@ -51,10 +51,6 @@ mkApplyEditForm	:: !FormId 	d !d			!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|
 
 // **** forms for lists ****
 
-horlistForm2 :: !Bool !FormId ![a] !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-vertlistForm2 :: !Bool !FormId ![a] !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-
-
 listForm 			:: !FormId 	  ![a] 	 !*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 horlistForm 		:: !FormId 	  ![a] 	 !*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 horlist2Form 		:: !FormId a  ![a] 	 !*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a

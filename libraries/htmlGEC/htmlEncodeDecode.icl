@@ -3,6 +3,8 @@
 // encoding and decoding of information
 // (c) 2005 MJP
 
+//R=QN,Qr@QþTQNÀ™Kíÿÿÿx‹KNN’=Q
+
 import StdEnv, ArgEnv, StdMaybe, Directory
 import htmlDataDef, htmlTrivial, htmlFormData
 import GenPrint, GenParse
@@ -104,6 +106,9 @@ where
 	findState` _ Leaf_ world = (False,Nothing,Leaf_,world)
 	findState` _ _ world = (False,Nothing,Leaf_,world)
 
+	string_to_dynamic` :: {#Char} -> Dynamic	// just to make a unique copy as requested by string_to_dynamic
+	string_to_dynamic` s = string_to_dynamic {s` \\ s` <-: s}
+
 replaceState :: !FormId a *FormStates *NWorld -> (*FormStates,*NWorld)	| gPrint{|*|} a & TC a
 replaceState formid val formstates=:{fstates} world
 # (fstates,world) = replaceState` formid val fstates world
@@ -142,8 +147,13 @@ where
 						])
 	where
 		toExistval PlainString string 		= PlainStr string	// string that has to be parsed in the context where the type is known
-		toExistval StaticDynamic string 	= StatDyn (hex_string_to_dynamic string) // here it crashes
-//		toExistval StaticDynamic string 	= StatDyn (dynamic 1) // no crash
+		toExistval StaticDynamic string 	= StatDyn (string_to_dynamic (decodeString string)) // crash
+/*
+abort ("dynamic read in:\n" +++ (encodeString string) +++ 
+													 "\ncompare this with\n" +++ (encodeString (dynamic_to_string (dynamic 1)))
+													 +++ "\n")
+													 */
+
 
 	(_,triplet,update,_) = DecodeArguments serverkind args
 
@@ -216,7 +226,6 @@ where
 	
 		lsubstr = length substr
 
-
 // traceHtmlInput utility used to see what kind of rubbish is received
 
 traceHtmlInput :: ServerKind (Maybe String) -> BodyTag
@@ -226,16 +235,16 @@ traceHtmlInput serverkind args
 			, 	Txt "update				: " , B [] update, Txt ";", Br 
 			, 	Txt "new value		  	: " , B [] new, Txt ";", Br 
 			, 	Txt "state			  	: " , BodyTag (showstate (mkList state)), Txt ";", Br 
-//			, 	Txt "input			  	: " , case args of 
-//													(Just x) -> Txt x
-//													_ -> Br 
+			, 	Txt "input			  	: " , case args of 
+													(Just x) -> Txt x
+													_ -> Br 
 			]
 where
 	(executable,update,new,state) = DecodeArguments serverkind args
 
 	showstate :: [Char] -> [BodyTag]
 	showstate [] 			= []
-	showstate listofchar	= [Br, B [] (mkString first)] ++ showstate second // temp fix
+	showstate listofchar	= [Br, B [] (mkString first)] ++ showstate second
 	where
 		(first,second) = mscan '$' listofchar
 
@@ -262,7 +271,7 @@ where
 		toHtmlState` (Node_ left (fid,OldState {life=Session,encoding=PlainStr stringval}) right) accu 
 			= toHtmlState` left [(fid,Session,PlainString,stringval):toHtmlState` right accu]
 		toHtmlState` (Node_ left (fid,OldState {life=Session,encoding=StatDyn dynval}) right) accu 
-			= toHtmlState` left [(fid,Session,StaticDynamic,dynamic_to_hex_string dynval):toHtmlState` right accu]
+			= toHtmlState` left [(fid,Session,StaticDynamic,encodeString (dynamic_to_string dynval)):toHtmlState` right accu]
 
 		// other old states will have lifespan page or persistent; they need not to be stored in the page
 
@@ -279,7 +288,7 @@ where
 		toHtmlState` (Node_ left (fid,NewState {encoding = PlainStr string,life}) right) accu 
 			= toHtmlState` left [(fid,life,PlainString,string): toHtmlState` right accu]
 		toHtmlState` (Node_ left (fid,NewState {encoding = StatDyn dynval,life}) right) accu 
-			= toHtmlState` left [(fid,life,StaticDynamic,dynamic_to_hex_string dynval): toHtmlState` right accu]
+			= toHtmlState` left [(fid,life,StaticDynamic,encodeString (dynamic_to_string dynval)): toHtmlState` right accu]
  
 	submitscript :: !String !String -> BodyTag
 	submitscript formname updatename
@@ -454,88 +463,118 @@ where
 			toStorageFormat ['s':_] = StaticDynamic
 			toStorageFormat _   	= PlainString
 
-// low level url encoding decoding
+// low level url encoding decoding of Strings
 
 encodeString :: String -> String
-encodeString s = mkString (urlEncode (mkList s))
-
-encodeInfo :: a -> String | gPrint{|*|} a
-encodeInfo inp = encoding  
-where
-	encoding = encodeString (printToString inp)
-
-urlEncode :: [Char] -> [Char]
-urlEncode [] = []
-urlEncode [x:xs] 
-| isAlphanum x = [x  : urlEncode xs]
-| otherwise    = urlEncodeChar x ++ urlEncode xs
-where
-	urlEncodeChar x 
-	# (c1,c2) = charToHex x
-	= ['%', c1 ,c2]
-
-	charToHex :: !Char -> (!Char, !Char)
-	charToHex c = (toChar (digitToHex (i >> 4)), toChar (digitToHex (i bitand 15)))
-	where
-	        i = toInt c
-	        digitToHex :: !Int -> Int
-	        digitToHex d
-	                | d <= 9 = d + toInt '0'
-	                = d + (toInt 'A' - 10)
-
-decodeChars :: [Char] -> *String
-decodeChars n = mkString (urlDecode n)
+encodeString s = urlEncode s
+//encodeString s = string_to_string52	s	// using the whole alphabet 
 
 decodeString :: String -> *String
-decodeString s = decodeChars (mkList s)
+decodeString s = urlDecode s
+//decodeString s = string52_to_string	{c \\c <-: s | not (isControl c)}	// using the whole alphabet
+
+// utility functions based on low level encoding - decoding
+
+encodeInfo :: a -> String | gPrint{|*|} a
+encodeInfo inp = encodeString (printToString inp)
 
 decodeInfo :: String -> Maybe a | gParse{|*|} a
 decodeInfo s = parseString (decodeString s)
 
-urlDecode :: [Char] -> [Char]
-urlDecode [] 				= []
-urlDecode ['%',hex1,hex2:xs]= [hexToChar(hex1, hex2):urlDecode xs]
+decodeChars :: [Char] -> *String
+decodeChars cs = urlDecode (mkString cs)
+
+// compact John van Groningen encoding-decoding to lower and uppercase alpabeth
+
+string_to_string52 :: !String -> *String
+string_to_string52 s
+# n		=	size s
+# n3d2	=	3*(n>>1)
+| n bitand 1==0
+= fill_string52 0 0 n s (createArray n3d2 '\0')
+# a = fill_string52 0 0 (n-1) s (createArray (n3d2+2) '\0')
+  i=toInt s.[n-1]
+  i1=i/52
+  r0=i-i1*52
+= {a & [n3d2]=int52_to_alpha_char i1,[n3d2+1]=int52_to_alpha_char r0} 
 where
-	hexToChar :: !(!Char, !Char) -> Char
-	hexToChar (a, b) = toChar (hexToDigit (toInt a) << 4 + hexToDigit (toInt b))
+	fill_string52 :: !Int !Int !Int !String !*String -> *String
+	fill_string52 si ai l s a
+	| si<l
+	# i=toInt s.[si]<<8+toInt s.[si+1]
+	  i1=i/52
+	  i2=i1/52
+	  r0=i-i1*52
+	  r1=i1-i2*52
+	  a={a & [ai]=int52_to_alpha_char i2,[ai+1]=int52_to_alpha_char r1,[ai+2]=int52_to_alpha_char r0}
+	= fill_string52 (si+2) (ai+3) l s a
+	= a
+
+int52_to_alpha_char i :== toChar (i-(((i-26)>>8) bitand 6)+71)
+
+string52_to_string :: !String -> *String
+string52_to_string s
+# n		=	size s
+# nd3	=	n/3
+# r3	=	n-nd3*3
+# n2d3	=	nd3<<1
+| r3==0	= fill_string 0 0 n s (createArray n2d3 '\0')
+| r3==2
+# a = fill_string 0 0 (n-2) s (createArray (n2d3+1) '\0')
+= {a & [n2d3]=toChar (alpha_to_int52 s.[n-2]*52+alpha_to_int52 s.[n-1])}
+where
+	fill_string :: !Int !Int !Int !String !*String -> *String
+	fill_string si ai l s a
+	| si<l
+	# i=(alpha_to_int52 s.[si]*52+alpha_to_int52 s.[si+1])*52+alpha_to_int52 s.[si+2]
+	# a={a & [ai]=toChar (i>>8),[ai+1]=toChar i}
+	= fill_string (si+3) (ai+2) l s a
+	= a
+
+alpha_to_int52 c
+:== let i=toInt c in i+(((i-97)>>8) bitand 6)-71
+
+// hex encoding-decoding to lower and uppercase alpabeth
+
+urlEncode :: String -> String
+urlEncode s = mkString (urlEncode` (mkList s))
+where
+	urlEncode` :: [Char] -> [Char]
+	urlEncode` [] = []
+	urlEncode` [x:xs] 
+	| isAlphanum x = [x  : urlEncode` xs]
+	| otherwise    = urlEncodeChar x ++ urlEncode` xs
 	where
-	        hexToDigit :: !Int -> Int
-	        hexToDigit i
-	                | i <= toInt '9' = i - toInt '0'
-	                = i - (toInt 'A' - 10)
-urlDecode [x:xs] 			= [x:urlDecode xs]
+		urlEncodeChar x 
+		# (c1,c2) = charToHex x
+		= ['%', c1 ,c2]
+	
+		charToHex :: !Char -> (!Char, !Char)
+		charToHex c = (toChar (digitToHex (i >> 4)), toChar (digitToHex (i bitand 15)))
+		where
+		        i = toInt c
+		        digitToHex :: !Int -> Int
+		        digitToHex d
+		                | d <= 9 = d + toInt '0'
+		                = d + (toInt 'A' - 10)
 
-dynamic_to_hex_string:: Dynamic -> *String
-dynamic_to_hex_string s
-        = to_hex (dynamic_to_string s);
-
-to_hex :: !String -> *String
-to_hex s = {to_hex_digit i s \\ i<-[0..(size s<<1)-1]}
+urlDecode :: String -> *String
+urlDecode s = mkString (urlDecode` (mkList s))
 where
-	to_hex_digit i s
-    # c=s.[i>>1]
-    # i=((toInt c)>>((1-(i bitand 1))<<2)) bitand 15
-    | i<10 = toChar (48+i)
-    = toChar (55+i)
-
-hex_string_to_dynamic :: {#Char} -> Dynamic
-hex_string_to_dynamic s
-        = string_to_dynamic (from_hex s)
-
-from_hex :: !String -> *String
-from_hex s
-| (size s) bitand 1==0
-= { toChar (hex_digit_to_int s.[i+i]<<4+hex_digit_to_int s.[i+i+1])\\ i<-[0..size s>>1-1]}
-where        
-	hex_digit_to_int d
-	# i=toInt d
-	| i>=65 = i-55
-	= i-48
+	urlDecode` :: [Char] -> [Char]
+	urlDecode` [] 				= []
+	urlDecode` ['%',hex1,hex2:xs]= [hexToChar(hex1, hex2):urlDecode` xs]
+	where
+		hexToChar :: !(!Char, !Char) -> Char
+		hexToChar (a, b) = toChar (hexToDigit (toInt a) << 4 + hexToDigit (toInt b))
+		where
+		        hexToDigit :: !Int -> Int
+		        hexToDigit i
+		                | i <= toInt '9' = i - toInt '0'
+		                = i - (toInt 'A' - 10)
+	urlDecode` [x:xs] 	= [x:urlDecode` xs]
 
 // small general utility functions
-
-string_to_dynamic` :: {#Char} -> Dynamic	// just to make a unique copy as requested by string_to_dynamic
-string_to_dynamic` s = string_to_dynamic {s` \\ s` <-: s}
 
 mscan c list = case (span ((<>) c) list) of  // scan like span but it removes character
 				(x,[])	= (x,[])

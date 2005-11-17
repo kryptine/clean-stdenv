@@ -52,13 +52,12 @@ traceHtmlInput	:: ServerKind (Maybe String) -> BodyTag		// for debugging showing
 
 // low level encoding of information
 
-encodeInfo 		:: a -> String | gPrint{|*|} a				// serialization to a Mime format, used to encode input forms 
-decodeInfo 		:: String -> Maybe a | gParse{|*|} a		// de-serialization from Mime format to a Clean value
-//encodeString	:: String -> String							// ordinary String to String in Mime format
-//decodeString 	:: String -> *String						// fString in Mime format to ordinary String
+encodeInfo 		:: a -> String | gPrint{|*|} a				// serialization to a web resistent format, used to encode input forms 
+decodeInfo 		:: String -> Maybe a | gParse{|*|} a		// de-serialization from a web resistent format to a Clean value
+
+decodeString	:: String -> *String						// decode the web resistent string
+
 callClean 		:: Script									// script that will take care of sending the required input to this application
 
-
-urlDecode 		:: [Char] -> [Char]
 
 
