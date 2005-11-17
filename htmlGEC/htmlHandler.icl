@@ -79,8 +79,13 @@ where
 	pages
 		=	[("clean", "CleanExample", \_ _ a  -> doHtmlServer2 (conv a) userpage)
 			]
-	conv args = mkString [input \\ input <- (urlDecode (mkList (foldl (+++) "" (map (\(x,y) -> y) args)))) 
-								| not (isControl input) ]
+	conv args = decodeString (foldl (+++) "" (map (\(x,y) -> y) args))
+
+//	conv args = {c \\ c <-: urlDecode (foldl (+++) "" (map (\(x,y) -> y) args))
+//					| not (isControl c) }
+
+//	conv args = mkString [input \\ input <- (urlDecode (mkList (foldl (+++) "" (map (\(x,y) -> y) args)))) 
+//								| not (isControl input) ]
 
 	doHtmlServer2 :: String .(*HSt -> (Html,!*HSt)) *World -> ([String],String,*World)
 	doHtmlServer2 args userpage world 
@@ -521,7 +526,7 @@ gForm{|DisplayMode|} gHa formid (HideMode a) hst=:{cntr}
 	},hst)
 gForm{|DisplayMode|} gHa formid (DisplayMode a) hst=:{cntr}  
 # (na,hst) = gHa {formid & mode = Display} a (setCntr (cntr+1) hst)
-= (	{changed= na.changed 
+= (	{changed= False
 	,value	= DisplayMode na.value
 	,form	= na.form
 	},hst)

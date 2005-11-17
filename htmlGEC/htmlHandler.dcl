@@ -9,7 +9,7 @@ import GenPrint
 import GenParse
 import StdBool, StdFile
 
-TraceInput :== True
+TraceInput :== False
 
 
 // doHtml main wrapper for generating & handling of a Html form
