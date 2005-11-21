@@ -12,7 +12,17 @@ import htmlDataDef, htmlFormData
 
 // Maintaining the internal state of all forms
 
+:: Triplet :== (String,Int,UpdValue)
+
 :: *FormStates 												// collection of all states of all forms
+
+:: UpdValue 					// the updates that can take place	
+	= UpdI Int					// new integer value
+	| UpdR Real					// new real value
+	| UpdB Bool					// new boolean value
+	| UpdC String				// choose indicated constructor 
+	| UpdS String				// new piece of text
+
 
 emptyFormStates :: *FormStates								// creates emtpy states
 
@@ -22,8 +32,8 @@ findState 		:: !FormId *FormStates *NWorld 				// find the state value given For
 replaceState 	:: !FormId a *FormStates *NWorld 			// replace state given FormId
 					-> (*FormStates,*NWorld)	| gPrint{|*|} a & TC a
 
-getTriplet  	:: *FormStates -> (!Maybe a, !Maybe b,*FormStates) // triplet, value of changed part
-												| gParse{|*|} a & gParse{|*|} b 
+getTriplet  	:: *FormStates -> (!Maybe Triplet, !Maybe b,*FormStates) // triplet, value of changed part
+												| gParse{|*|} b 
 getUpdateId 	:: *FormStates -> (String,*FormStates)		// id of previously changed form
 getUpdate 		:: *FormStates -> (String,*FormStates)		// value typed in by user as string
 
@@ -52,12 +62,12 @@ traceHtmlInput	:: ServerKind (Maybe String) -> BodyTag		// for debugging showing
 
 // low level encoding of information
 
-encodeInfo 		:: a -> String | gPrint{|*|} a				// serialization to a web resistent format, used to encode input forms 
-decodeInfo 		:: String -> Maybe a | gParse{|*|} a		// de-serialization from a web resistent format to a Clean value
+//encodeInfo 		:: a -> String | gPrint{|*|} a				// serialization to a web resistent format, used to encode input forms 
+//decodeInfo 		:: String -> Maybe a | gParse{|*|} a		// de-serialization from a web resistent format to a Clean value
 
-decodeString	:: String -> *String						// decode the web resistent string
+//decodeString	:: String -> *String						// decode the web resistent string
 
 callClean 		:: Script									// script that will take care of sending the required input to this application
-
+encodeTriplet	:: Triplet -> String						// encoding of triplets
 
 

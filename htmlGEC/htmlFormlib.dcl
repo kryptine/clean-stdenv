@@ -60,6 +60,11 @@ layoutListForm		:: !([BodyTag] [BodyTag] -> [BodyTag])
                        !(FormId a *HSt -> (Form a,*HSt))
                        !FormId    ![a]   !*HSt -> (Form [a],!*HSt)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
+// **** forms for lists **** additional Bool indicates that the iData has to be reset with the initial value
+
+horlistForm2 :: !Bool !FormId ![a] !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+vertlistForm2 :: !Bool !FormId ![a] !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+
 // **** forms for tuples ****
 
 t2EditForm  		:: !FormId !(a,b)	  !*HSt -> ((Form a,Form b),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a

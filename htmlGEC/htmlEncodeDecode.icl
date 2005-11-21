@@ -3,8 +3,6 @@
 // encoding and decoding of information
 // (c) 2005 MJP
 
-//R=QN,Qr@QþTQNÀ™Kíÿÿÿx‹KNN’=Q
-
 import StdEnv, ArgEnv, StdMaybe, Directory
 import htmlDataDef, htmlTrivial, htmlFormData
 import GenPrint, GenParse
@@ -58,10 +56,15 @@ where
 emptyFormStates :: *FormStates
 emptyFormStates = { fstates = Leaf_ , triplet = "", update = "", updateid = "", server = Internal}
 
-getTriplet :: *FormStates -> (!Maybe a, !Maybe b,*FormStates) | gParse{|*|} a & gParse{|*|} b 
+getTriplet :: *FormStates -> (!Maybe Triplet, !Maybe b,*FormStates) | gParse{|*|} b 
 getTriplet formstates=:{triplet,update}
 = (parseString triplet, parseString update, formstates)
 
+/*
+getTriplet :: *FormStates -> (!Maybe a, !Maybe b,*FormStates) | gParse{|*|} a & gParse{|*|} b 
+getTriplet formstates=:{triplet,update}
+= (parseString triplet, parseString update, formstates)
+*/
 getUpdateId ::  *FormStates -> (String,*FormStates)
 getUpdateId formStates=:{updateid} = (updateid,formStates)
 
@@ -148,12 +151,6 @@ where
 	where
 		toExistval PlainString string 		= PlainStr string	// string that has to be parsed in the context where the type is known
 		toExistval StaticDynamic string 	= StatDyn (string_to_dynamic (decodeString string)) // crash
-/*
-abort ("dynamic read in:\n" +++ (encodeString string) +++ 
-													 "\ncompare this with\n" +++ (encodeString (dynamic_to_string (dynamic 1)))
-													 +++ "\n")
-													 */
-
 
 	(_,triplet,update,_) = DecodeArguments serverkind args
 
@@ -177,6 +174,38 @@ abort ("dynamic read in:\n" +++ (encodeString string) +++
 	# (_,_,_,state) = DecodeArguments serverkind args
 	= [states \\states=:(id,_,_,nstate) <- StringToHtmlState state | id <> "" || nstate <> ""] // to be sure that no rubisch is passed on
 
+	StringToHtmlState :: String -> [HtmlState]
+	StringToHtmlState state = toHtmlState` (mkList state)
+	where
+		toHtmlState` :: [Char] -> [HtmlState]
+		toHtmlState` [] 			= []
+		toHtmlState` listofchar	= [mkHtmlState first : toHtmlState` second]
+		where
+			(first,second) = mscan '$' listofchar
+	
+			mkHtmlState :: [Char] -> HtmlState
+			mkHtmlState	elem = (mkString (stl fid),toLivetime fid,toStorageFormat fid,mkString (stl (reverse (stl (reverse formvalue)))))
+			where
+				(fid,formvalue) = mscan '"' (stl (stl elem)) // skip '("'
+				stl [] = []
+				stl [x:xs] = xs 
+				
+				toLivetime ['N':_] = Page
+				toLivetime ['n':_] = Page
+				toLivetime ['S':_] = Session
+				toLivetime ['s':_] = Session
+				toLivetime ['P':_] = Persistent
+				toLivetime ['p':_] = Persistent
+				toLivetime _   	   = Page
+	
+				toStorageFormat ['N':_] = PlainString
+				toStorageFormat ['S':_] = PlainString
+				toStorageFormat ['P':_] = PlainString
+				toStorageFormat ['n':_] = StaticDynamic
+				toStorageFormat ['p':_] = StaticDynamic
+				toStorageFormat ['s':_] = StaticDynamic
+				toStorageFormat _   	= PlainString
+
 // Parse and decode low level information obtained from server 
 // In case of using a php script and external server:
 
@@ -184,7 +213,7 @@ DecodeArguments External _ = DecodePhpArguments
 where
 //	DecodePhpArguments :: (!String,!String,!String,!String) // executable, id + update , new , state
 	DecodePhpArguments
-	# input 			= mkList GetArgs
+	# input 			= [c \\ c <-: GetArgs | not (isControl c) ] // get rid of communication noise
 	# (thisexe,input) 	= mscan '#' input 		// get rid of garbage
 	# input				= skipping ['#UD=']  input
 	# (update, input)	= mscan '=' input
@@ -204,7 +233,7 @@ DecodeArguments Internal (Just args) = DecodeCleanServerArguments args
 where
 	DecodeCleanServerArguments :: String -> (!String,!String,!String,!String) // executable, id + update , new , state
 	DecodeCleanServerArguments args
-	# input 			= mkList args
+	# input 			= [c \\ c <-: args | not (isControl c) ] // get rid of communication noise
 	# (thisexe,input) 	= mscan '\"' input 				// get rid of garbage
 	# input				= skipping ['UD\"']  input
 	# (update, input)	= mscan '=' input // should give triplet
@@ -344,6 +373,14 @@ where
 	serializeAndStoreState sid (StatDyn dynval) world 
 		= writeState (MyDir server) sid (dynamic_to_string dynval) world
 
+
+//encoding of triplets
+
+derive gPrint UpdValue, (,,)
+
+encodeTriplet	:: Triplet -> String				// encoding of triplets
+encodeTriplet triplet = encodeInfo triplet
+
 // script for transmitting name and value of changed input 
 
 callClean :: Script
@@ -431,47 +468,16 @@ where
 	fromLivetime Session 	StaticDynamic	= "s"
 	fromLivetime Persistent StaticDynamic	= "p"
 
-StringToHtmlState :: String -> [HtmlState]
-StringToHtmlState state = toHtmlState` (mkList state)
-where
-	toHtmlState` :: [Char] -> [HtmlState]
-	toHtmlState` [] 			= []
-	toHtmlState` listofchar	= [mkHtmlState first : toHtmlState` second]
-	where
-		(first,second) = mscan '$' listofchar
-
-		mkHtmlState :: [Char] -> HtmlState
-		mkHtmlState	elem = (mkString (stl fid),toLivetime fid,toStorageFormat fid,mkString (stl (reverse (stl (reverse formvalue)))))
-		where
-			(fid,formvalue) = mscan '"' (stl (stl elem)) // skip '("'
-			stl [] = []
-			stl [x:xs] = xs 
-			
-			toLivetime ['N':_] = Page
-			toLivetime ['n':_] = Page
-			toLivetime ['S':_] = Session
-			toLivetime ['s':_] = Session
-			toLivetime ['P':_] = Persistent
-			toLivetime ['p':_] = Persistent
-			toLivetime _   	   = Page
-
-			toStorageFormat ['N':_] = PlainString
-			toStorageFormat ['S':_] = PlainString
-			toStorageFormat ['P':_] = PlainString
-			toStorageFormat ['n':_] = StaticDynamic
-			toStorageFormat ['p':_] = StaticDynamic
-			toStorageFormat ['s':_] = StaticDynamic
-			toStorageFormat _   	= PlainString
 
 // low level url encoding decoding of Strings
 
 encodeString :: String -> String
 encodeString s = urlEncode s
-//encodeString s = string_to_string52	s	// using the whole alphabet 
+//encodeString s = string_to_string52 s	// using the whole alphabet 
 
 decodeString :: String -> *String
 decodeString s = urlDecode s
-//decodeString s = string52_to_string	{c \\c <-: s | not (isControl c)}	// using the whole alphabet
+//decodeString s = string52_to_string s	// using the whole alphabet
 
 // utility functions based on low level encoding - decoding
 
@@ -482,7 +488,7 @@ decodeInfo :: String -> Maybe a | gParse{|*|} a
 decodeInfo s = parseString (decodeString s)
 
 decodeChars :: [Char] -> *String
-decodeChars cs = urlDecode (mkString cs)
+decodeChars cs = decodeString (mkString cs)
 
 // compact John van Groningen encoding-decoding to lower and uppercase alpabeth
 

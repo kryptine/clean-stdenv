@@ -29,6 +29,9 @@ feedback 		:: (GecCircuit a b) (GecCircuit b a) -> (GecCircuit a b)
 
 self 			:: (a -> a) (GecCircuit a a) -> GecCircuit a a
 
+(`bindC`)  infix 0 :: (GecCircuit a b) (b -> GecCircuit b c) -> (GecCircuit a c)
+(`bindCI`) infix 0 :: (GecCircuit a b) ((Form b) -> GecCircuit b c) -> (GecCircuit a c)
+
 // to lift library functions to the circuit domain
 
 lift :: FormId (FormId a *HSt -> (Form b,*HSt)) -> (GecCircuit a b)
