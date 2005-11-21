@@ -12,14 +12,6 @@ import StdFile
 	= 	{ worldC	:: !*World		// world for any io
 		, inout		:: !*File		// to read from stdin and write to srdout
 		}				
-
-:: UpdValue 					// the updates that can take place	
-	= UpdI Int					// new integer value
-	| UpdR Real					// new real value
-	| UpdB Bool					// new boolean value
-	| UpdC String				// choose indicated constructor 
-	| UpdS String				// new piece of text
-
 instance FileSystem NWorld
 appWorldNWorld :: !.(*World -> *World)       !*NWorld -> *NWorld
 accWorldNWorld :: !.(*World -> *(.a,*World)) !*NWorld -> (.a,!*NWorld)

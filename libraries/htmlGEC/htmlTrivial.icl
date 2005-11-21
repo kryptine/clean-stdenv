@@ -7,10 +7,10 @@ derive bimap Maybe, (,)
 // converting strings to lists and backwards
 
 mkString :: [Char] -> *String
-mkString listofchar = {elem \\ elem <- listofchar}
+mkString listofchar = {c \\ c <- listofchar }
 
 mkList :: String -> [Char]
-mkList string = [e \\ e <-: string]
+mkList string = [c \\ c <-: string ]
 
 //	Useful string concatenation function
 (<$) infixl :: !String !a -> String | toString a

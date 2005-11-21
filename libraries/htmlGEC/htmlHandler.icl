@@ -79,7 +79,8 @@ where
 	pages
 		=	[("clean", "CleanExample", \_ _ a  -> doHtmlServer2 (conv a) userpage)
 			]
-	conv args = decodeString (foldl (+++) "" (map (\(x,y) -> y) args))
+	conv args =  (foldl (+++) "" (map (\(x,y) -> y) args))
+//	conv args = decodeString (foldl (+++) "" (map (\(x,y) -> y) args))
 
 //	conv args = {c \\ c <-: urlDecode (foldl (+++) "" (map (\(x,y) -> y) args))
 //					| not (isControl c) }
@@ -235,7 +236,7 @@ mkInput :: !Int !FormId Value UpdValue *HSt -> (BodyTag,*HSt)
 mkInput size formid=:{mode = Edit} val updval hst=:{cntr} 
 	= ( Input 	[	Inp_Type Inp_Text
 				, 	Inp_Value val
-				,	Inp_Name (encodeInfo (formid.id,cntr,updval))
+				,	Inp_Name (encodeTriplet (formid.id,cntr,updval))
 				,	Inp_Size size
 				, 	`Inp_Std [EditBoxStyle]
 				,	`Inp_Events	[OnChange callClean]
@@ -307,7 +308,7 @@ where
 					: styles
 					]
 					[Option  
-						[Opt_Value (encodeInfo (formid.id,cntr,UpdC elem))
+						[Opt_Value (encodeTriplet (formid.id,cntr,UpdC elem))
 						: if (j == nr) [Opt_Selected Selected:optionstyle] optionstyle 
 						]
 						elem
@@ -554,7 +555,7 @@ gForm{|Button|} formid  v=:(LButton size bname) hst=:{cntr}
 	,form	= [Input (ifEdit formid.mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Button
 				, Inp_Value (SV bname)
-				, Inp_Name (encodeInfo (formid.id,cntr,UpdS bname))
+				, Inp_Name (encodeTriplet (formid.id,cntr,UpdS bname))
 				, `Inp_Std [Std_Style ("width:" +++ toString size)]
 				, `Inp_Events [OnClick callClean]
 				]) ""]
@@ -565,7 +566,7 @@ gForm{|Button|} formid v=:(PButton (height,width) ref) hst=:{cntr}
 	,form	= [Input (ifEdit formid.mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Image
 				, Inp_Value (SV ref)
-				, Inp_Name (encodeInfo (formid.id,cntr,UpdS ref))
+				, Inp_Name (encodeTriplet (formid.id,cntr,UpdS ref))
 				, `Inp_Std [Std_Style ("width:" +++ toString width +++ " height:" +++ toString height)]
 				, `Inp_Events [OnClick callClean]
 				, Inp_Src ref
@@ -586,7 +587,7 @@ gForm{|CheckBox|} formid v=:(CBChecked name) hst=:{cntr}
 	,form	= [Input (ifEdit formid.mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Checkbox
 				, Inp_Value (SV name)
-				, Inp_Name (encodeInfo (formid.id,cntr,UpdS name))
+				, Inp_Name (encodeTriplet (formid.id,cntr,UpdS name))
 				, Inp_Checked Checked
 				, `Inp_Events [OnClick callClean]
 				]) ""]
@@ -598,7 +599,7 @@ gForm{|CheckBox|} formid v=:(CBNotChecked name) hst=:{cntr}
 	,form	= [Input (ifEdit formid.mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Checkbox
 				, Inp_Value (SV name)
-				, Inp_Name (encodeInfo (formid.id,cntr,UpdS name))
+				, Inp_Name (encodeTriplet (formid.id,cntr,UpdS name))
 				, `Inp_Events [OnClick callClean]
 				]) ""]
 	},(setCntr (cntr+1) hst))
@@ -613,7 +614,7 @@ gForm{|RadioButton|} formid v=:(RBChecked name) hst=:{cntr}
 	,form	= [Input (ifEdit formid.mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Radio
 				, Inp_Value (SV name)
-				, Inp_Name (encodeInfo (formid.id,cntr,UpdS name))
+				, Inp_Name (encodeTriplet (formid.id,cntr,UpdS name))
 				, Inp_Checked Checked
 				, `Inp_Events [OnClick callClean]
 				]) ""]
@@ -624,7 +625,7 @@ gForm{|RadioButton|} formid v=:(RBNotChecked name) hst=:{cntr}
 	,form	= [Input (ifEdit formid.mode [] [Inp_Disabled Disabled] ++
 				[ Inp_Type Inp_Radio
 				, Inp_Value (SV name)
-				, Inp_Name (encodeInfo (formid.id,cntr,UpdS name))
+				, Inp_Name (encodeTriplet (formid.id,cntr,UpdS name))
 				, `Inp_Events [OnClick callClean]
 				]) ""]
 	},(setCntr (cntr+1) hst))
@@ -643,7 +644,7 @@ gForm{|PullDownMenu|} formid v=:(PullDown (size,width) (menuindex,itemlist)) hst
 					, `Sel_Events [OnChange callClean]
 					])
 					[ Option  
-						[ Opt_Value (encodeInfo (formid.id,cntr,UpdC (itemlist!!j)))
+						[ Opt_Value (encodeTriplet (formid.id,cntr,UpdC (itemlist!!j)))
 						: if (j == menuindex) [Opt_Selected Selected] [] 
 						]
 						elem

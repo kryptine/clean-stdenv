@@ -68,6 +68,22 @@ self fun gecaa = feedback gecaa (arr fun)
 feedback :: (GecCircuit a b) (GecCircuit b a) -> (GecCircuit a b)
 feedback (HGC gec_ab) (HGC gec_ba) = HGC (gec_ab o gec_ba o gec_ab)
 
+(`bindC`) infix 0 :: (GecCircuit a b) (b -> GecCircuit b c) -> (GecCircuit a c)
+(`bindC`) (HGC gecab) bgecbc = HGC binds
+where
+	binds ((a,abody),ach,hst)
+	# ((b,bbody),bch,hst)	= gecab ((a,abody),ach,hst)
+	# (HGC gecbc) 			= bgecbc b
+	= gecbc ((b,bbody ++ abody),ach||bch,hst) 
+
+(`bindCI`) infix 0 :: (GecCircuit a b) ((Form b) -> GecCircuit b c) -> (GecCircuit a c)
+(`bindCI`) (HGC gecab) bgecbc = HGC binds
+where
+	binds ((a,abody),ach,hst)
+	# ((b,bbody),bch,hst)	= gecab ((a,abody),ach,hst)
+	# (HGC gecbc) 			= bgecbc {changed = bch, value = b, form = map snd bbody}
+	= gecbc ((b,bbody ++ abody),ach||bch,hst) 
+
 lift :: FormId (FormId a *HSt -> (Form b,*HSt)) -> (GecCircuit a b)
 lift formid fun = HGC fun`
 where

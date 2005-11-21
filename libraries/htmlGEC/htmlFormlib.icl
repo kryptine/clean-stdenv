@@ -237,6 +237,12 @@ horlistForm formid xs hSt = layoutListForm (\f1 f2 -> [f1 <=> f2]) mkEditForm fo
 vertlistForm :: !FormId ![a] !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 vertlistForm formid xs hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) mkEditForm formid xs hSt
 
+horlistForm2 :: !Bool !FormId ![a] !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+horlistForm2 b formid xs hSt = layoutListForm (\f1 f2 -> [f1 <=> f2]) (if b mkSetForm mkEditForm) formid xs hSt
+
+vertlistForm2 :: !Bool !FormId ![a] !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+vertlistForm2 b formid xs hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) (if b mkSetForm mkEditForm) formid xs hSt
+
 table_hv_Form :: !FormId ![[a]] !*HSt -> (Form [[a]],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 table_hv_Form formid xs hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) horlistForm formid xs hSt
 
