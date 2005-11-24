@@ -71,12 +71,12 @@ generateCode (e1 @ e2) env
 					(f :: m -> q) -> dynamic f x :: q
 					_ -> raise (ApplyTypeError codef codex)
 	= solveOverloading d env
+
+dynamicToDynamic :: a -> Dynamic | TC a
+dynamicToDynamic _ = dynamic toDynamic :: a^ -> Dynamic
 where
-	dynamicToDynamic :: a -> Dynamic | TC a
-	dynamicToDynamic _ = dynamic toDynamic :: a^ -> Dynamic
-	where
-		toDynamic :: b -> Dynamic | TC b
-		toDynamic x = dynamic x :: b^
+	toDynamic :: b -> Dynamic | TC b
+	toDynamic x = dynamic x :: b^
 
 solveOverloading :: !Dynamic !*env -> (!Dynamic, !*env) | resolveFilename env
 solveOverloading d=:(_ :: A.a: a) env = (d, env)
