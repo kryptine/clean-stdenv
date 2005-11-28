@@ -4,12 +4,11 @@ definition module htmlHandler
 // Generating HTML code, converting Clean types to GEC's, automatic dealing with form's ..
 // (c) MJP 2005 *** under construction
 
-import htmlDataDef, htmlEncodeDecode, htmlFormData
-import GenPrint
-import GenParse
-import StdBool, StdFile
+import htmlDataDef, iDataState
+import GenPrint, GenParse
+import StdBool
 
-TraceInput :== False
+TraceInput :== True
 
 
 // doHtml main wrapper for generating & handling of a Html form
@@ -96,3 +95,4 @@ specialize :: (FormId a *HSt -> (Form a,*HSt)) FormId a *HSt -> (Form a,*HSt) | 
 // for testing
 
 runUserApplication :: .(*HSt -> *(.a,*HSt)) *FormStates *NWorld -> *(.a,*FormStates,*NWorld)
+
