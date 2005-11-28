@@ -3,7 +3,7 @@ implementation module htmlHandler
 import StdEnv, ArgEnv, StdMaybe
 import htmlDataDef, htmlTrivial
 import StdGeneric
-import htmlEncodeDecode, htmlStylelib
+import iDataState, htmlStylelib
 import GenParse, GenPrint
 import httpServer
 
@@ -79,14 +79,7 @@ where
 	pages
 		=	[("clean", "CleanExample", \_ _ a  -> doHtmlServer2 (conv a) userpage)
 			]
-	conv args =  (foldl (+++) "" (map (\(x,y) -> y) args))
-//	conv args = decodeString (foldl (+++) "" (map (\(x,y) -> y) args))
-
-//	conv args = {c \\ c <-: urlDecode (foldl (+++) "" (map (\(x,y) -> y) args))
-//					| not (isControl c) }
-
-//	conv args = mkString [input \\ input <- (urlDecode (mkList (foldl (+++) "" (map (\(x,y) -> y) args)))) 
-//								| not (isControl input) ]
+	conv args =  foldl (+++) "" (map (\(x,y) -> y) args)
 
 	doHtmlServer2 :: String .(*HSt -> (Html,!*HSt)) *World -> ([String],String,*World)
 	doHtmlServer2 args userpage world 
@@ -736,6 +729,7 @@ where
 		= (bool,file,{hst & world = world})
 
 // General access to the World environment on HSt:
+
 appWorldHSt :: !.(*World -> *World) !*HSt -> *HSt
 appWorldHSt f hst=:{world}
 	= {hst & world=appWorldNWorld f world}
