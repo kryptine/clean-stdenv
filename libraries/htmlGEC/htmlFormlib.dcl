@@ -11,122 +11,6 @@ import StdEnv, htmlHandler
 mkHtml		:: String [BodyTag] *HSt -> (Html,*HSt)	// string is used for the title of the page
 simpleHtml	:: String [BodyTag]      -> Html		// as above, without HSt
 
-// **** easy creation of FormId's ****
-
-nFormId		:: String -> FormId					// page 	  livetime, editable, string format
-sFormId		:: String -> FormId					// session 	  livetime, editable, string format
-pFormId		:: String -> FormId					// persistent livetime, editable, string format
-
-ndFormId	:: String -> FormId					// page 	  livetime, displayed non-editable, string format
-sdFormId	:: String -> FormId					// session 	  livetime, displayed non-editable, string format
-pdFormId	:: String -> FormId					// persistent livetime, displayed non-editable, string format 
-
-nDFormId		:: String -> FormId				// page 	  livetime, editable, static dynamic format
-sDFormId		:: String -> FormId				// session 	  livetime, editable, static dynamic format
-pDFormId		:: String -> FormId				// persistent livetime, editable, static dynamic format
-
-ndDFormId	:: String -> FormId					// page 	  livetime, displayed non-editable, static dynamic format
-sdDFormId	:: String -> FormId					// session 	  livetime, displayed non-editable, static dynamic format
-pdDFormId	:: String -> FormId					// persistent livetime, displayed non-editable, static dynamic format 
-
-// **** frquently used "mkViewForm" variants ****
-
-// mkBimap			: editor, using Bimaps instead of HBimaps
-// mkEdit  		 	: editor, remembers its state, argument is taken as initial state 
-// mkSet			: editor, always displays argument regardless of current state of the editor
-// mkStore			: applies function to the internal state; second argument is initial state
-// mkSelf			: editor, state is updated with function; second argument is taken as initial state   
-// mkSelf2			: same as mkSelf, but the function will always be applied, whether the form is updated or not
-// mkApply 			: displays application of function to the argument
-// mkApplyEdit		: editor, displays its first argument if it is not updated; second argument is initial state
-
-mkBimapEditor 	:: !FormId 	d !(Bimap d v) 	!*HSt -> (Form d,!*HSt)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
-mkEditForm 		:: !FormId 	d 				!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkSetForm 		:: !FormId 	d 				!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkStoreForm 	:: !FormId 	d !(d -> d)		!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkSelfForm 		:: !FormId 	d !(d -> d)		!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkSelf2Form 	:: !FormId  d !(d -> d) 	!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkApplyForm 	:: !FormId 	d !(d -> d)		!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkApplyEditForm	:: !FormId 	d !d			!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-
-// **** forms for lists ****
-
-listForm 			:: !FormId 	  ![a] 	 !*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-horlistForm 		:: !FormId 	  ![a] 	 !*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-horlist2Form 		:: !FormId a  ![a] 	 !*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-vertlistForm 		:: !FormId    ![a] 	 !*HSt -> (Form [a],!*HSt) 		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-table_hv_Form 		:: !FormId    ![[a]] !*HSt -> (Form [[a]],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-layoutListForm		:: !([BodyTag] [BodyTag] -> [BodyTag]) 
-                       !(FormId a *HSt -> (Form a,*HSt))
-                       !FormId    ![a]   !*HSt -> (Form [a],!*HSt)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-
-// **** forms for lists **** additional Bool indicates that the iData has to be reset with the initial value
-
-horlistForm2 :: !Bool !FormId ![a] !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-vertlistForm2 :: !Bool !FormId ![a] !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-
-// **** forms for tuples ****
-
-t2EditForm  		:: !FormId !(a,b)	  !*HSt -> ((Form a,Form b),!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-																			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
-
-t3EditForm  		:: !FormId !(a,b,c)   !*HSt -> ((Form a,Form b,Form c),!*HSt) 
-																			| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-																   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
-																   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC c
-t4EditForm  		:: !FormId !(a,b,c,d) !*HSt -> ((Form a,Form b,Form c,Form d),!*HSt)
-																			| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-																   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
-																   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC c
-																   			& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-// **** special buttons ****
-
-counterForm 		:: !FormId !a 		  !*HSt -> (Form a,!*HSt) 			| +, -, one
-																			,  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-// browseButtons reset curindex step length numberofbuttuns formid mode 
-// returns buttons to step through numbers from 1 to length
-
-browseButtons 		:: !Bool !Int !Int !Int !Int !FormId !*HSt -> (Form Int,!*HSt)
-
-// **** assigning functions to buttons **** yield identity function when nothing pressed
-
-// ordinary buttons with labels 
-
-ListFuncBut 		:: !Bool !FormId [(Button, a -> a)] !*HSt 
-													 -> (Form (a -> a),!*HSt)
-ListFuncBut2 		:: !Bool !FormId [(Mode,Button, a -> a)] !*HSt  //fine grain, mode of each buttons can be set 
-													 -> (Form (a -> a),!*HSt)
-
-// ordinary buttons with labels displayed in table form
-
-TableFuncBut 		:: !FormId ![[(Button, a -> a)]] !*HSt 
-													  -> (Form (a -> a) ,!*HSt)
-TableFuncBut2 		:: !Bool !FormId ![[(Mode,Button, a -> a)]] !*HSt // fine grain mode
-													  -> (Form (a -> a) ,!*HSt)
-
-
-// checkboxes		:returns function corresponding to the checkbox pressed, and the checkbox body
-//					: the current setting of the checkboxes is remembered, first argument indicates that the new settings have to be taken over
-//					: arguments of callback function: - Bool indicates corresponding box is checked or not
-//													  - [Bool] indicates the settings of all (other) checkboxes 
-
-ListFuncCheckBox 	:: !Bool !FormId [(CheckBox, Bool [Bool] a -> a)] !*HSt 
-													 -> (Form (a -> a,[Bool]),!*HSt)
-
-// radiobuttons		: assign functions to radiobuttons, returns function corresponding to the radiobutton chosen, and the radiobuttons body
-//					: the current setting of the radiobutoons is remembered, pos integer: set radio, otherwise it just indicates the initial setting
-//					: arguments of callback function: - Int indicates which button is set
-
-ListFuncRadio 		:: !Int !FormId [Int -> a -> a] !*HSt 
-													 -> (Form(a -> a,Int),!*HSt)
-
-// pull down menu	: assign functions to a pull down menu, returns function corresponding to the menu item chosen, and the pull down menu body
-//					: the current setting of the menu is remembered, pos integer: set menu, otherwise it just indicates the initial setting
-//					: arguments of callback function: - Int indicates which button is set
-
-FuncMenu 			:: !Int !FormId [(String, a -> a)] !*HSt 
-													 -> (Form(a -> a,Int),!*HSt)
-
 // **** LayOut support ****
 
 (<=>)   infixl 5 	:: [BodyTag] [BodyTag] 	-> BodyTag		// place next to each other on a page
@@ -136,8 +20,83 @@ mkRowForm 		 	:: [BodyTag] 			-> BodyTag		// place next to each other on a page
 (<||>)   infixl 4 	:: [BodyTag] [BodyTag] 	-> BodyTag		// Place second below first
 (<.||.>) infixl 4 	::  BodyTag   BodyTag  	-> BodyTag		// Place second below first
 mkColForm		  	:: [BodyTag] 			-> BodyTag		// Place second below first
-
 mkSTable 			:: [[BodyTag]] 			-> BodyTag		// Make a table
+
+// **** frquently used "mkViewForm" variants ****
+
+// mkBimap			: editor, using the more simple Bimap instead of an HBimap
+// mkEdit  		 	: simple editor with view identical to data model
+// mkStore			: applies function to the internal state
+// mkSelf			: applies function to the internal state only if the idata has been changed
+// mkApplyEdit		: takes second argument if the idata is not changed by user
+
+mkBimapEditor 	:: !FormId 	!(Init d) !(Bimap d v) 	!*HSt -> (Form d,!*HSt)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
+mkEditForm 		:: !FormId 	!(Init d) 				!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+mkStoreForm 	:: !FormId 	!(Init d) !(d -> d)		!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+mkSelfForm 		:: !FormId 	!(Init d) !(d -> d)		!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+mkApplyEditForm	:: !FormId 	!(Init d) !d			!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+
+// **** forms for lists ****
+
+listForm 		:: !FormId 	  !(Init [a])			!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+horlistForm 	:: !FormId 	  !(Init [a]) 	 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+vertlistForm 	:: !FormId    !(Init [a]) 	 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+table_hv_Form 	:: !FormId    !(Init [[a]]) 		!*HSt -> (Form [[a]],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+layoutListForm	:: !([BodyTag] [BodyTag] -> [BodyTag]) 
+                       !(FormId !(Init a)    *HSt -> (Form a,*HSt))
+                        !FormId !(Init [a]) !*HSt -> (Form [a],!*HSt)			| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+
+// **** forms for tuples ****
+
+t2EditForm  	:: !FormId !(Init (a,b))		!*HSt -> ((Form a,Form b),!*HSt)| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+																				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
+
+t3EditForm  	:: !FormId !(Init (a,b,c))  	!*HSt -> ((Form a,Form b,Form c),!*HSt) 
+																				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+																   				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
+																   				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC c
+t4EditForm  	:: !FormId !(Init (a,b,c,d)) 	!*HSt -> ((Form a,Form b,Form c,Form d),!*HSt)
+																				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+																   				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
+																   				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC c
+																   				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+// **** special buttons ****
+
+counterForm 		:: !FormId !(Init a) 		  	!*HSt -> (Form a,!*HSt) | +, -, one
+																			,  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+
+// **** assigning functions to buttons 
+// **** they all yield the identity function when nothing pressed 
+
+//FuncBut 			:: !Int !FormId !(Init (Button, a -> a)) 			!*HSt -> (Form (a -> a),!*HSt)
+ListFuncBut 		:: !FormId !(Init [(Button, a -> a)]) 				!*HSt -> (Form (a -> a),!*HSt)
+TableFuncBut 		:: !FormId !(Init [[(Button, a -> a)]]) 			!*HSt -> (Form (a -> a) ,!*HSt)
+
+//fine grain variant, mode of each buttons can be set
+
+ListFuncBut2 		:: !FormId !(Init [(Mode,Button, a -> a)]) 			!*HSt -> (Form (a -> a),!*HSt)
+TableFuncBut2 		:: !FormId !(Init [[(Mode,Button, a -> a)]])		!*HSt -> (Form (a -> a),!*HSt)
+
+// assign function to each check box which gets an integer of the selected box and the settings of all other boxes
+// in addition the settings of all check boxes is returned
+
+ListFuncCheckBox 	:: !FormId !(Init [(CheckBox, Bool [Bool] a -> a)]) !*HSt -> (Form (a -> a,[Bool]),!*HSt)
+
+// assign function to each radio button which gets an integer of the selected radio
+// in addition an integer indicating the selected radio button is returned
+
+ListFuncRadio 		:: !FormId !(Init (Int,[Int a -> a])) 				!*HSt -> (Form (a -> a,Int),!*HSt)
+
+// assign function to each pull down menu which gets an integer of the selected menu element
+// in addition an integer indicating the selected menu item is returned
+
+FuncMenu 			:: !FormId !(Init (Int,[(String, a -> a)])) 		!*HSt -> (Form (a -> a,Int),!*HSt)
+
+
+// browseButtons initial index, step, length, numberofbuttuns, formid 
+// returns buttons to step through numbers from 1 to length
+
+browseButtons :: !(Init !Int) !Int !Int !Int !FormId !*HSt -> (Form Int,!*HSt)
 
 // **** scripts ****
 

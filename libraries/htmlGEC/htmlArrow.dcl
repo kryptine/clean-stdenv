@@ -15,7 +15,7 @@ instance Arrow GecCircuit
 
 // all "real" editors in the circuit will add a piece of html code in [Body]
 
-startCircuit 	:: (GecCircuit a b) a *HSt -> (Form b,*HSt) 
+startCircuit 	:: !(GecCircuit a b) !a !*HSt -> (!Form b,!*HSt) 
 
 // an editor shows the value which can be modified by the application user using a browser
 // a display just shows the value
@@ -34,4 +34,4 @@ self 			:: (a -> a) (GecCircuit a a) -> GecCircuit a a
 
 // to lift library functions to the circuit domain
 
-lift :: FormId (FormId a *HSt -> (Form b,*HSt)) -> (GecCircuit a b)
+lift :: !FormId (!FormId !(Init a) !*HSt -> (!Form b,!*HSt)) -> (GecCircuit a b)

@@ -4,7 +4,7 @@ import StdEnv
 import htmlDataDef, htmlHandler, htmlFormlib
 import StdArrow
 
-startCircuit :: (GecCircuit a b) a *HSt -> (Form b,*HSt) 
+startCircuit :: !(GecCircuit a b) !a !*HSt -> (!Form b,!*HSt) 
 startCircuit (HGC circuit) initval hst 
 # ((val,body),ch,hst) = circuit ((initval,[]),False,hst)
 = (	{changed= ch
@@ -45,21 +45,21 @@ edit formid = HGC mkApplyEdit`
 where
 	mkApplyEdit` :: (GecCircuitState a)  -> GecCircuitState a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 	mkApplyEdit` ((initval,prevbody),ch,hst) 
-	# (na,hst) = mkApplyEditForm formid initval initval hst
+	# (na,hst) = mkApplyEditForm formid (Init initval) initval hst
 	= ((na.value,[(formid.id,BodyTag na.form):prevbody]),ch||na.changed,hst) // propagate change
 
 display :: FormId -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 display formid = HGC mkEditForm`
 where
 	mkEditForm` ((val,prevbody),ch,hst) 
-	# (na,hst) = mkEditForm {formid & mode = Display} val hst
+	# (na,hst) = mkEditForm {formid & mode = Display} (Set val) hst
 	= ((na.value,[(formid.id,BodyTag na.form):prevbody]),ch||na.changed,hst)
 
 store :: FormId s -> GecCircuit (s -> s) s |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC s
 store formid initstore = HGC mkStoreForm`
 where
 	mkStoreForm` ((fun,prevbody),ch,hst) 
-	# (store,hst) = mkStoreForm formid initstore fun  hst
+	# (store,hst) = mkStoreForm formid (Init initstore) fun  hst
 	= ((store.value,[(formid.id,BodyTag store.form):prevbody]),ch||store.changed,hst)
 
 self :: (a -> a) (GecCircuit a a) -> GecCircuit a a
@@ -84,10 +84,10 @@ where
 	# (HGC gecbc) 			= bgecbc {changed = bch, value = b, form = map snd bbody}
 	= gecbc ((b,bbody ++ abody),ach||bch,hst) 
 
-lift :: FormId (FormId a *HSt -> (Form b,*HSt)) -> (GecCircuit a b)
+lift :: !FormId (!FormId !(Init a) !*HSt -> (!Form b,!*HSt)) -> (GecCircuit a b)
 lift formid fun = HGC fun`
 where
 	fun` ((a,body),ch,hst)
-	# (nb,hst) =  fun formid a hst
+	# (nb,hst) =  fun formid (Init a) hst
 	= ((nb.value,[(formid.id,BodyTag nb.form):body]),ch||nb.changed,hst) 
 

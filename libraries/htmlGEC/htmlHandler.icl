@@ -118,7 +118,7 @@ getChangedId hst=:{states}
 
 // swiss army nife editor that makes coffee too ...
 
-mkViewForm :: !FormId d !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
+mkViewForm :: !FormId (Init d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
 mkViewForm formid initdata bm=:{toForm, updForm, fromForm, resetForm}  {states,world} 
 # (isupdated,view,states,world) = findFormInfo formid states world // determine current value in the state store
 = calcnextView isupdated view states world
@@ -192,9 +192,9 @@ where
 // it remembers the current value of the index in the expression and creates an editor to show this value
 // the value might have been changed with this editor, so the value returned might differ form the value you started with !
 
-specialize :: (FormId a *HSt -> (Form a,*HSt)) FormId a *HSt -> (Form a,*HSt) | gUpd {|*|} a
+specialize :: !(!FormId !(Init a) !*HSt -> (!Form a,!*HSt)) !FormId !(Init a) !*HSt -> (!Form a,!*HSt) | gUpd {|*|} a
 specialize editor formid v hst=:{cntr = inidx,states = formStates,world}
-# nextidx = incrIndex inidx v			// this value will be repesented differently, so increment counter 
+# nextidx = incrIndex inidx (GetInit v)			// this value will be repesented differently, so increment counter 
 # (nv,{states,world}) 	= editor nformid v {cntr = 0,states = formStates,world = world}
 = (nv,{cntr=nextidx,states = states,world = world})
 where
