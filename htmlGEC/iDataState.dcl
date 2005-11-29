@@ -5,7 +5,7 @@ definition module iDataState
 
 import StdMaybe
 import GenParse, GenPrint
-import htmlDataDef, htmlFormData, EncodeDecode
+import htmlDataDef, EncodeDecode
 
 // Maintaining the internal state of all forms
 
