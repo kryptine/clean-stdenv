@@ -6,12 +6,12 @@ module calculator
 import StdEnv
 import StdHtml
 
-//Start world  = doHtml arrowcalculator world
-Start world  = doHtmlServer calculator world
+Start world  = doHtmlServer arrowcalculator world
+//Start world  = doHtmlServer calculator world
 
 calculator hst
-# (calcfun,hst) 	= TableFuncBut (nFormId "calcbut") calcbuttons hst		// shows buttons
-# (display,hst) 	= mkStoreForm (nFormId "display") initcalc calcfun.value  hst	// calculates new values	
+# (calcfun,hst) 	= TableFuncBut (nFormId "calcbut") (Init calcbuttons) hst		// shows buttons
+# (display,hst) 	= mkStoreForm (nFormId "display") (Init initcalc) calcfun.value  hst	// calculates new values	
 = mkHtml "Calculator"
 	[ H1 [] "Calculator Example: "
 	, toBody display 
@@ -19,7 +19,7 @@ calculator hst
 	] hst
 
 arrowcalculator hst
-# (calcfun,hst) 	= TableFuncBut (nFormId "calcfun") calcbuttons hst		// shows buttons
+# (calcfun,hst) 	= TableFuncBut (nFormId "calcfun") (Init calcbuttons) hst		// shows buttons
 # (display,hst) 	= startCircuit circuit calcfun.value  hst	// calculates new values	
 = mkHtml "Calculator" 
 	[ H1 [] "Calculator Example: "

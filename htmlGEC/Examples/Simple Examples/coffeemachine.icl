@@ -23,13 +23,13 @@ coffeemachine hst
 		, B [] (displayoutput machine.value)
 		] hst
 where
-	commandbuttons  = 
+	commandbuttons  = Init
 		[	[(but "Insert_Coins",	\m -> CoffeeMachine (InsertCoin,	m))]
 		,	[(but "Add_beans",   	\m -> CoffeeMachine (AddBeans,		m))]
 		,	[(but "Empty_Trash", 	\m -> CoffeeMachine (EmptyTrash,	m))]
 		]
 
-	optionbuttons  =
+	optionbuttons  = Init
 		[	[(but "Coffee",			\m -> CoffeeMachine (Ask Coffee,	m))
 			,(but "Capuccino",   	\m -> CoffeeMachine (Ask Capuccino,	m))
 			,(but "Espresso", 		\m -> CoffeeMachine (Ask Espresso,	m))
@@ -38,7 +38,7 @@ where
 
 	but s = LButton defpixel s
 
-	initmachine = {money=0,beans=6,trash=0,out=Message "Welcome."} 
+	initmachine = Init {money=0,beans=6,trash=0,out=Message "Welcome."} 
 
 	displayoutput {out} = toString out
 

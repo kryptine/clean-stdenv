@@ -8,7 +8,7 @@ derive gForm  []
 
 import tree
 
-Start world  = doHtml MyPage world
+Start world  = doHtmlServer MyPage world
 
 MyPage hst
 # (mycircuitf,hst) = startCircuit mycircuit [1] hst

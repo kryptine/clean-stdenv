@@ -13,20 +13,18 @@ derive gForm []
 // Different ways to define a simple spreadsheet
 // Just pick out one of the following Start rules.
 
-//Start world  = doHtml spreadsheet world
+//Start world  = doHtmlServer spreadsheet world
 //Start world  = doHtml toHtmlFormspreadsheet world
-//Start world  = doHtml arrowsspreadsheet world
-//Start world  = doHtml spreadsheetM world
-Start world  = doHtmlServer spreadsheet world
-
+//Start world  = doHtmlServer arrowsspreadsheet world
+Start world  = doHtmlServer spreadsheetM world
 
 // Classical way using Cleans # notation
 
 spreadsheet hst
-# (tablef, hst) = table_hv_Form (nFormId "table") (inittable 8 10)     	    hst
-# (rowsumf,hst) = vertlistForm  (ndFormId "rsum") (rowsum tablef.value)       hst
-# (colsumf,hst) = horlistForm   (ndFormId "csum") (colsum tablef.value)       hst
-# (totsumf,hst) = mkEditForm    (ndFormId "tsum") (sum (rowsum tablef.value)) hst
+# (tablef, hst) = table_hv_Form (nFormId "table") (Init (inittable 8 10))    		hst
+# (rowsumf,hst) = vertlistForm  (ndFormId "rsum") (Set (rowsum tablef.value))       hst
+# (colsumf,hst) = horlistForm   (ndFormId "csum") (Set (colsum tablef.value))       hst
+# (totsumf,hst) = mkEditForm    (ndFormId "tsum") (Set (sum (rowsum tablef.value))) hst
 = mkHtml "Spreadsheet"
 	[ H1 [] "Spreadsheet Example: "
 	, tablef.form  <=> rowsumf.form
@@ -36,16 +34,16 @@ spreadsheet hst
 // Variant using only editable forms in the # notation, displaying rest using toHtmlForm
 
 toHtmlFormspreadsheet hst
-# (table, hst) = table_hv_Form (nFormId "table") (inittable 8 10) hst
+# (table, hst) = table_hv_Form (nFormId "table") (Init (inittable 8 10)) hst
 = mkHtml "Spreadsheet"
 	[ H1 [] "Simple Spreadsheet Example: "
 	, table.form  <=> rowsumF table.value
 	, colsumF table.value <=> totsumF table.value
 	] hst
 where
-	rowsumF table = toHtmlForm (vertlistForm  (ndFormId "rsum") (rowsum table))       
-	colsumF table = toHtmlForm (horlistForm   (ndFormId "csum") (colsum table))       
-	totsumF table = toHtmlForm (mkEditForm    (ndFormId "tsum") (sum (rowsum table)))
+	rowsumF table = toHtmlForm (vertlistForm  (ndFormId "rsum") (Set (rowsum table)))       
+	colsumF table = toHtmlForm (horlistForm   (ndFormId "csum") (Set (colsum table)))       
+	totsumF table = toHtmlForm (mkEditForm    (ndFormId "tsum") (Set (sum (rowsum table))))
 
 // Variant using Arrow notation
 
@@ -59,8 +57,8 @@ arrowsspreadsheet hst
 	] hst
 where
 	mycircuit =	lift (nFormId "table") table_hv_Form
-				>>>	(	(arr rowsum >>> lift (nFormId "rsum") vertlistForm)	&&&
-			    		(arr colsum >>> lift (nFormId "csum") horlistForm) 
+				>>>	(	(arr rowsum >>> lift (ndFormId "rsum") vertlistForm)	&&&
+			    		(arr colsum >>> lift (ndFormId "csum") horlistForm) 
 			 		)
 			 	>>> arr (sum o fst)
 			 	>>> display (nFormId "tsum") 		
@@ -68,21 +66,16 @@ where
 // Variant uding monads
 
 spreadsheetM
-  = table_hv_Form (nFormId "table") (inittable 8 10)            >>= \tablef  ->
-	vertlistForm  (ndFormId "rsum") (rowsum tablef.value)       >>= \rowsumf -> 
-	horlistForm   (ndFormId "csum") (colsum tablef.value)       >>= \colsumf ->
-	mkEditForm    (ndFormId "tsum") (sum (rowsum tablef.value)) >>= \totsumf ->
+  = table_hv_Form (nFormId "table") (Init (inittable 8 10))           >>= \tablef  ->
+	vertlistForm  (ndFormId "rsum") (Set (rowsum tablef.value))       >>= \rowsumf -> 
+	horlistForm   (ndFormId "csum") (Set (colsum tablef.value))       >>= \colsumf ->
+	mkEditForm    (ndFormId "tsum") (Set (sum (rowsum tablef.value))) >>= \totsumf ->
 	mkHtmlM "Spreadsheet"
 	[ H1 [] "Spreadsheet Example: "
 	, Br
 	, tablef.form  <=> rowsumf.form
 	, colsumf.form <=> totsumf.form
 	]
-
-
-
-
-
 
 // simple utility functions to calculate the sum of the rows, sum of columns, total sum
 
