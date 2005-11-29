@@ -8,7 +8,6 @@ derive gForm  	Tree
 derive gPrint 	Tree
 derive gParse 	Tree
 derive gUpd 	Tree
-derive gHpr		Tree
 
 import StdClass
 
