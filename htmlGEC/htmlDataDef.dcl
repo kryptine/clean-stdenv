@@ -683,7 +683,7 @@ None			:== [NoAttr]
 			| BV Bool
 
 
-import htmlPrintUtil
+import PrintUtil
 
 derive gHpr Html, BodyTag
 derive gHpr ColorOption, TxtDir	
