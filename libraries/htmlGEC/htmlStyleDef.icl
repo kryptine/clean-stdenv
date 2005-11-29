@@ -1,7 +1,7 @@
 implementation module htmlStyleDef
 
 import StdEnv, ArgEnv
-import htmlPrintUtil, htmlDataDef
+import PrintUtil, htmlDataDef
 import StdGeneric
 
 //gHpr{|HtmlStyle|} prev (CSS styles)	= prev <+ styles 

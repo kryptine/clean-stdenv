@@ -2,7 +2,7 @@ implementation module htmlDataDef
 
 import StdEnv, ArgEnv
 
-import htmlPrintUtil
+import PrintUtil
 import htmlStyleDef, htmlStylelib
 
 import StdGeneric
