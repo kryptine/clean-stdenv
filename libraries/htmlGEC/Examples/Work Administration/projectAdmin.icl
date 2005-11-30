@@ -13,30 +13,6 @@ derive gUpd 	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan, Date, 
 derive gPrint	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan, Date
 derive gParse	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan, Date
 
-//	List elements need to be displayed below each other, left aligned:
-gForm {|[]|} gHa formid [] hst
-	= ({changed = False, value = [], form =[EmptyBody]},hst)
-gForm {|[]|} gHa formid [x:xs] hst 
-	# (formx, hst) = gHa formid x hst
-	# (formxs,hst) = gForm {|*->*|} gHa formid xs hst
-	= ({changed = False, value = [x:xs], form = [formx.form <||> formxs.form]},hst)
-//	Date should be displayed as a triplet of pull down menus, displaying (day, month, year) selections:
-gForm {|Date|} formid date=:(Date day month year) hst 
-	= specialize myeditor {formid & lifespan = Page} (Init date) hst
-where
-	myeditor formid date hst = mkBimapEditor formid date bimap hst
-	where
-		bimap = {map_to = toPullDown, map_from = fromPullDown}
-		where
-			toPullDown (Date day month year) = (pddays,pdmonths,pdyears)
-			where
-				pddays 		= PullDown (1,  defpixel/2) (day-1,  [toString i \\ i <- [1..31]])
-				pdmonths 	= PullDown (1,  defpixel/2) (month-1,[toString i \\ i <- [1..12]])
-				pdyears 	= PullDown (1,2*defpixel/3) (year-1, [toString i \\ i <- [2005..2010]])
-		
-			fromPullDown (pddays,pdmonths,pdyears) = Date (convert pddays) (convert pdmonths) (convert pdyears)
-			where
-				convert x	= toInt (toString x)
 
 Start world  = doHtmlServer ProjectAdminPage world
 //Start world  = doHtml ProjectAdminPage world
@@ -71,16 +47,16 @@ Start world  = doHtmlServer ProjectAdminPage world
 
 //	Form creation/update functions:
 adminForm :: ([Project] -> [Project]) *HSt -> (Form [Project], *HSt)
-adminForm update hst = mkStoreForm (ndFormId "admin") (Init initProjects) update hst
+adminForm update hst = mkStoreForm (pdFormId "admin") (Init initProjects) update hst
 
 projectForm :: *HSt -> (Form ProjectPlan, *HSt)
-projectForm hst = mkEditForm (pFormId "project") (Init (initProjectPlan "" 0)) hst
+projectForm hst = mkEditForm (nFormId "project") (Init (initProjectPlan "" 0)) hst
 
 workerForm :: (WorkerPlan -> WorkerPlan) *HSt -> (Form WorkerPlan, *HSt)
-workerForm update hst = mkSelf2Form  (nFormId "worker") (Init (initWorkerPlan "" 0 0 initProjects)) update hst
+workerForm update hst = mkStoreForm  (nFormId "worker") (Init (initWorkerPlan "" 0 0 initProjects)) update hst
 
 hoursForm :: (DailyWork -> DailyWork) *HSt -> (Form DailyWork, *HSt)
-hoursForm update hst = mkSelf2Form  (nFormId "hours") (Init (initDailyWork 0 0 initProjects)) update hst
+hoursForm update hst = mkStoreForm  (nFormId "hours") (Init (initDailyWork 0 0 initProjects)) update hst
 
 buttonsForm :: DailyWork WorkerPlan ProjectPlan *HSt -> (Form ([Project] -> [Project]), *HSt)
 buttonsForm daylog workplan project hst = ListFuncBut (nFormId "buttons") (Init myButtons) hst
@@ -177,6 +153,33 @@ where
 		no_projects	= isEmpty adminF.value
 		lTxt s		= B [] s
 		[projectButton,workerButton,hoursButton:_] = buttonsF.form
+
+// specializations
+
+//	List elements need to be displayed below each other, left aligned:
+gForm {|[]|} gHa formid [] hst
+	= ({changed = False, value = [], form =[EmptyBody]},hst)
+gForm {|[]|} gHa formid [x:xs] hst 
+	# (formx, hst) = gHa formid x hst
+	# (formxs,hst) = gForm {|*->*|} gHa formid xs hst
+	= ({changed = False, value = [x:xs], form = [formx.form <||> formxs.form]},hst)
+//	Date should be displayed as a triplet of pull down menus, displaying (day, month, year) selections:
+gForm {|Date|} formid date=:(Date day month year) hst 
+	= specialize myeditor {formid & lifespan = Page} (Init date) hst
+where
+	myeditor formid date hst = mkBimapEditor formid date bimap hst
+	where
+		bimap = {map_to = toPullDown, map_from = fromPullDown}
+		where
+			toPullDown (Date day month year) = (pddays,pdmonths,pdyears)
+			where
+				pddays 		= PullDown (1,  defpixel/2) (day-1,  [toString i \\ i <- [1..31]])
+				pdmonths 	= PullDown (1,  defpixel/2) (month-1,[toString i \\ i <- [1..12]])
+				pdyears 	= PullDown (1,2*defpixel/3) (year-1, [toString i \\ i <- [2005..2010]])
+		
+			fromPullDown (pddays,pdmonths,pdyears) = Date (convert pddays) (convert pdmonths) (convert pdyears)
+			where
+				convert x	= toInt (toString x)
 
 //	Initial values of the work administration's data structures:
 initProjects :: [Project]
