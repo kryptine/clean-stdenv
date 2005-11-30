@@ -24,21 +24,8 @@ so you have to add this library yourself (points 3 - 5)
 3. Click on one of the .prj files of the html Examples, in the htmlExamples folder, e.g. spreadsheet.prj
 
 
-4. Select in the Clean IDE menubar, Environment/Everything.
-This option is now marked.
+4. In the Clean IDE menubar, Environment/Web Applications should be selected.
 
-
-5. Select Environment/Edit Current ...
-Now properties of the Everything environment can be set.
-Click the path tab.
-
-
-Append the following libraries:
-{Application}\Libraries\GEC\GEC Implementation
-{Application}\Libraries\htmlGEC
-
-Now these libaries are part of the Everything environment. Projects which select this environment
-will find the software modules automatically.
 
 Installation is now complete.
 

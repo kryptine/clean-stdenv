@@ -13,10 +13,10 @@ derive gForm []
 // Different ways to define a simple spreadsheet
 // Just pick out one of the following Start rules.
 
-//Start world  = doHtmlServer spreadsheet world
+Start world  = doHtmlServer spreadsheet world
 //Start world  = doHtml toHtmlFormspreadsheet world
 //Start world  = doHtmlServer arrowsspreadsheet world
-Start world  = doHtmlServer spreadsheetM world
+//Start world  = doHtmlServer spreadsheetM world
 
 // Classical way using Cleans # notation
 
