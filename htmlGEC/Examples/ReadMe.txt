@@ -1,11 +1,12 @@
 This is the Clean Html GEC - iData library.
 
 This library is under development.
-Is has only been tested under windows.
+Is has only been tested under windows, but it should work on any other machine Clean 2.1.1 is available on.
 
 I. *** Install as follows:
 
-1. You need the latest Clean system (version 2.1.1) for windows which can be downloaded
+
+1. You need the latest Clean system (version 2.1.1 or higher) for windows which can be downloaded
 from our site (www.cs.ru.nl/~clean).
 Install this system. It will generate a Clean 2.1.1 folder.
 Put it anywhere, e.g. on your desktop.
@@ -16,16 +17,21 @@ It will associate files with Clean extensions to the Clean IDE. That is all.
 You can work with Clean, but the html library is not yet included in the latest version,
 so you have to add this library yourself (points 3 - 5)
 
+
 2. Move the htmlGEC library into the folder Clean 2.1.1/Libraries.
 
+
 3. Click on one of the .prj files of the html Examples, in the htmlExamples folder, e.g. spreadsheet.prj
+
 
 4. Select in the Clean IDE menubar, Environment/Everything.
 This option is now marked.
 
+
 5. Select Environment/Edit Current ...
 Now properties of the Everything environment can be set.
 Click the path tab.
+
 
 Append the following libraries:
 {Application}\Libraries\GEC\GEC Implementation
@@ -35,6 +41,9 @@ Now these libaries are part of the Everything environment. Projects which select
 will find the software modules automatically.
 
 Installation is now complete.
+
+
+
 
 
 II *** Running a Clean html application.
@@ -139,6 +148,8 @@ If you want to make your own application, the best way is just to copy one of th
 e.g. spreadsheet.icl.
 
 1. Rename the copied file too yourname.icl
+Also copy the file back35.jpg. The default web style uses white characters so you better have a none white background.
+You can of course set everything the way you like it by changing the styles...
 
 2. Open the file yourname.icl, the Clean IDE should start automatically.
 Rename the module spreadsheet to module yourname (first line in the file).
@@ -171,9 +182,6 @@ Known bugs:
 - if states are getting very large, sometimes nothing is displayed. 
 php has a limit of 4k for passing arguments to Clean.
 I therefore want to kick out php.
-
-Conceptual:
-- make storage of higher order function possible (involves dynamics).
 
 Examples:
 - Not all examples are completely worked out yet.
