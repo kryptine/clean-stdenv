@@ -59,11 +59,13 @@ sumId i = nFormId ("sum"<$i)
 derive gParse MInt
 derive gPrint MInt
 derive gUpd   MInt
-gForm{|MInt|} formId i hst = specialize asCounter formId 
-i hst
+gForm{|MInt|} formId mi hst = specialize asCounter formId (Init mi) hst
 where
-    asCounter formId (M i) hst
-        # (counterF,hst)    = counterForm formId i hst
+    asCounter formId mi hst
+        # (counterF,hst) = counterForm formId (PropInit mi i) hst
         = ({changed=counterF.changed,value=M (toInt counterF.value),form=counterF.form},hst)
+	where
+		(M i) = GetInit mi
+        
 
 instance toInt MInt where toInt (M i) = i
