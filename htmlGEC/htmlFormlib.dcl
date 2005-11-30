@@ -20,7 +20,9 @@ mkRowForm 		 	:: [BodyTag] 			-> BodyTag		// place next to each other on a page
 (<||>)   infixl 4 	:: [BodyTag] [BodyTag] 	-> BodyTag		// Place second below first
 (<.||.>) infixl 4 	::  BodyTag   BodyTag  	-> BodyTag		// Place second below first
 mkColForm		  	:: [BodyTag] 			-> BodyTag		// Place second below first
+
 mkSTable 			:: [[BodyTag]] 			-> BodyTag		// Make a table
+(<=|>) infixl 4		:: [BodyTag] [BodyTag] 	-> BodyTag			// Make a table by putting elements pairwise below each other
 
 // **** frquently used "mkViewForm" variants ****
 
@@ -28,7 +30,7 @@ mkSTable 			:: [[BodyTag]] 			-> BodyTag		// Make a table
 // mkEdit  		 	: simple editor with view identical to data model
 // mkStore			: applies function to the internal state
 // mkSelf			: applies function to the internal state only if the idata has been changed
-// mkApplyEdit		: takes second argument if the idata is not changed by user
+// mkApplyEdit		: sets iData with second value if the idata has not been changed by user
 
 mkBimapEditor 	:: !FormId 	!(Init d) !(Bimap d v) 	!*HSt -> (Form d,!*HSt)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
 mkEditForm 		:: !FormId 	!(Init d) 				!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
@@ -65,33 +67,32 @@ t4EditForm  	:: !FormId !(Init (a,b,c,d)) 	!*HSt -> ((Form a,Form b,Form c,Form 
 counterForm 		:: !FormId !(Init a) 		  	!*HSt -> (Form a,!*HSt) | +, -, one
 																			,  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
-// **** assigning functions to buttons 
-// **** they all yield the identity function when nothing pressed 
+// **** to each button below a function is assigned which is returned as iData value when the corresponding button is pressed
+// **** an identity function is returned when none of the set of buttons pressed 
 
-//FuncBut 			:: !Int !FormId !(Init (Button, a -> a)) 			!*HSt -> (Form (a -> a),!*HSt)
+FuncBut 			:: !FormId !(Init (Button, a -> a)) 				!*HSt -> (Form (a -> a),!*HSt)
 ListFuncBut 		:: !FormId !(Init [(Button, a -> a)]) 				!*HSt -> (Form (a -> a),!*HSt)
-TableFuncBut 		:: !FormId !(Init [[(Button, a -> a)]]) 			!*HSt -> (Form (a -> a) ,!*HSt)
+TableFuncBut 		:: !FormId !(Init [[(Button, a -> a)]]) 			!*HSt -> (Form (a -> a),!*HSt)
 
-//fine grain variant, mode of each buttons can be set
+//fine grain variant, mode of each button in list or table can be set
 
 ListFuncBut2 		:: !FormId !(Init [(Mode,Button, a -> a)]) 			!*HSt -> (Form (a -> a),!*HSt)
 TableFuncBut2 		:: !FormId !(Init [[(Mode,Button, a -> a)]])		!*HSt -> (Form (a -> a),!*HSt)
 
 // assign function to each check box which gets an integer of the selected box and the settings of all other boxes
-// in addition the settings of all check boxes is returned
+// in addition to the chosen function the settings of all check boxes is returned
 
 ListFuncCheckBox 	:: !FormId !(Init [(CheckBox, Bool [Bool] a -> a)]) !*HSt -> (Form (a -> a,[Bool]),!*HSt)
 
 // assign function to each radio button which gets an integer of the selected radio
-// in addition an integer indicating the selected radio button is returned
+// in addition to the chosen function an integer indicating the selected radio button is returned
 
 ListFuncRadio 		:: !FormId !(Init (Int,[Int a -> a])) 				!*HSt -> (Form (a -> a,Int),!*HSt)
 
 // assign function to each pull down menu which gets an integer of the selected menu element
-// in addition an integer indicating the selected menu item is returned
+// in addition to the chosen function an integer indicating the selected menu item is returned
 
 FuncMenu 			:: !FormId !(Init (Int,[(String, a -> a)])) 		!*HSt -> (Form (a -> a,Int),!*HSt)
-
 
 // browseButtons initial index, step, length, numberofbuttuns, formid 
 // returns buttons to step through numbers from 1 to length
@@ -110,5 +111,5 @@ openNoticeScript ::  !String !Int !Int !Html -> Script
 
 // **** special objects ****
 
-mediaPlayer:: (Int,Int) Bool String -> BodyTag	// plays movies, music etc
+mediaPlayer:: (Int,Int) Bool String -> BodyTag	// plays movies, music etc; parameters (height,width) autostart filename
 

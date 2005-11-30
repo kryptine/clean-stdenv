@@ -36,6 +36,9 @@ where
 (<.||.>) infixl 4	:: BodyTag BodyTag -> BodyTag	// Place a above b
 (<.||.>) b1 b2 =  STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[b1],[b2]]
 
+(<=|>) infixl 4	:: [BodyTag] [BodyTag] -> BodyTag	// Place a above b
+(<=|>) b1 b2 =  STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[be1,be2] \\ be1 <- b1 & be2 <- b2]
+
 // row and column making
 
 mkColForm :: [BodyTag] -> BodyTag
@@ -185,6 +188,9 @@ layoutListForm layoutF formF formid list hst
 	   },hst)
 	where
 		nformid = {formid & id = formid.id <$ length xs}
+
+FuncBut :: !FormId !(Init (Button, a -> a)) !*HSt -> (Form (a -> a),!*HSt)
+FuncBut formid init hst = FuncButNr 0 formid init hst 
 
 FuncButNr :: !Int !FormId !(Init (Button, a -> a)) !*HSt -> (Form (a -> a),!*HSt)
 FuncButNr i formid init hst
