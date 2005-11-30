@@ -83,7 +83,6 @@ derive gParse 	(,), (,,), (,,,), (<->), <|>, DisplayMode, Button, CheckBox, Radi
 // specialize has to be used if one wants to specialize gForm for a user-defined type
 
 specialize :: !(!FormId !(Init a) !*HSt -> (!Form a,!*HSt)) !FormId !(Init a) !*HSt -> (!Form a,!*HSt) | gUpd {|*|} a
-//specialize :: (FormId a *HSt -> (Form a,*HSt)) FormId a *HSt -> (Form a,*HSt) | gUpd {|*|} a
 
 // definitions on HSt
 
