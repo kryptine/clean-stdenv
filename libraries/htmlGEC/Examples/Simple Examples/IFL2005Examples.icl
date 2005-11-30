@@ -8,7 +8,7 @@ Start world  = doHtmlServer example5 world
 
 //  Example: display an integer editor:
 example1 hst
-    # (nrF,hst) = mkEditForm (nFormId "nr") 1 hst
+    # (nrF,hst) = mkEditForm (nFormId "nr") (Init 1) hst
     = mkHtml "Int editor"
         [ H1 [] "Int editor"
         , STable [] [nrF.form]
@@ -16,7 +16,7 @@ example1 hst
 
 //  Example: display a list of numbers vertically, and the sum of its values:
 example2 hst
-    # (nrFs,hst) = seqList [mkEditForm (sumId nr) nr \\ nr<-[1..5]] hst
+    # (nrFs,hst) = seqList [mkEditForm (sumId nr) (Init nr) \\ nr<-[1..5]] hst
     # sumNrs     = sum [nrF.value \\ nrF <- nrFs]
     = mkHtml "Sum of Numbers"
         [ H1 [] "Sum of Numbers"
@@ -26,7 +26,7 @@ example2 hst
 //  Example: display a list of numbers vertically, and the sum of its values.
 //           Do this twice, to illustrate sharing.
 example3 hst
-    # (nrFs,hst) = seqList [mkEditForm (sumId nr) nr \\ nr<-[1..5]] hst
+    # (nrFs,hst) = seqList [mkEditForm (sumId nr) (Init nr) \\ nr<-[1..5]] hst
     # sumNrs     = sum [nrF.value \\ nrF <- nrFs]
     = mkHtml "Sum of Numbers"
         [ H1 [] "Sum of Numbers"
@@ -36,7 +36,7 @@ example3 hst
 
 //  Example: display a list of numbers vertically, but use counter-editors instead of number-editors:
 example4 hst
-    # (nrFs,hst) = seqList [counterForm (sumId nr) nr \\ nr<-[1..5]] hst
+    # (nrFs,hst) = seqList [counterForm (sumId nr) (Init nr) \\ nr<-[1..5]] hst
     # sumNrs     = sum [nrF.value \\ nrF <- nrFs]
     = mkHtml "Sum of Numbers"
         [ H1 [] "Sum of Numbers"
@@ -45,7 +45,7 @@ example4 hst
 
 //  Example: display a list of numbers vertically, but use counter-editors instead of number-editors:
 example5 hst
-    # (nrFs,hst) = seqList [mkEditForm (sumId nr) (M nr) \\ nr<-[1..5]] hst
+    # (nrFs,hst) = seqList [mkEditForm (sumId nr) (Init (M nr)) \\ nr<-[1..5]] hst
     # sumNrs     = sum [toInt nrF.value \\ nrF <- nrFs]
     = mkHtml "Sum of Numbers"
         [ H1 [] "Sum of Numbers"
@@ -59,7 +59,8 @@ sumId i = nFormId ("sum"<$i)
 derive gParse MInt
 derive gPrint MInt
 derive gUpd   MInt
-gForm{|MInt|} formId i hst = specialize asCounter formId i hst
+gForm{|MInt|} formId i hst = specialize asCounter formId 
+i hst
 where
     asCounter formId (M i) hst
         # (counterF,hst)    = counterForm formId i hst

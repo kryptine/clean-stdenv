@@ -2,6 +2,12 @@ module projectAdmin
 
 import StdEnv, StdHtml
 
+
+:: Tree =  Leaf | Branch Tree Tree
+
+L = Leaf
+Bra = Branch
+
 derive gForm  	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan
 derive gUpd 	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan, Date, []
 derive gPrint	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan, Date
@@ -16,7 +22,7 @@ gForm {|[]|} gHa formid [x:xs] hst
 	= ({changed = False, value = [x:xs], form = [formx.form <||> formxs.form]},hst)
 //	Date should be displayed as a triplet of pull down menus, displaying (day, month, year) selections:
 gForm {|Date|} formid date=:(Date day month year) hst 
-	= specialize myeditor {formid & lifespan = Page} date hst
+	= specialize myeditor {formid & lifespan = Page} (Init date) hst
 where
 	myeditor formid date hst = mkBimapEditor formid date bimap hst
 	where
@@ -65,19 +71,19 @@ Start world  = doHtmlServer ProjectAdminPage world
 
 //	Form creation/update functions:
 adminForm :: ([Project] -> [Project]) *HSt -> (Form [Project], *HSt)
-adminForm update hst = mkStoreForm (pdFormId "admin") initProjects update hst
+adminForm update hst = mkStoreForm (ndFormId "admin") (Init initProjects) update hst
 
 projectForm :: *HSt -> (Form ProjectPlan, *HSt)
-projectForm hst = mkEditForm (nFormId "project") (initProjectPlan "" 0) hst
+projectForm hst = mkEditForm (pFormId "project") (Init (initProjectPlan "" 0)) hst
 
 workerForm :: (WorkerPlan -> WorkerPlan) *HSt -> (Form WorkerPlan, *HSt)
-workerForm update hst = mkSelf2Form  (nFormId "worker") (initWorkerPlan "" 0 0 initProjects) update hst
+workerForm update hst = mkSelf2Form  (nFormId "worker") (Init (initWorkerPlan "" 0 0 initProjects)) update hst
 
 hoursForm :: (DailyWork -> DailyWork) *HSt -> (Form DailyWork, *HSt)
-hoursForm update hst = mkSelf2Form  (pFormId "hours") (initDailyWork 0 0 initProjects) update hst
+hoursForm update hst = mkSelf2Form  (nFormId "hours") (Init (initDailyWork 0 0 initProjects)) update hst
 
 buttonsForm :: DailyWork WorkerPlan ProjectPlan *HSt -> (Form ([Project] -> [Project]), *HSt)
-buttonsForm daylog workplan project hst = ListFuncBut False (nFormId "buttons") myButtons hst
+buttonsForm daylog workplan project hst = ListFuncBut (nFormId "buttons") (Init myButtons) hst
 where
 	myButtons = [ (LButton defpixel "addProject", addNewProject  project )
 				, (LButton defpixel "addWorker",  addNewWorkplan workplan)
@@ -126,7 +132,7 @@ ProjectAdminPage hst
 where
 	updateForms :: *HSt -> ((Form [Project],Form ProjectPlan,Form WorkerPlan,Form DailyWork,Form ([Project] -> [Project])),*HSt)
 	updateForms hst
-		# (adminF,  hst) = adminForm   id hst
+//		# (adminF,  hst) = adminForm   id hst
 		# (projectF,hst) = projectForm    hst
 		# (workerF, hst) = workerForm  id hst
 		# (hoursF,  hst) = hoursForm   id hst
