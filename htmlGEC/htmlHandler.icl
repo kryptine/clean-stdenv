@@ -419,7 +419,7 @@ gUpd{|EITHER|} gUpda gUpdb mode (RIGHT b)
 # (mode,b) = gUpdb mode b
 = (mode,RIGHT b)
 
-gUpd{|OBJECT|} gUpdo (UpdCreate l) _ 		// invent new type ???
+gUpd{|OBJECT|} gUpdo (UpdCreate l) _ 		// invent new type
 # (mode,o) = gUpdo (UpdCreate l) (abort "Object evaluated")
 = (mode,OBJECT o)
 gUpd{|OBJECT of typedes|} gUpdo (UpdSearch (UpdC cname) 0) (OBJECT o) // constructor changed of this type
@@ -441,7 +441,10 @@ gUpd{|CONS|} gUpdo mode (CONS c) 			// other cases
 # (mode,c) = gUpdo mode c
 = (mode,CONS c)
 
-gUpd{|FIELD|} gUpdx mode (FIELD x)  // to be done !!!
+gUpd{|FIELD|} gUpdx (UpdCreate l) _  // invent new type 
+# (mode,x) = gUpdx (UpdCreate l) (abort "value of field evaluated")
+= (mode,FIELD x)
+gUpd{|FIELD|} gUpdx mode (FIELD x)  // other casesr
 # (mode,x) = gUpdx mode x
 = (mode,FIELD x)
 
