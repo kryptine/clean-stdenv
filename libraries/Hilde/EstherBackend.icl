@@ -112,12 +112,6 @@ where
 				_ -> (raise (InvalidInstance c type dyndict), env)
 	where
 		resolveInstance` "TC" (type :: a) env = (Just (dynamicToDynamic type), env)
-		where
-			dynamicToDynamic :: a -> Dynamic | TC a
-			dynamicToDynamic _ = dynamic toDynamic :: a^ -> Dynamic
-			where
-				toDynamic :: b -> Dynamic | TC b
-				toDynamic x = dynamic x :: b^
 		resolveInstance` n t env = case resolveFilename ("instance " +++ n +++ " " +++ snd (toStringDynamic t)) env of
 			(Just (inst, _), env) -> (Just inst, env)
 			(_, env) -> case resolveFilename ("instance " +++ n +++ " " +++ (outermostType t)) env of
