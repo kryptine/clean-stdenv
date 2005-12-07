@@ -30,8 +30,6 @@ instance toString WrappedDescriptor where
 		=	"[:]"
 	toString WrappedDescriptorNil
 		=	"[]"
-	toString WrappedDescriptorCons
-		=	"[:]"
 	toString WrappedDescriptorTuple
 		=	"(,..,)"
 	toString (WrappedDescriptorOther descriptorId)
