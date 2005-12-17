@@ -93,6 +93,23 @@ mkBimapEditor formid d {map_to,map_from} hst
 						, resetForm = Nothing
 						} hst 
 
+mkSubStateForm :: !FormId !subState state (subState state -> state) !*HSt -> (state,![BodyTag],!*HSt)
+							| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC subState
+mkSubStateForm formid subState state upd hst 
+# (nsubState,hst) 		= mkEditForm formid (Init subState) hst
+# (commitBut,hst)		= FuncBut (extendFormId formid "CommitBut") (Init (LButton defpixel "commit",id)) hst
+# (cancelBut,hst)		= FuncBut (extendFormId formid "CancelBut") (Init (LButton defpixel "cancel",id)) hst
+# (nsubState,hst) 		= if cancelBut.changed 
+								(mkEditForm formid (Set subState) hst)
+								(nsubState,hst)
+= 	( 	if commitBut.changed (upd nsubState.value state) state
+	,	[ BodyTag nsubState.form
+		, Br
+		, BodyTag commitBut.form
+		, BodyTag cancelBut.form
+		]
+	, 	hst)
+
 // Form collection:
 
 horlistForm :: !FormId !(Init [a]) !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a

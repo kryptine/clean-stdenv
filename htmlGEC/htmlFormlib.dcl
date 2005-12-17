@@ -37,6 +37,8 @@ mkEditForm 		:: !FormId 	!(Init d) 				!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gU
 mkStoreForm 	:: !FormId 	!(Init d) !(d -> d)		!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkSelfForm 		:: !FormId 	!(Init d) !(d -> d)		!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkApplyEditForm	:: !FormId 	!(Init d) !d			!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+mkSubStateForm 	:: !FormId !subState state (subState state -> state) !*HSt 
+												-> (state,![BodyTag],!*HSt)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC subState
 
 // **** forms for lists ****
 
