@@ -12,12 +12,44 @@ derive gParse MachineState, Output, Product
 //Start world  = doHtml coffeemachine world
 Start world  = doHtmlServer coffeemachine world
 
+myCommandsId :: (InIDataId [(Button,(MachineState -> MachineState))])
+myCommandsId = (Init,nFormId "cb" allbuttons)
+where
+	allbuttons  = 
+		[ (butp "CoffeeBeans.jpg",  \m -> CoffeeMachine (AddBeans,		m))
+		, (but "Empty_Trash", 		\m -> CoffeeMachine (EmptyTrash,	m))
+		, (but "Coffee",			\m -> CoffeeMachine (Ask Coffee,	m))
+		, (but "Capuccino", 		\m -> CoffeeMachine (Ask Capuccino,	m))
+		, (but "Espresso", 			\m -> CoffeeMachine (Ask Espresso,	m))
+		]
+		++
+		[moneybuttons n \\ n <- [200, 100, 50, 10, 5]]
+		where
+			moneybuttons n = (butp (toString n +++ ".gif"), \m -> CoffeeMachine (InsertCoin n, m))
+
+			but s	= LButton defpixel s
+			butp s	= PButton (defpixel/2,defpixel/2) ("images/" +++ s)
+
+myOptionsId :: Init Bool Bool -> (InIDataId [(CheckBox,(Bool [Bool] MachineState -> MachineState))])
+myOptionsId init milk sugar = (init,nFormId "ob" optionbuttons) 
+where
+	optionbuttons  = 
+		[ (check milk  "Milk",  \b _ m -> CoffeeMachine (AskMilk b,  m))
+		, (check sugar "Sugar", \b _ m -> CoffeeMachine (AskSugar b, m))
+		]
+	where
+		check True = CBChecked
+		check False = CBNotChecked
+
+myMachineId :: (InIDataId MachineState)
+myMachineId = (Init, nFormId "hidden" initmachine)
+
 coffeemachine hst
-# (input	,hst) 		= ListFuncBut (nFormId "cb") (Init allbuttons) hst	
-# (options	,hst) 		= ListFuncCheckBox (nFormId "op") (Init (optionbuttons False False)) hst	
+# (input	,hst) 		= ListFuncBut myCommandsId hst	
+# (options	,hst) 		= ListFuncCheckBox (myOptionsId Init False False)  hst	
 # (optionfun,optionbool)= options.value
-# (machine	,hst) 		= mkStoreForm (nFormId "hidden") (Init initmachine) (optionfun o input.value) hst
-# (checkboxf,hst) 		= ListFuncCheckBox (nFormId "op") (Set (optionbuttons machine.value.milk machine.value.sugar)) hst	
+# (machine	,hst) 		= mkStoreForm myMachineId (optionfun o input.value) hst
+# (checkboxf,hst) 		= ListFuncCheckBox (myOptionsId Set machine.value.milk machine.value.sugar) hst	
 = mkHtml "Coffee Machine"
 		[ H1 [] "Fancy Coffee Machine ..."
 		, Br
@@ -38,36 +70,12 @@ coffeemachine hst
 			] <=> [displayMachineImage machine.value.out] 
 		] hst
 where
-	allbuttons  = 
-		[ (butp "CoffeeBeans.jpg",  \m -> CoffeeMachine (AddBeans,		m))
-		, (but "Empty_Trash", 		\m -> CoffeeMachine (EmptyTrash,	m))
-		, (but "Coffee",			\m -> CoffeeMachine (Ask Coffee,	m))
-		, (but "Capuccino", 		\m -> CoffeeMachine (Ask Capuccino,	m))
-		, (but "Espresso", 			\m -> CoffeeMachine (Ask Espresso,	m))
-		]
-		++
-		[moneybuttons n \\ n <- [200, 100, 50, 10, 5]]
-		where
-			moneybuttons n = (butp (toString n +++ ".gif"), \m -> CoffeeMachine (InsertCoin n, m))
-
-			but s	= LButton defpixel s
-			butp s	= PButton (defpixel/2,defpixel/2) ("images/" +++ s)
-
-	optionbuttons milk sugar= 
-		[ (check milk  "Milk",  \b _ m -> CoffeeMachine (AskMilk b,  m))
-		, (check sugar "Sugar", \b _ m -> CoffeeMachine (AskSugar b, m))
-		]
-	where
-		check True = CBChecked
-		check False = CBNotChecked
-		
 	prizes = [cost Coffee,cost Capuccino, cost Espresso]
 	
 	displayMachineImage (Prod x) 	= machineImage 4
 	displayMachineImage (Message s) = machineImage 0
 
 	machineImage i	= Img [Img_Src ("images/coffeemachine0" +++ toString i +++ ".jpg"), Img_Width (RelLength 560) ,Img_Height (RelLength 445)]
-
 
 	bTxt				= B []
 

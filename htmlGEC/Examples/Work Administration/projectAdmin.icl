@@ -47,19 +47,19 @@ Start world  = doHtmlServer ProjectAdminPage world
 
 //	Form creation/update functions:
 adminForm :: ([Project] -> [Project]) *HSt -> (Form [Project], *HSt)
-adminForm update hst = mkStoreForm (pdFormId "admin") (Init initProjects) update hst
+adminForm update hst = mkStoreForm (Init, pdFormId "admin" initProjects) update hst
 
 projectForm :: *HSt -> (Form ProjectPlan, *HSt)
-projectForm hst = mkEditForm (nFormId "project") (Init (initProjectPlan "" 0)) hst
+projectForm hst = mkEditForm (Init, nFormId "project" (initProjectPlan "" 0)) hst
 
 workerForm :: (WorkerPlan -> WorkerPlan) *HSt -> (Form WorkerPlan, *HSt)
-workerForm update hst = mkStoreForm  (nFormId "worker") (Init (initWorkerPlan "" 0 0 initProjects)) update hst
+workerForm update hst = mkStoreForm  (Init, nFormId "worker" (initWorkerPlan "" 0 0 initProjects)) update hst
 
 hoursForm :: (DailyWork -> DailyWork) *HSt -> (Form DailyWork, *HSt)
-hoursForm update hst = mkStoreForm  (nFormId "hours") (Init (initDailyWork 0 0 initProjects)) update hst
+hoursForm update hst = mkStoreForm  (Init, nFormId "hours" (initDailyWork 0 0 initProjects)) update hst
 
 buttonsForm :: DailyWork WorkerPlan ProjectPlan *HSt -> (Form ([Project] -> [Project]), *HSt)
-buttonsForm daylog workplan project hst = ListFuncBut (nFormId "buttons") (Init myButtons) hst
+buttonsForm daylog workplan project hst = ListFuncBut (Init, nFormId "buttons" myButtons) hst
 where
 	myButtons = [ (LButton defpixel "addProject", addNewProject  project )
 				, (LButton defpixel "addWorker",  addNewWorkplan workplan)
@@ -157,18 +157,23 @@ where
 // specializations
 
 //	List elements need to be displayed below each other, left aligned:
-gForm {|[]|} gHa formid [] hst
+gForm {|[]|} gHa formid hst
+= case formid.ival of
+	[]	
 	= ({changed = False, value = [], form =[EmptyBody]},hst)
-gForm {|[]|} gHa formid [x:xs] hst 
-	# (formx, hst) = gHa formid x hst
-	# (formxs,hst) = gForm {|*->*|} gHa formid xs hst
+	[x:xs]
+	# (formx, hst) = gHa (reuseFormId formid x) hst
+	# (formxs,hst) = gForm {|*->*|} gHa (setFormId formid xs) hst
 	= ({changed = False, value = [x:xs], form = [formx.form <||> formxs.form]},hst)
+
 //	Date should be displayed as a triplet of pull down menus, displaying (day, month, year) selections:
-gForm {|Date|} formid date=:(Date day month year) hst 
-	= specialize myeditor {formid & lifespan = Page} (Init date) hst
+gForm {|Date|} formid hst 
+	= specialize myeditor (Init,formid) hst
 where
-	myeditor formid date hst = mkBimapEditor formid date bimap hst
+	myeditor (init,formid) hst = mkBimapEditor (init,formid) bimap hst
 	where
+		(Date day month year) = formid.ival
+
 		bimap = {map_to = toPullDown, map_from = fromPullDown}
 		where
 			toPullDown (Date day month year) = (pddays,pdmonths,pdyears)

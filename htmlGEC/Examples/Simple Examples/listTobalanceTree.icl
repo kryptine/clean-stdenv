@@ -11,6 +11,8 @@ import tree
 //Start world  = doHtml MyPage world
 Start world  = doHtmlServer MyPage world
 
+myListId = nFormId "list" []
+myTreeId = nFormId "tree" Leaf
 
 MyPage hst
 # (mycircuitf,hst) = startCircuit mycircuit [1,5,2] hst
@@ -20,4 +22,4 @@ MyPage hst
 	] hst
 where
 	mycircuit :: GecCircuit [Int] (Tree Int)
-	mycircuit = edit (nFormId "list") >>> arr fromListToBalTree >>> display (nFormId "tree")
+	mycircuit = edit myListId >>> arr fromListToBalTree >>> display myTreeId
