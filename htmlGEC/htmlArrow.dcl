@@ -21,9 +21,9 @@ startCircuit 	:: !(GecCircuit a b) !a !*HSt -> (!Form b,!*HSt)
 // a display just shows the value
 // a store applies the function to the stored value
 
-edit 			:: FormId 	-> GecCircuit a a 			|  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-display 		:: FormId 	-> GecCircuit a a 			|  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-store 			:: FormId a -> GecCircuit (a -> a) a 	|  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+edit 			:: (FormId a)	-> GecCircuit a a 			|  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+display 		:: (FormId a)	-> GecCircuit a a 			|  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+store 			:: (FormId a)	-> GecCircuit (a -> a) a 	|  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 	
 feedback 		:: (GecCircuit a b) (GecCircuit b a) -> (GecCircuit a b)
 
@@ -34,4 +34,6 @@ self 			:: (a -> a) (GecCircuit a a) -> GecCircuit a a
 
 // to lift library functions to the circuit domain
 
-lift :: !FormId (!FormId !(Init a) !*HSt -> (!Form b,!*HSt)) -> (GecCircuit a b)
+lift :: !(InIDataId a) (!(InIDataId a) !*HSt -> (!Form b,!*HSt)) -> (GecCircuit a b)
+
+//lift :: !(FormId a) (!(InIDataId a) !*HSt -> (!Form b,!*HSt)) -> (GecCircuit a b)
