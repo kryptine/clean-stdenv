@@ -6,16 +6,17 @@ definition module htmlFormData
 import htmlDataDef
 import StdMaybe, StdBool
 
-:: FormId										// properties one has to assign to any form 
+:: FormId d										// properties one has to assign to any form 
 	=	{ id 		:: !String					// id *uniquely* identifying the form
 		, lifespan	:: !Lifespan				// lifespan of form
 		, mode		:: !Mode					// editable or not
 		, storage	:: !StorageFormat			// serialization method
+		, ival		:: !d						// initial value
 		}
 
-:: Init d										// Kind of value 
-	=	Init !d									// 	If the iData has no value yet, this value will be used as initial value
-	|	Set  !d									// 	This value will be used as new iData value
+:: Init											// Kind of value 
+	=	Init 									// 	The value will be used as initial value
+	|	Set  									// 	This value will be used as new iData value
 
 :: Lifespan										// defines how long a form will be maintained		
 	= 	Persistent								// 	form will live "forever" in a file
@@ -27,7 +28,7 @@ import StdMaybe, StdBool
 	| 	Display									// 	a non-editable form
 
 :: HBimap d v 									// swiss army nife allowing to make a distinction between data and view domain
-	=	{ toForm   	:: (Init d)(Maybe v) -> v	// 	converts data to view domain, given current view
+	=	{ toForm   	:: Init d (Maybe v) -> v	// 	converts data to view domain, given current view
 		, updForm 	:: Changed v -> v			// 	update function, True when the form is edited 
 		, fromForm 	:: Changed v -> d			// 	converts view back to data domain, True when form is edited
 		, resetForm :: Maybe (v -> v)			// 	can be used to reset view (eg for buttons)
@@ -46,31 +47,39 @@ import StdMaybe, StdBool
 		, form		:: [BodyTag]				// html code to create the form, representing view domain (look)
 		}
 
+:: InIDataId d									// Often used combination
+	:==	!(!Init,!FormId d)						
+
 // **** easy creation of FormId's ****
 
-nFormId		:: !String -> FormId		// page 	  livetime, editable, string format
-sFormId		:: !String -> FormId		// session 	  livetime, editable, string format
-pFormId		:: !String -> FormId		// persistent livetime, editable, string format
+nFormId		:: !String !d -> (FormId d)		// page 	  livetime, editable, string format
+sFormId		:: !String !d -> (FormId d)		// session 	  livetime, editable, string format
+pFormId		:: !String !d -> (FormId d)		// persistent livetime, editable, string format
 
-ndFormId	:: !String -> FormId		// page 	  livetime, displayed non-editable, string format
-sdFormId	:: !String -> FormId		// session 	  livetime, displayed non-editable, string format
-pdFormId	:: !String -> FormId		// persistent livetime, displayed non-editable, string format 
+ndFormId	:: !String !d -> (FormId d)		// page 	  livetime, displayed non-editable, string format
+sdFormId	:: !String !d -> (FormId d)		// session 	  livetime, displayed non-editable, string format
+pdFormId	:: !String !d -> (FormId d)		// persistent livetime, displayed non-editable, string format 
 
-nDFormId	:: !String -> FormId		// page 	  livetime, editable, static dynamic format
-sDFormId	:: !String -> FormId		// session 	  livetime, editable, static dynamic format
-pDFormId	:: !String -> FormId		// persistent livetime, editable, static dynamic format
+nDFormId	:: !String !d -> (FormId d)		// page 	  livetime, editable, static dynamic format
+sDFormId	:: !String !d -> (FormId d)		// session 	  livetime, editable, static dynamic format
+pDFormId	:: !String !d -> (FormId d)		// persistent livetime, editable, static dynamic format
 
-ndDFormId	:: !String -> FormId		// page 	  livetime, displayed non-editable, static dynamic format
-sdDFormId	:: !String -> FormId		// session 	  livetime, displayed non-editable, static dynamic format
-pdDFormId	:: !String -> FormId		// persistent livetime, displayed non-editable, static dynamic format 
+ndDFormId	:: !String !d -> (FormId d)		// page 	  livetime, displayed non-editable, static dynamic format
+sdDFormId	:: !String !d -> (FormId d)		// session 	  livetime, displayed non-editable, static dynamic format
+pdDFormId	:: !String !d -> (FormId d)		// persistent livetime, displayed non-editable, static dynamic format 
 
-extendFormId :: !FormId !String -> FormId // extend id with suffix
+extidFormId :: !(FormId d) !String -> (FormId d)		// make new id by adding sufix 
+subFormId 	:: !(FormId a) !String !d 	-> (FormId d)	// make new id af new type by adding suffix
+setFormId 	:: !(FormId d) !d -> (FormId d)				// set new initial value in formid
+reuseFormId :: !(FormId a) !d -> (FormId d)				// reuse id for new type (only to be used in gform)
+
+initID		:: !(FormId d) 		-> InIDataId d	// (Init,FormId a)
+setID		:: !(FormId d) !d 	-> InIDataId d	// (Set,FormId a)
 
 // manipulating initial values
 
-GetInit 	:: !(Init d) -> d						// projection function on Init or Set
-PropInit 	:: !(Init v) !d -> (Init d)				// take over Init or Set of v to create d
-toViewId 	:: !(Init d) !(Maybe d) -> d			// copy first on Set and copy first if second is Nothing
-toViewMap 	:: !(d -> v) !(Init d) !(Maybe v) -> v	// same, but convert to view domain
+toViewId  :: !Init !d! (Maybe d) -> d					// copy second on Set or if third is Nothing
+toViewMap :: !(d -> v) !Init !d !(Maybe v) -> v			// same, but convert to view domain
 
-instance toBool (Init d) 
+instance toBool Init
+

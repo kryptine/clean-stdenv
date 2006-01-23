@@ -61,12 +61,12 @@ getUpdateId formStates=:{updateid} = (updateid,formStates)
 getUpdate ::  *FormStates -> (String,*FormStates)
 getUpdate formStates=:{update} = (update,formStates)
 
-findState :: !FormId *FormStates *NWorld -> (Bool,Maybe a,*FormStates,*NWorld)	| gParse{|*|} a & TC a
+findState :: !(FormId a) *FormStates *NWorld -> (Bool,Maybe a,*FormStates,*NWorld)	| gParse{|*|} a & TC a
 findState formid formstates=:{fstates,server} world
 # (bool,ma,fstates,world) = findState` formid fstates world
 = (bool,ma,{formstates & fstates = fstates},world)
 where
-	findState` :: !FormId *FStates *NWorld -> (Bool,Maybe a,*FStates,*NWorld)| gParse{|*|} a & TC a
+	findState` :: !(FormId a) *FStates *NWorld -> (Bool,Maybe a,*FStates,*NWorld)| gParse{|*|} a & TC a
 	findState` formid formstate=:(Node_ left (fid,info) right) world
 	| formid.id == fid = case info of
 					(OldState state) = (True, fetchFState state,formstate,world)
@@ -102,12 +102,12 @@ where
 string_to_dynamic` :: {#Char} -> Dynamic	// just to make a unique copy as requested by string_to_dynamic
 string_to_dynamic` s = string_to_dynamic {s` \\ s` <-: s}
 
-replaceState :: !FormId a *FormStates *NWorld -> (*FormStates,*NWorld)	| gPrint{|*|} a & TC a
+replaceState :: !(FormId a) a *FormStates *NWorld -> (*FormStates,*NWorld)	| gPrint{|*|} a & TC a
 replaceState formid val formstates=:{fstates} world
 # (fstates,world) = replaceState` formid val fstates world
 = ({formstates & fstates = fstates},world)
 where
-	replaceState` :: !FormId a *FStates *NWorld -> (*FStates,*NWorld)	| gPrint{|*|} a & TC a
+	replaceState` :: !(FormId a) a *FStates *NWorld -> (*FStates,*NWorld)	| gPrint{|*|} a & TC a
 	replaceState` formid val Leaf_ world = (Node_ Leaf_ (formid.id,NewState (initNewState formid.lifespan formid.storage val)) Leaf_,world)
 	replaceState` formid val (Node_ left a=:(fid,_) right) world
 	| formid.id == fid 	= (Node_ left (fid,NewState (initNewState formid.lifespan formid.storage val)) right,world)

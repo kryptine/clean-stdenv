@@ -13,10 +13,10 @@ import htmlDataDef, EncodeDecode
 
 emptyFormStates :: *FormStates								// creates emtpy states
 
-findState 		:: !FormId *FormStates *NWorld 				// find the state value given FormId and a correct type
+findState 		:: !(FormId a) *FormStates *NWorld 				// find the state value given FormId and a correct type
 					-> (Bool, Maybe a,*FormStates,*NWorld)	// true if form has not yet been previously inspected 	
 												| gParse{|*|} a & TC a		
-replaceState 	:: !FormId a *FormStates *NWorld 			// replace state given FormId
+replaceState 	:: !(FormId a) a *FormStates *NWorld 			// replace state given FormId
 					-> (*FormStates,*NWorld)	| gPrint{|*|} a & TC a
 
 getUpdateId 	:: *FormStates -> (String,*FormStates)		// id of previously changed form

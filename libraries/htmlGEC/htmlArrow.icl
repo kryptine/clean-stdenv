@@ -40,26 +40,25 @@ where
 		# ((b,bodya),ch,hst) = gec_ab ((a,prevbody),ch,hst)
 		= (((b,c),bodya),ch,hst)
 
-edit :: FormId -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+edit :: (FormId a) -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 edit formid = HGC mkApplyEdit`
 where
-	mkApplyEdit` :: (GecCircuitState a)  -> GecCircuitState a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 	mkApplyEdit` ((initval,prevbody),ch,hst) 
-	# (na,hst) = mkApplyEditForm formid (Init initval) initval hst
+	# (na,hst) = mkApplyEditForm (Init,setFormId formid initval) initval hst
 	= ((na.value,[(formid.id,BodyTag na.form):prevbody]),ch||na.changed,hst) // propagate change
 
-display :: FormId -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+display :: (FormId a) -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 display formid = HGC mkEditForm`
 where
 	mkEditForm` ((val,prevbody),ch,hst) 
-	# (na,hst) = mkEditForm {formid & mode = Display} (Set val) hst
+	# (na,hst) = mkEditForm (Set,setFormId {formid & mode = Display} val) hst
 	= ((na.value,[(formid.id,BodyTag na.form):prevbody]),ch||na.changed,hst)
 
-store :: FormId s -> GecCircuit (s -> s) s |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC s
-store formid initstore = HGC mkStoreForm`
+store :: (FormId s) -> GecCircuit (s -> s) s |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC s
+store formid = HGC mkStoreForm`
 where
 	mkStoreForm` ((fun,prevbody),ch,hst) 
-	# (store,hst) = mkStoreForm formid (Init initstore) fun  hst
+	# (store,hst) = mkStoreForm (Init,formid) fun hst
 	= ((store.value,[(formid.id,BodyTag store.form):prevbody]),ch||store.changed,hst)
 
 self :: (a -> a) (GecCircuit a a) -> GecCircuit a a
@@ -84,10 +83,23 @@ where
 	# (HGC gecbc) 			= bgecbc {changed = bch, value = b, form = map snd bbody}
 	= gecbc ((b,bbody ++ abody),ach||bch,hst) 
 
-lift :: !FormId (!FormId !(Init a) !*HSt -> (!Form b,!*HSt)) -> (GecCircuit a b)
+lift :: !(InIDataId a) (!(InIDataId a) !*HSt -> (!Form b,!*HSt)) -> (GecCircuit a b)
+lift (Set,formid) fun = HGC fun`
+where
+	fun` ((a,body),ch,hst)
+	# (nb,hst) =  fun (setID formid a) hst
+	= ((nb.value,[(formid.id,BodyTag nb.form):body]),ch||nb.changed,hst) 
+lift (Init,formid) fun = HGC fun`
+where
+	fun` ((a,body),ch,hst)
+	# (nb,hst) =  fun (Init, setFormId formid a) hst
+	= ((nb.value,[(formid.id,BodyTag nb.form):body]),ch||nb.changed,hst) 
+/*
+
+lift :: !(FormId a) (!(InIDataId a) !*HSt -> (!Form b,!*HSt)) -> (GecCircuit a b)
 lift formid fun = HGC fun`
 where
 	fun` ((a,body),ch,hst)
-	# (nb,hst) =  fun formid (Init a) hst
+	# (nb,hst) =  fun (setID formid a) hst
 	= ((nb.value,[(formid.id,BodyTag nb.form):body]),ch||nb.changed,hst) 
-
+*/
