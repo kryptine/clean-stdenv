@@ -22,5 +22,5 @@ MyPage hst
 	] hst
 where
 	mycircuit :: GecCircuit [Int] (Tree Int)
-	mycircuit = edit (nFormId "list") >>> arr fromListToBalTree >>> display (nFormId "tree")
+	mycircuit = edit (nFormId "list" []) >>> arr fromListToBalTree >>> display (nFormId "tree" Leaf)
 

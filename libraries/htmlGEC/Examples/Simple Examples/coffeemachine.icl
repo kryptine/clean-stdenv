@@ -11,37 +11,42 @@ derive gParse Machine, Output, Product
 //Start world  = doHtml coffeemachine world
 Start world  = doHtmlServer coffeemachine world
 
-coffeemachine hst
-# (command,hst)	= TableFuncBut (nFormId "cb") commandbuttons hst	
-# (option,hst)	= TableFuncBut (nFormId "ob") optionbuttons  hst	
-# (machine,hst)	= mkStoreForm (nFormId "hidden") initmachine (option.value o command.value)  hst
-= mkHtml "Coffee Machine"
-		[ H1 [] "Coffee Machine: "
-		, [toHtml (displaycontents  machine.value)] <=> command.form
-		, BodyTag option.form
-		, Br
-		, B [] (displayoutput machine.value)
-		] hst
+myCommandsId :: (FormId [[(Button,(Machine -> Machine))]])
+myCommandsId = nFormId "cb" commandbuttons
 where
-	commandbuttons  = Init
+	commandbuttons  = 
 		[	[(but "Insert_Coins",	\m -> CoffeeMachine (InsertCoin,	m))]
 		,	[(but "Add_beans",   	\m -> CoffeeMachine (AddBeans,		m))]
 		,	[(but "Empty_Trash", 	\m -> CoffeeMachine (EmptyTrash,	m))]
 		]
 
-	optionbuttons  = Init
+myOptionsId :: (FormId [[(Button,(Machine -> Machine))]])
+myOptionsId = nFormId "ob" optionbuttons
+where
+	optionbuttons  = 
 		[	[(but "Coffee",			\m -> CoffeeMachine (Ask Coffee,	m))
 			,(but "Capuccino",   	\m -> CoffeeMachine (Ask Capuccino,	m))
 			,(but "Espresso", 		\m -> CoffeeMachine (Ask Espresso,	m))
 			]
 		]
 
-	but s = LButton defpixel s
+myMachineId :: (FormId Machine)
+myMachineId = nFormId "hidden" initmachine
+where
+	initmachine = {money=0,beans=6,trash=0,out=Message "Welcome."} 
 
-	initmachine = Init {money=0,beans=6,trash=0,out=Message "Welcome."} 
-
-	displayoutput {out} = toString out
-
+coffeemachine hst
+# (command,hst)	= TableFuncBut (initID myCommandsId) hst	
+# (option,hst)	= TableFuncBut (initID myOptionsId)  hst	
+# (machine,hst)	= mkStoreForm  (initID myMachineId) (option.value o command.value)  hst
+= mkHtml "Coffee Machine"
+		[ H1 [] "Coffee Machine: "
+		, [toHtml (displaycontents  machine.value)] <=> command.form
+		, BodyTag option.form
+		, Br
+		, B [] (toString machine.value.out)
+		] hst
+where
 	displaycontents {money,beans,trash}
 		= ("money ",money) <|> 
 		  ("beans ",beans) <|> 
@@ -108,10 +113,10 @@ beancost Espresso  = 1
 ptrash :: Product -> Int 
 ptrash _ = 1                      
 
-
 instance toString Output where
 	toString (Message s)      = s
 	toString (Prod Coffee)    = "Coffee"
 	toString (Prod Capuccino) = "Capuccino"
 	toString (Prod Espresso)  = "Espresso"
 
+but s = LButton defpixel s

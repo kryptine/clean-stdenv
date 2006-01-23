@@ -19,27 +19,27 @@ derive gEq CurrentPage
 // session forms:
 
 indexForm :: (Int -> Int) *HSt -> (Form Int,!*HSt)
-indexForm f hst = mkStoreForm (sFormId "index") (Init 0) f hst
+indexForm f hst = mkStoreForm (Init, sFormId "index" 0) f hst
 
 stepForm :: *HSt -> (Form Int,!*HSt)
-stepForm hst = mkSelfForm (sFormId "stepsize") (Init 5) (\step -> if (step > 0 && step < 10) step 5) hst
+stepForm hst = mkSelfForm (Init, sFormId "stepsize" 5) (\step -> if (step > 0 && step < 10) step 5) hst
 
 searchForm :: *HSt -> (Form String,!*HSt)
-searchForm hst = mkEditForm (sFormId "searchstring") (Init "") hst
+searchForm hst = mkEditForm (Init, sFormId "searchstring" "") hst
 
 searchOptionForm :: (SearchOptions option) *HSt -> (Form (option -> option,Int),!*HSt)
-searchOptionForm {options} hst = FuncMenu (sFormId "searchoption") (Init (1,[(label,const option) \\ (label,option) <- options])) hst
+searchOptionForm {options} hst = FuncMenu (Init, sFormId "searchoption"(1,[(label,const option) \\ (label,option) <- options])) hst
 
 personalDataForm :: *HSt -> (Form PersonalData,*HSt)
-personalDataForm hst = mkEditForm (sFormId "personal") (Init initPersInfo) hst
+personalDataForm hst = mkEditForm (Init, sFormId "personal" initPersInfo) hst
 
 // session stores:
 
 currentpageStore :: (CurrentPage -> CurrentPage) *HSt -> (Form CurrentPage,!*HSt)
-currentpageStore f hst = mkStoreForm (sFormId "curpageswitch") (Init HomePage) f hst
+currentpageStore f hst = mkStoreForm (Init, sFormId "curpageswitch" HomePage)  f hst
 
 basketStore :: (Basket -> Basket) *HSt -> (Form Basket,!*HSt)
-basketStore f hst = mkStoreForm (sFormId "zbasket") (Init []) f hst
+basketStore f hst = mkStoreForm (Init,sFormId "zbasket" []) f hst
 
 
 :: PersonalData
@@ -112,7 +112,7 @@ webshopentry options extendedInfo headers database hst
 		, BodyTag page		// code of selected page
 		], hst)
 where
-	pageSelectionForm hst = ListFuncBut (nFormId "pagebut") (Init pagebuttons) hst
+	pageSelectionForm hst = ListFuncBut (Init, nFormId "pagebut" pagebuttons) hst
 	where
 		pagebuttons  = 
 			[ (but "Home", 		const HomePage)
@@ -150,15 +150,15 @@ doShopPage soptions extendedInfo headers database hst
 
 # (index,hst)		= indexForm id hst				// read current index
 # index		= if (searchString.changed || searchOption.changed) 
-							(Set 0)				// reset index 
-							(Set index.value)		// use old index
+							0				// reset index 
+							index.value		// use old index
 # (step,hst)		= stepForm hst					// read current step
-# (shownext, hst)	= browseButtons index step.value (length selection) nbuttuns (nFormId "browsebuts") hst
+# (shownext, hst)	= browseButtons (Init, nFormId "browsebuts" index) step.value (length selection) nbuttuns hst
 # (nindex,hst) 		= indexForm (\_ -> shownext.value) hst
 # (add,      hst)	= addToBasketForm nindex.value step.value selection hst
 # (basket,   hst) 	= basketStore add.value hst
-# (info,     hst)	= InformationForm (nFormId "listinfo") ([item.itemnr \\ {item} <- selection]%(nindex.value,nindex.value+step.value)) hst
-# (binfo,    hst)	= InformationForm (nFormId "basketinfo") basket.value hst
+# (info,     hst)	= InformationForm "listinfo" ([item.itemnr \\ {item} <- selection]%(nindex.value,nindex.value+step.value)) hst
+# (binfo,    hst)	= InformationForm "basketinfo" basket.value hst
 = (	[ (myTable 	[[Txt "Category:",Txt "Search for:",Txt "#Items found",Txt "#Items / page:"]
 				,[toBody searchOption,toBody searchString
 				,if found (Txt (toString (length selection)))
@@ -179,21 +179,21 @@ where
 
 	addToBasketForm :: !Int !Int [ItemData d] *HSt -> (Form (Basket -> Basket),!*HSt)
 	addToBasketForm index step selection hst
-		= ListFuncBut  (nFormId "additems")(Init ([(butp "basket.gif" ,\basket -> [data.item.itemnr:basket]) \\ data <- selection]%(index,index+step-1))) hst
+		= ListFuncBut  (Init, nFormId "additems" ([(butp "basket.gif" ,\basket -> [data.item.itemnr:basket]) \\ data <- selection]%(index,index+step-1))) hst
 
-InformationForm :: FormId [Int] *HSt -> (Form (Int -> Int),!*HSt)
-InformationForm formid itemlist hst
-	= ListFuncBut formid (Init [(butp "info.gif",const itemnr) \\ itemnr <- itemlist]) hst
+InformationForm :: String [Int] *HSt -> (Form (Int -> Int),!*HSt)
+InformationForm name itemlist hst
+	= ListFuncBut (Init,nFormId name [(butp "info.gif",const itemnr) \\ itemnr <- itemlist]) hst
 
 // basket page
 
 doBasketPage :: (ExtendedInfo d) (Headers d) [ItemData d] *HSt -> ([BodyTag],*HSt)
 doBasketPage extendedInfo headers database hst
 # (basket,   hst) 	= basketStore id hst
-# (delete,  hst)	= ListFuncBut (nFormId "delitems") (Init [(butp "trash.gif",removeMember itemnr) \\ itemnr <- basket.value]) hst
+# (delete,  hst)	= ListFuncBut (Init, nFormId "delitems" [(butp "trash.gif",removeMember itemnr) \\ itemnr <- basket.value])  hst
 # (nbasket, hst)	= basketStore delete.value hst	
-# (info,    hst)	= InformationForm (nFormId "basketinfo2") nbasket.value hst
-# (order,   hst)	= ListFuncBut (nFormId "buybut") (Init [(but "Order",const OrderPage)]) hst	
+# (info,    hst)	= InformationForm "basketinfo2" nbasket.value hst
+# (order,   hst)	= ListFuncBut (Init, nFormId "buybut" [(but "Order",const OrderPage)]) hst	
 # (curpage, hst)	= currentpageStore order.value hst
 | curpage.value ===  OrderPage = doOrderPage headers database hst
 = ( [ showBasket False nbasket.value headers database info.form delete.form
@@ -209,7 +209,7 @@ doBasketPage extendedInfo headers database hst
 doOrderPage :: (Headers d) [ItemData d] *HSt -> ([BodyTag],*HSt)
 doOrderPage headers database hst
 # (persData, hst)	= personalDataForm hst
-# (confirm,	 hst)	= ListFuncBut (nFormId "confirm") (Init [(but "confirm",const ThanksPage)]) hst	
+# (confirm,	 hst)	= ListFuncBut (Init, nFormId "confirm" [(but "confirm",const ThanksPage)]) hst	
 # (curpage,	 hst)	= currentpageStore confirm.value hst
 # (basket,   hst) 	= basketStore id hst
 | curpage.value ===  ThanksPage
