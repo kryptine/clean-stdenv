@@ -69,12 +69,12 @@ numberGuessingGame hst
 			] hst
 	
 //	Form initializer functions:
-playerForm			= mkEditForm   (nFormId "player")  (Init (low-1))		// The form in which the player enters guesses
-stateForm r f		= mkStoreForm  (pFormId "state") (Init (mkState r)) f	// The store form that keeps track of the state of the application
-nameForm name		= mkEditForm   (nFormId "name")     (Init name)		// The form in which the player can enter his/her name
-highForm high		= vertlistForm (ndFormId "display") (Init high)		// The form that displays the high-score list
-highButtonsForm pc	= ListFuncBut (nFormId "highButtons") (Init [(LButton (3*defpixel/2) "Add To High",addHigh pc)])	// Button to add result to high-score
-guessButtonForm		= ListFuncBut (nFormId "guessbutton") (Init [(LButton defpixel "Guess",      incCount  )])		// Button to confirm number to guess
-newButtonForm		= ListFuncBut (nFormId "newbutton")   (Init [(LButton defpixel "New Game",   nextRandom)])		// Button to start new game
+playerForm			= mkEditForm   (Init, nFormId "player" (low-1))  		// The form in which the player enters guesses
+stateForm r f		= mkStoreForm  (Init, pFormId "state" (mkState r)) f	// The store form that keeps track of the state of the application
+nameForm name		= mkEditForm   (Init, nFormId "name" name)      		// The form in which the player can enter his/her name
+highForm high		= vertlistForm (Init, ndFormId "display" high) 			// The form that displays the high-score list
+highButtonsForm pc	= ListFuncBut  (Init, nFormId "highButtons" [(LButton (3*defpixel/2) "Add To High",addHigh pc)]) 	// Button to add result to high-score
+guessButtonForm		= ListFuncBut  (Init, nFormId "guessbutton" [(LButton defpixel "Guess",      incCount  )]) 		// Button to confirm number to guess
+newButtonForm		= ListFuncBut  (Init, nFormId "newbutton" [(LButton defpixel "New Game",   nextRandom)])   		// Button to start new game
 
-//instance mod Int where mod a b = a - (a/b)*b
+instance mod Int where mod a b = a - (a/b)*b
