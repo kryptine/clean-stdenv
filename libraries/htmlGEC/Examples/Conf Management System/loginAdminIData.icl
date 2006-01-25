@@ -15,8 +15,8 @@ loginForm (init,login) hst = mkEditForm (init,sFormId "login" login) hst
 
 // a temperal login form used for changing passwords
 
-loginNForm :: !String !*HSt -> (Form String,!*HSt)
-loginNForm fid hst = mkEditForm (Init, nFormId fid "") hst
+passwordForm :: !String !*HSt -> (Form String,!*HSt)
+passwordForm fid hst = mkEditForm (Init, nFormId fid "") hst
 
 // a login page
 
@@ -36,9 +36,9 @@ loginPage loginDatabase hst
 	
 changePasswordPage :: !Login !*HSt -> (!Maybe Login,![BodyTag],!*HSt)
 changePasswordPage login hst
-# (oldpasswrd,hst)		= loginNForm "oldpasswrd" hst
-# (newpasswrd1,hst)		= loginNForm "newpasswrd1" hst
-# (newpasswrd2,hst)		= loginNForm "newpasswrd2" hst
+# (oldpasswrd,hst)		= passwordForm "oldpasswrd" hst
+# (newpasswrd1,hst)		= passwordForm "newpasswrd1" hst
+# (newpasswrd2,hst)		= passwordForm "newpasswrd2" hst
 | oldpasswrd.value <> login.password || newpasswrd1.value <> newpasswrd2.value  || newpasswrd1.value == ""
 = (Nothing, changePasswrdBody oldpasswrd newpasswrd1 newpasswrd2, hst)
 # (_,hst)				= loginForm (Set,mkLogin login.loginName newpasswrd1.value) hst
@@ -62,21 +62,24 @@ where
 					[]
 			] 
 						
+loginStateForm state hst	= mkEditForm 	(Init, nFormId "la_state" 	(mkLogin "" "",state)) hst
+addButton fun hst			= simpleButton "Add" fun hst
+allStates init states hst	= vertlistForm 	(init, nFormId "la_states" 	states) hst
+
 modifyStatesPage :: !(LoginState state) !(LoginStates state) !*HSt -> (!LoginStates state,![BodyTag],!*HSt)
  					| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC state
 modifyStatesPage (login,state) states hst
-# (nstate,hst)			= mkEditForm (Init,nFormId "hliststateelem" (login,state)) hst
-# (nstatebut,hst)		= FuncBut (Init, sFormId "addstate" (LButton defpixel "AddLogin",id)) hst
-# (hlistform,hst)		= vertlistForm (Init, nFormId "hliststate" states) hst
-# states				= if nstatebut.changed (addLogin nstate.value states) hlistform.value
-# (hlistform,hst)		= vertlistForm (Set,nFormId "hliststate" states) hst
-= 	( states 
+# (nstate,hst)		= loginStateForm state hst
+# (addstate,hst)	= addButton (\states -> addLogin nstate.value states) hst
+# (ostates,hst)		= allStates Init states hst
+# (nstates,hst)		= allStates Set (addstate.value ostates.value) hst
+= 	( nstates.value 
 	,	[ BodyTag nstate.form
 		, Br
-		, BodyTag nstatebut.form
+		, BodyTag addstate.form
 		, Br
 		, Hr []
 		, Br
-		, BodyTag hlistform.form
+		, BodyTag nstates.form
 		]
 	, hst)

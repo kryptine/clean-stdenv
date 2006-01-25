@@ -6,13 +6,24 @@ import loginAdmin
 
 // state stored in login administration
 
-initState :: (LoginStates State)
-initState 			= 	[(mkLogin "root" "secret",initialRootState)]
-initialRootState	= 	{ initialPage 	= 	RootHomePage
-						, person		= 	initPerson
-						, papersref		= []
-						, conflict		= []
+initRootLogin :: (LoginStates State)
+initRootLogin 		= 	[(mkLogin "root" "secret",initialRootState)]
+
+
+initialRootState :: State
+initialRootState	= 	{ role 		= ConfManager
+						, person	= initPerson
+						, papersref	= []
+						, conflict	= []
 						} 
+
+initialRefereeState :: State
+initialRefereeState	= 	{ role 		= Referee
+						, person	= initPerson
+						, papersref	= []
+						, conflict	= []
+						} 
+
 
 initPerson :: Person
 initPerson = 	{ firstName 	= ""
@@ -28,10 +39,14 @@ initPaper s =	{ title		= "paper " +++ s
 				, pdf		= "download pdf here"
 				}
 
-isRoot :: State -> Bool
-isRoot state = case state.initialPage of
-					RootHomePage -> True
+isManager :: State -> Bool
+isManager state = case state.role of
+					ConfManager -> True
 					_ ->  False
+
+homePage :: Role -> CurrPage
+homePage ConfManager 	= RootHomePage
+homePage Referee		= MemberHomePage
 
 findReports :: Int [State] -> [(Person,Maybe Report)]
 findReports papernr states 

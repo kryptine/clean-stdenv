@@ -18,10 +18,10 @@ derive gUpd []
 
 
 LoginStatesStore :: !((LoginStates State) -> (LoginStates State)) *HSt -> (!Form (LoginStates State),!*HSt) // login administration database
-LoginStatesStore upd hst = mkStoreForm (Init,pFormId "loginDatabase" initState) upd hst
+LoginStatesStore upd hst = mkStoreForm (Init,pFormId "cf_loginDatabase" initRootLogin) upd hst
 
 currPageStore :: !CurrPage  !(CurrPage -> CurrPage) *HSt -> (!Form CurrPage,!*HSt)							// current page to display
-currPageStore currpage cbf hst = mkStoreForm (Init, sFormId "currPage" currpage) cbf hst 
+currPageStore currpage cbf hst = mkStoreForm (Init, sFormId "cf_currPage" currpage) cbf hst 
 
 papersStore :: !Papers !(Papers -> Papers) *HSt -> (!Form Papers,!*HSt)										// papers to referee				
-papersStore papers cbf hst = mkStoreForm (Init, pFormId "papersDatabase" papers) cbf hst 
+papersStore papers cbf hst = mkStoreForm (Init, pFormId "cf_papersDatabase" papers) cbf hst 

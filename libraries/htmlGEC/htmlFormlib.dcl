@@ -67,6 +67,7 @@ t4EditForm  	:: !(InIDataId (a,b,c,d))	 	!*HSt -> ((Form a,Form b,Form c,Form d)
 																   				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 // **** special buttons ****
 
+simpleButton 	:: !String !(a -> a) 			!*HSt -> (Form (a -> a),!*HSt)
 counterForm 	:: !(InIDataId a)	  			!*HSt -> (Form a,!*HSt) | +, -, one
 																			,  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
@@ -74,7 +75,6 @@ counterForm 	:: !(InIDataId a)	  			!*HSt -> (Form a,!*HSt) | +, -, one
 // **** an identity function is returned when none of the set of buttons pressed 
 
 FuncBut 		:: !(InIDataId (Button, a -> a))		!*HSt -> (Form (a -> a),!*HSt)
-
 ListFuncBut 	:: !(InIDataId [(Button, a -> a)])		!*HSt -> (Form (a -> a),!*HSt)
 TableFuncBut 	:: !(InIDataId [[(Button, a -> a)]])	!*HSt -> (Form (a -> a),!*HSt)
 

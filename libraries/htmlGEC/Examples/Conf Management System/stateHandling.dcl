@@ -2,11 +2,14 @@ definition module stateHandling
 
 import loginAdmin
 
-:: State =		{ initialPage	:: CurrPage  // determines initial page when logged in
+:: State =		{ role			:: Role  	// determines initial page when logged in
 				, person		:: Person
 				, papersref		:: [(PaperNr, Maybe Report)]
 				, conflict		:: [PaperNr]
 				}
+
+:: Role 		= ConfManager
+				| Referee
 
 :: CurrPage 	= RootHomePage			// root pages
 				| AssignPapers
@@ -58,11 +61,15 @@ import loginAdmin
 				, pdf			:: String
 				}
 
-initState 		:: (LoginStates State)
-initPerson 		:: Person
-initPaper  		:: String -> Paper
 
-isRoot 			:: State -> Bool
+initRootLogin 		:: (LoginStates State)
+initialRootState 	:: State
+initialRefereeState	:: State
+initPerson 			:: Person
+initPaper  			:: String -> Paper
+
+isManager		:: State -> Bool
+homePage 		:: Role -> CurrPage
 
 findReports 	:: Int [State] -> [(Person,Maybe Report)]
 

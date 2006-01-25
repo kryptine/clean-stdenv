@@ -4,10 +4,14 @@ import StdHtml
 import stateHandling
 import loginAdminIData, confIData
 
-derive gForm 	CurrPage, State, Person, Paper, Report, Recommendation, Familiarity, Maybe
-derive gUpd 	CurrPage, State, Person, Paper, Report, Recommendation, Familiarity, Maybe
-derive gPrint 	CurrPage, State, Person, Paper, Report, Recommendation, Familiarity, Maybe 
-derive gParse 	CurrPage, State, Person, Paper, Report, Recommendation, Familiarity, Maybe
+derive gForm 	CurrPage, Role, State, Person, Paper, Report, Recommendation, Familiarity, Maybe
+derive gUpd 	CurrPage, Role, State, Person, Paper, Report, Recommendation, Familiarity, Maybe
+derive gPrint 	CurrPage, Role, State, Person, Paper, Report, Recommendation, Familiarity, Maybe 
+derive gParse 	CurrPage, Role, State, Person, Paper, Report, Recommendation, Familiarity, Maybe
+
+// forms
+
+
 
 showPapersPage :: !(LoginState State) !(InIDataId Papers) [State] !*HSt -> (![BodyTag],!*HSt)
 showPapersPage (login,state) (init,formid) states hst 

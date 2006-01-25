@@ -11,6 +11,89 @@ import StdEnv, StdHtml, Random
 Start :: *World -> *World
 Start world	= doHtmlServer numberGuessingGame world
 
+::	State	= { count	:: !Int
+			  , guess	:: !Int
+			  , high	:: ![(Int,String)]
+			  }
+derive gUpd   State
+derive gForm  State
+derive gParse State
+derive gPrint State
+
+derive gForm []
+derive gUpd  []
+
+//	Form initializer functions:
+nameForm 		= mkEditForm   (Init, nFormId "name" "")      			// The form in which the player can enter his/her name
+guessForm		= mkEditForm   (Init, nFormId "guess" (low-1))  		// The form in which the player enters guesses
+stateForm f		= mkStoreForm  (Init, pFormId "state" (newGame nullRandomSeed Nothing [])) f	// The store form that keeps track of the state of the application
+highForm high	= vertlistForm (Set,  ndFormId "display" high) 			// The form that displays the high-score list
+
+low			= 1
+up			= 10
+
+newGame seed mbname high	= {count=1, guess=nextNumber seed, high = insert mbname high}
+where
+	insert Nothing list 			= list
+	insert (Just namecount) list 	= [namecount:list]
+
+	nextNumber seed = let (new,_) 	= random seed in low + (new mod (up-low))
+
+adjustState newname newguess seed name guess state
+| newname 					= newGame seed Nothing state.high
+| newguess
+	| guess == state.guess 	= newGame seed (Just (state.count,name)) state.high 
+	| otherwise = {state & count = state.count + 1}
+= state
+
+numberGuessingGame :: *HSt -> (Html, *HSt)
+numberGuessingGame hst
+	# (ostate, hst)		= stateForm id hst							// get state
+	# (name, hst)		= nameForm hst								// get name
+	# (guess, hst)		= guessForm hst								// get new quess
+
+	# (randomSeed,hst)	= accWorldHSt getNewRandomSeed hst			// create random number seed
+	# (nstate, hst)		= stateForm 		 						// adjust state
+							(\st -> adjustState name.changed guess.changed randomSeed name.value guess.value st) hst
+
+	= mkHtml "Number Guessing Game"
+	  (	[ Txt ("Type in your name and guess a number between "<$ low <$ " and " <$ up <$ ".")
+	  	, Br, Br
+		, name.form 
+	  	<||> guess.form
+	  	, Br 
+	  	] ++ 
+		(if guess.changed
+			(if (guess.value == ostate.value.guess)
+				[ Txt ("Congratulations " <$ name.value <$ ".")
+				, Br 
+				, Txt ("You have guessed the number in " <$ ostate.value.count <$ " turn" <$ if (ostate.value.count>1) "s." ".")
+				, Br, Br 
+				, Txt "Here follows the list of fame: "
+				, Br, Br 
+				, BodyTag (toHtmlForm (highForm (sort nstate.value.high)))
+				, Br, Br 
+				, Txt ("Just type in a new number if you want to guess again...")
+				] 
+				[ Txt ("Sorry, " <$ name.value <$ ", your guess number " <$ ostate.value.count <$ " was wrong.")
+				, Br, Br
+				, Txt ("The number to guess is "<$if (guess.value < ostate.value.guess) "larger." "smaller.") 
+				]
+			)
+			[])
+		) hst
+
+instance mod Int where mod a b = a - (a/b)*b
+
+/* old code
+
+/**	This module implements the number guessing game.
+	The program randomly selects a number between given bounds.
+	The player tries to guess the selected number.
+	The number of guesses are stored in a high-score file.
+	These can be displayed on request.
+*/
+
 bounds		= (low,up)
 low			= 1
 up			= 10
@@ -78,3 +161,5 @@ guessButtonForm		= ListFuncBut  (Init, nFormId "guessbutton" [(LButton defpixel 
 newButtonForm		= ListFuncBut  (Init, nFormId "newbutton" [(LButton defpixel "New Game",   nextRandom)])   		// Button to start new game
 
 instance mod Int where mod a b = a - (a/b)*b
+*/
+
