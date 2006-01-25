@@ -156,6 +156,11 @@ t4EditForm (init,formid) hst
 where
 	(a,b,c,d) = formid.ival
 	
+
+simpleButton :: !String !(a -> a) !*HSt -> (Form (a -> a),!*HSt)
+simpleButton label fun hst = FuncBut (Init, nFormId ("fl_" +++ label) (LButton defpixel label,fun)) hst
+
+
 counterForm :: !(InIDataId a) !*HSt -> (Form a,!*HSt) | +, -, one, gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 counterForm inIDataId hst = mkViewForm inIDataId bimap hst
 where
