@@ -187,19 +187,24 @@ listForm inIDataId hSt = layoutListForm (\f1 f2 -> [BodyTag f1:f2]) mkEditForm i
 layoutListForm :: !([BodyTag] [BodyTag] -> [BodyTag]) 
                   !(!(InIDataId a) !*HSt -> (Form a,*HSt))
                   !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-layoutListForm layoutF formF (init,formid) hst
-= case formid.ival of
-	[] = ({changed	= False
-		   ,value	= []
-		   ,form	= []
+layoutListForm layoutF formF (init,formid) hst 
+# (store,hst)	= mkStoreForm (init,formid) id hst			// enables to store list with different # elements
+# (layout,hst)	= layoutListForm` 0 store.value hst
+# (store,hst)	= mkStoreForm (init,formid) (\list -> layout.value) hst
+= (layout,hst)
+where
+	layoutListForm` n [] hst
+		= ({changed	= False
+			   ,value	= []
+			   ,form	= []
+			   },hst)
+	layoutListForm` n [x:xs] hst
+		# (nxs,hst) = layoutListForm` (n+1)  xs  hst
+		# (nx, hst) = formF (init,subFormId formid (toString (n+1)) x) hst
+		= ({changed	= nx.changed || nxs.changed
+		   ,value	= [nx.value:nxs.value]
+		   ,form	= layoutF nx.form nxs.form
 		   },hst)
-	[x:xs]
-	# (nxs,hst) = layoutListForm layoutF formF (init,setFormId formid xs) hst
-	# (nx, hst) = formF (init,subFormId formid (toString (length xs)) x) hst
-	= ({changed	= nx.changed || nxs.changed
-	   ,value	= [nx.value:nxs.value]
-	   ,form	= layoutF nx.form nxs.form
-	   },hst)
 
 FuncBut :: !(InIDataId (Button, a -> a)) !*HSt -> (Form (a -> a),!*HSt)
 FuncBut (init,formid) hst = FuncButNr 0 (init,formid) hst 
@@ -437,7 +442,7 @@ where
 			++
 			take nbuttuns [(setmode i index,sbut (toString (i)),set i) \\ i <- [startval,startval+step .. length-1]] 
 			++ 
-			if (startval + range < length - 1) [(formid.mode,sbut "++", set (startval + range))] []
+			if (startval + range < length ) [(formid.mode,sbut "++", set (startval + range))] []
 		where
 			set j i 	= j
 			range 		= nbuttuns * step

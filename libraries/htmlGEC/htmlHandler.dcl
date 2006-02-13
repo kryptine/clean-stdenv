@@ -28,7 +28,9 @@ mkViewForm 		:: !(Init,FormId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|
 generic gForm a :: !(FormId a) !*HSt -> *(Form a, !*HSt)	
 generic gUpd a 	:: UpdMode a -> (UpdMode,a)
 
-:: UpdMode
+:: UpdMode	= UpdSearch UpdValue Int		// search for indicated postion and update it
+			| UpdCreate [ConsPos]			// create new values if necessary
+			| UpdDone						// and just copy the remaining stuff
 
 derive bimap Form, FormId
 		
