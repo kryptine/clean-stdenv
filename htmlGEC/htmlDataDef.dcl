@@ -98,8 +98,8 @@ None			:== [NoAttr]
 			| Fra_Src				Url					//URL of the file to show in the frame
 			| `Fra_Std				[Standard_Attr]
 
-:: ScrollingOption = Yes
-					| No
+:: ScrollingOption = DoScroll
+					| NoScroll
 					| Auto	
 	
 :: BodyAttr	= Batt_alink		ColorOption		//Color of the active links in the document
