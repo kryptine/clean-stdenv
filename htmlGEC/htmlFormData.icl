@@ -63,7 +63,9 @@ initID formid = (Init,formid)
 setID		:: !(FormId d) !d 	-> InIDataId d	// (Set,FormId a)
 setID formid na = (Set,setFormId formid na)
 
-// frequently used variants of mkViewForm
+ifEdit :: !Mode a a -> a
+ifEdit Edit 	then else = then
+ifEdit Display  then else = else 
 
 toViewId :: !Init !d !(Maybe d) -> d
 toViewId Set  d _ 			= d

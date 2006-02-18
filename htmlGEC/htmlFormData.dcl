@@ -76,6 +76,8 @@ reuseFormId :: !(FormId a) !d -> (FormId d)				// reuse id for new type (only to
 initID		:: !(FormId d) 		-> InIDataId d	// (Init,FormId a)
 setID		:: !(FormId d) !d 	-> InIDataId d	// (Set,FormId a)
 
+ifEdit 		:: !Mode a a -> a					// if Mode is Edit then-part else else-part
+
 // manipulating initial values
 
 toViewId  :: !Init !d! (Maybe d) -> d					// copy second on Set or if third is Nothing

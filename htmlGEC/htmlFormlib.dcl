@@ -1,10 +1,9 @@
 definition module htmlFormlib
 
-// Handy collection of Form's
-// Form library similar to the AGEC lib
+// Handy collection of Form creating functions and layout functions
 // (c) MJP 2005
 
-import StdEnv, htmlHandler
+import StdEnv, htmlHandler, htmlButtons
 
 // **** easy creation of a simple html page ****
 
@@ -15,14 +14,14 @@ simpleHtml	:: String [BodyTag]      -> Html		// as above, without HSt
 
 (<=>)   infixl 5 	:: [BodyTag] [BodyTag] 	-> BodyTag		// place next to each other on a page
 (<.=.>) infixl 5 	::  BodyTag   BodyTag  	-> BodyTag		// place next to each other on a page
-mkRowForm 		 	:: [BodyTag] 			-> BodyTag		// place next to each other on a page
+mkRowForm 		 	:: [BodyTag] 			-> BodyTag		// place every element in a row next to each other on a page
 
 (<||>)   infixl 4 	:: [BodyTag] [BodyTag] 	-> BodyTag		// Place second below first
 (<.||.>) infixl 4 	::  BodyTag   BodyTag  	-> BodyTag		// Place second below first
-mkColForm		  	:: [BodyTag] 			-> BodyTag		// Place second below first
+mkColForm		  	:: [BodyTag] 			-> BodyTag		// Place every element in a column below first
 
 mkSTable 			:: [[BodyTag]] 			-> BodyTag		// Make a table
-(<=|>) infixl 4		:: [BodyTag] [BodyTag] 	-> BodyTag			// Make a table by putting elements pairwise below each other
+(<=|>) infixl 4		:: [BodyTag] [BodyTag] 	-> BodyTag		// Make a table by putting elements pairwise below each other
 
 // **** frquently used "mkViewForm" variants ****
 
@@ -51,6 +50,11 @@ layoutListForm	:: !([BodyTag] [BodyTag] -> [BodyTag])
                        !(!(InIDataId a)	!*HSt  -> (Form a,*HSt))
                         !(InIDataId [a]) !*HSt -> (Form [a],!*HSt)			| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
+// User controlled number of list elements will be shown, including delete and append buttons; Int indicates max number of browse buttons
+
+vertlistFormButs:: !Int !(InIDataId [a]) 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+
+
 // **** forms for tuples ****
 
 t2EditForm  	:: !(InIDataId (a,b))			!*HSt -> ((Form a,Form b),!*HSt)| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
@@ -67,13 +71,16 @@ t4EditForm  	:: !(InIDataId (a,b,c,d))	 	!*HSt -> ((Form a,Form b,Form c,Form d)
 																   				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 // **** special buttons ****
 
-simpleButton 	:: !String !(a -> a) 			!*HSt -> (Form (a -> a),!*HSt)
 counterForm 	:: !(InIDataId a)	  			!*HSt -> (Form a,!*HSt) | +, -, one
 																			,  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+// buttons returning index between 1 to n given stepsize, n, maximal numberofbuttuns to show
+
+browseButtons :: !(InIDataId !Int) !Int !Int !Int !*HSt -> (Form Int,!*HSt)
 
 // **** to each button below a function is assigned which is returned as iData value when the corresponding button is pressed
 // **** an identity function is returned when none of the set of buttons pressed 
 
+simpleButton 	:: !String 		!(a -> a) 				!*HSt -> (Form (a -> a),!*HSt)
 FuncBut 		:: !(InIDataId (Button, a -> a))		!*HSt -> (Form (a -> a),!*HSt)
 ListFuncBut 	:: !(InIDataId [(Button, a -> a)])		!*HSt -> (Form (a -> a),!*HSt)
 TableFuncBut 	:: !(InIDataId [[(Button, a -> a)]])	!*HSt -> (Form (a -> a),!*HSt)
@@ -98,10 +105,6 @@ ListFuncRadio 		:: !(InIDataId (Int,[Int a -> a]))			!*HSt -> (Form (a -> a,Int)
 
 FuncMenu 			:: !(InIDataId (Int,[(String, a -> a)]))	!*HSt -> (Form (a -> a,Int),!*HSt)
 
-// browseButtons initial index, step, length, numberofbuttuns, formid 
-// returns buttons to step through numbers from 1 to length
-
-browseButtons :: !(InIDataId !Int) !Int !Int !Int !*HSt -> (Form Int,!*HSt)
 
 // **** scripts ****
 

@@ -7,10 +7,11 @@ import
 
 // intended for end user:
 
-			htmlHandler			// the kernel module for iData creation
-		,	htmlFormData		// iData type definitions
+			htmlFormlib			// handy collection of form creating functions  
+		,	htmlButtons			// basic collections of buttons, data types for lay-out	control	
 
-		,	htmlFormlib			// illustrative collection of form creating functions defined on top of htmlHandler  
+		,	htmlHandler			// the kernel module for iData creation
+		,	htmlFormData		// iData type definitions
 
 	 	,	htmlDataDef			// Clean's ADT representation of Html
 		,	htmlStyleDef		// Clean's ADT representation of Style sheets

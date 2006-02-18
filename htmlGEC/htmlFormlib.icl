@@ -120,6 +120,56 @@ horlistForm inIDataId hSt = layoutListForm (\f1 f2 -> [f1 <=> f2]) mkEditForm in
 vertlistForm :: !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 vertlistForm inIDataId hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) mkEditForm inIDataId hSt
 
+vertlistFormButs :: !Int !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+vertlistFormButs nbuts (init,formid) hst
+
+# indexId		= subFormId formid "idx" 0
+# (index,hst)	= mkEditForm (init,indexId) hst
+# (list,hst)	= listForm (init,formid) hst
+# lengthlist	= length list.value
+
+# pdmenu		= PullDown (1,defpixel) (0, [toString lengthlist +++ " More... " :["Show " +++ toString i \\ i <- [1 .. max 1 lengthlist]]]) 
+# pdmenuId		= {subFormId formid "pdm" pdmenu & mode = Edit, lifespan = Session}
+# (pdbuts,hst)	= mkEditForm (Init, pdmenuId) hst
+# (PullDown _ (step,_))	= pdbuts.value
+
+| step == 0		= ({form=pdbuts.form,value=list.value,changed=list.changed || pdbuts.changed},hst)		
+
+# bbutsId		= {subFormId formid "bb" index.value & mode = Edit, lifespan = Session}
+# (bbuts, hst)	= browseButtons (Init, bbutsId) step lengthlist nbuts hst
+
+# addId			= {subFormId formid "add" addbutton & lifespan = Page}
+# (add	,hst) 	= ListFuncBut (Init, addId) hst	
+# dellId		= {subFormId formid "dell" (delbutton bbuts.value step) & lifespan = Page}
+# (del	,hst) 	= ListFuncBut (Init, dellId) hst	
+
+# newlist		= del.value (list.value ++ add.value []) 
+# (list,hst)	= listForm (setID formid newlist) hst
+# lengthlist	= length newlist
+# (index,hst)	= mkEditForm (setID indexId bbuts.value) hst
+# (bbuts, hst)	= browseButtons (Init, bbutsId) step lengthlist nbuts hst
+
+# betweenindex	= (bbuts.value,bbuts.value + step - 1)
+
+# pdmenu		= PullDown (1,defpixel) (step, [toString lengthlist +++ " More... ":["Show " +++ toString i \\ i <- [1 .. max 1 lengthlist]]]) 
+# (pdbuts,hst)	= mkEditForm (setID pdmenuId pdmenu) hst
+ 
+= 	(	{ form 		= case formid.mode of
+						Edit ->		pdbuts.form ++ [toHtml ("#rec = " +++ toString (length list.value))] ++ bbuts.form ++ 
+									[[(toHtml ("nr " +++ toString i) <.||.> del) \\ del <- del.form & i <- [bbuts.value..]] <=|> list.form%betweenindex] ++ 
+									add.form 
+						Display ->	bbuts.form 
+		, value 	= list.value
+		, changed 	= list.changed || bbuts.changed || add.changed || del.changed || pdbuts.changed
+		}
+	,	hst )
+where
+	addbutton = 
+		[ (but "Append", \m -> snd (gUpd {|*|} (UpdSearch (UpdC "_Cons") 0) m))]
+	but s	= LButton defpixel s
+	delbutton index step = 
+		[ (but "Delete", \m -> removeAt i m) \\ i <- [index .. index + step]]
+		
 table_hv_Form :: !(InIDataId [[a]]) !*HSt -> (Form [[a]],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 table_hv_Form inIDataId hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) horlistForm inIDataId hSt
 
@@ -155,11 +205,9 @@ t4EditForm (init,formid) hst
 = ((forma,formb,formc,formd),hst) 
 where
 	(a,b,c,d) = formid.ival
-	
 
 simpleButton :: !String !(a -> a) !*HSt -> (Form (a -> a),!*HSt)
 simpleButton label fun hst = FuncBut (Init, nFormId ("fl_" +++ label) (LButton defpixel label,fun)) hst
-
 
 counterForm :: !(InIDataId a) !*HSt -> (Form a,!*HSt) | +, -, one, gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 counterForm inIDataId hst = mkViewForm inIDataId bimap hst
