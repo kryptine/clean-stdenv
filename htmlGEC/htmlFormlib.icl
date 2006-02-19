@@ -125,28 +125,28 @@ vertlistFormButs nbuts (init,formid) hst
 
 # indexId		= subFormId formid "idx" 0
 # (index,hst)	= mkEditForm (init,indexId) hst
-# (list,hst)	= listForm (init,formid) hst
-# lengthlist	= length list.value
+# (olist,hst)	= listForm (init,formid) hst
+# lengthlist	= length olist.value
 
 # pdmenu		= PullDown (1,defpixel) (0, [toString lengthlist +++ " More... " :["Show " +++ toString i \\ i <- [1 .. max 1 lengthlist]]]) 
 # pdmenuId		= {subFormId formid "pdm" pdmenu & mode = Edit, lifespan = Session}
 # (pdbuts,hst)	= mkEditForm (Init, pdmenuId) hst
 # (PullDown _ (step,_))	= pdbuts.value
 
-| step == 0		= ({form=pdbuts.form,value=list.value,changed=list.changed || pdbuts.changed},hst)		
+| step == 0		= ({form=pdbuts.form,value=olist.value,changed=olist.changed || pdbuts.changed},hst)		
 
 # bbutsId		= {subFormId formid "bb" index.value & mode = Edit, lifespan = Session}
-# (bbuts, hst)	= browseButtons (Init, bbutsId) step lengthlist nbuts hst
+# (obbuts, hst)	= browseButtons (Init, bbutsId) step lengthlist nbuts hst
 
 # addId			= {subFormId formid "add" addbutton & lifespan = Page}
 # (add	,hst) 	= ListFuncBut (Init, addId) hst	
-# dellId		= {subFormId formid "dell" (delbutton bbuts.value step) & lifespan = Page}
+# dellId		= {subFormId formid "dell" (delbutton obbuts.value step) & lifespan = Page}
 # (del	,hst) 	= ListFuncBut (Init, dellId) hst	
 
-# newlist		= del.value (list.value ++ add.value []) 
+# newlist		= del.value (olist.value ++ add.value []) 
 # (list,hst)	= listForm (setID formid newlist) hst
 # lengthlist	= length newlist
-# (index,hst)	= mkEditForm (setID indexId bbuts.value) hst
+# (index,hst)	= mkEditForm (setID indexId obbuts.value) hst
 # (bbuts, hst)	= browseButtons (Init, bbutsId) step lengthlist nbuts hst
 
 # betweenindex	= (bbuts.value,bbuts.value + step - 1)
@@ -160,7 +160,7 @@ vertlistFormButs nbuts (init,formid) hst
 									add.form 
 						Display ->	bbuts.form 
 		, value 	= list.value
-		, changed 	= list.changed || bbuts.changed || add.changed || del.changed || pdbuts.changed
+		, changed 	= olist.changed || obbuts.changed || add.changed || del.changed || pdbuts.changed
 		}
 	,	hst )
 where
@@ -539,3 +539,19 @@ mediaPlayer (height,width) autostart filename
 		[ Param [ Pam_Name "FileName", Pam_Value (SV filename) ]
 		, Param [ Pam_Name "autostart", Pam_Value (SV (toString autostart)) ]
 		]
+
+// special forms
+
+MailForm :: String Int Int -> BodyTag
+MailForm  mailaddress row col = 
+	Form [Frm_Action ("mailto:" +++ mailaddress), Frm_Method Post, Frm_Enctype "text/plain"] 
+			[mkSTable 	[ [BTxt "Name:", 	Input [Inp_Type Inp_Text, Inp_Name "uname", Inp_Size 20] ""]
+						, [BTxt "Email:", 	Input [Inp_Type Inp_Text, Inp_Name "email", Inp_Size 20] "" ]
+						, [BTxt "Message:", Textarea [Txa_Name "message", Txa_Rows row, Txa_Cols col ] "" ]
+						, [Input [Inp_Type Inp_Submit, Inp_Name "submit", Inp_Value (SV "Submit")] ""
+						  , Input [Inp_Type Inp_Reset, Inp_Name "reset", Inp_Value (SV "Reset")] ""
+						  ]
+						]
+			] 
+where
+	BTxt s = B [] s
