@@ -7,8 +7,9 @@ import StdEnv, htmlHandler, htmlButtons
 
 // **** easy creation of a simple html page ****
 
-mkHtml		:: String [BodyTag] *HSt -> (Html,*HSt)	// string is used for the title of the page
-simpleHtml	:: String [BodyTag]      -> Html		// as above, without HSt
+mkHtml		:: String [BodyTag] *HSt -> (Html,*HSt)			// string is used for the title of the page
+mkHtmlB		:: String [BodyAttr] [BodyTag] *HSt -> (Html,*HSt) // same, with bodytags options
+simpleHtml	:: String [BodyAttr] [BodyTag]      -> Html		// as above, without HSt
 
 // **** LayOut support ****
 
@@ -123,3 +124,6 @@ mediaPlayer:: (Int,Int) Bool String -> BodyTag	// plays movies, music etc; param
 // **** special forms ****
 
 MailForm :: String Int Int -> BodyTag // mailadddres, row size, col size
+
+MailApplicationLink :: String String String -> BodyTag // Link will start mail application: mailadddres, subject, contensbody
+

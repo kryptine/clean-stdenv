@@ -10,13 +10,18 @@ derive gForm []; derive gUpd []
 // easy creation of an html page
 
 mkHtml:: String [BodyTag] *HSt -> (Html,*HSt)
-mkHtml s tags hst 	= (simpleHtml s tags,hst)
+mkHtml s tags hst 	= (simpleHtml s [] tags,hst)
 
-simpleHtml:: String [BodyTag] -> Html
-simpleHtml s tags 	= Html (header s) (body tags)
+simpleHtml:: String [BodyAttr] [BodyTag] -> Html
+simpleHtml s ba tags 	= Html (header s) (body tags)
 where
 	header s		= Head [`Hd_Std [Std_Title s]] [] 
-	body tags		= Body [] tags
+	body tags		= Body ba tags
+
+mkHtmlB:: String [BodyAttr] [BodyTag] *HSt -> (Html,*HSt)
+mkHtmlB s attr tags hst = (simpleHtml s attr tags,hst)
+
+
 
 // operators for lay-out of html bodys ...
 
@@ -555,3 +560,10 @@ MailForm  mailaddress row col =
 			] 
 where
 	BTxt s = B [] s
+	
+MailApplicationLink :: String String String -> BodyTag
+MailApplicationLink mailaddress subject txtbody = 
+	A [Lnk_Href ("mailto:" +++ mailaddress +++
+				 "?subject=" +++ subject +++
+				 "&body=" +++ txtbody)] [Txt mailaddress]
+	
