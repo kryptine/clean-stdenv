@@ -429,10 +429,16 @@ mkInput size formid=:{mode = Edit} val updval hst=:{cntr}
 				, 	Inp_Value val
 				,	Inp_Name (encodeTriplet (formid.id,cntr,updval))
 				,	Inp_Size size
-				, 	`Inp_Std [EditBoxStyle]
+				, 	`Inp_Std [EditBoxStyle, Std_Title (showType val)]
 				,	`Inp_Events	[OnChange callClean]
 				] ""
 		,setCntr (cntr+1) hst)
+where
+	showType (SV str) 	= "::String"
+	showType (NQV str)	= "::String"
+	showType (IV i)		= "::Int"
+	showType (RV r) 	= "::Real"
+	showType (BV b) 	= "::Bool"
 mkInput size {mode = Display} val _ hst=:{cntr} 
 	= ( Input 	[	Inp_Type Inp_Text
 				, 	Inp_Value val

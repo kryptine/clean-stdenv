@@ -532,6 +532,10 @@ openNoticeScript ::  !String !Int !Int !Html -> Script
 openNoticeScript scriptname height width html 
 	= openWindowScript scriptname height width False False False False False False html
 
+OnLoadAlert :: (Bool,String) -> [BodyAttr]
+OnLoadAlert (True,message) 	= [`Batt_Events [OnLoad (SScript ("\"alert('" +++ message +++ "')\""))]]
+OnLoadAlert _				= []
+
 // special objects ...
 
 mediaPlayer:: (Int,Int) Bool String -> BodyTag
