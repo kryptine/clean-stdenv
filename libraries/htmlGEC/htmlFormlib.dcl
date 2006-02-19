@@ -119,3 +119,7 @@ openNoticeScript ::  !String !Int !Int !Html -> Script
 // **** special objects ****
 
 mediaPlayer:: (Int,Int) Bool String -> BodyTag	// plays movies, music etc; parameters (height,width) autostart filename
+
+// **** special forms ****
+
+MailForm :: String Int Int -> BodyTag // mailadddres, row size, col size
