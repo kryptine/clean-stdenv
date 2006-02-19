@@ -106,24 +106,20 @@ ListFuncRadio 		:: !(InIDataId (Int,[Int a -> a]))			!*HSt -> (Form (a -> a,Int)
 
 FuncMenu 			:: !(InIDataId (Int,[(String, a -> a)]))	!*HSt -> (Form (a -> a,Int),!*HSt)
 
+// **** special objects ****
+
+mediaPlayer			:: (Int,Int) Bool String -> BodyTag		// plays movies, music etc; parameters (height,width) autostart filename
+MailForm 			:: String Int Int -> BodyTag 			// mailadddres, row size, col size
+MailApplicationLink :: String String String -> BodyTag 		// Link will start mail application: mailadddres, subject, contensbody
 
 // **** scripts ****
 
 // openWindowScript will open a new browser window displaying the html code
 // parameters resp: scriptname() height width toolbar menubar scrollbars resizable location status html
-openWindowScript ::  !String !Int !Int !Bool !Bool !Bool !Bool !Bool !Bool !Html -> Script
+openWindowScript 	::  !String !Int !Int !Bool !Bool !Bool !Bool !Bool !Bool !Html -> Script
 
 // openNoticeScript simplified version of openWindowScript
 // parameters are resp: scriptname() height width html
-openNoticeScript ::  !String !Int !Int !Html -> Script
+openNoticeScript 	::  !String !Int !Int !Html -> Script
 
-// **** special objects ****
-
-mediaPlayer:: (Int,Int) Bool String -> BodyTag	// plays movies, music etc; parameters (height,width) autostart filename
-
-// **** special forms ****
-
-MailForm :: String Int Int -> BodyTag // mailadddres, row size, col size
-
-MailApplicationLink :: String String String -> BodyTag // Link will start mail application: mailadddres, subject, contensbody
-
+OnLoadAlert 		:: (Bool,String) -> [BodyAttr]					// to produce message on opening page
