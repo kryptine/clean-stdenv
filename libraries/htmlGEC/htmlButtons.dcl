@@ -4,10 +4,10 @@ definition module htmlButtons
 
 import htmlHandler
 
-derive gForm 	(,), (,,), (,,,), (<->), <|>, Date, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput
-derive gUpd  	(,), (,,), (,,,), (<->), <|>, Date, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput
-derive gPrint 	(,), (,,), (,,,), (<->), <|>, Date, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput
-derive gParse 	(,), (,,), (,,,), (<->), <|>, Date, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput
+derive gForm 	(,), (,,), (,,,), (<->), <|>, Date, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
+derive gUpd  	(,), (,,), (,,,), (<->), <|>, Date, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
+derive gPrint 	(,), (,,), (,,,), (<->), <|>, Date, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
+derive gParse 	(,), (,,), (,,,), (<->), <|>, Date, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
 
 instance toBool   CheckBox, Button, RadioButton		// True if checkbox checked, button pressed
 instance toInt    PullDownMenu						// Current index in pull down list
@@ -37,6 +37,7 @@ instance toString PullDownMenu						// Corresponding element in pull down list
 :: TextInput	= TI Int Int						// Input box of size Size for Integers
 				| TR Int Real						// Input box of size Size for Reals
 				| TS Int String						// Input box of size Size for Strings
+:: TextArea		= TextArea Int Int String			// Input Area Box, row col initial string
 	
 // special's
 

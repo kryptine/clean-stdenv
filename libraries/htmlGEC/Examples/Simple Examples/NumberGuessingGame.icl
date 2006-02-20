@@ -8,6 +8,13 @@ module NumberGuessingGame
 */
 import StdEnv, StdHtml, Random
 
+
+:: Trees a = Leaf | SNode a .(Trees2 a) (Trees2 a)
+:: Trees2 a :== Trees a
+
+f :: a *(Trees a) (Trees a) -> *(Trees a)
+f a x y = SNode a x y 
+
 Start :: *World -> *World
 Start world	= doHtmlServer numberGuessingGame world
 
@@ -65,7 +72,7 @@ numberGuessingGame hst
 	  	] ++ 
 		(if guess.changed
 			(if (guess.value == ostate.value.guess)
-				[ Txt ("Congratulations " <$ name.value <$ ".")
+				[ Txt` "Answer" ("Congratulations " <$ name.value <$ ".")
 				, Br 
 				, Txt ("You have guessed the number in " <$ ostate.value.count <$ " turn" <$ if (ostate.value.count>1) "s." ".")
 				, Br, Br 
@@ -75,13 +82,15 @@ numberGuessingGame hst
 				, Br, Br 
 				, Txt ("Just type in a new number if you want to guess again...")
 				] 
-				[ Txt ("Sorry, " <$ name.value <$ ", your guess number " <$ ostate.value.count <$ " was wrong.")
+				[ Txt` "Answer" ("Sorry, " <$ name.value <$ ", your guess number " <$ ostate.value.count <$ " was wrong.")
 				, Br, Br
 				, Txt ("The number to guess is "<$if (guess.value < ostate.value.guess) "larger." "smaller.") 
 				]
 			)
 			[])
 		) hst
+
+Txt` tag string = A [Lnk_Name tag] [Txt string]
 
 instance mod Int where mod a b = a - (a/b)*b
 

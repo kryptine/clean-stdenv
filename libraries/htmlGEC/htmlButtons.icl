@@ -4,9 +4,9 @@ import StdEnv, ArgEnv, StdMaybe
 
 import htmlHandler, htmlStylelib, htmlTrivial
 
-derive gUpd  	(,), (,,), (,,,), (<->), <|>, Date, DisplayMode, /*Button, */CheckBox, RadioButton /*, PullDownMenu, TextInput */
-derive gPrint 	(,), (,,), (,,,), (<->), <|>, Date, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput
-derive gParse 	(,), (,,), (,,,), (<->), <|>, Date, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput
+derive gUpd  	(,), (,,), (,,,), (<->), <|>, Date, DisplayMode, /*Button, */CheckBox, RadioButton /*, PullDownMenu, TextInput */, TextArea
+derive gPrint 	(,), (,,), (,,,), (<->), <|>, Date, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
+derive gParse 	(,), (,,), (,,,), (<->), <|>, Date, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
 
 :: TextInput	= TI Int Int						// Input box of size Size for Integers
 				| TR Int Real						// Input box of size Size for Reals
@@ -246,6 +246,28 @@ where
 							, fromForm 	= \_ v -> map_from v
 							, resetForm = Nothing
 							} hst 
+
+gForm{|TextArea|} formid hst 
+# (cntr,hst) = CntrHSt hst
+= (	{ changed 	= False
+	, value 	= formid.ival
+	, form		= [Form [Frm_Method Post, `Frm_Events [OnSubmit callClean]] 
+					[mkSTable 	[ [ Textarea [Txa_Name "message", Txa_Rows row, Txa_Cols col ] "" ]
+								, [BodyTag [ Input [Inp_Type Inp_Submit, Inp_Name (encodeTriplet (formid.id,cntr+2,UpdS string)), Inp_Value (SV "Submit"),`Inp_Events [OnClick callClean]] ""
+								  		    , Input [Inp_Type Inp_Reset, Inp_Name "reset", Inp_Value (SV "Reset")] ""
+								           ]
+								  ]
+								]
+					]] 
+	},(incrHSt 3 hst))
+where
+	(TextArea row col string) = formid.ival
+
+	mkSTable table
+	= Table []	(mktable table)
+	where
+		mktable table 	= [Tr [] (mkrow rows) \\ rows <- table]	
+		mkrow rows 		= [Td [Td_VAlign Alo_Top, Td_Width (Pixels defpixel)] [row] \\ row <- rows] 
 
 // Update that have to be treated special:
 
