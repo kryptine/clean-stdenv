@@ -21,8 +21,6 @@ where
 mkHtmlB:: String [BodyAttr] [BodyTag] *HSt -> (Html,*HSt)
 mkHtmlB s attr tags hst = (simpleHtml s attr tags,hst)
 
-
-
 // operators for lay-out of html bodys ...
 
 // Place two bodies next to each other

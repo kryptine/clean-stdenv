@@ -119,9 +119,6 @@ where
 	= case toString update of
 			"CS" -> ("clean", decodeChars new, "", toString state)
 			else -> ("clean", decodeChars update, toString new, toString state)
-/*	= case decodeChars update of
-			"CS" -> ("clean", decodeChars new, "", decodeChars state)
-			else -> ("clean", decodeChars update, decodeChars new, decodeChars state)*/
 
 	FindSubstr substr list = FindSubstr` list 0 
 	where
@@ -141,9 +138,12 @@ traceHtmlInput serverkind args
 							,[B [] "Identifier:", B [] "Lifetime:", B [] "Format:", B [] "Value:"]
 							:[[Txt id, Txt (showl life), Txt (showf storage), Txt (shows storage state)] 
 							 \\ (id,life,storage,state) <- htmlState]]
-				, Br 
+				, Br
+				, Txt string
 			]
 where
+	(Just string) = args
+
 	(htmlState,triplet,update) = DecodeHtmlStatesAndUpdate serverkind args
 
 	showl life = case life of Persistent -> "Persistent"; Session -> "Session"; _ -> "Page"
@@ -300,7 +300,7 @@ skipping [c:cs] list=:[x:xs]
 | otherwise 	= list
 skipping any    list = list
 
-/* The following code is not used anymore...
+// The following code is not used anymore...
 
 // encoding - decoding to hexadecimal code
 
@@ -341,4 +341,4 @@ where
 		                | i <= toInt '9' = i - toInt '0'
 		                = i - (toInt 'A' - 10)
 	urlDecode` [x:xs] 	= [x:urlDecode` xs]
-*/
+
