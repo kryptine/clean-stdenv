@@ -96,16 +96,18 @@ mkBimapEditor inIDataId {map_to,map_from} hst
 						, resetForm = Nothing
 						} hst 
 
-mkSubStateForm :: !(InIDataId !subState) !state !(subState state -> state) !*HSt -> (Form state,!*HSt)
+mkSubStateForm :: !(InIDataId !subState) !state !(subState state -> state) !*HSt -> (Bool,Form state,!*HSt)
 							| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC subState
 mkSubStateForm (init,formid) state upd hst 
-# (nsubState,hst) 		= mkEditForm (init,formid) hst
-# (commitBut,hst)		= FuncBut (Init,subFormId formid "CommitBut" (LButton defpixel "commit",id)) hst
-# (cancelBut,hst)		= FuncBut (Init,subFormId formid "CancelBut" (LButton defpixel "cancel",id)) hst
+# (nsubState,hst) 		= mkEditForm (init,subsFormId formid "subst" subState) hst
+# (commitBut,hst)		= FuncBut (Init,subnFormId formid "CommitBut" (LButton defpixel "commit",id)) hst
+# (cancelBut,hst)		= FuncBut (Init,subnFormId formid "CancelBut" (LButton defpixel "cancel",id)) hst
 # (nsubState,hst) 		= if cancelBut.changed 
 								(mkEditForm (Set,setFormId formid subState) hst)
 								(nsubState,hst)
-= 	( 	{ changed = nsubState.changed || commitBut.changed || cancelBut.changed
+= 	( 	commitBut.changed
+		,
+		{ changed = nsubState.changed || commitBut.changed || cancelBut.changed
 		, value = 	if commitBut.changed (upd nsubState.value state) state
 		, form 	=	[ BodyTag nsubState.form
 					, Br
@@ -114,7 +116,8 @@ mkSubStateForm (init,formid) state upd hst
 					, BodyTag cancelBut.form
 					]
 		}
-	, 	hst)
+		, 	
+		hst)
 where
 	subState = formid.ival
 
@@ -144,12 +147,18 @@ vertlistFormButs nbuts (init,formid) hst
 # bbutsId		= {subFormId formid "bb" index.value & mode = Edit, lifespan = Session}
 # (obbuts, hst)	= browseButtons (Init, bbutsId) step lengthlist nbuts hst
 
-# addId			= {subFormId formid "add" addbutton & lifespan = Page}
-# (add	,hst) 	= ListFuncBut (Init, addId) hst	
-# dellId		= {subFormId formid "dell" (delbutton obbuts.value step) & lifespan = Page}
+//# addId			= {subFormId formid "add" addbutton & lifespan = Page}
+//# (add	,hst) 	= ListFuncBut (Init, addId) hst	
+# dellId		= {subFormId formid "dell" (delbutton    obbuts.value step) & lifespan = Page}
 # (del	,hst) 	= ListFuncBut (Init, dellId) hst	
+# insrtId		= {subFormId formid "ins"  (insertbutton newElem obbuts.value step) & lifespan = Page}
+# (ins	,hst) 	= ListFuncBut (Init, insrtId) hst	
+# appId			= {subFormId formid "app"  (appendbutton newElem obbuts.value step) & lifespan = Page}
+# (app	,hst) 	= ListFuncBut (Init, appId) hst	
 
-# newlist		= del.value (olist.value ++ add.value []) 
+# newlist		= ins.value olist.value 
+# newlist		= app.value newlist 
+# newlist		= del.value newlist 
 # (list,hst)	= listForm (setID formid newlist) hst
 # lengthlist	= length newlist
 # (index,hst)	= mkEditForm (setID indexId obbuts.value) hst
@@ -162,19 +171,28 @@ vertlistFormButs nbuts (init,formid) hst
  
 = 	(	{ form 		= case formid.mode of
 						Edit ->		pdbuts.form ++ [toHtml ("#rec = " +++ toString (length list.value))] ++ bbuts.form ++ 
-									[[(toHtml ("nr " +++ toString i) <.||.> del) \\ del <- del.form & i <- [bbuts.value..]] <=|> list.form%betweenindex] ++ 
-									add.form 
+									[[(toHtml ("nr " +++ toString i) <.||.> del <.=.> ins <.=.> app) 
+										\\ del <- del.form & ins <- ins.form & app <- app.form & i <- [bbuts.value..]] 
+											<=|> list.form%betweenindex] 
 						Display ->	bbuts.form 
 		, value 	= list.value
-		, changed 	= olist.changed || obbuts.changed || add.changed || del.changed || pdbuts.changed
+		, changed 	= olist.changed || obbuts.changed || del.changed || pdbuts.changed ||ins.changed
 		}
 	,	hst )
 where
 	addbutton = 
-		[ (but "Append", \m -> snd (gUpd {|*|} (UpdSearch (UpdC "_Cons") 0) m))]
-	but s	= LButton defpixel s
+		[ (but 1 "Append", mkNewList)]
+	but i s	= LButton (defpixel/i) s
 	delbutton index step = 
-		[ (but "Delete", \m -> removeAt i m) \\ i <- [index .. index + step]]
+		[ (but 3 "Del", \m -> removeAt i m) \\ i <- [index .. index + step]]
+	insertbutton e index step = 
+		[ (but 3 "Ins", \m -> insertAt i e m) \\ i <- [index .. index + step]]
+	appendbutton e index step = 
+		[ (but 3 "App", \m -> insertAt (i+1) e m) \\ i <- [index .. index + step]]
+	newElem = hd [mkNewElement:formid.ival]
+
+mkNewList _ = snd (gUpd {|*|} (UpdSearch (UpdC "_Cons") 0) [])	// generates a new list with one element of required type
+mkNewElement = hd (mkNewList [])
 		
 table_hv_Form :: !(InIDataId [[a]]) !*HSt -> (Form [[a]],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 table_hv_Form inIDataId hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) horlistForm inIDataId hSt

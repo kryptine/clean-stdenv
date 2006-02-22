@@ -70,6 +70,10 @@ pdDFormId	:: !String !d -> (FormId d)		// persistent livetime, displayed non-edi
 
 extidFormId :: !(FormId d) !String -> (FormId d)		// make new id by adding sufix 
 subFormId 	:: !(FormId a) !String !d 	-> (FormId d)	// make new id af new type by adding suffix
+subnFormId 	:: !(FormId a) !String !d 	-> (FormId d)	// idem with lifespan Page
+subsFormId 	:: !(FormId a) !String !d 	-> (FormId d)	// idem with lifespan Session
+subpFormId 	:: !(FormId a) !String !d 	-> (FormId d)	// idem with lifespan Persitent
+
 setFormId 	:: !(FormId d) !d -> (FormId d)				// set new initial value in formid
 reuseFormId :: !(FormId a) !d -> (FormId d)				// reuse id for new type (only to be used in gform)
 

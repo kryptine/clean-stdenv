@@ -61,25 +61,27 @@ initialRefereeState	:: Int -> ConfState
 initPerson 			:: Int -> Person
 initPaper  			:: Int String -> Paper
 
-isManager		:: ConfState -> Bool
-homePage 		:: Role -> CurrPage
+isManager			:: ConfState -> Bool
+homePage 			:: Role -> CurrPage
 
-findReports 	:: Int [ConfState] -> [(Person,Maybe Report)]
-findReport 		:: Int ConfState -> (Maybe Report)
-getReports 		:: Reports -> [(PaperNr, Maybe Report)]
-addReport 		:: Int (Maybe Report) ConfState -> ConfState
-emptyReport 	:: Report
+findReports 		:: Int [ConfState] -> [(Person,Maybe Report)]
+findReport 			:: Int ConfState -> (Maybe Report)
+getReports 			:: Reports -> [(PaperNr, Maybe Report)]
+addReport 			:: Int (Maybe Report) ConfState -> ConfState
+emptyReport 		:: Report
 
-assignPaper 	:: Int ConfState -> ConfState
-deletePaper 	:: Int ConfState -> ConfState
-isRefereeOf 	:: Int ConfState -> Bool
-hasRefereed 	:: Int ConfState -> Bool
-papersToReferee :: ConfState -> [PaperNr]
+assignPaper 		:: Int ConfState -> ConfState
+deletePaper 		:: Int ConfState -> ConfState
+isRefereeOf 		:: Int ConfState -> Bool
+hasRefereed 		:: Int ConfState -> Bool
+papersToReferee 	:: ConfState -> [PaperNr]
+papersRefereed 		:: ConfState -> [PaperNr]
+papersNotRefereed 	:: ConfState -> [PaperNr]
 
-assignConflict 	:: Int ConfState -> ConfState
-deleteConflict	:: Int ConfState -> ConfState
-isConflict	 	:: Int ConfState -> Bool
+assignConflict 		:: Int ConfState -> ConfState
+deleteConflict		:: Int ConfState -> ConfState
+isConflict	 		:: Int ConfState -> Bool
 
-findPaper 		:: Int Papers -> (Maybe Paper)
+findPaper 			:: Int Papers -> (Maybe Paper)
 
-invariantConvDB :: ConferenceDB -> (Bool,String)
+invariantConvDB 	:: ConferenceDB -> (Bool,String)

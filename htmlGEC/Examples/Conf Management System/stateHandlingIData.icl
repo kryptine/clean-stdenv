@@ -14,17 +14,19 @@ gForm {|Reports|} formid hst
 where
 	myeditor (init,formid) hst
 	# (papernrform,hst)	= vertlistForm (Init,{reuseFormId formid reflist & mode = Display} ) hst
-	= (	{ changed			= papernrform.changed
-		, value 			= Reports reflist
-		, form 				= papernrform.form
+	= (	{ changed		= papernrform.changed
+		, value 		= Reports reflist
+		, form 			= papernrform.form
 		}
 		,hst )
 	(Reports reflist) = formid.ival
 
+//derive gForm Maybe
+
 gForm {|Maybe|} ga formid hst 
 # elem = formid.ival
 = case elem of
-	Nothing = ({value=Nothing,changed =False,form=[toHtml "Not yet done"]},hst)
+	Nothing = ({value=Nothing,changed =False,form=[toHtml "Not yet done",Br]},hst)
 	Just val
 		# (valform,hst)	= ga (reuseFormId formid val) hst
 		= ({value=Just valform.value,changed =valform.changed,form=valform.form},hst)
@@ -41,9 +43,11 @@ showPapersPage (login,state) (init,formid) states hst
 where
 	allpapers	= formid.ival
 	shortlist	= [(nr,paper.title,summary nr) \\ paper <- allpapers & nr <- [0..]]
-	summary i	= [report \\ thisstate <- states, (papernr,report) <- getReports thisstate.reports 
+	summary i	= [short report \\ thisstate <- states, (papernr,report) <- getReports thisstate.reports 
 				  | papernr == i && not (isConflict papernr state)]
 
+	short Nothing = Nothing
+	short (Just report) = Just (report.recommendation,report.familiarity)
 	paperInfoButs = [(LButton defpixel "PaperInfo",\_ -> i) \\ _ <- allpapers & i <- [0..]]
 	
 	refereeInfoButs = [(mode i,LButton defpixel "RefereeInfo",\_ -> i) \\ _ <- allpapers & i <- [0..]]
@@ -111,26 +115,53 @@ where
 
 refereeStatusPage :: (LoginState ConfState) !(LoginStates ConfState) !Papers *HSt -> (!LoginStates ConfState,![BodyTag],!*HSt)
 refereeStatusPage (login,state) loginstates papers hst
-# todo				= papersToReferee state							// determine which papers to referee
-| todo == []		= (loginstates,[Txt "There are no papers for you to referee (yet)"],hst)							// nothing to referee
-# defaultpaper		= hd todo
-# (papernr,hst) 	= FuncMenu (Init, nFormId "pdme" (0,[("paper " <+++ i,(\_ -> i)) \\ i <- todo])) hst
-# chosennr			= (fst papernr.value) defaultpaper
-# oldreport			= findReport chosennr state
-# (prompt,myreport)	= case oldreport of
-						Nothing -> (Txt "Please fill in your report and commit the form!",emptyReport)
-						Just report	-> (Txt "You can change your form by recomitting!",report)
-# (nstate,hst)		= mkSubStateForm (Init,nFormId ("myrep" <+++ chosennr) myreport) state (addRep chosennr) hst
-= ( changeState (login,nstate.value) loginstates,
-	papernr.form ++ 
+# todo				= papersToReferee state														// determine which papers to referee
+| todo == []		= (loginstates,noPapersMessage,hst)											// nothing to referee, done
+# defaultpaper		= hd todo																	// something to referee
+# (papernr,hst) 	= FuncMenu (Init, sFormId "pdme" (0,[("paper " <+++ i,(\_ -> i)) \\ i <- todo])) hst	// create pull down menu
+# chosennr			= if papernr.changed ((fst papernr.value) 0) (todo!!snd papernr.value)											// determine which report to show
+# oldreport			= findReport chosennr state													// find this report
+# myreport			= case oldreport of															
+						Nothing 	-> emptyReport												// show an empty report to fill in
+						Just report	-> report													// show previous report
+# (new,nstate,hst)	= mkSubStateForm (Init,sFormId  ("myreps" <+++ chosennr) myreport) state (addRep chosennr) hst // show report or new empty report
+# newreport			= findReport chosennr nstate.value													// determine new report
+= ( if new (changeState (login,nstate.value) loginstates) loginstates							// add submitted report to state
+  ,	[paperstate nstate.value] ++
+ 	[Br, Txt "Show me the report of: ":papernr.form] ++ 
+  	[Br, Br, Txt "You currently looking at your referee report of paper: ",Br] ++
 	paperinfo chosennr ++
-	[Br,Br,prompt,Br,Br] ++ 
-	nstate.form,hst)
+	[Br,Br,BodyTag (paperPrompt newreport),Br,Br] ++ 
+	nstate.form
+  ,hst)
 where
-	addRep chosennr report state = addReport chosennr (Just report) state
+	noPapersMessage 	= 	[ Txt "There are no papers for you to referee (yet)" ]
+	paperstate state 
+		= STable []	[ 	[ B [] "The following paper(s) have been assigned to you: "
+						, B [] (foldr (\i j -> toString i +++ ", " <+++ j) "" (papersToReferee state))
+						]
+					, case papersRefereed state of
+						[]		-> 	[]
+						list 	-> 	[ B [] "You already have refereed the following paper(s):"
+									, B [] (foldr (\i j -> toString i +++ ", " <+++ j) "" list)
+									]
+					, case papersNotRefereed state of
+						[]		->	[]
+						list 	->	[ B [] "You still have to referee the following paper(s):"
+									, B [] (foldr (\i j -> toString i +++ ", " <+++ j) "" list)
+									]
+					]
 	paperinfo chosennr = case findPaper chosennr papers of
-							Just paper = [Br,Br, Txt ("paper title: " <+++ paper.title)]
-							Nothing = [Br,Br, Txt ("Error. Cannot find paper with indicated number " <+++ chosennr)]
+							Just paper = [Br,Txt ("paper title: " <+++ paper.title),Br]
+							Nothing = [Br, Txt ("Error. Cannot find paper with indicated number " <+++ chosennr),Br]
+	paperPrompt report	= case report of															// determine feedback
+							Nothing -> 		[B [] "You did not commit a report about this paper yet.",
+											 Br,
+											 Txt "Please fill in your report and commit the form!"]
+							Just report	-> 	[B [] "You have commited this report previously. Thank you!",
+											 Br,
+											 Txt "You can change your current report by recomitting the form!"]
+	addRep chosennr report state = addReport chosennr (Just report) state
 
 
 

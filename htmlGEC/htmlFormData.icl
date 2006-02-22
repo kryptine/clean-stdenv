@@ -51,6 +51,15 @@ extidFormId formid s = {formid & id = formid.id +++ s}
 subFormId :: !(FormId a) !String !d 	-> (FormId d)	// make new formid of new type coping other old settinf
 subFormId formid s d = {formid & id = formid.id +++ s, ival = d}
 
+subnFormId :: !(FormId a) !String !d 	-> (FormId d)	// make new formid of new type coping other old settinf
+subnFormId formid s d = {formid & id = formid.id +++ s, ival = d, lifespan = Page}
+
+subsFormId :: !(FormId a) !String !d 	-> (FormId d)	// make new formid of new type coping other old settinf
+subsFormId formid s d = {formid & id = formid.id +++ s, ival = d, lifespan = Session}
+
+subpFormId :: !(FormId a) !String !d 	-> (FormId d)	// make new formid of new type coping other old settinf
+subpFormId formid s d = {formid & id = formid.id +++ s, ival = d, lifespan = Persistent}
+
 setFormId :: !(FormId d) !d -> (FormId d)			// set new initial value in formid
 setFormId formid d = {formid & ival = d}
 
