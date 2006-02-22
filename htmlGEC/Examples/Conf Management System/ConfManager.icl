@@ -9,8 +9,10 @@ import loginAdminIData, stateHandlingIData, confIData
 Start world  = doHtmlServer mainEntrance world
 
 mainEntrance hst
-# (body,hst)		= loginhandling hst
-= mkHtml "Conference Manager"
+# (_,hst)		= Exception (\_ -> (False,"")) hst	// reset exception handler
+# (body,hst)	= loginhandling hst					// handle login
+# (excep,hst)	= Exception id hst					// read out exception handler
+= mkHtmlB "Conference Manager" (OnLoadException excep.value) // raise alert in case of exception
 	[ BodyTag body
 	] hst
 
@@ -26,12 +28,14 @@ loginhandling  hst
 
 // iData defs
 
-doConfPortal :: (LoginState State) (LoginStates State) *HSt -> ([BodyTag],*HSt)
+doConfPortal :: (LoginState ConfState) (LoginStates ConfState) *HSt -> ([BodyTag],*HSt)
 doConfPortal (login,state) states hst
 # (navButtons,hst) 		= navigationButtons state.role hst							// setup proper set of navigation buttons
 # (currPage,hst)		= currPageStore (homePage state.role) navButtons.value hst	// determine current page to display
 # (states,navBody,hst) 	= showCurrPage (login,state) states currPage.value hst		// and show the corresponding page
-# (_,hst)				= LoginStatesStore (\_.states) hst							// store the new resulting state in global database
+# (excep,error)			= invariantConvDB states									// check whether invariants still hold
+# (_,hst)				= Exception (if excep (\_ -> (excep,error)) id) hst			// raise exception
+# (_,hst)				= LoginStatesStore (if excep id (\_.states)) hst			// store the new resulting approved state in global database
 = ( [ BodyTag navButtons.form
 	, Br
 	, Hr []
@@ -47,6 +51,7 @@ where
 			, (LButton defpixel "ListPapers", 		\_.ListPapers)
 			, (LButton defpixel "AssignPapers", 	\_.AssignPapers)
 			, (LButton defpixel "AssignConflict", 	\_.AssignConflict)
+			, (LButton defpixel "RefereeForm", 		\_.RefereeForm)
 			, (LButton defpixel "ModStates", 		\_.ModifyStates)
 			]
 		navButtons Referee = 
@@ -54,15 +59,16 @@ where
 			, (LButton defpixel "ChangePsswrd", 	\_.ChangePassword)
 			, (LButton defpixel "ChangeInfo", 		\_.ChangeInfo)
 			, (LButton defpixel "ListPapers", 		\_.ListPapers)
+			, (LButton defpixel "RefereeForm", 		\_.RefereeForm)
 			]
 
-showCurrPage :: (LoginState State) (LoginStates State) CurrPage *HSt -> (LoginStates State,[BodyTag],*HSt)
+showCurrPage :: (LoginState ConfState) (LoginStates ConfState) CurrPage *HSt -> (LoginStates ConfState,[BodyTag],*HSt)
 showCurrPage loginState=:(login,state) states currPage hst 
-# (papers,hst)	=	papersStore [initPaper (toString i) \\ i <- [0..3]] id hst
+# (papers,hst)	=	papersStore [initPaper i (toString i) \\ i <- [0..3]] id hst
 # (states,body,hst)	
 	= case currPage of
 		RootHomePage 	-> states <~ rootHomePage hst
-		ModifyStates 	-> modifyStatesPage (mkLogin "" "",initialRefereeState) states hst
+		ModifyStates 	-> modifyStatesPage (mkLogin "" "",initialRefereeState 1) states hst
 		AssignPapers 	-> assignPapersPage states papers.value hst
 		AssignConflict	-> assignConflictsPage states papers.value hst
 
@@ -71,6 +77,7 @@ showCurrPage loginState=:(login,state) states currPage hst
 //								(\person states = changeState (login,{state & person = person}) states) hst
 		ListPapers 		-> states <~ showPapersPage loginState (Init, nFormId "papers" papers.value) [state \\ (login,state) <- states] hst
 	
+		RefereeForm 	-> refereeStatusPage loginState states papers.value hst
 		MemberHomePage 	-> states <~ memberHomePage hst
 		_				-> states <~ ([],hst)
 =	(	states

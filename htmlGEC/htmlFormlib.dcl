@@ -38,7 +38,7 @@ mkStoreForm 	:: !(InIDataId d)  !(d -> d)	!*HSt -> (Form d,!*HSt) 	| gForm{|*|},
 mkSelfForm 		:: !(InIDataId d)  !(d -> d)	!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkApplyEditForm	:: !(InIDataId d)  !d			!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 
-mkSubStateForm :: !(InIDataId !subState) !state !(subState state -> state) !*HSt -> (state,![BodyTag],!*HSt)
+mkSubStateForm :: !(InIDataId !subState) !state !(subState state -> state) !*HSt -> (Form state,!*HSt)
 																				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC subState
 
 // **** forms for lists ****
@@ -122,4 +122,4 @@ openWindowScript 	::  !String !Int !Int !Bool !Bool !Bool !Bool !Bool !Bool !Htm
 // parameters are resp: scriptname() height width html
 openNoticeScript 	::  !String !Int !Int !Html -> Script
 
-OnLoadAlert 		:: (Bool,String) -> [BodyAttr]					// to produce message on opening page
+OnLoadException		:: (Bool,String) -> [BodyAttr]					// to produce message on opening page

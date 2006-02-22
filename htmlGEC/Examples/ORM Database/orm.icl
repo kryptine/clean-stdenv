@@ -11,7 +11,7 @@ myDB hst
 # (alert,hst)	= Alert (\_ -> (False,"")) hst	// reset Alert
 # (dbform,hst)  = mkEditForm (Init,myDB) hst	// create an editor for the database
 # (alert,hst)	= Alert id hst					// read out Alert
-= mkHtmlB  "database" (OnLoadAlert alert.value)
+= mkHtmlB  "database" (OnLoadException alert.value)
 	[ H1 [] "database Example: "
 	, BodyTag dbform.form
 	] hst	
@@ -19,6 +19,13 @@ where
 	myDB	:: FormId MyDatabase
 	myDB	= pFormId "myDB" Empty
 
+
+test2 hst
+# (dbform,hst)  = mkEditForm (Init,nFormId "text" (EditMode 8)) hst	// create an editor for the database
+= mkHtml  "database"
+	[ H1 [] "database Example: "
+	, BodyTag dbform.form
+	] hst	
 
 test hst
 # (dbform,hst)  = mkEditForm (Init,nFormId "text" (TextArea 4 30 "zal dit werken ???")) hst	// create an editor for the database

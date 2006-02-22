@@ -7,9 +7,7 @@ derive gUpd  []
 
 // global stores
 
-LoginStatesStore :: !((LoginStates State) -> (LoginStates State)) *HSt -> (!Form (LoginStates State),!*HSt) // login administration database
-
-currPageStore :: !CurrPage  !(CurrPage -> CurrPage) *HSt -> (!Form CurrPage,!*HSt)							// current page to display
-
-papersStore :: !Papers !(Papers -> Papers) *HSt -> (!Form Papers,!*HSt)										// papers to referee				
-
+LoginStatesStore 	:: !((LoginStates ConfState) -> (LoginStates ConfState)) *HSt -> (!Form (LoginStates ConfState),!*HSt) // login administration database
+papersStore 		:: !Papers !(Papers -> Papers) *HSt -> (!Form Papers,!*HSt)										// papers to referee				
+currPageStore 		:: !CurrPage  !(CurrPage -> CurrPage) *HSt -> (!Form CurrPage,!*HSt)							// current page to display
+Exception			:: ((Bool,String) -> (Bool,String)) -> (*HSt -> *((Form (Bool,String)),*HSt))

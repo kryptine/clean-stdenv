@@ -102,15 +102,15 @@ where
 string_to_dynamic` :: {#Char} -> Dynamic	// just to make a unique copy as requested by string_to_dynamic
 string_to_dynamic` s = string_to_dynamic {s` \\ s` <-: s}
 
-replaceState :: !(FormId a) a *FormStates *NWorld -> (*FormStates,*NWorld)	| gPrint{|*|} a & TC a
+replaceState ::  !(FormId a) a *FormStates *NWorld -> (*FormStates,*NWorld)	| gPrint{|*|} a & TC a
 replaceState formid val formstates=:{fstates} world
 # (fstates,world) = replaceState` formid val fstates world
 = ({formstates & fstates = fstates},world)
 where
-	replaceState` :: !(FormId a) a *FStates *NWorld -> (*FStates,*NWorld)	| gPrint{|*|} a & TC a
+	replaceState` ::  !(FormId a) a *FStates *NWorld -> (*FStates,*NWorld)	| gPrint{|*|} a & TC a
 	replaceState` formid val Leaf_ world = (Node_ Leaf_ (formid.id,NewState (initNewState formid.lifespan formid.storage val)) Leaf_,world)
 	replaceState` formid val (Node_ left a=:(fid,_) right) world
-	| formid.id == fid 	= (Node_ left (fid,NewState (initNewState formid.lifespan formid.storage val)) right,world)
+	| formid.id == fid 					= (Node_ left (fid,NewState (initNewState formid.lifespan formid.storage val)) right,world)
 	| formid.id < fid 	= (Node_ nleft a right,nworld)
 							with
 								(nleft,nworld) = replaceState` formid val left world

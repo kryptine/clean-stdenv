@@ -3,15 +3,18 @@ definition module stateHandlingIData
 import stateHandling
 import StdHtml
 
-derive gForm 	CurrPage, State, Person, Paper, Report, Recommendation, Familiarity, Maybe
-derive gUpd 	CurrPage, State, Person, Paper, Report, Recommendation, Familiarity, Maybe
-derive gPrint 	CurrPage, State, Person, Paper, Report, Recommendation, Familiarity, Maybe 
-derive gParse 	CurrPage, State, Person, Paper, Report, Recommendation, Familiarity, Maybe
+derive gForm 	CurrPage, ConfState, Person, Paper, Report, Recommendation, Familiarity, Maybe
+derive gUpd 	CurrPage, ConfState, Person, Paper, Report, Recommendation, Familiarity, Maybe
+derive gPrint 	CurrPage, ConfState, Person, Paper, Report, Recommendation, Familiarity, Maybe 
+derive gParse 	CurrPage, ConfState, Person, Paper, Report, Recommendation, Familiarity, Maybe
 
-showPapersPage :: !(LoginState State) !(InIDataId Papers) [State] !*HSt -> (![BodyTag],!*HSt)
+showPapersPage :: !(LoginState ConfState) !(InIDataId Papers) [ConfState] !*HSt -> (![BodyTag],!*HSt)
 
-assignPapersPage :: !(LoginStates State) !Papers *HSt -> (!LoginStates State,![BodyTag],!*HSt)
+assignPapersPage :: !(LoginStates ConfState) !Papers *HSt -> (!LoginStates ConfState,![BodyTag],!*HSt)
 
-assignConflictsPage :: !(LoginStates State) !Papers *HSt -> (!LoginStates State,![BodyTag],!*HSt)
+assignConflictsPage :: !(LoginStates ConfState) !Papers *HSt -> (!LoginStates ConfState,![BodyTag],!*HSt)
 
-refereeStatusPage :: !Int (LoginState State) !(LoginStates State) !Papers *HSt -> (!LoginStates State,![BodyTag],!*HSt)
+refereeStatusPage :: (LoginState ConfState) !(LoginStates ConfState) !Papers *HSt -> (!LoginStates ConfState,![BodyTag],!*HSt)
+
+modifyStatesPage :: !(LoginState state) !(LoginStates state) !*HSt -> (!LoginStates state,![BodyTag],!*HSt)
+ 					| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC state

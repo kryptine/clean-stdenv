@@ -10,4 +10,4 @@ mkString 	:: [Char] -> *String
 mkList 		:: String -> [Char]
 
 //	Useful string concatenation function
-(<$) infixl :: !String !a -> String | toString a
+(<+++) infixl :: !String !a -> String | toString a

@@ -3,10 +3,10 @@ implementation module loginAdminIData
 import StdEnv, StdHtml, StdMaybe
 import loginAdmin
 
-derive gForm  	Maybe, Login
-derive gUpd 	Maybe, Login
-derive gPrint	Maybe, Login
-derive gParse	Maybe, Login
+derive gForm  	Login
+derive gUpd 	Login
+derive gPrint	Login
+derive gParse	Login
 
 // this global login form should always contain correct login name and password
 
@@ -62,24 +62,3 @@ where
 					[]
 			] 
 						
-loginStateForm state hst	= mkEditForm 	(Init, nFormId "la_state" 	(mkLogin "" "",state)) hst
-addButton fun hst			= simpleButton "Add" fun hst
-allStates init states hst	= vertlistForm 	(init, nFormId "la_states" 	states) hst
-
-modifyStatesPage :: !(LoginState state) !(LoginStates state) !*HSt -> (!LoginStates state,![BodyTag],!*HSt)
- 					| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC state
-modifyStatesPage (login,state) states hst
-# (nstate,hst)		= loginStateForm state hst
-# (addstate,hst)	= addButton (\states -> addLogin nstate.value states) hst
-# (ostates,hst)		= allStates Init states hst
-# (nstates,hst)		= allStates Set (addstate.value ostates.value) hst
-= 	( nstates.value 
-	,	[ BodyTag nstate.form
-		, Br
-		, BodyTag addstate.form
-		, Br
-		, Hr []
-		, Br
-		, BodyTag nstates.form
-		]
-	, hst)
