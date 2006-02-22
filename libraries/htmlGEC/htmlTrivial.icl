@@ -13,5 +13,5 @@ mkList :: String -> [Char]
 mkList string = [c \\ c <-: string ]
 
 //	Useful string concatenation function
-(<$) infixl :: !String !a -> String | toString a
-(<$) str x = str +++ toString x
+(<+++) infixl :: !String !a -> String | toString a
+(<+++) str x = str +++ toString x

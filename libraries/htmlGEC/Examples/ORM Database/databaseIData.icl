@@ -48,8 +48,6 @@ where
 		adj mem=:{	appointment = TeachingAndProf _ }			= {mem 	& rank = Prof }
 		adj mem = mem
 
-	test = `Batt_Events [OnLoad (SScript "\"alert('Welkom op mijn pagina!')\"")]
-	alert message = Form [`Frm_Events [OnLoad (SScript ("\"alert('" +++ message +++ "')\""))]] []		
 	
 gForm {|Departments|} formid hst 
 	= specialize myeditor (Init,formid) hst

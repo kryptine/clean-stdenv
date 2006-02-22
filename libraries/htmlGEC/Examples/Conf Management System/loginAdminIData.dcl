@@ -16,6 +16,3 @@ loginPage  :: !(LoginStates state) !*HSt -> (!Maybe (LoginState state),![BodyTag
 
 changePasswordPage :: !Login !*HSt -> (!Maybe Login,![BodyTag],!*HSt)
 
-//
-modifyStatesPage :: !(LoginState state) !(LoginStates state) !*HSt -> (!LoginStates state,![BodyTag],!*HSt)
- 							| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC state

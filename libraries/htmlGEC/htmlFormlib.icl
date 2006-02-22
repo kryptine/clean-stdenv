@@ -96,7 +96,7 @@ mkBimapEditor inIDataId {map_to,map_from} hst
 						, resetForm = Nothing
 						} hst 
 
-mkSubStateForm :: !(InIDataId !subState) !state !(subState state -> state) !*HSt -> (state,![BodyTag],!*HSt)
+mkSubStateForm :: !(InIDataId !subState) !state !(subState state -> state) !*HSt -> (Form state,!*HSt)
 							| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC subState
 mkSubStateForm (init,formid) state upd hst 
 # (nsubState,hst) 		= mkEditForm (init,formid) hst
@@ -105,12 +105,15 @@ mkSubStateForm (init,formid) state upd hst
 # (nsubState,hst) 		= if cancelBut.changed 
 								(mkEditForm (Set,setFormId formid subState) hst)
 								(nsubState,hst)
-= 	( 	if commitBut.changed (upd nsubState.value state) state
-	,	[ BodyTag nsubState.form
-		, Br
-		, BodyTag commitBut.form
-		, BodyTag cancelBut.form
-		]
+= 	( 	{ changed = nsubState.changed || commitBut.changed || cancelBut.changed
+		, value = 	if commitBut.changed (upd nsubState.value state) state
+		, form 	=	[ BodyTag nsubState.form
+					, Br
+					, if commitBut.changed (BodyTag [Txt "Thanks for (re-)committing",Br,Br]) EmptyBody
+					, BodyTag commitBut.form
+					, BodyTag cancelBut.form
+					]
+		}
 	, 	hst)
 where
 	subState = formid.ival
@@ -275,8 +278,8 @@ FuncButNr i (init,formid) hst
 					, resetForm	= Just (const button)
 					}
 		nformid = case button of
-					LButton _ name -> {formid & id = formid.id <$ name <$ i}
-					PButton _ ref  -> {formid & id = formid.id <$ i <$ ref}
+					LButton _ name -> {formid & id = formid.id <+++ name <+++ i}
+					PButton _ ref  -> {formid & id = formid.id <+++ i <+++ ref}
 
 TableFuncBut :: !(InIDataId [[(Button, a -> a)]]) !*HSt -> (Form (a -> a) ,!*HSt)
 TableFuncBut inIDataId hSt
@@ -530,9 +533,9 @@ openNoticeScript ::  !String !Int !Int !Html -> Script
 openNoticeScript scriptname height width html 
 	= openWindowScript scriptname height width False False False False False False html
 
-OnLoadAlert :: (Bool,String) -> [BodyAttr]
-OnLoadAlert (True,message) 	= [`Batt_Events [OnLoad (SScript ("\"alert('" +++ message +++ "')\""))]]
-OnLoadAlert _				= []
+OnLoadException :: (Bool,String) -> [BodyAttr]
+OnLoadException (True,message) 	= [`Batt_Events [OnLoad (SScript ("\"alert('" +++ message +++ "')\""))]]
+OnLoadException _				= []
 
 // special objects ...
 
