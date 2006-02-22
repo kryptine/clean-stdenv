@@ -93,6 +93,12 @@ isConflict i state = isMember i  state.conflict
 papersToReferee :: ConfState -> [PaperNr]
 papersToReferee state = [nr \\ (nr,_) <- getReports state.reports]
 
+papersRefereed :: ConfState -> [PaperNr]
+papersRefereed state = [nr \\ (nr,Just _) <- getReports state.reports]
+
+papersNotRefereed :: ConfState -> [PaperNr]
+papersNotRefereed state = [nr \\ (nr,Nothing) <- getReports state.reports]
+
 findReport :: Int ConfState -> (Maybe Report)
 findReport i state 
 | isRefereeOf i state =  (hd [report \\ (j,report) <- getReports state.reports | j == i])

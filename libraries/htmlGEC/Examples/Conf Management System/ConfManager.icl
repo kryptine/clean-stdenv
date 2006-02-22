@@ -8,6 +8,17 @@ import loginAdminIData, stateHandlingIData, confIData
 
 Start world  = doHtmlServer mainEntrance world
 
+test hst
+# (but,hst)	= FuncBut (Init,nFormId "CommitBut" (LButton defpixel "commit",id)) hst				// read out exception handler
+# (int,hst)	= mkEditForm (Init,nFormId "int" 0) hst					// read out exception handler
+= mkHtml "Conference Manager"  // raise alert in case of exception
+	[ BodyTag but.form
+	, BodyTag int.form
+	, toHtml but.changed
+	] hst
+
+
+
 mainEntrance hst
 # (_,hst)		= Exception (\_ -> (False,"")) hst	// reset exception handler
 # (body,hst)	= loginhandling hst					// handle login
