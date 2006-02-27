@@ -230,7 +230,7 @@ gHpr{|RGBColor|} prev (RGBColor r g b)
         = prev  <+ "\"RGB(" <+ r <+ "," <+ g <+ "," <+ b <+ ")\"" 
 
 gHpr{|Hexnum|} prev (Hexnum h0 h1 h2 h3 h4 h5) 
-        = prev  <+ "\"#" <+ h0 <+ h1 <+ h2 <+ h3 <+ h4 <+ h5 <+ "\"" 
+        = prev  <+ "#" <+ h0 <+ h1 <+ h2 <+ h3 <+ h4 <+ h5 
 
 gHpr{|HN|} prev H_0 = prev  <+ "0"
 gHpr{|HN|} prev H_1 = prev  <+ "1"
