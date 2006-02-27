@@ -3,8 +3,9 @@ implementation module Random
 
 import	StdInt, StdClass
 import	StdTime
-import	StdHtml
+import htmlHandler, GenPrint, GenParse
 
+derive bimap (,), Maybe
 
 ::	RandomSeed	= RS !Int
 derive gForm RandomSeed; derive gUpd RandomSeed; derive gParse RandomSeed; derive gPrint RandomSeed
