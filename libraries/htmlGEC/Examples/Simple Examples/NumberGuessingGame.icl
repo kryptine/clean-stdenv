@@ -94,6 +94,9 @@ Txt` tag string = A [Lnk_Name tag] [Txt string]
 
 instance mod Int where mod a b = a - (a/b)*b
 
+(<$) infixl 5 :: !String !a -> String | toString a
+(<$) str x = str +++ toString x
+
 /* old code
 
 /**	This module implements the number guessing game.

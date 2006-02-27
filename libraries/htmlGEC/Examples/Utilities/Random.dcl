@@ -9,8 +9,8 @@ definition module Random
 //	
 //	**************************************************************************************************
 
-import StdHtml
-import StdTime
+import htmlHandler, GenPrint, GenParse
+from StdTime import class TimeEnv, instance TimeEnv World
 
 ::	RandomSeed
 derive gForm RandomSeed; derive gUpd RandomSeed; derive gParse RandomSeed; derive gPrint RandomSeed
