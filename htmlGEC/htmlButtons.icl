@@ -4,9 +4,9 @@ import StdEnv, ArgEnv, StdMaybe
 
 import htmlHandler, htmlStylelib, htmlTrivial
 
-derive gUpd  	(,), (,,), (,,,), (<->), <|>, Date, DisplayMode, /*Button, */CheckBox, RadioButton /*, PullDownMenu, TextInput */, TextArea
-derive gPrint 	(,), (,,), (,,,), (<->), <|>, Date, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
-derive gParse 	(,), (,,), (,,,), (<->), <|>, Date, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
+derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, /*Button, */CheckBox, RadioButton /*, PullDownMenu, TextInput */, TextArea
+derive gPrint 	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
+derive gParse 	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
 
 :: TextInput	= TI Int Int						// Input box of size Size for Integers
 				| TR Int Real						// Input box of size Size for Reals
@@ -220,7 +220,7 @@ gForm{|TextInput|} formid hst
 	# (body,hst) = mkInput size formid (SV s) (UpdS s) hst 
 	= ({changed=False, value=TS size s, form=[body]},incrHSt 2 hst)
 
-gForm {|Date|} formid hst 
+gForm {|HtmlDate|} formid hst 
 	= specialize myeditor (Init,formid) hst
 where
 	myeditor (init,formid) hst = mkBimapEditor (init,formid) bimap hst

@@ -524,4 +524,257 @@ runUserApplication userpage states nworld
 	= userpage {cntr = 0, states = states, world = nworld}
 = (html,states,world)
 
+// Experimental testing stuf ...
 
+/*		
+:: *TestEvent	:== (Triplet,UpdValue,*FormStates) // chosen triplet, its new value 
+:: InputType	= Inp_Button
+				| Inp_Checkbox
+				| Inp_File
+				| Inp_Hidden
+				| Inp_Image
+				| Inp_Password
+				| Inp_Radio
+				| Inp_Reset
+				| Inp_Submit
+				| Inp_Text
+*/
+
+instance toString (a,b,c) | toString a & toString b & toString c
+where
+	toString (a,b,c) = "(\"" +++ toString a +++ "\"," +++ toString b +++ "," +++ toString c +++ ")"
+instance toString UpdValue
+where
+	toString (UpdI i)	= "UpdI " +++ toString i	
+	toString (UpdR r)	= "UpdR " +++ toString r	
+	toString (UpdB b)	= "UpdB " +++ toString b	
+	toString (UpdC c)	= "UpdC " +++ c	
+	toString (UpdS s)	= "UpdS \"" +++ s +++ "\""	
+
+import MersenneTwister
+
+randomTest :: !Int !(*HSt -> (Html,!*HSt)) *World -> ([(Triplet,UpdValue)],*World)
+randomTest n userpage world 
+# (inout,world) 		= stdio world						// open stdin and stdout channels
+# nworld 				= {worldC = world, inout = inout}	
+= doTest Nothing [] n (genRandInt 13) nworld
+where
+	doTest events eventsofar 0 _ nworld = (eventsofar,nworld.worldC)
+	doTest events eventsofar n [r:rx] nworld 
+	# (options,state,nworld) = doHtmlTest2 events userpage nworld
+	# (triplet,update) = calcnewevent (options!!(abs r rem length options))
+	= case options of
+		[] 		= (eventsofar,nworld.worldC)
+		list 	= doTest (Just (triplet,update,state)) [(triplet,update):eventsofar] (n-1) rx nworld
+	where
+		calcnewevent :: (InputType,Value,Maybe Triplet) -> (Triplet,UpdValue)
+		calcnewevent (Inp_Button,SV buttonname,Just triplet) = (triplet,UpdS buttonname)		// button pressed
+		calcnewevent (Inp_Text,IV oldint,Just triplet) 		 = (triplet,UpdI (oldint + 1))		// new 
+		calcnewevent (Inp_Text,RV oldreal,Just triplet) 	 = (triplet,UpdR (oldreal + 1.0))
+		calcnewevent (Inp_Text,BV oldbool,Just triplet) 	 = (triplet,UpdB (not oldbool))
+
+doHtmlTest :: (Maybe *TestEvent) (*HSt -> (Html,!*HSt)) *World -> ([(InputType,Value,Maybe Triplet)],*FormStates,*World) // use this for testing
+doHtmlTest nextevent userpage world // execute user code given the chosen testevent to determine the new possible inputs
+# (inout,world) 				= stdio world						// open stdin and stdout channels
+# nworld 						= {worldC = world, inout = inout}	
+# (nextinputs,states,nworld) 	= doHtmlTest2 nextevent userpage nworld
+= (nextinputs,states,nworld.worldC)
+
+doHtmlTest2 :: (Maybe *TestEvent) (*HSt -> (Html,!*HSt)) *NWorld -> ([(InputType,Value,Maybe Triplet)],*FormStates,*NWorld)
+doHtmlTest2 nextevent userpage nworld // execute user code given the chosen testevent to determine the new possible inputs
+# (newstates,nworld) 	= case nextevent of 
+							Nothing -> initTestFormStates nworld // initial empty states
+							Just (triplet=:(id,pos,UpdI oldint),UpdI newint,oldstates) -> setTestFormStates (Just triplet) id (toString newint) oldstates nworld  
+							Just (triplet=:(id,pos,UpdR oldreal),UpdR newreal,oldstates) -> setTestFormStates (Just triplet) id (toString newreal) oldstates nworld  
+							Just (triplet=:(id,pos,UpdB oldbool),UpdB newbool,oldstates) -> setTestFormStates (Just triplet) id (toString newbool) oldstates nworld  
+							Just (triplet=:(id,pos,UpdC oldcons),UpdC newcons,oldstates) -> setTestFormStates (Just triplet) id (toString newcons) oldstates nworld  
+							Just (triplet=:(id,pos,UpdS oldstring),UpdS newstring,oldstates) -> setTestFormStates (Just triplet) id (toString newstring) oldstates nworld  
+= runUserApplication userpage newstates nworld
+where
+	runUserApplication userpage states nworld
+	# (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
+						= userpage {cntr = 0, states = states, world = nworld}
+	# options = fetchInputOptions bodytags
+	= (options,states,world)
+	
+	fetchInputOptions :: [BodyTag] -> [(InputType,Value,Maybe (String,Int,UpdValue))] // determine from html code which inputs can be given next time
+	fetchInputOptions [] 						= []
+	fetchInputOptions [Input info _  :inputs]	= fetchInputOption info   ++ fetchInputOptions inputs
+	fetchInputOptions [BodyTag bdtag :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [A _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Dd _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Dir _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Div _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Dl _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Dt _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Fieldset _ bdtag :inputs]= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Font _ bdtag  :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Form _ bdtag  :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Li _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Map _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Menu _ bdtag  :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Ol _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [P _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Pre _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Span _ bdtag  :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Table _ bdtag :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [TBody _ bdtag :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Td _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [TFoot _ bdtag :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [THead _ bdtag :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Tr _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Ul _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [STable _ bdtags :inputs] = flatten (map fetchInputOptions bdtags) ++ fetchInputOptions inputs
+	fetchInputOptions [_			 :inputs] 	= fetchInputOptions inputs
+	
+	fetchInputOption [Inp_Type inptype, Inp_Value val,	Inp_Name triplet:_] = [(inptype,val,decodeInfo triplet)]
+	fetchInputOption [Inp_Type inptype, Inp_Value val:_] = [(inptype,val,Nothing)]
+	fetchInputOption [x:xs] = fetchInputOption xs
+	fetchInputOption _ = []
+
+
+doHtmlTest3 :: (Maybe *TestEvent) (*HSt -> (Html,!*HSt)) *NWorld -> (Html,*FormStates,*NWorld)
+doHtmlTest3 nextevent userpage nworld // execute user code given the chosen testevent to determine the new possible inputs
+# (newstates,nworld) 	= case nextevent of 
+							Nothing -> initTestFormStates nworld // initial empty states
+							Just (triplet=:(id,pos,UpdI oldint),UpdI newint,oldstates) -> setTestFormStates (Just triplet) id (toString newint) oldstates nworld  
+							Just (triplet=:(id,pos,UpdR oldreal),UpdR newreal,oldstates) -> setTestFormStates (Just triplet) id (toString newreal) oldstates nworld  
+							Just (triplet=:(id,pos,UpdB oldbool),UpdB newbool,oldstates) -> setTestFormStates (Just triplet) id (toString newbool) oldstates nworld  
+							Just (triplet=:(id,pos,UpdC oldcons),UpdC newcons,oldstates) -> setTestFormStates (Just triplet) id (toString newcons) oldstates nworld  
+							Just (triplet=:(id,pos,UpdS oldstring),UpdS newstring,oldstates) -> setTestFormStates (Just triplet) id (toString newstring) oldstates nworld  
+= runUserApplication userpage newstates nworld
+where
+	runUserApplication userpage states nworld
+	# (html,{states,world}) 
+						= userpage {cntr = 0, states = states, world = nworld}
+	= (html,states,world)
+	
+fetchInputOptions1 :: Html -> [(InputType,Value,Maybe (String,Int,UpdValue))] // determine from html code which inputs can be given next time
+fetchInputOptions1 (Html (Head headattr headtags) (Body attr bodytags))
+	= fetchInputOptions bodytags
+where
+	fetchInputOptions :: [BodyTag] -> [(InputType,Value,Maybe (String,Int,UpdValue))] // determine from html code which inputs can be given next time
+	fetchInputOptions [] 						= []
+	fetchInputOptions [Input info _  :inputs]	= fetchInputOption info   ++ fetchInputOptions inputs
+	fetchInputOptions [BodyTag bdtag :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [A _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Dd _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Dir _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Div _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Dl _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Dt _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Fieldset _ bdtag :inputs]= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Font _ bdtag  :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Form _ bdtag  :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Li _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Map _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Menu _ bdtag  :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Ol _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [P _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Pre _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Span _ bdtag  :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Table _ bdtag :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [TBody _ bdtag :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Td _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [TFoot _ bdtag :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [THead _ bdtag :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Tr _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [Ul _ bdtag 	 :inputs] 	= fetchInputOptions bdtag ++ fetchInputOptions inputs
+	fetchInputOptions [STable _ bdtags :inputs] = flatten (map fetchInputOptions bdtags) ++ fetchInputOptions inputs
+	fetchInputOptions [_			 :inputs] 	= fetchInputOptions inputs
+	
+	fetchInputOption [Inp_Type inptype, Inp_Value val,	Inp_Name triplet:_] = [(inptype,val,decodeInfo triplet)]
+	fetchInputOption [Inp_Type inptype, Inp_Value val:_] = [(inptype,val,Nothing)]
+	fetchInputOption [x:xs] = fetchInputOption xs
+	fetchInputOption _ = []
+
+findTexts :: Html -> [String]
+findTexts (Html (Head headattr headtags) (Body attr bodytags))
+ = ft bodytags []
+where
+	ft :: [BodyTag] [String] -> [String]
+	ft [A		attrs btags:tl] c = ft btags (ft tl c)	// link ancor <a></a>
+	ft [B  		attrs str  :tl] c = [str:ft tl c]		// bold <b></b>
+	ft [Big  	attrs str  :tl] c = [str:ft tl c]		// big text <big></big>
+	ft [Caption	attrs str  :tl] c = [str:ft tl c]		// Table caption <caption></caption>			
+	ft [Center	attrs str  :tl] c = [str:ft tl c]		// centered text <center></center>			
+	ft [Code	attrs str  :tl] c = [str:ft tl c] 		// computer code text <code></code>			
+	ft [Em		attrs str  :tl] c = [str:ft tl c] 		// emphasized text <em></em>			
+	ft [H1	 	attrs str  :tl] c = [str:ft tl c]		// header 1 <h1></h1>
+	ft [H2 		attrs str  :tl] c = [str:ft tl c]		// header 2 <h2></h2>
+	ft [H3 		attrs str  :tl] c = [str:ft tl c]		// header 3 <h3></h3>
+	ft [H4	 	attrs str  :tl] c = [str:ft tl c]		// header 4 <h4></h4>
+	ft [H5 		attrs str  :tl] c = [str:ft tl c]		// header 5 <h5></h5>
+	ft [H6 		attrs str  :tl] c = [str:ft tl c]		// header 6 <h6></h6>			
+	ft [I 		attrs str  :tl] c = [str:ft tl c]		// italic text <i></i>
+	ft [Table	attrs btags:tl] c = ft btags (ft tl c)	// table <table></table>
+	ft [TBody 	attrs btags:tl] c = ft btags (ft tl c)	// body of a table <tbody></tbody>
+	ft [Td		attrs btags:tl] c = ft btags (ft tl c)	// table cell <td></td>
+	ft [Tr		attrs btags:tl] c = ft btags (ft tl c)	// table row <tr></tr>
+	ft [Tt		attrs str  :tl] c = [str:ft tl c] 		// teletyped text <tt></tt>
+	ft [Txt		      str  :tl] c = [str:ft tl c] 		// plain text
+	ft [U		attrs str  :tl] c = [str:ft tl c]		// underlined text <u></u>
+	ft [_:tl]                   c = ft tl c
+	ft []                       c = c
+/*
+			| Abbr 			[Std_Attr] String			// abbreviation <abbr></abbr>
+			| Acronym		[Std_Attr] String			// acronym <acronym></acronym>
+			| Address		[Std_Attr] String			// address <address></address>
+			| Applet		[Applet_Attr] String		// applet <applet></applet>
+			| Area			[Area_Attr]					// link area in an image <area> ALWAYS NESTED INSIDE A <map> TAG
+			| Bdo  			[Std_Attr] String			// direction of text <bdo></bdo>
+			| Blockquote  	[Block_Attr] String			// start of a long quotation <blockquote></blockquote>
+			| Br  										// single line break <br>
+			| Button 		[Button_Attr] String		// push button <button></button>		
+			| Cite			[Std_Attr] String 			// citation <cite></cite>			
+			| Comment		String 						// comment text <!-- text -->
+			| Col			[Col_Attr]					// attribute values for one or more columns in a table <col></col>
+			| Colgroup		[Col_Attr]					// group of table columns <colgroup></colgroup>
+			| Dd			[Std_Attr] [BodyTag]		// description of a term in a definition list <dd></dd>			
+			| Del			[Del_Attr] String 			// deleted text <del></del>			
+			| Dfn	 		[Std_Attr] String			// definition <dfn></dfn>	
+			| Dir			[Std_Attr] [BodyTag]		// directory list <dir></dir>			
+			| Div			[Div_Attr] [BodyTag]		// section in a document <div></div>			
+			| Dl			[Std_Attr] [BodyTag]		// definition list <dl></dl>			
+			| Dt			[Std_Attr] [BodyTag]		// definition term <dt></dt>			
+			| Fieldset		[Std_Attr] [BodyTag]		// fieldset element <fieldset></fieldset>
+			| Font			[Font_Attr] [BodyTag]		// font <font></font>
+			| Form 			[Form_Attr] [BodyTag] 		// form <form></form>
+			| Hr	 		[Hr_Attr]					// horizontal rule <hr>
+			| Iframe		[Iframe_Attr]				// iframe <iframe></iframe>
+			| Img	 		[Image_Attr]				// image <img>
+			| Input	 		[Input_Attr] String			// inputs <input>
+			| Ins 			[Ins_Attr] String			// inserted text <ins></ins>
+			| Kbd  			[Std_Attr] String			// keyboard text <kbd></kbd>
+			| Label			[Label_Attr] String			// label for a control <label></label>
+			| Legend		[Legend_Attr] String		// legend for a fieldset <legend></legend>
+			| Li			[Li_Attr] [BodyTag]			// options in lists <li></li>
+			| Map 			[Map_Attr] [BodyTag]		// map <map></map>
+			| Menu 			[Std_Attr] [BodyTag]		// menu list <menu></menu>
+			| Noscript		[Standard_Attr]	String		// you can't see scripts <noscript></noscript>
+			| Body_Object 	[Object_Attr] [Param]		// insert an object <object></object>
+			| Ol	 		[Ol_Attr] [BodyTag]			// ordered list <ol></ol>
+			| P  			[P_Attr] [BodyTag]			// paragraph <p></p>
+			| Pre 			[Pre_Attr] [BodyTag]		// preformatted text <pre></pre>
+			| Q				[Q_Attr] String				// short quotation <q></q>
+			| S	 			[Std_Attr] String			// strikethrough text <s></s>
+			| Samp	 		[Std_Attr] String			// Sample computer code <samp></samp>
+			| Script		[Script_Attr] Script		// script <script></script>
+			| Select 		[Select_Attr] [Option]		// select <select></select>
+			| Small 		[Std_Attr] String 			// smaller <small></small>
+			| Span			[Std_Attr] [BodyTag]		// section in a document <span></span>
+			| Strike		[Std_Attr] String			// strikethrough text <strike></strike>
+			| Strong		[Std_Attr] String			// strong emphasized text <strong></strong>
+			| Sub	 		[Std_Attr] String			// subscript text <sub></sub>
+			| Sup			[Std_Attr] String			// superscript text <sup></sup>
+			| Textarea		[TxtA_Attr] String			// textarea <textarea></textarea>
+			| TFoot			[T_Attr] [BodyTag]			// foot of a table <tfoot></tfoot>
+			| Th	 		[Td_Attr] String			// table header cell in a table <th></th>
+			| THead			[T_Attr] [BodyTag]			// header of a table <thead></thead>
+			| Ul	 		[Ul_Attr] [BodyTag]			// unordered list <ul></ul>
+			| Var			[Std_Attr] String			// variable text <var></var>
+
+			| STable		[Table_Attr] [[BodyTag]]	// simple table used for Clean forms
+			| BodyTag		[BodyTag]					// improves flexibility for code generation
+			| EmptyBody									// same 
+*/
