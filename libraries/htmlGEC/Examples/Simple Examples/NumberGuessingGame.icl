@@ -6,8 +6,69 @@ module NumberGuessingGame
 	The number of guesses are stored in a high-score file.
 	These can be displayed on request.
 */
-import StdEnv, StdHtml, Random
+import StdEnv, StdHtml, Random, gast, webServerTest
 
+// --------- The Specification --------- //
+
+:: TestState = InitState | Running Running
+:: Running
+ =	{ upB	:: Int
+	, lowB	:: Int
+	, rname	:: String
+	, tries	:: Int
+	}
+
+newRunning :: Running
+newRunning = {upB = up, lowB = low, rname = "", tries = 0}
+
+:: In = StringTextBox String | IntTextBox Int
+
+spec :: TestState In -> [Trans Html TestState]
+spec InitState	input			= [ FTrans (\_ = [Running newRunning]) ]
+spec (Running r) (StringTextBox s) = [ FTrans (\_ = [Running {r & rname = s}]) ] // error: implementation selects new number
+spec (Running r) (IntTextBox i)
+	# r = {r & tries = r.tries+1 }
+	| i < r.lowB	= [ FTrans (tooLow r)]	// can be omitted
+	| i > r.upB 	= [ FTrans (tooHigh r)]	// can be omitted
+	| i == r.upB && i == r.lowB
+					= [ FTrans (correct r) ]
+	| otherwise 	= [ FTrans (tooLow {r & lowB = i+1 })
+					  , FTrans (tooHigh {r & upB = i-1})
+					  , FTrans (correct r)
+					  ]
+where
+	tooLow r [html]
+		# texts = htmlTextValues html
+		| isMember "The number to guess is larger." texts && someTextStartsWith "Sorry" texts
+			= [Running r]
+			= []
+	tooHigh r [html]
+		# texts = htmlTextValues html
+		| isMember "The number to guess is smaller." texts && someTextStartsWith "Sorry" texts
+			= [Running r]
+			= []
+	correct r [html]
+		# texts = htmlTextValues html
+		| someTextStartsWith "Congratulations " texts
+			= [Running {r & lowB = low, upB = up, tries = 0 }]
+			= []
+
+//ggen{|In|} n r = [StringTextBox "tester": randomize [IntTextBox i \\ i <- [low-1..up+1]] r (up-low+3) (\_.[])]
+ggen{|In|} n r = [StringTextBox "tester": [IntTextBox i \\ i <- [low-1..up+1]]]
+derive gEq		TestState, Running
+derive genShow	In, TestState, Running
+
+someTextStartsWith :: String [String] -> Bool
+someTextStartsWith s l = stsw s (size s-1) l
+where
+	stsw s n [] = False
+	stsw s n [h:t] = (size h>n && (h%(0,n)==s)) || stsw s n t
+
+transInput (StringTextBox n) = HtmlStringTextBox "name" n
+transInput (IntTextBox n) = HtmlIntTextBox "guess" n
+trasnInput _ = abort "Undefined input in trasnInput"
+
+// --------- The Implementation --------- //
 
 :: Trees a = Leaf | SNode a .(Trees2 a) (Trees2 a)
 :: Trees2 a :== Trees a
@@ -16,7 +77,11 @@ f :: a *(Trees a) (Trees a) -> *(Trees a)
 f a x y = SNode a x y 
 
 Start :: *World -> *World
-Start world	= doHtmlServer numberGuessingGame world
+//Start world	= doHtmlServer numberGuessingGame world // Running as web application
+
+// --------- Testing --------- //
+
+Start world = testHtml [Nsequences 100, Ntests 100] spec InitState transInput numberGuessingGame world
 
 ::	State	= { count	:: !Int
 			  , guess	:: !Int
@@ -84,7 +149,7 @@ numberGuessingGame hst
 				] 
 				[ Txt` "Answer" ("Sorry, " <$ name.value <$ ", your guess number " <$ ostate.value.count <$ " was wrong.")
 				, Br, Br
-				, Txt ("The number to guess is "<$if (guess.value < ostate.value.guess) "larger." "smaller.") 
+				, Txt` "Hint" ("The number to guess is "<$if (guess.value < ostate.value.guess) "larger." "smaller.") 
 				]
 			)
 			[])
