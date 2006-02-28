@@ -235,6 +235,9 @@ decodeString s = string52_to_string s	// using the whole alphabet
 encodeInfo :: a -> String | gPrint{|*|} a
 encodeInfo inp = encodeString (printToString inp)
 
+decodeInfo :: String -> Maybe a | gParse{|*|} a
+decodeInfo str = parseString (decodeString str)
+
 decodeChars :: [Char] -> *String
 decodeChars cs = decodeString (mkString cs)
 

@@ -147,18 +147,31 @@ vertlistFormButs nbuts (init,formid) hst
 # bbutsId		= {subFormId formid "bb" index.value & mode = Edit, lifespan = Session}
 # (obbuts, hst)	= browseButtons (Init, bbutsId) step lengthlist nbuts hst
 
-//# addId			= {subFormId formid "add" addbutton & lifespan = Page}
-//# (add	,hst) 	= ListFuncBut (Init, addId) hst	
-# dellId		= {subFormId formid "dell" (delbutton    obbuts.value step) & lifespan = Page}
+# addId			= subnFormId formid "add" addbutton
+# (add	,hst) 	= ListFuncBut (Init, addId) hst	
+
+# dellId		= subnFormId formid "dell" (delbutton obbuts.value step)
 # (del	,hst) 	= ListFuncBut (Init, dellId) hst	
-# insrtId		= {subFormId formid "ins"  (insertbutton newElem obbuts.value step) & lifespan = Page}
+# insrtId		= subnFormId formid "ins"  (insertbutton createDefault obbuts.value step)
 # (ins	,hst) 	= ListFuncBut (Init, insrtId) hst	
-# appId			= {subFormId formid "app"  (appendbutton newElem obbuts.value step) & lifespan = Page}
+# appId			= subnFormId formid "app"  (appendbutton createDefault obbuts.value step)
 # (app	,hst) 	= ListFuncBut (Init, appId) hst	
 
-# newlist		= ins.value olist.value 
+# elemId		= subsFormId formid "copyelem" createDefault
+# copyId		= subnFormId formid "copy"  (copybutton obbuts.value step)
+# (copy	,hst) 	= ListFuncBut (Init, copyId) hst	
+# (elemstore,hst)= mkStoreForm (Init,elemId) (if copy.changed (\_ -> olist.value!!copy.value 0) id) hst	
+
+# pasteId		= subnFormId formid "paste"  (pastebutton obbuts.value step)
+# (paste,hst) 	= ListFuncBut (Init, pasteId) hst	
+
+# newlist		= olist.value
+# newlist		= if paste.changed (updateAt (paste.value 0) elemstore.value newlist) newlist
+# newlist		= ins.value newlist 
+# newlist		= add.value newlist
 # newlist		= app.value newlist 
 # newlist		= del.value newlist 
+
 # (list,hst)	= listForm (setID formid newlist) hst
 # lengthlist	= length newlist
 # (index,hst)	= mkEditForm (setID indexId obbuts.value) hst
@@ -170,29 +183,33 @@ vertlistFormButs nbuts (init,formid) hst
 # (pdbuts,hst)	= mkEditForm (setID pdmenuId pdmenu) hst
  
 = 	(	{ form 		= case formid.mode of
-						Edit ->		pdbuts.form ++ [toHtml ("#rec = " +++ toString (length list.value))] ++ bbuts.form ++ 
-									[[(toHtml ("nr " +++ toString i) <.||.> del <.=.> ins <.=.> app) 
-										\\ del <- del.form & ins <- ins.form & app <- app.form & i <- [bbuts.value..]] 
-											<=|> list.form%betweenindex] 
-						Display ->	bbuts.form 
+						Edit ->		pdbuts.form ++ 	bbuts.form ++ 
+									[[(toHtml ("nr " <+++ (i+1)  <+++ " / " <+++ length list.value) <.||.> 
+									  del <.=.> ins <.=.> app  <.=.> copy  <.=.> paste) 
+										\\ del <- del.form & ins <- ins.form & app <- app.form & copy <- copy.form & paste <- paste.form 
+											& i <- [bbuts.value..]] 
+											<=|> list.form%betweenindex] ++ 
+											(if (lengthlist <= 0) add.form [])
+						Display ->	[bbuts.form <=|> list.form%betweenindex]
 		, value 	= list.value
-		, changed 	= olist.changed || obbuts.changed || del.changed || pdbuts.changed ||ins.changed
+		, changed 	= olist.changed || obbuts.changed || del.changed || pdbuts.changed ||ins.changed ||
+						add.changed || copy.changed || paste.changed || list.changed
 		}
 	,	hst )
 where
 	addbutton = 
-		[ (but 1 "Append", mkNewList)]
+		[ (but 1 "Append", \_ -> [createDefault])]
 	but i s	= LButton (defpixel/i) s
 	delbutton index step = 
-		[ (but 3 "Del", \m -> removeAt i m) \\ i <- [index .. index + step]]
+		[ (but 5 "D", \list -> removeAt i list) \\ i <- [index .. index + step]]
 	insertbutton e index step = 
-		[ (but 3 "Ins", \m -> insertAt i e m) \\ i <- [index .. index + step]]
+		[ (but 5 "I", \list -> insertAt i e list) \\ i <- [index .. index + step]]
 	appendbutton e index step = 
-		[ (but 3 "App", \m -> insertAt (i+1) e m) \\ i <- [index .. index + step]]
-	newElem = hd [mkNewElement:formid.ival]
-
-mkNewList _ = snd (gUpd {|*|} (UpdSearch (UpdC "_Cons") 0) [])	// generates a new list with one element of required type
-mkNewElement = hd (mkNewList [])
+		[ (but 5 "A", \list -> insertAt (i+1) e list) \\ i <- [index .. index + step]]
+	copybutton index step = 
+		[ (but 5 "C", \_ -> i) \\ i <- [index .. index + step]]
+	pastebutton index step = 
+		[ (but 5 "P", \_ -> i) \\ i <- [index .. index + step]]
 		
 table_hv_Form :: !(InIDataId [[a]]) !*HSt -> (Form [[a]],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 table_hv_Form inIDataId hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) horlistForm inIDataId hSt

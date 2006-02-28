@@ -39,6 +39,8 @@ storeFormStates 	:: !FormStates *NWorld -> (BodyTag,*NWorld)
 	| UpdS String				// new piece of text
 
 encodeTriplet	:: Triplet -> String	// encoding of triplets
+decodeTriplet	:: String -> Maybe Triplet
+
 getTriplet  	:: *FormStates -> (!Maybe Triplet,!Maybe b,*FormStates)  | gParse{|*|} b // inspect triplet
 
 callClean 		:: Script		// script that will take care of sending the required input to this application

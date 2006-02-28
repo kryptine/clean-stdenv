@@ -267,6 +267,9 @@ where
 encodeTriplet	:: Triplet -> String				// encoding of triplets
 encodeTriplet triplet = encodeInfo triplet
 
+decodeTriplet	:: String -> Maybe Triplet				// encoding of triplets
+decodeTriplet triplet = decodeInfo triplet
+
 // script for transmitting name and value of changed input 
 
 callClean :: Script

@@ -39,10 +39,11 @@ specialize :: !(!(InIDataId a) !*HSt -> (!Form a,!*HSt)) !(InIDataId a) !*HSt ->
 		
 // utility functions
 
-toHtml 			:: a -> BodyTag | gForm {|*|} a				// toHtml displays any type into a non-editable form
-toHtmlForm 		:: (*HSt -> *(Form a,*HSt)) -> [BodyTag] 	// toHtmlForm displays any form one can make with a form function
+toHtml 			:: a -> BodyTag 				| gForm {|*|} a		// toHtml displays any type into a non-editable form
+toHtmlForm 		:: (*HSt -> *(Form a,*HSt)) -> [BodyTag] 			// toHtmlForm displays any form one can make with a form function
 												| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-toBody 			:: (Form a) -> BodyTag						// just (BodyTag form.body)
+toBody 			:: (Form a) -> BodyTag								// just (BodyTag form.body)
+createDefault 	:: a | gUpd{|*|} a 									// creates a default value of requested type
 
 // definitions on HSt
 

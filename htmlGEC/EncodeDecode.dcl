@@ -19,6 +19,7 @@ import htmlDataDef, htmlFormData
 // type driven encoding of strings, used to encode triplets
 
 encodeInfo :: a -> String | gPrint{|*|} a
+decodeInfo :: String -> Maybe a | gParse{|*|} a
 
 // serializing, de-serializing of iData states to strings stored in the html page
 
