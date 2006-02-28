@@ -159,6 +159,8 @@ ThisExe External
 = thisexe
 ThisExe Internal 
 = "clean"
+ThisExe _ 
+= "clean"
 
 MyPhP :: ServerKind -> String
 MyPhP External = (mkString (takeWhile ((<>) '.') (mkList (ThisExe External)))) +++ ".php"
