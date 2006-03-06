@@ -45,3 +45,15 @@ getLoginState slogin loginAdmin
 = case [state \\ (login,state) <- loginAdmin | login == slogin] of
 	list 	= hd list
 
+invariantLogin 	:: (LoginStates state) -> (Bool,String)
+invariantLogin loginstates 
+= invariant [(login.loginName,login.password) \\ (login,_) <- loginstates]
+where
+	invariant [] 							= (False,"")
+	invariant [(name,password):loginnames]
+	| name 		== "" 						= (True,"login name is not specified!")
+	| password  == "" 						= (True,"password required!")
+	| isMember name (map fst loginnames) 	= (True,"login name " +++ name +++ " is already being used!")
+	| size password < 6						= (True,"at least 6 characters required for a password!")
+	= invariant loginnames
+

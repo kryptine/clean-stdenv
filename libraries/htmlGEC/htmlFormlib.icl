@@ -559,7 +559,6 @@ openWindowScript scriptname height width toolbar menubar scrollbars resizable lo
 					",status=" <+ yn status <+ "\");\r" <+
 				"OpenWindow.document.write(\"" <+ html <+ "</HTML>\");\r" <+
 				"OpenWindow.document.close();\r" <+
-	//			"self.name=\"webshop.php\";\r" <+     // don't know whther is needed ???
 			"}")
 where
 	yn bool = if bool "yes" "no" 

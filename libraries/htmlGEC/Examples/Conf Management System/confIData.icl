@@ -4,7 +4,11 @@ import htmlHandler, StdList
 import loginAdmin, stateHandling
 import stateHandlingIData, loginAdminIData
 
-derive gUpd []
+// general forms display settings
+
+derive gUpd [], Maybe
+derive gPrint Maybe
+derive gParse Maybe
 
 gForm {|[]|} gHa formid hst 
 = case formid.ival of
@@ -15,19 +19,15 @@ gForm {|[]|} gHa formid hst
 	[] 
 	= ({changed = False,form = [],value = []},hst)
 
-/*
+gForm {|Maybe|} ga formid hst 
+# elem = formid.ival
+= case elem of
+	Nothing = ({value=Nothing,changed =False,form=[toHtml "Not yet done",Br]},hst)
+	Just val
+		# (valform,hst)	= ga (reuseFormId formid val) hst
+		= ({value=Just valform.value,changed =valform.changed,form=valform.form},hst)
 
-
-gForm {|[]|} gHa formid hst 
-= case formid.ival of
-	[x:xs]
-	# (x,hst) 	= gHa (reuseFormId formid x) hst
-	# (xs,hst) 	= gForm {|*->*|} gHa (subFormId formid (toString (length xs)) xs) hst
-	= ({changed = x.changed||xs.changed,form = x.form ++ xs.form,value = [x.value:xs.value]},hst)
-	[] 
-	= ({changed = False,form = [],value = []},hst)
-*/
-//derive gForm []
+// global forms and stores
 
 LoginStatesStore :: !((LoginStates ConfState) -> (LoginStates ConfState)) *HSt -> (!Form (LoginStates ConfState),!*HSt) // login administration database
 LoginStatesStore upd hst = mkStoreForm (Init,pFormId "cf_loginDatabase" initRootLogin) upd hst

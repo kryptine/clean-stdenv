@@ -21,3 +21,5 @@ changeState 	:: (LoginState state) (LoginStates state) -> (LoginStates state)
 isLoggedIn 		:: Login (LoginStates state) -> Bool
 getLoginState 	:: Login (LoginStates state) -> state
 removeLogin 	:: Login (LoginStates state) -> (LoginStates state) 
+
+invariantLogin 	:: (LoginStates state) -> (Bool,String)

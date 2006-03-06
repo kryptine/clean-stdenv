@@ -31,10 +31,10 @@ import loginAdmin
 				| 	Reject
 				| 	StrongReject
 :: Familiarity	= 	Expert
-				| 	Knowladgeble
+				| 	Knowledgeable
 				| 	Low
-:: CommCommittee:== String
-:: CommAuthors	:==	String
+:: CommCommittee:== TextArea 
+:: CommAuthors	:==	TextArea 
 
 :: Papers 		:==	[Paper]
 :: Paper 		=	{ title			:: String
