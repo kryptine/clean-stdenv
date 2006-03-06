@@ -56,8 +56,8 @@ findReports papernr states
 emptyReport :: Report
 emptyReport = 		{ recommendation	= StrongReject
 					, familiarity 		= Low  
-					, commCommittee		= ""
-					, commAuthors		= "add comment"
+					, commCommittee		= TextArea 4 70 ""
+					, commAuthors		= TextArea 10 70 "Please enter your report"
 					}
 
 getReports :: Reports -> [(PaperNr, Maybe Report)]
@@ -115,22 +115,29 @@ findPaper i [x=:{paperNr}:xs]
 | i == paperNr = Just x
 = findPaper i xs
 
-
 invariantConvDB :: ConferenceDB -> (Bool,String)
-invariantConvDB cdb 
-# (yes,error) = dor [ (	isMember papernr state.conflict
-						,"Referee " <+++ login.loginName <+++ " has a conflict with paper " <+++ papernr)
-				 \\ (login,state) <- cdb
-				 , (papernr,_) <- getReports state.reports
-				 ]
-| yes	= (yes,error)
-# (yes,error) = dor [ (	login.loginName == "" || login.password == ""
-						,"illegal login name or password")
-				 \\ (login,state) <- cdb
-				 ]
-= (yes,error)
+invariantConvDB cdb  
+= invariant [(state,i) \\ (_,state) <- cdb & i <- [1..]]
+where
+	invariant [] 							= invariantLogin cdb
+	invariant [({person,reports,conflict},i):cdbs]
+	| person.firstName		== "" 			= error " : first name is not specified!"
+	| person.lastName		== "" 			= error " : last name is not specified!"
+	| person.affiliation	== "" 			= error " : affiliation is not specified!"
+	| person.emailAddress	== "" 			= error " : email address is not specified!"
+	| isAnyMember papernrs conflict			= error " : conflict with papers assigend!"
+	= invariant cdbs
+	where
+		papernrs = [papernr \\ (papernr,_) <- getReports reports]
+		error message = (True,"record " <+++ i <+++ message)
+	
 
-dor [] 				= (False,"")
-dor [(True,msg):xs]	= (True,msg)
-dor [x:xs] 			= dor xs
+
+
+
+
+
+
+
+
 

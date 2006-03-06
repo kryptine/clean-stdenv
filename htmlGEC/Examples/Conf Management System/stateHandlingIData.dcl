@@ -3,18 +3,17 @@ definition module stateHandlingIData
 import stateHandling
 import StdHtml
 
-derive gForm 	CurrPage, ConfState, Person, Paper, Report, Recommendation, Familiarity, Maybe
-derive gUpd 	CurrPage, ConfState, Person, Paper, Report, Recommendation, Familiarity, Maybe
-derive gPrint 	CurrPage, ConfState, Person, Paper, Report, Recommendation, Familiarity, Maybe 
-derive gParse 	CurrPage, ConfState, Person, Paper, Report, Recommendation, Familiarity, Maybe
+derive gForm 	CurrPage, ConfState, Person, Paper, Report, Recommendation, Familiarity
+derive gUpd 	CurrPage, ConfState, Person, Paper, Report, Recommendation, Familiarity
+derive gPrint 	CurrPage, ConfState, Person, Paper, Report, Recommendation, Familiarity 
+derive gParse 	CurrPage, ConfState, Person, Paper, Report, Recommendation, Familiarity
 
-showPapersPage :: !(LoginState ConfState) !(InIDataId Papers) [ConfState] !*HSt -> (![BodyTag],!*HSt)
+changeInfo 			:: !(LoginState ConfState) !(LoginStates ConfState) !*HSt -> (LoginStates ConfState,[BodyTag],*HSt)
+showPapersPage ::  !Papers !(LoginState ConfState)!(LoginStates ConfState) !*HSt -> (![BodyTag],!*HSt)
 
-assignPapersPage :: !(LoginStates ConfState) !Papers *HSt -> (!LoginStates ConfState,![BodyTag],!*HSt)
+assignPapersPage 	:: !Papers !(LoginStates ConfState) !*HSt -> (!LoginStates ConfState,![BodyTag],!*HSt)
+assignConflictsPage :: !Papers !(LoginStates ConfState) !*HSt -> (!LoginStates ConfState,![BodyTag],!*HSt)
 
-assignConflictsPage :: !(LoginStates ConfState) !Papers *HSt -> (!LoginStates ConfState,![BodyTag],!*HSt)
+refereeStatusPage 	:: !Papers !(LoginState ConfState) !(LoginStates ConfState)  !*HSt -> (!LoginStates ConfState,![BodyTag],!*HSt)
 
-refereeStatusPage :: (LoginState ConfState) !(LoginStates ConfState) !Papers *HSt -> (!LoginStates ConfState,![BodyTag],!*HSt)
-
-modifyStatesPage :: !(LoginState state) !(LoginStates state) !*HSt -> (!LoginStates state,![BodyTag],!*HSt)
- 					| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC state
+modifyStatesPage 	:: !(LoginStates ConfState) !*HSt -> (!LoginStates ConfState,![BodyTag],!*HSt)
