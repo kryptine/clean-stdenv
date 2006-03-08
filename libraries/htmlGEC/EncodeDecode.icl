@@ -24,12 +24,14 @@ EncodeHtmlStates [(id,lifespan,storageformat,state):xsys]
 	  "$" +++ 									// end mark
 	  EncodeHtmlStates xsys
 where
-	fromLivetime Page 		PlainString		= "N"	// encode Lifespan & StorageFormat in first character
-	fromLivetime Session 	PlainString		= "S"
-	fromLivetime Persistent PlainString		= "P"
-	fromLivetime Page 		StaticDynamic	= "n"
-	fromLivetime Session 	StaticDynamic	= "s"
-	fromLivetime Persistent StaticDynamic	= "p"
+	fromLivetime Page 			PlainString		= "N"	// encode Lifespan & StorageFormat in first character
+	fromLivetime Session 		PlainString		= "S"
+	fromLivetime Persistent 	PlainString		= "P"
+	fromLivetime PersistentRO 	PlainString		= "R"
+	fromLivetime Page 			StaticDynamic	= "n"
+	fromLivetime Session 		StaticDynamic	= "s"
+	fromLivetime Persistent 	StaticDynamic	= "p"
+	fromLivetime PersistentRO 	StaticDynamic	= "r"
 
 // de-serialize Html State
 
@@ -60,14 +62,18 @@ where
 			toLivetime ['s':_] = Session
 			toLivetime ['P':_] = Persistent
 			toLivetime ['p':_] = Persistent
+			toLivetime ['R':_] = PersistentRO
+			toLivetime ['r':_] = PersistentRO
 			toLivetime _   	   = Page
 
 			toStorageFormat ['N':_] = PlainString
 			toStorageFormat ['S':_] = PlainString
 			toStorageFormat ['P':_] = PlainString
+			toStorageFormat ['R':_] = PlainString
 			toStorageFormat ['n':_] = StaticDynamic
 			toStorageFormat ['p':_] = StaticDynamic
 			toStorageFormat ['s':_] = StaticDynamic
+			toStorageFormat ['r':_] = StaticDynamic
 			toStorageFormat _   	= PlainString
 
 // reconstruct HtmlState out of the information obtained from browser
@@ -146,7 +152,11 @@ where
 
 	(htmlState,triplet,update) = DecodeHtmlStatesAndUpdate serverkind args
 
-	showl life = case life of Persistent -> "Persistent"; Session -> "Session"; _ -> "Page"
+	showl life = case life of 
+					Persistent 		-> "Persistent";
+					PersistentRO 	-> "Persistent Read Only" 
+					Session 		-> "Session"; 
+					_ 				-> "Page"
 	showf storage = case storage of PlainString -> "String";  _ -> "Dynamic"
 	shows PlainString s = s
 	shows _ d = d//"cannot show dynamic value" 
@@ -176,7 +186,7 @@ writeState directory filename serializedstate env
 #(_,env) = case getFileInfo mydir env of
 			((DoesntExist,fileinfo),env) -> createDirectory mydir env
 			(_,env) -> (NoDirError,env)
-# (ok,file,env)	= fopen (directory +++ "/" +++ filename) FWriteData env
+# (ok,file,env)	= fopen (directory +++ "/" +++ filename +++ ".txt") FWriteData env
 | not ok 		= env
 # file			= fwrites serializedstate file
 # (ok,env)		= fclose file env
@@ -189,7 +199,7 @@ readStringState directory filename env
 #(_,env) = case getFileInfo mydir env of
 			((DoesntExist,fileinfo),env) -> createDirectory mydir env
 			(_,env) -> (NoDirError,env)
-# (ok,file,env)	= fopen (directory +++ "/" +++ filename) FReadData env
+# (ok,file,env)	= fopen (directory +++ "/" +++ filename +++ ".txt") FReadData env
 | not ok 		= ("",env)
 # (string,file)	= freads file big
 | not ok 		= ("",env)
@@ -209,7 +219,7 @@ readDynamicState directory filename env
 #(_,env) = case getFileInfo mydir env of
 			((DoesntExist,fileinfo),env) -> createDirectory mydir env
 			(_,env) -> (NoDirError,env)
-# (ok,file,env)	= fopen (directory +++ "/" +++ filename) FReadData env
+# (ok,file,env)	= fopen (directory +++ "/" +++ filename +++ ".txt") FReadData env
 | not ok 		= ("",env)
 # (string,file)	= freads file big
 | not ok 		= ("",env)

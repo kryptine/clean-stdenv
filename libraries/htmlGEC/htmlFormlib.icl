@@ -3,7 +3,7 @@ implementation module htmlFormlib
 // Handy collection of Form's
 // (c) MJP 2005
 
-import StdEnv, StdHtml
+import StdEnv, StdHtml, StdLib
 
 derive gForm []; derive gUpd []
 
@@ -210,7 +210,125 @@ where
 		[ (but 5 "C", \_ -> i) \\ i <- [index .. index + step]]
 	pastebutton index step = 
 		[ (but 5 "P", \_ -> i) \\ i <- [index .. index + step]]
+
+// Refto structure will generate a file with indicated name containing the indicated value
+// The file will be read-only when the editor is generated in Display mode
+// The files can be used to share information (one needs to know the file name)
+// It also enables multi-user access by ensuring that a user only opens his own files for writing
+
+:: Refto a = Refto String a
+
+reftoEditForm :: !(InIDataId (Refto a)) !*HSt -> (Form (Refto a),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+reftoEditForm  (init,formid) hst 
+#(idata,hst) = mkEditForm (init,	{ formid 	& id 		= filename
+												, ival		= a
+												, lifespan 	= ifEdit formid.mode Persistent PersistentRO 
+									}) hst
+= ({idata & value = Refto filename idata.value, form = [[toHtml ("F " <+++ filename)] <=> idata.form]},hst)
+where
+	(Refto filename a) = formid.ival
+
+reftoVertListForm :: !(InIDataId [(Mode,Refto a)]) !*HSt -> (Form [Refto a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+reftoVertListForm (init,formid) hst
+# (listf,hst) 	= maplSt reftoEditForm [(init,{reuseFormId formid refto & mode = nmode}) \\ (nmode,refto) <- formid.ival] hst
+= (	{ changed 	= or [elem.changed \\ elem <- listf]
+	, value 	= [elem.value \\ elem <- listf]
+	, form		= [BodyTag elem.form \\ elem <- listf]
+//	, form		= [mkColForm (foldl (++) [] [elem.form \\ elem <- listf])]
+	},hst)
+where
+	(Refto filename a) = formid.ival
 		
+
+derive gForm Refto
+derive gUpd Refto
+derive gPrint Refto
+derive gParse Refto
+
+reftoListFormButs :: !Int  !(InIDataId [(Mode,Refto a)]) !*HSt -> (Form [Refto a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+reftoListFormButs nbuts (init,formid) hst
+# indexId		= subFormId formid "idx" 0
+# (index,hst)	= mkEditForm (init,indexId) hst
+# (olist,hst)	= reftoVertListForm (init,formid) hst
+# lengthlist	= length olist.value
+
+# pdmenu		= PullDown (1,defpixel) (0, [toString lengthlist +++ " More... " :["Show " +++ toString i \\ i <- [1 .. max 1 lengthlist]]]) 
+# pdmenuId		= {subFormId formid "pdm" pdmenu & mode = Edit, lifespan = Session}
+# (pdbuts,hst)	= mkEditForm (Init, pdmenuId) hst
+# (PullDown _ (step,_))	= pdbuts.value
+
+| step == 0		= ({form=pdbuts.form,value=olist.value,changed=olist.changed || pdbuts.changed},hst)		
+
+# bbutsId		= {subFormId formid "bb" index.value & mode = Edit, lifespan = Session}
+# (obbuts, hst)	= browseButtons (Init, bbutsId) step lengthlist nbuts hst
+
+# addId			= subnFormId formid "add" addbutton
+# (add	,hst) 	= ListFuncBut (Init, addId) hst	
+
+# dellId		= subnFormId formid "dell" (delbutton obbuts.value step)
+# (del	,hst) 	= ListFuncBut (Init, dellId) hst	
+# insrtId		= subnFormId formid "ins"  (insertbutton createDefault obbuts.value step)
+# (ins	,hst) 	= ListFuncBut (Init, insrtId) hst	
+# appId			= subnFormId formid "app"  (appendbutton createDefault obbuts.value step)
+# (app	,hst) 	= ListFuncBut (Init, appId) hst	
+
+# elemId		= subsFormId formid "copyelem" createDefault
+# copyId		= subnFormId formid "copy"  (copybutton obbuts.value step)
+# (copy	,hst) 	= ListFuncBut (Init, copyId) hst	
+# (elemstore,hst)= mkStoreForm (Init,elemId) (if copy.changed (\_ -> olist.value!!copy.value 0) id) hst	
+
+# pasteId		= subnFormId formid "paste"  (pastebutton obbuts.value step)
+# (paste,hst) 	= ListFuncBut (Init, pasteId) hst	
+
+# newlist		= olist.value
+# newlist		= if paste.changed (updateAt (paste.value 0) elemstore.value newlist) newlist
+# newlist		= ins.value newlist 
+# newlist		= add.value newlist
+# newlist		= app.value newlist 
+# newlist		= del.value newlist 
+
+//# (list,hst)	= reftoVertListForm (setID formid undef) hst
+# (list,hst)	= reftoVertListForm (setID formid [(mode,elem) \\ elem <- newlist & (mode,_) <- formid.ival]) hst
+# lengthlist	= length newlist
+# (index,hst)	= mkEditForm (setID indexId obbuts.value) hst
+# (bbuts, hst)	= browseButtons (Init, bbutsId) step lengthlist nbuts hst
+
+# betweenindex	= (bbuts.value,bbuts.value + step - 1)
+
+# pdmenu		= PullDown (1,defpixel) (step, [toString lengthlist +++ " More... ":["Show " +++ toString i \\ i <- [1 .. max 1 lengthlist]]]) 
+# (pdbuts,hst)	= mkEditForm (setID pdmenuId pdmenu) hst
+ 
+= 	(	{ form 		= case formid.mode of
+						Edit ->		pdbuts.form ++ 	bbuts.form ++ 
+									[[(toHtml ("nr " <+++ (i+1)  <+++ " / " <+++ length list.value) <.||.> 
+									  del <.=.> ins <.=.> app  <.=.> copy  <.=.> paste) 
+										\\ del <- del.form & ins <- ins.form & app <- app.form & copy <- copy.form & paste <- paste.form 
+											& i <- [bbuts.value..]] 
+											<=|> list.form%betweenindex] ++ 
+											(if (lengthlist <= 0) add.form [])
+						Display ->	[bbuts.form <=|> list.form%betweenindex]
+		, value 	= list.value
+		, changed 	= olist.changed || obbuts.changed || del.changed || pdbuts.changed ||ins.changed ||
+						add.changed || copy.changed || paste.changed || list.changed
+		}
+	,	hst )
+where
+	addbutton = 
+		[ (but 1 "Append", \_ -> [createDefault])]
+	but i s	= LButton (defpixel/i) s
+	delbutton index step = 
+		[ (but 5 "D", \list -> removeAt i list) \\ i <- [index .. index + step]]
+	insertbutton e index step = 
+		[ (but 5 "I", \list -> insertAt i e list) \\ i <- [index .. index + step]]
+	appendbutton e index step = 
+		[ (but 5 "A", \list -> insertAt (i+1) e list) \\ i <- [index .. index + step]]
+	copybutton index step = 
+		[ (but 5 "C", \_ -> i) \\ i <- [index .. index + step]]
+	pastebutton index step = 
+		[ (but 5 "P", \_ -> i) \\ i <- [index .. index + step]]
+
+	merge olist newlist = undef
+
 table_hv_Form :: !(InIDataId [[a]]) !*HSt -> (Form [[a]],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 table_hv_Form inIDataId hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) horlistForm inIDataId hSt
 

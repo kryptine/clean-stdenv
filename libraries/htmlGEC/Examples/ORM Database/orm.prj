@@ -61,11 +61,11 @@ MainModule
 	DclOpen:	False
 	Icl
 		WindowPosition
-			X:	13
-			Y:	18
+			X:	0
+			Y:	8
 			SizeX:	927
 			SizeY:	540
-	IclOpen:	False
+	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
 	Module
@@ -111,15 +111,15 @@ OtherModules
 			ReuseUniqueNodes:	True
 		Dcl
 			WindowPosition
-				X:	66
-				Y:	72
-				SizeX:	958
+				X:	0
+				Y:	87
+				SizeX:	932
 				SizeY:	514
-		DclOpen:	False
+		DclOpen:	True
 		Icl
 			WindowPosition
-				X:	57
-				Y:	22
+				X:	16
+				Y:	23
 				SizeX:	884
 				SizeY:	448
 		IclOpen:	False
@@ -4212,10 +4212,10 @@ OtherModules
 		DclOpen:	False
 		Icl
 			WindowPosition
-				X:	43
-				Y:	0
-				SizeX:	1045
-				SizeY:	563
+				X:	36
+				Y:	9
+				SizeX:	865
+				SizeY:	510
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -4489,6 +4489,7 @@ Static
 		Path:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_startup2.o
 		Path:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_system.o
 		Path:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Libraries\htmlGEC\Examples\ORM Database\Clean System Files\orm.o
+		Path:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Libraries\htmlGEC\Examples\ORM Database\Clean System Files\databaseDef.o
 		Path:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
 		Path:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
 		Path:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdOverloaded.o
@@ -4637,7 +4638,6 @@ Static
 		Path:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlArrow.o
 		Path:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
 		Path:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Libraries\htmlGEC\Examples\ORM Database\Clean System Files\databaseIData.o
-		Path:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Libraries\htmlGEC\Examples\ORM Database\Clean System Files\databaseDef.o
 		Path:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Libraries\htmlGEC\Examples\ORM Database\Clean System Files\support.o
 		Path:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.obj
 		Path:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFileSelectors_121.obj

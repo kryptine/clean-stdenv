@@ -55,6 +55,15 @@ layoutListForm	:: !([BodyTag] [BodyTag] -> [BodyTag])
 
 vertlistFormButs:: !Int !(InIDataId [a]) 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
+// The Refto structure used in the forms below will generate a file with indicated name containing the indicated value
+// This can be used to share information: one needs to know the file name
+// Display mode will open the files read-only which can be used for multi-user web pages
+
+:: Refto a = Refto String a		// filename and initial value to store in this file
+
+reftoEditForm 		:: 		!(InIDataId (Refto a)) 		 	!*HSt -> (Form (Refto a),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+reftoVertListForm 	:: 		!(InIDataId [(Mode,Refto a)]) 	!*HSt -> (Form [Refto a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+reftoListFormButs 	:: !Int !(InIDataId [(Mode,Refto a)]) 	!*HSt -> (Form [Refto a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
 // **** forms for tuples ****
 

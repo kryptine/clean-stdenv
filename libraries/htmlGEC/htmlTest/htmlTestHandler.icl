@@ -61,7 +61,7 @@ where
 	fetchInputOptions` [STable _ bdtags :inputs] = flatten (map fetchInputOptions` bdtags) ++ fetchInputOptions` inputs
 	fetchInputOptions` [_			 :inputs] 	= fetchInputOptions` inputs
 	
-	fetchInputOption [Inp_Type inptype, Inp_Value val,	Inp_Name triplet:_] = [(inptype,val,decodeInfo triplet)]
+	fetchInputOption [Inp_Type inptype, Inp_Value val,	Inp_Name triplet:_] = [(inptype,val,decodeTriplet triplet)]
 	fetchInputOption [Inp_Type inptype, Inp_Value val:_] = [(inptype,val,Nothing)]
 	fetchInputOption [x:xs] = fetchInputOption xs
 	fetchInputOption _ = []
