@@ -13,7 +13,7 @@ gForm {|Reports|} formid hst
 	= specialize myeditor (Init,formid) hst
 where
 	myeditor (init,formid) hst
-	# (papernrform,hst)	= vertlistForm (Init,{reuseFormId formid reflist & mode = Display} ) hst
+	# (papernrform,hst)	= vertlistForm (Init,{reuseFormId formid reflist & mode = Display, lifespan = Page} ) hst
 	= (	{ changed		= papernrform.changed
 		, value 		= Reports reflist
 		, form 			= papernrform.form

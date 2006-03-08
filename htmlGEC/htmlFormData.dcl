@@ -18,8 +18,9 @@ import StdMaybe, StdBool
 	=	Init 									// 	The value will be used as initial value
 	|	Set  									// 	This value will be used as new iData value
 
-:: Lifespan										// defines how long a form will be maintained		
-	= 	Persistent								// 	form will live "forever" in a file
+:: Lifespan										// 	defines how long a form will be maintained		
+	= 	Persistent								// 	form will live "forever" (in a file)
+	|	PersistentRO							//	persistent form is read-only
 	| 	Session									// 	form will live as long as one browses between the pages offered by the application
 	| 	Page									// 	form will be automatically garbage collected when no reference is made to it			
 

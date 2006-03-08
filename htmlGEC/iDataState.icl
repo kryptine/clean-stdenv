@@ -34,7 +34,7 @@ derive gPrint UpdValue, (,,)
 :: Tree_ a 		= Node_ (Tree_ a) a (Tree_ a) | Leaf_
 :: FormState 	= OldState !FState						// Old states are the states from the previous calculation
 				| NewState !FState						// New states are newly created states or old states that have been inspected and updated
-:: FState		= { format	 :: !Format			// Encoding method used for serialization
+:: FState		= { format	 :: !Format					// Encoding method used for serialization
 				  , life	 :: !Lifespan				// Its life span
 				  }
 :: Format		= PlainStr 	!.String						// Either a string is used for serialization
@@ -89,6 +89,12 @@ where
 		Just a 	-> (True,Just a,Node_ Leaf_ (id,NewState {format = PlainStr string, life = Persistent}) Leaf_,world)
 		Nothing	-> (False,Nothing,Leaf_,world)
 
+	findState` {id,lifespan = PersistentRO,storage = PlainString} Leaf_ world 
+	# (string,world) = readStringState (MyDir server) id world
+	= case parseString string of
+		Just a 	-> (True,Just a,Node_ Leaf_ (id,NewState {format = PlainStr string, life = PersistentRO}) Leaf_,world)
+		Nothing	-> (False,Nothing,Leaf_,world)
+
 	findState` {id,lifespan = Persistent,storage = StaticDynamic} Leaf_ world 
 	# (string,world) = readDynamicState (MyDir server) id world
 	= case string of 
@@ -96,6 +102,15 @@ where
 		_  = case string_to_dynamic` string of
 				dyn=:(dynval::a^) 	-> (True,Just dynval,Node_ Leaf_ (id,NewState {format = StatDyn dyn, life = Persistent}) Leaf_,world)
 				else				-> (False,Nothing,Leaf_,world)
+
+	findState` {id,lifespan = PersistentRO,storage = StaticDynamic} Leaf_ world 
+	# (string,world) = readDynamicState (MyDir server) id world
+	= case string of 
+		"" = (False,Nothing,Leaf_,world)
+		_  = case string_to_dynamic` string of
+				dyn=:(dynval::a^) 	-> (True,Just dynval,Node_ Leaf_ (id,NewState {format = StatDyn dyn, life = PersistentRO}) Leaf_,world)
+				else				-> (False,Nothing,Leaf_,world)
+
 	findState` _ Leaf_ world = (False,Nothing,Leaf_,world)
 	findState` _ _ world = (False,Nothing,Leaf_,world)
 
@@ -108,13 +123,13 @@ replaceState formid val formstates=:{fstates} world
 = ({formstates & fstates = fstates},world)
 where
 	replaceState` ::  !(FormId a) a *FStates *NWorld -> (*FStates,*NWorld)	| gPrint{|*|} a & TC a
-	replaceState` formid val Leaf_ world = (Node_ Leaf_ (formid.id,NewState (initNewState formid.lifespan formid.storage val)) Leaf_,world)
+	replaceState` formid val Leaf_ world = (Node_ Leaf_ (formid.id,NewState (initNewState (adjustlife formid.lifespan) formid.storage val)) Leaf_,world)
 	replaceState` formid val (Node_ left a=:(fid,_) right) world
-	| formid.id == fid 					= (Node_ left (fid,NewState (initNewState formid.lifespan formid.storage val)) right,world)
+	| formid.id == fid 	= (Node_ left (fid,NewState (initNewState formid.lifespan formid.storage val)) right,world)
 	| formid.id < fid 	= (Node_ nleft a right,nworld)
 							with
 								(nleft,nworld) = replaceState` formid val left world
-	| otherwise			 = (Node_ left a nright,nworld)
+	| otherwise			= (Node_ left a nright,nworld)
 							with
 								(nright,nworld) = replaceState` formid val right world
 
@@ -123,6 +138,9 @@ where
 	initNewState :: !Lifespan !StorageFormat !a  -> FState | TC a &  gPrint{|*|} a 
 	initNewState lifespan PlainString   nv = {format = PlainStr (printToString nv), life = lifespan}
 	initNewState lifespan StaticDynamic nv = {format = StatDyn  (dynamic nv), life = lifespan}// convert the hidden state information stored in the html page
+
+	adjustlife PersistentRO = Persistent // to enforce that a read only persistent file is written once
+	adjustlife life = life
 
 // Serialization and De-Serialization of states
 //
@@ -140,8 +158,7 @@ where
 						])
 	where
 		toExistval PlainString string 		= PlainStr string	// string that has to be parsed in the context where the type is known
-		toExistval StaticDynamic string 	= StatDyn (string_to_dynamic` string) // crash
-//		toExistval StaticDynamic string 	= StatDyn (string_to_dynamic (decodeString string)) // crash
+		toExistval StaticDynamic string 	= StatDyn (string_to_dynamic` string) // recover the dynamic
 
 	(htmlStates,triplet,update) = DecodeHtmlStatesAndUpdate serverkind args
 	parsed_triplet  = parseString triplet
@@ -158,11 +175,6 @@ where
 		Just ("",0,UpdI 0) = ""
 		Just (id,_,_)   = id 
 		else = ""
-
-/*	= case parseString triplet of
-		Just ("",0,UpdI 0) = ""
-		Just (id,_,_)   = id 
-		else = ""*/
 
 // Serialize all states in FormStates that have to be remembered to either hidden encoded Html Code
 // or store them in a persistent file, all depending on the kind of states
@@ -188,7 +200,6 @@ where
 			= toHtmlState` left [(fid,Session,PlainString,stringval):toHtmlState` right accu]
 		toHtmlState` (Node_ left (fid,OldState {life=Session,format=StatDyn dynval}) right) accu 
 			= toHtmlState` left [(fid,Session,StaticDynamic,dynamic_to_string dynval):toHtmlState` right accu]
-//			= toHtmlState` left [(fid,Session,StaticDynamic,encodeString (dynamic_to_string dynval)):toHtmlState` right accu]
 
 		// other old states will have lifespan page or persistent; they need not to be stored in the page
 
@@ -199,6 +210,8 @@ where
 
 		toHtmlState` (Node_ left (fid,NewState {life=Persistent}) right) accu 
 			= toHtmlState` left (toHtmlState` right accu)
+		toHtmlState` (Node_ left (fid,NewState {life=PersistentRO}) right) accu 
+			= toHtmlState` left (toHtmlState` right accu)
 
 		// the state of all other new forms created will be stored in the page 
 
@@ -206,7 +219,6 @@ where
 			= toHtmlState` left [(fid,life,PlainString,string): toHtmlState` right accu]
 		toHtmlState` (Node_ left (fid,NewState {format = StatDyn dynval,life}) right) accu 
 			= toHtmlState` left [(fid,life,StaticDynamic,dynamic_to_string dynval): toHtmlState` right accu]
-//			= toHtmlState` left [(fid,life,StaticDynamic,encodeString (dynamic_to_string dynval)): toHtmlState` right accu]
  
 	submitscript :: !String !String -> BodyTag
 	submitscript formname updatename

@@ -1,6 +1,6 @@
 implementation module htmlButtons
 
-import StdEnv, ArgEnv, StdMaybe
+import StdEnv, ArgEnv
 
 import htmlHandler, htmlStylelib, htmlTrivial
 
@@ -253,9 +253,9 @@ gForm{|TextArea|} formid hst
 	, value 	= formid.ival
 	, form		= [Form [Frm_Method Post, `Frm_Events [OnSubmit callClean]] 
 					[mkSTable 	[ [ Textarea [Txa_Name "message", Txa_Rows row, Txa_Cols col ] "" ]
-								, [BodyTag [ Input [Inp_Type Inp_Submit, Inp_Name (encodeTriplet (formid.id,cntr+2,UpdS string)), Inp_Value (SV "Submit"),`Inp_Events [OnClick callClean]] ""
-								  		    , Input [Inp_Type Inp_Reset, Inp_Name "reset", Inp_Value (SV "Reset")] ""
-								           ]
+								, [mkSTable [[ Input [Inp_Type Inp_Submit, Inp_Name (encodeTriplet (formid.id,cntr+2,UpdS string)), Inp_Value (SV "Set"),`Inp_Events [OnClick callClean]] ""
+								  		   		, Input [Inp_Type Inp_Reset, Inp_Name "reset", Inp_Value (SV "Reset")] ""
+								           		]]
 								  ]
 								]
 					]] 

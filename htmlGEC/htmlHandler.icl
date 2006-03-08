@@ -332,7 +332,6 @@ where
 gForm{|(->)|} garg gres formid hst 	
 = ({changed=False, value=formid.ival, form=[]},hst)
 
-
 // gUpd calculates a new value given the current value and a change in the value
 // if necessary it invents new default value (e.g. when switching from Nil to Cons ...
 // and leaves the rest untouched
@@ -526,20 +525,6 @@ runUserApplication userpage states nworld
 
 // Experimental testing stuf ...
 
-/*		
-:: *TestEvent	:== (Triplet,UpdValue,*FormStates) // chosen triplet, its new value 
-:: InputType	= Inp_Button
-				| Inp_Checkbox
-				| Inp_File
-				| Inp_Hidden
-				| Inp_Image
-				| Inp_Password
-				| Inp_Radio
-				| Inp_Reset
-				| Inp_Submit
-				| Inp_Text
-*/
-
 instance toString (a,b,c) | toString a & toString b & toString c
 where
 	toString (a,b,c) = "(\"" +++ toString a +++ "\"," +++ toString b +++ "," +++ toString c +++ ")"
@@ -716,65 +701,4 @@ where
 	ft [U		attrs str  :tl] c = [str:ft tl c]		// underlined text <u></u>
 	ft [_:tl]                   c = ft tl c
 	ft []                       c = c
-/*
-			| Abbr 			[Std_Attr] String			// abbreviation <abbr></abbr>
-			| Acronym		[Std_Attr] String			// acronym <acronym></acronym>
-			| Address		[Std_Attr] String			// address <address></address>
-			| Applet		[Applet_Attr] String		// applet <applet></applet>
-			| Area			[Area_Attr]					// link area in an image <area> ALWAYS NESTED INSIDE A <map> TAG
-			| Bdo  			[Std_Attr] String			// direction of text <bdo></bdo>
-			| Blockquote  	[Block_Attr] String			// start of a long quotation <blockquote></blockquote>
-			| Br  										// single line break <br>
-			| Button 		[Button_Attr] String		// push button <button></button>		
-			| Cite			[Std_Attr] String 			// citation <cite></cite>			
-			| Comment		String 						// comment text <!-- text -->
-			| Col			[Col_Attr]					// attribute values for one or more columns in a table <col></col>
-			| Colgroup		[Col_Attr]					// group of table columns <colgroup></colgroup>
-			| Dd			[Std_Attr] [BodyTag]		// description of a term in a definition list <dd></dd>			
-			| Del			[Del_Attr] String 			// deleted text <del></del>			
-			| Dfn	 		[Std_Attr] String			// definition <dfn></dfn>	
-			| Dir			[Std_Attr] [BodyTag]		// directory list <dir></dir>			
-			| Div			[Div_Attr] [BodyTag]		// section in a document <div></div>			
-			| Dl			[Std_Attr] [BodyTag]		// definition list <dl></dl>			
-			| Dt			[Std_Attr] [BodyTag]		// definition term <dt></dt>			
-			| Fieldset		[Std_Attr] [BodyTag]		// fieldset element <fieldset></fieldset>
-			| Font			[Font_Attr] [BodyTag]		// font <font></font>
-			| Form 			[Form_Attr] [BodyTag] 		// form <form></form>
-			| Hr	 		[Hr_Attr]					// horizontal rule <hr>
-			| Iframe		[Iframe_Attr]				// iframe <iframe></iframe>
-			| Img	 		[Image_Attr]				// image <img>
-			| Input	 		[Input_Attr] String			// inputs <input>
-			| Ins 			[Ins_Attr] String			// inserted text <ins></ins>
-			| Kbd  			[Std_Attr] String			// keyboard text <kbd></kbd>
-			| Label			[Label_Attr] String			// label for a control <label></label>
-			| Legend		[Legend_Attr] String		// legend for a fieldset <legend></legend>
-			| Li			[Li_Attr] [BodyTag]			// options in lists <li></li>
-			| Map 			[Map_Attr] [BodyTag]		// map <map></map>
-			| Menu 			[Std_Attr] [BodyTag]		// menu list <menu></menu>
-			| Noscript		[Standard_Attr]	String		// you can't see scripts <noscript></noscript>
-			| Body_Object 	[Object_Attr] [Param]		// insert an object <object></object>
-			| Ol	 		[Ol_Attr] [BodyTag]			// ordered list <ol></ol>
-			| P  			[P_Attr] [BodyTag]			// paragraph <p></p>
-			| Pre 			[Pre_Attr] [BodyTag]		// preformatted text <pre></pre>
-			| Q				[Q_Attr] String				// short quotation <q></q>
-			| S	 			[Std_Attr] String			// strikethrough text <s></s>
-			| Samp	 		[Std_Attr] String			// Sample computer code <samp></samp>
-			| Script		[Script_Attr] Script		// script <script></script>
-			| Select 		[Select_Attr] [Option]		// select <select></select>
-			| Small 		[Std_Attr] String 			// smaller <small></small>
-			| Span			[Std_Attr] [BodyTag]		// section in a document <span></span>
-			| Strike		[Std_Attr] String			// strikethrough text <strike></strike>
-			| Strong		[Std_Attr] String			// strong emphasized text <strong></strong>
-			| Sub	 		[Std_Attr] String			// subscript text <sub></sub>
-			| Sup			[Std_Attr] String			// superscript text <sup></sup>
-			| Textarea		[TxtA_Attr] String			// textarea <textarea></textarea>
-			| TFoot			[T_Attr] [BodyTag]			// foot of a table <tfoot></tfoot>
-			| Th	 		[Td_Attr] String			// table header cell in a table <th></th>
-			| THead			[T_Attr] [BodyTag]			// header of a table <thead></thead>
-			| Ul	 		[Ul_Attr] [BodyTag]			// unordered list <ul></ul>
-			| Var			[Std_Attr] String			// variable text <var></var>
 
-			| STable		[Table_Attr] [[BodyTag]]	// simple table used for Clean forms
-			| BodyTag		[BodyTag]					// improves flexibility for code generation
-			| EmptyBody									// same 
-*/
