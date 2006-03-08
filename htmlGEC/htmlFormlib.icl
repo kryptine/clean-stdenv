@@ -216,36 +216,55 @@ where
 // The files can be used to share information (one needs to know the file name)
 // It also enables multi-user access by ensuring that a user only opens his own files for writing
 
-:: Refto a = Refto String a
+:: Refto a = Refto String
 
-reftoEditForm :: !(InIDataId (Refto a)) !*HSt -> (Form (Refto a),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+derive gForm 	Refto
+derive gUpd 	Refto
+derive gPrint 	Refto
+derive gParse 	Refto
+
+reftoEditForm :: !(InIDataId (Refto a,Mode,a)) !*HSt -> (Form (Refto a),Form a,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 reftoEditForm  (init,formid) hst 
-#(idata,hst) = mkEditForm (init,	{ formid 	& id 		= filename
+# (ref,hst)		= mkEditForm (init, reuseFormId formid (Refto filename)) hst
+# (Refto nname)	= ref.value
+# (ifile,hst) 	= mkEditForm (init,	{ formid 	& id 		= nname
 												, ival		= a
-												, lifespan 	= ifEdit formid.mode Persistent PersistentRO 
+												, lifespan 	= ifEdit mode Persistent PersistentRO
+												, mode		= mode 
 									}) hst
-= ({idata & value = Refto filename idata.value, form = [[toHtml ("F " <+++ filename)] <=> idata.form]},hst)
+= ({ref & form = [[toHtml ("File Name: " )] <=> ref.form]},{ifile & form = [[toHtml (nname +++ ": ")] <=> ifile.form]},hst)
 where
-	(Refto filename a) = formid.ival
+	(Refto filename,mode,a) = formid.ival
 
-reftoVertListForm :: !(InIDataId [(Mode,Refto a)]) !*HSt -> (Form [Refto a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+reftoVertListForm :: !(InIDataId [(Refto a,Mode,a)]) !*HSt -> (Form [Refto a],Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 reftoVertListForm (init,formid) hst
-# (listf,hst) 	= maplSt reftoEditForm [(init,{reuseFormId formid refto & mode = nmode}) \\ (nmode,refto) <- formid.ival] hst
-= (	{ changed 	= or [elem.changed \\ elem <- listf]
-	, value 	= [elem.value \\ elem <- listf]
-	, form		= [BodyTag elem.form \\ elem <- listf]
-//	, form		= [mkColForm (foldl (++) [] [elem.form \\ elem <- listf])]
+# storeid		= reuseFormId formid [Refto name\\ (Refto name,mode,_) <- formid.ival]
+# (store,hst)	= mkStoreForm (init,storeid) id hst												// store for refto list	
+# (twof,hst) 	= maplSt reftoEditForm` [(init,subnFormId formid name (Refto name2,mode,a)) 
+											\\ (Refto name,mode,a) <- formid.ival & (Refto name2) <- store.value] hst
+# (fref,ffile)	= unzip twof
+# frefvalue		= [elem.value \\ elem <- fref]
+# (store,hst)	= mkStoreForm (init,storeid) (\list -> frefvalue) hst
+= (	{ changed 	= or [elem.changed \\ elem <- fref]
+	, value 	= [elem.value \\ elem <- fref]
+	, form		= [BodyTag elem.form \\ elem <- fref]
+	}
+  , { changed 	= or [elem.changed \\ elem <- ffile]
+	, value 	= [elem.value \\ elem <- ffile]
+	, form		= [BodyTag elem.form \\ elem <- ffile]
 	},hst)
 where
-	(Refto filename a) = formid.ival
+	reftoEditForm` all hst
+	# (fref,ffile,hst) = reftoEditForm all hst
+	= ((fref,ffile),hst)
+
 		
-
-derive gForm Refto
-derive gUpd Refto
-derive gPrint Refto
-derive gParse Refto
-
-reftoListFormButs :: !Int  !(InIDataId [(Mode,Refto a)]) !*HSt -> (Form [Refto a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+/*
+= (	{ changed 	= or [elem.changed \\ elem <- fref]
+	, value 	= [elem.value \\ elem <- fref]
+	, form		= [BodyTag elem.form \\ elem <- fref]
+	}
+reftoListFormButs :: !Int  !(InIDataId [(Mode,(Refto a,a))]) !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 reftoListFormButs nbuts (init,formid) hst
 # indexId		= subFormId formid "idx" 0
 # (index,hst)	= mkEditForm (init,indexId) hst
@@ -287,8 +306,10 @@ reftoListFormButs nbuts (init,formid) hst
 # newlist		= app.value newlist 
 # newlist		= del.value newlist 
 
-//# (list,hst)	= reftoVertListForm (setID formid undef) hst
-# (list,hst)	= reftoVertListForm (setID formid [(mode,elem) \\ elem <- newlist & (mode,_) <- formid.ival]) hst
+# (list,hst)	= reftoVertListForm (setID formid [(mode,Refto name value) 
+													\\ (Refto name value) <- newlist 
+													,  (mode,Refto name2 value) <- formid.ival
+													| name == name2]) hst
 # lengthlist	= length newlist
 # (index,hst)	= mkEditForm (setID indexId obbuts.value) hst
 # (bbuts, hst)	= browseButtons (Init, bbutsId) step lengthlist nbuts hst
@@ -328,7 +349,7 @@ where
 		[ (but 5 "P", \_ -> i) \\ i <- [index .. index + step]]
 
 	merge olist newlist = undef
-
+*/
 table_hv_Form :: !(InIDataId [[a]]) !*HSt -> (Form [[a]],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 table_hv_Form inIDataId hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) horlistForm inIDataId hSt
 
