@@ -8,7 +8,7 @@ import htmlDataDef, htmlFormData
 import StdBool
 import GenPrint, GenParse
 
-TraceInput :== True		// set it to True if you want to see what kind of information is received from browser
+TraceInput :== False		// set it to True if you want to see what kind of information is received from browser
 
 derive bimap Form, FormId
 
