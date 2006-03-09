@@ -55,22 +55,16 @@ layoutListForm	:: !([BodyTag] [BodyTag] -> [BodyTag])
 
 vertlistFormButs:: !Int !(InIDataId [a]) 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
-// The Refto structure used in the forms below will generate a file with indicated name containing a value of indicated type
-// This can be used to share information: one needs to know the file name
-// Display mode will open the files read-only which can be used for multi-user web pages
+// The Refto structure used in the forms below will refer to a file with indicated name containing a value of indicated type
+// This can be used to share information, the file name is used as key
+// The file is openend read-only (Mode = Display) or it can be edited and the new value will be written to file
 
 :: Refto a = Refto String
 
-reftoEditForm 		:: !(InIDataId  (Refto a,Mode,a)) 	!*HSt -> (Form (Refto a),Form a,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-reftoVertListForm 	:: !(InIDataId [(Refto a,Mode,a)]) 	!*HSt -> (Form [Refto a],Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+reftoEditForm 		:: 		!Mode !Init !(InIDataId  (Refto a,a))  !*HSt -> (Form (Refto a),Form a,!*HSt)   | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+reftoVertListForm 	:: 		!Mode !Init !(InIDataId [(Refto a,a)]) !*HSt -> (Form [Refto a],Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+reftoListFormButs 	:: !Int	!Mode !Init !(InIDataId [(Refto a,a)]) !*HSt -> (Form [Refto a],Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
-/*
-:: Refto a = Refto String a		// filename and initial value to store in this file
-
-reftoEditForm 		:: 		!(InIDataId (Refto a)) 		 	!*HSt -> (Form (Refto a),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-reftoVertListForm 	:: 		!(InIDataId [(Mode,Refto a)]) 	!*HSt -> (Form [Refto a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-reftoListFormButs 	:: !Int !(InIDataId [(Mode,Refto a)]) 	!*HSt -> (Form [Refto a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-*/
 // **** forms for tuples ****
 
 t2EditForm  	:: !(InIDataId (a,b))			!*HSt -> ((Form a,Form b),!*HSt)| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
