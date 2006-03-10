@@ -1,8 +1,9 @@
 definition module Rational
 
 import	ExtendedArithBasics
-from	StdOverloaded import ==, <, +, -, zero, *, /, one, abs, sign, ~, toReal
-from	BigInt import BigInt, toBigInt
+from	StdOverloaded import class ==,class <,class +,class -,class zero,
+		class *,class /,class one,class abs,class sign,class ~, class toReal
+from	BigInt import ::BigInt,class toBigInt
 
 :: Rational
 
