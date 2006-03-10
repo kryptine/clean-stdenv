@@ -1,8 +1,20 @@
-system module BigInt
+definition module BigInt
 
 import	StdOverloaded
 import	ExtendedArithBasics
-from	_SystemBigInt	import :: BigInt
+from	_SystemBigInt	import
+		:: BigInt,
+		instance zero       BigInt,
+		instance one        BigInt,
+		instance EqInt      BigInt,
+		instance LessInt    BigInt,
+		instance GreaterInt BigInt,
+		instance +%         BigInt,
+		instance -%         BigInt,
+		instance %-         BigInt,
+		instance *%         BigInt,
+		class toBigInt (..),
+		instance toBigInt   Int
 
 // integers of unbounded length: 
 
@@ -20,11 +32,11 @@ instance isOdd			BigInt
 
 instance +				BigInt
 instance -				BigInt
-instance zero			BigInt
+//instance zero			BigInt
 
 instance *				BigInt
 instance /				BigInt				//	Truncated to 0
-instance one 			BigInt
+//instance one 			BigInt
 
 instance ^				BigInt
 instance sqrt			BigInt
@@ -47,13 +59,13 @@ powMod  :: !BigInt !BigInt !BigInt -> .BigInt
 
 // specialised versions for operations with 32 bit numbers
 
-instance EqInt			BigInt
-instance LessInt		BigInt
-instance GreaterInt		BigInt
-instance +%				BigInt
-instance -%				BigInt
-instance %-				BigInt
-instance *%				BigInt
+//instance EqInt		BigInt
+//instance LessInt		BigInt
+//instance GreaterInt	BigInt
+//instance +%			BigInt
+//instance -%			BigInt
+//instance %-			BigInt
+//instance *%			BigInt
 instance ^%				BigInt
 
 // conversion
@@ -63,8 +75,8 @@ bigIntToString	::	!Base !Bool !BigInt -> String
 	// Bool: digits above '9' are uppercase
 stringToBigInt	::	!Base !String -> .BigInt
 
-class toBigInt			a	:: !a		->	.BigInt
-instance toBigInt 		Int
+//class toBigInt		a	:: !a		->	.BigInt
+//instance toBigInt 	Int
 instance toBigInt 		{#Char}
 
 instance toReal			BigInt
