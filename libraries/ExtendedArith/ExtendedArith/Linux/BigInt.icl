@@ -316,6 +316,8 @@ handle_add_overflow {sign_or_number}
 			  	
 addSB :: !Int !BigInt2 -> BigInt2
 addSB i bigInt=:{sign_or_number}
+	| i==0
+		= bigInt
 	| i<0
 		| sign_or_number<0
 			= add (~i) bigInt
