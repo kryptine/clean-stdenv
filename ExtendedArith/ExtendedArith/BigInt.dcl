@@ -2,13 +2,7 @@ system module BigInt
 
 import	StdOverloaded
 import	ExtendedArithBasics
-//1.3
-from	_SystemBigInt	import BigInt
-from	StdString		import String
-//3.1
-/*2.0
 from	_SystemBigInt	import :: BigInt
-0.2*/
 
 // integers of unbounded length: 
 
@@ -151,3 +145,4 @@ remBS :: !BigInt2 !Int -> BigInt2
 remSB :: !Int !BigInt2 -> .BigInt2
 small_to_big2 :: !Int -> .BigInt2`
 subBMinInt :: !BigInt2 !Int -> BigInt2
+min_Int_entry2 :: !Int -> Int;
