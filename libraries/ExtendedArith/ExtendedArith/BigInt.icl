@@ -491,7 +491,7 @@ add_inplace_UB_B {sign_or_number=s1, limbs=l1} {sign_or_number=s2, limbs=l2}
 		= subtract_inplace_SU (l2, size2) (l1, size1)
 	= subtract_inplace_US (l1, size1) (l2, size2)
 
-addLimbs :: !LimbsWithSize !LimbsWithSize -> !.Limbs
+addLimbs :: !LimbsWithSize !LimbsWithSize -> .Limbs
 addLimbs (l1, size1) (l2, size2)
 	| size1>=size2
 		= continuation (l1, size1) (l2, size2)
@@ -504,7 +504,7 @@ addLimbs (l1, size1) (l2, size2)
 			= { sum & [lSize]=carry }
 		= setSize sum lSize
 
-addLimbs_inplace :: !(!*Limbs, !Size) !LimbsWithSize -> !.Limbs
+addLimbs_inplace :: !(!*Limbs, !Size) !LimbsWithSize -> .Limbs
 /* inplace addition, which destructively updates the first parameter
    the following assertions should hold for (addLimbs_inplace (l1,s1) (l1,s2))
 	size l1=s1>0, size l2=s2>0, s1>=s2
@@ -515,7 +515,7 @@ addLimbs_inplace (long_limbs, lSize) short
 		= sum
 	= append_limb (sum, lSize) carry
 
-append_limb :: !LimbsWithSize !Limb -> !.Limbs
+append_limb :: !LimbsWithSize !Limb -> .Limbs
 append_limb (array, array_size) limb 
 	#!	new	= create_uninitialized_int_array (inc array_size)
 		sum	= copyArray new array array_size
@@ -605,7 +605,7 @@ subtract_inplace_with_equal_length x_sign l1 l2 i
 		= subtract_big_small_inplace_SU x_sign l1 l2 i
 	= subtract_inplace_continuation (~x_sign) (l2,i) (l1,i)			
 
-subtract_big_small_inplace_SU :: !Sign !.Limbs !*Limbs !.Size -> !.BigInt2
+subtract_big_small_inplace_SU :: !Sign !.Limbs !*Limbs !.Size -> .BigInt2
 subtract_big_small_inplace_SU sign l1 l2 i
 // calculate (l1 % (0,i-1))-(l2 % (0,i-1))
 // the problem: l1 % (0,i-1) is bigger than l2 % (0,i-1), but the operation should
@@ -746,11 +746,9 @@ copyB b
 
 instance zero			BigInt
   where
-	zero = code {
-		.inline zero;BigInt
+	zero = code inline {
 		pushI 0
 		build _Nil 0 _hnf
-		.end
 		}	
 
 instance *				BigInt
@@ -1069,11 +1067,9 @@ powBS base expLimb
 
 instance one 			BigInt
   where
-	one = code {
-		.inline one;BigInt
+	one = code inline {
 		pushI 1
 		build _Nil 0 _hnf
-		.end
 		}	
 
 instance abs 			BigInt
@@ -1212,8 +1208,7 @@ instance gcd			BigInt
 
 instance EqInt BigInt
   where
-	(==%) _ _ = code {
-			.inline ==%;BigInt
+	(==%) _ _ = code inline {
 					.newlocallabel small_eqi
 					.newlocallabel end_eqi
 		
@@ -1227,15 +1222,11 @@ instance EqInt BigInt
 					pop_a 1
 					eqI
 				:end_eqi
-			.end
-				.d 0 1 b
-					rtn			|| in case the module is not a system module
 		}
 	
 instance LessInt BigInt
   where
-	(<%) _ _ = code {
-			.inline <%;BigInt
+	(<%) _ _ = code inline {
 					.newlocallabel small_lti
 		
 					eq_desc _Nil 0 0
@@ -1246,15 +1237,11 @@ instance LessInt BigInt
 				:small_lti
 					pop_a 1
 					ltI
-			.end
-				.d 0 1 b
-					rtn			|| in case the module is not a system module
 		}
 	
 instance GreaterInt BigInt
   where
-	(>%) _ _ = code {
-			.inline >%;BigInt
+	(>%) _ _ = code inline {
 					.newlocallabel small_gti
 		
 					eq_desc _Nil 0 0
@@ -1265,15 +1252,11 @@ instance GreaterInt BigInt
 				:small_gti
 					pop_a 1
 					gtI
-			.end
-				.d 0 1 b
-					rtn			|| in case the module is not a system module
 		}
 	
 instance +% BigInt
   where
-	(+%) _ _ = code {
-			.inline +%;BigInt
+	(+%) _ _ = code inline {
 					.newlocallabel is_small_addi
 					.newlocallabel end_addi
 		
@@ -1290,15 +1273,11 @@ instance +% BigInt
 					jsr e_BigInt_shandle_add_overflow
 				.o 1 1 i
 				:end_addi
-			.end
-				.d 1 1 i
-					rtn			|| in case the module is not a system module
 		}
 	
 instance -% BigInt
   where
-	(-%) _ _ = code {
-			.inline -%;BigInt
+	(-%) _ _ = code inline {
 					.newlocallabel is_small_subi
 					.newlocallabel end_subi
 		
@@ -1315,9 +1294,12 @@ instance -% BigInt
 					jsr e_BigInt_shandle_sub_overflow
 				.o 1 1 i
 				:end_subi
-			.end
-				.d 1 1 i
-					rtn			|| in case the module is not a system module
+	}
+
+min_Int_entry2 :: !Int -> Int;
+min_Int_entry2 _ = code {
+		.d 0 1 i
+			rtn
 
 		.export bigInt_min_Int_entry2
 			.o 1 2 ii
@@ -1336,14 +1318,12 @@ instance -% BigInt
 			update_b 0 1						|| B afterwards: sign -x -x
 			pop_b 1								|| B afterwards: sign -x
 		.d 1 2 ii
-			jsr e_BigInt_saddSB 
-		.o 1 1 i
+			jmp e_BigInt_saddSB
 		}
 	
 instance %- BigInt
   where
-	(%-) _ _ = code {
-			.inline %-;BigInt
+	(%-) _ _ = code inline {
 					.newlocallabel is_small_subi2
 					.newlocallabel end_subi2
 		
@@ -1360,16 +1340,12 @@ instance %- BigInt
 					jsr e_BigInt_shandle_sub_overflow
 				.o 1 1 i
 				:end_subi2
-			.end
-				.d 1 1 i
-					rtn			|| in case the module is not a system module
 		}
 
 
 instance *% BigInt
   where
-	(*%) _ _ = code {
-			.inline *%;BigInt
+	(*%) _ _ = code inline {
 					.newlocallabel is_small_muli
 					.newlocallabel no_overflow_muli
 					.newlocallabel end_muli
@@ -1394,9 +1370,6 @@ instance *% BigInt
 					update_b 0 2
 					pop_b 2
 				:end_muli
-			.end
-				.d 1 1 i
-					rtn			|| in case the module is not a system module
 		}
 
 instance ^% BigInt
@@ -1571,11 +1544,8 @@ instance toBigInt {#Char}
 
 bigInt2ToBigInt :: !u:BigInt2 -> u:BigInt
 bigInt2ToBigInt _
-	= code
-		{
-			.inline bigInt2ToBigInt
+	= code inline {
 			pop_a 0
-			.end
 		}
 
 stringToBigInt	::	!Base !String -> .BigInt
@@ -1627,10 +1597,8 @@ class toBigInt			a	:: !a		->	.BigInt
 
 instance toBigInt Int
   where
-	toBigInt _ = code {
-		.inline toBigInt;i
+	toBigInt _ = code inline {
 		build _Nil 0 _hnf
-		.end
 		}	
 
 instance toInt BigInt
@@ -2100,10 +2068,8 @@ powm dest base exponent modulus
 
 powmC :: !Limbs !BigInt2 !BigInt2 !BigInt2 !Limbs -> (!GMPSize, !.Limbs)
 powmC dest base exponent modulus _
-	= code
-		{	.inline powmC
+	= code inline {
 			ccall powmC "AIAIAIA:I:A"
-			.end
 		}
 
 //mpn_add :: !*Limbs !LimbsWithSize !LimbsWithSize -> (!Limb, !.Limbs)
@@ -2114,14 +2080,11 @@ mpn_add dest s1 s2
 mpn_add_inplace sd_limbs size src2
 	:== mpn_addC sd_limbs (sd_limbs, size) src2 sd_limbs
 
-mpn_addC :: !Limbs !LimbsWithSize !LimbsWithSize !Limbs ->  !(!Limb, !.Limbs)
+mpn_addC :: !Limbs !LimbsWithSize !LimbsWithSize !Limbs ->  (!Limb, !.Limbs)
 // src1Size>=src2Size, size(dest)==src1Size, returns carry
 mpn_addC destPtr (src1Ptr, src1Size) (src2Ptr, src2Size) _
-	= code
-		{
-			.inline mpn_addC
+	= code inline {
 			ccall __mpn_add "AAIAI:I:A"
-			.end
 		}
 
 //mpn_add_1 :: !*Limbs !LimbsWithSize !Limb -> (!Limb, !.Limbs)
@@ -2134,11 +2097,8 @@ mpn_add_1_inplace limbs size limb
 
 mpn_add_1C :: !Limbs !LimbsWithSize !Limb !Limbs -> (!Limb, !.Limbs)
 mpn_add_1C  destPtr s1 s2 _
-	= code
-		{
-			.inline mpn_add_1C
+	= code inline {
 			ccall __mpn_add_1 "AAII:I:A"
-			.end
 		}
 
 //add_1 :: !*Limbs !LimbsWithSize !Limb -> .Limbs
@@ -2148,11 +2108,8 @@ add_1 new limbs_with_size limb
 
 add_1C :: !Limbs !LimbsWithSize !Limb !Limbs -> .Limbs
 add_1C  destPtr s1 s2 _
-	= code
-		{
-			.inline add_1C
+	= code inline {
 			ccall add_1C "AAII:V:A"
-			.end
 		}
 
 //mpn_sub_1 :: !*Limbs !LimbsWithSize !Limb -> (!Limb, !.Limbs)
@@ -2165,11 +2122,8 @@ mpn_sub_1_inplace limbs size limb
 
 mpn_sub_1C :: !Limbs !LimbsWithSize !Limb !Limbs -> (!Limb, !.Limbs)
 mpn_sub_1C  destPtr s1 s2 _
-	= code
-		{
-			.inline mpn_sub_1C
+	= code inline {
 			ccall __mpn_sub_1 "AAII:I:A"
-			.end
 		}
 
 //mpn_sub_inplace :: !*Limbs !Size !LimbsWithSize -> (!Limb, !.Limbs)
@@ -2183,11 +2137,8 @@ mpn_sub dest s1 s2
 // src1Size>=src2Size, size(dest)==src1Size, returns borrow
 mpn_subC :: !Limbs !LimbsWithSize !LimbsWithSize !Limbs -> (!Limb, !.Limbs)
 mpn_subC destPtr (src1Ptr, src1Size) (src2Ptr, src2Size) _
-	= code
-		{
-			.inline mpn_subC
+	= code inline {
 			ccall __mpn_sub "AAIAI:I:A"
-			.end
 		}
 
 mpn_cmp :: !Limbs !Limbs !Size -> Int
@@ -2198,11 +2149,8 @@ mpn_cmp l1 l2 _
 	| l1<l2 = "a number smaller than 0"
 */
 mpn_cmp l1 l2 _
-	= code
-		{
-			.inline mpn_cmp
+	= code inline {
 			ccall __mpn_cmp "AAI-I"
-			.end
 		}
 
 //mpn_mul :: !*Limbs !LimbsWithSize !LimbsWithSize -> (!Limb, !.Limbs)
@@ -2214,11 +2162,8 @@ mpn_mulC :: !Limbs !LimbsWithSize !LimbsWithSize !Limbs -> (!Limb, !.Limbs)
 // space for result must be src1Size+src2Size
 // src1Size must be >= src2Size
 mpn_mulC destPtr (src1Ptr, src1Size) (src2Ptr, src2Size) _
-	= code
-		{
-			.inline mpn_mulC
+	= code inline {
 			ccall __mpn_mul "AAIAI:I:A"
-			.end
 		}
 
 //mpn_mul_1 :: !*Limbs !LimbsWithSize !Limb -> (!Limb, !.Limbs)
@@ -2227,11 +2172,8 @@ mpn_mul_1 new lws l
 
 mpn_mul_1C :: !Limbs !LimbsWithSize !Limb !Limbs -> (!Limb, !.Limbs)
 mpn_mul_1C  destPtr s1 s2 _
-	= code
-		{
-			.inline mpn_mul_1C
+	= code inline {
 			ccall __mpn_mul_1 "AAII:I:A"
-			.end
 		}
 
 //mpn_divrem ::  !*Limbs !Int !*Limbs !Size !LimbsWithSize -> (!Limb, !(!.Limbs, !.Limbs))
@@ -2247,11 +2189,8 @@ mpn_divremC :: !Limbs !Int !LimbsWithSize !LimbsWithSize !*env -> (!Limb, !*env)
 // Requirements: nomSize>=denomSize, most significant bit of divisor must be set
 // space for dest = nomSize-denomSize+xSize
 mpn_divremC destPtr xSize nom=:(nomLimbs,nomSize) denom=:(denomLimbs,denomSize) _
-	= code
-		{
-			.inline mpn_divremC
+	= code inline {
 			ccall __mpn_divrem "AIAIAI:I:A"
-			.end
 		}
 
 //remainder :: !*Limbs !Size !LimbsWithSize -> .Limbs
@@ -2260,11 +2199,8 @@ remainder nomLimbs nomSize denom
 
 remainderC :: !LimbsWithSize !LimbsWithSize !Limbs -> .Limbs
 remainderC nom=:(nomLimbs,nomSize) denom=:(denomLimbs,denomSize) _
-	= code
-		{
-			.inline remainderC
+	= code inline {
 			ccall remainderC "AIAI:V:A"
-			.end
 		}
 
 //mpn_divrem_1 :: !*Limbs !Int !LimbsWithSize !Limb -> (!Limb, !.Limbs)
@@ -2277,21 +2213,15 @@ mpn_divrem_1C :: !Limbs !Int !LimbsWithSize !Limb !Limbs -> (!Limb, !.Limbs)
 // memory for dest = nomSize+xSize
 // it is allowed that dest and (fst nom) are the same array
 mpn_divrem_1C dest xSize nom denom _
-	= code
-		{
-			.inline mpn_divrem_1C
+	= code inline {
 			ccall __mpn_divrem_1 "AIAII:I:A"
-			.end
 		}
 
 mpn_mod_1 :: !(!Limbs, !Size) !Limb -> Limb
 // the argument limbs are not destroyed
 mpn_mod_1 _ _
-	= code
-		{
-			.inline mpn_mod_1
+	= code inline {
 			ccall __mpn_mod_1 "AII-I"
-			.end
 		}
 
 //mpn_lshift :: !*Limbs !LimbsWithSize !Int -> (!Limb, !.Limbs)
@@ -2304,11 +2234,8 @@ mpn_lshiftC :: !Limbs !LimbsWithSize !Int !Limbs -> (!Limb, !.Limbs)
 // requirements: 1<=count<=n-1 on a n-bit machine, when space of source and destination
 // overlap then destPtr>=srcPtr 
 mpn_lshiftC destPtr src=:(srcPtr,srcSize) count _
-	= code
-		{
-			.inline mpn_lshiftC
+	= code inline {
 			ccall __mpn_lshift "AAII:I:A"
-			.end
 		}
 
 //mpn_rshift_inplace :: !*Limbs !Size !Int -> (!Limb, !.Limbs)
@@ -2321,11 +2248,8 @@ mpn_rshiftC :: !Limbs !LimbsWithSize !Int !Limbs -> (!Limb, !.Limbs)
 // requirements: 1<=count<=n-1 on a n-bit machine, when space of source and destination
 // overlap then destPtr<=srcPtr 
 mpn_rshiftC destPtr src=:(srcPtr,srcSize) count _
-	= code
-		{
-			.inline mpn_rshiftC
+	= code inline {
 			ccall __mpn_rshift "AAII:I:A"
-			.end
 		}
 
 
@@ -2395,11 +2319,8 @@ setStringSize str newSize
 
 setStringSizeC :: !{#Char} !Int !{#Char} -> .{#Char}
 setStringSizeC _ _ _
-	= code
-		{
-			.inline setStringSizeC
+	= code inline {
 			ccall setStringSizeC "SI:V:S"
-			.end
 		}
 
 //setSize :: !*Limbs !Size -> .Limbs
@@ -2408,21 +2329,15 @@ setSize limbs newSize
 
 setSizeC :: !Limbs !Int !Limbs -> .Limbs
 setSizeC _ _ _
-	= code
-		{
-			.inline setSizeC
+	= code inline {
 			ccall setSizeC "AI:V:A"
-			.end
 		}
 
 countLeadingZeros :: !Int -> Int
 // returns number of leading zero bits. argument must not be 0
 countLeadingZeros _
-	= code
-		{
-			.inline countLeadingZeros
+	= code inline {
 			ccall countLeadingZeros "I:VI"
-			.end
 		}
 
 //gmp_gcd :: !*Limbs !BigInt2 !BigInt2 -> (!GMPSize, !.Limbs)
@@ -2431,72 +2346,51 @@ gmp_gcd dest u v
 
 gmp_gcdC :: !Limbs !BigInt2 !BigInt2 !Limbs -> (!GMPSize, !.Limbs)
 gmp_gcdC dest u v _
-	= code
-		{
-			.inline gmp_gcdC
+	= code inline {
 			ccall gmp_gcdC "AIAIA:I:A"
-			.end
 		}
 
 pow_uiC :: !BigInt2 !Int -> (!Int, !CPtr)
 pow_uiC base exp
-	= code
-		{
-			.inline pow_uiC
+	= code inline {
 			ccall pow_uiC "IAI-II"
-			.end
 		}
 
 //transferGMPNumberToClean :: !*Limbs !CPtr !Size -> !.Limbs
 transferGMPNumberToClean dest src size
 	:== transferGMPNumberToCleanC dest src size dest
 
-transferGMPNumberToCleanC :: !Limbs !CPtr !Size !Limbs -> !.Limbs
+transferGMPNumberToCleanC :: !Limbs !CPtr !Size !Limbs -> .Limbs
 transferGMPNumberToCleanC dest src size _
-	= code
-		{
-			.inline transferGMPNumberToCleanC
+	= code inline {
 			ccall transferGMPNumberToCleanC "AII:V:A"
-			.end
 		}
 
 get_max_string_sizeC :: !Base !Size -> Int
 get_max_string_sizeC _ _
-	= code
-		{
-			.inline get_max_string_sizeC
+	= code inline {
 			ccall get_max_string_sizeC "II-I"
-			.end
 		}
 
 ratioToRealC :: !BigInt2 !BigInt2 -> Real
 ratioToRealC nom denom
-	= code
-		{	.inline ratioToRealC
+	= code inline {
 			ccall ratioToRealC "IAIA-R"
-			.end
 		}
 
 bigIntToRealC :: !BigInt2 -> Real
 bigIntToRealC _
-	= code
-		{	.inline bigIntToRealC
+	= code inline {
 			ccall bigIntToRealC "IA-R"
-			.end
 		}
 
 create_uninitialized_int_array :: !Int -> .{#Int}
-create_uninitialized_int_array size = code {
-	.inline create_uninitialized_int_array
+create_uninitialized_int_array size = code inline {
 	create_array_ INT 0 1
-	.end
 	}
 
 Cast :: !.a -> .b
 Cast a
-	= code
-		{
-			.inline Cast
+	= code inline {
 			pop_a 0
-			.end
 		}
