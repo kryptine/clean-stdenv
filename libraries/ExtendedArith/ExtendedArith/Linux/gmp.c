@@ -22,8 +22,6 @@ MA 02111-1307, USA. */
 #include <stdio.h>
 #include "gmp.h"
 
-#include "gmp-mparam.h"
-
 #if 0
 #include "gmp-impl.h"
 #include "longlong.h" /* for count_leading_zeros */
@@ -111,10 +109,11 @@ static unsigned char n_leading_zeros[256] = {
 #endif
 
 int get_max_string_sizeC(unsigned int base, unsigned int msize) {
-      return (int) ( msize * BITS_PER_MP_LIMB
 #if 1
+      return (int) ( msize * 32
 		 * my_chars_per_bit_exactly[base]) + 3;
 #else
+      return (int) ( msize * BITS_PER_MP_LIMB
 		 * __mp_bases[base].chars_per_bit_exactly) + 3;
 #endif
 	}
