@@ -7,9 +7,49 @@ derive gUpd  	Maybe, []
 derive gPrint 	Maybe
 derive gParse 	Maybe
 
-// global i-Data stores
+derive gForm 	
+				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts,
+				RefPerson, Person,
+				Reports, RefReport, Report, Recommendation, Familiarity, 
+				RefPaper, Paper, PaperInfo 
+derive gUpd 	
+				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts,
+				RefPerson, Person,
+				Reports, RefReport, Report, Recommendation, Familiarity, 
+				RefPaper, Paper, PaperInfo 
+derive gPrint 	
+				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts,
+				RefPerson, Person,
+				Reports, RefReport, Report, Recommendation, Familiarity, 
+				RefPaper, Paper, PaperInfo 
+derive gParse 	
+				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts,
+				RefPerson, Person,
+				Reports, RefReport, Report, Recommendation, Familiarity, 
+				RefPaper, Paper, PaperInfo 
 
-LoginStatesStore 	:: !((LoginStates ConfState) -> (LoginStates ConfState)) *HSt -> (!Form (LoginStates ConfState),!*HSt) // login administration database
-papersStore 		:: !Papers !(Papers -> Papers) *HSt -> (!Form Papers,!*HSt)										// papers to referee				
-currPageStore 		:: !CurrPage  !(CurrPage -> CurrPage) *HSt -> (!Form CurrPage,!*HSt)							// current page to display
-Exception			:: ((Bool,String) -> (Bool,String)) -> (*HSt -> *((Form (Bool,String)),*HSt))
+// Naming convention of shared persistent information
+
+uniqueDBname		:== "confDBS"
+uniquePerson  name 	:== Refto (name +++ ".person")
+uniqueReport  name 	:== Refto (name +++ ".report")
+uniquePaper   name 	:== Refto (name +++ ".paper")
+
+// The used persistent i-Data stores
+
+editAccounts :: !Mode !Init !ConfAccounts *HSt -> (!Form ConfAccounts,!*HSt)
+
+editPerson 	:: (!Mode,!Init,(!Refto Person,!Mode,!Init)) *HSt -> (Form (Refto Person),Form Person,!*HSt)
+
+ReportStore :: (Judgement -> Judgement) *HSt -> (Judgement,!*HSt)
+//getPerson 	:: !RefPerson *HSt -> (!Person,!*HSt)
+
+//editReport	:: (!Mode,!Init,(!RefReport,!Mode,!Init)) *HSt -> (Form RefReport,Form Report,!*HSt)
+//getReport 	:: !RefReport *HSt -> (!Report,!*HSt)
+
+//editPaper 	:: (!Mode,!Init,(!RefPaper,!Mode,!Init)) *HSt -> (Form RefPaper,Form Paper,!*HSt)
+//getPaper 	:: !RefPaper *HSt -> (!Paper,!*HSt)
+
+
+
+

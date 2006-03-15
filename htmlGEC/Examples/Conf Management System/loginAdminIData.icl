@@ -8,25 +8,17 @@ derive gUpd 	Login
 derive gPrint	Login
 derive gParse	Login
 
-// this global login form should always contain correct login name and password
+// this session login form can be used at every event to check whether the end user is indeed administrated
 
 loginForm :: !(Init,Login) !*HSt -> (Form Login,!*HSt)
-loginForm (init,login) hst = mkEditForm (init,sFormId "login" login) hst
-
-// a temperal login form used for changing passwords
-
-passwordForm :: !String !*HSt -> (Form String,!*HSt)
-passwordForm fid hst = mkEditForm (Init, nFormId fid "") hst
+loginForm (init,login) hst = mkEditForm (init,sFormId "adminID_login" login) hst
 
 // a login page
 
-loginPage  :: !(LoginStates state) !*HSt -> (!Maybe (LoginState state),![BodyTag],!*HSt)
-				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC state
-loginPage loginDatabase hst
-# (login,hst)			= loginForm (Init,mkLogin "" "") hst
-= 	( if (isLoggedIn login.value loginDatabase)
-			(Just (login.value,getLoginState login.value loginDatabase))
-			Nothing
+loginPage  :: !(Accounts s) !*HSt -> (Maybe (Account s),[BodyTag],!*HSt)
+loginPage accounts hst
+# (login,hst) = loginForm (Init,mkLogin "" "") hst
+= 	( hasAccount login.value accounts
 	, [	Txt "Please log in.."
 	  ,	Br
 	  ,	Br
@@ -34,18 +26,21 @@ loginPage loginDatabase hst
 	  ] 
 	, hst)
 	
-changePasswordPage :: !Login !*HSt -> (!Maybe Login,![BodyTag],!*HSt)
-changePasswordPage login hst
+changePasswordPage :: !(Account s) !*HSt -> (Maybe (Account s),[BodyTag],!*HSt)
+changePasswordPage account hst
 # (oldpasswrd,hst)		= passwordForm "oldpasswrd" hst
 # (newpasswrd1,hst)		= passwordForm "newpasswrd1" hst
 # (newpasswrd2,hst)		= passwordForm "newpasswrd2" hst
-| oldpasswrd.value <> login.password || newpasswrd1.value <> newpasswrd2.value  || newpasswrd1.value == ""
+| oldpasswrd.value <> account.login.password || newpasswrd1.value <> newpasswrd2.value  || newpasswrd1.value == ""
 = (Nothing, changePasswrdBody oldpasswrd newpasswrd1 newpasswrd2, hst)
-# (_,hst)				= loginForm (Set,mkLogin login.loginName newpasswrd1.value) hst
-= (Just (mkLogin login.loginName newpasswrd1.value), [], hst)
+# newaccount			= {account & login.password = newpasswrd1.value}
+# (_,hst)				= ReportStore (\_ -> invariantLogAccounts [newaccount]) hst 
+| not ok				= (Nothing, changePasswrdBody oldpasswrd newpasswrd1 newpasswrd2, hst)
+# (_,hst)				= loginForm (Set,newaccount.login) hst
+= (Just newaccount, [], hst)
 where
 	changePasswrdBody oldpasswrd newpasswrd1 newpasswrd2 = 	
-		if (oldpasswrd.value <> login.password)
+		if (oldpasswrd.value <> account.login.password)
 			[	Txt "Retype old password .."
 			,	Br, Br
 			,	BodyTag oldpasswrd.form, Br
@@ -55,10 +50,13 @@ where
 			,	BodyTag newpasswrd1.form
 			, 	Br, Br
 			:	if (newpasswrd1.value <> newpasswrd2.value && newpasswrd1.value <> "")
-					[	Txt "Re_type new name and/or new password.."
+					[	Txt "Re_type new password.."
 					,	Br, Br
 					,	BodyTag newpasswrd2.form, Br
 					]
 					[]
 			] 
+
+	passwordForm :: !String !*HSt -> (Form String,!*HSt)
+	passwordForm fid hst = mkEditForm (Init, nFormId fid "") hst
 						

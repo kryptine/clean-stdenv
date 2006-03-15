@@ -2,17 +2,10 @@ definition module loginAdminIData
 
 import loginAdmin
 
-derive gForm  	Login
-derive gUpd 	Login
-derive gPrint	Login
-derive gParse	Login
+// login page: 			returns account corresponding to adminstrated user
 
-// login page: returns LoginState when loged in properly, page info, hst
+loginPage  			:: !(Accounts s)	!*HSt -> (Maybe (Account s),[BodyTag],!*HSt)
 
-loginPage  :: !(LoginStates state) !*HSt -> (!Maybe (LoginState state),![BodyTag],!*HSt)
-							| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC state
+// changePasswordPage: returns new account if changed password has been approved
 
-// changePassword page: returns True if change done, LoginState, page info, hst
-
-changePasswordPage :: !Login !*HSt -> (!Maybe Login,![BodyTag],!*HSt)
-
+changePasswordPage 	:: !(Account s) 	!*HSt -> (Maybe (Account s),[BodyTag],!*HSt)

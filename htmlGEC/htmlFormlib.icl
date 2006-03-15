@@ -6,6 +6,12 @@ implementation module htmlFormlib
 import StdEnv, StdHtml, StdLib
 
 derive gForm []; derive gUpd []
+derive gForm 	Refto
+derive gUpd 	Refto
+derive gPrint 	Refto
+derive gParse 	Refto
+
+:: Refto a = Refto String
 
 // easy creation of an html page
 
@@ -211,13 +217,6 @@ where
 	pastebutton index step = 
 		[ (but 5 "P", \_ -> i) \\ i <- [index .. index + step]]
 
-:: Refto a = Refto String
-
-derive gForm 	Refto
-derive gUpd 	Refto
-derive gPrint 	Refto
-derive gParse 	Refto
-
 reftoEditForm :: !Mode !Init !(InIDataId (Refto a,a)) !*HSt -> (Form (Refto a),Form a,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 reftoEditForm  modev initv (init,formid) hst 
 # (ref,hst)		= mkEditForm (init, reuseFormId formid (Refto filename)) hst
@@ -346,7 +345,6 @@ where
 	pastebutton index step = 
 		[ (but 5 "P", \_ -> i) \\ i <- [index .. index + step]]
 
-	merge olist newlist = undef
 
 table_hv_Form :: !(InIDataId [[a]]) !*HSt -> (Form [[a]],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 table_hv_Form inIDataId hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) horlistForm inIDataId hSt

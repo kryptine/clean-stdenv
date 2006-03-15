@@ -2,58 +2,63 @@ implementation module loginAdmin
 
 import StdEnv, StdHtml, StdMaybe
 
+instance == (Account s)
+where
+	(==) login1 login2 = login1.login.loginName == login2.login.loginName
+
 instance == Login
 where
-	(==) login1 login2 = login1.loginName == login2.loginName && login1.password == login2.password
+	(==) login1 login2 = login1.loginName == login2.loginName
 
-instance < Login
+
+instance < (Account s)
 where
-	(<) login1 login2 = login1.loginName < login2.loginName
+	(<) login1 login2 = login1.login.loginName < login2.login.loginName
 
-mkLogin :: String String -> Login
-mkLogin name password
-	= 	{ loginName = name
-		, password	= password
+mkAccount :: Login s -> (Account s)
+mkAccount login s
+	= 	{ login			= login
+		, state			= s
 		}
 
-addLogin :: (LoginState state) (LoginStates state) -> (LoginStates state) 
-addLogin (login,state) loginAdmin 
-| login.loginName <> "" && login.password  <> "" 
-	&& not (isLoggedIn login loginAdmin) = [(login,state):loginAdmin]
-| otherwise = loginAdmin
+mkLogin :: String String -> Login
+mkLogin name password = {loginName = name, password = password}
 
-changePassword 	:: (LoginState state) String (LoginStates state) -> (LoginStates state) 
-changePassword (oldlogin,state) nwpasswrd  loginAdmin
-# newlogin = mkLogin oldlogin.loginName nwpasswrd
-= addLogin (newlogin,state) (removeLogin oldlogin loginAdmin)
+addAccount :: (Account s) (Accounts s) -> (Accounts s) 
+addAccount account accounts 
+| fst (invariantLogAccounts [account:accounts])	= sort [account:accounts]	
+| otherwise 									= accounts
 
-changeState :: (LoginState state) (LoginStates state) -> (LoginStates state) 
-changeState (login,newstate) loginAdmin
-# (before,after) = span ((<>) login) (map fst loginAdmin)
-= updateAt (length before) (login,newstate) loginAdmin
+changePassword 	:: String (Account s) (Accounts s) -> (Accounts s) 
+changePassword nwpasswrd oldlogin accounts
+# changedlogin = mkAccount (mkLogin oldlogin.login.loginName nwpasswrd) oldlogin.state
+= addAccount changedlogin (removeAccount oldlogin accounts)
 
-removeLogin :: Login (LoginStates state) -> (LoginStates state) 
-removeLogin login loginAdmin 
-# (before,after) = span ((<>) login) (map fst loginAdmin)
-= removeAt (length before) loginAdmin
+changeAccount :: (Account s) (Accounts s) -> (Accounts s) 
+changeAccount account accounts
+# (before,after) = span ((<>) account) accounts
+= updateAt (length before) account accounts
 
-isLoggedIn :: Login (LoginStates state) -> Bool
-isLoggedIn login loginAdmin = isMember login (map fst loginAdmin)
+removeAccount :: (Account s) (Accounts s) -> (Accounts s) 
+removeAccount login accounts 
+# (before,after) = span ((<>) login) accounts
+= removeAt (length before) accounts
 
-getLoginState :: Login (LoginStates state) -> state
-getLoginState slogin loginAdmin
-= case [state \\ (login,state) <- loginAdmin | login == slogin] of
-	list 	= hd list
+hasAccount :: Login (Accounts s) -> (Maybe (Account s))
+hasAccount login [] = Nothing
+hasAccount login [acc:accs]
+| login.loginName == acc.login.loginName && login.password == acc.login.password = Just acc
+= hasAccount login accs
 
-invariantLogin 	:: (LoginStates state) -> (Bool,String)
-invariantLogin loginstates 
-= invariant [(login.loginName,login.password) \\ (login,_) <- loginstates]
-where
-	invariant [] 							= (False,"")
-	invariant [(name,password):loginnames]
-	| name 		== "" 						= (True,"login name is not specified!")
-	| password  == "" 						= (True,"password required!")
-	| isMember name (map fst loginnames) 	= (True,"login name " +++ name +++ " is already being used!")
-	| size password < 6						= (True,"at least 6 characters required for a password!")
-	= invariant loginnames
+invariantLogAccounts:: (Accounts s) -> Judgement
+invariantLogAccounts accounts = invariantLogins [login \\ {login} <- accounts]
+
+invariantLogins :: [Login] -> Judgement
+invariantLogins [] 			= OK
+invariantLogins [login=:{loginName,password}:logins]
+| loginName == "" 			= (False,"login name is not specified!")
+| password  == "" 			= (False,"password required!")
+| isMember login logins		= (False,"login name " +++ loginName +++ " is already being used!")
+| size password < 6			= (False,"at least 6 characters required for a password!")
+= invariantLogins logins
 
