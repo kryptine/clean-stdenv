@@ -4,11 +4,23 @@ import StdHtml
 import stateHandling
 import loginAdminIData, confIData
 
-derive gForm 	CurrPage, Role, ConfState, Person, Paper, /*Reports, */Report, Recommendation, Familiarity
-derive gUpd 	CurrPage, Role, ConfState, Person, Paper, Reports, Report, Recommendation, Familiarity
-derive gPrint 	CurrPage, Role, ConfState, Person, Paper, Reports, Report, Recommendation, Familiarity
-derive gParse 	CurrPage, Role, ConfState, Person, Paper, Reports, Report, Recommendation, Familiarity
+changeInfo :: !ConfAccount !*HSt -> ([BodyTag],!*HSt)
+changeInfo account hst
+# (_,personf,hst) = editPerson (Edit,Init,(getRefPerson account.state,Display,Init)) hst
+= (personf.form,hst)
 
+modifyStatesPage :: !ConfAccount !ConfAccounts !*HSt -> (Judgement,(ConfAccount,ConfAccounts),[BodyTag],!*HSt)
+modifyStatesPage account accounts hst
+# myid				= sFormId "la_states" accounts 					// local id
+# (naccounts,hst)	= vertlistFormButs 5 (Init,myid) hst			// make editor
+# (ok,judge)		= invariantLogAccounts naccounts.value			// test invariants
+# (naccounts,hst)	= if ok 
+						(vertlistFormButs 5 (setID  myid (setInvariantAccounts naccounts.value)) hst) // adjust references
+						(naccounts,hst)								// leave it as it is
+= ((ok,judge),(account,naccounts.value), naccounts.form, hst)
+
+
+/*
 gForm {|Reports|} formid hst 
 	= specialize myeditor (Init,formid) hst
 where
@@ -21,24 +33,24 @@ where
 		,hst )
 	(Reports reflist) = formid.ival
 
+*/
 
 // forms
-
-showPapersPage ::  !Papers !(LoginState ConfState)!(LoginStates ConfState) !*HSt -> (![BodyTag],!*HSt)
-showPapersPage papers (login,state) loginstates hst 
+/*
+showPapersPage ::  !Papers !ConfState !ConfStates !*HSt -> (![BodyTag],!*HSt)
+showPapersPage papers cstate cstates hst 
 # formid			= nFormId "cms_papers" papers
-# states 			= [state \\ (_,state) <- loginstates]
 # (list,hst) 		= listForm 		(Init,{subFormId formid "list"  shortlist & mode = Display}) hst
 # (ibuts,hst) 		= ListFuncBut  	(Init,subFormId formid "ibuts" paperInfoButs) hst
 # (rbuts,hst) 		= ListFuncBut2 	(Init,subFormId formid "rbuts" refereeInfoButs) hst
 # (okbut,hst) 		= FuncBut  		(Init,subFormId formid "okbut" okBut) hst
-= (showbody list states ibuts rbuts okbut,hst)
+= (showbody list cstates ibuts rbuts okbut,hst)
 where
 	shortlist	= [(nr,paper.title,summary nr) \\ paper <- papers & nr <- [0..]]
 	summary i	= [ short report 
-					\\ (_,thisstate) <- loginstates
-					, (papernr,report) <- getReports thisstate.reports 
-				  	| papernr == i && not (isConflict papernr state)]
+					\\ state <- cstates
+					, (papernr,report) <- getReports state.reports 
+				  	| papernr == i && not (isConflict papernr cstate)]
 
 	short Nothing = Nothing
 	short (Just report) = Just (report.recommendation,report.familiarity)
@@ -47,7 +59,7 @@ where
 	refereeInfoButs = [(mode i,LButton defpixel "RefereeInfo",\_ -> i) \\ _ <- papers & i <- [0..]]
 	where
 		mode i
-		| isConflict i state = Display
+		| isConflict i cstate = Display
 		= Edit
 	
 	okBut = (LButton defpixel "OK",id)
@@ -57,34 +69,34 @@ where
 	| rbuts.changed = [toHtml (findReports (rbuts.value 0) states):okbut.form]
 	= [[ib <.=.> rb \\ ib <- ibuts.form & rb <- rbuts.form] <=|> list.form]
 	
-assignPapersPage :: !Papers !(LoginStates ConfState) !*HSt -> (!LoginStates ConfState,![BodyTag],!*HSt)
-assignPapersPage papers loginstates hst
-# (referees,hst) 	= mkEditForm 	   (Set, ndFormId "referees" [logins.loginName \\ (logins,_) <- loginstates]) hst
-# (papers,hst) 		= ListFuncCheckBox (Init, nFormId "papers" (showpapers loginstates)) hst
-# loginstates 		= (fst papers.value) loginstates
-# (papers,hst) 		= ListFuncCheckBox (Set, nFormId "papers" (showpapers loginstates)) hst
-= (loginstates,table referees.form papers.form,hst)
+assignPapersPage :: !Papers !(Logins ConfStates,ConfStates) !*HSt -> (!ConfStates,![BodyTag],!*HSt)
+assignPapersPage papers (logins,cstates) hst
+# (referees,hst) 	= mkEditForm 	   (Set, ndFormId "referees" [login.loginName \\ login <- logins]) hst
+# (papers,hst) 		= ListFuncCheckBox (Init, nFormId "papers" (showpapers logins cstates)) hst
+# cstates 			= (fst papers.value) cstates
+# (papers,hst) 		= ListFuncCheckBox (Set, nFormId "papers"  (showpapers logins cstates)) hst
+= (cstates,table referees.form papers.form,hst)
 where
 	table referees npapers = [	referees <=|> group (length papers) npapers ]
 
 	group n list = [BodyTag (take n list): group n (drop n list)] 
 
-	showpapers	loginstates = [(check i login.loginName state,adjustPapers login i) 
-						\\ (login,state) <-  loginstates, i <- [0..] & j <- papers]
+	showpapers logins cstates = [(check i login.loginName cstate,adjustPapers j i) 
+								\\ j <- [1..] & cstate <- cstates & login <- logins, i <- [0..] & _ <- papers]
 	where
 		check i name state
 		| isRefereeOf i state = CBChecked ("check" +++ toString i +++ name)
 		= CBNotChecked ("check" +++ toString i +++ name)
 
-		adjustPapers:: !Login !Int Bool [Bool] (LoginStates ConfState) -> (LoginStates ConfState)
-		adjustPapers login papernr dopaper _ states
-		# state = getLoginState login states
+		adjustPapers:: !Int !Int Bool [Bool] ConfStates -> ConfStates
+		adjustPapers statenr papernr dopaper _ cstates
+		# state = cstates!!statenr
 		# newstate = if dopaper (assignPaper papernr state) (deletePaper papernr state)
-		=  changeState (login,newstate) states
+		=  updateAt statenr  newstate cstates
 		
-assignConflictsPage :: !Papers !(LoginStates ConfState) !*HSt -> (!LoginStates ConfState,![BodyTag],!*HSt)
+assignConflictsPage :: !Papers !(Logins ConfState) !*HSt -> (!Logins ConfState,![BodyTag],!*HSt)
 assignConflictsPage papers loginstates  hst
-# (referees,hst) 	= mkEditForm 	   (Set, ndFormId "refereesC" [logins.loginName \\ (logins,_) <- loginstates]) hst
+# (referees,hst) 	= mkEditForm 	   (Set, ndFormId "refereesC" [loginName \\ loginName <- loginstates]) hst
 # (papers,hst) 		= ListFuncCheckBox (Init, nFormId "papersC" (showpapers loginstates)) hst
 # loginstates 		= (fst papers.value) loginstates
 = (loginstates,table referees.form papers.form,hst)
@@ -93,32 +105,32 @@ where
 
 	group n list = [BodyTag (take n list): group n (drop n list)] 
 
-	showpapers	loginstates = [(check i login.loginName state,adjustPapers login i) 
-						\\ (login,state) <-  loginstates, i <- [0..] & j <- papers]
+	showpapers	loginstates = [(check i loginName state,adjustPapers login i) 
+						\\ login=:{loginName,state} <-  loginstates, i <- [0..] & j <- papers]
 	where
 		check i name state
 		| isConflict i state = CBChecked ("check" +++ toString i +++ name)
 		= CBNotChecked ("check" +++ toString i +++ name)
 
-		adjustPapers:: !Login !Int Bool [Bool] (LoginStates ConfState) -> (LoginStates ConfState)
+		adjustPapers:: !(Login ConfState) !Int Bool [Bool] (Logins ConfState) -> (Logins ConfState)
 		adjustPapers login papernr dopaper _ states
 		# state = getLoginState login states
 		# newstate = if dopaper (assignConflict papernr state) (deleteConflict papernr state)
-		=  changeState (login,newstate) states
+		=  changeState {login & state = newstate} states
 
-refereeStatusPage :: !Papers !(LoginState ConfState) !(LoginStates ConfState)  !*HSt -> (!LoginStates ConfState,![BodyTag],!*HSt)
-refereeStatusPage papers (login,state) loginstates  hst
-# todo				= papersToReferee state														// determine which papers to referee
+refereeStatusPage :: !Papers !(Login ConfState) !(Logins ConfState)  !*HSt -> (!Logins ConfState,![BodyTag],!*HSt)
+refereeStatusPage papers login loginstates  hst
+# todo				= papersToReferee login.state														// determine which papers to referee
 | todo == []		= (loginstates,noPapersMessage,hst)											// nothing to referee, done
 # defaultpaper		= hd todo																	// something to referee
 # (papernr,hst) 	= FuncMenu (Init, nFormId ("pdme" <+++ sum todo)(0,[("paper " <+++ i,(\_ -> i)) \\ i <- todo])) hst	// create pull down menu
 # chosennr			= if papernr.changed ((fst papernr.value) 0) (todo!!snd papernr.value)											// determine which report to show
-# myreport			= case findReport chosennr state of															
+# myreport			= case findReport chosennr login.state of															
 						Nothing 	-> emptyReport												// show an empty report to fill in
 						Just report	-> report													// show previous report
-# (new,nstate,hst)	= mkSubStateForm (Init,sFormId  ("myreps" <+++ chosennr) myreport) state (addRep chosennr) hst // show report or new empty report
+# (new,nstate,hst)	= mkSubStateForm (Init,sFormId  ("myreps" <+++ chosennr) myreport) login.state (addRep chosennr) hst // show report or new empty report
 # newreport			= findReport chosennr nstate.value													// determine new report
-= ( if new (changeState (login,nstate.value) loginstates) loginstates							// add submitted report to state
+= ( if new (changeState {login & state = nstate.value} loginstates) loginstates							// add submitted report to state
   ,	[paperstate nstate.value] ++
  	[Br, Txt "Show me the report of: ":papernr.form] ++ 
   	[Br, Br, Hr [], Br, Txt "You currently looking at your referee report of paper: ",Br] ++
@@ -155,17 +167,18 @@ where
 											 Txt "You can change your current report by recomitting the form!"]
 	addRep chosennr report state = addReport chosennr (Just report) state
 
+//mkSubStateForm :: !(InIDataId !subState) !state !(subState state -> state) !*HSt -> (Bool,Form state,!*HSt)
 
-changeInfo :: !(LoginState ConfState) !(LoginStates ConfState) !*HSt -> (LoginStates ConfState,[BodyTag],*HSt)
-changeInfo (login,state) states hst
-# (ok,statesform,hst) = mkSubStateForm (Init,nFormId "cms_info" state.person) states
-						(\person states = changeState (login,{state & person = person}) states) hst
+changeInfo :: !(Login ConfState) !(Logins ConfState) !*HSt -> (Logins ConfState,[BodyTag],*HSt)
+changeInfo login states hst
+# (ok,statesform,hst) = mkSubStateForm (Init,nFormId "cms_info" login.state.person) states
+						(\person states = changeState {login & state.person = person} states) hst
 = (statesform.value,statesform.form,hst)
 
-modifyStatesPage :: !(LoginStates ConfState) !*HSt -> (!LoginStates ConfState,![BodyTag],!*HSt)
+modifyStatesPage :: !(Logins ConfState) !*HSt -> (!Logins ConfState,![BodyTag],!*HSt)
 modifyStatesPage states hst
 # (nstates,hst)		= vertlistFormButs 5 (Init, nFormId "la_states" states) hst
 = 	(nstates.value,	nstates.form, hst)
 
-
+*/
 		

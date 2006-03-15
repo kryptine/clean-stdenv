@@ -5,6 +5,11 @@ definition module htmlFormlib
 
 import StdEnv, htmlHandler, htmlButtons
 
+derive gForm 	Refto
+derive gUpd 	Refto
+derive gPrint 	Refto
+derive gParse 	Refto
+
 // **** easy creation of a simple html page ****
 
 mkHtml		:: String [BodyTag] *HSt -> (Html,*HSt)			// string is used for the title of the page

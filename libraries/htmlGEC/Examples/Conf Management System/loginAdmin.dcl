@@ -2,24 +2,29 @@ definition module loginAdmin
 
 import StdEnv, StdHtml
 
-:: LoginState state		:== (Login,state)
-:: LoginStates state	:== [LoginState state]
-:: Login 				= 	{ loginName 	:: String
-							, password		:: String
+:: Account s			= 	{ login			:: Login		// login info		
+							, state			:: s			// state 
 							}
-//defaultLogin 	:== (Init (mkLogin "root" "secret"))
+:: Login 				= 	{ loginName 	:: String		// Should be unique
+							, password		:: String		// Should remain secret
+							}
 
-instance == Login
-instance < Login
+:: Accounts s			:== [Account s]
 
-mkLogin 		:: String String -> Login
+:: Judgement			:==	(Bool,String)					// True if invariant holds, error message otherwise
+OK						:== (True,"")
 
-addLogin 		:: (LoginState state) (LoginStates state) -> (LoginStates state) 
-changePassword 	:: (LoginState state) String (LoginStates state) -> (LoginStates state) 
-changeState 	:: (LoginState state) (LoginStates state) -> (LoginStates state) 
+instance == (Account s)
+instance <  (Account s)
 
-isLoggedIn 		:: Login (LoginStates state) -> Bool
-getLoginState 	:: Login (LoginStates state) -> state
-removeLogin 	:: Login (LoginStates state) -> (LoginStates state) 
+mkLogin 			:: String String 	-> Login
+mkAccount			:: Login s 			-> Account s
 
-invariantLogin 	:: (LoginStates state) -> (Bool,String)
+addAccount 			:: 			(Account s) (Accounts s) -> (Accounts s) 
+changePassword 		:: String 	(Account s) (Accounts s) -> (Accounts s) 
+changeAccount 		:: 			(Account s) (Accounts s) -> (Accounts s) 
+hasAccount 			:: 			Login		(Accounts s) -> (Maybe (Account s))
+removeAccount 		:: 			(Account s) (Accounts s) -> (Accounts s) 
+
+invariantLogins		:: 			[Login] 	 -> Judgement
+invariantLogAccounts:: 			(Accounts s) -> Judgement
