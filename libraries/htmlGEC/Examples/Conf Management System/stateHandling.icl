@@ -26,13 +26,6 @@ initAuthorsAccount login i
 							, person		= RefPerson (uniquePerson login.loginName)
 							})
 
-initPerson :: String -> Person
-initPerson name 
-= 	{ firstName 	= name
-	, lastName		= "lastname"
-	, affiliation 	= "affiliation"
-	, emailAddress	= "emailaddress"
-	}
 
 initPaper :: String -> Paper
 initPaper name
@@ -74,7 +67,7 @@ invariantPerson {firstName,lastName,affiliation,emailAddress}
 
 setInvariantAccounts :: ConfAccounts -> ConfAccounts
 setInvariantAccounts confaccounts
-	= sort (map setInvariantAccount confaccounts)
+	= map setInvariantAccount confaccounts
 
 setInvariantAccount :: ConfAccount -> ConfAccount
 setInvariantAccount account
@@ -86,13 +79,6 @@ setInvariantAccount account
 		(Authors paperInfo) ->
 			{account & state = Authors {paperInfo & PaperInfo.person = RefPerson (uniquePerson account.login.loginName)}}
 
-/*
-
-setRefPersonAccount account=:{state =(Referee refereeInfo)}		
-	= undef						
-setRefPersonAccount account=:{state =(Authors paperInfo)}		
-	= undef
-*/
 
 /*
 FetchReports :: Int ConfAccounts -> ([(Person,Maybe Report)],*Hst)

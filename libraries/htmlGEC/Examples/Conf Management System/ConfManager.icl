@@ -2,45 +2,69 @@ module ConfManager
 
 import StdEnv, StdHtml
 
-import loginAdminIData, stateHandlingIData, confIData
+import loginAdminIData, confIData, stateHandlingIData 
 
 // Here it starts ....
 
 Start world  = doHtmlServer mainEntrance world
 
 mainEntrance hst
-# (body,hst) = loginhandling hst													// each time the login will be checked
+# (body,hst) = loginhandling hst		// a login will be checked on correctness each time a page is requested !
 = mkHtml "Conference Manager" 
 	[ BodyTag body
 	] hst
 
-// login page
+// login page handling
 
 loginhandling :: *HSt -> ([BodyTag],*HSt)
-loginhandling  hst
-# (loginStates,hst) 			= LoginStatesStore id hst							// read out login database store
-# (mbloginState,loginBody,hst)	= loginPage loginStates.value hst					// set up a login page
-= case mbloginState of
-	Nothing			= (loginBody,hst)												// show login page if not yet logged in
-	Just loginState	= doConfPortal loginState loginStates.value hst					// show member page if logged in
+loginhandling  hst											
+# (accounts,hst) 			= editAccounts Display Init [initManagerAccount initManagerLogin] hst	
+																// read out all accounts read only
+# (mblogin,loginBody,hst)	= loginPage accounts.value hst		// set up a login page
+= case mblogin of												// check result of login procedure
+	Nothing		= (loginBody,hst)								// show login page when (still) not logged in
+	Just login	= doConfPortal login accounts.value hst			// show member page otherwise
 
-// iData defs
+// The different pages that exists:
 
-doConfPortal :: (LoginState ConfState) (LoginStates ConfState) *HSt -> ([BodyTag],*HSt)
-doConfPortal (login,state) states hst
-# (navButtons,hst) 		= navigationButtons state.role hst							// setup proper set of navigation buttons
-# (currPage,hst)		= currPageStore (homePage state.role) navButtons.value hst	// determine current page to display
-# (states,navBody,hst) 	= showCurrPage (login,state) states currPage.value hst		// and show the corresponding page
-# (excep,errormessage)	= invariantConvDB states									// check whether invariants still hold
-# (_,hst)				= LoginStatesStore (if excep id (\_.states)) hst			// if so, store the new resulting approved state in global database
-= ( [ mkSTable2 [ [EmptyBody,B [] "Conference" <.||.> B [] "Manager ",Oeps excep errormessage currPage.value]
+:: CurrPage 	= 	RootHomePage			// root pages
+				| 	AssignPapers
+				| 	AssignConflict
+				| 	ModifyStates
+
+				| 	ChangePassword			// shared pages 
+				| 	ChangeInfo
+				| 	ListPapers
+				|	RefereeForm				
+
+				| 	MemberHomePage			// member pages
+
+derive gForm 	CurrPage
+derive gUpd 	CurrPage
+derive gPrint 	CurrPage
+derive gParse 	CurrPage
+
+homePage (ConfManager info) = RootHomePage
+homePage (Referee info) 	= MemberHomePage
+
+// you are in, determine what to do
+
+doConfPortal :: ConfAccount ConfAccounts *HSt -> ([BodyTag],*HSt)
+doConfPortal account accounts hst
+# (navButtons,hst) 	= navigationButtons account.state hst							// setup proper set of navigation buttons
+# (_,hst)			= ReportStore (\_ -> OK) hst									// set global store to "all is fine"
+# (currPage,hst)	= currPageStore (homePage account.state) navButtons.value hst	// determine which current page to display
+# ((_,_),navBody,hst)	
+					= handleCurrPage currPage.value account accounts  hst			// and handle the corresponding page
+# ((ok,message),hst)= ReportStore id hst											// see if an error has occured somewhere
+= ( [ mkSTable2 [ [EmptyBody,B [] "Conference" <.||.> B [] "Manager ",Oeps ok message currPage.value]
 				, [mkColForm navButtons.form, EmptyBody, BodyTag navBody]
 				]
 	] , hst)
 where
-	navigationButtons role hst = ListFuncBut (Init, sFormId "navigation" (navButtons role)) hst
+	navigationButtons state hst = ListFuncBut (Init, sFormId "navigation" (navButtons state)) hst
 	where
-		navButtons ConfManager = 
+		navButtons (ConfManager info) = 
 			[ (LButton defpixel "RootHome", 		\_.RootHomePage)
 			, (LButton defpixel "ChangePsswrd", 	\_.ChangePassword)
 			, (LButton defpixel "ChangeInfo", 		\_.ChangeInfo)
@@ -50,12 +74,17 @@ where
 			, (LButton defpixel "RefereeForm", 		\_.RefereeForm)
 			, (LButton defpixel "ModStates", 		\_.ModifyStates)
 			]
-		navButtons Referee = 
+		navButtons (Referee info) = 
 			[ (LButton defpixel "Home", 			\_.MemberHomePage)
 			, (LButton defpixel "ChangePsswrd", 	\_.ChangePassword)
 			, (LButton defpixel "ChangeInfo", 		\_.ChangeInfo)
 			, (LButton defpixel "ListPapers", 		\_.ListPapers)
 			, (LButton defpixel "RefereeForm", 		\_.RefereeForm)
+			]
+		navButtons (Authors info) = 
+			[ (LButton defpixel "Home", 			\_.MemberHomePage)
+			, (LButton defpixel "ChangePsswrd", 	\_.ChangePassword)
+			, (LButton defpixel "ChangeInfo", 		\_.ChangeInfo)
 			]
 
 	mkSTable2 :: [[BodyTag]] -> BodyTag
@@ -65,31 +94,31 @@ where
 		mktable table 	= [Tr [] (mkrow rows) \\ rows <- table]	
 		mkrow rows 		= [Td [Td_VAlign Alo_Top] [row] \\ row <- rows] 
 	
-	Oeps exception errormessage currpage
-	| exception = Font [Fnt_Color (`Colorname Yellow)]	[B [] (printToString currpage +++ " - ERROR! - " +++ errormessage)]
+	Oeps ok errormessage currpage
+	| not ok = Font [Fnt_Color (`Colorname Yellow)]	[B [] (printToString currpage +++ " - ERROR! - " +++ errormessage)]
 	= Font [Fnt_Color (`Colorname Silver)]	[B [] (printToString currpage)] 
 
-showCurrPage :: (LoginState ConfState) (LoginStates ConfState) CurrPage *HSt -> (LoginStates ConfState,[BodyTag],*HSt)
-showCurrPage loginState=:(login,state) states currPage hst 
-# (papersform,hst)	= papersStore [initPaper i (toString i) \\ i <- [0..3]] id hst
-# papers			= papersform.value
-# (states,body,hst)	
-	= case currPage of
-		RootHomePage 	-> states <~ rootHomePage hst
-		ModifyStates 	-> modifyStatesPage 		  states hst
-		AssignPapers 	-> assignPapersPage    papers states hst
-		AssignConflict	-> assignConflictsPage papers states hst
+	currPageStore :: !CurrPage  !(CurrPage -> CurrPage) *HSt -> (!Form CurrPage,!*HSt)	// current page to display
+	currPageStore currpage cbf hst = mkStoreForm (Init, sFormId "cf_currPage" currpage) cbf hst 
 
-		ChangePassword 	-> changePasswrdPage loginState states hst
-		ChangeInfo		-> changeInfo	 	 loginState states hst  
-		ListPapers 		-> states <~ showPapersPage papers loginState states hst
+handleCurrPage :: CurrPage ConfAccount ConfAccounts *HSt 
+					-> ((ConfAccount,ConfAccounts),[BodyTag],*HSt)
+handleCurrPage currPage account accounts  hst 
+//# (papersform,hst)	= papersStore [initPaper i (toString i) \\ i <- [0..3]] id hst
+//# papers			= papersform.value
+= case currPage of
+		RootHomePage 	-> (account,accounts) <~ rootHomePage hst
+		ModifyStates 	-> modifyStatesPage	account accounts hst
+//		AssignPapers 	-> assignPapersPage    papers states hst
+//		AssignConflict	-> assignConflictsPage papers states hst
+
+		ChangePassword 	-> changePasswrdPage account accounts hst
+		ChangeInfo		-> (account,accounts) <~ changeInfo account hst  
+//		ListPapers 		-> (state,states) <~ showPapersPage papers loginState states hst
 	
-		RefereeForm 	-> refereeStatusPage papers loginState states hst
-		MemberHomePage 	-> states <~ memberHomePage hst
-		_				-> states <~ ([],hst)
-=	(	states
-	,	body
-	,	hst )
+//		RefereeForm 	-> refereeStatusPage papers loginState states hst
+		MemberHomePage 	-> (account,accounts) <~ memberHomePage hst
+		_				-> (account,accounts) <~ ([],hst)
 where
 	(<~) infix 
 	(<~) states (body,hst) = (states,body,hst)
@@ -108,11 +137,11 @@ memberHomePage hst =
 		]
 	, 	hst )
 
-changePasswrdPage loginState=:(login,state) states hst 
-# (mblogin,body,hst) = changePasswordPage login hst
-= case mblogin of
-	Nothing 		-> (states,	body, hst)
-	Just nlogin 	-> showCurrPage (nlogin,state) 
-						(changePassword loginState nlogin.password states) (homePage state.role) hst
+changePasswrdPage account accounts hst 
+# (mbaccount,body,hst) = changePasswordPage account hst
+= case mbaccount of
+	Nothing 		-> ((account, accounts), body, hst)
+	Just naccount 	-> handleCurrPage (homePage account.state)
+							naccount (changePassword naccount.login.password account accounts)  hst
 
 

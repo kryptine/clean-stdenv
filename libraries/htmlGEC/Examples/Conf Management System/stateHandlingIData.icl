@@ -6,18 +6,18 @@ import loginAdminIData, confIData
 
 changeInfo :: !ConfAccount !*HSt -> ([BodyTag],!*HSt)
 changeInfo account hst
-# (_,personf,hst) = editPerson (Edit,Init,(getRefPerson account.state,Display,Init)) hst
+# (personf,hst) = editPerson Edit Init (getRefPerson account.state) hst
 = (personf.form,hst)
 
-modifyStatesPage :: !ConfAccount !ConfAccounts !*HSt -> (Judgement,(ConfAccount,ConfAccounts),[BodyTag],!*HSt)
+modifyStatesPage :: !ConfAccount !ConfAccounts !*HSt -> ((ConfAccount,ConfAccounts),[BodyTag],!*HSt)
 modifyStatesPage account accounts hst
-# myid				= sFormId "la_states" accounts 					// local id
-# (naccounts,hst)	= vertlistFormButs 5 (Init,myid) hst			// make editor
-# (ok,judge)		= invariantLogAccounts naccounts.value			// test invariants
-# (naccounts,hst)	= if ok 
-						(vertlistFormButs 5 (setID  myid (setInvariantAccounts naccounts.value)) hst) // adjust references
-						(naccounts,hst)								// leave it as it is
-= ((ok,judge),(account,naccounts.value), naccounts.form, hst)
+# myid				= sFormId "conf_manager_temp_states" accounts 					// make a local editor
+# (naccounts,hst)	= vertlistFormButs 5 (Init,myid) hst							// make a list editor to mofify all accounts
+# ((ok,judge),hst)	= ReportStore (\_ -> invariantLogAccounts naccounts.value) hst	// test invariants and store conclusion
+| not ok			= ((account,naccounts.value), naccounts.form, hst)				// return as is
+# (naccounts,hst)	= vertlistFormButs 5 (setID  myid (setInvariantAccounts naccounts.value)) hst  // ugly: adjust references
+# (_,hst)			= editAccounts Edit Set naccounts.value hst 					// store in global database
+= ((account,naccounts.value), naccounts.form, hst)
 
 
 /*

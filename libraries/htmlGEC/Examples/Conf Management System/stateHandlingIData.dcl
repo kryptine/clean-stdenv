@@ -4,7 +4,7 @@ import stateHandling
 import StdHtml
 
 changeInfo 			:: !ConfAccount !*HSt -> ([BodyTag],!*HSt)
-modifyStatesPage 	:: !ConfAccount !ConfAccounts !*HSt -> (Judgement,(ConfAccount,ConfAccounts),[BodyTag],!*HSt)
+modifyStatesPage 	:: !ConfAccount !ConfAccounts !*HSt -> ((ConfAccount,ConfAccounts),[BodyTag],!*HSt)
 
 //changeInfo 			:: !(Login ConfState) !(Logins ConfState) !*HSt -> (Logins ConfState,[BodyTag],*HSt)
 //showPapersPage ::  !Papers !ConfState !ConfStates !*HSt -> (![BodyTag],!*HSt)

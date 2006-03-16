@@ -1,6 +1,6 @@
 definition module confIData
 
-import htmlHandler, loginAdmin, stateHandling
+import htmlFormData, loginAdmin, stateHandling
 
 derive gForm 	Maybe, []
 derive gUpd  	Maybe, []
@@ -30,18 +30,18 @@ derive gParse
 
 // Naming convention of shared persistent information
 
-uniqueDBname		:== "confDBS"
+uniqueDBname		:== "conferenceDBS"
 uniquePerson  name 	:== Refto (name +++ ".person")
 uniqueReport  name 	:== Refto (name +++ ".report")
 uniquePaper   name 	:== Refto (name +++ ".paper")
 
-// The used persistent i-Data stores
+// The used persistent global i-Data editors and stores
 
-editAccounts :: !Mode !Init !ConfAccounts *HSt -> (!Form ConfAccounts,!*HSt)
+editAccounts	:: !Mode !Init !ConfAccounts *HSt 	-> (Form ConfAccounts,!*HSt)
+editPerson 		:: !Mode !Init !(Refto Person) *HSt -> (Form Person,!*HSt)
 
-editPerson 	:: (!Mode,!Init,(!Refto Person,!Mode,!Init)) *HSt -> (Form (Refto Person),Form Person,!*HSt)
 
-ReportStore :: (Judgement -> Judgement) *HSt -> (Judgement,!*HSt)
+
 //getPerson 	:: !RefPerson *HSt -> (!Person,!*HSt)
 
 //editReport	:: (!Mode,!Init,(!RefReport,!Mode,!Init)) *HSt -> (Form RefReport,Form Report,!*HSt)
@@ -49,7 +49,6 @@ ReportStore :: (Judgement -> Judgement) *HSt -> (Judgement,!*HSt)
 
 //editPaper 	:: (!Mode,!Init,(!RefPaper,!Mode,!Init)) *HSt -> (Form RefPaper,Form Paper,!*HSt)
 //getPaper 	:: !RefPaper *HSt -> (!Paper,!*HSt)
-
 
 
 

@@ -1,6 +1,6 @@
 definition module stateHandling
 
-import loginAdmin
+import loginAdmin, htmlFormlib
 
 // The Information to maintain:
 
@@ -75,7 +75,6 @@ initManagerLogin 	:: Login
 initManagerAccount 	:: Login 		-> ConfAccount
 initRefereeAccount 	:: Login 		-> ConfAccount
 initAuthorsAccount	:: Login Int 	-> ConfAccount
-initPerson 			:: String -> Person
 initReport 			:: Report
 initPaper 			:: String -> Paper
 
