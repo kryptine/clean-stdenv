@@ -89,4 +89,5 @@ toViewId  :: !Init !d! (Maybe d) -> d					// copy second on Set or if third is N
 toViewMap :: !(d -> v) !Init !d !(Maybe v) -> v			// same, but convert to view domain
 
 instance toBool Init
+instance == Init, Mode
 

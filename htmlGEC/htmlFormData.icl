@@ -88,3 +88,19 @@ instance toBool Init
 where
 	toBool Set = True
 	toBool _ = False
+
+instance == Mode
+where
+	(==) Display Display 	= True
+	(==) Edit Edit 			= True
+	(==) _ _ 				= False
+
+instance == Init
+where
+	(==) Init Init 			= True
+	(==) Set Set 			= True
+	(==) _ _ 				= False
+
+
+
+

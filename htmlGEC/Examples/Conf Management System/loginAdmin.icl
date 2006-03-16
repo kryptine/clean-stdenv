@@ -50,6 +50,12 @@ hasAccount login [acc:accs]
 | login.loginName == acc.login.loginName && login.password == acc.login.password = Just acc
 = hasAccount login accs
 
+OK :: Judgement
+OK = (True,"")
+
+addJudgement ::	Judgement  -> (Judgement -> Judgement)
+addJudgement judgement = \(ok,oldmessage) -> if ok judgement (ok,oldmessage)
+
 invariantLogAccounts:: (Accounts s) -> Judgement
 invariantLogAccounts accounts = invariantLogins [login \\ {login} <- accounts]
 
