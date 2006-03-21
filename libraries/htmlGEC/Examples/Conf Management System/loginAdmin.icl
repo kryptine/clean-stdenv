@@ -10,7 +10,6 @@ instance == Login
 where
 	(==) login1 login2 = login1.loginName == login2.loginName
 
-
 instance < (Account s)
 where
 	(<) login1 login2 = login1.login.loginName < login2.login.loginName

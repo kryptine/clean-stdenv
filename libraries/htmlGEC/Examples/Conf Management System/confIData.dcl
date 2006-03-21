@@ -30,25 +30,14 @@ derive gParse
 
 // Naming convention of shared persistent information
 
-uniqueDBname		:== "conferenceDBS"
-uniquePerson  name 	:== Refto (name +++ ".person")
-uniqueReport  name 	:== Refto (name +++ ".report")
-uniquePaper   name 	:== Refto (name +++ ".paper")
+uniqueDBname			:== "conferenceDBS"
+uniquePerson  name 		:== name +++ ".person"
+uniqueReport  int name 	:== name +++ ".report" +++ "." +++ toString int
+uniquePaper   int name 	:== name +++ ".paper"  +++ "." +++ toString int
 
 // The used persistent global i-Data editors and stores
 
-editAccounts	:: !Mode !Init !ConfAccounts *HSt 	-> (Form ConfAccounts,!*HSt)
-editPerson 		:: !Mode !Init !(Refto Person) *HSt -> (Form Person,!*HSt)
-
-
-
-//getPerson 	:: !RefPerson *HSt -> (!Person,!*HSt)
-
-//editReport	:: (!Mode,!Init,(!RefReport,!Mode,!Init)) *HSt -> (Form RefReport,Form Report,!*HSt)
-//getReport 	:: !RefReport *HSt -> (!Report,!*HSt)
-
-//editPaper 	:: (!Mode,!Init,(!RefPaper,!Mode,!Init)) *HSt -> (Form RefPaper,Form Paper,!*HSt)
-//getPaper 	:: !RefPaper *HSt -> (!Paper,!*HSt)
+AccountsDB		:: !Mode !Init !ConfAccounts   *HSt -> (Form ConfAccounts,!*HSt)
 
 
 

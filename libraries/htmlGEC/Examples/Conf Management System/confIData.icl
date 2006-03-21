@@ -6,17 +6,14 @@ import loginAdmin, loginAdminIData
 
 // global editors and stores
 
-editAccounts :: !Mode !Init !ConfAccounts *HSt -> (Form ConfAccounts,!*HSt) // login administration database
-editAccounts mode Init accounts hst 
-	= mkEditForm (Init,
-		{pFormId uniqueDBname accounts
-			 & mode = mode, lifespan = ifEdit mode Persistent PersistentRO}) hst
-editAccounts mode Set accounts hst 
-	= mkEditForm (Set,
-		{pFormId uniqueDBname accounts
-			 & mode = mode, lifespan = ifEdit mode Persistent PersistentRO}) hst
+AccountsDB :: !Mode !Init !ConfAccounts *HSt -> (Form ConfAccounts,!*HSt) // login administration database
+AccountsDB mode init accounts hst 
+	= mkEditForm (init,
+		{sFormId uniqueDBname accounts
+			 & lifespan = ifEdit mode Persistent PersistentRO}
+			 ) hst
 
-// editor for shared structures...
+// general deRefto approach
 
 editRefto :: (!Mode,!Init,(!(!Refto a,!a),!!Mode,!Init)) *HSt -> 
 		(Form (Refto a),Form a,!*HSt)   | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
@@ -24,50 +21,95 @@ editRefto (rmode,rinit,((Refto s,a),pmode,pinit)) hst
 	= reftoEditForm rmode rinit (pinit,
 			{nFormId ("Refto_" +++ s) (Refto s, a) & mode = pmode}) hst
 
-// reference to Persons
-
-getPerson :: !(Refto Person) *HSt -> (!Person,!*HSt)
-getPerson refperson hst
-# (_,personf,hst) = editRefto (Display,Init,((refperson,createDefault),Display,Init)) hst
-= (personf.value,hst) 
-
-setPerson :: !(Refto Person) !Person *HSt -> (!Person,!*HSt)
-setPerson refperson person hst
-# (_,personf,hst) = editRefto (Edit,Set,((refperson,person),Display,Init)) hst
-= (personf.value,hst) 
-
-editPerson :: !Mode !Init !(Refto Person) *HSt -> (Form Person,!*HSt)
-editPerson mode init (Refto person) hst
-# (personv,hst)	= getPerson (Refto person) hst									// read out file
-# (personf,hst)	= mkEditForm (init,{sFormId person personv & mode = mode}) hst	// make an editor
-# (ok,msg)		= invariantPerson personf.value									// check invariants
-# (_,hst)		= ReportStore (addJudgement (ok,msg)) hst						// report them
-# (_,_,hst)		= if (ok && mode == Edit) 										// store 
-						(editRefto (Edit,Set,((Refto person,personf.value),Display,Init)) hst)
+universalRefEditor :: !Mode  !(a -> Judgement) !(Refto a) *HSt -> (Form a,!*HSt)   | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+universalRefEditor mode invariant (Refto filename) hst
+# (_,filef,hst)		= editRefto (Display,Init,((Refto filename,createDefault),Display,Init)) hst	// read out file
+# (copyf,hst)		= mkEditForm (Init,{sFormId filename filef.value & mode = mode}) hst			// make an editor
+# (ok,msg)			= invariant copyf.value															// check invariants
+# (_,hst)			= if (filename <> "") (ReportStore (addJudgement (ok,msg)) hst) (undef,hst)		// report them
+# (_,_,hst)			= if (ok && mode == Edit) 														// write to file if ok
+						(editRefto (Edit,Set,((Refto filename,copyf.value),Display,Init)) hst)
 						(undef,undef,hst)
-= (personf,hst)
+= (copyf,hst)
+
+// exported forms
 
 
-editReport :: (!Mode,!Init,(!Refto Report,!Mode,!Init)) *HSt -> (Form (Refto Report),Form Report,!*HSt)
-editReport (rmode,rinit,(Refto report,pmode,pinit)) hst
-	= editRefto (rmode,rinit,((Refto report,initReport),pmode,pinit)) hst
+// specialized forms
 
-getReport :: !RefReport *HSt -> (!Report,!*HSt)
-getReport (RefReport refreport) hst
-# (refreportf,reportf,hst) = editReport (Display,Init,(refreport,Display,Init)) hst
-= (reportf.value,hst) 
+gForm {|RefPerson|} (init,formid) hst = specialize myeditor (init,formid) hst
+where
+	myeditor (init,formid) hst
+	# (RefPerson refperson) 	= formid.ival
+	# (personf,hst)				= universalRefEditor Edit invariantPerson refperson hst
+	= ({personf & value = RefPerson refperson},hst)
 
-editPaper :: (!Mode,!Init,(!Refto Paper,!Mode,!Init)) *HSt -> (Form (Refto Paper),Form Paper,!*HSt)
-editPaper (rmode,rinit,(Refto paper,pmode,pinit)) hst
-	= editRefto (rmode,rinit,((Refto paper,initPaper paper),pmode,pinit)) hst
+gForm {|RefReport|} (init,formid) hst = specialize myeditor (init,formid) hst
+where
+	myeditor (init,formid) hst
+	# (RefReport refreport) 	= formid.ival
+	# (reportf,hst)				= universalRefEditor Edit (\_ -> OK) refreport hst
+	= ({reportf & value = RefReport refreport},hst)
 
-getPaper :: !RefPaper *HSt -> (!Paper,!*HSt)
-getPaper (RefPaper refpaper) hst
-# (refpaperf,paperf,hst) = editPaper (Display,Init,(refpaper,Display,Init)) hst
-= (paperf.value,hst) 
+gForm {|Reports|} informid hst = specialize myeditor informid hst
+where
+	myeditor (init,formid) hst
+	# (Reports papernrs) 		= formid.ival
+	# (papersf,hst)				= vertlistFormButs 5 (init,subsFormId formid "report" papernrs) hst
+	= ({papersf & value = Reports papersf.value},hst)
 
+gForm {|RefPaper|} (init,formid) hst = specialize myeditor (init,formid) hst
+where
+	myeditor (init,formid) hst
+	# (RefPaper refpaper) 		= formid.ival
+	# (reportf,hst)				= universalRefEditor formid.mode (\_ -> OK) refpaper hst
+	= ({reportf & value = RefPaper refpaper},hst)
 
-// special idata
+gForm {|Conflicts|} informid hst = specialize myeditor informid hst
+where
+	myeditor (init,formid) hst
+	# (Conflicts papernrs) 		= formid.ival
+	# (papersf,hst)				= vertlistFormButs 5 (init,subsFormId formid "conflict" papernrs) hst
+	= ({papersf & value = Conflicts papersf.value},hst)
+
+gForm {|Co_authors|} informid hst = specialize myeditor informid hst
+where
+	myeditor (init,formid) hst
+	# (Co_authors authors) 	= formid.ival
+	# (authorsf,hst)		= vertlistFormButs 5 (init,subsFormId formid "authors" authors) hst
+	= ({authorsf & value = Co_authors authorsf.value},hst)
+
+// general forms display settings
+
+derive gForm [], Maybe
+derive gUpd [], Maybe
+derive gPrint Maybe
+derive gParse Maybe
+
+derive gForm 	
+				Login, Account, Member, ManagerInfo, RefereeInfo, /*Conflicts, */
+				/*RefPerson, */Person,
+				/*Reports, *//*RefReport, */ Report, Recommendation, Familiarity, 
+				/*RefPaper, */Paper, PaperInfo 
+derive gUpd 	
+				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts, 
+				RefPerson, Person,
+				Reports, RefReport, Report, Recommendation, Familiarity, 
+				RefPaper, Paper, PaperInfo, Co_authors 
+derive gPrint 	
+				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts,
+				RefPerson, Person,
+				Reports, RefReport, Report, Recommendation, Familiarity, 
+				RefPaper, Paper, PaperInfo, Co_authors  
+derive gParse 	
+				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts, 
+				RefPerson, Person,
+				Reports, RefReport, Report, Recommendation, Familiarity, 
+				RefPaper, Paper, PaperInfo, Co_authors 
+				
+/*
+PersonDB :: !Mode !Init !(Refto Person) *HSt -> (Form Person,!*HSt)
+PersonDB mode init refperson hst = universalRefEditor Edit invariantPerson refperson hst
 
 gForm {|[]|} gHa formid hst 
 = case formid.ival of
@@ -85,67 +127,15 @@ gForm {|Maybe|} ga formid hst
 	Just val
 		# (valform,hst)	= ga (reuseFormId formid val) hst
 		= ({value=Just valform.value,changed =valform.changed,form=valform.form},hst)
+uniqueKey :: *HSt -> (Form Int,!*HSt)
+uniqueKey hst = mkStoreForm (Init,pFormId "key" 1) inc hst
 
-gForm {|RefPerson|} formid hst 
-# (RefPerson refperson) 	= formid.ival
-# (personf,hst)				= editPerson Edit Init refperson hst
-= ({value = RefPerson refperson, form = personf.form,changed = personf.changed},hst)
+mkUniqueKey  prefix "" hst 
+# (intf,hst)	=	uniqueKey hst
+= (prefix +++ toString intf.value,hst)
+mkUniqueKey  prefix key hst 
+= (key,hst)
 
-gForm {|RefPaper|} formid hst 
-# (RefPaper refpaper) 		= formid.ival
-# (refpaperf,paperf,hst)	= editPaper (Edit,Init,(refpaper,Edit,Init)) hst
-= ({value = RefPaper refpaperf.value, form = paperf.form,changed = paperf.changed},hst)
+*/
 
-gForm {|RefReport|} formid hst 
-# (RefReport refreport) 	= formid.ival
-# (refreportf,reportf,hst)	= editReport (Edit,Init,(refreport,Edit,Init)) hst
-= ({value = RefReport refreportf.value, form = reportf.form,changed = reportf.changed},hst)
-
-gForm {|Conflicts|} formid hst = specialize myeditor (Init,formid) hst
-where
-	myeditor (Init,formid) hst
-	# (Conflicts papernrs) 	= formid.ival
-	# (papersf,hst)			= vertlistFormButs 5 (Init,subsFormId formid "conflicts" papernrs) hst
-	= ({value = Conflicts papersf.value, form = papersf.form,changed = papersf.changed},hst)
-
-// general forms display settings
-
-derive gUpd [], Maybe
-derive gPrint Maybe
-derive gParse Maybe
-
-derive gForm 	
-				Login, Account, Member, ManagerInfo, RefereeInfo, /* Conflicts, */ 
-				/*RefPerson, */Person,
-				Reports, /*RefReport, */Report, Recommendation, Familiarity, 
-				/*RefPaper, */Paper, PaperInfo 
-derive gUpd 	
-				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts, 
-				RefPerson, Person,
-				Reports, RefReport, Report, Recommendation, Familiarity, 
-				RefPaper, Paper, PaperInfo 
-derive gPrint 	
-				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts,
-				RefPerson, Person,
-				Reports, RefReport, Report, Recommendation, Familiarity, 
-				RefPaper, Paper, PaperInfo 
-derive gParse 	
-				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts, 
-				RefPerson, Person,
-				Reports, RefReport, Report, Recommendation, Familiarity, 
-				RefPaper, Paper, PaperInfo
 				
-				
-				
-/*
-editPerson :: (!Mode,!Init,(!Refto Person,!Mode,!Init)) *HSt -> (Form (Refto Person),Form Person,!*HSt)
-editPerson (rmode,rinit,(Refto person,pmode,pinit)) hst
-# (personv,hst)				= getPerson (Refto person)
-//# (refpersonf,personf,hst) 	= editRefto (rmode,rinit,((Refto person,initPerson person),pmode,pinit)) hst
-# (personf,hst)				= mkEdit (rinit,sFormId person peronv)
-# (ok,msg)					= invariantPerson personf.value
-# (_,hst) 					= ReportStore (addJudgement (ok,msg)) hst
-# (_,hst)					= if ok
-									(editRefto (rmode,rinit,((Refto person,initPerson person),pmode,pinit)) hst)
-= (refpersonf,personf,hst)
-*/ 

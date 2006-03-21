@@ -138,7 +138,7 @@ vertlistForm inIDataId hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) mkEditForm 
 vertlistFormButs :: !Int !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 vertlistFormButs nbuts (init,formid) hst
 
-# indexId		= subsFormId formid "idx" 0
+# indexId		= {subsFormId formid "idx" 0 & mode = Display}
 # (index,hst)	= mkEditForm (init,indexId) hst
 # (olist,hst)	= listForm (init,formid) hst
 # lengthlist	= length olist.value
@@ -188,18 +188,16 @@ vertlistFormButs nbuts (init,formid) hst
 # pdmenu		= PullDown (1,defpixel) (step, [toString lengthlist +++ " More... ":["Show " +++ toString i \\ i <- [1 .. max 1 lengthlist]]]) 
 # (pdbuts,hst)	= mkEditForm (setID pdmenuId pdmenu) hst
  
-= 	(	{ form 		= case formid.mode of
-						Edit ->		pdbuts.form ++ 	bbuts.form ++ 
-									[[(toHtml ("nr " <+++ (i+1)  <+++ " / " <+++ length list.value) <.||.> 
-									  del <.=.> ins <.=.> app  <.=.> copy  <.=.> paste) 
-										\\ del <- del.form & ins <- ins.form & app <- app.form & copy <- copy.form & paste <- paste.form 
-											& i <- [bbuts.value..]] 
-											<=|> list.form%betweenindex] ++ 
-											(if (lengthlist <= 0) add.form [])
-						Display ->	[bbuts.form <=|> list.form%betweenindex]
+= 	(	{ form 		= pdbuts.form ++ bbuts.form ++ 
+						[[(toHtml ("nr " <+++ (i+1)  <+++ " / " <+++ length list.value) <.||.> 
+						 (ifEdit formid.mode (del <.=.> ins <.=.> app  <.=.> copy  <.=.> paste) EmptyBody)) 
+						\\ del <- del.form & ins <- ins.form & app <- app.form & copy <- copy.form & paste <- paste.form 
+						& i <- [bbuts.value..]]	<=|> 
+						list.form%betweenindex] ++ 
+						(if (lengthlist <= 0) add.form [])
 		, value 	= list.value
-		, changed 	= olist.changed || obbuts.changed || del.changed || pdbuts.changed ||ins.changed ||
-						add.changed || copy.changed || paste.changed || list.changed
+		, changed 	= olist.changed || list.changed || obbuts.changed || del.changed || pdbuts.changed ||ins.changed ||
+						add.changed || copy.changed || paste.changed || list.changed || index.changed || app.changed
 		}
 	,	hst )
 where
@@ -259,7 +257,7 @@ where
 
 reftoListFormButs :: !Int !Mode !Init !(InIDataId [(Refto a,a)]) !*HSt -> (Form [Refto a],Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 reftoListFormButs nbuts mode initv (init,formid) hst
-# indexId		= subsFormId formid "idx" 0
+# indexId		= {subsFormId formid "idx" 0 & mode = Edit}
 # (index,hst)	= mkEditForm (init,indexId) hst
 # (rlist,vlist,hst)= reftoVertListForm mode initv (init,formid) hst
 # lengthlist	= length rlist.value
@@ -287,14 +285,12 @@ reftoListFormButs nbuts mode initv (init,formid) hst
 # elemId		= subsFormId formid "copyelem" createDefault
 # copyId		= subnFormId formid "copy"  (copybutton obbuts.value step)
 # (copy	,hst) 	= ListFuncBut (Init, copyId) hst	
-//# (elemstore,hst)= mkStoreForm (Init,elemId) (if copy.changed (\_ -> rlist.value!!copy.value 0) id) hst
 # (elemstore,hst)= mkStoreForm (Init,elemId) (if copy.changed (\_ -> vlist.value!!copy.value 0) id) hst
 
 # pasteId		= subnFormId formid "paste"  (pastebutton obbuts.value step)
 # (paste,hst) 	= ListFuncBut (Init, pasteId) hst	
 
 # newlist		= rlist.value
-//# newlist		= if paste.changed (updateAt (paste.value 0) elemstore.value newlist) newlist
 # newlist		= ins.value newlist 
 # newlist		= add.value newlist
 # newlist		= app.value newlist 
@@ -316,15 +312,13 @@ reftoListFormButs nbuts mode initv (init,formid) hst
 # (pdbuts,hst)	= mkEditForm (setID pdmenuId pdmenu) hst
  
 = 	(	rlist	
-	,	{ form 		= case formid.mode of
-						Edit ->		pdbuts.form ++ 	bbuts.form ++ 
-									[[(toHtml ("nr " <+++ (i+1)  <+++ " / " <+++ length rlist.value) <.||.> 
-									  del <.=.> ins <.=.> app  <.=.> copy  <.=.> paste) 
-										\\ del <- del.form & ins <- ins.form & app <- app.form & copy <- copy.form & paste <- paste.form 
-											& i <- [bbuts.value..]] 
-											<=|> [re <.=.> ve \\ re <- rlist.form%betweenindex & ve <- vlist.form%betweenindex]] ++ 
-											(if (lengthlist <= 0) add.form [])
-						Display ->	[bbuts.form <=|> [re <.=.> ve \\ re <- rlist.form%betweenindex & ve <- vlist.form%betweenindex]]
+	,	{ form 		= pdbuts.form ++ bbuts.form ++ 
+						[[(toHtml ("nr " <+++ (i+1)  <+++ " / " <+++ length rlist.value) <.||.> 
+							(ifEdit formid.mode (del <.=.> ins <.=.> app  <.=.> copy  <.=.> paste) EmptyBody)) 
+						\\ del <- del.form & ins <- ins.form & app <- app.form & copy <- copy.form & paste <- paste.form 
+						& i <- [bbuts.value..]] 
+							<=|> [re <.=.> ve \\ re <- rlist.form%betweenindex & ve <- vlist.form%betweenindex]] ++ 
+						(if (lengthlist <= 0) add.form [])
 		, value 	= vlist.value
 		, changed 	= rlist.changed || vlist.changed || obbuts.changed || del.changed || pdbuts.changed ||ins.changed ||
 						add.changed || copy.changed || paste.changed

@@ -90,7 +90,7 @@ where
 
 // swiss army nife editor that makes coffee too ...
 
-mkViewForm :: !(Init,FormId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
+mkViewForm :: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
 mkViewForm (init,formid) bm=:{toForm, updForm, fromForm, resetForm}  {states,world} 
 # (isupdated,view,states,world) = findFormInfo vformid states world // determine current value in the state store
 = calcnextView isupdated view states world
@@ -106,7 +106,7 @@ where
 						Nothing 	-> view		 
 						Just reset 	-> reset view
 	# (viewform,{states,world})						// make a form for it
-					= gForm{|*|} (reuseFormId formid view) {cntr = 0,states = states, world = world}
+					= gForm{|*|} (init,reuseFormId formid view) {cntr = 0,states = states, world = world}
 	| viewform.changed && not isupdated 			// only true when a user defined specialisation is updated, recalculate the form
 		= calcnextView True (Just viewform.value) states world
 
@@ -181,28 +181,28 @@ where
 
 // gForm: automatic derives an Html Form for any Clean type
 
-generic gForm a :: !(FormId a) !*HSt -> *(Form a, !*HSt)	
+generic gForm a :: !(InIDataId a) !*HSt -> *(Form a, !*HSt)	
 
-gForm{|Int|} formid hst 	
-# (body,hst) = mkInput defsize formid (IV i) (UpdI i) hst
+gForm{|Int|} (init,formid) hst 	
+# (body,hst) = mkInput defsize (init,formid) (IV i) (UpdI i) hst
 = ({changed=False, value=i, form=[body]},hst)
 where
 	i = formid.ival 
 	
-gForm{|Real|} formid hst 	
-# (body,hst) = mkInput defsize formid (RV r) (UpdR r) hst
+gForm{|Real|} (init,formid) hst 	
+# (body,hst) = mkInput defsize (init,formid) (RV r) (UpdR r) hst
 = ({changed=False, value=r, form=[body]},hst)
 where
 	r = formid.ival 
 
-gForm{|Bool|} formid hst 	
-# (body,hst) = mkInput defsize formid (BV b) (UpdB b) hst
+gForm{|Bool|} (init,formid) hst 	
+# (body,hst) = mkInput defsize (init,formid) (BV b) (UpdB b) hst
 = ({changed=False, value=b, form=[body]},hst)
 where
 	b = formid.ival 
 
-gForm{|String|} formid hst 	
-# (body,hst) = mkInput defsize formid (SV s) (UpdS s) hst
+gForm{|String|} (init,formid) hst 	
+# (body,hst) = mkInput defsize (init,formid) (SV s) (UpdS s) hst
 = ({changed=False, value=s, form=[body]},hst)
 where
 	s = formid.ival 
@@ -210,9 +210,9 @@ where
 gForm{|UNIT|}  _ hst 
 = ({changed=False, value=UNIT, form=[EmptyBody]},hst)
 
-gForm{|PAIR|} gHa gHb formid  hst 
-# (na,hst) = gHa (reuseFormId formid a) hst
-# (nb,hst) = gHb (reuseFormId formid b) hst
+gForm{|PAIR|} gHa gHb (init,formid)  hst 
+# (na,hst) = gHa (init,reuseFormId formid a) hst
+# (nb,hst) = gHb (init,reuseFormId formid b) hst
 = (	{changed=na.changed || nb.changed
 	,value	=PAIR na.value nb.value
 	,form	=[STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [na.form,nb.form]]
@@ -220,33 +220,33 @@ gForm{|PAIR|} gHa gHb formid  hst
 where
 	(PAIR a b) = formid.ival 
 
-gForm{|EITHER|} gHa gHb formid  hst 
+gForm{|EITHER|} gHa gHb (init,formid)  hst 
 = case formid.ival of
 	(LEFT a)
-	# (na,hst) = gHa (reuseFormId formid a) hst
+	# (na,hst) = gHa (init,reuseFormId formid a) hst
 	= ({changed=na.changed, value=LEFT na.value, form=na.form},hst)
 	(RIGHT b)
-	# (nb,hst) = gHb (reuseFormId formid b) hst
+	# (nb,hst) = gHb (init,reuseFormId formid b) hst
 	= ({changed=nb.changed, value=RIGHT nb.value, form=nb.form},hst)
 
-gForm{|OBJECT|} gHo formid hst
-# (no,hst) = gHo (reuseFormId formid o) hst
+gForm{|OBJECT|} gHo (init,formid) hst
+# (no,hst) = gHo (init,reuseFormId formid o) hst
 = ({changed=no.changed, value=OBJECT no.value, form=no.form},hst)
 where
 	(OBJECT o) = formid.ival
 
-gForm{|CONS of t|} gHc formid hst=:{cntr}
+gForm{|CONS of t|} gHc (init,formid) hst=:{cntr}
 | not (isEmpty t.gcd_fields) 		 
-# (nc,hst) = gHc (reuseFormId formid c) (setCntr (cntr+1) hst) // don't display record constructor
+# (nc,hst) = gHc (init,reuseFormId formid c) (setCntr (cntr+1) hst) // don't display record constructor
 = ({changed=nc.changed, value=CONS nc.value, form=nc.form},hst)
 | t.gcd_type_def.gtd_num_conses == 1 
-# (nc,hst) = gHc (reuseFormId formid c) (setCntr (cntr+1) hst) // don't display constructors that have no alternative
+# (nc,hst) = gHc (init,reuseFormId formid c) (setCntr (cntr+1) hst) // don't display constructors that have no alternative
 = ({changed=nc.changed, value=CONS nc.value, form=nc.form},hst)
 | t.gcd_name.[(size t.gcd_name) - 1] == '_' // don't display constructor names which end with an underscore
-# (nc,hst) = gHc (reuseFormId formid c) (setCntr (cntr+1) hst) 
+# (nc,hst) = gHc (init,reuseFormId formid c) (setCntr (cntr+1) hst) 
 = ({changed=nc.changed, value=CONS nc.value, form=nc.form},hst)
 # (selector,hst)= mkConsSelector formid t hst
-# (nc,hst) = gHc (reuseFormId formid c) hst
+# (nc,hst) = gHc (init,reuseFormId formid c) hst
 = ({changed=nc.changed
 	,value=CONS nc.value
 	,form=[STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[selector,BodyTag nc.form]]]
@@ -293,8 +293,8 @@ where
 
 			width = "width:" +++ (toString defpixel) +++ "px"
 
-gForm{|FIELD of d |} gHx formid hst 
-# (nx,hst) = gHx (reuseFormId formid x) hst
+gForm{|FIELD of d |} gHx (init,formid) hst 
+# (nx,hst) = gHx (init,reuseFormId formid x) hst
 = ({changed=nx.changed
 	,value=FIELD nx.value
 	,form=[STable [Tbl_CellPadding (Pixels 1), Tbl_CellSpacing (Pixels 1)] [[fieldname,BodyTag nx.form]]]
@@ -329,7 +329,7 @@ where
 	| max - def <= 0 = def
 	| otherwise = ndefsize max (def + defsize)
 
-gForm{|(->)|} garg gres formid hst 	
+gForm{|(->)|} garg gres (init,formid) hst 	
 = ({changed=False, value=formid.ival, form=[]},hst)
 
 // gUpd calculates a new value given the current value and a change in the value
@@ -422,8 +422,8 @@ gUpd{|(->)|} gUpdArg gUpdRes mode f = (mode,f)
 
 // small utility functions
 
-mkInput :: !Int !(FormId d) Value UpdValue *HSt -> (BodyTag,*HSt) 
-mkInput size formid=:{mode = Edit} val updval hst=:{cntr} 
+mkInput :: !Int !(InIDataId d) Value UpdValue *HSt -> (BodyTag,*HSt) 
+mkInput size (init,formid=:{mode = Edit}) val updval hst=:{cntr} 
 	= ( Input 	[	Inp_Type Inp_Text
 				, 	Inp_Value val
 				,	Inp_Name (encodeTriplet (formid.id,cntr,updval))
@@ -438,7 +438,7 @@ where
 	showType (IV i)		= "::Int"
 	showType (RV r) 	= "::Real"
 	showType (BV b) 	= "::Bool"
-mkInput size {mode = Display} val _ hst=:{cntr} 
+mkInput size (init,{mode = Display}) val _ hst=:{cntr} 
 	= ( Input 	[	Inp_Type Inp_Text
 				, 	Inp_Value val
 				,	Inp_ReadOnly ReadOnly
@@ -449,7 +449,7 @@ mkInput size {mode = Display} val _ hst=:{cntr}
 		
 toHtml :: a -> BodyTag | gForm {|*|} a
 toHtml a 
-# (na,_) = gForm{|*|} {id = "__toHtml", lifespan = Page, mode = Display, storage = PlainString, ival = a} {cntr = 0, states = emptyFormStates, world = undef}
+# (na,_) = gForm{|*|} (Set,{id = "__toHtml", lifespan = Page, mode = Display, storage = PlainString, ival = a}) {cntr = 0, states = emptyFormStates, world = undef}
 = BodyTag na.form
 
 toHtmlForm :: (*HSt -> *(Form a,*HSt)) -> [BodyTag] | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a

@@ -8,8 +8,29 @@ import tree
 derive gForm []
 derive gUpd []
 
-Start world  = doHtmlServer MyPage3  world
+derive gForm 	Record
+derive gUpd 	Record
+derive gParse 	Record
+derive gPrint 	Record
+
+
+Start world  = doHtmlServer MyPage4  world
 //Start world  = doHtml MyPage  world
+
+
+:: Record = {name :: String, address :: String, zipcode :: Int}
+
+myrecord :: [Record]
+myrecord = []
+
+MyPage4 hst
+# (myrecord,hst) = mkEditForm (Init,nFormId "bla" myrecord)  hst
+=	mkHtml "Myrecord"
+	[ H1 [] "myrecord"
+	, BodyTag myrecord.form
+	]  hst
+
+
 
 myBalancedTree 	= nFormId "BalancedTree" 	(fromListToBalTree [0])
 mySortedList	= nFormId "SortedList"  	[0]
