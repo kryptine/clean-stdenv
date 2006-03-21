@@ -22,13 +22,13 @@ doHtmlServer 	:: (*HSt -> (Html,!*HSt))  *World -> *World 	// use this applicati
 // mkViewForm is the swiss army nife function creating stateful interactive forms with a view v of data d
 // make shure that all editors have a unique identifier !
 
-mkViewForm 		:: !(Init,FormId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
+mkViewForm 		:: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
 
 // gForm converts any Clean type to html code (form) to be used in a body
 // gUpd updates a value of type t given any user input in the html form
 
-generic gForm a :: !(FormId a) !*HSt -> *(Form a, !*HSt)		// user defined gForms: use "specialize"	
-generic gUpd a 	:: UpdMode a -> (UpdMode,a)						// gUpd can simply be derived
+generic gForm a :: !(InIDataId a) !*HSt -> *(Form a, !*HSt)		// user defined gForms: use "specialize"	
+generic gUpd a 	:: UpdMode a -> (UpdMode,a)							// gUpd can simply be derived
 
 derive gForm Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD//, (,) 
 derive gUpd  Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD//, (,) 
@@ -62,7 +62,7 @@ runUserApplication :: .(*HSt -> *(.a,*HSt)) *FormStates *NWorld -> *(.a,*FormSta
 
 incrHSt 		:: Int *HSt -> *HSt											// Cntr := Cntr + 1
 CntrHSt 		:: *HSt -> (Int,*HSt)										// Hst.Cntr
-mkInput 		:: !Int !(FormId d) Value UpdValue *HSt -> (BodyTag,*HSt)	// Html Form Creation utility 
+mkInput 		:: !Int !(InIDataId d) Value UpdValue *HSt -> (BodyTag,*HSt)	// Html Form Creation utility 
 getChangedId	:: !*HSt -> (String,!*HSt)					// id of form that has been changed by user
 
 :: UpdMode	= UpdSearch UpdValue Int		// search for indicated postion and update it

@@ -328,7 +328,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -356,7 +356,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -384,7 +384,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -412,7 +412,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -524,7 +524,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -552,7 +552,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -580,7 +580,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -4219,6 +4219,90 @@ OtherModules
 				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	MersenneTwister
+		Dir:	{Application}\Libraries\MersenneTwister
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdDebug
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlButtons
+		Dir:	{Application}\Libraries\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
 Static
 	Mods
 		Path:	{Project}\coffeemachine.icl
@@ -4368,6 +4452,9 @@ Static
 		Path:	{Application}\Libraries\Dynamics\general\md5.icl
 		Path:	{Application}\Libraries\htmlGEC\iDataState.icl
 		Path:	{Application}\Libraries\htmlGEC\PrintUtil.icl
+		Path:	{Application}\Libraries\MersenneTwister\MersenneTwister.icl
+		Path:	{Application}\Libraries\StdEnv\StdDebug.icl
+		Path:	{Application}\Libraries\htmlGEC\htmlButtons.icl
 	Objs
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup0.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup1Trace.o
@@ -4396,6 +4483,7 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdCharList.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\StdHtml.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlFormlib.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlHandler.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlDataDef.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlStyleDef.o
@@ -4410,8 +4498,8 @@ Static
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\iDataState.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\EncodeDecode.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlTrivial.o
-		Path:	{Application}\Libraries\Directory\Clean System Files\Directory.o
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
+		Path:	{Application}\Libraries\Directory\Clean System Files\Directory.o
 		Path:	{Application}\Libraries\htmlGEC\graph_copy\Clean System Files\dynamic_string.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicGraphConversion.o
@@ -4517,7 +4605,9 @@ Static
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\httpUtil.o
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLib.o
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdListExtensions.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlFormlib.o
+		Path:	{Application}\Libraries\MersenneTwister\Clean System Files\MersenneTwister.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlButtons.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlArrow.o
 		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
 		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.obj
@@ -4576,17 +4666,32 @@ Static
 		Path:	{Application}\Libraries\StdLib
 		Path:	{Application}\Libraries\ObjectIO
 		Path:	{Application}\Libraries\ObjectIO\OS Windows
+		Path:	{Application}\Libraries\Directory
 		Path:	{Application}\Libraries\Dynamics\extension
 		Path:	{Application}\Libraries\Dynamics\general
 		Path:	{Application}\Libraries\Dynamics\implementation
 		Path:	{Application}\Libraries\Dynamics\implementation\windows
 		Path:	{Application}\Libraries\Generics
 		Path:	{Application}\Libraries\ArgEnvWindows
+		Path:	{Application}\Libraries\Gast
 		Path:	{Application}\Libraries\Directory
 		Path:	{Application}\Libraries\Tcp
+		Path:	{Application}\Libraries\ExceptionsWindows
+		Path:	{Application}\Libraries\MersenneTwister
+		Path:	{Application}\Libraries\ExtendedArith\ExtendedArith
+		Path:	{Application}\Libraries\GameLib
+		Path:	{Application}\Libraries\GEC
 		Path:	{Application}\Libraries\GEC\GEC Implementation
+		Path:	{Application}\Libraries\WrapDebug
 		Path:	{Application}\Libraries\htmlGEC
 		Path:	{Application}\Libraries\htmlGEC\graph_copy
-		Path:	{Application}\Libraries\htmlGEC\htmlTest
-	AppP:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1
-	PrjP:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Examples\Simple Examples
+		Path:	{Application}\Libraries\Hilde
+		Path:	{Application}\Libraries\Hilde\Loes 0.2
+		Path:	{Application}\Libraries\Hilde\OS Windows\Foreign
+		Path:	{Application}\Libraries\Hilde\OS Windows\NoDynamicFileSystem
+		Path:	{Application}\Libraries\Hilde\Parser combinators 2002
+		Path:	{Application}\Libraries\ExtEnv
+		Path:	{Application}\Libraries\ExtendedArith
+		Path:	{Application}\Libraries\StdLib
+	AppP:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1
+	PrjP:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Libraries\htmlGEC\Examples\Simple Examples

@@ -17,9 +17,9 @@ derive gParse 	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, Button, Chec
 
 // Tuples are placed next to each other, pairs below each other ...
 
-gForm{|(,)|} gHa gHb formid hst
-# (na,hst) = gHa (reuseFormId formid a) (incrHSt 1 hst)   // one more for the now invisable (,) constructor 
-# (nb,hst) = gHb (reuseFormId formid b) hst
+gForm{|(,)|} gHa gHb (init,formid) hst
+# (na,hst) = gHa (init,reuseFormId formid a) (incrHSt 1 hst)   // one more for the now invisable (,) constructor 
+# (nb,hst) = gHb (init,reuseFormId formid b) hst
 = (	{changed= na.changed || nb.changed
 	,value	= (na.value,nb.value)
 	,form	= [STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[BodyTag na.form, BodyTag nb.form]]]
@@ -27,10 +27,10 @@ gForm{|(,)|} gHa gHb formid hst
 where
 	(a,b) = formid.ival
 
-gForm{|(,,)|} gHa gHb gHc formid hst
-# (na,hst) = gHa (reuseFormId formid a) (incrHSt 1 hst)   // one more for the now invisable (,,) constructor 
-# (nb,hst) = gHb (reuseFormId formid b) hst
-# (nc,hst) = gHc (reuseFormId formid c) hst
+gForm{|(,,)|} gHa gHb gHc (init,formid) hst
+# (na,hst) = gHa (init,reuseFormId formid a) (incrHSt 1 hst)   // one more for the now invisable (,,) constructor 
+# (nb,hst) = gHb (init,reuseFormId formid b) hst
+# (nc,hst) = gHc (init,reuseFormId formid c) hst
 = (	{changed= na.changed || nb.changed || nc.changed
 	,value	= (na.value,nb.value,nc.value)
 	,form	= [STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[BodyTag na.form,BodyTag nb.form,BodyTag nc.form]]]
@@ -38,11 +38,11 @@ gForm{|(,,)|} gHa gHb gHc formid hst
 where
 	(a,b,c) = formid.ival
 
-gForm{|(,,,)|} gHa gHb gHc gHd formid hst
-# (na,hst) = gHa (reuseFormId formid a) (incrHSt 1 hst)   // one more for the now invisable (,,) constructor 
-# (nb,hst) = gHb (reuseFormId formid b) hst
-# (nc,hst) = gHc (reuseFormId formid c) hst
-# (nd,hst) = gHd (reuseFormId formid d) hst
+gForm{|(,,,)|} gHa gHb gHc gHd (init,formid) hst
+# (na,hst) = gHa (init,reuseFormId formid a) (incrHSt 1 hst)   // one more for the now invisable (,,) constructor 
+# (nb,hst) = gHb (init,reuseFormId formid b) hst
+# (nc,hst) = gHc (init,reuseFormId formid c) hst
+# (nd,hst) = gHd (init,reuseFormId formid d) hst
 = (	{changed= na.changed || nb.changed || nc.changed || nd.changed
 	,value	= (na.value,nb.value,nc.value,nd.value)
 	,form	= [STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] 
@@ -53,9 +53,9 @@ where
 
 // <-> works exactly the same as (,) and places its arguments next to each other, for compatibility with GEC's
 
-gForm{|(<->)|} gHa gHb formid hst
-# (na,hst) = gHa (reuseFormId formid a) (incrHSt 1 hst)   // one more for the now invisable <-> constructor 
-# (nb,hst) = gHb (reuseFormId formid b) hst
+gForm{|(<->)|} gHa gHb (init,formid) hst
+# (na,hst) = gHa (init,reuseFormId formid a) (incrHSt 1 hst)   // one more for the now invisable <-> constructor 
+# (nb,hst) = gHb (init,reuseFormId formid b) hst
 = (	{changed= na.changed || nb.changed 
 	,value	= na.value <-> nb.value
 	,form	= [STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[BodyTag na.form, BodyTag nb.form]]]
@@ -65,9 +65,9 @@ where
 
 // <|> works exactly the same as PAIR and places its arguments below each other, for compatibility with GEC's
 
-gForm{|(<|>)|} gHa gHb formid hst 
-# (na,hst) = gHa (reuseFormId formid a) (incrHSt 1 hst) // one more for the now invisable <|> constructor
-# (nb,hst) = gHb (reuseFormId formid b) hst
+gForm{|(<|>)|} gHa gHb (init,formid) hst 
+# (na,hst) = gHa (init,reuseFormId formid a) (incrHSt 1 hst) // one more for the now invisable <|> constructor
+# (nb,hst) = gHb (init,reuseFormId formid b) hst
 = (	{changed= na.changed || nb.changed 
 	,value	= na.value <|> nb.value
 	,form	= [STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [na.form, nb.form]]
@@ -77,22 +77,22 @@ where
 
 // to switch between modes within a type ...
 
-gForm{|DisplayMode|} gHa formid hst 	
+gForm{|DisplayMode|} gHa (init,formid) hst 	
 = case formid.ival of
 	(HideMode a)
-	# (na,hst) = gHa {formid & mode = Display, ival = a} (incrHSt 1 hst)
+	# (na,hst) = gHa (init,{formid & mode = Display, ival = a}) (incrHSt 1 hst)
 	= (	{changed= na.changed 
 		,value	= HideMode na.value
 		,form	= [EmptyBody]
 		},hst)
 	(DisplayMode a)
-	# (na,hst) = gHa {formid & mode = Display, ival = a} (incrHSt 1 hst)
+	# (na,hst) = gHa (init,{formid & mode = Display, ival = a}) (incrHSt 1 hst)
 	= (	{changed= False
 		,value	= DisplayMode na.value
 		,form	= na.form
 		},hst)
 	(EditMode a) 
-	# (na,hst) = gHa {formid & mode = Edit, ival = a} (incrHSt 1 hst)
+	# (na,hst) = gHa (init,{formid & mode = Edit, ival = a}) (incrHSt 1 hst)
 	= (	{changed= na.changed
 		,value	= EditMode na.value
 		,form	= na.form
@@ -105,7 +105,7 @@ gForm{|DisplayMode|} gHa formid hst
 
 // Buttons to press
 
-gForm{|Button|} formid hst 
+gForm{|Button|} (init,formid) hst 
 # (cntr,hst) = CntrHSt hst
 = case formid.ival of
 	v=:(LButton size bname)
@@ -132,10 +132,10 @@ gForm{|Button|} formid hst
 					]) ""]
 		},(incrHSt 1 hst))
 	Pressed
-	= gForm {|*|} (setFormId formid (LButton defpixel "??")) hst // end user should reset button
+	= gForm {|*|} (init,(setFormId formid (LButton defpixel "??"))) hst // end user should reset button
 
 
-gForm{|CheckBox|} formid hst 
+gForm{|CheckBox|} (init,formid) hst 
 # (cntr,hst) = CntrHSt hst
 = case formid.ival of
 	v=:(CBChecked name) 
@@ -160,7 +160,7 @@ gForm{|CheckBox|} formid hst
 					]) ""]
 		},(incrHSt 1 hst))
 
-gForm{|RadioButton|} formid hst 
+gForm{|RadioButton|} (init,formid) hst 
 # (cntr,hst) = CntrHSt hst
 = case formid.ival of
 	v=:(RBChecked name)
@@ -185,7 +185,7 @@ gForm{|RadioButton|} formid hst
 					]) ""]
 		},(incrHSt 1 hst))
 
-gForm{|PullDownMenu|} formid  hst 
+gForm{|PullDownMenu|} (init,formid)  hst 
 # (cntr,hst) = CntrHSt hst
 = case formid.ival of
 	v=:(PullDown (size,width) (menuindex,itemlist))
@@ -207,21 +207,21 @@ gForm{|PullDownMenu|} formid  hst
 		},(incrHSt 1 hst))
 
 	
-gForm{|TextInput|} formid hst 	
+gForm{|TextInput|} (init,formid) hst 	
 # (cntr,hst) = CntrHSt hst
 = case formid.ival of
 	(TI size i)
-	# (body,hst) = mkInput size formid (IV i) (UpdI i) hst
+	# (body,hst) = mkInput size (init,formid) (IV i) (UpdI i) hst
 	= ({changed=False, value=TI size i, form=[body]},incrHSt 2 hst)
 	(TR size r)
-	# (body,hst) = mkInput size formid (RV r) (UpdR r) hst
+	# (body,hst) = mkInput size (init,formid) (RV r) (UpdR r) hst
 	= ({changed=False, value=TR size r, form=[body]},incrHSt 2 hst)
 	(TS size s)
-	# (body,hst) = mkInput size formid (SV s) (UpdS s) hst 
+	# (body,hst) = mkInput size (init,formid) (SV s) (UpdS s) hst 
 	= ({changed=False, value=TS size s, form=[body]},incrHSt 2 hst)
 
-gForm {|HtmlDate|} formid hst 
-	= specialize myeditor (Init,formid) hst
+gForm {|HtmlDate|} (init,formid) hst 
+	= specialize myeditor (init,formid) hst
 where
 	myeditor (init,formid) hst = mkBimapEditor (init,formid) bimap hst
 	where
@@ -247,7 +247,7 @@ where
 							, resetForm = Nothing
 							} hst 
 
-gForm{|TextArea|} formid hst 
+gForm{|TextArea|} (init,formid) hst 
 # (cntr,hst) = CntrHSt hst
 = (	{ changed 	= False
 	, value 	= formid.ival

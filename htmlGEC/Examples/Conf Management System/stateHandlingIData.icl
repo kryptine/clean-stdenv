@@ -6,34 +6,28 @@ import loginAdminIData, confIData
 
 changeInfo :: !ConfAccount !*HSt -> ([BodyTag],!*HSt)
 changeInfo account hst
-# (personf,hst) = editPerson Edit Init (getRefPerson account.state) hst
+# (personf,hst) = mkEditForm (Init,sFormId "person" (getRefPerson account.state)) hst
 = (personf.form,hst)
 
-modifyStatesPage :: !ConfAccount !ConfAccounts !*HSt -> ((ConfAccount,ConfAccounts),[BodyTag],!*HSt)
+modifyStatesPage :: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 modifyStatesPage account accounts hst
 # myid				= sFormId "conf_manager_temp_states" accounts 					// make a local editor
 # (naccounts,hst)	= vertlistFormButs 5 (Init,myid) hst							// make a list editor to mofify all accounts
 # ((ok,judge),hst)	= ReportStore (\_ -> invariantLogAccounts naccounts.value) hst	// test invariants and store conclusion
-| not ok			= ((account,naccounts.value), naccounts.form, hst)				// return as is
+| not ok			= (naccounts.form, hst)											// return as is
 # (naccounts,hst)	= vertlistFormButs 5 (setID  myid (setInvariantAccounts naccounts.value)) hst  // ugly: adjust references
-# (_,hst)			= editAccounts Edit Set naccounts.value hst 					// store in global database
-= ((account,naccounts.value), naccounts.form, hst)
+# (naccounts2,hst)	= AccountsDB Edit Set naccounts.value hst 						// store in global database
+= (naccounts.form ++ [Br,Txt (printToString naccounts2.value)], hst)
 
-
-/*
-gForm {|Reports|} formid hst 
-	= specialize myeditor (Init,formid) hst
+showPapersPage ::  !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
+showPapersPage account accounts hst
+# (papersf,hst) 	= vertlistFormButs 5 (Init,sdFormId "conf_papers" (getRefPapers accounts)) hst
+//# (papersf,hst) 	= mkEditForm (Init,sdFormId "papers" (getRefPapers accounts)) hst
+= (papersf.form ++ [Br,Txt (foldr (+++) "" debug)] ,hst)
 where
-	myeditor (init,formid) hst
-	# (papernrform,hst)	= vertlistForm (Init,{reuseFormId formid reflist & mode = Display, lifespan = Page} ) hst
-	= (	{ changed		= papernrform.changed
-		, value 		= Reports reflist
-		, form 			= papernrform.form
-		}
-		,hst )
-	(Reports reflist) = formid.ival
+	debug = map (\(i,RefPaper (Refto paper)) -> toString i +++ paper +++ ",") (getRefPapers accounts)
 
-*/
+
 
 // forms
 /*
@@ -166,19 +160,6 @@ where
 											 Br,
 											 Txt "You can change your current report by recomitting the form!"]
 	addRep chosennr report state = addReport chosennr (Just report) state
-
-//mkSubStateForm :: !(InIDataId !subState) !state !(subState state -> state) !*HSt -> (Bool,Form state,!*HSt)
-
-changeInfo :: !(Login ConfState) !(Logins ConfState) !*HSt -> (Logins ConfState,[BodyTag],*HSt)
-changeInfo login states hst
-# (ok,statesform,hst) = mkSubStateForm (Init,nFormId "cms_info" login.state.person) states
-						(\person states = changeState {login & state.person = person} states) hst
-= (statesform.value,statesform.form,hst)
-
-modifyStatesPage :: !(Logins ConfState) !*HSt -> (!Logins ConfState,![BodyTag],!*HSt)
-modifyStatesPage states hst
-# (nstates,hst)		= vertlistFormButs 5 (Init, nFormId "la_states" states) hst
-= 	(nstates.value,	nstates.form, hst)
 
 */
 		

@@ -24,9 +24,9 @@ import loginAdmin, htmlFormlib
 					, nr			:: PaperNr
 					, paper			:: RefPaper
 					}
-:: RefereeInfo	=	{ person		:: RefPerson
+:: RefereeInfo	=	{ person		:: RefPerson  
 					, conflicts		:: Conflicts 
-					, reports		:: Reports 
+					, reports		:: Reports
 					} 
 :: PaperNr 		:==	Int
 :: Conflicts	=	Conflicts 		[PaperNr]
@@ -49,8 +49,8 @@ import loginAdmin, htmlFormlib
 :: Familiarity	= 	Expert
 				| 	Knowledgeable
 				| 	Low
-:: CommCommittee:== TextArea 
-:: CommAuthors	:==	TextArea 
+:: CommCommittee:== String // TextArea 
+:: CommAuthors	:==	String // TextArea 
 
 // Information maintained by the Conference Manager *or* a Referee *or* an Author
 
@@ -63,33 +63,38 @@ import loginAdmin, htmlFormlib
 // Information submitted by an author
 
 :: Paper		=	{ title			:: String
-					, first_author	:: RefPerson
-					, co_authors	:: [RefPerson]
+					, first_author	:: Person
+					, co_authors	:: Co_authors
 					, abstract		:: String
 					, pdf			:: String
 					}
+:: Co_authors 	=	Co_authors [Person]					
 
 // access functions on these data structures:
 
 initManagerLogin 	:: Login
 initManagerAccount 	:: Login 		-> ConfAccount
-initRefereeAccount 	:: Login 		-> ConfAccount
-initAuthorsAccount	:: Login Int 	-> ConfAccount
-initReport 			:: Report
-initPaper 			:: String -> Paper
 
-isConfManager 		:: ConfAccount -> Bool
+isConfManager 		:: ConfAccount	-> Bool
 
-getRefPerson 		:: Member -> (Refto Person)
+getRefPerson 		:: Member 		-> RefPerson
+getRefPapers 		:: ConfAccounts -> [(Int,RefPaper)]
 
 // invariants testing and setting
 
-invariantPerson 	:: Person -> Judgement
-setInvariantAccounts:: ConfAccounts -> ConfAccounts
+invariantPerson 		:: Person -> Judgement
+setInvariantAccounts 	:: ConfAccounts -> ConfAccounts
 
 
 /*
 
+initRefereeAccount 	:: Login 		-> ConfAccount
+initAuthorsAccount	:: Login Int 	-> ConfAccount
+
+initReport 			:: Report
+initPaper 			:: String -> Paper
+
+setInvariantAccounts:: ConfAccounts -> ConfAccounts
 
 findReports 		:: Int [ConfAccount] -> [(Person,Maybe Report)]
 findReport 			:: Int ConfAccount -> (Maybe Report)

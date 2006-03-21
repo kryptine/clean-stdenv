@@ -10,39 +10,7 @@ initManagerLogin
 
 initManagerAccount :: Login -> ConfAccount
 initManagerAccount	login 
-= mkAccount login (ConfManager {ManagerInfo | person = RefPerson (uniquePerson login.loginName)})
-
-initRefereeAccount :: Login -> ConfAccount
-initRefereeAccount	login 
-= mkAccount login (Referee 	{ person		= RefPerson (uniquePerson login.loginName)
-							, conflicts		= Conflicts []
-							, reports		= Reports []
-							}) 
-
-initAuthorsAccount :: Login Int -> ConfAccount
-initAuthorsAccount login i
-= mkAccount login (Authors 	{ nr			= i
-							, paper			= RefPaper  (uniquePaper  login.loginName)
-							, person		= RefPerson (uniquePerson login.loginName)
-							})
-
-
-initPaper :: String -> Paper
-initPaper name
-=	{ title			= "paper of " +++ name
-	, first_author	= RefPerson (uniquePerson name)
-	, co_authors	= []
-	, abstract		= "type in abstract here"
-	, pdf			= "download pdf here"
-	}
-
-initReport :: Report
-initReport 
-= 	{ recommendation	= StrongReject
-	, familiarity 		= Low  
-	, commCommittee		= TextArea 4 70 ""
-	, commAuthors		= TextArea 10 70 "Please enter your report"
-	}
+= mkAccount login (ConfManager {ManagerInfo | person = RefPerson (Refto "")})
 
 isConfManager :: ConfAccount -> Bool
 isConfManager account 
@@ -50,12 +18,16 @@ isConfManager account
 	ConfManager _ -> True
 	_ ->  False
 
-getRefPerson :: Member -> (Refto Person)
-getRefPerson (ConfManager managerInfo) 	= deRefPerson managerInfo.ManagerInfo.person
-getRefPerson (Referee refereeInfo)		= deRefPerson refereeInfo.RefereeInfo.person							
-getRefPerson (Authors paperInfo)		= deRefPerson paperInfo.PaperInfo.person
+getRefPerson :: Member -> RefPerson
+getRefPerson (ConfManager managerInfo) 	= managerInfo.ManagerInfo.person
+getRefPerson (Referee refereeInfo)		= refereeInfo.RefereeInfo.person							
+getRefPerson (Authors paperInfo)		= paperInfo.PaperInfo.person
 
-deRefPerson (RefPerson refto) = refto
+
+getRefPapers :: ConfAccounts -> [(Int,RefPaper)]
+getRefPapers accounts = [(nr,refpapers) 
+						\\ {state = Authors {nr,paper = refpapers}} <- accounts]
+
 
 invariantPerson :: Person -> Judgement
 invariantPerson {firstName,lastName,affiliation,emailAddress}
@@ -68,19 +40,37 @@ invariantPerson {firstName,lastName,affiliation,emailAddress}
 setInvariantAccounts :: ConfAccounts -> ConfAccounts
 setInvariantAccounts confaccounts
 	= map setInvariantAccount confaccounts
-
-setInvariantAccount :: ConfAccount -> ConfAccount
-setInvariantAccount account
-=	case account.state of
-		(ConfManager managerInfo) -> 
-			{account & state = ConfManager {managerInfo & ManagerInfo.person = RefPerson (uniquePerson account.login.loginName)}}
-		(Referee refereeInfo) ->
-			{account & state = Referee {refereeInfo & RefereeInfo.person = RefPerson (uniquePerson account.login.loginName)}}
-		(Authors paperInfo) ->
-			{account & state = Authors {paperInfo & PaperInfo.person = RefPerson (uniquePerson account.login.loginName)}}
-
+where
+	setInvariantAccount :: ConfAccount -> ConfAccount
+	setInvariantAccount account
+	=	case account.state of
+			(ConfManager managerInfo) -> 
+				{account & state = ConfManager 	{managerInfo 
+												& ManagerInfo.person = RefPerson (Refto uniquename)}}
+			(Referee refereeInfo) ->
+				{account & state = Referee 		{refereeInfo 
+												& RefereeInfo.person 	= RefPerson (Refto uniquename)
+												, RefereeInfo.reports 	= setInvariantReports refereeInfo.reports}}
+			(Authors paperInfo) ->
+				{account & state = Authors 		{paperInfo 
+												& PaperInfo.person 		= RefPerson (Refto uniquename)
+												, PaperInfo.paper 		= RefPaper(Refto (uniquePaper paperInfo.nr uniquename))}}
+	where
+		uniquename = uniquePerson account.login.loginName
+	
+		setInvariantReports (Reports reports) = Reports (setInvariantReport reports)
+		
+		setInvariantReport :: [(PaperNr, Maybe RefReport)] -> [(PaperNr, Maybe RefReport)]
+		setInvariantReport [] = []
+		setInvariantReport [(nr, Just (RefReport (Refto _))):reports]
+						 = [(nr, Just (RefReport (Refto (uniqueReport nr uniquename)))):setInvariantReport reports]
+	
+		setInvariantReport [report:reports]
+						 = [report:setInvariantReport reports]
 
 /*
+
+
 FetchReports :: Int ConfAccounts -> ([(Person,Maybe Report)],*Hst)
 FetchReports papernr accounts hst
 	= [ (state.person,report) 	\\ 	{state = Referee info} <- accounts 
@@ -89,6 +79,20 @@ FetchReports papernr accounts hst
 
 */
 /*
+initRefereeAccount :: Login -> ConfAccount
+initRefereeAccount	login 
+= mkAccount login (Referee 	{ person		= RefPerson (Refto "")
+							, conflicts		= Conflicts []
+							, reports		= Reports []
+							}) 
+
+initAuthorsAccount :: Login Int -> ConfAccount
+initAuthorsAccount login i
+= mkAccount login (Authors 	{ nr			= i
+							, paper			= RefPaper  (Refto "")
+							, person		= RefPerson (Refto "")
+							})
+
 invariantAccounts :: ConfAccounts -> (Bool,String)
 invariantAccounts accounts  
 = invariant [(state,i) \\ state <- states & i <- [1..]]
@@ -159,6 +163,22 @@ findPaper i [x=:{paperNr}:xs]
 | i == paperNr = Just x
 = findPaper i xs
 
+initPaper :: String -> Paper
+initPaper name
+=	{ title			= "paper of " +++ name
+	, first_author	= RefPerson (Refto (uniquePerson name))
+	, co_authors	= Co_authors []
+	, abstract		= "type in abstract here"
+	, pdf			= "download pdf here"
+	}
+
+initReport :: Report
+initReport 
+= 	{ recommendation	= StrongReject
+	, familiarity 		= Low  
+	, commCommittee		= "committee remarks" // TextArea 4 70 ""
+	, commAuthors		= "author remarks" //TextArea 10 70 "Please enter your report"
+	}
 	
 
 */

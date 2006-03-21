@@ -115,7 +115,7 @@ OtherModules
 				Y:	87
 				SizeX:	932
 				SizeY:	514
-		DclOpen:	True
+		DclOpen:	False
 		Icl
 			WindowPosition
 				X:	16

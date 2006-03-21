@@ -18,7 +18,7 @@ mainEntrance hst
 
 loginhandling :: *HSt -> ([BodyTag],*HSt)
 loginhandling  hst											
-# (accounts,hst) 			= editAccounts Display Init [initManagerAccount initManagerLogin] hst	
+# (accounts,hst) 			= AccountsDB Display Init [initManagerAccount initManagerLogin] hst	
 																// read out all accounts read only
 # (mblogin,loginBody,hst)	= loginPage accounts.value hst		// set up a login page
 = case mblogin of												// check result of login procedure
@@ -54,8 +54,7 @@ doConfPortal account accounts hst
 # (navButtons,hst) 	= navigationButtons account.state hst							// setup proper set of navigation buttons
 # (_,hst)			= ReportStore (\_ -> OK) hst									// set global store to "all is fine"
 # (currPage,hst)	= currPageStore (homePage account.state) navButtons.value hst	// determine which current page to display
-# ((_,_),navBody,hst)	
-					= handleCurrPage currPage.value account accounts  hst			// and handle the corresponding page
+# (navBody,hst)		= handleCurrPage currPage.value account accounts  hst			// and handle the corresponding page
 # ((ok,message),hst)= ReportStore id hst											// see if an error has occured somewhere
 = ( [ mkSTable2 [ [EmptyBody,B [] "Conference" <.||.> B [] "Manager ",Oeps ok message currPage.value]
 				, [mkColForm navButtons.form, EmptyBody, BodyTag navBody]
@@ -101,27 +100,23 @@ where
 	currPageStore :: !CurrPage  !(CurrPage -> CurrPage) *HSt -> (!Form CurrPage,!*HSt)	// current page to display
 	currPageStore currpage cbf hst = mkStoreForm (Init, sFormId "cf_currPage" currpage) cbf hst 
 
-handleCurrPage :: CurrPage ConfAccount ConfAccounts *HSt 
-					-> ((ConfAccount,ConfAccounts),[BodyTag],*HSt)
+handleCurrPage :: CurrPage ConfAccount ConfAccounts *HSt -> ([BodyTag],*HSt)
 handleCurrPage currPage account accounts  hst 
 //# (papersform,hst)	= papersStore [initPaper i (toString i) \\ i <- [0..3]] id hst
 //# papers			= papersform.value
 = case currPage of
-		RootHomePage 	-> (account,accounts) <~ rootHomePage hst
+		RootHomePage 	-> rootHomePage hst
 		ModifyStates 	-> modifyStatesPage	account accounts hst
 //		AssignPapers 	-> assignPapersPage    papers states hst
 //		AssignConflict	-> assignConflictsPage papers states hst
 
 		ChangePassword 	-> changePasswrdPage account accounts hst
-		ChangeInfo		-> (account,accounts) <~ changeInfo account hst  
-//		ListPapers 		-> (state,states) <~ showPapersPage papers loginState states hst
+		ChangeInfo		-> changeInfo account hst  
+		ListPapers 		-> showPapersPage account accounts hst
 	
 //		RefereeForm 	-> refereeStatusPage papers loginState states hst
-		MemberHomePage 	-> (account,accounts) <~ memberHomePage hst
-		_				-> (account,accounts) <~ ([],hst)
-where
-	(<~) infix 
-	(<~) states (body,hst) = (states,body,hst)
+		MemberHomePage 	-> memberHomePage hst
+		_				-> ([],hst)
 
 // the different pages the super user can choose from
 
@@ -140,7 +135,7 @@ memberHomePage hst =
 changePasswrdPage account accounts hst 
 # (mbaccount,body,hst) = changePasswordPage account hst
 = case mbaccount of
-	Nothing 		-> ((account, accounts), body, hst)
+	Nothing 		-> (body, hst)
 	Just naccount 	-> handleCurrPage (homePage account.state)
 							naccount (changePassword naccount.login.password account accounts)  hst
 
