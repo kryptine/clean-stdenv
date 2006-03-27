@@ -6,11 +6,19 @@ import loginAdmin, loginAdminIData
 
 // global editors and stores
 
-AccountsDB :: !Mode !Init !ConfAccounts *HSt -> (Form ConfAccounts,!*HSt) // login administration database
+AccountsDB :: !Mode !Init !ConfAccounts *HSt -> (Form ConfAccounts,!*HSt) // conf management database
+AccountsDB Edit Set accounts hst 
+# ((ok,judge),hst)	= ReportStore (\_ -> (invariantLogAccounts  accounts +
+										  invariantConfAccounts accounts )	) hst	// test invariants
+# accounts			= setInvariantAccounts accounts										// set invariants
+= mkEditForm (Set,
+		{sFormId uniqueDBname accounts
+			 & lifespan = if ok Persistent PersistentRO}													// store conf accounts
+			 ) hst
 AccountsDB mode init accounts hst 
 	= mkEditForm (init,
 		{sFormId uniqueDBname accounts
-			 & lifespan = ifEdit mode Persistent PersistentRO}
+			 & lifespan = PersistentRO}													// nothing stored
 			 ) hst
 
 // general deRefto approach
@@ -26,14 +34,11 @@ universalRefEditor mode invariant (Refto filename) hst
 # (_,filef,hst)		= editRefto (Display,Init,((Refto filename,createDefault),Display,Init)) hst	// read out file
 # (copyf,hst)		= mkEditForm (Init,{sFormId filename filef.value & mode = mode}) hst			// make an editor
 # (ok,msg)			= invariant copyf.value															// check invariants
-# (_,hst)			= if (filename <> "") (ReportStore (addJudgement (ok,msg)) hst) (undef,hst)		// report them
+# (_,hst)			= if (filename <> "") (ReportStore ((+) (ok,msg)) hst) (undef,hst)				// report them
 # (_,_,hst)			= if (ok && mode == Edit) 														// write to file if ok
 						(editRefto (Edit,Set,((Refto filename,copyf.value),Display,Init)) hst)
 						(undef,undef,hst)
 = (copyf,hst)
-
-// exported forms
-
 
 // specialized forms
 
@@ -41,29 +46,30 @@ gForm {|RefPerson|} (init,formid) hst = specialize myeditor (init,formid) hst
 where
 	myeditor (init,formid) hst
 	# (RefPerson refperson) 	= formid.ival
-	# (personf,hst)				= universalRefEditor Edit invariantPerson refperson hst
+	# (personf,hst)				= universalRefEditor formid.mode invariantPerson refperson hst
 	= ({personf & value = RefPerson refperson},hst)
 
 gForm {|RefReport|} (init,formid) hst = specialize myeditor (init,formid) hst
 where
 	myeditor (init,formid) hst
 	# (RefReport refreport) 	= formid.ival
-	# (reportf,hst)				= universalRefEditor Edit (\_ -> OK) refreport hst
+	# (reportf,hst)				= universalRefEditor formid.mode (\_ -> OK) refreport hst
 	= ({reportf & value = RefReport refreport},hst)
-
-gForm {|Reports|} informid hst = specialize myeditor informid hst
-where
-	myeditor (init,formid) hst
-	# (Reports papernrs) 		= formid.ival
-	# (papersf,hst)				= vertlistFormButs 5 (init,subsFormId formid "report" papernrs) hst
-	= ({papersf & value = Reports papersf.value},hst)
 
 gForm {|RefPaper|} (init,formid) hst = specialize myeditor (init,formid) hst
 where
 	myeditor (init,formid) hst
 	# (RefPaper refpaper) 		= formid.ival
-	# (reportf,hst)				= universalRefEditor formid.mode (\_ -> OK) refpaper hst
+	# (reportf,hst)				= universalRefEditor formid.mode invariantPaper refpaper hst
 	= ({reportf & value = RefPaper refpaper},hst)
+
+
+gForm {|Reports|} informid hst = specialize myeditor informid hst
+where
+	myeditor (init,formid) hst
+	# (Reports reports) 		= formid.ival
+	# (reportsf,hst)			= vertlistFormButs 5 (init,subsFormId formid "report" reports) hst
+	= ({reportsf & value = Reports reportsf.value},hst)
 
 gForm {|Conflicts|} informid hst = specialize myeditor informid hst
 where
@@ -79,9 +85,27 @@ where
 	# (authorsf,hst)		= vertlistFormButs 5 (init,subsFormId formid "authors" authors) hst
 	= ({authorsf & value = Co_authors authorsf.value},hst)
 
+gForm {|[]|} gHa (init,formid) hst 
+= case formid.ival of
+	[x:xs]
+	# (x,hst) 	= gHa (init,subFormId formid (toString (length xs)) x) hst
+	# (xs,hst) 	= gForm {|*->*|} gHa (init,reuseFormId formid xs) hst
+	= ({changed = x.changed||xs.changed,form = x.form ++ xs.form,value = [x.value:xs.value]},hst)
+	[] 
+	= ({changed = False,form = [],value = []},hst)
+
+/*
+gForm {|Maybe|} ga (init,formid) hst 
+# elem = formid.ival
+= case elem of
+	Nothing = ({value=Nothing,changed =False,form=[toHtml "Not yet done",Br]},hst)
+	Just val
+		# (valform,hst)	= ga (init,reuseFormId formid val) hst
+		= ({value=Just valform.value,changed =valform.changed,form=valform.form},hst)
+*/
 // general forms display settings
 
-derive gForm [], Maybe
+derive gForm /*[], */Maybe
 derive gUpd [], Maybe
 derive gPrint Maybe
 derive gParse Maybe
@@ -111,22 +135,7 @@ derive gParse
 PersonDB :: !Mode !Init !(Refto Person) *HSt -> (Form Person,!*HSt)
 PersonDB mode init refperson hst = universalRefEditor Edit invariantPerson refperson hst
 
-gForm {|[]|} gHa formid hst 
-= case formid.ival of
-	[x:xs]
-	# (x,hst) 	= gHa (subFormId formid (toString (length xs)) x) hst
-	# (xs,hst) 	= gForm {|*->*|} gHa (reuseFormId formid xs) hst
-	= ({changed = x.changed||xs.changed,form = x.form ++ xs.form,value = [x.value:xs.value]},hst)
-	[] 
-	= ({changed = False,form = [],value = []},hst)
 
-gForm {|Maybe|} ga formid hst 
-# elem = formid.ival
-= case elem of
-	Nothing = ({value=Nothing,changed =False,form=[toHtml "Not yet done",Br]},hst)
-	Just val
-		# (valform,hst)	= ga (reuseFormId formid val) hst
-		= ({value=Just valform.value,changed =valform.changed,form=valform.form},hst)
 uniqueKey :: *HSt -> (Form Int,!*HSt)
 uniqueKey hst = mkStoreForm (Init,pFormId "key" 1) inc hst
 

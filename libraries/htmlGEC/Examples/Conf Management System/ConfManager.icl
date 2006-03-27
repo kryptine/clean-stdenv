@@ -29,15 +29,19 @@ loginhandling  hst
 
 :: CurrPage 	= 	RootHomePage			// root pages
 				| 	AssignPapers
-				| 	AssignConflict
 				| 	ModifyStates
 
-				| 	ChangePassword			// shared pages 
+				| 	AuthorsHomePage			// authors
+				| 	SubmitPaper
+				| 	ChangePassword			
 				| 	ChangeInfo
+
 				| 	ListPapers
+				| 	ListReports
 				|	RefereeForm				
 
-				| 	MemberHomePage			// member pages
+
+				| 	RefereeHomePage			// member pages
 
 derive gForm 	CurrPage
 derive gUpd 	CurrPage
@@ -45,7 +49,8 @@ derive gPrint 	CurrPage
 derive gParse 	CurrPage
 
 homePage (ConfManager info) = RootHomePage
-homePage (Referee info) 	= MemberHomePage
+homePage (Referee info) 	= RefereeHomePage
+homePage (Authors info) 	= AuthorsHomePage
 
 // you are in, determine what to do
 
@@ -67,21 +72,23 @@ where
 			[ (LButton defpixel "RootHome", 		\_.RootHomePage)
 			, (LButton defpixel "ChangePsswrd", 	\_.ChangePassword)
 			, (LButton defpixel "ChangeInfo", 		\_.ChangeInfo)
-			, (LButton defpixel "AssignConflict", 	\_.AssignConflict)
-			, (LButton defpixel "AssignPapers", 	\_.AssignPapers)
 			, (LButton defpixel "ListPapers", 		\_.ListPapers)
+			, (LButton defpixel "ListReports", 		\_.ListReports)
 			, (LButton defpixel "RefereeForm", 		\_.RefereeForm)
+			, (LButton defpixel "AssignPapers", 	\_.AssignPapers)
 			, (LButton defpixel "ModStates", 		\_.ModifyStates)
 			]
 		navButtons (Referee info) = 
-			[ (LButton defpixel "Home", 			\_.MemberHomePage)
+			[ (LButton defpixel "Home", 			\_.RefereeHomePage)
 			, (LButton defpixel "ChangePsswrd", 	\_.ChangePassword)
 			, (LButton defpixel "ChangeInfo", 		\_.ChangeInfo)
 			, (LButton defpixel "ListPapers", 		\_.ListPapers)
+			, (LButton defpixel "ListReports", 		\_.ListReports)
 			, (LButton defpixel "RefereeForm", 		\_.RefereeForm)
 			]
 		navButtons (Authors info) = 
-			[ (LButton defpixel "Home", 			\_.MemberHomePage)
+			[ (LButton defpixel "Home", 			\_.AuthorsHomePage)
+			, (LButton defpixel "SubmitPaper", 		\_.SubmitPaper)
 			, (LButton defpixel "ChangePsswrd", 	\_.ChangePassword)
 			, (LButton defpixel "ChangeInfo", 		\_.ChangeInfo)
 			]
@@ -102,21 +109,31 @@ where
 
 handleCurrPage :: CurrPage ConfAccount ConfAccounts *HSt -> ([BodyTag],*HSt)
 handleCurrPage currPage account accounts  hst 
-//# (papersform,hst)	= papersStore [initPaper i (toString i) \\ i <- [0..3]] id hst
-//# papers			= papersform.value
 = case currPage of
 		RootHomePage 	-> rootHomePage hst
-		ModifyStates 	-> modifyStatesPage	account accounts hst
-//		AssignPapers 	-> assignPapersPage    papers states hst
-//		AssignConflict	-> assignConflictsPage papers states hst
+		RefereeHomePage -> refereeHomePage hst
+		AuthorsHomePage -> authorsHomePage hst
 
 		ChangePassword 	-> changePasswrdPage account accounts hst
+		ModifyStates 	-> modifyStatesPage	accounts hst
+		AssignPapers 	-> assignPapersConflictsPage accounts hst
+
+		ListPapers 		-> showPapersPage accounts hst
+		ListReports		-> showReportsPage account accounts hst
+
 		ChangeInfo		-> changeInfo account hst  
-		ListPapers 		-> showPapersPage account accounts hst
+		SubmitPaper		-> submitPaperPage account hst
 	
-//		RefereeForm 	-> refereeStatusPage papers loginState states hst
-		MemberHomePage 	-> memberHomePage hst
+		RefereeForm 	-> submitReportPage account accounts hst
 		_				-> ([],hst)
+
+where
+	changePasswrdPage account accounts hst 
+	# (mbaccount,body,hst) = changePasswordPage account hst
+	= case mbaccount of
+		Nothing 		-> (body, hst)
+		Just naccount 	-> handleCurrPage (homePage account.state)
+								naccount (changePassword naccount.login.password account accounts)  hst
 
 // the different pages the super user can choose from
 
@@ -125,18 +142,15 @@ rootHomePage hst =
 		]
 	, 	hst )
 
-// the different pages a member can choose from
 
-memberHomePage hst =
+refereeHomePage hst =
 	(	[ Txt "Welcome Referee ... "
 		]
 	, 	hst )
 
-changePasswrdPage account accounts hst 
-# (mbaccount,body,hst) = changePasswordPage account hst
-= case mbaccount of
-	Nothing 		-> (body, hst)
-	Just naccount 	-> handleCurrPage (homePage account.state)
-							naccount (changePassword naccount.login.password account accounts)  hst
+authorsHomePage hst =
+	(	[ Txt "Welcome Author ... "
+		]
+	, 	hst )
 
 

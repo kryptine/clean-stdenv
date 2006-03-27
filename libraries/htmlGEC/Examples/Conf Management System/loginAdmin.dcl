@@ -27,7 +27,9 @@ removeAccount 		:: 			(Account s) (Accounts s) -> (Accounts s)
 
 :: Judgement		:==	(Bool,String)					
 OK 					::	Judgement
-addJudgement		::	Judgement -> (Judgement -> Judgement)
+instance + Judgement
+
+//addJudgement		::	Judgement -> (Judgement -> Judgement)
 
 invariantLogins		:: 	[Login] 	 -> Judgement
 invariantLogAccounts::	(Accounts s) -> Judgement

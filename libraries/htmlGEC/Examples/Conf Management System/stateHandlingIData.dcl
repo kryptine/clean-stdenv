@@ -3,16 +3,22 @@ definition module stateHandlingIData
 import stateHandling
 import StdHtml
 
-changeInfo 			:: !ConfAccount !*HSt -> ([BodyTag],!*HSt)
-modifyStatesPage 	:: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
-showPapersPage 		:: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
+// Conference Manager Pages 
 
-//changeInfo 			:: !(Login ConfState) !(Logins ConfState) !*HSt -> (Logins ConfState,[BodyTag],*HSt)
-//showPapersPage ::  !Papers !ConfState !ConfStates !*HSt -> (![BodyTag],!*HSt)
+modifyStatesPage 			:: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
+assignPapersConflictsPage 	:: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 
-// assignPapersPage 		:: !Papers !(Logins ConfStates,ConfStates) !*HSt -> (!ConfStates,![BodyTag],!*HSt)
-//assignConflictsPage :: !Papers !(Logins ConfState) !*HSt -> (!Logins ConfState,![BodyTag],!*HSt)
+// Showing information
 
-//refereeStatusPage 	:: !Papers !(Login ConfState) !(Logins ConfState)  !*HSt -> (!Logins ConfState,![BodyTag],!*HSt)
+showPapersPage 				:: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
+showReportsPage 			:: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 
-//modifyStatesPage 	:: !(Logins ConfState) !*HSt -> (!Logins ConfState,![BodyTag],!*HSt)
+// Changing user settings
+
+changeInfo 					:: !ConfAccount !*HSt -> ([BodyTag],!*HSt)
+submitPaperPage 			:: !ConfAccount !*HSt -> ([BodyTag],!*HSt)
+
+// Changes made by a referee
+
+submitReportPage 			:: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
+
