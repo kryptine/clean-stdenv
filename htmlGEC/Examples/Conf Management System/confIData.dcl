@@ -30,10 +30,10 @@ derive gParse
 
 // Naming convention of shared persistent information
 
-uniqueDBname			:== "conferenceDBS"
-uniquePerson  name 		:== name +++ ".person"
-uniqueReport  int name 	:== name +++ ".report" +++ "." +++ toString int
-uniquePaper   int name 	:== name +++ ".paper"  +++ "." +++ toString int
+uniqueDBname			:== "conferenceDBS"							// accounts database
+uniquePerson  name 		:== name									// personnel information
+uniqueReport  int name 	:== name +++ ".report." +++ toString int	// report of paper
+uniquePaper   int name 	:== name +++ ".paper."  +++ toString int	// submitted paper information
 
 // The used persistent global i-Data editors and stores
 

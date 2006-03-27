@@ -4,28 +4,107 @@ import StdHtml
 import stateHandling
 import loginAdminIData, confIData
 
+// Conference manager editors chabging accounts
+
+tempAccountsId accounts = sFormId "cfm_temp_states" accounts 	// temp editor for accounts
+
+modifyStatesPage :: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
+modifyStatesPage accounts hst
+# (naccounts,hst)	= vertlistFormButs 5 (Init,tempAccountsId accounts) hst			// make a list editor to mofify all accounts
+# (naccounts,hst)	= AccountsDB Edit Set naccounts.value hst 						// store in global database
+# (naccounts,hst)	= vertlistFormButs 5 (Set,tempAccountsId naccounts.value) hst 	// store in temp editor
+= (naccounts.form ++ [Br,Txt (printToString naccounts.value)], hst)
+
+assignPapersConflictsPage :: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
+assignPapersConflictsPage accounts hst
+# (accountsf,hst)	= vertlistFormButs 5 (Init,tempAccountsId accounts) hst						// make a list editor to mofify all accounts
+# accounts			= accountsf.value													// current value in temp editor
+# (assignf,hst) 	= ListFuncCheckBox (Init, nFormId "cfm_assigments" (showAssignments accounts)) hst
+# (conflictsf,hst) 	= ListFuncCheckBox (Init, nFormId "cfm_conflicts"  (showConflicts   accounts)) hst
+# accounts			= (fst assignf.value)    accounts
+# accounts			= (fst conflictsf.value) accounts
+# (_,hst)			= AccountsDB Edit Set accounts hst 									// if correct store in global database
+# (_,hst)			= vertlistFormButs 5 (Set,tempAccountsId accounts) hst 	// store in temp editor
+= (	[B [] "Assign papers to referees:", Br,Br] ++
+	table (allRefereeNames accounts) assignf.form accounts ++ 
+	[Br,B [] "Specify the conflicting papers:", Br,Br] ++
+	table (allRefereeNames accounts) conflictsf.form accounts 
+	,hst)
+where
+	allPaperNumbers acc	= map fst (getRefPapers acc)
+	allRefereeNames acc	= [Txt person \\ (RefPerson (Refto person),_,_) <- getConflictsAssign acc]
+	allPaperNames   acc	= [Txt (toString nr +++ " ") \\ nr <- allPaperNumbers acc]
+
+	table referees assignm acc
+		 = [	[B [] "paper nr: ":referees] <=|> 
+				group (length (allPaperNumbers acc)) (allPaperNames acc ++ assignm)]
+
+	group n list = [BodyTag (take n list): group n (drop n list)] 
+
+	showAssignments  accounts 
+		= [(check "cfm_ck_assign" (isMember papernr assigment) papernr person
+			, adjustAssignments papernr (RefPerson (Refto person))
+			) 
+			\\ (RefPerson (Refto person),_,assigment) <- getConflictsAssign accounts 
+			,  papernr <- allPaperNumbers accounts
+			]
+
+	showConflicts accounts 
+		= [(check "cfm_ck_confl" (isMember papernr conflicts) papernr person
+			, adjustConflicts papernr (RefPerson (Refto person))
+			) 
+			\\ (RefPerson (Refto person),conflicts,_) <- getConflictsAssign accounts
+			,  papernr <- allPaperNumbers accounts
+			]
+
+	check prefix bool i name 
+	| bool	= CBChecked (prefix +++ toString i +++ name)
+	= CBNotChecked (prefix +++ toString i +++ name)
+
+	adjustAssignments:: !Int !RefPerson !Bool ![Bool] !ConfAccounts -> ConfAccounts
+	adjustAssignments nr person True  bs accounts 	= addAssignment 	nr person accounts
+	adjustAssignments nr person False bs accounts 	= removeAssignment  nr person accounts
+
+	adjustConflicts:: !Int !RefPerson !Bool ![Bool] !ConfAccounts -> ConfAccounts
+	adjustConflicts nr person True  bs accounts 	= addConflict 	nr person accounts
+	adjustConflicts nr person False bs accounts 	= removeConflict  nr person accounts
+
+// general editors
+
 changeInfo :: !ConfAccount !*HSt -> ([BodyTag],!*HSt)
 changeInfo account hst
-# (personf,hst) = mkEditForm (Init,sFormId "person" (getRefPerson account.state)) hst
+# (personf,hst) = mkEditForm (Init,sFormId "cfm_ch_person" (getRefPerson account.state)) hst
 = (personf.form,hst)
 
-modifyStatesPage :: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
-modifyStatesPage account accounts hst
-# myid				= sFormId "conf_manager_temp_states" accounts 					// make a local editor
-# (naccounts,hst)	= vertlistFormButs 5 (Init,myid) hst							// make a list editor to mofify all accounts
-# ((ok,judge),hst)	= ReportStore (\_ -> invariantLogAccounts naccounts.value) hst	// test invariants and store conclusion
-| not ok			= (naccounts.form, hst)											// return as is
-# (naccounts,hst)	= vertlistFormButs 5 (setID  myid (setInvariantAccounts naccounts.value)) hst  // ugly: adjust references
-# (naccounts2,hst)	= AccountsDB Edit Set naccounts.value hst 						// store in global database
-= (naccounts.form ++ [Br,Txt (printToString naccounts2.value)], hst)
+showPapersPage :: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
+showPapersPage  accounts hst
+# (papersf,hst) 	= vertlistFormButs 5 (Set,sdFormId "cfm_shw_papers" (getRefPapers accounts)) hst
+= (papersf.form,hst)
 
-showPapersPage ::  !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
-showPapersPage account accounts hst
-# (papersf,hst) 	= vertlistFormButs 5 (Init,sdFormId "conf_papers" (getRefPapers accounts)) hst
-//# (papersf,hst) 	= mkEditForm (Init,sdFormId "papers" (getRefPapers accounts)) hst
-= (papersf.form ++ [Br,Txt (foldr (+++) "" debug)] ,hst)
-where
-	debug = map (\(i,RefPaper (Refto paper)) -> toString i +++ paper +++ ",") (getRefPapers accounts)
+showReportsPage :: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
+showReportsPage account accounts hst
+# allreports = [(nr,map (\(RefPerson (Refto name),report) -> (name,report)) reports) 
+				\\ (nr,reports) <- getMyRefReports account accounts]
+# (reportsf,hst) 	= vertlistFormButs 5 (Set,sdFormId "cfm_shw_reports" allreports) hst
+= (reportsf.form,hst)
+
+submitPaperPage ::  !ConfAccount !*HSt -> ([BodyTag],!*HSt)
+submitPaperPage account hst
+# [(nr,refpaper):_]	= getRefPapers [account]
+| nr > 0
+	# (paperf,hst)	= mkEditForm (Init,nFormId "cfm_sbm_paper" refpaper) hst
+	= (paperf.form,hst)
+= ([],hst)
+
+submitReportPage :: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
+submitReportPage account accounts hst
+# todo				= getMyReports account
+# mypapers			= map fst todo
+# paperlist 		= [DisplayMode ("paper " <+++ i) \\ i <- mypapers]
+# myreports			= [(nr,edit) \\ nr <- paperlist & edit <- map snd todo]
+| todo == []		= ([ Txt "There are no papers for you to referee (yet)" ],hst)
+# (reportsf,hst)	= vertlistFormButs 5 (Set,sFormId "cfm_mk_reports" myreports) hst
+= (reportsf.form,hst)
 
 
 
@@ -63,54 +142,7 @@ where
 	| rbuts.changed = [toHtml (findReports (rbuts.value 0) states):okbut.form]
 	= [[ib <.=.> rb \\ ib <- ibuts.form & rb <- rbuts.form] <=|> list.form]
 	
-assignPapersPage :: !Papers !(Logins ConfStates,ConfStates) !*HSt -> (!ConfStates,![BodyTag],!*HSt)
-assignPapersPage papers (logins,cstates) hst
-# (referees,hst) 	= mkEditForm 	   (Set, ndFormId "referees" [login.loginName \\ login <- logins]) hst
-# (papers,hst) 		= ListFuncCheckBox (Init, nFormId "papers" (showpapers logins cstates)) hst
-# cstates 			= (fst papers.value) cstates
-# (papers,hst) 		= ListFuncCheckBox (Set, nFormId "papers"  (showpapers logins cstates)) hst
-= (cstates,table referees.form papers.form,hst)
-where
-	table referees npapers = [	referees <=|> group (length papers) npapers ]
 
-	group n list = [BodyTag (take n list): group n (drop n list)] 
-
-	showpapers logins cstates = [(check i login.loginName cstate,adjustPapers j i) 
-								\\ j <- [1..] & cstate <- cstates & login <- logins, i <- [0..] & _ <- papers]
-	where
-		check i name state
-		| isRefereeOf i state = CBChecked ("check" +++ toString i +++ name)
-		= CBNotChecked ("check" +++ toString i +++ name)
-
-		adjustPapers:: !Int !Int Bool [Bool] ConfStates -> ConfStates
-		adjustPapers statenr papernr dopaper _ cstates
-		# state = cstates!!statenr
-		# newstate = if dopaper (assignPaper papernr state) (deletePaper papernr state)
-		=  updateAt statenr  newstate cstates
-		
-assignConflictsPage :: !Papers !(Logins ConfState) !*HSt -> (!Logins ConfState,![BodyTag],!*HSt)
-assignConflictsPage papers loginstates  hst
-# (referees,hst) 	= mkEditForm 	   (Set, ndFormId "refereesC" [loginName \\ loginName <- loginstates]) hst
-# (papers,hst) 		= ListFuncCheckBox (Init, nFormId "papersC" (showpapers loginstates)) hst
-# loginstates 		= (fst papers.value) loginstates
-= (loginstates,table referees.form papers.form,hst)
-where
-	table referees npapers = [referees <=|> group (length papers) npapers]
-
-	group n list = [BodyTag (take n list): group n (drop n list)] 
-
-	showpapers	loginstates = [(check i loginName state,adjustPapers login i) 
-						\\ login=:{loginName,state} <-  loginstates, i <- [0..] & j <- papers]
-	where
-		check i name state
-		| isConflict i state = CBChecked ("check" +++ toString i +++ name)
-		= CBNotChecked ("check" +++ toString i +++ name)
-
-		adjustPapers:: !(Login ConfState) !Int Bool [Bool] (Logins ConfState) -> (Logins ConfState)
-		adjustPapers login papernr dopaper _ states
-		# state = getLoginState login states
-		# newstate = if dopaper (assignConflict papernr state) (deleteConflict papernr state)
-		=  changeState {login & state = newstate} states
 
 refereeStatusPage :: !Papers !(Login ConfState) !(Logins ConfState)  !*HSt -> (!Logins ConfState,![BodyTag],!*HSt)
 refereeStatusPage papers login loginstates  hst

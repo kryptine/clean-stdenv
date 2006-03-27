@@ -37,7 +37,7 @@ changePasswordPage account hst
 | not ok				= (Nothing, changePasswrdBody oldpasswrd newpasswrd1 newpasswrd2, hst)
 
 # newaccount			= {account & login.password = newpasswrd1.value}
-# ((ok,_),hst)			= ReportStore (addJudgement (invariantLogAccounts [newaccount])) hst 
+# ((ok,_),hst)			= ReportStore ((+) (invariantLogAccounts [newaccount])) hst 
 | not ok				= (Nothing, changePasswrdBody oldpasswrd newpasswrd1 newpasswrd2, hst)
 
 # (_,hst)				= loginForm (Set,newaccount.login) hst	// password approved

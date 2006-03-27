@@ -52,8 +52,15 @@ hasAccount login [acc:accs]
 OK :: Judgement
 OK = (True,"")
 
-addJudgement ::	Judgement  -> (Judgement -> Judgement)
-addJudgement judgement = \(ok,oldmessage) -> if ok judgement (ok,oldmessage)
+//addJudgement ::	Judgement  -> (Judgement -> Judgement)
+//addJudgement judgement = \(ok,oldmessage) -> if ok judgement (ok,oldmessage)
+
+instance + Judgement
+where
+	(+) j1 j2 = addJudgement j1 j2
+	where
+		addJudgement judgement  (ok,oldmessage) = if ok judgement (ok,oldmessage)
+
 
 invariantLogAccounts:: (Accounts s) -> Judgement
 invariantLogAccounts accounts = invariantLogins [login \\ {login} <- accounts]

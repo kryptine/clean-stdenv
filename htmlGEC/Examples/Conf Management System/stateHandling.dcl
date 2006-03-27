@@ -11,7 +11,7 @@ import loginAdmin, htmlFormlib
 
 :: RefPerson	=	RefPerson   (Refto Person)
 :: RefPaper		=	RefPaper 	(Refto Paper)	
-:: RefReport	=	RefReport	(Refto Report)
+:: RefReport	=	RefReport	(Refto MaybeReport)
 
 // Information maintained by the Conference Manager
 
@@ -24,16 +24,19 @@ import loginAdmin, htmlFormlib
 					, nr			:: PaperNr
 					, paper			:: RefPaper
 					}
+:: PaperNr 		:==	Int
 :: RefereeInfo	=	{ person		:: RefPerson  
 					, conflicts		:: Conflicts 
 					, reports		:: Reports
 					} 
-:: PaperNr 		:==	Int
+:: Reports		=	Reports			[(PaperNr, RefReport)]
+
 :: Conflicts	=	Conflicts 		[PaperNr]
  
 // Information maintained by a referee
 
-:: Reports		=	Reports			[(PaperNr, Maybe RefReport)]
+:: MaybeReport	:==	Maybe Report
+
 :: Report		=	{ recommendation:: Recommendation
 					, familiarity 	:: Familiarity 
 					, commCommittee	:: CommCommittee
@@ -76,13 +79,38 @@ initManagerLogin 	:: Login
 initManagerAccount 	:: Login 		-> ConfAccount
 
 isConfManager 		:: ConfAccount	-> Bool
+isReferee			:: ConfAccount -> Bool
+isAuthor			:: ConfAccount -> Bool
 
 getRefPerson 		:: Member 		-> RefPerson
+getPaperNumbers 	:: ConfAccounts -> [Int]
 getRefPapers 		:: ConfAccounts -> [(Int,RefPaper)]
+getAssignments 		:: ConfAccounts -> [(RefPerson,[Int])]
+getConflicts 		:: ConfAccounts -> [(RefPerson,[Int])]
+getConflictsAssign	:: ConfAccounts -> [(RefPerson,[Int],[Int])]
+getRefReports 		:: ConfAccounts -> [(Int,[(RefPerson, RefReport)])]
+getMyRefReports 	:: ConfAccount ConfAccounts -> [(Int,[(RefPerson, RefReport)])]
+
+getMyReports 		:: ConfAccount -> [(Int, RefReport)]
+addMyReport 		:: (Int, RefReport) ConfAccount ConfAccounts -> ConfAccounts
+
+hasAssignment 		:: Int RefPerson ConfAccounts -> Bool
+hasConflict 		:: Int RefPerson ConfAccounts -> Bool
+
+addAssignment 		:: Int RefPerson ConfAccounts -> ConfAccounts
+removeAssignment 	:: Int RefPerson ConfAccounts -> ConfAccounts
+addConflict 		:: Int RefPerson ConfAccounts -> ConfAccounts
+removeConflict 		:: Int RefPerson ConfAccounts -> ConfAccounts
+
+
+instance == RefPerson, RefPaper, RefReport
 
 // invariants testing and setting
 
 invariantPerson 		:: Person -> Judgement
+invariantPaper 			:: Paper -> Judgement
+invariantConfAccounts 	:: ConfAccounts -> Judgement
+
 setInvariantAccounts 	:: ConfAccounts -> ConfAccounts
 
 
