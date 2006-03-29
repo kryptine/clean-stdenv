@@ -4,27 +4,28 @@ import StdHtml
 import stateHandling
 import loginAdminIData, confIData
 
-// Conference manager editors chabging accounts
+// Conference manager editors for changing account information, may conflict with other members
 
 tempAccountsId accounts = sFormId "cfm_temp_states" accounts 	// temp editor for accounts
 
 modifyStatesPage :: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 modifyStatesPage accounts hst
-# (naccounts,hst)	= vertlistFormButs 5 (Init,tempAccountsId accounts) hst			// make a list editor to mofify all accounts
-# (naccounts,hst)	= AccountsDB Edit Set naccounts.value hst 						// store in global database
-# (naccounts,hst)	= vertlistFormButs 5 (Set,tempAccountsId naccounts.value) hst 	// store in temp editor
-= (naccounts.form ++ [Br,Txt (printToString naccounts.value)], hst)
+# (naccounts,hst)	= vertlistFormButs 5 (Init,tempAccountsId accounts) hst		// make a list editor to mofify all accounts
+# (accounts,hst)	= AccountsDB Set naccounts.value hst 						// store in global database
+# (naccounts,hst)	= vertlistFormButs 5 (Set,tempAccountsId accounts) hst 		// store in temp editor
+//= (naccounts.form ++ [Br,Txt (printToString naccounts.value)], hst)
+= (naccounts.form, hst)
 
 assignPapersConflictsPage :: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 assignPapersConflictsPage accounts hst
-# (accountsf,hst)	= vertlistFormButs 5 (Init,tempAccountsId accounts) hst						// make a list editor to mofify all accounts
-# accounts			= accountsf.value													// current value in temp editor
+# (accountsf,hst)	= vertlistFormButs 5 (Init,tempAccountsId accounts) hst		// make a list editor to mofify all accounts
+# accounts			= accountsf.value											// current value in temp editor
 # (assignf,hst) 	= ListFuncCheckBox (Init, nFormId "cfm_assigments" (showAssignments accounts)) hst
 # (conflictsf,hst) 	= ListFuncCheckBox (Init, nFormId "cfm_conflicts"  (showConflicts   accounts)) hst
 # accounts			= (fst assignf.value)    accounts
 # accounts			= (fst conflictsf.value) accounts
-# (_,hst)			= AccountsDB Edit Set accounts hst 									// if correct store in global database
-# (_,hst)			= vertlistFormButs 5 (Set,tempAccountsId accounts) hst 	// store in temp editor
+# (accounts,hst)	= AccountsDB Set accounts hst 								// if correct store in global database
+# (_,hst)			= vertlistFormButs 5 (Set,tempAccountsId accounts) hst 		// store in temp editor
 = (	[B [] "Assign papers to referees:", Br,Br] ++
 	table (allRefereeNames accounts) assignf.form accounts ++ 
 	[Br,B [] "Specify the conflicting papers:", Br,Br] ++
@@ -73,12 +74,12 @@ where
 
 changeInfo :: !ConfAccount !*HSt -> ([BodyTag],!*HSt)
 changeInfo account hst
-# (personf,hst) = mkEditForm (Init,sFormId "cfm_ch_person" (getRefPerson account.state)) hst
+# (personf,hst) = mkEditForm (Init,nFormId "cfm_ch_person" (getRefPerson account.state)) hst
 = (personf.form,hst)
 
 showPapersPage :: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 showPapersPage  accounts hst
-# (papersf,hst) 	= vertlistFormButs 5 (Set,sdFormId "cfm_shw_papers" (getRefPapers accounts)) hst
+# (papersf,hst) = vertlistFormButs 5 (Set,ndFormId "cfm_shw_papers" (getRefPapers accounts)) hst
 = (papersf.form,hst)
 
 showReportsPage :: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)

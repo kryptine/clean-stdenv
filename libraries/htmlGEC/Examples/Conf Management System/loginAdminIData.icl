@@ -37,7 +37,7 @@ changePasswordPage account hst
 | not ok				= (Nothing, changePasswrdBody oldpasswrd newpasswrd1 newpasswrd2, hst)
 
 # newaccount			= {account & login.password = newpasswrd1.value}
-# ((ok,_),hst)			= ReportStore ((+) (invariantLogAccounts [newaccount])) hst 
+# ((ok,_),hst)			= ExceptionStore ((+) (invariantLogAccounts [newaccount])) hst 
 | not ok				= (Nothing, changePasswrdBody oldpasswrd newpasswrd1 newpasswrd2, hst)
 
 # (_,hst)				= loginForm (Set,newaccount.login) hst	// password approved
@@ -64,7 +64,7 @@ where
 	passwordForm :: !String !*HSt -> (Form String,!*HSt)
 	passwordForm fid hst = mkEditForm (Init, nFormId fid "") hst
 						
-ReportStore :: (Judgement -> Judgement) *HSt -> (Judgement,!*HSt)
-ReportStore judge hst 
-# (judgef,hst) = mkStoreForm (Init,ndFormId "cf_alert" OK) judge hst
+ExceptionStore :: (Judgement -> Judgement) *HSt -> (Judgement,!*HSt)
+ExceptionStore judge hst 
+# (judgef,hst) = mkStoreForm (Init,sdFormId "cf_alert" OK) judge hst
 = (judgef.value,hst)

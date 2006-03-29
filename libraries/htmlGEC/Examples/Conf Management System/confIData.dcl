@@ -37,7 +37,7 @@ uniquePaper   int name 	:== name +++ ".paper."  +++ toString int	// submitted pa
 
 // The used persistent global i-Data editors and stores
 
-AccountsDB		:: !Mode !Init !ConfAccounts   *HSt -> (Form ConfAccounts,!*HSt)
+AccountsDB		:: !Init !ConfAccounts   *HSt -> (ConfAccounts,!*HSt)
 
 
 
