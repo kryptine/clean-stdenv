@@ -20,13 +20,15 @@ import StdMaybe, StdBool
 
 :: Lifespan										// 	defines how long a form will be maintained		
 	= 	Persistent								// 	form will live "forever" (in a file)
-	|	PersistentRO							//	persistent form is read-only
+	|	PersistentRO							//	form will live "forever" (in a file), is used read-only
 	| 	Session									// 	form will live as long as one browses between the pages offered by the application
 	| 	Page									// 	form will be automatically garbage collected when no reference is made to it			
+	|	Temp									//	form setting is not stored at all, only lives in application	
 
 :: Mode											// one can choose:
 	=	Edit									// 	an editable form
 	| 	Display									// 	a non-editable form
+	|	NoForm									//	do not generate a form, only a value
 
 :: HBimap d v 									// swiss army nife allowing to make a distinction between data and view domain
 	=	{ toForm   	:: Init d (Maybe v) -> v	// 	converts data to view domain, given current view
@@ -85,7 +87,7 @@ reuseFormId :: !(FormId a) !d -> (FormId d)				// reuse id for new type (only to
 initID		:: !(FormId d) 		-> InIDataId d	// (Init,FormId a)
 setID		:: !(FormId d) !d 	-> InIDataId d	// (Set,FormId a)
 
-ifEdit 		:: !Mode a a -> a					// if Mode is Edit then-part else else-part
+onMode 		:: !Mode a a a -> a					// choose arg depending on Edit, Display, NoForm
 
 // manipulating initial values
 

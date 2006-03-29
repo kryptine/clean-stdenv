@@ -66,5 +66,5 @@ where
 						
 ExceptionStore :: (Judgement -> Judgement) *HSt -> (Judgement,!*HSt)
 ExceptionStore judge hst 
-# (judgef,hst) = mkStoreForm (Init,sdFormId "cf_alert" OK) judge hst
+# (judgef,hst) = mkStoreForm (Init,nFormId "cf_alert" OK) judge hst
 = (judgef.value,hst)

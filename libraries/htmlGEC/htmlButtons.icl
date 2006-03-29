@@ -111,7 +111,7 @@ gForm{|Button|} (init,formid) hst
 	v=:(LButton size bname)
 	= (	{changed= False
 		,value	= v
-		,form	= [Input (ifEdit formid.mode [] [Inp_Disabled Disabled] ++
+		,form	= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
 					[ Inp_Type Inp_Button
 					, Inp_Value (SV bname)
 					, Inp_Name (encodeTriplet (formid.id,cntr,UpdS bname))
@@ -122,7 +122,7 @@ gForm{|Button|} (init,formid) hst
 	v=:(PButton (height,width) ref)
 	= (	{changed= False
 		,value	= v
-		,form	= [Input (ifEdit formid.mode [] [Inp_Disabled Disabled] ++
+		,form	= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
 					[ Inp_Type Inp_Image
 					, Inp_Value (SV ref)
 					, Inp_Name (encodeTriplet (formid.id,cntr,UpdS ref))
@@ -134,14 +134,13 @@ gForm{|Button|} (init,formid) hst
 	Pressed
 	= gForm {|*|} (init,(setFormId formid (LButton defpixel "??"))) hst // end user should reset button
 
-
 gForm{|CheckBox|} (init,formid) hst 
 # (cntr,hst) = CntrHSt hst
 = case formid.ival of
 	v=:(CBChecked name) 
 	= (	{changed= False
 		,value	= v
-		,form	= [Input (ifEdit formid.mode [] [Inp_Disabled Disabled] ++
+		,form	= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
 					[ Inp_Type Inp_Checkbox
 					, Inp_Value (SV name)
 					, Inp_Name (encodeTriplet (formid.id,cntr,UpdS name))
@@ -152,7 +151,7 @@ gForm{|CheckBox|} (init,formid) hst
 	v=:(CBNotChecked name)
 	= (	{changed= False
 		,value	= v
-		,form	= [Input (ifEdit formid.mode [] [Inp_Disabled Disabled] ++
+		,form	= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
 					[ Inp_Type Inp_Checkbox
 					, Inp_Value (SV name)
 					, Inp_Name (encodeTriplet (formid.id,cntr,UpdS name))
@@ -166,7 +165,7 @@ gForm{|RadioButton|} (init,formid) hst
 	v=:(RBChecked name)
 	= (	{changed= False
 		,value	= v
-		,form	= [Input (ifEdit formid.mode [] [Inp_Disabled Disabled] ++
+		,form	= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
 					[ Inp_Type Inp_Radio
 					, Inp_Value (SV name)
 					, Inp_Name (encodeTriplet (formid.id,cntr,UpdS name))
@@ -177,7 +176,7 @@ gForm{|RadioButton|} (init,formid) hst
 	v=:(RBNotChecked name)
 	= (	{changed= False
 		,value	= v
-		,form	= [Input (ifEdit formid.mode [] [Inp_Disabled Disabled] ++
+		,form	= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
 					[ Inp_Type Inp_Radio
 					, Inp_Value (SV name)
 					, Inp_Name (encodeTriplet (formid.id,cntr,UpdS name))
@@ -191,7 +190,7 @@ gForm{|PullDownMenu|} (init,formid)  hst
 	v=:(PullDown (size,width) (menuindex,itemlist))
 	= (	{changed= False
 		,value	= v
-		,form	= [Select 	(ifEdit formid.mode [] [Sel_Disabled Disabled] ++
+		,form	= [Select 	(onMode formid.mode [] [Sel_Disabled Disabled] [] ++
 						[ Sel_Name ("CS")
 						, Sel_Size size
 						, `Sel_Std [Std_Style ("width:" +++ (toString width) +++ "px")]
