@@ -84,9 +84,10 @@ initID formid = (Init,formid)
 setID		:: !(FormId d) !d 	-> InIDataId d	// (Set,FormId a)
 setID formid na = (Set,setFormId formid na)
 
-ifEdit :: !Mode a a -> a
-ifEdit Edit 	then else = then
-ifEdit Display  then else = else 
+onMode :: !Mode a a a -> a
+onMode Edit 	e1 e2 e3 = e1
+onMode Display  e1 e2 e3 = e2
+onMode NoForm   e1 e2 e3 = e3
 
 toViewId :: !Init !d !(Maybe d) -> d
 toViewId Set  d _ 			= d
@@ -105,6 +106,7 @@ instance == Mode
 where
 	(==) Display Display 	= True
 	(==) Edit Edit 			= True
+	(==) NoForm NoForm		= True
 	(==) _ _ 				= False
 
 instance == Init

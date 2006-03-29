@@ -105,6 +105,17 @@ where
 	# view		= case resetForm of					// optionally reset the view herafter for next time
 						Nothing 	-> view		 
 						Just reset 	-> reset view
+// added
+
+	| formid.mode == NoForm							// NEW : don't make a form at all
+		# (states,world) = replaceState vformid view states world	// store new value into the store of states
+		= (	{changed	= False
+			, value		= newval
+			, form		= []
+			},{cntr = 0, states = states, world = world})
+
+// end added
+
 	# (viewform,{states,world})						// make a form for it
 					= gForm{|*|} (init,reuseFormId formid view) {cntr = 0,states = states, world = world}
 	| viewform.changed && not isupdated 			// only true when a user defined specialisation is updated, recalculate the form
@@ -237,14 +248,14 @@ where
 
 gForm{|CONS of t|} gHc (init,formid) hst=:{cntr}
 | not (isEmpty t.gcd_fields) 		 
-# (nc,hst) = gHc (init,reuseFormId formid c) (setCntr (cntr+1) hst) // don't display record constructor
-= ({changed=nc.changed, value=CONS nc.value, form=nc.form},hst)
+	# (nc,hst) = gHc (init,reuseFormId formid c) (setCntr (cntr+1) hst) // don't display record constructor
+	= ({changed=nc.changed, value=CONS nc.value, form=nc.form},hst)
 | t.gcd_type_def.gtd_num_conses == 1 
-# (nc,hst) = gHc (init,reuseFormId formid c) (setCntr (cntr+1) hst) // don't display constructors that have no alternative
-= ({changed=nc.changed, value=CONS nc.value, form=nc.form},hst)
+	# (nc,hst) = gHc (init,reuseFormId formid c) (setCntr (cntr+1) hst) // don't display constructors that have no alternative
+	= ({changed=nc.changed, value=CONS nc.value, form=nc.form},hst)
 | t.gcd_name.[(size t.gcd_name) - 1] == '_' // don't display constructor names which end with an underscore
-# (nc,hst) = gHc (init,reuseFormId formid c) (setCntr (cntr+1) hst) 
-= ({changed=nc.changed, value=CONS nc.value, form=nc.form},hst)
+	# (nc,hst) = gHc (init,reuseFormId formid c) (setCntr (cntr+1) hst) 
+	= ({changed=nc.changed, value=CONS nc.value, form=nc.form},hst)
 # (selector,hst)= mkConsSelector formid t hst
 # (nc,hst) = gHc (init,reuseFormId formid c) hst
 = ({changed=nc.changed
@@ -284,12 +295,12 @@ where
 						Edit	-> 	[ `Sel_Std	[Std_Style width, EditBoxStyle]
 									, `Sel_Events [OnChange callClean]
 									]
-						Display ->	[ `Sel_Std	[Std_Style width, DisplayBoxStyle]
+						_		 ->	[ `Sel_Std	[Std_Style width, DisplayBoxStyle]
 									,  Sel_Disabled Disabled
 									]
 			optionstyle	= case formid.mode of
-							Edit 		-> []
-							Display 	-> [`Opt_Std [DisplayBoxStyle]]
+							Edit	-> []
+							_	 	-> [`Opt_Std [DisplayBoxStyle]]
 
 			width = "width:" +++ (toString defpixel) +++ "px"
 
@@ -446,6 +457,8 @@ mkInput size (init,{mode = Display}) val _ hst=:{cntr}
 				,	Inp_Size size
 				] ""
 		,setCntr (cntr+1) hst)
+mkInput size (init,_) val _ hst=:{cntr} 
+	= ( EmptyBody,setCntr (cntr+1) hst)
 		
 toHtml :: a -> BodyTag | gForm {|*|} a
 toHtml a 

@@ -213,6 +213,11 @@ where
 		toHtmlState` (Node_ left (fid,NewState {life=PersistentRO}) right) accu 
 			= toHtmlState` left (toHtmlState` right accu)
 
+		// temperal form don't need to be stored and can be skipped as well
+
+		toHtmlState` (Node_ left (fid,NewState {life=Temp}) right) accu 
+			= toHtmlState` left (toHtmlState` right accu)
+
 		// the state of all other new forms created will be stored in the page 
 
 		toHtmlState` (Node_ left (fid,NewState {format = PlainStr string,life}) right) accu 

@@ -190,7 +190,7 @@ vertlistFormButs nbuts (init,formid) hst
  
 = 	(	{ form 		= pdbuts.form ++ bbuts.form ++ 
 						[[(toHtml ("nr " <+++ (i+1)  <+++ " / " <+++ length list.value) <.||.> 
-						 (ifEdit formid.mode (del <.=.> ins <.=.> app  <.=.> copy  <.=.> paste) EmptyBody)) 
+						 (onMode formid.mode (del <.=.> ins <.=.> app  <.=.> copy  <.=.> paste) EmptyBody EmptyBody)) 
 						\\ del <- del.form & ins <- ins.form & app <- app.form & copy <- copy.form & paste <- paste.form 
 						& i <- [bbuts.value..]]	<=|> 
 						list.form%betweenindex] ++ 
@@ -221,7 +221,7 @@ reftoEditForm  modev initv (init,formid) hst
 # (Refto nname)	= ref.value
 # (file,hst) 	= mkEditForm (initv,{ formid 	& id 		= nname
 												, ival		= a
-												, lifespan 	= ifEdit modev Persistent PersistentRO
+												, lifespan 	= onMode modev Persistent PersistentRO PersistentRO // ???
 												, mode		= modev 
 									}) hst
 = 	( {ref  & form = [[toHtml ("File Name: " )] <=> ref.form]}
@@ -314,7 +314,7 @@ reftoListFormButs nbuts mode initv (init,formid) hst
 = 	(	rlist	
 	,	{ form 		= pdbuts.form ++ bbuts.form ++ 
 						[[(toHtml ("nr " <+++ (i+1)  <+++ " / " <+++ length rlist.value) <.||.> 
-							(ifEdit formid.mode (del <.=.> ins <.=.> app  <.=.> copy  <.=.> paste) EmptyBody)) 
+							(onMode formid.mode (del <.=.> ins <.=.> app  <.=.> copy  <.=.> paste) EmptyBody EmptyBody)) 
 						\\ del <- del.form & ins <- ins.form & app <- app.form & copy <- copy.form & paste <- paste.form 
 						& i <- [bbuts.value..]] 
 							<=|> [re <.=.> ve \\ re <- rlist.form%betweenindex & ve <- vlist.form%betweenindex]] ++ 

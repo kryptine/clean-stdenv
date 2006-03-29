@@ -36,8 +36,8 @@ universalDB init invariant filename value hst
 # (_,hst)			= myDatabase Edit versionf.value value hst 	// update database file
 = (value,hst)
 where
-	myDatabase Display cnt value hst = mkEditForm (Init,rFormId filename (cnt,value)) hst 	// read the database
-	myDatabase Edit    cnt value hst = mkEditForm (Set, pFormId filename (cnt,value)) hst	// write the database
+	myDatabase Display cnt value hst = mkEditForm (Init,{rFormId filename (cnt,value) & mode = NoForm}) hst 	// read the database
+	myDatabase Edit    cnt value hst = mkEditForm (Set, {pFormId filename (cnt,value) & mode = NoForm}) hst	// write the database
 
 	myVersion init cnt hst	= mkEditForm (init,sdFormId ("vrs_" +++ filename) cnt) hst		// to remember version number
 
@@ -47,7 +47,7 @@ editRefto :: (!Mode,!Init,(!(!Refto a,!a),!!Mode,!Init)) *HSt ->
 		(Form (Refto a),Form a,!*HSt)   | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 editRefto (rmode,rinit,((Refto s,a),pmode,pinit)) hst
 	= reftoEditForm rmode rinit (pinit,
-			{nFormId ("Refto_" +++ s) (Refto s, a) & mode = pmode, lifespan = ifEdit pmode Persistent PersistentRO}) hst
+			{nFormId ("Refto_" +++ s) (Refto s, a) & mode = pmode, lifespan = onMode pmode Persistent PersistentRO PersistentRO}) hst
 
 
 universalRefEditor :: !Mode  !(a -> Judgement) !(Refto a) *HSt -> (Form a,!*HSt)   | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a

@@ -63,7 +63,7 @@ doConfPortal account accounts hst
 = ( [ mkSTable2 [ [EmptyBody,B [] "Conference" <.||.> B [] "Manager ",Oeps ok message currPage.value]
 				, [mkColForm navButtons.form, EmptyBody, BodyTag navBody]
 				]
-	] ++ [Txt (printToString account)]
+	]
 	, hst)
 where
 	navigationButtons state hst = ListFuncBut (Init, sFormId "navigation" (navButtons state)) hst
