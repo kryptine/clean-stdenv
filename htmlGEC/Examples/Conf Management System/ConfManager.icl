@@ -9,7 +9,8 @@ import loginAdminIData, confIData, stateHandlingIData
 Start world  = doHtmlServer mainEntrance world
 
 mainEntrance hst
-# (body,hst) = loginhandling hst		// a login will be checked on correctness each time a page is requested !
+# (_,hst)		= ExceptionStore (\_ -> OK) hst	// set global exception store to "all is fine"
+# (body,hst) 	= loginhandling hst				// a login will be checked on correctness each time a page is requested !
 = mkHtml "Conference Manager" 
 	[ BodyTag body
 	] hst
@@ -18,12 +19,11 @@ mainEntrance hst
 
 loginhandling :: *HSt -> ([BodyTag],*HSt)
 loginhandling  hst											
-# (accounts,hst) 			= AccountsDB Display Init [initManagerAccount initManagerLogin] hst	
-																// read out all accounts read only
-# (mblogin,loginBody,hst)	= loginPage accounts.value hst		// set up a login page
+# (accounts,hst) 			= AccountsDB Init [initManagerAccount initManagerLogin] hst	// read out all accounts read only
+# (mblogin,loginBody,hst)	= loginPage accounts hst			// set up a login page
 = case mblogin of												// check result of login procedure
 	Nothing		= (loginBody,hst)								// show login page when (still) not logged in
-	Just login	= doConfPortal login accounts.value hst			// show member page otherwise
+	Just login	= doConfPortal login accounts hst				// show member page otherwise
 
 // The different pages that exists:
 
@@ -57,14 +57,14 @@ homePage (Authors info) 	= AuthorsHomePage
 doConfPortal :: ConfAccount ConfAccounts *HSt -> ([BodyTag],*HSt)
 doConfPortal account accounts hst
 # (navButtons,hst) 	= navigationButtons account.state hst							// setup proper set of navigation buttons
-# (_,hst)			= ReportStore (\_ -> OK) hst									// set global store to "all is fine"
 # (currPage,hst)	= currPageStore (homePage account.state) navButtons.value hst	// determine which current page to display
 # (navBody,hst)		= handleCurrPage currPage.value account accounts  hst			// and handle the corresponding page
-# ((ok,message),hst)= ReportStore id hst											// see if an error has occured somewhere
+# ((ok,message),hst)= ExceptionStore id hst											// see if an error has occured somewhere
 = ( [ mkSTable2 [ [EmptyBody,B [] "Conference" <.||.> B [] "Manager ",Oeps ok message currPage.value]
 				, [mkColForm navButtons.form, EmptyBody, BodyTag navBody]
 				]
-	] , hst)
+	] ++ [Txt (printToString account)]
+	, hst)
 where
 	navigationButtons state hst = ListFuncBut (Init, sFormId "navigation" (navButtons state)) hst
 	where
@@ -101,8 +101,8 @@ where
 		mkrow rows 		= [Td [Td_VAlign Alo_Top] [row] \\ row <- rows] 
 	
 	Oeps ok errormessage currpage
-	| not ok = Font [Fnt_Color (`Colorname Yellow)]	[B [] (printToString currpage +++ " - ERROR! - " +++ errormessage)]
-	= Font [Fnt_Color (`Colorname Silver)]	[B [] (printToString currpage)] 
+	| not ok = Font [Fnt_Color (`Colorname Yellow)]	[B [] (printToString currpage), B [] (" - ERROR! - " +++ errormessage)]
+	= Font [Fnt_Color (`Colorname Silver)]			[B [] (printToString currpage)] 
 
 	currPageStore :: !CurrPage  !(CurrPage -> CurrPage) *HSt -> (!Form CurrPage,!*HSt)	// current page to display
 	currPageStore currpage cbf hst = mkStoreForm (Init, sFormId "cf_currPage" currpage) cbf hst 
@@ -132,7 +132,9 @@ where
 	# (mbaccount,body,hst) = changePasswordPage account hst
 	= case mbaccount of
 		Nothing 		-> (body, hst)
-		Just naccount 	-> handleCurrPage (homePage account.state)
+		Just naccount 	
+						# (accounts,hst)	= AccountsDB Set accounts hst	// store new password in administration
+						-> handleCurrPage (homePage account.state)
 								naccount (changePassword naccount.login.password account accounts)  hst
 
 // the different pages the super user can choose from

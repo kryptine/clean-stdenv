@@ -59,7 +59,9 @@ instance + Judgement
 where
 	(+) j1 j2 = addJudgement j1 j2
 	where
-		addJudgement judgement  (ok,oldmessage) = if ok judgement (ok,oldmessage)
+		addJudgement _  (False,j2) 	= (False,j2)
+		addJudgement (False,j1) _ 	= (False,j1)
+		addJudgement _ _ 			= OK
 
 
 invariantLogAccounts:: (Accounts s) -> Judgement

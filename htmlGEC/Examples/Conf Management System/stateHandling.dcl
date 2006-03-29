@@ -107,9 +107,10 @@ instance == RefPerson, RefPaper, RefReport
 
 // invariants testing and setting
 
-invariantPerson 		:: Person -> Judgement
-invariantPaper 			:: Paper -> Judgement
 invariantConfAccounts 	:: ConfAccounts -> Judgement
+invariantPerson 		:: String Person -> Judgement
+invariantPaper 			:: String Paper -> Judgement
+invariantReport 		:: String Report -> Judgement
 
 setInvariantAccounts 	:: ConfAccounts -> ConfAccounts
 

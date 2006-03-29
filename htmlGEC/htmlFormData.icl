@@ -8,6 +8,9 @@ import StdMaybe, StdBool, StdString
 pFormId :: !String !d -> (FormId d)		// persitent formid
 pFormId s d = {id = s, lifespan = Persistent, mode = Edit, storage = PlainString, ival = d}
 
+rFormId :: !String !d -> (FormId d)		// persitent formid
+rFormId s d = {id = s, lifespan = PersistentRO, mode = Edit, storage = PlainString, ival = d}
+
 sFormId :: !String !d -> (FormId d)		// session formid
 sFormId s d = {id = s, lifespan = Session, mode = Edit, storage = PlainString, ival = d}
 
@@ -16,6 +19,9 @@ nFormId s d = {id = s, lifespan = Page, mode = Edit, storage = PlainString, ival
 
 pdFormId :: !String !d -> (FormId d)	// persitent formid
 pdFormId s d = {id = s, lifespan = Persistent, mode = Display, storage = PlainString, ival = d}
+
+rdFormId :: !String !d -> (FormId d)	// persitent formid
+rdFormId s d = {id = s, lifespan = PersistentRO, mode = Display, storage = PlainString, ival = d}
 
 sdFormId :: !String !d -> (FormId d)	// session formid
 sdFormId s d = {id = s, lifespan = Session, mode = Display, storage = PlainString, ival = d}
@@ -28,6 +34,9 @@ ndFormId s d = {id = s, lifespan = Page, mode = Display, storage = PlainString, 
 pDFormId :: !String !d -> (FormId d)	// persitent formid
 pDFormId s d = {id = s, lifespan = Persistent, mode = Edit, storage = StaticDynamic, ival = d}
 
+rDFormId :: !String !d -> (FormId d)	// persitent formid
+rDFormId s d = {id = s, lifespan = PersistentRO, mode = Edit, storage = StaticDynamic, ival = d}
+
 sDFormId :: !String !d -> (FormId d)	// session formid
 sDFormId s d = {id = s, lifespan = Session, mode = Edit, storage = StaticDynamic, ival = d}
 
@@ -36,6 +45,9 @@ nDFormId s d = {id = s, lifespan = Page, mode = Edit, storage = StaticDynamic, i
 
 pdDFormId :: !String !d -> (FormId d)	// persitent formid
 pdDFormId s d = {id = s, lifespan = Persistent, mode = Display, storage = StaticDynamic, ival = d}
+
+rdDFormId :: !String !d -> (FormId d)	// persitent formid
+rdDFormId s d = {id = s, lifespan = PersistentRO, mode = Display, storage = StaticDynamic, ival = d}
 
 sdDFormId :: !String !d -> (FormId d)	// session formid
 sdDFormId s d = {id = s, lifespan = Session, mode = Display, storage = StaticDynamic, ival = d}

@@ -12,4 +12,4 @@ changePasswordPage 	:: !(Account s) 	!*HSt -> (Maybe (Account s),[BodyTag],!*HSt
 
 // Temporal global store in which any editor can report errors:
 
-ReportStore :: (Judgement -> Judgement) *HSt -> (Judgement,!*HSt)
+ExceptionStore 		:: (Judgement -> Judgement) *HSt -> (Judgement,!*HSt)

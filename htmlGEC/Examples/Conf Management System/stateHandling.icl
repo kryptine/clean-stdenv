@@ -161,22 +161,28 @@ with
 = [acc:removeConflict nr sperson accs]
 removeConflict nr sperson [acc:accs] = [acc:removeConflict nr sperson accs]
 
-invariantPerson :: Person -> Judgement
-invariantPerson {firstName,lastName,affiliation,emailAddress}
-| firstName		== ""	= (False,"first name is not specified!")
-| lastName		== ""	= (False,"last name is not specified!")
-| affiliation	== ""	= (False,"affiliation is not specified!")
-| emailAddress	== ""	= (False,"email address is not specified!")
+invariantPerson :: String Person -> Judgement
+invariantPerson id {firstName,lastName,affiliation,emailAddress}
+| firstName		== ""	= (False,id +++ " : first name is not specified!")
+| lastName		== ""	= (False,id +++ " : last name is not specified!")
+| affiliation	== ""	= (False,id +++ " : affiliation is not specified!")
+| emailAddress	== ""	= (False,id +++ " : email address is not specified!")
 = OK
 
-invariantPaper :: Paper -> Judgement
-invariantPaper {title,first_author,co_authors = Co_authors authors,abstract,pdf}
-| title			== ""	= (False,"title of paper not specified!")
-| abstract		== ""	= (False,"no abstract of paper specified!")
-| pdf			== ""	= (False,"no pdf given!")
-# judgementFirst_author	= invariantPerson first_author
-# judgementCo_authors	= foldl (+) OK (map invariantPerson authors)
+invariantPaper :: String Paper -> Judgement
+invariantPaper id {title,first_author,co_authors = Co_authors authors,abstract,pdf}
+| title			== ""	= (False,id +++ " : title of paper not specified!")
+| abstract		== ""	= (False,id +++ " : no abstract of paper specified!")
+| pdf			== ""	= (False,id +++ " : no pdf given!")
+# judgementFirst_author	= invariantPerson (id +++ " first author") first_author
+# judgementCo_authors	= foldl (+) OK (map (invariantPerson (id +++ " co_authors")) authors)
 = judgementFirst_author + judgementCo_authors
+
+invariantReport :: String Report -> Judgement
+invariantReport id {commCommittee,commAuthors}
+| commAuthors	== ""	= (False,id +++ " : You have to make some remarks to the authors")
+| commCommittee	== ""	= (False,id +++ " : You have to make some remarks to the committee")
+= OK
 
 invariantConfAccounts :: ConfAccounts -> Judgement
 invariantConfAccounts accounts 
