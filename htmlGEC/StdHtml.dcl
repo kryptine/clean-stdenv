@@ -9,6 +9,7 @@ import
 
 			htmlFormlib			// handy collection of form creating functions  
 		,	htmlButtons			// basic collections of buttons, data types for lay-out	control	
+		,	htmlRefFormlib		// handy collection of form persistent idata
 
 		,	htmlHandler			// the kernel module for iData creation
 		,	htmlFormData		// iData type definitions

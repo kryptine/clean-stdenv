@@ -2,14 +2,13 @@ module ConfManager
 
 import StdEnv, StdHtml
 
-import loginAdminIData, confIData, stateHandlingIData, judgementIData 
+import loginAdminIData, confIData, stateHandlingIData 
 
 // Here it starts ....
 
 Start world  = doHtmlServer mainEntrance world
 
 mainEntrance hst
-# (_,hst)		= ExceptionStore (\_ -> OK) hst	// set global exception store to "all is fine"
 # (body,hst) 	= loginhandling hst				// a login will be checked on correctness each time a page is requested !
 = mkHtml "Conference Manager" 
 	[ BodyTag body
@@ -58,8 +57,8 @@ doConfPortal account accounts hst
 # (navButtons,hst) 	= navigationButtons account.state hst							// setup proper set of navigation buttons
 # (currPage,hst)	= currPageStore (homePage account.state) navButtons.value hst	// determine which current page to display
 # (navBody,hst)		= handleCurrPage currPage.value account accounts  hst			// and handle the corresponding page
-# ((ok,message),hst)= ExceptionStore id hst											// see if an error has occured somewhere
-= ( [ mkSTable2 [ [EmptyBody,B [] "Conference" <.||.> B [] "Manager ",Oeps ok message currPage.value]
+# (exception,hst)	= ExceptionStore id hst											// see if an error has occured somewhere
+= ( [ mkSTable2 [ [EmptyBody,B [] "Conference" <.||.> B [] "Manager ",Oeps exception currPage.value]
 				, [mkColForm navButtons.form, EmptyBody, BodyTag navBody]
 				]
 	] // for debugging ++ [Txt (printToString accounts)]
@@ -99,9 +98,10 @@ where
 		mktable table 	= [Tr [] (mkrow rows) \\ rows <- table]	
 		mkrow rows 		= [Td [Td_VAlign Alo_Top] [row] \\ row <- rows] 
 	
-	Oeps ok errormessage currpage
-	| not ok = Font [Fnt_Color (`Colorname Yellow)]	[B [] (print currpage), B [] (" - ERROR! - " +++ errormessage)]
-	= Font [Fnt_Color (`Colorname Silver)]			[B [] (print currpage)] 
+	Oeps (Just (id,message)) currpage
+	= Font [Fnt_Color (`Colorname Yellow)] [B [] (print currpage), Br, B [] (id +++ " : " +++ message)]
+	Oeps Nothing currpage
+	= Font [Fnt_Color (`Colorname Silver)] [B [] (print currpage)] 
 
 	print currpage = printToString (currpage) +++ " of " +++ account.login.loginName
 

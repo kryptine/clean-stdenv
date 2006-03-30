@@ -1,5 +1,7 @@
 definition module confIData
 
+// In this module editors are derived or specialized for all types used
+
 import htmlFormData, loginAdmin, stateHandling
 
 derive gForm 	Maybe, []
@@ -35,9 +37,14 @@ uniquePerson  name 		:== name									// personnel information
 uniqueReport  int name 	:== name +++ ".report." +++ toString int	// report of paper
 uniquePaper   int name 	:== name +++ ".paper."  +++ toString int	// submitted paper information
 
-// The used persistent global i-Data editors and stores
+// Persistent conf account database
 
-AccountsDB		:: !Init !ConfAccounts   *HSt -> (ConfAccounts,!*HSt)
+AccountsDB			:: !Init !ConfAccounts   *HSt -> (ConfAccounts,!*HSt)
 
+// editors for referenced types
+
+editorRefPerson 	:: !(InIDataId RefPerson) !*HSt -> (Form Person,!*HSt)
+editorRefPaper 		:: !(InIDataId RefPaper) !*HSt -> (Form Paper,!*HSt)
+editorRefReport 	:: !(InIDataId RefReport) !*HSt -> (Form (Maybe Report),!*HSt)
 
 

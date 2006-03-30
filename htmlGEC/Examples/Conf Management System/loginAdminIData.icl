@@ -1,6 +1,6 @@
 implementation module loginAdminIData
 
-import StdEnv, StdHtml, StdMaybe, judgementIData
+import StdEnv, StdHtml, StdMaybe
 import loginAdmin
 
 derive gForm  	Login
@@ -37,8 +37,8 @@ changePasswordPage account hst
 | not ok				= (Nothing, changePasswrdBody oldpasswrd newpasswrd1 newpasswrd2, hst)
 
 # newaccount			= changePassword newpasswrd1.value account
-# ((ok,_),hst)			= ExceptionStore ((+) (invariantLogAccounts [newaccount])) hst 
-| not ok				= (Nothing, changePasswrdBody oldpasswrd newpasswrd1 newpasswrd2, hst)
+# (exception,hst)		= ExceptionStore ((+) (invariantLogAccounts account.login.loginName [newaccount])) hst 
+| isJust exception		= (Nothing, changePasswrdBody oldpasswrd newpasswrd1 newpasswrd2, hst)
 
 # (_,hst)				= loginForm (Set,newaccount.login) hst	// password approved
 = (Just newaccount, [Br,Txt "New Password accepted",Br], hst)

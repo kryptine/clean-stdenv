@@ -1,6 +1,6 @@
 implementation module loginAdmin
 
-import StdEnv, StdHtml, StdMaybe, judgement
+import StdEnv, StdHtml, StdMaybe
 
 instance == (Account s)
 where
@@ -25,8 +25,8 @@ mkLogin name password = {loginName = name, password = password}
 
 addAccount :: (Account s) (Accounts s) -> (Accounts s) 
 addAccount account accounts 
-| fst (invariantLogAccounts [account:accounts])	= sort [account:accounts]	
-| otherwise 									= accounts
+| isNothing (invariantLogAccounts account.login.loginName [account:accounts])	= sort [account:accounts]	
+| otherwise 																	= accounts
 
 changePassword 	:: String (Account s) -> (Account s) 
 changePassword nwpasswrd oldlogin 
@@ -50,15 +50,15 @@ hasAccount login [acc:accs]
 
 // Invariants
 
-invariantLogAccounts:: (Accounts s) -> Judgement
-invariantLogAccounts accounts = invariantLogins [login \\ {login} <- accounts]
+invariantLogAccounts:: String (Accounts s) -> Judgement
+invariantLogAccounts id accounts = invariantLogins id [login \\ {login} <- accounts]
 
-invariantLogins :: [Login] -> Judgement
-invariantLogins [] 			= OK
-invariantLogins [login=:{loginName,password}:logins]
-| loginName == "" 			= (False,"login name is not specified!")
-| password  == "" 			= (False,"password required!")
-| isMember login logins		= (False,"login name " +++ loginName +++ " is already being used!")
-| size password < 6			= (False,"at least 6 characters required for a password!")
-= invariantLogins logins
+invariantLogins :: String [Login] -> Judgement
+invariantLogins id [] 			= OK
+invariantLogins id [login=:{loginName,password}:logins]
+| loginName == "" 			= Just (id,"login name is not specified!")
+| password  == "" 			= Just (id,"password required!")
+| isMember login logins		= Just (id,"login name " +++ loginName +++ " is already being used!")
+| size password < 6			= Just (id,"at least 6 characters required for a password!")
+= invariantLogins id logins
 
