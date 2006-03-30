@@ -28,10 +28,9 @@ addAccount account accounts
 | fst (invariantLogAccounts [account:accounts])	= sort [account:accounts]	
 | otherwise 									= accounts
 
-changePassword 	:: String (Account s) (Accounts s) -> (Accounts s) 
-changePassword nwpasswrd oldlogin accounts
-# changedlogin = mkAccount (mkLogin oldlogin.login.loginName nwpasswrd) oldlogin.state
-= addAccount changedlogin (removeAccount oldlogin accounts)
+changePassword 	:: String (Account s) -> (Account s) 
+changePassword nwpasswrd oldlogin 
+= mkAccount (mkLogin oldlogin.login.loginName nwpasswrd) oldlogin.state
 
 changeAccount :: (Account s) (Accounts s) -> (Accounts s) 
 changeAccount account accounts

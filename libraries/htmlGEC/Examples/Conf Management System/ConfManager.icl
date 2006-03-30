@@ -33,15 +33,14 @@ loginhandling  hst
 
 				| 	AuthorsHomePage			// authors
 				| 	SubmitPaper
-				| 	ChangePassword			
+
+				| 	ChangePassword			// common			
 				| 	ChangeInfo
 
-				| 	ListPapers
+				| 	ListPapers				// referees + root
 				| 	ListReports
 				|	RefereeForm				
-
-
-				| 	RefereeHomePage			// member pages
+				| 	RefereeHomePage			// referees
 
 derive gForm 	CurrPage
 derive gUpd 	CurrPage
@@ -63,7 +62,7 @@ doConfPortal account accounts hst
 = ( [ mkSTable2 [ [EmptyBody,B [] "Conference" <.||.> B [] "Manager ",Oeps ok message currPage.value]
 				, [mkColForm navButtons.form, EmptyBody, BodyTag navBody]
 				]
-	]
+	] // for debugging ++ [Txt (printToString accounts)]
 	, hst)
 where
 	navigationButtons state hst = ListFuncBut (Init, sFormId "navigation" (navButtons state)) hst
@@ -101,8 +100,10 @@ where
 		mkrow rows 		= [Td [Td_VAlign Alo_Top] [row] \\ row <- rows] 
 	
 	Oeps ok errormessage currpage
-	| not ok = Font [Fnt_Color (`Colorname Yellow)]	[B [] (printToString currpage), B [] (" - ERROR! - " +++ errormessage)]
-	= Font [Fnt_Color (`Colorname Silver)]			[B [] (printToString currpage)] 
+	| not ok = Font [Fnt_Color (`Colorname Yellow)]	[B [] (print currpage), B [] (" - ERROR! - " +++ errormessage)]
+	= Font [Fnt_Color (`Colorname Silver)]			[B [] (print currpage)] 
+
+	print currpage = printToString (currpage) +++ " of " +++ account.login.loginName
 
 	currPageStore :: !CurrPage  !(CurrPage -> CurrPage) *HSt -> (!Form CurrPage,!*HSt)	// current page to display
 	currPageStore currpage cbf hst = mkStoreForm (Init, sFormId "cf_currPage" currpage) cbf hst 
@@ -133,9 +134,9 @@ where
 	= case mbaccount of
 		Nothing 		-> (body, hst)
 		Just naccount 	
-						# (accounts,hst)	= AccountsDB Set accounts hst	// store new password in administration
-						-> handleCurrPage (homePage account.state)
-								naccount (changePassword naccount.login.password account accounts)  hst
+						# accounts			= changeAccount naccount accounts	// replace changed account in accounts
+						# (accounts,hst)	= AccountsDB Set accounts hst		// store accounts in database administration
+						-> handleCurrPage (homePage account.state) naccount accounts  hst
 
 // the different pages the super user can choose from
 

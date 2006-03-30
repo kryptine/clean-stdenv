@@ -86,7 +86,7 @@ showReportsPage :: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 showReportsPage account accounts hst
 # allreports = [(nr,map (\(RefPerson (Refto name),report) -> (name,report)) reports) 
 				\\ (nr,reports) <- getMyRefReports account accounts]
-# (reportsf,hst) 	= vertlistFormButs 5 (Set,sdFormId "cfm_shw_reports" allreports) hst
+# (reportsf,hst) 	= vertlistFormButs 5 (Set,ndFormId "cfm_shw_reports" allreports) hst
 = (reportsf.form,hst)
 
 submitPaperPage ::  !ConfAccount !*HSt -> ([BodyTag],!*HSt)

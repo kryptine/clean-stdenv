@@ -36,12 +36,12 @@ changePasswordPage account hst
 		 newpasswrd1.value <> ""
 | not ok				= (Nothing, changePasswrdBody oldpasswrd newpasswrd1 newpasswrd2, hst)
 
-# newaccount			= {account & login.password = newpasswrd1.value}
+# newaccount			= changePassword newpasswrd1.value account
 # ((ok,_),hst)			= ExceptionStore ((+) (invariantLogAccounts [newaccount])) hst 
 | not ok				= (Nothing, changePasswrdBody oldpasswrd newpasswrd1 newpasswrd2, hst)
 
 # (_,hst)				= loginForm (Set,newaccount.login) hst	// password approved
-= (Just newaccount, [], hst)
+= (Just newaccount, [Br,Txt "New Password accepted",Br], hst)
 where
 	changePasswrdBody oldpasswrd newpasswrd1 newpasswrd2 = 	
 		if (oldpasswrd.value <> account.login.password)
