@@ -17,6 +17,9 @@ sFormId s d = {id = s, lifespan = Session, mode = Edit, storage = PlainString, i
 nFormId :: !String !d -> (FormId d)		// page formid
 nFormId s d = {id = s, lifespan = Page, mode = Edit, storage = PlainString, ival = d}
 
+xFormId :: !String !d -> (FormId d)	// persitent formid
+xFormId s d = {id = s, lifespan = Temp, mode = NoForm, storage = PlainString, ival = d}
+
 pdFormId :: !String !d -> (FormId d)	// persitent formid
 pdFormId s d = {id = s, lifespan = Persistent, mode = Display, storage = PlainString, ival = d}
 

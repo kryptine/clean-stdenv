@@ -221,8 +221,8 @@ invokeRefEditor editor (init,formid) hst
 
 // Exception handling 
 
-OK :: Judgement
-OK = Nothing
+Ok :: Judgement
+Ok = Nothing
 
 instance + Judgement
 where
@@ -234,7 +234,7 @@ where
 
 ExceptionStore :: (Judgement -> Judgement) *HSt -> (Judgement,!*HSt)
 ExceptionStore judge hst 
-# (judgef,hst) = mkStoreForm (Init,{nFormId "handle_exception" OK & mode = NoForm, lifespan = Temp}) judge hst
+# (judgef,hst) = mkStoreForm (Init,{nFormId "handle_exception" Ok & mode = NoForm, lifespan = Temp}) judge hst
 = (judgef.value,hst)
 
 

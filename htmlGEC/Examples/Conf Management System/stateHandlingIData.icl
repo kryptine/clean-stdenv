@@ -3,6 +3,7 @@ implementation module stateHandlingIData
 import StdHtml
 import stateHandling
 import loginAdminIData, confIData
+import StdListExtensions
 
 // Conference manager editors for changing account information, may conflict with other members
 
@@ -10,22 +11,21 @@ tempAccountsId accounts = sFormId "cfm_temp_states" accounts 	// temp editor for
 
 modifyStatesPage :: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 modifyStatesPage accounts hst
-# (naccounts,hst)	= vertlistFormButs 5 (Init,tempAccountsId accounts) hst		// make a list editor to mofify all accounts
-# (accounts,hst)	= AccountsDB Set naccounts.value hst 						// store in global database
-# (naccounts,hst)	= vertlistFormButs 5 (Set,tempAccountsId accounts) hst 		// store in temp editor
-//= (naccounts.form ++ [Br,Txt (printToString naccounts.value)], hst)
+# (naccounts,hst)	= vertlistFormButs 5 True (Init,tempAccountsId accounts) hst	// make a list editor to mofify all accounts
+# (accounts,hst)	= AccountsDB Set naccounts.value hst 							// store in global database
+# (naccounts,hst)	= vertlistFormButs 5 True (Set,tempAccountsId accounts) hst 	// store in temp editor
 = (naccounts.form, hst)
 
 assignPapersConflictsPage :: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 assignPapersConflictsPage accounts hst
-# (accountsf,hst)	= vertlistFormButs 5 (Init,tempAccountsId accounts) hst		// make a list editor to mofify all accounts
-# accounts			= accountsf.value											// current value in temp editor
+# (accountsf,hst)	= vertlistFormButs 5 True (Init,tempAccountsId accounts) hst	// make a list editor to mofify all accounts
+# accounts			= accountsf.value												// current value in temp editor
 # (assignf,hst) 	= ListFuncCheckBox (Init, nFormId "cfm_assigments" (showAssignments accounts)) hst
 # (conflictsf,hst) 	= ListFuncCheckBox (Init, nFormId "cfm_conflicts"  (showConflicts   accounts)) hst
 # accounts			= (fst assignf.value)    accounts
 # accounts			= (fst conflictsf.value) accounts
-# (accounts,hst)	= AccountsDB Set accounts hst 								// if correct store in global database
-# (_,hst)			= vertlistFormButs 5 (Set,tempAccountsId accounts) hst 		// store in temp editor
+# (accounts,hst)	= AccountsDB Set accounts hst 									// if correct store in global database
+# (_,hst)			= vertlistFormButs 5 True (Set,tempAccountsId accounts) hst 	// store in temp editor
 = (	[B [] "Assign papers to referees:", Br,Br] ++
 	table (allRefereeNames accounts) assignf.form accounts ++ 
 	[Br,B [] "Specify the conflicting papers:", Br,Br] ++
@@ -79,14 +79,14 @@ changeInfo account hst
 
 showPapersPage :: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 showPapersPage  accounts hst
-# (papersf,hst) = vertlistFormButs 5 (Set,ndFormId "cfm_shw_papers" (getRefPapers accounts)) hst
+# (papersf,hst) = vertlistFormButs 5 False (Set,ndFormId "cfm_shw_papers" (getRefPapers accounts)) hst
 = (papersf.form,hst)
 
 showReportsPage :: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 showReportsPage account accounts hst
 # allreports = [(nr,map (\(RefPerson (Refto name),report) -> (name,report)) reports) 
 				\\ (nr,reports) <- getMyRefReports account accounts]
-# (reportsf,hst) 	= vertlistFormButs 5 (Set,ndFormId "cfm_shw_reports" allreports) hst
+# (reportsf,hst) 	= vertlistFormButs 5 False (Set,ndFormId "cfm_shw_reports" allreports) hst
 = (reportsf.form,hst)
 
 submitPaperPage ::  !ConfAccount !*HSt -> ([BodyTag],!*HSt)
@@ -101,98 +101,22 @@ submitReportPage :: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 submitReportPage account accounts hst
 # todo				= getMyReports account
 # mypapers			= map fst todo
+# myrefreport		= map snd todo			
 # paperlist 		= [DisplayMode ("paper " <+++ i) \\ i <- mypapers]
-# myreports			= [(nr,edit) \\ nr <- paperlist & edit <- map snd todo]
+# myreports			= [nr <|> edit \\ nr <- paperlist & edit <- myrefreport]
 | todo == []		= ([ Txt "There are no papers for you to referee (yet)" ],hst)
-# (reportsf,hst)	= vertlistFormButs 5 (Set,sFormId "cfm_mk_reports" myreports) hst
-= (reportsf.form,hst)
-
-
-
-// forms
-/*
-showPapersPage ::  !Papers !ConfState !ConfStates !*HSt -> (![BodyTag],!*HSt)
-showPapersPage papers cstate cstates hst 
-# formid			= nFormId "cms_papers" papers
-# (list,hst) 		= listForm 		(Init,{subFormId formid "list"  shortlist & mode = Display}) hst
-# (ibuts,hst) 		= ListFuncBut  	(Init,subFormId formid "ibuts" paperInfoButs) hst
-# (rbuts,hst) 		= ListFuncBut2 	(Init,subFormId formid "rbuts" refereeInfoButs) hst
-# (okbut,hst) 		= FuncBut  		(Init,subFormId formid "okbut" okBut) hst
-= (showbody list cstates ibuts rbuts okbut,hst)
+# (reportsf,hst)	= vertlistFormButs 5 False (Set,sFormId "cfm_mk_reports" myreports) hst
+# (results,hst)		= maplSt editorRefReport [(Init,xFormId ("tmp" <+++ i) ref) \\ i <- mypapers & ref <- myrefreport] hst
+# resultvalue		= [res.value \\ res <- results]
+= (show1 mypapers ++ show2 mypapers resultvalue ++ show3 mypapers resultvalue ++ reportsf.form,hst)
 where
-	shortlist	= [(nr,paper.title,summary nr) \\ paper <- papers & nr <- [0..]]
-	summary i	= [ short report 
-					\\ state <- cstates
-					, (papernr,report) <- getReports state.reports 
-				  	| papernr == i && not (isConflict papernr cstate)]
+	show1 mypapers = [Txt ("The following papers have been assigned to you: "), B [] (print mypapers),Br]
+	show2 mypapers reports =  [Txt ("You have done: "), B [] (print [i \\ i <- mypapers & (Just report) <- reports]), Br]
+	show3 mypapers reports =  [Txt ("You still have to do: "), B [] (print [i \\ i <- mypapers & rep <- reports | isNothing rep]), Br, Br ]
 
-	short Nothing = Nothing
-	short (Just report) = Just (report.recommendation,report.familiarity)
-	paperInfoButs = [(LButton defpixel "PaperInfo",\_ -> i) \\ _ <- papers & i <- [0..]]
+	print [] = "Nothing"
+	print ps = printToString ps
+
+
+
 	
-	refereeInfoButs = [(mode i,LButton defpixel "RefereeInfo",\_ -> i) \\ _ <- papers & i <- [0..]]
-	where
-		mode i
-		| isConflict i cstate = Display
-		= Edit
-	
-	okBut = (LButton defpixel "OK",id)
-
-	showbody list states ibuts rbuts okbut
-	| ibuts.changed = [toHtml (papers!!ibuts.value 0):okbut.form]
-	| rbuts.changed = [toHtml (findReports (rbuts.value 0) states):okbut.form]
-	= [[ib <.=.> rb \\ ib <- ibuts.form & rb <- rbuts.form] <=|> list.form]
-	
-
-
-refereeStatusPage :: !Papers !(Login ConfState) !(Logins ConfState)  !*HSt -> (!Logins ConfState,![BodyTag],!*HSt)
-refereeStatusPage papers login loginstates  hst
-# todo				= papersToReferee login.state														// determine which papers to referee
-| todo == []		= (loginstates,noPapersMessage,hst)											// nothing to referee, done
-# defaultpaper		= hd todo																	// something to referee
-# (papernr,hst) 	= FuncMenu (Init, nFormId ("pdme" <+++ sum todo)(0,[("paper " <+++ i,(\_ -> i)) \\ i <- todo])) hst	// create pull down menu
-# chosennr			= if papernr.changed ((fst papernr.value) 0) (todo!!snd papernr.value)											// determine which report to show
-# myreport			= case findReport chosennr login.state of															
-						Nothing 	-> emptyReport												// show an empty report to fill in
-						Just report	-> report													// show previous report
-# (new,nstate,hst)	= mkSubStateForm (Init,sFormId  ("myreps" <+++ chosennr) myreport) login.state (addRep chosennr) hst // show report or new empty report
-# newreport			= findReport chosennr nstate.value													// determine new report
-= ( if new (changeState {login & state = nstate.value} loginstates) loginstates							// add submitted report to state
-  ,	[paperstate nstate.value] ++
- 	[Br, Txt "Show me the report of: ":papernr.form] ++ 
-  	[Br, Br, Hr [], Br, Txt "You currently looking at your referee report of paper: ",Br] ++
-	paperinfo chosennr ++
-	[Br,Br,BodyTag (paperPrompt newreport),Br,Br] ++ 
-	nstate.form
-  ,hst)
-where
-	noPapersMessage 	= 	[ Txt "There are no papers for you to referee (yet)" ]
-	paperstate state 
-		= STable []	[ 	[ B [] "The following paper(s) have been assigned to you: "
-						, B [] (foldr (\i j -> toString i +++ ", " <+++ j) "" (papersToReferee state))
-						]
-					, case papersRefereed state of
-						[]		-> 	[]
-						list 	-> 	[ B [] "You already have refereed the following paper(s):"
-									, B [] (foldr (\i j -> toString i +++ ", " <+++ j) "" list)
-									]
-					, case papersNotRefereed state of
-						[]		->	[]
-						list 	->	[ B [] "You still have to referee the following paper(s):"
-									, B [] (foldr (\i j -> toString i +++ ", " <+++ j) "" list)
-									]
-					]
-	paperinfo chosennr = case findPaper chosennr papers of
-							Just paper = [Br,Txt ("paper title: " <+++ paper.title),Br]
-							Nothing = [Br, Txt ("Error. Cannot find paper with indicated number " <+++ chosennr),Br]
-	paperPrompt report	= case report of															// determine feedback
-							Nothing -> 		[B [] "You did not commit a report about this paper yet.",
-											 Br,
-											 Txt "Please fill in your report and commit the form!"]
-							Just report	-> 	[B [] "You have commited this report previously. Thank you!",
-											 Br,
-											 Txt "You can change your current report by recomitting the form!"]
-	addRep chosennr report state = addReport chosennr (Just report) state
-
-*/
-		

@@ -31,7 +31,7 @@ editorRefReport (init,formid) hst
 # (Refto name) 			= refreport
 = universalRefEditor formid.mode (invariant name) refreport hst
 where
-	invariant name Nothing 			= OK
+	invariant name Nothing 			= Ok
 	invariant name (Just report)	= invariantReport name report
 	
 // specialized forms
@@ -46,21 +46,21 @@ gForm {|Reports|} informid hst = specialize myeditor informid hst
 where
 	myeditor (init,formid) hst
 	# (Reports reports) 		= formid.ival
-	# (reportsf,hst)			= vertlistFormButs 10 (init,subsFormId formid "report" reports) hst
+	# (reportsf,hst)			= vertlistFormButs 10 True (init,subsFormId formid "report" reports) hst
 	= ({reportsf & value = Reports reportsf.value},hst)
 
 gForm {|Conflicts|} informid hst = specialize myeditor informid hst
 where
 	myeditor (init,formid) hst
 	# (Conflicts papernrs) 		= formid.ival
-	# (papersf,hst)				= vertlistFormButs 10 (init,subsFormId formid "conflict" papernrs) hst
+	# (papersf,hst)				= vertlistFormButs 10 True (init,subsFormId formid "conflict" papernrs) hst
 	= ({papersf & value = Conflicts papersf.value},hst)
 
 gForm {|Co_authors|} informid hst = specialize myeditor informid hst
 where
 	myeditor (init,formid) hst
 	# (Co_authors authors) 	= formid.ival
-	# (authorsf,hst)		= vertlistFormButs 10 (init,subsFormId formid "authors" authors) hst
+	# (authorsf,hst)		= vertlistFormButs 10 True (init,subsFormId formid "authors" authors) hst
 	= ({authorsf & value = Co_authors authorsf.value},hst)
 
 gForm {|[]|} gHa (init,formid) hst 

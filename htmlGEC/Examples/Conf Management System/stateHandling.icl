@@ -113,7 +113,6 @@ hasConflict nr sperson [acc=:{state = Referee ref}:accs]
 | sperson == person = isMember nr conflicts
 hasConflict nr sperson [acc:accs] = hasConflict nr sperson accs
 
-
 addAssignment :: Int RefPerson ConfAccounts -> ConfAccounts
 addAssignment nr sperson [] = []
 addAssignment nr sperson [acc=:{state = Referee ref}:accs] 
@@ -122,7 +121,6 @@ addAssignment nr sperson [acc=:{state = Referee ref}:accs]
 | sperson == person = [{acc & state  = Referee {ref & reports = Reports [(nr,RefReport (Refto "")):reports]}}:accs]
 = [acc:addAssignment nr sperson accs]
 addAssignment nr sperson [acc:accs] = [acc:addAssignment nr sperson accs]
-
 
 removeAssignment :: Int RefPerson ConfAccounts -> ConfAccounts
 removeAssignment nr sperson [] = []
@@ -167,7 +165,7 @@ invariantPerson id {firstName,lastName,affiliation,emailAddress}
 | lastName		== ""	= Just (id,"last name is not specified!")
 | affiliation	== ""	= Just (id,"affiliation is not specified!")
 | emailAddress	== ""	= Just (id,"email address is not specified!")
-= OK
+= Ok
 
 invariantPaper :: String Paper -> Judgement
 invariantPaper id {title,first_author,co_authors = Co_authors authors,abstract,pdf}
@@ -175,14 +173,14 @@ invariantPaper id {title,first_author,co_authors = Co_authors authors,abstract,p
 | abstract		== ""	= Just (id,"no abstract of paper specified!")
 | pdf			== ""	= Just (id,"no pdf given!")
 # judgementFirst_author	= invariantPerson (id +++ " first author") first_author
-# judgementCo_authors	= foldl (+) OK (map (invariantPerson (id +++ " co_authors")) authors)
+# judgementCo_authors	= foldl (+) Ok (map (invariantPerson (id +++ " co_authors")) authors)
 = judgementFirst_author + judgementCo_authors
 
 invariantReport :: String Report -> Judgement
 invariantReport id {commCommittee,commAuthors}
 | commAuthors	== ""	= Just (id,"You have to make some remarks to the authors")
 | commCommittee	== ""	= Just (id,"You have to make some remarks to the committee")
-= OK
+= Ok
 
 invariantConfAccounts :: String ConfAccounts -> Judgement
 invariantConfAccounts id accounts 
@@ -199,7 +197,7 @@ invariantConfAccounts id accounts
 | not (allMembers allreportnrs allpapernrs)	= Just (id,"assignment refers to non existing paper number")
 # allconflicts		= [nr \\ (_,nrs) <- getConflicts accounts, nr <- nrs]
 | not (allMembers allconflicts allpapernrs)	= Just (id,"conflict refers to non existing paper number")
-= OK
+= Ok
 
 allUnique :: [a] -> Bool | Eq a
 allUnique list = length list == length (removeDup list)
@@ -238,106 +236,5 @@ where
 	
 		setInvariantReport [report:reports]
 						 = [report:setInvariantReport reports]
-
-
-
-/*
-assignPaper :: Int ConfAccount -> ConfAccount
-assignPaper i state
-| isRefereeOf i state = state
-= {state & reports = Reports [(i,Nothing):getReports state.reports]}
-*/
-/*
-
-
-FetchReports :: Int ConfAccounts -> ([(Person,Maybe Report)],*Hst)
-FetchReports papernr accounts hst
-	= [ (state.person,report) 	\\ 	{state = Referee info} <- accounts 
-								, 	(paperdone, report) <- getReports info.reports
-								|	paperdone == papernr ]
-
-*/
-/*
-
-getReports :: Reports -> [(PaperNr, Maybe Report)]
-getReports (Reports report) = report
-
-isRefereeOf :: Int ConfAccount -> Bool
-isRefereeOf papernr state
-	= foldr (||) False [ papertodo == papernr \\ (papertodo, _) <- getReports state.reports ]
-
-hasRefereed :: Int ConfAccount -> Bool
-hasRefereed papernr state
-	= foldr (||) False [ papertodo == papernr \\ (papertodo,Just report) <- getReports state.reports ]
-
-assignPaper :: Int ConfAccount -> ConfAccount
-assignPaper i state
-| isRefereeOf i state = state
-= {state & reports = Reports [(i,Nothing):getReports state.reports]}
-
-deletePaper :: Int ConfAccount -> ConfAccount
-deletePaper i state = {state & reports = Reports [(j,report) \\ (j,report) <- getReports state.reports | j <> i]}
-
-assignConflict :: Int ConfAccount -> ConfAccount
-assignConflict i state
-| isMember i state.conflict = state
-= {state & conflict = [i:state.conflict]}
-
-deleteConflict :: Int ConfAccount -> ConfAccount
-deleteConflict i state = {state & conflict = [j \\ j <- state.conflict | j <> i]}
-
-isConflict:: Int ConfAccount -> Bool
-isConflict i state = isMember i  state.conflict
-
-papersToReferee :: ConfAccount -> [PaperNr]
-papersToReferee state = [nr \\ (nr,_) <- getReports state.reports]
-
-papersRefereed :: ConfAccount -> [PaperNr]
-papersRefereed state = [nr \\ (nr,Just _) <- getReports state.reports]
-
-papersNotRefereed :: ConfAccount -> [PaperNr]
-papersNotRefereed state = [nr \\ (nr,Nothing) <- getReports state.reports]
-
-findReport :: Int ConfAccount -> (Maybe Report)
-findReport i state 
-| isRefereeOf i state =  (hd [report \\ (j,report) <- getReports state.reports | j == i])
-= Nothing
-
-addReport :: Int (Maybe Report) ConfAccount -> ConfAccount
-addReport i new state
-| isRefereeOf i state = {state & reports = Reports [(nr,if (nr==i) new old) \\ (nr,old) <- getReports state.reports ]}
-= state
-
-findPaper :: Int Papers -> (Maybe Paper)
-findPaper i [] = Nothing
-findPaper i [x=:{paperNr}:xs]
-| i == paperNr = Just x
-= findPaper i xs
-
-initPaper :: String -> Paper
-initPaper name
-=	{ title			= "paper of " +++ name
-	, first_author	= RefPerson (Refto (uniquePerson name))
-	, co_authors	= Co_authors []
-	, abstract		= "type in abstract here"
-	, pdf			= "download pdf here"
-	}
-
-initReport :: Report
-initReport 
-= 	{ recommendation	= StrongReject
-	, familiarity 		= Low  
-	, commCommittee		= "committee remarks" // TextArea 4 70 ""
-	, commAuthors		= "author remarks" //TextArea 10 70 "Please enter your report"
-	}
-	
-
-*/
-
-
-
-
-
-
 
 

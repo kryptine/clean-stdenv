@@ -130,8 +130,8 @@ horlistForm inIDataId hSt = layoutListForm (\f1 f2 -> [f1 <=> f2]) mkEditForm in
 vertlistForm :: !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 vertlistForm inIDataId hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) mkEditForm inIDataId hSt
 
-vertlistFormButs :: !Int !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-vertlistFormButs nbuts (init,formid) hst
+vertlistFormButs :: !Int !Bool !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+vertlistFormButs nbuts showbuts (init,formid) hst
 
 # indexId		= {subsFormId formid "idx" 0 & mode = Display}
 # (index,hst)	= mkEditForm (init,indexId) hst
@@ -185,7 +185,7 @@ vertlistFormButs nbuts (init,formid) hst
  
 = 	(	{ form 		= pdbuts.form ++ bbuts.form ++ 
 						[[(toHtml ("nr " <+++ (i+1)  <+++ " / " <+++ length list.value) <.||.> 
-						 (onMode formid.mode (del <.=.> ins <.=.> app  <.=.> copy  <.=.> paste) EmptyBody EmptyBody)) 
+						 (onMode formid.mode (if showbuts (del <.=.> ins <.=.> app  <.=.> copy  <.=.> paste) EmptyBody) EmptyBody EmptyBody)) 
 						\\ del <- del.form & ins <- ins.form & app <- app.form & copy <- copy.form & paste <- paste.form 
 						& i <- [bbuts.value..]]	<=|> 
 						list.form%betweenindex] ++ 

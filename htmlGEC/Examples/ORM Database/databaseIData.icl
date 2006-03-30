@@ -22,12 +22,12 @@ swapTable else = else
 */
 //turnTable table = [STable attr [[field][value]] \\ (STable attr oneitem) <- table, [field,value:_] <- oneitem ]
 
-gForm {|Academics|} formid hst 
-	= specialize myeditor (Init,formid) hst
+gForm {|Academics|} (init,formid) hst 
+	= specialize myeditor (init,formid) hst
 where
 	myeditor (init,formid) hst
-	# (academicForm,hst)	= vertlistFormButs 10 (Init,academicTable) hst
-	# (nacademicForm,hst)	= vertlistFormButs 10 (setID academicTable (pred academicForm.value)) hst
+	# (academicForm,hst)	= vertlistFormButs 10 True (init,academicTable) hst
+	# (nacademicForm,hst)	= vertlistFormButs 10 True (setID academicTable (pred academicForm.value)) hst
 	# (error,ok)			= testUnique (gCollect {|*|} nacademicForm.value [])
 	# (_,hst)				= Alert (if (not ok ) (\_ -> (True,error)) id) hst
 	= (	{ changed			= academicForm.changed
@@ -49,11 +49,11 @@ where
 		adj mem = mem
 
 	
-gForm {|Departments|} formid hst 
-	= specialize myeditor (Init,formid) hst
+gForm {|Departments|} (init,formid) hst 
+	= specialize myeditor (init,formid) hst
 where
 	myeditor (init,formid) hst
-	# (departmentForm,hst)	= vertlistFormButs 5 (Init,departmentTable) hst
+	# (departmentForm,hst)	= vertlistFormButs 5 True (init,departmentTable) hst
 	# (error,ok)			= testUnique (gCollect {|*|} departmentForm.value [])
 	# (_,hst)				= Alert (if (not ok ) (\_ -> (True,error)) id) hst
 	= (	{ changed			= departmentForm.changed
@@ -65,10 +65,10 @@ where
 
 // references to persistent tables:
 
-gForm {|RefDept|} formid hst = specialize myeditor (Init,formid) hst
+gForm {|RefDept|} (init,formid) hst = specialize myeditor (init,formid) hst
 where
 	myeditor (init,formid) hst
-	# (depForm,hst)				= mkEditForm (Init,{departmentTable & mode = Display}) hst
+	# (depForm,hst)				= mkEditForm (init,{departmentTable & mode = Display}) hst
 	| length depForm.value == 0	= ({changed=False,value = RefDept 0,form = [toHtml NoDepartment]},hst)
 	# (pdform,hst)				=  pullDownStore id hst
 	# (PullDown _ (idx,depnames)) = pdform.value
@@ -83,18 +83,18 @@ where
 	(RefDept currPtr) = formid.ival
 
 	pullDownStore :: (PullDownMenu -> PullDownMenu) !*HSt -> (Form PullDownMenu,!*HSt)
-	pullDownStore cbf hst = mkStoreForm (Init,pulldownId) cbf hst
+	pullDownStore cbf hst = mkStoreForm (init,pulldownId) cbf hst
 	where
 		pulldownId = subFormId formid "sub" (PullDown (1,defpixel) (0,[printToString NoDepartment]))
 
 // to ensure a unique identifier, each time a Uniq value is created, it will get a new unique value
 
-gForm {|Uniq|} formid hst = specialize myeditor (Init,formid) hst
+gForm {|Uniq|} (init,formid) hst = specialize myeditor (init,formid) hst
 where
-	myeditor (init,formid) hst 
+	myeditor c hst 
 	= case formid.ival of
 		(Uniq 0)
-			# (unqform,hst)	= mkStoreForm (Init,uniqueId) inc hst // side effects are very dangerous !!! THIS DOES NOT INCREMENTED WITH 1
+			# (unqform,hst)	= mkStoreForm (init,uniqueId) inc hst // side effects are very dangerous !!! THIS DOES NOT INCREMENTED WITH 1
 			= ({changed=True ,value = Uniq unqform.value,form = [toHtml unqform.value]},hst)
 		(Uniq n)
 			= ({changed=False,value = Uniq n, form = [toHtml n]},hst)
@@ -102,27 +102,25 @@ where
 		uniqueId :: FormId Int
 		uniqueId = pdFormId "uniqueId" 1 
 
-gForm {|Others|}  formid hst = specialize myeditor (Init,formid) hst
+gForm {|Others|}  (init,formid) hst = specialize myeditor (init,formid) hst
 where
 	myeditor (init,formid) hst
-	# (listForm,hst) = vertlistFormButs 5 (Init,reuseFormId formid intlist) hst
+	# (listForm,hst) = vertlistFormButs 5 True (init,reuseFormId formid intlist) hst
 	= (	{ changed = listForm.changed, value = Other listForm.value, form = listForm.form},hst)
 	(Other intlist) = formid.ival
 
-gForm {|Topics|}  formid hst = specialize myeditor (Init,formid) hst
+gForm {|Topics|} (init,formid) hst = specialize myeditor (init,formid) hst
 where
 	myeditor (init,formid) hst
-	# (listForm,hst) = vertlistFormButs 5 (Init,reuseFormId formid intlist) hst
+	# (listForm,hst) = vertlistFormButs 5 True (init,reuseFormId formid intlist) hst
 	= (	{ changed = listForm.changed, value = Topic listForm.value, form = listForm.form},hst)
 	(Topic intlist) = formid.ival
 
-gForm {|Degrees|} formid hst = specialize myeditor (Init,formid) hst //blue gives rise to run time error
+gForm {|Degrees|} (init,formid) hst = specialize myeditor (init,formid) hst //blue gives rise to run time error
 where
 	myeditor (init,formid) hst
-//	# (listForm,hst) = vertlistFormButs 5 (Init,reuseFormId formid (ot formid.ival)) hst
-	# (listForm,hst) = vertlistFormButs 5 (Init,reuseFormId formid intlist) hst
+	# (listForm,hst) = vertlistFormButs 5 True (init,reuseFormId formid intlist) hst
 	= (	{ changed = listForm.changed, value = Degree listForm.value, form = listForm.form},hst)
-//	= (	{ changed = listForm.changed, value = to listForm.value, form = listForm.form},hst)
 	(Degree intlist) = formid.ival
 	ot (Degree list) = list	
 	to list = Degree list
@@ -151,7 +149,7 @@ derive gParse 	Maybe,
 				Uniq, Opt, Others, Topic, X_TopicCode, Degrees, Topics,
 				Department, MyDatabase, RefAcademicus, Academics, Departments,RefDept
 	
-derive gCollect	[], Maybe, (,), Date,
+derive gCollect	[], Maybe, (,), HtmlDate, 
 				Academic, X_DepartmentName, Phone, Access_Level, Contract, University, X_Degree, Rank, Chair,
 				Appointment, Teacher, Professor, TeachingAndProf, Person, Room, Building,
 				Uniq, Opt, Others, Topic, X_TopicCode, Degrees, Topics,

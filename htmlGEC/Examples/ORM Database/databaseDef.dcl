@@ -45,7 +45,7 @@ import StdMaybe, support
 				|	National
 				| 	Local
 :: Contract		=	Tenjured
-				|	Till Date
+				|	Till HtmlDate
 :: University	=	RUU
 				|	TUE
 				|	UT

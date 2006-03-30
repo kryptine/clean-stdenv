@@ -51,9 +51,9 @@ layoutListForm	:: !([BodyTag] [BodyTag] -> [BodyTag])
                        !(!(InIDataId a)	!*HSt  -> (Form a,*HSt))
                         !(InIDataId [a]) !*HSt -> (Form [a],!*HSt)			| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
-// User controlled number of list elements will be shown, including delete and append buttons; Int indicates max number of browse buttons
+// User controlled number of list elements will be shown, including optional delete and append buttons; Int indicates max number of browse buttons
 
-vertlistFormButs:: !Int !(InIDataId [a]) 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+vertlistFormButs:: !Int !Bool !(InIDataId [a]) 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
 
 

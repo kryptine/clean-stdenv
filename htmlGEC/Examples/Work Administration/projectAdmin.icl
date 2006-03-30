@@ -9,9 +9,9 @@ L = Leaf
 Bra = Branch
 
 derive gForm  	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan
-derive gUpd 	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan, Date, []
-derive gPrint	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan, Date
-derive gParse	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan, Date
+derive gUpd 	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan, []
+derive gPrint	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan
+derive gParse	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan
 
 
 Start world  = doHtmlServer ProjectAdminPage world
@@ -31,15 +31,14 @@ Start world  = doHtmlServer ProjectAdminPage world
 					, 	status		:: Status
 					, 	work		:: [Work]
 					}
-:: Work			:== (Date,Int)
-:: Date 		= 	Date Int Int Int
+:: Work			:== (HtmlDate,Int)
 :: WorkerPlan	= 	{ 	project		:: ProjectList
 					,	name		:: String
 					, 	hours		:: Int
 					}
 :: DailyWork	=	{ 	projectId 	:: ProjectList
 					, 	myName		:: WorkersList
-					, 	date		:: Date
+					, 	date		:: HtmlDate
 					, 	hoursWorked	:: Int
 					}
 :: ProjectList	:== PullDownMenu
@@ -157,34 +156,15 @@ where
 // specializations
 
 //	List elements need to be displayed below each other, left aligned:
-gForm {|[]|} gHa formid hst
+gForm {|[]|} gHa (init,formid) hst
 = case formid.ival of
 	[]	
 	= ({changed = False, value = [], form =[EmptyBody]},hst)
 	[x:xs]
-	# (formx, hst) = gHa (reuseFormId formid x) hst
-	# (formxs,hst) = gForm {|*->*|} gHa (setFormId formid xs) hst
+	# (formx, hst) = gHa (init,reuseFormId formid x) hst
+	# (formxs,hst) = gForm {|*->*|} gHa (init,setFormId formid xs) hst
 	= ({changed = False, value = [x:xs], form = [formx.form <||> formxs.form]},hst)
 
-//	Date should be displayed as a triplet of pull down menus, displaying (day, month, year) selections:
-gForm {|Date|} formid hst 
-	= specialize myeditor (Init,formid) hst
-where
-	myeditor (init,formid) hst = mkBimapEditor (init,formid) bimap hst
-	where
-		(Date day month year) = formid.ival
-
-		bimap = {map_to = toPullDown, map_from = fromPullDown}
-		where
-			toPullDown (Date day month year) = (pddays,pdmonths,pdyears)
-			where
-				pddays 		= PullDown (1,  defpixel/2) (day-1,  [toString i \\ i <- [1..31]])
-				pdmonths 	= PullDown (1,  defpixel/2) (month-1,[toString i \\ i <- [1..12]])
-				pdyears 	= PullDown (1,2*defpixel/3) (year-1, [toString i \\ i <- [2005..2010]])
-		
-			fromPullDown (pddays,pdmonths,pdyears) = Date (convert pddays) (convert pdmonths) (convert pdyears)
-			where
-				convert x	= toInt (toString x)
 
 //	Initial values of the work administration's data structures:
 initProjects :: [Project]
@@ -226,7 +206,7 @@ initDailyWork i j projects
 		, date			= initDate
 		, hoursWorked	= 0 }
 
-initDate :: Date	
+initDate :: HtmlDate	
 initDate = Date 1 1 2005
 
 initWorkersList :: Int Int [Project] -> PullDownMenu

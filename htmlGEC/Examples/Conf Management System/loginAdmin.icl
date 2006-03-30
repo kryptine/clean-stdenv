@@ -54,7 +54,7 @@ invariantLogAccounts:: String (Accounts s) -> Judgement
 invariantLogAccounts id accounts = invariantLogins id [login \\ {login} <- accounts]
 
 invariantLogins :: String [Login] -> Judgement
-invariantLogins id [] 			= OK
+invariantLogins id [] 			= Ok
 invariantLogins id [login=:{loginName,password}:logins]
 | loginName == "" 			= Just (id,"login name is not specified!")
 | password  == "" 			= Just (id,"password required!")
