@@ -59,6 +59,7 @@ nFormId		:: !String !d -> (FormId d)		// page 	  	livetime, editable, string for
 sFormId		:: !String !d -> (FormId d)		// session 	  	livetime, editable, string format
 pFormId		:: !String !d -> (FormId d)		// persistent 	livetime, editable, string format
 rFormId		:: !String !d -> (FormId d)		// persistentRO	livetime, editable, string format
+xFormId 	:: !String !d -> (FormId d)		// temp, noform
 
 ndFormId	:: !String !d -> (FormId d)		// page 	  	livetime, displayed non-editable, string format
 sdFormId	:: !String !d -> (FormId d)		// session 	  	livetime, displayed non-editable, string format

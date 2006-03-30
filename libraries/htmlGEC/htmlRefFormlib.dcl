@@ -25,7 +25,7 @@ invokeRefEditor 	:: (!(InIDataId b) !*HSt -> (Form d,!*HSt)) (InIDataId b) !*HSt
 // Usefull for exception handling
 
 :: Judgement		:==	Maybe (String,String)	// id + message					
-OK 					::	Judgement
+Ok 					::	Judgement
 
 instance + Judgement
 

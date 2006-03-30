@@ -11,7 +11,7 @@ myIntId		= initID (nFormId "nr" 1)
 
 
 mySumId :: a -> (InIDataId a) | toString a
-mySumId i	= initID (nFormId ("sum"<$i) i)
+mySumId i	= initID (nFormId ("sum"<+++ i) i)
 
 
 //  Example: display an integer editor:
@@ -66,7 +66,7 @@ example5 hst
 derive gParse MInt
 derive gPrint MInt
 derive gUpd   MInt
-gForm{|MInt|} formId hst = specialize asCounter (Init,formId) hst
+gForm{|MInt|} (init,formid) hst = specialize asCounter (init,formid) hst
 where
     asCounter (init,formId) hst
         # (counterF,hst) = counterForm (init,nformId) hst
