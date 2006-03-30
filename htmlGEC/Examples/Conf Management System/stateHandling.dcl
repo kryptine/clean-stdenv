@@ -73,7 +73,7 @@ import loginAdmin, htmlFormlib
 					}
 :: Co_authors 	=	Co_authors [Person]					
 
-// access functions on these data structures:
+// Access functions on these data structures:
 
 initManagerLogin 	:: Login
 initManagerAccount 	:: Login 		-> ConfAccount
@@ -115,35 +115,3 @@ invariantReport 		:: String Report -> Judgement
 setInvariantAccounts 	:: ConfAccounts -> ConfAccounts
 
 
-/*
-
-initRefereeAccount 	:: Login 		-> ConfAccount
-initAuthorsAccount	:: Login Int 	-> ConfAccount
-
-initReport 			:: Report
-initPaper 			:: String -> Paper
-
-setInvariantAccounts:: ConfAccounts -> ConfAccounts
-
-findReports 		:: Int [ConfAccount] -> [(Person,Maybe Report)]
-findReport 			:: Int ConfAccount -> (Maybe Report)
-getReports 			:: Reports -> [(PaperNr, Maybe Report)]
-addReport 			:: Int (Maybe Report) ConfAccount -> ConfAccount
-emptyReport 		:: Report
-
-assignPaper 		:: Int ConfAccount -> ConfAccount
-deletePaper 		:: Int ConfAccount -> ConfAccount
-isRefereeOf 		:: Int ConfAccount -> Bool
-hasRefereed 		:: Int ConfAccount -> Bool
-papersToReferee 	:: ConfAccount -> [PaperNr]
-papersRefereed 		:: ConfAccount -> [PaperNr]
-papersNotRefereed 	:: ConfAccount -> [PaperNr]
-
-assignConflict 		:: Int ConfAccount -> ConfAccount
-deleteConflict		:: Int ConfAccount -> ConfAccount
-isConflict	 		:: Int ConfAccount -> Bool
-
-findPaper 			:: Int Papers -> (Maybe Paper)
-
-invariantConvDB 	:: ConfAccounts -> (Bool,String)
-*/

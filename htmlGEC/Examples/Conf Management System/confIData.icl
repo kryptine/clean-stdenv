@@ -19,14 +19,14 @@ universalDB init invariant filename value hst
 # (dbf,hst)			= myDatabase Display 0 value hst			// create / read out database file
 # dbversion			= fst dbf.value								// version number stored in database
 # dbvalue			= snd dbf.value								// value stored in database
-# (versionf,hst)	= myVersion Init 0 hst 						// create / read out version number expected by this application
+# (versionf,hst)	= myVersion Init dbversion hst 				// create / read out version number expected by this application
 # version			= versionf.value							// current version number assumed in this application
 | init == Init													// we only want to read, no version conflict
 	# (_,hst)		= myVersion Set dbversion hst 				// synchronize version number and
 	= (dbvalue,hst)												// return current value stored in database
 | dbversion <> version											// we want to write and have a version conflict
 	# (_,hst)		= myVersion Set dbversion hst				// synchronize with new version
-	# (_,hst)		= ExceptionStore ((+) (False,"DB Version conflict with database named " +++ filename)) hst	// Raise exception
+	# (_,hst)		= ExceptionStore ((+) (False,"DB Version conflict in record " +++ filename +++ "; latest value restored")) hst	// Raise exception
 	= (dbvalue,hst)												// return current version stored in database 
 # (ok,msg)			= invariant value							// no version conflict, check invariants															// check invariants
 | not ok														// we want to write, but invariants don't hold
@@ -47,7 +47,8 @@ editRefto :: (!Mode,!Init,(!(!Refto a,!a),!!Mode,!Init)) *HSt ->
 		(Form (Refto a),Form a,!*HSt)   | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 editRefto (rmode,rinit,((Refto s,a),pmode,pinit)) hst
 	= reftoEditForm rmode rinit (pinit,
-			{nFormId ("Refto_" +++ s) (Refto s, a) & mode = pmode, lifespan = onMode pmode Persistent PersistentRO PersistentRO}) hst
+//			{nFormId ("Refto_" +++ s) (Refto s, a) & mode = pmode, lifespan = onMode pmode Persistent PersistentRO PersistentRO}) hst
+			{nFormId ("Refto_" +++ s) (Refto s, a) & mode = pmode}) hst
 
 
 universalRefEditor :: !Mode  !(a -> Judgement) !(Refto a) *HSt -> (Form a,!*HSt)   | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
@@ -57,15 +58,16 @@ universalRefEditor mode invariant (Refto filename) hst
 # (_,dbf,hst)		= myDatabase Init 0 createDefault hst		// create / read out database file
 # dbversion			= fst dbf.value								// version number stored in database
 # dbvalue			= snd dbf.value								// value stored in database
-# (versionf,hst)	= myVersion Init 0 hst 						// create / read out version number expected by this application
+# (versionf,hst)	= myVersion Init dbversion hst 				// create / read out version number expected by this application
 # version			= versionf.value							// current version number assumed in this application
-# (valuef,hst)		= myEditor Init mode dbvalue hst			// create / read out current value 
 | mode == Display												// we only want to read, no version conflict
+	# (valuef,hst)	= myEditor  Set mode dbvalue hst			// synchronize with latest value 
 	# (_,hst)		= myVersion Set version hst 				// synchronize version number and
 	= (valuef,hst)												// return current value in editor
+# (valuef,hst)		= myEditor Init mode dbvalue hst			// create / read out current value 
 | dbversion <> version											// we have a version conflict and want to write
 	# (_,hst)		= myVersion Set dbversion hst				// synchronize with new version
-	# (_,hst)		= ExceptionStore ((+) (False,"Ref Editor Version conflict with information in " +++ filename)) hst	// Raise exception
+	# (_,hst)		= ExceptionStore ((+) (False,"Ref Editor Version conflict with information in " +++ filename +++ "; latest value restored")) hst	// Raise exception
 	= myEditor Set mode dbvalue hst								// return current version stored in database 
 # (ok,msg)			= invariant valuef.value					// no version conflict, check invariants															// check invariants
 | not ok														// we want to write, but invariants don't hold
@@ -146,15 +148,6 @@ gForm {|[]|} gHa (init,formid) hst
 	[] 
 	= ({changed = False,form = [],value = []},hst)
 
-/*
-gForm {|Maybe|} ga (init,formid) hst 
-# elem = formid.ival
-= case elem of
-	Nothing = ({value=Nothing,changed =False,form=[toHtml "Not yet done",Br]},hst)
-	Just val
-		# (valform,hst)	= ga (init,reuseFormId formid val) hst
-		= ({value=Just valform.value,changed =valform.changed,form=valform.form},hst)
-*/
 // general forms display settings
 
 derive gForm /*[], */Maybe
@@ -210,5 +203,14 @@ universalRefEditor mode invariant (Refto filename) hst
 						(editRefto (Edit,Set,((Refto filename,copyf.value),Display,Init)) hst)
 						(undef,undef,hst)
 = (copyf,hst)
+*/
+/*
+gForm {|Maybe|} ga (init,formid) hst 
+# elem = formid.ival
+= case elem of
+	Nothing = ({value=Nothing,changed =False,form=[toHtml "Not yet done",Br]},hst)
+	Just val
+		# (valform,hst)	= ga (init,reuseFormId formid val) hst
+		= ({value=Just valform.value,changed =valform.changed,form=valform.form},hst)
 */
 				
