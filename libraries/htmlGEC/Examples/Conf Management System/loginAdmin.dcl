@@ -1,6 +1,6 @@
 definition module loginAdmin
 
-import StdEnv, StdMaybe, judgement
+import StdEnv, StdMaybe, htmlRefFormlib
 
 :: Account s			= 	{ login			:: Login		// login info		
 							, state			:: s			// state 
@@ -26,5 +26,5 @@ hasAccount 			::	Login		(Accounts s) -> (Maybe (Account s))
 
 //	Invariants
 
-invariantLogins		:: 	[Login] 	 -> Judgement
-invariantLogAccounts::	(Accounts s) -> Judgement
+invariantLogins		:: 	String [Login] 	 	-> Judgement
+invariantLogAccounts::	String (Accounts s) -> Judgement

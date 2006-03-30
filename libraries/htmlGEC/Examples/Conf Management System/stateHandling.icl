@@ -163,42 +163,42 @@ removeConflict nr sperson [acc:accs] = [acc:removeConflict nr sperson accs]
 
 invariantPerson :: String Person -> Judgement
 invariantPerson id {firstName,lastName,affiliation,emailAddress}
-| firstName		== ""	= (False,id +++ " : first name is not specified!")
-| lastName		== ""	= (False,id +++ " : last name is not specified!")
-| affiliation	== ""	= (False,id +++ " : affiliation is not specified!")
-| emailAddress	== ""	= (False,id +++ " : email address is not specified!")
+| firstName		== ""	= Just (id,"first name is not specified!")
+| lastName		== ""	= Just (id,"last name is not specified!")
+| affiliation	== ""	= Just (id,"affiliation is not specified!")
+| emailAddress	== ""	= Just (id,"email address is not specified!")
 = OK
 
 invariantPaper :: String Paper -> Judgement
 invariantPaper id {title,first_author,co_authors = Co_authors authors,abstract,pdf}
-| title			== ""	= (False,id +++ " : title of paper not specified!")
-| abstract		== ""	= (False,id +++ " : no abstract of paper specified!")
-| pdf			== ""	= (False,id +++ " : no pdf given!")
+| title			== ""	= Just (id,"title of paper not specified!")
+| abstract		== ""	= Just (id,"no abstract of paper specified!")
+| pdf			== ""	= Just (id,"no pdf given!")
 # judgementFirst_author	= invariantPerson (id +++ " first author") first_author
 # judgementCo_authors	= foldl (+) OK (map (invariantPerson (id +++ " co_authors")) authors)
 = judgementFirst_author + judgementCo_authors
 
 invariantReport :: String Report -> Judgement
 invariantReport id {commCommittee,commAuthors}
-| commAuthors	== ""	= (False,id +++ " : You have to make some remarks to the authors")
-| commCommittee	== ""	= (False,id +++ " : You have to make some remarks to the committee")
+| commAuthors	== ""	= Just (id,"You have to make some remarks to the authors")
+| commCommittee	== ""	= Just (id,"You have to make some remarks to the committee")
 = OK
 
-invariantConfAccounts :: ConfAccounts -> Judgement
-invariantConfAccounts accounts 
+invariantConfAccounts :: String ConfAccounts -> Judgement
+invariantConfAccounts id accounts 
 # allpapernrs 		= [nr \\ (nr,refpapers) <- getRefPapers accounts]
-| isMember 0 allpapernrs 					= (False,"paper number has to be a postive number")
-| not (allUnique allpapernrs) 				= (False,"paper number already in use")
+| isMember 0 allpapernrs 					= Just (id,"paper number has to be a postive number")
+| not (allUnique allpapernrs) 				= Just (id,"paper number already in use")
 # uniqueconflicts 	= and [allUnique nrs \\ (_,nrs) <- getConflicts accounts] 
-| not uniqueconflicts						= (False,"conflict already assigned to referee")
+| not uniqueconflicts						= Just (id,"conflict already assigned to referee")
 # uniqueassigment 	= and [allUnique nrs  \\ (_,nrs) <- getAssignments accounts] 
-| not uniqueassigment						= (False,"paper already assigned to referee")
+| not uniqueassigment						= Just (id,"paper already assigned to referee")
 # uniqueassignconfl = or [isAnyMember conflnrs asnrs \\ (_,conflnrs,asnrs) <- getConflictsAssign accounts] 
-| uniqueassignconfl							= (False,"paper assigned conflicts with conflict assigned")
+| uniqueassignconfl							= Just (id,"paper assigned conflicts with conflict assigned")
 # allreportnrs		= [nr \\ (_,nrs) <- getAssignments accounts, nr <- nrs]
-| not (allMembers allreportnrs allpapernrs)	= (False,"assignment refers to non existing paper number")
+| not (allMembers allreportnrs allpapernrs)	= Just (id,"assignment refers to non existing paper number")
 # allconflicts		= [nr \\ (_,nrs) <- getConflicts accounts, nr <- nrs]
-| not (allMembers allconflicts allpapernrs)	= (False,"conflict refers to non existing paper number")
+| not (allMembers allconflicts allpapernrs)	= Just (id,"conflict refers to non existing paper number")
 = OK
 
 allUnique :: [a] -> Bool | Eq a
