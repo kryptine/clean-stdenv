@@ -2,7 +2,7 @@ definition module loginAdminIData
 
 import loginAdmin, htmlHandler
 
-// login page: 			returns account corresponding to adminstrated user
+// login page: 			returns account if user is adminstrated
 
 loginPage  			:: !(Accounts s)	!*HSt -> (Maybe (Account s),[BodyTag],!*HSt)
 
@@ -10,6 +10,3 @@ loginPage  			:: !(Accounts s)	!*HSt -> (Maybe (Account s),[BodyTag],!*HSt)
 
 changePasswordPage 	:: !(Account s) 	!*HSt -> (Maybe (Account s),[BodyTag],!*HSt)
 
-// Temporal global store in which any editor can report errors:
-
-ExceptionStore 		:: (Judgement -> Judgement) *HSt -> (Judgement,!*HSt)

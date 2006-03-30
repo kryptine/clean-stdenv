@@ -1,6 +1,6 @@
 definition module loginAdmin
 
-import StdEnv, StdLib
+import StdEnv, StdMaybe, judgement
 
 :: Account s			= 	{ login			:: Login		// login info		
 							, state			:: s			// state 
@@ -24,13 +24,7 @@ removeAccount 		::	(Account s) (Accounts s) -> (Accounts s)
 changeAccount 		::	(Account s) (Accounts s) -> (Accounts s) 
 hasAccount 			::	Login		(Accounts s) -> (Maybe (Account s))
 
-// Checking invariants
-
-:: Judgement		:==	(Bool,String)					
-OK 					::	Judgement
-instance + Judgement
-
-//addJudgement		::	Judgement -> (Judgement -> Judgement)
+//	Invariants
 
 invariantLogins		:: 	[Login] 	 -> Judgement
 invariantLogAccounts::	(Accounts s) -> Judgement

@@ -1,6 +1,6 @@
 implementation module loginAdmin
 
-import StdEnv, StdHtml, StdMaybe
+import StdEnv, StdHtml, StdMaybe, judgement
 
 instance == (Account s)
 where
@@ -48,20 +48,7 @@ hasAccount login [acc:accs]
 | login.loginName == acc.login.loginName && login.password == acc.login.password = Just acc
 = hasAccount login accs
 
-OK :: Judgement
-OK = (True,"")
-
-//addJudgement ::	Judgement  -> (Judgement -> Judgement)
-//addJudgement judgement = \(ok,oldmessage) -> if ok judgement (ok,oldmessage)
-
-instance + Judgement
-where
-	(+) j1 j2 = addJudgement j1 j2
-	where
-		addJudgement _  (False,j2) 	= (False,j2)
-		addJudgement (False,j1) _ 	= (False,j1)
-		addJudgement _ _ 			= OK
-
+// Invariants
 
 invariantLogAccounts:: (Accounts s) -> Judgement
 invariantLogAccounts accounts = invariantLogins [login \\ {login} <- accounts]

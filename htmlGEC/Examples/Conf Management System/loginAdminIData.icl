@@ -1,6 +1,6 @@
 implementation module loginAdminIData
 
-import StdEnv, StdHtml, StdMaybe
+import StdEnv, StdHtml, StdMaybe, judgementIData
 import loginAdmin
 
 derive gForm  	Login
@@ -64,7 +64,3 @@ where
 	passwordForm :: !String !*HSt -> (Form String,!*HSt)
 	passwordForm fid hst = mkEditForm (Init, nFormId fid "") hst
 						
-ExceptionStore :: (Judgement -> Judgement) *HSt -> (Judgement,!*HSt)
-ExceptionStore judge hst 
-# (judgef,hst) = mkStoreForm (Init,nFormId "cf_alert" OK) judge hst
-= (judgef.value,hst)
