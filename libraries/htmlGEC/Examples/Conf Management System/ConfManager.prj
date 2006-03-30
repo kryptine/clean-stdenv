@@ -1,6 +1,6 @@
 Version: 1.4
 Global
-	Built:	False
+	Built:	True
 	Target:	Web Applications
 	Exec:	{Project}\ConfManager.exe
 	CodeGen
@@ -61,8 +61,8 @@ MainModule
 	DclOpen:	False
 	Icl
 		WindowPosition
-			X:	16
-			Y:	32
+			X:	14
+			Y:	90
 			SizeX:	879
 			SizeY:	539
 	IclOpen:	False
@@ -955,7 +955,7 @@ OtherModules
 			WindowPosition
 				X:	51
 				Y:	8
-				SizeX:	1195
+				SizeX:	928
 				SizeY:	604
 		DclOpen:	False
 		Icl
@@ -4261,15 +4261,15 @@ OtherModules
 			ReuseUniqueNodes:	True
 		Dcl
 			WindowPosition
-				X:	135
-				Y:	63
+				X:	38
+				Y:	85
 				SizeX:	889
 				SizeY:	428
 		DclOpen:	False
 		Icl
 			WindowPosition
-				X:	33
-				Y:	72
+				X:	28
+				Y:	42
 				SizeX:	860
 				SizeY:	490
 		IclOpen:	False
@@ -4289,9 +4289,9 @@ OtherModules
 			ReuseUniqueNodes:	True
 		Dcl
 			WindowPosition
-				X:	19
-				Y:	16
-				SizeX:	896
+				X:	4
+				Y:	6
+				SizeX:	913
 				SizeY:	574
 		DclOpen:	False
 		Icl
@@ -4440,6 +4440,62 @@ OtherModules
 				Y:	9
 				SizeX:	838
 				SizeY:	583
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	judgement
+		Dir:	{Project}
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	10
+				Y:	10
+				SizeX:	800
+				SizeY:	640
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	0
+				Y:	0
+				SizeX:	500
+				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	judgementIData
+		Dir:	{Project}
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+		Dcl
+			WindowPosition
+				X:	84
+				Y:	15
+				SizeX:	800
+				SizeY:	640
+		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	87
+				Y:	42
+				SizeX:	800
+				SizeY:	640
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 Static
@@ -4599,13 +4655,17 @@ Static
 		Path:	{Application}\Libraries\MersenneTwister\MersenneTwister.icl
 		Path:	{Application}\Libraries\StdEnv\StdDebug.icl
 		Path:	{Project}\stateHandlingIData.icl
+		Path:	{Project}\judgement.icl
+		Path:	{Project}\judgementIData.icl
 	Objs
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup0.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup1Trace.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup2.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_system.o
 		Path:	{Project}\Clean System Files\ConfManager.o
-		Path:	{Project}\Clean System Files\stateHandling.o
+		Path:	{Project}\Clean System Files\judgementIData.o
+		Path:	{Project}\Clean System Files\judgement.o
+		Path:	{Project}\Clean System Files\loginAdmin.o
 		Path:	{Project}\Clean System Files\loginAdminIData.o
 		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlArrow.o
@@ -4756,8 +4816,8 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
-		Path:	{Project}\Clean System Files\loginAdmin.o
 		Path:	{Project}\Clean System Files\confIData.o
+		Path:	{Project}\Clean System Files\stateHandling.o
 		Path:	{Project}\Clean System Files\stateHandlingIData.o
 		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.obj
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFileSelectors_121.obj

@@ -1,8 +1,9 @@
 implementation module confIData
 
-import htmlHandler, htmlTrivial, StdList
+import StdHtml, StdList
+
 import stateHandling
-import loginAdmin, loginAdminIData
+import loginAdmin, loginAdminIData, judgementIData
 
 // global editors and stores
 

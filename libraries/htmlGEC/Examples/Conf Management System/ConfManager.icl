@@ -2,7 +2,7 @@ module ConfManager
 
 import StdEnv, StdHtml
 
-import loginAdminIData, confIData, stateHandlingIData 
+import loginAdminIData, confIData, stateHandlingIData, judgementIData 
 
 // Here it starts ....
 
