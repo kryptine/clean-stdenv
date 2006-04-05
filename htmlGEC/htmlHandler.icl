@@ -39,10 +39,12 @@ doHtml userpage world
 # (allformbodies,world) = storeFormStates states world
 # {worldC}				= print_to_stdout 
 								(Html (Head headattr [extra_style:headtags]) 
-								(Body (extra_body_attr ++ attr) [debugInput,allformbodies:bodytags])) 
+								(Body (extra_body_attr ++ attr) [debugInput,allformbodies:bodytags]))
 								world
 = worldC
 where
+	stuf = "Hello world"
+
 	extra_body_attr = [Batt_background "back35.jpg",`Batt_Std [CleanStyle]]
 	extra_style = Hd_Style [] CleanStyles	
 
