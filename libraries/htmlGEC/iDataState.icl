@@ -265,7 +265,7 @@ where
 	selectorInpName :: String
 	selectorInpName =: "CS"
 
-//	writeAllPersistentStates:: FormStates *NWorld -> *NWorld 
+	writeAllPersistentStates:: FStates *NWorld -> *NWorld 
 	writeAllPersistentStates Leaf_ world = world
 	writeAllPersistentStates (Node_ left (sid,NewState {format,life = Persistent}) right) world
 	= writeAllPersistentStates right (writeAllPersistentStates left (serializeAndStoreState sid format world))
