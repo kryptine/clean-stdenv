@@ -232,9 +232,8 @@ where
 		addJudgement (Just j1) _ 	= (Just j1)
 		addJudgement _ _ 			= Nothing
 
-ExceptionStore :: (Judgement -> Judgement) *HSt -> (Judgement,!*HSt)
+ExceptionStore :: (Judgement -> Judgement) !*HSt -> (Judgement,!*HSt)
 ExceptionStore judge hst 
 # (judgef,hst) = mkStoreForm (Init,{nFormId "handle_exception" Ok & mode = NoForm, lifespan = Temp}) judge hst
 = (judgef.value,hst)
-
 

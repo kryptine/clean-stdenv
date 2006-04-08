@@ -9,22 +9,33 @@ import loginAdmin, htmlFormlib
 
 // Shared Information:
 
-:: RefPerson	=	RefPerson   (Refto Person)
-:: RefPaper		=	RefPaper 	(Refto Paper)	
-:: RefReport	=	RefReport	(Refto MaybeReport)
+:: RefPerson	=	RefPerson   	(Refto Person)
+:: RefPaper		=	RefPaper 		(Refto Paper)	
+:: RefReport	=	RefReport		(Refto MaybeReport)
+:: RefDiscussion=	RefDiscussion	(Refto Discussion)
 
 // Information maintained by the Conference Manager
 
 :: Member 		= 	ConfManager		ManagerInfo			
 				|	Authors			PaperInfo							
 				| 	Referee 		RefereeInfo
+				|	Guest			Person
+				
 :: ManagerInfo	=	{ person		:: RefPerson
 					}
 :: PaperInfo	=	{ person		:: RefPerson
 					, nr			:: PaperNr
 					, paper			:: RefPaper
+					, status		:: PaperStatus
+					, discussion	:: RefDiscussion
 					}
 :: PaperNr 		:==	Int
+:: PaperStatus	=	Accepted
+				|	CondAccepted
+				|	Rejected
+				|	UnderDiscussion
+				|	Submitted
+
 :: RefereeInfo	=	{ person		:: RefPerson  
 					, conflicts		:: Conflicts 
 					, reports		:: Reports
@@ -63,6 +74,10 @@ import loginAdmin, htmlFormlib
 					, emailAddress	:: String
 					} 
 
+// Information maintained by the Conference Manager *or* a Referee *or* an Author
+
+:: Discussion	=	Discussion	[(String,String)]
+
 // Information submitted by an author
 
 :: Paper		=	{ title			:: String
@@ -81,8 +96,9 @@ initManagerAccount 	:: Login 		-> ConfAccount
 isConfManager 		:: ConfAccount	-> Bool
 isReferee			:: ConfAccount -> Bool
 isAuthor			:: ConfAccount -> Bool
+isGuest				:: ConfAccount -> Bool
 
-getRefPerson 		:: Member 		-> RefPerson
+getRefPerson 		:: Member 		-> (Maybe RefPerson)
 getPaperNumbers 	:: ConfAccounts -> [Int]
 getRefPapers 		:: ConfAccounts -> [(Int,RefPaper)]
 getAssignments 		:: ConfAccounts -> [(RefPerson,[Int])]
@@ -109,6 +125,7 @@ instance == RefPerson, RefPaper, RefReport
 
 invariantConfAccounts 	:: String ConfAccounts 	-> Judgement
 invariantPerson 		:: String Person 		-> Judgement
+invariantPersons 		:: String [Person] 		-> Judgement
 invariantPaper 			:: String Paper 		-> Judgement
 invariantReport 		:: String Report 		-> Judgement
 

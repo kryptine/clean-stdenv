@@ -21,7 +21,8 @@ mkRowForm 		 	:: [BodyTag] 			-> BodyTag		// place every element in a row next t
 (<.||.>) infixl 4 	::  BodyTag   BodyTag  	-> BodyTag		// Place second below first
 mkColForm		  	:: [BodyTag] 			-> BodyTag		// Place every element in a column below first
 
-mkSTable 			:: [[BodyTag]] 			-> BodyTag		// Make a table
+mkSTable 			:: [[BodyTag]] 			-> BodyTag		// Make a table, default with
+mkTable 			:: [[BodyTag]]			-> BodyTag		// Make a table
 (<=|>) infixl 4		:: [BodyTag] [BodyTag] 	-> BodyTag		// Make a table by putting elements pairwise below each other
 
 // **** frquently used "mkViewForm" variants ****

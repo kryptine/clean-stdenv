@@ -59,6 +59,15 @@ where
 	mktable table 	= [Tr [] (mkrow rows) \\ rows <- table]	
 	mkrow rows 		= [Td [Td_VAlign Alo_Top, Td_Width (Pixels defpixel)] [row] \\ row <- rows] 
 
+mkTable :: [[BodyTag]] -> BodyTag
+mkTable table
+= Table []	(mktable table)
+where
+	mktable table 	= [Tr [] (mkrow rows) \\ rows <- table]	
+	mkrow rows 		= [Td [Td_VAlign Alo_Top] [row] \\ row <- rows] 
+
+
+
 // frequently used variants of mkViewForm
 
 mkEditForm:: !(InIDataId d) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
