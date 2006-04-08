@@ -13,6 +13,11 @@ AccountsDB init accounts hst
 = universalDB init (\s a -> invariantLogAccounts s a + invariantConfAccounts s a) 
 	uniqueDBname accounts hst 
 
+PaperNrStore :: !(Int -> Int) *HSt -> (Int,!*HSt) // paper counter
+PaperNrStore fun hst 
+# (intf,hst) = mkStoreForm (Init,{pFormId "LastPaperNr" 1 & mode = NoForm}) fun hst
+= (intf.value,hst)
+
 editorRefPerson :: !(InIDataId RefPerson) !*HSt -> (Form Person,!*HSt)
 editorRefPerson (init,formid) hst
 # (RefPerson refperson) = formid.ival
@@ -34,6 +39,11 @@ where
 	invariant name Nothing 			= Ok
 	invariant name (Just report)	= invariantReport name report
 	
+editorRefDiscussion :: !(InIDataId RefDiscussion) !*HSt -> (Form Discussion,!*HSt)
+editorRefDiscussion (init,formid) hst
+# (RefDiscussion refdiscus) = formid.ival
+= universalRefEditor formid.mode (\_ -> Ok) refdiscus hst
+
 // specialized forms
 
 gForm {|RefPerson|} iniformid hst = specialize (invokeRefEditor editorRefPerson) 	iniformid hst
@@ -41,6 +51,8 @@ gForm {|RefPerson|} iniformid hst = specialize (invokeRefEditor editorRefPerson)
 gForm {|RefPaper|}  iniformid hst = specialize (invokeRefEditor editorRefPaper)  	iniformid hst
 
 gForm {|RefReport|} iniformid hst = specialize (invokeRefEditor editorRefReport)	iniformid hst
+
+gForm {|RefDiscussion|} iniformid hst = specialize (invokeRefEditor editorRefDiscussion)	iniformid hst
 
 gForm {|Reports|} informid hst = specialize myeditor informid hst
 where
@@ -63,6 +75,16 @@ where
 	# (authorsf,hst)		= vertlistFormButs 10 True (init,subsFormId formid "authors" authors) hst
 	= ({authorsf & value = Co_authors authorsf.value},hst)
 
+gForm {|Discussion|} informid hst = specialize myeditor informid hst
+where
+	myeditor (init,formid) hst
+	# (Discussion list) 		= formid.ival
+	= ({changed = False, form 	= showDiscussion list, value = (Discussion list)},hst)
+	where
+		showDiscussion [] = []
+		showDiscussion [(name,content):more] = [ Br, B [] (name +++ ":"), Br, Txt content, Br, Hr []] ++ showDiscussion more
+
+
 gForm {|[]|} gHa (init,formid) hst 
 = case formid.ival of
 	[x:xs]
@@ -83,20 +105,20 @@ derive gForm
 				Login, Account, Member, ManagerInfo, RefereeInfo, /*Conflicts, */
 				/*RefPerson, */Person,
 				/*Reports, *//*RefReport, */ Report, Recommendation, Familiarity, 
-				/*RefPaper, */Paper, PaperInfo 
+				/*RefPaper, */Paper, PaperInfo,/* RefDiscussion,*/ PaperStatus/*, Discussion */ 
 derive gUpd 	
 				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts, 
 				RefPerson, Person,
 				Reports, RefReport, Report, Recommendation, Familiarity, 
-				RefPaper, Paper, PaperInfo, Co_authors 
+				RefPaper, Paper, PaperInfo, Co_authors, RefDiscussion, PaperStatus, Discussion 
 derive gPrint 	
 				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts,
 				RefPerson, Person,
 				Reports, RefReport, Report, Recommendation, Familiarity, 
-				RefPaper, Paper, PaperInfo, Co_authors  
+				RefPaper, Paper, PaperInfo, Co_authors, RefDiscussion, PaperStatus, Discussion 
 derive gParse 	
 				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts, 
 				RefPerson, Person,
 				Reports, RefReport, Report, Recommendation, Familiarity, 
-				RefPaper, Paper, PaperInfo, Co_authors 
+				RefPaper, Paper, PaperInfo, Co_authors, RefDiscussion, PaperStatus, Discussion 
 				

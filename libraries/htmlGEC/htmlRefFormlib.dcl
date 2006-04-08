@@ -29,4 +29,4 @@ Ok 					::	Judgement
 
 instance + Judgement
 
-ExceptionStore :: (Judgement -> Judgement) *HSt -> (Judgement,!*HSt)
+ExceptionStore :: (Judgement -> Judgement) !*HSt -> (Judgement,!*HSt)

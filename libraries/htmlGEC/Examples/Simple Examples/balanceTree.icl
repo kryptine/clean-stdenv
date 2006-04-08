@@ -21,12 +21,13 @@ Start world  = doHtmlServer MyPage4  world
 :: Record = {name :: String, address :: String, zipcode :: Int}
 
 myrecord :: [Record]
-myrecord = []
+myrecord = createDefault
 
 MyPage4 hst
-# (myrecord,hst) = mkEditForm (Init,nFormId "bla" myrecord)  hst
-=	mkHtml "Myrecord"
-	[ H1 [] "myrecord"
+//# (myrecord,hst) = mkEditForm (Init,nFormId "bla" myrecord)  hst
+# (myrecord,hst) = vertlistFormButs 5 True (Init,nFormId "bla" myrecord)  hst
+=	mkHtml "Example"
+	[ H1 [] ""
 	, BodyTag myrecord.form
 	]  hst
 

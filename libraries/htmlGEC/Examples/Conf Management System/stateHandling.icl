@@ -43,10 +43,17 @@ isAuthor account
 	Authors _ -> True
 	_ ->  False
 
-getRefPerson :: Member -> RefPerson
-getRefPerson (ConfManager managerInfo) 	= managerInfo.ManagerInfo.person
-getRefPerson (Referee refereeInfo)		= refereeInfo.RefereeInfo.person							
-getRefPerson (Authors paperInfo)		= paperInfo.PaperInfo.person
+isGuest:: ConfAccount -> Bool
+isGuest account 
+= case account.state of
+	Guest _ -> True
+	_ ->  False
+
+getRefPerson :: Member -> (Maybe RefPerson)
+getRefPerson (ConfManager managerInfo) 	= Just managerInfo.ManagerInfo.person
+getRefPerson (Referee refereeInfo)		= Just refereeInfo.RefereeInfo.person							
+getRefPerson (Authors paperInfo)		= Just paperInfo.PaperInfo.person
+getRefPerson _ = Nothing
 
 getRefPapers :: ConfAccounts -> [(Int,RefPaper)]
 getRefPapers accounts = [(nr,refpapers) 
@@ -70,8 +77,9 @@ getRefReports accounts = [(nr,	[ (person,refreports)
 getMyRefReports :: ConfAccount ConfAccounts -> [(Int,[(RefPerson, RefReport)])]
 getMyRefReports account accounts
 # me = getRefPerson account.state 
+| isNothing me	= []
 =  [(i,reports) 			\\ (i,reports) <- getRefReports accounts
-							| not (hasConflict i me [account])]
+							| not (hasConflict i (fromJust me) [account])]
 
 getMyReports :: ConfAccount -> [(Int, RefReport)]
 getMyReports {state = Referee {reports = Reports allreports}} =  allreports
@@ -167,6 +175,12 @@ invariantPerson id {firstName,lastName,affiliation,emailAddress}
 | emailAddress	== ""	= Just (id,"email address is not specified!")
 = Ok
 
+invariantPersons :: String [Person] -> Judgement
+invariantPersons id persons
+# unique		=	allUnique (map (\p -> p.emailAddress) persons)
+| not unique 	= Just (id,"e-mail address has to be unique!")
+= Ok
+
 invariantPaper :: String Paper -> Judgement
 invariantPaper id {title,first_author,co_authors = Co_authors authors,abstract,pdf}
 | title			== ""	= Just (id,"title of paper not specified!")
@@ -222,8 +236,10 @@ where
 												, RefereeInfo.reports 	= setInvariantReports refereeInfo.reports}}
 			(Authors paperInfo) ->
 				{account & state = Authors 		{paperInfo 
-												& PaperInfo.person 		= RefPerson (Refto uniquename)
+												& PaperInfo.person 		= RefPerson 	(Refto uniquename)
+												, PaperInfo.discussion	= RefDiscussion (Refto (uniqueDiscussion paperInfo.nr uniquename))
 												, PaperInfo.paper 		= RefPaper(Refto (uniquePaper paperInfo.nr uniquename))}}
+			_ -> account
 	where
 		uniquename = uniquePerson account.login.loginName
 	
