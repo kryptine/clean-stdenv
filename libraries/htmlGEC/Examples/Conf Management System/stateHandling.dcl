@@ -82,7 +82,12 @@ import loginAdmin, htmlFormlib
 
 // Information maintained by the Conference Manager *or* a Referee *or* an Author
 
-:: Discussion	=	Discussion	[(String,String)]
+:: Discussion	=	Discussion [Message]
+:: Message		= 	{ messageFrom	:: String
+					, date			:: HtmlDate
+					, time			:: HtmlTime
+					, message 		:: String
+					}
 
 // Information submitted by an author
 

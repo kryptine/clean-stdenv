@@ -14,25 +14,25 @@ derive gForm
 				RefPerson, Person,
 				Reports, RefReport, Report, Recommendation, Familiarity, 
 				RefPaper, Paper, PaperInfo, Co_authors, RefDiscussion,
-				PaperStatus, Discussion, DiscussionStatus 
+				PaperStatus, Discussion, DiscussionStatus, Message
 derive gUpd 	
 				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts,
 				RefPerson, Person,
 				Reports, RefReport, Report, Recommendation, Familiarity, 
 				RefPaper, Paper, PaperInfo, Co_authors, RefDiscussion,
-				PaperStatus, Discussion, DiscussionStatus 
+				PaperStatus, Discussion, DiscussionStatus, Message
 derive gPrint 	
 				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts,
 				RefPerson, Person,
 				Reports, RefReport, Report, Recommendation, Familiarity, 
 				RefPaper, Paper, PaperInfo, Co_authors, RefDiscussion,
-				PaperStatus, Discussion, DiscussionStatus 
+				PaperStatus, Discussion, DiscussionStatus, Message
 derive gParse 	
 				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts,
 				RefPerson, Person,
 				Reports, RefReport, Report, Recommendation, Familiarity, 
 				RefPaper, Paper, PaperInfo, Co_authors, RefDiscussion,
-				PaperStatus, Discussion, DiscussionStatus 
+				PaperStatus, Discussion, DiscussionStatus, Message
 
 // Naming convention of shared persistent information
 

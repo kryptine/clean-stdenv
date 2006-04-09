@@ -22,19 +22,19 @@ editorRefPerson :: !(InIDataId RefPerson) !*HSt -> (Form Person,!*HSt)
 editorRefPerson (init,formid) hst
 # (RefPerson refperson) = formid.ival
 # (Refto name) 			= refperson
-= universalRefEditor formid.mode (invariantPerson name) refperson hst
+= universalRefEditor formid.mode formid.lifespan (invariantPerson name) refperson hst
 
 editorRefPaper :: !(InIDataId RefPaper) !*HSt -> (Form Paper,!*HSt)
 editorRefPaper (init,formid) hst
 # (RefPaper refpaper) 	= formid.ival
 # (Refto name) 			= refpaper
-= universalRefEditor formid.mode (invariantPaper name) refpaper hst
+= universalRefEditor formid.mode formid.lifespan (invariantPaper name) refpaper hst
 
 editorRefReport :: !(InIDataId RefReport) !*HSt -> (Form (Maybe Report),!*HSt)
 editorRefReport (init,formid) hst
 # (RefReport refreport) = formid.ival
 # (Refto name) 			= refreport
-= universalRefEditor formid.mode (invariant name) refreport hst
+= universalRefEditor formid.mode formid.lifespan (invariant name) refreport hst
 where
 	invariant name Nothing 			= Ok
 	invariant name (Just report)	= invariantReport name report
@@ -42,7 +42,7 @@ where
 editorRefDiscussion :: !(InIDataId RefDiscussion) !*HSt -> (Form Discussion,!*HSt)
 editorRefDiscussion (init,formid) hst
 # (RefDiscussion refdiscus) = formid.ival
-= universalRefEditor formid.mode (\_ -> Ok) refdiscus hst
+= universalRefEditor formid.mode formid.lifespan (\_ -> Ok) refdiscus hst
 
 // specialized forms
 
@@ -78,12 +78,16 @@ where
 gForm {|Discussion|} informid hst = specialize myeditor informid hst
 where
 	myeditor (init,formid) hst
-	# (Discussion list) 		= formid.ival
-	= ({changed = False, form 	= showDiscussion list, value = (Discussion list)},hst)
+	# (Discussion messages)		= formid.ival
+	= ({changed = False, form 	= showDiscussion messages, value = formid.ival},hst)
 	where
-		showDiscussion [] = []
-		showDiscussion [(name,content):more] = [B [] (name +++ ":"), Br, Txt content, Br, Hr []] ++ showDiscussion more
-
+		showDiscussion [] 	= []
+		showDiscussion [{messageFrom,date,time,message}:more] 
+							= 	[ mkTable [	[ Txt "from: ", B [] messageFrom ]
+										,	[ Txt "date: ", toHtml date]
+										,	[ Txt "time: ", toHtml time]
+										,	[ Txt "message: ", Txt message]
+										]] ++ [Br, Hr []] ++ showDiscussion more
 
 gForm {|[]|} gHa (init,formid) hst 
 = case formid.ival of
@@ -106,23 +110,23 @@ derive gForm
 				/*RefPerson, */Person,
 				/*Reports, *//*RefReport, */ Report, Recommendation, Familiarity, 
 				/*RefPaper, */Paper, PaperInfo,/* RefDiscussion,*/ 
-				PaperStatus/*, Discussion */ , DiscussionStatus 
+				PaperStatus/*, Discussion */ , DiscussionStatus, Message 
 derive gUpd 	
 				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts, 
 				RefPerson, Person,
 				Reports, RefReport, Report, Recommendation, Familiarity, 
 				RefPaper, Paper, PaperInfo, Co_authors, RefDiscussion,
-				PaperStatus, Discussion, DiscussionStatus 
+				PaperStatus, Discussion, DiscussionStatus, Message
 derive gPrint 	
 				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts,
 				RefPerson, Person,
 				Reports, RefReport, Report, Recommendation, Familiarity, 
 				RefPaper, Paper, PaperInfo, Co_authors, RefDiscussion,
-				PaperStatus, Discussion, DiscussionStatus 
+				PaperStatus, Discussion, DiscussionStatus, Message
 derive gParse 	
 				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts, 
 				RefPerson, Person,
 				Reports, RefReport, Report, Recommendation, Familiarity, 
 				RefPaper, Paper, PaperInfo, Co_authors, RefDiscussion,
-				PaperStatus, Discussion, DiscussionStatus 
+				PaperStatus, Discussion, DiscussionStatus, Message
 				

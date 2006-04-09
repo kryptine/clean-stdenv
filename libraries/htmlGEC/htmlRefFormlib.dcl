@@ -18,7 +18,7 @@ reftoVertListForm 	:: 		!Mode !Init !(InIDataId [(Refto a,a)]) !*HSt -> (Form [R
 reftoListFormButs 	:: !Int	!Mode !Init !(InIDataId [(Refto a,a)]) !*HSt -> (Form [Refto a],Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
 universalDB 		:: !Init !(String a -> Judgement) !String !a *HSt -> (a,!*HSt)   	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-universalRefEditor 	:: !Mode  !(a -> Judgement) !(Refto a) *HSt -> (Form a,!*HSt)   	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+universalRefEditor 	:: !Mode !Lifespan !(a -> Judgement) !(Refto a) *HSt -> (Form a,!*HSt)   	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
 invokeRefEditor 	:: (!(InIDataId b) !*HSt -> (Form d,!*HSt)) (InIDataId b) !*HSt -> (Form b,!*HSt)
 
@@ -26,6 +26,8 @@ invokeRefEditor 	:: (!(InIDataId b) !*HSt -> (Form d,!*HSt)) (InIDataId b) !*HSt
 
 :: Judgement		:==	Maybe (String,String)	// id + message					
 Ok 					::	Judgement
+noException			:: Judgement -> Bool
+yesException		:: Judgement -> Bool
 
 instance + Judgement
 

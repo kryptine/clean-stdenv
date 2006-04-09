@@ -96,15 +96,14 @@ addAuthorPage accounts hst
 		]
 	, hst)
 
-
 // Conference manager editors for changing account information, may conflict with other members
 
-tempAccountsId accounts = sFormId "cfm_temp_states" accounts 	// temp editor for accounts
+tempAccountsId accounts = nFormId "cfm_temp_states" accounts 	// temp editor for accounts
 
 modifyStatesPage :: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 modifyStatesPage accounts hst
 # (naccounts,hst)	= vertlistFormButs 15 True (Init,tempAccountsId accounts) hst	// make a list editor to mofify all accounts
-# (accounts,hst)	= AccountsDB Set naccounts.value hst 							// store in global database
+# (accounts,hst)	= if naccounts.changed (AccountsDB Set naccounts.value hst) (naccounts.value,hst) 							// store in global database
 # (naccounts,hst)	= vertlistFormButs 15 True (Set,tempAccountsId accounts) hst 	// store in temp editor
 = (naccounts.form, hst)
 
@@ -214,37 +213,42 @@ discussPapersPage account accounts hst
 # (allreports,hst)	= getAllMyReports account accounts hst
 # allpapernrs		= map fst allreports
 # pdmenu			= (0, [("Show " +++ toString nr, \_ -> i) \\ i <- [0 .. ] & nr <- allpapernrs]) 
-# (pdfun,hst)		= FuncMenu (Init, sFormId "cfm_dpp_pdm" pdmenu) hst
-# selected			= (fst pdfun.value) 0
-# mbpaperrefinfo	= getPaperInfo (allpapernrs!!selected) accounts
+# (pdfun,hst)		= FuncMenu (Init, nFormId "cfm_dpp_pdm" pdmenu) hst
+# selected			= snd pdfun.value
+# selectedpaper		= allpapernrs!!selected
+# mbpaperrefinfo	= getPaperInfo selectedpaper accounts
 # (RefDiscussion (Refto name)) = (fromJust mbpaperrefinfo).discussion
-# (disclist,hst)	= mkEditForm (Init, rFormId name (0,Discussion [])) hst
-# (ok,newdisc,hst)	= mkSubStateForm (if pdfun.changed Set Init, nFormId "cfm_dpp_adddisc" (TS 80 "")) disclist.value 
-						(\s (Discussion l) -> Discussion [(account.login.loginName,toS s):l]) hst
-# (disclist,hst)	= if ok (mkEditForm (Set, pFormId name newdisc.value) hst) (disclist,hst)
-= (	pdfun.form ++ [Br,Hr [], Br] <|.|>  
-	mkdisplay allreports !! selected  ++ [Br,Hr [], Br] <|.|>
-	newdisc.form <|.|> [Br,Hr [], Br] 
-	++ disclist.form,hst)
+# (disclist,hst)	= universalDB Init (\_ _ -> Ok) name (Discussion []) hst
+# (time,date,hst)	= getTimeAndDate hst
+# (newsubmit,newdiscf,hst)	
+					= mkSubStateForm (if pdfun.changed Set Init, nFormId "cfm_dpp_adddisc" (TS 80 "")) disclist
+						(\s -> addItemTextInput (account.login.loginName) time date (toS s)) hst
+# (_,hst)			= if newsubmit (universalDB Set (\_ _ -> Ok) name newdiscf.value hst) (undef,hst)
+# (disclistf,hst) 	= mkEditForm (Set,tdFormId "cfm_show_disc" newdiscf.value) hst
+= (	pdfun.form ++ [Br,Hr []] <|.|>  
+	hd (mkdisplay allreports selectedpaper) ++ [Br,Hr [], Br] <|.|>
+	newdiscf.form <|.|> [Br,Hr []] 
+	++ disclistf.form,hst)
 where
+	addItemTextInput name time date message (Discussion list) 
+		=  Discussion [{messageFrom = name, date = date, time = time, message = message}:list]
+
 	toS (TS _ s) = s
 
-	summarize Nothing 		= [EmptyBody]
-	summarize (Just report)	= [ toHtml report.recommendation , toHtml report.familiarity]	
-
-	mkdisplay allrep =	[	[mkTable [	[B [] "Paper nr:"	, B [] (toString nr)]
-									 ,	[B [] "Status"		, toHtml (paperInfo nr).status] 
-									 ]
-							] ++
-							[mkTable[ 	[ B [] "Referee: ", Txt (ref.firstName +++ " " +++ ref.lastName)] ++ summarize report	
-									\\ ref <- map fst refs_reports & report <- map snd refs_reports 
-									]
+	mkdisplay allrep snr =	[ 	[mkTable 	[	[B [] "Paper nr:"	, B [] (toString nr)]
+									 		,	[B [] "Status"		, toHtml (paperInfo nr).status] 
+									 		]
+								] ++
+								[mkTable	[ 	[ B [] "Referee: ", Txt (ref.firstName +++ " " +++ ref.lastName)] ++ summarize report	
+											\\ ref <- map fst refs_reports & report <- map snd refs_reports 
+											]
+								]
+								\\ (nr,refs_reports) <- allrep | nr == snr
 							]
-							\\ (nr,refs_reports) <- allrep
-						]
-						where
-							paperInfo nr = fromJust (getPaperInfo nr accounts)
+	where
+		paperInfo nr = fromJust (getPaperInfo nr accounts)
 
-
+		summarize Nothing 		= [EmptyBody]
+		summarize (Just report)	= [ toHtml report.recommendation , toHtml report.familiarity]	
 
 	
