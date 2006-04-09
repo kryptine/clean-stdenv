@@ -4,10 +4,10 @@ definition module htmlButtons
 
 import htmlHandler
 
-derive gForm 	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
-derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
-derive gPrint 	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
-derive gParse 	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
+derive gForm 	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML
+derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML
+derive gPrint 	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML
+derive gParse 	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML
 
 instance toBool   CheckBox, Button, RadioButton		// True if checkbox checked, button pressed
 instance toInt    PullDownMenu						// Current index in pull down list
@@ -23,6 +23,8 @@ instance toString PullDownMenu						// Corresponding element in pull down list
 				| EditMode    a						// editable
 				| HideMode    a						// hiding a
 				| EmptyMode							// nothing to display or hide
+
+:: HTML = HTML [BodyTag]							// to print html: NOT Parsed, CANNOT be stored NOR retrieved
 
 // buttons representing classical html buttons
 

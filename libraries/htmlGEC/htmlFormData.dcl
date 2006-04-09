@@ -55,31 +55,35 @@ import StdMaybe, StdBool
 
 // **** easy creation of FormId's ****
 
-nFormId		:: !String !d -> (FormId d)		// page 	  	livetime, editable, string format
-sFormId		:: !String !d -> (FormId d)		// session 	  	livetime, editable, string format
-pFormId		:: !String !d -> (FormId d)		// persistent 	livetime, editable, string format
-rFormId		:: !String !d -> (FormId d)		// persistentRO	livetime, editable, string format
+nFormId		:: !String !d -> (FormId d)		// page 	  	, editable, string format
+sFormId		:: !String !d -> (FormId d)		// session 	  	, editable, string format
+pFormId		:: !String !d -> (FormId d)		// persistent 	, editable, string format
+rFormId		:: !String !d -> (FormId d)		// persistentRO	, editable, string format
 
-ndFormId	:: !String !d -> (FormId d)		// page 	  	livetime, displayed non-editable, string format
-sdFormId	:: !String !d -> (FormId d)		// session 	  	livetime, displayed non-editable, string format
-pdFormId	:: !String !d -> (FormId d)		// persistent 	livetime, displayed non-editable, string format 
-rdFormId	:: !String !d -> (FormId d)		// persistentRO	livetime, displayed non-editable, string format 
+ndFormId	:: !String !d -> (FormId d)		// page 	  	, displayed non-editable, string format
+sdFormId	:: !String !d -> (FormId d)		// session 	  	, displayed non-editable, string format
+pdFormId	:: !String !d -> (FormId d)		// persistent 	, displayed non-editable, string format 
+rdFormId	:: !String !d -> (FormId d)		// persistentRO	, displayed non-editable, string format 
 
-xFormId 	:: !String !d -> (FormId d)		// temp, noform
-xnFormId	:: !String !d -> (FormId d)		// page 	  	livetime, noform, string format
-xsFormId	:: !String !d -> (FormId d)		// session 	  	livetime, noform, string format
-xpFormId	:: !String !d -> (FormId d)		// persistent 	livetime, noform, string format
-xrFormId	:: !String !d -> (FormId d)		// persistentRO	livetime, noform, string format
+xtFormId 	:: !String !d -> (FormId d)		// temp			, noform
+xnFormId	:: !String !d -> (FormId d)		// page 	  	, noform, string format
+xsFormId	:: !String !d -> (FormId d)		// session 	  	, noform, string format
+xpFormId	:: !String !d -> (FormId d)		// persistent 	, noform, string format
+xrFormId	:: !String !d -> (FormId d)		// persistentRO	, noform, string format
 
-nDFormId	:: !String !d -> (FormId d)		// page 	  	livetime, editable, static dynamic format
-sDFormId	:: !String !d -> (FormId d)		// session 	  	livetime, editable, static dynamic format
-pDFormId	:: !String !d -> (FormId d)		// persistent 	livetime, editable, static dynamic format
-rDFormId	:: !String !d -> (FormId d)		// persistentRO	livetime, editable, static dynamic format
+tFormId 	:: !String !d -> (FormId d)		// temp 	  	, editable, string format
+tdFormId 	:: !String !d -> (FormId d)		// temp 	  	, displayed non-editable, string format
 
-ndDFormId	:: !String !d -> (FormId d)		// page 	  	livetime, displayed non-editable, static dynamic format
-sdDFormId	:: !String !d -> (FormId d)		// session 	  	livetime, displayed non-editable, static dynamic format
-pdDFormId	:: !String !d -> (FormId d)		// persistent 	livetime, displayed non-editable, static dynamic format 
-rdDFormId	:: !String !d -> (FormId d)		// persistentRO	livetime, displayed non-editable, static dynamic format 
+
+nDFormId	:: !String !d -> (FormId d)		// page 	  	, editable, static dynamic format
+sDFormId	:: !String !d -> (FormId d)		// session 	  	, editable, static dynamic format
+pDFormId	:: !String !d -> (FormId d)		// persistent 	, editable, static dynamic format
+rDFormId	:: !String !d -> (FormId d)		// persistentRO	, editable, static dynamic format
+
+ndDFormId	:: !String !d -> (FormId d)		// page 	  	, displayed non-editable, static dynamic format
+sdDFormId	:: !String !d -> (FormId d)		// session 	  	, displayed non-editable, static dynamic format
+pdDFormId	:: !String !d -> (FormId d)		// persistent 	, displayed non-editable, static dynamic format 
+rdDFormId	:: !String !d -> (FormId d)		// persistentRO	, displayed non-editable, static dynamic format 
 
 extidFormId :: !(FormId d) !String -> (FormId d)		// make new id by adding sufix 
 subFormId 	:: !(FormId a) !String !d 	-> (FormId d)	// make new id af new type by adding suffix

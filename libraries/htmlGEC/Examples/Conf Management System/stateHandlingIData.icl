@@ -5,16 +5,34 @@ import stateHandling
 import loginAdminIData, confIData
 import StdListExtensions
 
-// Support
+// Utility code for DeReferences of pointers
 
-getAllPersons :: !String !ConfAccounts !*HSt -> ([Person],!*HSt)
-getAllPersons id accounts hst
+getAllPersons :: !ConfAccounts !*HSt -> ([RefPerson],[Person],!*HSt)
+getAllPersons accounts hst
 # allrefperson 			= [ refperson \\ acc <- accounts , (Just refperson) <- [getRefPerson acc.state]]	
-# (allpersonsf,hst)		= maplSt editorRefPerson [(Init,xFormId ("pers" <+++ i) pers) \\ i <- [0..] & pers <- allrefperson] hst
+# (allpersonsf,hst)		= maplSt editorRefPerson [(Init,xtFormId ("shd_coll_pers" <+++ i) pers) \\ i <- [0..] & pers <- allrefperson] hst
 # allpersons 			= map (\v -> v.value) allpersonsf
-# (exception,hst)		= ExceptionStore ((+) (invariantPersons id allpersons)) hst 
-| isJust exception		= ([],hst)
-= (allpersons,hst)
+= (allrefperson,allpersons,hst)
+
+getAllMyReports :: !ConfAccount !ConfAccounts !*HSt -> ([(Int,[(Person, Maybe Report)])],!*HSt)
+getAllMyReports account accounts hst
+# (allrefpersons,allpersons,hst) = getAllPersons accounts hst
+# allirefreports 		= getMyRefReports account accounts
+# allrefreports			= [refreport 	\\	(_,refperson_refreports) <- allirefreports
+										, 	refreport <- map snd refperson_refreports]
+# (allreportsf,hst)		= maplSt editorRefReport 
+							[(Init,xtFormId ("shd_coll_rep" <+++ i) refreport) \\ i <- [0..] & refreport <- allrefreports] hst
+# allreports 			= map (\v -> v.value) allreportsf
+# allireports 			= [(nr,	[(findperson refperson allrefpersons allpersons,report)	\\ (refperson,refreport) <- refperson_refreports
+																						&	report <- allreports
+								])
+						  \\ (nr,refperson_refreports) <- allirefreports
+						  ]
+
+= (allireports,hst)
+where
+	findperson refperson refpersons persons = hd [p \\ ref <- refpersons & p <- persons | ref == refperson]
+
 
 // Entrance
 
@@ -47,7 +65,7 @@ passwordForgotten ::  !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 passwordForgotten accounts hst
 # (emailadres,hst)	= mkEditForm (Init,nFormId "email_addr" "") hst
 # (mailmebut,hst)	= simpleButton "MailMe" id hst
-# (persons,hst) 	= getAllPersons emailadres.value accounts hst
+# (_,persons,hst) 	= getAllPersons accounts hst
 # found 			= search emailadres.value persons accounts
 =	(	[ B [] "Password / login forgotten ?", Br, Br	
 		, Txt "Type in your e-mail address: "
@@ -173,7 +191,7 @@ submitReportPage account accounts hst
 # myreports			= [nr <|> edit \\ nr <- paperlist & edit <- myrefreport]
 | todo == []		= ([ Txt "There are no papers for you to referee (yet)" ],hst)
 # (reportsf,hst)	= vertlistFormButs 5 False (Set,sFormId "cfm_mk_reports" myreports) hst
-# (results,hst)		= maplSt editorRefReport [(Init,xFormId ("tmp" <+++ i) ref) \\ i <- mypapers & ref <- myrefreport] hst
+# (results,hst)		= maplSt editorRefReport [(Init,xtFormId ("tmp" <+++ i) ref) \\ i <- mypapers & ref <- myrefreport] hst
 # resultvalue		= [res.value \\ res <- results]
 = (show1 mypapers ++ show2 mypapers resultvalue ++ show3 mypapers resultvalue ++ reportsf.form,hst)
 where
@@ -186,19 +204,41 @@ where
 
 showReportsPage :: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 showReportsPage account accounts hst
-# allreports = [("paper: " +++ toString nr,map (\(RefPerson (Refto name),report) -> (name,report)) reports) 
+# allreports = [("paper " +++ toString nr,map (\(RefPerson (Refto name),report) -> (name,report)) reports) 
 				\\ (nr,reports) <- getMyRefReports account accounts]
 # (reportsf,hst) 	= vertlistFormButs 5 False (Set,ndFormId "cfm_shw_reports" allreports) hst
 = (reportsf.form,hst)
 
 discussPapersPage :: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 discussPapersPage account accounts hst
-# allreports = [(nr,map (\(RefPerson (Refto name),report) -> (name,report)) reports) 
-				\\ (nr,reports) <- getMyRefReports account accounts]
-# (reportsf,hst) 	= vertlistFormButs 5 False (Set,ndFormId "cfm_shw_reports" allreports) hst
-= (reportsf.form,hst)
+# (allreports,hst)	= getAllMyReports account accounts hst
+# allpapernrs		= map fst allreports
+# pdmenu			= (0, [("Show " +++ toString nr, \_ -> i) \\ i <- [0 .. ] & nr <- allpapernrs]) 
+# (pdfun,hst)		= FuncMenu (Init, sFormId "cfm_dpp_pdm" pdmenu) hst
+# selected			= (fst pdfun.value) 0
+# mbpaperrefinfo	= getPaperInfo (allpapernrs!!selected) accounts
+# (RefDiscussion (Refto name)) = (fromJust mbpaperrefinfo).discussion
+# (disclist,hst)	= mkEditForm (Init, pFormId name (Discussion [])) hst
+# (ok,newdisc,hst)	= mkSubStateForm (Init, nFormId "cfm_dpp_adddisc" (TS 80 "")) disclist.value 
+						(\s (Discussion l) -> Discussion [(account.login.loginName,toS s):l]) hst
+# (disclist,hst)	= if ok (mkEditForm (Set, pFormId name newdisc.value) hst) (disclist,hst)
+= (	pdfun.form ++ [Br,Hr [], Br] <|.|>  
+	mkdisplay allreports !! selected  ++ [Br,Hr [], Br] <|.|>
+	newdisc.form <|.|> [Br,Hr [], Br] 
+	++ disclist.form,hst)
+where
+	toS (TS _ s) = s
+
+	summarize Nothing 		= [EmptyBody]
+	summarize (Just report)	= [ toHtml report.recommendation , toHtml report.familiarity]	
 
 
+	mkdisplay allrep =	[	[B [] ("Paper " +++ toString nr +++ ":")] ++
+							[mkTable[ 	[ B [] "Referee: ", Txt (ref.firstName +++ " " +++ ref.lastName)] ++ summarize report	
+										\\ ref <- map fst refs_reports & report <- map snd refs_reports 
+									]]
+							\\ (nr,refs_reports) <- allrep
+						]
 
 
 

@@ -101,15 +101,14 @@ where
 
 	calcnextView isupdated view states world
 	# (changedid,states) = getUpdateId states
-	# view 		= toForm  init formid.ival view			// map value to view domain, given previous view value
+	# view 		= toForm  init formid.ival view		// map value to view domain, given previous view value
 	# view		= updForm  {isChanged = isupdated, changedId = changedid} view			// apply update function telling user if an update has taken place
 	# newval	= fromForm {isChanged = isupdated, changedId = changedid} view			// convert back to data domain	 
 	# view		= case resetForm of					// optionally reset the view herafter for next time
 						Nothing 	-> view		 
 						Just reset 	-> reset view
-// added
 
-	| formid.mode == NoForm							// NEW : don't make a form at all
+	| formid.mode == NoForm							// don't make a form at all
 		# (states,world) = replaceState vformid view states world	// store new value into the store of states
 		= (	{changed	= False
 			, value		= newval
@@ -485,7 +484,7 @@ setCntr :: InputId *HSt -> *HSt
 setCntr i hst = {hst & cntr = i}
 
 incrHSt :: Int *HSt -> *HSt
-incrHSt i hst = {hst & cntr = i}
+incrHSt i hst = {hst & cntr = hst.cntr + i} // BUG ??????
 
 CntrHSt :: *HSt -> (Int,*HSt)
 CntrHSt hst=:{cntr} = (cntr,hst)

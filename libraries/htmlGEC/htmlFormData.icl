@@ -17,8 +17,14 @@ sFormId s d = {id = s, lifespan = Session, mode = Edit, storage = PlainString, i
 nFormId :: !String !d -> (FormId d)		// page formid
 nFormId s d = {id = s, lifespan = Page, mode = Edit, storage = PlainString, ival = d}
 
-xFormId :: !String !d -> (FormId d)	// persitent formid
-xFormId s d = {id = s, lifespan = Temp, mode = NoForm, storage = PlainString, ival = d}
+xtFormId :: !String !d -> (FormId d)	// persitent formid
+xtFormId s d = {id = s, lifespan = Temp, mode = NoForm, storage = PlainString, ival = d}
+
+tFormId :: !String !d -> (FormId d)	// persitent formid
+tFormId s d = {id = s, lifespan = Temp, mode = Edit, storage = PlainString, ival = d}
+
+tdFormId :: !String !d -> (FormId d)	// persitent formid
+tdFormId s d = {id = s, lifespan = Temp, mode = Display, storage = PlainString, ival = d}
 
 xpFormId :: !String !d -> (FormId d)		// persitent formid
 xpFormId s d = {id = s, lifespan = Persistent, mode = NoForm, storage = PlainString, ival = d}

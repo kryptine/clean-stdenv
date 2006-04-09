@@ -81,12 +81,12 @@ showBasket onlytop basket headers database infobuts deletebuts
 | onlytop = 		BodyTag
 				  	[ Txt "Last Item put into basket:"
 				  	, Br, Br
-					, mkTable (1,length basket) headers [database!!(hd basket)] infobuts deletebuts
+					, mkShopTable (1,length basket) headers [database!!(hd basket)] infobuts deletebuts
 					]
 | otherwise			= BodyTag
 				  	[ Txt "Contents of your basket:"
 				  	, Br, Br
-					, mkTable (1,length basket) headers [database!!itemnr \\ itemnr <- basket] infobuts deletebuts
+					, mkShopTable (1,length basket) headers [database!!itemnr \\ itemnr <- basket] infobuts deletebuts
 					, Br, Br
 					, myTable 	[[ Txt "Total Prize:"]
 								, [Txt (showPrize (sum [(database!!itemnr).item.prize \\ itemnr <- basket]))]
@@ -168,7 +168,7 @@ doShopPage soptions extendedInfo headers database hst
 		 STable [] [shownext.form])
 
 	, Br, Br 
-	, mkTable (nindex.value+1,length selection) headers (selection%(nindex.value,nindex.value+step.value)) info.form add.form 
+	, mkShopTable (nindex.value+1,length selection) headers (selection%(nindex.value,nindex.value+step.value)) info.form add.form 
 	, Br, Br
 	, showBasket True basket.value headers database binfo.form [EmptyBody]
 	, if (info.value -1 < 0) EmptyBody (doScript extendedInfo (database!!(info.value -1)))
@@ -262,8 +262,8 @@ scriptName = "openwindow()"
 
 // Function to display contents of selected items, database, basket
 
-mkTable :: (Int,Int) (Headers d) [ItemData d] [BodyTag] [BodyTag] -> BodyTag
-mkTable (cnt,max) headers items infobuttons deladdbuttons
+mkShopTable :: (Int,Int) (Headers d) [ItemData d] [BodyTag] [BodyTag] -> BodyTag
+mkShopTable (cnt,max) headers items infobuttons deladdbuttons
 	= table
 		[ empty ++ itemHeader ++ dataHeader ++ empty ++ empty
 		: [	CntRow i max ++ itemRow item ++ dataRow headers data ++ mkButtonRow infobutton ++ mkButtonRow deladdbutton

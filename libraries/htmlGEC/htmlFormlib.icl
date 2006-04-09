@@ -37,6 +37,10 @@ mkHtmlB s attr tags hst = (simpleHtml s attr tags,hst)
 (<||>) infixl 4	:: [BodyTag] [BodyTag] -> BodyTag	// Place a above b
 (<||>) b1 b2 = (BodyTag b1) <.||.> (BodyTag b2)
 
+(<|.|>) infixl 4	:: [BodyTag] [BodyTag] -> [BodyTag]	// Place a above b
+(<|.|>) b1 b2 = [(BodyTag b1) <.||.> (BodyTag b2)]
+
+
 (<.||.>) infixl 4	:: BodyTag BodyTag -> BodyTag	// Place a above b
 (<.||.>) b1 b2 =  STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[b1],[b2]]
 
