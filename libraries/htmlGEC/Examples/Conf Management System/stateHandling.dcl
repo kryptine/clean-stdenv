@@ -33,8 +33,13 @@ import loginAdmin, htmlFormlib
 :: PaperStatus	=	Accepted
 				|	CondAccepted
 				|	Rejected
-				|	UnderDiscussion
+				|	UnderDiscussion	DiscussionStatus
 				|	Submitted
+:: DiscussionStatus
+				=	ProposeAccept
+				|	ProposeCondAccept
+				|	ProposeReject
+				|	DoDiscuss	
 
 :: RefereeInfo	=	{ person		:: RefPerson  
 					, conflicts		:: Conflicts 

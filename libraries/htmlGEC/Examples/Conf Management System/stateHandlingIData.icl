@@ -179,7 +179,7 @@ submitPaperPage account hst
 
 showPapersPage :: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 showPapersPage  accounts hst
-# (papersf,hst) = vertlistFormButs 5 False (Set,ndFormId "cfm_shw_papers" (getRefPapers accounts)) hst
+# (papersf,hst) = vertlistFormButs 10 False (Set,ndFormId "cfm_shw_papers" (getRefPapers accounts)) hst
 = (papersf.form,hst)
 
 submitReportPage :: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
@@ -218,8 +218,8 @@ discussPapersPage account accounts hst
 # selected			= (fst pdfun.value) 0
 # mbpaperrefinfo	= getPaperInfo (allpapernrs!!selected) accounts
 # (RefDiscussion (Refto name)) = (fromJust mbpaperrefinfo).discussion
-# (disclist,hst)	= mkEditForm (Init, pFormId name (Discussion [])) hst
-# (ok,newdisc,hst)	= mkSubStateForm (Init, nFormId "cfm_dpp_adddisc" (TS 80 "")) disclist.value 
+# (disclist,hst)	= mkEditForm (Init, rFormId name (0,Discussion [])) hst
+# (ok,newdisc,hst)	= mkSubStateForm (if pdfun.changed Set Init, nFormId "cfm_dpp_adddisc" (TS 80 "")) disclist.value 
 						(\s (Discussion l) -> Discussion [(account.login.loginName,toS s):l]) hst
 # (disclist,hst)	= if ok (mkEditForm (Set, pFormId name newdisc.value) hst) (disclist,hst)
 = (	pdfun.form ++ [Br,Hr [], Br] <|.|>  
@@ -232,17 +232,18 @@ where
 	summarize Nothing 		= [EmptyBody]
 	summarize (Just report)	= [ toHtml report.recommendation , toHtml report.familiarity]	
 
-
-	mkdisplay allrep =	[	[B [] ("Paper " +++ toString nr +++ ":")] ++
+	mkdisplay allrep =	[	[mkTable [	[B [] "Paper nr:"	, B [] (toString nr)]
+									 ,	[B [] "Status"		, toHtml (paperInfo nr).status] 
+									 ]
+							] ++
 							[mkTable[ 	[ B [] "Referee: ", Txt (ref.firstName +++ " " +++ ref.lastName)] ++ summarize report	
-										\\ ref <- map fst refs_reports & report <- map snd refs_reports 
-									]]
+									\\ ref <- map fst refs_reports & report <- map snd refs_reports 
+									]
+							]
 							\\ (nr,refs_reports) <- allrep
 						]
-
-
-
-
+						where
+							paperInfo nr = fromJust (getPaperInfo nr accounts)
 
 
 
