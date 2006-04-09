@@ -4,10 +4,10 @@ definition module htmlButtons
 
 import htmlHandler
 
-derive gForm 	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML
-derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML
-derive gPrint 	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML
-derive gParse 	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML
+derive gForm 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML
+derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML
+derive gPrint 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML
+derive gParse 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML
 
 instance toBool   CheckBox, Button, RadioButton		// True if checkbox checked, button pressed
 instance toInt    PullDownMenu						// Current index in pull down list
@@ -44,6 +44,9 @@ instance toString PullDownMenu						// Corresponding element in pull down list
 // special's
 
 :: HtmlDate 	= 	Date Int Int Int				// Day Month Year
+:: HtmlTime 	= 	Time Int Int Int				// Hours Minutes Seconds
+
+getTimeAndDate :: !*HSt -> *(!HtmlTime,!HtmlDate,!*HSt)
 
 
 

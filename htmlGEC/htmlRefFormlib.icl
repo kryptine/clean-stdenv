@@ -170,15 +170,15 @@ where
 
 // editor for reference to a file
 
-editRefto :: (!Mode,!Init,(!(!Refto a,!a),!!Mode,!Init)) *HSt -> 
+editRefto :: (!Mode,!Init,(!(!Refto a,!a),!!Mode,!Init,!Lifespan)) *HSt -> 
 		(Form (Refto a),Form a,!*HSt)   | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-editRefto (rmode,rinit,((Refto s,a),pmode,pinit)) hst
+editRefto (rmode,rinit,((Refto s,a),pmode,pinit,plifespan)) hst
 	= reftoEditForm rmode rinit (pinit,
-			{nFormId ("Refto_" +++ s) (Refto s, a) & mode = pmode}) hst
+			{nFormId ("Refto_" +++ s) (Refto s, a) & mode = pmode, lifespan = plifespan}) hst
 
 
-universalRefEditor :: !Mode  !(a -> Judgement) !(Refto a) *HSt -> (Form a,!*HSt)   | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-universalRefEditor mode invariant (Refto filename) hst
+universalRefEditor :: !Mode !Lifespan !(a -> Judgement) !(Refto a) *HSt -> (Form a,!*HSt)   | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+universalRefEditor mode lifespan invariant (Refto filename) hst
 | filename == ""	// just temporal
 	= myEditor Init mode createDefault hst
 # (_,dbf,hst)		= myDatabase Init 0 createDefault hst		// create / read out database file
@@ -186,7 +186,7 @@ universalRefEditor mode invariant (Refto filename) hst
 # dbvalue			= snd dbf.value								// value stored in database
 # (versionf,hst)	= myVersion Init dbversion hst 				// create / read out version number expected by this application
 # version			= versionf.value							// current version number assumed in this application
-| mode == Display												// we only want to read, no version conflict
+| mode <> Edit													// we only want to read, no version conflict
 	# (valuef,hst)	= myEditor  Set mode dbvalue hst			// synchronize with latest value 
 	# (_,hst)		= myVersion Set version hst 				// synchronize version number and
 	= (valuef,hst)												// return current value in editor
@@ -205,13 +205,13 @@ universalRefEditor mode invariant (Refto filename) hst
 # (_,_,hst)			= myDatabase Set versionf.value valuef.value hst // update database file
 = (valuef,hst)
 where
-	myDatabase Init cnt value hst = editRefto (Display,Init,((Refto filename,(cnt,value)),Display,Init)) hst 	// read the database
-	myDatabase Set  cnt value hst = editRefto (Edit   ,Set, ((Refto filename,(cnt,value)),Display,Init)) hst	// write the database
+	myDatabase Init cnt value hst = editRefto (Display,Init,((Refto filename,(cnt,value)),Display,Init,lifespan)) hst 	// read the database
+	myDatabase Set  cnt value hst = editRefto (Edit   ,Set, ((Refto filename,(cnt,value)),Display,Init,lifespan)) hst	// write the database
 
 	myVersion init cnt hst	= mkEditForm (init,sdFormId ("vrs_" +++ filename) cnt) hst						// to remember version number
 
 	myEditor :: !Init !Mode !a *HSt -> (Form a,!*HSt)   | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-	myEditor init mode value hst	= mkEditForm (init,{sFormId ("copy_" +++ filename) value & mode = mode}) hst	// to remember version number
+	myEditor init mode value hst	= mkEditForm (init,{nFormId ("copy_" +++ filename) value & mode = mode,  lifespan = lifespan}) hst	// to remember version number
 
 
 invokeRefEditor :: (!(InIDataId b) !*HSt -> (Form d,!*HSt)) (InIDataId b) !*HSt -> (Form b,!*HSt)
@@ -223,6 +223,13 @@ invokeRefEditor editor (init,formid) hst
 
 Ok :: Judgement
 Ok = Nothing
+
+noException			:: Judgement -> Bool
+noException		Nothing = True
+noException		_ = False
+
+yesException		:: Judgement -> Bool
+yesException judgement = not (noException judgement)
 
 instance + Judgement
 where

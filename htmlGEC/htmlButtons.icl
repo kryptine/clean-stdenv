@@ -4,9 +4,11 @@ import StdEnv, ArgEnv
 
 import htmlHandler, htmlStylelib, htmlTrivial
 
-derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, /*Button, */CheckBox, RadioButton /*, PullDownMenu, TextInput */, TextArea
-derive gPrint 	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
-derive gParse 	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
+derive gForm HtmlTime
+
+derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, /*Button, */CheckBox, RadioButton /*, PullDownMenu, TextInput */, TextArea
+derive gPrint 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
+derive gParse 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
 
 :: TextInput	= TI Int Int						// Input box of size Size for Integers
 				| TR Int Real						// Input box of size Size for Reals
@@ -263,6 +265,17 @@ where
 							, fromForm 	= \_ v -> map_from v
 							, resetForm = Nothing
 							} hst 
+// time and date
+
+import StdTime
+
+getTimeAndDate :: !*HSt -> *(!HtmlTime,!HtmlDate,!*HSt)
+getTimeAndDate hst
+# (time,hst)	= accWorldHSt getCurrentTime hst
+# htmltime		= Time time.hours time.minutes time.seconds
+# (date,hst)	= accWorldHSt getCurrentDate hst
+# htmldate		= Date date.day date.month date.year
+= (htmltime,htmldate,hst)
 
 gForm{|TextArea|} (init,formid) hst 
 # (cntr,hst) = CntrHSt hst
@@ -311,6 +324,7 @@ gUpd{|TextInput|} (UpdSearch (UpdS ns) 0) 	(TS size s)  = (UpdDone,TS size ns)		
 gUpd{|TextInput|} (UpdSearch val cnt)     	i = (UpdSearch val (cnt - 3),i)			// continue search, don't change
 gUpd{|TextInput|} (UpdCreate l)				_ = (UpdCreate l,TI defsize 0)			// create default value
 gUpd{|TextInput|} mode 			  	    	i = (mode,i)							// don't change
+
 
 // small utility stuf
 
