@@ -105,20 +105,24 @@ derive gForm
 				Login, Account, Member, ManagerInfo, RefereeInfo, /*Conflicts, */
 				/*RefPerson, */Person,
 				/*Reports, *//*RefReport, */ Report, Recommendation, Familiarity, 
-				/*RefPaper, */Paper, PaperInfo,/* RefDiscussion,*/ PaperStatus/*, Discussion */ 
+				/*RefPaper, */Paper, PaperInfo,/* RefDiscussion,*/ 
+				PaperStatus/*, Discussion */ , DiscussionStatus 
 derive gUpd 	
 				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts, 
 				RefPerson, Person,
 				Reports, RefReport, Report, Recommendation, Familiarity, 
-				RefPaper, Paper, PaperInfo, Co_authors, RefDiscussion, PaperStatus, Discussion 
+				RefPaper, Paper, PaperInfo, Co_authors, RefDiscussion,
+				PaperStatus, Discussion, DiscussionStatus 
 derive gPrint 	
 				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts,
 				RefPerson, Person,
 				Reports, RefReport, Report, Recommendation, Familiarity, 
-				RefPaper, Paper, PaperInfo, Co_authors, RefDiscussion, PaperStatus, Discussion 
+				RefPaper, Paper, PaperInfo, Co_authors, RefDiscussion,
+				PaperStatus, Discussion, DiscussionStatus 
 derive gParse 	
 				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts, 
 				RefPerson, Person,
 				Reports, RefReport, Report, Recommendation, Familiarity, 
-				RefPaper, Paper, PaperInfo, Co_authors, RefDiscussion, PaperStatus, Discussion 
+				RefPaper, Paper, PaperInfo, Co_authors, RefDiscussion,
+				PaperStatus, Discussion, DiscussionStatus 
 				
