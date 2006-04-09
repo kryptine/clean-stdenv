@@ -59,6 +59,12 @@ getRefPapers :: ConfAccounts -> [(Int,RefPaper)]
 getRefPapers accounts = [(nr,refpapers) 
 						\\ {state = Authors {nr,paper = refpapers}} <- accounts]
 
+getPaperInfo :: Int ConfAccounts -> Maybe PaperInfo
+getPaperInfo i accounts =  case [info \\ {state = Authors info=:{nr}} <- accounts | i == nr] of
+							[] -> Nothing
+							[x:_] -> Just x
+
+
 getPaperNumbers :: ConfAccounts -> [Int]
 getPaperNumbers accounts = sort [nr \\ {state = Authors {nr}} <- accounts]
 
@@ -177,8 +183,6 @@ invariantPerson id {firstName,lastName,affiliation,emailAddress}
 
 invariantPersons :: String [Person] -> Judgement
 invariantPersons id persons
-# unique		=	allUnique (map (\p -> p.emailAddress) persons)
-| not unique 	= Just (id,"e-mail address has to be unique!")
 = Ok
 
 invariantPaper :: String Paper -> Judgement

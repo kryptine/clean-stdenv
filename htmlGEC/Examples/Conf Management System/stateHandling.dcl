@@ -57,6 +57,7 @@ import loginAdmin, htmlFormlib
 				= 	StrongAccept
 				| 	Accept
 				| 	WeakAccept
+				|	Discuss
 				| 	WeakReject
 				| 	Reject
 				| 	StrongReject
@@ -99,8 +100,10 @@ isAuthor			:: ConfAccount -> Bool
 isGuest				:: ConfAccount -> Bool
 
 getRefPerson 		:: Member 		-> (Maybe RefPerson)
+
 getPaperNumbers 	:: ConfAccounts -> [Int]
 getRefPapers 		:: ConfAccounts -> [(Int,RefPaper)]
+getPaperInfo 		:: Int ConfAccounts -> Maybe PaperInfo
 getAssignments 		:: ConfAccounts -> [(RefPerson,[Int])]
 getConflicts 		:: ConfAccounts -> [(RefPerson,[Int])]
 getConflictsAssign	:: ConfAccounts -> [(RefPerson,[Int],[Int])]

@@ -19,6 +19,7 @@ mkRowForm 		 	:: [BodyTag] 			-> BodyTag		// place every element in a row next t
 
 (<||>)   infixl 4 	:: [BodyTag] [BodyTag] 	-> BodyTag		// Place second below first
 (<.||.>) infixl 4 	::  BodyTag   BodyTag  	-> BodyTag		// Place second below first
+(<|.|>) infixl 4	:: [BodyTag] [BodyTag] -> [BodyTag]		// Place second below first
 mkColForm		  	:: [BodyTag] 			-> BodyTag		// Place every element in a column below first
 
 mkSTable 			:: [[BodyTag]] 			-> BodyTag		// Make a table, default with

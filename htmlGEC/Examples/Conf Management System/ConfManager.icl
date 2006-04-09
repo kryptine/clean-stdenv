@@ -7,13 +7,22 @@ import loginAdminIData, confIData, stateHandlingIData
 // Here it starts ....
 
 Start world  = doHtmlServer mainEntrance world
+//Start world  = doHtmlServer test world
 
+test hst
+# (body,hst) = mkEditForm (Init,nFormId "xx" (23,try)) hst				// a login will be checked on correctness each time a page is requested !
+= mkHtml "Conference Manager" 
+	[ BodyTag body.form
+	] hst
+where
+	try = HTML [Txt "Is dit wel een goed idee ?",B [] "of niet"]
 
 mainEntrance hst
 # (body,hst) 	= loginhandling hst				// a login will be checked on correctness each time a page is requested !
 = mkHtml "Conference Manager" 
 	[ BodyTag body
 	] hst
+
 
 // login page handling
 
@@ -227,7 +236,8 @@ where
 	# (_,hst)				= mkEditForm (Set,pFormId uniquename (0,person)) hst		// store person info
 	# (_,hst)				= mkEditForm (Set,pFormId uniquepaper (0,paperf.value)) hst	// store paper info
 	# (_,hst)				= guestAccountStore (\(_,guest) -> (False,account)) hst		// kick out guest
-	= ([B [] "Paper submitted.",Br, Txt "You have a login account you can use to update the provided information.",Br,Br],hst)
+	= ([B [] "Paper submitted.",Br, Txt "You have a login account you can use to update the provided information",Br,
+			Txt "and keep in touch with us",Br],hst)
 
 
 

@@ -15,6 +15,24 @@ derive gParse 	(,), (,,), (,,,), (<->), <|>, HtmlDate, DisplayMode, Button, Chec
 
 // Types that have an effect on lay-out
 
+:: HTML = HTML [BodyTag]
+
+gForm {|HTML|} (init,formid ) hst = specialize myeditor (Set,formid) hst
+where
+	myeditor (init,formid ) hst
+	# (HTML bodytag) = formid.ival
+	= ({changed = False, form = bodytag, value = formid.ival},hst)
+
+gUpd {|HTML|} mode v = (mode,v)
+
+gPrint{|HTML|} (HTML x) st = st <<- "XYX" 
+
+gParse {|HTML|} st 
+= case gParse {|*|} st of
+	Just "XYX" -> Just (HTML [EmptyBody])
+	_ -> Just (HTML [EmptyBody])
+
+
 // Tuples are placed next to each other, pairs below each other ...
 
 gForm{|(,)|} gHa gHb (init,formid) hst

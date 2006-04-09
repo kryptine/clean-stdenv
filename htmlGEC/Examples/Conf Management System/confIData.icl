@@ -82,7 +82,7 @@ where
 	= ({changed = False, form 	= showDiscussion list, value = (Discussion list)},hst)
 	where
 		showDiscussion [] = []
-		showDiscussion [(name,content):more] = [ Br, B [] (name +++ ":"), Br, Txt content, Br, Hr []] ++ showDiscussion more
+		showDiscussion [(name,content):more] = [B [] (name +++ ":"), Br, Txt content, Br, Hr []] ++ showDiscussion more
 
 
 gForm {|[]|} gHa (init,formid) hst 
