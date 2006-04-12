@@ -4,10 +4,10 @@ definition module confIData
 
 import htmlFormData, loginAdmin, stateHandling
 
-derive gForm 	Maybe, []
-derive gUpd  	Maybe, []
-derive gPrint 	Maybe
-derive gParse 	Maybe
+derive gForm 	Maybe, [], Ref2
+derive gUpd  	Maybe, [], Ref2
+derive gPrint 	Maybe, Ref2
+derive gParse 	Maybe, Ref2
 
 derive gForm 	
 				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts,
@@ -49,9 +49,9 @@ PaperNrStore 		:: !(Int -> Int) *HSt -> (Int,!*HSt) 					// paper counter
 
 // editors for referenced types
 
-editorRefPerson 	:: !(InIDataId RefPerson) 		!*HSt -> (Form Person,!*HSt)
-editorRefPaper 		:: !(InIDataId RefPaper) 		!*HSt -> (Form Paper,!*HSt)
-editorRefReport 	:: !(InIDataId RefReport) 		!*HSt -> (Form (Maybe Report),!*HSt)
-editorRefDiscussion :: !(InIDataId RefDiscussion)	!*HSt -> (Form Discussion,!*HSt)
+editorRefPerson 	:: !(InIDataId RefPerson) 		!*HSt -> (Form RefPerson,!*HSt)
+editorRefPaper 		:: !(InIDataId RefPaper) 		!*HSt -> (Form RefPaper,!*HSt)
+editorRefReport 	:: !(InIDataId RefReport) 		!*HSt -> (Form RefReport,!*HSt)
+editorRefDiscussion :: !(InIDataId RefDiscussion)	!*HSt -> (Form RefDiscussion,!*HSt)
 
 
