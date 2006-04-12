@@ -184,7 +184,7 @@ specialize editor (init,formid) hst=:{cntr = inidx,states = formStates,world}
 # (nv,{states,world}) 	= editor (init,nformid) {cntr = 0,states = formStates,world = world}
 = (nv,{cntr=nextidx,states = states,world = world})
 where
-	nformid = {formid & id = formid.id +++ "_" +++ toString inidx}
+	nformid = {formid & id = formid.id +++ "_specialize_" +++ toString inidx +++ "_"}
 
 	incrIndex :: Int v -> Int | gUpd {|*|} v
 	incrIndex i v
