@@ -18,41 +18,46 @@ PaperNrStore fun hst
 # (intf,hst) = mkStoreForm (Init,{pFormId "LastPaperNr" 1 & mode = NoForm}) fun hst
 = (intf.value,hst)
 
-editorRefPerson :: !(InIDataId RefPerson) !*HSt -> (Form Person,!*HSt)
+editorRefPerson :: !(InIDataId RefPerson) !*HSt -> (Form RefPerson,!*HSt)
 editorRefPerson (init,formid) hst
 # (RefPerson refperson) = formid.ival
-# (Refto name) 			= refperson
-= universalRefEditor (init,reuseFormId formid refperson) (invariantPerson name) hst
+# (Ref2 name _) 	= refperson
+# (dereff,hst)		= universalRefEditor (init,reuseFormId formid refperson) (invariantPerson name) hst
+= ({dereff & value = RefPerson (Ref2 name dereff.value)},hst)
 
-editorRefPaper :: !(InIDataId RefPaper) !*HSt -> (Form Paper,!*HSt)
+editorRefPaper :: !(InIDataId RefPaper) !*HSt -> (Form RefPaper,!*HSt)
 editorRefPaper (init,formid) hst
 # (RefPaper refpaper) 	= formid.ival
-# (Refto name) 			= refpaper
-= universalRefEditor (init,reuseFormId formid refpaper) (invariantPaper name) hst
+# (Ref2 name _) 		= refpaper
+# (dereff,hst)			=  universalRefEditor (init,reuseFormId formid refpaper) (invariantPaper name) hst
+= ({dereff & value = RefPaper (Ref2 name dereff.value)},hst)
 
-editorRefReport :: !(InIDataId RefReport) !*HSt -> (Form (Maybe Report),!*HSt)
+editorRefReport :: !(InIDataId RefReport) !*HSt -> (Form RefReport,!*HSt)
 editorRefReport (init,formid) hst
 # (RefReport refreport) = formid.ival
-# (Refto name) 			= refreport
-= universalRefEditor (init,reuseFormId formid refreport) (invariant name)  hst
+# (Ref2 name _) 		= refreport
+# (dereff,hst)			= universalRefEditor (init,reuseFormId formid refreport) (invariant name)  hst
+= ({dereff & value = RefReport (Ref2 name dereff.value)},hst)
 where
 	invariant name Nothing 			= Ok
 	invariant name (Just report)	= invariantReport name report
 	
-editorRefDiscussion :: !(InIDataId RefDiscussion) !*HSt -> (Form Discussion,!*HSt)
+editorRefDiscussion :: !(InIDataId RefDiscussion) !*HSt -> (Form RefDiscussion,!*HSt)
 editorRefDiscussion (init,formid) hst
 # (RefDiscussion refdiscus) = formid.ival
-= universalRefEditor (init,reuseFormId formid refdiscus) (\_ -> Ok) hst
+# (Ref2 name _) 			= refdiscus
+# (dereff,hst)				= universalRefEditor (init,reuseFormId formid refdiscus) (\_ -> Ok) hst
+= ({dereff & value = RefDiscussion (Ref2 name dereff.value)},hst)
 
 // specialized forms
 
-gForm {|RefPerson|} iniformid hst = specialize (invokeRefEditor editorRefPerson) 	iniformid hst
+gForm {|RefPerson|} iniformid hst = specialize  editorRefPerson 	iniformid hst
 	
-gForm {|RefPaper|}  iniformid hst = specialize (invokeRefEditor editorRefPaper)  	iniformid hst
+gForm {|RefPaper|}  iniformid hst = specialize editorRefPaper  	iniformid hst
 
-gForm {|RefReport|} iniformid hst = specialize (invokeRefEditor editorRefReport)	iniformid hst
+gForm {|RefReport|} iniformid hst = specialize  editorRefReport	iniformid hst
 
-gForm {|RefDiscussion|} iniformid hst = specialize (invokeRefEditor editorRefDiscussion)	iniformid hst
+gForm {|RefDiscussion|} iniformid hst = specialize  editorRefDiscussion	iniformid hst
 
 gForm {|Reports|} informid hst = specialize myeditor informid hst
 where
@@ -100,10 +105,10 @@ gForm {|[]|} gHa (init,formid) hst
 
 // derived forms ....
 
-derive gForm /*[], */Maybe
-derive gUpd [], Maybe
-derive gPrint Maybe
-derive gParse Maybe
+derive gForm /*[], */Maybe, Ref2
+derive gUpd [], Maybe, Ref2
+derive gPrint Maybe, Ref2
+derive gParse Maybe, Ref2
 
 derive gForm 	
 				Login, Account, Member, ManagerInfo, RefereeInfo, /*Conflicts, */

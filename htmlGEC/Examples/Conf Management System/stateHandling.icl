@@ -10,7 +10,7 @@ initManagerLogin
 
 initManagerAccount :: Login -> ConfAccount
 initManagerAccount	login 
-= mkAccount login (ConfManager {ManagerInfo | person = RefPerson (Refto "")})
+= mkAccount login (ConfManager {ManagerInfo | person = RefPerson (Ref2 "" createDefault)})
 
 instance == RefPerson
 where
@@ -132,7 +132,7 @@ addAssignment nr sperson [] = []
 addAssignment nr sperson [acc=:{state = Referee ref}:accs] 
 # person 			= ref.RefereeInfo.person
 # (Reports reports) = ref.RefereeInfo.reports
-| sperson == person = [{acc & state  = Referee {ref & reports = Reports [(nr,RefReport (Refto "")):reports]}}:accs]
+| sperson == person = [{acc & state  = Referee {ref & reports = Reports [(nr,RefReport (Ref2 "" createDefault)):reports]}}:accs]
 = [acc:addAssignment nr sperson accs]
 addAssignment nr sperson [acc:accs] = [acc:addAssignment nr sperson accs]
 
@@ -233,16 +233,16 @@ where
 	=	case account.state of
 			(ConfManager managerInfo) -> 
 				{account & state = ConfManager 	{managerInfo 
-												& ManagerInfo.person 	= RefPerson (Refto uniquename)}}
+												& ManagerInfo.person 	= RefPerson (Ref2 uniquename createDefault)}}
 			(Referee refereeInfo) ->
 				{account & state = Referee 		{refereeInfo 
-												& RefereeInfo.person 	= RefPerson (Refto uniquename)
+												& RefereeInfo.person 	= RefPerson (Ref2 uniquename createDefault)
 												, RefereeInfo.reports 	= setInvariantReports refereeInfo.reports}}
 			(Authors paperInfo) ->
 				{account & state = Authors 		{paperInfo 
-												& PaperInfo.person 		= RefPerson 	(Refto uniquename)
-												, PaperInfo.discussion	= RefDiscussion (Refto (uniqueDiscussion paperInfo.nr uniquename))
-												, PaperInfo.paper 		= RefPaper(Refto (uniquePaper paperInfo.nr uniquename))}}
+												& PaperInfo.person 		= RefPerson 	(Ref2 uniquename createDefault)
+												, PaperInfo.discussion	= RefDiscussion (Ref2 (uniqueDiscussion paperInfo.nr uniquename) createDefault)
+												, PaperInfo.paper 		= RefPaper(Ref2 (uniquePaper paperInfo.nr uniquename) createDefault)}}
 			_ -> account
 	where
 		uniquename = uniquePerson account.login.loginName
@@ -251,8 +251,8 @@ where
 		
 		setInvariantReport :: [(PaperNr, RefReport)] -> [(PaperNr, RefReport)]
 		setInvariantReport [] = []
-		setInvariantReport [(nr, (RefReport (Refto _))):reports]
-						 = [(nr, (RefReport (Refto (uniqueReport nr uniquename)))):setInvariantReport reports]
+		setInvariantReport [(nr, (RefReport (Ref2 _ _))):reports]
+						 = [(nr, (RefReport (Ref2 (uniqueReport nr uniquename) createDefault))):setInvariantReport reports]
 	
 		setInvariantReport [report:reports]
 						 = [report:setInvariantReport reports]

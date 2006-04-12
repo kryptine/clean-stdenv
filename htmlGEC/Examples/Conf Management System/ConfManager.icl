@@ -220,11 +220,11 @@ where
 	# uniquepaper			= uniquePaper paperNr uniquename
 	# uniquediscussion		= uniqueDiscussion paperNr uniquename
 	# account				= {login  = (snd guestf.value).login
-							  , state = Authors 	{ person =  RefPerson (Refto uniquename)
+							  , state = Authors 	{ person =  RefPerson (Ref2 uniquename createDefault)
 													, nr = paperNr
-													, paper	= RefPaper (Refto uniquepaper)
+													, paper	= RefPaper (Ref2 uniquepaper createDefault )
 													, status = Submitted
-													, discussion = RefDiscussion (Refto uniquediscussion) 
+													, discussion = RefDiscussion (Ref2 uniquediscussion createDefault) 
 													}}
 	# (_,hst)				= adjustLogin account hst
 	# accounts				= addAccount account accounts

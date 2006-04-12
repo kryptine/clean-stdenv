@@ -9,10 +9,10 @@ import loginAdmin, htmlFormlib
 
 // Shared Information:
 
-:: RefPerson	=	RefPerson   	(Refto Person)
-:: RefPaper		=	RefPaper 		(Refto Paper)	
-:: RefReport	=	RefReport		(Refto MaybeReport)
-:: RefDiscussion=	RefDiscussion	(Refto Discussion)
+:: RefPerson	=	RefPerson   	(Ref2 Person)
+:: RefPaper		=	RefPaper 		(Ref2 Paper)	
+:: RefReport	=	RefReport		(Ref2 MaybeReport)
+:: RefDiscussion=	RefDiscussion	(Ref2 Discussion)
 
 // Information maintained by the Conference Manager
 
