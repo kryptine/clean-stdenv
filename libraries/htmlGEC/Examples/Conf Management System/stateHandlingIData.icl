@@ -183,14 +183,12 @@ changeInfo account hst
 submitPaperPage ::  !ConfAccount !*HSt -> ([BodyTag],!*HSt)
 submitPaperPage account hst
 # [(nr,refpaper):_]	= getRefPapers [account]
-| nr > 0
-	# (paperf,hst)	= mkEditForm (Init,nFormId "cfm_sbm_paper" refpaper) hst
-	= (paperf.form,hst)
-= ([],hst)
+# (paperf,hst)	= mkEditForm (Init,nFormId "cfm_sbm_paper" refpaper) hst
+= (paperf.form,hst)
 
 showPapersPage :: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 showPapersPage  accounts hst
-# (papersf,hst) = vertlistFormButs 10 False (Init,ndFormId "cfm_shw_papers" (getRefPapers accounts)) hst
+# (papersf,hst) = vertlistFormButs 10 False (Init,sdFormId "cfm_shw_papers" (getRefPapers accounts)) hst
 = (papersf.form,hst)
 
 submitReportPage :: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
@@ -199,12 +197,8 @@ submitReportPage account accounts hst
 # mypapers			= map fst rreports
 | mypapers == []	= ([ Txt "There are no papers for you to referee (yet)" ],hst)
 # myreports			= [DisplayMode ("Paper Nr: " +++ toString i) <|> rreport \\ (i,rreport) <- rreports] 			
-//# (reportsf,hst)	= mkEditForm (Init,nFormId "cfm_mk_reports" myreports) hst
-# (reportsf,hst)	= vertlistFormButs 10 False (Init,nFormId "cfm_mk_reports" myreports) hst
-
-//
-
-= (show1 mypapers /*++ show2 mypapers reportsf.value ++ show3 mypapers reportsf.value*/ ++ reportsf.form,hst)
+# (reportsf,hst)	= vertlistFormButs 10 False (Init,sFormId "cfm_mk_reports" myreports) hst
+= (show1 mypapers /*++ show2 mypapers rreports ++ show3 mypapers rreports*/ ++ reportsf.form,hst)
 
 where
 	show1 mypapers 			= [Txt ("The following papers have been assigned to you: "), B [] (print mypapers),Br]

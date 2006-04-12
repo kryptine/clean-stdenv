@@ -33,7 +33,6 @@ where
 universalRefEditor 	:: !(InIDataId (Refto a)) !(a -> Judgement)  !*HSt -> (Form a,!*HSt)   	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 universalRefEditor (init,formid) invariant  hst
 # (Refto filename)	= formid.ival
-| filename == ""	= myEditor init createDefault hst			// just in case...
 # (_,dbf,hst)		= myDatabase Init filename (0,createDefault) hst		
 																// create / read out current value in file file
 # dbversion			= fst dbf.value								// version number stored in database
@@ -41,56 +40,16 @@ universalRefEditor (init,formid) invariant  hst
 # (versionf,hst)	= myVersion Init filename dbversion hst 	// create / read out version number expected by this application
 # version			= versionf.value							// current version number assumed in this application
 | init == Init && 
-			(formid.mode == Display || formid.mode == NoForm) 	// we only want to read, no version conflict
-	# (valuef,hst)	= myEditor  Set dbvalue hst					// synchronize with latest value 
+			(formid.mode == Display || formid.mode == NoForm || filename == "") 	// we only want to read, no version conflict
 	# (_,hst)		= myVersion Set filename dbversion hst 		// synchronize version number and
-	= (valuef,hst)												// return current value in editor
+	= myEditor Set filename dbvalue hst									// synchronize with latest value 
 | dbversion > version											// we have a version conflict and want to write
-	# (_,hst)		= myVersion Set filename dbversion hst		// synchronize with new version
 	# (_,hst)		= ExceptionStore ((+) (Just (filename,toString dbversion +++ " " +++ toString version +++ 
-						" Your screen data is out of date; I have retrieved the latest data."))) hst	// Raise exception
-	= myEditor Set dbvalue hst									// return current version stored in database 
-# (valuef,hst)		= myEditor Init dbvalue hst					// create / read out current value 
-# (_,hst)			= myVersion Set filename dbversion hst 		// synchronize version number and
-# exception			= invariant valuef.value					// no version conflict, check invariants															// check invariants
-| isJust exception												// we want to write, but invariants don't hold
-	# (_,hst)		= ExceptionStore ((+) exception) hst 		// report them 
-	= (valuef,hst)												// return wrong value such that it can be improved
-//| not valuef.changed											// nothing has changed,
-//	= (valuef,hst)												// so we don't write anything
-# (versionf,hst)	= myVersion  Set filename (dbversion + 1) hst// increment version number
-# (_,_,hst)			= myDatabase Set filename (dbversion + 1,valuef.value) hst // update database file
-= ({valuef & changed = True},hst)
-where
-	myDatabase Init filename cntvalue hst = reftoEditForm (Init,NoForm,PersistentRO) (init,subFormId formid "refto" (Refto filename,cntvalue)) hst 	// read the database
-	myDatabase Set  filename cntvalue hst = reftoEditForm (Set, NoForm,Persistent)   (init,subFormId formid "refto" (Refto filename,cntvalue)) hst	// write the database
-
-	myVersion init filename cnt hst	= mkEditForm (init,subFormId formid ("vrs_r_" +++ filename) cnt) hst						// to remember version number
-
-	myEditor :: !Init  !a *HSt -> (Form a,!*HSt)   | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-	myEditor init value hst	= mkEditForm (init,subFormId formid "ref_copy_" value) hst	// to remember version number
-
-/*
-universalRefEditor 	:: !(InIDataId (Refto a)) !(a -> Judgement)  !*HSt -> (Form a,!*HSt)   	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-universalRefEditor (init,formid) invariant  hst
-# (Refto filename)	= formid.ival
-//| filename == ""	= abort "reference to illegal - empty - filename"
-//	= myEditor init createDefault hst							// just in case...
-# (_,dbf,hst)		= myDatabase Init filename (0,createDefault) hst		// create / read out database file
-# dbversion			= fst dbf.value								// version number stored in database
-# dbvalue			= snd dbf.value								// value stored in database
-# (versionf,hst)	= myVersion Init filename dbversion hst 	// create / read out version number expected by this application
-# version			= versionf.value							// current version number assumed in this application
-| formid.mode == Display										// we only want to read, no version conflict
-	# (valuef,hst)	= myEditor  Set dbvalue hst					// synchronize with latest value 
-	# (_,hst)		= myVersion Set filename version hst 		// synchronize version number and
-	= (valuef,hst)												// return current value in editor
-| dbversion > version											// we have a version conflict and want to write
+						"Ref Your screen data is out of date; I have retrieved the latest data."))) hst	// Raise exception
 	# (_,hst)		= myVersion Set filename dbversion hst		// synchronize with new version
-	# (_,hst)		= ExceptionStore ((+) (Just (filename,toString dbversion +++ " " +++ toString version +++ " Your screen data is out of date; I have retrieved the latest data."))) hst	// Raise exception
-	= myEditor Set dbvalue hst									// return current version stored in database 
-# (valuef,hst)		= myEditor Init dbvalue hst					// create / read out current value 
-# exception			= invariant valuef.value					// no version conflict, check invariants															// check invariants
+	= myEditor Set filename dbvalue hst							// return current version stored in database 
+# (valuef,hst)		= myEditor Init filename dbvalue hst		// editor is in sync; create / read out current value 
+# exception			= invariant valuef.value					// check invariants															// check invariants
 | isJust exception												// we want to write, but invariants don't hold
 	# (_,hst)		= ExceptionStore ((+) exception) hst 		// report them 
 	= (valuef,hst)												// return wrong value such that it can be improved
@@ -100,21 +59,24 @@ universalRefEditor (init,formid) invariant  hst
 # (_,_,hst)			= myDatabase Set filename (dbversion + 1,valuef.value) hst // update database file
 = ({valuef & changed = True},hst)
 where
-	myDatabase Init filename cntvalue hst = reftoEditForm (Init,NoForm,PersistentRO) (init,subFormId formid "refto" (Refto filename,cntvalue)) hst 	// read the database
-	myDatabase Set  filename cntvalue hst = reftoEditForm (Set,NoForm,Persistent)    (init,subFormId formid "refto" (Refto filename,cntvalue)) hst	// write the database
+	myDatabase dbinit filename cntvalue hst 
+	# databaseId	= {reuseFormId formid (Refto filename,cntvalue) & id = formid.id +++ "refto" /*+++ filename*/}
+	= case dbinit of
+		Init = reftoEditForm (Init,NoForm,PersistentRO) (init,databaseId) hst 	// read the database
+		Set	 = reftoEditForm (Set, NoForm,Persistent)   (init,databaseId) hst	// write the database
 
-	myVersion init filename cnt hst	= mkEditForm (init,subFormId formid ("vrs_r_" +++ filename) cnt) hst						// to remember version number
+	myVersion init filename cnt hst	= mkEditForm (init,{reuseFormId formid cnt & id = ("vrs_r_" +++ filename)
+																				, mode = NoForm}) hst						// to remember version number
 
-	myEditor :: !Init  !a *HSt -> (Form a,!*HSt)   | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-	myEditor init value hst	= mkEditForm (init,subFormId formid "copy_" value) hst	// to remember version number
-*/
-
+	myEditor :: !Init  !String !a *HSt -> (Form a,!*HSt)   | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+	myEditor init filename value hst	
+	# formId = {reuseFormId formid value & id = "copy_r_" +++ filename}
+	= mkEditForm (init,formId) hst	// copy of database information 
 
 invokeRefEditor :: (!(InIDataId b) !*HSt -> (Form d,!*HSt)) (InIDataId b) !*HSt -> (Form b,!*HSt)
 invokeRefEditor editor (init,formid) hst
 # (formf,hst)		= editor (init,formid) hst
 = ({formf & value = formid.ival},hst)
-
 
 // editor for persistent information
 
