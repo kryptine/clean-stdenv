@@ -113,7 +113,7 @@ mkBimapEditor inIDataId {map_to,map_from} hst
 mkSubStateForm :: !(InIDataId !subState) !state !(subState state -> state) !*HSt -> (Bool,Form state,!*HSt)
 							| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC subState
 mkSubStateForm (init,formid) state upd hst 
-# (nsubState,hst) 		= mkEditForm (init,subsFormId formid "subst" subState) hst
+# (nsubState,hst) 		= mkEditForm (init,subFormId formid "subst" subState) hst
 # (commitBut,hst)		= FuncBut (Init,subnFormId formid "CommitBut" (LButton defpixel "commit",id)) hst
 # (cancelBut,hst)		= FuncBut (Init,subnFormId formid "CancelBut" (LButton defpixel "cancel",id)) hst
 # (nsubState,hst) 		= if cancelBut.changed 
@@ -146,19 +146,19 @@ vertlistForm inIDataId hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) mkEditForm 
 vertlistFormButs :: !Int !Bool !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 vertlistFormButs nbuts showbuts (init,formid) hst
 
-# indexId		= {subsFormId formid "idx" 0 & mode = Display}
+# indexId		= {subFormId formid "idx" 0 & mode = Display}
 # (index,hst)	= mkEditForm (init,indexId) hst
 # (olist,hst)	= listForm (init,formid) hst
 # lengthlist	= length olist.value
 
 # pdmenu		= PullDown (1,defpixel) (0, [toString lengthlist +++ " More... " :["Show " +++ toString i \\ i <- [1 .. max 1 lengthlist]]]) 
-# pdmenuId		= {subsFormId formid "pdm" pdmenu & mode = Edit}
+# pdmenuId		= {subFormId formid "pdm" pdmenu & mode = Edit}
 # (pdbuts,hst)	= mkEditForm (Init, pdmenuId) hst
 # (PullDown _ (step,_))	= pdbuts.value
 
 | step == 0		= ({form=pdbuts.form,value=olist.value,changed=olist.changed || pdbuts.changed},hst)		
 
-# bbutsId		= {subsFormId formid "bb" index.value & mode = Edit}
+# bbutsId		= {subFormId formid "bb" index.value & mode = Edit}
 # (obbuts, hst)	= browseButtons (Init, bbutsId) step lengthlist nbuts hst
 
 # addId			= subnFormId formid "add" addbutton
@@ -171,7 +171,7 @@ vertlistFormButs nbuts showbuts (init,formid) hst
 # appId			= subnFormId formid "app"  (appendbutton createDefault obbuts.value step)
 # (app	,hst) 	= ListFuncBut (Init, appId) hst	
 
-# elemId		= subsFormId formid "copyelem" createDefault
+# elemId		= subFormId formid "copyelem" createDefault
 # copyId		= subnFormId formid "copy"  (copybutton obbuts.value step)
 # (copy	,hst) 	= ListFuncBut (Init, copyId) hst	
 # (elemstore,hst)= mkStoreForm (Init,elemId) (if copy.changed (\_ -> olist.value!!copy.value 0) id) hst	

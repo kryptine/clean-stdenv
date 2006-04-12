@@ -21,7 +21,8 @@ getAllMyReports account accounts hst
 # allrefreports			= [refreport 	\\	(_,refperson_refreports) <- allirefreports
 										, 	refreport <- map snd refperson_refreports]
 # (allreportsf,hst)		= maplSt editorRefReport 
-							[(Init,xtFormId ("shd_coll_rep" <+++ i) refreport) \\ i <- [0..] & refreport <- allrefreports] hst
+							[(Init,xtFormId ("shwrep_coll_rep" <+++ i) refreport) 
+							\\ i <- [0..] & refreport <- allrefreports] hst
 # allreports 			= map (\v -> v.value) allreportsf
 # allireports 			= [(nr,	[(findperson refperson allrefpersons allpersons,report)	\\ (refperson,refreport) <- refperson_refreports
 																						&	report <- allreports
@@ -33,6 +34,16 @@ getAllMyReports account accounts hst
 where
 	findperson refperson refpersons persons = hd [p \\ ref <- refpersons & p <- persons | ref == refperson]
 
+getMyOwnReports :: !ConfAccount !*HSt -> ([(Int,Maybe Report)],!*HSt)
+getMyOwnReports account hst
+# allirefreports 		= getMyReports account 
+# (allreportsf,hst)		= maplSt editorRefReport 
+							[(Init,ndFormId ("shwrep_rep" <+++ i) refreport) 
+							\\ i <- [0..] & refreport <- map snd allirefreports
+							] hst
+# allreports 			= map (\v -> v.value) allreportsf
+# allireports			= [(nr,reports) \\ nr <- map fst allirefreports & reports <- allreports]
+= (allireports,hst)
 
 // Entrance
 
@@ -43,7 +54,8 @@ where
 
 loginHandlingPage  :: !ConfAccounts !*HSt -> (Maybe ConfAccount,[BodyTag],!*HSt)
 loginHandlingPage accounts hst
-# (mbaccount,login,hst) = loginPage accounts hst
+# (mbaccount,login,hst) = loginPage accounts hst	// has account ?
+| isJust mbaccount		= (mbaccount,[],hst)		// ok, goto memeber area
 # (forgotf,hst)			= passwordForgotten accounts hst
 # (yes,addauthorf,hst)	= addAuthorPage accounts hst
 # (guest,hst)			= guestAccountStore (if yes (\(_,guest) -> (True,guest)) id) hst
@@ -165,8 +177,8 @@ where
 
 changeInfo :: !ConfAccount !*HSt -> ([BodyTag],!*HSt)
 changeInfo account hst
-# (personf,hst) = mkEditForm (Init,nFormId "cfm_ch_person" (getRefPerson account.state)) hst
-= (personf.form,hst)
+# (personf,hst) = mkEditForm (Init,nFormId "cfm_ch_person" (fromJust (getRefPerson account.state))) hst
+= ([Br, Txt "Change your personel information:", Br, Br] ++ personf.form,hst)
 
 submitPaperPage ::  !ConfAccount !*HSt -> ([BodyTag],!*HSt)
 submitPaperPage account hst
@@ -178,25 +190,26 @@ submitPaperPage account hst
 
 showPapersPage :: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 showPapersPage  accounts hst
-# (papersf,hst) = vertlistFormButs 10 False (Set,ndFormId "cfm_shw_papers" (getRefPapers accounts)) hst
+# (papersf,hst) = vertlistFormButs 10 False (Init,ndFormId "cfm_shw_papers" (getRefPapers accounts)) hst
 = (papersf.form,hst)
 
 submitReportPage :: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 submitReportPage account accounts hst
-# todo				= getMyReports account
-# mypapers			= map fst todo
-# myrefreport		= map snd todo			
-# paperlist 		= [DisplayMode ("paper " <+++ i) \\ i <- mypapers]
-# myreports			= [nr <|> edit \\ nr <- paperlist & edit <- myrefreport]
-| todo == []		= ([ Txt "There are no papers for you to referee (yet)" ],hst)
-# (reportsf,hst)	= vertlistFormButs 5 False (Set,sFormId "cfm_mk_reports" myreports) hst
-# (results,hst)		= maplSt editorRefReport [(Init,xtFormId ("tmp" <+++ i) ref) \\ i <- mypapers & ref <- myrefreport] hst
-# resultvalue		= [res.value \\ res <- results]
-= (show1 mypapers ++ show2 mypapers resultvalue ++ show3 mypapers resultvalue ++ reportsf.form,hst)
+# rreports			= getMyReports account
+# mypapers			= map fst rreports
+| mypapers == []	= ([ Txt "There are no papers for you to referee (yet)" ],hst)
+# myreports			= [DisplayMode ("Paper Nr: " +++ toString i) <|> rreport \\ (i,rreport) <- rreports] 			
+//# (reportsf,hst)	= mkEditForm (Init,nFormId "cfm_mk_reports" myreports) hst
+# (reportsf,hst)	= vertlistFormButs 10 False (Init,nFormId "cfm_mk_reports" myreports) hst
+
+//
+
+= (show1 mypapers /*++ show2 mypapers reportsf.value ++ show3 mypapers reportsf.value*/ ++ reportsf.form,hst)
+
 where
-	show1 mypapers = [Txt ("The following papers have been assigned to you: "), B [] (print mypapers),Br]
-	show2 mypapers reports =  [Txt ("You have done: "), B [] (print [i \\ i <- mypapers & (Just report) <- reports]), Br]
-	show3 mypapers reports =  [Txt ("You still have to do: "), B [] (print [i \\ i <- mypapers & rep <- reports | isNothing rep]), Br, Br ]
+	show1 mypapers 			= [Txt ("The following papers have been assigned to you: "), B [] (print mypapers),Br]
+	show2 mypapers reports	= [Txt ("You have done: "), B [] (print [i \\ i <- mypapers & (_ <|> Just report) <- reports]), Br]
+	show3 mypapers reports	= [Txt ("You still have to do: "), B [] (print [i \\ i <- mypapers & (_ <|> Nothing) <- reports]), Br, Br ]
 
 	print [] = "Nothing"
 	print ps = printToString ps

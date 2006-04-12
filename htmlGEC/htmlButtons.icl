@@ -4,8 +4,6 @@ import StdEnv, ArgEnv
 
 import htmlHandler, htmlStylelib, htmlTrivial
 
-derive gForm HtmlTime
-
 derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, /*Button, */CheckBox, RadioButton /*, PullDownMenu, TextInput */, TextArea
 derive gPrint 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
 derive gParse 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
@@ -239,6 +237,27 @@ gForm{|TextInput|} (init,formid) hst
 	# (body,hst) = mkInput size (init,formid) (SV s) (UpdS s) hst 
 	= ({changed=False, value=TS size s, form=[body]},incrHSt 2 hst)
 
+//derive gForm HtmlTime
+
+gForm {|HtmlTime|} (init,formid) hst 
+	= specialize myeditor (init,formid) hst
+where
+	myeditor (init,formid) hst = mkBimapEditor (init,formid) bimap hst
+	where
+		(Time hours minutes seconds) = formid.ival
+
+		bimap = {map_to = toPullDown, map_from = fromPullDown}
+		where
+			toPullDown (Time hours minutes seconds) = (pdhours,pdminutes,pdseconds)
+			where
+				pdhours		= PullDown (1, defpixel/2) (hours,  [toString i \\ i <- [0..23]])
+				pdminutes 	= PullDown (1, defpixel/2) (minutes,[toString i \\ i <- [0..59]])
+				pdseconds 	= PullDown (1, defpixel/2) (seconds, [toString i \\ i <- [0..59]])
+		
+			fromPullDown (pdhours,pdminutes,pdseconds) = Time (convert pdhours) (convert pdminutes) (convert pdseconds)
+			where
+				convert x	= toInt (toString x)
+
 gForm {|HtmlDate|} (init,formid) hst 
 	= specialize myeditor (init,formid) hst
 where
@@ -252,19 +271,19 @@ where
 			where
 				pddays 		= PullDown (1,  defpixel/2) (day-1,  [toString i \\ i <- [1..31]])
 				pdmonths 	= PullDown (1,  defpixel/2) (month-1,[toString i \\ i <- [1..12]])
-				pdyears 	= PullDown (1,2*defpixel/3) (year-1, [toString i \\ i <- [2005..2010]])
+				pdyears 	= PullDown (1,2*defpixel/3) (year-1, [toString i \\ i <- [year..2015]])
 		
 			fromPullDown (pddays,pdmonths,pdyears) = Date (convert pddays) (convert pdmonths) (convert pdyears)
 			where
 				convert x	= toInt (toString x)
 
-	mkBimapEditor :: !(InIDataId d) !(Bimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
-	mkBimapEditor inIDataId {map_to,map_from} hst
-	= mkViewForm inIDataId { toForm 	= toViewMap map_to 
-							, updForm 	= \_ v -> v
-							, fromForm 	= \_ v -> map_from v
-							, resetForm = Nothing
-							} hst 
+mkBimapEditor :: !(InIDataId d) !(Bimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
+mkBimapEditor inIDataId {map_to,map_from} hst
+= mkViewForm inIDataId { toForm 	= toViewMap map_to 
+						, updForm 	= \_ v -> v
+						, fromForm 	= \_ v -> map_from v
+						, resetForm = Nothing
+						} hst 
 // time and date
 
 import StdTime

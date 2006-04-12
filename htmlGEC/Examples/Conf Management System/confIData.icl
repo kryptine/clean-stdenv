@@ -22,19 +22,19 @@ editorRefPerson :: !(InIDataId RefPerson) !*HSt -> (Form Person,!*HSt)
 editorRefPerson (init,formid) hst
 # (RefPerson refperson) = formid.ival
 # (Refto name) 			= refperson
-= universalRefEditor formid.mode formid.lifespan (invariantPerson name) refperson hst
+= universalRefEditor (init,reuseFormId formid refperson) (invariantPerson name) hst
 
 editorRefPaper :: !(InIDataId RefPaper) !*HSt -> (Form Paper,!*HSt)
 editorRefPaper (init,formid) hst
 # (RefPaper refpaper) 	= formid.ival
 # (Refto name) 			= refpaper
-= universalRefEditor formid.mode formid.lifespan (invariantPaper name) refpaper hst
+= universalRefEditor (init,reuseFormId formid refpaper) (invariantPaper name) hst
 
 editorRefReport :: !(InIDataId RefReport) !*HSt -> (Form (Maybe Report),!*HSt)
 editorRefReport (init,formid) hst
 # (RefReport refreport) = formid.ival
 # (Refto name) 			= refreport
-= universalRefEditor formid.mode formid.lifespan (invariant name) refreport hst
+= universalRefEditor (init,reuseFormId formid refreport) (invariant name)  hst
 where
 	invariant name Nothing 			= Ok
 	invariant name (Just report)	= invariantReport name report
@@ -42,7 +42,7 @@ where
 editorRefDiscussion :: !(InIDataId RefDiscussion) !*HSt -> (Form Discussion,!*HSt)
 editorRefDiscussion (init,formid) hst
 # (RefDiscussion refdiscus) = formid.ival
-= universalRefEditor formid.mode formid.lifespan (\_ -> Ok) refdiscus hst
+= universalRefEditor (init,reuseFormId formid refdiscus) (\_ -> Ok) hst
 
 // specialized forms
 
@@ -83,11 +83,11 @@ where
 	where
 		showDiscussion [] 	= []
 		showDiscussion [{messageFrom,date,time,message}:more] 
-							= 	[ mkTable [	[ Txt "from: ", B [] messageFrom ]
-										,	[ Txt "date: ", toHtml date]
-										,	[ Txt "time: ", toHtml time]
-										,	[ Txt "message: ", Txt message]
-										]] ++ [Br, Hr []] ++ showDiscussion more
+							= 	[ mkTable [	[ Txt "date: ", toHtml date, Txt "time: ", toHtml time]
+										  ,	[ Txt "from: ", B [] messageFrom ]
+								]] ++ 
+								[ Txt "message:", Txt message] ++
+								[Hr []] ++ showDiscussion more
 
 gForm {|[]|} gHa (init,formid) hst 
 = case formid.ival of
