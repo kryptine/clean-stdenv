@@ -19,6 +19,7 @@ assignPapersConflictsPage 	:: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 showPapersPage 				:: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 showReportsPage 			:: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 discussPapersPage 			:: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
+showPapersStatusPage 			:: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 
 // Changing user settings
 

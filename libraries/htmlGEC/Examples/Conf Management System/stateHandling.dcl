@@ -132,7 +132,7 @@ addConflict 		:: Int RefPerson ConfAccounts -> ConfAccounts
 removeConflict 		:: Int RefPerson ConfAccounts -> ConfAccounts
 
 
-instance == RefPerson, RefPaper, RefReport
+instance == RefPerson, RefPaper, RefReport, PaperStatus
 
 // invariants testing and setting
 

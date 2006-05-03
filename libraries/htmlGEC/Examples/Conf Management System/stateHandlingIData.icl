@@ -3,49 +3,7 @@ implementation module stateHandlingIData
 import StdHtml
 import stateHandling
 import loginAdminIData, confIData
-import StdListExtensions
 
-// Utility code for DeReferences of pointers
-
-getAllPersons :: !ConfAccounts !*HSt -> ([RefPerson],[Person],!*HSt)
-getAllPersons accounts hst
-# allrefperson 			= [ refperson \\ acc <- accounts , (Just refperson) <- [getRefPerson acc.state]]	
-# (allpersonsf,hst)		= maplSt editorRefPerson [(Init,xtFormId ("shd_coll_pers" <+++ i) pers) \\ i <- [0..] & pers <- allrefperson] hst
-# allpersons 			= [person \\ (RefPerson (Ref2 _ person)) <- map (\v -> v.value) allpersonsf]
-= (allrefperson,allpersons,hst)
-
-getAllMyReports :: !ConfAccount !ConfAccounts !*HSt -> ([(Int,[(Person, Maybe Report)])],!*HSt)
-getAllMyReports account accounts hst
-# (allrefpersons,allpersons,hst) = getAllPersons accounts hst
-# allirefreports 		= getMyRefReports account accounts
-# allrefreports			= [refreport 	\\	(_,refperson_refreports) <- allirefreports
-										, 	refreport <- map snd refperson_refreports]
-# (allreportsf,hst)		= maplSt editorRefReport 
-							[(Init,xtFormId ("shwrep_coll_rep" <+++ i) refreport) 
-							\\ i <- [0..] & refreport <- allrefreports] hst
-# allreports 			= map (\v -> v.value) allreportsf
-# allireports 			= [(nr,	[(findperson refperson allrefpersons allpersons,report)	\\ (refperson,refreport) <- refperson_refreports
-																						&	(RefReport (Ref2 _ report)) <- allreports
-								])
-						  \\ (nr,refperson_refreports) <- allirefreports
-						  ]
-
-= (allireports,hst)
-where
-	findperson refperson refpersons persons = hd [p \\ ref <- refpersons & p <- persons | ref == refperson]
-
-/*
-getMyOwnReports :: !ConfAccount !*HSt -> ([(Int,Maybe Report)],!*HSt)
-getMyOwnReports account hst
-# allirefreports 		= getMyReports account 
-# (allreportsf,hst)		= maplSt editorRefReport 
-							[(Init,ndFormId ("shwrep_rep" <+++ i) refreport) 
-							\\ i <- [0..] & refreport <- map snd allirefreports
-							] hst
-# allreports 			= map (\v -> v.value) allreportsf
-# allireports			= [(nr,reports) \\ nr <- map fst allirefreports & reports <- allreports]
-= (allireports,hst)
-*/
 // Entrance
 
 guestAccountStore :: ((Bool,ConfAccount) -> (Bool,ConfAccount)) !*HSt -> (Form (Bool,ConfAccount),!*HSt)
@@ -77,7 +35,7 @@ where
 passwordForgotten ::  !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 passwordForgotten accounts hst
 # (emailadres,hst)	= mkEditForm (Init,nFormId "email_addr" "") hst
-# (mailmebut,hst)	= simpleButton "MailMe" id hst
+# (mailmebut,hst)	= simpleButton "sh_mailme" "MailMe" id hst
 # (_,persons,hst) 	= getAllPersons accounts hst
 # found 			= search emailadres.value persons accounts
 =	(	[ B [] "Password / login forgotten ?", Br, Br	
@@ -100,7 +58,7 @@ where
 			
 addAuthorPage :: !ConfAccounts !*HSt -> (Bool,[BodyTag],!*HSt)
 addAuthorPage accounts hst 
-# (yessubmitf,hst)	= simpleButton "Yes" id hst
+# (yessubmitf,hst)	= simpleButton "sh_Yes_submit" "Yes" id hst
 =	(	yessubmitf.changed
 	,	[ B [] "Paper Submission Area:", Br, Br	
 		, Txt "Deadline is due on xx-yy-2006", Br, Br
@@ -111,7 +69,7 @@ addAuthorPage accounts hst
 
 // Conference manager editors for changing account information, may conflict with other members
 
-tempAccountsId accounts = sFormId "cfm_temp_states" accounts 	// temp editor for accounts
+tempAccountsId accounts = sFormId "sh_root_accounts" accounts 	// temp editor for accounts
 
 modifyStatesPage :: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 modifyStatesPage accounts hst
@@ -124,8 +82,8 @@ assignPapersConflictsPage :: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 assignPapersConflictsPage accounts hst
 # (accountsf,hst)	= vertlistFormButs 15 True (Init,tempAccountsId accounts) hst	// make a list editor to mofify all accounts
 # accounts			= accountsf.value												// current value in temp editor
-# (assignf,hst) 	= ListFuncCheckBox (Init, nFormId "cfm_assigments" (showAssignments accounts)) hst
-# (conflictsf,hst) 	= ListFuncCheckBox (Init, nFormId "cfm_conflicts"  (showConflicts   accounts)) hst
+# (assignf,hst) 	= ListFuncCheckBox (Init, nFormId "sh_assigments" (showAssignments accounts)) hst
+# (conflictsf,hst) 	= ListFuncCheckBox (Init, nFormId "sh_conflicts"  (showConflicts   accounts)) hst
 # accounts			= (fst assignf.value)    accounts
 # accounts			= (fst conflictsf.value) accounts
 # (accounts,hst)	= AccountsDB Set accounts hst 									// if correct store in global database
@@ -137,7 +95,7 @@ assignPapersConflictsPage accounts hst
 	,hst)
 where
 	allPaperNumbers acc	= map fst (getRefPapers acc)
-	allRefereeNames acc	= [Txt person \\ (RefPerson (Ref2 person _),_,_) <- getConflictsAssign acc]
+	allRefereeNames acc	= [Txt person \\ (RefPerson (Ref2 person),_,_) <- getConflictsAssign acc]
 	allPaperNames   acc	= [Txt (toString nr +++ " ") \\ nr <- allPaperNumbers acc]
 
 	table referees assignm acc
@@ -147,18 +105,18 @@ where
 	group n list = [BodyTag (take n list): group n (drop n list)] 
 
 	showAssignments  accounts 
-		= [(check "cfm_ck_assign" (isMember papernr assigment) papernr person
-			, adjustAssignments papernr (RefPerson (Ref2 person value))
+		= [(check "sh_shw_assign" (isMember papernr assigment) papernr person
+			, adjustAssignments papernr (RefPerson (Ref2 person))
 			) 
-			\\ (RefPerson (Ref2 person value),_,assigment) <- getConflictsAssign accounts 
+			\\ (RefPerson (Ref2 person),_,assigment) <- getConflictsAssign accounts 
 			,  papernr <- allPaperNumbers accounts
 			]
 
 	showConflicts accounts 
-		= [(check "cfm_ck_confl" (isMember papernr conflicts) papernr person
-			, adjustConflicts papernr (RefPerson (Ref2 person value))
+		= [(check "sh_shw_confl" (isMember papernr conflicts) papernr person
+			, adjustConflicts papernr (RefPerson (Ref2 person))
 			) 
-			\\ (RefPerson (Ref2 person value),conflicts,_) <- getConflictsAssign accounts
+			\\ (RefPerson (Ref2 person),conflicts,_) <- getConflictsAssign accounts
 			,  papernr <- allPaperNumbers accounts
 			]
 
@@ -178,44 +136,45 @@ where
 
 changeInfo :: !ConfAccount !*HSt -> ([BodyTag],!*HSt)
 changeInfo account hst
-# (personf,hst) = mkEditForm (Init,nFormId "cfm_ch_person" (fromJust (getRefPerson account.state))) hst
+# (personf,hst) = mkEditForm (Init,nFormId "sh_changeInfo" (fromJust (getRefPerson account.state))) hst
 = ([Br, Txt "Change your personel information:", Br, Br] ++ personf.form,hst)
 
 submitPaperPage ::  !ConfAccount !*HSt -> ([BodyTag],!*HSt)
 submitPaperPage account hst
 # [(nr,refpaper):_]	= getRefPapers [account]
-# (paperf,hst)	= mkEditForm (Init,sFormId "cfm_sbm_paper" refpaper) hst
+# (paperf,hst)	= mkEditForm (Init,sFormId "sh_sbm_paper" refpaper) hst
 = (paperf.form,hst)
 
 showPapersPage :: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 showPapersPage  accounts hst
-# (papersf,hst) = vertlistFormButs 10 False (Init,sdFormId "cfm_shw_papers" (getRefPapers accounts)) hst
+# irefpaper 	= getRefPapers accounts // [(Int,RefPaper)]
+# (papersf,hst) = vertlistFormButs 10 False (Init,sdFormId "sh_shw_papers" 
+						(map (\(nr,p) -> (DisplayMode ("Paper Nr: " <+++ nr)<|>p)) irefpaper)) hst
 = (papersf.form,hst)
 
 submitReportPage :: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 submitReportPage account accounts hst
-# rreports			= getMyReports account
-# mypapers			= map fst rreports
-| mypapers == []	= ([ Txt "There are no papers for you to referee (yet)" ],hst)
-# myreports			= [DisplayMode ("Paper Nr: " +++ toString i) <|> rreport \\ (i,rreport) <- rreports] 			
-# (reportsf,hst)	= vertlistFormButs 10 False (Init,sFormId "cfm_mk_reports" myreports) hst
-= (show1 mypapers ++ show2 mypapers reportsf.value ++ show3 mypapers reportsf.value ++ reportsf.form,hst)
-
+# myirefreports		= getMyReports account // [(Int, RefReport)]
+# mypapersnrs		= map fst myirefreports
+| mypapersnrs == []	= ([ Txt "There are no papers for you to referee (yet)" ],hst)
+# myrefreports		= [DisplayMode ("Paper Nr: " +++ toString i) <|> refreport \\ (i,refreport) <- myirefreports] 			
+# (refreportsf,hst)	= vertlistFormButs 10 False (Init,sFormId "sh_subm_reports" myrefreports) hst
+# (reports,hst)		= derefReports (map snd myirefreports) hst
+= (show1 mypapersnrs ++ show2 mypapersnrs reports ++ show3 mypapersnrs reports ++ refreportsf.form,hst)
 where
 	show1 mypapers 			= [Txt ("The following papers have been assigned to you: "), B [] (print mypapers),Br]
-	show2 mypapers reports	= [Txt ("You have done: "), B [] (print [i \\ i <- mypapers 
-																& (_ <|> RefReport (Ref2 _ (Just _))) <- reports]), Br]
-	show3 mypapers reports	= [Txt ("You still have to do: "), B [] (print [i \\ i <- mypapers 
-																& (_ <|> RefReport (Ref2 _ Nothing)) <- reports]), Br, Br ]
+
+	show2 mypapers reports	= [Txt ("You have done: ")		 , B [] (print [i \\ i <- mypapers & n <- reports | isJust n]), Br]
+	show3 mypapers reports	= [Txt ("You still have to do: "), B [] (print [i \\ i <- mypapers & n <- reports | isNothing n]), Br]
 
 	print [] = "Nothing"
 	print ps = printToString ps
 
 showReportsPage :: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 showReportsPage account accounts hst
-# allreports = [("paper " +++ toString nr,map (\(RefPerson (Ref2 name value),report) -> (name,report)) reports) 
+# allreports = [("paper " +++ toString nr,map (\(RefPerson (Ref2 name),report) -> (name,report)) reports) 
 				\\ (nr,reports) <- getMyRefReports account accounts]
-# (reportsf,hst) 	= vertlistFormButs 5 False (Set,sdFormId "cfm_shw_reports" allreports) hst
+# (reportsf,hst) 	= vertlistFormButs 5 False (Set,sdFormId "sh_shw_reports" allreports) hst
 = (reportsf.form,hst)
 
 discussPapersPage :: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
@@ -223,18 +182,21 @@ discussPapersPage account accounts hst
 # (allreports,hst)	= getAllMyReports account accounts hst
 # allpapernrs		= map fst allreports
 # pdmenu			= (0, [("Show paper nr " +++ toString nr, \_ -> i) \\ i <- [0 .. ] & nr <- allpapernrs]) 
-# (pdfun,hst)		= FuncMenu (Init, sFormId "cfm_dpp_pdm" pdmenu) hst
+# (pdfun,hst)		= FuncMenu (Init, sFormId "sh_dpp_pdm" pdmenu) hst
 # selected			= snd pdfun.value
 # selectedpaper		= allpapernrs!!selected
 # mbpaperrefinfo	= getPaperInfo selectedpaper accounts
-# (RefDiscussion (Ref2 name value)) = (fromJust mbpaperrefinfo).discussion
+# (RefDiscussion (Ref2 name)) = (fromJust mbpaperrefinfo).discussion
 # (disclist,hst)	= universalDB Init (\_ _ -> Ok) name (Discussion []) hst
 # (time,date,hst)	= getTimeAndDate hst
 # (newsubmit,newdiscf,hst)	
-					= mkSubStateForm (if pdfun.changed Set Init, nFormId "cfm_dpp_adddisc" (TS 80 "")) disclist
+					= mkSubStateForm (if pdfun.changed Set Init, nFormId "sh_dpp_adddisc" (TS 80 "")) disclist
 						(\s -> addItemTextInput (account.login.loginName) time date (toS s)) hst
 # (_,hst)			= if newsubmit (universalDB Set (\_ _ -> Ok) name newdiscf.value hst) (undef,hst)
-# (disclistf,hst) 	= mkEditForm (Set,sdFormId "cfm_show_disc" newdiscf.value) hst
+# (disclistf,hst) 	= mkEditForm (Set,sdFormId "sh_show_disc" newdiscf.value) hst
+# (newsubmit,newdiscf,hst)	
+					= if newsubmit (mkSubStateForm (Set,nFormId "sh_dpp_adddisc" (TS 80 "")) disclist
+						(\s -> addItemTextInput (account.login.loginName) time date (toS s)) hst) (newsubmit,newdiscf,hst)
 = (	pdfun.form ++ [Br,Hr []] <|.|>  
 	hd (mkdisplay allreports selectedpaper) ++ [Br,Hr [], Br] <|.|>
 	newdiscf.form <|.|> [Br,Hr []] 
@@ -261,4 +223,35 @@ where
 		summarize Nothing 		= [EmptyBody]
 		summarize (Just report)	= [ toHtml report.recommendation , toHtml report.familiarity]	
 
-	
+
+showPapersStatusPage :: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
+showPapersStatusPage account accounts hst
+# (pdmenu,hst)		= mkEditForm   (Init,sFormId "sh_sPSP_pdm" Submitted) hst // to select status of papers you want to see
+# (allireports,hst)	= getAllMyReports account accounts hst	//[(Int,[(Person, Maybe Report)])]
+# allpapernrs		= map fst allireports 
+# selpaperinfo		= [(nr,paperinfo.status) 	\\ nr <- allpapernrs 
+												, (Just paperinfo) <- [getPaperInfo nr accounts]
+												| paperinfo.status == pdmenu.value] 	
+# selpapernrs		= map fst selpaperinfo	// the number of the papers that have the selected status
+
+| isNil selpapernrs	= ([Txt "Show status of all papers which are:",Br,Br] ++ pdmenu.form ++ [Br, Txt "There are no papers that obey this criteria.",Br],hst)
+# selreports		= [(nr,map snd persreport) \\ (nr,persreport) <- allireports | isMember nr selpapernrs]
+# selsummary		= [("Paper nr: " <+++ nr,	[ (report.recommendation,report.familiarity)
+							\\ (Just report) <- reports
+							]
+						) 
+						\\ (nr,reports) <- selreports]
+# (sumlist,hst)		= vertlistForm (Set,tdFormId "sh_sPSP_summ" selsummary) hst
+= ([Txt "List all papers which are:",Br,Br] ++ pdmenu.form ++ [Br] ++ sumlist.form,hst)
+
+// utility
+
+show StrongAccept 	= colorbox "Strong Accept" Green
+show Accept 		= colorbox "Accept" Lime
+show WeakAccept 	= colorbox "Weak Accept" Olive
+show Discuss 		= colorbox "Discuss" Black
+show WeakReject 	= colorbox "Weak Reject" Maroon
+show Reject 		= colorbox "Reject" Fuchsia
+show StrongReject 	= colorbox "Strong Reject" Red
+colorbox bla color = Table [] [Td [Td_Align Aln_Center,Td_VAlign Alo_Top, Td_Width (Pixels (defpixel)),Td_Bgcolor (`Colorname color)] [Txt bla]]
+

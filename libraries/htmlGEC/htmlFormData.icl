@@ -1,7 +1,7 @@
 implementation module htmlFormData
 
 import htmlDataDef
-import StdMaybe, StdBool, StdString
+import StdMaybe, StdBool, StdString, StdInt
 
 // utility for creating FormId's
 
@@ -93,6 +93,9 @@ subsFormId formid s d = {formid & id = formid.id +++ s, ival = d, lifespan = Ses
 subpFormId :: !(FormId a) !String !d 	-> (FormId d)	// make new formid of new type coping other old settinf
 subpFormId formid s d = {formid & id = formid.id +++ s, ival = d, lifespan = Persistent}
 
+subtFormId :: !(FormId a) !String !d 	-> (FormId d)	// make new formid of new type coping other old settinf
+subtFormId formid s d = {formid & id = formid.id +++ s, ival = d, lifespan = Temp}
+
 setFormId :: !(FormId d) !d -> (FormId d)			// set new initial value in formid
 setFormId formid d = {formid & ival = d}
 
@@ -136,6 +139,25 @@ where
 	(==) Set Set 			= True
 	(==) _ _ 				= False
 
+instance == Lifespan
+where
+	(==) Persistent 	Persistent		= True
+	(==) PersistentRO 	PersistentRO	= True
+	(==) Session 		Session			= True
+	(==) Page 			Page			= True
+	(==) Temp 			Temp			= True
+	(==) _ _ 							= False
 
+instance < Lifespan
+where
+	(<) l1 l2 = toInt l1 < toInt l2
 
+instance toInt 	Lifespan
+where
+	toInt 	Temp			= 0
+	toInt 	Page			= 1
+	toInt 	Session			= 2
+	toInt 	PersistentRO	= 3
+	toInt 	Persistent		= 4
 
+	

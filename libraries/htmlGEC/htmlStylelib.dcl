@@ -1,6 +1,6 @@
 definition module htmlStylelib
 
-import htmlStyleDef
+import htmlStyleDef, StdInt
 
 // predefined styles used internally, may also be used by end-user
 // can be redefined if one does not like the styles chosen
@@ -13,8 +13,8 @@ TableRowStyle 		:: Standard_Attr	// for tables
 
 // Some related default constants used for the length of input boxes
 
-defsize  :== 8							// size of inputfield
-defpixel :== 83							// size in pixels for buttons, pull-down buttons
+defsize  :== 12 //8  * 4 / 3					// size of inputfield
+defpixel :== 83	* 4 / 3					// size in pixels for buttons, pull-down buttons
 
 // definition of clean styles
 

@@ -33,6 +33,8 @@ mkTable 			:: [[BodyTag]]			-> BodyTag		// Make a table
 // mkStore			: applies function to the internal state
 // mkSelf			: applies function to the internal state only if the idata has been changed
 // mkApplyEdit		: sets iData with second value if the idata has not been changed by user
+// mkSubState		: makes form for substate, with ok and cancel buttons; only added to state if ok is pressed
+// mkShowHide		: as mkEdit, but with show / hide button
 
 mkBimapEditor 	:: !(InIDataId d) !(Bimap d v) 	!*HSt -> (Form d,!*HSt)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
 mkEditForm 		:: !(InIDataId d)  				!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
@@ -40,8 +42,10 @@ mkStoreForm 	:: !(InIDataId d)  !(d -> d)	!*HSt -> (Form d,!*HSt) 	| gForm{|*|},
 mkSelfForm 		:: !(InIDataId d)  !(d -> d)	!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 mkApplyEditForm	:: !(InIDataId d)  !d			!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
 
-mkSubStateForm :: !(InIDataId !subState) !state !(subState state -> state) !*HSt -> (Bool,Form state,!*HSt)
+mkSubStateForm 	:: !(InIDataId !subState) !state !(subState state -> state) !*HSt -> (Bool,Form state,!*HSt)
 																				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC subState
+
+mkShowHideForm 	:: !(InIDataId a)  !*HSt -> (Form a,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
 // **** forms for lists ****
 
@@ -84,7 +88,7 @@ browseButtons :: !(InIDataId !Int) !Int !Int !Int !*HSt -> (Form Int,!*HSt)
 // **** to each button below a function is assigned which is returned as iData value when the corresponding button is pressed
 // **** an identity function is returned when none of the set of buttons pressed 
 
-simpleButton 	:: !String 		!(a -> a) 				!*HSt -> (Form (a -> a),!*HSt)
+simpleButton 	:: !String !String 		!(a -> a) 				!*HSt -> (Form (a -> a),!*HSt)
 FuncBut 		:: !(InIDataId (Button, a -> a))		!*HSt -> (Form (a -> a),!*HSt)
 ListFuncBut 	:: !(InIDataId [(Button, a -> a)])		!*HSt -> (Form (a -> a),!*HSt)
 TableFuncBut 	:: !(InIDataId [[(Button, a -> a)]])	!*HSt -> (Form (a -> a),!*HSt)

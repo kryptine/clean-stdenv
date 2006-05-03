@@ -123,9 +123,9 @@ replaceState formid val formstates=:{fstates} world
 = ({formstates & fstates = fstates},world)
 where
 	replaceState` ::  !(FormId a) a *FStates *NWorld -> (*FStates,*NWorld)	| gPrint{|*|} a & TC a
-	replaceState` formid val Leaf_ world = (Node_ Leaf_ (formid.id,NewState (initNewState (adjustlife formid.lifespan) formid.storage val)) Leaf_,world)
-	replaceState` formid val (Node_ left a=:(fid,_) right) world
-	| formid.id == fid 	= (Node_ left (fid,NewState (initNewState formid.lifespan formid.storage val)) right,world)
+	replaceState` formid val Leaf_ world = (Node_ Leaf_ (formid.id,NewState (initNewState (adjustlife formid.lifespan) Temp formid.storage val)) Leaf_,world)
+	replaceState` formid val (Node_ left a=:(fid,fstate) right) world
+	| formid.id == fid 	= (Node_ left (fid,NewState (initNewState formid.lifespan (detlifespan fstate) formid.storage val)) right,world)
 	| formid.id < fid 	= (Node_ nleft a right,nworld)
 							with
 								(nleft,nworld) = replaceState` formid val left world
@@ -135,12 +135,17 @@ where
 
 	// NewState Handling routines 
 
-	initNewState :: !Lifespan !StorageFormat !a  -> FState | TC a &  gPrint{|*|} a 
-	initNewState lifespan PlainString   nv = {format = PlainStr (printToString nv), life = lifespan}
-	initNewState lifespan StaticDynamic nv = {format = StatDyn  (dynamic nv), life = lifespan}// convert the hidden state information stored in the html page
+	initNewState :: !Lifespan !Lifespan !StorageFormat !a  -> FState | TC a &  gPrint{|*|} a 
+	initNewState lifespan olifespan PlainString   nv = {format = PlainStr (printToString nv), life = order lifespan olifespan}
+	initNewState lifespan olifespan StaticDynamic nv = {format = StatDyn  (dynamic nv), life = order lifespan olifespan}// convert the hidden state information stored in the html page
 
 	adjustlife PersistentRO = Persistent // to enforce that a read only persistent file is written once
 	adjustlife life = life
+
+	detlifespan (OldState formstate) = formstate.life
+	detlifespan (NewState formstate) = formstate.life
+
+	order l1 l2 = if (l1 < l2) l2 l1	// longest lifetime chosen will be the final setting
 
 // Serialization and De-Serialization of states
 //
