@@ -10,7 +10,7 @@ initManagerLogin
 
 initManagerAccount :: Login -> ConfAccount
 initManagerAccount	login 
-= mkAccount login (ConfManager {ManagerInfo | person = RefPerson (Ref2 "" createDefault)})
+= mkAccount login (ConfManager {ManagerInfo | person = RefPerson (Ref2 "")})
 
 instance == RefPerson
 where
@@ -18,12 +18,37 @@ where
 instance == RefPaper
 where
 	(==) (RefPaper rp1) (RefPaper rp2) = rp1 == rp2
+instance < RefPaper
+where
+	(<) (RefPaper (Ref2 rp1)) (RefPaper (Ref2 rp2)) = rp1 < rp2
 instance == RefReport
 where
 	(==) (RefReport rp1) (RefReport rp2) = rp1 == rp2
-instance == (Refto a)
+instance < RefReport
 where
-	(==) (Refto rp1) (Refto rp2) = rp1 == rp2
+	(<) (RefReport (Ref2 rp1)) (RefReport (Ref2 rp2)) = rp1 < rp2
+instance == PaperStatus
+where
+	(==) Accepted Accepted = True
+	(==) CondAccepted CondAccepted = True
+	(==) Rejected Rejected = True
+	(==) (UnderDiscussion d1) (UnderDiscussion d2) = d1 == d2
+	(==) Submitted Submitted = True
+	(==) _ _ = False
+
+instance == DiscussionStatus
+where
+	(==) ProposeAccept ProposeAccept = True
+	(==) ProposeCondAccept ProposeCondAccept = True
+	(==) ProposeReject ProposeReject = True
+	(==) DoDiscuss DoDiscuss = True
+	(==) _ _ = False
+
+:: DiscussionStatus
+				=	ProposeAccept
+				|	ProposeCondAccept
+				|	ProposeReject
+				|	DoDiscuss	
 
 isConfManager :: ConfAccount -> Bool
 isConfManager account 
@@ -56,8 +81,9 @@ getRefPerson (Authors paperInfo)		= Just paperInfo.PaperInfo.person
 getRefPerson _ = Nothing
 
 getRefPapers :: ConfAccounts -> [(Int,RefPaper)]
-getRefPapers accounts = [(nr,refpapers) 
-						\\ {state = Authors {nr,paper = refpapers}} <- accounts]
+getRefPapers accounts = sort [(nr,refpapers) 
+							\\ {state = Authors {nr,paper = refpapers}} <- accounts]
+
 
 getPaperInfo :: Int ConfAccounts -> Maybe PaperInfo
 getPaperInfo i accounts =  case [info \\ {state = Authors info=:{nr}} <- accounts | i == nr] of
@@ -88,7 +114,7 @@ getMyRefReports account accounts
 							| not (hasConflict i (fromJust me) [account])]
 
 getMyReports :: ConfAccount -> [(Int, RefReport)]
-getMyReports {state = Referee {reports = Reports allreports}} =  allreports
+getMyReports {state = Referee {reports = Reports allreports}} =  sort allreports
 getMyReports _ = []
 
 addMyReport :: (Int,RefReport) ConfAccount ConfAccounts -> ConfAccounts
@@ -132,7 +158,7 @@ addAssignment nr sperson [] = []
 addAssignment nr sperson [acc=:{state = Referee ref}:accs] 
 # person 			= ref.RefereeInfo.person
 # (Reports reports) = ref.RefereeInfo.reports
-| sperson == person = [{acc & state  = Referee {ref & reports = Reports [(nr,RefReport (Ref2 "" createDefault)):reports]}}:accs]
+| sperson == person = [{acc & state  = Referee {ref & reports = Reports [(nr,RefReport (Ref2 "")):reports]}}:accs]
 = [acc:addAssignment nr sperson accs]
 addAssignment nr sperson [acc:accs] = [acc:addAssignment nr sperson accs]
 
@@ -233,16 +259,16 @@ where
 	=	case account.state of
 			(ConfManager managerInfo) -> 
 				{account & state = ConfManager 	{managerInfo 
-												& ManagerInfo.person 	= RefPerson (Ref2 uniquename createDefault)}}
+												& ManagerInfo.person 	= RefPerson (Ref2 uniquename)}}
 			(Referee refereeInfo) ->
 				{account & state = Referee 		{refereeInfo 
-												& RefereeInfo.person 	= RefPerson (Ref2 uniquename createDefault)
+												& RefereeInfo.person 	= RefPerson (Ref2 uniquename)
 												, RefereeInfo.reports 	= setInvariantReports refereeInfo.reports}}
 			(Authors paperInfo) ->
 				{account & state = Authors 		{paperInfo 
-												& PaperInfo.person 		= RefPerson 	(Ref2 uniquename createDefault)
-												, PaperInfo.discussion	= RefDiscussion (Ref2 (uniqueDiscussion paperInfo.nr uniquename) createDefault)
-												, PaperInfo.paper 		= RefPaper(Ref2 (uniquePaper paperInfo.nr uniquename) createDefault)}}
+												& PaperInfo.person 		= RefPerson 	(Ref2 uniquename)
+												, PaperInfo.discussion	= RefDiscussion (Ref2 (uniqueDiscussion paperInfo.nr uniquename))
+												, PaperInfo.paper 		= RefPaper(Ref2 (uniquePaper paperInfo.nr uniquename))}}
 			_ -> account
 	where
 		uniquename = uniquePerson account.login.loginName
@@ -251,9 +277,8 @@ where
 		
 		setInvariantReport :: [(PaperNr, RefReport)] -> [(PaperNr, RefReport)]
 		setInvariantReport [] = []
-		setInvariantReport [(nr, (RefReport (Ref2 _ _))):reports]
-						 = [(nr, (RefReport (Ref2 (uniqueReport nr uniquename) createDefault))):setInvariantReport reports]
-	
+		setInvariantReport [(nr, (RefReport (Ref2 _))):reports]
+						 = [(nr, (RefReport (Ref2 (uniqueReport nr uniquename)))):setInvariantReport reports]
 		setInvariantReport [report:reports]
 						 = [report:setInvariantReport reports]
 

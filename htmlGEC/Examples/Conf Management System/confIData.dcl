@@ -49,9 +49,15 @@ PaperNrStore 		:: !(Int -> Int) *HSt -> (Int,!*HSt) 					// paper counter
 
 // editors for referenced types
 
-editorRefPerson 	:: !(InIDataId RefPerson) 		!*HSt -> (Form RefPerson,!*HSt)
-editorRefPaper 		:: !(InIDataId RefPaper) 		!*HSt -> (Form RefPaper,!*HSt)
-editorRefReport 	:: !(InIDataId RefReport) 		!*HSt -> (Form RefReport,!*HSt)
-editorRefDiscussion :: !(InIDataId RefDiscussion)	!*HSt -> (Form RefDiscussion,!*HSt)
+editorRefPerson 	:: !(InIDataId RefPerson) 		!*HSt -> (Form Person,!*HSt)
+editorRefPaper 		:: !(InIDataId RefPaper) 		!*HSt -> (Form Paper,!*HSt)
+editorRefReport 	:: !(InIDataId RefReport) 		!*HSt -> (Form (Maybe Report),!*HSt)
+editorRefDiscussion :: !(InIDataId RefDiscussion)	!*HSt -> (Form Discussion,!*HSt)
 
+// access functions on referenced types
+
+derefPersons 	:: [RefPerson] !*HSt -> ([Person],!*HSt)
+derefReports 	:: [RefReport] !*HSt -> ([Maybe Report],!*HSt)
+getAllPersons 	:: !ConfAccounts !*HSt -> ([RefPerson],[Person],!*HSt)
+getAllMyReports :: !ConfAccount !ConfAccounts !*HSt -> ([(Int,[(Person, Maybe Report)])],!*HSt)
 

@@ -6,23 +6,48 @@ import loginAdminIData, confIData, stateHandlingIData
 
 // Here it starts ....
 
-Start world  = doHtmlServer mainEntrance world
-//Start world  = doHtmlServer test world
+import StdDebug
+
+Start world = doHtmlServer test world
+
+:: PH = PH [BodyTag]
+:: NPH = NPH
+
+gForm {|PH|} (init,formid) hst = specialize myedit (init,formid) hst
+where
+	myedit (init,formid) hst
+	# (PH bodytag) = formid.ival
+	# (idata,hst) = mkBimapEditor (Init,{subtFormId formid "_htm" bodytag & mode = NoForm}) {map_to = \_ -> NPH, map_from = \_ -> bodytag} hst
+//	= ({changed = False, form = idata.value, value = PH idata.value},hst)
+	= ({changed = False, form = idata.form, value = PH idata.form},hst)
+
+
+gUpd{|PH|} (UpdSearch (UpdI ni) 0) 	_ 	= (UpdDone,PH [])					// update integer value
+gUpd{|PH|} (UpdSearch val cnt)     	i 	= (UpdSearch val (dec cnt),i)		// continue search, don't change
+gUpd{|PH|} (UpdCreate l)	_			= (UpdCreate l,PH [])					// create default value
+gUpd{|PH|} mode 			  		i 	= (mode,i)						// don't change
+
+gPrint{|PH|} ph st = gPrint{|*|} NPH st
+gParse{|PH|} expr = case gParse{|*|} expr of
+						(Just NPH) -> Just (PH [])
+						_ -> Nothing
+
+derive gParse NPH
+derive gPrint NPH
+derive gForm  NPH
+derive gUpd   NPH
 
 test hst
-# (body,hst) = mkEditForm (Init,nFormId "xx" (23,try)) hst				// a login will be checked on correctness each time a page is requested !
-= mkHtml "Conference Manager" 
-	[ BodyTag body.form
+# (idata,hst) = mkEditForm (Init,nFormId "x" (0 <-> PH [Txt "zo gaat ie goed"])) hst
+= mkHtml ""
+	[ BodyTag idata.form
 	] hst
-where
-	try = HTML [Txt "Is dit wel een goed idee ?",B [] "of niet"]
 
 mainEntrance hst
 # (body,hst) 	= loginhandling hst				// a login will be checked on correctness each time a page is requested !
 = mkHtml "Conference Manager" 
 	[ BodyTag body
 	] hst
-
 
 // login page handling
 
@@ -49,6 +74,7 @@ loginhandling  hst
 				| 	ListPapers				// referees + root
 				| 	ListReports
 				| 	DiscussPapers
+				|	ShowPapersStatus
 				|	RefereeForm				
 				| 	RefereeHomePage			// referees
 
@@ -73,15 +99,18 @@ where
 		, (LButton defpixel "AssignPapers", 	\_.AssignPapers)
 		, (LButton defpixel "ListReports", 		\_.ListReports)
 		, (LButton defpixel "DiscussPapers", 	\_.DiscussPapers)
+		, (LButton defpixel "ShowPaperStatus", 	\_.ShowPapersStatus)
 		, (LButton defpixel "ChangeInfo", 		\_.ChangeInfo)
 		, (LButton defpixel "ChangePsswrd", 	\_.ChangePassword)
 		]
+
 	navButtons (Referee info) = 
 		[ (LButton defpixel "Home", 			\_.RefereeHomePage)
 		, (LButton defpixel "ListPapers", 		\_.ListPapers)
 		, (LButton defpixel "RefereeForm", 		\_.RefereeForm)
 		, (LButton defpixel "ListReports", 		\_.ListReports)
 		, (LButton defpixel "DiscussPapers", 	\_.DiscussPapers)
+		, (LButton defpixel "ShowPaperStatus", 	\_.ShowPapersStatus)
 		, (LButton defpixel "ChangeInfo", 		\_.ChangeInfo)
 		, (LButton defpixel "ChangePsswrd", 	\_.ChangePassword)
 		]
@@ -141,10 +170,10 @@ where
 			RefereeForm 	-> submitReportPage account accounts hst
 			ListReports		-> showReportsPage account accounts hst
 			DiscussPapers	-> discussPapersPage account accounts hst	
+			ShowPapersStatus-> showPapersStatusPage account accounts hst	
 			ChangeInfo		-> changeInfo account hst  
 			ChangePassword 	-> changePasswrdPage account accounts hst
 			_				-> ([],hst)
-	
 	where
 		changePasswrdPage account accounts hst 
 		# (mbaccount,body,hst) = changePasswordPage account hst
@@ -220,11 +249,11 @@ where
 	# uniquepaper			= uniquePaper paperNr uniquename
 	# uniquediscussion		= uniqueDiscussion paperNr uniquename
 	# account				= {login  = (snd guestf.value).login
-							  , state = Authors 	{ person =  RefPerson (Ref2 uniquename createDefault)
+							  , state = Authors 	{ person =  RefPerson (Ref2 uniquename)
 													, nr = paperNr
-													, paper	= RefPaper (Ref2 uniquepaper createDefault )
+													, paper	= RefPaper (Ref2 uniquepaper)
 													, status = Submitted
-													, discussion = RefDiscussion (Ref2 uniquediscussion createDefault) 
+													, discussion = RefDiscussion (Ref2 uniquediscussion) 
 													}}
 	# (_,hst)				= adjustLogin account hst
 	# accounts				= addAccount account accounts

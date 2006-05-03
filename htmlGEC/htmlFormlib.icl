@@ -135,6 +135,24 @@ mkSubStateForm (init,formid) state upd hst
 where
 	subState = formid.ival
 
+mkShowHideForm :: !(InIDataId a)  !*HSt -> (Form a,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+mkShowHideForm  (init,formid)  hst 
+| formid.mode == NoForm || formid.lifespan == Temp
+	= mkEditForm (init,formid) hst
+# (hiding,hst)	= mkStoreForm (Init,subFormId formid "ShowHideSore" True) id hst // True == Hide
+# (switch,hst)	= myfuncbut hiding.value hst	
+# hide 			= switch.value hiding.value
+# (hiding,hst)	= mkStoreForm (Set,subFormId formid "ShowHideSore" True) (\b -> hide) hst // True == Hide
+# (switch,hst)	= myfuncbut hiding.value hst
+| hide
+	# (info,hst)	= mkEditForm (init,{formid & mode = NoForm}) hst // noForm
+	= ({info & form = switch.form},hst)
+# (info,hst) = mkEditForm (init,formid) hst
+= ({info & form = switch.form ++ info.form},hst)
+where
+	mybut hide 	= LButton defpixel (if hide "Show" "Hide") 	
+	myfuncbut hide	= FuncBut (Init,{subFormId formid "ShowHideBut" (mybut hide,not) & mode = Edit})
+
 // Form collection:
 
 horlistForm :: !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
@@ -260,8 +278,8 @@ t4EditForm (init,formid) hst
 where
 	(a,b,c,d) = formid.ival
 
-simpleButton :: !String !(a -> a) !*HSt -> (Form (a -> a),!*HSt)
-simpleButton label fun hst = FuncBut (Init, nFormId ("fl_" +++ label) (LButton defpixel label,fun)) hst
+simpleButton :: !String !String !(a -> a) !*HSt -> (Form (a -> a),!*HSt)
+simpleButton id label fun hst = FuncBut (Init, nFormId (id +++ label) (LButton defpixel label,fun)) hst
 
 counterForm :: !(InIDataId a) !*HSt -> (Form a,!*HSt) | +, -, one, gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 counterForm inIDataId hst = mkViewForm inIDataId bimap hst

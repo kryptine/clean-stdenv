@@ -6,69 +6,45 @@ implementation module htmlRefFormlib
 import StdEnv, StdHtml, StdLib
 
 derive gForm []; derive gUpd []
-derive gForm 	Refto, Maybe
-derive gUpd 	Refto, Maybe
-derive gPrint 	Refto, Maybe
-derive gParse 	Refto, Maybe
+derive gForm 	Maybe
+derive gUpd 	Maybe
+derive gPrint 	Maybe
+derive gParse 	Maybe
 
-:: Ref2 a = Ref2 String a
+:: Ref2 a = Ref2 String
 
 instance == (Ref2 a)
 where
-	(==)(Ref2 file1 value1) (Ref2 file2 value2) = file1 == file2
+	(==)(Ref2 file1) (Ref2 file2) = file1 == file2
 
-ref2EditForm :: !(!Init,!Mode!,!Lifespan) !(InIDataId (Ref2 a)) !*HSt -> (Form (Ref2 a),!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-ref2EditForm  (initv,modev,lifespan) (init,formid) hst 
-//# (hide,hst)	= mkEditForm 	(Init, reuseFormId formid True) hst
-//# (change,hst)	= FuncBut 		(init, subFormId formid "hos" (button hide.value)) hst
-//# (hide,hst)	= mkEditForm 	(Set, reuseFormId formid (change.value hide.value)) hst
-//# (change,hst)	= FuncBut 		(Set, subFormId formid "hos" (button hide.value)) hst
-# (file,hst) 	= mkEditForm (initv,{ formid 	& id 		= filename
-												, ival		= a
-												, lifespan 	= lifespan
-												, mode		= modev 
-									}) hst
-= 	( {file & value = Ref2 filename file.value}
-	, hst
-	)
+ref2EditForm :: !(InIDataId a) !(InIDataId (Ref2 a))  !*HSt -> (Form a,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+ref2EditForm  (inita,formida) (initra,formidra) hst 
+| refname == "" = mkEditForm (Init,reuseFormId formida createDefault) hst
+= mkEditForm (inita,{formida & id = refname}) hst
 where
-	(Ref2 filename a) = formid.ival
-	button hide = (LButton defpixel (if hide "show" "hide" +++ filename),\b -> not b)
+	(Ref2 refname) = formidra.ival
 
-
-:: Refto a = Refto String
-
-
-reftoEditForm :: !(!Init,!Mode!,!Lifespan) !(InIDataId (Refto a,a)) !*HSt -> (Form (Refto a),Form a,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-reftoEditForm  (initv,modev,lifespan) (init,formid) hst 
-# (ref,hst)		= mkEditForm (init, reuseFormId formid (Refto filename)) hst
-# (Refto nname)	= ref.value
-# (file,hst) 	= mkEditForm (initv,{ formid 	& id 		= nname
-												, ival		= a
-												, lifespan 	= lifespan
-												, mode		= modev 
-									}) hst
-= 	( {ref  & form = [[toHtml ("File Name: " )] <=> ref.form]}
-	, {file & form = [[toHtml (nname +++ ": ")] <=> file.form]}
-	, hst
-	)
-where
-	(Refto filename,a) = formid.ival
+invokeRefEditor :: (!(InIDataId b) !*HSt -> (Form d,!*HSt)) (InIDataId b) !*HSt -> (Form b,!*HSt)
+invokeRefEditor editor (init,formid) hst
+# (idata,hst)		= editor (init,formid) hst
+= ({idata & value = formid.ival},hst)
 
 universalRefEditor 	:: !(InIDataId (Ref2 a)) !(a -> Judgement)  !*HSt -> (Form a,!*HSt)   	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 universalRefEditor (init,formid) invariant  hst
-# (Ref2 filename value)	= formid.ival
-# (dbf,hst)			= myDatabase Init filename (0,value) hst		
+# (Ref2 filename)	= formid.ival
+| filename == ""	= mkEditForm (Init,xtFormId "ure_TEMP" createDefault) hst
+# (dbf,hst)			= myDatabase Init filename (0,createDefault) hst		
 																// create / read out current value in file file
-# (Ref2 _ dbvalue)	= dbf.value	
+# dbvalue			= dbf.value	
 # dbversion			= fst dbvalue								// version number stored in database
 # dbvalue			= snd dbvalue								// value stored in database
 # (versionf,hst)	= myVersion Init filename dbversion hst 	// create / read out version number expected by this application
 # version			= versionf.value							// current version number assumed in this application
 | init == Init && 
 			(formid.mode == Display || formid.mode == NoForm || filename == "") 	// we only want to read, no version conflict
-	# (_,hst)		= myVersion Set filename dbversion hst 		// synchronize version number and
-	= myEditor Set filename dbvalue hst									// synchronize with latest value 
+//	# (_,hst)		= myVersion Set filename dbversion hst 		// synchronize version number and
+//	= myEditor Set filename dbvalue hst							// synchronize with latest value 
+	= myEditor Init filename dbvalue hst							// synchronize with latest value 
 | dbversion > version											// we have a version conflict and want to write
 	# (_,hst)		= ExceptionStore ((+) (Just (filename, "Ref Your screen data is out of date; I have retrieved the latest data."))) hst	// Raise exception
 	# (_,hst)		= myVersion Set filename dbversion hst		// synchronize with new version
@@ -82,32 +58,22 @@ universalRefEditor (init,formid) invariant  hst
 //	= (valuef,hst)												// so we don't write anything
 # (versionf,hst)	= myVersion  Set filename (dbversion + 1) hst// increment version number
 # (_,hst)			= myDatabase Set filename (dbversion + 1,valuef.value) hst // update database file
-//# (_,_,hst)			= myDatabase Set filename (dbversion + 1,valuef.value) hst // update database file
 = ({valuef & changed = True},hst)
 where
 	myDatabase dbinit filename cntvalue hst 
-	# databaseId	= {reuseFormId formid (Ref2 filename cntvalue) & id = formid.id +++ "refto" /*+++ filename*/}
+	# databaseId	= {reuseFormId formid (Ref2 filename) & id = formid.id +++ "refto" /*+++ filename*/}
 	= case dbinit of
-		Init = ref2EditForm (Init,NoForm,PersistentRO) (init,databaseId) hst 	// read the database
-		Set	 = ref2EditForm (Set, NoForm,Persistent)   (init,databaseId) hst	// write the database
-/*
-	# databaseId	= {reuseFormId formid (Refto filename,cntvalue) & id = formid.id +++ "refto" /*+++ filename*/}
-	= case dbinit of
-		Init = reftoEditForm (Init,NoForm,PersistentRO) (init,databaseId) hst 	// read the database
-		Set	 = reftoEditForm (Set, NoForm,Persistent)   (init,databaseId) hst	// write the database
-*/
+		Init = ref2EditForm (Init,xrFormId "" cntvalue) (init,databaseId) hst 	// read the database
+		Set	 = ref2EditForm (Set, xpFormId "" cntvalue) (init,databaseId) hst	// write the database
+
 	myVersion init filename cnt hst	= mkEditForm (init,{reuseFormId formid cnt & id = ("vrs_r_" +++ filename)
 																				, mode = NoForm}) hst						// to remember version number
 
 	myEditor :: !Init  !String !a *HSt -> (Form a,!*HSt)   | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 	myEditor init filename value hst	
 	# formId = {reuseFormId formid value & id = "copy_r_" +++ filename}
-	= mkEditForm (init,formId) hst	// copy of database information 
+	= mkShowHideForm (init,formId) hst	// copy of database information 
 
-invokeRefEditor :: (!(InIDataId b) !*HSt -> (Form d,!*HSt)) (InIDataId b) !*HSt -> (Form b,!*HSt)
-invokeRefEditor editor (init,formid) hst
-# (formf,hst)		= editor (init,formid) hst
-= ({formf & value = formid.ival},hst)
 
 // editor for persistent information
 
@@ -138,6 +104,52 @@ where
 
 	myVersion init cnt hst	= mkEditForm (init,xtFormId ("vrs_db_" +++ filename) cnt) hst		// to remember version number
 
+// Exception handling 
+
+Ok :: Judgement
+Ok = Nothing
+
+noException			:: Judgement -> Bool
+noException		Nothing = True
+noException		_ = False
+
+yesException		:: Judgement -> Bool
+yesException judgement = not (noException judgement)
+
+instance + Judgement
+where
+	(+) j1 j2 = addJudgement j1 j2
+	where
+//		addJudgement (Just (r1,j1)) (Just (r2,j2)) 	= (Just ((r1 +++ " " +++ r2),(j1 +++ " " +++ j2))) //for debugging
+		addJudgement (Just j1) _ 	= (Just j1)
+		addJudgement _  (Just j2) 	= (Just j2)
+		addJudgement _ _ 			= Nothing
+
+ExceptionStore :: (Judgement -> Judgement) !*HSt -> (Judgement,!*HSt)
+ExceptionStore judge hst 
+# (judgef,hst) = mkStoreForm (Init,{nFormId "handle_exception" Ok & mode = NoForm, lifespan = Temp}) judge hst
+= (judgef.value,hst)
+
+/*
+
+:: Refto a = Refto String
+
+
+reftoEditForm :: !(!Init,!Mode!,!Lifespan) !(InIDataId (Refto a,a)) !*HSt -> (Form (Refto a),Form a,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+reftoEditForm  (initv,modev,lifespan) (init,formid) hst 
+# (ref,hst)		= mkEditForm (init, reuseFormId formid (Refto filename)) hst
+# (Refto nname)	= ref.value
+# (file,hst) 	= mkEditForm (initv,{ formid 	& id 		= nname
+												, ival		= a
+												, lifespan 	= lifespan
+												, mode		= modev 
+									}) hst
+= 	( {ref  & form = [[toHtml ("File Name: " )] <=> ref.form]}
+	, {file & form = [[toHtml (nname +++ ": ")] <=> file.form]}
+	, hst
+	)
+where
+	(Refto filename,a) = formid.ival
 
 
 // special editors on top of this ...
@@ -252,29 +264,4 @@ where
 
 
 
-// Exception handling 
-
-Ok :: Judgement
-Ok = Nothing
-
-noException			:: Judgement -> Bool
-noException		Nothing = True
-noException		_ = False
-
-yesException		:: Judgement -> Bool
-yesException judgement = not (noException judgement)
-
-instance + Judgement
-where
-	(+) j1 j2 = addJudgement j1 j2
-	where
-//		addJudgement (Just (r1,j1)) (Just (r2,j2)) 	= (Just ((r1 +++ " " +++ r2),(j1 +++ " " +++ j2))) //for debugging
-		addJudgement (Just j1) _ 	= (Just j1)
-		addJudgement _  (Just j2) 	= (Just j2)
-		addJudgement _ _ 			= Nothing
-
-ExceptionStore :: (Judgement -> Judgement) !*HSt -> (Judgement,!*HSt)
-ExceptionStore judge hst 
-# (judgef,hst) = mkStoreForm (Init,{nFormId "handle_exception" Ok & mode = NoForm, lifespan = Temp}) judge hst
-= (judgef.value,hst)
-
+*/
