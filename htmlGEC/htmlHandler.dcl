@@ -12,7 +12,11 @@ TraceInput :== False		// set it to True if you want to see what kind of informat
 
 derive bimap Form, FormId
 
-:: *HSt 					// unique state required for creating Html forms
+//:: *HSt 					// unique state required for creating Html forms
+:: *HSt 		= 	{ cntr 		:: Int // InputId		// counts position in expression
+					, states 	:: *FormStates  // all form states are collected here ... 	
+					, world		:: *NWorld		// to enable all other kinds of I/O
+					}	
 
 // doHtml main wrapper for generating & handling of a Html form
 
@@ -68,15 +72,3 @@ getChangedId	:: !*HSt -> (String,!*HSt)					// id of form that has been changed 
 :: UpdMode	= UpdSearch UpdValue Int		// search for indicated postion and update it
 			| UpdCreate [ConsPos]			// create new values if necessary
 			| UpdDone						// and just copy the remaining stuff
-
-// for testing pages:
-
-//:: Triplet 		:== (String,Int,UpdValue)
-:: *TestEvent	:== (Triplet,UpdValue,*FormStates) // chosen triplet, its new value 
-
-doHtmlTest :: (Maybe *TestEvent) (*HSt -> (Html,!*HSt)) *World -> ([(InputType,Value,Maybe Triplet)],*FormStates,*World) // use this for testing
-randomTest :: !Int !(*HSt -> (Html,!*HSt)) *World -> ([(Triplet,UpdValue)],*World)
-doHtmlTest2 :: (Maybe *TestEvent) (*HSt -> (Html,!*HSt)) *NWorld -> ([(InputType,Value,Maybe Triplet)],*FormStates,*NWorld)
-doHtmlTest3 :: (Maybe *TestEvent) (*HSt -> (Html,!*HSt)) *NWorld -> (Html,*FormStates,*NWorld)
-fetchInputOptions1 :: Html -> [(InputType,Value,Maybe (String,Int,UpdValue))] // determine from html code which inputs can be given next time
-findTexts :: Html -> [String] // find fixed strings in Html
