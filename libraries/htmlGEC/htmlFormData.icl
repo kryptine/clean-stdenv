@@ -78,23 +78,26 @@ ndDFormId s d = {id = s, lifespan = Page, mode = Display, storage = StaticDynami
 
 // create id's
 
+(++/) infixr 5 
+(++/) s1 s2 = s1 +++ "/" +++ s2
+
 extidFormId :: !(FormId d) !String -> (FormId d)
-extidFormId formid s = {formid & id = formid.id +++ s}
+extidFormId formid s = {formid & id = formid.id ++/ s}
 
 subFormId :: !(FormId a) !String !d 	-> (FormId d)	// make new formid of new type coping other old settinf
-subFormId formid s d = {formid & id = formid.id +++ s, ival = d}
+subFormId formid s d = {formid & id = formid.id ++/ s, ival = d}
 
 subnFormId :: !(FormId a) !String !d 	-> (FormId d)	// make new formid of new type coping other old settinf
-subnFormId formid s d = {formid & id = formid.id +++ s, ival = d, lifespan = Page}
+subnFormId formid s d = {formid & id = formid.id ++/ s, ival = d, lifespan = Page}
 
 subsFormId :: !(FormId a) !String !d 	-> (FormId d)	// make new formid of new type coping other old settinf
-subsFormId formid s d = {formid & id = formid.id +++ s, ival = d, lifespan = Session}
+subsFormId formid s d = {formid & id = formid.id ++/ s, ival = d, lifespan = Session}
 
 subpFormId :: !(FormId a) !String !d 	-> (FormId d)	// make new formid of new type coping other old settinf
-subpFormId formid s d = {formid & id = formid.id +++ s, ival = d, lifespan = Persistent}
+subpFormId formid s d = {formid & id = formid.id ++/ s, ival = d, lifespan = Persistent}
 
 subtFormId :: !(FormId a) !String !d 	-> (FormId d)	// make new formid of new type coping other old settinf
-subtFormId formid s d = {formid & id = formid.id +++ s, ival = d, lifespan = Temp}
+subtFormId formid s d = {formid & id = formid.id ++/ s, ival = d, lifespan = Temp}
 
 setFormId :: !(FormId d) !d -> (FormId d)			// set new initial value in formid
 setFormId formid d = {formid & ival = d}
