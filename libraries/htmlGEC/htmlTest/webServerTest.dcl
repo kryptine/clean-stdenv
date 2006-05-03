@@ -2,7 +2,7 @@ definition module webServerTest
 
 /*
 	Special library to test Webservers.
-	Pieter Koopman 2005
+	Pieter Koopman 2005, 2006
 */
 
 //import StdEnv, gast, StdHtml, htmlPrintUtil
