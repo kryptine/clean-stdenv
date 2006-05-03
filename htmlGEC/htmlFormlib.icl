@@ -344,8 +344,8 @@ FuncButNr i (init,formid) hst
 					, resetForm	= Just (const button)
 					}
 		nformid = case button of
-					LButton _ name -> {formid & id = formid.id <+++ name <+++ i}
-					PButton _ ref  -> {formid & id = formid.id <+++ i <+++ ref}
+					LButton _ name -> {formid & id = formid.id <+++ "/" <+++ name <+++ "/" <+++ i}
+					PButton _ ref  -> {formid & id = formid.id <+++ "/" <+++ i <+++ "/" <+++ ref}
 
 TableFuncBut :: !(InIDataId [[(Button, a -> a)]]) !*HSt -> (Form (a -> a) ,!*HSt)
 TableFuncBut inIDataId hSt
@@ -516,7 +516,7 @@ where
 			| stripname b.changedId == formid.id = RBNotChecked formid.id
 			| otherwise = v
 			
-			nformid = {formid & id = formid.id +++ "_" +++ toString j, ival = (\_ a -> a,-1)}
+			nformid = {formid & id = formid.id +++ "/" +++ toString j, ival = (\_ a -> a,-1)}
 
 			stripname name = mkString (takeWhile ((<>) '_') (mkList name))
 
