@@ -59,14 +59,11 @@ derive gEq		TestState, Running
 derive genShow	In, TestState, Running
 
 someTextStartsWith :: String [String] -> Bool
-someTextStartsWith s l = stsw s (size s-1) l
-where
-	stsw s n [] = False
-	stsw s n [h:t] = (size h>n && (h%(0,n)==s)) || stsw s n t
+someTextStartsWith s l = any (\h -> size h >= size s && h%(0,size s-1)==s) l
 
 transInput (StringTextBox n) = HtmlStringTextBox "name" n
 transInput (IntTextBox n) = HtmlIntTextBox "guess" n
-trasnInput _ = abort "Undefined input in trasnInput"
+transInput _ = abort "Undefined input in transInput"
 
 // --------- The Implementation --------- //
 
@@ -77,11 +74,11 @@ f :: a *(Trees a) (Trees a) -> *(Trees a)
 f a x y = SNode a x y 
 
 Start :: *World -> *World
-//Start world	= doHtmlServer numberGuessingGame world // Running as web application
+Start world	= doHtmlServer numberGuessingGame world // Running as web application
 
 // --------- Testing --------- //
 
-Start world = testHtml [Nsequences 100, Ntests 100] spec InitState transInput numberGuessingGame world
+//Start world = testHtml [Nsequences 100, Ntests 100] spec InitState transInput numberGuessingGame world
 
 ::	State	= { count	:: !Int
 			  , guess	:: !Int
@@ -120,40 +117,44 @@ adjustState newname newguess seed name guess state
 
 numberGuessingGame :: *HSt -> (Html, *HSt)
 numberGuessingGame hst
-	# (ostate, hst)		= stateForm id hst							// get state
-	# (name, hst)		= nameForm hst								// get name
-	# (guess, hst)		= guessForm hst								// get new quess
-
+	# (ostate,hst)		= stateForm id hst							// get state
+	# (name,  hst)		= nameForm     hst							// get name
+	# (guess, hst)		= guessForm    hst							// get new quess
 	# (randomSeed,hst)	= accWorldHSt getNewRandomSeed hst			// create random number seed
-	# (nstate, hst)		= stateForm 		 						// adjust state
-							(\st -> adjustState name.changed guess.changed randomSeed name.value guess.value st) hst
-
+	# (nstate,hst)		= stateForm 		 						// adjust state
+							(adjustState name.changed guess.changed randomSeed name.value guess.value) hst
 	= mkHtml "Number Guessing Game"
-	  (	[ Txt ("Type in your name and guess a number between "<$ low <$ " and " <$ up <$ ".")
-	  	, Br, Br
-		, name.form 
-	  	<||> guess.form
-	  	, Br 
-	  	] ++ 
-		(if guess.changed
-			(if (guess.value == ostate.value.guess)
-				[ Txt` "Answer" ("Congratulations " <$ name.value <$ ".")
-				, Br 
-				, Txt ("You have guessed the number in " <$ ostate.value.count <$ " turn" <$ if (ostate.value.count>1) "s." ".")
-				, Br, Br 
-				, Txt "Here follows the list of fame: "
-				, Br, Br 
-				, BodyTag (toHtmlForm (highForm (sort nstate.value.high)))
-				, Br, Br 
-				, Txt ("Just type in a new number if you want to guess again...")
-				] 
-				[ Txt` "Answer" ("Sorry, " <$ name.value <$ ", your guess number " <$ ostate.value.count <$ " was wrong.")
-				, Br, Br
-				, Txt` "Hint" ("The number to guess is "<$if (guess.value < ostate.value.guess) "larger." "smaller.") 
-				]
+	  (	headerHTML name guess ++ 									// display game information
+		(if guess.changed											// new guess by player
+			(if (guess.value == ostate.value.guess)					// player has guessed the number
+				(successHTML name nstate ostate) 					// congratulate player
+				(failureHTML name guess  ostate)					// provide hint to player
 			)
 			[])
-		) hst
+	  ) hst
+where
+	headerHTML name guess
+				= [ Txt ("Type in your name and guess a number between "<$ low <$ " and " <$ up <$ ".")
+			  	  , Br, Br
+				  , name.form <||> guess.form
+			  	  , Br 
+			  	  ]
+	successHTML	name nstate ostate
+				= [ Txt` "Answer" ("Congratulations " <$ name.value <$ ".")
+				  , Br 
+				  , Txt ("You have guessed the number in " <$ ostate.value.count <$ " turn" <$ if (ostate.value.count>1) "s." ".")
+				  , Br, Br 
+				  , Txt "Here follows the list of fame: "
+				  , Br, Br 
+				  , BodyTag (toHtmlForm (highForm (sort nstate.value.high)))
+				  , Br
+				  , Txt "Just type in a new number if you want to guess again..."
+				  ]
+	failureHTML	name guess ostate
+				= [ Txt` "Answer" ("Sorry, " <$ name.value <$ ", your guess number " <$ ostate.value.count <$ " was wrong.")
+				  , Br, Br
+				  , Txt` "Hint" ("The number to guess is "<$if (guess.value < ostate.value.guess) "larger." "smaller.") 
+				  ]
 
 Txt` tag string = A [Lnk_Name tag] [Txt string]
 
