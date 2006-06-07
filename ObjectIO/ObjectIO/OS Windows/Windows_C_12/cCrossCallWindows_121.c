@@ -2455,7 +2455,7 @@ void EvalCcRqCREATESDIDOCWINDOW (CrossCallInfo *pcci)	/* textptr, frameptr, pack
 	pwintitle    = (LPCTSTR) pcci->p1;
 	hwndFrame    = (HWND) pcci->p2;
 	winpos.x     = pcci->p3>>16;
-	winpos.y     = (pcci->p3<<16)>>16;
+	winpos.y     = (SHORT)pcci->p3;
 	clientDims.x = pcci->p4;
 	clientDims.y = pcci->p5;
 	styleFlags   = (DWORD) pcci->p6;
@@ -2513,9 +2513,9 @@ void EvalCcRqCREATEMDIDOCWINDOW (CrossCallInfo *pcci)		/* textptr, clientPtr, be
 	hwndClient   = (HWND) pcci->p2;
 	hwndBehind   = (HWND) pcci->p3;
 	winpos.x     = pcci->p4>>16;
-	winpos.y     = (pcci->p4<<16)>>16;
+	winpos.y     = (SHORT)pcci->p4;
 	dims.x       = pcci->p5>>16;
-	dims.y       = (pcci->p5<<16)>>16;
+	dims.y       = (SHORT)pcci->p5;
 	styleFlags   = (DWORD) pcci->p6;
 	exStyleFlags = (DWORD) 0;
 
@@ -2567,6 +2567,7 @@ void EvalCcRqGETWINDOWTEXT (CrossCallInfo *pcci) /* hwnd;  textptr result. */
 	textptr = (char *) rmalloc (length + 1);
 	GetWindowText (hwnd, textptr, length + 1);
 	textptr[length] = 0;
+
 	MakeReturn1Cci (pcci, (int) textptr);
 }
 
@@ -3028,7 +3029,7 @@ void EvalCcRqCREATECOMPOUND (CrossCallInfo *pcci)	/* hwnd, packed pos,w,h, scrol
 
 	parentwindow  = (HWND) pcci->p1;
 	left          = pcci->p2>>16;
-	top           = (pcci->p2<<16)>>16;
+	top           = (SHORT)pcci->p2;
 	width         = pcci->p3;
 	height        = pcci->p4;
 	compoundstyle = pcci->p5;
