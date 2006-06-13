@@ -199,7 +199,11 @@ static BOOL CALLBACK DialogProcedure (HWND hwnd, UINT message, WPARAM wParam, LP
 				else
 				{
 					SetCursorFromCode (GetGlobalCursorCode ());
+#ifdef _WIN64
+					SetWindowLongPtr (hwnd, DWLP_MSGRESULT, (LONG_PTR)TRUE);
+#else
 					SetWindowLong (hwnd, DWL_MSGRESULT, TRUE);
+#endif
 					return TRUE;
 				}
 			} break;
@@ -1708,7 +1712,11 @@ static LRESULT CALLBACK SDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 				LocalWindowData wdata;
 
 				wdata = AllocateLocalWindowData ();			// create the LocalWindowData struct
+#ifdef _WIN64
+				SetWindowLongPtr (hWin, 0, (LONG_PTR) wdata);//	and store it in the local memory of the window
+#else
 				SetWindowLong (hWin, 0, (long) wdata);		//	and store it in the local memory of the window
+#endif
 
 				SendMessage1ToClean (CcWmCREATE, hWin);
 
@@ -1738,7 +1746,11 @@ static LRESULT CALLBACK SDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 
 				wdata = (LocalWindowData) GetWindowLong (hWin,0);
 				wdata->lwd_usersizemoving = (BOOL)TRUE;
+#ifdef _WIN64
+				SetWindowLongPtr (hWin, 0, (LONG_PTR)wdata);
+#else
 				SetWindowLong (hWin, 0, (long)wdata);
+#endif
 			}
 			break;
 		case WM_EXITSIZEMOVE:
@@ -1747,7 +1759,11 @@ static LRESULT CALLBACK SDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 
 				wdata = (LocalWindowData) GetWindowLong (hWin,0);
 				wdata->lwd_usersizemoving = (BOOL)FALSE;
+#ifdef _WIN64
+				SetWindowLongPtr (hWin, 0, (LONG_PTR)wdata);
+#else
 				SetWindowLong (hWin, 0, (long)wdata);
+#endif
 			}
 			break;
 		/*	The WM_SIZE message informs Clean about the new size.
@@ -2196,8 +2212,11 @@ static LRESULT CALLBACK MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 				LocalWindowData wdata;
 
 				wdata = AllocateLocalWindowData ();			// create the LocalWindowData struct
+#ifdef _WIN64
+				SetWindowLongPtr (hWin, 0, (LONG_PTR)wdata);//	and store it in the local memory of the window
+#else
 				SetWindowLong (hWin, 0, (long) wdata);		//	and store it in the local memory of the window
-
+#endif
 				SendMessage1ToClean (CcWmCREATE, hWin);
 
 				/*	After creation of the window controls, their HFONT should be set to 8pt "MS Sans Serif" */
@@ -2214,7 +2233,11 @@ static LRESULT CALLBACK MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 
 				wdata = (LocalWindowData) GetWindowLong (hWin,0);
 				wdata->lwd_usersizemoving = (BOOL)TRUE;
+#ifdef _WIN64
+				SetWindowLongPtr (hWin, 0, (LONG_PTR)wdata);
+#else
 				SetWindowLong (hWin, 0, (long)wdata);
+#endif
 			}
 			break;
 		case WM_EXITSIZEMOVE:
@@ -2223,7 +2246,11 @@ static LRESULT CALLBACK MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 
 				wdata = (LocalWindowData) GetWindowLong (hWin,0);
 				wdata->lwd_usersizemoving = (BOOL)FALSE;
+#ifdef _WIN64
+				SetWindowLongPtr (hWin, 0, (LONG_PTR)wdata);
+#else
 				SetWindowLong (hWin, 0, (long)wdata);
+#endif
 			}
 			break;
 		case WM_SIZE:
@@ -2752,8 +2779,11 @@ void EvalCcRqCHANGEWINDOWCURSOR (CrossCallInfo *pcci)	/* hwnd, cursor code; no r
 	
 	wdata = (LocalWindowData) GetWindowLong (hwnd,0);
 	wdata->lwd_cursorcode = cursorcode;
+#ifdef _WIN64
+	SetWindowLongPtr (hwnd, 0, (LONG_PTR)wdata);
+#else
 	SetWindowLong (hwnd, 0, (long)wdata);
-
+#endif
 	MakeReturn0Cci (pcci);
 }
 
@@ -3295,14 +3325,17 @@ void EvalCcRqCREATEEDITTXT (CrossCallInfo *pcci) /* hwnd, x,y,w,h, flags; HWND r
 		and subclass the edit control with EditControlProcedure if isKeySensitive and
 		SimpleEditControlProcedure otherwise.
 	*/
+#ifdef _WIN64
 	if (isKeySensitive)
-	{
-		stdEditCallback = SetWindowLong (handle, GWL_WNDPROC, (LONG) EditControlProcedure);
-	}
+		stdEditCallback = SetWindowLongPtr (handle, GWLP_WNDPROC, (LONG_PTR) EditControlProcedure);
 	else
-	{
+		stdEditCallback = SetWindowLongPtr (handle, GWLP_WNDPROC, (LONG_PTR) SimpleEditControlProcedure);
+#else
+	if (isKeySensitive)
+		stdEditCallback = SetWindowLong (handle, GWL_WNDPROC, (LONG) EditControlProcedure);
+	else
 		stdEditCallback = SetWindowLong (handle, GWL_WNDPROC, (LONG) SimpleEditControlProcedure);
-	}
+#endif
 
 	MakeReturn1Cci (pcci, (int) handle);
 }
@@ -3490,7 +3523,11 @@ void EvalCcRqCREATEPOPUP (CrossCallInfo *pcci)	/* hwnd, x,y,w,h,isEditable;  HWN
 	if (isEditable)
 	{
 		hwndEdit = GetWindow (hwndPopUp,GW_CHILD);
+#ifdef _WIN64
+		stdPopUpCallback = SetWindowLongPtr (hwndEdit, GWLP_WNDPROC, (LONG_PTR) PopUpControlProcedure);
+#else
 		stdPopUpCallback = SetWindowLong (hwndEdit, GWL_WNDPROC, (LONG) PopUpControlProcedure);
+#endif
 	}
 	else
 	{

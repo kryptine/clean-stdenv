@@ -278,7 +278,7 @@ osCreateWindow	wMetrics isResizable hInfo=:{cbiHasScroll=hasHScroll} vInfo=:{cbi
 		  					bitor (if hasVScroll  WS_VSCROLL    0)
 		  					bitor (if isResizable WS_THICKFRAME 0)
 		  				//	bitor WS_CLIPCHILDREN
-		  createcci		= Rq6Cci CcRqCREATEMDIDOCWINDOW textPtr osinfo.osClient behindPtr (x<<16+(y<<16)>>16) (w<<16+(h<<16)>>16) styleFlags
+		  createcci		= Rq6Cci CcRqCREATEMDIDOCWINDOW textPtr osinfo.osClient behindPtr (x<<16+(y bitand 0xffff)) (w<<16+(h bitand 0xffff)) styleFlags
 		# (returncci,(control_info,delay_info),tb)
 						= issueCleanRequest (osCreateWindowCallback isResizable minSize maxSize create_controls update_controls)
 											createcci
@@ -295,7 +295,7 @@ osCreateWindow	wMetrics isResizable hInfo=:{cbiHasScroll=hasHScroll} vInfo=:{cbi
 	| di==SDI
 		# (textPtr,tb)	= winMakeCString title tb		// PA+++
 		  styleFlags	= (if hasHScroll WS_HSCROLL 0) bitor (if hasVScroll WS_VSCROLL 0)
-		  createcci		= Rq6Cci CcRqCREATESDIDOCWINDOW textPtr osFrame (x<<16+(y<<16)>>16) w h styleFlags
+		  createcci		= Rq6Cci CcRqCREATESDIDOCWINDOW textPtr osFrame (x<<16+(y bitand 0xffff)) w h styleFlags
 		# (returncci,(control_info,delay_info),tb)
 						= issueCleanRequest (osCreateWindowCallback isResizable minSize maxSize create_controls update_controls)
 											createcci
@@ -651,7 +651,7 @@ osCreateCompoundControl wMetrics parentWindow parentPos show able isTransparent 
 						vInfo=:{cbiHasScroll=hasVScroll} tb
 	# (x,y)			= (x-fst parentPos,y-snd parentPos)
 	  scrollFlags	= (if hasHScroll WS_HSCROLL 0) bitor (if hasVScroll WS_VSCROLL 0)
-	  createcci		= Rq6Cci CcRqCREATECOMPOUND parentWindow (x<<16+(y<<16)>>16) w h scrollFlags (toInt isTransparent)
+	  createcci		= Rq6Cci CcRqCREATECOMPOUND parentWindow (x<<16+(y bitand 0xffff)) w h scrollFlags (toInt isTransparent)
 	# (returncci,tb)= issueCleanRequest2 osIgnoreCallback createcci tb
 	  compoundPtr	= case returncci.ccMsg of
 						CcRETURN1	-> returncci.p1

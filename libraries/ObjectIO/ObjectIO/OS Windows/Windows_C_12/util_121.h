@@ -18,17 +18,19 @@ typedef int Bool;
 typedef int HITEM; 
 
 typedef struct 
-{   int  mess;
-    int  p1;
-    int  p2;
-    int  p3;
-    int  p4;
-    int  p5;
-    int  p6;
+{   int    mess;
+    size_t p1;
+    size_t p2;
+    size_t p3;
+    size_t p4;
+    size_t p5;
+    size_t p6;
 } CrossCallInfo;
 
+typedef size_t clean_int;
+
 typedef struct clean_string
-    {   int  length;
+    {   clean_int  length;
         char characters[1];
     } *CLEAN_STRING;
 

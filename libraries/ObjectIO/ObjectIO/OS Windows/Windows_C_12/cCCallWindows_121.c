@@ -103,12 +103,20 @@ void W95AdjustCleanSDIWindowDimensions (DWORD styleFlags, POINT * dim)
 */
 void SetGWL_USERDATA (LONG data, HWND hwnd)
 {
+#ifdef _WIN64
+	SetWindowLong (hwnd, GWLP_USERDATA, data);
+#else
 	SetWindowLong (hwnd, GWL_USERDATA, data);
+#endif
 }
 
 LONG GetGWL_USERDATA (HWND hwnd)
 {
+#ifdef _WIN64
+	return GetWindowLong (hwnd, GWLP_USERDATA);
+#else
 	return GetWindowLong (hwnd, GWL_USERDATA);
+#endif
 }
 
 

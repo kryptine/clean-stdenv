@@ -10,7 +10,7 @@
 ********************************************************************************************/
 #include "util_121.h"
 #include <stdarg.h>
-
+#include "Clean.h"
 
 
 //	Convenience procedure to fill in LOGFONT struct.
@@ -174,13 +174,17 @@ char * cstring (CLEAN_STRING s)
 CLEAN_STRING cleanstring (char *s)
 {
 	static CLEAN_STRING result_clean_string = NULL;
+	clean_int length;
+		
 /* rprintf("[cleanstring"); */
 	if (result_clean_string)
 		rfree (result_clean_string);
 
-	result_clean_string = (CLEAN_STRING) rmalloc (sizeof (int) + rstrlen (s) +1);
-	result_clean_string->length = rstrlen (s);
-	rsncopy (result_clean_string->characters, s, rstrlen (s) + 1);
+	length=rstrlen (s);
+
+	result_clean_string = (CLEAN_STRING) rmalloc (CleanStringSizeBytes (length+1));
+	result_clean_string->length = length;
+	rsncopy (result_clean_string->characters, s, length + 1);
 /* rprintf("]\n"); */
 	return result_clean_string;
 }	/* cleanstring */

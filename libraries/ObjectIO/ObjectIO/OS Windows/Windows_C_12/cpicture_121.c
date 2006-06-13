@@ -1360,7 +1360,11 @@ OS WinDestroyScreenHDC (HDC ihdc, OS os)
 static void getBitmapData(/*input:*/ char *ptr,	// points to beginning of bitmap
 						  /*output*/ char **startOfData,char **startOfHeader, int *height)
 {
+#ifdef _WIN64
+	char *startOfFile	= ptr + 8;
+#else
 	char *startOfFile	= ptr + 4;
+#endif
 	int  dataOffset     = *((int*)(startOfFile + 10));
 	*startOfData		= startOfFile + dataOffset;
 	*startOfHeader		= startOfFile + 14;
