@@ -463,10 +463,12 @@ OS WinEndOs (OS os)
 OS os_toolbox;
 
 void WinCallOsWithCallBack (int imess,
-					  		int ip1, int ip2, int ip3,int ip4, int ip5, int ip6,
+					  		size_t ip1, size_t ip2, size_t ip3,
+					  		size_t ip4, size_t ip5, size_t ip6,
 							OS ios,
 						 	int *omess,
-					 		int *op1, int *op2, int *op3,int *op4, int *op5, int *op6,
+					 		size_t *op1, size_t *op2, size_t *op3,
+					 		size_t *op4, size_t *op5, size_t *op6,
 							OS * oos
 					 		)
 {
@@ -507,9 +509,10 @@ static int ossp = -1;
 static int clsp = -1;
 #endif
 
-extern void call_back_clean_object_io (int,int,int,int,int,int,int,OS,int*,int*,int*,int*,int*,int*,int*,OS*);
+extern void call_back_clean_object_io (int,size_t,size_t,size_t,size_t,size_t,size_t,OS,
+										int*,size_t*,size_t*,size_t*,size_t*,size_t*,size_t*,OS*);
 
-void SendMessageToClean (int mess, int p1, int p2, int p3, int p4, int p5, int p6)
+void SendMessageToClean (int mess, size_t p1, size_t p2, size_t p3, size_t p4, size_t p5, size_t p6)
 {
 	gCci.mess = mess;
 	gCci.p1 = p1;
@@ -519,8 +522,19 @@ void SendMessageToClean (int mess, int p1, int p2, int p3, int p4, int p5, int p
 	gCci.p5 = p5;
 	gCci.p6 = p6;
 
+#ifdef _WIN64
+	{
+	size_t new_mess,new_os_toolbox;
+
+	call_back_clean_object_io (mess,p1,p2,p3,p4,p5,p6,os_toolbox,
+							   &new_mess,&gCci.p1,&gCci.p2,&gCci.p3,&gCci.p4,&gCci.p5,&gCci.p6,&new_os_toolbox);
+	gCci.mess=new_mess;
+	os_toolbox=new_os_toolbox;
+	}
+#else
 	call_back_clean_object_io (mess,p1,p2,p3,p4,p5,p6,os_toolbox,
 							   &gCci.mess,&gCci.p1,&gCci.p2,&gCci.p3,&gCci.p4,&gCci.p5,&gCci.p6,&os_toolbox);
+#endif
 }
 
 CrossCallInfo *MakeReturn0Cci (CrossCallInfo * pcci)
@@ -529,14 +543,14 @@ CrossCallInfo *MakeReturn0Cci (CrossCallInfo * pcci)
 	return pcci;
 }
 
-CrossCallInfo *MakeReturn1Cci (CrossCallInfo * pcci, int v1)
+CrossCallInfo *MakeReturn1Cci (CrossCallInfo * pcci, size_t v1)
 {
 	pcci->mess = CcRETURN1;
 	pcci->p1 = v1;
 	return pcci;
 }
 
-CrossCallInfo *MakeReturn2Cci (CrossCallInfo * pcci, int v1, int v2)
+CrossCallInfo *MakeReturn2Cci (CrossCallInfo * pcci, size_t v1, size_t v2)
 {
 	pcci->mess = CcRETURN2;
 	pcci->p1 = v1;
@@ -544,7 +558,7 @@ CrossCallInfo *MakeReturn2Cci (CrossCallInfo * pcci, int v1, int v2)
 	return pcci;
 }
 
-CrossCallInfo *MakeReturn3Cci (CrossCallInfo * pcci, int v1, int v2, int v3)
+CrossCallInfo *MakeReturn3Cci (CrossCallInfo * pcci, size_t v1, size_t v2, size_t v3)
 {
 	pcci->mess = CcRETURN3;
 	pcci->p1 = v1;
@@ -553,7 +567,7 @@ CrossCallInfo *MakeReturn3Cci (CrossCallInfo * pcci, int v1, int v2, int v3)
 	return pcci;
 }
 
-CrossCallInfo *MakeReturn4Cci (CrossCallInfo * pcci, int v1, int v2, int v3, int v4)
+CrossCallInfo *MakeReturn4Cci (CrossCallInfo * pcci, size_t v1, size_t v2, size_t v3, size_t v4)
 {
 	pcci->mess = CcRETURN4;
 	pcci->p1 = v1;
@@ -563,7 +577,7 @@ CrossCallInfo *MakeReturn4Cci (CrossCallInfo * pcci, int v1, int v2, int v3, int
 	return pcci;
 }
 
-CrossCallInfo *MakeReturn5Cci (CrossCallInfo * pcci, int v1, int v2, int v3, int v4, int v5)
+CrossCallInfo *MakeReturn5Cci (CrossCallInfo * pcci, size_t v1, size_t v2, size_t v3, size_t v4, size_t v5)
 {
 	pcci->mess = CcRETURN5;
 	pcci->p1 = v1;
@@ -574,7 +588,7 @@ CrossCallInfo *MakeReturn5Cci (CrossCallInfo * pcci, int v1, int v2, int v3, int
 	return pcci;
 }
 
-CrossCallInfo *MakeReturn6Cci (CrossCallInfo * pcci, int v1, int v2, int v3, int v4, int v5, int v6)
+CrossCallInfo *MakeReturn6Cci (CrossCallInfo * pcci, size_t v1, size_t v2, size_t v3, size_t v4, size_t v5, size_t v6)
 {
 	pcci->mess = CcRETURN6;
 	pcci->p1 = v1;

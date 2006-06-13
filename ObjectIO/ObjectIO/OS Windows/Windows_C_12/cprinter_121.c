@@ -70,22 +70,22 @@ static CleanString PassCleanString(PassObject *pPassObj, char* data,unsigned int
 
 	if (*pPassObj==NULL)
 		{
-		*pPassObj	= (PassObject) LocalAlloc(LMEM_FIXED, size+8);
-		((unsigned int*)*pPassObj)[0]	= size;
+		*pPassObj	= (PassObject) LocalAlloc(LMEM_FIXED, sizeof(size_t)+CleanStringSizeBytes (size));
+		((size_t*)*pPassObj)[0]	= size;
 		};
 	passObjSize	= ((unsigned int*)*pPassObj)[0];
 	if (passObjSize<size)
 		{
 		LocalFree(LocalHandle(*pPassObj));
-		*pPassObj	= (PassObject) LocalAlloc(LMEM_FIXED, size+8);
-		((unsigned int*)*pPassObj)[0]	= size;
+		*pPassObj	= (PassObject) LocalAlloc(LMEM_FIXED, sizeof(size_t)+CleanStringSizeBytes (size));
+		((size_t*)*pPassObj)[0]	= size;
 		};
 	// now the pass object is big enough, so fill it with data
 	passObj		= *pPassObj;
-	((unsigned int*)passObj)[1]	= size;
+	((size_t*)passObj)[1]	= size;
 	for(i=0; i<size; i++)
-		((char*)passObj)[i+8]	= data[i];
-	return (CleanString) (((unsigned int*)passObj)+1);
+		((char*)passObj)[i+2*sizeof (size_t)] = data[i];
+	return (CleanString) (((size_t*)passObj)+1);
 }
 
 #define tachtig 80
@@ -112,14 +112,13 @@ void getDevmodeSizeC(int *size, HANDLE *phPrinter,
 	*size = DocumentProperties(NULL,*phPrinter,szDevice,NULL,NULL,0);
 }
 
-void getDefaultDevmodeC(char *printSetup, LPHANDLE phPrinter,  CleanString *device)
+void getDefaultDevmodeC (CleanString *printSetup, LPHANDLE phPrinter, CleanString *device)
 {
 	int		size,r1;
 
-	size		= ((int*)printSetup)[0];
-	printSetup	+=4;
-	r1 = DocumentProperties(NULL,phPrinter,((char*)device)+4,
-							(DEVMODE*)printSetup,NULL,DM_OUT_BUFFER);
+	size		= CleanStringLength (printSetup);
+	r1 = DocumentProperties(NULL,phPrinter,CleanStringCharacters(device),
+							(DEVMODE*)CleanStringCharacters(printSetup),NULL,DM_OUT_BUFFER);
 	ClosePrinter(phPrinter);
 }
 

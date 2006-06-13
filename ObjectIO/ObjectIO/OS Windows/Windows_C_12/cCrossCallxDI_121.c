@@ -943,7 +943,11 @@ void EvalCcRqCREATEMDIFRAMEWINDOW (CrossCallInfo *pcci)	/* show, accept file ope
 	/*	Store the standard Windows callback routine adress in stdMDIClientCallback
 		and subclass the MDI client window with MDIClientProcedure.
 	*/
+#ifdef _WIN64
+	stdMDIClientCallback = SetWindowLong (hwndClient, GWLP_WNDPROC, (LONG) MDIClientProcedure);
+#else
 	stdMDIClientCallback = SetWindowLong (hwndClient, GWL_WNDPROC, (LONG) MDIClientProcedure);
+#endif
 	
 	MakeReturn4Cci (pcci,(int) hwndFrame,(int) hwndClient,(int) menuBar,(int) windowMenu);
 }
