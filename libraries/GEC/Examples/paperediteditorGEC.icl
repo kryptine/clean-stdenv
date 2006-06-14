@@ -40,7 +40,8 @@ gecEdit :== edit
 CGEC :== startCircuit
 :: CGEC a b :== GecCircuit a b
 
-derive generate DynString, Command, Editor, TypeVal, Maybe, ApplicationElem
+derive ggen DynString, Command, Editor, TypeVal, Maybe, ApplicationElem
+ggen {|(->)|} ga gb i is = undef
 
 testDynamic = CGEC  (%| (dotest @| gecEdit "test" ))  initval  
 where	

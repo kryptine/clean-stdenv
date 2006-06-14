@@ -44,4 +44,4 @@ eitherGEC ::                         !(GECGUIFun (EITHER a b) (PSt .ps)) !(TgGEC
                                                                          !(TgGEC b (PSt .ps)) -> TgGEC (EITHER a b) (PSt .ps)
 basicGEC  :: !String !(GECId t)      !(GECGUIFun t            (PSt .ps))                      -> TgGEC t            (PSt .ps)
           |  parseprint    t 
-          &  generate{|*|} t
+          &  ggen {|*|} t

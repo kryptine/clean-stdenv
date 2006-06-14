@@ -1,6 +1,6 @@
 implementation module genericgecs
 
-import infragecs
+import infragecs, StdMisc
 
 derive gGEC []
 

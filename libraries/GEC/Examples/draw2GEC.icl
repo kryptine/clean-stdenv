@@ -35,7 +35,7 @@ myclock = Timed (\i -> 100) 100
 
 
 derive gGEC MouseState, Modifiers
-derive generate ShapeAttributes, Mode, MouseState, Colour, Shape, Modifiers, Point2, RGBColour
+derive ggen ShapeAttributes, Mode, MouseState, Colour, Shape, Modifiers, Point2, RGBColour
 
 example_mouse pst
 	=	startCircuit (feedback  (  edit "Mouse" >>> gecMouse "Mouse" )) MouseLost pst

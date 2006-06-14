@@ -616,7 +616,7 @@ basicGEC :: !String
             !(GECId t) 
             !(GECGUIFun t (PSt .ps)) 
          -> TgGEC    t (PSt .ps) 
-         |  parseprint t & generate{|*|} t
+         |  parseprint t & ggen{|*|} t
 basicGEC type_name tGEC gecguiFun = basicGEC` type_name tGEC gecguiFun 
 where
 	basicGEC` type_name tGEC gecguiFun gecArgs=:{location=(guiLoc,objLoc),outputOnly,gec_value=mt,update} pSt
