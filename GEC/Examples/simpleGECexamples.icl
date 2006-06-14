@@ -9,7 +9,7 @@ import basicEditors
 // ALL EXAMPLES HAVE TO BE OF TYPE ((PSt Void) -> (PSt Void))
 
 Start :: *World -> *World
-Start world = startGEC myEditor2 world
+Start world = startGEC myEditor4 world
 
 // List Editor
                                                

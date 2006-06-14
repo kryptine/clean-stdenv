@@ -1,16 +1,17 @@
 implementation module GenDefaultVal
 
 import testable
-import iostate, StdPSt
+import iostate, StdPSt, MersenneTwister, StdTime, StdList
 
-gDefaultVal :: !*env -> (!t,!*env) | generate{|*|} t & TimeEnv env
+gDefaultVal :: !*env -> (!t,!*env) | ggen {|*|} t & TimeEnv env
 gDefaultVal env
-	# (rs,env)			= randomStream env
-	# (result,_,_,_)	= generate{|*|} emptyTrace rs
-	= (result,env)
+	# (seed,env)= getBlinkInterval env
+	# result	= ggen {|*|} seed (genRandInt 42)
+	= (hd result,env)
 
-GenDefaultValIfNoValue :: !(Maybe t) !*env -> (!t,!*env) | generate{|*|} t & TimeEnv env
+GenDefaultValIfNoValue :: !(Maybe t) !*env -> (!t,!*env) | ggen {|*|} t & TimeEnv env
 GenDefaultValIfNoValue maybev env
 	= case maybev of
 		Just v  = (v,env)
 		nothing = gDefaultVal env
+

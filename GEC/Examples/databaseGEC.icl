@@ -10,7 +10,7 @@ import StdGEC
 goGui :: (*(PSt u:Void) -> *(PSt u:Void)) *World -> .World
 goGui gui world = startIO MDI Void gui [ProcessClose closeProcess] world
 
-derive generate MyAdminstration, Mode
+derive ggen MyAdminstration, Mode
 
 Start :: *World -> *World
 Start world 
@@ -31,7 +31,7 @@ where
 											&& isAlpha zipcode.[4]
 											&& isAlpha zipcode.[5] //|| zipcode==""
 
-predGEC 		:: String (a -> Bool) 		-> GecCircuit a a 		| gGEC{|*|}, generate{|*|} a
+predGEC 		:: String (a -> Bool) 		-> GecCircuit a a 		| gGEC{|*|}, ggen{|*|} a
 predGEC s p  =  	arr (\a -> (a,Hide a)) 
 				>>> edit s 
 				>>>	arr (\(a,Hide oa) -> if (p a) a oa)

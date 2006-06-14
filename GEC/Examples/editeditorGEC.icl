@@ -43,7 +43,9 @@ where
 		   		} = {all & result = showAGEC ((^^ af) (^^ av))}
 	dotest all = all
 	
-derive generate MyRecord, Command, Editor, TypeVal, Maybe, DynString, ApplicationElem
+derive ggen MyRecord, Command, Editor, TypeVal, Maybe, DynString, ApplicationElem
+
+ggen {|(->)|} ga gb i is = undef
 
 Start :: *World -> *World
 //Start world = goGui testje world  
