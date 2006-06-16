@@ -1,10 +1,10 @@
 #include <windows.h>
 #include "util_121.h"
 
-extern int WinInvalidateWindow (int hwnd, int ios);
-extern int WinInvalidateRect (int hwnd, int left, int top, int right, int bottom, int ios);
-extern int WinValidateRect (int hwnd, int left, int top, int right, int bottom, int ios);
-extern int WinValidateRgn (int hwnd, int rgn, int ios);
+extern int WinInvalidateWindow (size_t hwnd, int ios);
+extern int WinInvalidateRect (size_t hwnd, int left, int top, int right, int bottom, int ios);
+extern int WinValidateRect (size_t hwnd, int left, int top, int right, int bottom, int ios);
+extern int WinValidateRgn (size_t hwnd, size_t rgn, int ios);
 
 /*	Win(M/S)DIClientToOuterSizeDims returns the width and height needed to add/subtract
 	from the client/outer size to obtain the outer/client size. 
@@ -23,8 +23,13 @@ extern void W95AdjustCleanSDIWindowDimensions (DWORD styleFlags, POINT * dim);
 
 /*	Set and get the GWL_USERDATA of a windowhandle.
 */
+#ifdef _WIN64
+extern void SetGWLP_USERDATA (LONG_PTR data, HWND hwnd);
+extern LONG_PTR GetGWLP_USERDATA (HWND hwnd);
+#else
 extern void SetGWL_USERDATA (LONG data, HWND hwnd);
 extern LONG GetGWL_USERDATA (HWND hwnd);
+#endif
 
 /*	UpdateWindowScrollbars updates any window scrollbars and non-client area if present.
 */

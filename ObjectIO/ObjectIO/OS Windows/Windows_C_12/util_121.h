@@ -1,7 +1,9 @@
 #ifndef _UTILH
 #define _UTILH
 
-#define STRICT
+#ifndef STRICT
+# define STRICT
+#endif
 #include <windows.h>
 #include <shlobj.h>
 

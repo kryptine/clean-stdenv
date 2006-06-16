@@ -27,12 +27,13 @@ void EvalCcRqDO_PRINT_SETUP (CrossCallInfo *pcci)
 	printSetup(0, pcci->p1,
 				(char*) pcci->p2, (char*) pcci->p3, (char*) pcci->p4, (char*) pcci->p5,
 				&ok, &pdPtr);
-	MakeReturn2Cci (pcci, ok, (int) pdPtr);
+	MakeReturn2Cci (pcci, ok, (size_t) pdPtr);
 }
 
 void EvalCcRqGET_PRINTER_DC (CrossCallInfo *pcci)
 {	int doDialog,emulateScreenRes,
-		err,first,last,copies,pPrintDlg,deviceContext;
+		err,first,last,copies,pPrintDlg;
+	size_t deviceContext;
 
 	// unpack doDialog and emulateScreenRes
 	doDialog			= (pcci->p1) & 1;
@@ -52,7 +53,7 @@ void EvalCcRqSTARTDOC (CrossCallInfo *pcci)
 	EnableWindow (ghMainWindow, FALSE) ;
 	hDlgPrint = CreateCancelDialog ();
 	SetAbortProc (hdc, AbortProc) ;
-	err = startDoc((int) hdc);
+	err = startDoc((size_t)hdc);
 	if (err<=0 && ghMainWindow!=NULL && !bUserAbort)
 		{
 			EnableWindow (ghMainWindow, TRUE) ;
@@ -65,7 +66,7 @@ void EvalCcRqENDDOC (CrossCallInfo *pcci)
 {	
 	HDC hdc = (HDC) pcci->p1;
 	
-	endDoc((int) hdc);
+	endDoc((size_t)hdc);
 	if (ghMainWindow!=NULL && !bUserAbort)
 		{
 			EnableWindow (ghMainWindow, TRUE) ;

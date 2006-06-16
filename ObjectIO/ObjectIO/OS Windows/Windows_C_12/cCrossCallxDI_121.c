@@ -26,8 +26,11 @@ int gCurChar;
 /*	Global data with internal references only:
 */
 static int gDoubleDownDistance   = -1;
+#ifdef _WIN64
+static LONG_PTR stdMDIClientCallback = 0;			/* The standard internal Windows callback routine of MDI client windows. */
+#else
 static LONG stdMDIClientCallback = 0;				/* The standard internal Windows callback routine of MDI client windows. */
-
+#endif
 
 /*	Registered Windows class names:
 */
@@ -236,7 +239,7 @@ static void SendDropFilesToClean (HWND hWin,WPARAM wPara)
 	*(filenames+nrChars-1) = 0;		/* terminate string with zero character. */
 
 	DragFinish ((HANDLE)wPara);		/* free the internal memory required for DROPFILES. */
-	SendMessage2ToClean (CcWmPROCESSDROPFILES, (int) hWin, (int) filenames);
+	SendMessage2ToClean (CcWmPROCESSDROPFILES, (size_t) hWin, (size_t) filenames);
 }	/* SendDropFilesToClean */
 
 
@@ -331,9 +334,11 @@ static LRESULT CALLBACK SDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPA
 				if (pnmh->code == TTN_NEEDTEXT && from != 0 && flags != TTF_IDISHWND)
 				{
 					HWND hwndToolbar;
-
+#ifdef _WIN64
+					hwndToolbar = (HWND)GetGWLP_USERDATA (hWin);
+#else
 					hwndToolbar = (HWND)GetGWL_USERDATA (hWin);
-
+#endif
 					//	get tooltip text from Clean
 					SendMessage2ToClean (CcWmGETTOOLBARTIPTEXT, hwndToolbar, from);
 					lstrcpy (lpttt->szText,(LPSTR)gCci.p1);
@@ -357,7 +362,11 @@ static LRESULT CALLBACK SDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPA
 
 				ghTopDocWindow=NULL;
 
-				shortcuts = (ProcessShortcutTable) GetWindowLong (hWin, 0);	// get the local shortcut table
+#ifdef _WIN64
+				shortcuts = (ProcessShortcutTable) GetWindowLongPtr (hWin, 0);// get the local shortcut table
+#else
+				shortcuts = (ProcessShortcutTable) GetWindowLong (hWin, 0);	  // get the local shortcut table
+#endif
 				DestroyProcessShortcutTable (shortcuts);					// and destroy it.
 				gAcceleratorTableIsUpToDate = FALSE;	// The active global accelerator table is not up to date
 
@@ -377,7 +386,7 @@ static LRESULT CALLBACK SDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPA
 
 				if (wPara == MSGF_DIALOGBOX && hwndModalDialog != ghwndLastModalDialog)
 				{
-					SendMessage1ToClean (CcWmIDLEDIALOG,(int)hwndModalDialog);
+					SendMessage1ToClean (CcWmIDLEDIALOG,(size_t)hwndModalDialog);
 					ghwndLastModalDialog = hwndModalDialog;
 				}
 				else
@@ -540,7 +549,11 @@ static LRESULT CALLBACK SDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPA
 				ProcessShortcutTable shortcuts;
 
 				shortcuts = AllocateProcessShortcutTable (MINSIZEPROCESSSHORTCUTTABLE);	// create a new shortcut table
+#ifdef _WIN64
+				SetWindowLongPtr (hWin, 0, (LONG_PTR) shortcuts); //   and store it in the local memory of the window
+#else
 				SetWindowLong (hWin, 0, (long) shortcuts);		//     and store it in the local memory of the window
+#endif
 				gAcceleratorTableIsUpToDate = FALSE;			// The active global accelerator table is not up to date
 				
 				ghActiveFrameWindow  = hWin;					// Keep track of the active frame window
@@ -558,8 +571,11 @@ static LRESULT CALLBACK SDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPA
 				int  toolbarHeight = 0;
 
 				/*	Also resize the toolbar if present. */
+#ifdef _WIN64
+				hwndToolbar = (HWND)GetGWLP_USERDATA (hWin);
+#else
 				hwndToolbar = (HWND)GetGWL_USERDATA (hWin);
-				
+#endif
 				if (hwndToolbar != NULL)
 				{
 					SendMessage (hwndToolbar, TB_AUTOSIZE, (WPARAM)0, (LPARAM)0);
@@ -616,7 +632,7 @@ static LRESULT CALLBACK MDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPA
 
 				if (wPara == MSGF_DIALOGBOX && hwndModalDialog != ghwndLastModalDialog)
 				{
-					SendMessage1ToClean (CcWmIDLEDIALOG,(int)hwndModalDialog);
+					SendMessage1ToClean (CcWmIDLEDIALOG,(size_t)hwndModalDialog);
 					ghwndLastModalDialog = hwndModalDialog;
 				}
 				else
@@ -630,8 +646,11 @@ static LRESULT CALLBACK MDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPA
 				if (HIWORD (wPara)==0 && lPara!=0)
 				{
 					HWND hwndToolbar;
-
+#ifdef _WIN64
+					hwndToolbar = (HWND)GetGWLP_USERDATA (hWin);// Obtain the toolbar handle
+#else
 					hwndToolbar = (HWND)GetGWL_USERDATA (hWin);	// Obtain the toolbar handle
+#endif
 					if (hwndToolbar != 0)
 						SendMessage4ToClean (CcWmBUTTONCLICKED, hWin, lPara, GetModifiers (), LOWORD (wPara));
 				}
@@ -674,7 +693,11 @@ static LRESULT CALLBACK MDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPA
 				InsertMenu (menuBar,					// add it to the menuBar
 							0xFFFFFFFF,					// at the end
 							MF_BYPOSITION | MF_POPUP,	// Flags
+#ifdef _WIN64
+							(LONG_PTR) windowMenu,		// the "Window" menu
+#else
 							(UINT) windowMenu,			// the "Window" menu
+#endif
 							"&Window"					// and set its title
 					);
 				InsertMenu (windowMenu,0,MF_BYPOSITION | MF_STRING,OSMenuIDEnd+1,"Arrange &Icons");		// Add "Arrange Icons" command
@@ -697,7 +720,11 @@ static LRESULT CALLBACK MDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPA
 											);
 
 				shortcuts = AllocateProcessShortcutTable (MINSIZEPROCESSSHORTCUTTABLE);	// create a new shortcut table
+#ifdef _WIN64
+				SetWindowLongPtr (hWin, 0, (LONG_PTR) shortcuts);//    and store it in the local memory of the window
+#else
 				SetWindowLong (hWin, 0, (long) shortcuts);		//     and store it in the local memory of the window
+#endif
 				gAcceleratorTableIsUpToDate = FALSE;			// The active global accelerator table is not up to date
 
 				ghActiveFrameWindow  = hWin;					// Keep track of the active frame window
@@ -713,8 +740,12 @@ static LRESULT CALLBACK MDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPA
 		case WM_DESTROY:	/*	The frame is in the act of being closed. */
 			{
 				ProcessShortcutTable shortcuts;
-			
-				shortcuts = (ProcessShortcutTable) GetWindowLong (hWin, 0);	// get the local shortcut table
+
+#ifdef _WIN64
+				shortcuts = (ProcessShortcutTable) GetWindowLongPtr (hWin, 0); // get the local shortcut table
+#else
+				shortcuts = (ProcessShortcutTable) GetWindowLong (hWin, 0);	   // get the local shortcut table
+#endif
 				DestroyProcessShortcutTable (shortcuts);					// and destroy it.
 				gAcceleratorTableIsUpToDate = FALSE;	// The active global accelerator table is not up to date
 
@@ -752,9 +783,11 @@ static LRESULT CALLBACK MDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPA
 				if (pnmh->code == TTN_NEEDTEXT && from != 0 && flags != TTF_IDISHWND)
 				{
 					HWND hwndToolbar;
-
+#ifdef _WIN64
+					hwndToolbar = (HWND)GetGWLP_USERDATA (hWin);
+#else
 					hwndToolbar = (HWND)GetGWL_USERDATA (hWin);
-
+#endif
 					//	get tooltip text from Clean
 					SendMessage2ToClean (CcWmGETTOOLBARTIPTEXT, hwndToolbar, from);
 					lstrcpy (lpttt->szText,(LPSTR)gCci.p1);
@@ -766,10 +799,18 @@ static LRESULT CALLBACK MDIFrameProcedure (HWND hWin,UINT uMess,WPARAM wPara,LPA
 		case WM_SIZE:
 			{
 				HWND hwndToolbar;
-
+#ifdef _WIN64
+				hwndToolbar = (HWND)GetGWLP_USERDATA (hWin);
+#else
 				hwndToolbar = (HWND)GetGWL_USERDATA (hWin);
+#endif
+
 				if (hwndToolbar != NULL)
+#ifdef _WIN64
+					SendMessage ((HWND)GetGWLP_USERDATA (hWin), TB_AUTOSIZE, (WPARAM)0, (LPARAM)0);
+#else
 					SendMessage ((HWND)GetGWL_USERDATA (hWin), TB_AUTOSIZE, (WPARAM)0, (LPARAM)0);
+#endif
 			}
 			break;
 		/*	Accept the user dropping file(s) in the frame window. */
@@ -806,8 +847,11 @@ static LRESULT CALLBACK MDIClientProcedure (HWND hwnd,UINT uMess,WPARAM wParam,L
 				wp = (LPWINDOWPOS)lParam;
 
 				hwndFrame = GetParent (hwnd);
+#ifdef _WIN64
+				hwndToolbar = (HWND)GetGWLP_USERDATA (hwndFrame);
+#else
 				hwndToolbar = (HWND)GetGWL_USERDATA (hwndFrame);
-
+#endif
 				if (hwndToolbar==0)
 				{
 					tbHeight = 0;
@@ -897,7 +941,7 @@ void EvalCcRqCREATESDIFRAMEWINDOW (CrossCallInfo *pcci)	/* accept file open; fra
 	if (acceptFileOpen)
 		DragAcceptFiles (hwndFrame,TRUE);		/* register for WM_DROPFILES events. */
 
-	MakeReturn2Cci (pcci, (int) hwndFrame, (int) menuBar);
+	MakeReturn2Cci (pcci, (size_t) hwndFrame, (size_t) menuBar);
 }
 
 /*	Create MDI frame window. */
@@ -944,12 +988,12 @@ void EvalCcRqCREATEMDIFRAMEWINDOW (CrossCallInfo *pcci)	/* show, accept file ope
 		and subclass the MDI client window with MDIClientProcedure.
 	*/
 #ifdef _WIN64
-	stdMDIClientCallback = SetWindowLong (hwndClient, GWLP_WNDPROC, (LONG) MDIClientProcedure);
+	stdMDIClientCallback = SetWindowLongPtr (hwndClient, GWLP_WNDPROC, (LONG_PTR) MDIClientProcedure);
 #else
 	stdMDIClientCallback = SetWindowLong (hwndClient, GWL_WNDPROC, (LONG) MDIClientProcedure);
 #endif
 	
-	MakeReturn4Cci (pcci,(int) hwndFrame,(int) hwndClient,(int) menuBar,(int) windowMenu);
+	MakeReturn4Cci (pcci,(size_t) hwndFrame,(size_t) hwndClient,(size_t) menuBar,(size_t) windowMenu);
 }
 
 void EvalCcRqDESTROYWINDOW (CrossCallInfo *pcci) /* hwnd; no result. */
@@ -1003,7 +1047,12 @@ void EvalCcRqCREATEMDITOOLBAR (CrossCallInfo *pcci)			/* hwnd, width, height; to
 								(HANDLE) ghInst,
 								0
 								);
-	SetGWL_USERDATA ((LONG)hwndToolbar, hwndParent);	// Administrate the toolbar handle in the MDI frame parent handle
+
+#ifdef _WIN64
+	SetGWLP_USERDATA ((LONG_PTR)hwndToolbar, hwndParent);// Administrate the toolbar handle in the MDI frame parent handle
+#else
+	SetGWL_USERDATA ((LONG)hwndToolbar, hwndParent);	 // Administrate the toolbar handle in the MDI frame parent handle
+#endif
 	SendMessage (hwndToolbar, TB_SETBITMAPSIZE, (WPARAM)0, (LPARAM)MAKELONG(bmpWidth,bmpHeight));
 	SendMessage (hwndToolbar, TB_AUTOSIZE, (WPARAM)0, (LPARAM)0);
 	SendMessage (hwndToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM) sizeof (TBBUTTON), (LPARAM) 0);
@@ -1018,7 +1067,7 @@ void EvalCcRqCREATEMDITOOLBAR (CrossCallInfo *pcci)			/* hwnd, width, height; to
 		rMessageBox (NULL,MB_APPLMODAL,"CcRqCREATEMDITOOLBAR","GetWindowRect failed");
 	tbHeight = tbRect.bottom - tbRect.top;
 
-	MakeReturn2Cci (pcci,(int)hwndToolbar,tbHeight);
+	MakeReturn2Cci (pcci,(size_t)hwndToolbar,tbHeight);
 }
 
 /*	Create a toolbar in a SDI window. */
@@ -1041,7 +1090,11 @@ void EvalCcRqCREATESDITOOLBAR (CrossCallInfo *pcci)			/* hwnd, width, height; to
 								(HANDLE) ghInst,
 								0
 							   );
-	SetGWL_USERDATA ((LONG)hwndToolbar,hwndParent);	// Administrate the toolbar handle in the SDI window handle
+#ifdef _WIN64
+	SetGWLP_USERDATA ((LONG_PTR)hwndToolbar,hwndParent);// Administrate the toolbar handle in the SDI window handle
+#else
+	SetGWL_USERDATA ((LONG)hwndToolbar,hwndParent);		// Administrate the toolbar handle in the SDI window handle
+#endif
 	SendMessage (hwndToolbar, TB_SETBITMAPSIZE, (WPARAM)0, (LPARAM)MAKELONG(bmpWidth,bmpHeight));
 	SendMessage (hwndToolbar, TB_AUTOSIZE, (WPARAM)0, (LPARAM)0);
 	SendMessage (hwndToolbar, TB_BUTTONSTRUCTSIZE, (WPARAM) sizeof (TBBUTTON), (LPARAM) 0);
@@ -1060,7 +1113,7 @@ void EvalCcRqCREATESDITOOLBAR (CrossCallInfo *pcci)			/* hwnd, width, height; to
 	ShowWindow (hwndToolbar,SW_SHOWNORMAL);
 	UpdateWindow (hwndToolbar);
 
-	MakeReturn2Cci (pcci, (int) hwndToolbar, tbHeight);
+	MakeReturn2Cci (pcci, (size_t) hwndToolbar, tbHeight);
 }
 
 /*	Create a bitmap toolbar item. */
@@ -1077,7 +1130,7 @@ void EvalCcRqCREATETOOLBARITEM (CrossCallInfo *pcci)		// hwnd, hbmp, index; no r
 	index      = pcci->p3;
 
 	tbab.hInst = NULL;
-	tbab.nID   = (UINT) hbmp;
+	tbab.nID   = (UINT_PTR) hbmp;
 
 	tbb.iBitmap   = index-1;
 	tbb.idCommand = index;

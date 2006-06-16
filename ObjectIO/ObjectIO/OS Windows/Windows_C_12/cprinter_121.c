@@ -242,7 +242,11 @@ int release_memory_handles(PRINTDLG *pd, int os) {
 	return os;
 	}
 
+#ifdef _WIN64
+static UINT_PTR APIENTRY DialogToFrontHook(HWND hdl, UINT msg, WPARAM wParam, LPARAM lParam)
+#else
 static UINT APIENTRY DialogToFrontHook(HWND hdl, UINT msg, WPARAM wParam, LPARAM lParam)
+#endif
 // This function hooks the Print dialog. It's purpose is to set the dialog in the
 // foreground.
 {
@@ -307,19 +311,19 @@ void printSetup(int calledFromCleanThread, int devmodeSize,
 }
 
 
-int startPage(int hdc)
+int startPage(size_t hdc)
 {
 	//rMessageBox(NULL, MB_APPLMODAL, "in startPage", "");
 	return StartPage((HDC) hdc) > 0;
 }
 
-int endPage(int hdc)
+int endPage(size_t hdc)
 {
 	//rMessageBox(NULL, MB_APPLMODAL, "in endPage", "");
 	return EndPage((HDC) hdc) > 0;
 }
 
-int startDoc(int hdc)
+int startDoc(size_t hdc)
 			// err code: >0:no error, <=0: user cancelled file dialog
 {
 	static DOCINFO docInfo = { sizeof (DOCINFO), "Clean", NULL, NULL, 0 } ;
@@ -330,7 +334,7 @@ int startDoc(int hdc)
 	return StartDoc((HDC) hdc, &docInfo);
 }
 
-void endDoc(int hdc)
+void endDoc(size_t hdc)
 {
 	//rMessageBox(NULL, MB_APPLMODAL, "in endDoc", "");
 	if (bUserAbort)
@@ -339,7 +343,7 @@ void endDoc(int hdc)
 		EndDoc((HDC) hdc);
 }
 
-void deleteDC(int hdc)
+void deleteDC(size_t hdc)
 {
 	//rMessageBox(NULL, MB_APPLMODAL, "in deleteDC", "");
 	DeleteDC((HDC) hdc);
@@ -388,7 +392,7 @@ void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, int devm
 			int *err,
 			int *first, int *last, int *copies,
 			PRINTDLG	**ppPrintDlg,
-			int *deviceContext
+			size_t *deviceContext
 	 		)
 					// err code: -1:no error, others: non fatal error
 {
@@ -489,7 +493,7 @@ void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, int devm
 			SetViewportExtEx(hdcPrint,pXdpi, pYdpi, NULL);
 		};
 	
-	*deviceContext	= (int) hdcPrint;
+	*deviceContext	= (size_t) hdcPrint;
 	//rMessageBox(NULL, MB_APPLMODAL, "leaving getDC","");
 
 }

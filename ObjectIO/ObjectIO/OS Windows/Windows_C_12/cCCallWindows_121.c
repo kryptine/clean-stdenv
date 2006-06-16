@@ -10,13 +10,13 @@
 ********************************************************************************************/
 #include "cCCallWindows_121.h"
 
-int WinInvalidateWindow (int hwnd, int ios)
+int WinInvalidateWindow (size_t hwnd, int ios)
 {
 	InvalidateRect ((HWND) hwnd, NULL, FALSE);
 	return ios;
 }
 
-int WinInvalidateRect (int hwnd, int left, int top, int right, int bottom, int ios)
+int WinInvalidateRect (size_t hwnd, int left, int top, int right, int bottom, int ios)
 {
 	RECT rect;
 
@@ -28,7 +28,7 @@ int WinInvalidateRect (int hwnd, int left, int top, int right, int bottom, int i
 	return ios;
 }
 
-int WinValidateRect (int hwnd, int left, int top, int right, int bottom, int ios)
+int WinValidateRect (size_t hwnd, int left, int top, int right, int bottom, int ios)
 {
 	RECT rect;
 
@@ -40,7 +40,7 @@ int WinValidateRect (int hwnd, int left, int top, int right, int bottom, int ios
 	return ios;
 }
 
-int WinValidateRgn (int hwnd, int rgn, int ios)
+int WinValidateRgn (size_t hwnd, size_t rgn, int ios)
 {
 	ValidateRgn ((HWND) hwnd, (HRGN) rgn);
 	return ios;
@@ -101,24 +101,29 @@ void W95AdjustCleanSDIWindowDimensions (DWORD styleFlags, POINT * dim)
 
 /*	Set and get the GWL_USERDATA of a windowhandle.
 */
+#ifdef _WIN64
+void SetGWLP_USERDATA (LONG_PTR data, HWND hwnd)
+{
+	SetWindowLongPtr (hwnd, GWLP_USERDATA, data);
+}
+#else
 void SetGWL_USERDATA (LONG data, HWND hwnd)
 {
-#ifdef _WIN64
-	SetWindowLong (hwnd, GWLP_USERDATA, data);
-#else
 	SetWindowLong (hwnd, GWL_USERDATA, data);
-#endif
 }
+#endif
 
+#ifdef _WIN64
+LONG_PTR GetGWLP_USERDATA (HWND hwnd)
+{
+	return GetWindowLongPtr (hwnd, GWLP_USERDATA);
+}
+#else
 LONG GetGWL_USERDATA (HWND hwnd)
 {
-#ifdef _WIN64
-	return GetWindowLong (hwnd, GWLP_USERDATA);
-#else
 	return GetWindowLong (hwnd, GWL_USERDATA);
-#endif
 }
-
+#endif
 
 /*	UpdateWindowScrollbars updates any window scrollbars and non-client area if present.
 	Uses the following access procedures to the GWL_STYLE of a windowhandle:
