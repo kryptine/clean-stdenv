@@ -203,7 +203,11 @@ int CheckVirtualKeyCode (int keycode)
 	EndSuspendTimerProc is called, which kills the timer and informs
 	Clean about the timer event. 
 */
+#ifdef _WIN64
+static VOID CALLBACK EndSuspendTimerProc (HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime )
+#else
 static VOID CALLBACK EndSuspendTimerProc (HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime )
+#endif
 {
 	KillTimer (ghMainWindow, (UINT) -2);
 	SendMessage0ToClean (CcWmIDLETIMER);
@@ -246,14 +250,15 @@ static int GetMessageQuickly (BOOL gIdleTimerOn, int gSleeptime, MSG * pmsg)
 				A timer is set to suspend this thread until atleast the timer interval
 				has elapsed. 
 			*/
+#ifdef _WIN64
+			if (SetTimer (ghMainWindow, (UINT_PTR) -2, (UINT)gSleeptime, &EndSuspendTimerProc))
+#else
 			if (SetTimer (ghMainWindow, (UINT) -2, (UINT)gSleeptime, &EndSuspendTimerProc))
-			{
+#endif
 				WaitMessage ();
-			}
 			else
-			{
 				rMessageBox (NULL,MB_APPLMODAL,"GetMessageQuickly","SetTimer failed to create timer");
-			}
+
 			/*	End of insertion.
 			*/
 
@@ -524,7 +529,8 @@ void SendMessageToClean (int mess, size_t p1, size_t p2, size_t p3, size_t p4, s
 
 #ifdef _WIN64
 	{
-	size_t new_mess,new_os_toolbox;
+	int new_mess;
+	OS new_os_toolbox;
 
 	call_back_clean_object_io (mess,p1,p2,p3,p4,p5,p6,os_toolbox,
 							   &new_mess,&gCci.p1,&gCci.p2,&gCci.p3,&gCci.p4,&gCci.p5,&gCci.p6,&new_os_toolbox);
@@ -702,7 +708,7 @@ static LRESULT CALLBACK MainWindowProcedure (HWND hWin, UINT uMess, WPARAM wPara
 
 				if (wPara == MSGF_DIALOGBOX && hwndModalDialog != ghwndLastModalDialog)
 				{
-					SendMessage1ToClean (CcWmIDLEDIALOG,(int)hwndModalDialog);
+					SendMessage1ToClean (CcWmIDLEDIALOG,(size_t)hwndModalDialog);
 					ghwndLastModalDialog = hwndModalDialog;
 				}
 				else

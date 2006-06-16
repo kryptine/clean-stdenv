@@ -205,7 +205,11 @@ HACCEL UpdateAcceleratorTable (HACCEL gAcceleratorTable,HWND ghActiveFrameWindow
 
 	if (ghActiveFrameWindow!=NULL)		// The current frame is an (MDI/SDI) frame
 	{
+#ifdef _WIN64
+		table = (ProcessShortcutTable) GetWindowLongPtr (ghActiveFrameWindow, 0);
+#else
 		table = (ProcessShortcutTable) GetWindowLong (ghActiveFrameWindow, 0);
+#endif
 		if (table!=NULL)
 		{
 			gAcceleratorTable = CreateAcceleratorTable (table->pst_shortcuts,table->pst_used);

@@ -5,12 +5,12 @@
 
 //	PA: all made extern
 extern char * strtokMW(char **str, const char ch1, const char ch2);
-extern int startPage(int hdc);
-extern int endPage  (int hdc);
-extern int startDoc (int hdc);
+extern int startPage(size_t hdc);
+extern int endPage  (size_t hdc);
+extern int startDoc (size_t hdc);
 			// returns err code: >0:no error, <=0: user cancelled file dialog
-extern void endDoc  (int hdc);
-extern void deleteDC(int hdc);
+extern void endDoc  (size_t hdc);
+extern void deleteDC(size_t hdc);
 extern int wasCanceled(void);
 extern void printSetup (int calledFromCleanThread, int devmodeSize,
 						char *devmode, char *device, char *driver, char *output,
@@ -21,7 +21,7 @@ extern void getDC( int doDialog, int emulateScreen, int calledFromCleanThread, i
 				   int *err,
 				   int *first, int *last, int *copies,
 				   PRINTDLG	**ppPrintDlg,
-				   int *deviceContext
+				   size_t *deviceContext
 	 			  );
 					// err code: -1:no error, others: non fatal error
 extern void get_printSetup_with_PRINTDLG(PRINTDLG *pd, CleanString *o_devmode,

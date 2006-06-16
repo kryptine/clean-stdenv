@@ -12,8 +12,8 @@ void DonePicture( HDC hdc );
 static int PointsToPix(HDC hdc, int size);
 */
 
-extern void WinGetDC (int,OS,HDC*,OS*);
-extern OS WinReleaseDC (int,HDC,OS);
+extern void WinGetDC (size_t,OS,HDC*,OS*);
+extern OS WinReleaseDC (size_t,HDC,OS);
 extern int WinGetVertResolution (void);
 extern int WinGetHorzResolution (void);
 
@@ -125,8 +125,8 @@ extern void WinGetStringWidth (CLEAN_STRING,CLEAN_STRING,int,int,int,HDC,OS,int*
 extern void WinGetCharWidth (int,CLEAN_STRING,int,int,int,HDC,OS,int*,OS*);
 
 //	Get the resolution of a picture
-extern void getResolutionC(int,int*,int*);
+extern void getResolutionC(size_t,int*,int*);
 
 //	Get scaling factors, which have to be applied to coordinates for clipping regions in case 
 //	of emulating the screen resolution for printing (MM_ISOTROPIC)
-extern void WinGetPictureScaleFactor(int,int,int*,int*,int*,int*,int*,int*);
+extern void WinGetPictureScaleFactor(size_t,int,int*,int*,int*,int*,int*,int*);

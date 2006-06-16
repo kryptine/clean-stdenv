@@ -22,9 +22,13 @@
 /*	Global data:
 */
 static PAINTSTRUCT gPaintStruct;
+#ifdef _WIN64
+static LONG_PTR stdEditCallback  = 0;		/* The standard internal Windows callback routine of edit controls. */
+static LONG_PTR stdPopUpCallback = 0;		/* The standard internal Windows callback routine of pop up controls. */
+#else
 static LONG stdEditCallback      = 0;			/* The standard internal Windows callback routine of edit controls. */
 static LONG stdPopUpCallback     = 0;			/* The standard internal Windows callback routine of pop up controls. */
-
+#endif
 
 /*	Registered Windows class names:
 */
@@ -218,7 +222,7 @@ static BOOL CALLBACK DialogProcedure (HWND hwnd, UINT message, WPARAM wParam, LP
 
 				if (wParam == MSGF_DIALOGBOX && hwndModalDialog != ghwndLastModalDialog)
 				{
-					SendMessage1ToClean (CcWmIDLEDIALOG,(int)hwndModalDialog);
+					SendMessage1ToClean (CcWmIDLEDIALOG,(size_t)hwndModalDialog);
 					ghwndLastModalDialog = hwndModalDialog;
 				}
 				else
@@ -1539,7 +1543,7 @@ static LRESULT CALLBACK SDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 				if (GetUpdateRect (hWin, &updaterect, FALSE))
 				{
 					hdc = BeginPaint (hWin, &ps);
-					if (updaterect.left != updaterect.right && updaterect.top != updaterect.bottom)
+					if (updaterect.left != updaterect.right && updaterect.top != updaterect.bottom)						
 						SendMessage6ToClean (CcWmPAINT, hWin, updaterect.left,updaterect.top,updaterect.right,updaterect.bottom,hdc);
 					EndPaint (hWin, &ps);
 				}
@@ -1565,7 +1569,11 @@ static LRESULT CALLBACK SDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 					{
 						return DefWindowProc (hWin, uMess, wPara, lPara);
 					}
+#ifdef _WIN64
+					wdata = (LocalWindowData) GetWindowLongPtr (hWin,0);
+#else
 					wdata = (LocalWindowData) GetWindowLong (hWin,0);
+#endif
 					cursorcode = wdata->lwd_cursorcode;
 				}
 				else
@@ -1730,7 +1738,11 @@ static LRESULT CALLBACK SDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 			{
 				LocalWindowData wdata;
 
+#ifdef _WIN64
+				wdata = (LocalWindowData) GetWindowLongPtr (hWin,0);//	get the local SDI window data
+#else
 				wdata = (LocalWindowData) GetWindowLong (hWin,0);	//	get the local SDI window data
+#endif
 				DestroyLocalWindowData (wdata);						//	and destroy it.
 
 				return 0;
@@ -1743,8 +1755,11 @@ static LRESULT CALLBACK SDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 		case WM_ENTERSIZEMOVE:
 			{
 				LocalWindowData wdata;
-
+#ifdef _WIN64
+				wdata = (LocalWindowData) GetWindowLongPtr (hWin,0);
+#else
 				wdata = (LocalWindowData) GetWindowLong (hWin,0);
+#endif
 				wdata->lwd_usersizemoving = (BOOL)TRUE;
 #ifdef _WIN64
 				SetWindowLongPtr (hWin, 0, (LONG_PTR)wdata);
@@ -1757,7 +1772,11 @@ static LRESULT CALLBACK SDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 			{
 				LocalWindowData wdata;
 
+#ifdef _WIN64
+				wdata = (LocalWindowData) GetWindowLongPtr (hWin,0);
+#else
 				wdata = (LocalWindowData) GetWindowLong (hWin,0);
+#endif
 				wdata->lwd_usersizemoving = (BOOL)FALSE;
 #ifdef _WIN64
 				SetWindowLongPtr (hWin, 0, (LONG_PTR)wdata);
@@ -1777,7 +1796,11 @@ static LRESULT CALLBACK SDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 
 					width  = LOWORD (lPara);		// Width  of window excluding vertical scrollbar 
 					height = HIWORD (lPara);		// Height of window excluding horizontal scrollbar 
+#ifdef _WIN64
+					wdata  = (LocalWindowData) GetWindowLongPtr (hWin,0);
+#else
 					wdata  = (LocalWindowData) GetWindowLong (hWin,0);
+#endif
 					UpdateWindow (hWin);			// But first update the window
 					SendMessage4ToClean (CcWmSIZE, hWin, width, height, (int)wdata->lwd_usersizemoving);
 				}
@@ -2018,7 +2041,11 @@ static LRESULT CALLBACK MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 			{
 				LocalWindowData wdata;
 
+#ifdef _WIN64
+				wdata = (LocalWindowData) GetWindowLongPtr (hWin,0);// Get the local MDI window data
+#else
 				wdata = (LocalWindowData) GetWindowLong (hWin,0);	// Get the local MDI window data
+#endif
 				DestroyLocalWindowData (wdata);						//	and destroy it.
 				
 				ghTopDocWindow=NULL;
@@ -2035,7 +2062,11 @@ static LRESULT CALLBACK MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 					{
 						return DefMDIChildProc (hWin, uMess, wPara, lPara);
 					}
+#ifdef _WIN64
+					wdata = (LocalWindowData) GetWindowLongPtr (hWin,0);
+#else
 					wdata = (LocalWindowData) GetWindowLong (hWin,0);
+#endif
 					cursorcode = wdata->lwd_cursorcode;
 				}
 				else
@@ -2230,8 +2261,11 @@ static LRESULT CALLBACK MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 		case WM_ENTERSIZEMOVE:
 			{
 				LocalWindowData wdata;
-
+#ifdef _WIN64
+				wdata = (LocalWindowData) GetWindowLongPtr (hWin,0);
+#else
 				wdata = (LocalWindowData) GetWindowLong (hWin,0);
+#endif
 				wdata->lwd_usersizemoving = (BOOL)TRUE;
 #ifdef _WIN64
 				SetWindowLongPtr (hWin, 0, (LONG_PTR)wdata);
@@ -2243,8 +2277,11 @@ static LRESULT CALLBACK MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 		case WM_EXITSIZEMOVE:
 			{
 				LocalWindowData wdata;
-
+#ifdef _WIN64
+				wdata = (LocalWindowData) GetWindowLongPtr (hWin,0);
+#else
 				wdata = (LocalWindowData) GetWindowLong (hWin,0);
+#endif
 				wdata->lwd_usersizemoving = (BOOL)FALSE;
 #ifdef _WIN64
 				SetWindowLongPtr (hWin, 0, (LONG_PTR)wdata);
@@ -2259,7 +2296,11 @@ static LRESULT CALLBACK MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 				int width,height;
 				LocalWindowData wdata;
 
+#ifdef _WIN64
+				hwndToolbar = (HWND) GetGWLP_USERDATA (hWin);
+#else
 				hwndToolbar = (HWND) GetGWL_USERDATA (hWin);
+#endif
 				// First resize the toolbar if present
 				if (hwndToolbar!=NULL)
 					SendMessage (hwndToolbar, TB_AUTOSIZE, (WPARAM)0, (LPARAM)0);
@@ -2268,7 +2309,11 @@ static LRESULT CALLBACK MDIWindowProcedure (HWND hWin,UINT uMess,WPARAM wPara,LP
 				{
 					width  = LOWORD (lPara);		// Width  of window excluding vertical scrollbar
 					height = HIWORD (lPara);		// Height of window excluding horizontal scrollbar
+#ifdef _WIN64
+					wdata  = (LocalWindowData) GetWindowLongPtr (hWin,0);
+#else
 					wdata  = (LocalWindowData) GetWindowLong (hWin,0);
+#endif
 					UpdateWindow (hWin);			// But first update the window
 					SendMessage4ToClean (CcWmSIZE, hWin, width, height, (int)wdata->lwd_usersizemoving);
 				}
@@ -2420,7 +2465,7 @@ void EvalCcRqBEGINPAINT (CrossCallInfo *pcci)	/* hwnd; HDC result. */
 {
 	HDC hdc;
 	hdc = BeginPaint ((HWND) pcci->p1, &gPaintStruct);
-	MakeReturn1Cci (pcci, (int) hdc);
+	MakeReturn1Cci (pcci, (size_t) hdc);
 }
 
 void EvalCcRqENDPAINT (CrossCallInfo *pcci)		/* hwnd; no result.  */
@@ -2487,7 +2532,11 @@ void EvalCcRqCREATESDIDOCWINDOW (CrossCallInfo *pcci)	/* textptr, frameptr, pack
 	clientDims.y = pcci->p5;
 	styleFlags   = (DWORD) pcci->p6;
 
+#ifdef _WIN64
+	hwndToolbar  = (HWND)GetGWLP_USERDATA (hwndFrame);
+#else
 	hwndToolbar  = (HWND)GetGWL_USERDATA (hwndFrame);
+#endif
 	if (hwndToolbar == NULL || !GetWindowRect (hwndToolbar,&tbRect))
 	{
 		tbHeight = 0;
@@ -2524,7 +2573,7 @@ void EvalCcRqCREATESDIDOCWINDOW (CrossCallInfo *pcci)	/* textptr, frameptr, pack
 	UpdateWindow (hwndClient);
 	UpdateWindowScrollbars (hwndClient);
 
-	MakeReturn1Cci (pcci, (int) hwndClient);
+	MakeReturn1Cci (pcci, (size_t) hwndClient);
 }
 
 /*	Create MDI child window. */
@@ -2573,7 +2622,7 @@ void EvalCcRqCREATEMDIDOCWINDOW (CrossCallInfo *pcci)		/* textptr, clientPtr, be
 		SetWindowPos (whandle, hwndBehind, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE);
 	}
 
-	MakeReturn1Cci (pcci, (int) whandle);
+	MakeReturn1Cci (pcci, (size_t) whandle);
 }
 
 void EvalCcRqSETWINDOWTITLE (CrossCallInfo *pcci)		/* hwnd, textptr		no result. */
@@ -2595,7 +2644,7 @@ void EvalCcRqGETWINDOWTEXT (CrossCallInfo *pcci) /* hwnd;  textptr result. */
 	GetWindowText (hwnd, textptr, length + 1);
 	textptr[length] = 0;
 
-	MakeReturn1Cci (pcci, (int) textptr);
+	MakeReturn1Cci (pcci, (size_t) textptr);
 }
 
 /*	Update rect part of a window. */
@@ -2776,8 +2825,12 @@ void EvalCcRqCHANGEWINDOWCURSOR (CrossCallInfo *pcci)	/* hwnd, cursor code; no r
 	{
 		SetCursorFromCode (cursorcode);
 	}
-	
+
+#ifdef _WIN64
+	wdata = (LocalWindowData) GetWindowLongPtr (hwnd,0);
+#else
 	wdata = (LocalWindowData) GetWindowLong (hwnd,0);
+#endif
 	wdata->lwd_cursorcode = cursorcode;
 #ifdef _WIN64
 	SetWindowLongPtr (hwnd, 0, (LONG_PTR)wdata);
@@ -2974,7 +3027,7 @@ void EvalCcRqCREATEDIALOG (CrossCallInfo *pcci)	// textptr,parentptr,behindPtr; 
 	ShowWindow (hwnd, SW_SHOWNORMAL);						// Only now the dialog should be made visible. 
 	UpdateWindow (hwnd);
 
-	MakeReturn1Cci (pcci, (int) hwnd);
+	MakeReturn1Cci (pcci, (size_t) hwnd);
 }
 
 //	Create modal dialogues.
@@ -3086,7 +3139,7 @@ void EvalCcRqCREATECOMPOUND (CrossCallInfo *pcci)	/* hwnd, packed pos,w,h, scrol
 	SendMessage  (compoundhandle, WM_SETFONT, (WPARAM)gControlFont, MAKELPARAM (TRUE,0));
 	SetWindowPos (compoundhandle, HWND_BOTTOM, 0,0,0,0, SWP_NOMOVE+SWP_NOSIZE);	// This should implement control stack
 
-	MakeReturn1Cci (pcci, (int) compoundhandle);
+	MakeReturn1Cci (pcci, (size_t) compoundhandle);
 }
 
 /*	Create scrollbars. */
@@ -3125,13 +3178,14 @@ void EvalCcRqCREATESCROLLBAR (CrossCallInfo *pcci)	/* hwnd, x,y,w,h bool; HWND r
 	SendMessage  (scroll, WM_SETFONT, (WPARAM)gControlFont, MAKELPARAM (TRUE,0));
 	SetWindowPos (scroll, HWND_BOTTOM, 0,0,0,0, SWP_NOMOVE+SWP_NOSIZE);	// This should implement control stack
 
-	MakeReturn1Cci (pcci, (int) scroll);
+	MakeReturn1Cci (pcci, (size_t) scroll);
 }
 
 void EvalCcRqCREATEBUTTON (CrossCallInfo *pcci)	/* hwnd, x,y,w,h, kind;  HWND result. */
 {
 	HWND but, parent;
-	int style, id;
+	int style;
+	size_t id;
 	int x, y, w, h, kind;
 
 	parent	= (HWND) pcci->p1;
@@ -3175,13 +3229,14 @@ void EvalCcRqCREATEBUTTON (CrossCallInfo *pcci)	/* hwnd, x,y,w,h, kind;  HWND re
 	SendMessage  (but, WM_SETFONT, (WPARAM)gControlFont, MAKELPARAM (TRUE,0));
 	SetWindowPos (but, HWND_BOTTOM, 0,0,0,0, SWP_NOMOVE+SWP_NOSIZE);	// This should implement control stack
 
-	MakeReturn1Cci (pcci, (int) but);
+	MakeReturn1Cci (pcci, (size_t) but);
 }
 
 void EvalCcRqCREATEICONBUT (CrossCallInfo *pcci)	/* hwnd, x,y,w,h,kind; HWND result. */
 {
 	HWND but, parent;
-	int style, id, x, y, w, h, kind;
+	int style, x, y, w, h, kind;
+	size_t id;
 
 	parent	= (HWND) pcci->p1;
 	x		= pcci->p2;
@@ -3219,7 +3274,7 @@ void EvalCcRqCREATEICONBUT (CrossCallInfo *pcci)	/* hwnd, x,y,w,h,kind; HWND res
 	SendMessage  (but, WM_SETFONT, (WPARAM)gControlFont, MAKELPARAM (TRUE,0));
 	SetWindowPos (but, HWND_BOTTOM, 0,0,0,0, SWP_NOMOVE+SWP_NOSIZE);	// This should implement control stack
 
-	MakeReturn1Cci (pcci, (int) but);
+	MakeReturn1Cci (pcci, (size_t) but);
 }
 
 void EvalCcRqCREATECUSTOM (CrossCallInfo *pcci)	/* hwnd, x,y,w,h; HWND result. */
@@ -3248,7 +3303,7 @@ void EvalCcRqCREATECUSTOM (CrossCallInfo *pcci)	/* hwnd, x,y,w,h; HWND result. *
 	SendMessage  (ctrl, WM_SETFONT, (WPARAM)gControlFont, MAKELPARAM (TRUE,0));
 	SetWindowPos (ctrl, HWND_BOTTOM, 0,0,0,0, SWP_NOMOVE+SWP_NOSIZE);	// This should implement control stack
 
-	MakeReturn1Cci (pcci, (int) ctrl);
+	MakeReturn1Cci (pcci, (size_t) ctrl);
 }
 
 void EvalCcRqCREATESTATICTXT (CrossCallInfo *pcci)		/* hwnd, x,y,w,h; HWND result. */
@@ -3279,7 +3334,7 @@ void EvalCcRqCREATESTATICTXT (CrossCallInfo *pcci)		/* hwnd, x,y,w,h; HWND resul
 	SendMessage  (handle, WM_SETFONT, (WPARAM)gControlFont, MAKELPARAM (TRUE,0));
 	SetWindowPos (handle, HWND_BOTTOM, 0,0,0,0, SWP_NOMOVE+SWP_NOSIZE);	// This should implement control stack
 
-	MakeReturn1Cci (pcci, (int) handle);
+	MakeReturn1Cci (pcci, (size_t) handle);
 }
 
 void EvalCcRqCREATEEDITTXT (CrossCallInfo *pcci) /* hwnd, x,y,w,h, flags; HWND result. */
@@ -3337,7 +3392,7 @@ void EvalCcRqCREATEEDITTXT (CrossCallInfo *pcci) /* hwnd, x,y,w,h, flags; HWND r
 		stdEditCallback = SetWindowLong (handle, GWL_WNDPROC, (LONG) SimpleEditControlProcedure);
 #endif
 
-	MakeReturn1Cci (pcci, (int) handle);
+	MakeReturn1Cci (pcci, (size_t) handle);
 }
 
 void EvalCcRqCREATERADIOBUT (CrossCallInfo *pcci)		/* hwnd, x,y,w,h, isfirst;	HWND result. */
@@ -3371,7 +3426,7 @@ void EvalCcRqCREATERADIOBUT (CrossCallInfo *pcci)		/* hwnd, x,y,w,h, isfirst;	HW
 	SendMessage  (handle, WM_SETFONT, (WPARAM)gControlFont, MAKELPARAM (TRUE,0));
 	SetWindowPos (handle, HWND_BOTTOM, 0,0,0,0, SWP_NOMOVE+SWP_NOSIZE);	// This should implement control stack
 
-	MakeReturn1Cci (pcci, (int) handle);
+	MakeReturn1Cci (pcci, (size_t) handle);
 }
 
 void EvalCcRqCREATECHECKBOX (CrossCallInfo *pcci)		/* hwnd, x,y,w,h, isfirst; HWND result. */
@@ -3405,7 +3460,7 @@ void EvalCcRqCREATECHECKBOX (CrossCallInfo *pcci)		/* hwnd, x,y,w,h, isfirst; HW
 	SendMessage  (handle, WM_SETFONT, (WPARAM)gControlFont, MAKELPARAM (TRUE,0));
 	SetWindowPos (handle, HWND_BOTTOM, 0,0,0,0, SWP_NOMOVE+SWP_NOSIZE);	// This should implement control stack
 
-	MakeReturn1Cci (pcci, (int) handle);
+	MakeReturn1Cci (pcci, (size_t) handle);
 }
 
 void EvalCcRqSETITEMCHECK (CrossCallInfo *pcci)	/* hwnd, bool; no result. */
@@ -3533,7 +3588,7 @@ void EvalCcRqCREATEPOPUP (CrossCallInfo *pcci)	/* hwnd, x,y,w,h,isEditable;  HWN
 	{
 		hwndEdit = 0;
 	}
-	MakeReturn2Cci (pcci, (int) hwndPopUp, (int) hwndEdit);
+	MakeReturn2Cci (pcci, (size_t) hwndPopUp, (size_t) hwndEdit);
 }
 
 void EvalCcRqADDTOPOPUP (CrossCallInfo *pcci)	/* hwnd, textptr, enabled, selected, index; Pos result. */
@@ -3620,7 +3675,11 @@ void EvalCcRqADDCONTROLTIP (CrossCallInfo *pcci) /* parentPtr, controlPtr, textP
 	ti.cbSize     = sizeof(TOOLINFO);
 	ti.uFlags     = TTF_IDISHWND | TTF_SUBCLASS;
 	ti.hwnd       = hwndParent;
+#ifdef _WIN64
+	ti.uId        = (UINT_PTR) hwndControl;
+#else
 	ti.uId        = (UINT) hwndControl;
+#endif
 	ti.rect.left  = 0;
 	ti.rect.top   = 0;
 	ti.rect.right = 0;
@@ -3645,7 +3704,11 @@ void EvalCcRqDELCONTROLTIP (CrossCallInfo *pcci) /* parentPtr, controlPtr; no re
 	ti.cbSize     = sizeof(TOOLINFO);
 	ti.uFlags     = TTF_IDISHWND;
 	ti.hwnd       = hwndParent;
+#ifdef _WIN64
+	ti.uId        = (UINT_PTR) hwndControl;
+#else
 	ti.uId        = (UINT) hwndControl;
+#endif
 
 	SendMessage (ghwndTT, TTM_DELTOOL, 0, (LPARAM) (LPTOOLINFO)&ti);
 	MakeReturn0Cci (pcci);

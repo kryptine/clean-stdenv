@@ -15,7 +15,11 @@
 #include "util_121.h"
 #include "cCrossCall_121.h"
 
+#ifdef _WIN64
+static UINT_PTR APIENTRY FileSelectorHook (HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam)
+#else
 static UINT APIENTRY FileSelectorHook (HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam)
+#endif
 {
 	if (uiMsg == WM_INITDIALOG)
 	{
@@ -64,13 +68,13 @@ void EvalCcRqDIRECTORYDIALOG (CrossCallInfo *pcci)		/* no params;  bool, textptr
 		CoTaskMemFree (pidlReturn);
 		CoUninitialize ();		// Uninitialise the COM library
 
-		MakeReturn2Cci (pcci, (int)TRUE, (int)s);
+		MakeReturn2Cci (pcci, TRUE, (size_t)s);
 		/* and have the calling Clean function deallocate the directory name buffer. */
 	}
 	else
 	{
 		CoUninitialize ();		// Uninitialise the COM library
-		MakeReturn2Cci (pcci, (int)FALSE, (int)NULL);
+		MakeReturn2Cci (pcci, FALSE, (size_t)NULL);
 	}
 }
 
@@ -187,12 +191,12 @@ void EvalCcRqFILEOPENDIALOG (CrossCallInfo *pcci)		/* no params;  bool, textptr 
 
 	if (success)
 	{
-		MakeReturn2Cci (pcci, success, (int) ofn.lpstrFile);
+		MakeReturn2Cci (pcci, success, (size_t) ofn.lpstrFile);
 		/* and have the calling clean function deallocate the filename buffer */
 	}
 	else
 	{
-		MakeReturn2Cci (pcci, success, (int) NULL);
+		MakeReturn2Cci (pcci, success, (size_t) NULL);
 		rfree (ofn.lpstrFile);
 	}
 }
@@ -260,12 +264,12 @@ void EvalCcRqFILESAVEDIALOG (CrossCallInfo *pcci)		/* promptptr, nameptr; bool, 
 
 	if (success)
 	{
-		MakeReturn2Cci (pcci, success, (int) ofn.lpstrFile);
+		MakeReturn2Cci (pcci, success, (size_t) ofn.lpstrFile);
 		/* and have the calling clean function deallocate the filename buffer */
 	}
 	else
 	{
-		MakeReturn2Cci (pcci, success, (int) NULL);
+		MakeReturn2Cci (pcci, success, (size_t) NULL);
 		rfree (ofn.lpstrFile);
 	}
 }

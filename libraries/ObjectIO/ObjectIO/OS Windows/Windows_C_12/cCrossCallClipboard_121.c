@@ -77,7 +77,7 @@ void EvalCcRqGETCLIPBOARDTEXT (CrossCallInfo *pcci)			/* no params; string resul
 	}
 	CloseClipboard ();
 
-	MakeReturn1Cci (pcci, (int) result);
+	MakeReturn1Cci (pcci, (size_t) result);
 }
 
 /*	CcRqGETCLIPBOARDCOUNT is used by Clean to retrieve current clipboard count.

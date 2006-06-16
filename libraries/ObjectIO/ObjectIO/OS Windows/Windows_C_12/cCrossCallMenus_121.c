@@ -15,7 +15,7 @@
 
 OS WinDestroyMenu (HMENU menu, OS os)
 {
-	rprintf ("DestroyMenu: menu = %d\n", (int) menu);
+/*	rprintf ("DestroyMenu: menu = %d\n", (int) menu); */
 
 	DestroyMenu (menu);
 	return (os);
@@ -35,9 +35,17 @@ void EvalCcRqADDMENUSHORTKEY (CrossCallInfo *pcci)	/* frameptr, cmd, key; no res
 	cmd      = pcci->p2;
 	key      = pcci->p3;
 
+#ifdef _WIN64
+	table = (ProcessShortcutTable) GetWindowLongPtr (frameptr,0);
+#else
 	table = (ProcessShortcutTable) GetWindowLong (frameptr,0);
+#endif
 	table = AddProcessShortcut (key, cmd, table);
+#ifdef _WIN64
+	SetWindowLongPtr (frameptr, 0, (LONG_PTR)table);
+#else
 	SetWindowLong (frameptr, 0, (long)table);
+#endif
 
 	if (gAcceleratorTableIsUpToDate)
 	{
@@ -57,9 +65,17 @@ void EvalCcRqREMOVEMENUSHORTKEY (CrossCallInfo *pcci)	/* frameptr, cmd; no resul
 	frameptr = (HWND) pcci->p1;
 	cmd      = pcci->p2;
 
+#ifdef _WIN64
+	table    = (ProcessShortcutTable) GetWindowLongPtr (frameptr,0);
+#else
 	table    = (ProcessShortcutTable) GetWindowLong (frameptr,0);
+#endif
 	table    = RemoveProcessShortcut (cmd, table);
+#ifdef _WIN64
+	SetWindowLongPtr (frameptr, 0, (LONG_PTR)table);
+#else
 	SetWindowLong (frameptr, 0, (long)table);
+#endif
 
 	if (gAcceleratorTableIsUpToDate)
 	{
@@ -292,7 +308,7 @@ void EvalCcRqTRACKPOPMENU (CrossCallInfo *pcci)	/* popupmenu,framePtr; return: i
 
 void EvalCcRqCREATEPOPMENU (CrossCallInfo *pcci) /* no params; MENU result.   */
 {
-	MakeReturn1Cci (pcci, (int) CreatePopupMenu ());
+	MakeReturn1Cci (pcci, (size_t) CreatePopupMenu ());
 }
 
 void EvalCcRqCHECKMENUITEM (CrossCallInfo *pcci) /* menu, HITEM, on/off; no result.	*/

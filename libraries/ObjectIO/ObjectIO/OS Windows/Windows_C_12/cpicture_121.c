@@ -10,7 +10,7 @@
 ********************************************************************************************/
 #include "cpicture_121.h"
 
-void WinGetDC (int hwnd, OS ios, HDC * ohdc, OS * oos)
+void WinGetDC (size_t hwnd, OS ios, HDC * ohdc, OS * oos)
 {
 	HDC hdc;
 
@@ -22,7 +22,7 @@ void WinGetDC (int hwnd, OS ios, HDC * ohdc, OS * oos)
 	* oos  = ios;
 }	/* WinGetDC */
 
-OS WinReleaseDC (int hwnd, HDC hdc, OS ios)
+OS WinReleaseDC (size_t hwnd, HDC hdc, OS ios)
 {
 	int returncode;
 	
@@ -1785,7 +1785,7 @@ void WinGetCharWidth (int ichar, CLEAN_STRING clFontName, int style, int size, i
 
 // MW...
 
-void getResolutionC(int hdc, int *xResP, int *yResP)
+void getResolutionC(size_t hdc, int *xResP, int *yResP)
 {
 	int mapMode = GetMapMode((HDC) hdc);
 	if (mapMode==MM_ISOTROPIC)	
@@ -1801,7 +1801,7 @@ void getResolutionC(int hdc, int *xResP, int *yResP)
 */
 }	/* getResolutionC */
 
-void WinGetPictureScaleFactor(int ihdc, int ios, int *nh, int *dh, int *nv, int *dv, int *ohdc, int *oos)
+void WinGetPictureScaleFactor(size_t ihdc, int ios, int *nh, int *dh, int *nv, int *dv, int *ohdc, int *oos)
 {
 	if (GetMapMode((HDC) ihdc)==MM_TEXT)
 	    {	*nh = 1;
