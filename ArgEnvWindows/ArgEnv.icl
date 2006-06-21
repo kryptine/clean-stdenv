@@ -5,7 +5,7 @@
 */
 implementation module ArgEnv
 
-import code from "ArgEnvC.obj"
+import code from "ArgEnvC."
 
 import StdEnv
 
