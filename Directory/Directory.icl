@@ -8,15 +8,10 @@ implementation module Directory
 // version 1.1.1
 
 import	StdEnv
-import code from "cDirectory.obj",  library "directory_library" // this is the only platform dependent line in this module
+import code from "cDirectory.",  library "directory_library" // this is the only platform dependent line in this module
 //import code from "cDirectory." // for the Macintosh
 import StdMaybe
-//1.3
-from StdLibMisc		import Date, Time
-//3.1
-/*2.0
-from StdLibMisc		import :: Date (..), :: Time (..)
-0.2*/
+from StdLibMisc import :: Date (..), :: Time (..)
 //import BigInt
 
 //	**************************************************************************************************
