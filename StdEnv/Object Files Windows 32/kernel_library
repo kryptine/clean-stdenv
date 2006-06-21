@@ -73,6 +73,9 @@ DeleteFileA@4
 CreateDirectoryA@8
 RemoveDirectoryA@4
 GetCurrentDirectoryA@8
+SetCurrentDirectoryA@4
+GetLogicalDrives@0
+MoveFileA@8
 UnmapViewOfFile@4
 MapViewOfFile@20
 DuplicateHandle@28
