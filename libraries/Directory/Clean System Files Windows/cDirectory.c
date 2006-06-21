@@ -2,7 +2,7 @@
 
 #include <windows.h>
 #include <direct.h>
-#include <Clean.h>
+#include "Clean.h"
 
 // error codes:
 #define NoDirError			 0
@@ -83,7 +83,7 @@ void getCommonFileInfoC(int also_get_file_name,
 	SYSTEMTIME	localSystemTime;
 	int			i;
 	static CleanStringVariable(fileName,MAX_PATH);
-	static int nix = 0;
+	static size_t nix = 0;
 
 	if (also_get_file_name) {
 		for(i=0; gWFD.cFileName[i]!='\0' && i<MAX_PATH; i++)
