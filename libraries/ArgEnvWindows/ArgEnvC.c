@@ -23,7 +23,7 @@ extern char **global_argv;
 
 typedef struct
 {
-	int		length;
+	size_t	length;
 	char	characters [kVariableSize];
 } *CleanString;
 
