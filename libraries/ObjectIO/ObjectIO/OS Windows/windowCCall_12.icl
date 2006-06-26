@@ -5,7 +5,7 @@ from	ostoolbox		import :: OSToolbox
 from	ostypes			import :: HWND
 from	rgnCCall_12		import :: HRGN
 from	pictCCall_12	import :: HDC
-import code from "cCCallWindows_121.obj","cpicture_121.obj"
+import code from "cCCallWindows_121.","cpicture_121."
 
 
 winInitialiseWindows:: !*OSToolbox -> *OSToolbox

@@ -3,8 +3,8 @@ implementation module osprint
 import StdArray, StdBool, StdEnum, StdFile, StdFunc, StdInt, StdList, StdMisc, StdTuple
 import clCCall_12,clCrossCall_12, iostate, scheduler
 import ospicture, osevent, StdWindow, StdPSt
-import code from "cCrossCallPrinter_121.obj",
-				 "cprinter_121.obj"
+import code from "cCrossCallPrinter_121.",
+				 "cprinter_121."
 
 ::	PrintSetup
 	=	{	devmode		:: !String
