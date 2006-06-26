@@ -5,7 +5,7 @@ import	StdInt, StdMaybe, StdOverloaded, StdString, StdTuple
 import	clCrossCall_12, ostoolbar, ossystem, ostypes, windowCrossCall_12
 from	commondef	import fatalError
 from	StdIOCommon	import :: DocumentInterface(..)
-import	code from "cCrossCallxDI_121.obj"
+import	code from "cCrossCallxDI_121."
 
 
 ::	OSDInfo

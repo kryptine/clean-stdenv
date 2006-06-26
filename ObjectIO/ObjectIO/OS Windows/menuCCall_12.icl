@@ -1,7 +1,7 @@
 implementation module menuCCall_12
 
 import ostoolbox
-import code from "cCrossCallMenus_121.obj"
+import code from "cCrossCallMenus_121."
 
 winInitialiseMenus :: !*OSToolbox -> *OSToolbox
 winInitialiseMenus _

@@ -3,13 +3,13 @@ implementation module clCCall_12
 import	StdClass, StdInt
 from	StdIOCommon	import :: Modifiers{..}
 from	ostoolbox	import :: OSToolbox
-import code from "cCCallSystem_121.obj", 
-				 "cCCallWindows_121.obj",
-				 "cCrossCallWindows_121.obj", 
-				 "cCrossCall_121.obj", 
-				 "cdebug_121.obj", 
-				 "cpicture_121.obj",
-				 "util_121.obj"
+import code from "cCCallSystem_121.",
+				 "cCCallWindows_121.",
+				 "cCrossCallWindows_121.", 
+				 "cCrossCall_121.", 
+				 "cdebug_121.", 
+				 "cpicture_121.",
+				 "util_121."
 
 
 ::	CSTR	:==  Int

@@ -2,13 +2,13 @@ implementation module clCrossCall_12
 
 import StdBool, StdClass, StdInt, StdMisc, StdString, StdTuple, StdArray;
 import ostoolbox
-import code from "cAcceleratorTable_121.obj",
-				 "cCCallWindows_121.obj", 
-				 "cCCallSystem_121.obj",
-				 "cCrossCall_121.obj", 
-				 "cCrossCallCursor_121.obj",
-				 "cCrossCallProcedureTable_121.obj",
-				 "cCrossCallWindows_121.obj"
+import code from "cAcceleratorTable_121.",
+				 "cCCallWindows_121.", 
+				 "cCCallSystem_121.",
+				 "cCrossCall_121.", 
+				 "cCrossCallCursor_121.",
+				 "cCrossCallProcedureTable_121.",
+				 "cCrossCallWindows_121."
 import code from library "advapi32_library",
                  library "comctl32_library",
                  library "kernel32_library",
