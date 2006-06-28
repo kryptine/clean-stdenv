@@ -1,4 +1,0 @@
-foreign module xfileselect;
-
-void select_input_file(int, int *,CLEAN_STRING *)	'XSelectInputFile';
-void select_output_file(CLEAN_STRING,CLEAN_STRING,int *,CLEAN_STRING *) 'XSelectOutputFile';
