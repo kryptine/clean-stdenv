@@ -120,7 +120,7 @@ void getWindowsFileInfoC(int *pFileAttributes,
 	FILETIME	localFileTime;
 	SYSTEMTIME	localSystemTime;
 	int			i;
-	CleanStringVariable(fileName,ALT_LENGTH);
+	static CleanStringVariable(fileName,ALT_LENGTH);
 
 	*pFileAttributes	= gWFD.dwFileAttributes;
 	FileTimeToLocalFileTime(&gWFD.ftCreationTime,&localFileTime);
