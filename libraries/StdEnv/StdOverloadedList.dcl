@@ -187,7 +187,7 @@ TakeM n l :== take n l
 		take n [|a:x]	= [|a:take (dec n) x]
 		take n [|]		= [|]
 
-TakeWhile f l :== takeWhile f l
+TakeWhile f l :== takeWhile l
 	where
 		takeWhile [|a:x] | f a	= [|a:takeWhile x]
 								= [|]
