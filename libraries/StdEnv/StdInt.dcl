@@ -54,3 +54,5 @@ instance lcm Int	//	Least common multiple
 (<<)	infix  7	:: !Int !Int 	->	Int 	//	Shift arg1 to the left arg2 bit places
 (>>)	infix  7	:: !Int !Int 	->	Int 	//	Shift arg1 to the right arg2 bit places
 bitnot				:: !Int 		->	Int 	//	One's complement of arg1
+
+IF_INT_64_OR_32 int64 int32 :== int32;
