@@ -181,11 +181,16 @@ Take :: !Int u:(l v:e) -> u:(l v:e) | List l e,[u<=v]
 		l=[#],e=Char; l=[#!],e=Char
 		l=[#],e=Real; l=[#!],e=Real
 
-TakeM n l :== take n l
+TakeM n l :== if (n<=0) [|] (take n l)
 	where
-		take 0 _		= [|]
-		take n [|a:x]	= [|a:take (dec n) x]
-		take n [|]		= [|]
+		take n [|x:xs]
+			| n<=1
+				= [|x]
+				= [|x:take (n-1) xs]
+		take n [|]
+			| n<=0
+				= [|]
+				= [|]
 
 TakeWhile f l :== takeWhile l
 	where
@@ -193,7 +198,7 @@ TakeWhile f l :== takeWhile l
 								= [|]
 		takeWhile [|]			= [|]
 
-Drop :: Int !u:(l v:e) -> u:(l v:e) | List l e,[u<=v]
+Drop :: !Int !u:(l v:e) -> u:(l v:e) | List l e,[u<=v]
 	special
 		l=[]; l=[!]; l=[ !]; l=[!!]
 		l=[#],e=Int ; l=[#!],e=Int
@@ -202,9 +207,9 @@ Drop :: Int !u:(l v:e) -> u:(l v:e) | List l e,[u<=v]
 
 DropM n l :== drop n l
 	where
-		drop n cons=:[|a:x]	| n>0	= drop (n - 1) x
-									= cons
-		drop n [|]					= [|]
+		drop n xs | n<=0 = xs
+		drop n [|x:xs] = drop (n - 1) xs
+		drop n [|] = [|]
 
 DropWhile f l :== dropWhile l
 	where
