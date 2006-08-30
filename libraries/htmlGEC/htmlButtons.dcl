@@ -4,15 +4,15 @@ definition module htmlButtons
 
 import htmlHandler
 
-derive gForm 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML
-derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML
-derive gPrint 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML
-derive gParse 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML
+derive gForm 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML, PasswordBox
+derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML, PasswordBox
+derive gPrint 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML, PasswordBox
+derive gParse 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML, PasswordBox
 
 instance toBool   CheckBox, Button, RadioButton		// True if checkbox checked, button pressed
 instance toInt    PullDownMenu						// Current index in pull down list
 instance toString PullDownMenu						// Corresponding element in pull down list
-
+instance ==		  PasswordBox
 // lay out
 
 :: <-> a b		= (<->) infixl 5 a b				// place b to the left of a
@@ -40,6 +40,7 @@ instance toString PullDownMenu						// Corresponding element in pull down list
 				| TR Int Real						// Input box of size Size for Reals
 				| TS Int String						// Input box of size Size for Strings
 :: TextArea		= TextArea Int Int String			// Input Area Box, row col initial string
+:: PasswordBox	= PasswordBox String
 	
 // special's
 

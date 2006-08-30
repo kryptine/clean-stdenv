@@ -4,9 +4,9 @@ import StdEnv, ArgEnv
 
 import htmlHandler, htmlStylelib, htmlTrivial
 
-derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, /*Button, */CheckBox, RadioButton /*, PullDownMenu, TextInput */, TextArea
-derive gPrint 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
-derive gParse 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea
+derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, /*Button, */CheckBox, RadioButton /*, PullDownMenu, TextInput */, TextArea/*, PasswordBox*/
+derive gPrint 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, PasswordBox
+derive gParse 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, PasswordBox
 
 :: TextInput	= TI Int Int						// Input box of size Size for Integers
 				| TR Int Real						// Input box of size Size for Reals
@@ -237,6 +237,35 @@ gForm{|TextInput|} (init,formid) hst
 	# (body,hst) = mkInput size (init,formid) (SV s) (UpdS s) hst 
 	= ({changed=False, value=TS size s, form=[body]},incrHSt 2 hst)
 
+
+:: PasswordBox	= PasswordBox String
+gForm{|PasswordBox|} (init,formid) hst 	
+= case formid.ival of
+	(PasswordBox password) 
+	# (body,hst) = mkPswInput defsize (init,formid) password (UpdS password) hst
+	= ({changed=False, value=PasswordBox password, form=[body]},incrHSt 1 hst)
+where
+	mkPswInput :: !Int !(InIDataId d) String UpdValue *HSt -> (BodyTag,*HSt) 
+	mkPswInput size (init,formid=:{mode = Edit}) sval updval hst=:{cntr} 
+		= ( Input 	[	Inp_Type Inp_Password
+					, 	Inp_Value (SV sval)
+					,	Inp_Name (encodeTriplet (formid.id,cntr,updval))
+					,	Inp_Size size
+					, 	`Inp_Std [EditBoxStyle, Std_Title "::Password"]
+					,	`Inp_Events	[OnChange callClean]
+					] ""
+			,incrHSt 1 hst)
+	mkPswInput size (init,{mode = Display}) sval _ hst=:{cntr} 
+		= ( Input 	[	Inp_Type Inp_Password
+					, 	Inp_Value (SV sval)
+					,	Inp_ReadOnly ReadOnly
+					, 	`Inp_Std [DisplayBoxStyle]
+					,	Inp_Size size
+					] ""
+			,incrHSt 1 hst)
+	mkPswInput size (init,_) val _ hst=:{cntr} 
+		= ( EmptyBody,incrHSt 1 hst)
+
 //derive gForm HtmlTime
 
 gForm {|HtmlTime|} (init,formid) hst 
@@ -344,6 +373,10 @@ gUpd{|TextInput|} (UpdSearch val cnt)     	i = (UpdSearch val (cnt - 3),i)			// 
 gUpd{|TextInput|} (UpdCreate l)				_ = (UpdCreate l,TI defsize 0)			// create default value
 gUpd{|TextInput|} mode 			  	    	i = (mode,i)							// don't change
 
+gUpd{|PasswordBox|} (UpdSearch (UpdS name) 0) 	_ = (UpdDone,PasswordBox name)			// update password value
+gUpd{|PasswordBox|} (UpdSearch val cnt)      	b = (UpdSearch val (cnt - 2),b)			// continue search, don't change
+gUpd{|PasswordBox|} (UpdCreate l)				_ = (UpdCreate l,PasswordBox "")		// create default value
+gUpd{|PasswordBox|} mode 			  	    	b = (mode,b)							// don't change
 
 // small utility stuf
 
@@ -367,3 +400,7 @@ where
 instance toString PullDownMenu
 where
 	toString (PullDown _ (i,s)) = if (i>=0 && i <length s) (s!!i) ""
+	
+instance == PasswordBox
+where
+	(==) (PasswordBox psw1) (PasswordBox psw2) = psw1 == psw2

@@ -56,6 +56,7 @@ where
 doHtmlServer :: (*HSt -> (Html,!*HSt)) *World -> *World
 doHtmlServer userpage world
 	= StartServer 80 (map (\(id,_,f) -> (id,f)) pages) world
+//	= StartServer 80 pages world
 where
 //	pages :: [(String,String, String String Arguments *World -> ([String],String,*World))]
 	pages

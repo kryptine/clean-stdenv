@@ -6,7 +6,7 @@ definition module httpServer
 
 // StartServer takes a port number + list of virtual pages
 
-StartServer		:: Int [(String,(String String Arguments *World-> ([String],String,*World)))] *World -> *World
+StartServer		:: Int [(String,(String String Arguments *World -> ([String],String,*World)))] *World -> *World
 
 getArgValue		:: String Arguments -> String
 getContentType	:: String -> String
