@@ -131,20 +131,28 @@ init []       = []
 init [x]     = []
 init [x:xs] = [x: init xs]
 
-take::!Int [.a] -> [.a]
-take 0 _		= []
-take n [a:x]	= [a:take (dec n) x]
-take n []		= []
+take :: !Int [.a] -> [.a]
+take n xs
+	| n<=0
+		= []
+		= take n xs
+	where
+		take :: !Int ![.a] -> [.a]
+		take n [x:xs]
+			| n<=1
+				= [x]
+				= [x:take (n-1) xs]
+		take n [] = []
 
 takeWhile::(a -> .Bool) !.[a] -> .[a]
 takeWhile f [a:x] | f a	= [a:takeWhile f x]
 						= []
 takeWhile f []			= []
 
-drop::Int !u:[.a] -> u:[.a]
-drop n cons=:[a:x]	| n>0	= drop (n - 1) x
-							= cons
-drop n []					= []
+drop :: !Int !u:[.a] -> u:[.a]
+drop n xs | n<=0 = xs
+drop n [a:x] = drop (n - 1) x
+drop n [] = []
 
 dropWhile :: (a -> .Bool) !u:[a] -> u:[a]
 dropWhile f cons=:[a:x]	| f a	= dropWhile f x

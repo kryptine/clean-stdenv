@@ -37,7 +37,7 @@ last		:: ![.a] -> .a							//	Last element of the list
 init	 	:: ![.a] -> [.a]						//	Remove last element of the list
 take		:: !Int [.a] -> [.a]					//	Take first arg1 elements of the list
 takeWhile	:: (a -> .Bool) !.[a] -> .[a]			//	Take elements while pred holds
-drop		:: Int !u:[.a] -> u:[.a]				//	Drop first arg1 elements from the list
+drop		:: !Int !u:[.a] -> u:[.a]				//	Drop first arg1 elements from the list
 dropWhile	:: (a -> .Bool) !u:[a] -> u:[a]			//	Drop elements while pred holds
 span		:: (a -> .Bool) !u:[a] -> (.[a],u:[a])	//	(takeWhile list,dropWhile list)
 filter		:: (a -> .Bool) !.[a] -> .[a]			//	Drop all elements not satisfying pred
