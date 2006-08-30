@@ -9,7 +9,7 @@ import loginAdminIData, confIData
 guestAccountStore :: ((Bool,ConfAccount) -> (Bool,ConfAccount)) !*HSt -> (Form (Bool,ConfAccount),!*HSt)
 guestAccountStore fun hst = mkStoreForm (Init,nFormId "shd_temp_guest" (False,guest)) fun hst
 where
-	guest = mkAccount (mkLogin "guest" "temppassword") (Guest createDefault)
+	guest = mkAccount (mkLogin "guest" (PasswordBox "temppassword")) (Guest createDefault)
 
 loginHandlingPage  :: !ConfAccounts !*HSt -> (Maybe ConfAccount,[BodyTag],!*HSt)
 loginHandlingPage accounts hst

@@ -6,7 +6,7 @@ import StdEnv, StdMaybe, htmlRefFormlib
 							, state			:: s			// state 
 							}
 :: Login 				= 	{ loginName 	:: String		// Should be unique
-							, password		:: String		// Should remain secret
+							, password		:: PasswordBox		// Should remain secret
 							}
 :: Accounts s			:== [Account s]
 
@@ -15,9 +15,9 @@ import StdEnv, StdMaybe, htmlRefFormlib
 instance == (Account s)
 instance <  (Account s)
 
-mkLogin 			:: String String 	-> Login
+mkLogin 			:: String PasswordBox 	-> Login
 mkAccount			:: Login s 			-> Account s
-changePassword 		:: String  (Account s) -> (Account s) 
+changePassword 		:: PasswordBox  (Account s) -> (Account s) 
 
 addAccount 			::	(Account s) (Accounts s) -> (Accounts s) 
 removeAccount 		::	(Account s) (Accounts s) -> (Accounts s) 

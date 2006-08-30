@@ -6,7 +6,7 @@ import loginAdmin
 
 initManagerLogin :: Login
 initManagerLogin	
-= (mkLogin "root" "secret")
+= (mkLogin "root" (PasswordBox "secret"))
 
 initManagerAccount :: Login -> ConfAccount
 initManagerAccount	login 

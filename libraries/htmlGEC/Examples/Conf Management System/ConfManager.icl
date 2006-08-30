@@ -8,40 +8,8 @@ import loginAdminIData, confIData, stateHandlingIData
 
 import StdDebug
 
-Start world = doHtmlServer test world
+Start world = doHtmlServer mainEntrance world
 
-:: PH = PH [BodyTag]
-:: NPH = NPH
-
-gForm {|PH|} (init,formid) hst = specialize myedit (init,formid) hst
-where
-	myedit (init,formid) hst
-	# (PH bodytag) = formid.ival
-	# (idata,hst) = mkBimapEditor (Init,{subtFormId formid "_htm" bodytag & mode = NoForm}) {map_to = \_ -> NPH, map_from = \_ -> bodytag} hst
-//	= ({changed = False, form = idata.value, value = PH idata.value},hst)
-	= ({changed = False, form = idata.form, value = PH idata.form},hst)
-
-
-gUpd{|PH|} (UpdSearch (UpdI ni) 0) 	_ 	= (UpdDone,PH [])					// update integer value
-gUpd{|PH|} (UpdSearch val cnt)     	i 	= (UpdSearch val (dec cnt),i)		// continue search, don't change
-gUpd{|PH|} (UpdCreate l)	_			= (UpdCreate l,PH [])					// create default value
-gUpd{|PH|} mode 			  		i 	= (mode,i)						// don't change
-
-gPrint{|PH|} ph st = gPrint{|*|} NPH st
-gParse{|PH|} expr = case gParse{|*|} expr of
-						(Just NPH) -> Just (PH [])
-						_ -> Nothing
-
-derive gParse NPH
-derive gPrint NPH
-derive gForm  NPH
-derive gUpd   NPH
-
-test hst
-# (idata,hst) = mkEditForm (Init,nFormId "x" (0 <-> PH [Txt "zo gaat ie goed"])) hst
-= mkHtml ""
-	[ BodyTag idata.form
-	] hst
 
 mainEntrance hst
 # (body,hst) 	= loginhandling hst				// a login will be checked on correctness each time a page is requested !

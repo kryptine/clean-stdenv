@@ -20,7 +20,7 @@ mkAccount login s
 		, state			= s
 		}
 
-mkLogin :: String String -> Login
+mkLogin :: String PasswordBox -> Login
 mkLogin name password = {loginName = name, password = password}
 
 addAccount :: (Account s) (Accounts s) -> (Accounts s) 
@@ -28,7 +28,7 @@ addAccount account accounts
 | isNothing (invariantLogAccounts account.login.loginName [account:accounts])	= sort [account:accounts]	
 | otherwise 																	= accounts
 
-changePassword 	:: String (Account s) -> (Account s) 
+changePassword 	:: PasswordBox (Account s) -> (Account s) 
 changePassword nwpasswrd oldlogin 
 = mkAccount (mkLogin oldlogin.login.loginName nwpasswrd) oldlogin.state
 
@@ -55,10 +55,10 @@ invariantLogAccounts id accounts = invariantLogins id [login \\ {login} <- accou
 
 invariantLogins :: String [Login] -> Judgement
 invariantLogins id [] 			= Ok
-invariantLogins id [login=:{loginName,password}:logins]
-| loginName == "" 			= Just (id,"login name is not specified!")
-| password  == "" 			= Just (id,"password required!")
-| isMember login logins		= Just (id,"login name " +++ loginName +++ " is already being used!")
-| size password < 6			= Just (id,"at least 6 characters required for a password!")
+invariantLogins id [login=:{loginName,password=(PasswordBox mypassword)}:logins]
+| loginName  == "" 				= Just (id,"login name is not specified!")
+| mypassword == ""				= Just (id,"password required!")
+| isMember login logins			= Just (id,"login name " +++ loginName +++ " is already being used!")
+| size mypassword < 6			= Just (id,"at least 6 characters required for a password!")
 = invariantLogins id logins
 
