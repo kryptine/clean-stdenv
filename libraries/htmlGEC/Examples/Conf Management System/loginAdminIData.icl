@@ -34,7 +34,7 @@ loginPage  :: !(Accounts s) !*HSt -> (Maybe (Account s),[BodyTag],!*HSt)
 loginPage accounts hst
 # (login,hst) = loginForm (Init,mkLogin "" (PasswordBox "")) hst
 = 	( hasAccount login.value accounts
-	, [	Txt "Please log in.."
+	, [	Txt "Please log in."
 	  ,	Br
 	  ,	Br
 	  ,	BodyTag login.form
@@ -98,5 +98,3 @@ where
 					]
 					[]
 			] 
-
-						

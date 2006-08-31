@@ -8,8 +8,8 @@ import loginAdminIData, confIData, stateHandlingIData
 
 import StdDebug
 
+//Start world = doHtmlServer test world
 Start world = doHtmlServer mainEntrance world
-
 
 mainEntrance hst
 # (body,hst) 	= loginhandling hst				// a login will be checked on correctness each time a page is requested !
@@ -100,7 +100,7 @@ doConfPortal account accounts hst
 # (currPage,hst)	= currPageStore (homePage account.state) navButtons.value hst	// determine which current page to display
 # (navBody,hst)		= handleCurrPage currPage.value account accounts  hst			// and handle the corresponding page
 # (exception,hst)	= ExceptionStore id hst											// see if an error has occured somewhere
-= ( [ mkSTable2 [ [EmptyBody,B [] "Conference" <.||.> B [] "Manager ",Oeps exception currPage.value]
+= ( [ mkSTable2 [ [EmptyBody,B [] "Conference" <.||.> B [] "Manager ",oops exception currPage.value]
 				, [mkColForm navButtons.form, EmptyBody, BodyTag navBody]
 				]
 	] // for debugging ++ [Txt (printToString accounts)]
@@ -114,9 +114,9 @@ where
 		mktable table 	= [Tr [] (mkrow rows) \\ rows <- table]	
 		mkrow rows 		= [Td [Td_VAlign Alo_Top] [row] \\ row <- rows] 
 	
-	Oeps (Just (id,message)) currpage
+	oops (Just (id,message)) currpage
 	= Font [Fnt_Color (`Colorname Yellow)] [B [] (print currpage), Br, B [] (id +++ " : " +++ message)]
-	Oeps Nothing currpage
+	oops Nothing currpage
 	= Font [Fnt_Color (`Colorname Silver)] [B [] (print currpage)] 
 
 	print currpage = printToString (currpage) +++ " of " +++ account.login.loginName
@@ -200,7 +200,7 @@ where
 	guestPerson hst 		// 2. administrate personel administration
 	# (personf,hst)			= mkEditForm (Init,nFormId "cms_guest_person" createDefault) hst
 	# (exception,hst)		= ExceptionStore ((+) (invariantPerson account.login.loginName personf.value)) hst	
-	| isJust exception		= ([Txt "2. Please fill in your personal data such that we can inform you.",Br,Br ] ++ personf.form,hst)
+	| isJust exception		= ([Txt "2. Please fill in your personal data so that we can inform you.",Br,Br ] ++ personf.form,hst)
 	# (_,hst)				= guestSubPages Set (\_ -> GuestSubmitPaper) hst
 	# account				= {account & state = Guest personf.value}
 	# (_,hst)				= guestAccountStore (\(_,guest) -> (True,{guest & state = Guest personf.value})) hst		// update guest account
@@ -228,13 +228,10 @@ where
 	# (_,hst)				= AccountsDB Set accounts hst								// store accounts
 	# (exception,hst)		= ExceptionStore id hst	
 	| isJust exception		
-		= ([Txt "Sorry, an exception occured, something went wrong, you have to try again"],hst)
+		= ([Txt "Sorry, an exception occurred, something went wrong, you have to try again"],hst)
 
 	# (_,hst)				= mkEditForm (Set,pFormId uniquename (0,person)) hst		// store person info
 	# (_,hst)				= mkEditForm (Set,pFormId uniquepaper (0,paperf.value)) hst	// store paper info
 	# (_,hst)				= guestAccountStore (\(_,guest) -> (False,account)) hst		// kick out guest
-	= ([B [] "Paper submitted.",Br, Txt "You have a login account you can use to update the provided information",Br,
-			Txt "and keep in touch with us",Br],hst)
-
-
-
+	= ([B [] "Paper submitted.",Br, Txt "Use your account to update provided information",Br,
+			Txt "and stay in touch with us",Br],hst)

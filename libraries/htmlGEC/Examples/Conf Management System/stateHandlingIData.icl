@@ -45,7 +45,7 @@ passwordForgotten accounts hst
 		, if (	mailmebut.changed && 
 				emailadres.value <> "") 
 					(if (isJust found) 
-						(Txt "e-mail has been send")  			// **** But I don't know yet how to do that
+						(Txt "e-mail has been sent")  			// **** But I don't know yet how to do that
 						(Txt "you are not administrated")) 
 					EmptyBody
 		]
@@ -62,7 +62,7 @@ addAuthorPage accounts hst
 =	(	yessubmitf.changed
 	,	[ B [] "Paper Submission Area:", Br, Br	
 		, Txt "Deadline is due on xx-yy-2006", Br, Br
-		, Txt "Do you want to submit a paper ?", Br, Br
+		, Txt "Do you want to submit a paper?", Br, Br
 		, BodyTag yessubmitf.form
 		]
 	, hst)
@@ -137,7 +137,7 @@ where
 changeInfo :: !ConfAccount !*HSt -> ([BodyTag],!*HSt)
 changeInfo account hst
 # (personf,hst) = mkEditForm (Init,nFormId "sh_changeInfo" (fromJust (getRefPerson account.state))) hst
-= ([Br, Txt "Change your personel information:", Br, Br] ++ personf.form,hst)
+= ([Br, Txt "Change your personal information:", Br, Br] ++ personf.form,hst)
 
 submitPaperPage ::  !ConfAccount !*HSt -> ([BodyTag],!*HSt)
 submitPaperPage account hst
@@ -234,7 +234,7 @@ showPapersStatusPage account accounts hst
 												| paperinfo.status == pdmenu.value] 	
 # selpapernrs		= map fst selpaperinfo	// the number of the papers that have the selected status
 
-| isNil selpapernrs	= ([Txt "Show status of all papers which are:",Br,Br] ++ pdmenu.form ++ [Br, Txt "There are no papers that obey this criteria.",Br],hst)
+| isNil selpapernrs	= ([Txt "Show status of all papers which are:",Br,Br] ++ pdmenu.form ++ [Br, Txt "There are no papers that obey these criteria.",Br],hst)
 # selreports		= [(nr,map snd persreport) \\ (nr,persreport) <- allireports | isMember nr selpapernrs]
 # selsummary		= [("Paper nr: " <+++ nr,	[ (report.recommendation,report.familiarity)
 							\\ (Just report) <- reports
@@ -254,4 +254,3 @@ show WeakReject 	= colorbox "Weak Reject" Maroon
 show Reject 		= colorbox "Reject" Fuchsia
 show StrongReject 	= colorbox "Strong Reject" Red
 colorbox bla color = Table [] [Td [Td_Align Aln_Center,Td_VAlign Alo_Top, Td_Width (Pixels (defpixel)),Td_Bgcolor (`Colorname color)] [Txt bla]]
-

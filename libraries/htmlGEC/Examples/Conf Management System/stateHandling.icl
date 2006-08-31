@@ -229,7 +229,7 @@ invariantReport id {commCommittee,commAuthors}
 invariantConfAccounts :: String ConfAccounts -> Judgement
 invariantConfAccounts id accounts 
 # allpapernrs 		= [nr \\ (nr,refpapers) <- getRefPapers accounts]
-| isMember 0 allpapernrs 					= Just (id,"paper number has to be a postive number")
+| isMember 0 allpapernrs 					= Just (id,"paper number has to be a positive number")
 | not (allUnique allpapernrs) 				= Just (id,"paper number already in use")
 # uniqueconflicts 	= and [allUnique nrs \\ (_,nrs) <- getConflicts accounts] 
 | not uniqueconflicts						= Just (id,"conflict already assigned to referee")
@@ -281,5 +281,3 @@ where
 						 = [(nr, (RefReport (Ref2 (uniqueReport nr uniquename)))):setInvariantReport reports]
 		setInvariantReport [report:reports]
 						 = [report:setInvariantReport reports]
-
-
