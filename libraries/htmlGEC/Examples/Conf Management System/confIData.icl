@@ -63,7 +63,7 @@ editorRefPerson (init,formid) hst
 # (RefPerson refperson) = formid.ival
 # (Ref2 name) 			= refperson
 # (dereff,hst)			= universalRefEditor (init,reuseFormId formid refperson) (invariantPerson name) hst
-= ({dereff & value = dereff.value},hst)
+= ({dereff & value = dereff.value},hst)		// PA: huh? {dereff & value = dereff.value} = dereff
 
 editorRefPaper :: !(InIDataId RefPaper) !*HSt -> (Form Paper,!*HSt)
 editorRefPaper (init,formid) hst

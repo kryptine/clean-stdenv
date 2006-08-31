@@ -125,22 +125,22 @@ where
 	currPageStore currpage cbf hst = mkStoreForm (Init, sFormId "cf_currPage" currpage) cbf hst 
 	
 	handleCurrPage :: CurrPage ConfAccount ConfAccounts *HSt -> ([BodyTag],*HSt)
-	handleCurrPage currPage account accounts  hst 
+	handleCurrPage currPage account accounts hst 
 	= case currPage of
-			RootHomePage 	-> rootHomePage hst
-			RefereeHomePage -> refereeHomePage hst
-			AuthorsHomePage -> authorsHomePage hst
-			GuestHomePage	-> guestHomePage account accounts hst
-			ModifyStates 	-> modifyStatesPage	accounts hst
-			AssignPapers 	-> assignPapersConflictsPage accounts hst
-			SubmitPaper		-> submitPaperPage account hst
-			ListPapers 		-> showPapersPage accounts hst
-			RefereeForm 	-> submitReportPage account accounts hst
-			ListReports		-> showReportsPage account accounts hst
-			DiscussPapers	-> discussPapersPage account accounts hst	
-			ShowPapersStatus-> showPapersStatusPage account accounts hst	
-			ChangeInfo		-> changeInfo account hst  
-			ChangePassword 	-> changePasswrdPage account accounts hst
+			RootHomePage 	-> rootHomePage                          hst
+			RefereeHomePage -> refereeHomePage                       hst
+			AuthorsHomePage -> authorsHomePage                       hst
+			GuestHomePage	-> guestHomePage        account accounts hst
+			ModifyStates 	-> modifyStatesPage	            accounts hst
+			AssignPapers 	-> assignPapersConflictsPage    accounts hst
+			SubmitPaper		-> submitPaperPage      account          hst
+			ListPapers 		-> showPapersPage               accounts hst
+			RefereeForm 	-> submitReportPage     account accounts hst
+			ListReports		-> showReportsPage      account accounts hst
+			DiscussPapers	-> discussPapersPage    account accounts hst
+			ShowPapersStatus-> showPapersStatusPage account accounts hst
+			ChangeInfo		-> changeInfo           account          hst
+			ChangePassword 	-> changePasswrdPage    account accounts hst
 			_				-> ([],hst)
 	where
 		changePasswrdPage account accounts hst 

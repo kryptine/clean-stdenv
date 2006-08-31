@@ -80,25 +80,25 @@ getRefPerson (Referee refereeInfo)		= Just refereeInfo.RefereeInfo.person
 getRefPerson (Authors paperInfo)		= Just paperInfo.PaperInfo.person
 getRefPerson _ = Nothing
 
-getRefPapers :: ConfAccounts -> [(Int,RefPaper)]
+getRefPapers :: ConfAccounts -> [(PaperNr,RefPaper)]
 getRefPapers accounts = sort [(nr,refpapers) 
 							\\ {state = Authors {nr,paper = refpapers}} <- accounts]
 
 
-getPaperInfo :: Int ConfAccounts -> Maybe PaperInfo
+getPaperInfo :: PaperNr ConfAccounts -> Maybe PaperInfo
 getPaperInfo i accounts =  case [info \\ {state = Authors info=:{nr}} <- accounts | i == nr] of
 							[] -> Nothing
 							[x:_] -> Just x
 
 
-getPaperNumbers :: ConfAccounts -> [Int]
+getPaperNumbers :: ConfAccounts -> [PaperNr]
 getPaperNumbers accounts = sort [nr \\ {state = Authors {nr}} <- accounts]
 
-getAssignments :: ConfAccounts -> [(RefPerson,[Int])]
+getAssignments :: ConfAccounts -> [(RefPerson,[PaperNr])]
 getAssignments accounts = [(person,map fst reportslist) 
 						 \\ {state = Referee {person,reports = Reports reportslist}} 	<- accounts]
 
-getRefReports :: ConfAccounts -> [(Int,[(RefPerson, RefReport)])]
+getRefReports :: ConfAccounts -> [(PaperNr,[(RefPerson, RefReport)])]
 getRefReports accounts = [(nr,	[ (person,refreports) 
 								\\ {state = Referee {person,reports = Reports reportslist}} <- accounts
 						 		, (rnr,refreports) 									<- reportslist
@@ -106,18 +106,18 @@ getRefReports accounts = [(nr,	[ (person,refreports)
 							\\ nr <- getPaperNumbers accounts]
 
 
-getMyRefReports :: ConfAccount ConfAccounts -> [(Int,[(RefPerson, RefReport)])]
+getMyRefReports :: ConfAccount ConfAccounts -> [(PaperNr,[(RefPerson, RefReport)])]
 getMyRefReports account accounts
 # me = getRefPerson account.state 
 | isNothing me	= []
 =  [(i,reports) 			\\ (i,reports) <- getRefReports accounts
 							| not (hasConflict i (fromJust me) [account])]
 
-getMyReports :: ConfAccount -> [(Int, RefReport)]
+getMyReports :: ConfAccount -> [(PaperNr, RefReport)]
 getMyReports {state = Referee {reports = Reports allreports}} =  sort allreports
 getMyReports _ = []
 
-addMyReport :: (Int,RefReport) ConfAccount ConfAccounts -> ConfAccounts
+addMyReport :: (PaperNr,RefReport) ConfAccount ConfAccounts -> ConfAccounts
 addMyReport myreport acc=:{state = Referee refinfo=:{reports = Reports oldreports}} accounts 
 # account = {acc & state = Referee {refinfo & reports = Reports (addreport myreport oldreports)}}
 =  changeAccount account accounts
@@ -127,17 +127,17 @@ where
 	| i == j = [(i,mbrep):reps]
 	= [(j,oldrep):addreport (i,mbrep) reps]
 
-getConflicts :: ConfAccounts -> [(RefPerson,[Int])]
+getConflicts :: ConfAccounts -> [(RefPerson,[PaperNr])]
 getConflicts accounts = [(person,nrs) 
 						 \\ {state = Referee {person,conflicts = Conflicts nrs}} 		<- accounts]
 
-getConflictsAssign :: ConfAccounts -> [(RefPerson,[Int],[Int])]
+getConflictsAssign :: ConfAccounts -> [(RefPerson,[PaperNr],[PaperNr])]
 getConflictsAssign accounts = [(person,nrs,map fst reportslist) 
 						 	\\ {state = Referee {person,conflicts = Conflicts nrs
 							 ,  reports = Reports reportslist}} 						<- accounts]
 
 
-hasAssignment :: Int RefPerson ConfAccounts -> Bool
+hasAssignment :: PaperNr RefPerson ConfAccounts -> Bool
 hasAssignment nr sperson [] = False
 hasAssignment nr sperson [acc=:{state = Referee ref}:accs] 
 # person 			= ref.RefereeInfo.person
@@ -145,7 +145,7 @@ hasAssignment nr sperson [acc=:{state = Referee ref}:accs]
 | sperson == person = isMember nr (map fst reports)
 hasAssignment nr sperson [acc:accs] = hasAssignment nr sperson accs
 
-hasConflict :: Int RefPerson ConfAccounts -> Bool
+hasConflict :: PaperNr RefPerson ConfAccounts -> Bool
 hasConflict nr sperson [] = False
 hasConflict nr sperson [acc=:{state = Referee ref}:accs] 
 # person 				= ref.RefereeInfo.person
@@ -153,7 +153,7 @@ hasConflict nr sperson [acc=:{state = Referee ref}:accs]
 | sperson == person = isMember nr conflicts
 hasConflict nr sperson [acc:accs] = hasConflict nr sperson accs
 
-addAssignment :: Int RefPerson ConfAccounts -> ConfAccounts
+addAssignment :: PaperNr RefPerson ConfAccounts -> ConfAccounts
 addAssignment nr sperson [] = []
 addAssignment nr sperson [acc=:{state = Referee ref}:accs] 
 # person 			= ref.RefereeInfo.person
@@ -162,7 +162,7 @@ addAssignment nr sperson [acc=:{state = Referee ref}:accs]
 = [acc:addAssignment nr sperson accs]
 addAssignment nr sperson [acc:accs] = [acc:addAssignment nr sperson accs]
 
-removeAssignment :: Int RefPerson ConfAccounts -> ConfAccounts
+removeAssignment :: PaperNr RefPerson ConfAccounts -> ConfAccounts
 removeAssignment nr sperson [] = []
 removeAssignment nr sperson [acc=:{state = Referee ref}:accs] 
 # person 			= ref.RefereeInfo.person
@@ -176,7 +176,7 @@ with
 = [acc:removeAssignment nr sperson accs]
 removeAssignment nr sperson [acc:accs] = [acc:removeAssignment nr sperson accs]
 
-addConflict :: Int RefPerson ConfAccounts -> ConfAccounts
+addConflict :: PaperNr RefPerson ConfAccounts -> ConfAccounts
 addConflict nr sperson [] = []
 addConflict nr sperson [acc=:{state = Referee ref}:accs] 
 # person 				= ref.RefereeInfo.person
@@ -185,7 +185,7 @@ addConflict nr sperson [acc=:{state = Referee ref}:accs]
 = [acc:addConflict nr sperson accs]
 addConflict nr sperson [acc:accs] = [acc:addConflict nr sperson accs]
 
-removeConflict :: Int RefPerson ConfAccounts -> ConfAccounts
+removeConflict :: PaperNr RefPerson ConfAccounts -> ConfAccounts
 removeConflict nr sperson [] = []
 removeConflict nr sperson [acc=:{state = Referee ref}:accs] 
 # person 				= ref.RefereeInfo.person

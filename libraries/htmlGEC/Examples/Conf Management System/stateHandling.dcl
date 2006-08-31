@@ -111,25 +111,25 @@ isGuest				:: ConfAccount -> Bool
 
 getRefPerson 		:: Member 		-> (Maybe RefPerson)
 
-getPaperNumbers 	:: ConfAccounts -> [Int]
-getRefPapers 		:: ConfAccounts -> [(Int,RefPaper)]
-getPaperInfo 		:: Int ConfAccounts -> Maybe PaperInfo
-getAssignments 		:: ConfAccounts -> [(RefPerson,[Int])]
-getConflicts 		:: ConfAccounts -> [(RefPerson,[Int])]
-getConflictsAssign	:: ConfAccounts -> [(RefPerson,[Int],[Int])]
-getRefReports 		:: ConfAccounts -> [(Int,[(RefPerson, RefReport)])]
-getMyRefReports 	:: ConfAccount ConfAccounts -> [(Int,[(RefPerson, RefReport)])]
+getPaperNumbers 	:: ConfAccounts -> [PaperNr]
+getRefPapers 		:: ConfAccounts -> [(PaperNr,RefPaper)]
+getPaperInfo 		:: PaperNr ConfAccounts -> Maybe PaperInfo
+getAssignments 		:: ConfAccounts -> [(RefPerson,[PaperNr])]
+getConflicts 		:: ConfAccounts -> [(RefPerson,[PaperNr])]
+getConflictsAssign	:: ConfAccounts -> [(RefPerson,[PaperNr],[PaperNr])]
+getRefReports 		:: ConfAccounts -> [(PaperNr,[(RefPerson, RefReport)])]
+getMyRefReports 	:: ConfAccount ConfAccounts -> [(PaperNr,[(RefPerson, RefReport)])]
 
-getMyReports 		:: ConfAccount -> [(Int, RefReport)]
-addMyReport 		:: (Int, RefReport) ConfAccount ConfAccounts -> ConfAccounts
+getMyReports 		:: ConfAccount -> [(PaperNr, RefReport)]
+addMyReport 		:: (PaperNr, RefReport) ConfAccount ConfAccounts -> ConfAccounts
 
-hasAssignment 		:: Int RefPerson ConfAccounts -> Bool
-hasConflict 		:: Int RefPerson ConfAccounts -> Bool
+hasAssignment 		:: PaperNr RefPerson ConfAccounts -> Bool
+hasConflict 		:: PaperNr RefPerson ConfAccounts -> Bool
 
-addAssignment 		:: Int RefPerson ConfAccounts -> ConfAccounts
-removeAssignment 	:: Int RefPerson ConfAccounts -> ConfAccounts
-addConflict 		:: Int RefPerson ConfAccounts -> ConfAccounts
-removeConflict 		:: Int RefPerson ConfAccounts -> ConfAccounts
+addAssignment 		:: PaperNr RefPerson ConfAccounts -> ConfAccounts
+removeAssignment 	:: PaperNr RefPerson ConfAccounts -> ConfAccounts
+addConflict 		:: PaperNr RefPerson ConfAccounts -> ConfAccounts
+removeConflict 		:: PaperNr RefPerson ConfAccounts -> ConfAccounts
 
 
 instance == RefPerson, RefPaper, RefReport, PaperStatus
@@ -143,5 +143,3 @@ invariantPaper 			:: String Paper 		-> Judgement
 invariantReport 		:: String Report 		-> Judgement
 
 setInvariantAccounts 	:: ConfAccounts -> ConfAccounts
-
-

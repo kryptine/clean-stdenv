@@ -60,4 +60,3 @@ derefPersons 	:: [RefPerson] !*HSt -> ([Person],!*HSt)
 derefReports 	:: [RefReport] !*HSt -> ([Maybe Report],!*HSt)
 getAllPersons 	:: !ConfAccounts !*HSt -> ([RefPerson],[Person],!*HSt)
 getAllMyReports :: !ConfAccount !ConfAccounts !*HSt -> ([(Int,[(Person, Maybe Report)])],!*HSt)
-
