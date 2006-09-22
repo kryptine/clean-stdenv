@@ -29,6 +29,8 @@ feedback 		:: (GecCircuit a b) (GecCircuit b a) -> (GecCircuit a b)
 
 self 			:: (a -> a) (GecCircuit a a) -> GecCircuit a a
 
+loops 			:: (GecCircuit (a, b) (c, b)) -> GecCircuit a c |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
+
 (`bindC`)  infix 0 :: (GecCircuit a b) (b -> GecCircuit b c) -> (GecCircuit a c)
 (`bindCI`) infix 0 :: (GecCircuit a b) ((Form b) -> GecCircuit b c) -> (GecCircuit a c)
 

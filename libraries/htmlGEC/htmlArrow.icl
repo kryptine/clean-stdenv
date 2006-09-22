@@ -67,6 +67,20 @@ self fun gecaa = feedback gecaa (arr fun)
 feedback :: (GecCircuit a b) (GecCircuit b a) -> (GecCircuit a b)
 feedback (HGC gec_ab) (HGC gec_ba) = HGC (gec_ab o gec_ba o gec_ab)
 
+loops :: (GecCircuit (a, b) (c, b)) -> GecCircuit a c |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
+loops (HGC gec_abcb) = HGC loopForm
+where
+	loopForm ((aval,prevbody),ch,hst) 
+	# (bstore,hst) = mkStoreForm (Init,xsFormId "??" createDefault) id hst
+	# (((cval,bval),bodyac),ch,hst) = gec_abcb (((aval,bstore.value),prevbody),ch,hst)
+	# (bstore,hst) = mkStoreForm (Set,xsFormId "??" createDefault) (\_ -> bval) hst
+	= ((cval,bodyac),ch,hst)	
+	
+
+//self fun gecaa = feedback gecaa (arr fun)
+
+
+
 (`bindC`) infix 0 :: (GecCircuit a b) (b -> GecCircuit b c) -> (GecCircuit a c)
 (`bindC`) (HGC gecab) bgecbc = HGC binds
 where
