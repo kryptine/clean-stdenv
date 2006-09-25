@@ -5,23 +5,25 @@ definition module StdHtml
 
 import
 
-// intended for end user:
+// iData modules:
 
-			htmlFormlib			// handy collection of form creating functions  
-		,	htmlButtons			// basic collections of buttons, data types for lay-out	control	
-		,	htmlRefFormlib		// handy collection of form persistent idata
-
+			htmlFormData		// basic iData type definitions
 		,	htmlHandler			// the kernel module for iData creation
-		,	htmlFormData		// iData type definitions
 
-	 	,	htmlDataDef			// Clean's ADT representation of Html
-		,	htmlStyleDef		// Clean's ADT representation of Style sheets
+		,	htmlButtons			// basic collections of buttons, data types for lay-out	control	
+		,	htmlFormlib			// handy collection of advanced iData creating functions  
+		,	htmlRefFormlib		// handy collection of persistent idata maintaining sharing
 
 		,	htmlArrow			// arrow instantiations for iData forms
 
 // free to change when the default style of the generated web pages is not appealing:
 
-		,	htmlStylelib		// style definitions   
+		,	htmlStylelib		// style definitions used by iData  
+
+// html code generation:
+
+	 	,	htmlDataDef			// Clean's ADT representation of Html
+		,	htmlStyleDef		// Clean's ADT representation of Style sheets
 
 // of general use:
 
