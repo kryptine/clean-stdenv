@@ -11,19 +11,7 @@ derive gParse Pounds, Euros
 :: Pounds = {pounds :: Real}                        
 :: Euros  = {euros  :: Real}                        
 
-//Start world  = doHtml mutual world
-Start world  = doHtmlServer test world
-
-test hst
-# (first,hst) = startCircuit circuit (0,0) hst
-= mkHtml "first"
-	[ H1 [] "test of first"
-	, toBody first
-	]  hst
-where
-	circuit = first (edit (nFormId "in" 0) >>> arr ((+) 1)) >>> display (nFormId "out" (0,0))
-
-
+Start world  = doHtmlServer mutual world
 
 myEuroId :: (FormId Euros)
 myEuroId	= nFormId "euros"  initEuros

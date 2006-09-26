@@ -4,7 +4,7 @@ module spreadsheet
 // (c) MJP 2005
 
 import StdEnv
-import StdHtml//, htmlMonad
+import StdHtml, htmlMonad
 
 derive gUpd []
 derive gForm []
@@ -12,10 +12,10 @@ derive gForm []
 // Different ways to define a simple spreadsheet
 // Just pick out one of the following Start rules.
 
-Start world  = doHtmlServer spreadsheet world
+//Start world  = doHtmlServer spreadsheet world
 //Start world  = doHtmlServer toHtmlFormspreadsheet world
 //Start world  = doHtmlServer arrowsspreadsheet world
-//Start world  = doHtmlServer spreadsheetM world
+Start world  = doHtmlServer spreadsheetM world
 
 myTableId :: (FormId [[Int]])
 myTableId = nFormId "table" mytable
@@ -77,7 +77,7 @@ where
 			 	>>> display myTotId 		
 
 // Variant uding monads
-/*
+
 spreadsheetM
   = table_hv_Form (initID myTableId)							>>= \tablef  ->
 	vertlistForm  (setID  myRowId (rowsum tablef.value)) 		>>= \rowsumf -> 
@@ -89,7 +89,7 @@ spreadsheetM
 	, tablef.form  <=> rowsumf.form
 	, colsumf.form <=> totsumf.form
 	]
-*/
+
 // simple utility functions to calculate the sum of the rows, sum of columns, total sum
 
 rowsum table	= map sum table
