@@ -42,8 +42,6 @@ universalRefEditor (init,formid) invariant  hst
 # version			= versionf.value							// current version number assumed in this application
 | init == Init && 
 			(formid.mode == Display || formid.mode == NoForm || filename == "") 	// we only want to read, no version conflict
-//	# (_,hst)		= myVersion Set filename dbversion hst 		// synchronize version number and
-//	= myEditor Set filename dbvalue hst							// synchronize with latest value 
 	= myEditor Init filename dbvalue hst							// synchronize with latest value 
 | dbversion > version											// we have a version conflict and want to write
 	# (_,hst)		= ExceptionStore ((+) (Just (filename, "Ref Your screen data is out of date; I have retrieved the latest data."))) hst	// Raise exception
@@ -54,8 +52,6 @@ universalRefEditor (init,formid) invariant  hst
 | isJust exception												// we want to write, but invariants don't hold
 	# (_,hst)		= ExceptionStore ((+) exception) hst 		// report them 
 	= (valuef,hst)												// return wrong value such that it can be improved
-//| not valuef.changed											// nothing has changed,
-//	= (valuef,hst)												// so we don't write anything
 # (versionf,hst)	= myVersion  Set filename (dbversion + 1) hst// increment version number
 # (_,hst)			= myDatabase Set filename (dbversion + 1,valuef.value) hst // update database file
 = ({valuef & changed = True},hst)

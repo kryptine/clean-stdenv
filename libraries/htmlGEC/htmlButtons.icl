@@ -246,7 +246,7 @@ gForm{|PasswordBox|} (init,formid) hst
 	= ({changed=False, value=PasswordBox password, form=[body]},incrHSt 1 hst)
 where
 	mkPswInput :: !Int !(InIDataId d) String UpdValue *HSt -> (BodyTag,*HSt) 
-	mkPswInput size (init,formid=:{mode = Edit}) sval updval hst=:{cntr} 
+	mkPswInput size (init,formid=:{mode = Edit}) sval updval hst=:{cntr}
 		= ( Input 	[	Inp_Type Inp_Password
 					, 	Inp_Value (SV sval)
 					,	Inp_Name (encodeTriplet (formid.id,cntr,updval))
@@ -255,7 +255,7 @@ where
 					,	`Inp_Events	[OnChange callClean]
 					] ""
 			,incrHSt 1 hst)
-	mkPswInput size (init,{mode = Display}) sval _ hst=:{cntr} 
+	mkPswInput size (init,{mode = Display}) sval _ hst
 		= ( Input 	[	Inp_Type Inp_Password
 					, 	Inp_Value (SV sval)
 					,	Inp_ReadOnly ReadOnly

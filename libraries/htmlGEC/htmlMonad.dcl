@@ -2,7 +2,7 @@ definition module htmlMonad
 
 import htmlHandler
 
-::	*HStM a :== *HSt -> *(a, *HSt)
+::	HStM a :== *HSt -> *(a, *HSt)
 
 //	The standard definition of the bind operator
 (>>=) infixr 5 :: (HStM .a) (.a -> HStM .b) -> HStM .b

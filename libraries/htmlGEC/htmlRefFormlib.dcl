@@ -19,7 +19,7 @@ universalDB 		:: !Init !(String a -> Judgement) !String !a !*HSt -> (a,!*HSt)   
 // Usefull for exception handling
 
 :: Judgement		:==	Maybe (String,String)	// id + message					
-Ok 					::	Judgement
+Ok 					:: Judgement
 noException			:: Judgement -> Bool
 yesException		:: Judgement -> Bool
 

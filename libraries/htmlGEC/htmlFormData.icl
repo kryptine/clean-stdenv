@@ -117,9 +117,9 @@ onMode Display  e1 e2 e3 = e2
 onMode NoForm   e1 e2 e3 = e3
 
 toViewId :: !Init !d !(Maybe d) -> d
-toViewId Set  d _ 			= d
 toViewId Init d Nothing 	= d
 toViewId Init d (Just v) 	= v
+toViewId _  d _ 			= d
 
 toViewMap :: !(d -> v) !Init !d !(Maybe v) -> v
 toViewMap f init d mv = toViewId init (f d) mv
@@ -140,6 +140,7 @@ instance == Init
 where
 	(==) Init Init 			= True
 	(==) Set Set 			= True
+	(==) Const Const 		= True
 	(==) _ _ 				= False
 
 instance == Lifespan

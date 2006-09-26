@@ -2,18 +2,19 @@ implementation module PrintUtil
 
 import StdEnv, ArgEnv
 import StdGeneric
+import StdStrictLists
 
 :: Url 	:== String
 
-generic gHpr a :: !*File !a -> *File
+generic gHpr a :: !*HtmlStream !a -> *HtmlStream
 
-gHpr{|String|} file s = file <<< s	// the only entry that actualy prints something
+gHpr{|String|} file s = [|s:file]	// the only entry that actualy prints something
 											// all others eventually come here converted to string
 
-gHpr{|Int|}    file i = file <<< i
-gHpr{|Real|}   file r = file <<< r
-gHpr{|Bool|}   file b = file <<< toString b
-gHpr{|Char|}   file c = file <<< c
+gHpr{|Int|}    file i = [|toString i:file]
+gHpr{|Real|}   file r = [|toString r:file] 
+gHpr{|Bool|}   file b = [|toString b:file]
+gHpr{|Char|}   file c = [|toString c:file]
 gHpr{|UNIT|}   				file _ 				= file
 gHpr{|PAIR|}   gHpra gHprb 	file (PAIR a b) 	= gHprb (gHpra file a) b
 gHpr{|EITHER|} gHprl gHprr 	file (LEFT left) 	= gHprl file left
@@ -47,12 +48,12 @@ where
 // outility print functions based on gHpr
 
 print :: !String -> FoF
-print a = \f -> fwrites a f
+print a = \f -> [|a:f]
 
-(<+) infixl :: !*File !a -> *File | gHpr{|*|} a
+(<+) infixl :: !*HtmlStream !a -> *HtmlStream | gHpr{|*|} a
 (<+) file new = gHpr{|*|} file new
 
-(<+>) infixl :: !*File FoF -> *File
+(<+>) infixl :: !*HtmlStream FoF -> *HtmlStream
 (<+>) file new = new file
 
 print_to_stdout :: a *NWorld -> *NWorld | gHpr{|*|} a
@@ -64,7 +65,7 @@ htmlCmnd :: !a !b -> FoF | gHpr{|*|} a & gHpr{|*|} b
 htmlCmnd hdr txt =  \file -> closeCmnd hdr (openCmnd hdr "" file <+ txt) 			
 
 openCmnd :: !a !b -> FoF | gHpr{|*|} a & gHpr{|*|} b
-openCmnd  hdr attr =  \file -> file <<< "<"  <+ hdr <+ attr <+ ">"
+openCmnd  hdr attr =  \file -> [|"<":file]  <+ hdr <+ attr <+ ">"
 
 closeCmnd :: !a -> FoF | gHpr{|*|} a
 closeCmnd hdr =  \file -> print "</" file <+ hdr <+ ">"

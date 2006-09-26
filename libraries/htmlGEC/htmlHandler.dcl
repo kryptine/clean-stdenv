@@ -13,6 +13,7 @@ TraceInput :== False		// set it to True if you want to see what kind of informat
 derive bimap Form, FormId
 
 //:: *HSt 					// unique state required for creating Html forms
+
 :: *HSt 		= 	{ cntr 		:: Int // InputId		// counts position in expression
 					, states 	:: *FormStates  // all form states are collected here ... 	
 					, world		:: *NWorld		// to enable all other kinds of I/O

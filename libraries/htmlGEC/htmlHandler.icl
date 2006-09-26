@@ -31,8 +31,9 @@ gPrint{|(->)|} gArg gRes  _ _	= abort "functions can only be used with dynamic s
 
 doHtml :: .(*HSt -> (Html,!*HSt)) *World -> *World
 doHtml userpage world 
-# (inout,world) 		= stdio world						// open stdin and stdout channels
-# nworld 				= { worldC = world, inout = inout }	
+//# (inout,world) 		= stdio world						// open stdin and stdout channels
+# inout					= [|]
+# nworld 				= { worldC = world, inout = inout}	
 # (initforms,nworld) 	= retrieveFormStates External Nothing nworld
 # (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
 						= userpage {cntr = 0, states = initforms, world = nworld}
@@ -66,7 +67,8 @@ where
 
 	doHtmlServer2 :: String .(*HSt -> (Html,!*HSt)) *World -> ([String],String,*World)
 	doHtmlServer2 args userpage world 
-	# (ok,temp,world) 		= fopen "temp" FWriteText world						// open stdin and stdout channels
+	# temp 					= [|]
+//	# (ok,temp,world) 		= fopen "temp" FWriteText world						// open stdin and stdout channels
 	# nworld 				= { worldC = world, inout = temp }	
 	# (initforms,nworld) 	= retrieveFormStates Internal (Just args) nworld
 	# (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
@@ -76,27 +78,52 @@ where
 										(Html (Head headattr [extra_style:headtags]) 
 										(Body (extra_body_attr ++ attr) [debugInput,allformbodies:bodytags])) 
 										world
-	# (ok,world)			= fclose inout worldC
-	# (allhtmlcode,world)	= readoutcompletefile "temp" world	
+	# world					= worldC
+//	# (ok,world)			= fclose inout worldC
+//	# (allhtmlcode,world)	= readoutcompletefile "temp" world	
+	# reversed_strings = inout
+	# n_chars = count_chars reversed_strings 0
+		with
+			count_chars [|] n = n
+			count_chars [|s:l] n = count_chars l (n+size s)
+	# allhtmlcode = copy_strings reversed_strings n_chars (createArray n_chars '\0')
+		with
+			copy_strings [|e:l] i s
+				# size_e = size e
+				# i=i-size_e
+				= copy_strings l i (copy_chars e 0 i size_e s)
+			copy_strings [|] 0 s
+				= s
+
+			copy_chars :: !{#Char} !Int !Int !Int !*{#Char} -> !*{#Char}
+			copy_chars s_s s_i d_i n d_s
+				| s_i<n
+					# d_s = {d_s & [d_i]=s_s.[s_i]}
+					= copy_chars s_s (s_i+1) (d_i+1) n d_s
+					= d_s
 	= ([],allhtmlcode,world)
 	where
 		extra_body_attr = [Batt_background "back35.jpg",`Batt_Std [CleanStyle]]
 		extra_style = Hd_Style [] CleanStyles	
-	
+/*	
 		readoutcompletefile name env
 		# (ok,file,env) = fopen name FReadText env
 		# (text,file)	= freads file 1000000
 		# (ok,env)		= fclose file env
 		= (text,env)
-	
+*/
 		debugInput = if TraceInput (traceHtmlInput Internal (Just args)) EmptyBody
 
 // swiss army nife editor that makes coffee too ...
 
 mkViewForm :: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
-mkViewForm (init,formid) bm=:{toForm, updForm, fromForm, resetForm}  {states,world} 
-# (isupdated,view,states,world) = findFormInfo vformid states world // determine current value in the state store
-= calcnextView isupdated view states world
+mkViewForm (init,formid) bm=:{toForm, updForm, fromForm, resetForm}  hst=:{states,world} 
+| init == Const	&& formid.lifespan <> Temp
+= mkViewForm (init,{formid & lifespan = Temp}) bm hst				// constant i-data are never stored
+| init == Const														// constant i-data, no look up of previous value
+= calcnextView False Nothing states world				
+# (isupdated,view,states,world) = findFormInfo vformid states world // determine current view value in the state store
+= calcnextView isupdated view states world							// and calculate new i-data
 where
 	vformid = (reuseFormId formid (toForm init formid.ival Nothing))
 
@@ -105,30 +132,31 @@ where
 	# view 		= toForm  init formid.ival view		// map value to view domain, given previous view value
 	# view		= updForm  {isChanged = isupdated, changedId = changedid} view			// apply update function telling user if an update has taken place
 	# newval	= fromForm {isChanged = isupdated, changedId = changedid} view			// convert back to data domain	 
-	# view		= case resetForm of					// optionally reset the view herafter for next time
+	# view		= case resetForm of					// optionally reset the view hereafter for next time
 						Nothing 	-> view		 
 						Just reset 	-> reset view
 
 	| formid.mode == NoForm							// don't make a form at all
-		# (states,world) = replaceState vformid view states world	// store new value into the store of states
+		# (states,world) = replaceState` vformid view states world	// store new value into the store of states
 		= (	{changed	= False
 			, value		= newval
 			, form		= []
 			},{cntr = 0, states = states, world = world})
 
-// end added
-
 	# (viewform,{states,world})						// make a form for it
-					= gForm{|*|} (init,reuseFormId formid view) {cntr = 0,states = states, world = world}
-	| viewform.changed && not isupdated 			// only true when a user defined specialisation is updated, recalculate the form
+					= gForm{|*|} (init,if (init == Const) vformid (reuseFormId formid view)) {cntr = 0,states = states, world = world}
+
+	| viewform.changed && not isupdated 			// trick: redo it all to handle the case that a user defined specialisation is updated !!
 		= calcnextView True (Just viewform.value) states world
 
-	# (states,world) = replaceState vformid (viewform.value) states world	// store new value into the store of states
+	# (states,world) = replaceState` vformid (viewform.value) states world	// store new value into the store of states
 
 	= (	{changed	= isupdated
 		, value		= newval
 		, form		= viewform.form
 		},{cntr = 0, states = states, world = world})
+
+	replaceState` vformid view states world = if (init <> Const) (replaceState vformid view states world) (states,world)
 
 //	findFormInfo :: FormId *FormStates *NWorld -> (Bool,Maybe a,*FormStates,*NWorld) | gUpd{|*|} a & gParse{|*|} a & TC a
 	findFormInfo formid formStates world

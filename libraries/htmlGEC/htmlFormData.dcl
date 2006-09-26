@@ -14,9 +14,10 @@ import StdMaybe, StdBool
 		, ival		:: !d						// initial value
 		}
 
-:: Init											// Kind of value 
-	=	Init 									// 	The value will be used as initial value
-	|	Set  									// 	This value will be used as new iData value
+:: Init											// Usage of the value stored in FormId
+	=	Const									//	The value is a constant
+	|	Init 									// 	The value is taken as initial value
+	|	Set  									// 	The value will be used as new iData value
 
 :: Lifespan										// 	defines how long a form will be maintained		
 	= 	Persistent								// 	form will live "forever" (in a file)
