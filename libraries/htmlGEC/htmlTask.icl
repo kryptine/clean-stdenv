@@ -69,9 +69,8 @@ where
 	| taskdone.value	= doTask` a ((i,myturn,html),hst)							// task is now completed, handle as previously
 	= (a,((i,taskdone.value,html <|.|> (editor.form ++ finbut.form)),hst))
 
-
-doCTask :: [(String,Task a)] -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-doCTask options = \tst -> mkTask (doCTask` options) tst
+doCpdmenuTask :: [(String,Task a)] -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+doCpdmenuTask options = \tst -> mkTask (doCTask` options) tst
 where
 	doCTask` options tst=:((i,myturn,html),hst)									// choose one subtask out of the list
 	# taskId						= "task_" <+++ mkTaskNr i
@@ -90,14 +89,13 @@ where
 	doCTask` options tst=:((i,myturn,html),hst)									// choose one subtask out of the list
 	# taskId						= "task_" <+++ mkTaskNr i
 	# (choice,hst)					= TableFuncBut  (Init,nFormId taskId [[(but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]]) hst
-	| choice.value -1 == -1			= (createDefault,((i,False,html <|.|> choice.form),hst))
-	# chosenTask					= snd (options!!choice.value -1)
+	# (chosen,hst)					= mkStoreForm (Init,nFormId ("chosen_" <+++ mkTaskNr i) -1) choice.value hst
+	| chosen.value == -1			= (createDefault,((i,False,html <|.|> choice.form),hst))
+	# chosenTask					= snd (options!!chosen.value)
 	# (a,((i,adone,ahtml),hst)) 	= chosenTask ((i ++ [1],True,[]),hst)
 	= (a,((i,adone,html <|.|> ahtml),hst))
 
-	but i = LButton (defpixel / 3) i
-
-
+	but i = LButton defpixel i
 
 doPTask :: (Task a,Task b) -> (Task (a,b)) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a & gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
 doPTask (taska,taskb) = \tst -> mkTask (doPTask` (taska,taskb)) tst

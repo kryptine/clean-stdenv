@@ -300,11 +300,13 @@ where
 			where
 				pddays 		= PullDown (1,  defpixel/2) (day-1,  [toString i \\ i <- [1..31]])
 				pdmonths 	= PullDown (1,  defpixel/2) (month-1,[toString i \\ i <- [1..12]])
-				pdyears 	= PullDown (1,2*defpixel/3) (year-1, [toString i \\ i <- [year..2015]])
+				pdyears 	= PullDown (1,2*defpixel/3) (year-1, [toString i \\ i <- [if (year < thisyear) thisyear year..2015]])
 		
 			fromPullDown (pddays,pdmonths,pdyears) = Date (convert pddays) (convert pdmonths) (convert pdyears)
 			where
 				convert x	= toInt (toString x)
+
+		thisyear = 2006
 
 mkBimapEditor :: !(InIDataId d) !(Bimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
 mkBimapEditor inIDataId {map_to,map_from} hst
