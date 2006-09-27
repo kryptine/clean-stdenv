@@ -14,45 +14,47 @@ derive gUpd []
 // Start world = doHtmlServer (mkflow (RecordSongs ["song 1","song 2","song 3"])) world
 //Start world = doHtmlServer (mkflow CreateMusic) world
 //Start world = doHtmlServer (mkflow (Quotation myQuotation)) world
-Start world = doHtmlServer (mkflow (travel [NoFlight,NoHotel,NoCar] [])) world
+Start world = doHtmlServer (mkflow travel) world
+//Start world = doHtmlServer (mkflow test) world
 where
 	mkflow tasks hst 
 	# (html,hst) = startTask tasks hst
 	= mkHtml "test" html hst
 
+test tst
+= doPorTask
+	(doMCcheckTask [(txt, doSTask "Done" 0) \\ txt <- ["aap","noot","mies"]]
+	,buttonTask "Cancel" (returnTask [])
+	)  tst
+
 // travel request
 
-:: TravelSt = NoHotel | NoFlight | NoCar
-
-travel booked bookings tst
-= doCbuttonTask 
-	(	(if (isMember NoFlight booked) 	[("Book_Flight",BookFlight booked bookings)] []) ++
-		(if (isMember NoHotel  booked) 	[("Book_Hotel", BookHotel  booked bookings)] []) ++
-		(if (isMember NoCar    booked) 	[("Book_Car",   BookCar    booked bookings)] []) ++
-		(if (length booked < 3)			[("Confirm",Pay booked bookings)] []) ++
-		[("Cancel",returnTask "Cancelled")]
-	) tst
+travel tst
+# (booked,tst)= doPorTask
+					( doSTasks
+						[	( "Choose Booking options"
+							, doMCcheckTask	[ ("Book_Flight",BookFlight)
+											, ("Book_Hotel", BookHotel)
+											, ("Book_Car",   BookCar)
+											]
+							)
+						, 	( "Booking confirmation"
+							, buttonTask "Confirm" (returnTask [])
+							)
+						]
+					, buttonTask "Cancel" (returnV [])
+					) tst
+| isNil	booked	= returnTask "Cancelled" tst
+# (_,tst)		= doSTask "Pay" (Dsp (calcCosts booked)) tst
+= returnTask "Paid" tst
 where
-	BookFlight booked bookings tst	
-	# (_,tst) = doSTask "BookFlight" (Dsp "Flight Number",0) tst
-	= travel (removeMember NoFlight booked) bookings tst
-		
-	BookHotel booked bookings tst
-	# (_,tst) = doSTask "BookHotel" (Dsp "Hotel Name",0) tst
-	= travel (removeMember NoHotel booked) bookings tst
-
-	BookCar booked bookings tst	
-	# (_,tst) = doSTask "BookCar" (Dsp "Car Type",0) tst
-	= travel (removeMember NoCar booked) bookings tst
+	BookFlight tst 	= doSTask "BookFlight" 	(Dsp "Flight Number","",Dsp "Costs",0) tst
+	BookHotel tst 	= doSTask "BookHotel" 	(Dsp "Hotel Name","",Dsp "Costs",0) tst
+	BookCar tst 	= doSTask "BookCar" 	(Dsp "Car Brand","",Dsp "Costs",0) tst
 
 	Pay booked bookings tst		= returnTask "OK" tst	
 
-instance == TravelSt
-where
-	(==) NoHotel NoHotel = True
-	(==) NoFlight NoFlight = True
-	(==) NoCar NoCar = True
-	(==) _ _ = False
+	calcCosts booked = sum [cost \\ (_,_,_,cost) <- hd booked]
 
 // quotation example
 
@@ -166,7 +168,7 @@ where
 CreateMusic tst
 # (_,tst) 	= returnTask "In Music" tst
 # (_,tst) 	= doSTask "Decide" (Dsp "Make music") tst
-# (_,tst) 	= doPTask (audition,learn) tst
+# (_,tst) 	= doPandTask (audition,learn) tst
 = returnTask "Out Music" tst
 where
 	audition tst = doCpdmenuTask [("Audition passed",returnTask True),("Audition failed",returnTask False)] tst
