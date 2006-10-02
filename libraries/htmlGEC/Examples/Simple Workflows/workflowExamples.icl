@@ -14,7 +14,7 @@ derive gUpd []
 // Start world = doHtmlServer (mkflow (RecordSongs ["song 1","song 2","song 3"])) world
 //Start world = doHtmlServer (mkflow CreateMusic) world
 //Start world = doHtmlServer (mkflow (Quotation myQuotation)) world
-Start world = doHtmlServer (mkflow travel) world
+Start world = doHtmlServer (mkflow test) world
 //Start world = doHtmlServer (mkflow test) world
 where
 	mkflow tasks hst 
@@ -22,35 +22,35 @@ where
 	= mkHtml "test" html hst
 
 test tst
-= doPorTask
-	(doMCcheckTask [(txt, doSTask "Done" 0) \\ txt <- ["aap","noot","mies"]]
-	,buttonTask "Cancel" (returnTask [])
-	)  tst
+= PCTasks
+	[ ("travel",travel)
+	, ("keuze2",STask "Gereed" "")
+	]  tst
 
 // travel request
 
 travel tst
-# (booked,tst)= doPorTask
-					( doSTasks
+# (booked,tst)= PCTask2
+					( STasks 
 						[	( "Choose Booking options"
-							, doMCcheckTask	[ ("Book_Flight",BookFlight)
+							, MCTask_ckbox	[ ("Book_Flight",BookFlight)
 											, ("Book_Hotel", BookHotel)
 											, ("Book_Car",   BookCar)
 											]
 							)
 						, 	( "Booking confirmation"
-							, buttonTask "Confirm" (returnTask [])
+							, STask_button "Confirm" (returnV [])
 							)
 						]
-					, buttonTask "Cancel" (returnV [])
+					, STask_button "Cancel" (returnV [])
 					) tst
 | isNil	booked	= returnTask "Cancelled" tst
-# (_,tst)		= doSTask "Pay" (Dsp (calcCosts booked)) tst
+# (_,tst)		= STask "Pay" (Dsp (calcCosts booked)) tst
 = returnTask "Paid" tst
 where
-	BookFlight tst 	= doSTask "BookFlight" 	(Dsp "Flight Number","",Dsp "Costs",0) tst
-	BookHotel tst 	= doSTask "BookHotel" 	(Dsp "Hotel Name","",Dsp "Costs",0) tst
-	BookCar tst 	= doSTask "BookCar" 	(Dsp "Car Brand","",Dsp "Costs",0) tst
+	BookFlight tst 	= STask "BookFlight" 	(Dsp "Flight Number","",Dsp "Costs",0) tst
+	BookHotel tst 	= STask "BookHotel" 	(Dsp "Hotel Name","",Dsp "Costs",0) tst
+	BookCar tst 	= STask "BookCar" 	(Dsp "Car Brand","",Dsp "Costs",0) tst
 
 	Pay booked bookings tst		= returnTask "OK" tst	
 
@@ -75,9 +75,9 @@ myQuotation :: (QState,QForm)
 myQuotation = createDefault
 
 Quotation (state,form) tst
-# ((_,form),tst) = doSTask "Submit" (Dsp state, form) tst
-# ((_,form),tst) = doSTask "Review" (Dsp Submitted,form) tst
-= doCbuttonTask
+# ((_,form),tst) = STask "Submit" (Dsp state, form) tst
+# ((_,form),tst) = STask "Review" (Dsp Submitted,form) tst
+= CTask_button
 	[ ("Rework",Quotation (Rework,form))
 	, ("Approved",returnTask Approved)
 	, ("Cancel",returnTask Cancelled)
@@ -87,7 +87,7 @@ Quotation (state,form) tst
 
 Coffeemachine tst
 # (_,tst) 				= returnTask "Choose Product" tst
-# ((toPay,product),tst) = doCbuttonTask
+# ((toPay,product),tst) = CTask_button
 								 	[	("Coffee", returnTask (100,"Coffee"))
 									,	("Cappucino",returnTask (150,"Cappucino"))
 									,	("Thee",returnTask (50,"Thee"))
@@ -97,7 +97,7 @@ Coffeemachine tst
 = returnTask (product,returnMoney) tst
 where
 	getCoins (toPay,paid) tst
-	# (coin,tst)		= doCbuttonTask [(toString i <+++ " cts", returnTask i) \\ i <- [5,10,20,50,100]] tst
+	# (coin,tst)		= CTask_button [(toString i <+++ " cts", returnTask i) \\ i <- [5,10,20,50,100]] tst
 	| toPay - coin > 0 	= mkTask (getCoins (toPay - coin,paid + coin)) tst
 	= returnV (coin - toPay) tst
 
@@ -105,7 +105,7 @@ where
 
 Coffeemachine2 
 = 	returnTask "Choose Product" `bind`
-	\_ 					-> doCbuttonTask 	
+	\_ 					-> CTask_button 	
 									[	("Coffee", returnTask (100,"Coffee"))
 									,	("Cappucino",returnTask (150,"Cappucino"))
 									,	("Thee",returnTask (50,"Thee"))
@@ -115,7 +115,7 @@ Coffeemachine2
 	\returnMoney 		-> returnTask (product,returnMoney) 
 where
 	getCoins (toPay,paid) 
-	=	doCbuttonTask [(toString i <+++ " cts", returnTask i) \\ i <- [5,10,20,50,100]] `bind`
+	=	CTask_button [(toString i <+++ " cts", returnTask i) \\ i <- [5,10,20,50,100]] `bind`
 		\coin			-> if (toPay - coin > 0)
 								(mkTask (getCoins (toPay - coin,paid + coin)))
 								(returnV (coin - toPay))
@@ -124,7 +124,7 @@ where
 
 Coffeemachine3 tst
 # tst 					= returnF [Txt "Choose Product:", Br] tst
-# ((toPay,product),tst) = doCpdmenuTask 	[	("Coffee", returnTask (100,"Coffee"))
+# ((toPay,product),tst) = CTask_pdmenu 	[	("Coffee", returnTask (100,"Coffee"))
 									,	("Cappucino",returnTask (150,"Cappucino"))
 									,	("Thee",returnTask (50,"Thee"))
 									,	("Chocolate",returnTask (100,"Chocolate"))
@@ -133,7 +133,7 @@ Coffeemachine3 tst
 = returnTask (product,returnMoney) tst
 where
 	getCoins (toPay,paid) tst
-	# (coin,tst)		= doCpdmenuTask [(toString i <+++ " cts", returnTask i) \\ i <- [5,10,20,50,100]] tst
+	# (coin,tst)		= CTask_pdmenu [(toString i <+++ " cts", returnTask i) \\ i <- [5,10,20,50,100]] tst
 	| toPay - coin > 0 	= mkTask (getCoins (toPay - coin,paid + coin)) tst
 	= returnTask (coin - toPay) tst
 
@@ -145,20 +145,20 @@ requestTask budget tst
 where
 	requestTask` budget tst
 	# ((_,_,budget),tst) 	= handleRequest budget tst
-	= doCpdmenuTask 	[	("More Requests?", requestTask` budget)
+	= CTask_pdmenu 	[	("More Requests?", requestTask` budget)
 				,	("Stop",returnTask "End Request")
 				] tst
 
 	handleRequest budget tst
-	# (n,tst) 		= doSTask "request" 0 tst
+	# (n,tst) 		= STask "request" 0 tst
 	| n > budget	= return "Not Authorized" budget tst
-	= doCpdmenuTask
+	= CTask_pdmenu
 		[	("Approved", placeOrder budget n)
 		,	("Not Approved",return "Not Approved" budget)
 		] tst
 
 	placeOrder budget n tst 
-	# (_,tst) = doSTask "Submit" (Dsp ("Submit Order","price = ",n)) tst
+	# (_,tst) = STask "Submit" (Dsp ("Submit Order","price = ",n)) tst
 	= return "Order Placed" (budget - n) tst
 
 	return s b tst = returnTask (s,"budget = ",b)tst
@@ -167,12 +167,12 @@ where
 
 CreateMusic tst
 # (_,tst) 	= returnTask "In Music" tst
-# (_,tst) 	= doSTask "Decide" (Dsp "Make music") tst
-# (_,tst) 	= doPandTask (audition,learn) tst
+# (_,tst) 	= STask "Decide" (Dsp "Make music") tst
+# (_,tst) 	= PTask2 (audition,learn) tst
 = returnTask "Out Music" tst
 where
-	audition tst = doCpdmenuTask [("Audition passed",returnTask True),("Audition failed",returnTask False)] tst
-	learn tst = doSTask "Skill" 0 tst
+	audition tst = CTask_pdmenu [("Audition passed",returnTask True),("Audition failed",returnTask False)] tst
+	learn tst = STask "Skill" 0 tst
 
 // record songs example (vd aalst)
 
@@ -182,17 +182,17 @@ RecordSongs songs tst
 where
 	RecordSongs` songs rsongs tst
 	# (rsongs,tst) = ChooseSongs songs rsongs tst
-	# (_,tst) 		= doSTask "Done" (Dsp "Record Songs") tst
-	= doCpdmenuTask [ ("More recordings?", RecordSongs` songs rsongs)
+	# (_,tst) 		= STask "Done" (Dsp "Record Songs") tst
+	= CTask_pdmenu [ ("More recordings?", RecordSongs` songs rsongs)
 			  , ("No More",Market rsongs)
 			  ] tst
 
 	ChooseSongs songs rsongs tst
-	= doCpdmenuTask 
+	= CTask_pdmenu 
 		([(s,ChooseSongs songs [s:rsongs]) \\ s <- songs] ++ [("Stop",returnTask rsongs)]) tst
 
 	Market rsongs tst
-	# (_,tst)	= doSTask "Send" (Dsp "to Market Dept") tst
+	# (_,tst)	= STask "Send" (Dsp "to Market Dept") tst
 	= returnTask ("Out Make Record",rsongs) tst
 
 
