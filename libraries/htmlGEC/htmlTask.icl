@@ -22,9 +22,9 @@ where
 mkTask :: (*TSt -> *(a,*TSt)) -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 mkTask mytask = \tst -> mkTask` tst
 where
-	mkTask` tst=:((i,myturn,html),hst)										// choose one subtask out of the list
+	mkTask` tst=:((i,myturn,html),hst)			
 	# tst 			= incTask tst				// every task should first increment its tasknumber
-	| not myturn	= (createDefault,tst)					// not active, return value
+	| not myturn	= (createDefault,tst)		// not active, return default value
 	= mytask tst
 	where
 		incTask ((i,b,html),hst) = ((incTasknr i,b,html),hst)
@@ -72,6 +72,7 @@ where
 CTask_pdmenu :: [(String,Task a)] -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 CTask_pdmenu options = \tst -> mkTask (doCTask` options) tst
 where
+	doCTask` [] tst					= returnV createDefault tst	
 	doCTask` options tst=:((i,myturn,html),hst)									// choose one subtask out of the list
 	# (choice,hst)					= FuncMenu  (Init,sFormId ("Cpd_task_" <+++ mkTaskNr i) (0,[(txt,id) \\ txt <- map fst options]))	hst
 	# (_,((i,adone,ahtml),hst)) 	= STask  "Cpd_Done" Niks ((i ++ [0],True,[]),hst)	
@@ -84,6 +85,7 @@ where
 CTask_button :: [(String,Task a)] -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 CTask_button options = \tst -> mkTask (doCTask` options) tst
 where
+	doCTask` [] tst					= returnV createDefault tst				
 	doCTask` options tst=:((i,myturn,html),hst)									// choose one subtask out of the list
 	# (choice,hst)					= TableFuncBut (Init,sFormId ("Cbt_task_" <+++ mkTaskNr i) [[(but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]]) hst
 	# (chosen,hst)					= mkStoreForm  (Init,sFormId ("Cbt_chosen_" <+++ mkTaskNr i) -1) choice.value hst
@@ -95,9 +97,10 @@ where
 	but i = LButton defpixel i
 
 MCTask_ckbox :: [(String,Task a)] -> (Task [a]) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-MCTask_ckbox options = \tst -> mkTask (MCTask_ckbox options) tst
+MCTask_ckbox options = \tst -> mkTask (MCTask_ckbox` options) tst
 where
-	MCTask_ckbox`` options tst=:((i,myturn,html),hst)									// choose one subtask out of the list
+	MCTask_ckbox` [] tst			= returnV [] tst	
+	MCTask_ckbox` options tst=:((i,myturn,html),hst)									// choose one subtask out of the list
 	# (cboxes,hst)					= ListFuncCheckBox (Init,sFormId ("MC_check" <+++ mkTaskNr i) initCheckboxes) hst
 	# optionsform					= cboxes.form <=|> [Txt text \\ (text,_) <- options]
 	# (_,((i,adone,ahtml),hst)) 	= STask  "OK" Niks ((i,True,[]),hst)	
@@ -127,19 +130,19 @@ where
 	= ((a,b),((i,adone&&bdone,html <|.|> ahtml <|.|> bhtml),hst))
 
 PCTask2 :: (Task a,Task a) -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
-PCTask2 (taska,taskb) = \tst -> mkTask (doPorTask` (taska,taskb)) tst
+PCTask2 (taska,taskb) = \tst -> mkTask (PCTask2` (taska,taskb)) tst
 where
-	doPorTask` (taska,taskb) tst=:((i,myturn,html),hst)
+	PCTask2` (taska,taskb) tst=:((i,myturn,html),hst)
 	# (a,((_,adone,ahtml),hst)) 	= taska ((i ++ [0],True,[]),hst)	
 	# (b,((_,bdone,bhtml),hst)) 	= taskb ((i ++ [1],True,[]),hst)
 	# (aorb,aorbdone,myhtml)		= if adone (a,adone,ahtml) (if bdone (b,bdone,bhtml) (a,False,ahtml <|.|> bhtml))
 	= (aorb,((i,aorbdone,html <|.|> myhtml),hst))
 
-
 PCTasks :: [(String,Task a)] -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
-PCTasks options = \tst -> mkTask (doPorTasks` options) tst
+PCTasks options = \tst -> mkTask (PCTasks` options) tst
 where
-	doPorTasks` tasks tst=:((i,myturn,html),hst)
+	PCTasks` [] tst 				= returnV createDefault tst
+	PCTasks` tasks tst=:((i,myturn,html),hst)
 	# (choice,hst)					= TableFuncBut (Init,sFormId ("Cbt_task_" <+++ mkTaskNr i) [[(but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]]) hst
 	# (chosen,hst)					= mkStoreForm  (Init,sFormId ("Cbt_chosen_" <+++ mkTaskNr i) 0) choice.value hst
 	# chosenTask					= snd (options!!chosen.value)
@@ -149,8 +152,34 @@ where
 
 	but i = LButton defpixel i
 
+PTasks :: [(String,Task a)] -> (Task [a]) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
+PTasks options = \tst -> mkTask (doPTasks` options) tst
+where
+	doPTasks` [] tst			= returnV [] tst
+	doPTasks` options tst=:((i,myturn,html),hst)
+	# (choice,hst)				= TableFuncBut (Init,sFormId ("Cbt_task_" <+++ mkTaskNr i) [[(but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]]) hst
+	# (chosen,hst)				= mkStoreForm  (Init,sFormId ("Cbt_chosen_" <+++ mkTaskNr i) 0) choice.value hst
+	# chosenTask				= snd (options!!chosen.value)
+	# (a,((_,adone,ahtml),hst)) = chosenTask ((i ++ [chosen.value + 1],True,[]),hst)
+	| not adone					= ([a],((i,adone,html <|.|> [choice.form <=> ahtml]),hst))
+	# (alist,((_,finished,_),hst))		
+								= checkAllTasks 0 [] ((i,myturn,[]),hst)
+	| finished					= (alist,((i,finished,html),hst))
+	= ([a],((i,finished,html <|.|> [choice.form <=> ahtml]),hst))
+
+	but i = LButton defpixel i
+
+	checkAllTasks tasknr alist tst=:((i,myturn,_),hst)
+	| tasknr == length options	= (reverse alist,((i,True,[]),hst))	
+	# task						= snd (options!!tasknr)
+	# (a,((_,adone,html),hst))	= task ((i ++ [tasknr + 1],True,[]),hst)
+	| adone						= checkAllTasks (inc tasknr) [a:alist] ((i,myturn,[]),hst)
+	= ([],((i,False,[]),hst))
+
 STask_button 		:: String (Task a) 			-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 STask_button s task = CTask_button [(s,task)]
+
+
 // utility section
 
 mkTaskNr [] = ""

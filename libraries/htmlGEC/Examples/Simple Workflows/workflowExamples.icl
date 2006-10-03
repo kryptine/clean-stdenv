@@ -14,18 +14,19 @@ derive gUpd []
 // Start world = doHtmlServer (mkflow (RecordSongs ["song 1","song 2","song 3"])) world
 //Start world = doHtmlServer (mkflow CreateMusic) world
 //Start world = doHtmlServer (mkflow (Quotation myQuotation)) world
+//Start world = doHtmlServer (mkflow travel) world
 Start world = doHtmlServer (mkflow test) world
-//Start world = doHtmlServer (mkflow test) world
 where
 	mkflow tasks hst 
 	# (html,hst) = startTask tasks hst
 	= mkHtml "test" html hst
 
 test tst
-= PCTasks
-	[ ("travel",travel)
-	, ("keuze2",STask "Gereed" "")
-	]  tst
+# (a,tst) = PTasks	[ ("travel",travel)
+			, ("keuze2",STask "Gereed" "")
+			]  tst
+= STask "Klaar" a tst
+
 
 // travel request
 
@@ -50,7 +51,7 @@ travel tst
 where
 	BookFlight tst 	= STask "BookFlight" 	(Dsp "Flight Number","",Dsp "Costs",0) tst
 	BookHotel tst 	= STask "BookHotel" 	(Dsp "Hotel Name","",Dsp "Costs",0) tst
-	BookCar tst 	= STask "BookCar" 	(Dsp "Car Brand","",Dsp "Costs",0) tst
+	BookCar tst 	= STask "BookCar" 		(Dsp "Car Brand","",Dsp "Costs",0) tst
 
 	Pay booked bookings tst		= returnTask "OK" tst	
 

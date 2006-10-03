@@ -12,20 +12,20 @@ import StdHtml
 startTask		:: lift iData to iTask domain
 mkTask			:: promote TSt state function to an interactive Task, i.e. task will only be called when it is its turn
 
-STask			:: an Sequential iTask
-STask_button	:: do iTask when when button pressed
-STasks			:: do all iTasks one after another, finished when all done
+STask			:: a Sequential iTask
+STask_button	:: do corresponding iTask when button pressed
+STasks			:: do all iTasks one after another, task completed when all done
 
 CTask_button	:: Choose one iTask from list, depending on button pressed
 CTask_pdmenu	:: Choose one iTask from list, depending on pulldownmenu item selected
 
-MCTask_ckbox	:: Multiple Choice of iTasks, depending on chosen checkboxes
+MCTask_ckbox	:: Multiple Choice of iTasks, depending on marked checkboxes
 
-PTask2			:: do both iTasks in any order (paralel), finished when both done
+PCTask2			:: do both iTasks in any order (paralel), task completed as soon as first one done
+PCTasks			:: do all  iTasks in any order (paralel), task completed as soon as first one done
 
-PCTask2			:: do both iTasks in any order, finished as soon as first one done
-PCTasks			:: do all iTasks  in any order, finished as soon as first one done
-
+PTask2			:: do both iTasks in any order (paralel), task completed when both done
+PTask			:: do all  iTasks in any order (paralel), task completed when all  done
 
 returnTask		:: return the value and show it, no IO action from the user required
 returnVF		:: return the value and show the code, no IO action from the user required
@@ -47,10 +47,11 @@ CTask_pdmenu 	:: [(String,Task a)] 	-> (Task a)	 	| gForm{|*|}, gUpd{|*|}, gPrin
 
 MCTask_ckbox 	:: [(String,Task a)] 	-> (Task [a]) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
-PTask2 			:: (Task a,Task b) 		-> (Task (a,b)) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a & gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
-
 PCTask2			:: (Task a,Task a) 		-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
 PCTasks			:: [(String,Task a)] 	-> (Task a)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
+
+PTask2 			:: (Task a,Task b) 		-> (Task (a,b)) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a & gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
+PTasks 			:: [(String,Task a)]	-> (Task [a])	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
 
 returnTask 		:: a 					-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
 returnVF 		:: a [BodyTag] 			-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
