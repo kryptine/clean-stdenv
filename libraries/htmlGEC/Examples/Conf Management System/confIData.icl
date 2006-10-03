@@ -8,7 +8,7 @@ import StdListExtensions
 
 // global account database editor
 
-AccountsDB :: !Init  !ConfAccounts *HSt -> (ConfAccounts,!*HSt) // conf management database
+AccountsDB :: !Init  !ConfAccounts *HSt -> (ConfAccounts,!*HSt) 				// conf management database
 AccountsDB init accounts hst 
 # accounts = setInvariantAccounts accounts										// ensure that all links are correct
 = universalDB init (\s a -> invariantLogAccounts s a + invariantConfAccounts s a) 
@@ -60,69 +60,65 @@ where
 
 editorRefPerson :: !(InIDataId RefPerson) !*HSt -> (Form Person,!*HSt)
 editorRefPerson (init,formid) hst
-# (RefPerson refperson) = formid.ival
-# (Ref2 name) 			= refperson
-# (dereff,hst)			= universalRefEditor (init,reuseFormId formid refperson) (invariantPerson name) hst
-= ({dereff & value = dereff.value},hst)		// PA: huh? {dereff & value = dereff.value} = dereff
+# (RefPerson refperson)					= formid.ival
+# (Ref2 name)							= refperson
+= universalRefEditor (init,reuseFormId formid refperson) (invariantPerson name) hst
 
 editorRefPaper :: !(InIDataId RefPaper) !*HSt -> (Form Paper,!*HSt)
 editorRefPaper (init,formid) hst
-# (RefPaper refpaper) 	= formid.ival
-# (Ref2 name) 			= refpaper
-# (dereff,hst)			= universalRefEditor (init,reuseFormId formid refpaper) (invariantPaper name) hst
-= ({dereff & value = dereff.value},hst)
+# (RefPaper refpaper)					= formid.ival
+# (Ref2 name)							= refpaper
+= universalRefEditor (init,reuseFormId formid refpaper) (invariantPaper name) hst
 
 editorRefReport :: !(InIDataId RefReport) !*HSt -> (Form (Maybe Report),!*HSt)
 editorRefReport (init,formid) hst
-# (RefReport refreport) = formid.ival
-# (Ref2 name)		= refreport
-# (dereff,hst)		= universalRefEditor (init,reuseFormId formid refreport) (invariant name)  hst
-= ({dereff & value = dereff.value},hst)
+# (RefReport refreport)					= formid.ival
+# (Ref2 name)							= refreport
+= universalRefEditor (init,reuseFormId formid refreport) (invariant name) hst
 where
-	invariant name Nothing 			= Ok
-	invariant name (Just report)	= invariantReport name report
+	invariant name Nothing 				= Ok
+	invariant name (Just report)		= invariantReport name report
 	
 editorRefDiscussion :: !(InIDataId RefDiscussion) !*HSt -> (Form Discussion,!*HSt)
 editorRefDiscussion (init,formid) hst
-# (RefDiscussion refdiscus) = formid.ival
-# (Ref2 name) 			= refdiscus
-# (dereff,hst)			= universalRefEditor (init,reuseFormId formid refdiscus) (\_ -> Ok) hst
-= ({dereff & value = dereff.value},hst)
+# (RefDiscussion refdiscus)				= formid.ival
+# (Ref2 name)							= refdiscus
+= universalRefEditor (init,reuseFormId formid refdiscus) (const Ok) hst
 
 // specialized idata forms
 
-gForm {|RefPerson|} iniformid hst 		= specialize (invokeRefEditor editorRefPerson) 		iniformid hst
-gForm {|RefPaper|}  iniformid hst 		= specialize (invokeRefEditor editorRefPaper)  		iniformid hst
-gForm {|RefReport|} iniformid hst 		= specialize (invokeRefEditor editorRefReport)		iniformid hst
+gForm {|RefPerson|}     iniformid hst	= specialize (invokeRefEditor editorRefPerson) 		iniformid hst
+gForm {|RefPaper|}      iniformid hst	= specialize (invokeRefEditor editorRefPaper)  		iniformid hst
+gForm {|RefReport|}     iniformid hst	= specialize (invokeRefEditor editorRefReport)		iniformid hst
 gForm {|RefDiscussion|} iniformid hst 	= specialize (invokeRefEditor editorRefDiscussion)	iniformid hst
 
 
-gForm {|Reports|} informid hst = specialize myeditor informid hst
+gForm {|Reports|} informid hst			= specialize myeditor informid hst
 where
 	myeditor (init,formid) hst
-	# (Reports reports) 		= formid.ival
-	# (reportsf,hst)			= vertlistFormButs 10 True (init,subsFormId formid "report" reports) hst
+	# (Reports reports) 				= formid.ival
+	# (reportsf,hst)					= vertlistFormButs 10 True (init,subsFormId formid "report" reports) hst
 	= ({reportsf & value = Reports reportsf.value},hst)
 
-gForm {|Conflicts|} informid hst = specialize myeditor informid hst
+gForm {|Conflicts|} informid hst		= specialize myeditor informid hst
 where
 	myeditor (init,formid) hst
-	# (Conflicts papernrs) 		= formid.ival
-	# (papersf,hst)				= vertlistFormButs 10 True (init,subsFormId formid "conflict" papernrs) hst
+	# (Conflicts papernrs) 				= formid.ival
+	# (papersf,hst)						= vertlistFormButs 10 True (init,subsFormId formid "conflict" papernrs) hst
 	= ({papersf & value = Conflicts papersf.value},hst)
 
-gForm {|Co_authors|} informid hst = specialize myeditor informid hst
+gForm {|Co_authors|} informid hst		= specialize myeditor informid hst
 where
 	myeditor (init,formid) hst
-	# (Co_authors authors) 	= formid.ival
-	# (authorsf,hst)		= vertlistFormButs 10 True (init,subsFormId formid "authors" authors) hst
+	# (Co_authors authors) 				= formid.ival
+	# (authorsf,hst)					= vertlistFormButs 10 True (init,subsFormId formid "authors" authors) hst
 	= ({authorsf & value = Co_authors authorsf.value},hst)
 
-gForm {|Discussion|} informid hst = specialize myeditor informid hst
+gForm {|Discussion|} informid hst		= specialize myeditor informid hst
 where
 	myeditor (init,formid) hst
-	# (Discussion messages)		= formid.ival
-	= ({changed = False, form 	= showDiscussion messages, value = formid.ival},hst)
+	# (Discussion messages)				= formid.ival
+	= ({changed = False, form 			= showDiscussion messages, value = formid.ival},hst)
 	where
 		showDiscussion [] 	= []
 		showDiscussion [{messageFrom,date,time,message}:more] 

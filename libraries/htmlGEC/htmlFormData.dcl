@@ -52,7 +52,7 @@ import StdMaybe, StdBool
 		}
 
 :: InIDataId d									// Often used combination
-	:==	!(Init,FormId d)						
+	:==	(Init,FormId d)						
 
 // **** easy creation of FormId's ****
 

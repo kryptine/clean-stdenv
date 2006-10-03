@@ -105,11 +105,10 @@ where
 Ok :: Judgement
 Ok = Nothing
 
-noException			:: Judgement -> Bool
-noException		Nothing = True
-noException		_ = False
+noException :: Judgement -> Bool
+noException judgement = isNothing judgement
 
-yesException		:: Judgement -> Bool
+yesException :: Judgement -> Bool
 yesException judgement = not (noException judgement)
 
 instance + Judgement
@@ -117,8 +116,8 @@ where
 	(+) j1 j2 = addJudgement j1 j2
 	where
 //		addJudgement (Just (r1,j1)) (Just (r2,j2)) 	= (Just ((r1 +++ " " +++ r2),(j1 +++ " " +++ j2))) //for debugging
-		addJudgement (Just j1) _ 	= (Just j1)
-		addJudgement _  (Just j2) 	= (Just j2)
+		addJudgement (Just j1) _ 	= Just j1
+		addJudgement _  (Just j2) 	= Just j2
 		addJudgement _ _ 			= Nothing
 
 ExceptionStore :: (Judgement -> Judgement) !*HSt -> (Judgement,!*HSt)
