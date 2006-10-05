@@ -271,13 +271,9 @@ where
 												, PaperInfo.paper 		= RefPaper(Ref2 (uniquePaper paperInfo.nr uniquename))}}
 			_ -> account
 	where
-		uniquename = uniquePerson account.login.loginName
-	
-		setInvariantReports (Reports reports) = Reports (setInvariantReport reports)
+		uniquename								= uniquePerson account.login.loginName
+		setInvariantReports (Reports reports)	= Reports (map setInvariantReport reports)
 		
-		setInvariantReport :: [(PaperNr, RefReport)] -> [(PaperNr, RefReport)]
-		setInvariantReport [] = []
-		setInvariantReport [(nr, (RefReport (Ref2 _))):reports]
-						 = [(nr, (RefReport (Ref2 (uniqueReport nr uniquename)))):setInvariantReport reports]
-		setInvariantReport [report:reports]
-						 = [report:setInvariantReport reports]
+		setInvariantReport :: (PaperNr, RefReport) -> (PaperNr, RefReport)
+		setInvariantReport (nr, (RefReport (Ref2 _)))
+						 = (nr, (RefReport (Ref2 (uniqueReport nr uniquename))))

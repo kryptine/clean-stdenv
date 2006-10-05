@@ -14,7 +14,7 @@ where
 loginHandlingPage  :: !ConfAccounts !*HSt -> (Maybe ConfAccount,[BodyTag],!*HSt)
 loginHandlingPage accounts hst
 # (mbaccount,login,hst) = loginPage accounts hst	// has account ?
-| isJust mbaccount		= (mbaccount,[],hst)		// ok, goto memeber area
+| isJust mbaccount		= (mbaccount,[],hst)		// ok, goto member area
 # (forgotf,hst)			= passwordForgotten accounts hst
 # (yes,addauthorf,hst)	= addAuthorPage accounts hst
 # (guest,hst)			= guestAccountStore (if yes (\(_,guest) -> (True,guest)) id) hst

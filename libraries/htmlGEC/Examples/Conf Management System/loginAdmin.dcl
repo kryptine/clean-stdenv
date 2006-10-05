@@ -6,7 +6,7 @@ import StdEnv, StdMaybe, htmlRefFormlib
 							, state			:: s			// state 
 							}
 :: Login 				= 	{ loginName 	:: String		// Should be unique
-							, password		:: PasswordBox		// Should remain secret
+							, password		:: PasswordBox	// Should remain secret
 							}
 :: Accounts s			:== [Account s]
 

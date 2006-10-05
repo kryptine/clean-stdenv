@@ -636,4 +636,3 @@ MailApplicationLink mailaddress subject txtbody =
 	A [Lnk_Href ("mailto:" +++ mailaddress +++
 				 "?subject=" +++ subject +++
 				 "&body=" +++ txtbody)] [Txt mailaddress]
-	
