@@ -55,9 +55,9 @@ invariantLogAccounts id accounts = invariantLogins id [login \\ {login} <- accou
 
 invariantLogins :: String [Login] -> Judgement
 invariantLogins id [] 			= Ok
-invariantLogins id [login=:{loginName,password=(PasswordBox mypassword)}:logins]
+invariantLogins id [login=:{loginName,password=PasswordBox mypassword}:logins]
 | loginName  == "" 				= Just (id,"login name is not specified!")
-| mypassword == ""				= Just (id,"password required!")
+//| mypassword == ""				= Just (id,"password required!")
 | isMember login logins			= Just (id,"login name " +++ loginName +++ " is already being used!")
 | size mypassword < 6			= Just (id,"at least 6 characters required for a password!")
 = invariantLogins id logins

@@ -118,7 +118,7 @@ gForm {|Discussion|} informid hst		= specialize myeditor informid hst
 where
 	myeditor (init,formid) hst
 	# (Discussion messages)				= formid.ival
-	= ({changed = False, form 			= showDiscussion messages, value = formid.ival},hst)
+	= ({changed = False, form = showDiscussion messages, value = formid.ival},hst)
 	where
 		showDiscussion [] 	= []
 		showDiscussion [{messageFrom,date,time,message}:more] 
