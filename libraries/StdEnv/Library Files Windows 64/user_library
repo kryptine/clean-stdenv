@@ -122,3 +122,5 @@ GetDesktopWindow
 RegisterWindowMessageA
 PostThreadMessageA
 MsgWaitForMultipleObjects
+LoadImageA
+RegisterClassExA

@@ -83,3 +83,8 @@ SetUnhandledExceptionFilter
 VirtualProtect
 UnhandledExceptionFilter
 GetVersionExA
+GetProcessHeap
+HeapAlloc
+InitializeCriticalSection
+EnterCriticalSection
+LeaveCriticalSection
