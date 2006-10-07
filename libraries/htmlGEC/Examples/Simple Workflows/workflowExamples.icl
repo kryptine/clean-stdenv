@@ -22,17 +22,11 @@ where
 	= mkHtml "test" html hst
 
 test2 tst
-# (tb,ta,tst)	= LazyTask "test" (mkTask test) tst
-//# (a,tst) 		= ta tst
-# (b,tst)		= PCTask2 ( STask "Klaar1" True, STask "Klaar2" True) tst
+# (tb,aa,tst)	= LTask "test" (mkTask travel) tst
+# (b,tst)		= PCTask2 ( tb, STask "Klaar2" True) tst
 # (b,tst)		= PCTask2 ( STask "Klaar1" True, STask "Klaar2" True) tst
 = (b,tst)
 
-test tst
-# (a,tst) = PTasks	[ ("travel",travel)
-					, ("keuze2",STask "Gereed" "")
-					]  tst
-= STask "Klaar" a tst
 
 :: EenOfAnder = Naam | Woonplaats 
 
@@ -52,6 +46,7 @@ where
 	(==) Naam Naam = True
 	(==) Woonplaats Woonplaats = True
 	(==) _ _ = False
+
 
 // travel request
 

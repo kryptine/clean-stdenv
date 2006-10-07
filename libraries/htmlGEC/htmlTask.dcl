@@ -8,7 +8,7 @@ import StdHtml
 :: Task a		:== St *TSt a				// an interactive task
 :: IDataFun a	:== St *HSt (Form a)		// an iData Form
 
-LazyTask :: String (Task a) *TSt -> (Task Bool,Task (Maybe a),*TSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+LTask :: String (Task a) *TSt -> (Task Bool,Maybe a,*TSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 derive gForm Maybe
 derive gUpd Maybe
 derive gPrint Maybe

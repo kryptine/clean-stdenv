@@ -13,18 +13,20 @@ derive gPrint Niks
 
 // lazy task ???
 
-LazyTask :: String (Task a) *TSt -> (Task Bool,Task (Maybe a),*TSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-LazyTask s task tst=:((j,myturn,html),hst) = LazyTask` s task (incTask tst)
+LTask :: String (Task a) *TSt -> (Task Bool,Maybe a,*TSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+LTask s task tst=:((j,myturn,html),hst) 
+	# (bt,(mba,tst)) = LazyTask` s task (incTask tst)
+	= (bt,mba,tst)
 where
-	LazyTask` s task tst=:((j,myturn,html),hst) = (BT,LT s task,incTask tst)
+	LazyTask` s task tst=:((_,myturn,html),hst) = (BT,LT s task tst)
 	where
 		LT s task tst = mkTask (LT` s task) tst
 		where
 			LT` s task tst=:((i,myturn,html),hst) 
 			# (todo,hst)	= mkEditForm (Init,nFormId editId False) hst
 			| todo.value	
-				# (a,((i,myturn,html),hst)) = task ((i,True,html),hst)
-				= (Just a,((i,True,html),hst))
+				# (a,((i,adone,ahtml),hst)) = task ((i,True,[]),hst)
+				= (Just a,((i,True,html <|.|> if adone [] [Txt ("lazy task \"" +++ s +++ "\" activated"),Br] <|.|> ahtml),hst))
 			= (Nothing,((i,True,html),hst))
 	
 		BT tst = mkTask (BT`) tst
