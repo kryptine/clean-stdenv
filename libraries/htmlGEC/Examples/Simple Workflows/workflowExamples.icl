@@ -15,18 +15,43 @@ derive gUpd []
 //Start world = doHtmlServer (mkflow CreateMusic) world
 //Start world = doHtmlServer (mkflow (Quotation myQuotation)) world
 //Start world = doHtmlServer (mkflow travel) world
-Start world = doHtmlServer (mkflow test) world
+Start world = doHtmlServer (mkflow test2) world
 where
 	mkflow tasks hst 
 	# (html,hst) = startTask tasks hst
 	= mkHtml "test" html hst
 
+test2 tst
+# (tb,ta,tst)	= LazyTask "test" (mkTask test) tst
+//# (a,tst) 		= ta tst
+# (b,tst)		= PCTask2 ( STask "Klaar1" True, STask "Klaar2" True) tst
+# (b,tst)		= PCTask2 ( STask "Klaar1" True, STask "Klaar2" True) tst
+= (b,tst)
+
 test tst
 # (a,tst) = PTasks	[ ("travel",travel)
-			, ("keuze2",STask "Gereed" "")
-			]  tst
+					, ("keuze2",STask "Gereed" "")
+					]  tst
 = STask "Klaar" a tst
 
+:: EenOfAnder = Naam | Woonplaats 
+
+AnalyseForm tst  
+# (((_,naam),(_,woonplaats),geslacht),tst) 
+			= STask "Vul in" ((Dsp "Naam:",""),(Dsp "Woonplaats",""),False) tst
+# ((_,either),tst) = STask "Kies" (Dsp geslacht,Naam) tst
+= returnTask (either,if (either == Naam) naam woonplaats) tst
+
+derive gForm EenOfAnder
+derive gUpd EenOfAnder
+derive gParse EenOfAnder
+derive gPrint EenOfAnder
+
+instance == EenOfAnder
+where
+	(==) Naam Naam = True
+	(==) Woonplaats Woonplaats = True
+	(==) _ _ = False
 
 // travel request
 

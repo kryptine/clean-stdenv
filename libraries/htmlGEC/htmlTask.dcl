@@ -8,6 +8,13 @@ import StdHtml
 :: Task a		:== St *TSt a				// an interactive task
 :: IDataFun a	:== St *HSt (Form a)		// an iData Form
 
+LazyTask :: String (Task a) *TSt -> (Task Bool,Task (Maybe a),*TSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+derive gForm Maybe
+derive gUpd Maybe
+derive gPrint Maybe
+derive gParse Maybe
+
+
 /*
 startTask		:: lift iData to iTask domain
 mkTask			:: promote TSt state function to an interactive Task, i.e. task will only be called when it is its turn

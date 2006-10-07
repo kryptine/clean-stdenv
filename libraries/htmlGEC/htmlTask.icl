@@ -11,6 +11,34 @@ derive gPrint Niks
 
 :: Niks 		= Niks								// to make an empty task
 
+// lazy task ???
+
+LazyTask :: String (Task a) *TSt -> (Task Bool,Task (Maybe a),*TSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+LazyTask s task tst=:((j,myturn,html),hst) = LazyTask` s task (incTask tst)
+where
+	LazyTask` s task tst=:((j,myturn,html),hst) = (BT,LT s task,incTask tst)
+	where
+		LT s task tst = mkTask (LT` s task) tst
+		where
+			LT` s task tst=:((i,myturn,html),hst) 
+			# (todo,hst)	= mkEditForm (Init,nFormId editId False) hst
+			| todo.value	
+				# (a,((i,myturn,html),hst)) = task ((i,True,html),hst)
+				= (Just a,((i,True,html),hst))
+			= (Nothing,((i,True,html),hst))
+	
+		BT tst = mkTask (BT`) tst
+		where
+			BT` tst=:((i,myturn,html),hst) 
+			# (todo,hst)	= mkEditForm (Init,nFormId editId False) hst
+			= (todo.value,incTask ((i,myturn,html<|.|>todo.form ),hst))	
+	
+		editId = "signal_xxx" <+++ mkTaskNr j
+
+derive gForm Maybe
+derive gUpd Maybe
+derive gPrint Maybe
+derive gParse Maybe
 
 startTask :: (Task a) *HSt -> ([BodyTag],HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
 startTask taska hst
@@ -26,11 +54,11 @@ where
 	# tst 			= incTask tst				// every task should first increment its tasknumber
 	| not myturn	= (createDefault,tst)		// not active, return default value
 	= mytask tst
-	where
-		incTask ((i,b,html),hst) = ((incTasknr i,b,html),hst)
-		where
-			incTasknr [] = [0]
-			incTasknr [i:is] = [i+1:is]
+
+incTask ((i,b,html),hst) = ((incTasknr i,b,html),hst)
+where
+	incTasknr [] = [0]
+	incTasknr [i:is] = [i+1:is]
 
 returnTask :: a -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
 returnTask a = \tst -> mkTask (returnTask` a) tst
