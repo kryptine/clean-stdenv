@@ -8,16 +8,11 @@ import StdHtml
 :: Task a		:== St *TSt a				// an interactive task
 :: IDataFun a	:== St *HSt (Form a)		// an iData Form
 
-LTask :: String (Task a) *TSt -> (Task Bool,Maybe a,*TSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-derive gForm Maybe
-derive gUpd Maybe
-derive gPrint Maybe
-derive gParse Maybe
-
-
 /*
 startTask		:: lift iData to iTask domain
 mkTask			:: promote TSt state function to an interactive Task, i.e. task will only be called when it is its turn
+mkLTask			:: split indicated task in a lazy task and 
+					a task which can be used to activate that lazy task aftrewhich it waits for its completion and result
 
 STask			:: a Sequential iTask
 STask_button	:: do corresponding iTask when button pressed
@@ -44,6 +39,8 @@ appIData		:: lift iData editors to iTask domain
 
 startTask 		:: (Task a) *HSt -> ([BodyTag],HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
 mkTask 			:: (*TSt -> *(a,*TSt)) 	-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+mkLTask 		:: String (Task a) *TSt -> (Task a,Task a,*TSt) 
+														| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 
 STask 			:: String a 			-> (Task a)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
 STask_button	:: String (Task a)		-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
@@ -59,6 +56,7 @@ PCTasks			:: [(String,Task a)] 	-> (Task a)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|
 
 PTask2 			:: (Task a,Task b) 		-> (Task (a,b)) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a & gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
 PTasks 			:: [(String,Task a)]	-> (Task [a])	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
+
 
 returnTask 		:: a 					-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
 returnVF 		:: a [BodyTag] 			-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 

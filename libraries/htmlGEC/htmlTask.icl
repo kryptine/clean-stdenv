@@ -13,34 +13,35 @@ derive gPrint Niks
 
 // lazy task ???
 
-LTask :: String (Task a) *TSt -> (Task Bool,Maybe a,*TSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-LTask s task tst=:((j,myturn,html),hst) 
-	# (bt,(mba,tst)) = LazyTask` s task (incTask tst)
-	= (bt,mba,tst)
+mkLTask :: String (Task a) *TSt -> (Task a,Task a,*TSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+mkLTask s task tst = LazyTask` s task (incTask tst)
 where
-	LazyTask` s task tst=:((_,myturn,html),hst) = (BT,LT s task tst)
+	LazyTask` s task tst=:((j,myturn,html),hst) = (bossTask, workerTask s task,tst)
 	where
-		LT s task tst = mkTask (LT` s task) tst
+		workerTask s task tst = mkTask (workerTask` s task) tst
 		where
-			LT` s task tst=:((i,myturn,html),hst) 
-			# (todo,hst)	= mkEditForm (Init,nFormId editId False) hst
-			| todo.value	
-				# (a,((i,adone,ahtml),hst)) = task ((i,True,[]),hst)
-				= (Just a,((i,True,html <|.|> if adone [] [Txt ("lazy task \"" +++ s +++ "\" activated"),Br] <|.|> ahtml),hst))
-			= (Nothing,((i,True,html),hst))
+			workerTask` s task tst=:((i,myturn,html),hst) 
+			# (todo,hst)	= checkBossSignal id hst	// check whether lazy task evaluation has to be done
+			| todo.value								// yes	
+				# (a,((_,adone,ahtml),hst)) = task ((j++[0],True,[]),hst)			// do task
+				# (_,hst) 					= lazyTaskStore (\_ -> (adone,a)) hst	// store task and status
+				= (a,((i,myturn,html <|.|> if adone [] [Txt ("lazy task \"" +++ s +++ "\" activated:"),Br] <|.|> ahtml),hst))
+			= (createDefault,((i,myturn,html),hst))		// no
 	
-		BT tst = mkTask (BT`) tst
+		bossTask tst = mkTask (bossTask`) tst
 		where
-			BT` tst=:((i,myturn,html),hst) 
-			# (todo,hst)	= mkEditForm (Init,nFormId editId False) hst
-			= (todo.value,incTask ((i,myturn,html<|.|>todo.form ),hst))	
+			bossTask` tst=:((i,myturn,html),hst) 
+			# buttonId		= "getlt" <+++ mkTaskNr i
+			# (finbut,hst)  = simpleButton buttonId s (\_ -> True) hst	// button press will trigger related lazy task	
+			# (todo,hst)	= checkBossSignal finbut.value hst			// set store True if button pressed
+			# (result,hst)	= lazyTaskStore id hst						// inspect status task
+			# (done,value)	= result.value
+			| not done 		= (createDefault,((i,False,html<|.|>if todo.value [Txt ("Waiting for task \"" +++ s +++ "\"..")] finbut.form),hst))
+			= (value,((i,myturn,html <|.|>  [Txt ("Result of lazy task \"" +++ s +++ "\" :")]),hst))	
 	
-		editId = "signal_xxx" <+++ mkTaskNr j
+		lazyTaskStore   fun = mkStoreForm (Init,sFormId ("getLT" <+++ mkTaskNr j) (False,createDefault)) fun 
+		checkBossSignal fun = mkStoreForm (Init,sFormId ("setLT" <+++ mkTaskNr j) (fun False)) fun 
 
-derive gForm Maybe
-derive gUpd Maybe
-derive gPrint Maybe
-derive gParse Maybe
 
 startTask :: (Task a) *HSt -> ([BodyTag],HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
 startTask taska hst
