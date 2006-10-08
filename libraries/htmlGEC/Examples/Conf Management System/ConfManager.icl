@@ -54,11 +54,13 @@ derive gUpd 	CurrPage
 derive gPrint 	CurrPage
 derive gParse 	CurrPage
 
+homePage :: Member -> CurrPage
 homePage (ConfManager info) = RootHomePage
 homePage (Referee info) 	= RefereeHomePage
 homePage (Authors info) 	= AuthorsHomePage
 homePage (Guest info)		= GuestHomePage
 
+navigationButtons :: Member *HSt -> (Form (CurrPage -> CurrPage),*HSt)
 navigationButtons state hst = ListFuncBut (Init, sFormId "navigation" (navButtons state)) hst
 where
 	navButtons (ConfManager info) = 

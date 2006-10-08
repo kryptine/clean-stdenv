@@ -73,14 +73,14 @@ tempAccountsId accounts = sFormId "sh_root_accounts" accounts 	// temp editor fo
 
 modifyStatesPage :: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 modifyStatesPage accounts hst
-# (naccounts,hst)	= vertlistFormButs 15 True (Init,tempAccountsId accounts) hst	// make a list editor to mofify all accounts
+# (naccounts,hst)	= vertlistFormButs 15 True (Init,tempAccountsId accounts) hst	// make a list editor to modify all accounts
 # (accounts,hst)	= AccountsDB Set naccounts.value hst 							// if correct store in global database
-# (naccounts,hst)	= vertlistFormButs 15 True (Set,tempAccountsId accounts) hst	// make a list editor to mofify all accounts
+# (naccounts,hst)	= vertlistFormButs 15 True (Set,tempAccountsId accounts) hst	// make a list editor to modify all accounts
 = (naccounts.form, hst)
 
 assignPapersConflictsPage :: !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 assignPapersConflictsPage accounts hst
-# (accountsf,hst)	= vertlistFormButs 15 True (Init,tempAccountsId accounts) hst	// make a list editor to mofify all accounts
+# (accountsf,hst)	= vertlistFormButs 15 True (Init,tempAccountsId accounts) hst	// make a list editor to modify all accounts
 # accounts			= accountsf.value												// current value in temp editor
 # (assignf,hst) 	= ListFuncCheckBox (Init, nFormId "sh_assigments" (showAssignments accounts)) hst
 # (conflictsf,hst) 	= ListFuncCheckBox (Init, nFormId "sh_conflicts"  (showConflicts   accounts)) hst
