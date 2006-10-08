@@ -15,19 +15,33 @@ derive gUpd []
 //Start world = doHtmlServer (mkflow CreateMusic) world
 //Start world = doHtmlServer (mkflow (Quotation myQuotation)) world
 //Start world = doHtmlServer (mkflow travel) world
-Start world = doHtmlServer (mkflow test2) world
+Start world = doHtmlServer (mkflow optelTaak) world
 where
 	mkflow tasks hst 
 	# (html,hst) = startTask tasks hst
 	= mkHtml "test" html hst
 
+optelTaak tst
+# (a,tst) = STask "waarde1" 0 tst
+# (b,tst) = STask "waarde2" 0 tst
+# (c,tst) = returnTask (a+b) tst
+| c > 1000	= returnTask c tst
+= mkTask optelTaak tst
+
 test2 tst
-# (tb,aa,tst)	= LTask "test" (mkTask travel) tst
-# (b,tst)		= PCTask2 ( tb, STask "Klaar2" True) tst
-# (b,tst)		= PCTask2 ( STask "Klaar1" True, STask "Klaar2" True) tst
-= (b,tst)
-
-
+# (tboss,tsecr,tst)	= mkLTask "travel" travel tst
+# (result,tst)		= PTasks
+						 [( "secretary"
+						  ,	PTask2 (tsecr `bind` \t -> returnTask t,  working "secr")
+						  )
+						 ,( "boss"
+						  , PTask2 (tboss `bind` \t -> returnTask t,  working "boss")
+						  )
+						 ] tst
+= returnTask result tst 
+where
+	working s tst = CTask_button [(s+++"Working",working s),(s+++"Done",returnTask "done")] tst
+	
 :: EenOfAnder = Naam | Woonplaats 
 
 AnalyseForm tst  
