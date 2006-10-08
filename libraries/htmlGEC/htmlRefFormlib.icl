@@ -4,6 +4,7 @@ implementation module htmlRefFormlib
 // (c) MJP 2005
 
 import StdEnv, StdHtml, StdLib
+import GenEq
 
 derive gForm []; derive gUpd []
 derive gForm 	Maybe

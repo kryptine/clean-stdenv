@@ -11,6 +11,7 @@ import StdDebug
 //Start world = doHtmlServer test world
 Start world = doHtmlServer mainEntrance world
 
+mainEntrance :: *HSt -> *(Html,*HSt)
 mainEntrance hst
 # (body,hst) 	= loginhandling hst				// a login will be checked on correctness each time a page is requested !
 = mkHtml "Conference Manager" 
@@ -61,32 +62,32 @@ homePage (Guest info)		= GuestHomePage
 navigationButtons state hst = ListFuncBut (Init, sFormId "navigation" (navButtons state)) hst
 where
 	navButtons (ConfManager info) = 
-		[ (LButton defpixel "RootHome", 		\_.RootHomePage)
-		, (LButton defpixel "ModStates", 		\_.ModifyStates)
-		, (LButton defpixel "ListPapers", 		\_.ListPapers)
-		, (LButton defpixel "AssignPapers", 	\_.AssignPapers)
-		, (LButton defpixel "ListReports", 		\_.ListReports)
-		, (LButton defpixel "DiscussPapers", 	\_.DiscussPapers)
-		, (LButton defpixel "ShowPaperStatus", 	\_.ShowPapersStatus)
-		, (LButton defpixel "ChangeInfo", 		\_.ChangeInfo)
-		, (LButton defpixel "ChangePsswrd", 	\_.ChangePassword)
+		[ (LButton defpixel "RootHome", 		const RootHomePage)
+		, (LButton defpixel "ModStates", 		const ModifyStates)
+		, (LButton defpixel "ListPapers", 		const ListPapers)
+		, (LButton defpixel "AssignPapers", 	const AssignPapers)
+		, (LButton defpixel "ListReports", 		const ListReports)
+		, (LButton defpixel "DiscussPapers", 	const DiscussPapers)
+		, (LButton defpixel "ShowPaperStatus", 	const ShowPapersStatus)
+		, (LButton defpixel "ChangeInfo", 		const ChangeInfo)
+		, (LButton defpixel "ChangePsswrd", 	const ChangePassword)
 		]
 
 	navButtons (Referee info) = 
-		[ (LButton defpixel "Home", 			\_.RefereeHomePage)
-		, (LButton defpixel "ListPapers", 		\_.ListPapers)
-		, (LButton defpixel "RefereeForm", 		\_.RefereeForm)
-		, (LButton defpixel "ListReports", 		\_.ListReports)
-		, (LButton defpixel "DiscussPapers", 	\_.DiscussPapers)
-		, (LButton defpixel "ShowPaperStatus", 	\_.ShowPapersStatus)
-		, (LButton defpixel "ChangeInfo", 		\_.ChangeInfo)
-		, (LButton defpixel "ChangePsswrd", 	\_.ChangePassword)
+		[ (LButton defpixel "Home", 			const RefereeHomePage)
+		, (LButton defpixel "ListPapers", 		const ListPapers)
+		, (LButton defpixel "RefereeForm", 		const RefereeForm)
+		, (LButton defpixel "ListReports", 		const ListReports)
+		, (LButton defpixel "DiscussPapers", 	const DiscussPapers)
+		, (LButton defpixel "ShowPaperStatus", 	const ShowPapersStatus)
+		, (LButton defpixel "ChangeInfo", 		const ChangeInfo)
+		, (LButton defpixel "ChangePsswrd", 	const ChangePassword)
 		]
 	navButtons (Authors info) = 
-		[ (LButton defpixel "Home", 			\_.AuthorsHomePage)
-		, (LButton defpixel "SubmitPaper", 		\_.SubmitPaper)
-		, (LButton defpixel "ChangeInfo", 		\_.ChangeInfo)
-		, (LButton defpixel "ChangePsswrd", 	\_.ChangePassword)
+		[ (LButton defpixel "Home", 			const AuthorsHomePage)
+		, (LButton defpixel "SubmitPaper", 		const SubmitPaper)
+		, (LButton defpixel "ChangeInfo", 		const ChangeInfo)
+		, (LButton defpixel "ChangePsswrd", 	const ChangePassword)
 		]
 	navButtons (Guest info) = 
 		[ 

@@ -268,7 +268,7 @@ where
 				{account & state = Authors 		{paperInfo 
 												& PaperInfo.person 		= RefPerson 	(Ref2 uniquename)
 												, PaperInfo.discussion	= RefDiscussion (Ref2 (uniqueDiscussion paperInfo.nr uniquename))
-												, PaperInfo.paper 		= RefPaper(Ref2 (uniquePaper paperInfo.nr uniquename))}}
+												, PaperInfo.paper 		= RefPaper      (Ref2 (uniquePaper paperInfo.nr uniquename))}}
 			_ -> account
 	where
 		uniquename								= uniquePerson account.login.loginName
