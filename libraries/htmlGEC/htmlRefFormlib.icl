@@ -19,11 +19,9 @@ where
 	(==)(Ref2 file1) (Ref2 file2) = file1 == file2
 
 ref2EditForm :: !(InIDataId a) !(InIDataId (Ref2 a))  !*HSt -> (Form a,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-ref2EditForm  (inita,formida) (initra,formidra) hst 
+ref2EditForm  (inita,formida) (_,{ival=Ref2 refname}) hst 
 | refname == "" = mkEditForm (Init,reuseFormId formida createDefault) hst
-= mkEditForm (inita,{formida & id = refname}) hst
-where
-	(Ref2 refname) = formidra.ival
+| otherwise     = mkEditForm (inita,{formida & id = refname}) hst
 
 invokeRefEditor :: (!(InIDataId b) !*HSt -> (Form d,!*HSt)) (InIDataId b) !*HSt -> (Form b,!*HSt)
 invokeRefEditor editor (init,formid) hst

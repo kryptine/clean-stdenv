@@ -504,10 +504,8 @@ toBody :: (Form a) -> BodyTag
 toBody form = BodyTag form.form
 
 createDefault :: a | gUpd{|*|} a 
-createDefault = hd (mkNewList [])
-where
-	mkNewList _ = snd (gUpd {|*|} (UpdSearch (UpdC "_Cons") 0) [])	// generates a new list with one element of required type
-derive gUpd []
+createDefault = fromJust (snd (gUpd {|*|} (UpdSearch (UpdC "Just") 0) Nothing))
+derive gUpd Maybe
 
 setCntr :: InputId *HSt -> *HSt
 setCntr i hst = {hst & cntr = i}
