@@ -9,13 +9,13 @@ derive gUpd []
 
 
 
-//Start world = doHtmlServer (mkflow Coffeemachine) world
+//Start world = doHtmlServer (mkflow CoffeeMachineInf) world
 //Start world = doHtmlServer (mkflow (requestTask 100)) world
 // Start world = doHtmlServer (mkflow (RecordSongs ["song 1","song 2","song 3"])) world
 //Start world = doHtmlServer (mkflow CreateMusic) world
 //Start world = doHtmlServer (mkflow (Quotation myQuotation)) world
 //Start world = doHtmlServer (mkflow travel) world
-Start world = doHtmlServer (mkflow optelTaak) world
+Start world = doHtmlServer (mkflow agenda) world
 where
 	mkflow tasks hst 
 	# (html,hst) = startTask tasks hst
@@ -28,16 +28,59 @@ optelTaak tst
 | c > 1000	= returnTask c tst
 = mkTask optelTaak tst
 
-test2 tst
-# (tboss,tsecr,tst)	= mkLTask "travel" travel tst
-# (result,tst)		= PTasks
-						 [( "secretary"
-						  ,	PTask2 (tsecr `bind` \t -> returnTask t,  working "secr")
-						  )
-						 ,( "boss"
-						  , PTask2 (tboss `bind` \t -> returnTask t,  working "boss")
-						  )
+agenda :: (Task Bool)
+agenda = \tst -> agenda` tst
+where
+	agenda` tst
+	# ((voorstel,acceptatie),tst) = mkLTaskRTC "agenda" init datumbrief tst
+	# (afspraak,tst)			= PTasks
+								 [( "persoon1"
+								  ,	acceptatie `bind` \t -> returnTask t
+								  )
+								 ,( "persoon2"
+								  , STask "kiesDatum" init `bind` voorstel 
+								  )
+								 ] tst
+	| not (hd afspraak) = mkTask agenda tst
+	= returnTask (hd afspraak) tst 
+	where
+		init = Date 2 2 2006
+	
+		datumbrief date tst
+		# tst = returnF [Txt "voorgestelde datum:",Br]  tst	
+		# (_,tst) = returnTask date tst						// laat voorgestelde datum zien
+		= CTask_button 	[ ("geaccepteerd", returnTask True)
+						 , ("afgewezen",   returnTask False)
 						 ] tst
+
+
+test3 tst
+# ((tboss,tsecr),tst)	= mkLTaskRTC "telop" 0  telop tst
+# (result,tst)			= PTasks
+							 [( "secretary"
+							  ,	tsecr
+							  )
+							 ,( "boss"
+							  , STask "waarde" 0 `bind` tboss
+							  )
+							 ] tst
+= returnTask result tst 
+where
+	telop b tst
+	# (_,tst) = returnTask b tst
+	# (a,tst) = STask "telop" 0 tst
+	= returnTask (a+b) tst
+
+test2 tst
+# ((tboss,tsecr),tst)	= mkLTask "travel" travel tst
+# (result,tst)			= PTasks
+							 [( "secretary"
+							  ,	PTask2 (tsecr `bind` \t -> returnTask t,  tsecr `bind` \t -> returnTask t)
+							  )
+							 ,( "boss"
+							  , PTask2 (tboss `bind` \t -> returnTask t, tsecr `bind` \t -> returnTask t)
+							  )
+							 ] tst
 = returnTask result tst 
 where
 	working s tst = CTask_button [(s+++"Working",working s),(s+++"Done",returnTask "done")] tst
@@ -120,6 +163,11 @@ Quotation (state,form) tst
 
 // coffee machine
 
+CoffeeMachineInf :: *TSt -> (Int,*TSt)
+CoffeeMachineInf tst
+# (_,tst) = Coffeemachine tst
+= mkTask CoffeeMachineInf tst
+
 Coffeemachine tst
 # (_,tst) 				= returnTask "Choose Product" tst
 # ((toPay,product),tst) = CTask_button
@@ -128,13 +176,17 @@ Coffeemachine tst
 									,	("Thee",returnTask (50,"Thee"))
 									,	("Chocolate",returnTask (100,"Chocolate"))
 									] tst
-# (returnMoney,tst) 	= getCoins (toPay,0) tst
+# ((cancel,returnMoney),tst) = getCoins (toPay,0) tst
+| cancel				= returnTask ("Cancelled",returnMoney) tst
 = returnTask (product,returnMoney) tst
 where
 	getCoins (toPay,paid) tst
-	# (coin,tst)		= CTask_button [(toString i <+++ " cts", returnTask i) \\ i <- [5,10,20,50,100]] tst
+	# ((cancel,coin),tst)= PCTask2 	( CTask_button [(toString i <+++ " cts", returnTask (False,i)) \\ i <- [5,10,20,50,100]]
+									, STask_button "Cancel" (returnV (True,0))
+									) tst
+	| cancel			= returnV (cancel,paid) tst
 	| toPay - coin > 0 	= mkTask (getCoins (toPay - coin,paid + coin)) tst
-	= returnV (coin - toPay) tst
+	= returnV (cancel,coin - toPay) tst
 
 // coffee machine, monadic style
 

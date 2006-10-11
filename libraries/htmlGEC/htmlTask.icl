@@ -11,10 +11,70 @@ derive gPrint Niks
 
 :: Niks 		= Niks								// to make an empty task
 
-// lazy task ???
+startTask :: (Task a) *HSt -> ([BodyTag],HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
+startTask taska hst
+# (_,((_,_,html),hst)) = taska (newTask,hst) 
+= (html,hst)
+where
+	newTask = ([],True,[])
 
-mkLTask :: String (Task a) *TSt -> (Task a,Task a,*TSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-mkLTask s task tst = LazyTask` s task (incTask tst)
+mkTask :: (*TSt -> *(a,*TSt)) -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+mkTask mytask = \tst -> mkTask` tst
+where
+	mkTask` tst=:((i,myturn,html),hst)			
+	# tst 			= incTask tst				// every task should first increment its tasknumber
+	| not myturn	= (createDefault,tst)		// not active, return default value
+	= mytask tst
+
+incTask ((i,b,html),hst) = ((incTasknr i,b,html),hst)
+where
+	incTasknr [] = [0]
+	incTasknr [i:is] = [i+1:is]
+
+mkLTaskRTC :: String b (b -> Task a) *TSt -> ((b -> Task a,Task a),*TSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+												& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
+mkLTaskRTC s initb batask tst = let (a,b,c) = LazyTask` s (incTask tst) in ((a,b),c)
+where
+	LazyTask` s tst=:((j,myturn,html),hst) = (bossTask, workerTask s,tst)
+	where
+		workerTask s tst = mkTask (workerTask` s) tst
+		where
+			workerTask` s tst=:((i,myturn,html),hst) 
+			# (boss,hst)	= bossStore id hst		// check input from boss
+			# (worker,hst)	= workerStore id hst	// check result from worker
+			# bdone			= fst boss.value
+			# binput		= snd boss.value
+			# wdone			= fst worker.value
+			# wresult		= snd worker.value
+			| wdone			= (wresult,((i,True,html<|.|>  [Txt ("Lazy task \"" +++ s +++ "\" completed:")]),hst))	
+			| bdone
+				# (wresult,((_,wdone,whtml),hst)) = batask binput ((j++[0],True,[]),hst)	// apply task to input from boss
+				| wdone															// worker task finshed
+					# (_,hst)	= workerStore (\_ -> (wdone,wresult)) hst		// store task and status
+					= workerTask` s ((i,myturn,html),hst) 				// complete as before
+				= (createDefault,((i,False,html <|.|> if wdone [] [Txt ("lazy task \"" +++ s +++ "\" activated:"),Br] <|.|> whtml),hst))
+			= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))		// no
+	
+		bossTask b tst = mkTask bossTask` tst
+		where
+			bossTask` tst=:((i,myturn,html),hst) 
+			# (boss,hst)				= bossStore id hst		// check input from boss
+			# (worker,hst)				= workerStore id hst	// check result from worker
+			# bdone						= fst boss.value
+			# binput					= snd boss.value
+			# wdone						= fst worker.value
+			# wresult					= snd worker.value
+			| bdone && wdone			= (wresult,((i,True,html<|.|>  [Txt ("Result of lazy task \"" +++ s +++ "\" :")]),hst))	// finished
+			| not bdone
+				# (_, hst)		= bossStore (\_ -> (True,b)) hst	// store b information to communicate to worker	
+				= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))
+			= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))	
+	
+		workerStore   fun = mkStoreForm (Init,sFormId ("workerStore" <+++ mkTaskNr j) (False,createDefault)) fun 
+		bossStore     fun = mkStoreForm (Init,sFormId ("bossStore"   <+++ mkTaskNr j) (False,initb)) fun 
+
+mkLTask :: String (Task a) *TSt -> ((Task a,Task a),*TSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+mkLTask s task tst = let (a,b,c) = LazyTask` s task (incTask tst) in ((a,b),c)
 where
 	LazyTask` s task tst=:((j,myturn,html),hst) = (bossTask, workerTask s task,tst)
 	where
@@ -41,27 +101,6 @@ where
 	
 		lazyTaskStore   fun = mkStoreForm (Init,sFormId ("getLT" <+++ mkTaskNr j) (False,createDefault)) fun 
 		checkBossSignal fun = mkStoreForm (Init,sFormId ("setLT" <+++ mkTaskNr j) (fun False)) fun 
-
-
-startTask :: (Task a) *HSt -> ([BodyTag],HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
-startTask taska hst
-# (_,((_,_,html),hst)) = taska (newTask,hst) 
-= (html,hst)
-where
-	newTask = ([],True,[])
-
-mkTask :: (*TSt -> *(a,*TSt)) -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-mkTask mytask = \tst -> mkTask` tst
-where
-	mkTask` tst=:((i,myturn,html),hst)			
-	# tst 			= incTask tst				// every task should first increment its tasknumber
-	| not myturn	= (createDefault,tst)		// not active, return default value
-	= mytask tst
-
-incTask ((i,b,html),hst) = ((incTasknr i,b,html),hst)
-where
-	incTasknr [] = [0]
-	incTasknr [i:is] = [i+1:is]
 
 returnTask :: a -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
 returnTask a = \tst -> mkTask (returnTask` a) tst
@@ -191,12 +230,13 @@ where
 	# (choice,hst)				= TableFuncBut (Init,sFormId ("Cbt_task_" <+++ mkTaskNr i) [[(but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]]) hst
 	# (chosen,hst)				= mkStoreForm  (Init,sFormId ("Cbt_chosen_" <+++ mkTaskNr i) 0) choice.value hst
 	# chosenTask				= snd (options!!chosen.value)
+	# chosenTaskName				= fst (options!!chosen.value)
 	# (a,((_,adone,ahtml),hst)) = chosenTask ((i ++ [chosen.value + 1],True,[]),hst)
-	| not adone					= ([a],((i,adone,html <|.|> [choice.form <=> ahtml]),hst))
+	| not adone					= ([a],((i,adone,html <|.|> [choice.form <=> ( [Txt ("Task: " +++ chosenTaskName)] <|.|> ahtml)]),hst))
 	# (alist,((_,finished,_),hst))		
 								= checkAllTasks 0 [] ((i,myturn,[]),hst)
 	| finished					= (alist,((i,finished,html),hst))
-	= ([a],((i,finished,html <|.|> [choice.form <=> ahtml]),hst))
+	= ([a],((i,finished,html <|.|> [choice.form <=> ([Txt ("Task: " +++ chosenTaskName)] <|.|> ahtml)]),hst))
 
 	but i = LButton defpixel i
 
