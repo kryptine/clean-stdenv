@@ -66,6 +66,8 @@ example5 hst
 derive gParse MInt
 derive gPrint MInt
 derive gUpd   MInt
+derive gerda   MInt
+
 gForm{|MInt|} (init,formid) hst = specialize asCounter (init,formid) hst
 where
     asCounter (init,formId) hst

@@ -34,6 +34,13 @@ derive gParse
 				RefPaper, Paper, PaperInfo, Co_authors, RefDiscussion,
 				PaperStatus, Discussion, DiscussionStatus, Message
 
+derive gerda 	
+				Login, Account, Member, ManagerInfo, RefereeInfo, Conflicts,
+				RefPerson, Person,
+				Reports, RefReport, Report, Recommendation, Familiarity, 
+				RefPaper, Paper, PaperInfo, Co_authors, RefDiscussion,
+				PaperStatus, Discussion, DiscussionStatus, Message
+
 // Naming convention of shared persistent information
 
 uniqueDBname				:== "conferenceDBS"							// accounts database

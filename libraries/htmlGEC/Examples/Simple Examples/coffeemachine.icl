@@ -7,6 +7,7 @@ derive gForm  Machine, Output, Product
 derive gUpd   Machine, Output, Product
 derive gPrint Machine, Output, Product
 derive gParse Machine, Output, Product
+derive gerda Machine, Output, Product
 
 //Start world  = doHtml coffeemachine world
 Start world  = doHtmlServer coffeemachine world

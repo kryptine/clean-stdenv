@@ -8,6 +8,7 @@ derive gForm  	Tree
 derive gPrint 	Tree
 derive gParse 	Tree
 derive gUpd 	Tree
+derive gerda 	Tree
                                               
 balanceTree :: ((Tree a) -> (Tree a)) | Ord a
 balanceTree = fromListToBalTree o fromTreeToList

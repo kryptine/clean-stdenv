@@ -37,35 +37,36 @@ returnF			:: add html code
 appIData		:: lift iData editors to iTask domain
 */
 
-startTask 		:: (Task a) *HSt -> ([BodyTag],HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
-mkTask 			:: (*TSt -> *(a,*TSt)) 	-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+startTask 		:: (Task a) *HSt -> ([BodyTag],HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
+mkTask 			:: (*TSt -> *(a,*TSt)) 	-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 mkLTask 		:: String (Task a) *TSt -> ((Task a,Task a),*TSt) 
-														| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+														| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 
 mkLTaskRTC 		:: String b (b -> Task a) *TSt -> ((b -> Task a,Task a),*TSt) 
-														| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-														& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
+														| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
+														& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC b
 
-STask 			:: String a 			-> (Task a)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
-STask_button	:: String (Task a)		-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-STasks			:: [(String,Task a)] 	-> (Task [a])	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
+STask 			:: String a 			-> (Task a)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
+STask_button	:: String (Task a)		-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
+STasks			:: [(String,Task a)] 	-> (Task [a])	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
 
-CTask_button 	:: [(String,Task a)] 	-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-CTask_pdmenu 	:: [(String,Task a)] 	-> (Task a)	 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+CTask_button 	:: [(String,Task a)] 	-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
+CTask_pdmenu 	:: [(String,Task a)] 	-> (Task a)	 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 
-MCTask_ckbox 	:: [(String,Task a)] 	-> (Task [a]) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+MCTask_ckbox 	:: [(String,Task a)] 	-> (Task [a]) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 
-PCTask2			:: (Task a,Task a) 		-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
-PCTasks			:: [(String,Task a)] 	-> (Task a)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
+PCTask2			:: (Task a,Task a) 		-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
+PCTasks			:: [(String,Task a)] 	-> (Task a)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
 
-PTask2 			:: (Task a,Task b) 		-> (Task (a,b)) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a & gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
-PTasks 			:: [(String,Task a)]	-> (Task [a])	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
+PTask2 			:: (Task a,Task b) 		-> (Task (a,b)) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
+														& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC b
+PTasks 			:: [(String,Task a)]	-> (Task [a])	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
 
 
-returnTask 		:: a 					-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
-returnVF 		:: a [BodyTag] 			-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
-returnV 		:: a 					-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
+returnTask 		:: a 					-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
+returnVF 		:: a [BodyTag] 			-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
+returnV 		:: a 					-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
 returnF 		:: [BodyTag] 			-> TSt -> TSt
 
-appIData 		:: (IDataFun a) 		-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+appIData 		:: (IDataFun a) 		-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 

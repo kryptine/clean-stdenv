@@ -12,6 +12,7 @@ derive gForm  	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan
 derive gUpd 	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan, []
 derive gPrint	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan
 derive gParse	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan
+derive gerda	Worker, Project, DailyWork, ProjectPlan, Status, WorkerPlan
 
 
 Start world  = doHtmlServer ProjectAdminPage world

@@ -25,6 +25,10 @@ import
 	 	,	htmlDataDef			// Clean's ADT representation of Html
 		,	htmlStyleDef		// Clean's ADT representation of Style sheets
 
+// automatic data base storage and retrieval
+
+		,	Gerda				// Clean's GEneRic Database Access
+
 // of general use:
 
 		,	htmlTrivial			// some trivial generic bimap derives

@@ -36,51 +36,51 @@ mkTable 			:: [[BodyTag]]			-> BodyTag		// Make a table
 // mkSubState		: makes form for substate, with ok and cancel buttons; only added to state if ok is pressed
 // mkShowHide		: as mkEdit, but with show / hide button
 
-mkBimapEditor 	:: !(InIDataId d) !(Bimap d v) 	!*HSt -> (Form d,!*HSt)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
-mkEditForm 		:: !(InIDataId d)  				!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkStoreForm 	:: !(InIDataId d)  !(d -> d)	!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkSelfForm 		:: !(InIDataId d)  !(d -> d)	!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
-mkApplyEditForm	:: !(InIDataId d)  !d			!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+mkBimapEditor 	:: !(InIDataId d) !(Bimap d v) 	!*HSt -> (Form d,!*HSt)		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC v
+mkEditForm 		:: !(InIDataId d)  				!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC d
+mkStoreForm 	:: !(InIDataId d)  !(d -> d)	!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC d
+mkSelfForm 		:: !(InIDataId d)  !(d -> d)	!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC d
+mkApplyEditForm	:: !(InIDataId d)  !d			!*HSt -> (Form d,!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC d
 
 mkSubStateForm 	:: !(InIDataId !subState) !state !(subState state -> state) !*HSt -> (Bool,Form state,!*HSt)
-																				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC subState
+																				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC subState
 
-mkShowHideForm 	:: !(InIDataId a)  !*HSt -> (Form a,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+mkShowHideForm 	:: !(InIDataId a)  !*HSt -> (Form a,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 
 // **** forms for lists ****
 
-listForm 		:: !(InIDataId [a]) 			!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-horlistForm 	:: !(InIDataId [a]) 			!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-vertlistForm 	:: !(InIDataId [a]) 			!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-table_hv_Form 	:: !(InIDataId [[a]])		 	!*HSt -> (Form [[a]],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+listForm 		:: !(InIDataId [a]) 			!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
+horlistForm 	:: !(InIDataId [a]) 			!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
+vertlistForm 	:: !(InIDataId [a]) 			!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
+table_hv_Form 	:: !(InIDataId [[a]])		 	!*HSt -> (Form [[a]],!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 layoutListForm	:: !([BodyTag] [BodyTag] -> [BodyTag]) 
                        !(!(InIDataId a)	!*HSt  -> (Form a,*HSt))
-                        !(InIDataId [a]) !*HSt -> (Form [a],!*HSt)			| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+                        !(InIDataId [a]) !*HSt -> (Form [a],!*HSt)			| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 
 // User controlled number of list elements will be shown, including optional delete and append buttons; Int indicates max number of browse buttons
 
-vertlistFormButs:: !Int !Bool !(InIDataId [a]) 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+vertlistFormButs:: !Int !Bool !(InIDataId [a]) 		!*HSt -> (Form [a],!*HSt) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 
 
 
 // **** forms for tuples ****
 
-t2EditForm  	:: !(InIDataId (a,b))			!*HSt -> ((Form a,Form b),!*HSt)| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-																				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
+t2EditForm  	:: !(InIDataId (a,b))			!*HSt -> ((Form a,Form b),!*HSt)| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
+																				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC b
 
 t3EditForm  	:: !(InIDataId (a,b,c))	 		!*HSt -> ((Form a,Form b,Form c),!*HSt) 
-																				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-																   				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
-																   				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC c
+																				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
+																   				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC b
+																   				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC c
 t4EditForm  	:: !(InIDataId (a,b,c,d))	 	!*HSt -> ((Form a,Form b,Form c,Form d),!*HSt)
-																				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-																   				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
-																   				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC c
-																   				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC d
+																				| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
+																   				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC b
+																   				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC c
+																   				& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC d
 // **** special buttons ****
 
 counterForm 	:: !(InIDataId a)	  			!*HSt -> (Form a,!*HSt) | +, -, one
-																			,  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+																			,  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 // buttons returning index between 1 to n given stepsize, n, maximal numberofbuttuns to show
 
 browseButtons :: !(InIDataId !Int) !Int !Int !Int !*HSt -> (Form Int,!*HSt)

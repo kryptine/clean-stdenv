@@ -88,6 +88,7 @@ derive gUpd   State
 derive gForm  State
 derive gParse State
 derive gPrint State
+derive gerda State
 
 derive gForm []
 derive gUpd  []

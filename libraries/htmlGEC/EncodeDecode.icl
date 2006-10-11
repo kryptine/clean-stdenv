@@ -28,10 +28,12 @@ where
 	fromLivetime Session 		PlainString		= "S"
 	fromLivetime Persistent 	PlainString		= "P"
 	fromLivetime PersistentRO 	PlainString		= "R"
+	fromLivetime Database	 	PlainString		= "D"
 	fromLivetime Page 			StaticDynamic	= "n"
 	fromLivetime Session 		StaticDynamic	= "s"
 	fromLivetime Persistent 	StaticDynamic	= "p"
 	fromLivetime PersistentRO 	StaticDynamic	= "r"
+	fromLivetime Database	 	StaticDynamic	= "d"
 
 // de-serialize Html State
 
@@ -64,16 +66,20 @@ where
 			toLivetime ['p':_] = Persistent
 			toLivetime ['R':_] = PersistentRO
 			toLivetime ['r':_] = PersistentRO
+			toLivetime ['D':_] = Database
+			toLivetime ['d':_] = Database
 			toLivetime _   	   = Page
 
 			toStorageFormat ['N':_] = PlainString
 			toStorageFormat ['S':_] = PlainString
 			toStorageFormat ['P':_] = PlainString
 			toStorageFormat ['R':_] = PlainString
+			toStorageFormat ['D':_] = PlainString
 			toStorageFormat ['n':_] = StaticDynamic
 			toStorageFormat ['p':_] = StaticDynamic
 			toStorageFormat ['s':_] = StaticDynamic
 			toStorageFormat ['r':_] = StaticDynamic
+			toStorageFormat ['d':_] = StaticDynamic
 			toStorageFormat _   	= PlainString
 
 // reconstruct HtmlState out of the information obtained from browser
@@ -156,6 +162,7 @@ where
 					Persistent 		-> "Persistent";
 					PersistentRO 	-> "Persistent Read Only" 
 					Session 		-> "Session"; 
+					Database 		-> "Database"; 
 					_ 				-> "Page"
 	showf storage = case storage of PlainString -> "String";  _ -> "Dynamic"
 	shows PlainString s = s

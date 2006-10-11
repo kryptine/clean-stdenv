@@ -9,7 +9,7 @@ derive gForm  []
 import tree
 
 //Start world  = doHtml MyPage world
-Start world  = doHtmlServer MyPage world
+Start world  = doHtmlServer MyPageArr world
 
 myListId = nFormId "list" []
 myTreeId = nFormId "tree" Leaf

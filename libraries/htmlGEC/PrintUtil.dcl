@@ -6,14 +6,16 @@ definition module PrintUtil
 import StdGeneric
 import StdFile
 import StdStrictLists
+import Gerda
 
 :: *HtmlStream :== [# String !]
 
 :: FoF :== (*HtmlStream -> *HtmlStream)
 
 :: *NWorld							// io interface
-	= 	{ worldC	:: !*World		// world for any io
-		, inout		:: !*HtmlStream		// to read from stdin and write to srdout
+	= 	{ worldC	:: !*World			// world for any io
+		, inout		:: !*HtmlStream		// to read from stdin and write to stdout
+		, gerda		:: !*Gerda			// to read and write to the database
 		}				
 instance FileSystem NWorld
 appWorldNWorld :: !.(*World -> *World)       !*NWorld -> *NWorld
@@ -36,8 +38,8 @@ print_to_stdout 	:: a *NWorld -> *NWorld | gHpr{|*|} a
 // handy utility print routines	
 
 print 			:: !String 				-> FoF
-(<+) infixl 	:: !*HtmlStream !a 			-> *HtmlStream | gHpr{|*|} a
-(<+>) infixl 	:: !*HtmlStream FoF 			-> *HtmlStream
+(<+) infixl 	:: !*HtmlStream !a 		-> *HtmlStream | gHpr{|*|} a
+(<+>) infixl 	:: !*HtmlStream FoF 	-> *HtmlStream
 htmlAttrCmnd 	:: !hdr !tag !body  	-> FoF | gHpr{|*|} hdr & gHpr{|*|} tag & gHpr{|*|} body
 openCmnd 		:: !a !b 				-> FoF | gHpr{|*|} a & gHpr{|*|} b
 styleCmnd 		:: !a !b 				-> FoF | gHpr{|*|} a & gHpr{|*|} b

@@ -7,6 +7,7 @@ derive gForm  	Login
 derive gUpd 	Login
 derive gPrint	Login
 derive gParse	Login
+derive gerda	Login
 
 // this session login form will be used at every event to check whether the end user is indeed administrated
 

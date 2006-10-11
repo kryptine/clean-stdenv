@@ -71,13 +71,15 @@ testHtml opts spec initState transInput userpage world
 	  (ok1,console,world)		= fopen "console.txt" FWriteText world
 	  (ok2,file,world)			= fopen "testOut.txt" FWriteText world
 	  (inout,world) 			= stdio world
-	  nworld 					= {worldC = world, inout = inout}	
+	  (gerda,world)				= openGerda "iDataDatabase" world
+	  nworld 					= {worldC = world, inout = inout, gerda = gerda}	
 	  (initFormStates,nworld)	= initTestFormStates nworld 
 	  inits 					= {ioOptions = [], fStates = initFormStates, nWorld = nworld}
 	  (sut,console,file)		= testConfSM ([Seed seed]++opts) spec initState (calcNextHtml userpage transInput) inits (\sut={sut & ioOptions = []}) console file
 	  nworld					= sut.nWorld
 	  (_,world)					= fclose console nworld.worldC
 	  (_,world)					= fclose file world
+	  world						= closeGerda gerda world
 	= world
 
 doHtmlTest3 :: (Maybe *TestEvent) (*HSt -> (Html,!*HSt)) *NWorld -> (Html,*FormStates,*NWorld)

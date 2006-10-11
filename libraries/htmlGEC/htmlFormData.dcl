@@ -20,11 +20,12 @@ import StdMaybe, StdBool
 	|	Set  									// 	The value will be used as new iData value
 
 :: Lifespan										// 	defines how long a form will be maintained		
-	= 	Persistent								// 	form will live "forever" (in a file)
-	|	PersistentRO							//	form will live "forever" (in a file), is used read-only
+	=	Database								//	persistent form stored in Database using generic db functions from Gerda
+	|	Persistent								// 	persistent form stored in a file
+	|	PersistentRO							//	persistent form stored in a file which is used Read-Only
 	| 	Session									// 	form will live as long as one browses between the pages offered by the application
-	| 	Page									// 	form will be automatically garbage collected when no reference is made to it			
-	|	Temp									//	form setting is not stored at all, only lives in application	
+	| 	Page									// 	form will be automatically garbage collected when no reference is made to it in a page			
+	|	Temp									//	form setting is not stored at all, only lives temporaly in the Clean application	
 
 :: Mode											// one can choose:
 	=	Edit									// 	an editable form
@@ -56,38 +57,56 @@ import StdMaybe, StdBool
 
 // **** easy creation of FormId's ****
 
+// editable, string format
+
 nFormId		:: !String !d -> (FormId d)		// page 	  	, editable, string format
 sFormId		:: !String !d -> (FormId d)		// session 	  	, editable, string format
 pFormId		:: !String !d -> (FormId d)		// persistent 	, editable, string format
 rFormId		:: !String !d -> (FormId d)		// persistentRO	, editable, string format
+dbFormId	:: !String !d -> (FormId d)		// database		, editable, string format
+
+// non-editable, string format
 
 ndFormId	:: !String !d -> (FormId d)		// page 	  	, displayed non-editable, string format
 sdFormId	:: !String !d -> (FormId d)		// session 	  	, displayed non-editable, string format
 pdFormId	:: !String !d -> (FormId d)		// persistent 	, displayed non-editable, string format 
 rdFormId	:: !String !d -> (FormId d)		// persistentRO	, displayed non-editable, string format 
+dbdFormId 	:: !String !d -> (FormId d)		// database		, displayed non-editable, string format
+
+// noform, string format
 
 xtFormId 	:: !String !d -> (FormId d)		// temp			, noform
 xnFormId	:: !String !d -> (FormId d)		// page 	  	, noform, string format
 xsFormId	:: !String !d -> (FormId d)		// session 	  	, noform, string format
 xpFormId	:: !String !d -> (FormId d)		// persistent 	, noform, string format
 xrFormId	:: !String !d -> (FormId d)		// persistentRO	, noform, string format
+xdbFormId	:: !String !d -> (FormId d)		// database		, noform, string format
+
+// temp forms
 
 tFormId 	:: !String !d -> (FormId d)		// temp 	  	, editable, string format
 tdFormId 	:: !String !d -> (FormId d)		// temp 	  	, displayed non-editable, string format
 
+// editable, dynamic format also allows to store functions
 
 nDFormId	:: !String !d -> (FormId d)		// page 	  	, editable, static dynamic format
 sDFormId	:: !String !d -> (FormId d)		// session 	  	, editable, static dynamic format
 pDFormId	:: !String !d -> (FormId d)		// persistent 	, editable, static dynamic format
 rDFormId	:: !String !d -> (FormId d)		// persistentRO	, editable, static dynamic format
+dbDFormId	:: !String !d -> (FormId d)		// Database		, editable, static dynamic format
+
+// non-editable, dynamic format also allows to store functions
 
 ndDFormId	:: !String !d -> (FormId d)		// page 	  	, displayed non-editable, static dynamic format
 sdDFormId	:: !String !d -> (FormId d)		// session 	  	, displayed non-editable, static dynamic format
 pdDFormId	:: !String !d -> (FormId d)		// persistent 	, displayed non-editable, static dynamic format 
 rdDFormId	:: !String !d -> (FormId d)		// persistentRO	, displayed non-editable, static dynamic format 
+dbdDFormId	:: !String !d -> (FormId d)		// Database	, displayed non-editable, static dynamic format 
 
-extidFormId :: !(FormId d) !String -> (FormId d)		// make new id by adding sufix 
-subFormId 	:: !(FormId a) !String !d 	-> (FormId d)	// make new id af new type by adding suffix
+// to create new FormId's ou of an existing one, handy for making unique identifiers
+
+extidFormId :: !(FormId d) !String 		-> (FormId d)	// make new id by adding sufix 
+subFormId 	:: !(FormId a) !String !d 	-> (FormId d)	// make new id for a new type by adding suffix
 subnFormId 	:: !(FormId a) !String !d 	-> (FormId d)	// idem with lifespan Page
 subsFormId 	:: !(FormId a) !String !d 	-> (FormId d)	// idem with lifespan Session
 subpFormId 	:: !(FormId a) !String !d 	-> (FormId d)	// idem with lifespan Persitent

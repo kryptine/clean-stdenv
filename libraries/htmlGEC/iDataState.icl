@@ -33,14 +33,14 @@ derive gPrint UpdValue, (,,)
 :: FStates		:== Tree_ (String,FormState)			// each form needs a different string id
 :: Tree_ a 		= Node_ (Tree_ a) a (Tree_ a) | Leaf_
 :: FormState 	= OldState !FState						// Old states are the states from the previous calculation
-				| NewState !FState						// New states are newly created states or old states that have been inspected and updated
+				| NewState !FState 						// New states are newly created states or old states that have been inspected and updated
 :: FState		= { format	 :: !Format					// Encoding method used for serialization
 				  , life	 :: !Lifespan				// Its life span
 				  }
-:: Format		= PlainStr 	!.String						// Either a string is used for serialization
-				| StatDyn	!Dynamic					// Or a dynamic which enables serialization of functions defined in the application (no plug ins yet)
-
-
+:: Format		= PlainStr 	!.String 					// Either a string is used for serialization
+				| StatDyn	!Dynamic 					// Or a dynamic which enables serialization of functions defined in the application (no plug ins yet)
+				| DBStr		!.String (*Gerda -> *Gerda)	// In case a new value has to bestored in the database 
+				
 // functions defined on the FormStates abstract data type
 
 instance < FormState
@@ -61,12 +61,12 @@ getUpdateId formStates=:{updateid} = (updateid,formStates)
 getUpdate ::  *FormStates -> (String,*FormStates)
 getUpdate formStates=:{update} = (update,formStates)
 
-findState :: !(FormId a) *FormStates *NWorld -> (Bool,Maybe a,*FormStates,*NWorld)	| gParse{|*|} a & TC a
+findState :: !(FormId a) *FormStates *NWorld -> (Bool,Maybe a,*FormStates,*NWorld)	| gPrint {|*|}, gParse{|*|}, gerda{|*|}, TC a
 findState formid formstates=:{fstates,server} world
 # (bool,ma,fstates,world) = findState` formid fstates world
 = (bool,ma,{formstates & fstates = fstates},world)
 where
-	findState` :: !(FormId a) *FStates *NWorld -> (Bool,Maybe a,*FStates,*NWorld)| gParse{|*|} a & TC a
+	findState` :: !(FormId a) *FStates *NWorld -> (Bool,Maybe a,*FStates,*NWorld)| gPrint {|*|}, gParse{|*|}, gerda{|*|}, TC a
 	findState` formid formstate=:(Node_ left (fid,info) right) world
 	| formid.id == fid = case info of
 					(OldState state) = (True, fetchFState state,formstate,world)
@@ -74,6 +74,7 @@ where
 	with
 		fetchFState :: FState -> Maybe a | TC a & gParse{|*|} a
 		fetchFState {format = PlainStr string} = parseString string
+		fetchFState {format = DBStr string _}  = parseString string
 		fetchFState {format = StatDyn (v::a^)} = Just v    
 		fetchFState _ = Nothing
 	| formid.id  < fid 	= (bool,parsed, Node_ leftformstates (fid,info) right,nworld)
@@ -83,24 +84,50 @@ where
 					with
 						(bool,parsed,rightformstates,nworld) = findState` formid right world
 
+	// value is not yet available in the tree storage...
+	// all stuf read out from persistent store are now marked as OldState (was NewState)	
+	// read out database and store as string 
+
+	findState` {id,lifespan = Database,storage = PlainString} Leaf_ world=:{gerda} 
+	# (value,gerda) = readGerda id	gerda
+	# world = {world & gerda = gerda}
+	= case value of
+		Just a 	-> (True,Just a,Node_ Leaf_ (id,OldState {format = PlainStr (printToString a), life = Database}) Leaf_,world)
+		Nothing	-> (False,Nothing,Leaf_,world)
+
+	// read out database and store as dynamic
+
+	findState` {id,lifespan = Database,storage = StaticDynamic} Leaf_ world=:{gerda} 
+	# (value,gerda) = readGerda id	gerda
+	# world = {world & gerda = gerda}
+	= case value of 
+		Nothing 		= (False,Nothing,Leaf_,world)
+		(Just string)	= case string_to_dynamic` string of
+							dyn=:(dynval::a^) 	-> (True,Just dynval,Node_ Leaf_ (id,OldState {format = StatDyn dyn, life = Persistent}) Leaf_,world)
+							else				-> (False,Nothing,Leaf_,world)
+
+	// read out file and store as string
+
 	findState` {id,lifespan = Persistent,storage = PlainString} Leaf_ world 
 	# (string,world) = readStringState (MyDir server) id world
 	= case parseString string of
-		Just a 	-> (True,Just a,Node_ Leaf_ (id,NewState {format = PlainStr string, life = Persistent}) Leaf_,world)
+		Just a 	-> (True,Just a,Node_ Leaf_ (id,OldState {format = PlainStr string, life = Persistent}) Leaf_,world)
 		Nothing	-> (False,Nothing,Leaf_,world)
 
 	findState` {id,lifespan = PersistentRO,storage = PlainString} Leaf_ world 
 	# (string,world) = readStringState (MyDir server) id world
 	= case parseString string of
-		Just a 	-> (True,Just a,Node_ Leaf_ (id,NewState {format = PlainStr string, life = PersistentRO}) Leaf_,world)
+		Just a 	-> (True,Just a,Node_ Leaf_ (id,OldState {format = PlainStr string, life = PersistentRO}) Leaf_,world)
 		Nothing	-> (False,Nothing,Leaf_,world)
+
+	// read out file and store as dynamic
 
 	findState` {id,lifespan = Persistent,storage = StaticDynamic} Leaf_ world 
 	# (string,world) = readDynamicState (MyDir server) id world
 	= case string of 
 		"" = (False,Nothing,Leaf_,world)
 		_  = case string_to_dynamic` string of
-				dyn=:(dynval::a^) 	-> (True,Just dynval,Node_ Leaf_ (id,NewState {format = StatDyn dyn, life = Persistent}) Leaf_,world)
+				dyn=:(dynval::a^) 	-> (True,Just dynval,Node_ Leaf_ (id,OldState {format = StatDyn dyn, life = Persistent}) Leaf_,world)
 				else				-> (False,Nothing,Leaf_,world)
 
 	findState` {id,lifespan = PersistentRO,storage = StaticDynamic} Leaf_ world 
@@ -108,24 +135,27 @@ where
 	= case string of 
 		"" = (False,Nothing,Leaf_,world)
 		_  = case string_to_dynamic` string of
-				dyn=:(dynval::a^) 	-> (True,Just dynval,Node_ Leaf_ (id,NewState {format = StatDyn dyn, life = PersistentRO}) Leaf_,world)
+				dyn=:(dynval::a^) 	-> (True,Just dynval,Node_ Leaf_ (id,OldState {format = StatDyn dyn, life = PersistentRO}) Leaf_,world)
 				else				-> (False,Nothing,Leaf_,world)
 
-	findState` _ Leaf_ world = (False,Nothing,Leaf_,world)
-	findState` _ _ world = (False,Nothing,Leaf_,world)
+	// cannot find the value at all
+
+	findState` _ Leaf_ world 	= (False,Nothing,Leaf_,world)
+	findState` _ _ world 		= (False,Nothing,Leaf_,world)
 
 string_to_dynamic` :: {#Char} -> Dynamic	// just to make a unique copy as requested by string_to_dynamic
 string_to_dynamic` s = string_to_dynamic {s` \\ s` <-: s}
 
-replaceState ::  !(FormId a) a *FormStates *NWorld -> (*FormStates,*NWorld)	| gPrint{|*|} a & TC a
+replaceState ::  !(FormId a) a *FormStates *NWorld -> (*FormStates,*NWorld)	| gPrint{|*|}, gerda{|*|}, TC a
 replaceState formid val formstates=:{fstates} world
 # (fstates,world) = replaceState` formid val fstates world
 = ({formstates & fstates = fstates},world)
 where
-	replaceState` ::  !(FormId a) a *FStates *NWorld -> (*FStates,*NWorld)	| gPrint{|*|} a & TC a
-	replaceState` formid val Leaf_ world = (Node_ Leaf_ (formid.id,NewState (initNewState (adjustlife formid.lifespan) Temp formid.storage val)) Leaf_,world)
+	replaceState` ::  !(FormId a) a *FStates *NWorld -> (*FStates,*NWorld)	| gPrint{|*|}, gerda{|*|}, TC a
+	replaceState` formid val Leaf_ world 									// id not part of tree yet
+						= (Node_ Leaf_ (formid.id,NewState (initNewState formid.id (adjustlife formid.lifespan) Temp formid.storage val)) Leaf_,world)
 	replaceState` formid val (Node_ left a=:(fid,fstate) right) world
-	| formid.id == fid 	= (Node_ left (fid,NewState (initNewState formid.lifespan (detlifespan fstate) formid.storage val)) right,world)
+	| formid.id == fid 	= (Node_ left (fid,NewState (initNewState formid.id formid.lifespan (detlifespan fstate) formid.storage val)) right,world)
 	| formid.id < fid 	= (Node_ nleft a right,nworld)
 							with
 								(nleft,nworld) = replaceState` formid val left world
@@ -135,9 +165,10 @@ where
 
 	// NewState Handling routines 
 
-	initNewState :: !Lifespan !Lifespan !StorageFormat !a  -> FState | TC a &  gPrint{|*|} a 
-	initNewState lifespan olifespan PlainString   nv = {format = PlainStr (printToString nv), life = order lifespan olifespan}
-	initNewState lifespan olifespan StaticDynamic nv = {format = StatDyn  (dynamic nv), life = order lifespan olifespan}// convert the hidden state information stored in the html page
+	initNewState :: !String !Lifespan !Lifespan !StorageFormat !a  -> FState | gPrint{|*|}, gerda{|*|}, TC a 
+	initNewState id Database olifespan PlainString   nv = {format = DBStr    (printToString nv) (writeGerda id nv), life = order Database olifespan}
+	initNewState id lifespan olifespan PlainString   nv = {format = PlainStr (printToString nv), life = order lifespan olifespan}
+	initNewState id lifespan olifespan StaticDynamic nv = {format = StatDyn  (dynamic nv), life = order lifespan olifespan}// convert the hidden state information stored in the html page
 
 	adjustlife PersistentRO = Persistent // to enforce that a read only persistent file is written once
 	adjustlife life = life
@@ -145,7 +176,7 @@ where
 	detlifespan (OldState formstate) = formstate.life
 	detlifespan (NewState formstate) = formstate.life
 
-	order l1 l2 = if (l1 < l2) l2 l1	// longest lifetime chosen will be the final setting
+	order l1 l2 = if (l1 < l2) l2 l1	// longest lifetime chosen will be the final setting Database > Persistent > Session > Page > temp
 
 // Serialization and De-Serialization of states
 //
@@ -213,6 +244,8 @@ where
 
 		// persistent stores (either old or new) have already been stored in files and can be skipped here
 
+		toHtmlState` (Node_ left (fid,NewState {life=Database}) right) accu 
+			= toHtmlState` left (toHtmlState` right accu)
 		toHtmlState` (Node_ left (fid,NewState {life=Persistent}) right) accu 
 			= toHtmlState` left (toHtmlState` right accu)
 		toHtmlState` (Node_ left (fid,NewState {life=PersistentRO}) right) accu 
@@ -270,19 +303,31 @@ where
 	selectorInpName :: String
 	selectorInpName =: "CS"
 
-	writeAllPersistentStates:: FStates *NWorld -> *NWorld 
-	writeAllPersistentStates Leaf_ world = world
-	writeAllPersistentStates (Node_ left (sid,NewState {format,life = Persistent}) right) world
-	= writeAllPersistentStates right (writeAllPersistentStates left (serializeAndStoreState sid format world))
-	writeAllPersistentStates (Node_ left (sid,OldState {format,life = Persistent}) right) world
-	= writeAllPersistentStates right (writeAllPersistentStates left (serializeAndStoreState sid format world))
-	writeAllPersistentStates (Node_ left _ right) world
-	= writeAllPersistentStates right (writeAllPersistentStates left world)
+	writeAllPersistentStates:: FStates *NWorld -> *NWorld 	// store states in persistent stores
+	writeAllPersistentStates Leaf_ nworld = nworld
 
-	serializeAndStoreState sid (PlainStr string) world 
-		= writeState (MyDir server) sid string world
-	serializeAndStoreState sid (StatDyn dynval) world 
-		= writeState (MyDir server) sid (dynamic_to_string dynval) world
+	// only new states need to be stored, since old states have not been changed (assertion)
+
+//	writeAllPersistentStates (Node_ left (sid,OldState {format,life = Persistent}) right) nworld
+//	= writeAllPersistentStates right (writeAllPersistentStates left (serializeAndStoreState sid format nworld))
+//	= writeAllPersistentStates right (writeAllPersistentStates left nworld)
+
+	writeAllPersistentStates (Node_ left (sid,NewState {format,life = Database}) right) nworld
+	= writeAllPersistentStates right (writeAllPersistentStates left (storeInDatabase sid format nworld))
+	writeAllPersistentStates (Node_ left (sid,NewState {format,life = Persistent}) right) nworld
+	= writeAllPersistentStates right (writeAllPersistentStates left (serializeAndStoreState sid format nworld))
+	writeAllPersistentStates (Node_ left _ right) nworld
+	= writeAllPersistentStates right (writeAllPersistentStates left nworld)
+
+	storeInDatabase sid (DBStr string gerdafun) nworld=:{gerda}	//last value stored in tree hidden in curried function
+	# gerda = gerdafun gerda
+	= {nworld & gerda = gerda}
+	storeInDatabase sid (StatDyn dynval) nworld=:{gerda}		//write the dynamic as a string to the database
+	# gerda = writeGerda sid (dynamic_to_string dynval) gerda
+	= {nworld & gerda = gerda}
+
+	serializeAndStoreState sid (PlainStr string) nworld 	= writeState (MyDir server) sid string nworld
+	serializeAndStoreState sid (StatDyn dynval)  nworld 	= writeState (MyDir server) sid (dynamic_to_string dynval) nworld
 
 // to encode triplets in htmlpages
 

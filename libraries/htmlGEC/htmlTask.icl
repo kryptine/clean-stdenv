@@ -2,23 +2,24 @@ implementation module htmlTask
 
 import StdEnv, StdHtml
 
-derive gForm [], Niks
-derive gUpd [], Niks
-derive gParse Niks
-derive gPrint Niks
+derive gForm 	[], Niks
+derive gUpd 	[], Niks
+derive gParse 	Niks
+derive gPrint 	Niks
+derive gerda 	Niks
 
 :: *TSt 		:== (([Int],Bool,[BodyTag]),HSt)   	// Task State: task nr, has this task to be done?, html code accumulator
 
 :: Niks 		= Niks								// to make an empty task
 
-startTask :: (Task a) *HSt -> ([BodyTag],HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
+startTask :: (Task a) *HSt -> ([BodyTag],HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
 startTask taska hst
 # (_,((_,_,html),hst)) = taska (newTask,hst) 
 = (html,hst)
 where
 	newTask = ([],True,[])
 
-mkTask :: (*TSt -> *(a,*TSt)) -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+mkTask :: (*TSt -> *(a,*TSt)) -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 mkTask mytask = \tst -> mkTask` tst
 where
 	mkTask` tst=:((i,myturn,html),hst)			
@@ -31,8 +32,8 @@ where
 	incTasknr [] = [0]
 	incTasknr [i:is] = [i+1:is]
 
-mkLTaskRTC :: String b (b -> Task a) *TSt -> ((b -> Task a,Task a),*TSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
-												& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
+mkLTaskRTC :: String b (b -> Task a) *TSt -> ((b -> Task a,Task a),*TSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
+												& gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC b
 mkLTaskRTC s initb batask tst = let (a,b,c) = LazyTask` s (incTask tst) in ((a,b),c)
 where
 	LazyTask` s tst=:((j,myturn,html),hst) = (bossTask, workerTask s,tst)
@@ -73,7 +74,7 @@ where
 		workerStore   fun = mkStoreForm (Init,sFormId ("workerStore" <+++ mkTaskNr j) (False,createDefault)) fun 
 		bossStore     fun = mkStoreForm (Init,sFormId ("bossStore"   <+++ mkTaskNr j) (False,initb)) fun 
 
-mkLTask :: String (Task a) *TSt -> ((Task a,Task a),*TSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+mkLTask :: String (Task a) *TSt -> ((Task a,Task a),*TSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 mkLTask s task tst = let (a,b,c) = LazyTask` s task (incTask tst) in ((a,b),c)
 where
 	LazyTask` s task tst=:((j,myturn,html),hst) = (bossTask, workerTask s task,tst)
@@ -102,7 +103,7 @@ where
 		lazyTaskStore   fun = mkStoreForm (Init,sFormId ("getLT" <+++ mkTaskNr j) (False,createDefault)) fun 
 		checkBossSignal fun = mkStoreForm (Init,sFormId ("setLT" <+++ mkTaskNr j) (fun False)) fun 
 
-returnTask :: a -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
+returnTask :: a -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
 returnTask a = \tst -> mkTask (returnTask` a) tst
 where
 	returnTask` a ((i,myturn,html),hst)
@@ -110,11 +111,11 @@ where
 	# (editor,hst) 		= (mkEditForm  (Set,ndFormId editId a) hst)			// yes, read out current value, make editor passive
 	= (editor.value,((i,myturn,html <|.|> editor.form),hst))				// return result task
 
-returnVF :: a [BodyTag] -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
+returnVF :: a [BodyTag] -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
 returnVF a bodytag =
 	\tst=:((i,myturn,html),hst) -> (a,((i,myturn,html <|.|> bodytag),hst))				// return result task
 
-returnV :: a -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
+returnV :: a -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
 returnV a  = 
 	\tst  -> (a,tst)				// return result task
 
@@ -122,7 +123,7 @@ returnF :: [BodyTag] -> TSt -> TSt
 returnF bodytag =
 	\tst=:((i,myturn,html),hst) -> ((i,myturn,html <|.|> bodytag),hst)				// return result task
 
-STask :: String a -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
+STask :: String a -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
 STask prompt a = \tst -> mkTask (STask` a) tst
 where
 	STask` a ((i,myturn,html),hst)
@@ -139,7 +140,7 @@ where
 	| taskdone.value	= STask` a ((i,myturn,html),hst)							// task is now completed, handle as previously
 	= (a,((i,taskdone.value,html <|.|> (editor.form ++ finbut.form)),hst))
 
-CTask_pdmenu :: [(String,Task a)] -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+CTask_pdmenu :: [(String,Task a)] -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 CTask_pdmenu options = \tst -> mkTask (doCTask` options) tst
 where
 	doCTask` [] tst					= returnV createDefault tst	
@@ -152,7 +153,7 @@ where
 	# (a,((i,bdone,bhtml),hst)) 	= chosenTask ((i ++ [1],True,[]),hst)
 	= (a,((i,adone&&bdone,html <|.|> bhtml),hst))
 
-CTask_button :: [(String,Task a)] -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+CTask_button :: [(String,Task a)] -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 CTask_button options = \tst -> mkTask (doCTask` options) tst
 where
 	doCTask` [] tst					= returnV createDefault tst				
@@ -166,7 +167,7 @@ where
 
 	but i = LButton defpixel i
 
-MCTask_ckbox :: [(String,Task a)] -> (Task [a]) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+MCTask_ckbox :: [(String,Task a)] -> (Task [a]) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 MCTask_ckbox options = \tst -> mkTask (MCTask_ckbox` options) tst
 where
 	MCTask_ckbox` [] tst			= returnV [] tst	
@@ -181,7 +182,7 @@ where
 	initCheckboxes  = 
 		[(CBNotChecked  text,  \ b bs id -> id) \\ (text,_) <- options]
 
-STasks :: [(String,Task a)] -> (Task [a])| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
+STasks :: [(String,Task a)] -> (Task [a])| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
 STasks options = \tst -> mkTask (doSandTasks` options []) tst
 where
 	doSandTasks` [] accu tst 		= returnV (reverse accu) tst
@@ -191,7 +192,7 @@ where
 	= mkTask (doSandTasks` ts [a:accu]) ((i,adone,html <|.|> ahtml),hst)
 
 
-PTask2 :: (Task a,Task b) -> (Task (a,b)) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a & gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC b
+PTask2 :: (Task a,Task b) -> (Task (a,b)) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a & gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC b
 PTask2 (taska,taskb) = \tst -> mkTask (PTask2` (taska,taskb)) tst
 where
 	PTask2` (taska,taskb) tst=:((i,myturn,html),hst)
@@ -199,7 +200,7 @@ where
 	# (b,((_,bdone,bhtml),hst)) 	= taskb ((i ++ [1],True,[]),hst)
 	= ((a,b),((i,adone&&bdone,html <|.|> ahtml <|.|> bhtml),hst))
 
-PCTask2 :: (Task a,Task a) -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
+PCTask2 :: (Task a,Task a) -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
 PCTask2 (taska,taskb) = \tst -> mkTask (PCTask2` (taska,taskb)) tst
 where
 	PCTask2` (taska,taskb) tst=:((i,myturn,html),hst)
@@ -208,7 +209,7 @@ where
 	# (aorb,aorbdone,myhtml)		= if adone (a,adone,ahtml) (if bdone (b,bdone,bhtml) (a,False,ahtml <|.|> bhtml))
 	= (aorb,((i,aorbdone,html <|.|> myhtml),hst))
 
-PCTasks :: [(String,Task a)] -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
+PCTasks :: [(String,Task a)] -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
 PCTasks options = \tst -> mkTask (PCTasks` options) tst
 where
 	PCTasks` [] tst 				= returnV createDefault tst
@@ -222,7 +223,7 @@ where
 
 	but i = LButton defpixel i
 
-PTasks :: [(String,Task a)] -> (Task [a]) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a 
+PTasks :: [(String,Task a)] -> (Task [a]) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a 
 PTasks options = \tst -> mkTask (doPTasks` options) tst
 where
 	doPTasks` [] tst			= returnV [] tst
@@ -247,7 +248,7 @@ where
 	| adone						= checkAllTasks (inc tasknr) [a:alist] ((i,myturn,[]),hst)
 	= ([],((i,False,[]),hst))
 
-STask_button 		:: String (Task a) 			-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+STask_button 		:: String (Task a) 			-> (Task a) 	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 STask_button s task = CTask_button [(s,task)]
 
 
@@ -257,7 +258,7 @@ mkTaskNr [] = ""
 mkTaskNr [i:is] = toString i <+++ "." <+++ mkTaskNr is
 
 
-appIData :: (IDataFun a) -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+appIData :: (IDataFun a) -> (Task a) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 appIData idatafun = \tst -> mkTask (appIData` idatafun) tst
 where
 	appIData` idata tst=:((i,myturn,html),hst)

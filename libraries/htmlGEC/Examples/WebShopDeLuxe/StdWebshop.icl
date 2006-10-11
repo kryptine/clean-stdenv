@@ -9,6 +9,7 @@ derive gForm  CurrentPage, Item, PersonalData
 derive gUpd   CurrentPage, Item, PersonalData
 derive gPrint CurrentPage, Item, PersonalData
 derive gParse CurrentPage, Item, PersonalData
+derive gerda CurrentPage, Item, PersonalData
 
 :: CurrentPage 	= HomePage | ShopPage | BasketPage | OrderPage | ThanksPage
 

@@ -7,6 +7,7 @@ derive gForm  MachineState, Output, Product
 derive gUpd   MachineState, Output, Product
 derive gPrint MachineState, Output, Product
 derive gParse MachineState, Output, Product
+derive gerda MachineState, Output, Product
 
 
 //Start world  = doHtml coffeemachine world

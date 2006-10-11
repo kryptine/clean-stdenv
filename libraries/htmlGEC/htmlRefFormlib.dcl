@@ -12,9 +12,9 @@ instance == (Ref2 a)
 //ref2EditForm 	:: !(InIDataId a) !(InIDataId (Ref2 a))  !*HSt -> (Form a,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 invokeRefEditor :: (!(InIDataId b) !*HSt -> (Form d,!*HSt)) (InIDataId b) !*HSt -> (Form b,!*HSt)
 
-universalRefEditor 	:: !(InIDataId (Ref2 a)) !(a -> Judgement)  !*HSt -> (Form a,!*HSt)   	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+universalRefEditor 	:: !(InIDataId (Ref2 a)) !(a -> Judgement)  !*HSt -> (Form a,!*HSt)   	| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 
-universalDB 		:: !Init !(String a -> Judgement) !String !a !*HSt -> (a,!*HSt)   		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+universalDB 		:: !Init !(String a -> Judgement) !String !a !*HSt -> (a,!*HSt)   		| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
 
 // Usefull for exception handling
 

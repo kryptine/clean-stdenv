@@ -6,6 +6,7 @@ import StdGeneric
 import iDataState, htmlStylelib
 import GenParse, GenPrint
 import httpServer
+import Gerda
 
 derive gPrint (,), (,,), (,,,), UpdValue
 derive gParse (,), (,,), (,,,), UpdValue
@@ -16,7 +17,7 @@ derive bimap Form, [], FormId
 gParse {|(->)|} gArg gRes _ 	= Nothing 
 gPrint{|(->)|} gArg gRes  _ _	= abort "functions can only be used with dynamic storage option!\n" 
 
-:: *HSt 		= 	{ cntr 		:: Int // InputId		// counts position in expression
+:: *HSt 		= 	{ cntr 		:: Int 			// counts position in expression
 					, states 	:: *FormStates  // all form states are collected here ... 	
 					, world		:: *NWorld		// to enable all other kinds of I/O
 					}	
@@ -31,17 +32,18 @@ gPrint{|(->)|} gArg gRes  _ _	= abort "functions can only be used with dynamic s
 
 doHtml :: .(*HSt -> (Html,!*HSt)) *World -> *World
 doHtml userpage world 
-//# (inout,world) 		= stdio world						// open stdin and stdout channels
 # inout					= [|]
-# nworld 				= { worldC = world, inout = inout}	
+# (gerda,world)			= openGerda "iDataDatabase" world	
+# nworld 				= { worldC = world, inout = inout, gerda = gerda}	
 # (initforms,nworld) 	= retrieveFormStates External Nothing nworld
 # (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
 						= userpage {cntr = 0, states = initforms, world = nworld}
 # (allformbodies,world) = storeFormStates states world
-# {worldC}				= print_to_stdout 
+# {worldC,gerda}		= print_to_stdout 
 								(Html (Head headattr [extra_style:headtags]) 
 								(Body (extra_body_attr ++ attr) [debugInput,allformbodies:bodytags]))
 								world
+# worldC				= closeGerda gerda worldC
 = worldC
 where
 	stuf = "Hello world"
@@ -57,9 +59,7 @@ where
 doHtmlServer :: (*HSt -> (Html,!*HSt)) *World -> *World
 doHtmlServer userpage world
 	= StartServer 80 (map (\(id,_,f) -> (id,f)) pages) world
-//	= StartServer 80 pages world
 where
-//	pages :: [(String,String, String String Arguments *World -> ([String],String,*World))]
 	pages
 		=	[("clean", "CleanExample", \_ _ a  -> doHtmlServer2 (conv a) userpage)
 			]
@@ -68,19 +68,18 @@ where
 	doHtmlServer2 :: String .(*HSt -> (Html,!*HSt)) *World -> ([String],String,*World)
 	doHtmlServer2 args userpage world 
 	# temp 					= [|]
-//	# (ok,temp,world) 		= fopen "temp" FWriteText world						// open stdin and stdout channels
-	# nworld 				= { worldC = world, inout = temp }	
+	# (gerda,world)			= openGerda "iDataDatabase" world
+	# nworld 				= { worldC = world, inout = temp, gerda = gerda }	
 	# (initforms,nworld) 	= retrieveFormStates Internal (Just args) nworld
 	# (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
 							= userpage {cntr = 0, states = initforms, world = nworld}
 	# (allformbodies,world) = storeFormStates states world
-	# {worldC,inout}		= print_to_stdout 
+	# {worldC,gerda,inout}	= print_to_stdout 
 										(Html (Head headattr [extra_style:headtags]) 
 										(Body (extra_body_attr ++ attr) [debugInput,allformbodies:bodytags])) 
 										world
 	# world					= worldC
-//	# (ok,world)			= fclose inout worldC
-//	# (allhtmlcode,world)	= readoutcompletefile "temp" world	
+	# world					= closeGerda gerda world
 	# reversed_strings = inout
 	# n_chars = count_chars reversed_strings 0
 		with
@@ -105,18 +104,11 @@ where
 	where
 		extra_body_attr = [Batt_background "back35.jpg",`Batt_Std [CleanStyle]]
 		extra_style = Hd_Style [] CleanStyles	
-/*	
-		readoutcompletefile name env
-		# (ok,file,env) = fopen name FReadText env
-		# (text,file)	= freads file 1000000
-		# (ok,env)		= fclose file env
-		= (text,env)
-*/
 		debugInput = if TraceInput (traceHtmlInput Internal (Just args)) EmptyBody
 
 // swiss army nife editor that makes coffee too ...
 
-mkViewForm :: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
+mkViewForm :: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC v
 mkViewForm (init,formid) bm=:{toForm, updForm, fromForm, resetForm}  hst=:{states,world} 
 | init == Const	&& formid.lifespan <> Temp
 = mkViewForm (init,{formid & lifespan = Temp}) bm hst				// constant i-data are never stored

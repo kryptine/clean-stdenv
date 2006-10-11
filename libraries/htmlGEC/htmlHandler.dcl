@@ -7,7 +7,7 @@ definition module htmlHandler
 import htmlDataDef, htmlFormData
 import StdBool
 import GenPrint, GenParse
-
+import Gerda
 TraceInput :== False		// set it to True if you want to see what kind of information is received from browser
 
 derive bimap Form, FormId
@@ -27,7 +27,7 @@ doHtmlServer 	:: (*HSt -> (Html,!*HSt))  *World -> *World 	// use this applicati
 // mkViewForm is the swiss army nife function creating stateful interactive forms with a view v of data d
 // make shure that all editors have a unique identifier !
 
-mkViewForm 		:: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
+mkViewForm 		:: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC v
 
 // gForm converts any Clean type to html code (form) to be used in a body
 // gUpd updates a value of type t given any user input in the html form

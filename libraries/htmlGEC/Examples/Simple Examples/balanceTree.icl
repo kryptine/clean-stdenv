@@ -8,14 +8,15 @@ import tree
 derive gForm []
 derive gUpd []
 
+
 derive gForm 	Record
 derive gUpd 	Record
 derive gParse 	Record
 derive gPrint 	Record
+derive gerda	Record
 
-
-Start world  = doHtmlServer MyPage4  world
-//Start world  = doHtml MyPage  world
+//Start world  = doHtmlServer MyPage4  world
+Start world  = doHtmlServer MyPage  world
 
 
 :: Record = {name :: String, address :: String, zipcode :: Int}
@@ -31,9 +32,7 @@ MyPage4 hst
 	, BodyTag myrecord.form
 	]  hst
 
-
-
-myBalancedTree 	= nFormId "BalancedTree" 	(fromListToBalTree [0])
+myBalancedTree 	= pFormId "BalancedTree" 	(fromListToBalTree [0])
 mySortedList	= nFormId "SortedList"  	[0]
 
 MyPage hst

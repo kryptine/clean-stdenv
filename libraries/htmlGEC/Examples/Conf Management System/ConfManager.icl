@@ -18,6 +18,14 @@ mainEntrance hst
 	[ BodyTag body
 	] hst
 
+
+//Start world = doHtmlServer test world
+
+test hst
+= mkHtml "test" [BodyTag (download "back35.jpg")] hst
+where
+	download url = [A [Lnk_Href url, Lnk_Target Trg__Blank] [Txt "click here"]]
+
 // login page handling
 
 loginhandling :: *HSt -> ([BodyTag],*HSt)
@@ -53,6 +61,7 @@ derive gForm 	CurrPage
 derive gUpd 	CurrPage
 derive gPrint 	CurrPage
 derive gParse 	CurrPage
+derive gerda 	CurrPage
 
 homePage :: Member -> CurrPage
 homePage (ConfManager info) = RootHomePage
@@ -181,6 +190,7 @@ derive gForm	GuestPages
 derive gUpd		GuestPages
 derive gParse	GuestPages
 derive gPrint	GuestPages
+derive gerda	GuestPages
 
 guestHomePage account accounts hst
 # (subpagef,hst)	= guestSubPages Init id hst

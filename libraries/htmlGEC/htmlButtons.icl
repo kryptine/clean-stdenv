@@ -7,6 +7,7 @@ import htmlHandler, htmlStylelib, htmlTrivial
 derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, /*Button, */CheckBox, RadioButton /*, PullDownMenu, TextInput */, TextArea/*, PasswordBox*/
 derive gPrint 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, PasswordBox
 derive gParse 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, PasswordBox
+derive gerda 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, PasswordBox
 
 :: TextInput	= TI Int Int						// Input box of size Size for Integers
 				| TR Int Real						// Input box of size Size for Reals
@@ -308,7 +309,8 @@ where
 
 		thisyear = 2006
 
-mkBimapEditor :: !(InIDataId d) !(Bimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC v
+mkBimapEditor :: !(InIDataId d) !(Bimap d v) !*HSt -> (Form d,!*HSt) 
+										| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC v
 mkBimapEditor inIDataId {map_to,map_from} hst
 = mkViewForm inIDataId { toForm 	= toViewMap map_to 
 						, updForm 	= \_ v -> v

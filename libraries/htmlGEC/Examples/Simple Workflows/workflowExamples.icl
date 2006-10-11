@@ -97,6 +97,7 @@ derive gForm EenOfAnder
 derive gUpd EenOfAnder
 derive gParse EenOfAnder
 derive gPrint EenOfAnder
+derive gerda EenOfAnder
 
 instance == EenOfAnder
 where
@@ -148,6 +149,7 @@ derive gForm QForm, QState
 derive gUpd QForm, QState
 derive gParse QForm, QState
 derive gPrint QForm, QState
+derive gerda QForm, QState
 
 myQuotation :: (QState,QForm)
 myQuotation = createDefault

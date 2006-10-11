@@ -5,38 +5,28 @@ import StdMaybe, StdBool, StdString, StdInt
 
 // utility for creating FormId's
 
+// editable, string format
+
+nFormId :: !String !d -> (FormId d)		// page formid
+nFormId s d = {id = s, lifespan = Page, mode = Edit, storage = PlainString, ival = d}
+
+sFormId :: !String !d -> (FormId d)		// session formid
+sFormId s d = {id = s, lifespan = Session, mode = Edit, storage = PlainString, ival = d}
+
 pFormId :: !String !d -> (FormId d)		// persistent formid
 pFormId s d = {id = s, lifespan = Persistent, mode = Edit, storage = PlainString, ival = d}
 
 rFormId :: !String !d -> (FormId d)		// persistent formid
 rFormId s d = {id = s, lifespan = PersistentRO, mode = Edit, storage = PlainString, ival = d}
 
-sFormId :: !String !d -> (FormId d)		// session formid
-sFormId s d = {id = s, lifespan = Session, mode = Edit, storage = PlainString, ival = d}
+dbFormId	:: !String !d -> (FormId d)		// database		, editable, string format
+dbFormId s d = {id = s, lifespan = Database, mode = Edit, storage = PlainString, ival = d}
 
-nFormId :: !String !d -> (FormId d)		// page formid
-nFormId s d = {id = s, lifespan = Page, mode = Edit, storage = PlainString, ival = d}
+ndFormId :: !String !d -> (FormId d)	// page formid
+ndFormId s d = {id = s, lifespan = Page, mode = Display, storage = PlainString, ival = d}
 
-xtFormId :: !String !d -> (FormId d)	// persistent formid
-xtFormId s d = {id = s, lifespan = Temp, mode = NoForm, storage = PlainString, ival = d}
-
-tFormId :: !String !d -> (FormId d)	// persistent formid
-tFormId s d = {id = s, lifespan = Temp, mode = Edit, storage = PlainString, ival = d}
-
-tdFormId :: !String !d -> (FormId d)	// persistent formid
-tdFormId s d = {id = s, lifespan = Temp, mode = Display, storage = PlainString, ival = d}
-
-xpFormId :: !String !d -> (FormId d)		// persistent formid
-xpFormId s d = {id = s, lifespan = Persistent, mode = NoForm, storage = PlainString, ival = d}
-
-xrFormId :: !String !d -> (FormId d)		// persistent formid
-xrFormId s d = {id = s, lifespan = PersistentRO, mode = NoForm, storage = PlainString, ival = d}
-
-xsFormId :: !String !d -> (FormId d)		// session formid
-xsFormId s d = {id = s, lifespan = Session, mode = NoForm, storage = PlainString, ival = d}
-
-xnFormId :: !String !d -> (FormId d)		// page formid
-xnFormId s d = {id = s, lifespan = Page, mode = NoForm, storage = PlainString, ival = d}
+sdFormId :: !String !d -> (FormId d)	// session formid
+sdFormId s d = {id = s, lifespan = Session, mode = Display, storage = PlainString, ival = d}
 
 pdFormId :: !String !d -> (FormId d)	// persistent formid
 pdFormId s d = {id = s, lifespan = Persistent, mode = Display, storage = PlainString, ival = d}
@@ -44,13 +34,38 @@ pdFormId s d = {id = s, lifespan = Persistent, mode = Display, storage = PlainSt
 rdFormId :: !String !d -> (FormId d)	// persistent formid
 rdFormId s d = {id = s, lifespan = PersistentRO, mode = Display, storage = PlainString, ival = d}
 
-sdFormId :: !String !d -> (FormId d)	// session formid
-sdFormId s d = {id = s, lifespan = Session, mode = Display, storage = PlainString, ival = d}
+dbdFormId :: !String !d -> (FormId d)	// persistent formid
+dbdFormId s d = {id = s, lifespan = Database, mode = Display, storage = PlainString, ival = d}
 
-ndFormId :: !String !d -> (FormId d)	// page formid
-ndFormId s d = {id = s, lifespan = Page, mode = Display, storage = PlainString, ival = d}
+xtFormId :: !String !d -> (FormId d)	// persistent formid
+xtFormId s d = {id = s, lifespan = Temp, mode = NoForm, storage = PlainString, ival = d}
 
-// store info as a dynamic
+xnFormId :: !String !d -> (FormId d)		// page formid
+xnFormId s d = {id = s, lifespan = Page, mode = NoForm, storage = PlainString, ival = d}
+
+xsFormId :: !String !d -> (FormId d)		// session formid
+xsFormId s d = {id = s, lifespan = Session, mode = NoForm, storage = PlainString, ival = d}
+
+xpFormId :: !String !d -> (FormId d)		// persistent formid
+xpFormId s d = {id = s, lifespan = Persistent, mode = NoForm, storage = PlainString, ival = d}
+
+xrFormId :: !String !d -> (FormId d)		// persistent formid
+xrFormId s d = {id = s, lifespan = PersistentRO, mode = NoForm, storage = PlainString, ival = d}
+
+xdbFormId :: !String !d -> (FormId d)		// persistent formid
+xdbFormId s d = {id = s, lifespan = Database, mode = NoForm, storage = PlainString, ival = d}
+
+tFormId :: !String !d -> (FormId d)	// persistent formid
+tFormId s d = {id = s, lifespan = Temp, mode = Edit, storage = PlainString, ival = d}
+
+tdFormId :: !String !d -> (FormId d)	// persistent formid
+tdFormId s d = {id = s, lifespan = Temp, mode = Display, storage = PlainString, ival = d}
+
+nDFormId :: !String !d -> (FormId d)	// page formid
+nDFormId s d = {id = s, lifespan = Page, mode = Edit, storage = StaticDynamic, ival = d}
+
+sDFormId :: !String !d -> (FormId d)	// session formid
+sDFormId s d = {id = s, lifespan = Session, mode = Edit, storage = StaticDynamic, ival = d}
 
 pDFormId :: !String !d -> (FormId d)	// persistent formid
 pDFormId s d = {id = s, lifespan = Persistent, mode = Edit, storage = StaticDynamic, ival = d}
@@ -58,11 +73,14 @@ pDFormId s d = {id = s, lifespan = Persistent, mode = Edit, storage = StaticDyna
 rDFormId :: !String !d -> (FormId d)	// persistent formid
 rDFormId s d = {id = s, lifespan = PersistentRO, mode = Edit, storage = StaticDynamic, ival = d}
 
-sDFormId :: !String !d -> (FormId d)	// session formid
-sDFormId s d = {id = s, lifespan = Session, mode = Edit, storage = StaticDynamic, ival = d}
+dbDFormId :: !String !d -> (FormId d)	// persistent formid
+dbDFormId s d = {id = s, lifespan = Database, mode = Edit, storage = StaticDynamic, ival = d}
 
-nDFormId :: !String !d -> (FormId d)	// page formid
-nDFormId s d = {id = s, lifespan = Page, mode = Edit, storage = StaticDynamic, ival = d}
+ndDFormId :: !String !d -> (FormId d)	// page formid
+ndDFormId s d = {id = s, lifespan = Page, mode = Display, storage = StaticDynamic, ival = d}
+
+sdDFormId :: !String !d -> (FormId d)	// session formid
+sdDFormId s d = {id = s, lifespan = Session, mode = Display, storage = StaticDynamic, ival = d}
 
 pdDFormId :: !String !d -> (FormId d)	// persistent formid
 pdDFormId s d = {id = s, lifespan = Persistent, mode = Display, storage = StaticDynamic, ival = d}
@@ -70,11 +88,9 @@ pdDFormId s d = {id = s, lifespan = Persistent, mode = Display, storage = Static
 rdDFormId :: !String !d -> (FormId d)	// persistent formid
 rdDFormId s d = {id = s, lifespan = PersistentRO, mode = Display, storage = StaticDynamic, ival = d}
 
-sdDFormId :: !String !d -> (FormId d)	// session formid
-sdDFormId s d = {id = s, lifespan = Session, mode = Display, storage = StaticDynamic, ival = d}
+dbdDFormId :: !String !d -> (FormId d)	// persistent formid
+dbdDFormId s d = {id = s, lifespan = Database, mode = Display, storage = StaticDynamic, ival = d}
 
-ndDFormId :: !String !d -> (FormId d)	// page formid
-ndDFormId s d = {id = s, lifespan = Page, mode = Display, storage = StaticDynamic, ival = d}
 
 // create id's
 
@@ -163,3 +179,4 @@ where
 	toInt 	Session			= 2
 	toInt 	PersistentRO	= 3
 	toInt 	Persistent		= 4
+	toInt 	Database		= 5

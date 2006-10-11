@@ -1,7 +1,7 @@
 Version: 1.4
 Global
-	Built:	False
-	Target:	Everything
+	Built:	True
+	Target:	Web Applications
 	Exec:	{Project}\ConfManager.exe
 	CodeGen
 		CheckStacks:	False
@@ -52,6 +52,7 @@ MainModule
 		Verbose:	True
 		ReadableABC:	False
 		ReuseUniqueNodes:	True
+		Fusion:	False
 	Dcl
 		WindowPosition
 			X:	0
@@ -61,123 +62,28 @@ MainModule
 	DclOpen:	False
 	Icl
 		WindowPosition
-			X:	7
-			Y:	7
-			SizeX:	1103
-			SizeY:	687
-	IclOpen:	True
+			X:	10
+			Y:	10
+			SizeX:	902
+			SizeY:	493
+	IclOpen:	False
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
 	Module
-		Name:	GenEq
-		Dir:	{Application}\Libraries\Generics
+		Name:	stateHandlingIData
+		Dir:	{Project}
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	_SystemEnumStrict
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	_SystemStrictLists
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdStrictLists
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -193,48 +99,9 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	203
-				Y:	187
-				SizeX:	916
-				SizeY:	564
-		DclOpen:	True
-		Icl
-			WindowPosition
-				X:	177
-				Y:	295
-				SizeX:	1060
-				SizeY:	588
-		IclOpen:	True
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	confIData
-		Dir:	{Project}
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	149
-				Y:	83
-				SizeX:	942
-				SizeY:	661
-		DclOpen:	True
-		Icl
-			WindowPosition
-				X:	115
-				Y:	151
-				SizeX:	997
-				SizeY:	653
-		IclOpen:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	loginAdmin
@@ -249,20 +116,9 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	115
-				Y:	411
-				SizeX:	869
-				SizeY:	435
-		DclOpen:	True
-		Icl
-			WindowPosition
-				X:	444
-				Y:	34
-				SizeX:	801
-				SizeY:	730
-		IclOpen:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	loginAdminIData
@@ -277,19 +133,14 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	874
-				SizeY:	470
+			Fusion:	False
 		DclOpen:	False
 		Icl
 			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	1055
-				SizeY:	754
+				X:	10
+				Y:	10
+				SizeX:	800
+				SizeY:	624
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -305,19 +156,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	919
-				SizeY:	538
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -333,19 +173,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -361,19 +190,25 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	325
-				Y:	49
-				SizeX:	932
-				SizeY:	533
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	398
-				Y:	78
-				SizeX:	695
-				SizeY:	673
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlFormlib
+		Dir:	{Application}\Libraries\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -389,24 +224,13 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	1002
-				SizeY:	568
-		DclOpen:	True
-		Icl
-			WindowPosition
-				X:	38
-				Y:	39
-				SizeX:	1057
-				SizeY:	517
+			Fusion:	False
+		DclOpen:	False
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
-		Name:	StdDebug
-		Dir:	{Application}\Libraries\StdEnv
+		Name:	StdArrayExtensions
+		Dir:	{Application}\Libraries\StdLib
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -417,19 +241,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	851
-				SizeY:	591
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -445,19 +258,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	816
-				SizeY:	492
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	33
-				Y:	511
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -473,19 +275,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -501,19 +292,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -529,19 +309,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -557,19 +326,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -585,19 +343,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
@@ -618,19 +365,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -646,19 +382,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -674,19 +399,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -702,23 +416,12 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	cCrossCallFileSelectors_121.obj
+			ObjectFile:	cCrossCallFileSelectors_121.
 	Module
 		Name:	StdFileSelect
 		Dir:	{Application}\Libraries\ObjectIO
@@ -732,19 +435,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -760,19 +452,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -788,19 +469,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -816,19 +486,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -844,19 +503,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -872,19 +520,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -900,19 +537,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -928,19 +554,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -956,19 +571,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -984,19 +588,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1012,19 +605,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1040,19 +622,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1068,19 +639,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1096,19 +656,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1124,19 +673,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1152,19 +690,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1180,19 +707,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1208,19 +724,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1236,19 +741,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1264,19 +758,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1292,19 +775,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1320,23 +792,12 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	cCrossCallMenus_121.obj
+			ObjectFile:	cCrossCallMenus_121.
 	Module
 		Name:	osmenu
 		Dir:	{Application}\Libraries\ObjectIO\OS Windows
@@ -1350,19 +811,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1378,19 +828,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1406,19 +845,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1434,19 +862,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1462,19 +879,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1490,19 +896,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1518,19 +913,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1546,19 +930,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1574,19 +947,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1602,19 +964,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1630,19 +981,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1658,19 +998,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1686,19 +1015,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1714,19 +1032,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1742,19 +1049,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1770,19 +1066,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1798,19 +1083,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1826,19 +1100,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1854,19 +1117,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1882,19 +1134,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1910,19 +1151,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1938,19 +1168,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1966,19 +1185,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1994,19 +1202,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2022,19 +1219,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2050,24 +1236,13 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	cpicture_121.obj
-			ObjectFile:	cCCallWindows_121.obj
+			ObjectFile:	cpicture_121.
+			ObjectFile:	cCCallWindows_121.
 	Module
 		Name:	ostoolbar
 		Dir:	{Application}\Libraries\ObjectIO\OS Windows
@@ -2081,19 +1256,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2109,19 +1273,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2137,23 +1290,12 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	cCrossCallxDI_121.obj
+			ObjectFile:	cCrossCallxDI_121.
 	Module
 		Name:	clCCall_12
 		Dir:	{Application}\Libraries\ObjectIO\OS Windows
@@ -2167,29 +1309,18 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	util_121.obj
-			ObjectFile:	cpicture_121.obj
-			ObjectFile:	cdebug_121.obj
-			ObjectFile:	cCrossCall_121.obj
-			ObjectFile:	cCrossCallWindows_121.obj
-			ObjectFile:	cCCallWindows_121.obj
-			ObjectFile:	cCCallSystem_121.obj
+			ObjectFile:	util_121.
+			ObjectFile:	cpicture_121.
+			ObjectFile:	cdebug_121.
+			ObjectFile:	cCrossCall_121.
+			ObjectFile:	cCrossCallWindows_121.
+			ObjectFile:	cCCallWindows_121.
+			ObjectFile:	cCCallSystem_121.
 	Module
 		Name:	commondef
 		Dir:	{Application}\Libraries\ObjectIO
@@ -2203,19 +1334,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2231,19 +1351,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2259,19 +1368,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2287,19 +1385,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2315,19 +1402,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2343,19 +1419,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2371,19 +1436,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2399,19 +1453,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2427,19 +1470,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2455,19 +1487,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2483,19 +1504,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2511,19 +1521,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2539,19 +1538,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2567,19 +1555,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2595,19 +1572,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2623,19 +1589,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2651,19 +1606,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2679,19 +1623,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2707,29 +1640,18 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	cCrossCallWindows_121.obj
-			ObjectFile:	cCrossCallProcedureTable_121.obj
-			ObjectFile:	cCrossCallCursor_121.obj
-			ObjectFile:	cCrossCall_121.obj
-			ObjectFile:	cCCallSystem_121.obj
-			ObjectFile:	cCCallWindows_121.obj
-			ObjectFile:	cAcceleratorTable_121.obj
+			ObjectFile:	cCrossCallWindows_121.
+			ObjectFile:	cCrossCallProcedureTable_121.
+			ObjectFile:	cCrossCallCursor_121.
+			ObjectFile:	cCrossCall_121.
+			ObjectFile:	cCCallSystem_121.
+			ObjectFile:	cCCallWindows_121.
+			ObjectFile:	cAcceleratorTable_121.
 		NeededLibraries
 			Library:	userExt_library
 			Library:	gdiExt_library
@@ -2754,23 +1676,12 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	cCrossCallFont_121.obj
+			ObjectFile:	cCrossCallFont_121.
 	Module
 		Name:	ostick
 		Dir:	{Application}\Libraries\ObjectIO\OS Windows
@@ -2784,19 +1695,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2812,19 +1712,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	756
-				SizeY:	477
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	993
-				SizeY:	491
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2840,19 +1729,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	856
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2868,19 +1746,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2896,19 +1763,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2924,79 +1780,12 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
-		Name:	StdArrayExtensions
-		Dir:	{Application}\Libraries\StdLib
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	md5
-		Dir:	{Application}\Libraries\Dynamics\general
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	DynID
+		Name:	DynIDMacros
 		Dir:	{Application}\Libraries\Dynamics\implementation
 		Compiler
 			NeverMemoryProfile:	False
@@ -3008,19 +1797,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3036,19 +1814,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
@@ -3066,19 +1833,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
@@ -3098,19 +1854,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3126,19 +1871,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3154,19 +1888,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
@@ -3184,19 +1907,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3212,19 +1924,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3240,19 +1941,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3268,19 +1958,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3296,19 +1975,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3324,19 +1992,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3352,19 +2009,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3380,19 +2026,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3408,19 +2043,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
@@ -3428,66 +2052,6 @@ OtherModules
 			ObjectFile:	copy_string_to_graph_interface.obj
 			ObjectFile:	copy_graph_to_string.obj
 			ObjectFile:	copy_graph_to_string_interface.obj
-	Module
-		Name:	Directory
-		Dir:	{Application}\Libraries\Directory
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-		NeededObjFiles
-			ObjectFile:	cDirectory.obj
-		NeededLibraries
-			Library:	directory_library
-	Module
-		Name:	StdLibMisc
-		Dir:	{Application}\Libraries\StdLib
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	htmlTrivial
 		Dir:	{Application}\Libraries\htmlGEC
@@ -3501,21 +2065,48 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	740
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdLibMisc
+		Dir:	{Application}\Libraries\StdLib
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	Directory
+		Dir:	{Application}\Libraries\Directory
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	cDirectory.
+		NeededLibraries
+			Library:	directory_library
 	Module
 		Name:	EncodeDecode
 		Dir:	{Application}\Libraries\htmlGEC
@@ -3529,19 +2120,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	835
-				SizeY:	546
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3557,19 +2137,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	725
-				SizeY:	563
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	58
-				Y:	42
-				SizeX:	1095
-				SizeY:	544
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3585,19 +2154,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	268
-				Y:	26
-				SizeX:	741
-				SizeY:	446
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	53
-				Y:	12
-				SizeX:	1003
-				SizeY:	505
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3613,245 +2171,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	116
-				Y:	49
-				SizeX:	875
-				SizeY:	512
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	967
-				SizeY:	515
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdMaybe
-		Dir:	{Application}\Libraries\StdLib
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	624
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	htmlFormData
-		Dir:	{Application}\Libraries\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	932
-				SizeY:	520
-		DclOpen:	True
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	1079
-				SizeY:	496
-		IclOpen:	True
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	htmlStylelib
-		Dir:	{Application}\Libraries\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	733
-				SizeY:	393
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	655
-				SizeY:	395
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	ArgEnv
-		Dir:	{Application}\Libraries\ArgEnvWindows
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-		NeededObjFiles
-			ObjectFile:	ArgEnvC.obj
-	Module
-		Name:	StdGeneric
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	PrintUtil
-		Dir:	{Application}\Libraries\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	829
-				SizeY:	603
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	862
-				SizeY:	566
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	htmlStyleDef
-		Dir:	{Application}\Libraries\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	htmlDataDef
-		Dir:	{Application}\Libraries\htmlGEC
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	497
-				SizeY:	516
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	898
-				SizeY:	499
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3867,23 +2188,12 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	115
-				Y:	517
-				SizeX:	874
-				SizeY:	326
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	1189
-				SizeY:	671
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
-		Name:	htmlFormlib
+		Name:	htmlStylelib
 		Dir:	{Application}\Libraries\htmlGEC
 		Compiler
 			NeverMemoryProfile:	False
@@ -3895,19 +2205,252 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	107
-				Y:	7
-				SizeX:	1116
-				SizeY:	527
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	254
-				Y:	35
-				SizeX:	927
-				SizeY:	575
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	ArgEnv
+		Dir:	{Application}\Libraries\ArgEnvWindows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	ArgEnvC.
+	Module
+		Name:	StdDebug
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	odbccp
+		Dir:	{Application}\Libraries\Gerda
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededLibraries
+			Library:	odbccp_library
+	Module
+		Name:	odbc
+		Dir:	{Application}\Libraries\Gerda
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededLibraries
+			Library:	odbc_library
+	Module
+		Name:	StdMaybe
+		Dir:	{Application}\Libraries\StdLib
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	Gerda
+		Dir:	{Application}\Libraries\Gerda
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	_SystemEnumStrict
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	_SystemStrictLists
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdStrictLists
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdGeneric
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	PrintUtil
+		Dir:	{Application}\Libraries\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlStyleDef
+		Dir:	{Application}\Libraries\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlDataDef
+		Dir:	{Application}\Libraries\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlFormData
+		Dir:	{Application}\Libraries\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3923,19 +2466,14 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	670
-				SizeY:	490
+				X:	10
+				Y:	10
+				SizeX:	800
+				SizeY:	624
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3951,19 +2489,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -3979,19 +2506,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -4007,19 +2523,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -4035,19 +2540,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -4063,19 +2557,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -4091,19 +2574,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -4119,19 +2591,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	919
-				SizeY:	574
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -4141,25 +2602,14 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	871
-				SizeY:	584
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	852
-				SizeY:	565
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -4169,25 +2619,14 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -4197,25 +2636,31 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdMisc
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -4231,19 +2676,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -4259,19 +2693,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -4287,19 +2710,8 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -4309,53 +2721,14 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdMisc
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -4365,25 +2738,14 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -4393,109 +2755,14 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdCleanTypes
-		Dir:	{Application}\Libraries\Dynamics\extension
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
 			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	_SystemDynamic
-		Dir:	{Application}\Libraries\Dynamics\implementation\windows
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	StdOverloaded
-		Dir:	{Application}\Libraries\StdEnv
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -4511,23 +2778,63 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
+			Fusion:	False
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
-		Name:	stateHandlingIData
+		Name:	StdOverloaded
+		Dir:	{Application}\Libraries\StdEnv
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	_SystemDynamic
+		Dir:	{Application}\Libraries\Dynamics\implementation\windows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdCleanTypes
+		Dir:	{Application}\Libraries\Dynamics\extension
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	confIData
 		Dir:	{Project}
 		Compiler
 			NeverMemoryProfile:	False
@@ -4539,419 +2846,419 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	848
-				SizeY:	571
+				X:	10
+				Y:	10
+				SizeX:	800
+				SizeY:	624
 		DclOpen:	False
 		Icl
 			WindowPosition
-				X:	190
-				Y:	107
-				SizeX:	860
-				SizeY:	708
-		IclOpen:	True
+				X:	10
+				Y:	10
+				SizeX:	821
+				SizeY:	492
+		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 Static
 	Mods
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Examples\Conf Management System\ConfManager.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Generics\GenEq.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\_SystemEnumStrict.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\_SystemStrictLists.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdStrictLists.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Examples\Conf Management System\stateHandling.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Examples\Conf Management System\confIData.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Examples\Conf Management System\loginAdmin.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Examples\Conf Management System\loginAdminIData.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\GEC\GEC Implementation\StdArrow.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\htmlArrow.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\htmlRefFormlib.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\htmlButtons.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdDebug.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdLib\StdListExtensions.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdLib\StdLib.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\httpUtil.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\StdStringChannels.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\StdEventTCP.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\ostcp.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\tcp_bytestreams.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\StdTCPDef.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\StdTCPChannels.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osfileselect.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdFileSelect.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdPStClass.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\scheduler.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\receiverevent.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\receiverdevice.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdReceiverAttribute.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\receiverdefaccess.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\receiveraccess.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\receiverid.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdReceiver.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdReceiverDef.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\world.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osbeep.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdProcessDef.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdProcessAttribute.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdPSt.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osmouse.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\roundrobin.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\processstack.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\timerhandle.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\processhandle.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\menuCCall_12.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osmenu.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdMenuDef.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\menuhandle.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\devicesystemstate.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\keyfocus.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\receiverhandle.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdWindowDef.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdControlDef.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\windowhandle.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdTimerDef.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\timertable.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\cast.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\semidynamic.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\receivertable.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\receivermessage.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\deviceevents.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\devicefunctions.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osguishare.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osevent.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osactivaterequests.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\iostate.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdId.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ostime.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\windowCrossCall_12.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ossystem.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\windowCCall_12.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ostoolbar.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\menuCrossCall_12.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osdocumentinterface.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\clCCall_12.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\commondef.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\oskey.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdKey.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdPicture.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdIOBasic.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdPictureDef.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osfont.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\rgnCCall_12.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\pictCCall_12.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ostypes.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osrgn.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ospicture.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osbitmap.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdBitmap.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdIOCommon.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\systemid.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\device.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\id.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\clCrossCall_12.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ostoolbox.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ostick.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\StdTime.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\tcp.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\StdChannels.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\StdTCP.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\httpServer.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdLib\StdArrayExtensions.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\general\md5.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\DynID.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\windows\memory.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\windows\memory_mapped_files.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\StdDynamicVersion.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\windows\shared_buffer.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\windows\DynamicLinkerInterface.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\general\BitSet.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\StdDynamicLowLevelInterface.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\DynamicUtilities.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\general\EnDecode.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\general\DefaultElem.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\StdDynamicTypes.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\windows\DynamicGraphConversion.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\extension\StdDynamic.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\graph_copy\dynamic_string.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Directory\Directory.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdLib\StdLibMisc.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\htmlTrivial.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\EncodeDecode.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\iDataState.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Generics\GenParse.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Generics\GenPrint.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdLib\StdMaybe.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\htmlFormData.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\htmlStylelib.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ArgEnvWindows\ArgEnv.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdGeneric.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\PrintUtil.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\htmlStyleDef.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\htmlDataDef.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\htmlHandler.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\htmlFormlib.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\StdHtml.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdFunc.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdCharList.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdTuple.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdOrdList.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\_SystemEnum.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdEnum.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdList.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdFile.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdString.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdReal.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\_SystemArray.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdArray.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdClass.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdChar.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdMisc.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdInt.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdBool.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\extension\StdCleanTypes.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\windows\_SystemDynamic.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdOverloaded.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\StdEnv.icl
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Examples\Conf Management System\stateHandlingIData.icl
+		Path:	{Project}\ConfManager.icl
+		Path:	{Project}\stateHandlingIData.icl
+		Path:	{Project}\stateHandling.icl
+		Path:	{Project}\loginAdmin.icl
+		Path:	{Project}\loginAdminIData.icl
+		Path:	{Application}\Libraries\GEC\GEC Implementation\StdArrow.icl
+		Path:	{Application}\Libraries\htmlGEC\htmlArrow.icl
+		Path:	{Application}\Libraries\htmlGEC\htmlRefFormlib.icl
+		Path:	{Application}\Libraries\htmlGEC\htmlFormlib.icl
+		Path:	{Application}\Libraries\htmlGEC\htmlButtons.icl
+		Path:	{Application}\Libraries\StdLib\StdArrayExtensions.icl
+		Path:	{Application}\Libraries\StdLib\StdListExtensions.icl
+		Path:	{Application}\Libraries\StdLib\StdLib.icl
+		Path:	{Application}\Libraries\htmlGEC\httpUtil.icl
+		Path:	{Application}\Libraries\Tcp\StdStringChannels.icl
+		Path:	{Application}\Libraries\Tcp\StdEventTCP.icl
+		Path:	{Application}\Libraries\Tcp\ostcp.icl
+		Path:	{Application}\Libraries\Tcp\tcp_bytestreams.icl
+		Path:	{Application}\Libraries\Tcp\StdTCPDef.icl
+		Path:	{Application}\Libraries\Tcp\StdTCPChannels.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\osfileselect.icl
+		Path:	{Application}\Libraries\ObjectIO\StdFileSelect.icl
+		Path:	{Application}\Libraries\ObjectIO\StdPStClass.icl
+		Path:	{Application}\Libraries\ObjectIO\scheduler.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\receiverevent.icl
+		Path:	{Application}\Libraries\ObjectIO\receiverdevice.icl
+		Path:	{Application}\Libraries\ObjectIO\StdReceiverAttribute.icl
+		Path:	{Application}\Libraries\ObjectIO\receiverdefaccess.icl
+		Path:	{Application}\Libraries\ObjectIO\receiveraccess.icl
+		Path:	{Application}\Libraries\ObjectIO\receiverid.icl
+		Path:	{Application}\Libraries\ObjectIO\StdReceiver.icl
+		Path:	{Application}\Libraries\ObjectIO\StdReceiverDef.icl
+		Path:	{Application}\Libraries\ObjectIO\world.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\osbeep.icl
+		Path:	{Application}\Libraries\ObjectIO\StdProcessDef.icl
+		Path:	{Application}\Libraries\ObjectIO\StdProcessAttribute.icl
+		Path:	{Application}\Libraries\ObjectIO\StdPSt.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\osmouse.icl
+		Path:	{Application}\Libraries\ObjectIO\roundrobin.icl
+		Path:	{Application}\Libraries\ObjectIO\processstack.icl
+		Path:	{Application}\Libraries\ObjectIO\timerhandle.icl
+		Path:	{Application}\Libraries\ObjectIO\processhandle.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\menuCCall_12.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\osmenu.icl
+		Path:	{Application}\Libraries\ObjectIO\StdMenuDef.icl
+		Path:	{Application}\Libraries\ObjectIO\menuhandle.icl
+		Path:	{Application}\Libraries\ObjectIO\devicesystemstate.icl
+		Path:	{Application}\Libraries\ObjectIO\keyfocus.icl
+		Path:	{Application}\Libraries\ObjectIO\receiverhandle.icl
+		Path:	{Application}\Libraries\ObjectIO\StdWindowDef.icl
+		Path:	{Application}\Libraries\ObjectIO\StdControlDef.icl
+		Path:	{Application}\Libraries\ObjectIO\windowhandle.icl
+		Path:	{Application}\Libraries\ObjectIO\StdTimerDef.icl
+		Path:	{Application}\Libraries\ObjectIO\timertable.icl
+		Path:	{Application}\Libraries\ObjectIO\cast.icl
+		Path:	{Application}\Libraries\ObjectIO\semidynamic.icl
+		Path:	{Application}\Libraries\ObjectIO\receivertable.icl
+		Path:	{Application}\Libraries\ObjectIO\receivermessage.icl
+		Path:	{Application}\Libraries\ObjectIO\deviceevents.icl
+		Path:	{Application}\Libraries\ObjectIO\devicefunctions.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\osguishare.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\osevent.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\osactivaterequests.icl
+		Path:	{Application}\Libraries\ObjectIO\iostate.icl
+		Path:	{Application}\Libraries\ObjectIO\StdId.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\ostime.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\windowCrossCall_12.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\ossystem.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\windowCCall_12.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\ostoolbar.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\menuCrossCall_12.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\osdocumentinterface.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\clCCall_12.icl
+		Path:	{Application}\Libraries\ObjectIO\commondef.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\oskey.icl
+		Path:	{Application}\Libraries\ObjectIO\StdKey.icl
+		Path:	{Application}\Libraries\ObjectIO\StdPicture.icl
+		Path:	{Application}\Libraries\ObjectIO\StdIOBasic.icl
+		Path:	{Application}\Libraries\ObjectIO\StdPictureDef.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\osfont.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\rgnCCall_12.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\pictCCall_12.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\ostypes.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\osrgn.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\ospicture.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\osbitmap.icl
+		Path:	{Application}\Libraries\ObjectIO\StdBitmap.icl
+		Path:	{Application}\Libraries\ObjectIO\StdIOCommon.icl
+		Path:	{Application}\Libraries\ObjectIO\systemid.icl
+		Path:	{Application}\Libraries\ObjectIO\device.icl
+		Path:	{Application}\Libraries\ObjectIO\id.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\clCrossCall_12.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\ostoolbox.icl
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\ostick.icl
+		Path:	{Application}\Libraries\ObjectIO\StdTime.icl
+		Path:	{Application}\Libraries\Tcp\tcp.icl
+		Path:	{Application}\Libraries\Tcp\StdChannels.icl
+		Path:	{Application}\Libraries\Tcp\StdTCP.icl
+		Path:	{Application}\Libraries\htmlGEC\httpServer.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\DynIDMacros.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\memory.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\memory_mapped_files.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\StdDynamicVersion.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\shared_buffer.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\DynamicLinkerInterface.icl
+		Path:	{Application}\Libraries\Dynamics\general\BitSet.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\StdDynamicLowLevelInterface.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\DynamicUtilities.icl
+		Path:	{Application}\Libraries\Dynamics\general\EnDecode.icl
+		Path:	{Application}\Libraries\Dynamics\general\DefaultElem.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\StdDynamicTypes.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\DynamicGraphConversion.icl
+		Path:	{Application}\Libraries\Dynamics\extension\StdDynamic.icl
+		Path:	{Application}\Libraries\htmlGEC\graph_copy\dynamic_string.icl
+		Path:	{Application}\Libraries\htmlGEC\htmlTrivial.icl
+		Path:	{Application}\Libraries\StdLib\StdLibMisc.icl
+		Path:	{Application}\Libraries\Directory\Directory.icl
+		Path:	{Application}\Libraries\htmlGEC\EncodeDecode.icl
+		Path:	{Application}\Libraries\htmlGEC\iDataState.icl
+		Path:	{Application}\Libraries\Generics\GenParse.icl
+		Path:	{Application}\Libraries\Generics\GenPrint.icl
+		Path:	{Application}\Libraries\htmlGEC\htmlHandler.icl
+		Path:	{Application}\Libraries\htmlGEC\htmlStylelib.icl
+		Path:	{Application}\Libraries\ArgEnvWindows\ArgEnv.icl
+		Path:	{Application}\Libraries\StdEnv\StdDebug.icl
+		Path:	{Application}\Libraries\Gerda\odbccp.icl
+		Path:	{Application}\Libraries\Gerda\odbc.icl
+		Path:	{Application}\Libraries\StdLib\StdMaybe.icl
+		Path:	{Application}\Libraries\Gerda\Gerda.icl
+		Path:	{Application}\Libraries\StdEnv\_SystemEnumStrict.icl
+		Path:	{Application}\Libraries\StdEnv\_SystemStrictLists.icl
+		Path:	{Application}\Libraries\StdEnv\StdStrictLists.icl
+		Path:	{Application}\Libraries\StdEnv\StdGeneric.icl
+		Path:	{Application}\Libraries\htmlGEC\PrintUtil.icl
+		Path:	{Application}\Libraries\htmlGEC\htmlStyleDef.icl
+		Path:	{Application}\Libraries\htmlGEC\htmlDataDef.icl
+		Path:	{Application}\Libraries\htmlGEC\htmlFormData.icl
+		Path:	{Application}\Libraries\htmlGEC\StdHtml.icl
+		Path:	{Application}\Libraries\StdEnv\StdFunc.icl
+		Path:	{Application}\Libraries\StdEnv\StdCharList.icl
+		Path:	{Application}\Libraries\StdEnv\StdTuple.icl
+		Path:	{Application}\Libraries\StdEnv\StdOrdList.icl
+		Path:	{Application}\Libraries\StdEnv\_SystemEnum.icl
+		Path:	{Application}\Libraries\StdEnv\StdEnum.icl
+		Path:	{Application}\Libraries\StdEnv\StdList.icl
+		Path:	{Application}\Libraries\StdEnv\StdFile.icl
+		Path:	{Application}\Libraries\StdEnv\StdString.icl
+		Path:	{Application}\Libraries\StdEnv\StdReal.icl
+		Path:	{Application}\Libraries\StdEnv\StdMisc.icl
+		Path:	{Application}\Libraries\StdEnv\_SystemArray.icl
+		Path:	{Application}\Libraries\StdEnv\StdArray.icl
+		Path:	{Application}\Libraries\StdEnv\StdClass.icl
+		Path:	{Application}\Libraries\StdEnv\StdChar.icl
+		Path:	{Application}\Libraries\StdEnv\StdInt.icl
+		Path:	{Application}\Libraries\StdEnv\StdBool.icl
+		Path:	{Application}\Libraries\StdEnv\StdEnv.icl
+		Path:	{Application}\Libraries\StdEnv\StdOverloaded.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\_SystemDynamic.icl
+		Path:	{Application}\Libraries\Dynamics\extension\StdCleanTypes.icl
+		Path:	{Project}\confIData.icl
 	Objs
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_startup0.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_startup1Trace.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_startup2.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_system.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Examples\Conf Management System\Clean System Files\ConfManager.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdDebug.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Examples\Conf Management System\Clean System Files\stateHandlingIData.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Examples\Conf Management System\Clean System Files\stateHandling.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Examples\Conf Management System\Clean System Files\confIData.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Examples\Conf Management System\Clean System Files\loginAdmin.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Examples\Conf Management System\Clean System Files\loginAdminIData.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Generics\Clean System Files\GenEq.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlArrow.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdOverloaded.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdEnv.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdBool.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdInt.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdMisc.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdChar.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdClass.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdArray.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_SystemArray.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdReal.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdString.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdFile.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdList.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdEnum.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_SystemEnum.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdOrdList.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdTuple.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdCharList.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdFunc.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\StdHtml.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlFormData.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlDataDef.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlStyleDef.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\PrintUtil.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdGeneric.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdStrictLists.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_SystemStrictLists.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_SystemEnumStrict.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlStylelib.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdMaybe.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlHandler.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Generics\Clean System Files\GenPrint.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Generics\Clean System Files\GenParse.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\iDataState.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\EncodeDecode.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlTrivial.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Directory\Clean System Files\Directory.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdLibMisc.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\graph_copy\Clean System Files\dynamic_string.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicGraphConversion.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\Clean System Files\StdDynamicTypes.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\general\Clean System Files\DefaultElem.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\general\Clean System Files\EnDecode.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\Clean System Files\DynamicUtilities.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\Clean System Files\StdDynamicLowLevelInterface.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\general\Clean System Files\BitSet.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicLinkerInterface.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\shared_buffer.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\Clean System Files\StdDynamicVersion.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\memory_mapped_files.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\memory.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\Clean System Files\DynID.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\general\Clean System Files\md5.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\httpServer.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\Clean System Files\StdTCP.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\Clean System Files\StdChannels.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\Clean System Files\tcp.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdTime.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ostick.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ostoolbox.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\clCrossCall_12.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\id.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\device.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\systemid.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdIOCommon.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdBitmap.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osbitmap.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ospicture.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osrgn.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ostypes.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\pictCCall_12.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\rgnCCall_12.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osfont.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdPictureDef.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdIOBasic.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdPicture.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdKey.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\oskey.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\commondef.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\clCCall_12.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osdocumentinterface.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\menuCrossCall_12.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ostoolbar.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\windowCCall_12.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ossystem.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\windowCrossCall_12.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ostime.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdId.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\iostate.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osactivaterequests.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osevent.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osguishare.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\devicefunctions.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\deviceevents.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receivermessage.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receivertable.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\semidynamic.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\cast.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\timertable.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdTimerDef.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\windowhandle.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdControlDef.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdWindowDef.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receiverhandle.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\keyfocus.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\devicesystemstate.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\menuhandle.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdMenuDef.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osmenu.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\menuCCall_12.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\processhandle.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\timerhandle.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\processstack.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\roundrobin.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osmouse.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdPSt.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdProcessAttribute.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdProcessDef.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osbeep.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\world.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdReceiverDef.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdReceiver.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receiverid.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receiveraccess.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receiverdefaccess.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdReceiverAttribute.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receiverdevice.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\receiverevent.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\scheduler.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdPStClass.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdFileSelect.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osfileselect.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\Clean System Files\StdTCPChannels.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\Clean System Files\StdTCPDef.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\Clean System Files\tcp_bytestreams.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\Clean System Files\ostcp.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\Clean System Files\StdEventTCP.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\Clean System Files\StdStringChannels.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\httpUtil.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdLib.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdListExtensions.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlButtons.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlFormlib.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlRefFormlib.o
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFileSelectors_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFont_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallMenus_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallTCP_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallWindows_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallProcedureTable_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallCursor_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCall_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallSystem_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cAcceleratorTable_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallxDI_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Directory\Clean System Files\cDirectory.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cTCP_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\graph_copy\Clean System Files\copy_string_to_graph.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\graph_copy\Clean System Files\copy_string_to_graph_interface.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\graph_copy\Clean System Files\copy_graph_to_string.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\graph_copy\Clean System Files\copy_graph_to_string_interface.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cpicture_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\low.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\mem.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\read_function.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\util_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cpicture_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cdebug_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCall_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallWindows_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.obj
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallSystem_121.obj
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup0.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup1Trace.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup2.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_system.o
+		Path:	{Project}\Clean System Files\ConfManager.o
+		Path:	{Project}\Clean System Files\stateHandlingIData.o
+		Path:	{Project}\Clean System Files\stateHandling.o
+		Path:	{Project}\Clean System Files\confIData.o
+		Path:	{Project}\Clean System Files\loginAdmin.o
+		Path:	{Project}\Clean System Files\loginAdminIData.o
+		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlArrow.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlRefFormlib.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlFormlib.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlButtons.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdListExtensions.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLib.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\httpUtil.o
+		Path:	{Application}\Libraries\Tcp\Clean System Files\StdStringChannels.o
+		Path:	{Application}\Libraries\Tcp\Clean System Files\StdEventTCP.o
+		Path:	{Application}\Libraries\Tcp\Clean System Files\ostcp.o
+		Path:	{Application}\Libraries\Tcp\Clean System Files\tcp_bytestreams.o
+		Path:	{Application}\Libraries\Tcp\Clean System Files\StdTCPDef.o
+		Path:	{Application}\Libraries\Tcp\Clean System Files\StdTCPChannels.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osfileselect.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdFileSelect.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPStClass.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\scheduler.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\receiverevent.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverdevice.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiverAttribute.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverdefaccess.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiveraccess.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverid.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiver.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiverDef.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\world.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osbeep.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdProcessDef.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdProcessAttribute.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPSt.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osmouse.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\roundrobin.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\processstack.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\timerhandle.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\processhandle.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\menuCCall_12.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osmenu.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdMenuDef.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\menuhandle.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\devicesystemstate.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\keyfocus.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverhandle.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdWindowDef.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdControlDef.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\windowhandle.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTimerDef.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\timertable.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\cast.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\semidynamic.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receivertable.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receivermessage.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\deviceevents.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\devicefunctions.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osguishare.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osevent.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osactivaterequests.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\iostate.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdId.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostime.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\windowCrossCall_12.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ossystem.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\windowCCall_12.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostoolbar.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\menuCrossCall_12.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osdocumentinterface.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\clCCall_12.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\commondef.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\oskey.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdKey.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPicture.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdIOBasic.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPictureDef.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osfont.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\rgnCCall_12.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\pictCCall_12.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostypes.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osrgn.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ospicture.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\osbitmap.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdBitmap.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdIOCommon.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\systemid.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\device.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\id.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\clCrossCall_12.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostoolbox.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ostick.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdTime.o
+		Path:	{Application}\Libraries\Tcp\Clean System Files\tcp.o
+		Path:	{Application}\Libraries\Tcp\Clean System Files\StdChannels.o
+		Path:	{Application}\Libraries\Tcp\Clean System Files\StdTCP.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\httpServer.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynIDMacros.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory_mapped_files.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicVersion.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\shared_buffer.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicLinkerInterface.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\BitSet.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicLowLevelInterface.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynamicUtilities.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\EnDecode.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\DefaultElem.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicTypes.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicGraphConversion.o
+		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
+		Path:	{Application}\Libraries\htmlGEC\graph_copy\Clean System Files\dynamic_string.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlTrivial.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
+		Path:	{Application}\Libraries\Directory\Clean System Files\Directory.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\EncodeDecode.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\iDataState.o
+		Path:	{Application}\Libraries\Generics\Clean System Files\GenParse.o
+		Path:	{Application}\Libraries\Generics\Clean System Files\GenPrint.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlHandler.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlStylelib.o
+		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
+		Path:	{Application}\Libraries\Gerda\Clean System Files\odbccp.o
+		Path:	{Application}\Libraries\Gerda\Clean System Files\odbc.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
+		Path:	{Application}\Libraries\Gerda\Clean System Files\Gerda.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnumStrict.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemStrictLists.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdStrictLists.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\PrintUtil.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlStyleDef.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlDataDef.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlFormData.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\StdHtml.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdCharList.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdTuple.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOrdList.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnum.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnum.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdList.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFile.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdString.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdReal.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdMisc.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemArray.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdArray.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdClass.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdChar.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdInt.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdBool.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnv.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
+		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
+		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFileSelectors_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFont_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallMenus_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallTCP_121.obj
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallWindows_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallProcedureTable_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallCursor_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCall_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallSystem_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cAcceleratorTable_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallxDI_121.o
+		Path:	{Application}\Libraries\Directory\Clean System Files\cDirectory.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cTCP_121.obj
+		Path:	{Application}\Libraries\htmlGEC\graph_copy\Clean System Files\copy_string_to_graph.obj
+		Path:	{Application}\Libraries\htmlGEC\graph_copy\Clean System Files\copy_string_to_graph_interface.obj
+		Path:	{Application}\Libraries\htmlGEC\graph_copy\Clean System Files\copy_graph_to_string.obj
+		Path:	{Application}\Libraries\htmlGEC\graph_copy\Clean System Files\copy_graph_to_string_interface.obj
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cpicture_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\low.obj
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\mem.obj
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\read_function.obj
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\util_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cpicture_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cdebug_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCall_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallWindows_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallSystem_121.o
 	Dlib
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\kernel_library
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\user_library
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\gdi_library
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\comdlg_library
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\StdDynamic_kernel32_library
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Directory\Clean System Files\directory_library
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\userExt_library
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\gdiExt_library
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\kernelExt_library
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv\Clean System Files\winspool_library
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\winmm_library
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\shell32_library
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ole32_library
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\kernel32_library
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\comctl32_library
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\advapi32_library
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp\Clean System Files\wsock_library
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\kernel_library
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\user_library
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\gdi_library
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\comdlg_library
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\StdDynamic_kernel32_library
+		Path:	{Application}\Libraries\Directory\Clean System Files\directory_library
+		Path:	{Application}\Libraries\Gerda\Clean System Files\odbc_library
+		Path:	{Application}\Libraries\Gerda\Clean System Files\odbccp_library
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\userExt_library
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\gdiExt_library
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\kernelExt_library
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\winspool_library
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\winmm_library
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\shell32_library
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\ole32_library
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\kernel32_library
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\comctl32_library
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\advapi32_library
+		Path:	{Application}\Libraries\Tcp\Clean System Files\wsock_library
 	Pths
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Examples\Conf Management System
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdEnv
-		Path:	C:\Clean\Clean 2.1.1\Libraries\StdLib
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ObjectIO\OS Windows
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Directory
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\extension
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\general
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Dynamics\implementation\windows
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Generics
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ArgEnvWindows
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Gast
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Directory
-		Path:	C:\Clean\Clean 2.1.1\Libraries\Tcp
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ExceptionsWindows
-		Path:	C:\Clean\Clean 2.1.1\Libraries\MersenneTwister
-		Path:	C:\Clean\Clean 2.1.1\Libraries\WrapDebug
-		Path:	C:\Clean\Clean 2.1.1\Libraries\ExtendedArith\ExtendedArith
-		Path:	C:\Clean\Clean 2.1.1\Libraries\GameLib
-		Path:	C:\Clean\Clean 2.1.1\Libraries\GEC
-		Path:	C:\Clean\Clean 2.1.1\Libraries\GEC\GEC Implementation
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC
-		Path:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\graph_copy
-	AppP:	C:\Clean\Clean 2.1.1
-	PrjP:	C:\Clean\Clean 2.1.1\Libraries\htmlGEC\Examples\Conf Management System
+		Path:	{Project}
+		Path:	{Application}\Libraries\StdEnv
+		Path:	{Application}\Libraries\StdLib
+		Path:	{Application}\Libraries\ObjectIO
+		Path:	{Application}\Libraries\ObjectIO\OS Windows
+		Path:	{Application}\Libraries\Dynamics\extension
+		Path:	{Application}\Libraries\Dynamics\general
+		Path:	{Application}\Libraries\Dynamics\implementation
+		Path:	{Application}\Libraries\Dynamics\implementation\windows
+		Path:	{Application}\Libraries\Generics
+		Path:	{Application}\Libraries\ArgEnvWindows
+		Path:	{Application}\Libraries\Directory
+		Path:	{Application}\Libraries\Tcp
+		Path:	{Application}\Libraries\GEC\GEC Implementation
+		Path:	{Application}\Libraries\htmlGEC
+		Path:	{Application}\Libraries\htmlGEC\graph_copy
+		Path:	{Application}\Libraries\htmlGEC\htmlTest
+		Path:	{Application}\Libraries\MersenneTwister
+		Path:	{Application}\Libraries\Gerda
+	AppP:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1
+	PrjP:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Examples\Conf Management System
