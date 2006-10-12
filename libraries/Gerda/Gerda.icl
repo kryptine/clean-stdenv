@@ -486,19 +486,21 @@ where
 	(GerdaFunctions _ layoutK _ _) = gerdaInt [SqlPrimary]
 
 removeTable :: !String !*Gerda -> *Gerda
-removeTable tableName g=:{layout, connection, state}
+removeTable name g=:{layout, connection, state}
 	# (r, h, state) = SQLAllocHandle SQL_HANDLE_STMT connection state
 	| r <> SQL_SUCCESS = abort "SQLAllocHandle SQL_HANDLE_STMT failed"
-	# drop = "DROP TABLE " +++ sqlEscape ("*" +++ tableName)
+	# drop = "DROP TABLE " +++ sqlEscape tableName
 	  (r, state) = SQLExecDirect h (TRACE_SQL drop) (size drop) state
 //	| r <> SQL_SUCCESS = abort ("SQLExecDirect failed " +++ drop)
 	# (r, state) = SQLFreeHandle SQL_HANDLE_STMT h state
 	| r <> SQL_SUCCESS = abort "SQLFreeHandle SQL_HANDLE_STMT failed"
-	# (m, layout) = extractTable ("*" +++ tableName) layout
+	# (m, layout) = extractTable tableName layout
 	  g = {g & layout = layout, state = state}
 	= case m of
 		Just table -> closeTable table g
 		_ -> g
+where
+	tableName = "*" +++ name
 
 writeToTable :: !String ![Table] !(GerdaWrite a) a !*Gerda -> (!Int, !*Gerda)
 writeToTable tableName tables write x g
