@@ -3,8 +3,8 @@ implementation module Gerda
 import StdMaybe, StdGeneric
 import StdEnv, odbc, odbccp, StdDebug
 
-//TRACE_SQL statement :== statement
-TRACE_SQL statement :== trace_n ("<<<" +++ statement +++ ">>>") statement
+TRACE_SQL statement :== statement
+//TRACE_SQL statement :== trace_n ("<<<" +++ statement +++ ">>>") statement
 
 :: Gerda = {
 		index :: !Int,
@@ -494,7 +494,7 @@ removeTable tableName g=:{layout, connection, state}
 //	| r <> SQL_SUCCESS = abort ("SQLExecDirect failed " +++ drop)
 	# (r, state) = SQLFreeHandle SQL_HANDLE_STMT h state
 	| r <> SQL_SUCCESS = abort "SQLFreeHandle SQL_HANDLE_STMT failed"
-	# (m, layout) = extractTable tableName layout
+	# (m, layout) = extractTable ("*" +++ tableName) layout
 	  g = {g & layout = layout, state = state}
 	= case m of
 		Just table -> closeTable table g
