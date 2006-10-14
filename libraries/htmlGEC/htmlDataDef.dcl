@@ -1,5 +1,8 @@
 definition module htmlDataDef
 
+// Clean Algebraic Data Types that are isomorphic with HTML intructions
+// (c) 2005 MJP
+
 import htmlStyleDef
 
 :: Url			:== String

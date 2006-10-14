@@ -1,7 +1,7 @@
 definition module htmlHandler
 
 // Converting Clean types to iData for automatic generation and dealing with Html form's ..
-// (c) MJP 2005 *** under construction
+// (c) MJP 2005
 
 import htmlDataDef, htmlFormData
 import StdBool

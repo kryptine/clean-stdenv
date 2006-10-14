@@ -3,7 +3,6 @@ definition module htmlArrow
 // arrow implementation for Html GEC's
 // (c) 2005 MJP
 
-
 import htmlDataDef, htmlHandler
 import StdArrow
 

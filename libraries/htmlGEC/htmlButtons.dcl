@@ -1,6 +1,7 @@
 definition module htmlButtons
 
 // Prdefined i-Data making html Buttons, forms, and lay-out 
+// (c) 2005 MJP
 
 import htmlHandler
 
