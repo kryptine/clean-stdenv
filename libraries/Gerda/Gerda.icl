@@ -1,6 +1,6 @@
 implementation module Gerda
 
-import StdMaybe, StdGeneric
+import StdMisc, StdMaybe, StdGeneric
 import StdEnv, odbc, odbccp, StdDebug
 
 TRACE_SQL statement :== statement
@@ -18,7 +18,7 @@ TRACE_SQL statement :== statement
 :: GerdaFunctions a = GerdaFunctions GerdaType GerdaLayout (GerdaWrite a) (GerdaRead a)
 
 :: GerdaType :== Path History Int -> (GenType, Int)
-:: GerdaLayout :== [SqlAttr] String [Table] Int -> ([Column], [Table], Int)
+:: GerdaLayout :== [SqlAttr] String String [Table] Int -> ([Column], [Table], Int)
 :: GerdaWrite a :== .(Maybe a) *Gerda -> *Gerda
 :: GerdaRead a :== *Gerda -> *(.Maybe a, *Gerda)
 
@@ -32,6 +32,7 @@ TRACE_SQL statement :== statement
 	bufferSize :: !Int,
 	bufferPointer :: !Int,
 	insertStmt :: !SQLHSTMT,
+	updateStmt :: !SQLHSTMT,
 	selectStmt :: !SQLHSTMT}
 
 :: Column = {
@@ -51,10 +52,6 @@ TRACE_SQL statement :== statement
 	| SqlChar1
 	| SqlVarChar252
 	| SqlDouble
-
-:: Binary252 = {binary252 :: !.String}
-
-:: CompactList a = CompactList !a (Maybe (CompactList a))
 
 openGerda :: !String !*World -> (!*Gerda, !*World)
 openGerda dbname world
@@ -119,11 +116,9 @@ generic gerda a :: GerdaFunctions a
 gerda{|OBJECT of {gtd_name, gtd_arity, gtd_num_conses}|} gerdaA
 	= GerdaFunctions typeO layoutO writeO readO
 where
-	(functionsA=:GerdaFunctions typeA layoutA writeA readA) = gerdaA
+	(GerdaFunctions typeA layoutA writeA readA) = gerdaA
 
 	(GerdaFunctions _ layoutR writeR readR) = gerdaInt [SqlReference tableName]
-
-	(GerdaFunctions _ layoutK writeK readK) = gerdaInt [SqlPrimary]
 
 	typeO path=:(T arity con typ) history i
 		| gtd_arity == 0 = (GenTypeCons gtd_name, i)
@@ -154,9 +149,9 @@ where
 	where
 		(type, _) = typeO (T 0 "" "") NoHistory 0
 
-	layoutO attr field tables i = (columns, tables``, j)
+	layoutO attr constr field tables i = (columns, tables``, j)
 	where
-		(columns, tables`, j) = layoutR attr field tables i
+		(columns, tables`, j) = layoutR attr constr field tables i
 		tables`` = layoutTable tableName layoutA tables`
 	
 	writeO (Just (OBJECT x)) g=:{layout}
@@ -172,17 +167,12 @@ where
 			# (m, g) = readFromTable tableName [] readA ref g
 			= (mapMaybe OBJECT m, g)
 
-		unsafeInterleave :: !(*Gerda -> *(a, *Gerda)) !*Gerda -> (a, !*Gerda)
-		unsafeInterleave f g=:{layout, malloc8, connection, environment}
-			# state = fst (openSqlState (cast 42))
-			  (x, _) = f {index = 0, buffer = {}, layout = layout, malloc8 = malloc8, 
-			  			connection = connection, environment = environment, state = state}
-			= (x, g)
-		where
-			cast :: !u:a -> u:b
-			cast _ = code {
-					pop_a	0
-				}
+	unsafeInterleave :: (*Gerda -> *(a, *Gerda)) !*Gerda -> (a, !*Gerda)
+	unsafeInterleave f g=:{layout, malloc8, connection, environment}
+		# state = fst (openSqlState (cast 42))
+		  (x, _) = f {index = 0, buffer = {}, layout = layout, malloc8 = malloc8, 
+		  			connection = connection, environment = environment, state = state}
+		= (x, g)
 
 gerda{|OBJECT|} gerdaA = gerdaBimap (GenTypeApp (GenTypeCons "OBJECT")) [] (\(OBJECT x) -> x) OBJECT gerdaA
 
@@ -205,7 +195,7 @@ where
 		pair2either (PAIR _ (Just y)) = RIGHT y
 
 gerda{|CONS of {gcd_name, gcd_arity, gcd_type, gcd_type_def}|} gerdaA
-	= GerdaFunctions typeC layoutA writeC readC
+	= GerdaFunctions typeC layoutC writeC readC
 where
 	(GerdaFunctions typeA layoutA writeA readA) = gerdaA
 	
@@ -259,6 +249,8 @@ where
 				where (xs, r) = splitType (n - 1) y
 				
 		(t, j) = freshCopy gcd_type i
+
+	layoutC attr _ field tables i = layoutA attr gcd_name field tables i
 	
 	writeC = mapWrite writeA \(CONS x) -> x
 
@@ -270,7 +262,7 @@ gerda{|FIELD of {gfd_name}|} gerdaA = GerdaFunctions typeA layoutF writeF readF
 where
 	(GerdaFunctions typeA layoutA writeA readA) = gerdaA
 	
-	layoutF attr _ tables i = layoutA attr gfd_name tables i
+	layoutF attr _ _ tables i = layoutA attr "" gfd_name tables i
 	
 	writeF = mapWrite writeA \(FIELD x) -> x
 
@@ -291,10 +283,10 @@ where
 						P l r -> (l, r)
 						_ -> (path, path)
 
-	layoutP attr field tables i = (columns ++ columns`, tables``, k)
+	layoutP attr constr field tables i = (columns ++ columns`, tables``, k)
 	where
-		(columns, tables`, j) = layoutA attr field tables i
-		(columns`, tables``, k) = layoutB attr field tables` j
+		(columns, tables`, j) = layoutA attr constr field tables i
+		(columns`, tables``, k) = layoutB attr constr "" tables` j
 
 	writeP m g
 		# g = writeA (mapMaybe (\(PAIR x y) -> x) m) g
@@ -313,7 +305,7 @@ where
 	
 	typeU _ _ i = (GenTypeCons "UNIT", i)
 	
-	layoutU attr field tables i = layoutB (removeMember SqlNull attr) field tables i
+	layoutU attr constr field tables i = layoutB (removeMember SqlNull attr) constr field tables i
 
 	writeU m g = writeB (Just (isJust m)) g
 
@@ -341,7 +333,7 @@ gerda{|Real|} =: gerdaInline (GenTypeCons "Real") SqlDouble [] 3 store load
 where
 	store x index buffer 
 		# (i1, i2) = real2ints x
-		= {buffer & [index] = 1, [index + 1] = i1, [index + 2] = i2}
+		= {buffer & [index] = 8, [index + 1] = i1, [index + 2] = i2}
 	where
 		real2ints :: !Real -> (!Int, !Int)
 		real2ints _ = code {
@@ -392,7 +384,7 @@ where
 	where
 		(a, j) = typeA path history i
 
-	layoutM attr field tables i = layoutA (if (isMember SqlNull attr) attr [SqlNull:attr]) field tables i
+	layoutM attr constr field tables i = layoutA (if (isMember SqlNull attr) attr [SqlNull:attr]) constr field tables i
 
 	writeM (Just x=:(Just _)) g = writeA x g
 	writeM _ g = writeA Nothing g
@@ -426,6 +418,42 @@ where
 	fromMCL (Just (CompactList x xs)) = [x:fromMCL xs]
 	fromMCL _ = []
 
+gerda{|{}|} gerdaA = gerdaArray (GenTypeCons "{}") gerdaA
+
+gerda{|{!}|} gerdaA = gerdaArray (GenTypeCons "{!}") gerdaA
+
+gerda{|GerdaObject|} gerdaA = GerdaFunctions typeG layoutG writeG readG
+where
+	(GerdaFunctions typeA layoutA writeA readA) = gerdaA
+
+	(GerdaFunctions _ layoutR writeR readR) = gerdaInt [SqlReference tableName]
+
+	typeG path history i = (GenTypeApp (GenTypeCons "GerdaObject") a, j)
+	where
+		(a, j) = typeA path history i
+	
+	tableName = type2tableName type
+	where
+		(type, _) = typeG (T 0 "" "") NoHistory 0
+
+	layoutG attr constr field tables i = (columnsR, tables``, j)
+	where
+		(columnsR, tables`, j) = layoutR attr constr field tables i
+		tables`` = layoutTable tableName layoutA tables`
+
+	writeG (Just {gerdaValue}) g=:{layout}
+		# (key, g) = writeToTable tableName [] writeA gerdaValue g
+		= writeR (Just key) g
+	writeG _ g = writeR Nothing g
+
+	readG g = case readR g of
+				(Just ref, g) -> case readFromTable tableName [] readA ref g of
+									(Just x, g) -> (Just {gerdaValue = x, 
+														gerdaWrite = updateInTable tableName [] writeA ref, 
+														gerdaRead = \g -> case readFromTable tableName [] readA ref g of (Just x, g) -> (x, g)}, g)
+									(_, g) -> (Nothing, g)
+				(_, g) -> (Nothing, g)
+			
 gerdaInt :: ![SqlAttr] -> GerdaFunctions Int
 gerdaInt sqlAttr = gerdaInline (GenTypeCons "Int") SqlInteger sqlAttr 2 store load
 where
@@ -441,7 +469,7 @@ where
 	where
 		(type, j) = typeA path history i
 
-	layoutB attr field tables i = layoutA (removeDup (sqlAttr ++ attr)) field tables i
+	layoutB attr constr field tables i = layoutA (removeDup (sqlAttr ++ attr)) constr field tables i
 
 	writeB = mapWrite writeA toF
 
@@ -451,9 +479,9 @@ gerdaInline genType sqlType sqlAttr dataSize store load :== GerdaFunctions typeI
 where
 	typeI _ _ i = (genType, i)
 
-	layoutI attr field tables i = ([{name = n, sqlType = sqlType, sqlAttr = removeDup (sqlAttr ++ attr)}], tables, i + 1)
+	layoutI attr constr field tables i = ([{name = n, sqlType = sqlType, sqlAttr = removeDup (sqlAttr ++ attr)}], tables, i + 1)
 	where
-		n = if (field == "") (toString i) field
+		n = if (field == "") (toString i +++ constr) field
 
 	writeI m g=:{index, buffer} = case m of
 		Just x -> {g & index = index + dataSize, buffer = store x index buffer}
@@ -465,6 +493,52 @@ where
 		# (x, buffer) = load avail index buffer 
 		= (Just x, {g & index = index + dataSize, buffer = buffer})
 	
+gerdaArray type gerdaA :== GerdaFunctions typeY layoutY writeY readY
+where
+	(GerdaFunctions typeA layoutA writeA readA) = gerdaA
+
+	(GerdaFunctions _ layoutR writeR readR) = gerdaInt [SqlReference tableName]
+
+	(GerdaFunctions _ layoutS writeS readS) = gerdaInt []
+
+	typeY path history i = (GenTypeApp type a, j)
+	where
+		(a, j) = typeA path history i
+	
+	tableName = type2tableName type
+	where
+		(type, _) = typeY (T 0 "" "") NoHistory 0
+
+	layoutY attr constr field tables i = (columnsR ++ columnsS, tables```, k)
+	where
+		(columnsR, tables`, j) = layoutR attr constr field tables i
+		(columnsS, tables``, k) = layoutS attr constr "" tables j
+		tables``` = layoutTable tableName layoutA tables``
+
+	writeY (Just array) g=:{layout}
+		# (lastkey, g) = writeArray 0 -1 g
+		  g = writeR (Just (lastkey - len + 1)) g
+		= writeS (Just len) g
+	where
+		len = size array
+		writeArray i key g
+			| i >= len = (key, g)
+			# (k, g) = writeToTable tableName [] writeA array.[i] g
+			= writeArray (i + 1) k g
+	writeY _ g = writeR Nothing g
+
+	readY g = case readR g of
+				(Just ref, g) -> case readS g of
+									(Just len, g) -> readArray ref 0 (createArray len (cast [])) g
+									(_, g) -> (Nothing, g)
+				(_, g) -> (Nothing, g)
+	where
+		readArray ref i array g
+			| i >= size array = (Just array, g)
+			= case readFromTable tableName [] readA (ref + i) g of
+				(Just x, g) -> readArray ref (i + 1) {array & [i] = x} g
+				(_, g) -> (Nothing, g)
+			
 mapWrite write f m g :== case m of 
 	Just x -> write (Just (f x)) g
 	_ -> write Nothing g
@@ -479,9 +553,9 @@ layoutTable tableName layoutA layout
 	= [table:tables]
 where
     table = {name = tableName, header = key ++ header, key = 0, 
-    		bufferSize = 0, bufferPointer = 0, insertStmt = 0, selectStmt = 0}
-	(header, tables, _) = layoutA [] "" tables` k
-	(key, tables`, k) = layoutK [] "K" [table:layout] 0
+    		bufferSize = 0, bufferPointer = 0, insertStmt = 0, updateStmt = 0, selectStmt = 0}
+	(header, tables, _) = layoutA [] "" "" tables` k
+	(key, tables`, k) = layoutK [] "" "K" [table:layout] 0
 
 	(GerdaFunctions _ layoutK _ _) = gerdaInt [SqlPrimary]
 
@@ -502,7 +576,37 @@ removeTable name g=:{layout, connection, state}
 where
 	tableName = "*" +++ name
 
-writeToTable :: !String ![Table] !(GerdaWrite a) a !*Gerda -> (!Int, !*Gerda)
+updateInTable :: !String ![Table] !(GerdaWrite a) !Int !a !*Gerda -> *Gerda
+updateInTable tableName tables write key x g
+	# g=:{layout, index=previousIndex, buffer=previousBuffer} = openTables tables g
+	  (m, layout) = extractTable tableName layout
+	| isNothing m = abort ("updateInTable cannot find " +++ tableName +++ " (internal error)")
+	# (Just t=:{header, bufferSize, bufferPointer, updateStmt}) = m
+	  g=:{buffer, connection, state} = write (Just x) {g & index = 2, buffer = {createArray bufferSize 0 & [0] = 4, [1] = key}}
+	  state = copy 0 bufferPointer buffer state
+	  update = "UPDATE " +++ sqlEscape tableName +++ " SET " +++ separatorList "," [name +++ "=?"\\ {name, sqlType} <- tl header] +++ " WHERE K=" +++ toString key
+	  (r, state) = SQLPrepare updateStmt (TRACE_SQL update) (size update) state
+	| r <> SQL_SUCCESS = abort ("SQLPrepare failed " +++ update)
+	# state = bindParameters (tl header) 1 (bufferPointer + 8) updateStmt state
+	  (r, state) = SQLExecute updateStmt state
+	| r <> SQL_SUCCESS = abort ("SQLExecDirect failed " +++ toString r)
+	= {g & index = previousIndex, buffer = previousBuffer, state = state}
+where
+	copy :: !Int !Int !{#Int} !*st -> *st
+	copy i ptr buffer state
+		| i >= size buffer = state
+		# state = poke ptr buffer.[i] state
+		= copy (i + 1) (ptr + 4) buffer state
+
+	bindParameters [{sqlType}:cs] i p h state
+		# (r, state) = SQLBindParameter h i SQL_PARAM_INPUT c_type sql_type (len * 4 - 4) 0 (p + 4) 0 p state
+		| r <> SQL_SUCCESS = abort "SQLBindParameter failed"
+		= bindParameters cs (i + 1) (p + len * 4) h state
+	where
+		(len, c_type, sql_type, _) = sqlTypeInfo sqlType
+	bindParameters _ _ _ _ state = state
+
+writeToTable :: !String ![Table] !(GerdaWrite a) !a !*Gerda -> (!Int, !*Gerda)
 writeToTable tableName tables write x g
 	# g=:{layout, index=previousIndex, buffer=previousBuffer} = openTables tables g
 	  (m, layout) = extractTable tableName layout
@@ -575,17 +679,20 @@ openTables [t=:{name, header}:ts] g=:{layout, malloc8, connection, state}
 
 	# (r, insertStmt, state) = SQLAllocHandle SQL_HANDLE_STMT connection state
 	| r <> SQL_SUCCESS = abort "SQLAllocHandle SQL_HANDLE_STMT failed"
-	# insert = ("INSERT INTO " +++ sqlEscape name +++ " VALUES (" +++ separatorList "," (map (const "?") header) +++ ")")
+	# insert = "INSERT INTO " +++ sqlEscape name +++ " VALUES (" +++ separatorList "," (map (const "?") header) +++ ")"
 	  (r, state) = SQLPrepare insertStmt (TRACE_SQL insert) (size insert) state
 	| r <> SQL_SUCCESS = abort ("SQLPrepare failed " +++ insert)
 	# state = bindParameters header 1 bufferPointer insertStmt state
+
+	# (r, updateStmt, state) = SQLAllocHandle SQL_HANDLE_STMT connection state
+	| r <> SQL_SUCCESS = abort "SQLAllocHandle SQL_HANDLE_STMT failed"
 
 	# (r, selectStmt, state) = SQLAllocHandle SQL_HANDLE_STMT connection state
 	| r <> SQL_SUCCESS = abort "SQLAllocHandle SQL_HANDLE_STMT failed"
 	# state = bindCols header 1 bufferPointer selectStmt state
 
 	# t = {t & key = key, bufferSize = bufferSize, bufferPointer = bufferPointer, 
-	  		insertStmt = insertStmt, selectStmt = selectStmt}
+	  		insertStmt = insertStmt, updateStmt = updateStmt, selectStmt = selectStmt}
 	= openTables ts {g & layout = [t:layout], state = state}
 where
 	bindParameters [{sqlType}:cs] i p h state
@@ -710,9 +817,12 @@ where
 		"PAIR" -> "p"
 		"UNIT" -> "n"
 		"Maybe" -> "m"
+		"Binary252" -> "t"
 		"CompactList" -> "x"
+		"{}" -> "a"
+		"{!}" -> "s"
 		"{#}" -> "u"
-		"Binary252" -> "y"
+		"GerdaObject" -> "g"
 		s | s % (0, 5) == "_Tuple" -> s % (6, size s - 1)
 		els -> els
 	f False (GenTypeArrow x y) = f True x +++ "_" +++ f False y
@@ -748,12 +858,12 @@ instance == SqlAttr where
 	(==) _ _ = False
 
 LocalAlloc :: !Int !Int !*st -> (!Int, !*st)
-LocalAlloc flags size st = code {
+LocalAlloc flags size st = code inline {
 		ccall LocalAlloc@8 "PII:I:A"
 	}
 
 LocalFree ::  !Int !*st -> (!Int, !*st)
-LocalFree p st = code {
+LocalFree p st = code inline {
 		ccall LocalFree@4 "PI:I:A"
 	}
 
@@ -761,9 +871,10 @@ sqlEscape :: !String -> String
 sqlEscape s = toString (['`':escape (fromString s)])
 where
 	escape [c:cs] 
-		| toInt c < 32 = abort "Illegal SQL string, cannot escape symbol < 32"
-		| toInt c > 127 = abort "Illegal SQL string, cannot escape symbol > 127"
-		| c == '`' = abort "Illegal SQL string, contains a `"
+		| toInt c < 32 = abort ("Illegal SQL string, cannot escape symbol < 32: " +++ s)
+		| toInt c > 127 = abort ("Illegal SQL string, cannot escape symbol > 127: " +++ s)
+//		| c == '`' = abort ("Illegal SQL string, contains a `: " +++ s)
+		| c == '`' = ['\'':escape cs]
 		= [c:escape cs]
 	escape _ = ['`']
 
@@ -779,12 +890,17 @@ poke p v st = code {
 }
 
 peek :: !Int !*st -> (!Int, !*st)
-peek p st = code {
+peek p st = code inline {
     push_b_a 0
     pop_b 1
     pushD_a 0
     pop_a 1
 }
+
+cast :: !u:a -> u:b
+cast _ = code inline {
+		pop_a	0
+	}
 
 derive bimap GerdaFunctions, (,), (,,), (,,,), [], Maybe
 derive gerda CompactList

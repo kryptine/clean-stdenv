@@ -33,7 +33,7 @@ gPrint{|(->)|} gArg gRes  _ _	= abort "functions can only be used with dynamic s
 doHtml :: .(*HSt -> (Html,!*HSt)) *World -> *World
 doHtml userpage world 
 # inout					= [|]
-# (gerda,world)			= openGerda "iDataDatabase" world	
+# (gerda,world)			= openGerda MyDataBase world	
 # nworld 				= { worldC = world, inout = inout, gerda = gerda}	
 # (initforms,nworld) 	= retrieveFormStates External Nothing nworld
 # (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
@@ -68,7 +68,7 @@ where
 	doHtmlServer2 :: String .(*HSt -> (Html,!*HSt)) *World -> ([String],String,*World)
 	doHtmlServer2 args userpage world 
 	# temp 					= [|]
-	# (gerda,world)			= openGerda "iDataDatabase" world
+	# (gerda,world)			= openGerda MyDataBase world
 	# nworld 				= { worldC = world, inout = temp, gerda = gerda }	
 	# (initforms,nworld) 	= retrieveFormStates Internal (Just args) nworld
 	# (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
@@ -108,7 +108,8 @@ where
 
 // swiss army nife editor that makes coffee too ...
 
-mkViewForm :: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC v
+mkViewForm :: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | iData, TC v
+//mkViewForm :: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC v
 mkViewForm (init,formid) bm=:{toForm, updForm, fromForm, resetForm}  hst=:{states,world} 
 | init == Const	&& formid.lifespan <> Temp
 = mkViewForm (init,{formid & lifespan = Temp}) bm hst				// constant i-data are never stored

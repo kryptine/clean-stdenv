@@ -9,6 +9,7 @@ import Gerda, StdEnv
 :: Tree a b = Bin !(Tree a b) !a !(Tree a b) | Tip !b
 :: Rose a = Rose a [Rose a]
 :: GRose m a = GRose a (m (GRose m a))
+:: Test` = Constr` Int
 
 Start world 
 	# (g, world) = openGerda "Clean Data Structures" world
@@ -28,16 +29,30 @@ Start world
 //	  x = ["Hello", "world"]
 //	  x = Rose 1 [Rose 2 [], Rose 3 []]
 //	  x = "a" +++ {'b' \\ _ <- [1..1000]}
-	  x = GRose (1, 'a', 0.5, "bud") [GRose (2, 'b', 0.75, "another bud") [], GRose (3, 'c', 0.875, "yet another bud") []]
+//	  x = GRose (1, 'a', 0.5, "bud") [GRose (2, 'b', 0.75, "another bud") [], GRose (3, 'c', 0.875, "yet another bud") []]
 //	  x = [1..10000]
+//	  x = array {strictArray {1, 2, 3}, strictArray {1 .. 100}}
+//	  x = Constr` 42
+	  x = gerdaObject 42
 	  g = writeGerda "test" x g
 	  (y, g) = readGerda "test" g
-	= (y `typeOf` x, closeGerda g world)
+	  f = case y of Just {gerdaWrite} -> gerdaWrite; _ -> const id
+	  h = case y of Just {gerdaRead} -> gerdaRead; _ -> (\g -> (undef, g))
+	  g = f 123 g
+	  (w, g) = h g
+	  (z, g) = readGerda "test" g
+	= (y `typeOf` x, Just w `typeOf` x.gerdaValue, z `typeOf` x, closeGerda g world)
 where
 	(`typeOf`) :: !(Maybe a) a -> Maybe a
 	(`typeOf`) x _ = x
 
-derive gerda Tree, Rose, R, N, (,), (,,), (,,,), GRose//, []
+	array :: !{a} -> {a}
+	array x = x
+
+	strictArray :: !{!a} -> {!a}
+	strictArray x = x
+
+derive gerda Tree, Rose, R, N, (,), (,,), (,,,), GRose, Test`
 
 /*
 :: T3 a b c = C3 a b c | D3 | E3

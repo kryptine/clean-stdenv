@@ -40,21 +40,21 @@ where
 		# ((b,bodya),ch,hst) = gec_ab ((a,prevbody),ch,hst)
 		= (((b,c),bodya),ch,hst)
 
-edit :: (FormId a) -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
+edit :: (FormId a) -> GecCircuit a a |  iData, TC a
 edit formid = HGC mkApplyEdit`
 where
 	mkApplyEdit` ((initval,prevbody),ch,hst) 
 	# (na,hst) = mkApplyEditForm (Init,setFormId formid initval) initval hst
 	= ((na.value,[(formid.id,BodyTag na.form):prevbody]),ch||na.changed,hst) // propagate change
 
-display :: (FormId a) -> GecCircuit a a |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC a
+display :: (FormId a) -> GecCircuit a a |  iData, TC a
 display formid = HGC mkEditForm`
 where
 	mkEditForm` ((val,prevbody),ch,hst) 
 	# (na,hst) = mkEditForm (Set,setFormId {formid & mode = Display} val) hst
 	= ((na.value,[(formid.id,BodyTag na.form):prevbody]),ch||na.changed,hst)
 
-store :: (FormId s) -> GecCircuit (s -> s) s |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC s
+store :: (FormId s) -> GecCircuit (s -> s) s |  iData, TC s
 store formid = HGC mkStoreForm`
 where
 	mkStoreForm` ((fun,prevbody),ch,hst) 
@@ -67,7 +67,7 @@ self fun gecaa = feedback gecaa (arr fun)
 feedback :: (GecCircuit a b) (GecCircuit b a) -> (GecCircuit a b)
 feedback (HGC gec_ab) (HGC gec_ba) = HGC (gec_ab o gec_ba o gec_ab)
 
-loops :: (GecCircuit (a, b) (c, b)) -> GecCircuit a c |  gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC b
+loops :: (GecCircuit (a, b) (c, b)) -> GecCircuit a c |  iData, TC b
 loops (HGC gec_abcb) = HGC loopForm
 where
 	loopForm ((aval,prevbody),ch,hst) 

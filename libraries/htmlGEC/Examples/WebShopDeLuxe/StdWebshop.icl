@@ -265,7 +265,7 @@ scriptName = "openwindow()"
 
 mkShopTable :: (Int,Int) (Headers d) [ItemData d] [BodyTag] [BodyTag] -> BodyTag
 mkShopTable (cnt,max) headers items infobuttons deladdbuttons
-	= table
+	= 	table
 		[ empty ++ itemHeader ++ dataHeader ++ empty ++ empty
 		: [	CntRow i max ++ itemRow item ++ dataRow headers data ++ mkButtonRow infobutton ++ mkButtonRow deladdbutton
 			\\ i           <- [cnt..]

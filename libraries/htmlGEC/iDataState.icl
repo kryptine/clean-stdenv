@@ -103,7 +103,7 @@ where
 	= case value of 
 		Nothing 		= (False,Nothing,Leaf_,world)
 		(Just string)	= case string_to_dynamic` string of
-							dyn=:(dynval::a^) 	-> (True,Just dynval,Node_ Leaf_ (id,OldState {format = StatDyn dyn, life = Persistent}) Leaf_,world)
+							dyn=:(dynval::a^) 	-> (True,Just dynval,Node_ Leaf_ (id,OldState {format = StatDyn dyn, life = Database}) Leaf_,world)
 							else				-> (False,Nothing,Leaf_,world)
 
 	// read out file and store as string
@@ -237,7 +237,7 @@ where
 		toHtmlState` (Node_ left (fid,OldState {life=Session,format=StatDyn dynval}) right) accu 
 			= toHtmlState` left [(fid,Session,StaticDynamic,dynamic_to_string dynval):toHtmlState` right accu]
 
-		// other old states will have lifespan page or persistent; they need not to be stored in the page
+		// other old states will have lifespan page or are persistent; they need not to be stored
 
 		toHtmlState` (Node_ left (fid,OldState s) right) accu 
 			= toHtmlState` left (toHtmlState` right accu)
@@ -319,7 +319,7 @@ where
 	writeAllPersistentStates (Node_ left _ right) nworld
 	= writeAllPersistentStates right (writeAllPersistentStates left nworld)
 
-	storeInDatabase sid (DBStr string gerdafun) nworld=:{gerda}	//last value stored in tree hidden in curried function
+	storeInDatabase sid (DBStr string gerdafun) nworld=:{gerda}	//last value is stored in curried write function
 	# gerda = gerdafun gerda
 	= {nworld & gerda = gerda}
 	storeInDatabase sid (StatDyn dynval) nworld=:{gerda}		//write the dynamic as a string to the database

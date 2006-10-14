@@ -8,15 +8,14 @@ import tree
 derive gForm []
 derive gUpd []
 
-
 derive gForm 	Record
 derive gUpd 	Record
 derive gParse 	Record
 derive gPrint 	Record
 derive gerda	Record
 
-//Start world  = doHtmlServer MyPage4  world
 Start world  = doHtmlServer MyPage  world
+//Start world  = doHtmlServer testdb  world
 
 
 :: Record = {name :: String, address :: String, zipcode :: Int}
@@ -24,6 +23,11 @@ Start world  = doHtmlServer MyPage  world
 myrecord :: [Record]
 myrecord = createDefault
 
+myfun file 
+	= if (sfend2 file file) (fwritec 'a' file) (fwritec 'b' file)
+	where
+		sfend2 n m = sfend n		
+	
 MyPage4 hst
 //# (myrecord,hst) = mkEditForm (Init,nFormId "bla" myrecord)  hst
 # (myrecord,hst) = vertlistFormButs 5 True (Init,nFormId "bla" myrecord)  hst
@@ -32,7 +36,7 @@ MyPage4 hst
 	, BodyTag myrecord.form
 	]  hst
 
-myBalancedTree 	= pFormId "BalancedTree" 	(fromListToBalTree [0])
+myBalancedTree 	= dbFormId "BalancedTree" 	(fromListToBalTree [0])
 mySortedList	= nFormId "SortedList"  	[0]
 
 MyPage hst

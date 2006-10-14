@@ -355,6 +355,12 @@ OtherModules
 				SizeX:	800
 				SizeY:	640
 		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	10
+				Y:	10
+				SizeX:	800
+				SizeY:	640
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -619,7 +625,6 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_system.o
 		Path:	{Project}\Clean System Files\GenericDatabase.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
-		Path:	{Project}\Clean System Files\odbccp.o
 		Path:	{Project}\Clean System Files\odbc.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdCharList.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdTuple.o
@@ -636,13 +641,14 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdArray.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdClass.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdChar.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdMisc.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdInt.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdBool.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdMisc.o
 		Path:	{Project}\Clean System Files\Gerda.o
+		Path:	{Project}\Clean System Files\odbccp.o
 	Dlib
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\kernel_library
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\user_library

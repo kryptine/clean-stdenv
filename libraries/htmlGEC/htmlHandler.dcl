@@ -1,22 +1,36 @@
 definition module htmlHandler
 
-// Main entrance for en user
-// Generating HTML code, converting Clean types to GEC's, automatic dealing with form's ..
+// Converting Clean types to iData for automatic generation and dealing with Html form's ..
 // (c) MJP 2005 *** under construction
 
 import htmlDataDef, htmlFormData
 import StdBool
-import GenPrint, GenParse
-import Gerda
-TraceInput :== False		// set it to True if you want to see what kind of information is received from browser
 
+TraceInput :== False			// set it to True if you want to see what kind of information is received from browser
+MyDataBase :== "iDataDatabase"	// name of database being used by iData applications
+
+class iData a					// The collection of generic functions needed to make iData:	
+		| gForm {|*|}			//		Creates an Html Form
+		, gUpd  {|*|}			//		Makes it possible to edit the form and updates the corresponding value
+		, gPrint{|*|}			//		To serialize a form to a String
+		, gParse{|*|}			//		To de-serialize the string back to a value
+		, gerda {|*|} a			//		To store and retrieve a value in a database
+		//TC a					//		To be able to store values in a dynamic
+								//		TC is a special class cannot be included here
+
+generic gForm a :: !(InIDataId a) !*HSt -> *(Form a, !*HSt)		// user defined gForms: use "specialize"	
+generic gUpd a 	:: UpdMode a -> (UpdMode,a)						// gUpd can simply be derived
+import  GenPrint
+import  GenParse
+import  Gerda
+
+derive gForm Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD//, (,) 
+derive gUpd  Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD//, (,) 
 derive bimap Form, FormId
 
-//:: *HSt 					// unique state required for creating Html forms
-
-:: *HSt 		= 	{ cntr 		:: Int // InputId		// counts position in expression
+:: *HSt 		= 	{ cntr 		:: Int 			// counts position in expression
 					, states 	:: *FormStates  // all form states are collected here ... 	
-					, world		:: *NWorld		// to enable all other kinds of I/O
+					, world		:: *NWorld		// to enable file I/O, database I/O, ...
 					}	
 
 // doHtml main wrapper for generating & handling of a Html form
@@ -24,19 +38,11 @@ derive bimap Form, FormId
 doHtml 			:: .(*HSt -> (Html,!*HSt)) *World -> *World  	// use this application with some external server and php
 doHtmlServer 	:: (*HSt -> (Html,!*HSt))  *World -> *World 	// use this application with the build-in Clean server: http://localhost/clean
 
-// mkViewForm is the swiss army nife function creating stateful interactive forms with a view v of data d
+// mkViewForm is the *swiss army nife* function creating stateful interactive forms with a view v of data d
 // make shure that all editors have a unique identifier !
 
-mkViewForm 		:: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC v
-
-// gForm converts any Clean type to html code (form) to be used in a body
-// gUpd updates a value of type t given any user input in the html form
-
-generic gForm a :: !(InIDataId a) !*HSt -> *(Form a, !*HSt)		// user defined gForms: use "specialize"	
-generic gUpd a 	:: UpdMode a -> (UpdMode,a)							// gUpd can simply be derived
-
-derive gForm Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD//, (,) 
-derive gUpd  Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD//, (,) 
+mkViewForm 		:: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | iData, TC v
+//mkViewForm 		:: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC v
 
 // specialize has to be used if one wants to specialize gForm for a user-defined type
 
@@ -57,13 +63,16 @@ instance FileSystem HSt												// enabling file IO on HSt
 appWorldHSt		:: !.(*World -> *World)       !*HSt -> *HSt			// enabling World operations on HSt
 accWorldHSt		:: !.(*World -> *(.a,*World)) !*HSt -> (.a,!*HSt)	// enabling World operations on HSt
 
-// for testing
+
+// Specialists section...
+
+// Added for testing of iData applications with GAST
 
 import iDataState
 
 runUserApplication :: .(*HSt -> *(.a,*HSt)) *FormStates *NWorld -> *(.a,*FormStates,*NWorld)
 
-// low level utility functions handy when specialize cannot be used, only to be used by experts !!
+// Some low level utility functions handy when specialize cannot be used, only to be used by experts !!
 
 incrHSt 		:: Int *HSt -> *HSt											// Cntr := Cntr + 1
 CntrHSt 		:: *HSt -> (Int,*HSt)										// Hst.Cntr
@@ -73,3 +82,4 @@ getChangedId	:: !*HSt -> (String,!*HSt)					// id of form that has been changed 
 :: UpdMode	= UpdSearch UpdValue Int		// search for indicated postion and update it
 			| UpdCreate [ConsPos]			// create new values if necessary
 			| UpdDone						// and just copy the remaining stuff
+
