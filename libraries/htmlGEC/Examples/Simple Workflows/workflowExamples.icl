@@ -7,7 +7,7 @@ import htmlTask
 derive gForm []
 derive gUpd []
 
-
+:: Void = Void
 
 //Start world = doHtmlServer (mkflow CoffeeMachineInf) world
 //Start world = doHtmlServer (mkflow (requestTask 100)) world
@@ -15,11 +15,32 @@ derive gUpd []
 //Start world = doHtmlServer (mkflow CreateMusic) world
 //Start world = doHtmlServer (mkflow (Quotation myQuotation)) world
 //Start world = doHtmlServer (mkflow travel) world
-Start world = doHtmlServer (mkflow agenda) world
+Start world = doHtmlServer (mkflow twotasks) world
 where
 	mkflow tasks hst 
 	# (html,hst) = startTask tasks hst
 	= mkHtml "test" html hst
+
+:: RecForm = {name :: String, number:: Int}
+
+twotasks tst
+# ((tbname,tname),tst) 		= mkLTask "name"   (STask "name" "") tst		// split name task
+# ((tbnumber,tnumber),tst)	= mkLTask "number" (STask "number" 0) tst		// split number task
+= PTasks
+	 [( "employee1", tname `bind` void)							// assign name task
+	 ,( "employee2", tnumber `bind` void)						// assign number task
+	 ,( "boss"
+	  , (PTask2
+	  		(tbname,			// ask for name and
+	  		 tbnumber))			// ask for number in any order
+		`bind` 										// construct record form
+			\(name,number) -> returnTask {name = name, number = number}
+		`bind` \_ -> STask_button "klaar" (returnV Void)  
+	  )
+	 ] tst
+where
+	void _ tst = returnV Void tst
+
 
 optelTaak tst
 # (a,tst) = STask "waarde1" 0 tst
@@ -93,11 +114,11 @@ AnalyseForm tst
 # ((_,either),tst) = STask "Kies" (Dsp geslacht,Naam) tst
 = returnTask (either,if (either == Naam) naam woonplaats) tst
 
-derive gForm EenOfAnder
-derive gUpd EenOfAnder
-derive gParse EenOfAnder
-derive gPrint EenOfAnder
-derive gerda EenOfAnder
+derive gForm EenOfAnder, RecForm, Void
+derive gUpd EenOfAnder, RecForm, Void
+derive gParse EenOfAnder, RecForm, Void
+derive gPrint EenOfAnder, RecForm, Void
+derive gerda EenOfAnder, RecForm, Void
 
 instance == EenOfAnder
 where
