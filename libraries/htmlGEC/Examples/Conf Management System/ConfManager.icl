@@ -14,9 +14,7 @@ Start world = doHtmlServer mainEntrance world
 mainEntrance :: *HSt -> *(Html,*HSt)
 mainEntrance hst
 # (body,hst) 	= loginhandling hst				// a login will be checked on correctness each time a page is requested !
-= mkHtml "Conference Manager" 
-	[ BodyTag body
-	] hst
+= mkHtml "Conference Manager" body hst
 
 
 //Start world = doHtmlServer test world
