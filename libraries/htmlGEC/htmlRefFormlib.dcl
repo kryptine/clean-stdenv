@@ -14,7 +14,7 @@ invokeRefEditor :: (!(InIDataId b) !*HSt -> (Form d,!*HSt)) (InIDataId b) !*HSt 
 
 universalRefEditor 	:: !(InIDataId (Ref2 a)) !(a -> Judgement)  !*HSt -> (Form a,!*HSt)   	| iData, TC a
 
-universalDB 		:: !Init !(String a -> Judgement) !String !a !*HSt -> (a,!*HSt)   		| iData, TC a
+universalDB 		:: !(!Init,!a) !String !(String a -> Judgement) !*HSt -> (a,!*HSt) 		| iData, TC a
 
 // Usefull for exception handling
 

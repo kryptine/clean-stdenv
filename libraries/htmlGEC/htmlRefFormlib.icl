@@ -72,8 +72,8 @@ where
 
 // editor for persistent information
 
-universalDB :: !Init !(String a -> Judgement) !String !a !*HSt -> (a,!*HSt)   | iData, TC a
-universalDB init invariant filename value hst
+universalDB :: !(!Init,!a) !String !(String a -> Judgement) !*HSt -> (a,!*HSt)   | iData, TC a
+universalDB (init,value) filename invariant hst
 # (dbf,hst)			= myDatabase Init 0 value hst				// create / read out database file
 # dbversion			= fst dbf.value								// version number stored in database
 # dbvalue			= snd dbf.value								// value stored in database

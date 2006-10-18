@@ -50,7 +50,3 @@ instance ==		  PasswordBox
 :: HtmlTime 	= 	Time Int Int Int				// Hours Minutes Seconds
 
 getTimeAndDate :: !*HSt -> *(!HtmlTime,!HtmlDate,!*HSt)
-
-
-
-

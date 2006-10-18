@@ -11,8 +11,7 @@ import StdListExtensions
 AccountsDB :: !Init  !ConfAccounts *HSt -> (ConfAccounts,!*HSt) 				// conf management database
 AccountsDB init accounts hst 
 # accounts = setInvariantAccounts accounts										// ensure that all links are correct
-= universalDB init (\s a -> invariantLogAccounts s a + invariantConfAccounts s a) 
-	uniqueDBname accounts hst 
+= universalDB (init,accounts,uniqueDBname) (\s a -> invariantLogAccounts s a + invariantConfAccounts s a) hst 
 
 PaperNrStore :: !(Int -> Int) *HSt -> (Int,!*HSt) // paper counter
 PaperNrStore fun hst 
