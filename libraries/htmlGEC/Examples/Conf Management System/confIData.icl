@@ -11,11 +11,11 @@ import StdListExtensions
 AccountsDB :: !Init  !ConfAccounts *HSt -> (ConfAccounts,!*HSt) 				// conf management database
 AccountsDB init accounts hst 
 # accounts = setInvariantAccounts accounts										// ensure that all links are correct
-= universalDB (init,accounts,uniqueDBname) (\s a -> invariantLogAccounts s a + invariantConfAccounts s a) hst 
+= universalDB (init,storageOption,accounts,uniqueDBname) (\s a -> invariantLogAccounts s a + invariantConfAccounts s a) hst 
 
 PaperNrStore :: !(Int -> Int) *HSt -> (Int,!*HSt) // paper counter
 PaperNrStore fun hst 
-# (intf,hst) = mkStoreForm (Init,{pFormId "LastPaperNr" 1 & mode = NoForm}) fun hst
+# (intf,hst) = mkStoreForm (Init,{storeFormId "LastPaperNr" 1 & mode = NoForm}) fun hst
 = (intf.value,hst)
 
 // utility access functions for dereferencing
@@ -61,19 +61,19 @@ editorRefPerson :: !(InIDataId RefPerson) !*HSt -> (Form Person,!*HSt)
 editorRefPerson (init,formid) hst
 # (RefPerson refperson)					= formid.ival
 # (Ref2 name)							= refperson
-= universalRefEditor (init,reuseFormId formid refperson) (invariantPerson name) hst
+= universalRefEditor storageOption (init,reuseFormId formid refperson) (invariantPerson name) hst
 
 editorRefPaper :: !(InIDataId RefPaper) !*HSt -> (Form Paper,!*HSt)
 editorRefPaper (init,formid) hst
 # (RefPaper refpaper)					= formid.ival
 # (Ref2 name)							= refpaper
-= universalRefEditor (init,reuseFormId formid refpaper) (invariantPaper name) hst
+= universalRefEditor storageOption (init,reuseFormId formid refpaper) (invariantPaper name) hst
 
 editorRefReport :: !(InIDataId RefReport) !*HSt -> (Form (Maybe Report),!*HSt)
 editorRefReport (init,formid) hst
 # (RefReport refreport)					= formid.ival
 # (Ref2 name)							= refreport
-= universalRefEditor (init,reuseFormId formid refreport) (invariant name) hst
+= universalRefEditor storageOption (init,reuseFormId formid refreport) (invariant name) hst
 where
 	invariant name Nothing 				= Ok
 	invariant name (Just report)		= invariantReport name report
@@ -82,7 +82,7 @@ editorRefDiscussion :: !(InIDataId RefDiscussion) !*HSt -> (Form Discussion,!*HS
 editorRefDiscussion (init,formid) hst
 # (RefDiscussion refdiscus)				= formid.ival
 # (Ref2 name)							= refdiscus
-= universalRefEditor (init,reuseFormId formid refdiscus) (const Ok) hst
+= universalRefEditor storageOption (init,reuseFormId formid refdiscus) (const Ok) hst
 
 // specialized idata forms
 

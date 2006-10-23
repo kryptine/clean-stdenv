@@ -187,12 +187,12 @@ discussPapersPage account accounts hst
 # selectedpaper		= allpapernrs!!selected
 # mbpaperrefinfo	= getPaperInfo selectedpaper accounts
 # (RefDiscussion (Ref2 name)) = (fromJust mbpaperrefinfo).discussion
-# (disclist,hst)	= universalDB (Init,Discussion [],name) (\_ _ -> Ok) hst
+# (disclist,hst)	= universalDB (Init,storageOption,Discussion [],name) (\_ _ -> Ok) hst
 # (time,date,hst)	= getTimeAndDate hst
 # (newsubmit,newdiscf,hst)	
 					= mkSubStateForm (if pdfun.changed Set Init, nFormId "sh_dpp_adddisc" (TS 80 "")) disclist
 						(\s -> addItemTextInput (account.login.loginName) time date (toS s)) hst
-# (_,hst)			= if newsubmit (universalDB (Set,newdiscf.value,name) (\_ _ -> Ok) hst) (undef,hst)
+# (_,hst)			= if newsubmit (universalDB (Set,storageOption,newdiscf.value,name) (\_ _ -> Ok) hst) (undef,hst)
 # (disclistf,hst) 	= mkEditForm (Set,sdFormId "sh_show_disc" newdiscf.value) hst
 # (newsubmit,newdiscf,hst)	
 					= if newsubmit (mkSubStateForm (Set,nFormId "sh_dpp_adddisc" (TS 80 "")) disclist

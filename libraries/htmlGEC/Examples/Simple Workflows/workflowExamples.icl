@@ -7,6 +7,7 @@ import htmlTask
 derive gForm []
 derive gUpd []
 
+
 :: Void = Void
 
 //Start world = doHtmlServer (mkflow CoffeeMachineInf) world
@@ -15,13 +16,26 @@ derive gUpd []
 //Start world = doHtmlServer (mkflow CreateMusic) world
 //Start world = doHtmlServer (mkflow (Quotation myQuotation)) world
 //Start world = doHtmlServer (mkflow travel) world
-Start world = doHtmlServer (mkflow twotasks) world
+Start world = doHtmlServer (mkflow twotasks2) world
 where
 	mkflow tasks hst 
 	# (html,hst) = startTask tasks hst
 	= mkHtml "test" html hst
 
+
+twotasks2 tst
+# ((tboss,tsecr),tst) 		= mkLTaskRTC2 "name" 25 tst		// split name task
+= PTasks
+	 [( "employee1", tsecr)							// assign name task
+	 ,( "boss", STask "ervoor" 0 `bind` 
+	 			\bi ->  tboss (STask "DoIt" bi) `bind`
+	 			\si ->  STask "erna" si
+	  )
+	 ] tst
+
+
 :: RecForm = {name :: String, number:: Int}
+
 
 twotasks tst
 # ((tbname,tname),tst) 		= mkLTask "name"   (STask "name" "") tst		// split name task

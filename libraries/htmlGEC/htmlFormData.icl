@@ -161,6 +161,7 @@ where
 
 instance == Lifespan
 where
+	(==) Database	 	Database		= True
 	(==) Persistent 	Persistent		= True
 	(==) PersistentRO 	PersistentRO	= True
 	(==) Session 		Session			= True

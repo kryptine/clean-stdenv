@@ -40,3 +40,7 @@ MyDir 				:: ServerKind -> String		// name of directory in which persistent form
 
 traceHtmlInput		:: ServerKind (Maybe String) -> BodyTag		// for debugging showing the information received from browser
 
+// low level encoding and decoding 
+
+encodeString :: String -> String
+decodeString :: String -> *String

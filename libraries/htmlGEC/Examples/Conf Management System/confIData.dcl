@@ -67,3 +67,10 @@ derefPersons 	:: [RefPerson] !*HSt -> ([Person],!*HSt)
 derefReports 	:: [RefReport] !*HSt -> ([Maybe Report],!*HSt)
 getAllPersons 	:: !ConfAccounts !*HSt -> ([RefPerson],[Person],!*HSt)
 getAllMyReports :: !ConfAccount !ConfAccounts !*HSt -> ([(Int,[(Person, Maybe Report)])],!*HSt)
+
+// global setting to store either in files or in a database 
+
+//storageOption 	:== Persistent			// Choose this one to store in files
+storageOption 	:== Database		// Choose this one to store in a database
+
+storeFormId 	:== if (storageOption == Persistent) pFormId dbFormId 

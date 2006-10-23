@@ -46,7 +46,7 @@ MainModule
 		NeverMemoryProfile:	False
 		NeverTimeProfile:	False
 		StrictnessAnalysis:	True
-		ListTypes:	InferredTypes
+		ListTypes:	NoTypes
 		ListAttributes:	True
 		Warnings:	True
 		Verbose:	True
@@ -62,11 +62,11 @@ MainModule
 	DclOpen:	False
 	Icl
 		WindowPosition
-			X:	124
-			Y:	26
-			SizeX:	932
+			X:	12
+			Y:	10
+			SizeX:	892
 			SizeY:	556
-	IclOpen:	False
+	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
 	Module
@@ -671,15 +671,15 @@ OtherModules
 		Dcl
 			WindowPosition
 				X:	77
-				Y:	-17
+				Y:	0
 				SizeX:	806
 				SizeY:	566
 		DclOpen:	False
 		Icl
 			WindowPosition
-				X:	306
-				Y:	0
-				SizeX:	779
+				X:	106
+				Y:	7
+				SizeX:	999
 				SizeY:	574
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
@@ -4318,10 +4318,10 @@ OtherModules
 		DclOpen:	False
 		Icl
 			WindowPosition
-				X:	-2
-				Y:	16
-				SizeX:	897
-				SizeY:	516
+				X:	-29
+				Y:	26
+				SizeX:	932
+				SizeY:	504
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -4764,29 +4764,28 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup2.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_system.o
 		Path:	{Project}\Clean System Files\balanceTree.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlRefFormlib.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\StdHtml.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdCharList.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdTuple.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOrdList.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnum.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnum.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdList.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFile.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdString.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdReal.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemArray.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdArray.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdClass.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdChar.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdMisc.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdInt.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdBool.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnv.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnv.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdBool.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdInt.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdMisc.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdChar.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdClass.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdArray.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemArray.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdReal.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdString.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFile.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdList.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnum.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnum.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOrdList.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdTuple.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdCharList.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\StdHtml.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlFormData.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlDataDef.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlStyleDef.o
@@ -4797,9 +4796,9 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnumStrict.o
 		Path:	{Application}\Libraries\Gerda\Clean System Files\Gerda.o
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
 		Path:	{Application}\Libraries\Gerda\Clean System Files\odbc.o
 		Path:	{Application}\Libraries\Gerda\Clean System Files\odbccp.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
 		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlStylelib.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlHandler.o
@@ -4916,6 +4915,7 @@ Static
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlButtons.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlFormlib.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlRefFormlib.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlArrow.o
 		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
 		Path:	{Application}\Libraries\Generics\Clean System Files\GenEq.o

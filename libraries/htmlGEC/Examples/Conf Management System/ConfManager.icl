@@ -241,8 +241,8 @@ where
 	| isJust exception		
 		= ([Txt "Sorry, an exception occurred, something went wrong, you have to try again"],hst)
 
-	# (_,hst)				= mkEditForm (Set,pFormId uniquename (0,person)) hst		// store person info
-	# (_,hst)				= mkEditForm (Set,pFormId uniquepaper (0,paperf.value)) hst	// store paper info
+	# (_,hst)				= mkEditForm (Set,storeFormId uniquename (0,person)) hst		// store person info
+	# (_,hst)				= mkEditForm (Set,storeFormId uniquepaper (0,paperf.value)) hst	// store paper info
 	# (_,hst)				= guestAccountStore (\(_,guest) -> (False,account)) hst		// kick out guest
 	= ([B [] "Paper submitted.",Br, Txt "Use your account to update provided information",Br,
 			Txt "and stay in touch with us",Br],hst)

@@ -9,12 +9,12 @@ import StdEnv, htmlHandler, htmlButtons
 :: Ref2 a = Ref2 String
 instance == (Ref2 a)
 
-ref2EditForm 	:: !(InIDataId a) !(InIDataId (Ref2 a))  !*HSt -> (Form a,!*HSt) 			| iData, TC a
-invokeRefEditor :: (!(InIDataId b) !*HSt -> (Form d,!*HSt)) (InIDataId b) !*HSt -> (Form b,!*HSt)
+ref2EditForm 		:: !(InIDataId a) !(InIDataId (Ref2 a))  !*HSt -> (Form a,!*HSt) 					| iData, TC a
+invokeRefEditor 	:: (!(InIDataId b) !*HSt -> (Form d,!*HSt)) (InIDataId b) !*HSt -> (Form b,!*HSt)
 
-universalRefEditor 	:: !(InIDataId (Ref2 a)) !(a -> Judgement)  !*HSt -> (Form a,!*HSt)   	| iData, TC a
+universalRefEditor 	:: !Lifespan !(InIDataId (Ref2 a)) !(a -> Judgement)  !*HSt -> (Form a,!*HSt)   				| iData, TC a
 
-universalDB 		:: !(!Init,!a,!String) !(String a -> Judgement) !*HSt -> (a,!*HSt) 		| iData, TC a
+universalDB 		:: !(!Init,!Lifespan,!a,!String) !(String a -> Judgement) !*HSt -> (a,!*HSt) 		| iData, TC a
 
 // Usefull for exception handling
 

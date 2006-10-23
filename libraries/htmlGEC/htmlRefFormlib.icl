@@ -28,8 +28,8 @@ invokeRefEditor editor (init,formid) hst
 # (idata,hst)		= editor (init,formid) hst
 = ({idata & value = formid.ival},hst)
 
-universalRefEditor 	:: !(InIDataId (Ref2 a)) !(a -> Judgement)  !*HSt -> (Form a,!*HSt)   	| iData, TC a
-universalRefEditor (init,formid) invariant  hst
+universalRefEditor 	:: !Lifespan !(InIDataId (Ref2 a)) !(a -> Judgement)  !*HSt -> (Form a,!*HSt)   	| iData, TC a
+universalRefEditor lifespan (init,formid) invariant  hst
 # (Ref2 filename)	= formid.ival
 | filename == ""	= mkEditForm (Init,xtFormId "ure_TEMP" createDefault) hst
 # (dbf,hst)			= myDatabase Init filename (0,createDefault) hst		
@@ -57,9 +57,16 @@ universalRefEditor (init,formid) invariant  hst
 where
 	myDatabase dbinit filename cntvalue hst 
 	# databaseId	= {reuseFormId formid (Ref2 filename) & id = formid.id +++ "refto" /*+++ filename*/}
+	= ref2EditForm (dbinit, storeFormId "" cntvalue) (init,databaseId) hst	// write the database
+
+	storeFormId => if (lifespan == Persistent) xpFormId xdbFormId
+
+/*
 	= case dbinit of
-		Init = ref2EditForm (Init,xrFormId "" cntvalue) (init,databaseId) hst 	// read the database
-		Set	 = ref2EditForm (Set, xpFormId "" cntvalue) (init,databaseId) hst	// write the database
+//		Init = ref2EditForm (Init,xrFormId "" cntvalue) (init,databaseId) hst 	// read the database
+		Init = ref2EditForm (Init,storeFormId "" cntvalue) (init,databaseId) hst 	// read the database
+		Set	 = ref2EditForm (Set, storeFormId "" cntvalue) (init,databaseId) hst	// write the database
+*/
 
 	myVersion init filename cnt hst	= mkEditForm (init,{reuseFormId formid cnt & id = ("vrs_r_" +++ filename)
 																				, mode = NoForm}) hst						// to remember version number
@@ -72,8 +79,8 @@ where
 
 // editor for persistent information
 
-universalDB :: !(!Init,!a,!String) !(String a -> Judgement) !*HSt -> (a,!*HSt)   | iData, TC a
-universalDB (init,value,filename) invariant hst
+universalDB :: !(!Init,!Lifespan,!a,!String) !(String a -> Judgement) !*HSt -> (a,!*HSt)   | iData, TC a
+universalDB (init,lifespan,value,filename) invariant hst
 # (dbf,hst)			= myDatabase Init 0 value hst				// create / read out database file
 # dbversion			= fst dbf.value								// version number stored in database
 # dbvalue			= snd dbf.value								// value stored in database
@@ -94,8 +101,9 @@ universalDB (init,value,filename) invariant hst
 # (_,hst)			= myDatabase Set versionf.value value hst 	// update database file
 = (value,hst)
 where
-	myDatabase Init cnt value hst = mkEditForm (Init,{rFormId filename (cnt,value) & mode = NoForm}) hst 	// read the database
-	myDatabase Set  cnt value hst = mkEditForm (Set, {pFormId filename (cnt,value) & mode = NoForm}) hst	// write the database
+	myDatabase init cnt value hst = mkEditForm (init,{storeFormId filename (cnt,value) & mode = NoForm}) hst 	// read the database
+	where
+		storeFormId = if (lifespan == Persistent) pFormId dbFormId
 
 	myVersion init cnt hst	= mkEditForm (init,xtFormId ("vrs_db_" +++ filename) cnt) hst		// to remember version number
 

@@ -8,6 +8,60 @@ derive gParse 	Niks
 derive gPrint 	Niks
 derive gerda 	Niks
 
+
+import dynamic_string, EncodeDecode
+
+mkLTaskRTC2 :: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt) | iData, TC a
+mkLTaskRTC2 s a tst = LazyTask` (incTask tst)
+where
+	LazyTask` tst=:((j,myturn,html),hst) = ((bossTask, workerTask),tst)
+	where
+		workerTask tst = mkTask workerTask` tst
+		where
+			workerTask` tst=:((i,myturn,html),hst) 
+			# (boss,hst)	= bossStore (False,defaulttask) hst		// check input from boss
+			# (worker,hst)	= workerStore id hst				// check result from worker
+			# (bdone,btask)	= boss.value
+			# (wdone,wresult)= worker.value
+			| wdone			= (wresult,((i,True,html<|.|>  [Txt ("Lazy task \"" +++ s +++ "\" completed:")]),hst))	
+			| bdone
+				# (wresult,((_,wdone,whtml),hst)) = btask ((j++[0],True,[]),hst)	// apply task stored in memory
+				| wdone																// worker task finshed
+					# (_,hst)	= workerStore (\_ -> (wdone,wresult)) hst			// store task and status
+					= workerTask` ((i,myturn,whtml),hst) 							// complete as before
+				= (createDefault,((i,False,html <|.|> [Txt ("lazy task \"" +++ s +++ "\" activated:"),Br] <|.|> whtml),hst))
+			= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))		// no
+	
+		bossTask taska tst = mkTask bossTask` tst
+		where
+			bossTask` tst=:((i,myturn,html),hst) 
+			# (boss,hst)		= bossStore (False,defaulttask) hst		// check input from boss
+			# (worker,hst)		= workerStore id hst			// check result from worker
+			# (bdone,btask)		= boss.value
+			# (wdone,wresult)	= worker.value
+			| bdone && wdone	= (wresult,((i,True,html<|.|>  [Txt ("Result of lazy task \"" +++ s +++ "\" :")]),hst))	// finished
+			| not bdone
+				# (_, hst)		= bossStore (True,taska) hst	// store b information to communicate to worker	
+				= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))
+			= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))	
+	
+		workerStore   fun = mkStoreForm (Init,sFormId ("workerStore" <+++ mkTaskNr j) (False,createDefault)) fun 
+
+		bossStore (set,task) hst
+		# (boss,hst) 		= mkStoreForm (Init,sFormId ("bossStore" <+++ mkTaskNr j) initBoss) settask hst
+		# (bdone,encbtask)	= boss.value
+		# btask				= case string_to_dynamic` encbtask of
+									(mytask::Task a^) -> mytask
+									_ -> STask "Default2" a
+		= ({boss & value = (bdone,btask)},hst)
+		where
+			initBoss			 = (False,dynamic_to_string (dynamic defaulttask))
+			settask				 = if set (\_ -> (True,dynamic_to_string (dynamic task))) id
+			string_to_dynamic` s = string_to_dynamic ( {s` \\ s` <-: s})
+
+		defaulttask 		 = STask "Default" a
+
+
 :: *TSt 		:== (([Int],Bool,[BodyTag]),HSt)   	// Task State: task nr, has this task to be done?, html code accumulator
 
 :: Niks 		= Niks								// to make an empty task
@@ -43,10 +97,8 @@ where
 			workerTask` s tst=:((i,myturn,html),hst) 
 			# (boss,hst)	= bossStore id hst		// check input from boss
 			# (worker,hst)	= workerStore id hst	// check result from worker
-			# bdone			= fst boss.value
-			# binput		= snd boss.value
-			# wdone			= fst worker.value
-			# wresult		= snd worker.value
+			# (bdone,binput)= boss.value
+			# (wdone,wresult)= worker.value
 			| wdone			= (wresult,((i,True,html<|.|>  [Txt ("Lazy task \"" +++ s +++ "\" completed:")]),hst))	
 			| bdone
 				# (wresult,((_,wdone,whtml),hst)) = batask binput ((j++[0],True,[]),hst)	// apply task to input from boss
@@ -61,10 +113,8 @@ where
 			bossTask` tst=:((i,myturn,html),hst) 
 			# (boss,hst)				= bossStore id hst		// check input from boss
 			# (worker,hst)				= workerStore id hst	// check result from worker
-			# bdone						= fst boss.value
-			# binput					= snd boss.value
-			# wdone						= fst worker.value
-			# wresult					= snd worker.value
+			# (bdone,binput)= boss.value
+			# (wdone,wresult)= worker.value
 			| bdone && wdone			= (wresult,((i,True,html<|.|>  [Txt ("Result of lazy task \"" +++ s +++ "\" :")]),hst))	// finished
 			| not bdone
 				# (_, hst)		= bossStore (\_ -> (True,b)) hst	// store b information to communicate to worker	

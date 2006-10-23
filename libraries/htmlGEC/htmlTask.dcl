@@ -9,6 +9,9 @@ import StdHtml
 :: Task a		:== St *TSt a				// an interactive task
 :: IDataFun a	:== St *HSt (Form a)		// an iData Form
 
+mkLTaskRTC2 :: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt) | iData, TC a
+
+
 /*
 startTask		:: lift iData to iTask domain
 mkTask			:: promote TSt state function to an interactive Task, i.e. task will only be called when it is its turn
