@@ -14,10 +14,10 @@ import Gerda, StdEnv
 Start world 
 	# (g, world) = openGerda "Clean Data Structures" world
 //	  x = 42
-//	  x = C2
+//	  x = [[1]]
 //	  x = (1, 3.1415927, 'a', [C2, C1, C3])
 //	  x = [3, 5, 7]
-//	  x = [C3, C1, C2]
+//	  x = [C3, C1, C2, C1, C3, C2]
 //	  x = [[[[[[[1]]]]]]]
 //	  x = ["test"]
 //	  x = ['aapnoot']
@@ -26,25 +26,41 @@ Start world
 //	  x = Rose 1 [Rose 2 [], Rose 3 []]
 //	  x = [[C1, C2], [C3, C2, C1]]
 //	  x = {naam = ['aap'], leeftijd = 13.5, rec = Nothing}
-//	  x = ["Hello", "world"]
+	  x = ["Hello", "world"]
 //	  x = Rose 1 [Rose 2 [], Rose 3 []]
 //	  x = "a" +++ {'b' \\ _ <- [1..1000]}
 //	  x = GRose (1, 'a', 0.5, "bud") [GRose (2, 'b', 0.75, "another bud") [], GRose (3, 'c', 0.875, "yet another bud") []]
 //	  x = [1..10000]
 //	  x = array {strictArray {1, 2, 3}, strictArray {1 .. 100}}
 //	  x = Constr` 42
-	  x = gerdaObject 42
 	  g = writeGerda "test" x g
+	  g = writeGerda "test2" x2 g
 	  (y, g) = readGerda "test" g
-	  f = case y of Just {gerdaWrite} -> gerdaWrite; _ -> const id
-	  h = case y of Just {gerdaRead} -> gerdaRead; _ -> (\g -> (undef, g))
-	  g = f 123 g
-	  (w, g) = h g
-	  (z, g) = readGerda "test" g
-	= (y `typeOf` x, Just w `typeOf` x.gerdaValue, z `typeOf` x, closeGerda g world)
+	  (y2, g) = readGerda "test2" g
+/*	= case y `typeOf` x of
+		Just x`
+		  # g = writeGerda "test2" x` g
+		    (z, g) = readGerda "test" g
+		  -> (z `typeOf` x, closeGerda g world)*/
+	= (y `typeOf` x, y2 `typeOf` x2, closeGerda g world)
+//	  x = gerdaObject 42
+//	  g = writeGerda "test" x g
+//	  (y, g) = readGerda "test" g
+//	  f = case y of Just {gerdaWrite} -> gerdaWrite; _ -> const id
+//	  h = case y of Just {gerdaRead} -> gerdaRead; _ -> (\g -> (undef, g))
+//	  g = f 123 g
+//	  (w, g) = h g
+//	  (z, g) = readGerda "test" g
+//	= (y `typeOf` x, Just w `typeOf` x.gerdaValue, z `typeOf` x, closeGerda g world)
 where
 	(`typeOf`) :: !(Maybe a) a -> Maybe a
 	(`typeOf`) x _ = x
+
+	x :: Phantom [Int]
+	x = Opera
+
+	x2 :: Phantom Char
+	x2 = Opera
 
 	array :: !{a} -> {a}
 	array x = x
@@ -52,7 +68,9 @@ where
 	strictArray :: !{!a} -> {!a}
 	strictArray x = x
 
-derive gerda Tree, Rose, R, N, (,), (,,), (,,,), GRose, Test`
+derive gerda Tree, Rose, R, N, (,), (,,), (,,,), GRose, Test`, Phantom
+
+:: Phantom a = Opera
 
 /*
 :: T3 a b c = C3 a b c | D3 | E3

@@ -160,19 +160,16 @@ where
 	writeO _ g = writeR Nothing g
 
 	readO g = case readR g of
-					(Just ref, g) -> unsafeInterleave (readObject ref) g
+					(Just ref, g) -> unsafeRead readA ref g 
 					(_, g) -> (Nothing, g)
 	where
-		readObject ref g
-			# (m, g) = readFromTable tableName [] readA ref g
+		unsafeRead :: !(GerdaRead a) !Int !*Gerda -> (Maybe (OBJECT a), !*Gerda)
+		unsafeRead readA ref g=:{layout, malloc8, connection, environment}
+			# (state, _) = openSqlState (cast 0x9E5DA)
+			  g` = {index = 0, buffer = {}, layout = layout, malloc8 = malloc8, 
+			  		connection = connection, environment = environment, state = state}
+			  (m, _) = readFromTable tableName [] readA ref g`
 			= (mapMaybe OBJECT m, g)
-
-	unsafeInterleave :: (*Gerda -> *(a, *Gerda)) !*Gerda -> (a, !*Gerda)
-	unsafeInterleave f g=:{layout, malloc8, connection, environment}
-		# state = fst (openSqlState (cast 42))
-		  (x, _) = f {index = 0, buffer = {}, layout = layout, malloc8 = malloc8, 
-		  			connection = connection, environment = environment, state = state}
-		= (x, g)
 
 gerda{|OBJECT|} gerdaA = gerdaBimap (GenTypeApp (GenTypeCons "OBJECT")) [] (\(OBJECT x) -> x) OBJECT gerdaA
 
@@ -288,16 +285,17 @@ where
 		(columns, tables`, j) = layoutA attr constr field tables i
 		(columns`, tables``, k) = layoutB attr constr "" tables` j
 
-	writeP m g
-		# g = writeA (mapMaybe (\(PAIR x y) -> x) m) g
-		= writeB (mapMaybe (\(PAIR x y) -> y) m) g
+	writeP (Just (PAIR x y)) g
+		# g = writeA (Just x) g
+		= writeB (Just y) g
+	writeP _ g
+		# g = writeA Nothing g
+		= writeB Nothing g
 
 	readP g
 		# (ma, g) = readA g
 		  (mb, g) = readB g
-		= case (ma, mb) of 
-			(Just x, Just y) -> (Just (PAIR x y), g)
-			_ -> (Nothing, g)
+		= (case (ma, mb) of (Just x, Just y) -> Just (PAIR x y); _ -> Nothing, g)
 
 gerda{|UNIT|} =: GerdaFunctions typeU layoutU writeU readU
 where
@@ -311,7 +309,7 @@ where
 
 	readU g 
 		# (Just b, g) = readB g 
-		= (if b (Just UNIT) Nothing, g)
+		= if b (Just UNIT, g) (Nothing, g)
 		
 gerda{|Int|} =: gerdaInt []
 
@@ -390,12 +388,12 @@ where
 	writeM _ g = writeA Nothing g
 	
 	readM g 
-		# (m, g) = readA g 
+		# (m, g) = readA g
 		= (Just m, g)
 
 gerda{|String|} =: gerdaBimap typeS [] fromS toS (gerda{|*->*|} gerda{|*|})
 where
-	typeS _ = GenTypeApp (GenTypeCons "{#}") (GenTypeCons "Char")
+	typeS _ = GenTypeCons "_String"
 	
 	fromS s = CompactList {binary252 = s % (0, 251)} (f (s % (252, 1 << 30)))
 	where
@@ -491,6 +489,7 @@ where
 		# (avail, buffer) = buffer![index]
 		| avail == SQL_NULL_DATA = (Nothing, {g & index = index + dataSize, buffer = buffer})
 		# (x, buffer) = load avail index buffer 
+		#!x = x
 		= (Just x, {g & index = index + dataSize, buffer = buffer})
 	
 gerdaArray type gerdaA :== GerdaFunctions typeY layoutY writeY readY
@@ -543,9 +542,7 @@ mapWrite write f m g :== case m of
 	Just x -> write (Just (f x)) g
 	_ -> write Nothing g
 
-mapRead read f g :== case read g of 
-	(Just x, g) -> (Just (f x), g)
-	(_, g) -> (Nothing, g)
+mapRead read f g :== case read g of (m, g) -> (mapMaybe f m, g)
 
 layoutTable :: !String !GerdaLayout ![Table] -> [Table]
 layoutTable tableName layoutA layout
@@ -788,8 +785,8 @@ unify [GenTypeArrow x1 x2:xs] [GenTypeArrow y1 y2:ys]
 	= unify [x1, x2:xs] [y1, y2:ys]
 unify [GenTypeCons x:xs] [GenTypeCons y:ys] | x == y = unify xs ys
 unify [] [] = id
-/*unify xs ys = abort ("Cannot unify " +++ separatorList "," xs +++ " and " +++ separatorList "," ys)
-
+unify xs ys = abort ("Cannot unify " +++ separatorList "," xs +++ " and " +++ separatorList "," ys)
+/*
 occurs :: !String !GenType -> Bool
 occurs v (GenTypeVar x) = v == x
 occurs v (GenTypeCons x) = v == x
@@ -821,7 +818,7 @@ where
 		"CompactList" -> "x"
 		"{}" -> "a"
 		"{!}" -> "s"
-		"{#}" -> "u"
+		"_String" -> "u"
 		"GerdaObject" -> "g"
 		s | s % (0, 5) == "_Tuple" -> s % (6, size s - 1)
 		els -> els
@@ -858,12 +855,12 @@ instance == SqlAttr where
 	(==) _ _ = False
 
 LocalAlloc :: !Int !Int !*st -> (!Int, !*st)
-LocalAlloc flags size st = code inline {
+LocalAlloc flags size st = code {
 		ccall LocalAlloc@8 "PII:I:A"
 	}
 
 LocalFree ::  !Int !*st -> (!Int, !*st)
-LocalFree p st = code inline {
+LocalFree p st = code {
 		ccall LocalFree@4 "PI:I:A"
 	}
 
@@ -890,15 +887,15 @@ poke p v st = code {
 }
 
 peek :: !Int !*st -> (!Int, !*st)
-peek p st = code inline {
+peek p st = code {
     push_b_a 0
     pop_b 1
     pushD_a 0
     pop_a 1
 }
 
-cast :: !u:a -> u:b
-cast _ = code inline {
+cast :: !u:a -> v:b
+cast _ = code {
 		pop_a	0
 	}
 

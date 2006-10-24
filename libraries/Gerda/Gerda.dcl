@@ -10,7 +10,7 @@ writeGerda :: !String !a !*Gerda -> *Gerda | gerda{|*|} a
 readGerda :: !String !*Gerda -> (!Maybe a, !*Gerda) | gerda{|*|} a
 
 :: Binary252 = {binary252 :: !.String}
-:: CompactList a = CompactList !a (Maybe (CompactList a))
+:: CompactList a = CompactList a .(Maybe (CompactList a))
 :: GerdaObject a = {gerdaValue :: !a, 
 					gerdaWrite :: a -> *Gerda -> *Gerda,
 					gerdaRead :: *Gerda -> *(a, *Gerda)}
