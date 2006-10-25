@@ -25,24 +25,27 @@ Start world
 //	  x = Bin (Tip 'a') 42 (Tip 'b')
 //	  x = Rose 1 [Rose 2 [], Rose 3 []]
 //	  x = [[C1, C2], [C3, C2, C1]]
-//	  x = {naam = ['aap'], leeftijd = 13.5, rec = Nothing}
-	  x = ["Hello", "world"]
+//	  r1 = {naam = ['aap'], leeftijd = 13.5, rec = Nothing} 
+//	  r2 = {naam = ['aap'], leeftijd = 13.5, rec = Just r1}
+//	  x = array {r1, r2, r2, r1}
+//	  x = ["Hello", "world"]
 //	  x = Rose 1 [Rose 2 [], Rose 3 []]
 //	  x = "a" +++ {'b' \\ _ <- [1..1000]}
 //	  x = GRose (1, 'a', 0.5, "bud") [GRose (2, 'b', 0.75, "another bud") [], GRose (3, 'c', 0.875, "yet another bud") []]
 //	  x = [1..10000]
 //	  x = array {strictArray {1, 2, 3}, strictArray {1 .. 100}}
 //	  x = Constr` 42
-	  g = writeGerda "test" x g
-	  g = writeGerda "test2" x2 g
-	  (y, g) = readGerda "test" g
-	  (y2, g) = readGerda "test2" g
+	  x = PAIR Nothing Nothing
+	  g = writeGerda "test`.1" x g
+//	  g = writeGerda "test2" x2 g
+	  (y, g) = readGerda "test`.1" g
+//	  (y2, g) = readGerda "test2" g
 /*	= case y `typeOf` x of
 		Just x`
 		  # g = writeGerda "test2" x` g
 		    (z, g) = readGerda "test" g
 		  -> (z `typeOf` x, closeGerda g world)*/
-	= (y `typeOf` x, y2 `typeOf` x2, closeGerda g world)
+	= (y `typeOf` x, closeGerda g world)
 //	  x = gerdaObject 42
 //	  g = writeGerda "test" x g
 //	  (y, g) = readGerda "test" g
@@ -53,7 +56,7 @@ Start world
 //	  (z, g) = readGerda "test" g
 //	= (y `typeOf` x, Just w `typeOf` x.gerdaValue, z `typeOf` x, closeGerda g world)
 where
-	(`typeOf`) :: !(Maybe a) a -> Maybe a
+	(`typeOf`) :: !(Maybe (EITHER Int Int)) (PAIR (Maybe Int) (Maybe Int)) -> Maybe (EITHER Int Int)
 	(`typeOf`) x _ = x
 
 	x :: Phantom [Int]

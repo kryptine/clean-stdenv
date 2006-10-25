@@ -186,10 +186,11 @@ where
 		either2pair (LEFT x) = PAIR (Just x) Nothing
 		either2pair (RIGHT y) = PAIR Nothing (Just y)
 	
-	readE = mapRead readP pair2either
+	readE g = case readP g of (m, g) -> (pair2either m, g)
 	where
-		pair2either (PAIR (Just x) _) = LEFT x
-		pair2either (PAIR _ (Just y)) = RIGHT y
+		pair2either (Just (PAIR (Just x) _)) = Just (LEFT x)
+		pair2either (Just (PAIR _ (Just y))) = Just (RIGHT y)
+		pair2either _ = Nothing
 
 gerda{|CONS of {gcd_name, gcd_arity, gcd_type, gcd_type_def}|} gerdaA
 	= GerdaFunctions typeC layoutC writeC readC
@@ -560,7 +561,7 @@ removeTable :: !String !*Gerda -> *Gerda
 removeTable name g=:{layout, connection, state}
 	# (r, h, state) = SQLAllocHandle SQL_HANDLE_STMT connection state
 	| r <> SQL_SUCCESS = abort "SQLAllocHandle SQL_HANDLE_STMT failed"
-	# drop = "DROP TABLE " +++ sqlEscape tableName
+	# drop = "DROP TABLE" +++ sqlEscape tableName
 	  (r, state) = SQLExecDirect h (TRACE_SQL drop) (size drop) state
 //	| r <> SQL_SUCCESS = abort ("SQLExecDirect failed " +++ drop)
 	# (r, state) = SQLFreeHandle SQL_HANDLE_STMT h state
@@ -871,6 +872,7 @@ where
 		| toInt c < 32 = abort ("Illegal SQL string, cannot escape symbol < 32: " +++ s)
 		| toInt c > 127 = abort ("Illegal SQL string, cannot escape symbol > 127: " +++ s)
 //		| c == '`' = abort ("Illegal SQL string, contains a `: " +++ s)
+		| c == '.' = ['"':escape cs]
 		| c == '`' = ['\'':escape cs]
 		= [c:escape cs]
 	escape _ = ['`']
