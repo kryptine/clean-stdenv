@@ -1,8 +1,8 @@
 definition module StdList
 
 //	****************************************************************************************
-//	Concurrent Clean Standard Library Module Version 2.01
-//	Copyright 1998 University of Nijmegen
+//	Concurrent Clean Standard Library Module Version 2.2
+//	Copyright 1998-2006 University of Nijmegen
 //	****************************************************************************************
 
 import StdClass
@@ -11,8 +11,14 @@ import StdInt,StdChar,StdReal
 //	Instances of overloaded functions:
 
 instance ==	[a] | == a
+						special a=Int
+								a=Char
+								a=Real
 
 instance <	[a] | Ord a
+						special a=Int
+								a=Char
+								a=Real
 
 instance length	[]
 instance %		[a]
