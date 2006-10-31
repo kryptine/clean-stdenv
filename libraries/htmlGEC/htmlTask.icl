@@ -51,15 +51,18 @@ where
 		# (boss,hst) 		= mkStoreForm (Init,sFormId ("bossStore" <+++ mkTaskNr j) initBoss) settask hst
 		# (bdone,encbtask)	= boss.value
 		# btask				= case string_to_dynamic` encbtask of
-									(mytask::Task a^) -> mytask
-									_ -> STask "Default2" a
+									(mytask:: *TSt -> *(a^,*TSt)) -> mytask
+									_ -> 	STask "Default2" a
 		= ({boss & value = (bdone,btask)},hst)
 		where
-			initBoss			 = (False,dynamic_to_string (dynamic defaulttask))
-			settask				 = if set (\_ -> (True,dynamic_to_string (dynamic task))) id
+			initBoss			= (False,convertTask defaulttask)
+			settask				= if set (\_ -> (True,convertTask task)) id
+			convertTask task 	= dynamic_to_string (dynamic task::*TSt -> *(a^,*TSt))
+
 			string_to_dynamic` s = string_to_dynamic ( {s` \\ s` <-: s})
 
 		defaulttask 		 = STask "Default" a
+
 
 
 :: *TSt 		:== (([Int],Bool,[BodyTag]),HSt)   	// Task State: task nr, has this task to be done?, html code accumulator
@@ -316,4 +319,38 @@ where
 	# (_,((i,adone,ahtml),hst)) = STask  "Done" Niks ((i,True,[]),hst)	
 	= (idata.value,((i,adone,html <|.|> if adone idata.form (idata.form <|.|> ahtml)),hst))
 	
+// debugging code 
+
+print_graph :: !a -> Bool;
+print_graph a = code {
+.d 1 0
+jsr _print_graph
+.o 0 0
+pushB TRUE
+}
+
+my_dynamic_to_string :: !Dynamic -> {#Char};
+my_dynamic_to_string d
+| not (print_graph d)
+= abort ""
+#! s=dynamic_to_string d;
+| not (print_graph (tohexstring s))
+= abort "" 
+# d2 = string_to_dynamic {c \\ c <-: s};
+| not (print_graph d2)
+= abort ""
+= s;
+
+tohexstring :: {#Char} -> {#Char};
+tohexstring s = {tohexchar s i \\ i<-[0..2*size s-1]};
+
+tohexchar :: {#Char} Int -> Char;
+tohexchar s i
+# c=((toInt s.[i>>1]) >> ((1-(i bitand 1))<<2)) bitand 15;
+| c<10
+= toChar (48+c);
+= toChar (55+c);
+
+//K:: !x y -> y |  iData, TC y
+K x y = y
 	

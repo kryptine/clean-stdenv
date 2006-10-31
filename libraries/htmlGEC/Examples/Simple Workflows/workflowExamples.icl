@@ -24,15 +24,36 @@ where
 
 
 twotasks2 tst
-# ((tboss,tsecr),tst) 		= mkLTaskRTC2 "name" 25 tst		// split name task
+# ((tboss,tsecr),tst) 		= mkLTaskRTC2 "name" 0 tst		// split name task
 = PTasks
-	 [( "employee1", tsecr)							// assign name task
-	 ,( "boss", STask "ervoor" 0 `bind` 
-	 			\bi ->  tboss (STask "DoIt" bi) `bind`
-	 			\si ->  STask "erna" si
+	 [( "secretary", tsecr)							// assign name task
+	 ,( "boss", STask "Choose" Easy `bind` 
+	 			\situation ->  tboss (handle situation) `bind`
+	 			\result ->  STask "accept" result
 	  )
 	 ] tst
+where
+	handle Easy tst
+	# tst = returnF [Txt ("Handle easy case")] tst
+	= STask "Damage" 0 tst
+	handle (Difficult upperbound) tst
+	# tst = returnF [Txt ("Handle difficult case with limit " +++ (toString upperbound) +++ " Euro's")] tst
+	= checktask upperbound tst
+	where
+		checktask limit  tst
+		# (amount,tst) = STask "Damage" 0 tst
+		| amount > limit
+			# tst = returnF [Txt ("amount " +++ toString amount +++ " exceeds limit set")] tst
+			= mkTask (checktask limit) tst
+		= returnTask amount tst
+	
+:: Situation = Difficult Int | Easy
 
+derive gForm Situation
+derive gUpd Situation
+derive gParse Situation
+derive gPrint Situation
+derive gerda Situation
 
 :: RecForm = {name :: String, number:: Int}
 
