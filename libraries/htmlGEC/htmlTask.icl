@@ -11,57 +11,7 @@ derive gerda 	Niks
 
 import dynamic_string, EncodeDecode
 
-mkLTaskRTC2 :: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt) | iData, TC a
-mkLTaskRTC2 s a tst = LazyTask` (incTask tst)
-where
-	LazyTask` tst=:((j,myturn,html),hst) = ((bossTask, workerTask),tst)
-	where
-		workerTask tst = mkTask workerTask` tst
-		where
-			workerTask` tst=:((i,myturn,html),hst) 
-			# (boss,hst)	= bossStore (False,defaulttask) hst		// check input from boss
-			# (worker,hst)	= workerStore id hst				// check result from worker
-			# (bdone,btask)	= boss.value
-			# (wdone,wresult)= worker.value
-			| wdone			= (wresult,((i,True,html<|.|>  [Txt ("Lazy task \"" +++ s +++ "\" completed:")]),hst))	
-			| bdone
-				# (wresult,((_,wdone,whtml),hst)) = btask ((j++[0],True,[]),hst)	// apply task stored in memory
-				| wdone																// worker task finshed
-					# (_,hst)	= workerStore (\_ -> (wdone,wresult)) hst			// store task and status
-					= workerTask` ((i,myturn,whtml),hst) 							// complete as before
-				= (createDefault,((i,False,html <|.|> [Txt ("lazy task \"" +++ s +++ "\" activated:"),Br] <|.|> whtml),hst))
-			= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))		// no
-	
-		bossTask taska tst = mkTask bossTask` tst
-		where
-			bossTask` tst=:((i,myturn,html),hst) 
-			# (boss,hst)		= bossStore (False,defaulttask) hst		// check input from boss
-			# (worker,hst)		= workerStore id hst			// check result from worker
-			# (bdone,btask)		= boss.value
-			# (wdone,wresult)	= worker.value
-			| bdone && wdone	= (wresult,((i,True,html<|.|>  [Txt ("Result of lazy task \"" +++ s +++ "\" :")]),hst))	// finished
-			| not bdone
-				# (_, hst)		= bossStore (True,taska) hst	// store b information to communicate to worker	
-				= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))
-			= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))	
-	
-		workerStore   fun = mkStoreForm (Init,sFormId ("workerStore" <+++ mkTaskNr j) (False,createDefault)) fun 
 
-		bossStore (set,task) hst
-		# (boss,hst) 		= mkStoreForm (Init,sFormId ("bossStore" <+++ mkTaskNr j) initBoss) settask hst
-		# (bdone,encbtask)	= boss.value
-		# btask				= case string_to_dynamic` encbtask of
-									(mytask:: *TSt -> *(a^,*TSt)) -> mytask
-									_ -> 	STask "Default2" a
-		= ({boss & value = (bdone,btask)},hst)
-		where
-			initBoss			= (False,convertTask defaulttask)
-			settask				= if set (\_ -> (True,convertTask task)) id
-			convertTask task 	= dynamic_to_string (dynamic task::*TSt -> *(a^,*TSt))
-
-			string_to_dynamic` s = string_to_dynamic ( {s` \\ s` <-: s})
-
-		defaulttask 		 = STask "Default" a
 
 
 
@@ -89,72 +39,7 @@ where
 	incTasknr [] = [0]
 	incTasknr [i:is] = [i+1:is]
 
-mkLTaskRTC :: String b (b -> Task a) *TSt -> ((b -> Task a,Task a),*TSt) | iData, TC a
-												& iData, TC b
-mkLTaskRTC s initb batask tst = let (a,b,c) = LazyTask` s (incTask tst) in ((a,b),c)
-where
-	LazyTask` s tst=:((j,myturn,html),hst) = (bossTask, workerTask s,tst)
-	where
-		workerTask s tst = mkTask (workerTask` s) tst
-		where
-			workerTask` s tst=:((i,myturn,html),hst) 
-			# (boss,hst)	= bossStore id hst		// check input from boss
-			# (worker,hst)	= workerStore id hst	// check result from worker
-			# (bdone,binput)= boss.value
-			# (wdone,wresult)= worker.value
-			| wdone			= (wresult,((i,True,html<|.|>  [Txt ("Lazy task \"" +++ s +++ "\" completed:")]),hst))	
-			| bdone
-				# (wresult,((_,wdone,whtml),hst)) = batask binput ((j++[0],True,[]),hst)	// apply task to input from boss
-				| wdone															// worker task finshed
-					# (_,hst)	= workerStore (\_ -> (wdone,wresult)) hst		// store task and status
-					= workerTask` s ((i,myturn,html),hst) 				// complete as before
-				= (createDefault,((i,False,html <|.|> if wdone [] [Txt ("lazy task \"" +++ s +++ "\" activated:"),Br] <|.|> whtml),hst))
-			= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))		// no
-	
-		bossTask b tst = mkTask bossTask` tst
-		where
-			bossTask` tst=:((i,myturn,html),hst) 
-			# (boss,hst)				= bossStore id hst		// check input from boss
-			# (worker,hst)				= workerStore id hst	// check result from worker
-			# (bdone,binput)= boss.value
-			# (wdone,wresult)= worker.value
-			| bdone && wdone			= (wresult,((i,True,html<|.|>  [Txt ("Result of lazy task \"" +++ s +++ "\" :")]),hst))	// finished
-			| not bdone
-				# (_, hst)		= bossStore (\_ -> (True,b)) hst	// store b information to communicate to worker	
-				= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))
-			= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))	
-	
-		workerStore   fun = mkStoreForm (Init,sFormId ("workerStore" <+++ mkTaskNr j) (False,createDefault)) fun 
-		bossStore     fun = mkStoreForm (Init,sFormId ("bossStore"   <+++ mkTaskNr j) (False,initb)) fun 
 
-mkLTask :: String (Task a) *TSt -> ((Task a,Task a),*TSt) | iData, TC a
-mkLTask s task tst = let (a,b,c) = LazyTask` s task (incTask tst) in ((a,b),c)
-where
-	LazyTask` s task tst=:((j,myturn,html),hst) = (bossTask, workerTask s task,tst)
-	where
-		workerTask s task tst = mkTask (workerTask` s task) tst
-		where
-			workerTask` s task tst=:((i,myturn,html),hst) 
-			# (todo,hst)	= checkBossSignal id hst	// check whether lazy task evaluation has to be done
-			| todo.value								// yes	
-				# (a,((_,adone,ahtml),hst)) = task ((j++[0],True,[]),hst)			// do task
-				# (_,hst) 					= lazyTaskStore (\_ -> (adone,a)) hst	// store task and status
-				= (a,((i,myturn,html <|.|> if adone [] [Txt ("lazy task \"" +++ s +++ "\" activated:"),Br] <|.|> ahtml),hst))
-			= (createDefault,((i,myturn,html),hst))		// no
-	
-		bossTask tst = mkTask (bossTask`) tst
-		where
-			bossTask` tst=:((i,myturn,html),hst) 
-			# buttonId		= "getlt" <+++ mkTaskNr i
-			# (finbut,hst)  = simpleButton buttonId s (\_ -> True) hst	// button press will trigger related lazy task	
-			# (todo,hst)	= checkBossSignal finbut.value hst			// set store True if button pressed
-			# (result,hst)	= lazyTaskStore id hst						// inspect status task
-			# (done,value)	= result.value
-			| not done 		= (createDefault,((i,False,html<|.|>if todo.value [Txt ("Waiting for task \"" +++ s +++ "\"..")] finbut.form),hst))
-			= (value,((i,myturn,html <|.|>  [Txt ("Result of lazy task \"" +++ s +++ "\" :")]),hst))	
-	
-		lazyTaskStore   fun = mkStoreForm (Init,sFormId ("getLT" <+++ mkTaskNr j) (False,createDefault)) fun 
-		checkBossSignal fun = mkStoreForm (Init,sFormId ("setLT" <+++ mkTaskNr j) (fun False)) fun 
 
 returnTask :: a -> (Task a) | iData, TC a 
 returnTask a = \tst -> mkTask (returnTask` a) tst
@@ -304,6 +189,128 @@ where
 STask_button 		:: String (Task a) 			-> (Task a) 	| iData, TC a
 STask_button s task = CTask_button [(s,task)]
 
+
+mkRTask :: String (Task a) *TSt -> ((Task a,Task a),*TSt) | iData, TC a
+mkRTask s task tst = let (a,b,c) = mkRTask` s task (incTask tst) in ((a,b),c)
+where
+	mkRTask` s task tst=:((j,myturn,html),hst) = (bossTask, workerTask s task,tst)
+	where
+		workerTask s task tst = mkTask (workerTask` s task) tst
+		where
+			workerTask` s task tst=:((i,myturn,html),hst) 
+			# (todo,hst)	= checkBossSignal id hst	// check whether lazy task evaluation has to be done
+			| todo.value								// yes	
+				# (a,((_,adone,ahtml),hst)) = task ((j++[0],True,[]),hst)			// do task
+				# (_,hst) 					= lazyTaskStore (\_ -> (adone,a)) hst	// store task and status
+				= (a,((i,myturn,html <|.|> if adone [] [Txt ("lazy task \"" +++ s +++ "\" activated:"),Br] <|.|> ahtml),hst))
+			= (createDefault,((i,myturn,html),hst))		// no
+	
+		bossTask tst = mkTask (bossTask`) tst
+		where
+			bossTask` tst=:((i,myturn,html),hst) 
+			# buttonId		= "getlt" <+++ mkTaskNr i
+			# (finbut,hst)  = simpleButton buttonId s (\_ -> True) hst	// button press will trigger related lazy task	
+			# (todo,hst)	= checkBossSignal finbut.value hst			// set store True if button pressed
+			# (result,hst)	= lazyTaskStore id hst						// inspect status task
+			# (done,value)	= result.value
+			| not done 		= (createDefault,((i,False,html<|.|>if todo.value [Txt ("Waiting for task \"" +++ s +++ "\"..")] finbut.form),hst))
+			= (value,((i,myturn,html <|.|>  [Txt ("Result of lazy task \"" +++ s +++ "\" :")]),hst))	
+	
+		lazyTaskStore   fun = mkStoreForm (Init,sFormId ("getLT" <+++ mkTaskNr j) (False,createDefault)) fun 
+		checkBossSignal fun = mkStoreForm (Init,sFormId ("setLT" <+++ mkTaskNr j) (fun False)) fun 
+		
+mkRTaskCall :: String b (b -> Task a) *TSt -> ((b -> Task a,Task a),*TSt) | iData, TC a
+												& iData, TC b
+mkRTaskCall  s initb batask tst = let (a,b,c) = mkRTaskCall` s (incTask tst) in ((a,b),c)
+where
+	mkRTaskCall` s tst=:((j,myturn,html),hst) = (bossTask, workerTask s,tst)
+	where
+		workerTask s tst = mkTask (workerTask` s) tst
+		where
+			workerTask` s tst=:((i,myturn,html),hst) 
+			# (boss,hst)	= bossStore id hst		// check input from boss
+			# (worker,hst)	= workerStore id hst	// check result from worker
+			# (bdone,binput)= boss.value
+			# (wdone,wresult)= worker.value
+			| wdone			= (wresult,((i,True,html<|.|>  [Txt ("Lazy task \"" +++ s +++ "\" completed:")]),hst))	
+			| bdone
+				# (wresult,((_,wdone,whtml),hst)) = batask binput ((j++[0],True,[]),hst)	// apply task to input from boss
+				| wdone															// worker task finshed
+					# (_,hst)	= workerStore (\_ -> (wdone,wresult)) hst		// store task and status
+					= workerTask` s ((i,myturn,html),hst) 				// complete as before
+				= (createDefault,((i,False,html <|.|> if wdone [] [Txt ("lazy task \"" +++ s +++ "\" activated:"),Br] <|.|> whtml),hst))
+			= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))		// no
+	
+		bossTask b tst = mkTask bossTask` tst
+		where
+			bossTask` tst=:((i,myturn,html),hst) 
+			# (boss,hst)				= bossStore id hst		// check input from boss
+			# (worker,hst)				= workerStore id hst	// check result from worker
+			# (bdone,binput)= boss.value
+			# (wdone,wresult)= worker.value
+			| bdone && wdone			= (wresult,((i,True,html<|.|>  [Txt ("Result of lazy task \"" +++ s +++ "\" :")]),hst))	// finished
+			| not bdone
+				# (_, hst)		= bossStore (\_ -> (True,b)) hst	// store b information to communicate to worker	
+				= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))
+			= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))	
+	
+		workerStore   fun = mkStoreForm (Init,sFormId ("workerStore" <+++ mkTaskNr j) (False,createDefault)) fun 
+		bossStore     fun = mkStoreForm (Init,sFormId ("bossStore"   <+++ mkTaskNr j) (False,initb)) fun 
+
+
+		
+mkRDynTaskCall :: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt) | iData, TC a
+mkRDynTaskCall s a tst = mkRDynTaskCall` (incTask tst)
+where
+	mkRDynTaskCall` tst=:((j,myturn,html),hst) = ((bossTask, workerTask),tst)
+	where
+		workerTask tst = mkTask workerTask` tst
+		where
+			workerTask` tst=:((i,myturn,html),hst) 
+			# (boss,hst)	= bossStore (False,defaulttask) hst		// check input from boss
+			# (worker,hst)	= workerStore id hst				// check result from worker
+			# (bdone,btask)	= boss.value
+			# (wdone,wresult)= worker.value
+			| wdone			= (wresult,((i,True,html<|.|>  [Txt ("Lazy task \"" +++ s +++ "\" completed:")]),hst))	
+			| bdone
+				# (wresult,((_,wdone,whtml),hst)) = btask ((j++[0],True,[]),hst)	// apply task stored in memory
+				| wdone																// worker task finshed
+					# (_,hst)	= workerStore (\_ -> (wdone,wresult)) hst			// store task and status
+					= workerTask` ((i,myturn,whtml),hst) 							// complete as before
+				= (createDefault,((i,False,html <|.|> [Txt ("lazy task \"" +++ s +++ "\" activated:"),Br] <|.|> whtml),hst))
+			= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))		// no
+	
+		bossTask taska tst = mkTask bossTask` tst
+		where
+			bossTask` tst=:((i,myturn,html),hst) 
+			# (boss,hst)		= bossStore (False,defaulttask) hst		// check input from boss
+			# (worker,hst)		= workerStore id hst			// check result from worker
+			# (bdone,btask)		= boss.value
+			# (wdone,wresult)	= worker.value
+			| bdone && wdone	= (wresult,((i,True,html<|.|>  [Txt ("Result of lazy task \"" +++ s +++ "\" :")]),hst))	// finished
+			| not bdone
+				# (_, hst)		= bossStore (True,taska) hst	// store b information to communicate to worker	
+				= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))
+			= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))	
+	
+		workerStore   fun = mkStoreForm (Init,sFormId ("workerStore" <+++ mkTaskNr j) (False,createDefault)) fun 
+
+		bossStore (set,task) hst
+		# (boss,hst) 		= mkStoreForm (Init,sFormId ("bossStore" <+++ mkTaskNr j) initBoss) settask hst
+		# (bdone,encbtask)	= boss.value
+		# btask				= case string_to_dynamic` encbtask of
+									(mytask:: *TSt -> *(a^,*TSt)) -> mytask
+									_ -> 	STask "Default2" a
+		= ({boss & value = (bdone,btask)},hst)
+		where
+			initBoss			= (False,convertTask defaulttask)
+			settask				= if set (\_ -> (True,convertTask task)) id
+			convertTask task 	= dynamic_to_string (dynamic task::*TSt -> *(a^,*TSt))
+
+			string_to_dynamic` s = string_to_dynamic ( {s` \\ s` <-: s})
+
+		defaulttask 		 = STask "Default" a
+		
 
 // utility section
 
