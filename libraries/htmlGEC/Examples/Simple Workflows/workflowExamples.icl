@@ -24,7 +24,7 @@ where
 
 
 twotasks2 tst
-# ((tboss,tsecr),tst) 		= mkLTaskRTC2 "name" 0 tst		// split name task
+# ((tboss,tsecr),tst) 		= mkRDynTaskCall "name" 0 tst		// split name task
 = PTasks
 	 [( "secretary", tsecr)							// assign name task
 	 ,( "boss", STask "Choose" Easy `bind` 
@@ -59,8 +59,8 @@ derive gerda Situation
 
 
 twotasks tst
-# ((tbname,tname),tst) 		= mkLTask "name"   (STask "name" "") tst		// split name task
-# ((tbnumber,tnumber),tst)	= mkLTask "number" (STask "number" 0) tst		// split number task
+# ((tbname,tname),tst) 		= mkRTask "name"   (STask "name" "") tst		// split name task
+# ((tbnumber,tnumber),tst)	= mkRTask "number" (STask "number" 0) tst		// split number task
 = PTasks
 	 [( "employee1", tname `bind` void)							// assign name task
 	 ,( "employee2", tnumber `bind` void)						// assign number task
@@ -88,7 +88,7 @@ agenda :: (Task Bool)
 agenda = \tst -> agenda` tst
 where
 	agenda` tst
-	# ((voorstel,acceptatie),tst) = mkLTaskRTC "agenda" init datumbrief tst
+	# ((voorstel,acceptatie),tst) = mkRTaskCall "agenda" init datumbrief tst
 	# (afspraak,tst)			= PTasks
 								 [( "persoon1"
 								  ,	acceptatie `bind` \t -> returnTask t
@@ -111,7 +111,7 @@ where
 
 
 test3 tst
-# ((tboss,tsecr),tst)	= mkLTaskRTC "telop" 0  telop tst
+# ((tboss,tsecr),tst)	= mkRTaskCall "telop" 0  telop tst
 # (result,tst)			= PTasks
 							 [( "secretary"
 							  ,	tsecr
@@ -128,7 +128,7 @@ where
 	= returnTask (a+b) tst
 
 test2 tst
-# ((tboss,tsecr),tst)	= mkLTask "travel" travel tst
+# ((tboss,tsecr),tst)	= mkRTask "travel" travel tst
 # (result,tst)			= PTasks
 							 [( "secretary"
 							  ,	PTask2 (tsecr `bind` \t -> returnTask t,  tsecr `bind` \t -> returnTask t)
