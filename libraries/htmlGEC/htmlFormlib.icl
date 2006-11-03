@@ -74,12 +74,12 @@ where
 
 // frequently used variants of mkViewForm
 
-mkEditForm:: !(InIDataId d) !*HSt -> (Form d,!*HSt) | iData, TC d
+mkEditForm:: !(InIDataId d) !*HSt -> (Form d,!*HSt) | iData d
 mkEditForm inIDataId hst
 = mkViewForm inIDataId
 	{toForm = toViewId , updForm = \_ v -> v , fromForm = \_ v -> v , resetForm = Nothing}  hst
 
-mkSelfForm  :: !(InIDataId d) !(d -> d) !*HSt -> (Form d,!*HSt) | iData, TC d
+mkSelfForm  :: !(InIDataId d) !(d -> d) !*HSt -> (Form d,!*HSt) | iData d
 mkSelfForm inIDataId cbf  hst
 = mkViewForm inIDataId 
 	{toForm = toViewId , updForm = update , fromForm = \_ v -> v , resetForm = Nothing}  hst
@@ -88,12 +88,12 @@ where
 	| b.isChanged 	= cbf val
 	| otherwise 	= val
 	
-mkStoreForm :: !(InIDataId d) !(d -> d) !*HSt -> (Form d,!*HSt) | iData, TC d
+mkStoreForm :: !(InIDataId d) !(d -> d) !*HSt -> (Form d,!*HSt) | iData d
 mkStoreForm inIDataId cbf  hst
 = mkViewForm inIDataId
 	{toForm = toViewId , updForm = \_ v = cbf v , fromForm = \_ v -> v, resetForm = Nothing}  hst
 
-mkApplyEditForm	:: !(InIDataId d) !d !*HSt -> (Form d,!*HSt) | iData, TC d
+mkApplyEditForm	:: !(InIDataId d) !d !*HSt -> (Form d,!*HSt) | iData d
 mkApplyEditForm inIDataId inputval  hst
 = mkViewForm inIDataId
 	{toForm =  toViewId , updForm = update , fromForm = \_ v -> v, resetForm = Nothing}  hst
@@ -102,7 +102,7 @@ where
 	| b.isChanged 	= val
 	| otherwise 	= inputval
 
-mkBimapEditor :: !(InIDataId d) !(Bimap d v) !*HSt -> (Form d,!*HSt) | iData, TC v
+mkBimapEditor :: !(InIDataId d) !(Bimap d v) !*HSt -> (Form d,!*HSt) | iData v
 mkBimapEditor inIDataId {map_to,map_from} hst
 = mkViewForm inIDataId { toForm 	= toViewMap map_to 
 						, updForm 	= \_ v -> v
@@ -111,7 +111,7 @@ mkBimapEditor inIDataId {map_to,map_from} hst
 						} hst 
 
 mkSubStateForm :: !(InIDataId !subState) !state !(subState state -> state) !*HSt -> (Bool,Form state,!*HSt)
-							| iData, TC subState
+							| iData subState
 mkSubStateForm (init,formid) state upd hst 
 # (nsubState,hst) 		= mkEditForm (init,subFormId formid "subst" subState) hst
 # (commitBut,hst)		= FuncBut (Init,subnFormId formid "CommitBut" (LButton defpixel "commit",id)) hst
@@ -135,7 +135,7 @@ mkSubStateForm (init,formid) state upd hst
 where
 	subState = formid.ival
 
-mkShowHideForm :: !(InIDataId a)  !*HSt -> (Form a,!*HSt) | iData, TC a
+mkShowHideForm :: !(InIDataId a)  !*HSt -> (Form a,!*HSt) | iData a
 mkShowHideForm  (init,formid)  hst 
 | formid.mode == NoForm || formid.lifespan == Temp
 	= mkEditForm (init,formid) hst
@@ -155,13 +155,13 @@ where
 
 // Form collection:
 
-horlistForm :: !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | iData, TC a
+horlistForm :: !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | iData a
 horlistForm inIDataId hSt = layoutListForm (\f1 f2 -> [f1 <=> f2]) mkEditForm inIDataId hSt
 			
-vertlistForm :: !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | iData, TC a
+vertlistForm :: !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | iData a
 vertlistForm inIDataId hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) mkEditForm inIDataId hSt
 
-vertlistFormButs :: !Int !Bool !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | iData, TC a
+vertlistFormButs :: !Int !Bool !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | iData a
 vertlistFormButs nbuts showbuts (init,formid) hst
 
 # indexId		= {subFormId formid "idx" 0 & mode = Display}
@@ -242,10 +242,10 @@ where
 		[ (but 5 "P", \_ -> i) \\ i <- [index .. index + step]]
 
 
-table_hv_Form :: !(InIDataId [[a]]) !*HSt -> (Form [[a]],!*HSt) | iData, TC a
+table_hv_Form :: !(InIDataId [[a]]) !*HSt -> (Form [[a]],!*HSt) | iData a
 table_hv_Form inIDataId hSt = layoutListForm (\f1 f2 -> [f1 <||> f2]) horlistForm inIDataId hSt
 
-t2EditForm  :: !(InIDataId (a,b)) !*HSt -> ((Form a,Form b),!*HSt) |  iData, TC a & iData, TC b
+t2EditForm  :: !(InIDataId (a,b)) !*HSt -> ((Form a,Form b),!*HSt) |  iData a & iData b
 t2EditForm (init,formid) hst
 # (forma,hst) = mkEditForm (init,subFormId formid "t21" a) hst 
 # (formb,hst) = mkEditForm (init,subFormId formid "t21" b) hst
@@ -253,7 +253,7 @@ t2EditForm (init,formid) hst
 where
 	(a,b) = formid.ival
 
-t3EditForm  :: !(InIDataId (a,b,c)) !*HSt -> ((Form a,Form b,Form c),!*HSt) | iData, TC a & iData, TC b & iData, TC c
+t3EditForm  :: !(InIDataId (a,b,c)) !*HSt -> ((Form a,Form b,Form c),!*HSt) | iData a & iData b & iData c
 t3EditForm (init,formid) hst
 # (forma,hst) = mkEditForm (init,subFormId formid "t31" a) hst 
 # (formb,hst) = mkEditForm (init,subFormId formid "t32" b) hst
@@ -263,7 +263,7 @@ where
 	(a,b,c) = formid.ival
 
 t4EditForm  :: !(InIDataId (a,b,c,d)) !*HSt -> ((Form a,Form b,Form c,Form d),!*HSt) 
-																				| iData, TC a & iData, TC b & iData, TC c & iData, TC d
+																				| iData a & iData b & iData c & iData d
 t4EditForm (init,formid) hst
 # (forma,hst) = mkEditForm (init,subFormId formid "t41" a) hst 
 # (formb,hst) = mkEditForm (init,subFormId formid "t42" b) hst
@@ -276,7 +276,7 @@ where
 simpleButton :: !String !String !(a -> a) !*HSt -> (Form (a -> a),!*HSt)
 simpleButton id label fun hst = FuncBut (Init, nFormId (id +++ label) (LButton defpixel label,fun)) hst
 
-counterForm 	:: !(InIDataId a)	  			!*HSt -> (Form a,!*HSt) 		| +, -, one,  iData, TC a
+counterForm 	:: !(InIDataId a)	  			!*HSt -> (Form a,!*HSt) 		| +, -, one,  iData a
 counterForm inIDataId hst = mkViewForm inIDataId bimap hst
 where
 	bimap =	{ toForm 	= toViewMap (\n -> (n,down,up))
@@ -296,12 +296,12 @@ where
 	up 		= LButton (defpixel / 6) "+"
 	down	= LButton (defpixel / 6) "-"
 
-listForm :: !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | iData, TC a
+listForm :: !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | iData a
 listForm inIDataId hSt = layoutListForm (\f1 f2 -> [BodyTag f1:f2]) mkEditForm inIDataId hSt
 
 layoutListForm :: !([BodyTag] [BodyTag] -> [BodyTag]) 
                   !(!(InIDataId a) !*HSt -> (Form a,*HSt))
-                  !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | iData, TC a
+                  !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | iData a
 layoutListForm layoutF formF (init,formid) hst 
 # (store,hst)	= mkStoreForm (init,formid) id hst			// enables to store list with different # elements
 # (layout,hst)	= layoutListForm` 0 store.value hst

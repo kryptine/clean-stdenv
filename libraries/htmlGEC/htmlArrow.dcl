@@ -20,15 +20,15 @@ startCircuit 	:: !(GecCircuit a b) !a !*HSt -> (!Form b,!*HSt)
 // a display just shows the value
 // a store applies the function to the stored value
 
-edit 			:: (FormId a)	-> GecCircuit a a 					|  iData, TC a
-display 		:: (FormId a)	-> GecCircuit a a 					|  iData, TC a
-store 			:: (FormId a)	-> GecCircuit (a -> a) a 			|  iData, TC a
+edit 			:: (FormId a)	-> GecCircuit a a 					|  iData a
+display 		:: (FormId a)	-> GecCircuit a a 					|  iData a
+store 			:: (FormId a)	-> GecCircuit (a -> a) a 			|  iData a
 	
 feedback 		:: (GecCircuit a b) (GecCircuit b a) -> (GecCircuit a b)
 
 self 			:: (a -> a) (GecCircuit a a) -> GecCircuit a a
 
-loops 			:: (GecCircuit (a, b) (c, b)) -> GecCircuit a c 	|  iData, TC b
+loops 			:: (GecCircuit (a, b) (c, b)) -> GecCircuit a c 	|  iData b
 
 (`bindC`)  infix 0 :: (GecCircuit a b) (b -> GecCircuit b c) -> (GecCircuit a c)
 (`bindCI`) infix 0 :: (GecCircuit a b) ((Form b) -> GecCircuit b c) -> (GecCircuit a c)

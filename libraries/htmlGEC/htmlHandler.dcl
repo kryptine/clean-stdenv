@@ -3,20 +3,9 @@ definition module htmlHandler
 // Converting Clean types to iData for automatic generation and dealing with Html form's ..
 // (c) MJP 2005
 
-import htmlDataDef, htmlFormData
+import htmlDataDef, htmlFormData, htmlSettings
 import StdBool
 
-TraceInput :== False			// set it to True if you want to see what kind of information is received from browser
-MyDataBase :== "iDataDatabase"	// name of database being used by iData applications
-
-class iData a					// The collection of generic functions needed to make iData:	
-		| gForm {|*|}			//		Creates an Html Form
-		, gUpd  {|*|}			//		Makes it possible to edit the form and updates the corresponding value
-		, gPrint{|*|}			//		To serialize a form to a String
-		, gParse{|*|}			//		To de-serialize the string back to a value
-		, gerda {|*|} a			//		To store and retrieve a value in a database
-		//TC a					//		To be able to store values in a dynamic
-								//		TC is a special class cannot be included here
 
 generic gForm a :: !(InIDataId a) !*HSt -> *(Form a, !*HSt)		// user defined gForms: use "specialize"	
 generic gUpd a 	:: UpdMode a -> (UpdMode,a)						// gUpd can simply be derived
@@ -41,7 +30,7 @@ doHtmlServer 	:: (*HSt -> (Html,!*HSt))  *World -> *World 	// use this applicati
 // mkViewForm is the *swiss army nife* function creating stateful interactive forms with a view v of data d
 // make shure that all editors have a unique identifier !
 
-mkViewForm 		:: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | iData, TC v
+mkViewForm 		:: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | iData v
 //mkViewForm 		:: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC v
 
 // specialize has to be used if one wants to specialize gForm for a user-defined type

@@ -312,7 +312,7 @@ where
 		thisyear = 2006
 
 mkBimapEditor :: !(InIDataId d) !(Bimap d v) !*HSt -> (Form d,!*HSt) 
-										| iData, TC v
+										| iData v
 mkBimapEditor inIDataId {map_to,map_from} hst
 = mkViewForm inIDataId { toForm 	= toViewMap map_to 
 						, updForm 	= \_ v -> v

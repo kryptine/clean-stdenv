@@ -16,11 +16,47 @@ derive gUpd []
 //Start world = doHtmlServer (mkflow CreateMusic) world
 //Start world = doHtmlServer (mkflow (Quotation myQuotation)) world
 //Start world = doHtmlServer (mkflow travel) world
-Start world = doHtmlServer (mkflow twotasks2) world
+Start world = doHtmlServer (mkflow test4) world
 where
 	mkflow tasks hst 
 	# (html,hst) = startTask tasks hst
 	= mkHtml "test" html hst
+
+
+twotasks3 tst
+# ((tboss,tsecr),tst) 		= mkRDynTaskCall "name" 0 tst		// split name task
+= PTasks
+	 [( "secretary", tsecr)							// assign name task
+	 ,( "boss", STask "Choose" Easy `bind` 
+	 			\situation ->  tboss (handle situation) `bind`
+	 			\result ->  STask "accept" result
+	  )
+	 ] tst
+where
+	handle Easy tst
+	# tst = returnF [Txt ("Handle easy case")] tst
+	= STask "Damage" 0 tst
+	handle (Difficult upperbound) tst
+	# tst = returnF [Txt ("Handle difficult case with limit " +++ (toString upperbound) +++ " Euro's")] tst
+	= checktask upperbound tst
+	where
+		checktask limit  tst
+		# (amount,tst) = STask "Damage" 0 tst
+		| amount > limit
+			# tst = returnF [Txt ("amount " +++ toString amount +++ " exceeds limit set")] tst
+			= mkTask (checktask limit) tst
+		= returnTask amount tst
+
+test4 tst
+# (result,tst)			= PMilestoneTasks
+							 [( "secretary"
+							  ,	STask "een" 1
+							  )
+							 ,( "boss"
+							  , STask "twee" 2
+							  )
+							 ] tst
+= STask "drie" 3 tst
 
 
 twotasks2 tst
@@ -28,6 +64,10 @@ twotasks2 tst
 = PTasks
 	 [( "secretary", tsecr)							// assign name task
 	 ,( "boss", STask "Choose" Easy `bind` 
+	 			\situation ->  tboss (handle situation) `bind`
+	 			\result ->  STask "accept" result
+	  )
+	 ,( "boss2", STask "Choose" Easy `bind` 
 	 			\situation ->  tboss (handle situation) `bind`
 	 			\result ->  STask "accept" result
 	  )

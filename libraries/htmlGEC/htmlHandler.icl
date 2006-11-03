@@ -1,7 +1,7 @@
 implementation module htmlHandler
 
 import StdEnv, ArgEnv, StdMaybe
-import htmlDataDef, htmlTrivial
+import htmlDataDef, htmlTrivial, htmlSettings
 import StdGeneric
 import iDataState, htmlStylelib
 import GenParse, GenPrint
@@ -108,7 +108,7 @@ where
 
 // swiss army nife editor that makes coffee too ...
 
-mkViewForm :: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | iData, TC v
+mkViewForm :: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | iData v
 //mkViewForm :: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, gerda{|*|}, TC v
 mkViewForm (init,formid) bm=:{toForm, updForm, fromForm, resetForm}  hst=:{states,world} 
 | init == Const	&& formid.lifespan <> Temp
@@ -488,7 +488,8 @@ toHtml a
 # (na,_) = gForm{|*|} (Set,{id = "__toHtml", lifespan = Page, mode = Display, storage = PlainString, ival = a}) {cntr = 0, states = emptyFormStates, world = undef}
 = BodyTag na.form
 
-toHtmlForm :: (*HSt -> *(Form a,*HSt)) -> [BodyTag] | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
+toHtmlForm :: (*HSt -> *(Form a,*HSt)) -> [BodyTag]
+												| gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 toHtmlForm anyform 
 # (na,hst) = anyform {cntr = 0, states = emptyFormStates, world = undef}
 =  na.form

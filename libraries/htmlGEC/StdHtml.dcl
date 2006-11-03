@@ -7,8 +7,9 @@ import
 
 // iData modules:
 
-			htmlFormData		// basic iData type definitions
-		,	htmlHandler			// the kernel module for iData creation
+			htmlSettings		// some global settings
+		,	htmlFormData		// general iData type definitions
+		,	htmlHandler			// the kernel module for iData creation and handling
 
 		,	htmlButtons			// basic collections of buttons, data types for lay-out	control	
 		,	htmlFormlib			// handy collection of advanced iData creating functions  
@@ -16,14 +17,15 @@ import
 
 		,	htmlArrow			// arrow instantiations for iData forms
 
-// free to change when the default style of the generated web pages is not appealing:
-
-		,	htmlStylelib		// style definitions used by iData  
 
 // html code generation:
 
 	 	,	htmlDataDef			// Clean's ADT representation of Html
 		,	htmlStyleDef		// Clean's ADT representation of Style sheets
+
+// free to change when the default style of the generated web pages is not appealing:
+
+		,	htmlStylelib		// style definitions used by iData  
 
 // automatic data base storage and retrieval
 

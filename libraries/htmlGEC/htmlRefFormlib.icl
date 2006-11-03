@@ -18,7 +18,7 @@ instance == (Ref2 a)
 where
 	(==)(Ref2 file1) (Ref2 file2) = file1 == file2
 
-ref2EditForm :: !(InIDataId a) !(InIDataId (Ref2 a))  !*HSt -> (Form a,!*HSt) | iData, TC a
+ref2EditForm :: !(InIDataId a) !(InIDataId (Ref2 a))  !*HSt -> (Form a,!*HSt) | iData a
 ref2EditForm  (inita,formida) (_,{ival=Ref2 refname}) hst 
 | refname == "" = mkEditForm (Init,reuseFormId formida createDefault) hst
 | otherwise     = mkEditForm (inita,{formida & id = refname}) hst
@@ -28,7 +28,7 @@ invokeRefEditor editor (init,formid) hst
 # (idata,hst)		= editor (init,formid) hst
 = ({idata & value = formid.ival},hst)
 
-universalRefEditor 	:: !Lifespan !(InIDataId (Ref2 a)) !(a -> Judgement)  !*HSt -> (Form a,!*HSt)   	| iData, TC a
+universalRefEditor 	:: !Lifespan !(InIDataId (Ref2 a)) !(a -> Judgement)  !*HSt -> (Form a,!*HSt)   	| iData a
 universalRefEditor lifespan (init,formid) invariant  hst
 # (Ref2 filename)	= formid.ival
 | filename == ""	= mkEditForm (Init,xtFormId "ure_TEMP" createDefault) hst
@@ -71,7 +71,7 @@ where
 	myVersion init filename cnt hst	= mkEditForm (init,{reuseFormId formid cnt & id = ("vrs_r_" +++ filename)
 																				, mode = NoForm}) hst						// to remember version number
 
-	myEditor :: !Init  !String !a *HSt -> (Form a,!*HSt)   | iData, TC a
+	myEditor :: !Init  !String !a *HSt -> (Form a,!*HSt)   | iData a
 	myEditor init filename value hst	
 	# formId = {reuseFormId formid value & id = "copy_r_" +++ filename}
 	= mkShowHideForm (init,formId) hst	// copy of database information 
@@ -79,7 +79,7 @@ where
 
 // editor for persistent information
 
-universalDB :: !(!Init,!Lifespan,!a,!String) !(String a -> Judgement) !*HSt -> (a,!*HSt)   | iData, TC a
+universalDB :: !(!Init,!Lifespan,!a,!String) !(String a -> Judgement) !*HSt -> (a,!*HSt)   | iData a
 universalDB (init,lifespan,value,filename) invariant hst
 # (dbf,hst)			= myDatabase Init 0 value hst				// create / read out database file
 # dbversion			= fst dbf.value								// version number stored in database

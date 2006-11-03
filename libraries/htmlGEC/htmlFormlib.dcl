@@ -36,44 +36,44 @@ mkTable 			:: [[BodyTag]]			-> BodyTag		// Make a table
 // mkSubState		: makes form for substate, with ok and cancel buttons; only added to state if ok is pressed
 // mkShowHide		: as mkEdit, but with show / hide button
 
-mkBimapEditor 	:: !(InIDataId d) !(Bimap d v) 	!*HSt -> (Form d,!*HSt)		| iData, TC v
-mkEditForm 		:: !(InIDataId d)  				!*HSt -> (Form d,!*HSt) 	| iData, TC d
-mkStoreForm 	:: !(InIDataId d)  !(d -> d)	!*HSt -> (Form d,!*HSt) 	| iData, TC d
-mkSelfForm 		:: !(InIDataId d)  !(d -> d)	!*HSt -> (Form d,!*HSt) 	| iData, TC d
-mkApplyEditForm	:: !(InIDataId d)  !d			!*HSt -> (Form d,!*HSt) 	| iData, TC d
+mkBimapEditor 	:: !(InIDataId d) !(Bimap d v) 	!*HSt -> (Form d,!*HSt)		| iData v
+mkEditForm 		:: !(InIDataId d)  				!*HSt -> (Form d,!*HSt) 	| iData d
+mkStoreForm 	:: !(InIDataId d)  !(d -> d)	!*HSt -> (Form d,!*HSt) 	| iData d
+mkSelfForm 		:: !(InIDataId d)  !(d -> d)	!*HSt -> (Form d,!*HSt) 	| iData d
+mkApplyEditForm	:: !(InIDataId d)  !d			!*HSt -> (Form d,!*HSt) 	| iData d
 
 mkSubStateForm 	:: !(InIDataId !subState) !state !(subState state -> state) !*HSt -> (Bool,Form state,!*HSt)
-																			| iData, TC subState
+																			| iData subState
 
-mkShowHideForm 	:: !(InIDataId a)  !*HSt 				-> (Form a,!*HSt) 	| iData, TC a
+mkShowHideForm 	:: !(InIDataId a)  !*HSt 				-> (Form a,!*HSt) 	| iData a
 
 // **** forms for lists ****
 
-listForm 		:: !(InIDataId [a]) 			!*HSt -> (Form [a],!*HSt) 	| iData, TC a
-horlistForm 	:: !(InIDataId [a]) 			!*HSt -> (Form [a],!*HSt) 	| iData, TC a
-vertlistForm 	:: !(InIDataId [a]) 			!*HSt -> (Form [a],!*HSt) 	| iData, TC a
-table_hv_Form 	:: !(InIDataId [[a]])		 	!*HSt -> (Form [[a]],!*HSt) | iData, TC a
+listForm 		:: !(InIDataId [a]) 			!*HSt -> (Form [a],!*HSt) 	| iData a
+horlistForm 	:: !(InIDataId [a]) 			!*HSt -> (Form [a],!*HSt) 	| iData a
+vertlistForm 	:: !(InIDataId [a]) 			!*HSt -> (Form [a],!*HSt) 	| iData a
+table_hv_Form 	:: !(InIDataId [[a]])		 	!*HSt -> (Form [[a]],!*HSt) | iData a
 layoutListForm	:: !([BodyTag] [BodyTag] -> [BodyTag]) 
                        !(!(InIDataId a)	!*HSt  -> (Form a,*HSt))
-                        !(InIDataId [a]) !*HSt -> (Form [a],!*HSt)			| iData, TC a
+                        !(InIDataId [a]) !*HSt -> (Form [a],!*HSt)			| iData a
 
 // User controlled number of list elements will be shown, including optional delete and append buttons; Int indicates max number of browse buttons
 
-vertlistFormButs:: !Int !Bool !(InIDataId [a]) 		!*HSt -> (Form [a],!*HSt) 	| iData, TC a
+vertlistFormButs:: !Int !Bool !(InIDataId [a]) 		!*HSt -> (Form [a],!*HSt) 	| iData a
 
 
 
 // **** forms for tuples ****
 
-t2EditForm  	:: !(InIDataId (a,b))			!*HSt -> ((Form a,Form b),!*HSt)| iData, TC a & iData, TC b
+t2EditForm  	:: !(InIDataId (a,b))			!*HSt -> ((Form a,Form b),!*HSt)| iData a & iData b
 
 t3EditForm  	:: !(InIDataId (a,b,c))	 		!*HSt -> ((Form a,Form b,Form c),!*HSt) 
-																				| iData, TC a & iData, TC b & iData, TC c
+																				| iData a & iData b & iData c
 t4EditForm  	:: !(InIDataId (a,b,c,d))	 	!*HSt -> ((Form a,Form b,Form c,Form d),!*HSt)
-																				| iData, TC a & iData, TC b & iData, TC c & iData, TC d
+																				| iData a & iData b & iData c & iData d
 // **** special buttons ****
 
-counterForm 	:: !(InIDataId a)	  			!*HSt -> (Form a,!*HSt) 		| +, -, one,  iData, TC a
+counterForm 	:: !(InIDataId a)	  			!*HSt -> (Form a,!*HSt) 		| +, -, one,  iData a
 // buttons returning index between 1 to n given stepsize, n, maximal numberofbuttuns to show
 
 browseButtons :: !(InIDataId !Int) !Int !Int !Int !*HSt -> (Form Int,!*HSt)
