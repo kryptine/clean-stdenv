@@ -4,7 +4,7 @@ definition module htmlFormData
 // (c) 2005 - MJP
 
 import htmlDataDef
-import StdMaybe, StdBool
+import StdMaybe, StdBool, htmlHandler
 
 :: FormId d										// properties one has to assign to any form 
 	=	{ id 		:: !String					// id *uniquely* identifying the form
@@ -52,8 +52,8 @@ import StdMaybe, StdBool
 		, form		:: [BodyTag]				// html code to create the form, representing view domain (look)
 		}
 
-:: InIDataId d									// Often used combination
-	:==	(Init,FormId d)						
+:: InIDataId d	:==	(Init,FormId d)				// Often used parameter of iData editors
+:: IDataFun a	:== St *HSt (Form a)			// Often used iData HSt State transition functions
 
 // **** easy creation of FormId's ****
 

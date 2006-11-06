@@ -344,6 +344,28 @@ where
 
 		defaulttask 		 = STask "DefaultTask" a
 		
+// time and date related tasks
+
+waitForTimeTask:: HtmlTime	-> (Task HtmlTime)
+waitForTimeTask time = \tst ->  mkTask waitForTimeTask` tst
+where
+	waitForTimeTask` tst=:((i,myturn,html),hst)
+	# taskId			= "Stask_" <+++ mkTaskNr i
+	# (taskdone,hst) 	= mkStoreForm (Init,sFormId taskId (False,time)) id hst  			// remember time
+	# ((currtime,_),hst) = getTimeAndDate hst
+	| currtime < time	= (time,((i,True,html <|.|> [Txt ("Waiting for time " ):[toHtml time]]),hst))
+	= (time,((i,myturn,html),hst))
+
+waitForDateTask:: HtmlDate	-> (Task HtmlDate)
+waitForDateTask date = \tst ->  mkTask waitForDateTask` tst
+where
+	waitForDateTask` tst=:((i,myturn,html),hst)
+	# taskId			= "Stask_" <+++ mkTaskNr i
+	# (taskdone,hst) 	= mkStoreForm (Init,sFormId taskId (False,date)) id hst  			// remember date
+	# ((_,currdate),hst) = getTimeAndDate hst
+	| currdate < date	= (date,((i,True,html <|.|> [Txt ("Waiting for date " ):[toHtml date]]),hst))
+	= (date,((i,myturn,html),hst))
+
 
 // utility section
 
@@ -358,6 +380,11 @@ where
 	# (idata,hst) 				= idatafun hst
 	# (_,((i,adone,ahtml),hst)) = STask  "Done" Niks ((i,True,[]),hst)	
 	= (idata.value,((i,adone,html <|.|> if adone idata.form (idata.form <|.|> ahtml)),hst))
+
+appHSt :: (HSt -> (a,HSt)) TSt -> (a,TSt)
+appHSt hstfun tst=:((i,myturn,html),hst)
+# (a,hst) = hstfun hst
+= (a,((i,myturn,html),hst))
 	
 // debugging code 
 

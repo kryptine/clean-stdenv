@@ -14,7 +14,8 @@ derive gerda 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, But
 instance toBool   CheckBox, Button, RadioButton		// True if checkbox checked, button pressed
 instance toInt    PullDownMenu						// Current index in pull down list
 instance toString PullDownMenu						// Corresponding element in pull down list
-instance ==		  PasswordBox
+instance ==		  PasswordBox, HtmlDate, HtmlTime
+instance <		  HtmlDate, HtmlTime
 // lay out
 
 :: <-> a b		= (<->) infixl 5 a b				// place b to the left of a
@@ -49,4 +50,4 @@ instance ==		  PasswordBox
 :: HtmlDate 	= 	Date Int Int Int				// Day Month Year
 :: HtmlTime 	= 	Time Int Int Int				// Hours Minutes Seconds
 
-getTimeAndDate :: !*HSt -> *(!HtmlTime,!HtmlDate,!*HSt)
+getTimeAndDate :: !*HSt -> *(!(!HtmlTime,!HtmlDate),!*HSt)

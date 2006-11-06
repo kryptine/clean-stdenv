@@ -7,73 +7,92 @@ import StdHtml
 
 :: *TSt										// task state
 :: Task a		:== St *TSt a				// an interactive task
-:: IDataFun a	:== St *HSt (Form a)		// an iData Form
 
+/* Initiating the iTask library:
+startTask		:: start function for iTasks		
+*/
+startTask 		:: (Task a) *HSt 		-> ([BodyTag],HSt) 				| iData a 
 
+/* Promote any TSt state transition function to an iTask:
+mkTask			:: function will only be called when it is its turn to be activated
+					Also needed for defining recursive tasks
+*/
+mkTask 			:: (*TSt -> *(a,*TSt)) 	-> (Task a) 					| iData a 
 
-/*
-startTask		:: start function for iTasks
-
+/*	Sequential Tasks:
 STask			:: a Sequential iTask
 STask_button	:: do corresponding iTask when button pressed
 STasks			:: do all iTasks one after another, task completed when all done
+*/
+STask 			:: String a 			-> (Task a)						| iData a 
+STask_button	:: String (Task a)		-> (Task a) 					| iData a
+STasks			:: [(String,Task a)] 	-> (Task [a])					| iData a 
 
+/* Choose one Task out of n:
 CTask_button	:: Choose one iTask from list, depending on button pressed
 CTask_pdmenu	:: Choose one iTask from list, depending on pulldownmenu item selected
+*/
+CTask_button 	:: [(String,Task a)] 	-> (Task a) 					| iData a
+CTask_pdmenu 	:: [(String,Task a)] 	-> (Task a)	 					| iData a
 
+/* Choose m Tasks out of n:
 MCTask_ckbox	:: Multiple Choice of iTasks, depending on marked checkboxes
+*/
+MCTask_ckbox 	:: [(String,Task a)] 	-> (Task [a]) 					| iData a
 
-PCTask2			:: do both iTasks in any order (paralel), task completed and ends as soon as first one done
-PCTasks			:: do all  iTasks in any order (paralel), task completed and ends as soon as first one done
+/* Do m Tasks parallel / interleaved and FINISH as soon as SOME Task completes:
+PCTask2			:: do both iTasks in any order, task completed and ends as soon as first one done
+PCTasks			:: do all  iTasks in any order, task completed and ends as soon as first one done
+*/
+PCTask2			:: (Task a,Task a) 		-> (Task a) 					| iData a 
+PCTasks			:: [(String,Task a)] 	-> (Task a)						| iData a 
 
+/* Do Tasks parallel / interleaved and FINISH when ALL Tasks done:
 PTask2			:: do both iTasks in any order (paralel), task completed when both done
 PTasks			:: do all  iTasks in any order (paralel), task completed when all  done
-PMilestoneTasks :: do all  iTasks in any order (paralel), task completed (but not ended) as soon as first one done
+PMilestoneTasks :: do all  iTasks in any order (paralel), task completed when all  done
+					but continue with next task as soon as SOME Task completes
+*/
+PTask2 			:: (Task a,Task b) 		-> (Task (a,b)) 				| iData a & iData b
+PTasks 			:: [(String,Task a)]	-> (Task [a])					| iData a 
+PMilestoneTasks :: [(String,Task a)] 	-> (Task [a]) 					| iData a 
 
-returnTask		:: return the value and show it, no IO action from the user required
-returnVF		:: return the value and show the code, no IO action from the user required
-returnV			:: return the value, no IO action from the user required
+/* Tasks that do not require IO actions from the user:
+returnV			:: return the value
+returnTask		:: return the value and show it 
+returnVF		:: return the value and show the Html code specified
 returnF			:: add html code
+*/
+returnV 		:: a 					-> (Task a) 					| iData a 
+returnTask 		:: a 					-> (Task a) 					| iData a 
+returnVF 		:: a [BodyTag] 			-> (Task a) 					| iData a 
+returnF 		:: [BodyTag] 			-> TSt -> TSt
 
-appIData		:: lift iData editors to iTask domain
-
-mkTask			:: promote TSt state function to an iTask, i.e. task will only be called when it is its turn to be activated
-					Needed for defining recursive tasks
+/* Setting up communication channels between users:
 mkRTask			:: Remote Task: split indicated task in two tasks: a calling task and a receiving task
 					the caller will wait until the receiver has completed the task
 mkRTaskCall 	:: as mkRTask, but the caller will provide input for the remote task
 mkRDynTaskCall 	:: a remote task is set up, but the task that is created will be determined dynamically !
 					BE CAREFUL: static dynamics are used here, will work only for one exectable.
 */
-
-startTask 		:: (Task a) *HSt 		-> ([BodyTag],HSt) 				| iData a 
-mkTask 			:: (*TSt -> *(a,*TSt)) 	-> (Task a) 					| iData a 
-
-
-STask 			:: String a 			-> (Task a)						| iData a 
-STask_button	:: String (Task a)		-> (Task a) 					| iData a
-STasks			:: [(String,Task a)] 	-> (Task [a])					| iData a 
-
-CTask_button 	:: [(String,Task a)] 	-> (Task a) 					| iData a
-CTask_pdmenu 	:: [(String,Task a)] 	-> (Task a)	 					| iData a
-
-MCTask_ckbox 	:: [(String,Task a)] 	-> (Task [a]) 					| iData a
-
-PCTask2			:: (Task a,Task a) 		-> (Task a) 					| iData a 
-PCTasks			:: [(String,Task a)] 	-> (Task a)						| iData a 
-
-PTask2 			:: (Task a,Task b) 		-> (Task (a,b)) 				| iData a & iData b
-PTasks 			:: [(String,Task a)]	-> (Task [a])					| iData a 
-PMilestoneTasks :: [(String,Task a)] 	-> (Task [a]) 					| iData a 
-
-returnTask 		:: a 					-> (Task a) 					| iData a 
-returnVF 		:: a [BodyTag] 			-> (Task a) 					| iData a 
-returnV 		:: a 					-> (Task a) 					| iData a 
-returnF 		:: [BodyTag] 			-> TSt -> TSt
-
-appIData 		:: (IDataFun a) 		-> (Task a) 					| iData a
-
 mkRTask 		:: String (Task a) *TSt -> ((Task a,Task a),*TSt) 		| iData a 
 mkRTaskCall		:: String b (b -> Task a) *TSt 
 										-> ((b -> Task a,Task a),*TSt)	| iData a & iData b
 mkRDynTaskCall 	:: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt) | iData a
+
+
+/* Time and Date management:
+waitForTimeTask	:: Task is done when time has come
+waitForDateTask	:: Task is done when date has come
+*/
+waitForTimeTask	:: HtmlTime				-> (Task HtmlTime)
+waitForDateTask	:: HtmlDate				-> (Task HtmlDate)
+
+
+/* Lifting iData domain to iTask domain
+appIData		:: lift iData editors to iTask domain
+appHSt			:: lift HSt domain to TSt domain
+*/
+appIData 		:: (IDataFun a) 		-> (Task a) 					| iData a
+appHSt 			:: (HSt -> (a,HSt)) TSt -> (a,TSt)
+

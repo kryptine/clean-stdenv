@@ -322,13 +322,13 @@ mkBimapEditor inIDataId {map_to,map_from} hst
 
 import StdTime
 
-getTimeAndDate :: !*HSt -> *(!HtmlTime,!HtmlDate,!*HSt)
+getTimeAndDate :: !*HSt -> *(!(!HtmlTime,!HtmlDate),!*HSt)
 getTimeAndDate hst
 # (time,hst)	= accWorldHSt getCurrentTime hst
 # htmltime		= Time time.hours time.minutes time.seconds
 # (date,hst)	= accWorldHSt getCurrentDate hst
 # htmldate		= Date date.day date.month date.year
-= (htmltime,htmldate,hst)
+= ((htmltime,htmldate),hst)
 
 gForm{|TextArea|} (init,formid) hst 
 # (cntr,hst) = CntrHSt hst
@@ -416,3 +416,27 @@ where
 instance == PasswordBox
 where
 	(==) (PasswordBox psw1) (PasswordBox psw2) = psw1 == psw2
+
+instance == HtmlTime
+where
+	(==) (Time hrs0 min0 sec0) (Time hrs1 min1 sec1) = hrs0==hrs1 && min0==min1 && sec0==sec1 
+
+instance < HtmlTime
+where
+	(<) (Time hrs0 min0 sec0) (Time hrs1 min1 sec1) 
+	| hrs0 < hrs1 = True
+	| hrs0 == hrs1 && min0 <  min1 = True
+	| hrs0 == hrs1 && min0 == min1 && sec0 < sec1 = True
+	= False
+	
+instance == HtmlDate
+where
+	(==) (Date day0 month0 year0) (Date day1 month1 year1) = day0==day1 && month0==month1 && year0==year1
+
+instance < HtmlDate
+where
+	(<) (Date day0 month0 year0) (Date day1 month1 year1) 
+	| year0 < year1 = True
+	| year0 == year1 && month0 <  month1 = True
+	| year0 == year1 && month0 == month1 && day0 < day1 = True
+	= False
