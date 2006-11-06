@@ -293,23 +293,22 @@ gForm {|HtmlDate|} (init,formid) hst
 where
 	myeditor (init,formid) hst = mkBimapEditor (init,formid) bimap hst
 	where
-		(Date day month year) = formid.ival
-
 		bimap = {map_to = toPullDown, map_from = fromPullDown}
 		where
 			toPullDown (Date day month year) = (pddays,pdmonths,pdyears)
 			where
-				pddays 		= PullDown (1,  defpixel/2) (day-1,  [toString i \\ i <- [1..31]])
-				pdmonths 	= PullDown (1,  defpixel/2) (month-1,[toString i \\ i <- [1..12]])
-				pdyears 	= PullDown (1,2*defpixel/3) (year-minyear-1, [toString i \\ i <- [minyear..2015]])
+				pddays 		= PullDown (1,  defpixel/2) (minday-1,  [toString i \\ i <- [1..31]])
+				pdmonths 	= PullDown (1,  defpixel/2) (minmonth-1,[toString i \\ i <- [1..12]])
+				pdyears 	= PullDown (1,2*defpixel/3) (minyear-2006, [toString i \\ i <- [2006..2015]])
 
-				minyear = if (year < thisyear) thisyear year
+				minyear 	= if (year >= 2006 	&& year <= 2015) 	year 2006
+				minday		= if (day >= 1 		&& day <= 31) 		day 1
+				minmonth 	= if (month >= 1 	&& month <= 12) 	month 1
 		
 			fromPullDown (pddays,pdmonths,pdyears) = Date (convert pddays) (convert pdmonths) (convert pdyears)
 			where
 				convert x	= toInt (toString x)
 
-		thisyear = 2006
 
 mkBimapEditor :: !(InIDataId d) !(Bimap d v) !*HSt -> (Form d,!*HSt) 
 										| iData v
@@ -405,7 +404,7 @@ where
 
 instance toString PullDownMenu
 where
-	toString (PullDown _ (i,s)) = if (i>=0 && i <length s) (s!!i) ""
+	toString (PullDown _ (i,s)) = if (i>=0 && i <=length s) (s!!i) ""
 	
 instance == PasswordBox
 where
