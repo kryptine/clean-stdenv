@@ -432,7 +432,7 @@ where
 		FuncCheckBox formid (checkbox,cbf) hst = mkViewForm (init,nformid) bimap hst
 		where
 			bimap =	{ toForm 	= \init _ v -> toViewId init checkbox v
-					, updForm	= \b v -> if (not (toBool init) && b.isChanged) (toggle v) v // if (not init && b.isChanged) (toggle v) v
+					, updForm	= \b v -> v
 					, fromForm	= \b v -> if b.isChanged ((docbf  v),toBool v) (\_ a -> a,toBool v)
 					, resetForm	= Nothing
 					}
@@ -513,7 +513,7 @@ where
 			
 			nformid = {formid & id = formid.id +++ "/" +++ toString j, ival = (\_ a -> a,-1)}
 
-			stripname name = mkString (takeWhile ((<>) '_') (mkList name))
+			stripname name = mkString (takeWhile ((<>) '/') (mkList name))
 
 FuncMenu :: !(InIDataId (Int,[(String, a -> a)])) !*HSt 
 													 -> (Form (a -> a,Int),!*HSt)

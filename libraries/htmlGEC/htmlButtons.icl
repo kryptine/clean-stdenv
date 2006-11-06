@@ -4,7 +4,7 @@ import StdEnv, ArgEnv
 
 import htmlHandler, htmlStylelib, htmlTrivial
 
-derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, /*Button, */CheckBox, RadioButton /*, PullDownMenu, TextInput */, TextArea/*, PasswordBox*/
+derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode/*, Button, CheckBox*/, RadioButton /*, PullDownMenu, TextInput */, TextArea/*, PasswordBox*/
 derive gPrint 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, PasswordBox
 derive gParse 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, PasswordBox
 derive gerda 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, PasswordBox
@@ -365,11 +365,18 @@ gUpd{|PullDownMenu|} (UpdSearch val cnt) v = (UpdSearch val (cnt - 1),v)			// co
 gUpd{|PullDownMenu|} (UpdCreate l)		_ = (UpdCreate l,PullDown (1,defpixel) (0,["error"]))					// create default value
 gUpd{|PullDownMenu|} mode 			  	v = (mode,v)							// don't change
 
-
-gUpd{|Button|} (UpdSearch (UpdS name) 0) 	_ = (UpdDone,Pressed)					// update integer value
+gUpd{|Button|} (UpdSearch (UpdS name) 0) 	_ = (UpdDone,Pressed)					// update button value
 gUpd{|Button|} (UpdSearch val cnt)      	b = (UpdSearch val (cnt - 1),b)			// continue search, don't change
 gUpd{|Button|} (UpdCreate l)				_ = (UpdCreate l,(LButton defsize "Press"))					// create default value
 gUpd{|Button|} mode 			  	    	b = (mode,b)							// don't change
+
+
+gUpd{|CheckBox|} (UpdSearch (UpdS name) 0) 	(CBChecked s) = (UpdDone,CBNotChecked s)	// update CheckBox value
+gUpd{|CheckBox|} (UpdSearch (UpdS name) 0) 	(CBNotChecked s) = (UpdDone,CBChecked s)	// update CheckBox value
+gUpd{|CheckBox|} (UpdSearch val cnt)      	b = (UpdSearch val (cnt - 1),b)			// continue search, don't change
+gUpd{|CheckBox|} (UpdCreate l)				_ = (UpdCreate l,(CBNotChecked "defaultCheckboxName"))					// create default value
+gUpd{|CheckBox|} mode 			  	    	b = (mode,b)							// don't change
+
 
 gUpd{|TextInput|} (UpdSearch (UpdI ni) 0) 	(TI size i)  = (UpdDone,TI size ni)		// update integer value
 gUpd{|TextInput|} (UpdSearch (UpdR nr) 0) 	(TR size r)  = (UpdDone,TR size nr)		// update integer value
