@@ -20,6 +20,12 @@ startTask		:: start function for iTasks
 */
 startTask 		:: (Task a) *HSt 		-> ([BodyTag],HSt) 		| iData a 
 
+/* Global Attribute settings: iTask are by default Lifespan = Session, StorageFormt = PlainString
+*/
+class setTaskAttribute a :: !a *TSt -> *TSt
+
+instance setTaskAttribute Lifespan, StorageFormat
+
 /* Promote any TSt state transition function to an iTask:
 mkTask			:: function will only be called when it is its turn to be activated
 					Also needed for defining recursive tasks

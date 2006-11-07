@@ -8,9 +8,7 @@ derive gForm []
 derive gUpd []
 
 
-:: Void = Void
-
-Start world = doHtmlServer (mkflow (requestTask 500)) world
+Start world = doHtmlServer (mkflow twotasks3) world
 where
 	mkflow tasks hst 
 	# (html,hst) = startTask tasks hst
@@ -34,6 +32,7 @@ where
 :: Situation = Difficult Int | Easy
 
 twotasks3 tst
+# tst							= setTaskAttribute Persistent tst
 # ((forSecr,fromBoss),tst) 		= mkRDynTaskCall "boss-secr"  0 tst		// split name task
 # ((forAssist,fromSecr),tst) 	= mkRDynTaskCall "secr-assist" 0 tst		// split name task
 = PTasks
@@ -210,11 +209,11 @@ AnalyseForm tst
 # ((_,either),tst) = STask "Kies" (Dsp geslacht,Naam) tst
 = returnTask (either,if (either == Naam) naam woonplaats) tst
 
-derive gForm EenOfAnder, RecForm, Void
-derive gUpd EenOfAnder, RecForm, Void
-derive gParse EenOfAnder, RecForm, Void
-derive gPrint EenOfAnder, RecForm, Void
-derive gerda EenOfAnder, RecForm, Void
+derive gForm EenOfAnder, RecForm
+derive gUpd EenOfAnder, RecForm
+derive gParse EenOfAnder, RecForm
+derive gPrint EenOfAnder, RecForm
+derive gerda EenOfAnder, RecForm
 
 instance == EenOfAnder
 where
