@@ -10,33 +10,45 @@ derive gUpd []
 
 :: Void = Void
 
-//Start world = doHtmlServer (mkflow CoffeeMachineInf) world
-//Start world = doHtmlServer (mkflow (requestTask 100)) world
-// Start world = doHtmlServer (mkflow (RecordSongs ["song 1","song 2","song 3"])) world
-//Start world = doHtmlServer (mkflow CreateMusic) world
-//Start world = doHtmlServer (mkflow (Quotation myQuotation)) world
-//Start world = doHtmlServer (mkflow travel) world
-Start world = doHtmlServer (mkflow test4) world
+Start world = doHtmlServer (mkflow (requestTask 500)) world
 where
 	mkflow tasks hst 
 	# (html,hst) = startTask tasks hst
 	= mkHtml "test" html hst
 
+testTime tst
+# (time,tst) = STask "SetTimer" (Date 0 0 0) tst
+# (_,tst) = PTasks	[ ("timer",waitForDateTask time)
+		, ("someone",STask "Done" 0 `bind` \_ -> returnV time)
+		] tst
+= returnTask time tst
+
+
+mytest tst = test (CBChecked "",CBChecked "") tst
+where
+	test val tst
+	# (val,tst) = STask "Set" val tst
+	| False = returnTask val tst
+	= mkTask (test val) tst
+
+:: Situation = Difficult Int | Easy
 
 twotasks3 tst
-# ((tboss,tsecr),tst) 		= mkRDynTaskCall "name" 0 tst		// split name task
+# ((forSecr,fromBoss),tst) 		= mkRDynTaskCall "boss-secr"  0 tst		// split name task
+# ((forAssist,fromSecr),tst) 	= mkRDynTaskCall "secr-assist" 0 tst		// split name task
 = PTasks
-	 [( "secretary", tsecr)							// assign name task
-	 ,( "boss", STask "Choose" Easy `bind` 
-	 			\situation ->  tboss (handle situation) `bind`
+	 [( "boss", STask "Choose" Easy `bind` 
+	 			\situation ->  forSecr (taskForSecr situation forAssist) `bind`
 	 			\result ->  STask "accept" result
 	  )
+	 ,("secretary", fromBoss)
+	 ,("assistent", fromSecr)							
 	 ] tst
 where
-	handle Easy tst
+	taskForSecr Easy forAssist tst
 	# tst = returnF [Txt ("Handle easy case")] tst
-	= STask "Damage" 0 tst
-	handle (Difficult upperbound) tst
+	= forAssist (STask "Damage" 0) tst
+	taskForSecr (Difficult upperbound) _ tst
 	# tst = returnF [Txt ("Handle difficult case with limit " +++ (toString upperbound) +++ " Euro's")] tst
 	= checktask upperbound tst
 	where
@@ -87,7 +99,6 @@ where
 			= mkTask (checktask limit) tst
 		= returnTask amount tst
 	
-:: Situation = Difficult Int | Easy
 
 derive gForm Situation
 derive gUpd Situation
@@ -124,29 +135,39 @@ optelTaak tst
 | c > 1000	= returnTask c tst
 = mkTask optelTaak tst
 
-agenda :: (Task Bool)
-agenda = \tst -> agenda` tst
+//agenda :: (Task Bool)
+agenda = \tst -> agenda` (22) tst
 where
-	agenda` tst
-	# ((voorstel,acceptatie),tst) = mkRTaskCall "agenda" init datumbrief tst
+	agenda` date tst
+	# ((voorstel,acceptatie),tst) = mkRTaskCall "agenda" date datumbrief tst
 	# (afspraak,tst)			= PTasks
-								 [( "persoon1"
-								  ,	acceptatie `bind` \t -> returnTask t
+								 [( "antwoorder"
+								  ,	acceptatie `bind` 
+								  	\t -> returnTask t
 								  )
-								 ,( "persoon2"
-								  , STask "kiesDatum" init `bind` voorstel 
+								 ,( "vrager"
+								  , STask "kiesDatum" date `bind` 
+								  	\t -> voorstel t `bind`
+								  	afhandelen								  	
 								  )
 								 ] tst
-	| not (hd afspraak) = mkTask agenda tst
-	= returnTask (hd afspraak) tst 
+	# [(_,date):_]	= afspraak
+	# ok = or (map fst afspraak)
+	| ok 	= returnTask date tst 
+	= mkTask (agenda` date) tst
 	where
-		init = Date 2 2 2006
-	
+		afhandelen (True,datum) tst = returnTask (True,datum) tst
+		afhandelen (False,datum) tst
+		# (_,tst) = returnTask datum tst
+		# (ok,tst) = CTask_button [("Accoord",returnV True),("NietAccoord",returnV False)] tst
+		= returnTask (ok,datum) tst
+
+
 		datumbrief date tst
 		# tst = returnF [Txt "voorgestelde datum:",Br]  tst	
 		# (_,tst) = returnTask date tst						// laat voorgestelde datum zien
-		= CTask_button 	[ ("geaccepteerd", returnTask True)
-						 , ("afgewezen",   returnTask False)
+		= CTask_button 	[ ("geaccepteerd", returnTask (True,date))
+						 , ("afgewezen",   STask "kiesDatum" date `bind` \date -> returnTask (False,date))
 						 ] tst
 
 
