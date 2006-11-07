@@ -8,50 +8,45 @@ derive gParse 	Niks
 derive gPrint 	Niks
 derive gerda 	Niks
 
-
 import dynamic_string, EncodeDecode
 
-
-
-
-
-:: *TSt 		:== (([Int],Bool,[BodyTag]),HSt)   	// Task State: task nr, has this task to be done?, html code accumulator
+:: *TSt 		=	{ tasknr 	:: ![Int]
+					, myturn	:: !Bool   	
+					, html		:: ![BodyTag]
+					, hst		:: !HSt
+					}
 
 :: Niks 		= Niks								// to make an empty task
 
 startTask :: (Task a) *HSt -> ([BodyTag],HSt) | iData a 
 startTask taska hst
-# (_,((_,_,html),hst)) = taska (newTask,hst) 
+# (_,{html,hst}) = taska {tasknr = [], myturn = True, html = [], hst = hst}
 = (html,hst)
-where
-	newTask = ([],True,[])
 
 mkTask :: (*TSt -> *(a,*TSt)) -> (Task a) | iData a
 mkTask mytask = \tst -> mkTask` tst
 where
-	mkTask` tst=:((i,myturn,html),hst)			
+	mkTask` tst=:{myturn}		
 	# tst 			= incTask tst				// every task should first increment its tasknumber
 	| not myturn	= (createDefault,tst)		// not active, return default value
 	= mytask tst
 
-incTask ((i,b,html),hst) = ((incTasknr i,b,html),hst)
+incTask tst = {tst & tasknr = incTasknr tst.tasknr}
 where
 	incTasknr [] = [0]
 	incTasknr [i:is] = [i+1:is]
 
-
-
 returnTask :: a -> (Task a) | iData a 
 returnTask a = \tst -> mkTask (returnTask` a) tst
 where
-	returnTask` a ((i,myturn,html),hst)
-	# editId			= "edit_" <+++ mkTaskNr i
+	returnTask` a  tst=:{tasknr,myturn,html,hst}
+	# editId			= "edit_" <+++ mkTaskNr tasknr
 	# (editor,hst) 		= (mkEditForm  (Set,ndFormId editId a) hst)			// yes, read out current value, make editor passive
-	= (editor.value,((i,myturn,html <|.|> editor.form),hst))				// return result task
+	= (editor.value,{tst & html = html <|.|> editor.form, hst = hst})				// return result task
 
 returnVF :: a [BodyTag] -> (Task a) | iData a 
 returnVF a bodytag =
-	\tst=:((i,myturn,html),hst) -> (a,((i,myturn,html <|.|> bodytag),hst))				// return result task
+	\tst=:{html} -> (a,{tst & html = html <|.|> bodytag})				// return result task
 
 returnV :: a -> (Task a) | iData a 
 returnV a  = 
@@ -59,49 +54,49 @@ returnV a  =
 
 returnF :: [BodyTag] -> TSt -> TSt
 returnF bodytag =
-	\tst=:((i,myturn,html),hst) -> ((i,myturn,html <|.|> bodytag),hst)				// return result task
+	\tst=:{html} -> {tst & html = html <|.|> bodytag}			// return result task
 
 STask :: String a -> (Task a) | iData a 
 STask prompt a = \tst -> mkTask (STask` a) tst
 where
-	STask` a ((i,myturn,html),hst)
-	# taskId			= "Stask_" <+++ mkTaskNr i
-	# editId			= "Sedit_" <+++ mkTaskNr i
-	# buttonId			= mkTaskNr i
+	STask` a tst=:{tasknr,myturn,html,hst}
+	# taskId			= "Stask_" <+++ mkTaskNr tasknr
+	# editId			= "Sedit_" <+++ mkTaskNr tasknr
+	# buttonId			= mkTaskNr tasknr
 	# (taskdone,hst) 	= mkStoreForm (Init,sFormId taskId False) id hst  			// remember if the task done
 	| taskdone.value																// test if task completed
 		# (editor,hst) 	= (mkEditForm  (Init,ndFormId editId a) hst)				// yes, read out current value, make editor passive
-		= (editor.value,((i,True,html <|.|> editor.form),hst))						// return result task
+		= (editor.value,{tst & myturn = True, html = html <|.|> editor.form, hst = hst})	// return result task
 	# (editor,hst) 		= mkEditForm  (Init,sFormId editId a) hst					// no, read out current value from active editor
 	# (finbut,hst)  	= simpleButton buttonId prompt (\_ -> True) hst				// add button for marking task as done
 	# (taskdone,hst) 	= mkStoreForm (Init,sFormId taskId False) finbut.value hst 	// remember task status for next time
-	| taskdone.value	= STask` a ((i,myturn,html),hst)							// task is now completed, handle as previously
-	= (a,((i,taskdone.value,html <|.|> (editor.form ++ finbut.form)),hst))
+	| taskdone.value	= STask` a {tst & hst = hst}								// task is now completed, handle as previously
+	= (a,{tst & myturn = taskdone.value, html = html <|.|> (editor.form ++ finbut.form), hst = hst})
 
 CTask_pdmenu :: [(String,Task a)] -> (Task a) | iData a
 CTask_pdmenu options = \tst -> mkTask (doCTask` options) tst
 where
 	doCTask` [] tst					= returnV createDefault tst	
-	doCTask` options tst=:((i,myturn,html),hst)									// choose one subtask out of the list
-	# (choice,hst)					= FuncMenu  (Init,sFormId ("Cpd_task_" <+++ mkTaskNr i) (0,[(txt,id) \\ txt <- map fst options]))	hst
-	# (_,((i,adone,ahtml),hst)) 	= STask  "Cpd_Done" Niks ((i ++ [0],True,[]),hst)	
-	| not adone						= (createDefault,((i,False,html <|.|> choice.form <|.|> ahtml),hst))
+	doCTask` options tst=:{tasknr,myturn,html,hst}								// choose one subtask out of the list
+	# (choice,hst)					= FuncMenu  (Init,sFormId ("Cpd_task_" <+++ mkTaskNr tasknr) (0,[(txt,id) \\ txt <- map fst options]))	hst
+	# (_,{tasknr,myturn=adone,html=ahtml,hst})	= STask  "Done" Niks {tasknr = tasknr ++ [0],myturn = True, html = [], hst = hst}	
+	| not adone						= (createDefault,{tasknr = tasknr,myturn = False, html = html <|.|> choice.form <|.|> ahtml, hst = hst})
 	# chosenIdx						= snd choice.value
 	# chosenTask					= snd (options!!chosenIdx)
-	# (a,((i,bdone,bhtml),hst)) 	= chosenTask ((i ++ [1],True,[]),hst)
-	= (a,((i,adone&&bdone,html <|.|> bhtml),hst))
-
+	# (a,{tasknr,myturn=bdone,html=bhtml,hst}) = chosenTask {tasknr = tasknr ++ [1],myturn = True, html = [], hst = hst}
+	= (a,{tasknr = tasknr, myturn = adone&&bdone, html = html <|.|> bhtml,hst = hst})
+	
 CTask_button :: [(String,Task a)] -> (Task a) | iData a
 CTask_button options = \tst -> mkTask (doCTask` options) tst
 where
 	doCTask` [] tst					= returnV createDefault tst				
-	doCTask` options tst=:((i,myturn,html),hst)									// choose one subtask out of the list
-	# (choice,hst)					= TableFuncBut (Init,sFormId ("Cbt_task_" <+++ mkTaskNr i) [[(but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]]) hst
-	# (chosen,hst)					= mkStoreForm  (Init,sFormId ("Cbt_chosen_" <+++ mkTaskNr i) -1) choice.value hst
-	| chosen.value == -1			= (createDefault,((i,False,html <|.|> choice.form),hst))
+	doCTask` options tst=:{tasknr,myturn,html,hst}									// choose one subtask out of the list
+	# (choice,hst)					= TableFuncBut (Init,sFormId ("Cbt_task_" <+++ mkTaskNr tasknr) [[(but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]]) hst
+	# (chosen,hst)					= mkStoreForm  (Init,sFormId ("Cbt_chosen_" <+++ mkTaskNr tasknr) -1) choice.value hst
+	| chosen.value == -1			= (createDefault,{tst & myturn =False,html = html <|.|> choice.form, hst = hst})
 	# chosenTask					= snd (options!!chosen.value)
-	# (a,((i,adone,ahtml),hst)) 	= chosenTask ((i ++ [1],True,[]),hst)
-	= (a,((i,adone,html <|.|> ahtml),hst))
+	# (a,{tasknr,myturn=adone,html=ahtml,hst}) = chosenTask {tasknr = tasknr ++ [1], myturn = True, html = [], hst = hst}
+	= (a,{tasknr = tasknr, myturn = adone, html = html <|.|> ahtml,hst = hst})
 
 	but i = LButton defpixel i
 
@@ -109,13 +104,13 @@ MCTask_ckbox :: [(String,Task a)] -> (Task [a]) | iData a
 MCTask_ckbox options = \tst -> mkTask (MCTask_ckbox` options) tst
 where
 	MCTask_ckbox` [] tst			= returnV [] tst	
-	MCTask_ckbox` options tst=:((i,myturn,html),hst)									// choose one subtask out of the list
-	# (cboxes,hst)					= ListFuncCheckBox (Init,sFormId ("MC_check" <+++ mkTaskNr i) initCheckboxes) hst
+	MCTask_ckbox` options tst=:{tasknr,myturn,html,hst}									// choose one subtask out of the list
+	# (cboxes,hst)					= ListFuncCheckBox (Init,sFormId ("MC_check" <+++ mkTaskNr tasknr) initCheckboxes) hst
 	# optionsform					= cboxes.form <=|> [Txt text \\ (text,_) <- options]
-	# (_,((i,adone,ahtml),hst)) 	= STask  "OK" Niks ((i,True,[]),hst)	
-	| not adone						= (createDefault,((i,False,html <|.|> [optionsform] <|.|> ahtml),hst))
+	# (_,{tasknr,myturn=adone,html=ahtml,hst}) = STask  "OK" Niks {tst & myturn = True, html = [], hst = hst}	
+	| not adone						= (createDefault,{tasknr=tasknr,myturn=False,html=html <|.|> [optionsform] <|.|> ahtml, hst = hst})
 	# mytasks						= [option \\ option <- options & True <- snd cboxes.value]
-	= STasks mytasks ((i,True,html),hst)
+	= STasks mytasks {tasknr=tasknr,myturn=True,html=html, hst = hst}
 
 	initCheckboxes  = 
 		[(CBNotChecked  text,  \ b bs id -> id) \\ (text,_) <- options]
@@ -124,40 +119,41 @@ STasks :: [(String,Task a)] -> (Task [a])| iData a
 STasks options = \tst -> mkTask (doSandTasks` options []) tst
 where
 	doSandTasks` [] accu tst 		= returnV (reverse accu) tst
-	doSandTasks` [(txt,task):ts] accu tst=:((i,myturn,html),hst)	 
-	# (a,((i,adone,ahtml),hst)) 	= task ((i,True,[]),hst)
-	| not adone						= (reverse accu,((i,adone,html <|.|> [Txt ("Task: " +++ txt),Br] <|.|> ahtml),hst))
-	= mkTask (doSandTasks` ts [a:accu]) ((i,adone,html <|.|> ahtml),hst)
+	doSandTasks` [(txt,task):ts] accu tst=:{tasknr,myturn,html,hst} 
+	# (a,{tasknr,myturn =adone,html=ahtml,hst}) = task {tst & myturn = True, html = []}
+	| not adone						= (reverse accu,{tasknr = tasknr,myturn = adone, html = html <|.|> [Txt ("Task: " +++ txt),Br] <|.|> ahtml,hst = hst})
+	= mkTask (doSandTasks` ts [a:accu]) {tasknr = tasknr,myturn = adone, html = html <|.|> ahtml,hst = hst}
 
 
 PTask2 :: (Task a,Task b) -> (Task (a,b)) | iData a & iData b
 PTask2 (taska,taskb) = \tst -> mkTask (PTask2` (taska,taskb)) tst
 where
-	PTask2` (taska,taskb) tst=:((i,myturn,html),hst)
-	# (a,((_,adone,ahtml),hst)) 	= taska ((i ++ [0],True,[]),hst)	
-	# (b,((_,bdone,bhtml),hst)) 	= taskb ((i ++ [1],True,[]),hst)
-	= ((a,b),((i,adone&&bdone,html <|.|> ahtml <|.|> bhtml),hst))
+	PTask2` (taska,taskb) tst=:{tasknr,myturn,html,hst}
+	# (a,{myturn=adone,html=ahtml,hst})	= taska {tasknr = tasknr ++ [0],myturn = True, html = [], hst = hst}	
+	# (b,{myturn=bdone,html=bhtml,hst})	= taskb {tasknr = tasknr ++ [1],myturn = True, html = [], hst = hst}
+	= ((a,b),{tst & myturn = adone&&bdone, html = html <|.|> ahtml <|.|> bhtml,hst = hst})
 
 PCTask2 :: (Task a,Task a) -> (Task a) | iData a 
 PCTask2 (taska,taskb) = \tst -> mkTask (PCTask2` (taska,taskb)) tst
 where
-	PCTask2` (taska,taskb) tst=:((i,myturn,html),hst)
-	# (a,((_,adone,ahtml),hst)) 	= taska ((i ++ [0],True,[]),hst)	
-	# (b,((_,bdone,bhtml),hst)) 	= taskb ((i ++ [1],True,[]),hst)
+	PCTask2` (taska,taskb) tst=:{tasknr,myturn,html,hst}
+	# (a,{myturn=adone,html=ahtml,hst}) = taska {tasknr = tasknr ++ [0],myturn = True, html = [], hst = hst}	
+	# (b,{myturn=bdone,html=bhtml,hst}) = taskb {tasknr = tasknr ++ [1],myturn = True, html = [], hst = hst}
 	# (aorb,aorbdone,myhtml)		= if adone (a,adone,ahtml) (if bdone (b,bdone,bhtml) (a,False,ahtml <|.|> bhtml))
-	= (aorb,((i,aorbdone,html <|.|> myhtml),hst))
+	= (aorb,{tst & myturn = aorbdone, html = html <|.|> myhtml,hst =  hst})
 
 PCTasks :: [(String,Task a)] -> (Task a) | iData a 
 PCTasks options = \tst -> mkTask (PCTasks` options) tst
 where
 	PCTasks` [] tst 				= returnV createDefault tst
-	PCTasks` tasks tst=:((i,myturn,html),hst)
-	# (choice,hst)					= TableFuncBut (Init,sFormId ("Cbt_task_" <+++ mkTaskNr i) [[(but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]]) hst
-	# (chosen,hst)					= mkStoreForm  (Init,sFormId ("Cbt_chosen_" <+++ mkTaskNr i) 0) choice.value hst
+	PCTasks` tasks tst=:{tasknr,myturn,html,hst}
+	# (choice,hst)					= TableFuncBut (Init,sFormId ("Cbt_task_" <+++ mkTaskNr tasknr) [[(but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]]) hst
+	# (chosen,hst)					= mkStoreForm  (Init,sFormId ("Cbt_chosen_" <+++ mkTaskNr tasknr) 0) choice.value hst
 	# chosenTask					= snd (options!!chosen.value)
-	# (a,((i,adone,ahtml),hst)) 	= chosenTask ((i ++ [chosen.value + 1],True,[]),hst)
-	| not adone						= (a,((i,adone,html <|.|> [choice.form <=> ahtml]),hst))
-	= (a,((i,adone,html <|.|> ahtml),hst))
+	# (a,{tasknr,myturn=adone,html=ahtml,hst})
+									= chosenTask {tasknr = tasknr ++ [chosen.value + 1], myturn = True, html = [], hst = hst}
+	| not adone						= (a,{tasknr = tasknr, myturn = adone, html = html <|.|> [choice.form <=> ahtml], hst = hst})
+	= (a,{tasknr = tasknr, myturn = adone, html = html <|.|> ahtml, hst = hst})
 
 	but i = LButton defpixel i
 
@@ -165,60 +161,63 @@ PTasks :: [(String,Task a)] -> (Task [a]) | iData a
 PTasks options = \tst -> mkTask (doPTasks` options) tst
 where
 	doPTasks` [] tst			= returnV [] tst
-	doPTasks` options tst=:((i,myturn,html),hst)
-	# (choice,hst)				= TableFuncBut (Init,sFormId ("Cbt_task_" <+++ mkTaskNr i) [[(but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]]) hst
-	# (chosen,hst)				= mkStoreForm  (Init,sFormId ("Cbt_chosen_" <+++ mkTaskNr i) 0) choice.value hst
+	doPTasks` options tst=:{tasknr,myturn,html,hst}
+	# (choice,hst)				= TableFuncBut (Init,sFormId ("Cbt_task_" <+++ mkTaskNr tasknr) [[(but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]]) hst
+	# (chosen,hst)				= mkStoreForm  (Init,sFormId ("Cbt_chosen_" <+++ mkTaskNr tasknr) 0) choice.value hst
 	# chosenTask				= snd (options!!chosen.value)
 	# chosenTaskName			= fst (options!!chosen.value)
-	# (a,((_,adone,ahtml),hst)) = chosenTask ((i ++ [chosen.value + 1],True,[]),hst)
-	| not adone					= ([a],((i,adone,html <|.|> [choice.form <=> ( [Txt ("Task: " +++ chosenTaskName)] <|.|> ahtml)]),hst))
-	# (alist,((_,finished,_),hst))		
-								= checkAllTasks 0 [] ((i,myturn,[]),hst)
-	| finished					= (alist,((i,finished,html),hst))
-	= ([a],((i,finished,html <|.|> [choice.form <=> ([Txt ("Task: " +++ chosenTaskName)] <|.|> ahtml)]),hst))
+	# (a,{myturn=adone,html=ahtml,hst}) = chosenTask {tasknr = tasknr ++ [chosen.value + 1], myturn = True, html = [], hst = hst}
+	| not adone					= ([a],{tst & myturn = adone, html = html <|.|> [choice.form <=> ( [Txt ("Task: " +++ chosenTaskName)] <|.|> ahtml)], hst = hst})
+	# (alist,{myturn=finished,hst})		
+								= checkAllTasks 0 [] {tst & html = [], hst = hst}
+	| finished					= (alist,{tst & myturn = finished, hst = hst})
+	= ([a],{tst & myturn = finished, html = html <|.|> [choice.form <=> ([Txt ("Task: " +++ chosenTaskName)] <|.|> ahtml)], hst = hst})
 
 	but i = LButton defpixel i
 
-	checkAllTasks tasknr alist tst=:((i,myturn,_),hst)
-	| tasknr == length options	= (reverse alist,((i,True,[]),hst))	
-	# task						= snd (options!!tasknr)
-	# (a,((_,adone,html),hst))	= task ((i ++ [tasknr + 1],True,[]),hst)
-	| adone						= checkAllTasks (inc tasknr) [a:alist] ((i,myturn,[]),hst)
-	= ([],((i,False,[]),hst))
+	checkAllTasks ctasknr alist tst=:{tasknr,myturn,html,hst}
+	| ctasknr == length options	= (reverse alist,{tst & myturn = True, html = [], hst = hst})
+	# task						= snd (options!!ctasknr)
+	# (a,{myturn = adone,hst})	= task {tasknr = tasknr ++ [ctasknr + 1], myturn = True, html = [], hst = hst}
+	| adone						= checkAllTasks (inc ctasknr) [a:alist] {tasknr = tasknr, myturn = myturn, html = [], hst = hst}
+	= ([],{tst & myturn = False, html = [], hst = hst})
 
 PMilestoneTasks :: [(String,Task a)] -> (Task [a]) | iData a 
 PMilestoneTasks options = \tst -> mkTask (PMilestoneTasks` options) tst
 where
 	PMilestoneTasks` [] tst			= returnV [] tst
-	PMilestoneTasks` options tst=:((i,myturn,html),hst)
-	# (choice,hst)				= TableFuncBut (Init,sFormId ("Cbt_task_" <+++ mkTaskNr i) [[(but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]]) hst
-	# (chosen,hst)				= mkStoreForm  (Init,sFormId ("Cbt_chosen_" <+++ mkTaskNr i) 0) choice.value hst
+	PMilestoneTasks` options tst=:{tasknr,myturn,html,hst}
+	# (choice,hst)				= TableFuncBut (Init,sFormId ("Cbt_task_" <+++ mkTaskNr tasknr) [[(but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]]) hst
+	# (chosen,hst)				= mkStoreForm  (Init,sFormId ("Cbt_chosen_" <+++ mkTaskNr tasknr) 0) choice.value hst
 	# chosenTask				= snd (options!!chosen.value)
 	# chosenTaskName			= fst (options!!chosen.value)
-	# (milestoneReached,(_,hst))= checkAnyTasks 0 ((i,myturn,[]),hst)
-	# (a,((_,adone,ahtml),hst)) = chosenTask ((i ++ [chosen.value + 1],True,[]),hst)
-	| not adone					= ([a],((i,milestoneReached,html <|.|> [choice.form <=> ( [Txt ("Task: " +++ chosenTaskName)] <|.|> ahtml)]),hst))
-	# (alist,((_,finished,_),hst))		
-								= checkAllTasks 0 [] ((i,myturn,[]),hst)
-	| finished					= (alist,((i,finished,html),hst))
-	= ([a],((i,milestoneReached,html <|.|> [choice.form <=> ([Txt ("Task: " +++ chosenTaskName)] <|.|> ahtml)]),hst))
+	# (milestoneReached,{hst})	= checkAnyTasks 0 {tst & html = [], hst = hst}
+	# (a,{myturn=adone,html=ahtml,hst}) 
+								= chosenTask {tasknr = tasknr ++ [chosen.value + 1], myturn = True, html = [], hst = hst}
+	| not adone					= ([a],{tasknr = tasknr, myturn = milestoneReached, html = html <|.|> [choice.form <=> ( [Txt ("Task: " +++ chosenTaskName)] <|.|> ahtml)], hst = hst})
+	# (alist,{myturn=finished,hst})		
+								= checkAllTasks 0 [] {tst & html = [], hst = hst}
+	| finished					= (alist,{tst & myturn = True, hst = hst})
+	= ([a],{tst & myturn = milestoneReached, html = html <|.|> [choice.form <=> ([Txt ("Task: " +++ chosenTaskName)] <|.|> ahtml)], hst = hst})
 
 	but i = LButton defpixel i
 
-	checkAllTasks tasknr alist tst=:((i,myturn,_),hst)
-	| tasknr == length options	= (reverse alist,((i,True,[]),hst))	
-	# task						= snd (options!!tasknr)
-	# (a,((_,adone,html),hst))	= task ((i ++ [tasknr + 1],True,[]),hst)
-	| adone						= checkAllTasks (inc tasknr) [a:alist] ((i,myturn,[]),hst)
-	= ([],((i,False,[]),hst))
+	checkAllTasks ctasknr alist tst=:{tasknr,myturn,html,hst}
+	| ctasknr == length options	= (reverse alist,{tst & myturn = True, html = [], hst = hst})
+	# task						= snd (options!!ctasknr)
+	# (a,{myturn=adone,html,hst})
+								= task {tasknr = tasknr ++ [ctasknr + 1], myturn = True, html = [], hst = hst}
+	| adone						= checkAllTasks (inc ctasknr) [a:alist] {tst & html = [], hst = hst}
+	= ([],{tst & myturn = False, html = [], hst = hst})
 
-	checkAnyTasks tasknr tst=:((i,myturn,_),hst)
-	| tasknr == length options	= (False,tst)
-	# task						= snd (options!!tasknr)
-	# (a,((_,adone,html),hst))	= task ((i ++ [tasknr + 1],True,[]),hst)
-	| adone						= (True,((i,adone,html),hst))
-	= checkAnyTasks (inc tasknr) ((i,myturn,[]),hst)
-
+	checkAnyTasks ctasknr tst=:{tasknr,myturn,html,hst}
+	| ctasknr == length options	= (False,tst)
+	# task						= snd (options!!ctasknr)
+	# (a,{myturn=adone,html,hst})
+								= task {tasknr = tasknr ++ [ctasknr + 1], myturn = True, html = [], hst = hst}
+	| adone						= (True,{tst & myturn = adone, html = html, hst = hst})
+	= checkAnyTasks (inc ctasknr) {tst & html = [], hst = hst}
+	
 STask_button 		:: String (Task a) 			-> (Task a) 	| iData a
 STask_button s task = CTask_button [(s,task)]
 
@@ -226,110 +225,110 @@ STask_button s task = CTask_button [(s,task)]
 mkRTask :: String (Task a) *TSt -> ((Task a,Task a),*TSt) | iData a
 mkRTask s task tst = let (a,b,c) = mkRTask` s task (incTask tst) in ((a,b),c)
 where
-	mkRTask` s task tst=:((j,myturn,html),hst) = (bossTask, workerTask s task,tst)
+	mkRTask` s task tst=:{tasknr = maintasknr} = (bossTask, workerTask s task,tst)
 	where
 		workerTask s task tst = mkTask (workerTask` s task) tst
 		where
-			workerTask` s task tst=:((i,myturn,html),hst) 
+			workerTask` s task tst=:{tasknr,myturn,html,hst} 
 			# (todo,hst)	= checkBossSignal id hst	// check whether lazy task evaluation has to be done
 			| todo.value								// yes	
-				# (a,((_,adone,ahtml),hst)) = task ((j++[0],True,[]),hst)			// do task
+				# (a,{myturn=adone,html=ahtml,hst}) = task {tasknr = maintasknr++[0], myturn = True, html = [], hst = hst}			// do task
 				# (_,hst) 					= lazyTaskStore (\_ -> (adone,a)) hst	// store task and status
-				= (a,((i,myturn,html <|.|> if adone [] [Txt ("lazy task \"" +++ s +++ "\" activated:"),Br] <|.|> ahtml),hst))
-			= (createDefault,((i,myturn,html),hst))		// no
+				= (a,{tst & html = html <|.|> if adone [] [Txt ("lazy task \"" +++ s +++ "\" activated:"),Br] <|.|> ahtml, hst = hst})
+			= (createDefault,{tst & hst = hst})	// no
 	
 		bossTask tst = mkTask (bossTask`) tst
 		where
-			bossTask` tst=:((i,myturn,html),hst) 
-			# buttonId		= "getlt" <+++ mkTaskNr i
+			bossTask` tst=:{tasknr,myturn,html,hst} 
+			# buttonId		= "getlt" <+++ mkTaskNr tasknr
 			# (finbut,hst)  = simpleButton buttonId s (\_ -> True) hst	// button press will trigger related lazy task	
 			# (todo,hst)	= checkBossSignal finbut.value hst			// set store True if button pressed
 			# (result,hst)	= lazyTaskStore id hst						// inspect status task
 			# (done,value)	= result.value
-			| not done 		= (createDefault,((i,False,html<|.|>if todo.value [Txt ("Waiting for task \"" +++ s +++ "\"..")] finbut.form),hst))
-			= (value,((i,myturn,html <|.|>  [Txt ("Result of lazy task \"" +++ s +++ "\" :")]),hst))	
+			| not done 		= (createDefault,{tst & myturn = False, html = html <|.|> if todo.value [Txt ("Waiting for task \"" +++ s +++ "\"..")] finbut.form, hst = hst})
+			= (value,{tst & html = html <|.|>  [Txt ("Result of lazy task \"" +++ s +++ "\" :")], hst = hst})
 	
-		lazyTaskStore   fun = mkStoreForm (Init,sFormId ("getLT" <+++ mkTaskNr j) (False,createDefault)) fun 
-		checkBossSignal fun = mkStoreForm (Init,sFormId ("setLT" <+++ mkTaskNr j) (fun False)) fun 
+		lazyTaskStore   fun = mkStoreForm (Init,sFormId ("getLT" <+++ mkTaskNr maintasknr) (False,createDefault)) fun 
+		checkBossSignal fun = mkStoreForm (Init,sFormId ("setLT" <+++ mkTaskNr maintasknr) (fun False)) fun 
 		
 mkRTaskCall :: String b (b -> Task a) *TSt -> ((b -> Task a,Task a),*TSt) | iData a
 												& iData b
 mkRTaskCall  s initb batask tst = let (a,b,c) = mkRTaskCall` s (incTask tst) in ((a,b),c)
 where
-	mkRTaskCall` s tst=:((j,myturn,html),hst) = (bossTask, workerTask s,tst)
+	mkRTaskCall` s tst=:{tasknr = maintasknr} = (bossTask, workerTask s,tst)
 	where
 		workerTask s tst = mkTask (workerTask` s) tst
 		where
-			workerTask` s tst=:((i,myturn,html),hst) 
+			workerTask` s tst=:{tasknr,myturn,html,hst}
 			# (boss,hst)	= bossStore id hst		// check input from boss
 			# (worker,hst)	= workerStore id hst	// check result from worker
 			# (bdone,binput)= boss.value
 			# (wdone,wresult)= worker.value
-			| wdone			= (wresult,((i,True,html<|.|>  [Txt ("Lazy task \"" +++ s +++ "\" completed:")]),hst))	
+			| wdone			= (wresult,{tst & myturn = True, html = html <|.|>  [Txt ("Lazy task \"" +++ s +++ "\" completed:")], hst = hst})
 			| bdone
-				# (wresult,((_,wdone,whtml),hst)) = batask binput ((j++[0],True,[]),hst)	// apply task to input from boss
+				# (wresult,{myturn=wdone,html=whtml,hst}) = batask binput {tasknr = maintasknr++[0], myturn = True, html = [], hst = hst}	// apply task to input from boss
 				| wdone															// worker task finshed
 					# (_,hst)	= workerStore (\_ -> (wdone,wresult)) hst		// store task and status
-					= workerTask` s ((i,myturn,html),hst) 				// complete as before
-				= (createDefault,((i,False,html <|.|> if wdone [] [Txt ("lazy task \"" +++ s +++ "\" activated:"),Br] <|.|> whtml),hst))
-			= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))		// no
+					= workerTask` s {tst &  hst = hst}				// complete as before
+				= (createDefault,{tst & myturn = False, html = html <|.|> if wdone [] [Txt ("lazy task \"" +++ s +++ "\" activated:"),Br] <|.|> whtml, hst = hst})
+			= (createDefault,{tst & myturn = False, html = html <|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")], hst = hst})
 	
 		bossTask b tst = mkTask bossTask` tst
 		where
-			bossTask` tst=:((i,myturn,html),hst) 
+			bossTask` tst=:{tasknr,myturn,html,hst} 
 			# (boss,hst)				= bossStore id hst		// check input from boss
 			# (worker,hst)				= workerStore id hst	// check result from worker
 			# (bdone,binput)= boss.value
 			# (wdone,wresult)= worker.value
-			| bdone && wdone			= (wresult,((i,True,html<|.|>  [Txt ("Result of lazy task \"" +++ s +++ "\" :")]),hst))	// finished
+			| bdone && wdone			= (wresult,{tst & myturn = True, html = html <|.|>  [Txt ("Result of lazy task \"" +++ s +++ "\" :")], hst = hst})	// finished
 			| not bdone
 				# (_, hst)		= bossStore (\_ -> (True,b)) hst	// store b information to communicate to worker	
-				= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))
-			= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))	
+				= (createDefault,{tst & myturn = False, html = html <|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")], hst = hst})
+			= (createDefault,{tst & myturn = False, html = html <|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")], hst = hst})	
 	
-		workerStore   fun = mkStoreForm (Init,sFormId ("workerStore" <+++ mkTaskNr j) (False,createDefault)) fun 
-		bossStore     fun = mkStoreForm (Init,sFormId ("bossStore"   <+++ mkTaskNr j) (False,initb)) fun 
+		workerStore   fun = mkStoreForm (Init,sFormId ("workerStore" <+++ mkTaskNr maintasknr) (False,createDefault)) fun 
+		bossStore     fun = mkStoreForm (Init,sFormId ("bossStore"   <+++ mkTaskNr maintasknr) (False,initb)) fun 
 
 
 		
 mkRDynTaskCall :: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt) | iData a
 mkRDynTaskCall s a tst = mkRDynTaskCall` (incTask tst)
 where
-	mkRDynTaskCall` tst=:((j,myturn,html),hst) = ((bossTask, workerTask),tst)
+	mkRDynTaskCall` tst=:{tasknr = maintasknr} = ((bossTask, workerTask),tst)
 	where
 		workerTask tst = mkTask workerTask` tst
 		where
-			workerTask` tst=:((i,myturn,html),hst) 
+			workerTask` tst=:{tasknr,myturn,html,hst} 
 			# (boss,hst)	= bossStore (False,defaulttask) hst		// check input from boss
 			# (worker,hst)	= workerStore id hst				// check result from worker
 			# (bdone,btask)	= boss.value
 			# (wdone,wresult)= worker.value
-			| wdone			= (wresult,((i,True,html<|.|>  [Txt ("Lazy task \"" +++ s +++ "\" completed:")]),hst))	
+			| wdone			= (wresult,{tst & myturn = True, html = html <|.|>  [Txt ("Lazy task \"" +++ s +++ "\" completed:")], hst = hst})	
 			| bdone
-				# (wresult,((_,wdone,whtml),hst)) = btask ((j++[0],True,[]),hst)	// apply task stored in memory
+				# (wresult,{myturn=wdone,html=whtml,hst}) = btask {tasknr = maintasknr++[0], myturn = True, html = [], hst = hst}	// apply task stored in memory
 				| wdone																// worker task finshed
 					# (_,hst)	= workerStore (\_ -> (wdone,wresult)) hst			// store task and status
-					= workerTask` ((i,myturn,whtml),hst) 							// complete as before
-				= (createDefault,((i,False,html <|.|> [Txt ("lazy task \"" +++ s +++ "\" activated:"),Br] <|.|> whtml),hst))
-			= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))		// no
+					= workerTask` {tst & hst = hst} 							// complete as before
+				= (createDefault,{tst & myturn = False, html = html <|.|> [Txt ("lazy task \"" +++ s +++ "\" activated:"),Br] <|.|> whtml, hst = hst})
+			= (createDefault,{tst & myturn = False, html = html <|.|> [Txt ("Waiting for task \"" +++ s +++ "\"..")], hst = hst})		// no
 	
 		bossTask taska tst = mkTask bossTask` tst
 		where
-			bossTask` tst=:((i,myturn,html),hst) 
+			bossTask` tst=:{tasknr,myturn,html,hst} 
 			# (boss,hst)		= bossStore (False,defaulttask) hst		// check input from boss
 			# (worker,hst)		= workerStore id hst			// check result from worker
 			# (bdone,btask)		= boss.value
 			# (wdone,wresult)	= worker.value
-			| bdone && wdone	= (wresult,((i,True,html<|.|>  [Txt ("Result of lazy task \"" +++ s +++ "\" :")]),hst))	// finished
+			| bdone && wdone	= (wresult,{tst & myturn = True, html = html <|.|>  [Txt ("Result of lazy task \"" +++ s +++ "\" :")], hst = hst})	// finished
 			| not bdone
 				# (_, hst)		= bossStore (True,taska) hst	// store b information to communicate to worker	
-				= (createDefault,((i,False,html<|.|>[Txt ("Task commited.\nWaiting for task \"" +++ s +++ "\"..")]),hst))
-			= (createDefault,((i,False,html<|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")]),hst))	
+				= (createDefault,{tst & myturn = False, html = html <|.|>[Txt ("Task commited.\nWaiting for task \"" +++ s +++ "\"..")], hst = hst})
+			= (createDefault,{tst & myturn = False, html = html <|.|>[Txt ("Waiting for task \"" +++ s +++ "\"..")], hst = hst})	
 	
-		workerStore   fun = mkStoreForm (Init,sFormId ("workerStore" <+++ mkTaskNr j) (False,createDefault)) fun 
+		workerStore   fun = mkStoreForm (Init,sFormId ("workerStore" <+++ mkTaskNr maintasknr) (False,createDefault)) fun 
 
 		bossStore (set,task) hst
-		# (boss,hst) 		= mkStoreForm (Init,sFormId ("bossStore" <+++ mkTaskNr j) initBoss) settask hst
+		# (boss,hst) 		= mkStoreForm (Init,sFormId ("bossStore" <+++ mkTaskNr maintasknr) initBoss) settask hst
 		# (bdone,encbtask)	= boss.value
 		# btask				= case string_to_dynamic` encbtask of
 									(mytask:: *TSt -> *(a^,*TSt)) -> mytask
@@ -349,22 +348,22 @@ where
 waitForTimeTask:: HtmlTime	-> (Task HtmlTime)
 waitForTimeTask time = \tst ->  mkTask waitForTimeTask` tst
 where
-	waitForTimeTask` tst=:((i,myturn,html),hst)
-	# taskId			= "Stask_" <+++ mkTaskNr i
+	waitForTimeTask` tst=:{tasknr,myturn,html,hst}
+	# taskId			= "Stask_" <+++ mkTaskNr tasknr
 	# (taskdone,hst) 	= mkStoreForm (Init,sFormId taskId (False,time)) id hst  			// remember time
 	# ((currtime,_),hst) = getTimeAndDate hst
-	| currtime < time	= (time,((i,True,html <|.|> [Txt ("Waiting for time " ):[toHtml time]]),hst))
-	= (time,((i,myturn,html),hst))
+	| currtime < time	= (time,{tst & myturn = True, html = html <|.|> [Txt ("Waiting for time " ):[toHtml time]], hst = hst})
+	= (time,{tst & hst = hst})
 
 waitForDateTask:: HtmlDate	-> (Task HtmlDate)
 waitForDateTask date = \tst ->  mkTask waitForDateTask` tst
 where
-	waitForDateTask` tst=:((i,myturn,html),hst)
-	# taskId			= "Stask_" <+++ mkTaskNr i
+	waitForDateTask` tst=:{tasknr,myturn,html,hst}
+	# taskId			= "Stask_" <+++ mkTaskNr tasknr
 	# (taskdone,hst) 	= mkStoreForm (Init,sFormId taskId (False,date)) id hst  			// remember date
 	# ((_,currdate),hst) = getTimeAndDate hst
-	| currdate < date	= (date,((i,True,html <|.|> [Txt ("Waiting for date " ):[toHtml date]]),hst))
-	= (date,((i,myturn,html),hst))
+	| currdate < date	= (date,{tst & myturn = True, html = html <|.|> [Txt ("Waiting for date " ):[toHtml date]], hst = hst})
+	= (date,{tst & hst = hst})
 
 
 // utility section
@@ -376,15 +375,15 @@ mkTaskNr [i:is] = toString i <+++ "." <+++ mkTaskNr is
 appIData :: (IDataFun a) -> (Task a) | iData a
 appIData idatafun = \tst -> mkTask (appIData` idatafun) tst
 where
-	appIData` idata tst=:((i,myturn,html),hst)
-	# (idata,hst) 				= idatafun hst
-	# (_,((i,adone,ahtml),hst)) = STask  "Done" Niks ((i,True,[]),hst)	
-	= (idata.value,((i,adone,html <|.|> if adone idata.form (idata.form <|.|> ahtml)),hst))
+	appIData` idata tst=:{tasknr,myturn,html,hst}
+	# (idata,hst) 						= idatafun hst
+	# (_,{tasknr,myturn,html=ahtml,hst}) 	= STask  "Done" Niks {tst & myturn = True, html = [],hst = hst}	
+	= (idata.value,{tasknr = tasknr,myturn = myturn, html = html <|.|> if myturn idata.form (idata.form <|.|> ahtml), hst = hst})
 
 appHSt :: (HSt -> (a,HSt)) TSt -> (a,TSt)
-appHSt hstfun tst=:((i,myturn,html),hst)
+appHSt hstfun tst=:{tasknr,myturn,html,hst}
 # (a,hst) = hstfun hst
-= (a,((i,myturn,html),hst))
+= (a,{tst & hst = hst})
 	
 // debugging code 
 
@@ -418,6 +417,4 @@ tohexchar s i
 = toChar (48+c);
 = toChar (55+c);
 
-//K:: !x y -> y |  iData y
-K x y = y
 	
