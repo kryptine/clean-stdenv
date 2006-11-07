@@ -23,7 +23,7 @@ extern char **global_argv;
 
 typedef struct
 {
-	int		length;
+	size_t		length;
 	char	characters [kVariableSize];
 } *CleanString;
 
@@ -78,7 +78,7 @@ ArgEnvGetEnvironmentVariableCharsC (CleanString value, CleanString name)
 # else /* ifndef _WINDOWS_ */
 
 void
-ArgEnvGetEnvironmentVariableC (CleanString name, int *sizeP, char **stringP)
+ArgEnvGetEnvironmentVariableC (CleanString name, size_t *sizeP, char **stringP)
 {
 	char	*value;
 
@@ -101,7 +101,7 @@ ArgEnvGetCommandLineCountC (void)
 } /* ArgEnvGetCommandLineCountC */
 
 void
-ArgEnvGetCommandLineArgumentC (int i, int *sizeP, char **stringP)
+ArgEnvGetCommandLineArgumentC (int i, size_t *sizeP, char **stringP)
 {
 	char	*arg;
 
