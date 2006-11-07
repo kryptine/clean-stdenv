@@ -14,8 +14,16 @@ NULL :== 0
     =	EnvironmentVariableUndefined
     |   EnvironmentVariable !.{#Char}
 
-getEnv :: !{#Char} -> (!Int, !CString)
-getEnv _
+getEnv es :== IF_INT_64_OR_32 (getEnv64 es) (getEnv32 es);
+
+getEnv64 :: !{#Char} -> (!Int, !CString)
+getEnv64 _
+	= code inline {
+			ccall ArgEnvGetEnvironmentVariableC "S-pp"
+	}
+
+getEnv32 :: !{#Char} -> (!Int, !CString)
+getEnv32 _
 	= code inline {
 			ccall ArgEnvGetEnvironmentVariableC "S-II"
 	}
@@ -30,16 +38,26 @@ getEnvironmentVariable name
 		(size, cString)
 			=	getEnv (name +++ "\0")
 
+copy length cString :== IF_INT_64_OR_32 (copy64 length cString) (copy32 length cString)
 
-copy :: !Int !CString -> {#.Char}
-copy length cString
+copy64 :: !Int !CString -> {#.Char}
+copy64 length cString
+	= code inline {
+			create_array_	CHAR 0 1
+
+			push_a	0
+			ccall	ArgEnvCopyCStringToCleanStringC "pS-I"
+			pop_b	1
+	}
+
+copy32 :: !Int !CString -> {#.Char}
+copy32 length cString
 	= code inline {
 			create_array_	CHAR 0 1
 
 			push_a	0
 			ccall	ArgEnvCopyCStringToCleanStringC "IS-I"
 			pop_b	1
-		.end
 	}
 
 getCommandLineCount :: Int
@@ -48,8 +66,16 @@ getCommandLineCount
 			ccall ArgEnvGetCommandLineCountC "-I"
 	}
 
-getCommandLineArgument :: !Int -> (!Int, !Int)
-getCommandLineArgument _
+getCommandLineArgument n = IF_INT_64_OR_32 (getCommandLineArgument64 n) (getCommandLineArgument64 n)
+
+getCommandLineArgument64 :: !Int -> (!Int, !Int)
+getCommandLineArgument64 _
+	= code inline {
+			ccall ArgEnvGetCommandLineArgumentC "I-pp"
+	}
+
+getCommandLineArgument32 :: !Int -> (!Int, !Int)
+getCommandLineArgument32 _
 	= code inline {
 			ccall ArgEnvGetCommandLineArgumentC "I-II"
 	}
