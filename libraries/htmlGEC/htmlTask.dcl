@@ -7,6 +7,13 @@ import StdHtml
 
 :: *TSt										// task state
 :: Task a		:== St *TSt a				// an interactive task
+:: Void 		= Void						// for tasks returning non interesting results
+
+derive gForm 	Void
+derive gUpd 	Void
+derive gParse 	Void
+derive gPrint 	Void
+derive gerda 	Void
 
 /* Initiating the iTask library:
 startTask		:: start function for iTasks		
