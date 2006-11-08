@@ -339,8 +339,8 @@ FuncButNr i (init,formid) hst
 					, resetForm	= Just (const button)
 					}
 		nformid = case button of
-					LButton _ name -> {formid & id = formid.id <+++ "/" <+++ name <+++ "/" <+++ i}
-					PButton _ ref  -> {formid & id = formid.id <+++ "/" <+++ i <+++ "/" <+++ ref}
+					LButton _ name -> {formid & id = formid.id <+++ iDataIdSeparator <+++ name <+++ iDataIdSeparator <+++ i}
+					PButton _ ref  -> {formid & id = formid.id <+++ iDataIdSeparator <+++ i <+++ iDataIdSeparator <+++ ref}
 
 TableFuncBut :: !(InIDataId [[(Button, a -> a)]]) !*HSt -> (Form (a -> a) ,!*HSt)
 TableFuncBut inIDataId hSt
