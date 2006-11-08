@@ -16,15 +16,19 @@ derive gPrint 	Void
 derive gerda 	Void
 
 /* Initiating the iTask library:
-startTask		:: start function for iTasks		
+startTask		:: start function for iTasks for user with indicated id		
 */
-startTask 		:: (Task a) *HSt 		-> ([BodyTag],HSt) 		| iData a 
+startTask 		:: !Int !(Task a) HSt -> (a,[BodyTag],HSt) 		| iData a 
 
 /* Global Attribute settings: iTask are by default Lifespan = Session, StorageFormt = PlainString
 */
 class setTaskAttribute a :: !a *TSt -> *TSt
 
 instance setTaskAttribute Lifespan, StorageFormat
+
+/* Assign tasks to worker with indicated id
+*/
+assignTask :: !Int (Task a)	-> (Task a)			| iData a
 
 /* Promote any TSt state transition function to an iTask:
 mkTask			:: function will only be called when it is its turn to be activated
@@ -109,3 +113,8 @@ appHSt			:: lift HSt domain to TSt domain
 appIData 		:: (IDataFun a) 		-> (Task a) 					| iData a
 appHSt 			:: (HSt -> (a,HSt)) TSt -> (a,TSt)
 
+/* monadic shorthands
+*/
+
+(=>>) infix 0 :: w:(St .s .a) v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]	// `bind`
+(#>>) infix 0 :: w:(St .s .a) v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]			// `bind` ignoring argument

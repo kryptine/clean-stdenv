@@ -70,7 +70,7 @@ getAllMyReports :: !ConfAccount !ConfAccounts !*HSt -> ([(Int,[(Person, Maybe Re
 
 // global setting to store either in files or in a database 
 
-//storageOption 	:== Persistent			// Choose this one to store in files
-storageOption 	:== Database		// Choose this one to store in a database
+storageOption 	:== Persistent			// Choose this one to store in files
+//storageOption 	:== Database		// Choose this one to store in a database
 
 storeFormId 	:== if (storageOption == Persistent) pFormId dbFormId 

@@ -8,11 +8,31 @@ derive gForm []
 derive gUpd []
 
 
-Start world = doHtmlServer (mkflow twotasks3) world
+Start world = doHtmlServer (mkpflow testMultiUser) world
 where
 	mkflow tasks hst 
-	# (html,hst) = startTask tasks hst
+	# (_,html,hst) = startTask 0 tasks hst
 	= mkHtml "test" html hst
+
+	mkpflow tasks hst 
+	# (idform,hst) 	= mkEditForm (Init,nFormId "intro" 0) hst
+	# (_,html,hst) = startTask idform.value (persistent tasks) hst
+	= mkHtml "test" (idform.form <|.|> html) hst
+	where
+		persistent tasks tst
+		# tst	= setTaskAttribute Persistent tst
+		= tasks tst
+
+testMultiUser tst
+# (i1,tst) = STask "Set1" 0 tst
+# (i2,tst) = assignTask 1 (STask "Set1" 0 o returnF [Txt ("werkgever 0 heeft bedrag " +++ (toString i1) +++ " opgegeven")]  ) tst
+# (i3,tst) = (STask "Set1" 0) tst
+= returnTask (i1+i2+i3) tst
+
+infTask a tst
+# (_,tst) = STask "Update" Void tst
+| False = returnV a tst
+= mkTask (infTask a) tst
 
 testTime tst
 # (time,tst) = STask "SetTimer" (Date 0 0 0) tst
@@ -32,7 +52,6 @@ where
 :: Situation = Difficult Int | Easy
 
 twotasks3 tst
-# tst							= setTaskAttribute Persistent tst
 # ((forSecr,fromBoss),tst) 		= mkRDynTaskCall "boss-secr"  0 tst		// split name task
 # ((forAssist,fromSecr),tst) 	= mkRDynTaskCall "secr-assist" 0 tst		// split name task
 = PTasks
@@ -134,8 +153,16 @@ optelTaak tst
 | c > 1000	= returnTask c tst
 = mkTask optelTaak tst
 
+:: Single a = Single a
+derive gForm Single
+derive gUpd Single
+derive gParse Single
+derive gPrint Single
+derive gerda Single
+
+
 //agenda :: (Task Bool)
-agenda = \tst -> agenda` (22) tst
+agenda = \tst -> agenda` (PullDown (1,30) (0,[toString i \\ i <- [0..10]]) ) tst
 where
 	agenda` date tst
 	# ((voorstel,acceptatie),tst) = mkRTaskCall "agenda" date datumbrief tst
