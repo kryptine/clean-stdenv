@@ -383,6 +383,7 @@ appHSt hstfun tst=:{tasknr,myturn,html,hst}
 // utility section
 
 mkTaskNr [] = ""
+mkTaskNr [i] = toString i
 mkTaskNr [i:is] = toString i <+++ "." <+++ mkTaskNr is
 
 incTask tst = {tst & tasknr = incTasknr tst.tasknr}
