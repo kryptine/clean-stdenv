@@ -17,3 +17,5 @@ TraceInput :== False			// set it to True if you want to see what kind of informa
 
 MyDataBase :== "iDataDatabase"	// name of database being used by iData applications
 
+iDataIdSeparator :== "."		// used as separator when combining iData form id's
+radioButtonSeparator :== '.'	// used as extension for family of radiobuttons

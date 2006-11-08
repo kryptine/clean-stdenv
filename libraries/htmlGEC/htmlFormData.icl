@@ -1,6 +1,6 @@
 implementation module htmlFormData
 
-import htmlDataDef
+import htmlDataDef, htmlSettings
 import StdMaybe, StdBool, StdString, StdInt
 
 // utility for creating FormId's
@@ -95,7 +95,7 @@ dbdDFormId s d = {id = s, lifespan = Database, mode = Display, storage = StaticD
 // create id's
 
 (++/) infixr 5 
-(++/) s1 s2 = s1 +++ "/" +++ s2
+(++/) s1 s2 = s1 +++ iDataIdSeparator +++ s2
 
 extidFormId :: !(FormId d) !String -> (FormId d)
 extidFormId formid s = {formid & id = formid.id ++/ s}

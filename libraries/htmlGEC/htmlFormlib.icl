@@ -511,9 +511,9 @@ where
 			| stripname b.changedId == formid.id = RBNotChecked formid.id
 			| otherwise = v
 			
-			nformid = {formid & id = formid.id +++ "/" +++ toString j, ival = (\_ a -> a,-1)}
+			nformid = {formid & id = formid.id +++ iDataIdSeparator +++ toString j, ival = (\_ a -> a,-1)}
 
-			stripname name = mkString (takeWhile ((<>) '/') (mkList name))
+			stripname name = mkString (takeWhile ((<>) radioButtonSeparator) (mkList name))
 
 FuncMenu :: !(InIDataId (Int,[(String, a -> a)])) !*HSt 
 													 -> (Form (a -> a,Int),!*HSt)

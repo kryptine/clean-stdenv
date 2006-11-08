@@ -166,7 +166,7 @@ where
 					_ 				-> "Page"
 	showf storage = case storage of PlainString -> "String";  _ -> "Dynamic"
 	shows PlainString s = s
-	shows _ d = d//"cannot show dynamic value" 
+	shows _ d =  d	//"cannot show dynamic value" 
 	
 // global names setting depending on kind of server used
 
