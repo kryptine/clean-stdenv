@@ -10,13 +10,13 @@ derive gerda 	Void
 
 import dynamic_string, EncodeDecode
 
-:: *TSt 		=	{ tasknr 		:: ![Int]
-					, activated		:: !Bool   	
-					, myId			:: !Int
-					, assignedTo	:: !Int
-					, html			:: ![BodyTag]
-					, storageInfo	:: !Storage
-					, hst			:: !HSt
+:: *TSt 		=	{ tasknr 		:: ![Int]			// for generating unique form-id's
+					, activated		:: !Bool   			// if true activate task, if set as result task completed	
+					, myId			:: !Int				// id of user
+					, assignedTo	:: !Int				// id of user which should perform the task
+					, html			:: ![BodyTag]		// accumulator for html code
+					, storageInfo	:: !Storage			// iData lifespan and storage format
+					, hst			:: !HSt				// iData state
 					}
 :: Storage		=	{ tasklife		:: !Lifespan
 					, taskstorage	:: !StorageFormat
@@ -45,37 +45,36 @@ where setTaskAttribute storageformat tst = {tst & storageInfo.taskstorage = stor
 assignTask :: !Int (Task a)	-> (Task a)			| iData a
 assignTask i taska = \tst -> assignTask` tst
 where
-	assignTask` tst=:{assignedTo}
-	# (a,tst) = taska {tst & assignedTo = i}
-	= (a,{tst & assignedTo = assignedTo})
+	assignTask` tst=:{assignedTo,html}
+	# (a,tst=:{activated,html=nhtml}) = taska {tst & assignedTo = i}		// assign task to user with indicated id
+	= (a,{tst & assignedTo = assignedTo,html = if activated html nhtml})	// if task finished clear output
 
 mkTask :: (*TSt -> *(a,*TSt)) -> (Task a) | iData a
 mkTask mytask = \tst -> mkTask` tst
 where
-	mkTask` tst=:{activated}		
-	# tst 			= incTask tst				// every task should first increment its tasknumber
-	| not activated	= (createDefault,tst)		// not active, return default value
-	= mytask tst
+	mkTask` tst=:{activated,myId,assignedTo,html}		
+	# tst 						= incTask tst				// every task should first increment its tasknumber
+	| not activated				= (createDefault,tst)		// not active, return default value
+	# (a,tst=:{html=nhtml}) 	= mytask tst				// active, so perform task or get its result
+	# mywork					= myId == assignedTo
+	= (a,{tst & html = if mywork nhtml html})				// only show html code for tasks to be performed by this user
 
 STask :: String a -> (Task a) | iData a 
 STask prompt a = \tst -> mkTask (STask` a) tst
 where
-	STask` a tst=:{tasknr,html,hst,myId,assignedTo}
-	# mywork			= myId == assignedTo
+	STask` a tst=:{tasknr,html,hst}
 	# taskId			= "iTask_" <+++ mkTaskNr tasknr
 	# editId			= "iEdit_" <+++ mkTaskNr tasknr
 	# buttonId			= mkTaskNr tasknr
 	# (taskdone,hst) 	= mkStoreForm (Init,cFormId tst.storageInfo taskId False) id hst  	// remember if the task has been done
 	| taskdone.value																		// test if task has completed
 		# (editor,hst) 	= (mkEditForm  (Init,cdFormId tst.storageInfo editId a) hst)		// yes, read out current value, make editor passive
-		= (editor.value,{tst & activated = True, html = showMine mywork html editor.form, hst = hst})	// return result task
+		= (editor.value,{tst & activated = True, html = html <|.|> editor.form, hst = hst})	// return result task
 	# (editor,hst) 		= mkEditForm  (Init,cFormId tst.storageInfo editId a) hst			// no, read out current value from active editor
 	# (finbut,hst)  	= simpleButton buttonId prompt (\_ -> True) hst						// add button for marking task as done
 	# (taskdone,hst) 	= mkStoreForm (Init,cFormId tst.storageInfo taskId False) finbut.value hst 	// remember task status for next time
 	| taskdone.value	= STask` a {tst & hst = hst}										// task is now completed, handle as previously
-	= (a,{tst & activated = taskdone.value, html = showMine mywork html (editor.form ++ finbut.form), hst = hst})
-
-showMine bool html more = if bool (html <|.|> more) html
+	= (a,{tst & activated = taskdone.value, html = html <|.|> (editor.form ++ finbut.form), hst = hst})
 
 STask_button 		:: String (Task a) 			-> (Task a) 	| iData a
 STask_button s task = CTask_button [(s,task)]
@@ -88,7 +87,8 @@ where
 	# (a,{tasknr,activated=adone,html=ahtml,hst}) 
 									= task {tst & activated = True, html = []}
 	| not adone						= (reverse accu,{tst & tasknr = tasknr,activated = adone, html = html <|.|> [Txt ("Task: " +++ txt),Br] <|.|> ahtml,hst = hst})
-	= mkTask (doSandTasks` ts [a:accu]) {tst & tasknr = tasknr,activated = adone, html = html <|.|> ahtml,hst = hst}
+//	= mkTask (doSandTasks` ts [a:accu]) {tst & tasknr = tasknr,activated = adone, html = html <|.|> ahtml,hst = hst}
+	= doSandTasks` ts [a:accu] {tst & tasknr = tasknr,activated = adone, html = html <|.|> ahtml,hst = hst}
 
 CTask_button :: [(String,Task a)] -> (Task a) | iData a
 CTask_button options = \tst -> mkTask (doCTask` options) tst
@@ -239,10 +239,18 @@ where
 	= (editor.value,{tst & html = html <|.|> editor.form, hst = hst})		// return result task
 
 returnVF :: a [BodyTag] -> (Task a) | iData a 
-returnVF a bodytag = \tst=:{html} -> (a,{tst & html = html <|.|> bodytag})	// return result task
+returnVF a bodytag = \tst = mkTask returnVF` tst
+where
+	returnVF` tst =:{html} 
+	= (a,{tst & html = html <|.|> bodytag})
 
 returnF :: [BodyTag] -> TSt -> TSt
-returnF bodytag = \tst=:{html} -> {tst & html = html <|.|> bodytag}			// return result task
+returnF bodytag = \tst = returnF` tst
+where
+	returnF` tst =:{html,assignedTo,myId,activated} 
+	| not activated = tst
+	# mywork = assignedTo == myId
+	= {tst & html = showMine mywork html bodytag}
 
 mkRTask :: String (Task a) *TSt -> ((Task a,Task a),*TSt) | iData a
 mkRTask s task tst = let (a,b,c) = mkRTask` s task (incTask tst) in ((a,b),c)
@@ -391,9 +399,10 @@ appIData :: (IDataFun a) -> (Task a) | iData a
 appIData idatafun = \tst -> mkTask (appIData` idatafun) tst
 where
 	appIData` idata tst=:{tasknr,html,hst}
-	# (idata,hst) 							= idatafun hst
-	# (_,{tasknr,activated,html=ahtml,hst}) 	= STask  "Done" Void {tst & activated = True, html = [],hst = hst}	
-	= (idata.value,{tst & tasknr = tasknr,activated 	= activated, html = html <|.|> if activated idata.form (idata.form <|.|> ahtml), hst = hst})
+	# (idata,hst) 										= idatafun hst
+	# (_,{tasknr,activated,html=ahtml,hst}) 			= STask  "Done" Void {tst & activated = True, html = [],hst = hst}	
+	= (idata.value,{tst & tasknr = tasknr,activated 	= activated, html = html <|.|>
+															(if activated idata.form (idata.form <|.|> ahtml)), hst = hst})
 
 appHSt :: (HSt -> (a,HSt)) TSt -> (a,TSt)
 appHSt hstfun tst=:{tasknr,activated,html,hst}
@@ -413,6 +422,8 @@ where
 
 cFormId  {tasklife,taskstorage} s d = {nFormId  s d & lifespan = tasklife, storage = taskstorage}
 cdFormId {tasklife,taskstorage} s d = {ndFormId s d & lifespan = tasklife, storage = taskstorage}
+
+showMine bool html more = if bool (html <|.|> more) html
 
 // monadic shorthands
 

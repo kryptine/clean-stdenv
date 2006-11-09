@@ -1,6 +1,6 @@
 definition module htmlTask
 
-// *experimental* library for controlling interactive Tasks (iTask) based on iData 
+// *experimental* library for controlling interactive Tasks (iTask) based on iData
 // (c) 2006 MJP
 
 import StdHtml
@@ -21,6 +21,7 @@ startTask		:: start function for iTasks for user with indicated id
 startTask 		:: !Int !(Task a) HSt -> (a,[BodyTag],HSt) 		| iData a 
 
 /* Global Attribute settings: iTask are by default Lifespan = Session, StorageFormt = PlainString
+For multi user systems 
 */
 class setTaskAttribute a :: !a *TSt -> *TSt
 
