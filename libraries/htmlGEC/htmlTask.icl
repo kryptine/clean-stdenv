@@ -12,6 +12,7 @@ import dynamic_string, EncodeDecode
 
 :: *TSt 		=	{ tasknr 		:: ![Int]			// for generating unique form-id's
 					, activated		:: !Bool   			// if true activate task, if set as result task completed	
+					, myId			:: !Int				// id of worker to which task is assigned
 					, html			:: !HtmlTree		// accumulator for html code
 					, storageInfo	:: !Storage			// iData lifespan and storage format
 					, hst			:: !HSt				// iData state
@@ -27,12 +28,22 @@ import dynamic_string, EncodeDecode
 
 startTask :: !Int !(Task a) HSt -> (a,[BodyTag],HSt) | iData a 
 startTask thisUser taska hst
+# (pversion,hst)	 	= mkStoreForm (Init, pFormId ("Worker" <+++ thisUser <+++ "VrsNr") 0) id hst
+# (refresh,hst) 		= simpleButton ("Task_" <+++ thisUser) "Refresh" id hst
+# (sversion,hst)	 	= mkStoreForm (Init, nFormId ("Session" <+++ thisUser <+++ "VrsNr") pversion.value) (if refresh.changed (\_ -> pversion.value) id) hst
+| sversion.value < pversion.value	= (createDefault,  refresh.form ++ [Br,Br, Hr [],Br] <|.|>
+														[Font [Fnt_Color (`Colorname Yellow)]
+													   [B [] "Sorry, cannot apply command.",Br, 
+													    B [] "Your page is not up-to date!",Br]],hst)
 # (a,{html,hst}) = taska 	{ tasknr	= []
-							, activated = True 
+							, activated = True
+							, myId		= defaultUser 
 							, html 		= defaultUser @@: BT []
 							, hst 		= hst
 							, storageInfo = {tasklife = Session, taskstorage = PlainString }}
-= (a,Filter thisUser defaultUser html,hst)
+# (pversion,hst)	 	= mkStoreForm (Init, pFormId ("Worker" <+++ thisUser <+++ "VrsNr") 0) inc hst
+# (sversion,hst)	 	= mkStoreForm (Init, nFormId ("Session" <+++ thisUser <+++ "VrsNr") pversion.value) inc hst
+= (a,refresh.form ++ [Br,Br, Hr [],Br] <|.|> Filter thisUser defaultUser html,hst)
 where
 	Filter thisUser user (BT bdtg) 			= if (thisUser == user) bdtg []
 	Filter thisUser user (nuser @@: tree) 	= Filter thisUser nuser tree
@@ -49,15 +60,17 @@ instance setTaskAttribute StorageFormat
 where setTaskAttribute storageformat tst = {tst & storageInfo.taskstorage = storageformat}
 
 (@:) infix 1 :: !Int (Task a)	-> (Task a)			| iData a
-(@:) i taska = \tst -> assignTask` tst
+(@:) userId taska = \tst -> mkTask assignTask` tst
 where
-	assignTask` tst=:{html}
-	# (a,tst=:{html=nhtml,activated})	= taska {tst & html = BT []}	// assign task to user with indicated id
-	| activated 						= (a,{tst & html = html +|+ 
-												BT [Txt ("Worker " <+++ i <+++ " returned value: " <+++ printToString a)]})							// if task finished clear output
-	= (a,{tst & html = 	html +|+ 
-						BT [Br, Txt ("Waiting for worker " <+++ i <+++ "..."),Br] +|+ 
-						(i @@: BT [Txt ("Task to complete:"),Br] +|+ nhtml)})						// combine html code, filter later					
+	assignTask` tst=:{html,myId}
+	# (a,tst=:{html=nhtml,activated})	= taska {tst & html = BT [],myId = userId}		// activate task of indicated worker
+	| activated 						= (a,{tst & myId = myId							// work is done						
+												  ,	html = html +|+ 					// clear screen
+													BT [Txt ("Worker " <+++ userId <+++ " finished task."),Br]})	
+	= (a,{tst & myId = myId																// restore user Id
+			  , html = 	html +|+ 
+						BT [Br, Txt ("Waiting for worker " <+++ userId <+++ "..."),Br] +|+ 
+						(userId @@: BT [Txt ("Worker " <+++ myId <+++ " has submitted the following task:"),Br] +|+ nhtml)})				// combine html code, filter later					
 
 mkTask :: (*TSt -> *(a,*TSt)) -> (Task a) | iData a
 mkTask mytask = \tst -> mkTask` tst
@@ -423,8 +436,8 @@ where
 	incTasknr [] = [0]
 	incTasknr [i:is] = [i+1:is]
 
-cFormId  {tasklife,taskstorage} s d = {nFormId  s d & lifespan = tasklife, storage = taskstorage}
-cdFormId {tasklife,taskstorage} s d = {ndFormId s d & lifespan = tasklife, storage = taskstorage}
+cFormId  {tasklife,taskstorage} s d = {sFormId  s d & lifespan = tasklife, storage = taskstorage}
+cdFormId {tasklife,taskstorage} s d = {sdFormId s d & lifespan = tasklife, storage = taskstorage}
 
 showMine bool html more = if bool (html +|+ more) html
 

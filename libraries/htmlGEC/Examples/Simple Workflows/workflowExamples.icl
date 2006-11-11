@@ -8,26 +8,40 @@ derive gForm []
 derive gUpd []
 
 
-Start world = doHtmlServer (mkpflow testMultiUser) world
+Start world = doHtmlServer (multiUser list) world
 where
-	mkflow tasks hst 
+	singleUser tasks hst 
 	# (_,html,hst) = startTask 0 tasks hst
 	= mkHtml "test" html hst
 
-	mkpflow tasks hst 
-	# (idform,hst) 	= mkEditForm (Init,nFormId "intro" 0) hst
-	# (_,html,hst) = startTask idform.value (persistent tasks) hst
-	= mkHtml "test" (idform.form <|.|> html) hst
+	multiUser tasks hst 
+	# (idform,hst) 	= FuncMenu (Init,nFormId "pdm_chooseWorker" 
+							(0,[("Worker " +++ toString i,\_ -> i) \\ i<-[0..5] ])) hst
+	# currentWorker	= snd idform.value
+	# (_,html,hst) 	= startTask currentWorker (persistent tasks) hst
+	= mkHtml "test" [idform.form <=> html] hst
 	where
 		persistent tasks tst
 		# tst	= setTaskAttribute Persistent tst
 		= tasks tst
 
+
+list tst
+# (a,tst) = appIData (vertlistFormButs 1 True (Init,pFormId "list0" [0])) tst
+# (a,tst) = (1 @: appIData (vertlistFormButs 1 True (Init,pFormId "list1" a))) tst
+# (a,tst) = returnTask a tst
+= (a,tst)
+
+testMultiUser1 tst
+# (v,tst) = STasks  [("een",1 @: (simple 1)),("twee",2 @:(simple 2))] tst
+//# (v,tst) = STasks  [("een",(simple 1)),("twee",(simple 2))] tst
+= STask "click"  (sum v) tst
+
 testMultiUser tst
-# (i1,tst) = STask "Set1" 0 tst
-# (i2,tst) = assignTask 1 (STask "Set1" 0 o returnF [Txt ("werkgever 0 heeft bedrag " +++ (toString i1) +++ " opgegeven")]  ) tst
-# (i3,tst) = (STask "Set1" 0) tst
-= returnTask (i1+i2+i3) tst
+# (v,tst) = (1 @: (simple 0) =>> \t -> 2 @: (simple t)) tst
+= STask "click"  v tst
+
+simple n  = STask "OK" n 
 
 infTask a tst
 # (_,tst) = STask "Update" Void tst
@@ -77,16 +91,6 @@ where
 			= mkTask (checktask limit) tst
 		= returnTask amount tst
 
-test4 tst
-# (result,tst)			= PMilestoneTasks
-							 [( "secretary"
-							  ,	STask "een" 1
-							  )
-							 ,( "boss"
-							  , STask "twee" 2
-							  )
-							 ] tst
-= STask "drie" 3 tst
 
 
 twotasks2 tst
@@ -128,8 +132,8 @@ derive gerda Situation
 
 
 twotasks tst
-# ((tbname,tname),tst) 		= mkRTask "name"   (STask "name" "") tst		// split name task
-# ((tbnumber,tnumber),tst)	= mkRTask "number" (STask "number" 0) tst		// split number task
+# ((tbname,tname),tst) 		= mkRTask "name"   (1 @: STask "name" "") tst		// split name task
+# ((tbnumber,tnumber),tst)	= mkRTask "number" (2 @: STask "number" 0) tst		// split number task
 = PTasks
 	 [( "employee1", tname `bind` void)							// assign name task
 	 ,( "employee2", tnumber `bind` void)						// assign number task
@@ -160,16 +164,34 @@ derive gParse Single
 derive gPrint Single
 derive gerda Single
 
+agenda2 = \tst -> agenda` (PullDown (1,100) (0,[toString i \\ i <- [0..10]]) ) tst
+where
+	agenda` date tst
+	# (date,tst) 		= STask "SetDate" date tst
+	# (who,tst)			= STask "AskPerson" (PullDown (1,100) (0,[toString i \\ i <- [0..5]])) tst
+	# ((ok,date),tst) 	= (toInt (toString who) @: handle date) tst
+	| ok				= returnTask date tst
+	# (ok,tst)			= CTask_button [("Accept",returnV True),("Sorry",returnV False)] tst
+	| ok				= returnV date tst
+	= mkTask (agenda` date) tst
+	where
+		handle date tst
+		# tst 		= returnF [Txt ("Can you meet on " <+++ date <+++ "?"),Br]  tst	
+		# (ok,tst)	= CTask_button [("Accept",returnV True),("Sorry",returnV False)] tst
+		| ok		= returnV (ok,date) tst
+		# (date,tst) = STask "SetDate" date tst
+		= returnV (ok,date) tst
 
 //agenda :: (Task Bool)
-agenda = \tst -> agenda` (PullDown (1,30) (0,[toString i \\ i <- [0..10]]) ) tst
+agenda = \tst -> agenda` (PullDown (1,300) (0,[toString i \\ i <- [0..10]]) ) tst
+//agenda = \tst -> agenda` (PullDown (1,30) (0,[toString i \\ i <- [0..10]]) ) tst
 where
 	agenda` date tst
 	# ((voorstel,acceptatie),tst) = mkRTaskCall "agenda" date datumbrief tst
 	# (afspraak,tst)			= PTasks
 								 [( "antwoorder"
-								  ,	acceptatie `bind` 
-								  	\t -> returnTask t
+								  ,	1 @: acceptatie `bind` 
+								  		 \t -> returnTask t
 								  )
 								 ,( "vrager"
 								  , STask "kiesDatum" date `bind` 
@@ -255,9 +277,9 @@ travel tst
 # (booked,tst)= PCTask2
 					( STasks 
 						[	( "Choose Booking options"
-							, MCTask_ckbox	[ ("Book_Flight",BookFlight)
+							, MCTask_ckbox	[ ("Book_Flight",2 @: BookFlight)
 											, ("Book_Hotel", BookHotel)
-											, ("Book_Car",   BookCar)
+											, ("Book_Car",   1 @: BookCar)
 											]
 							)
 						, 	( "Booking confirmation"
@@ -326,7 +348,7 @@ Coffeemachine tst
 = returnTask (product,returnMoney) tst
 where
 	getCoins (toPay,paid) tst
-	# ((cancel,coin),tst)= PCTask2 	( CTask_button [(toString i <+++ " cts", returnTask (False,i)) \\ i <- [5,10,20,50,100]]
+	# ((cancel,coin),tst)= PCTask2 	( CTask_button [(toString i <+++ " cts", returnTask (False,i)) \\ i <- [5,10,20,50,100,200]]
 									, STask_button "Cancel" (returnV (True,0))
 									) tst
 	| cancel			= returnV (cancel,paid) tst
