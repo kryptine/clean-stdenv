@@ -29,7 +29,7 @@ instance setTaskAttribute Lifespan, StorageFormat
 
 /* Assign tasks to worker with indicated id
 */
-assignTask :: !Int (Task a)	-> (Task a)			| iData a
+(@:) infix 1 :: !Int (Task a)	-> (Task a)			| iData a
 
 /* Promote any TSt state transition function to an iTask:
 mkTask			:: function will only be called when it is its turn to be activated
