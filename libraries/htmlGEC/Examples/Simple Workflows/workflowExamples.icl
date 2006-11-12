@@ -7,8 +7,8 @@ import htmlTask
 derive gForm []
 derive gUpd []
 
-
-Start world = doHtmlServer (multiUser list) world
+//Start world = doHtmlServer (multiUser (Quotation myQuotation)) world
+Start world = doHtmlServer (multiUser testTime) world
 where
 	singleUser tasks hst 
 	# (_,html,hst) = startTask 0 tasks hst
@@ -16,7 +16,7 @@ where
 
 	multiUser tasks hst 
 	# (idform,hst) 	= FuncMenu (Init,nFormId "pdm_chooseWorker" 
-							(0,[("Worker " +++ toString i,\_ -> i) \\ i<-[0..5] ])) hst
+							(0,[("User " +++ toString i,\_ -> i) \\ i<-[0..5] ])) hst
 	# currentWorker	= snd idform.value
 	# (_,html,hst) 	= startTask currentWorker (persistent tasks) hst
 	= mkHtml "test" [idform.form <=> html] hst
@@ -28,18 +28,16 @@ where
 
 list tst
 # (a,tst) = appIData (vertlistFormButs 1 True (Init,pFormId "list0" [0])) tst
-# (a,tst) = (1 @: appIData (vertlistFormButs 1 True (Init,pFormId "list1" a))) tst
+# (a,tst) = ((1,"Control List)") @: appIData (vertlistFormButs 1 True (Init,pFormId "list1" a))) tst
 # (a,tst) = returnTask a tst
 = (a,tst)
 
-testMultiUser1 tst
-# (v,tst) = STasks  [("een",1 @: (simple 1)),("twee",2 @:(simple 2))] tst
-//# (v,tst) = STasks  [("een",(simple 1)),("twee",(simple 2))] tst
-= STask "click"  (sum v) tst
+testEenTwee tst
+# (v,tst) = STasks  [ ("een", (1,"number1") @: simple 1 =>> \t -> returnTask t)
+					, ("twee",(2,"number2") @: simple 2 =>> \t -> returnTask t)
+					] tst
+= STask "Klaar"  (sum v) tst
 
-testMultiUser tst
-# (v,tst) = (1 @: (simple 0) =>> \t -> 2 @: (simple t)) tst
-= STask "click"  v tst
 
 simple n  = STask "OK" n 
 
@@ -49,19 +47,12 @@ infTask a tst
 = mkTask (infTask a) tst
 
 testTime tst
-# (time,tst) = STask "SetTimer" (Date 0 0 0) tst
-# (_,tst) = PTasks	[ ("timer",waitForDateTask time)
-		, ("someone",STask "Done" 0 `bind` \_ -> returnV time)
-		] tst
-= returnTask time tst
-
-
-mytest tst = test (CBChecked "",CBChecked "") tst
-where
-	test val tst
-	# (val,tst) = STask "Set" val tst
-	| False = returnTask val tst
-	= mkTask (test val) tst
+# (time,tst) = STask "SetTimer" (Time 0 0 0) tst
+# ((ok,estimation),tst) = PCTask2	( waitForTimeTask time #>> returnV (False,0)
+									, (1,"Estimation") @: returnTask time #>> (STask "Confirm" 0 =>> \t -> returnV (True,t)) 
+									) tst
+| ok	= (estimation,returnF [Txt ("Received estimation is " <+++ estimation)] tst)
+= mkTask testTime tst
 
 :: Situation = Difficult Int | Easy
 
@@ -132,8 +123,8 @@ derive gerda Situation
 
 
 twotasks tst
-# ((tbname,tname),tst) 		= mkRTask "name"   (1 @: STask "name" "") tst		// split name task
-# ((tbnumber,tnumber),tst)	= mkRTask "number" (2 @: STask "number" 0) tst		// split number task
+# ((tbname,tname),tst) 		= mkRTask "name"   ((1,"give name") @: STask "name" "") tst		// split name task
+# ((tbnumber,tnumber),tst)	= mkRTask "number" ((2,"geive number") @: STask "number" 0) tst		// split number task
 = PTasks
 	 [( "employee1", tname `bind` void)							// assign name task
 	 ,( "employee2", tnumber `bind` void)						// assign number task
@@ -169,7 +160,7 @@ where
 	agenda` date tst
 	# (date,tst) 		= STask "SetDate" date tst
 	# (who,tst)			= STask "AskPerson" (PullDown (1,100) (0,[toString i \\ i <- [0..5]])) tst
-	# ((ok,date),tst) 	= (toInt (toString who) @: handle date) tst
+	# ((ok,date),tst) 	= ((toInt (toString who),"Meeting required") @: handle date) tst
 	| ok				= returnTask date tst
 	# (ok,tst)			= CTask_button [("Accept",returnV True),("Sorry",returnV False)] tst
 	| ok				= returnV date tst
@@ -190,7 +181,7 @@ where
 	# ((voorstel,acceptatie),tst) = mkRTaskCall "agenda" date datumbrief tst
 	# (afspraak,tst)			= PTasks
 								 [( "antwoorder"
-								  ,	1 @: acceptatie `bind` 
+								  ,	acceptatie `bind` 
 								  		 \t -> returnTask t
 								  )
 								 ,( "vrager"
@@ -217,25 +208,6 @@ where
 		= CTask_button 	[ ("geaccepteerd", returnTask (True,date))
 						 , ("afgewezen",   STask "kiesDatum" date `bind` \date -> returnTask (False,date))
 						 ] tst
-
-
-test3 tst
-# ((tboss,tsecr),tst)	= mkRTaskCall "telop" 0  telop tst
-# (result,tst)			= PTasks
-							 [( "secretary"
-							  ,	tsecr
-							  )
-							 ,( "boss"
-							  , STask "waarde" 0 `bind` tboss
-							  )
-							 ] tst
-= returnTask result tst 
-where
-	telop b tst
-	# (_,tst) = returnTask b tst
-	# (a,tst) = STask "telop" 0 tst
-	= returnTask (a+b) tst
-
 test2 tst
 # ((tboss,tsecr),tst)	= mkRTask "travel" travel tst
 # (result,tst)			= PTasks
@@ -277,9 +249,9 @@ travel tst
 # (booked,tst)= PCTask2
 					( STasks 
 						[	( "Choose Booking options"
-							, MCTask_ckbox	[ ("Book_Flight",2 @: BookFlight)
+							, MCTask_ckbox	[ ("Book_Flight",BookFlight)
 											, ("Book_Hotel", BookHotel)
-											, ("Book_Car",   1 @: BookCar)
+											, ("Book_Car",   BookCar)
 											]
 							)
 						, 	( "Booking confirmation"
@@ -302,11 +274,11 @@ where
 
 // quotation example
 
-:: QForm = { fromComp :: String
-			, toComp :: String
+:: QForm = { fromComp 	:: String
+			, toComp 	:: String
 			, startDate :: HtmlDate
-			, endDate :: HtmlDate
-			, estHours :: Int
+			, endDate 	:: HtmlDate
+			, estHours 	:: Int
 			}
 :: QState =  Submitted | Approved | Cancelled | Rework | Draft
 			
@@ -320,8 +292,9 @@ myQuotation :: (QState,QForm)
 myQuotation = createDefault
 
 Quotation (state,form) tst
-# ((_,form),tst) = STask "Submit" (Dsp state, form) tst
-# ((_,form),tst) = STask "Review" (Dsp Submitted,form) tst
+# ((_,form),tst) = ((1,"Quotation") @: STask "Submit" (Dsp state, form))    tst
+# ((_,form),tst) = ((2,"Review")    @: STask "Review" (Dsp Submitted,form)) tst
+# (_,tst) = returnTask form tst
 = CTask_button
 	[ ("Rework",Quotation (Rework,form))
 	, ("Approved",returnTask Approved)

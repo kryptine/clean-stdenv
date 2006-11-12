@@ -12,7 +12,7 @@ import dynamic_string, EncodeDecode
 
 :: *TSt 		=	{ tasknr 		:: ![Int]			// for generating unique form-id's
 					, activated		:: !Bool   			// if true activate task, if set as result task completed	
-					, myId			:: !Int				// id of worker to which task is assigned
+					, myId			:: !Int				// id of user to which task is assigned
 					, html			:: !HtmlTree		// accumulator for html code
 					, storageInfo	:: !Storage			// iData lifespan and storage format
 					, hst			:: !HSt				// iData state
@@ -28,9 +28,11 @@ import dynamic_string, EncodeDecode
 
 startTask :: !Int !(Task a) HSt -> (a,[BodyTag],HSt) | iData a 
 startTask thisUser taska hst
-# (pversion,hst)	 	= mkStoreForm (Init, pFormId ("Worker" <+++ thisUser <+++ "VrsNr") 0) id hst
-# (refresh,hst) 		= simpleButton ("Task_" <+++ thisUser) "Refresh" id hst
-# (sversion,hst)	 	= mkStoreForm (Init, nFormId ("Session" <+++ thisUser <+++ "VrsNr") pversion.value) (if refresh.changed (\_ -> pversion.value) id) hst
+# userVersionNr			= "User" <+++ thisUser <+++ "VrsNr"
+# sessionVersionNr		= "Session" <+++ thisUser <+++ "VrsNr"
+# (pversion,hst)	 	= mkStoreForm (Init, pFormId userVersionNr 0) id hst
+# (refresh,hst) 		= simpleButton ("Task_" <+++ userVersionNr) "Refresh" id hst
+# (sversion,hst)	 	= mkStoreForm (Init, nFormId sessionVersionNr pversion.value) (if refresh.changed (\_ -> pversion.value) id) hst
 | sversion.value < pversion.value	= (createDefault,  refresh.form ++ [Br,Br, Hr [],Br] <|.|>
 														[Font [Fnt_Color (`Colorname Yellow)]
 													   [B [] "Sorry, cannot apply command.",Br, 
@@ -41,8 +43,8 @@ startTask thisUser taska hst
 							, html 		= defaultUser @@: BT []
 							, hst 		= hst
 							, storageInfo = {tasklife = Session, taskstorage = PlainString }}
-# (pversion,hst)	 	= mkStoreForm (Init, pFormId ("Worker" <+++ thisUser <+++ "VrsNr") 0) inc hst
-# (sversion,hst)	 	= mkStoreForm (Init, nFormId ("Session" <+++ thisUser <+++ "VrsNr") pversion.value) inc hst
+# (pversion,hst)	 	= mkStoreForm (Init, pFormId userVersionNr 0) inc hst
+# (sversion,hst)	 	= mkStoreForm (Init, nFormId sessionVersionNr pversion.value) inc hst
 = (a,refresh.form ++ [Br,Br, Hr [],Br] <|.|> Filter thisUser defaultUser html,hst)
 where
 	Filter thisUser user (BT bdtg) 			= if (thisUser == user) bdtg []
@@ -59,18 +61,18 @@ where setTaskAttribute lifespan tst = {tst & storageInfo.tasklife = lifespan}
 instance setTaskAttribute StorageFormat
 where setTaskAttribute storageformat tst = {tst & storageInfo.taskstorage = storageformat}
 
-(@:) infix 1 :: !Int (Task a)	-> (Task a)			| iData a
-(@:) userId taska = \tst -> mkTask assignTask` tst
+(@:) infix 0 :: !(!Int,!String) (Task a)	-> (Task a)			| iData a
+(@:) (userId,taskname) taska = \tst -> mkTask assignTask` tst
 where
 	assignTask` tst=:{html,myId}
-	# (a,tst=:{html=nhtml,activated})	= taska {tst & html = BT [],myId = userId}		// activate task of indicated worker
+	# (a,tst=:{html=nhtml,activated})	= taska {tst & html = BT [],myId = userId}		// activate task of indicated user
 	| activated 						= (a,{tst & myId = myId							// work is done						
 												  ,	html = html +|+ 					// clear screen
-													BT [Txt ("Worker " <+++ userId <+++ " finished task."),Br]})	
+													BT [Txt ("User " <+++ userId <+++ " has finished task "),B [] taskname, Br]})	
 	= (a,{tst & myId = myId																// restore user Id
 			  , html = 	html +|+ 
-						BT [Br, Txt ("Waiting for worker " <+++ userId <+++ "..."),Br] +|+ 
-						(userId @@: BT [Txt ("Worker " <+++ myId <+++ " has submitted the following task:"),Br] +|+ nhtml)})				// combine html code, filter later					
+						BT [Br, Txt ("Waiting for task "), B [] taskname, Txt (" from User " <+++ userId <+++ "..."),Br] +|+ 
+						(userId @@: BT [Txt ("User " <+++ myId <+++ " waits for task "), B [] taskname,Br,Br] +|+ nhtml)})				// combine html code, filter later					
 
 mkTask :: (*TSt -> *(a,*TSt)) -> (Task a) | iData a
 mkTask mytask = \tst -> mkTask` tst
@@ -249,7 +251,9 @@ where
 	but i = LButton defpixel i
 
 returnV :: a -> (Task a) | iData a 
-returnV a  = \tst  -> (a,tst)				// return result task
+returnV a  = \tst  -> mkTask returnV` tst
+where
+	returnV` tst = (a,tst)				// return result task
 
 returnTask :: a -> (Task a) | iData a 
 returnTask a = \tst -> mkTask (returnTask` a) tst
@@ -396,7 +400,7 @@ where
 	# taskId				= "iTask_timer_" <+++ mkTaskNr tasknr
 	# (taskdone,hst) 		= mkStoreForm (Init,cFormId tst.storageInfo taskId (False,time)) id hst  			// remember time
 	# ((currtime,_),hst)	= getTimeAndDate hst
-	| currtime < time		= (time,{tst & activated = True, html = html +|+ BT [Txt ("Waiting for time " ):[toHtml time]], hst = hst})
+	| currtime < time		= (time,{tst & activated = False, html = html +|+ BT [Txt ("Waiting for time " ):[toHtml time]], hst = hst})
 	= (time,{tst & hst = hst})
 
 waitForDateTask:: HtmlDate	-> (Task HtmlDate)
@@ -406,7 +410,7 @@ where
 	# taskId				= "iTask_date_" <+++ mkTaskNr tasknr
 	# (taskdone,hst) 		= mkStoreForm (Init,cFormId tst.storageInfo taskId (False,date)) id hst  			// remember date
 	# ((_,currdate),hst) 	= getTimeAndDate hst
-	| currdate < date		= (date,{tst & activated = True, html = html +|+ BT [Txt ("Waiting for date " ):[toHtml date]], hst = hst})
+	| currdate < date		= (date,{tst & activated = False, html = html +|+ BT [Txt ("Waiting for date " ):[toHtml date]], hst = hst})
 	= (date,{tst & hst = hst})
 
 // lifting section
@@ -443,10 +447,10 @@ showMine bool html more = if bool (html +|+ more) html
 
 // monadic shorthands
 
-(=>>) infix 0 :: w:(St .s .a) v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]
+(=>>) infix 2 :: w:(St .s .a) v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]
 (=>>) a b = a `bind` b
 
-(#>>) infix 0 :: w:(St .s .a) v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]
+(#>>) infix 1 :: w:(St .s .a) v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]
 (#>>) a b = a `bind` (\_ -> b)
 
 

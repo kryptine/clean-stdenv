@@ -27,9 +27,9 @@ class setTaskAttribute a :: !a *TSt -> *TSt
 
 instance setTaskAttribute Lifespan, StorageFormat
 
-/* Assign tasks to worker with indicated id
+/* Assign tasks with informative name to user with indicated id
 */
-(@:) infix 1 :: !Int (Task a)	-> (Task a)			| iData a
+(@:) infix 0 :: !(!Int,!String) (Task a)	-> (Task a)			| iData a
 
 /* Promote any TSt state transition function to an iTask:
 mkTask			:: function will only be called when it is its turn to be activated
@@ -117,5 +117,5 @@ appHSt 			:: (HSt -> (a,HSt)) TSt -> (a,TSt)
 /* monadic shorthands
 */
 
-(=>>) infix 0 :: w:(St .s .a) v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]	// `bind`
-(#>>) infix 0 :: w:(St .s .a) v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]			// `bind` ignoring argument
+(=>>) infix 2 :: w:(St .s .a) v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]	// `bind`
+(#>>) infix 1 :: w:(St .s .a) v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]			// `bind` ignoring argument
