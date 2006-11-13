@@ -41,6 +41,17 @@ derive gPrint UpdValue, (,,)
 				| StatDyn	!Dynamic 					// Or a dynamic which enables serialization of functions defined in the application (no plug ins yet)
 				| DBStr		!.String (*Gerda -> *Gerda)	// In case a new value has to bestored in the database 
 				
+// Options
+
+readGerda` id gerda 
+:== IF_GERDA (readGerda id gerda)
+					(abort "Reading Database, yet option is swiched off\n", 
+					 abort "Reading Database, yet option is swiched off\n")
+
+writeGerda` id val 
+:== IF_GERDA (writeGerda id val)
+					(\_ -> abort "Writing Database, yet option is swiched off\n")
+
 // functions defined on the FormStates abstract data type
 
 instance < FormState
@@ -61,12 +72,12 @@ getUpdateId formStates=:{updateid} = (updateid,formStates)
 getUpdate ::  *FormStates -> (String,*FormStates)
 getUpdate formStates=:{update} = (update,formStates)
 
-findState :: !(FormId a) *FormStates *NWorld -> (Bool,Maybe a,*FormStates,*NWorld)	| gPrint {|*|}, gParse{|*|}, gerda{|*|}, TC a
+findState :: !(FormId a) *FormStates *NWorld -> (Bool,Maybe a,*FormStates,*NWorld)	| iDataSerAndDeSerialize a
 findState formid formstates=:{fstates,server} world
 # (bool,ma,fstates,world) = findState` formid fstates world
 = (bool,ma,{formstates & fstates = fstates},world)
 where
-	findState` :: !(FormId a) *FStates *NWorld -> (Bool,Maybe a,*FStates,*NWorld)| gPrint {|*|}, gParse{|*|}, gerda{|*|}, TC a
+	findState` :: !(FormId a) *FStates *NWorld -> (Bool,Maybe a,*FStates,*NWorld)| iDataSerAndDeSerialize a
 	findState` formid formstate=:(Node_ left (fid,info) right) world
 	| formid.id == fid = case info of
 					(OldState state) = (True, fetchFState state,formstate,world)
@@ -89,7 +100,7 @@ where
 	// read out database and store as string 
 
 	findState` {id,lifespan = Database,storage = PlainString} Leaf_ world=:{gerda} 
-	# (value,gerda) = readGerda id	gerda
+	# (value,gerda) = readGerda` id	gerda
 	# world = {world & gerda = gerda}
 	= case value of
 		Just a 	-> (True,Just a,Node_ Leaf_ (id,OldState {format = PlainStr (printToString a), life = Database}) Leaf_,world)
@@ -98,7 +109,7 @@ where
 	// read out database and store as dynamic
 
 	findState` {id,lifespan = Database,storage = StaticDynamic} Leaf_ world=:{gerda} 
-	# (value,gerda) = readGerda id	gerda
+	# (value,gerda) = readGerda` id	gerda
 	# world = {world & gerda = gerda}
 	= case value of 
 		Nothing 		= (False,Nothing,Leaf_,world)
@@ -146,12 +157,12 @@ where
 string_to_dynamic` :: {#Char} -> Dynamic	// just to make a unique copy as requested by string_to_dynamic
 string_to_dynamic` s = string_to_dynamic {s` \\ s` <-: s}
 
-replaceState ::  !(FormId a) a *FormStates *NWorld -> (*FormStates,*NWorld)	| gPrint{|*|}, gerda{|*|}, TC a
+replaceState ::  !(FormId a) a *FormStates *NWorld -> (*FormStates,*NWorld)	| iDataSerialize a
 replaceState formid val formstates=:{fstates} world
 # (fstates,world) = replaceState` formid val fstates world
 = ({formstates & fstates = fstates},world)
 where
-	replaceState` ::  !(FormId a) a *FStates *NWorld -> (*FStates,*NWorld)	| gPrint{|*|}, gerda{|*|}, TC a
+	replaceState` ::  !(FormId a) a *FStates *NWorld -> (*FStates,*NWorld)	| iDataSerialize a
 	replaceState` formid val Leaf_ world 									// id not part of tree yet
 						= (Node_ Leaf_ (formid.id,NewState (initNewState formid.id (adjustlife formid.lifespan) Temp formid.storage val)) Leaf_,world)
 	replaceState` formid val (Node_ left a=:(fid,fstate) right) world
@@ -165,8 +176,8 @@ where
 
 	// NewState Handling routines 
 
-	initNewState :: !String !Lifespan !Lifespan !StorageFormat !a  -> FState | gPrint{|*|}, gerda{|*|}, TC a 
-	initNewState id Database olifespan PlainString   nv = {format = DBStr    (printToString nv) (writeGerda id nv), life = order Database olifespan}
+	initNewState :: !String !Lifespan !Lifespan !StorageFormat !a  -> FState | iDataSerialize a 
+	initNewState id Database olifespan PlainString   nv = {format = DBStr    (printToString nv) (writeGerda` id nv), life = order Database olifespan}
 	initNewState id lifespan olifespan PlainString   nv = {format = PlainStr (printToString nv), life = order lifespan olifespan}
 	initNewState id lifespan olifespan StaticDynamic nv = {format = StatDyn  (dynamic nv), life = order lifespan olifespan}// convert the hidden state information stored in the html page
 

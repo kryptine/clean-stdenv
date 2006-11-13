@@ -15,7 +15,7 @@ import Gerda
 :: *NWorld							// io interface
 	= 	{ worldC	:: !*World			// world for any io
 		, inout		:: !*HtmlStream		// to read from stdin and write to stdout
-		, gerda		:: !*Gerda			// to read and write to the database
+		, gerda		:: *Gerda			// to read and write to the database
 		}				
 instance FileSystem NWorld
 appWorldNWorld :: !.(*World -> *World)       !*NWorld -> *NWorld
