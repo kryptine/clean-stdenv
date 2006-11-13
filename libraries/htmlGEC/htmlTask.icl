@@ -270,7 +270,13 @@ where
 	= (a,{tst & html = html +|+ BT bodytag})
 
 returnF :: [BodyTag] -> TSt -> TSt
-returnF bodytag = \tst=:{html} = {tst & html = html +|+ BT bodytag}
+returnF bodytag = \tst = returnVF` tst
+where
+	returnVF` tst=:{activated, html}  
+	| not activated				= tst		// not active, return default value
+	= {tst & html = html +|+ BT bodytag}	// active, so perform task or get its result
+
+
 
 mkRTask :: String (Task a) *TSt -> ((Task a,Task a),*TSt) | iData a
 mkRTask s task tst = let (a,b,c) = mkRTask` s task (incTask tst) in ((a,b),c)

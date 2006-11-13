@@ -211,7 +211,7 @@ readStringState directory filename env
 # (string,file)	= freads file big
 | not ok 		= ("",env)
 # (ok,env)		= fclose file env
-# string		= mkString (removeBackslashQuote (mkList string))
+//# string		= mkString (removeBackslashQuote (mkList string))  // ?? STILL NEEDED ??
 = (string,env) 
 where
 	big = 100000

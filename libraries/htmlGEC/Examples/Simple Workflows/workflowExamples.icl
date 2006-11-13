@@ -8,7 +8,8 @@ derive gForm []
 derive gUpd []
 
 //Start world = doHtmlServer (multiUser (Quotation myQuotation)) world
-Start world = doHtmlServer (multiUser testTime) world
+//Start world = doHtmlServer (multiUser twotasks3) world
+Start world = doHtmlServer (multiUser agenda2) world
 where
 	singleUser tasks hst 
 	# (_,html,hst) = startTask 0 tasks hst
@@ -160,17 +161,18 @@ where
 	agenda` date tst
 	# (date,tst) 		= STask "SetDate" date tst
 	# (who,tst)			= STask "AskPerson" (PullDown (1,100) (0,[toString i \\ i <- [0..5]])) tst
-	# ((ok,date),tst) 	= ((toInt (toString who),"Meeting required") @: handle date) tst
+	# ((ok,date),tst) 	= ((toInt (toString who),"Meeting Request") @: handle date) tst
 	| ok				= returnTask date tst
+	# tst				= returnF [Txt ("No, but can we meet on the " <+++ date <+++ "?"),Br]  tst
 	# (ok,tst)			= CTask_button [("Accept",returnV True),("Sorry",returnV False)] tst
 	| ok				= returnV date tst
 	= mkTask (agenda` date) tst
 	where
 		handle date tst
-		# tst 		= returnF [Txt ("Can you meet on " <+++ date <+++ "?"),Br]  tst	
+		# tst 		= returnF [Txt ("Can we meet on the " <+++ date <+++ "?"),Br]  tst	
 		# (ok,tst)	= CTask_button [("Accept",returnV True),("Sorry",returnV False)] tst
 		| ok		= returnV (ok,date) tst
-		# (date,tst) = STask "SetDate" date tst
+		# (date,tst) = STask "AlternativeDate" date tst
 		= returnV (ok,date) tst
 
 //agenda :: (Task Bool)
