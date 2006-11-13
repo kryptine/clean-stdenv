@@ -156,17 +156,24 @@ derive gParse Single
 derive gPrint Single
 derive gerda Single
 
-agenda2 = \tst -> agenda` (PullDown (1,100) (0,[toString i \\ i <- [0..10]]) ) tst
+instance toString (a,b) | toString a & toString b
 where
-	agenda` date tst
-	# (date,tst) 		= STask "SetDate" date tst
-	# (who,tst)			= STask "AskPerson" (PullDown (1,100) (0,[toString i \\ i <- [0..5]])) tst
-	# ((ok,date),tst) 	= ((toInt (toString who),"Meeting Request") @: handle date) tst
-	| ok				= returnTask date tst
+	toString (a,b) = "(" <+++ a <+++ "," <+++ b <+++ ")"
+
+agenda2 = \tst -> agenda` 	0 ( Date 0 0 0, Time 0 0 0
+							) tst
+where
+	agenda` who date tst
+	# (date,tst) 		= STask "SetDateAndTime" date tst
+	# (whoPd,tst)		= STask "AskPerson" (PullDown (1,100) (who,[toString i \\ i <- [0..10]])) tst
+	# ((ok,date),tst) 	= ((toInt (toString whoPd),"Meeting Request") @: handle date) tst
+	| ok				
+		# tst			= returnF [Txt "Proposal accepted",Br] tst
+		= returnTask date tst
 	# tst				= returnF [Txt ("No, but can we meet on the " <+++ date <+++ "?"),Br]  tst
 	# (ok,tst)			= CTask_button [("Accept",returnV True),("Sorry",returnV False)] tst
 	| ok				= returnV date tst
-	= mkTask (agenda` date) tst
+	= mkTask (agenda` (toInt(toString whoPd)) date) tst
 	where
 		handle date tst
 		# tst 		= returnF [Txt ("Can we meet on the " <+++ date <+++ "?"),Br]  tst	

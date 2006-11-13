@@ -428,6 +428,11 @@ where
 	| hrs0 == hrs1 && min0 <  min1 = True
 	| hrs0 == hrs1 && min0 == min1 && sec0 < sec1 = True
 	= False
+
+instance toString HtmlTime
+where
+	toString (Time hrs min sec) = toString hrs <+++ ":" <+++ min <+++ ":" <+++ sec
+
 	
 instance == HtmlDate
 where
@@ -440,3 +445,8 @@ where
 	| year0 == year1 && month0 <  month1 = True
 	| year0 == year1 && month0 == month1 && day0 < day1 = True
 	= False
+	
+instance toString HtmlDate
+where
+	toString (Date day month year) = toString day <+++ "/" <+++ month <+++ "/" <+++ year
+

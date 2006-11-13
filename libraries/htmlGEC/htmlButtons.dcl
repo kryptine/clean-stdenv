@@ -16,6 +16,7 @@ instance toInt    PullDownMenu						// Current index in pull down list
 instance toString PullDownMenu						// Corresponding element in pull down list
 instance ==		  PasswordBox, HtmlDate, HtmlTime
 instance <		  HtmlDate, HtmlTime
+instance toString		  HtmlDate, HtmlTime
 // lay out
 
 :: <-> a b		= (<->) infixl 5 a b				// place b to the left of a
