@@ -2,129 +2,89 @@ implementation module htmlFormData
 
 import htmlDataDef, htmlSettings
 import StdMaybe, StdBool, StdString, StdInt
+import GenEq
 
 // utility for creating FormId's
 
+class   (<@) infixl 4 att :: !(FormId d) !att -> FormId d
+
+instance <@ String        where <@ formId a = {formId & id       = a}
+instance <@ Lifespan      where <@ formId a = {formId & lifespan = a}
+instance <@ Mode          where <@ formId a = {formId & mode     = a}
+instance <@ StorageFormat where <@ formId a	= {formId & storage  = a}
+
+mkFormId :: !String !d -> FormId d				// Default FormId with given id and ival.
+mkFormId s d = {id = s, lifespan = Page, mode = Edit, storage = PlainString, ival = d}
+
 // editable, string format
 
-nFormId :: !String !d -> (FormId d)		// page formid
-nFormId s d = {id = s, lifespan = Page, mode = Edit, storage = PlainString, ival = d}
+tFormId		:: !String !d -> FormId d;			tFormId    s d = mkFormId  s d <@ Temp
+nFormId		:: !String !d -> FormId d;			nFormId    s d = mkFormId  s d <@ Page
+sFormId		:: !String !d -> FormId d;			sFormId    s d = mkFormId  s d <@ Session
+pFormId		:: !String !d -> FormId d;			pFormId    s d = mkFormId  s d <@ Persistent
+rFormId		:: !String !d -> FormId d;			rFormId    s d = mkFormId  s d <@ PersistentRO
+dbFormId	:: !String !d -> FormId d;			dbFormId   s d = mkFormId  s d <@ Database
 
-sFormId :: !String !d -> (FormId d)		// session formid
-sFormId s d = {id = s, lifespan = Session, mode = Edit, storage = PlainString, ival = d}
+tdFormId	:: !String !d -> FormId d;			tdFormId   s d = tFormId   s d <@ Display
+ndFormId	:: !String !d -> FormId d;			ndFormId   s d = nFormId   s d <@ Display
+sdFormId	:: !String !d -> FormId d;			sdFormId   s d = sFormId   s d <@ Display
+pdFormId	:: !String !d -> FormId d;			pdFormId   s d = pFormId   s d <@ Display
+rdFormId	:: !String !d -> FormId d;			rdFormId   s d = rFormId   s d <@ Display
+dbdFormId	:: !String !d -> FormId d;			dbdFormId  s d = dbFormId  s d <@ Display
 
-pFormId :: !String !d -> (FormId d)		// persistent formid
-pFormId s d = {id = s, lifespan = Persistent, mode = Edit, storage = PlainString, ival = d}
+xtFormId	:: !String !d -> FormId d;			xtFormId   s d = tFormId   s d <@ NoForm
+xnFormId	:: !String !d -> FormId d;			xnFormId   s d = nFormId   s d <@ NoForm
+xsFormId	:: !String !d -> FormId d;			xsFormId   s d = sFormId   s d <@ NoForm
+xpFormId	:: !String !d -> FormId d;			xpFormId   s d = pFormId   s d <@ NoForm
+xrFormId	:: !String !d -> FormId d;			xrFormId   s d = rFormId   s d <@ NoForm
+xdbFormId	:: !String !d -> FormId d;			xdbFormId  s d = dbFormId  s d <@ NoForm
 
-rFormId :: !String !d -> (FormId d)		// persistent formid
-rFormId s d = {id = s, lifespan = PersistentRO, mode = Edit, storage = PlainString, ival = d}
+nDFormId	:: !String !d -> FormId d;			nDFormId   s d = nFormId   s d <@ StaticDynamic
+sDFormId	:: !String !d -> FormId d;			sDFormId   s d = sFormId   s d <@ StaticDynamic
+pDFormId	:: !String !d -> FormId d;			pDFormId   s d = pFormId   s d <@ StaticDynamic
+rDFormId	:: !String !d -> FormId d;			rDFormId   s d = rFormId   s d <@ StaticDynamic
+dbDFormId	:: !String !d -> FormId d;			dbDFormId  s d = dbFormId  s d <@ StaticDynamic
 
-dbFormId	:: !String !d -> (FormId d)		// database		, editable, string format
-dbFormId s d = {id = s, lifespan = Database, mode = Edit, storage = PlainString, ival = d}
-
-ndFormId :: !String !d -> (FormId d)	// page formid
-ndFormId s d = {id = s, lifespan = Page, mode = Display, storage = PlainString, ival = d}
-
-sdFormId :: !String !d -> (FormId d)	// session formid
-sdFormId s d = {id = s, lifespan = Session, mode = Display, storage = PlainString, ival = d}
-
-pdFormId :: !String !d -> (FormId d)	// persistent formid
-pdFormId s d = {id = s, lifespan = Persistent, mode = Display, storage = PlainString, ival = d}
-
-rdFormId :: !String !d -> (FormId d)	// persistent formid
-rdFormId s d = {id = s, lifespan = PersistentRO, mode = Display, storage = PlainString, ival = d}
-
-dbdFormId :: !String !d -> (FormId d)	// persistent formid
-dbdFormId s d = {id = s, lifespan = Database, mode = Display, storage = PlainString, ival = d}
-
-xtFormId :: !String !d -> (FormId d)	// persistent formid
-xtFormId s d = {id = s, lifespan = Temp, mode = NoForm, storage = PlainString, ival = d}
-
-xnFormId :: !String !d -> (FormId d)		// page formid
-xnFormId s d = {id = s, lifespan = Page, mode = NoForm, storage = PlainString, ival = d}
-
-xsFormId :: !String !d -> (FormId d)		// session formid
-xsFormId s d = {id = s, lifespan = Session, mode = NoForm, storage = PlainString, ival = d}
-
-xpFormId :: !String !d -> (FormId d)		// persistent formid
-xpFormId s d = {id = s, lifespan = Persistent, mode = NoForm, storage = PlainString, ival = d}
-
-xrFormId :: !String !d -> (FormId d)		// persistent formid
-xrFormId s d = {id = s, lifespan = PersistentRO, mode = NoForm, storage = PlainString, ival = d}
-
-xdbFormId :: !String !d -> (FormId d)		// persistent formid
-xdbFormId s d = {id = s, lifespan = Database, mode = NoForm, storage = PlainString, ival = d}
-
-tFormId :: !String !d -> (FormId d)	// persistent formid
-tFormId s d = {id = s, lifespan = Temp, mode = Edit, storage = PlainString, ival = d}
-
-tdFormId :: !String !d -> (FormId d)	// persistent formid
-tdFormId s d = {id = s, lifespan = Temp, mode = Display, storage = PlainString, ival = d}
-
-nDFormId :: !String !d -> (FormId d)	// page formid
-nDFormId s d = {id = s, lifespan = Page, mode = Edit, storage = StaticDynamic, ival = d}
-
-sDFormId :: !String !d -> (FormId d)	// session formid
-sDFormId s d = {id = s, lifespan = Session, mode = Edit, storage = StaticDynamic, ival = d}
-
-pDFormId :: !String !d -> (FormId d)	// persistent formid
-pDFormId s d = {id = s, lifespan = Persistent, mode = Edit, storage = StaticDynamic, ival = d}
-
-rDFormId :: !String !d -> (FormId d)	// persistent formid
-rDFormId s d = {id = s, lifespan = PersistentRO, mode = Edit, storage = StaticDynamic, ival = d}
-
-dbDFormId :: !String !d -> (FormId d)	// persistent formid
-dbDFormId s d = {id = s, lifespan = Database, mode = Edit, storage = StaticDynamic, ival = d}
-
-ndDFormId :: !String !d -> (FormId d)	// page formid
-ndDFormId s d = {id = s, lifespan = Page, mode = Display, storage = StaticDynamic, ival = d}
-
-sdDFormId :: !String !d -> (FormId d)	// session formid
-sdDFormId s d = {id = s, lifespan = Session, mode = Display, storage = StaticDynamic, ival = d}
-
-pdDFormId :: !String !d -> (FormId d)	// persistent formid
-pdDFormId s d = {id = s, lifespan = Persistent, mode = Display, storage = StaticDynamic, ival = d}
-
-rdDFormId :: !String !d -> (FormId d)	// persistent formid
-rdDFormId s d = {id = s, lifespan = PersistentRO, mode = Display, storage = StaticDynamic, ival = d}
-
-dbdDFormId :: !String !d -> (FormId d)	// persistent formid
-dbdDFormId s d = {id = s, lifespan = Database, mode = Display, storage = StaticDynamic, ival = d}
+ndDFormId	:: !String !d -> FormId d;			ndDFormId  s d = nDFormId  s d <@ Display
+sdDFormId	:: !String !d -> FormId d;			sdDFormId  s d = sDFormId  s d <@ Display
+pdDFormId	:: !String !d -> FormId d;			pdDFormId  s d = pDFormId  s d <@ Display
+rdDFormId	:: !String !d -> FormId d;			rdDFormId  s d = rDFormId  s d <@ Display
+dbdDFormId	:: !String !d -> FormId d;			dbdDFormId s d = dbDFormId s d <@ Display
 
 
 // create id's
 
-(++/) infixr 5 
+(++/) infixr 5
 (++/) s1 s2 = s1 +++ iDataIdSeparator +++ s2
 
-extidFormId :: !(FormId d) !String -> (FormId d)
-extidFormId formid s = {formid & id = formid.id ++/ s}
+extidFormId :: !(FormId d) !String -> FormId d
+extidFormId formid s = formid <@ formid.id ++/ s
 
-subFormId :: !(FormId a) !String !d 	-> (FormId d)	// make new formid of new type copying other old settinf
-subFormId formid s d = {formid & id = formid.id ++/ s, ival = d}
+subFormId :: !(FormId a) !String !d -> FormId d	// make new formid of new type copying other old settinf
+subFormId formid s d = reuseFormId (extidFormId formid s) d
 
-subnFormId :: !(FormId a) !String !d 	-> (FormId d)	// make new formid of new type copying other old settinf
-subnFormId formid s d = {formid & id = formid.id ++/ s, ival = d, lifespan = Page}
+subnFormId :: !(FormId a) !String !d -> FormId d	// make new formid of new type copying other old settinf
+subnFormId formid s d = subFormId formid s d <@ Page
 
-subsFormId :: !(FormId a) !String !d 	-> (FormId d)	// make new formid of new type copying other old settinf
-subsFormId formid s d = {formid & id = formid.id ++/ s, ival = d, lifespan = Session}
+subsFormId :: !(FormId a) !String !d -> FormId d	// make new formid of new type copying other old settinf
+subsFormId formid s d = subFormId formid s d <@ Session
 
-subpFormId :: !(FormId a) !String !d 	-> (FormId d)	// make new formid of new type copying other old settinf
-subpFormId formid s d = {formid & id = formid.id ++/ s, ival = d, lifespan = Persistent}
+subpFormId :: !(FormId a) !String !d -> FormId d	// make new formid of new type copying other old settinf
+subpFormId formid s d = subFormId formid s d <@ Persistent
 
-subtFormId :: !(FormId a) !String !d 	-> (FormId d)	// make new formid of new type copying other old settinf
-subtFormId formid s d = {formid & id = formid.id ++/ s, ival = d, lifespan = Temp}
+subtFormId :: !(FormId a) !String !d -> FormId d	// make new formid of new type copying other old settinf
+subtFormId formid s d = subFormId formid s d <@ Temp
 
-setFormId :: !(FormId d) !d -> (FormId d)			// set new initial value in formid
+setFormId :: !(FormId d) !d -> FormId d			// set new initial value in formid
 setFormId formid d = {formid & ival = d}
 
-reuseFormId :: !(FormId d) !v -> (FormId v)
+reuseFormId :: !(FormId d) !v -> FormId v
 reuseFormId formid v = {formid & ival = v}
 
-initID		:: !(FormId d) 		-> InIDataId d	// (Init,FormId a)
+initID :: !(FormId d) -> InIDataId d	// (Init,FormId a)
 initID formid = (Init,formid)
 
-setID		:: !(FormId d) !d 	-> InIDataId d	// (Set,FormId a)
+setID :: !(FormId d) !d -> InIDataId d	// (Set,FormId a)
 setID formid na = (Set,setFormId formid na)
 
 onMode :: !Mode a a a -> a
@@ -140,44 +100,18 @@ toViewId _  d _ 			= d
 toViewMap :: !(d -> v) !Init !d !(Maybe v) -> v
 toViewMap f init d mv = toViewId init (f d) mv
 
-instance toBool Init
-where
-	toBool Set = True
-	toBool _ = False
+derive gEq Mode, Init, Lifespan
+instance == Mode        where == m1 m2 = m1 === m2
+instance == Init        where == i1 i2 = i1 === i2
+instance == Lifespan    where == l1 l2 = l1 === l2
 
-instance == Mode
-where
-	(==) Display Display 	= True
-	(==) Edit Edit 			= True
-	(==) NoForm NoForm		= True
-	(==) _ _ 				= False
+instance < Lifespan     where (<) l1 l2 = toInt l1 < toInt l2
 
-instance == Init
-where
-	(==) Init Init 			= True
-	(==) Set Set 			= True
-	(==) Const Const 		= True
-	(==) _ _ 				= False
-
-instance == Lifespan
-where
-	(==) Database	 	Database		= True
-	(==) Persistent 	Persistent		= True
-	(==) PersistentRO 	PersistentRO	= True
-	(==) Session 		Session			= True
-	(==) Page 			Page			= True
-	(==) Temp 			Temp			= True
-	(==) _ _ 							= False
-
-instance < Lifespan
-where
-	(<) l1 l2 = toInt l1 < toInt l2
-
-instance toInt 	Lifespan
-where
-	toInt 	Temp			= 0
-	toInt 	Page			= 1
-	toInt 	Session			= 2
-	toInt 	PersistentRO	= 3
-	toInt 	Persistent		= 4
-	toInt 	Database		= 5
+instance toBool Init    where toBool Set = True
+							  toBool _   = False
+instance toInt Lifespan where toInt Temp			= 0
+							  toInt Page			= 1
+							  toInt Session			= 2
+							  toInt PersistentRO	= 3
+							  toInt Persistent		= 4
+							  toInt Database		= 5
