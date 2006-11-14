@@ -55,50 +55,50 @@ dbdDFormId	:: !String !d -> FormId d;			dbdDFormId s d = dbDFormId s d <@ Displa
 // create id's
 
 (++/) infixr 5
-(++/) s1 s2 = s1 +++ iDataIdSeparator +++ s2
+(++/) s1 s2				= s1 +++ iDataIdSeparator +++ s2
 
 extidFormId :: !(FormId d) !String -> FormId d
-extidFormId formid s = formid <@ formid.id ++/ s
+extidFormId formid s	= formid <@ formid.id ++/ s
 
-subFormId :: !(FormId a) !String !d -> FormId d	// make new formid of new type copying other old settinf
-subFormId formid s d = reuseFormId (extidFormId formid s) d
+subFormId :: !(FormId a) !String !d -> FormId d			// make new formid of new type copying other old settinf
+subFormId formid s d	= reuseFormId (extidFormId formid s) d
 
-subnFormId :: !(FormId a) !String !d -> FormId d	// make new formid of new type copying other old settinf
-subnFormId formid s d = subFormId formid s d <@ Page
+subnFormId :: !(FormId a) !String !d -> FormId d		// make new formid of new type copying other old settinf
+subnFormId formid s d	= subFormId formid s d <@ Page
 
-subsFormId :: !(FormId a) !String !d -> FormId d	// make new formid of new type copying other old settinf
-subsFormId formid s d = subFormId formid s d <@ Session
+subsFormId :: !(FormId a) !String !d -> FormId d		// make new formid of new type copying other old settinf
+subsFormId formid s d	= subFormId formid s d <@ Session
 
-subpFormId :: !(FormId a) !String !d -> FormId d	// make new formid of new type copying other old settinf
-subpFormId formid s d = subFormId formid s d <@ Persistent
+subpFormId :: !(FormId a) !String !d -> FormId d		// make new formid of new type copying other old settinf
+subpFormId formid s d	= subFormId formid s d <@ Persistent
 
-subtFormId :: !(FormId a) !String !d -> FormId d	// make new formid of new type copying other old settinf
-subtFormId formid s d = subFormId formid s d <@ Temp
+subtFormId :: !(FormId a) !String !d -> FormId d		// make new formid of new type copying other old settinf
+subtFormId formid s d	= subFormId formid s d <@ Temp
 
-setFormId :: !(FormId d) !d -> FormId d			// set new initial value in formid
-setFormId formid d = {formid & ival = d}
+setFormId :: !(FormId d) !d -> FormId d					// set new initial value in formid
+setFormId formid d		= reuseFormId formid d
 
 reuseFormId :: !(FormId d) !v -> FormId v
-reuseFormId formid v = {formid & ival = v}
+reuseFormId formid v	= {formid & ival = v}
 
 initID :: !(FormId d) -> InIDataId d	// (Init,FormId a)
-initID formid = (Init,formid)
+initID formid			= (Init,formid)
 
 setID :: !(FormId d) !d -> InIDataId d	// (Set,FormId a)
-setID formid na = (Set,setFormId formid na)
+setID formid na			= (Set,setFormId formid na)
 
 onMode :: !Mode a a a -> a
-onMode Edit 	e1 e2 e3 = e1
-onMode Display  e1 e2 e3 = e2
-onMode NoForm   e1 e2 e3 = e3
+onMode Edit    e1 e2 e3 = e1
+onMode Display e1 e2 e3 = e2
+onMode NoForm  e1 e2 e3 = e3
 
 toViewId :: !Init !d !(Maybe d) -> d
-toViewId Init d Nothing 	= d
-toViewId Init d (Just v) 	= v
-toViewId _  d _ 			= d
+toViewId Init d Nothing = d
+toViewId Init d (Just v)= v
+toViewId _  d _ 		= d
 
 toViewMap :: !(d -> v) !Init !d !(Maybe v) -> v
-toViewMap f init d mv = toViewId init (f d) mv
+toViewMap f init d mv	= toViewId init (f d) mv
 
 derive gEq Mode, Init, Lifespan
 instance == Mode        where == m1 m2 = m1 === m2

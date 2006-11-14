@@ -16,8 +16,9 @@ mkList string = [c \\ c <-: string ]
 (<+++) infixl :: !String !a -> String | toString a
 (<+++) str x = str +++ toString x
 
-isNil :: [a] -> Bool
-isNil [] = True
-isNil _ = False
-
-
+(??) infixl 9 :: ![a] !a -> Int | == a
+(??) [a:as] b
+	| a==b		= 0
+	| otherwise	= 1 + as??b
+(??) [] _
+	= -1

@@ -1,8 +1,7 @@
 implementation module htmlButtons
 
 import StdEnv, ArgEnv
-
-import htmlHandler, htmlStylelib, htmlTrivial
+import htmlFormlib, htmlHandler, htmlStylelib, htmlTrivial
 
 derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode/*, Button, CheckBox*/, RadioButton /*, PullDownMenu, TextInput */, TextArea/*, PasswordBox*/
 derive gPrint 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, PasswordBox
@@ -18,331 +17,234 @@ derive gerda 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, But
 
 :: HTML = HTML [BodyTag]
 
-gForm {|HTML|} (init,formid ) hst = specialize myeditor (Set,formid) hst
+gForm {|HTML|} (init,formid ) hst	= specialize myeditor (Set,formid) hst
 where
 	myeditor (init,formid ) hst
-	# (HTML bodytag) = formid.ival
+	# (HTML bodytag)				= formid.ival
 	= ({changed = False, form = bodytag, value = formid.ival},hst)
 
-gUpd {|HTML|} mode v = (mode,v)
+gUpd  {|HTML|} mode v				= (mode,v)
 
-gPrint{|HTML|} (HTML x) st = st <<- "XYX" 
+gPrint{|HTML|} (HTML x) st			= st <<- "XYX" 
 
-gParse {|HTML|} st 
-= case gParse {|*|} st of
-	Just "XYX" -> Just (HTML [EmptyBody])
-	_ -> Just (HTML [EmptyBody])
+gParse{|HTML|} st					= case gParse {|*|} st of
+										Just "XYX" -> Just (HTML [EmptyBody])
+										_          -> Just (HTML [EmptyBody])
 
 
 // Tuples are placed next to each other, pairs below each other ...
+layoutTableAtts	:== [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)]	// default table attributes for arranging layout
 
 gForm{|(,)|} gHa gHb (init,formid) hst
-# (na,hst) = gHa (init,reuseFormId formid a) (incrHSt 1 hst)   // one more for the now invisable (,) constructor 
-# (nb,hst) = gHb (init,reuseFormId formid b) hst
-= (	{changed= na.changed || nb.changed
-	,value	= (na.value,nb.value)
-	,form	= [STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[BodyTag na.form, BodyTag nb.form]]]
+# (na,hst)				= gHa (init,reuseFormId formid a) (incrHSt 1 hst)   	// one more for the now invisible (,) constructor 
+# (nb,hst)				= gHb (init,reuseFormId formid b) hst
+= (	{ changed			= na.changed || nb.changed
+	, value				= (na.value,nb.value)
+	, form				= [STable layoutTableAtts [[BodyTag na.form, BodyTag nb.form]]]
 	},hst)
 where
-	(a,b) = formid.ival
+	(a,b)				= formid.ival
 
 gForm{|(,,)|} gHa gHb gHc (init,formid) hst
-# (na,hst) = gHa (init,reuseFormId formid a) (incrHSt 1 hst)   // one more for the now invisable (,,) constructor 
-# (nb,hst) = gHb (init,reuseFormId formid b) hst
-# (nc,hst) = gHc (init,reuseFormId formid c) hst
-= (	{changed= na.changed || nb.changed || nc.changed
-	,value	= (na.value,nb.value,nc.value)
-	,form	= [STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[BodyTag na.form,BodyTag nb.form,BodyTag nc.form]]]
+# (na,hst)				= gHa (init,reuseFormId formid a) (incrHSt 1 hst)   	// one more for the now invisible (,,) constructor 
+# (nb,hst)				= gHb (init,reuseFormId formid b) hst
+# (nc,hst)				= gHc (init,reuseFormId formid c) hst
+= (	{ changed			= na.changed || nb.changed || nc.changed
+	, value				= (na.value,nb.value,nc.value)
+	, form				= [STable layoutTableAtts [[BodyTag na.form,BodyTag nb.form,BodyTag nc.form]]]
 	},hst)
 where
-	(a,b,c) = formid.ival
+	(a,b,c)				= formid.ival
 
 gForm{|(,,,)|} gHa gHb gHc gHd (init,formid) hst
-# (na,hst) = gHa (init,reuseFormId formid a) (incrHSt 1 hst)   // one more for the now invisable (,,) constructor 
-# (nb,hst) = gHb (init,reuseFormId formid b) hst
-# (nc,hst) = gHc (init,reuseFormId formid c) hst
-# (nd,hst) = gHd (init,reuseFormId formid d) hst
-= (	{changed= na.changed || nb.changed || nc.changed || nd.changed
-	,value	= (na.value,nb.value,nc.value,nd.value)
-	,form	= [STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] 
-				[[BodyTag na.form,BodyTag nb.form,BodyTag nc.form, BodyTag nd.form]]]
+# (na,hst)				= gHa (init,reuseFormId formid a) (incrHSt 1 hst)   	// one more for the now invisible (,,) constructor 
+# (nb,hst)				= gHb (init,reuseFormId formid b) hst
+# (nc,hst)				= gHc (init,reuseFormId formid c) hst
+# (nd,hst)				= gHd (init,reuseFormId formid d) hst
+= (	{ changed			= na.changed || nb.changed || nc.changed || nd.changed
+	, value				= (na.value,nb.value,nc.value,nd.value)
+	, form				= [STable layoutTableAtts [[BodyTag na.form,BodyTag nb.form,BodyTag nc.form, BodyTag nd.form]]]
 	},hst)
 where
-	(a,b,c,d) = formid.ival
+	(a,b,c,d)			= formid.ival
 
 // <-> works exactly the same as (,) and places its arguments next to each other, for compatibility with GEC's
 
 gForm{|(<->)|} gHa gHb (init,formid) hst
-# (na,hst) = gHa (init,reuseFormId formid a) (incrHSt 1 hst)   // one more for the now invisable <-> constructor 
-# (nb,hst) = gHb (init,reuseFormId formid b) hst
-= (	{changed= na.changed || nb.changed 
-	,value	= na.value <-> nb.value
-	,form	= [STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [[BodyTag na.form, BodyTag nb.form]]]
+# (na,hst)				= gHa (init,reuseFormId formid a) (incrHSt 1 hst)   	// one more for the now invisible <-> constructor 
+# (nb,hst)				= gHb (init,reuseFormId formid b) hst
+= (	{ changed			= na.changed || nb.changed 
+	, value				= na.value <-> nb.value
+	, form				= [STable layoutTableAtts [[BodyTag na.form, BodyTag nb.form]]]
 	},hst)
 where
-	(a <-> b) = formid.ival
+	(a <-> b)			= formid.ival
 
 // <|> works exactly the same as PAIR and places its arguments below each other, for compatibility with GEC's
 
 gForm{|(<|>)|} gHa gHb (init,formid) hst 
-# (na,hst) = gHa (init,reuseFormId formid a) (incrHSt 1 hst) // one more for the now invisable <|> constructor
-# (nb,hst) = gHb (init,reuseFormId formid b) hst
-= (	{changed= na.changed || nb.changed 
-	,value	= na.value <|> nb.value
-	,form	= [STable [Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)] [na.form, nb.form]]
+# (na,hst)				= gHa (init,reuseFormId formid a) (incrHSt 1 hst)		// one more for the now invisible <|> constructor
+# (nb,hst)				= gHb (init,reuseFormId formid b) hst
+= (	{ changed			= na.changed || nb.changed 
+	, value				= na.value <|> nb.value
+	, form				= [STable layoutTableAtts [na.form, nb.form]]
 	},hst)
 where
-	(a <|> b) = formid.ival
+	(a <|> b)			= formid.ival
 
 // to switch between modes within a type ...
 
 gForm{|DisplayMode|} gHa (init,formid) hst 	
 = case formid.ival of
 	(HideMode a)
-	# (na,hst) = gHa (init,{formid & mode = Display, ival = a}) (incrHSt 1 hst)
-	= (	{changed= na.changed 
-		,value	= HideMode na.value
-		,form	= [EmptyBody]
-		},hst)
+		# (na,hst)		= gHa (init,reuseFormId formid a <@ Display) (incrHSt 1 hst)
+		= (	{ changed	= na.changed 
+			, value		= HideMode na.value
+			, form		= [EmptyBody]
+			},hst)
 	(DisplayMode a)
-	# (na,hst) = gHa (init,{formid & mode = Display, ival = a}) (incrHSt 1 hst)
-	= (	{changed= False
-		,value	= DisplayMode na.value
-		,form	= na.form
-		},hst)
+		# (na,hst)		= gHa (init,reuseFormId formid a <@ Display) (incrHSt 1 hst)
+		= (	{ changed	= False
+			, value		= DisplayMode na.value
+			, form		= na.form
+			},hst)
 	(EditMode a) 
-	# (na,hst) = gHa (init,{formid & mode = Edit, ival = a}) (incrHSt 1 hst)
-	= (	{changed= na.changed
-		,value	= EditMode na.value
-		,form	= na.form
-		},hst)
+		# (na,hst)		= gHa (init,reuseFormId formid a <@ Edit) (incrHSt 1 hst)
+		= (	{ changed	= na.changed
+			, value		= EditMode na.value
+			, form		= na.form
+			},hst)
 	EmptyMode
-	= (	{changed= False
-		,value	= EmptyMode
-		,form	= [EmptyBody]
-		},(incrHSt 1 hst))
+		= (	{ changed	= False
+			, value		= EmptyMode
+			, form		= [EmptyBody]
+			},incrHSt 1 hst)
 
 // Buttons to press
 
 gForm{|Button|} (init,formid) hst 
-# (cntr,hst) = CntrHSt hst
+# (cntr,hst)			= CntrHSt hst
 = case formid.ival of
 	v=:(LButton size bname)
-	= (	{changed= False
-		,value	= v
-		,form	= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
-					[ Inp_Type Inp_Button
-					, Inp_Value (SV bname)
-					, Inp_Name (encodeTriplet (formid.id,cntr,UpdS bname))
-					, `Inp_Std [Std_Style ("width:" +++ toString size)]
-					, `Inp_Events [OnClick callClean]
-					]) ""]
+	= (	{ changed		= False
+		, value			= v
+		, form			= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
+							[ Inp_Type		Inp_Button
+							, Inp_Value		(SV bname)
+							, Inp_Name		(encodeTriplet (formid.id,cntr,UpdS bname))
+							, `Inp_Std		[Std_Style ("width:" <+++ size)]
+							, `Inp_Events	[OnClick callClean]
+							]) ""]
 		},(incrHSt 1 hst))
 	v=:(PButton (height,width) ref)
-	= (	{changed= False
-		,value	= v
-		,form	= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
-					[ Inp_Type Inp_Image
-					, Inp_Value (SV ref)
-					, Inp_Name (encodeTriplet (formid.id,cntr,UpdS ref))
-					, `Inp_Std [Std_Style ("width:" +++ toString width +++ " height:" +++ toString height)]
-					, `Inp_Events [OnClick callClean]
-					, Inp_Src ref
-					]) ""]
-		},(incrHSt 1 hst))
+	= (	{ changed		= False
+		, value			= v
+		, form			= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
+							[ Inp_Type		Inp_Image
+							, Inp_Value		(SV ref)
+							, Inp_Name		(encodeTriplet (formid.id,cntr,UpdS ref))
+							, `Inp_Std		[Std_Style ("width:" <+++ width <+++ " height:" <+++ height)]
+							, `Inp_Events	[OnClick callClean]
+							, Inp_Src ref
+							]) ""]
+		},incrHSt 1 hst)
 	Pressed
 	= gForm {|*|} (init,(setFormId formid (LButton defpixel "??"))) hst // end user should reset button
 
 gForm{|CheckBox|} (init,formid) hst 
-# (cntr,hst) = CntrHSt hst
+# (cntr,hst)			= CntrHSt hst
 = case formid.ival of
 	v=:(CBChecked name) 
-	= (	{changed= False
-		,value	= v
-		,form	= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
-					[ Inp_Type Inp_Checkbox
-					, Inp_Value (SV name)
-					, Inp_Name (encodeTriplet (formid.id,cntr,UpdS name))
-					, Inp_Checked Checked
-					, `Inp_Events [OnClick callClean]
-					]) ""]
-		},(incrHSt 1 hst))
+	= (	{ changed		= False
+		, value			= v
+		, form			= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
+							[ Inp_Type		Inp_Checkbox
+							, Inp_Value		(SV name)
+							, Inp_Name		(encodeTriplet (formid.id,cntr,UpdS name))
+							, Inp_Checked	Checked
+							, `Inp_Events	[OnClick callClean]
+							]) ""]
+		},incrHSt 1 hst)
 	v=:(CBNotChecked name)
-	= (	{changed= False
-		,value	= v
-		,form	= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
-					[ Inp_Type Inp_Checkbox
-					, Inp_Value (SV name)
-					, Inp_Name (encodeTriplet (formid.id,cntr,UpdS name))
-					, `Inp_Events [OnClick callClean]
-					]) ""]
-		},(incrHSt 1 hst))
+	= (	{ changed		= False
+		, value			= v
+		, form			= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
+							[ Inp_Type		Inp_Checkbox
+							, Inp_Value		(SV name)
+							, Inp_Name		(encodeTriplet (formid.id,cntr,UpdS name))
+							, `Inp_Events	[OnClick callClean]
+							]) ""]
+		},incrHSt 1 hst)
 
 gForm{|RadioButton|} (init,formid) hst 
-# (cntr,hst) = CntrHSt hst
+# (cntr,hst)			= CntrHSt hst
 = case formid.ival of
 	v=:(RBChecked name)
-	= (	{changed= False
-		,value	= v
-		,form	= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
-					[ Inp_Type Inp_Radio
-					, Inp_Value (SV name)
-					, Inp_Name (encodeTriplet (formid.id,cntr,UpdS name))
-					, Inp_Checked Checked
-					, `Inp_Events [OnClick callClean]
-					]) ""]
-		},(incrHSt 1 hst))
+	= (	{ changed		= False
+		, value			= v
+		, form			= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
+							[ Inp_Type			Inp_Radio
+							, Inp_Value			(SV name)
+							, Inp_Name			(encodeTriplet (formid.id,cntr,UpdS name))
+							, Inp_Checked		Checked
+							, `Inp_Events		[OnClick callClean]
+							]) ""]
+		},incrHSt 1 hst)
 	v=:(RBNotChecked name)
-	= (	{changed= False
-		,value	= v
-		,form	= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
-					[ Inp_Type Inp_Radio
-					, Inp_Value (SV name)
-					, Inp_Name (encodeTriplet (formid.id,cntr,UpdS name))
-					, `Inp_Events [OnClick callClean]
-					]) ""]
-		},(incrHSt 1 hst))
+	= (	{ changed		= False
+		, value			= v
+		, form			= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
+							[ Inp_Type			Inp_Radio
+							, Inp_Value			(SV name)
+							, Inp_Name			(encodeTriplet (formid.id,cntr,UpdS name))
+							, `Inp_Events		[OnClick callClean]
+							]) ""]
+		},incrHSt 1 hst)
 
-gForm{|PullDownMenu|} (init,formid)  hst 
-# (cntr,hst) = CntrHSt hst
+gForm{|PullDownMenu|} (init,formid) hst 
+# (cntr,hst)			= CntrHSt hst
 = case formid.ival of
 	v=:(PullDown (size,width) (menuindex,itemlist))
-	= (	{changed= False
-		,value	= v
-		,form	= [Select 	(onMode formid.mode [] [Sel_Disabled Disabled] [] ++
-						[ Sel_Name ("CS")
-						, Sel_Size size
-						, `Sel_Std [Std_Style ("width:" +++ (toString width) +++ "px")]
-						, `Sel_Events [OnChange callClean]
-						])
-						[ Option  
-							[ Opt_Value (encodeTriplet (formid.id,cntr,UpdC (itemlist!!j)))
-							: if (j == menuindex) [Opt_Selected Selected] [] 
-							]
-							elem
-							\\ elem <- itemlist & j <- [0..]
-						 ]] 	
-		},(incrHSt 1 hst))
+	= (	{ changed		= False
+		, value			= v
+		, form			= [Select (onMode formid.mode [] [Sel_Disabled Disabled] [] ++
+							[ Sel_Name			("CS")
+							, Sel_Size			size
+							, `Sel_Std			[Std_Style ("width:" <+++ width <+++ "px")]
+							, `Sel_Events		[OnChange callClean]
+							])
+							[ Option 
+								[ Opt_Value (encodeTriplet (formid.id,cntr,UpdC (itemlist!!j)))
+								: if (j == menuindex) [Opt_Selected Selected] [] 
+								]
+								elem
+								\\ elem <- itemlist & j <- [0..]
+							]]
+		},incrHSt 1 hst)
 
-	
 gForm{|TextInput|} (init,formid) hst 	
-# (cntr,hst) = CntrHSt hst
-= case formid.ival of
-	(TI size i)
-	# (body,hst) = mkInput size (init,formid) (IV i) (UpdI i) hst
-	= ({changed=False, value=TI size i, form=[body]},incrHSt 2 hst)
-	(TR size r)
-	# (body,hst) = mkInput size (init,formid) (RV r) (UpdR r) hst
-	= ({changed=False, value=TR size r, form=[body]},incrHSt 2 hst)
-	(TS size s)
-	# (body,hst) = mkInput size (init,formid) (SV s) (UpdS s) hst 
-	= ({changed=False, value=TS size s, form=[body]},incrHSt 2 hst)
-
-
-:: PasswordBox	= PasswordBox String
-gForm{|PasswordBox|} (init,formid) hst 	
-= case formid.ival of
-	(PasswordBox password) 
-	# (body,hst) = mkPswInput defsize (init,formid) password (UpdS password) hst
-	= ({changed=False, value=PasswordBox password, form=[body]},incrHSt 1 hst)
+# (cntr,hst)			= CntrHSt hst
+# (body,hst)			= mkInput size (init,formid) v updv hst
+= ({changed=False, value=formid.ival, form=[body]},incrHSt 2 hst)
 where
-	mkPswInput :: !Int !(InIDataId d) String UpdValue *HSt -> (BodyTag,*HSt) 
-	mkPswInput size (init,formid=:{mode = Edit}) sval updval hst=:{cntr}
-		= ( Input 	[	Inp_Type Inp_Password
-					, 	Inp_Value (SV sval)
-					,	Inp_Name (encodeTriplet (formid.id,cntr,updval))
-					,	Inp_Size size
-					, 	`Inp_Std [EditBoxStyle, Std_Title "::Password"]
-					,	`Inp_Events	[OnChange callClean]
-					] ""
-			,incrHSt 1 hst)
-	mkPswInput size (init,{mode = Display}) sval _ hst
-		= ( Input 	[	Inp_Type Inp_Password
-					, 	Inp_Value (SV sval)
-					,	Inp_ReadOnly ReadOnly
-					, 	`Inp_Std [DisplayBoxStyle]
-					,	Inp_Size size
-					] ""
-			,incrHSt 1 hst)
-	mkPswInput size (init,_) val _ hst=:{cntr} 
-		= ( EmptyBody,incrHSt 1 hst)
-
-//derive gForm HtmlTime
-
-gForm {|HtmlTime|} (init,formid) hst 
-	= specialize myeditor (init,formid) hst
-where
-	myeditor (init,formid) hst = mkBimapEditor (init,formid) bimap hst
-	where
-		(Time hours minutes seconds) = formid.ival
-
-		bimap = {map_to = toPullDown, map_from = fromPullDown}
-		where
-			toPullDown (Time hours minutes seconds) = (pdhours,pdminutes,pdseconds)
-			where
-				pdhours		= PullDown (1, defpixel/2) (hours,  [toString i \\ i <- [0..23]])
-				pdminutes 	= PullDown (1, defpixel/2) (minutes,[toString i \\ i <- [0..59]])
-				pdseconds 	= PullDown (1, defpixel/2) (seconds, [toString i \\ i <- [0..59]])
-		
-			fromPullDown (pdhours,pdminutes,pdseconds) = Time (convert pdhours) (convert pdminutes) (convert pdseconds)
-			where
-				convert x	= toInt (toString x)
-
-gForm {|HtmlDate|} (init,formid) hst 
-	= specialize myeditor (init,formid) hst
-where
-	myeditor (init,formid) hst = mkBimapEditor (init,formid) bimap hst
-	where
-		bimap = {map_to = toPullDown, map_from = fromPullDown}
-		where
-			toPullDown (Date day month year) = (pddays,pdmonths,pdyears)
-			where
-				pddays 		= PullDown (1,  defpixel/2) (minday-1,  [toString i \\ i <- [1..31]])
-				pdmonths 	= PullDown (1,  defpixel/2) (minmonth-1,[toString i \\ i <- [1..12]])
-				pdyears 	= PullDown (1,2*defpixel/3) (minyear-2006, [toString i \\ i <- [2006..2015]])
-
-				minyear 	= if (year >= 2006 	&& year <= 2015) 	year 2006
-				minday		= if (day >= 1 		&& day <= 31) 		day 1
-				minmonth 	= if (month >= 1 	&& month <= 12) 	month 1
-		
-			fromPullDown (pddays,pdmonths,pdyears) = Date (convert pddays) (convert pdmonths) (convert pdyears)
-			where
-				convert x	= toInt (toString x)
-
-
-mkBimapEditor :: !(InIDataId d) !(Bimap d v) !*HSt -> (Form d,!*HSt) 
-										| iData v
-mkBimapEditor inIDataId {map_to,map_from} hst
-= mkViewForm inIDataId { toForm 	= toViewMap map_to 
-						, updForm 	= \_ v -> v
-						, fromForm 	= \_ v -> map_from v
-						, resetForm = Nothing
-						} hst 
-// time and date
-
-import StdTime
-
-getTimeAndDate :: !*HSt -> *(!(!HtmlTime,!HtmlDate),!*HSt)
-getTimeAndDate hst
-# (time,hst)	= accWorldHSt getCurrentTime hst
-# htmltime		= Time time.hours time.minutes time.seconds
-# (date,hst)	= accWorldHSt getCurrentDate hst
-# htmldate		= Date date.day date.month date.year
-= ((htmltime,htmldate),hst)
+	(size,v,updv)		= case formid.ival of
+							(TI size i) = (size,IV i,UpdI i)
+							(TR size r) = (size,RV r,UpdR r)
+							(TS size s) = (size,SV s,UpdS s)
 
 gForm{|TextArea|} (init,formid) hst 
-# (cntr,hst) = CntrHSt hst
-= (	{ changed 	= False
-	, value 	= formid.ival
-	, form		= [Form [Frm_Method Post, `Frm_Events [OnSubmit callClean]] 
-					[mkSTable 	[ [ Textarea [Txa_Name "message", Txa_Rows row, Txa_Cols col ] "" ]
-								, [mkSTable [[ Input [Inp_Type Inp_Submit, Inp_Name (encodeTriplet (formid.id,cntr+2,UpdS string)), Inp_Value (SV "Set"),`Inp_Events [OnClick callClean]] ""
-								  		   		, Input [Inp_Type Inp_Reset, Inp_Name "reset", Inp_Value (SV "Reset")] ""
-								           		]]
-								  ]
-								]
-					]] 
-	},(incrHSt 3 hst))
+# (cntr,hst)			= CntrHSt hst
+= (	{ changed			= False
+	, value				= formid.ival
+	, form				= [Form [Frm_Method Post, `Frm_Events [OnSubmit callClean]] 
+							[mkSTable 	[ [ Textarea [Txa_Name "message", Txa_Rows row, Txa_Cols col ] "" ]
+										, [ mkSTable [[ Input [Inp_Type Inp_Submit, Inp_Name (encodeTriplet (formid.id,cntr+2,UpdS string)), Inp_Value (SV "Set"),`Inp_Events [OnClick callClean]] ""
+										  		   	  , Input [Inp_Type Inp_Reset,  Inp_Name "reset",                                        Inp_Value (SV "Reset")] ""
+										           	 ]]
+										  ]
+										]
+							]] 
+	},incrHSt 3 hst)
 where
 	(TextArea row col string) = formid.ival
 
@@ -352,101 +254,138 @@ where
 		mktable table 	= [Tr [] (mkrow rows) \\ rows <- table]	
 		mkrow rows 		= [Td [Td_VAlign Alo_Top, Td_Width (Pixels defpixel)] [row] \\ row <- rows] 
 
-// Update that have to be treated special:
-
-gUpd{|PullDownMenu|} (UpdSearch (UpdC cname) 0) (PullDown (size,width) (menuindex,itemlist)) 
-			= (UpdDone,PullDown (size,width) (nmenuindex 0 cname itemlist,itemlist))					// update integer value
+gForm{|PasswordBox|} (init,formid) hst 	
+= case formid.ival of
+	(PasswordBox password) 
+	# (body,hst)		= mkPswInput defsize (init,formid) password (UpdS password) hst
+	= ({ changed		= False
+	   , value			= PasswordBox password
+	   , form			= [body]
+	   },incrHSt 1 hst)
 where
-	nmenuindex cnt name [itemname:items] 
-	| name == itemname = cnt
-	| otherwise		   = nmenuindex (cnt+1) name items
-	nmenuindex _ _ [] = -1
-gUpd{|PullDownMenu|} (UpdSearch val cnt) v = (UpdSearch val (cnt - 1),v)			// continue search, don't change
-gUpd{|PullDownMenu|} (UpdCreate l)		_ = (UpdCreate l,PullDown (1,defpixel) (0,["error"]))					// create default value
-gUpd{|PullDownMenu|} mode 			  	v = (mode,v)							// don't change
+	mkPswInput :: !Int !(InIDataId d) String UpdValue !*HSt -> (!BodyTag,!*HSt) 
+	mkPswInput size (init,formid=:{mode = Edit}) sval updval hst=:{cntr}
+		= ( Input 	[ Inp_Type		Inp_Password
+					, Inp_Value		(SV sval)
+					, Inp_Name		(encodeTriplet (formid.id,cntr,updval))
+					, Inp_Size		size
+					, `Inp_Std		[EditBoxStyle, Std_Title "::Password"]
+					, `Inp_Events	[OnChange callClean]
+					] ""
+			,incrHSt 1 hst)
+	mkPswInput size (init,{mode = Display}) sval _ hst
+		= ( Input 	[ Inp_Type		Inp_Password
+					, Inp_Value		(SV sval)
+					, Inp_ReadOnly	ReadOnly
+					, `Inp_Std		[DisplayBoxStyle]
+					, Inp_Size		size
+					] ""
+			,incrHSt 1 hst)
+	mkPswInput size (init,_) val _ hst=:{cntr} 
+		= ( EmptyBody,incrHSt 1 hst )
 
-gUpd{|Button|} (UpdSearch (UpdS name) 0) 	_ = (UpdDone,Pressed)					// update button value
-gUpd{|Button|} (UpdSearch val cnt)      	b = (UpdSearch val (cnt - 1),b)			// continue search, don't change
-gUpd{|Button|} (UpdCreate l)				_ = (UpdCreate l,(LButton defsize "Press"))					// create default value
-gUpd{|Button|} mode 			  	    	b = (mode,b)							// don't change
 
+// time and date
 
-gUpd{|CheckBox|} (UpdSearch (UpdS name) 0) 	(CBChecked s) = (UpdDone,CBNotChecked s)	// update CheckBox value
-gUpd{|CheckBox|} (UpdSearch (UpdS name) 0) 	(CBNotChecked s) = (UpdDone,CBChecked s)	// update CheckBox value
-gUpd{|CheckBox|} (UpdSearch val cnt)      	b = (UpdSearch val (cnt - 1),b)			// continue search, don't change
-gUpd{|CheckBox|} (UpdCreate l)				_ = (UpdCreate l,(CBNotChecked "defaultCheckboxName"))					// create default value
-gUpd{|CheckBox|} mode 			  	    	b = (mode,b)							// don't change
+import StdTime
 
+getTimeAndDate :: !*HSt -> *(!(!HtmlTime,!HtmlDate),!*HSt)
+getTimeAndDate hst
+# (time,hst)				= accWorldHSt getCurrentTime hst
+# (date,hst)				= accWorldHSt getCurrentDate hst
+= ((Time time.hours time.minutes time.seconds,Date date.day date.month date.year),hst)
 
-gUpd{|TextInput|} (UpdSearch (UpdI ni) 0) 	(TI size i)  = (UpdDone,TI size ni)		// update integer value
-gUpd{|TextInput|} (UpdSearch (UpdR nr) 0) 	(TR size r)  = (UpdDone,TR size nr)		// update integer value
-gUpd{|TextInput|} (UpdSearch (UpdS ns) 0) 	(TS size s)  = (UpdDone,TS size ns)		// update integer value
-gUpd{|TextInput|} (UpdSearch val cnt)     	i = (UpdSearch val (cnt - 3),i)			// continue search, don't change
-gUpd{|TextInput|} (UpdCreate l)				_ = (UpdCreate l,TI defsize 0)			// create default value
-gUpd{|TextInput|} mode 			  	    	i = (mode,i)							// don't change
+gForm {|HtmlTime|} (init,formid) hst
+	= specialize (flip mkBimapEditor {map_to = toPullDown, map_from = fromPullDown}) (init,formid) hst
+where
+	toPullDown (Time h m s)	= (hv,mv,sv)
+	where
+		hv					= PullDown (1, defpixel/2) (h,[toString i \\ i <- [0..23]])
+		mv					= PullDown (1, defpixel/2) (m,[toString i \\ i <- [0..59]])
+		sv					= PullDown (1, defpixel/2) (s,[toString i \\ i <- [0..59]])
 
-gUpd{|PasswordBox|} (UpdSearch (UpdS name) 0) 	_ = (UpdDone,PasswordBox name)			// update password value
-gUpd{|PasswordBox|} (UpdSearch val cnt)      	b = (UpdSearch val (cnt - 2),b)			// continue search, don't change
-gUpd{|PasswordBox|} (UpdCreate l)				_ = (UpdCreate l,PasswordBox "")		// create default value
-gUpd{|PasswordBox|} mode 			  	    	b = (mode,b)							// don't change
+	fromPullDown (hv,mv,sv)	= Time (convert hv) (convert mv) (convert sv)
+	where
+		convert x			= toInt (toString x)
+
+gForm {|HtmlDate|} (init,formid) hst 
+	= specialize (flip mkBimapEditor {map_to = toPullDown, map_from = fromPullDown}) (init,formid) hst
+where
+	toPullDown (Date d m y)	= (dv,mv,yv)
+	where
+		dv					= PullDown (1,  defpixel/2) (md-1,   [toString i \\ i <- [1..31]])
+		mv					= PullDown (1,  defpixel/2) (mm-1,   [toString i \\ i <- [1..12]])
+		yv					= PullDown (1,2*defpixel/3) (my-2006,[toString i \\ i <- [2006..2015]])
+
+		my					= if (y >= 2006 && y <= 2015) y 2006
+		md					= if (d >= 1    && d <= 31)   d 1
+		mm					= if (m >= 1    && m <= 12)   m 1
+
+	fromPullDown (dv,mv,yv)	= Date (convert dv) (convert mv) (convert yv)
+	where
+		convert x			= toInt (toString x)
+
+// Updates that have to be treated specially:
+
+gUpd{|PullDownMenu|} (UpdSearch (UpdC cname) 0) (PullDown dim (menuindex,itemlist)) 
+																= (UpdDone,                PullDown dim (itemlist??cname,itemlist))	// update integer value
+gUpd{|PullDownMenu|} (UpdSearch val cnt)       v				= (UpdSearch val (cnt - 1),v)										// continue search, don't change
+gUpd{|PullDownMenu|} (UpdCreate l)             _				= (UpdCreate l,            PullDown (1,defpixel) (0,["error"]))		// create default value
+gUpd{|PullDownMenu|} mode                      v				= (mode,                   v)										// don't change
+
+gUpd{|Button|}       (UpdSearch (UpdS name) 0) _				= (UpdDone,                Pressed)									// update button value
+gUpd{|Button|}       (UpdSearch val cnt)       b				= (UpdSearch val (cnt - 1),b)										// continue search, don't change
+gUpd{|Button|}       (UpdCreate l)             _				= (UpdCreate l,            LButton defsize "Press")					// create default value
+gUpd{|Button|}       mode                      b				= (mode,                   b)										// don't change
+
+gUpd{|CheckBox|}     (UpdSearch (UpdS name) 0) (CBChecked    s)	= (UpdDone,                CBNotChecked s)							// update CheckBox value
+gUpd{|CheckBox|}     (UpdSearch (UpdS name) 0) (CBNotChecked s)	= (UpdDone,                CBChecked    s)							// update CheckBox value
+gUpd{|CheckBox|}     (UpdSearch val cnt)       b				= (UpdSearch val (cnt - 1),b)										// continue search, don't change
+gUpd{|CheckBox|}     (UpdCreate l)             _				= (UpdCreate l,            CBNotChecked "defaultCheckboxName")		// create default value
+gUpd{|CheckBox|}     mode                      b				= (mode,                   b)										// don't change
+
+gUpd{|TextInput|}    (UpdSearch (UpdI ni) 0)   (TI size i)		= (UpdDone,                TI size ni)								// update integer value
+gUpd{|TextInput|}    (UpdSearch (UpdR nr) 0)   (TR size r)		= (UpdDone,                TR size nr)								// update real    value
+gUpd{|TextInput|}    (UpdSearch (UpdS ns) 0)   (TS size s)		= (UpdDone,                TS size ns)								// update string  value
+gUpd{|TextInput|}    (UpdSearch val cnt)       i				= (UpdSearch val (cnt - 3),i)										// continue search, don't change
+gUpd{|TextInput|}    (UpdCreate l)             _				= (UpdCreate l,            TI defsize 0)							// create default value
+gUpd{|TextInput|}    mode                      i				= (mode,                   i)										// don't change
+
+gUpd{|PasswordBox|}  (UpdSearch (UpdS name) 0) _				= (UpdDone,                PasswordBox name)						// update password value
+gUpd{|PasswordBox|}  (UpdSearch val cnt)       b				= (UpdSearch val (cnt - 2),b)										// continue search, don't change
+gUpd{|PasswordBox|}  (UpdCreate l)             _				= (UpdCreate l,            PasswordBox "")							// create default value
+gUpd{|PasswordBox|}  mode                      b				= (mode,                   b)										// don't change
 
 // small utility stuf
 
-instance toBool RadioButton
-where	toBool (RBChecked _)= True
-		toBool _ 		 = False
+instance toBool RadioButton where
+	toBool (RBChecked _)					= True
+	toBool _								= False
 
-instance toBool CheckBox
-where	toBool (CBChecked _)= True
-		toBool _ 		 = False
+instance toBool CheckBox where
+	toBool (CBChecked _)					= True
+	toBool _								= False
 
-instance toBool Button
-where	toBool Pressed = True
-		toBool _ 		 = False
+instance toBool Button where
+	toBool Pressed							= True
+	toBool _								= False
 
-instance toInt PullDownMenu
-where
-	toInt:: PullDownMenu -> Int
-	toInt (PullDown _ (i,_)) = i
+instance toInt PullDownMenu where
+	toInt (PullDown _ (i,_))				= i
 
-instance toString PullDownMenu
-where
-	toString (PullDown _ (i,s)) = if (i>=0 && i <=length s) (s!!i) ""
-	
-instance == PasswordBox
-where
-	(==) (PasswordBox psw1) (PasswordBox psw2) = psw1 == psw2
+instance toString PullDownMenu where
+	toString (PullDown _ (i,s))				= if (i>=0 && i <=length s) (s!!i) ""
 
-instance == HtmlTime
-where
-	(==) (Time hrs0 min0 sec0) (Time hrs1 min1 sec1) = hrs0==hrs1 && min0==min1 && sec0==sec1 
+derive gEq PasswordBox, HtmlTime, HtmlDate
+instance == PasswordBox where (==) pb1 pb2	= pb1 === pb2
+instance == HtmlTime    where (==) ht1 ht2	= ht1 === ht2
+instance == HtmlDate    where (==) hd1 hd2	= hd1 === hd2
 
-instance < HtmlTime
-where
-	(<) (Time hrs0 min0 sec0) (Time hrs1 min1 sec1) 
-	| hrs0 < hrs1 = True
-	| hrs0 == hrs1 && min0 <  min1 = True
-	| hrs0 == hrs1 && min0 == min1 && sec0 < sec1 = True
-	= False
+derive gLexOrd HtmlTime, HtmlDate
+instance < HtmlTime where (<) ht1 ht2		= gEq{|*|} (gLexOrd{|*|} ht1 ht2) LT
+instance < HtmlDate where (<) hd1 hd2		= gEq{|*|} (gLexOrd{|*|} hd1 hd2) LT
 
-instance toString HtmlTime
-where
-	toString (Time hrs min sec) = toString hrs <+++ ":" <+++ min <+++ ":" <+++ sec
-
-	
-instance == HtmlDate
-where
-	(==) (Date day0 month0 year0) (Date day1 month1 year1) = day0==day1 && month0==month1 && year0==year1
-
-instance < HtmlDate
-where
-	(<) (Date day0 month0 year0) (Date day1 month1 year1) 
-	| year0 < year1 = True
-	| year0 == year1 && month0 <  month1 = True
-	| year0 == year1 && month0 == month1 && day0 < day1 = True
-	= False
-	
-instance toString HtmlDate
-where
-	toString (Date day month year) = toString day <+++ "/" <+++ month <+++ "/" <+++ year
-
+instance toString HtmlTime where
+	toString (Time hrs min sec)				= toString hrs <+++ ":" <+++ min <+++ ":" <+++ sec
+instance toString HtmlDate where
+	toString (Date day month year)			= toString day <+++ "/" <+++ month <+++ "/" <+++ year

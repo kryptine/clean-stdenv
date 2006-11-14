@@ -4,6 +4,7 @@ definition module htmlButtons
 // (c) 2005 MJP
 
 import htmlHandler
+import GenLexOrd
 
 derive gForm 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML, PasswordBox
 derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML, PasswordBox
@@ -11,12 +12,16 @@ derive gPrint 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Bu
 derive gParse 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, HTML, PasswordBox
 derive gerda 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, PasswordBox
 
-instance toBool   CheckBox, Button, RadioButton		// True if checkbox checked, button pressed
-instance toInt    PullDownMenu						// Current index in pull down list
-instance toString PullDownMenu						// Corresponding element in pull down list
-instance ==		  PasswordBox, HtmlDate, HtmlTime
-instance <		  HtmlDate, HtmlTime
-instance toString		  HtmlDate, HtmlTime
+instance toBool		CheckBox, Button, RadioButton	// True if checkbox checked, button pressed
+instance toInt		PullDownMenu					// Current index in pull down list
+instance toString	PullDownMenu					// Corresponding element in pull down list
+derive   gEq		HtmlDate, HtmlTime, PasswordBox
+instance ==			HtmlDate, HtmlTime, PasswordBox
+derive   gLexOrd	HtmlDate, HtmlTime
+instance <			HtmlDate, HtmlTime
+instance toString	HtmlDate, HtmlTime
+
+
 // lay out
 
 :: <-> a b		= (<->) infixl 5 a b				// place b to the left of a

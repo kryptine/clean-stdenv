@@ -24,17 +24,15 @@ edit 			:: (FormId a)	-> GecCircuit a a 					|  iData a
 display 		:: (FormId a)	-> GecCircuit a a 					|  iData a
 store 			:: (FormId a)	-> GecCircuit (a -> a) a 			|  iData a
 	
-feedback 		:: (GecCircuit a b) (GecCircuit b a) -> (GecCircuit a b)
+feedback 		:: !(GecCircuit a b) !(GecCircuit b a) -> GecCircuit a b
 
-self 			:: (a -> a) (GecCircuit a a) -> GecCircuit a a
+self 			:: (a -> a) !(GecCircuit a a)  -> GecCircuit a a
 
-loops 			:: (GecCircuit (a, b) (c, b)) -> GecCircuit a c 	|  iData b
+loops 			:: !(GecCircuit (a, b) (c, b)) -> GecCircuit a c 	|  iData b
 
-(`bindC`)  infix 0 :: (GecCircuit a b) (b -> GecCircuit b c) -> (GecCircuit a c)
-(`bindCI`) infix 0 :: (GecCircuit a b) ((Form b) -> GecCircuit b c) -> (GecCircuit a c)
+(`bindC`)  infix 0 :: !(GecCircuit a b) (b -> GecCircuit b c) -> (GecCircuit a c)
+(`bindCI`) infix 0 :: !(GecCircuit a b) ((Form b) -> GecCircuit b c) -> (GecCircuit a c)
 
 // to lift library functions to the circuit domain
 
-lift :: !(InIDataId a) (!(InIDataId a) !*HSt -> (!Form b,!*HSt)) -> (GecCircuit a b)
-
-//lift :: !(FormId a) (!(InIDataId a) !*HSt -> (!Form b,!*HSt)) -> (GecCircuit a b)
+lift :: !(InIDataId a) (!(InIDataId a) !*HSt -> (!Form b,!*HSt)) -> GecCircuit a b

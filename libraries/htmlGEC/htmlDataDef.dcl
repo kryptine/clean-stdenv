@@ -5,410 +5,408 @@ definition module htmlDataDef
 
 import htmlStyleDef
 
-:: Url			:== String
-:: UniqueName 	:== String
+:: Url				:== String
+:: UniqueName		:== String
 
-None			:== [NoAttr]
-:: NoAttr = NoAttr
+None				:== [NoAttr]
+:: NoAttr			= NoAttr
 
 // a Clean data structure representing a subset of html
 
-:: Html 	= Html Head Rest
+:: Html 			= Html Head Rest
 
-:: Head = Head [HeadAttr] [HeadTag]
+:: Head				= Head [HeadAttr] [HeadTag]
 
-:: HeadAttr = Hd_Profile	Url				//space separated list of URL's that contains meta data information about the page
-			| `Hd_Std		[Standard_Attr]
+:: HeadAttr			= Hd_Profile	Url				//space separated list of URL's that contains meta data information about the page
+					| `Hd_Std		[Standard_Attr]
 			
-:: HeadTag 	= Hd_Base 		[BaseAttr]				//base <base>
-			| Hd_Basefont 	[BasefontAttr]			//basefont <basefont>
-			| Hd_Link 		[LinkAttr]				//link <link>
-			| Hd_Meta 		[MetaOption]			//meta <meta>
-			| Hd_Object 	[Object_Attr] [Param]	//object <object></object> 
-			| Hd_Script 	[Script_Attr] Script	//script <script></script>
-			| Hd_Style 		[StyleAttr] [Style]		//<style></style>
-//			| Hd_Style 		[StyleAttr] String		//<style></style>
-			| Hd_Title		String					//title <title></title>
+:: HeadTag			= Hd_Base 		[BaseAttr]				//base <base>
+					| Hd_Basefont 	[BasefontAttr]			//basefont <basefont>
+					| Hd_Link 		[LinkAttr]				//link <link>
+					| Hd_Meta 		[MetaOption]			//meta <meta>
+					| Hd_Object 	[Object_Attr] [Param]	//object <object></object> 
+					| Hd_Script 	[Script_Attr] Script	//script <script></script>
+					| Hd_Style 		[StyleAttr] [Style]		//<style></style>
+		//			| Hd_Style 		[StyleAttr] String		//<style></style>
+					| Hd_Title		String					//title <title></title>
 			
-:: BaseAttr = Bsa_Href		Url				//URL to use as the base URL for links in the page
-			| Bsa_Target 	TargetOption	//where to open all the links on the page
+:: BaseAttr			= Bsa_Href		Url				//URL to use as the base URL for links in the page
+					| Bsa_Target 	TargetOption	//where to open all the links on the page
 
-:: BasefontAttr = Bsf_Color		ColorOption		//text color
-				| Bsf_Face 		String			//font to use
-				| Bsf_Size		Int				//size for font elements
-				| `Bsf_Std		[Standard_Attr]
+:: BasefontAttr	 = Bsf_Color		ColorOption		//text color
+					| Bsf_Face 		String			//font to use
+					| Bsf_Size		Int				//size for font elements
+					| `Bsf_Std		[Standard_Attr]
 
-:: LinkAttr = Lka_Charset		String			//character encoding of the target URL
-			| Lka_Href			Url				//target URL of the resource
-			| Lka_HrefLang		String			//base language of the target URL
-			| Lka_Media			MediaOption		//on what device the document will be displayed
-			| Lka_Rel			DocRelation		//relationship between the current document and the target URL
-			| Lka_Rev			DocRelation		//relationship between the target URL and the current document
-			| Lka_Target		TargetOption	//Where to open the target URL
-			| Lka_Type			String			//MIME type of the target URL
-			| `Lka_Std			[Standard_Attr]
-			| `Lka_Events		[ElementEvents]
+:: LinkAttr			= Lka_Charset		String			//character encoding of the target URL
+					| Lka_Href			Url				//target URL of the resource
+					| Lka_HrefLang		String			//base language of the target URL
+					| Lka_Media			MediaOption		//on what device the document will be displayed
+					| Lka_Rel			DocRelation		//relationship between the current document and the target URL
+					| Lka_Rev			DocRelation		//relationship between the target URL and the current document
+					| Lka_Target		TargetOption	//Where to open the target URL
+					| Lka_Type			String			//MIME type of the target URL
+					| `Lka_Std			[Standard_Attr]
+					| `Lka_Events		[ElementEvents]
 			
-:: MediaOption = All
-			| Aural
-			| Braille
-			| Handheld
-			| Print
-			| Projection
-			| Screen
-			| Speech
-			| Tty
-			| Tv
+:: MediaOption		= All
+					| Aural
+					| Braille
+					| Handheld
+					| Print
+					| Projection
+					| Screen
+					| Speech
+					| Tty
+					| Tv
 				
-:: MetaOption = Mto_Content		String			//meta information to be associated with http-equiv or name
-			| Mto_HttpEquiv 	MetaHttpEquiv	//connects the content attribute to an HTTP header
-			| Mto_Name 			MetaName		//connects the content attribute to a name
-			| Mto_Scheme 		String			//format to be used to interpret the value of the content attribute
+:: MetaOption		= Mto_Content		String			//meta information to be associated with http-equiv or name
+					| Mto_HttpEquiv 	MetaHttpEquiv	//connects the content attribute to an HTTP header
+					| Mto_Name 			MetaName		//connects the content attribute to a name
+					| Mto_Scheme 		String			//format to be used to interpret the value of the content attribute
 						
-:: MetaHttpEquiv = ContentType
-				| Expires
-				| Refresh
-				| SetCookie
+:: MetaHttpEquiv	= ContentType
+					| Expires
+					| Refresh
+					| SetCookie
 
-:: MetaName = Author
-			| Description
-			| Keywords
-			| Generator
-			| Revised
-			| Others		String
+:: MetaName			= Author
+					| Description
+					| Keywords
+					| Generator
+					| Revised
+					| Others		String
 
-:: StyleAttr = Sty_Type		String
-			| Sty_Media 	MediaOption
+:: StyleAttr		= Sty_Type		String
+					| Sty_Media 	MediaOption
 
-
-:: Rest = Body		[BodyAttr] [BodyTag]
-		| Frameset	[FramesetAttr] [Frame]
+:: Rest				= Body		[BodyAttr] [BodyTag]
+					| Frameset	[FramesetAttr] [Frame]
 		
-:: FramesetAttr = Fsa_Cols	String			//number and size of columns
-				| Fsa_Rows	String			//number and size of rows
-				| `Fsa_Std	[Standard_Attr]
+:: FramesetAttr		= Fsa_Cols	String			//number and size of columns
+					| Fsa_Rows	String			//number and size of rows
+					| `Fsa_Std	[Standard_Attr]
 				
-:: Frame = Frame [FrameAttr]
-			| NoFrames [Std_Attr] [BodyTag]
+:: Frame			= Frame [FrameAttr]
+					| NoFrames [Std_Attr] [BodyTag]
 
-:: FrameAttr = Fra_Frameborder		Int					//display (1) or not (0) border around the frame
-			| Fra_Longdesc			Url					//URL to a long description of the frame 
-			| Fra_Marginheight		Int					//top and bottom margins in the frame
-			| Fra_Marginwidth		Int					//left and right margins in the frame
-			| Fra_Name				String				//unique name for the frame 
-			| Fra_Noresize								//set to noresize the user cannot resize the frame
-			| Fra_Scrolling			ScrollingOption		//scrollbar action
-			| Fra_Src				Url					//URL of the file to show in the frame
-			| `Fra_Std				[Standard_Attr]
+:: FrameAttr		= Fra_Frameborder		Int					//display (1) or not (0) border around the frame
+					| Fra_Longdesc			Url					//URL to a long description of the frame 
+					| Fra_Marginheight		Int					//top and bottom margins in the frame
+					| Fra_Marginwidth		Int					//left and right margins in the frame
+					| Fra_Name				String				//unique name for the frame 
+					| Fra_Noresize								//set to noresize the user cannot resize the frame
+					| Fra_Scrolling			ScrollingOption		//scrollbar action
+					| Fra_Src				Url					//URL of the file to show in the frame
+					| `Fra_Std				[Standard_Attr]
 
-:: ScrollingOption = DoScroll
+:: ScrollingOption	= DoScroll
 					| NoScroll
 					| Auto	
 	
-:: BodyAttr	= Batt_alink		ColorOption		//Color of the active links in the document
-			| Batt_background	String			//An image to use as the background
-			| Batt_bgcolor		ColorOption		//Background color of the document
-			| Batt_link			ColorOption		//Color of all the links in the document
-			| Batt_text			ColorOption		//Color of the text in the document
-			| Batt_vlink		ColorOption		//Color of the visited links in the document
-			| `Batt_Std			[Standard_Attr]
-			| `Batt_Events		[ElementEvents]	
+:: BodyAttr			= Batt_alink		ColorOption		//Color of the active links in the document
+					| Batt_background	String			//An image to use as the background
+					| Batt_bgcolor		ColorOption		//Background color of the document
+					| Batt_link			ColorOption		//Color of all the links in the document
+					| Batt_text			ColorOption		//Color of the text in the document
+					| Batt_vlink		ColorOption		//Color of the visited links in the document
+					| `Batt_Std			[Standard_Attr]
+					| `Batt_Events		[ElementEvents]	
 
-:: BodyTag 	= A 			[A_Attr] [BodyTag]			// link ancor <a></a>
-			| Abbr 			[Std_Attr] String			// abbreviation <abbr></abbr>
-			| Acronym		[Std_Attr] String			// acronym <acronym></acronym>
-			| Address		[Std_Attr] String			// address <address></address>
-			| Applet		[Applet_Attr] String		// applet <applet></applet>
-			| Area			[Area_Attr]					// link area in an image <area> ALWAYS NESTED INSIDE A <map> TAG
-			| B  			[Std_Attr] String			// bold <b></b>
-			| Bdo  			[Std_Attr] String			// direction of text <bdo></bdo>
-			| Big  			[Std_Attr] String			// big text <big></big>
-			| Blockquote  	[Block_Attr] String			// start of a long quotation <blockquote></blockquote>
-			| Br  										// single line break <br>
-			| Button 		[Button_Attr] String		// push button <button></button>		
-			| Caption		[Caption_Attr] String		// Table caption <caption></caption>			
-			| Center		[Std_Attr] String			// centered text <center></center>			
-			| Cite			[Std_Attr] String 			// citation <cite></cite>			
-			| Code			[Std_Attr] String 			// computer code text <code></code>			
-			| Comment		String 						// comment text <!-- text -->
-			| Col			[Col_Attr]					// attribute values for one or more columns in a table <col></col>
-			| Colgroup		[Col_Attr]					// group of table columns <colgroup></colgroup>
-			| Dd			[Std_Attr] [BodyTag]		// description of a term in a definition list <dd></dd>			
-			| Del			[Del_Attr] String 			// deleted text <del></del>			
-			| Dfn	 		[Std_Attr] String			// definition <dfn></dfn>	
-			| Dir			[Std_Attr] [BodyTag]		// directory list <dir></dir>			
-			| Div			[Div_Attr] [BodyTag]		// section in a document <div></div>			
-			| Dl			[Std_Attr] [BodyTag]		// definition list <dl></dl>			
-			| Dt			[Std_Attr] [BodyTag]		// definition term <dt></dt>			
-			| Em			[Std_Attr] String 			// emphasized text <em></em>			
-			| Fieldset		[Std_Attr] [BodyTag]		// fieldset element <fieldset></fieldset>
-			| Font			[Font_Attr] [BodyTag]		// font <font></font>
-			| Form 			[Form_Attr] [BodyTag] 		// form <form></form>
-			| H1	 		[Hnum_Attr] String			// header 1 <h1></h1>
-			| H2 			[Hnum_Attr] String			// header 2 <h2></h2>
-			| H3 			[Hnum_Attr] String			// header 3 <h3></h3>
-			| H4	 		[Hnum_Attr] String			// header 4 <h4></h4>
-			| H5 			[Hnum_Attr] String			// header 5 <h5></h5>
-			| H6 			[Hnum_Attr] String			// header 6 <h6></h6>			
-			| Hr	 		[Hr_Attr]					// horizontal rule <hr>
-			| I 			[Std_Attr] String			// italic text <i></i>
-			| Iframe		[Iframe_Attr]				// iframe <iframe></iframe>
-			| Img	 		[Image_Attr]				// image <img>
-			| Input	 		[Input_Attr] String			// inputs <input>
-			| Ins 			[Ins_Attr] String			// inserted text <ins></ins>
-			| Kbd  			[Std_Attr] String			// keyboard text <kbd></kbd>
-			| Label			[Label_Attr] String			// label for a control <label></label>
-			| Legend		[Legend_Attr] String		// legend for a fieldset <legend></legend>
-			| Li			[Li_Attr] [BodyTag]			// options in lists <li></li>
-			| Map 			[Map_Attr] [BodyTag]		// map <map></map>
-			| Menu 			[Std_Attr] [BodyTag]		// menu list <menu></menu>
-			| Noscript		[Standard_Attr]	String		// you can't see scripts <noscript></noscript>
-			| Body_Object 	[Object_Attr] [Param]		// insert an object <object></object>
-			| Ol	 		[Ol_Attr] [BodyTag]			// ordered list <ol></ol>
-			| P  			[P_Attr] [BodyTag]			// paragraph <p></p>
-			| Pre 			[Pre_Attr] [BodyTag]		// preformatted text <pre></pre>
-			| Q				[Q_Attr] String				// short quotation <q></q>
-			| S	 			[Std_Attr] String			// strikethrough text <s></s>
-			| Samp	 		[Std_Attr] String			// Sample computer code <samp></samp>
-			| Script		[Script_Attr] Script		// script <script></script>
-			| Select 		[Select_Attr] [Option]		// select <select></select>
-			| Small 		[Std_Attr] String 			// smaller <small></small>
-			| Span			[Std_Attr] [BodyTag]		// section in a document <span></span>
-			| Strike		[Std_Attr] String			// strikethrough text <strike></strike>
-			| Strong		[Std_Attr] String			// strong emphasized text <strong></strong>
-			| Sub	 		[Std_Attr] String			// subscript text <sub></sub>
-			| Sup			[Std_Attr] String			// superscript text <sup></sup>
-			| Table			[Table_Attr] [BodyTag]  	// table <table></table>
-			| TBody 		[T_Attr] [BodyTag]			// body of a table <tbody></tbody>
-			| Td			[Td_Attr] [BodyTag]			// table cell <td></td>
-			| Textarea		[TxtA_Attr] String			// textarea <textarea></textarea>
-			| TFoot			[T_Attr] [BodyTag]			// foot of a table <tfoot></tfoot>
-			| Th	 		[Td_Attr] String			// table header cell in a table <th></th>
-			| THead			[T_Attr] [BodyTag]			// header of a table <thead></thead>
-			| Tr			[Tr_Attr] [BodyTag]			// table row <tr></tr>
-			| Tt		 	[Std_Attr] String 			// teletyped text <tt></tt>
-			| Txt		 	String 						// plain text
-			| U				[Std_Attr] String			// underlined text <u></u>
-			| Ul	 		[Ul_Attr] [BodyTag]			// unordered list <ul></ul>
-			| Var			[Std_Attr] String			// variable text <var></var>
-
-			| STable		[Table_Attr] [[BodyTag]]	// simple table used for Clean forms
-			| BodyTag		[BodyTag]					// improves flexibility for code generation
-			| EmptyBody									// same 
+:: BodyTag			= A 				[A_Attr] [BodyTag]			// link ancor <a></a>
+					| Abbr 				[Std_Attr] String			// abbreviation <abbr></abbr>
+					| Acronym			[Std_Attr] String			// acronym <acronym></acronym>
+					| Address			[Std_Attr] String			// address <address></address>
+					| Applet			[Applet_Attr] String		// applet <applet></applet>
+					| Area				[Area_Attr]					// link area in an image <area> ALWAYS NESTED INSIDE A <map> TAG
+					| B  				[Std_Attr] String			// bold <b></b>
+					| Bdo	  			[Std_Attr] String			// direction of text <bdo></bdo>
+					| Big  				[Std_Attr] String			// big text <big></big>
+					| Blockquote	  	[Block_Attr] String			// start of a long quotation <blockquote></blockquote>
+					| Br  											// single line break <br>
+					| Button 			[Button_Attr] String		// push button <button></button>		
+					| Caption			[Caption_Attr] String		// Table caption <caption></caption>			
+					| Center			[Std_Attr] String			// centered text <center></center>			
+					| Cite				[Std_Attr] String 			// citation <cite></cite>			
+					| Code				[Std_Attr] String 			// computer code text <code></code>			
+					| Comment			String 						// comment text <!-- text -->
+					| Col				[Col_Attr]					// attribute values for one or more columns in a table <col></col>
+					| Colgroup			[Col_Attr]					// group of table columns <colgroup></colgroup>
+					| Dd				[Std_Attr] [BodyTag]		// description of a term in a definition list <dd></dd>			
+					| Del				[Del_Attr] String 			// deleted text <del></del>			
+					| Dfn		 		[Std_Attr] String			// definition <dfn></dfn>	
+					| Dir				[Std_Attr] [BodyTag]		// directory list <dir></dir>			
+					| Div				[Div_Attr] [BodyTag]		// section in a document <div></div>			
+					| Dl				[Std_Attr] [BodyTag]		// definition list <dl></dl>			
+					| Dt				[Std_Attr] [BodyTag]		// definition term <dt></dt>			
+					| Em				[Std_Attr] String 			// emphasized text <em></em>			
+					| Fieldset			[Std_Attr] [BodyTag]		// fieldset element <fieldset></fieldset>
+					| Font				[Font_Attr] [BodyTag]		// font <font></font>
+					| Form 				[Form_Attr] [BodyTag] 		// form <form></form>
+					| H1		 		[Hnum_Attr] String			// header 1 <h1></h1>
+					| H2 				[Hnum_Attr] String			// header 2 <h2></h2>
+					| H3 				[Hnum_Attr] String			// header 3 <h3></h3>
+					| H4		 		[Hnum_Attr] String			// header 4 <h4></h4>
+					| H5	 			[Hnum_Attr] String			// header 5 <h5></h5>
+					| H6	 			[Hnum_Attr] String			// header 6 <h6></h6>			
+					| Hr	 			[Hr_Attr]					// horizontal rule <hr>
+					| I 				[Std_Attr] String			// italic text <i></i>
+					| Iframe			[Iframe_Attr]				// iframe <iframe></iframe>
+					| Img		 		[Image_Attr]				// image <img>
+					| Input	 			[Input_Attr] String			// inputs <input>
+					| Ins 				[Ins_Attr] String			// inserted text <ins></ins>
+					| Kbd  				[Std_Attr] String			// keyboard text <kbd></kbd>
+					| Label				[Label_Attr] String			// label for a control <label></label>
+					| Legend			[Legend_Attr] String		// legend for a fieldset <legend></legend>
+					| Li				[Li_Attr] [BodyTag]			// options in lists <li></li>
+					| Map 				[Map_Attr] [BodyTag]		// map <map></map>
+					| Menu	 			[Std_Attr] [BodyTag]		// menu list <menu></menu>
+					| Noscript			[Standard_Attr]	String		// you can't see scripts <noscript></noscript>
+					| Body_Object	 	[Object_Attr] [Param]		// insert an object <object></object>
+					| Ol		 		[Ol_Attr] [BodyTag]			// ordered list <ol></ol>
+					| P  				[P_Attr] [BodyTag]			// paragraph <p></p>
+					| Pre 				[Pre_Attr] [BodyTag]		// preformatted text <pre></pre>
+					| Q					[Q_Attr] String				// short quotation <q></q>
+					| S	 				[Std_Attr] String			// strikethrough text <s></s>
+					| Samp	 			[Std_Attr] String			// Sample computer code <samp></samp>
+					| Script			[Script_Attr] Script		// script <script></script>
+					| Select	 		[Select_Attr] [Option]		// select <select></select>
+					| Small 			[Std_Attr] String 			// smaller <small></small>
+					| Span				[Std_Attr] [BodyTag]		// section in a document <span></span>
+					| Strike			[Std_Attr] String			// strikethrough text <strike></strike>
+					| Strong			[Std_Attr] String			// strong emphasized text <strong></strong>
+					| Sub	 			[Std_Attr] String			// subscript text <sub></sub>
+					| Sup				[Std_Attr] String			// superscript text <sup></sup>
+					| Table				[Table_Attr] [BodyTag]  	// table <table></table>
+					| TBody 			[T_Attr] [BodyTag]			// body of a table <tbody></tbody>
+					| Td				[Td_Attr] [BodyTag]			// table cell <td></td>
+					| Textarea			[TxtA_Attr] String			// textarea <textarea></textarea>
+					| TFoot				[T_Attr] [BodyTag]			// foot of a table <tfoot></tfoot>
+					| Th	 			[Td_Attr] String			// table header cell in a table <th></th>
+					| THead				[T_Attr] [BodyTag]			// header of a table <thead></thead>
+					| Tr				[Tr_Attr] [BodyTag]			// table row <tr></tr>
+					| Tt			 	[Std_Attr] String 			// teletyped text <tt></tt>
+					| Txt		 		String 						// plain text
+					| U					[Std_Attr] String			// underlined text <u></u>
+					| Ul		 		[Ul_Attr] [BodyTag]			// unordered list <ul></ul>
+					| Var				[Std_Attr] String			// variable text <var></var>
+		
+					| STable			[Table_Attr] [[BodyTag]]	// simple table used for Clean forms
+					| BodyTag			[BodyTag]					// improves flexibility for code generation
+					| EmptyBody									// same 
 									
 //Order by type name
-:: A_Attr = Lnk_Href 		Url				//target URL of the link
-		| Lnk_Target 		TargetOption	//where to open the target URL
-		| Lnk_Charset		String			//character encoding of the target URL
-		| Lnk_Coords		String  		//coordinates appropriate to the shape attribute to define a region of an image for image maps
-		| Lnk_Hreflang		String			//base language of the target URL
-		| Lnk_Name			String			//names an anchor. Use this attribute to create a bookmark in a document
-		| Lnk_Rel			DocRelation		//relationship between the current document and the target URL
-		| Lnk_Rev			DocRelation		//relationship between the target URL and the current document
-		| Lnk_Shape			ShapeOption		//type of region to be defined for mapping in the current area tag
-		| Lnk_Type			String			//MIME type of the target URL
-		| `Lnk_Std			[Standard_Attr]
-		| `Lnk_Events		[ElementEvents]
+:: A_Attr			= Lnk_Href 			Url				//target URL of the link
+					| Lnk_Target 		TargetOption	//where to open the target URL
+					| Lnk_Charset		String			//character encoding of the target URL
+					| Lnk_Coords		String  		//coordinates appropriate to the shape attribute to define a region of an image for image maps
+					| Lnk_Hreflang		String			//base language of the target URL
+					| Lnk_Name			String			//names an anchor. Use this attribute to create a bookmark in a document
+					| Lnk_Rel			DocRelation		//relationship between the current document and the target URL
+					| Lnk_Rev			DocRelation		//relationship between the target URL and the current document
+					| Lnk_Shape			ShapeOption		//type of region to be defined for mapping in the current area tag
+					| Lnk_Type			String			//MIME type of the target URL
+					| `Lnk_Std			[Standard_Attr]
+					| `Lnk_Events		[ElementEvents]
 
-:: AlignTxt  = Aln_Left 
-			| Aln_Right 
-			| Aln_Center
-			| Aln_Justify
-			| Aln_Char
+:: AlignTxt			= Aln_Left 
+					| Aln_Right 
+					| Aln_Center
+					| Aln_Justify
+					| Aln_Char
 
-:: AlignObj = Alo_Left 
-			| Alo_Right 
-			| Alo_Top
-			| Alo_Bottom
-			| Alo_Middle
-			| Alo_Baseline
-			| Alo_Texttop
-			| Alo_Absmiddle
-			| Alo_Absbottom
+:: AlignObj			= Alo_Left 
+					| Alo_Right 
+					| Alo_Top
+					| Alo_Bottom
+					| Alo_Middle
+					| Alo_Baseline
+					| Alo_Texttop
+					| Alo_Absmiddle
+					| Alo_Absbottom
 
-:: Applet_Attr = Apl_Height 		Int				//Height of the applet
-				| Apl_Width 		Int				//Width of the applet
-				| Apl_Align			AlignObj		//Text Aligment around the applet
-				| Apl_Alt			String  		//Alternate text
-				| Apl_Archive		Url				//A URL to the applet
-				| Apl_Code			Url				//A URL that points to the class of the applet
-				| Apl_Codebase		Url				//Indicates the base URL of the applet 
-				| Apl_Hspace		Int				//Horizontal spacing around the applet
-				| Apl_Name			UniqueName		//Unique name of the applet(to use in scripts)
-				| Apl_Object		String			//Name of the resource that contains a serialized representation of the applet
-				| Apl_Title			String			//Additional information to be displayed in tool tip
-				| Apl_Vspace		Int				//Vertical spacing around the applet
-				| `Apl_Std			[Standard_Attr]
-				| `Apl_Events		[ElementEvents]
+:: Applet_Attr		= Apl_Height 		Int				//Height of the applet
+					| Apl_Width 		Int				//Width of the applet
+					| Apl_Align			AlignObj		//Text Aligment around the applet
+					| Apl_Alt			String  		//Alternate text
+					| Apl_Archive		Url				//A URL to the applet
+					| Apl_Code			Url				//A URL that points to the class of the applet
+					| Apl_Codebase		Url				//Indicates the base URL of the applet 
+					| Apl_Hspace		Int				//Horizontal spacing around the applet
+					| Apl_Name			UniqueName		//Unique name of the applet(to use in scripts)
+					| Apl_Object		String			//Name of the resource that contains a serialized representation of the applet
+					| Apl_Title			String			//Additional information to be displayed in tool tip
+					| Apl_Vspace		Int				//Vertical spacing around the applet
+					| `Apl_Std			[Standard_Attr]
+					| `Apl_Events		[ElementEvents]
 
-:: Area_Attr = Are_Alt	 		String			//Alternate text
-			| Are_Coords 		String			//Coordinates of the clickable area
-			| Are_Href			Url				//Target URL of the area
-			| Are_Nohref		BoolValue		//Excludes an area from the image map
-			| Are_Shape			ShapeOption		//Shape of the area
-			| Are_Target		TargetOption	//Where to open the target URL
-			| `Are_Std			[Standard_Attr]
-			| `Are_Events		[ElementEvents]
+:: Area_Attr		= Are_Alt	 		String			//Alternate text
+					| Are_Coords 		String			//Coordinates of the clickable area
+					| Are_Href			Url				//Target URL of the area
+					| Are_Nohref		BoolValue		//Excludes an area from the image map
+					| Are_Shape			ShapeOption		//Shape of the area
+					| Are_Target		TargetOption	//Where to open the target URL
+					| `Are_Std			[Standard_Attr]
+					| `Are_Events		[ElementEvents]
 
-:: BdoTxtDir = Bdir_Dir TxtDir
+:: BdoTxtDir		= Bdir_Dir TxtDir
 
-:: Block_Attr = Blk_Cite	Url				//URL of the quote
-			| `Blk_Std		[Standard_Attr]
-			| `Blk_Events	[ElementEvents]
+:: Block_Attr		= Blk_Cite			Url				//URL of the quote
+					| `Blk_Std			[Standard_Attr]
+					| `Blk_Events		[ElementEvents]
 
-:: BoolValue = True
-			| False
+:: BoolValue		= True
+					| False
 
-:: Button_Attr = Btn_Disabled					//Disables the button
-				| Btn_Name		String			//Unique name for the button
-				| Btn_Type		Button_Type		//The type of button
-				| Btn_Value		String			//Initial value for the button.
-				| `Btn_Std		[Standard_Attr]
-				| `Btn_Events	[ElementEvents]
+:: Button_Attr		= Btn_Disabled					//Disables the button
+					| Btn_Name		String			//Unique name for the button
+					| Btn_Type		Button_Type		//The type of button
+					| Btn_Value		String			//Initial value for the button.
+					| `Btn_Std		[Standard_Attr]
+					| `Btn_Events	[ElementEvents]
 
-:: Button_Type = Btn_Button
-				| Btn_Submit
-				| Btn_Reset
+:: Button_Type		= Btn_Button
+					| Btn_Submit
+					| Btn_Reset
 
-:: Caption_Attr = Cap_Aling		AlignObj		//how to align the caption
-				| `Cap_Std		[Standard_Attr]
-				| `Cap_Events	[ElementEvents]
+:: Caption_Attr		= Cap_Aling		AlignObj		//how to align the caption
+					| `Cap_Std		[Standard_Attr]
+					| `Cap_Events	[ElementEvents]
 
-:: Checked	= Checked
+:: Checked			= Checked
 
-:: Col_Attr = Col_Aling		AlignTxt 		//horizontal alignment of the content in the table cell
-			| Col_Char		Char			//character to use to align text on
-			| Col_Charoff	Int				//alignment offset to the first character to align on
-			| Col_Span		Int				//number of columns the <col> should span
-			| Col_VAlign	AlignObj		//vertical alignment of the content in the table cell
-			| Col_Width		Int				//width of the column
-			| `Col_Std		[Standard_Attr]
-			| `Col_Events	[ElementEvents]
+:: Col_Attr			= Col_Aling		AlignTxt 		//horizontal alignment of the content in the table cell
+					| Col_Char		Char			//character to use to align text on
+					| Col_Charoff	Int				//alignment offset to the first character to align on
+					| Col_Span		Int				//number of columns the <col> should span
+					| Col_VAlign	AlignObj		//vertical alignment of the content in the table cell
+					| Col_Width		Int				//width of the column
+					| `Col_Std		[Standard_Attr]
+					| `Col_Events	[ElementEvents]
 
-:: ColorOption = `Colorname		Colorname
-				| `HexColor 	Hexnum			//"#FFFFFF"
-				| `RGBColor 	RGBColor		//"RGB(255,255,255)"
+:: ColorOption		= `Colorname		Colorname
+					| `HexColor 	Hexnum			//"#FFFFFF"
+					| `RGBColor 	RGBColor		//"RGB(255,255,255)"
 			
-:: Colorname = Black	//"#000000"
-			| Silver	//"#C0C0C0"
-			| Gray 		//"#808080"
-			| White		//"#FFFFFF"
-			| Maroon	//"#800000"
-			| Red		//"#FF0000"
-			| Purple	//"#800080"
-			| Fuchsia	//"#FF00FF"
-			| Green		//"#008000" 
-			| Lime		//"#00FF00"
-			| Olive		//"#808000" 
-			| Yellow	//"#FFFF00"
-			| Navy 		//"#000080" 
-			| Blue		//"#0000FF"
-			| Teal		//"#008080" 
-			| Aqua		//"#00FFFF"
+:: Colorname		= Black	//"#000000"
+					| Silver	//"#C0C0C0"
+					| Gray 		//"#808080"
+					| White		//"#FFFFFF"
+					| Maroon	//"#800000"
+					| Red		//"#FF0000"
+					| Purple	//"#800080"
+					| Fuchsia	//"#FF00FF"
+					| Green		//"#008000" 
+					| Lime		//"#00FF00"
+					| Olive		//"#808000" 
+					| Yellow	//"#FFFF00"
+					| Navy 		//"#000080" 
+					| Blue		//"#0000FF"
+					| Teal		//"#008080" 
+					| Aqua		//"#00FFFF"
 
-:: Del_Attr = Del_Cite		Url				//URL to another document which explains why the text was deleted or inserted
-			| Del_Datetime	String			//date and time the text was deleted
-			| `Del_Std		[Standard_Attr]
-			| `Del_Events	[ElementEvents]
+:: Del_Attr			= Del_Cite		Url				//URL to another document which explains why the text was deleted or inserted
+					| Del_Datetime	String			//date and time the text was deleted
+					| `Del_Std		[Standard_Attr]
+					| `Del_Events	[ElementEvents]
 
-:: Div_Attr = Div_Align		AlignObj		//how to align the text in the div element
-			| `Div_Std		[Standard_Attr]
-			| `Div_Events	[ElementEvents]
+:: Div_Attr			= Div_Align		AlignObj		//how to align the text in the div element
+					| `Div_Std		[Standard_Attr]
+					| `Div_Events	[ElementEvents]
 
-:: Disabled = Disabled
+:: Disabled			= Disabled
 
-:: DocRelation = Docr_Alternate
-			| Docr_Designates
-			| Docr_Stylesheet
-			| Docr_Start
-			| Docr_Next
-			| Docr_Prev
-			| Docr_Contents
-			| Docr_Index
-			| Docr_Glossary
-			| Docr_Copyright
-			| Docr_Chapter
-			| Docr_Section
-			| Docr_Subsection
-			| Docr_Appendix
-			| Docr_Help
-			| Docr_Bookmark
+:: DocRelation		= Docr_Alternate
+					| Docr_Designates
+					| Docr_Stylesheet
+					| Docr_Start
+					| Docr_Next
+					| Docr_Prev
+					| Docr_Contents
+					| Docr_Index
+					| Docr_Glossary
+					| Docr_Copyright
+					| Docr_Chapter
+					| Docr_Section
+					| Docr_Subsection
+					| Docr_Appendix
+					| Docr_Help
+					| Docr_Bookmark
 		
-:: ElementEvents
-			= OnChange		Script		// FormElementEvents - run when element changes
-			| OnSubmit		Script		// FormElementEvents - run when form submitted
-			| OnReset		Script		// FormElementEvents - run when form is reset
-			| OnSelect		Script		// FormElementEvents - run when selected
-			| OnBlur		Script		// FormElementEvents - run when element loses focus
-			| OnFocus		Script		// FormElementEvents - run when element gets focus
-			| OnKeyDown		Script		// KeyboardEvents - run when key pressed
-			| OnKeyPress	Script		// KeyboardEvents - run when key pressed and released
-			| OnKeyUp		Script		// KeyboardEvents - run when key released
-			| OnClick		Script		// MouseEvents - run when mouse clicked
-			| OnDClick		Script		// MouseEvents - run when mouse doubleclicked
-			| OnMouseDown	Script		// MouseEvents - run when mouse button pressed
-			| OnMouseMove	Script		// MouseEvents - run when mouse pointer moves
-			| OnMouseOver	Script		// MouseEvents - run when mouse pointer moves over an element
-			| OnMouseOut	Script		// MouseEvents - run when mouse pointer moves out of an element
-			| OnMouseUp		Script		// MouseEvents - run when mouse button is released
-			| OnLoad		Script		// WindowEvents - run when the window is loaded
-			| OnUnload		Script		// WindowEvents - run when the window is unloaded
+:: ElementEvents	= OnChange		Script		// FormElementEvents - run when element changes
+					| OnSubmit		Script		// FormElementEvents - run when form submitted
+					| OnReset		Script		// FormElementEvents - run when form is reset
+					| OnSelect		Script		// FormElementEvents - run when selected
+					| OnBlur		Script		// FormElementEvents - run when element loses focus
+					| OnFocus		Script		// FormElementEvents - run when element gets focus
+					| OnKeyDown		Script		// KeyboardEvents - run when key pressed
+					| OnKeyPress	Script		// KeyboardEvents - run when key pressed and released
+					| OnKeyUp		Script		// KeyboardEvents - run when key released
+					| OnClick		Script		// MouseEvents - run when mouse clicked
+					| OnDClick		Script		// MouseEvents - run when mouse doubleclicked
+					| OnMouseDown	Script		// MouseEvents - run when mouse button pressed
+					| OnMouseMove	Script		// MouseEvents - run when mouse pointer moves
+					| OnMouseOver	Script		// MouseEvents - run when mouse pointer moves over an element
+					| OnMouseOut	Script		// MouseEvents - run when mouse pointer moves out of an element
+					| OnMouseUp		Script		// MouseEvents - run when mouse button is released
+					| OnLoad		Script		// WindowEvents - run when the window is loaded
+					| OnUnload		Script		// WindowEvents - run when the window is unloaded
 
-:: Font_Attr = Fnt_Size		Int				//size of the text 
-			| Fnt_Face		String			//font of the text 
-			| Fnt_Color		ColorOption		//color of the text
-			| `Fnt_Std		[Standard_Attr]
+:: Font_Attr		= Fnt_Size		Int				//size of the text 
+					| Fnt_Face		String			//font of the text 
+					| Fnt_Color		ColorOption		//color of the text
+					| `Fnt_Std		[Standard_Attr]
 			
-:: Form_Attr = Frm_Action 			Url				//URL that defines where to send the data when the submit button is pushed
-			| Frm_Accept			String			//comma separated list of content types that the server that processes this form will handle correctly
-			| Frm_AcceptCharset		String			//comma separated list of possible character sets for the form data
-			| Frm_Enctype	 		String			//mime type used to encode the content of the form
-			| Frm_Method 			GetOrPost		//HTTP method for sending data to the action URL. Default is get
-			| Frm_Name 				UniqueName		//unique name for the form
-			| Frm_Target 			TargetOption	//where to open the target URL	
-			| `Frm_Std				[Standard_Attr]
-			| `Frm_Events			[ElementEvents]
+:: Form_Attr		= Frm_Action 			Url				//URL that defines where to send the data when the submit button is pushed
+					| Frm_Accept			String			//comma separated list of content types that the server that processes this form will handle correctly
+					| Frm_AcceptCharset		String			//comma separated list of possible character sets for the form data
+					| Frm_Enctype	 		String			//mime type used to encode the content of the form
+					| Frm_Method 			GetOrPost		//HTTP method for sending data to the action URL. Default is get
+					| Frm_Name 				UniqueName		//unique name for the form
+					| Frm_Target 			TargetOption	//where to open the target URL	
+					| `Frm_Std				[Standard_Attr]
+					| `Frm_Events			[ElementEvents]
 
-:: FrameOption = Frm_Void
-				| Frm_Above
-				| Frm_Below
-				| Frm_Hsides
-				| Frm_Lhs
-				| Frm_Rhs
-				| Frm_Vsides
-				| Frm_Box
-				| Frm_Border
+:: FrameOption		= Frm_Void
+					| Frm_Above
+					| Frm_Below
+					| Frm_Hsides
+					| Frm_Lhs
+					| Frm_Rhs
+					| Frm_Vsides
+					| Frm_Box
+					| Frm_Border
 
-:: GetOrPost = Get 
-			|  Post
+:: GetOrPost		= Get 
+					| Post
 			
-:: Hexnum = Hexnum HN HN HN HN HN HN
+:: Hexnum			= Hexnum HN HN HN HN HN HN
 
-:: HN = H_0 | H_1 | H_2 | H_3 | H_4 | H_5 | H_6 | H_7 | H_8 | H_9 
-		| H_A | H_B | H_C | H_D | H_E | H_F
+:: HN				= H_0 | H_1 | H_2 | H_3 | H_4 | H_5 | H_6 | H_7 | H_8 | H_9 
+					| H_A | H_B | H_C | H_D | H_E | H_F
 
-:: Hnum_Attr = Hnum_Align 			AlignTxt		//alignment of the text in the header
-			| `Hnum_Std				[Standard_Attr]
-			| `Hnum_Events			[ElementEvents]
+:: Hnum_Attr		= Hnum_Align 			AlignTxt		//alignment of the text in the header
+					| `Hnum_Std				[Standard_Attr]
+					| `Hnum_Events			[ElementEvents]
 
-:: Hr_Attr = Hr_Align 			AlignTxt		//alignment of the horizontal rule
-			| Hr_Noshade						//set to true the rule should render in a solid color, when set to false the rule should render in a two-color "groove"
-			| Hr_Size			SizeOption		//Specifies the thickness (height) of the horizontal rule
-			| Hr_Width			SizeOption		//width of the horizontal rule
-			| `Hr_Std			[Standard_Attr]
-			| `Hr_Events		[ElementEvents]
+:: Hr_Attr			= Hr_Align 			AlignTxt		//alignment of the horizontal rule
+					| Hr_Noshade						//set to true the rule should render in a solid color, when set to false the rule should render in a two-color "groove"
+					| Hr_Size			SizeOption		//Specifies the thickness (height) of the horizontal rule
+					| Hr_Width			SizeOption		//width of the horizontal rule
+					| `Hr_Std			[Standard_Attr]
+					| `Hr_Events		[ElementEvents]
 
-:: Iframe_Attr = Ifa_Align			AlignObj			//align the iframe according to the surrounding text
-			| Ifa_Frameborder		Int					//display (1) or not (0) border around the iframe
-			| Ifa_Height			Int					//height of the iframe
-			| Ifa_Longdesc			Url					//URL to a long description of the contents 
-			| Ifa_Marginheight		Int					//top and bottom margins in the iframe
-			| Ifa_Marginwidth		Int					//left and right margins in the iframe
-			| Ifa_Name				UniqueName			//unique name for the frame 
-			| Ifa_Scrolling			ScrollingOption		//scrollbar
-			| Ifa_Src				Url					//URL of the file to show in the iframe
-			| Ifa_Width				Int					//width of the iframe
-			| `Ifa_Std				[Standard_Attr]
+:: Iframe_Attr		= Ifa_Align			AlignObj			//align the iframe according to the surrounding text
+					| Ifa_Frameborder	Int					//display (1) or not (0) border around the iframe
+					| Ifa_Height		Int					//height of the iframe
+					| Ifa_Longdesc		Url					//URL to a long description of the contents 
+					| Ifa_Marginheight	Int					//top and bottom margins in the iframe
+					| Ifa_Marginwidth	Int					//left and right margins in the iframe
+					| Ifa_Name			UniqueName			//unique name for the frame 
+					| Ifa_Scrolling		ScrollingOption		//scrollbar
+					| Ifa_Src			Url					//URL of the file to show in the iframe
+					| Ifa_Width			Int					//width of the iframe
+					| `Ifa_Std			[Standard_Attr]
 
 :: Image_Attr = Img_Align			AlignObj			//align the image according to the surrounding text
 			| Img_Alt				String				//short description of the image

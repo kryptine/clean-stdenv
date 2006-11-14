@@ -87,7 +87,7 @@ where
 DecodeHtmlStatesAndUpdate :: ServerKind (Maybe String) -> ([HtmlState],String,String)
 DecodeHtmlStatesAndUpdate serverkind args
 # (_,triplet,update,state) = DecodeArguments serverkind args
-= ([states \\states=:(id,_,_,nstate) <- DecodeHtmlStates state | id <> "" || nstate <> ""],triplet,update) // to be sure that no rubisch is passed on
+= ([states \\states=:(id,_,_,nstate) <- DecodeHtmlStates state | id <> "" || nstate <> ""],triplet,update) // to be sure that no rubbish is passed on
 
 // Parse and decode low level information obtained from server 
 // In case of using a php script and external server:

@@ -23,17 +23,13 @@ where
 :: GecCircuitChanged :== Bool
 
 
-instance Arrow GecCircuit
-where
-	arr :: (a -> b) -> GecCircuit a b
+instance Arrow GecCircuit where
 	arr fun = HGC fun`
 	where
 		fun` ((a,body),ch,hst) = ((fun a,body),ch,hst)
 
-	(>>>) infixr 1 :: (GecCircuit a b) (GecCircuit b c) -> GecCircuit a c
 	(>>>) (HGC gec_ab) (HGC gec_bc) = HGC (gec_bc o gec_ab)
 
-	first :: (GecCircuit a b) -> GecCircuit (a, c) (b, c)
 	first (HGC gec_ab) = HGC first`
 	where
 		first` (((a,c),prevbody),ch,hst)
@@ -61,13 +57,13 @@ where
 	# (store,hst) = mkStoreForm (Init,formid) fun hst
 	= ((store.value,[(formid.id,BodyTag store.form):prevbody]),ch||store.changed,hst)
 
-self :: (a -> a) (GecCircuit a a) -> GecCircuit a a
+self :: (a -> a) !(GecCircuit a a) -> GecCircuit a a
 self fun gecaa = feedback gecaa (arr fun)
 	
-feedback :: (GecCircuit a b) (GecCircuit b a) -> (GecCircuit a b)
+feedback :: !(GecCircuit a b) !(GecCircuit b a) -> (GecCircuit a b)
 feedback (HGC gec_ab) (HGC gec_ba) = HGC (gec_ab o gec_ba o gec_ab)
 
-loops :: (GecCircuit (a, b) (c, b)) -> GecCircuit a c |  iData b
+loops :: !(GecCircuit (a, b) (c, b)) -> GecCircuit a c |  iData b
 loops (HGC gec_abcb) = HGC loopForm
 where
 	loopForm ((aval,prevbody),ch,hst) 
@@ -75,13 +71,9 @@ where
 	# (((cval,bval),bodyac),ch,hst) = gec_abcb (((aval,bstore.value),prevbody),ch,hst)
 	# (bstore,hst) = mkStoreForm (Set,xsFormId "??" createDefault) (\_ -> bval) hst
 	= ((cval,bodyac),ch,hst)	
-	
-
-//self fun gecaa = feedback gecaa (arr fun)
 
 
-
-(`bindC`) infix 0 :: (GecCircuit a b) (b -> GecCircuit b c) -> (GecCircuit a c)
+(`bindC`) infix 0 :: !(GecCircuit a b) (b -> GecCircuit b c) -> (GecCircuit a c)
 (`bindC`) (HGC gecab) bgecbc = HGC binds
 where
 	binds ((a,abody),ach,hst)
@@ -89,7 +81,7 @@ where
 	# (HGC gecbc) 			= bgecbc b
 	= gecbc ((b,bbody ++ abody),ach||bch,hst) 
 
-(`bindCI`) infix 0 :: (GecCircuit a b) ((Form b) -> GecCircuit b c) -> (GecCircuit a c)
+(`bindCI`) infix 0 :: !(GecCircuit a b) ((Form b) -> GecCircuit b c) -> (GecCircuit a c)
 (`bindCI`) (HGC gecab) bgecbc = HGC binds
 where
 	binds ((a,abody),ach,hst)
@@ -97,7 +89,7 @@ where
 	# (HGC gecbc) 			= bgecbc {changed = bch, value = b, form = map snd bbody}
 	= gecbc ((b,bbody ++ abody),ach||bch,hst) 
 
-lift :: !(InIDataId a) (!(InIDataId a) !*HSt -> (!Form b,!*HSt)) -> (GecCircuit a b)
+lift :: !(InIDataId a) (!(InIDataId a) !*HSt -> (!Form b,!*HSt)) -> GecCircuit a b
 lift (Set,formid) fun = HGC fun`
 where
 	fun` ((a,body),ch,hst)
@@ -108,12 +100,3 @@ where
 	fun` ((a,body),ch,hst)
 	# (nb,hst) =  fun (Init, setFormId formid a) hst
 	= ((nb.value,[(formid.id,BodyTag nb.form):body]),ch||nb.changed,hst) 
-/*
-
-lift :: !(FormId a) (!(InIDataId a) !*HSt -> (!Form b,!*HSt)) -> (GecCircuit a b)
-lift formid fun = HGC fun`
-where
-	fun` ((a,body),ch,hst)
-	# (nb,hst) =  fun (setID formid a) hst
-	= ((nb.value,[(formid.id,BodyTag nb.form):body]),ch||nb.changed,hst) 
-*/

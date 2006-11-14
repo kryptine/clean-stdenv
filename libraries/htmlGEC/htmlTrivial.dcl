@@ -6,10 +6,10 @@ derive bimap Maybe, (,)
 
 // utility 
 
-mkString 	:: [Char] -> *String
-mkList 		:: String -> [Char]
+mkString		:: [Char] -> *String
+mkList			:: String -> [Char]
 
 //	Useful string concatenation function
-(<+++) infixl :: !String !a -> String | toString a
+(<+++) infixl	:: !String !a -> String | toString a
 
-isNil :: [a] -> Bool
+(??) infixl 9	:: ![a] !a -> Int | == a

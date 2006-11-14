@@ -12,8 +12,8 @@ import
 		,	htmlHandler			// the kernel module for iData creation and handling
 
 		,	htmlButtons			// basic collections of buttons, data types for lay-out	control	
-		,	htmlFormlib			// handy collection of advanced iData creating functions  
-		,	htmlRefFormlib		// handy collection of persistent idata maintaining sharing
+		,	htmlFormlib			// collection of advanced iData creating functions  
+		,	htmlRefFormlib		// collection of persistent idata maintaining sharing
 
 		,	htmlArrow			// arrow instantiations for iData forms
 
