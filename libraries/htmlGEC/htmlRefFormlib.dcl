@@ -10,7 +10,7 @@ import StdEnv, htmlHandler, htmlButtons
 instance == (Ref2 a)
 
 ref2EditForm 		:: !(InIDataId a) !(InIDataId (Ref2 a))  !*HSt -> (Form a,!*HSt) 					| iData a
-invokeRefEditor 	:: (!(InIDataId b) !*HSt -> (Form d,!*HSt)) (InIDataId b) !*HSt -> (Form b,!*HSt)
+invokeRefEditor 	:: !((InIDataId b) *HSt -> (Form d,*HSt)) (InIDataId b) !*HSt -> (Form b,!*HSt)
 
 universalRefEditor 	:: !Lifespan !(InIDataId (Ref2 a)) !(a -> Judgement)  !*HSt -> (Form a,!*HSt)   	| iData a
 

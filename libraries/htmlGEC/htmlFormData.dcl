@@ -119,7 +119,7 @@ reuseFormId :: !(FormId a) !d			-> FormId d		// reuse id for new type (only to b
 initID		:: !(FormId d)				-> InIDataId d	// (Init,FormId a)
 setID		:: !(FormId d) !d			-> InIDataId d	// (Set,FormId a)
 
-onMode 		:: !Mode a a a -> a							// choose arg depending on Edit, Display, NoForm
+onMode 		:: !Mode a a a -> a							// chose arg depending on Edit, Display, NoForm
 
 // manipulating initial values
 

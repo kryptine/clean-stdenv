@@ -23,7 +23,7 @@ ref2EditForm  (inita,formida) (_,{ival=Ref2 refname}) hst
 | refname == "" = mkEditForm (Init,reuseFormId formida createDefault) hst
 | otherwise     = mkEditForm (inita,{formida & id = refname}) hst
 
-invokeRefEditor :: (!(InIDataId b) !*HSt -> (Form d,!*HSt)) (InIDataId b) !*HSt -> (Form b,!*HSt)
+invokeRefEditor :: !((InIDataId b) *HSt -> (Form d,*HSt)) (InIDataId b) !*HSt -> (Form b,!*HSt)
 invokeRefEditor editor (init,formid) hst
 # (idata,hst)		= editor (init,formid) hst
 = ({idata & value = formid.ival},hst)

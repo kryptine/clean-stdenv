@@ -35,4 +35,4 @@ loops 			:: !(GecCircuit (a, b) (c, b)) -> GecCircuit a c 	|  iData b
 
 // to lift library functions to the circuit domain
 
-lift :: !(InIDataId a) (!(InIDataId a) !*HSt -> (!Form b,!*HSt)) -> GecCircuit a b
+lift :: !(InIDataId a) ((InIDataId a) *HSt -> (Form b,*HSt)) -> GecCircuit a b

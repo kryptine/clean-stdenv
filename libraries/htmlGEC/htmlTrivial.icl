@@ -6,11 +6,11 @@ derive bimap Maybe, (,)
 
 // converting strings to lists and backwards
 
-mkString :: [Char] -> *String
-mkString listofchar = {c \\ c <- listofchar }
+mkString	:: ![Char] -> *String
+mkString	listofchar	= {c \\ c <- listofchar }
 
-mkList :: String -> [Char]
-mkList string = [c \\ c <-: string ]
+mkList		:: !String -> [Char]
+mkList		string		= [c \\ c <-: string ]
 
 //	Useful string concatenation function
 (<+++) infixl :: !String !a -> String | toString a
@@ -22,3 +22,6 @@ mkList string = [c \\ c <-: string ]
 	| otherwise	= 1 + as??b
 (??) [] _
 	= -1
+
+const2 :: .a !.b -> .b
+const2 _ x = x

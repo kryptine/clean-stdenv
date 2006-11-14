@@ -89,7 +89,7 @@ where
 	# (HGC gecbc) 			= bgecbc {changed = bch, value = b, form = map snd bbody}
 	= gecbc ((b,bbody ++ abody),ach||bch,hst) 
 
-lift :: !(InIDataId a) (!(InIDataId a) !*HSt -> (!Form b,!*HSt)) -> GecCircuit a b
+lift :: !(InIDataId a) ((InIDataId a) *HSt -> (Form b,*HSt)) -> GecCircuit a b
 lift (Set,formid) fun = HGC fun`
 where
 	fun` ((a,body),ch,hst)
