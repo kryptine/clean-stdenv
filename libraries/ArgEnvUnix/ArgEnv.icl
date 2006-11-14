@@ -66,7 +66,7 @@ getCommandLineCount
 			ccall ArgEnvGetCommandLineCountC "-I"
 	}
 
-getCommandLineArgument n = IF_INT_64_OR_32 (getCommandLineArgument64 n) (getCommandLineArgument64 n)
+getCommandLineArgument n = IF_INT_64_OR_32 (getCommandLineArgument64 n) (getCommandLineArgument32 n)
 
 getCommandLineArgument64 :: !Int -> (!Int, !Int)
 getCommandLineArgument64 _
