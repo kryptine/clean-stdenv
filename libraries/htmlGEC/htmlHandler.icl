@@ -476,52 +476,52 @@ mkInput size (init,_) val _ hst=:{cntr}
 		
 toHtml :: a -> BodyTag | gForm {|*|} a
 toHtml a
-# (na,_)			= gForm{|*|} (Set,mkFormId "__toHtml" a <@ Display) (mkHSt emptyFormStates undef)
+# (na,_)						= gForm{|*|} (Set,mkFormId "__toHtml" a <@ Display) (mkHSt emptyFormStates undef)
 = BodyTag na.form
 
 toHtmlForm :: !(*HSt -> *(Form a,*HSt)) -> [BodyTag] | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a
 toHtmlForm anyform 
-# (na,hst)			= anyform (mkHSt emptyFormStates undef)
+# (na,hst)						= anyform (mkHSt emptyFormStates undef)
 = na.form
 
 toBody :: (Form a) -> BodyTag
-toBody form			= BodyTag form.form
+toBody form						= BodyTag form.form
 
 createDefault :: a | gUpd{|*|} a 
-createDefault		= fromJust (snd (gUpd {|*|} (UpdSearch (UpdC "Just") 0) Nothing))
+createDefault					= fromJust (snd (gUpd {|*|} (UpdSearch (UpdC "Just") 0) Nothing))
 derive gUpd Maybe
 
 setCntr :: InputId *HSt -> *HSt
-setCntr i hst		= {hst & cntr = i}
+setCntr i hst					= {hst & cntr = i}
 
 incrHSt :: Int !*HSt -> *HSt
-incrHSt i hst		= {hst & cntr = hst.cntr + i} // BUG ??????
+incrHSt i hst					= {hst & cntr = hst.cntr + i} // BUG ??????
 
 CntrHSt :: !*HSt -> (Int,*HSt)
-CntrHSt hst=:{cntr}	= (cntr,hst)
+CntrHSt hst=:{cntr}				= (cntr,hst)
 
 getChangedId :: !*HSt -> (String,!*HSt)	// id of form that has been changed by user
 getChangedId hst=:{states}
-# (id,states)		= getUpdateId states
+# (id,states)					= getUpdateId states
 = (id,{hst & states = states })
 
 // Enabling file IO on HSt
 
 instance FileSystem HSt where
 	fopen string int hst=:{world}
-		# (bool,file,world) = fopen string int world
+		# (bool,file,world)		= fopen string int world
 		= (bool,file,{hst & world = world})
 
 	fclose file hst=:{world}
-		# (bool,world) = fclose file world
+		# (bool,world)			= fclose file world
 		= (bool,{hst & world = world})
 
 	stdio hst=:{world}
-		# (file,world) = stdio world
+		# (file,world)			= stdio world
 		= (file,{hst & world = world})
 
 	sfopen string int hst=:{world}
-		# (bool,file,world) = sfopen string int world
+		# (bool,file,world)		= sfopen string int world
 		= (bool,file,{hst & world = world})
 
 // General access to the World environment on HSt:
@@ -539,5 +539,5 @@ accWorldHSt f hst=:{world}
 
 runUserApplication :: .(*HSt -> *(.a,*HSt)) *FormStates *NWorld -> *(.a,*FormStates,*NWorld)
 runUserApplication userpage states nworld
-# (html,{states,world})	= userpage (mkHSt states nworld)
+# (html,{states,world})			= userpage (mkHSt states nworld)
 = (html,states,world)

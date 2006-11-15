@@ -1,6 +1,6 @@
 definition module loginAdmin
 
-import StdEnv, StdMaybe, htmlRefFormlib
+import StdMaybe, htmlRefFormlib, htmlButtons
 
 :: Account s			= 	{ login			:: Login		// login info		
 							, state			:: s			// state 

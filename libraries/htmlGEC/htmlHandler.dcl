@@ -24,7 +24,7 @@ derive bimap Form, FormId
 // doHtml main wrapper for generating & handling of a Html form
 
 doHtml 				:: !.(*HSt -> (Html,!*HSt)) !*World -> *World  					// use this application with some external server and php
-doHtmlServer 		:: ! (*HSt -> (Html,!*HSt)) !*World -> *World 					// use this application with the build-in Clean server: http://localhost/clean
+doHtmlServer 		:: ! (*HSt -> (Html,!*HSt)) !*World -> *World 					// use this application with the built-in Clean server: http://localhost/clean
 
 // mkViewForm is the *swiss army knife* function creating stateful interactive forms with a view v of data d.
 // Make sure that all editors have a unique identifier!

@@ -1,6 +1,6 @@
 implementation module loginAdmin
 
-import StdEnv, StdHtml, StdMaybe
+import StdHtml, StdMaybe
 
 instance == (Account s)
 where

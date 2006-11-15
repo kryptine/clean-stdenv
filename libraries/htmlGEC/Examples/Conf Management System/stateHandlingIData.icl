@@ -188,7 +188,7 @@ discussPapersPage account accounts hst
 # mbpaperrefinfo	= getPaperInfo selectedpaper accounts
 # (RefDiscussion (Ref2 name)) = (fromJust mbpaperrefinfo).discussion
 # (disclist,hst)	= universalDB (Init,storageOption,Discussion [],name) (\_ _ -> Ok) hst
-# (time,date,hst)	= getTimeAndDate hst
+# ((time,date),hst)	= getTimeAndDate hst
 # (newsubmit,newdiscf,hst)	
 					= mkSubStateForm (if pdfun.changed Set Init, nFormId "sh_dpp_adddisc" (TS 80 "")) disclist
 						(\s -> addItemTextInput (account.login.loginName) time date (toS s)) hst
@@ -226,22 +226,21 @@ where
 
 showPapersStatusPage :: !ConfAccount !ConfAccounts !*HSt -> ([BodyTag],!*HSt)
 showPapersStatusPage account accounts hst
-# (pdmenu,hst)		= mkEditForm   (Init,sFormId "sh_sPSP_pdm" Submitted) hst // to select status of papers you want to see
-# (allireports,hst)	= getAllMyReports account accounts hst	//[(Int,[(Person, Maybe Report)])]
-# allpapernrs		= map fst allireports 
-# selpaperinfo		= [(nr,paperinfo.status) 	\\ nr <- allpapernrs 
+# (pdmenu,hst)			= mkEditForm   (Init,sFormId "sh_sPSP_pdm" Submitted) hst // to select status of papers you want to see
+# (allireports,hst)		= getAllMyReports account accounts hst	//[(Int,[(Person, Maybe Report)])]
+# allpapernrs			= map fst allireports 
+# selpaperinfo			= [(nr,paperinfo.status) 	\\ nr <- allpapernrs 
 												, (Just paperinfo) <- [getPaperInfo nr accounts]
 												| paperinfo.status == pdmenu.value] 	
-# selpapernrs		= map fst selpaperinfo	// the number of the papers that have the selected status
+# selpapernrs			= map fst selpaperinfo	// the number of the papers that have the selected status
 
-| isNil selpapernrs	= ([Txt "Show status of all papers which are:",Br,Br] ++ pdmenu.form ++ [Br, Txt "There are no papers that obey these criteria.",Br],hst)
-# selreports		= [(nr,map snd persreport) \\ (nr,persreport) <- allireports | isMember nr selpapernrs]
-# selsummary		= [("Paper nr: " <+++ nr,	[ (report.recommendation,report.familiarity)
-							\\ (Just report) <- reports
-							]
-						) 
-						\\ (nr,reports) <- selreports]
-# (sumlist,hst)		= vertlistForm (Set,tdFormId "sh_sPSP_summ" selsummary) hst
+| isEmpty selpapernrs	= ([Txt "Show status of all papers which are:",Br,Br] ++ pdmenu.form ++ [Br, Txt "There are no papers that obey these criteria.",Br],hst)
+# selreports			= [(nr,map snd persreport) \\ (nr,persreport) <- allireports | isMember nr selpapernrs]
+# selsummary			= [("Paper nr: " <+++ nr,	[ (report.recommendation,report.familiarity)
+													\\ (Just report) <- reports
+						  							]) 
+						  \\ (nr,reports) <- selreports]
+# (sumlist,hst)			= vertlistForm (Set,tdFormId "sh_sPSP_summ" selsummary) hst
 = ([Txt "List all papers which are:",Br,Br] ++ pdmenu.form ++ [Br] ++ sumlist.form,hst)
 
 // utility

@@ -1,12 +1,10 @@
 implementation module htmlStyleDef
 
-import StdEnv, ArgEnv
 import PrintUtil, htmlDataDef
-import StdGeneric
 
 //gHpr{|HtmlStyle|} prev (CSS styles)	= prev <+ styles 
 
-gHpr{|Style|} prev (Style name attr) = prev <+> styleCmnd name attr
+gHpr{|Style|}    prev (Style name attr)			= prev <+> styleCmnd name attr
 
 //Background Style
 gHpr{|StyleOpt|} prev (Background opt)		  	= prev <+> styleAttrCmnd "background"				opt
@@ -163,46 +161,46 @@ derive gHpr VisibOpt
 derive gHpr WhiteSpaceOpt
 derive gHpr ZIndexOpt
 
-gHpr{|ClipOpt|} prev Cli_Auto							=	prev  <+ " auto"
-gHpr{|ClipOpt|} prev (Cli_Shape val1 val2 val3 val4)	=	prev  <+ " " <+ val1 <+ " " <+ val2 <+ " " <+ val3 <+ " " <+ val4
+gHpr{|ClipOpt|}      prev Cli_Auto							= prev  <+ " auto"
+gHpr{|ClipOpt|}      prev (Cli_Shape val1 val2 val3 val4)	= prev  <+ " " <+ val1 <+ " " <+ val2 <+ " " <+ val3 <+ " " <+ val4
 
-gHpr{|CounterOpt|} prev (Cto_Ident id)			=	prev  <+ " " <+ id
-gHpr{|CounterOpt|} prev (Cto_IdentInt id val)	=	prev  <+ " " <+ id <+ " " <+ val
-gHpr{|CounterOpt|} prev Cto_None				=	prev  <+ " none"
+gHpr{|CounterOpt|}   prev (Cto_Ident id)					= prev  <+ " " <+ id
+gHpr{|CounterOpt|}   prev (Cto_IdentInt id val)				= prev  <+ " " <+ id <+ " " <+ val
+gHpr{|CounterOpt|}   prev Cto_None							= prev  <+ " none"
 
 
-gHpr{|LengthOpt|} prev (Lgt_Percent val)	=	prev  <+ " " <+ val <+ "%"
-gHpr{|LengthOpt|} prev (Lgt_Pixel val)		=	prev  <+ " " <+ val <+ "px"
+gHpr{|LengthOpt|}    prev (Lgt_Percent val)					= prev  <+ " " <+ val <+ "%"
+gHpr{|LengthOpt|}    prev (Lgt_Pixel val)					= prev  <+ " " <+ val <+ "px"
 
-gHpr{|LineHOpt|} prev (Lho_Percent val)		=	prev  <+ " " <+ val <+ "%"
-gHpr{|LineHOpt|} prev (Lho_Size val)		=	prev  <+ " " <+ val
+gHpr{|LineHOpt|}     prev (Lho_Percent val)					= prev  <+ " " <+ val <+ "%"
+gHpr{|LineHOpt|}     prev (Lho_Size val)					= prev  <+ " " <+ val
 
-gHpr{|LineSizeOpt|} prev (Lso_Length val)	=	prev  <+ " " <+ val <+ "pt"
-gHpr{|LineSizeOpt|} prev Lso_Normal			=	prev  <+ " normal"
-gHpr{|LineSizeOpt|} prev (Lso_Number val)	=	prev  <+ " " <+ val
-gHpr{|LineSizeOpt|} prev (Lso_Percent val)	=	prev  <+ " " <+ val <+ "%"
+gHpr{|LineSizeOpt|}  prev (Lso_Length val)					= prev  <+ " " <+ val <+ "pt"
+gHpr{|LineSizeOpt|}  prev Lso_Normal						= prev  <+ " normal"
+gHpr{|LineSizeOpt|}  prev (Lso_Number val)					= prev  <+ " " <+ val
+gHpr{|LineSizeOpt|}  prev (Lso_Percent val)					= prev  <+ " " <+ val <+ "%"
 
-gHpr{|MaxSizeOpt|} prev (Mas_Length val)	=	prev  <+ " " <+ val <+ "px"
-gHpr{|MaxSizeOpt|} prev Mas_None			=	prev  <+ " none"
-gHpr{|MaxSizeOpt|} prev (Mas_Percent val)	=	prev  <+ " " <+ val <+ "%"
+gHpr{|MaxSizeOpt|}   prev (Mas_Length val)					= prev  <+ " " <+ val <+ "px"
+gHpr{|MaxSizeOpt|}   prev Mas_None							= prev  <+ " none"
+gHpr{|MaxSizeOpt|}   prev (Mas_Percent val)					= prev  <+ " " <+ val <+ "%"
 
-gHpr{|QuotesOpt|} prev Qto_None							=	prev  <+ " none" 
-gHpr{|QuotesOpt|} prev (Qto_Quotes val1 val2 val3 val4)	=	prev  <+ " \"" <+ val1 <+ "\" \"" <+ val2 <+ "\" \"" <+ val3 <+ "\" \"" <+ val4 <+ "\""
+gHpr{|QuotesOpt|}    prev Qto_None							= prev  <+ " none" 
+gHpr{|QuotesOpt|}    prev (Qto_Quotes val1 val2 val3 val4)	= prev  <+ " \"" <+ val1 <+ "\" \"" <+ val2 <+ "\" \"" <+ val3 <+ "\" \"" <+ val4 <+ "\""
 
-gHpr{|SizeOpt|} prev Szo_Auto			=	prev  <+ " auto"
-gHpr{|SizeOpt|} prev (Szo_Length val)	=	prev  <+ " " <+ val <+ "px"
-gHpr{|SizeOpt|} prev (Szo_Percent val)	=	prev  <+ " " <+ val <+ "%"
+gHpr{|SizeOpt|}      prev Szo_Auto							= prev  <+ " auto"
+gHpr{|SizeOpt|}      prev (Szo_Length val)					= prev  <+ " " <+ val <+ "px"
+gHpr{|SizeOpt|}      prev (Szo_Percent val)					= prev  <+ " " <+ val <+ "%"
 
-gHpr{|SpacingOpt|} prev (Spo_Length val)	=	prev  <+ " " <+ val <+ "px"
-gHpr{|SpacingOpt|} prev Spo_Normal			=	prev  <+ " normal"
+gHpr{|SpacingOpt|}   prev (Spo_Length val)					= prev  <+ " " <+ val <+ "px"
+gHpr{|SpacingOpt|}   prev Spo_Normal						= prev  <+ " normal"
 
-gHpr{|VertAlignOpt|} prev Vao_Baseline		=	prev  <+ " baseline"
-gHpr{|VertAlignOpt|} prev Vao_Bottom		=	prev  <+ " bottom"
-gHpr{|VertAlignOpt|} prev (Vao_Length val)	=	prev  <+ " " <+ val <+ "px"
-gHpr{|VertAlignOpt|} prev Vao_Middle		=	prev  <+ " middle"
-gHpr{|VertAlignOpt|} prev (Vao_Percent val)	=	prev  <+ " " <+ val <+ "%"
-gHpr{|VertAlignOpt|} prev Vao_Sub			=	prev  <+ " sub"
-gHpr{|VertAlignOpt|} prev Vao_Super			=	prev  <+ " super"
-gHpr{|VertAlignOpt|} prev Vao_TextBottom	=	prev  <+ " text-bottom"
-gHpr{|VertAlignOpt|} prev Vao_TextTop		=	prev  <+ " text-top"
-gHpr{|VertAlignOpt|} prev Vao_Top			=	prev  <+ " top"
+gHpr{|VertAlignOpt|} prev Vao_Baseline						= prev  <+ " baseline"
+gHpr{|VertAlignOpt|} prev Vao_Bottom						= prev  <+ " bottom"
+gHpr{|VertAlignOpt|} prev (Vao_Length val)					= prev  <+ " " <+ val <+ "px"
+gHpr{|VertAlignOpt|} prev Vao_Middle						= prev  <+ " middle"
+gHpr{|VertAlignOpt|} prev (Vao_Percent val)					= prev  <+ " " <+ val <+ "%"
+gHpr{|VertAlignOpt|} prev Vao_Sub							= prev  <+ " sub"
+gHpr{|VertAlignOpt|} prev Vao_Super							= prev  <+ " super"
+gHpr{|VertAlignOpt|} prev Vao_TextBottom					= prev  <+ " text-bottom"
+gHpr{|VertAlignOpt|} prev Vao_TextTop						= prev  <+ " text-top"
+gHpr{|VertAlignOpt|} prev Vao_Top							= prev  <+ " top"
