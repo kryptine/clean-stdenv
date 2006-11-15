@@ -2,10 +2,14 @@ module workflowExamples
 
 import StdEnv, StdHtml
 
-import htmlTask
+import htmlTask, htmlHandler
 
 derive gForm []
 derive gUpd []
+
+
+testCode tst = STask "OK" (showHtml [Txt "Vul de waarde in: ",Br, Hr [], B [] "test", Br ], 0) tst
+
 
 //Start world = doHtmlServer (multiUser (Quotation myQuotation)) world
 //Start world = doHtmlServer (multiUser twotasks3) world
@@ -23,7 +27,7 @@ where
 	= mkHtml "test" [idform.form <=> html] hst
 	where
 		persistent tasks tst
-		# tst	= setTaskAttribute Persistent tst
+//		# tst	= setTaskAttribute Persistent tst
 		= tasks tst
 
 
@@ -62,7 +66,7 @@ twotasks3 tst
 # ((forAssist,fromSecr),tst) 	= mkRDynTaskCall "secr-assist" 0 tst		// split name task
 = PTasks
 	 [( "boss", STask "Choose" Easy `bind` 
-	 			\situation ->  forSecr (taskForSecr situation forAssist) `bind`
+	 			\situation ->  forSecr ((1,"Do Job ") @: taskForSecr situation forAssist) `bind`
 	 			\result ->  STask "accept" result
 	  )
 	 ,("secretary", fromBoss)
@@ -71,7 +75,7 @@ twotasks3 tst
 where
 	taskForSecr Easy forAssist tst
 	# tst = returnF [Txt ("Handle easy case")] tst
-	= forAssist (STask "Damage" 0) tst
+	= forAssist ((2,"Specify damage") @: STask "Damage" 0) tst
 	taskForSecr (Difficult upperbound) _ tst
 	# tst = returnF [Txt ("Handle difficult case with limit " +++ (toString upperbound) +++ " Euro's")] tst
 	= checktask upperbound tst
@@ -160,28 +164,36 @@ instance toString (a,b) | toString a & toString b
 where
 	toString (a,b) = "(" <+++ a <+++ "," <+++ b <+++ ")"
 
-agenda2 = \tst -> agenda` 	0 ( Date 0 0 0, Time 0 0 0
-							) tst
+agenda2 = \tst -> agenda` 0 (Date 0 0 0,Time 0 0 0) tst
 where
-	agenda` who date tst
-	# (date,tst) 		= STask "SetDateAndTime" date tst
+	agenda` who daytime tst
+	# (daytime,tst) 	= askDateTime daytime tst
 	# (whoPd,tst)		= STask "AskPerson" (PullDown (1,100) (who,[toString i \\ i <- [0..10]])) tst
-	# ((ok,date),tst) 	= ((toInt (toString whoPd),"Meeting Request") @: handle date) tst
+	# ((ok,daytime),tst)= ((toInt (toString whoPd),"Meeting Request") @: handle daytime) tst
 	| ok				
-		# tst			= returnF [Txt "Proposal accepted",Br] tst
-		= returnTask date tst
-	# tst				= returnF [Txt ("No, but can we meet on the " <+++ date <+++ "?"),Br]  tst
+		# tst			= returnF [Txt "Accepted",Br] tst
+		= returnTask daytime tst
+	# tst				= promptDateTime daytime tst
 	# (ok,tst)			= CTask_button [("Accept",returnV True),("Sorry",returnV False)] tst
-	| ok				= returnV date tst
-	= mkTask (agenda` (toInt(toString whoPd)) date) tst
+	| ok				= returnV daytime tst
+	= mkTask (agenda` (toInt(toString whoPd)) daytime) tst
 	where
-		handle date tst
-		# tst 		= returnF [Txt ("Can we meet on the " <+++ date <+++ "?"),Br]  tst	
-		# (ok,tst)	= CTask_button [("Accept",returnV True),("Sorry",returnV False)] tst
-		| ok		= returnV (ok,date) tst
-		# (date,tst) = STask "AlternativeDate" date tst
-		= returnV (ok,date) tst
+		handle daytime tst
+		# tst 			= promptDateTime daytime tst
+		# (ok,tst)		= CTask_button [("Accept",returnV True),("Sorry",returnV False)] tst
+		| ok			= returnV (ok,daytime) tst
+		# (daytime,tst) = askDateTime daytime tst
+		= returnV (ok,daytime) tst
 
+		askDateTime (date,time) tst
+		# input = (showHtml [Txt "Meeting Date: "], date, showHtml [Txt "Meeting Time: "], time)
+		# ((_,date,_,time),tst) = STask "Set" input tst
+		= ((date,time),tst)
+		
+		promptDateTime (date,time) tst
+		= returnF [Txt ("Can we meet on the " <+++ date <+++ " at " <+++ time <+++ "?"),Br]  tst	
+		
+		
 //agenda :: (Task Bool)
 agenda = \tst -> agenda` (PullDown (1,300) (0,[toString i \\ i <- [0..10]]) ) tst
 //agenda = \tst -> agenda` (PullDown (1,30) (0,[toString i \\ i <- [0..10]]) ) tst
@@ -280,6 +292,9 @@ where
 	Pay booked bookings tst		= returnTask "OK" tst	
 
 	calcCosts booked = sum [cost \\ (_,_,_,cost) <- hd booked]
+
+	isNil [] = True
+	isNil _ = False
 
 // quotation example
 

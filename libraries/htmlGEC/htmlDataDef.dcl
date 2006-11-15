@@ -191,6 +191,7 @@ None				:== [NoAttr]
 					| Ul		 		[Ul_Attr] [BodyTag]			// unordered list <ul></ul>
 					| Var				[Std_Attr] String			// variable text <var></var>
 		
+					| InlineCode		String						// to give the ability to plug in code directly
 					| STable			[Table_Attr] [[BodyTag]]	// simple table used for Clean forms
 					| BodyTag			[BodyTag]					// improves flexibility for code generation
 					| EmptyBody										// same 

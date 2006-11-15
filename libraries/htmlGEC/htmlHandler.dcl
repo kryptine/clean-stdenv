@@ -42,13 +42,20 @@ toHtmlForm 			:: !(*HSt -> *(Form a,*HSt)) -> [BodyTag] 						// toHtmlForm disp
 toBody 				:: (Form a) -> BodyTag											// just (BodyTag form.body)
 createDefault 		:: a						| gUpd{|*|} a 						// creates a default value of requested type
 
+:: Inline = Inline String
+derive gForm	Inline
+derive gUpd 	Inline
+derive gParse 	Inline
+derive gPrint 	Inline
+
+showHtml 			:: [BodyTag] -> Inline											// enabling to show Html code in Clean data
+
 // definitions on HSt
 
 instance FileSystem HSt																// enabling file IO on HSt
 
 appWorldHSt			:: !.(*World -> *World)       !*HSt -> *HSt						// enabling World operations on HSt
 accWorldHSt			:: !.(*World -> *(.a,*World)) !*HSt -> (.a,!*HSt)				// enabling World operations on HSt
-
 
 // Specialists section...
 

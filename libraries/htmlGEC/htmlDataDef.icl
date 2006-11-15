@@ -104,7 +104,8 @@ gHpr{|BodyTag|} prev (Tr attr body)				= prev <+> htmlAttrCmnd "tr"			attr body
 gHpr{|BodyTag|} prev (Tt attr text)				= prev <+> htmlAttrCmnd "tt" 			attr text
 gHpr{|BodyTag|} prev (Txt text)  				= prev <+ text
 
-//gHpr{|BodyTag|} prev (Txt attr text)  		= prev <+> htmlAttrCmnd "b" 			attr text
+gHpr{|BodyTag|} prev (InlineCode text)	 		= [|text:prev]
+
 gHpr{|BodyTag|} prev (U attr text)	 			= prev <+> htmlAttrCmnd "u" 			attr text
 gHpr{|BodyTag|} prev (Ul attr body)	 			= prev <+> htmlAttrCmnd "ul" 			attr body
 gHpr{|BodyTag|} prev (Var attr text) 			= prev <+> htmlAttrCmnd "var" 			attr text
@@ -246,7 +247,5 @@ derive gHpr TxtDir
 derive gHpr Ul_Attr
 
 derive gHpr BodyAttr
-/*
-gHpr{|BodyAttr|} prev (Batt_background file)	= prev <+ " background=" <+ file
-gHpr{|BodyAttr|} prev (Batt_bgcolor color) 		= prev <+ " bgcolor=" <+ color
-*/
+
+

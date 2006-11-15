@@ -487,6 +487,17 @@ toHtmlForm anyform
 toBody :: (Form a) -> BodyTag
 toBody form						= BodyTag form.form
 
+derive gUpd 	Inline
+derive gParse 	Inline
+derive gPrint 	Inline
+
+gForm{|Inline|} (init,formid) hst
+# (Inline string) =  formid.ival 	
+= ({changed=False, value=formid.ival, form=[InlineCode string]},incrHSt 2 hst)
+
+showHtml :: [BodyTag] -> Inline
+showHtml bodytags = Inline (foldl (+++) "" (reverse [x \\ x <|- gHpr {|*|} [|] bodytags]))
+
 createDefault :: a | gUpd{|*|} a 
 createDefault					= fromJust (snd (gUpd {|*|} (UpdSearch (UpdC "Just") 0) Nothing))
 derive gUpd Maybe

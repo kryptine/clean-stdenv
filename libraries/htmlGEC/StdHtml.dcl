@@ -17,6 +17,8 @@ import
 
 		,	htmlArrow			// arrow instantiations for iData forms
 
+		,	htmlTask			// for easy creation of workflow tasks based on iData
+
 
 // html code generation:
 
