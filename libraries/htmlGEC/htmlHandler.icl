@@ -490,6 +490,7 @@ toBody form						= BodyTag form.form
 derive gUpd 	Inline
 derive gParse 	Inline
 derive gPrint 	Inline
+derive gerda 	Inline
 
 gForm{|Inline|} (init,formid) hst
 # (Inline string) =  formid.ival 	

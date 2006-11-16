@@ -7,10 +7,6 @@ import htmlTask, htmlHandler
 derive gForm []
 derive gUpd []
 
-
-testCode tst = STask "OK" (showHtml [Txt "Vul de waarde in: ",Br, Hr [], B [] "test", Br ], 0) tst
-
-
 //Start world = doHtmlServer (multiUser (Quotation myQuotation)) world
 //Start world = doHtmlServer (multiUser twotasks3) world
 Start world = doHtmlServer (multiUser agenda2) world

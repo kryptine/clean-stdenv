@@ -10,10 +10,10 @@ class iData a							// The collection of generic functions needed to make iData:
 		, iDataSerAndDeSerialize a
 		
 class iDataSerialize a
-		| gPrint{|*|}					//		To serialize a value to a String
-//		, gerda {|*|} 					//		OPTION: To store and retrieve a value in a database
-		, TC a							//		To be able to store values in a dynamic
-										//		TC is a special class cannot be included here
+		| gPrint{|*|}			//		To serialize a value to a String
+		, gerda {|*|} 			//		OPTION: To store and retrieve a value in a database
+		, TC a					//		To be able to store values in a dynamic
+								//		TC is a special class cannot be included here
 class iDataSerAndDeSerialize a
 		| gParse{|*|}					//		To de-serialize a string back to a value
 		, iDataSerialize a		

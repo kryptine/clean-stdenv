@@ -47,6 +47,7 @@ derive gForm	Inline
 derive gUpd 	Inline
 derive gParse 	Inline
 derive gPrint 	Inline
+derive gerda 	Inline
 
 showHtml 			:: [BodyTag] -> Inline											// enabling to show Html code in Clean data
 
