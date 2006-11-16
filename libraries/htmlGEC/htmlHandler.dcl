@@ -4,9 +4,7 @@ definition module htmlHandler
 // (c) MJP 2005
 
 import htmlDataDef, htmlFormData, htmlSettings
-import StdBool
-import GenPrint
-import GenParse
+import GenPrint, GenParse
 import Gerda
 
 generic gForm a	:: !(InIDataId a) !*HSt -> *(Form a, !*HSt)							// user defined gForms: use "specialize"	

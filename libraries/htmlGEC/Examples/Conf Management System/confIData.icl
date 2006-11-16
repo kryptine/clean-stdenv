@@ -1,6 +1,6 @@
 implementation module confIData
 
-import StdHtml, StdList
+import StdHtml, StdFunc, StdList, StdString
 
 import stateHandling
 import loginAdmin, loginAdminIData

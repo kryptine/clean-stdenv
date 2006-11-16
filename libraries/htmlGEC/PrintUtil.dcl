@@ -5,7 +5,6 @@ definition module PrintUtil
 
 import StdGeneric
 import StdFile
-import StdStrictLists
 import Gerda
 
 :: *HtmlStream	:== [# String !]
@@ -33,7 +32,7 @@ derive gHpr Int, Real, Bool, String, Char, []
 
 // the main print routine
 
-print_to_stdout :: !a !*NWorld -> *NWorld | gHpr{|*|} a
+print_to_stdout :: !a !*NWorld			-> *NWorld | gHpr{|*|} a
 
 // handy utility print routines	
 

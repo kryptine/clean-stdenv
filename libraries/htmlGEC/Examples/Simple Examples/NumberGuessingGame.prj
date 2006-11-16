@@ -1,7 +1,7 @@
 Version: 1.4
 Global
 	Built:	False
-	Target:	Web Applications
+	Target:	Everything
 	Exec:	{Project}\NumberGuessingGame.exe
 	CodeGen
 		CheckStacks:	False
@@ -514,7 +514,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -543,7 +543,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -572,7 +572,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -601,7 +601,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -717,7 +717,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -746,7 +746,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -775,7 +775,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -1134,8 +1134,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	696
-				SizeY:	366
+				SizeX:	785
+				SizeY:	575
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -4848,10 +4848,10 @@ OtherModules
 			Fusion:	False
 		Dcl
 			WindowPosition
-				X:	10
-				Y:	10
-				SizeX:	800
-				SizeY:	624
+				X:	302
+				Y:	225
+				SizeX:	806
+				SizeY:	381
 		DclOpen:	False
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
@@ -4901,6 +4901,125 @@ OtherModules
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
 			ListTypes:	NoTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlSettings
+		Dir:	{Application}\Libraries\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	GenMap
+		Dir:	{Application}\Libraries\Generics
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	_Array
+		Dir:	{Application}\Libraries\Generics
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	GenLexOrd
+		Dir:	{Application}\Libraries\Generics
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlDatabase
+		Dir:	{Application}\Libraries\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlExceptions
+		Dir:	{Application}\Libraries\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	htmlTask
+		Dir:	{Application}\Libraries\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True

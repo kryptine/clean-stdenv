@@ -3,19 +3,19 @@ implementation module htmlStylelib
 import htmlStyleDef
 
 TableHeaderStyle :: Standard_Attr
-TableHeaderStyle = Std_Class "TableHeader"
+TableHeaderStyle	= Std_Class "TableHeader"
 
 TableRowStyle :: Standard_Attr
-TableRowStyle = Std_Class "TableRow"
+TableRowStyle		= Std_Class "TableRow"
 
 CleanStyle :: Standard_Attr
-CleanStyle = Std_Class "CleanStyle"
+CleanStyle			= Std_Class "CleanStyle"
 
 EditBoxStyle :: Standard_Attr
-EditBoxStyle = Std_Class "EditBox"
+EditBoxStyle		= Std_Class "EditBox"
 
 DisplayBoxStyle :: Standard_Attr
-DisplayBoxStyle = Std_Class "DisplayBox"
+DisplayBoxStyle		= Std_Class "DisplayBox"
 
 CleanStyles :: [Style]
 CleanStyles 
@@ -78,4 +78,3 @@ CleanStyles
 			,	FntWeight Fwo_Bold
 			]
 		]
-

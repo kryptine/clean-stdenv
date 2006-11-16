@@ -1,11 +1,7 @@
 implementation module htmlDataDef
 
-import StdEnv, ArgEnv
-
-import PrintUtil
+import StdStrictLists, StdString
 import htmlStyleDef, htmlStylelib
-
-import StdGeneric
 
 gHpr{|Html|}    prev (Html head rest)			= prev <+ head <+ rest 
 where
@@ -247,5 +243,3 @@ derive gHpr TxtDir
 derive gHpr Ul_Attr
 
 derive gHpr BodyAttr
-
-

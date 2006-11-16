@@ -3,8 +3,8 @@ definition module htmlFormData
 // common data type definition used for forms
 // (c) 2005 - MJP
 
-import htmlDataDef
-import StdMaybe, StdBool, htmlHandler
+import htmlHandler
+import StdMaybe, StdBool
 import GenEq
 
 :: FormId d										// properties one has to assign to any form 
@@ -53,7 +53,7 @@ import GenEq
 		, form		:: [BodyTag]				// html code to create the form, representing view domain (look)
 		}
 
-:: InIDataId d	:==	(Init,FormId d)				// Often used parameter of iData editors
+:: InIDataId d	:==	(!Init,!FormId d)			// Often used parameter of iData editors
 :: IDataFun a	:== St *HSt (Form a)			// Often used iData HSt State transition functions
 
 // **** easy creation of FormId's ****

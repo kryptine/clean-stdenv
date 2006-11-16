@@ -14,7 +14,7 @@ derive gParse 	Record
 derive gPrint 	Record
 derive gerda	Record
 
-Start world  = doHtmlServer MyPage5  world
+Start world  = doHtmlServer MyPage  world
 //Start world  = doHtmlServer testdb  world
 
 MyPage5 hst

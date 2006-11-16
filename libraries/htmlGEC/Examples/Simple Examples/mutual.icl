@@ -7,7 +7,7 @@ derive gForm  Pounds, Euros
 derive gUpd   Pounds, Euros
 derive gPrint Pounds, Euros
 derive gParse Pounds, Euros
-derive gerda Pounds, Euros
+derive gerda  Pounds, Euros
 
 :: Pounds = {pounds :: Real}                        
 :: Euros  = {euros  :: Real}                        
@@ -38,5 +38,3 @@ where
 	toEuros {pounds} = {euros = pounds * exchangerate} 
 	
 	exchangerate = 1.4                                  
-
- 

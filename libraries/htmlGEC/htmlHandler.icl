@@ -1,10 +1,9 @@
 implementation module htmlHandler
 
-import StdEnv, ArgEnv, StdMaybe
-import htmlDataDef, htmlTrivial, htmlSettings
-import StdGeneric
-import iDataState, htmlStylelib
-import GenParse, GenPrint
+import StdArray, StdChar, StdList, StdStrictLists, StdString, StdTuple
+import ArgEnv, StdMaybe
+import htmlDataDef, htmlTrivial, htmlSettings, htmlStylelib, iDataState
+import StdGeneric, GenParse, GenPrint
 import httpServer
 import Gerda
 
@@ -13,7 +12,9 @@ derive gParse (,), (,,), (,,,), UpdValue
 derive gHpr   (,), (,,), (,,,)
 derive gUpd		   (,,), (,,,)
 derive bimap Form, [], FormId
- 
+
+:: Inline = Inline String
+
 gParse{|(->)|} gArg gRes _ 		= Nothing 
 gPrint{|(->)|} gArg gRes _ _	= abort "functions can only be used with dynamic storage option!\n" 
 

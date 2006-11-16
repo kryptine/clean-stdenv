@@ -1,10 +1,10 @@
- implementation module EncodeDecode
+implementation module EncodeDecode
 
 // encoding and decoding of information
 // (c) 2005 MJP
 
-import StdEnv, ArgEnv, StdMaybe, Directory
-import htmlDataDef, htmlTrivial, htmlFormData
+import StdArray, StdInt, StdList, StdString, ArgEnv, StdMaybe, Directory
+import htmlTrivial, htmlFormData
 import GenPrint, GenParse
 import dynamic_string
 
@@ -14,14 +14,14 @@ EncodeHtmlStates :: ![HtmlState] -> String
 EncodeHtmlStates [] = "$"
 EncodeHtmlStates [(id,lifespan,storageformat,state):xsys] 
 	= encodeString
-	  (	"(\"" +++ 								// begin mark
-		fromLivetime lifespan storageformat +++ // character encodes lifetime and kind of encoding
-		id +++ 									// id of state 
-	  	"\"," +++ 								// delimiter
-	  	 state +++ 								// encoded state 
+	  (	"(\"" +++ 										// begin mark
+		fromLivetime lifespan storageformat +++ 		// character encodes lifetime and kind of encoding
+		id +++ 											// id of state 
+	  	"\"," +++ 										// delimiter
+	  	 state +++ 										// encoded state 
 	  	")" 
 	  )	+++
-	  "$" +++ 									// end mark
+	  "$" +++ 											// end mark
 	  EncodeHtmlStates xsys
 where
 	fromLivetime Page 			PlainString		= "N"	// encode Lifespan & StorageFormat in first character
@@ -37,140 +37,117 @@ where
 
 // de-serialize Html State
 
-DecodeHtmlStates :: String -> [HtmlState]
-DecodeHtmlStates state = toHtmlState` (mkList state)
+DecodeHtmlStates :: !String -> [HtmlState]
+DecodeHtmlStates state					= toHtmlState` (mkList state)
 where
-	toHtmlState` :: [Char] -> [HtmlState]
-	toHtmlState` [] 		= []
-	toHtmlState` listofchar	= [mkHtmlState (mkList (decodeChars first)) : toHtmlState` second]
+	toHtmlState` :: ![Char] -> [HtmlState]
+	toHtmlState` [] 					= []
+	toHtmlState` listofchar				= [mkHtmlState (mkList (decodeChars first)) : toHtmlState` second]
 	where
-		(first,second) = mscan '$' listofchar	// search for end mark
+		(first,second)					= mscan '$' listofchar									// search for end mark
 
-		mkHtmlState :: [Char] -> HtmlState
-		mkHtmlState	elem = 
-			( mkString (stl fid)									// decode unique identification
-			, toLivetime fid										// decode livetime from character
-			, toStorageFormat fid									// decode storage format from character
-			, mkString (stl (reverse (stl (reverse formvalue)))) 	// decode state
-			)
+		mkHtmlState :: ![Char] -> HtmlState
+		mkHtmlState	elem				= ( mkString (stl fid)									// decode unique identification
+										  , lifespan											// decode livetime from character
+										  , format												// decode storage format from character
+										  , mkString (stl (reverse (stl (reverse formvalue)))) 	// decode state
+										  )
 		where
-			(fid,formvalue) = mscan '"' (stl (stl elem)) 			// skip '("'
-			stl [] = []
-			stl [x:xs] = xs 
-			
-			toLivetime ['N':_] = Page
-			toLivetime ['n':_] = Page
-			toLivetime ['S':_] = Session
-			toLivetime ['s':_] = Session
-			toLivetime ['P':_] = Persistent
-			toLivetime ['p':_] = Persistent
-			toLivetime ['R':_] = PersistentRO
-			toLivetime ['r':_] = PersistentRO
-			toLivetime ['D':_] = Database
-			toLivetime ['d':_] = Database
-			toLivetime _   	   = Page
-
-			toStorageFormat ['N':_] = PlainString
-			toStorageFormat ['S':_] = PlainString
-			toStorageFormat ['P':_] = PlainString
-			toStorageFormat ['R':_] = PlainString
-			toStorageFormat ['D':_] = PlainString
-			toStorageFormat ['n':_] = StaticDynamic
-			toStorageFormat ['p':_] = StaticDynamic
-			toStorageFormat ['s':_] = StaticDynamic
-			toStorageFormat ['r':_] = StaticDynamic
-			toStorageFormat ['d':_] = StaticDynamic
-			toStorageFormat _   	= PlainString
+			(fid,formvalue)				= mscan '"' (stl (stl elem)) 							// skip '("'
+			(lifespan,format)			= case fid of
+											['N':_]		= (Page,        PlainString  )
+											['n':_]		= (Page,        StaticDynamic)
+											['S':_]		= (Session,     PlainString  )
+											['s':_] 	= (Session,     StaticDynamic)
+											['P':_] 	= (Persistent,  PlainString  )
+											['p':_]		= (Persistent,  StaticDynamic)
+											['R':_]		= (PersistentRO,PlainString  )
+											['r':_] 	= (PersistentRO,StaticDynamic)
+											['D':_] 	= (Database,    PlainString  )
+											['d':_] 	= (Database,    StaticDynamic)
+											_			= (Page,        PlainString  )
 
 // reconstruct HtmlState out of the information obtained from browser
 
-DecodeHtmlStatesAndUpdate :: ServerKind (Maybe String) -> ([HtmlState],String,String)
+DecodeHtmlStatesAndUpdate :: !ServerKind (Maybe String) -> ([HtmlState],String,String)
 DecodeHtmlStatesAndUpdate serverkind args
-# (_,triplet,update,state) = DecodeArguments serverkind args
+# (_,triplet,update,state)				= DecodeArguments serverkind args
 = ([states \\states=:(id,_,_,nstate) <- DecodeHtmlStates state | id <> "" || nstate <> ""],triplet,update) // to be sure that no rubbish is passed on
 
 // Parse and decode low level information obtained from server 
 // In case of using a php script and external server:
 
-DecodeArguments External _ = DecodePhpArguments
+DecodeArguments :: !ServerKind (Maybe String) -> (!String,!String,!String,!String)
+DecodeArguments External _				= DecodePhpArguments
 where
-//	DecodePhpArguments :: (!String,!String,!String,!String) // executable, id + update , new , state
+//	DecodePhpArguments :: (!String,!String,!String,!String)							// executable, id + update , new , state
 	DecodePhpArguments
-	# input 			= [c \\ c <-: GetArgs | not (isControl c) ] // get rid of communication noise
-	# (thisexe,input) 	= mscan '#' input 		// get rid of garbage
-	# input				= skipping ['#UD=']  input
-	# (update, input)	= mscan '=' input
-	# (new,    input)	= mscan ';' input
-	# input				= skipping ['GS=']  input
-	# (state, input)	= mscan ';' input
+	# input 							= [c \\ c <-: GetArgs | not (isControl c) ]	// get rid of communication noise
+	# (thisexe,input) 					= mscan '#'         input					// get rid of garbage
+	# input								= skipping ['#UD='] input
+	# (update, input)					= mscan '='         input
+	# (new,    input)					= mscan ';'         input
+	# input								= skipping ['GS=']  input
+	# (state, input)					= mscan ';'         input
 	=: case toString update of
-			"CS" -> (toString thisexe, decodeChars new, "", toString state)
-			else -> (toString thisexe, decodeChars update, toString new, toString state)
+			"CS"						= (toString thisexe, decodeChars new,    "",           toString state)
+			else						= (toString thisexe, decodeChars update, toString new, toString state)
 /*	=: case (decodeChars thisexe, decodeChars update, decodeChars new, decodeChars state) of
-			(thisexe,"CS",new,state) -> (thisexe,new,"",state)
-		    else		    -> else*/
+			(thisexe,"CS",new,state)	= (thisexe,new,"",state)
+		    else						= else*/
 
 	GetArgs :: String 
 	GetArgs =: foldl (+++) "" [strings \\ strings <-: getCommandLine]
 
 // In case of using the internal server written in Clean:
 
-DecodeArguments Internal (Just args) = DecodeCleanServerArguments args
+DecodeArguments Internal (Just args)	= DecodeCleanServerArguments args
 where
-	DecodeCleanServerArguments :: String -> (!String,!String,!String,!String) // executable, id + update , new , state
+	DecodeCleanServerArguments :: !String -> (!String,!String,!String,!String)		// executable, id + update , new , state
 	DecodeCleanServerArguments args
-	# input 			= [c \\ c <-: args | not (isControl c) ] // get rid of communication noise
-	# (thisexe,input) 	= mscan '\"' input 				// get rid of garbage
-	# input				= skipping ['UD\"']  input
-	# (update, input)	= mscan '=' input // should give triplet
-	# (new,    input)	= mscan '-' input // should give update value <<< *** Bug for negative integers??? ***
-	# (_,input)			= mscan '=' input
-	# input				= skipping ['\"GS\"']  input
-	# (found,index) 	= FindSubstr ['---'] input
-	# state				= if found (take index input) ['']
+	# input 							= [c \\ c <-: args | not (isControl c) ]	// get rid of communication noise
+	# (thisexe,input) 					= mscan '\"'          input					// get rid of garbage
+	# input								= skipping ['UD\"']   input
+	# (update, input)					= mscan '='           input					// should give triplet
+	# (new,    input)					= mscan '-'           input					// should give update value <<< *** Bug for negative integers??? ***
+	# (_,input)							= mscan '='           input
+	# input								= skipping ['\"GS\"'] input
+	# (found,index) 					= FindSubstr ['---']  input
+	# state								= if found (take index input) ['']
 	= case toString update of
-			"CS" -> ("clean", decodeChars new, "", toString state)
-			else -> ("clean", decodeChars update, toString new, toString state)
-
-	FindSubstr substr list = FindSubstr` list 0 
-	where
-		FindSubstr` list=:[] index = (False,0)
-		FindSubstr` list=:[x:xs] index
-		| substr == take lsubstr list = (True,index)
-		| otherwise = FindSubstr` xs (index + 1)
-	
-		lsubstr = length substr
+			"CS"						= ("clean", decodeChars new,    "",           toString state)
+			else						= ("clean", decodeChars update, toString new, toString state)
 
 // traceHtmlInput utility used to see what kind of rubbish is received
 
-traceHtmlInput :: ServerKind (Maybe String) -> BodyTag
-traceHtmlInput serverkind args
-=	BodyTag	[	STable [] [ [B [] "Triplet:", Txt triplet]
-							,[B [] "Update:", Txt update]
-							,[B [] "Identifier:", B [] "Lifetime:", B [] "Format:", B [] "Value:"]
-							:[[Txt id, Txt (showl life), Txt (showf storage), Txt (shows storage state)] 
-							 \\ (id,life,storage,state) <- htmlState]]
-				, Br
-				, Txt string
+traceHtmlInput :: !ServerKind !(Maybe String) -> BodyTag
+traceHtmlInput serverkind args=:(Just string)
+=	BodyTag	[ STable [] [ [B [] "Triplet:", Txt triplet]
+						  ,[B [] "Update:", Txt update]
+						  ,[B [] "Identifier:", B [] "Lifetime:", B [] "Format:", B [] "Value:"]
+						: [  [Txt id, Txt (showl life), Txt (showf storage), Txt (shows storage state)] 
+						  \\ (id,life,storage,state) <- htmlState
+						  ]
+						]
+			, Br
+			, Txt string
 			]
 where
-	(Just string) = args
+	(htmlState,triplet,update)			= DecodeHtmlStatesAndUpdate serverkind args
 
-	(htmlState,triplet,update) = DecodeHtmlStatesAndUpdate serverkind args
+	showl life							= case life of 
+											Persistent 		= "Persistent"
+											PersistentRO 	= "Persistent Read Only" 
+											Session 		= "Session"
+											Database 		= "Database"
+											_ 				= "Page"
+	showf storage						= case storage of PlainString -> "String";  _ -> "Dynamic"
+	shows PlainString s					= s
+	shows _ d							= d											// "cannot show dynamic value" 
 
-	showl life = case life of 
-					Persistent 		-> "Persistent";
-					PersistentRO 	-> "Persistent Read Only" 
-					Session 		-> "Session"; 
-					Database 		-> "Database"; 
-					_ 				-> "Page"
-	showf storage = case storage of PlainString -> "String";  _ -> "Dynamic"
-	shows PlainString s = s
-	shows _ d =  d	//"cannot show dynamic value" 
-	
 // global names setting depending on kind of server used
 
-ThisExe :: ServerKind -> String
+ThisExe :: !ServerKind -> String
 ThisExe External 
 # (thisexe,_,_,_) = DecodeArguments External Nothing 
 = thisexe
@@ -179,86 +156,64 @@ ThisExe Internal
 ThisExe _ 
 = "clean"
 
-MyPhP :: ServerKind -> String
-MyPhP External = (mkString (takeWhile ((<>) '.') (mkList (ThisExe External)))) +++ ".php"
-MyPhP Internal = "clean"
+MyPhP :: !ServerKind -> String
+MyPhP External							= (mkString (takeWhile ((<>) '.') (mkList (ThisExe External)))) +++ ".php"
+MyPhP Internal							= "clean"
 
-MyDir :: ServerKind -> String
-MyDir serverkind = (mkString (takeWhile ((<>) '.') (mkList (ThisExe serverkind))))
+MyDir :: !ServerKind -> String
+MyDir serverkind						= mkString (takeWhile ((<>) '.') (mkList (ThisExe serverkind)))
 
 // writing and reading of persistent states to a file
 
 writeState :: !String !String !String !*NWorld -> *NWorld 
 writeState directory filename serializedstate env
-#(_,env) = case getFileInfo mydir env of
-			((DoesntExist,fileinfo),env) -> createDirectory mydir env
-			(_,env) -> (NoDirError,env)
-# (ok,file,env)	= fopen (directory +++ "/" +++ filename +++ ".txt") FWriteData env
-| not ok 		= env
-# file			= fwrites serializedstate file
-# (ok,env)		= fclose file env
+#(_,env)								= case getFileInfo mydir env of
+											((DoesntExist,fileinfo),env)	= createDirectory mydir env
+											(_,env)							= (NoDirError,env)
+# (ok,file,env)							= fopen (directory +++ "/" +++ filename +++ ".txt") FWriteData env
+| not ok	 							= env
+# file									= fwrites serializedstate file
+# (ok,env)								= fclose file env
 = env
 where
-	mydir = RelativePath [PathDown directory]
+	mydir								= RelativePath [PathDown directory]
 
-readStringState :: !String !String !*NWorld -> (!String,!*NWorld) 
-readStringState directory filename env
-#(_,env) = case getFileInfo mydir env of
-			((DoesntExist,fileinfo),env) -> createDirectory mydir env
-			(_,env) -> (NoDirError,env)
-# (ok,file,env)	= fopen (directory +++ "/" +++ filename +++ ".txt") FReadData env
-| not ok 		= ("",env)
-# (string,file)	= freads file big
-| not ok 		= ("",env)
-# (ok,env)		= fclose file env
-//# string		= mkString (removeBackslashQuote (mkList string))  // ?? STILL NEEDED ??
-= (string,env) 
+readState :: !String !String !*NWorld -> (!String,!*NWorld) 
+readState directory filename env
+#(_,env)								= case getFileInfo mydir env of
+											((DoesntExist,fileinfo),env)	= createDirectory mydir env
+											(_,env)							= (NoDirError,env)
+# (ok,file,env)							= fopen (directory +++ "/" +++ filename +++ ".txt") FReadData env
+| not ok 								= ("",env)
+# (string,file)							= freads file big
+| not ok 								= ("",env)
+# (ok,env)								= fclose file env
+= (string,env)
 where
-	big = 100000
-	mydir = RelativePath [PathDown directory]
-
-	removeBackslashQuote [] 			= []
-	removeBackslashQuote ['\\\"':xs] 	= ['\"':removeBackslashQuote xs]
-	removeBackslashQuote [x:xs] 		= [x:removeBackslashQuote xs]
-
-readDynamicState :: !String !String !*NWorld -> (!String,!*NWorld) 
-readDynamicState directory filename env
-#(_,env) = case getFileInfo mydir env of
-			((DoesntExist,fileinfo),env) -> createDirectory mydir env
-			(_,env) -> (NoDirError,env)
-# (ok,file,env)	= fopen (directory +++ "/" +++ filename +++ ".txt") FReadData env
-| not ok 		= ("",env)
-# (string,file)	= freads file big
-| not ok 		= ("",env)
-# (ok,env)		= fclose file env
-= (string,env) 
-where
-	big = 100000
-	mydir = RelativePath [PathDown directory]
+	big									= 1000000
+	mydir								= RelativePath [PathDown directory]
 
 // serializing and de-serializing of html states
 
 
 // low level url encoding decoding of Strings
 
-encodeString :: String -> String
-//encodeString s = urlEncode s
-encodeString s = string_to_string52 s	// using the whole alphabet 
+encodeString :: !String -> String
+encodeString s							= /* see also urlEncode */ string_to_string52 s	// using the whole alphabet 
 
-decodeString :: String -> *String
-//decodeString s = urlDecode s
-decodeString s = string52_to_string s	// using the whole alphabet
+decodeString :: !String -> *String
+decodeString s							= /* see also urlDecode */ string52_to_string s	// using the whole alphabet
 
 // utility functions based on low level encoding - decoding
 
-encodeInfo :: a -> String | gPrint{|*|} a
-encodeInfo inp = encodeString (printToString inp)
+encodeInfo :: !a -> String | gPrint{|*|} a
+encodeInfo inp							= encodeString (printToString inp)
 
-decodeInfo :: String -> Maybe a | gParse{|*|} a
-decodeInfo str = parseString (decodeString str)
+decodeInfo :: !String -> Maybe a | gParse{|*|} a
+decodeInfo str							= parseString (decodeString str)
 
-decodeChars :: [Char] -> *String
-decodeChars cs = decodeString (mkString cs)
+decodeChars :: ![Char] -> *String
+decodeChars cs							= decodeString (mkString cs)
 
 // compact John van Groningen encoding-decoding to lower and uppercase alpabeth
 
@@ -312,55 +267,55 @@ alpha_to_int52 c
 
 // small parsing utility functions
 
-mscan :: Char [Char] -> ([Char],[Char])
-mscan c list = case (span ((<>) c) list) of  // scan like span but it removes character
-				(x,[])	= (x,[])
-				(x,y)	= (x,tl y)
+mscan :: Char ![Char] -> ([Char],[Char])
+mscan c list							= case span ((<>) c) list of			// scan like span but it removes character
+											(x,[])	= (x,[])
+											(x,y)	= (x,tl y)
 
+skipping :: !.[a] !u:[a] -> v:[a] | == a, [u <= v]
 skipping [c:cs] list=:[x:xs]
-| c == x 		= skipping cs xs
-| otherwise 	= list
-skipping any    list = list
+| c == x								= skipping cs xs
+| otherwise								= list
+skipping any    list					= list
 
-// The following code is not used anymore...
+// The following code is not used, but is included as reference code and for debugging purposes.
 
 // encoding - decoding to hexadecimal code
 
-urlEncode :: String -> String
-urlEncode s = mkString (urlEncode` (mkList s))
+urlEncode :: !String -> String
+urlEncode s								= mkString (urlEncode` (mkList s))
 where
-	urlEncode` :: [Char] -> [Char]
-	urlEncode` [] = []
+	urlEncode` :: ![Char] -> [Char]
+	urlEncode` []						= []
 	urlEncode` [x:xs] 
-	| isAlphanum x = [x  : urlEncode` xs]
-	| otherwise    = urlEncodeChar x ++ urlEncode` xs
+	| isAlphanum x						= [x  : urlEncode` xs]
+	| otherwise							= urlEncodeChar x ++ urlEncode` xs
 	where
 		urlEncodeChar x 
-		# (c1,c2) = charToHex x
+		# (c1,c2)						= charToHex x
 		= ['%', c1 ,c2]
 	
 		charToHex :: !Char -> (!Char, !Char)
-		charToHex c = (toChar (digitToHex (i >> 4)), toChar (digitToHex (i bitand 15)))
+		charToHex c						= (toChar (digitToHex (i >> 4)), toChar (digitToHex (i bitand 15)))
 		where
-		        i = toInt c
+		        i						= toInt c
 		        digitToHex :: !Int -> Int
 		        digitToHex d
-		                | d <= 9 = d + toInt '0'
-		                = d + (toInt 'A' - 10)
+		                | d <= 9		= d + toInt '0'
+		                | otherwise		= d + toInt 'A' - 10
 
-urlDecode :: String -> *String
-urlDecode s = mkString (urlDecode` (mkList s))
+urlDecode :: !String -> *String
+urlDecode s								= mkString (urlDecode` (mkList s))
 where
-	urlDecode` :: [Char] -> [Char]
-	urlDecode` [] 				= []
-	urlDecode` ['%',hex1,hex2:xs]= [hexToChar(hex1, hex2):urlDecode` xs]
+	urlDecode` :: ![Char] -> [Char]
+	urlDecode` []						= []
+	urlDecode` ['%',hex1,hex2:xs]		= [hexToChar(hex1, hex2):urlDecode` xs]
 	where
 		hexToChar :: !(!Char, !Char) -> Char
-		hexToChar (a, b) = toChar (hexToDigit (toInt a) << 4 + hexToDigit (toInt b))
+		hexToChar (a, b)				= toChar (hexToDigit (toInt a) << 4 + hexToDigit (toInt b))
 		where
 		        hexToDigit :: !Int -> Int
 		        hexToDigit i
-		                | i <= toInt '9' = i - toInt '0'
-		                = i - (toInt 'A' - 10)
-	urlDecode` [x:xs] 	= [x:urlDecode` xs]
-
+		                | i<=toInt '9'	= i - toInt '0'
+		                | otherwise		= i - toInt 'A' - 10
+	urlDecode` [x:xs]				 	= [x:urlDecode` xs]

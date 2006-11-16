@@ -1,5 +1,6 @@
 implementation module htmlMonad
 
+import StdFunc
 import htmlHandler, htmlFormlib
 
 (>>=) infixr 5 :: (HStM .a) (.a -> HStM .b) -> HStM .b

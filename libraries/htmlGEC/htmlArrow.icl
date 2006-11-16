@@ -1,7 +1,7 @@
 implementation module htmlArrow
 
-import StdEnv
-import htmlDataDef, htmlHandler, htmlFormlib
+import StdFunc, StdList, StdString
+import htmlFormlib
 import StdArrow
 
 startCircuit :: !(GecCircuit a b) !a !*HSt -> (!Form b,!*HSt) 

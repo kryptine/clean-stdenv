@@ -1,6 +1,6 @@
 implementation module PrintUtil
 
-import StdEnv, ArgEnv
+import StdArray, StdFile, StdList, StdString, ArgEnv
 import StdGeneric
 import StdStrictLists
 import Gerda
@@ -9,8 +9,8 @@ import Gerda
 
 generic gHpr a :: !*HtmlStream !a -> *HtmlStream
 
-gHpr{|String|} file s = [|s:file]			// the only entry that actually prints something
-											// all others eventually come here converted to string
+gHpr{|String|}              file s              = [|s:file]			// the only entry that actually prints something
+																	// all others eventually come here converted to string
 
 gHpr{|Int|}                 file i              = [|toString i:file]
 gHpr{|Real|}                file r              = [|toString r:file] 
@@ -22,9 +22,9 @@ gHpr{|EITHER|} gHprl gHprr  file (LEFT left) 	= gHprl file left
 gHpr{|EITHER|} gHprl gHprr  file (RIGHT right) 	= gHprr file right
 gHpr{|OBJECT|} gHpro        file (OBJECT object)= gHpro file object 
 
-gHpr{|CONS of t|} gPrHtmlc prev (CONS c) // constructor names are printed, prefix Foo_ is stripped
+gHpr{|CONS of t|} gPrHtmlc prev (CONS c)		// constructor names are printed, prefix Foo_ is stripped
 = case t.gcd_name.[0] of
-	'`' 	= 	gPrHtmlc prev c	// just skip this constructor name
+	'`' 	= 	gPrHtmlc prev c					// just skip this constructor name
 	else	=	case t.gcd_arity of
 					0 = prev <+ " " <+ myprint t.gcd_name	 
 					1 = gPrHtmlc (prev <+ " " <+ myprint t.gcd_name <+ " = ") c	

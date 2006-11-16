@@ -3,7 +3,7 @@ definition module htmlFormlib
 // Handy collection of Form creating functions and layout functions
 // (c) MJP 2005
 
-import StdEnv, htmlHandler, htmlButtons
+import htmlButtons
 
 // **** easy creation of a simple html page ****
 

@@ -1,7 +1,8 @@
 implementation module htmlFormData
 
+import StdBool, StdInt, StdString
 import htmlDataDef, htmlSettings
-import StdMaybe, StdBool, StdString, StdInt
+import StdMaybe
 import GenEq
 
 // utility for creating FormId's

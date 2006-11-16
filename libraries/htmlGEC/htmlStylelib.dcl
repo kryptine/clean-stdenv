@@ -18,5 +18,4 @@ defpixel :== 107						// size in pixels for buttons, pull-down buttons
 
 // definition of clean styles
 
-CleanStyles :: [Style]
-
+CleanStyles			:: [Style]

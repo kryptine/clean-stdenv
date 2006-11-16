@@ -1,6 +1,6 @@
 module listTobalanceTree
 
-import StdEnv
+import StdEnv, StdStrictLists
 import StdHtml
 
 derive gUpd   []
@@ -23,7 +23,7 @@ Start3 world
 # (gerda,world)			= openGerda "bla" world	
 # nworld 				= { worldC = world, inout = inout, gerda = gerda}	
 # nworld				= writeState (MyDir Internal) "mylist"  mydynamic nworld
-# (string,nworld)		= readDynamicState (MyDir Internal) "mylist" nworld
+# (string,nworld)		= readState (MyDir Internal) "mylist" nworld
 =  string_to_dynamic` string
 where
 	string_to_dynamic` :: {#Char} -> Dynamic	// just to make a unique copy as requested by string_to_dynamic

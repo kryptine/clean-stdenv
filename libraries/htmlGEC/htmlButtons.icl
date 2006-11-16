@@ -1,6 +1,6 @@
 implementation module htmlButtons
 
-import StdEnv, ArgEnv
+import StdFunc, StdList, StdString
 import htmlFormlib, htmlHandler, htmlStylelib, htmlTrivial
 
 derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode/*, Button, CheckBox*/, RadioButton /*, PullDownMenu, TextInput */, TextArea/*, PasswordBox*/

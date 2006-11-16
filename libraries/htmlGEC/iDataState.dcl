@@ -3,7 +3,6 @@ definition module iDataState
 // maintains the state of the iDate
 // (c) 2005 - MJP
 
-import StdMaybe
 import GenParse, GenPrint
 import htmlDataDef, EncodeDecode
 
@@ -11,16 +10,16 @@ import htmlDataDef, EncodeDecode
 
 :: *FormStates 													// collection of all states of all forms
 
-emptyFormStates		:: *FormStates								// creates emtpy states
+emptyFormStates		:: *FormStates								// creates empty states
 
-findState 			:: !(FormId a) *FormStates *NWorld 			// find the state value given FormId and a correct type
+findState 			:: !(FormId a) !*FormStates *NWorld			// find the state value given FormId and a correct type
 					-> (Bool, Maybe a,*FormStates,*NWorld)		// true if form has not yet been previously inspected 	
 												| iDataSerAndDeSerialize a		
-replaceState 		:: !(FormId a) a *FormStates *NWorld 		// replace state given FormId
+replaceState 		:: !(FormId a) a !*FormStates *NWorld 		// replace state given FormId
 					-> (*FormStates,*NWorld)	| iDataSerialize a
 
-getUpdateId 		:: *FormStates -> (String,*FormStates)		// id of previously changed form
-getUpdate 			:: *FormStates -> (String,*FormStates)		// value typed in by user as string
+getUpdateId 		:: !*FormStates -> (String,!*FormStates)	// id of previously changed form
+getUpdate 			:: !*FormStates -> (String,!*FormStates)	// value typed in by user as string
 
 // storage and retrieval of FormStates
 
@@ -38,10 +37,10 @@ storeFormStates 	:: !FormStates *NWorld -> (BodyTag,*NWorld)
 	| UpdC String												// choose indicated constructor 
 	| UpdS String												// new piece of text
 
-encodeTriplet		:: Triplet -> String						// encoding of triplets
-decodeTriplet		:: String -> Maybe Triplet
+encodeTriplet		:: !Triplet -> String						// encoding of triplets
+decodeTriplet		:: !String  -> Maybe Triplet
 
-getTriplet  		:: *FormStates -> (!Maybe Triplet,!Maybe b,*FormStates)  | gParse{|*|} b // inspect triplet
+getTriplet  		:: !*FormStates -> (!Maybe Triplet,!Maybe b,!*FormStates)  | gParse{|*|} b // inspect triplet
 
 callClean 			:: Script									// script that takes care of sending the required input to this application
 
@@ -49,4 +48,3 @@ callClean 			:: Script									// script that takes care of sending the required
 
 initTestFormStates 	::  *NWorld -> (*FormStates,*NWorld) 		// creates initial empty form states
 setTestFormStates 	::  (Maybe Triplet) String String *FormStates *NWorld -> (*FormStates,*NWorld) 	// stores triplet updateid update in state 
-
