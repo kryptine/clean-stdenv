@@ -8,6 +8,6 @@ SQLConfigDataSource hwndParent fRequest lpszDriver lpszAttributes sql_state
 	= (SQLConfigDataSource_ hwndParent fRequest lpszDriver lpszAttributes, sql_state);
 
 SQLConfigDataSource_ :: !Int !Int !{#Char} !{#Char} -> Int;
-SQLConfigDataSource_ hwndParent fRequest lpszDriver lpszAttributes = code {
+SQLConfigDataSource_ hwndParent fRequest lpszDriver lpszAttributes = code inline {
 	ccall SQLConfigDataSource@16 "PIIss:I"
 }

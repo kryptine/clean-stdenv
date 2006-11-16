@@ -1,6 +1,6 @@
 module GenericDatabase
 
-import Gerda, StdEnv
+import Gerda, StdEnv, GenEq//, MyDebug
 
 :: R = {naam :: [Char], leeftijd :: Real, rec :: Maybe R}
 :: A = C R
@@ -11,59 +11,40 @@ import Gerda, StdEnv
 :: GRose m a = GRose a (m (GRose m a))
 :: Test` = Constr` Int
 
-Start world 
-	# (g, world) = openGerda "Clean Data Structures" world
-//	  x = 42
-//	  x = [[1]]
-//	  x = (1, 3.1415927, 'a', [C2, C1, C3])
-//	  x = [3, 5, 7]
-//	  x = [C3, C1, C2, C1, C3, C2]
-//	  x = [[[[[[[1]]]]]]]
-//	  x = ["test"]
-//	  x = ['aapnoot']
-//	  x = [['aap'], ['noot']]
-//	  x = Bin (Tip 'a') 42 (Tip 'b')
-//	  x = Rose 1 [Rose 2 [], Rose 3 []]
-//	  x = [[C1, C2], [C3, C2, C1]]
-//	  r1 = {naam = ['aap'], leeftijd = 13.5, rec = Nothing} 
-//	  r2 = {naam = ['aap'], leeftijd = 13.5, rec = Just r1}
-//	  x = array {r1, r2, r2, r1}
-//	  x = ["Hello", "world"]
-//	  x = Rose 1 [Rose 2 [], Rose 3 []]
-//	  x = "a" +++ {'b' \\ _ <- [1..1000]}
-//	  x = GRose (1, 'a', 0.5, "bud") [GRose (2, 'b', 0.75, "another bud") [], GRose (3, 'c', 0.875, "yet another bud") []]
-//	  x = [1..10000]
-//	  x = array {strictArray {1, 2, 3}, strictArray {1 .. 100}}
-//	  x = Constr` 42
-	  x = PAIR Nothing Nothing
-	  g = writeGerda "test`.1" x g
-//	  g = writeGerda "test2" x2 g
-	  (y, g) = readGerda "test`.1" g
-//	  (y2, g) = readGerda "test2" g
-/*	= case y `typeOf` x of
-		Just x`
-		  # g = writeGerda "test2" x` g
-		    (z, g) = readGerda "test" g
-		  -> (z `typeOf` x, closeGerda g world)*/
-	= (y `typeOf` x, closeGerda g world)
-//	  x = gerdaObject 42
-//	  g = writeGerda "test" x g
-//	  (y, g) = readGerda "test" g
-//	  f = case y of Just {gerdaWrite} -> gerdaWrite; _ -> const id
-//	  h = case y of Just {gerdaRead} -> gerdaRead; _ -> (\g -> (undef, g))
-//	  g = f 123 g
-//	  (w, g) = h g
-//	  (z, g) = readGerda "test" g
-//	= (y `typeOf` x, Just w `typeOf` x.gerdaValue, z `typeOf` x, closeGerda g world)
+:: Test = E. a: {value :: a, write :: a *Gerda -> *Gerda, read :: *Gerda -> *(a, *Gerda), equal :: a a -> Bool}
+
+test :: a -> Test | gerda{|*|}, gEq{|*|} a
+test x = {value = x, write = \x g -> writeGerda "test" x g, read = \g -> case readGerda "test" g of (Just x, g) -> (x, g), equal = (===)}
+
+tests = flatten (repeatn 10 [
+//	test {gerdaKey = 1, gerdaValue = 2},
+	test 42, 
+	test C1, 
+	test (Constr` 42),
+	test [1, 3, 5, 7], 
+	test (1, 3.1415927, 'a', [C3, C1, C2, C1, C3, C2]),
+	test [[[[[[[1]]]]]]],
+	test "test",
+	test ("a" +++ {'b' \\ _ <- [1..1000]}),
+	test [['aap'], ['noot']],
+	test (Bin (Tip 'a') 42 (Tip 'b')),
+	test (Rose 1 [Rose 2 [], Rose 3 []]),
+	test p1,
+	test p2,
+	test r2,
+	test (strictArray {2, 3, 5, 7, 11, 13, 17, 19}), 
+	test (array {r1, r2, r2, r1}),
+	test (GRose (1, 'a', 0.5, "bud") [GRose (2, 'b', 0.75, "another bud") [], GRose (3, 'c', 0.875, "yet another bud") []]),
+	test {gerdaUnique = 21}])
 where
-	(`typeOf`) :: !(Maybe (EITHER Int Int)) (PAIR (Maybe Int) (Maybe Int)) -> Maybe (EITHER Int Int)
-	(`typeOf`) x _ = x
+	r1 = {naam = ['noot'], leeftijd = 41.2, rec = Nothing} 
+	r2 = {naam = ['aap'], leeftijd = 13.5, rec = Just r1}
 
-	x :: Phantom [Int]
-	x = Opera
+	p1 :: Phantom Char
+	p1 = Opera
 
-	x2 :: Phantom Char
-	x2 = Opera
+	p2 :: Phantom [Int]
+	p2 = Opera
 
 	array :: !{a} -> {a}
 	array x = x
@@ -71,7 +52,36 @@ where
 	strictArray :: !{!a} -> {!a}
 	strictArray x = x
 
-derive gerda Tree, Rose, R, N, (,), (,,), (,,,), GRose, Test`, Phantom
+runTests [{value, write, read, equal}:ts] g
+	# g = write value g
+	  (v, g) = read g
+	| not (equal v value) = abort "TEST FAILED" //<<- (value, v)
+	= runTests ts g
+runTests _ g = g
+
+Start world 
+	# (g, world) = openGerda "Clean Data Structures" world
+	  g = runTests tests g
+	  x = gerdaObject (42, 'a', 3.14, [1..10])
+	  g = writeGerda "test2" x g
+	  (y, g) = readGerda "test2" g
+	  w = case y of Just {gerdaWrite} -> gerdaWrite; _ -> const id
+	  r = case y of Just {gerdaRead} -> gerdaRead; _ -> (\g -> (abort "NO readGerda", g))
+	  g = w (123, 'b', 2.41, []) g
+	  (u, g) = r g
+	  g = w (789, 'c', 1.61, []) g
+	  (z, g) = r g
+	  (v, g) = readGerda "test2" g
+	= (mapMaybe (\{gerdaObject} -> gerdaObject) y `typeOf` x.gerdaObject, u, z, mapMaybe (\{gerdaObject} -> gerdaObject) v `typeOf` x.gerdaObject, closeGerda g world)
+//	= closeGerda g world
+where
+	(`typeOf`) :: !(Maybe a) a -> Maybe a
+	(`typeOf`) x _ = x
+
+derive gerda (,), (,,), (,,,), Tree, Rose, R, N, GRose, Test`, Phantom
+derive gEq GerdaPrimary, GerdaUnique, Binary252, Maybe, Tree, Rose, R, N, Test`, Phantom
+
+gEq{|GRose|} eq_m eq_a (GRose x xs) (GRose y ys) = eq_a x y && eq_m (gEq{|(*->*)->*->*|} eq_m eq_a) xs ys
 
 :: Phantom a = Opera
 

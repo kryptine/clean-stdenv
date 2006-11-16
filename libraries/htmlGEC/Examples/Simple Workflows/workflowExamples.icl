@@ -2,8 +2,6 @@ module workflowExamples
 
 import StdEnv, StdHtml
 
-import htmlTask, htmlHandler
-
 derive gForm []
 derive gUpd []
 
@@ -23,7 +21,7 @@ where
 	= mkHtml "test" [idform.form <=> html] hst
 	where
 		persistent tasks tst
-//		# tst	= setTaskAttribute Persistent tst
+		# tst	= setTaskAttribute Database tst
 		= tasks tst
 
 
