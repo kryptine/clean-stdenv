@@ -122,9 +122,10 @@ where
 
 traceHtmlInput :: !ServerKind !(Maybe String) -> BodyTag
 traceHtmlInput serverkind args=:(Just string)
-=	BodyTag	[ STable [] [ [B [] "Triplet:", Txt triplet]
+=	BodyTag	[ Br, B [] "State values received from client when application started:", Br,
+				STable [] [ [B [] "Triplet:", Txt triplet]
 						  ,[B [] "Update:", Txt update]
-						  ,[B [] "Identifier:", B [] "Lifetime:", B [] "Format:", B [] "Value:"]
+						  ,[B [] "Id:", B [] "Lifespan:", B [] "Format:", B [] "Value:"]
 						: [  [Txt id, Txt (showl life), Txt (showf storage), Txt (shows storage state)] 
 						  \\ (id,life,storage,state) <- htmlState
 						  ]
@@ -135,13 +136,8 @@ traceHtmlInput serverkind args=:(Just string)
 where
 	(htmlState,triplet,update)			= DecodeHtmlStatesAndUpdate serverkind args
 
-	showl life							= case life of 
-											Persistent 		= "Persistent"
-											PersistentRO 	= "Persistent Read Only" 
-											Session 		= "Session"
-											Database 		= "Database"
-											_ 				= "Page"
-	showf storage						= case storage of PlainString -> "String";  _ -> "Dynamic"
+	showl life							= toString life
+	showf storage						= case storage of PlainString -> "String";  _ -> "S_Dynamic"
 	shows PlainString s					= s
 	shows _ d							= d											// "cannot show dynamic value" 
 
@@ -172,7 +168,7 @@ writeState directory filename serializedstate env
 											(_,env)							= (NoDirError,env)
 # (ok,file,env)							= fopen (directory +++ "/" +++ filename +++ ".txt") FWriteData env
 | not ok	 							= env
-# file									= fwrites serializedstate file
+# file									= fwrites serializedstate file  // DEBUG
 # (ok,env)								= fclose file env
 = env
 where

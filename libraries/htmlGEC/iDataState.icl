@@ -307,7 +307,73 @@ where
 		writePersistentState _ nworld
 		= nworld
 
+// trace States
+ 
+import EstherBackend
 
+traceStates :: !*FormStates -> !(BodyTag,!*FormStates)
+traceStates formstates=:{fstates}
+# (bodytags,fstates) = traceStates` fstates
+= (BodyTag [Br, B [] "State values when application ended:",Br,		
+			 STable [] ([[B [] "Id:", B[] "Inspected:", B [] "Lifespan:", B [] "Format:", B [] "Value:"]] ++ 
+						 bodytags)
+			],{formstates & fstates = fstates})
+where
+	traceStates` Leaf_		= ([],Leaf_)
+	traceStates` (Node_ left a right)
+	# (leftTrace,left)		= traceStates` left
+	# nodeTrace				= nodeTrace a
+	# (rightTrace,right)	= traceStates` right
+	= (leftTrace ++ nodeTrace ++ rightTrace,Node_ left a right)
+
+	nodeTrace (id,OldState fstate=:{format,life}) = [[Txt id,Txt "No", Txt (toString life):toStr format]]
+	nodeTrace (id,NewState fstate=:{format,life}) = [[Txt id,Txt "Yes",Txt (toString life):toStr format]]
+	
+	toStr (PlainStr str) = [Txt "String", Txt str]
+	toStr (StatDyn  dyn) = [Txt "S_Dynamic", Txt (ShowValueDynamic dyn <+++ " :: " <+++ ShowTypeDynamic dyn )]
+	toStr (DBStr    str _) = [Txt "Database", Txt str]
+	
+	strip s = { ns \\ ns <-: s | ns >= '\020' && ns <= '\0200'}
+	
+	ShowValueDynamic :: Dynamic -> String
+	ShowValueDynamic d = strip (foldr (+++) "" (fst (toStringDynamic d)) +++ " ")
+	
+	ShowTypeDynamic :: Dynamic -> String
+	ShowTypeDynamic d = strip (snd (toStringDynamic d) +++ " ")
+// debugging code 
+
+print_graph :: !a -> Bool;
+print_graph a = code {
+.d 1 0
+jsr _print_graph
+.o 0 0
+pushB TRUE
+}
+
+my_dynamic_to_string :: !Dynamic -> {#Char};
+my_dynamic_to_string d
+| not (print_graph d)
+= abort ""
+#! s=dynamic_to_string d;
+| not (print_graph (tohexstring s))
+= abort "" 
+# d2 = string_to_dynamic {c \\ c <-: s};
+| not (print_graph d2)
+= abort ""
+= s;
+
+tohexstring :: {#Char} -> {#Char};
+tohexstring s = {tohexchar s i \\ i<-[0..2*size s-1]};
+
+tohexchar :: {#Char} Int -> Char;
+tohexchar s i
+# c=((toInt s.[i>>1]) >> ((1-(i bitand 1))<<2)) bitand 15;
+| c<10
+= toChar (48+c);
+= toChar (55+c);
+
+	
+//	traceLife Lifespan
 
 // to encode triplets in htmlpages
 

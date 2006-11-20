@@ -21,7 +21,8 @@ where
 	= mkHtml "test" [idform.form <=> html] hst
 	where
 		persistent tasks tst
-		# tst	= setTaskAttribute Database tst
+		# tst	= setTaskAttribute Persistent tst
+//		# tst	= setTaskAttribute Database tst
 		= tasks tst
 
 

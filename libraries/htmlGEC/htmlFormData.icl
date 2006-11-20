@@ -116,3 +116,12 @@ instance toInt Lifespan where toInt Temp			= 0
 							  toInt PersistentRO	= 3
 							  toInt Persistent		= 4
 							  toInt Database		= 5
+
+instance toString Lifespan where 	
+							  toString Temp			= "Temp"
+							  toString Page			= "Page"
+							  toString Session		= "Session"
+							  toString PersistentRO	= "PersistentRO"
+							  toString Persistent	= "Persistent"
+							  toString Database		= "Database"
+

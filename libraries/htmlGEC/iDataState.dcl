@@ -44,6 +44,10 @@ getTriplet  		:: !*FormStates -> (!Maybe Triplet,!Maybe b,!*FormStates)  | gPars
 
 callClean 			:: Script									// script that takes care of sending the required input to this application
 
+// tracing all states ...
+
+traceStates :: !*FormStates -> !(BodyTag,!*FormStates)
+
 // fstate handling used for testing only
 
 initTestFormStates 	::  *NWorld -> (*FormStates,*NWorld) 		// creates initial empty form states

@@ -128,5 +128,6 @@ toViewMap	:: !(d -> v) !Init !d !(Maybe v) -> v		// same, but convert to view do
 
 instance toBool Init
 instance <  Lifespan
+instance toString Lifespan 	
 instance == Init, Mode, Lifespan
 derive  gEq Init, Mode, Lifespan

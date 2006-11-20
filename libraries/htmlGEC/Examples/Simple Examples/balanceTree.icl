@@ -14,14 +14,20 @@ derive gParse 	Record
 derive gPrint 	Record
 derive gerda	Record
 
-Start world  = doHtmlServer MyPage  world
-//Start world  = doHtmlServer testdb  world
+//Start world  = doHtmlSubServer (4,0,1,"tree") MyPage5  world
+Start world  = doHtmlServer MyPage5  world
 
 MyPage5 hst
-# (balancedtree,hst) = mkEditForm (Init,pDFormId "test" [0]) hst
+# (n1,hst) = mkEditForm (Init,nDFormId "test1" [0]) hst
+# (n2,hst) = mkEditForm (Init,pDFormId "test2" [0]) hst
+# (n3,hst) = mkEditForm (Set, pDFormId "test2" n1.value) hst
 =	mkHtml "Balanced Tree"
 	[ H1 [] "Balanced Tree"
-	, BodyTag balancedtree.form
+	, BodyTag n1.form
+	, Br
+	, toHtml n1.value, Br
+	, toHtml n2.value, Br
+	, toHtml n3.value, Br
 	]  hst
 
 :: Record = {name :: String, address :: String, zipcode :: Int}

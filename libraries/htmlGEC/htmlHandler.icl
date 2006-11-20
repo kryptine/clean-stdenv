@@ -52,29 +52,53 @@ doHtmlServer userpage world
 where
 	conv args				= foldl (+++) "" (map snd args)
 
-	doHtmlServer2 :: String .(*HSt -> (Html,!*HSt)) *World -> ([String],String,*World)
-	doHtmlServer2 args userpage world
-	# (inout,world)			= doHtmlPage Internal (Just args) userpage [|] world
-	# n_chars				= count_chars inout 0
-		with
-			count_chars [|]    n = n
-			count_chars [|s:l] n = count_chars l (n+size s)
-	# allhtmlcode			= copy_strings inout n_chars (createArray n_chars '\0')
-		with
-			copy_strings [|e:l] i s
-				# size_e	= size e
-				# i			= i-size_e
-				= copy_strings l i (copy_chars e 0 i size_e s)
-			copy_strings [|] 0 s
-				= s
+doHtmlServer2 :: String .(*HSt -> (Html,!*HSt)) *World -> ([String],String,*World)
+doHtmlServer2 args userpage world
+# (inout,world)			= doHtmlPage Internal (Just args) userpage [|] world
+# n_chars				= count_chars inout 0
+	with
+		count_chars [|]    n = n
+		count_chars [|s:l] n = count_chars l (n+size s)
+# allhtmlcode			= copy_strings inout n_chars (createArray n_chars '\0')
+	with
+		copy_strings [|e:l] i s
+			# size_e	= size e
+			# i			= i-size_e
+			= copy_strings l i (copy_chars e 0 i size_e s)
+		copy_strings [|] 0 s
+			= s
 
-			copy_chars :: !{#Char} !Int !Int !Int !*{#Char} -> *{#Char}
-			copy_chars s_s s_i d_i n d_s
-				| s_i<n
-					# d_s	= {d_s & [d_i]=s_s.[s_i]}
-					= copy_chars s_s (s_i+1) (d_i+1) n d_s
-					= d_s
-	= ([],allhtmlcode,world)
+		copy_chars :: !{#Char} !Int !Int !Int !*{#Char} -> *{#Char}
+		copy_chars s_s s_i d_i n d_s
+			| s_i<n
+				# d_s	= {d_s & [d_i]=s_s.[s_i]}
+				= copy_chars s_s (s_i+1) (d_i+1) n d_s
+				= d_s
+= ([],allhtmlcode,world)
+
+import SUBSERVER
+
+doHtmlSubServer :: !(!Int,!Int,!Int,!String) !(*HSt -> (Html,!*HSt)) !*World -> *World
+doHtmlSubServer (prio,min,max,location) userpage world
+	# (console,world) = stdio world
+	# result = RegisterSubProcToServer prio min max ".*" "\location"
+	| result==1
+		# (_,world) = fclose (fwrites ("Error: SubServer \"" +++ location +++ "\" could *NOT* registered to an HTTP 1.1 main server\n") console) world
+		= world
+	| result==2
+		# (_,world) = fclose (fwrites ("SubServer \"" +++ location +++ "\" successfully registered to an HTTP 1.1 main server\n") console) world
+		= world
+	# world 		= WaitForMessageLoop mycallbackfun 0 world
+	# (_,world) 	= fclose console world
+	= world
+where
+	mycallbackfun :: [String] Int Socket *World -> (Socket,*World)
+	mycallbackfun header contentlength socket world
+	# (_,datafromclient,socket,world)	= ReceiveString 0 contentlength socket world
+	| socket==0 						= (0,world)				//socket closed or timed out
+	# (_,htmlcode,world) 				= doHtmlServer2 datafromclient userpage world
+	= SendString htmlcode "text/html" header socket world
+
 
 doHtmlPage :: !ServerKind !(Maybe String) !.(*HSt -> (Html,!*HSt)) !*HtmlStream !*World -> (!*HtmlStream,!*World)
 doHtmlPage serverkind args userpage inout world
@@ -83,10 +107,11 @@ doHtmlPage serverkind args userpage inout world
 # (initforms,nworld)	 	= retrieveFormStates serverkind args nworld
 # (Html (Head headattr headtags) (Body attr bodytags),{states,world}) 
 							= userpage (mkHSt initforms nworld)
+# (debufOutput,states)		= if TraceOutput (traceStates states) (EmptyBody,states)
 # (allformbodies,world)		= storeFormStates states world
 # {worldC,gerda,inout}		= print_to_stdout 
 								(Html (Head headattr [extra_style:headtags]) 
-								(Body (extra_body_attr ++ attr) [debugInput,allformbodies:bodytags]))
+								(Body (extra_body_attr ++ attr) [debugInput,debufOutput,allformbodies:bodytags]))
 								world
 # world						= closeGerda` gerda worldC
 = (inout,world)
@@ -94,6 +119,7 @@ where
 	extra_body_attr			= [Batt_background "back35.jpg",`Batt_Std [CleanStyle]]
 	extra_style				= Hd_Style [] CleanStyles	
 	debugInput				= if TraceInput (traceHtmlInput serverkind args) EmptyBody
+
 
 // swiss army knife editor that makes coffee too ...
 
