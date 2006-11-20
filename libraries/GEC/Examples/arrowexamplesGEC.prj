@@ -59,6 +59,7 @@ MainModule
 		Verbose:	True
 		ReadableABC:	False
 		ReuseUniqueNodes:	True
+		Fusion:	False
 	Dcl
 		WindowPosition
 			X:	0
@@ -88,6 +89,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -116,6 +118,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -144,6 +147,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -172,6 +176,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -202,6 +207,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -230,6 +236,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -258,6 +265,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -286,6 +294,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -314,6 +323,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -342,6 +352,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -370,6 +381,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -398,6 +410,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -426,6 +439,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -456,6 +470,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -488,6 +503,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -516,6 +532,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -544,6 +561,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -574,6 +592,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -602,6 +621,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -630,6 +650,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -658,6 +679,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -686,6 +708,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -714,6 +737,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -742,6 +766,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -770,6 +795,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -798,6 +824,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -826,6 +853,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -854,6 +882,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -882,6 +911,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -910,6 +940,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -938,6 +969,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -966,6 +998,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -994,6 +1027,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1022,6 +1056,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1050,6 +1085,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1078,6 +1114,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1106,6 +1143,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1134,6 +1172,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1162,6 +1201,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1190,6 +1230,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1218,6 +1259,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1246,6 +1288,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1274,6 +1317,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1302,6 +1346,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1330,6 +1375,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1358,34 +1404,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
-		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
-	Module
-		Name:	gen
-		Dir:	{Application}\Libraries\Gast
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1414,6 +1433,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1442,6 +1462,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1470,6 +1491,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1498,6 +1520,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1526,6 +1549,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1554,6 +1578,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1582,6 +1607,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1610,6 +1636,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1638,6 +1665,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1666,6 +1694,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1694,6 +1723,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1722,6 +1752,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1750,6 +1781,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1778,6 +1810,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1806,6 +1839,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1834,6 +1868,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1862,6 +1897,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1890,6 +1926,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1918,6 +1955,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1946,6 +1984,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1974,6 +2013,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2002,6 +2042,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2030,6 +2071,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2058,6 +2100,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2086,6 +2129,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2114,6 +2158,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2142,6 +2187,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2170,6 +2216,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2198,6 +2245,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2226,6 +2274,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2254,6 +2303,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2282,6 +2332,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2310,6 +2361,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2338,6 +2390,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2366,6 +2419,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2394,6 +2448,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2422,6 +2477,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2450,6 +2506,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2478,6 +2535,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2506,6 +2564,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2534,6 +2593,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2562,6 +2622,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2590,6 +2651,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2618,6 +2680,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2646,6 +2709,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2674,6 +2738,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2702,6 +2767,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2730,6 +2796,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2758,6 +2825,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2786,6 +2854,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2814,6 +2883,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2842,6 +2912,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2870,6 +2941,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2898,6 +2970,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2926,6 +2999,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2954,6 +3028,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2982,6 +3057,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3010,6 +3086,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3038,6 +3115,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3066,6 +3144,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3082,8 +3161,8 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	cprinter_121.obj
-			ObjectFile:	cCrossCallPrinter_121.obj
+			ObjectFile:	cprinter_121.
+			ObjectFile:	cCrossCallPrinter_121.
 	Module
 		Name:	StdPrint
 		Dir:	{Application}\Libraries\ObjectIO
@@ -3097,6 +3176,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3125,6 +3205,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3141,7 +3222,7 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	cCrossCallClipboard_121.obj
+			ObjectFile:	cCrossCallClipboard_121.
 	Module
 		Name:	osclipboard
 		Dir:	{Application}\Libraries\ObjectIO\OS Windows
@@ -3155,6 +3236,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3183,6 +3265,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3211,6 +3294,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3239,6 +3323,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3267,6 +3352,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3295,6 +3381,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3323,6 +3410,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3351,6 +3439,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3379,6 +3468,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3407,6 +3497,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3435,6 +3526,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3463,6 +3555,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3491,6 +3584,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3519,6 +3613,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3547,6 +3642,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3575,6 +3671,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3603,6 +3700,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3631,6 +3729,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3659,6 +3758,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3687,6 +3787,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3715,6 +3816,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3743,6 +3845,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3771,6 +3874,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3799,6 +3903,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3827,6 +3932,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3855,6 +3961,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3883,6 +3990,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3911,6 +4019,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3939,6 +4048,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3967,6 +4077,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -3995,6 +4106,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4023,6 +4135,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4039,7 +4152,7 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	cCrossCallFileSelectors_121.obj
+			ObjectFile:	cCrossCallFileSelectors_121.
 	Module
 		Name:	scheduler
 		Dir:	{Application}\Libraries\ObjectIO
@@ -4053,6 +4166,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4081,6 +4195,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4109,6 +4224,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4137,6 +4253,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4165,6 +4282,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4193,6 +4311,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4221,6 +4340,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4249,6 +4369,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4277,6 +4398,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4305,6 +4427,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4333,6 +4456,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4361,6 +4485,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4389,6 +4514,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4417,6 +4543,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4433,7 +4560,7 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	cCrossCallMenus_121.obj
+			ObjectFile:	cCrossCallMenus_121.
 	Module
 		Name:	osmenu
 		Dir:	{Application}\Libraries\ObjectIO\OS Windows
@@ -4447,6 +4574,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4475,6 +4603,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4503,6 +4632,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4531,6 +4661,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4559,6 +4690,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4587,6 +4719,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4615,6 +4748,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4643,6 +4777,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4671,6 +4806,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4699,6 +4835,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4727,6 +4864,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4755,6 +4893,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4783,6 +4922,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4811,6 +4951,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4839,6 +4980,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4867,6 +5009,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4895,6 +5038,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4923,6 +5067,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4951,6 +5096,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -4979,6 +5125,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5007,6 +5154,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5035,6 +5183,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5063,6 +5212,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5079,8 +5229,8 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	cpicture_121.obj
-			ObjectFile:	cCCallWindows_121.obj
+			ObjectFile:	cpicture_121.
+			ObjectFile:	cCCallWindows_121.
 	Module
 		Name:	ostoolbar
 		Dir:	{Application}\Libraries\ObjectIO\OS Windows
@@ -5094,6 +5244,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5122,6 +5273,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5150,6 +5302,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5166,7 +5319,7 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	cCrossCallxDI_121.obj
+			ObjectFile:	cCrossCallxDI_121.
 	Module
 		Name:	osactivaterequests
 		Dir:	{Application}\Libraries\ObjectIO\OS Windows
@@ -5180,6 +5333,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5208,6 +5362,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5236,6 +5391,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5252,13 +5408,13 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	util_121.obj
-			ObjectFile:	cpicture_121.obj
-			ObjectFile:	cdebug_121.obj
-			ObjectFile:	cCrossCall_121.obj
-			ObjectFile:	cCrossCallWindows_121.obj
-			ObjectFile:	cCCallWindows_121.obj
-			ObjectFile:	cCCallSystem_121.obj
+			ObjectFile:	util_121.
+			ObjectFile:	cpicture_121.
+			ObjectFile:	cdebug_121.
+			ObjectFile:	cCrossCall_121.
+			ObjectFile:	cCrossCallWindows_121.
+			ObjectFile:	cCCallWindows_121.
+			ObjectFile:	cCCallSystem_121.
 	Module
 		Name:	commondef
 		Dir:	{Application}\Libraries\ObjectIO
@@ -5272,6 +5428,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5300,6 +5457,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5328,6 +5486,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5356,6 +5515,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5384,6 +5544,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5412,6 +5573,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5440,6 +5602,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5468,6 +5631,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5496,6 +5660,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5524,6 +5689,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5552,6 +5718,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5568,13 +5735,13 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	cCrossCallWindows_121.obj
-			ObjectFile:	cCrossCallProcedureTable_121.obj
-			ObjectFile:	cCrossCallCursor_121.obj
-			ObjectFile:	cCrossCall_121.obj
-			ObjectFile:	cCCallSystem_121.obj
-			ObjectFile:	cCCallWindows_121.obj
-			ObjectFile:	cAcceleratorTable_121.obj
+			ObjectFile:	cCrossCallWindows_121.
+			ObjectFile:	cCrossCallProcedureTable_121.
+			ObjectFile:	cCrossCallCursor_121.
+			ObjectFile:	cCrossCall_121.
+			ObjectFile:	cCCallSystem_121.
+			ObjectFile:	cCCallWindows_121.
+			ObjectFile:	cAcceleratorTable_121.
 		NeededLibraries
 			Library:	userExt_library
 			Library:	gdiExt_library
@@ -5599,6 +5766,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5615,7 +5783,7 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	cCrossCallFont_121.obj
+			ObjectFile:	cCrossCallFont_121.
 	Module
 		Name:	osrgn
 		Dir:	{Application}\Libraries\ObjectIO\OS Windows
@@ -5629,6 +5797,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5657,6 +5826,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5685,6 +5855,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5713,6 +5884,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5741,6 +5913,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5769,6 +5942,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5797,6 +5971,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5825,6 +6000,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5853,6 +6029,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5881,6 +6058,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5909,6 +6087,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5937,6 +6116,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5965,6 +6145,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -5993,6 +6174,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6021,6 +6203,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6049,6 +6232,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6077,6 +6261,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6105,6 +6290,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6127,12 +6313,13 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6155,12 +6342,13 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6183,12 +6371,13 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6217,6 +6406,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6245,6 +6435,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6273,6 +6464,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6295,12 +6487,13 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6323,12 +6516,13 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6351,12 +6545,13 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6379,12 +6574,13 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6413,6 +6609,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6441,6 +6638,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6469,6 +6667,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6497,6 +6696,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -6525,6 +6725,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	10
@@ -6553,6 +6754,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	10
@@ -6581,6 +6783,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	10
@@ -6609,6 +6812,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	10
@@ -6637,6 +6841,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	10
@@ -6665,6 +6870,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	10
@@ -6678,6 +6884,23 @@ OtherModules
 				Y:	0
 				SizeX:	500
 				SizeY:	300
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	DynIDMacros
+		Dir:	{Application}\Libraries\Dynamics\implementation
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 Static
@@ -6729,7 +6952,6 @@ Static
 		Path:	{Application}\Libraries\GEC\GEC Implementation\GenDefaultVal.icl
 		Path:	{Application}\Libraries\StdEnv\StdDebug.icl
 		Path:	{Application}\Libraries\MersenneTwister\MersenneTwister.icl
-		Path:	{Application}\Libraries\Gast\gen.icl
 		Path:	{Application}\Libraries\Gast\stdProperty.icl
 		Path:	{Application}\Libraries\Gast\genLibTest.icl
 		Path:	{Application}\Libraries\Gast\testable.icl
@@ -6917,6 +7139,7 @@ Static
 		Path:	{Application}\Libraries\GEC\GEC Implementation\StdGECExt.icl
 		Path:	{Application}\Libraries\GEC\GEC Implementation\StdArrow.icl
 		Path:	{Application}\Libraries\Generics\GenDefault.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\DynIDMacros.icl
 	Objs
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup0.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup1.o
@@ -7098,17 +7321,16 @@ Static
 		Path:	{Application}\Libraries\Generics\Clean System Files\GenEq.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
 		Path:	{Application}\Libraries\Generics\Clean System Files\GenPrint.o
-		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\guigecs.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\GenParse.o
 		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\parseprint.o
-		Path:	{Application}\Libraries\GEC\ObjectIOExtensions\Clean System Files\ColourTextControl.o
+		Path:	{Application}\Libraries\Generics\Clean System Files\GenParse.o
+		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\guigecs.o
 		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\StdObjectIOExt.o
+		Path:	{Application}\Libraries\GEC\ObjectIOExtensions\Clean System Files\ColourTextControl.o
 		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\StdBimap.o
 		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\infragecs.o
 		Path:	{Application}\Libraries\Gast\Clean System Files\testable.o
 		Path:	{Application}\Libraries\Gast\Clean System Files\genLibTest.o
 		Path:	{Application}\Libraries\Gast\Clean System Files\stdProperty.o
-		Path:	{Application}\Libraries\Gast\Clean System Files\gen.o
 		Path:	{Application}\Libraries\MersenneTwister\Clean System Files\MersenneTwister.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
 		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\GenDefaultVal.o
@@ -7116,20 +7338,20 @@ Static
 		Path:	{Application}\Libraries\WrapDebug\Clean System Files\Debug.o
 		Path:	{Application}\Libraries\WrapDebug\Clean System Files\Wrap.o
 		Path:	{Application}\Libraries\WrapDebug\Clean System Files\ShowWrapped.o
-		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\GECValue.o
 		Path:	{Application}\Libraries\GEC\Clean System Files\StdAGEC.o
 		Path:	{Application}\Libraries\GEC\Clean System Files\basicAGEC.o
 		Path:	{Application}\Libraries\GEC\Clean System Files\modeGEC.o
 		Path:	{Application}\Libraries\GEC\Clean System Files\buttonGEC.o
 		Path:	{Application}\Libraries\GEC\Clean System Files\layoutGEC.o
 		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\store.o
+		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\GECValue.o
 		Path:	{Application}\Libraries\Generics\Clean System Files\GenDefault.o
 		Path:	{Application}\Libraries\GEC\Clean System Files\StdCircuits.o
 		Path:	{Application}\Libraries\GEC\Clean System Files\dynamicAGEC.o
 		Path:	{Application}\Libraries\GEC\Clean System Files\noObjectGEC.o
 		Path:	{Application}\Libraries\GEC\Clean System Files\timedGEC.o
 		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\EstherInterFace.o
-		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherPostParser.o
+		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherBackend.o
 		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherParser.o
 		Path:	{Application}\Libraries\ExceptionsWindows\Clean System Files\StdException.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
@@ -7145,44 +7367,45 @@ Static
 		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicVersion.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory_mapped_files.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynID.o
-		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\md5.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynIDMacros.o
 		Path:	{Application}\Libraries\Hilde\Parser combinators 2002\Clean System Files\StdParsComb.o
-		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherBackend.o
+		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherPostParser.o
 		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherTransform.o
 		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherScript.o
 		Path:	{Application}\Libraries\Hilde\Clean System Files\DynamicFileSystem.o
 		Path:	{Application}\Libraries\Hilde\OS Windows\Clean System Files\Windows.o
 		Path:	{Application}\Libraries\Hilde\Clean System Files\Marshall.o
 		Path:	{Application}\Libraries\Hilde\Clean System Files\CleanTricks.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynID.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\md5.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
 		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherStdEnv.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallClipboard_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFileSelectors_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFont_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallMenus_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallWindows_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallProcedureTable_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallCursor_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCall_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallSystem_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cAcceleratorTable_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallxDI_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cpicture_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cprinter_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallPrinter_121.obj
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallClipboard_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFileSelectors_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFont_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallMenus_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallWindows_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallProcedureTable_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallCursor_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCall_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallSystem_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cAcceleratorTable_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallxDI_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cpicture_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cprinter_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallPrinter_121.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\low.obj
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\mem.obj
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\read_function.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\util_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cpicture_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cdebug_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCall_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallWindows_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.obj
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallSystem_121.obj
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\util_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cpicture_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cdebug_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCall_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallWindows_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallWindows_121.o
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCCallSystem_121.o
 	Dlib
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\kernel_library
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\user_library
@@ -7225,28 +7448,15 @@ Static
 		Path:	{Application}\Libraries\Tcp
 		Path:	{Application}\Libraries\ExceptionsWindows
 		Path:	{Application}\Libraries\MersenneTwister
+		Path:	{Application}\Libraries\WrapDebug
 		Path:	{Application}\Libraries\ExtendedArith\ExtendedArith
 		Path:	{Application}\Libraries\GameLib
-		Path:	{Application}\Libraries\GEC
-		Path:	{Application}\Libraries\GEC\GEC Implementation
-		Path:	{Application}\Libraries\WrapDebug
 		Path:	{Application}\Libraries\htmlGEC
-		Path:	{Application}\Libraries\htmlGEC\graph_copy
-		Path:	{Application}\Libraries\Hilde
-		Path:	{Application}\Libraries\Hilde\Loes 0.2
-		Path:	{Application}\Libraries\Hilde\OS Windows\Foreign
-		Path:	{Application}\Libraries\Hilde\OS Windows\NoDynamicFileSystem
-		Path:	{Application}\Libraries\Hilde\Parser combinators 2002
-		Path:	{Application}\Libraries\ExtEnv
-		Path:	{Application}\Libraries\ExtendedArith
-		Path:	{Application}\Libraries\StdLib
 		Path:	{Application}\Libraries\GEC\GEC Implementation
-		Path:	{Application}\Libraries\GEC\ObjectIOExtensions
 		Path:	{Application}\Libraries\Hilde
-		Path:	{Application}\Libraries\Hilde\Loes 0.2
-		Path:	{Application}\Libraries\Hilde\OS Windows\Foreign
-		Path:	{Application}\Libraries\Hilde\OS Windows\NoDynamicFileSystem
+		Path:	{Application}\Libraries\GEC
+		Path:	{Application}\Libraries\htmlGEC\graph_copy
+		Path:	{Application}\Libraries\Gerda
 		Path:	{Application}\Libraries\Hilde\Parser combinators 2002
-		Path:	{Application}\Libraries\Generics
 	AppP:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1
-	PrjP:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Examples\GEC
+	PrjP:	C:\Documents and Settings\rinus\Desktop\Recent Work\libraries\GEC\Examples

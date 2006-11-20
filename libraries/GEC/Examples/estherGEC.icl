@@ -152,8 +152,8 @@ where
 */
 mkDynStr x = let dx = dynamic x in DynStr dx (ShowValueDynamic dx)
 
-derive ggen Mode, DynString, MyRecord3, T, X, MyRecord10
-ggen {|(->)|} ga gb i is = undef
+derive generate Mode, DynString, MyRecord3, T, X, MyRecord10
+//ggen {|(->)|} ga gb i is = undef
 
 
 /*	Section 4.1. Example 2
