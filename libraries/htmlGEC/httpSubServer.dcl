@@ -2,6 +2,17 @@ definition module httpSubServer
 
 import httpUtil
 
+// (c) 2006 Erwin Lips and Jacco van Drunen
+// HIO - Breda
+// Radboud University Nijmegen
+
+// This is an Http 1.1 SubServer written in Clean
+// The SubServer can be linked with a Clean function generating Html code
+// It creates a subserver application which can be attached to a Http 1.1 compliant main server.
+// This can e.g. be an Apache server, a Microsoft IIS server, or the Clean Http 1.1 server.
+// Several SubServers can be attached, and Strings and Files can be communicated
+
+
 :: Socket :== Int;
 
 //required functions
