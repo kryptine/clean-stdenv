@@ -1,6 +1,164 @@
 implementation module httpUtil
 import StdEnv, StdLib, StdMaybe
 
+/****************************************************************************
+	Set of handy http related functions for the end user
+****************************************************************************/
+
+/*1e method, 2e location, 3e get data, 4e http version*/
+GetFirstLine :: String -> (String,String,[String],String)
+GetFirstLine firstLine
+| length data <>3 = ("","",[],"")
+| otherwise
+	# location=data!!1
+	# location = case location % (0,6) == "http://" of
+		True=location % ((FindIndexInString (location % (7,size location)) "/" 0)+7,size location)
+		_=location
+	# location = case location == "" of
+		True="/"
+		_=URLDecode (fromString location)
+	# nr = FindIndexInString location "?" 0
+	| nr==(-1) = (data!!0,location,[],data!!2)
+	= (data!!0,location % (0,nr-1),(SplitToStringArray (location %(nr+1,size (location)))) "&",data!!2)
+where
+	data = SplitToStringArray firstLine " "
+
+HexLineToInt :: [Char] -> Int
+HexLineToInt [a] = toInt(hexToChar a)
+HexLineToInt [a,b] = (16 * toInt(hexToChar a)) + HexLineToInt [b]
+HexLineToInt [a,b,c] = (256 * toInt(hexToChar a)) + HexLineToInt [b,c]
+HexLineToInt [a,b,c,d] = (4096 * toInt(hexToChar a)) + HexLineToInt [b,c,d]
+HexLineToInt _ = 0
+
+URLDecode :: [Char] -> String//URLDecode-functie (zet %?? om naar juiste characters, %20 naar spatie bijv.)
+URLDecode [] = ""
+URLDecode ['%',a,b:tail] = toString ((toChar (16 * toInt (hexToChar a))) + hexToChar b)+++ URLDecode tail
+URLDecode ['+':tail]= " "+++URLDecode tail
+URLDecode [head:tail] = toString head +++URLDecode tail
+
+hexToChar :: Char -> Char//functie is onderdeel van removeEscapes
+hexToChar a
+	| a >= '0' && a <= '9' = a - '0'
+	| a >= 'A' && a <= 'F' = a - 'A' + (toChar 10)
+	| a >= 'a' && a <= 'f' = a - 'a' + (toChar 10)
+	= toChar 0
+
+GetHeaderData :: [String] *String -> String//ook een hulpfunctie, tevens interne functie
+GetHeaderData [as:bs] header
+	#string1 = ToUniqueString(as % (0,(size header)-1))
+	# string = StringToUppercase 0 string1
+	# header = StringToUppercase 0 header
+	| string==header = TrimString (as % ((size header),size as))
+	= GetHeaderData bs header
+GetHeaderData _ _ = ""
+
+getContentTypeGF :: String -> String//functie die Content-Type genereert aan de hand van de extensie
+getContentTypeGF ".jpg" = "image/jpeg"
+getContentTypeGF ".gif" = "image/gif"
+getContentTypeGF ".bmp" = "image/x-ms-bmp"
+getContentTypeGF ".htm" = "text/html"
+getContentTypeGF ".txt" = "text/plain"
+getContentTypeGF "" = "application/octet-stream\r\nContent-Disposition: attachment;"//forceer download (bij video's bijv., zodat deze niet meteen worden afgespeeld)
+getContentTypeGF str = getContentTypeGF (str % (1,size str))
+
+CheckLocation ::String -> String
+CheckLocation location
+# array = SplitToStringArray (location % (1,size location)) "/"
+| hd array ==".." = ""
+# array = FlattenLocation array
+| hd array ==".." = ""
+| (hd array) % (0,0)=="%" = ""
+# countBack = CountStringInArray array ".." 0
+# bool = StringArrayCount array - countBack > countBack
+| not bool = ""
+= StringArrayToString array "\\"
+
+FlattenLocation :: [String] -> [String]
+FlattenLocation array
+# array1 = FlattenLocation1 array
+| array == array1 = array1
+= FlattenLocation array1
+where
+	FlattenLocation1 [as,bs:cs]
+	| as==".." && bs==".." && cs<>[]= [as]++ FlattenLocation1 ([bs]++cs)
+	| as==".." && bs<>".."&& cs<>[]= FlattenLocation1 cs
+	| bs==".." && cs<>[] = FlattenLocation1 cs
+	| cs<>[] = [as]++ FlattenLocation1 ([bs]++cs)
+	FlattenLocation1 [as,bs] = [as,bs]
+	FlattenLocation1 [as] = [as]
+
+/****************************************************************************
+	String handling utility functions
+****************************************************************************/
+
+CountStringInString :: String String -> Int
+CountStringInString string token
+# index = FindIndexInString string token 0
+| index > -1 = 1 + CountStringInString (string % (index+size token,size string)) token
+= 0
+
+StringToUppercase :: Int *String  ->*String
+StringToUppercase nr string
+| nr < 0 = string
+| size string > nr
+	#! char = CharToUppercase string.[nr]
+	# string = update string nr char
+	= StringToUppercase (nr+1) string
+| otherwise = string
+
+CharToUppercase :: Char -> Char
+CharToUppercase char
+| int > 96 && int < 123 = toChar (int bitand (0xdf))
+| otherwise = char
+where 
+	int = toInt char
+
+TrimString::String -> String
+TrimString string
+| (FindIndexInString string "\t" 0)==0 = TrimString (string % (1,size string))
+| string %(size string-1,size string)=="\t"= TrimString (string % (0,size string-2))
+| (FindIndexInString string " " 0)==0 = TrimString (string % (1,size string))
+| string %(size string-1,size string)==" "= TrimString (string % (0,size string-2))
+| otherwise = string
+
+SplitToStringArray :: String String -> [String]
+SplitToStringArray string token
+| string==""=[]
+| nr <> -1 = [string % (0,(nr-1))]++SplitToStringArray (string % ((nr+(size token)),size string)) token
+| otherwise = [string]
+where
+	nr = FindIndexInString string token 0
+
+FindIndexInString ::String String Int -> Int
+FindIndexInString string token nr
+| nr>size string  || token==""= -1
+| string %(nr,nr+(size token)-1)==token = nr
+| ((size string) - 1)== nr = -1
+| otherwise = FindIndexInString string token (nr+1)
+
+StringArrayToTupple::[String] String -> [(String,String)]
+StringArrayToTupple [as:bs] token
+# index = FindIndexInString as token 0
+| index== -1 = StringArrayToTupple bs token
+| otherwise = [(as % (0,(index-1)),as%((index+size token),size as))]++ StringArrayToTupple bs token
+StringArrayToTupple _ _ = []
+
+ToUniqueString :: String -> *String
+ToUniqueString c = {c.[i] \\ i <- [0..(size c-1)]}
+
+CountStringInArray :: [String] String Int -> Int
+CountStringInArray [as:bs] token nr
+| as==token = CountStringInArray bs token nr+1
+| otherwise = CountStringInArray bs token nr
+CountStringInArray _ _ nr = nr
+
+StringArrayCount :: [String] -> Int
+StringArrayCount [as:bs] = 1 + StringArrayCount bs
+StringArrayCount _ = 0
+
+StringArrayToString :: [String] String-> String
+StringArrayToString [as:bs] token= token+++as +++ StringArrayToString bs token
+StringArrayToString _ _= ""
 
 /****************************************************************************
 	as -- bs removes all elements in bs from as

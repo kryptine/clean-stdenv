@@ -1,7 +1,7 @@
 definition module StdHtml
 
-// main portal for generating Clean Web applications using the iData / GEC technique
-// (c) 2005 MJP 
+// top module for generating Clean Web applications using the iData / GEC technique
+// (c) 2005 - 2006 MJP 
 
 import
 
@@ -9,18 +9,17 @@ import
 
 			htmlSettings		// some global settings
 		,	htmlFormData		// general iData type definitions
-		,	htmlHandler			// the kernel module for iData creation and handling
+		,	htmlHandler			// *the* kernel module for iData creation and handling
 
 		,	htmlButtons			// basic collections of buttons, data types for lay-out	control	
+		,	htmlFormlib			// collection of advanced iData creating functions  
 		,	htmlDatabase		// collection for storing data, while guarding consistency and versions
 		,	htmlExceptions		// collection of global exception handling and storage
-		,	htmlFormlib			// collection of advanced iData creating functions  
 		,	htmlRefFormlib		// collection of persistent idata maintaining sharing
 
 		,	htmlArrow			// arrow instantiations for iData forms
 
 		,	htmlTask			// for easy creation of workflow tasks based on iData
-
 
 // html code generation:
 

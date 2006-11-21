@@ -4,7 +4,7 @@ import StdArray, StdChar, StdList, StdStrictLists, StdString, StdTuple
 import ArgEnv, StdMaybe
 import htmlDataDef, htmlTrivial, htmlSettings, htmlStylelib, iDataState
 import StdGeneric, GenParse, GenPrint
-import httpServer
+import httpServer, httpSubServer
 import Gerda
 
 derive gPrint (,), (,,), (,,,), UpdValue
@@ -75,8 +75,6 @@ doHtmlServer2 args userpage world
 				= copy_chars s_s (s_i+1) (d_i+1) n d_s
 				= d_s
 = ([],allhtmlcode,world)
-
-import SUBSERVER
 
 doHtmlSubServer :: !(!Int,!Int,!Int,!String) !(*HSt -> (Html,!*HSt)) !*World -> *World
 doHtmlSubServer (prio,min,max,location) userpage world
