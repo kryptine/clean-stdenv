@@ -3,10 +3,11 @@ implementation module EncodeDecode
 // encoding and decoding of information
 // (c) 2005 MJP
 
-import StdArray, StdInt, StdList, StdString, ArgEnv, StdMaybe, Directory
+import StdArray, StdBool, StdInt, StdList, StdOrdList, StdString, StdTuple, ArgEnv, StdMaybe, Directory
 import htmlTrivial, htmlFormData
 import GenPrint, GenParse
 import dynamic_string
+import EstherBackend
 
 // Serializing Html states...
 
@@ -124,22 +125,36 @@ traceHtmlInput :: !ServerKind !(Maybe String) -> BodyTag
 traceHtmlInput serverkind args=:(Just string)
 =	BodyTag	[ Br, B [] "State values received from client when application started:", Br,
 				STable [] [ [B [] "Triplet:", Txt triplet]
-						  ,[B [] "Update:", Txt update]
+						  ,[B [] "Update:", Txt updates]
 						  ,[B [] "Id:", B [] "Lifespan:", B [] "Format:", B [] "Value:"]
 						: [  [Txt id, Txt (showl life), Txt (showf storage), Txt (shows storage state)] 
 						  \\ (id,life,storage,state) <- htmlState
 						  ]
 						]
 			, Br
-			, Txt string
+//			, Txt string
 			]
 where
-	(htmlState,triplet,update)			= DecodeHtmlStatesAndUpdate serverkind args
+	(htmlState,triplet,updates)			= DecodeHtmlStatesAndUpdate serverkind args
 
 	showl life							= toString life
 	showf storage						= case storage of PlainString -> "String";  _ -> "S_Dynamic"
 	shows PlainString s					= s
-	shows _ d							= d											// "cannot show dynamic value" 
+	shows StaticDynamic d				= toStr (string_to_dynamic` d)											// "cannot show dynamic value" 
+
+	toStr dyn = ShowValueDynamic dyn <+++ " :: " <+++ ShowTypeDynamic dyn
+
+	string_to_dynamic` :: {#Char} -> Dynamic	// just to make a unique copy as requested by string_to_dynamic
+	string_to_dynamic` s	= string_to_dynamic {s` \\ s` <-: s}
+	
+	strip s = { ns \\ ns <-: s | ns >= '\020' && ns <= '\0200'}
+	
+	ShowValueDynamic :: Dynamic -> String
+	ShowValueDynamic d = strip (foldr (+++) "" (fst (toStringDynamic d)) +++ " ")
+	
+	ShowTypeDynamic :: Dynamic -> String
+	ShowTypeDynamic d = strip (snd (toStringDynamic d) +++ " ")
+
 
 // global names setting depending on kind of server used
 

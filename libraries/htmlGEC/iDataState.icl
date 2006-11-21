@@ -7,6 +7,9 @@ import StdArray, StdList, StdOrdList, StdString, StdTuple, ArgEnv, StdMaybe, Dir
 import htmlDataDef, htmlTrivial, htmlFormData, EncodeDecode
 import GenPrint, GenParse
 import dynamic_string
+import EstherBackend
+//import Debug // TEMP
+
 
 derive gParse UpdValue, (,,)
 derive gPrint UpdValue, (,,)
@@ -77,7 +80,7 @@ findState formid formstates=:{fstates,server} world
 # (bool,ma,fstates,world) = findState` formid fstates world
 = (bool,ma,{formstates & fstates = fstates},world)
 where
-	findState` :: !(FormId a) *FStates *NWorld -> (Bool,Maybe a,*FStates,*NWorld)| iDataSerAndDeSerialize a
+	findState` :: !(FormId a) *FStates *NWorld -> (Bool,Maybe a,*FStates,*NWorld)| gPrint{|*|}, gerda{|*|}, TC, gParse{|*|} a //iDataSerAndDeSerialize a
 	findState` formid formstate=:(Node_ left (fid,info) right) world
 	| formid.id == fid	= case info of
 							(OldState state)	= (True, fetchFState state,formstate,world)
@@ -140,6 +143,8 @@ where
 		_				= case string_to_dynamic` string of
 							dyn=:(dynval::a^)	= (True, Just dynval,Node_ Leaf_ (id,OldState {format = StatDyn dyn, life = Persistent}) Leaf_,world)
 							else				= (False,Nothing,    Leaf_,world)
+//	with
+//		mydebug s dyn = ["\n" <+++ s <+++ ShowValueDynamic dyn <+++ " :: " <+++ ShowTypeDynamic dyn]
 
 	findState` {id,lifespan = PersistentRO,storage = StaticDynamic} Leaf_ world 
 	# (string,world)	= readState (MyDir server) id world
@@ -309,9 +314,7 @@ where
 
 // trace States
  
-import EstherBackend
-
-traceStates :: !*FormStates -> !(BodyTag,!*FormStates)
+traceStates :: !*FormStates -> (BodyTag,!*FormStates)
 traceStates formstates=:{fstates}
 # (bodytags,fstates) = traceStates` fstates
 = (BodyTag [Br, B [] "State values when application ended:",Br,		
@@ -333,13 +336,13 @@ where
 	toStr (StatDyn  dyn) = [Txt "S_Dynamic", Txt (ShowValueDynamic dyn <+++ " :: " <+++ ShowTypeDynamic dyn )]
 	toStr (DBStr    str _) = [Txt "Database", Txt str]
 	
-	strip s = { ns \\ ns <-: s | ns >= '\020' && ns <= '\0200'}
-	
-	ShowValueDynamic :: Dynamic -> String
-	ShowValueDynamic d = strip (foldr (+++) "" (fst (toStringDynamic d)) +++ " ")
-	
-	ShowTypeDynamic :: Dynamic -> String
-	ShowTypeDynamic d = strip (snd (toStringDynamic d) +++ " ")
+strip s = { ns \\ ns <-: s | ns >= '\020' && ns <= '\0200'}
+
+ShowValueDynamic :: Dynamic -> String
+ShowValueDynamic d = strip (foldr (+++) "" (fst (toStringDynamic d)) +++ " ")
+
+ShowTypeDynamic :: Dynamic -> String
+ShowTypeDynamic d = strip (snd (toStringDynamic d) +++ " ")
 // debugging code 
 
 print_graph :: !a -> Bool;

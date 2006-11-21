@@ -46,7 +46,7 @@ callClean 			:: Script									// script that takes care of sending the required
 
 // tracing all states ...
 
-traceStates :: !*FormStates -> !(BodyTag,!*FormStates)
+traceStates :: !*FormStates -> (BodyTag,!*FormStates)
 
 // fstate handling used for testing only
 

@@ -5,7 +5,7 @@ import StdEnv,StdTCP
 from httpUtil import unlines, cSplit, endWith, splitAfter, wordsWith, unwords, readFile
 
 DEBUGSERVER
-	:== True
+	:== False
 
 (<<?) file s 
 	= case DEBUGSERVER of
@@ -28,7 +28,9 @@ getArgValue a arguments
 StartServer :: Int [(String,(String String Arguments *World-> ([String],String,*World)))] *World -> *World
 StartServer poortNr linktofunctionlist world
 	// open console voor debuggen:
-	# (console,world) = stdio world
+	# (console,world) 	= stdio world
+	# console			= fwrites "Open your favorite browser and surf to http://localhost/clean\n" console
+
 
 	//luister op de opgegeven poort:
 	# (listen,world) = listenOnPort poortNr world
