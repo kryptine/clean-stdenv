@@ -208,59 +208,13 @@ where
 									((sid,pos,UpdB b), _) 				= (Just (pos,UpdB b) )
 									(_,_) = case parseTriplet tripletupd of
 										((sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns))
-										((sid,pos,UpdS s),	_)			= (Just (pos,UpdS s) )
-										(upd,new) 						= (Nothing			 )
+//										((sid,pos,UpdS s),	_)			= (Just (pos,UpdS s) )
+										_								= case  tripletupd of
+																			((sid,pos,UpdS s), ns) -> (Just (pos, UpdS ns))
+																			_ -> (Nothing			 )
 	where
 		parseTriplet :: TripletUpdate -> (Triplet,Maybe b) | gParse {|*|} b
 		parseTriplet (triplet,update) = (triplet,parseString update)
-
-
-/*		= case (decodeInput1 formid formStates world) of
-
-			// an update for this form is detected
-
-			(Just (pos,updval), (True,Just currentState,formStates,world)) 		// state as received from browser 
-					-> (True, Just (snd (gUpd{|*|} (UpdSearch updval pos) currentState)),formStates,world)
-			(Just (pos,updval), (False,Just currentState,formStates,world)) 	// state has been updated already
-					-> (False, Just currentState,formStates,world)   			// to indicate the update already has taken place, used in arrows
-
-			// no update found, determine the current stored state
-
-			(_, (_,Just currentState, formStates,world))	
-					-> (False, Just currentState,formStates,world)
-
-			// no update, no state stored, the current value is taken as (new) state
-
-			(_,(_,_,formStates,world))	-> (False, Nothing,formStates,world)	
-
-	where
-//		decodeInput1 :: (FormId b) *FormStates *NWorld-> (Maybe FormUpdate, (Bool,Maybe b, *FormStates,*NWorld)) | gParse{|*|} b & TC b
-		decodeInput1 formid fs world
-		# (updateid,fs) = getUpdateId fs
-//		# (anyInput,fs) = getUpdate   fs 
-		| updateid == formid.id	// this state is updated
-		= case getTriplet fs of
-			(Just (sid,pos,UpdC s), Just "",fs) 							= (Just (pos,UpdC s),       findState (nformid sid) fs world)
-			(Just (sid,pos,UpdC s), _,fs) 									= (Just (pos,UpdC s),       findState (nformid sid) fs world)
-			(_,_,fs)= case getTriplet fs of
-					(Just (sid,pos,UpdI i), Just ni,fs) 					= (Just (pos,UpdI ni),      findState (nformid sid) fs world) 
-					(Just (sid,pos,UpdI i), _,fs) 							= (Just (pos,UpdI i),       findState (nformid sid) fs world) 
-					(_,_,fs) = case getTriplet fs of
-							(Just (sid,pos,UpdR r), Just nr,fs) 			= (Just (pos,UpdR nr),      findState (nformid sid) fs world) 
-							(Just (sid,pos,UpdR r), _,fs) 					= (Just (pos,UpdR r),       findState (nformid sid) fs world) 
-							(_,_,fs) = case getTriplet fs of
-									(Just (sid,pos,UpdB b), Just nb,fs) 	= (Just (pos,UpdB nb),      findState (nformid sid) fs world) 
-									(Just (sid,pos,UpdB b), _,fs) 			= (Just (pos,UpdB b),       findState (nformid sid) fs world) 
-									(_,_,fs) = case getTriplet fs of
-										(Just (sid,pos,UpdS s),	Just ns,fs)	= (Just (pos,UpdS ns),      findState (nformid sid) fs world) 
-										(Just (sid,pos,UpdS s),	_,fs)		= (Just (pos,UpdS s),		findState (nformid sid) fs world) 
-//										(Just (sid,pos,UpdS s),	_,fs)		= (Just (pos,UpdS anyInput),findState (nformid sid) fs world) 
-										(upd,new,fs) 						= (Nothing,                 findState formid        fs world)
-
-		| otherwise = (Nothing, findState formid fs world)
-
-		nformid sid = {formid & id = sid}
-*/
 
 // specialize has to be used if a programmer wants to specialize gForm.
 // It remembers the current value of the index in the expression and creates an editor to show this value.

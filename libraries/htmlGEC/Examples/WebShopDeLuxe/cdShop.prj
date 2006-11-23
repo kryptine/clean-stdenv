@@ -2360,7 +2360,7 @@ OtherModules
 				Y:	10
 				SizeX:	909
 				SizeY:	624
-		IclOpen:	True
+		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	htmlStylelib
