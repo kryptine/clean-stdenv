@@ -56,7 +56,7 @@ where
 		, map_from 	= x.map_from o map_from o y.map_to
 		}
 
-getConsPath :: GenericConsDescriptor -> [ConsPos]
+getConsPath :: !GenericConsDescriptor -> [ConsPos]
 getConsPath {gcd_index, gcd_type_def={gtd_num_conses}}
 	= doit gcd_index gtd_num_conses
 where

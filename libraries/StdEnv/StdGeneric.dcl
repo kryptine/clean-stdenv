@@ -53,7 +53,7 @@ bimapId :: Bimap .a .a
 	
 // determine the path in the generic binary-sum-tree of a constructor
 :: ConsPos = ConsLeft | ConsRight
-getConsPath :: GenericConsDescriptor -> [ConsPos]
+getConsPath :: !GenericConsDescriptor -> [ConsPos]
 	
 // generic bidirectional mapping
 generic bimap a b :: Bimap .a .b
