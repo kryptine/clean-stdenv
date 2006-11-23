@@ -61,6 +61,9 @@ where
 emptyFormStates :: *FormStates
 emptyFormStates = { fstates = Leaf_ , triplets = [], updateid = "", server = Internal}
 
+getTriplets :: !*FormStates -> (Triplets,!*FormStates)
+getTriplets formstates=:{triplets} = (triplets,formstates)
+
 getTriplet :: !*FormStates -> (!Maybe Triplet, !Maybe b, !*FormStates) | gParse{|*|} b 
 getTriplet formstates=:{triplets}
 = case triplets of
@@ -197,7 +200,7 @@ where
 //
 // De-serialize information from server to the internally used form states
 
-retrieveFormStates :: ServerKind (Maybe String) *NWorld -> (*FormStates,*NWorld) 					// retrieves all form states hidden in the html page
+retrieveFormStates :: ServerKind (Maybe [(String, String)]) *NWorld -> (*FormStates,*NWorld) 					// retrieves all form states hidden in the html page
 retrieveFormStates serverkind args world 
 	= ({ fstates = retrieveFStates, triplets = triplets, updateid = calc_updateid triplets, server = serverkind },world)
 where

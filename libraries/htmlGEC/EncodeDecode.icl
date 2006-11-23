@@ -131,7 +131,7 @@ where
 
 // reconstruct HtmlState out of the information obtained from browser
 
-DecodeHtmlStatesAndUpdate :: !ServerKind (Maybe String) -> (![HtmlState],!Triplets)
+DecodeHtmlStatesAndUpdate :: !ServerKind (Maybe [(String, String)]) -> (![HtmlState],!Triplets)
 DecodeHtmlStatesAndUpdate serverkind args
 # (_,triplets,state)				= DecodeArguments serverkind args
 = ([states \\states=:(id,_,_,nstate) <- DecodeHtmlStates state | id <> "" || nstate <> ""],triplets) // to be sure that no rubbish is passed on
@@ -139,7 +139,7 @@ DecodeHtmlStatesAndUpdate serverkind args
 // Parse and decode low level information obtained from server 
 // In case of using a php script and external server:
 
-DecodeArguments :: !ServerKind (Maybe String) -> (!String,!Triplets,!String)
+DecodeArguments :: !ServerKind (Maybe [(String, String)]) -> (!String,!Triplets,!String)
 DecodeArguments External _				= DecodePhpArguments
 where
 //	DecodePhpArguments :: (!String,!String,!String,!String)							// executable, id + update , new , state
@@ -161,10 +161,19 @@ where
 
 // In case of using the internal server written in Clean:
 
-DecodeArguments Internal (Just args)	= DecodeCleanServerArguments args
+DecodeArguments Internal (Just args)	
+# nargs = length args
+| nargs == 0 	= ("clean",[],"")
+| nargs == 1	= DecodeCleanServerArguments (foldl (+++) "" [name +++ "=" +++ value +++ ";" \\ (name,value) <- args])
+//= ("clean",[],snd (last args))
+# state = urlDecode (snd (last args))
+= ("clean",[(calcTriplet (decodeString triplet) "",new) \\ (triplet,new) <- tl (reverse args)],state)
 where
 	DecodeCleanServerArguments :: !String -> (!String,!Triplets,!String)		// executable, id + update , new , state
 	DecodeCleanServerArguments args
+//	# nargs	= foldl (+++) "" [name +++ "=" +++ value +++ ";" \\ (name,value) <- args]
+
+
 	# input 							= [c \\ c <-: args | not (isControl c) ]	// get rid of communication noise
 	# (thisexe,input) 					= mscan '\"'          input					// get rid of garbage
 	# input								= skipping ['UD\"']   input
@@ -188,8 +197,10 @@ calcTriplet s newstring
 
 // traceHtmlInput utility used to see what kind of rubbish is received
 
-traceHtmlInput :: !ServerKind !(Maybe String) -> BodyTag
-traceHtmlInput serverkind args=:(Just string)
+traceHtmlInput :: !ServerKind !(Maybe [(String, String)]) -> BodyTag
+traceHtmlInput serverkind args=:(Just input)
+# nargs	= foldl (+++) "" [name +++ "=" +++ value +++ ";" \\ (name,value) <- input]
+
 =	BodyTag	[ Br, B [] "State values received from client when application started:", Br,
 				STable [] [ [B [] "Triplets:",Br]
 							, showTriplet triplets
@@ -199,15 +210,13 @@ traceHtmlInput serverkind args=:(Just string)
 						  ]
 						]
 			, Br
-			, Txt string
+			, STable [] [[Txt name,Txt value] \\ (name,value) <- input]
 //			, Txt (decodeString string)
 			]
 where
 	(htmlState,triplets)			= DecodeHtmlStatesAndUpdate serverkind args
 
-	showTriplet []			= []
-	showTriplet [triplet:triplets]
-							= [Txt (printToString triplet),Br:showTriplet triplets]
+	showTriplet triplets	= [STable [] [[Txt (printToString triplet)] \\ triplet <- triplets]]
 	showl life				= toString life
 	showf storage			= case storage of PlainString -> "String";  _ -> "S_Dynamic"
 	shows PlainString s		= s

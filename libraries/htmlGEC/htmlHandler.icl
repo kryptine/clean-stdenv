@@ -48,12 +48,13 @@ doHtml userpage world
 
 doHtmlServer :: !(*HSt -> (Html,!*HSt)) !*World -> *World
 doHtmlServer userpage world
-= StartServer 80 [("clean", \_ _ a -> doHtmlServer2 (conv a) userpage)] world
+= StartServer 80 [("clean", \_ _ args -> doHtmlServer2 args userpage)] world
+//= StartServer 80 [("clean", \_ _ a -> doHtmlServer2 (conv a) userpage)] world
 where
 	conv args				= foldl (+++) "" [name +++ "=" +++ value +++ ";" \\ (name,value) <- args]
 //	conv args				= foldl (+++) "" (map snd args)
 
-doHtmlServer2 :: String .(*HSt -> (Html,!*HSt)) *World -> ([String],String,*World)
+doHtmlServer2 :: [(String, String)] .(*HSt -> (Html,!*HSt)) *World -> ([String],String,*World)
 doHtmlServer2 args userpage world
 # (inout,world)			= doHtmlPage Internal (Just args) userpage [|] world
 # n_chars				= count_chars inout 0
@@ -95,11 +96,12 @@ where
 	mycallbackfun header contentlength socket world
 	# (_,datafromclient,socket,world)	= ReceiveString 0 contentlength socket world
 	| socket==0 						= (0,world)				//socket closed or timed out
-	# (_,htmlcode,world) 				= doHtmlServer2 datafromclient userpage world
+//	# (_,htmlcode,world) 				= doHtmlServer2 datafromclient userpage world
+	# (_,htmlcode,world) 				= doHtmlServer2 [] userpage world
 	= SendString htmlcode "text/html" header socket world
 
 
-doHtmlPage :: !ServerKind !(Maybe String) !.(*HSt -> (Html,!*HSt)) !*HtmlStream !*World -> (!*HtmlStream,!*World)
+doHtmlPage :: !ServerKind !(Maybe [(String, String)]) !.(*HSt -> (Html,!*HSt)) !*HtmlStream !*World -> (!*HtmlStream,!*World)
 doHtmlPage serverkind args userpage inout world
 # (gerda,world)				= openGerda` MyDataBase world	
 # nworld 					= { worldC = world, inout = inout, gerda = gerda}	
@@ -171,7 +173,49 @@ where
 
 //	findFormInfo :: FormId *FormStates *NWorld -> (Bool,Maybe a,*FormStates,*NWorld) | gUpd{|*|} a & gParse{|*|} a & TC a
 	findFormInfo formid formStates world
-		= case (decodeInput1 formid formStates world) of
+	# (updateid,formStates) 	= getUpdateId formStates
+	| updateid <> formid.id		
+		# (bool,justcurstate,formStates,world) = findState formid formStates world									// the current form is not updated
+		= (False,justcurstate,formStates,world)
+	# (alltriplets,formStates)	= getTriplets formStates
+	= case (findState formid formStates world) of
+			(False,Just currentState,formStates,world) -> (False, Just currentState,formStates,world) 				// yes, but update already handled
+			(True, Just currentState,formStates,world) -> updateState alltriplets currentState formStates world		// yes, handle update
+			(_,    Nothing,formStates,world) 		   -> (False, Nothing,formStates,world) 		  				// cannot find previously stored state
+
+
+	updateState alltriplets currentState formStates world
+	# allUpdates = [update \\ tripletupd <- alltriplets, (Just update) <- [examineTriplet tripletupd]]
+	# newState = applyUpdates allUpdates currentState
+	= (True,Just newState,formStates,world)
+
+	applyUpdates [] currentState 					= currentState
+	applyUpdates [(pos,upd):updates] currentState	= applyUpdates updates (snd (gUpd{|*|} (UpdSearch upd pos) currentState))
+
+	examineTriplet :: TripletUpdate -> Maybe (Int,UpdValue)
+	examineTriplet tripletupd
+		= case parseTriplet tripletupd of
+			((sid,pos,UpdC s), Just "") 								= (Just (pos,UpdC s) )
+			((sid,pos,UpdC s), _) 										= (Just (pos,UpdC s) )
+			(_,_)= case parseTriplet tripletupd of
+					((sid,pos,UpdI i), Just ni) 						= (Just (pos,UpdI ni))
+					((sid,pos,UpdI i), _) 								= (Just (pos,UpdI i) )
+					(_,_) = case parseTriplet tripletupd of
+							((sid,pos,UpdR r), Just nr) 				= (Just (pos,UpdR nr))
+							((sid,pos,UpdR r), _) 						= (Just (pos,UpdR r) )
+							(_,_) = case parseTriplet tripletupd of
+									((sid,pos,UpdB b), Just nb) 		= (Just (pos,UpdB nb))
+									((sid,pos,UpdB b), _) 				= (Just (pos,UpdB b) )
+									(_,_) = case parseTriplet tripletupd of
+										((sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns))
+										((sid,pos,UpdS s),	_)			= (Just (pos,UpdS s) )
+										(upd,new) 						= (Nothing			 )
+	where
+		parseTriplet :: TripletUpdate -> (Triplet,Maybe b) | gParse {|*|} b
+		parseTriplet (triplet,update) = (triplet,parseString update)
+
+
+/*		= case (decodeInput1 formid formStates world) of
 
 			// an update for this form is detected
 
@@ -188,11 +232,12 @@ where
 			// no update, no state stored, the current value is taken as (new) state
 
 			(_,(_,_,formStates,world))	-> (False, Nothing,formStates,world)	
+
 	where
 //		decodeInput1 :: (FormId b) *FormStates *NWorld-> (Maybe FormUpdate, (Bool,Maybe b, *FormStates,*NWorld)) | gParse{|*|} b & TC b
 		decodeInput1 formid fs world
 		# (updateid,fs) = getUpdateId fs
-		# (anyInput,fs) = getUpdate   fs 
+//		# (anyInput,fs) = getUpdate   fs 
 		| updateid == formid.id	// this state is updated
 		= case getTriplet fs of
 			(Just (sid,pos,UpdC s), Just "",fs) 							= (Just (pos,UpdC s),       findState (nformid sid) fs world)
@@ -208,12 +253,14 @@ where
 									(Just (sid,pos,UpdB b), _,fs) 			= (Just (pos,UpdB b),       findState (nformid sid) fs world) 
 									(_,_,fs) = case getTriplet fs of
 										(Just (sid,pos,UpdS s),	Just ns,fs)	= (Just (pos,UpdS ns),      findState (nformid sid) fs world) 
-										(Just (sid,pos,UpdS s),	_,fs)		= (Just (pos,UpdS s),findState (nformid sid) fs world) 
+										(Just (sid,pos,UpdS s),	_,fs)		= (Just (pos,UpdS s),		findState (nformid sid) fs world) 
 //										(Just (sid,pos,UpdS s),	_,fs)		= (Just (pos,UpdS anyInput),findState (nformid sid) fs world) 
 										(upd,new,fs) 						= (Nothing,                 findState formid        fs world)
+
 		| otherwise = (Nothing, findState formid fs world)
 
 		nformid sid = {formid & id = sid}
+*/
 
 // specialize has to be used if a programmer wants to specialize gForm.
 // It remembers the current value of the index in the expression and creates an editor to show this value.

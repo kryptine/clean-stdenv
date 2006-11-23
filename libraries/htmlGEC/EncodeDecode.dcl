@@ -30,7 +30,6 @@ import htmlFormData
 	| UpdS String												// new piece of text
 
 encodeTriplet		:: !Triplet -> String						// encoding of triplets
-decodeTriplet		:: !String  -> Maybe Triplet
 
 // Form submission handling
 
@@ -38,15 +37,10 @@ callClean 		:: !(Script -> ElementEvents) !Mode !String -> [ElementEvents]
 submitscript 	::  BodyTag
 globalstateform :: !Value -> BodyTag
 
-// type driven encoding of strings, used to encode triplets
-
-encodeInfo					:: !a      -> String  | gPrint{|*|} a
-decodeInfo					:: !String -> Maybe a | gParse{|*|} a
-
 // serializing, de-serializing of iData states to strings stored in the html page
 
 EncodeHtmlStates 			:: ![HtmlState] -> String
-DecodeHtmlStatesAndUpdate 	:: !ServerKind (Maybe String) -> (![HtmlState],!Triplets) // hidden state stored in Client + triplets
+DecodeHtmlStatesAndUpdate 	:: !ServerKind (Maybe [(String, String)]) -> (![HtmlState],!Triplets) // hidden state stored in Client + triplets
 
 // serializing, de-serializing of iData state stored in files
 
@@ -59,9 +53,5 @@ ThisExe						:: !ServerKind -> String									// name of this executable
 MyPhP 						:: !ServerKind -> String									// name of php script interface between server and this executable
 MyDir 						:: !ServerKind -> String									// name of directory in which persistent form info is stored
 
-traceHtmlInput				:: !ServerKind !(Maybe String) -> BodyTag					// for debugging showing the information received from browser
+traceHtmlInput				:: !ServerKind !(Maybe [(String, String)]) -> BodyTag					// for debugging showing the information received from browser
 
-// low level encoding and decoding 
-
-encodeString				:: !String -> String
-decodeString				:: !String -> *String
