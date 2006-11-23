@@ -114,7 +114,7 @@ removeDup		:: !.[a] 		-> .[a] 	| Eq a	//	Remove all duplicates from list
 													special a=Int
 															a=Char
 															a=Real
-removeIndex 	:: a  !u:[a] -> (Int,u:[a])	| Eq a	//	"removeMember" returning index of removed element
+removeIndex 	:: !a !u:[a] -> (Int,u:[a])	| Eq a	//	"removeMember" returning index of removed element
 													special a=Int
 															a=Char
 															a=Real

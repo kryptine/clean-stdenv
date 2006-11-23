@@ -345,10 +345,10 @@ removeMembers::!u:[a] !.[a] -> u:[a] | Eq a
 removeMembers x []		= x
 removeMembers x [b:y]	= removeMembers (removeMember b x) y
 
-removeIndex :: a !u:[a] -> (Int,u:[a]) | Eq a
+removeIndex :: !a !u:[a] -> (Int,u:[a]) | Eq a
 removeIndex e xs = removei e xs 0
 where
-	removei :: a u:[a] !Int -> (Int,u:[a]) | == a;
+	removei :: !a u:[a] !Int -> (Int,u:[a]) | == a;
 	removei e [x:xs] i
 		| x==e
 			= (i,xs)
