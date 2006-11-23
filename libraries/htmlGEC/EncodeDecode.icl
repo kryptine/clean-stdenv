@@ -9,6 +9,67 @@ import GenPrint, GenParse
 import dynamic_string
 import EstherBackend
 
+derive gParse UpdValue, (,,)
+derive gPrint UpdValue, (,,), (,)
+
+
+// form submission department....
+
+// script for transmitting name and value of changed input 
+
+callClean :: !(Script -> ElementEvents) !Mode !String -> [ElementEvents]
+callClean  onSomething Edit		_    =  [onSomething (SScript "toclean(this)")]
+callClean  onSomething Submit 	myid =  [onSomething (SScript ("toclean2(" <+++ myid <+++ ")"))]
+callClean  onSomething _ 		_	 =  []
+
+submitscript :: BodyTag
+submitscript 
+=	BodyTag 
+    [ Script [] (SScript
+		(	" function toclean(inp)" +++
+			" { document." +++ globalFormName +++ "." +++	updateInpName +++ ".value=inp.name+\"=\"+inp.value;" +++
+			   "document." +++ globalFormName +++ ".submit(); }"
+		))
+	,	Script [] (SScript
+		(	" function toclean2(form)" +++
+			" { "  +++
+				"form.hidden.value=" +++ "document." +++ globalFormName +++ "." +++ globalInpName +++ ".value;" +++
+				"form.submit();" +++
+			"}" 
+		))
+
+	]
+
+// form that contains global state and empty input form for storing updated input
+	
+globalstateform :: !Value -> BodyTag
+globalstateform  globalstate
+=	Form 	[ Frm_Name globalFormName 
+//			, Frm_Action (MyPhP server)
+			, Frm_Method Post
+			, Frm_Enctype "multipart/form-data"			// what to do to enable large data ??
+			]
+			[ Input [ Inp_Name updateInpName
+					, Inp_Type Inp_Hidden
+					] ""
+			, Input [ Inp_Name globalInpName
+					, Inp_Type Inp_Hidden
+					, Inp_Value globalstate
+					] ""
+			]		 
+
+globalFormName :: String
+globalFormName	=: "CleanForm"
+
+updateInpName :: String
+updateInpName	=: "UD"
+
+globalInpName :: String
+globalInpName	=: "GS"
+
+selectorInpName :: String
+selectorInpName	=: "CS"
+	
 // Serializing Html states...
 
 EncodeHtmlStates :: ![HtmlState] -> String
@@ -70,15 +131,15 @@ where
 
 // reconstruct HtmlState out of the information obtained from browser
 
-DecodeHtmlStatesAndUpdate :: !ServerKind (Maybe String) -> ([HtmlState],String,String)
+DecodeHtmlStatesAndUpdate :: !ServerKind (Maybe String) -> (![HtmlState],!Triplets)
 DecodeHtmlStatesAndUpdate serverkind args
-# (_,triplet,update,state)				= DecodeArguments serverkind args
-= ([states \\states=:(id,_,_,nstate) <- DecodeHtmlStates state | id <> "" || nstate <> ""],triplet,update) // to be sure that no rubbish is passed on
+# (_,triplets,state)				= DecodeArguments serverkind args
+= ([states \\states=:(id,_,_,nstate) <- DecodeHtmlStates state | id <> "" || nstate <> ""],triplets) // to be sure that no rubbish is passed on
 
 // Parse and decode low level information obtained from server 
 // In case of using a php script and external server:
 
-DecodeArguments :: !ServerKind (Maybe String) -> (!String,!String,!String,!String)
+DecodeArguments :: !ServerKind (Maybe String) -> (!String,!Triplets,!String)
 DecodeArguments External _				= DecodePhpArguments
 where
 //	DecodePhpArguments :: (!String,!String,!String,!String)							// executable, id + update , new , state
@@ -86,16 +147,14 @@ where
 	# input 							= [c \\ c <-: GetArgs | not (isControl c) ]	// get rid of communication noise
 	# (thisexe,input) 					= mscan '#'         input					// get rid of garbage
 	# input								= skipping ['#UD='] input
-	# (update, input)					= mscan '='         input
+	# (triplet, input)					= mscan '='         input
 	# (new,    input)					= mscan ';'         input
 	# input								= skipping ['GS=']  input
 	# (state, input)					= mscan ';'         input
 	=: case toString update of
-			"CS"						= (toString thisexe, decodeChars new,    "",           toString state)
-			else						= (toString thisexe, decodeChars update, toString new, toString state)
-/*	=: case (decodeChars thisexe, decodeChars update, decodeChars new, decodeChars state) of
-			(thisexe,"CS",new,state)	= (thisexe,new,"",state)
-		    else						= else*/
+//			"CS"						= (toString thisexe, decodeChars new,    "",           toString state)
+//			else						= (toString thisexe, decodeChars triplet, toString new, toString state)
+			else						= ("clean", [(calcTriplet (decodeChars triplet) "", toString new)], toString state)
 
 	GetArgs :: String 
 	GetArgs =: foldl (+++) "" [strings \\ strings <-: getCommandLine]
@@ -104,43 +163,55 @@ where
 
 DecodeArguments Internal (Just args)	= DecodeCleanServerArguments args
 where
-	DecodeCleanServerArguments :: !String -> (!String,!String,!String,!String)		// executable, id + update , new , state
+	DecodeCleanServerArguments :: !String -> (!String,!Triplets,!String)		// executable, id + update , new , state
 	DecodeCleanServerArguments args
 	# input 							= [c \\ c <-: args | not (isControl c) ]	// get rid of communication noise
 	# (thisexe,input) 					= mscan '\"'          input					// get rid of garbage
 	# input								= skipping ['UD\"']   input
-	# (update, input)					= mscan '='           input					// should give triplet
-	# (new,    input)					= mscan '-'           input					// should give update value <<< *** Bug for negative integers??? ***
+	# (triplet, input)					= mscan '='           input					// should give triplet
+	# (new,    input)					= mscan '-'           input					// should give triplet value <<< *** Bug for negative integers??? ***
 	# (_,input)							= mscan '='           input
 	# input								= skipping ['\"GS\"'] input
 	# (found,index) 					= FindSubstr ['---']  input
 	# state								= if found (take index input) ['']
-	= case toString update of
-			"CS"						= ("clean", decodeChars new,    "",           toString state)
-			else						= ("clean", decodeChars update, toString new, toString state)
+	= case toString triplet of
+			""							= ("clean", [], toString state)
+			"CS"						= ("clean", [(calcTriplet (decodeChars new) "", "")], toString state)
+			else						= ("clean", [(calcTriplet (decodeChars triplet) (toString new), toString new)], toString state)
+
+calcTriplet:: String String -> Triplet
+calcTriplet s newstring
+= case parseString s of
+	Just (id,pos,UpdS _) = (id,pos,UpdS newstring)
+	Just triplet = triplet
+	_ = ("Parse Error!",0,UpdS s)
 
 // traceHtmlInput utility used to see what kind of rubbish is received
 
 traceHtmlInput :: !ServerKind !(Maybe String) -> BodyTag
 traceHtmlInput serverkind args=:(Just string)
 =	BodyTag	[ Br, B [] "State values received from client when application started:", Br,
-				STable [] [ [B [] "Triplet:", Txt triplet]
-						  ,[B [] "Update:", Txt updates]
+				STable [] [ [B [] "Triplets:",Br]
+							, showTriplet triplets
 						  ,[B [] "Id:", B [] "Lifespan:", B [] "Format:", B [] "Value:"]
 						: [  [Txt id, Txt (showl life), Txt (showf storage), Txt (shows storage state)] 
 						  \\ (id,life,storage,state) <- htmlState
 						  ]
 						]
 			, Br
-//			, Txt string
+			, Txt string
+//			, Txt (decodeString string)
 			]
 where
-	(htmlState,triplet,updates)			= DecodeHtmlStatesAndUpdate serverkind args
+	(htmlState,triplets)			= DecodeHtmlStatesAndUpdate serverkind args
 
-	showl life							= toString life
-	showf storage						= case storage of PlainString -> "String";  _ -> "S_Dynamic"
-	shows PlainString s					= s
-	shows StaticDynamic d				= toStr (string_to_dynamic` d)											// "cannot show dynamic value" 
+	showTriplet []			= []
+	showTriplet [triplet:triplets]
+							= [Txt (printToString triplet),Br:showTriplet triplets]
+	showl life				= toString life
+	showf storage			= case storage of PlainString -> "String";  _ -> "S_Dynamic"
+	shows PlainString s		= s
+	shows StaticDynamic d	= toStr (string_to_dynamic` d)											// "cannot show dynamic value" 
 
 	toStr dyn = ShowValueDynamic dyn <+++ " :: " <+++ ShowTypeDynamic dyn
 
@@ -160,7 +231,7 @@ where
 
 ThisExe :: !ServerKind -> String
 ThisExe External 
-# (thisexe,_,_,_) = DecodeArguments External Nothing 
+# (thisexe,_,_) = DecodeArguments External Nothing 
 = thisexe
 ThisExe Internal 
 = "clean"
@@ -211,9 +282,19 @@ where
 
 encodeString :: !String -> String
 encodeString s							= /* see also urlEncode */ string_to_string52 s	// using the whole alphabet 
+//encodeString s							= urlEncode s
 
 decodeString :: !String -> *String
 decodeString s							= /* see also urlDecode */ string52_to_string s	// using the whole alphabet
+//decodeString s							= urlDecode s
+
+// to encode triplets in htmlpages
+
+encodeTriplet	:: !Triplet -> String				// encoding of triplets
+encodeTriplet triplet = encodeInfo triplet
+
+decodeTriplet	:: !String -> Maybe Triplet			// decoding of triplets
+decodeTriplet triplet = decodeInfo triplet
 
 // utility functions based on low level encoding - decoding
 

@@ -128,23 +128,23 @@ gForm{|Button|} (init,formid) hst
 	v=:(LButton size bname)
 	= (	{ changed		= False
 		, value			= v
-		, form			= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
+		, form			= [Input (onMode formid.mode [] [] [Inp_Disabled Disabled] [] ++
 							[ Inp_Type		Inp_Button
 							, Inp_Value		(SV bname)
 							, Inp_Name		(encodeTriplet (formid.id,cntr,UpdS bname))
 							, `Inp_Std		[Std_Style ("width:" <+++ size)]
-							, `Inp_Events	[OnClick callClean]
+							, `Inp_Events	(callClean OnClick Edit "")
 							]) ""]
 		},(incrHSt 1 hst))
 	v=:(PButton (height,width) ref)
 	= (	{ changed		= False
 		, value			= v
-		, form			= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
+		, form			= [Input (onMode formid.mode [] [] [Inp_Disabled Disabled] [] ++
 							[ Inp_Type		Inp_Image
 							, Inp_Value		(SV ref)
 							, Inp_Name		(encodeTriplet (formid.id,cntr,UpdS ref))
 							, `Inp_Std		[Std_Style ("width:" <+++ width <+++ " height:" <+++ height)]
-							, `Inp_Events	[OnClick callClean]
+							, `Inp_Events	(callClean OnClick Edit "")
 							, Inp_Src ref
 							]) ""]
 		},incrHSt 1 hst)
@@ -157,22 +157,22 @@ gForm{|CheckBox|} (init,formid) hst
 	v=:(CBChecked name) 
 	= (	{ changed		= False
 		, value			= v
-		, form			= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
+		, form			= [Input (onMode formid.mode [] [] [Inp_Disabled Disabled] [] ++
 							[ Inp_Type		Inp_Checkbox
 							, Inp_Value		(SV name)
 							, Inp_Name		(encodeTriplet (formid.id,cntr,UpdS name))
 							, Inp_Checked	Checked
-							, `Inp_Events	[OnClick callClean]
+							, `Inp_Events	(callClean OnClick Edit "")
 							]) ""]
 		},incrHSt 1 hst)
 	v=:(CBNotChecked name)
 	= (	{ changed		= False
 		, value			= v
-		, form			= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
+		, form			= [Input (onMode formid.mode [] [] [Inp_Disabled Disabled] [] ++
 							[ Inp_Type		Inp_Checkbox
 							, Inp_Value		(SV name)
 							, Inp_Name		(encodeTriplet (formid.id,cntr,UpdS name))
-							, `Inp_Events	[OnClick callClean]
+							, `Inp_Events	(callClean OnClick Edit "")
 							]) ""]
 		},incrHSt 1 hst)
 
@@ -182,22 +182,22 @@ gForm{|RadioButton|} (init,formid) hst
 	v=:(RBChecked name)
 	= (	{ changed		= False
 		, value			= v
-		, form			= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
+		, form			= [Input (onMode formid.mode [] [] [Inp_Disabled Disabled] [] ++
 							[ Inp_Type			Inp_Radio
 							, Inp_Value			(SV name)
 							, Inp_Name			(encodeTriplet (formid.id,cntr,UpdS name))
 							, Inp_Checked		Checked
-							, `Inp_Events		[OnClick callClean]
+							, `Inp_Events		(callClean OnClick Edit "")
 							]) ""]
 		},incrHSt 1 hst)
 	v=:(RBNotChecked name)
 	= (	{ changed		= False
 		, value			= v
-		, form			= [Input (onMode formid.mode [] [Inp_Disabled Disabled] [] ++
+		, form			= [Input (onMode formid.mode [] [] [Inp_Disabled Disabled] [] ++
 							[ Inp_Type			Inp_Radio
 							, Inp_Value			(SV name)
 							, Inp_Name			(encodeTriplet (formid.id,cntr,UpdS name))
-							, `Inp_Events		[OnClick callClean]
+							, `Inp_Events		(callClean OnClick Edit "")
 							]) ""]
 		},incrHSt 1 hst)
 
@@ -207,11 +207,11 @@ gForm{|PullDownMenu|} (init,formid) hst
 	v=:(PullDown (size,width) (menuindex,itemlist))
 	= (	{ changed		= False
 		, value			= v
-		, form			= [Select (onMode formid.mode [] [Sel_Disabled Disabled] [] ++
+		, form			= [Select (onMode formid.mode [] [] [Sel_Disabled Disabled] [] ++
 							[ Sel_Name			("CS")
 							, Sel_Size			size
 							, `Sel_Std			[Std_Style ("width:" <+++ width <+++ "px")]
-							, `Sel_Events		[OnChange callClean]
+							, `Sel_Events		(callClean OnChange Edit "")
 							])
 							[ Option 
 								[ Opt_Value (encodeTriplet (formid.id,cntr,UpdC (itemlist!!j)))
@@ -236,9 +236,9 @@ gForm{|TextArea|} (init,formid) hst
 # (cntr,hst)			= CntrHSt hst
 = (	{ changed			= False
 	, value				= formid.ival
-	, form				= [Form [Frm_Method Post, `Frm_Events [OnSubmit callClean]] 
+	, form				= [Form [Frm_Method Post, `Frm_Events (callClean OnSubmit Edit "")] 
 							[mkSTable 	[ [ Textarea [Txa_Name "message", Txa_Rows row, Txa_Cols col ] "" ]
-										, [ mkSTable [[ Input [Inp_Type Inp_Submit, Inp_Name (encodeTriplet (formid.id,cntr+2,UpdS string)), Inp_Value (SV "Set"),`Inp_Events [OnClick callClean]] ""
+										, [ mkSTable [[ Input [Inp_Type Inp_Submit, Inp_Name (encodeTriplet (formid.id,cntr+2,UpdS string)), Inp_Value (SV "Set"),`Inp_Events (callClean OnClick Edit "")] ""
 										  		   	  , Input [Inp_Type Inp_Reset,  Inp_Name "reset",                                        Inp_Value (SV "Reset")] ""
 										           	 ]]
 										  ]
@@ -270,7 +270,7 @@ where
 					, Inp_Name		(encodeTriplet (formid.id,cntr,updval))
 					, Inp_Size		size
 					, `Inp_Std		[EditBoxStyle, Std_Title "::Password"]
-					, `Inp_Events	[OnChange callClean]
+					, `Inp_Events	(callClean OnChange Edit "")
 					] ""
 			,incrHSt 1 hst)
 	mkPswInput size (init,{mode = Display}) sval _ hst

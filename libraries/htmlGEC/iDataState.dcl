@@ -26,23 +26,9 @@ getUpdate 			:: !*FormStates -> (String,!*FormStates)	// value typed in by user 
 retrieveFormStates 	:: ServerKind (Maybe String) *NWorld -> (*FormStates,*NWorld) 	// retrieves all form states hidden in the html page
 storeFormStates 	:: !FormStates *NWorld -> (BodyTag,*NWorld)
 
-// Triplet handling
-
-:: Triplet			:== (String,Int,UpdValue)
-
-:: UpdValue 													// the updates that can take place	
-	= UpdI Int													// new integer value
-	| UpdR Real													// new real value
-	| UpdB Bool													// new boolean value
-	| UpdC String												// choose indicated constructor 
-	| UpdS String												// new piece of text
-
-encodeTriplet		:: !Triplet -> String						// encoding of triplets
-decodeTriplet		:: !String  -> Maybe Triplet
 
 getTriplet  		:: !*FormStates -> (!Maybe Triplet,!Maybe b,!*FormStates)  | gParse{|*|} b // inspect triplet
 
-callClean 			:: Script									// script that takes care of sending the required input to this application
 
 // tracing all states ...
 
@@ -51,4 +37,4 @@ traceStates :: !*FormStates -> (BodyTag,!*FormStates)
 // fstate handling used for testing only
 
 initTestFormStates 	::  *NWorld -> (*FormStates,*NWorld) 		// creates initial empty form states
-setTestFormStates 	::  (Maybe Triplet) String String *FormStates *NWorld -> (*FormStates,*NWorld) 	// stores triplet updateid update in state 
+setTestFormStates 	:: [(Triplet,String)] String String *FormStates *NWorld -> (*FormStates,*NWorld)			// retrieves all form states hidden in the html page

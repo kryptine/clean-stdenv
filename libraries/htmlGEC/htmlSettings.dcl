@@ -28,5 +28,5 @@ radioButtonSeparator :== '.'			// used as extension for family of radiobuttons
 
 // OPTIONS WHICH CAN BE SET OFF AND ON
 
-IF_GERDA gerda no_gerda :== gerda		// If Gerda option is chosen
+IF_GERDA gerda no_gerda :== gerda		// If database option is used
 //IF_GERDA gerda no_gerda :== no_gerda	// otherwise, BUT manually flag of ", gerda{|*|}" in the class definition above

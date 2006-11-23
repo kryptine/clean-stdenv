@@ -50,7 +50,8 @@ doHtmlServer :: !(*HSt -> (Html,!*HSt)) !*World -> *World
 doHtmlServer userpage world
 = StartServer 80 [("clean", \_ _ a -> doHtmlServer2 (conv a) userpage)] world
 where
-	conv args				= foldl (+++) "" (map snd args)
+	conv args				= foldl (+++) "" [name +++ "=" +++ value +++ ";" \\ (name,value) <- args]
+//	conv args				= foldl (+++) "" (map snd args)
 
 doHtmlServer2 :: String .(*HSt -> (Html,!*HSt)) *World -> ([String],String,*World)
 doHtmlServer2 args userpage world
@@ -109,7 +110,7 @@ doHtmlPage serverkind args userpage inout world
 # (allformbodies,world)		= storeFormStates states world
 # {worldC,gerda,inout}		= print_to_stdout 
 								(Html (Head headattr [extra_style:headtags]) 
-								(Body (extra_body_attr ++ attr) [debugInput,debufOutput,allformbodies:bodytags]))
+								(Body (extra_body_attr ++ attr) [allformbodies:bodytags++[debugInput,debufOutput]]))
 								world
 # world						= closeGerda` gerda worldC
 = (inout,world)
@@ -151,7 +152,7 @@ where
 		  ,mkHSt states world)
 
 	# (viewform,{states,world})											// make a form for it
-							= gForm{|*|} (init,if (init == Const) vformid (reuseFormId formid view)) (mkHSt states world)
+							= mkForm (init,if (init == Const) vformid (reuseFormId formid view)) (mkHSt states world)
 
 	| viewform.changed && not isupdated						 			// important: redo it all to handle the case that a user defined specialisation is updated !!
 							= calcnextView True (Just viewform.value) states world
@@ -207,7 +208,8 @@ where
 									(Just (sid,pos,UpdB b), _,fs) 			= (Just (pos,UpdB b),       findState (nformid sid) fs world) 
 									(_,_,fs) = case getTriplet fs of
 										(Just (sid,pos,UpdS s),	Just ns,fs)	= (Just (pos,UpdS ns),      findState (nformid sid) fs world) 
-										(Just (sid,pos,UpdS s),	_,fs)		= (Just (pos,UpdS anyInput),findState (nformid sid) fs world) 
+										(Just (sid,pos,UpdS s),	_,fs)		= (Just (pos,UpdS s),findState (nformid sid) fs world) 
+//										(Just (sid,pos,UpdS s),	_,fs)		= (Just (pos,UpdS anyInput),findState (nformid sid) fs world) 
 										(upd,new,fs) 						= (Nothing,                 findState formid        fs world)
 		| otherwise = (Nothing, findState formid fs world)
 
@@ -231,6 +233,27 @@ where
 	= i + (-1 - cnt)
 
 // gForm: automatically derives a Html form for any Clean type
+
+mkForm :: !(InIDataId a) !*HSt -> *(Form a, !*HSt)	| gForm {|*|} a
+mkForm (init,formid=:{mode = Submit}) hst 
+# (form,hst) 	= gForm{|*|} (init,formid) hst
+# hidden		= Input [ Inp_Name "hidden"
+						, Inp_Type Inp_Hidden
+						, Inp_Value (SV "")
+						] ""
+# submit		= Input [ Inp_Type Inp_Button
+						, Inp_Value (SV "Submit")
+						,`Inp_Events (callClean OnClick Submit formid.id)
+						] ""
+# clear			= Input [ Inp_Type Inp_Reset, Inp_Value (SV "Clear")] ""
+# sform			= [Form [ Frm_Method Post
+						, Frm_Name  formid.id
+						] (form.form ++ [hidden,Br,submit,clear])
+				  ] 
+= ({form & form = sform} ,hst)
+mkForm inidataid hst = gForm{|*|} inidataid hst
+	
+
 
 generic gForm a :: !(InIDataId a) !*HSt -> *(Form a, !*HSt)	
 
@@ -331,7 +354,7 @@ where
 		where
 			styles			= case formid.mode of
 								Edit	-> [ `Sel_Std	[Std_Style width, EditBoxStyle]
-										   , `Sel_Events [OnChange callClean]
+										   , `Sel_Events (callClean OnChange Edit "")
 										   ]
 								_		-> [ `Sel_Std	[Std_Style width, DisplayBoxStyle]
 										   ,  Sel_Disabled Disabled
@@ -473,22 +496,17 @@ gUpd{|(->)|} gUpdArg gUpdRes mode f
 // small utility functions
 
 mkInput :: !Int !(InIDataId d) Value UpdValue !*HSt -> (BodyTag,*HSt) 
-mkInput size (init,formid=:{mode = Edit}) val updval hst=:{cntr} 
+mkInput size (init,formid=:{mode}) val updval hst=:{cntr} 
+| mode == Edit || mode == Submit
 	= ( Input 	[ Inp_Type		Inp_Text
 				, Inp_Value		val
 				, Inp_Name		(encodeTriplet (formid.id,cntr,updval))
 				, Inp_Size		size
 				, `Inp_Std		[EditBoxStyle, Std_Title (showType val)]
-				, `Inp_Events	[OnChange callClean]
+				, `Inp_Events	if (mode == Edit) (callClean OnChange formid.mode "") []
 				] ""
 	  , setCntr (cntr+1) hst)
-where
-	showType (SV  str) 	= "::String"
-	showType (NQV str)	= "::String"
-	showType (IV i)		= "::Int"
-	showType (RV r) 	= "::Real"
-	showType (BV b) 	= "::Bool"
-mkInput size (init,{mode = Display}) val _ hst=:{cntr} 
+| mode == Display
 	= ( Input 	[ Inp_Type		Inp_Text
 				, Inp_Value		val
 				, Inp_ReadOnly	ReadOnly
@@ -496,12 +514,17 @@ mkInput size (init,{mode = Display}) val _ hst=:{cntr}
 				, Inp_Size		size
 				] ""
 		,setCntr (cntr+1) hst)
-mkInput size (init,_) val _ hst=:{cntr} 
-	= ( EmptyBody,setCntr (cntr+1) hst)
+= ( EmptyBody,setCntr (cntr+1) hst)
+where
+	showType (SV  str) 	= "::String"
+	showType (NQV str)	= "::String"
+	showType (IV i)		= "::Int"
+	showType (RV r) 	= "::Real"
+	showType (BV b) 	= "::Bool"
 		
 toHtml :: a -> BodyTag | gForm {|*|} a
 toHtml a
-# (na,_)						= gForm{|*|} (Set,mkFormId "__toHtml" a <@ Display) (mkHSt emptyFormStates undef)
+# (na,_)						= mkForm (Set,mkFormId "__toHtml" a <@ Display) (mkHSt emptyFormStates undef)
 = BodyTag na.form
 
 toHtmlForm :: !(*HSt -> *(Form a,*HSt)) -> [BodyTag] | gForm{|*|}, gUpd{|*|}, gPrint{|*|}, gParse{|*|}, TC a

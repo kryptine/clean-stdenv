@@ -16,6 +16,28 @@ import htmlFormData
 	| JustTesting					// No Server attached at all, intended for testing (in collaboration with Gast)
 	| Internal						// No external server needed: a Clean Server is atached to this executable
 
+// Triplet handling
+
+:: Triplet			:== (String,Int,UpdValue)
+:: TripletUpdate	:== (Triplet,String)
+:: Triplets			:== [TripletUpdate]
+
+:: UpdValue 													// the updates that can take place	
+	= UpdI Int													// new integer value
+	| UpdR Real													// new real value
+	| UpdB Bool													// new boolean value
+	| UpdC String												// choose indicated constructor 
+	| UpdS String												// new piece of text
+
+encodeTriplet		:: !Triplet -> String						// encoding of triplets
+decodeTriplet		:: !String  -> Maybe Triplet
+
+// Form submission handling
+
+callClean 		:: !(Script -> ElementEvents) !Mode !String -> [ElementEvents]
+submitscript 	::  BodyTag
+globalstateform :: !Value -> BodyTag
+
 // type driven encoding of strings, used to encode triplets
 
 encodeInfo					:: !a      -> String  | gPrint{|*|} a
@@ -24,7 +46,7 @@ decodeInfo					:: !String -> Maybe a | gParse{|*|} a
 // serializing, de-serializing of iData states to strings stored in the html page
 
 EncodeHtmlStates 			:: ![HtmlState] -> String
-DecodeHtmlStatesAndUpdate 	:: !ServerKind (Maybe String) -> ([HtmlState],String,String) // + triplet + update
+DecodeHtmlStatesAndUpdate 	:: !ServerKind (Maybe String) -> (![HtmlState],!Triplets) // hidden state stored in Client + triplets
 
 // serializing, de-serializing of iData state stored in files
 

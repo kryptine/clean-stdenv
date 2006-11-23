@@ -5,7 +5,7 @@ import StdEnv,StdTCP
 from httpUtil import unlines, cSplit, endWith, splitAfter, wordsWith, unwords, readFile
 
 DEBUGSERVER
-	:== False
+	:== True
 
 (<<?) file s 
 	= case DEBUGSERVER of

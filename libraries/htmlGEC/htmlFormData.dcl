@@ -29,7 +29,8 @@ import GenEq
 	|	Temp									//	form setting is not stored at all, only lives temporaly in the Clean application	
 
 :: Mode											// one can choose:
-	=	Edit									// 	an editable form
+	=	Edit									// 	an editable form where every change is commited to the server
+	|	Submit									//	an editable form where the whole content is commited on submit 
 	| 	Display									// 	a non-editable form
 	|	NoForm									//	do not generate a form, only a value
 
@@ -119,7 +120,7 @@ reuseFormId :: !(FormId a) !d			-> FormId d		// reuse id for new type (only to b
 initID		:: !(FormId d)				-> InIDataId d	// (Init,FormId a)
 setID		:: !(FormId d) !d			-> InIDataId d	// (Set,FormId a)
 
-onMode 		:: !Mode a a a -> a							// chose arg depending on Edit, Display, NoForm
+onMode 		:: !Mode a a a a -> a						// chose arg depending on Edit, Submit, Display, NoForm
 
 // manipulating initial values
 

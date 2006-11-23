@@ -11,9 +11,6 @@ import EstherBackend
 //import Debug // TEMP
 
 
-derive gParse UpdValue, (,,)
-derive gPrint UpdValue, (,,)
-
 // This module controls the handling of state forms and the communication with the browser
 // iData states are maintained in a binairy tree
 
@@ -27,8 +24,8 @@ derive gPrint UpdValue, (,,)
 
 :: *FormStates 	=										// collection of states of all forms
 				{ fstates 	:: *FStates					// internal tree of states
-				, triplet	:: Maybe Triplet			// indicates what has changed: which form, which postion, which value
-				, update	:: String					// what is the new value created by the end user
+				, triplets	:: [(Triplet,String)]		// indicates what has changed: which form, which postion, which value
+//				, update	:: String					// what is the new value created by the end user
 				, updateid	:: String					// which form has changed
 				, server	:: ServerKind				// is an external server required
 				}		
@@ -62,18 +59,20 @@ where
 	(<) _ _ = True
 
 emptyFormStates :: *FormStates
-emptyFormStates = { fstates = Leaf_ , triplet = Nothing, update = "", updateid = "", server = Internal}
+emptyFormStates = { fstates = Leaf_ , triplets = [], updateid = "", server = Internal}
 
 getTriplet :: !*FormStates -> (!Maybe Triplet, !Maybe b, !*FormStates) | gParse{|*|} b 
-getTriplet formstates=:{triplet,update}
-= (triplet, parseString update, formstates)
-//= (parseString triplet, parseString update, formstates)
+getTriplet formstates=:{triplets}
+= case triplets of
+	[] 						= (Nothing,Nothing,formstates)
+	[(triplet,update):xs]	= (Just triplet, parseString update, formstates)
 
 getUpdateId :: !*FormStates -> (String,!*FormStates)
 getUpdateId formStates=:{updateid} = (updateid,formStates)
 
 getUpdate :: !*FormStates -> (String,!*FormStates)
-getUpdate formStates=:{update} = (update,formStates)
+//getUpdate formStates=:{update} = (update,formStates)
+getUpdate formStates = ("",formStates)
 
 findState :: !(FormId a) !*FormStates *NWorld -> (Bool,Maybe a,*FormStates,*NWorld)	| iDataSerAndDeSerialize a
 findState formid formstates=:{fstates,server} world
@@ -200,7 +199,7 @@ where
 
 retrieveFormStates :: ServerKind (Maybe String) *NWorld -> (*FormStates,*NWorld) 					// retrieves all form states hidden in the html page
 retrieveFormStates serverkind args world 
-	= ({ fstates = retrieveFStates, triplet = parsed_triplet, update = update, updateid = calc_updateid, server = serverkind },world)
+	= ({ fstates = retrieveFStates, triplets = triplets, updateid = calc_updateid triplets, server = serverkind },world)
 where
 	retrieveFStates 
 		= Balance (sort [(sid,OldState {format = toExistval storageformat state, life = lifespan}) 
@@ -211,14 +210,13 @@ where
 		toExistval PlainString   string	= PlainStr string						// string that has to be parsed in the context where the type is known
 		toExistval StaticDynamic string	= StatDyn (string_to_dynamic` string)	// recover the dynamic
 
-	(htmlStates,triplet,update)	= DecodeHtmlStatesAndUpdate serverkind args
-	parsed_triplet				= parseString triplet
+	(htmlStates,triplets)	= DecodeHtmlStatesAndUpdate serverkind args
 	
-	calc_updateid 		
-	= case parsed_triplet of
-		Just ("",0,UpdI 0)		= ""
-		Just (id,_,_)			= id 
-		else					= ""
+	calc_updateid [] 	= ""		
+	calc_updateid [(triplet,upd):_]	= case triplet of
+							("",0,UpdI 0)	= ""
+							(id,_,_)		= id 
+							else			= ""
 
 // Serialize all states in FormStates that have to be remembered to either hidden encoded Html Code
 // or store them in a persistent file, all depending on the kind of states
@@ -227,8 +225,8 @@ storeFormStates :: !FormStates *NWorld -> (BodyTag,*NWorld)
 storeFormStates {fstates = allFormStates,server} world
 #	world							= writeAllPersistentStates allFormStates world			// first write all persistens states
 =	(BodyTag
-	[ submitscript    globalFormName updateInpName
-	, globalstateform globalFormName updateInpName globalInpName (SV encodedglobalstate) 
+	[ submitscript    
+	, globalstateform (SV encodedglobalstate) 
 	],world)
 where
 	encodedglobalstate				= EncodeHtmlStates (FStateToHtmlState allFormStates [])
@@ -255,45 +253,9 @@ where
 		htmlStateOf (fid,NewState {format = PlainStr string,life})			= Just (fid,life,PlainString,string)
 		htmlStateOf (fid,NewState {format = StatDyn dynval, life})			= Just (fid,life,StaticDynamic,dynamic_to_string dynval)
  
-	submitscript :: !String !String -> BodyTag
-	submitscript formname updatename
-	=	Script [] (SScript
-		(	" function toclean(inp)" +++
-			" { document." +++
-				formname  +++ "." +++
-				updatename +++ ".value=inp.name+\"=\"+inp.value;" +++
-				"document." +++ formname +++ ".submit(); }"
-		))
 
-	// form that contains global state and empty input form for storing updated input
-		
-	globalstateform :: !String !String !String !Value -> BodyTag
-	globalstateform formname updatename globalname globalstate
-	=	Form 	[ Frm_Name formname
-				, Frm_Action (MyPhP server)
-				, Frm_Method Post
-				, Frm_Enctype "multipart/form-data"			// what to do to enable large data ??
-				]
-				[ Input [ Inp_Name updatename
-						, Inp_Type Inp_Hidden
-						] ""
-				, Input [ Inp_Name globalname
-						, Inp_Type Inp_Hidden
-						, Inp_Value globalstate
-						] ""
-				]		 
 
-	globalFormName :: String
-	globalFormName	=: "CleanForm"
-	
-	updateInpName :: String
-	updateInpName	=: "UD"
-	
-	globalInpName :: String
-	globalInpName	=: "GS"
-	
-	selectorInpName :: String
-	selectorInpName	=: "CS"
+
 
 	writeAllPersistentStates :: !FStates *NWorld -> *NWorld				// store states in persistent stores
 	writeAllPersistentStates Leaf_ nworld = nworld
@@ -376,20 +338,7 @@ tohexchar s i
 = toChar (55+c);
 
 	
-//	traceLife Lifespan
 
-// to encode triplets in htmlpages
-
-encodeTriplet	:: !Triplet -> String				// encoding of triplets
-encodeTriplet triplet = encodeInfo triplet
-
-decodeTriplet	:: !String -> Maybe Triplet			// decoding of triplets
-decodeTriplet triplet = decodeInfo triplet
-
-// script for transmitting name and value of changed input 
-
-callClean :: Script
-callClean =: SScript "toclean(this)"
 
 //	create balanced storage tree:
 
@@ -408,11 +357,11 @@ derive gMap Tree_
 
 initTestFormStates :: *NWorld -> (*FormStates,*NWorld)													// retrieves all form states hidden in the html page
 initTestFormStates world 
-	= ({ fstates = Leaf_, triplet = Nothing, update = "", updateid = "" , server = JustTesting},world)
+	= ({ fstates = Leaf_, triplets = [], updateid = "" , server = JustTesting},world)
 
-setTestFormStates :: (Maybe Triplet) String String *FormStates *NWorld -> (*FormStates,*NWorld)			// retrieves all form states hidden in the html page
-setTestFormStates triplet updateid update states world 
-	= ({ fstates = gMap{|*->*|} toOldState states.fstates, triplet = triplet, update = update, updateid = updateid, server = JustTesting},world)
+setTestFormStates :: [(Triplet,String)] String String *FormStates *NWorld -> (*FormStates,*NWorld)			// retrieves all form states hidden in the html page
+setTestFormStates triplets updateid update states world 
+	= ({ fstates = gMap{|*->*|} toOldState states.fstates, triplets = triplets, updateid = updateid, server = JustTesting},world)
 where
 	toOldState (s,NewState fstate)	= (s,OldState fstate)
 	toOldState else					= else

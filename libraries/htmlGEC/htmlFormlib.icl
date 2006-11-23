@@ -210,7 +210,7 @@ vertlistFormButs nbuts showbuts (init,formid) hst
 = (	{ form 					= pdbuts.form ++ bbuts.form ++ 
 								[[ toHtml ("nr " <+++ (i+1) <+++ " / " <+++ length list.value)
 										<.||.> 
-								   (onMode formid.mode (if showbuts (del <.=.> ins <.=.> app  <.=.> copy  <.=.> paste) EmptyBody) EmptyBody EmptyBody)
+								   (onMode formid.mode (if showbuts (del <.=.> ins <.=.> app  <.=.> copy  <.=.> paste) EmptyBody) EmptyBody EmptyBody EmptyBody)
 								 \\ del <- del.form & ins <- ins.form & app <- app.form & copy <- copy.form & paste <- paste.form & i <- [bbuts.value..]]
 										<=|> 
 								list.form % betweenindex

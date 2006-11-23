@@ -88,10 +88,11 @@ initID formid			= (Init,formid)
 setID :: !(FormId d) !d -> InIDataId d	// (Set,FormId a)
 setID formid na			= (Set,setFormId formid na)
 
-onMode :: !Mode a a a -> a
-onMode Edit    e1 e2 e3 = e1
-onMode Display e1 e2 e3 = e2
-onMode NoForm  e1 e2 e3 = e3
+onMode :: !Mode a a a a -> a
+onMode Edit    e1 e2 e3 e4 = e1
+onMode Submit  e1 e2 e3 e4 = e2
+onMode Display e1 e2 e3 e4 = e3
+onMode NoForm  e1 e2 e3 e4 = e4
 
 toViewId :: !Init !d !(Maybe d) -> d
 toViewId Init d Nothing = d
