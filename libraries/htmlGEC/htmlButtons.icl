@@ -201,7 +201,7 @@ gForm{|RadioButton|} (init,formid) hst
 							]) ""]
 		},incrHSt 1 hst)
 
-gForm{|PullDownMenu|} (init,formid) hst 
+gForm{|PullDownMenu|} (init,formid) hst=:{submits}
 # (cntr,hst)			= CntrHSt hst
 = case formid.ival of
 	v=:(PullDown (size,width) (menuindex,itemlist))
@@ -211,7 +211,7 @@ gForm{|PullDownMenu|} (init,formid) hst
 							[ Sel_Name			("CS")
 							, Sel_Size			size
 							, `Sel_Std			[Std_Style ("width:" <+++ width <+++ "px")]
-							, `Sel_Events		(callClean OnChange formid.mode formid.id)
+							, `Sel_Events		(if submits [] (callClean OnChange formid.mode formid.id))
 							])
 							[ Option 
 								[ Opt_Value (encodeTriplet (formid.id,cntr,UpdC (itemlist!!j)))
@@ -264,16 +264,17 @@ gForm{|PasswordBox|} (init,formid) hst
 	   },incrHSt 1 hst)
 where
 	mkPswInput :: !Int !(InIDataId d) String UpdValue !*HSt -> (!BodyTag,!*HSt) 
-	mkPswInput size (init,formid=:{mode = Edit}) sval updval hst=:{cntr}
+	mkPswInput size (init,formid=:{mode}) sval updval hst=:{cntr,submits}
+	| mode == Edit || mode == Submit
 		= ( Input 	[ Inp_Type		Inp_Password
 					, Inp_Value		(SV sval)
 					, Inp_Name		(encodeTriplet (formid.id,cntr,updval))
 					, Inp_Size		size
 					, `Inp_Std		[EditBoxStyle, Std_Title "::Password"]
-					, `Inp_Events	(callClean OnChange Edit "")
+					, `Inp_Events	if (mode == Edit && not submits) (callClean OnChange Edit "") []
 					] ""
 			,incrHSt 1 hst)
-	mkPswInput size (init,{mode = Display}) sval _ hst
+	| mode == Display
 		= ( Input 	[ Inp_Type		Inp_Password
 					, Inp_Value		(SV sval)
 					, Inp_ReadOnly	ReadOnly
@@ -281,8 +282,7 @@ where
 					, Inp_Size		size
 					] ""
 			,incrHSt 1 hst)
-	mkPswInput size (init,_) val _ hst=:{cntr} 
-		= ( EmptyBody,incrHSt 1 hst )
+	= ( EmptyBody,incrHSt 1 hst )
 
 
 // time and date

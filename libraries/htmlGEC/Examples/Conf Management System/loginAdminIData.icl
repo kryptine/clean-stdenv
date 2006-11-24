@@ -12,7 +12,7 @@ derive gerda	Login
 // this session login form will be used at every event to check whether the end user is indeed administrated
 
 loginForm :: !(Init,Login) !*HSt -> (Form Login,!*HSt)
-loginForm (init,login) hst = mkEditForm (init,sFormId "adminID_login" login) hst
+loginForm (init,login) hst = mkEditForm (init,sFormId "adminID_login" login <@ Submit) hst
 
 // scratch form 
 

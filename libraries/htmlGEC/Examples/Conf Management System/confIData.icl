@@ -61,7 +61,7 @@ editorRefPerson :: !(InIDataId RefPerson) !*HSt -> (Form Person,!*HSt)
 editorRefPerson (init,formid) hst
 # (RefPerson refperson)					= formid.ival
 # (Ref2 name)							= refperson
-= universalRefEditor storageOption (init,reuseFormId formid refperson) (invariantPerson name) hst
+= universalRefEditor storageOption (init,reuseFormId formid refperson <@ Submit) (invariantPerson name) hst
 
 editorRefPaper :: !(InIDataId RefPaper) !*HSt -> (Form Paper,!*HSt)
 editorRefPaper (init,formid) hst

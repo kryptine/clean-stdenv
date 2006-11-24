@@ -32,7 +32,7 @@ searchOptionForm :: (SearchOptions option) *HSt -> (Form (option -> option,Int),
 searchOptionForm {options} hst = FuncMenu (Init, sFormId "searchoption"(1,[(label,const option) \\ (label,option) <- options])) hst
 
 personalDataForm :: *HSt -> (Form PersonalData,*HSt)
-personalDataForm hst = mkEditForm (Init, sFormId "personal" initPersInfo) hst
+personalDataForm hst = mkEditForm (Init, sFormId "personal" initPersInfo <@ Submit) hst
 
 // session stores:
 

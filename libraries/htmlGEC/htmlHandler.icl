@@ -209,7 +209,6 @@ where
 									((sid,pos,UpdB b), _) 				= (Just (pos,UpdB b) )
 									(_,_) = case parseTriplet tripletupd of
 										((sid,pos,UpdS s),	Just ns)	= (Just (pos,UpdS ns))
-//										((sid,pos,UpdS s),	_)			= (Just (pos,UpdS s) )
 										_								= case  tripletupd of
 																			((sid,pos,UpdS s), ns) -> (Just (pos, UpdS ns))
 																			_ -> (Nothing			 )
