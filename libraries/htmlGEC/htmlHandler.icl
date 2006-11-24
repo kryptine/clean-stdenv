@@ -19,6 +19,7 @@ gParse{|(->)|} gArg gRes _ 		= Nothing
 gPrint{|(->)|} gArg gRes _ _	= abort "functions can only be used with dynamic storage option!\n" 
 
 :: *HSt 		= { cntr 	:: Int 			// counts position in expression
+				  , submits	:: Bool			// True if we are in submit form
 				  , states	:: *FormStates  // all form states are collected here ... 	
 				  , world	:: *NWorld		// to enable all other kinds of I/O
 				  }	
@@ -26,7 +27,7 @@ gPrint{|(->)|} gArg gRes _ _	= abort "functions can only be used with dynamic st
 :: FormUpdate	:== (InputId,UpdValue)		// info obtained when form is updated
 
 mkHSt :: *FormStates *NWorld -> *HSt
-mkHSt states nworld = { cntr=0, states=states, world=nworld }
+mkHSt states nworld = { cntr=0, states=states, world=nworld, submits = False }
 
 
 // OPTIONS
@@ -125,7 +126,7 @@ where
 // swiss army knife editor that makes coffee too ...
 
 mkViewForm :: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | iData v
-mkViewForm (init,formid) bm=:{toForm, updForm, fromForm, resetForm} hst=:{states,world} 
+mkViewForm (init,formid) bm=:{toForm, updForm, fromForm, resetForm} hst=:{states,world,submits} 
 | init == Const	&& formid.lifespan <> Temp
 = mkViewForm (init,{formid & lifespan = Temp}) bm hst					// constant i-data are never stored
 | init == Const															// constant i-data, no look up of previous value
@@ -136,8 +137,8 @@ where
 	vformid					= reuseFormId formid (toForm init formid.ival Nothing)
 
 	calcnextView isupdated view states world
-	# (changedid,states)	= getUpdateId states
-	# changed				= {isChanged = isupdated, changedId = changedid}
+	# (changedids,states)	= getUpdateId states
+	# changed				= {isChanged = isupdated, changedId = changedids}
 	# view					= toForm init formid.ival view				// map value to view domain, given previous view value
 	# view					= updForm  changed view						// apply update function telling user if an update has taken place
 	# newval				= fromForm changed view						// convert back to data domain	 
@@ -154,7 +155,7 @@ where
 		  ,mkHSt states world)
 
 	# (viewform,{states,world})											// make a form for it
-							= mkForm (init,if (init == Const) vformid (reuseFormId formid view)) (mkHSt states world)
+							= mkForm (init,if (init == Const) vformid (reuseFormId formid view)) ({mkHSt states world & submits = submits})
 
 	| viewform.changed && not isupdated						 			// important: redo it all to handle the case that a user defined specialisation is updated !!
 							= calcnextView True (Just viewform.value) states world
@@ -173,11 +174,11 @@ where
 
 //	findFormInfo :: FormId *FormStates *NWorld -> (Bool,Maybe a,*FormStates,*NWorld) | gUpd{|*|} a & gParse{|*|} a & TC a
 	findFormInfo formid formStates world
-	# (updateid,formStates) 	= getUpdateId formStates
-	| updateid <> formid.id		
-		# (bool,justcurstate,formStates,world) = findState formid formStates world									// the current form is not updated
+	# (updateids,formStates) 					= getUpdateId formStates // get list of updated id's
+	| not (isMember formid.id updateids)		
+		# (bool,justcurstate,formStates,world)	= findState formid formStates world									// the current form is not updated
 		= (False,justcurstate,formStates,world)
-	# (alltriplets,formStates)	= getTriplets formStates
+	# (alltriplets,formStates)	= getTriplets formid.id formStates		// get my update triplets
 	= case (findState formid formStates world) of
 			(False,Just currentState,formStates,world) -> (False, Just currentState,formStates,world) 				// yes, but update already handled
 			(True, Just currentState,formStates,world) -> updateState alltriplets currentState formStates world		// yes, handle update
@@ -221,10 +222,10 @@ where
 // The value might have been changed with this editor, so the value returned might differ from the value you started with!
 
 specialize :: !((InIDataId a) *HSt -> (Form a,*HSt)) !(InIDataId a) !*HSt -> (!Form a,!*HSt) | gUpd {|*|} a
-specialize editor (init,formid) hst=:{cntr = inidx,states = formStates,world}
+specialize editor (init,formid) hst=:{cntr = inidx,states = formStates,world,submits}
 # nextidx					= incrIndex inidx formid.ival		// this value will be repesented differently, so increment counter 
-# (nv,hst) 					= editor (init,nformid) (setCntr 0 hst)
-= (nv,setCntr nextidx hst)
+# (nv,hst) 					= editor (init,nformid) {setCntr 0 hst & submits = True}
+= (nv,{setCntr nextidx hst & submits = submits})
 where
 	nformid					= {formid & id = formid.id <+++ "_specialize_" <+++ inidx <+++ "_"}
 
@@ -236,8 +237,8 @@ where
 // gForm: automatically derives a Html form for any Clean type
 
 mkForm :: !(InIDataId a) !*HSt -> *(Form a, !*HSt)	| gForm {|*|} a
-mkForm (init,formid=:{mode = Submit}) hst 
-# (form,hst) 	= gForm{|*|} (init,formid) hst
+mkForm (init,formid=:{mode = Submit}) hst=:{submits = False} 
+# (form,hst) 	= gForm{|*|} (init,formid) {hst & submits = True}
 # hidden		= Input [ Inp_Name "hidden"
 						, Inp_Type Inp_Hidden
 						, Inp_Value (SV "")
@@ -317,7 +318,7 @@ gForm{|OBJECT|} gHo (init,formid) hst
 = ({no & value=OBJECT no.value},hst)
 where
 	(OBJECT o) = formid.ival
-gForm{|CONS of t|} gHc (init,formid) hst=:{cntr}
+gForm{|CONS of t|} gHc (init,formid) hst=:{cntr,submits}
 | not (isEmpty t.gcd_fields) 		 
 	# (nc,hst)				= gHc (init,reuseFormId formid c) (setCntr (cntr+1) hst) // don't display record constructor
 	= ({nc & value=CONS nc.value},hst)
@@ -355,13 +356,16 @@ where
 		where
 			styles			= case formid.mode of
 								Edit	-> [ `Sel_Std	[Std_Style width, EditBoxStyle]
-										   , `Sel_Events (callClean OnChange Edit "")
+										   , `Sel_Events (if submits [] (callClean OnChange Edit formid.id))
+										   ]
+								Submit	-> [ `Sel_Std	[Std_Style width, EditBoxStyle]
 										   ]
 								_		-> [ `Sel_Std	[Std_Style width, DisplayBoxStyle]
 										   ,  Sel_Disabled Disabled
 										   ]
 			optionstyle		= case formid.mode of
 								Edit	-> []
+								Submit	-> []
 								_	 	-> [`Opt_Std [DisplayBoxStyle]]
 
 			width			= "width:" <+++ defpixel <+++ "px"
@@ -497,14 +501,14 @@ gUpd{|(->)|} gUpdArg gUpdRes mode f
 // small utility functions
 
 mkInput :: !Int !(InIDataId d) Value UpdValue !*HSt -> (BodyTag,*HSt) 
-mkInput size (init,formid=:{mode}) val updval hst=:{cntr} 
+mkInput size (init,formid=:{mode}) val updval hst=:{cntr,submits} 
 | mode == Edit || mode == Submit
 	= ( Input 	[ Inp_Type		Inp_Text
 				, Inp_Value		val
 				, Inp_Name		(encodeTriplet (formid.id,cntr,updval))
 				, Inp_Size		size
 				, `Inp_Std		[EditBoxStyle, Std_Title (showType val)]
-				, `Inp_Events	if (mode == Edit) (callClean OnChange formid.mode "") []
+				, `Inp_Events	if (mode == Edit && not submits) (callClean OnChange formid.mode "") []
 				] ""
 	  , setCntr (cntr+1) hst)
 | mode == Display
@@ -561,10 +565,10 @@ incrHSt i hst					= {hst & cntr = hst.cntr + i} // BUG ??????
 CntrHSt :: !*HSt -> (Int,*HSt)
 CntrHSt hst=:{cntr}				= (cntr,hst)
 
-getChangedId :: !*HSt -> (String,!*HSt)	// id of form that has been changed by user
+getChangedId :: !*HSt -> ([String],!*HSt)	// id of form that has been changed by user
 getChangedId hst=:{states}
-# (id,states)					= getUpdateId states
-= (id,{hst & states = states })
+# (ids,states)					= getUpdateId states
+= (ids,{hst & states = states })
 
 // Enabling file IO on HSt
 

@@ -9,7 +9,7 @@ import GenPrint, GenParse
 import dynamic_string
 import EstherBackend
 
-derive gParse UpdValue, (,,)
+derive gParse UpdValue, (,,), (,)
 derive gPrint UpdValue, (,,), (,)
 
 
@@ -142,7 +142,10 @@ DecodeHtmlStatesAndUpdate serverkind args
 DecodeArguments :: !ServerKind (Maybe [(String, String)]) -> (!String,!Triplets,!String)
 DecodeArguments External _				= DecodePhpArguments
 where
-//	DecodePhpArguments :: (!String,!String,!String,!String)							// executable, id + update , new , state
+
+// decode PHP will NOT work any more: either repair or kick it out !
+
+//	DecodePhpArguments :: (!String,!String,!String,!String)					R		// executable, id + update , new , state
 	DecodePhpArguments
 	# input 							= [c \\ c <-: GetArgs | not (isControl c) ]	// get rid of communication noise
 	# (thisexe,input) 					= mscan '#'         input					// get rid of garbage
@@ -154,7 +157,7 @@ where
 	=: case toString update of
 //			"CS"						= (toString thisexe, decodeChars new,    "",           toString state)
 //			else						= (toString thisexe, decodeChars triplet, toString new, toString state)
-			else						= ("clean", [(calcTriplet (decodeChars triplet) "", toString new)], toString state)
+			else						= ("clean", []/*[(fromJust (parseString (decodeChars triplet)), toString new)]*/, toString state)
 
 	GetArgs :: String 
 	GetArgs =: foldl (+++) "" [strings \\ strings <-: getCommandLine]
@@ -163,17 +166,18 @@ where
 
 DecodeArguments Internal (Just args)	
 # nargs = length args
-| nargs == 0 	= ("clean",[],"")
-| nargs == 1	= DecodeCleanServerArguments (foldl (+++) "" [name +++ "=" +++ value +++ ";" \\ (name,value) <- args])
-//= ("clean",[],snd (last args))
-# state = urlDecode (snd (last args))
-= ("clean",[(calcTriplet (decodeString triplet) "",new) \\ (triplet,new) <- tl (reverse args)],state)
+| nargs == 0 		= ("clean",[],"")
+| nargs == 1		= DecodeCleanServerArguments (foldl (+++) "" [name +++ "=" +++ value +++ ";" \\ (name,value) <- args])
+# tripargs 			= reverse args													// state hidden in last field, rest are triplets
+# (state,tripargs)	= (urlDecode (snd (hd tripargs)),tl tripargs)					// decode state, get triplets highest positions first	
+# constriplets		= filter (\(name,_) -> name == "CS") tripargs		// select constructor triplets  
+# nconstriplets		= [(constrip,"") \\ (_,codedtrip) <- constriplets, (Just constrip) <- [parseString (decodeString (urlDecode codedtrip))]] // and decode
+# valtriplets		= filter (\(name,_) -> name <> "CS") tripargs		// select all other triplets 
+# nvaltriplets		= [(mytrip,new) \\ (codedtrip,new) <- valtriplets, (Just mytrip) <- [parseString (decodeString (urlDecode codedtrip))]] // and decode
+= ("clean",reverse nconstriplets ++ nvaltriplets,state)	// order is important, first the structure than the values ...
 where
 	DecodeCleanServerArguments :: !String -> (!String,!Triplets,!String)		// executable, id + update , new , state
 	DecodeCleanServerArguments args
-//	# nargs	= foldl (+++) "" [name +++ "=" +++ value +++ ";" \\ (name,value) <- args]
-
-
 	# input 							= [c \\ c <-: args | not (isControl c) ]	// get rid of communication noise
 	# (thisexe,input) 					= mscan '\"'          input					// get rid of garbage
 	# input								= skipping ['UD\"']   input
@@ -185,22 +189,13 @@ where
 	# state								= if found (take index input) ['']
 	= case toString triplet of
 			""							= ("clean", [], toString state)
-			"CS"						= ("clean", [(calcTriplet (decodeChars new) "", "")], toString state)
-			else						= ("clean", [(calcTriplet (decodeChars triplet) (toString new), toString new)], toString state)
+			"CS"						= ("clean", [(fromJust (parseString (decodeChars new)), "")], toString state)
+			else						= ("clean", [(fromJust (parseString (decodeChars triplet)) , toString new)], toString state)
 
-calcTriplet:: String String -> Triplet
-calcTriplet s newstring
-= case parseString s of
-	Just (id,pos,UpdS _) = (id,pos,UpdS newstring)
-	Just triplet = triplet
-	_ = ("Parse Error!",0,UpdS s)
-
-// traceHtmlInput utility used to see what kind of rubbish is received
+// traceHtmlInput utility used to see what kind of rubbish is received from client 
 
 traceHtmlInput :: !ServerKind !(Maybe [(String, String)]) -> BodyTag
 traceHtmlInput serverkind args=:(Just input)
-# nargs	= foldl (+++) "" [name +++ "=" +++ value +++ ";" \\ (name,value) <- input]
-
 =	BodyTag	[ Br, B [] "State values received from client when application started:", Br,
 				STable [] [ [B [] "Triplets:",Br]
 							, showTriplet triplets
@@ -211,10 +206,9 @@ traceHtmlInput serverkind args=:(Just input)
 						]
 			, Br
 			, STable [] [[Txt name,Txt value] \\ (name,value) <- input]
-//			, Txt (decodeString string)
 			]
 where
-	(htmlState,triplets)			= DecodeHtmlStatesAndUpdate serverkind args
+	(htmlState,triplets)	= DecodeHtmlStatesAndUpdate serverkind args
 
 	showTriplet triplets	= [STable [] [[Txt (printToString triplet)] \\ triplet <- triplets]]
 	showl life				= toString life

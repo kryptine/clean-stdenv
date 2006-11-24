@@ -25,7 +25,6 @@ import EstherBackend
 :: *FormStates 	=										// collection of states of all forms
 				{ fstates 	:: *FStates					// internal tree of states
 				, triplets	:: [(Triplet,String)]		// indicates what has changed: which form, which postion, which value
-//				, update	:: String					// what is the new value created by the end user
 				, updateid	:: String					// which form has changed
 				, server	:: ServerKind				// is an external server required
 				}		
@@ -61,17 +60,11 @@ where
 emptyFormStates :: *FormStates
 emptyFormStates = { fstates = Leaf_ , triplets = [], updateid = "", server = Internal}
 
-getTriplets :: !*FormStates -> (Triplets,!*FormStates)
-getTriplets formstates=:{triplets} = (triplets,formstates)
+getTriplets :: !String !*FormStates -> (Triplets,!*FormStates)
+getTriplets id formstates=:{triplets} = ([mytrips \\ mytrips=:((tripid,_,_),_) <- triplets | id == tripid] ,formstates)
 
-getTriplet :: !*FormStates -> (!Maybe Triplet, !Maybe b, !*FormStates) | gParse{|*|} b 
-getTriplet formstates=:{triplets}
-= case triplets of
-	[] 						= (Nothing,Nothing,formstates)
-	[(triplet,update):xs]	= (Just triplet, parseString update, formstates)
-
-getUpdateId :: !*FormStates -> (String,!*FormStates)
-getUpdateId formStates=:{updateid} = (updateid,formStates)
+getUpdateId :: !*FormStates -> ([String],!*FormStates)
+getUpdateId formStates=:{triplets} = (removeDup [tripid \\ ((tripid,_,_),_) <- triplets] ,formStates)
 
 getUpdate :: !*FormStates -> (String,!*FormStates)
 //getUpdate formStates=:{update} = (update,formStates)
@@ -255,10 +248,6 @@ where
 			| isMember life [Database,Persistent,PersistentRO,Temp]			= Nothing
 		htmlStateOf (fid,NewState {format = PlainStr string,life})			= Just (fid,life,PlainString,string)
 		htmlStateOf (fid,NewState {format = StatDyn dynval, life})			= Just (fid,life,StaticDynamic,dynamic_to_string dynval)
- 
-
-
-
 
 	writeAllPersistentStates :: !FStates *NWorld -> *NWorld				// store states in persistent stores
 	writeAllPersistentStates Leaf_ nworld = nworld
@@ -339,9 +328,6 @@ tohexchar s i
 | c<10
 = toChar (48+c);
 = toChar (55+c);
-
-	
-
 
 //	create balanced storage tree:
 

@@ -490,7 +490,7 @@ where
 					, resetForm	= Nothing
 					}
 			otherradio b v
-			| stripname b.changedId == formid.id
+			| stripname (hd b.changedId) == formid.id		// REPAIR TO NEW 
 							= RBNotChecked formid.id
 			| otherwise		= v
 			

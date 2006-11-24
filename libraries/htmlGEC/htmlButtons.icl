@@ -162,7 +162,7 @@ gForm{|CheckBox|} (init,formid) hst
 							, Inp_Value		(SV name)
 							, Inp_Name		(encodeTriplet (formid.id,cntr,UpdS name))
 							, Inp_Checked	Checked
-							, `Inp_Events	(callClean OnClick Edit "")
+							, `Inp_Events	(callClean OnClick formid.mode "")
 							]) ""]
 		},incrHSt 1 hst)
 	v=:(CBNotChecked name)
@@ -172,7 +172,7 @@ gForm{|CheckBox|} (init,formid) hst
 							[ Inp_Type		Inp_Checkbox
 							, Inp_Value		(SV name)
 							, Inp_Name		(encodeTriplet (formid.id,cntr,UpdS name))
-							, `Inp_Events	(callClean OnClick Edit "")
+							, `Inp_Events	(callClean OnClick formid.mode "")
 							]) ""]
 		},incrHSt 1 hst)
 
@@ -187,7 +187,7 @@ gForm{|RadioButton|} (init,formid) hst
 							, Inp_Value			(SV name)
 							, Inp_Name			(encodeTriplet (formid.id,cntr,UpdS name))
 							, Inp_Checked		Checked
-							, `Inp_Events		(callClean OnClick Edit "")
+							, `Inp_Events		(callClean OnClick formid.mode "")
 							]) ""]
 		},incrHSt 1 hst)
 	v=:(RBNotChecked name)
@@ -197,7 +197,7 @@ gForm{|RadioButton|} (init,formid) hst
 							[ Inp_Type			Inp_Radio
 							, Inp_Value			(SV name)
 							, Inp_Name			(encodeTriplet (formid.id,cntr,UpdS name))
-							, `Inp_Events		(callClean OnClick Edit "")
+							, `Inp_Events		(callClean OnClick formid.mode "")
 							]) ""]
 		},incrHSt 1 hst)
 
@@ -211,7 +211,7 @@ gForm{|PullDownMenu|} (init,formid) hst
 							[ Sel_Name			("CS")
 							, Sel_Size			size
 							, `Sel_Std			[Std_Style ("width:" <+++ width <+++ "px")]
-							, `Sel_Events		(callClean OnChange Edit "")
+							, `Sel_Events		(callClean OnChange formid.mode formid.id)
 							])
 							[ Option 
 								[ Opt_Value (encodeTriplet (formid.id,cntr,UpdC (itemlist!!j)))

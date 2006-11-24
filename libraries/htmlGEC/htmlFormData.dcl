@@ -42,7 +42,7 @@ import GenEq
 		}
 :: Changed
 	=	{ isChanged	:: Bool						// is this form changed
-		, changedId	:: String					// id of changed form
+		, changedId	:: [String]					// id's of changed forms
 		}
 :: StorageFormat								// Serialization method:
 	=	StaticDynamic							// + higher order types, fast, NO dynamic linker needed; - works only for a specific application !

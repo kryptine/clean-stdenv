@@ -14,10 +14,11 @@ derive gForm Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD
 derive gUpd  Int, Real, Bool, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD
 derive bimap Form, FormId
 
-:: *HSt	= { cntr 	:: Int 															// counts position in expression
-		  , states 	:: *FormStates  												// all form states are collected here ... 	
-		  , world	:: *NWorld														// to enable file I/O, database I/O, ...
-		  }	
+:: *HSt 		= { cntr 	:: Int 			// counts position in expression
+				  , submits	:: Bool			// True if we are in submitting mode
+				  , states	:: *FormStates  // all form states are collected here ... 	
+				  , world	:: *NWorld		// to enable all other kinds of I/O
+				  }	
 
 // doHtml main wrapper for generating & handling of a Html form
 
@@ -72,7 +73,7 @@ runUserApplication	:: .(*HSt -> *(.a,*HSt)) *FormStates *NWorld -> *(.a,*FormSta
 incrHSt				:: Int !*HSt -> *HSt											// Cntr := Cntr + 1
 CntrHSt				:: !*HSt -> (Int,*HSt)											// Hst.Cntr
 mkInput				:: !Int !(InIDataId d) Value UpdValue !*HSt -> (BodyTag,*HSt)	// Html Form Creation utility 
-getChangedId		:: !*HSt -> (String,!*HSt)										// id of form that has been changed by user
+getChangedId		:: !*HSt -> ([String],!*HSt)									// id's of form(s) that has been changed by user
 
 :: UpdMode			= UpdSearch UpdValue Int										// search for indicated postion and update it
 					| UpdCreate [ConsPos]											// create new values if necessary

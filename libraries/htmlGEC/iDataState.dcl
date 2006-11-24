@@ -18,7 +18,7 @@ findState 			:: !(FormId a) !*FormStates *NWorld			// find the state value given
 replaceState 		:: !(FormId a) a !*FormStates *NWorld 		// replace state given FormId
 					-> (*FormStates,*NWorld)	| iDataSerialize a
 
-getUpdateId 		:: !*FormStates -> (String,!*FormStates)	// id of previously changed form
+getUpdateId 		:: !*FormStates -> ([String],!*FormStates)	// id of previously changed form
 
 // storage and retrieval of FormStates
 
@@ -26,9 +26,7 @@ retrieveFormStates 	:: ServerKind (Maybe [(String, String)]) *NWorld -> (*FormSt
 storeFormStates 	:: !FormStates *NWorld -> (BodyTag,*NWorld)
 
 
-getTriplets 		:: !*FormStates -> (Triplets,!*FormStates)	// retrieve triplets
-//getTriplet  		:: !*FormStates -> (!Maybe Triplet,!Maybe b,!*FormStates)  | gParse{|*|} b // inspect triplet
-
+getTriplets 		:: !String !*FormStates -> (Triplets,!*FormStates)	// retrieve triplets
 
 // tracing all states ...
 
