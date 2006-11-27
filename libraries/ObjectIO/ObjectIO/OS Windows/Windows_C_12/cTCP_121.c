@@ -4,10 +4,6 @@
 	for the Windows platform.
 ********************************************************************************************/
 
-/********************************************************************************************
-	About this module:
-	Routines related to printing.
-********************************************************************************************/
 //#define FD_SETSIZE "maximal number of sockets to select on" (default is 64) 
 
 #include <winsock.h>
@@ -25,34 +21,34 @@ Naming convention: functions, which are called from Clean end with a "C". Functi
 //************************************************
 // functions, which are called from Clean (semantic is explained in tcp.icl or ostcp.icl)
 
-int os_eom(SOCKET endpointRef);
-int os_disconnected(SOCKET endpointRef);
-int os_connectrequestavailable(SOCKET endpointRef);
+int os_eom (SOCKET endpointRef);
+int os_disconnected (SOCKET endpointRef);
+int os_connectrequestavailable (SOCKET endpointRef);
 void abortedHost_syncC(CleanString inetAddr, int *errCode, int *ipAddr);
 void abortedHost_asyncC(CleanString inetAddr, int *errCode, HANDLE *endpointRef);
 void openTCP_ListenerC(int portNum, int *pErrCode, SOCKET *pEndpointRef);
-void acceptC(SOCKET endpointRef, int *pErrCode, int *pInetHost, SOCKET *pEndpointRef);
-void os_connectTCPC(int isIOProg, int block, int doTimeout, unsigned int stopTime,
+void acceptC (SOCKET endpointRef, int *pErrCode, int *pInetHost, SOCKET *pEndpointRef);
+void os_connectTCPC (int isIOProg, int block, int doTimeout, unsigned int stopTime,
 						   int ipAddr, int portnum,
 						   int *errCode, int *timeoutExpiredP, int *endpointRefP
 						  );
-void sendC(SOCKET endpointRef, CleanString data, int begin, int nBytes, int *pErrCode, int *pSentBytes);
+void sendC (SOCKET endpointRef, CleanString data, int begin, int nBytes, int *pErrCode, int *pSentBytes);
 void receiveC(SOCKET endpointRef, int maxSize, CleanString *data);
 int getRcvBuffSizeC();
 void resizeStringC(CleanString string, int newSize);
 int data_availableC(SOCKET endpointRef);
-void disconnectGracefulC(SOCKET endpointRef);
-void disconnectBrutalC(SOCKET endpointRef);
-void garbageCollectEndpointC(SOCKET endpointRef);
-void os_select_inetevents(SOCKET endpointRef, int receiverCategory,
+void disconnectGracefulC (SOCKET endpointRef);
+void disconnectBrutalC (SOCKET endpointRef);
+void garbageCollectEndpointC (SOCKET endpointRef);
+void os_select_inetevents (SOCKET endpointRef, int receiverCategory,
 								 int referenceCount, int getReceiveEvents, int getSendEvents,
 								 int aborted
 								);
-void selectChC(int justForMac, int nonBlocking, int doTimeout, unsigned int stopTime, 
+void selectChC (int justForMac, int nonBlocking, int doTimeout, unsigned int stopTime, 
 					  SOCKET *pRChannels, int *justForMac2, SOCKET *pSChannels,
 					  int *pErrCode
 					 );
-int tcpPossibleC(void);
+int tcpPossibleC (void);
 
 //************************************************
 // other functions
@@ -72,10 +68,10 @@ int insertNewDictionaryItem(SOCKET endpointRef);
 	// adds it to the dictionary. returns error code: 0==ok, 1==not ok
 dictitem* lookup(SOCKET endpointRef);
 	// lookup entry (CFN)
-void setEndpointDataC(int endpointRef, int referenceCount,
+void setEndpointDataC (SOCKET endpointRef, int referenceCount,
 							 int hasReceiveNotifier, int hasSendableNotifier, int aborted);
 	// set the corresponding fields of the entry 
-void getEndpointDataC(int endpointRef, int *referenceCount,
+void getEndpointDataC (SOCKET endpointRef, int *referenceCount,
 							 int *hasReceiveNotifier, int *hasSendableNotifier, int *aborted);
 	// returns the corresponding fields of the entry 
 void removeDictionaryItem(SOCKET endpointRef);
@@ -100,19 +96,19 @@ extern	void (*exit_tcpip_function)();	// the function will be called, when the C
 
 //--------------------- FUNCTION IMPLEMENTATION -----------------------------------
 
-int tcpPossibleC(void)
+int tcpPossibleC (void)
 {
-	StartUp(FALSE);
+	StartUp (FALSE);
 	return tcpStartedUp;
 }
 
-int os_eom(SOCKET endpointRef)
+int os_eom (SOCKET endpointRef)
 {
 	int			err, err2;
 	char		dummyBuffer[1];
 	dictitem	*pDictitem;
 
-	err		= recv(	endpointRef, dummyBuffer, 1, MSG_PEEK);
+	err		= recv (endpointRef, dummyBuffer, 1, MSG_PEEK);
 	err2	= WSAGetLastError();
 	if (err>0)
 		return FALSE;
@@ -128,7 +124,7 @@ int os_eom(SOCKET endpointRef)
 	return TRUE;
 }
 
-int os_disconnected(SOCKET endpointRef)
+int os_disconnected (SOCKET endpointRef)
 {
 	int		err;
 	char	string[1];
@@ -147,7 +143,7 @@ int os_disconnected(SOCKET endpointRef)
 				// only this error can happen with sockets that can still send
 }
 
-int os_connectrequestavailable(SOCKET endpointRef)
+int os_connectrequestavailable (SOCKET endpointRef)
 {
 	FD_SET	readSet;
 	TIMEVAL timeout;
@@ -228,50 +224,48 @@ void StartUp(int abort)
 		};
 }
 	
-
-void lookupHost_syncC(CleanString inetAddr, int *errCode, int *ipAddrP)
+void lookupHost_syncC (CleanString inetAddr, int *errCode, int *ipAddrP)
 // error code: 0 ok, 1 error (also: addr doesn't exist)
 {
 	HOSTENT *hostentP;
 	unsigned long ipAddr;
 	
-	StartUp(TRUE);
-	ipAddr	= inet_addr(CleanStringCharacters(inetAddr));
-	if (ipAddr!=INADDR_NONE)
-		{
+	StartUp (TRUE);
+	ipAddr	= inet_addr (CleanStringCharacters(inetAddr));
+	if (ipAddr!=INADDR_NONE){
 		*errCode	= 0;
 		*ipAddrP	= ntohl(ipAddr);
 		return;
-		};
+	}
 	*errCode = 1;
-	hostentP = gethostbyname(CleanStringCharacters(inetAddr));	// string is alphanumerical 
-	if (hostentP!=NULL)
-		{ *ipAddrP = ntohl(((DWORD *)(*(hostentP->h_addr_list)))[0]);	
-		  if (*ipAddrP!=0)
+	hostentP = gethostbyname (CleanStringCharacters (inetAddr));	// string is alphanumerical 
+	if (hostentP!=NULL){
+		*ipAddrP = ntohl (((DWORD *)(*(hostentP->h_addr_list)))[0]);	
+		if (*ipAddrP!=0)
 		    *errCode = 0;
-	    };
+	}
 }
 
-void lookupHost_asyncC(CleanString inetAddr, int *errCode, HANDLE *endpointRef)
+void lookupHost_asyncC (CleanString inetAddr, int *errCode, HANDLE *endpointRef)
 // errCode: 0 ok, 1 not ok
 {
 	DNSInfo		*newPtr;
 	HANDLE		dnsHdl;
 
-	StartUp(TRUE);
+	StartUp (TRUE);
 
 	*errCode	= 1;
-	newPtr = (DNSInfo*) LocalAlloc(LMEM_FIXED,sizeof(DNSInfo));
-	if (newPtr==NULL) {
+	newPtr = (DNSInfo*) LocalAlloc (LMEM_FIXED,sizeof(DNSInfo));
+	if (newPtr==NULL){
 		*errCode	= 1;
 		return;
-		};
+	}
 
 	newPtr->next = DNSInfoList;
 	DNSInfoList = newPtr;
 
 	// and fill the fields and initiate DNS lookup.
-	dnsHdl = WSAAsyncGetHostByName(ghMainWindow,PM_DNS_EVENT,CleanStringCharacters(inetAddr),
+	dnsHdl = WSAAsyncGetHostByName (ghMainWindow,PM_DNS_EVENT,CleanStringCharacters(inetAddr),
 									DNSInfoList->junion.freeSpace,
 									MAXGETHOSTSTRUCT);
 	// this will cause the sending of a PM_DNS_EVENT message to the main window.
@@ -321,10 +315,10 @@ void openTCP_ListenerC(int portNum, int *pErrCode, SOCKET *pEndpointRef)
 	if (*pErrCode)
 		return;
 	
-	setEndpointDataC(s, 1,0,0,0);
+	setEndpointDataC (s, 1,0,0,0);
 }
 
-void acceptC(SOCKET listener, int *pErrCode, int *pInetHost, SOCKET *pEndpointRef)
+void acceptC (SOCKET listener, int *pErrCode, int *pInetHost, SOCKET *pEndpointRef)
 // errCode: 0:ok;	otherwise:not ok
 {
 	SOCKET		endpointRef;
@@ -334,7 +328,7 @@ void acceptC(SOCKET listener, int *pErrCode, int *pInetHost, SOCKET *pEndpointRe
 	clientAdrSize	= sizeof(clientAdr);
 	endpointRef		= accept(listener,(LPSOCKADDR) &clientAdr, &clientAdrSize);
 	tru				= TRUE;
-	ioctlsocket(endpointRef, FIONBIO, &tru);	// set mode to non blocking
+	ioctlsocket (endpointRef, FIONBIO, &tru);	// set mode to non blocking
 	*pErrCode		= endpointRef==INVALID_SOCKET;
 	if (*pErrCode)
 		return;
@@ -346,12 +340,12 @@ void acceptC(SOCKET listener, int *pErrCode, int *pInetHost, SOCKET *pEndpointRe
 	if (*pErrCode)
 		return;
 
-	setEndpointDataC(endpointRef,2,0,0,0);
+	setEndpointDataC (endpointRef,2,0,0,0);
 }
 
-void os_connectTCPC(int onlyForMac, int block, int doTimeout, unsigned int stopTime,
-					int ipAddr, int portnum,
-					int *errCodeP, int *timeoutExpiredP, int *endpointRefP)
+void os_connectTCPC (int onlyForMac, int block, int doTimeout, unsigned int stopTime,
+					 int ipAddr, int portnum,
+					 int *errCodeP, int *timeoutExpiredP, size_t *endpointRefP)
 // errCode: 0 ok;	1 not ok
 {
 	SOCKET client;
@@ -370,11 +364,10 @@ void os_connectTCPC(int onlyForMac, int block, int doTimeout, unsigned int stopT
 	clientAdr.sin_port = 0;					// the winsock library will choose a free number between 1024 and 5000
 	
 	err = bind(client, (LPSOCKADDR) &clientAdr, sizeof(clientAdr));
-	if (err)
-		{
+	if (err){
 		closesocket(client);
 		return;
-		};
+	}
 
 	srvAdr.sin_family = AF_INET;			// of course internet adress family
 	srvAdr.sin_addr.s_addr = htonl(ipAddr);
@@ -382,121 +375,106 @@ void os_connectTCPC(int onlyForMac, int block, int doTimeout, unsigned int stopT
 	
 	tru				= TRUE;
 
-	//////////////////////////////////////////////////////////////////////////
-	if (block && doTimeout)
-		{
+	if (block && doTimeout){
 		ioctlsocket(client, FIONBIO, &tru);		// set mode to non blocking
 		err = connect(client, (LPSOCKADDR) &srvAdr, sizeof(srvAdr));
 		if (!err) {
 			*errCodeP = 0;
 			*timeoutExpiredP	= FALSE;
 			*endpointRefP = client;
-			}
-		  else if (WSAGetLastError()!=WSAEWOULDBLOCK) {
-				closesocket(client);
-				return;
-				}
-			else
-				{
-				FD_SET writeSet, exptnSet;
-				TIMEVAL timeout;
-				unsigned int	now;
-				int				noOfWritableSockets, timeoutTicks;		
-				FD_ZERO(&writeSet);
-				FD_SET(client,&writeSet);
-				FD_ZERO(&exptnSet);
-				FD_SET(client,&exptnSet);
-
-				now	= GetTickCount();
-				timeoutTicks	= ((int)stopTime) - ((int)now);
-				if (timeoutTicks<=0)
-					{						// timeout expired
-					closesocket(client);
-					*timeoutExpiredP	= TRUE;
-					return;
-					};
-				timeout.tv_sec	= timeoutTicks / 1000;			// Timeout in sec's
-				timeout.tv_usec	= (timeoutTicks % 1000)*1000;	// Timeout in microsec's
-				noOfWritableSockets = select(0,NULL,&writeSet,&exptnSet,&timeout);
-				*errCodeP =		noOfWritableSockets<0
-							||	(noOfWritableSockets>0 && FD_ISSET(client,&exptnSet));
-				*timeoutExpiredP	= noOfWritableSockets==0;
-				*endpointRefP		= client;
-				if (*errCodeP || *timeoutExpiredP) {
-					closesocket(client);
-					return;
-					};
-				};
-		};
-	///////////////////////////////////////////////////////////////////////////
-	if (block && !doTimeout)
-		{
-		err = connect(client, (LPSOCKADDR) &srvAdr, sizeof(srvAdr));
-		if (err)
-			{
+		} else if (WSAGetLastError()!=WSAEWOULDBLOCK) {
 			closesocket(client);
 			return;
-			};
+		} else {
+			FD_SET writeSet, exptnSet;
+			TIMEVAL timeout;
+			unsigned int	now;
+			int				noOfWritableSockets, timeoutTicks;		
+			FD_ZERO(&writeSet);
+			FD_SET(client,&writeSet);
+			FD_ZERO(&exptnSet);
+			FD_SET(client,&exptnSet);
+
+			now	= GetTickCount();
+			timeoutTicks	= ((int)stopTime) - ((int)now);
+			if (timeoutTicks<=0)
+				{						// timeout expired
+				closesocket(client);
+				*timeoutExpiredP	= TRUE;
+				return;
+				};
+			timeout.tv_sec	= timeoutTicks / 1000;			// Timeout in sec's
+			timeout.tv_usec	= (timeoutTicks % 1000)*1000;	// Timeout in microsec's
+			noOfWritableSockets = select(0,NULL,&writeSet,&exptnSet,&timeout);
+			*errCodeP =		noOfWritableSockets<0
+						||	(noOfWritableSockets>0 && FD_ISSET(client,&exptnSet));
+			*timeoutExpiredP	= noOfWritableSockets==0;
+			*endpointRefP		= client;
+			if (*errCodeP || *timeoutExpiredP) {
+				closesocket(client);
+				return;
+			}
+		}
+	}
+
+	if (block && !doTimeout){
+		err = connect(client, (LPSOCKADDR) &srvAdr, sizeof(srvAdr));
+		if (err){
+			closesocket(client);
+			return;
+		}
 
 		ioctlsocket(client, FIONBIO, &tru);		// set mode to non blocking
 		
 		*errCodeP = 0;
 		*timeoutExpiredP	= FALSE;
 		*endpointRefP = client;
-		};
-	////////////////////////////////////////////////////////////////////////////
-	if (!block)
-		{
-	
+	}
+
+	if (!block){
 		err = WSAAsyncSelect(client,ghMainWindow,PM_SOCKET_EVENT,FD_CONNECT);
-		if (err)
-			{
+		if (err){
 			closesocket(client);
 			return;
-			};
-		
+		}
+
 		err = connect(client, (LPSOCKADDR) &srvAdr, sizeof(srvAdr));
-		if (err==SOCKET_ERROR)
-			{
+		if (err==SOCKET_ERROR){
 			err = WSAGetLastError();		// a WSAEWOULDBLOCK error is a pretty harmless thing
-			if (err!=WSAEWOULDBLOCK)	
-				{
+			if (err!=WSAEWOULDBLOCK){
 				closesocket(client);
 				return;
-				};
-			};
+			}
+		}
 		*errCodeP			= 0;
 		*timeoutExpiredP	= FALSE;
 		*endpointRefP		= client;
-		};
-	//////////////////////////////////////////////////////////////////////////////
+	}
 
 	*errCodeP	= insertNewDictionaryItem(client);
-	if (*errCodeP)
-		{
+	if (*errCodeP){
 		closesocket(client);
 		return;
-		};
+	}
 	if (block)
-		setEndpointDataC(client,2,0,0,0);
-	  else
-		{	
+		setEndpointDataC (client,2,0,0,0);
+	else {
 		dictitem *ptr;
 		ptr	= lookup(client);
 		ptr->referenceCount			= 1;
 		ptr->hasReceiveNotifier		= 0;
 		ptr->hasSendableNotifier	= 1;
 		ptr->aborted				= 0;
-		};
+	}
 }
 
-void sendC(SOCKET endpointRef, CleanString data, int begin, int nBytes,
-		 int *pErrCode, int *pSentBytes)
+void sendC (SOCKET endpointRef, CleanString data, int begin, int nBytes,
+			int *pErrCode, int *pSentBytes)
 {
-	int				sentBytes;
+	int sentBytes;
 
 	*pErrCode	= 0;
-	sentBytes = send(endpointRef, CleanStringCharacters(data)+begin,nBytes, 0);
+	sentBytes = send (endpointRef, CleanStringCharacters(data)+begin,nBytes, 0);
 	if (sentBytes==SOCKET_ERROR) {
 		int err;
 		sentBytes	= 0;
@@ -514,31 +492,29 @@ void sendC(SOCKET endpointRef, CleanString data, int begin, int nBytes,
 }
 
 
-void receiveC(SOCKET endpointRef, int maxSize, CleanString *pReceived)
+void receiveC (SOCKET endpointRef, int maxSize, CleanString *pReceived)
 {
 	int			size, received;
 	dictitem	*pDictitem;
 
 	*pReceived	= (CleanString) pRcvBuff;
 	size		= maxSize<=0 ? rcvBuffSize : maxSize;
-	received	= recv(	endpointRef, CleanStringCharacters(pRcvBuff), size, 0);
+	received	= recv (endpointRef, CleanStringCharacters(pRcvBuff), size, 0);
 	pDictitem	= lookup(endpointRef);
 	trace(	if (!pDictitem)
 				rMessageBox(NULL, MB_APPLMODAL, "in receiveC", "ERROR");)
-	if (received>0) {
+	if (received>0){
 		pDictitem->availByteValid = 0;
 		CleanStringLength(pRcvBuff)	= received;
-		}
-	  else if (pDictitem->availByteValid) {
-			CleanStringCharacters(pRcvBuff)[0]	= pDictitem->availByte;
-			pDictitem->availByteValid = 0;
-			CleanStringLength(pRcvBuff) = 1;
-			}
-		else
-			CleanStringLength(pRcvBuff) = 0;
+	} else if (pDictitem->availByteValid) {
+		CleanStringCharacters(pRcvBuff)[0]	= pDictitem->availByte;
+		pDictitem->availByteValid = 0;
+		CleanStringLength(pRcvBuff) = 1;
+	} else
+		CleanStringLength(pRcvBuff) = 0;
 }
 
-int data_availableC(SOCKET endpointRef)
+int data_availableC (SOCKET endpointRef)
 {
 	dictitem	*pDictitem;
 	int			err;
@@ -550,43 +526,42 @@ int data_availableC(SOCKET endpointRef)
 	if (pDictitem->availByteValid)
 		return TRUE;
 	err	= recv(	endpointRef, &pDictitem->availByte, 1, MSG_PEEK);
-	if (err>0) {
+	if (err>0){
 		pDictitem->availByteValid = 1;
 		return TRUE;
-		};
+	}
 	return FALSE;
 }
 
-void disconnectGracefulC(SOCKET endpointRef)
+void disconnectGracefulC (SOCKET endpointRef)
 {
-	shutdown(endpointRef,1);	// 1: graceful
+	shutdown (endpointRef,1);	// 1: graceful
 }
 
-void disconnectBrutalC(SOCKET endpointRef)
+void disconnectBrutalC (SOCKET endpointRef)
 {
 	LINGER	linger;
 	linger.l_onoff	= 1;
 	linger.l_linger	= 0;
-	setsockopt(endpointRef, SOL_SOCKET, SO_LINGER, (char*) &linger, sizeof(linger));
+	setsockopt (endpointRef, SOL_SOCKET, SO_LINGER, (char*) &linger, sizeof(linger));
 }
 
-void garbageCollectEndpointC(SOCKET endpointRef)
+void garbageCollectEndpointC (SOCKET endpointRef)
 {
 	dictitem	*pDictitem;
 
-	pDictitem	= lookup(endpointRef);
-	if (pDictitem!=NULL && pDictitem->referenceCount==0) {
+	pDictitem	= lookup (endpointRef);
+	if (pDictitem!=NULL && pDictitem->referenceCount==0){
 		closesocket(endpointRef);
 		removeDictionaryItem(endpointRef);
-		};
+	};
 }
 
-
-void os_select_inetevents(	SOCKET endpointRef, int receiverCategory,
+void os_select_inetevents (	SOCKET endpointRef, int receiverCategory,
 							int referenceCount, int getReceiveEvents, int getSendEvents, 
 							int aborted)
 {
-	setEndpointDataC(endpointRef, referenceCount, getReceiveEvents, getSendEvents, aborted);
+	setEndpointDataC (endpointRef, referenceCount, getReceiveEvents, getSendEvents, aborted);
 }
 
 void initFD_SET(FD_SET **ppSet, SOCKET sockets[], int n)
@@ -599,8 +574,8 @@ void initFD_SET(FD_SET **ppSet, SOCKET sockets[], int n)
 		FD_SET(sockets[i], pSet);
 	*ppSet	= pSet;
 }
-			
-void selectChC(	int justForMac, int nonBlocking, int doTimeout, unsigned int stopTime, 
+
+void selectChC (int justForMac, int nonBlocking, int doTimeout, unsigned int stopTime, 
 			    SOCKET *pRChannels, int *justForMac2, SOCKET *pSChannels,
 				int *pErrCode)
 // error code: 0=ok; 1=timeout expired, 3=other errors
@@ -613,31 +588,28 @@ void selectChC(	int justForMac, int nonBlocking, int doTimeout, unsigned int sto
 
 	nRChannels	= (int) pRChannels[-2];
 	nSChannels	= (int) pSChannels[-2];
-	if (doTimeout)
-		{
+	if (doTimeout){
 		now	= GetTickCount();
 		timeoutTicks	= nonBlocking ? 0 : ((int)stopTime) - ((int)now);
-		if (timeoutTicks<0)
-			{
+		if (timeoutTicks<0){
 			*pErrCode	= 1;
 			return;
-			};
+		};
 		timeout.tv_sec	= timeoutTicks / 1000;			// Timeout in sec's
 		timeout.tv_usec	= (timeoutTicks % 1000)*1000;	// Timeout in microsec's
-		};
+	}
 	initFD_SET(&pReadSet,  pRChannels, nRChannels);
 	initFD_SET(&pWriteSet, pSChannels, nSChannels);
-	n = select(0,pReadSet,pWriteSet,NULL, doTimeout ? &timeout : NULL);
-	if (n==0)
-		{	// timeout expired
+	n = select (0,pReadSet,pWriteSet,NULL, doTimeout ? &timeout : NULL);
+	if (n==0){
+		// timeout expired
 		*pErrCode	= 1;
 		return;
-		};
-	if (n<0)
-		{
+	}
+	if (n<0){
 		*pErrCode	= 3;
 		return;
-		};
+	}
 	for(i=0; i<nRChannels; i++)
 		if (FD_ISSET(pRChannels[i], pReadSet))
 			pRChannels[i]	= 0;
@@ -656,10 +628,9 @@ void CleanUp(void)
 	while (pDictitem) {
 		referenceCount	= pDictitem->referenceCount;
 		if (referenceCount!=0) {
-			if (referenceCount==1 && pDictitem->aborted) {
+			if (referenceCount==1 && pDictitem->aborted){
 				disconnectBrutalC(pDictitem->endpointRef);
-				}
-			else
+			} else
 				disconnectGracefulC(pDictitem->endpointRef);
 			closesocket(pDictitem->endpointRef);
 			};
@@ -698,36 +669,34 @@ dictitem* lookup(SOCKET endpointRef)
 	return ptr;
 }
 
-void setEndpointDataC(	int endpointRef, int referenceCount,
+void setEndpointDataC ( SOCKET endpointRef, int referenceCount,
 						int hasReceiveNotifier, int hasSendableNotifier, int aborted)
 {
-	dictitem	*ptr			= lookup((SOCKET) endpointRef);
+	dictitem	*ptr			= lookup (endpointRef);
 	
-	if (ptr!=NULL)
-		{	ptr->referenceCount			= referenceCount;
-			ptr->hasReceiveNotifier		= hasReceiveNotifier ? 1 : 0;
-			ptr->hasSendableNotifier	= hasSendableNotifier ? 1 : 0;
-			ptr->aborted				= aborted ? 1 : 0;
-		};
-	WSAAsyncSelect(endpointRef, ghMainWindow, PM_SOCKET_EVENT, 
+	if (ptr!=NULL){
+		ptr->referenceCount			= referenceCount;
+		ptr->hasReceiveNotifier		= hasReceiveNotifier ? 1 : 0;
+		ptr->hasSendableNotifier	= hasSendableNotifier ? 1 : 0;
+		ptr->aborted				= aborted ? 1 : 0;
+	};
+	WSAAsyncSelect (endpointRef, ghMainWindow, PM_SOCKET_EVENT, 
 						(hasReceiveNotifier ? FD_READ | FD_OOB | FD_ACCEPT | FD_CLOSE : 0)
 					  |	(hasSendableNotifier ? FD_WRITE | FD_CLOSE : 0));
 }
 
-
-void getEndpointDataC(	int endpointRef, int *referenceCount,
+void getEndpointDataC (	SOCKET endpointRef, int *referenceCount,
 						int *hasReceiveNotifier, int *hasSendableNotifier, int *aborted)
 {
-	dictitem	*ptr			= lookup((SOCKET) endpointRef);
+	dictitem	*ptr			= lookup (endpointRef);
 	
-	if (ptr!=NULL)
-		{	*referenceCount			= ptr->referenceCount;
-			*hasReceiveNotifier		= ptr->hasReceiveNotifier!=0;
-			*hasSendableNotifier	= ptr->hasSendableNotifier!=0;
-			*aborted				= ptr->aborted!=0;
-		};
+	if (ptr!=NULL){
+		*referenceCount			= ptr->referenceCount;
+		*hasReceiveNotifier		= ptr->hasReceiveNotifier!=0;
+		*hasSendableNotifier	= ptr->hasSendableNotifier!=0;
+		*aborted				= ptr->aborted!=0;
+	};
 }
-
 
 void removeDictionaryItem(SOCKET endpointRef)
 // the dictionary MUST contain a valid item with the endpointRef
