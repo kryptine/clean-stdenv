@@ -120,133 +120,223 @@ lookupHost_syncC :: !String !*env -> (!(!InetErrCode, !Int), !*env)
 // returns ip address in host order; string can be in aplhanumerical or dotted decimal form; (null terminated)
 // error code: 0 ok, otherwise error (also: addr doesn't exist)
 lookupHost_syncC _ _
-	= code
-		{
-			ccall lookupHost_syncC "S:VII:A"
-		}
+	= code {
+		ccall lookupHost_syncC "S:VII:A"
+	}
 
-lookupHost_asyncC	::	!String !*env -> (!(!InetErrCode, !EndpointRef), !*env)
+lookupHost_asyncC :: !String !*env -> (!(!InetErrCode, !EndpointRef), !*env)
 // creates new endpoint for one dns request.
 // When the dns query is completed, this endpoint will be closed automatically, and the dictionary entry will be
 // removed. Furtheron,
 // one event will be generated, which possibly carries the ip address (host order).
 // string can be in aplhanumerical or dotted decimal form (null terminated).
-lookupHost_asyncC _ _
-	= code
-		{
-			ccall lookupHost_asyncC "S:VII:A"
-		}
+lookupHost_asyncC inetAddr e
+	= IF_INT_64_OR_32 (lookupHost_asyncC64 inetAddr e) (lookupHost_asyncC32 inetAddr e);
 
-openTCP_ListenerC	::	!Int !*env -> (!(!InetErrCode, !EndpointRef), !*env)
+lookupHost_asyncC64 :: !String !*env -> (!(!InetErrCode, !EndpointRef), !*env)
+lookupHost_asyncC64 inetAddr e
+	= code inline {
+		ccall lookupHost_asyncC "S:VIp:A"
+	}
+
+lookupHost_asyncC32 :: !String !*env -> (!(!InetErrCode, !EndpointRef), !*env)
+lookupHost_asyncC32 inetAddr e
+	= code inline {
+		ccall lookupHost_asyncC "S:VII:A"
+	}
+
+openTCP_ListenerC :: !Int !*env -> (!(!InetErrCode, !EndpointRef), !*env)
 // installs a Listener. first param: portnum (host order); errCode: 0:ok;	otherwise:not ok
 // also adds a new dictionary item with values (referencecount=1, hasSNotif=False, hasRNotif=False, aborted=False)
-openTCP_ListenerC _ _
-	= code
-		{
-			ccall openTCP_ListenerC "I:VII:A"
-		}
+openTCP_ListenerC portNum e
+	= IF_INT_64_OR_32 (openTCP_ListenerC64 portNum e) (openTCP_ListenerC32 portNum e);
 
-data_availableC		::	!EndpointRef !*env -> (!Bool, !*env)
+openTCP_ListenerC64 :: !Int !*env -> (!(!InetErrCode, !EndpointRef), !*env)
+openTCP_ListenerC64 portNum e
+	= code inline {
+		ccall openTCP_ListenerC "I:VIp:A"
+	}
+
+openTCP_ListenerC32 :: !Int !*env -> (!(!InetErrCode, !EndpointRef), !*env)
+openTCP_ListenerC32 portNum e
+	= code inline {
+		ccall openTCP_ListenerC "I:VII:A"
+	}
+
+data_availableC :: !EndpointRef !*env -> (!Bool, !*env)
 // returns whether data is available
 data_availableC er env
-	# (avail,env) = data_availableC er env
+	# (avail,env) = IF_INT_64_OR_32 (data_availableC64 er env) (data_availableC32 er env);
 	= (avail <> 0, env)
 where
-	data_availableC		::	!EndpointRef !*env -> (!Int, !*env)
-	data_availableC _ _
-		= code
-		{
+	data_availableC64 :: !EndpointRef !*env -> (!Int, !*env)
+	data_availableC64 _ _
+		= code {
+			ccall data_availableC "p:I:A"
+		}
+
+	data_availableC32 :: !EndpointRef !*env -> (!Int, !*env)
+	data_availableC32 _ _
+		= code {
 			ccall data_availableC "I:I:A"
 		}
 
-sendC				::	!EndpointRef !String !Int !Int !*env -> (!(!InetErrCode, !Int), !*env)
+sendC :: !EndpointRef !String !Int !Int !*env -> (!(!InetErrCode, !Int), !*env)
 /*	sendC epr data begin nBytes env 
 		sends non blocking (data % (begin, begin+nBytes-1)) via the endpoint. 
 		(isIOProg<>0)<=>evaluation happens within startS(N)(M)DI
 		returns number of sent bytes (0 if errCode<>0)
 		errCode: 0=ok, otherwise not ok
 */
-sendC _ _ _ _ _
-	= code
-		{
-			ccall sendC "ISII:VII:A"
-		}
+sendC endpointRef data begin nBytes e
+	= IF_INT_64_OR_32 (sendC64 endpointRef data begin nBytes e) (sendC32 endpointRef data begin nBytes e);
 
-receiveC			::	!EndpointRef !Int !*env -> (!String, !*env)
+sendC64 :: !EndpointRef !String !Int !Int !*env -> (!(!InetErrCode, !Int), !*env)
+sendC64 endpointRef data begin nBytes e
+	= code inline {
+		ccall sendC "pSII:VII:A"
+	}
+
+sendC32 :: !EndpointRef !String !Int !Int !*env -> (!(!InetErrCode, !Int), !*env)
+sendC32 endpointRef data begin nBytes e
+	= code inline {
+		ccall sendC "ISII:VII:A"
+	}
+
+receiveC :: !EndpointRef !Int !*env -> (!String, !*env)
 // receiveC endpointRef maxBytes: receive maximal maxBytes bytes on endpoint endpointRef
-receiveC _ _ _
-	= code
-		{
-			ccall receiveC "II:VS:A"
-		}
+receiveC endpointRef maxSize e
+	= IF_INT_64_OR_32 (receiveC64 endpointRef maxSize e) (receiveC32 endpointRef maxSize e);
 
-acceptC				::	!EndpointRef !*env	->	(!(!InetErrCode, !Int, !EndpointRef),!*env) 
+receiveC64 :: !EndpointRef !Int !*env -> (!String, !*env)
+receiveC64 endpointRef maxSize e
+	= code {
+		ccall receiveC "pI:VS:A"
+	}
+
+receiveC32 :: !EndpointRef !Int !*env -> (!String, !*env)
+receiveC32 endpointRef maxSize e
+	= code {
+		ccall receiveC "II:VS:A"
+	}
+
+acceptC :: !EndpointRef !*env -> (!(!InetErrCode, !Int, !EndpointRef),!*env) 
 // accept connection request on a listener, yielding the ip adress of the remote side in host order and
 // a new endpointRef
 // also adds a new dictionary item with values (referencecount=2, hasSNotif=False, hasRNotif=False, aborted=False)
 // error code: 0: ok, otherwise: not ok
-acceptC _ _
-	= code
-		{
-			ccall acceptC "I:VIII:A"
-		}
+acceptC listener e
+	= IF_INT_64_OR_32 (acceptC64 listener e) (acceptC32 listener e);
+
+acceptC64 :: !EndpointRef !*env -> (!(!InetErrCode, !Int, !EndpointRef),!*env) 
+acceptC64 listener e
+	= code inline {
+		ccall acceptC "p:VIIp:A"
+	}
+
+acceptC32 :: !EndpointRef !*env -> (!(!InetErrCode, !Int, !EndpointRef),!*env) 
+acceptC32 listener e
+	= code inline {
+		ccall acceptC "I:VIII:A"
+	}
 
 disconnectGracefulC	::	!EndpointRef !*env -> *env		
 // disconnect graceful !
-disconnectGracefulC _ _
-	= code
-		{
-			ccall disconnectGracefulC "I:V:A"
-		}
+disconnectGracefulC endpointRef e
+	= IF_INT_64_OR_32 (disconnectGracefulC64 endpointRef e) (disconnectGracefulC32 endpointRef e);
 
-disconnectBrutalC	::	!EndpointRef !*env -> *env		
+disconnectGracefulC64 :: !EndpointRef !*env -> *env		
+disconnectGracefulC64 endpointRef e
+	= code inline {
+		ccall disconnectGracefulC "p:V:A"
+	}
+
+disconnectGracefulC32 :: !EndpointRef !*env -> *env		
+disconnectGracefulC32 endpointRef e
+	= code inline {
+		ccall disconnectGracefulC "I:V:A"
+	}
+
+disconnectBrutalC :: !EndpointRef !*env -> *env		
 // disconnect brutal !
-disconnectBrutalC _ _
-	= code
-		{
-			ccall disconnectBrutalC "I:V:A"
-		}
+disconnectBrutalC endpointRef e
+	= IF_INT_64_OR_32 (disconnectBrutalC64 endpointRef e) (disconnectBrutalC32 endpointRef e);
 
-garbageCollectEndpointC	::	!EndpointRef !*env -> *env
+disconnectBrutalC64 :: !EndpointRef !*env -> *env		
+disconnectBrutalC64 endpointRef e
+	= code inline {
+		ccall disconnectBrutalC "p:V:A"
+	}
+
+disconnectBrutalC32 :: !EndpointRef !*env -> *env		
+disconnectBrutalC32 endpointRef e
+	= code inline {
+		ccall disconnectBrutalC "I:V:A"
+	}
+
+garbageCollectEndpointC :: !EndpointRef !*env -> *env
 // returns resources back to the system. uses reference count of dictionary item
-garbageCollectEndpointC _ _ 
-	= code
-		{
-			ccall garbageCollectEndpointC "I:V:A"
-		}
+garbageCollectEndpointC endpointRef e
+	= IF_INT_64_OR_32 (garbageCollectEndpointC64 endpointRef e) (garbageCollectEndpointC32 endpointRef e);
 
-/////////// endpoint dictionary functions ///////////////////////
+garbageCollectEndpointC64 :: !EndpointRef !*env -> *env
+garbageCollectEndpointC64 endpointRef e
+	= code inline {
+		ccall garbageCollectEndpointC "p:V:A"
+	}
 
-/*	for each endpoint, a record is kept in C memory. This record contains
-*/
+garbageCollectEndpointC32 :: !EndpointRef !*env -> *env
+garbageCollectEndpointC32 endpointRef e
+	= code inline {
+		ccall garbageCollectEndpointC "I:V:A"
+	}
 
+// endpoint dictionary functions
 
-setEndpointDataC				::	!EndpointRef !Int !Bool !Bool !Bool !*env -> *env
+/*	for each endpoint, a record is kept in C memory. This record contains */
+
+setEndpointDataC :: !EndpointRef !Int !Bool !Bool !Bool !*env -> *env
 // set the endpointRef data. parameters: endpointRef referenceCount hasReceiveNotifier hasSendableNotifier aborted
 // the values of hasReceiveNotifier and hasSendableNotifier also have an effect on the set of internet events,
 // that will reach Clean
 // if the item is already deallocated by the C side, nothing will happen
-setEndpointDataC _ _ _ _ _ _
-	= code
-		{
-			ccall setEndpointDataC "IIIII:V:A"
-		}
+setEndpointDataC endpointRef referenceCount hasReceiveNotifier hasSendableNotifier aborted e
+	= IF_INT_64_OR_32
+		(setEndpointDataC64 endpointRef referenceCount hasReceiveNotifier hasSendableNotifier aborted e)
+		(setEndpointDataC32 endpointRef referenceCount hasReceiveNotifier hasSendableNotifier aborted e);
 
-getEndpointDataC			::	!EndpointRef !*env -> (!(!Int, !Bool, !Bool, !Bool), !*env)
+setEndpointDataC64 :: !EndpointRef !Int !Bool !Bool !Bool !*env -> *env
+setEndpointDataC64 endpointRef referenceCount hasReceiveNotifier hasSendableNotifier aborted e
+	= code inline {
+		ccall setEndpointDataC "pIIII:V:A"
+	}
+
+setEndpointDataC32 :: !EndpointRef !Int !Bool !Bool !Bool !*env -> *env
+setEndpointDataC32 endpointRef referenceCount hasReceiveNotifier hasSendableNotifier aborted e
+	= code inline {
+		ccall setEndpointDataC "IIIII:V:A"
+	}
+
+getEndpointDataC :: !EndpointRef !*env -> (!(!Int, !Bool, !Bool, !Bool), !*env)
 // get the endpointRef data. result: referenceCount hasReceiveNotifier hasSendableNotifier aborted
 // if the item is already deallocated by the C side, then the returned values are undefined
 getEndpointDataC er env
-	# ((a,b,c,d),env) = getEndpointDataC er env
+	# ((a,b,c,d),env) = IF_INT_64_OR_32 (getEndpointDataC64 er env) (getEndpointDataC32 er env);
 	= ((a,b<>0,c<>0,d<>0),env)
 where
-	getEndpointDataC			::	!EndpointRef !*env -> (!(!Int, !Int, !Int, !Int), !*env)
-	getEndpointDataC _ _
-		= code
-		{
+	getEndpointDataC64 :: !EndpointRef !*env -> (!(!Int, !Int, !Int, !Int), !*env)
+	getEndpointDataC64 endpointRef e 
+		= code {
+			ccall getEndpointDataC "p:VIIII:A"
+		}
+
+	getEndpointDataC32 :: !EndpointRef !*env -> (!(!Int, !Int, !Int, !Int), !*env)
+	getEndpointDataC32 endpointRef e 
+		= code {
 			ccall getEndpointDataC "I:VIIII:A"
 		}
 
-selectChC			::	!Int !Bool !(!Bool, !Int) !{#EndpointRef} !{#Int} !{#EndpointRef} !*env -> (!InetErrCode, !*env)
+selectChC :: !Int !Bool !(!Bool, !Int) !{#EndpointRef} !{#Int} !{#EndpointRef} !*env -> (!InetErrCode, !*env)
 /* selectChC isIOProg nonBlocking (doTimeout, stopTime) rcvEndpoints rcvKinds sndEndpoints
    calls the sockets select function. HAS A SIDEEFFECT: the contents of rcvEndpoints and sndEndpoints will
    be updated.
@@ -267,13 +357,12 @@ selectChC			::	!Int !Bool !(!Bool, !Int) !{#EndpointRef} !{#Int} !{#EndpointRef}
 	after function execution those elements of rcvEndpoints will be set to 0 which are readable or "eom"
 	after function execution those elements of sndEndpoints will be set to 0 which are sendable or "disconnected"
 */
-selectChC _ _ _ _ _ _ _
-	= code
-		{
-			ccall selectChC "IIIIAAA:VI:A"
-		}
+selectChC justForMac nonBlocking doTimeout stopTime pRChannels justForMac2 pSChannels
+	= code {
+		ccall selectChC "IIIIAAA:VI:A"
+	}
 
-tcpPossibleC		::	!*env -> (!Bool, !*env)	
+tcpPossibleC :: !*env -> (!Bool, !*env)	
 // whether tcp can be started up
 tcpPossibleC env
 	# (res,env)	= tcpPossibleC env
@@ -281,7 +370,6 @@ tcpPossibleC env
 where
 	tcpPossibleC		::	!*env -> (!Int, !*env)	
 	tcpPossibleC _
-		= code
-		{
+		= code {
 			ccall tcpPossibleC ":I:A"
 		}
