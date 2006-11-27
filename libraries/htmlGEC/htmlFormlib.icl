@@ -157,7 +157,8 @@ vertlistForm :: !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | iData a
 vertlistForm inIDataId hSt	= layoutListForm (\f1 f2 -> [f1 <||> f2]) mkEditForm inIDataId hSt
 
 vertlistFormButs :: !Int !Bool !(InIDataId [a]) !*HSt -> (Form [a],!*HSt) | iData a
-vertlistFormButs nbuts showbuts (init,formid) hst
+vertlistFormButs nbuts showbuts (init,formid=:{mode}) hst
+# formid					= formid <@ Edit
 # indexId					= subFormId formid "idx" 0 <@ Display
 # (index,hst)				= mkEditForm (init,indexId) hst
 # (olist,hst)				= listForm   (init,formid)  hst
@@ -197,7 +198,7 @@ vertlistFormButs nbuts showbuts (init,formid) hst
 # newlist					= app.value newlist 
 # newlist					= del.value newlist 
 
-# (list, hst)				= listForm (setID formid newlist) hst
+# (list, hst)				= listForm (Set,setFormId formid newlist <@ mode) hst
 # lengthlist				= length newlist
 # (index,hst)				= mkEditForm (setID indexId obbuts.value) hst
 # (bbuts,hst)				= browseButtons (Init, bbutsId) step lengthlist nbuts hst
@@ -210,7 +211,10 @@ vertlistFormButs nbuts showbuts (init,formid) hst
 = (	{ form 					= pdbuts.form ++ bbuts.form ++ 
 								[[ toHtml ("nr " <+++ (i+1) <+++ " / " <+++ length list.value)
 										<.||.> 
-								   (onMode formid.mode (if showbuts (del <.=.> ins <.=.> app  <.=.> copy  <.=.> paste) EmptyBody) EmptyBody EmptyBody EmptyBody)
+								   (onMode formid.mode (if showbuts (del <.=.> ins <.=.> app  <.=.> copy  <.=.> paste) EmptyBody) 
+								   	(if showbuts (del <.=.> ins <.=.> app  <.=.> copy  <.=.> paste) EmptyBody)
+								   	EmptyBody 
+								   	EmptyBody)
 								 \\ del <- del.form & ins <- ins.form & app <- app.form & copy <- copy.form & paste <- paste.form & i <- [bbuts.value..]]
 										<=|> 
 								list.form % betweenindex
@@ -288,7 +292,7 @@ listForm inIDataId hSt		= layoutListForm (\f1 f2 -> [BodyTag f1:f2]) mkEditForm 
 layoutListForm :: !([BodyTag] [BodyTag] -> [BodyTag]) 
                   !((InIDataId  a)   *HSt -> (Form  a,  *HSt))
                   ! (InIDataId [a]) !*HSt -> (Form [a],!*HSt) | iData a
-layoutListForm layoutF formF (init,formid) hst 
+layoutListForm layoutF formF (init,formid=:{mode}) hst 
 # (store, hst)				= mkStoreForm (init,formid) id  hst			// enables to store list with different # elements
 # (layout,hst)				= layoutListForm` 0 store.value hst
 # (store, hst)				= mkStoreForm (init,formid) (const layout.value) hst

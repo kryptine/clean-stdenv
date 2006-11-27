@@ -7,23 +7,25 @@ derive gUpd []
 
 //Start world = doHtmlServer (multiUser (Quotation myQuotation)) world
 //Start world = doHtmlServer (multiUser twotasks3) world
-Start world = doHtmlServer (multiUser agenda2) world
+
+
+Start world = doHtmlServer (multiUser twotasks3) world
 where
 	singleUser tasks hst 
 	# (_,html,hst) = startTask 0 tasks hst
-	= mkHtml "test" html hst
+	= mkHtml "stest" html hst
 
 	multiUser tasks hst 
 	# (idform,hst) 	= FuncMenu (Init,nFormId "pdm_chooseWorker" 
 							(0,[("User " +++ toString i,\_ -> i) \\ i<-[0..5] ])) hst
 	# currentWorker	= snd idform.value
 	# (_,html,hst) 	= startTask currentWorker (persistent tasks) hst
-	= mkHtml "test" [idform.form <=> html] hst
+	= mkHtml "mtest" [idform.form <=> html] hst
 	where
 		persistent tasks tst
-//		# tst	= setTaskAttribute Persistent tst
-		# tst	= setTaskAttribute StaticDynamic tst
-		# tst	= setTaskAttribute Database tst
+		# tst	= setTaskAttribute Persistent tst
+//		# tst	= setTaskAttribute StaticDynamic tst
+//		# tst	= setTaskAttribute Database tst
 		= tasks tst
 
 

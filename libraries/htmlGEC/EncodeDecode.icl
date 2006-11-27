@@ -170,13 +170,13 @@ DecodeArguments Internal (Just args)
 | nargs == 1		= DecodeCleanServerArguments (foldl (+++) "" [name +++ "=" +++ value +++ ";" \\ (name,value) <- args])
 # tripargs 			= reverse args													// state hidden in last field, rest are triplets
 # (state,tripargs)	= (urlDecode (snd (hd tripargs)),tl tripargs)					// decode state, get triplets highest positions first	
-# constriplets		= filter (\(name,_) -> name == "CS") tripargs		// select constructor triplets  
+# constriplets		= filter (\(name,_) -> name == "CS") tripargs					// select constructor triplets  
 # nconstriplets		= [(constrip,"") \\ (_,codedtrip) <- constriplets, (Just constrip) <- [parseString (decodeString (urlDecode codedtrip))]] // and decode
-# valtriplets		= filter (\(name,_) -> name <> "CS") tripargs		// select all other triplets 
+# valtriplets		= filter (\(name,_) -> name <> "CS") tripargs					// select all other triplets 
 # nvaltriplets		= [(mytrip,new) \\ (codedtrip,new) <- valtriplets, (Just mytrip) <- [parseString (decodeString (urlDecode codedtrip))]] // and decode
-= ("clean",reverse nconstriplets ++ nvaltriplets,state)	// order is important, first the structure than the values ...
+= ("clean",reverse nconstriplets ++ nvaltriplets,state)								// order is important, first the structure than the values ...
 where
-	DecodeCleanServerArguments :: !String -> (!String,!Triplets,!String)		// executable, id + update , new , state
+	DecodeCleanServerArguments :: !String -> (!String,!Triplets,!String)			// executable, id + update , new , state
 	DecodeCleanServerArguments args
 	# input 							= [c \\ c <-: args | not (isControl c) ]	// get rid of communication noise
 	# (thisexe,input) 					= mscan '\"'          input					// get rid of garbage

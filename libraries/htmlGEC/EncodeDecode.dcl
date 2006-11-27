@@ -30,12 +30,13 @@ import htmlFormData
 	| UpdS String												// new piece of text
 
 encodeTriplet		:: !Triplet -> String						// encoding of triplets
+encodeString 		:: !String  -> String						// encoding of 
 
 // Form submission handling
 
-callClean 		:: !(Script -> ElementEvents) !Mode !String -> [ElementEvents]
-submitscript 	::  BodyTag
-globalstateform :: !Value -> BodyTag
+callClean 					:: !(Script -> ElementEvents) !Mode !String -> [ElementEvents]
+submitscript 				::  BodyTag
+globalstateform 			:: !Value -> BodyTag
 
 // serializing, de-serializing of iData states to strings stored in the html page
 
@@ -49,9 +50,9 @@ readState				 	:: !String !String !*NWorld -> (!String,!*NWorld)
 
 // constants that maybe useful
 
-ThisExe						:: !ServerKind -> String									// name of this executable
-MyPhP 						:: !ServerKind -> String									// name of php script interface between server and this executable
-MyDir 						:: !ServerKind -> String									// name of directory in which persistent form info is stored
+ThisExe						:: !ServerKind -> String			// name of this executable
+MyPhP 						:: !ServerKind -> String			// name of php script interface between server and this executable
+MyDir 						:: !ServerKind -> String			// name of directory in which persistent form info is stored
 
 traceHtmlInput				:: !ServerKind !(Maybe [(String, String)]) -> BodyTag					// for debugging showing the information received from browser
 

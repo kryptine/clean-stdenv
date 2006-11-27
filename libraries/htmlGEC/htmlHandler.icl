@@ -238,24 +238,25 @@ where
 mkForm :: !(InIDataId a) !*HSt -> *(Form a, !*HSt)	| gForm {|*|} a
 mkForm (init,formid=:{mode = Submit}) hst=:{submits = False} 
 # (form,hst) 	= gForm{|*|} (init,formid) {hst & submits = True}
+# hst			= {hst & submits = False}
 # hidden		= Input [ Inp_Name "hidden"
 						, Inp_Type Inp_Hidden
 						, Inp_Value (SV "")
 						] ""
 # submit		= Input [ Inp_Type Inp_Button
 						, Inp_Value (SV "Submit")
-						,`Inp_Events (callClean OnClick Submit formid.id)
+						,`Inp_Events (callClean OnClick Submit formname)
 						] ""
 # clear			= Input [ Inp_Type Inp_Reset, Inp_Value (SV "Clear")] ""
 # sform			= [Form [ Frm_Method Post
-						, Frm_Name  formid.id
+						, Frm_Name  formname
 						] (form.form ++ [hidden,Br,submit,clear])
 				  ] 
 = ({form & form = sform} ,hst)
+where
+	formname = encodeString formid.id				// to enable the use of any character in a form name
 mkForm inidataid hst = gForm{|*|} inidataid hst
 	
-
-
 generic gForm a :: !(InIDataId a) !*HSt -> *(Form a, !*HSt)	
 
 gForm{|Int|} (init,formid) hst 	
