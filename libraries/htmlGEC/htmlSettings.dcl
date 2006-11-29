@@ -18,8 +18,8 @@ class iDataSerAndDeSerialize a
 		| gParse{|*|}					//		To de-serialize a string back to a value
 		, iDataSerialize a		
 
-TraceInput			:== False			// show what kind of information is received from Client
-TraceOutput			:== False			// show what kind of information is stored
+TraceInput			:== True			// show what kind of information is received from Client
+TraceOutput			:== True			// show what kind of information is stored
 
 MyDataBase			:== "iDataDatabase"	// name of database being used by iData applications
 

@@ -413,4 +413,5 @@ where
 		        hexToDigit i
 		                | i<=toInt '9'	= i - toInt '0'
 		                | otherwise		= i - toInt 'A' - 10
+	urlDecode` ['+':xs]				 	= [' ':urlDecode` xs]
 	urlDecode` [x:xs]				 	= [x:urlDecode` xs]

@@ -214,16 +214,18 @@ invariantPersons id persons
 invariantPaper :: String Paper -> Judgement
 invariantPaper id {title,first_author,co_authors = Co_authors authors,abstract,pdf}
 | title			== ""	= Just (id,"title of paper not specified!")
-| abstract		== ""	= Just (id,"no abstract of paper specified!")
+| tabstract		== ""	= Just (id,"no abstract of paper specified!")
 | pdf			== ""	= Just (id,"no pdf given!")
 # judgementFirst_author	= invariantPerson (id +++ " first author") first_author
 # judgementCo_authors	= foldl (+) Ok (map (invariantPerson (id +++ " co_authors")) authors)
 = judgementFirst_author + judgementCo_authors
+where
+ (TextArea _ _ tabstract) = abstract	
 
 invariantReport :: String Report -> Judgement
-invariantReport id {commCommittee,commAuthors}
-| commAuthors	== ""	= Just (id,"You have to make some remarks to the authors")
-| commCommittee	== ""	= Just (id,"You have to make some remarks to the committee")
+invariantReport id {commCommittee=(TextArea _ _ commcommittee),commAuthors=(TextArea _ _ commauthors)}
+| commauthors	== ""	= Just (id,"You have to make some remarks to the authors")
+| commcommittee	== ""	= Just (id,"You have to make some remarks to the committee")
 = Ok
 
 invariantConfAccounts :: String ConfAccounts -> Judgement

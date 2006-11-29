@@ -381,6 +381,7 @@ where
 	fieldname				= Input [ Inp_Type		Inp_Text
 									, Inp_Value		(SV (prettify d.gfd_name +++ ": "))
 									, Inp_ReadOnly	ReadOnly
+									, Inp_Disabled	Disabled
 									, `Inp_Std		[DisplayBoxStyle]
 									, Inp_Size		maxsize`
 									] ""

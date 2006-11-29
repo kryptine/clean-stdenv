@@ -49,6 +49,7 @@ instance toString	HtmlDate, HtmlTime
 				| TR Int Real						// Input box of size Size for Reals
 				| TS Int String						// Input box of size Size for Strings
 :: TextArea		= TextArea Int Int String			// Input Area Box, row col initial string
+													// Only works in Submit mode due to Html restrictions!
 :: PasswordBox	= PasswordBox String
 	
 // special's

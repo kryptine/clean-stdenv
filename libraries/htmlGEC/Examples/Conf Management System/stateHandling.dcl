@@ -69,8 +69,8 @@ import loginAdmin, htmlFormlib
 :: Familiarity	= 	Expert
 				| 	Knowledgeable
 				| 	Low
-:: CommCommittee:== String // TextArea 
-:: CommAuthors	:==	String // TextArea 
+:: CommCommittee:== TextArea 
+:: CommAuthors	:==	TextArea 
 
 // Information maintained by the Conference Manager *or* a Referee *or* an Author
 
@@ -94,7 +94,7 @@ import loginAdmin, htmlFormlib
 :: Paper		=	{ title			:: String
 					, first_author	:: Person
 					, co_authors	:: Co_authors
-					, abstract		:: String
+					, abstract		:: TextArea
 					, pdf			:: String
 					}
 :: Co_authors 	=	Co_authors [Person]					

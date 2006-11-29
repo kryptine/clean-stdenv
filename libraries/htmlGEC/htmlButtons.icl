@@ -3,7 +3,7 @@ implementation module htmlButtons
 import StdFunc, StdList, StdString
 import htmlFormlib, htmlHandler, htmlStylelib, htmlTrivial
 
-derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode/*, Button, CheckBox*/, RadioButton /*, PullDownMenu, TextInput */, TextArea/*, PasswordBox*/
+derive gUpd  	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode/*, Button, CheckBox*/, RadioButton /*, PullDownMenu, TextInput , TextArea, PasswordBox*/
 derive gPrint 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, PasswordBox
 derive gParse 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, PasswordBox
 derive gerda 	(,), (,,), (,,,), (<->), <|>, HtmlDate, HtmlTime, DisplayMode, Button, CheckBox, RadioButton, PullDownMenu, TextInput, TextArea, PasswordBox
@@ -236,23 +236,26 @@ gForm{|TextArea|} (init,formid) hst
 # (cntr,hst)			= CntrHSt hst
 = (	{ changed			= False
 	, value				= formid.ival
-	, form				= [Form [Frm_Method Post, `Frm_Events (callClean OnSubmit Edit "")] 
-							[mkSTable 	[ [ Textarea [Txa_Name "message", Txa_Rows row, Txa_Cols col ] "" ]
-										, [ mkSTable [[ Input [Inp_Type Inp_Submit, Inp_Name (encodeTriplet (formid.id,cntr+2,UpdS string)), Inp_Value (SV "Set"),`Inp_Events (callClean OnClick Edit "")] ""
-										  		   	  , Input [Inp_Type Inp_Reset,  Inp_Name "reset",                                        Inp_Value (SV "Reset")] ""
-										           	 ]]
-										  ]
-										]
-							]] 
-	},incrHSt 3 hst)
+	, form				= [myTable [	[ Textarea 	[ Txa_Name (encodeTriplet (formid.id,cntr,UpdS string))
+						  				, Txa_Rows (if (row == 0) 10 row)
+						  				, Txa_Cols (if (col == 0) 50 col)
+						  				] string ]
+						  			]
+						  ]
+	},incrHSt 1 hst)
 where
 	(TextArea row col string) = formid.ival
 
-	mkSTable table
+	myTable table
 	= Table []	(mktable table)
 	where
 		mktable table 	= [Tr [] (mkrow rows) \\ rows <- table]	
 		mkrow rows 		= [Td [Td_VAlign Alo_Top, Td_Width (Pixels defpixel)] [row] \\ row <- rows] 
+
+gUpd{|TextArea|}       (UpdSearch (UpdS name) 0) (TextArea r c s) 	= (UpdDone,                TextArea r c (urlDecode name))									// update button value
+gUpd{|TextArea|}       (UpdSearch val cnt)       t					= (UpdSearch val (cnt - 1),t)										// continue search, don't change
+gUpd{|TextArea|}       (UpdCreate l)             _					= (UpdCreate l,            TextArea defsize defsize "")					// create default value
+gUpd{|TextArea|}       mode                      t					= (mode,                   t)										// don't change
 
 gForm{|PasswordBox|} (init,formid) hst 	
 = case formid.ival of

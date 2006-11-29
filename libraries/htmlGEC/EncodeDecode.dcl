@@ -30,7 +30,9 @@ import htmlFormData
 	| UpdS String												// new piece of text
 
 encodeTriplet		:: !Triplet -> String						// encoding of triplets
-encodeString 		:: !String  -> String						// encoding of 
+encodeString 		:: !String  -> String						// encoding of string 
+urlEncode 			:: !String ->  String
+urlDecode 			:: !String -> *String
 
 // Form submission handling
 

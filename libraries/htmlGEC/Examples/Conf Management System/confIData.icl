@@ -67,13 +67,13 @@ editorRefPaper :: !(InIDataId RefPaper) !*HSt -> (Form Paper,!*HSt)
 editorRefPaper (init,formid) hst
 # (RefPaper refpaper)					= formid.ival
 # (Ref2 name)							= refpaper
-= universalRefEditor storageOption (init,reuseFormId formid refpaper) (invariantPaper name) hst
+= universalRefEditor storageOption (init,reuseFormId formid refpaper <@ Submit) (invariantPaper name) hst
 
 editorRefReport :: !(InIDataId RefReport) !*HSt -> (Form (Maybe Report),!*HSt)
 editorRefReport (init,formid) hst
 # (RefReport refreport)					= formid.ival
 # (Ref2 name)							= refreport
-= universalRefEditor storageOption (init,reuseFormId formid refreport) (invariant name) hst
+= universalRefEditor storageOption (init,reuseFormId formid refreport <@ Submit) (invariant name) hst
 where
 	invariant name Nothing 				= Ok
 	invariant name (Just report)		= invariantReport name report

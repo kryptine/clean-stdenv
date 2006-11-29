@@ -14,35 +14,18 @@ derive gParse 	Record
 derive gPrint 	Record
 derive gerda	Record
 
-//Start world  = doHtmlSubServer (4,0,1,"tree") MyPage5  world
-Start world  = doHtmlServer MyPage5  world
+//Start world  = doHtmlSubServer (4,1,1,"tree") MyPage5  world
+Start world  = doHtmlServer MyPage4  world
 
-MyPage5 hst
-# (n1,hst) = mkEditForm (Init,nDFormId "test1" [0]) hst
-# (n2,hst) = mkEditForm (Init,pDFormId "test2" [0]) hst
-# (n3,hst) = mkEditForm (Set, pDFormId "test2" n1.value) hst
-=	mkHtml "Balanced Tree"
-	[ H1 [] "Balanced Tree"
-	, BodyTag n1.form
-	, Br
-	, toHtml n1.value, Br
-	, toHtml n2.value, Br
-	, toHtml n3.value, Br
-	]  hst
+:: Record = {name :: String, address :: TextArea, zipcode :: Int}
 
-:: Record = {name :: String, address :: String, zipcode :: Int}
-
-myrecord :: [Record]
+myrecord :: TextArea
 myrecord = createDefault
 
-myfun file 
-	= if (sfend2 file file) (fwritec 'a' file) (fwritec 'b' file)
-	where
-		sfend2 n m = sfend n		
 	
 MyPage4 hst
-//# (myrecord,hst) = mkEditForm (Init,nFormId "bla" myrecord)  hst
-# (myrecord,hst) = vertlistFormButs 5 True (Init,nFormId "bla" myrecord)  hst
+# (myrecord,hst) = mkEditForm (Init,nFormId "bla" myrecord <@ Submit)  hst
+//# (myrecord,hst) = vertlistFormButs 5 True (Init,nFormId "bla" myrecord <@ Submit)  hst
 =	mkHtml "Example"
 	[ H1 [] ""
 	, BodyTag myrecord.form
