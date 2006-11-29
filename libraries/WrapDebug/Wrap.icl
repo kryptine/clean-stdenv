@@ -105,7 +105,8 @@ shallowWrap node
 		rtn
 	:not_a_bool
 
-		eq_desc	INT 0 0
+		pushD_a 0
+		eq_desc_b INT 0
 		jmp_false	not_an_int
 
 		pushI_a	0
