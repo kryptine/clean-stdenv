@@ -12,6 +12,59 @@
 
 #include "cOSGameLib_121.h"
 
+#ifdef _WIN64
+static void my_copy_memory (void *d_q, void *s_q, size_t s)
+{
+	char *d_p,*s_p;
+	
+	s_p=s_q;
+	d_p=d_q;
+	while (s>0){
+		*d_p++ = *s_p++;
+		--s;
+	}
+}
+
+static void my_zero_memory (void *q,size_t s)
+{
+	char *p;
+	
+	p=q;
+
+	while (s>=32){
+		*(__int64*)p=0;
+		*(__int64*)(p+16)=0;
+		*(__int64*)(p+8)=0;		
+		*(__int64*)(p+24)=0;
+		p+=32;
+		s-=32;
+	}
+	if (s>=16){
+		*(__int64*)p=0;
+		*(__int64*)(p+8)=0;
+		p+=16;
+		s-=16;
+	}
+	if (s>=8){
+		*(__int64*)p=0;
+		p+=8;
+		s-=8;
+	}
+	if (s>=4){
+		*(int*)p=0;
+		p+=4;
+		s-=4;
+	}
+	if (s>=2){
+		*(short*)p=0;
+		p+=2;
+		s-=2;
+	}
+	if (s>0)
+		*(char*)p=0;	
+}
+#endif
+
 /* DD functions from DDUTIL.CPP ... */
 
 /*
@@ -47,7 +100,11 @@ IDirectDrawSurface * DDLoadBitmap(IDirectDraw *pdd, LPCSTR szBitmap, int dx, int
     //
     // create a DirectDrawSurface for this bitmap
     //
+#ifdef _WIN64
+	my_zero_memory (&ddsd, sizeof(ddsd));
+#else
     ZeroMemory(&ddsd, sizeof(ddsd));
+#endif
     ddsd.dwSize = sizeof(ddsd);
     ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
     ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;
@@ -695,11 +752,18 @@ BOOL DSFillSoundBuffer(IDirectSoundBuffer *pDSB, BYTE *pbWaveData, DWORD cbWaveS
         if (SUCCEEDED(IDirectSoundBuffer_Lock(pDSB, 0, cbWaveSize,
             &pMem1, &dwSize1, &pMem2, &dwSize2, 0)))
         {
-            CopyMemory(pMem1, pbWaveData, dwSize1);
+#ifdef _WIN64
+			my_copy_memory (pMem1, pbWaveData, dwSize1);
+#else
+            CopyMemory (pMem1, pbWaveData, dwSize1);
+#endif
 
             if ( 0 != dwSize2 )
-                CopyMemory(pMem2, pbWaveData+dwSize1, dwSize2);
-
+#ifdef _WIN64
+				my_copy_memory (pMem2, pbWaveData+dwSize1, dwSize2);
+#else
+                CopyMemory (pMem2, pbWaveData+dwSize1, dwSize2);
+#endif
             IDirectSoundBuffer_Unlock(pDSB, pMem1, dwSize1, pMem2, dwSize2);
             return TRUE;
         }
@@ -1044,7 +1108,11 @@ BOOL OSInitGameWindow (void)
                 ShowError ("IDirectDraw_SetDisplayMode failed");
             else
             {
-                memset (&ddsd, 0, sizeof (DDSURFACEDESC));  // set non-used values to zero!
+#ifdef _WIN64
+				my_zero_memory (&ddsd, sizeof (DDSURFACEDESC));  // set non-used values to zero!
+#else
+		        memset (&ddsd, 0, sizeof (DDSURFACEDESC));  // set non-used values to zero!
+#endif
                 ddsd.dwSize = sizeof (ddsd);
                 if (FullScreen)
                 {
@@ -1084,8 +1152,11 @@ BOOL OSInitGameWindow (void)
                             {
                                 if (!FullScreen)
                                 {
-
+#ifdef _WIN64
+									my_zero_memory (&ddsd, sizeof (DDSURFACEDESC));
+#else
                                     memset (&ddsd, 0, sizeof (DDSURFACEDESC));
+#endif
                                     ddsd.dwSize = sizeof (ddsd);
                                     ddsd.dwFlags = DDSD_CAPS |
                                                    DDSD_WIDTH |
@@ -1153,7 +1224,11 @@ void OSClearScreen (void)
 {
     DDBLTFX ddbltfx;
 
+#ifdef _WIN64
+	my_zero_memory (&ddbltfx, sizeof (ddbltfx));
+#else
     memset (&ddbltfx, 0, sizeof (ddbltfx));
+#endif
     ddbltfx.dwSize = sizeof (ddbltfx);
     ddbltfx.dwFillColor = DDColorMatch (lpDDSFront, 0);
     IDirectDrawSurface_Blt (lpDDSFront, NULL, NULL, NULL,
@@ -1171,7 +1246,11 @@ void OSClearVirtualScreen (COLORREF c)
     dst.right = ScreenWidth + XShiftScreen;
     dst.bottom = ScreenHeight + YShiftScreen;
 
+#ifdef _WIN64
+	my_zero_memory (&ddbltfx, sizeof (ddbltfx));
+#else
     memset (&ddbltfx, 0, sizeof (ddbltfx));
+#endif
 
     ddbltfx.dwSize = sizeof (ddbltfx);
     ddbltfx.dwFillColor = DDColorMatch (lpDDSBack, c);
@@ -1193,7 +1272,11 @@ void OSFillBlack (BOOL vis, RECT dst)
       dst.bottom += YShiftScreen;
 //    }
 
+#ifdef _WIN64
+	my_zero_memory (&ddbltfx, sizeof (ddbltfx));
+#else
     memset (&ddbltfx, 0, sizeof (ddbltfx));
+#endif
     ddbltfx.dwSize = sizeof (ddbltfx);
     ddbltfx.dwFillColor = DDColorMatch (lpDDS, 0);
     IDirectDrawSurface_Blt (lpDDS, &dst, NULL, NULL,
@@ -1213,7 +1296,11 @@ void OSBlit (RECT *r)
     sr.right = r->right + XShiftScreen;
     sr.bottom = r->bottom + YShiftScreen;
 
+#ifdef _WIN64
+	my_zero_memory (&ddbltfx, sizeof (ddbltfx));
+#else
     memset (&ddbltfx, 0, sizeof (ddbltfx));
+#endif
     ddbltfx.dwSize = sizeof (ddbltfx);
     ddbltfx.dwDDFX = DDBLTFX_NOTEARING;
 
@@ -1330,7 +1417,11 @@ int OSInitGameBitmap (int id, char *name,
     if (!GetGameBitmapInfo (id))  /* identifier not used yet */
     {
         /* set non-used values to zero! */
-        memset (&ddsd, 0, sizeof (DDSURFACEDESC));
+#ifdef _WIN64
+		my_zero_memory (&ddsd, sizeof (DDSURFACEDESC));
+#else
+	    memset (&ddsd, 0, sizeof (DDSURFACEDESC));
+#endif
         ddsd.dwSize = sizeof (ddsd);
         ddsd.dwFlags = DDSD_CAPS |
                        DDSD_WIDTH |
@@ -1621,7 +1712,11 @@ void OSDraw (RECT *dst, int id, RECT *src, BOOL mirlr, BOOL mirud, int flags)
         }
 
       //  ddbltfx.dwDDFX = 0;
+#ifdef _WIN64
+		my_zero_memory (&ddbltfx, sizeof (ddbltfx));
+#else
         memset (&ddbltfx, 0, sizeof (ddbltfx));
+#endif
         ddbltfx.dwSize = sizeof (ddbltfx);
 
         if (mirlr)
