@@ -174,7 +174,9 @@ DecodeArguments Internal (Just args)
 # nconstriplets		= [(constrip,"") \\ (_,codedtrip) <- constriplets, (Just constrip) <- [parseString (decodeString (urlDecode codedtrip))]] // and decode
 # valtriplets		= filter (\(name,_) -> name <> "CS") tripargs					// select all other triplets 
 # nvaltriplets		= [(mytrip,new) \\ (codedtrip,new) <- valtriplets, (Just mytrip) <- [parseString (decodeString (urlDecode codedtrip))]] // and decode
+//# alltriplets		= ordertriplets (nconstriplets ++ nvaltriplets) []
 = ("clean",reverse nconstriplets ++ nvaltriplets,state)								// order is important, first the structure than the values ...
+//= ("clean",alltriplets,state)								// order is important, first the structure than the values ...
 where
 	DecodeCleanServerArguments :: !String -> (!String,!Triplets,!String)			// executable, id + update , new , state
 	DecodeCleanServerArguments args
@@ -182,7 +184,11 @@ where
 	# (thisexe,input) 					= mscan '\"'          input					// get rid of garbage
 	# input								= skipping ['UD\"']   input
 	# (triplet, input)					= mscan '='           input					// should give triplet
-	# (new,    input)					= mscan '-'           input					// should give triplet value <<< *** Bug for negative integers??? ***
+//	# (new,    input)					= mscan '-'           input					// should give triplet value <<< *** Bug for negative integers??? ***
+
+	# (found,index) 					= FindSubstr ['--']  input
+	# (new,    input)					= splitAt index       input					// should give triplet value 
+
 	# (_,input)							= mscan '='           input
 	# input								= skipping ['\"GS\"'] input
 	# (found,index) 					= FindSubstr ['---']  input
@@ -191,6 +197,16 @@ where
 			""							= ("clean", [], toString state)
 			"CS"						= ("clean", [(fromJust (parseString (decodeChars new)), "")], toString state)
 			else						= ("clean", [(fromJust (parseString (decodeChars triplet)) , toString new)], toString state)
+
+	ordertriplets [] accu = accu
+	ordertriplets [x=:((id,_,_),_):xs] accu
+	# (thisgroup,other) = ([x:filter (\((tid,_,_),_) -> tid == id) xs],filter (\((tid,_,_),_) -> tid <> id) xs)
+	= ordertriplets other (qsort thisgroup ++ accu)
+
+	qsort [] = []
+	qsort [x=:((_,posx,_),_):xs ] = [y \\ y=:((_,posy,_),_) <- xs | posy < posx] 
+									++ [x] ++ 
+									[y \\ y=:((_,posy,_),_) <- xs | posy > posx]
 
 // traceHtmlInput utility used to see what kind of rubbish is received from client 
 

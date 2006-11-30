@@ -19,7 +19,7 @@ class iDataSerAndDeSerialize a
 		, iDataSerialize a		
 
 TraceInput			:== True			// show what kind of information is received from Client
-TraceOutput			:== True			// show what kind of information is stored
+TraceOutput			:== False			// show what kind of information is stored
 
 MyDataBase			:== "iDataDatabase"	// name of database being used by iData applications
 
