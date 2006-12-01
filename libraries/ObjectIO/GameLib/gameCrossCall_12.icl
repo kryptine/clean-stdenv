@@ -5,9 +5,9 @@ from	commondef			import fatalError
 from	windowCrossCall_12	import winFakePaint
 import	clCrossCall_12, gameintrface_12
 import	ostypes
-import code from "cCrossCallGame_121.obj",
-				 "cGameLib_121.obj",
-				 "cOSGameLib_121.obj"
+import code from "cCrossCallGame_121.",
+				 "cGameLib_121.",
+				 "cOSGameLib_121."
 //				 "ddutil.obj"          
 //				 "dsutil.obj"
 import code from library "ddraw_library"
