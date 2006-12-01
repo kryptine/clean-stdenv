@@ -68,8 +68,11 @@ globalInpName :: String
 globalInpName	=: "GS"
 
 selectorInpName :: String
-selectorInpName	=: "CS"
-	
+selectorInpName	=: "CS_"
+
+isSelector name 	= name%(0,size selectorInpName - 1) == selectorInpName
+getSelector name 	= name%(size selectorInpName,size name - 1)
+
 // Serializing Html states...
 
 EncodeHtmlStates :: ![HtmlState] -> String
@@ -155,7 +158,7 @@ where
 	# input								= skipping ['GS=']  input
 	# (state, input)					= mscan ';'         input
 	=: case toString update of
-//			"CS"						= (toString thisexe, decodeChars new,    "",           toString state)
+//			selectorInpName				= (toString thisexe, decodeChars new,    "",           toString state)
 //			else						= (toString thisexe, decodeChars triplet, toString new, toString state)
 			else						= ("clean", []/*[(fromJust (parseString (decodeChars triplet)), toString new)]*/, toString state)
 
@@ -170,13 +173,12 @@ DecodeArguments Internal (Just args)
 | nargs == 1		= DecodeCleanServerArguments (foldl (+++) "" [name +++ "=" +++ value +++ ";" \\ (name,value) <- args])
 # tripargs 			= reverse args													// state hidden in last field, rest are triplets
 # (state,tripargs)	= (urlDecode (snd (hd tripargs)),tl tripargs)					// decode state, get triplets highest positions first	
-# constriplets		= filter (\(name,_) -> name == "CS") tripargs					// select constructor triplets  
-# nconstriplets		= [(constrip,"") \\ (_,codedtrip) <- constriplets, (Just constrip) <- [parseString (decodeString (urlDecode codedtrip))]] // and decode
-# valtriplets		= filter (\(name,_) -> name <> "CS") tripargs					// select all other triplets 
+# constriplets		= filter (\(name,_) -> isSelector name) tripargs				// select constructor triplets  
+# nconstriplets		= [(constrip,getSelector name) \\ (name,codedtrip) <- constriplets, (Just constrip) <- [parseString (decodeString (urlDecode codedtrip))]] // and decode
+# valtriplets		= filter (\(name,_) -> not (isSelector name)) tripargs			// select all other triplets 
 # nvaltriplets		= [(mytrip,new) \\ (codedtrip,new) <- valtriplets, (Just mytrip) <- [parseString (decodeString (urlDecode codedtrip))]] // and decode
-//# alltriplets		= ordertriplets (nconstriplets ++ nvaltriplets) []
-= ("clean",reverse nconstriplets ++ nvaltriplets,state)								// order is important, first the structure than the values ...
-//= ("clean",alltriplets,state)								// order is important, first the structure than the values ...
+# alltriplets		= ordertriplets (nconstriplets ++ nvaltriplets) []
+= ("clean",determineChanged alltriplets ,state)								// order is important, first the structure than the values ...
 where
 	DecodeCleanServerArguments :: !String -> (!String,!Triplets,!String)			// executable, id + update , new , state
 	DecodeCleanServerArguments args
@@ -193,10 +195,11 @@ where
 	# input								= skipping ['\"GS\"'] input
 	# (found,index) 					= FindSubstr ['---']  input
 	# state								= if found (take index input) ['']
-	= case toString triplet of
-			""							= ("clean", [], toString state)
-			"CS"						= ("clean", [(fromJust (parseString (decodeChars new)), "")], toString state)
-			else						= ("clean", [(fromJust (parseString (decodeChars triplet)) , toString new)], toString state)
+	= if (toString triplet == "")
+			("clean", [], toString state)
+			(if (isSelector (toString triplet)) 
+					("clean", [(fromJust (parseString (decodeChars new)), "")], toString state)
+					("clean", [(fromJust (parseString (decodeChars triplet)) , toString new)], toString state))
 
 	ordertriplets [] accu = accu
 	ordertriplets [x=:((id,_,_),_):xs] accu
@@ -204,9 +207,18 @@ where
 	= ordertriplets other (qsort thisgroup ++ accu)
 
 	qsort [] = []
-	qsort [x=:((_,posx,_),_):xs ] = [y \\ y=:((_,posy,_),_) <- xs | posy < posx] 
+	qsort [x=:((_,posx,_),_):xs ] = qsort [y \\ y=:((_,posy,_),_) <- xs | posy > posx] 
 									++ [x] ++ 
-									[y \\ y=:((_,posy,_),_) <- xs | posy > posx]
+									qsort [y \\ y=:((_,posy,_),_) <- xs | posy < posx]
+
+	determineChanged triplets = filter updated triplets
+	where
+		updated ((_,_,UpdC c1),c2) 	= c1 <> c2
+		updated ((_,_,UpdI i),s)  	= i <> toInt s
+		updated ((_,_,UpdR r),s)  	= r <> toReal s
+		updated ((_,_,UpdB True),"False")  	= True
+		updated ((_,_,UpdB False),"True")  	= True
+		updated ((_,_,UpdS s1),s2) 	= s1 <> s2
 
 // traceHtmlInput utility used to see what kind of rubbish is received from client 
 
