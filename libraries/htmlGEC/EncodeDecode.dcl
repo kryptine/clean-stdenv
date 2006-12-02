@@ -58,3 +58,8 @@ MyDir 						:: !ServerKind -> String			// name of directory in which persistent 
 
 traceHtmlInput				:: !ServerKind !(Maybe [(String, String)]) -> BodyTag					// for debugging showing the information received from browser
 
+
+globalFormName	:== "CleanForm"		// name of hidden Html form in which iData state information is stored
+updateInpName	:== "UD"			// marks update information
+globalInpName	:== "GS"			// marks global state information
+selectorInpName	:== "CS_"			// marks constructor update

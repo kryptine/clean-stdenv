@@ -19,7 +19,7 @@ Start world  = doHtmlServer MyPage4  world
 
 :: Record = {name :: String, address :: TextArea, zipcode :: Int}
 
-myrecord :: TextArea
+myrecord :: [Tree Record]
 myrecord = createDefault
 
 	

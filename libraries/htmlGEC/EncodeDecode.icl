@@ -58,20 +58,9 @@ globalstateform  globalstate
 					] ""
 			]		 
 
-globalFormName :: String
-globalFormName	=: "CleanForm"
-
-updateInpName :: String
-updateInpName	=: "UD"
-
-globalInpName :: String
-globalInpName	=: "GS"
-
-selectorInpName :: String
-selectorInpName	=: "CS_"
 
 isSelector name 	= name%(0,size selectorInpName - 1) == selectorInpName
-getSelector name 	= name%(size selectorInpName,size name - 1)
+getSelector name 	= decodeString (name%(size selectorInpName,size name - 1))
 
 // Serializing Html states...
 
@@ -186,20 +175,21 @@ where
 	# (thisexe,input) 					= mscan '\"'          input					// get rid of garbage
 	# input								= skipping ['UD\"']   input
 	# (triplet, input)					= mscan '='           input					// should give triplet
-//	# (new,    input)					= mscan '-'           input					// should give triplet value <<< *** Bug for negative integers??? ***
-
 	# (found,index) 					= FindSubstr ['--']  input
 	# (new,    input)					= splitAt index       input					// should give triplet value 
-
 	# (_,input)							= mscan '='           input
 	# input								= skipping ['\"GS\"'] input
 	# (found,index) 					= FindSubstr ['---']  input
 	# state								= if found (take index input) ['']
-	= if (toString triplet == "")
+	# striplet	= toString triplet
+	= if (striplet == "")
 			("clean", [], toString state)
-			(if (isSelector (toString triplet)) 
-					("clean", [(fromJust (parseString (decodeChars new)), "")], toString state)
-					("clean", [(fromJust (parseString (decodeChars triplet)) , toString new)], toString state))
+			(if (isSelector striplet) 
+					("clean", [(fromJust` (decodeChars new) 	(parseString (decodeChars new)), "")], toString state)
+					("clean", [(fromJust` (decodeChars triplet) (parseString (decodeChars triplet)) , toString new)], toString state))
+
+	fromJust` _ (Just value) = value
+	fromJust` string Nothing = ("",0,UpdI 0)
 
 	ordertriplets [] accu = accu
 	ordertriplets [x=:((id,_,_),_):xs] accu

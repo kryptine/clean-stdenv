@@ -348,7 +348,7 @@ where
 
 	mkConsSel :: Int String [String] Int (FormId x) -> BodyTag
 	mkConsSel cntr myname list nr formid
-		= Select [ Sel_Name ("CS_" +++ myname) : styles ]		// changed to see changes in case of a submit
+		= Select [ Sel_Name (selectorInpName +++ encodeString myname) : styles ]		// changed to see changes in case of a submit
 				 [ Option  
 					[Opt_Value (encodeTriplet (formid.id,cntr,UpdC elem)) : if (j == nr) [Opt_Selected Selected:optionstyle] optionstyle] elem
 				 \\ elem <- list & j <- [0..]
