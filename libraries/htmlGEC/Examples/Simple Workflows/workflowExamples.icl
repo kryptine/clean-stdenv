@@ -9,7 +9,7 @@ derive gUpd []
 //Start world = doHtmlServer (multiUser twotasks3) world
 
 
-Start world = doHtmlServer (multiUser testEenTwee) world
+Start world = doHtmlServer (multiUser agenda2) world
 where
 	singleUser tasks hst 
 	# (_,html,hst) = startTask 0 tasks hst
@@ -23,7 +23,7 @@ where
 	= mkHtml "mtest" [idform.form <=> html] hst
 	where
 		persistent tasks tst
-		# tst	= setTaskAttribute Persistent tst
+//		# tst	= setTaskAttribute Persistent tst
 //		# tst	= setTaskAttribute StaticDynamic tst
 //		# tst	= setTaskAttribute Database tst
 		= tasks tst
@@ -50,9 +50,13 @@ infTask a tst
 = mkTask (infTask a) tst
 
 testTime tst
-# (time,tst) = STask "SetTimer" (Time 0 0 0) tst
-# ((ok,estimation),tst) = PCTask2	( waitForTimeTask time #>> returnV (False,0)
-									, (1,"Estimation") @: returnTask time #>> (STask "Confirm" 0 =>> \t -> returnV (True,t)) 
+# tst 	 		= returnF 	[Txt "How long do you want to wait?", Br] tst
+# (time,tst) 	= STask     "SetTimer" (Time 0 0 0) tst
+# ((ok,estimation),tst) = PCTask2	( 						waitForTimeTask time 		// wait for deadline
+														#>> returnV (False,0)			// do it yourself
+									, (1,"Estimation") 	@: 	returnVF Void [Txt ("Please finish task before" <+++ time)]
+														#>> STask "Confirm" 0 
+														=>> \t -> returnV (True,t) 
 									) tst
 | ok	= (estimation,returnF [Txt ("Received estimation is " <+++ estimation)] tst)
 = mkTask testTime tst

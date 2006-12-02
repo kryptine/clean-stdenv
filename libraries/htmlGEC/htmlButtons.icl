@@ -208,7 +208,8 @@ gForm{|PullDownMenu|} (init,formid) hst=:{submits}
 	= (	{ changed		= False
 		, value			= v
 		, form			= [Select (onMode formid.mode [] [] [Sel_Disabled Disabled] [] ++
-							[ Sel_Name			(selectorInpName +++ encodeString (itemlist!!menuindex))
+							[ Sel_Name			(selectorInpName +++ encodeString 
+													(if (menuindex >= 0 && menuindex < length itemlist) (itemlist!!menuindex) ""))
 							, Sel_Size			size
 							, `Sel_Std			[Std_Style ("width:" <+++ width <+++ "px")]
 							, `Sel_Events		(if submits [] (callClean OnChange formid.mode formid.id))
