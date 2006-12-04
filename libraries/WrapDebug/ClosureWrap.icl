@@ -37,7 +37,8 @@ closureHasDescriptor
 				pop_b		1				|B|
 				pushD_a		0				|B| [n_entry-8]=desc
 				pop_a		2				|A| 
-			
+				pushI		4294967295		| (1<<32)-1
+				and%
 				pushI		0				|B| 0 | desc
 				eqI							|B| desc == 0
 				notB
@@ -94,6 +95,8 @@ closureShallowWrapNode node = code {
 	pop_b		1				|B|
 	pushD_a		0				|B| [n-entry-4]=arity
 	pop_a		1				|A| node | result
+	pushI		4294967295		| (1<<32)-1
+	and%
 
 	pushI		0				|B| 0 | arity
 	push_b		1				|B| arity | 0 | arity
@@ -121,6 +124,8 @@ closureShallowWrapNode node = code {
 	pop_b		1				|B| boxed | unboxed
 	pushD_a		0				|B| [n-entry-8] | boxed | unboxed
 	pop_a		1				|A| node | result
+	pushI		4294967295		| (1<<32)-1
+	and%
 	pushI		2				|B| 2 | [n-entry-8] | boxed | unboxed
 	addI						|B| ([n-entry-8] + 2)=desc | boxed | unboxed
 
@@ -164,7 +169,11 @@ closureShallowWrapNode node = code {
 	ltI							|B| i < boxed | i | boxed | unboxed
 	jmp_false	args_done		|B| i | boxed | unboxed
 
-	pushI		2				|B| 2 | i | boxed | unboxed
+	pushI		32
+	pushI		4294967296		| 1<<32
+	shiftr%						| (1<<32)>>32
+	pushI		2
+	addI						| 2 if 32 bits, 3 if 64 bits
 	push_b		1				|B| i | 2 | i | boxed | unboxed
 	incI						|B| i + 1 | 2 | i | boxed | unboxed
 	shiftl%						|B| i * 4 + 4 | i | boxed | unboxed
