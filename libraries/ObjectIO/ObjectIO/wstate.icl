@@ -556,11 +556,14 @@ where
 	
 	setWItemInfo` :: !WItemInfo` !(WItemInfo .ls .pst) -> WItemInfo .ls .pst
 	setWItemInfo` (RadioInfo` {radioItems`,radioIndex`}) (RadioInfo radio=:{radioItems,radioIndex})
-		= RadioInfo {radio & radioItems=setRadioInfos radioItems` radioItems,radioIndex=radioIndex`}
+		#! radioItems=setRadioInfos radioItems` radioItems
+		= RadioInfo {radio & radioItems=radioItems,radioIndex=radioIndex`}
 	where
 		setRadioInfos :: ![RadioItemInfo`] ![RadioItemInfo .st] -> [RadioItemInfo .st]
 		setRadioInfos [info`:infos`] [info:infos]
-			= [setRadioInfo info` info:setRadioInfos infos` infos]
+			#! info=setRadioInfo info` info
+			#! infos=setRadioInfos infos` infos
+			= [info:infos]
 		where
 			setRadioInfo :: !RadioItemInfo` !(RadioItemInfo .st) -> RadioItemInfo .st
 			setRadioInfo {radioItem`=(item`,s`),radioItemPos`,radioItemSize`} info=:{radioItem=(_,_,f)}
@@ -820,11 +823,14 @@ where
 	where	
 		setWItemInfo` :: !WItemInfo` !(WItemInfo .ls .pst) -> WItemInfo .ls .pst
 		setWItemInfo` (RadioInfo` {radioItems`,radioIndex`}) (RadioInfo radio=:{radioItems,radioIndex})
-			= RadioInfo {radio & radioItems=setRadioInfos radioItems` radioItems,radioIndex=radioIndex`}
+			#! radioItems=setRadioInfos radioItems` radioItems
+			= RadioInfo {radio & radioItems=radioItems,radioIndex=radioIndex`}
 		where
 			setRadioInfos :: ![RadioItemInfo`] ![RadioItemInfo .st] -> [RadioItemInfo .st]
 			setRadioInfos [info`:infos`] [info:infos]
-				= [setRadioInfo info` info:setRadioInfos infos` infos]
+				#! info=setRadioInfo info` info
+				#! infos=setRadioInfos infos` infos
+				= [info:infos]
 			where
 				setRadioInfo :: !RadioItemInfo` !(RadioItemInfo .st) -> RadioItemInfo .st
 				setRadioInfo {radioItem`=(item`,s`),radioItemPos`,radioItemSize`} info=:{radioItem=(_,_,f)}

@@ -546,8 +546,8 @@ where
 		| otherwise
 			# (_,text)				= id_text
 			  shownContext1			= shownContext && itemH.wItemShow2
-			  textInfo				= getWItemTextInfo` itemH.wItemInfo2
-			  itemH					= {itemH & wItemInfo2=TextInfo` {textInfo & textInfoText=text}}
+			#! textInfo				= getWItemTextInfo` itemH.wItemInfo2
+			# itemH					= {itemH & wItemInfo2=TextInfo` {textInfo & textInfoText=text}}
 			  itemRect				= posSizeToRect absolutePos itemH.wItemSize2
 			# tb					= osSetTextControlText wPtr itemH.wItemPtr2 clipRect itemRect shownContext1 text tb
 			= (WItemHandle2 itemH,(id_texts,tb))
