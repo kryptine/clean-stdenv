@@ -13,6 +13,7 @@ printenv : printenv.o ArgEnv.o ArgEnvC.o
 
 ArgEnvC.o : ArgEnvC.c
 	$(CC) $(COPTIONS) -c ArgEnvC.c
+	cp ArgEnvC.o "Clean System Files/ArgEnvC.o"
 
 ArgEnv.o : ArgEnv.icl ArgEnv.dcl
 	$(CLM) -O ArgEnv
