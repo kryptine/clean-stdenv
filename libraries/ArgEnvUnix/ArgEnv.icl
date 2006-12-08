@@ -7,6 +7,8 @@ implementation module ArgEnv
 
 import StdEnv
 
+import code from "ArgEnvC.o"
+
 :: CString :== Int
 NULL :== 0
 
