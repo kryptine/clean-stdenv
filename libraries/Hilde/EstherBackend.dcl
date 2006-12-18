@@ -20,6 +20,7 @@ import EstherParser, StdMaybe
 	| CoreCode !Dynamic 
 	| CoreVariable !String
 	| CoreDynamic
+//	| CoreEta
 
 class resolveFilename env :: !String !*env -> (!Maybe (Dynamic, GenConsPrio), !*env)
 

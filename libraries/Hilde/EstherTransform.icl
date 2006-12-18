@@ -117,43 +117,43 @@ where
 	patternMatch _ (VariablePattern (NTvariable x _)) then _ = abstract x then
 	patternMatch _ (AnyPattern _) then _ = abstract_ then
 
-match :: !Dynamic !Int -> Core
-match (x :: Real) 1 = ifEqual x
-match (x :: Int) 1 = ifEqual x
-match (x :: Char) 1 = ifEqual x
-match (x :: String) 1 = ifEqual x
-match (x :: Bool) 1 = ifEqual x
-match constr n = case constructorNode constr of
-	(arity, x :: a) -> if (n <> arity) (ifMatch x) (raise CaseBadConstructorArity)
-where
-	ifMatch :: !a -> Core | TC a
-	ifMatch x = CoreCode (dynamic IfConstr :: A.b: (a^ -> b) b a^ -> b)
+	match :: !Dynamic !Int -> Core
+	match (x :: Real) 1 = ifEqual x
+	match (x :: Int) 1 = ifEqual x
+	match (x :: Char) 1 = ifEqual x
+	match (x :: String) 1 = ifEqual x
+	match (x :: Bool) 1 = ifEqual x
+	match constr n = case constructorNode constr of
+		(arity, x :: a) -> if (n <> arity) (ifMatch x) (raise CaseBadConstructorArity)
 	where
-		IfConstr th el y = if (matchConstructor x y) (th y) el
-
-	constructorNode :: !Dynamic -> (!Int, !Dynamic)
-	constructorNode (f :: a -> b) = (n + 1, d)
-	where
-		(n, d) = constructorNode (dynamic f (unsafeTypeCast []) :: b)
-	constructorNode d = (0, d)
+		ifMatch :: !a -> Core | TC a
+		ifMatch x = CoreCode (dynamic IfConstr :: A.b: (a^ -> b) b a^ -> b)
+		where
+			IfConstr th el y = if (matchConstructor x y) (th y) el
 	
-ifEqual :: !a -> Core | TC a & == a
-ifEqual x = CoreCode (dynamic IfEq :: A.b: (a^ -> b) b a^ -> b)
-where
-	IfEq th el y = if (x == y) (th y) el
-
-codeApply :: !Dynamic -> Core
-codeApply (_ :: a b c d e f g h i -> j) = raise (NotSupported "constructors with arity above eight")
-codeApply (_ :: a b c d e f g h -> i) = CoreCode (dynamic \f n -> f (unsafeSelect1of8 n) (unsafeSelect2of8 n) (unsafeSelect3of8 n) (unsafeSelect4of8 n) (unsafeSelect5of8 n) (unsafeSelect6of8 n) (unsafeSelect7of8 n) (unsafeSelect8of8 n) :: A.j: (a b c d e f g h -> j) i -> j)
-codeApply (_ :: a b c d e f g -> h) = CoreCode (dynamic \f n -> f (unsafeSelect1of7 n) (unsafeSelect2of7 n) (unsafeSelect3of7 n) (unsafeSelect4of7 n) (unsafeSelect5of7 n) (unsafeSelect6of7 n) (unsafeSelect7of7 n) :: A.i: (a b c d e f g -> i) h -> i)
-codeApply (_ :: a b c d e f -> g) = CoreCode (dynamic \f n -> f (unsafeSelect1of6 n) (unsafeSelect2of6 n) (unsafeSelect3of6 n) (unsafeSelect4of6 n) (unsafeSelect5of6 n) (unsafeSelect6of6 n) :: A.h: (a b c d e f -> h) g -> h)
-codeApply (_ :: a b c d e -> f) = CoreCode (dynamic \f n -> f (unsafeSelect1of5 n) (unsafeSelect2of5 n) (unsafeSelect3of5 n) (unsafeSelect4of5 n) (unsafeSelect5of5 n) :: A.g: (a b c d e -> g) f -> g)
-codeApply (_ :: a b c d -> e) = CoreCode (dynamic \f n -> f (unsafeSelect1of4 n) (unsafeSelect2of4 n) (unsafeSelect3of4 n) (unsafeSelect4of4 n) :: A.f: (a b c d -> f) e -> f)
-codeApply (_ :: a b c -> d) = CoreCode (dynamic \f n -> f (unsafeSelect1of3 n) (unsafeSelect2of3 n) (unsafeSelect3of3 n) :: A.e: (a b c -> e) d -> e)
-codeApply (_ :: a b -> c) = CoreCode (dynamic \f n -> f (unsafeSelect1of2 n) (unsafeSelect2of2 n) :: A.d: (a b -> d) c -> d)
-codeApply (_ :: a -> b) = CoreCode (dynamic \f n -> f (unsafeSelect1of1 n) :: A.c: (a -> c) b -> c)
-codeApply (_ :: a) = CoreCode (dynamic \f n -> f :: A.b: b a -> b)
-
+		constructorNode :: !Dynamic -> (!Int, !Dynamic)
+		constructorNode (f :: a -> b) = (n + 1, d)
+		where
+			(n, d) = constructorNode (dynamic f (unsafeTypeCast []) :: b)
+		constructorNode d = (0, d)
+		
+	ifEqual :: !a -> Core | TC a & == a
+	ifEqual x = CoreCode (dynamic IfEq :: A.b: (a^ -> b) b a^ -> b)
+	where
+		IfEq th el y = if (x == y) (th y) el
+	
+	codeApply :: !Dynamic -> Core
+	codeApply (_ :: a b c d e f g h i -> j) = raise (NotSupported "constructors with arity above eight")
+	codeApply (_ :: a b c d e f g h -> i) = CoreCode (dynamic \f n -> f (unsafeSelect1of8 n) (unsafeSelect2of8 n) (unsafeSelect3of8 n) (unsafeSelect4of8 n) (unsafeSelect5of8 n) (unsafeSelect6of8 n) (unsafeSelect7of8 n) (unsafeSelect8of8 n) :: A.j: (a b c d e f g h -> j) i -> j)
+	codeApply (_ :: a b c d e f g -> h) = CoreCode (dynamic \f n -> f (unsafeSelect1of7 n) (unsafeSelect2of7 n) (unsafeSelect3of7 n) (unsafeSelect4of7 n) (unsafeSelect5of7 n) (unsafeSelect6of7 n) (unsafeSelect7of7 n) :: A.i: (a b c d e f g -> i) h -> i)
+	codeApply (_ :: a b c d e f -> g) = CoreCode (dynamic \f n -> f (unsafeSelect1of6 n) (unsafeSelect2of6 n) (unsafeSelect3of6 n) (unsafeSelect4of6 n) (unsafeSelect5of6 n) (unsafeSelect6of6 n) :: A.h: (a b c d e f -> h) g -> h)
+	codeApply (_ :: a b c d e -> f) = CoreCode (dynamic \f n -> f (unsafeSelect1of5 n) (unsafeSelect2of5 n) (unsafeSelect3of5 n) (unsafeSelect4of5 n) (unsafeSelect5of5 n) :: A.g: (a b c d e -> g) f -> g)
+	codeApply (_ :: a b c d -> e) = CoreCode (dynamic \f n -> f (unsafeSelect1of4 n) (unsafeSelect2of4 n) (unsafeSelect3of4 n) (unsafeSelect4of4 n) :: A.f: (a b c d -> f) e -> f)
+	codeApply (_ :: a b c -> d) = CoreCode (dynamic \f n -> f (unsafeSelect1of3 n) (unsafeSelect2of3 n) (unsafeSelect3of3 n) :: A.e: (a b c -> e) d -> e)
+	codeApply (_ :: a b -> c) = CoreCode (dynamic \f n -> f (unsafeSelect1of2 n) (unsafeSelect2of2 n) :: A.d: (a b -> d) c -> d)
+	codeApply (_ :: a -> b) = CoreCode (dynamic \f n -> f (unsafeSelect1of1 n) :: A.c: (a -> c) b -> c)
+	codeApply (_ :: a) = CoreCode (dynamic \f n -> f :: A.b: b a -> b)
+	
 dynamicTuple :: !Int -> Dynamic
 dynamicTuple 2 = dynamicTuple2
 dynamicTuple 3 = dynamicTuple3

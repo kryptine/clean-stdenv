@@ -20,27 +20,40 @@ overloaded3 :: !String !String !String !Dynamic -> Dynamic
 overloaded3 c1 c2 c3 ((_, _, _, e) :: (v1, v2, v3, d1 d2 d3 -> t)) = dynamic (\(dict1 &&& dict2 &&& dict3) -> e dict1 dict2 dict3) ||| Class c1 &&& Class c2 &&& Class c3 :: Overloaded (Contexts d1 (Contexts d2 d3)) t (Contexts (Context v1) (Contexts (Context v2) (Context v3)))
 
 abstract :: !String !Core -> Core
-abstract v e | freeVar v e = coreK @ e
+abstract v e | noVarOf v e = coreK @ e
 abstract v (CoreVariable x) = coreI
+//abstract v (srcf @ CoreVariable x) | noVarOf v srcf = srcf //dangerous!
+/*abstract v (srcf @ CoreVariable x) | noVarOf v srcf = case srcf of
+	CoreCode (f :: a -> b) -> srcf
+	_ -> CoreEta @ srcf*/
 abstract v (srcf @ srcx @ srcy)
-	| freeVar v srcf
-		| freeVar v srcx = coreB` @ srcf @ srcx @ abstract v srcy
-		| freeVar v srcy = coreC` @ srcf @ abstract v srcx @ srcy
+	| noVarOf v srcf
+		| noVarOf v srcx = coreB` @ srcf @ srcx @ abstract v srcy
+		| noVarOf v srcy = coreC` @ srcf @ abstract v srcx @ srcy
 		= coreS` @ srcf @ abstract v srcx @ abstract v srcy
 abstract v (srcf @ srcx)
-	| freeVar v srcf = coreB @ srcf @ abstract v srcx
-	| freeVar v srcx = coreC @ abstract v srcf @ srcx
+	| noVarOf v srcf = coreB @ srcf @ abstract v srcx
+	| noVarOf v srcx = coreC @ abstract v srcf @ srcx
 	= coreS @ abstract v srcf @ abstract v srcx
 
 abstract_ :: !Core -> Core
 abstract_ e = coreK @ e
 
-freeVar :: !String !Core -> Bool
-freeVar v (f @ x) = freeVar v f && freeVar v x
-freeVar v (CoreVariable x) = v <> x
-freeVar _ _ = True
+noVarOf :: !String !Core -> Bool
+noVarOf v (f @ x) = noVarOf v f && noVarOf v x
+noVarOf v (CoreVariable x) = v <> x
+noVarOf _ _ = True
+
+coreF = dynamic F :: A.a b: (a -> b) a -> b
+F f x = f x
 
 generateCode :: !Core !*env -> (!Dynamic, !*env) | resolveFilename env
+/*generateCode CoreEta env = (coreF, env)
+generateCode (CoreEta @ e) env 
+	# (codef, env) = generateCode e env
+	= case codef of
+		(f :: a -> b) -> (dynamic f :: a -> b, env)
+		_ -> raise (ApplyTypeError codef (dynamic Omega :: A.a b: a -> b))*/
 generateCode CoreDynamic env = (dynamic I ||| Class "TC" :: A.z: Overloaded (z -> Dynamic) (z -> Dynamic) (Context z), env)
 generateCode (CoreDynamic @ e) env 
 	# (codex, env) = generateCode e env
@@ -252,9 +265,17 @@ toStringDynamic d = prettyDynamic d
 prettyDynamic :: !Dynamic -> ([String], String)
 prettyDynamic d = (v, t)
 where
-	v = case d of (x :: a) -> debugShowWithOptions [DebugTerminator "", DebugMaxChars (80 * 22)] x
+//	v = case d of (x :: a) -> debugShowWithOptions [DebugTerminator "", DebugMaxChars (80 * 22)] x
+	v = case d of (x :: a) -> debugShowWithOptions [DebugTerminator "", DebugMaxChars 79] x
 
 	t = removeForAll (typeCodeOfDynamic d)
 	where
 		removeForAll (TypeScheme _ t) = toString t
 		removeForAll t = toString t
+
+instance toString Core where
+	toString (CoreApply f x) = toString f +++ " (" +++ toString x +++ ")"
+	toString (CoreVariable x) = x
+	toString (CoreCode x) = foldr (+++) "" xs
+	where
+		(xs, t) = toStringDynamic x
