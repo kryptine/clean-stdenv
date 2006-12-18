@@ -1,22 +1,25 @@
 definition module testable
 
 /*
-Pieter Koopman 2002
-Nijmegen University, The Netherlands
+	GAST: A Generic Automatic Software Test-system
+	
+	testable: the test algorithm for logical properties
 
-GAST: A Generic Automatic Software Test-system
+	Pieter Koopman, 2002-2004
+	Radboud Universty, Nijmegen
+	The Netherlands
+	pieter@cs.ru.nl
 */
 
-import StdEnv, genLibTest, StdTime //, Property
+import genLibTest
 from stdProperty import ::Property // for instance of testable
+import gen
 
 //--- basics --//
 
-:: Admin = {res::Result, labels::[String], args::[String], name::[String]}
+:: Admin = {res::Result, labels::![String], args::![String], name::![String]}
 :: Result = Undef | Rej | Pass | OK | CE
-:: Trace
 :: RandomStream :== [Int]
-emptyTrace :: Trace
 
 derive gLess Result
 instance == Result
@@ -25,41 +28,42 @@ instance == Result
 
 prop :: a -> Property | Testable a
 
-randomStream :: *env -> (RandomStream,*env)  | TimeEnv env
-
-generic generate a :: Trace RandomStream -> (a, Trace, a->Int, RandomStream)
-
-class TestArg a | genShow{|*|}, generate{|*|} a
-class Testable a where evaluate :: a RandomStream Admin -> [Admin]
+class TestArg a | genShow{|*|}, ggen{|*|} a
+class Testable a where evaluate :: a RandomStream !Admin -> [Admin]
 
 instance Testable Bool
 instance Testable Property
 instance Testable (a->b) | Testable b & TestArg a  
+instance Testable [a] | Testable a  
 
-derive generate (,), (,,), (,,,), (,,,,), (,,,,,), [], Int, Char, Bool, Real, String, UNIT, PAIR, EITHER, CONS, FIELD, OBJECT, (->)
+derive bimap [], (,), (,,), (,,,), (,,,,), (,,,,,)
 
-predInts	:== [0,1,-1]
-predChars	:== ['aZ ~']
-predReals	:== [0.0, 1.0, -1.0]
-predStrings :== ["","\"\"","Hello world!"]
-StrLen		:== 25
-IntSize		:== 1000
-MaxExists	:== 500 //500
-MaxNoCE		:== 500
+MaxExists	:== 500
+NrOfTest	:== 500
 
-//--- for implementationof properties ---//
+//--- for generating lists of elements ---//
 
-forAll :: !(a->b) ![a] RandomStream Admin -> [Admin] | Testable b & TestArg a
-split :: RandomStream -> (RandomStream,RandomStream)
-generateAll :: RandomStream -> [a] | generate{|*|} a
+aStream :: RandomStream
+
+//--- for implementation of properties ---//
+
+diagonal :: [[a]] -> [a]
+forAll :: !(a->b) ![a] RandomStream !Admin -> [Admin] | Testable b & TestArg a
+split :: !RandomStream -> (RandomStream,RandomStream)
+generateAll :: !RandomStream -> [a] | ggen{|*|} a
 
 //--- testing --//
 
-verbose  ::      RandomStream p -> [String] | Testable p
-verbosen :: !Int RandomStream p -> [String] | Testable p
-concise  ::      RandomStream p -> [String] | Testable p
-concisen :: !Int RandomStream p -> [String] | Testable p
-quiet    ::      RandomStream p -> [String] | Testable p
-quietn   :: !Int RandomStream p -> [String] | Testable p
+verbose  ::      !RandomStream !p -> [String] | Testable p
+verbosen :: !Int !RandomStream !p -> [String] | Testable p
+concise  ::      !RandomStream !p -> [String] | Testable p
+concisen :: !Int !RandomStream !p -> [String] | Testable p
+quiet    ::      !RandomStream !p -> [String] | Testable p
+quietn   :: !Int !RandomStream !p -> [String] | Testable p
+quietnm  :: !Int !Int !RandomStream !p -> [String] | Testable p
 
-test :== verbosen 20
+test :: !p -> [String] | Testable p              // test p NrOfTest times
+testn :: !Int !p -> [String] | Testable p        // maxnumber of tests
+ttestn :: !Int !p -> [String] | Testable p       // maxnumber of tests, trace all arguments
+testnm :: !Int !Int !p -> [String] | Testable p  // maxnumber of tests, max number of errors
+ttestnm :: !Int !Int !p -> [String] | Testable p // maxnumber of tests, max number of errors

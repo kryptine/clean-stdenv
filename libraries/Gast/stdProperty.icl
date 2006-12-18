@@ -1,14 +1,17 @@
 implementation module stdProperty
 
 /*
-Pieter Koopman 2002
-Nijmegen University, The Netherlands
+	GAST: A Generic Automatic Software Test-system
+	
+	stdProperty: opertors on logical properties
 
-GAST: A Generic Automatic Software Test-system
+	Pieter Koopman, 2004
+	Radboud Universty, Nijmegen
+	The Netherlands
+	pieter@cs.ru.nl
 */
 
-
-import testable
+import testable, StdEnv
 from MersenneTwister import genRandInt
 
 class (==>) infixr 1 b :: b p -> Property | Testable p
@@ -29,12 +32,6 @@ where
 			OK	= evaluate p rs r1
 				= [{r & res = Rej}]
 
-/*
-(==>) infixr 1 :: !Bool p -> Property | Testable p
-(==>) c p
-	| c	= Prop (evaluate p)
-		= Prop (\rs r = [{r & res = Rej}])
-*/
 class (\/) infixr 2 a b	:: !a b -> Property	//	Conditional or  of arg1 and arg2
 class (/\) infixr 3	a b :: !a b -> Property	//	Conditional and of arg1 and arg2
 
@@ -48,7 +45,7 @@ where (/\) x y = Prop (and x y)
 			# (rs2,rs) = split rs
 			  r1 = testAnalysis r (evaluate x rs r)
 			  r2 = testAnalysis r (evaluate y rs2 r)
-			= case (r1.res,r2.res) of // collect labels  !! XXXXXXXXX
+			= case (r1.res,r2.res) of // collect labels  !! 
 				(CE   ,_    )	= [r1] // to fix the evaluation order
 				(_    ,CE   )	= [r2]
 				(Undef,_    )	= [r2]
@@ -91,37 +88,40 @@ where (\/) x y = Prop (or x y)
 												 = [r]
 								= evaluate y rs2 r
 
-//(<==>) infix 4 :: !Property !Property -> Property			//	True if properties are equivalent
 (<==>) infix 4 :: !a !b -> Property	| Testable a & Testable b		//	True if properties are equivalent
 (<==>) p q 
 		# rs = genRandInt 42
 		  r  = {res=Undef, labels=[], args=[], name=[]}
 		  b  = testAnalysis r (evaluate p rs r)
 		  c  = testAnalysis r (evaluate q rs r)
-		= prop (b.res == c.res) // should be improved
-
-//(<==>) p q = p ==> q /\ q ==> p // is dit beter? Nee, te veel rejects die als succes geteld worden
-//(<==>) p q = (p ===> q) /\ (q ===> p) // is dit beter? Types niet goed.
-// je zou hier een class van kunnen maken net zo als /\ en \/.
+		= prop (b.res == c.res) // can this be improved?
 
 (===>) infix 1 :: Bool Bool -> Bool
 (===>) p q = (not p) || q 
 
+ExistsIn :: (x->p) [x] -> Property | Testable p & TestArg x
+ExistsIn f l = Prop p
+where p rs r = [exists r [testAnalysis r (evaluate (f a) rs r)\\a <- l] MaxExists]
+
 Exists :: (x->p) -> Property | Testable p & TestArg x
 Exists f = Prop p
-where p rs r = [exists r (evaluate f rs r) MaxExists]
-
-exists r []              n = {r & res = CE}
-exists r _               0 = {r & res = Undef}
-exists _ [r=:{res=OK}:x] n = r
-exists _ [r:x]           n = exists r x (n-1)
+where p rs r 
+		# (rs,rs2) = split rs
+		= [exists r [testAnalysis r (evaluate (f a) rs2 r)\\a <- generateAll rs] MaxExists]
+exists r []				n = {r & res = CE}
+exists r _				0 = {r & res = Undef}
+exists _ [r=:{res}:x]	n = case res of
+								OK	= r
+								Pass	= r
+										= exists r x (n-1)
 
 noCE r []              n = {r & res = OK}
 noCE r _               0 = {r & res = Pass}
 noCE _ [r=:{res=CE}:x] n = r
 noCE _ [r=:{res=OK}:x] n = noCE {r&res=Pass} x (n-1)
-noCE _ [r:x]           n = noCE r x (n-1)
+noCE r [_:x]           n = noCE r x (n-1)
 
+testAnalysis :: Admin [Admin] -> Admin // maakt van een lijst resultaten een enkel resultaat
 testAnalysis r l = analysis l MaxExists Undef OK
 where
 	analysis []    n min max = {r & res = max}
@@ -129,22 +129,37 @@ where
 	analysis [s:x] n min max
 	 = case s.res of
 		CE		= s
-		OK		= analysis x (n-1) min max
-		Pass	= analysis x (n-1) min Pass
-		Undef	= analysis x (n-1) min Pass
-		Rej		= analysis x (n-1) Rej max
+		OK		= analysis x (n-1) Pass max
+		Pass	= analysis x (n-1) Pass Pass
+		Undef	= analysis x (n-1) min  max
+		Rej		= case min of
+					OK  	= analysis x (n-1) OK   max
+					Pass	= analysis x (n-1) Pass max
+							= analysis x (n-1) Rej  max
 				= abort "Unknow result in testAnalysis"
-
 
 ForAll :: !(x->p) -> Property | Testable p & TestArg x
 ForAll f = Prop (evaluate f)
-//ForAll f = Prop (\rs r = [testAnalysis r (evaluate f rs r)])
 
 ForEach :: ![x] !(x->p) -> Property | Testable p & TestArg x
 ForEach list f = Prop (forAll f list)
 
 (For) infixl 0 :: !(x->p) ![x] -> Property | Testable p & TestArg x
 (For) p list = ForEach list p
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXX
+
+class (VOOR) infixl 0 t :: (t a b) [a] -> [b]
+instance VOOR (->)
+where VOOR f l = map f l
+
+:: PL a b = PL [a->b]
+instance VOOR PL
+where VOOR (PL fl) l = diagonal [map f l\\f<-fl] //[f x \\ f<-fl, x<-l]
+
+//| Testable p & TestArg x
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXX
 
 (ForAndGen) infixl 0 :: !(x->p) ![x] -> Property | Testable p & TestArg x
 (ForAndGen) p list = Prop (evaluate p)
@@ -164,6 +179,7 @@ name :: !n !p -> Property | Testable p & genShow{|*|} n
 name n p = Prop (\rs r = evaluate p rs {r & name = [show1 n:r.name]})
 
 instance ~ Bool where ~ b = not b
+
 instance ~ Result
 where
 	~ CE = OK
@@ -171,9 +187,7 @@ where
 	~ Pass = CE
 	~ Rej = Rej
 	~ Undef = Undef
+
 instance ~ Property
 where ~ (Prop p) = Prop (\rs r = let r` = testAnalysis r (p rs r) in [{r` & res = ~r`.res}])
-instance ~ (a->b) | ~ b
-where
-	~ f = \x = ~ (f x)
 

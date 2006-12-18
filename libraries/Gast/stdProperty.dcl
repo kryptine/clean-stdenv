@@ -1,8 +1,18 @@
 definition module stdProperty
 
+/*
+	GAST: A Generic Automatic Software Test-system
+	
+	stdProperty: opertors on logical properties
+
+	Pieter Koopman, 2004
+	Radboud Universty, Nijmegen
+	The Netherlands
+	pieter@cs.ru.nl
+*/
+
 import genLibTest
 import testable
-//from testable import ::Property, class Testable, class TestArg, generic generate
 
 class (\/) infixr 2 a b	:: !a b -> Property	//	Conditional or  of arg1 and arg2
 class (/\) infixr 3	a b :: !a b -> Property	//	Conditional and of arg1 and arg2
@@ -22,9 +32,9 @@ class (==>) infixr 1 b :: b p -> Property | Testable p
 instance ==> Bool
 instance ==> Property
 
-//(<==>) infix 4 :: !Property !Property -> Property			//	True if properties are equivalent
 (<==>) infix 4 :: !a !b -> Property	| Testable a & Testable b		//	True if properties are equivalent
 
+ExistsIn :: (x->p) [x] -> Property | Testable p & TestArg x
 Exists :: (x->p) -> Property | Testable p & TestArg x
 ForAll :: !(x->p) -> Property | Testable p & TestArg x
 
@@ -38,4 +48,3 @@ name :: !n !p -> Property | Testable p & genShow{|*|} n
 
 instance ~ Bool
 instance ~ Property
-instance ~ (a->b) | ~ b

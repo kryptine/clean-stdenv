@@ -1,17 +1,20 @@
 definition module genLibTest
 
 /*
-Pieter Koopman 2002
-Nijmegen University, The Netherlands
+	GAST: A Generic Automatic Software Test-system
+	
+	genLibtest: library for generic testing: showing and comparing values
 
-GAST: A Generic Automatic Software Test-system
+	Pieter Koopman, 2004
+	Radboud Universty, Nijmegen
+	The Netherlands
+	pieter@cs.ru.nl
 */
 
-import StdGeneric
+import StdGeneric, GenEq
 
 import StdClass
 instance + String
-import GenEq
 
 (@) infixl 2 :: (a->b)  a -> b
 (@!)infixl 2 :: (a->b) !a -> b
@@ -19,8 +22,8 @@ import GenEq
 generic genShow a :: String Bool a [String] -> [String]
 generic gLess a  :: a a -> Bool
 
-derive genShow	Int, Char, Bool, Real, String, UNIT, PAIR, EITHER, CONS, FIELD, OBJECT, [], (,), (,,), (,,,), (,,,,), (,,,,,), (,,,,,,), (,,,,,,,), (,,,,,,,,), (,,,,,,,,,), (->), {}, {!}
-derive gLess    Int, Char, Bool, Real, String, UNIT, PAIR, EITHER, CONS, FIELD, OBJECT, [], (,), (,,), (,,,), (,,,,), (,,,,,), (,,,,,,), (,,,,,,,), (,,,,,,,,), (,,,,,,,,,) 
+derive genShow	Int, Char, Bool, Real, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, [], (,), (,,), (,,,), (,,,,), (,,,,,), (,,,,,,), (,,,,,,,), (,,,,,,,,), (,,,,,,,,,), (->), {}, {!}
+derive gLess    Int, Char, Bool, Real, String, UNIT, PAIR, EITHER, OBJECT, CONS, FIELD, [], (,), (,,), (,,,), (,,,,), (,,,,,), (,,,,,,), (,,,,,,,), (,,,,,,,,), (,,,,,,,,,) 
 
 show  :: !a -> [String] | genShow{|*|} a
 show1 :: !a ->  String  | genShow{|*|} a
