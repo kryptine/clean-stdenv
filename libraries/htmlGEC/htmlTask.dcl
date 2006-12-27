@@ -16,10 +16,13 @@ derive gPrint 	Void
 derive gerda 	Void
 
 /* Initiating the iTask library:
-startTask		:: start function for iTasks for user with indicated id		
+startTask		:: general start function for iTasks for user with indicated id		
+singleUserTask 	:: wrapper for single user 
+multiUserTask 	:: wrapper for [0..users - 1], optional set of global Task attributes can be given  
 */
-startTask 		:: !Int !(Task a) HSt -> (a,[BodyTag],HSt) 		| iData a 
-
+startTask 		:: !Int !(Task a) HSt -> (a,[BodyTag],HSt) 			  | iData a 
+singleUserTask 	:: !(Task a) 					 !*HSt -> (Html,*HSt) | iData a 
+multiUserTask 	:: !Int !(Task a) [*TSt -> *TSt] !*HSt -> (Html,*HSt) | iData a 
 /* Global Attribute settings: iTask are by default Lifespan = Session, StorageFormt = PlainString
 For multi user systems 
 */
@@ -34,6 +37,7 @@ instance setTaskAttribute Lifespan, StorageFormat
 /* Promote any TSt state transition function to an iTask:
 mkTask			:: function will only be called when it is its turn to be activated
 					Also needed for defining recursive tasks
+clearTask			:: same, but clear output of all finished recursive calls
 */
 mkTask 			:: (*TSt -> *(a,*TSt)) 	-> (Task a) 			| iData a 
 
@@ -80,11 +84,13 @@ returnV			:: return the value
 returnTask		:: return the value and show it 
 returnVF		:: return the value and show the Html code specified
 returnF			:: add html code
+(?>>)			:: only prompt as long as task is active but not finished
 */
 returnV 		:: a 					-> (Task a) 			| iData a 
 returnTask 		:: a 					-> (Task a) 			| iData a 
 returnVF 		:: a [BodyTag] 			-> (Task a) 			| iData a 
 returnF 		:: [BodyTag] 			-> TSt -> TSt
+(?>>) infix 3 :: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
 
 /* Setting up communication channels between users:
 mkRTask			:: Remote Task: split indicated task in two tasks: a calling task and a receiving task

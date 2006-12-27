@@ -61,6 +61,23 @@ where setTaskAttribute lifespan tst = {tst & storageInfo.tasklife = lifespan}
 instance setTaskAttribute StorageFormat
 where setTaskAttribute storageformat tst = {tst & storageInfo.taskstorage = storageformat}
 
+singleUserTask :: !(Task a) !*HSt -> (Html,*HSt) | iData a 
+singleUserTask task hst 
+# (_,html,hst) = startTask 0 task hst
+= mkHtml "stest" html hst
+
+multiUserTask :: !Int !(Task a) [*TSt -> *TSt] !*HSt -> (Html,*HSt) | iData a 
+multiUserTask nusers task attr hst 
+# (idform,hst) 	= FuncMenu (Init,nFormId "pdm_chooseWorker" 
+						(0,[("User " +++ toString i,\_ -> i) \\ i<-[0..nusers - 1] ])) hst
+# currentWorker	= snd idform.value
+# (_,html,hst) 	= startTask currentWorker (applyattr task) hst
+= mkHtml "mtest" [idform.form <=> html] hst
+where
+	applyattr task tst
+	# tst	= seq attr tst
+	= task tst
+		
 (@:) infix 0 :: !(!Int,!String) (Task a)	-> (Task a)			| iData a
 (@:) (userId,taskname) taska = \tst -> mkTask assignTask` tst
 where
@@ -457,6 +474,13 @@ showMine bool html more = if bool (html +|+ more) html
 (#>>) infix 1 :: w:(St .s .a) v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]
 (#>>) a b = a `bind` (\_ -> b)
 
+(?>>) infix 3 :: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
+(?>>) prompt task = \tst -> doit tst
+where
+	doit tst=:{html=ohtml,activated=myturn}
+	# (a,tst=:{activated,html=nhtml}) = task {tst & html = BT []}
+	| activated || not myturn= (a,{tst & html = ohtml +|+ nhtml})
+	= (a,{tst & html = ohtml +|+ BT prompt +|+ nhtml})
 
 // debugging code 
 
