@@ -22,17 +22,20 @@ multiUserTask 	:: wrapper for [0..users - 1], optional set of global Task attrib
 */
 startTask 		:: !Int !(Task a) HSt -> (a,[BodyTag],HSt) 			  | iData a 
 singleUserTask 	:: !(Task a) 					 !*HSt -> (Html,*HSt) | iData a 
-multiUserTask 	:: !Int !(Task a) [*TSt -> *TSt] !*HSt -> (Html,*HSt) | iData a 
+multiUserTask 	:: !Int [*TSt -> *TSt] !(Task a)  !*HSt -> (Html,*HSt) | iData a 
 /* Global Attribute settings: iTask are by default Lifespan = Session, StorageFormt = PlainString
 For multi user systems 
 */
 class setTaskAttribute a :: !a *TSt -> *TSt
 
-instance setTaskAttribute Lifespan, StorageFormat
+instance setTaskAttribute Lifespan, StorageFormat, Mode
 
 /* Assign tasks with informative name to user with indicated id
+(@:)			:: will prompt who is waiting for what
+(@::)			:: no prompting
 */
-(@:) infix 0 :: !(!Int,!String) (Task a)	-> (Task a)			| iData a
+(@:)  infix 1 	:: !(!Int,!String) (Task a)	-> (Task a)			| iData a
+(@::) infix 1 	:: !Int (Task a)		    -> (Task a)			| iData a
 
 /* Promote any TSt state transition function to an iTask:
 mkTask			:: function will only be called when it is its turn to be activated
@@ -90,7 +93,8 @@ returnV 		:: a 					-> (Task a) 			| iData a
 returnTask 		:: a 					-> (Task a) 			| iData a 
 returnVF 		:: a [BodyTag] 			-> (Task a) 			| iData a 
 returnF 		:: [BodyTag] 			-> TSt -> TSt
-(?>>) infix 3 :: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
+(?>>) infix 0 	:: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
+myId			:: TSt -> (Int,TSt)
 
 /* Setting up communication channels between users:
 mkRTask			:: Remote Task: split indicated task in two tasks: a calling task and a receiving task
@@ -125,3 +129,4 @@ appHSt 			:: (HSt -> (a,HSt)) TSt -> (a,TSt)
 
 (=>>) infix 2 :: w:(St .s .a) v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]	// `bind`
 (#>>) infix 1 :: w:(St .s .a) v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]			// `bind` ignoring argument
+(|>>) infix 3 :: (*TSt -> *(a,*TSt)) (a -> .Bool,a -> String) -> .(*TSt -> *(a,*TSt)) | iData a		// repeat as long as predicate does not hold

@@ -19,6 +19,7 @@ import dynamic_string, EncodeDecode
 					}
 :: Storage		=	{ tasklife		:: !Lifespan
 					, taskstorage	:: !StorageFormat
+					, taskmode		:: !Mode
 					}
 
 :: HtmlTree		=	BT [BodyTag]
@@ -42,17 +43,18 @@ startTask thisUser taska hst
 							, myId		= defaultUser 
 							, html 		= defaultUser @@: BT []
 							, hst 		= hst
-							, storageInfo = {tasklife = Session, taskstorage = PlainString }}
+							, storageInfo = {tasklife = Session, taskstorage = PlainString, taskmode = Edit }}
 # (pversion,hst)	 	= mkStoreForm (Init, pFormId userVersionNr 0) inc hst
 # (sversion,hst)	 	= mkStoreForm (Init, nFormId sessionVersionNr pversion.value) inc hst
-= (a,refresh.form ++ [Br,Br, Hr [],Br] <|.|> Filter thisUser defaultUser html,hst)
+= (a,refresh.form ++ [Br,Br, Hr [],Br] <|.|> Filter ((==) thisUser) defaultUser html,hst)
 where
-	Filter thisUser user (BT bdtg) 			= if (thisUser == user) bdtg []
-	Filter thisUser user (nuser @@: tree) 	= Filter thisUser nuser tree
-	Filter thisUser user (tree1 +|+ tree2)  = Filter thisUser user tree1 <|.|> Filter thisUser user tree2
-	Filter thisUser user (tree1 +-+ tree2)  = [Filter thisUser user tree1 <=> Filter thisUser user tree2]
-
 	defaultUser	= 0
+
+Filter pred user (BT bdtg) 			= if (pred user) bdtg []
+Filter pred user (nuser @@: tree) 	= Filter pred nuser tree
+Filter pred user (tree1 +|+ tree2)  = Filter pred user tree1 <|.|> Filter pred user tree2
+Filter pred user (tree1 +-+ tree2)  = [Filter pred user tree1 <=> Filter pred user tree2]
+
 // options settings
 
 instance setTaskAttribute Lifespan
@@ -61,13 +63,16 @@ where setTaskAttribute lifespan tst = {tst & storageInfo.tasklife = lifespan}
 instance setTaskAttribute StorageFormat
 where setTaskAttribute storageformat tst = {tst & storageInfo.taskstorage = storageformat}
 
+instance setTaskAttribute Mode
+where setTaskAttribute mode tst = {tst & storageInfo.taskmode = mode}
+
 singleUserTask :: !(Task a) !*HSt -> (Html,*HSt) | iData a 
 singleUserTask task hst 
 # (_,html,hst) = startTask 0 task hst
 = mkHtml "stest" html hst
 
-multiUserTask :: !Int !(Task a) [*TSt -> *TSt] !*HSt -> (Html,*HSt) | iData a 
-multiUserTask nusers task attr hst 
+multiUserTask :: !Int [*TSt -> *TSt] !(Task a)  !*HSt -> (Html,*HSt) | iData a 
+multiUserTask nusers attr task  hst 
 # (idform,hst) 	= FuncMenu (Init,nFormId "pdm_chooseWorker" 
 						(0,[("User " +++ toString i,\_ -> i) \\ i<-[0..nusers - 1] ])) hst
 # currentWorker	= snd idform.value
@@ -78,26 +83,39 @@ where
 	# tst	= seq attr tst
 	= task tst
 		
-(@:) infix 0 :: !(!Int,!String) (Task a)	-> (Task a)			| iData a
+(@:) infix 1 :: !(!Int,!String) (Task a)	-> (Task a)			| iData a
 (@:) (userId,taskname) taska = \tst -> mkTask assignTask` tst
 where
 	assignTask` tst=:{html,myId}
 	# (a,tst=:{html=nhtml,activated})	= taska {tst & html = BT [],myId = userId}		// activate task of indicated user
 	| activated 						= (a,{tst & myId = myId							// work is done						
 												  ,	html = html +|+ 					// clear screen
-													BT [Txt ("User " <+++ userId <+++ " has finished task "),B [] taskname, Br]})	
+													BT [Txt ("User " <+++ userId <+++ " finished task "),B [] taskname, Txt " yielding ", toHtml a, Br]})	
 	= (a,{tst & myId = myId																// restore user Id
 			  , html = 	html +|+ 
 						BT [Br, Txt ("Waiting for task "), B [] taskname, Txt (" from User " <+++ userId <+++ "..."),Br] +|+ 
 						(userId @@: BT [Txt ("User " <+++ myId <+++ " waits for task "), B [] taskname,Br,Br] +|+ nhtml)})				// combine html code, filter later					
 
+(@::) infix 1 :: !Int (Task a)	-> (Task a)			| iData a
+(@::) userId taska = \tst -> mkTask assignTask` tst
+where
+	assignTask` tst=:{html,myId}
+	# (a,tst=:{html=nhtml,activated})	= taska {tst & html = BT [],myId = userId}		// activate task of indicated user
+	| activated 						= (a,{tst & myId = myId							// work is done						
+												  ,	html = html})	
+	= (a,{tst & myId = myId																// restore user Id
+			  , html = 	html +|+  (userId @@: nhtml)})				// combine html code, filter later					
+
 mkTask :: (*TSt -> *(a,*TSt)) -> (Task a) | iData a
 mkTask mytask = \tst -> mkTask` tst
 where
-	mkTask` tst=:{activated}		
+	mkTask` tst=:{activated,html}		
 	# tst 						= incTask tst				// every task should first increment its tasknumber
 	| not activated				= (createDefault,tst)		// not active, return default value
-	= mytask tst											// active, so perform task or get its result
+//	= mytask tst											// active, so perform task or get its result
+	# (a,tst=:{activated}) 		=  mytask tst											// active, so perform task or get its result
+//	| activated 				= (a,{tst & html = html}) 	// task done, clear output
+	= (a,tst)
 
 STask :: String a -> (Task a) | iData a 
 STask prompt a = \tst -> mkTask (STask` a) tst
@@ -108,7 +126,7 @@ where
 	# buttonId			= mkTaskNr tasknr
 	# (taskdone,hst) 	= mkStoreForm (Init,cFormId tst.storageInfo taskId False) id hst  			// remember if the task has been done
 	| taskdone.value																				// test if task has completed
-		# (editor,hst) 	= (mkEditForm  (Init,cdFormId tst.storageInfo editId a) hst)				// yes, read out current value, make editor passive
+		# (editor,hst) 	= (mkEditForm  (Init,cdFormId tst.storageInfo editId a <@ Display) hst)				// yes, read out current value, make editor passive
 		= (editor.value,{tst & activated = True, html = html +|+ BT editor.form, hst = hst})		// return result task
 	# (editor,hst) 		= mkEditForm  (Init,cFormId tst.storageInfo editId a) hst					// no, read out current value from active editor
 	# (finbut,hst)  	= simpleButton buttonId prompt (\_ -> True) hst								// add button for marking task as done
@@ -277,7 +295,7 @@ returnTask a = \tst -> mkTask (returnTask` a) tst
 where
 	returnTask` a  tst=:{tasknr,activated,html,hst}
 	# editId			= "edit_" <+++ mkTaskNr tasknr
-	# (editor,hst) 		= (mkEditForm  (Set,cdFormId tst.storageInfo editId a) hst)			// yes, read out current value, make editor passive
+	# (editor,hst) 		= (mkEditForm  (Set,cdFormId tst.storageInfo editId a <@ Display) hst)			// yes, read out current value, make editor passive
 	= (editor.value,{tst & html = html +|+ BT editor.form, hst = hst})		// return result task
 
 returnVF :: a [BodyTag] -> (Task a) | iData a 
@@ -417,21 +435,21 @@ where
 waitForTimeTask:: HtmlTime	-> (Task HtmlTime)
 waitForTimeTask time = \tst ->  mkTask waitForTimeTask` tst
 where
-	waitForTimeTask` tst=:{tasknr,html,hst}
+	waitForTimeTask` tst=:{tasknr,hst}
 	# taskId				= "iTask_timer_" <+++ mkTaskNr tasknr
 	# (taskdone,hst) 		= mkStoreForm (Init,cFormId tst.storageInfo taskId (False,time)) id hst  			// remember time
 	# ((currtime,_),hst)	= getTimeAndDate hst
-	| currtime < time		= (time,{tst & activated = False, html = html +|+ BT [Txt ("Waiting for time " ):[toHtml time]], hst = hst})
+	| currtime < time		= (time,{tst & activated = False,hst = hst})
 	= (time,{tst & hst = hst})
 
 waitForDateTask:: HtmlDate	-> (Task HtmlDate)
 waitForDateTask date = \tst ->  mkTask waitForDateTask` tst
 where
-	waitForDateTask` tst=:{tasknr,html,hst}
+	waitForDateTask` tst=:{tasknr,hst}
 	# taskId				= "iTask_date_" <+++ mkTaskNr tasknr
 	# (taskdone,hst) 		= mkStoreForm (Init,cFormId tst.storageInfo taskId (False,date)) id hst  			// remember date
 	# ((_,currdate),hst) 	= getTimeAndDate hst
-	| currdate < date		= (date,{tst & activated = False, html = html +|+ BT [Txt ("Waiting for date " ):[toHtml date]], hst = hst})
+	| currdate < date		= (date,{tst & activated = False, hst = hst})
 	= (date,{tst & hst = hst})
 
 // lifting section
@@ -461,8 +479,8 @@ where
 	incTasknr [] = [0]
 	incTasknr [i:is] = [i+1:is]
 
-cFormId  {tasklife,taskstorage} s d = {sFormId  s d & lifespan = tasklife, storage = taskstorage}
-cdFormId {tasklife,taskstorage} s d = {sdFormId s d & lifespan = tasklife, storage = taskstorage}
+cFormId  {tasklife,taskstorage,taskmode} s d = {sFormId  s d & lifespan = tasklife, storage = taskstorage, mode = taskmode}
+cdFormId {tasklife,taskstorage,taskmode} s d = {sdFormId s d & lifespan = tasklife, storage = taskstorage, mode = taskmode}
 
 showMine bool html more = if bool (html +|+ more) html
 
@@ -474,13 +492,26 @@ showMine bool html more = if bool (html +|+ more) html
 (#>>) infix 1 :: w:(St .s .a) v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]
 (#>>) a b = a `bind` (\_ -> b)
 
-(?>>) infix 3 :: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
+(|>>) infix 3 :: (*TSt -> *(a,*TSt)) (a -> .Bool, a -> String) -> .(*TSt -> *(a,*TSt)) | iData a
+(|>>) taska (pred,message) = \tst -> mkTask doTask tst
+where
+	doTask tst=:{html}
+	# (a,tst=:{activated}) 	= taska tst
+	| not activated 		= (a,tst)
+	| pred a 				= (a,tst)
+	= mkTask doTask {tst & html = html +|+ BT [Txt (message a)]}
+
+(?>>) infix 0 :: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
 (?>>) prompt task = \tst -> doit tst
 where
-	doit tst=:{html=ohtml,activated=myturn}
+	doit tst=:{html=ohtml,activated=myturn,myId}
 	# (a,tst=:{activated,html=nhtml}) = task {tst & html = BT []}
-	| activated || not myturn= (a,{tst & html = ohtml +|+ nhtml})
+//	| activated || not myturn= (a,{tst & html = ohtml +|+ nhtml})
+	| activated || not myturn= (a,{tst & html = ohtml +|+ BT (Filter ((<>) myId) myId nhtml)})
 	= (a,{tst & html = ohtml +|+ BT prompt +|+ nhtml})
+
+myId :: TSt -> (Int,TSt)
+myId tst=:{myId} = (myId,tst)
 
 // debugging code 
 

@@ -75,7 +75,7 @@ findState formid formstates=:{fstates,server} world
 # (bool,ma,fstates,world) = findState` formid fstates world
 = (bool,ma,{formstates & fstates = fstates},world)
 where
-	findState` :: !(FormId a) *FStates *NWorld -> (Bool,Maybe a,*FStates,*NWorld)| gPrint{|*|}, gerda{|*|}, TC, gParse{|*|} a //iDataSerAndDeSerialize a
+//	findState` :: !(FormId a) *FStates *NWorld -> (Bool,Maybe a,*FStates,*NWorld)| gPrint{|*|}, gerda{|*|}, TC, gParse{|*|} a //iDataSerAndDeSerialize a
 	findState` formid formstate=:(Node_ left (fid,info) right) world
 	| formid.id == fid	= case info of
 							(OldState state)	= (True, fetchFState state,formstate,world)

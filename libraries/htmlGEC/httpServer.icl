@@ -4,8 +4,7 @@ import StdEnv,StdTCP
 
 from httpUtil import unlines, cSplit, endWith, splitAfter, wordsWith, unwords, readFile
 
-DEBUGSERVER
-	:== True
+from  htmlSettings import DEBUGSERVER
 
 (<<?) file s 
 	= case DEBUGSERVER of

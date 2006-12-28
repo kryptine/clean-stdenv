@@ -11,7 +11,7 @@ class iData a							// The collection of generic functions needed to make iData:
 		
 class iDataSerialize a
 		| gPrint{|*|}			//		To serialize a value to a String
-		, gerda {|*|} 			//		OPTION: To store and retrieve a value in a database
+//		, gerda {|*|} 			//		OPTION: To store and retrieve a value in a database
 		, TC a					//		To be able to store values in a dynamic
 								//		TC is a special class cannot be included here
 class iDataSerAndDeSerialize a
@@ -21,6 +21,8 @@ class iDataSerAndDeSerialize a
 TraceInput			:== False			// show what kind of information is received from Client
 TraceOutput			:== False			// show what kind of information is stored
 
+DEBUGSERVER			:== True			// show what kind of information is transmitted by the Clean HtmlServer
+
 MyDataBase			:== "iDataDatabase"	// name of database being used by iData applications
 
 iDataIdSeparator 	 :== "."			// used as separator when combining iData form id's
@@ -28,5 +30,5 @@ radioButtonSeparator :== '.'			// used as extension for family of radiobuttons
 
 // OPTIONS WHICH CAN BE SET OFF AND ON
 
-IF_GERDA gerda no_gerda :== gerda		// If database option is used
-//IF_GERDA gerda no_gerda :== no_gerda	// otherwise, BUT manually flag of ", gerda{|*|}" in the class definition above
+//IF_GERDA gerda no_gerda :== gerda		// If database option is used
+IF_GERDA gerda no_gerda :== no_gerda	// otherwise, BUT manually flag of ", gerda{|*|}" in the class definition above

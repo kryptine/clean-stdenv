@@ -3,10 +3,10 @@ implementation module htmlDataDef
 import StdStrictLists, StdString
 import htmlStyleDef, htmlStylelib
 
-gHpr{|Html|}    prev (Html head rest)			= prev <+ head <+ rest 
+gHpr{|Html|}    prev (Html head rest)			= prev <+ htmlbegin <+ head <+ rest <+ htmlend 
 where
 	htmlbegin									= "<html>"
-	htmlend 									= "</html>/n/n"
+	htmlend 									= "</html>"
 
 gHpr{|Head|}    prev (Head attr tags)			= prev <+> htmlAttrCmnd "head"			attr tags
 

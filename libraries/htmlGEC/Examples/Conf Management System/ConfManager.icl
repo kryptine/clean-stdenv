@@ -209,7 +209,7 @@ where
 	= guestHomePage newaccount accounts hst
 	
 	guestPerson hst 		// 2. administrate personel administration
-	# (personf,hst)			= mkEditForm (Init,nFormId "cms_guest_person" createDefault) hst
+	# (personf,hst)			= mkEditForm (Init,nFormId "cms_guest_person" createDefault <@ Submit) hst
 	# (exception,hst)		= ExceptionStore ((+) (invariantPerson account.login.loginName personf.value)) hst	
 	| isJust exception		= ([Txt "2. Please fill in your personal data so that we can inform you.",Br,Br ] ++ personf.form,hst)
 	# (_,hst)				= guestSubPages Set (\_ -> GuestSubmitPaper) hst
@@ -218,7 +218,7 @@ where
 	= guestHomePage account accounts hst
 
 	guestSubmitPaper hst	// 3. handle paper submission
-	# (paperf,hst)			= mkEditForm (Init,nFormId "cms_guest_paper" createDefault) hst
+	# (paperf,hst)			= mkEditForm (Init,nFormId "cms_guest_paper" createDefault <@ Submit) hst
 	# (exception,hst)		= ExceptionStore ((+) (invariantPaper account.login.loginName paperf.value)) hst	
 	| isJust exception		= ([Txt "3. Now submit your paper.", Br, Br] ++ paperf.form,hst)
 	# (paperNr,hst)			= PaperNrStore inc hst	// now all iformation is there, make it all persistent

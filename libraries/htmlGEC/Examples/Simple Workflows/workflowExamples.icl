@@ -9,7 +9,7 @@ derive gUpd []
 //Start world = doHtmlServer (multiUser twotasks3) world
 
 
-Start world = doHtmlServer (multiUser agenda2) world
+Start world = doHtmlServer (singleUser CoffeeMachineInf) world
 where
 	singleUser tasks hst 
 	# (_,html,hst) = startTask 0 tasks hst
@@ -26,6 +26,7 @@ where
 //		# tst	= setTaskAttribute Persistent tst
 //		# tst	= setTaskAttribute StaticDynamic tst
 //		# tst	= setTaskAttribute Database tst
+//		# tst	= setTaskAttribute Submit tst
 		= tasks tst
 
 
@@ -35,9 +36,19 @@ list tst
 # (a,tst) = returnTask a tst
 = (a,tst)
 
+onetwo tst
+# (v,tst) = STasks  [ ("First", 	simple 1 |>> (\n -> n > 100, \_ -> "Value should be larger than 100") 
+								=>> (\t -> returnTask t))
+					, ("Second",	simple 2 
+								=>> (\t -> returnTask t))
+					] tst
+= STask "Klaar"  (sum v) tst
+
 testEenTwee tst
-# (v,tst) = STasks  [ ("een", (1,"number1") @: simple 1 =>> \t -> returnTask t)
-					, ("twee",(2,"number2") @: simple 2 =>> \t -> returnTask t)
+# (v,tst) = STasks  [ ("een", (1,"number1") @: 	simple 1 |>> (\n -> n > 100,\_ -> "Value should be larger than 100") 
+											=>> \t -> returnTask t)
+					, ("twee",(2,"number2") @: 	simple 2 
+											=>> \t -> returnTask t)
 					] tst
 = STask "Klaar"  (sum v) tst
 
