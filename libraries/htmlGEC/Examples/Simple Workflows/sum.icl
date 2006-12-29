@@ -5,7 +5,8 @@ import StdEnv, StdHtml
 // choose one of the following variants
 
 //Start world = doHtmlServer (singleUserTask count) world
-Start world = doHtmlServer (multiUserTask 3 [] countMU) world
+Start world = doHtmlServer (singleUserTask count2) world
+//Start world = doHtmlServer (multiUserTask 3 [] countMU) world
 //Start world = doHtmlServer (multiUserTask 3 [setTaskAttribute Persistent] countMU) world
 //Start world = doHtmlServer countIData world
 
@@ -22,7 +23,16 @@ count tst
 # tst		= returnF [Txt "+",Hr []] tst
 = returnTask (v1 + v2) tst
 
-// multi user varian
+// single user, monadic style
+
+count2 tst
+= 	(			STask "Set" initVal 
+	=>> \v1 -> 	STask "Set" initVal
+	=>> \v2 ->	[Txt "+",Hr []] 
+				!>>	returnTask (v1 + v2)
+	) tst
+
+// multi user variant
 
 countMU tst
 # (v1,tst) 	= ((1,"number") @: STask "Set" initVal) tst	// user 1
@@ -30,7 +40,17 @@ countMU tst
 # tst		= returnF [Txt "+",Hr []] tst				// user 0
 = returnTask (v1 + v2) tst								// user 0
 
-// iData variant to show what iTasks do automatically for you
+// multi user variant, monadic atyle
+
+count2MU tst
+= 	(			(1,"number") @: STask "Set" initVal
+	=>> \v1 -> 	(2,"number") @: STask "Set" initVal 
+	=>> \v2 ->	[Txt "+",Hr []] 
+				!>> returnTask (v1 + v2) 
+	) tst
+
+
+// iData variant to show what iTasks do for you
 
 countIData hst
 # ((d1,v1),t1,hst) = myEdit "v1" 0 hst

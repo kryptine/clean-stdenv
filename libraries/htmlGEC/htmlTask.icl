@@ -83,7 +83,7 @@ where
 	# tst	= seq attr tst
 	= task tst
 		
-(@:) infix 1 :: !(!Int,!String) (Task a)	-> (Task a)			| iData a
+(@:) infix 4 :: !(!Int,!String) (Task a)	-> (Task a)			| iData a
 (@:) (userId,taskname) taska = \tst -> mkTask assignTask` tst
 where
 	assignTask` tst=:{html,myId}
@@ -96,7 +96,7 @@ where
 						BT [Br, Txt ("Waiting for task "), B [] taskname, Txt (" from User " <+++ userId <+++ "..."),Br] +|+ 
 						(userId @@: BT [Txt ("User " <+++ myId <+++ " waits for task "), B [] taskname,Br,Br] +|+ nhtml)})				// combine html code, filter later					
 
-(@::) infix 1 :: !Int (Task a)	-> (Task a)			| iData a
+(@::) infix 4 :: !Int (Task a)	-> (Task a)			| iData a
 (@::) userId taska = \tst -> mkTask assignTask` tst
 where
 	assignTask` tst=:{html,myId}
@@ -486,28 +486,38 @@ showMine bool html more = if bool (html +|+ more) html
 
 // monadic shorthands
 
-(=>>) infix 2 :: w:(St .s .a) v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]
+(=>>) infix 1 :: w:(St .s .a) v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]
 (=>>) a b = a `bind` b
 
-(#>>) infix 1 :: w:(St .s .a) v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]
+(#>>) infixl 1 :: w:(St .s .a) v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]
 (#>>) a b = a `bind` (\_ -> b)
 
-(|>>) infix 3 :: (*TSt -> *(a,*TSt)) (a -> .Bool, a -> String) -> .(*TSt -> *(a,*TSt)) | iData a
-(|>>) taska (pred,message) = \tst -> mkTask doTask tst
+(<|) infix 3 :: (*TSt -> *(a,*TSt)) (a -> .Bool, a -> String) -> .(*TSt -> *(a,*TSt)) | iData a
+(<|) taska (pred,message) = \tst -> mkTask doTask tst
 where
-	doTask tst=:{html}
+	doTask tst=:{html = ohtml}
 	# (a,tst=:{activated}) 	= taska tst
 	| not activated 		= (a,tst)
 	| pred a 				= (a,tst)
-	= mkTask doTask {tst & html = html +|+ BT [Txt (message a)]}
+//	= mkTask doTask {tst & html = ohtml +|+ BT [Txt (message a)]}
+	# (a,tst=:{html = nhtml})= mkTask doTask {tst & html = BT []}
+	| pred a 				 = (a,{tst & html = ohtml +|+ nhtml})
+	= (a,{tst & html = ohtml +|+ BT [Txt (message a)] +|+ nhtml})
 
-(?>>) infix 0 :: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
+(?>>) infix 2 :: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
 (?>>) prompt task = \tst -> doit tst
 where
 	doit tst=:{html=ohtml,activated=myturn,myId}
 	# (a,tst=:{activated,html=nhtml}) = task {tst & html = BT []}
-//	| activated || not myturn= (a,{tst & html = ohtml +|+ nhtml})
 	| activated || not myturn= (a,{tst & html = ohtml +|+ BT (Filter ((<>) myId) myId nhtml)})
+	= (a,{tst & html = ohtml +|+ BT prompt +|+ nhtml})
+
+(!>>) infix 2 :: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
+(!>>) prompt task = \tst -> doit tst
+where
+	doit tst=:{html=ohtml,activated=myturn,myId}
+	# (a,tst=:{activated,html=nhtml}) = task {tst & html = BT []}
+	| not myturn	= (a,{tst & html = ohtml +|+ BT (Filter ((<>) myId) myId nhtml)})
 	= (a,{tst & html = ohtml +|+ BT prompt +|+ nhtml})
 
 myId :: TSt -> (Int,TSt)

@@ -34,8 +34,8 @@ instance setTaskAttribute Lifespan, StorageFormat, Mode
 (@:)			:: will prompt who is waiting for what
 (@::)			:: no prompting
 */
-(@:)  infix 1 	:: !(!Int,!String) (Task a)	-> (Task a)			| iData a
-(@::) infix 1 	:: !Int (Task a)		    -> (Task a)			| iData a
+(@:)  infix 4 	:: !(!Int,!String) (Task a)	-> (Task a)			| iData a
+(@::) infix 4 	:: !Int (Task a)		    -> (Task a)			| iData a
 
 /* Promote any TSt state transition function to an iTask:
 mkTask			:: function will only be called when it is its turn to be activated
@@ -87,13 +87,11 @@ returnV			:: return the value
 returnTask		:: return the value and show it 
 returnVF		:: return the value and show the Html code specified
 returnF			:: add html code
-(?>>)			:: only prompt as long as task is active but not finished
 */
 returnV 		:: a 					-> (Task a) 			| iData a 
 returnTask 		:: a 					-> (Task a) 			| iData a 
 returnVF 		:: a [BodyTag] 			-> (Task a) 			| iData a 
 returnF 		:: [BodyTag] 			-> TSt -> TSt
-(?>>) infix 0 	:: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
 myId			:: TSt -> (Int,TSt)
 
 /* Setting up communication channels between users:
@@ -125,8 +123,15 @@ appIData 		:: (IDataFun a) 		-> (Task a) 					| iData a
 appHSt 			:: (HSt -> (a,HSt)) TSt -> (a,TSt)
 
 /* monadic shorthands
+(?>>)			:: only prompt as long as task is active but not finished
+(!>>)			:: prompt
+(=>>)			:: bind
+(#>>)			:: bind, no argument passed
+(#>>)			:: conditional added
 */
 
-(=>>) infix 2 :: w:(St .s .a) v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]	// `bind`
-(#>>) infix 1 :: w:(St .s .a) v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]			// `bind` ignoring argument
-(|>>) infix 3 :: (*TSt -> *(a,*TSt)) (a -> .Bool,a -> String) -> .(*TSt -> *(a,*TSt)) | iData a		// repeat as long as predicate does not hold
+(?>>) infix 2 	:: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
+(!>>) infix 2 	:: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
+(=>>) infix 1 	:: w:(St .s .a) v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]	// `bind`
+(#>>) infixl 1 	:: w:(St .s .a) v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]			// `bind` ignoring argument
+(<|) infix 3 	:: (*TSt -> *(a,*TSt)) (a -> .Bool,a -> String) -> .(*TSt -> *(a,*TSt)) | iData a		// repeat as long as predicate does not hold
