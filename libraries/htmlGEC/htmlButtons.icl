@@ -386,6 +386,14 @@ instance == PasswordBox where (==) pb1 pb2	= pb1 === pb2
 instance == HtmlTime    where (==) ht1 ht2	= ht1 === ht2
 instance == HtmlDate    where (==) hd1 hd2	= hd1 === hd2
 
+instance == (DisplayMode a) | == a
+where 
+	(==) (DisplayMode a) (DisplayMode b)	= a == b
+	(==) (EditMode a) (EditMode b)			= a == b
+	(==) (HideMode a) (HideMode b)			= a == b
+	(==) EmptyMode EmptyMode				= True
+	(==) _ _								= False
+
 derive gLexOrd HtmlTime, HtmlDate
 instance < HtmlTime where (<) ht1 ht2		= gEq{|*|} (gLexOrd{|*|} ht1 ht2) LT
 instance < HtmlDate where (<) hd1 hd2		= gEq{|*|} (gLexOrd{|*|} hd1 hd2) LT

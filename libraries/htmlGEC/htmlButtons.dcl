@@ -17,6 +17,7 @@ instance toInt		PullDownMenu					// Current index in pull down list
 instance toString	PullDownMenu					// Corresponding element in pull down list
 derive   gEq		HtmlDate, HtmlTime, PasswordBox
 instance ==			HtmlDate, HtmlTime, PasswordBox
+instance == 		(DisplayMode a) | == a
 derive   gLexOrd	HtmlDate, HtmlTime
 instance <			HtmlDate, HtmlTime
 instance toString	HtmlDate, HtmlTime
