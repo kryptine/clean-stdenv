@@ -25,12 +25,11 @@ count tst
 
 // single user, monadic style
 
-count2 tst
-= 	(			STask "Set" initVal 
+count2 
+= 				STask "Set" initVal 
 	=>> \v1 -> 	STask "Set" initVal
 	=>> \v2 ->	[Txt "+",Hr []] 
 				!>>	returnTask (v1 + v2)
-	) tst
 
 // multi user variant
 
@@ -42,13 +41,11 @@ countMU tst
 
 // multi user variant, monadic atyle
 
-count2MU tst
-= 	(			(1,"number") @: STask "Set" initVal
+count2MU 
+= 				(1,"number") @: STask "Set" initVal
 	=>> \v1 -> 	(2,"number") @: STask "Set" initVal 
 	=>> \v2 ->	[Txt "+",Hr []] 
 				!>> returnTask (v1 + v2) 
-	) tst
-
 
 // iData variant to show what iTasks do for you
 

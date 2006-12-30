@@ -10,7 +10,7 @@ CoffeeMachineInf2 tst
 	#>>		mkTask CoffeeMachineInf2
 	) tst
 
-Coffeemachine2 tst
+Coffeemachine2 tst 
 =	( 							[Txt "Choose product:", Br] 
 								?>>	CTask_button
 								 	[	("Coffee: 100", 	returnV (100,"Coffee"))
