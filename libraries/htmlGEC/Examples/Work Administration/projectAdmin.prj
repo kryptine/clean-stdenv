@@ -1,7 +1,7 @@
 Version: 1.4
 Global
 	Built:	True
-	Target:	Everything
+	Target:	Web Applications
 	Exec:	{Project}\projectAdmin.exe
 	CodeGen
 		CheckStacks:	False
@@ -220,7 +220,13 @@ OtherModules
 			ReuseUniqueNodes:	True
 			Fusion:	False
 		DclOpen:	False
-		IclOpen:	False
+		Icl
+			WindowPosition
+				X:	10
+				Y:	10
+				SizeX:	1137
+				SizeY:	624
+		IclOpen:	True
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	httpSubServer
@@ -2804,7 +2810,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -2821,7 +2827,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -2838,7 +2844,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -2906,7 +2912,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -2923,7 +2929,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -2940,7 +2946,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -2957,7 +2963,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -3235,10 +3241,6 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdTuple.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdCharList.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
-		Path:	{Application}\Libraries\WrapDebug\Clean System Files\Debug.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
-		Path:	{Application}\Libraries\WrapDebug\Clean System Files\Wrap.o
-		Path:	{Application}\Libraries\WrapDebug\Clean System Files\ShowWrapped.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\StdHtml.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlSettings.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlHandler.o
@@ -3250,6 +3252,7 @@ Static
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
 		Path:	{Application}\Libraries\Gerda\Clean System Files\odbc.o
 		Path:	{Application}\Libraries\Gerda\Clean System Files\odbccp.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdStrictLists.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemStrictLists.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnumStrict.o
@@ -3262,8 +3265,8 @@ Static
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\iDataState.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\EncodeDecode.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlTrivial.o
-		Path:	{Application}\Libraries\Directory\Clean System Files\Directory.o
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
+		Path:	{Application}\Libraries\Directory\Clean System Files\Directory.o
 		Path:	{Application}\Libraries\htmlGEC\graph_copy\Clean System Files\dynamic_string.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicGraphConversion.o
@@ -3283,9 +3286,16 @@ Static
 		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherParser.o
 		Path:	{Application}\Libraries\ExceptionsWindows\Clean System Files\StdException.o
 		Path:	{Application}\Libraries\Hilde\Parser combinators 2002\Clean System Files\StdParsComb.o
+		Path:	{Application}\Libraries\WrapDebug\Clean System Files\Debug.o
+		Path:	{Application}\Libraries\WrapDebug\Clean System Files\Wrap.o
+		Path:	{Application}\Libraries\WrapDebug\Clean System Files\ShowWrapped.o
 		Path:	{Application}\Libraries\Generics\Clean System Files\GenMap.o
 		Path:	{Application}\Libraries\Generics\Clean System Files\_Array.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\httpServer.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\httpUtil.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLib.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdListExtensions.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
 		Path:	{Application}\Libraries\Tcp\Clean System Files\StdTCP.o
 		Path:	{Application}\Libraries\Tcp\Clean System Files\StdChannels.o
 		Path:	{Application}\Libraries\Tcp\Clean System Files\tcp.o
@@ -3354,11 +3364,11 @@ Static
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\world.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiverDef.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiver.o
+		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverid.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiveraccess.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverdefaccess.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdReceiverAttribute.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverdevice.o
-		Path:	{Application}\Libraries\ObjectIO\Clean System Files\receiverid.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\receiverevent.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\scheduler.o
 		Path:	{Application}\Libraries\ObjectIO\Clean System Files\StdPStClass.o
@@ -3370,10 +3380,6 @@ Static
 		Path:	{Application}\Libraries\Tcp\Clean System Files\ostcp.o
 		Path:	{Application}\Libraries\Tcp\Clean System Files\StdEventTCP.o
 		Path:	{Application}\Libraries\Tcp\Clean System Files\StdStringChannels.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\httpUtil.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLib.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdListExtensions.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\httpSubServer.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlButtons.o
 		Path:	{Application}\Libraries\Generics\Clean System Files\GenLexOrd.o
@@ -3449,28 +3455,23 @@ Static
 		Path:	{Application}\Libraries\StdLib
 		Path:	{Application}\Libraries\ObjectIO
 		Path:	{Application}\Libraries\ObjectIO\OS Windows
-		Path:	{Application}\Libraries\Directory
 		Path:	{Application}\Libraries\Dynamics\extension
 		Path:	{Application}\Libraries\Dynamics\general
 		Path:	{Application}\Libraries\Dynamics\implementation
 		Path:	{Application}\Libraries\Dynamics\implementation\windows
 		Path:	{Application}\Libraries\Generics
 		Path:	{Application}\Libraries\ArgEnvWindows
-		Path:	{Application}\Libraries\Gast
 		Path:	{Application}\Libraries\Directory
 		Path:	{Application}\Libraries\Tcp
-		Path:	{Application}\Libraries\ExceptionsWindows
-		Path:	{Application}\Libraries\MersenneTwister
-		Path:	{Application}\Libraries\WrapDebug
-		Path:	{Application}\Libraries\ExtendedArith\ExtendedArith
-		Path:	{Application}\Libraries\GameLib
-		Path:	{Application}\Libraries\htmlGEC
 		Path:	{Application}\Libraries\GEC\GEC Implementation
-		Path:	{Application}\Libraries\Hilde
-		Path:	{Application}\Libraries\GEC
+		Path:	{Application}\Libraries\htmlGEC
 		Path:	{Application}\Libraries\htmlGEC\graph_copy
+		Path:	{Application}\Libraries\htmlGEC\htmlTest
+		Path:	{Application}\Libraries\MersenneTwister
 		Path:	{Application}\Libraries\Gerda
+		Path:	{Application}\Libraries\Hilde
 		Path:	{Application}\Libraries\Hilde\Parser combinators 2002
-		Path:	{Application}\Libraries\ExtEnv
-	AppP:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1
-	PrjP:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Libraries\htmlGEC\Examples\Work Administration
+		Path:	{Application}\Libraries\ExceptionsWindows
+		Path:	{Application}\Libraries\WrapDebug
+	AppP:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1
+	PrjP:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Examples\Work Administration

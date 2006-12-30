@@ -5,34 +5,42 @@ import StdEnv, StdHtml
 derive gForm []
 derive gUpd []
 
-Start world = doHtmlServer (singleUserTask travel) world
+Start world = doHtmlServer (singleUserTask travelInf) world
 
-travel tst
-# (booked,tst)= PCTask2
+travelInf :: (Task Void)
+travelInf = 			travel
+			#>> mkTask	travelInf
+
+travel :: (Task Void)
+travel 
+= 			[Txt "Book your journey:",Br,Br]
+			?>>	PCTask2
 					( STasks 
-						[	( "Choose Booking options"
+						[	( "Choose Booking options:"
 							, MCTask_ckbox	[ ("Book_Flight",BookFlight)
 											, ("Book_Hotel", BookHotel)
 											, ("Book_Car",   BookCar)
 											]
 							)
-						, 	( "Booking confirmation"
+						, 	( "Confirm Booking:"
 							, STask_button "Confirm" (returnV [])
 							)
 						]
 					, STask_button "Cancel" (returnV [])
-					) tst
-| isNil	booked	= returnTask "Cancelled" tst
-# (_,tst)		= STask "Pay" (Dsp (calcCosts booked)) tst
-= returnTask "Paid" tst
+					)
+	=>> \booking -> [Txt "Handling bookings:",Br,Br]
+					?>> handleBookings booking
 where
-	BookFlight tst 	= STask "BookFlight" 	(Dsp "Flight Number","",Dsp "Costs",0) tst
-	BookHotel tst 	= STask "BookHotel" 	(Dsp "Hotel Name","",Dsp "Costs",0) tst
-	BookCar tst 	= STask "BookCar" 		(Dsp "Car Brand","",Dsp "Costs",0) tst
+	handleBookings booking
+	| isNil	booking	= 		STask "Cancelled" Void
+	| otherwise		= 		STask "Pay" (Dsp (calcCosts booking))
+					  #>>	STask "Paid" Void
+	where
+		calcCosts booked = sum [cost \\ (_,_,_,cost) <- hd booked]
 
-	Pay booked bookings tst		= returnTask "OK" tst	
-
-	calcCosts booked = sum [cost \\ (_,_,_,cost) <- hd booked]
+	BookFlight  = STask "BookFlight" 	(Dsp "Flight Number","",Dsp "Costs",0)
+	BookHotel  	= STask "BookHotel" 	(Dsp "Hotel Name","",Dsp "Costs",0)
+	BookCar  	= STask "BookCar" 		(Dsp "Car Brand","",Dsp "Costs",0)
 
 	isNil [] = True
 	isNil _ = False

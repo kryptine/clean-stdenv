@@ -10,7 +10,7 @@ derive gerda 	QForm, QState
 
 derive gEq		QState
 
-Start world = doHtmlServer (multiUserTask 2 [] (Quotation createDefault)) world
+Start world = doHtmlServer (multiUserTask 2 [] (Quotation 1 createDefault)) world
 
 :: QForm = 	{ fromComp 			:: String
 			, toComp 			:: String
@@ -22,19 +22,20 @@ Start world = doHtmlServer (multiUserTask 2 [] (Quotation createDefault)) world
 			}
 :: QState =	Submitted | Approved | Cancelled | NeedsRework | Draft
 			
-Quotation :: (QState,QForm) TSt -> ((QState,QForm),TSt)
-Quotation (state,form) tst
-# (form,tst) 	= ([Txt "Fill in Form:",Br,Br] ?>> id (STask "Submit" form)) tst
-# (state,tst) 	= (1 @:: review (state,form)) tst
-# (_,tst)		= ([Txt ("Quotation " <+++ printToString state),Br,Br] ?>> STask "OK" Void) tst
-| state === NeedsRework	= mkTask (Quotation (state,form)) tst
-= returnV (state,form) tst
+Quotation :: Int (QState,QForm) -> Task (QState,QForm)
+Quotation reviewer (state,form)
+=					[Txt "Fill in Form:",Br,Br] ?>> id (STask "Submit" form)
+	=>> \form	->	reviewer @:: review (state,form)
+	=>> \state	->	[Txt ("Reviewer " <+++ reviewer <+++ " says quotation " <+++ printToString state),Br,Br] ?>> STask "OK" Void
+	#>>				case state of
+						NeedsRework	-> mkTask (Quotation reviewer (state,form)) 	
+						else		-> returnV (state,form)
 where
-	review (state,form) tst
-		= ( [toHtml form,Br,Br]?>>
+	review :: (QState,QForm) -> Task QState
+	review (state,form) 
+		= [toHtml form,Br,Br]?>>
 			CTask_button
 			[ ("Rework",	returnV NeedsRework)
 			, ("Approved",	returnV Approved)
 			, ("Cancel",	returnV Cancelled)
-			] )tst
-
+			]

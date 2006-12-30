@@ -11,31 +11,25 @@ Start world = doHtmlServer (multiUserTask npersons [] (deadline mytask)) world
 
 mytask = STask "Press" 0
 
-deadline task tst
-# (whomPD,tst)		= 	( 	[Txt "Choose person you want to shift work to:",Br,Br] 
+deadline :: (Task a) -> (Task a) | iData a
+deadline task
+=						[Txt "Choose person you want to shift work to:",Br,Br] 
 						?>>	STask "Set" (PullDown (1,100) (0,[toString i \\ i <- [1..npersons]]))
-					  	) 	tst
-# who				=	toInt(toString whomPD)
-# (time,tst)		= 	( 	[Txt "Until what time do you want to wait today?",Br,Br] 
+	=>> \whomPD		->	[Txt "Until what time do you want to wait today?",Br,Br] 
 						?>>	STask "SetTimer" (Time 0 0 0)
-					  	) 	tst
-# ((ok,value),tst) = 	(	[]
-						?>> shifttask who time task 
-						)	tst
-# (_,tst) 			= 	(	if ok [Txt ("Result of task: " <+++ value),Br,Br] [Txt "Task Expired !",Br,Br]
-						?>> STask "OK" Void
-						)	tst
-= (value,tst)
+	=>> \time		->	[]
+						?>> shifttask (toInt(toString whomPD)) time task
+	=>> \(ok,value) ->	if ok [Txt ("Result of task: " +++ printToString value),Br,Br] [Txt "Task Expired, default value chosen !",Br,Br]
+						?>> STask "OK" value
+
 where
-	shifttask who time task tst
-		= ((who,"Timed Task") 	
+	shifttask who time task
+		= 	(who,"Timed Task") 	
 				@: 	PCTask2	
 					(	waitForTimeTask time 								// wait for deadline
-						#>> returnV (False,createDefault)					// return default
+						#>> returnV (False,createDefault)					// return default value
 					, 	[Txt ("Please finish task before" <+++ time),Br,Br]	// tell deadline
 						?>> (task =>> \v -> returnV (True,v))				// do task and return its result
 					) 
-			) tst
-
 
 

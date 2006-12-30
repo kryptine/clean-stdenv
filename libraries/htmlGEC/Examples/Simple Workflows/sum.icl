@@ -10,42 +10,41 @@ Start world = doHtmlServer (singleUserTask count2) world
 //Start world = doHtmlServer (multiUserTask 3 [setTaskAttribute Persistent] countMU) world
 //Start world = doHtmlServer countIData world
 
-// Change the type to any type one can apply addition to
+// single user, give first value, then give second, then show sum
+// monadic style
 
-initVal :: Int
-initVal = createDefault
+count :: Task Int
+count
+= 				STask "Set" 0 
+	=>> \v1 -> 	STask "Set" 0
+	=>> \v2 ->	[Txt "+",Hr []] 
+				!>>	returnTask (v1 + v2)
+// multi user variant, monadic atyle
 
-// single user: give first value, then give second, then show sum
+countMU :: Task Int
+countMU 
+= 				(1,"number") @: STask "Set" 0
+	=>> \v1 -> 	(2,"number") @: STask "Set" 0 
+	=>> \v2 ->	[Txt "+",Hr []] 
+				!>> returnTask (v1 + v2) 
 
-count tst
-# (v1,tst) 	= STask "Set" initVal tst
-# (v2,tst) 	= STask "Set" initVal tst
+// single user, normal Clean style 
+
+count2 :: TSt -> (Int,TSt)
+count2 tst
+# (v1,tst) 	= STask "Set" 0 tst
+# (v2,tst) 	= STask "Set" 0 tst
 # tst		= returnF [Txt "+",Hr []] tst
 = returnTask (v1 + v2) tst
 
-// single user, monadic style
+// multi user variant, normal Clean style
 
-count2 
-= 				STask "Set" initVal 
-	=>> \v1 -> 	STask "Set" initVal
-	=>> \v2 ->	[Txt "+",Hr []] 
-				!>>	returnTask (v1 + v2)
-
-// multi user variant
-
-countMU tst
-# (v1,tst) 	= ((1,"number") @: STask "Set" initVal) tst	// user 1
-# (v2,tst) 	= ((2,"number") @: STask "Set" initVal) tst	// user 2
-# tst		= returnF [Txt "+",Hr []] tst				// user 0
-= returnTask (v1 + v2) tst								// user 0
-
-// multi user variant, monadic atyle
-
-count2MU 
-= 				(1,"number") @: STask "Set" initVal
-	=>> \v1 -> 	(2,"number") @: STask "Set" initVal 
-	=>> \v2 ->	[Txt "+",Hr []] 
-				!>> returnTask (v1 + v2) 
+count2MU :: TSt -> (Int,TSt)
+count2MU tst
+# (v1,tst) 	= ((1,"number") @: STask "Set" 0) tst
+# (v2,tst) 	= ((2,"number") @: STask "Set" 0) tst
+# tst		= returnF [Txt "+",Hr []] tst
+= returnTask (v1 + v2) tst
 
 // iData variant to show what iTasks do for you
 
