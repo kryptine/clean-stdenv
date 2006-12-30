@@ -485,6 +485,13 @@ cdFormId {tasklife,taskstorage,taskmode} s d = {sdFormId s d & lifespan = taskli
 showMine bool html more = if bool (html +|+ more) html
 
 // monadic shorthands
+//u:(.a -> (.b,.c)) v:(.b -> .(.c -> .d)) -> w:(.a -> .d), [w <= u,w <= v]
+(*>>) infix 1 :: w:(St .s .a)  v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]
+(*>>) ftst b = \tst -> doit tst
+where
+	doit tst
+	# (a,tst) = ftst tst
+	= b a tst
 
 (=>>) infix 1 :: w:(St .s .a) v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]
 (=>>) a b = a `bind` b
