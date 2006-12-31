@@ -40,8 +40,8 @@ startTask thisUser taska hst
 													    B [] "Your page is not up-to date!",Br]],hst)
 # (a,{html,hst}) = taska 	{ tasknr	= []
 							, activated = True
-							, myId		= defaultUser 
-							, html 		= defaultUser @@: BT []
+							, myId		= thisUser 
+							, html 		= thisUser @@: BT []
 							, hst 		= hst
 							, storageInfo = {tasklife = Session, taskstorage = PlainString, taskmode = Edit }}
 # (pversion,hst)	 	= mkStoreForm (Init, pFormId userVersionNr 0) inc hst
@@ -86,13 +86,14 @@ where
 (@:) infix 4 :: !(!Int,!String) (Task a)	-> (Task a)			| iData a
 (@:) (userId,taskname) taska = \tst -> mkTask assignTask` tst
 where
-	assignTask` tst=:{html,myId}
+	assignTask` tst=:{html=ohtml,myId}
 	# (a,tst=:{html=nhtml,activated})	= taska {tst & html = BT [],myId = userId}		// activate task of indicated user
 	| activated 						= (a,{tst & myId = myId							// work is done						
-												  ,	html = html +|+ 					// clear screen
-													BT [Txt ("User " <+++ userId <+++ " finished task "),B [] taskname, Txt " yielding ", toHtml a, Br]})	
+												  ,	html = ohtml +|+ 					// clear screen
+													BT [Txt ("User " <+++ userId <+++ " finished task "),B [] taskname, Txt " yielding ", toHtml a, Br] +|+
+													(userId @@:nhtml)})	
 	= (a,{tst & myId = myId																// restore user Id
-			  , html = 	html +|+ 
+			  , html = 	ohtml +|+ 
 						BT [Br, Txt ("Waiting for task "), B [] taskname, Txt (" from User " <+++ userId <+++ "..."),Br] +|+ 
 						(userId @@: BT [Txt ("User " <+++ myId <+++ " waits for task "), B [] taskname,Br,Br] +|+ nhtml)})				// combine html code, filter later					
 
@@ -112,18 +113,22 @@ where
 	mkTask` tst=:{activated,html}		
 	# tst 						= incTask tst				// every task should first increment its tasknumber
 	| not activated				= (createDefault,tst)		// not active, return default value
-//	= mytask tst											// active, so perform task or get its result
 	# (a,tst=:{activated}) 		=  mytask tst											// active, so perform task or get its result
-//	| activated 				= (a,{tst & html = html}) 	// task done, clear output
 	= (a,tst)
+
+
+repeatTask :: (Task a) -> Task a | iData a
+repeatTask task
+= task #>> mkTask (repeatTask task)
 
 STask :: String a -> (Task a) | iData a 
 STask prompt a = \tst -> mkTask (STask` a) tst
 where
 	STask` a tst=:{tasknr,html,hst}
-	# taskId			= "iTask_" <+++ mkTaskNr tasknr
-	# editId			= "iEdit_" <+++ mkTaskNr tasknr
-	# buttonId			= mkTaskNr tasknr
+	# tasknr			= mkTaskNr tasknr
+	# taskId			= "iTask_" 	<+++ tasknr
+	# editId			= "iEdit_" 	<+++ tasknr
+	# buttonId			= "iButton" <+++ tasknr
 	# (taskdone,hst) 	= mkStoreForm (Init,cFormId tst.storageInfo taskId False) id hst  			// remember if the task has been done
 	| taskdone.value																				// test if task has completed
 		# (editor,hst) 	= (mkEditForm  (Init,cdFormId tst.storageInfo editId a <@ Display) hst)				// yes, read out current value, make editor passive
@@ -284,6 +289,15 @@ where
 																			ahtml), hst = hst})
 
 	but i = LButton defpixel i
+
+PmuTasks :: [(Int,Task a)] -> (Task [a]) | iData a 
+PmuTasks tasks = \tst-> mkTask (PmuTasks` tasks) tst
+where
+	PmuTasks` [] tst									= returnV [] tst
+	PmuTasks` [(ida,taska):tasks] tst=:{html}
+	# (a, tst=:{html=htmla,activated=adone})		= (ida @:: taska) {tst & html = ida @@: BT [], activated = True}
+	# (ax,tst=:{html=htmlstasks,activated=alldone})	= PmuTasks` tasks (incTask {tst & html = ida @@: BT []})
+	= ([a:ax],{tst & html = html +|+ htmla +|+ htmlstasks,activated=adone&&alldone})	
 
 returnV :: a -> (Task a) | iData a 
 returnV a  = \tst  -> mkTask returnV` tst
@@ -506,7 +520,6 @@ where
 	# (a,tst=:{activated}) 	= taska tst
 	| not activated 		= (a,tst)
 	| pred a 				= (a,tst)
-//	= mkTask doTask {tst & html = ohtml +|+ BT [Txt (message a)]}
 	# (a,tst=:{html = nhtml})= mkTask doTask {tst & html = BT []}
 	| pred a 				 = (a,{tst & html = ohtml +|+ nhtml})
 	= (a,{tst & html = ohtml +|+ BT [Txt (message a)] +|+ nhtml})

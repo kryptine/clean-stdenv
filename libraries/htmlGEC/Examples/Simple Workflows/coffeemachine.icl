@@ -2,12 +2,7 @@ module coffeemachine
 
 import StdEnv, StdHtml
 
-Start world = doHtmlServer (singleUserTask CoffeeMachineInf) world
-
-CoffeeMachineInf :: Task Int
-CoffeeMachineInf 
-=			CoffeeMachine
-	#>>		mkTask CoffeeMachineInf
+Start world = doHtmlServer (singleUserTask (repeatTask CoffeeMachine)) world
 
 CoffeeMachine :: Task (String,Int)
 CoffeeMachine  

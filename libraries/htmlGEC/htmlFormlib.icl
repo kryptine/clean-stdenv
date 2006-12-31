@@ -272,7 +272,8 @@ where
 
 simpleButton :: !String !String !(a -> a) !*HSt -> (Form (a -> a),!*HSt)
 simpleButton id label fun hst
-	= FuncBut (Init, nFormId (id +++ label) (LButton defpixel label,fun)) hst
+//	= FuncBut (Init, nFormId (id +++ label) (LButton defpixel label,fun)) hst
+	= FuncBut (Init, nFormId id (LButton defpixel label,fun)) hst
 
 counterForm :: !(InIDataId a) !*HSt -> (Form a,!*HSt) | +, -, one, iData a
 counterForm inIDataId hst	= mkViewForm inIDataId bimap hst
@@ -325,7 +326,6 @@ FuncButNr i (init,formid) hst
 = case formid.ival of
 	(Pressed,cbf)			= FuncButNr i (init,setFormId formid (LButton 10 "??",cbf)) hst
 	(button, cbf)			= mkViewForm (init,reuseFormId nformid id) hbimap hst
-//	(button,cbf)			= mkViewForm nformid (Set id) hbimap hst
 	where
 		hbimap				= { toForm		= \init _ v -> toViewId init button v
 							  , updForm		= const2

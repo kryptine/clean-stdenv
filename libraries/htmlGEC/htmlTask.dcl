@@ -20,9 +20,9 @@ startTask		:: general start function for iTasks for user with indicated id
 singleUserTask 	:: wrapper for single user 
 multiUserTask 	:: wrapper for [0..users - 1], optional set of global Task attributes can be given  
 */
-startTask 		:: !Int !(Task a) HSt -> (a,[BodyTag],HSt) 			  | iData a 
-singleUserTask 	:: !(Task a) 					 !*HSt -> (Html,*HSt) | iData a 
-multiUserTask 	:: !Int [*TSt -> *TSt] !(Task a)  !*HSt -> (Html,*HSt) | iData a 
+startTask 		:: !Int !(Task a) HSt -> (a,[BodyTag],HSt) 			  	| iData a 
+singleUserTask 	:: !(Task a) 					 !*HSt -> (Html,*HSt) 	| iData a 
+multiUserTask 	:: !Int [*TSt -> *TSt] !(Task a)  !*HSt -> (Html,*HSt) 	| iData a 
 /* Global Attribute settings: iTask are by default Lifespan = Session, StorageFormt = PlainString
 For multi user systems 
 */
@@ -40,9 +40,10 @@ instance setTaskAttribute Lifespan, StorageFormat, Mode
 /* Promote any TSt state transition function to an iTask:
 mkTask			:: function will only be called when it is its turn to be activated
 					Also needed for defining recursive tasks
-clearTask			:: same, but clear output of all finished recursive calls
+repeatTask		:: infinitely repeat Task
 */
 mkTask 			:: (*TSt -> *(a,*TSt)) 	-> (Task a) 			| iData a 
+repeatTask 		:: (Task a) -> Task a 							| iData a
 
 /*	Sequential Tasks:
 STask			:: a Sequential iTask
@@ -77,10 +78,12 @@ PTask2			:: do both iTasks in any order (paralel), task completed when both done
 PTasks			:: do all  iTasks in any order (paralel), task completed when all  done
 PMilestoneTasks :: do all  iTasks in any order (paralel), task completed when all  done
 					but continue with next task as soon as SOME Task completes
+PmuTasks		:: assign task to indicated users, task completed when all done
 */
 PTask2 			:: (Task a,Task b) 		-> (Task (a,b)) 		| iData a & iData b
 PTasks 			:: [(String,Task a)]	-> (Task [a])			| iData a 
 PMilestoneTasks :: [(String,Task a)] 	-> (Task [a]) 			| iData a 
+PmuTasks 		:: [(Int,Task a)] -> (Task [a]) 				| iData a 
 
 /* Tasks that do not require IO actions from the user:
 returnV			:: return the value

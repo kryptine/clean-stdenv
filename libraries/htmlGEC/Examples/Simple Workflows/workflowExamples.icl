@@ -9,7 +9,7 @@ derive gUpd []
 //Start world = doHtmlServer (multiUser twotasks3) world
 
 
-Start world = doHtmlServer (singleUser CoffeeMachineInf) world
+Start world = doHtmlServer (multiUser twotasks3) world
 where
 	singleUser tasks hst 
 	# (_,html,hst) = startTask 0 tasks hst
@@ -36,21 +36,6 @@ list tst
 # (a,tst) = returnTask a tst
 = (a,tst)
 
-onetwo tst
-# (v,tst) = STasks  [ ("First", 	simple 1 |>> (\n -> n > 100, \_ -> "Value should be larger than 100") 
-								=>> (\t -> returnTask t))
-					, ("Second",	simple 2 
-								=>> (\t -> returnTask t))
-					] tst
-= STask "Klaar"  (sum v) tst
-
-testEenTwee tst
-# (v,tst) = STasks  [ ("een", (1,"number1") @: 	simple 1 |>> (\n -> n > 100,\_ -> "Value should be larger than 100") 
-											=>> \t -> returnTask t)
-					, ("twee",(2,"number2") @: 	simple 2 
-											=>> \t -> returnTask t)
-					] tst
-= STask "Klaar"  (sum v) tst
 
 
 simple n  = STask "OK" n 
@@ -60,17 +45,6 @@ infTask a tst
 | False = returnV a tst
 = mkTask (infTask a) tst
 
-testTime tst
-# tst 	 		= returnF 	[Txt "How long do you want to wait?", Br] tst
-# (time,tst) 	= STask     "SetTimer" (Time 0 0 0) tst
-# ((ok,estimation),tst) = PCTask2	( 						waitForTimeTask time 		// wait for deadline
-														#>> returnV (False,0)			// do it yourself
-									, (1,"Estimation") 	@: 	returnVF Void [Txt ("Please finish task before" <+++ time)]
-														#>> STask "Confirm" 0 
-														=>> \t -> returnV (True,t) 
-									) tst
-| ok	= (estimation,returnF [Txt ("Received estimation is " <+++ estimation)] tst)
-= mkTask testTime tst
 
 :: Situation = Difficult Int | Easy
 
