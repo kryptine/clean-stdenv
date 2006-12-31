@@ -221,10 +221,10 @@ where
 // The value might have been changed with this editor, so the value returned might differ from the value you started with!
 
 specialize :: !((InIDataId a) *HSt -> (Form a,*HSt)) !(InIDataId a) !*HSt -> (!Form a,!*HSt) | gUpd {|*|} a
-specialize editor (init,formid) hst=:{cntr = inidx,states = formStates,world}
+specialize editor (init,formid) hst=:{cntr = inidx,states = formStates,submits,world}
 # nextidx					= incrIndex inidx formid.ival		// this value will be repesented differently, so increment counter 
 # (nv,hst) 					= editor (init,nformid) (setCntr 0 hst)
-= (nv,setCntr nextidx hst)
+= (nv,{setCntr nextidx hst & submits = submits})
 where
 	nformid					= {formid & id = formid.id <+++ "_specialize_" <+++ inidx <+++ "_"}
 

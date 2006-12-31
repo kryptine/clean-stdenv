@@ -4,8 +4,8 @@ import StdEnv, StdHtml
 
 // choose one of the following variants
 
-//Start world = doHtmlServer (singleUserTask count) world
-Start world = doHtmlServer (singleUserTask count2) world
+Start world = doHtmlServer (singleUserTask count) world
+//Start world = doHtmlServer (singleUserTask count2) world
 //Start world = doHtmlServer (multiUserTask 3 [] countMU) world
 //Start world = doHtmlServer (multiUserTask 3 [setTaskAttribute Persistent] countMU) world
 //Start world = doHtmlServer countIData world

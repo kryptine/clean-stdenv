@@ -24,7 +24,11 @@ Start world = doHtmlServer (multiUserTask 2 [] (Quotation 1 createDefault)) worl
 			
 Quotation :: Int (QState,QForm) -> Task (QState,QForm)
 Quotation reviewer (state,form)
-=					[Txt "Fill in Form:",Br,Br] ?>> id (STask "Submit" form)
+=					[Txt "Fill in Form:",Br,Br] 
+					?>>	setTaskAttribute Submit
+					@>> STask "TaskDone" form
+					=>> \v -> setTaskAttribute Edit
+								@>> returnV v
 	=>> \form	->	reviewer @:: review (state,form)
 	=>> \state	->	[Txt ("Reviewer " <+++ reviewer <+++ " says quotation " <+++ printToString state),Br,Br] ?>> STask "OK" Void
 	#>>				case state of

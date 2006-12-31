@@ -23,6 +23,7 @@ multiUserTask 	:: wrapper for [0..users - 1], optional set of global Task attrib
 startTask 		:: !Int !(Task a) HSt -> (a,[BodyTag],HSt) 			  	| iData a 
 singleUserTask 	:: !(Task a) 					 !*HSt -> (Html,*HSt) 	| iData a 
 multiUserTask 	:: !Int [*TSt -> *TSt] !(Task a)  !*HSt -> (Html,*HSt) 	| iData a 
+
 /* Global Attribute settings: iTask are by default Lifespan = Session, StorageFormt = PlainString
 For multi user systems 
 */
@@ -130,7 +131,9 @@ appHSt 			:: (HSt -> (a,HSt)) TSt -> (a,TSt)
 (!>>)			:: prompt when task is activated
 (=>>)			:: bind
 (#>>)			:: bind, no argument passed
-(#>>)			:: conditional added
+(<|)			:: post conditional added to task
+(*>>)			:: combining TSt -> (a,TSt)
+(@>>)			:: combining TSt -> TSt
 */
 
 (?>>) infix  2 	:: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
@@ -138,4 +141,5 @@ appHSt 			:: (HSt -> (a,HSt)) TSt -> (a,TSt)
 (=>>) infix  1 	:: w:(St .s .a) v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]	// `bind`
 (#>>) infixl 1 	:: w:(St .s .a) v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]			// `bind` ignoring argument
 (<|)  infix  3 	:: (*TSt -> *(a,*TSt)) (a -> .Bool,a -> String) -> .(*TSt -> *(a,*TSt)) | iData a		// repeat as long as predicate does not hold
-(*>>) infix  1 :: w:(St .s .a)  v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]
+(*>>) infix  4	:: w:(St .s .a)  v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]
+(@>>) infix  4	:: w:(.s -> .s)  v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]
