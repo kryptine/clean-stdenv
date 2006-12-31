@@ -12,30 +12,35 @@ Start world = doHtmlServer (multiUserTask 5 [] (repeatTask doTasks)) world
 
 :: Situation = `Limit Int
 
+simpleTask 	= STask "Done" 0
+Boss 		= 0
+Secretary	= 1
+Assistent	= 2
+
 doTasks
-=								 	mkRDynTaskCall "boss-secr"   createDefault
-	*>> \(forSecr,fromBoss)   	->	mkRDynTaskCall "secr-assist" createDefault 
+=								 	mkRDynTaskCall "boss-secr"   0
+	*>> \(forSecr,fromBoss)   	->	mkRDynTaskCall "secr-assist" 0 
 	*>> \(forAssist,fromSecr) 	->	PmuTasks
-										 [(0, boss forSecr)
-										 ,(1, secretary fromBoss forAssist)
-										 ,(2, assistent fromSecr)							
+										 [(Boss, 		bossWork forSecr)								
+										 ,(Secretary, 	doWork simpleTask (forAssist fromBoss))
+										 ,(Assistent, 	doWork simpleTask fromSecr)							
 										 ]
 	=>> \v						->	[Txt ("Result: " <+++ printToString v)]
 									?>> STask "OK" Void
 where
-	boss forSecr
- 	= 			[Txt "Define Limit!",Br,Br]
- 				?>> STask "OK" 0
- 		=>> \v ->	forSecr ( 	[Txt ("Limit = " <+++ v)]
- 								?>> (STask "Set" 0) <| (\nv -> nv <= v && nv > 0, \_ -> "Value should not exceed " <+++ v))
- 	secretary fromBoss forAssist
-	= 			[Txt "Doing my own work as secretary:",Br,Br]
-				?>> STask "Done" Void
-		#>> 	[Txt "Time for doing some work for the boss:",Br,Br]
-				?>> forAssist fromBoss 
-	assistent fromSecr
-	= 			[Txt "Doing my own work as assistent:",Br,Br]
-				?>> STask "Done" Void
-		#>>		[Txt "Time for doing some work for the secretary:",Br,Br]
-				?>> fromSecr
+	bossWork forSecr
+ 	= 				[Txt "Define Limit!",Br,Br]
+ 					?>> STask "OK" 0
+ 		=>> \v ->	forSecr (taskToDelegate v)
+
+ 	taskToDelegate v
+ 	= 	[Txt ("Limit = " <+++ v)]
+ 		?>> (STask "Set" 0) <| (\nv -> nv <= v && nv > 0, \_ -> "Value should not exceed " <+++ v)
+
+ 	doWork task delegatedtask
+	= 	PCTasks	[	("MyOwnWork", repeatTask task)
+				,	("Delegated", delegatedtask)
+				]
+
+
 
