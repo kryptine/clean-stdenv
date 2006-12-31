@@ -215,7 +215,7 @@ where
 	# chosenTask					= snd (options!!chosen.value)
 	# (a,{tasknr,activated=adone,html=ahtml,hst})
 									= chosenTask {tst & tasknr = tasknr ++ [chosen.value + 1], activated = True, html = BT [], hst = hst}
-	| not adone						= (a,{tst & tasknr = tasknr, activated = adone, html = html +|+ BT choice.form +|+ ahtml, hst = hst})
+	| not adone						= (a,{tst & tasknr = tasknr, activated = adone, html = html +|+ BT choice.form +-+ ahtml, hst = hst})
 	= (a,{tst & tasknr = tasknr, activated = adone, html = html +|+ ahtml, hst = hst})
 
 	but i = LButton defpixel i
@@ -474,7 +474,7 @@ where
 	appIData` idata tst=:{tasknr,html,hst}
 	# (idata,hst) 										= idatafun hst
 	# (_,{tasknr,activated,html=ahtml,hst}) 			= STask  "Done" Void {tst & activated = True, html = BT [],hst = hst}	
-	= (idata.value,{tst & tasknr = tasknr,activated 	= activated, html = html +|+ 
+	= (idata.value,{tst & tasknr = tasknr,activated = activated, html = html +|+ 
 															(if activated (BT idata.form) (BT idata.form +|+ ahtml)), hst = hst})
 
 appHSt :: (HSt -> (a,HSt)) TSt -> (a,TSt)
