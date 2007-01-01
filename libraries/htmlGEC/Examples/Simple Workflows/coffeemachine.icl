@@ -17,7 +17,7 @@ CoffeeMachine
 								?>> getCoins (toPay,0)
 	=>> \(cancel,returnMoney)->	let nproduct = if cancel "Cancelled" product 
 								in
-								[Txt ("product = " <+++ nproduct <+++  ", returned money = " <+++ returnMoney),Br,Br] 
+								[Txt ("product = " <+++ nproduct <+++ ", returned money = " <+++ returnMoney),Br,Br] 
 								?>>	STask_button "Thanks" (returnV Void)
 	#>>							returnV (nproduct,returnMoney) 
 where

@@ -7,19 +7,23 @@ derive gUpd []
 
 npersons = 5
 
-Start world = doHtmlServer (multiUserTask npersons (deadline mytask)) world
+Start world = doHtmlServer (multiUserTask npersons (deadline mytask <<@ Persistent)) world
 
 mytask = STask "Press" 0
 
 deadline :: (Task a) -> (Task a) | iData a
 deadline task
-=						[Txt "Choose person you want to shift work to:",Br,Br] 
+=						[Txt "Choose person you want to delegate work to:",Br,Br] 
 						?>>	STask "Set" (PullDown (1,100) (0,[toString i \\ i <- [1..npersons]]))
 	=>> \whomPD		->	[Txt "Until what time do you want to wait today?",Br,Br] 
 						?>>	STask "SetTimer" (Time 0 0 0)
-	=>> \time		->	[]
-						?>> shifttask (toInt(toString whomPD)) time task
-	=>> \(ok,value) ->	if ok [Txt ("Result of task: " +++ printToString value),Br,Br] [Txt "Task Expired, default value chosen !",Br,Br]
+	=>> \time		->	[Txt "Cancel delegated work if you are getting impatient:",Br,Br]
+						?>> PCTasks
+								[ ("Waiting",	shifttask (toInt(toString whomPD)) time task)
+								, ("Cancel",	returnV (False,createDefault))
+								]
+	=>> \(ok,value) ->	if ok 	[Txt ("Result of task: " +++ printToString value),Br,Br] 
+								[Txt "Task expired or canceled, default value chosen !",Br,Br]
 						?>> STask "OK" value
 where
 	shifttask who time task
