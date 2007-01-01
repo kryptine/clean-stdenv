@@ -9,7 +9,7 @@ import StdEnv, StdHtml
 
 npersons = 5
 
-Start world = doHtmlServer (multiUserTask npersons [] findDate) world
+Start world = doHtmlServer (multiUserTask npersons findDate) world
 
 findDate :: Task (HtmlDate,HtmlTime)
 findDate

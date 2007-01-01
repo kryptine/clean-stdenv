@@ -2,15 +2,16 @@ module quotation
 
 import StdEnv, StdHtml, GenEq
 
-derive gForm 	QForm, QState
-derive gUpd 	QForm, QState
-derive gParse 	QForm, QState
-derive gPrint 	QForm, QState
-derive gerda 	QForm, QState
+derive gForm 	QForm, ReviewState
+derive gUpd 	QForm, ReviewState
+derive gParse 	QForm, ReviewState
+derive gPrint 	QForm, ReviewState
+derive gerda 	QForm, ReviewState
 
-derive gEq		QState
+derive gEq		ReviewState
 
-Start world = doHtmlServer (multiUserTask 2 [] (Quotation 1 createDefault)) world
+Start world = doHtmlServer (multiUserTask 2 Quotation) world
+//Start world = doHtmlServer (multiUserTask 2 (Quotation <<@ Persistent)) world
 
 :: QForm = 	{ fromComp 			:: String
 			, toComp 			:: String
@@ -20,23 +21,23 @@ Start world = doHtmlServer (multiUserTask 2 [] (Quotation 1 createDefault)) worl
 			, description		:: TextArea
 			, price				:: Int
 			}
-:: QState =	Submitted | Approved | Cancelled | NeedsRework | Draft
-			
-Quotation :: Int (QState,QForm) -> Task (QState,QForm)
-Quotation reviewer (state,form)
+:: ReviewState = Approved | Cancelled | NeedsRework | Draft
+
+Quotation :: Task (QForm,ReviewState)
+Quotation = reviewedTask 1 createDefault
+
+reviewedTask :: Int (a,ReviewState) -> Task (a,ReviewState) | iData a
+reviewedTask reviewer (form,state)
 =					[Txt "Fill in Form:",Br,Br] 
-					?>>	setTaskAttribute Submit
-					@>> STask "TaskDone" form
-					=>> \v -> setTaskAttribute Edit
-								@>> returnV v
-	=>> \form	->	reviewer @:: review (state,form)
-	=>> \state	->	[Txt ("Reviewer " <+++ reviewer <+++ " says quotation " <+++ printToString state),Br,Br] ?>> STask "OK" Void
+					?>>	STask "TaskDone" form <<@ Submit
+	=>> \form	->	reviewer @:: review (form,state)
+	=>> \state	->	[Txt ("Reviewer " <+++ reviewer <+++ " says " <+++ printToString state),Br,Br] ?>> STask "OK" Void
 	#>>				case state of
-						NeedsRework	-> mkTask (Quotation reviewer (state,form)) 	
-						else		-> returnV (state,form)
+						NeedsRework	-> mkTask (reviewedTask reviewer (form,state)) 	
+						else		-> returnV (form,state)
 where
-	review :: (QState,QForm) -> Task QState
-	review (state,form) 
+	review :: (a,ReviewState) -> Task ReviewState | iData a
+	review (form,state) 
 		= [toHtml form,Br,Br]?>>
 			CTask_button
 			[ ("Rework",	returnV NeedsRework)

@@ -5,12 +5,12 @@ import StdEnv, StdHtml
 derive gForm []
 derive gUpd []
 
-Start world = doHtmlServer (multiUserTask 2 [] listControl) world
+Start world = doHtmlServer (multiUserTask 2 listControl) world
 
 
 listControl
 =					[Txt "Define the list:",Br,Br]
-					?>>	appIData (vertlistFormButs 1 True (Init,sFormId "list0" [0]))
+					?>>	appIData (vertlistFormButs 5 True (Init,sFormId "list0" [0]))
 	=>> \list ->	[]
 					?>> (1,"Control List:") 
 						@:	(	[Txt "Control the list:",Br,Br]

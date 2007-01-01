@@ -7,7 +7,7 @@ derive gUpd []
 
 npersons = 5
 
-Start world = doHtmlServer (multiUserTask npersons [] (deadline mytask)) world
+Start world = doHtmlServer (multiUserTask npersons (deadline mytask)) world
 
 mytask = STask "Press" 0
 
@@ -21,7 +21,6 @@ deadline task
 						?>> shifttask (toInt(toString whomPD)) time task
 	=>> \(ok,value) ->	if ok [Txt ("Result of task: " +++ printToString value),Br,Br] [Txt "Task Expired, default value chosen !",Br,Br]
 						?>> STask "OK" value
-
 where
 	shifttask who time task
 		= 	(who,"Timed Task") 	

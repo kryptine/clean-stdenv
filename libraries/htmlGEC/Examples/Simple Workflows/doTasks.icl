@@ -8,7 +8,7 @@ derive gParse 	Situation
 derive gPrint 	Situation
 derive gerda 	Situation
 
-Start world = doHtmlServer (multiUserTask 5 [] (repeatTask doTasks)) world
+Start world = doHtmlServer (multiUserTask 5 (repeatTask doTasks)) world
 
 :: Situation = `Limit Int
 

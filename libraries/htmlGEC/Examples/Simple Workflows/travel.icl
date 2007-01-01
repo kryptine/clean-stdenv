@@ -34,11 +34,12 @@ where
 	where
 		calcCosts booked = sum [cost \\ (_,_,_,cost) <- hd booked]
 
-	BookFlight  = STask "BookFlight" 	(Dsp "Flight Number","",Dsp "Costs",0)
-	BookHotel  	= STask "BookHotel" 	(Dsp "Hotel Name","",Dsp "Costs",0)
-	BookCar  	= STask "BookCar" 		(Dsp "Car Brand","",Dsp "Costs",0)
+		isNil [] = True
+		isNil _ = False
 
-	isNil [] = True
-	isNil _ = False
+	BookFlight  = STask "BookFlight" 	(Dsp "Flight Number","",Dsp "Costs",0) 	<<@ Submit
+	BookHotel  	= STask "BookHotel" 	(Dsp "Hotel Name","",Dsp "Costs",0)		<<@ Submit
+	BookCar  	= STask "BookCar" 		(Dsp "Car Brand","",Dsp "Costs",0)		<<@ Submit
+
 
 Dsp = DisplayMode 

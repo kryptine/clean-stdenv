@@ -17,6 +17,7 @@ import dynamic_string, EncodeDecode
 					, storageInfo	:: !Storage			// iData lifespan and storage format
 					, hst			:: !HSt				// iData state
 					}
+
 :: Storage		=	{ tasklife		:: !Lifespan
 					, taskstorage	:: !StorageFormat
 					, taskmode		:: !Mode
@@ -27,7 +28,20 @@ import dynamic_string, EncodeDecode
 				|	(+-+) infixl 1 HtmlTree HtmlTree				
 				|	(+|+) infixl 1 HtmlTree HtmlTree				
 
-startTask :: !Int !(Task a) HSt -> (a,[BodyTag],HSt) | iData a 
+// options settings
+
+instance setTaskAttr Lifespan
+where setTaskAttr lifespan tst = {tst & storageInfo.tasklife = lifespan}
+
+instance setTaskAttr StorageFormat
+where setTaskAttr storageformat tst = {tst & storageInfo.taskstorage = storageformat}
+
+instance setTaskAttr Mode
+where setTaskAttr mode tst = {tst & storageInfo.taskmode = mode}
+
+// wrappers
+
+startTask 		:: !Int !(Task a) 		!*HSt -> (a,[BodyTag],!*HSt) 	| iData a 
 startTask thisUser taska hst
 # userVersionNr			= "User" <+++ thisUser <+++ "VrsNr"
 # sessionVersionNr		= "Session" <+++ thisUser <+++ "VrsNr"
@@ -50,39 +64,29 @@ startTask thisUser taska hst
 where
 	defaultUser	= 0
 
+
+singleUserTask 	:: !(Task a) 		   	!*HSt -> (Html,*HSt) 			| iData a 
+singleUserTask task hst 
+# (_,html,hst) = startTask 0 task hst
+= mkHtml "stest" html hst
+
+multiUserTask 	:: !Int!(Task a)  	!*HSt -> (Html,*HSt) 			| iData a 
+multiUserTask nusers task  hst 
+# (idform,hst) 	= FuncMenu (Init,nFormId "pdm_chooseWorker" 
+						(0,[("User " +++ toString i,\_ -> i) \\ i<-[0..nusers - 1] ])) hst
+# currentWorker	= snd idform.value
+# (_,html,hst) 	= startTask currentWorker task hst
+= mkHtml "mtest" [idform.form <=> html] hst
+
+// to every user the information is shown intended for this user
+
 Filter pred user (BT bdtg) 			= if (pred user) bdtg []
 Filter pred user (nuser @@: tree) 	= Filter pred nuser tree
 Filter pred user (tree1 +|+ tree2)  = Filter pred user tree1 <|.|> Filter pred user tree2
 Filter pred user (tree1 +-+ tree2)  = [Filter pred user tree1 <=> Filter pred user tree2]
 
-// options settings
-
-instance setTaskAttribute Lifespan
-where setTaskAttribute lifespan tst = {tst & storageInfo.tasklife = lifespan}
-
-instance setTaskAttribute StorageFormat
-where setTaskAttribute storageformat tst = {tst & storageInfo.taskstorage = storageformat}
-
-instance setTaskAttribute Mode
-where setTaskAttribute mode tst = {tst & storageInfo.taskmode = mode}
-
-singleUserTask :: !(Task a) !*HSt -> (Html,*HSt) | iData a 
-singleUserTask task hst 
-# (_,html,hst) = startTask 0 task hst
-= mkHtml "stest" html hst
-
-multiUserTask :: !Int [*TSt -> *TSt] !(Task a)  !*HSt -> (Html,*HSt) | iData a 
-multiUserTask nusers attr task  hst 
-# (idform,hst) 	= FuncMenu (Init,nFormId "pdm_chooseWorker" 
-						(0,[("User " +++ toString i,\_ -> i) \\ i<-[0..nusers - 1] ])) hst
-# currentWorker	= snd idform.value
-# (_,html,hst) 	= startTask currentWorker (applyattr task) hst
-= mkHtml "mtest" [idform.form <=> html] hst
-where
-	applyattr task tst
-	# tst	= seq attr tst
-	= task tst
-		
+// combinators and functions on Tasks
+	
 (@:) infix 4 :: !(!Int,!String) (Task a)	-> (Task a)			| iData a
 (@:) (userId,taskname) taska = \tst -> mkTask assignTask` tst
 where
@@ -519,7 +523,7 @@ where
 (#>>) infixl 1 :: w:(St .s .a) v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]
 (#>>) a b = a `bind` (\_ -> b)
 
-(<|) infix 3 :: (*TSt -> *(a,*TSt)) (a -> .Bool, a -> String) -> .(*TSt -> *(a,*TSt)) | iData a
+(<|) infix 3 :: (St TSt a) (a -> .Bool, a -> String) -> (St TSt a) | iData a
 (<|) taska (pred,message) = \tst -> mkTask doTask tst
 where
 	doTask tst=:{html = ohtml}
@@ -529,6 +533,15 @@ where
 	# (a,tst=:{html = nhtml})= mkTask doTask {tst & html = BT []}
 	| pred a 				 = (a,{tst & html = ohtml +|+ nhtml})
 	= (a,{tst & html = ohtml +|+ BT [Txt (message a)] +|+ nhtml})
+
+(<<@) infix 3 ::  v:(St TSt .a) b  -> u:(St TSt .a) | setTaskAttr b, [u <= v]
+(<<@) task attr 
+= \tst -> doit tst
+where
+	doit tst=:{storageInfo}
+	# tst = setTaskAttr attr tst
+	# (a,tst) = task (setTaskAttr attr tst)
+	= (a,{tst & storageInfo = storageInfo})
 
 (?>>) infix 2 :: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
 (?>>) prompt task = \tst -> doit tst

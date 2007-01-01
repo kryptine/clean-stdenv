@@ -1,7 +1,7 @@
 definition module htmlTask
 
 // *experimental* library for controlling interactive Tasks (iTask) based on iData
-// (c) 2006 MJP
+// (c) 2006,2007 MJP
 
 import StdHtml
 
@@ -16,20 +16,20 @@ derive gPrint 	Void
 derive gerda 	Void
 
 /* Initiating the iTask library:
-startTask		:: general start function for iTasks for user with indicated id		
-singleUserTask 	:: wrapper for single user 
-multiUserTask 	:: wrapper for [0..users - 1], optional set of global Task attributes can be given  
+startTask		:: start function for iTasks for user with indicated id		
+singleUserTask 	:: start wrapper function for single user 
+multiUserTask 	:: start wrapper function for user with indicated id with option to switch between [0..users - 1]  
 */
-startTask 		:: !Int !(Task a) HSt -> (a,[BodyTag],HSt) 			  	| iData a 
-singleUserTask 	:: !(Task a) 					 !*HSt -> (Html,*HSt) 	| iData a 
-multiUserTask 	:: !Int [*TSt -> *TSt] !(Task a)  !*HSt -> (Html,*HSt) 	| iData a 
+startTask 		:: !Int !(Task a) 	!*HSt -> (a,[BodyTag],!*HSt) 	| iData a 
+singleUserTask 	:: !(Task a) 		!*HSt -> (Html,*HSt) 			| iData a 
+multiUserTask 	:: !Int !(Task a)  	!*HSt -> (Html,*HSt) 			| iData a 
 
 /* Global Attribute settings: iTask are by default Lifespan = Session, StorageFormt = PlainString
 For multi user systems 
 */
-class setTaskAttribute a :: !a *TSt -> *TSt
+class setTaskAttr a :: !a *TSt -> *TSt
 
-instance setTaskAttribute Lifespan, StorageFormat, Mode
+instance setTaskAttr Lifespan, StorageFormat, Mode
 
 /* Assign tasks with informative name to user with indicated id
 (@:)			:: will prompt who is waiting for what
@@ -127,19 +127,25 @@ appIData 		:: (IDataFun a) 		-> (Task a) 					| iData a
 appHSt 			:: (HSt -> (a,HSt)) TSt -> (a,TSt)
 
 /* monadic shorthands
-(?>>)			:: only prompt as long as task is active but not finished
-(!>>)			:: prompt when task is activated
 (=>>)			:: bind
 (#>>)			:: bind, no argument passed
-(<|)			:: post conditional added to task
-(*>>)			:: combining TSt -> (a,TSt)
-(@>>)			:: combining TSt -> TSt
+(?>>)			:: prompt as long as task is active but not finished
+(!>>)			:: prompt when task is activated
+(*>>)			:: applying function of type: TSt -> (a,TSt)
+(@>>)			:: applying function of type: TSt -> TSt
+
+(<|)			:: repeat task as long as predicate does not hold
+(<<@)			:: set attribute for indicated task
+
 */
 
+(=>>) infix  1 	:: w:(St .s .a) v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]	
+(#>>) infixl 1 	:: w:(St .s .a) v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]			
 (?>>) infix  2 	:: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
 (!>>) infix  2 	:: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
-(=>>) infix  1 	:: w:(St .s .a) v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]	// `bind`
-(#>>) infixl 1 	:: w:(St .s .a) v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]			// `bind` ignoring argument
-(<|)  infix  3 	:: (*TSt -> *(a,*TSt)) (a -> .Bool,a -> String) -> .(*TSt -> *(a,*TSt)) | iData a		// repeat as long as predicate does not hold
 (*>>) infix  4	:: w:(St .s .a)  v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]
 (@>>) infix  4	:: w:(.s -> .s)  v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]
+
+(<|)  infix 3 	:: (St TSt a) (a -> .Bool, a -> String) -> (St TSt a) | iData a
+(<<@) infix 3 	::  v:(St TSt .a) b  -> u:(St TSt .a) | setTaskAttr b, [u <= v]
+
