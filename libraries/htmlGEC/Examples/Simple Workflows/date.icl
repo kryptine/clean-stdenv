@@ -21,7 +21,7 @@ findDate
 						?>> findDate` whom (Date 1 1 2007,Time 9 0 0)
 	=>> \datetime	->	myId
 	*>> \me			->	[]
-						?>> PTask2 (confirm me whom datetime,confirm whom me datetime) 						
+						?>> PTask2 (confirm me whom datetime,confirm whom me datetime)						
 	#>>					returnV datetime
 
 where
@@ -37,10 +37,11 @@ where
 	where
 		proposeDateTime :: (HtmlDate,HtmlTime) -> Task (HtmlDate,HtmlTime)
 		proposeDateTime (date,time)
-		=							STask "Set" input 
+		=							[Txt "Propose a new date and time for meeting",Br,Br]
+									?>> STask "Set" input 
 			=>> \(_,date,_,time) -> returnV (date,time)
 		where
-			input = (showHtml [Txt "Propose date: "], date, showHtml [Txt "Propose time: "], time)
+			input = (showHtml [Txt "date: "], date, showHtml [Txt "time: "], time)
 
 		determineDateTime :: (HtmlDate,HtmlTime) -> Task (Bool,(HtmlDate,HtmlTime))
 		determineDateTime daytime
@@ -59,6 +60,6 @@ where
 
 	confirm  :: Int Int (HtmlDate,HtmlTime) -> Task Void 
 	confirm me you (date,time)
-	= 	me @::	( 	[Txt ("Person " <+++ me <+++ " and person " <+++ you <+++ " will meet on " <+++ date <+++ " at " <+++ time),Br,Br] 
+	= 	me @::	( 	[Txt ("Person " <+++ me <+++ " and " <+++ you <+++ " have a meeting on " <+++ date <+++ " at " <+++ time),Br,Br] 
 				?>>	STask "OK" Void
 				)

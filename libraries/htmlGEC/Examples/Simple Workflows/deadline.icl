@@ -7,7 +7,7 @@ derive gUpd []
 
 npersons = 5
 
-Start world = doHtmlServer (multiUserTask npersons (deadline mytask <<@ Persistent)) world
+Start world = doHtmlServer (multiUserTask npersons (repeatTask (deadline mytask) /*<<@ Persistent*/)) world
 
 mytask = STask "Press" 0
 
@@ -16,17 +16,20 @@ deadline task
 =						[Txt "Choose person you want to delegate work to:",Br,Br] 
 						?>>	STask "Set" (PullDown (1,100) (0,[toString i \\ i <- [1..npersons]]))
 	=>> \whomPD		->	[Txt "Until what time do you want to wait today?",Br,Br] 
-						?>>	STask "SetTimer" (Time 0 0 0)
+						?>>	STask "SetTime" (Time 0 0 0)
 	=>> \time		->	[Txt "Cancel delegated work if you are getting impatient:",Br,Br]
-						?>> PCTasks
-								[ ("Waiting",	shifttask (toInt(toString whomPD)) time task)
-								, ("Cancel",	returnV (False,createDefault))
-								]
-	=>> \(ok,value) ->	if ok 	[Txt ("Result of task: " +++ printToString value),Br,Br] 
-								[Txt "Task expired or canceled, default value chosen !",Br,Br]
-						?>> STask "OK" value
+						?>> PCTask2
+								(	delegateTask (toInt(toString whomPD)) time task
+								, 	STask_button "Cancel" (returnV (False,createDefault))
+								)
+	=>> \(ok,value) ->	if ok 	(	[Txt ("Result of task: " +++ printToString value),Br,Br] 
+									?>> STask_button "OK" (returnV value)
+								)
+								(	[Txt "Task expired or canceled, you have to do it yourself!",Br,Br]
+									?>>	STask_button "OK" task
+								)
 where
-	shifttask who time task
+	delegateTask who time task
 		= 	(who,"Timed Task") 	
 				@: 	PCTask2	
 					(	waitForTimeTask time 								// wait for deadline

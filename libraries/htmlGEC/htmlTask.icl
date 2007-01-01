@@ -13,6 +13,7 @@ import dynamic_string, EncodeDecode
 :: *TSt 		=	{ tasknr 		:: ![Int]			// for generating unique form-id's
 					, activated		:: !Bool   			// if true activate task, if set as result task completed	
 					, myId			:: !Int				// id of user to which task is assigned
+					, userId		:: !Int				// id of application user 
 					, html			:: !HtmlTree		// accumulator for html code
 					, storageInfo	:: !Storage			// iData lifespan and storage format
 					, hst			:: !HSt				// iData state
@@ -54,8 +55,9 @@ startTask thisUser taska hst
 													    B [] "Your page is not up-to date!",Br]],hst)
 # (a,{html,hst}) = taska 	{ tasknr	= []
 							, activated = True
-							, myId		= thisUser 
-							, html 		= thisUser @@: BT []
+							, userId	= thisUser 
+							, myId		= defaultUser 
+							, html 		= defaultUser @@: BT []
 							, hst 		= hst
 							, storageInfo = {tasklife = Session, taskstorage = PlainString, taskmode = Edit }}
 # (pversion,hst)	 	= mkStoreForm (Init, pFormId userVersionNr 0) inc hst
@@ -561,6 +563,9 @@ where
 
 myId :: TSt -> (Int,TSt)
 myId tst=:{myId} = (myId,tst)
+
+userId :: TSt -> (Int,TSt)
+userId tst=:{userId} = (userId,tst)
 
 // debugging code 
 

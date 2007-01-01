@@ -25,11 +25,18 @@ singleUserTask 	:: !(Task a) 		!*HSt -> (Html,*HSt) 			| iData a
 multiUserTask 	:: !Int !(Task a)  	!*HSt -> (Html,*HSt) 			| iData a 
 
 /* Global Attribute settings: iTask are by default Lifespan = Session, StorageFormt = PlainString
-For multi user systems 
 */
 class setTaskAttr a :: !a *TSt -> *TSt
 
 instance setTaskAttr Lifespan, StorageFormat, Mode
+
+/* Operations on Task state
+myId			:: id assigned to task
+userId			:: id of application user
+*/
+
+myId			:: TSt -> (Int,TSt)
+userId 			:: TSt -> (Int,TSt)
 
 /* Assign tasks with informative name to user with indicated id
 (@:)			:: will prompt who is waiting for what
@@ -96,7 +103,6 @@ returnV 		:: a 					-> (Task a) 			| iData a
 returnTask 		:: a 					-> (Task a) 			| iData a 
 returnVF 		:: a [BodyTag] 			-> (Task a) 			| iData a 
 returnF 		:: [BodyTag] 			-> TSt -> TSt
-myId			:: TSt -> (Int,TSt)
 
 /* Setting up communication channels between users:
 mkRTask			:: Remote Task: split indicated task in two tasks: a calling task and a receiving task
