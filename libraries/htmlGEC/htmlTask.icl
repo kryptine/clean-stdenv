@@ -25,7 +25,7 @@ import dynamic_string, EncodeDecode
 					}
 
 :: HtmlTree		=	BT [BodyTag]
-				|	(@@:) infix  0  Int HtmlTree
+				|	(@@:) infix  0 (Int,String) HtmlTree
 				|	(+-+) infixl 1 HtmlTree HtmlTree				
 				|	(+|+) infixl 1 HtmlTree HtmlTree				
 
@@ -57,12 +57,13 @@ startTask thisUser taska hst
 							, activated = True
 							, userId	= thisUser 
 							, myId		= defaultUser 
-							, html 		= defaultUser @@: BT []
+							, html 		= BT []
 							, hst 		= hst
 							, storageInfo = {tasklife = Session, taskstorage = PlainString, taskmode = Edit }}
 # (pversion,hst)	 	= mkStoreForm (Init, pFormId userVersionNr 0) inc hst
 # (sversion,hst)	 	= mkStoreForm (Init, nFormId sessionVersionNr pversion.value) inc hst
-= (a,refresh.form ++ [Br,Br, Hr [],Br] <|.|> Filter ((==) thisUser) defaultUser html,hst)
+# (selbuts,seltask,hst)	= Filter2 thisUser defaultUser ((defaultUser,"Main") @@: html) hst
+= (a,refresh.form ++ [Br,Br, Hr [],Br] ++ [([mkColForm selbuts] <=>  seltask)],hst)
 where
 	defaultUser	= 0
 
@@ -82,11 +83,49 @@ multiUserTask nusers task  hst
 
 // to every user the information is shown intended for this user
 
-Filter pred user (BT bdtg) 			= if (pred user) bdtg []
-Filter pred user (nuser @@: tree) 	= Filter pred nuser tree
-Filter pred user (tree1 +|+ tree2)  = Filter pred user tree1 <|.|> Filter pred user tree2
-Filter pred user (tree1 +-+ tree2)  = [Filter pred user tree1 <=> Filter pred user tree2]
+Filter thisuser user (BT bdtg) 						= if (thisuser == user) bdtg []
+Filter thisuser user ((nuser,taskname) @@: tree) 	= Filter thisuser nuser tree
+Filter thisuser user (tree1 +|+ tree2)  			= Filter thisuser user tree1 <|.|> Filter thisuser user tree2
+Filter thisuser user (tree1 +-+ tree2)  			= [Filter thisuser user tree1 <=> Filter thisuser user tree2]
 
+Filter2 id user tree hst
+# (_,accu) 		= Collect id user [] tree
+| isNil accu	= ([],[],hst)
+# (names,tasks) = unzip accu
+# (fun,hst)		= ListFuncBut (Init,sFormId ("switchTask" <+++ id <+++ length accu) [(LButton defpixel name,dotask i) \\ name <- names & i <- [0..]]) hst
+# (selected,hst)= mkStoreForm (Init,sFormId ("currTask" <+++ id <+++ length accu) 0) fun.value hst 
+= (fun.form,tasks!!if (selected.value >= length accu) 0 selected.value,hst)
+where
+	dotask i _ = i
+
+isNil [] = True
+isNil _ = False
+//:: !(InIDataId [(Button, a -> a)]) !*HSt -> (Form (a -> a),!*HSt)
+
+
+Collect id user accu ((nuser,taskname) @@: tree)
+# (myhtml,accu)	= Collect id nuser accu tree
+| id == nuser && not (isNil myhtml)
+				= ([],[(taskname,myhtml):accu])
+| otherwise		= ([],accu)
+Collect id user accu (BT bdtg)
+				= (bdtg,accu)
+Collect id user accu  (tree1 +|+ tree2)
+# (lhtml,accu)	= Collect id user accu tree1
+# (rhtml,accu)	= Collect id user accu tree2
+= (lhtml <|.|> rhtml,accu)
+Collect id user accu  (tree1 +-+ tree2)
+# (lhtml,accu)	= Collect id user accu tree1
+# (rhtml,accu)	= Collect id user [] tree2
+= ([lhtml <=> rhtml],accu)
+
+
+/*
+Filter thisuser user (BT bdtg) 						= if (thisuser == user) bdtg []
+Filter thisuser user ((nuser,taskname) @@: tree) 	= Filter thisuser nuser tree
+Filter thisuser user (tree1 +|+ tree2)  			= Filter thisuser user tree1 <|.|> Filter thisuser user tree2
+Filter thisuser user (tree1 +-+ tree2)  			= [Filter thisuser user tree1 <=> Filter thisuser user tree2]
+*/
 // combinators and functions on Tasks
 	
 (@:) infix 4 :: !(!Int,!String) (Task a)	-> (Task a)			| iData a
@@ -97,11 +136,11 @@ where
 	| activated 						= (a,{tst & myId = myId							// work is done						
 												  ,	html = ohtml +|+ 					// clear screen
 													BT [Txt ("User " <+++ userId <+++ " finished task "),B [] taskname, Txt " yielding ", toHtml a, Br] +|+
-													(userId @@:nhtml)})	
+													((userId,taskname) @@: nhtml)})	
 	= (a,{tst & myId = myId																// restore user Id
 			  , html = 	ohtml +|+ 
 						BT [Br, Txt ("Waiting for task "), B [] taskname, Txt (" from User " <+++ userId <+++ "..."),Br] +|+ 
-						(userId @@: BT [Txt ("User " <+++ myId <+++ " waits for task "), B [] taskname,Br,Br] +|+ nhtml)})				// combine html code, filter later					
+						((userId,taskname) @@: BT [Txt ("User " <+++ myId <+++ " waits for task "), B [] taskname,Br,Br] +|+ nhtml)})				// combine html code, filter later					
 
 (@::) infix 4 :: !Int (Task a)	-> (Task a)			| iData a
 (@::) userId taska = \tst -> mkTask assignTask` tst
@@ -111,7 +150,7 @@ where
 	| activated 						= (a,{tst & myId = myId							// work is done						
 												  ,	html = html})	
 	= (a,{tst & myId = myId																// restore user Id
-			  , html = 	html +|+  (userId @@: nhtml)})				// combine html code, filter later					
+			  , html = 	html +|+  ((userId,"Task " <+++ myId) @@: nhtml)})				// combine html code, filter later					
 
 mkTask :: (*TSt -> *(a,*TSt)) -> (Task a) | iData a
 mkTask mytask = \tst -> mkTask` tst
@@ -301,8 +340,8 @@ PmuTasks tasks = \tst-> mkTask (PmuTasks` tasks) tst
 where
 	PmuTasks` [] tst									= returnV [] tst
 	PmuTasks` [(ida,taska):tasks] tst=:{html}
-	# (a, tst=:{html=htmla,activated=adone})		= (ida @:: taska) {tst & html = ida @@: BT [], activated = True}
-	# (ax,tst=:{html=htmlstasks,activated=alldone})	= PmuTasks` tasks (incTask {tst & html = ida @@: BT []})
+	# (a, tst=:{html=htmla,activated=adone})		= (ida @:: taska) {tst & html = (ida,"Task") @@: BT [], activated = True}
+	# (ax,tst=:{html=htmlstasks,activated=alldone})	= PmuTasks` tasks (incTask {tst & html = (ida,"Task") @@: BT []})
 	= ([a:ax],{tst & html = html +|+ htmla +|+ htmlstasks,activated=adone&&alldone})	
 
 returnV :: a -> (Task a) | iData a 
@@ -550,7 +589,8 @@ where
 where
 	doit tst=:{html=ohtml,activated=myturn,myId}
 	# (a,tst=:{activated,html=nhtml}) = task {tst & html = BT []}
-	| activated || not myturn= (a,{tst & html = ohtml +|+ BT (Filter ((<>) myId) myId nhtml)})
+//	| activated || not myturn= (a,{tst & html = ohtml +|+ BT (Filter ((<>) myId) myId nhtml)})
+	| activated || not myturn= (a,{tst & html = ohtml})
 	= (a,{tst & html = ohtml +|+ BT prompt +|+ nhtml})
 
 (!>>) infix 2 :: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
@@ -558,7 +598,8 @@ where
 where
 	doit tst=:{html=ohtml,activated=myturn,myId}
 	# (a,tst=:{activated,html=nhtml}) = task {tst & html = BT []}
-	| not myturn	= (a,{tst & html = ohtml +|+ BT (Filter ((<>) myId) myId nhtml)})
+//	| not myturn	= (a,{tst & html = ohtml +|+ BT (Filter ((<>) myId) myId nhtml)})
+	| not myturn	= (a,{tst & html = ohtml})
 	= (a,{tst & html = ohtml +|+ BT prompt +|+ nhtml})
 
 myId :: TSt -> (Int,TSt)
