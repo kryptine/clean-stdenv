@@ -42,6 +42,14 @@ where setTaskAttr mode tst = {tst & storageInfo.taskmode = mode}
 
 // wrappers
 
+multiUserTask 	:: !Int!(Task a)  	!*HSt -> (Html,*HSt) 			| iData a 
+multiUserTask nusers task  hst 
+# (idform,hst) 	= FuncMenu (Init,nFormId "pdm_chooseWorker" 
+						(0,[("User " +++ toString i,\_ -> i) \\ i<-[0..nusers - 1] ])) hst
+# currentWorker	= snd idform.value
+# (_,html,hst) 	= startTask currentWorker task hst
+= mkHtml "mtest" (idform.form ++ html) hst
+
 startTask 		:: !Int !(Task a) 		!*HSt -> (a,[BodyTag],!*HSt) 	| iData a 
 startTask thisUser taska hst
 # userVersionNr			= "User" <+++ thisUser <+++ "VrsNr"
@@ -63,9 +71,28 @@ startTask thisUser taska hst
 # (pversion,hst)	 	= mkStoreForm (Init, pFormId userVersionNr 0) inc hst
 # (sversion,hst)	 	= mkStoreForm (Init, nFormId sessionVersionNr pversion.value) inc hst
 # (selbuts,seltask,hst)	= Filter2 thisUser defaultUser ((defaultUser,"Main") @@: html) hst
-= (a,refresh.form ++ [Br,Br, Hr [],Br] ++ [([mkColForm selbuts] <=>  seltask)],hst)
+= 	(a,	refresh.form ++ 
+		[Br,Br, Hr [],Br] ++ 
+		[ mkSTable2 [ [yellowUser thisUser,EmptyBody,EmptyBody]
+					, [mkColForm selbuts, EmptyBody, BodyTag seltask]
+					]
+		] 
+	,hst)
 where
 	defaultUser	= 0
+
+	mkSTable2 :: [[BodyTag]] -> BodyTag
+	mkSTable2 table
+	= Table []	(mktable table)
+	where
+		mktable table 	= [Tr [] (mkrow rows) \\ rows <- table]	
+		mkrow rows 		= [Td [Td_VAlign Alo_Top] [row] \\ row <- rows] 
+	
+yellowUser nr
+= yellow ("User " <+++ nr <+++ " :")
+
+yellow message
+= Font [Fnt_Color (`Colorname Yellow)] [B [] message]
 
 
 singleUserTask 	:: !(Task a) 		   	!*HSt -> (Html,*HSt) 			| iData a 
@@ -73,13 +100,6 @@ singleUserTask task hst
 # (_,html,hst) = startTask 0 task hst
 = mkHtml "stest" html hst
 
-multiUserTask 	:: !Int!(Task a)  	!*HSt -> (Html,*HSt) 			| iData a 
-multiUserTask nusers task  hst 
-# (idform,hst) 	= FuncMenu (Init,nFormId "pdm_chooseWorker" 
-						(0,[("User " +++ toString i,\_ -> i) \\ i<-[0..nusers - 1] ])) hst
-# currentWorker	= snd idform.value
-# (_,html,hst) 	= startTask currentWorker task hst
-= mkHtml "mtest" [idform.form <=> html] hst
 
 // to every user the information is shown intended for this user
 
@@ -135,12 +155,12 @@ where
 	# (a,tst=:{html=nhtml,activated})	= taska {tst & html = BT [],myId = userId}		// activate task of indicated user
 	| activated 						= (a,{tst & myId = myId							// work is done						
 												  ,	html = ohtml +|+ 					// clear screen
-													BT [Txt ("User " <+++ userId <+++ " finished task "),B [] taskname, Txt " yielding ", toHtml a, Br] +|+
+													BT [yellowUser userId, Txt " finished task ",yellow taskname, Br,Br] +|+
 													((userId,taskname) @@: nhtml)})	
 	= (a,{tst & myId = myId																// restore user Id
 			  , html = 	ohtml +|+ 
-						BT [Br, Txt ("Waiting for task "), B [] taskname, Txt (" from User " <+++ userId <+++ "..."),Br] +|+ 
-						((userId,taskname) @@: BT [Txt ("User " <+++ myId <+++ " waits for task "), B [] taskname,Br,Br] +|+ nhtml)})				// combine html code, filter later					
+						BT [Br, Txt ("Waiting for Task "), yellow taskname, Txt " from ", yellowUser userId,Br] +|+ 
+						((userId,taskname) @@: BT [Txt "Task ",yellow taskname, Txt " requested by ", yellowUser myId,Br,Br] +|+ nhtml)})				// combine html code, filter later					
 
 (@::) infix 4 :: !Int (Task a)	-> (Task a)			| iData a
 (@::) userId taska = \tst -> mkTask assignTask` tst

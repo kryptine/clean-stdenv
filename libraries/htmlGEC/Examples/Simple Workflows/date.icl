@@ -60,6 +60,6 @@ where
 
 	confirm  :: Int Int (HtmlDate,HtmlTime) -> Task Void 
 	confirm me you (date,time)
-	= 	me @::	( 	[Txt ("Person " <+++ me <+++ " and " <+++ you <+++ " have a meeting on " <+++ date <+++ " at " <+++ time),Br,Br] 
+	= 	me @::	( 	[Txt ("User " <+++ me <+++ " and " <+++ you <+++ " have a meeting on " <+++ date <+++ " at " <+++ time),Br,Br] 
 				?>>	STask "OK" Void
 				)
