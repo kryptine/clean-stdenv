@@ -2,18 +2,10 @@ definition module Directory
 
 // version 1.1.1
 
-//1.3
-from StdFile		import FileSystem
-from StdOverloaded	import toInt, ==
-from StdLibMisc		import Date, Time
-//from BigInt			import BigInt
-//3.1
-/*2.0
 from StdFile		import class FileSystem
 from StdOverloaded	import class toInt (..), class == (..)
 from StdLibMisc		import :: Date, :: Time
 //from BigInt			import :: BigInt
-0.2*/
 
 // shorthands: PI="platform independent", PD="platform dependent"
 
