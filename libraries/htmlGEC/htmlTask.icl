@@ -103,11 +103,6 @@ singleUserTask task hst
 
 // to every user the information is shown intended for this user
 
-Filter thisuser user (BT bdtg) 						= if (thisuser == user) bdtg []
-Filter thisuser user ((nuser,taskname) @@: tree) 	= Filter thisuser nuser tree
-Filter thisuser user (tree1 +|+ tree2)  			= Filter thisuser user tree1 <|.|> Filter thisuser user tree2
-Filter thisuser user (tree1 +-+ tree2)  			= [Filter thisuser user tree1 <=> Filter thisuser user tree2]
-
 Filter2 id user tree hst
 # (_,accu) 		= Collect id user [] tree
 | isNil accu	= ([],[],hst)
@@ -139,13 +134,6 @@ Collect id user accu  (tree1 +-+ tree2)
 # (rhtml,accu)	= Collect id user [] tree2
 = ([lhtml <=> rhtml],accu)
 
-
-/*
-Filter thisuser user (BT bdtg) 						= if (thisuser == user) bdtg []
-Filter thisuser user ((nuser,taskname) @@: tree) 	= Filter thisuser nuser tree
-Filter thisuser user (tree1 +|+ tree2)  			= Filter thisuser user tree1 <|.|> Filter thisuser user tree2
-Filter thisuser user (tree1 +-+ tree2)  			= [Filter thisuser user tree1 <=> Filter thisuser user tree2]
-*/
 // combinators and functions on Tasks
 	
 (@:) infix 4 :: !(!Int,!String) (Task a)	-> (Task a)			| iData a
@@ -578,6 +566,18 @@ where
 	# tst = ftst tst
 	= b tst
 
+Once :: (St TSt a) a -> (St TSt a)
+Once fun default = \tst -> mkTask doit tst
+where
+	doit tst=:{activated,html,tasknr,hst,storageInfo}
+	# tasknr			= mkTaskNr tasknr
+	# taskId			= "iTask_" 	<+++ tasknr
+//	# (taskdone,hst) 	= mkStoreForm (Init,cFormId storageInfo taskId False) id hst  			// remember if the task has been done
+//	| taskdone.value	= (default,{tst & hst = hst})																				// test if task has completed
+	# (a,tst)			= fun {tst & hst = hst}
+//	# (taskdone,hst) 	= mkStoreForm (Init,cFormId storageInfo taskId False) (\_ -> True) hst 	// remember task status for next time
+	= (a,{tst & activated = True, hst = hst})												// task is now completed, handle as previously
+
 (=>>) infix 1 :: w:(St .s .a) v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]
 (=>>) a b = a `bind` b
 
@@ -609,7 +609,6 @@ where
 where
 	doit tst=:{html=ohtml,activated=myturn,myId}
 	# (a,tst=:{activated,html=nhtml}) = task {tst & html = BT []}
-//	| activated || not myturn= (a,{tst & html = ohtml +|+ BT (Filter ((<>) myId) myId nhtml)})
 	| activated || not myturn= (a,{tst & html = ohtml})
 	= (a,{tst & html = ohtml +|+ BT prompt +|+ nhtml})
 
@@ -618,7 +617,6 @@ where
 where
 	doit tst=:{html=ohtml,activated=myturn,myId}
 	# (a,tst=:{activated,html=nhtml}) = task {tst & html = BT []}
-//	| not myturn	= (a,{tst & html = ohtml +|+ BT (Filter ((<>) myId) myId nhtml)})
 	| not myturn	= (a,{tst & html = ohtml})
 	= (a,{tst & html = ohtml +|+ BT prompt +|+ nhtml})
 
