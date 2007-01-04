@@ -1,6 +1,6 @@
 Version: 1.4
 Global
-	Built:	True
+	Built:	False
 	Target:	Web Applications
 	Exec:	{Project}\coffeemachine.exe
 	CodeGen
@@ -2924,6 +2924,12 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
+		Dcl
+			WindowPosition
+				X:	10
+				Y:	10
+				SizeX:	800
+				SizeY:	624
 		DclOpen:	False
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
@@ -3027,6 +3033,12 @@ OtherModules
 			ReuseUniqueNodes:	True
 			Fusion:	False
 		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	10
+				Y:	10
+				SizeX:	919
+				SizeY:	483
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 Static

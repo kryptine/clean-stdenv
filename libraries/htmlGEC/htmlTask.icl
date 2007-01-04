@@ -553,30 +553,32 @@ showMine bool html more = if bool (html +|+ more) html
 
 // monadic shorthands
 (*>>) infix 4 :: w:(St .s .a)  v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]
-(*>>) ftst b = \tst -> doit tst
+(*>>) ftst b = doit
 where
 	doit tst
 	# (a,tst) = ftst tst
 	= b a tst
 
 (@>>) infix 4 :: w:(.s -> .s)  v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]
-(@>>) ftst b = \tst -> doit tst
+(@>>) ftst b = doit
 where
 	doit tst
 	# tst = ftst tst
 	= b tst
 
-Once :: (St TSt a) a -> (St TSt a)
-Once fun default = \tst -> mkTask doit tst
+Once :: (St TSt a) -> (St TSt a) | iData a
+Once fun = mkTask doit
 where
 	doit tst=:{activated,html,tasknr,hst,storageInfo}
-	# tasknr			= mkTaskNr tasknr
-	# taskId			= "iTask_" 	<+++ tasknr
-//	# (taskdone,hst) 	= mkStoreForm (Init,cFormId storageInfo taskId False) id hst  			// remember if the task has been done
-//	| taskdone.value	= (default,{tst & hst = hst})																				// test if task has completed
-	# (a,tst)			= fun {tst & hst = hst}
-//	# (taskdone,hst) 	= mkStoreForm (Init,cFormId storageInfo taskId False) (\_ -> True) hst 	// remember task status for next time
-	= (a,{tst & activated = True, hst = hst})												// task is now completed, handle as previously
+	# ntasknr			= mkTaskNr tasknr
+	# taskId			= "iTask_" 	<+++ ntasknr
+	# (store,hst) 		= mkStoreForm (Init,cFormId storageInfo taskId (False,createDefault)) id hst  			
+	# (done,value)		= store.value
+	| done 				= (value,{tst & hst = hst})	// if task has completed, don't do it again
+	# (value,tst=:{hst})= fun {tst & hst = hst}
+	# (store,hst) 		= mkStoreForm (Init,cFormId storageInfo taskId (False,createDefault)) (\_ -> (True,value)) hst 	// remember task status for next time
+	# (done,value)		= store.value
+	= (value,{tst & activated = done, hst = hst})													// task is now completed, handle as previously
 
 (=>>) infix 1 :: w:(St .s .a) v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]
 (=>>) a b = a `bind` b
