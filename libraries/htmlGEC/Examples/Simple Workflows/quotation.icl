@@ -11,8 +11,7 @@ derive gerda 	QForm, ReviewState
 Start world = doHtmlServer (multiUserTask 2 Quotation) world
 //Start world = doHtmlServer (multiUserTask 2 (Quotation <<@ Persistent)) world
 
-:: QForm = 	{ fromComp 			:: String
-			, toComp 			:: String
+:: QForm = 	{ toComp 			:: String
 			, startDate 		:: HtmlDate
 			, endDate 			:: HtmlDate
 			, estimatedHours 	:: Int
@@ -22,16 +21,17 @@ Start world = doHtmlServer (multiUserTask 2 Quotation) world
 :: ReviewState = Approved | Cancelled | NeedsRework TextArea | Draft
 
 Quotation :: Task (QForm,ReviewState)
-Quotation = reviewedTask 1 createDefault
+Quotation = taskToReview 1 (createDefault, mytask,createDefault)
+where	mytask form =	[Txt "Fill in Form:",Br,Br] 
+						?>>	STask "TaskDone" form <<@ Submit
 
-reviewedTask :: Int (a,ReviewState) -> Task (a,ReviewState) | iData a
-reviewedTask reviewer (form,state)
-=					[Txt "Fill in Form:",Br,Br] 
-					?>>	STask "TaskDone" form <<@ Submit
+taskToReview :: Int (a,a -> Task a,ReviewState) -> Task (a,ReviewState) | iData a
+taskToReview reviewer (form,task,state)
+=					task form
 	=>> \form	->	reviewer @:: review (form,state)
 	=>> \state	->	[Txt ("Reviewer " <+++ reviewer <+++ " says "),toHtml state,Br] ?>> STask "OK" Void
 	#>>				case state of
-						(NeedsRework	_) -> mkTask (reviewedTask reviewer (form,state)) 	
+						(NeedsRework	_) -> mkTask (taskToReview reviewer (form,task,state)) 	
 						else		-> returnV (form,state)
 where
 	review :: (a,ReviewState) -> Task ReviewState | iData a
