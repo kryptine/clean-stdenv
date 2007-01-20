@@ -2,7 +2,24 @@ module coffeemachine
 
 import StdEnv, StdHtml
 
-Start world = doHtmlServer (singleUserTask (repeatTask CoffeeMachine)) world
+Start world = doHtmlServer (singleUserTask (repeatTask test12orp)) world
+
+derive gForm []
+derive gUpd []
+
+test12orb = CTask_button [("one",test12l 1),("two",test12l 8)]
+
+test12orp = CTask_pdmenu [("one",test12l 1),("two",test12l 8)]
+
+test12l i = STasks [("one",test12 i),("two",test12 (i+2))]
+
+test12 i = 				simpleTask i
+				#>> 	simpleTask (i+1)
+
+simpleTask i = STask "OK"  i
+
+
+//Start world = doHtmlServer (singleUserTask (repeatTask CoffeeMachine)) world
 
 CoffeeMachine :: Task (String,Int)
 CoffeeMachine  
