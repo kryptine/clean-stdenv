@@ -130,7 +130,7 @@ appIData		:: lift iData editors to iTask domain
 appHSt			:: lift HSt domain to TSt domain
 */
 appIData 		:: (IDataFun a) 		-> (Task a) 					| iData a
-appHSt 			:: (HSt -> (a,HSt)) TSt -> (a,TSt)
+appHSt 			:: (HSt -> (a,HSt)) 	-> (Task a)						| iData a
 
 /* monadic shorthands
 (=>>)			:: bind

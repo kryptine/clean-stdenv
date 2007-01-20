@@ -8,8 +8,8 @@ derive gParse 	QForm, ReviewState
 derive gPrint 	QForm, ReviewState
 derive gerda 	QForm, ReviewState
 
-Start world = doHtmlServer (multiUserTask 2 Quotation) world
-//Start world = doHtmlServer (multiUserTask 2 (Quotation <<@ Persistent)) world
+//Start world = doHtmlServer (multiUserTask 2 Quotation) world
+Start world = doHtmlServer (multiUserTask 2 (Quotation <<@ Database)) world
 
 :: QForm = 	{ toComp 			:: String
 			, startDate 		:: HtmlDate
