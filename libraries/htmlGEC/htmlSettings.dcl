@@ -19,7 +19,7 @@ class iDataSerAndDeSerialize a
 		, iDataSerialize a		
 
 TraceInput			:== False			// show what kind of information is received from Client
-TraceOutput			:== False			// show what kind of information is stored
+TraceOutput			:== True			// show what kind of information is stored
 
 DEBUGSERVER			:== True			// show what kind of information is transmitted by the Clean HtmlServer
 
