@@ -8,8 +8,19 @@ derive gParse 	QForm, ReviewState
 derive gPrint 	QForm, ReviewState
 derive gerda 	QForm, ReviewState
 
-//Start world = doHtmlServer (multiUserTask 2 Quotation) world
-Start world = doHtmlServer (multiUserTask 2 (Quotation <<@ Database)) world
+
+:: Persoonsgegevens
+				=	{ naam :: String
+					, e_mail :: String
+					}
+:: Verzendgegevens
+				=	{ adres 	:: String
+					, postcode 	:: String
+					, plaats 	:: String
+					}
+
+Start world = doHtmlServer (multiUserTask 2 Quotation) world
+//Start world = doHtmlServer (multiUserTask 2 (Quotation )) world
 
 :: QForm = 	{ toComp 			:: String
 			, startDate 		:: HtmlDate

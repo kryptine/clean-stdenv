@@ -7,7 +7,7 @@ derive gUpd []
 
 npersons = 5
 
-Start world = doHtmlServer (multiUserTask npersons (repeatTask (deadline mytask) <<@ Persistent)) world
+Start world = doHtmlServer (multiUserTask npersons (repeatTask (deadline mytask) )) world
 
 mytask = STask "Press" 0
 
