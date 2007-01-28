@@ -86,11 +86,12 @@ PTask2			:: do both iTasks in any order (paralel), task completed when both done
 PTasks			:: do all  iTasks in any order (paralel), task completed when all  done
 PMilestoneTasks :: do all  iTasks in any order (paralel), task completed when all  done
 					but continue with next task as soon as SOME Task completes
+					string indicates which tasks have completed
 PmuTasks		:: assign task to indicated users, task completed when all done
 */
 PTask2 			:: (Task a,Task b) 		-> (Task (a,b)) 		| iData a & iData b
 PTasks 			:: [(String,Task a)]	-> (Task [a])			| iData a 
-PMilestoneTasks :: [(String,Task a)] 	-> (Task [a]) 			| iData a 
+PMilestoneTasks :: [(String,Task a)] 	-> (Task [(String,a)]) 	| iData a 
 PmuTasks 		:: [(Int,Task a)] -> (Task [a]) 				| iData a 
 
 /* Tasks that do not require IO actions from the user:

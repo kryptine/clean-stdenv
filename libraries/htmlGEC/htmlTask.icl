@@ -324,57 +324,87 @@ where
 	# (b,{activated=bdone,html=bhtml,hst,trace})	= taskb {tst & tasknr = [-1,1:tasknr],activated = True, html = BT [], hst = hst, trace = trace}
 	= ((a,b),{tst & activated = adone&&bdone, html = html +|+ ahtml +|+ bhtml,hst = hst, trace = trace})
 
+checkAllTasks options ctasknr bool alist tst=:{tasknr}
+| ctasknr == length options		= (reverse alist,{tst & activated = bool})
+# (taskname,task)				= options!!ctasknr
+# (a,tst=:{activated = adone})	= task {tst & tasknr = [-1,ctasknr:tasknr], activated = True}
+= checkAllTasks options (inc ctasknr) (bool&&adone) (if adone [(taskname,a):alist] alist) {tst & tasknr = tasknr}
+
+checkAnyTasks taskoptions ctasknr bool tst=:{tasknr}
+| ctasknr == length taskoptions	= (bool,tst)
+# task							= taskoptions!!ctasknr
+# (a,tst=:{activated = adone})	= task {tst & tasknr = [-1,ctasknr:tasknr], activated = True}
+= checkAnyTasks taskoptions (inc ctasknr) (bool||adone) {tst & tasknr = tasknr}
+
 PTasks :: [(String,Task a)] -> (Task [a]) | iData a 
 PTasks options = \tst -> mkTask "PTasks" (doPTasks` options) tst
 where
 	doPTasks` [] tst	= returnV [] tst
 	doPTasks` options tst=:{tasknr,html,hst,trace}
 	# (chosen,hst)		= mkStoreForm   (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) ("_All" <+++ length options) ) 0) id hst
-	# (choice,hst)		= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_But" ) [[(mode chosen.value n,but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]] <@ Page) hst
+	# (choice,hst)		= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_But" ) [[(mode chosen.value n,but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]] <@ Page) hst
 	# (chosen,hst)		= mkStoreForm   (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) ("_All" <+++ length options) ) 0) choice.value hst
-	# (choice,hst)		= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_But" ) [[(mode chosen.value n,but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]] <@ Page) hst
+	# (choice,hst)		= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_But" ) [[(mode chosen.value n,but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]] <@ Page) hst
 	# chosenTask		= snd (options!!chosen.value)
 	# chosenTaskName	= fst (options!!chosen.value)
 	# (alist,{activated=finished,hst,trace})		
-						= checkAllTasks (map snd options) 0 [] {tst & html = BT [], hst = hst,trace = trace}
-	| finished			= (alist,{tst & activated = finished, hst = hst,trace = trace})
+						= checkAllTasks options 0 True [] {tst & html = BT [], hst = hst,trace = trace}
+	| finished			= (map snd alist,{tst & activated = finished, hst = hst,trace = trace})
 	# (a,{activated=adone,html=ahtml,hst,trace}) = chosenTask {tst & tasknr = [-1,chosen.value:tasknr], activated = True, html = BT [], hst = hst, trace = trace}
 	| not adone			= ([a],{tst & 	trace = trace,
 										activated = adone, 
-										html = html +|+ BT choice.form +-+ 
-												(BT [Txt ("Task: " +++ chosenTaskName +++ "."),Br] +|+ ahtml), 
+										html = html +|+ BT choice.form +|+ 
+												(BT [Br, gray chosenTaskName,Br] +|+ ahtml), 
 										hst = hst})
 	# (alist,{activated=finished,hst,trace})		
-						= checkAllTasks (map snd options) 0 [] {tst & html = BT [], hst = hst, trace = trace}
-	| finished			= (alist,{tst & activated = finished, hst = hst,trace =trace})
-	= ([a],{tst & trace = trace,
+						= checkAllTasks options 0 True [] {tst & html = BT [], hst = hst, trace = trace}
+	| finished			= (map snd alist,{tst & activated = finished, hst = hst,trace =trace})
+	= (map snd alist,{tst & trace = trace,
 				  activated = finished, html = 	html +|+ 
-												BT choice.form +-+ (BT [Txt ("Task: " +++ chosenTaskName+++ "."),Br] +|+ 
+												BT choice.form +|+ (BT [Br, gray chosenTaskName,Br] +|+ 
 																	ahtml), hst = hst})
 
-	but i = LButton defpixel (i <+++ ":And")
+	but i = LButton defpixel i
 	mode i j
 	| i==j = Display
 	= Edit
 
-checkAllTasks taskoptions ctasknr alist tst=:{tasknr,html,hst,trace}
-| ctasknr == length taskoptions	= (reverse alist,{tst & activated = True, html = BT [], hst = hst, trace = trace})
-# task							= taskoptions!!ctasknr
-# (a,{activated = adone,hst,trace})	= task {tst & tasknr = [-1,ctasknr:tasknr], activated = True, html = BT [], hst = hst,trace = trace}
-| adone							= checkAllTasks taskoptions (inc ctasknr) [a:alist] {tst & tasknr = tasknr, html = BT [], hst = hst, trace = trace}
-= ([],{tst & tasknr = tasknr, activated = False, html = BT [], hst = hst, trace = trace})
-
-checkAnyTasks taskoptions ctasknr bool tst=:{tasknr,html,hst,trace}
-| ctasknr == length taskoptions	= (bool,tst)
-# task							= taskoptions!!ctasknr
-# (a,{activated = adone,hst,trace})	= task {tst & tasknr = [-1,ctasknr:tasknr], activated = True, html = BT [], hst = hst,trace = trace}
-= checkAnyTasks taskoptions (inc ctasknr) (bool||adone) {tst & tasknr = tasknr, html = BT [], hst = hst, trace = trace}
-
-PMilestoneTasks :: [(String,Task a)] -> (Task [a]) | iData a 
+PMilestoneTasks :: [(String,Task a)] -> (Task [(String,a)]) | iData a 
 PMilestoneTasks options = \tst -> mkTask "PMilestoneTasks" (PMilestoneTasks` options) tst
 where
-	PMilestoneTasks` [] tst		= returnV [] tst
-	PMilestoneTasks` options tst=:{tasknr,html,hst}
+	PMilestoneTasks` [] tst	= returnV [] tst
+	PMilestoneTasks` options tst=:{tasknr,html,hst,trace}
+	# (chosen,hst)		= mkStoreForm   (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) ("_PMile_" <+++ length options) ) 0) id hst
+	# (choice,hst)		= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_But" ) [[(mode chosen.value n,but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]] <@ Page) hst
+	# (chosen,hst)		= mkStoreForm   (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) ("_PMile_" <+++ length options) ) 0) choice.value hst
+	# (choice,hst)		= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_But" ) [[(mode chosen.value n,but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]] <@ Page) hst
+	# chosenTask		= snd (options!!chosen.value)
+	# chosenTaskName	= fst (options!!chosen.value)
+	# (alist,{activated=finished,hst,trace})		
+						= checkAllTasks options 0 True [] {tst & html = BT [], hst = hst,trace = trace}
+	| finished			= (alist,{tst & activated = finished, hst = hst,trace = trace})
+	# (a,{activated=adone,html=ahtml,hst,trace}) = chosenTask {tst & tasknr = [-1,chosen.value:tasknr], activated = True, html = BT [], hst = hst, trace = trace}
+	# (milestoneReached,{hst})	
+						= checkAnyTasks (map snd options) 0 False {tst & html = BT [], hst = hst, trace = trace}
+	| not adone			= (alist,{tst & 	trace = trace,
+										activated = adone || milestoneReached, 
+										html = html +|+ BT choice.form +|+ 
+												(BT [Br, gray chosenTaskName,Br] +|+ ahtml +|+ BT [Br, Hr [], Br]), 
+										hst = hst})
+	# (alist,{activated=finished,hst,trace})		
+						= checkAllTasks options 0 True [] {tst & html = BT [], hst = hst, trace = trace}
+	| finished			= (alist,{tst & activated = finished, hst = hst,trace =trace})
+	= (alist,{tst & trace = trace,
+				  activated = finished || milestoneReached, html = 	html +|+ 
+												BT choice.form +|+ (BT [Br, gray chosenTaskName,Br] +|+ 
+																	ahtml +|+ BT [Br, Hr [], Br]), hst = hst})
+
+	but i = LButton defpixel i
+	mode i j
+	| i==j = Display
+	= Edit
+/*	PMilestoneTasks` [] tst		= returnV [] tst
+	PMilestoneTasks` options tst=:{tasknr,html,hst,trace}
 	# (chosen,hst)				= mkStoreForm  (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_PMile_" ) 0) id hst
 	# (choice,hst)				= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_But_" ) [[(mode chosen.value n,but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]] <@ Page) hst
 	# (chosen,hst)				= mkStoreForm  (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_PMile_" ) 0) choice.value hst
@@ -382,8 +412,8 @@ where
 	# chosenTask				= snd (options!!chosen.value)
 	# chosenTaskName			= fst (options!!chosen.value)
 	# taskoptions				= map snd options
-	# (milestoneReached,{hst})	= checkAnyTasks taskoptions 0 False {tst & html = BT [], hst = hst}
-	# (a,{activated=adone,html=ahtml,hst}) 
+	# (milestoneReached,{hst})	= checkAnyTasks taskoptions 0 False {tst & html = BT [], hst = hst, trace = trace}
+	# (a,{activated=adone,html=ahtml,hst,trace}) 
 								= chosenTask {tst & tasknr = [-1:addTasknr tasknr chosen.value], activated = True, html = BT [], hst = hst}
 	# tasknr					= addTasknr tasknr (length options)
 	| not adone					= ([a],{tst & tasknr = tasknr, activated = milestoneReached, 
@@ -391,7 +421,7 @@ where
 												BT choice.form +-+  (BT [Txt ("Task: " +++ chosenTaskName +++ "."),Br] +|+ 
 																		ahtml), hst = hst})
 	# (alist,{activated=finished,hst})		
-								= checkAllTasks taskoptions 0 [] {tst & html = BT [], hst = hst}
+								= checkAllTasks taskoptions 0 True [] {tst & html = BT [], hst = hst}
 	| finished					= (alist,{tst & tasknr = tasknr, activated = True, hst = hst})
 	= ([a],{tst & tasknr = tasknr, activated = milestoneReached, html =	html +|+ 
 														BT choice.form +-+  (BT [Txt ("Task: " +++ chosenTaskName +++ "."),Br] +|+ 
@@ -401,7 +431,7 @@ where
 	mode i j
 	| i==j = Display
 	= Edit
-
+*/
 PmuTasks :: [(Int,Task a)] -> (Task [a]) | iData a 
 PmuTasks tasks = \tst-> mkTask "PmuTasks" (PmuTasks` tasks) tst
 where
