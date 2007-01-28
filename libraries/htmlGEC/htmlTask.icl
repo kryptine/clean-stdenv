@@ -152,7 +152,8 @@ where
 	mkTask` tst=:{activated,html,tasknr,myId}		
 	| not activated							= (createDefault,tst)	// not active, return default value
 	# (val,tst=:{activated,trace})			=  mytask tst			// active, so perform task or get its result
-	| not activated	|| isNothing trace		= (val,tst)				// no trace, just return value
+	| not activated	|| isNothing trace || taskname == ""
+											= (val,tst)				// no trace, just return value
 	= (val,{tst & trace 					= Just (InsertTrace tasknr myId taskname (printToString val) (fromJust trace))}) // adjust trace
 
 repeatTask :: (Task a) -> Task a | iData a
@@ -187,88 +188,97 @@ where
 			  , html = 	html +|+  ((userId,"Task " <+++ myId) @@: nhtml)})				// combine html code, filter later					
 
 // sequential tasks
+iSTask tracename prompt task = \tst -> mkTask tracename (STask` prompt task) tst
 
 STask :: String a -> (Task a) | iData a 
-STask prompt a = \tst -> mkTask "STask" (STask` a) tst
-where
-	STask` a tst=:{tasknr,html,hst}
-	# tasknr			= showTaskNr tasknr
-	# taskId			= itaskId tasknr "_Seq"
-	# editId			= itaskId tasknr "_Val"
-	# buttonId			= itaskId tasknr "_But"
-	# (taskdone,hst) 	= mkStoreForm (Init,cFormId tst.storageInfo taskId False) id hst  			// remember if the task has been done
-	| taskdone.value																				// test if task has completed
-		# (editor,hst) 	= (mkEditForm  (Init,cdFormId tst.storageInfo editId a <@ Display) hst)		// yes, read out current value, make editor passive
-		= (editor.value,{tst & activated = True, html = html +|+ BT editor.form, hst = hst})		// return result task
-	# (editor,hst) 		= mkEditForm  (Init,cFormId tst.storageInfo editId a) hst					// no, read out current value from active editor
-	# (finbut,hst)  	= simpleButton buttonId prompt (\_ -> True) hst								// add button for marking task as done
-	# (taskdone,hst) 	= mkStoreForm (Init,cFormId tst.storageInfo taskId False) finbut.value hst 	// remember task status for next time
-	| taskdone.value	= STask` a {tst & hst = hst}												// task is now completed, handle as previously
-	= (a,{tst & activated = taskdone.value, html = html +|+ BT (editor.form ++ finbut.form), hst = hst})
+STask prompt a = \tst -> mkTask "STask" (STask` prompt a) tst
+
+STask` prompt a tst=:{tasknr,html,hst}
+# tasknr			= showTaskNr tasknr
+# taskId			= itaskId tasknr "_Seq"
+# editId			= itaskId tasknr "_Val"
+# buttonId			= itaskId tasknr "_But"
+# (taskdone,hst) 	= mkStoreForm (Init,cFormId tst.storageInfo taskId False) id hst  			// remember if the task has been done
+| taskdone.value																				// test if task has completed
+	# (editor,hst) 	= (mkEditForm  (Init,cdFormId tst.storageInfo editId a <@ Display) hst)		// yes, read out current value, make editor passive
+	= (editor.value,{tst & activated = True, html = html +|+ BT editor.form, hst = hst})		// return result task
+# (editor,hst) 		= mkEditForm  (Init,cFormId tst.storageInfo editId a) hst					// no, read out current value from active editor
+# (finbut,hst)  	= simpleButton buttonId prompt (\_ -> True) hst								// add button for marking task as done
+# (taskdone,hst) 	= mkStoreForm (Init,cFormId tst.storageInfo taskId False) finbut.value hst 	// remember task status for next time
+| taskdone.value	= STask` prompt a {tst & hst = hst}												// task is now completed, handle as previously
+= (a,{tst & activated = taskdone.value, html = html +|+ BT (editor.form ++ finbut.form), hst = hst})
 
 STask_button 		:: String (Task a) 			-> (Task a) 	| iData a
-STask_button s task = CTask_button [(s,task)]
+STask_button s task = iCTask_button "STask_button" [(s,task)]
 
 STasks :: [(String,Task a)] -> (Task [a])| iData a 
-STasks options = \tst -> mkTaskNoInc "STasks" (doSandTasks` options []) tst
+STasks options = \tst -> mkTask "STasks" STasks` tst
 where
-	doSandTasks` [] accu tst 		= returnV (reverse accu) tst
-	doSandTasks` [(txt,task):ts] accu tst=:{tasknr,html,hst} 
-	# (a,{tasknr,activated=adone,html=ahtml,trace=trace,hst}) 
+	STasks` tst=:{tasknr}
+	# (val,tst)	 = doSandTasks` options [] {tst & tasknr = [-1:tasknr]}
+	= (val,{tst & tasknr = tasknr})
+
+	doSandTasks` [] accu tst 		= (reverse accu,{tst & activated = True})
+	doSandTasks` [(txt,task):ts] accu tst=:{html} 
+	# (a,tst=:{activated=adone,html=ahtml}) 
 									= task {tst & activated = True, html = BT []}
-	| not adone						= (reverse accu,{tst & trace = trace,tasknr = tasknr,activated = adone, html = html +|+ BT [Txt ("Task: " +++ txt),Br] +|+ ahtml,hst = hst})
-	= doSandTasks` ts [a:accu] {tst & trace = trace, tasknr = tasknr,activated = adone, html = html +|+ ahtml,hst = hst}
+	| not adone						= (reverse accu,{tst & html = html +|+ BT [Txt ("Task: " +++ txt),Br] +|+ ahtml})
+	= doSandTasks` ts [a:accu] {tst & html = html +|+ ahtml}
 
 // Choose one or more tasks out of a collection
+iCTask_button tracename options = \tst -> mkTask tracename (doCTask` options) tst
 
 CTask_button :: [(String,Task a)] -> (Task a) | iData a
 CTask_button options = \tst -> mkTask "CTask_button" (doCTask` options) tst
-where
-	doCTask` [] tst					= returnV createDefault tst				
-	doCTask` options tst=:{tasknr,html,hst}									// choose one subtask out of the list
-	# taskId						= itaskId (showTaskNr tasknr) ("_Or0." <+++ length options)
-	# buttonId						= itaskId (showTaskNr tasknr) "_But"
-	# (chosen,hst)					= mkStoreForm  (Init,cFormId tst.storageInfo taskId -1) id hst
-	| chosen.value == -1
-		# (choice,hst)				= TableFuncBut (Init,cFormId tst.storageInfo buttonId [[(but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]] <@ Page) hst
-		# (chosen,hst)				= mkStoreForm  (Init,cFormId tst.storageInfo taskId -1) choice.value hst
-		| chosen.value == -1		= (createDefault,{tst & activated =False,html = html +|+ BT choice.form, hst = hst})
-		# chosenTask				= snd (options!!chosen.value)
-		# (a,tst=:{activated=adone,html=ahtml,hst}) = chosenTask {tst & tasknr = [-1:tasknr], activated = True, html = BT [], hst = hst}
-		= (a,{tst & tasknr = tasknr, activated = adone, html = html +|+ ahtml,hst = hst})
-	# chosenTask					= snd (options!!chosen.value)
+
+doCTask` [] tst					= returnV createDefault tst				
+doCTask` options tst=:{tasknr,html,hst}									// choose one subtask out of the list
+# taskId						= itaskId (showTaskNr tasknr) ("_Or0." <+++ length options)
+# buttonId						= itaskId (showTaskNr tasknr) "_But"
+# (chosen,hst)					= mkStoreForm  (Init,cFormId tst.storageInfo taskId -1) id hst
+| chosen.value == -1
+	# (choice,hst)				= TableFuncBut (Init,cFormId tst.storageInfo buttonId [[(but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]] <@ Page) hst
+	# (chosen,hst)				= mkStoreForm  (Init,cFormId tst.storageInfo taskId -1) choice.value hst
+	| chosen.value == -1		= (createDefault,{tst & activated =False,html = html +|+ BT choice.form, hst = hst})
+	# chosenTask				= snd (options!!chosen.value)
 	# (a,tst=:{activated=adone,html=ahtml,hst}) = chosenTask {tst & tasknr = [-1:tasknr], activated = True, html = BT [], hst = hst}
 	= (a,{tst & tasknr = tasknr, activated = adone, html = html +|+ ahtml,hst = hst})
+# chosenTask					= snd (options!!chosen.value)
+# (a,tst=:{activated=adone,html=ahtml,hst}) = chosenTask {tst & tasknr = [-1:tasknr], activated = True, html = BT [], hst = hst}
+= (a,{tst & tasknr = tasknr, activated = adone, html = html +|+ ahtml,hst = hst})
 
-	but i = LButton defpixel i
+but i = LButton defpixel i
 
 CTask_pdmenu :: [(String,Task a)] -> (Task a) | iData a
 CTask_pdmenu options = \tst -> mkTask "CTask_pdmenu" (doCTask` options) tst
 where
-	doCTask` [] tst					= returnV createDefault tst	
+	doCTask` [] tst					= (createDefault,{tst& activated = True})	
 	doCTask` options tst=:{tasknr,html,hst}								// choose one subtask out of the list
 	# taskId						= itaskId (showTaskNr tasknr) ("_Or0." <+++ length options)
 	# (choice,hst)					= FuncMenu  (Init,cFormId tst.storageInfo taskId (0,[(txt,id) \\ txt <- map fst options]))	hst
-	# (_,{tasknr,activated=adone,html=ahtml,hst})	
-									= STask  "Done" Void {tst & activated = True, html = BT [], hst = hst} 	
-	| not adone						= (createDefault,{tst & tasknr = tasknr,activated = False, html = html +|+ BT choice.form +|+ ahtml, hst = hst})
+	# (_,tst=:{activated=adone,html=ahtml})	
+									= iSTask "" "Done" Void {tst & activated = True, html = BT [], hst = hst,tasknr = [-1:tasknr]} 	
+	| not adone						= (createDefault,{tst & activated = False, html = html +|+ BT choice.form +|+ ahtml, tasknr = tasknr})
 	# chosenIdx						= snd choice.value
 	# chosenTask					= snd (options!!chosenIdx)
-	# (a,{activated=bdone,html=bhtml,hst}) 
-									= chosenTask {tst & tasknr = [-1:tasknr],activated = True, html = BT [], hst = hst}
-	= (a,{tst & tasknr = tasknr, activated = adone&&bdone, html = html +|+ bhtml,hst = hst})
+	# (a,tst=:{activated=bdone,html=bhtml,hst}) 
+									= chosenTask {tst & activated = True, html = BT [], tasknr = [0:tasknr]}
+	= (a,{tst & activated = adone&&bdone, html = html +|+ bhtml,hst = hst, tasknr = tasknr})
 	
 MCTask_ckbox :: [(String,Task a)] -> (Task [a]) | iData a
-MCTask_ckbox options = \tst -> mkTaskNoInc "MCTask_ckbox" (MCTask_ckbox` options) tst
+MCTask_ckbox options = \tst -> mkTask "MCTask_ckbox" (MCTask_ckbox` options) tst
 where
-	MCTask_ckbox` [] tst			= returnV [] tst	
+	MCTask_ckbox` [] tst			= ([],{tst& activated = True})
 	MCTask_ckbox` options tst=:{tasknr,html,hst}									// choose one subtask out of the list
-	# (cboxes,hst)					= ListFuncCheckBox (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) ("_MLC." <+++ length options)) initCheckboxes) hst
+	# taskId						= itaskId (showTaskNr tasknr) ("_MLC." <+++ length options)
+	# (cboxes,hst)					= ListFuncCheckBox (Init,cFormId tst.storageInfo taskId initCheckboxes) hst
 	# optionsform					= cboxes.form <=|> [Txt text \\ (text,_) <- options]
-	# (_,{tasknr,activated=adone,html=ahtml,hst}) = STask "OK" Void {tst & activated = True, html = BT [], hst = hst}	
-	| not adone						= (createDefault,{tst & tasknr=tasknr,activated=False,html=html +|+ BT [optionsform] +|+ ahtml, hst = hst})
+	# (_,tst=:{html=ahtml,activated = adone})
+									= (iSTask "" "OK" Void <<@ Page)	{tst & activated = True, html = BT [],hst = hst,tasknr = [-1:tasknr]} 
+	| not adone						= STasks [] {tst & html=html +|+ BT [optionsform] +|+ ahtml,tasknr = [0:tasknr]}
 	# mytasks						= [option \\ option <- options & True <- snd cboxes.value]
-	= STasks mytasks {tst & tasknr=tasknr,activated=True, hst = hst}
+	# (val,tst)						= STasks mytasks {tst & tasknr = [0:tasknr]}
+	= (val,{tst & tasknr = tasknr})
 
 	initCheckboxes  = 
 		[(CBNotChecked  text,  \ b bs id -> id) \\ (text,_) <- options]
@@ -575,7 +585,7 @@ appIData idatafun = \tst -> mkTask "appIData" (appIData` idatafun) tst
 where
 	appIData` idata tst=:{tasknr,html,hst}
 	# (idata,hst) 										= idatafun hst
-	# (_,{tasknr,activated,html=ahtml,hst}) 			= STask  "Done" Void {tst & activated = True, html = BT [],hst = hst}	
+	# (_,{tasknr,activated,html=ahtml,hst}) 			= iSTask "appIDataDone" "Done" Void {tst & activated = True, html = BT [],hst = hst}	
 	= (idata.value,{tst & tasknr = tasknr,activated = activated, html = html +|+ 
 															(if activated (BT idata.form) (BT idata.form +|+ ahtml)), hst = hst})
 
