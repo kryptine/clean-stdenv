@@ -42,7 +42,7 @@ taskToReview reviewer (form,task,state)
 	=>> \form	->	reviewer @:: review (form,state)
 	=>> \state	->	[Txt ("Reviewer " <+++ reviewer <+++ " says "),toHtml state,Br] ?>> STask "OK" Void
 	#>>				case state of
-						(NeedsRework	_) -> mkTask (taskToReview reviewer (form,task,state)) 	
+						(NeedsRework	_) -> mkTask "taskToReview" (taskToReview reviewer (form,task,state)) 	
 						else		-> returnV (form,state)
 where
 	review :: (a,ReviewState) -> Task ReviewState | iData a

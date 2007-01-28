@@ -9,7 +9,7 @@ npersons = 5
 
 Start world = doHtmlServer (multiUserTask npersons (repeatTask (deadline mytask) )) world
 
-mytask = STask "Press" 0
+mytask = STask "OK" 0
 
 deadline :: (Task a) -> (Task a) | iData a
 deadline task

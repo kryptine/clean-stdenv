@@ -19,9 +19,8 @@ findDate
 						in
 						[Txt "Determining date:",Br,Br] 
 						?>> findDate` whom (Date 1 1 2007,Time 9 0 0)
-	=>> \datetime	->	myId
-	*>> \me			->	[]
-						?>> PTask2 (confirm me whom datetime,confirm whom me datetime)						
+	=>> \datetime	->	[]
+						?>> PTask2 (confirm 0 whom datetime,confirm whom 0 datetime)						
 	#>>					returnV datetime
 
 where
@@ -32,7 +31,7 @@ where
 		=>> \(ok,daytime)->	if ok (returnV daytime)
 							(			isOkDateTime daytime
 							=>> \ok ->	if ok (returnV daytime)
-										(mkTask (findDate` whom daytime))
+										(mkTask "findDate`" (findDate` whom daytime))
 							)
 	where
 		proposeDateTime :: (HtmlDate,HtmlTime) -> Task (HtmlDate,HtmlTime)

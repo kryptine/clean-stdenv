@@ -32,7 +32,7 @@ where
 	where
 		handleCoin (cancel,coin)
 		| cancel			= returnV (cancel,paid)
-		| toPay - coin > 0 	= mkTask (getCoins (toPay - coin,paid + coin))
+		| toPay - coin > 0 	= mkTask "getCoins" (getCoins (toPay - coin,paid + coin))
 		= returnV (cancel,coin - toPay)
 
 

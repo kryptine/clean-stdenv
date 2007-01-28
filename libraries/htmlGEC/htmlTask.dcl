@@ -31,11 +31,11 @@ class setTaskAttr a :: !a *TSt -> *TSt
 instance setTaskAttr Lifespan, StorageFormat, Mode
 
 /* Operations on Task state
-myId			:: id assigned to task
+taskId			:: id assigned to task
 userId			:: id of application user
 */
 
-myId			:: TSt -> (Int,TSt)
+taskId			:: TSt -> (Int,TSt)
 userId 			:: TSt -> (Int,TSt)
 
 /* Assign tasks with informative name to user with indicated id
@@ -50,7 +50,7 @@ mkTask			:: function will only be called when it is its turn to be activated
 					Also needed for defining recursive tasks
 repeatTask		:: infinitely repeat Task
 */
-mkTask 			:: (*TSt -> *(a,*TSt)) 	-> (Task a) 			| iData a 
+mkTask 			:: !String (*TSt -> *(a,*TSt)) 	-> (Task a) 	| iData a 
 repeatTask 		:: (Task a) -> Task a 							| iData a
 
 /*	Sequential Tasks:
