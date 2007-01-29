@@ -86,8 +86,7 @@ startTask thisUser taska hst
 = 	(a,	refresh.form ++ traceAsked.form ++
 		[Br,Br, Hr [],Br] ++ 
 		if doTrace
-			[ printTrace trace ]
-//			[ toHtml trace ]
+			[ printTrace2 trace ]
 			[ mkSTable2 [ [yellowUser thisUser,EmptyBody,EmptyBody]
 						, [mkColForm selbuts, EmptyBody, BodyTag seltask]
 						]
@@ -137,8 +136,23 @@ singleUserTask task hst
 # (_,html,hst) = startTask 0 task hst
 = mkHtml "stest" html hst
 
-// combinators and functions on Tasks
+// Task makers
+// It is very important that the numbering of the tasks is done systematically
+// Every task should have a unique number
+// Every task should increase the task number
+// If a task i is composed out of subtasks, all subtasks have as number [...:i] 
 	
+recTask :: !String (*TSt -> *(a,*TSt)) -> (Task a) | iData a
+recTask taskname mytask = \tst -> mkTask ("recTask " <+++ taskname) mkTask` tst
+where
+	mkTask` tst=:{activated,html,myId,tasknr}		
+//	# tst=:{tasknr}	 		= incTask tst			// every task should first increment its tasknumber
+	# (val,tst)	= mkTask "" mytask {tst & tasknr = [-1:tasknr]}		// shift tasknr
+	= (val,{tst & tasknr = tasknr})
+
+//	# tst=:{tasknr}	 		= incTask tst			// every task should first increment its tasknumber
+
+
 mkTask :: !String (*TSt -> *(a,*TSt)) -> (Task a) | iData a
 mkTask taskname mytask = \tst -> mkTask` tst
 where
@@ -158,7 +172,7 @@ where
 
 repeatTask :: (Task a) -> Task a | iData a
 repeatTask task
-= task #>> mkTaskNoInc "repeatTask" (repeatTask task)
+= task #>> mkTask "repeatTask" (repeatTask task)
 
 // assigning tasks to users
 
@@ -231,7 +245,7 @@ iCTask_button tracename options = \tst -> mkTask tracename (doCTask` options) ts
 CTask_button :: [(String,Task a)] -> (Task a) | iData a
 CTask_button options = \tst -> mkTask "CTask_button" (doCTask` options) tst
 
-doCTask` [] tst					= returnV createDefault tst				
+doCTask` [] tst					= ireturnV createDefault tst				
 doCTask` options tst=:{tasknr,html,hst}									// choose one subtask out of the list
 # taskId						= itaskId (showTaskNr tasknr) ("_Or0." <+++ length options)
 # buttonId						= itaskId (showTaskNr tasknr) "_But"
@@ -297,7 +311,7 @@ where
 PCTasks :: [(String,Task a)] -> (Task a) | iData a 
 PCTasks options = \tst -> mkTask "PCTasks" (PCTasks` options) tst
 where
-	PCTasks` [] tst 				= returnV createDefault tst
+	PCTasks` [] tst 				= ireturnV createDefault tst
 	PCTasks` tasks tst=:{tasknr,html,hst}
 	# (chosen,hst)					= mkStoreForm  (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) ("_One0." <+++ length options) ) 0) id hst
 	# (choice,hst)					= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_But" ) [[(mode chosen.value n, but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]] <@ Page) hst
@@ -339,7 +353,7 @@ checkAnyTasks taskoptions ctasknr bool tst=:{tasknr}
 PTasks :: [(String,Task a)] -> (Task [a]) | iData a 
 PTasks options = \tst -> mkTask "PTasks" (doPTasks` options) tst
 where
-	doPTasks` [] tst	= returnV [] tst
+	doPTasks` [] tst	= ireturnV [] tst
 	doPTasks` options tst=:{tasknr,html,hst,trace}
 	# (chosen,hst)		= mkStoreForm   (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) ("_All" <+++ length options) ) 0) id hst
 	# (choice,hst)		= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_But" ) [[(mode chosen.value n,but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]] <@ Page) hst
@@ -372,7 +386,7 @@ where
 PMilestoneTasks :: [(String,Task a)] -> (Task [(String,a)]) | iData a 
 PMilestoneTasks options = \tst -> mkTask "PMilestoneTasks" (PMilestoneTasks` options) tst
 where
-	PMilestoneTasks` [] tst	= returnV [] tst
+	PMilestoneTasks` [] tst	= ireturnV [] tst
 	PMilestoneTasks` options tst=:{tasknr,html,hst,trace}
 	# (chosen,hst)		= mkStoreForm   (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) ("_PMile_" <+++ length options) ) 0) id hst
 	# (choice,hst)		= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_But" ) [[(mode chosen.value n,but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]] <@ Page) hst
@@ -403,43 +417,18 @@ where
 	mode i j
 	| i==j = Display
 	= Edit
-/*	PMilestoneTasks` [] tst		= returnV [] tst
-	PMilestoneTasks` options tst=:{tasknr,html,hst,trace}
-	# (chosen,hst)				= mkStoreForm  (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_PMile_" ) 0) id hst
-	# (choice,hst)				= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_But_" ) [[(mode chosen.value n,but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]] <@ Page) hst
-	# (chosen,hst)				= mkStoreForm  (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_PMile_" ) 0) choice.value hst
-	# (choice,hst)				= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_But_" ) [[(mode chosen.value n,but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]] <@ Page) hst
-	# chosenTask				= snd (options!!chosen.value)
-	# chosenTaskName			= fst (options!!chosen.value)
-	# taskoptions				= map snd options
-	# (milestoneReached,{hst})	= checkAnyTasks taskoptions 0 False {tst & html = BT [], hst = hst, trace = trace}
-	# (a,{activated=adone,html=ahtml,hst,trace}) 
-								= chosenTask {tst & tasknr = [-1:addTasknr tasknr chosen.value], activated = True, html = BT [], hst = hst}
-	# tasknr					= addTasknr tasknr (length options)
-	| not adone					= ([a],{tst & tasknr = tasknr, activated = milestoneReached, 
-										html = 	html +|+ 
-												BT choice.form +-+  (BT [Txt ("Task: " +++ chosenTaskName +++ "."),Br] +|+ 
-																		ahtml), hst = hst})
-	# (alist,{activated=finished,hst})		
-								= checkAllTasks taskoptions 0 True [] {tst & html = BT [], hst = hst}
-	| finished					= (alist,{tst & tasknr = tasknr, activated = True, hst = hst})
-	= ([a],{tst & tasknr = tasknr, activated = milestoneReached, html =	html +|+ 
-														BT choice.form +-+  (BT [Txt ("Task: " +++ chosenTaskName +++ "."),Br] +|+ 
-																			ahtml), hst = hst})
 
-	but i = LButton defpixel (i <+++ ":MileSt")
-	mode i j
-	| i==j = Display
-	= Edit
-*/
 PmuTasks :: [(Int,Task a)] -> (Task [a]) | iData a 
 PmuTasks tasks = \tst-> mkTask "PmuTasks" (PmuTasks` tasks) tst
 where
-	PmuTasks` [] tst								= returnV [] tst
+	PmuTasks` [] tst								= ireturnV [] tst
 	PmuTasks` [(ida,taska):tasks] tst=:{html}
 	# (a, tst=:{html=htmla,activated=adone})		= (ida @:: taska) {tst & html = (ida,"Task") @@: BT [], activated = True}
 	# (ax,tst=:{html=htmlstasks,activated=alldone})	= PmuTasks` tasks (incTask {tst & html = (ida,"Task") @@: BT []})
 	= ([a:ax],{tst & html = html +|+ htmla +|+ htmlstasks,activated=adone&&alldone})	
+
+ireturnV :: a -> (Task a) | iData a 
+ireturnV a  = \tst  -> (a,{tst & activated = True})	
 
 returnV :: a -> (Task a) | iData a 
 returnV a  = \tst  -> mkTask "returnV" returnV` tst
@@ -765,9 +754,11 @@ InsertTrace idx who taskname val trace = InsertTrace` ridx who val trace
 where
 	InsertTrace` :: ![Int] !Int !String ![Trace] -> [Trace]
 	InsertTrace` [i] 	who str traces
+	| i < 0					= abort "negative task numbers"
 	# (Trace _ itraces)		= select i traces
 	= updateAt` i (Trace (Just (who,show,taskname,str)) itraces)  traces
 	InsertTrace` [i:is] who str traces
+	| i < 0					= abort "negative task numbers"
 	# (Trace ni itraces)	= select i traces
 	# nistraces				= InsertTrace` is who str itraces
 	= updateAt` i (Trace ni nistraces) traces
@@ -781,21 +772,37 @@ where
 	ridx	= reverse idx
 
 	updateAt`:: !Int !Trace ![Trace] -> [Trace]
-	updateAt` 0 x []		= [x]
-	updateAt` 0 x [y:ys]	= [x:ys]
-	updateAt` n x []		= [Trace Nothing []	: updateAt` (n-1) x []]
-	updateAt` n x [y:ys]	= [y      			: updateAt` (n-1) x ys]
+	updateAt` n x list
+	| n < 0		= abort "negative numbers not allowed"
+	= updateAt` n x list
+	where
+		updateAt`:: !Int !Trace ![Trace] -> [Trace]
+		updateAt` 0 x []		= [x]
+		updateAt` 0 x [y:ys]	= [x:ys]
+		updateAt` n x []		= [Trace Nothing []	: updateAt` (n-1) x []]
+		updateAt` n x [y:ys]	= [y      			: updateAt` (n-1) x ys]
+
+printTrace2 Nothing 	= EmptyBody
+printTrace2 (Just a)  	= STable [] (print a)
+where
+	print []	= []
+	print trace	= [pr x ++ [STable [] (print xs)]\\ (Trace x xs) <- trace] 
+
+	pr Nothing 				= [EmptyBody]
+	pr (Just (w,i,tn,s)) 	= [STable [] 	[ [red (toString w),yellow tn	]
+											, [gray ("T" <+++ toString i),Txt s]
+											]]
 
 printTrace Nothing 		= EmptyBody
-printTrace (Just a)  	= STable [] (print 0 a)
+printTrace (Just a)  	= STable [] (print a)
 where
-	print n []	= []
-	print n [Trace Nothing rest:ts]
-				= print (inc n) rest ++ print n ts
-	print n [Trace (Just (w,i,tn,s)) rest:ts]	
-				= 	print (inc n) rest ++
+	print []	= []
+	print [Trace Nothing rest:ts]
+				= print  rest ++ print  ts
+	print [Trace (Just (w,i,tn,s)) rest:ts]	
+				= 	print rest ++
 					[[red (toString w),	gray ("T" <+++ toString i), yellow tn, Txt s]] ++
-					print n ts
+					print ts
 					
 // debugging code 
 

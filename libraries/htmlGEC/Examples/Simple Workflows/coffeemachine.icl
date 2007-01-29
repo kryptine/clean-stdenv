@@ -22,17 +22,18 @@ CoffeeMachine
 	#>>							returnV (nproduct,returnMoney) 
 where
 	getCoins :: (Int,Int) -> Task (Bool,Int)
-	getCoins (toPay,paid)
-	= 							[Txt ("To pay: " <+++ toPay),Br,Br] 
+	getCoins (toPay,paid) = recTask "getCoins" getCoins`
+	where
+		getCoins` = [Txt ("To pay: " <+++ toPay),Br,Br] 
 								?>>	PCTask2	
 									( 	CTask_button [(toString i <+++ " cts", returnV (False,i)) \\ i <- [5,10,20,50,100,200]]
 									, 	STask_button "Cancel" (returnV (True,0))
 									)
-		=>> \(cancel,coin) ->	handleCoin (cancel,coin)
-	where
+					=>> \(cancel,coin) ->	handleCoin (cancel,coin)
+
 		handleCoin (cancel,coin)
 		| cancel			= returnV (cancel,paid)
-		| toPay - coin > 0 	= mkTask "getCoins" (getCoins (toPay - coin,paid + coin))
+		| toPay - coin > 0 	= getCoins (toPay - coin,paid + coin)
 		= returnV (cancel,coin - toPay)
 
 

@@ -50,7 +50,8 @@ mkTask			:: function will only be called when it is its turn to be activated
 					Also needed for defining recursive tasks
 repeatTask		:: infinitely repeat Task
 */
-mkTask 			:: !String (*TSt -> *(a,*TSt)) 	-> (Task a) 	| iData a 
+//mkTask 			:: !String (*TSt -> *(a,*TSt)) 	-> (Task a) 	| iData a 
+recTask 		:: !String (*TSt -> *(a,*TSt)) 	-> (Task a) 	| iData a 
 repeatTask 		:: (Task a) -> Task a 							| iData a
 
 /*	Sequential Tasks:
