@@ -731,17 +731,6 @@ showTaskNr [i:is] 	= showTaskNr is <+++ "." <+++ toString i
 
 itaskId nr postfix = "iTask_" <+++ nr <+++ postfix
 
-// Trace handling
-/*
-Start
-# t = InsertTrace [0,0] 22 "bla0.1" []
-# t = InsertTrace [1,0] 22 "bla0.2" t
-# t = InsertTrace [0] 22 "bla0" t
-# t = InsertTrace [2] 22 "bla2" t
-# t = InsertTrace [1] 22 "bla1" t
-= printTrace (Just t)
-*/
-
 InsertTrace :: !Bool ![Int] !Int String !String ![Trace] -> [Trace]
 InsertTrace finished idx who taskname val trace = InsertTrace` ridx who val trace
 where
@@ -782,13 +771,13 @@ where
 	print b trace	= [pr b x ++ [STable emptyBackground (print (isDone x||b) xs)]\\ (Trace x xs) <- trace] 
 
 	pr _ Nothing 			= [STable doneBackground2 	
-											[ [EmptyBody,EmptyBody]
-											]
+									[ [EmptyBody,EmptyBody]
+									]
 							  ]
 	pr dprev (Just (dtask,(w,i,tn,s)))	
 	| dprev && (not dtask)	= pr False Nothing	// subtask not important anymore (assume no milestone tasks)
-	| not dtask				= showTask Navy Silver Maroon Silver (w,i,tn,s)
-	= showTask Red Silver Yellow White (w,i,tn,s)
+	| not dtask				= showTask2 cellattr1b Navy Silver Maroon Silver (w,i,tn,s)
+	= showTask2 cellattr1a Red Silver Yellow White (w,i,tn,s)
 	
 	showTask c1 c2 c3 c4 (w,i,tn,s)
 	= [STable doneBackground 	
@@ -801,15 +790,25 @@ where
 	isDone (Just (b,(w,i,tn,s))) = b
 
 
-	doneBackground = 	[ Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0), Tbl_Width (Pixels 150)
-						, Tbl_Frame Frm_Border, Tbl_Rules Rul_None
+	doneBackground = 	[ Tbl_CellPadding (Pixels 1), Tbl_CellSpacing (Pixels 0), Tbl_Width (Pixels 130)
+						, Tbl_Rules Rul_None, Tbl_Frame Frm_Below//Frm_Border 
 						]
-	doneBackground2 = 	[ Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0), Tbl_Width (Pixels 150)
+	doneBackground2 = 	[ Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0), Tbl_Width (Pixels 130)
 						]
 	emptyBackground = 	[Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)]
-	
+	cellattr1a		=	[Td_Bgcolor (`Colorname Green), Td_Width (Pixels 10), Td_VAlign Alo_Absmiddle]
+	cellattr1b		=	[Td_Bgcolor (`Colorname Silver), Td_Width (Pixels 10), Td_VAlign Alo_Absmiddle]
+	cellattr2		=	[Td_VAlign Alo_Top]
+
 	font color message
 	= Font [Fnt_Color (`Colorname color), Fnt_Size -1] [B [] message]
+	
+	showTask2 attr1 c1 c2 c3 c4 (w,i,tn,s)
+	= [Table doneBackground 	[ Tr [] [Td attr1 [font c1 (toString w)],	Td cellattr2 [font c2 ("T" <+++ toString i)]]
+								, Tr [] [Td attr1 [EmptyBody], 				Td cellattr2 [font c3 tn]]
+								, Tr [] [Td attr1 [EmptyBody], 				Td cellattr2 [font c4 s]]
+								]
+	  ,Br]
 
 /*printTrace Nothing 		= EmptyBody
 printTrace (Just a)  	= STable [] (print a)

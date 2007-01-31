@@ -1,19 +1,19 @@
 Version: 1.4
 Global
-	Built:	False
+	Built:	True
 	Target:	Web Applications
 	Exec:	{Project}\travel.exe
 	CodeGen
-		CheckStacks:	False
+		CheckStacks:	True
 		CheckIndexes:	True
 	Application
-		HeapSize:	3145728
-		StackSize:	1048576
+		HeapSize:	6291456
+		StackSize:	2097152
 		ExtraMemory:	81920
 		IntialHeapSize:	204800
 		HeapSizeMultiplier:	4096
 		ShowExecutionTime:	False
-		ShowGC:	False
+		ShowGC:	True
 		ShowStackSize:	False
 		MarkingCollector:	False
 		StandardRuntimeEnv:	True
@@ -23,7 +23,7 @@ Global
 			Time:	True
 			Stack:	True
 		Output
-			Output:	ShowConstructors
+			Output:	BasicValuesOnly
 			Font:	Courier
 			FontSize:	9
 			WriteStdErr:	False
@@ -58,7 +58,7 @@ MainModule
 		WindowPosition
 			X:	10
 			Y:	10
-			SizeX:	885
+			SizeX:	626
 			SizeY:	604
 	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
@@ -3027,7 +3027,13 @@ OtherModules
 			ReuseUniqueNodes:	True
 			Fusion:	False
 		DclOpen:	False
-		IclOpen:	False
+		Icl
+			WindowPosition
+				X:	-1
+				Y:	47
+				SizeX:	1169
+				SizeY:	619
+		IclOpen:	True
 		LastModified:	No 0 0 0 0 0 0
 Static
 	Mods
