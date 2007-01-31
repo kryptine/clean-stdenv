@@ -122,6 +122,7 @@ None				:== [NoAttr]
 					| B  				[Std_Attr] String			// bold <b></b>
 					| Bdo	  			[Std_Attr] String			// direction of text <bdo></bdo>
 					| Big  				[Std_Attr] String			// big text <big></big>
+					| Blink				[Std_Attr] String			// blinked text <blink></blink>
 					| Blockquote	  	[Block_Attr] String			// start of a long quotation <blockquote></blockquote>
 					| Br  											// single line break <br>
 					| Button 			[Button_Attr] String		// push button <button></button>		

@@ -34,6 +34,7 @@ gHpr{|BodyTag|} prev (Area attr)				= prev <+> openCmnd 	"area"			attr
 gHpr{|BodyTag|} prev (B attr text)  			= prev <+> htmlAttrCmnd "b" 			attr text
 gHpr{|BodyTag|} prev (Bdo attr text)			= prev <+> htmlAttrCmnd "bdo" 			attr text
 gHpr{|BodyTag|} prev (Big attr text)			= prev <+> htmlAttrCmnd "big" 			attr text
+gHpr{|BodyTag|} prev (Blink attr text)	 		= prev <+> htmlAttrCmnd "blink" 		attr text
 gHpr{|BodyTag|} prev (Blockquote attr text)		= prev <+> htmlAttrCmnd "blockquote"	attr text
 gHpr{|BodyTag|} prev Br							= prev <+ "<br>"
 gHpr{|BodyTag|} prev (Button attr text)			= prev <+> htmlAttrCmnd "button" 		attr text

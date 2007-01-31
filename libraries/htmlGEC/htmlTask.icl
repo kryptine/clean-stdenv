@@ -35,7 +35,7 @@ import dynamic_string, EncodeDecode
 
 :: Trace		=	Trace TraceInfo [Trace]				// traceinfo with possibly subprocess
 
-:: TraceInfo	:== Maybe (Int,String,String,String)	// Who did it, task nr, task name (for tracing) value produced
+:: TraceInfo	:== Maybe (Bool,(Int,String,String,String))	// Task finished? who did it, task nr, task name (for tracing) value produced
 
 // setting global iData options for tasks
 
@@ -146,12 +146,8 @@ recTask :: !String (*TSt -> *(a,*TSt)) -> (Task a) | iData a
 recTask taskname mytask = \tst -> mkTask ("recTask " <+++ taskname) mkTask` tst
 where
 	mkTask` tst=:{activated,html,myId,tasknr}		
-//	# tst=:{tasknr}	 		= incTask tst			// every task should first increment its tasknumber
 	# (val,tst)	= mkTask "" mytask {tst & tasknr = [-1:tasknr]}		// shift tasknr
 	= (val,{tst & tasknr = tasknr})
-
-//	# tst=:{tasknr}	 		= incTask tst			// every task should first increment its tasknumber
-
 
 mkTask :: !String (*TSt -> *(a,*TSt)) -> (Task a) | iData a
 mkTask taskname mytask = \tst -> mkTask` tst
@@ -166,9 +162,9 @@ where
 	mkTask` tst=:{activated,html,tasknr,myId}		
 	| not activated							= (createDefault,tst)	// not active, return default value
 	# (val,tst=:{activated,trace})			=  mytask tst			// active, so perform task or get its result
-	| not activated	|| isNothing trace || taskname == ""
+	| isNothing trace || taskname == ""
 											= (val,tst)				// no trace, just return value
-	= (val,{tst & trace 					= Just (InsertTrace tasknr myId taskname (printToString val) (fromJust trace))}) // adjust trace
+	= (val,{tst & trace 					= Just (InsertTrace activated tasknr myId taskname (printToString val) (fromJust trace))}) // adjust trace
 
 repeatTask :: (Task a) -> Task a | iData a
 repeatTask task
@@ -716,9 +712,6 @@ yellowUser nr
 yellow message
 = Font [Fnt_Color (`Colorname Yellow)] [B [] message]
 
-red message
-= Font [Fnt_Color (`Colorname Red)] [B [] message]
-
 gray message
 = Font [Fnt_Color (`Colorname Silver)] [B [] message]
 
@@ -749,14 +742,14 @@ Start
 = printTrace (Just t)
 */
 
-InsertTrace ::  ![Int] !Int String !String ![Trace] -> [Trace]
-InsertTrace idx who taskname val trace = InsertTrace` ridx who val trace
+InsertTrace :: !Bool ![Int] !Int String !String ![Trace] -> [Trace]
+InsertTrace finished idx who taskname val trace = InsertTrace` ridx who val trace
 where
 	InsertTrace` :: ![Int] !Int !String ![Trace] -> [Trace]
 	InsertTrace` [i] 	who str traces
 	| i < 0					= abort "negative task numbers"
 	# (Trace _ itraces)		= select i traces
-	= updateAt` i (Trace (Just (who,show,taskname,str)) itraces)  traces
+	= updateAt` i (Trace (Just (finished,(who,show,taskname,str))) itraces)  traces
 	InsertTrace` [i:is] who str traces
 	| i < 0					= abort "negative task numbers"
 	# (Trace ni itraces)	= select i traces
@@ -783,17 +776,42 @@ where
 		updateAt` n x [y:ys]	= [y      			: updateAt` (n-1) x ys]
 
 printTrace2 Nothing 	= EmptyBody
-printTrace2 (Just a)  	= STable [] (print a)
+printTrace2 (Just a)  	= STable emptyBackground (print False a)
 where
-	print []	= []
-	print trace	= [pr x ++ [STable [] (print xs)]\\ (Trace x xs) <- trace] 
+	print _ []		= []
+	print b trace	= [pr b x ++ [STable emptyBackground (print (isDone x||b) xs)]\\ (Trace x xs) <- trace] 
 
-	pr Nothing 				= [EmptyBody]
-	pr (Just (w,i,tn,s)) 	= [STable [] 	[ [red (toString w),yellow tn	]
-											, [gray ("T" <+++ toString i),Txt s]
-											]]
+	pr _ Nothing 			= [STable doneBackground2 	
+											[ [EmptyBody,EmptyBody]
+											]
+							  ]
+	pr dprev (Just (dtask,(w,i,tn,s)))	
+	| dprev && (not dtask)	= pr False Nothing	// subtask not important anymore (assume no milestone tasks)
+	| not dtask				= showTask Navy Silver Maroon Silver (w,i,tn,s)
+	= showTask Red Silver Yellow White (w,i,tn,s)
+	
+	showTask c1 c2 c3 c4 (w,i,tn,s)
+	= [STable doneBackground 	
+		[ [font c1 (toString w),font c2 ("T" <+++ toString i)]
+		, [EmptyBody, font c3 tn]
+		, [EmptyBody, font c4 s]
+		]
+		]
+	isDone Nothing = False
+	isDone (Just (b,(w,i,tn,s))) = b
 
-printTrace Nothing 		= EmptyBody
+
+	doneBackground = 	[ Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0), Tbl_Width (Pixels 150)
+						, Tbl_Frame Frm_Border, Tbl_Rules Rul_None
+						]
+	doneBackground2 = 	[ Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0), Tbl_Width (Pixels 150)
+						]
+	emptyBackground = 	[Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)]
+	
+	font color message
+	= Font [Fnt_Color (`Colorname color), Fnt_Size -1] [B [] message]
+
+/*printTrace Nothing 		= EmptyBody
 printTrace (Just a)  	= STable [] (print a)
 where
 	print []	= []
@@ -803,7 +821,7 @@ where
 				= 	print rest ++
 					[[red (toString w),	gray ("T" <+++ toString i), yellow tn, Txt s]] ++
 					print ts
-					
+*/					
 // debugging code 
 
 print_graph :: !a -> Bool;
