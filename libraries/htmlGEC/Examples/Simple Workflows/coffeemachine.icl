@@ -4,6 +4,13 @@ import StdEnv, StdHtml
 
 Start world = doHtmlServer (singleUserTask (repeatTask CoffeeMachine)) world
 
+tst =	
+		PCTask2	
+		( 	CTask_button [(toString i <+++ " cts", returnV (False,i)) \\ i <- [5,10,20,50,100,200]]
+		, 	STask_button "Cancel" (returnV (True,0))
+		)
+
+
 CoffeeMachine :: Task (String,Int)
 CoffeeMachine  
 =	 							[Txt "Choose product:",Br,Br] 

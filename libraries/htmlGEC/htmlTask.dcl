@@ -1,6 +1,6 @@
 definition module htmlTask
 
-// *experimental* library for controlling interactive Tasks (iTask) based on iData
+// library for controlling interactive Tasks (iTask) based on iData
 // (c) 2006,2007 MJP
 
 import StdHtml
@@ -46,13 +46,11 @@ userId 			:: TSt -> (Int,TSt)
 (@::) infix 4 	:: !Int (Task a)		    -> (Task a)			| iData a
 
 /* Promote any TSt state transition function to an iTask:
-mkTask			:: function will only be called when it is its turn to be activated
-					Also needed for defining recursive tasks
-repeatTask		:: infinitely repeat Task
+recTask			:: to create a function which can recursively be called as a task
+repeatTask		:: infinitely repeating Task
 */
-//mkTask 			:: !String (*TSt -> *(a,*TSt)) 	-> (Task a) 	| iData a 
-recTask 		:: !String (*TSt -> *(a,*TSt)) 	-> (Task a) 	| iData a 
-repeatTask 		:: (Task a) -> Task a 							| iData a
+recTask 		:: !String (Task a) 		-> (Task a) 		| iData a 
+repeatTask 		:: (Task a) 				-> Task a 			| iData a
 
 /*	Sequential Tasks:
 STask			:: a Sequential iTask
@@ -106,7 +104,7 @@ returnTask 		:: a 					-> (Task a) 			| iData a
 returnVF 		:: a [BodyTag] 			-> (Task a) 			| iData a 
 returnF 		:: [BodyTag] 			-> TSt -> TSt
 
-/* Setting up communication channels between users:
+/* Experimental!! DONT USE Setting up communication channels between users:
 mkRTask			:: Remote Task: split indicated task in two tasks: a calling task and a receiving task
 					the caller will wait until the receiver has completed the task
 mkRTaskCall 	:: as mkRTask, but the caller will provide input for the remote task
@@ -118,14 +116,12 @@ mkRTaskCall		:: String b (b -> Task a) *TSt
 										-> ((b -> Task a,Task a),*TSt)	| iData a & iData b
 mkRDynTaskCall 	:: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt)| iData a
 
-
 /* Time and Date management:
 waitForTimeTask	:: Task is done when time has come
 waitForDateTask	:: Task is done when date has come
 */
 waitForTimeTask	:: HtmlTime				-> (Task HtmlTime)
 waitForDateTask	:: HtmlDate				-> (Task HtmlDate)
-
 
 /* Lifting iData domain to iTask domain
 appIData		:: lift iData editors to iTask domain
@@ -137,14 +133,15 @@ appHSt 			:: (HSt -> (a,HSt)) 	-> (Task a)						| iData a
 /* monadic shorthands
 (=>>)			:: bind
 (#>>)			:: bind, no argument passed
+
 (?>>)			:: prompt as long as task is active but not finished
 (!>>)			:: prompt when task is activated
+
 (*>>)			:: applying function of type: TSt -> (a,TSt)
 (@>>)			:: applying function of type: TSt -> TSt
 
 (<|)			:: repeat task as long as predicate does not hold
 (<<@)			:: set attribute for indicated task
-
 */
 
 (=>>) infix  1 	:: w:(St .s .a) v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]	
@@ -153,7 +150,6 @@ appHSt 			:: (HSt -> (a,HSt)) 	-> (Task a)						| iData a
 (!>>) infix  2 	:: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
 (*>>) infix  4	:: w:(St .s .a)  v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]
 (@>>) infix  4	:: w:(.s -> .s)  v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]
-
-(<|)  infix 3 	:: (St TSt a) (a -> .Bool, a -> String) -> (St TSt a) | iData a
-(<<@) infix 3 	::  v:(St TSt .a) b  -> u:(St TSt .a) | setTaskAttr b, [u <= v]
+(<|)  infix  3 	:: (St TSt a) (a -> .Bool, a -> String) -> (St TSt a) | iData a
+(<<@) infix  3 	::  v:(St TSt .a) b  -> u:(St TSt .a) | setTaskAttr b, [u <= v]
 

@@ -1,5 +1,7 @@
 implementation module htmlTask
 
+// (c) MJP 2006 - 2007
+
 import StdEnv, StdHtml
 
 derive gForm 	[], Void
@@ -50,7 +52,12 @@ where setTaskAttr mode tst = {tst & storageInfo.taskmode = mode}
 
 // wrappers
 
-multiUserTask 	:: !Int!(Task a)  	!*HSt -> (Html,*HSt) 			| iData a 
+singleUserTask :: !(Task a) !*HSt -> (Html,*HSt) | iData a 
+singleUserTask task hst 
+# (_,html,hst) = startTask 0 task hst
+= mkHtml "stest" html hst
+
+multiUserTask :: !Int!(Task a) !*HSt -> (Html,*HSt) | iData a 
 multiUserTask nusers task  hst 
 # (idform,hst) 	= FuncMenu (Init,nFormId "User_Selected" 
 						(0,[("User " +++ toString i,\_ -> i) \\ i<-[0..nusers - 1] ])) hst
@@ -58,7 +65,7 @@ multiUserTask nusers task  hst
 # (_,html,hst) 	= startTask currentWorker task hst
 = mkHtml "mtest" (idform.form ++ html) hst
 
-startTask 		:: !Int !(Task a) 		!*HSt -> (a,[BodyTag],!*HSt) 	| iData a 
+startTask :: !Int !(Task a) !*HSt -> (a,[BodyTag],!*HSt) | iData a 
 startTask thisUser taska hst
 # userVersionNr			= "User" <+++ thisUser <+++ "_VersionPNr"
 # sessionVersionNr		= "User" <+++ thisUser <+++ "_VersionSNr" 
@@ -72,14 +79,14 @@ startTask thisUser taska hst
 														[Font [Fnt_Color (`Colorname Yellow)]
 													   [B [] "Sorry, cannot apply command.",Br, 
 													    B [] "Your page is not up-to date!",Br]],hst)
-# (a,{html,hst,trace}) = taska 	{ tasknr	= [0]
-							, activated = True
-							, userId	= thisUser 
-							, myId		= defaultUser 
-							, html 		= BT []
-							, trace		= if doTrace (Just []) Nothing
-							, hst 		= hst
-							, storageInfo = {tasklife = Session, taskstorage = PlainString, taskmode = Edit }}
+# (a,{html,hst,trace}) = taska 	{ tasknr	= [-1]
+								, activated = True
+								, userId	= thisUser 
+								, myId		= defaultUser 
+								, html 		= BT []
+								, trace		= if doTrace (Just []) Nothing
+								, hst 		= hst
+								, storageInfo = {tasklife = Session, taskstorage = PlainString, taskmode = Edit }}
 # (pversion,hst)	 	= mkStoreForm (Init, pFormId userVersionNr 0) inc hst
 # (sversion,hst)	 	= mkStoreForm (Init, nFormId sessionVersionNr pversion.value) inc hst
 # (selbuts,seltask,hst)	= Filter thisUser defaultUser ((defaultUser,"Main") @@: html) hst
@@ -131,46 +138,56 @@ where
 	isNil [] = True
 	isNil _ = False
 
-singleUserTask 	:: !(Task a) 		   	!*HSt -> (Html,*HSt) 			| iData a 
-singleUserTask task hst 
-# (_,html,hst) = startTask 0 task hst
-= mkHtml "stest" html hst
-
-// Task makers
+// Task makers are wrappers which take care of
+//		- deciding whether a task should be called (activated) or not
+//		- adding trace information
+//		- generating task numbers in a systematic way
 // It is very important that the numbering of the tasks is done systematically
 // Every task should have a unique number
-// Every task should increase the task number
-// If a task i is composed out of subtasks, all subtasks have as number [...:i] 
+// Every sequential task should increase the task number
+// If a task i is composed out of subtasks, all subtasks have as number [...:i] called a shift
+// For parallel tasks you need two shifts, one for the subtask and one to allow subsequent numbering
 	
-recTask :: !String (*TSt -> *(a,*TSt)) -> (Task a) | iData a
-recTask taskname mytask = \tst -> mkTask ("recTask " <+++ taskname) mkTask` tst
-where
-	mkTask` tst=:{activated,html,myId,tasknr}		
-	# (val,tst)	= mkTask "" mytask {tst & tasknr = [-1:tasknr]}		// shift tasknr
-	= (val,{tst & tasknr = tasknr})
-
-mkTask :: !String (*TSt -> *(a,*TSt)) -> (Task a) | iData a
+mkTask :: !String (Task a) -> (Task a) | iData a
 mkTask taskname mytask = \tst -> mkTask` tst
 where
-	mkTask` tst=:{activated,html,myId}		
+	mkTask` tst		
 	# tst			 						= incTask tst			// every task should first increment its tasknumber
 	= mkTaskNoInc taskname mytask tst
 
-mkTaskNoInc :: !String (*TSt -> *(a,*TSt)) -> (Task a) | iData a			// same as mkTask, but no increment of task nr
+mkTaskNoInc :: !String (Task a) -> (Task a) | iData a				// common second part of task wrappers
 mkTaskNoInc taskname mytask = \tst -> mkTask` tst
 where
-	mkTask` tst=:{activated,html,tasknr,myId}		
-	| not activated							= (createDefault,tst)	// not active, return default value
-	# (val,tst=:{activated,trace})			=  mytask tst			// active, so perform task or get its result
-	| isNothing trace || taskname == ""
-											= (val,tst)				// no trace, just return value
+	mkTask` tst=:{activated,tasknr,myId}		
+	| not activated							= (createDefault,tst)	// not active, don't call tasl, return default value
+	# (val,tst=:{activated,trace})			= mytask tst			// active, so perform task and get its result
+	| isNothing trace || taskname == ""		= (val,tst)				// no trace, just return value
 	= (val,{tst & trace 					= Just (InsertTrace activated tasknr myId taskname (printToString val) (fromJust trace))}) // adjust trace
 
 repeatTask :: (Task a) -> Task a | iData a
-repeatTask task
-= task #>> mkTask "repeatTask" (repeatTask task)
+repeatTask task = \tst -> mkTask "repeatTask" mkTask` tst
+where
+	mkTask` tst=:{tasknr}		
+	# (val,tst)	= task {tst & tasknr = [-1:tasknr]}					// shift tasknr
+	= repeatTask task {tst & tasknr = tasknr}						// loop
 
-// assigning tasks to users
+recTask :: !String (Task a) -> (Task a) 	| iData a 
+recTask taskname mytask = \tst -> mkTask taskname mkTask` tst
+where
+	mkTask` tst=:{tasknr}		
+	# (val,tst)	= mytask {tst & tasknr = [-1:tasknr]} 				// shift tasknr
+	= (val,{tst & tasknr = tasknr})
+
+mkParSubTask :: !String !Int (Task a) -> (Task a)  | iData a 		// two shifts are needed
+mkParSubTask name i task = \tst -> mkParSubTask` name i task tst
+where
+	mkParSubTask` name i task tst=:{tasknr}
+	# (v,tst) = mkTaskNoInc (name <+++ "." <+++ i) mysubtask {tst & tasknr = [i:tasknr],activated = True} // shift task
+	= (v,{tst & tasknr = tasknr})
+	where
+		mysubtask tst=:{tasknr} = task {tst & tasknr = [-1:tasknr], activated = True, html = BT []}	// shift once again!
+
+// assigning tasks to users, each user is identified by a number
 
 (@:) infix 4 :: !(!Int,!String) (Task a)	-> (Task a)			| iData a
 (@:) (userId,taskname) taska = \tst=:{myId} -> assignTask` myId {tst & myId = userId}
@@ -198,6 +215,7 @@ where
 			  , html = 	html +|+  ((userId,"Task " <+++ myId) @@: nhtml)})				// combine html code, filter later					
 
 // sequential tasks
+
 iSTask tracename prompt task = \tst -> mkTask tracename (STask` prompt task) tst
 
 STask :: String a -> (Task a) | iData a 
@@ -218,7 +236,7 @@ STask` prompt a tst=:{tasknr,html,hst}
 | taskdone.value	= STask` prompt a {tst & hst = hst}												// task is now completed, handle as previously
 = (a,{tst & activated = taskdone.value, html = html +|+ BT (editor.form ++ finbut.form), hst = hst})
 
-STask_button 		:: String (Task a) 			-> (Task a) 	| iData a
+STask_button :: String (Task a) -> (Task a) | iData a
 STask_button s task = iCTask_button "STask_button" [(s,task)]
 
 STasks :: [(String,Task a)] -> (Task [a])| iData a 
@@ -298,11 +316,11 @@ where
 PCTask2 :: (Task a,Task a) -> (Task a) | iData a 
 PCTask2 (taska,taskb) = \tst -> mkTask "PCTask2" (PCTask2` (taska,taskb)) tst
 where
-	PCTask2` (taska,taskb) tst=:{tasknr,html,hst,trace}
-	# (a,{activated=adone,html=ahtml,hst,trace}) 	= taska {tst & tasknr = [-1,0:tasknr],activated = True, html = BT [], hst = hst, trace = trace}
-	# (b,{activated=bdone,html=bhtml,hst,trace}) 	= taskb {tst & tasknr = [-1,1:tasknr],activated = True, html = BT [], hst = hst, trace = trace}
+	PCTask2` (taska,taskb) tst=:{tasknr,html}
+	# (a,tst=:{activated=adone,html=ahtml})	= mkParSubTask "PTask2" 0 taska tst
+	# (b,tst=:{activated=bdone,html=bhtml})	= mkParSubTask "PTask2" 1 taskb {tst & tasknr = tasknr}
 	# (aorb,aorbdone,myhtml)				= if adone (a,adone,ahtml) (if bdone (b,bdone,bhtml) (a,False,ahtml +|+ bhtml))
-	= (aorb,{tst & activated = aorbdone, html = html +|+ myhtml, hst =  hst, trace = trace})
+	= (aorb,{tst & activated = aorbdone, html = html +|+ myhtml})
 
 PCTasks :: [(String,Task a)] -> (Task a) | iData a 
 PCTasks options = \tst -> mkTask "PCTasks" (PCTasks` options) tst
@@ -329,10 +347,10 @@ where
 PTask2 :: (Task a,Task b) -> (Task (a,b)) | iData a & iData b
 PTask2 (taska,taskb) = \tst -> mkTask "PTask2" (PTask2` (taska,taskb)) tst
 where
-	PTask2` (taska,taskb) tst=:{tasknr,html,hst,trace}
-	# (a,{activated=adone,html=ahtml,hst,trace})	= taska {tst & tasknr = [-1,0:tasknr],activated = True, html = BT [], hst = hst,trace = trace}	
-	# (b,{activated=bdone,html=bhtml,hst,trace})	= taskb {tst & tasknr = [-1,1:tasknr],activated = True, html = BT [], hst = hst, trace = trace}
-	= ((a,b),{tst & activated = adone&&bdone, html = html +|+ ahtml +|+ bhtml,hst = hst, trace = trace})
+	PTask2` (taska,taskb) tst=:{tasknr,html}
+	# (a,tst=:{activated=adone,html=ahtml})	= mkParSubTask "PTask2" 0 taska tst
+	# (b,tst=:{activated=bdone,html=bhtml})	= mkParSubTask "PTask2" 1 taskb {tst & tasknr = tasknr}
+	= ((a,b),{tst & activated = adone&&bdone, html = html +|+ ahtml +|+ bhtml})
 
 checkAllTasks options ctasknr bool alist tst=:{tasknr}
 | ctasknr == length options		= (reverse alist,{tst & activated = bool})
@@ -415,7 +433,7 @@ where
 	= Edit
 
 PmuTasks :: [(Int,Task a)] -> (Task [a]) | iData a 
-PmuTasks tasks = \tst-> mkTask "PmuTasks" (PmuTasks` tasks) tst
+PmuTasks tasks = \tst-> recTask "PmuTasks" (PmuTasks` tasks) tst
 where
 	PmuTasks` [] tst								= ireturnV [] tst
 	PmuTasks` [(ida,taska):tasks] tst=:{html}
@@ -435,9 +453,8 @@ returnTask :: a -> (Task a) | iData a
 returnTask a = \tst -> mkTask "returnTask" (returnTask` a) tst
 where
 	returnTask` a  tst=:{tasknr,activated,html,hst}
-	# editId			= "edit_" <+++ showTaskNr tasknr
-	# (editor,hst) 		= (mkEditForm  (Set,cdFormId tst.storageInfo editId a <@ Display) hst)			// yes, read out current value, make editor passive
-	= (editor.value,{tst & html = html +|+ BT editor.form, activated = True, hst = hst})		// return result task
+	# editId	= "edit_" <+++ showTaskNr tasknr
+	= (a,{tst & html = html +|+ BT [toHtml a ], activated = True, hst = hst})		// return result task
 
 returnVF :: a [BodyTag] -> (Task a) | iData a 
 returnVF a bodytag = \tst = mkTask "returnVF" returnVF` tst
@@ -770,10 +787,7 @@ where
 	print _ []		= []
 	print b trace	= [pr b x ++ [STable emptyBackground (print (isDone x||b) xs)]\\ (Trace x xs) <- trace] 
 
-	pr _ Nothing 			= [STable doneBackground2 	
-									[ [EmptyBody,EmptyBody]
-									]
-							  ]
+	pr _ Nothing 			= []
 	pr dprev (Just (dtask,(w,i,tn,s)))	
 	| dprev && (not dtask)	= pr False Nothing	// subtask not important anymore (assume no milestone tasks)
 	| not dtask				= showTask2 cellattr1b Navy Silver Maroon Silver (w,i,tn,s)
@@ -790,15 +804,16 @@ where
 	isDone (Just (b,(w,i,tn,s))) = b
 
 
-	doneBackground = 	[ Tbl_CellPadding (Pixels 1), Tbl_CellSpacing (Pixels 0), Tbl_Width (Pixels 130)
-						, Tbl_Rules Rul_None, Tbl_Frame Frm_Below//Frm_Border 
+	doneBackground = 	[ Tbl_CellPadding (Pixels 1), Tbl_CellSpacing (Pixels 0), cellwidth
+						, Tbl_Rules Rul_None, Tbl_Frame Frm_Border 
 						]
-	doneBackground2 = 	[ Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0), Tbl_Width (Pixels 130)
+	doneBackground2 = 	[ Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0), cellwidth
 						]
 	emptyBackground = 	[Tbl_CellPadding (Pixels 0), Tbl_CellSpacing (Pixels 0)]
-	cellattr1a		=	[Td_Bgcolor (`Colorname Green), Td_Width (Pixels 10), Td_VAlign Alo_Absmiddle]
+	cellattr1a		=	[Td_Bgcolor (`Colorname Green),  Td_Width (Pixels 10), Td_VAlign Alo_Absmiddle]
 	cellattr1b		=	[Td_Bgcolor (`Colorname Silver), Td_Width (Pixels 10), Td_VAlign Alo_Absmiddle]
 	cellattr2		=	[Td_VAlign Alo_Top]
+	cellwidth		= 	Tbl_Width (Pixels 130)
 
 	font color message
 	= Font [Fnt_Color (`Colorname color), Fnt_Size -1] [B [] message]

@@ -10,47 +10,41 @@ import tree
 
 
 //Start world  = doHtml MyPage world
-//Start world  = doHtmlServer MyPage world
-Start world = Start3 world
+Start world  = doHtmlServer MyPage world
+
 myListId = nFormId "list" []
 myTreeId = nFormId "tree" Leaf
 
-import dynamic_string
 
-//Start3 :: *World -> Dynamic
-Start3 world 
-# inout					= [|]
-# (gerda,world)			= openGerda "bla" world	
-# nworld 				= { worldC = world, inout = inout, gerda = gerda}	
-# nworld				= writeState (MyDir Internal) "mylist"  mydynamic nworld
-# (string,nworld)		= readState (MyDir Internal) "mylist" nworld
-=  string_to_dynamic` string
-where
-	string_to_dynamic` :: {#Char} -> Dynamic	// just to make a unique copy as requested by string_to_dynamic
-	string_to_dynamic` s = string_to_dynamic {s` \\ s` <-: s}
+gForm {|GerdaObject|} ga (init,formidGO=:{ival}) hst
+# (fa,hst) = ga (init,reuseFormId formidGO ival.gerdaObject) hst
+= ({fa & value = {ival & gerdaObject = fa.value}},hst) 
 
-	mydynamic = dynamic_to_string (dynamic [1..10])
+gParse {|GerdaObject|} ga expr =
+	case ga expr of
+		(Just a) -> Just (gerdaObject a)
+		_ -> Nothing
 
-Start2 :: *World -> Dynamic
-Start2 world 
-# (ok,file,world)	= fopen "bla.txt" FWriteData world
-| not ok 			= dynamic 0
-# file				= fwrites (dynamic_to_string (dynamic [1..10])) file
-# (ok,world)		= fclose file world
-# (ok,file,world)	= fopen "bla.txt" FReadData world
-# (string,file)		= freads file 10000
-=  string_to_dynamic string
+gPrint {|GerdaObject|} ga {gerdaObject} pst =
+	ga gerdaObject pst 
+
+gUpd{|GerdaObject|} ga (UpdCreate l) _ 
+# (updmode,a)	= ga (UpdCreate l) (abort "gerdaobject cannot create new element")
+= (updmode,gerdaObject a)
+gUpd{|GerdaObject|} ga updmode go 
+# (updmode,a)	= ga updmode go.gerdaObject
+= (updmode,{go & gerdaObject = a})
 
 MyPage hst
-# (iList,hst) = mkEditForm (Init, pDFormId "mylist" initVal) hst
+# (iList,hst) = mkEditForm (Init, nFormId "mylist" initVal <@ Database) hst
 = mkHtml "Balancing Tree From List"
 		[ Txt "Converting a list:", Br, Br
           , BodyTag iList.form
-//          , BodyTag iTree.form
           ] hst
 
-initVal :: [Int]
-initVal = [1..10]
+//initVal :: [GerdaObject Int]
+initVal = [gerdaObject i \\ i <- [1..3]]
+//initVal = [1..3]
 
 MyPageArr hst
 # (mycircuitf,hst) = startCircuit mycircuit [1,5,2] hst
