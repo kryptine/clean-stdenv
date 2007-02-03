@@ -156,25 +156,25 @@ where
 	= mkTaskNoInc taskname mytask tst
 
 mkTaskNoInc :: !String (Task a) -> (Task a) | iData a				// common second part of task wrappers
-mkTaskNoInc taskname mytask = \tst -> mkTask` tst
+mkTaskNoInc taskname mytask = \tst -> mkTaskNoInc` tst
 where
-	mkTask` tst=:{activated,tasknr,myId}		
+	mkTaskNoInc` tst=:{activated,tasknr,myId}		
 	| not activated							= (createDefault,tst)	// not active, don't call tasl, return default value
 	# (val,tst=:{activated,trace})			= mytask tst			// active, so perform task and get its result
 	| isNothing trace || taskname == ""		= (val,tst)				// no trace, just return value
 	= (val,{tst & trace 					= Just (InsertTrace activated tasknr myId taskname (printToString val) (fromJust trace))}) // adjust trace
 
 repeatTask :: (Task a) -> Task a | iData a
-repeatTask task = \tst -> mkTask "repeatTask" mkTask` tst
+repeatTask task = \tst -> mkTask "repeatTask" repeatTask` tst
 where
-	mkTask` tst=:{tasknr}		
+	repeatTask` tst=:{tasknr}		
 	# (val,tst)	= task {tst & tasknr = [-1:tasknr]}					// shift tasknr
 	= repeatTask task {tst & tasknr = tasknr}						// loop
 
 recTask :: !String (Task a) -> (Task a) 	| iData a 
-recTask taskname mytask = \tst -> mkTask taskname mkTask` tst
+recTask taskname mytask = \tst -> mkTask taskname recTask` tst
 where
-	mkTask` tst=:{tasknr}		
+	recTask` tst=:{tasknr}		
 	# (val,tst)	= mytask {tst & tasknr = [-1:tasknr]} 				// shift tasknr
 	= (val,{tst & tasknr = tasknr})
 
