@@ -189,6 +189,43 @@ where
 
 	order l1 l2			= if (l1 < l2) l2 l1	// longest lifetime chosen will be the final setting Database > Persistent > Session > Page > temp
 
+deleteStates :: !(String -> Bool) !*FormStates *NWorld -> (*FormStates,*NWorld)	
+deleteStates pred formstates=:{fstates,server} world
+# (fstates,world)		= deleteStates` fstates world
+= ({formstates & fstates = fstates},world)
+where
+	deleteStates` :: *FStates *NWorld -> (*FStates,*NWorld)	
+	deleteStates` Leaf_ world 									// id not part of tree yet
+						= (Leaf_,world)
+	deleteStates` (Node_ left a=:(fid,fstate) right) world
+	| pred fid			= deleteIData left right a world
+	# (nleft, world) 	= deleteStates` left  world
+	# (nright,world)	= deleteStates` right world
+	= (Node_ nleft a nright,world)
+
+	deleteIData left right a world
+	# world = deletePersistentIData a world
+	= (join left right,world)
+	where
+		join Leaf_  right 	= right
+		join left   Leaf_  	= left    
+		join left   right	= Node_ nleft largest right
+		where
+			(largest,nleft)	= FindRemoveLargest left
+	
+			FindRemoveLargest (Node_ left x Leaf_)  = (x,left)
+			FindRemoveLargest (Node_ left x right ) = (largest,Node_ left x nright)
+			where
+				(largest,nright) = FindRemoveLargest right
+
+		deletePersistentIData (fid,OldState {life}) world 	= deletePersistent fid life world
+		deletePersistentIData (fid,NewState {life}) world 	= deletePersistent fid life world
+
+		deletePersistent fid Database 		world=:{gerda}	= {world & gerda  = deleteGerda fid gerda}
+		deletePersistent fid Persistent 	world 			= deleteState (MyDir server) fid world
+		deletePersistent fid PersistentRO 	world			= deleteState (MyDir server) fid world
+		deletePersistent fid _ 				world 			= world
+
 // Serialization and De-Serialization of states
 //
 // De-serialize information from server to the internally used form states

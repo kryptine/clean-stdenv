@@ -296,6 +296,13 @@ where
 	big									= 1000000
 	mydir								= RelativePath [PathDown directory]
 
+deleteState :: !String !String !*NWorld -> !*NWorld 
+deleteState directory filename env
+# ((ok,path),env) 						= pd_StringToPath (directory +++ "/" +++ filename +++ ".txt") env
+| not ok								= abort "Cannot delete indicated iData"
+# (_,env)								= fremove path env
+= env
+
 // serializing and de-serializing of html states
 
 

@@ -19,7 +19,7 @@ derive gerda 	QForm, ReviewState
 					, plaats 	:: String
 					}
 
-Start world = doHtmlServer (multiUserTask 2 Quotation) world
+Start world = doHtmlServer (multiUserTask 2 (Quotation <<@ Persistent)) world
 //Start world = doHtmlServer (multiUserTask 2 (Quotation )) world
 
 :: QForm = 	{ toComp 			:: String

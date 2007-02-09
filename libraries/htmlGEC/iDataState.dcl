@@ -20,6 +20,9 @@ replaceState 		:: !(FormId a) a !*FormStates *NWorld 		// replace state given Fo
 
 getUpdateId 		:: !*FormStates -> ([String],!*FormStates)	// id of previously changed form
 
+deleteStates 		:: !(String -> Bool) !*FormStates *NWorld -> (*FormStates,*NWorld)	
+
+
 // storage and retrieval of FormStates
 
 retrieveFormStates 	:: ServerKind (Maybe [(String, String)]) *NWorld -> (*FormStates,*NWorld) 	// retrieves all form states hidden in the html page

@@ -32,6 +32,10 @@ doHtml 				:: !.(*HSt -> (Html,!*HSt)) !*World -> *World  					// use this appli
 // Make sure that all editors have a unique identifier!
 mkViewForm 			:: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | iData v
 
+// Explicit removal of all (Persistent) IData for which the predicate holds applied on the IData form id
+
+deleteIData			:: !(String -> Bool) !*HSt -> !*HSt
+
 // specialize has to be used if one wants to specialize gForm for a user-defined type
 
 specialize			:: !((InIDataId a) *HSt -> (Form a,*HSt)) !(InIDataId a) !*HSt -> (!Form a,!*HSt) | gUpd {|*|} a
