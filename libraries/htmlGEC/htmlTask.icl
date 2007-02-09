@@ -168,8 +168,16 @@ repeatTask :: (Task a) -> Task a | iData a
 repeatTask task = \tst -> mkTask "repeatTask" repeatTask` tst
 where
 	repeatTask` tst=:{tasknr}		
+	# (val,tst=:{activated})	= task {tst & tasknr = [-1:tasknr]}					// shift tasknr
+	| activated 				= repeatTask` (deleteSubTasks tasknr {tst & tasknr = tasknr})
+	= (val,tst)					// loop
+
+repeatTask2 :: (Task a) -> Task a | iData a
+repeatTask2 task = \tst -> mkTask "repeatTask" repeatTask` tst
+where
+	repeatTask` tst=:{tasknr}		
 	# (val,tst)	= task {tst & tasknr = [-1:tasknr]}					// shift tasknr
-	= repeatTask task {tst & tasknr = tasknr}						// loop
+	= repeatTask2 task {tst & tasknr = tasknr}						// loop
 
 recTask :: !String (Task a) -> (Task a) 	| iData a 
 recTask taskname mytask = \tst -> mkTask taskname recTask` tst
@@ -713,6 +721,11 @@ taskId tst=:{myId} = (myId,tst)
 
 userId :: TSt -> (Int,TSt)
 userId tst=:{userId} = (userId,tst)
+
+deleteSubTasks :: ![Int] TSt -> TSt
+deleteSubTasks tasknr tst=:{hst} = {tst & hst = deleteIData (subtasksids tasknr) hst}
+where
+	subtasksids tasknr = (<) (itaskId tasknr "")
 
 // *** utility section ***
 

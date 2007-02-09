@@ -298,7 +298,7 @@ where
 
 deleteState :: !String !String !*NWorld -> !*NWorld 
 deleteState directory filename env
-# ((ok,path),env) 						= pd_StringToPath (directory +++ "/" +++ filename +++ ".txt") env
+# ((ok,path),env) 						= pd_StringToPath (directory +++ "\\" +++ filename +++ ".txt") env
 | not ok								= abort "Cannot delete indicated iData"
 # (_,env)								= fremove path env
 = env

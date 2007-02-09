@@ -198,9 +198,9 @@ where
 	deleteStates` Leaf_ world 									// id not part of tree yet
 						= (Leaf_,world)
 	deleteStates` (Node_ left a=:(fid,fstate) right) world
-	| pred fid			= deleteIData left right a world
 	# (nleft, world) 	= deleteStates` left  world
 	# (nright,world)	= deleteStates` right world
+	| pred fid			= deleteIData nleft nright a world
 	= (Node_ nleft a nright,world)
 
 	deleteIData left right a world
