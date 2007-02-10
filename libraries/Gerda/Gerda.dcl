@@ -4,14 +4,15 @@ import StdMisc, StdMaybe, StdGeneric
 
 :: Gerda
 
-openGerda :: !String !*World -> (!*Gerda, !*World)
-closeGerda :: !*Gerda !*World -> *World
-writeGerda :: !String !a !*Gerda -> *Gerda | gerda{|*|} a
-readGerda :: !String !*Gerda -> (!Maybe a, !*Gerda) | gerda{|*|} a
+openGerda 		:: !String !*World -> (!*Gerda, !*World)
+closeGerda 		:: !*Gerda !*World -> *World
+writeGerda 		:: !String !a !*Gerda -> *Gerda | gerda{|*|} a
+readGerda 		:: !String !*Gerda -> (!Maybe a, !*Gerda) | gerda{|*|} a
+deleteGerda 	:: !String !*Gerda -> *Gerda
 
 :: Binary252 = {binary252 :: !.String}
 :: CompactList a = CompactList a .(Maybe (CompactList a))
-:: GerdaObject a = {gerdaObject :: !a, 
+:: GerdaObject a = {gerdaObject :: a, 
 					gerdaWrite :: a -> *Gerda -> *Gerda,
 					gerdaRead :: *Gerda -> *(a, *Gerda)}
 :: GerdaPrimary k v = {gerdaKey :: !k, gerdaValue :: v}

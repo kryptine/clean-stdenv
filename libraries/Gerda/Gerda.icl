@@ -133,6 +133,11 @@ where
 	(gerdaA=:{gerdaL=layoutA, gerdaR=readA}) = gerda{|*|}
 	tableName = "*" +++ name
 
+deleteGerda :: !String !*Gerda -> *Gerda
+deleteGerda name g = removeTable tableName g
+where
+	tableName = "*" +++ name
+
 unsafeRead :: !String !(Table k v) !k !(v -> w) !*Gerda -> (Maybe w, !*Gerda)
 unsafeRead tableName table=:{value} ref f g=:{layout, connection, environment}
 	#!(state, _) = openSqlState (cast 0x9E5DA)
