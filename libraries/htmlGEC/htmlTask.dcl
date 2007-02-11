@@ -48,9 +48,14 @@ userId 			:: TSt -> (Int,TSt)
 /* Promote any TSt state transition function to an iTask:
 recTask			:: to create a function which can recursively be called as a task
 repeatTask		:: infinitely repeating Task
+recTask2		:: same, but do not optimize
+repeatTask2		:: same, but do not optimize
 */
 recTask 		:: !String (Task a) 		-> (Task a) 		| iData a 
 repeatTask 		:: (Task a) 				-> Task a 			| iData a
+
+recTask2 		:: !String (Task a) 		-> (Task a) 		| iData a 
+repeatTask2		:: (Task a) 				-> Task a 			| iData a
 
 /*	Sequential Tasks:
 STask			:: a Sequential iTask

@@ -37,7 +37,7 @@ import dynamic_string, EncodeDecode
 
 :: Trace		=	Trace TraceInfo [Trace]				// traceinfo with possibly subprocess
 
-:: TraceInfo	:== Maybe (Bool,(Int,String,String,String))	// Task finished? who did it, task nr, task name (for tracing) value produced
+:: TraceInfo	:== Maybe (Bool,(Int,[Int],String,String))	// Task finished? who did it, task nr, task name (for tracing) value produced
 
 // setting global iData options for tasks
 
@@ -169,8 +169,8 @@ repeatTask task = \tst -> mkTask "repeatTask" repeatTask` tst
 where
 	repeatTask` tst=:{tasknr}		
 	# (val,tst=:{activated})	= task {tst & tasknr = [-1:tasknr]}					// shift tasknr
-	| activated 				= repeatTask` (deleteSubTasks tasknr {tst & tasknr = tasknr})
-	= (val,tst)					// loop
+	| activated 				= repeatTask` (deleteSubTasks tasknr {tst & tasknr = tasknr}) // loop
+	= (val,tst)					
 
 repeatTask2 :: (Task a) -> Task a | iData a
 repeatTask2 task = \tst -> mkTask "repeatTask" repeatTask` tst
@@ -181,6 +181,20 @@ where
 
 recTask :: !String (Task a) -> (Task a) 	| iData a 
 recTask taskname mytask = \tst -> mkTask taskname recTask` tst
+where
+	recTask` tst=:{tasknr,hst}		
+	# taskId					= itaskId tasknr "_Rec"
+	# (taskval,hst) 			= mkStoreForm (Init,cFormId tst.storageInfo taskId (False,createDefault)) id hst  // remember if the task has been done
+	# (taskdone,taskvalue)		= taskval.value
+	| taskdone					= (taskvalue,{tst & hst = hst})			// optimize: return stored value
+	# (val,tst=:{activated,hst})= mytask {tst & tasknr = [-1:tasknr],hst =hst} 	// do task, first shift tasknr
+	| not activated				= (val,{tst & tasknr = tasknr})			// subtask not ready, return value of subtasks
+	# tst=:{hst}				= deleteSubTasks [0:tasknr] {tst & tasknr = [0:tasknr]}
+	# (_,hst) 					= mkStoreForm (Init,cFormId tst.storageInfo taskId (False,createDefault)) (\_ -> (True,val)) hst  // remember if the task has been done
+	= (val,{tst & tasknr = tasknr, hst = hst})
+
+recTask2 :: !String (Task a) -> (Task a) 	| iData a 
+recTask2 taskname mytask = \tst -> mkTask taskname recTask` tst
 where
 	recTask` tst=:{tasknr}		
 	# (val,tst)	= mytask {tst & tasknr = [-1:tasknr]} 				// shift tasknr
@@ -230,7 +244,6 @@ STask :: String a -> (Task a) | iData a
 STask prompt a = \tst -> mkTask "STask" (STask` prompt a) tst
 
 STask` prompt a tst=:{tasknr,html,hst}
-# tasknr			= showTaskNr tasknr
 # taskId			= itaskId tasknr "_Seq"
 # editId			= itaskId tasknr "_Val"
 # buttonId			= itaskId tasknr "_But"
@@ -269,8 +282,8 @@ CTask_button options = \tst -> mkTask "CTask_button" (doCTask` options) tst
 
 doCTask` [] tst					= ireturnV createDefault tst				
 doCTask` options tst=:{tasknr,html,hst}									// choose one subtask out of the list
-# taskId						= itaskId (showTaskNr tasknr) ("_Or0." <+++ length options)
-# buttonId						= itaskId (showTaskNr tasknr) "_But"
+# taskId						= itaskId tasknr ("_Or0." <+++ length options)
+# buttonId						= itaskId tasknr "_But"
 # (chosen,hst)					= mkStoreForm  (Init,cFormId tst.storageInfo taskId -1) id hst
 | chosen.value == -1
 	# (choice,hst)				= TableFuncBut (Init,cFormId tst.storageInfo buttonId [[(but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]] <@ Page) hst
@@ -290,7 +303,7 @@ CTask_pdmenu options = \tst -> mkTask "CTask_pdmenu" (doCTask` options) tst
 where
 	doCTask` [] tst					= (createDefault,{tst& activated = True})	
 	doCTask` options tst=:{tasknr,html,hst}								// choose one subtask out of the list
-	# taskId						= itaskId (showTaskNr tasknr) ("_Or0." <+++ length options)
+	# taskId						= itaskId tasknr ("_Or0." <+++ length options)
 	# (choice,hst)					= FuncMenu  (Init,cFormId tst.storageInfo taskId (0,[(txt,id) \\ txt <- map fst options]))	hst
 	# (_,tst=:{activated=adone,html=ahtml})	
 									= iSTask "" "Done" Void {tst & activated = True, html = BT [], hst = hst,tasknr = [-1:tasknr]} 	
@@ -306,7 +319,7 @@ MCTask_ckbox options = \tst -> mkTask "MCTask_ckbox" (MCTask_ckbox` options) tst
 where
 	MCTask_ckbox` [] tst			= ([],{tst& activated = True})
 	MCTask_ckbox` options tst=:{tasknr,html,hst}									// choose one subtask out of the list
-	# taskId						= itaskId (showTaskNr tasknr) ("_MLC." <+++ length options)
+	# taskId						= itaskId tasknr ("_MLC." <+++ length options)
 	# (cboxes,hst)					= ListFuncCheckBox (Init,cFormId tst.storageInfo taskId initCheckboxes) hst
 	# optionsform					= cboxes.form <=|> [Txt text \\ (text,_) <- options]
 	# (_,tst=:{html=ahtml,activated = adone})
@@ -335,10 +348,10 @@ PCTasks options = \tst -> mkTask "PCTasks" (PCTasks` options) tst
 where
 	PCTasks` [] tst 				= ireturnV createDefault tst
 	PCTasks` tasks tst=:{tasknr,html,hst}
-	# (chosen,hst)					= mkStoreForm  (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) ("_One0." <+++ length options) ) 0) id hst
-	# (choice,hst)					= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_But" ) [[(mode chosen.value n, but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]] <@ Page) hst
-	# (chosen,hst)					= mkStoreForm  (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) ("_One0." <+++ length options) ) 0) choice.value hst
-	# (choice,hst)					= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_But" ) [[(mode chosen.value n, but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]] <@ Page) hst
+	# (chosen,hst)					= mkStoreForm  (Init,cFormId tst.storageInfo (itaskId tasknr ("_One0." <+++ length options) ) 0) id hst
+	# (choice,hst)					= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId tasknr "_But" ) [[(mode chosen.value n, but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]] <@ Page) hst
+	# (chosen,hst)					= mkStoreForm  (Init,cFormId tst.storageInfo (itaskId tasknr ("_One0." <+++ length options) ) 0) choice.value hst
+	# (choice,hst)					= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId tasknr "_But" ) [[(mode chosen.value n, but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]] <@ Page) hst
 	# chosenTask					= snd (options!!chosen.value)
 	# (a,{tasknr,activated=adone,html=ahtml,hst})
 									= chosenTask {tst & tasknr = [-1,chosen.value:tasknr], activated = True, html = BT [], hst = hst}
@@ -377,10 +390,10 @@ PTasks options = \tst -> mkTask "PTasks" (doPTasks` options) tst
 where
 	doPTasks` [] tst	= ireturnV [] tst
 	doPTasks` options tst=:{tasknr,html,hst,trace}
-	# (chosen,hst)		= mkStoreForm   (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) ("_All" <+++ length options) ) 0) id hst
-	# (choice,hst)		= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_But" ) [[(mode chosen.value n,but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]] <@ Page) hst
-	# (chosen,hst)		= mkStoreForm   (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) ("_All" <+++ length options) ) 0) choice.value hst
-	# (choice,hst)		= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_But" ) [[(mode chosen.value n,but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]] <@ Page) hst
+	# (chosen,hst)		= mkStoreForm   (Init,cFormId tst.storageInfo (itaskId tasknr ("_All" <+++ length options) ) 0) id hst
+	# (choice,hst)		= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId tasknr "_But" ) [[(mode chosen.value n,but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]] <@ Page) hst
+	# (chosen,hst)		= mkStoreForm   (Init,cFormId tst.storageInfo (itaskId tasknr ("_All" <+++ length options) ) 0) choice.value hst
+	# (choice,hst)		= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId tasknr "_But" ) [[(mode chosen.value n,but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]] <@ Page) hst
 	# chosenTask		= snd (options!!chosen.value)
 	# chosenTaskName	= fst (options!!chosen.value)
 	# (alist,{activated=finished,hst,trace})		
@@ -410,10 +423,10 @@ PMilestoneTasks options = \tst -> mkTask "PMilestoneTasks" (PMilestoneTasks` opt
 where
 	PMilestoneTasks` [] tst	= ireturnV [] tst
 	PMilestoneTasks` options tst=:{tasknr,html,hst,trace}
-	# (chosen,hst)		= mkStoreForm   (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) ("_PMile_" <+++ length options) ) 0) id hst
-	# (choice,hst)		= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_But" ) [[(mode chosen.value n,but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]] <@ Page) hst
-	# (chosen,hst)		= mkStoreForm   (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) ("_PMile_" <+++ length options) ) 0) choice.value hst
-	# (choice,hst)		= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId (showTaskNr tasknr) "_But" ) [[(mode chosen.value n,but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]] <@ Page) hst
+	# (chosen,hst)		= mkStoreForm   (Init,cFormId tst.storageInfo (itaskId tasknr ("_PMile_" <+++ length options) ) 0) id hst
+	# (choice,hst)		= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId tasknr "_But" ) [[(mode chosen.value n,but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]] <@ Page) hst
+	# (chosen,hst)		= mkStoreForm   (Init,cFormId tst.storageInfo (itaskId tasknr ("_PMile_" <+++ length options) ) 0) choice.value hst
+	# (choice,hst)		= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId tasknr "_But" ) [[(mode chosen.value n,but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]] <@ Page) hst
 	# chosenTask		= snd (options!!chosen.value)
 	# chosenTaskName	= fst (options!!chosen.value)
 	# (alist,{activated=finished,hst,trace})		
@@ -461,7 +474,7 @@ returnTask :: a -> (Task a) | iData a
 returnTask a = \tst -> mkTask "returnTask" (returnTask` a) tst
 where
 	returnTask` a  tst=:{tasknr,activated,html,hst}
-	# editId	= "edit_" <+++ showTaskNr tasknr
+//	# editId	= "edit_" <+++ showTaskNr tasknr
 	= (a,{tst & html = html +|+ BT [toHtml a ], activated = True, hst = hst})		// return result task
 
 returnVF :: a [BodyTag] -> (Task a) | iData a 
@@ -602,7 +615,7 @@ waitForTimeTask:: HtmlTime	-> (Task HtmlTime)
 waitForTimeTask time = \tst ->  mkTask "waitForTimeTask" waitForTimeTask` tst
 where
 	waitForTimeTask` tst=:{tasknr,hst}
-	# taskId				= itaskId (showTaskNr tasknr) "_Time_"
+	# taskId				= itaskId tasknr "_Time_"
 	# (taskdone,hst) 		= mkStoreForm (Init,cFormId tst.storageInfo taskId (False,time)) id hst  			// remember time
 	# ((currtime,_),hst)	= getTimeAndDate hst
 	| currtime < time		= (time,{tst & activated = False,hst = hst})
@@ -612,7 +625,7 @@ waitForDateTask:: HtmlDate	-> (Task HtmlDate)
 waitForDateTask date = \tst ->  mkTask "waitForDateTask" waitForDateTask` tst
 where
 	waitForDateTask` tst=:{tasknr,hst}
-	# taskId				= itaskId (showTaskNr tasknr) "_Date_"
+	# taskId				= itaskId tasknr "_Date_"
 	# (taskdone,hst) 		= mkStoreForm (Init,cFormId tst.storageInfo taskId (False,date)) id hst  			// remember date
 	# ((_,currdate),hst) 	= getTimeAndDate hst
 	| currdate < date		= (date,{tst & activated = False, hst = hst})
@@ -633,8 +646,7 @@ appHSt :: (HSt -> (a,HSt)) -> (Task a) | iData a
 appHSt fun = mkTask "appHSt" doit
 where
 	doit tst=:{activated,html,tasknr,hst,storageInfo}
-	# ntasknr			= showTaskNr tasknr
-	# taskId			= "iTask_" 	<+++ ntasknr
+	# taskId			= itaskId tasknr "appHst"
 	# (store,hst) 		= mkStoreForm (Init,cFormId storageInfo taskId (False,createDefault)) id hst  			
 	# (done,value)		= store.value
 	| done 				= (value,{tst & hst = hst})	// if task has completed, don't do it again
@@ -664,8 +676,7 @@ Once :: (St TSt a) -> (St TSt a) | iData a
 Once fun = mkTask "Once" doit
 where
 	doit tst=:{activated,html,tasknr,hst,storageInfo}
-	# ntasknr			= showTaskNr tasknr
-	# taskId			= itaskId (showTaskNr tasknr) "_Once_"
+	# taskId			= itaskId tasknr "_Once_"
 	# (store,hst) 		= mkStoreForm (Init,cFormId storageInfo taskId (False,createDefault)) id hst  			
 	# (done,value)		= store.value
 	| done 				= (value,{tst & hst = hst})	// if task has completed, don't do it again
@@ -725,7 +736,12 @@ userId tst=:{userId} = (userId,tst)
 deleteSubTasks :: ![Int] TSt -> TSt
 deleteSubTasks tasknr tst=:{hst} = {tst & hst = deleteIData (subtasksids tasknr) hst}
 where
-	subtasksids tasknr = (<) (itaskId tasknr "")
+	subtasksids tasknr formid
+	# prefix 		= itaskId tasknr ""
+	# lprefix 		= size prefix
+	# prefixformid	= formid%(0,lprefix - 1)
+	# lformid 		= size formid
+	= prefix <= formid && lformid > lprefix	
 
 // *** utility section ***
 
@@ -759,7 +775,8 @@ showTaskNr [] 		= ""
 showTaskNr [i] 		= toString i
 showTaskNr [i:is] 	= showTaskNr is <+++ "." <+++ toString i 
 
-itaskId nr postfix = "iTask_" <+++ nr <+++ postfix
+itaskId :: ![Int] String -> String
+itaskId nr postfix = "iTask_" <+++ (showTaskNr nr) <+++ postfix
 
 InsertTrace :: !Bool ![Int] !Int String !String ![Trace] -> [Trace]
 InsertTrace finished idx who taskname val trace = InsertTrace` ridx who val trace
@@ -780,7 +797,7 @@ where
 	| i < length list = list!!i 
 	=  Trace Nothing []
 
-	show 	= showTaskNr idx
+	show 	= idx //showTaskNr idx
 	ridx	= reverse idx
 
 	updateAt`:: !Int !Trace ![Trace] -> [Trace]
@@ -803,9 +820,15 @@ where
 	pr _ Nothing 			= []
 	pr dprev (Just (dtask,(w,i,tn,s)))	
 	| dprev && (not dtask)	= pr False Nothing	// subtask not important anymore (assume no milestone tasks)
-	| not dtask				= showTask2 cellattr1b Navy Silver Maroon Silver (w,i,tn,s)
-	= showTask2 cellattr1a Red Silver Yellow White (w,i,tn,s)
+	| not dtask				= showTask2 cellattr1b White Navy Maroon Silver (w,i,tn,s)
+	= showTask2 cellattr1a White Yellow Red White (w,i,tn,s)
 	
+	showTask2 attr1 c1 c2 c3 c4 (w,i,tn,s)
+	= [Table doneBackground 	[ Tr [] [Td attr1 [font c1 (toString (last (reverse i)))],	Td cellattr2 [font c2 tn]]
+								, Tr [] [Td attr1 [font c3 (toString w)], 					Td cellattr2 [font c4 s]]
+								]
+	  ,Br]
+
 	showTask c1 c2 c3 c4 (w,i,tn,s)
 	= [STable doneBackground 	
 		[ [font c1 (toString w),font c2 ("T" <+++ toString i)]
@@ -831,12 +854,6 @@ where
 	font color message
 	= Font [Fnt_Color (`Colorname color), Fnt_Size -1] [B [] message]
 	
-	showTask2 attr1 c1 c2 c3 c4 (w,i,tn,s)
-	= [Table doneBackground 	[ Tr [] [Td attr1 [font c1 (toString w)],	Td cellattr2 [font c2 ("T" <+++ toString i)]]
-								, Tr [] [Td attr1 [EmptyBody], 				Td cellattr2 [font c3 tn]]
-								, Tr [] [Td attr1 [EmptyBody], 				Td cellattr2 [font c4 s]]
-								]
-	  ,Br]
 
 /*printTrace Nothing 		= EmptyBody
 printTrace (Just a)  	= STable [] (print a)
