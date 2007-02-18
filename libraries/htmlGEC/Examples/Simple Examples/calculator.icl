@@ -6,8 +6,8 @@ module calculator
 import StdEnv
 import StdHtml
 
-Start world  = doHtmlServer arrowcalculator world
-//Start world  = doHtmlServer calculator world
+//Start world  = doHtmlServer arrowcalculator world
+Start world  = doHtmlServer calculator world
 
 calculator hst
 # (calcfun,hst) 	= TableFuncBut (initID myCalculator) hst			// shows buttons
@@ -18,16 +18,6 @@ calculator hst
 	, toBody calcfun
 	] hst
 
-arrowcalculator hst
-# (calcfun,hst) 	= TableFuncBut (initID myCalculator) hst		// shows buttons
-# (display,hst) 	= startCircuit circuit calcfun.value hst	// calculates new values	
-= mkHtml "Calculator" 
-	[ H1 [] "Calculator Example: "
-	, toBody display
-	, toBody calcfun
-	] hst
-where
-	circuit  =  store myDisplay
 	
 myDisplay		= nFormId "display" (0 <|> 0)
 
@@ -48,3 +38,16 @@ where
 		app2    fun (t <|> b) = (fun t t <|> 0)
 		
 but i = LButton (defpixel / 3) i
+
+/*
+arrowcalculator hst
+# (calcfun,hst) 	= TableFuncBut (initID myCalculator) hst		// shows buttons
+# (display,hst) 	= startCircuit circuit calcfun.value hst	// calculates new values	
+= mkHtml "Calculator" 
+	[ H1 [] "Calculator Example: "
+	, toBody display
+	, toBody calcfun
+	] hst
+where
+	circuit  =  store myDisplay
+*/

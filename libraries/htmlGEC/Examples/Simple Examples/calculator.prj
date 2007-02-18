@@ -456,7 +456,7 @@ OtherModules
 				Y:	0
 				SizeX:	1034
 				SizeY:	383
-		DclOpen:	True
+		DclOpen:	False
 		Icl
 			WindowPosition
 				X:	0
@@ -485,7 +485,7 @@ OtherModules
 				Y:	0
 				SizeX:	500
 				SizeY:	300
-		DclOpen:	True
+		DclOpen:	False
 		Icl
 			WindowPosition
 				X:	0
@@ -617,7 +617,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -646,7 +646,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -675,7 +675,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -704,7 +704,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -820,7 +820,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -849,7 +849,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -878,7 +878,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	NoTypes
+			ListTypes:	StrictExportTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -3870,8 +3870,8 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	cCrossCallTCP_121.obj
-			ObjectFile:	cTCP_121.obj
+			ObjectFile:	cCrossCallTCP_121.
+			ObjectFile:	cTCP_121.
 		NeededLibraries
 			Library:	wsock_library
 	Module
@@ -4675,7 +4675,19 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
+		Dcl
+			WindowPosition
+				X:	10
+				Y:	10
+				SizeX:	800
+				SizeY:	640
 		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	10
+				Y:	10
+				SizeX:	1182
+				SizeY:	658
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -5004,12 +5016,9 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_system.o
 		Path:	{Project}\Clean System Files\calculator.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlTask.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlArrow.o
+		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlRefFormlib.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlExceptions.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlDatabase.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlFormlib.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\GenLexOrd.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlButtons.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\httpSubServer.o
 		Path:	{Application}\Libraries\Tcp\Clean System Files\StdStringChannels.o
@@ -5100,39 +5109,7 @@ Static
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdListExtensions.o
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLib.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\httpUtil.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\httpServer.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\_Array.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\GenMap.o
-		Path:	{Application}\Libraries\WrapDebug\Clean System Files\ShowWrapped.o
-		Path:	{Application}\Libraries\WrapDebug\Clean System Files\Wrap.o
-		Path:	{Application}\Libraries\WrapDebug\Clean System Files\Debug.o
-		Path:	{Application}\Libraries\Hilde\Parser combinators 2002\Clean System Files\StdParsComb.o
-		Path:	{Application}\Libraries\ExceptionsWindows\Clean System Files\StdException.o
-		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherParser.o
-		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherBackend.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynIDMacros.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory_mapped_files.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicVersion.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\shared_buffer.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicLinkerInterface.o
-		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\BitSet.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicLowLevelInterface.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynamicUtilities.o
-		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\EnDecode.o
-		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\DefaultElem.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicTypes.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicGraphConversion.o
-		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
-		Path:	{Application}\Libraries\htmlGEC\graph_copy\Clean System Files\dynamic_string.o
-		Path:	{Application}\Libraries\Directory\Clean System Files\Directory.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlTrivial.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\EncodeDecode.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\iDataState.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\GenParse.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\GenPrint.o
-		Path:	{Application}\Libraries\Generics\Clean System Files\GenEq.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlFormData.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlStylelib.o
 		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
@@ -5148,7 +5125,6 @@ Static
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\PrintUtil.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlStyleDef.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlDataDef.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlHandler.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlSettings.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
@@ -5172,7 +5148,43 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdCharList.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\StdHtml.o
-		Path:	{Application}\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlHandler.o
+		Path:	{Application}\Libraries\Generics\Clean System Files\GenEq.o
+		Path:	{Application}\Libraries\Generics\Clean System Files\GenPrint.o
+		Path:	{Application}\Libraries\Generics\Clean System Files\GenParse.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\iDataState.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlTrivial.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
+		Path:	{Application}\Libraries\Directory\Clean System Files\Directory.o
+		Path:	{Application}\Libraries\htmlGEC\graph_copy\Clean System Files\dynamic_string.o
+		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicGraphConversion.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicTypes.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\DefaultElem.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\EnDecode.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynamicUtilities.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicLowLevelInterface.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\BitSet.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicLinkerInterface.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\shared_buffer.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicVersion.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory_mapped_files.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynIDMacros.o
+		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherBackend.o
+		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherParser.o
+		Path:	{Application}\Libraries\ExceptionsWindows\Clean System Files\StdException.o
+		Path:	{Application}\Libraries\Hilde\Parser combinators 2002\Clean System Files\StdParsComb.o
+		Path:	{Application}\Libraries\WrapDebug\Clean System Files\Debug.o
+		Path:	{Application}\Libraries\WrapDebug\Clean System Files\Wrap.o
+		Path:	{Application}\Libraries\WrapDebug\Clean System Files\ShowWrapped.o
+		Path:	{Application}\Libraries\Generics\Clean System Files\GenMap.o
+		Path:	{Application}\Libraries\Generics\Clean System Files\_Array.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\httpServer.o
+		Path:	{Application}\Libraries\Generics\Clean System Files\GenLexOrd.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlFormlib.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlExceptions.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlArrow.o
 		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\SUBSERVER.OBJ
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\CFUNCLIB.OBJ
@@ -5182,7 +5194,7 @@ Static
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFileSelectors_121.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallFont_121.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallMenus_121.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallTCP_121.obj
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallTCP_121.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallWindows_121.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallProcedureTable_121.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallCursor_121.o
@@ -5192,7 +5204,7 @@ Static
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cAcceleratorTable_121.o
 		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cCrossCallxDI_121.o
 		Path:	{Application}\Libraries\Directory\Clean System Files\cDirectory.o
-		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cTCP_121.obj
+		Path:	{Application}\Libraries\ObjectIO\OS Windows\Clean System Files\cTCP_121.o
 		Path:	{Application}\Libraries\htmlGEC\graph_copy\Clean System Files\copy_string_to_graph.obj
 		Path:	{Application}\Libraries\htmlGEC\graph_copy\Clean System Files\copy_string_to_graph_interface.obj
 		Path:	{Application}\Libraries\htmlGEC\graph_copy\Clean System Files\copy_graph_to_string.obj
@@ -5257,5 +5269,5 @@ Static
 		Path:	{Application}\Libraries\Hilde\Parser combinators 2002
 		Path:	{Application}\Libraries\ExceptionsWindows
 		Path:	{Application}\Libraries\WrapDebug
-	AppP:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1
-	PrjP:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Examples\Simple Examples
+	AppP:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1
+	PrjP:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Libraries\htmlGEC\Examples\Simple Examples

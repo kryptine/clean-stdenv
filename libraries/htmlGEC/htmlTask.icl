@@ -739,7 +739,6 @@ where
 	subtasksids tasknr formid
 	# prefix 		= itaskId tasknr ""
 	# lprefix 		= size prefix
-	# prefixformid	= formid%(0,lprefix - 1)
 	# lformid 		= size formid
 	= prefix <= formid && lformid > lprefix	
 

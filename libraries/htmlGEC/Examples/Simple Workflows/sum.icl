@@ -4,10 +4,21 @@ import StdEnv, StdHtml
 
 // choose one of the following variants
 
-Start world = doHtmlServer (singleUserTask sequence) world
+Start world = doHtmlServer (singleUserTask sequence4) world
 //Start world = doHtmlServer (singleUserTask sequence3) world
 //Start world = doHtmlServer (multiUserTask 3 [setTaskAttribute Persistent] sequenceMU) world
 //Start world = doHtmlServer sequenceIData world
+
+derive gForm []
+derive gUpd []
+
+sequence4 :: Task Int
+sequence4
+= 							STask "OK" 0
+				=>> \n ->	PTasks [(toString i,STask "OK" 0) \\ i <- [0..n]]
+				=>> \v -> 	returnTask (sum v)
+
+
 
 // single user, give first value, then give second, then show sum
 // monadic style

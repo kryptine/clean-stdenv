@@ -65,8 +65,8 @@ MainModule
 	DclOpen:	False
 	Icl
 		WindowPosition
-			X:	29
-			Y:	40
+			X:	345
+			Y:	109
 			SizeX:	950
 			SizeY:	556
 	IclOpen:	True
@@ -4451,8 +4451,8 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	cCrossCallTCP_121.obj
-			ObjectFile:	cTCP_121.obj
+			ObjectFile:	cCrossCallTCP_121.
+			ObjectFile:	cTCP_121.
 		NeededLibraries
 			Library:	wsock_library
 	Module
@@ -4741,9 +4741,9 @@ OtherModules
 			WindowPosition
 				X:	143
 				Y:	27
-				SizeX:	842
-				SizeY:	531
-		IclOpen:	False
+				SizeX:	1039
+				SizeY:	737
+		IclOpen:	True
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdStrictLists
@@ -5029,6 +5029,152 @@ OtherModules
 		DclOpen:	False
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	EstherBackend
+		Dir:	{Application}\Libraries\Hilde
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	EstherParser
+		Dir:	{Application}\Libraries\Hilde
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdException
+		Dir:	{Application}\Libraries\ExceptionsWindows
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	StdParsComb
+		Dir:	{Application}\Libraries\Hilde\Parser combinators 2002
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	Debug
+		Dir:	{Application}\Libraries\WrapDebug
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	Wrap
+		Dir:	{Application}\Libraries\WrapDebug
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	ShowWrapped
+		Dir:	{Application}\Libraries\WrapDebug
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	httpSubServer
+		Dir:	{Application}\Libraries\htmlGEC
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+		NeededObjFiles
+			ObjectFile:	SUBSERVER.OBJ
+			ObjectFile:	CFUNCLIB.OBJ
+			ObjectFile:	REGERROR.OBJ
+			ObjectFile:	REGSUB.OBJ
+			ObjectFile:	REGEXP.OBJ
+		NeededLibraries
+			Library:	WSOCK32.TXT
+			Library:	USER32.TXT
+			Library:	KERNEL32.TXT
 Static
 	Mods
 		Path:	C:\Documents and Settings\rinus\Desktop\Clean 2.1.1\Libraries\htmlGEC\Examples\Simple Examples\NumberGuessingGame.icl

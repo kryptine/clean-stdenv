@@ -31,7 +31,7 @@ where
 		=>> \(ok,daytime)->	if ok (returnV daytime)
 							(			isOkDateTime daytime
 							=>> \ok ->	if ok (returnV daytime)
-										(mkTask "findDate`" (findDate` whom daytime))
+										(recTask "findDate`" (findDate` whom daytime))
 							)
 	where
 		proposeDateTime :: (HtmlDate,HtmlTime) -> Task (HtmlDate,HtmlTime)
