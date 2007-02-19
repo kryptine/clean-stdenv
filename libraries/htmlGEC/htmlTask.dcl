@@ -67,10 +67,10 @@ STask_button	:: String (Task a)		-> (Task a) 			| iData a
 STasks			:: [(String,Task a)] 	-> (Task [a])			| iData a 
 
 /* Choose one Task out of n:
-CTask_button	:: Choose one iTask from list, depending on button pressed
+CTask			:: Choose one iTask from list, depending on button pressed
 CTask_pdmenu	:: Choose one iTask from list, depending on pulldownmenu item selected
 */
-CTask_button 	:: [(String,Task a)] 	-> (Task a) 			| iData a
+CTask		 	:: [(String,Task a)] 	-> (Task a) 			| iData a
 CTask_pdmenu 	:: [(String,Task a)] 	-> (Task a)	 			| iData a
 
 /* Choose m Tasks out of n:

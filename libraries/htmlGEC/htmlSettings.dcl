@@ -18,8 +18,8 @@ class iDataSerAndDeSerialize a
 		| gParse{|*|}					//		To de-serialize a string back to a value
 		, iDataSerialize a		
 
-TraceInput			:== True			// show what kind of information is received from Client
-TraceOutput			:== True			// show what kind of information is stored
+TraceInput			:== False			// show what kind of information is received from Client
+TraceOutput			:== False			// show what kind of information is stored
 
 DEBUGSERVER			:== True			// show what kind of information is transmitted by the Clean HtmlServer
 

@@ -6,7 +6,7 @@ Start world = doHtmlServer (singleUserTask (repeatTask (CoffeeMachine <<@ Persis
 
 tst =	
 		PCTask2	
-		( 	CTask_button [(toString i <+++ " cts", returnV (False,i)) \\ i <- [5,10,20,50,100,200]]
+		( 	CTask [(toString i <+++ " cts", returnV (False,i)) \\ i <- [5,10,20,50,100,200]]
 		, 	STask_button "Cancel" (returnV (True,0))
 		)
 
@@ -14,7 +14,7 @@ tst =
 CoffeeMachine :: Task (String,Int)
 CoffeeMachine  
 =	 							[Txt "Choose product:",Br,Br] 
-								?>>	CTask_button
+								?>>	CTask
 								 	[	("Coffee: 100", 	returnV (100,"Coffee"))
 									,	("Cappucino: 150",	returnV (150,"Cappucino"))
 									,	("Tee: 50",			returnV (50, "Tee"))
@@ -33,7 +33,7 @@ where
 	where
 		getCoins` = [Txt ("To pay: " <+++ toPay),Br,Br] 
 								?>>	PCTask2	
-									( 	CTask_button [(toString i <+++ " cts", returnV (False,i)) \\ i <- [5,10,20,50,100,200]]
+									( 	CTask [(toString i <+++ " cts", returnV (False,i)) \\ i <- [5,10,20,50,100,200]]
 									, 	STask_button "Cancel" (returnV (True,0))
 									)
 					=>> \(cancel,coin) ->	handleCoin (cancel,coin)
