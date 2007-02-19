@@ -80,6 +80,47 @@ You will see the effect of the chosen example.
 
 The browser might warn for all kinds of things, but you don't have to worry. It is quite safe.
 
+4.In case it does not work:
+
+The default settings of the system assume that you have installed a ODCB interface on your machine.
+This is the case for instance when you have installed Microsoft Access or any other database system.
+If you don't have this, you will get a run-time error in the black command line window complaining about missing ODCB stuf.
+Without such standard database installed, the iData system cannot be used with the database option on.
+
+You have to switch the database option off:
+
+In the file htmlSettings.dcl you find the following definitions:
+
+class iDataSerialize a
+  | gPrint{|*|}   //  To serialize a value to a String
+  , gerda {|*|}    //  OPTION: To store and retrieve a value in a database
+  , TC a     //  To be able to store values in a dynamic
+
+// OPTIONS WHICH CAN BE SET OFF AND ON
+
+IF_GERDA gerda no_gerda :== gerda  // If database option is used
+//IF_GERDA gerda no_gerda :== no_gerda // otherwise, BUT manually flag of ", gerda{|*|}" in the class definition above
+
+Comment out the following rules
+
+//  , gerda {|*|}    //  OPTION: To store and retrieve a value in a database
+
+//IF_GERDA gerda no_gerda :== gerda  // If database option is used
+
+And remove the comment in:
+
+IF_GERDA gerda no_gerda :== no_gerda // otherwise, BUT manually flag of ", gerda{|*|}" in the class definition above
+
+Now the database option is switched off, and you can recompile by pressing Run (ctrl+r).
+Make sure that you first close the black command window.
+
+Now it should work.
+
+If you have any questions, mail me.
+
+
+
+
 
 
 *** Hard way
