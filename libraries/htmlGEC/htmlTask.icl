@@ -27,6 +27,7 @@ import dynamic_string, EncodeDecode
 
 :: HtmlTree		=	BT [BodyTag]						// simple code
 				|	(@@:) infix  0 (Int,String) HtmlTree// code with id of user attached to it
+				|	(-@:) infix  0 Int 			HtmlTree// skip code with this id if it is the id of the user 
 				|	(+-+) infixl 1 HtmlTree HtmlTree	// code to be placed next to each other				
 				|	(+|+) infixl 1 HtmlTree HtmlTree	// code to be placed below each other				
 
@@ -110,7 +111,7 @@ where
 		mkrow rows 		= [Td [Td_VAlign Alo_Top] [row] \\ row <- rows] 
 	
 	Filter id user tree hst
-	# (_,accu) 		= Collect id user [] tree
+	# (_,accu) 		= Collect ((==) id) user [] tree
 	| isNil accu	= ([],[],hst)
 	# (names,tasks) = unzip accu
 	# (fun,hst)		= ListFuncBut (Init,sFormId ("User" <+++ id <+++ "_Task" <+++ length accu) [(LButton defpixel name,dotask i) \\ name <- names & i <- [0..]]) hst
@@ -119,20 +120,22 @@ where
 	where
 		dotask i _ = i
 	
-	Collect id user accu ((nuser,taskname) @@: tree)
-	# (myhtml,accu)	= Collect id nuser accu tree
-	| id == nuser && not (isNil myhtml)
+	Collect pred user accu (nuser -@: tree)
+					= Collect (\v -> pred v && ((<>) nuser v)) user accu tree
+	Collect pred user accu ((nuser,taskname) @@: tree)
+	# (myhtml,accu)	= Collect pred nuser accu tree
+	| pred nuser && not (isNil myhtml)
 					= ([],[(taskname,myhtml):accu])
 	| otherwise		= ([],accu)
-	Collect id user accu (BT bdtg)
+	Collect pred user accu (BT bdtg)
 					= (bdtg,accu)
-	Collect id user accu  (tree1 +|+ tree2)
-	# (lhtml,accu)	= Collect id user accu tree1
-	# (rhtml,accu)	= Collect id user accu tree2
+	Collect pred user accu  (tree1 +|+ tree2)
+	# (lhtml,accu)	= Collect pred user accu tree1
+	# (rhtml,accu)	= Collect pred user accu tree2
 	= (lhtml <|.|> rhtml,accu)
-	Collect id user accu  (tree1 +-+ tree2)
-	# (lhtml,accu)	= Collect id user accu tree1
-	# (rhtml,accu)	= Collect id user [] tree2
+	Collect pred user accu  (tree1 +-+ tree2)
+	# (lhtml,accu)	= Collect pred user accu tree1
+	# (rhtml,accu)	= Collect pred user [] tree2
 	= ([lhtml <=> rhtml],accu)
 
 	isNil [] = True
@@ -164,13 +167,9 @@ where
 	| isNothing trace || taskname == ""		= (val,tst)				// no trace, just return value
 	= (val,{tst & trace 					= Just (InsertTrace activated tasknr myId taskname (printToString val) (fromJust trace))}) // adjust trace
 
-repeatTask :: (Task a) -> Task a | iData a
-repeatTask task = \tst -> mkTask "repeatTask" repeatTask` tst
-where
-	repeatTask` tst=:{tasknr}		
-	# (val,tst=:{activated})	= task {tst & tasknr = [-1:tasknr]}					// shift tasknr
-	| activated 				= repeatTask` (deleteSubTasks tasknr {tst & tasknr = tasknr}) // loop
-	= (val,tst)					
+
+// non optimized versions of repeattask and recTask will increase the task tree stack and
+// therefore cannot be used for big applications
 
 repeatTask2 :: (Task a) -> Task a | iData a
 repeatTask2 task = \tst -> mkTask "repeatTask2" repeatTask` tst
@@ -179,26 +178,64 @@ where
 	# (val,tst)	= task {tst & tasknr = [-1:tasknr]}					// shift tasknr
 	= repeatTask2 task {tst & tasknr = tasknr}						// loop
 
-recTask :: !String (Task a) -> (Task a) 	| iData a 
-recTask taskname mytask = \tst -> mkTask taskname recTask` tst
-where
-	recTask` tst=:{tasknr,hst}		
-	# taskId					= itaskId tasknr "_Rec"
-	# (taskval,hst) 			= mkStoreForm (Init,cFormId tst.storageInfo taskId (False,createDefault)) id hst  // remember if the task has been done
-	# (taskdone,taskvalue)		= taskval.value
-	| taskdone					= (taskvalue,{tst & hst = hst})					// optimize: return stored value
-	# (val,tst=:{activated,hst})= mytask {tst & tasknr = [-1:tasknr],hst =hst} 	// do task, first shift tasknr
-	| not activated				= (val,{tst & tasknr = tasknr})					// subtask not ready, return value of subtasks
-	# tst=:{hst}				= deleteSubTasks [0:tasknr] {tst & tasknr = [0:tasknr]}
-	# (_,hst) 					= mkStoreForm (Init,cFormId tst.storageInfo taskId (False,createDefault)) (\_ -> (True,val)) hst  // remember if the task has been done
-	= (val,{tst & tasknr = tasknr, hst = hst})
-
 recTask2 :: !String (Task a) -> (Task a) 	| iData a 
 recTask2 taskname mytask = \tst -> mkTask taskname recTask` tst
 where
 	recTask` tst=:{tasknr}		
 	# (val,tst)	= mytask {tst & tasknr = [-1:tasknr]} 				// shift tasknr
 	= (val,{tst & tasknr = tasknr})
+
+// same, but by remembering results stack space can be saved
+
+repeatTask :: (Task a) -> Task a | iData a
+repeatTask task = \tst -> repeatTask` tst
+where
+	repeatTask` tst=:{tasknr,hst} 
+	# mytasknr					= incTasknr tasknr					// manual incr task nr
+	# taskId					= itaskId mytasknr "_Rep"				// create store id
+	# (currtasknr,hst)			= mkStoreForm (Init,cFormId tst.storageInfo taskId mytasknr) id hst	// fetch actual tasknr
+	# (val,tst=:{activated,hst})= mkTaskNoInc "repeatTask" repeatTask`` {tst & tasknr = currtasknr.value,hst = hst}
+	| activated 																					// task is completed	
+		# ntasknr				= incTasknr currtasknr.value										// incr tasknr
+		# (currtasknr,hst)		= mkStoreForm (Init,cFormId tst.storageInfo taskId tasknr) (\_ -> ntasknr) hst // store next task nr
+		= mkTaskNoInc "repeatTask" repeatTask`` {tst & tasknr = currtasknr.value, hst = hst}		// initialize new task
+	= (val,tst)					
+	where
+		repeatTask`` tst=:{tasknr}		
+		# (val,tst)= task {tst & tasknr = [-1:tasknr]}	// do task to repeat
+		= (val,{tst & tasknr = tasknr})					
+
+recTask :: !String (Task a) -> (Task a) 	| iData a 
+recTask taskname mytask = \tst -> mkTask taskname (recTask` False mytask) tst
+
+recTask` collect mytask tst=:{tasknr,hst}		
+# taskId					= itaskId tasknr "_Rec"
+# (taskval,hst) 			= mkStoreForm (Init,cFormId tst.storageInfo taskId (False,createDefault)) id hst  // remember if the task has been done
+# (taskdone,taskvalue)		= taskval.value
+| taskdone					= (taskvalue,{tst & hst = hst})					// optimize: return stored value
+# (val,tst=:{activated,hst})= mytask {tst & tasknr = [-1:tasknr],hst =hst} 	// do task, first shift tasknr
+| not activated				= (val,{tst & tasknr = tasknr})					// subtask not ready, return value of subtasks
+# tst=:{hst}				= if collect 
+									(deleteSubTasks [0:tasknr] {tst & tasknr = [0:tasknr]})
+									tst
+# (_,hst) 					= mkStoreForm (Init,cFormId tst.storageInfo taskId (False,createDefault)) (\_ -> (True,val)) hst  // remember if the task has been done
+= (val,{tst & tasknr = tasknr, hst = hst})
+
+// same, but additionally deleting subtasks
+
+repeatTaskGC :: (Task a) -> Task a | iData a
+repeatTaskGC task = \tst -> mkTask "repeatTaskGC" repeatTask` tst
+where
+	repeatTask` tst=:{tasknr}		
+	# (val,tst=:{activated})	= task {tst & tasknr = [-1:tasknr]}					// shift tasknr
+	| activated 				= repeatTask` (deleteSubTasks tasknr {tst & tasknr = tasknr}) // loop
+	= (val,tst)					
+
+recTaskGC :: !String (Task a) -> (Task a) 	| iData a 
+recTaskGC taskname mytask = \tst -> mkTask taskname (recTask` True mytask) tst
+
+
+// parallel subtask creation utility
 
 mkParSubTask :: !String !Int (Task a) -> (Task a)  | iData a 		// two shifts are needed
 mkParSubTask name i task = \tst -> mkParSubTask` name i task tst
@@ -385,10 +422,10 @@ checkAnyTasks traceid taskoptions ctasknr bool tst=:{tasknr}
 # (a,tst=:{activated = adone})	= mkParSubTask traceid ctasknr task {tst & tasknr = tasknr, activated = True}
 = checkAnyTasks traceid taskoptions (inc ctasknr) (bool||adone) {tst & tasknr = tasknr}
 
-PmuTasks :: [(Int,Task a)] -> (Task [a]) | iData a 
-PmuTasks tasks = \tst-> recTask "PmuTasks" (PmuTasks` tasks) tst
+PmuTasks :: String [(Int,Task a)] -> (Task [a]) | iData a 
+PmuTasks taskid tasks = \tst-> recTask "PmuTasks" (PmuTasks` tasks) tst
 where
-	PmuTasks` list tst								= PTasks [("Task " <+++ i, (i @:: task)) \\ (i,task) <- list] tst
+	PmuTasks` list tst								= PTasks [(taskid <+++ " " <+++ i, i @:: task) \\ (i,task) <- list] tst
 /*
 	PmuTasks` [] tst								= ireturnV [] tst
 	PmuTasks` [(ida,taska):tasks] tst=:{html}
@@ -402,7 +439,7 @@ PTasks :: [(String,Task a)] -> (Task [a]) | iData a
 PTasks options = \tst -> mkTask "PTasks" (doPTasks` options) tst
 where
 	doPTasks` [] tst	= ireturnV [] tst
-	doPTasks` options tst=:{tasknr,html,hst,trace}
+	doPTasks` options tst=:{tasknr,html,hst,trace,myId}
 	# (chosen,hst)		= mkStoreForm   (Init,cFormId tst.storageInfo (itaskId tasknr ("_All" <+++ length options) ) 0) id hst
 	# (choice,hst)		= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId tasknr "_But" ) [[(mode chosen.value n,but txt,\_ -> n) \\ txt <- map fst options & n <- [0..]]] <@ Page) hst
 	# (chosen,hst)		= mkStoreForm   (Init,cFormId tst.storageInfo (itaskId tasknr ("_All" <+++ length options) ) 0) choice.value hst
@@ -411,20 +448,20 @@ where
 	# chosenTaskName	= fst (options!!chosen.value)
 	# (alist,{activated=finished,hst,trace,html=allhtml})		
 						= checkAllTasks "PTasks" options 0 True [] {tst & html = BT [], hst = hst,trace = trace}
-	| finished			= (map snd alist,{tst & activated = finished, hst = hst,trace = trace, html = html +|+ allhtml})
+	| finished			= (map snd alist,{tst & activated = finished, hst = hst,trace = trace, html = html +|+ (myId -@: allhtml)})
 	# (a,{activated=adone,html=ahtml,hst,trace}) = mkParSubTask "PTasks" chosen.value chosenTask {tst & tasknr = tasknr, activated = True, html = BT [], hst = hst, trace = trace}
 	| not adone			= ([a],{tst & 	trace = trace,
 										activated = adone, 
 										html = html +|+ BT choice.form +|+ 
-												(BT [Br, gray chosenTaskName,Br] +|+ ahtml +|+ allhtml), 
+												(BT [Br, gray chosenTaskName,Br] +|+ ahtml +|+ (myId -@: allhtml)), 
 										hst = hst})
 	# (alist,{activated=finished,hst,trace,html=allhtml})		
 						= checkAllTasks "PTasks" options 0 True [] {tst & html = BT [], hst = hst, trace = trace}
-	| finished			= (map snd alist,{tst & activated = finished, hst = hst,trace =trace, html = html +|+ allhtml})
+	| finished			= (map snd alist,{tst & activated = finished, hst = hst,trace =trace, html = html +|+ (myId -@: allhtml)})
 	= (map snd alist,{tst & trace = trace,
 				  activated = finished, html = 	html +|+ 
 												BT choice.form +|+ (BT [Br, gray chosenTaskName,Br] +|+ 
-																	ahtml +|+ allhtml), hst = hst})
+																	ahtml +|+ (myId -@: allhtml)), hst = hst})
 
 	but i = LButton defpixel i
 	mode i j

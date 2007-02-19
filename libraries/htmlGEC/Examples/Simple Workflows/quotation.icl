@@ -48,7 +48,7 @@ where
 
 	review :: a -> Task ReviewState | iData a
 	review form = [toHtml form,Br,Br]?>>
-							CTask_button
+							CTask
 							[ ("Rework",	STask "Done" (NeedsRework createDefault) <<@ Submit)
 							, ("Approved",	returnV Approved)
 							, ("Cancel",	returnV Cancelled)

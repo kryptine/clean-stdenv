@@ -48,14 +48,20 @@ userId 			:: TSt -> (Int,TSt)
 /* Promote any TSt state transition function to an iTask:
 recTask			:: to create a function which can recursively be called as a task
 repeatTask		:: infinitely repeating Task
-recTask2		:: same, but do not optimize
-repeatTask2		:: same, but do not optimize
+recTaskGC		:: same, and garbage collect *all* (persistent) subtasks
+repeatTaskGC	:: same, and garbage collect *all* (persistent) subtasks
+recTask2		:: same, non optimized version will increase stack
+repeatTask2		:: same, non optimized version will increase stack
 */
 recTask 		:: !String (Task a) 		-> (Task a) 		| iData a 
-repeatTask 		:: (Task a) 				-> Task a 			| iData a
+repeatTask		:: (Task a) 				-> Task a 			| iData a
+
+recTaskGC 		:: !String (Task a) 		-> (Task a) 		| iData a 
+repeatTaskGC	:: (Task a) 				-> Task a 			| iData a
 
 recTask2 		:: !String (Task a) 		-> (Task a) 		| iData a 
-repeatTask2		:: (Task a) 				-> Task a 			| iData a
+repeatTask2 	:: (Task a) 				-> Task a 			| iData a
+
 
 /*	Sequential Tasks:
 STask			:: a Sequential iTask
@@ -96,7 +102,7 @@ PmuTasks		:: assign task to indicated users, task completed when all done
 PTask2 			:: (Task a,Task b) 		-> (Task (a,b)) 		| iData a & iData b
 PTasks 			:: [(String,Task a)]	-> (Task [a])			| iData a 
 PMilestoneTasks :: [(String,Task a)] 	-> (Task [(String,a)]) 	| iData a 
-PmuTasks 		:: [(Int,Task a)] -> (Task [a]) 				| iData a 
+PmuTasks 		:: String [(Int,Task a)]-> (Task [a]) 			| iData a 
 
 /* Tasks that do not require IO actions from the user:
 returnV			:: return the value

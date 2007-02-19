@@ -4,7 +4,7 @@ import StdEnv, StdHtml
 
 // choose one of the following variants
 
-Start world = doHtmlServer (singleUserTask sequence4) world
+Start world = doHtmlServer (singleUserTask sequence) world
 //Start world = doHtmlServer (singleUserTask sequence3) world
 //Start world = doHtmlServer (multiUserTask 3 [setTaskAttribute Persistent] sequenceMU) world
 //Start world = doHtmlServer sequenceIData world

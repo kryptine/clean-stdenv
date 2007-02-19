@@ -53,7 +53,7 @@ where
 		isOkDateTime :: (HtmlDate,HtmlTime) -> Task Bool
 		isOkDateTime (date,time)
 		=	[Txt ("Can we meet on the " <+++ date <+++ " at " <+++ time <+++ "?"),Br] ?>>
-			CTask_button [ ("Accept",returnV True)
+			CTask		 [ ("Accept",returnV True)
 						 , ("Sorry",returnV False)
 						 ]
 

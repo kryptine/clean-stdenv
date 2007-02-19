@@ -2,7 +2,7 @@ module coffeemachine
 
 import StdEnv, StdHtml
 
-Start world = doHtmlServer (singleUserTask (repeatTask (CoffeeMachine <<@ Persistent))) world
+Start world = doHtmlServer (singleUserTask (repeatTaskGC CoffeeMachine <<@ Persistent)) world
 
 tst =	
 		PCTask2	
