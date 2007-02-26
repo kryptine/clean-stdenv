@@ -50,11 +50,17 @@ newsReader
 	*>> \me 		->	CTask 	[("subscribe",  PCTask2 (subscribeNewsGroup me, STask "Cancel" Void))
 								,("readNews",   readNews me)]
 where
+	OK :: Task Void
+	OK = STask "OK" Void
+
+	subscribeNewsGroup :: Subscriber -> Task Void
 	subscribeNewsGroup me
 	= 						readNewsGroups
 		=>> \groups		->	PDMenu groups
 		=>> \(_,group)	->	addSubscription me (group,0)
 		#>>					[Txt "You have subscribed to news group ", B [] group,Br,Br] ?>> OK
+
+	readNews :: Subscriber -> Task Void
 	readNews me
 	= 						readSubscriptions me
 		=>> \mygroups	->	PDMenu ([group \\ (group,_) <- mygroups] ++ ["noGroup"])
@@ -62,31 +68,31 @@ where
 							PCTask2	( repeatTask (				readIndex me group
 												  =>> \index ->	readNewsGroup group
 												  =>> \news -> 	showNews index (news%(index,index+nmessage-1)) (length news) ?>>
-														CTask 	[("<<",	readNextNewsItems group me index (~nmessage) (length news))
+														CTask 	[("<<",	readNextNewsItems me (group,index) (~nmessage) (length news))
 																,("update",		returnV Void)
-																,(">>",	readNextNewsItems group me index nmessage (length news))
+																,(">>",	readNextNewsItems me (group,index) nmessage (length news))
 																,("commitNews",		commitItem group me)
 																])
 									, STask "leaveGroup" Void
 									)
 
-OK = STask "OK" Void
+	readNextNewsItems :: Subscriber Subscription Int Int -> Task Void
+	readNextNewsItems  me (group,index) offset length
+	# nix = index + offset
+	# nix = if (nix < 0) 0 (if (length <= nix) index nix)
+	= 						addSubscription me (group,nix)
+		#>> returnV  Void				 
 
-readNextNewsItems :: GroupName Subscriber Index Int Int -> Task Void
-readNextNewsItems group me index offset length
-# nix = index + offset
-# nix = if (nix < 0) 0 (if (length <= nix) index nix)
-= 						addSubscription me (group,nix)
-	#>> returnV  Void				 
+	commitItem :: GroupName Subscriber -> Task Void
+	commitItem group me 
+	=								[Txt "Type your message ..."]
+									?>>	STask "Commit" (TextArea 4 80 "") <<@ Submit
+		=>>	\(TextArea _ _ val) -> 	readNewsGroup group
+		=>> \news				->	writeNewsGroup group (news ++ [(me,val)])
+		#>>							[Txt "Message commited to news group ",B [] group, Br,Br] ?>> OK
 
-commitItem :: GroupName Subscriber -> Task Void
-commitItem group me 
-=								[Txt "Type your message ..."]
-								?>>	STask "Commit" (TextArea 4 80 "") <<@ Submit
-	=>>	\(TextArea _ _ val) -> 	readNewsGroup group
-	=>> \news				->	writeNewsGroup group (news ++ [(me,val)])
-	#>>							[Txt "Message commited to news group ",B [] group, Br,Br] ?>> OK
 
+// displaying news groups
 
 showNews ix news nrItems = [STable [] 	[[B [] "Issue:", B [] "By:", B [] "Contents:"]
 								:[[Txt (showIndex nr),Txt (toString who),Txt (toString info)] 

@@ -36,15 +36,17 @@ gUpd{|GerdaObject|} ga updmode go
 = (updmode,{go & gerdaObject = a})
 
 MyPage hst
-# (iList,hst) = mkEditForm (Init, nFormId "mylist" initVal <@ Database) hst
+# (iList1,hst) = mkEditForm (Init, nFormId "mylist1" initVal <@ Submit ) hst
+# (iList2,hst) = mkEditForm (Init, nFormId "mylist2" initVal <@ Submit ) hst
 = mkHtml "Balancing Tree From List"
 		[ Txt "Converting a list:", Br, Br
-          , BodyTag iList.form
-          ] hst
+          , BodyTag iList1.form
+         , BodyTag iList2.form
+           ] hst
 
 //initVal :: [GerdaObject Int]
-initVal = [gerdaObject i \\ i <- [1..3]]
-//initVal = [1..3]
+//initVal = [gerdaObject i \\ i <- [1..3]]
+initVal = [1..3]
 
 MyPageArr hst
 # (mycircuitf,hst) = startCircuit mycircuit [1,5,2] hst
