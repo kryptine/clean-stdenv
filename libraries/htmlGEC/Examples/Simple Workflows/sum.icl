@@ -4,10 +4,10 @@ import StdEnv, StdHtml
 
 // choose one of the following variants
 
-Start world = doHtmlServer (singleUserTask sequence) world
+//Start world = doHtmlServer (singleUserTask sequence) world
 //Start world = doHtmlServer (singleUserTask sequence3) world
 //Start world = doHtmlServer (multiUserTask 3 [setTaskAttribute Persistent] sequenceMU) world
-//Start world = doHtmlServer sequenceIData world
+Start world = doHtmlServer sequenceIData2 world
 
 derive gForm []
 derive gUpd []
@@ -85,5 +85,28 @@ where
 		# (idata,hst) = mkEditForm (Set,  nFormId name (HideMode done,nval) <@ Display) hst	
 		= (True,{idata & value = nval},hst)	
 	= (False,{idata & value = nval},hst)	
-	
+
+
+sequenceIData2 hst
+# (done1,val1,form1,hst) = myEditor "v1" 0 hst
+# (done2,val2,form2,hst) = myEditor "v2" 0 hst
+=	mkHtml "Solution using iData without iTasks"
+	[ 			BodyTag form1
+	, if done1 (BodyTag form2) 					  EmptyBody
+	, if done2 (BodyTag [Txt "+",Hr [],toHtml (val1 + val2)]) EmptyBody
+	]  hst
+
+myEditor :: String a *HSt -> (Bool,a,[BodyTag],*HSt) | iData a
+myEditor id val hst 
+# editId		= id +++ "_Editor"
+# buttonId		= id +++ "_Button"
+# storeId		= id +++ "_Store"
+#(button,hst) 	= simpleButton buttonId "OK" (\_  -> True) hst
+#(done,hst)		= mkStoreForm (Init,nFormId storeId False) button.value hst
+| done.value	
+	# (idata,hst)	= mkEditForm (Init,nFormId  editId val <@ Display) hst
+	= (True, idata.value, idata.form ++ [Br], hst)
+| otherwise	
+	# (idata,hst)	= mkEditForm (Init,nFormId  editId val) hst
+	= (False, idata.value, idata.form ++ button.form, hst)
 	
