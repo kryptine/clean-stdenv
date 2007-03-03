@@ -2,14 +2,10 @@ module coffeemachine
 
 import StdEnv, StdHtml
 
-Start world = doHtmlServer (singleUserTask (repeatTaskGC CoffeeMachine <<@ Persistent)) world
+//Start world = doHtmlServer (singleUserTask (repeatTaskGC CoffeeMachine )) world
+Start world = doHtmlServer (singleUserTask (repeatTaskGC tesy )) world
 
-tst =	
-		PCTask2	
-		( 	CTask [(toString i <+++ " cts", returnV (False,i)) \\ i <- [5,10,20,50,100,200]]
-		, 	STask_button "Cancel" (returnV (True,0))
-		)
-
+tesy = STask "OK" 0 <| (\n -> n >= 23,\n -> "Error" +++ toString n) =>> \v -> returnTask v
 
 CoffeeMachine :: Task (String,Int)
 CoffeeMachine  

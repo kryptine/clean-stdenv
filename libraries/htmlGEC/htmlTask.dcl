@@ -20,30 +20,41 @@ startTask		:: start function for iTasks for user with indicated id
 singleUserTask 	:: start wrapper function for single user 
 multiUserTask 	:: start wrapper function for user with indicated id with option to switch between [0..users - 1]  
 */
+
 startTask 		:: !Int !(Task a) 	!*HSt -> (a,[BodyTag],!*HSt) 	| iData a 
 singleUserTask 	:: !(Task a) 		!*HSt -> (Html,*HSt) 			| iData a 
 multiUserTask 	:: !Int !(Task a)  	!*HSt -> (Html,*HSt) 			| iData a 
 
-/* Global Attribute settings: iTask are by default Lifespan = Session, StorageFormt = PlainString
+/* promote iData editor
+STask			:: create an editor with button to finish task
 */
-class setTaskAttr a :: !a *TSt -> *TSt
+STask 			:: String a -> (Task a)								| iData a 
 
-instance setTaskAttr Lifespan, StorageFormat, Mode
-
-/* Operations on Task state
-taskId			:: id assigned to task
-userId			:: id of application user
+/* monadic shorthands
+(=>>)			:: bind
+(#>>)			:: bind, no argument passed
+returnV			:: return the value
 */
 
-taskId			:: TSt -> (Int,TSt)
-userId 			:: TSt -> (Int,TSt)
+(=>>) infix  1 	:: (Task a) (a -> Task b) 	-> Task b
+(#>>) infixl 1 	:: (Task a) (Task b) 		-> Task b
+returnV 		:: a 						-> Task a 				| iData a 
 
-/* Assign tasks with informative name to user with indicated id
-(@:)			:: will prompt who is waiting for what
-(@::)			:: no prompting
+/* prompting variants
+(?>>)			:: prompt as long as task is active but not finished
+(!>>)			:: prompt when task is activated
+(<|)			:: repeat task as long as predicate does not hold, and give error message otherwise
+returnTask		:: return the value and show it 
+returnVF		:: return the value and show the Html code specified
+returnF			:: add html code
 */
-(@:)  infix 4 	:: !(!Int,!String) (Task a)	-> (Task a)			| iData a
-(@::) infix 4 	:: !Int (Task a)		    -> (Task a)			| iData a
+
+(?>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a
+(!>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a
+(<|)  infix  3 	:: (Task a) (a -> .Bool, a -> String) -> Task a 	| iData a
+returnTask 		:: a 						-> Task a				| iData a 
+returnVF 		:: a [BodyTag] 		  		-> Task a				| iData a 
+returnF 		:: [BodyTag] TSt -> TSt
 
 /* Promote any TSt state transition function to an iTask:
 recTask			:: to create a function which can recursively be called as a task
@@ -53,6 +64,7 @@ repeatTaskGC	:: same, and garbage collect *all* (persistent) subtasks
 recTask2		:: same, non optimized version will increase stack
 repeatTask2		:: same, non optimized version will increase stack
 */
+
 recTask 		:: !String (Task a) 		-> (Task a) 		| iData a 
 repeatTask		:: (Task a) 				-> Task a 			| iData a
 
@@ -63,12 +75,12 @@ recTask2 		:: !String (Task a) 		-> (Task a) 		| iData a
 repeatTask2 	:: (Task a) 				-> Task a 			| iData a
 
 
+
 /*	Sequential Tasks:
 STask			:: a Sequential iTask
 STask_button	:: do corresponding iTask when button pressed
 STasks			:: do all iTasks one after another, task completed when all done
 */
-STask 			:: String a 			-> (Task a)				| iData a 
 STask_button	:: String (Task a)		-> (Task a) 			| iData a
 STasks			:: [(String,Task a)] 	-> (Task [a])			| iData a 
 
@@ -104,16 +116,55 @@ PTasks 			:: [(String,Task a)]	-> (Task [a])			| iData a
 PMilestoneTasks :: [(String,Task a)] 	-> (Task [(String,a)]) 	| iData a 
 PmuTasks 		:: String [(Int,Task a)]-> (Task [a]) 			| iData a 
 
-/* Tasks that do not require IO actions from the user:
-returnV			:: return the value
-returnTask		:: return the value and show it 
-returnVF		:: return the value and show the Html code specified
-returnF			:: add html code
+
+/* Assign tasks with informative name to user with indicated id
+(@:)			:: will prompt who is waiting for what
+(@::)			:: no prompting
 */
-returnV 		:: a 					-> (Task a) 			| iData a 
-returnTask 		:: a 					-> (Task a) 			| iData a 
-returnVF 		:: a [BodyTag] 			-> (Task a) 			| iData a 
-returnF 		:: [BodyTag] 			-> TSt -> TSt
+(@:)  infix 4 	:: !(!Int,!String) (Task a)	-> (Task a)			| iData a
+(@::) infix 4 	:: !Int (Task a)		    -> (Task a)			| iData a
+
+
+/*
+(<<@)			:: set attribute for indicated task
+*/
+(<<@) infix  3 	:: (Task a) b  -> (Task a) | setTaskAttr b
+
+/* Global Attribute settings: iTask are by default Lifespan = Session, StorageFormt = PlainString
+*/
+class setTaskAttr a :: !a *TSt -> *TSt
+
+instance setTaskAttr Lifespan, StorageFormat, Mode
+/* Time and Date management:
+waitForTimeTask	:: Task is done when time has come
+waitForTimerTask:: Task is done when specified amount of time has passed 
+waitForDateTask	:: Task is done when date has come
+*/
+waitForTimeTask	:: HtmlTime				-> (Task HtmlTime)
+waitForTimerTask:: HtmlTime				-> (Task HtmlTime)
+waitForDateTask	:: HtmlDate				-> (Task HtmlDate)
+
+/*
+(*>>)			:: applying function of type: TSt -> (a,TSt)
+(@>>)			:: applying function of type: TSt -> TSt
+*/
+
+(*>>) infix  4	:: w:(St .s .a)  v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]
+(@>>) infix  4	:: w:(.s -> .s)  v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]
+/* Operations on Task state
+taskId			:: id assigned to task
+userId			:: id of application user
+*/
+
+taskId			:: TSt -> (Int,TSt)
+userId 			:: TSt -> (Int,TSt)
+
+/* Lifting iData domain to iTask domain
+appIData		:: lift iData editors to iTask domain
+appHSt			:: lift HSt domain to TSt domain
+*/
+appIData 		:: (IDataFun a) 		-> (Task a) 			| iData a
+appHSt 			:: (HSt -> (a,HSt)) 	-> (Task a)				| iData a
 
 /* Experimental!! DONT USE Setting up communication channels between users:
 mkRTask			:: Remote Task: split indicated task in two tasks: a calling task and a receiving task
@@ -126,43 +177,4 @@ mkRTask 		:: String (Task a) *TSt -> ((Task a,Task a),*TSt) 		| iData a
 mkRTaskCall		:: String b (b -> Task a) *TSt 
 										-> ((b -> Task a,Task a),*TSt)	| iData a & iData b
 mkRDynTaskCall 	:: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt)| iData a
-
-/* Time and Date management:
-waitForTimeTask	:: Task is done when time has come
-waitForTimerTask:: Task is done when specified amount of time has passed 
-waitForDateTask	:: Task is done when date has come
-*/
-waitForTimeTask	:: HtmlTime				-> (Task HtmlTime)
-waitForTimerTask:: HtmlTime				-> (Task HtmlTime)
-waitForDateTask	:: HtmlDate				-> (Task HtmlDate)
-
-/* Lifting iData domain to iTask domain
-appIData		:: lift iData editors to iTask domain
-appHSt			:: lift HSt domain to TSt domain
-*/
-appIData 		:: (IDataFun a) 		-> (Task a) 			| iData a
-appHSt 			:: (HSt -> (a,HSt)) 	-> (Task a)				| iData a
-
-/* monadic shorthands
-(=>>)			:: bind
-(#>>)			:: bind, no argument passed
-
-(?>>)			:: prompt as long as task is active but not finished
-(!>>)			:: prompt when task is activated
-
-(*>>)			:: applying function of type: TSt -> (a,TSt)
-(@>>)			:: applying function of type: TSt -> TSt
-
-(<|)			:: repeat task as long as predicate does not hold
-(<<@)			:: set attribute for indicated task
-*/
-
-(=>>) infix  1 	:: w:(St .s .a) v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]	
-(#>>) infixl 1 	:: w:(St .s .a) v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]			
-(?>>) infix  2 	:: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
-(!>>) infix  2 	:: [BodyTag] v:(St TSt .a) -> v:(St TSt .a)
-(*>>) infix  4	:: w:(St .s .a)  v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]
-(@>>) infix  4	:: w:(.s -> .s)  v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]
-(<|)  infix  3 	:: (St TSt a) (a -> .Bool, a -> String) -> (St TSt a) | iData a
-(<<@) infix  3 	::  v:(St TSt .a) b  -> u:(St TSt .a) | setTaskAttr b, [u <= v]
 

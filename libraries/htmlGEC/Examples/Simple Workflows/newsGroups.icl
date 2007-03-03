@@ -11,7 +11,7 @@ derive gForm 	[]
 derive gUpd 	[]
 
 npersons 		= 5							// number of participants
-storageKind 	= Session					// storage format
+storageKind 	= Database					// storage format
 nmessage		= 5							// maximum number of messages to read from group
 
 :: NewsGroups	:== [GroupName]				// list of newsgroup names

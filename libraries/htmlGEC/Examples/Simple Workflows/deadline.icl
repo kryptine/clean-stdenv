@@ -9,7 +9,7 @@ npersons = 5
 
 Start world = doHtmlServer (multiUserTask npersons (repeatTask (deadline mytask) )) world
 
-mytask = STask "OK" 0
+mytask = STask "OK" 0 <| (\n -> n > 23,\n -> "let erop, " <+++ n <+++ " is niet groter dan 23")
 
 
 
