@@ -21,7 +21,8 @@ instance == 		(DisplayMode a) | == a
 derive   gLexOrd	HtmlDate, HtmlTime
 instance <			HtmlDate, HtmlTime
 instance toString	HtmlDate, HtmlTime
-
+instance +			HtmlTime
+instance -			HtmlTime
 
 // lay out
 

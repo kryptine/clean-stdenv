@@ -155,8 +155,10 @@ mkTask :: !String (Task a) -> (Task a) | iData a
 mkTask taskname mytask = \tst -> mkTask` tst
 where
 	mkTask` tst		
-	# tst			 						= incTask tst			// every task should first increment its tasknumber
-	= mkTaskNoInc taskname mytask tst
+	# tst			= incTask tst						// every task should first increment its tasknumber
+	# (tasknr,tst)	= tst!tasknr						// to avoid uniqueness type error
+	# (a,tst)		= mkTaskNoInc taskname mytask tst
+	= (a,{tst & tasknr = tasknr})
 
 mkTaskNoInc :: !String (Task a) -> (Task a) | iData a				// common second part of task wrappers
 mkTaskNoInc taskname mytask = \tst -> mkTaskNoInc` tst
@@ -176,14 +178,13 @@ repeatTask2 task = \tst -> mkTask "repeatTask2" repeatTask` tst
 where
 	repeatTask` tst=:{tasknr}		
 	# (val,tst)	= task {tst & tasknr = [-1:tasknr]}					// shift tasknr
-	= repeatTask2 task {tst & tasknr = tasknr}						// loop
+	= repeatTask2 task tst						// loop
 
 recTask2 :: !String (Task a) -> (Task a) 	| iData a 
 recTask2 taskname mytask = \tst -> mkTask taskname recTask` tst
 where
 	recTask` tst=:{tasknr}		
-	# (val,tst)	= mytask {tst & tasknr = [-1:tasknr]} 				// shift tasknr
-	= (val,{tst & tasknr = tasknr})
+	= mytask {tst & tasknr = [-1:tasknr]} 				// shift tasknr
 
 // same, but by remembering results stack space can be saved
 
@@ -395,7 +396,7 @@ where
 	| not adone						= (a,{tst & activated = adone, html = html +|+ BT choice.form +-+ ahtml, hst = hst})
 	= (a,{tst & activated = adone, html = html +|+ ahtml, hst = hst})
 
-	but i = LButton defpixel (i <+++ ":Or")
+	but i = LButton defpixel i
 	mode i j
 	| i==j = Display
 	= Edit
@@ -505,18 +506,17 @@ where
 
 
 ireturnV :: a -> (Task a) | iData a 
-ireturnV a  = \tst  -> (a,{tst & activated = True})	
+ireturnV a  = \tst  -> (a,tst)	
 
 returnV :: a -> (Task a) | iData a 
 returnV a  = \tst  -> mkTask "returnV" returnV` tst
 where
-	returnV` tst = (a,{tst & activated = True})				// return result task
+	returnV` tst = (a,tst)				// return result task
 
 returnTask :: a -> (Task a) | iData a 
 returnTask a = \tst -> mkTask "returnTask" (returnTask` a) tst
 where
 	returnTask` a  tst=:{tasknr,activated,html,hst}
-//	# editId	= "edit_" <+++ showTaskNr tasknr
 	= (a,{tst & html = html +|+ BT [toHtml a ], activated = True, hst = hst})		// return result task
 
 returnVF :: a [BodyTag] -> (Task a) | iData a 
@@ -658,10 +658,17 @@ waitForTimeTask time = \tst ->  mkTask "waitForTimeTask" waitForTimeTask` tst
 where
 	waitForTimeTask` tst=:{tasknr,hst}
 	# taskId				= itaskId tasknr "_Time_"
-	# (taskdone,hst) 		= mkStoreForm (Init,cFormId tst.storageInfo taskId (False,time)) id hst  			// remember time
+	# (stime,hst) 			= mkStoreForm (Init,cFormId tst.storageInfo taskId time) id hst  			// remember time
 	# ((currtime,_),hst)	= getTimeAndDate hst
-	| currtime < time		= (time,{tst & activated = False,hst = hst})
-	= (time,{tst & hst = hst})
+	| currtime < stime.value= (stime.value,{tst & activated = False,hst = hst})
+	= (currtime - stime.value,{tst & hst = hst})
+
+waitForTimerTask:: HtmlTime	-> (Task HtmlTime)
+waitForTimerTask time  = waitForTimerTask`
+where
+	waitForTimerTask` tst=:{hst}
+	# ((ctime,_),hst)	= getTimeAndDate hst
+	= waitForTimeTask (ctime + time) {tst & hst = hst}
 
 waitForDateTask:: HtmlDate	-> (Task HtmlDate)
 waitForDateTask date = \tst ->  mkTask "waitForDateTask" waitForDateTask` tst

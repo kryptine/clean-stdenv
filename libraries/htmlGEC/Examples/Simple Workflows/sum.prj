@@ -2664,7 +2664,7 @@ OtherModules
 				Y:	10
 				SizeX:	800
 				SizeY:	624
-		DclOpen:	True
+		DclOpen:	False
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module

@@ -129,9 +129,11 @@ mkRDynTaskCall 	:: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt)| iData 
 
 /* Time and Date management:
 waitForTimeTask	:: Task is done when time has come
+waitForTimerTask:: Task is done when specified amount of time has passed 
 waitForDateTask	:: Task is done when date has come
 */
 waitForTimeTask	:: HtmlTime				-> (Task HtmlTime)
+waitForTimerTask:: HtmlTime				-> (Task HtmlTime)
 waitForDateTask	:: HtmlDate				-> (Task HtmlDate)
 
 /* Lifting iData domain to iTask domain

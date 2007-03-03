@@ -1,8 +1,9 @@
 module newsGroups
 
 //	In this example newsgroups are created and maintained
-//	User 0 is the manager of the newsgroup who can create ne newgroups
+//	User 0 is the manager of the newsgroup who can create new newgroups
 //	All other users can subscribe to such a newsgroup, commit a message or read news
+// (c) mjp 2007 
 
 import StdEnv, StdHtml
 

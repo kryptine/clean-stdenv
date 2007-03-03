@@ -11,6 +11,9 @@ Start world = doHtmlServer (multiUserTask npersons (repeatTask (deadline mytask)
 
 mytask = STask "OK" 0
 
+
+
+
 deadline :: (Task a) -> (Task a) | iData a
 deadline task
 =						[Txt "Choose person you want to delegate work to:",Br,Br] 
