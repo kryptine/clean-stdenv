@@ -2,10 +2,7 @@ module coffeemachine
 
 import StdEnv, StdHtml
 
-//Start world = doHtmlServer (singleUserTask (repeatTaskGC CoffeeMachine )) world
-Start world = doHtmlServer (singleUserTask (repeatTaskGC tesy )) world
-
-tesy = STask "OK" 0 <| (\n -> n >= 23,\n -> "Error" +++ toString n) =>> \v -> returnTask v
+Start world = doHtmlServer (singleUserTask (repeatTaskGC CoffeeMachine)) world
 
 CoffeeMachine :: Task (String,Int)
 CoffeeMachine  

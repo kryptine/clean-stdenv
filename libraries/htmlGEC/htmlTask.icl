@@ -169,7 +169,7 @@ STask` prompt a tst=:{tasknr,html,hst}
 (#>>) a b = a `bind` (\_ -> b)
 
 ireturnV :: a -> (Task a) 
-ireturnV a  = \tst  -> (a,tst)	
+ireturnV a  = return a	
 
 returnV :: a -> (Task a) | iData a 
 returnV a  = mkTask "returnV" (return a) 
@@ -186,10 +186,6 @@ where
 	returnVF` tst
 	= (a,{tst & html = tst.html +|+ BT bodytag})
 
-returnF :: [BodyTag] TSt -> TSt
-returnF bodytag  tst=:{activated, html}  
-| not activated = tst		// not active, return default value
-= {tst & html = html +|+ BT bodytag}	// active, so perform task or get its result
 
 (<|) infix 3 :: (Task a) (a -> .Bool, a -> String) -> Task a | iData a
 (<|) taska (pred,message) = doTask
@@ -235,11 +231,7 @@ where
 // If a task j is a subtask of task i, than it will get number i.j in reverse order
 	
 mkTask :: !String (Task a) -> (Task a) | iData a
-mkTask taskname mytask = mkTask`
-where 	mkTask` tst
-		# (tasknr,tst)	= (incTask tst)!tasknr						// to avoid uniqueness type error
-		# (a,tst)		= mkTaskNoInc taskname mytask tst
-		= (a,{tst & tasknr = tasknr})
+mkTask taskname mytask = mkTaskNoInc taskname mytask o incTaskNr
 
 mkTaskNoInc :: !String (Task a) -> (Task a) | iData a				// common second part of task wrappers
 mkTaskNoInc taskname mytask = mkTaskNoInc`
@@ -248,36 +240,43 @@ where
 	| not activated							= (createDefault,tst)	// not active, don't call task, return default value
 	# (val,tst=:{activated,trace})			= mytask tst			// active, so perform task and get its result
 	| isNothing trace || taskname == ""		= (val,tst)				// no trace, just return value
-	= (val,{tst & trace = Just (InsertTrace activated tasknr myId taskname (printToString val) (fromJust trace))}) // adjust trace
+	= (val,{tst & tasknr = tasknr
+				, trace = Just (InsertTrace activated tasknr myId taskname (printToString val) (fromJust trace))}) // adjust trace
+
+incTaskNr tst 		= {tst & tasknr = incNr tst.tasknr}
+newSubTaskNr tst	= {tst & tasknr = [-1:tst.tasknr]}
+
+incNr [] = [0]
+incNr [i:is] = [i+1:is]
+
+addTasknr [] j = [j]
+addTasknr [i:is] j = [i+j:is]
 
 // non optimized versions of repeattask and recTask will increase the task tree stack and
 // therefore cannot be used for big applications
 
 repeatTask2 :: (Task a) -> Task a | iData a
-repeatTask2 task = \tst -> mkTask "repeatTask2" repeatTask` tst
+repeatTask2 task = mkTask "repeatTask2" repeatTask`
 where
-	repeatTask` tst=:{tasknr}		
-	# (val,tst)	= task {tst & tasknr = [-1:tasknr]}					// shift tasknr
-	= repeatTask2 task tst						// loop
+	repeatTask` tst		
+	# (_,tst)	= task (newSubTaskNr tst)		
+	= repeatTask2 task tst						
 
-recTask2 :: !String (Task a) -> (Task a) 	| iData a 
-recTask2 taskname mytask = \tst -> mkTask taskname recTask` tst
-where
-	recTask` tst=:{tasknr}		
-	= mytask {tst & tasknr = [-1:tasknr]} 				// shift tasknr
+recTask2 :: !String (Task a) -> (Task a) | iData a 
+recTask2 taskname mytask = mkTask taskname (mytask o newSubTaskNr)
 
-// same, but by remembering results stack space can be saved
+// same, but by remembering task results stack space can be saved
 
 repeatTask :: (Task a) -> Task a | iData a
-repeatTask task = \tst -> repeatTask` tst
+repeatTask task = repeatTask`
 where
 	repeatTask` tst=:{tasknr,hst} 
-	# mytasknr					= incTasknr tasknr					// manual incr task nr
+	# mytasknr					= incNr tasknr							// manual incr task nr
 	# taskId					= itaskId mytasknr "_Rep"				// create store id
 	# (currtasknr,hst)			= mkStoreForm (Init,cFormId tst.storageInfo taskId mytasknr) id hst	// fetch actual tasknr
 	# (val,tst=:{activated,hst})= mkTaskNoInc "repeatTask" repeatTask`` {tst & tasknr = currtasknr.value,hst = hst}
 	| activated 																					// task is completed	
-		# ntasknr				= incTasknr currtasknr.value										// incr tasknr
+		# ntasknr				= incNr currtasknr.value											// incr tasknr
 		# (currtasknr,hst)		= mkStoreForm (Init,cFormId tst.storageInfo taskId tasknr) (\_ -> ntasknr) hst // store next task nr
 		= mkTaskNoInc "repeatTask" repeatTask`` {tst & tasknr = currtasknr.value, hst = hst}		// initialize new task
 	= (val,tst)					
@@ -286,8 +285,9 @@ where
 		# (val,tst)= task {tst & tasknr = [-1:tasknr]}	// do task to repeat
 		= (val,{tst & tasknr = tasknr})					
 
+
 recTask :: !String (Task a) -> (Task a) 	| iData a 
-recTask taskname mytask = \tst -> mkTask taskname (recTask` False mytask) tst
+recTask taskname mytask = mkTask taskname (recTask` False mytask)
 
 recTask` collect mytask tst=:{tasknr,hst}		
 # taskId					= itaskId tasknr "_Rec"
@@ -305,7 +305,7 @@ recTask` collect mytask tst=:{tasknr,hst}
 // same, but additionally deleting subtasks
 
 repeatTaskGC :: (Task a) -> Task a | iData a
-repeatTaskGC task = \tst -> mkTask "repeatTaskGC" repeatTask` tst
+repeatTaskGC task = mkTask "repeatTaskGC" repeatTask`
 where
 	repeatTask` tst=:{tasknr}		
 	# (val,tst=:{activated})	= task {tst & tasknr = [-1:tasknr]}					// shift tasknr
@@ -315,6 +315,14 @@ where
 recTaskGC :: !String (Task a) -> (Task a) 	| iData a 
 recTaskGC taskname mytask = \tst -> mkTask taskname (recTask` True mytask) tst
 
+deleteSubTasks :: ![Int] TSt -> TSt
+deleteSubTasks tasknr tst=:{hst} = {tst & hst = deleteIData (subtasksids tasknr) hst}
+where
+	subtasksids tasknr formid
+	# prefix 		= itaskId tasknr ""
+	# lprefix 		= size prefix
+	# lformid 		= size formid
+	= prefix <= formid && lformid > lprefix	
 
 // parallel subtask creation utility
 
@@ -325,7 +333,7 @@ where
 	# (v,tst) = mkTaskNoInc (name <+++ "." <+++ i) mysubtask {tst & tasknr = [i:tasknr],activated = True} // shift task
 	= (v,{tst & tasknr = tasknr})
 	where
-		mysubtask tst=:{tasknr} = task {tst & tasknr = [-1:tasknr], activated = True/*, html = BT []*/}	// shift once again!
+		mysubtask tst=:{tasknr} = task {tst & tasknr = [-1:tasknr], activated = True}	// shift once again!
 
 // assigning tasks to users, each user is identified by a number
 
@@ -598,7 +606,33 @@ where
 	| currdate < date		= (date,{tst & activated = False, hst = hst})
 	= (date,{tst & hst = hst})
 
-// lifting section
+// functions on TSt
+
+taskId :: TSt -> (Int,TSt)
+taskId tst=:{myId} = (myId,tst)
+
+userId :: TSt -> (Int,TSt)
+userId tst=:{userId} = (userId,tst)
+
+addHtml :: [BodyTag] TSt -> TSt
+addHtml bodytag  tst=:{activated, html}  
+| not activated = tst						// not active, return default value
+= {tst & html = html +|+ BT bodytag}		// active, so perform task or get its result
+
+// lifters to iTask state
+(*>>) infix 4 :: (TSt -> (a,TSt)) (a -> Task b) -> (Task b)
+(*>>) ftst b = doit
+where
+	doit tst
+	# (a,tst) = ftst tst
+	= b a tst
+
+(@>>) infix 4 :: (TSt -> TSt) (Task a) -> Task a
+(@>>) ftst b = doit
+where
+	doit tst
+	# tst = ftst tst
+	= b tst
 
 appIData :: (IDataFun a) -> (Task a) | iData a
 appIData idatafun = \tst -> mkTask "appIData" (appIData` idatafun) tst
@@ -622,21 +656,6 @@ where
 	# (done,value)		= store.value
 	= (value,{tst & activated = done, hst = hst})													// task is now completed, handle as previously
 	
-// monadic shorthands
-(*>>) infix 4 :: w:(St .s .a)  v:(.a -> .(St .s .b)) -> u:(St .s .b), [u <= v, u <= w]
-(*>>) ftst b = doit
-where
-	doit tst
-	# (a,tst) = ftst tst
-	= b a tst
-
-(@>>) infix 4 :: w:(.s -> .s)  v:(St .s .b) -> u:(St .s .b), [u <= v, u <= w]
-(@>>) ftst b = doit
-where
-	doit tst
-	# tst = ftst tst
-	= b tst
-
 Once :: (Task a) -> (Task a) | iData a
 Once fun = mkTask "Once" doit
 where
@@ -649,23 +668,6 @@ where
 	# (store,hst) 		= mkStoreForm (Init,cFormId storageInfo taskId (False,createDefault)) (\_ -> (True,value)) hst 	// remember task status for next time
 	# (done,value)		= store.value
 	= (value,{tst & activated = done, hst = hst})													// task is now completed, handle as previously
-
-
-
-taskId :: TSt -> (Int,TSt)
-taskId tst=:{myId} = (myId,tst)
-
-userId :: TSt -> (Int,TSt)
-userId tst=:{userId} = (userId,tst)
-
-deleteSubTasks :: ![Int] TSt -> TSt
-deleteSubTasks tasknr tst=:{hst} = {tst & hst = deleteIData (subtasksids tasknr) hst}
-where
-	subtasksids tasknr formid
-	# prefix 		= itaskId tasknr ""
-	# lprefix 		= size prefix
-	# lformid 		= size formid
-	= prefix <= formid && lformid > lprefix	
 
 // *** utility section ***
 
@@ -686,14 +688,6 @@ gray message
 = Font [Fnt_Color (`Colorname Silver)] [B [] message]
 
 // task number generation
-
-incTask tst = {tst & tasknr = incTasknr tst.tasknr}
-
-incTasknr [] = [0]
-incTasknr [i:is] = [i+1:is]
-
-addTasknr [] j = [j]
-addTasknr [i:is] j = [i+j:is]
 
 showTaskNr [] 		= ""
 showTaskNr [i] 		= toString i
@@ -781,7 +775,7 @@ where
 //  not tested experimental stuf:
 
 mkRTask :: String (Task a) *TSt -> ((Task a,Task a),*TSt) | iData a
-mkRTask s task tst = let (a,b,c) = mkRTask` s task (incTask tst) in ((a,b),c)
+mkRTask s task tst = let (a,b,c) = mkRTask` s task (incTaskNr tst) in ((a,b),c)
 where
 	mkRTask` s task tst=:{tasknr = maintasknr,storageInfo} = (bossTask, workerTask s task,tst)
 	where
@@ -811,7 +805,7 @@ where
 		
 mkRTaskCall :: String b (b -> Task a) *TSt -> ((b -> Task a,Task a),*TSt) | iData a
 												& iData b
-mkRTaskCall  s initb batask tst = let (a,b,c) = mkRTaskCall` s (incTask tst) in ((a,b),c)
+mkRTaskCall  s initb batask tst = let (a,b,c) = mkRTaskCall` s (incTaskNr tst) in ((a,b),c)
 where
 	mkRTaskCall` s tst=:{tasknr = maintasknr,storageInfo} = (bossTask, workerTask s,tst)
 	where
@@ -848,7 +842,7 @@ where
 		bossStore     fun = mkStoreForm (Init,cFormId storageInfo ("bossStore"   <+++ showTaskNr maintasknr) (False,initb)) fun 
 		
 mkRDynTaskCall :: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt) | iData a
-mkRDynTaskCall s a tst = mkRDynTaskCall` (incTask tst)
+mkRDynTaskCall s a tst = mkRDynTaskCall` (incTaskNr tst)
 where
 	mkRDynTaskCall` tst=:{tasknr = maintasknr,storageInfo} = ((bossTask, workerTask),tst)
 	where

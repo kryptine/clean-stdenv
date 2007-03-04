@@ -64,8 +64,11 @@ where
 	readNews :: Subscriber -> Task Void
 	readNews me
 	= 						readSubscriptions me
-		=>> \mygroups	->	PDMenu ([group \\ (group,_) <- mygroups] ++ ["noGroup"])
-		=>> \(_,group)->	[Txt "You are looking at news group ", B [] group, Br, Br] ?>>
+		=>> \mygroups	->	PDMenu ([group \\ (group,_) <- mygroups] ++ ["Cancel"])
+		=>> \(_,group)	->	readNews` group
+	where
+		readNews` "Cancel"=	[Txt "You have not selected a newgroup you are subscribed on!",Br,Br] ?>> OK
+		readNews` group	=	[Txt "You are looking at news group ", B [] group, Br, Br] ?>>
 							PCTask2	( repeatTask (				readIndex me group
 												  =>> \index ->	readNewsGroup group
 												  =>> \news -> 	showNews index (news%(index,index+nmessage-1)) (length news) ?>>
@@ -125,7 +128,10 @@ addSubscription me (groupname,index)
 readIndex :: Subscriber GroupName -> Task Index
 readIndex me groupname
 =							readSubscriptions me
-	=>> \subscriptions	->	returnV (hd [index \\ (group,index) <- subscriptions | group == groupname])
+	=>> \subscriptions	->	returnV (hds [index \\ (group,index) <- subscriptions | group == groupname])
+where
+	hds [x:xs] = x
+	hds [] = 0
 
 readNewsGroup :: GroupName -> Task NewsGroup
 readNewsGroup groupname = readDB (groupNameId groupname)
