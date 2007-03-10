@@ -337,7 +337,8 @@ where
 (@:) infix 4 :: !(!Int,!String) (Task a)	-> (Task a)			| iData a
 (@:) (userId,taskname) taska = \tst=:{myId} -> assignTask` myId {tst & myId = userId}
 where
-	assignTask` myId tst=:{html=ohtml}
+	assignTask` myId tst=:{html=ohtml,activated}
+	| not activated						= (createDefault,tst)
 	# (a,tst=:{html=nhtml,activated})	= taska {tst & html = BT [],myId = userId}		// activate task of indicated user
 	| activated 						= (a,{tst & activated = True
 												  ,	myId = myId							// work is done						

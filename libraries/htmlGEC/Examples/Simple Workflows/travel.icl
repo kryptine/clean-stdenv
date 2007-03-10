@@ -13,7 +13,7 @@ travel
 			?>>	OrTask
 					( SeqTasks 
 						[	( "Choose Booking options:"
-							, MChoiceTask	[ ("Book_Flight",BookFlight)
+							, MChoiceTasks	[ ("Book_Flight",BookFlight)
 											, ("Book_Hotel", BookHotel)
 											, ("Book_Car",   BookCar)
 											]
