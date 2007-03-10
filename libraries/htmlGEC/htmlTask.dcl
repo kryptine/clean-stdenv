@@ -55,7 +55,7 @@ returnDisplay	:: return the value and show it in iData display format
 */
 
 (?>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a
-(!>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a
+(!>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a				| iData a
 (<|)  infix  3 	:: (Task a) (a -> .Bool, a -> String) -> Task a 	| iData a
 returnVF 		:: a [BodyTag] 		  		-> Task a				| iData a 
 returnDisplay	:: a 						-> Task a				| iData a 
@@ -97,13 +97,14 @@ MChoiceTask		:: Multiple Choice of iTasks, depending on marked checkboxes
 */
 ChooseTask		:: [(String,Task a)] 	-> (Task a) 			| iData a
 ChooseTask_pdm 	:: [(String,Task a)] 	-> (Task a)	 			| iData a
-MChoiceTask 	:: [(String,Task a)] 	-> (Task [a]) 			| iData a
+MChoiceTasks 	:: [(String,Task a)] 	-> (Task [a]) 			| iData a
 
 /* Do m Tasks parallel / interleaved and FINISH as soon as SOME Task completes:
 OrTask			:: do both iTasks in any order, task completed and ends as soon as first one done
 OrTasks			:: do all  iTasks in any order, task completed and ends as soon as first one done
 */
-OrTask			:: (Task a,Task a) 		-> (Task a) 			| iData a 
+OrTask 			:: (Task a,Task a) 		-> (Task a) 			| iData a
+OrTask2			:: (Task a,Task b) 		-> (Task (EITHER a b)) 	| iData a & iData b
 OrTasks			:: [(String,Task a)] 	-> (Task a)				| iData a 
 
 /* Do Tasks parallel / interleaved and FINISH when ALL Tasks done:
