@@ -34,22 +34,22 @@ Start world = doHtmlServer (multiUserTask 2 Quotation) world
 Quotation :: Task (QForm,ReviewState)
 Quotation = taskToReview 1 (createDefault, mytask,createDefault)
 where	mytask form =	[Txt "Fill in Form:",Br,Br] 
-						?>>	STask "TaskDone" form <<@ Submit
+						?>>	editTask "TaskDone" form <<@ Submit
 
 taskToReview :: Int (a,a -> Task a,ReviewState) -> Task (a,ReviewState) | iData a
-taskToReview reviewer (form,task,state) = recTask "taskToReview" taskToReview`
+taskToReview reviewer (form,task,state) = newTask "taskToReview" taskToReview`
 where 
 	taskToReview`	=					task form
 						=>> \form	->	reviewer @:: review form
-						=>> \state	->	[Txt ("Reviewer " <+++ reviewer <+++ " says "),toHtml state,Br] ?>> STask "OK" Void
+						=>> \state	->	[Txt ("Reviewer " <+++ reviewer <+++ " says "),toHtml state,Br] ?>> editTask "OK" Void
 						#>>				case state of
 											(NeedsRework	_) 	-> taskToReview reviewer (form,task,state) 	
 											else				-> returnV (form,state)
 
 	review :: a -> Task ReviewState | iData a
 	review form = [toHtml form,Br,Br]?>>
-							CTask
-							[ ("Rework",	STask "Done" (NeedsRework createDefault) <<@ Submit)
+							ChooseTask
+							[ ("Rework",	editTask "Done" (NeedsRework createDefault) <<@ Submit)
 							, ("Approved",	returnV Approved)
 							, ("Cancel",	returnV Cancelled)
 							]

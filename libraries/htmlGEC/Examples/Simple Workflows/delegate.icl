@@ -12,40 +12,40 @@ npersons = 5
 
 Start world = doHtmlServer (multiUserTask npersons (delegate mytask (Time 0 0 15))) world
 
-mytask = STask "Done" 0
+mytask = editTask "Done" 0
 
 
 delegate taskToDelegate time 
 =						[Txt "Choose persons you want to delegate work to:",Br,Br] 
 						?>>	determineSet [] =>> \set -> delegateToSet set
 where
-	delegateToSet set = recTask "delegateToSet" delegateToSet`
+	delegateToSet set = newTask "delegateToSet" delegateToSet`
 	where 
 		delegateToSet`						
-		  =					PCTasks [("Waiting", who @:: STask "I Will Do It" Void #>> returnV who) \\ who <- set]
+		  =					OrTasks [("Waiting", who @:: editTask "I Will Do It" Void #>> returnV who) \\ who <- set]
 			=>> \who 	->	who @:: (timedTask time taskToDelegate)	
 			=>> \(b,work)->	if b (returnV work) (delegateToSet set )
 
-	determineSet set = recTask "determineSet" determineSet`
+	determineSet set = newTask "determineSet" determineSet`
 	where
 		determineSet`	
 		= 					[Txt ("Current set:" +++ print set)] 
-							?>> CTask	[("Add Person", cancelTask choosePerson =>> \nr  -> returnV nr)
-										,("Finished",	returnV Nothing)
-										]
+							?>> ChooseTask	[("Add Person", cancelTask choosePerson =>> \nr  -> returnV nr)
+											,("Finished",	returnV Nothing)
+											]
 			=>> \result -> case result of
 							(Just new)  -> determineSet (sort (removeDup [new:set])) 
 							Nothing		-> returnV set
 
-		choosePerson =	STask "Set" (PullDown (1,100) (0,[toString i \\ i <- [1..npersons]]))
+		choosePerson =	editTask "Set" (PullDown (1,100) (0,[toString i \\ i <- [1..npersons]]))
 						=>> \whomPD  -> returnV (Just (toInt(toString whomPD)))
 
-		cancelTask task = PCTask2 (task,STask "Cancel" Void #>> returnV createDefault)
+		cancelTask task = OrTask (task,editTask "Cancel" Void #>> returnV createDefault)
 		
 		print [] = ""
 		print [x:xs] = toString x +++ " " +++ print xs
 
-	timedTask time task	= PCTask2  	( PCTasks 	[ ("TimedTask",task =>> \value -> returnV (True,value))
+	timedTask time task	= OrTask  	( OrTasks 	[ ("TimedTask",task =>> \value -> returnV (True,value))
 												, ("Return", returnV (False,createDefault))
 												] 
 						 			, waitForTimerTask time #>> returnV (False,createDefault)

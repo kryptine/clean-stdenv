@@ -17,7 +17,7 @@ listControl
 								?>> appIData (vertlistFormButs 1 True (Init,sFormId "list1" list))
 							)
 	=>> \list ->	[Txt "sum of list = ",Br,Br]
-					?>> STask "OK" (DisplayMode (sum list))		 
+					?>> editTask "OK" (DisplayMode (sum list))		 
 
 
 

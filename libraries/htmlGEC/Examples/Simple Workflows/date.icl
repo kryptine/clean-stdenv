@@ -14,13 +14,13 @@ Start world = doHtmlServer (multiUserTask npersons findDate) world
 findDate :: Task (HtmlDate,HtmlTime)
 findDate
 	= 					[Txt "Choose person you want to date:",Br] 
-						?>>	STask "Set" (PullDown (1,100) (0,[toString i \\ i <- [1..npersons]]))
+						?>>	editTask "Set" (PullDown (1,100) (0,[toString i \\ i <- [1..npersons]]))
 	=>> \whomPD		->	let whom = toInt(toString whomPD)
 						in
 						[Txt "Determining date:",Br,Br] 
 						?>> findDate` whom (Date 1 1 2007,Time 9 0 0)
 	=>> \datetime	->	[]
-						?>> PTask2 (confirm 0 whom datetime,confirm whom 0 datetime)						
+						?>> AndTask (confirm 0 whom datetime,confirm whom 0 datetime)						
 	#>>					returnV datetime
 
 where
@@ -31,13 +31,13 @@ where
 		=>> \(ok,daytime)->	if ok (returnV daytime)
 							(			isOkDateTime daytime
 							=>> \ok ->	if ok (returnV daytime)
-										(recTask "findDate`" (findDate` whom daytime))
+										(newTask "findDate`" (findDate` whom daytime))
 							)
 	where
 		proposeDateTime :: (HtmlDate,HtmlTime) -> Task (HtmlDate,HtmlTime)
 		proposeDateTime (date,time)
 		=							[Txt "Propose a new date and time for meeting",Br,Br]
-									?>> STask "Set" input 
+									?>> editTask "Set" input 
 			=>> \(_,date,_,time) -> returnV (date,time)
 		where
 			input = (showHtml [Txt "date: "], date, showHtml [Txt "time: "], time)
@@ -53,12 +53,12 @@ where
 		isOkDateTime :: (HtmlDate,HtmlTime) -> Task Bool
 		isOkDateTime (date,time)
 		=	[Txt ("Can we meet on the " <+++ date <+++ " at " <+++ time <+++ "?"),Br] ?>>
-			CTask		 [ ("Accept",returnV True)
+			ChooseTask	 [ ("Accept",returnV True)
 						 , ("Sorry",returnV False)
 						 ]
 
 	confirm  :: Int Int (HtmlDate,HtmlTime) -> Task Void 
 	confirm me you (date,time)
 	= 	me @::	( 	[Txt ("User " <+++ me <+++ " and " <+++ you <+++ " have a meeting on " <+++ date <+++ " at " <+++ time),Br,Br] 
-				?>>	STask "OK" Void
+				?>>	editTask "OK" Void
 				)

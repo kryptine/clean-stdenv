@@ -28,10 +28,10 @@ singleUserTask 	:: !(Task a) 		!*HSt -> (Html,*HSt) 			| iData a
 multiUserTask 	:: !Int !(Task a)  	!*HSt -> (Html,*HSt) 			| iData a 
 
 /* promote iData editor
-STask			:: create an editor with button to finish task
-(<<@)			:: set iData attribute globally for indicated (collection of) iTask(s) 
+editTask		:: create an editor with button to finish task
+(<<@)			:: set iData attribute globally for indicated (composition of) iTask(s) 
 */
-STask 			:: String a 	-> Task a							| iData a 
+editTask 		:: String a 	-> Task a							| iData a 
 (<<@) infix  3 	:: (Task a) b  	-> Task a 							| setTaskAttr b
 
 instance setTaskAttr Lifespan, StorageFormat, Mode
@@ -49,16 +49,16 @@ returnV 		:: a 						-> Task a 				| iData a
 /* prompting variants
 (?>>)			:: prompt as long as task is active but not finished
 (!>>)			:: prompt when task is activated
-(<|)			:: repeat task as long as predicate does not hold, and give error message otherwise
-returnTask		:: return the value and show it 
+(<|)			:: repeat task (from scratch) as long as predicate does not hold, and give error message otherwise
 returnVF		:: return the value and show the Html code specified
+returnDisplay	:: return the value and show it in iData display format
 */
 
 (?>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a
 (!>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a
 (<|)  infix  3 	:: (Task a) (a -> .Bool, a -> String) -> Task a 	| iData a
-returnTask 		:: a 						-> Task a				| iData a 
 returnVF 		:: a [BodyTag] 		  		-> Task a				| iData a 
+returnDisplay	:: a 						-> Task a				| iData a 
 
 /* Assign tasks to user with indicated id
 (@:)			:: will prompt who is waiting for task with give name
@@ -68,51 +68,43 @@ returnVF 		:: a [BodyTag] 		  		-> Task a				| iData a
 (@::) infix 4 	:: !Int (Task a)		    -> (Task a)			| iData a
 
 /* Promote any TSt state transition function to an iTask:
-recTask			:: to create a function which can recursively be called as a task
+newTask			:: to promote a user defined function to as task which is (possibly recursively) called when activated
+newTaskGC		:: same, and garbage collect *all* (persistent) subtasks
+newTaskStd		:: same, non optimized version will increase stack
 repeatTask		:: infinitely repeating Task
-recTaskGC		:: same, and garbage collect *all* (persistent) subtasks
 repeatTaskGC	:: same, and garbage collect *all* (persistent) subtasks
-recTask2		:: same, non optimized version will increase stack
-repeatTask2		:: same, non optimized version will increase stack
+repeatTaskStd	:: same, non optimized version will increase stack
 */
 
-recTask 		:: !String (Task a) 		-> (Task a) 		| iData a 
+newTask 		:: !String (Task a) 		-> (Task a) 		| iData a 
+newTaskGC 		:: !String (Task a) 		-> (Task a) 		| iData a 
+newTaskStd 		:: !String (Task a) 		-> (Task a) 		| iData a 
 repeatTask		:: (Task a) 				-> Task a 			| iData a
-
-recTaskGC 		:: !String (Task a) 		-> (Task a) 		| iData a 
 repeatTaskGC	:: (Task a) 				-> Task a 			| iData a
-
-recTask2 		:: !String (Task a) 		-> (Task a) 		| iData a 
-repeatTask2 	:: (Task a) 				-> Task a 			| iData a
-
-
+repeatTaskStd 	:: (Task a) 				-> Task a 			| iData a
 
 /*	Sequential Tasks:
-STask			:: a Sequential iTask
-STask_button	:: do corresponding iTask when button pressed
-STasks			:: do all iTasks one after another, task completed when all done
+SeqTask			:: do corresponding iTask when button pressed
+SeqTasks		:: do all iTasks one after another, task completed when all done
 */
-STask_button	:: String (Task a)		-> (Task a) 			| iData a
-STasks			:: [(String,Task a)] 	-> (Task [a])			| iData a 
+SeqTask			:: String (Task a)		-> (Task a) 			| iData a
+SeqTasks		:: [(String,Task a)] 	-> (Task [a])			| iData a 
 
-/* Choose one Task out of n:
-CTask			:: Choose one iTask from list, depending on button pressed
-CTask_pdmenu	:: Choose one iTask from list, depending on pulldownmenu item selected
+/* Choose Tasks
+ChooseTask		:: Choose one iTask from list, depending on button pressed
+ChooseTask_pdm	:: Choose one iTask from list, depending on pulldownmenu item selected
+MChoiceTask		:: Multiple Choice of iTasks, depending on marked checkboxes
 */
-CTask		 	:: [(String,Task a)] 	-> (Task a) 			| iData a
-CTask_pdmenu 	:: [(String,Task a)] 	-> (Task a)	 			| iData a
-
-/* Choose m Tasks out of n:
-MCTask_ckbox	:: Multiple Choice of iTasks, depending on marked checkboxes
-*/
-MCTask_ckbox 	:: [(String,Task a)] 	-> (Task [a]) 			| iData a
+ChooseTask		:: [(String,Task a)] 	-> (Task a) 			| iData a
+ChooseTask_pdm 	:: [(String,Task a)] 	-> (Task a)	 			| iData a
+MChoiceTask 	:: [(String,Task a)] 	-> (Task [a]) 			| iData a
 
 /* Do m Tasks parallel / interleaved and FINISH as soon as SOME Task completes:
-PCTask2			:: do both iTasks in any order, task completed and ends as soon as first one done
-PCTasks			:: do all  iTasks in any order, task completed and ends as soon as first one done
+OrTask			:: do both iTasks in any order, task completed and ends as soon as first one done
+OrTasks			:: do all  iTasks in any order, task completed and ends as soon as first one done
 */
-PCTask2			:: (Task a,Task a) 		-> (Task a) 			| iData a 
-PCTasks			:: [(String,Task a)] 	-> (Task a)				| iData a 
+OrTask			:: (Task a,Task a) 		-> (Task a) 			| iData a 
+OrTasks			:: [(String,Task a)] 	-> (Task a)				| iData a 
 
 /* Do Tasks parallel / interleaved and FINISH when ALL Tasks done:
 PTask2			:: do both iTasks in any order (paralel), task completed when both done
@@ -122,9 +114,9 @@ PMilestoneTasks :: do all  iTasks in any order (paralel), task completed when al
 					string indicates which tasks have completed
 PmuTasks		:: assign task to indicated users, task completed when all done
 */
-PTask2 			:: (Task a,Task b) 		-> (Task (a,b)) 		| iData a & iData b
-PTasks 			:: [(String,Task a)]	-> (Task [a])			| iData a 
-PmuTasks 		:: String [(Int,Task a)]-> (Task [a]) 			| iData a 
+AndTask			:: (Task a,Task b) 		-> (Task (a,b)) 		| iData a & iData b
+AndTasks		:: [(String,Task a)]	-> (Task [a])			| iData a 
+muAndTasks 		:: String [(Int,Task a)]-> (Task [a]) 			| iData a 
 
 /* Time and Date management:
 waitForTimeTask	:: Task is done when time has come
@@ -155,6 +147,8 @@ appHSt			:: lift HSt domain to TSt domain
 (@>>) infix 4 	:: (TSt -> TSt) (Task a) 			-> Task a
 appIData 		:: (IDataFun a) 					-> Task a 			| iData a
 appHSt 			:: (HSt -> (a,HSt)) 				-> Task a			| iData a
+
+
 
 
 /* Experimental!! DONT USE NOT FINISHED

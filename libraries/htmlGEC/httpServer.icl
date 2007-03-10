@@ -207,6 +207,11 @@ hexToChar a
 	= toChar 0
 
 
+makeArguments :: String -> Arguments
+makeArguments input = map makeArg (wordsWith '&' input)
+where
+	makeArg s			= cSplit '=' s
+
 //functie die de functie van de gebruiker aanroept en zorgt voor HTTP-opmaak die meteen verstuurd kan worden:
 makeReturnData :: String [(String,(String String Arguments *World-> ([String],String,*World)))] String [String] *World-> (ByteSeq,*World)
 makeReturnData str linktofunctionlist method overigeHeaders world

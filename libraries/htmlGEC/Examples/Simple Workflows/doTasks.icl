@@ -12,7 +12,7 @@ Start world = doHtmlServer (multiUserTask 5 (repeatTask doTasks)) world
 
 :: Situation = `Limit Int
 
-simpleTask 	= STask "Done" 0
+simpleTask 	= editTask "Done" 0
 Boss 		= 0
 Secretary	= 1
 Assistent	= 2
@@ -20,25 +20,25 @@ Assistent	= 2
 doTasks
 =								 	mkRDynTaskCall "boss-secr"   0
 	*>> \(forSecr,fromBoss)   	->	mkRDynTaskCall "secr-assist" 0 
-	*>> \(forAssist,fromSecr) 	->	PmuTasks
+	*>> \(forAssist,fromSecr) 	->	muAndTasks
 										 [(Boss, 		bossWork forSecr)								
 										 ,(Secretary, 	doWork simpleTask (forAssist fromBoss))
 										 ,(Assistent, 	doWork simpleTask fromSecr)							
 										 ]
 	=>> \v						->	[Txt ("Result: " <+++ printToString v)]
-									?>> STask "OK" Void
+									?>> editTask "OK" Void
 where
 	bossWork forSecr
  	= 				[Txt "Define Limit!",Br,Br]
- 					?>> STask "OK" 0
+ 					?>> editTask "OK" 0
  		=>> \v ->	forSecr (taskToDelegate v)
 
  	taskToDelegate v
  	= 	[Txt ("Limit = " <+++ v)]
- 		?>> (STask "Set" 0) <| (\nv -> nv <= v && nv > 0, \_ -> "Value should not exceed " <+++ v)
+ 		?>> (editTask "Set" 0) <| (\nv -> nv <= v && nv > 0, \_ -> "Value should not exceed " <+++ v)
 
  	doWork task delegatedtask
-	= 	PCTasks	[	("MyOwnWork", repeatTask task)
+	= 	OrTask	[	("MyOwnWork", repeatTask task)
 				,	("Delegated", delegatedtask)
 				]
 

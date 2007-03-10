@@ -26,33 +26,33 @@ nmessage		= 5							// maximum number of messages to read from group
 
 Start world = doHtmlServer (multiUserTask npersons allTasks) world
 
-allTasks = PmuTasks "newsGroups" [(0,repeatTask newsManager):[(i,repeatTask newsReader) \\ i <- [1 .. npersons - 1]]]
+allTasks = muAndTasks "newsGroups" [(0,repeatTask newsManager):[(i,repeatTask newsReader) \\ i <- [1 .. npersons - 1]]]
 
 newsManager
-=	CTask 	[("newGroup",  PCTask2 (addNewsGroup, STask "Cancel" Void))
+=	ChooseTask 	[("newGroup",  OrTask (addNewsGroup, editTask "Cancel" Void))
 			,("showGroup", showGroup)
 			]
 where
 	addNewsGroup
-	= 						[Txt "Define name of new news group:",Br,Br] ?>> STask "Define" ""
+	= 						[Txt "Define name of new news group:",Br,Br] ?>> editTask "Define" ""
 		=>> \newName	->	readNewsGroups
 		=>> \oldNames	->	writeNewsGroups (removeDup (sort [newName:oldNames]))
 		#>> returnV Void
 	showGroup
 	= readNewsGroups =>> \groups -> PDMenu groups #>> returnV Void
 
-PDMenu list =	[] ?>> STask "OK" (PullDown (1,100) (0,[e \\ e <- list]))
+PDMenu list =	[] ?>> editTask "OK" (PullDown (1,100) (0,[e \\ e <- list]))
 				=>> \value	->	returnV (idx value,toString value)
 where
 	idx (PullDown _ (index,_)) = index
 
 newsReader 
 =	taskId
-	*>> \me 		->	CTask 	[("subscribe",  PCTask2 (subscribeNewsGroup me, STask "Cancel" Void))
-								,("readNews",   readNews me)]
+	*>> \me 		->	ChooseTask 	[("subscribe",  OrTask (subscribeNewsGroup me, editTask "Cancel" Void))
+									,("readNews",   readNews me)]
 where
 	OK :: Task Void
-	OK = STask "OK" Void
+	OK = editTask "OK" Void
 
 	subscribeNewsGroup :: Subscriber -> Task Void
 	subscribeNewsGroup me
@@ -69,15 +69,15 @@ where
 	where
 		readNews` "Cancel"=	[Txt "You have not selected a newgroup you are subscribed on!",Br,Br] ?>> OK
 		readNews` group	=	[Txt "You are looking at news group ", B [] group, Br, Br] ?>>
-							PCTask2	( repeatTask (				readIndex me group
+							OrTask	( repeatTask (				readIndex me group
 												  =>> \index ->	readNewsGroup group
 												  =>> \news -> 	showNews index (news%(index,index+nmessage-1)) (length news) ?>>
-														CTask 	[("<<",	readNextNewsItems me (group,index) (~nmessage) (length news))
+														ChooseTask 	[("<<",	readNextNewsItems me (group,index) (~nmessage) (length news))
 																,("update",		returnV Void)
 																,(">>",	readNextNewsItems me (group,index) nmessage (length news))
 																,("commitNews",		commitItem group me)
 																])
-									, STask "leaveGroup" Void
+									, editTask "leaveGroup" Void
 									)
 
 	readNextNewsItems :: Subscriber Subscription Int Int -> Task Void
@@ -90,7 +90,7 @@ where
 	commitItem :: GroupName Subscriber -> Task Void
 	commitItem group me 
 	=								[Txt "Type your message ..."]
-									?>>	STask "Commit" (TextArea 4 80 "") <<@ Submit
+									?>>	editTask "Commit" (TextArea 4 80 "") <<@ Submit
 		=>>	\(TextArea _ _ val) -> 	readNewsGroup group
 		=>> \news				->	writeNewsGroup group (news ++ [(me,val)])
 		#>>							[Txt "Message commited to news group ",B [] group, Br,Br] ?>> OK

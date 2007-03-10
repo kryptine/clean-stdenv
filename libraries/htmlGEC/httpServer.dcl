@@ -19,3 +19,5 @@ getContentType	:: String -> String
 
 :: Arguments	:== [(String, String)]
 printArguments	:: Arguments -> String
+
+makeArguments :: String -> Arguments

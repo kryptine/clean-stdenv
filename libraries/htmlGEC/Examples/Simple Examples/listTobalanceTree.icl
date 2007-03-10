@@ -10,7 +10,7 @@ import tree
 
 
 //Start world  = doHtml MyPage world
-Start world  = doHtmlServer MyPage world
+Start world  = doHtmlSubServer (1,1,1,"*.*") MyPage world
 
 myListId = nFormId "list" []
 myTreeId = nFormId "tree" Leaf
@@ -36,8 +36,8 @@ gUpd{|GerdaObject|} ga updmode go
 = (updmode,{go & gerdaObject = a})
 
 MyPage hst
-# (iList1,hst) = mkEditForm (Init, nFormId "mylist1" initVal <@ Submit ) hst
-# (iList2,hst) = mkEditForm (Init, nFormId "mylist2" initVal <@ Submit ) hst
+# (iList1,hst) = mkEditForm (Init, nFormId "mylist1" initVal ) hst
+# (iList2,hst) = mkEditForm (Init, nFormId "mylist2" initVal <@ Display ) hst
 = mkHtml "Balancing Tree From List"
 		[ Txt "Converting a list:", Br, Br
           , BodyTag iList1.form
