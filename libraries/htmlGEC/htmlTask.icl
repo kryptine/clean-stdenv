@@ -53,12 +53,12 @@ where setTaskAttr mode tst = {tst & storageInfo.taskmode = mode}
 
 // wrappers
 
-singleUserTask :: !(Task a) !*HSt -> (Html,*HSt) | gUpd{|*|} a 
+singleUserTask :: !(Task a) !*HSt -> (Html,*HSt) | default a 
 singleUserTask task hst 
 # (_,html,hst) = startTask 0 task hst
 = mkHtml "stest" html hst
 
-multiUserTask :: !Int!(Task a) !*HSt -> (Html,*HSt) | gUpd{|*|} a 
+multiUserTask :: !Int!(Task a) !*HSt -> (Html,*HSt) | default a 
 multiUserTask nusers task  hst 
 # (idform,hst) 	= FuncMenu (Init,nFormId "User_Selected" 
 						(0,[("User " +++ toString i,\_ -> i) \\ i<-[0..nusers - 1] ])) hst
@@ -66,7 +66,7 @@ multiUserTask nusers task  hst
 # (_,html,hst) 	= startTask currentWorker task hst
 = mkHtml "mtest" (idform.form ++ html) hst
 
-startTask :: !Int !(Task a) !*HSt -> (a,[BodyTag],!*HSt) | gUpd{|*|} a 
+startTask :: !Int !(Task a) !*HSt -> (a,[BodyTag],!*HSt) | default a 
 startTask thisUser taska hst
 # userVersionNr			= "User" <+++ thisUser <+++ "_VersionPNr"
 # sessionVersionNr		= "User" <+++ thisUser <+++ "_VersionSNr" 
@@ -174,6 +174,7 @@ ireturnV a  = return a
 returnV :: a -> (Task a) | iTrace a
 returnV a  = mkTask "returnV" (return a) 
 
+
 returnDisplay :: a -> (Task a) | gForm {|*|}, iTrace a
 returnDisplay a = mkTask "returnDispplay" returnDisplay`
 where
@@ -186,7 +187,7 @@ where
 	returnVF` tst
 	= (a,{tst & html = tst.html +|+ BT bodytag})
 
-(<|) infix 3 :: (Task a) (a -> .Bool, a -> String) -> Task a | gUpd{|*|} a
+(<|) infix 3 :: (Task a) (a -> .Bool, a -> String) -> Task a | default a
 (<|) taska (pred,message) = doTask
 where
 	doTask tst=:{html = ohtml,activated}
@@ -211,7 +212,7 @@ where
 	| activated || not myturn= (a,{tst & html = ohtml})
 	= (a,{tst & html = ohtml +|+ BT prompt +|+ nhtml})
 
-(!>>) infix 2 :: [BodyTag] (Task a) -> (Task a) | gUpd{|*|} a
+(!>>) infix 2 :: [BodyTag] (Task a) -> (Task a) | default a
 (!>>) prompt task = doTask
 where
 	doTask tst=:{html=ohtml,activated=myturn}
@@ -231,7 +232,6 @@ where
 mkTask :: !String (Task a) -> (Task a) | iTrace a
 mkTask taskname mytask = mkTaskNoInc taskname mytask o incTaskNr
 
-//mkTaskNoInc :: !String (Task a) -> (Task a) | iTask a			// common second part of task wrappers
 mkTaskNoInc :: !String (Task a) -> (Task a) | iTrace a			// common second part of task wrappers
 mkTaskNoInc taskname mytask = mkTaskNoInc`
 where
@@ -335,7 +335,7 @@ where
 
 // assigning tasks to users, each user is identified by a number
 
-(@:) infix 4 :: !(!Int,!String) (Task a)	-> (Task a)			| gUpd{|*|} a
+(@:) infix 4 :: !(!Int,!String) (Task a)	-> (Task a)			| default a
 (@:) (userId,taskname) taska = \tst=:{myId} -> assignTask` myId {tst & myId = userId}
 where
 	assignTask` myId tst=:{html=ohtml,activated}
@@ -351,7 +351,7 @@ where
 						BT [Br, Txt ("Waiting for Task "), yellow taskname, Txt " from ", yellowUser userId,Br] +|+ 
 						((userId,taskname) @@: BT [Txt "Task ",yellow taskname, Txt " requested by ", yellowUser myId,Br,Br] +|+ nhtml)})				// combine html code, filter later					
 
-(@::) infix 4 :: !Int (Task a)	-> (Task a)			| gUpd{|*|}  a
+(@::) infix 4 :: !Int (Task a)	-> (Task a)			| default  a
 (@::) userId taska = \tst=:{myId} -> assignTask` myId {tst & myId = userId}
 where
 	assignTask` myId tst=:{html}
@@ -668,6 +668,25 @@ where
 	# (done,value)		= store.value
 	= (value,{tst & activated = done, hst = hst})													// task is now completed, handle as previously
 
+// Notice that when combining tasks the context restrictions on certain types will get stronger
+// It can vary from : no restriction on a -> iTrace a -> iData a
+// In most cases the user can simply ask Clean to derive the corresponding generic functions
+// For the type Task this will not work since it is a higher order type
+// Therefore when yielding a task as result of a task,
+// the type Task need to be wrapped into TClosure for which the generic functions are defined below
+// Tested for iTrace, will not work for iData
+
+gPrint{|TClosure|} gpa a ps = ps <<- "Task Closure"
+
+gUpd{|TClosure|} gc (UpdSearch _ 0)	  	 c		= (UpdDone, c)								
+gUpd{|TClosure|} gc (UpdSearch val cnt)  c		= (UpdSearch val (cnt - 2),c)						
+gUpd{|TClosure|} gc (UpdCreate l)        _		
+# (mode,default)	= gc (UpdCreate l) undef
+= (UpdCreate l, TClosure (\tst -> (default,tst)))			
+gUpd{|TClosure|} gc mode                 b		= (mode, b)										
+
+
+
 // *** utility section ***
 
 // editors
@@ -772,43 +791,6 @@ where
 	= Font [Fnt_Color (`Colorname color), Fnt_Size -1] [B [] message]
 	
 //  not tested experimental stuf:
-
-gPrint{|TClosure|} gpa a p = p <<- "task closure"
-gUpd{|TClosure|} gpa updm a = (updm,a)
-
-returnTask :: (Task a) -> (Task (TClosure a)) | iTrace a
-returnTask taska = mkTask "returnTask" doreturnTask
-where
-	doreturnTask tst
-	= (TClosure taska,tst)
-	
-//	# taskId		= itaskId tasknr "_closure"
-//	# (store,hst) 	= mkStoreForm (init,cFormId storageInfo taskid (taskId,convertTask task)) id 
-//	= (TaskClosure (taskId,storageInfo,taska),tst)
-
-//	convertTask task 	= dynamic_to_string (dynamic task::*TSt -> *(a^,*TSt))
-
-
-	/*
-	#	Store   fun = mkStoreForm (Init,cFormId storageInfo ("workerStore" <+++ showTaskNr maintasknr) (False,createDefault)) fun 
-
-		bossStore (set,task) hst
-		# (boss,hst) 			= mkStoreForm (Init,cFormId storageInfo ("bossStore" <+++ showTaskNr maintasknr) initBoss) settask hst
-		# (bdone,encbtask)		= boss.value
-		# btask					= case string_to_dynamic` encbtask of
-									(mytask:: *TSt -> *(a^,*TSt)) -> mytask
-									_ -> 	defaulttask
-		= ({boss & value = (bdone,btask)},hst)
-		where
-			initBoss			= (False,convertTask defaulttask)
-			settask				= if set (\_ -> (True,convertTask task)) id
-			convertTask task 	= dynamic_to_string (dynamic task::*TSt -> *(a^,*TSt))
-
-			string_to_dynamic` s = string_to_dynamic ( {s` \\ s` <-: s})
-
-		defaulttask 		 	= editTask "DefaultTask" a
-
-*/
 
 
 

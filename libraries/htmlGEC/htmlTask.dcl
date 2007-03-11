@@ -6,19 +6,22 @@ definition module htmlTask
 import StdHtml
 
 class iTrace a
-		| gUpd {|*|} 
-		, gPrint{|*|} a
+		| gPrint{|*|}
+		, default a
+class default a
+		| gUpd {|*|} a
 
 :: *TSt										// task state
 :: Task a		:== St *TSt a				// an interactive task
 :: Void 		= Void						// for tasks returning non interesting results, won't show up in editors either
+:: TClosure a 	= TClosure (Task a)			// to allow a task to deliver a task as result, so higher order tasks are possible
 
 class setTaskAttr a :: !a *TSt -> *TSt
 
 derive gForm 	Void						
-derive gUpd 	Void
+derive gUpd 	Void, TClosure
+derive gPrint 	Void, TClosure
 derive gParse 	Void
-derive gPrint 	Void
 derive gerda 	Void
 
 /* Initiating the iTask library:
@@ -27,9 +30,9 @@ singleUserTask 	:: start wrapper function for single user
 multiUserTask 	:: start wrapper function for user with indicated id with option to switch between [0..users - 1]  
 */
 
-startTask 		:: !Int !(Task a) 	!*HSt -> (a,[BodyTag],!*HSt) 	| gUpd{|*|} a
-singleUserTask 	:: !(Task a) 		!*HSt -> (Html,*HSt) 			| gUpd{|*|} a
-multiUserTask 	:: !Int !(Task a)  	!*HSt -> (Html,*HSt) 			| gUpd{|*|} a
+startTask 		:: !Int !(Task a) 	!*HSt -> (a,[BodyTag],!*HSt) 	| default a
+singleUserTask 	:: !(Task a) 		!*HSt -> (Html,*HSt) 			| default a
+multiUserTask 	:: !Int !(Task a)  	!*HSt -> (Html,*HSt) 			| default a
 
 /* promote iData editor
 editTask		:: create an editor with button to finish task
@@ -59,8 +62,8 @@ returnDisplay	:: return the value and show it in iData display format
 */
 
 (?>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a
-(!>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a				| gUpd{|*|} a
-(<|)  infix  3 	:: (Task a) (a -> .Bool, a -> String) -> Task a 	| gUpd{|*|} a
+(!>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a				| default a
+(<|)  infix  3 	:: (Task a) (a -> .Bool, a -> String) -> Task a 	| default a
 returnVF 		:: a [BodyTag] 		  		-> Task a				| iTrace a
 returnDisplay	:: a 						-> Task a				| gForm {|*|}, iTrace a
 
@@ -68,8 +71,8 @@ returnDisplay	:: a 						-> Task a				| gForm {|*|}, iTrace a
 (@:)			:: will prompt who is waiting for task with give name
 (@::)			:: no prompting
 */
-(@:)  infix 4 	:: !(!Int,!String) (Task a)	-> (Task a)			| gUpd{|*|} a
-(@::) infix 4 	:: !Int (Task a)		    -> (Task a)			| gUpd{|*|} a
+(@:)  infix 4 	:: !(!Int,!String) (Task a)	-> (Task a)			| default a
+(@::) infix 4 	:: !Int (Task a)		    -> (Task a)			| default a
 
 /* Promote any TSt state transition function to an iTask:
 newTask			:: to promote a user defined function to as task which is (possibly recursively) called when activated
@@ -173,9 +176,3 @@ mkRDynTaskCall 	:: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt)| iTrace
 
 PMilestoneTasks :: [(String,Task a)] 	-> (Task [(String,a)]) 			| iTrace a
 
-derive gPrint TClosure
-derive gUpd TClosure
-
-:: TClosure a = TClosure (Task a)
-
-returnTask :: (Task a) -> (Task (TClosure a)) | iTrace a //iTrace a
