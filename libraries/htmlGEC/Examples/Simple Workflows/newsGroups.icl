@@ -26,12 +26,12 @@ nmessage		= 5							// maximum number of messages to read from group
 
 Start world = doHtmlServer (multiUserTask npersons allTasks) world
 
-allTasks = muAndTasks "newsGroups" [(0,repeatTask newsManager):[(i,repeatTask newsReader) \\ i <- [1 .. npersons - 1]]]
+allTasks = mu_andTasks "newsGroups" [(0,repeatTask newsManager):[(i,repeatTask newsReader) \\ i <- [1 .. npersons - 1]]]
 
 newsManager
-=	ChooseTask 	[("newGroup",  OrTask (addNewsGroup, editTask "Cancel" Void))
-			,("showGroup", showGroup)
-			]
+=	chooseTask 	[("newGroup",  orTask (addNewsGroup, editTask "Cancel" Void))
+				,("showGroup", showGroup)
+				]
 where
 	addNewsGroup
 	= 						[Txt "Define name of new news group:",Br,Br] ?>> editTask "Define" ""
@@ -48,7 +48,7 @@ where
 
 newsReader 
 =	taskId
-	*>> \me 		->	ChooseTask 	[("subscribe",  OrTask (subscribeNewsGroup me, editTask "Cancel" Void))
+	*>> \me 		->	chooseTask 	[("subscribe",  orTask (subscribeNewsGroup me, editTask "Cancel" Void))
 									,("readNews",   readNews me)]
 where
 	OK :: Task Void
@@ -69,13 +69,14 @@ where
 	where
 		readNews` "Cancel"=	[Txt "You have not selected a newgroup you are subscribed on!",Br,Br] ?>> OK
 		readNews` group	=	[Txt "You are looking at news group ", B [] group, Br, Br] ?>>
-							OrTask	( repeatTask (				readIndex me group
+							orTask	( repeatTask (				readIndex me group
 												  =>> \index ->	readNewsGroup group
 												  =>> \news -> 	showNews index (news%(index,index+nmessage-1)) (length news) ?>>
-														ChooseTask 	[("<<",	readNextNewsItems me (group,index) (~nmessage) (length news))
+														chooseTask 	
+																[("<<",			readNextNewsItems me (group,index) (~nmessage) (length news))
 																,("update",		returnV Void)
-																,(">>",	readNextNewsItems me (group,index) nmessage (length news))
-																,("commitNews",		commitItem group me)
+																,(">>",			readNextNewsItems me (group,index) nmessage (length news))
+																,("commitNews",	commitItem group me)
 																])
 									, editTask "leaveGroup" Void
 									)

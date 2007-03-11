@@ -5,6 +5,10 @@ definition module htmlTask
 
 import StdHtml
 
+class iTrace a
+		| gUpd {|*|} 
+		, gPrint{|*|} a
+
 :: *TSt										// task state
 :: Task a		:== St *TSt a				// an interactive task
 :: Void 		= Void						// for tasks returning non interesting results, won't show up in editors either
@@ -23,15 +27,15 @@ singleUserTask 	:: start wrapper function for single user
 multiUserTask 	:: start wrapper function for user with indicated id with option to switch between [0..users - 1]  
 */
 
-startTask 		:: !Int !(Task a) 	!*HSt -> (a,[BodyTag],!*HSt) 	| iData a 
-singleUserTask 	:: !(Task a) 		!*HSt -> (Html,*HSt) 			| iData a 
-multiUserTask 	:: !Int !(Task a)  	!*HSt -> (Html,*HSt) 			| iData a 
+startTask 		:: !Int !(Task a) 	!*HSt -> (a,[BodyTag],!*HSt) 	| gUpd{|*|} a
+singleUserTask 	:: !(Task a) 		!*HSt -> (Html,*HSt) 			| gUpd{|*|} a
+multiUserTask 	:: !Int !(Task a)  	!*HSt -> (Html,*HSt) 			| gUpd{|*|} a
 
 /* promote iData editor
 editTask		:: create an editor with button to finish task
 (<<@)			:: set iData attribute globally for indicated (composition of) iTask(s) 
 */
-editTask 		:: String a 	-> Task a							| iData a 
+editTask 		:: String a 	-> Task a							| iTrace, iData a 
 (<<@) infix  3 	:: (Task a) b  	-> Task a 							| setTaskAttr b
 
 instance setTaskAttr Lifespan, StorageFormat, Mode
@@ -44,7 +48,7 @@ returnV			:: return the value
 
 (=>>) infix  1 	:: (Task a) (a -> Task b) 	-> Task b
 (#>>) infixl 1 	:: (Task a) (Task b) 		-> Task b
-returnV 		:: a 						-> Task a 				| iData a 
+returnV 		:: a 						-> Task a 				| iTrace a
 
 /* prompting variants
 (?>>)			:: prompt as long as task is active but not finished
@@ -55,17 +59,17 @@ returnDisplay	:: return the value and show it in iData display format
 */
 
 (?>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a
-(!>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a				| iData a
-(<|)  infix  3 	:: (Task a) (a -> .Bool, a -> String) -> Task a 	| iData a
-returnVF 		:: a [BodyTag] 		  		-> Task a				| iData a 
-returnDisplay	:: a 						-> Task a				| iData a 
+(!>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a				| gUpd{|*|} a
+(<|)  infix  3 	:: (Task a) (a -> .Bool, a -> String) -> Task a 	| gUpd{|*|} a
+returnVF 		:: a [BodyTag] 		  		-> Task a				| iTrace a
+returnDisplay	:: a 						-> Task a				| gForm {|*|}, iTrace a
 
 /* Assign tasks to user with indicated id
 (@:)			:: will prompt who is waiting for task with give name
 (@::)			:: no prompting
 */
-(@:)  infix 4 	:: !(!Int,!String) (Task a)	-> (Task a)			| iData a
-(@::) infix 4 	:: !Int (Task a)		    -> (Task a)			| iData a
+(@:)  infix 4 	:: !(!Int,!String) (Task a)	-> (Task a)			| gUpd{|*|} a
+(@::) infix 4 	:: !Int (Task a)		    -> (Task a)			| gUpd{|*|} a
 
 /* Promote any TSt state transition function to an iTask:
 newTask			:: to promote a user defined function to as task which is (possibly recursively) called when activated
@@ -76,48 +80,46 @@ repeatTaskGC	:: same, and garbage collect *all* (persistent) subtasks
 repeatTaskStd	:: same, non optimized version will increase stack
 */
 
-newTask 		:: !String (Task a) 		-> (Task a) 		| iData a 
-newTaskGC 		:: !String (Task a) 		-> (Task a) 		| iData a 
-newTaskStd 		:: !String (Task a) 		-> (Task a) 		| iData a 
-repeatTask		:: (Task a) 				-> Task a 			| iData a
-repeatTaskGC	:: (Task a) 				-> Task a 			| iData a
-repeatTaskStd 	:: (Task a) 				-> Task a 			| iData a
+newTask 		:: !String (Task a) 		-> (Task a) 		| iTrace, iData a 
+newTaskGC 		:: !String (Task a) 		-> (Task a) 		| iTrace, iData a 
+newTaskStd 		:: !String (Task a) 		-> (Task a) 		| iTrace a
+repeatTask		:: (Task a) 				-> Task a 			| iTrace, iData a
+repeatTaskGC	:: (Task a) 				-> Task a 			| iTrace a
+repeatTaskStd 	:: (Task a) 				-> Task a 			| iTrace a
 
 /*	Sequential Tasks:
-SeqTask			:: do corresponding iTask when button pressed
-SeqTasks		:: do all iTasks one after another, task completed when all done
+seqTask			:: do corresponding iTask when button pressed
+seqTasks		:: do all iTasks one after another, task completed when all done
 */
-SeqTask			:: String (Task a)		-> (Task a) 			| iData a
-SeqTasks		:: [(String,Task a)] 	-> (Task [a])			| iData a 
+seqTask			:: String (Task a)		-> (Task a) 			| iTrace a
+seqTasks		:: [(String,Task a)] 	-> (Task [a])			| iTrace a
 
 /* Choose Tasks
-ChooseTask		:: Choose one iTask from list, depending on button pressed
-ChooseTask_pdm	:: Choose one iTask from list, depending on pulldownmenu item selected
-MChoiceTask		:: Multiple Choice of iTasks, depending on marked checkboxes
+chooseTask		:: Choose one iTask from list, depending on button pressed
+chooseTask_pdm	:: Choose one iTask from list, depending on pulldownmenu item selected
+mchoiceTask		:: Multiple Choice of iTasks, depending on marked checkboxes
 */
-ChooseTask		:: [(String,Task a)] 	-> (Task a) 			| iData a
-ChooseTask_pdm 	:: [(String,Task a)] 	-> (Task a)	 			| iData a
-MChoiceTasks 	:: [(String,Task a)] 	-> (Task [a]) 			| iData a
+chooseTask		:: [(String,Task a)] 	-> (Task a) 			| iTrace a
+chooseTask_pdm 	:: [(String,Task a)] 	-> (Task a)	 			| iTrace a
+mchoiceTasks 	:: [(String,Task a)] 	-> (Task [a]) 			| iTrace a
 
 /* Do m Tasks parallel / interleaved and FINISH as soon as SOME Task completes:
-OrTask			:: do both iTasks in any order, task completed and ends as soon as first one done
-OrTasks			:: do all  iTasks in any order, task completed and ends as soon as first one done
+orTask			:: do both iTasks in any order, task completed and ends as soon as first one done
+orTask2			:: do both iTasks in any order, task completed and ends as soon as first one done
+orTasks			:: do all  iTasks in any order, task completed and ends as soon as first one done
 */
-OrTask 			:: (Task a,Task a) 		-> (Task a) 			| iData a
-OrTask2			:: (Task a,Task b) 		-> (Task (EITHER a b)) 	| iData a & iData b
-OrTasks			:: [(String,Task a)] 	-> (Task a)				| iData a 
+orTask 			:: (Task a,Task a) 		-> (Task a) 			| iTrace a
+orTask2			:: (Task a,Task b) 		-> (Task (EITHER a b)) 	| iTrace a & iTrace b
+orTasks			:: [(String,Task a)] 	-> (Task a)				| iTrace a 
 
 /* Do Tasks parallel / interleaved and FINISH when ALL Tasks done:
-PTask2			:: do both iTasks in any order (paralel), task completed when both done
-PTasks			:: do all  iTasks in any order (paralel), task completed when all  done
-PMilestoneTasks :: do all  iTasks in any order (paralel), task completed when all  done
-					but continue with next task as soon as SOME Task completes
-					string indicates which tasks have completed
-PmuTasks		:: assign task to indicated users, task completed when all done
+andTask			:: do both iTasks in any order (paralel), task completed when both done
+andTasks		:: do all  iTasks in any order (paralel), task completed when all  done
+mu_andTasks		:: assign task to indicated users, task completed when all done
 */
-AndTask			:: (Task a,Task b) 		-> (Task (a,b)) 		| iData a & iData b
-AndTasks		:: [(String,Task a)]	-> (Task [a])			| iData a 
-muAndTasks 		:: String [(Int,Task a)]-> (Task [a]) 			| iData a 
+andTask			:: (Task a,Task b) 		-> (Task (a,b)) 		| iTrace a & iTrace b
+andTasks		:: [(String,Task a)]	-> (Task [a])			| iTrace a
+mu_andTasks 	:: String [(Int,Task a)]-> (Task [a]) 			| iTrace, iData a
 
 /* Time and Date management:
 waitForTimeTask	:: Task is done when time has come
@@ -146,8 +148,8 @@ appHSt			:: lift HSt domain to TSt domain
 */
 (*>>) infix 4 	:: (TSt -> (a,TSt)) (a -> Task b) 	-> Task b
 (@>>) infix 4 	:: (TSt -> TSt) (Task a) 			-> Task a
-appIData 		:: (IDataFun a) 					-> Task a 			| iData a
-appHSt 			:: (HSt -> (a,HSt)) 				-> Task a			| iData a
+appIData 		:: (IDataFun a) 					-> Task a 			| iTrace, iData a
+appHSt 			:: (HSt -> (a,HSt)) 				-> Task a			| iTrace, iData a
 
 
 
@@ -160,11 +162,20 @@ mkRTask			:: Remote Task: split indicated task in two tasks: a calling task and 
 mkRTaskCall 	:: as mkRTask, but the caller will provide input for the remote task
 mkRDynTaskCall 	:: a remote task is set up, but the task that is created will be determined dynamically !
 					BE CAREFUL: static dynamics are used here, will work only for one exectable.
+PMilestoneTasks :: do all  iTasks in any order (paralel), task completed when all  done
+					but continue with next task as soon as SOME Task completes
+					string indicates which tasks have completed
 */
-mkRTask 		:: String (Task a) *TSt -> ((Task a,Task a),*TSt) 		| iData a 
+mkRTask 		:: String (Task a) *TSt -> ((Task a,Task a),*TSt) 		| iTrace, iData a 
 mkRTaskCall		:: String b (b -> Task a) *TSt 
-										-> ((b -> Task a,Task a),*TSt)	| iData a & iData b
-mkRDynTaskCall 	:: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt)| iData a
+										-> ((b -> Task a,Task a),*TSt)	| iTrace, iData a & iData b
+mkRDynTaskCall 	:: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt)| iTrace, iData a
 
-PMilestoneTasks :: [(String,Task a)] 	-> (Task [(String,a)]) 	| iData a 
+PMilestoneTasks :: [(String,Task a)] 	-> (Task [(String,a)]) 			| iTrace a
 
+derive gPrint TClosure
+derive gUpd TClosure
+
+:: TClosure a = TClosure (Task a)
+
+returnTask :: (Task a) -> (Task (TClosure a)) | iTrace a //iTrace a

@@ -11,27 +11,27 @@ Start world = doHtmlServer (multiUserTask npersons (repeatTask (deadline mytask)
 
 mytask = editTask "OK" 0 <| (\n -> n > 23,\n -> "let erop, " <+++ n <+++ " is niet groter dan 23")
 
-deadline :: (Task a) -> (Task a) | iData a
+deadline :: (Task a) -> (Task a) | iTrace, iData a
 deadline task
 =						[Txt "Choose person you want to delegate work to:",Br,Br] 
 						?>>	editTask "Set" (PullDown (1,100) (0,[toString i \\ i <- [1..npersons]]))
 	=>> \whomPD		->	[Txt "How long do you want to wait?",Br,Br] 
 						?>>	editTask "SetTime" (Time 0 0 0)
 	=>> \time		->	[Txt "Cancel delegated work if you are getting impatient:",Br,Br]
-						?>> OrTask
+						?>> orTask
 								(	delegateTask (toInt(toString whomPD)) time task
-								, 	SeqTask "Cancel" (returnV (False,createDefault))
+								, 	seqTask "Cancel" (returnV (False,createDefault))
 								)
 	=>> \(ok,value) ->	if ok 	(	[Txt ("Result of task: " +++ printToString value),Br,Br] 
-									?>> SeqTask "OK" (returnV value)
+									?>> seqTask "OK" (returnV value)
 								)
 								(	[Txt "Task expired or canceled, you have to do it yourself!",Br,Br]
-									?>>	SeqTask "OK" task
+									?>>	seqTask "OK" task
 								)
 where
 	delegateTask who time task
 		= 	(who,"Timed Task") 	
-				@: 	OrTask	
+				@: 	orTask	
 					(	waitForTimerTask time 								// wait for deadline
 						#>> returnV (False,createDefault)					// return default value
 					, 	[Txt ("Please finish task before" <+++ time),Br,Br]	// tell deadline

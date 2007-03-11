@@ -15,7 +15,7 @@ derive gUpd []
 sequence4 :: Task Int
 sequence4
 = 							editTask "OK" 0
-				=>> \n ->	AndTasks [(toString i,editTask "OK" 0) \\ i <- [0..n]]
+				=>> \n ->	andTasks [(toString i,editTask "OK" 0) \\ i <- [0..n]]
 				=>> \v -> 	returnDisplay (sum v)
 
 

@@ -20,7 +20,7 @@ findDate
 						[Txt "Determining date:",Br,Br] 
 						?>> findDate` whom (Date 1 1 2007,Time 9 0 0)
 	=>> \datetime	->	[]
-						?>> AndTask (confirm 0 whom datetime,confirm whom 0 datetime)						
+						?>> andTask (confirm 0 whom datetime,confirm whom 0 datetime)						
 	#>>					returnV datetime
 
 where
@@ -53,7 +53,7 @@ where
 		isOkDateTime :: (HtmlDate,HtmlTime) -> Task Bool
 		isOkDateTime (date,time)
 		=	[Txt ("Can we meet on the " <+++ date <+++ " at " <+++ time <+++ "?"),Br] ?>>
-			ChooseTask	 [ ("Accept",returnV True)
+			chooseTask	 [ ("Accept",returnV True)
 						 , ("Sorry",returnV False)
 						 ]
 

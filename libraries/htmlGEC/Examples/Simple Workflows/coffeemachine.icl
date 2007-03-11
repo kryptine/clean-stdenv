@@ -7,7 +7,7 @@ Start world = doHtmlServer (singleUserTask (repeatTaskGC CoffeeMachine)) world
 CoffeeMachine :: Task (String,Int)
 CoffeeMachine  
 =	 							[Txt "Choose product:",Br,Br] 
-								?>>	ChooseTask
+								?>>	chooseTask
 								 	[	("Coffee: 100", 	returnV (100,"Coffee"))
 									,	("Cappucino: 150",	returnV (150,"Cappucino"))
 									,	("Tee: 50",			returnV (50, "Tee"))
@@ -18,16 +18,16 @@ CoffeeMachine
 	=>> \(cancel,returnMoney)->	let nproduct = if cancel "Cancelled" product 
 								in
 								[Txt ("product = " <+++ nproduct <+++ ", returned money = " <+++ returnMoney),Br,Br] 
-								?>>	SeqTask "Thanks" (returnV Void)
+								?>>	seqTask "Thanks" (returnV Void)
 	#>>							returnV (nproduct,returnMoney) 
 where
 	getCoins :: (Int,Int) -> Task (Bool,Int)
 	getCoins (toPay,paid) = newTask "getCoins" getCoins`
 	where
 		getCoins` = [Txt ("To pay: " <+++ toPay),Br,Br] 
-								?>>	OrTask	
-									( 	ChooseTask [(toString i <+++ " cts", returnV (False,i)) \\ i <- [5,10,20,50,100,200]]
-									, 	SeqTask "Cancel" (returnV (True,0))
+								?>>	orTask	
+									( 	chooseTask [(toString i <+++ " cts", returnV (False,i)) \\ i <- [5,10,20,50,100,200]]
+									, 	seqTask "Cancel" (returnV (True,0))
 									)
 					=>> \(cancel,coin) ->	handleCoin (cancel,coin)
 
