@@ -62,10 +62,10 @@ returnDisplay	:: return the value and show it in iData display format
 */
 
 (?>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a
-(!>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a				| default a
-(<|)  infix  3 	:: (Task a) (a -> .Bool, a -> String) -> Task a 	| default a
-returnVF 		:: a [BodyTag] 		  		-> Task a				| iTrace a
-returnDisplay	:: a 						-> Task a				| gForm {|*|}, iTrace a
+(!>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a			| default a
+(<|)  infix  3 	:: (Task a) (a -> .Bool, a -> String) -> Task a | default a
+returnVF 		:: a [BodyTag] 		  		-> Task a			| iTrace a
+returnDisplay	:: a 						-> Task a			| gForm {|*|}, iTrace a
 
 /* Assign tasks to user with indicated id
 (@:)			:: will prompt who is waiting for task with give name
@@ -154,9 +154,6 @@ appHSt			:: lift HSt domain to TSt domain
 appIData 		:: (IDataFun a) 					-> Task a 			| iTrace, iData a
 appHSt 			:: (HSt -> (a,HSt)) 				-> Task a			| iTrace, iData a
 
-
-
-
 /* Experimental!! DONT USE NOT FINISHED
 
 Setting up communication channels between users:
@@ -175,4 +172,6 @@ mkRTaskCall		:: String b (b -> Task a) *TSt
 mkRDynTaskCall 	:: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt)| iTrace, iData a
 
 PMilestoneTasks :: [(String,Task a)] 	-> (Task [(String,a)]) 			| iTrace a
+
+stopTask :: (Task a) -> (Task (Bool,TClosure a)) | iTrace a
 

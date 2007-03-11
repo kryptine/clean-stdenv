@@ -913,3 +913,14 @@ where
 
 		defaulttask 		 	= editTask "DefaultTask" a
 
+stopTask :: (Task a) -> (Task (Bool,TClosure a)) | iTrace a
+stopTask  task =  stop`
+where
+	stop` tst=:{tasknr,html}
+	# subtasknr1 = [-1,0:tasknr]
+	# subtasknr2 = [-1,1:tasknr]
+	# (val,tst=:{activated = jobdone,html = jobhtml}) 		= task {tst & html = BT [], tasknr = subtasknr1}
+	# (count,tst=:{activated = jobstopped,html = stophtml}) = editTask "Stop" Void {tst & activated = True, html = BT [], tasknr = subtasknr2} 
+	| jobdone		= returnV (False,TClosure (returnV val)) {tst & html = html +|+ jobhtml, activated = True}
+	| jobstopped	= returnV (True,TClosure (\tst=:{html} -> task {tst & tasknr = subtasknr1})) {tst & html = html, activated = True}
+	= returnV (False,TClosure (returnV val)) {tst & html = html +|+ jobhtml +|+ stophtml}

@@ -10,30 +10,27 @@ derive gParse Maybe
 
 npersons = 5
 
-//Start world = doHtmlServer (multiUserTask npersons (delegate mytask (Time 0 0 15))) world
-Start world = doHtmlServer (multiUserTask npersons strange) world
-
-
-strange = 	repeatTask	(							 chooseTask [("een",returnV (TClosure mytask)),("twee",returnV (TClosure mytask2))]
-							=>> \(TClosure task)  -> task)  
-
+Start world = doHtmlServer (multiUserTask npersons (delegate mytask2 (Time 0 15 0))) world
 
 mytask = editTask "Done" 0
-mytask2 =			editTask "Done" 0
-		 =>> \v1 ->	editTask "Done" 0
-		 =>> \v2 -> returnDisplay (v1 + v2)
+mytask2 =			editTask "Done1" 0
+		 =>> \v1 ->	editTask "Done2" 0
+		 =>> \v2 ->	editTask "Done3" 0
+		 =>> \v3 -> returnDisplay (v1 + v2 + v3)
 
+delegate :: (Task a) HtmlTime -> (Task a) | iTrace a & iData a
 delegate taskToDelegate time 
 =						[Txt "Choose persons you want to delegate work to:",Br,Br] 
 						?>>	determineSet [] 
-			=>> \set -> delegateToSet set
+			=>> \set -> delegateToSet taskToDelegate set
+			=>> \result -> returnDisplay result
 where
-	delegateToSet set = newTask "delegateToSet" delegateToSet`
+	delegateToSet task set = newTask "delegateToSet" delegateToSet`
 	where 
 		delegateToSet`						
-		  =					orTasks [("Waiting", who @:: editTask "I Will Do It" Void #>> returnV who) \\ who <- set]
-			=>> \who 	->	who @:: (timedTask time taskToDelegate)	
-			=>> \(b,work)->	if b (returnV work) (delegateToSet set )
+		  =									orTasks [("Waiting", who @:: editTask "I Will Do It" Void #>> returnV who) \\ who <- set]
+			=>> \who 						->	who @:: (timedTask time task)	
+			=>> \(stopped,TClosure task)	->	if stopped (delegateToSet task set) task 
 
 	determineSet set = newTask "determineSet" determineSet`
 	where
@@ -54,8 +51,7 @@ where
 		print [] = ""
 		print [x:xs] = toString x +++ " " +++ print xs
 
-	timedTask time task	= orTask  	( orTasks 	[ ("TimedTask",task =>> \value -> returnV (True,value))
-												, ("Return", returnV (False,createDefault))
-												] 
-						 			, waitForTimerTask time #>> returnV (False,createDefault)
+	timedTask :: HtmlTime (Task a) -> (Task (Bool,TClosure a)) | iTrace a
+	timedTask time task	= orTask  	( stopTask task
+						 			, waitForTimerTask time #>> returnV (True,TClosure task)
 						  			)
