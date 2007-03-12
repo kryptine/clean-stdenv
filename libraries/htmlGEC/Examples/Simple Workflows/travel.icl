@@ -1,6 +1,6 @@
 module travel
 
-import StdEnv, htmlTask
+import StdEnv, htmlTask, htmlTrivial
 
 // (c) 2007 MJP
 
@@ -26,10 +26,10 @@ travel
 											]
 							)
 						, 	( "Confirm Booking:"
-							, seqTask "Confirm" (returnV [])
+							, seqTask "Confirm" (return_V [])
 							)
 						]
-					, seqTask "Cancel" (returnV [])
+					, seqTask "Cancel" (return_V [])
 					)
 	=>> \booking -> [Txt "Handling bookings:",Br,Br]
 					?>> handleBookings booking

@@ -23,16 +23,16 @@ findDate
 						?>> findDate` whom (Date 1 1 2007,Time 9 0 0)
 	=>> \datetime	->	[]
 						?>> andTask (confirm 0 whom datetime,confirm whom 0 datetime)						
-	#>>					returnV datetime
+	#>>					return_V datetime
 
 where
 	findDate` :: Int (HtmlDate,HtmlTime) -> Task (HtmlDate,HtmlTime)
 	findDate` whom daytime
 	=						proposeDateTime daytime
 		=>> \daytime	->	(whom,"Meeting Request") @: determineDateTime daytime 
-		=>> \(ok,daytime)->	if ok (returnV daytime)
+		=>> \(ok,daytime)->	if ok (return_V daytime)
 							(			isOkDateTime daytime
-							=>> \ok ->	if ok (returnV daytime)
+							=>> \ok ->	if ok (return_V daytime)
 										(newTask "findDate`" (findDate` whom daytime))
 							)
 	where
@@ -40,23 +40,23 @@ where
 		proposeDateTime (date,time)
 		=							[Txt "Propose a new date and time for meeting",Br,Br]
 									?>> editTask "Set" input 
-			=>> \(_,date,_,time) -> returnV (date,time)
+			=>> \(_,date,_,time) -> return_V (date,time)
 		where
 			input = (showHtml [Txt "date: "], date, showHtml [Txt "time: "], time)
 
 		determineDateTime :: (HtmlDate,HtmlTime) -> Task (Bool,(HtmlDate,HtmlTime))
 		determineDateTime daytime
 		=					isOkDateTime daytime
-			=>> \ok	->		if ok (returnV (ok,daytime))
+			=>> \ok	->		if ok (return_V (ok,daytime))
 							(					proposeDateTime daytime
-							=>> \daytime ->	 	returnV (ok,daytime)
+							=>> \daytime ->	 	return_V (ok,daytime)
 							)
 
 		isOkDateTime :: (HtmlDate,HtmlTime) -> Task Bool
 		isOkDateTime (date,time)
 		=	[Txt ("Can we meet on the " <+++ date <+++ " at " <+++ time <+++ "?"),Br] ?>>
-			chooseTask	 [ ("Accept",returnV True)
-						 , ("Sorry",returnV False)
+			chooseTask	 [ ("Accept",return_V True)
+						 , ("Sorry",return_V False)
 						 ]
 
 	confirm  :: Int Int (HtmlDate,HtmlTime) -> Task Void 

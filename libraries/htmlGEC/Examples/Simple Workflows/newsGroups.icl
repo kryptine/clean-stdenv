@@ -26,7 +26,7 @@ nmessage		= 5							// maximum number of messages to read from group
 
 Start world = doHtmlServer (multiUserTask npersons allTasks) world
 
-allTasks = mu_andTasks "newsGroups" [(0,repeatTask newsManager):[(i,repeatTask newsReader) \\ i <- [1 .. npersons - 1]]]
+allTasks = andTasks_mu "newsGroups" [(0,repeatTask newsManager):[(i,repeatTask newsReader) \\ i <- [1 .. npersons - 1]]]
 
 newsManager
 =	chooseTask 	[("newGroup",  orTask (addNewsGroup, editTask "Cancel" Void))
@@ -37,12 +37,12 @@ where
 	= 						[Txt "Define name of new news group:",Br,Br] ?>> editTask "Define" ""
 		=>> \newName	->	readNewsGroups
 		=>> \oldNames	->	writeNewsGroups (removeDup (sort [newName:oldNames]))
-		#>> returnV Void
+		#>> return_V Void
 	showGroup
-	= readNewsGroups =>> \groups -> PDMenu groups #>> returnV Void
+	= readNewsGroups =>> \groups -> PDMenu groups #>> return_V Void
 
 PDMenu list =	[] ?>> editTask "OK" (PullDown (1,100) (0,[e \\ e <- list]))
-				=>> \value	->	returnV (idx value,toString value)
+				=>> \value	->	return_V (idx value,toString value)
 where
 	idx (PullDown _ (index,_)) = index
 
@@ -74,7 +74,7 @@ where
 												  =>> \news -> 	showNews index (news%(index,index+nmessage-1)) (length news) ?>>
 														chooseTask 	
 																[("<<",			readNextNewsItems me (group,index) (~nmessage) (length news))
-																,("update",		returnV Void)
+																,("update",		return_V Void)
 																,(">>",			readNextNewsItems me (group,index) nmessage (length news))
 																,("commitNews",	commitItem group me)
 																])
@@ -86,7 +86,7 @@ where
 	# nix = index + offset
 	# nix = if (nix < 0) 0 (if (length <= nix) index nix)
 	= 						addSubscription me (group,nix)
-		#>> returnV  Void				 
+		#>> return_V  Void				 
 
 	commitItem :: GroupName Subscriber -> Task Void
 	commitItem group me 
@@ -129,7 +129,7 @@ addSubscription me (groupname,index)
 readIndex :: Subscriber GroupName -> Task Index
 readIndex me groupname
 =							readSubscriptions me
-	=>> \subscriptions	->	returnV (hds [index \\ (group,index) <- subscriptions | group == groupname])
+	=>> \subscriptions	->	return_V (hds [index \\ (group,index) <- subscriptions | group == groupname])
 where
 	hds [x:xs] = x
 	hds [] = 0

@@ -1,6 +1,6 @@
 module list
 
-import StdEnv, htmlTask
+import StdEnv, StdHtml
 
 // (c) 2007 MJP
 

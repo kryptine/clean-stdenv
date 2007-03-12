@@ -1,6 +1,6 @@
 module delegate
 
-import StdEnv, htmlTask
+import StdEnv, htmlTask, htmlTrivial
 
 
 // (c) 2007 MJP
@@ -28,19 +28,19 @@ mytask = editTask "Done" 0
 mytask2 =			editTask "Done1" 0
 		 =>> \v1 ->	editTask "Done2" 0
 		 =>> \v2 ->	editTask "Done3" 0
-		 =>> \v3 -> returnDisplay (v1 + v2 + v3)
+		 =>> \v3 -> return_D (v1 + v2 + v3)
 
 delegate :: (Task a) HtmlTime -> (Task a) | iData a
 delegate taskToDelegate time 
 =						[Txt "Choose persons you want to delegate work to:",Br,Br] 
 						?>>	determineSet [] 
 			=>> \set -> delegateToSet taskToDelegate set
-			=>> \result -> returnDisplay result
+			=>> \result -> return_D result
 where
 	delegateToSet task set = newTask "delegateToSet" delegateToSet`
 	where 
 		delegateToSet`						
-		  =									orTasks [("Waiting", who @:: editTask "I Will Do It" Void #>> returnV who) \\ who <- set]
+		  =									orTasks [("Waiting", who @:: editTask "I Will Do It" Void #>> return_V who) \\ who <- set]
 			=>> \who 						->	who @:: (timedTask time task)	
 			=>> \(stopped,TClosure task)	->	if stopped (delegateToSet task set) task 
 
@@ -48,22 +48,22 @@ where
 	where
 		determineSet`	
 		= 					[Txt ("Current set:" +++ print set)] 
-							?>> chooseTask	[("Add Person", cancelTask choosePerson =>> \nr  -> returnV nr)
-											,("Finished",	returnV Nothing)
+							?>> chooseTask	[("Add Person", cancelTask choosePerson =>> \nr  -> return_V nr)
+											,("Finished",	return_V Nothing)
 											]
 			=>> \result -> case result of
 							(Just new)  -> determineSet (sort (removeDup [new:set])) 
-							Nothing		-> returnV set
+							Nothing		-> return_V set
 
 		choosePerson =	editTask "Set" (PullDown (1,100) (0,[toString i \\ i <- [1..npersons]]))
-						=>> \whomPD  -> returnV (Just (toInt(toString whomPD)))
+						=>> \whomPD  -> return_V (Just (toInt(toString whomPD)))
 
-		cancelTask task = orTask (task,editTask "Cancel" Void #>> returnV createDefault)
+		cancelTask task = orTask (task,editTask "Cancel" Void #>> return_V createDefault)
 		
 		print [] = ""
 		print [x:xs] = toString x +++ " " +++ print xs
 
 	timedTask :: HtmlTime (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
 	timedTask time task	= orTask  	( stopTask task
-						 			, waitForTimerTask time #>> returnV (True,TClosure task)
+						 			, waitForTimerTask time #>> return_V (True,TClosure task)
 						  			)

@@ -1,6 +1,6 @@
 module deadline
 
-import StdEnv, htmlTask
+import StdEnv, htmlTask, htmlTrivial
 
 derive gForm []
 derive gUpd []
@@ -28,10 +28,10 @@ deadline task
 	=>> \time		->	[Txt "Cancel delegated work if you are getting impatient:",Br,Br]
 						?>> orTask
 								(	delegateTask (toInt(toString whomPD)) time task
-								, 	seqTask "Cancel" (returnV (False,createDefault))
+								, 	seqTask "Cancel" (return_V (False,createDefault))
 								)
 	=>> \(ok,value) ->	if ok 	(	[Txt ("Result of task: " +++ printToString value),Br,Br] 
-									?>> seqTask "OK" (returnV value)
+									?>> seqTask "OK" (return_V value)
 								)
 								(	[Txt "Task expired or canceled, you have to do it yourself!",Br,Br]
 									?>>	seqTask "OK" task
@@ -41,9 +41,9 @@ where
 		= 	(who,"Timed Task") 	
 				@: 	orTask	
 					(	waitForTimerTask time 								// wait for deadline
-						#>> returnV (False,createDefault)					// return default value
+						#>> return_V (False,createDefault)					// return default value
 					, 	[Txt ("Please finish task before" <+++ time),Br,Br]	// tell deadline
-						?>> (task =>> \v -> returnV (True,v))				// do task and return its result
+						?>> (task =>> \v -> return_V (True,v))				// do task and return its result
 					) 
 
 

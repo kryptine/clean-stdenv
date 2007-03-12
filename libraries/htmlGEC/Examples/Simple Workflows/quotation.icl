@@ -53,12 +53,12 @@ where
 						=>> \state	->	[Txt ("Reviewer " <+++ reviewer <+++ " says "),toHtml state,Br] ?>> editTask "OK" Void
 						#>>				case state of
 											(NeedsRework	_) 	-> taskToReview reviewer (form,task,state) 	
-											else				-> returnV (form,state)
+											else				-> return_V (form,state)
 
 	review :: a -> Task ReviewState | iData a
 	review form = [toHtml form,Br,Br]?>>
 							chooseTask
 							[ ("Rework",	editTask "Done" (NeedsRework createDefault) <<@ Submit)
-							, ("Approved",	returnV Approved)
-							, ("Cancel",	returnV Cancelled)
+							, ("Approved",	return_V Approved)
+							, ("Cancel",	return_V Cancelled)
 							]

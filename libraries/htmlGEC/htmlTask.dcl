@@ -3,16 +3,8 @@ definition module htmlTask
 // library for controlling interactive Tasks (iTask) based on iData
 // (c) 2006,2007 MJP
 
-import StdHtml
+import htmlSettings, htmlButtons
 
-/*
-class iTrace a
-		| gPrint{|*|}
-		, default a
-class default a
-		| gUpd {|*|} a
-
-*/
 :: *TSt										// task state
 :: Task a		:== St *TSt a				// an interactive task
 :: Void 		= Void						// for tasks returning non interesting results, won't show up in editors either
@@ -48,26 +40,26 @@ instance setTaskAttr Lifespan, StorageFormat, Mode
 /* monadic operators on iTasks
 (=>>)			:: bind
 (#>>)			:: bind, no argument passed
-returnV			:: return the value
+return_V		:: return the value
 */
 
 (=>>) infix  1 	:: (Task a) (a -> Task b) 	-> Task b
 (#>>) infixl 1 	:: (Task a) (Task b) 		-> Task b
-returnV 		:: a 						-> Task a 				| iCreateAndPrint a
+return_V 		:: a 						-> Task a 				| iCreateAndPrint a
 
 /* prompting variants
 (?>>)			:: prompt as long as task is active but not finished
 (!>>)			:: prompt when task is activated
 (<|)			:: repeat task (from scratch) as long as predicate does not hold, and give error message otherwise
-returnVF		:: return the value and show the Html code specified
-returnDisplay	:: return the value and show it in iData display format
+return_VF		:: return the value and show the Html code specified
+return_D		:: return the value and show it in iData display format
 */
 
 (?>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a
 (!>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a			| iCreate a
 (<|)  infix  3 	:: (Task a) (a -> .Bool, a -> String) -> Task a | iCreate a
-returnVF 		:: a [BodyTag] 		  		-> Task a			| iCreateAndPrint a
-returnDisplay	:: a 						-> Task a			| gForm {|*|}, iCreateAndPrint a
+return_VF 		:: a [BodyTag] 		  		-> Task a			| iCreateAndPrint a
+return_D		:: a 						-> Task a			| gForm {|*|}, iCreateAndPrint a
 
 /* Assign tasks to user with indicated id
 (@:)			:: will prompt who is waiting for task with give name
@@ -78,19 +70,19 @@ returnDisplay	:: a 						-> Task a			| gForm {|*|}, iCreateAndPrint a
 
 /* Promote any TSt state transition function to an iTask:
 newTask			:: to promote a user defined function to as task which is (possibly recursively) called when activated
-newTaskGC		:: same, and garbage collect *all* (persistent) subtasks
-newTaskStd		:: same, non optimized version will increase stack
+newTask_GC		:: same, and garbage collect *all* (persistent) subtasks
+newTask_Std		:: same, non optimized version will increase stack
 repeatTask		:: infinitely repeating Task
-repeatTaskGC	:: same, and garbage collect *all* (persistent) subtasks
-repeatTaskStd	:: same, non optimized version will increase stack
+repeatTask_GC	:: same, and garbage collect *all* (persistent) subtasks
+repeatTask_Std	:: same, non optimized version will increase stack
 */
 
 newTask 		:: !String (Task a) 		-> (Task a) 		| iData a 
-newTaskGC 		:: !String (Task a) 		-> (Task a) 		| iData a 
-newTaskStd 		:: !String (Task a) 		-> (Task a) 		| iCreateAndPrint a
+newTask_GC 		:: !String (Task a) 		-> (Task a) 		| iData a 
+newTask_Std 	:: !String (Task a) 		-> (Task a) 		| iCreateAndPrint a
 repeatTask		:: (Task a) 				-> Task a 			| iData a
-repeatTaskGC	:: (Task a) 				-> Task a 			| iCreateAndPrint a
-repeatTaskStd 	:: (Task a) 				-> Task a 			| iCreateAndPrint a
+repeatTask_GC	:: (Task a) 				-> Task a 			| iCreateAndPrint a
+repeatTask_Std 	:: (Task a) 				-> Task a 			| iCreateAndPrint a
 
 /*	Sequential Tasks:
 seqTask			:: do corresponding iTask when button pressed
@@ -118,13 +110,13 @@ orTask2			:: (Task a,Task b) 		-> (Task (EITHER a b)) 	| iCreateAndPrint a & iCr
 orTasks			:: [(String,Task a)] 	-> (Task a)				| iCreateAndPrint a 
 
 /* Do Tasks parallel / interleaved and FINISH when ALL Tasks done:
-andTask			:: do both iTasks in any order (paralel), task completed when both done
-andTasks		:: do all  iTasks in any order (paralel), task completed when all  done
-mu_andTasks		:: assign task to indicated users, task completed when all done
+andTask			:: do both iTasks in any order (interleaved), task completed when both done
+andTasks		:: do all  iTasks in any order (interleaved), task completed when all  done
+andTasks_mu		:: assign task to indicated users, task completed when all done
 */
 andTask			:: (Task a,Task b) 		-> (Task (a,b)) 		| iCreateAndPrint a & iCreateAndPrint b
 andTasks		:: [(String,Task a)]	-> (Task [a])			| iCreateAndPrint a
-mu_andTasks 	:: String [(Int,Task a)]-> (Task [a]) 			| iData a
+andTasks_mu 	:: String [(Int,Task a)]-> (Task [a]) 			| iData a
 
 /* Time and Date management:
 waitForTimeTask	:: Task is done when time has come
@@ -156,24 +148,17 @@ appHSt			:: lift HSt domain to TSt domain
 appIData 		:: (IDataFun a) 					-> Task a 			| iData a
 appHSt 			:: (HSt -> (a,HSt)) 				-> Task a			| iData a
 
-/* Experimental!! DONT USE NOT FINISHED
+/* Experimental section !! 
+The following combinators might be dangerous to use when you garbage collect tasks
 
-Setting up communication channels between users:
-mkRTask			:: Remote Task: split indicated task in two tasks: a calling task and a receiving task
-					the caller will wait until the receiver has completed the task
-mkRTaskCall 	:: as mkRTask, but the caller will provide input for the remote task
-mkRDynTaskCall 	:: a remote task is set up, but the task that is created will be determined dynamically !
-					BE CAREFUL: static dynamics are used here, will work only for one exectable.
-PMilestoneTasks :: do all  iTasks in any order (paralel), task completed when all  done
-					but continue with next task as soon as SOME Task completes
-					string indicates which tasks have completed
+andTasks_mstone :: do all  iTasks in any order (interleaved), task completed when all  done
+					but continue with next task as soon as one of the tasks is completed
+					string indicates which task delivered what
+stopTask		:: indicated task can be stopped at any time and can be finished elsewhere
+					boolean indicated whether task is stopped or is finished
 */
-mkRTask 		:: String (Task a) *TSt -> ((Task a,Task a),*TSt) 		| iData a 
-mkRTaskCall		:: String b (b -> Task a) *TSt 
-										-> ((b -> Task a,Task a),*TSt)	| iData a & iData b
-mkRDynTaskCall 	:: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt)| iData a
 
-PMilestoneTasks :: [(String,Task a)] 	-> (Task [(String,a)]) 			| iCreateAndPrint a
+andTasks_mstone :: [(String,Task a)] 		-> (Task [(String,a)]) 		| iCreateAndPrint a
 
-stopTask :: (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
+stopTask 		:: (Task a) 				-> (Task (Bool,TClosure a)) | iCreateAndPrint a
 
