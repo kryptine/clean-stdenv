@@ -2,6 +2,15 @@ module quotation
 
 import StdEnv, StdHtml, GenEq
 
+// (c) 2007 MJP
+
+// A task is given to user 0
+// When finished the result of the task is reviewed by user 1
+// He can comment on the task, or approve or cancel it
+// When the result needs more work, the whole process is repeated
+// Otherwise the task is completed
+// The task itself in the example is a quotation form that needs to be filled in
+
 derive gForm 	QForm, ReviewState
 derive gUpd 	QForm, ReviewState
 derive gParse 	QForm, ReviewState

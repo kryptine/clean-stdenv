@@ -1,6 +1,12 @@
 module list
 
-import StdEnv, StdHtml
+import StdEnv, htmlTask
+
+// (c) 2007 MJP
+
+// Just a simple test to see if more complex iData editors can be used
+// A list can be edited by user 0 and is shipped for further editing to user 1 
+// When finished the sum of the list is displayed by user 0
 
 derive gForm []
 derive gUpd []

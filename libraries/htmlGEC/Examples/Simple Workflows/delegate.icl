@@ -2,11 +2,23 @@ module delegate
 
 import StdEnv, htmlTask
 
+
+// (c) 2007 MJP
+
+// Quite a difficult workflow exercise given to me by Erik Zuurbier.
+// First a set of person id's is made to which a task can be delegated
+// The task is actually shipped to the first person who accepts the task
+// That person can stop the task whenever he wants
+// Now again everybody in the set is asked again to accept the task
+// The one who accepts can *continue* the work already done so far
+// This process can be repeated as many times one likes until finally the task is finished
+
+// When the timer goes, the whole process is repeated from scratch and the task performed so far is lossed.
+// To make this work an additional combinator is needed. Work to do.
+
 derive gForm [], Maybe
 derive gUpd [], Maybe
 derive gPrint Maybe
-derive gParse Maybe
-//derive gerda Maybe
 
 npersons = 5
 

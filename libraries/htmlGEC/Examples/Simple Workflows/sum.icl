@@ -2,6 +2,10 @@ module sum
 
 import StdEnv, StdHtml
 
+// (c) MJP 2007
+
+// All kinds of ways to add up two numbers, used for the ICFP paper
+
 // choose one of the following variants
 
 //Start world = doHtmlServer (singleUserTask sequence) world

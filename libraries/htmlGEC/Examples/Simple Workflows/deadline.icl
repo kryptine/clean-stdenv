@@ -1,17 +1,25 @@
 module deadline
 
-import StdEnv, StdHtml
+import StdEnv, htmlTask
 
 derive gForm []
 derive gUpd []
+
+// (c) MJP 2007
+
+// One can select a user to which a task is delegated
+// This user will get a certain amount of time to finish the task
+// If the task is not finished on time, the task will be shipped back to the original user who has to do it instead
+// It is also possible that the user becomes impatient and he can cancel the delegated task even though the dealine is not reached
+
 
 npersons = 5
 
 Start world = doHtmlServer (multiUserTask npersons (repeatTask (deadline mytask) )) world
 
-mytask = editTask "OK" 0 <| (\n -> n > 23,\n -> "let erop, " <+++ n <+++ " is niet groter dan 23")
+mytask = editTask "OK" 0 <| (\n -> n > 23,\n -> "Error " <+++ n <+++ " should be larger than 23")
 
-deadline :: (Task a) -> (Task a) | iTrace, iData a
+deadline :: (Task a) -> (Task a) |iData a
 deadline task
 =						[Txt "Choose person you want to delegate work to:",Br,Br] 
 						?>>	editTask "Set" (PullDown (1,100) (0,[toString i \\ i <- [1..npersons]]))

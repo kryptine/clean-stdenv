@@ -4,7 +4,7 @@ import StdEnv
 import StdHtml
 
 //Start world  = doHtml example1 world
-Start world  = doHtmlServer example5 world
+Start world  = doHtmlServer example5a world
 
 myIntId :: (InIDataId Int)
 myIntId		= initID (nFormId "nr" 1)
@@ -60,6 +60,19 @@ example5 hst
         , STable [] ([nrF.form \\ nrF <- nrFs] ++ [[toHtml sumNrs]])
         ] hst
 
+<<<<<<< IFL2005Examples.icl
+//  Example: display a list of numbers vertically, but use counter-editors instead of number-editors:
+example5a hst
+    # (nrFs,hst) = seqList [mkEditForm (sumId nr) (Init nr) \\ nr<-[1..5]] hst
+    # sumNrs     = sum [toInt nrF.value \\ nrF <- nrFs]
+    = mkHtml "Vertical Table"
+        [ H1 [] "Vertical Table"
+        , STable [] ([nrF.form \\ nrF <- nrFs] ++ [[toHtml sumNrs]])
+        ] hst
+
+sumId i = nFormId ("sum"<$i)
+=======
+>>>>>>> 1.5
 
 //	Define new type to specialize 'Int':
 ::  MInt = M Int

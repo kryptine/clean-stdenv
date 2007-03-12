@@ -1,6 +1,13 @@
 module travel
 
-import StdEnv, StdHtml
+import StdEnv, htmlTask
+
+// (c) 2007 MJP
+
+// Test for multiple choice
+// One can choose to book a flight, hotel and / or a car
+// One by one the chosen bookings will be handled
+// The bill is made up in the end
 
 derive gForm []
 derive gUpd []
@@ -37,9 +44,9 @@ where
 		isNil [] = True
 		isNil _ = False
 
-	BookFlight  = editTask "BookFlight" 	(Dsp "Flight Number","",Dsp "Costs",0) 	<<@ Submit
+	BookFlight  = editTask "BookFlight" (Dsp "Flight Number","",Dsp "Costs",0) 	<<@ Submit
 	BookHotel  	= editTask "BookHotel" 	(Dsp "Hotel Name","",Dsp "Costs",0)		<<@ Submit
-	BookCar  	= editTask "BookCar" 		(Dsp "Car Brand","",Dsp "Costs",0)		<<@ Submit
+	BookCar  	= editTask "BookCar" 	(Dsp "Car Brand","",Dsp "Costs",0)		<<@ Submit
 
 
 Dsp = DisplayMode 

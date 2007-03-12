@@ -2,8 +2,10 @@ module date
 
 import StdEnv, StdHtml
 
+// (c) MJP 2007
+
 // findDate will settle a date and time between two persons that want to meet
-// first a person is chosen by the person taken the initiative
+// first a person is chosen by the person taken the initiative, person 0
 // then a date is settled by the two persons by repeatedly asking each other for a convenient date
 // if such a date is found both have to confirm the date and the task is finished
 

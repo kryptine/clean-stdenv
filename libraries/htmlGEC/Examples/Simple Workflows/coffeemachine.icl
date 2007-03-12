@@ -1,8 +1,15 @@
 module coffeemachine
 
+// (c) MJP 2007
+//
+// This is just a demo of a coffeemachine programmed with iTasks combinators
+// The persistent variant will remember the state in which the coffee machine was left
+// Garbage collection of unused tasks will be done automatically
+
 import StdEnv, StdHtml
 
 Start world = doHtmlServer (singleUserTask (repeatTaskGC CoffeeMachine)) world
+//Start world = doHtmlServer (singleUserTask (repeatTaskGC CoffeeMachine <@ Persistent)) world
 
 CoffeeMachine :: Task (String,Int)
 CoffeeMachine  
