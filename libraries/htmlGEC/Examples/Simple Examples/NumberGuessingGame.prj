@@ -4743,7 +4743,7 @@ OtherModules
 				Y:	27
 				SizeX:	1039
 				SizeY:	737
-		IclOpen:	True
+		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdStrictLists
