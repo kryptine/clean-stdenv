@@ -1,7 +1,7 @@
 implementation module FamkeProcess
 
 import FamkeKernel
-import FamkeRpc, LoesListSeq, LoesKeyList, TcpIp
+import FamkeRpc, LoesListSeq, LoesKeyList, TcpIp, StdException
 import StdBool, StdInt, StdMisc, StdString, StdList, StdArray, StdTuple, ArgEnv, Windows
 from DynamicLinkerInterface import GetDynamicLinkerPath
 
@@ -9,6 +9,7 @@ TRACE msg x :== trace_n msg x; import StdDebug
 
 :: ProtocolIn
 	= ClientWorkRequest !ProcessId !Int
+	| ClientException !ProcessId !Int
 	| NewProcess Process
 	| ReuseProcess !ProcessId Process
 	| JoinProcess !ProcessId !ProcessId
@@ -119,6 +120,7 @@ where
 		  st = {st & working = working, server = server, famke = famke}
 		= case request of
 			ClientWorkRequest self osId -> clientWorkRequest self osId reply st
+			ClientException self osId -> clientException self osId reply st
 			NewProcess process -> newProcess` process reply st
 			ReuseProcess id process -> renewProcess` id process reply st
 			JoinProcess self id -> joinProcess` self id reply st
@@ -147,6 +149,12 @@ where
 						  		-> TRACE ("Process client " +++ toString self +++ " idle") (processServer {st & working = working, waiting = waiting, famke = famke})
 	  		_ -> TRACE ("Process client " +++ toString self +++ " does not exist") (processServer {st & working = working, famke = famke})
 		
+	clientException self osId reply st=:{working}
+		# (_, working) = uExtractK self working
+		  st=:{famke} = TRACE ("Process client " +++ toString self +++ " had an exception") {st & working = working}
+		  famke = reply ClientNoMoreWork famke
+		= processServer {st & famke = famke}
+	
 	newProcess` process reply st=:{working, waiting, nextid} 
 		# (maybe, waiting) = uDeCons waiting
 		  (id, st=:{famke}) = case maybe of
@@ -259,9 +267,13 @@ where
 		= case reply of
 			ClientDoMoreWork f 
 				#!famke = TRACE ("Famke Process Client " +++ toString id +++ " working") famke
-				  famke = f famke
+				  (maybe, famke) = ((\env -> (Nothing, f env)) catchAllIO (\d env -> (Just d, env))) famke
 			  	  famke = TRACE ("Famke Process Client " +++ toString id +++ " done") famke
-			  	-> processClient id osId famke
+			  	-> case maybe of
+			  		Just exception
+						# (reply, famke) = rpcProcessServer (ClientException id osId) famke
+						-> case reply of ClientNoMoreWork -> raiseDynamic exception		
+			  		_ -> processClient id osId famke
 			ClientNoMoreWork -> famke
 
 StartProcess :: !(*World -> *World) !*World -> *World

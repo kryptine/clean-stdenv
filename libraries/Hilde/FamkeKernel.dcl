@@ -25,7 +25,4 @@ famkeDisconnect :: !*(FamkeChannel .a .b) !*World -> *World
 famkeSend :: a !*(FamkeChannel a .b) !*World -> (!Bool, !*FamkeChannel a .b, !*World) | TC a
 famkeReceive :: !Bool !*(FamkeChannel .a b) !*World -> (!Bool, b, !*FamkeChannel .a b, !*World) | TC b
 
-unsafeFamkeSendDynamic :: !Dynamic !*(FamkeChannel .a .b) !*World -> (!Bool, !*FamkeChannel .a .b, !*World)
-unsafeFamkeReceiveDynamic :: !Bool !*(FamkeChannel .a .b) !*World -> (!Bool, !Dynamic, !*FamkeChannel .a .b, !*World)
-
 StartKernel :: !ProcessId !.(*World -> *World) !*World -> *World

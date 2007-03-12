@@ -7,8 +7,8 @@ Global
 		CheckStacks:	False
 		CheckIndexes:	True
 	Application
-		HeapSize:	4194304
-		StackSize:	204800
+		HeapSize:	8388608
+		StackSize:	1048576
 		ExtraMemory:	81920
 		IntialHeapSize:	1048576
 		HeapSizeMultiplier:	4096
@@ -59,6 +59,7 @@ MainModule
 		Verbose:	True
 		ReadableABC:	True
 		ReuseUniqueNodes:	True
+		Fusion:	False
 	Dcl
 		WindowPosition
 			X:	0
@@ -88,6 +89,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -116,6 +118,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -144,6 +147,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	5
@@ -153,10 +157,10 @@ OtherModules
 		DclOpen:	False
 		Icl
 			WindowPosition
-				X:	9
-				Y:	2
-				SizeX:	785
-				SizeY:	481
+				X:	10
+				Y:	10
+				SizeX:	800
+				SizeY:	640
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -172,6 +176,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	182
@@ -200,12 +205,13 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	658
+				SizeY:	460
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -228,6 +234,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	189
@@ -256,6 +263,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	True
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	55
@@ -284,6 +292,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	136
@@ -312,6 +321,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -340,6 +350,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -368,6 +379,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -396,6 +408,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -424,6 +437,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -454,6 +468,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -486,6 +501,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -514,6 +530,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -542,6 +559,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -572,6 +590,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -600,6 +619,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -628,6 +648,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -656,6 +677,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -684,6 +706,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -712,6 +735,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -740,6 +764,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -768,6 +793,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -796,6 +822,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -824,6 +851,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -852,6 +880,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -880,6 +909,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -908,6 +938,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	34
@@ -936,6 +967,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -964,6 +996,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -992,6 +1025,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	274
@@ -1020,6 +1054,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	34
@@ -1048,6 +1083,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1076,6 +1112,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1104,6 +1141,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1132,6 +1170,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	454
@@ -1160,6 +1199,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1188,6 +1228,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1216,12 +1257,13 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	723
+				SizeY:	358
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -1244,6 +1286,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1255,8 +1298,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	734
+				SizeY:	556
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1272,6 +1315,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1300,6 +1344,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1328,6 +1373,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1356,6 +1402,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1384,6 +1431,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1395,8 +1443,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	725
-				SizeY:	300
+				SizeX:	745
+				SizeY:	586
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1412,6 +1460,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1440,6 +1489,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1468,6 +1518,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1496,6 +1547,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	83
@@ -1509,7 +1561,7 @@ OtherModules
 				Y:	154
 				SizeX:	758
 				SizeY:	474
-		IclOpen:	True
+		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	Windows
@@ -1524,6 +1576,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1554,6 +1607,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1582,6 +1636,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	10
@@ -1594,7 +1649,7 @@ OtherModules
 				X:	61
 				Y:	70
 				SizeX:	732
-				SizeY:	399
+				SizeY:	453
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1610,6 +1665,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1621,8 +1677,8 @@ OtherModules
 			WindowPosition
 				X:	0
 				Y:	0
-				SizeX:	500
-				SizeY:	300
+				SizeX:	805
+				SizeY:	465
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -1638,6 +1694,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1654,7 +1711,7 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	cDirectory.obj
+			ObjectFile:	cDirectory.
 		NeededLibraries
 			Library:	directory_library
 	Module
@@ -1670,6 +1727,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1698,6 +1756,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	8
@@ -1711,7 +1770,7 @@ OtherModules
 				Y:	0
 				SizeX:	805
 				SizeY:	551
-		IclOpen:	True
+		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	FamkeKernel
@@ -1726,6 +1785,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	10
@@ -1754,6 +1814,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1786,6 +1847,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	10
@@ -1814,6 +1876,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1842,6 +1905,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1870,6 +1934,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1898,6 +1963,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1926,6 +1992,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1954,6 +2021,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1982,6 +2050,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -1991,8 +2060,8 @@ OtherModules
 		DclOpen:	False
 		Icl
 			WindowPosition
-				X:	0
-				Y:	0
+				X:	511
+				Y:	1
 				SizeX:	500
 				SizeY:	300
 		IclOpen:	False
@@ -2010,6 +2079,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2038,6 +2108,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2066,6 +2137,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2094,6 +2166,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2122,6 +2195,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2138,7 +2212,7 @@ OtherModules
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
-			ObjectFile:	ArgEnvC.obj
+			ObjectFile:	ArgEnvC.
 	Module
 		Name:	EstherFamkeEnv
 		Dir:	{Project}
@@ -2152,6 +2226,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2180,6 +2255,7 @@ OtherModules
 			Verbose:	True
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
+			Fusion:	False
 		Dcl
 			WindowPosition
 				X:	0
@@ -2193,6 +2269,23 @@ OtherModules
 				Y:	0
 				SizeX:	773
 				SizeY:	529
+		IclOpen:	False
+		LastModified:	No 0 0 0 0 0 0
+	Module
+		Name:	DynIDMacros
+		Dir:	{Application}\Libraries\Dynamics\implementation
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		DclOpen:	False
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 Static
@@ -2273,89 +2366,91 @@ Static
 		Path:	{Application}\Libraries\ArgEnvWindows\ArgEnv.icl
 		Path:	{Project}\EstherFamkeEnv.icl
 		Path:	{Project}\EstherStdEnv.icl
+		Path:	{Application}\Libraries\Dynamics\implementation\DynIDMacros.icl
 	Objs
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup0.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup1.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_startup2.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_system.o
 		Path:	{Project}\Clean System Files\Esther.o
-		Path:	{Project}\Clean System Files\EstherFamkeEnv.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
-		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamicFileIO.o
-		Path:	{Project}\Clean System Files\EstherTransform.o
-		Path:	{Application}\Libraries\WrapDebug\Clean System Files\Wrap.o
-		Path:	{Project}\Clean System Files\EstherBackend.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
-		Path:	{Project}\Clean System Files\EstherParser.o
 		Path:	{Project}\Clean System Files\EstherScript.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
 		Path:	{Project}\OS Windows\Clean System Files\Windows.o
+		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
+		Path:	{Application}\Libraries\ExceptionsWindows\Clean System Files\StdException.o
 		Path:	{Project}\Loes 0.2\Clean System Files\LoesColl.o
+		Path:	{Project}\Loes 0.2\Clean System Files\LoesListColl.o
 		Path:	{Project}\Loes 0.2\Clean System Files\LoesAssoc.o
+		Path:	{Project}\Loes 0.2\Clean System Files\LoesKeyList.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloadedList.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnumStrict.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemStrictLists.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdStrictLists.o
 		Path:	{Project}\Loes 0.2\Clean System Files\LoesCommon.o
+		Path:	{Project}\Loes 0.2\Clean System Files\LoesSeq.o
 		Path:	{Project}\Loes 0.2\Clean System Files\LoesListSeq.o
-		Path:	{Project}\Clean System Files\CleanTricks.o
-		Path:	{Project}\Clean System Files\TcpIp.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory_mapped_files.o
+		Path:	{Project}\Clean System Files\FamkeRpc.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
 		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\md5.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynID.o
+		Path:	{Project}\Clean System Files\CleanTricks.o
+		Path:	{Project}\Clean System Files\Marshall.o
+		Path:	{Project}\Clean System Files\TcpIp.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory_mapped_files.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynIDMacros.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicGraphConversion.o
+		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicVersion.o
 		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicTypes.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\BitSet.o
 		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicLowLevelInterface.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\shared_buffer.o
 		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynamicUtilities.o
+		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\EnDecode.o
 		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\DefaultElem.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicLinkerInterface.o
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
+		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
 		Path:	{Project}\Clean System Files\FamkeKernel.o
+		Path:	{Project}\Clean System Files\FamkeProcess.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdCharList.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOrdList.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnv.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdTuple.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnum.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnum.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdReal.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdList.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFile.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdString.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemArray.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdArray.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdChar.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdMisc.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdInt.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdBool.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdClass.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdBool.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemArray.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdReal.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnum.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnv.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdTuple.o
-		Path:	{Project}\Clean System Files\FamkeProcess.o
-		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicLinkerInterface.o
-		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\EnDecode.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\shared_buffer.o
-		Path:	{Application}\Libraries\Dynamics\general\Clean System Files\BitSet.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\StdDynamicVersion.o
-		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynID.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory.o
-		Path:	{Project}\Clean System Files\Marshall.o
-		Path:	{Project}\Clean System Files\FamkeRpc.o
-		Path:	{Project}\Loes 0.2\Clean System Files\LoesSeq.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdStrictLists.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnumStrict.o
-		Path:	{Project}\Loes 0.2\Clean System Files\LoesKeyList.o
-		Path:	{Project}\Loes 0.2\Clean System Files\LoesListColl.o
-		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
 		Path:	{Project}\Clean System Files\EstherPostParser.o
-		Path:	{Application}\Libraries\ExceptionsWindows\Clean System Files\StdException.o
+		Path:	{Project}\Clean System Files\EstherParser.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
 		Path:	{Project}\Parser combinators 2002\Clean System Files\StdParsComb.o
+		Path:	{Project}\Clean System Files\EstherBackend.o
 		Path:	{Application}\Libraries\WrapDebug\Clean System Files\Debug.o
+		Path:	{Application}\Libraries\WrapDebug\Clean System Files\Wrap.o
 		Path:	{Application}\Libraries\WrapDebug\Clean System Files\ShowWrapped.o
+		Path:	{Project}\Clean System Files\EstherTransform.o
 		Path:	{Project}\Clean System Files\DynamicFileSystem.o
+		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamicFileIO.o
 		Path:	{Application}\Libraries\Directory\Clean System Files\Directory.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
 		Path:	{Project}\Clean System Files\EstherStdEnv.o
-		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.obj
-		Path:	{Application}\Libraries\Directory\Clean System Files\cDirectory.obj
+		Path:	{Project}\Clean System Files\EstherFamkeEnv.o
+		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.o
+		Path:	{Application}\Libraries\Directory\Clean System Files\cDirectory.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\low.obj
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\mem.obj
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\read_function.obj
@@ -2389,5 +2484,5 @@ Static
 		Path:	{Application}\Libraries\Dynamics\implementation
 		Path:	{Application}\Libraries\Dynamics\implementation\windows
 		Path:	{Application}\Libraries\Generics
-	AppP:	C:\Clean 2.1.1a3
-	PrjP:	D:\My Documents\Hilde
+	AppP:	C:\Clean 2.2
+	PrjP:	D:\Documents\Hilde

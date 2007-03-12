@@ -15,13 +15,15 @@ Esther env
 	  (continue, input, console) = freadline` console
   	  (_, env) = fclose console env
 	| input == "" = env
-	# (result, env) = (interpret input catchAllIO \d env -> (handler d, env)) env
+	# (result, type, env) = interpret input env
+	  result = evalToNF result unsafeCatchAll \d -> handler (dynamic EstherError "Unprintable")
 	  (console, env) = stdio env
-	  console = foldl (\f x -> fwrites x f) console result
+	  console = foldl (\f s -> fwrites s f) console result 
+	  console = fwrites type console
 	  console = fwrites "\n" console
   	  (_, env) = fclose console env
-	| not continue = env
-	= Esther env
+  	| continue = Esther env
+	= env
 where
 	freadline` file
 		# (line, file) = freadline file
@@ -30,37 +32,54 @@ where
 
 	interpret input env
 		# (maybe, {env}) = compose input {builtin = Builtin, env = env}
-		  (r, env) = case maybe of NoException d -> eval d env; Exception d -> raiseDynamic d
-		  (v, t) = toStringDynamic r 
-		= (v ++ [" :: ", t], env)
+		 = case maybe of 
+  				NoException d 
+					# (_, t) = toStringDynamic d
+  					-> case eval d env of
+	  					(NoException d, env) 
+							# (v, t) = toStringDynamic d
+	  						-> (v, " :: " +++ t, env)
+	  					(Exception d, env) -> (handler d, " :: " +++ t, env)
+  				Exception d -> (handler d, "", env)
 	where
-		eval :: !Dynamic !*env -> (!Dynamic, !*env) | TC env
+		eval :: !Dynamic !*env -> (!MaybeException Dynamic, !*env) | TC, ExceptionEnv env
 		eval (f :: A.a: *a -> *a) env 
-			#!f = f
-			= (dynamic f :: A.a: *a -> *a, env)
+			# (maybe, env) = getException f env
+			= (case maybe of
+				NoException f -> NoException (dynamic f :: A.a: *a -> *a)
+				Exception e -> Exception e
+				, env)
 		eval (f :: *env^ -> *env^) env 
 //			# env = trace_n " < *World -> *World > " env
-			= (dynamic UNIT, f env)
-		eval (f :: A.a b: *a -> *(b, *a)) env 
-			#!f = f
-			= (dynamic f :: A.a b: *a -> *(b, *a), env)
+			= eval (dynamic \e -> (UNIT, f e) :: *env^ -> *(UNIT, *env^)) env
+		eval (f :: A.a: *a -> *(b, *a)) env 
+			# (maybe, env) = getException f env
+			= (case maybe of
+				NoException f -> NoException (dynamic f :: A.a: *a -> *(b, *a))
+				Exception e -> Exception e
+				, env)
 		eval (f :: *env^ -> *(a, *env^)) env 
 //			# env = trace_n " < *World -> *(a, *World) > " env
-			# (x, env) = f env
-			#!x = x
-			= (dynamic x :: a, env)
+			# (maybe, env) = getExceptionIO f env
+			= (case maybe of
+				NoException x -> NoException (dynamic x :: a)
+				Exception e -> Exception e
+				, env)
 		eval (x :: a) env
-			#!x = x
-			= (dynamic x :: a, env)
+			# (maybe, env) = getException x env
+			= (case maybe of
+				NoException y -> NoException (dynamic y :: a)
+				Exception e -> Exception e
+				, env)
 
-	handler d=:(_ :: A.a: a) = ["*** Error: ":take 1000 v] ++ [" :: " , t, " ***"]
+	handler d=:(_ :: A.a: a) = ["***(":take 1000 v] ++ ["::" , t, ")***"]
 	where
 		(v, t) = toStringDynamic d
-	handler (EstherError s :: EstherError) = ["*** Esther: ", s, " ***"]
-	handler d = ["*** Error: ":take 1000 v] ++ [" :: " , t, " ***"]
+	handler (EstherError s :: EstherError) = ["***(", s, ")***"]
+	handler d = ["***(":take 1000 v] ++ ["::" , t, ")***"]
 	where
 		(v, t) = toStringDynamic d
-
+	
 Builtin =: estherEnv ++ famkeEnv
 
 estherEnv :: [(String, Dynamic)]

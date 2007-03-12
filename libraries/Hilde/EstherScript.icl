@@ -23,22 +23,37 @@ where
 		= generateCode core env`
 
 	handler :: !Dynamic -> Dynamic
-	handler ((ApplyTypeError df dx) :: ComposeException) = dynamic EstherError ("cannot apply `" +++ tf +++ "' to `" +++ tx +++ "'")
+	handler ((ApplyTypeError df dx) :: ComposeException) = dynamic EstherError (applyError df dx)
 	where
-		(vf, tf) = toStringDynamic df
-		(vx, tx) = toStringDynamic dx
-	handler (UnboundVariable v :: ComposeException) = dynamic EstherError ("unbound variable (internal error) `" +++ v +++ "'")
+		applyError df dx = case (df, dx) of
+			(f :: A.a: a, x :: b) -> unifyError (dynamic f :: A.a: a) (dynamic x :: b)
+			(f :: a -> b, x :: c) -> unifyError (dynamic undef :: a) (dynamic x :: c)
+			_ -> "Cannot apply `" +++ tf +++ "' to `" +++ tx +++ "'"
+		where
+			(_, tf) = toStringDynamic df
+			(_, tx) = toStringDynamic dx
+
+		unifyError dx dy = case (dx, dy) of
+			(x :: A.a: a, y :: b) -> "Cannot unify `" +++ tx +++ "' with `" +++ ty +++ "'"
+			(x :: a, y :: A.b: b) -> "Cannot unify `" +++ tx +++ "' with `" +++ ty +++ "'"
+			(x :: a -> b, y :: a -> c) -> unifyError (dynamic undef :: b) (dynamic undef :: c)
+			(x :: a -> b, y :: c -> b) -> unifyError (dynamic undef :: a) (dynamic undef :: c)
+			_ -> "Cannot unify `" +++ tx +++ "' with `" +++ ty +++ "'"
+		where
+			(_, tx) = toStringDynamic dx
+			(_, ty) = toStringDynamic dy
+	handler (UnboundVariable v :: ComposeException) = dynamic EstherError ("Unbound variable (internal error) `" +++ v +++ "'")
 	handler (InstanceNotFound c dt :: ComposeException) = dynamic EstherError ("`instance " +++ c +++ " " +++ snd (toStringDynamic dt) +++ "' not found")
 	handler (InvalidInstance c t dt :: ComposeException) = dynamic EstherError ("`instance " +++ c +++ " " +++ snd (toStringDynamic t) +++ "' has invalid type `" +++ snd (toStringDynamic dt) +++ "'")
-	handler (UnsolvableOverloading :: ComposeException) = dynamic EstherError ("unsolvable overloading")
-	handler (InfixRightArgumentMissing :: PostParseException) = dynamic EstherError ("right argument of infix operator is missing")
-	handler (InfixLeftArgumentMissing :: PostParseException) = dynamic EstherError ("left argument of infix operator is missing")
-	handler (UnsolvableInfixOrder :: PostParseException) = dynamic EstherError ("conflicting priorities of infix operators")
-	handler (NameNotFound n :: PostParseException) = dynamic EstherError ("file `" +++ n +++ "' not found")
-	handler (CaseBadConstructorArity :: TransformException) = dynamic EstherError ("constructor in pattern has too many or too little arguments")
-	handler (NotSupported s :: TransformException) = dynamic EstherError ("feature not (yet) supported: `" +++ s +++ "'")
-	handler (NotSupported` s :: ComposeException) = dynamic EstherError ("feature not (yet) supported: `" +++ s +++ "'")
-	handler (_ :: ParseException) = dynamic EstherError ("parser error")
+	handler (UnsolvableOverloading :: ComposeException) = dynamic EstherError ("Unsolvable overloading")
+	handler (InfixRightArgumentMissing :: PostParseException) = dynamic EstherError ("Right argument of infix operator is missing")
+	handler (InfixLeftArgumentMissing :: PostParseException) = dynamic EstherError ("Left argument of infix operator is missing")
+	handler (UnsolvableInfixOrder :: PostParseException) = dynamic EstherError ("Conflicting priorities of infix operators")
+	handler (NameNotFound n :: PostParseException) = dynamic EstherError ("File `" +++ n +++ "' not found")
+	handler (CaseBadConstructorArity :: TransformException) = dynamic EstherError ("Constructor in pattern has too many or too little arguments")
+	handler (NotSupported s :: TransformException) = dynamic EstherError ("Feature (" +++ s +++ ") not (yet) supported: `" +++ s +++ "'")
+	handler (NotSupported` s :: ComposeException) = dynamic EstherError ("Feature (" +++ s +++ ") not (yet) supported: `" +++ s +++ "'")
+	handler (_ :: ParseException) = dynamic EstherError ("Parser error")
 	handler d = d
 
 instance resolveFilename World
