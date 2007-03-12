@@ -53,12 +53,12 @@ where setTaskAttr mode tst = {tst & storageInfo.taskmode = mode}
 
 // wrappers
 
-singleUserTask :: !(Task a) !*HSt -> (Html,*HSt) | default a 
+singleUserTask :: !(Task a) !*HSt -> (Html,*HSt) | iCreate a 
 singleUserTask task hst 
 # (_,html,hst) = startTask 0 task hst
 = mkHtml "stest" html hst
 
-multiUserTask :: !Int!(Task a) !*HSt -> (Html,*HSt) | default a 
+multiUserTask :: !Int!(Task a) !*HSt -> (Html,*HSt) | iCreate a 
 multiUserTask nusers task  hst 
 # (idform,hst) 	= FuncMenu (Init,nFormId "User_Selected" 
 						(0,[("User " +++ toString i,\_ -> i) \\ i<-[0..nusers - 1] ])) hst
@@ -66,7 +66,7 @@ multiUserTask nusers task  hst
 # (_,html,hst) 	= startTask currentWorker task hst
 = mkHtml "mtest" (idform.form ++ html) hst
 
-startTask :: !Int !(Task a) !*HSt -> (a,[BodyTag],!*HSt) | default a 
+startTask :: !Int !(Task a) !*HSt -> (a,[BodyTag],!*HSt) | iCreate a 
 startTask thisUser taska hst
 # userVersionNr			= "User" <+++ thisUser <+++ "_VersionPNr"
 # sessionVersionNr		= "User" <+++ thisUser <+++ "_VersionSNr" 
@@ -143,7 +143,7 @@ where
 
 // make an iTask editor
 
-editTask :: String a -> (Task a) | iTrace, iData a 
+editTask :: String a -> (Task a) | iData a 
 editTask prompt a = mkTask "editTask" (editTask` prompt a)
 
 editTask` prompt a tst=:{tasknr,html,hst}
@@ -171,23 +171,23 @@ editTask` prompt a tst=:{tasknr,html,hst}
 ireturnV :: a -> (Task a) 
 ireturnV a  = return a	
 
-returnV :: a -> (Task a) | iTrace a
+returnV :: a -> (Task a) | iCreateAndPrint a
 returnV a  = mkTask "returnV" (return a) 
 
 
-returnDisplay :: a -> (Task a) | gForm {|*|}, iTrace a
+returnDisplay :: a -> (Task a) | gForm {|*|}, iCreateAndPrint a
 returnDisplay a = mkTask "returnDispplay" returnDisplay`
 where
 	returnDisplay` tst
 	= (a,{tst & html = tst.html +|+ BT [toHtml a ]})		// return result task
 
-returnVF :: a [BodyTag] -> (Task a) |  iTrace a
+returnVF :: a [BodyTag] -> (Task a) |  iCreateAndPrint a
 returnVF a bodytag = mkTask "returnVF" returnVF`
 where
 	returnVF` tst
 	= (a,{tst & html = tst.html +|+ BT bodytag})
 
-(<|) infix 3 :: (Task a) (a -> .Bool, a -> String) -> Task a | default a
+(<|) infix 3 :: (Task a) (a -> .Bool, a -> String) -> Task a | iCreate a
 (<|) taska (pred,message) = doTask
 where
 	doTask tst=:{html = ohtml,activated}
@@ -212,7 +212,7 @@ where
 	| activated || not myturn= (a,{tst & html = ohtml})
 	= (a,{tst & html = ohtml +|+ BT prompt +|+ nhtml})
 
-(!>>) infix 2 :: [BodyTag] (Task a) -> (Task a) | default a
+(!>>) infix 2 :: [BodyTag] (Task a) -> (Task a) | iCreate a
 (!>>) prompt task = doTask
 where
 	doTask tst=:{html=ohtml,activated=myturn}
@@ -229,10 +229,10 @@ where
 // Every sequential task should increase the task number
 // If a task j is a subtask of task i, than it will get number i.j in reverse order
 	
-mkTask :: !String (Task a) -> (Task a) | iTrace a
+mkTask :: !String (Task a) -> (Task a) | iCreateAndPrint a
 mkTask taskname mytask = mkTaskNoInc taskname mytask o incTaskNr
 
-mkTaskNoInc :: !String (Task a) -> (Task a) | iTrace a			// common second part of task wrappers
+mkTaskNoInc :: !String (Task a) -> (Task a) | iCreateAndPrint a			// common second part of task wrappers
 mkTaskNoInc taskname mytask = mkTaskNoInc`
 where
 	mkTaskNoInc` tst=:{activated,tasknr,myId}		
@@ -254,19 +254,19 @@ addTasknr [i:is] j = [i+j:is]
 // non optimized versions of repeattask and newTask will increase the task tree stack and
 // therefore cannot be used for big applications
 
-repeatTaskStd :: (Task a) -> Task a | iTrace a
+repeatTaskStd :: (Task a) -> Task a | iCreateAndPrint a
 repeatTaskStd task = mkTask "repeatTaskStd" dorepeatTaskStd
 where
 	dorepeatTaskStd tst		
 	# (_,tst)	= task (newSubTaskNr tst)		
 	= repeatTaskStd task tst						
 
-newTaskStd :: !String (Task a) -> (Task a) | iTrace a
+newTaskStd :: !String (Task a) -> (Task a) | iCreateAndPrint a
 newTaskStd taskname mytask = mkTask taskname (mytask o newSubTaskNr)
 
 // same, but by remembering task results stack space can be saved
 
-repeatTask :: (Task a) -> Task a | iTrace, iData a
+repeatTask :: (Task a) -> Task a | iData a
 repeatTask task = repeatTask`
 where
 	repeatTask` tst=:{tasknr,hst} 
@@ -284,7 +284,7 @@ where
 		# (val,tst)= task {tst & tasknr = [-1:tasknr]}	// do task to repeat
 		= (val,{tst & tasknr = tasknr})					
 
-newTask :: !String (Task a) -> (Task a) 	| iTrace, iData a 
+newTask :: !String (Task a) -> (Task a) 	| iData a 
 newTask taskname mytask = mkTask taskname (newTask` False mytask)
 
 newTask` collect mytask tst=:{tasknr,hst}		
@@ -302,7 +302,7 @@ newTask` collect mytask tst=:{tasknr,hst}
 
 // same, but additionally deleting subtasks
 
-repeatTaskGC :: (Task a) -> Task a | iTrace a
+repeatTaskGC :: (Task a) -> Task a | iCreateAndPrint a
 repeatTaskGC task = mkTask "repeatTaskGC" repeatTask`
 where
 	repeatTask` tst=:{tasknr}		
@@ -310,7 +310,7 @@ where
 	| activated 				= repeatTask` (deleteSubTasks tasknr {tst & tasknr = tasknr}) // loop
 	= (val,tst)					
 
-newTaskGC :: !String (Task a) -> (Task a) 	| iTrace, iData a 
+newTaskGC :: !String (Task a) -> (Task a) 	| iData a 
 newTaskGC taskname mytask = mkTask taskname (newTask` True mytask)
 
 deleteSubTasks :: ![Int] TSt -> TSt
@@ -324,7 +324,7 @@ where
 
 // parallel subtask creation utility
 
-mkParSubTask :: !String !Int (Task a) -> (Task a)  | iTrace a		// two shifts are needed
+mkParSubTask :: !String !Int (Task a) -> (Task a)  | iCreateAndPrint a		// two shifts are needed
 mkParSubTask name i task = mkParSubTask`
 where
 	mkParSubTask` tst=:{tasknr}
@@ -335,7 +335,7 @@ where
 
 // assigning tasks to users, each user is identified by a number
 
-(@:) infix 4 :: !(!Int,!String) (Task a)	-> (Task a)			| default a
+(@:) infix 4 :: !(!Int,!String) (Task a)	-> (Task a)			| iCreate a
 (@:) (userId,taskname) taska = \tst=:{myId} -> assignTask` myId {tst & myId = userId}
 where
 	assignTask` myId tst=:{html=ohtml,activated}
@@ -351,7 +351,7 @@ where
 						BT [Br, Txt ("Waiting for Task "), yellow taskname, Txt " from ", yellowUser userId,Br] +|+ 
 						((userId,taskname) @@: BT [Txt "Task ",yellow taskname, Txt " requested by ", yellowUser myId,Br,Br] +|+ nhtml)})				// combine html code, filter later					
 
-(@::) infix 4 :: !Int (Task a)	-> (Task a)			| default  a
+(@::) infix 4 :: !Int (Task a)	-> (Task a)			| iCreate  a
 (@::) userId taska = \tst=:{myId} -> assignTask` myId {tst & myId = userId}
 where
 	assignTask` myId tst=:{html}
@@ -365,10 +365,10 @@ where
 
 internEditSTask tracename prompt task = \tst -> mkTask tracename (editTask` prompt task) tst
 
-seqTask :: String (Task a) -> (Task a) | iTrace a
+seqTask :: String (Task a) -> (Task a) | iCreateAndPrint a
 seqTask s task = iCTask_button "seqTask" [(s,task)]
 
-seqTasks :: [(String,Task a)] -> (Task [a])| iTrace a
+seqTasks :: [(String,Task a)] -> (Task [a])| iCreateAndPrint a
 seqTasks options = mkTask "seqTasks" seqTasks`
 where
 	seqTasks` tst=:{tasknr}
@@ -385,7 +385,7 @@ where
 // choose one or more tasks out of a collection
 iCTask_button tracename options = mkTask tracename (dochooseTask options)
 
-chooseTask :: [(String,Task a)] -> (Task a) | iTrace a
+chooseTask :: [(String,Task a)] -> (Task a) | iCreateAndPrint a
 chooseTask options = mkTask "chooseTask" (dochooseTask options)
 
 dochooseTask [] tst				= ireturnV createDefault tst				
@@ -406,7 +406,7 @@ dochooseTask options tst=:{tasknr,html,hst}									// choose one subtask out of
 
 but i = LButton defpixel i
 
-chooseTask_pdm :: [(String,Task a)] -> (Task a) |iTrace a
+chooseTask_pdm :: [(String,Task a)] -> (Task a) |iCreateAndPrint a
 chooseTask_pdm options = mkTask "chooseTask_pdm" (dochooseTask_pdm options)
 where
 	dochooseTask_pdm [] tst			= (createDefault,{tst& activated = True})	
@@ -422,7 +422,7 @@ where
 									= chosenTask {tst & activated = True, html = BT [], tasknr = [0:tasknr]}
 	= (a,{tst & activated = adone&&bdone, html = html +|+ bhtml,hst = hst, tasknr = tasknr})
 	
-mchoiceTasks :: [(String,Task a)] -> (Task [a]) | iTrace a
+mchoiceTasks :: [(String,Task a)] -> (Task [a]) | iCreateAndPrint a
 mchoiceTasks options = mkTask "mchoiceTask" (domchoiceTasks options)
 where
 	domchoiceTasks [] tst			= ([],{tst& activated = True})
@@ -442,7 +442,7 @@ where
 
 // Parallel tasks ending as soon as one completes
 
-orTask :: (Task a,Task a) -> (Task a) | iTrace a
+orTask :: (Task a,Task a) -> (Task a) | iCreateAndPrint a
 orTask (taska,taskb) = mkTask "orTask" (doorTask (taska,taskb))
 where
 	doorTask (taska,taskb) tst=:{tasknr,html}
@@ -451,7 +451,7 @@ where
 	# (aorb,aorbdone,myhtml)				= if adone (a,adone,ahtml) (if bdone (b,bdone,bhtml) (a,False,ahtml +|+ bhtml))
 	= (aorb,{tst & activated = aorbdone, html = html +|+ myhtml})
 
-orTask2 :: (Task a,Task b) -> (Task (EITHER a b)) | iTrace a & iTrace b
+orTask2 :: (Task a,Task b) -> (Task (EITHER a b)) | iCreateAndPrint a & iCreateAndPrint b
 orTask2 (taska,taskb) = mkTask "orTask2" (doorTask (taska,taskb))
 where
 	doorTask (taska,taskb) tst=:{tasknr,html}
@@ -460,7 +460,7 @@ where
 	# (aorb,aorbdone,myhtml)				= if adone (LEFT a,adone,ahtml) (if bdone (RIGHT b,bdone,bhtml) (LEFT a,False,ahtml +|+ bhtml))
 	= (aorb,{tst & activated = aorbdone, html = html +|+ myhtml})
 
-orTasks :: [(String,Task a)] -> (Task a) | iTrace a
+orTasks :: [(String,Task a)] -> (Task a) | iCreateAndPrint a
 orTasks options = mkTask "orTasks" (doorTasks options)
 where
 	doorTasks [] tst 				= ireturnV createDefault tst
@@ -482,7 +482,7 @@ where
 
 // Parallel tasks ending if all complete
 
-andTask :: (Task a,Task b) -> (Task (a,b)) | iTrace a & iTrace b
+andTask :: (Task a,Task b) -> (Task (a,b)) | iCreateAndPrint a & iCreateAndPrint b
 andTask (taska,taskb) = mkTask "andTask" (doandTask (taska,taskb))
 where
 	doandTask (taska,taskb) tst=:{tasknr,html}
@@ -490,7 +490,7 @@ where
 	# (b,tst=:{activated=bdone,html=bhtml})	= mkParSubTask "andTask" 1 taskb {tst & tasknr = tasknr, html = BT []}
 	= ((a,b),{tst & activated = adone&&bdone, html = html +|+ ahtml +|+ bhtml})
 
-andTasks :: [(String,Task a)] -> (Task [a]) | iTrace a
+andTasks :: [(String,Task a)] -> (Task [a]) | iCreateAndPrint a
 andTasks options = mkTask "PTasks" (doandTasks options)
 where
 	doandTasks [] tst	= ireturnV [] tst
@@ -535,13 +535,13 @@ checkAnyTasks traceid taskoptions ctasknr bool tst=:{tasknr}
 # (a,tst=:{activated = adone})	= mkParSubTask traceid ctasknr task {tst & tasknr = tasknr, activated = True}
 = checkAnyTasks traceid taskoptions (inc ctasknr) (bool||adone) {tst & tasknr = tasknr}
 
-mu_andTasks :: String [(Int,Task a)] -> (Task [a]) | iTrace, iData a
+mu_andTasks :: String [(Int,Task a)] -> (Task [a]) | iData a
 mu_andTasks taskid tasks = newTask "mu_andTasks" (domu_andTasks tasks)
 where
 	domu_andTasks list tst	= andTasks [(taskid <+++ " " <+++ i, i @:: task) \\ (i,task) <- list] tst
 
 
-PMilestoneTasks :: [(String,Task a)] -> (Task [(String,a)]) | iTrace a
+PMilestoneTasks :: [(String,Task a)] -> (Task [(String,a)]) | iCreateAndPrint a
 PMilestoneTasks options = mkTask "PMilestoneTasks" (PMilestoneTasks` options)
 where
 	PMilestoneTasks` [] tst	= ireturnV [] tst
@@ -633,7 +633,7 @@ where
 	# tst = ftst tst
 	= b tst
 
-appIData :: (IDataFun a) -> (Task a) | iTrace a & iData a 
+appIData :: (IDataFun a) -> (Task a) | iData a 
 appIData idatafun = \tst -> mkTask "appIData" (appIData` idatafun) tst
 where
 	appIData` idata tst=:{tasknr,html,hst}
@@ -642,7 +642,7 @@ where
 	= (idata.value,{tst & tasknr = tasknr,activated = activated, html = html +|+ 
 															(if activated (BT idata.form) (BT idata.form +|+ ahtml)), hst = hst})
 
-appHSt :: (HSt -> (a,HSt)) -> (Task a) | iTrace, iData a
+appHSt :: (HSt -> (a,HSt)) -> (Task a) | iData a
 appHSt fun = mkTask "appHSt" doit
 where
 	doit tst=:{activated,html,tasknr,hst,storageInfo}
@@ -655,7 +655,7 @@ where
 	# (done,value)		= store.value
 	= (value,{tst & activated = done, hst = hst})													// task is now completed, handle as previously
 	
-Once :: (Task a) -> (Task a) | iTrace, iData a
+Once :: (Task a) -> (Task a) | iData a
 Once fun = mkTask "Once" doit
 where
 	doit tst=:{activated,html,tasknr,hst,storageInfo}
@@ -794,7 +794,7 @@ where
 
 
 
-mkRTask :: String (Task a) *TSt -> ((Task a,Task a),*TSt) | iTrace, iData a
+mkRTask :: String (Task a) *TSt -> ((Task a,Task a),*TSt) | iData a
 mkRTask s task tst = let (a,b,c) = mkRTask` s task (incTaskNr tst) in ((a,b),c)
 where
 	mkRTask` s task tst=:{tasknr = maintasknr,storageInfo} = (bossTask, workerTask s task,tst)
@@ -823,7 +823,7 @@ where
 		lazyTaskStore   fun = mkStoreForm (Init,cFormId storageInfo ("getLT" <+++ showTaskNr maintasknr) (False,createDefault)) fun 
 		checkBossSignal fun = mkStoreForm (Init,cFormId storageInfo ("setLT" <+++ showTaskNr maintasknr) (fun False)) fun 
 		
-mkRTaskCall :: String b (b -> Task a) *TSt -> ((b -> Task a,Task a),*TSt) | iTrace, iData a
+mkRTaskCall :: String b (b -> Task a) *TSt -> ((b -> Task a,Task a),*TSt) | iData a
 												& iData b
 mkRTaskCall  s initb batask tst = let (a,b,c) = mkRTaskCall` s (incTaskNr tst) in ((a,b),c)
 where
@@ -861,7 +861,7 @@ where
 		workerStore   fun = mkStoreForm (Init,cFormId storageInfo ("workerStore" <+++ showTaskNr maintasknr) (False,createDefault)) fun 
 		bossStore     fun = mkStoreForm (Init,cFormId storageInfo ("bossStore"   <+++ showTaskNr maintasknr) (False,initb)) fun 
 		
-mkRDynTaskCall :: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt) | iTrace, iData a
+mkRDynTaskCall :: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt) | iData a
 mkRDynTaskCall s a tst = mkRDynTaskCall` (incTaskNr tst)
 where
 	mkRDynTaskCall` tst=:{tasknr = maintasknr,storageInfo} = ((bossTask, workerTask),tst)
@@ -913,7 +913,7 @@ where
 
 		defaulttask 		 	= editTask "DefaultTask" a
 
-stopTask :: (Task a) -> (Task (Bool,TClosure a)) | iTrace a
+stopTask :: (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
 stopTask  task =  stop`
 where
 	stop` tst=:{tasknr,html}

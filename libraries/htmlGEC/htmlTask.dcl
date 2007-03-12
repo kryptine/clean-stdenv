@@ -5,12 +5,14 @@ definition module htmlTask
 
 import StdHtml
 
+/*
 class iTrace a
 		| gPrint{|*|}
 		, default a
 class default a
 		| gUpd {|*|} a
 
+*/
 :: *TSt										// task state
 :: Task a		:== St *TSt a				// an interactive task
 :: Void 		= Void						// for tasks returning non interesting results, won't show up in editors either
@@ -30,15 +32,15 @@ singleUserTask 	:: start wrapper function for single user
 multiUserTask 	:: start wrapper function for user with indicated id with option to switch between [0..users - 1]  
 */
 
-startTask 		:: !Int !(Task a) 	!*HSt -> (a,[BodyTag],!*HSt) 	| default a
-singleUserTask 	:: !(Task a) 		!*HSt -> (Html,*HSt) 			| default a
-multiUserTask 	:: !Int !(Task a)  	!*HSt -> (Html,*HSt) 			| default a
+startTask 		:: !Int !(Task a) 	!*HSt -> (a,[BodyTag],!*HSt) 	| iCreate a
+singleUserTask 	:: !(Task a) 		!*HSt -> (Html,*HSt) 			| iCreate a
+multiUserTask 	:: !Int !(Task a)  	!*HSt -> (Html,*HSt) 			| iCreate a
 
 /* promote iData editor
 editTask		:: create an editor with button to finish task
 (<<@)			:: set iData attribute globally for indicated (composition of) iTask(s) 
 */
-editTask 		:: String a 	-> Task a							| iTrace, iData a 
+editTask 		:: String a 	-> Task a							| iData a 
 (<<@) infix  3 	:: (Task a) b  	-> Task a 							| setTaskAttr b
 
 instance setTaskAttr Lifespan, StorageFormat, Mode
@@ -51,7 +53,7 @@ returnV			:: return the value
 
 (=>>) infix  1 	:: (Task a) (a -> Task b) 	-> Task b
 (#>>) infixl 1 	:: (Task a) (Task b) 		-> Task b
-returnV 		:: a 						-> Task a 				| iTrace a
+returnV 		:: a 						-> Task a 				| iCreateAndPrint a
 
 /* prompting variants
 (?>>)			:: prompt as long as task is active but not finished
@@ -62,17 +64,17 @@ returnDisplay	:: return the value and show it in iData display format
 */
 
 (?>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a
-(!>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a			| default a
-(<|)  infix  3 	:: (Task a) (a -> .Bool, a -> String) -> Task a | default a
-returnVF 		:: a [BodyTag] 		  		-> Task a			| iTrace a
-returnDisplay	:: a 						-> Task a			| gForm {|*|}, iTrace a
+(!>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a			| iCreate a
+(<|)  infix  3 	:: (Task a) (a -> .Bool, a -> String) -> Task a | iCreate a
+returnVF 		:: a [BodyTag] 		  		-> Task a			| iCreateAndPrint a
+returnDisplay	:: a 						-> Task a			| gForm {|*|}, iCreateAndPrint a
 
 /* Assign tasks to user with indicated id
 (@:)			:: will prompt who is waiting for task with give name
 (@::)			:: no prompting
 */
-(@:)  infix 4 	:: !(!Int,!String) (Task a)	-> (Task a)			| default a
-(@::) infix 4 	:: !Int (Task a)		    -> (Task a)			| default a
+(@:)  infix 4 	:: !(!Int,!String) (Task a)	-> (Task a)			| iCreate a
+(@::) infix 4 	:: !Int (Task a)		    -> (Task a)			| iCreate a
 
 /* Promote any TSt state transition function to an iTask:
 newTask			:: to promote a user defined function to as task which is (possibly recursively) called when activated
@@ -83,46 +85,46 @@ repeatTaskGC	:: same, and garbage collect *all* (persistent) subtasks
 repeatTaskStd	:: same, non optimized version will increase stack
 */
 
-newTask 		:: !String (Task a) 		-> (Task a) 		| iTrace, iData a 
-newTaskGC 		:: !String (Task a) 		-> (Task a) 		| iTrace, iData a 
-newTaskStd 		:: !String (Task a) 		-> (Task a) 		| iTrace a
-repeatTask		:: (Task a) 				-> Task a 			| iTrace, iData a
-repeatTaskGC	:: (Task a) 				-> Task a 			| iTrace a
-repeatTaskStd 	:: (Task a) 				-> Task a 			| iTrace a
+newTask 		:: !String (Task a) 		-> (Task a) 		| iData a 
+newTaskGC 		:: !String (Task a) 		-> (Task a) 		| iData a 
+newTaskStd 		:: !String (Task a) 		-> (Task a) 		| iCreateAndPrint a
+repeatTask		:: (Task a) 				-> Task a 			| iData a
+repeatTaskGC	:: (Task a) 				-> Task a 			| iCreateAndPrint a
+repeatTaskStd 	:: (Task a) 				-> Task a 			| iCreateAndPrint a
 
 /*	Sequential Tasks:
 seqTask			:: do corresponding iTask when button pressed
 seqTasks		:: do all iTasks one after another, task completed when all done
 */
-seqTask			:: String (Task a)		-> (Task a) 			| iTrace a
-seqTasks		:: [(String,Task a)] 	-> (Task [a])			| iTrace a
+seqTask			:: String (Task a)		-> (Task a) 			| iCreateAndPrint a
+seqTasks		:: [(String,Task a)] 	-> (Task [a])			| iCreateAndPrint a
 
 /* Choose Tasks
 chooseTask		:: Choose one iTask from list, depending on button pressed
 chooseTask_pdm	:: Choose one iTask from list, depending on pulldownmenu item selected
 mchoiceTask		:: Multiple Choice of iTasks, depending on marked checkboxes
 */
-chooseTask		:: [(String,Task a)] 	-> (Task a) 			| iTrace a
-chooseTask_pdm 	:: [(String,Task a)] 	-> (Task a)	 			| iTrace a
-mchoiceTasks 	:: [(String,Task a)] 	-> (Task [a]) 			| iTrace a
+chooseTask		:: [(String,Task a)] 	-> (Task a) 			| iCreateAndPrint a
+chooseTask_pdm 	:: [(String,Task a)] 	-> (Task a)	 			| iCreateAndPrint a
+mchoiceTasks 	:: [(String,Task a)] 	-> (Task [a]) 			| iCreateAndPrint a
 
 /* Do m Tasks parallel / interleaved and FINISH as soon as SOME Task completes:
 orTask			:: do both iTasks in any order, task completed and ends as soon as first one done
 orTask2			:: do both iTasks in any order, task completed and ends as soon as first one done
 orTasks			:: do all  iTasks in any order, task completed and ends as soon as first one done
 */
-orTask 			:: (Task a,Task a) 		-> (Task a) 			| iTrace a
-orTask2			:: (Task a,Task b) 		-> (Task (EITHER a b)) 	| iTrace a & iTrace b
-orTasks			:: [(String,Task a)] 	-> (Task a)				| iTrace a 
+orTask 			:: (Task a,Task a) 		-> (Task a) 			| iCreateAndPrint a
+orTask2			:: (Task a,Task b) 		-> (Task (EITHER a b)) 	| iCreateAndPrint a & iCreateAndPrint b
+orTasks			:: [(String,Task a)] 	-> (Task a)				| iCreateAndPrint a 
 
 /* Do Tasks parallel / interleaved and FINISH when ALL Tasks done:
 andTask			:: do both iTasks in any order (paralel), task completed when both done
 andTasks		:: do all  iTasks in any order (paralel), task completed when all  done
 mu_andTasks		:: assign task to indicated users, task completed when all done
 */
-andTask			:: (Task a,Task b) 		-> (Task (a,b)) 		| iTrace a & iTrace b
-andTasks		:: [(String,Task a)]	-> (Task [a])			| iTrace a
-mu_andTasks 	:: String [(Int,Task a)]-> (Task [a]) 			| iTrace, iData a
+andTask			:: (Task a,Task b) 		-> (Task (a,b)) 		| iCreateAndPrint a & iCreateAndPrint b
+andTasks		:: [(String,Task a)]	-> (Task [a])			| iCreateAndPrint a
+mu_andTasks 	:: String [(Int,Task a)]-> (Task [a]) 			| iData a
 
 /* Time and Date management:
 waitForTimeTask	:: Task is done when time has come
@@ -151,8 +153,8 @@ appHSt			:: lift HSt domain to TSt domain
 */
 (*>>) infix 4 	:: (TSt -> (a,TSt)) (a -> Task b) 	-> Task b
 (@>>) infix 4 	:: (TSt -> TSt) (Task a) 			-> Task a
-appIData 		:: (IDataFun a) 					-> Task a 			| iTrace, iData a
-appHSt 			:: (HSt -> (a,HSt)) 				-> Task a			| iTrace, iData a
+appIData 		:: (IDataFun a) 					-> Task a 			| iData a
+appHSt 			:: (HSt -> (a,HSt)) 				-> Task a			| iData a
 
 /* Experimental!! DONT USE NOT FINISHED
 
@@ -166,12 +168,12 @@ PMilestoneTasks :: do all  iTasks in any order (paralel), task completed when al
 					but continue with next task as soon as SOME Task completes
 					string indicates which tasks have completed
 */
-mkRTask 		:: String (Task a) *TSt -> ((Task a,Task a),*TSt) 		| iTrace, iData a 
+mkRTask 		:: String (Task a) *TSt -> ((Task a,Task a),*TSt) 		| iData a 
 mkRTaskCall		:: String b (b -> Task a) *TSt 
-										-> ((b -> Task a,Task a),*TSt)	| iTrace, iData a & iData b
-mkRDynTaskCall 	:: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt)| iTrace, iData a
+										-> ((b -> Task a,Task a),*TSt)	| iData a & iData b
+mkRDynTaskCall 	:: String a *TSt -> (((Task a) -> (Task a),Task a),*TSt)| iData a
 
-PMilestoneTasks :: [(String,Task a)] 	-> (Task [(String,a)]) 			| iTrace a
+PMilestoneTasks :: [(String,Task a)] 	-> (Task [(String,a)]) 			| iCreateAndPrint a
 
-stopTask :: (Task a) -> (Task (Bool,TClosure a)) | iTrace a
+stopTask :: (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
 

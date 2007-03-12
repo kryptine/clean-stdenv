@@ -14,9 +14,9 @@ emptyFormStates		:: *FormStates								// creates empty states
 
 findState 			:: !(FormId a) !*FormStates *NWorld			// find the state value given FormId and a correct type
 					-> (Bool, Maybe a,*FormStates,*NWorld)		// true if form has not yet been previously inspected 	
-												| iDataSerAndDeSerialize a		
+												| iPrint, iParse, iSpecialStore a		
 replaceState 		:: !(FormId a) a !*FormStates *NWorld 		// replace state given FormId
-					-> (*FormStates,*NWorld)	| iDataSerialize a
+					-> (*FormStates,*NWorld)	| iPrint, iSpecialStore a
 
 getUpdateId 		:: !*FormStates -> ([String],!*FormStates)	// id of previously changed form
 

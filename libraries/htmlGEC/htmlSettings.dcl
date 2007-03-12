@@ -5,10 +5,40 @@ import htmlHandler
 // Global settings of iData applications
 
 class iData a							// The collection of generic functions needed to make iData:	
+		| gForm {|*|}					// Creates an Html Form
+		, iCreateAndPrint				
+		, iParse
+		, iSpecialStore a
+
+class iCreateAndPrint a					// Used for tracing iTasks
+		| iCreate
+		, iPrint a	
+
+class iCreate a
+		| gUpd  {|*|} a					// Makes it possible to update and create any value, given a change somewhere in the data structure
+
+class iPrint a
+		| gPrint{|*|} a					// To serialize a value to a String
+
+class iParse a
+		| gParse{|*|} a					// To de-serialize a string back to a value
+		
+class iSpecialStore a
+										// OPTION: Comment out the next line if you do not have access to an ODCB database on your machine !!!!
+		| gerda {|*|} 					// To store and retrieve a value in a database
+
+		, TC a							// To be able to store values in a dynamic
+								
+/*
+class iData a							// The collection of generic functions needed to make iData:	
 		| gForm {|*|}					//		Creates an Html Form
 		, gUpd  {|*|}					//		Makes it possible to edit the form and updates the corresponding value
 		, iDataSerAndDeSerialize a
-		
+
+class iDataSerAndDeSerialize a
+		| gParse{|*|}					// To de-serialize a string back to a value
+		, iDataSerialize a		
+
 class iDataSerialize a
 		| gPrint{|*|}			//		To serialize a value to a String
 
@@ -16,10 +46,9 @@ class iDataSerialize a
 		, gerda {|*|} 			//		To store and retrieve a value in a database
 
 		, TC a					//		To be able to store values in a dynamic
-								
-class iDataSerAndDeSerialize a
-		| gParse{|*|}					// To de-serialize a string back to a value
-		, iDataSerialize a		
+*/
+
+
 
 TraceInput			:== False			// show what kind of information is received from Client
 TraceOutput			:== False			// show what kind of information is stored

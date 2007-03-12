@@ -18,7 +18,7 @@ mytask2 =			editTask "Done1" 0
 		 =>> \v2 ->	editTask "Done3" 0
 		 =>> \v3 -> returnDisplay (v1 + v2 + v3)
 
-delegate :: (Task a) HtmlTime -> (Task a) | iTrace a & iData a
+delegate :: (Task a) HtmlTime -> (Task a) | iData a
 delegate taskToDelegate time 
 =						[Txt "Choose persons you want to delegate work to:",Br,Br] 
 						?>>	determineSet [] 
@@ -51,7 +51,7 @@ where
 		print [] = ""
 		print [x:xs] = toString x +++ " " +++ print xs
 
-	timedTask :: HtmlTime (Task a) -> (Task (Bool,TClosure a)) | iTrace a
+	timedTask :: HtmlTime (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
 	timedTask time task	= orTask  	( stopTask task
 						 			, waitForTimerTask time #>> returnV (True,TClosure task)
 						  			)
