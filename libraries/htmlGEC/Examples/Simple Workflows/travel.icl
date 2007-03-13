@@ -10,7 +10,7 @@ import StdEnv, htmlTask, htmlTrivial
 // The bill is made up in the end
 
 derive gForm []
-derive gUpd []
+derive gUpd  []
 
 Start world = doHtmlServer (singleUserTask (repeatTask travel)) world
 

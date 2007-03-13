@@ -1,6 +1,6 @@
 Version: 1.4
 Global
-	Built:	True
+	Built:	False
 	Target:	Web Applications
 	Exec:	{Project}\sum.exe
 	CodeGen
@@ -56,8 +56,8 @@ MainModule
 	DclOpen:	False
 	Icl
 		WindowPosition
-			X:	278
-			Y:	16
+			X:	21
+			Y:	10
 			SizeX:	800
 			SizeY:	624
 	IclOpen:	True
@@ -77,6 +77,12 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
+		Dcl
+			WindowPosition
+				X:	254
+				Y:	46
+				SizeX:	936
+				SizeY:	472
 		DclOpen:	False
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
@@ -2381,6 +2387,12 @@ OtherModules
 			ReuseUniqueNodes:	True
 			Fusion:	False
 		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	10
+				Y:	10
+				SizeX:	800
+				SizeY:	480
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2641,6 +2653,12 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
+		Dcl
+			WindowPosition
+				X:	10
+				Y:	10
+				SizeX:	800
+				SizeY:	480
 		DclOpen:	False
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0

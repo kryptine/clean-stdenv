@@ -1,6 +1,6 @@
 Version: 1.4
 Global
-	Built:	True
+	Built:	False
 	Target:	Web Applications
 	Exec:	{Project}\deadline.exe
 	CodeGen
@@ -56,8 +56,8 @@ MainModule
 	DclOpen:	False
 	Icl
 		WindowPosition
-			X:	145
-			Y:	6
+			X:	10
+			Y:	12
 			SizeX:	1023
 			SizeY:	481
 	IclOpen:	True

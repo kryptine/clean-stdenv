@@ -239,7 +239,7 @@ where
 // or to optimize iTasks
 // All IData objects satisfying the predicate will be deleted, no matter where they are stored
 
-deleteIData :: !(String -> Bool) !*HSt -> !*HSt
+deleteIData :: !(String -> Bool) !*HSt -> *HSt
 deleteIData pred hst=:{states,world}
 # (states,world) = deleteStates pred states world
 = {hst & states = states, world = world}

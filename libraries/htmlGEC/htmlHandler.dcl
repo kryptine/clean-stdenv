@@ -34,7 +34,7 @@ mkViewForm 			:: !(InIDataId d) !(HBimap d v) !*HSt -> (Form d,!*HSt) | iData v
 
 // Explicit removal of all (Persistent) IData for which the predicate holds applied on the IData form id
 
-deleteIData			:: !(String -> Bool) !*HSt -> !*HSt
+deleteIData			:: !(String -> Bool) !*HSt -> *HSt
 
 // specialize has to be used if one wants to specialize gForm for a user-defined type
 

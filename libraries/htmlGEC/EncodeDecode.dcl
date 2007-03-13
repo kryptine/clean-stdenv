@@ -49,7 +49,7 @@ DecodeHtmlStatesAndUpdate 	:: !ServerKind (Maybe [(String, String)]) -> (![HtmlS
 
 writeState		 			:: !String !String !String !*NWorld -> *NWorld 
 readState				 	:: !String !String !*NWorld -> (!String,!*NWorld) 
-deleteState 				:: !String !String !*NWorld -> !*NWorld 
+deleteState 				:: !String !String !*NWorld -> *NWorld
 
 // constants that maybe useful
 

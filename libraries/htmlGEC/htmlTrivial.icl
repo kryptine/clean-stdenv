@@ -31,6 +31,9 @@ stl [x:xs]				= xs
 (<+++) infixl :: !String !a -> String | toString a
 (<+++) str x = str +++ toString x
 
+(+++>) infixr :: !a !String -> String | toString a
+(+++>) x str = toString x +++ str
+
 (??) infixl 9 :: ![a] !a -> Int | == a
 (??) [a:as] b
 	| a==b		= 0

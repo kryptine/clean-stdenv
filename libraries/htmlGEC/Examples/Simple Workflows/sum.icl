@@ -14,13 +14,13 @@ import StdEnv, StdHtml
 Start world = doHtmlServer sequenceIData2 world
 
 derive gForm []
-derive gUpd []
+derive gUpd  []
 
 sequence4 :: Task Int
 sequence4
-= 							editTask "OK" 0
-				=>> \n ->	andTasks [(toString i,editTask "OK" 0) \\ i <- [0..n]]
-				=>> \v -> 	return_D (sum v)
+=	editTask "OK" 0                                        =>> \n ->
+	andTasks [(toString i,editTask "OK" 0) \\ i <- [0..n]] =>> \v ->
+	return_D (sum v)
 
 
 
@@ -29,18 +29,17 @@ sequence4
 
 sequence :: Task Int
 sequence
-= 				editTask "Set" 0 
-	=>> \v1 -> 	editTask "Set" 0
-	=>> \v2 ->	[Txt "+",Hr []] 
-				!>>	return_D (v1 + v2)
-// multi user variant, monadic atyle
+=	editTask "Set" 0 =>> \v1 ->
+	editTask "Set" 0 =>> \v2 ->
+	[Txt "+",Hr []] !>>	return_D (v1 + v2)
+
+// multi user variant, monadic style
 
 sequenceMU :: Task Int
 sequenceMU 
-= 				(1,"number") @: editTask "Set" 0
-	=>> \v1 -> 	(2,"number") @: editTask "Set" 0 
-	=>> \v2 ->	[Txt "+",Hr []] 
-				!>> return_D (v1 + v2) 
+= 	(1,"number") @: editTask "Set" 0 =>> \v1 ->
+	(2,"number") @: editTask "Set" 0 =>> \v2 ->
+	[Txt "+",Hr []] !>> return_D (v1 + v2) 
 
 // single user, normal Clean style 
 
@@ -76,9 +75,9 @@ sequenceIData hst
 # (done2,idata2,hst) = myEdit "v2" 0 hst
 =	mkHtml "Solution using iData without iTasks"
 	[ 			BodyTag idata1.form
-	, if done1 (BodyTag idata2.form) 					  EmptyBody
+	, if done1 (BodyTag idata2.form)                                          EmptyBody
 	, if done2 (BodyTag [Txt "+",Hr [],toHtml (idata1.value + idata2.value)]) EmptyBody
-	]  hst
+	] hst
 where
 	myEdit :: String a HSt -> (Bool,Form a,HSt) | iData a
 	myEdit name val hst
@@ -86,9 +85,10 @@ where
 	# nval			= snd idata.value
 	# done			= idata.changed || fst idata.value == HideMode True
 	| done
-		# (idata,hst) = mkEditForm (Set,  nFormId name (HideMode done,nval) <@ Display) hst	
+		# (idata,hst) = mkEditForm (Set,nFormId name (HideMode done,nval) <@ Display) hst	
 		= (True,{idata & value = nval},hst)	
-	= (False,{idata & value = nval},hst)	
+	| otherwise
+		= (False,{idata & value = nval},hst)	
 
 
 sequenceIData2 hst
@@ -96,21 +96,21 @@ sequenceIData2 hst
 # (done2,val2,form2,hst) = myEditor "v2" 0 hst
 =	mkHtml "Solution using iData without iTasks"
 	[ 			BodyTag form1
-	, if done1 (BodyTag form2) 					  EmptyBody
+	, if done1 (BodyTag form2)                                EmptyBody
 	, if done2 (BodyTag [Txt "+",Hr [],toHtml (val1 + val2)]) EmptyBody
-	]  hst
+	] hst
 
 myEditor :: String a *HSt -> (Bool,a,[BodyTag],*HSt) | iData a
 myEditor id val hst 
-# editId		= id +++ "_Editor"
-# buttonId		= id +++ "_Button"
-# storeId		= id +++ "_Store"
-#(button,hst) 	= simpleButton buttonId "OK" (\_  -> True) hst
-#(done,hst)		= mkStoreForm (Init,nFormId storeId False) button.value hst
+# (button,hst)	 	= simpleButton buttonId "OK" (const True) hst
+# (done,  hst)		= mkStoreForm (Init,nFormId storeId False) button.value hst
 | done.value	
-	# (idata,hst)	= mkEditForm (Init,nFormId  editId val <@ Display) hst
+	# (idata,hst)	= mkEditForm (Init,nFormId editId val <@ Display) hst
 	= (True, idata.value, idata.form ++ [Br], hst)
 | otherwise	
 	# (idata,hst)	= mkEditForm (Init,nFormId  editId val) hst
 	= (False, idata.value, idata.form ++ button.form, hst)
-	
+where
+	editId			= id +++ "_Editor"
+	buttonId		= id +++ "_Button"
+	storeId			= id +++ "_Store"

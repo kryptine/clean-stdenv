@@ -56,10 +56,10 @@ MainModule
 	DclOpen:	False
 	Icl
 		WindowPosition
-			X:	95
-			Y:	19
-			SizeX:	1248
-			SizeY:	730
+			X:	8
+			Y:	11
+			SizeX:	1106
+			SizeY:	607
 	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
@@ -232,6 +232,12 @@ OtherModules
 				SizeX:	943
 				SizeY:	640
 		DclOpen:	False
+		Icl
+			WindowPosition
+				X:	10
+				Y:	10
+				SizeX:	800
+				SizeY:	480
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
@@ -2290,6 +2296,12 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
+		Dcl
+			WindowPosition
+				X:	10
+				Y:	10
+				SizeX:	800
+				SizeY:	480
 		DclOpen:	False
 		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
