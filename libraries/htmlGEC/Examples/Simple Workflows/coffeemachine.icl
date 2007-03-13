@@ -8,7 +8,9 @@ module coffeemachine
 
 import StdEnv, StdHtml
 
-Start world = doHtmlServer (singleUserTask (repeatTask_GC CoffeeMachine)) world
+//Start world = doHtmlServer (singleUserTask (repeatTask_GC singleStepCoffeeMachine)) world
+Start world = doHtmlServer (singleUserTask singleStepCoffeeMachine) world
+//Start world = doHtmlServer (singleUserTask (repeatTask_GC CoffeeMachine)) world
 //Start world = doHtmlServer (singleUserTask (repeatTask_GC CoffeeMachine <@ Persistent)) world
 
 CoffeeMachine :: Task (String,Int)
@@ -25,20 +27,34 @@ CoffeeMachine
 	let nproduct = if cancel "Cancelled" product 
 	in
 	[Txt ("product = " <+++ nproduct <+++ ", returned money = " <+++ returnMoney),Br,Br] ?>>
-	seqTask "Thanks" (return_V Void) #>>
-	return_V (nproduct,returnMoney)
+	seqTask "Thanks" 
+	(return_V (nproduct,returnMoney))
+
+getCoins :: (Int,Int) -> Task (Bool,Int)
+getCoins (cost,paid) = newTask "getCoins" getCoins`
 where
-	getCoins :: (Int,Int) -> Task (Bool,Int)
-	getCoins (toPay,paid) = newTask "getCoins" getCoins`
-	where
-		getCoins` = [Txt ("To pay: " <+++ toPay),Br,Br] ?>>
-					orTask
-						( chooseTask [(c +++> " cts", return_V (False,c)) \\ c <- coins]
+	coins			= [5,10,20,50,100,200]
+	getCoins`		= [Txt ("To pay: " <+++ cost),Br,Br] ?>>
+					  orTask
+						( chooseTask [(c +++> " cents", return_V (False,c)) \\ c <- coins]
 						, seqTask "Cancel" (return_V (True,0))
-						) =>> \(cancel,coin) ->
-					handleCoin (cancel,coin)
-		coins     = [5,10,20,50,100,200]
-		handleCoin (cancel,coin)
-		| cancel			= return_V (cancel,paid)
-		| toPay - coin > 0 	= getCoins (toPay - coin,paid + coin)
-		| otherwise			= return_V (cancel,coin - toPay)
+						) =>> \(cancel,coin) -> 
+					  if cancel        (return_V (cancel,   paid))
+					 (if (cost > coin) (getCoins (cost-coin,paid+coin))
+					                   (return_V (cancel,   coin-cost)))
+
+singleStepCoffeeMachine :: Task (String,Int)
+singleStepCoffeeMachine
+=	[Txt "Choose product:",Br,Br] ?>>
+	chooseTask
+		[(p<+++": "<+++c, return_V prod) \\ prod=:(p,c)<-products]
+	=>> \prod=:(p,c) -> 
+	[Txt ("Chosen product: "<+++p),Br,Br] ?>>
+	pay prod (seqTask "Thanks" (return_V prod))
+where
+	products	= [("Coffee",100),("Tea",50)]
+	
+//	pay (p,c) t	= seqTask ("Pay "<+++c<+++ " cents") t
+	pay (p,c) t	= getCoins (c,0) =>> \(cancel,returnMoney) ->
+				  let np = if cancel "cancelled" p
+				  in  [Txt ("Product = "<+++np<+++". Returned money = "<+++returnMoney),Br,Br] ?>> t
