@@ -85,15 +85,19 @@ startTask thisUser taska hst
 								, storageInfo = {tasklife = Session, taskstorage = PlainString, taskmode = Edit }}
 # (pversion,hst)	 	= mkStoreForm (Init, pFormId userVersionNr 0) inc hst
 # (sversion,hst)	 	= mkStoreForm (Init, nFormId sessionVersionNr pversion.value) inc hst
-# (selbuts,seltask,hst)	= Filter thisUser defaultUser ((defaultUser,"Main") @@: html) hst
+# (selbuts,selname,seltask,hst)	= Filter thisUser defaultUser ((defaultUser,"Main") @@: html) hst
 = 	(a,	refresh.form ++ traceAsked.form ++
-		[Br,Br, Hr [],Br] ++ 
+		[Br,Hr [],showUser thisUser,Hr [],Br] ++ 
 		if doTrace
 			[ printTrace2 trace ]
-			[ mkSTable2 [ [yellowUser thisUser,EmptyBody,EmptyBody]
-						, [mkColForm selbuts, EmptyBody, BodyTag seltask]
+			[ STable []	[ [BodyTag  selbuts, selname <||>  seltask ]
 						]
-			]
+			] 
+
+//			[ mkSTable2 [ [mkColForm selbuts, EmptyBody, BodyTag selname]
+//						, [EmptyBody, EmptyBody, BodyTag seltask]
+//						]
+//			]
 	,hst)
 where
 	defaultUser	= 0
@@ -107,23 +111,20 @@ where
 	
 	Filter id user tree hst
 	# (_,accu) 		= Collect ((==) id) user [] tree
-	| isNil accu	= ([],[],hst)
+	| isNil accu	= ([],[],[],hst)
 	# (names,tasks) = unzip accu
-	# (fun,hst)		= ListFuncBut (Init,sFormId ("User" <+++ id <+++ "_Task" <+++ length accu) [(LButton defpixel name,dotask i) \\ name <- names & i <- [0..]]) hst
-	# (selected,hst)= mkStoreForm (Init,sFormId ("User" <+++ id <+++ "_Task" <+++ length accu) 0) fun.value hst 
-	= (fun.form,tasks!!if (selected.value >= length accu) 0 selected.value,hst)
-	where
-		dotask i _ = i
-	
-	Collect pred user accu (nuser -@: tree)
-					= Collect (\v -> pred v && ((<>) nuser v)) user accu tree
+	# info			= { tasklife = Session, taskstorage	= PlainString, taskmode = Edit}
+	# (selected,buttons,chosenname,hst) = mkTaskButtons "Main Tasks:" ("User" <+++ id) [] info names hst 
+	= (buttons,chosenname,tasks!!if (selected >= length accu) 0 selected,hst)
+
 	Collect pred user accu ((nuser,taskname) @@: tree)
 	# (myhtml,accu)	= Collect pred nuser accu tree
 	| pred nuser && not (isNil myhtml)
 					= ([],[(taskname,myhtml):accu])
 	| otherwise		= ([],accu)
 	Collect pred user accu (BT bdtg)
-					= (bdtg,accu)
+	| pred user		= (bdtg,accu)
+	| otherwise		= ([],accu)
 	Collect pred user accu  (tree1 +|+ tree2)
 	# (lhtml,accu)	= Collect pred user accu tree1
 	# (rhtml,accu)	= Collect pred user accu tree2
@@ -132,6 +133,9 @@ where
 	# (lhtml,accu)	= Collect pred user accu tree1
 	# (rhtml,accu)	= Collect pred user [] tree2
 	= ([lhtml <=> rhtml],accu)
+	Collect pred user accu (nuser -@: tree)
+					= Collect (\v -> pred v && ((<>) nuser v)) user accu tree
+//					= Collect (\v -> (<>) nuser v) user accu tree
 
 	isNil [] = True
 	isNil _ = False
@@ -175,7 +179,7 @@ where
 	return_Display` tst
 	= (a,{tst & html = tst.html +|+ BT [toHtml a ]})		// return result task
 
-return_VF :: a [BodyTag] -> (Task a) |  iCreateAndPrint a
+return_VF :: a [BodyTag] -> (Task a) | iCreateAndPrint a
 return_VF a bodytag = mkTask "return_VF" return_VF`
 where
 	return_VF` tst
@@ -338,12 +342,12 @@ where
 	| activated 						= (a,{tst & activated = True
 												  ,	myId = myId							// work is done						
 												  ,	html = ohtml +|+ 					// clear screen
-													BT [yellowUser userId, Txt " finished task ",yellow taskname, Br,Br] +|+
+													BT [showUser userId, Txt " finished task ",yellow taskname, Br,Br] +|+
 													((userId,taskname) @@: nhtml)})	
 	= (a,{tst & myId = myId																// restore user Id
 			  , html = 	ohtml +|+ 
-						BT [Br, Txt ("Waiting for Task "), yellow taskname, Txt " from ", yellowUser userId,Br] +|+ 
-						((userId,taskname) @@: BT [Txt "Task ",yellow taskname, Txt " requested by ", yellowUser myId,Br,Br] +|+ nhtml)})				// combine html code, filter later					
+						BT [Br, Txt ("Waiting for Task "), yellow taskname, Txt " from ", showUser userId,Br] +|+ 
+						((userId,taskname) @@: BT [Txt "Task ",yellow taskname, Txt " requested by ", showUser myId,Br,Br] +|+ nhtml)})				// combine html code, filter later					
 
 (@::) infix 4 :: !Int (Task a)	-> (Task a)			| iCreate  a
 (@::) userId taska = \tst=:{myId} -> assignTask` myId {tst & myId = userId}
@@ -353,7 +357,9 @@ where
 	| activated 						= (a,{tst & myId = myId							// work is done						
 												  ,	html = html})	
 	= (a,{tst & myId = myId																// restore user Id
-			  , html = 	html +|+  ((userId,"Task " <+++ myId) @@: nhtml)})				// combine html code, filter later					
+			  , html = html +|+  
+			  			BT [Br, Txt "Waiting for ", yellow ("Task " <+++ myId), Txt " from ", showUser userId,Br] +|+ 
+						((userId,"Task " <+++ myId) @@: nhtml)})				// combine html code, filter later					
 
 // sequential tasks
 
@@ -434,7 +440,7 @@ where
 	initCheckboxes  = 
 		[(CBNotChecked  text,  \ b bs id -> id) \\ (text,_) <- options]
 
-// Parallel tasks ending as soon as one completes
+// tasks ending as soon as one of its subtasks completes
 
 orTask :: (Task a,Task a) -> (Task a) | iCreateAndPrint a
 orTask (taska,taskb) = mkTask "orTask" (doorTask (taska,taskb))
@@ -457,22 +463,60 @@ where
 orTasks :: [(String,Task a)] -> (Task a) | iCreateAndPrint a
 orTasks options = mkTask "orTasks" (doorTasks options)
 where
-	doorTasks [] tst 				= ireturn_V createDefault tst
-	doorTasks tasks tst=:{tasknr,html,hst}
-	# (chosen,hst)					= mkStoreForm  (Init,cFormId tst.storageInfo (itaskId tasknr ("_One0." <+++ length options) ) 0) id hst
-	# (choice,hst)					= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId tasknr "_But" ) [[(mode chosen.value n, but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]] <@ Page) hst
-	# (chosen,hst)					= mkStoreForm  (Init,cFormId tst.storageInfo (itaskId tasknr ("_One0." <+++ length options) ) 0) choice.value hst
-	# (choice,hst)					= TableFuncBut2 (Init,cFormId tst.storageInfo (itaskId tasknr "_But" ) [[(mode chosen.value n, but txt,\_ -> n)] \\ txt <- map fst options & n <- [0..]] <@ Page) hst
-	# chosenTask					= snd (options!!chosen.value)
-	# (a,{tasknr,activated=adone,html=ahtml,hst})
-									= chosenTask {tst & tasknr = [-1,chosen.value:tasknr], activated = True, html = BT [], hst = hst}
-	| not adone						= (a,{tst & activated = adone, html = html +|+ BT choice.form +-+ ahtml, hst = hst})
-	= (a,{tst & activated = adone, html = html +|+ ahtml, hst = hst})
+	doorTasks [] tst	= ireturn_V createDefault tst
+	doorTasks tasks tst=:{tasknr,html,hst,myId,userId}
+	# (chosen,buttons,chosenname,hst) 
+						= mkTaskButtons "or Tasks:" "or" tasknr tst.storageInfo (map fst options) hst
+	# (finished,which,tst=:{html=allhtml})= checkAnyTasks "orTasks" (map snd options) (0,chosen) (False,0) {tst & html = BT [], hst = hst, activated = True}
+	# chosenvalue		= if finished which chosen			// it can be the case that someone else has finshed one of the tasks
+	# chosenTaskName	= fst (options!!chosenvalue)
+	# chosenTask		= snd (options!!chosenvalue)
+	# (a,tst=:{activated=adone,html=ahtml})
+						= chosenTask {tst & tasknr = [-1,chosenvalue:tasknr], activated = True, html = BT []}
+	| not adone			= (a,{tst 	& activated = adone
+									, html =	html +|+ 
+												BT buttons +-+ 	(BT chosenname +|+ ahtml) +|+ 
+												(myId -@: allhtml)
+							})
+	= (a,{tst & activated = adone, html = html +|+ ahtml})
 
+mkTaskButtons :: !String !String ![Int] !Storage ![String] *HSt -> (Int,[BodyTag],[BodyTag],*HSt)
+mkTaskButtons header myid tasknr info btnnames hst
+# btnsId			= itaskId tasknr (myid <+++ "_Btns")
+# myidx				= length btnnames
+# (chosen,hst)		= SelectStore (myid,myidx) tasknr info id hst							// which choice was made in the past
+# (buttons,hst)		= SelectButtons btnsId info (chosen,btnnames) hst	// create buttons
+# (chosen,hst)		= SelectStore (myid,myidx) tasknr info  buttons.value hst				// maybe a new button was pressed
+# (buttons,hst)		= SelectButtons btnsId info (chosen,btnnames) hst	// adjust look of that button
+= (chosen,[red header, Br: buttons.form],[yellow (btnnames!!chosen)],hst)
+//= (chosen,[STable [] [[red header], buttons.form]],[yellow (btnnames!!chosen)],hst)
+where
+	SelectButtons id info (idx,btnnames) hst = TableFuncBut2 (Init,cFormId info id 
+															[[(mode idx n, but txt,\_ -> n)] \\ txt <- btnnames & n <- [0..]] <@ Page) hst
 	but i = LButton defpixel i
+
 	mode i j
 	| i==j = Display
 	= Edit
+
+	SelectStore :: !(String,Int) ![Int] !Storage (Int -> Int) *HSt -> (Int,*HSt)
+	SelectStore (myid,idx) tasknr info fun hst 
+	# storeId 			= itaskId tasknr (myid <+++ "_Select" <+++ idx)
+	# (storeform,hst)	= mkStoreForm (Init,cFormId info storeId 0) fun hst
+	= (storeform.value,hst)
+
+checkAnyTasks traceid taskoptions (ctasknr,skipnr) (bool,which) tst=:{tasknr}
+| ctasknr == length taskoptions	= (bool,which,tst)
+| ctasknr == skipnr				= checkAnyTasks traceid taskoptions (inc ctasknr,skipnr) (bool,which) tst
+# task							= taskoptions!!ctasknr
+# (a,tst=:{activated = adone})	= mkParSubTask traceid ctasknr task {tst & tasknr = tasknr, activated = True}
+= checkAnyTasks traceid taskoptions (inc ctasknr,skipnr) (bool||adone,if adone ctasknr which) {tst & tasknr = tasknr, activated = True}
+
+checkAllTasks traceid options ctasknr bool alist tst=:{tasknr}
+| ctasknr == length options		= (reverse alist,{tst & activated = bool})
+# (taskname,task)				= options!!ctasknr
+# (a,tst=:{activated = adone})	= mkParSubTask traceid ctasknr task {tst & tasknr = tasknr, activated = True}
+= checkAllTasks traceid options (inc ctasknr) (bool&&adone) (if adone [(taskname,a):alist] alist) {tst & tasknr = tasknr}
 
 // Parallel tasks ending if all complete
 
@@ -502,14 +546,14 @@ where
 	| not adone			= ([a],{tst & 	trace = trace,
 										activated = adone, 
 										html = html +|+ BT choice.form +|+ 
-												(BT [Br, gray chosenTaskName,Br] +|+ ahtml +|+ (myId -@: allhtml)), 
+												(BT [Br, silver chosenTaskName,Br] +|+ ahtml +|+ (myId -@: allhtml)), 
 										hst = hst})
 	# (alist,{activated=finished,hst,trace,html=allhtml})		
 						= checkAllTasks "PTasks" options 0 True [] {tst & html = BT [], hst = hst, trace = trace}
 	| finished			= (map snd alist,{tst & activated = finished, hst = hst,trace =trace, html = html +|+ (myId -@: allhtml)})
 	= (map snd alist,{tst & trace = trace,
 				  activated = finished, html = 	html +|+ 
-												BT choice.form +|+ (BT [Br, gray chosenTaskName,Br] +|+ 
+												BT choice.form +|+ (BT [Br, silver chosenTaskName,Br] +|+ 
 																	ahtml +|+ (myId -@: allhtml)), hst = hst})
 
 	but i = LButton defpixel i
@@ -517,17 +561,6 @@ where
 	| i==j = Display
 	= Edit
 
-checkAllTasks traceid options ctasknr bool alist tst=:{tasknr}
-| ctasknr == length options		= (reverse alist,{tst & activated = bool})
-# (taskname,task)				= options!!ctasknr
-# (a,tst=:{activated = adone})	= mkParSubTask traceid ctasknr task {tst & tasknr = tasknr, activated = True}
-= checkAllTasks traceid options (inc ctasknr) (bool&&adone) (if adone [(taskname,a):alist] alist) {tst & tasknr = tasknr}
-
-checkAnyTasks traceid taskoptions ctasknr bool tst=:{tasknr}
-| ctasknr == length taskoptions	= (bool,tst)
-# task							= taskoptions!!ctasknr
-# (a,tst=:{activated = adone})	= mkParSubTask traceid ctasknr task {tst & tasknr = tasknr, activated = True}
-= checkAnyTasks traceid taskoptions (inc ctasknr) (bool||adone) {tst & tasknr = tasknr}
 
 andTasks_mu :: String [(Int,Task a)] -> (Task [a]) | iData a
 andTasks_mu taskid tasks = newTask "andTasks_mu" (domu_andTasks tasks)
@@ -547,22 +580,22 @@ where
 	# chosenTask		= snd (options!!chosen.value)
 	# chosenTaskName	= fst (options!!chosen.value)
 	# (alist,{activated=finished,hst,trace})		
-						= checkAllTasks "PMilestoneTasks" options 0 True [] {tst & html = BT [], hst = hst,trace = trace}
+						= checkAllTasks "andTasks_mstone" options 0 True [] {tst & html = BT [], hst = hst,trace = trace}
 	| finished			= (alist,{tst & activated = finished, hst = hst,trace = trace})
 	# (a,{activated=adone,html=ahtml,hst,trace}) = chosenTask {tst & tasknr = [-1,chosen.value:tasknr], activated = True, html = BT [], hst = hst, trace = trace}
-	# (milestoneReached,{hst})	
-						= checkAnyTasks "PMilestoneTasks" (map snd options) 0 False {tst & html = BT [], hst = hst, trace = trace}
+	# (milestoneReached,_,{hst})	
+						= checkAnyTasks "andTasks_mstone" (map snd options) (0,-1) (False,-1) {tst & html = BT [], hst = hst, trace = trace}
 	| not adone			= (alist,{tst & 	trace = trace,
 										activated = adone || milestoneReached, 
 										html = html +|+ BT choice.form +|+ 
-												(BT [Br, gray chosenTaskName,Br] +|+ ahtml +|+ BT [Br, Hr [], Br]), 
+												(BT [Br, silver chosenTaskName,Br] +|+ ahtml +|+ BT [Br, Hr [], Br]), 
 										hst = hst})
 	# (alist,{activated=finished,hst,trace})		
-						= checkAllTasks "PMilestoneTasks" options 0 True [] {tst & html = BT [], hst = hst, trace = trace}
+						= checkAllTasks "andTasks_mstone" options 0 True [] {tst & html = BT [], hst = hst, trace = trace}
 	| finished			= (alist,{tst & activated = finished, hst = hst,trace =trace})
 	= (alist,{tst & trace = trace,
 				  activated = finished || milestoneReached, html = 	html +|+ 
-												BT choice.form +|+ (BT [Br, gray chosenTaskName,Br] +|+ 
+												BT choice.form +|+ (BT [Br, silver chosenTaskName,Br] +|+ 
 																	ahtml +|+ BT [Br, Hr [], Br]), hst = hst})
 
 	but i = LButton defpixel i
@@ -690,14 +723,17 @@ cdFormId {tasklife,taskstorage,taskmode} s d = {sdFormId s d & lifespan = taskli
 
 // simple html code generation utilities
 
-yellowUser nr
+showUser nr
 = yellow ("User " <+++ nr <+++ " :")
 
 yellow message
 = Font [Fnt_Color (`Colorname Yellow)] [B [] message]
 
-gray message
+silver message
 = Font [Fnt_Color (`Colorname Silver)] [B [] message]
+
+red message
+= Font [Fnt_Color (`Colorname Red)] [B [] message]
 
 // task number generation
 

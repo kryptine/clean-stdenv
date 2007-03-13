@@ -7,10 +7,8 @@ import htmlSettings, htmlButtons
 
 :: *TSt										// task state
 :: Task a		:== St *TSt a				// an interactive task
-:: Void 		= Void						// for tasks returning non interesting results, won't show up in editors either
 :: TClosure a 	= TClosure (Task a)			// to allow a task to deliver a task as result, so higher order tasks are possible
-
-class setTaskAttr a :: !a *TSt -> *TSt
+:: Void 		= Void						// for tasks returning non interesting results, won't show up in editors either
 
 derive gForm 	Void						
 derive gUpd 	Void, TClosure
@@ -35,6 +33,7 @@ editTask		:: create an editor with button to finish task
 editTask 		:: String a 	-> Task a							| iData a 
 (<<@) infix  3 	:: (Task a) b  	-> Task a 							| setTaskAttr b
 
+class 	 setTaskAttr a :: !a *TSt -> *TSt
 instance setTaskAttr Lifespan, StorageFormat, Mode
 
 /* monadic operators on iTasks
@@ -155,7 +154,7 @@ andTasks_mstone :: do all  iTasks in any order (interleaved), task completed whe
 					but continue with next task as soon as one of the tasks is completed
 					string indicates which task delivered what
 stopTask		:: indicated task can be stopped at any time and can be finished elsewhere
-					boolean indicated whether task is stopped or is finished
+					boolean indicates whether task is stopped or is finished
 */
 
 andTasks_mstone :: [(String,Task a)] 		-> (Task [(String,a)]) 		| iCreateAndPrint a
