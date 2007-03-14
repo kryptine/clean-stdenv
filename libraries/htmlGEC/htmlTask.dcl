@@ -64,7 +64,7 @@ return_D		:: a 						-> Task a			| gForm {|*|}, iCreateAndPrint a
 (@:)			:: will prompt who is waiting for task with give name
 (@::)			:: no prompting
 */
-(@:)  infix 4 	:: !(!Int,!String) (Task a)	-> (Task a)			| iCreate a
+(@:)  infix 4 	:: !(!String,!Int) (Task a)	-> (Task a)			| iCreate a
 (@::) infix 4 	:: !Int (Task a)		    -> (Task a)			| iCreate a
 
 /* Promote any TSt state transition function to an iTask:
