@@ -17,7 +17,7 @@ listControl
 =	[Txt "Define the list:",Br,Br] ?>>
 	appIData (vertlistFormButs 5 True (Init,sFormId "list0" [0])) =>> \list ->	
 	[] ?>>
-	(1,"Control List:") 
+	("Control List:",1) 
 	@:(	[Txt "Control the list:",Br,Br] ?>>
 		appIData (vertlistFormButs 1 True (Init,sFormId "list1" list))
 	  ) =>> \list ->

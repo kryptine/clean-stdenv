@@ -1,6 +1,6 @@
 module sum
 
-import StdEnv, StdHtml
+import StdEnv, StdHtml, htmlTask
 
 // (c) MJP 2007
 
@@ -10,7 +10,7 @@ import StdEnv, StdHtml
 
 //Start world = doHtmlServer (singleUserTask sequence) world
 //Start world = doHtmlServer (singleUserTask sequence3) world
-Start world = doHtmlServer (multiUserTask 3 /*[setTaskAttribute Persistent]*/ sequenceMU) world
+Start world = doHtmlServer (multiUserTask 3 sequenceMU) world
 //Start world = doHtmlServer sequenceIData2 world
 
 derive gForm []
@@ -37,8 +37,8 @@ sequence
 
 sequenceMU :: Task Int
 sequenceMU 
-= 	(1,"number") @: editTask "Set" 0 =>> \v1 ->
-	(2,"number") @: editTask "Set" 0 =>> \v2 ->
+= 	("number",1) @: editTask "Set" 0 =>> \v1 ->
+	("number",2) @: editTask "Set" 0 =>> \v2 ->
 	[Txt "+",Hr []] !>> return_D (v1 + v2) 
 
 // single user, normal Clean style 
@@ -63,8 +63,8 @@ where
 
 sequence2MU :: TSt -> (Int,TSt)
 sequence2MU tst
-# (v1,tst) 	= ((1,"number") @: editTask "Set" 0) tst
-# (v2,tst) 	= ((2,"number") @: editTask "Set" 0) tst
+# (v1,tst) 	= (("number",1) @: editTask "Set" 0) tst
+# (v2,tst) 	= (("number",2) @: editTask "Set" 0) tst
 # tst		= addHtml [Txt "+",Hr []] tst
 = return_D (v1 + v2) tst
 

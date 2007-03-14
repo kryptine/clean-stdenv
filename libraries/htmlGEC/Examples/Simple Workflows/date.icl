@@ -28,7 +28,7 @@ where
 	findDate` :: Int (HtmlDate,HtmlTime) -> Task (HtmlDate,HtmlTime)
 	findDate` whom daytime
 	=	proposeDateTime daytime =>> \daytime ->
-		(whom,"Meeting Request") @: determineDateTime daytime =>> \(ok,daytime) ->
+		("Meeting Request",whom) @: determineDateTime daytime =>> \(ok,daytime) ->
 		if ok (return_V daytime)
 		(	isOkDateTime daytime =>> \ok ->
 			if ok (return_V daytime)

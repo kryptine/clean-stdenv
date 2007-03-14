@@ -39,7 +39,7 @@ deadline task
 		)
 where
 	delegateTask who time task
-	= 	(who,"Timed Task") 	
+	= 	("Timed Task",who) 	
 		@:orTask	
 			(	waitForTimerTask time #>> 								// wait for deadline
 				return_V (False,createDefault)							// return default value

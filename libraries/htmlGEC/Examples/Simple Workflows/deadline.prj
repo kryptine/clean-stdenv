@@ -57,9 +57,9 @@ MainModule
 	Icl
 		WindowPosition
 			X:	10
-			Y:	12
-			SizeX:	1002
-			SizeY:	614
+			Y:	10
+			SizeX:	800
+			SizeY:	624
 	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
@@ -3044,176 +3044,176 @@ OtherModules
 Static
 	Mods
 		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Examples\Simple Workflows\deadline.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlTask.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\GEC\GEC Implementation\StdArrow.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlArrow.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlRefFormlib.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlExceptions.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlDatabase.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlFormlib.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\GenLexOrd.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlButtons.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\httpSubServer.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\StdStringChannels.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\StdEventTCP.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\ostcp.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\tcp_bytestreams.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\StdTCPDef.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\StdTCPChannels.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osfileselect.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdFileSelect.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdPStClass.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\scheduler.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\receiverevent.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\receiverdevice.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdReceiverAttribute.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\receiverdefaccess.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\receiveraccess.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\receiverid.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdReceiver.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdReceiverDef.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\world.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osbeep.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdProcessDef.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdProcessAttribute.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdPSt.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osmouse.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\roundrobin.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\processstack.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\timerhandle.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\processhandle.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\menuCCall_12.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osmenu.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdMenuDef.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\menuhandle.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\devicesystemstate.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\keyfocus.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\receiverhandle.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdWindowDef.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdControlDef.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\windowhandle.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdTimerDef.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\timertable.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\cast.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\semidynamic.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\receivertable.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\receivermessage.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\deviceevents.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\devicefunctions.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osguishare.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osevent.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osactivaterequests.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\iostate.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdId.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ostime.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\windowCrossCall_12.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ossystem.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\windowCCall_12.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ostoolbar.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\menuCrossCall_12.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osdocumentinterface.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\clCCall_12.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\commondef.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\oskey.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdKey.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdPicture.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdIOBasic.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdPictureDef.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osfont.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\rgnCCall_12.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\pictCCall_12.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ostypes.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osrgn.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ospicture.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osbitmap.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdBitmap.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdIOCommon.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\systemid.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\device.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\id.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\clCrossCall_12.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ostoolbox.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ostick.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdTime.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\tcp.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\StdChannels.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\StdTCP.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\StdArrayExtensions.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\StdListExtensions.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\StdLib.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\httpUtil.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\httpServer.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\_Array.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\GenMap.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\WrapDebug\ShowWrapped.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\WrapDebug\Wrap.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\WrapDebug\Debug.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Hilde\Parser combinators 2002\StdParsComb.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ExceptionsWindows\StdException.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Hilde\EstherParser.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Hilde\EstherBackend.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\DynIDMacros.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\memory.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\memory_mapped_files.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\StdDynamicVersion.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\shared_buffer.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\DynamicLinkerInterface.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\general\BitSet.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\StdDynamicLowLevelInterface.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\DynamicUtilities.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\general\EnDecode.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\general\DefaultElem.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\StdDynamicTypes.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\DynamicGraphConversion.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\extension\StdDynamic.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\graph_copy\dynamic_string.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Directory\Directory.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\StdLibMisc.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlTrivial.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\EncodeDecode.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\iDataState.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\GenParse.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\GenPrint.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\GenEq.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlFormData.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlStylelib.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ArgEnvWindows\ArgEnv.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\_SystemEnumStrict.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\_SystemStrictLists.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdStrictLists.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdDebug.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Gerda\odbccp.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Gerda\odbc.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\StdMaybe.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Gerda\Gerda.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdGeneric.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\PrintUtil.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlStyleDef.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlDataDef.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlHandler.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlSettings.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\StdHtml.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdFunc.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdCharList.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdTuple.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdOrdList.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\_SystemEnum.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdEnum.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdList.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdFile.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdString.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdReal.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\_SystemArray.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdArray.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdClass.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdChar.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdMisc.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdInt.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdBool.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdEnv.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdOverloaded.icl
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\_SystemDynamic.icl
 		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\extension\StdCleanTypes.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\_SystemDynamic.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdOverloaded.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdEnv.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdBool.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdInt.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdMisc.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdChar.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdClass.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdArray.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\_SystemArray.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdReal.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdString.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdFile.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdList.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdEnum.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\_SystemEnum.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdOrdList.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdTuple.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdCharList.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdFunc.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\StdHtml.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlSettings.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlHandler.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlDataDef.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlStyleDef.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\PrintUtil.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdGeneric.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Gerda\Gerda.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\StdMaybe.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Gerda\odbc.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Gerda\odbccp.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdDebug.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\StdStrictLists.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\_SystemStrictLists.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\_SystemEnumStrict.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ArgEnvWindows\ArgEnv.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlStylelib.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlFormData.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\GenEq.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\GenPrint.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\GenParse.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\iDataState.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\EncodeDecode.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlTrivial.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\StdLibMisc.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Directory\Directory.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\graph_copy\dynamic_string.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\extension\StdDynamic.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\DynamicGraphConversion.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\StdDynamicTypes.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\general\DefaultElem.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\general\EnDecode.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\DynamicUtilities.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\StdDynamicLowLevelInterface.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\general\BitSet.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\DynamicLinkerInterface.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\shared_buffer.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\StdDynamicVersion.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\memory_mapped_files.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\memory.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\DynIDMacros.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Hilde\EstherBackend.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Hilde\EstherParser.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ExceptionsWindows\StdException.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Hilde\Parser combinators 2002\StdParsComb.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\WrapDebug\Debug.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\WrapDebug\Wrap.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\WrapDebug\ShowWrapped.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\GenMap.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\_Array.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\httpServer.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\httpUtil.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\StdLib.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\StdListExtensions.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\StdArrayExtensions.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\StdTCP.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\StdChannels.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\tcp.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdTime.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ostick.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ostoolbox.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\clCrossCall_12.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\id.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\device.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\systemid.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdIOCommon.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdBitmap.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osbitmap.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ospicture.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osrgn.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ostypes.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\pictCCall_12.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\rgnCCall_12.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osfont.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdPictureDef.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdIOBasic.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdPicture.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdKey.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\oskey.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\commondef.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\clCCall_12.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osdocumentinterface.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\menuCrossCall_12.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ostoolbar.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\windowCCall_12.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ossystem.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\windowCrossCall_12.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\ostime.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdId.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\iostate.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osactivaterequests.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osevent.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osguishare.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\devicefunctions.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\deviceevents.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\receivermessage.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\receivertable.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\semidynamic.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\cast.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\timertable.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdTimerDef.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\windowhandle.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdControlDef.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdWindowDef.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\receiverhandle.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\keyfocus.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\devicesystemstate.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\menuhandle.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdMenuDef.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osmenu.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\menuCCall_12.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\processhandle.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\timerhandle.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\processstack.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\roundrobin.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osmouse.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdPSt.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdProcessAttribute.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdProcessDef.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osbeep.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\world.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdReceiverDef.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdReceiver.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\receiverid.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\receiveraccess.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\receiverdefaccess.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdReceiverAttribute.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\receiverdevice.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\receiverevent.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\scheduler.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdPStClass.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\StdFileSelect.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\osfileselect.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\StdTCPChannels.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\StdTCPDef.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\tcp_bytestreams.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\ostcp.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\StdEventTCP.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\StdStringChannels.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\httpSubServer.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlButtons.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\GenLexOrd.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlFormlib.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlDatabase.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlExceptions.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlRefFormlib.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlArrow.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\GEC\GEC Implementation\StdArrow.icl
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\htmlTask.icl
 	Objs
 		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_startup0.o
 		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_startup1Trace.o
@@ -3221,154 +3221,6 @@ Static
 		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_system.o
 		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Examples\Simple Workflows\Clean System Files\deadline.o
 		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlTask.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlArrow.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlRefFormlib.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlExceptions.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlDatabase.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlFormlib.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\Clean System Files\GenLexOrd.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlButtons.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\httpSubServer.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\Clean System Files\StdStringChannels.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\Clean System Files\StdEventTCP.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\Clean System Files\ostcp.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\Clean System Files\tcp_bytestreams.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\Clean System Files\StdTCPDef.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\Clean System Files\StdTCPChannels.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osfileselect.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdFileSelect.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdPStClass.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\scheduler.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\receiverevent.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receiverdevice.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdReceiverAttribute.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receiverdefaccess.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receiveraccess.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receiverid.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdReceiver.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdReceiverDef.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\world.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osbeep.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdProcessDef.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdProcessAttribute.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdPSt.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osmouse.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\roundrobin.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\processstack.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\timerhandle.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\processhandle.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\menuCCall_12.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osmenu.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdMenuDef.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\menuhandle.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\devicesystemstate.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\keyfocus.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receiverhandle.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdWindowDef.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdControlDef.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\windowhandle.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdTimerDef.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\timertable.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\cast.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\semidynamic.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receivertable.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receivermessage.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\deviceevents.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\devicefunctions.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osguishare.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osevent.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osactivaterequests.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\iostate.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdId.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ostime.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\windowCrossCall_12.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ossystem.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\windowCCall_12.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ostoolbar.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\menuCrossCall_12.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osdocumentinterface.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\clCCall_12.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\commondef.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\oskey.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdKey.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdPicture.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdIOBasic.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdPictureDef.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osfont.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\rgnCCall_12.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\pictCCall_12.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ostypes.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osrgn.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ospicture.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osbitmap.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdBitmap.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdIOCommon.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\systemid.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\device.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\id.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\clCrossCall_12.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ostoolbox.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ostick.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdTime.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\Clean System Files\tcp.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\Clean System Files\StdChannels.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\Clean System Files\StdTCP.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdListExtensions.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdLib.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\httpUtil.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\httpServer.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\Clean System Files\_Array.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\Clean System Files\GenMap.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\WrapDebug\Clean System Files\ShowWrapped.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\WrapDebug\Clean System Files\Wrap.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\WrapDebug\Clean System Files\Debug.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Hilde\Parser combinators 2002\Clean System Files\StdParsComb.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ExceptionsWindows\Clean System Files\StdException.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Hilde\Clean System Files\EstherParser.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Hilde\Clean System Files\EstherBackend.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\Clean System Files\DynIDMacros.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\memory.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\memory_mapped_files.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\Clean System Files\StdDynamicVersion.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\shared_buffer.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicLinkerInterface.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\general\Clean System Files\BitSet.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\Clean System Files\StdDynamicLowLevelInterface.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\Clean System Files\DynamicUtilities.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\general\Clean System Files\EnDecode.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\general\Clean System Files\DefaultElem.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\Clean System Files\StdDynamicTypes.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicGraphConversion.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\graph_copy\Clean System Files\dynamic_string.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Directory\Clean System Files\Directory.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdLibMisc.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlTrivial.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\EncodeDecode.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\iDataState.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\Clean System Files\GenParse.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\Clean System Files\GenPrint.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\Clean System Files\GenEq.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlFormData.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlStylelib.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_SystemEnumStrict.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_SystemStrictLists.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdStrictLists.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdDebug.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Gerda\Clean System Files\odbccp.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Gerda\Clean System Files\odbc.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdMaybe.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Gerda\Clean System Files\Gerda.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdGeneric.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\PrintUtil.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlStyleDef.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlDataDef.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlHandler.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlSettings.o
-		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\StdHtml.o
 		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdFunc.o
 		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdCharList.o
 		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdTuple.o
@@ -3390,6 +3242,154 @@ Static
 		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdOverloaded.o
 		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
 		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlSettings.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlHandler.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlDataDef.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlStyleDef.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\PrintUtil.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdGeneric.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Gerda\Clean System Files\Gerda.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdMaybe.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Gerda\Clean System Files\odbc.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Gerda\Clean System Files\odbccp.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdDebug.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\Clean System Files\StdStrictLists.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_SystemStrictLists.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdEnv\Clean System Files\_SystemEnumStrict.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlStylelib.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlFormData.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\Clean System Files\GenEq.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\Clean System Files\GenPrint.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\Clean System Files\GenParse.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\iDataState.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\EncodeDecode.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlTrivial.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdLibMisc.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Directory\Clean System Files\Directory.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\graph_copy\Clean System Files\dynamic_string.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicGraphConversion.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\Clean System Files\StdDynamicTypes.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\general\Clean System Files\DefaultElem.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\general\Clean System Files\EnDecode.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\Clean System Files\DynamicUtilities.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\Clean System Files\StdDynamicLowLevelInterface.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\general\Clean System Files\BitSet.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicLinkerInterface.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\shared_buffer.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\Clean System Files\StdDynamicVersion.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\memory_mapped_files.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\windows\Clean System Files\memory.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Dynamics\implementation\Clean System Files\DynIDMacros.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Hilde\Clean System Files\EstherBackend.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Hilde\Clean System Files\EstherParser.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ExceptionsWindows\Clean System Files\StdException.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Hilde\Parser combinators 2002\Clean System Files\StdParsComb.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\WrapDebug\Clean System Files\Debug.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\WrapDebug\Clean System Files\Wrap.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\WrapDebug\Clean System Files\ShowWrapped.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\Clean System Files\GenMap.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\Clean System Files\_Array.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\httpServer.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\httpUtil.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdLib.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdListExtensions.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\Clean System Files\StdTCP.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\Clean System Files\StdChannels.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\Clean System Files\tcp.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdTime.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ostick.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ostoolbox.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\clCrossCall_12.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\id.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\device.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\systemid.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdIOCommon.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdBitmap.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osbitmap.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ospicture.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osrgn.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ostypes.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\pictCCall_12.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\rgnCCall_12.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osfont.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdPictureDef.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdIOBasic.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdPicture.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdKey.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\oskey.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\commondef.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\clCCall_12.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osdocumentinterface.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\menuCrossCall_12.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ostoolbar.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\windowCCall_12.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ossystem.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\windowCrossCall_12.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\ostime.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdId.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\iostate.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osactivaterequests.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osevent.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osguishare.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\devicefunctions.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\deviceevents.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receivermessage.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receivertable.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\semidynamic.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\cast.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\timertable.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdTimerDef.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\windowhandle.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdControlDef.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdWindowDef.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receiverhandle.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\keyfocus.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\devicesystemstate.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\menuhandle.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdMenuDef.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osmenu.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\menuCCall_12.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\processhandle.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\timerhandle.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\processstack.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\roundrobin.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osmouse.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdPSt.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdProcessAttribute.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdProcessDef.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osbeep.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\world.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdReceiverDef.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdReceiver.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receiverid.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receiveraccess.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receiverdefaccess.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdReceiverAttribute.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\receiverdevice.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\receiverevent.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\scheduler.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdPStClass.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\Clean System Files\StdFileSelect.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ObjectIO\OS Windows\Clean System Files\osfileselect.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\Clean System Files\StdTCPChannels.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\Clean System Files\StdTCPDef.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\Clean System Files\tcp_bytestreams.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\Clean System Files\ostcp.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\Clean System Files\StdEventTCP.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Tcp\Clean System Files\StdStringChannels.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\httpSubServer.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlButtons.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\Generics\Clean System Files\GenLexOrd.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlFormlib.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\StdHtml.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlDatabase.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlExceptions.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlRefFormlib.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\htmlArrow.o
+		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\GEC\GEC Implementation\Clean System Files\StdArrow.o
 		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.o
 		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\SUBSERVER.OBJ
 		Path:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Clean System Files\CFUNCLIB.OBJ

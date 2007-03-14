@@ -40,7 +40,7 @@ where
 	delegateToSet task set = newTask "delegateToSet" delegateToSet`
 	where 
 		delegateToSet`						
-		  =									orTasks [("Waiting", who @:: editTask "I Will Do It" Void #>> return_V who) \\ who <- set]
+		  =									orTasks [("Waiting for " <+++ who, who @:: editTask "I Will Do It" Void #>> return_V who) \\ who <- set]
 			=>> \who 						->	who @:: (timedTask time task)	
 			=>> \(stopped,TClosure task)	->	if stopped (delegateToSet task set) task 
 
