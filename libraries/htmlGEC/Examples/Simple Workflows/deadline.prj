@@ -58,8 +58,8 @@ MainModule
 		WindowPosition
 			X:	10
 			Y:	12
-			SizeX:	1023
-			SizeY:	481
+			SizeX:	1002
+			SizeY:	614
 	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
@@ -3032,14 +3032,14 @@ OtherModules
 				Y:	10
 				SizeX:	800
 				SizeY:	510
-		DclOpen:	False
+		DclOpen:	True
 		Icl
 			WindowPosition
 				X:	41
 				Y:	35
 				SizeX:	1062
 				SizeY:	546
-		IclOpen:	False
+		IclOpen:	True
 		LastModified:	No 0 0 0 0 0 0
 Static
 	Mods

@@ -10,8 +10,8 @@ import StdEnv, StdHtml
 
 //Start world = doHtmlServer (singleUserTask sequence) world
 //Start world = doHtmlServer (singleUserTask sequence3) world
-//Start world = doHtmlServer (multiUserTask 3 [setTaskAttribute Persistent] sequenceMU) world
-Start world = doHtmlServer sequenceIData2 world
+Start world = doHtmlServer (multiUserTask 3 /*[setTaskAttribute Persistent]*/ sequenceMU) world
+//Start world = doHtmlServer sequenceIData2 world
 
 derive gForm []
 derive gUpd  []
