@@ -22,7 +22,7 @@ derive gPrint Maybe
 
 npersons = 5
 
-Start world = doHtmlServer (multiUserTask npersons (delegate mytask2 (Time 0 15 0))) world
+Start world = doHtmlServer (multiUserTask npersons (delegate mytask2 (Time 0 0 30))) world
 
 mytask = editTask "Done" 0
 mytask2 =			editTask "Done1" 0
@@ -34,36 +34,38 @@ delegate :: (Task a) HtmlTime -> (Task a) | iData a
 delegate taskToDelegate time 
 =						[Txt "Choose persons you want to delegate work to:",Br,Br] 
 						?>>	determineSet [] 
-			=>> \set -> delegateToSet taskToDelegate set
+			=>> \set -> delegateToSomeone taskToDelegate set
 			=>> \result -> return_D result
 where
-	delegateToSet task set = newTask "delegateToSet" delegateToSet`
+	delegateToSomeone :: (Task a) [Int] -> (Task a) | iData a
+	delegateToSomeone task set = newTask "delegateToSet" doDelegate
 	where 
-		delegateToSet`						
-		  =									orTasks [("Waiting for " <+++ who, who @:: editTask "I Will Do It" Void #>> return_V who) \\ who <- set]
-			=>> \who 						->	who @:: (timedTask time task)	
-			=>> \(stopped,TClosure task)	->	if stopped (delegateToSet task set) task 
+		doDelegate						
+		  =									orTasks [("Waiting for " <+++ who, who @:: seqTask "I Will Do It" (return_V who)) \\ who <- set]
+			=>> \who 						->	who @:: returnableTask stopIt task	
+			=>> \(stopped,TClosure task)	->	if stopped (delegateToSomeone task set) task 
+	
+	userStop 		= seqTask "Stop" (return_V True)					  			
+	timerStop time	= waitForTimerTask time #>> return_V True
+	
+	stopIt = orTask (timerStop time,userStop)				  			
+						  			
+determineSet set = newTask "determineSet" determineSet`
+where
+	determineSet`	
+	= 					[Txt ("Current set:" +++ print set)] 
+						?>> chooseTask	[("Add Person", cancelTask choosePerson =>> \nr  -> return_V nr)
+										,("Finished",	return_V Nothing)
+										]
+		=>> \result -> case result of
+						(Just new)  -> determineSet (sort (removeDup [new:set])) 
+						Nothing		-> return_V set
 
-	determineSet set = newTask "determineSet" determineSet`
-	where
-		determineSet`	
-		= 					[Txt ("Current set:" +++ print set)] 
-							?>> chooseTask	[("Add Person", cancelTask choosePerson =>> \nr  -> return_V nr)
-											,("Finished",	return_V Nothing)
-											]
-			=>> \result -> case result of
-							(Just new)  -> determineSet (sort (removeDup [new:set])) 
-							Nothing		-> return_V set
+	choosePerson =	editTask "Set" (PullDown (1,100) (0,[toString i \\ i <- [1..npersons]]))
+					=>> \whomPD  -> return_V (Just (toInt(toString whomPD)))
 
-		choosePerson =	editTask "Set" (PullDown (1,100) (0,[toString i \\ i <- [1..npersons]]))
-						=>> \whomPD  -> return_V (Just (toInt(toString whomPD)))
-
-		cancelTask task = orTask (task,editTask "Cancel" Void #>> return_V createDefault)
-		
-		print [] = ""
-		print [x:xs] = toString x +++ " " +++ print xs
-
-	timedTask :: HtmlTime (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
-	timedTask time task	= orTask  	( stopTask task
-						 			, waitForTimerTask time #>> return_V (True,TClosure task)
-						  			)
+	cancelTask task = orTask (task,editTask "Cancel" Void #>> return_V createDefault)
+	
+	print [] = ""
+	print [x:xs] = toString x +++ " " +++ print xs
+						  			

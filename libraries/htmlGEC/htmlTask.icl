@@ -602,18 +602,18 @@ where
 
 
 
-//  not tested experimental stuf:
+// very experimental higher order lazy task stuf
 
-stopTask :: (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
-stopTask  task =  mkTask "stopTask" stop`
+returnableTask :: (Task Bool) (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
+returnableTask stoptask task =  mkTask "stopTask" stop`
 where
 	stop` tst=:{tasknr,html}
 	# stopTaskId = [-1,0:tasknr]
 	# stopBtnId  = [-1,1:tasknr]
-	# (val,tst=:{activated = jobdone,html = jobhtml}) 		= task {tst & html = BT [], tasknr = stopTaskId}
-	# (count,tst=:{activated = jobstopped,html = stophtml}) = editTask "Stop" Void {tst & activated = True, html = BT [], tasknr = stopBtnId} 
-	| jobdone		= return_V (False,TClosure (return_V val)) {tst & html = html +|+ jobhtml, activated = True}
-	| jobstopped	= return_V (True,TClosure (\tst=:{html} -> task {tst & tasknr = stopTaskId})) {tst & html = html, activated = True}
+	# (val,tst=:{activated = jobdone,html = jobhtml}) 			= task     {tst & html = BT [], tasknr = stopTaskId}
+	# (stopped,tst=:{activated = jobstopped,html = stophtml})	= stoptask {tst & activated = True, html = BT [], tasknr = stopBtnId}
+	| jobdone	= return_V (False,TClosure (return_V val)) {tst & html = html +|+ jobhtml, activated = True}
+	| stopped	= return_V (True,TClosure (\tst=:{html} -> task {tst & tasknr = stopTaskId})) {tst & html = html, activated = True}
 	= return_V (False,TClosure (return_V val)) {tst & html = html +|+ jobhtml +|+ stophtml}
 
 // time and date related tasks

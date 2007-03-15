@@ -153,11 +153,12 @@ The following combinators might be dangerous to use when you garbage collect tas
 andTasks_mstone :: do all  iTasks in any order (interleaved), task completed when all  done
 					but continue with next task as soon as one of the tasks is completed
 					string indicates which task delivered what
-stopTask		:: indicated task can be stopped at any time and can be finished elsewhere
-					boolean indicates whether task is stopped or is finished
+returnableTask	:: task will be stopped when boolean Task yields True
+					the work done so far it returned and can be can be finished elsewhere
+					boolean indicates whether task is stopped or is finished normally
 */
 
 andTasks_mstone :: [(String,Task a)] 		-> (Task [(String,a)]) 		| iCreateAndPrint a
 
-stopTask 		:: (Task a) 				-> (Task (Bool,TClosure a)) | iCreateAndPrint a
+returnableTask 	:: (Task Bool) (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
 

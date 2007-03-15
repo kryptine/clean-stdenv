@@ -25,31 +25,10 @@ class iParse a
 		
 class iSpecialStore a
 										// OPTION: Comment out the next line if you do not have access to an ODCB database on your machine !!!!
-		| gerda {|*|} 					// To store and retrieve a value in a database
+		| gerda {|*|} , 				// To store and retrieve a value in a database
 
-		, TC a							// To be able to store values in a dynamic
+		  TC a							// To be able to store values in a dynamic
 								
-/*
-class iData a							// The collection of generic functions needed to make iData:	
-		| gForm {|*|}					//		Creates an Html Form
-		, gUpd  {|*|}					//		Makes it possible to edit the form and updates the corresponding value
-		, iDataSerAndDeSerialize a
-
-class iDataSerAndDeSerialize a
-		| gParse{|*|}					// To de-serialize a string back to a value
-		, iDataSerialize a		
-
-class iDataSerialize a
-		| gPrint{|*|}			//		To serialize a value to a String
-
-// OPTION: Comment out the next line if you do not have access to an ODCB database on your machine !!!!
-		, gerda {|*|} 			//		To store and retrieve a value in a database
-
-		, TC a					//		To be able to store values in a dynamic
-*/
-
-
-
 TraceInput			:== False			// show what kind of information is received from Client
 TraceOutput			:== False			// show what kind of information is stored
 
