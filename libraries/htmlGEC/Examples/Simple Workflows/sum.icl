@@ -8,9 +8,9 @@ import StdEnv, StdHtml, htmlTask
 
 // choose one of the following variants
 
-//Start world = doHtmlServer (singleUserTask sequence) world
+Start world = let s :: Task Int; s = sequence in doHtmlServer (singleUserTask s) world
 //Start world = doHtmlServer (singleUserTask sequence3) world
-Start world = doHtmlServer (multiUserTask 3 sequenceMU) world
+//Start world = doHtmlServer (multiUserTask 3 sequenceMU) world
 //Start world = doHtmlServer sequenceIData2 world
 
 derive gForm []
@@ -27,10 +27,10 @@ sequence4
 // single user, give first value, then give second, then show sum
 // monadic style
 
-sequence :: Task Int
+sequence :: Task a | +, zero, iData a
 sequence
-=	editTask "Set" 0 =>> \v1 ->
-	editTask "Set" 0 =>> \v2 ->
+=	editTask "Set" zero =>> \v1 ->
+	editTask "Set" zero =>> \v2 ->
 	[Txt "+",Hr []] !>>	return_D (v1 + v2)
 
 // multi user variant, monadic style

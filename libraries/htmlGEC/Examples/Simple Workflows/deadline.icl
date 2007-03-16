@@ -28,14 +28,14 @@ deadline task
 	[Txt "Cancel delegated work if you are getting impatient:",Br,Br] ?>>
 	orTask
 		(	delegateTask (toInt(toString whomPD)) time task
-		, 	seqTask "Cancel" (return_V (False,createDefault))
+		, 	buttonTask "Cancel" (return_V (False,createDefault))
 		) =>> \(ok,value) ->
 	if ok
 		(	[Txt ("Result of task: " +++ printToString value),Br,Br] ?>>
-			seqTask "OK" (return_V value)
+			buttonTask "OK" (return_V value)
 		)
 		(	[Txt "Task expired or canceled, you have to do it yourself!",Br,Br] ?>>
-			seqTask "OK" task
+			buttonTask "OK" task
 		)
 where
 	delegateTask who time task

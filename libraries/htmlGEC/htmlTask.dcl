@@ -83,11 +83,14 @@ repeatTask		:: (Task a) 				-> Task a 			| iData a
 repeatTask_GC	:: (Task a) 				-> Task a 			| iCreateAndPrint a
 repeatTask_Std 	:: (Task a) 				-> Task a 			| iCreateAndPrint a
 
-/*	Sequential Tasks:
-seqTask			:: do corresponding iTask when button pressed
+/*	Prompting Tasks:
+buttonTask		:: do corresponding iTask when button pressed
+*/
+buttonTask :: String (Task a) -> (Task a) | iCreateAndPrint a
+
+/*	Sequencing Tasks:
 seqTasks		:: do all iTasks one after another, task completed when all done
 */
-seqTask			:: String (Task a)		-> (Task a) 			| iCreateAndPrint a
 seqTasks		:: [(String,Task a)] 	-> (Task [a])			| iCreateAndPrint a
 
 /* Choose Tasks

@@ -26,10 +26,10 @@ travel
 											]
 							)
 						, 	( "Confirm Booking:"
-							, seqTask "Confirm" (return_V [])
+							, buttonTask "Confirm" (return_V [])
 							)
 						]
-					, seqTask "Cancel" (return_V [])
+					, buttonTask "Cancel" (return_V [])
 					)
 	=>> \booking -> [Txt "Handling bookings:",Br,Br]
 					?>> handleBookings booking

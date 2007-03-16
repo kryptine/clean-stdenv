@@ -386,8 +386,8 @@ where
 
 internEditSTask tracename prompt task = \tst -> mkTask tracename (editTask` prompt task) tst
 
-seqTask :: String (Task a) -> (Task a) | iCreateAndPrint a
-seqTask s task = iCTask_button "seqTask" [(s,task)]
+buttonTask :: String (Task a) -> (Task a) | iCreateAndPrint a
+buttonTask s task = iCTask_button "seqTask" [(s,task)]
 
 seqTasks :: [(String,Task a)] -> (Task [a])| iCreateAndPrint a
 seqTasks options = mkTask "seqTasks" seqTasks`

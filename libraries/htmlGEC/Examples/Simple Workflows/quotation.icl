@@ -11,11 +11,11 @@ import StdEnv, StdHtml, GenEq
 // Otherwise the task is completed
 // The task itself in the example is a quotation form that needs to be filled in
 
-derive gForm 	QForm, ReviewState
-derive gUpd 	QForm, ReviewState
-derive gParse 	QForm, ReviewState
-derive gPrint 	QForm, ReviewState
-derive gerda 	QForm, ReviewState
+derive gForm 	QForm, Review, Person, Gender
+derive gUpd 	QForm, Review, Person, Gender
+derive gParse 	QForm, Review, Person, Gender
+derive gPrint 	QForm, Review, Person, Gender
+derive gerda 	QForm, Review, Person, Gender
 
 
 :: Persoonsgegevens
@@ -28,8 +28,8 @@ derive gerda 	QForm, ReviewState
 					, plaats 	:: String
 					}
 
-//Start world = doHtmlServer (multiUserTask 2 (Quotation <<@ Persistent)) world
-Start world = doHtmlServer (multiUserTask 2 Quotation) world
+//Start world = doHtmlServer (multiUserTask 2 (reviewtask <<@ Persistent)) world
+Start world = doHtmlServer (multiUserTask 2 reviewtask) world
 
 :: QForm = 	{ toComp 			:: String
 			, startDate 		:: HtmlDate
@@ -38,28 +38,38 @@ Start world = doHtmlServer (multiUserTask 2 Quotation) world
 			, description		:: TextArea
 			, price				:: Real	
 			}
-:: ReviewState = Approved | Cancelled | NeedsRework TextArea | Draft
+::	Person = { firstName		:: String
+			 , surname			:: String
+			 , dateOfBirth		:: HtmlDate
+			 , gender			:: Gender
+			 }
+::	Gender = Male | Female
+:: Review = Approved | Rejected | NeedsRework TextArea
 
-Quotation :: Task (QForm,ReviewState)
-Quotation = taskToReview 1 (createDefault, mytask,createDefault)
-where	mytask form = [Txt "Fill in Form:",Br,Br] ?>>
-                      editTask "TaskDone" form <<@ Submit
+reviewtask :: Task (Person,Review)
+reviewtask = taskToReview 1 (createDefault, mytask)
 
-taskToReview :: Int (a,a -> Task a,ReviewState) -> Task (a,ReviewState) | iData a
-taskToReview reviewer (form,task,state) = newTask "taskToReview" taskToReview`
-where 
-	taskToReview`	=					task form                =>> \form  ->
-										reviewer @:: review form =>> \state	->	
-										[Txt ("Reviewer " <+++ reviewer <+++ " says "),toHtml state,Br] ?>> 
-										editTask "OK" Void       #>>
-										case state of
-											(NeedsRework _) -> taskToReview reviewer (form,task,state) 	
-											else            -> return_V (form,state)
+mytask :: a -> *TSt -> (a,TSt) | iData a
+mytask v = [Txt "Fill in Form:",Br,Br] ?>> editTask "TaskDone" v <<@ Submit
 
-	review :: a -> Task ReviewState | iData a
-	review form = [toHtml form,Br,Br] ?>>
-							chooseTask
-							[ ("Rework",	editTask "Done" (NeedsRework createDefault) <<@ Submit)
-							, ("Approved",	return_V Approved)
-							, ("Cancel",	return_V Cancelled)
-							]
+taskToReview :: Int (a,a -> Task a) -> Task (a,Review) | iData a
+taskToReview reviewer (v`,task) 
+= newTask "taskToReview" (
+	task v`               =>> \v ->
+	reviewer @:: review v =>> \r ->
+	[Txt ("Reviewer " <+++ reviewer <+++ " says "),toHtml r,Br] ?>> 
+//	editTask "OK" Void #>>
+	buttonTask "OK" 
+	case r of
+		(NeedsRework _) -> taskToReview reviewer (v,task) 	
+		else            -> return_V (v,r)
+  )
+
+review :: a -> Task Review | iData a
+review v
+=	[toHtml v,Br,Br] ?>>
+	chooseTask
+		[ ("Rework",  editTask "Done" (NeedsRework createDefault) <<@ Submit)
+		, ("Approved",return_V Approved)
+		, ("Reject",  return_V Rejected)
+		]

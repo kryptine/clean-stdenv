@@ -27,7 +27,7 @@ CoffeeMachine
 	let nproduct = if cancel "Cancelled" product 
 	in
 	[Txt ("product = " <+++ nproduct <+++ ", returned money = " <+++ returnMoney),Br,Br] ?>>
-	seqTask "Thanks" 
+	buttonTask "Thanks" 
 	(return_V (nproduct,returnMoney))
 
 getCoins :: (Int,Int) -> Task (Bool,Int)
@@ -37,7 +37,7 @@ where
 	getCoins`		= [Txt ("To pay: " <+++ cost),Br,Br] ?>>
 					  orTask
 						( chooseTask [(c +++> " cents", return_V (False,c)) \\ c <- coins]
-						, seqTask "Cancel" (return_V (True,0))
+						, buttonTask "Cancel" (return_V (True,0))
 						) =>> \(cancel,coin) -> 
 					  if cancel        (return_V (cancel,   paid))
 					 (if (cost > coin) (getCoins (cost-coin,paid+coin))
@@ -50,11 +50,11 @@ singleStepCoffeeMachine
 		[(p<+++": "<+++c, return_V prod) \\ prod=:(p,c)<-products]
 	=>> \prod=:(p,c) -> 
 	[Txt ("Chosen product: "<+++p),Br,Br] ?>>
-	pay prod (seqTask "Thanks" (return_V prod))
+	pay prod (buttonTask "Thanks" (return_V prod))
 where
 	products	= [("Coffee",100),("Tea",50)]
 	
-//	pay (p,c) t	= seqTask ("Pay "<+++c<+++ " cents") t
+//	pay (p,c) t	= buttonTask ("Pay "<+++c<+++ " cents") t
 	pay (p,c) t	= getCoins (c,0) =>> \(cancel,returnMoney) ->
 				  let np = if cancel "cancelled" p
 				  in  [Txt ("Product = "<+++np<+++". Returned money = "<+++returnMoney),Br,Br] ?>> t
