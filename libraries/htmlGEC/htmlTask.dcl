@@ -7,7 +7,6 @@ import htmlSettings, htmlButtons
 
 :: *TSt										// task state
 :: Task a		:== St *TSt a				// an interactive task
-:: TClosure a 	= TClosure (Task a)			// to allow a task to deliver a task as result, so higher order tasks are possible
 :: Void 		= Void						// for tasks returning non interesting results, won't show up in editors either
 
 derive gForm 	Void						
@@ -62,7 +61,7 @@ return_D		:: a 						-> Task a			| gForm {|*|}, iCreateAndPrint a
 
 /* Assign tasks to user with indicated id
 (@:)			:: will prompt who is waiting for task with give name
-(@::)			:: no prompting
+(@::)			:: same, default task name given
 */
 (@:)  infix 4 	:: !(!String,!Int) (Task a)	-> (Task a)			| iCreate a
 (@::) infix 4 	:: !Int (Task a)		    -> (Task a)			| iCreate a
@@ -83,21 +82,18 @@ repeatTask		:: (Task a) 				-> Task a 			| iData a
 repeatTask_GC	:: (Task a) 				-> Task a 			| iCreateAndPrint a
 repeatTask_Std 	:: (Task a) 				-> Task a 			| iCreateAndPrint a
 
-/*	Prompting Tasks:
-buttonTask		:: do corresponding iTask when button pressed
-*/
-buttonTask :: String (Task a) -> (Task a) | iCreateAndPrint a
-
 /*	Sequencing Tasks:
 seqTasks		:: do all iTasks one after another, task completed when all done
 */
 seqTasks		:: [(String,Task a)] 	-> (Task [a])			| iCreateAndPrint a
 
 /* Choose Tasks
+buttonTask		:: Choose the iTask when button pressed
 chooseTask		:: Choose one iTask from list, depending on button pressed
 chooseTask_pdm	:: Choose one iTask from list, depending on pulldownmenu item selected
 mchoiceTask		:: Multiple Choice of iTasks, depending on marked checkboxes
 */
+buttonTask		:: String (Task a)		-> (Task a) 			| iCreateAndPrint a
 chooseTask		:: [(String,Task a)] 	-> (Task a) 			| iCreateAndPrint a
 chooseTask_pdm 	:: [(String,Task a)] 	-> (Task a)	 			| iCreateAndPrint a
 mchoiceTasks 	:: [(String,Task a)] 	-> (Task [a]) 			| iCreateAndPrint a
@@ -120,6 +116,13 @@ andTask			:: (Task a,Task b) 		-> (Task (a,b)) 		| iCreateAndPrint a & iCreateAn
 andTasks		:: [(String,Task a)]	-> (Task [a])			| iCreateAndPrint a
 andTasks_mu 	:: String [(Int,Task a)]-> (Task [a]) 			| iData a
 
+/* Do not yet use these tasks when you garbage collect tasks !!
+andTasks_mstone :: do all iTasks in any order (interleaved), task completed when all done
+					but continue with next task as soon as one of the tasks is completed
+					string indicates which task delivered what
+*/
+andTasks_mstone :: [(String,Task a)] 	-> (Task [(String,a)]) 		| iCreateAndPrint a
+
 /* Time and Date management:
 waitForTimeTask	:: Task is done when time has come
 waitForTimerTask:: Task is done when specified amount of time has passed 
@@ -128,6 +131,14 @@ waitForDateTask	:: Task is done when date has come
 waitForTimeTask	:: HtmlTime				-> (Task HtmlTime)
 waitForTimerTask:: HtmlTime				-> (Task HtmlTime)
 waitForDateTask	:: HtmlDate				-> (Task HtmlDate)
+
+/* Do not yet use these tasks when you garbage collect tasks !!
+sharedTask		:: either a finished task or an interrupted Task (when boolean Task yields True) is returned
+				   the work done so far it returned and can be can be continued somewhere else
+*/
+:: TClosure a 	= TClosure (Task a)			
+
+sharedTask 		:: (Task Bool) (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
 
 /* Operations on Task state
 taskId			:: id assigned to task
@@ -150,18 +161,4 @@ appHSt			:: lift HSt domain to TSt domain
 appIData 		:: (IDataFun a) 					-> Task a 			| iData a
 appHSt 			:: (HSt -> (a,HSt)) 				-> Task a			| iData a
 
-/* Experimental section !! 
-The following combinators might be dangerous to use when you garbage collect tasks
-
-andTasks_mstone :: do all  iTasks in any order (interleaved), task completed when all  done
-					but continue with next task as soon as one of the tasks is completed
-					string indicates which task delivered what
-returnableTask	:: task will be stopped when boolean Task yields True
-					the work done so far it returned and can be can be finished elsewhere
-					boolean indicates whether task is stopped or is finished normally
-*/
-
-andTasks_mstone :: [(String,Task a)] 		-> (Task [(String,a)]) 		| iCreateAndPrint a
-
-returnableTask 	:: (Task Bool) (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
 

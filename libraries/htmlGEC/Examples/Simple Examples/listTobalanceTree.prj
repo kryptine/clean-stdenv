@@ -65,9 +65,9 @@ MainModule
 		WindowPosition
 			X:	110
 			Y:	19
-			SizeX:	1123
-			SizeY:	489
-	IclOpen:	False
+			SizeX:	1301
+			SizeY:	786
+	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
 	Module
@@ -5102,6 +5102,8 @@ Static
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\iDataState.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\EncodeDecode.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlTrivial.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
+		Path:	{Application}\Libraries\Directory\Clean System Files\Directory.o
 		Path:	{Application}\Libraries\htmlGEC\graph_copy\Clean System Files\dynamic_string.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicGraphConversion.o
@@ -5117,8 +5119,6 @@ Static
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory_mapped_files.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\memory.o
 		Path:	{Application}\Libraries\Dynamics\implementation\Clean System Files\DynIDMacros.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
-		Path:	{Application}\Libraries\Directory\Clean System Files\Directory.o
 		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherBackend.o
 		Path:	{Application}\Libraries\Hilde\Clean System Files\EstherParser.o
 		Path:	{Application}\Libraries\ExceptionsWindows\Clean System Files\StdException.o

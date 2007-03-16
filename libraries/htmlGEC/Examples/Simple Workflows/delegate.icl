@@ -22,7 +22,23 @@ derive gPrint Maybe
 
 npersons = 5
 
-Start world = doHtmlServer (multiUserTask npersons (delegate mytask2 (Time 0 0 30))) world
+//Start world = doHtmlServer (multiUserTask npersons (delegate mytask2 (Time 0 0 30))) world
+Start world = doHtmlServer (multiUserTask npersons (test mytask2)) world
+
+test :: (Task Int) -> Task Int
+test task 		= newTask "test" (doit task)
+where 
+	
+	doit t		= stop  task =>>  \t -> ifStopped t (\t -> orTask (test t, test t))
+
+	doit2 task	= stop  task =>>  \t -> ifStopped t test
+
+	userStop	= buttonTask "Stop" (return_V True) 				  			
+
+	stop task	= sharedTask userStop task 
+
+	ifStopped (True,TClosure task) alttask 	= alttask task
+	ifStopped (_,   TClosure task) _ 		= task
 
 mytask = editTask "Done" 0
 mytask2 =			editTask "Done1" 0
@@ -41,11 +57,11 @@ where
 	delegateToSomeone task set = newTask "delegateToSet" doDelegate
 	where 
 		doDelegate						
-		  =									orTasks [("Waiting for " <+++ who, who @:: seqTask "I Will Do It" (return_V who)) \\ who <- set]
-			=>> \who 						->	who @:: returnableTask stopIt task	
+		  =									orTasks [("Waiting for " <+++ who, who @:: buttonTask "I Will Do It" (return_V who)) \\ who <- set]
+			=>> \who 						->	who @:: sharedTask stopIt task	
 			=>> \(stopped,TClosure task)	->	if stopped (delegateToSomeone task set) task 
 	
-	userStop 		= seqTask "Stop" (return_V True)					  			
+	userStop 		= buttonTask "Stop" (return_V True)					  			
 	timerStop time	= waitForTimerTask time #>> return_V True
 	
 	stopIt = orTask (timerStop time,userStop)				  			

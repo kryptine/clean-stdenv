@@ -386,9 +386,6 @@ where
 
 internEditSTask tracename prompt task = \tst -> mkTask tracename (editTask` prompt task) tst
 
-buttonTask :: String (Task a) -> (Task a) | iCreateAndPrint a
-buttonTask s task = iCTask_button "seqTask" [(s,task)]
-
 seqTasks :: [(String,Task a)] -> (Task [a])| iCreateAndPrint a
 seqTasks options = mkTask "seqTasks" seqTasks`
 where
@@ -404,6 +401,9 @@ where
 	= doseqTasks ts [a:accu] {tst & html = html +|+ ahtml}
 
 // choose one or more tasks out of a collection
+buttonTask :: String (Task a) -> (Task a) | iCreateAndPrint a
+buttonTask s task = iCTask_button "buttonTask" [(s,task)]
+
 iCTask_button tracename options = mkTask tracename (dochooseTask options)
 
 chooseTask :: [(String,Task a)] -> (Task a) | iCreateAndPrint a
@@ -573,11 +573,6 @@ where
 										(myId -@: allhtml)
 						})
 
-/*
-	# (milestoneReached,_,{hst})	
-						= checkAnyTasks "andTasks_mstone" (map snd options) (0,-1) (False,-1) {tst & html = BT [], hst = hst, trace = trace}
-*/
-
 // skip should be added for task displayed by user....
 checkAllTasks traceid options ctasknr bool alist tst=:{tasknr}
 | ctasknr == length options		= (reverse alist,{tst & activated = bool})
@@ -600,12 +595,10 @@ andTasks_mu taskid tasks = newTask "andTasks_mu" (domu_andTasks tasks)
 where
 	domu_andTasks list tst	= andTasks [(taskid <+++ " " <+++ i, i @:: task) \\ (i,task) <- list] tst
 
-
-
 // very experimental higher order lazy task stuf
 
-returnableTask :: (Task Bool) (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
-returnableTask stoptask task =  mkTask "stopTask" stop`
+sharedTask :: (Task Bool) (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
+sharedTask stoptask task =  mkTask "sharedTask" stop`
 where
 	stop` tst=:{tasknr,html}
 	# stopTaskId = [-1,0:tasknr]
@@ -613,7 +606,7 @@ where
 	# (val,tst=:{activated = jobdone,html = jobhtml}) 			= task     {tst & html = BT [], tasknr = stopTaskId}
 	# (stopped,tst=:{activated = jobstopped,html = stophtml})	= stoptask {tst & activated = True, html = BT [], tasknr = stopBtnId}
 	| jobdone	= return_V (False,TClosure (return_V val)) {tst & html = html +|+ jobhtml, activated = True}
-	| stopped	= return_V (True,TClosure (\tst=:{html} -> task {tst & tasknr = stopTaskId})) {tst & html = html, activated = True}
+	| stopped	= return_V (True,TClosure (\tst -> task {tst & tasknr = stopTaskId})) {tst & html = html, activated = True}
 	= return_V (False,TClosure (return_V val)) {tst & html = html +|+ jobhtml +|+ stophtml}
 
 // time and date related tasks
