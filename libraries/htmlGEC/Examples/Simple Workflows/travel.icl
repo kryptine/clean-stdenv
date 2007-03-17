@@ -17,20 +17,18 @@ Start world = doHtmlServer (singleUserTask (repeatTask travel)) world
 travel :: (Task Void)
 travel 
 = 			[Txt "Book your journey:",Br,Br]
-			?>>	orTask
-					( seqTasks 
-						[	( "Choose Booking options:"
-							, mchoiceTasks	[ ("Book_Flight",BookFlight)
-											, ("Book_Hotel", BookHotel)
-											, ("Book_Car",   BookCar)
-											]
-							)
-						, 	( "Confirm Booking:"
-							, buttonTask "Confirm" (return_V [])
-							)
-						]
-					, buttonTask "Cancel" (return_V [])
-					)
+			?>>	seqTasks	[ ( "Choose Booking options:"
+							  , mchoiceTasks	[ ("Book_Flight",BookFlight)
+												, ("Book_Hotel", BookHotel)
+												, ("Book_Car",   BookCar)
+												]
+							  )
+							, ( "Confirm Booking:"
+							  , buttonTask "Confirm" (return_V [])
+							  )
+							]
+				-||- 
+				buttonTask "Cancel" (return_V [])
 	=>> \booking -> [Txt "Handling bookings:",Br,Br]
 					?>> handleBookings booking
 where

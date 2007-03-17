@@ -58,7 +58,6 @@ taskToReview reviewer (v`,task)
 	task v`               =>> \v ->
 	reviewer @:: review v =>> \r ->
 	[Txt ("Reviewer " <+++ reviewer <+++ " says "),toHtml r,Br] ?>> 
-//	editTask "OK" Void #>>
 	buttonTask "OK" 
 	case r of
 		(NeedsRework _) -> taskToReview reviewer (v,task) 	

@@ -29,7 +29,7 @@ Start world = doHtmlServer (multiUserTask npersons allTasks) world
 allTasks = andTasks_mu "newsGroups" [(0,repeatTask newsManager):[(i,repeatTask newsReader) \\ i <- [1 .. npersons - 1]]]
 
 newsManager
-=	chooseTask 	[("newGroup",  orTask (addNewsGroup, editTask "Cancel" Void))
+=	chooseTask 	[("newGroup",  addNewsGroup -||- editTask "Cancel" Void)
 				,("showGroup", showGroup)
 				]
 where
@@ -40,7 +40,6 @@ where
 		writeNewsGroups (removeDup (sort [newName:oldNames])) #>>
 		return_V Void
 	showGroup
-//	=	readNewsGroups =>> \groups -> PDMenu groups #>> return_V Void
 	=	(readNewsGroups =>> PDMenu) #>> return_V Void
 
 PDMenu list
@@ -50,7 +49,7 @@ PDMenu list
 
 newsReader 
 =	taskId *>> \me ->
-	chooseTask 	[("subscribe",orTask (subscribeNewsGroup me, editTask "Cancel" Void))
+	chooseTask 	[("subscribe", subscribeNewsGroup me -||- editTask "Cancel" Void)
 				,("readNews", readNews me)]
 where
 	OK :: Task Void
@@ -70,19 +69,20 @@ where
 		readNews` group
 	where
 		readNews` "Cancel"=	[Txt "You have not selected a newgroup you are subscribed on!",Br,Br] ?>> OK
-		readNews` group	=	[Txt "You are looking at news group ", B [] group, Br, Br] ?>>
-							orTask	( repeatTask (
-										readIndex me  group =>> \index ->
-										readNewsGroup group =>> \news  ->
-										showNews index (news%(index,index+nmessage-1)) (length news) ?>>
-										chooseTask 	
-											[("<<",			readNextNewsItems me (group,index) (~nmessage) (length news))
-											,("update",		return_V Void)
-											,(">>",			readNextNewsItems me (group,index) nmessage (length news))
-											,("commitNews",	commitItem group me)
-											])
-									, editTask "leaveGroup" Void
-									)
+		readNews` group	=	[Txt "You are looking at news group ", B [] group, Br, Br] 
+							?>>	repeatTask 
+								(	readIndex me  group =>> \index ->
+									readNewsGroup group =>> \news  ->
+									showNews index (news%(index,index+nmessage-1)) (length news) 
+									?>>	chooseTask 	
+										[("<<",			readNextNewsItems me (group,index) (~nmessage) (length news))
+										,("update",		return_V Void)
+										,(">>",			readNextNewsItems me (group,index) nmessage (length news))
+										,("commitNews",	commitItem group me)
+										]
+								)
+								-||-
+								editTask "leaveGroup" Void
 
 	readNextNewsItems :: Subscriber Subscription Int Int -> Task Void
 	readNextNewsItems  me (group,index) offset length
@@ -92,8 +92,8 @@ where
 
 	commitItem :: GroupName Subscriber -> Task Void
 	commitItem group me 
-	=	[Txt "Type your message ..."] ?>>
-		editTask "Commit" (TextArea 4 80 "") <<@ Submit =>>	\(TextArea _ _ val) -> 	
+	=	[Txt "Type your message ..."] 
+		?>>	editTask "Commit" (TextArea 4 80 "") <<@ Submit =>>	\(TextArea _ _ val) -> 	
 		readNewsGroup  group =>> \news ->	
 		writeNewsGroup group (news ++ [(me,val)]) #>>
 		[Txt "Message commited to news group ",B [] group, Br,Br] ?>> OK

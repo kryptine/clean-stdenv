@@ -205,7 +205,7 @@ where
 	return_VF` tst
 	= (a,{tst & html = tst.html +|+ BT bodytag})
 
-(<|) infix 3 :: (Task a) (a -> .Bool, a -> String) -> Task a | iCreate a
+(<|) infix 6 :: (Task a) (a -> .Bool, a -> String) -> Task a | iCreate a
 (<|) taska (pred,message) = doTask
 where
 	doTask tst=:{html = ohtml,activated}
@@ -222,7 +222,7 @@ where
 	# (a,tst) = task (setTaskAttr attr tst)
 	= (a,{tst & storageInfo = storageInfo})
 
-(?>>) infix 2 :: [BodyTag] (Task a) -> (Task a)
+(?>>) infix 5 :: [BodyTag] (Task a) -> (Task a)
 (?>>) prompt task = doTask
 where
 	doTask tst=:{html=ohtml,activated=myturn}
@@ -230,7 +230,7 @@ where
 	| activated || not myturn= (a,{tst & html = ohtml})
 	= (a,{tst & html = ohtml +|+ BT prompt +|+ nhtml})
 
-(!>>) infix 2 :: [BodyTag] (Task a) -> (Task a) | iCreate a
+(!>>) infix 5 :: [BodyTag] (Task a) -> (Task a) | iCreate a
 (!>>) prompt task = doTask
 where
 	doTask tst=:{html=ohtml,activated=myturn}
@@ -353,7 +353,7 @@ where
 
 // assigning tasks to users, each user is identified by a number
 
-(@:) infix 4 :: !(!String,!Int) (Task a)	-> (Task a)			| iCreate a
+(@:) infix 3 :: !(!String,!Int) (Task a)	-> (Task a)			| iCreate a
 (@:) (taskname,userId) taska = \tst=:{myId} -> assignTask` myId {tst & myId = userId}
 where
 	assignTask` myId tst=:{html=ohtml,activated}
@@ -368,7 +368,7 @@ where
 						BT [Br, Txt ("Waiting for Task "), yellow taskname, Txt " from ", showUser userId,Br] +|+ 
 						((userId,taskname) @@: BT [Txt "Requested by ", showUser myId,Br,Br] +|+ nhtml)})				// combine html code, filter later					
 
-(@::) infix 4 :: !Int (Task a)	-> (Task a)			| iCreate  a
+(@::) infix 3 :: !Int (Task a)	-> (Task a)			| iCreate  a
 (@::) userId taska = \tst=:{myId} -> assignTask` myId {tst & myId = userId}
 where
 	assignTask` myId tst=:{html,activated}
@@ -464,7 +464,7 @@ where
 // tasks ending as soon as one of its subtasks completes
 
 
-(-||-) infixr 5 :: (Task a) (Task a) -> (Task a) | iCreateAndPrint a
+(-||-) infixr 3 :: (Task a) (Task a) -> (Task a) | iCreateAndPrint a
 (-||-) taska taskb = mkTask "-||-" (doOrTask (taska,taskb))
 
 orTask :: (Task a,Task a) -> (Task a) | iCreateAndPrint a
@@ -515,7 +515,7 @@ where
 
 // Parallel tasks ending if all complete
 
-(-&&-) infixr 6 ::  (Task a) (Task b) -> (Task (a,b)) | iCreateAndPrint a & iCreateAndPrint b
+(-&&-) infixr 4 ::  (Task a) (Task b) -> (Task (a,b)) | iCreateAndPrint a & iCreateAndPrint b
 (-&&-) taska taskb = mkTask "-&&-" (doAndTask (taska,taskb))
 
 andTask :: (Task a,Task b) -> (Task (a,b)) | iCreateAndPrint a & iCreateAndPrint b

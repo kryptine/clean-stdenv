@@ -53,9 +53,9 @@ return_VF		:: return the value and show the Html code specified
 return_D		:: return the value and show it in iData display format
 */
 
-(?>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a
-(!>>) infix  2 	:: [BodyTag] (Task a) 		-> Task a			| iCreate a
-(<|)  infix  3 	:: (Task a) (a -> .Bool, a -> String) -> Task a | iCreate a
+(?>>) infix  5 	:: [BodyTag] (Task a) 		-> Task a
+(!>>) infix  5 	:: [BodyTag] (Task a) 		-> Task a			| iCreate a
+(<|)  infix  6 	:: (Task a) (a -> .Bool, a -> String) -> Task a | iCreate a
 return_VF 		:: a [BodyTag] 		  		-> Task a			| iCreateAndPrint a
 return_D		:: a 						-> Task a			| gForm {|*|}, iCreateAndPrint a
 
@@ -63,8 +63,8 @@ return_D		:: a 						-> Task a			| gForm {|*|}, iCreateAndPrint a
 (@:)			:: will prompt who is waiting for task with give name
 (@::)			:: same, default task name given
 */
-(@:)  infix 4 	:: !(!String,!Int) (Task a)	-> (Task a)			| iCreate a
-(@::) infix 4 	:: !Int (Task a)		    -> (Task a)			| iCreate a
+(@:)  infix 3 	:: !(!String,!Int) (Task a)	-> (Task a)			| iCreate a
+(@::) infix 3 	:: !Int (Task a)		    -> (Task a)			| iCreate a
 
 /* Promote any TSt state transition function to an iTask:
 newTask			:: to promote a user defined function to as task which is (possibly recursively) called when activated
@@ -105,7 +105,7 @@ orTask2			:: do both iTasks in any order, task completed and ends as soon as fir
 orTasks			:: do all  iTasks in any order, task completed and ends as soon as first one done
 */
 orTask 			:: (Task a,Task a) 		-> (Task a) 			| iCreateAndPrint a
-(-||-) infixr 5 :: (Task a) (Task a) 	-> (Task a) 			| iCreateAndPrint a
+(-||-) infixr 3 :: (Task a) (Task a) 	-> (Task a) 			| iCreateAndPrint a
 orTask2			:: (Task a,Task b) 		-> (Task (EITHER a b)) 	| iCreateAndPrint a & iCreateAndPrint b
 orTasks			:: [(String,Task a)] 	-> (Task a)				| iCreateAndPrint a 
 
@@ -116,7 +116,7 @@ andTasks		:: do all  iTasks in any order (interleaved), task completed when all 
 andTasks_mu		:: assign task to indicated users, task completed when all done
 */
 andTask			:: (Task a,Task b) 		-> (Task (a,b)) 		| iCreateAndPrint a & iCreateAndPrint b
-(-&&-) infixr 6 :: (Task a) (Task b) 	-> (Task (a,b)) 		| iCreateAndPrint a & iCreateAndPrint b
+(-&&-) infixr 4 :: (Task a) (Task b) 	-> (Task (a,b)) 		| iCreateAndPrint a & iCreateAndPrint b
 andTasks		:: [(String,Task a)]	-> (Task [a])			| iCreateAndPrint a
 andTasks_mu 	:: String [(Int,Task a)]-> (Task [a]) 			| iData a
 

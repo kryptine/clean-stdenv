@@ -15,14 +15,13 @@ Start world = doHtmlServer (multiUserTask npersons findDate) world
 
 findDate :: Task (HtmlDate,HtmlTime)
 findDate
-=	[Txt "Choose person you want to date:",Br] ?>>
-	editTask "Set" (PullDown (1,100) (0,[toString i \\ i <- [1..npersons]])) =>> \whomPD ->
+=	[Txt "Choose person you want to date:",Br] 
+	?>>	editTask "Set" (PullDown (1,100) (0,[toString i \\ i <- [1..npersons]])) =>> \whomPD ->
 	let whom = toInt(toString whomPD)
 	in
-	[Txt "Determining date:",Br,Br] ?>>
-	findDate` whom (Date 1 1 2007,Time 9 0 0) =>> \datetime	->
-	[] ?>>
-	andTask (confirm 0 whom datetime,confirm whom 0 datetime) #>>
+	[Txt "Determining date:",Br,Br] 
+	?>>	findDate` whom (Date 1 1 2007,Time 9 0 0) =>> \datetime	->
+	[] ?>> confirm 0 whom datetime -&&- confirm whom 0 datetime #>>
 	return_V datetime
 where
 	findDate` :: Int (HtmlDate,HtmlTime) -> Task (HtmlDate,HtmlTime)
@@ -37,8 +36,8 @@ where
 	where
 		proposeDateTime :: (HtmlDate,HtmlTime) -> Task (HtmlDate,HtmlTime)
 		proposeDateTime (date,time)
-		=	[Txt "Propose a new date and time for meeting",Br,Br] ?>>
-			editTask "Set" input =>> \(_,date,_,time) -> 
+		=	[Txt "Propose a new date and time for meeting",Br,Br] 
+			?>>	editTask "Set" input =>> \(_,date,_,time) -> 
 			return_V (date,time)
 		where
 			input = (showHtml [Txt "date: "], date, showHtml [Txt "time: "], time)
@@ -53,13 +52,13 @@ where
 
 		isOkDateTime :: (HtmlDate,HtmlTime) -> Task Bool
 		isOkDateTime (date,time)
-		=	[Txt ("Can we meet on the " <+++ date <+++ " at " <+++ time <+++ "?"),Br] ?>>
-			chooseTask	 [ ("Accept",return_V True)
-						 , ("Sorry", return_V False)
-						 ]
+		=	[Txt ("Can we meet on the " <+++ date <+++ " at " <+++ time <+++ "?"),Br] 
+			?>>	chooseTask	[ ("Accept",return_V True)
+						 	, ("Sorry", return_V False)
+						 	]
 
 	confirm  :: Int Int (HtmlDate,HtmlTime) -> Task Void 
 	confirm me you (date,time)
-	= 	me @::	( 	[Txt ("User " <+++ me <+++ " and " <+++ you <+++ " have a meeting on " <+++ date <+++ " at " <+++ time),Br,Br] ?>>
-					editTask "OK" Void
-				)
+	= 	me @::	[Txt ("User " <+++ me <+++ " and " <+++ you <+++ " have a meeting on " <+++ date <+++ " at " <+++ time),Br,Br] 
+				?>>	editTask "OK" Void
+				

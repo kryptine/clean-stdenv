@@ -9,13 +9,28 @@ import StdEnv, StdHtml
 // Known bugs 
 // -> an andTask should skip to add html code of the task being selected by the user
 
+derive gUpd []
+derive gForm []
+
 Start world = doHtmlServer (multiUserTask 9 (/*repeatTask*/ simpleMile)) world
 
-simpleMile = show( andTasks_mstone [("task " <+++ i,simple) \\ i <- [0..2]])
 
 // the following obscure tasks have been tested succesfully
 
-// milestones
+// closure task test
+testClosure :: (Task Int) -> Task Int
+testClosure task 		= newTask "test" (doit task)
+where 
+	doit t		= stop  task =>>  \t -> ifStopped t (\t -> orTask (testClosure t, testClosure t))
+	doit2 task	= stop  task =>>  \t -> ifStopped t testClosure
+	userStop	= buttonTask "Stop" (return_V True) 				  			
+	stop task	= closureTask userStop task 
+	ifStopped (True,TClosure task) alttask 	= alttask task
+	ifStopped (_,   TClosure task) _ 		= task
+
+
+// mile stone task
+simpleMile = show( andTasks_mstone [("task " <+++ i,simple) \\ i <- [0..2]])
 
 // andTask tests
 simpleAnd 	= show( andTasks [("task " <+++ i,simple) \\ i <- [0..3]])
@@ -50,20 +65,3 @@ show task			= task =>> \v -> return_D v
 simple  			= editTask "OK" 0
 simple2 n 			= [Txt "Fill in integer value:"] ?>> editTask "OK" n
 
-// stop Editors test
-myStop 				= stopMe simple
-stopMe v 			= newTask "Oeps" (stopTask v =>> \(stopped,TClosure v) -> if stopped (stopMe v) v)
-
-
-
-
-derive gForm []
-derive gUpd []
-
-test 
-= 	
-	andTask
-			(	("number 1",1) @: (editTask "Set" 1 =>> \v -> editTask "Set" (v,0))
-			, 	("number 2",1) @: (editTask "Set" 2 =>> \v -> editTask "Set" (v,0))
-			)
-	=>> \((a1,a2),(b1,b2)) -> return_V (a1+b1,a2+b2)

@@ -14,12 +14,10 @@ derive gUpd  []
 Start world = doHtmlServer (multiUserTask 2 listControl) world
 
 listControl
-=	[Txt "Define the list:",Br,Br] ?>>
-	appIData (vertlistFormButs 5 True (Init,sFormId "list0" [0])) =>> \list ->	
-	[] ?>>
+=	[Txt "Define the list:",Br,Br] 
+	?>>	appIData (vertlistFormButs 5 True (Init,sFormId "list0" [0])) =>> \list ->	
 	("Control List:",1) 
-	@:(	[Txt "Control the list:",Br,Br] ?>>
-		appIData (vertlistFormButs 1 True (Init,sFormId "list1" list))
-	  ) =>> \list ->
-	[Txt "sum of list = ",Br,Br] ?>>
-	editTask "OK" (DisplayMode (sum list))		 
+	@:	[Txt "Check the list:",Br,Br] 
+		?>>	appIData (vertlistFormButs 1 True (Init,sFormId "list1" list))=>> \list ->
+	[Txt "sum of list = ",Br,Br] 
+	?>>	editTask "OK" (DisplayMode (sum list))		 

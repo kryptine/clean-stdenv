@@ -21,28 +21,27 @@ mytask = editTask "OK" 0 <| ((<) 23,\n -> "Error " <+++ n <+++ " should be large
 
 deadline :: (Task a) -> (Task a) | iData a
 deadline task
-=	[Txt "Choose person you want to delegate work to:",Br,Br] ?>>
-	editTask "Set" (PullDown (1,100) (0,map toString [1..npersons])) =>> \whomPD ->	
-	[Txt "How long do you want to wait?",Br,Br] ?>>
-	editTask "SetTime" (Time 0 0 0) =>> \time ->
-	[Txt "Cancel delegated work if you are getting impatient:",Br,Br] ?>>
-	orTask
-		(	delegateTask (toInt(toString whomPD)) time task
-		, 	buttonTask "Cancel" (return_V (False,createDefault))
-		) =>> \(ok,value) ->
-	if ok
-		(	[Txt ("Result of task: " +++ printToString value),Br,Br] ?>>
-			buttonTask "OK" (return_V value)
-		)
-		(	[Txt "Task expired or canceled, you have to do it yourself!",Br,Br] ?>>
-			buttonTask "OK" task
-		)
+=	[Txt "Choose person you want to delegate work to:",Br,Br] 
+	?>>	editTask "Set" (PullDown (1,100) (0,map toString [1..npersons])) =>> \whomPD ->	
+	[Txt "How long do you want to wait?",Br,Br] 
+	?>>	editTask "SetTime" (Time 0 0 0) =>> \time ->
+	[Txt "Cancel delegated work if you are getting impatient:",Br,Br] 
+	?>> delegateTask (toInt(toString whomPD)) time task
+		-||-
+		buttonTask "Cancel" (return_V (False,createDefault))=>> CheckDone
 where
+	CheckDone (ok,value)
+	| ok =	[Txt ("Result of task: " +++ printToString value),Br,Br] 
+			?>>	buttonTask "OK" (return_V value)
+	=		[Txt "Task expired or canceled, you have to do it yourself!",Br,Br] 
+			?>>	buttonTask "OK" task
+
 	delegateTask who time task
 	= 	("Timed Task",who) 	
-		@:orTask	
-			(	waitForTimerTask time #>> 								// wait for deadline
-				return_V (False,createDefault)							// return default value
-			, 	[Txt ("Please finish task before" <+++ time),Br,Br] ?>>	// tell deadline
-				(task =>> \v -> return_V (True,v))						// do task and return its result
-			) 
+		@: 	waitForTimerTask time #>> 								// wait for deadline
+			return_V (False,createDefault)							// return default value
+			-||-
+			[Txt ("Please finish task before" <+++ time),Br,Br] 	// tell deadline
+			?>> (task =>> \v -> return_V (True,v))					// do task and return its result
+			
+
