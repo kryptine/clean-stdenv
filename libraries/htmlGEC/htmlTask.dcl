@@ -100,23 +100,27 @@ mchoiceTasks 	:: [(String,Task a)] 	-> (Task [a]) 			| iCreateAndPrint a
 
 /* Do m Tasks parallel / interleaved and FINISH as soon as SOME Task completes:
 orTask			:: do both iTasks in any order, task completed and ends as soon as first one done
+(-||-)			:: same, now as infix combinator
 orTask2			:: do both iTasks in any order, task completed and ends as soon as first one done
 orTasks			:: do all  iTasks in any order, task completed and ends as soon as first one done
 */
 orTask 			:: (Task a,Task a) 		-> (Task a) 			| iCreateAndPrint a
+(-||-) infixr 5 :: (Task a) (Task a) 	-> (Task a) 			| iCreateAndPrint a
 orTask2			:: (Task a,Task b) 		-> (Task (EITHER a b)) 	| iCreateAndPrint a & iCreateAndPrint b
 orTasks			:: [(String,Task a)] 	-> (Task a)				| iCreateAndPrint a 
 
 /* Do Tasks parallel / interleaved and FINISH when ALL Tasks done:
 andTask			:: do both iTasks in any order (interleaved), task completed when both done
+(-&&-)			:: same, now as infix combinator
 andTasks		:: do all  iTasks in any order (interleaved), task completed when all  done
 andTasks_mu		:: assign task to indicated users, task completed when all done
 */
 andTask			:: (Task a,Task b) 		-> (Task (a,b)) 		| iCreateAndPrint a & iCreateAndPrint b
+(-&&-) infixr 6 :: (Task a) (Task b) 	-> (Task (a,b)) 		| iCreateAndPrint a & iCreateAndPrint b
 andTasks		:: [(String,Task a)]	-> (Task [a])			| iCreateAndPrint a
 andTasks_mu 	:: String [(Int,Task a)]-> (Task [a]) 			| iData a
 
-/* Do not yet use these tasks when you garbage collect tasks !!
+/* Do not yet use when you garbage collect tasks !!
 andTasks_mstone :: do all iTasks in any order (interleaved), task completed when all done
 					but continue with next task as soon as one of the tasks is completed
 					string indicates which task delivered what
@@ -132,13 +136,13 @@ waitForTimeTask	:: HtmlTime				-> (Task HtmlTime)
 waitForTimerTask:: HtmlTime				-> (Task HtmlTime)
 waitForDateTask	:: HtmlDate				-> (Task HtmlDate)
 
-/* Do not yet use these tasks when you garbage collect tasks !!
-sharedTask		:: either a finished task or an interrupted Task (when boolean Task yields True) is returned
+/* Do not yet when you garbage collect tasks !!
+closureTask		:: either a finished task or an interrupted Task (when boolean Task yields True) is returned
 				   the work done so far it returned and can be can be continued somewhere else
 */
 :: TClosure a 	= TClosure (Task a)			
 
-sharedTask 		:: (Task Bool) (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
+closureTask 		:: (Task Bool) (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
 
 /* Operations on Task state
 taskId			:: id assigned to task

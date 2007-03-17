@@ -463,19 +463,23 @@ where
 
 // tasks ending as soon as one of its subtasks completes
 
+
+(-||-) infixr 5 :: (Task a) (Task a) -> (Task a) | iCreateAndPrint a
+(-||-) taska taskb = mkTask "-||-" (doOrTask (taska,taskb))
+
 orTask :: (Task a,Task a) -> (Task a) | iCreateAndPrint a
-orTask (taska,taskb) = mkTask "orTask" (doorTask (taska,taskb))
-where
-	doorTask (taska,taskb) tst=:{tasknr,html}
-	# (a,tst=:{activated=adone,html=ahtml})	= mkParSubTask "orTask" 0 taska {tst & html = BT []}
-	# (b,tst=:{activated=bdone,html=bhtml})	= mkParSubTask "orTask" 1 taskb {tst & tasknr = tasknr, html = BT []}
-	# (aorb,aorbdone,myhtml)				= if adone (a,adone,ahtml) (if bdone (b,bdone,bhtml) (a,False,ahtml +|+ bhtml))
-	= (aorb,{tst & activated = aorbdone, html = html +|+ myhtml})
+orTask (taska,taskb) = mkTask "orTask" (doOrTask (taska,taskb))
+
+doOrTask (taska,taskb) tst=:{tasknr,html}
+# (a,tst=:{activated=adone,html=ahtml})	= mkParSubTask "orTask" 0 taska {tst & html = BT []}
+# (b,tst=:{activated=bdone,html=bhtml})	= mkParSubTask "orTask" 1 taskb {tst & tasknr = tasknr, html = BT []}
+# (aorb,aorbdone,myhtml)				= if adone (a,adone,ahtml) (if bdone (b,bdone,bhtml) (a,False,ahtml +|+ bhtml))
+= (aorb,{tst & activated = aorbdone, html = html +|+ myhtml})
 
 orTask2 :: (Task a,Task b) -> (Task (EITHER a b)) | iCreateAndPrint a & iCreateAndPrint b
-orTask2 (taska,taskb) = mkTask "orTask2" (doorTask (taska,taskb))
+orTask2 (taska,taskb) = mkTask "orTask2" (doorTask2 (taska,taskb))
 where
-	doorTask (taska,taskb) tst=:{tasknr,html}
+	doorTask2 (taska,taskb) tst=:{tasknr,html}
 	# (a,tst=:{activated=adone,html=ahtml})	= mkParSubTask "orTask" 0 taska {tst & html = BT []}
 	# (b,tst=:{activated=bdone,html=bhtml})	= mkParSubTask "orTask" 1 taskb {tst & tasknr = tasknr, html = BT []}
 	# (aorb,aorbdone,myhtml)				= if adone (LEFT a,adone,ahtml) (if bdone (RIGHT b,bdone,bhtml) (LEFT a,False,ahtml +|+ bhtml))
@@ -507,6 +511,20 @@ where
 												(myId -@: allhtml)
 							})
 	= (a,{tst & activated = adone, html = html}) 
+
+
+// Parallel tasks ending if all complete
+
+(-&&-) infixr 6 ::  (Task a) (Task b) -> (Task (a,b)) | iCreateAndPrint a & iCreateAndPrint b
+(-&&-) taska taskb = mkTask "-&&-" (doAndTask (taska,taskb))
+
+andTask :: (Task a,Task b) -> (Task (a,b)) | iCreateAndPrint a & iCreateAndPrint b
+andTask (taska,taskb) = mkTask "andTask" (doAndTask (taska,taskb))
+
+doAndTask (taska,taskb) tst=:{tasknr,html}
+# (a,tst=:{activated=adone,html=ahtml})	= mkParSubTask "andTask" 0 taska {tst & html = BT []}
+# (b,tst=:{activated=bdone,html=bhtml})	= mkParSubTask "andTask" 1 taskb {tst & tasknr = tasknr, html = BT []}
+= ((a,b),{tst & activated = adone&&bdone, html = html +|+ ahtml +|+ bhtml})
 
 andTasks :: [(String,Task a)] -> (Task [a]) | iCreateAndPrint a
 andTasks options = mkTask "andTasks" (doandTasks options)
@@ -580,16 +598,6 @@ checkAllTasks traceid options ctasknr bool alist tst=:{tasknr}
 # (a,tst=:{activated = adone})	= mkParSubTask traceid ctasknr task {tst & tasknr = tasknr, activated = True}
 = checkAllTasks traceid options (inc ctasknr) (bool&&adone) [(taskname,a):alist] {tst & tasknr = tasknr, activated = True}
 
-// Parallel tasks ending if all complete
-
-andTask :: (Task a,Task b) -> (Task (a,b)) | iCreateAndPrint a & iCreateAndPrint b
-andTask (taska,taskb) = mkTask "andTask" (doandTask (taska,taskb))
-where
-	doandTask (taska,taskb) tst=:{tasknr,html}
-	# (a,tst=:{activated=adone,html=ahtml})	= mkParSubTask "andTask" 0 taska {tst & html = BT []}
-	# (b,tst=:{activated=bdone,html=bhtml})	= mkParSubTask "andTask" 1 taskb {tst & tasknr = tasknr, html = BT []}
-	= ((a,b),{tst & activated = adone&&bdone, html = html +|+ ahtml +|+ bhtml})
-
 andTasks_mu :: String [(Int,Task a)] -> (Task [a]) | iData a
 andTasks_mu taskid tasks = newTask "andTasks_mu" (domu_andTasks tasks)
 where
@@ -597,8 +605,8 @@ where
 
 // very experimental higher order lazy task stuf
 
-sharedTask :: (Task Bool) (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
-sharedTask stoptask task =  mkTask "sharedTask" stop`
+closureTask :: (Task Bool) (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
+closureTask stoptask task =  mkTask "sharedTask" stop`
 where
 	stop` tst=:{tasknr,html}
 	# stopTaskId = [-1,0:tasknr]
@@ -792,8 +800,8 @@ where
 	pr _ Nothing 			= []
 	pr dprev (Just (dtask,(w,i,tn,s)))	
 	| dprev && (not dtask)	= pr False Nothing	// subtask not important anymore (assume no milestone tasks)
-	| not dtask				= showTask cellattr1b White Navy Maroon Silver (w,i,tn,s)
-	= showTask cellattr1a White Yellow Red White (w,i,tn,s)
+	| not dtask				= showTask2 cellattr1b White Navy Maroon Silver (w,i,tn,s)
+	= showTask2 cellattr1a White Yellow Red White (w,i,tn,s)
 	
 	showTask2 attr1 c1 c2 c3 c4 (w,i,tn,s)
 	= [Table doneBackground 	[ Tr [] [Td attr1 [font c1 (toString (last (reverse i)))],	Td cellattr2 [font c2 tn]]

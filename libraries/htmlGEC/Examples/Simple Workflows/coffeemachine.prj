@@ -1,6 +1,6 @@
 Version: 1.4
 Global
-	Built:	True
+	Built:	False
 	Target:	Web Applications
 	Exec:	{Project}\coffeemachine.exe
 	CodeGen
@@ -56,10 +56,10 @@ MainModule
 	DclOpen:	False
 	Icl
 		WindowPosition
-			X:	125
-			Y:	4
-			SizeX:	901
-			SizeY:	479
+			X:	128
+			Y:	3
+			SizeX:	923
+			SizeY:	581
 	IclOpen:	True
 	LastModified:	No 0 0 0 0 0 0
 OtherModules
@@ -83,14 +83,14 @@ OtherModules
 				Y:	30
 				SizeX:	929
 				SizeY:	624
-		DclOpen:	True
+		DclOpen:	False
 		Icl
 			WindowPosition
 				X:	10
 				Y:	10
 				SizeX:	991
 				SizeY:	640
-		IclOpen:	True
+		IclOpen:	False
 		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdArrow
@@ -2900,7 +2900,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -2917,7 +2917,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -2934,7 +2934,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -3002,7 +3002,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -3019,7 +3019,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -3036,7 +3036,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -3053,7 +3053,7 @@ OtherModules
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
 			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
+			ListTypes:	NoTypes
 			ListAttributes:	True
 			Warnings:	True
 			Verbose:	True
@@ -3320,10 +3320,6 @@ Static
 		Path:	{Application}\Libraries\Generics\Clean System Files\GenLexOrd.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlButtons.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\httpSubServer.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdListExtensions.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLib.o
-		Path:	{Application}\Libraries\htmlGEC\Clean System Files\httpUtil.o
 		Path:	{Application}\Libraries\Tcp\Clean System Files\StdStringChannels.o
 		Path:	{Application}\Libraries\Tcp\Clean System Files\StdEventTCP.o
 		Path:	{Application}\Libraries\Tcp\Clean System Files\ostcp.o
@@ -3408,6 +3404,10 @@ Static
 		Path:	{Application}\Libraries\Tcp\Clean System Files\tcp.o
 		Path:	{Application}\Libraries\Tcp\Clean System Files\StdChannels.o
 		Path:	{Application}\Libraries\Tcp\Clean System Files\StdTCP.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdArrayExtensions.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdListExtensions.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLib.o
+		Path:	{Application}\Libraries\htmlGEC\Clean System Files\httpUtil.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\httpServer.o
 		Path:	{Application}\Libraries\Generics\Clean System Files\_Array.o
 		Path:	{Application}\Libraries\Generics\Clean System Files\GenMap.o
@@ -3433,8 +3433,8 @@ Static
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\DynamicGraphConversion.o
 		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdDynamic.o
 		Path:	{Application}\Libraries\htmlGEC\graph_copy\Clean System Files\dynamic_string.o
-		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
 		Path:	{Application}\Libraries\Directory\Clean System Files\Directory.o
+		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlTrivial.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\EncodeDecode.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\iDataState.o
@@ -3447,9 +3447,9 @@ Static
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnumStrict.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemStrictLists.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdStrictLists.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
 		Path:	{Application}\Libraries\Gerda\Clean System Files\odbccp.o
 		Path:	{Application}\Libraries\Gerda\Clean System Files\odbc.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdMaybe.o
 		Path:	{Application}\Libraries\Gerda\Clean System Files\Gerda.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdGeneric.o
@@ -3458,28 +3458,28 @@ Static
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlDataDef.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlHandler.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\htmlSettings.o
-		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
-		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnv.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdBool.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdInt.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdMisc.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdChar.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdClass.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdArray.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemArray.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdReal.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdString.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFile.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdList.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnum.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnum.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOrdList.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdTuple.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdCharList.o
-		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\StdHtml.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFunc.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdCharList.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdTuple.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOrdList.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemEnum.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnum.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdList.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdFile.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdString.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdReal.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\_SystemArray.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdArray.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdClass.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdChar.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdMisc.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdInt.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdBool.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdEnv.o
+		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdOverloaded.o
+		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\_SystemDynamic.o
+		Path:	{Application}\Libraries\Dynamics\extension\Clean System Files\StdCleanTypes.o
 		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.o
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\SUBSERVER.OBJ
 		Path:	{Application}\Libraries\htmlGEC\Clean System Files\CFUNCLIB.OBJ
@@ -3563,5 +3563,5 @@ Static
 		Path:	{Application}\Libraries\Hilde\Parser combinators 2002
 		Path:	{Application}\Libraries\ExceptionsWindows
 		Path:	{Application}\Libraries\WrapDebug
-	AppP:	D:\Clean\Clean2.2
-	PrjP:	D:\Clean\Clean2.2\Libraries\htmlGEC\Examples\Simple Workflows
+	AppP:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1
+	PrjP:	C:\Documents and Settings\rinus\Bureaublad\Current Work\Clean 2.1.1\Libraries\htmlGEC\Examples\Simple Workflows
