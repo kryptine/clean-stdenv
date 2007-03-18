@@ -137,12 +137,15 @@ waitForTimerTask:: HtmlTime				-> (Task HtmlTime)
 waitForDateTask	:: HtmlDate				-> (Task HtmlDate)
 
 /* Do not yet when you garbage collect tasks !!
-closureTask		:: either a finished task or an interrupted Task (when boolean Task yields True) is returned
-				   the work done so far it returned and can be can be continued somewhere else
+-!>				:: a task, either finished or interrupted (by completion of the first task) is returned in the closure
+				   if interrupted, the work done so far is returned and can be can be continued somewhere else
+channel			:: splits a task in respectively a sender task and receiver task; the sender can be edited as usual. 
+				   When the sender task is finshed the receiver task gets its result and is finished as well.
 */
 :: TClosure a 	= TClosure (Task a)			
 
-(-!>) infix 4 	:: (Task s) (Task a) -> (Task (Maybe s,TClosure a)) | iCreateAndPrint s & iCreateAndPrint a
+(-!>) infix 4 	:: (Task stop) (Task a) -> (Task (Maybe stop,TClosure a)) | iCreateAndPrint stop & iCreateAndPrint a
+channel  		:: String (Task a) 		-> (Task (TClosure a,TClosure a)) | iCreateAndPrint a
 
 /* Operations on Task state
 taskId			:: id assigned to task

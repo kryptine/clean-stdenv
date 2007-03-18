@@ -620,6 +620,24 @@ where
 		stopTaskId 		= [-1,0:tasknr]
 		normalTaskId  	= [-1,1:tasknr]
 
+channel  :: String (Task a) -> (Task (TClosure a,TClosure a)) | iCreateAndPrint a
+channel name task =  mkTask "channel" doSplit
+where
+	doSplit tst=:{tasknr}
+	= return_V (TClosure (hclose task),TClosure (close task)) tst
+	where
+		close  task = \tst -> task {tst & tasknr = tasknr}
+		hclose task = \tst -> nohtml task {tst & tasknr = tasknr}
+		
+		nohtml task tst
+		# (val,tst=:{activated}) = task tst
+		| activated	= (val,{tst & html = BT []})
+		= (val,{tst & html = BT [Txt ("Waiting for completion of "<+++ name)]})
+
+		hiddenTaskId 	= [-1,0:tasknr]
+		normalTaskId  	= [-1,1:tasknr]
+
+
 // time and date related tasks
 
 waitForTimeTask:: HtmlTime	-> (Task HtmlTime)
