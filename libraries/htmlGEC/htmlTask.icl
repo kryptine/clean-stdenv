@@ -606,7 +606,7 @@ where
 // very experimental higher order lazy task stuf
 
 (-!>) infix 4  :: (Task s) (Task a) -> (Task (Maybe s,TClosure a)) | iCreateAndPrint s & iCreateAndPrint a
-(-!>)  stoptask task =  mkTask "sharedTask" stop`
+(-!>)  stoptask task =  mkTask "-!>" stop`
 where
 	stop` tst=:{tasknr,html}
 	# (val,tst=:{activated = taskdone,html = taskhtml}) = task     {tst & activated = True, html = BT [], tasknr = normalTaskId}

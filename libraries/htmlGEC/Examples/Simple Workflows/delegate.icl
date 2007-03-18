@@ -13,8 +13,6 @@ import StdEnv, htmlTask, htmlTrivial
 // The one who accepts can *continue* the work already done so far
 // This process can be repeated as many times one likes until finally the task is finished
 
-// When the timer goes, the whole process is repeated from scratch and the task performed so far is lossed.
-// To make this work an additional combinator is needed. Work to do.
 
 derive gForm [], Maybe
 derive gUpd [], Maybe
@@ -22,7 +20,7 @@ derive gPrint Maybe
 
 npersons = 5
 
-Start world = doHtmlServer (multiUserTask npersons (delegate mytask2 (Time 0 0 30))) world
+Start world = doHtmlServer (multiUserTask npersons (delegate mytask2 (Time 0 3 0))) world
 
 mytask = editTask "Done" 0
 mytask2 =	editTask "Done1" 0 =>> \v1 ->	
@@ -42,14 +40,15 @@ where
 	where 
 		doDelegate						
 		 =	orTasks [("Waiting for " <+++ who, who @:: buttonTask "I Will Do It" (return_V who)) \\ who <- set]	=>> \who ->	
-			who @:: userStop -!> task =>> \(stopped,TClosure task) -> 
+			who @:: stopTask2 -!> task =>> \(stopped,TClosure task) -> 
 		 	if (isJust stopped) (delegateToSomeone task set) task   
 	
-		userStop 		= buttonTask "Stop" (return_V True)					  			
+		stopTask 		= buttonTask "Stop" (return_V True)					  			
+
+		stopTask2		= stopTask -||- timerStop time -||- (0 @:: stopTask)	
 
 		timerStop time	= waitForTimerTask time #>> return_V True
 	
-		stopIt 			= timerStop time -||- userStop				  			
 						  			
 
 determineSet set = newTask "determineSet" determineSet`
