@@ -4,10 +4,10 @@ implementation module htmlTask
 
 import StdEnv, StdHtml
 
-derive gForm 	[], Void
-derive gUpd 	[], Void
-derive gParse 	Void
-derive gPrint 	Void
+derive gForm 	[], Void, Maybe
+derive gUpd 	[], Void, Maybe
+derive gParse 	Void, Maybe
+derive gPrint 	Void, Maybe
 derive gerda 	Void
 
 :: *TSt 		=	{ tasknr 		:: ![Int]			// for generating unique form-id's
@@ -605,17 +605,20 @@ where
 
 // very experimental higher order lazy task stuf
 
-closureTask :: (Task Bool) (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
-closureTask stoptask task =  mkTask "sharedTask" stop`
+(-!>) infix 4  :: (Task s) (Task a) -> (Task (Maybe s,TClosure a)) | iCreateAndPrint s & iCreateAndPrint a
+(-!>)  stoptask task =  mkTask "sharedTask" stop`
 where
 	stop` tst=:{tasknr,html}
-	# stopTaskId = [-1,0:tasknr]
-	# stopBtnId  = [-1,1:tasknr]
-	# (val,tst=:{activated = jobdone,html = jobhtml}) 			= task     {tst & html = BT [], tasknr = stopTaskId}
-	# (stopped,tst=:{activated = jobstopped,html = stophtml})	= stoptask {tst & activated = True, html = BT [], tasknr = stopBtnId}
-	| jobdone	= return_V (False,TClosure (return_V val)) {tst & html = html +|+ jobhtml, activated = True}
-	| stopped	= return_V (True,TClosure (\tst -> task {tst & tasknr = stopTaskId})) {tst & html = html, activated = True}
-	= return_V (False,TClosure (return_V val)) {tst & html = html +|+ jobhtml +|+ stophtml}
+	# (val,tst=:{activated = taskdone,html = taskhtml}) = task     {tst & activated = True, html = BT [], tasknr = normalTaskId}
+	# (s,  tst=:{activated = stopped, html = stophtml})	= stoptask {tst & activated = True, html = BT [], tasknr = stopTaskId}
+	| stopped	= return_V (Just s,TClosure (close task)) {tst & html = html, activated = True}
+	| taskdone	= return_V (Nothing,TClosure (return_V val)) {tst & html = html +|+ taskhtml, activated = True}
+	= return_V (Nothing,TClosure (return_V val)) {tst & html = html +|+ taskhtml +|+ stophtml, activated = False}
+	where
+		close t = \tst -> t {tst & tasknr = normalTaskId}
+
+		stopTaskId 		= [-1,0:tasknr]
+		normalTaskId  	= [-1,1:tasknr]
 
 // time and date related tasks
 

@@ -142,7 +142,7 @@ closureTask		:: either a finished task or an interrupted Task (when boolean Task
 */
 :: TClosure a 	= TClosure (Task a)			
 
-closureTask 		:: (Task Bool) (Task a) -> (Task (Bool,TClosure a)) | iCreateAndPrint a
+(-!>) infix 4 	:: (Task s) (Task a) -> (Task (Maybe s,TClosure a)) | iCreateAndPrint s & iCreateAndPrint a
 
 /* Operations on Task state
 taskId			:: id assigned to task

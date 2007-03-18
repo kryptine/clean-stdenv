@@ -31,10 +31,10 @@ mytask2 =	editTask "Done1" 0 =>> \v1 ->
 			return_D (v1 + v2 + v3)
 
 delegate :: (Task a) HtmlTime -> (Task a) | iData a
-delegate taskToDelegate time 
+delegate task time 
 =	[Txt "Choose persons you want to delegate work to:",Br,Br] 
 	?>>	determineSet [] =>> \set -> 
-	delegateToSomeone taskToDelegate set =>> \result -> 
+	delegateToSomeone task set =>> \result -> 
 	return_D result
 where
 	delegateToSomeone :: (Task a) [Int] -> (Task a) | iData a
@@ -42,14 +42,16 @@ where
 	where 
 		doDelegate						
 		 =	orTasks [("Waiting for " <+++ who, who @:: buttonTask "I Will Do It" (return_V who)) \\ who <- set]	=>> \who ->	
-		 	who @:: closureTask stopIt task	=>> \(stopped,TClosure task) ->	
-		 	if stopped (delegateToSomeone task set) task 
+			who @:: userStop -!> task =>> \(stopped,TClosure task) -> 
+		 	if (isJust stopped) (delegateToSomeone task set) task   
 	
-	userStop 		= buttonTask "Stop" (return_V True)					  			
-	timerStop time	= waitForTimerTask time #>> return_V True
+		userStop 		= buttonTask "Stop" (return_V True)					  			
+
+		timerStop time	= waitForTimerTask time #>> return_V True
 	
-	stopIt 			= timerStop time -||- userStop				  			
+		stopIt 			= timerStop time -||- userStop				  			
 						  			
+
 determineSet set = newTask "determineSet" determineSet`
 where
 	determineSet`	
