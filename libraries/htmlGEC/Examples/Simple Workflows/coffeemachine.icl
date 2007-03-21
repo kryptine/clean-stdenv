@@ -10,8 +10,10 @@ import StdEnv, StdHtml
 
 //Start world = doHtmlServer (singleUserTask (repeatTask_GC singleStepCoffeeMachine)) world
 //Start world = doHtmlServer (singleUserTask singleStepCoffeeMachine) world
-Start world = doHtmlServer (singleUserTask (repeatTask_GC CoffeeMachine)) world
+Start world = doHtmlServer (singleUserTask (repeatTask_GC SimpleCoffee2)) world
 //Start world = doHtmlServer (singleUserTask (repeatTask_GC CoffeeMachine <@ Persistent)) world
+
+
 
 CoffeeMachine :: Task (String,Int)
 CoffeeMachine  
@@ -45,6 +47,8 @@ where
 
 	coins			= [5,10,20,50,100,200]
 
+// for the ICFP paper: a single step coffee machine
+
 singleStepCoffeeMachine :: Task (String,Int)
 singleStepCoffeeMachine
 =	[Txt "Choose product:",Br,Br] 
@@ -58,3 +62,34 @@ where
 	pay (p,c) t	= getCoins (c,0) =>> \(cancel,returnMoney) ->
 				  let np = if cancel "cancelled" p
 				  in  [Txt ("Product = "<+++np<+++". Returned money = "<+++returnMoney),Br,Br] ?>> t
+
+
+// A very simple coffee machine
+
+SimpleCoffee :: Task Void
+SimpleCoffee
+= 	[Txt "Choose product:",Br,Br] 
+	?>>	chooseTask
+		[("Coffee: 10",    return_V (10,"Coffee"))
+		,("Tea: 10", 		return_V (10,"Tea"))
+		]	=>>  \(toPay,product) ->
+	buttonTask "10 cts" (return_V Void) #>>
+	[Txt ("Enjoy your " <+++ product)]
+	?>> buttonTask "OK" (return_V Void)
+
+SimpleCoffee2 :: Task Void
+SimpleCoffee2
+= 	[Txt "Choose product:",Br,Br] 
+	?>>	chooseTask
+		[("Coffee: 20",    return_V (20,"Coffee"))
+		,("Tea: 10", 		return_V (10,"Tea"))
+		]	=>>  \(toPay,product) ->
+
+	payDimes toPay #>>
+
+	[Txt ("Enjoy your " <+++ product)]
+	?>> buttonTask "OK" (return_V Void)
+where
+	payDimes 0 = return_V Void
+	payDimes n = buttonTask "10 cts" (return_V Void) #>> payDimes (n - 10)
+
