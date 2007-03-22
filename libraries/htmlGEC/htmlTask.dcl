@@ -70,17 +70,28 @@ return_D		:: a 						-> Task a			| gForm {|*|}, iCreateAndPrint a
 newTask			:: to promote a user defined function to as task which is (possibly recursively) called when activated
 newTask_GC		:: same, and garbage collect *all* (persistent) subtasks
 newTask_Std		:: same, non optimized version will increase stack
-repeatTask		:: infinitely repeating Task
-repeatTask_GC	:: same, and garbage collect *all* (persistent) subtasks
-repeatTask_Std	:: same, non optimized version will increase stack
 */
-
 newTask 		:: !String (Task a) 		-> (Task a) 		| iData a 
 newTask_GC 		:: !String (Task a) 		-> (Task a) 		| iData a 
 newTask_Std 	:: !String (Task a) 		-> (Task a) 		| iCreateAndPrint a
-repeatTask		:: (Task a) 				-> Task a 			| iData a
-repeatTask_GC	:: (Task a) 				-> Task a 			| iCreateAndPrint a
-repeatTask_Std 	:: (Task a) 				-> Task a 			| iCreateAndPrint a
+
+/* Infinite iteration of an iTask:
+foreverTask		:: infinitely repeating Task
+foreverTask_GC	:: same, and garbage collect *all* (persistent) subtasks
+foreverTask_Std	:: same, non optimized version will increase stack
+*/
+foreverTask		:: (Task a) 				-> Task a 			| iData a
+foreverTask_GC	:: (Task a) 				-> Task a 			| iCreateAndPrint a
+foreverTask_Std	:: (Task a) 				-> Task a 			| iCreateAndPrint a
+
+/* Conditional iteration of an iTask:
+repeatTask		:: repeat Task until predict is valid
+repeatTask_GC	:: same, and garbage collect *all* (persistent) subtasks
+repeatTask_Std	:: same, non optimized version will increase stack
+*/
+//repeatTask		:: (Task a) 				-> Task a 			| iData a
+//repeatTask_GC	:: (Task a) 				-> Task a 			| iCreateAndPrint a
+repeatTask_Std	:: (a -> Task a) (a -> Bool) -> a -> Task a		| iCreateAndPrint a
 
 /*	Sequencing Tasks:
 seqTasks		:: do all iTasks one after another, task completed when all done

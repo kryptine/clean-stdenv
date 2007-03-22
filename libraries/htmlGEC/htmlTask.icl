@@ -269,36 +269,48 @@ incNr [i:is] = [i+1:is]
 addTasknr [] j = [j]
 addTasknr [i:is] j = [i+j:is]
 
-// non optimized versions of repeattask and newTask will increase the task tree stack and
+/////////////////////////////////////
+
+repeatTask_Std :: (a -> Task a) (a -> Bool) -> a -> Task a | iCreateAndPrint a
+repeatTask_Std task p = dorepeatTask_Std
+where
+	dorepeatTask_Std v tst
+	# (a,tst)	= task v (newSubTaskNr tst)
+	| p a		= (a,tst)
+	= dorepeatTask_Std a tst
+
+/////////////////////////////////////
+
+// non optimized versions of foreverTask and newTask will increase the task tree stack and
 // therefore cannot be used for big applications
 
-repeatTask_Std :: (Task a) -> Task a | iCreateAndPrint a
-repeatTask_Std task = mkTask "repeatTask_Std" dorepeatTask_Std
+foreverTask_Std :: (Task a) -> Task a | iCreateAndPrint a
+foreverTask_Std task = mkTask "foreverTask_Std" doforeverTask_Std
 where
-	dorepeatTask_Std tst		
+	doforeverTask_Std tst		
 	# (_,tst)	= task (newSubTaskNr tst)		
-	= repeatTask_Std task tst						
+	= foreverTask_Std task tst						
 
 newTask_Std :: !String (Task a) -> (Task a) | iCreateAndPrint a
 newTask_Std taskname mytask = mkTask taskname (mytask o newSubTaskNr)
 
 // same, but by remembering task results stack space can be saved
 
-repeatTask :: (Task a) -> Task a | iData a
-repeatTask task = repeatTask`
+foreverTask :: (Task a) -> Task a | iData a
+foreverTask task = foreverTask`
 where
-	repeatTask` tst=:{tasknr,hst} 
+	foreverTask` tst=:{tasknr,hst} 
 	# mytasknr					= incNr tasknr							// manual incr task nr
 	# taskId					= itaskId mytasknr "_Rep"				// create store id
 	# (currtasknr,hst)			= mkStoreForm (Init,cFormId tst.storageInfo taskId mytasknr) id hst	// fetch actual tasknr
-	# (val,tst=:{activated,hst})= mkTaskNoInc "repeatTask" repeatTask`` {tst & tasknr = currtasknr.value,hst = hst}
+	# (val,tst=:{activated,hst})= mkTaskNoInc "foreverTask" foreverTask`` {tst & tasknr = currtasknr.value,hst = hst}
 	| activated 																					// task is completed	
 		# ntasknr				= incNr currtasknr.value											// incr tasknr
 		# (currtasknr,hst)		= mkStoreForm (Init,cFormId tst.storageInfo taskId tasknr) (\_ -> ntasknr) hst // store next task nr
-		= mkTaskNoInc "repeatTask" repeatTask`` {tst & tasknr = currtasknr.value, hst = hst}		// initialize new task
+		= mkTaskNoInc "foreverTask" foreverTask`` {tst & tasknr = currtasknr.value, hst = hst}		// initialize new task
 	= (val,tst)					
 	where
-		repeatTask`` tst=:{tasknr}		
+		foreverTask`` tst=:{tasknr}		
 		# (val,tst)= task {tst & tasknr = [-1:tasknr]}	// do task to repeat
 		= (val,{tst & tasknr = tasknr})					
 
@@ -320,12 +332,12 @@ newTask` collect mytask tst=:{tasknr,hst}
 
 // same, but additionally deleting subtasks
 
-repeatTask_GC :: (Task a) -> Task a | iCreateAndPrint a
-repeatTask_GC task = mkTask "repeatTask_GC" repeatTask`
+foreverTask_GC :: (Task a) -> Task a | iCreateAndPrint a
+foreverTask_GC task = mkTask "foreverTask_GC" foreverTask`
 where
-	repeatTask` tst=:{tasknr}		
+	foreverTask` tst=:{tasknr}		
 	# (val,tst=:{activated})	= task {tst & tasknr = [-1:tasknr]}					// shift tasknr
-	| activated 				= repeatTask` (deleteSubTasks tasknr {tst & tasknr = tasknr}) // loop
+	| activated 				= foreverTask` (deleteSubTasks tasknr {tst & tasknr = tasknr}) // loop
 	= (val,tst)					
 
 newTask_GC :: !String (Task a) -> (Task a) 	| iData a 
@@ -854,4 +866,3 @@ where
 
 	font color message
 	= Font [Fnt_Color (`Colorname color), Fnt_Size -1] [B [] message]
-	

@@ -26,7 +26,7 @@ nmessage		= 5							// maximum number of messages to read from group
 
 Start world = doHtmlServer (multiUserTask npersons allTasks) world
 
-allTasks = andTasks_mu "newsGroups" [(0,repeatTask newsManager):[(i,repeatTask newsReader) \\ i <- [1 .. npersons - 1]]]
+allTasks = andTasks_mu "newsGroups" [(0,foreverTask newsManager):[(i,foreverTask newsReader) \\ i <- [1 .. npersons - 1]]]
 
 newsManager
 =	chooseTask 	[("newGroup",  addNewsGroup -||- editTask "Cancel" Void)
@@ -70,7 +70,7 @@ where
 	where
 		readNews` "Cancel"=	[Txt "You have not selected a newgroup you are subscribed on!",Br,Br] ?>> OK
 		readNews` group	=	[Txt "You are looking at news group ", B [] group, Br, Br] 
-							?>>	repeatTask 
+							?>>	foreverTask 
 								(	readIndex me  group =>> \index ->
 									readNewsGroup group =>> \news  ->
 									showNews index (news%(index,index+nmessage-1)) (length news) 

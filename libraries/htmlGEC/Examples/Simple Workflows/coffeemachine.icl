@@ -8,10 +8,10 @@ module coffeemachine
 
 import StdEnv, StdHtml
 
-//Start world = doHtmlServer (singleUserTask (repeatTask_GC singleStepCoffeeMachine)) world
-//Start world = doHtmlServer (singleUserTask singleStepCoffeeMachine) world
-Start world = doHtmlServer (singleUserTask (repeatTask_GC SimpleCoffee2)) world
-//Start world = doHtmlServer (singleUserTask (repeatTask_GC CoffeeMachine <@ Persistent)) world
+//Start world = doHtmlServer (singleUserTask (foreverTask_GC singleStepCoffeeMachine)) world
+Start world = doHtmlServer (singleUserTask singleStepCoffeeMachine) world
+//Start world = doHtmlServer (singleUserTask (foreverTask_GC SimpleCoffee2)) world
+//Start world = doHtmlServer (singleUserTask (foreverTask_GC CoffeeMachine <@ Persistent)) world
 
 
 
@@ -47,6 +47,19 @@ where
 
 	coins			= [5,10,20,50,100,200]
 
+//	getCoins2 is alternative definition of getCoins, but uses repeatTask instead of direct recursion
+getCoins2 :: ((Bool,Int,Int) -> Task (Bool,Int,Int))
+getCoins2 			= repeatTask_Std get (\(cancel,cost,paid) -> cancel || cost <= 0)
+where
+	get (cancel,cost,paid)
+					= newTask "pay" ([Txt ("To pay: " <+++ cost),Br,Br]
+					  ?>> chooseTask [(c +++> " cents", return_V (False,c)) \\ c <- coins]
+					  		-||-
+					  	  buttonTask "Cancel" (return_V (True,0))
+					  =>> \(cancel,c) -> return_V (cancel,cost-c,paid+c))
+
+	coins			= [5,10,20,50,100,200]
+
 // for the ICFP paper: a single step coffee machine
 
 singleStepCoffeeMachine :: Task (String,Int)
@@ -59,9 +72,17 @@ where
 	products	= [("Coffee",100),("Tea",50)]
 	
 //	pay (p,c) t	= buttonTask ("Pay "<+++c<+++ " cents") t
-	pay (p,c) t	= getCoins (c,0) =>> \(cancel,returnMoney) ->
-				  let np = if cancel "cancelled" p
-				  in  [Txt ("Product = "<+++np<+++". Returned money = "<+++returnMoney),Br,Br] ?>> t
+//	version using getCoins:
+/*	pay (p,c) t	= getCoins (c,0) =>> \(cancel,returnMoney) ->
+				  [Txt ("Product = "<+++if cancel "cancelled" p
+				                    <+++". Returned money = "<+++returnMoney),Br,Br] 
+				  ?>> t
+*/
+//	version using getCoins2:
+	pay (p,c) t	= getCoins2 (False,c,0) =>> \(cancel,_,paid) ->
+				  [Txt ("Product = "<+++if cancel "cancelled" p
+				                    <+++". Returned money = "<+++(paid-c)),Br,Br] 
+				  ?>> t
 
 
 // A very simple coffee machine
