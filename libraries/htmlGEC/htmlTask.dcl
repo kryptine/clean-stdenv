@@ -55,7 +55,8 @@ return_D		:: return the value and show it in iData display format
 
 (?>>) infix  5 	:: [BodyTag] (Task a) 		-> Task a
 (!>>) infix  5 	:: [BodyTag] (Task a) 		-> Task a			| iCreate a
-(<|)  infix  6 	:: (Task a) (a -> .Bool, a -> String) -> Task a | iCreate a
+(<|)  infix  6 	:: (Task a) (a -> .Bool, a -> [BodyTag]) 
+											-> Task a | iCreate a
 return_VF 		:: a [BodyTag] 		  		-> Task a			| iCreateAndPrint a
 return_D		:: a 						-> Task a			| gForm {|*|}, iCreateAndPrint a
 
@@ -147,7 +148,7 @@ waitForTimeTask	:: HtmlTime				-> (Task HtmlTime)
 waitForTimerTask:: HtmlTime				-> (Task HtmlTime)
 waitForDateTask	:: HtmlDate				-> (Task HtmlDate)
 
-/* Do not yet when you garbage collect tasks !!
+/* Do not yet use when you garbage collect tasks !!
 -!>				:: a task, either finished or interrupted (by completion of the first task) is returned in the closure
 				   if interrupted, the work done so far is returned and can be can be continued somewhere else
 channel			:: splits a task in respectively a sender task and receiver task; the sender can be edited as usual. 

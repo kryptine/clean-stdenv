@@ -1,6 +1,6 @@
 module combinatorTest
 
-import StdEnv, StdHtml
+import StdEnv, htmlTask, htmlTrivial
 
 // (c) MJP 2007
 
@@ -12,28 +12,30 @@ import StdEnv, StdHtml
 derive gUpd []
 derive gForm []
 
-Start world = doHtmlServer (multiUserTask 9 (/*repeatTask*/ simpleMile)) world
+Start world = doHtmlServer (multiUserTask 9 (/*repeatTask*/ simpleAnd3)) world
+
+
+
+
 
 
 // the following obscure tasks have been tested succesfully
 
+// test repeat
+testRepeat = simpleAnd <| (\n -> sum n > 100,\n -> [Txt "sum should be larger then 100",Br, toHtml n, Br])
+
+
+
 // closure task test
-testClosure :: (Task Int) -> Task Int
-testClosure task 		= newTask "test" (doit task)
-where 
-	doit t		= stop  task =>>  \t -> ifStopped t (\t -> orTask (testClosure t, testClosure t))
-	doit2 task	= stop  task =>>  \t -> ifStopped t testClosure
-	userStop	= buttonTask "Stop" (return_V True) 				  			
-	stop task	= closureTask userStop task 
-	ifStopped (True,TClosure task) alttask 	= alttask task
-	ifStopped (_,   TClosure task) _ 		= task
 
 
 // mile stone task
 simpleMile = show( andTasks_mstone [("task " <+++ i,simple) \\ i <- [0..2]])
 
 // andTask tests
-simpleAnd 	= show( andTasks [("task " <+++ i,simple) \\ i <- [0..3]])
+simpleAnd3 	= andTasks [("task " <+++ i,simple_mu i 0 (simple2 i)) \\ i <- [0..1]]
+simpleAnd2 	= andTasks [("task " <+++ i,simple) \\ i <- [0..3]]
+simpleAnd 	= show( andTasks [("task " <+++ i,simple) \\ i <- [0..2]])
 myAndTasks2 = andTasks [("MyTask " <+++ i,
 						("W" <+++ i,i) @: (editTask ("OK " <+++ i) i =>> \v -> 
 						("B1",0) @: editTask ("OK " <+++ v) v))

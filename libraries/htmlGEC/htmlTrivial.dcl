@@ -1,8 +1,8 @@
 definition module htmlTrivial
 
-import StdMaybe, StdGeneric
+import StdMaybe, StdGeneric, StdOverloaded
 
-derive bimap Maybe, (,)
+derive bimap Maybe, (,) 
 
 // utility 
 

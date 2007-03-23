@@ -205,14 +205,14 @@ where
 	return_VF` tst
 	= (a,{tst & html = tst.html +|+ BT bodytag})
 
-(<|) infix 6 :: (Task a) (a -> .Bool, a -> String) -> Task a | iCreate a
+(<|) infix 6 :: (Task a) (a -> .Bool, a -> [BodyTag]) -> Task a | iCreate a
 (<|) taska (pred,message) = doTask
 where
 	doTask tst=:{html = ohtml,activated}
 	| not activated 			= (createDefault,tst)
 	# (a,tst=:{activated,html= nhtml}) = taska {tst & html = BT []}
 	| not activated || pred a	= (a,{tst & html = ohtml +|+ nhtml})
-	= doTask {tst & html = ohtml +|+ BT [Txt (message a)]}
+	= doTask {tst & html = ohtml +|+ BT (message a)}
 
 (<<@) infix 3 ::  (Task a) b  -> (Task a) | setTaskAttr b
 (<<@) task attr = doTask
@@ -542,9 +542,9 @@ andTasks :: [(String,Task a)] -> (Task [a]) | iCreateAndPrint a
 andTasks options = mkTask "andTasks" (doandTasks options)
 where
 	doandTasks [] tst	= ireturn_V [] tst
-	doandTasks options tst=:{tasknr,html,myId}
-	# (alist,tst=:{activated=finished,html=allhtml})		
-						= checkAllTasks "andTasks" options 0 True [] {tst & html = BT [], activated = True}
+	doandTasks options tst=:{tasknr,html,myId,hst}
+	# (alist,tst=:{activated=finished,hst=hst})		
+						= checkAllTasks "andTasks" options (0,-1) True [] {tst & html = BT [], activated = True,hst=hst}
 	| finished			= (map snd alist,{tst & html = html}) 
 	# tst=:{hst}		= tst
 	# (chosen,buttons,chosenname,hst) 
@@ -553,6 +553,8 @@ where
 	# chosenTaskName	= fst (options!!chosen)
 	# (a,{activated=adone,html=ahtml,hst=hst}) 
 						= mkParSubTask "andTasks" chosen chosenTask {tst & tasknr = tasknr, activated = True, html = BT [], hst = hst}
+	# (alist,tst=:{activated=finished,html=allhtml,hst=hst})		
+						= checkAllTasks "andTasks" options (0,chosen) True [] {tst & html = BT [], activated = True,hst=hst}
 	| not adone			= ([a],{tst & 	hst = hst
 									,	activated = False
 									, 	html = 	html +|+ 
@@ -560,7 +562,7 @@ where
 												(myId -@: allhtml) 
 							})
 	# (alist,{activated=finished,html=allhtml,hst = hst})		
-						= checkAllTasks "PTasks" options 0 True [] {tst & html = BT [],hst =hst}
+						= checkAllTasks "PTasks" options (0,chosen) True [] {tst & html = BT [],hst =hst}
 	| finished			= (map snd alist,{tst & hst = hst, activated = finished, html = html})
 	= (map snd alist,{tst 	& hst = hst
 							, activated = finished
@@ -570,13 +572,20 @@ where
 						})
 
 
+checkAllTasks traceid options (ctasknr,skipnr) bool alist tst=:{tasknr}
+| ctasknr == length options		= (reverse alist,{tst & activated = bool})
+| ctasknr == skipnr				= checkAllTasks traceid options (inc ctasknr,skipnr) bool alist tst
+# (taskname,task)				= options!!ctasknr
+# (a,tst=:{activated = adone})	= mkParSubTask traceid ctasknr task {tst & tasknr = tasknr, activated = True}
+= checkAllTasks traceid options (inc ctasknr,skipnr) (bool&&adone) [(taskname,a):alist] {tst & tasknr = tasknr, activated = True}
+
 andTasks_mstone :: [(String,Task a)] -> (Task [(String,a)]) | iCreateAndPrint a
 andTasks_mstone options = mkTask "andTasks_mstone" (PMilestoneTasks` options)
 where
 	PMilestoneTasks` [] tst	= ireturn_V [] tst
 	PMilestoneTasks` options tst=:{tasknr,html,myId}
 	# (alist,tst=:{activated=finished,html=allhtml})		
-						= checkAllTasks "andTasks" options 0 True [] {tst & html = BT [], activated = True}
+						= checkAllTasks "andTasks" options (0,-1) True [] {tst & html = BT [], activated = True}
 	| finished			= (alist,{tst & html = html}) 
 	# tst=:{hst}		= tst
 	# (chosen,buttons,chosenname,hst) 
@@ -594,7 +603,7 @@ where
 												(myId -@: allhtml) 
 							})
 	# (alist,{activated=finished,html=allhtml,hst = hst})		
-						= checkAllTasks "PTasks" options 0 True [] {tst & html = BT [],hst =hst}
+						= checkAllTasks "PTasks" options (0,chosen) True [] {tst & html = BT [],hst =hst}
 	| finished			= (alist,{tst & hst = hst, activated = finished, html = html })
 	= (alist,{tst 	& hst = hst
 							, activated = finished || milestoneReached
@@ -603,17 +612,11 @@ where
 										(myId -@: allhtml)
 						})
 
-// skip should be added for task displayed by user....
-checkAllTasks traceid options ctasknr bool alist tst=:{tasknr}
-| ctasknr == length options		= (reverse alist,{tst & activated = bool})
-# (taskname,task)				= options!!ctasknr
-# (a,tst=:{activated = adone})	= mkParSubTask traceid ctasknr task {tst & tasknr = tasknr, activated = True}
-= checkAllTasks traceid options (inc ctasknr) (bool&&adone) [(taskname,a):alist] {tst & tasknr = tasknr, activated = True}
 
 andTasks_mu :: String [(Int,Task a)] -> (Task [a]) | iData a
 andTasks_mu taskid tasks = newTask "andTasks_mu" (domu_andTasks tasks)
 where
-	domu_andTasks list tst	= andTasks [(taskid <+++ " " <+++ i, i @:: task) \\ (i,task) <- list] tst
+	domu_andTasks list = andTasks [(taskid <+++ " " <+++ i, i @:: task) \\ (i,task) <- list] 
 
 // very experimental higher order lazy task stuf
 
@@ -636,7 +639,7 @@ channel  :: String (Task a) -> (Task (TClosure a,TClosure a)) | iCreateAndPrint 
 channel name task =  mkTask "channel" doSplit
 where
 	doSplit tst=:{tasknr}
-	= return_V (TClosure (hclose task),TClosure (close task)) tst
+	= return_V (TClosure (close task),TClosure (hclose task)) tst
 	where
 		close  task = \tst -> task {tst & tasknr = tasknr}
 		hclose task = \tst -> nohtml task {tst & tasknr = tasknr}
@@ -759,6 +762,13 @@ gUpd{|TClosure|} gc (UpdCreate l)        _
 = (UpdCreate l, TClosure (\tst -> (default,tst)))			
 gUpd{|TClosure|} gc mode                 b		= (mode, b)										
 
+gForm{|TClosure|} gfa (init,formid) hst
+= ({value=formid.ival,changed=False,form=[]},hst)
+
+/*
+convertTask task 	= dynamic_to_string (dynamic task::*TSt -> *(a^,*TSt))
+string_to_dynamic` s = string_to_dynamic ( {s` \\ s` <-: s})
+*/
 
 
 // *** utility section ***
