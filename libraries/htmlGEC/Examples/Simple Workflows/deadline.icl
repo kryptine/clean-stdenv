@@ -17,7 +17,7 @@ npersons = 5
 
 Start world = doHtmlServer (multiUserTask npersons (foreverTask (deadline mytask))) world
 
-mytask = editTask "OK" 0 <| ((<) 23,\n -> "Error " <+++ n <+++ " should be larger than 23")
+mytask = editTask "OK" 0 <| ((<) 23,\n -> [Txt ("Error " <+++ n <+++ " should be larger than 23")])
 
 deadline :: (Task a) -> (Task a) | iData a
 deadline task
@@ -37,11 +37,11 @@ where
 			?>>	buttonTask "OK" task
 
 	delegateTask who time task
-	= 	("Timed Task",who) 	
-		@: 	waitForTimerTask time #>> 								// wait for deadline
-			return_V (False,createDefault)							// return default value
+	= ("Timed Task",who) 	
+	  @: 	(( waitForTimeTask time #>> 							// wait for deadline
+			  return_V (False,createDefault) )						// return default value
 			-||-
-			[Txt ("Please finish task before" <+++ time),Br,Br] 	// tell deadline
-			?>> (task =>> \v -> return_V (True,v))					// do task and return its result
-			
+			([Txt ("Please finish task before " <+++ time),Br,Br] 	// tell deadline
+			?>> task =>> \v -> return_V (True,v)))					// do task and return its result
+
 

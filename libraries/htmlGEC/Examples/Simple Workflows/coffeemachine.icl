@@ -6,12 +6,12 @@ module coffeemachine
 // The persistent variant will remember the state in which the coffee machine was left
 // Garbage collection of unused tasks will be done automatically
 
-import StdEnv, StdHtml
+import StdEnv, htmlTask, htmlTrivial
 
 //Start world = doHtmlServer (singleUserTask (foreverTask_GC singleStepCoffeeMachine)) world
-Start world = doHtmlServer (singleUserTask singleStepCoffeeMachine) world
+//Start world = doHtmlServer (singleUserTask singleStepCoffeeMachine) world
 //Start world = doHtmlServer (singleUserTask (foreverTask_GC SimpleCoffee2)) world
-//Start world = doHtmlServer (singleUserTask (foreverTask_GC CoffeeMachine <@ Persistent)) world
+Start world = doHtmlServer (singleUserTask (foreverTask_GC CoffeeMachine )) world
 
 
 

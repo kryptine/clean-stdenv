@@ -10,16 +10,16 @@ derive gParse 	Void, Maybe
 derive gPrint 	Void, Maybe
 derive gerda 	Void
 
-:: *TSt 		=	{ tasknr 		:: ![Int]			// for generating unique form-id's
+:: *TSt 		=	{ tasknr 		:: !TaskNr			// for generating unique form-id's
 					, activated		:: !Bool   			// if true activate task, if set as result task completed	
-					, myId			:: !Int				// id of user to which task is assigned
-					, userId		:: !Int				// id of application user 
+					, userId		:: !Int				// id of user to which task is assigned
+					, currentUserId	:: !Int				// id of application user 
 					, html			:: !HtmlTree		// accumulator for html code
 					, storageInfo	:: !Storage			// iData lifespan and storage format
 					, trace			:: !Maybe [Trace]	// for displaying task trace
 					, hst			:: !HSt				// iData state
 					}
-
+:: TaskNr		:== [Int]								// task nr i.j is adminstrated as [j,i]
 :: HtmlTree		=	BT [BodyTag]						// simple code
 				|	(@@:) infix  0 (Int,String) HtmlTree// code with id of user attached to it
 				|	(-@:) infix  0 Int 			HtmlTree// skip code with this id if it is the id of the user 
@@ -33,7 +33,7 @@ derive gerda 	Void
 
 :: Trace		=	Trace TraceInfo [Trace]				// traceinfo with possibly subprocess
 
-:: TraceInfo	:== Maybe (Bool,(Int,[Int],String,String))	// Task finished? who did it, task nr, task name (for tracing) value produced
+:: TraceInfo	:== Maybe (Bool,(Int,TaskNr,String,String))	// Task finished? who did it, task nr, task name (for tracing) value produced
 
 // setting global iData options for tasks
 
@@ -75,14 +75,14 @@ startTask thisUser taska hst
 														[Font [Fnt_Color (`Colorname Yellow)]
 													   [B [] "Sorry, cannot apply command.",Br, 
 													    B [] "Your page is not up-to date!",Br]],hst)
-# (a,{html,hst,trace}) = taska 	{ tasknr	= [-1]
-								, activated = True
-								, userId	= thisUser 
-								, myId		= defaultUser 
-								, html 		= BT []
-								, trace		= if doTrace (Just []) Nothing
-								, hst 		= hst
-								, storageInfo = {tasklife = Session, taskstorage = PlainString, taskmode = Edit }}
+# (a,{html,hst,trace}) = taska 	{ tasknr		= [-1]
+								, activated 	= True
+								, currentUserId	= thisUser 
+								, userId			= defaultUser 
+								, html 			= BT []
+								, trace			= if doTrace (Just []) Nothing
+								, hst 			= hst
+								, storageInfo 	= {tasklife = Session, taskstorage = PlainString, taskmode = Edit }}
 # (pversion,hst)	 	= mkStoreForm (Init, pFormId userVersionNr 0) inc hst
 # (sversion,hst)	 	= mkStoreForm (Init, nFormId sessionVersionNr pversion.value) inc hst
 # (selbuts,selname,seltask,hst)	= Filter thisUser defaultUser ((defaultUser,"Main") @@: html) hst
@@ -135,7 +135,7 @@ where
 	isNil [] = True
 	isNil _ = False
 
-mkTaskButtons :: !String !String ![Int] !Storage ![String] *HSt -> (Int,[BodyTag],[BodyTag],*HSt)
+mkTaskButtons :: !String !String !TaskNr !Storage ![String] *HSt -> (Int,[BodyTag],[BodyTag],*HSt)
 mkTaskButtons header myid tasknr info btnnames hst
 # btnsId			= itaskId tasknr (myid <+++ "_Btns")
 # myidx				= length btnnames
@@ -153,7 +153,7 @@ where
 	| i==j = Display
 	= Edit
 
-	SelectStore :: !(String,Int) ![Int] !Storage (Int -> Int) *HSt -> (Int,*HSt)
+	SelectStore :: !(String,Int) !TaskNr !Storage (Int -> Int) *HSt -> (Int,*HSt)
 	SelectStore (myid,idx) tasknr info fun hst 
 	# storeId 			= itaskId tasknr (myid <+++ "_Select" <+++ idx)
 	# (storeform,hst)	= mkStoreForm (Init,cFormId info storeId 0) fun hst
@@ -222,12 +222,13 @@ where
 	# (a,tst) = task (setTaskAttr attr tst)
 	= (a,{tst & storageInfo = storageInfo})
 
-(?>>) infix 5 :: [BodyTag] (Task a) -> (Task a)
+(?>>) infix 5 :: [BodyTag] (Task a) -> (Task a) | iCreate a
 (?>>) prompt task = doTask
 where
-	doTask tst=:{html=ohtml,activated=myturn}
+	doTask tst=:{html=ohtml,activated}
+	| not activated	= (createDefault,tst)
 	# (a,tst=:{activated,html=nhtml}) = task {tst & html = BT []}
-	| activated || not myturn= (a,{tst & html = ohtml})
+	| activated = (a,{tst & html = ohtml})
 	= (a,{tst & html = ohtml +|+ BT prompt +|+ nhtml})
 
 (!>>) infix 5 :: [BodyTag] (Task a) -> (Task a) | iCreate a
@@ -253,12 +254,12 @@ mkTask taskname mytask = mkTaskNoInc taskname mytask o incTaskNr
 mkTaskNoInc :: !String (Task a) -> (Task a) | iCreateAndPrint a			// common second part of task wrappers
 mkTaskNoInc taskname mytask = mkTaskNoInc`
 where
-	mkTaskNoInc` tst=:{activated,tasknr,myId}		
+	mkTaskNoInc` tst=:{activated,tasknr,userId}		
 	| not activated							= (createDefault,tst)	// not active, don't call task, return default value
 	# (val,tst=:{activated,trace})			= mytask tst			// active, so perform task and get its result
 	| isNothing trace || taskname == ""		= (val,tst)				// no trace, just return value
 	= (val,{tst & tasknr = tasknr
-				, trace = Just (InsertTrace activated tasknr myId taskname (printToString val) (fromJust trace))}) // adjust trace
+				, trace = Just (InsertTrace activated tasknr userId taskname (printToString val) (fromJust trace))}) // adjust trace
 
 incTaskNr tst 		= {tst & tasknr = incNr tst.tasknr}
 newSubTaskNr tst	= {tst & tasknr = [-1:tst.tasknr]}
@@ -272,12 +273,12 @@ addTasknr [i:is] j = [i+j:is]
 /////////////////////////////////////
 
 repeatTask_Std :: (a -> Task a) (a -> Bool) -> a -> Task a | iCreateAndPrint a
-repeatTask_Std task p = dorepeatTask_Std
+repeatTask_Std task pred = \a -> mkTask "repeatTask_Std" (dorepeatTask_Std a)
 where
-	dorepeatTask_Std v tst
-	# (a,tst)	= task v (newSubTaskNr tst)
-	| p a		= (a,tst)
-	= dorepeatTask_Std a tst
+	dorepeatTask_Std a tst
+	# (na,tst)	= task a (newSubTaskNr tst)
+	| pred na	= (na,tst)
+	= dorepeatTask_Std na (incTaskNr tst)
 
 /////////////////////////////////////
 
@@ -343,7 +344,7 @@ where
 newTask_GC :: !String (Task a) -> (Task a) 	| iData a 
 newTask_GC taskname mytask = mkTask taskname (newTask` True mytask)
 
-deleteSubTasks :: ![Int] TSt -> TSt
+deleteSubTasks :: !TaskNr TSt -> TSt
 deleteSubTasks tasknr tst=:{hst} = {tst & hst = deleteIData (subtasksids tasknr) hst}
 where
 	subtasksids tasknr formid
@@ -366,33 +367,33 @@ where
 // assigning tasks to users, each user is identified by a number
 
 (@:) infix 3 :: !(!String,!Int) (Task a)	-> (Task a)			| iCreate a
-(@:) (taskname,userId) taska = \tst=:{myId} -> assignTask` myId {tst & myId = userId}
+(@:) (taskname,nuserId) taska = \tst=:{userId} -> assignTask` userId {tst & userId = nuserId}
 where
-	assignTask` myId tst=:{html=ohtml,activated}
+	assignTask` userId tst=:{html=ohtml,activated}
 	| not activated						= (createDefault,tst)
-	# (a,tst=:{html=nhtml,activated})	= taska {tst & html = BT [],myId = userId}		// activate task of indicated user
+	# (a,tst=:{html=nhtml,activated})	= taska {tst & html = BT [],userId = nuserId}		// activate task of indicated user
 	| activated 						= (a,{tst & activated = True
-												  ,	myId = myId							// work is done						
-												  ,	html = ohtml +|+ 					// clear screen
-													((userId,taskname) @@: nhtml)})	
-	= (a,{tst & myId = myId																// restore user Id
+												  ,	userId = userId							// work is done						
+												  ,	html = ohtml +|+ 						// clear screen
+													((nuserId,taskname) @@: nhtml)})	
+	= (a,{tst & userId = userId																// restore user Id
 			  , html = 	ohtml +|+ 
-						BT [Br, Txt ("Waiting for Task "), yellow taskname, Txt " from ", showUser userId,Br] +|+ 
-						((userId,taskname) @@: BT [Txt "Requested by ", showUser myId,Br,Br] +|+ nhtml)})				// combine html code, filter later					
+						BT [Br, Txt ("Waiting for Task "), yellow taskname, Txt " from ", showUser nuserId,Br] +|+ 
+						((nuserId,taskname) @@: BT [Txt "Requested by ", showUser userId,Br,Br] +|+ nhtml)})				// combine html code, filter later					
 
 (@::) infix 3 :: !Int (Task a)	-> (Task a)			| iCreate  a
-(@::) userId taska = \tst=:{myId} -> assignTask` myId {tst & myId = userId}
+(@::) nuserId taska = \tst=:{userId} -> assignTask` userId {tst & userId = nuserId}
 where
-	assignTask` myId tst=:{html,activated}
+	assignTask` userId tst=:{html,activated}
 	| not activated						= (createDefault,tst)
-	# (a,tst=:{html=nhtml,activated})	= taska {tst & html = BT [],myId = userId}		// activate task of indicated user
-	| activated 						= (a,{tst & myId = myId							// work is done						
+	# (a,tst=:{html=nhtml,activated})	= taska {tst & html = BT [],userId = nuserId}		// activate task of indicated user
+	| activated 						= (a,{tst & userId = userId							// work is done						
 												  ,	html = html})	
-	= (a,{tst & myId = myId																// restore user Id
+	= (a,{tst & userId = userId																// restore user Id
 			  , html = 	html +|+  
-			  			BT [Br, Txt "Waiting for ", yellow ("Task " <+++ myId), Txt " from ", showUser userId,Br] +|+ 
-						((userId,"Task " <+++ myId) @@: 
-							BT [Txt "Requested by ", showUser myId,Br,Br] +|+ nhtml)})				// combine html code, filter later					
+			  			BT [Br, Txt "Waiting for ", yellow ("Task " <+++ userId), Txt " from ", showUser nuserId,Br] +|+ 
+						((nuserId,"Task " <+++ userId) @@: 
+							BT [Txt "Requested by ", showUser userId,Br,Br] +|+ nhtml)})				// combine html code, filter later					
 
 // sequential tasks
 
@@ -483,8 +484,8 @@ orTask :: (Task a,Task a) -> (Task a) | iCreateAndPrint a
 orTask (taska,taskb) = mkTask "orTask" (doOrTask (taska,taskb))
 
 doOrTask (taska,taskb) tst=:{tasknr,html}
-# (a,tst=:{activated=adone,html=ahtml})	= mkParSubTask "orTask" 0 taska {tst & html = BT []}
-# (b,tst=:{activated=bdone,html=bhtml})	= mkParSubTask "orTask" 1 taskb {tst & tasknr = tasknr, html = BT []}
+# (a,tst=:{activated=adone,html=ahtml})	= mkParSubTask "orTask" 0 taska {tst & tasknr = tasknr, html = BT []}
+# (b,tst=:{activated=bdone,html=bhtml})	= mkParSubTask "orTask" 1 taskb {tst & tasknr = tasknr, html = BT [],activated = True}
 # (aorb,aorbdone,myhtml)				= if adone (a,adone,ahtml) (if bdone (b,bdone,bhtml) (a,False,ahtml +|+ bhtml))
 = (aorb,{tst & activated = aorbdone, html = html +|+ myhtml})
 
@@ -492,7 +493,7 @@ orTask2 :: (Task a,Task b) -> (Task (EITHER a b)) | iCreateAndPrint a & iCreateA
 orTask2 (taska,taskb) = mkTask "orTask2" (doorTask2 (taska,taskb))
 where
 	doorTask2 (taska,taskb) tst=:{tasknr,html}
-	# (a,tst=:{activated=adone,html=ahtml})	= mkParSubTask "orTask" 0 taska {tst & html = BT []}
+	# (a,tst=:{activated=adone,html=ahtml})	= mkParSubTask "orTask" 0 taska {tst & tasknr = tasknr, html = BT []}
 	# (b,tst=:{activated=bdone,html=bhtml})	= mkParSubTask "orTask" 1 taskb {tst & tasknr = tasknr, html = BT []}
 	# (aorb,aorbdone,myhtml)				= if adone (LEFT a,adone,ahtml) (if bdone (RIGHT b,bdone,bhtml) (LEFT a,False,ahtml +|+ bhtml))
 	= (aorb,{tst & activated = aorbdone, html = html +|+ myhtml})
@@ -508,7 +509,7 @@ orTasks :: [(String,Task a)] -> (Task a) | iCreateAndPrint a
 orTasks options = mkTask "orTasks" (doorTasks options)
 where
 	doorTasks [] tst	= ireturn_V createDefault tst
-	doorTasks tasks tst=:{tasknr,html,hst,myId}
+	doorTasks tasks tst=:{tasknr,html,hst,userId}
 	# (chosen,buttons,chosenname,hst) 
 						= mkTaskButtons "or Tasks:" "or" tasknr tst.storageInfo (map fst options) hst
 	# (finished,which,tst=:{html=allhtml})= checkAnyTasks "orTasks" (map snd options) (0,chosen) (False,0) {tst & html = BT [], hst = hst, activated = True}
@@ -520,7 +521,7 @@ where
 	| not adone			= (a,{tst 	& activated = adone
 									, html =	html +|+ 
 												BT buttons +-+ 	(BT chosenname +|+ ahtml) +|+ 
-												(myId -@: allhtml)
+												(userId -@: allhtml)
 							})
 	= (a,{tst & activated = adone, html = html}) 
 
@@ -542,7 +543,7 @@ andTasks :: [(String,Task a)] -> (Task [a]) | iCreateAndPrint a
 andTasks options = mkTask "andTasks" (doandTasks options)
 where
 	doandTasks [] tst	= ireturn_V [] tst
-	doandTasks options tst=:{tasknr,html,myId,hst}
+	doandTasks options tst=:{tasknr,html,userId,hst}
 	# (alist,tst=:{activated=finished,hst=hst})		
 						= checkAllTasks "andTasks" options (0,-1) True [] {tst & html = BT [], activated = True,hst=hst}
 	| finished			= (map snd alist,{tst & html = html}) 
@@ -559,7 +560,7 @@ where
 									,	activated = False
 									, 	html = 	html +|+ 
 												BT buttons +-+ 	(BT chosenname +|+ ahtml) +|+ 
-												(myId -@: allhtml) 
+												(userId -@: allhtml) 
 							})
 	# (alist,{activated=finished,html=allhtml,hst = hst})		
 						= checkAllTasks "PTasks" options (0,chosen) True [] {tst & html = BT [],hst =hst}
@@ -568,7 +569,7 @@ where
 							, activated = finished
 							, html = 	html +|+ 
 										BT buttons +-+ 	(BT chosenname +|+ ahtml) +|+ 
-										(myId -@: allhtml)
+										(userId -@: allhtml)
 						})
 
 
@@ -583,7 +584,7 @@ andTasks_mstone :: [(String,Task a)] -> (Task [(String,a)]) | iCreateAndPrint a
 andTasks_mstone options = mkTask "andTasks_mstone" (PMilestoneTasks` options)
 where
 	PMilestoneTasks` [] tst	= ireturn_V [] tst
-	PMilestoneTasks` options tst=:{tasknr,html,myId}
+	PMilestoneTasks` options tst=:{tasknr,html,userId}
 	# (alist,tst=:{activated=finished,html=allhtml})		
 						= checkAllTasks "andTasks" options (0,-1) True [] {tst & html = BT [], activated = True}
 	| finished			= (alist,{tst & html = html}) 
@@ -600,7 +601,7 @@ where
 									,	activated = adone || milestoneReached
 									, 	html = 	html +|+ 
 												BT buttons +-+ 	(BT chosenname +|+ ahtml) +|+ 
-												(myId -@: allhtml) 
+												(userId -@: allhtml) 
 							})
 	# (alist,{activated=finished,html=allhtml,hst = hst})		
 						= checkAllTasks "PTasks" options (0,chosen) True [] {tst & html = BT [],hst =hst}
@@ -609,7 +610,7 @@ where
 							, activated = finished || milestoneReached
 							, html = 	html +|+ 
 										BT buttons +-+ 	(BT chosenname +|+ ahtml) +|+ 
-										(myId -@: allhtml)
+										(userId -@: allhtml)
 						})
 
 
@@ -649,10 +650,6 @@ where
 		| activated	= (val,{tst & html = BT []})
 		= (val,{tst & html = BT [Txt ("Waiting for completion of "<+++ name)]})
 
-		hiddenTaskId 	= [-1,0:tasknr]
-		normalTaskId  	= [-1,1:tasknr]
-
-
 // time and date related tasks
 
 waitForTimeTask:: HtmlTime	-> (Task HtmlTime)
@@ -685,10 +682,10 @@ where
 // functions on TSt
 
 taskId :: TSt -> (Int,TSt)
-taskId tst=:{myId} = (myId,tst)
+taskId tst=:{userId} = (userId,tst)
 
 userId :: TSt -> (Int,TSt)
-userId tst=:{userId} = (userId,tst)
+userId tst=:{currentUserId} = (currentUserId,tst)
 
 addHtml :: [BodyTag] TSt -> TSt
 addHtml bodytag  tst=:{activated, html}  
@@ -798,13 +795,13 @@ showTaskNr [] 		= ""
 showTaskNr [i] 		= toString i
 showTaskNr [i:is] 	= showTaskNr is <+++ "." <+++ toString i 
 
-itaskId :: ![Int] String -> String
+itaskId :: !TaskNr String -> String
 itaskId nr postfix = "iTask_" <+++ (showTaskNr nr) <+++ postfix
 
-InsertTrace :: !Bool ![Int] !Int String !String ![Trace] -> [Trace]
+InsertTrace :: !Bool !TaskNr !Int String !String ![Trace] -> [Trace]
 InsertTrace finished idx who taskname val trace = InsertTrace` ridx who val trace
 where
-	InsertTrace` :: ![Int] !Int !String ![Trace] -> [Trace]
+	InsertTrace` :: !TaskNr !Int !String ![Trace] -> [Trace]
 	InsertTrace` [i] 	who str traces
 	| i < 0					= abort ("negative task numbers:" <+++ showTaskNr idx <+++ "," <+++ who <+++ "," <+++ taskname)
 	# (Trace _ itraces)		= select i traces

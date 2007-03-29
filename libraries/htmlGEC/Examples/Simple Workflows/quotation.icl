@@ -49,7 +49,7 @@ Start world = doHtmlServer (multiUserTask 2 reviewtask) world
 reviewtask :: Task (Person,Review)
 reviewtask = taskToReview 1 (createDefault, mytask)
 
-mytask :: a -> *TSt -> (a,TSt) | iData a
+mytask :: a -> (Task a) | iData a
 mytask v = [Txt "Fill in Form:",Br,Br] ?>> editTask "TaskDone" v <<@ Submit
 
 taskToReview :: Int (a,a -> Task a) -> Task (a,Review) | iData a
