@@ -22,6 +22,7 @@ npersons = 5
 
 Start world = doHtmlServer (multiUserTask npersons (delegate mytask2 (Time 0 3 0) <<@ Persistent)) world
 
+
 mytask = editTask "Done" 0
 mytask2 =	editTask "Done1" 0 =>> \v1 ->	
 			editTask "Done2" 0 =>> \v2 ->	

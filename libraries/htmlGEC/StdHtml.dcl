@@ -1,7 +1,7 @@
 definition module StdHtml
 
-// top module for generating Clean Web applications using the iData / GEC technique
-// (c) 2005 - 2006 MJP 
+// top module for generating Clean Web applications using the iData technique
+// (c) 2005 - 2006 Rinus Plasmeijer
 
 import
 

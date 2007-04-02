@@ -1,5 +1,8 @@
 definition module htmlSettings
 
+// iData & iTask Library
+// Concept & Programming (c) 2005 - 2007 Rinus Plasmeijer
+
 import htmlHandler
 
 // Global settings of iData applications
@@ -28,7 +31,9 @@ class iSpecialStore a
 		| gerda {|*|} , 				// To store and retrieve a value in a database
 
 		  TC a							// To be able to store values in a dynamic
-								
+
+// Debug switches								
+
 TraceInput			:== False			// show what kind of information is received from Client
 TraceOutput			:== False			// show what kind of information is stored
 

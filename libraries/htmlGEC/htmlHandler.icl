@@ -78,7 +78,7 @@ doHtmlServer2 args userpage world
 doHtmlSubServer :: !(!Int,!Int,!Int,!String) !(*HSt -> (Html,!*HSt)) !*World -> *World
 doHtmlSubServer (prio,min,max,location) userpage world
 	# (console,world) = stdio world
-	# location = ".*"
+	# location = location +++ ".*" // added MJP: location +++
 	# result = RegisterSubProcToServer prio min max ".*" location
 	| result==1
 		# (_,world) = fclose (fwrites ("Error: SubServer \"" +++ location +++ "\" could *NOT* registered to an HTTP 1.1 main server\n") console) world
@@ -92,13 +92,12 @@ doHtmlSubServer (prio,min,max,location) userpage world
 where
 	mycallbackfun :: [String] Int Socket *World -> (Socket,*World)
 	mycallbackfun header contentlength socket world
-	# (method,location,getDataArray,version) = GetFirstLine (hd header)
+	# (method,rlocation,getDataArray,version) = GetFirstLine (hd header)
 	# (alldatareceived,datafromclient,socket,world)	= ReceiveString 0 contentlength socket world
 	| socket==0 						= (0,world)				//socket closed or timed out
-	
 	| alldatareceived== -1
 		# data = "NO DATA RECEIVED (CONTENTLENGTH=0)"
-		# data = data+++"\r\nMethod="+++method+++"\r\nLocation="+++location+++
+		# data = data+++"\r\nMethod="+++method+++"\r\nLocation="+++rlocation+++
 				"\r\nVersion="+++version+++"\r\nHost="+++(GetHeaderData header "HOST:")
 
 		# (_,data,world) 				= doHtmlServer2 [] userpage world
@@ -106,18 +105,16 @@ where
 		= SendString data "text/html" header socket world
 	| alldatareceived<>0
 		# data = "THERE ARE "+++(toString alldatareceived)+++" BYTES OF DATA LEFT, DATA SO FAR: " +++ datafromclient
-		# data = data+++"\r\nMethod="+++method+++"\r\nLocation="+++location+++
+		# data = data+++"\r\nMethod="+++method+++"\r\nLocation="+++rlocation+++
 				"\r\nVersion="+++version+++"\r\nHost="+++(GetHeaderData header "HOST:")
 		= SendString data "text/plain" header socket world
 
-	# data = "ALL DATA RECEIVED: " +++ datafromclient
-	# data = data+++"\r\nMethod="+++method+++"\r\nLocation="+++location+++
+	| alldatareceived==0 && rlocation <> location 			// server asks for files
+			= SendFile rlocation header socket world 
+	# data = "ALL DATA RECEIVED: " +++ datafromclient		// server asks for html code 
+	# data = data+++"\r\nMethod="+++method+++"\r\nLocation="+++rlocation+++
 			"\r\nVersion="+++version+++"\r\nHost="+++(GetHeaderData header "HOST:")
-//	= SendString data "text/plain" header socket world
-
-	
-//		# (_,htmlcode,world) 				= doHtmlServer2 datafromclient userpage world
-	# (_,htmlcode,world) 				= doHtmlServer2 (makeArguments datafromclient) userpage world
+	# (_,htmlcode,world) 	= doHtmlServer2 (makeArguments datafromclient) userpage world
 	= SendString htmlcode "text/html" header socket world
 
 
