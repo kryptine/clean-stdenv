@@ -209,34 +209,34 @@ where
 (<|) taska (pred,message) = doTask
 where
 	doTask tst=:{html = ohtml,activated}
-	| not activated 			= (createDefault,tst)
-	# (a,tst=:{activated,html= nhtml}) = taska {tst & html = BT []}
-	| not activated || pred a	= (a,{tst & html = ohtml +|+ nhtml})
+	| not activated 					= (createDefault,tst)
+	# (a,tst=:{activated,html= nhtml}) 	= taska {tst & html = BT []}
+	| not activated || pred a			= (a,{tst & html = ohtml +|+ nhtml})
 	= doTask {tst & html = ohtml +|+ BT (message a)}
 
 (<<@) infix 3 ::  (Task a) b  -> (Task a) | setTaskAttr b
 (<<@) task attr = doTask
 where
 	doTask tst=:{storageInfo}
-	# tst = setTaskAttr attr tst
-	# (a,tst) = task (setTaskAttr attr tst)
+	# tst 		= setTaskAttr attr tst
+	# (a,tst) 	= task (setTaskAttr attr tst)
 	= (a,{tst & storageInfo = storageInfo})
 
 (?>>) infix 5 :: [BodyTag] (Task a) -> (Task a) | iCreate a
 (?>>) prompt task = doTask
 where
 	doTask tst=:{html=ohtml,activated}
-	| not activated	= (createDefault,tst)
-	# (a,tst=:{activated,html=nhtml}) = task {tst & html = BT []}
-	| activated = (a,{tst & html = ohtml})
+	| not activated						= (createDefault,tst)
+	# (a,tst=:{activated,html=nhtml}) 	= task {tst & html = BT []}
+	| activated 						= (a,{tst & html = ohtml})
 	= (a,{tst & html = ohtml +|+ BT prompt +|+ nhtml})
 
 (!>>) infix 5 :: [BodyTag] (Task a) -> (Task a) | iCreate a
 (!>>) prompt task = doTask
 where
 	doTask tst=:{html=ohtml,activated=myturn}
-	| not myturn	= (createDefault,tst)
-	# (a,tst=:{activated,html=nhtml}) = task {tst & html = BT []}
+	| not myturn			= (createDefault,tst)
+	# (a,tst=:{html=nhtml}) = task {tst & html = BT []}
 	= (a,{tst & html = ohtml +|+ BT prompt +|+ nhtml})
 
 // Task makers are wrappers which take care of
@@ -348,9 +348,9 @@ deleteSubTasks :: !TaskNr TSt -> TSt
 deleteSubTasks tasknr tst=:{hst} = {tst & hst = deleteIData (subtasksids tasknr) hst}
 where
 	subtasksids tasknr formid
-	# prefix 		= itaskId tasknr ""
-	# lprefix 		= size prefix
-	# lformid 		= size formid
+	# prefix 	= itaskId tasknr ""
+	# lprefix 	= size prefix
+	# lformid	= size formid
 	= prefix <= formid && lformid > lprefix	
 
 // parallel subtask creation utility
@@ -459,16 +459,16 @@ where
 mchoiceTasks :: [(String,Task a)] -> (Task [a]) | iCreateAndPrint a
 mchoiceTasks options = mkTask "mchoiceTask" (domchoiceTasks options)
 where
-	domchoiceTasks [] tst			= ([],{tst& activated = True})
+	domchoiceTasks [] tst	= ([],{tst& activated = True})
 	domchoiceTasks options tst=:{tasknr,html,hst}									// choose one subtask out of the list
-	# taskId						= itaskId tasknr ("_MLC." <+++ length options)
-	# (cboxes,hst)					= ListFuncCheckBox (Init,cFormId tst.storageInfo taskId initCheckboxes) hst
-	# optionsform					= cboxes.form <=|> [Txt text \\ (text,_) <- options]
+	# taskId				= itaskId tasknr ("_MLC." <+++ length options)
+	# (cboxes,hst)			= ListFuncCheckBox (Init,cFormId tst.storageInfo taskId initCheckboxes) hst
+	# optionsform			= cboxes.form <=|> [Txt text \\ (text,_) <- options]
 	# (_,tst=:{html=ahtml,activated = adone})
-									= (internEditSTask "" "OK" Void <<@ Page)	{tst & activated = True, html = BT [],hst = hst,tasknr = [-1:tasknr]} 
-	| not adone						= seqTasks [] {tst & html=html +|+ BT [optionsform] +|+ ahtml,tasknr = [0:tasknr]}
-	# mytasks						= [option \\ option <- options & True <- snd cboxes.value]
-	# (val,tst)						= seqTasks mytasks {tst & tasknr = [0:tasknr]}
+							= (internEditSTask "" "OK" Void <<@ Page)	{tst & activated = True, html = BT [],hst = hst,tasknr = [-1:tasknr]} 
+	| not adone				= seqTasks [] {tst & html=html +|+ BT [optionsform] +|+ ahtml,tasknr = [0:tasknr]}
+	# mytasks				= [option \\ option <- options & True <- snd cboxes.value]
+	# (val,tst)				= seqTasks mytasks {tst & tasknr = [0:tasknr]}
 	= (val,{tst & tasknr = tasknr})
 
 	initCheckboxes  = 
@@ -483,20 +483,46 @@ where
 orTask :: (Task a,Task a) -> (Task a) | iCreateAndPrint a
 orTask (taska,taskb) = mkTask "orTask" (doOrTask (taska,taskb))
 
-doOrTask (taska,taskb) tst=:{tasknr,html}
-# (a,tst=:{activated=adone,html=ahtml})	= mkParSubTask "orTask" 0 taska {tst & tasknr = tasknr, html = BT []}
-# (b,tst=:{activated=bdone,html=bhtml})	= mkParSubTask "orTask" 1 taskb {tst & tasknr = tasknr, html = BT [],activated = True}
-# (aorb,aorbdone,myhtml)				= if adone (a,adone,ahtml) (if bdone (b,bdone,bhtml) (a,False,ahtml +|+ bhtml))
-= (aorb,{tst & activated = aorbdone, html = html +|+ myhtml})
+doOrTask (taska,taskb) tst=:{tasknr,html,hst}
+# taskId								= itaskId tasknr "orTaskChosen"
+# (chosen,hst)							= mkStoreForm  (Init,cFormId tst.storageInfo taskId -1) id hst
+| chosen.value == 0	// a chosen
+	# (a,tst=:{html=ahtml})				= mkParSubTask "orTask" 0 taska {tst & tasknr = tasknr, html = BT [], hst = hst}
+	= (a,{tst & html = html +|+ ahtml})
+| chosen.value == 1	// b chosen
+	# (b,tst=:{html=bhtml})				= mkParSubTask "orTask" 1 taskb {tst & tasknr = tasknr, html = BT [], hst = hst}
+	= (b,{tst & html = html +|+ bhtml})
+# (a,tst=:{activated=adone,html=ahtml})	= mkParSubTask "orTask" 0 taska {tst & tasknr = tasknr, html = BT [], hst = hst}
+| adone
+	# (chosen,hst)						= mkStoreForm  (Init,cFormId tst.storageInfo taskId -1) (\_ -> 0) hst
+	= (a,{tst & html = html +|+ ahtml})
+# (b,tst=:{activated=bdone,html=bhtml})	= mkParSubTask "orTask" 1 taskb {tst & tasknr = tasknr, html = BT []}
+| bdone
+	# (chosen,hst)						= mkStoreForm  (Init,cFormId tst.storageInfo taskId -1) (\_ -> 1) hst
+	= (b,{tst & html = html +|+ bhtml})
+= (a,{tst & activated = False, html = html +|+ ahtml +|+ bhtml})
 
 orTask2 :: (Task a,Task b) -> (Task (EITHER a b)) | iCreateAndPrint a & iCreateAndPrint b
 orTask2 (taska,taskb) = mkTask "orTask2" (doorTask2 (taska,taskb))
 where
-	doorTask2 (taska,taskb) tst=:{tasknr,html}
-	# (a,tst=:{activated=adone,html=ahtml})	= mkParSubTask "orTask" 0 taska {tst & tasknr = tasknr, html = BT []}
+	doorTask2 (taska,taskb) tst=:{tasknr,html,hst}
+	# taskId								= itaskId tasknr "orTask2Chosen"
+	# (chosen,hst)							= mkStoreForm  (Init,cFormId tst.storageInfo taskId -1) id hst
+	| chosen.value == 0	// a chosen
+		# (a,tst=:{html=ahtml})				= mkParSubTask "orTask" 0 taska {tst & tasknr = tasknr, html = BT [], hst = hst}
+		= (LEFT a,{tst & html = html +|+ ahtml})
+	| chosen.value == 1	// b chosen
+		# (b,tst=:{html=bhtml})				= mkParSubTask "orTask" 1 taskb {tst & tasknr = tasknr, html = BT [], hst = hst}
+		= (RIGHT b,{tst & html = html +|+ bhtml})
+	# (a,tst=:{activated=adone,html=ahtml})	= mkParSubTask "orTask" 0 taska {tst & tasknr = tasknr, html = BT [], hst = hst}
+	| adone
+		# (chosen,hst)						= mkStoreForm  (Init,cFormId tst.storageInfo taskId -1) (\_ -> 0) hst
+		= (LEFT a,{tst & html = html +|+ ahtml})
 	# (b,tst=:{activated=bdone,html=bhtml})	= mkParSubTask "orTask" 1 taskb {tst & tasknr = tasknr, html = BT []}
-	# (aorb,aorbdone,myhtml)				= if adone (LEFT a,adone,ahtml) (if bdone (RIGHT b,bdone,bhtml) (LEFT a,False,ahtml +|+ bhtml))
-	= (aorb,{tst & activated = aorbdone, html = html +|+ myhtml})
+	| bdone
+		# (chosen,hst)						= mkStoreForm  (Init,cFormId tst.storageInfo taskId -1) (\_ -> 1) hst
+		= (RIGHT b,{tst & html = html +|+ bhtml})
+	= (LEFT a,{tst & activated = False, html = html +|+ ahtml +|+ bhtml})
 
 checkAnyTasks traceid taskoptions (ctasknr,skipnr) (bool,which) tst=:{tasknr}
 | ctasknr == length taskoptions	= (bool,which,tst)
@@ -510,6 +536,12 @@ orTasks options = mkTask "orTasks" (doorTasks options)
 where
 	doorTasks [] tst	= ireturn_V createDefault tst
 	doorTasks tasks tst=:{tasknr,html,hst,userId}
+	# taskId			= itaskId tasknr "orTasksChosen"
+	# (chosenS,hst)		= mkStoreForm  (Init,cFormId tst.storageInfo taskId -1) id hst
+	| chosenS.value <> -1	// task has been finished already
+		# chosenTask   	= snd (options!!chosenS.value)
+		# (a,tst)		= chosenTask {tst & tasknr = [-1,chosenS.value:tasknr], activated = True, html = BT [], hst = hst}
+		= (a,{tst & activated = True, html = html}) 
 	# (chosen,buttons,chosenname,hst) 
 						= mkTaskButtons "or Tasks:" "or" tasknr tst.storageInfo (map fst options) hst
 	# (finished,which,tst=:{html=allhtml})= checkAnyTasks "orTasks" (map snd options) (0,chosen) (False,0) {tst & html = BT [], hst = hst, activated = True}
@@ -523,8 +555,8 @@ where
 												BT buttons +-+ 	(BT chosenname +|+ ahtml) +|+ 
 												(userId -@: allhtml)
 							})
+	# (chosenS,hst)		= mkStoreForm  (Init,cFormId tst.storageInfo taskId -1) (\_ -> chosenvalue)  hst // remember finished task for next tim
 	= (a,{tst & activated = adone, html = html}) 
-
 
 // Parallel tasks ending if all complete
 
@@ -572,7 +604,6 @@ where
 										(userId -@: allhtml)
 						})
 
-
 checkAllTasks traceid options (ctasknr,skipnr) bool alist tst=:{tasknr}
 | ctasknr == length options		= (reverse alist,{tst & activated = bool})
 | ctasknr == skipnr				= checkAllTasks traceid options (inc ctasknr,skipnr) bool alist tst
@@ -612,7 +643,6 @@ where
 										BT buttons +-+ 	(BT chosenname +|+ ahtml) +|+ 
 										(userId -@: allhtml)
 						})
-
 
 andTasks_mu :: String [(Int,Task a)] -> (Task [a]) | iData a
 andTasks_mu taskid tasks = newTask "andTasks_mu" (domu_andTasks tasks)
