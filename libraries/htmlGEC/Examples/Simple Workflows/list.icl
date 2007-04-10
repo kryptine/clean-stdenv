@@ -11,7 +11,7 @@ import StdEnv, StdHtml
 derive gForm []
 derive gUpd  []
 
-Start world = doHtmlServer (multiUserTask 2 listControl) world
+Start world = doHtmlServer (multiUserTask 2 True listControl) world
 
 listControl
 =	[Txt "Define the list:",Br,Br] 

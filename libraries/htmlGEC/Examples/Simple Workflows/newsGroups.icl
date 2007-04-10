@@ -24,7 +24,7 @@ nmessage		= 5							// maximum number of messages to read from group
 :: Subscription	:== (GroupName,Index)		// last message read in corresponding group
 :: Index		:== Int						// 0 <= index < length newsgroup 
 
-Start world = doHtmlServer (multiUserTask npersons allTasks) world
+Start world = doHtmlServer (multiUserTask npersons True allTasks) world
 
 allTasks = andTasks_mu "newsGroups" [(0,foreverTask newsManager):[(i,foreverTask newsReader) \\ i <- [1 .. npersons - 1]]]
 

@@ -29,7 +29,7 @@ derive gerda 	QForm, Review, Person, Gender
 					}
 
 //Start world = doHtmlServer (multiUserTask 2 (reviewtask <<@ Persistent)) world
-Start world = doHtmlServer (multiUserTask 2 reviewtask) world
+Start world = doHtmlServer (multiUserTask 2 True reviewtask) world
 
 :: QForm = 	{ toComp 			:: String
 			, startDate 		:: HtmlDate

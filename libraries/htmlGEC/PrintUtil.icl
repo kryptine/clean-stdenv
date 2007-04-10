@@ -66,10 +66,10 @@ htmlCmnd		:: !a !b -> FoF | gHpr{|*|} a & gHpr{|*|} b
 htmlCmnd		hdr txt			= \file -> closeCmnd hdr (openCmnd hdr "" file <+ txt)
 
 openCmnd		:: !a !b -> FoF | gHpr{|*|} a & gHpr{|*|} b
-openCmnd		hdr attr		= \file -> [|"\r<":file]  <+ hdr <+ attr <+ ">"
+openCmnd		hdr attr		= \file -> [|"<":file]  <+ hdr <+ attr <+ ">"
 
 closeCmnd		:: !a -> FoF | gHpr{|*|} a
-closeCmnd		hdr				= \file -> print "\r</" file <+ hdr <+ ">"
+closeCmnd		hdr				= \file -> print "</" file <+ hdr <+ ">"
 
 htmlAttrCmnd	:: !hdr !attr !body -> FoF | gHpr{|*|} hdr & gHpr{|*|} attr & gHpr{|*|} body
 htmlAttrCmnd	hdr attr txt	= \file -> closeCmnd hdr (openCmnd hdr attr file <+ txt)

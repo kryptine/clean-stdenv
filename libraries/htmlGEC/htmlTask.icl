@@ -48,21 +48,62 @@ where setTaskAttr mode tst = {tst & storageInfo.taskmode = mode}
 
 // wrappers
 
-singleUserTask :: !(Task a) !*HSt -> (Html,*HSt) | iCreate a 
-singleUserTask task hst 
-# (_,html,hst) = startTask 0 task hst
+startTask :: !Int !Bool !(Task a) !*HSt -> (a,[BodyTag],!*HSt) | iCreate a 
+startTask thisUser traceOn taska hst 
+# (a,body,tst) = startTstTask thisUser traceOn taska tst
+= (a,body,tst.hst)
+where
+	tst	=	{ tasknr		= [-1]
+			, activated 	= True
+			, currentUserId	= thisUser 
+			, userId		= defaultUser 
+			, html 			= BT []
+			, trace			= Nothing
+			, hst 			= hst
+			, storageInfo 	= {tasklife = Session, taskstorage = PlainString, taskmode = Edit }}
+
+startNewTask :: !Int !Bool !(Task a) -> Task a | iCreateAndPrint a 
+startNewTask newUser traceOn taska = mkTask "startNewTask" startNewTask`
+where
+	startNewTask` tst=:{html} 
+	# (a,body,tst) 	= startTstTask newUser traceOn taska {tst & html = BT [], currentUserId = newUser, userId = defaultUser, tasknr = [-1]}
+	= (a,{tst & html = html +|+ BT body})
+
+singleUserTask :: !Int !Bool !(Task a) !*HSt -> (Html,*HSt) | iCreate a 
+singleUserTask userId traceOn task hst 
+# (_,html,hst) = startTask userId traceOn task hst
 = mkHtml "stest" html hst
 
-multiUserTask :: !Int!(Task a) !*HSt -> (Html,*HSt) | iCreate a 
-multiUserTask nusers task  hst 
+multiUserTask :: !Int !Bool !(Task a) !*HSt -> (Html,*HSt) | iCreate a 
+multiUserTask nusers traceOn task  hst 
 # (idform,hst) 	= FuncMenu (Init,nFormId "User_Selected" 
 						(0,[("User " +++ toString i,\_ -> i) \\ i<-[0..nusers - 1] ])) hst
 # currentWorker	= snd idform.value
-# (_,html,hst) 	= startTask currentWorker task hst
-= mkHtml "mtest" (idform.form ++ html) hst
+# (_,html,hst) 	= startTask currentWorker traceOn task hst
+= mkHtml "mtest" (ifTraceOn idform.form ++ html) hst
+where
+	ifTraceOn form = if traceOn form []
 
-startTask :: !Int !(Task a) !*HSt -> (a,[BodyTag],!*HSt) | iCreate a 
-startTask thisUser taska hst
+multiUserTask2 :: !(!Int,!Int) !Int !Bool !(Task a) !*HSt -> (Html,*HSt) | iCreate a 
+multiUserTask2 (minutes,seconds) nusers traceOn task  hst 
+# (idform,hst) 	= FuncMenu (Init,nFormId "User_Selected" 
+						(0,[("User " +++ toString i,\_ -> i) \\ i<-[0..nusers - 1] ])) hst
+# currentWorker	= snd idform.value
+# (_,html,hst) 	= startTask currentWorker traceOn task hst
+= mkxHtml "mtest" (idform.form ++ html) hst
+where
+	mkxHtml s tags hst 	= (Html (header s) (body tags),hst)
+	header s 			= Head [`Hd_Std [Std_Title s]] [Hd_Script [] (autoRefresh minutes seconds)]
+	body tags 			= Body [onloadBody] tags
+	onloadBody 			= `Batt_Events [OnLoad (SScript scriptName)]
+	scriptName 			= "beginrefresh()"
+
+
+startTstTask :: !Int !Bool !(Task a) !*TSt -> (a,[BodyTag],!*TSt) | iCreate a 
+startTstTask thisUser traceOn taska tst=:{hst}
+| thisUser < 0 
+	# (a,tst=:{html}) 	= taska {tst & hst = hst}
+	= (a, noFilter html, {tst & html = html})
 # userVersionNr			= "User" <+++ thisUser <+++ "_VersionPNr"
 # sessionVersionNr		= "User" <+++ thisUser <+++ "_VersionSNr" 
 # traceId				= "User" <+++ thisUser <+++ "_Trace" 
@@ -74,28 +115,21 @@ startTask thisUser taska hst
 | sversion.value < pversion.value	= (createDefault,  refresh.form ++ [Br,Br, Hr [],Br] <|.|>
 														[Font [Fnt_Color (`Colorname Yellow)]
 													   [B [] "Sorry, cannot apply command.",Br, 
-													    B [] "Your page is not up-to date!",Br]],hst)
-# (a,{html,hst,trace}) = taska 	{ tasknr		= [-1]
-								, activated 	= True
-								, currentUserId	= thisUser 
-								, userId			= defaultUser 
-								, html 			= BT []
-								, trace			= if doTrace (Just []) Nothing
-								, hst 			= hst
-								, storageInfo 	= {tasklife = Session, taskstorage = PlainString, taskmode = Edit }}
+													    B [] "Your page is not up-to date!",Br]],{tst & hst = hst})
+# (a,tst=:{html,hst,trace}) = taska {tst & hst = hst, trace = if doTrace (Just []) Nothing}
 # (pversion,hst)	 	= mkStoreForm (Init, pFormId userVersionNr 0) inc hst
 # (sversion,hst)	 	= mkStoreForm (Init, nFormId sessionVersionNr pversion.value) inc hst
 # (selbuts,selname,seltask,hst)	= Filter thisUser defaultUser ((defaultUser,"Main") @@: html) hst
-= 	(a,	refresh.form ++ traceAsked.form ++
+= 	(a,	refresh.form ++ ifTraceOn traceAsked.form ++
 		[Br,Hr [],showUser thisUser,Br,Br] ++ 
-		if doTrace
+		if (doTrace && traceOn)
 			[ printTrace2 trace ]
 			[ STable []	[ [BodyTag  selbuts, selname <||>  seltask ]
 						]
 			] 
-	,hst)
+	,{tst & hst = hst})
 where
-	defaultUser	= 0
+	ifTraceOn form = if traceOn form []
 
 	mkSTable2 :: [[BodyTag]] -> BodyTag
 	mkSTable2 table
@@ -134,6 +168,12 @@ where
 
 	isNil [] = True
 	isNil _ = False
+
+	noFilter (BT body) 			= body
+	noFilter (_ @@: html) 		= noFilter html
+	noFilter (_ -@: html) 		= noFilter html
+	noFilter (htmlL +-+ htmlR) 	= [noFilter htmlL  <=>  noFilter htmlR]
+	noFilter (htmlL +|+ htmlR) 	=  noFilter htmlL <|.|> noFilter htmlR
 
 mkTaskButtons :: !String !String !TaskNr !Storage ![String] *HSt -> (Int,[BodyTag],[BodyTag],*HSt)
 mkTaskButtons header myid tasknr info btnnames hst
@@ -746,6 +786,13 @@ where
 	= (idata.value,{tst & tasknr = tasknr,activated = activated, html = html +|+ 
 															(if activated (BT idata.form) (BT idata.form +|+ ahtml)), hst = hst})
 
+appHSt2 :: (HSt -> (a,HSt)) -> (Task a) | iData a
+appHSt2 fun = mkTask "appHSt" doit
+where
+	doit tst=:{hst}
+	# (value,hst)		= fun hst
+	= (value,{tst & hst = hst, activated = True})													// task is now completed, handle as previously
+
 appHSt :: (HSt -> (a,HSt)) -> (Task a) | iData a
 appHSt fun = mkTask "appHSt" doit
 where
@@ -753,7 +800,7 @@ where
 	# taskId			= itaskId tasknr "appHst"
 	# (store,hst) 		= mkStoreForm (Init,cFormId storageInfo taskId (False,createDefault)) id hst  			
 	# (done,value)		= store.value
-	| done 				= (value,{tst & hst = hst})	// if task has completed, don't do it again
+	| done 				= (value,{tst & hst = hst})													// if task has completed, don't do it again
 	# (value,hst)		= fun hst
 	# (store,hst) 		= mkStoreForm (Init,cFormId storageInfo taskId (False,createDefault)) (\_ -> (True,value)) hst 	// remember task status for next time
 	# (done,value)		= store.value
@@ -766,7 +813,7 @@ where
 	# taskId			= itaskId tasknr "_Once_"
 	# (store,hst) 		= mkStoreForm (Init,cFormId storageInfo taskId (False,createDefault)) id hst  			
 	# (done,value)		= store.value
-	| done 				= (value,{tst & hst = hst})	// if task has completed, don't do it again
+	| done 				= (value,{tst & hst = hst})													// if task has completed, don't do it again
 	# (value,tst=:{hst})= fun {tst & hst = hst}
 	# (store,hst) 		= mkStoreForm (Init,cFormId storageInfo taskId (False,createDefault)) (\_ -> (True,value)) hst 	// remember task status for next time
 	# (done,value)		= store.value

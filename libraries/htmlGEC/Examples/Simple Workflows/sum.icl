@@ -8,7 +8,7 @@ import StdEnv, StdHtml, htmlTask
 
 // choose one of the following variants
 
-Start world = let s :: Task Int; s = sequence in doHtmlServer (singleUserTask s) world
+Start world = let s :: Task Int; s = sequence in doHtmlServer (singleUserTask 0 True s) world
 //Start world = doHtmlServer (singleUserTask sequence3) world
 //Start world = doHtmlServer (multiUserTask 3 sequenceMU) world
 Start world = doHtmlServer sequenceIData2 world

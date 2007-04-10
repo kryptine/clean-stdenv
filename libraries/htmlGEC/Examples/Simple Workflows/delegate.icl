@@ -20,7 +20,7 @@ derive gPrint Maybe
 
 npersons = 5
 
-Start world = doHtmlServer (multiUserTask npersons (delegate mytask2 (Time 0 3 0) <<@ Persistent)) world
+Start world = doHtmlServer (multiUserTask npersons True (delegate mytask2 (Time 0 3 0) <<@ Persistent)) world
 
 
 mytask = editTask "Done" 0

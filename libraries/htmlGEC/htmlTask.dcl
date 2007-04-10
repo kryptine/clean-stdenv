@@ -9,6 +9,8 @@ import htmlSettings, htmlButtons
 :: Task a		:== St *TSt a				// an interactive task
 :: Void 		= Void						// for tasks returning non interesting results, won't show up in editors either
 
+defaultUser		:== 0						// default id of user
+
 derive gForm 	Void						
 derive gUpd 	Void, TClosure
 derive gPrint 	Void, TClosure
@@ -16,14 +18,20 @@ derive gParse 	Void
 derive gerda 	Void
 
 /* Initiating the iTask library:
-startTask		:: start function for iTasks for user with indicated id		
+startTask		:: start iTasks for user with given id, True if trace allowed
+				 	id < 0	: for login purposes						
 singleUserTask 	:: start wrapper function for single user 
 multiUserTask 	:: start wrapper function for user with indicated id with option to switch between [0..users - 1]  
+multiUserTask2 	:: same, but forces an automatic update request every (n minutes, m seconds)  
 */
 
-startTask 		:: !Int !(Task a) 	!*HSt -> (a,[BodyTag],!*HSt) 	| iCreate a
-singleUserTask 	:: !(Task a) 		!*HSt -> (Html,*HSt) 			| iCreate a
-multiUserTask 	:: !Int !(Task a)  	!*HSt -> (Html,*HSt) 			| iCreate a
+startTask 		:: !Int !Bool !(Task a) 	!*HSt -> (a,[BodyTag],!*HSt) 	| iCreate a
+singleUserTask 	:: !Int	!Bool !(Task a) 	!*HSt -> (Html,*HSt) 			| iCreate a
+multiUserTask 	:: !Int !Bool !(Task a)  	!*HSt -> (Html,*HSt) 			| iCreate a
+startNewTask 	:: !Int !Bool !(Task a) 		  -> Task a 				| iCreateAndPrint a 
+
+multiUserTask2 :: !(!Int,!Int) !Int !Bool !(Task a) !*HSt -> (Html,*HSt) 	| iCreate a 
+
 
 /* promote iData editor
 editTask		:: create an editor with button to finish task
@@ -173,11 +181,19 @@ addHtml 		:: [BodyTag] TSt -> TSt
 (*>>)			:: lift functions of type (TSt -> (a,TSt)) to iTask domain 
 (@>>)			:: lift functions of (TSt -> TSt) to iTask domain 
 appIData		:: lift iData editors to iTask domain
-appHSt			:: lift HSt domain to TSt domain
+appHSt			:: lift HSt domain to TSt domain, will be executed only once
+appHSt2			:: lift HSt domain to TSt domain, will be executed on each invocation
 */
 (*>>) infix 4 	:: (TSt -> (a,TSt)) (a -> Task b) 	-> Task b
 (@>>) infix 4 	:: (TSt -> TSt) (Task a) 			-> Task a
 appIData 		:: (IDataFun a) 					-> Task a 			| iData a
 appHSt 			:: (HSt -> (a,HSt)) 				-> Task a			| iData a
+appHSt2			:: (HSt -> (a,HSt)) 				-> Task a			| iData a
+
+/* Controlling side effects
+Once			:; 	task will be done only once, the value of the task will be remembered
+*/
+
+Once 			:: (Task a) 						-> (Task a) 		| iData a
 
 

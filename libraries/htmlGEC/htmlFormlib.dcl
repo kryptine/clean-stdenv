@@ -124,3 +124,9 @@ openWindowScript 	:: !String !Int !Int !Bool !Bool !Bool !Bool !Bool !Bool !Html
 openNoticeScript 	:: !String !Int !Int !Html -> Script
 
 OnLoadException		:: !(!Bool,String) -> [BodyAttr]				// to produce message on opening page
+
+autoRefresh 		:: !Int !Int -> Script							// autorefresh page after n minutes and m seconds have been passed
+
+
+
+

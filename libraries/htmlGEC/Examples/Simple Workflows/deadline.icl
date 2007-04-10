@@ -15,7 +15,7 @@ derive gUpd  []
 
 npersons = 5
 
-Start world = doHtmlServer (multiUserTask npersons (foreverTask (deadline mytask))) world
+Start world = doHtmlServer (multiUserTask npersons True (foreverTask (deadline mytask))) world
 
 mytask = editTask "OK" 0 <| ((<) 23,\n -> [Txt ("Error " <+++ n <+++ " should be larger than 23")])
 

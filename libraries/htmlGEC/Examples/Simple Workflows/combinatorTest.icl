@@ -12,7 +12,7 @@ import StdEnv, htmlTask, htmlTrivial
 derive gUpd []
 derive gForm []
 
-Start world = doHtmlServer (multiUserTask 9 (foreverTask_Std simpleMile)) world
+Start world = doHtmlServer (multiUserTask 9 True (foreverTask_Std simpleMile)) world
 
 
 

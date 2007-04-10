@@ -252,15 +252,6 @@ where
 				  ]
 	tableAttr	= [Tbl_Border 1, Tbl_Bgcolor (`Colorname Lime)]
 
-
-myScript :: [BodyTag] -> Script
-myScript body = openWindowScript scriptName 700 400 False False True True False False 
-					(mksHtml "Information window" body)
-
-onloadBody = `Batt_Events [OnLoad (SScript scriptName)]
-
-scriptName = "openwindow()"
-
 // Function to display contents of selected items, database, basket
 
 mkShopTable :: (Int,Int) (Headers d) [ItemData d] [BodyTag] [BodyTag] -> BodyTag
@@ -310,6 +301,15 @@ header s 			= Head [`Hd_Std [Std_Title s]] []
 body tags 			= Body [onloadBody] tags
 mksHtml s tags 	 	= Html (Head [`Hd_Std [Std_Title s]] []) (Body [] tags)
 
+//[Hd_Script [] (autoRefresh 0 10)]
+
+myScript :: [BodyTag] -> Script
+myScript body = openWindowScript scriptName 700 400 False False True True False False 
+					(mksHtml "InformationWindow" body)
+
+onloadBody = `Batt_Events [OnLoad (SScript scriptName)]
+
+scriptName = "OpenMyWindow()"
 
 but s				= LButton defpixel s
 butp s				= PButton (defpixel/2,defpixel/2) ("images/" +++ s)
