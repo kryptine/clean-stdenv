@@ -18,18 +18,19 @@ derive gParse 	Void
 derive gerda 	Void
 
 /* Initiating the iTask library:
-startTask		:: start iTasks for user with given id, True if trace allowed
-				 	id < 0	: for login purposes						
+startTask		:: start iTasks beginning with user with given id, True if trace allowed
+				 	id < 0	: for login purposes.						
+startNewTask	:: same, lifted to iTask domain, use it after a login ritual						
 singleUserTask 	:: start wrapper function for single user 
 multiUserTask 	:: start wrapper function for user with indicated id with option to switch between [0..users - 1]  
 multiUserTask2 	:: same, but forces an automatic update request every (n minutes, m seconds)  
 */
 
 startTask 		:: !Int !Bool !(Task a) 	!*HSt -> (a,[BodyTag],!*HSt) 	| iCreate a
-singleUserTask 	:: !Int	!Bool !(Task a) 	!*HSt -> (Html,*HSt) 			| iCreate a
-multiUserTask 	:: !Int !Bool !(Task a)  	!*HSt -> (Html,*HSt) 			| iCreate a
 startNewTask 	:: !Int !Bool !(Task a) 		  -> Task a 				| iCreateAndPrint a 
 
+singleUserTask 	:: !Int	!Bool !(Task a) 	!*HSt -> (Html,*HSt) 			| iCreate a
+multiUserTask 	:: !Int !Bool !(Task a)  	!*HSt -> (Html,*HSt) 			| iCreate a
 multiUserTask2 :: !(!Int,!Int) !Int !Bool !(Task a) !*HSt -> (Html,*HSt) 	| iCreate a 
 
 

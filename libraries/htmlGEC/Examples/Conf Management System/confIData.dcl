@@ -49,7 +49,7 @@ uniqueReport  	 int name 	:== name +++ ".report." +++ toString int	// report of 
 uniquePaper   	 int name 	:== name +++ ".paper."  +++ toString int	// submitted paper
 uniqueDiscussion int name	:== "discuss."  +++ (uniquePaper int name)	// discussion about submitted paper
 
-// Persistent conf account database
+// TxtFile conf account database
 
 AccountsDB			:: !Init !ConfAccounts   *HSt -> (ConfAccounts,!*HSt)	// confaccounts db
 PaperNrStore 		:: !(Int -> Int) *HSt -> (Int,!*HSt) 					// paper counter
@@ -70,7 +70,7 @@ getAllMyReports :: !ConfAccount !ConfAccounts !*HSt -> ([(Int,[(Person, Maybe Re
 
 // global setting to store either in files or in a database 
 
-storageOption 	:== Persistent			// Choose this one to store in files
+storageOption 	:== TxtFile			// Choose this one to store in files
 //storageOption 	:== Database		// Choose this one to store in a database
 
-storeFormId 	:== if (storageOption == Persistent) pFormId dbFormId 
+storeFormId 	:== if (storageOption == TxtFile) pFormId dbFormId 

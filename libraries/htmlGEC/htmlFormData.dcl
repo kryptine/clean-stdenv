@@ -22,8 +22,8 @@ import GenEq
 
 :: Lifespan										// 	defines how long a form will be maintained		
 	=	Database								//	persistent form stored in Database using generic db functions from Gerda
-	|	Persistent								// 	persistent form stored in a file
-	|	PersistentRO							//	persistent form stored in a file which is used Read-Only
+	|	TxtFile									// 	persistent form stored in a file
+	|	TxtFileRO								//	persistent form stored in a file which is used Read-Only
 	| 	Session									// 	form will live as long as one browses between the pages offered by the application
 	| 	Page									// 	form will be automatically garbage collected when no reference is made to it in a page			
 	|	Temp									//	form setting is not stored at all, only lives temporaly in the Clean application	

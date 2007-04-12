@@ -22,8 +22,8 @@ mkFormId s d = {id = s, lifespan = Page, mode = Edit, storage = PlainString, iva
 tFormId		:: !String !d -> FormId d;			tFormId    s d = mkFormId  s d <@ Temp
 nFormId		:: !String !d -> FormId d;			nFormId    s d = mkFormId  s d <@ Page
 sFormId		:: !String !d -> FormId d;			sFormId    s d = mkFormId  s d <@ Session
-pFormId		:: !String !d -> FormId d;			pFormId    s d = mkFormId  s d <@ Persistent
-rFormId		:: !String !d -> FormId d;			rFormId    s d = mkFormId  s d <@ PersistentRO
+pFormId		:: !String !d -> FormId d;			pFormId    s d = mkFormId  s d <@ TxtFile
+rFormId		:: !String !d -> FormId d;			rFormId    s d = mkFormId  s d <@ TxtFileRO
 dbFormId	:: !String !d -> FormId d;			dbFormId   s d = mkFormId  s d <@ Database
 
 tdFormId	:: !String !d -> FormId d;			tdFormId   s d = tFormId   s d <@ Display
@@ -71,7 +71,7 @@ subsFormId :: !(FormId a) !String !d -> FormId d		// make new formid of new type
 subsFormId formid s d	= subFormId formid s d <@ Session
 
 subpFormId :: !(FormId a) !String !d -> FormId d		// make new formid of new type copying other old settinf
-subpFormId formid s d	= subFormId formid s d <@ Persistent
+subpFormId formid s d	= subFormId formid s d <@ TxtFile
 
 subtFormId :: !(FormId a) !String !d -> FormId d		// make new formid of new type copying other old settinf
 subtFormId formid s d	= subFormId formid s d <@ Temp
@@ -114,15 +114,15 @@ instance toBool Init    where toBool Set = True
 instance toInt Lifespan where toInt Temp			= 0
 							  toInt Page			= 1
 							  toInt Session			= 2
-							  toInt PersistentRO	= 3
-							  toInt Persistent		= 4
+							  toInt TxtFileRO	= 3
+							  toInt TxtFile		= 4
 							  toInt Database		= 5
 
 instance toString Lifespan where 	
 							  toString Temp			= "Temp"
 							  toString Page			= "Page"
 							  toString Session		= "Session"
-							  toString PersistentRO	= "PersistentRO"
-							  toString Persistent	= "Persistent"
+							  toString TxtFileRO	= "TxtFileRO"
+							  toString TxtFile	= "TxtFile"
 							  toString Database		= "Database"
 

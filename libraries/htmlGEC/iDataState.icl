@@ -117,36 +117,36 @@ where
 
 	// read out file and store as string
 
-	findState` {id,lifespan = Persistent,storage = PlainString} Leaf_ world 
+	findState` {id,lifespan = TxtFile,storage = PlainString} Leaf_ world 
 	# (string,world)	= readState (MyDir server) id world
 	= case parseString string of
-		Just a			= (True, Just a, Node_ Leaf_ (id,OldState {format = PlainStr string, life = Persistent}) Leaf_,world)
+		Just a			= (True, Just a, Node_ Leaf_ (id,OldState {format = PlainStr string, life = TxtFile}) Leaf_,world)
 		Nothing			= (False,Nothing,Leaf_,world)
 
-	findState` {id,lifespan = PersistentRO,storage = PlainString} Leaf_ world 
+	findState` {id,lifespan = TxtFileRO,storage = PlainString} Leaf_ world 
 	# (string,world)	= readState (MyDir server) id world
 	= case parseString string of
-		Just a			= (True, Just a, Node_ Leaf_ (id,OldState {format = PlainStr string, life = PersistentRO}) Leaf_,world)
+		Just a			= (True, Just a, Node_ Leaf_ (id,OldState {format = PlainStr string, life = TxtFileRO}) Leaf_,world)
 		Nothing			= (False,Nothing,Leaf_,world)
 
 	// read out file and store as dynamic
 
-	findState` {id,lifespan = Persistent,storage = StaticDynamic} Leaf_ world 
+	findState` {id,lifespan = TxtFile,storage = StaticDynamic} Leaf_ world 
 	# (string,world)	= readState (MyDir server) id world
 	= case string of 
 		""				= (False,Nothing,Leaf_,world)
 		_				= case string_to_dynamic` string of
-							dyn=:(dynval::a^)	= (True, Just dynval,Node_ Leaf_ (id,OldState {format = StatDyn dyn, life = Persistent}) Leaf_,world)
+							dyn=:(dynval::a^)	= (True, Just dynval,Node_ Leaf_ (id,OldState {format = StatDyn dyn, life = TxtFile}) Leaf_,world)
 							else				= (False,Nothing,    Leaf_,world)
 //	with
 //		mydebug s dyn = ["\n" <+++ s <+++ ShowValueDynamic dyn <+++ " :: " <+++ ShowTypeDynamic dyn]
 
-	findState` {id,lifespan = PersistentRO,storage = StaticDynamic} Leaf_ world 
+	findState` {id,lifespan = TxtFileRO,storage = StaticDynamic} Leaf_ world 
 	# (string,world)	= readState (MyDir server) id world
 	= case string of 
 		""				= (False,Nothing,Leaf_,world)
 		_				= case string_to_dynamic` string of
-							dyn=:(dynval::a^)	= (True, Just dynval,Node_ Leaf_ (id,OldState {format = StatDyn dyn, life = PersistentRO}) Leaf_,world)
+							dyn=:(dynval::a^)	= (True, Just dynval,Node_ Leaf_ (id,OldState {format = StatDyn dyn, life = TxtFileRO}) Leaf_,world)
 							else				= (False,Nothing,    Leaf_,world)
 
 	// cannot find the value at all
@@ -181,13 +181,13 @@ where
 	initNewState id lifespan olifespan PlainString   nv = {format = PlainStr (printToString nv),                     life = order lifespan olifespan}
 	initNewState id lifespan olifespan StaticDynamic nv = {format = StatDyn  (dynamic nv),                           life = order lifespan olifespan}// convert the hidden state information stored in the html page
 
-	adjustlife PersistentRO = Persistent		// to enforce that a read only persistent file is written once
+	adjustlife TxtFileRO = TxtFile		// to enforce that a read only persistent file is written once
 	adjustlife life		= life
 
 	detlifespan (OldState formstate) = formstate.life
 	detlifespan (NewState formstate) = formstate.life
 
-	order l1 l2			= if (l1 < l2) l2 l1	// longest lifetime chosen will be the final setting Database > Persistent > Session > Page > temp
+	order l1 l2			= if (l1 < l2) l2 l1	// longest lifetime chosen will be the final setting Database > TxtFile > Session > Page > temp
 
 deleteStates :: !(String -> Bool) !*FormStates *NWorld -> (*FormStates,*NWorld)	
 deleteStates pred formstates=:{fstates,server} world
@@ -204,7 +204,7 @@ where
 	= (Node_ nleft a nright,world)
 
 	deleteIData left right a world
-	# world = deletePersistentIData a world
+	# world = deleteTxtFileIData a world
 	= (join left right,world)
 	where
 		join Leaf_  right 	= right
@@ -218,13 +218,13 @@ where
 			where
 				(largest,nright) = FindRemoveLargest right
 
-		deletePersistentIData (fid,OldState {life}) world 	= deletePersistent fid life world
-		deletePersistentIData (fid,NewState {life}) world 	= deletePersistent fid life world
+		deleteTxtFileIData (fid,OldState {life}) world 	= deleteTxtFile fid life world
+		deleteTxtFileIData (fid,NewState {life}) world 	= deleteTxtFile fid life world
 
-		deletePersistent fid Database 		world=:{gerda}	= {world & gerda  = deleteGerda fid gerda}
-		deletePersistent fid Persistent 	world 			= deleteState (MyDir server) fid world
-		deletePersistent fid PersistentRO 	world			= deleteState (MyDir server) fid world
-		deletePersistent fid _ 				world 			= world
+		deleteTxtFile fid Database 		world=:{gerda}	= {world & gerda  = deleteGerda fid gerda}
+		deleteTxtFile fid TxtFile 	world 			= deleteState (MyDir server) fid world
+		deleteTxtFile fid TxtFileRO 	world			= deleteState (MyDir server) fid world
+		deleteTxtFile fid _ 				world 			= world
 
 // Serialization and De-Serialization of states
 //
@@ -256,7 +256,7 @@ where
 
 storeFormStates :: !FormStates *NWorld -> (BodyTag,*NWorld)
 storeFormStates {fstates = allFormStates,server} world
-#	world							= writeAllPersistentStates allFormStates world			// first write all persistens states
+#	world							= writeAllTxtFileStates allFormStates world			// first write all persistens states
 =	(BodyTag
 	[ submitscript    
 	, globalstateform (SV encodedglobalstate) 
@@ -282,25 +282,25 @@ where
 		// temperal form don't need to be stored and can be skipped as well
 		// the state of all other new forms created are stored in the page 
 		htmlStateOf (fid,NewState {life})
-			| isMember life [Database,Persistent,PersistentRO,Temp]			= Nothing
+			| isMember life [Database,TxtFile,TxtFileRO,Temp]			= Nothing
 		htmlStateOf (fid,NewState {format = PlainStr string,life})			= Just (fid,life,PlainString,string)
 		htmlStateOf (fid,NewState {format = StatDyn dynval, life})			= Just (fid,life,StaticDynamic,dynamic_to_string dynval)
 
-	writeAllPersistentStates :: !FStates *NWorld -> *NWorld				// store states in persistent stores
-	writeAllPersistentStates Leaf_ nworld = nworld
-	writeAllPersistentStates (Node_ left st right) nworld
-		= writeAllPersistentStates right (writeAllPersistentStates left (writePersistentState st nworld))
+	writeAllTxtFileStates :: !FStates *NWorld -> *NWorld				// store states in persistent stores
+	writeAllTxtFileStates Leaf_ nworld = nworld
+	writeAllTxtFileStates (Node_ left st right) nworld
+		= writeAllTxtFileStates right (writeAllTxtFileStates left (writeTxtFileState st nworld))
 	where
 	// only new states need to be stored, since old states have not been changed (assertion)
-		writePersistentState (sid,NewState {format,life = Database}) nworld=:{gerda}
+		writeTxtFileState (sid,NewState {format,life = Database}) nworld=:{gerda}
 		= case format of
 			DBStr string gerdafun	= {nworld & gerda = gerdafun gerda}										// last value is stored in curried write function
 			StatDyn dynval			= {nworld & gerda = writeGerda sid (dynamic_to_string dynval) gerda}	// write the dynamic as a string to the database
-		writePersistentState (sid,NewState {format,life = Persistent}) nworld
+		writeTxtFileState (sid,NewState {format,life = TxtFile}) nworld
 		= case format of
 				PlainStr string		= writeState (MyDir server) sid string nworld
 				StatDyn  dynval		= writeState (MyDir server) sid (dynamic_to_string dynval) nworld
-		writePersistentState _ nworld
+		writeTxtFileState _ nworld
 		= nworld
 
 // trace States

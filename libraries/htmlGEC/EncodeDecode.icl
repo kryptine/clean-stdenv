@@ -80,13 +80,13 @@ EncodeHtmlStates [(id,lifespan,storageformat,state):xsys]
 where
 	fromLivetime Page 			PlainString		= "N"	// encode Lifespan & StorageFormat in first character
 	fromLivetime Session 		PlainString		= "S"
-	fromLivetime Persistent 	PlainString		= "P"
-	fromLivetime PersistentRO 	PlainString		= "R"
+	fromLivetime TxtFile 		PlainString		= "P"
+	fromLivetime TxtFileRO 		PlainString		= "R"
 	fromLivetime Database	 	PlainString		= "D"
 	fromLivetime Page 			StaticDynamic	= "n"
 	fromLivetime Session 		StaticDynamic	= "s"
-	fromLivetime Persistent 	StaticDynamic	= "p"
-	fromLivetime PersistentRO 	StaticDynamic	= "r"
+	fromLivetime TxtFile 		StaticDynamic	= "p"
+	fromLivetime TxtFileRO 		StaticDynamic	= "r"
 	fromLivetime Database	 	StaticDynamic	= "d"
 
 // de-serialize Html State
@@ -113,10 +113,10 @@ where
 											['n':_]		= (Page,        StaticDynamic)
 											['S':_]		= (Session,     PlainString  )
 											['s':_] 	= (Session,     StaticDynamic)
-											['P':_] 	= (Persistent,  PlainString  )
-											['p':_]		= (Persistent,  StaticDynamic)
-											['R':_]		= (PersistentRO,PlainString  )
-											['r':_] 	= (PersistentRO,StaticDynamic)
+											['P':_] 	= (TxtFile,  PlainString  )
+											['p':_]		= (TxtFile,  StaticDynamic)
+											['R':_]		= (TxtFileRO,PlainString  )
+											['r':_] 	= (TxtFileRO,StaticDynamic)
 											['D':_] 	= (Database,    PlainString  )
 											['d':_] 	= (Database,    StaticDynamic)
 											_			= (Page,        PlainString  )
