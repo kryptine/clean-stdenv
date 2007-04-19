@@ -27,10 +27,12 @@ class iParse a
 		| gParse{|*|} a					// To de-serialize a string back to a value
 		
 class iSpecialStore a
-										// OPTION: Comment out the next line if you do not have access to an ODCB database on your machine !!!!
-		| gerda {|*|} , 				// To store and retrieve a value in a database
+										// OPTION: Comment out the next two lines if you do not have access to an ODCB database on your machine !!!!
+										// and enable the third line 
+		| gerda {|*|} 	 				// To store and retrieve a value in a database
+		, TC a							// To be able to store values in a dynamic
+//		| TC a							// To be able to store values in a dynamic
 
-		  TC a							// To be able to store values in a dynamic
 
 // Debug switches								
 

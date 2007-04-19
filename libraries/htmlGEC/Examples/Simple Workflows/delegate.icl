@@ -20,7 +20,8 @@ derive gPrint Maybe
 
 npersons = 5
 
-Start world = doHtmlServer (multiUserTask npersons True (delegate mytask2 (Time 0 3 0) <<@ Persistent)) world
+//Start world = doHtmlServer (multiUserTask npersons True (delegate mytask2 (Time 0 3 0) <<@ TxtFile)) world
+Start world = doHtmlServer (multiUserTask npersons True (delegate mytask2 (Time 0 3 0) )) world
 
 
 mytask = editTask "Done" 0
@@ -46,7 +47,8 @@ where
 	
 		stopTask 		= buttonTask "Stop" (return_V True)					  			
 
-		stopTask2		= stopTask -||- timerStop time -||- (0 @:: stopTask)	
+		stopTask2		= stopTask -||- (0 @:: stopTask)	
+//		stopTask2		= stopTask -||- timerStop time -||- (0 @:: stopTask)	
 
 		timerStop time	= waitForTimerTask time #>> return_V True
 	

@@ -320,7 +320,7 @@ where
 	where
 		dv					= PullDown (1,  defpixel/2) (md-1,   [toString i \\ i <- [1..31]])
 		mv					= PullDown (1,  defpixel/2) (mm-1,   [toString i \\ i <- [1..12]])
-		yv					= PullDown (1,2*defpixel/3) (my-2006,[toString i \\ i <- [2006..2015]])
+		yv					= PullDown (1,2*defpixel/3) (my-1950,[toString i \\ i <- [1950..2015]])
 
 		my					= if (y >= 2006 && y <= 2015) y 2006
 		md					= if (d >= 1    && d <= 31)   d 1

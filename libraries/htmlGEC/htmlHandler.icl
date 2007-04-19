@@ -78,7 +78,7 @@ doHtmlServer2 args userpage world
 doHtmlSubServer :: !(!Int,!Int,!Int,!String) !(*HSt -> (Html,!*HSt)) !*World -> *World
 doHtmlSubServer (prio,min,max,location) userpage world
 	# (console,world) = stdio world
-	# location = location +++ ".*" // added MJP: location +++
+	# location = location //+++ ".*" // added MJP: location +++
 	# result = RegisterSubProcToServer prio min max ".*" location
 	| result==1
 		# (_,world) = fclose (fwrites ("Error: SubServer \"" +++ location +++ "\" could *NOT* registered to an HTTP 1.1 main server\n") console) world

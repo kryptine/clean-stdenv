@@ -12,6 +12,7 @@ import StdEnv, htmlTask, htmlTrivial
 //Start world = doHtmlServer (singleUserTask singleStepCoffeeMachine) world
 //Start world = doHtmlServer (singleUserTask (foreverTask_GC SimpleCoffee2)) world
 Start world = doHtmlServer (singleUserTask 0 True (foreverTask_GC CoffeeMachine )) world
+//Start world = doHtmlSubServer (1,0,1,"*.*")(singleUserTask 0 True (foreverTask_GC CoffeeMachine )) world
 
 
 
