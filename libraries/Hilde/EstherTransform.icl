@@ -69,7 +69,7 @@ transform{|NTexpression|} (Apply f x) = transform{|*|} f @ transform{|*|} x
 transform{|NTterm|} (Plain e) = transform{|*|} e
 transform{|NTterm|} (Sugar e) = transform{|*|} (desugar e)
 
-transform{|NTdynamic|} (NTdynamic _ e) = CoreDynamic @ transform{|*|} e
+transform{|NTdynamic|} (NTdynamic _ e) = coreDynamic @ transform{|*|} e
 
 transform{|NTnameOrValue|} (NTvalue d _) = CoreCode d
 transform{|NTnameOrValue|} (NTname y _) = CoreVariable y
@@ -195,3 +195,7 @@ codeY :: Core
 codeY = CoreCode (dynamic Y :: A.a: (a -> a) -> a) 
 where 
 	Y f = let x = f x in x 
+
+coreDynamic :: Core
+coreDynamic = CoreCode (overloaded "TC" (dynamic (undef, id) :: A.a: (a, (a -> Dynamic) -> (a -> Dynamic))))
+

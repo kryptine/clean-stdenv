@@ -23,9 +23,8 @@ abstract :: !String !Core -> Core
 abstract v e | noVarOf v e = coreK @ e
 abstract v (CoreVariable x) = coreI
 //abstract v (srcf @ CoreVariable x) | noVarOf v srcf = srcf //dangerous!
-/*abstract v (srcf @ CoreVariable x) | noVarOf v srcf = case srcf of
-	CoreCode (f :: a -> b) -> srcf
-	_ -> CoreEta @ srcf*/
+/*abstract v (srcf @ CoreVariable x) | noVarOf v srcf = CoreEta srcf 
+abstract v (CoreEta srcf) = CoreEta (abstract v srcf)*/
 abstract v (srcf @ srcx @ srcy)
 	| noVarOf v srcf
 		| noVarOf v srcx = coreB` @ srcf @ srcx @ abstract v srcy
@@ -42,31 +41,20 @@ abstract_ e = coreK @ e
 noVarOf :: !String !Core -> Bool
 noVarOf v (f @ x) = noVarOf v f && noVarOf v x
 noVarOf v (CoreVariable x) = v <> x
+//noVarOf v (CoreEta f) = noVarOf v f
 noVarOf _ _ = True
 
-coreF = dynamic F :: A.a b: (a -> b) a -> b
-F f x = f x
-
 generateCode :: !Core !*env -> (!Dynamic, !*env) | resolveFilename env
-/*generateCode CoreEta env = (coreF, env)
-generateCode (CoreEta @ e) env 
-	# (codef, env) = generateCode e env
-	= case codef of
-		(f :: a -> b) -> (dynamic f :: a -> b, env)
-		_ -> raise (ApplyTypeError codef (dynamic Omega :: A.a b: a -> b))*/
-generateCode CoreDynamic env = (dynamic I ||| Class "TC" :: A.z: Overloaded (z -> Dynamic) (z -> Dynamic) (Context z), env)
-generateCode (CoreDynamic @ e) env 
-	# (codex, env) = generateCode e env
-	= (dynamic codex :: Dynamic, env)
 generateCode (CoreCode d) env = (d, env)
 generateCode (CoreVariable v) env = (raise (UnboundVariable v), env)
+/*generateCode (CoreEta e) env
+	# (codef, env) = generateCode e env
+	= case codef of
+		(f :: a b -> c) -> (dynamic f :: a b -> c, env)
+		_ -> raise (ApplyTypeError (dynamic Omega :: A.d e f: d e -> f) codef)*/
 generateCode (e1 @ e2) env 
 	# (codef, env) = generateCode e1 env
 	  (codex, env) = generateCode e2 env
-	/*= case (codex, codef) of
-		(x :: b, f ||| (Class "TC") :: Overloaded (b -> Dynamic) (b -> c) (Context b)) 
-		  = case dynamicToDynamic x of (tc :: b -> Dynamic) -> (dynamic f tc x :: c, env) 
-		_*/
 	# d = case codex of
 				(x :: A.a: a) -> case codef of
 					(f :: A.b: b) -> dynamic f x :: A.c: c
@@ -100,13 +88,6 @@ solveOverloading d=:(_ :: Overloaded a b c) env
 		_ -> (check d, env)
 where
 	solve d=:(e ||| Class c :: Overloaded d t (Context a)) env = case dynamic Omega :: a of
-/*		(_ :: A.b: b) | c == "TC"
-			# n = countTypeVar (dynamic Omega :: (a, t))
-			| n > 0 -> (Nothing, env)
-			# (Just dyndict, env) = resolveInstance` c (dynamic Omega :: a) env
-			-> case dyndict of 
-				(dict :: d) -> (Just (dynamic e dict :: t), env)
-				_ -> raise (InvalidInstance c dyndict)*/
 		(_ :: A.b: b) -> (Nothing, env)
 		type
 			# (maybe, env) = resolveInstance` c type env
