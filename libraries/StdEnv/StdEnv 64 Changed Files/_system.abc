@@ -9,7 +9,7 @@
 
 .export	_channel_code
 
-.export	EMPTY dINT BOOL CHAR REAL FILE _STRING_ _ARRAY_ ARRAY
+.export	EMPTY dINT BOOL CHAR REAL FILE _STRING_ _ARRAY_ ARRAY INT32 REAL32
 .export	_reserve _cycle_in_spine _hnf 
 .export	_type_error _match_error selector_m_error index_error
 .export	_print_graph _eval_to_nf
