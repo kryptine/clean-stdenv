@@ -38,10 +38,10 @@
 .desc GRAPH	_hnf	_hnf	0 0	""
 .desc _ARRAY_	_hnf	_hnf	0 0	"_ARRAY_"
 .desc _STRING_	_hnf	_hnf	0 0	"_STRING_"
-|.desc STRING	_hnf	_hnf	0	"STRING"
-|.desc FILE	_hnf	_hnf	0	"FILE"
 .desc REAL	_hnf	_hnf	0 0	"REAL"
 .desc dINT	_hnf	_hnf	0 0	"INT"
+.desc REAL32	_hnf	_hnf	0 0	"REAL32"
+.desc INT32		_hnf	_hnf	0 0	"INT32"
 .desc BOOL	_hnf	_hnf	0 0	"BOOL"
 .desc CHAR	_hnf	_hnf	0 0	"CHAR"
 
