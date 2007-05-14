@@ -4,10 +4,10 @@ import StdEnv,StdTCP
 
 from httpUtil import unlines, cSplit, endWith, splitAfter, wordsWith, unwords, readFile
 
-from  iDataSettings import DEBUGSERVER
+from  iDataSettings import TraceHttp10
 
 (<<?) file s 
-	= case DEBUGSERVER of
+	= case TraceHttp10 of
 		True	= file <<< s <<< "\n" 
 		False	= file
 
@@ -26,9 +26,10 @@ getArgValue a arguments
 //functie die de HTTP-server start
 StartServer :: Int [(String,(String String Arguments *World-> ([String],String,*World)))] *World -> *World
 StartServer poortNr linktofunctionlist world
+	# (location,_)		= hd linktofunctionlist
 	// open console voor debuggen:
 	# (console,world) 	= stdio world
-	# console			= fwrites "Open your favorite browser and surf to http://localhost/clean\n" console
+	# console			= fwrites ("Open your favorite browser and surf to http://localhost/" +++ location +++ "\n") console
 
 
 	//luister op de opgegeven poort:
