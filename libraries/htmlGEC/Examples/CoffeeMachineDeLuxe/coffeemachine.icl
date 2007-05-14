@@ -1,7 +1,7 @@
 module coffeemachine
 
 import StdEnv
-import StdHtml
+import StdiData
 
 derive gForm  MachineState, Output, Product
 derive gUpd   MachineState, Output, Product
