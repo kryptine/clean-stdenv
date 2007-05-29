@@ -1,17 +1,13 @@
 definition module FamkeKernel
 
 import StdDynamic
-from FamkeProcess import :: ProcessId(..)
-
-processId :: !*World -> (!ProcessId, !*World)
 
 :: FamkePort a b
-	= FamkeProcessServer
+	= FamkeProcessServer !Int
 	| FamkeNameServer
 	| FamkeAnyServer
-	| FamkeServer !.(FamkeId a b)
+	| FamkeServer !Int !Int
 
-:: FamkeId a b = {famkeIp :: !Int, famkePort :: !Int}
 :: FamkeServer a b 
 :: FamkeChannel a b 
 
@@ -25,4 +21,4 @@ famkeDisconnect :: !*(FamkeChannel .a .b) !*World -> *World
 famkeSend :: a !*(FamkeChannel a .b) !*World -> (!Bool, !*FamkeChannel a .b, !*World) | TC a
 famkeReceive :: !Bool !*(FamkeChannel .a b) !*World -> (!Bool, b, !*FamkeChannel .a b, !*World) | TC b
 
-StartKernel :: !ProcessId !.(*World -> *World) !*World -> *World
+StartKernel :: !Int !.(*World -> *World) !*World -> *World

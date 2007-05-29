@@ -1,7 +1,6 @@
 implementation module FamkeKernel
 
 import StdDynamic
-from FamkeProcess import :: ProcessId
 import TcpIp
 import StdFile
 import StdBool, StdMisc, StdString, StdList, StdArray, DynID
@@ -15,14 +14,6 @@ from StdDynamicLowLevelInterface import
 
 TRACE msg x :== x//trace_n msg x; import StdDebug
 
-processId :: !*World -> (!ProcessId, !*World)
-processId famke = (cast famke, cast famke)//famke!processId
-where
-	cast :: !.a -> .b
-	cast _ = code inline {
-			pop_a	0
-		}
-
 :: FamkeServer a b 
 	:== TcpIp .(FamkeChannel b a)
 
@@ -34,7 +25,7 @@ famkeOpen comport famke
 	# (ip, port, famke) = toTcpIpPort comport famke
 	  (ok, port, tcpip, famke) = listenTcpIp port famke
 	| not ok = (False, abort "famkeOpen failed", abort "famkeOpen failed", famke)
-	= (True, FamkeServer {famkeIp = ip, famkePort = port}, tcpip, famke)
+	= (True, FamkeServer ip port, tcpip, famke)
 
 famkeAccept :: !Bool !*(FamkeServer .a .b) !*World -> (!Bool, !*FamkeChannel .b .a, !*FamkeServer .a .b, !*World)
 famkeAccept blocking tcpip famke
@@ -61,22 +52,12 @@ famkeDisconnect comm famke
 	= famke
 
 famkeSend :: a !*(FamkeChannel a .b) !*World -> (!Bool, !*FamkeChannel a .b, !*World) | TC a
-famkeSend x comm famke = unsafeFamkeSendDynamic (dynamic x :: a^) comm famke
-
-famkeReceive :: !Bool !*(FamkeChannel .a b) !*World -> (!Bool, b, !*FamkeChannel .a b, !*World) | TC b
-famkeReceive blocking comm famke
-	# (ok, d, comm, famke) = unsafeFamkeReceiveDynamic blocking comm famke
-	| not ok = (False, abort "famkeReceive: nothing received", comm, famke)
-	= case d of
-		(x :: b^) -> (True, x, comm, famke)
-		_ -> abort "famkeReceive: Type pattern match failed"
-
-unsafeFamkeSendDynamic :: !Dynamic !*(FamkeChannel .a .b) !*World -> (!Bool, !*FamkeChannel .a .b, !*World)
-unsafeFamkeSendDynamic d comm famke//=:{world}
-	# famke = TRACE (case d of
+famkeSend x comm famke
+	# d = dynamic x :: a^
+	  famke = TRACE (case d of
 		(s :: String) -> "famkeSendDynamic: " +++ s +++ " :: String.\n"
 		d -> "famkeSendDynamic: ? :: " +++ toString (typeCodeOfDynamic d) +++ ".\n") famke
-	# (s, famke) = dynamicToString d famke
+	  (s, famke) = dynamicToString d famke
 	  (ok, comm) = sendTcpIp s comm
 	| not ok = (False, comm, famke)
 	# (comm, famke) = handleRequestsForFiles comm famke//{famke & world = world}
@@ -89,17 +70,19 @@ where
 		  (ok, comm) = sendTcpIp data comm
 		= handleRequestsForFiles comm famke//{famke & world = world}
 
-unsafeFamkeReceiveDynamic :: !Bool !*(FamkeChannel .a .b) !*World -> (!Bool, !Dynamic, !*FamkeChannel .a .b, !*World)
-unsafeFamkeReceiveDynamic blocking comm famke
+famkeReceive :: !Bool !*(FamkeChannel .a b) !*World -> (!Bool, b, !*FamkeChannel .a b, !*World) | TC b
+famkeReceive blocking comm famke
 	# (ok, s, comm) = receiveTcpIp blocking comm
-	| not ok = (False, dynamic abort "unsafeFamkeReceiveDynamic: nothing received" :: A.c: c, comm, famke)
+	| not ok = (False, abort "famkeReceiveDynamic: nothing received", comm, famke)
 	# (s, sysdyns, libtyps) = fileReferencesInDynamicAsString ("" +++. s)
       (comm, famke/*=:{world}*/) = doRequestsForFiles (sysdyns ++ libtyps) comm famke
 	  (d, famke) = stringToDynamic s famke
 	# famke = TRACE (case d of
 		(s :: String) -> "famkeReceiveDynamic: " +++ s +++ " :: String.\n"
 		d -> "famkeReceiveDynamic: ? :: " +++ toString (typeCodeOfDynamic d) +++ ".\n") famke
-	= (True, d, comm, famke/*{famke & world = world}*/)
+	= case d of
+		(x :: b^) -> (True, x, comm, famke)
+		_ -> abort "famkeReceive: Type pattern match failed"
 where
 	doRequestsForFiles [] comm famke 
 		# (ok, comm) = sendTcpIp "" comm
@@ -112,7 +95,7 @@ where
 		  famke = writeFileInDynamicPath f data famke
 		= doRequestsForFiles fs comm famke//{famke & world = world}
 
-StartKernel :: !ProcessId !.(*World -> *World) !*World -> *World
+StartKernel :: !Int !.(*World -> *World) !*World -> *World
 StartKernel id f world
 //	# {world} = f {processId = id, world = world}
 	# world = f (cast id)
@@ -156,13 +139,13 @@ where
 		= (ok, file, {famke & world = world})
 */
 toTcpIpPort :: !(FamkePort .a .b) !*World -> (!Int, !TcpIpPort, !*World)
-toTcpIpPort FamkeProcessServer famke
-	# (_, ip, famke) = localhostIp famke
+toTcpIpPort (FamkeProcessServer ip) famke
+//	# (_, ip, famke) = localhostIp famke
 	= (ip, FixedPort 0xFA00, famke)
 toTcpIpPort FamkeNameServer famke
 	# (_, ip, famke) = localhostIp famke
 	= (ip, FixedPort 0xFA01, famke)
-toTcpIpPort (FamkeServer {famkeIp, famkePort}) famke = (famkeIp, FixedPort famkePort, famke)
+toTcpIpPort (FamkeServer famkeIp famkePort) famke = (famkeIp, FixedPort famkePort, famke)
 toTcpIpPort FamkeAnyServer famke 
 	# (_, ip, famke) = localhostIp famke
 	= (ip, AnyPort, famke)
