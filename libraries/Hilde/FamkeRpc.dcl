@@ -1,6 +1,6 @@
 definition module FamkeRpc
 
-from FamkeKernel import :: FamkePort//(..)
+from FamkeKernel import :: FamkePort(..)
 
 :: RpcId a b :== FamkePort a b
 
