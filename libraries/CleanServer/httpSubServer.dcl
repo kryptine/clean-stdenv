@@ -16,7 +16,7 @@ import httpUtil
 :: Socket :== Int;
 
 //required functions
-RegisterSubProcToServer :: !Int !Int !Int !String !String -> Int
+RegisterSubProcToServer :: !Int !Int !Int !String !String -> Int		// priority minimum maximum number of subservers
 WaitForMessageLoop :: ([String] Int Socket *World -> (Socket,*World)) Socket !*World -> *World
 
 //helper-functions for sending (suggested to use one of these)
