@@ -2,7 +2,7 @@ definition module genericgecs
 
 import gec
 import infragecs
-import StdBimap
+//import StdBimap XXX
 
 /** gGEC gecArgs env -->  (gec,env)
 		creates the value-infrastructure of a Visual Editor Component (GEC) that is defined by

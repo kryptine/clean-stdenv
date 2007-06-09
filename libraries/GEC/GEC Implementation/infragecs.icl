@@ -4,8 +4,8 @@ import StdBool, StdFunc, StdList, StdMisc, StdTuple
 import StdPSt, StdPStClass
 import GenDefaultVal, guiloc, guigecs, TRACE
 
-import StdBimap
-derive bimap GECArgs
+//import StdBimap XXX
+derive bimap GECArgs, Maybe
 
 ::	BasicSt t env
 	=	{	basicVisible     :: !Bool
