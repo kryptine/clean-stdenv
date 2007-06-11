@@ -93,7 +93,7 @@ isPressed :: Button -> Bool
 isPressed (Button _ _) = False
 isPressed Pressed      = True
 
-derive generate Mode, Button, Machine, Output, Product
+derive ggen Mode, Button, Machine, Output, Product
 
 coffeemachine
 	= startCircuit (feedback (edit "Coffee" >>> arr updCoffee)) (toViewModel (Idle,initCoffee))

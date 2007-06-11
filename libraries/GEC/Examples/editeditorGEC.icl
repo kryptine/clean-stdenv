@@ -25,6 +25,7 @@ where
 		   		} = {all & result = DynStr (dynamic (f v)) (ShowValueDynamic (dynamic (f v)))}
 	dotest all = all
 */
+ggen {|(->)|} ga gb i is = undef
 :: MyRecord = { function :: AGEC (Int -> Int)
               , argument :: AGEC Int
               , result   :: AGEC Int
@@ -43,7 +44,7 @@ where
 		   		} = {all & result = showAGEC ((^^ af) (^^ av))}
 	dotest all = all
 	
-derive generate MyRecord, Command, Editor, TypeVal, Maybe, DynString, ApplicationElem
+derive ggen MyRecord, Command, Editor, Maybe, DynString, ApplicationElem
 
 Start :: *World -> *World
 //Start world = goGui testje world  

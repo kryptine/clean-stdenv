@@ -4,6 +4,8 @@ import StdEnv
 import StdIO
 import StdGEC
 
+ggen {|(->)|} ga gb i is = undef
+
 // TO TEST JUST REPLACE THE EXAMPLE NAME IN THE START RULE WITH ANY OF THE EXAMPLES BELOW
 // ALL EXAMPLES HAVE TO BE OF FORM pst -> pst
 
@@ -24,7 +26,7 @@ where
 
 myclock = Timed (\i -> 100) 100 
 
-derive generate Mode, Timed
+derive ggen Mode, Timed
 
 example_timer2 = startCircuit (edit "delay (msec)" >>> arr f >>> display "Show Prime Numbers" >>> loop (second (delay (2,Hide allprimes) >>> display "Show Prime Numbers" >>> arr thisone))) 100
 where
