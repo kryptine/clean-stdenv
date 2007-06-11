@@ -2,13 +2,13 @@ implementation module buttonGEC
 
 import genericgecs, guigecs, infragecs
 import StdPSt
-
+import StdEnv
 // Buttons :
 	
 instance toInt Button where
 	toInt any = 0
 
-derive generate Button
+derive ggen Button
 instance parseprint Button where
 	parseGEC any = Just undef
 	printGEC any = "Button"
@@ -43,7 +43,7 @@ where
 
 // Up Down button ...
 
-derive generate UpDown
+derive ggen UpDown
 
 instance parseprint UpDown where
 	parseGEC "UpPressed" 	= Just UpPressed
@@ -88,7 +88,7 @@ instance toInt UpDown where
 
 // Checkbox ...
 
-derive generate Checkbox
+derive ggen Checkbox
 instance parseprint Checkbox where
 	parseGEC "Checked" =  Just Checked
 	parseGEC any		= Just NotChecked
@@ -130,7 +130,7 @@ where
 
 // Simple text ...
 
-derive generate Text
+derive ggen Text
 instance parseprint Text where
 	parseGEC any 	=  Just (Text "")
 	printGEC (Text t) = t

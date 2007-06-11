@@ -130,4 +130,4 @@ ShowTypeDynamic d = strip (snd (toStringDynamic d) +++ " ")
 strip s = { ns \\ ns <-: s | ns >= '\020' && ns <= '\0200'}
 
 	
-generate{|Dynamic|} trace stream = (dynamic 1 :: Int, trace, \_ -> 0, stream)
+ggen{|Dynamic|} trace stream = [dynamic 0 :: Int \\ i <- [0..] ]

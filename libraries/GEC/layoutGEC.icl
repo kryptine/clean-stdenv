@@ -1,6 +1,7 @@
 implementation module layoutGEC
 
 import genericgecs, guigecs, infragecs, StdGECExt
+import StdEnv
 
 // (,) is used to place editors next to each other
 

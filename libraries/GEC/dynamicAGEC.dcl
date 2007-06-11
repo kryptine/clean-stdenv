@@ -12,4 +12,4 @@ derive gGEC (->), DynString
 ShowValueDynamic :: Dynamic -> String
 ShowTypeDynamic  :: Dynamic -> String
 
-derive generate Dynamic
+derive ggen Dynamic

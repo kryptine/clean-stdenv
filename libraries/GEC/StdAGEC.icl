@@ -1,7 +1,7 @@
 implementation module StdAGEC
 
 import genericgecs, guigecs, infragecs
-import StdGECExt, basicAGEC
+import StdGECExt, basicAGEC, StdMisc
 
 :: GECaGECb a ps 	= E.va : {bimapto :: va -> a, bimapfrom :: a -> va ,gGEC :: (TgGEC va *(PSt ps))}
 
@@ -357,9 +357,9 @@ CGECtoAGEC cgec a
 		 } "CGECtoAGEC"
 
 
-generate{|AGEC|} gena trace randomStream 
-# (a,trace,atoi,random) = gena trace randomStream
-= (undef, trace, \a -> 0, randomStream)
+ggen{|AGEC|} gena trace randomStream 
+= abort "Cannot generate random AGEC"
+//= (undef, trace, \a -> 0, randomStream)
 
 // unused utility functions ...
 

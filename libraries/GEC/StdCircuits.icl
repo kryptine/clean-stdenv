@@ -7,6 +7,7 @@ implementation module StdCircuits
 ********************************************************************/
 
 import StdAGEC, basicAGEC, layoutGEC
+import StdEnv
 
 selfCir :: String (a -> a) -> (GecCircuit a a) | gGEC{|*|} a
 selfCir s f = 	feedback (		arr f 

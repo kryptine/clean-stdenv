@@ -26,7 +26,7 @@ to_BimapGEC 		:: (Bimap a b) a -> (BimapGEC a b)		// will TestStoreUpd
 
 derive gGEC  AGEC
 derive bimap AGEC
-derive generate AGEC
+derive ggen AGEC
 
 :: AGEC a			// abstract GEC for an a-value maintained with a b-editor
 

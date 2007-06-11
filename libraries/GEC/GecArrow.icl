@@ -2,6 +2,7 @@ implementation module GecArrow
 
 import StdArrow, StdGECExt
 import store, GenDefault, StdDebug
+import StdMisc, StdFunc
 
 :: GecCircuit a b = GecCircuit !.(A. .ps: (GecSet b ps) *(PSt ps) -> *(GecSet a ps, *PSt ps))
 
