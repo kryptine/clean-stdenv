@@ -6,7 +6,7 @@ import ColourTextControl
 import objectloc, gec
 import parseprint, GenPrint, StdArray
 
-tipTypeText t :== ":: "+++t
+tipTypeText t :== ":: "+++t 
 
 derive gEq OutputOnly
 
