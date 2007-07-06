@@ -5,6 +5,7 @@ import StdEnv,StdTCP
 from httpUtil import unlines, cSplit, endWith, splitAfter, wordsWith, unwords, readFile
 
 from  iDataSettings import TraceHttp10
+import iDataTrivial
 
 (<<?) file s 
 	= case TraceHttp10 of
@@ -141,7 +142,9 @@ listenOnPort :: Int !*World -> (TCP_Listener,!*World)
 listenOnPort port world
 	# (ok,mbListener,world) = openTCP_Listener port world//probeer te luisteren, of het lukt komt in ok-variabele
 	| ok = (fromJust mbListener,world)//gelukt
-	| otherwise = abort "Poort bezet!"//niet gelukt
+	| otherwise = abort ("Error: The server port " <+++ port <+++ " is currently occupied!\n" <+++
+						 "Probably a previous application is still running and you have forgotten to close it.\n" <+++
+						 "It is also possible that another web server running on your machine is using this port.\n\n\n")
 
 // functie die de Content-Length teruggeeft:
 getContentLength :: [String] -> Int
