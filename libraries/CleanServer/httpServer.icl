@@ -12,7 +12,6 @@ import iDataTrivial
 		True	= file <<< s <<< "\n" 
 		False	= file
 
-
 printArguments :: Arguments -> String
 printArguments args
 	= unwords ["(" +++ f +++ "," +++ v +++ ")" \\ (f,v) <- args]
@@ -30,7 +29,8 @@ StartServer poortNr linktofunctionlist world
 	# (location,_)		= hd linktofunctionlist
 	// open console voor debuggen:
 	# (console,world) 	= stdio world
-	# console			= fwrites ("Open your favorite browser and surf to http://localhost/" +++ location +++ "\n") console
+	# console			= fwrites ( "Open your favorite browser and surf to http://localhost/" +++ location +++ "\n\n" +++
+									"Close this window to stop this application...") console
 
 
 	//luister op de opgegeven poort:
