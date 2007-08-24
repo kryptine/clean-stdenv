@@ -95,6 +95,7 @@ _defer_code
 	print	"Error: defer code entered"
 	halt
 
+.a 2 ea_Cons
 .o 2 0
 l_Cons
 	push_args 0 1 1
@@ -109,6 +110,7 @@ l_Cons
 .export _Conss n_Conss ea_Conss
 .desc _Conss n_Conss l_Conss 2 0 "Cons!"
 
+.a 2 ea_Conss
 .o 2 0
 l_Conss
 	push_args 0 1 1
@@ -117,6 +119,12 @@ l_Conss
 	update_a 0 3
 	pop_a 1
 	jsr_eval 0
+	fill _Cons 2 _hnf 2
+.d 1 0
+	rtn
+
+.o 3 0
+ea_Cons
 	fill _Cons 2 _hnf 2
 .d 1 0
 	rtn
@@ -135,6 +143,7 @@ ea_Conss
 .export _Consts n_Consts ea_Consts
 .desc _Consts n_Consts l_Consts 2 0 "Cons!"
 
+.a 2 ea_Consts
 .o 2 0
 l_Consts
 	push_args 0 1 1
@@ -161,6 +170,7 @@ ea_Consts
 .export _Conssts n_Conssts ea_Conssts
 .desc _Conssts n_Conssts l_Conssts 2 0 "Cons!!"
 
+.a 2 ea_Conssts
 .o 2 0
 l_Conssts
 	push_args 0 1 1
