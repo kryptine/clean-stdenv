@@ -361,8 +361,7 @@ Repeat x :== cons
 	where
 		cons = [|x:cons]
 
-//Unzip:: !.(l (.a,.b)) -> (.(l .a),.(l .b)) | List l a & List l b & List l (a,b)
-Unzip:: !.(l (a,b)) -> (.(l a),.(l b)) | List l a & List l b & List l (a,b)
+Unzip:: !u:(l v:(.a,.b)) -> .(u:(l .a),u:(l .b)) | List l a & List l b & List l (a,b), [u<=v]
 	special
 		l=[]; l=[!]; l=[ !]; l=[!!]
 
@@ -373,7 +372,7 @@ UnzipM l :== unzip_ l
 			where
 				(xs,ys) = unzip_ xys
 
-Zip2 :: !.(l a) .(l b) -> .(l (a,b)) | List l a & List l b & List l (a,b)
+Zip2 :: !u:(l .a) u:(l .b) -> u:(l v:(.a,.b)) | List l a & List l b & List l (a,b), [u<=v]
 	special
 		l=[]; l=[!]; l=[ !]; l=[!!]
 
@@ -382,7 +381,7 @@ Zip2M l1 l2 :== zip2_ l1 l2
 		zip2_ [|a:as] [|b:bs] = [|(a,b):zip2_ as bs]
 		zip2_ as bs			= [|]
 
-Zip :: !(!.(l a),.(l b)) -> .(l (a,b)) | List l a & List l b & List l (a,b)
+Zip :: !.(!u:(l .a),u:(l .b)) -> u:(l v:(.a,.b)) | List l a & List l b & List l (a,b), [u<=v]
 	special
 		l=[]; l=[!]; l=[ !]; l=[!!]
 

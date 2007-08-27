@@ -564,9 +564,7 @@ Repeat x :== cons
 	where
 		cons = [|x:cons]
 
-//Unzip:: !.(l (.a,.b)) -> (.(l .a),.(l .b)) | List l a & List l b & List l (a,b)	// compiler bug ?
-//Unzip :: !.(a (.b,.c)) -> (.(d .b),.(e .c)) | List a (b,c) & List e c & List d b	// compiler bug ?
-Unzip:: !.(l (a,b)) -> (.(l a),.(l b)) | List l a & List l b & List l (a,b)
+Unzip:: !u:(l v:(.a,.b)) -> .(u:(l .a),u:(l .b)) | List l a & List l b & List l (a,b), [u<=v]
 Unzip [|] = ([|], [|])
 Unzip [|(x,y) : xys] = ([|x : xs],[|y : ys])
 	where
@@ -579,8 +577,7 @@ UnzipM l :== unzip_ l
 			where
 				(xs,ys) = unzip_ xys
 
-//Zip2 :: !.(l .a) .(l .b) -> .(l (.a,.b)) | List l a & List l b & List l (.a,.b)
-Zip2 :: !.(l a) .(l b) -> .(l (a,b)) | List l a & List l b & List l (a,b)
+Zip2 :: !u:(l .a) u:(l .b) -> u:(l v:(.a,.b)) | List l a & List l b & List l (a,b), [u<=v]
 Zip2 [|a:as] [|b:bs] = [|(a,b):Zip2 as bs]
 Zip2 as bs			= [|]
 
@@ -589,7 +586,7 @@ Zip2M l1 l2 :== zip2_ l1 l2
 		zip2_ [|a:as] [|b:bs] = [|(a,b):zip2_ as bs]
 		zip2_ as bs			= [|]
 
-Zip :: !(!.(l a),.(l b)) -> .(l (a,b)) | List l a & List l b & List l (a,b)
+Zip :: !.(!u:(l .a),u:(l .b)) -> u:(l v:(.a,.b)) | List l a & List l b & List l (a,b), [u<=v]
 Zip (x,y) = Zip2 x y
 
 ZipM t :== zip_ t
