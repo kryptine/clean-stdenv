@@ -107,6 +107,12 @@ l_Cons
 .d 1 0
 	rtn
 
+.o 3 0
+ea_Cons
+	fill _Cons 2 _hnf 2
+.d 1 0
+	rtn
+
 .export _Conss n_Conss ea_Conss
 .desc _Conss n_Conss l_Conss 2 0 "Cons!"
 
@@ -119,12 +125,6 @@ l_Conss
 	update_a 0 3
 	pop_a 1
 	jsr_eval 0
-	fill _Cons 2 _hnf 2
-.d 1 0
-	rtn
-
-.o 3 0
-ea_Cons
 	fill _Cons 2 _hnf 2
 .d 1 0
 	rtn
@@ -1189,7 +1189,9 @@ _print_ul_char
 	update_b	1 2
 	updatepop_b	0 1
 
+	print_sc "'"
 	print_char
+	print_sc "'"
 
 	jmp	_print_rest_unboxed_list
 
