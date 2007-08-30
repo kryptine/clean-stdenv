@@ -1861,6 +1861,101 @@ _eval_last_list
 	pop_a	1
 	jmp	_eval_brackets
 
+
+_eval_unboxed_list
+	pop_b 1
+	jmp	_eval_unboxed_list_
+
+_eval_unboxed_list_lp0
+	push_t_r_args
+
+	push_b	0
+	push_r_arg_t
+	eqC_b	'l' 0
+	updatepop_b 0 1
+	jmp_true	_eval_unboxed_list_
+	halt
+
+_eval_unboxed_list_
+	push_b 0
+	incI
+	push_r_arg_t
+	eqC_b	'R' 0
+	updatepop_b 0 1
+	jmp_false _eval_unboxed_list_lp1
+
+_eval_ul_record
+	incI
+
+_eval_unboxed_list_lp1
+	incI
+	push_b	0
+	push_r_arg_t
+_eval_ul_next_field
+_eval_unboxed_list_lp2
+	push_b 0
+	print_char
+
+	eqC_b	'i' 0
+	jmp_true	_eval_ul_int_char_or_bool
+	eqC_b	'c' 0
+	jmp_true	_eval_ul_int_char_or_bool
+	eqC_b	'r' 0
+	jmp_true	_eval_ul_real_or_file
+	eqC_b	'b' 0
+	jmp_true	_eval_ul_int_char_or_bool
+	eqC_b	'f' 0
+	jmp_true	_eval_ul_real_or_file
+	eqC_b	'a' 0
+	jmp_true	_eval_ul_graph
+	halt
+
+_eval_ul_int_char_or_bool
+	pop_b	1
+	updatepop_b	0 1
+	jmp	_eval_rest_unboxed_list
+
+_eval_ul_real_or_file
+	pop_b	1
+	updatepop_b	0 2
+	jmp	_eval_rest_unboxed_list
+
+_eval_ul_graph
+	pop_b	1
+
+	jsr_eval 0
+
+	pushI	0
+.d 1 1 i
+	jsr	_eval2
+.o 0 0
+	jmp	_eval_rest_unboxed_list
+
+_eval_rest_unboxed_list
+	incI
+	push_b 0
+	push_r_arg_t
+	eqC_b	'a' 0
+	jmp_false _eval_ul_next_field
+
+	push_b 1
+	incI
+	push_r_arg_t
+	eqI_b	0 0
+	updatepop_b 0 1
+	jmp_false	_eval_ul_next_field
+
+	pop_b 2
+
+	jsr_eval 0
+	eq_desc	_Nil 0 0
+	jmp_false _eval_unboxed_list_lp0
+
+_eval_last_unboxed_list
+	pop_a	1
+	jmp	_eval_brackets
+
+
 _eval__array_
 .d 1 1 i
 	jmp	_eval__array2
@@ -2043,6 +2138,8 @@ _eval_record
 
 	push_b	0
 	push_r_arg_t
+	eqC_b	'l' 0
+	jmp_true	_eval_unboxed_list
 	eqC_b	'd' 0
 	jmp_false	_eval_record_lp_
 
