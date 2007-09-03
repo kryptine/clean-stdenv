@@ -1273,8 +1273,37 @@ _print_last_unboxed_list
 	jmp	_print_brackets
 
 _print_ul_next_field
+	eqC_b	',' 0
+	jmp_true _print_ul_comma_next_field
+	eqC_b	'(' 0
+	jmp_true _print_ul_open_tuple_next_field
+	eqC_b	')' 0
+	jmp_true _print_ul_close_tuple_next_field
 	print_sc " "
 	jmp	_print_unboxed_list_lp2
+
+_print_ul_open_tuple_next_field
+	pop_b 1
+	print_sc " ("
+	jmp	_print_ul_next_field_without_space
+
+_print_ul_comma_next_field
+	pop_b 1
+	print_sc ","
+_print_ul_next_field_without_space
+	incI
+	push_b	0
+	push_r_arg_t
+	eqC_b	'(' 0
+	jmp_false _print_unboxed_list_lp2
+	pop_b 1
+	print_sc "("
+	jmp	_print_ul_next_field_without_space
+
+_print_ul_close_tuple_next_field
+	pop_b 1
+	print_sc ")"
+	jmp	_print_rest_unboxed_list
 
 _print_ul_record
 	pushD_a 0
@@ -1296,7 +1325,7 @@ _print_ul_record
 	print_sc " "
 	push_t_r_args
 	incI
-	jmp	_print_unboxed_list_lp1
+	jmp	_print_ul_next_field_without_space
 
 
 _print__array_
@@ -1390,7 +1419,12 @@ _print_a_record_lp
 	push_r_arg_t
 	eqI_b	0 0
 	jmp_true	_end_print_a_record
+	eqC_b	',' 0
+	jmp_true	_print_ar_tuple_comma
+	eqC_b	')' 0
+	jmp_true	_print_ar_close_tuple_char
 	print_sc	" "
+_print_a_record_lp__
 	eqC_b	'r' 0
 	jmp_true	_print_ar_real
 	eqC_b	'i' 0
@@ -1403,6 +1437,8 @@ _print_a_record_lp
 	jmp_true	_print_ar_file
 	eqC_b	'a' 0
 	jmp_true	_print_ar_graph
+	eqC_b	'(' 0
+	jmp_true	_print_ar_open_tuple_char
 	halt
 
 _print_ar_integer
@@ -1490,6 +1526,31 @@ _print_a_array
 	jsr	_print__array
 .o 0 0
 	incI
+	jmp	_print_a_record_lp
+
+_print_ar_open_tuple_char
+	pop_b 1
+	incI
+	print_sc "("
+_print_ar_record_lp_no_space
+	push_b	0
+	push_r_arg_t
+	eqC_b	')' 0
+	jmp_true	_print_ar_close_tuple_char
+	eqI_b	0 0
+	jmp_false	_print_a_record_lp__
+	jmp	_end_print_a_record
+
+_print_ar_tuple_comma
+	pop_b 1
+	incI
+	print_sc ","
+	jmp	_print_ar_record_lp_no_space
+
+_print_ar_close_tuple_char
+	pop_b 1
+	incI
+	print_sc ")"
 	jmp	_print_a_record_lp
 
 _end_print_a_record
@@ -1669,7 +1730,12 @@ _print_record_lp
 _print_record_lp_
 	eqI_b	0 0
 	jmp_true	_end_print_record
+	eqC_b	',' 0
+	jmp_true	_print_tuple_comma
+	eqC_b	')' 0
+	jmp_true	_print_close_tuple_char
 	print_sc	" "
+_print_record_lp__
 	eqC_b	'i' 0
 	jmp_true	_print_r_integer
 	eqC_b	'c' 0
@@ -1682,6 +1748,8 @@ _print_record_lp_
 	jmp_true	_print_r_file
 	eqC_b	'a' 0
 	jmp_true	_print_r_graph
+	eqC_b	'(' 0
+	jmp_true	_print_open_tuple_char
 	halt
 
 _print_r_integer
@@ -1771,6 +1839,29 @@ _print_r_graph
 .d 1 1 i
 	jsr	_print2
 .o 0 0
+	jmp	_print_record_lp
+
+_print_open_tuple_char
+	pop_b 1
+	print_sc "("
+_print_record_lp_no_space
+	incI
+	push_b	0
+	push_r_arg_t
+	eqC_b	')' 0
+	jmp_true	_print_close_tuple_char
+	eqI_b	0 0
+	jmp_false	_print_record_lp__
+	jmp	_end_print_record
+
+_print_tuple_comma
+	pop_b 1
+	print_sc ","
+	jmp	_print_record_lp_no_space
+
+_print_close_tuple_char
+	pop_b 1
+	print_sc ")"
 	jmp	_print_record_lp
 
 _print_last_record_arg
@@ -1909,6 +2000,12 @@ _eval_unboxed_list_lp2
 	jmp_true	_eval_ul_real_or_file
 	eqC_b	'a' 0
 	jmp_true	_eval_ul_graph
+	eqC_b	'(' 0
+	jmp_true	_eval_ul_skip_char
+	eqC_b	',' 0
+	jmp_true	_eval_ul_skip_char
+	eqC_b	')' 0
+	jmp_true	_eval_ul_skip_char
 	halt
 
 _eval_ul_int_char_or_bool
@@ -1932,6 +2029,8 @@ _eval_ul_graph
 .o 0 0
 	jmp	_eval_rest_unboxed_list
 
+_eval_ul_skip_char
+	pop_b 1
 _eval_rest_unboxed_list
 	incI
 	push_b 0
@@ -2046,6 +2145,12 @@ _eval_a_record_lp
 	jmp_true	_eval_ar_file
 	eqC_b	'a' 0
 	jmp_true	_eval_ar_graph
+	eqC_b	'(' 0
+	jmp_true	_eval_a_skip_char
+	eqC_b	',' 0
+	jmp_true	_eval_a_skip_char
+	eqC_b	')' 0
+	jmp_true	_eval_a_skip_char
 	halt
 
 _eval_ar_bool
@@ -2084,6 +2189,11 @@ _eval_a_array
 .d 1 1 i
 	jsr	_eval__array
 .o 0 0
+	incI
+	jmp	_eval_a_record_lp
+
+_eval_a_skip_char
+	pop_b	1
 	incI
 	jmp	_eval_a_record_lp
 
@@ -2165,6 +2275,12 @@ _eval_record_lp_
 	jmp_true	_eval_r_file
 	eqC_b	'a' 0
 	jmp_true	_eval_r_graph
+	eqC_b	'(' 0
+	jmp_true	_eval_r_skip_char
+	eqC_b	',' 0
+	jmp_true	_eval_r_skip_char
+	eqC_b	')' 0
+	jmp_true	_eval_r_skip_char
 	halt
 
 _eval_r_char
@@ -2202,6 +2318,11 @@ _eval_r_graph
 .d 1 1 i
 	jsr	_eval2
 .o 0 0
+	incI
+	jmp	_eval_record_lp
+
+_eval_r_skip_char
+	pop_b	1
 	incI
 	jmp	_eval_record_lp
 
