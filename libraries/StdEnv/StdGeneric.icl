@@ -1,17 +1,14 @@
 implementation module StdGeneric
 
-import StdInt, StdMisc, StdClass
+import StdInt, StdMisc, StdClass, StdFunc
 
 generic bimap a b :: Bimap .a .b
 
-id x = x
 bimapId :: Bimap .a .a
 bimapId = { map_to = id, map_from = id }
 
-(o) infixr  9  :: u:(.a -> .b) v:(.c -> .a) -> w:(.c -> .b), [w <= u,w <= v]
-(o) f g = \x-> f (g x)
-
 bimap{|c|} = { map_to = id, map_from = id }
+
 bimap{|PAIR|} bx by = { map_to= map_to, map_from=map_from }
 where
 	map_to (PAIR x y) 	= PAIR (bx.map_to x) (by.map_to y)
@@ -25,10 +22,8 @@ where
 
 bimap{|(->)|} barg bres = { map_to = map_to, map_from = map_from }
 where
-	//map_to f	x	= bres.map_to (f (barg.map_from x)) 
-	//map_from f x	= bres.map_from (f (barg.map_to x)) 
-	map_to f		= bres.map_to o f o barg.map_from
-	map_from f 		= bres.map_from o f o barg.map_to
+	map_to f = comp3 bres.map_to f barg.map_from
+	map_from f = comp3 bres.map_from f barg.map_to
 
 bimap{|CONS|} barg = { map_to= map_to, map_from=map_from }
 where
@@ -44,17 +39,40 @@ bimap{|OBJECT|} barg = { map_to= map_to, map_from=map_from }
 where
 	map_to   (OBJECT x) = OBJECT (barg.map_to x)
 	map_from (OBJECT x) = OBJECT (barg.map_from x)
-	
+
 bimap{|Bimap|} x y = {map_to = map_to, map_from = map_from}
 where
 	map_to 	{map_to, map_from} = 
-		{ map_to 	= y.map_to o map_to o x.map_from
-		, map_from 	= x.map_to o map_from o y.map_from
+		{ map_to 	= comp3 y.map_to map_to x.map_from
+		, map_from 	= comp3 x.map_to map_from y.map_from
 		}
 	map_from {map_to, map_from} = 
-		{ map_to 	= y.map_from o map_to o x.map_to
-		, map_from 	= x.map_from o map_from o y.map_to
+		{ map_to 	= comp3 y.map_from map_to x.map_to
+		, map_from 	= comp3 x.map_from map_from y.map_to
 		}
+
+comp3 :: !(.a -> .b) u:(.c -> .a) !(.d -> .c) -> u:(.d -> .b)
+comp3 f g h
+	| is_id f
+		| is_id h
+			= cast g
+			= cast (\x -> g (h x))
+		| is_id h
+			= cast (\x -> f (g x))
+			= \x -> f (g (h x))
+where
+	is_id :: !.(.a -> .b) -> Bool
+	is_id f = code inline
+	{
+		eq_desc e_StdFunc_did 0 0
+		pop_a 1
+	}
+	
+	cast :: !u:a -> u:b
+	cast f = code inline
+	{
+		pop_a 0
+	}
 
 getConsPath :: !GenericConsDescriptor -> [ConsPos]
 getConsPath {gcd_index, gcd_type_def={gtd_num_conses}}
