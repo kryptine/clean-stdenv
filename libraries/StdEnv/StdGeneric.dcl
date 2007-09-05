@@ -47,7 +47,7 @@ bimapId :: Bimap .a .a
 	}
 
 :: GenType 	= GenTypeCons String
-			| GenTypeVar String
+			| GenTypeVar !Int
 			| GenTypeApp GenType GenType
 			| GenTypeArrow GenType GenType
 	
@@ -57,6 +57,7 @@ getConsPath :: !GenericConsDescriptor -> [ConsPos]
 	
 // generic bidirectional mapping
 generic bimap a b :: Bimap .a .b
+
 derive bimap c
 derive bimap PAIR
 derive bimap EITHER
