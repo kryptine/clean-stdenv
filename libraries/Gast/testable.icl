@@ -26,6 +26,8 @@ class TestArg a | genShow{|*|}, ggen{|*|} a
 //instance Testable Bool where evaluate b rs result = [{result & res = if b OK CE, args = reverse result.args}]
 instance Testable Bool where evaluate b rs result=:{args} = [{result & args = reverse args, res = if b OK CE}]
 
+instance Testable Result where evaluate r rs result=:{args} = [{result & args = reverse args, res = r}]
+
 instance Testable Property
 where evaluate (Prop p) rs result = p rs result
 
@@ -117,7 +119,7 @@ countConfig
 quietConfig
  =	{ maxTests	= 100
 	, maxArgs	= 10000
-	, every		= animate // \n r c = if (n rem 10000 == 0) [".":c] c
+	, every		= animate2 // \n r c = if (n rem 10000 == 0) [".":c] c
 	, errors	= 1
 	}
 
@@ -132,6 +134,11 @@ animate n r c
 		= c
 
 Steps =: 1000
+
+animate2 n r c
+	| n rem Steps == 0
+		= ["\r       \r",toString n," ":c]
+		= c
 
 test :: !p -> [String] | Testable p
 test p = testn NrOfTest p
@@ -170,7 +177,7 @@ quietnm   :: !Int !Int !RandomStream !p -> [String] | Testable p
 quietnm n m rs p = testConfig rs { quietConfig & maxTests = n, maxArgs = 100*n, errors = m } p
 
 aStream :: RandomStream
-aStream = genRandInt 1964
+aStream = genRandInt 1957 //1964
 
 gather :: [Admin] -> [[String]]
 gather list = [r.args \\ r<- list]

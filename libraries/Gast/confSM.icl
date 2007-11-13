@@ -14,7 +14,7 @@ implementation module confSM
 import StdEnv, MersenneTwister, gen, GenEq, genLibTest, testable, StdLib
 
 toSpec :: (state input -> [(state,[output])]) -> Spec state input output // conversion for old specificaions
-toSpec fun = \s i = [P o t \\ (t,o) <- fun s i]
+toSpec fun = \s i = [Pt o t \\ (t,o) <- fun s i]
 
 SpectoIUTstep :: (Spec t i o) (t i -> [[o]]) -> IUTstep (t,RandomStream) i o | genShow{|*|} t & genShow{|*|} i & genShow{|*|} o
 SpectoIUTstep spec outputGen = selectTrans
@@ -25,8 +25,8 @@ where
 		| len == 0
 			= abort ("\n\nIUT is not input enabled in state "+show1 t+" for input "+show1 i+"\n")
 			= case tuples !! ((abs r) rem len) of
-				P o t = (o,(t,rnd))
-				F f   #	outputs = outputGen t i
+				Pt o t = (o,(t,rnd))
+				Ft f  #	outputs = outputGen t i
 						leno = lengthN 31 0 outputs
 					  | leno == 0
 						= abort ("\n\nOutput function yields no output in state "+show1 t+" for input "+show1 i+"\n")
@@ -112,7 +112,7 @@ onPath n ts
 
 mkComplete spec s i
 	= case spec s i of
-		[] = [P [] s]
+		[] = [Pt [] s]
 		r  = r
 
 offPath :: (Spec s i o) [i] (TestState s i o) -> *(NewInput i, TestState s i o) | ggen{|*|} i
@@ -160,14 +160,14 @@ genLongInput s n spec inputs [r,r2:x]
 				[]		= abort "\n\nError in genLongInput, please report.\n\n"
 				list	# len		= length list
 						  s	= case list !! ((abs r2) rem len) of
-								P o s = s
-								F f = abort "genLongInput F f"
+								Pt o s = s
+								Ft f = abort "genLongInput Ft f"
 						= [ i : genLongInput s (n-1) spec inputs x ]	
 
 genLongInputs :: s (Spec s i o) [i] Int [Int] -> [[i]]
 genLongInputs s spec inputs n [r:x] = [genLongInput s n spec inputs (genRandInt r): genLongInputs s spec inputs n x]
 
-testConfSM :: [Option s i o] (Spec s i o) s (IUTstep .t i o) .t (.t->.t) *d -> (.t,*d)
+testConfSM :: [TestOption s i o] (Spec s i o) s (IUTstep .t i o) .t (.t->.t) *d -> (.t,*d)
 			| FileSystem d & ggen{|*|} i & gEq{|*|} s & gEq{|*|} o & genShow{|*|} s & genShow{|*|} i & genShow{|*|} o
 testConfSM opts spec s0 iut t reset world
 	# (console,world) = stdio world
@@ -285,11 +285,11 @@ doTest ts=:{input,curState,spec,stop} step t reset
 outputFile = "testOut.txt"
 
 newStates [] iut_o = []
-newStates [P o s:r] iut_o
+newStates [Pt o s:r] iut_o
 	| o === iut_o
 		= [s:newStates r iut_o]
 		= newStates r iut_o
-newStates [F f:r] iut_o = f iut_o ++ newStates r iut_o
+newStates [Ft f:r] iut_o = f iut_o ++ newStates r iut_o
 
 resetState ts
   =	{ts	& curState = [ts.iniState]
@@ -426,9 +426,9 @@ where
 //	generateTrans :: [s] [s] (Spec s i o) (s->[i]) -> [(s,i,[o],s)] | gEq{|*|} s
 	generateTrans seen [] spec inputs = []
 	generateTrans seen [s:todo] spec inputs
-		| not (isEmpty [f \\ i <- inputs s, F f <- spec s i ])
-			= abort "Cannot handle (F f) transitions in FSM"
-		# trans	= [ (s,i,o,t) \\ i <- inputs s, P o t <- spec s i ]
+		| not (isEmpty [f \\ i <- inputs s, Ft f <- spec s i ])
+			= abort "Cannot handle (Ft f) transitions in FSM"
+		# trans	= [ (s,i,o,t) \\ i <- inputs s, Pt o t <- spec s i ]
 		  seen	= [ s:seen ]
 		  new	= [ t \\ (_,_,_,t) <- trans | isNew seen t && p t ]
 		= trans ++ generateTrans seen (removeDup (todo++new)) spec inputs
@@ -474,9 +474,9 @@ generateFSMpaths start spec inputs identify = A4 (generateLTS spec start (\_=inp
   = \i = case i of
 			[]    = s
 			[i:r]
-				| not (isEmpty [f \\ u<-s, F f <- spec u i ])
-					= abort "Cannot handle (F f) transitions in (after)"
-					= ([t \\ u<-s, P o t <- spec u i] after spec) r
+				| not (isEmpty [f \\ u<-s, Ft f <- spec u i ])
+					= abort "Cannot handle (Ft f) transitions in (after)"
+					= ([t \\ u<-s, Pt o t <- spec u i] after spec) r
 /*where
 	apply [] i = []
 	apply s [] = s

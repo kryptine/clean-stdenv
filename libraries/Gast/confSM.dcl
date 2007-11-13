@@ -14,7 +14,7 @@ definition module confSM
 import StdEnv, MersenneTwister, gen, genLibTest, testable
 
 :: Spec state input output :== state input -> [Trans output state]
-:: Trans output state = P [output] state | F ([output]->[state])
+:: Trans output state = Pt [output] state | Ft ([output]->[state])
 derive genShow Trans
 
 :: IUTstep t i o :== t -> .(i -> .([o],t))
@@ -25,7 +25,7 @@ toSpec :: (state input -> [(state,[output])]) -> Spec state input output
 genLongInputs :: s (Spec s i o) [i] Int [Int] -> [[i]]
 generateFSMpaths :: s (Spec s i o) [i] (s->[i]) -> [[i]] | gEq{|*|} s
 
-:: Option s i o
+:: TestOption s i o
 	= Ntests Int
 	| Nsequences Int
 	| Seed Int
@@ -42,7 +42,7 @@ generateFSMpaths :: s (Spec s i o) [i] (s->[i]) -> [[i]] | gEq{|*|} s
 	| ErrorFile String
 	| Stop ([s] -> Bool)
 
-testConfSM :: [Option s i o] (Spec s i o) s (IUTstep .t i o) .t (.t->.t) *d -> (.t,*d)
+testConfSM :: [TestOption s i o] (Spec s i o) s (IUTstep .t i o) .t (.t->.t) *d -> (.t,*d)
 			| FileSystem d & ggen{|*|} i & gEq{|*|} s & gEq{|*|} o & genShow{|*|} s & genShow{|*|} i & genShow{|*|} o
 
 (after) infix 0 :: [s] (Spec s i o) -> ([i] -> [s])

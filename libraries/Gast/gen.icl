@@ -116,5 +116,5 @@ instance genElem Char where genElem [r:rnd] = (toChar (32+((abs r) rem 94)),rnd)
 instance genElem Bool where genElem [r:rnd] = (isOdd r,rnd)
 instance genElem Real where genElem [r,s,t:rnd] = ((toReal r/toReal s)*toReal t,rnd)
 
-derive ggen (,), (,,), []
+derive ggen (,), (,,), (,,,), []
 derive bimap []

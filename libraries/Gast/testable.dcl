@@ -5,7 +5,7 @@ definition module testable
 	
 	testable: the test algorithm for logical properties
 
-	Pieter Koopman, 2002-2004
+	Pieter Koopman, 2002-2007
 	Radboud Universty, Nijmegen
 	The Netherlands
 	pieter@cs.ru.nl
@@ -32,14 +32,15 @@ class TestArg a | genShow{|*|}, ggen{|*|} a
 class Testable a where evaluate :: a RandomStream !Admin -> [Admin]
 
 instance Testable Bool
+instance Testable Result
 instance Testable Property
 instance Testable (a->b) | Testable b & TestArg a  
 instance Testable [a] | Testable a  
 
-derive bimap [], (,), (,,), (,,,), (,,,,), (,,,,,)
+//derive bimap [], (,), (,,), (,,,), (,,,,), (,,,,,)
 
 MaxExists	:== 500
-NrOfTest	:== 500
+NrOfTest	:== 1000
 
 //--- for generating lists of elements ---//
 

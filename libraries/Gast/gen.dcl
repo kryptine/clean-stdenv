@@ -17,7 +17,7 @@ randomize :: [a] [Int] Int ([Int] -> [a]) -> [a]
 
 generic ggen a :: Int [Int] -> [a]
 
-derive ggen Int, Bool, Real, Char, UNIT, PAIR, EITHER, CONS, OBJECT, FIELD, (,), (,,), [], String
+derive ggen Int, Bool, Real, Char, UNIT, PAIR, EITHER, CONS, OBJECT, FIELD, (,), (,,), (,,,), [], String
 
 maxint	:: Int
 minint	:: Int
