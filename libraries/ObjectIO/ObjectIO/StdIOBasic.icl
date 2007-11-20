@@ -12,7 +12,7 @@ from	commondef	import error
 
 /*	General type constructors for composing context-dependent data structures.
 */
-::	:~:		t1 t2		cs	= (:~:) infixr 9 .(t1 cs) .(t2 cs)
+::	:~:		t1 t2		cs	= (:~:) infixr 9 (t1 cs) (t2 cs)
 ::	ListCS	t			cs	= ListCS .[t cs]
 ::	NilCS				cs	= NilCS
 
@@ -20,7 +20,7 @@ from	commondef	import error
 /*	General type constructors for composing local and context-dependent 
 	data structures.
 */
-::	:+:		t1 t2	ls	cs	= (:+:) infixr 9 .(t1 ls cs) .(t2 ls cs)
+::	:+:		t1 t2	ls	cs	= (:+:) infixr 9 (t1 ls cs) (t2 ls cs)
 ::	ListLS		t	ls	cs	= ListLS .[t ls cs]
 ::	NilLS			ls	cs	= NilLS
 ::	NewLS		t	ls	cs	= E. .new: {newLS :: new, newDef :: t   new		cs}
