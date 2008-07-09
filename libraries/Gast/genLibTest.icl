@@ -60,10 +60,10 @@ genShow{|CONS of {gcd_name, gcd_arity, gcd_fields}|} fx sep p (CONS x) rest
 		= [gcd_name: rest]
 	| isEmpty gcd_fields // ordinary constructor
 		| p // parentheses needed
-			= ["(",gcd_name," ":fx " " False x [")":rest]]
-			= [gcd_name," ":fx " " False x rest]
-//			= ["(",gcd_name," ":fx " " True x [")":rest]]
-//			= [gcd_name," ":fx " " True x rest]
+//			= ["(",gcd_name," ":fx " " False x [")":rest]]
+//			= [gcd_name," ":fx " " False x rest]
+			= ["(",gcd_name," ":fx " " True x [")":rest]]
+			= [gcd_name," ":fx " " True x rest]
 	| otherwise // record
 		= ["{",{gcd_name.[i]\\i<-[1..size gcd_name-1]},"|":fx "," False x ["}":rest]]
 genShow{|FIELD of {gfd_name}|} fx sep p (FIELD x) rest

@@ -34,7 +34,7 @@ instance ==> Property
 
 (<==>) infix 4 :: !a !b -> Property	| Testable a & Testable b		//	True if properties are equivalent
 
-ExistsIn :: (x->p) [x] -> Property | Testable p & TestArg x
+ExistsIn :: (x->p) [x] -> Property | Testable p & TestArg x 		// type is too restricive
 Exists :: (x->p) -> Property | Testable p & TestArg x
 ForAll :: !(x->p) -> Property | Testable p & TestArg x
 

@@ -39,10 +39,11 @@ where
  
  // =abort "toUIT"
 
-:: NewInput i = Input i | Reset | End
+:: NewInput i = NewInput i | Reset | End
 
 :: *TestState s i o
  =	!{	spec	:: !Spec s i o
+//	,	specW	:: !SpecWorld s i
 	,	iniState:: !s
 	,	curState:: ![s]
 	,	nRej	:: !Int
@@ -64,7 +65,8 @@ where
 	,	errFile	:: !*File
 	,	mesFile	:: !*File
 	,	trace	:: !Bool
-	,	stop	:: ([s] -> Bool)
+	,	incons	:: [o] [s] -> Maybe [String]
+	,	stop	:: [s] -> Bool
 	}
 /*
 apply :: i (IUT s i o) -> ([o],IUT s i o) | genShow{|*|} s & genShow{|*|} i
@@ -86,7 +88,7 @@ newSpec spec2 n ts
  # (i,ts) = onTheFly ts
  = case i of
 	Reset	= (i,{ ts & input = newSpec spec2 ts.nOnPath })
-	Input _	= (i,{ ts & input = newSpec spec2 (n-1)})
+	NewInput _	= (i,{ ts & input = newSpec spec2 (n-1)})
 	_		= (i,ts)
 
 oldSpec :: (Spec s i o) (TestState s i o) -> *(NewInput i, TestState s i o) | ggen{|*|} i
@@ -107,7 +109,7 @@ onPath n ts
  # (i,ts) = onTheFly ts
  = case i of
 	Reset	= (i,{ ts & input = onPath ts.nOnPath })
-	Input _	= (i,{ ts & input = onPath (n-1)})
+	NewInput _	= (i,{ ts & input = onPath (n-1)})
 	_		= (i,ts)
 
 mkComplete spec s i
@@ -120,7 +122,7 @@ offPath spec [] ts = (Reset,{ ts & input = onPath ts.nOnPath })
 offPath spec [i:r] ts
   | ts.nStep >= ts.maxLen-1 || ts.nRej >= ts.maxLen-1
 	= (Reset,{ ts & input = onPath ts.nOnPath })
-	= (Input i,{ts & input = offPath spec r})
+	= (NewInput i,{ts & input = offPath spec r})
 
 onTheFly :: (TestState s i o) -> *(NewInput i, TestState s i o)
 onTheFly ts=:{curState,inputs,rnd,spec}
@@ -134,7 +136,7 @@ onTheFly ts=:{curState,inputs,rnd,spec}
 			  n = lengthN max 0 is	// the number of the selected input
 			  [r:rnd] = rnd
 			  i = is !! ((abs r) rem n)
-			= (Input i,{ts & rnd = rnd})
+			= (NewInput i,{ts & rnd = rnd})
 
 lengthN :: !Int !Int ![a] -> Int
 lengthN m n [] = n
@@ -148,7 +150,7 @@ fixedInputs [[]   :r] ts = (Reset, { ts & input = fixedInputs r })
 fixedInputs [[a:x]:r] ts=:{curState,spec} 
 	| isEmpty [t \\ s<- curState, t<-spec s a]
 		= (Reset, { ts & input = fixedInputs r , nTrun = ts.nTrun+1})
-		= (Input a, {ts & input = fixedInputs [x:r]})
+		= (NewInput a, {ts & input = fixedInputs [x:r]})
 
 genLongInput :: s Int (Spec s i o) [i] [Int] -> [i]
 genLongInput s 0 spec inputs [r:x] = randomize inputs x 7 (\_.[])
@@ -167,6 +169,154 @@ genLongInput s n spec inputs [r,r2:x]
 genLongInputs :: s (Spec s i o) [i] Int [Int] -> [[i]]
 genLongInputs s spec inputs n [r:x] = [genLongInput s n spec inputs (genRandInt r): genLongInputs s spec inputs n x]
 
+testConfSM :: [TestOption s i o] (Spec s i o) s (IUTstep .t i o) .t (.t->.t) *File *File -> (.t,*File,*File)
+			| ggen{|*|} i & gEq{|*|} s & gEq{|*|} o & genShow{|*|} s & genShow{|*|} i & genShow{|*|} o
+testConfSM opts spec s0 iut t reset console file
+	# ts=:{fileName}		= initState file console
+	# (t,ts)	= doTest ts iut t reset
+	  {mesFile,errFile} = ts
+	= (t, mesFile, errFile)
+where
+	initState file console
+	 =	handleOptions opts
+	 	{	spec	= spec
+	// 	,	specW	= \s i.[]
+		,	iniState= s0
+		,	curState= [s0]
+		,	nRej	= 0
+		,	nTrun	= 0
+		,	nPath	= 0
+		,	nStep	= 0
+		,	nTotal	= 0
+		,	maxPath	= 100
+		,	maxLen	= 1000
+		,	nOnPath	= 50
+		,	inputs	= (\rnd s -> ggen {|*|} 2 rnd)
+		,	input	= onTheFly 
+		,	n		= 0
+		,	h_in	= []
+		,	h_out	= []
+		,	h_state	= []
+		,	rnd		= aStream
+		,	errFile	= file
+		,	fileName= outputFile
+		,	mesFile	= console <<< "Gast starts testing.\n"
+		,	trace	= False
+		,	incons	= \o ss -> Nothing
+		,	stop	= (\states = False)
+		}
+
+findFileName [] name = name
+findFileName [ErrorFile s:r] name = findFileName r s
+findFileName [_:r] name = findFileName r name
+
+doTest :: (TestState s i o) (IUTstep .t i o) .t (.t->.t) -> (.t,TestState s i o)
+		| gEq{|*|} s & gEq{|*|} o & genShow{|*|} s & genShow{|*|} i & genShow{|*|} o
+doTest ts=:{input,curState,spec,incons} step t reset
+  | isEmpty ts.curState
+	= (t, errorFound ts)
+  | ts.nStep >= ts.maxLen || ts.nRej >= ts.maxLen
+	= doTest (resetState ts) step (reset t) reset
+  | ts.nPath >= ts.maxPath
+  	| ts.nRej == 0 && ts.nTrun == 0
+	  = (t,{ts & mesFile = ts.mesFile	<<< "\nEnd of testing, maximum paths used. \n"
+										<<< ts.nPath
+										<<< " test paths executed successful, in total "
+										<<< ts.nTotal <<< " transitions.\n"})
+	  = (t,{ts & mesFile = ts.mesFile	<<< "\nEnd of testing, maximum paths used. \n"
+										<<< ts.nPath
+										<<< " test paths executed successful, "
+										<<< ts.nTrun <<< " paths truncated, "
+										<<< " in total "
+										<<< ts.nTotal <<< " transitions.\n"})
+  #	(inp,ts) = input ts
+  =	case inp of
+	  Reset	= doTest (resetState ts) step (reset t) reset
+	  End	| ts.nRej == 0 && ts.nTrun == 0
+			  = (t,{ts & mesFile = ts.mesFile	<<< "\nAll input paths tested successfully.\n"
+												<<< "All " <<< ts.nPath
+												<<< " executed test paths successful (Proof), in total "
+												<<< ts.nTotal <<< " transitions.\n"})
+			  = (t,{ts & mesFile = ts.mesFile	<<< "\nAll inputs tested successfully.\n"
+												<<< (ts.nPath-ts.nRej)
+												<<< "test path executed successful (Proof), " <<< ts.nRej
+												<<< " paths rejected " <<< ts.nTrun
+												<<< " paths truncated, "
+												<<< "in total " <<< ts.nTotal <<< " transitions.\n"})
+	  NewInput i	// assumption: only inputs allowed by spec will be generated:
+		#!	(iut_o,t) = step t i
+			tuples = [tup \\ s<-curState, tup<-spec s i]
+			states = mkset (newStates tuples iut_o)
+		| isEmpty states
+			#! errFile = ts.errFile <<< "Error found! Trace:\n"
+									<<< "SpecificationStates Input -> ObservedOutput\n"
+			   errFile = showError (ts.nStep+1) [curState:ts.h_state] [i:ts.h_in] [iut_o:ts.h_out] errFile
+			   errFile = errorInfo ts.nPath ts.nRej ts.nTrun (ts.nTotal+1) (errFile <<< "\n")
+			   mesFile = errorInfo ts.nPath ts.nRej ts.nTrun (ts.nTotal+1) ts.mesFile
+			   mesFile = mesFile <<< "See file \"" <<< ts.fileName <<< "\" for details about the error.\n"
+			= (t,{ts	& mesFile = mesFile
+						, errFile = errFile
+						, curState = []
+						})
+			= case incons iut_o states of
+				Nothing
+				   # mesFile = ts.mesFile <<< "paths: " <<< ts.nPath <<< ", rejected: " <<< ts.nRej <<< ", truncated: " <<< ts.nTrun <<< "...\r"
+				   = doTest {ts	& curState = states
+								, nStep = ts.nStep+1
+								, nTotal =ts.nTotal+1
+								, h_in = [i:ts.h_in]
+								, h_out = [iut_o:ts.h_out]
+								, h_state = [curState:ts.h_state]
+								, mesFile = if ts.trace (mesFile <<< ts.nPath <<< "," <<< ts.nStep <<< ": " <<< show1 ts.curState <<< " " <<< show1 i <<< " " <<< show1 iut_o <<< "\n") mesFile
+								}
+							step t reset
+				Just errors	
+					#! errFile = ts.errFile <<< "Inconsistency! Trace:\n"
+											<<< "SpecificationStates Input -> ObservedOutput\n"
+					   errFile = showError (ts.nStep+1) [curState:ts.h_state] [i:ts.h_in] [iut_o:ts.h_out] errFile
+					   errFile = errFile <<< "Inconsistency info:\n" <<< errors <<< "\n"
+					   errFile = errorInfo ts.nPath ts.nRej ts.nTrun (ts.nTotal+1) (errFile <<< "\n")
+					   mesFile = ts.mesFile <<< "Inconsistency found!\n" <<< errors <<< "\n\n"
+					   mesFile = errorInfo ts.nPath ts.nRej ts.nTrun (ts.nTotal+1) mesFile
+					   mesFile = mesFile <<< "See file \"" <<< ts.fileName <<< "\" for details.\n"
+					= (t,{ts	& mesFile = mesFile
+								, errFile = errFile
+								, curState = []
+								})
+where
+	errorInfo :: !Int !Int !Int !Int *File -> *File
+	errorInfo nPath nRej nTrun nTotal file
+	 = file	<<< "Error found in path " <<< (nPath+1) <<< ", "
+			<<< (nPath-nRej) <<< " paths executed, "
+			<<< nTrun <<< " tests truncated, in total "
+			<<< nTotal <<< " transitions.\n"
+
+outputFile = "testOut.txt"
+
+newStates [] iut_o = []
+newStates [Pt o s:r] iut_o
+	| o === iut_o
+		= [s:newStates r iut_o]
+		= newStates r iut_o
+newStates [Ft f:r] iut_o = f iut_o ++ newStates r iut_o
+
+resetState ts
+  =	{ts	& curState = [ts.iniState]
+		, nPath    = ts.nPath+1
+		, nStep    = 0
+		, h_in     = []
+		, h_out    = []
+		, h_state  = []
+		, mesFile  = if ts.trace (ts.mesFile <<< "End of path reached: reset.\n") ts.mesFile
+	}
+
+errorFound ts=:{errFile,mesFile}
+ # errFile = errFile <<< "Error Found!\n"
+ # mesFile = mesFile <<< "Error Found!\n"
+ = {ts & errFile = errFile,mesFile=mesFile}
+
+restart testState = { testState & h_in = [], h_out = [], h_state = [] }
+/*
 testConfSM :: [TestOption s i o] (Spec s i o) s (IUTstep .t i o) .t (.t->.t) *d -> (.t,*d)
 			| FileSystem d & ggen{|*|} i & gEq{|*|} s & gEq{|*|} o & genShow{|*|} s & genShow{|*|} i & genShow{|*|} o
 testConfSM opts spec s0 iut t reset world
@@ -307,7 +457,7 @@ errorFound ts=:{errFile,mesFile}
  = {ts & errFile = errFile,mesFile=mesFile}
 
 restart testState = { testState & h_in = [], h_out = [], h_state = [] }
-
+*/
 handleOptions [] ts = ts
 handleOptions [o:r] ts=:{mesFile}
 	# ts = case o of
@@ -319,7 +469,7 @@ handleOptions [o:r] ts=:{mesFile}
 				InputFun f = {ts & inputs = undef }
 			//	OutputFun f = {test & } //([s] i -> o)
 				FSM inp identify = {ts & input = fixedInputs (generateFSMpaths ts.iniState ts.spec inp identify) }
-				Trace b = { ts & trace = b }
+				MkTrace b = { ts & trace = b }
 				OnPath n = { ts & nOnPath = n }
 				OnAndOffPath = { ts & input = onAndOff }
 				SwitchSpec spec = { ts & input = switchSpec spec }

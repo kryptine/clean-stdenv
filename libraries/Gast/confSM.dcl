@@ -5,13 +5,13 @@ definition module confSM
 	
 	ioco: Input Output COnformance of reactive systems
 
-	Pieter Koopman, 2004, 2005
+	Pieter Koopman, 2004-2008
 	Radboud Universty, Nijmegen
 	The Netherlands
 	pieter@cs.ru.nl
 */
 
-import StdEnv, MersenneTwister, gen, genLibTest, testable
+import StdEnv, MersenneTwister, gen, genLibTest, testable, StdMaybe
 
 :: Spec state input output :== state input -> [Trans output state]
 :: Trans output state = Pt [output] state | Ft ([output]->[state])
@@ -31,19 +31,22 @@ generateFSMpaths :: s (Spec s i o) [i] (s->[i]) -> [[i]] | gEq{|*|} s
 	| Seed Int
 	| Randoms [Int]
 	| FixedInputs [[i]]
-	| InputFun ([s] -> i)
+	| InputFun (RandomStream s -> [i])
 	| OnPath Int
 	//	| OutputFun ([s] i -> o)
 	| FSM [i] (s->[i]) // inputs state_identification
-	| Trace Bool
+	| MkTrace Bool
 	| OnTheFly
 	| SwitchSpec (Spec s i o)
 	| OnAndOffPath
 	| ErrorFile String
 	| Stop ([s] -> Bool)
+	| Inconsistent ([o] [s] -> Maybe [String])
 
-testConfSM :: [TestOption s i o] (Spec s i o) s (IUTstep .t i o) .t (.t->.t) *d -> (.t,*d)
-			| FileSystem d & ggen{|*|} i & gEq{|*|} s & gEq{|*|} o & genShow{|*|} s & genShow{|*|} i & genShow{|*|} o
+//testConfSM :: [TestOption s i o] (Spec s i o) s (IUTstep .t i o) .t (.t->.t) *d -> (.t,*d)
+//			| FileSystem d & ggen{|*|} i & gEq{|*|} s & gEq{|*|} o & genShow{|*|} s & genShow{|*|} i & genShow{|*|} o
+testConfSM :: [TestOption s i o] (Spec s i o) s (IUTstep .t i o) .t (.t->.t) *File *File -> (.t,*File,*File)
+			| ggen{|*|} i & gEq{|*|} s & gEq{|*|} o & genShow{|*|} s & genShow{|*|} i & genShow{|*|} o
 
 (after) infix 0 :: [s] (Spec s i o) -> ([i] -> [s])
 
