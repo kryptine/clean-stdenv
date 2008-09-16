@@ -76,7 +76,7 @@ instance == GenConsAssoc where
 	(==) _ _ = False
 
 mkContext :: GenericConsDescriptor -> Context
-mkContext {gcd_prio=GenConsNoPrio, gcd_fields, gcd_name, gcd_arity} 
+mkContext {gcd_prio=GenConsNoPrio, gcd_fields, gcd_name, gcd_arity}
 	| isEmpty gcd_fields 
 		| gcd_arity == 0
 			= CtxNullary
@@ -117,7 +117,7 @@ needParenthesis (CtxInfix _ _ _ _) CtxNone = False
 needParenthesis (CtxInfix _ _ _ _) CtxNullary = True
 needParenthesis (CtxInfix _ _ _ _) CtxTuple = False
 needParenthesis (CtxInfix _ _ _ _) CtxRecord = False
-needParenthesis (CtxInfix _ _ _ _) CtxNonfix = False
+needParenthesis (CtxInfix _ _ _ _) CtxNonfix = True // False // PK
 needParenthesis (CtxInfix _ this_assoc this_prio _) (CtxInfix _ outer_assoc outer_prio branch) 
 	= 	outer_prio > this_prio 
 	||  (outer_prio == this_prio && not (this_assoc == outer_assoc && this_assoc == branch))

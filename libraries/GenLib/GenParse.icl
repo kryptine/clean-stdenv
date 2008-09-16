@@ -189,7 +189,8 @@ where
 						| isDigit c
 							-> lex_number -1 (lexUngetChar c s)
 						| otherwise
-							-> lex_ident 1 ['-'] (lexUngetChar c s)
+							-> lex_funny_ident 1 ['-'] (lexUngetChar c s) // PK
+	//						-> lex_ident 1 ['-'] (lexUngetChar c s)
 			Just c
 				| isSpace c
 					-> lex s 
@@ -576,7 +577,7 @@ gParse{|CONS of d|} parse_arg expr
 	| isEmpty d.gcd_fields
 		| is_tuple d.gcd_name
 			= parse_tuple expr	
-		| otherwise	
+		| otherwise
 			= case d.gcd_prio of
 				GenConsNoPrio			
 					-> parse_nonfix expr
