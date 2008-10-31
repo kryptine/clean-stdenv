@@ -171,7 +171,7 @@ where
 		(t, j) = makeType gtd_arity (GenTypeCons gtd_name) i
 		where
 			makeType 0 t i = (t, i)
-			makeType n t i = makeType (n - 1) (GenTypeApp t (GenTypeVar (toString i))) (i + 1)
+			makeType n t i = makeType (n - 1) (GenTypeApp t (GenTypeVar (/*toString*/ i))) (i + 1)
 	
 		lookup (History n c t hs)
 			| c == con && t == typ = n
@@ -978,7 +978,7 @@ freshCopy t fresh = (s t, fresh`)
 where
 	(s, fresh`) = makeSubst t fresh
 	
-	makeSubst (GenTypeVar x) fresh = (subst x (GenTypeVar (toString fresh)), fresh + 1)
+	makeSubst (GenTypeVar x) fresh = (subst (toString x) (GenTypeVar (/*toString*/ fresh)), fresh + 1)
 	makeSubst (GenTypeApp x y) fresh = (s2 o s1, fresh``)
 	where 
 		(s1, fresh`) = makeSubst x fresh
@@ -992,9 +992,9 @@ where
 unify :: ![GenType] ![GenType] -> GenType -> GenType
 unify [GenTypeVar x:xs] [GenTypeVar y:ys] | x == y = unify xs ys
 unify [GenTypeVar x:xs] [y:ys] 
-/*	| not (occurs x y)*/ = unify (map s xs) (map s ys) o s where s = subst x y
+/*	| not (occurs x y)*/ = unify (map s xs) (map s ys) o s where s = subst (toString x) y
 unify [x:xs] [GenTypeVar y:ys] 
-/*	| not (occurs y x)*/ = unify (map s xs) (map s ys) o s where s = subst y x
+/*	| not (occurs y x)*/ = unify (map s xs) (map s ys) o s where s = subst (toString y) x
 unify [GenTypeApp x1 x2:xs] [GenTypeApp y1 y2:ys] 
 	= unify [x1, x2:xs] [y1, y2:ys]
 unify [GenTypeArrow x1 x2:xs] [GenTypeArrow y1 y2:ys] 
@@ -1012,12 +1012,12 @@ occurs v (GenTypeArrow x y) = occurs v x || occurs v y
 subst :: !String !GenType !GenType -> GenType
 subst x y (GenTypeApp a b) = GenTypeApp (subst x y a) (subst x y b)
 subst x y (GenTypeArrow a b) = GenTypeArrow (subst x y a) (subst x y b)
-subst x y (GenTypeVar t) | t == x = y
+subst x y (GenTypeVar t) | toString t == x = y
 subst _ _ t = t
 
 type2tableName t = f False t
 where
-	f _ (GenTypeVar x) = x
+	f _ (GenTypeVar x) = toString x
 	f _ (GenTypeCons x) = case x of
 		"_List" -> "l"
 		"Char" -> "h"
@@ -1066,7 +1066,7 @@ where
 instance toString GenType where
 	toString x = f x False
 	where
-		f (GenTypeVar x) _ = x
+		f (GenTypeVar x) _ = toString x
 		f (GenTypeCons x) _ = x
 		f (GenTypeArrow x y) _ = f x True +++ " -> " +++ f y False
 		f (GenTypeApp x y) False = f x False +++ " " +++ f y True
