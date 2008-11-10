@@ -14,7 +14,7 @@ mkStringPrintState :: PrintState StringOutput
 printToString :: a -> String | gPrint{|*|} a
 
 (<<-) infixl 0 :: (PrintState *s) a -> *(PrintState *s) 
-	| gPrint{|*|} a & PrintOutput s & bimap{|*|} s
+	| gPrint{|*|} a & PrintOutput s
 
 
 instance PrintOutput StringOutput 
