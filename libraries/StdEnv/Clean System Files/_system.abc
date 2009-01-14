@@ -996,6 +996,28 @@ _reserve
 	print	"Run Time Warning: cycle in spine detected\n"
 	halt
 
+.descexp e_system_dseq e_system_nseq e_system_lseq 2 0 "seq"
+.a 0 e_system_easeq
+.o 2 0
+e_system_lseq
+	repl_args 1 1
+.o 2 0
+e_system_easeq
+	jsr_eval 0
+	pop_a 1
+	jmp_eval
+.n 2 e_system_dseq _
+.o 1 0
+e_system_nseq
+	push_node _cycle_in_spine 2
+	jsr_eval 0
+	pop_a 1
+	jsr_eval 0
+	fill_a 0 1
+	pop_a 1
+.d 1 0
+	rtn
+
 |.n 0 EMPTY
 |.o 1 0
 |_reserve
