@@ -55,7 +55,7 @@ where
 	init_i :: !Int !*{#Int} !Int -> *{#Int}
 	init_i i mt n
 		| i<N
-			# n = IF_INT_64_OR_32 (n * 69069) ((n bitxor (shiftRight n 62)) * 6364136223846793005 + i);
+			# n = IF_INT_64_OR_32 ((n bitxor (shiftRight n 62)) * 6364136223846793005 + i) (n * 69069);
 			= init_i (i+1) {mt & [i] = n} n
 			= mt
 
