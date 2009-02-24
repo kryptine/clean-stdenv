@@ -172,6 +172,7 @@ where
 			Just '\'' -> lex_char 0 [] s
 			Just '"'  -> lex_string 0 [] s
 			Just '_' -> lex_ident 1 ['_'] s
+			Just '`' -> lex_ident 1 ['`'] s
 			Just '+'
 				# (mc, s) = lexGetChar s
 				-> case mc of
@@ -276,6 +277,7 @@ where
 		= case mc of
 			Nothing -> (mktoken num_chars acc_chars, s)
 			Just '_' -> lex_ident (inc num_chars) ['_':acc_chars] s
+			Just '`' -> lex_ident (inc num_chars) ['`':acc_chars] s
 			Just c	
 				| isAlphanum c
 					-> lex_ident (inc num_chars) [c:acc_chars] s
