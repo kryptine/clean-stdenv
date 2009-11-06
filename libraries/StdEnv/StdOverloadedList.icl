@@ -431,13 +431,13 @@ DropWhile f l :== dropWhile l
 
 Span p l :== span l
 	where
-		span list=:[x:xs]
+		span list=:[|x:xs]
 			| p x
-				= ([x:ys],zs)
-				 with	(ys,zs) = span xs
-				= ([],list)
-		span []
-			= ([], [])
+				# (ys,zs) = span xs
+				= ([|x:ys],zs)
+				= ([|],list)
+		span [|]
+			= ([|], [|])
 
 //Filter :: (e -> .Bool) !.(l e) -> .(l e) | List l e
 Filter f l :== filter l
