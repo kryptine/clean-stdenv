@@ -153,7 +153,9 @@ where
 			Just w=:{workingWork, workingJoin, workingState}
 				# famke = Foldr (joinClient self) famke workingJoin
 				-> case workingState of
-					Disconnect -> processServer {st & working = working, famke = endWaitingClient 0 {waitingReply = reply, waitingWorking=w} famke}
+					Disconnect
+						# w = {w & workingJoin=Empty} // JvG: prevent uniqueness error caused by use of unique workingJoin in Foldr
+						-> processServer {st & working = working, famke = endWaitingClient 0 {waitingReply = reply, waitingWorking=w} famke}
 					_
 						# (maybe, workingWork) = uDeCons workingWork
 						  w = {w & workingWork = workingWork, workingJoin = Empty, workingState = Connected osId}
@@ -202,7 +204,8 @@ where
 		= case maybe of
 			Just w=:{workingJoin} | self <> {processIp = ip, processNr = nr}
 				# working = uInsertK nr {w & workingJoin = uCons {joinId = self, joinReply = reply} workingJoin} working
-				-> TRACE ("Process client " +++ toString self +++ " waiting to join " +++ toString nr) (processServer {st & working = working})
+				-> TRACE ("Process client " +++ toString self +++ " waiting to join " +++ toString nr)
+					(processServer {st & working = working, famke=famke /* JvG: added update of famke to fix uniqueness error */})
 			_
 				# famke = reply ProcessJoined famke
 				-> TRACE ("Process client " +++ toString self +++ " joined " +++ toString nr) (processServer {st & working = working, famke = famke})
