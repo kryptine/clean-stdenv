@@ -85,3 +85,4 @@ GetFileType@4
 SetUnhandledExceptionFilter@4
 VirtualProtect@16
 GetVersionExA@4
+WaitForMultipleObjects@16
