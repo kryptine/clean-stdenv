@@ -88,3 +88,4 @@ HeapAlloc
 InitializeCriticalSection
 EnterCriticalSection
 LeaveCriticalSection
+WaitForMultipleObjects
