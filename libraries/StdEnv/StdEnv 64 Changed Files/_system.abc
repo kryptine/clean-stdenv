@@ -1189,7 +1189,9 @@ _print_ul_char
 	update_b	1 2
 	updatepop_b	0 1
 
+	print_sc "'"
 	print_char
+	print_sc "'"
 
 	jmp	_print_rest_unboxed_list
 
@@ -1422,7 +1424,9 @@ _print_ar_char
 	update_b	0 1
 	pop_b	1
 
+	print_sc "'"
 	print_char
+	print_sc "'"
 
 	incI
 	jmp	_print_a_record_lp
@@ -1698,7 +1702,9 @@ _print_r_char
 	update_b	0 1
 	pop_b	1
 
+	print_sc "'"
 	print_char
+	print_sc "'"
 
 	jmp	_print_record_lp
 
