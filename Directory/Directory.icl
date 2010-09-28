@@ -1,20 +1,9 @@
-/*
-** MdM
-** Replaced all BigInts by (Int,Int)!!
-*/
-
 implementation module Directory
 
-// version 1.1.1
-
 import	StdEnv
-import code from "cDirectory.",  library "directory_library" // this is the only platform dependent line in this module
-//import code from "cDirectory." // for the Macintosh
+import code from "cDirectory."
 import StdMaybe
 from StdLibMisc import :: Date (..), :: Time (..)
-//import BigInt
-
-//	**************************************************************************************************
 
 getDirectoryContents::	!Path !*env -> (!(!DirError, [DirEntry]), !*env)	| FileSystem env
 getDirectoryContents path files
@@ -79,9 +68,8 @@ getDirEntry also_get_file_name platform files
 									,	winIsSystemFile		= (FILE_ATTRIBUTE_SYSTEM bitand winFileAttributes) <> 0
 									}
 		= ({fileName=fileName, fileInfo={pi_fileInfo=pi_fileInfo, pd_fileInfo=Windows windowsFileInfo}}, files)
-	|	platform == UnixPlatform			 
-		#	((unixModeBitsField, unixOwnerUserId, unixOwnerGroupId,
-			  unixLastAccessTimeTuple), files)
+	|	platform == UnixPlatform
+		#	((unixModeBitsField, unixOwnerUserId, unixOwnerGroupId, unixLastAccessTimeTuple), files)
 			 	= getUnixFileInfoC files
 			unixFileInfo = 	{	unixModeBitsField	= unixModeBitsField
 							,	unixOwnerUserId		= unixOwnerUserId
