@@ -1,4 +1,4 @@
-implementation module TcpIp
+implementation module FamkeTcpIp
 
 import StdClass, StdBool, StdInt, StdArray, StdMisc, Marshall, StdString
 import code from "windowsTcpIp.obj", library "windowsWS2_32_library"
