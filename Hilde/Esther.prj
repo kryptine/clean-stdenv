@@ -42,7 +42,7 @@ Global
 		Path:	{Project}\OS Windows\DynamicFileSystem
 		Path:	{Project}\Loes 0.2
 		Path:	{Application}\Libraries\ExceptionsWindows
-		Path:	{Application}\Libraries\ArgEnvWindows
+		Path:	{Application}\Libraries\ArgEnv
 		Path:	{Application}\Libraries\WrapDebug
 	Precompile:	
 	Postlink:	
@@ -90,21 +90,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	CleanTricks
 		Dir:	{Project}
@@ -133,7 +120,6 @@ OtherModules
 				SizeX:	776
 				SizeY:	614
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	EstherBackend
 		Dir:	{Project}
@@ -162,7 +148,6 @@ OtherModules
 				SizeX:	800
 				SizeY:	640
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	EstherTransform
 		Dir:	{Project}
@@ -191,7 +176,6 @@ OtherModules
 				SizeX:	734
 				SizeY:	475
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdParsComb
 		Dir:	{Project}\Parser combinators 2002
@@ -213,14 +197,7 @@ OtherModules
 				SizeX:	658
 				SizeY:	460
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdGeneric
 		Dir:	{Application}\Libraries\StdEnv
@@ -242,14 +219,7 @@ OtherModules
 				SizeX:	819
 				SizeY:	531
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdException
 		Dir:	{Application}\Libraries\ExceptionsWindows
@@ -278,7 +248,6 @@ OtherModules
 				SizeX:	821
 				SizeY:	528
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	EstherParser
 		Dir:	{Project}
@@ -307,7 +276,6 @@ OtherModules
 				SizeX:	813
 				SizeY:	498
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	EstherPostParser
 		Dir:	{Project}
@@ -336,7 +304,6 @@ OtherModules
 				SizeX:	810
 				SizeY:	506
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdArrayExtensions
 		Dir:	{Application}\Libraries\StdLib
@@ -351,12 +318,6 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -365,7 +326,6 @@ OtherModules
 				SizeX:	782
 				SizeY:	553
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	md5
 		Dir:	{Application}\Libraries\Dynamics\general
@@ -380,21 +340,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	DynID
 		Dir:	{Application}\Libraries\Dynamics\implementation
@@ -409,21 +356,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	memory
 		Dir:	{Application}\Libraries\Dynamics\implementation\windows
@@ -438,12 +372,6 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -452,7 +380,6 @@ OtherModules
 				SizeX:	767
 				SizeY:	523
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
 			ObjectFile:	mem.obj
 	Module
@@ -469,21 +396,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
 			ObjectFile:	low.obj
 		NeededLibraries
@@ -502,21 +416,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	shared_buffer
 		Dir:	{Application}\Libraries\Dynamics\implementation\windows
@@ -531,21 +432,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	DynamicLinkerInterface
 		Dir:	{Application}\Libraries\Dynamics\implementation\windows
@@ -560,12 +448,6 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -574,7 +456,6 @@ OtherModules
 				SizeX:	805
 				SizeY:	530
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
 			ObjectFile:	read_function.obj
 	Module
@@ -591,21 +472,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdDynamicLowLevelInterface
 		Dir:	{Application}\Libraries\Dynamics\implementation
@@ -620,21 +488,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	DynamicUtilities
 		Dir:	{Application}\Libraries\Dynamics\implementation
@@ -649,21 +504,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	EnDecode
 		Dir:	{Application}\Libraries\Dynamics\general
@@ -678,21 +520,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	DefaultElem
 		Dir:	{Application}\Libraries\Dynamics\general
@@ -707,21 +536,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdMaybe
 		Dir:	{Application}\Libraries\StdLib
@@ -736,21 +552,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdDynamicTypes
 		Dir:	{Application}\Libraries\Dynamics\implementation
@@ -765,21 +568,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	DynamicGraphConversion
 		Dir:	{Application}\Libraries\Dynamics\implementation\windows
@@ -794,12 +584,6 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -808,7 +592,6 @@ OtherModules
 				SizeX:	759
 				SizeY:	392
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	_SystemDynamic
 		Dir:	{Application}\Libraries\Dynamics\implementation\windows
@@ -837,7 +620,6 @@ OtherModules
 				SizeX:	717
 				SizeY:	455
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdDynamic
 		Dir:	{Application}\Libraries\Dynamics\extension
@@ -852,21 +634,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdDebug
 		Dir:	{Application}\Libraries\StdEnv
@@ -881,21 +650,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ShowWrapped
 		Dir:	{Application}\Libraries\WrapDebug
@@ -910,12 +666,6 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -924,7 +674,6 @@ OtherModules
 				SizeX:	740
 				SizeY:	443
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	Debug
 		Dir:	{Application}\Libraries\WrapDebug
@@ -953,7 +702,6 @@ OtherModules
 				SizeX:	822
 				SizeY:	543
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdCharList
 		Dir:	{Application}\Libraries\StdEnv
@@ -968,21 +716,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdOrdList
 		Dir:	{Application}\Libraries\StdEnv
@@ -997,21 +732,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdClass
 		Dir:	{Application}\Libraries\StdEnv
@@ -1033,14 +755,7 @@ OtherModules
 				SizeX:	683
 				SizeY:	405
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdOverloaded
 		Dir:	{Application}\Libraries\StdEnv
@@ -1062,14 +777,7 @@ OtherModules
 				SizeX:	500
 				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdBool
 		Dir:	{Application}\Libraries\StdEnv
@@ -1084,21 +792,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdReal
 		Dir:	{Application}\Libraries\StdEnv
@@ -1113,21 +808,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdFunc
 		Dir:	{Application}\Libraries\StdEnv
@@ -1142,12 +824,6 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -1156,7 +832,6 @@ OtherModules
 				SizeX:	500
 				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdInt
 		Dir:	{Application}\Libraries\StdEnv
@@ -1185,7 +860,6 @@ OtherModules
 				SizeX:	750
 				SizeY:	611
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdMisc
 		Dir:	{Application}\Libraries\StdEnv
@@ -1200,21 +874,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdArray
 		Dir:	{Application}\Libraries\StdEnv
@@ -1229,21 +890,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	_SystemArray
 		Dir:	{Application}\Libraries\StdEnv
@@ -1272,7 +920,6 @@ OtherModules
 				SizeX:	756
 				SizeY:	504
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdTuple
 		Dir:	{Application}\Libraries\StdEnv
@@ -1301,7 +948,6 @@ OtherModules
 				SizeX:	734
 				SizeY:	556
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdFile
 		Dir:	{Application}\Libraries\StdEnv
@@ -1330,7 +976,6 @@ OtherModules
 				SizeX:	719
 				SizeY:	490
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdEnv
 		Dir:	{Application}\Libraries\StdEnv
@@ -1345,21 +990,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdChar
 		Dir:	{Application}\Libraries\StdEnv
@@ -1374,21 +1006,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdString
 		Dir:	{Application}\Libraries\StdEnv
@@ -1403,12 +1022,6 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -1417,7 +1030,6 @@ OtherModules
 				SizeX:	807
 				SizeY:	563
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdList
 		Dir:	{Application}\Libraries\StdEnv
@@ -1446,7 +1058,6 @@ OtherModules
 				SizeX:	745
 				SizeY:	586
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdEnum
 		Dir:	{Application}\Libraries\StdEnv
@@ -1461,21 +1072,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	_SystemEnum
 		Dir:	{Application}\Libraries\StdEnv
@@ -1490,21 +1088,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	Wrap
 		Dir:	{Application}\Libraries\WrapDebug
@@ -1533,7 +1118,6 @@ OtherModules
 				SizeX:	773
 				SizeY:	507
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	DynamicFileSystem
 		Dir:	{Project}
@@ -1562,7 +1146,6 @@ OtherModules
 				SizeX:	758
 				SizeY:	474
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	Windows
 		Dir:	{Project}\OS Windows
@@ -1577,21 +1160,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 		NeededLibraries
 			Library:	windowsKERNEL32_library
 	Module
@@ -1608,21 +1178,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	EstherScript
 		Dir:	{Project}
@@ -1651,7 +1208,6 @@ OtherModules
 				SizeX:	732
 				SizeY:	453
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdDynamicFileIO
 		Dir:	{Application}\Libraries\Dynamics\extension
@@ -1666,12 +1222,6 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -1680,7 +1230,6 @@ OtherModules
 				SizeX:	805
 				SizeY:	465
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	Directory
 		Dir:	{Application}\Libraries\Directory
@@ -1695,21 +1244,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
 			ObjectFile:	cDirectory.
 		NeededLibraries
@@ -1728,21 +1264,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	FamkeProcess
 		Dir:	{Project}
@@ -1771,7 +1294,6 @@ OtherModules
 				SizeX:	805
 				SizeY:	551
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	FamkeKernel
 		Dir:	{Project}
@@ -1800,7 +1322,6 @@ OtherModules
 				SizeX:	768
 				SizeY:	476
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	TcpIp
 		Dir:	{Project}
@@ -1815,12 +1336,6 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -1829,7 +1344,6 @@ OtherModules
 				SizeX:	804
 				SizeY:	529
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
 			ObjectFile:	windowsTcpIp.obj
 		NeededLibraries
@@ -1862,7 +1376,6 @@ OtherModules
 				SizeX:	810
 				SizeY:	536
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	LoesListSeq
 		Dir:	{Project}\Loes 0.2
@@ -1877,21 +1390,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	LoesSeq
 		Dir:	{Project}\Loes 0.2
@@ -1906,21 +1406,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	LoesCommon
 		Dir:	{Project}\Loes 0.2
@@ -1935,21 +1422,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdStrictLists
 		Dir:	{Application}\Libraries\StdEnv
@@ -1964,21 +1438,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	_SystemStrictLists
 		Dir:	{Application}\Libraries\StdEnv
@@ -1993,21 +1454,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	_SystemEnumStrict
 		Dir:	{Application}\Libraries\StdEnv
@@ -2022,21 +1470,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	StdOverloadedList
 		Dir:	{Application}\Libraries\StdEnv
@@ -2051,12 +1486,6 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -2065,7 +1494,6 @@ OtherModules
 				SizeX:	500
 				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	LoesKeyList
 		Dir:	{Project}\Loes 0.2
@@ -2080,21 +1508,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	LoesAssoc
 		Dir:	{Project}\Loes 0.2
@@ -2109,21 +1524,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	LoesListColl
 		Dir:	{Project}\Loes 0.2
@@ -2138,21 +1540,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	LoesColl
 		Dir:	{Project}\Loes 0.2
@@ -2167,24 +1556,11 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	ArgEnv
-		Dir:	{Application}\Libraries\ArgEnvWindows
+		Dir:	{Application}\Libraries\ArgEnv
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -2196,21 +1572,8 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
-		Icl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 		NeededObjFiles
 			ObjectFile:	ArgEnvC.
 	Module
@@ -2227,12 +1590,6 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -2241,7 +1598,6 @@ OtherModules
 				SizeX:	700
 				SizeY:	412
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	EstherStdEnv
 		Dir:	{Project}
@@ -2256,12 +1612,6 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
-		Dcl
-			WindowPosition
-				X:	0
-				Y:	0
-				SizeX:	500
-				SizeY:	300
 		DclOpen:	False
 		Icl
 			WindowPosition
@@ -2270,7 +1620,6 @@ OtherModules
 				SizeX:	773
 				SizeY:	529
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 	Module
 		Name:	DynIDMacros
 		Dir:	{Application}\Libraries\Dynamics\implementation
@@ -2287,7 +1636,6 @@ OtherModules
 			Fusion:	False
 		DclOpen:	False
 		IclOpen:	False
-		LastModified:	No 0 0 0 0 0 0
 Static
 	Mods
 		Path:	{Project}\Esther.icl
@@ -2363,7 +1711,7 @@ Static
 		Path:	{Project}\Loes 0.2\LoesAssoc.icl
 		Path:	{Project}\Loes 0.2\LoesListColl.icl
 		Path:	{Project}\Loes 0.2\LoesColl.icl
-		Path:	{Application}\Libraries\ArgEnvWindows\ArgEnv.icl
+		Path:	{Application}\Libraries\ArgEnv\ArgEnv.icl
 		Path:	{Project}\EstherFamkeEnv.icl
 		Path:	{Project}\EstherStdEnv.icl
 		Path:	{Application}\Libraries\Dynamics\implementation\DynIDMacros.icl
@@ -2376,7 +1724,7 @@ Static
 		Path:	{Project}\Clean System Files\EstherScript.o
 		Path:	{Application}\Libraries\StdEnv\Clean System Files\StdDebug.o
 		Path:	{Project}\OS Windows\Clean System Files\Windows.o
-		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnv.o
+		Path:	{Application}\Libraries\ArgEnv\Clean System Files\ArgEnv.o
 		Path:	{Application}\Libraries\ExceptionsWindows\Clean System Files\StdException.o
 		Path:	{Project}\Loes 0.2\Clean System Files\LoesColl.o
 		Path:	{Project}\Loes 0.2\Clean System Files\LoesListColl.o
@@ -2449,7 +1797,7 @@ Static
 		Path:	{Application}\Libraries\StdLib\Clean System Files\StdLibMisc.o
 		Path:	{Project}\Clean System Files\EstherStdEnv.o
 		Path:	{Project}\Clean System Files\EstherFamkeEnv.o
-		Path:	{Application}\Libraries\ArgEnvWindows\Clean System Files\ArgEnvC.o
+		Path:	{Application}\Libraries\ArgEnv\Clean System Files\ArgEnvC.o
 		Path:	{Application}\Libraries\Directory\Clean System Files\cDirectory.o
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\low.obj
 		Path:	{Application}\Libraries\Dynamics\implementation\windows\Clean System Files\mem.obj
@@ -2472,7 +1820,7 @@ Static
 		Path:	{Project}\OS Windows\DynamicFileSystem
 		Path:	{Project}\Loes 0.2
 		Path:	{Application}\Libraries\ExceptionsWindows
-		Path:	{Application}\Libraries\ArgEnvWindows
+		Path:	{Application}\Libraries\ArgEnv
 		Path:	{Application}\Libraries\WrapDebug
 		Path:	{Application}\Libraries\StdEnv
 		Path:	{Application}\Libraries\StdLib
