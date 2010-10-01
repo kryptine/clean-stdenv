@@ -1,7 +1,7 @@
 implementation module FamkeProcess
 
 import FamkeKernel
-import FamkeRpc, LoesListSeq, LoesKeyList, TcpIp, StdException
+import FamkeRpc, LoesListSeq, LoesKeyList, FamkeTcpIp, StdException
 import StdBool, StdInt, StdMisc, StdString, StdList, StdArray, StdTuple, ArgEnv, Windows
 from DynamicLinkerInterface import GetDynamicLinkerPath
 

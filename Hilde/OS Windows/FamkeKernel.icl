@@ -1,7 +1,7 @@
 implementation module FamkeKernel
 
 import StdDynamic
-import TcpIp
+import FamkeTcpIp
 import StdFile
 import StdBool, StdMisc, StdString, StdList, StdArray, DynID
 from DynamicGraphConversion import string_to_dynamic, class EncodedDynamic (dynamic_to_string), instance EncodedDynamic String
