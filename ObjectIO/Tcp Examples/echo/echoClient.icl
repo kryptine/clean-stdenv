@@ -7,7 +7,7 @@ module echoClient
 //
 //	**************************************************************************************************
 
-import	StdEnv, StdTCP, StdMaybe
+import	StdEnv, TCPIP, StdMaybe
 from	StdSystem import ticksPerSecond
 
 echoPort	:== 7

@@ -8,7 +8,7 @@ module downloadHTTP
 //	
 //	**************************************************************************************************
 
-import	StdEnv, StdTCP, StdIO
+import	StdEnv, TCPIP, StdMaybe
 from	StdSystem import ticksPerSecond
 
 server	:== "www.cs.kun.nl"

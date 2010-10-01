@@ -37,7 +37,8 @@ Global
 		ExportedNames:	
 	Paths
 		Path:	{Project}
-		Path:	{Application}\Libraries\Tcp
+		Path:	{Application}\Libraries\TCPIP
+		Path:	{Application}\Libraries\TCPIP\ObjectIO
 	Precompile:	
 	Postlink:	
 MainModule
