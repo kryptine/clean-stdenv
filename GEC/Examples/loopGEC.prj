@@ -6373,7 +6373,7 @@ Static
 		Path:	{Application}\Libraries\Dynamics\implementation
 		Path:	{Application}\Libraries\Dynamics\implementation\windows
 		Path:	{Application}\Libraries\Generics
-		Path:	{Application}\Libraries\ArgEnvWindows
+		Path:	{Application}\Libraries\ArgEnv
 		Path:	{Application}\Libraries\Gast
 		Path:	{Application}\Libraries\Directory
 		Path:	{Application}\Libraries\Tcp
