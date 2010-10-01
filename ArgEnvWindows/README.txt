@@ -33,8 +33,7 @@ FILES
 
 USAGE
 
-    - add the ArgEnvWindows directory to the search paths of your
-      project
+    - add the ArgEnv directory to the search paths of your project
     - import ArgEnv
 
 BUGS
