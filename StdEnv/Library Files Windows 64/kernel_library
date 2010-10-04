@@ -89,3 +89,6 @@ InitializeCriticalSection
 EnterCriticalSection
 LeaveCriticalSection
 WaitForMultipleObjects
+SetCurrentDirectoryA
+GetLogicalDrives
+MoveFileA
