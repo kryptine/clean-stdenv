@@ -6,10 +6,10 @@
 CLM=clm
 
 CC=gcc
-COPTIONS=-Wall -pedantic
+COPTIONS=-Wall -pedantic -O
 
 printenv : printenv.o ArgEnv.o ArgEnvC.o
-	$(CLM) -b -nt -l ArgEnvC.o printenv -o printenv
+	$(CLM) -b -nt printenv -o printenv
 
 ArgEnvC.o : ArgEnvC.c
 	$(CC) $(COPTIONS) -c ArgEnvC.c
