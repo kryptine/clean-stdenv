@@ -649,10 +649,10 @@ Or [|b : tl]
 	= b || Or tl
 
 Any p l :== any_ l
-	where		
-		any_ []
+	where
+		any_ [|]
 			= False
-		any_ [b : tl]
+		any_ [|b : tl]
 			= p b || any_ tl
 
 All p l :== all_ l
