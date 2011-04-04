@@ -442,9 +442,9 @@ Or :: !u:(l v:Bool) -> Bool | List l Bool,[u<=v]
 
 Any p l :== any_ l
 	where		
-		any_ []
+		any_ [|]
 			= False
-		any_ [b : tl]
+		any_ [|b : tl]
 			= p b || any_ tl
 
 All p l :== all_ l
