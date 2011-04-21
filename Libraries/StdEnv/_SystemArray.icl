@@ -11,7 +11,6 @@ class Array .a e where
 	replace				:: !*(a .e) !Int .e -> *(.e, !*(a .e))
 
 instance Array {#} Int where
-	select :: .{#e:Int} Int -> e:Int
 	select arr index =
 		code
 		{
