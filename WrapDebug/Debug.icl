@@ -96,7 +96,7 @@ debugShowWithOptions debugOptions debugValue
 					=	{options & terminator=terminator}
 
 instance <<< [a] | <<< a where
-	(<<<) :: *File [a] -> *File | <<< a
+	(<<<) :: !*File ![a] -> *File | <<< a
 	(<<<) file []
 		=	file
 	(<<<) file [h:t]
