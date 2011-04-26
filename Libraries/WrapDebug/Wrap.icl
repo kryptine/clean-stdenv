@@ -12,7 +12,7 @@ import	StdOverloaded, StdMisc, StdArray, StdClass, StdInt
 ::	WrappedDescriptorId = {descriptorId :: !Int}
 
 instance toString WrappedDescriptorId where
-	toString :: WrappedDescriptorId -> {#Char}
+	toString :: !WrappedDescriptorId -> {#Char}
 	toString {descriptorId}
 		=	descriptorIDtoString descriptorId
 	where

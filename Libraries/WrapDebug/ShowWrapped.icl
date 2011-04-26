@@ -172,7 +172,7 @@ intersperse _ l
 
 instance toString File
 where
-	toString :: File -> {#Char}
+	toString :: !File -> {#Char}
 	toString _
 		=	"File"
 
