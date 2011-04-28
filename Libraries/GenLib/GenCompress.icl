@@ -28,12 +28,11 @@ mkCompressSt arr = { cs_pos = 0, cs_bits = arr}
 :: Compress a :== a -> *CompressSt -> *CompressSt
 :: Uncompress a :== .CompressSt -> .(.(Maybe a), .CompressSt)
 
-	
 compressBool :: !Bool !*CompressSt -> *CompressSt
 compressBool bit {cs_pos = pos, cs_bits = bits}
 	#! s = size bits
-	#! int_pos = pos / 32
-	#! bit_pos = pos - int_pos * 32 
+	#! int_pos = pos >> (IF_INT_64_OR_32 6 5)
+	#! bit_pos = pos bitand (IF_INT_64_OR_32 63 31)
 	| s == int_pos
 		= abort "reallocate" 
 		#! int = bits.[int_pos]
@@ -44,8 +43,8 @@ compressBool bit {cs_pos = pos, cs_bits = bits}
 uncompressBool :: !u:CompressSt -> (.(Maybe Bool),v:CompressSt), [u <= v]
 uncompressBool cs=:{cs_pos = pos, cs_bits = bits}
 	#! s = size bits
-	#! int_pos = pos / 32
-	#! bit_pos = pos - int_pos * 32 
+	#! int_pos = pos >> (IF_INT_64_OR_32 6 5)
+	#! bit_pos = pos bitand (IF_INT_64_OR_32 63 31)
 	| s == int_pos
 		= (Nothing, cs) 
 		#! int = bits.[int_pos]
@@ -65,7 +64,7 @@ where
 			o compressBool ((int bitand 1) == 1)
 
 
-compressInt = compressIntB 32
+compressInt = compressIntB (IF_INT_64_OR_32 64 32)
 compressChar c = compressIntB 8 (toInt c)
 
 uncompressIntB :: !.Int -> u:CompressSt -> (.(Maybe Int),v:CompressSt), [u <= v]
@@ -75,37 +74,50 @@ where
 	uncompress i n int
 		| i == n
 			= ret int
-		| otherwise				
+		| otherwise
 			=   	uncompressBool
 			>>= 	\bit -> uncompress (inc i) n int 
 			>>= 	\x -> ret ((if bit 1 0) + (x << 1))
 
 uncompressInt :: (u:CompressSt -> (.(Maybe Int),v:CompressSt)), [u <= v]
-uncompressInt = uncompressIntB 32
+uncompressInt = uncompressIntB (IF_INT_64_OR_32 64 32)
 
 uncompressChar :: (u:CompressSt -> (.(Maybe Char),v:CompressSt)), [u <= v]
 uncompressChar = uncompressIntB 8 >>= ret o toChar 
 
-realToBinary :: !Real -> (!Int,!Int);
-realToBinary _ = code {
+realToBinary32 :: !Real -> (!Int,!Int);
+realToBinary32 _ = code {
     pop_b 0
     };
 
-binaryToReal :: !(!Int,!Int) -> Real;
-binaryToReal _ = code {
+realToBinary64 :: !Real -> Int;
+realToBinary64 _ = code {
     pop_b 0
     };
-    
+
+binaryToReal32 :: !(!Int,!Int) -> Real;
+binaryToReal32 _ = code {
+    pop_b 0
+    };
+
+binaryToReal64 :: !Int -> Real;
+binaryToReal64 _ = code {
+    pop_b 0
+    };
+
 compressReal real
-	#! (i1, i2) = realToBinary real    
-	= compressInt i2 o compressInt i1
-
+	= IF_INT_64_OR_32
+		(compressInt (realToBinary64 real))
+		(let (i1, i2) = realToBinary32 real in compressInt i2 o compressInt i1)
 
 uncompressReal :: (u:CompressSt -> (.(Maybe Real),v:CompressSt)), [u <= v]
 uncompressReal
-	= 	uncompressInt 
-	>>= \i1 -> uncompressInt 
-	>>= \i2 -> ret (binaryToReal (i1,i2)) 
+	= IF_INT_64_OR_32
+		(uncompressInt
+		>>= \i -> ret (binaryToReal64 i))
+		(uncompressInt 
+		>>= \i1 -> uncompressInt 
+		>>= \i2 -> ret (binaryToReal32 (i1,i2)))
 
 compressArray :: (a -> u:(v:CompressSt -> w:CompressSt)) !.(b a) -> x:(*CompressSt -> y:CompressSt) | Array b a, [x <= u,w <= v,w <= y]
 compressArray f xs 
@@ -156,7 +168,7 @@ gCompress{|[]|} c xs = compressList c xs
 
 
 generic gCompressedSize a :: a -> Int
-gCompressedSize{|Int|} _ = 32
+gCompressedSize{|Int|} _ = IF_INT_64_OR_32 64 32
 gCompressedSize{|Real|} _ = 64
 gCompressedSize{|Char|} _ = 8
 gCompressedSize{|Bool|} _ = 1
@@ -167,13 +179,13 @@ gCompressedSize{|EITHER|} cl cr (RIGHT x) = 1 + cr x
 gCompressedSize{|CONS|} c (CONS x) = c x
 gCompressedSize{|FIELD|} c (FIELD x) = c x
 gCompressedSize{|OBJECT|} c (OBJECT x) = c x
-gCompressedSize{|[]|} c xs = foldSt (\x st -> c x + st) xs 32 
-gCompressedSize{|{}|} c xs = foldSt (\x st -> c x + st) [x\\x<-:xs] 32 
-gCompressedSize{|{!}|} c xs = foldSt (\x st -> c x + st) [x\\x<-:xs] 32 
-gCompressedSize{|String|} xs = 32 + size xs * 8
+gCompressedSize{|[]|} c xs = foldSt (\x st -> c x + st) xs (IF_INT_64_OR_32 64 32) 
+gCompressedSize{|{}|} c xs = foldSt (\x st -> c x + st) [x\\x<-:xs] (IF_INT_64_OR_32 64 32) 
+gCompressedSize{|{!}|} c xs = foldSt (\x st -> c x + st) [x\\x<-:xs] (IF_INT_64_OR_32 64 32) 
+gCompressedSize{|String|} xs = (IF_INT_64_OR_32 64 32) + size xs * 8
 
 generic gUncompress a :: (u:CompressSt -> ((Maybe a),u:CompressSt))
-gUncompress{|Int|} = uncompressInt 
+gUncompress{|Int|} = uncompressInt
 gUncompress{|Real|} = uncompressReal
 gUncompress{|Char|} = uncompressChar
 gUncompress{|Bool|} = uncompressBool
@@ -202,7 +214,7 @@ uncompress = fst o gUncompress{|*|} o mkCompressSt
 compress :: !a -> BitVector | gCompressedSize{|*|} a & gCompress{|*|} a
 compress x 
 	#! compressed_size = gCompressedSize{|*|} x
-	#! arr_size = compressed_size / 32 + (if (compressed_size rem 32 == 0) 0 1)
+	#! arr_size = (compressed_size + (IF_INT_64_OR_32 63 31)) >> (IF_INT_64_OR_32 6 5)
 	#! bits = createArray arr_size 0
 	= (gCompress{|*|} x (mkCompressSt bits)).cs_bits
  
