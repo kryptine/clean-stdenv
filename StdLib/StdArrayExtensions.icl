@@ -28,147 +28,31 @@ class updateArrElt a :: !(.e -> .e) !Int !*(a .e) -> *(a .e)
 
 instance updateArrElt {}
   where
-	updateArrElt f index array = updateArrElt_Lazy f index array
+	updateArrElt f index array
+		# (e,array) = array![index]
+		= {array & [index] = f e}
 
 instance updateArrElt {!}
   where
-	updateArrElt f index array = updateArrElt_Strict f index array
-
-updateArrElt_Lazy :: !(.e -> .e) !Int !*{.e} -> *{.e}
-updateArrElt_Lazy f i a
-	= code
-		{
-			push_b 0
-			push_a 1
-			update_a 1 2
-			updatepop_a 0 1
-			push_a 0
-			select _ 1 0
-			push_a 0
-			push_a 3
-			build e_system_dAP 2 e_system_nAP
-			push_b 0
-			push_a 2
-			update_a 1 4
-			updatepop_a 0 3
-			updatepop_b 0 1
-			update _ 1 0
-		}
-
-updateArrElt_Strict :: !(.e -> .e) !Int !*{!.e} -> *{!.e}
-updateArrElt_Strict f i a
-	= code
-		{
-			push_b 0
-			push_a 1
-			update_a 1 2
-			updatepop_a 0 1
-			push_a 0
-			select _ 1 0
-			push_a 0
-			push_a 3
-			update_a 3 4
-			update_a 1 3
-			updatepop_a 0 2
-		.d 2 0
-			jsr e_system_sAP
-		.o 1 0
-			push_b 0
-			push_a 1
-			update_a 1 2
-			updatepop_a 0 1
-			updatepop_b 0 1
-			update _ 1 0
-		.d 1 0
-			rtn
-		}
+	updateArrElt f index array
+		# (e,array) = array![index]
+		= {array & [index] = f e}
 
 class accArrElt a :: !(.e -> (!.x, !.e)) !Int !*(a .e) -> (!.x, !*(a .e))
 
 instance accArrElt {}
   where
-	accArrElt f i a
-		= accArrElt_Lazy f i a
+	accArrElt f index array
+		# (e,array) = array![index]
+		  (x,e) = f e
+		= (x, {array & [index] = e})
 
 instance accArrElt {!}
   where
-	accArrElt f i a
-		= accArrElt_Strict f i a
-
-accArrElt_Lazy :: !(.e -> (!.x, !.e)) !Int !*{.e} -> (!.x, !*{.e})
-accArrElt_Lazy f i a
-	= code
-		{
-			push_b 0
-			push_a 1
-			update_a 1 2
-			updatepop_a 0 1
-			push_a 0
-			select _ 1 0
-			push_a 0
-			push_a 3
-			update_a 3 4
-			update_a 1 3
-			updatepop_a 0 2
-		.d 2 0
-			jsr e_system_sAP
-		.o 1 0
-			push_arg 0 2 2
-			push_b 0
-			push_a 2
-			updatepop_b 0 1
-			update_a 2 3
-			update_a 1 2
-			updatepop_a 0 1
-			update _ 1 0
-			push_arg 1 2 1
-			jsr_eval 0
-			update_a 1 2
-			updatepop_a 0 1
-		.d 2 0
-			rtn
-		}		
-
-accArrElt_Strict :: !(.e -> (!.x, !.e)) !Int !*{!.e} -> (!.x, !*{!.e})
-accArrElt_Strict f i a
-	= code
-		{
-			push_b 0
-			push_a 1
-			update_a 1 2
-			updatepop_a 0 1
-			push_a 0
-			select _ 1 0
-			push_a 0
-			push_a 3
-			update_a 3 4
-			update_a 1 3
-			updatepop_a 0 2
-		.d 2 0
-			jsr e_system_sAP
-		.o 1 0
-			push_arg 0 2 2
-			jsr_eval 0
-			push_b 0
-			push_a 2
-			updatepop_b 0 1
-			update_a 2 3
-			update_a 1 2
-			updatepop_a 0 1
-			update _ 1 0
-			push_arg 1 2 1
-			jsr_eval 0
-			update_a 1 2
-			updatepop_a 0 1
-		.d 2 0
-			rtn
-		}
-/*
-	# (ai, a) = a![i]
-	  (x, fai) = f ai
-	= (x, { a & [i] = fai })
-*/
-
+	accArrElt f index array
+		# (e,array) = array![index]
+		  (x,e) = f e
+		= (x, {array & [index] = e})
 
 findlArrElt pred array i
 	:== findl array i
@@ -186,181 +70,38 @@ findrArrElt pred array i
 			= i
 		= findr array (i-1)
 
-//createStrictArrIncFoldSt :: !Int !(Int .st -> ([a], .st)) !.st -> (!.{![a]}, !.st)
 createStrictArrIncFoldSt :: !Int !(Int .st -> (.a, .st)) !.st -> (!.{!.a}, !.st)
 createStrictArrIncFoldSt size create_element st
-/*
 	| size<0
 		= abort "createStrictArrIncFoldSt: called with negative size parameter\n"
-	# new_array = createArray size []
-	= createStrictArrIncFoldSt_loop 0 size 1 create_element new_array st
-*/
-	= code {
-		.export createStrictArrIncFoldSt_loop
-			pushI 0
-			push_b 1
-			ltI
-			jmp_false ok1
-			buildAC "createStrictArrIncFoldSt: called with negative size parameter\n"
-			updatepop_a 0 2
-			pop_b 1
-		.d 1 0
-			jsr e_StdMisc_sabort
-		.o 1 0
-			repl_args 2 2
-			jsr_eval 1
-			jsr_eval 0
-			push_array 0
-			update_a 0 1
-			pop_a 1
-		.d 2 0
-			rtn
-		:ok1
-			buildh _Nil 0
-			push_b 0
-			create_array _ 1 0
-			push_a 2
-			push_a 2
-			pushI 1
-			push_b 1
-			pushI 0
-			push_a 2
-			update_a 2 3
-			update_a 0 2
-			pop_a 1
-			update_a 2 4
-			update_a 1 3
-			updatepop_a 0 2
-			update_b 2 3
-			update_b 1 2
-			updatepop_b 0 1
-		.d 3 3 iii
-			jmp createStrictArrIncFoldSt_loop
-		.o 3 3 iii
-		:createStrictArrIncFoldSt_loop
-			push_b 1
-			push_b 1
-			eqI
-			jmp_false further
-			push_a 2
-			push_a 2
-			update_a 1 4
-			updatepop_a 0 3
-			pop_b 3
-		.d 2 0
-			rtn
-		:further
-			buildI_b 0
-			push_a 1
-		.d 2 0
-			jsr e_system_sAP
-		.o 1 0
-			push_a 3
-			push_a 1
-			update_a 1 2
-			update_a 0 1
-			pop_a 1
-			buildh _Nil 0
-			update_a 0 5
-			pop_a 1
-		.d 2 0
-			jsr e_system_sAP
-		.o 1 0
-			push_arg 0 2 2
-			jsr_eval 0
-			push_arg 1 2 1
-			jsr_eval 0
-			push_b 0
-			push_a 4
-			buildh _Nil 0
-			update_a 0 6
-			update_a 0 4
-			pop_a 1
-			update _ 1 0
-			push_b 2
-			push_b 1
-			addI
-			push_a 3
-			push_b 3
-			push_b 3
-			push_b 2
-			update_b 2 3
-			update_b 1 2
-			update_b 0 1
-			pop_b 1
-			update_a 2 6
-			update_a 1 5
-			updatepop_a 0 4
-			update_b 2 5
-			update_b 1 4
-			updatepop_b 0 3
-		.d 3 3 iii
-			jmp createStrictArrIncFoldSt_loop
-	}
-		
-//createStrictArrDecFoldSt :: !Int !(Int .st -> ([a], .st)) !.st -> (!.{![a]}, !.st)
+	# new_array = createUninitializedStrictArray size
+	= createStrictArrIncFoldSt_loop 0 size create_element new_array st
+	where
+		createStrictArrIncFoldSt_loop :: !Int !Int !(Int .st -> (.a, .st)) !*{!.a} !.st -> (!.{!.a.}, !.st)
+		createStrictArrIncFoldSt_loop frm to create_element new_array st
+			| frm<>to
+				# (new_element, st) = create_element frm st
+				# new_array = {new_array & [frm] = new_element}
+				= createStrictArrIncFoldSt_loop (frm+1) to create_element new_array st
+				= (new_array, st)
+
 createStrictArrDecFoldSt :: !Int !(Int .st -> (.a, .st)) !.st -> (!.{!.a}, !.st)
 createStrictArrDecFoldSt size create_element st
-/*
 	| size<0
 		= abort "createStrictArrDecFoldSt: called with negative size parameter\n"
-	# new_array = createArray size []
-	= createStrictArrIncFoldSt_loop (size-1) (-1) (-1) create_element new_array st
-*/
-	= code {
-			pushI 0
-			push_b 1
-			ltI
-			jmp_false ok2
-			buildAC "createStrictArrDecFoldSt: called with negative size parameter\n"
-			updatepop_a 0 2
-			pop_b 1
-		.d 1 0
-			jsr e_StdMisc_sabort
-		.o 1 0
-			repl_args 2 2
-			jsr_eval 1
-			jsr_eval 0
-			push_array 0
-			update_a 0 1
-			pop_a 1
-		.d 2 0
-			rtn
-		:ok2
-			buildh _Nil 0
-			push_b 0
-			create_array _ 1 0
-			pushI 1
-			push_b 1
-			subI
-			push_a 2
-			push_a 2
-			pushI -1
-			pushI -1
-			push_a 2
-			update_a 2 3
-			update_a 0 2
-			pop_a 1
-			push_b 2
-			update_b 2 3
-			update_b 1 2
-			update_b 0 1
-			pop_b 1
-			update_a 2 4
-			update_a 1 3
-			updatepop_a 0 2
-			update_b 2 3
-			update_b 1 2
-			updatepop_b 0 1
-		.d 3 3 iii
-			jmp createStrictArrIncFoldSt_loop
+	# new_array = createUninitializedStrictArray size
+	= createStrictArrDecFoldSt_loop (size-1) create_element new_array st
+	where
+		createStrictArrDecFoldSt_loop :: !Int !(Int .st -> (.a, .st)) !*{!.a} !.st -> (!.{!.a.}, !.st)
+		createStrictArrDecFoldSt_loop frm create_element new_array st
+			| frm>=0
+				# (new_element, st) = create_element frm st
+				# new_array = {new_array & [frm] = new_element}
+				= createStrictArrDecFoldSt_loop (frm-1) create_element new_array st
+				= (new_array, st)
+
+createUninitializedStrictArray :: !Int -> *{!.e}
+createUninitializedStrictArray size
+	= code inline {
+		create_array_ _ 1 0
 	}
-		
-/*
-createStrictArrIncFoldSt_loop :: !Int !Int !Int !(Int .st -> (.a, .st)) !*{!.a} !.st -> (!.{!.a.}, !.st)
-createStrictArrIncFoldSt_loop frm to step create_element new_array st
-	| frm==to
-		= (new_array, st)
-	# (new_element, st) = create_element frm st
-	= loop (frm+step) to step create_element { new_array & [frm] = new_element } st
-*/
