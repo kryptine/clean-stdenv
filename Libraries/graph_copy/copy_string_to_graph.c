@@ -519,7 +519,7 @@ int *copy_string_to_graph (int *string_p,void *begin_free_heap,void *end_free_he
 							++string_p;
 							heap_p+=arity-1;
 							continue;							
-						} else {
+						} else if (arity!=257){
 							int n_pointers,n_non_pointers,*non_pointers_p;
 							
 							n_non_pointers=arity>>8;
@@ -569,6 +569,17 @@ int *copy_string_to_graph (int *string_p,void *begin_free_heap,void *end_free_he
 								heap_p+=arity-1;
 								continue;
 							}
+						} else {
+							n_free_words-=2;
+							if (n_free_words<0){
+								*last_heap_pa=heap_p+3+(stack_end-stack_begin);
+								return (int*)((int)&string_p[1]+1);
+							}
+
+							heap_p[1]=string_p[1];
+							string_p+=2;
+							heap_p+=3;
+							break;
 						}
 					} else {
 						n_free_words-=2;
