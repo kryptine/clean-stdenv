@@ -257,7 +257,7 @@ int *copy_graph_to_string (int *node_p,void *begin_free_heap,void *end_free_heap
 									*heap_p++=node_p[2];
 								} else {
 									if (stack_p<=stack_begin){
-										if ((int*)stack_p<heap_p)
+										if ((int*)stack_p<=heap_p)
 											return NULL;
 										--stack_begin;
 									}
