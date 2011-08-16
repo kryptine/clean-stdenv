@@ -3,10 +3,10 @@ implementation module dynamic_string
 import StdDynamic
 import StdEnv
 
-import code from "copy_graph_to_string_interface.obj"
-import code from "copy_graph_to_string.obj"
-import code from "copy_string_to_graph_interface.obj"
-import code from "copy_string_to_graph.obj"
+import code from "copy_graph_to_string_interface."
+import code from "copy_graph_to_string."
+import code from "copy_string_to_graph_interface."
+import code from "copy_string_to_graph."
 
 copy_to_string :: !.a -> *{#Char}
 copy_to_string g = code {
