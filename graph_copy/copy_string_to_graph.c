@@ -634,6 +634,15 @@ Int *copy_string_to_graph (Int *string_p,void *begin_free_heap,void *end_free_he
 				}
 			} else {
 				Int *node_p;
+
+#ifdef THREAD
+				if (desc & 2){
+					node_p=(Int*)(desc-3);
+					*arg_a=node_p;
+					++string_p;
+					break;
+				}
+#endif
 				
 				node_p=*(Int**)((Int)string_p+(desc-1));
 				*arg_a=node_p;
