@@ -22,7 +22,11 @@ static void copy (Int *dest_p,Int *source_p,Int n_words)
 		dest_p[i]=source_p[i];
 }
 
-Int *copy_graph_to_string (Int *node_p,void *begin_free_heap,void *end_free_heap)
+Int *copy_graph_to_string (Int *node_p,void *begin_free_heap,void *end_free_heap
+#ifdef THREAD
+							,void *begin_heap,unsigned Int heap_size
+#endif
+							)
 {
 	Int **stack_p,**stack_begin,**stack_end,*heap_p;
 
@@ -43,8 +47,18 @@ Int *copy_graph_to_string (Int *node_p,void *begin_free_heap,void *end_free_heap
 		for (;;){
 			Int desc;
 
+#ifdef THREAD
+			if (((unsigned Int)node_p-(unsigned Int)begin_heap)>=heap_size){
+				if (heap_p>=(Int*)stack_begin)
+					return NULL;
+				heap_p[0]=3+(Int)node_p;
+				++heap_p;
+				break;
+			}
+#endif
+
 			desc=*node_p;
-			
+
 			if (heap_p>=(Int*)stack_begin)
 				return NULL;
 			
