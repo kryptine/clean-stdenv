@@ -9,7 +9,7 @@ copy_graph_to_string.o: copy_graph_to_string.c
 
 copy_graph_to_string_interface_ts.o: copy_graph_to_string_interface_ts.s
 	as copy_graph_to_string_interface_ts.s -o copy_graph_to_string_interface_ts.o
-	cp copy_graph_to_string_interface_ts.o "Clean System Files"/copy_graph_to_string_interface_ts.o
+	cp copy_graph_to_string_interface_ts.o "Clean System Files"/copy_graph_to_string_interface.o
 
 copy_string_to_graph.o: copy_string_to_graph.c
 	gcc -DTHREAD -O -S -fomit-frame-pointer copy_string_to_graph.c -o copy_string_to_graph.a
@@ -19,4 +19,4 @@ copy_string_to_graph.o: copy_string_to_graph.c
 
 copy_string_to_graph_interface_ts.o: copy_string_to_graph_interface_ts.s
 	as copy_string_to_graph_interface_ts.s -o copy_string_to_graph_interface_ts.o
-	cp copy_string_to_graph_interface_ts.o "Clean System Files"/copy_string_to_graph_interface_ts.o
+	cp copy_string_to_graph_interface_ts.o "Clean System Files"/copy_string_to_graph_interface.o
