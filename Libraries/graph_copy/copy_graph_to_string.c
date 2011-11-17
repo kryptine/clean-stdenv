@@ -5,8 +5,13 @@
 # define Int __int64
 # define INT_descriptor dINT
 #else
-# define Int int
-# define INT_descriptor INT
+# ifdef MACH_O64
+#  define Int long long
+#  define INT_descriptor dINT
+# else
+#  define Int int
+#  define INT_descriptor INT
+# endif
 # define __STRING__ _STRING__
 # define __ARRAY__ _ARRAY__
 #endif
