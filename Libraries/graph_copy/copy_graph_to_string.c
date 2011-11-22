@@ -4,13 +4,16 @@
 #ifdef _WIN64
 # define Int __int64
 # define INT_descriptor dINT
+# define ARCH_64 1
 #else
 # ifdef MACH_O64
 #  define Int long long
 #  define INT_descriptor dINT
+#  define ARCH_64 1
 # else
 #  define Int int
 #  define INT_descriptor INT
+#  define ARCH_64 0
 # endif
 # define __STRING__ _STRING__
 # define __ARRAY__ _ARRAY__
@@ -77,7 +80,7 @@ Int *copy_graph_to_string (Int *node_p,void *begin_free_heap,void *end_free_heap
 					arity=((unsigned short *)desc)[-1];
 					if (arity==0){
 						if (desc==(Int)&INT_descriptor+2 || desc==(Int)&CHAR+2 || desc==(Int)&BOOL+2
-#ifdef _WIN64
+#if ARCH_64
 							|| desc==(Int)&REAL+2
 #endif
 						){
@@ -86,7 +89,7 @@ Int *copy_graph_to_string (Int *node_p,void *begin_free_heap,void *end_free_heap
 
 							*heap_p++=node_p[1];
 							break;
-#ifndef _WIN64
+#if ! ARCH_64
 						} else if (desc==(Int)&REAL+2){
 							if (heap_p+2>(Int*)stack_begin)
 								return NULL;
@@ -101,7 +104,7 @@ Int *copy_graph_to_string (Int *node_p,void *begin_free_heap,void *end_free_heap
 							
 							length=node_p[1];
 							node_p+=2;
-#ifdef _WIN64
+#if ARCH_64
 							n_words=(length+7)>>3;							
 #else
 							n_words=(length+3)>>2;
@@ -140,7 +143,7 @@ Int *copy_graph_to_string (Int *node_p,void *begin_free_heap,void *end_free_heap
 									stack_p[array_size]=(Int*)node_p[array_size];						
 								break;
 							} else if (elem_desc==(Int)&INT_descriptor+2
-#ifdef _WIN64
+#if ARCH_64
 								|| elem_desc==(Int)&REAL+2
 #endif
 							){
@@ -150,7 +153,7 @@ Int *copy_graph_to_string (Int *node_p,void *begin_free_heap,void *end_free_heap
 								copy (heap_p,node_p,array_size);	
 								heap_p+=array_size;
 								break;
-#ifndef _WIN64
+#if ! ARCH_64
 							} else if (elem_desc==(Int)&REAL+2){
 								array_size<<=1;
 							
@@ -162,7 +165,7 @@ Int *copy_graph_to_string (Int *node_p,void *begin_free_heap,void *end_free_heap
 								break;
 #endif
 							} else if (elem_desc==(Int)&BOOL+2){
-#ifdef _WIN64
+#if ARCH_64
 								array_size=(array_size+7)>>3;
 #else
 								array_size=(array_size+3)>>2;
