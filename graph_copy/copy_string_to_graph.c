@@ -4,13 +4,16 @@
 #ifdef _WIN64
 # define Int __int64
 # define INT_descriptor dINT
+# define ARCH_64 1
 #else
 # ifdef MACH_O64
 #  define Int long long
 #  define INT_descriptor dINT
+#  define ARCH_64 1
 # else
 #  define Int int
 #  define INT_descriptor INT
+#  define ARCH_64 0
 # endif
 # define __STRING__ _STRING__
 # define __ARRAY__ _ARRAY__
@@ -97,7 +100,7 @@ Int *copy_string_to_graph (Int *string_p,void *begin_free_heap,void *end_free_he
 							string_p+=2;
 							break;
 						} else if (desc==(Int)&BOOL+2
-#ifdef _WIN64
+#if ARCH_64
 							|| desc==(Int)&REAL+2
 #endif
 						){
@@ -110,7 +113,7 @@ Int *copy_string_to_graph (Int *string_p,void *begin_free_heap,void *end_free_he
 							string_p+=2;
 							heap_p+=2;
 							break;
-#ifndef _WIN64
+#if ! ARCH_64
 						} else if (desc==(Int)&REAL+2){
 							n_free_words-=2;
 							if (n_free_words<0){
@@ -129,7 +132,7 @@ Int *copy_string_to_graph (Int *string_p,void *begin_free_heap,void *end_free_he
 							
 							length=string_p[1];
 							string_p+=2;
-#ifdef _WIN64
+#if ARCH_64
 							n_words=(length+7)>>3;
 #else
 							n_words=(length+3)>>2;
@@ -187,7 +190,7 @@ Int *copy_string_to_graph (Int *string_p,void *begin_free_heap,void *end_free_he
 								heap_p+=array_size;
 								break;
 							} else if (elem_desc==(Int)&INT_descriptor+2
-#ifdef _WIN64
+#if ARCH_64
 								|| elem_desc==(Int)&REAL+2
 #endif
 							){
@@ -201,7 +204,7 @@ Int *copy_string_to_graph (Int *string_p,void *begin_free_heap,void *end_free_he
 								string_p+=array_size;
 								heap_p+=array_size;
 								break;
-#ifndef _WIN64
+#if ! ARCH_64
 							} else if (elem_desc==(Int)&REAL+2){
 								array_size<<=1;
 							
@@ -217,7 +220,7 @@ Int *copy_string_to_graph (Int *string_p,void *begin_free_heap,void *end_free_he
 								break;
 #endif
 							} else if (elem_desc==(Int)&BOOL+2){
-#ifdef _WIN64
+#if ARCH_64
 								array_size=(array_size+7)>>3;
 #else
 								array_size=(array_size+3)>>2;
@@ -321,7 +324,7 @@ Int *copy_string_to_graph (Int *string_p,void *begin_free_heap,void *end_free_he
 #ifdef OLD_DESCRIPTORS
 							desc-=10;
 #else
-# ifdef _WIN64
+# if ARCH_64
 							desc-=10;
 # else
 							desc-=6;
@@ -685,12 +688,12 @@ void remove_forwarding_pointers_from_string (Int *string_p,Int *end_forwarding_p
 				arity=((unsigned short *)desc)[-1];
 				if (arity==0){
 					if (desc==(Int)&INT_descriptor+2 || desc==(Int)&CHAR+2 || desc==(Int)&BOOL+2
-#ifdef _WIN64
+#if ARCH_64
 						|| desc==(Int)&REAL+2
 #endif
 					){
 						string_p+=2;
-#ifndef _WIN64
+#if ! ARCH_64
 					} else if (desc==(Int)&REAL+2){
 						string_p+=3;
 #endif
@@ -699,7 +702,7 @@ void remove_forwarding_pointers_from_string (Int *string_p,Int *end_forwarding_p
 							
 						length=string_p[1];
 						string_p+=2;
-#ifdef _WIN64
+#if ARCH_64
 						n_words=(length+7)>>3;
 #else
 						n_words=(length+3)>>2;
@@ -714,18 +717,18 @@ void remove_forwarding_pointers_from_string (Int *string_p,Int *end_forwarding_p
 													
 						if (elem_desc==0){
 						} else if (elem_desc==(Int)&INT_descriptor+2
-#ifdef _WIN64
+#if ARCH_64
 							|| elem_desc==(Int)&REAL+2
 #endif
 						){
 							string_p+=array_size;
-#ifndef _WIN64
+#if ! ARCH_64
 						} else if (elem_desc==(Int)&REAL+2){
 							array_size<<=1;
 							string_p+=array_size;
 #endif
 						} else if (elem_desc==(Int)&BOOL+2){
-#ifdef _WIN64
+#if ARCH_64
 							array_size=(array_size+7)>>3;
 #else
 							array_size=(array_size+3)>>2;
