@@ -15,7 +15,7 @@
 #  define INT_descriptor INT
 #  define ARCH_64 0
 # endif
-# ifndef LINUX64
+# if !(defined (LINUX32) || defined (LINUX64))
 #  define __STRING__ _STRING__
 #  define __ARRAY__ _ARRAY__
 # endif
