@@ -6,7 +6,7 @@
 # define INT_descriptor dINT
 # define ARCH_64 1
 #else
-# ifdef MACH_O64
+# if defined (MACH_O64) || defined (LINUX64)
 #  define Int long long
 #  define INT_descriptor dINT
 #  define ARCH_64 1
@@ -15,8 +15,10 @@
 #  define INT_descriptor INT
 #  define ARCH_64 0
 # endif
-# define __STRING__ _STRING__
-# define __ARRAY__ _ARRAY__
+# ifndef LINUX64
+#  define __STRING__ _STRING__
+#  define __ARRAY__ _ARRAY__
+# endif
 #endif
 
 extern void *INT_descriptor,*CHAR,*BOOL,*REAL,*__STRING__,*__ARRAY__;
