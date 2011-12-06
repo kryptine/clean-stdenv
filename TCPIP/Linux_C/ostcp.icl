@@ -91,40 +91,6 @@ os_connectTCP_sync32 onlyForMac time addr e
 		ccall os_connectTCP_syncC "IIIII:VIII:A"
 	}
 
-os_connectTCP_async :: !Int !(!Int,!Int) !*env -> (!(!InetErrCode,!EndpointRef), !*env)
-os_connectTCP_async onlyForMac addr e
-	= IF_INT_64_OR_32 (os_connectTCP_async64 onlyForMac addr e) (os_connectTCP_async32 onlyForMac addr e);
-
-os_connectTCP_async64 :: !Int !(!Int,!Int) !*env -> (!(!InetErrCode,!EndpointRef), !*env)
-os_connectTCP_async64 onlyForMac addr e
-	= code inline {
-		ccall os_connectTCP_asyncC "III:VIp:A"
-	}
-
-os_connectTCP_async32 :: !Int !(!Int,!Int) !*env -> (!(!InetErrCode,!EndpointRef), !*env)
-os_connectTCP_async32 onlyForMac addr e
-	= code inline {
-		ccall os_connectTCP_asyncC "III:VII:A"
-	}
-
-os_select_inetevents :: !EndpointRef !InetReceiverCategory !Int !Bool !Bool !Bool !*env -> *env
-os_select_inetevents endpointRef receiverType referenceCount get_receive_events get_sendable_events alreadyEom env
-	= IF_INT_64_OR_32
-		(os_select_inetevents64 endpointRef receiverType referenceCount get_receive_events get_sendable_events alreadyEom env)
-		(os_select_inetevents32 endpointRef receiverType referenceCount get_receive_events get_sendable_events alreadyEom env);
-
-os_select_inetevents64 :: !EndpointRef !InetReceiverCategory !Int !Bool !Bool !Bool !*env -> *env
-os_select_inetevents64 endpointRef receiverType referenceCount get_receive_events get_sendable_events alreadyEom env
-	= code inline {
-		ccall os_select_inetevents "pIIIII:V:A"
-	}
-
-os_select_inetevents32 :: !EndpointRef !InetReceiverCategory !Int !Bool !Bool !Bool !*env -> *env
-os_select_inetevents32 endpointRef receiverType referenceCount get_receive_events get_sendable_events alreadyEom env
-	= code inline {
-		ccall os_select_inetevents "IIIIII:V:A"
-	}
-
 getMbStopTime :: !(Maybe Timeout) !*env -> (!(!Bool, !Int), !*env) | ChannelEnv env
 getMbStopTime Nothing env
 	=((False,0), env)
@@ -139,5 +105,5 @@ tcp_getcurrenttick world
 GetTickCount :: Int
 GetTickCount
 	= code inline {
-		ccall GetTickCount@0 "P:I"
+		ccall GetTickCount ":I"
 	}
