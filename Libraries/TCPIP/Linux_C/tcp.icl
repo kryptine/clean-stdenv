@@ -126,27 +126,6 @@ lookupHost_syncC _ _
 		ccall lookupHost_syncC "S:VII:A"
 	}
 
-lookupHost_asyncC :: !String !*env -> (!(!InetErrCode, !EndpointRef), !*env)
-// creates new endpoint for one dns request.
-// When the dns query is completed, this endpoint will be closed automatically, and the dictionary entry will be
-// removed. Furtheron,
-// one event will be generated, which possibly carries the ip address (host order).
-// string can be in aplhanumerical or dotted decimal form (null terminated).
-lookupHost_asyncC inetAddr e
-	= IF_INT_64_OR_32 (lookupHost_asyncC64 inetAddr e) (lookupHost_asyncC32 inetAddr e);
-
-lookupHost_asyncC64 :: !String !*env -> (!(!InetErrCode, !EndpointRef), !*env)
-lookupHost_asyncC64 inetAddr e
-	= code inline {
-		ccall lookupHost_asyncC "S:VIp:A"
-	}
-
-lookupHost_asyncC32 :: !String !*env -> (!(!InetErrCode, !EndpointRef), !*env)
-lookupHost_asyncC32 inetAddr e
-	= code inline {
-		ccall lookupHost_asyncC "S:VII:A"
-	}
-
 openTCP_ListenerC :: !Int !*env -> (!(!InetErrCode, !EndpointRef), !*env)
 // installs a Listener. first param: portnum (host order); errCode: 0:ok;	otherwise:not ok
 // also adds a new dictionary item with values (referencecount=1, hasSNotif=False, hasRNotif=False, aborted=False)
@@ -294,30 +273,6 @@ garbageCollectEndpointC32 endpointRef e
 	}
 
 // endpoint dictionary functions
-
-/*	for each endpoint, a record is kept in C memory. This record contains */
-
-setEndpointDataC :: !EndpointRef !Int !Bool !Bool !Bool !*env -> *env
-// set the endpointRef data. parameters: endpointRef referenceCount hasReceiveNotifier hasSendableNotifier aborted
-// the values of hasReceiveNotifier and hasSendableNotifier also have an effect on the set of internet events,
-// that will reach Clean
-// if the item is already deallocated by the C side, nothing will happen
-setEndpointDataC endpointRef referenceCount hasReceiveNotifier hasSendableNotifier aborted e
-	= IF_INT_64_OR_32
-		(setEndpointDataC64 endpointRef referenceCount hasReceiveNotifier hasSendableNotifier aborted e)
-		(setEndpointDataC32 endpointRef referenceCount hasReceiveNotifier hasSendableNotifier aborted e);
-
-setEndpointDataC64 :: !EndpointRef !Int !Bool !Bool !Bool !*env -> *env
-setEndpointDataC64 endpointRef referenceCount hasReceiveNotifier hasSendableNotifier aborted e
-	= code inline {
-		ccall setEndpointDataC "pIIII:V:A"
-	}
-
-setEndpointDataC32 :: !EndpointRef !Int !Bool !Bool !Bool !*env -> *env
-setEndpointDataC32 endpointRef referenceCount hasReceiveNotifier hasSendableNotifier aborted e
-	= code inline {
-		ccall setEndpointDataC "IIIII:V:A"
-	}
 
 setEndpointData_no_new_notifiersC :: !EndpointRef !Int !Bool !Bool !Bool !*env -> *env
 // set the endpointRef data. parameters: endpointRef referenceCount hasReceiveNotifier hasSendableNotifier aborted

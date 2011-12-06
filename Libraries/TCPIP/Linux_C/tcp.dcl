@@ -82,7 +82,6 @@ unpack_ipaddr		::	!IPAddress				-> Int
 toDottedDecimal	::	!Int	->	String
 
 lookupHost_syncC	::	!String !*env -> (!(!InetErrCode, !Int), !*env)
-lookupHost_asyncC	::	!String !*env -> (!(!InetErrCode, !EndpointRef), !*env)
 
 close_listener		:: !EndpointRef !*env	->	*env
 close_tcprchan		:: !EndpointRef !*env	->	*env
@@ -96,7 +95,6 @@ disconnectGracefulC	::	!EndpointRef !*env -> *env
 disconnectBrutalC	::	!EndpointRef !*env -> *env		
 garbageCollectEndpointC	::	!EndpointRef !*env -> *env
 
-setEndpointDataC	::	!EndpointRef !Int !Bool !Bool !Bool !*env -> *env
 setEndpointData_no_new_notifiersC :: !EndpointRef !Int !Bool !Bool !Bool !*env -> *env
 getEndpointDataC	::	!EndpointRef !*env -> (!(!Int, !Bool, !Bool, !Bool), !*env)
 selectChC			::	!Int !Bool !(!Bool, !Int) !{#EndpointRef} !{#Int} !{#EndpointRef} !*env -> (!InetErrCode, !*env)
