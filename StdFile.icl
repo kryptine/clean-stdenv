@@ -112,46 +112,6 @@ sfopen_ s i
 	.o 0 3 b f
 	}
 
-/*
-	openfiles::!*World -> (!*Files,!*World)
-	openfiles world
-	| (1 bitand w) == 0
-		=	OpenFiles2 (StoreWorld (w bitor 1) world)
-		=	abort "openfiles: This world doesn't contain files"
-			where  w = LoadWorld world
-
-	OpenFiles2::!*World -> (!*Files,!*World)
-	OpenFiles2 w
-	= code inline {
-		pushI 0
-	}
-
-	LoadWorld :: !World -> Int;
-	LoadWorld w = code inline {
-		pushI_a 0
-		pop_a 1
-	};
-
-	StoreWorld :: !Int !World -> *World;
-	StoreWorld i w = code inline {
-		fillI_b 0 1
-		pop_b 1
-		pop_a 1
-	};
-
-	closefiles::!*Files !*World -> *World
-	closefiles f world
-	=	CloseFiles2 f (StoreWorld ((LoadWorld world) bitand (-2)) world)
-
-	CloseFiles2::!*Files !*World -> *World
-	CloseFiles2 f w
-	= code inline {
-		pop_b 1
-		fill_a 0 1
-		pop_a 1
-	}
-*/
-
 freopen::!*File !Int -> (!Bool,!*File)
 /*	Re-opens an open file in a possibly different mode.
 	The boolean indicates whether the file was successfully closed before reopening. */
@@ -215,12 +175,10 @@ freadsubstring :: !Int !Int !*{#Char} !*File -> (!Int,!*{#Char},!*File)
 	and the file are returned.
 	*/
 freadsubstring i n s f
-	= code {
-		.inline freadsubstring
+	= code inline {
 		.d 1 4 i i f
 			jsr readFString
 		.o 1 3 i f
-		.end
 	}
 
 freadline::!*File -> (!*{#Char},!*File)
@@ -325,7 +283,6 @@ fseek f p m
 		.o 0 3 b f
 	}
 
-
 //	Predefined files.
 
 stderr::   *File
@@ -360,7 +317,6 @@ sfreadr f
 			jsr	readSFR
 		.o 0 5 b r f
 	}
-
 
 sfreads::!File !Int -> (!*{#Char},!File)
 sfreads f i 
@@ -418,6 +374,7 @@ class (<<<) infixl a :: !*File !a -> *File
 
 instance <<< Int where
 //  (<<<) file i = fwritei i file
+ (<<<) :: !*File !Int -> *File
  (<<<) file i = code inline {
 		push_b 2
 		update_b 2 3
@@ -431,6 +388,7 @@ instance <<< Int where
 
 instance <<< Char where
 //  (<<<) file c = fwritec c file
+ (<<<) :: !*File !Char -> *File
  (<<<) file c = code inline {
 		push_b 2
 		update_b 2 3
@@ -444,6 +402,7 @@ instance <<< Char where
 
 instance <<< {#Char} where
 //  (<<<) file s = fwrites s file
+ (<<<) :: !*File !{#Char} -> *File
  (<<<) file s = code inline {
 	.d 1 2 f
 		jsr writeFS
@@ -452,6 +411,7 @@ instance <<< {#Char} where
 
 instance <<< Real where
 //  (<<<) file r = fwriter r file
+ (<<<) :: !*File !Real -> *File
  (<<<) file r = code inline {
 		push_b 3
 		push_b 3
@@ -484,8 +444,8 @@ instance FileEnv World where
 
 	appFiles :: !.(*Files -> *Files) !*World -> *World
 	appFiles appfun world
-		#! files1=create_files
-		   files=appfun files1
+		#! files=create_files
+		   files=appfun files
 		=  do_files files world
 		where
 			do_files :: !*Files !*World -> *World

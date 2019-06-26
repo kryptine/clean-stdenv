@@ -65,7 +65,7 @@ freadi		:: !*File -> (!Bool,!Int,!*File)							:== code { .d 0 2 f ; jsr readFI 
 	then reading digits, which may be preceeded by a plus or minus sign.
 	From a datafile freadi will just read four bytes (a Clean Int). */
 
-freadr		:: !*File -> (!Bool,!Real,!*File)							:== code { .d 0 2 f ; jsr readFR ; .o 0 5 b r f }
+freadr		:: !*File -> (!Bool,!Real,!*File)							:== code { .d 0 2 f ; jsr readFR ; .o 0 4 b r f }
 /*	Reads a Real from a textfile by skipping spaces, tabs and newlines and then
 	reading a character representation of a Real number.
 	From a datafile freadr will just read eight bytes (a Clean Real). */
@@ -98,7 +98,7 @@ fwritei		:: !Int !*File -> *File										:== code { .d 0 3 i f ; jsr writeFI ; 
 /*	Writes an Integer (its textual representation) to a text file.
 	To a datafile fwritei writes four bytes (a Clean Int). */
 
-fwriter		:: !Real !*File -> *File									:== code { .d 0 4 r f ; jsr writeFR ; .o 0 2 f }
+fwriter		:: !Real !*File -> *File									:== code { .d 0 3 r f ; jsr writeFR ; .o 0 2 f }
 /*	Writes a Real (its textual representation) to a text file.
 	To a datafile fwriter writes eight bytes (a Clean Real). */
 
@@ -115,7 +115,7 @@ class (<<<) infixl a :: !*File !a -> *File
 instance <<< Int 		:: !*File !Int -> *File							:== code { push_b 2 ; update_b 2 3 ; update_b 1 2 ; updatepop_b 0 1 ; .d 0 3 i f ; jsr writeFI ; .o 0 2 f }
 instance <<< Char		:: !*File !Char -> *File						:== code { push_b 2 ; update_b 2 3 ; update_b 1 2 ; updatepop_b 0 1 ; .d 0 3 c f ; jsr writeFC ; .o 0 2 f }
 instance <<< {#Char}	:: !*File !{#Char} -> *File						:== code { .d 1 2 f ; jsr writeFS ; .o 0 2 f }
-instance <<< Real		:: !*File !Real -> *File						:== code { push_b 3 ; push_b 3 ; update_b 3 5 ; update_b 2 4 ; update_b 1 3 ; updatepop_b 0 2 ; .d 0 4 r f ; jsr writeFR ; .o 0 2 f }
+instance <<< Real		:: !*File !Real -> *File						:== code { push_b 2 ; update_b 2 3 ; update_b 1 2 ; updatepop_b 0 1 ; .d 0 3 r f ; jsr writeFR ; .o 0 2 f }
 
 //	Testing:
 
@@ -142,7 +142,7 @@ stderr		:: *File													:== code { .d 0 0 ; jsr	stderrF ; .o 0 2 f }
 
 sfreadc		:: !File -> (!Bool,!Char,!File)								:== code { .d 0 2 f ; jsr readSFC ; .o 0 4 b c f }
 sfreadi		:: !File -> (!Bool,!Int,!File)								:== code { .d 0 2 f ; jsr readSFI ; .o 0 4 b i f }
-sfreadr		:: !File -> (!Bool,!Real,!File)								:== code { .d 0 2 f ; jsr readSFR ; .o 0 5 b r f }
+sfreadr		:: !File -> (!Bool,!Real,!File)								:== code { .d 0 2 f ; jsr readSFR ; .o 0 4 b r f }
 sfreads		:: !File !Int -> (!*{#Char},!File)							:== code { .d 0 3 f i ; jsr readSFS ; .o 1 2 f }
 sfreadline	:: !File -> (!*{#Char},!File)								:== code { .d 0 2 f ; jsr readLineSF ; .o 1 2 f }
 sfseek		:: !File !Int !Int -> (!Bool,!File)							:== code { .d 0 4 f i i ; jsr seekSF ; .o 0 3 b f }

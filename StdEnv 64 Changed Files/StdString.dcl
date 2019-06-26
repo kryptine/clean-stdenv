@@ -16,7 +16,7 @@ instance toString	Int		:: !Int -> {#Char}								:== code { .d 0 1 i ; jsr ItoAC
 
 instance toString	Char	:: !Char -> {#Char}								:== code { CtoAC }
 
-instance toString	Real	:: !Real -> {#Char}								:== code { .d 0 2 r ; jsr RtoAC ; .o 1 0 }
+instance toString	Real	:: !Real -> {#Char}								:== code { .d 0 1 r ; jsr RtoAC ; .o 1 0 }
 
 instance toString	Bool	:: !Bool -> {#Char}								:== code { .d 0 1 b ; jsr BtoAC ; .o 1 0 }
 

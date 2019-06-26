@@ -30,7 +30,7 @@ instance toReal		{#Char}
 
 instance fromReal	Int		:: !Real -> Int				:== code { RtoI }
 instance fromReal	Real	:: !Real -> Real			:== code { no_op }
-instance fromReal	{#Char}	:: !Real -> {#Char}			:== code { .d 0 2 r ; jsr RtoAC ; .o 1 0 }
+instance fromReal	{#Char}	:: !Real -> {#Char}			:== code { .d 0 1 r ; jsr RtoAC ; .o 1 0 }
 
 //	Logarithmical Functions:
 
