@@ -63,3 +63,6 @@ bitnot				:: !Int 		->	Int							:== code { not% }
 					//	One's complement of arg1
 
 IF_INT_64_OR_32 int64 int32 :== int32;
+
+MIN_INT :== 0x80000000
+MAX_INT :== 0x7fffffff
