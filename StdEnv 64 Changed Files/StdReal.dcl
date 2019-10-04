@@ -71,6 +71,7 @@ entier			:: !Real -> Int									:== code { entierR }
 
 Infinity :== 1E9999
 NaN :== 1E9999+(-1E9999)
+Epsilon :== 2.22E-16
 
 isNaN x :== if (x==x) False True
 isInfinity x :== if (abs x==1E9999) True False
