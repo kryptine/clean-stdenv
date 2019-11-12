@@ -59,6 +59,3 @@ where
 			= [ ConsLeft : doit i (n>>1) ]
 		| otherwise
 			= [ ConsRight : doit (i - (n>>1)) (n - (n>>1)) ]
-
-bimapId :: Bimap .a .a	// deprecated, no longer used
-bimapId = { map_to = id, map_from = id }

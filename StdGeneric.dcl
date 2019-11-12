@@ -69,7 +69,3 @@ derive bimap (->)
 // from other classes
 :: GenericDict a = { generic_dict :: !a }
 :: GenericDict0 a = { generic_dict0 :: a }
-
-// embedding-projection
-:: Bimap a b = { map_to :: .(a -> b), map_from :: .(b -> a) }	// deprecated, no longer used
-bimapId :: Bimap .a .a	// deprecated, no longer used
