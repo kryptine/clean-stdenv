@@ -1,4 +1,4 @@
-.comp 920 010111011
+.comp 920 01011101100000
 .code 0 0 0
 .start _nostart_
 .endinfo
