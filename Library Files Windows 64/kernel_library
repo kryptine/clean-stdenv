@@ -92,3 +92,5 @@ WaitForMultipleObjects
 SetCurrentDirectoryA
 GetLogicalDrives
 MoveFileA
+HeapFree
+HeapReAlloc

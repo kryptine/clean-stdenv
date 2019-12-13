@@ -90,3 +90,7 @@ GetShortPathNameA@12
 UnmapViewOfFile@8
 OpenProcess@12
 InterlockedIncrement
+GetProcessHeap@0
+HeapAlloc@12
+HeapFree@12
+HeapReAlloc@16
