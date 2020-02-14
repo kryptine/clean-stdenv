@@ -64,6 +64,11 @@ derive bimap RECORD
 derive bimap FIELD
 derive bimap (->)
 
+generic binumap a b | binumap b a :: a -> b
+
+derive binumap c
+derive binumap (->)
+
 // HACK: dictionaries for all generics.
 // It works since all generic classes have only one method and do not inherit 
 // from other classes

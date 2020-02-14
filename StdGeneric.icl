@@ -21,6 +21,12 @@ bimap{|OBJECT|} fx _ (OBJECT x) = OBJECT (fx x)
 
 bimap{|(->)|} _ ba fr _ f = comp3 fr f ba
 
+generic binumap a b | binumap b a :: a ->b
+
+binumap{|c|} x = x
+
+binumap{|(->)|} _ ba fr _ f = comp3 fr f ba
+
 comp3 :: !(.a -> .b) u:(.c -> .a) !(.d -> .c) -> u:(.d -> .b)
 comp3 f g h
 	| is_id f
