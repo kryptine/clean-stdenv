@@ -19,7 +19,7 @@ where
 			= [[x1,x2]:pair xs];
 	pair x = [x];
 
-	msort [x1,x2:xs] = msort (merge_stage [x1,x2:xs]);
+	msort xs=:[_,_:_] = msort (merge_stage xs);
 	msort x	= x;
 
 	merge_stage [xs1,xs2:xxs] = [merge xs1 xs2 : merge_stage xxs];
@@ -34,7 +34,7 @@ where
 			= [[x1,x2]:pair xs];
 	pair x = [x];
 
-	msort [x1,x2:xs] = msort (merge_stage [x1,x2:xs]);
+	msort xs=:[_,_:_] = msort (merge_stage xs);
 	msort x	= x;
 
 	merge_stage [xs1,xs2:xxs] = [mergeBy less_f xs1 xs2 : merge_stage xxs];
