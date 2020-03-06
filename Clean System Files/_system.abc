@@ -248,16 +248,6 @@ ea_S.1
 	jmp_eval_upd
 .pe
 
-.o 1 0
-o_S.1
-	get_node_arity	0
-	pushI	1
-	push_arg_b	0
-	update_a	0 1
-	pop_a	1
-.d 1 0
-	rtn
-
 .descs d_S.2 n_S.2 _ 2 0 "_S.2"
 .pb "_S.2"
 .n -1 d_S.2 ea_S.2
@@ -309,21 +299,6 @@ ea_S.2_
 	jmp_eval_upd
 .pe
 
-.o 1 0
-o_S.2
-	get_node_arity	0
-	eqI_b 2 0
-	jmp_false o_S.2_
-	pop_b 1
-	repl_arg 2 2
-.d 1 0
-	rtn
-o_S.2_
-	repl_arg 3 2
-	pop_b 1
-.d 1 0
-	rtn
-
 .descs d_S.3 n_S.3 _ 4 0 "_S.3"
 .pb "_S.3"
 .n -1 d_S.3 ea_S.3
@@ -359,16 +334,6 @@ ea_S.3
 	pop_a	1
 	jmp_eval_upd
 .pe
-
-.o 1 0
-o_S.3
-	get_node_arity	0
-	pushI	3
-	push_arg_b	0
-	update_a	0 1
-	pop_a	1
-.d 1 0
-	rtn
 
 .descs d_S.4 n_S.4 _ 5 0 "_S.4"
 .pb "_S.4"
@@ -406,16 +371,6 @@ ea_S.4
 	jmp_eval_upd
 .pe
 
-.o 1 0
-o_S.4
-	get_node_arity	0
-	pushI	4
-	push_arg_b	0
-	update_a	0 1
-	pop_a	1
-.d 1 0
-	rtn
-
 .descs d_S.5 n_S.5 _ 6 0 "_S.5"
 .pb "_S.5"
 .n -1 d_S.5 ea_S.5
@@ -452,16 +407,6 @@ ea_S.5
 	jmp_eval_upd
 .pe
 
-.o 1 0
-o_S.5
-	get_node_arity	0
-	pushI	5
-	push_arg_b	0
-	update_a	0 1
-	pop_a	1
-.d 1 0
-	rtn
-
 .descs d_S.6 n_S.6 _ 7 0 "_S.6"
 .pb "_S.6"
 .n -1 d_S.6 ea_S.6
@@ -497,17 +442,6 @@ ea_S.6
 	pop_a	1
 	jmp_eval_upd
 .pe
-
-.o 1 0
-o_S.6
-	get_node_arity	0
-	pushI	6
-	push_arg_b	0
-	update_a	0 1
-	pop_a	1
-.d 1 0
-	rtn
-
 
 
 .desc d_Sr.1 n_Sr.1 o_Sr.1 1 0 "_Sr.1"
