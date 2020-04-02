@@ -427,7 +427,7 @@ DropWhile f l :== dropWhile l
 	where
 		dropWhile cons=:[|a:x] | f a	= dropWhile x
 										= cons
-		dropWhile []					= [|]
+		dropWhile [|]					= [|]
 
 Span p l :== span l
 	where
@@ -473,7 +473,7 @@ where
 	insert_ x ls=:[|y : ys]
 		| r x y		= 	[|x : ls]
 					=	[|y : insert_ x ys]
-	insert_ x [] 	= 	[|x]
+	insert_ x [|] 	= 	[|x]
 
 InsertAt :: !Int v:e u:(l v:e) -> u:(l v:e) | List l e,[u<=v]
 InsertAt 0 x ys	= [|x:ys]
