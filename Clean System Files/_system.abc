@@ -9,7 +9,7 @@
 
 .export	_channel_code
 
-.export	EMPTY INT BOOL CHAR REAL FILE _STRING_ _ARRAY_ ARRAY
+.export	EMPTY INT BOOL CHAR REAL FILE _STRING_ _ARRAY_ ARRAY INT32 REAL32
 .export	_reserve _cycle_in_spine _hnf 
 .export	_type_error _match_error selector_m_error index_error
 .export	_print_graph _eval_to_nf
@@ -41,6 +41,8 @@
 |.desc FILE	_hnf	_hnf	0	"FILE"
 .desc REAL	_hnf	_hnf	0 0	"REAL"
 .desc INT	_hnf	_hnf	0 0	"INT"
+.desc REAL32	_hnf	_hnf	0 0	"REAL32"
+.desc INT32		_hnf	_hnf	0 0	"INT32"
 .desc BOOL	_hnf	_hnf	0 0	"BOOL"
 .desc CHAR	_hnf	_hnf	0 0	"CHAR"
 
