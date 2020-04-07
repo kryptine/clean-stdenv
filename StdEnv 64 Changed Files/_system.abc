@@ -1342,6 +1342,14 @@ _print__array2
 	eq_desc_b	REAL 0
 	jmp_true	_print_real_array
 
+	push_b	0
+	eq_desc_b	INT32 0
+	jmp_true	_print_int32_array
+
+	push_b	0
+	eq_desc_b	REAL32 0
+	jmp_true	_print_real32_array
+
 	pushI	0
 
 	push_a	0
@@ -1690,6 +1698,72 @@ _no_comma_3
 _print_real_array_lp2
 	eqI_b	0 0
 	jmp_false	_print_real_array_lp1
+	pop_a	1
+	pop_b	2
+	print_sc	"}"
+	jmp	_print_brackets
+
+_print_int32_array
+	pop_b	1
+	pushI	0
+	push_a	0
+	push_arraysize	INT32 0 1
+	jmp	_print_int32_array_lp2
+.o 1 2 i i
+_print_int32_array_lp1
+	eqI_b	0 1
+	jmp_true	_no_comma_4
+	print_sc	","
+_no_comma_4
+	push_b	1
+	push_a	0
+	select	INT32 0 1
+	print_int
+
+	push_b	1
+	incI
+	update_b	0 2
+	pop_b 1
+	decI
+_print_int32_array_lp2
+	eqI_b	0 0
+	jmp_false	_print_int32_array_lp1
+
+	pop_a	1
+	pop_b	2
+	print_sc	"}"
+	jmp	_print_brackets
+
+_print_real32_array
+	pop_b	1
+	push_a	0
+	pushI	0
+	push_arraysize	REAL32 0 2
+	jmp	_print_real32_array_lp2
+.o 1 2 i i
+_print_real32_array_lp1
+	eqI_b	0 1
+	jmp_true	_no_comma_5
+	print_sc	","
+_no_comma_5
+	push_b	1
+	push_a	0
+	select	REAL32 0 2
+
+	create
+	fillR_b	0 0
+	pop_b	1
+	print_symbol_sc	0
+	pop_a	1
+
+	push_b	1
+	incI
+	update_b	0 2
+	pop_b 1
+	decI
+_print_real32_array_lp2
+	eqI_b	0 0
+	jmp_false	_print_real32_array_lp1
 	pop_a	1
 	pop_b	2
 	print_sc	"}"
@@ -2120,6 +2194,14 @@ _eval__array2
 	eq_desc_b	REAL 0
 	jmp_true	_eval_real_array
 
+	push_b	0
+	eq_desc_b	INT32 0
+	jmp_true	_eval_int32_array
+
+	push_b	0
+	eq_desc_b	REAL32 0
+	jmp_true	_eval_real32_array
+
 	pushI	0
 
 	push_a	0
@@ -2245,9 +2327,11 @@ _eval_char_array
 .d 0 0
 	rtn
 
-_eval_real_array
 _eval_bool_array
 _eval_int_array
+_eval_real_array
+_eval_int32_array
+_eval_real32_array
 	pop_b	1
 	pop_a	1
 .d 0 0
